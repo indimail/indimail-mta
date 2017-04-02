@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.8 2016-06-07 10:47:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.9 2017-04-02 22:43:25+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -464,7 +464,7 @@ send_template_now(char *filename)
 
 				case 'V': /* show version number */
 					printf("<a href=\"http://sourceforge.net/projects/indimail/\">%s</a> %s<BR>", PACKAGE, VERSION);
-					printf("<a href=\"http://www.indimail.org/\">%s</a> %s<BR>", PACKAGE, VERSION);
+					printf("<a href=\"http://localhost://mailmrtg/\">IndiMail MRTG Graphs</a><BR>");
 					break;
 
 				case 'v': /* display the main menu */
