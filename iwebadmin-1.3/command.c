@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.5 2013-09-20 14:44:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.6 2017-04-03 14:35:30+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,6 @@
 #undef PACKAGE_VERSION
 #undef PACKAGE_BUGREPORT
 #undef PACKAGE_URL
-#include "config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
