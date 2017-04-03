@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.8 2016-06-07 10:46:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.9 2017-04-03 14:35:17+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -141,6 +141,7 @@ addautorespond()
 void
 addautorespondnow()
 {
+	int             i = 0;
 	FILE           *fs;
 
 	if (AdminType != DOMAIN_ADMIN) {
@@ -195,6 +196,15 @@ addautorespondnow()
 	/*- subject in iwebadmin autoresponder panel */
 	fprintf(fs, "Reference: %s\n", Alias);
 	fprintf(fs, "Subject: This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, Alias);
+	for (i = 400; i < 450; i++) {
+		if (html_text[i] == NULL)
+			break;
+		if ((*(html_text[i]) == ' ') || (*(html_text[i]) == '\t') || 
+			(*(html_text[i]) == '\r') || (*(html_text[i]) == '\n') || (!(*(html_text[i]))))
+			continue;
+		fprintf(fs, "%s\n", html_text[i]);
+	}
+	fprintf(fs, "MIME-Version: 1.0\n");
 	fprintf(fs, "\n%s\n", Message);
 	fclose(fs);
 	/*- Make the autoresponder .qmail file */
