@@ -286,3 +286,5 @@
 318 setgid() failed, unable to continue
 319 setuid() failed, unable to continue
 320 Invalid password: it can be easily guessed from the username
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit
