@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.9 2017-04-02 22:43:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.10 2017-04-03 14:35:42+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -242,7 +242,14 @@ send_template_now(char *filename)
 					printf("        </tr>\n");
 					printf("       </table>\n");
 					printf("       <textarea cols=80 rows=40 name=\"message\">");
-					fgets(TmpBuf2, sizeof (TmpBuf2), fs);
+
+					/*- Skip custom headers */
+					while(1) {
+						fgets(TmpBuf2, sizeof(TmpBuf2), fs);
+						if ((*TmpBuf2 == '\r') || (*TmpBuf2 == '\n'))
+							break;
+					}
+					printf("%s", TmpBuf2);
 					while (fgets(TmpBuf2, sizeof (TmpBuf2), fs)) {
 						printf("%s", TmpBuf2);
 					}
