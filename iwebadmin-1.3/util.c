@@ -1,5 +1,5 @@
 /*
- * $Id: util.c,v 1.4 2011-11-26 09:35:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: util.c,v 1.5 2017-04-03 15:55:13+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -59,6 +59,9 @@
 extern FILE    *lang_fs;
 extern FILE    *color_table;
 
+#ifdef SORT_TABLE_ENTRIES
+#undef SORT_TABLE_ENTRIES
+#endif
 #define SORT_TABLE_ENTRIES 100000
 
 /*
