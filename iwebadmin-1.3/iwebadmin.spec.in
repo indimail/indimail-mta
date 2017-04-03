@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.21 2017-03-20 16:21:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.22 2017-04-03 12:43:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -33,7 +33,7 @@ Version: @version@
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
-Release: 1.1%{?dist}
+Release: 1.B_CNT%{?dist}
 %endif
 
 %if %build_on_obs == 1
@@ -95,51 +95,51 @@ echo "------------------------------------------------------"
 
 proj=%{name}-%{version}
 if [ -d $proj ] ; then
-	/bin/rm -rf $proj
+  /bin/rm -rf $proj
 fi
 if [ -f ../SOURCES/$proj.tar.gz ] ; then
-	gunzip -c ../SOURCES/$proj.tar.gz |tar xf -
+  gunzip -c ../SOURCES/$proj.tar.gz |tar xf -
 elif [ -f ../SOURCES/$proj.tar.bz2 ] ; then
-	bzip2 -d -c ../SOURCES/$proj.tar.bz2 |tar xf -
+  bzip2 -d -c ../SOURCES/$proj.tar.bz2 |tar xf -
 else
-	echo "No Source Archive for $proj"
-	exit 1
+  echo "No Source Archive for $proj"
+  exit 1
 fi
 if [ -d $proj ] ; then
-	if [ -f %{name}-%{version}/patches/$proj.patch ] ; then
-	    # Copy for the SRPM
-		/bin/cp %{name}-%{version}/patches/$proj.patch ../SOURCES
-	fi
+  if [ -f %{name}-%{version}/patches/$proj.patch ] ; then
+    # Copy for the SRPM
+    /bin/cp %{name}-%{version}/patches/$proj.patch ../SOURCES
+  fi
 fi
 
 %build
 ID=$(id -u)
 if [ $ID -eq 0 ] ; then
-	/usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
-	if [ $? = 4 ] ; then
-		/usr/sbin/groupadd -r indimail
-	fi
-	/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d {_prefix} indimail || true
-	if [ $? = 4 ] ; then
-		/usr/sbin/useradd -r -g indimail -d {_prefix} indimail
-	fi
+ /usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
+ if [ $? = 4 ] ; then
+   /usr/sbin/groupadd -r indimail
+ fi
+ /usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d {_prefix} indimail || true
+ if [ $? = 4 ] ; then
+   /usr/sbin/useradd -r -g indimail -d {_prefix} indimail
+ fi
 fi
 
 cd %{name}-%{version}
 if [ %{reconfigure_mode} -eq 1 ] ; then
-	autoreconf -fi
+  autoreconf -fi
 fi
 
 ./configure --prefix=%{_prefix} \
-	--sysconfdir=%{sysconfdir} \
-	--libdir=%{_libdir} \
-	--enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
-	--enable-mysqlprefix=%{mysqlPrefix} \
-	--enable-modify-quota \
-	--enable-htmldir=@htmldir@ \
-	--enable-cgibindir=@cgibindir@ \
-	--enable-imagedir=@imagedir@ \
-	--enable-htmllibdir=@htmllibdir@
+  --sysconfdir=%{sysconfdir} \
+  --libdir=%{_libdir} \
+  --enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
+  --enable-mysqlprefix=%{mysqlPrefix} \
+  --enable-modify-quota \
+  --enable-htmldir=@htmldir@ \
+  --enable-cgibindir=@cgibindir@ \
+  --enable-imagedir=@imagedir@ \
+  --enable-htmllibdir=@htmllibdir@
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
@@ -147,122 +147,122 @@ ID=$(id -u)
 for i in %{name}-%{version}
 do
 if [ -d $i ] ; then
-	cd $i
-	%{__make} -s DESTDIR=%{buildroot}
-	%{__make} -s DESTDIR=%{buildroot} install-strip
-	cd ..
+  cd $i
+  %{__make} -s DESTDIR=%{buildroot}
+  %{__make} -s DESTDIR=%{buildroot} install-strip
+  cd ..
 fi
 done
 
 # copy files here
 if [ -x /usr/bin/chrpath ] ; then
-	/usr/bin/chrpath -d %{buildroot}@cgibindir@/iwebadmin
+  /usr/bin/chrpath -d %{buildroot}@cgibindir@/iwebadmin
 fi
 
 %files
 %defattr(-,root,root,-)
 %if "%{_prefix}" != "/usr"
-%dir %attr(555,root,qmail)          %{_prefix}
+%dir %attr(555,root,qmail)                   %{_prefix}
 %endif
-%dir %attr(555,root,qmail)          @htmllibdir@
-%dir %attr(555,root,qmail)          @htmllibdir@/html
-%dir %attr(555,root,qmail)          @htmllibdir@/lang
+%dir %attr(755,root,qmail)                   @htmllibdir@
+%dir %attr(755,root,qmail)                   @htmllibdir@/html
+%dir %attr(755,root,qmail)                   @htmllibdir@/lang
 
 # binary
-%attr(6555,root,indimail)           @cgibindir@/iwebadmin
+%attr(6555,root,indimail)                    @cgibindir@/iwebadmin
 
 #html
-%attr(444,root,root)                @htmllibdir@/html/add_autorespond.html
-%attr(444,root,root)                @htmllibdir@/html/add_forward.html
-%attr(444,root,root)                @htmllibdir@/html/add_listdig.html
-%attr(444,root,root)                @htmllibdir@/html/add_listmod.html
-%attr(444,root,root)                @htmllibdir@/html/add_listuser.html
-%attr(444,root,root)                @htmllibdir@/html/add_mailinglist-idx.html
-%attr(444,root,root)                @htmllibdir@/html/add_mailinglist-no-idx.html
-%attr(444,root,root)                @htmllibdir@/html/add_user.html
-%attr(444,root,root)                @htmllibdir@/html/change_password.html
-%attr(444,root,root)                @htmllibdir@/html/change_password_success.html
-%attr(444,root,root)                @htmllibdir@/html/colortable
-%attr(444,root,root)                @htmllibdir@/html/del_autorespond_confirm.html
-%attr(444,root,root)                @htmllibdir@/html/del_forward_confirm.html
-%attr(444,root,root)                @htmllibdir@/html/del_listdig.html
-%attr(444,root,root)                @htmllibdir@/html/del_listmod.html
-%attr(444,root,root)                @htmllibdir@/html/del_listuser.html
-%attr(444,root,root)                @htmllibdir@/html/del_mailinglist_confirm.html
-%attr(444,root,root)                @htmllibdir@/html/del_user_confirm.html
-%attr(444,root,root)                @htmllibdir@/html/footer.html
-%attr(444,root,root)                @htmllibdir@/html/header.html
-%attr(444,root,root)                @htmllibdir@/html/main_menu.html
-%attr(444,root,root)                @htmllibdir@/html/mod_autorespond.html
-%attr(444,root,root)                @htmllibdir@/html/mod_dotqmail.html
-%attr(444,root,root)                @htmllibdir@/html/mod_mailinglist-idx.html
-%attr(444,root,root)                @htmllibdir@/html/mod_user.html
-%attr(444,root,root)                @htmllibdir@/html/setremotecatchall.html
-%attr(444,root,root)                @htmllibdir@/html/show_autorespond.html
-%attr(444,root,root)                @htmllibdir@/html/show_digest_subscribers.html
-%attr(444,root,root)                @htmllibdir@/html/show_forwards.html
-%attr(444,root,root)                @htmllibdir@/html/show_login.html
-%attr(444,root,root)                @htmllibdir@/html/show_mailinglist.html
-%attr(444,root,root)                @htmllibdir@/html/show_moderators.html
-%attr(444,root,root)                @htmllibdir@/html/show_subscribers.html
-%attr(444,root,root)                @htmllibdir@/html/show_users.html
+%attr(444,root,root)                         @htmllibdir@/html/add_autorespond.html
+%attr(444,root,root)                         @htmllibdir@/html/add_forward.html
+%attr(444,root,root)                         @htmllibdir@/html/add_listdig.html
+%attr(444,root,root)                         @htmllibdir@/html/add_listmod.html
+%attr(444,root,root)                         @htmllibdir@/html/add_listuser.html
+%attr(444,root,root)                         @htmllibdir@/html/add_mailinglist-idx.html
+%attr(444,root,root)                         @htmllibdir@/html/add_mailinglist-no-idx.html
+%attr(444,root,root)                         @htmllibdir@/html/add_user.html
+%attr(444,root,root)                         @htmllibdir@/html/change_password.html
+%attr(444,root,root)                         @htmllibdir@/html/change_password_success.html
+%attr(444,root,root)                         @htmllibdir@/html/colortable
+%attr(444,root,root)                         @htmllibdir@/html/del_autorespond_confirm.html
+%attr(444,root,root)                         @htmllibdir@/html/del_forward_confirm.html
+%attr(444,root,root)                         @htmllibdir@/html/del_listdig.html
+%attr(444,root,root)                         @htmllibdir@/html/del_listmod.html
+%attr(444,root,root)                         @htmllibdir@/html/del_listuser.html
+%attr(444,root,root)                         @htmllibdir@/html/del_mailinglist_confirm.html
+%attr(444,root,root)                         @htmllibdir@/html/del_user_confirm.html
+%attr(444,root,root)                         @htmllibdir@/html/footer.html
+%attr(444,root,root)                         @htmllibdir@/html/header.html
+%attr(444,root,root)                         @htmllibdir@/html/main_menu.html
+%attr(444,root,root)                         @htmllibdir@/html/mod_autorespond.html
+%attr(444,root,root)                         @htmllibdir@/html/mod_dotqmail.html
+%attr(444,root,root)                         @htmllibdir@/html/mod_mailinglist-idx.html
+%attr(444,root,root)                         @htmllibdir@/html/mod_user.html
+%attr(444,root,root)                         @htmllibdir@/html/setremotecatchall.html
+%attr(444,root,root)                         @htmllibdir@/html/show_autorespond.html
+%attr(444,root,root)                         @htmllibdir@/html/show_digest_subscribers.html
+%attr(444,root,root)                         @htmllibdir@/html/show_forwards.html
+%attr(444,root,root)                         @htmllibdir@/html/show_login.html
+%attr(444,root,root)                         @htmllibdir@/html/show_mailinglist.html
+%attr(444,root,root)                         @htmllibdir@/html/show_moderators.html
+%attr(444,root,root)                         @htmllibdir@/html/show_subscribers.html
+%attr(444,root,root)                         @htmllibdir@/html/show_users.html
 
 #language files
-%attr(444,root,root)                @htmllibdir@/lang/bg
-%attr(444,root,root)                @htmllibdir@/lang/cs
-%attr(444,root,root)                @htmllibdir@/lang/da
-%attr(444,root,root)                @htmllibdir@/lang/de
-%attr(444,root,root)                @htmllibdir@/lang/en
-%attr(444,root,root)                @htmllibdir@/lang/es
-%attr(444,root,root)                @htmllibdir@/lang/fi
-%attr(444,root,root)                @htmllibdir@/lang/fr
-%attr(444,root,root)                @htmllibdir@/lang/hu
-%attr(444,root,root)                @htmllibdir@/lang/it
-%attr(444,root,root)                @htmllibdir@/lang/ja
-%attr(444,root,root)                @htmllibdir@/lang/lt
-%attr(444,root,root)                @htmllibdir@/lang/nl
-%attr(444,root,root)                @htmllibdir@/lang/no
-%attr(444,root,root)                @htmllibdir@/lang/pl
-%attr(444,root,root)                @htmllibdir@/lang/pt-br
-%attr(444,root,root)                @htmllibdir@/lang/ru
-%attr(444,root,root)                @htmllibdir@/lang/sk
-%attr(444,root,root)                @htmllibdir@/lang/sv
-%attr(444,root,root)                @htmllibdir@/lang/tr
-%attr(444,root,root)                @htmllibdir@/lang/zh-cn
+%attr(444,root,root)                         @htmllibdir@/lang/bg
+%attr(444,root,root)                         @htmllibdir@/lang/cs
+%attr(444,root,root)                         @htmllibdir@/lang/da
+%attr(444,root,root)                         @htmllibdir@/lang/de
+%attr(444,root,root)                         @htmllibdir@/lang/en
+%attr(444,root,root)                         @htmllibdir@/lang/es
+%attr(444,root,root)                         @htmllibdir@/lang/fi
+%attr(444,root,root)                         @htmllibdir@/lang/fr
+%attr(444,root,root)                         @htmllibdir@/lang/hu
+%attr(444,root,root)                         @htmllibdir@/lang/it
+%attr(444,root,root)                         @htmllibdir@/lang/ja
+%attr(444,root,root)                         @htmllibdir@/lang/lt
+%attr(444,root,root)                         @htmllibdir@/lang/nl
+%attr(444,root,root)                         @htmllibdir@/lang/no
+%attr(444,root,root)                         @htmllibdir@/lang/pl
+%attr(444,root,root)                         @htmllibdir@/lang/pt-br
+%attr(444,root,root)                         @htmllibdir@/lang/ru
+%attr(444,root,root)                         @htmllibdir@/lang/sk
+%attr(444,root,root)                         @htmllibdir@/lang/sv
+%attr(444,root,root)                         @htmllibdir@/lang/tr
+%attr(444,root,root)                         @htmllibdir@/lang/zh-cn
 
-%attr(444,root,root)                @sysconfdir@/iwebadmin_perm_list
+%attr(444,root,root) %config(noreplace)      @sysconfdir@/iwebadmin_perm_list
 #images
-%attr(444,root,root)                @imagedir@/delete.png
-%attr(444,root,root)                @imagedir@/disabled.png
-%attr(444,root,root)                @imagedir@/lowerleft.png
-%attr(444,root,root)                @imagedir@/lowermiddle.png
-%attr(444,root,root)                @imagedir@/lowerright.png
-%attr(444,root,root)                @imagedir@/main.png
-%attr(444,root,root)                @imagedir@/main1.png
-%attr(444,root,root)                @imagedir@/main2.png
-%attr(444,root,root)                @imagedir@/middleleft1.png
-%attr(444,root,root)                @imagedir@/middleleft2.png
-%attr(444,root,root)                @imagedir@/middlelogin.png
-%attr(444,root,root)                @imagedir@/middleright1.png
-%attr(444,root,root)                @imagedir@/modify.png
-%attr(444,root,root)                @imagedir@/pixel.png
-%attr(444,root,root)                @imagedir@/radio-off.png
-%attr(444,root,root)                @imagedir@/radio-on.png
-%attr(444,root,root)                @imagedir@/trash.png
-%attr(444,root,root)                @imagedir@/upperleft.png
-%attr(444,root,root)                @imagedir@/uppermiddle1.png
-%attr(444,root,root)                @imagedir@/uppermiddle2.png
-%attr(444,root,root)                @imagedir@/upperright.png
+%attr(444,root,root)                         @imagedir@/delete.png
+%attr(444,root,root)                         @imagedir@/disabled.png
+%attr(444,root,root)                         @imagedir@/lowerleft.png
+%attr(444,root,root)                         @imagedir@/lowermiddle.png
+%attr(444,root,root)                         @imagedir@/lowerright.png
+%attr(444,root,root)                         @imagedir@/main.png
+%attr(444,root,root)                         @imagedir@/main1.png
+%attr(444,root,root)                         @imagedir@/main2.png
+%attr(444,root,root)                         @imagedir@/middleleft1.png
+%attr(444,root,root)                         @imagedir@/middleleft2.png
+%attr(444,root,root)                         @imagedir@/middlelogin.png
+%attr(444,root,root)                         @imagedir@/middleright1.png
+%attr(444,root,root)                         @imagedir@/modify.png
+%attr(444,root,root)                         @imagedir@/pixel.png
+%attr(444,root,root)                         @imagedir@/radio-off.png
+%attr(444,root,root)                         @imagedir@/radio-on.png
+%attr(444,root,root)                         @imagedir@/trash.png
+%attr(444,root,root)                         @imagedir@/upperleft.png
+%attr(444,root,root)                         @imagedir@/uppermiddle1.png
+%attr(444,root,root)                         @imagedir@/uppermiddle2.png
+%attr(444,root,root)                         @imagedir@/upperright.png
 
 #
 # If the configuration file should not be replaced when the RPM is
 # upgraded, mark it as follows:
-# %config(noreplace) filename
+# %%config(noreplace) filename
 #
 # For files that should be included in the list of files so that they
 # are uninstalled when the package is removed but may not exist until
 # they are created during post-install should be marked as follows:
-# %config(missingok) filename
+# %%config(missingok) filename
 #
 
 %clean
@@ -274,36 +274,36 @@ fi
 # % preun       -        0         1         -
 # % postun      -        0         1         -
 %pre 
-#echo This is pre for %{version}-%{release} : arg=$1
+#echo This is pre for %%{version}-%%{release} : arg=$1
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
-	exit 1
+  echo "You are not root"
+  exit 1
 fi
 
 %post
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
-	exit 1
+  echo "You are not root"
+  exit 1
 fi
 
 %preun
-#echo This is preun for %{version}-%{release} : arg=$1
+#echo This is preun for %%{version}-%%{release} : arg=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
-	exit 1
+  echo "You are not root"
+  exit 1
 fi
 
 %postun
-#echo This is postun for %{version}-%{release} : arg=$1
+#echo This is postun for %%{version}-%%{release} : arg=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
-	exit 1
+  echo "You are not root"
+  exit 1
 fi
 
 # fix changelog for openSUSE buildservice
