@@ -37,7 +37,9 @@
 
 #define SHOW_VERSION_LINK 1
 
+#ifndef MAX_FILE_NAME
 #define MAX_FILE_NAME 100
+#endif
 
 #ifdef MAX_BUFF
 #undef MAX_BUFF
@@ -45,7 +47,7 @@
 #define MAX_BUFF 500
 #define MAX_BIG_BUFF 5000
 
-#define MAX_LANG_STR 350
+#define MAX_LANG_STR 500
 
 #define QMAILADMIN_UNLIMITED -1
 
