@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.5 2017-04-02 22:43:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.6 2017-04-03 13:03:31+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -68,6 +68,9 @@ int             checkopt[256];	/* used to display mailing list options */
 #define REPLYTO_SENDER 1
 #define REPLYTO_LIST 2
 #define REPLYTO_ADDRESS 3
+#define GROUP_SUBSCRIBER 0
+#define GROUP_MODERATOR 1
+#define GROUP_DIGEST 2
 
 void            set_options();
 void            default_options();
@@ -81,9 +84,7 @@ show_mailing_lists(char *user, char *dom, time_t mytime)
 		exit(0);
 	}
 
-/*
- * see if there's anything to display 
- */
+	/*- see if there's anything to display */
 	count_mailinglists();
 	if (CurMailingLists == 0) {
 		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[231]);
@@ -123,9 +124,7 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 		return;
 	}
 
-/*
- * First display the title row 
- */
+	/*- First display the title row */
 	printf("<tr bgcolor=\"#cccccc\">");
 	printf("<th align=center><font size=2>%s</font></th>", html_text[72]);
 #ifdef EZMLMIDX
@@ -147,9 +146,7 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 
 	sort_init();
 
-/*
- * Now, display each list 
- */
+	/*- Now, display each list */
 	while ((mydirent = readdir(mydir)) != NULL) {
 		if (strncmp(".qmail-", mydirent->d_name, 7) == 0) {
 			if ((fs = fopen(mydirent->d_name, "r")) == NULL) {
@@ -172,9 +169,7 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 
 	for (i = 0; (addr = (char *) sort_get_entry(i)); ++i) {
 		sprintf(testfn, ".qmail-%s-digest-owner", addr);
-	/*
-	 * convert ':' in addr to '.' 
-	 */
+		/*- convert ':' in addr to '.' */
 		str_replace(addr, ':', '.');
 
 		printf("<tr>");
@@ -194,13 +189,9 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 		qmail_button(addr, "dellistmod", user, dom, mytime, "delete.png");
 		qmail_button(addr, "showlistmod", user, dom, mytime, "delete.png");
 
-	/*
-	 * Is it a digest list? 
-	 */
+		/*- Is it a digest list?  */
 		if ((fs = fopen(testfn, "r")) == NULL) {
-		/*
-		 * not a digest list 
-		 */
+			/*- not a digest list */
 			printf("<TD COLSPAN=3> </TD>");
 		} else {
 			qmail_button(addr, "addlistdig", user, dom, mytime, "delete.png");
@@ -272,9 +263,7 @@ show_mailing_list_line2(char *user, char *dom, time_t mytime, char *dir)
 	}
 	closedir(mydir);
 
-/*
- * if there aren't any lists, don't display anything 
- */
+	/*- if there aren't any lists, don't display anything */
 	if (listcount == 0) {
 		sort_cleanup();
 		return;
@@ -317,9 +306,7 @@ addmailinglist()
 		exit(0);
 	}
 
-/*
- * set up default options for new list 
- */
+	/*- set up default options for new list */
 	default_options();
 
 #ifdef EZMLMIDX
@@ -355,7 +342,7 @@ delmailinglistnow()
 	}
 
 	if (fixup_local_name(ActionUser)) {
-	// invalid address given, abort
+		/*- invalid address given, abort */
 		vclose();
 		exit(0);
 	}
@@ -370,9 +357,7 @@ delmailinglistnow()
 	call_onchange("delmailinglist");
 #endif
 
-/*
- * make dotqmail name 
- */
+	/*- make dotqmail name */
 	strcpy(dotqmail_name, ActionUser);
 	for (dotnum = 0; dotqmail_name[dotnum] != '\0'; dotnum++) {
 		if (dotqmail_name[dotnum] == '.')
@@ -383,21 +368,16 @@ delmailinglistnow()
 	sprintf(TmpBuf3, ".qmail-%s-", dotqmail_name);
 	while ((mydirent = readdir(mydir)) != NULL) {
 
-	/*
-	 * delete the main .qmail-"list" file 
-	 */
+		/*- delete the main .qmail-"list" file */
 		if (strcmp(TmpBuf2, mydirent->d_name) == 0) {
 			if (unlink(mydirent->d_name) != 0) {
 				ack("185", TmpBuf2);
 			}
 
-		/*
-		 * delete secondary .qmail-"list"-* files 
-		 */
-		} else if (strncmp(TmpBuf3, mydirent->d_name, strlen(TmpBuf3)) == 0) {
-			if (unlink(mydirent->d_name) != 0) {
+		} else /*- delete secondary .qmail-"list"-* files */
+		if (strncmp(TmpBuf3, mydirent->d_name, strlen(TmpBuf3)) == 0) {
+			if (unlink(mydirent->d_name) != 0)
 				ack("185", TmpBuf2);
-			}
 		}
 	}
 	closedir(mydir);
@@ -416,10 +396,10 @@ delmailinglistnow()
 
 }
 
-/*
+/*-
  * sets the Reply-To header in header* files based on form fields
- * * designed to be called by ezmlm_make() (after calling ezmlm-make)
- * * Replaces the "Reply-To" line in <filename> with <newtext>.
+ * designed to be called by ezmlm_make() (after calling ezmlm-make)
+ * Replaces the "Reply-To" line in <filename> with <newtext>.
  */
 void
 ezmlm_setreplyto(char *filename, char *newtext)
@@ -441,9 +421,7 @@ ezmlm_setreplyto(char *filename, char *newtext)
 		return;
 	}
 
-/*
- * copy contents to new file, except for Reply-To header 
- */
+	/*- copy contents to new file, except for Reply-To header */
 	while (fgets(buf, sizeof (buf), headerfile) != NULL) {
 		if (strncasecmp("Reply-To", buf, 8) != 0) {
 			fputs(buf, temp);
@@ -477,11 +455,11 @@ ezmlm_make(int newlist)
 	char            loop_ch[64];
 	int             loop;
 
-/*
+/*-
  * Initialize listopt to be a string of the characters A-Z, with each one
- * * set to the correct case (e.g., A or a) to match the expected behavior
- * * of not checking any checkboxes.  Leave other letters blank.
- * * NOTE: Leave F out, since we handle it manually.
+ * set to the correct case (e.g., A or a) to match the expected behavior
+ * of not checking any checkboxes.  Leave other letters blank.
+ * NOTE: Leave F out, since we handle it manually.
  */
 	char            listopt[] = "A  D   hIj L N pQRST      ";
 
@@ -498,9 +476,7 @@ ezmlm_make(int newlist)
 		exit(0);
 	}
 
-/*
- * update listopt based on user selections 
- */
+	/*- update listopt based on user selections */
 	for (loop = 0; loop < 20; loop++) {
 		sprintf(tmp, "opt%d=", loop);
 		GetValue(TmpCGI, loop_ch, tmp, sizeof (loop_ch));
@@ -513,9 +489,7 @@ ezmlm_make(int newlist)
 		}
 	}
 
-/*
- * don't allow option c, force option e if modifying existing list 
- */
+	/*- don't allow option c, force option e if modifying existing list */
 	listopt[2] = ' ';
 	listopt[4] = newlist ? ' ' : 'e';
 
@@ -523,33 +497,25 @@ ezmlm_make(int newlist)
 	arguments[argc++] = "ezmlm-make";
 
 #ifdef EZMLMIDX
-/*
- * check the list owner entry 
- */
-	GetValue(TmpCGI, list_owner, "listowner=", sizeof (list_owner));	// Get the listowner
+	/*- check the list owner entry */
+	GetValue(TmpCGI, list_owner, "listowner=", sizeof (list_owner));		/*- Get the listowner -*/
 	if (strlen(list_owner) > 0) {
 		sprintf(owneremail, "-5%s", list_owner);
 		arguments[argc++] = owneremail;
 	}
 #endif
 
-/*
- * build the option string 
- */
+	/*- build the option string */
 	tmpstr = options;
 	arguments[argc++] = tmpstr;
 	*tmpstr++ = '-';
 #ifndef EZMLMIDX
-/*
- * non idx list, only allows options A and P 
- */
+	/*- non idx list, only allows options A and P */
 	*tmpstr++ = listopt[0];		/* a or A */
 	*tmpstr++ = listopt['p' - 'a'];	/* p or P */
 	*tmpstr++ = 0;				/* add NULL terminator */
 #else
-/*
- * ignore options v-z, but test a-u 
- */
+	/*- ignore options v-z, but test a-u */
 	for (i = 0; i <= ('u' - 'a'); i++) {
 		if (listopt[i] != ' ') {
 			*tmpstr++ = listopt[i];
@@ -557,9 +523,7 @@ ezmlm_make(int newlist)
 	}
 	*tmpstr++ = 0;				/* add NULL terminator */
 
-/*
- * check for sql support 
- */
+	/*- check for sql support */
 	GetValue(TmpCGI, tmp, "sqlsupport=", sizeof (tmp));
 	if (strlen(tmp) > 0) {
 		arguments[argc++] = tmpstr;
@@ -570,17 +534,13 @@ ezmlm_make(int newlist)
 			GetValue(TmpCGI, loop_ch, tmp, sizeof (loop_ch));
 			tmpstr += sprintf(tmpstr, "%s:", loop_ch);
 		}
-	/*
-	 * remove trailing : 
-	 */
+		/*- remove trailing : */
 		tmpstr--;
 		*tmpstr++ = 0;
 	}
 #endif
 
-/*
- * make dotqmail name 
- */
+	/*- make dotqmail name */
 	strcpy(dotqmail_name, ActionUser);
 	for (dotnum = 0; dotqmail_name[dotnum] != '\0'; dotnum++) {
 		if (dotqmail_name[dotnum] == '.')
@@ -596,7 +556,7 @@ ezmlm_make(int newlist)
 		arguments[argc++] = TmpBuf3;
 		arguments[argc++] = ActionUser;
 		arguments[argc++] = Domain;
-		arguments[argc] = NULL;
+		arguments[argc] = (char *) NULL;
 
 		execv(TmpBuf1, arguments);
 		exit(127);
@@ -604,39 +564,10 @@ ezmlm_make(int newlist)
 		wait(&pid);
 	}
 
-/*
- * ezmlm-make -e leaves .qmail-listname-(accept||reject) links for some reason.
- * (causing file permission errors in "show mailing lists") Also, it doesn't 
- * delete dir/digest/ when turning off digests.  This section cleans up...
- */
-	if (listopt['M' - 'A'] == 'M') {	/* moderation off */
-		sprintf(tmp, "%s/.qmail-%s-accept-default", RealDir, dotqmail_name);
-		unlink(tmp);
-		sprintf(tmp, "%s/.qmail-%s-reject-default", RealDir, dotqmail_name);
-		unlink(tmp);
-	}
-	if (listopt['D' - 'A'] == 'D') {	/* digest off */
-		sprintf(tmp, "%s/.qmail-%s-digest-return-default", RealDir, dotqmail_name);
-		unlink(tmp);
-		sprintf(tmp, "%s/.qmail-%s-digest-owner", RealDir, dotqmail_name);
-		unlink(tmp);
-
-	/*
-	 * delete the digest directory 
-	 */
-		sprintf(tmp, "%s/%s/digest", RealDir, ActionUser);
-		vdelfiles(tmp, ActionUser, Domain);
-		(void) chdir(RealDir);
-	}
-
-/*
- * Check for prefix setting 
- */
+	/*- Check for prefix setting */
 	GetValue(TmpCGI, tmp, "prefix=", sizeof (tmp));
 
-/*
- * strip leading '[' and trailing ']' from tmp 
- */
+	/*- strip leading '[' and trailing ']' from tmp */
 	tmpstr = strchr(tmp, ']');
 	if (tmpstr != NULL)
 		*tmpstr = '\0';
@@ -644,9 +575,7 @@ ezmlm_make(int newlist)
 	while (*tmpstr == '[')
 		tmpstr++;
 
-/*
- * Create (or delete) the file as appropriate 
- */
+	/*- Create (or delete) the file as appropriate */
 	sprintf(TmpBuf, "%s/%s/prefix", RealDir, ActionUser);
 	if (strlen(tmp) > 0) {
 		file = fopen(TmpBuf, "w");
@@ -658,15 +587,11 @@ ezmlm_make(int newlist)
 		unlink(TmpBuf);
 	}
 
-/*
- * set Reply-To header 
- */
+	/*- set Reply-To header */
 	GetValue(TmpCGI, TmpBuf, "replyto=", sizeof (TmpBuf));
 	replyto = atoi(TmpBuf);
 	if (replyto == REPLYTO_SENDER) {
-	/*
-	 * ezmlm shouldn't remove/add Reply-To header 
-	 */
+		/*- ezmlm shouldn't remove/add Reply-To header */
 		ezmlm_setreplyto("headeradd", "");
 		ezmlm_setreplyto("headerremove", "");
 	} else {
@@ -680,25 +605,19 @@ ezmlm_make(int newlist)
 		ezmlm_setreplyto("headerremove", "Reply-To");
 	}
 
-/*
- * update inlocal file 
- */
+	/*- update inlocal file */
 	sprintf(TmpBuf, "%s/%s/inlocal", RealDir, ActionUser);
 	if ((file = fopen(TmpBuf, "w")) != NULL) {
 		fprintf(file, "%s-%s", Domain, ActionUser);
 		fclose(file);
 	}
 #ifdef EZMLMIDX
-/*
- * if this is a new list, add owner as subscriber 
- */
+	/*- if this is a new list, add owner as subscriber */
 	if (newlist && (*list_owner != '\0')) {
-		ezmlm_sub("", list_owner);
+		ezmlm_sub(GROUP_SUBSCRIBER, list_owner);
 		if (listopt['M' - 'A'] == 'm') {	/* moderation on */
-		/*
-		 * add owner as moderator/remote admin as well 
-		 */
-			ezmlm_sub("mod", list_owner);
+			/*- add owner as moderator/remote admin as well */
+			ezmlm_sub(GROUP_MODERATOR, list_owner);
 		}
 	}
 #endif
@@ -734,13 +653,12 @@ addmailinglistnow()
 	show_mailing_lists(Username, Domain, Mytime);
 }
 
+/*-
+ * mod = 0 for subscribers, 1 for moderators, 2 for digest users 
+ */
 void
 show_list_group_now(int mod)
 {
-/*
- * mod = 0 for subscribers, 1 for moderators, 2 for digest users 
- */
-
 	FILE           *fs;
 	int             handles[2], pid, z = 0, subuser_count = 0;
 	char            buf[256];
@@ -753,8 +671,7 @@ show_list_group_now(int mod)
 	}
 
 	lowerit(ActionUser);
-	if (pipe(handles))
-	{
+	if (pipe(handles)) {
 		vclose();
 		exit(0);
 	}
@@ -764,22 +681,20 @@ show_list_group_now(int mod)
 		(void) close(handles[0]);
 		(void) dup2(handles[1], fileno(stdout));
 		sprintf(TmpBuf1, "%s/ezmlm-list", EZMLMDIR);
-		if (mod == 1) {
-			sprintf(TmpBuf2, "%s/%s/mod", RealDir, ActionUser);
-		} else if (mod == 2) {
-			sprintf(TmpBuf2, "%s/%s/digest", RealDir, ActionUser);
+		sprintf(TmpBuf2, "%s/%s", RealDir, ActionUser);
+		if (mod == GROUP_MODERATOR) {
+			execl(TmpBuf1, "ezmlm-list", TmpBuf2, "mod", (char *) NULL);
+		} else if (mod == GROUP_DIGEST) {
+			execl(TmpBuf1, "ezmlm-list", TmpBuf2, "digest", (char *) NULL);
 		} else {
-			sprintf(TmpBuf2, "%s/%s/", RealDir, ActionUser);
+			execl(TmpBuf1, "ezmlm-list", TmpBuf2, (char *) NULL);
 		}
-		execl(TmpBuf1, "ezmlm-list", TmpBuf2, NULL);
 		exit(127);
 	} else {
 		close(handles[1]);
 		fs = fdopen(handles[0], "r");
 
-	/*
-	 * Load subscriber/moderator list 
-	 */
+		/*- Load subscriber/moderator list */
 
 		sort_init();
 		while ((fgets(buf, sizeof (buf), fs) != NULL)) {
@@ -789,27 +704,19 @@ show_list_group_now(int mod)
 
 		sort_dosort();
 
-	/*
-	 * Display subscriber/moderator/digest list, along with delete button 
-	 */
+		/*- Display subscriber/moderator/digest list, along with delete button */
 		if (mod == 1) {
 			strcpy(TmpBuf, "228");
 			strcpy(TmpBuf1, "220");
-		/*
-		 * strcpy(TmpBuf2, "087"); 
-		 */
+			/*- strcpy(TmpBuf2, "087"); */
 		} else if (mod == 2) {
 			strcpy(TmpBuf, "244");
 			strcpy(TmpBuf1, "246");
-		/*
-		 * strcpy(TmpBuf2, "245"); 
-		 */
+			/*- strcpy(TmpBuf2, "245"); */
 		} else {
 			strcpy(TmpBuf, "230");
 			strcpy(TmpBuf1, "222");
-		/*
-		 * strcpy(TmpBuf2, "084"); 
-		 */
+			/*- strcpy(TmpBuf2, "084"); */
 		}
 		strcpy(TmpBuf2, "072");
 		printf("<TABLE border=0 width=\"100%%\">\n");
@@ -901,11 +808,11 @@ addlistdig()
 	addlistgroup("add_listdig.html");
 }
 
-/*
+/*-
  * returns 0 for success 
  */
 int
-ezmlm_sub(char *dir, char *email)
+ezmlm_sub(int mod, char *email)
 {
 	int             pid;
 	char            subpath[MAX_BUFF];
@@ -914,23 +821,24 @@ ezmlm_sub(char *dir, char *email)
 	pid = fork();
 	if (pid == 0) {
 		snprintf(subpath, sizeof (subpath), "%s/ezmlm-sub", EZMLMDIR);
-		snprintf(listpath, sizeof (listpath), "%s/%s/%s", RealDir, ActionUser, dir);
-		execl(subpath, "ezmlm-sub", listpath, email, NULL);
+		snprintf(listpath, sizeof (listpath), "%s/%s", RealDir, ActionUser);
+		if (mod == GROUP_MODERATOR)
+			execl(subpath, "ezmlm-sub", listpath, "mod", email, (char *) NULL);
+		else if (mod == GROUP_DIGEST)
+			execl(subpath, "ezmlm-sub", listpath, "digest", email, (char *) NULL);
+		else
+			execl(subpath, "ezmlm-sub", listpath, email, (char *) NULL);
 		exit(127);
 	} else
 		wait(&pid);
-
-/*
- * need to check exit code for failure somehow 
- */
-
+	/*- need to check exit code for failure somehow */
 	return 0;
 }
 
+/*- mod = 0 for subscribers, 1 for moderators, 2 for digest subscribers */
 void
 addlistgroupnow(int mod)
 {
-// mod = 0 for subscribers, 1 for moderators, 2 for digest subscribers
 
 	if (AdminType != DOMAIN_ADMIN) {
 		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
@@ -942,27 +850,24 @@ addlistgroupnow(int mod)
 
 	if (check_email_addr(Newu)) {
 		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[148], Newu);
-		if (mod == 1) {
+		if (mod == GROUP_MODERATOR)
 			addlistmod();
-		} else if (mod == 2) {
+		else if (mod == GROUP_DIGEST)
 			addlistdig();
-		} else {
+		else
 			addlistuser();
-		}
 		vclose();
 		exit(0);
 	}
 
-	if (mod == 1) {
-		ezmlm_sub("mod", Newu);
+	ezmlm_sub(mod, Newu);
+	if (mod == GROUP_MODERATOR) {
 		snprinth(StatusMessage, sizeof (StatusMessage), "%H %s %H@%H\n", Newu, html_text[194], ActionUser, Domain);
 		send_template("add_listmod.html");
-	} else if (mod == 2) {
-		ezmlm_sub("digest", Newu);
+	} else if (mod == GROUP_DIGEST) {
 		snprinth(StatusMessage, sizeof (StatusMessage), "%H %s %H@%H\n", Newu, html_text[240], ActionUser, Domain);
 		send_template("add_listdig.html");
 	} else {
-		ezmlm_sub("", Newu);
 		snprinth(StatusMessage, sizeof (StatusMessage), "%H %s %H@%H\n", Newu, html_text[193], ActionUser, Domain);
 		send_template("add_listuser.html");
 	}
@@ -996,8 +901,10 @@ dellistgroupnow(int mod)
 
 	lowerit(Newu);
 
-// for dealing with AOL spam complaints, if address doesn't contain @,
-// but does contain '=', change the '=' to '@'.
+	/*-
+	 * for dealing with AOL spam complaints, if address doesn't contain @,
+	 * but does contain '=', change the '=' to '@'.
+	 */
 	if (!strchr(Newu, '@')) {
 		if ((p = strchr(Newu, '=')))
 			*p = '@';
@@ -1006,21 +913,21 @@ dellistgroupnow(int mod)
 	pid = fork();
 	if (pid == 0) {
 		sprintf(TmpBuf1, "%s/ezmlm-unsub", EZMLMDIR);
-		if (mod == 1) {
-			sprintf(TmpBuf2, "%s/%s/mod", RealDir, ActionUser);
-		} else if (mod == 2) {
-			sprintf(TmpBuf2, "%s/%s/digest", RealDir, ActionUser);
-		} else {
-			sprintf(TmpBuf2, "%s/%s/", RealDir, ActionUser);
-		}
+		sprintf(TmpBuf2, "%s/%s", RealDir, ActionUser);
+		if (mod == GROUP_MODERATOR)
+			execl(TmpBuf1, "ezmlm-unsub", TmpBuf2, "mod", Newu, (char *) NULL);
+		else if (mod == GROUP_DIGEST)
+			execl(TmpBuf1, "ezmlm-unsub", TmpBuf2, "digest", Newu, (char *) NULL);
+		else
+			execl(TmpBuf1, "ezmlm-unsub", TmpBuf2, Newu, (char *) NULL);
 		execl(TmpBuf1, "ezmlm-unsub", TmpBuf2, Newu, NULL);
 		exit(127);
 	} else
 		wait(&pid);
 
-	if (mod == 1) {
+	if (mod == GROUP_MODERATOR) {
 		snprinth(StatusMessage, sizeof (StatusMessage), "%H %s %H@%H\n", Newu, html_text[197], ActionUser, Domain);
-	} else if (mod == 2) {
+	} else if (mod == GROUP_DIGEST) {
 		snprinth(StatusMessage, sizeof (StatusMessage), "%H %s %H@%H\n", Newu, html_text[242], ActionUser, Domain);
 	} else {
 		snprinth(StatusMessage, sizeof (StatusMessage), "%H %s %H@%H\n", Newu, html_text[203], ActionUser, Domain);
@@ -1051,8 +958,7 @@ count_mailinglists()
 				printf(html_text[144], mydirent->d_name);
 				continue;
 			}
-			if (!fgets(TmpBuf2, sizeof (TmpBuf2), fs))
-			{
+			if (!fgets(TmpBuf2, sizeof (TmpBuf2), fs)) {
 				printf(html_text[144], mydirent->d_name);
 				continue;
 			}
@@ -1066,12 +972,12 @@ count_mailinglists()
 
 }
 
+/*-
+ * name of list to modify is stored in ActionUser 
+ */
 void
 modmailinglist()
 {
-/*
- * name of list to modify is stored in ActionUser 
- */
 	int             i;
 	FILE           *fs;
 
@@ -1083,9 +989,7 @@ modmailinglist()
 
 	strcpy(Alias, "");			/* initialize Alias (list owner) to empty string */
 
-/*
- * get the current listowner and copy it to Alias 
- */
+	/*- get the current listowner and copy it to Alias */
 	strcpy(dotqmail_name, ActionUser);
 	str_replace(dotqmail_name, '.', ':');
 	sprintf(TmpBuf, ".qmail-%s-owner", dotqmail_name);
@@ -1104,15 +1008,11 @@ modmailinglist()
 		fclose(fs);
 	}
 
-/*
- * set default to "replies go to original sender" 
- */
+	/*- set default to "replies go to original sender" */
 	replyto = REPLYTO_SENDER;	/* default */
 	*replyto_addr = '\0';
 	sprintf(TmpBuf, "%s/headeradd", ActionUser);
-/*
- * get the Reply-To setting for the list 
- */
+	/*- get the Reply-To setting for the list */
 	if ((fs = fopen(TmpBuf, "r")) != NULL) {
 		while (fgets(TmpBuf2, sizeof (TmpBuf2), fs)) {
 			if (strncasecmp("Reply-To: ", TmpBuf2, 10) == 0) {
@@ -1130,9 +1030,7 @@ modmailinglist()
 		fclose(fs);
 	}
 
-/*
- * read in options for the current list 
- */
+	/*- read in options for the current list */
 	set_options();
 
 #ifdef EZMLMIDX
@@ -1175,10 +1073,7 @@ build_option_str(char *type, char *param, char *options, char *description)
 	for (optptr = options; *optptr; optptr++) {
 		selected = selected && checkopt[(int) *optptr];
 	}
-/*
- * selected is now true if all options for this radio button are true 
- */
-
+	/*- selected is now true if all options for this radio button are true */
 	printh("<INPUT TYPE=%s NAME=\"%H\" VALUE=\"%H\"%s> %s\n", type, param, options, selected ? " CHECKED" : "", description);
 }
 
@@ -1201,15 +1096,15 @@ get_ezmlmidx_line_arguments(char *line, char *program, char argument)
 	char           *end;
 	char           *arg;
 
-// does line contain program name?
+	/*- does line contain program name? */
 	if ((strstr(line, program)) != NULL) {
-	// find the options
+	/*- find the options */
 		begin = strchr(line, ' ');
 		begin++;
 		if (*begin == '-') {
 			end = strchr(begin, ' ');
 			arg = strchr(begin, argument);
-		// if arg is found && it's in the options (before the trailing space), return 1
+			/*- if arg is found && it's in the options (before the trailing space), return 1 */
 			if (arg && (arg < end))
 				return 1;
 		}
@@ -1223,105 +1118,133 @@ set_options()
 	char            c;
 	FILE           *fs;
 
-/*
+/*-
  * Note that with ezmlm-idx it might be possible to replace most
  * of this code by reading the config file in the list's directory.
  */
 
-/*
- * make dotqmail name (ActionUser with '.' replaced by ':') 
- */
+	/*- make dotqmail name (ActionUser with '.' replaced by ':') */
 	strcpy(dotqmail_name, ActionUser);
 	for (dotnum = 0; dotqmail_name[dotnum] != '\0'; dotnum++) {
 		if (dotqmail_name[dotnum] == '.')
 			dotqmail_name[dotnum] = ':';
 	}
 
-// default to false for lowercase letters
+	/*- default to false for lowercase letters */
 	for (c = 'a'; c <= 'z'; checkopt[(int) c++] = 0);
 
-// figure out some options in the -default file
+/*- ------ newer configuration reads -*/
+
+	/*- -s: Subscription moderation. touching dir/modsub */
+	sprintf(TmpBuf, "%s/modsub", ActionUser);
+	checkopt['s'] = file_exists(TmpBuf);
+	/*- -h: Help  subscription. Don't require confirmation. Not recommented! -*/
+	sprintf(TmpBuf, "%s/nosubconfirm", ActionUser);
+	checkopt['h'] = file_exists(TmpBuf);
+	/*- -j Jump off. Unsubscribe  does not require confirmation. -*/
+	sprintf(TmpBuf, "%s/nounsubconfirm", ActionUser);
+	checkopt['j'] = file_exists(TmpBuf);
+
+	/*- -m: Message  moderation. touch dir/modpost -*/
+	sprintf(TmpBuf, "%s/modpost", ActionUser);		/*- valid for newer ezmlm-versions -*/
+	checkopt['m'] = file_exists(TmpBuf);
+	/*- -o: Reject others than; applicable to message moderated lists only -*/
+	sprintf(TmpBuf, "%s/modpostonly", ActionUser);
+	checkopt['o'] = file_exists(TmpBuf);
+	/*- -u: User posts only. subscribers, digest-subscribers and dir/allow -*/
+	sprintf(TmpBuf, "%s/subpostonly", ActionUser);
+	checkopt['u'] = file_exists(TmpBuf);
+
+	/*- -f: Subject Prefix. outgoing subject will be pre-fixed with the list name -*/
+	sprintf(TmpBuf, "%s/prefix", ActionUser);
+	checkopt['f'] = file_exists(TmpBuf);
+	/*- -t: Message Trailer. create dir/text/trailer -*/
+	sprintf(TmpBuf, "%s/addtrailer", ActionUser);
+	checkopt['t'] = file_exists(TmpBuf);
+
+	/*- -a: Archived: touch dir/archived and dir/indexed -*/
+	sprintf(TmpBuf, "%s/archived", ActionUser);
+	checkopt['a'] = file_exists(TmpBuf);
+	/*- -i: indexed for WWW archive access -*/
+	sprintf(TmpBuf, "%s/threaded", ActionUser);
+	checkopt['i'] = file_exists(TmpBuf);
+	/*- -p: Public archive. touch dir/public -*/
+	sprintf(TmpBuf, "%s/public", ActionUser);
+	checkopt['p'] = file_exists(TmpBuf);
+	/*- -g: Guard archive. Access requests from unrecognized SENDERs will be rejected. -*/
+	sprintf(TmpBuf, "%s/subgetonly", ActionUser);
+	checkopt['g'] = file_exists(TmpBuf);
+	/*- -b: Block archive. Only moderators are allowed to access the archive. -*/
+	sprintf(TmpBuf, "%s/modgetonly", ActionUser);
+	checkopt['b'] = file_exists(TmpBuf);
+
+	/*- -d: Digest -*/
+	sprintf(TmpBuf, "%s/digested", ActionUser);
+	checkopt['d'] = file_exists(TmpBuf);
+
+	/*- -r: Remote admin. touching dir/remote -*/
+	sprintf(TmpBuf, "%s/remote", ActionUser);
+	checkopt['r'] = file_exists(TmpBuf);
+	/*- -l List subscribers. administrators can request a subscriber -*/
+	sprintf(TmpBuf, "%s/modcanlist", ActionUser);
+	checkopt['l'] = file_exists(TmpBuf);
+	/*- -n New text file. administrators may edit texts -*/
+	sprintf(TmpBuf, "%s/modcanedit", ActionUser);
+	checkopt['n'] = file_exists(TmpBuf);
+
+	/*- ------ end of newer configuration reads -*/
+
+	/*- ------ read in old ezmlm's values -*/
+	/*- figure out some options in the -default file; -*/
 	sprintf(TmpBuf, ".qmail-%s-default", dotqmail_name);
 	if ((fs = fopen(TmpBuf, "r")) != NULL) {
 		while (fgets(TmpBuf2, sizeof (TmpBuf2), fs)) {
+			/*- -b: Block archive. Only moderators are allowed to access the archive. -*/
 			if ((get_ezmlmidx_line_arguments(TmpBuf2, "ezmlm-get", 'P')) > 0) {
 				checkopt['b'] = 1;
 			}
+			/*- -g: Guard archive. Access requests from unrecognized SENDERs will be rejected. -*/
 			if ((get_ezmlmidx_line_arguments(TmpBuf2, "ezmlm-get", 's')) > 0) {
 				checkopt['g'] = 1;
 			}
+			/*- -h: Help  subscription. Don't require confirmation. Not recommented! -*/
 			if ((get_ezmlmidx_line_arguments(TmpBuf2, "ezmlm-manage", 'S')) > 0) {
 				checkopt['h'] = 1;
 			}
+			/*- -j Jump off. Unsubscribe  does not require confirmation. -*/
 			if ((get_ezmlmidx_line_arguments(TmpBuf2, "ezmlm-manage", 'U')) > 0) {
 				checkopt['j'] = 1;
 			}
+			/*- -l List subscribers. administrators can request a subscriber -*/
 			if ((get_ezmlmidx_line_arguments(TmpBuf2, "ezmlm-manage", 'l')) > 0) {
 				checkopt['l'] = 1;
 			}
+			/*- -n New text file. administrators may edit texts -*/
 			if ((get_ezmlmidx_line_arguments(TmpBuf2, "ezmlm-manage", 'e')) > 0) {
 				checkopt['n'] = 1;
 			}
-			if ((strstr(TmpBuf2, "ezmlm-request")) != 0) {
-				checkopt['q'] = 1;
-			}
 		}
 		fclose(fs);
 	}
-// figure out some options in the -accept-default file
-	sprintf(TmpBuf, ".qmail-%s-accept-default", dotqmail_name);
-	if ((fs = fopen(TmpBuf, "r")) != NULL) {
-		while (fgets(TmpBuf2, sizeof (TmpBuf2), fs)) {
-			if (strstr(TmpBuf2, "ezmlm-archive") != 0) {
-				checkopt['i'] = 1;
-			}
-		}
-		fclose(fs);
-	}
-// figure out some options in the qmail file
+	/*- figure out some options in the qmail file -*/
 	sprintf(TmpBuf, ".qmail-%s", dotqmail_name);
 	if ((fs = fopen(TmpBuf, "r")) != NULL) {
 		while (fgets(TmpBuf2, sizeof (TmpBuf2), fs)) {
-			if ((get_ezmlmidx_line_arguments(TmpBuf2, "ezmlm-store", 'P')) > 0) {
+			/*- -o: Reject others than; applicable to message moderated lists only -*/
+			if (((get_ezmlmidx_line_arguments(TmpBuf2, "ezmlm-store", 'P')) > 0)) {
 				checkopt['o'] = 1;
-			}
-			if ((strstr(TmpBuf2, "ezmlm-gate")) != 0 || (strstr(TmpBuf2, "ezmlm-issubn")) != 0) {
-				checkopt['u'] = 1;
-			}
-			if (strstr(TmpBuf2, "ezmlm-archive") != 0) {
-				checkopt['i'] = 1;
 			}
 		}
 		fclose(fs);
 	}
-
-	sprintf(TmpBuf, ".qmail-%s-accept-default", dotqmail_name);
-	checkopt['m'] = file_exists(TmpBuf);
-
-	sprintf(TmpBuf, "%s/archived", ActionUser);
-	checkopt['a'] = file_exists(TmpBuf);
-
-	sprintf(TmpBuf, "%s/digest/bouncer", ActionUser);
-	checkopt['d'] = file_exists(TmpBuf);
-
-	sprintf(TmpBuf, "%s/prefix", ActionUser);
-	checkopt['f'] = file_exists(TmpBuf);
-
-	sprintf(TmpBuf, "%s/public", ActionUser);
-	checkopt['p'] = file_exists(TmpBuf);
-
-	sprintf(TmpBuf, "%s/remote", ActionUser);
-	checkopt['r'] = file_exists(TmpBuf);
-
-	sprintf(TmpBuf, "%s/modsub", ActionUser);
-	checkopt['s'] = file_exists(TmpBuf);
-
+	/*- -t: Message Trailer. create dir/text/trailer -*/
 	sprintf(TmpBuf, "%s/text/trailer", ActionUser);
-	checkopt['t'] = file_exists(TmpBuf);
+	if (file_exists(TmpBuf)) {
+		checkopt['t'] = 1;
+	}
+	/*- ------ end of read in old ezmlm's values -*/
 
-/*
- * update the uppercase option letters (just the opposite of the lowercase) 
- */
+	/*- update the uppercase option letters (just the opposite of the lowercase) */
 	for (c = 'A'; c <= 'Z'; c++) {
 		checkopt[(int) c] = !checkopt[(int) (c - 'A' + 'a')];
 	}
@@ -1336,14 +1259,12 @@ default_options()
 	replyto = REPLYTO_SENDER;
 	*replyto_addr = '\0';
 
-/*
+/*-
  * These are currently set to defaults for a good, generic list.
- * * Basically, make it safe/friendly and don't turn anything extra on.
+ * Basically, make it safe/friendly and don't turn anything extra on.
  */
 
-/*
- * for the options below, use 1 for "on" or "yes" 
- */
+	/*- for the options below, use 1 for "on" or "yes" */
 	checkopt['a'] = 1;			/* Archive */
 	checkopt['b'] = 1;			/* Moderator-only access to archive */
 	checkopt['c'] = 0;			/* ignored */
@@ -1360,7 +1281,7 @@ default_options()
 	checkopt['n'] = 0;			/* Remote admins can edit text files */
 	checkopt['o'] = 0;			/* Others rejected (for Moderated lists only */
 	checkopt['p'] = 1;			/* Public */
-	checkopt['q'] = 1;			/* Service listname-request */
+	checkopt['q'] = 1;			/* Service listname-request, no longer supported */
 	checkopt['r'] = 0;			/* Remote Administration */
 	checkopt['s'] = 0;			/* Subscriptions are moderated */
 	checkopt['t'] = 0;			/* Add Trailer to outgoing messages */
@@ -1371,9 +1292,7 @@ default_options()
 	checkopt['y'] = 0;			/* ignored */
 	checkopt['z'] = 0;			/* ignored */
 
-/*
- * update the uppercase option letters (just the opposite of the lowercase) 
- */
+	/*- update the uppercase option letters (just the opposite of the lowercase) */
 	for (c = 'A'; c <= 'Z'; c++) {
 		checkopt[(int) c] = !checkopt[(int) (c - 'A' + 'a')];
 	}
@@ -1390,20 +1309,20 @@ show_current_list_values()
 	char            listname[128];
 	int             checked;
 
-/*
+/*-
  * Note that we do not support the following list options:
- * *   k - posts from addresses in listname/deny are rejected
- * *   x - strip annoying MIME parts (spreadsheets, rtf, html, etc.)
- * *   0 - make the list a sublist of another list
- * *   3 - replace the From: header with another address
- * *   4 - digest options (limits related to sending digest out)
- * *   7, 8, 9 - break moderators up into message, subscription and admin
+ * k - posts from addresses in listname/deny are rejected
+ * x - strip annoying MIME parts (spreadsheets, rtf, html, etc.)
+ * 0 - make the list a sublist of another list
+ * 3 - replace the From: header with another address
+ * 4 - digest options (limits related to sending digest out)
+ * 7, 8, 9 - break moderators up into message, subscription and admin
  */
 
-/*
+/*-
  * IMPORTANT: If you change the behavior of the checkboxes, you need
- * * to update the default settings in modmailinglistnow so iwebadmin
- * * will use the proper settings when a checkbox isn't checked.
+ * to update the default settings in modmailinglistnow so iwebadmin
+ * will use the proper settings when a checkbox isn't checked.
  */
 
 	if (*dotqmail_name) {		/* modifying an existing list */
@@ -1413,9 +1332,7 @@ show_current_list_values()
 		sprintf(listname, "<I>%s</I>", html_text[261]);
 	}
 
-/*
- * Posting Messages 
- */
+	/*- Posting Messages */
 	printf("<P><B><U>%s</U></B><BR>\n", html_text[262]);
 	build_option_str("RADIO", "opt1", "MU", html_text[263]);
 	printf("<BR>\n");
@@ -1428,17 +1345,8 @@ show_current_list_values()
 	build_option_str("RADIO", "opt1", "mUO", html_text[267]);
 	printf("</P>\n");
 
-/*
- * List Options 
- */
+	/*- List Options */
 	printf("<P><B><U>%s</U></B><BR>\n", html_text[268]);
-/*
- * this next option isn't necessary since we use the edit box to
- * * set/delete the prefix
- * sprintf (TmpBuf, html_text[269], listname);
- * build_option_str ("CHECKBOX", "opt3", "f", TmpBuf);
- * printf ("<BR>\n");
- */
 	printf("<TABLE><TR><TD ROWSPAN=3 VALIGN=TOP>%s</TD>", html_text[310]);
 	printf("<TD><INPUT TYPE=RADIO NAME=\"replyto\" VALUE=\"%d\"%s>%s</TD></TR>\n", REPLYTO_SENDER,
 		   (replyto == REPLYTO_SENDER) ? " CHECKED" : "", html_text[311]);
@@ -1453,12 +1361,7 @@ show_current_list_values()
 	build_option_str("CHECKBOX", "opt5", "d", html_text[271]);
 	sprintf(TmpBuf, html_text[272], listname);
 	printf("<SMALL>(%s)</SMALL>", TmpBuf);
-	printf("<BR>\n");
-	sprintf(TmpBuf, html_text[273], listname);
-	build_option_str("CHECKBOX", "opt6", "q", TmpBuf);
-	printf("<BR>\n");
-	sprintf(TmpBuf, html_text[274], listname, listname, listname);
-	printf("&nbsp; &nbsp; <SMALL>(%s)</SMALL></P>", TmpBuf);
+	printf("</P>");
 
 /*
  * Remote Administration 
@@ -1494,22 +1397,16 @@ show_current_list_values()
 	printf("<OPTION VALUE=\"b\"%s>%s\n", checkopt['b'] ? " SELECTED" : "", html_text[295]);
 	printf("</SELECT>.");
 	printf("<BR>\n");
-/*
- * note that if user doesn't have ezmlm-cgi installed, it might be
- * a good idea to default to having option i off. 
- */
+	/*-
+	 * note that if user doesn't have ezmlm-cgi installed, it might be
+	 * a good idea to default to having option i off. 
+	 */
 	build_option_str("CHECKBOX", "opt16", "i", html_text[291]);
 	printf("</P>\n");
 
-  /***********************/
-/*
- * begin MySQL options 
- */
-  /***********************/
+	/*- begin MySQL options */
 
-/*
- * See if sql is turned on 
- */
+	/*- See if sql is turned on */
 	checked = 0;
 	sprintf(TmpBuf, "%s/sql", ActionUser);
 	if ((fs = fopen(TmpBuf, "r")) != NULL) {
@@ -1530,18 +1427,14 @@ show_current_list_values()
 	printf("<P><B><U>%s</U></B><BR>\n", html_text[99]);
 	printf("<input type=checkbox name=\"sqlsupport\" value=\"-6\"%s> %s", checked ? " CHECKED" : "", html_text[53]);
 
-/*
- * parse dir/sql file for SQL settings 
- */
+	/*- parse dir/sql file for SQL settings */
 	printf("    <table cellpadding=0 cellspacing=2 border=0>\n");
 #else
 	if (checked)
 		printf("<INPUT TYPE=HIDDEN NAME=sqlsupport VALUE=\"-6\">\n");
 #endif
 
-/*
- * get hostname 
- */
+	/*- get hostname */
 	strcpy(checked1, "localhost");
 	if (usesql == 1 && sqlfileok == 1) {
 		strncpy(TmpBuf3, TmpBuf1, 1);
@@ -1560,9 +1453,7 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql1 VALUE=\"%H\">\n", checked1);
 #endif
 
-/*
- * get port 
- */
+	/*- get port */
 	strcpy(checked1, "3306");
 	if (usesql == 1 && sqlfileok == 1) {
 		strncpy(TmpBuf3, &TmpBuf1[++i], 1);
@@ -1581,9 +1472,7 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql2 VALUE=\"%H\">\n", checked1);
 #endif
 
-/*
- * get user 
- */
+	/*- get user */
 	strcpy(checked1, "");
 	if (usesql == 1 && sqlfileok == 1) {
 		strncpy(TmpBuf3, &TmpBuf1[++i], 1);
@@ -1602,9 +1491,7 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql3 VALUE=\"%H\">\n", checked1);
 #endif
 
-/*
- * get password 
- */
+	/*- get password */
 	strcpy(checked1, "");
 	if (usesql == 1 && sqlfileok == 1) {
 		strncpy(TmpBuf3, &TmpBuf1[++i], 1);
@@ -1623,9 +1510,7 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql4 VALUE=\"%H\">\n", checked1);
 #endif
 
-/*
- * get database name 
- */
+	/*- get database name */
 	strcpy(checked1, "");
 	if (usesql == 1 && sqlfileok == 1) {
 		strncpy(TmpBuf3, &TmpBuf1[++i], 1);
@@ -1644,9 +1529,7 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql5 VALUE=\"%H\">\n", checked1);
 #endif
 
-/*
- * get table name 
- */
+	/*- get table name */
 	strcpy(checked1, "ezmlm");
 	if (usesql == 1 && sqlfileok == 1) {
 		++i;
