@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.6  2017-04-03 15:56:50+05:30  Cprogrammer
+# create FIFODIR
+#
 # Revision 2.5  2017-03-31 21:17:37+05:30  Cprogrammer
 # fix DEFAULT_HOST, QMAILDEFAULTHOST, envnoathost, defaulthost settings
 #
@@ -128,3 +131,9 @@ $uname -n > /etc/indimail/control/defaulthost
 if [ -f /service/fetchmail/variables/QMAILDEFAULTHOST ] ; then
 	$rm -f /service/fetchmamil/variables/QMAILDEFAULTHOST
 fi
+for i in inlookup.infifo qmail-imapd* qmail-pop3d* qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587
+do
+	if [ -d /service/$i ] ; then
+		echo /var/indimail/inquery > /service/$i/variables/FIFODIR
+	fi
+done
