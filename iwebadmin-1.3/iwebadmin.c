@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.8 2014-01-01 18:29:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.9 2017-04-03 17:34:10+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -123,8 +123,8 @@ iwebadmin_suid(gid_t Gid, uid_t Uid)
 	if (setgid(Gid) != 0)
 #endif
 	{
-		printf("%s", html_text[318]);
-		perror("setregid");
+		printf("<h2>%s</h2>\n", html_text[318]);
+		perror("iwebadmin: setregid");
 		vclose();
 		exit(EXIT_FAILURE);
 	}
@@ -134,8 +134,8 @@ iwebadmin_suid(gid_t Gid, uid_t Uid)
 	if (setuid(Uid) != 0)
 #endif
 	{
-		printf("%s", html_text[319]);
-		perror("setreuid");
+		printf("<h2>%s</h2>\n", html_text[319]);
+		perror("iwebadmin: setreuid");
 		vclose();
 		exit(EXIT_FAILURE);
 	}
@@ -172,7 +172,6 @@ main(argc, argv)
 	struct passwd  *pw;
 
 	init_globals();
-
 	if (x_forward)
 		ip_addr = x_forward;
 	if (!ip_addr)
@@ -208,7 +207,7 @@ main(argc, argv)
 		vget_assign(Domain, RealDir, sizeof (RealDir), &Uid, &Gid);
 		iwebadmin_suid(Gid, Uid);
 		if (chdir(RealDir) < 0) {
-			fprintf(stderr, "<h2>%s %s</h2>\n", html_text[171], RealDir);
+			printf("<h2>%s %s</h2>\n", html_text[171], RealDir);
 		}
 		load_limits();
 		set_admin_type();
@@ -232,6 +231,7 @@ main(argc, argv)
 		if (*Username && (*Password == '\0') && (*Password1 || *Password2)) {
 			/*- username entered, but no password */
 			snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
+			fprintf(stderr, "iwebadmin: %s: No password\n", Username);
 		} else
 		if (*Username && *Password) {
 			/*- attempt to authenticate user */
@@ -246,6 +246,7 @@ main(argc, argv)
 
 			if (*Domain == '\0') {
 				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
+				fprintf(stderr, "iwebadmin: %s: No domain given\n", Username);
 			} else {
 				(void) chdir(RealDir);
 				load_limits();
@@ -253,12 +254,14 @@ main(argc, argv)
 					encrypt_flag = 1;
 				if (!(pw = vauth_getpw(User, Domain)))
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
+					fprintf(stderr, "iwebadmin: %s: No such user\n", Username);
 				else
 				if (pw->pw_gid & NO_PASSWD_CHNG) {
 					strcpy(StatusMessage, "You don't have permission to change your password.");
 				} else
 				if (auth_user(pw, Password)) {
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
+					fprintf(stderr, "iwebadmin: %s: incorrect password\n", Username);
 				} else
 				if (strcmp(Password1, Password2) != 0) {
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[200]);
@@ -278,6 +281,7 @@ main(argc, argv)
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[139]);
 					*Password = '\0';
 					send_template("change_password_success.html");
+					fprintf(stderr, "iwebadmin: %s: password changed\n", Username);
 					return 0;
 				}
 			}
@@ -304,12 +308,14 @@ main(argc, argv)
 			load_limits();
 			if (!(pw = vauth_getpw(Username, Domain))) {
 				snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[198]);
+				fprintf(stderr, "iwebadmin: %s: No such user\n", Username);
 				show_login();
 				vclose();
 				exit(0);
 			}
 			if (auth_user(pw, Password)) {
 				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
+				fprintf(stderr, "iwebadmin: %s: incorrect password\n", Username);
 				show_login();
 				vclose();
 				exit(0);
@@ -349,7 +355,6 @@ main(argc, argv)
 	}
 	show_login();
 	vclose();
-
 	return 0;
 }
 
@@ -362,8 +367,10 @@ load_lang(char *lang)
 	char           *p;
 
 	if (open_lang(lang)) {
-	// Rare error likely caused by improper installation, should probably be 
-	// handled by regular error system, but this is a quick band-aid.
+	/*-
+	 * Rare error likely caused by improper installation, should probably be 
+	 * handled by regular error system, but this is a quick band-aid.
+	 */
 		printf("Content-Type: text/html\r\n\r\n");
 		printf("<html> <head>\r\n");
 		printf("<title>Failed to open lang file:%s</title>\r\n", lang);
