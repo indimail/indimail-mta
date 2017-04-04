@@ -1,9 +1,13 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.2  2017-04-05 04:05:14+05:30  Cprogrammer
+ * conditional compilation of dlnamespace()
+ *
  * Revision 1.1  2017-04-05 03:08:25+05:30  Cprogrammer
  * Initial revision
  *
  */
+#ifdef LOAD_SHARED_OBJECTS
 #include <errno.h>
 #include "str.h"
 #include "fmt.h"
@@ -53,3 +57,4 @@ dlnamespace(char *fn, unsigned long *id)
 		return (-1);
 	return (0);
 }
+#endif
