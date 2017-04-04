@@ -1,5 +1,8 @@
 /*
  * $Log: prot.h,v $
+ * Revision 1.4  2017-04-05 03:10:30+05:30  Cprogrammer
+ * changed datatype for uid, gid to uid_t, gid_t
+ *
  * Revision 1.3  2007-06-10 10:15:37+05:30  Cprogrammer
  * fixed compilation warning
  *
@@ -12,8 +15,9 @@
  */
 #ifndef PROT_H
 #define PROT_H
+#include <sys/types.h>
 
-int             prot_gid(unsigned int);
-int             prot_uid(int);
+int             prot_gid(gid_t);
+int             prot_uid(uid_t);
 
 #endif
