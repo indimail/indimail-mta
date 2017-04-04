@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.55  2017-04-05 04:08:39+05:30  Cprogrammer
+ * execute tcpserver_plugin() after shedding root privilege
+ *
  * Revision 1.54  2017-04-05 03:06:32+05:30  Cprogrammer
  * changed data type for uid, gid to uid_t, gid_t
  *
@@ -183,7 +186,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.54 2017-04-05 03:06:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.55 2017-04-05 04:08:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1558,8 +1561,6 @@ main(int argc, char **argv, char **envp)
 		byte_copy(localip, 4, addresses.s);
 #endif
 	}
-	if (tcpserver_plugin(envp, 1))
-		_exit(111);
 #ifdef TLS
 	if (flagssl == 1)
 	{
@@ -1604,6 +1605,8 @@ main(int argc, char **argv, char **envp)
 		strerr_die2sys(111, FATAL, "unable to set gid: ");
 	if (uid && prot_uid(uid) == -1)
 		strerr_die2sys(111, FATAL, "unable to set uid: ");
+	if (tcpserver_plugin(envp, 1))
+		_exit(111);
 	localportstr[fmt_ulong(localportstr, localport)] = 0;
 	if (flag1)
 	{
