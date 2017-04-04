@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.54  2017-04-05 03:06:32+05:30  Cprogrammer
+ * changed data type for uid, gid to uid_t, gid_t
+ *
  * Revision 1.53  2016-06-21 13:33:06+05:30  Cprogrammer
  * use SSL_set_cipher_list as part of crypto-policy-compliance
  *
@@ -180,7 +183,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.53 2016-06-21 13:33:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.54 2017-04-05 03:06:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -240,8 +243,8 @@ char            bspace[16];
 buffer          b;
 static stralloc limitFile;
 
-unsigned long   uid = 0;
-unsigned long   gid = 0;
+uid_t           uid = 0;
+gid_t           gid = 0;
 
 struct iptable
 {
@@ -1454,16 +1457,16 @@ main(int argc, char **argv, char **envp)
 		case 'U':
 			x = env_get("UID");
 			if (x)
-				scan_ulong(x, &uid);
+				scan_uint(x, &uid);
 			x = env_get("GID");
 			if (x)
-				scan_ulong(x, &gid);
+				scan_uint(x, &gid);
 			break;
 		case 'u':
-			scan_ulong(optarg, &uid);
+			scan_uint(optarg, &uid);
 			break;
 		case 'g':
-			scan_ulong(optarg, &gid);
+			scan_uint(optarg, &gid);
 			break;
 		case '1':
 			flag1 = 1;
