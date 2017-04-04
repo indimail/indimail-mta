@@ -494,22 +494,22 @@ compile prot.c hasshsgr.h prot.h
 
 rblsmtpd.so: \
 load rbl.o commands.o pathexec_rundl.o load_shared.o \
-dns.a time.a unix.a byte.a socket.lib
+dlnamespace.o dns.a time.a unix.a byte.a socket.lib
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
 	rbl.o commands.o pathexec_rundl.o load_shared.o \
-	dns.a time.a unix.a byte.a  `cat socket.lib`; \
+	dlnamespace.o dns.a time.a unix.a byte.a  `cat socket.lib`; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o rblsmtpd.so \
 	rbl.o commands.o pathexec_rundl.o load_shared.o \
-	dns.a time.a unix.a byte.a  `cat socket.lib`; \
+	dlnamespace.o dns.a time.a unix.a byte.a  `cat socket.lib` -ldl; \
 	fi
 
 rblsmtpd: \
 load rblsmtpd.o commands.o pathexec_rundl.o load_shared.o \
-dns.a time.a unix.a byte.a socket.lib
+dlnamespace.o dns.a time.a unix.a byte.a socket.lib
 	./load rblsmtpd commands.o pathexec_rundl.o load_shared.o \
-	dns.a time.a unix.a byte.a  \
+	dlnamespace.o dns.a time.a unix.a byte.a  \
 	`cat socket.lib` -ldl
 
 rblsmtpd.o: \
@@ -806,21 +806,26 @@ stralloc.h gen_alloc.h
 	./compile tcprulescheck.c
 
 load_shared.o: \
-compile load_shared.c str.h strerr.h
+compile load_shared.c str.h strerr.h dlnamespace.h
 	./compile `grep -h -v "^#" conf-dlopen` load_shared.c
 
 tcpserver_plugin.o: \
-compile tcpserver_plugin.c str.h stralloc.h strerr.h scan.h fmt.h env.h conf-dlopen
+compile tcpserver_plugin.c str.h stralloc.h strerr.h scan.h \
+fmt.h env.h dlnamespace.h conf-dlopen
 	./compile `grep -h -v "^#" conf-dlopen` tcpserver_plugin.c
+
+dlnamespace.o: \
+compile dlnamespace.c str.h stralloc.h scan.h fmt.h
+	./compile `grep -h -v "^#" conf-dlopen` dlnamespace.c
 
 tcpserver: \
 load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o pathexec_rundl.o \
 tcpserver_plugin.o load_shared.o control.o str_diffn.o auto_home.o \
-fmt_str.o fmt_uint.o scan_uint.o \
+fmt_str.o fmt_uint.o scan_uint.o dlnamespace.o \
 cdb.a dns.a time.a unix.a byte.a socket.lib mysql_config
 	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o \
 	control.o str_diffn.o auto_home.o tcpserver_plugin.o load_shared.o \
-	fmt_str.o fmt_uint.o scan_uint.o \
+	fmt_str.o fmt_uint.o scan_uint.o dlnamespace.o \
 	pathexec_rundl.o cdb.a dns.a time.a unix.a byte.a `cat socket.lib` \
 	$(SSLLIBS) $(mysql_libs) -ldl
 
