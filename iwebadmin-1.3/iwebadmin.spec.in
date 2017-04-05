@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.22 2017-04-03 12:43:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.23 2017-04-05 14:12:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -75,6 +75,7 @@ BuildRequires: -post-build-checks
 
 Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
 Requires: procps /usr/bin/awk indimail > 1.6
+Requires: ezmlm-idx > 7.2
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Excludeos: windows 
 
