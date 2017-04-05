@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.393 2017-04-01 21:10:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.394 2017-04-05 14:11:27+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2422,7 +2422,7 @@ fi
 # SMTP
 %ifarch x86_64
 %global fetchmail_mem 144857600
-%global smtp_soft_mem 104857600
+%global smtp_soft_mem 536870912
 %global qmtp_soft_mem 104857600
 %global qmqp_soft_mem 104857600
 %global imap_pop3_mem 524288000

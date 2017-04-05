@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.7  2017-04-05 14:11:14+05:30  Cprogrammer
+# upgraded soft mem to 536870912
+#
 # Revision 2.6  2017-04-03 15:56:50+05:30  Cprogrammer
 # create FIFODIR
 #
@@ -115,6 +118,7 @@ done
 for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25
 do
 	echo /etc/indimail/certs > /service/$i/variables/CERTDIR
+	echo 536870912 > /service/$i/variables/SOFT_MEM
 done
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do

@@ -285,7 +285,7 @@ fi
 a_arch=`uname -m`
 if [ " $a_arch" = " x86_64" ] ; then
 	fetchmail_mem=144857600
-	smtp_soft_mem=104857600
+	smtp_soft_mem=536870912
 	qmtp_soft_mem=104857600
 	qmqp_soft_mem=104857600
 	imap_pop3_mem=209715200
