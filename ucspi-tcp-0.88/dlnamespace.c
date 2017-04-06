@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.4  2017-04-06 17:24:35+05:30  Cprogrammer
+ * added comments/description
+ *
  * Revision 1.3  2017-04-05 04:36:25+05:30  Cprogrammer
  * replace ':' character after str comparision
  *
@@ -19,6 +22,15 @@
 
 static stralloc namespace = {0};
 
+/*
+ * dlnamespace has two modes of operations - search & store
+ * Search - return value
+ *  1 - Entry found
+ *  0 - No Entry found
+ * Store - return value
+ *  0 - successful
+ * -1 - ENOMEM failure
+ */
 int
 dlnamespace(char *fn, unsigned long *id)
 {
@@ -30,6 +42,7 @@ dlnamespace(char *fn, unsigned long *id)
 		errno = EINVAL;
 		return (-1);
 	}
+	/*- search for loaded module fn. each entry is separated by NULL character */
 	if (!*id) {
 		for (cptr = ptr = namespace.s, i = 0; i < namespace.len;ptr++, i++) {
 			if (!*ptr) {
@@ -48,7 +61,11 @@ dlnamespace(char *fn, unsigned long *id)
 		}
 		return (0);
 	}
-	/*- append store the new id */
+	/*- 
+	 * store operation
+	 * append/store the new id in the form
+	 * id1:filename1^@id2:filename2^@
+	 */
 	strnum[fmt_ulong(strnum, *id)] = 0;
 	if (!stralloc_cats(&namespace, strnum))
 		return (-1);
