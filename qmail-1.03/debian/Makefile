@@ -7,9 +7,7 @@ logdir=/var/log/indimail
 prefix=/usr
 all: rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm indimail-mta.postinst \
 obs_deb_prep indimail-mta.install \
-indimail-mta-xUbuntu_16.10.dsc indimail-mta-xUbuntu_16.04.dsc \
-indimail-mta-Debian_8.0.dsc indimail-mta-Debian_7.0.dsc \
-debian.tar.gz dummy.tar.gz
+indimail-mta.dsc debian.tar.gz dummy.tar.gz
 
 #bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
 bits=32
