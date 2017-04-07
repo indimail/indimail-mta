@@ -46,9 +46,7 @@ pkgconfigdir=@prefix@/lib/pkgconfig
 
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
-obs_deb_prep gen_control indimail.install \
-indimail-xUbuntu_16.10.dsc indimail-xUbuntu_16.04.dsc indimail-xUbuntu_14.04.dsc \
-indimail-xUbuntu_12.04.dsc indimail-Debian_8.0.dsc indimail-Debian_7.0.dsc \
+obs_deb_prep gen_control indimail.install indimail.dsc \
 indimail-devel32 indimail-devel64 libindimail32 libindimail64 indimail-devel.postinst \
 indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst debian.tar.gz dummy.tar.gz
@@ -166,22 +164,7 @@ obs_deb_prep: obs_deb_prep.in obs.mk
 changelog: changelog.in obs.mk
 	$(edit) $@.in > $@;
 
-indimail-Debian_7.0.dsc: indimail-Debian_7.0.dsc.in obs.mk changelog.in
-	$(edit) $@.in > $@.tmp; \
-	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
-indimail-Debian_8.0.dsc: indimail-Debian_8.0.dsc.in obs.mk changelog.in
-	$(edit) $@.in > $@.tmp; \
-	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
-indimail-xUbuntu_16.10.dsc: indimail-xUbuntu_16.10.dsc.in obs.mk changelog.in
-	$(edit) $@.in > $@.tmp; \
-	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
-indimail-xUbuntu_16.04.dsc: indimail-xUbuntu_16.04.dsc.in obs.mk changelog.in
-	$(edit) $@.in > $@.tmp; \
-	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
-indimail-xUbuntu_14.04.dsc: indimail-xUbuntu_14.04.dsc.in obs.mk changelog.in
-	$(edit) $@.in > $@.tmp; \
-	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
-indimail-xUbuntu_12.04.dsc: indimail-xUbuntu_12.04.dsc.in obs.mk changelog.in
+indimail.dsc: indimail.dsc.in obs.mk changelog.in
 	$(edit) $@.in > $@.tmp; \
 	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
