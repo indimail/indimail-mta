@@ -1,0 +1,4 @@
+etc/indimail /etc
+usr/share/iwebadmin /usr/share
+var/www/cgi-bin /var/www
+var/www/html /var/www
