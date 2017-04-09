@@ -1,0 +1,26 @@
+dnsip="HOME/bin/dnsip"
+dnsqr="HOME/bin/dnsqr"
+svc="/usr/bin/svc"
+mv=$(which mv)
+cp=$(which cp)
+
+if [ ! -f $svc ] ; then
+	echo "could not find $svc" 1>&2
+	exit 1
+fi
+if [ -f /etc/indimail/dnsroots.global ] ; then
+	$mv /etc/indimail/dnsroots.global /etc/indimail/dnsroots.global.old
+	if [ $? -ne 0 ] ; then
+		exit 1
+	fi
+fi
+${dnsip} $( ${dnsqr} ns . | awk '/answer:/ { print $5; }' | sort ) \
+  > /etc/indimail/dnsroots.global
+if [ $? -ne 0 ] ; then
+	exit 1
+fi
+$cp /etc/indimail/dnsroots.global /service/dnscache/root/servers/@
+if [ $? -ne 0 ] ; then
+	exit 1
+fi
+exec ${svc} -du /service/dnscache

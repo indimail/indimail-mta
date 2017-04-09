@@ -1,0 +1,72 @@
+.TH walldns 8
+
+.SH NAME
+walldns \- a reverse DNS wall
+
+.SH DESCRIPTION
+.B walldns
+is a reverse DNS wall.
+It accepts iterative DNS queries for 
+.I in-addr.arpa
+domains
+from hosts around the Internet,
+and supplies generic responses that avoid revealing local host information.
+
+For example, 
+.B walldns
+provides a PTR record for 
+.I 4.3.2.1.in-addr.arpa
+showing 
+.I 4.3.2.1.in-addr.arpa
+as the name of IP address 
+.IR 1.2.3.4 ,
+and a matching A record showing 
+.I 1.2.3.4
+as the IP address of 
+.IR 4.3.2.1.in-addr.arpa .
+
+.SH Configuration
+Normally 
+.B walldns
+is set up by the
+.BR walldns-conf (8)
+program.
+
+.B walldns
+runs chrooted in the directory
+specified by the 
+.I $ROOT
+environment variable,
+under the uid and gid
+specified by the 
+.I $UID
+and 
+.I $GID
+environment variables.
+
+.B walldns
+listens for incoming UDP packets
+addressed to port 53 of 
+.IR $IP .
+It does not listen for TCP queries.
+
+.SH Further details
+
+.B walldns
+rejects
+inverse queries, non-Internet-class queries, truncated packets,
+packets that contain anything other than a single question,
+queries for domains outside 
+.IR in-addr.arpa ,
+and request types other than A, PTR, and *.
+
+.B walldns
+does not include NS or SOA records with its responses.
+
+.B walldns
+uses TTLs slightly over one week.
+
+.SH SEE ALSO
+walldns-conf(8)
+
+http://cr.yp.to/djbdns.html

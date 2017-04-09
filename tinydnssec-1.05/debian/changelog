@@ -1,0 +1,5 @@
+tinydnssec (1.05-1) stable; urgency=low
+
+  * First debian release of tinydnssec for indimail/indimail-mta
+
+ -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 09 Apr 2017 11:13:05 +0530

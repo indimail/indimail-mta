@@ -1,0 +1,228 @@
+.TH qualification 5
+
+.SH NAME
+qualification \- User's guide to name qualification
+
+.SH OVERVIEW
+.B Qualification
+means conversion
+of a short host name that you type, such as 
+.IR cheetah ,
+into a complete (``fully qualified'') domain name,
+such as 
+.IR cheetah.heaven.af.mil .
+
+This page explains the djbdns qualification procedure.
+These rules are followed by the
+.I dns_ip4_qualify
+library routine in djbdns,
+and by programs that use the
+.BR dns_ip4_qualify (3)
+routine.
+
+.SH Rewriting instructions
+Normally the djbdns  qualification procedure
+follows instructions listed in 
+.IR /etc/dnsrewrite ,
+a file created by your system administrator.
+You can override
+.I /etc/dnsrewrite
+by creating your own file
+and setting the
+.I $DNSREWRITEFILE
+environment variable
+to the name of that file.
+
+Sample instructions:
+
+  # anything.local -> me
+  -.local:me
+  # me -> 127.0.0.1
+  =me:127.0.0.1
+  # any.name.a -> any.name.af.mil
+  *.a:.af.mil
+  # any-name-without-dots -> any-name-without-dots.heaven.af.mil
+  ?:.heaven.af.mil
+  # remove trailing dot
+  *.:
+
+Instructions are followed in order, each at most once.
+There are four types of instructions:
+.TP
+.RI = post\fR:\fInew\fR
+means that the host name 
+.I post
+is replaced by 
+.IR new .
+.TP
+.RI * post\fR:\fInew\fR
+means that any name of the form 
+.I prepost
+is replaced by 
+.IR prenew .
+.TP
+.RI ? post\fR:\fInew\fR
+means that any name of the form 
+.IR prepost ,
+where 
+.I pre
+does not contain dots or brackets,
+is replaced by 
+.IR prenew .
+.TP
+.RI - post\fR:\fInew\fR
+means that any name of the form 
+.I prepost
+is replaced by 
+.IR new .
+
+.SH Searching
+
+The djbdns qualification procedure
+can search through DNS for several possible qualifications of a name.
+For example, the name
+
+cheetah+.heaven.af.mil+.af.mil
+
+is qualified as 
+.I cheetah.heaven.af.mil
+if that name has IP addresses listed in DNS,
+or 
+.I cheetah.af.mil
+otherwise.
+
+In general,
+.IR x +\fIy1\fR+\fIy2\fR+\fIy3\fR
+is qualified as 
+.I xy1
+if 
+.I xy1
+has IP addresses listed in DNS;
+otherwise, as 
+.I xy2
+if 
+.I xy2
+has IP addresses listed in DNS;
+otherwise, as 
+.IR xy3 .
+You can list any number of +'s.
+
+Searching is applied after rewriting,
+so you can use a rewriting instruction such as
+
+?:+.heaven.af.mil+.af.mil
+
+to have
+.I lion
+qualified as 
+.I lion.heaven.af.mil
+or 
+.IR lion.af.mil ,
+and
+.I tiger
+qualified as 
+.I tiger.heaven.af.mil
+or 
+.IR tiger.af.mil ,
+and so on.
+
+Searching is generally not a recommended feature.
+If you rely on 
+.I gw
+being qualified as 
+.IR gw.af.mil ,
+and someone suddenly adds a new 
+.IR gw.heaven.af.mil ,
+you'll end up talking to the wrong host.
+It's better to rely on syntactic rules that you control.
+
+.SH Compatibility mechanisms
+If the rewriting-instructions file does not exist,
+the djbdns qualification procedure looks for a local domain name in three
+places:
+.TP
+1.
+the 
+.I $LOCALDOMAIN
+environment variable, if it is set; or
+.TP
+2.
+the first 
+.I domain
+or 
+.I search
+line
+in 
+.IR /etc/resolv.conf ,
+if 
+.I /etc/resolv.conf
+exists and has such a line; or
+.TP
+3.
+everything after the first dot in the system's hostname.
+.P
+It then creates rewriting instructions of the form
+
+  ?:.\fIdomain\fR
+  *.:
+
+so that 
+.RI . domain
+is added to any name without dots or brackets.
+
+You can specify searching in 
+.I $LOCALDOMAIN
+by using several domain names separated by spaces.
+Your system administrator can specify searching in 
+.I /etc/resolv.conf
+by putting several domains on a 
+.I search
+line.
+
+.SH Compatibility notes
+Different DNS client programs use different qualification procedures.
+Two major differences between the djbdns qualification procedure
+and other qualification procedures:
+.IP
+Most programs use only
+.IR /etc/resolv.conf .
+They don't know anything about
+.I /etc/dnsrewrite
+and
+.IR $DNSREWRITEFILE .
+.IP
+Most long-running programs
+don't notice changes in
+.IR /etc/resolv.conf ;
+they read
+.I /etc/resolv.conf
+when they start,
+and they don't reread it until they are restarted.
+In contrast, the djbdns qualification procedure
+checks for changes every 10 minutes or 10000 uses.
+.P
+Two minor differences:
+.IP
+Some programs interpret a
+.I domain
+line in
+.I /etc/resolv.conf
+as specifying a search list consisting of various suffixes of the domain.
+.IP
+Many programs will search the local domain
+for names 
+.I with
+dots.
+.P
+If you want the local domain searched for names with dots,
+you can set it up with rewriting:
+
+  # aol.com -> aol.com or aol.com.heaven.af.mil
+  *:++.heaven.af.mil
+  # but skip directly to heaven.af.mil if no dots
+  ?++.heaven.af.mil:.heaven.af.mil
+
+.SH SEE ALSO
+dnsipq(1)
+
+http://cr.yp.to/djbdns.html

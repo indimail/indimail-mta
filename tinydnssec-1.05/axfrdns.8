@@ -1,0 +1,139 @@
+.TH axfrdns 8
+
+.SH NAME
+axfrdns \- a DNS zone-transfer server.
+
+.SH DESCRIPTION
+.B axfrdns
+reads a zone-transfer request
+in DNS-over-TCP format from its standard input,
+and responds with locally configured information.
+
+.SH Configuration
+Normally 
+.B axfrdns
+is set up by the
+.BR axfrdns-conf (8)
+program.
+
+.B axfrdns
+runs chrooted in the directory
+specified by the 
+.I $ROOT
+environment variable,
+under the uid and gid
+specified by the 
+.I $UID
+and 
+.I $GID
+environment variables.
+
+Normally 
+.B axfrdns
+runs under 
+.BR tcpserver (1)
+to handle TCP connections on port 53 of a local IP address.
+
+.BR tcpserver (1)
+is responsible for
+rejecting connections from hosts not authorized to perform zone transfers.
+
+.B axfrdns
+can also run under secure connection tools
+offering an UCSPI-compliant interface.
+
+.B axfrdns
+looks up zone-transfer results
+in 
+.IR data.cdb ,
+a binary file created by
+.BR tinydns-data (8).
+It also responds to normal client queries,
+such as SOA queries, which usually precede zone-transfer requests.
+
+.B axfrdns
+allows zone transfers
+for any zone listed in the 
+.I $AXFR
+environment variable.
+
+.I $AXFR
+is a slash-separated list of domain names.
+If 
+.I $AXFR
+is not set,
+.B axfrdns
+allows zone transfers for all zones
+available in 
+.IR data.cdb .
+
+.B axfrdns
+aborts
+if it runs out of memory,
+or has trouble reading 
+.IR data.cdb ,
+or receives a request larger than 512 bytes,
+or receives a truncated request,
+or receives a zone-transfer request disallowed by 
+.IR $AXFR ,
+or receives a request not answered by 
+.IR data.cdb ,
+or waits 60 seconds with nothing happening.
+
+.SH Further notes on zone transfers
+
+.B axfrdns
+provides every record it can find inside the target domain.
+This may include records in child zones.
+Some of these records (such as glue inside a child zone) are essential;
+others are not.
+It is up to the client to decide which out-of-zone records to keep.
+
+.B axfrdns
+does not provide glue records outside the target domain.
+
+The zone-transfer protocol does not support timestamps.
+If a record is scheduled to be created in the future,
+.B axfrdns
+does not send it;
+after the starting time,
+the zone-transfer client will continue claiming that the record doesn't exist,
+until it contacts 
+.B axfrdns
+again.
+Similarly, if a record is scheduled to die in the future,
+.B axfrdns
+sends it (with a 2-second TTL);
+after the ending time,
+the zone-transfer client will continue providing the old record,
+until it contacts 
+.B axfrdns
+again.
+
+Zone-transfer clients rely on zone serial numbers
+changing for every zone modification.
+
+.BR tinydns-data (8)
+uses the modification time of the 
+.I data
+file
+as its serial number for all zones.
+Do not make more than one modification per second.
+
+BIND's zone-transfer client, 
+.BR named-xfer ,
+converts zone-transfer data to zone-file format.
+Beware that zone-file format has no generic mechanism
+to express records of arbitrary types;
+
+.B named-xfer
+chokes
+if it does not recognize a record type used in 
+.IR data.cdb .
+
+.SH SEE ALSO
+axfrdns-conf(8),
+tinydns-data(8),
+tcpserver(1)
+
+http://cr.yp.to/djbdns.html

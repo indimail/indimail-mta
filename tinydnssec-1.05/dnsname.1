@@ -1,0 +1,46 @@
+.TH dnsname 1
+
+.SH NAME
+dnsname \- does a reverse lookup for the IP address
+
+.SH SYNOPSIS
+.B dnsname 
+.I a.b.c.d
+
+.SH DESCRIPTION
+.B dnsname
+does a reverse lookup for the IP address
+.IR a.b.c.d .
+It prints the first domain name for that address.
+If no domain names are listed in DNS,
+.B dnsname
+prints a blank line.
+You can list several IP addresses;
+.B dnsname
+prints each result on a separate line.
+
+There is also a
+.BR dnsfilter (1)
+program
+that reads IP addresses from its input
+and performs many reverse lookups in parallel.
+
+Normally 
+.B dnsname
+exits 0.
+If 
+.B dnsname
+encounters a temporary problem
+that prevents it from determining the domain name,
+it prints an error message and exits 111.
+
+.SH SEE ALSO
+dnsip(1),
+dnsipq(1),
+dnsmx(1),
+dnstxt(1),
+dnsqr(1),
+dnsq(1),
+dnstrace(1)
+
+http://cr.yp.to/djbdns.html

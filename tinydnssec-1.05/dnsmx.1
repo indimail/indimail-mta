@@ -1,0 +1,38 @@
+.TH dnsmx 1
+
+.SH NAME
+dnsmx \- prints the MX records of fqdn
+
+.SH SYNOPSIS
+.B dnsmx
+.I fqdn
+
+.SH DESCRIPTION
+
+.B dnsmx
+prints the MX records of
+.IR fqdn .
+If there are no MX records,
+.B dnsmx
+prints an artificial MX record,
+simulating the behavior of MTAs.
+
+Normally 
+.B dnsmx
+exits 0.
+If 
+.B dnsmx
+encounters a temporary problem
+that prevents it from determining the list of MX records,
+it prints an error message and exits 111.
+
+.SH SEE ALSO
+dnsip(1),
+dnsname(1),
+dnsipq(1),
+dnstxt(1),
+dnsqr(1),
+dnsq(1),
+dnstrace(1)
+
+http://cr.yp.to/djbdns.html
