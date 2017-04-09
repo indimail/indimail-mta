@@ -599,14 +599,14 @@ done
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root/scanq
-%dir %attr(755,root,root)         %{qsysconfdir}
-%dir %attr(775,root,qmail)        %{qsysconfdir}/etc
-%dir %attr(775,indimail,qmail)    %{qsysconfdir}/users
-%dir %attr(775,indimail,qmail)    %{qsysconfdir}/certs
-%dir %attr(775,indimail,qmail)    %{qsysconfdir}/control
+%dir %attr(2755,root,qmail)       %{qsysconfdir}
+%dir %attr(2775,root,qmail)       %{qsysconfdir}/etc
+%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/users
+%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/certs
+%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/control
 %dir %attr(2775,qmailr,qmail)     %{qsysconfdir}/control/ratelimit
-%dir %attr(775,indimail,qmail)    %{qsysconfdir}/control/domainkeys
-%dir %attr(775,indimail,qmail)    %{qsysconfdir}/control/defaultqueue
+%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/control/domainkeys
+%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/control/defaultqueue
 %dir %attr(2775,indimail,qmail)   %{qmaildir}/autoturn
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)         %{mandir}

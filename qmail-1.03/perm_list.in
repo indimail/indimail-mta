@@ -25,11 +25,11 @@
 %dir %attr(0755,root,root)         @mandir@/man7
 %dir %attr(0755,root,root)         @mandir@/man8
 %dir %attr(0555,root,qmail)        @prefix@/lib/indimail/plugins
-%dir %attr(0775,root,qmail)        @sysconfdir@/etc
-%dir %attr(0775,indimail,qmail)    @sysconfdir@/certs
-%dir %attr(0775,indimail,qmail)    @sysconfdir@/users
-%dir %attr(0775,indimail,qmail)    @sysconfdir@/control
-%dir %attr(0775,indimail,qmail)    @sysconfdir@/control/domainkeys
+%dir %attr(2775,root,qmail)        @sysconfdir@/etc
+%dir %attr(2775,indimail,qmail)    @sysconfdir@/certs
+%dir %attr(2775,indimail,qmail)    @sysconfdir@/users
+%dir %attr(2775,indimail,qmail)    @sysconfdir@/control
+%dir %attr(2775,indimail,qmail)    @sysconfdir@/control/domainkeys
 %dir %attr(2775,qmailr,qmail)      @sysconfdir@/control/ratelimit
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control/defaultqueue
 #
