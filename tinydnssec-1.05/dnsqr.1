@@ -1,0 +1,61 @@
+.TH dnsqr 1
+
+.SH NAME
+dnsqr \- asks for records of type 
+.I t
+under the domain name 
+.I fqdn
+
+.SH SYNOPSIS
+.B dnsqr 
+.I t
+.I fqdn
+
+.SH DESCRIPTION
+.B dnsqr
+asks for records of type 
+.I t
+under the domain name 
+.IR fqdn .
+It prints the results in a human-readable format,
+more compact than the 
+.I dig
+output format.
+
+.I t
+may be a name or number.
+Currently recognized names:
+.IR any ,
+.IR a ,
+.IR ns ,
+.IR mx ,
+.IR ptr ,
+.IR txt ,
+.IR cname ,
+.IR soa ,
+.IR hinfo ,
+.IR rp ,
+.IR sig ,
+.IR key ,
+.IR aaaa ,
+.IR axfr .
+Note that, if you want to
+perform a zone transfer, you should use
+.BR axfr-get (8),
+not
+.B dnsqr axfr\fR.
+
+.B dnsqr
+is available in djbdns 1.01 and above.
+
+.SH SEE ALSO
+dnsip(1),
+dnsipq(1),
+dnsmx(1),
+dnstxt(1),
+dnsname(1),
+dnsq(1),
+dnstrace(1),
+tinydns-get(1)
+
+http://cr.yp.to/djbdns.html

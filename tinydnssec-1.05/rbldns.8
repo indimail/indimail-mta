@@ -1,0 +1,68 @@
+.TH rbldns 8
+
+.SH NAME
+rbldns \- an IP-address-listing DNS server
+
+.SH DESCRIPTION
+.B rbldns
+is an IP-address-listing DNS server.
+It accepts iterative DNS queries
+from hosts around the Internet asking about various IP addresses.
+It provides responses showing whether the addresses
+are on a locally configured list,
+such as RBL or DUL.
+
+.SH Configuration
+Normally 
+.B rbldns
+is set up by the
+.BR rbldns-conf (8)
+program.
+
+.B rbldns
+runs chrooted in the directory
+specified by the 
+.I $ROOT
+environment variable,
+under the uid and gid
+specified by the 
+.I $UID
+and 
+.I $GID
+environment variables.
+
+.B rbldns
+listens for incoming UDP packets
+addressed to port 53 of 
+.IR $IP .
+It does not listen for TCP queries.
+
+.B rbldns
+handles domains of the form
+.IR d.c.b.a\fR.\fIbase
+where 
+.I a.b.c.d
+is the IP address in question
+and 
+.I base
+is given by the 
+.I $BASE
+environment variable.
+
+.B rbldns
+rejects
+inverse queries, non-Internet-class queries, truncated packets,
+packets that contain anything other than a single query,
+query types other than A, TXT, or *,
+and queries for domains outside 
+.IR $BASE .
+It looks up other queries inside 
+.IR data.cdb ,
+a binary file created by
+.BR rbldns-data (8).
+
+.SH SEE ALSO
+rbldns-conf(8),
+rbldns-data(8)
+
+http://cr.yp.to/djbdns.html

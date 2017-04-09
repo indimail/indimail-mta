@@ -1,0 +1,48 @@
+.TH dnsip 1
+
+.SH NAME
+dnsip \- lookup IP addresses
+
+.SH SYNOPSIS
+dnsip 
+[
+.I fqdn
+]
+
+.SH DESCRIPTION
+.B dnsip
+resolves
+.I fqdn
+and prints the IP addresses of
+.I fqdn
+on a single line.
+If 
+.I fqdn
+does not exist, 
+.B dnsip
+prints a blank line.
+You can list several  
+.IR fqdn s;
+.B dnsip
+prints each result on a separate line.
+
+Normally 
+.B dnsip
+exits 0.
+If 
+.B dnsip
+encounters a temporary problem
+that prevents it from determining the list of IP addresses,
+it prints an error message and exits 111.
+The same comments apply to the other programs described here.
+
+.SH SEE ALSO
+dnsipq(1),
+dnsname(1),
+dnsmx(1),
+dnstxt(1),
+dnsqr(1),
+dnsq(1),
+dnstrace(1)
+
+http://cr.yp.to/djbdns.html

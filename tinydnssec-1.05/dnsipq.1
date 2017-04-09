@@ -1,0 +1,47 @@
+.TH dnsipq 1
+
+.SH NAME
+dnsipq \- dns lookup tool
+
+.SH SYNOPSIS
+.B dnsipq 
+[
+.I udn
+]
+
+.SH DESCRIPTION
+.b dnsipq
+feeds the name  
+.I udn
+through
+.BR qualification (5).
+It prints the fully qualified domain name and IP addresses
+on a single line.
+If the fully qualified domain name does not exist,
+.B dnsipq
+prints no addresses.
+You can list several  
+.IR udn s;
+.B dnsipq
+prints each result on a separate line.
+
+Normally 
+.B dnsipq
+exits 0.
+If 
+.B dnsipq
+encounters a temporary problem
+that prevents it from determining the list of IP addresses,
+it prints an error message and exits 111.
+
+.SH SEE ALSO
+qualification(5),
+dnsip(1),
+dnsname(1),
+dnsmx(1),
+dnstxt(1),
+dnsqr(1),
+dnsq(1),
+dnstrace(1)
+
+http://cr.yp.to/djbdns.html

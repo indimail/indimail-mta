@@ -1,0 +1,149 @@
+.TH tinydns-edit 8
+
+.SH NAME
+tinydns-edit \- edit the (source form of the) database served by tinydns/axfrdns
+
+.SH SYNOPSIS
+.B tinydns-edit
+.I data
+.I data.tmp
+add
+.I type
+.I name
+.I address
+
+.SH DESCRIPTION
+.B tinydns-edit
+edits the
+.I data
+file, which is the source form of the database that is compiled by
+.BR tinydns-data (8)
+and that is served by
+.BR tinydns (8)
+and
+.BR axfrdns (8).
+The update to
+.I data
+is performed atomically, by first writing the updated database content to the file
+.I data.tmp
+and then renaming
+.I data.tmp
+to
+.I data .
+The two files must, of course, reside on the same volume in order that this can be achieved.
+.PP
+On success,
+.I tinydns-edit
+returns zero.  If, for any reason, an error occurs it will exit with a non-zero code and
+.I data
+will not be changed.
+.PP
+With the "add" verb, 
+.I tinydns-edit
+appends to the database a record whose type is determined by
+.I type ,
+with the fully-qualified name
+.I name
+and the IP address
+.I address .
+.I type
+can be one of:
+.IP ns
+A '.' record is created.  This record specifies that the domain
+.I name
+is published by a DNS content server that is listening on the IP address
+.I address .
+.IP
+The name of the DNS content server is not directly specifiable.  Names are automatically assigned by
+.I tinydns-edit
+itself, following the pattern
+.I [a-z].ns.name .
+.I tinydns-edit
+will assign the first letter of the alphabet that is not already used in another '.' or '&' record as the name of a DNS content server.
+If no letters of the alphabet remain unused,
+.I tinydns-edit
+will fail.
+.IP
+If a '.' or '&' record for the domain already exists, proxy DNS servers are allowed to cache the new record for the same length of time as they are allowed to cache the existing records.
+Otherwise, proxy DNS servers are allowed to cache the record for up to 3 days.
+.IP childns
+A '&' record is created.  This record specifies that queries for names in the domain
+.I name
+should be referred to a ("child") DNS content server that is listening on the IP address
+.I address .
+.IP
+The name of the DNS content server is not directly specifiable.  Names are automatically assigned by
+.I tinydns-edit
+itself, following the pattern
+.I [a-z].ns.name .
+.I tinydns-edit
+will assign the first letter of the alphabet that is not already used in another '.' or '&' record as the name of a DNS content server.
+If no letters of the alphabet remain unused,
+.I tinydns-edit
+will fail.
+.IP
+If a '.' or '&' record for the domain already exists, proxy DNS servers are allowed to cache the new record for the same length of time as they are allowed to cache the existing records.
+Otherwise, proxy DNS servers are allowed to cache the record for up to 3 days.
+.IP mx
+A '@' record is created.  This record specifies that mail to names in the domain
+.I name
+should be sent to an SMTP server that is listening on the IP address
+.I address .
+.IP
+The name of the SMTP server is not directly specifiable.  Names are automatically assigned by
+.I tinydns-edit
+itself, following the pattern
+.I [a-z].mx.name .
+.I tinydns-edit
+will assign the first letter of the alphabet that is not already used in another '@' record as the name of an SMTP server.
+If no letters of the alphabet remain unused,
+.I tinydns-edit
+will fail.
+.IP
+It is not possible to specify the 
+.I distance 
+value for the SMTP server.  
+.I tinydns-edit
+will leave that field blank, meaning that 
+.I tinydns-data (8)
+will use whatever the default value is.
+.IP
+If a '@' record for the domain already exists, proxy DNS servers are allowed to cache the new record for the same length of time as they are allowed to cache the existing records.
+Otherwise, proxy DNS servers are allowed to cache the record for up to 1 day.
+.IP host
+A '=' record is created, that proxy DNS servers are allowed to cache for up to 1 day.  This record specifies that the name
+.I name
+maps to the IP address
+.I address 
+and vice versa.
+.IP
+.I tinydns-edit
+will fail if a '=' record already exists that uses either
+.I name
+or
+.I address .
+.IP alias
+A '+' record is created, that proxy DNS servers are allowed to cache for up to 1 day.  This record specifies that the name
+.I name
+maps to the IP address
+.I address 
+but that there is no reverse mapping.
+.IP
+Because this is an alias record,
+.I tinydns-edit
+will not fail if there happen to already be existing records that use
+.I address .
+
+.SH SEE ALSO
+tinydns-data(8),
+
+http://cr.yp.to/djbdns.html
+
+.SH AUTHOR AND MODIFICATIONS
+This manual page was created by Jonathan de Boyne Pollard on 2001-04-06.
+.PP
+2001-04-26: A new AUTHOR AND MODIFICATIONS section was added.
+.BR axfrdns (8)
+is now mentioned.
+The description of how server names were auto-generated was clarified.
+A cut-and-paste error in the description of the "mx" type was corrected.

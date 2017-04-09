@@ -1,0 +1,95 @@
+.TH rbldns-data 8
+
+.SH NAME
+rbldns-data \- data tool for rbldns
+
+.SH DESCRIPTION
+.B rbldns-data
+reads an IP address list
+from a file named 
+.I data
+in the current directory.
+It creates 
+.I data.cdb
+in a binary format designed for
+fast access by 
+.BR rbldns (8).
+It may also create some other files
+with names beginning with 
+.IR data .
+
+.B rbldns-data
+updates 
+.I data.cdb
+atomically,
+so you can use it safely while 
+.BR rbldns (8)
+is running.
+If anything goes wrong with the creation of 
+.IR data.cdb ,
+.B rbldns-data
+stops and leaves the old 
+.I data.cdb
+in place.
+
+.SH Data format
+
+.I ip
+
+The IP address 
+.I ip
+is on the list.
+
+.I ip\fR/\fIn
+
+All IP addresses that share the first 
+.I n
+bits
+of the IP address 
+.I ip
+are on the list.
+For example, 
+.I 1.2.3.0/24
+means all 
+.I 1.2.3.*
+addresses.
+.I n
+must be at least 8,
+and all bits past the 
+.IR n th
+in 
+.I ip
+must be 0.
+
+.RI : a\fR:\fItxt\fR
+
+DNS queries for addresses on the list
+will receive an A record of 
+.I a
+and a TXT record of 
+.IR txt .
+Typically 
+.I a
+is 
+.I 127.0.0.2
+and 
+.I txt
+is a pointer to a web page about the list.
+
+If 
+.I txt
+ends with 
+.IR $ ,
+.BR rbldns (8)
+replaces the 
+.I $
+with the IP address.
+
+.RI # comment
+
+Comment line. The line is ignored.
+
+.SH SEE ALSO
+rbldns(8)
+
+http://cr.yp.to/djbdns.html

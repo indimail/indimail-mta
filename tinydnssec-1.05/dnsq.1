@@ -1,0 +1,33 @@
+.TH dnsq 1
+
+.SH NAME
+dnsq \- sends a non-recursive DNS query to DNS server
+
+.SH SYNOPSIS
+.B dnsq 
+.I t
+.I fqdn
+.I s
+
+.SH DESCRIPTION
+.B dnsq
+sends a non-recursive DNS query
+to DNS server 
+.I s
+for records of type 
+.I t
+under the domain name 
+.IR fqdn .
+It prints the results in a human-readable format.
+
+.SH SEE ALSO
+dnsip(1),
+dnsipq(1),
+dnsmx(1),
+dnstxt(1),
+dnsqr(1),
+dnsname(1),
+dnstrace(1),
+tinydns-get(1)
+
+http://cr.yp.to/djbdns.html

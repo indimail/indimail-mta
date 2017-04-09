@@ -1,0 +1,44 @@
+.TH tinydns-get 1
+
+.SH NAME
+tinydns-get \- is like dnsq(1), but obtains its results from data.cdb in the current directory
+
+.SH SYNOPSIS
+.B tinydns-get 
+.I t
+.I fqdn
+[
+.I ip
+]
+
+.SH DESCRIPTION
+.B tinydns-get
+is like
+.BR dnsq (1),
+but obtains its results from
+.I data.cdb
+in the current directory, in exactly the same way that
+.BR tinydns (8)
+and
+.BR axfrdns (8)
+obtain results from
+.I data.cdb
+in their root directories. If
+.I ip
+is provided, it simulates the results of a query from IP address
+.IR ip ;
+this matters if
+.I data.cdb
+differentiates among clients in different locations.
+
+.SH SEE ALSO
+dnsq(1),
+dnsip(1),
+dnsipq(1),
+dnsmx(1),
+dnstxt(1),
+dnsqr(1),
+dnsname(1),
+dnstrace(1)
+
+http://cr.yp.to/djbdns.html

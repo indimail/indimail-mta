@@ -1,0 +1,75 @@
+.TH tinydns 8
+
+.SH NAME
+tinydns \- a DNS server.
+
+.SH DESCRIPTION
+.B tinydns
+accepts iterative DNS queries
+from hosts around the Internet,
+and responds with locally configured information.
+
+.SH Configuration
+This is a reference page.
+For tutorial information, see the instructions for
+.br
+.B running a DNS server
+(http://cr.yp.to/djbdns/run-server.html).
+
+Normally 
+.B tinydns
+is set up by the
+.BR tinydns-conf (8)
+program.
+
+.B tinydns
+runs chrooted in the directory
+specified by the 
+.I $ROOT
+environment variable,
+under the uid and gid
+specified by the 
+.I $UID
+and 
+.I $GID
+environment variables.
+
+.B tinydns
+listens for incoming UDP packets
+addressed to port 53 of 
+.IR $IP .
+It does not listen for TCP queries.
+
+.B tinydns
+answers queries
+as specified by 
+.IR data.cdb ,
+a binary file created by
+.BR tinydns-data (8).
+
+.SH Further details
+
+.B tinydns
+rejects
+zone-transfer requests,
+inverse queries, non-Internet-class queries, truncated packets, and
+packets that contain anything other than a single query.
+
+.BR tinydns ,
+like BIND,
+includes NS records with answers to most queries.
+This increases DNS packet sizes,
+but it draws queries away from parent servers,
+and reduces the frequency of long DNS delays.
+With the default 
+.BR tinydns-data (8)
+cache times,
+a client that uses a normal record at least once every day
+will always have the corresponding NS records cached
+and will never have to talk to parent servers.
+
+.SH SEE ALSO
+tinydns-conf(8),
+tinydns-data(8)
+
+http://cr.yp.to/djbdns.html
