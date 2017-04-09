@@ -37,13 +37,7 @@ postinst: postinst.in obs.mk
 	$(edit) $@.in > $@;
 postrm: postrm.in obs.mk
 	$(edit) $@.in > $@;
-iwebadmin-Debian_8.0.dsc: iwebadmin-Debian_8.0.dsc.in
-	$(edit) $@.in > $@
-iwebadmin-Debian_7.0.dsc: iwebadmin-Debian_7.0.dsc.in
-	$(edit) $@.in > $@
-iwebadmin-xUbuntu_16.10.dsc: iwebadmin-xUbuntu_16.10.dsc.in
-	$(edit) $@.in > $@
-iwebadmin-xUbuntu_16.04.dsc: iwebadmin-xUbuntu_16.04.dsc.in
+iwebadmin.dsc: iwebadmin.dsc.in
 	$(edit) $@.in > $@
 changelog:changelog.in
 	$(edit) $@.in > $@
@@ -51,5 +45,5 @@ _service: _service.in
 	$(edit) $@.in > $@
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-debian.tar.gz: copyright rules control changelog postinst postrm compat
-	tar cf - copyright rules postinst postrm control changelog compat |gzip > $@
+debian.tar.gz: copyright rules control changelog postinst postrm compat iwebadmin.install
+	tar cf - copyright rules postinst postrm control changelog compat iwebadmin.install |gzip > $@
