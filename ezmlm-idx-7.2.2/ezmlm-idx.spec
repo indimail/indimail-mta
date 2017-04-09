@@ -45,10 +45,10 @@ BuildRequires: groff
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
 %endif
-##############################################################################
 %else
 BuildRequires: groff
 %endif
+##############################################################################
 Requires: rpm >= 3.0.2
 Requires: indimail-mta >= 2.0
 Source0: http://ezmlm.org/archive/%{version}/%{name}-%{version}.tar.gz
