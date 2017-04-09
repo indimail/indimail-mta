@@ -116,14 +116,14 @@ fi
 %build
 ID=$(id -u)
 if [ $ID -eq 0 ] ; then
- /usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
- if [ $? = 4 ] ; then
-   /usr/sbin/groupadd -r indimail
- fi
- /usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d {_prefix} indimail || true
- if [ $? = 4 ] ; then
-   /usr/sbin/useradd -r -g indimail -d {_prefix} indimail
- fi
+  /usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
+  if [ $? = 4 ] ; then
+    /usr/sbin/groupadd -r indimail
+  fi
+  /usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d {_prefix} indimail || true
+  if [ $? = 4 ] ; then
+    /usr/sbin/useradd -r -g indimail -d {_prefix} indimail
+  fi
 fi
 
 cd %{name}-%{version}
@@ -163,97 +163,97 @@ fi
 %files
 %defattr(-,root,root,-)
 %if "%{_prefix}" != "/usr"
-%dir %attr(555,root,qmail)                   %{_prefix}
+%dir %attr(555,root,qmail)               %{_prefix}
 %endif
-%dir %attr(755,root,qmail)                   @htmllibdir@
-%dir %attr(755,root,qmail)                   @htmllibdir@/html
-%dir %attr(755,root,qmail)                   @htmllibdir@/lang
+%dir %attr(755,root,qmail)               @htmllibdir@
+%dir %attr(755,root,qmail)               @htmllibdir@/html
+%dir %attr(755,root,qmail)               @htmllibdir@/lang
 
 # binary
-%attr(6555,root,indimail)                    @cgibindir@/iwebadmin
+%attr(6555,root,indimail)                @cgibindir@/iwebadmin
 
 #html
-%attr(444,root,root)                         @htmllibdir@/html/add_autorespond.html
-%attr(444,root,root)                         @htmllibdir@/html/add_forward.html
-%attr(444,root,root)                         @htmllibdir@/html/add_listdig.html
-%attr(444,root,root)                         @htmllibdir@/html/add_listmod.html
-%attr(444,root,root)                         @htmllibdir@/html/add_listuser.html
-%attr(444,root,root)                         @htmllibdir@/html/add_mailinglist-idx.html
-%attr(444,root,root)                         @htmllibdir@/html/add_mailinglist-no-idx.html
-%attr(444,root,root)                         @htmllibdir@/html/add_user.html
-%attr(444,root,root)                         @htmllibdir@/html/change_password.html
-%attr(444,root,root)                         @htmllibdir@/html/change_password_success.html
-%attr(444,root,root)                         @htmllibdir@/html/colortable
-%attr(444,root,root)                         @htmllibdir@/html/del_autorespond_confirm.html
-%attr(444,root,root)                         @htmllibdir@/html/del_forward_confirm.html
-%attr(444,root,root)                         @htmllibdir@/html/del_listdig.html
-%attr(444,root,root)                         @htmllibdir@/html/del_listmod.html
-%attr(444,root,root)                         @htmllibdir@/html/del_listuser.html
-%attr(444,root,root)                         @htmllibdir@/html/del_mailinglist_confirm.html
-%attr(444,root,root)                         @htmllibdir@/html/del_user_confirm.html
-%attr(444,root,root)                         @htmllibdir@/html/footer.html
-%attr(444,root,root)                         @htmllibdir@/html/header.html
-%attr(444,root,root)                         @htmllibdir@/html/main_menu.html
-%attr(444,root,root)                         @htmllibdir@/html/mod_autorespond.html
-%attr(444,root,root)                         @htmllibdir@/html/mod_dotqmail.html
-%attr(444,root,root)                         @htmllibdir@/html/mod_mailinglist-idx.html
-%attr(444,root,root)                         @htmllibdir@/html/mod_user.html
-%attr(444,root,root)                         @htmllibdir@/html/setremotecatchall.html
-%attr(444,root,root)                         @htmllibdir@/html/show_autorespond.html
-%attr(444,root,root)                         @htmllibdir@/html/show_digest_subscribers.html
-%attr(444,root,root)                         @htmllibdir@/html/show_forwards.html
-%attr(444,root,root)                         @htmllibdir@/html/show_login.html
-%attr(444,root,root)                         @htmllibdir@/html/show_mailinglist.html
-%attr(444,root,root)                         @htmllibdir@/html/show_moderators.html
-%attr(444,root,root)                         @htmllibdir@/html/show_subscribers.html
-%attr(444,root,root)                         @htmllibdir@/html/show_users.html
+%attr(444,root,root)                     @htmllibdir@/html/add_autorespond.html
+%attr(444,root,root)                     @htmllibdir@/html/add_forward.html
+%attr(444,root,root)                     @htmllibdir@/html/add_listdig.html
+%attr(444,root,root)                     @htmllibdir@/html/add_listmod.html
+%attr(444,root,root)                     @htmllibdir@/html/add_listuser.html
+%attr(444,root,root)                     @htmllibdir@/html/add_mailinglist-idx.html
+%attr(444,root,root)                     @htmllibdir@/html/add_mailinglist-no-idx.html
+%attr(444,root,root)                     @htmllibdir@/html/add_user.html
+%attr(444,root,root)                     @htmllibdir@/html/change_password.html
+%attr(444,root,root)                     @htmllibdir@/html/change_password_success.html
+%attr(444,root,root)                     @htmllibdir@/html/colortable
+%attr(444,root,root)                     @htmllibdir@/html/del_autorespond_confirm.html
+%attr(444,root,root)                     @htmllibdir@/html/del_forward_confirm.html
+%attr(444,root,root)                     @htmllibdir@/html/del_listdig.html
+%attr(444,root,root)                     @htmllibdir@/html/del_listmod.html
+%attr(444,root,root)                     @htmllibdir@/html/del_listuser.html
+%attr(444,root,root)                     @htmllibdir@/html/del_mailinglist_confirm.html
+%attr(444,root,root)                     @htmllibdir@/html/del_user_confirm.html
+%attr(444,root,root)                     @htmllibdir@/html/footer.html
+%attr(444,root,root)                     @htmllibdir@/html/header.html
+%attr(444,root,root)                     @htmllibdir@/html/main_menu.html
+%attr(444,root,root)                     @htmllibdir@/html/mod_autorespond.html
+%attr(444,root,root)                     @htmllibdir@/html/mod_dotqmail.html
+%attr(444,root,root)                     @htmllibdir@/html/mod_mailinglist-idx.html
+%attr(444,root,root)                     @htmllibdir@/html/mod_user.html
+%attr(444,root,root)                     @htmllibdir@/html/setremotecatchall.html
+%attr(444,root,root)                     @htmllibdir@/html/show_autorespond.html
+%attr(444,root,root)                     @htmllibdir@/html/show_digest_subscribers.html
+%attr(444,root,root)                     @htmllibdir@/html/show_forwards.html
+%attr(444,root,root)                     @htmllibdir@/html/show_login.html
+%attr(444,root,root)                     @htmllibdir@/html/show_mailinglist.html
+%attr(444,root,root)                     @htmllibdir@/html/show_moderators.html
+%attr(444,root,root)                     @htmllibdir@/html/show_subscribers.html
+%attr(444,root,root)                     @htmllibdir@/html/show_users.html
 
 #language files
-%attr(444,root,root)                         @htmllibdir@/lang/bg
-%attr(444,root,root)                         @htmllibdir@/lang/cs
-%attr(444,root,root)                         @htmllibdir@/lang/da
-%attr(444,root,root)                         @htmllibdir@/lang/de
-%attr(444,root,root)                         @htmllibdir@/lang/en
-%attr(444,root,root)                         @htmllibdir@/lang/es
-%attr(444,root,root)                         @htmllibdir@/lang/fi
-%attr(444,root,root)                         @htmllibdir@/lang/fr
-%attr(444,root,root)                         @htmllibdir@/lang/hu
-%attr(444,root,root)                         @htmllibdir@/lang/it
-%attr(444,root,root)                         @htmllibdir@/lang/ja
-%attr(444,root,root)                         @htmllibdir@/lang/lt
-%attr(444,root,root)                         @htmllibdir@/lang/nl
-%attr(444,root,root)                         @htmllibdir@/lang/no
-%attr(444,root,root)                         @htmllibdir@/lang/pl
-%attr(444,root,root)                         @htmllibdir@/lang/pt-br
-%attr(444,root,root)                         @htmllibdir@/lang/ru
-%attr(444,root,root)                         @htmllibdir@/lang/sk
-%attr(444,root,root)                         @htmllibdir@/lang/sv
-%attr(444,root,root)                         @htmllibdir@/lang/tr
-%attr(444,root,root)                         @htmllibdir@/lang/zh-cn
+%attr(444,root,root)                     @htmllibdir@/lang/bg
+%attr(444,root,root)                     @htmllibdir@/lang/cs
+%attr(444,root,root)                     @htmllibdir@/lang/da
+%attr(444,root,root)                     @htmllibdir@/lang/de
+%attr(444,root,root)                     @htmllibdir@/lang/en
+%attr(444,root,root)                     @htmllibdir@/lang/es
+%attr(444,root,root)                     @htmllibdir@/lang/fi
+%attr(444,root,root)                     @htmllibdir@/lang/fr
+%attr(444,root,root)                     @htmllibdir@/lang/hu
+%attr(444,root,root)                     @htmllibdir@/lang/it
+%attr(444,root,root)                     @htmllibdir@/lang/ja
+%attr(444,root,root)                     @htmllibdir@/lang/lt
+%attr(444,root,root)                     @htmllibdir@/lang/nl
+%attr(444,root,root)                     @htmllibdir@/lang/no
+%attr(444,root,root)                     @htmllibdir@/lang/pl
+%attr(444,root,root)                     @htmllibdir@/lang/pt-br
+%attr(444,root,root)                     @htmllibdir@/lang/ru
+%attr(444,root,root)                     @htmllibdir@/lang/sk
+%attr(444,root,root)                     @htmllibdir@/lang/sv
+%attr(444,root,root)                     @htmllibdir@/lang/tr
+%attr(444,root,root)                     @htmllibdir@/lang/zh-cn
 
-%attr(444,root,root) %config(noreplace)      @sysconfdir@/iwebadmin_perm_list
+%attr(444,root,root) %config(noreplace)  @sysconfdir@/iwebadmin_perm_list
 #images
-%attr(444,root,root)                         @imagedir@/delete.png
-%attr(444,root,root)                         @imagedir@/disabled.png
-%attr(444,root,root)                         @imagedir@/lowerleft.png
-%attr(444,root,root)                         @imagedir@/lowermiddle.png
-%attr(444,root,root)                         @imagedir@/lowerright.png
-%attr(444,root,root)                         @imagedir@/main.png
-%attr(444,root,root)                         @imagedir@/main1.png
-%attr(444,root,root)                         @imagedir@/main2.png
-%attr(444,root,root)                         @imagedir@/middleleft1.png
-%attr(444,root,root)                         @imagedir@/middleleft2.png
-%attr(444,root,root)                         @imagedir@/middlelogin.png
-%attr(444,root,root)                         @imagedir@/middleright1.png
-%attr(444,root,root)                         @imagedir@/modify.png
-%attr(444,root,root)                         @imagedir@/pixel.png
-%attr(444,root,root)                         @imagedir@/radio-off.png
-%attr(444,root,root)                         @imagedir@/radio-on.png
-%attr(444,root,root)                         @imagedir@/trash.png
-%attr(444,root,root)                         @imagedir@/upperleft.png
-%attr(444,root,root)                         @imagedir@/uppermiddle1.png
-%attr(444,root,root)                         @imagedir@/uppermiddle2.png
-%attr(444,root,root)                         @imagedir@/upperright.png
+%attr(444,root,root)                     @imagedir@/delete.png
+%attr(444,root,root)                     @imagedir@/disabled.png
+%attr(444,root,root)                     @imagedir@/lowerleft.png
+%attr(444,root,root)                     @imagedir@/lowermiddle.png
+%attr(444,root,root)                     @imagedir@/lowerright.png
+%attr(444,root,root)                     @imagedir@/main.png
+%attr(444,root,root)                     @imagedir@/main1.png
+%attr(444,root,root)                     @imagedir@/main2.png
+%attr(444,root,root)                     @imagedir@/middleleft1.png
+%attr(444,root,root)                     @imagedir@/middleleft2.png
+%attr(444,root,root)                     @imagedir@/middlelogin.png
+%attr(444,root,root)                     @imagedir@/middleright1.png
+%attr(444,root,root)                     @imagedir@/modify.png
+%attr(444,root,root)                     @imagedir@/pixel.png
+%attr(444,root,root)                     @imagedir@/radio-off.png
+%attr(444,root,root)                     @imagedir@/radio-on.png
+%attr(444,root,root)                     @imagedir@/trash.png
+%attr(444,root,root)                     @imagedir@/upperleft.png
+%attr(444,root,root)                     @imagedir@/uppermiddle1.png
+%attr(444,root,root)                     @imagedir@/uppermiddle2.png
+%attr(444,root,root)                     @imagedir@/upperright.png
 
 #
 # If the configuration file should not be replaced when the RPM is
