@@ -62,6 +62,7 @@ install: build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
+	dh_install --sourcedir=$(DESTDIR) -pbogofilter-worldlist
 	dh_installchangelogs
 	dh_installdocs
 	dh_link
