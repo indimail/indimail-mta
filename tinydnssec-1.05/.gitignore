@@ -66,3 +66,4 @@ haven2i.h
 sockaddr_in6.h
 dns-notify
 dnsnamex
+dnsgetroot
