@@ -42,7 +42,7 @@ int mode;
 
   if (stat(file,&st) == -1) {
     if (errno == error_noent) {
-      if (!str_diffn(prefix2, (char *) "man", 3)) {/*- check for .gz extension */
+      if (!str_diffn(prefix2, "man", 3)) {/*- check for .gz extension */
 		if (!stralloc_copys(&tfile, file))
           strerr_die2sys(111, FATAL,"out of memory: ");
 		if (!stralloc_catb(&tfile, ".gz", 4))
