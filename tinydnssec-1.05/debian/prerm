@@ -31,7 +31,7 @@ case "$1" in
     remove|upgrade|deconfigure)
 	echo "Giving dnscache exactly 5 seconds to exit nicely" 1>&2
 	${rm} -f /service/dnscache /service/tinydns
-	/usr/bin/svc -dx ${sysconfdir}/dnscache ${sysconfdir}/dnscache/log
+	/usr/bin/svc -dx ${sysconfdir}/dnscache ${sysconfdir}/dnscache/log || true
 	sleep 5
     ;;
 
