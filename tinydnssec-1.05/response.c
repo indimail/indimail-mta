@@ -36,6 +36,10 @@ int response_addname(const char *d)
         uint16_pack_big(buf,49152 + name_ptr[i]);
         return response_addbytes(buf,2);
       }
+	/*-
+	 * article.gmane.org/gmane.network.djbdns/13864
+	 * Patch by Matthew Dempsky
+	 */
     if ((dlen <= 128) && (response_len < 16384))
       if (name_num < NAMES) {
 	byte_copy(name[name_num],dlen,d);
