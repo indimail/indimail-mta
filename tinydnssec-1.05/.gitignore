@@ -67,3 +67,10 @@ sockaddr_in6.h
 dns-notify
 dnsnamex
 dnsgetroot
+debian/debian.tar.gz
+debian/dummy.tar.gz
+debian/tinydnssec.dsc
+debian/postinst
+debian/preinst
+debian/postrm
+debian/prerm
