@@ -252,3 +252,4 @@ dnsnamex.o
 dns-notify.o
 dnsnamex
 dnsgetroot
+str_diffn.o
