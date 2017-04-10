@@ -448,7 +448,7 @@ ENVRULES           |qmail-smtpd  |used    |Any environment variable(s) can be se
                    |             |        |SPAMREDIRECT, SPAMIGNORE,
                    |             |        |SPAMIGNOREPATTERNS, QREGEX, DATABYTES,
                    |             |        |SMTPROUTE, ONSUCCESS_REMOTE
-                   |             |        |ONFAILURE_REMOTE, ONTRANSIENT_REMOTE
+                   |             |        |ONFAILURE_REMOTE, ONTEMPORARY_REMOTE
 -------------------|-------------|--------|----------------------------------------
 QREGEX             |qmail-smtpd  |used    |If set, regex is used to evaluate
                    |spawn-filter |        |patterns in
@@ -600,10 +600,10 @@ RATELIMIT_DIR      |spawn-filter |used    |Directory for rate limit definitions
 -------------------|-------------|--------|----------------------------------------
 ONSUCCESS_REMOTE   |qmail-remote |used    |if set, program defined by
 ONFAILURE_REMOTE   |             |        |ONSUCCESS_REMOTE gets called on
-ONTRANSIENT_REMOTE |             |        |successful remote deliveries. similarly
+ONTEMPORARY_REMOTE |             |        |successful remote deliveries. similarly
                    |             |        |program defined by ONFAILURE_REMOTE gets
                    |             |        |called on failed remote deliveries and
-                   |             |        |program defined by ONTRANSIENT_REMOTE 
+                   |             |        |program defined by ONTEMPORARY_REMOTE 
                    |             |        |gets called on deferrals.
                    |             |        |Arguments passed to this program are same
                    |             |        |as that for qmail-remote. These programs
