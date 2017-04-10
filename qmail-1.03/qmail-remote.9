@@ -210,12 +210,12 @@ If \fBONFAILURE_REMOTE\fR environment variable is defined and points to a progra
 to remote host \fIhost\fR. The exit status of \fBqmail-remote\fR will be the exit status of the
 program. The argument passed to this program will be the same as those for \fBqmail-remote\fR.
 
-If \fBONTRANSIENT_REMOTE\fR environment variable is defined and points to a program,
+If \fBONTEMPORARY_REMOTE\fR environment variable is defined and points to a program,
 \fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR, on a deferred email delivery
 to remote host \fIhost\fR. The exit status of \fBqmail-remote\fR will be the exit status of the
 program. The argument passed to this program will be the same as those for \fBqmail-remote\fR.
 
-If neither of these variables \fBONSUCCESS_REMOTE\fR, \fBONFAILURE_REMOTE\fR and \fBONTRANSIENT_REMOTE\fR
+If neither of these variables \fBONSUCCESS_REMOTE\fR, \fBONFAILURE_REMOTE\fR and \fBONTEMPORARY_REMOTE\fR
 are defined, \fBqmail-remote\fR will always return zero exit status.
 
 When these two variables are set, \fBqmail-remote\fR will also set the environment variables
@@ -499,6 +499,8 @@ of the following environment variables
 	DISABLE_CRAM_RIPEMD
 	DISABLE_DIGEST_MD5
 .EE
+If you set the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled, unless qmail-remote
+has opened a TLS session wth the remote host. See the control file \fIclientcert.pem\fR
 
 If all connections to the 
 .I relay
