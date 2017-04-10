@@ -1,5 +1,8 @@
 #
 # $Log: indimail-mta.te,v $
+# Revision 1.5  2017-04-11 01:02:04+05:30  Cprogrammer
+# added rules for tinydnssec
+#
 # Revision 1.4  2017-03-21 11:18:39+05:30  Cprogrammer
 # updated selinux rules
 #
@@ -14,7 +17,7 @@
 #
 #
 #
-# $Id: indimail-mta.te,v 1.4 2017-03-21 11:18:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.te,v 1.5 2017-04-11 01:02:04+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -61,6 +64,7 @@ require {
 	type root_t;
 	type tmp_t;
 	type user_home_t;
+	type user_home_dir_t;
 	type user_tmp_t;
 	type usr_t;
 	type var_t;
@@ -106,7 +110,7 @@ allow httpd_sys_script_t home_root_t:file { unlink read write open create lock g
 allow httpd_sys_script_t self:capability { fowner setuid setgid dac_override dac_read_search};
 allow httpd_sys_script_t user_tmp_t:lnk_file read;
 allow httpd_sys_script_t var_t:dir { create read write remove_name add_name rmdir setattr };
-allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open lock };
+allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_trans write getattr rename unlink open lock };
 allow httpd_sys_script_t var_t:lnk_file read;
 
 #============= nscd_t ==============
@@ -191,6 +195,9 @@ allow svc_start_t var_lock_t:lnk_file read;
 allow svc_start_t var_t:dir { read create write add_name remove_name setattr rmdir };
 allow svc_start_t var_t:file { create getattr setattr ioctl open read lock write unlink };
 allow svc_start_t var_t:fifo_file { open read };
+
+#!!!! WARNING: 'etc_t' is a base type.
+allow svc_start_t etc_t:fifo_file write;
 
 #============= svc_run_t ==============
 
