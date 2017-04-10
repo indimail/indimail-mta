@@ -611,26 +611,32 @@ compile hier.c auto_home.h
 setup: \
 load setup.o hier.o auto_home.o buffer.a unix.a byte.a \
 stralloc_opys.o stralloc_cats.o stralloc_pend.o \
+getopt.a \
 stralloc_opyb.o stralloc_catb.o stralloc_eady.o alloc.a
 	./load setup hier.o auto_home.o buffer.a unix.a byte.a \
 	stralloc_opys.o stralloc_cats.o stralloc_pend.o \
+	getopt.a \
 	stralloc_opyb.o stralloc_catb.o stralloc_eady.o alloc.a
 
-#stralloc_cat.o
-#stralloc_copy.o
-#stralloc_num.o
+str_diffn.o: \
+compile str_diffn.c str.h
+	./compile str_diffn.c
 
 setup.o: \
 compile setup.c buffer.h strerr.h error.h open.h exit.h \
-stralloc.h
+stralloc.h sgetopt.h
 	./compile setup.c
 
 instcheck: \
-load instcheck.o hier.o auto_home.o buffer.a unix.a byte.a
-	./load instcheck hier.o auto_home.o buffer.a unix.a byte.a
+load instcheck.o hier.o auto_home.o buffer.a unix.a byte.a \
+str_diffn.o stralloc_catb.o stralloc_opyb.o stralloc_eady.o \
+alloc.a
+	./load instcheck hier.o auto_home.o buffer.a unix.a byte.a \
+	str_diffn.o stralloc_catb.o stralloc_opyb.o stralloc_eady.o \
+	alloc.a
 
 instcheck.o: \
-compile instcheck.c strerr.h error.h exit.h
+compile instcheck.c strerr.h error.h exit.h stralloc.h str.h
 	./compile instcheck.c
 
 iopause.h: \
@@ -895,7 +901,7 @@ taia.h iopause.h alloc.h str.h edns0.h
 
 install: \
 it setup
-	./setup $(DESTDIR)
+	./setup -d $(DESTDIR) -m /usr/share/man
 
 sgetopt.o: \
 compile sgetopt.c buffer.h sgetopt.h subgetopt.h subgetopt.h
