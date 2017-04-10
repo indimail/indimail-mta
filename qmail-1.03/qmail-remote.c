@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.101  2017-04-10 20:44:39+05:30  Cprogrammer
+ * use SMTPS if SMTPS environment variable is set
+ * added documentation and better variable name for type
+ *
  * Revision 1.100  2017-04-06 15:58:00+05:30  Cprogrammer
  * new tls_quit() function to avoid mixed usage of tls_quit(), quit() functions
  *
@@ -399,7 +403,7 @@ stralloc        qmtproutes = { 0 };
 struct constmap mapsmtproutes;
 struct constmap mapqmtproutes;
 stralloc        bounce = {0};
-int             type = 0;
+int             protocol_t = 0; /*- defines smtps, smtp, qmtp */
 #ifdef MXPS
 int             mxps = 0;
 #endif
@@ -496,33 +500,23 @@ run_script(char code, int succ)
 	{
 	case 1: /*- success */
 		str = "ONSUCCESS_REMOTE";
-		remote_code[0] = 'K';
-		if (!env_put2("SMTPSTATUS", remote_code)) {
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
 		break;
 	case 0: /*- failure */
 		str = "ONFAILURE_REMOTE";
-		remote_code[0] = code;
-		if (!env_put2("SMTPSTATUS", remote_code)) {
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
 		break;
 	case -1: /*- transient error */
-		str = "ONTRANSIENT_REMOTE";
-		remote_code[0] = code;
-		if (!env_put2("SMTPSTATUS", remote_code)) {
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
+		str = "ONTEMPORARY_REMOTE";
 		break;
 	default:
 		return 0;
 	}
 	if (!(prog = env_get(str)))
 		return (0);
+	remote_code[0] = code;
+	if (!env_put2("SMTPSTATUS", remote_code)) {
+		my_error("alert: Out of memory", 0, 0);
+		_exit (1);
+	}
 	if (!(args = (char **) alloc(my_argc + 1)))
 	{
 		my_error("alert: Out of memory", 0, 0);
@@ -542,7 +536,7 @@ run_script(char code, int succ)
 				my_error("alert: out of memory", 0, 0);
 				_exit (1);
 			}
-			if (!env_unset("ONTRANSIENT_REMOTE")) {
+			if (!env_unset("ONTEMPORARY_REMOTE")) {
 				my_error("alert: out of memory", 0, 0);
 				_exit (1);
 			}
@@ -552,7 +546,7 @@ run_script(char code, int succ)
 				my_error("alert: Out of memory", 0, 0);
 				_exit (1);
 			}
-			if (!env_unset("ONTRANSIENT_REMOTE")) {
+			if (!env_unset("ONTEMPORARY_REMOTE")) {
 				my_error("alert: Out of memory", 0, 0);
 				_exit (1);
 			}
@@ -636,7 +630,7 @@ int
 setsmtptext(int code, int type)
 {
 	if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE")
-			||env_get("ONTRANSIENT_REMOTE"))
+			||env_get("ONTEMPORARY_REMOTE"))
 	{
 		char            strnum[FMT_ULONG];
 
@@ -650,7 +644,7 @@ setsmtptext(int code, int type)
 			if (!stralloc_0(&smtpenv))
 				return (1);
 			smtpenv.len--;
-			if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", smtpenv.s)) {
+			if (!env_put2((type == 'q' || mxps) ? "QMTPTEXT" : "SMTPTEXT", smtpenv.s)) {
 				return (1);
 			}
 		}
@@ -660,7 +654,7 @@ setsmtptext(int code, int type)
 			if (!env_put2("SMTPCODE", strnum))
 				return (1);
 		} else /*- shouldn't happen - no additional code available from remote host. BUG in code */
-		if (!env_put2((type == 's' || mxps) ? "QMTPCODE" : "SMTPCODE", "-1"))
+		if (!env_put2((type == 'q' || mxps) ? "QMTPCODE" : "SMTPCODE", "-1"))
 			temp_nomem();
 	}
 	return (0);
@@ -672,7 +666,7 @@ temp_nomem()
 	out("ZOut of memory. (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, "Out of memory. (#4.3.0)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -694,7 +688,7 @@ temp_noip()
 		temp_nomem();
 	if (!stralloc_cats(&smtptext, "/outgoingip (#4.3.0)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -705,7 +699,7 @@ temp_oserr()
 	out("ZSystem resources temporarily unavailable. (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, "System resources temporarily unavailable. (#4.3.0)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -716,7 +710,7 @@ temp_read()
 	out("ZUnable to read message. (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, "Unable to read message. (#4.3.0)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -727,7 +721,7 @@ temp_dnscanon()
 	out("ZCNAME lookup failed temporarily. (#4.4.3)\n");
 	if (!stralloc_copys(&smtptext, "CNAME lookup failed temporarily. (#4.4.3)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -738,7 +732,7 @@ temp_dns()
 	out("ZSorry, I couldn't find any host by that name. (#4.1.2)\n");
 	if (!stralloc_copys(&smtptext, "Sorry, I couldn't find any host by that name. (#4.1.2)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -749,7 +743,7 @@ temp_chdir()
 	out("ZUnable to switch to home directory. (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, "Unable to switch to home directory. (#4.3.0)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -760,7 +754,7 @@ temp_control()
 	out("ZUnable to read control files. (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, "Unable to read control files. (#4.3.0)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -774,7 +768,7 @@ perm_partialline()
 	if (!stralloc_copys(&smtptext, r + 1))
 		temp_nomem();
 	smtptext.len--;
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie(r, 0);
 }
@@ -788,7 +782,7 @@ perm_usage()
 	if (!stralloc_copys(&smtptext, r + 3))
 		temp_nomem();
 	smtptext.len--;
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie(r, 0);
 }
@@ -807,7 +801,7 @@ perm_dns()
 		temp_nomem();
 	if (!stralloc_cats(&smtptext, ". (#5.1.2)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie(r, 0);
 }
@@ -821,7 +815,7 @@ perm_nomx()
 	if (!stralloc_copys(&smtptext, r + 1))
 		temp_nomem();
 	smtptext.len--;
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie(r, 0);
 }
@@ -845,7 +839,7 @@ perm_ambigmx()
 		temp_nomem();
 	if (!stralloc_cats(&smtptext, "/locals file, so I don't treat it as local. (#5.4.6)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie(r, 0);
 }
@@ -937,7 +931,7 @@ dropped()
 	out("(#4.4.2)\n");
 	if (!stralloc_cats(&smtptext, "(#4.4.2)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -959,7 +953,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 	if (!stralloc_copys(&smtptext, ""))
 		temp_nomem();
 	temp_noconn_out("ZSorry, I wasn't able to establish an ");
-	temp_noconn_out((type == 's' || mxps) ? "QMTP connection for " : "SMTP connection for ");
+	temp_noconn_out((protocol_t == 'q' || mxps) ? "QMTP connection for " : "SMTP connection for ");
 	if (substdio_put(subfdoutsmall, h->s, h->len) == -1)
 		_exit(0);
 	if (!stralloc_catb(&smtptext, h->s, h->len))
@@ -986,7 +980,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 		alloc_free(ip);
 	}
 	temp_noconn_out(". (#4.4.1)\n");
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -1016,7 +1010,7 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 		alloc_free(ip);
 	}
 	temp_noconn_out(". (#4.4.1)\n");
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -1137,7 +1131,7 @@ ehlo()
 	if (ehlokw.len > maxehlokwlen)
 		maxehlokwlen = ehlokw.len;
 	ehlokw.len = 0;
-	if (type == 's') /* QMTP */
+	if (protocol_t == 'q') /* QMTP */
 		return 0;
 	substdio_puts(&smtpto, "EHLO ");
 	substdio_put(&smtpto, helohost.s, helohost.len);
@@ -1372,6 +1366,14 @@ verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
 	return 1;
 }
 
+/*
+ * returns 0 --> fallback to non-tls
+ *    if certs do not exist
+ *    host is in notlshosts
+ *    smtps == 0 and tls session cannot be initated
+ * returns 1 if tls session was initated
+ * exits on error, smtps == 1 and tls session did not succeed
+ */
 int
 tls_init()
 {
@@ -1458,7 +1460,7 @@ tls_init()
 			if (!stat(tlsFilename.s, &st))
 			{
 				alloc_free(tlsFilename.s);
-				return 0;
+				return (0);
 			}
 		} else
 			needtlsauth = 1;
@@ -2252,7 +2254,7 @@ void temp_proto()
 	out("Zrecipient did not talk proper QMTP (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, "recipient did not talk proper QMTP (#4.3.0)"))
 		temp_nomem();
-	if (setsmtptext(0, type))
+	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
@@ -2398,10 +2400,7 @@ smtp()
 
 	inside_greeting = 1;
 #ifdef TLS
-	if (type == 'S')
-		smtps = 1;
-	else
-	if (type != 's' && port == 465)
+	if (protocol_t == 'S' || (protocol_t != 'q' && port == 465))
 		smtps = 1;
 	if (!smtps)
 		code = smtpcode();
@@ -2969,6 +2968,7 @@ main(int argc, char **argv)
 	msgsize = argv[4];
 	recips = argv + 5;
 	getcontrols();
+	protocol_t = env_get("SMTPS") ? 'S' : 's';
 	use_auth_smtp = env_get("AUTH_SMTP");
 	/*- Per user SMTPROUTE functionality using moresmtproutes.cdb */
 	relayhost = lookup_host(*recips, str_len(*recips));
@@ -2978,7 +2978,7 @@ main(int argc, char **argv)
 		if (!stralloc_copys(&bounce, "!@"))
 			temp_nomem();
 		if ((relayhost = constmap(&mapqmtproutes, bounce.s, bounce.len))) {
-			type = 's';
+			protocol_t = 'q';
 			port = PORT_QMTP;
 		} else
 		if (!(relayhost = constmap(&mapsmtproutes, bounce.s, bounce.len)))
@@ -2995,7 +2995,7 @@ main(int argc, char **argv)
 			{
 				/* default qmtproutes */
 				if (cntrl_stat2 == 2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
-					type = 's';
+					protocol_t = 'q';
 					port = PORT_QMTP;
 					break;
 				} else
@@ -3005,7 +3005,7 @@ main(int argc, char **argv)
 					break;
 				} else
 				if (cntrl_stat2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
-					type = 's';
+					protocol_t = 'q';
 					port = PORT_QMTP;
 					break;
 				} else
@@ -3154,9 +3154,9 @@ main(int argc, char **argv)
 		mxps = 0;
 		if (qmtp_priority(ip.ix[i].pref))
 			mxps = 1;
-		if (type == 's' || mxps || ip.ix[i].pref < prefme)
+		if (protocol_t == 'q' || mxps || ip.ix[i].pref < prefme)
 #else
-		if (type == 's' || ip.ix[i].pref < prefme)
+		if (protocol_t == 'q' || ip.ix[i].pref < prefme)
 #endif
 		{
 			if (flagtcpto && tcpto(&ip.ix[i], min_penalty))
@@ -3188,9 +3188,9 @@ main(int argc, char **argv)
 					partner_fqdn = ip.ix[i].fqdn;
 #endif
 #ifdef MXPS
-					if (mxps != -1 && (type == 's' || mxps))
+					if (mxps != -1 && (protocol_t == 'q' || mxps))
 #else
-					if (type == 's')
+					if (protocol_t == 'q')
 #endif
 					{
 						if (j)
@@ -3241,7 +3241,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.100 2017-04-06 15:58:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.101 2017-04-10 20:44:39+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
