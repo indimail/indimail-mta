@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.6  2017-04-10 20:42:36+05:30  Cprogrammer
+ * renamed ONTRANSIENT_ERROR to ONTEMPORARY_ERROR
+ *
  * Revision 1.5  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -42,7 +45,7 @@
 #define FATAL     "rrt: fatal: "
 #define SUCCESS   1
 #define FAILURE   2
-#define TRANSIENT 3
+#define TEMPORARY 3
 #define READ_ERR  1
 #define WRITE_ERR 2
 #define MEM_ERR   3
@@ -321,8 +324,8 @@ main(int argc, char **argv)
 	if (env_get("ONFAILURE_REMOTE"))
 		type = FAILURE;
 	else
-	if (env_get("ONTRANSIENT_REMOTE"))
-		type = TRANSIENT;
+	if (env_get("ONTEMPORARY_REMOTE"))
+		type = TEMPORARY;
 	else
 		_exit (0);
 	/*- no need of processing bounce */
@@ -361,7 +364,7 @@ main(int argc, char **argv)
 	if (type == FAILURE)
 		my_putb("Permanent Failure: Mail Delivery Report: ", 41);
 	else
-	if (type == TRANSIENT)
+	if (type == TEMPORARY)
 		my_putb("Temporary Failure: Mail Delivery Report: ", 41);
 	my_putb(email_subj.s, email_subj.len);
 	my_putb("To: ", 4);
@@ -398,7 +401,7 @@ main(int argc, char **argv)
 				"receive no further notifications. Otherwise you may still receive\n"
 				"notifications of mail delivery errors from other systems.\n\n");
 	} else
-	if (type == TRANSIENT) {
+	if (type == TEMPORARY) {
 		my_puts("Your message has not been delivered to the destination(s)\n"
 				"listed below. You may receive further notifications until the\n"
 				"message gets delivered\n\n");
@@ -414,7 +417,7 @@ main(int argc, char **argv)
 	if (type == SUCCESS) {
 		my_putb("There is no guarantee that the message has been read or understood.\n", 68);
 	} else
-	if (type == TRANSIENT) {
+	if (type == TEMPORARY) {
 		my_putb("There is no guarantee that the message will be deliverd.\n", 57);
 	}
 
@@ -488,7 +491,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.5 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.6 2017-04-10 20:42:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
