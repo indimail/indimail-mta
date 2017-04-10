@@ -5,7 +5,6 @@ Architecture: any
 Version: 1.05-1
 Maintainer: Manvendra Bhangui <manvendra@indimail.org>
 Homepage: http://indimail.sourceforge.net
-Build-Depends: debhelper (>= 4.1.16)
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: tinydnssec-1.05.tar.gz
 Standards-Version: 3.9.1
