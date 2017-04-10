@@ -44,7 +44,11 @@ Release: 1.1%{?dist}
 Release: 1.1%{?dist}
 %endif
 Summary: DNS suite
-Group: System/Base
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Base
+%else
+Group: Productivity/Networking/Email/Servers
+%endif
 %if %build_on_obs == 1
 License: GPL-3.0+
 %else
@@ -105,7 +109,7 @@ See http://cr.yp.to/djbdns.html
 
 %build
 sed -i 's{/usr{%{_prefix}{' conf-home
-%{__make} -s DESTDIR=%{buildroot}
+%{__make} -s
 pod2man -s 8 -c '' "tinydns-sign" >tinydns-sign.8
 
 %install
@@ -116,15 +120,11 @@ pod2man -s 8 -c '' "tinydns-sign" >tinydns-sign.8
 
 %files
 %defattr(-,root,root,-)
-#%ghost %attr(-,root,root)      %{_sysconfdir}/dnscache
-#%ghost %attr(-,-,-)            %{_sysconfdir}/dnscache/*
-#%ghost %attr(-,root,root)      %{_sysconfdir}/tinydns
-#%ghost %attr(-,-,-)            %{_sysconfdir}/tinydns/*
-%config                        %{_sysconfdir}/dnsroots.global
+%config(noreplace)             %{_sysconfdir}/dnsroots.global
 
 %{_prefix}/bin/*
 
-%doc INSTALL README doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/README.tinydnssec doc/Thedjbway_djbdns.pdf
+%doc README doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/README.tinydnssec doc/Thedjbway_djbdns.pdf
 %doc %{_mandir}/man1/*
 %doc %{_mandir}/man5/*
 %doc %{_mandir}/man8/*
