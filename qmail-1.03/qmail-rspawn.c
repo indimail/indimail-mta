@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.29  2017-04-11 03:46:12+05:30  Cprogrammer
+ * move out QMAILLOCAL unset out of vfork()
+ *
  * Revision 1.28  2011-07-29 09:29:45+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -274,6 +277,8 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 		}
 	}
 #endif
+	if (!env_unset("QMAILLOCAL"))
+		_exit(111);
 	if (!(f = vfork()))
 	{
 		if (fd_move(0, fdmess) == -1)
@@ -281,8 +286,6 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 		if (fd_move(1, fdout) == -1)
 			_exit(111);
 		if (fd_copy(2, 1) == -1)
-			_exit(111);
-		if (!env_unset("QMAILLOCAL"))
 			_exit(111);
 		if (!(ptr = env_get("QMAILREMOTE")))
 			execvp(*args, args);
@@ -298,7 +301,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.28 2011-07-29 09:29:45+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.29 2017-04-11 03:46:12+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
