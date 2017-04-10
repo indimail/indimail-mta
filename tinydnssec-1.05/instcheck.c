@@ -5,11 +5,15 @@
 #include "strerr.h"
 #include "error.h"
 #include "exit.h"
+#include "stralloc.h"
+#include "str.h"
 
 extern void hier();
 
 #define FATAL "instcheck: fatal: "
 #define WARNING "instcheck: warning: "
+const char     *mandir = "/usr/share/man";
+stralloc        tfile = {0};
 
 void
 l(home, file, target)
@@ -37,9 +41,21 @@ int mode;
   struct stat st;
 
   if (stat(file,&st) == -1) {
-    if (errno == error_noent)
-      strerr_warn6(WARNING,prefix1,prefix2,prefix3,file," does not exist",0);
-    else
+    if (errno == error_noent) {
+      if (!str_diffn(prefix2, (char *) "man", 3)) {/*- check for .gz extension */
+		if (!stralloc_copys(&tfile, file))
+          strerr_die2sys(111, FATAL,"out of memory: ");
+		if (!stralloc_catb(&tfile, ".gz", 4))
+          strerr_die2sys(111, FATAL,"out of memory: ");
+        if (stat(tfile.s,&st) == -1) {
+          if (errno == error_noent) {
+            strerr_warn6(WARNING,prefix1,prefix2,prefix3,file," does not exist",0);
+          } else
+            strerr_warn4(WARNING,"unable to stat .../",file,": ",&strerr_sys);
+        }
+      } else
+        strerr_warn6(WARNING,prefix1,prefix2,prefix3,file," does not exist",0);
+    } else
       strerr_warn4(WARNING,"unable to stat .../",file,": ",&strerr_sys);
     return;
   }
@@ -48,9 +64,9 @@ int mode;
     strerr_warn6(WARNING,prefix1,prefix2,prefix3,file," has wrong owner",0);
   if ((gid != -1) && (st.st_gid != gid))
     strerr_warn6(WARNING,prefix1,prefix2,prefix3,file," has wrong group",0);
-  if ((st.st_mode & 07777) != mode)
+  if ((mode != -1) && ((st.st_mode & 07777) != mode))
     strerr_warn6(WARNING,prefix1,prefix2,prefix3,file," has wrong permissions",0);
-  if ((st.st_mode & S_IFMT) != type)
+  if ((mode != -1) && ((st.st_mode & S_IFMT) != type))
     strerr_warn6(WARNING,prefix1,prefix2,prefix3,file," has wrong type",0);
 }
 
@@ -117,6 +133,6 @@ int mode;
 
 int main()
 {
-  hier();
+  hier(0);
   _exit(0);
 }

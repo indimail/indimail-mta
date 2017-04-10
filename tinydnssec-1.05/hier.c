@@ -1,63 +1,63 @@
 #include "auto_home.h"
+extern char *mandir;
 void c(const char *,const char *,const char *,int,int,int);
 void h(const char *, int,int,int);
 void d(const char *,const char *,int,int,int);
 void l(const char *,const char *,const char *);
 
-void hier()
+void hier(char *inst_dir)
 {
- char *mandir = "/usr/share/man";
+  const char *auto_h = auto_home;
 
+  if (inst_dir && *inst_dir)
+    auto_h = inst_dir;
   h("/etc/indimail",-1,-1,02755);
   c("/etc","indimail","dnsroots.global",-1,-1,0644);
-#if 0
-  l("/etc/indimail/tinydns",  "dnsroots.global", "/etc/indimail");
-  l("/etc/indimail/dnscache", "dnsroots.global", "/etc/indimail");
-#endif
 
-  h(auto_home,-1,-1,02755);
+  h(auto_h,-1,-1,02755);
   h(mandir,-1,-1,0755);
   d(mandir,"man1",-1,-1,0755);
   d(mandir,"man5",-1,-1,0755);
   d(mandir,"man8",-1,-1,0755);
-  d(auto_home,"bin",-1,-1,02755);
+  d(auto_h,"bin",-1,-1,02755);
 
-  c(auto_home,"bin","dnscache-conf",-1,-1,0755);
-  c(auto_home,"bin","tinydns-conf",-1,-1,0755);
-  c(auto_home,"bin","walldns-conf",-1,-1,0755);
-  c(auto_home,"bin","rbldns-conf",-1,-1,0755);
-  c(auto_home,"bin","pickdns-conf",-1,-1,0755);
-  c(auto_home,"bin","axfrdns-conf",-1,-1,0755);
+  c(auto_h,"bin","dnscache-conf",-1,-1,0755);
+  c(auto_h,"bin","tinydns-conf",-1,-1,0755);
+  c(auto_h,"bin","walldns-conf",-1,-1,0755);
+  c(auto_h,"bin","rbldns-conf",-1,-1,0755);
+  c(auto_h,"bin","pickdns-conf",-1,-1,0755);
+  c(auto_h,"bin","axfrdns-conf",-1,-1,0755);
 
-  c(auto_home,"bin","dnscache",-1,-1,0755);
-  c(auto_home,"bin","tinydns",-1,-1,0755);
-  c(auto_home,"bin","walldns",-1,-1,0755);
-  c(auto_home,"bin","rbldns",-1,-1,0755);
-  c(auto_home,"bin","pickdns",-1,-1,0755);
-  c(auto_home,"bin","axfrdns",-1,-1,0755);
+  c(auto_h,"bin","dnscache",-1,-1,0755);
+  c(auto_h,"bin","tinydns",-1,-1,0755);
+  c(auto_h,"bin","walldns",-1,-1,0755);
+  c(auto_h,"bin","rbldns",-1,-1,0755);
+  c(auto_h,"bin","pickdns",-1,-1,0755);
+  c(auto_h,"bin","axfrdns",-1,-1,0755);
 
-  c(auto_home,"bin","tinydns-get",-1,-1,0755);
-  c(auto_home,"bin","tinydns-data",-1,-1,0755);
-  c(auto_home,"bin","tinydns-edit",-1,-1,0755);
-  c(auto_home,"bin","rbldns-data",-1,-1,0755);
-  c(auto_home,"bin","pickdns-data",-1,-1,0755);
-  c(auto_home,"bin","axfr-get",-1,-1,0755);
+  c(auto_h,"bin","tinydns-get",-1,-1,0755);
+  c(auto_h,"bin","tinydns-data",-1,-1,0755);
+  c(auto_h,"bin","tinydns-edit",-1,-1,0755);
+  c(auto_h,"bin","rbldns-data",-1,-1,0755);
+  c(auto_h,"bin","pickdns-data",-1,-1,0755);
+  c(auto_h,"bin","axfr-get",-1,-1,0755);
 
-  c(auto_home,"bin","dnsip",-1,-1,0755);
-  c(auto_home,"bin","dnsip6",-1,-1,0755);
-  c(auto_home,"bin","dnsnamex",-1,-1,0755);
-  c(auto_home,"bin","dnsipq",-1,-1,0755);
-  c(auto_home,"bin","dnsip6q",-1,-1,0755);
-  c(auto_home,"bin","dnsname",-1,-1,0755);
-  c(auto_home,"bin","dnstxt",-1,-1,0755);
-  c(auto_home,"bin","dnsmx",-1,-1,0755);
-  c(auto_home,"bin","dnsfilter",-1,-1,0755);
-  c(auto_home,"bin","random-ip",-1,-1,0755);
-  c(auto_home,"bin","dnsqr",-1,-1,0755);
-  c(auto_home,"bin","dnsq",-1,-1,0755);
-  c(auto_home,"bin","dnstrace",-1,-1,0755);
-  c(auto_home,"bin","dnstracesort",-1,-1,0755);
-  c(auto_home,"bin","dnsgetroot",-1,-1,0755);
+  c(auto_h,"bin","dnsip",-1,-1,0755);
+  c(auto_h,"bin","dnsip6",-1,-1,0755);
+  c(auto_h,"bin","dnsnamex",-1,-1,0755);
+  c(auto_h,"bin","dnsipq",-1,-1,0755);
+  c(auto_h,"bin","dnsip6q",-1,-1,0755);
+  c(auto_h,"bin","dnsname",-1,-1,0755);
+  c(auto_h,"bin","dnstxt",-1,-1,0755);
+  c(auto_h,"bin","dnsmx",-1,-1,0755);
+  c(auto_h,"bin","dnsfilter",-1,-1,0755);
+  c(auto_h,"bin","random-ip",-1,-1,0755);
+  c(auto_h,"bin","dnsqr",-1,-1,0755);
+  c(auto_h,"bin","dnsq",-1,-1,0755);
+  c(auto_h,"bin","dnstrace",-1,-1,0755);
+  c(auto_h,"bin","dnstracesort",-1,-1,0755);
+  c(auto_h,"bin","dnsgetroot",-1,-1,0755);
+  c(auto_h,"bin","tinydns-sign",-1,-1,0755);
   c(mandir,"man1","dnsfilter.1",-1,-1,0644);
   c(mandir,"man1","dnsip.1",-1,-1,0644);
   c(mandir,"man1","dnsipq.1",-1,-1,0644);
