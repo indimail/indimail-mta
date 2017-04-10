@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.23  2017-04-11 03:45:52+05:30  Cprogrammer
+ * unset QMAILREMOTE in parent
+ *
  * Revision 1.22  2017-01-09 19:36:15+05:30  Cprogrammer
  * use postmaster@virtualdomain for null user (bounce)
  *
@@ -306,6 +309,8 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 	struct passwd  *pw;
 #endif
 
+	if (!env_unset("QMAILREMOTE"))
+		_exit(-1);
 #ifdef INDIMAIL
 /*
  * saldo-biuro.com.pl-david-goliath@saldo-biuro.com.pl
@@ -421,8 +426,6 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 			_exit(QLX_USAGE);
 		if (!getuid())
 			_exit(QLX_ROOT);
-		if (!env_unset("QMAILREMOTE"))
-			_exit(QLX_SYS);
 		if (!(ptr = env_get("QMAILLOCAL")))
 			execv(*args, args);
 		else
@@ -437,7 +440,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.22 2017-01-09 19:36:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.23 2017-04-11 03:45:52+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
