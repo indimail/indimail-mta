@@ -104,9 +104,9 @@ administrators use to diagnose misconfigured remote servers.
 See http://cr.yp.to/djbdns.html
 
 %build
-echo %{_prefix} > conf-home
+sed -i 's{/usr{%{_prefix}{' conf-home
 %{__make} -s DESTDIR=%{buildroot}
-pod2man -s 8 -c '' "tinydns-sign.pl" >tinydns-sign.8
+pod2man -s 8 -c '' "tinydns-sign" >tinydns-sign.8
 
 %install
 %{__make} -s DESTDIR=%{buildroot} install-strip
@@ -132,7 +132,6 @@ pod2man -s 8 -c '' "tinydns-sign.pl" >tinydns-sign.8
 %prep
 %setup -q
 
-
 %pre
 argv1=$1
 ID=$(id -u)
@@ -142,11 +141,14 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
+  echo "Giving dnscache exactly 5 seconds to exit nicely" 1>&2
+  /usr/bin/svc -dx %{_sysconfdir}/dnscache %{_sysconfdir}/dnscache/log
+  sleep 5
   exit 0
 fi
 for i in dnscache dnslog tinydns
 do
-	%{__rm} -f /var/spool/mail/$i
+  %{__rm} -f /var/spool/mail/$i
 done
 /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
 /usr/bin/getent passwd dnscache > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin dnscache || true
@@ -154,6 +156,14 @@ done
 /usr/bin/getent passwd tinydns  > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin tinydns  || true
 
 %preun
+argv1=$1
+echo "Giving dnscache exactly 5 seconds to exit nicely" 1>&2
+/usr/bin/svc -dx %{_sysconfdir}/dnscache %{_sysconfdir}/dnscache/log
+sleep 5
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+  exit 0
+fi
 for i in tinydns dnslog dnscache
 do
   echo "Removing user $i"
