@@ -7,10 +7,12 @@
 #include "error.h"
 #include "open.h"
 #include "exit.h"
+#include "sgetopt.h"
 
-extern void hier();
+extern void hier(char *);
 
-char           *destdir = 0;
+char           *destdir = 0, *mandir = 0;
+const char     *usage = "usage: setup -d destdir [-m mandir] [instdir]";
 stralloc        tmpdir = {0};
 stralloc        dirbuf = { 0 };
 stralloc        dird = { 0 };
@@ -250,13 +252,28 @@ int mode;
 
 int main(int argc, char **argv)
 {
+  int             opt;
+
   fdsourcedir = open_read(".");
   if (fdsourcedir == -1)
     strerr_die2sys(111,FATAL,"unable to open current directory: ");
+  while ((opt = getopt(argc,argv,"d:m:")) != opteof) {
+		switch (opt) {
+		case 'd':
+			destdir = optarg;
+			break;
+		case 'm':
+			mandir = optarg;
+			break;
+		default:
+			strerr_die1x(100, usage);
+		}
+  }
 
-  if (argc == 2)
-    destdir = argv[1];
   umask(077);
-  hier();
+  if (optind + 1 != argc)
+    hier(0);
+  else
+    hier(argv[optind++]);
   _exit(0);
 }
