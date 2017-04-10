@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.22  2017-04-11 01:00:26+05:30  Cprogrammer
+# added rules for tinydnssec
+#
 # Revision 2.21  2017-04-02 22:42:22+05:30  Cprogrammer
 # added rename capability for iwebadmin on var_t
 #
@@ -64,7 +67,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.21 2017-04-02 22:42:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.22 2017-04-11 01:00:26+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -266,12 +269,8 @@ allow svc_start_t var_t:dir { read create write add_name remove_name setattr rmd
 allow svc_start_t var_t:file { create getattr setattr ioctl open read lock write unlink };
 allow svc_start_t var_t:fifo_file { open read };
 
-#============= init_t ==============
-
-allow init_t var_t:file { execute execute_no_trans ioctl open read };
-allow init_t root_t:fifo_file { open write };
-allow init_t user_tmp_t:file open;
-allow init_t svc_svc_t:dir read;
+#!!!! WARNING: 'etc_t' is a base type.
+allow svc_start_t etc_t:fifo_file write;
 
 #============= svc_run_t ==============
 
@@ -326,3 +325,10 @@ allow svc_multilog_t init_t:unix_stream_socket { write read };
 allow svc_multilog_t var_log_t:dir create;
 allow svc_multilog_t svc_start_t:process sigchld;
 allow svc_multilog_t svc_start_t:fd use;
+
+#============= init_t ==============
+
+allow init_t var_t:file { execute execute_no_trans ioctl open read };
+allow init_t root_t:fifo_file { open write };
+allow init_t user_tmp_t:file open;
+allow init_t svc_svc_t:dir read;
