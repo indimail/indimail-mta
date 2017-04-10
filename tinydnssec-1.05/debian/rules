@@ -34,6 +34,7 @@ build-stamp:
 	# run make
 	#
 	$(MAKE) -s DESTDIR=$(DESTDIR)
+	pod2man -s 8 -c '' "tinydns-sign" >tinydns-sign.8
 	touch build-stamp
 
 clean:
