@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.227  2017-04-11 18:26:51+05:30  Cprogrammer
+ * sysconfdir permissions were getting set multiple times
+ *
  * Revision 1.226  2017-03-27 08:51:20+05:30  Cprogrammer
  * moved inquery to /var/indimail
  *
@@ -635,6 +638,9 @@ hier(inst_dir, fatal, dev_package)
 		/* create indimail/qmail home directory (/var/indimail or /var/qmail */
 		h(auto_qmail_home, auto_uido, auto_gidq, 0555);
 	}
+	/*- sysconf directory for control, config files */
+	if (str_diff(auto_qmail, auto_sysconfdir))
+		h(auto_sysconfdir, auto_uido, auto_gidq, 02755); /*- create /etc/indimail */
 
 	/*-
 	 * auto_control    = /etc/indimail/control
@@ -652,9 +658,10 @@ hier(inst_dir, fatal, dev_package)
 		d(auto_qmail_home, "control", auto_uidv, auto_gidq, 0775);
 	else {
 		/* create control directory (/etc/indimail */
-		h(auto_cntrl_dir, 0, 0, 0755);
+		if (str_diff(auto_sysconfdir, auto_cntrl_dir))
+			h(auto_cntrl_dir, auto_uido, auto_gidq, 02755);
 		/* create control directory (/etc/indimail/control */
-		d(auto_cntrl_dir, "control", auto_uidv, auto_gidq, 0775);
+		d(auto_cntrl_dir, "control", auto_uidv, auto_gidq, 02775);
 		/*- link /var/indimail/control to /etc/indimail/control */
 		l(auto_qmail_home, "control", auto_control, 0);
 	}
@@ -673,8 +680,9 @@ hier(inst_dir, fatal, dev_package)
 	if (!str_diff(auto_qmail, auto_assgn_dir))
 		d(auto_qmail_home, "users", auto_uidv, auto_gidq, 0775);
 	else {
-		h(auto_assgn_dir, 0, 0, 0755);
-		d(auto_assgn_dir, "users", auto_uidv, auto_gidq, 0775);
+		if (str_diff(auto_sysconfdir, auto_assgn_dir))
+			h(auto_assgn_dir, auto_uido, auto_gidq, 02755);
+		d(auto_assgn_dir, "users", auto_uidv, auto_gidq, 02775);
 		/*- link /var/indimail/users to /etc/indimail/users */
 		l(auto_qmail_home, "users", auto_assign, 0);
 	}
@@ -717,10 +725,6 @@ hier(inst_dir, fatal, dev_package)
 		l(auto_qmail_home, "libexec", auto_libexec, 0);
 	}
 
-	/*- sysconf directory for control, config files */
-	if (str_diff(auto_qmail, auto_sysconfdir))
-		h(auto_sysconfdir, 0, 0, 0755); /*- create /etc/indimail */
-
 	if (str_diff(auto_qmail, auto_prefix)) {
 		uidr = 0;
 		gidr = 0;
@@ -747,8 +751,8 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_prefix,     "bin", uidr, gidr, 0555);
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
 	d(auto_qmail_home, "domains", auto_uido, auto_gidv, 0775);
-	d(auto_sysconfdir, "etc", auto_uido, auto_gidq, 0775);
-	d(auto_sysconfdir, "certs", auto_uidv, auto_gidq, 0775);
+	d(auto_sysconfdir, "etc", auto_uido, auto_gidq, 02755);
+	d(auto_sysconfdir, "certs", auto_uidv, auto_gidq, 02775);
 	d(auto_qmail_home, "qscanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root/scanq", auto_uidc, auto_gidc, 0750);
@@ -757,9 +761,9 @@ hier(inst_dir, fatal, dev_package)
 #ifdef INDIMAIL
 	d(auto_qmail_home, "inquery", auto_uidv, auto_gidq, 0775);
 #endif
-	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 0775);
+	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 02755);
 	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02775);
-	d(auto_cntrl_dir,  "control/defaultqueue", auto_uidv, auto_gidq, 0775);
+	d(auto_cntrl_dir,  "control/defaultqueue", auto_uidv, auto_gidq, 0755);
 	d(auto_shared,     "boot", auto_uido, auto_gidq, 0555);
 	d(auto_shared,     "doc", auto_uido, auto_gidq, 0555);
 	d(mandir,          "man", uidr, gidr, moder_d);
@@ -1545,7 +1549,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.226 2017-03-27 08:51:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.227 2017-04-11 18:26:51+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
