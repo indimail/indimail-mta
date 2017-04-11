@@ -54,7 +54,6 @@ ID=$(id -u)
 %make_install
 
 %files
-%dir %attr(755,root,root)                         %{sysconfdir}
 %attr(0644,indimail,indimail) %config(noreplace)  %{sysconfdir}/wordlist.db
 
 %doc
