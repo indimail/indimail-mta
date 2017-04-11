@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.395 2017-04-11 00:59:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.396 2017-04-11 18:29:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -996,13 +996,13 @@ fi
 %dir %attr(555,root,root)         %{libexecdir}
 %dir %attr(555,root,root)         %{libexecdir}/imapmodules
 %dir %attr(2755,root,qmail)       %{sysconfdir}
-%dir %attr(2775,root,qmail)       %{sysconfdir}/etc
+%dir %attr(2755,root,qmail)       %{sysconfdir}/etc
 %dir %attr(2775,indimail,qmail)   %{sysconfdir}/users
 %dir %attr(2775,indimail,qmail)   %{sysconfdir}/certs
 %dir %attr(2775,indimail,qmail)   %{sysconfdir}/control
 %dir %attr(2775,qmailr,qmail)     %{sysconfdir}/control/ratelimit
-%dir %attr(2775,indimail,qmail)   %{sysconfdir}/control/domainkeys
-%dir %attr(2775,indimail,qmail)   %{sysconfdir}/control/defaultqueue
+%dir %attr(2755,indimail,qmail)   %{sysconfdir}/control/domainkeys
+%dir %attr(755,indimail,qmail)    %{sysconfdir}/control/defaultqueue
 %dir %attr(2775,indimail,qmail)   %{indimaildir}/autoturn
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)         %{mandir}
