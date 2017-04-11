@@ -25,13 +25,14 @@
 %dir %attr(0755,root,root)         /usr/share/man/man7
 %dir %attr(0755,root,root)         /usr/share/man/man8
 %dir %attr(0555,root,qmail)        /usr/lib/indimail/plugins
-%dir %attr(2775,root,qmail)        /etc/indimail/etc
+%dir %attr(0775,root,qmail)        /etc/indimail
+%dir %attr(2755,root,qmail)        /etc/indimail/etc
 %dir %attr(2775,indimail,qmail)    /etc/indimail/certs
 %dir %attr(2775,indimail,qmail)    /etc/indimail/users
 %dir %attr(2775,indimail,qmail)    /etc/indimail/control
-%dir %attr(2775,indimail,qmail)    /etc/indimail/control/domainkeys
+%dir %attr(2755,indimail,qmail)    /etc/indimail/control/domainkeys
 %dir %attr(2775,qmailr,qmail)      /etc/indimail/control/ratelimit
-%dir %attr(0775,indimail,qmail)    /etc/indimail/control/defaultqueue
+%dir %attr(0755,indimail,qmail)    /etc/indimail/control/defaultqueue
 #
 # Binaries
 #
