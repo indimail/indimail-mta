@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.60  2017-04-11 12:38:45+05:30  Cprogrammer
+ * field_len was not initialized. Fixed envheader randomly not working
+ *
  * Revision 1.59  2016-06-03 09:58:17+05:30  Cprogrammer
  * moved qhspi to sbin
  *
@@ -785,11 +788,12 @@ int
 main()
 {
 	int             token_len, exclude = 0, include = 0, loghead = 0, line_brk_excl = 1,
-					line_brk_incl = 1, in_header = 1, line_brk_log = 1, logfd = -1;
+					line_brk_incl = 1, in_header = 1, line_brk_log = 1, logfd = -1, field_len,
+					itoken_len;
 #ifdef USE_FSYNC
 	int             fd;
 #endif
-	unsigned int    len, x, originipfield = 0;
+	unsigned int    len, originipfield = 0;
 	char            tmp[FMT_ULONG];
 	char            ch;
 	char           *ptr, *qqeh, *tmp_ptr;
@@ -804,8 +808,8 @@ main()
 	if (control_readint((int *) &originipfield, "originipfield") == -1)
 		die(55);
 	if ((ptr = env_get("ORIGINIPFIELD"))) {
-		scan_ulong(ptr, (unsigned long *) &x);
-		originipfield = x;
+		scan_ulong(ptr, (unsigned long *) &field_len);
+		originipfield = field_len;
 	}
 	if (!(ptr = env_get("EXTRAQUEUE"))) {
 		if (control_readfile(&extraqueue, "extraqueue", 0) == -1)
@@ -908,7 +912,7 @@ main()
 			die_write();
 		}
 	} else
-	for (;;) { /*- Line Processing */
+	for (itoken_len = 0;;) { /*- Line Processing */
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			die_read();
 		if (!match && line.len == 0)
@@ -927,8 +931,10 @@ main()
 		if (line.s[0] == ' ' || line.s[0] == '\t') { /*- RFC 822 LWSP char */
 			if (!line_brk_excl) /*- Not a continuation line */
 				exclude = 1;
-			if (!line_brk_incl)
+			if (!line_brk_incl) {
+				itoken_len += line.len;
 				include = 1;
+			}
 			if (logfd > 0 && !line_brk_log)
 				loghead = 1;
 		} else {
@@ -949,10 +955,11 @@ main()
 				for (tmp_ptr = ptr;*tmp_ptr && *tmp_ptr != ':';tmp_ptr++);
 				if (*tmp_ptr == ':') {
 					*tmp_ptr = 0;
-					scan_uint(tmp_ptr + 1, &x);
-				}
-				len += ((token_len = str_len(ptr)) + 1);
-				if (token_len <= x && !case_diffb(ptr, token_len, line.s)) {
+					scan_uint(tmp_ptr + 1, (unsigned int *) &field_len);
+				} else
+					field_len = -1;
+				len += ((itoken_len = str_len(ptr)) + 1);
+				if ((field_len == -1 || itoken_len <= field_len) && !case_diffb(ptr, itoken_len, line.s)) {
 					include = 1;
 					line_brk_incl = 0; /*- Include next line starting with LWSP */
 					break;
@@ -969,7 +976,7 @@ main()
 				ptr = logh.s + len;
 			}
 		}
-		if (include && !stralloc_catb(&envheaders, line.s, line.len))
+		if (include && (field_len == -1 || itoken_len <= field_len) && !stralloc_catb(&envheaders, line.s, line.len))
 			die(51);
 		if (!exclude && substdio_put(&ssout, line.s, line.len))
 			die_write();
@@ -1218,7 +1225,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.59 2016-06-03 09:58:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.60 2017-04-11 12:38:45+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
