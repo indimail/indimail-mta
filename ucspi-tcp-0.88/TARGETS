@@ -220,3 +220,4 @@ tcpserver_plugin.o
 rblsmtpd.so
 auto_shared.o
 str_cpy.o
+dlnamespace.o
