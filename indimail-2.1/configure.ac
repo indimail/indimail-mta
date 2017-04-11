@@ -518,7 +518,7 @@ case $POPRELAY in
 	AC_DEFINE_UNQUOTED(TCPRULES_PROG,"$tcprules_prog",full path of tcprules program)
 
 	tcpserver_file=""
-	for f in "$indimaildir"/etc/tcp.smtp /etc/tcp.smtp /etc/tcprules.d/qmail-smtpd
+	for f in "$sysconfdir"/tcp.smtp /etc/tcp.smtp /etc/tcprules.d/qmail-smtpd
 	do
 	if test -f $f
 	then
@@ -527,20 +527,20 @@ case $POPRELAY in
 	fi
 	done
 
-	AC_ARG_ENABLE(tcpserver_file, [  --enable-tcpserver-file=~indimail/etc/tcp.smtp  File where tcpserver -x relay information is stored.],
+	AC_ARG_ENABLE(tcpserver_file, [  --enable-tcpserver-file=$sysconfdir/tcp.smtp  File where tcpserver -x relay information is stored.],
 	tcpserver_file="$enableval",
 	[
 		if test "$tcpserver_file" = ""
 		then
-			echo "127.:allow,RELAYCLIENT=\"\"" > "$indimaildir"/etc/tcp.smtp
-			tcpserver_file="$indimaildir"/etc/tcp.smtp
+			echo "127.:allow,RELAYCLIENT=\"\"" > "$sysconfdir"/tcp.smtp
+			tcpserver_file="$sysconfdir"/tcp.smtp
 			AC_MSG_WARN([Unable to find your tcpserver relay file.])
-			AC_MSG_WARN([Creating tcp.smtp in "$indimaildir"/etc/tcp.smtp.])
+			AC_MSG_WARN([Creating tcp.smtp in "$sysconfdir"/tcp.smtp.])
 		fi
 	])
 	AC_DEFINE_UNQUOTED(TCP_FILE,"$tcpserver_file",full path of the TCP Rules File)
 
-	open_smtp="$indimaildir/etc/open-smtp"
+	open_smtp="$sysconfdir/open-smtp"
 	AC_DEFINE_UNQUOTED(OPEN_SMTP,"$open_smtp","")
 	;;
 *)
