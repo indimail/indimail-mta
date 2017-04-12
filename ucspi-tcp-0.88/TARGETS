@@ -221,3 +221,4 @@ rblsmtpd.so
 auto_shared.o
 str_cpy.o
 dlnamespace.o
+hasdlmopen.h
