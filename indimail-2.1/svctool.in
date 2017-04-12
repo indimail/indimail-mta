@@ -1,6 +1,10 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.323  2017-04-12 16:31:41+05:30  Cprogrammer
+# added --check-certs option
+# added systemd script to backup list
+#
 # Revision 2.322  2017-04-06 21:17:55+05:30  mbhangui
 # fixed couriersslcache path
 #
@@ -58,7 +62,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $
+# $Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -147,7 +151,7 @@ Known values for OPTION are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
@@ -158,8 +162,8 @@ Known values for OPTION are:
   Port           - Bind on this port for SMTP
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
-                   $QmailHOME appropriate links will be created in
-                   $QmailHOME
+                   @qmaildir@ appropriate links will be created in
+                   @qmaildir@
   cntrl_path     - Path where Qmail control files are stored
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   chkrecipient   - Perform a User Status query before accepting mails
@@ -251,7 +255,7 @@ Known values for OPTION are:
 
  Installs a new queue without a SMTP listener
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   D              - Max deliveries allowed per day for a user
@@ -260,8 +264,8 @@ Known values for OPTION are:
   no-multi       - Do not set QMAILQUEUE to qmail-multi
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
-                   $QmailHOME appropriate links will be created in
-                   $QmailHOME
+                   @qmaildir@ appropriate links will be created in
+                   @qmaildir@
   cntrl_path     - Path where Qmail control files are stored
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   qregex         - Use regular expressions for matching entries in
@@ -314,10 +318,10 @@ Known values for OPTION are:
  Installs a new queue with a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
   queue_path     - Path where the queues are installed. If this is different from
-                   $QmailHOME appropriate links will be created in
-                   $QmailHOME
+                   @qmaildir@ appropriate links will be created in
+                   @qmaildir@
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   cntrl_path     - Path where Qmail control files are stored
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
@@ -386,15 +390,15 @@ Known values for OPTION are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
   Port           - Bind on this port for QMTP
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
-                   $QmailHOME appropriate links will be created in
-                   $QmailHOME
+                   @qmaildir@ appropriate links will be created in
+                   @qmaildir@
   cntrl_path     - Path where Qmail control files are stored
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
@@ -430,15 +434,15 @@ Known values for OPTION are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
   Port           - Bind on this port for QMTP
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
-                   $QmailHOME appropriate links will be created in
-                   $QmailHOME
+                   @qmaildir@ appropriate links will be created in
+                   @qmaildir@
   cntrl_path     - Path where Qmail control files are stored
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
@@ -475,7 +479,7 @@ Known values for OPTION are:
   proxy          - Install as a proxy and connect to actual imap on destport
   legacyserver   - To be set if destination IMAP server is not Indimail's IMAP server
   fifo_path      - Install fifo specified by this path
-                   (e.g. $QmailHOME/inquery/infifo)
+                   (e.g. @qmaildir@/inquery/infifo)
   postmaster     - name of the user who will be the contact for Certificates.
   common_name    - Common Name (CN) for server
   query-cache    - Enable caching of queries
@@ -557,7 +561,7 @@ Known values for OPTION are:
 
   Installs a new Fifo Server
   fifo_path      - Install fifo specified by this path
-                   (e.g. $QmailHOME/inquery/infifo)
+                   (e.g. @qmaildir@/inquery/infifo)
   N              - No of parallel inlookup threads to spawn
   service_path   - Path where supervise scripts will be installed
   cntrl_path     - Path where Qmail control files are stored
@@ -614,7 +618,7 @@ Known values for OPTION are:
   mysqlPrefix    - Installation Prefix for mysql
   databasedir    - Directory containing the Database and Logs
   mysqlsocket    - Unix Domain Socket for connecting to mysql
-  config         - MySQL Configuration file (e.g. $sysconfdir/indimail.cnf)
+  config         - MySQL Configuration file (e.g. @sysconfdir@/indimail.cnf)
   service_path   - Path where supervise scripts will be installed
   default-domain - default domain name for which this host will handle mails
 
@@ -633,10 +637,10 @@ Known values for OPTION are:
 
   Install Fetchmail Server
   queue_path     - Path where the queues are installed. If this is different from
-                   $QmailHOME appropriate links will be created in
-                   $QmailHOME
+                   @qmaildir@ appropriate links will be created in
+                   @qmaildir@
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that Fetchmail can allocate
@@ -715,9 +719,9 @@ Known values for OPTION are:
 	[--stdout]
 	[--wipe]
 
-  mysql          - Create $sysconfdir/indimail.cnf
-  imap           - Create $sysconfdir/imapd
-  pop3           - Create $sysconfdir/pop3d
+  mysql          - Create @sysconfdir@/indimail.cnf
+  imap           - Create @sysconfdir@/imapd
+  pop3           - Create @sysconfdir@/pop3d
   qmail          - Create default qmail control files
   users          - Create Internal System Users used by IndiMail
   rmusers        - Remove Internal System Users used by IndiMail
@@ -751,7 +755,7 @@ Known values for OPTION are:
   service_path - Path where supervise scripts have been installed
   queue_path   - Path where the queues are installed.
   N            - No of Queues
-  I            - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
+  I            - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
 
 --inittab --servicedir=service_path
 
@@ -767,6 +771,7 @@ Known values for OPTION are:
   backupdir    - Directory to dump backup
 
 --repair-tables
+  Repair MySQL tables in @qmaildir@/mysqldb/data
 
 --report=all| zddist| zdeferrals| zfailures| zoverall| zrecipients| zrhosts|
 		zrxdelay| zsenders| zsendmail| zsuccesses| zsuids | zsmtp | zspam
@@ -776,6 +781,9 @@ Known values for OPTION are:
 
   postmaster - name of the user who will recieve the report.
   attach     - zip and send the report as an attachment
+
+--check-certs
+  Check IndiMail Certificates in @sysconfdir@/certs
 
 --help
 
@@ -1581,7 +1589,7 @@ echo  $fifo_path > $conf_dir/LOGFILTER
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-logfifo/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# $prog_args"
 echo ""
 echo "LOGFILTER=\`cat $SERVICEDIR/qmail-logfifo/variables/LOGFILTER\`"
@@ -1602,7 +1610,7 @@ fi
 #qmail-logfifo log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1909,7 +1917,7 @@ esac
 echo "$QmailBinPrefix/sbin/vchkpass $QmailBinPrefix/sbin/systpass" > $conf_dir/AUTHMODULES
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1972,7 +1980,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2236,7 +2244,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2277,7 +2285,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2338,7 +2346,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2356,7 +2364,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2425,7 +2433,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2448,7 +2456,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2547,7 +2555,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2603,7 +2611,7 @@ fi
 # qmail-[imapd|pop3d] log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3021,7 +3029,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3049,7 +3057,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3077,7 +3085,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3099,7 +3107,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3132,7 +3140,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3199,7 +3207,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3216,7 +3224,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3264,7 +3272,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3295,7 +3303,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3311,7 +3319,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3421,7 +3429,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3437,7 +3445,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3497,7 +3505,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 	fi
 	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
@@ -3628,7 +3636,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/mysql.$port/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3725,7 +3733,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3742,7 +3750,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3956,7 +3964,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4076,7 +4084,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4098,7 +4106,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4177,7 +4185,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4218,7 +4226,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4434,7 +4442,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4451,7 +4459,7 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -6377,6 +6385,7 @@ echo "Version Information"
 /bin/rm -f /tmp/svctool.ver.$$
 }
 
+# backup /service, system-startup config, indimail configuration
 sort_backup()
 {
 if [ $# -lt 1 ] ; then
@@ -6395,18 +6404,21 @@ if [ -f $sysconfdir/backup.conf ] ; then
 	file="$file `cat $sysconfdir/backup.conf`"
 fi
 servicedir=$1
-	(
-	for i in $servicedir $CONTROLDIR \
-		$sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
-		$QmailHOME/alias $shareddir \
-		/etc/inittab /etc/init.d/indimail \
-		$file /etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
-		$QmailHOME/.bashrc $QmailHOME/.bash_profile \
-		$QmailHOME/.indimail $file
-	do
+(
+for i in $servicedir $CONTROLDIR \
+	$sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
+	$QmailHOME/alias/.qmail-* \
+	/etc/inittab /etc/init.d/indimail \
+	$file /etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
+	/etc/resolv.conf \
+	$QmailHOME/.bashrc $QmailHOME/.bash_profile \
+	$QmailHOME/.indimail $file
+do
+	if [ -f $i -o -d $i ] ; then
 		echo $i
-	done
-	) | sort -u
+	fi
+done
+) | sort -u
 }
 
 create_mrtg()
@@ -6440,7 +6452,7 @@ sed "s{MRTGHOSTNAME{`hostname`{;  s{HTMLDIR{$htmldir\/{" \
 # mrtg run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -6468,7 +6480,7 @@ fi
 # mrtg log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -6477,6 +6489,67 @@ echo "$QmailBinPrefix/bin/multilog t $LOGDIR/mrtg"
 ) > "$DESTDIR"$SERVICEDIR/mrtg/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/mrtg/log/run
 echo "$prog_args" > $conf_dir/.options
+}
+
+tls_cert_check()
+{
+error=0
+for cert in servercert.pem clientcert.pem
+do
+	if [ -f "@sysconfdir@/certs/$cert" ]; then
+		#First, check that it's a valid cert for the task
+		TEMP_PURPOSE=`openssl x509 -in @sysconfdir@/certs/$cert -noout -purpose 2>/dev/null`
+		if [ "$?" != "0" ]; then
+			error=1
+			$mv -f @sysconfdir@/certs/$cert @sysconfdir@/certs/BROKEN-${cert}
+			if [ $? -eq 0 ] ; then
+				echo $TEMP_PURPOSE 1>&2
+				echo "@sysconfdir@/certs/$cert is a broken cert. Disabled" 1>&2
+			fi
+		fi
+
+		#Now check it hasn't expired
+		TEMP_DATE=`openssl x509 -in @sysconfdir@/certs/$cert -noout -dates 2>/dev/null|grep -i after|cut -d= -f2`
+		EXPIRE_IN_SECS=`date +%s --date $TEMP_DATE 2>/dev/null`
+		if [ "`echo $EXPIRE_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
+			NOW_IN_SECS=`date +%s 2>/dev/null`
+			if [ "`echo $NOW_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
+				if [ $NOW_IN_SECS -gt $EXPIRE_IN_SECS ]; then
+				 error=1
+				 echo expiry $TEMP_DATE 1>&2
+				 $mv -f @sysconfdir@/certs/$cert @sysconfdir@/certs/EXPIRED-${cert}
+				 if [ $? -eq 0 ] ; then
+				  echo "@sysconfdir@/certs/$cert has EXPIRED. Disabling" 1>&2
+			 	 fi
+				fi
+			fi
+		fi
+
+		if [ "`echo $cert|grep server`" != "" ];then
+			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|server).* yes'`" = "" ]; then
+			 error=1
+			 echo "Purpose $TEMP_PURPOSE" 1>&2
+			 $mv -f @sysconfdir@/certs/$cert @sysconfdir@/certs/NOT-A-SERVER-CERT-${cert}
+			 if [ $? -eq 0 ] ; then
+			 	echo "@sysconfdir@/certs/$cert is NOT a server cert. Disabled" 1>&2
+		 	 fi
+			fi
+		fi
+		if [ "`echo $cert|grep client`" != "" ];then
+			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|client).* yes'`" = "" ]; then
+			 error=1
+			 echo "Purpose $TEMP_PURPOSE" 1>&2
+			 $mv -f @sysconfdir@/certs/$cert @sysconfdir@/certs/NOT-A-CLIENT-CERT-${cert}
+			 if [ $? -eq 0 ] ; then
+			 echo "@sysconfdir@/certs/$cert is NOT a client cert. Disabled" 1>&2
+		 	 fi
+			fi		
+		fi
+	fi
+done
+if [ $error -eq 0 ] ; then
+	echo "All Certificates found OK"
+fi
 }
 
 ################################# Main ##################################
@@ -6870,7 +6943,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.322 2017-04-06 21:17:55+05:30 mbhangui Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.323 2017-04-12 16:31:41+05:30 Cprogrammer Exp mbhangui $"
 	exit 0
 	;;
 
@@ -7038,6 +7111,9 @@ while test $# -gt 0; do
 	shared_objects=$optarg
 	;;
 
+	--check-certs)
+	option=30
+	;;
 	*)
 	echo "invalid option [$1]" 1>&2
 	read key
@@ -7688,7 +7764,7 @@ case $option in
 		exit 1
 	fi
 	EXT=`date +'%d%m%y-%H%M%S'`
-	tar cf - `sort_backup $servicedir` | gzip -c > $backupdir/indiconfig.$EXT.tar.gz
+	tar cf - `sort_backup $servicedir` | gzip -c > $backupdir/indimail-backup.$EXT.tar.gz
 	$mysqlPrefix/bin/mysqldump  -u mysql -p$PRIV_PASS --extended-insert \
 		--compress --add-drop-table --delayed-insert --flush-logs --lock-tables \
 		--verbose --delayed -A | gzip -c > $backupdir/dbexport.$EXT.gz
@@ -8029,6 +8105,11 @@ case $option in
 	fi
 	echo "Creating indimail mrtg $hmtldir in $servicedir"
 	create_mrtg $htmldir $servicedir
+	;;
+
+	30)
+	[ `id -u` = 0 ] || exit 4
+	tls_cert_check
 	;;
 
 	*)
