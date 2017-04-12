@@ -1,5 +1,8 @@
 /*
  * $Log: background.c,v $
+ * Revision 1.6  2017-04-13 00:16:23+05:30  Cprogrammer
+ * fixed prototype of UupdateBackgrounds()
+ *
  * Revision 1.5  2011-07-29 09:23:47+05:30  Cprogrammer
  * fixed gcc warnings
  *
@@ -229,7 +232,7 @@ DisplayBackgrounds(void)
 }
 
 static int
-UpdateBackgrounds(r)
+UpdateBackgrounds(int r)
 {
 	if (TimeNow > _BGMS_NextUpdate)
 		return 1;
