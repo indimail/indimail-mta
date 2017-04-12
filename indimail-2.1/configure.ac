@@ -127,7 +127,7 @@ AC_SUBST(defaultprefix)
 
 dnl configure only packages for whom the subdirectories which are present
 subdir_list=""
-for i in cdb-1.0 eps-1.2 ../flash-0.9.4 ../ripmime-1.4.0.9 ../altermime-0.3.10 \
+for i in cdb-1.0 eps-1.2 ../flash-0.9.4 ../ripmime-1.4.0.10 ../altermime-0.3.10 \
 		../mpack-1.6 ../fortune-1.1 ../pam-multi-1.1 ../logalert-0.3 . ../qmail-1.03
 do
 	if test -d $i
@@ -150,8 +150,8 @@ do
 				../flash-0.9.4)
 				AC_CONFIG_SUBDIRS([../flash-0.9.4])
 				;;
-				../ripmime-1.4.0.9)
-				AC_CONFIG_SUBDIRS([../ripmime-1.4.0.9])
+				../ripmime-1.4.0.10)
+				AC_CONFIG_SUBDIRS([../ripmime-1.4.0.10])
 				;;
 				../altermime-0.3.10)
 				AC_CONFIG_SUBDIRS([../altermime-0.3.10])
@@ -1647,9 +1647,9 @@ then
 	then
 		echo "http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz"
 	fi
-	if ! test -d ../ripmime-1.4.0.9
+	if ! test -d ../ripmime-1.4.0.10
 	then
-		echo "http://downloads.sourceforge.net/indimail/ripmime-1.4.0.9.tar.gz"
+		echo "http://downloads.sourceforge.net/indimail/ripmime-1.4.0.10.tar.gz"
 	fi
 	if ! test -d ../mpack-1.6
 	then
