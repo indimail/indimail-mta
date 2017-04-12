@@ -67,7 +67,7 @@ doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf HOWTO.bogofilter \
 	COPYING.procmail COPYRIGHT.flash COPYRIGHT.mpack LICENSE.altermime \
 	LICENSE.ezmlm-idx LICENSE.logalert LICENSE.ripmime README.altermime \
 	README.courier-imap README.djbdns README.ezmlm-idx README.flash \
-	README.iwebadmin README.ldap README.logalert README.mpack README.nssd \
+	README.iwebadmin README.ldap README.logalert README.nssd \
 	README.pam-multi README.procmail README.ripmime README.tinydnssec \
 	README.vlimits softwarelicense1-1.html
 
