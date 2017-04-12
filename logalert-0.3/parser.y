@@ -140,7 +140,7 @@ handle_entry_args(unsigned int a_id, char *value)
 		return;
 
 	if (pa->a_nvalues == 0) {	//bolean value
-		if (!(*pa->a_parser) (conf_table[cur_pconf]) == OK)
+		if ((!(*pa->a_parser) (conf_table[cur_pconf])) == OK)
 			yyerror("Error while parsing function %s", pa->a_name);
 		return;
 	}
@@ -158,7 +158,7 @@ handle_entry_args(unsigned int a_id, char *value)
 		yyerror("null value for %s parameter", pa->a_name);
 
 	// start the specific parser
-	if (!(*pa->a_parser) (conf_table[cur_pconf], fixed_val) == OK)
+	if ((!(*pa->a_parser) (conf_table[cur_pconf], fixed_val)) == OK)
 		yyerror("Error while parsing function %s", pa->a_name);
 
 	return;
