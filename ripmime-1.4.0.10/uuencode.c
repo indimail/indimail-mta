@@ -614,7 +614,9 @@ int UUENCODE_decode_uu( FFGET_FILE *f, char *unpackdir, char *input_filename, ch
 
 					if ( wbcount >= UUENCODE_WRITE_BUFFER_LIMIT )
 					{
-						fwrite(writebuffer, 1, wbcount, outf);
+						size_t bc;
+						bc = fwrite(writebuffer, 1, wbcount, outf);
+						if (bc != wbcount) LOGGER_log("%s:%d:UUENCODE_decode_uu:WARNING: Only wrote %d of %d bytes", FL, bc, wbcount);
 						wbpos = writebuffer;
 						wbcount = 0;
 					}
@@ -639,7 +641,11 @@ int UUENCODE_decode_uu( FFGET_FILE *f, char *unpackdir, char *input_filename, ch
 			} // While (1)
 
 			if ((outfo)&&(wbcount > 0))
-				fwrite(writebuffer, 1, wbcount, outf);
+			{
+				size_t bc;
+				bc = fwrite(writebuffer, 1, wbcount, outf);
+				if (bc != wbcount) LOGGER_log("%s:%d:UUENCODE_decode_uu:WARNING: Only wrote %d of %d bytes", FL, bc, wbcount);
+			}
 
 
 			if (outfo) fclose(outf);

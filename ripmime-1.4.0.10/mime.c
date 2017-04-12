@@ -35,6 +35,8 @@
 #include <time.h>
 #include <errno.h>
 #include <dirent.h>
+#include <iconv.h>
+#include <assert.h>
 
 #ifdef MEMORY_DEBUG
 #define DEBUG_MEMORY 1
@@ -151,6 +153,8 @@ struct MIME_globals {
 	int name_by_type;
 	int mailbox_format;
 
+	char out_charset[MDECODE_ISO_CHARSET_SIZE_MAX];
+
 	int decode_uu;
 	int decode_tnef;
 	int decode_b64;
@@ -252,6 +256,14 @@ int MIME_set_name_by_type( int level )
 	glb.name_by_type = level;
 
 	return glb.name_by_type;
+}
+
+int MIME_set_out_charset( char *charset )
+{
+	MDECODE_set_out_charset(charset);
+	PLD_strncpy(glb.out_charset, charset, sizeof(glb.out_charset));
+
+	return 0;
 }
 
 /*------------------------------------------------------------------------
@@ -1172,17 +1184,6 @@ int MIME_is_file_RFC822( char *fname )
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 /*------------------------------------------------------------------------
 Procedure:     MIME_getchar_start ID:1
 Purpose:       This function is used on a once-off basis. It's purpose is to locate a
@@ -1367,7 +1368,12 @@ int MIME_decode_raw( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *h
 			break;
 
 		} else {
+
+			size_t bc;
 			if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_decode_raw:DEBUG: writing: %s\n",FL, buffer);
+
+			bc = write( fo, buffer, readcount);
+			if (bc != readcount) LOGGER_log("%s:%d:MIME_decode_raw:WARNING: Only wrote %d of %d bytes", FL, bc, readcount);
 		}
 	}
 
@@ -1490,10 +1496,10 @@ int MIME_decode_text( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *
 			//20041217-1529:PLD: 
 			if (line[0] == '-')
 			{
-				if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_DNORMAL:DEBUG: Testing boundary",FL);
+				if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_decode_text:DEBUG: Testing boundary",FL);
 				if ((BS_count() > 0)&&(BS_cmp(line,line_len)))
 				{
-					if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_DNORMAL:DEBUG: Hit a boundary on the line",FL);
+					if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_decode_text:DEBUG: Hit a boundary on the line",FL);
 					lastlinewasboundary = 1;
 					result = 0;
 					break;
@@ -1505,9 +1511,12 @@ int MIME_decode_text( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *
 			{
 				if (hinfo->content_transfer_encoding == _CTRANS_ENCODING_QP)
 				{
-					if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_DNORMAL:DEBUG: Hit a boundary on the line",FL);
+					size_t bc;
+
+					if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_decode_text:DEBUG: Hit a boundary on the line",FL);
 					decodesize = MDECODE_decode_qp_text(line);
-					fwrite(line, 1, decodesize, of);
+					bc = fwrite(line, 1, decodesize, of);
+					if (bc != decodesize) LOGGER_log("%s:%d:MIME_decode_text:WARNING: Only wrote %d of %d bytes", FL, bc, decodesize);
 
 				} else {
 					fprintf(of,"%s",line);
@@ -1522,7 +1531,7 @@ int MIME_decode_text( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *
 			}
 			//	linecount++;
 
-			if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_DNORMAL:DEBUG: End processing line.",FL);
+			if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_decode_text:DEBUG: End processing line.",FL);
 
 		} // while
 
@@ -1726,9 +1735,8 @@ int MIME_decode_64( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *hi
 	/* do an endless loop, as we're -breaking- out later */
 	while (1)
 	{
-#if 0
+
 		int lastchar_was_linebreak=0;
-#endif
 
 		/* Initialise the decode buffer */
 		input[0] = input[1] = input[2] = input[3] = 0; // was '0' - Stepan Kasal patch
@@ -1751,9 +1759,8 @@ int MIME_decode_64( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *hi
 			//
 
 			do {
-#if 0
+
 				if ((c == '\n')||(c == '\r')) lastchar_was_linebreak = 1; else lastchar_was_linebreak = 0;
-#endif
 
 				if (f->ungetcset)
 				{
@@ -1784,6 +1791,8 @@ int MIME_decode_64( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *hi
 
 			//
 			//-------END OF INLINE---------------------------------------------
+
+			if ((lastchar_was_linebreak == 1)&&(MIME_DNORMAL)) LOGGER_log("%s:%d:MIME_decode_64:DEBUG: Last char was linebreak",FL);
 
 			if ((ignore_crcount == 1)&&(c == '-'))
 				//&&(lastchar_was_linebreak == 1))
@@ -1874,11 +1883,13 @@ int MIME_decode_64( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *hi
 			/* if we get an EOF char, then we know something went wrong */
 			if ( c == EOF )
 			{
+				size_t bc;
 				if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_decode_64:DEBUG: input stream broken for base64 decoding for file %s. %ld bytes of data in buffer to be written out\n",FL,hinfo->filename,wbcount);
 
 				status = MIME_ERROR_B64_INPUT_STREAM_EOF;
 				//fwrite(writebuffer, 1, wbcount, of);
-				write( of, writebuffer, wbcount);
+				bc = write( of, writebuffer, wbcount);
+				if (bc != wbcount) LOGGER_log("%s:%d:MIME_decode_64:WARNING: Could only write %d of %d bytes", FL, bc, wbcount);
 				close(of);
 				if (writebuffer) free(writebuffer);
 				return status;
@@ -1965,7 +1976,9 @@ int MIME_decode_64( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *hi
 
 			if ( wbcount > _MIME_WRITE_BUFFER_LIMIT )
 			{
-				write ( of, writebuffer, wbcount );
+				size_t bc;
+				bc = write ( of, writebuffer, wbcount );
+				if (bc != wbcount) LOGGER_log("%s:%d:MIME_decode_64:WARNING: Could only write %d of %d bytes", FL, bc, wbcount);
 				//			fwrite(writebuffer, 1, wbcount, of);
 				wbpos = writebuffer;
 				wbcount = 0;
@@ -1997,8 +2010,10 @@ int MIME_decode_64( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *hi
 
 			if (wbcount > 0)
 			{
+				size_t bc;
 				//fwrite(writebuffer, 1, wbcount, of);
-				write( of, writebuffer, wbcount);
+				bc = write( of, writebuffer, wbcount);
+				if (bc != wbcount) LOGGER_log("%s:%d:MIME_decode_64:WARNING: Could only write %d of %d bytes", FL, bc, wbcount);
 			}
 
 			/* close the output file, we're done writing to it */
@@ -2342,6 +2357,7 @@ int MIME_init( void )
 	glb.blankfileprefix_expliticly_set = 0;
 
 	glb.subject[0]='\0';
+  glb.out_charset[0] = '\0';
 
 	return 0;
 }
@@ -2764,9 +2780,6 @@ int MIME_decode_encoding( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_in
 			}
 		} // Decode MHT files
 
-
-
-
 	} // If result != -1
 
 	// End.
@@ -2985,6 +2998,128 @@ int MIME_handle_rfc822( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info
 }
 
 
+static size_t iconvert(iconv_t _iconv, char *from, size_t from_size, char **to, size_t *to_size)
+{
+  assert(from);
+
+  size_t inbytesleft = from_size;
+  size_t outbytesleft = 0;
+
+  if (*to_size == 0)
+    outbytesleft = from_size;
+  else
+    outbytesleft = *to_size;
+
+  char *to_str = malloc(outbytesleft);
+  *to = to_str;
+  *to_size = outbytesleft;
+
+  char *from_str_pp = from;
+  char *to_str_pp = to_str;
+
+  size_t iconv_res = iconv(_iconv, &from_str_pp, &inbytesleft, &to_str_pp, &outbytesleft);
+  *to_size -= outbytesleft;
+
+  if (iconv_res == -1) {
+    switch(errno) {
+      case EILSEQ:
+        LOGGER_log("%s: iconv: invalid multibyte sequence\n", FL);
+        abort();
+        break;
+      case EINVAL:
+        break;
+      case E2BIG:
+        free(to_str); *to = 0;
+        *to_size += inbytesleft;
+        return iconvert(_iconv, from, from_size, to, to_size);
+        break;
+      default:
+        LOGGER_log("%s: iconv: unknown error\n", FL);
+        abort();
+        break;
+    }
+  }
+
+  return inbytesleft;
+}
+
+
+int MIME_convert_charset(char *unpackdir, struct MIMEH_header_info *hinfo)
+{
+  if (MIME_DNORMAL) LOGGER_log("charset: %s filename: %s", hinfo->charset,hinfo->filename);
+
+  if ((glb.out_charset[0] == 0) || (strcmp(glb.out_charset, hinfo->charset) == 0))
+    return 0;
+
+  iconv_t _iconv = iconv_open(glb.out_charset, hinfo->charset);
+  if (_iconv == (iconv_t)-1) {
+    LOGGER_log("%s:%d:MIME_convert_charset:ERROR: cannot open iconv for convert from '%s' to '%s'", FL, hinfo->charset, glb.out_charset);
+    return -1;
+  }
+
+	FILE *ifile;                  // Output file
+	FILE *ofile;                  // Output file
+  char ifullfilename[1024]="";  // Filename of the input file
+  char ofullfilename[1024]="";  // Filename of the output file
+	char line[1024];              // The input lines from the file we're decoding
+	int result = 0;
+  char *get_result = &line[0];
+
+	snprintf(ifullfilename, sizeof(ifullfilename), "%s/%s", unpackdir, hinfo->filename);
+	snprintf(ofullfilename, sizeof(ofullfilename), "%s/tmp_%s", unpackdir, hinfo->filename);
+
+  ifile = fopen(ifullfilename, "r");
+  if (!ifile) {
+    LOGGER_log("%s:%d:MIME_convert_charset:ERROR: cannot open %s for reading", FL, ifullfilename);
+    return -1;
+  }
+  ofile = fopen(ofullfilename, "w");
+  if (!ofile) {
+    LOGGER_log("%s:%d:MIME_convert_charset:ERROR: cannot open %s for writing", FL, ofullfilename);
+    return -1;
+  }
+
+  int idx = 0;
+  const size_t line_size = sizeof(line);
+  size_t bytes_to_read = line_size;
+  while ((get_result = fgets(&line[idx], bytes_to_read, ifile)) && (ofile))
+  {
+    char *out_bytes = 0;
+    size_t out_size = 0;
+
+    size_t bytes_to_convert = strlen(line);
+    size_t bytes_left = iconvert(_iconv, line, bytes_to_convert, &out_bytes, &out_size);
+
+    if (bytes_left == 0) {
+      const size_t writed = fwrite(out_bytes, 1, out_size, ofile);
+      if (writed < out_size) {
+        LOGGER_log("%s:%d:MIME_convert_charset:ERROR: error while write to '%s'", FL, ofullfilename);
+        abort();
+      }
+      idx = 0;
+      bytes_to_read = line_size;
+    } else {
+      memmove(line, &line[bytes_to_convert - bytes_left], bytes_left);
+      idx = bytes_left;
+      bytes_to_read = line_size - bytes_left;
+    }
+
+    if (out_bytes)
+      free(out_bytes);
+  }
+
+  fclose(ifile);
+  fclose(ofile);
+  iconv_close(_iconv);
+
+  if (rename(ofullfilename, ifullfilename) == -1) {
+    LOGGER_log("%s:%d:MIME_convert_charset:ERROR: rename from '%s' to '%s' failed: %s",
+               FL, ofullfilename, ifullfilename, strerror(errno));
+    abort();
+  }
+
+	return result;
+}
 
 /*-----------------------------------------------------------------\
   Function Name	: MIME_handle_plain
@@ -3010,7 +3145,7 @@ int MIME_handle_plain( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info 
 	/** Handle a plain text encoded data stream from *f **/
 	int result = 0;
 
-	if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_handle_plain:DEBUG: Handling plain email",FL);
+	if (MIME_DNORMAL) LOGGER_log("charset: %s filename: %s", h->charset, h->filename);
 
 	result = MIME_decode_encoding( f, unpackdir, h, ss );
 	if ((result == MIME_ERROR_FFGET_EMPTY)||(result == 0))
@@ -3024,6 +3159,8 @@ int MIME_handle_plain( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info 
 			result = MIME_unpack_single( unpackdir, h->scratch, current_recursion_level, ss );
 			if (glb.header_longsearch != 0) MIMEH_set_header_longsearch(0);
 		}
+
+    MIME_convert_charset(unpackdir, h);
 	}
 
 	return result;

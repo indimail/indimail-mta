@@ -99,6 +99,7 @@ int MIME_get_attachment_count( void );
 int MIME_set_name_by_type( int level );
 int MIME_set_multiple_filenames( int level );
 int MIME_get_header_defect_count( void );
+int MIME_set_out_charset( char *charset );
 
 int MIME_is_file_mime( char *fname );
 int MIME_is_file_uuenc( char *fname );

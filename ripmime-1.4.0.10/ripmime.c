@@ -27,7 +27,7 @@
 #include "mime.h"
 #include "strstack.h"
 #include "MIME_headers.h"
-
+#include "libmime-decoders.h"
 
 #define RIPMIME_ERROR_CANT_CREATE_OUTPUT_DIR 1
 #define RIPMIME_ERROR_CANT_OPEN_INPUT_FILE 2
@@ -67,6 +67,7 @@ char help[] = "ripMIME -i <mime file> -d <directory>"
 	"-e [headers file name] : Dump headers from mailpack (default '_headers_')\n"
 	"-v : Turn on verbosity\n"
 	"-q : Run quietly, do no report non-fatal errors\n"
+	"-x<iconv character set name>: Set character set for all output\n"
 	"\n"
 	"--verbose-contenttype : Turn on verbosity of file content type\n"
 	"--verbose-oldstyle : Uses the v1.2.x style or filename reporting\n"
@@ -249,6 +250,18 @@ int RIPMIME_parse_parameters (struct RIPMIME_globals *glb, int argc, char **argv
 							MIME_set_headersname (argv[++i]);
 					}
 					break;		// makes MIME dump out the headers to a file
+
+				case 'x':
+					if (argv[i][2] != '\0')
+					{
+						MIME_set_out_charset(&argv[i][2]);
+					}
+					else
+					{
+            LOGGER_log("ERROR: insufficient parameters after '-x'\n");
+            abort();
+					}
+					break;
 #ifdef RIPMIME_BLANKZONE
 				case 'b':
 					if (argv[i][2] != '\0')

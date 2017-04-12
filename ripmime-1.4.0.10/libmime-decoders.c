@@ -8,6 +8,7 @@
 #include <time.h>
 #include <errno.h>
 #include <dirent.h>
+#include <iconv.h>
 
 #include "ffget.h"
 #include "pldstr.h"
@@ -18,8 +19,6 @@
 #ifndef FL
 #define FL __FILE__,__LINE__
 #endif
-
-#define MDECODE_ISO_CHARSET_SIZE_MAX 16
 
 // Debug precodes
 #define MDECODE_DPEDANTIC ((glb.debug >= MDECODE_DEBUG_PEDANTIC))
@@ -77,6 +76,8 @@ struct MDECODE_globals {
 	int verbose;
 	int decode_qp;
 	int decode_b64;
+	char out_charset[MDECODE_ISO_CHARSET_SIZE_MAX];
+  char current_charset[MDECODE_ISO_CHARSET_SIZE_MAX];
 };
 
 static struct MDECODE_globals glb;
@@ -90,6 +91,8 @@ int MDECODE_init( void )
 	glb.verbose = 0;
 	glb.decode_qp = 1;
 	glb.decode_b64 = 1;
+  glb.out_charset[0] = '\0';
+  glb.current_charset[0] = '\0';
 
 	return 0;
 }
@@ -128,6 +131,54 @@ int MDECODE_set_decode_b64( int level )
 {
 	glb.decode_b64 = level;
 	return glb.decode_b64;
+}
+
+int MDECODE_set_out_charset( char *charset )
+{
+	PLD_strncpy(glb.out_charset, charset, sizeof(glb.out_charset));
+
+	return 0;
+}
+
+static void iconvert(char *text)
+{
+  if ((glb.out_charset[0] == 0) || (glb.current_charset[0] == 0)
+      || (strcmp(glb.out_charset, glb.current_charset) == 0))
+    return;
+
+  iconv_t _iconv = iconv_open(glb.out_charset, glb.current_charset);
+  if ((iconv_t) -1 != _iconv) {
+    size_t inbytesleft = strlen(text);
+    size_t outbytesleft = inbytesleft;
+    char *out_str = malloc(outbytesleft +1);
+    char *out_str_pp = out_str;
+    char *in_str_pp = text;
+    size_t iconv_res = iconv(_iconv, &in_str_pp, &inbytesleft, &out_str_pp, &outbytesleft);
+		if (iconv_res == -1) {
+			switch(errno) {
+				case EILSEQ:
+				case EINVAL:
+					LOGGER_log("%s: iconv: invalid multibyte sequence\n", FL);
+					break;
+				case E2BIG:
+				// This is possible if the input string is encoded in a single-byte encoding,
+				// and output need to Multibyte.
+				// This situation we can not process,
+				// because input string is part of the buffer header mime...
+					 LOGGER_log("%s: iconv: there is not sufficient room at outbuf\n", FL);
+					break;
+				default:
+					LOGGER_log("%s: iconv: unknown error\n", FL);
+					break;
+			}
+      abort();
+  }
+
+    *out_str_pp = '\0';
+    snprintf(text, strlen(text), "%s", out_str);
+    iconv_close(_iconv);
+    free(out_str);
+  }
 }
 
 
@@ -382,8 +433,8 @@ int MDECODE_decode_qp_text( char *line )
 
 int MDECODE_decode_qp_ISO( char *line )
 {
-//	return MDECODE_decode_quoted_printable( line, MDECODE_QPMODE_ISO, '=' );
-	return MDECODE_decode_quoted_printable( line, MDECODE_QPMODE_STD, '=' );
+//	return MDECODE_decode_quoted_printable( line, MDECODE_QPMODE_STD, '=' );
+	return MDECODE_decode_quoted_printable( line, MDECODE_QPMODE_ISO, '=' );
 }
 
 int MDECODE_decode_multipart( char *line )
@@ -406,7 +457,6 @@ int MDECODE_decode_ISO( char *isostring, int size )
 	char *start_pair, *end_pair;
 	char *iso, *iso_copy;
 	char encoding_type='-';
-	char encoding_charset[ MDECODE_ISO_CHARSET_SIZE_MAX ];
 	char *iso_start, *iso_end;
 	int iso_decoded;
 
@@ -460,8 +510,8 @@ int MDECODE_decode_ISO( char *isostring, int size )
 
 				token_end = strchr(iso,'?');
 				if (token_end) *token_end = '\0';
-				snprintf( encoding_charset, sizeof( encoding_charset ), "%s", iso);
-				DMD LOGGER_log("%s:%d:MDECODE_decode_ISO:DEBUG: ISO char set = '%s'",FL,encoding_charset);
+				snprintf( glb.current_charset, sizeof(glb.current_charset), "%s", iso);
+				DMD LOGGER_log("%s:%d:MDECODE_decode_ISO:DEBUG: ISO char set = '%s'",FL,glb.current_charset);
 
 				iso = token_end +1;
 
@@ -498,7 +548,7 @@ int MDECODE_decode_ISO( char *isostring, int size )
 						case MDECODE_ISO_ENCODING_Q:
 						case MDECODE_ISO_ENCODING_q:
 							DMD LOGGER_log("%s:%d:MDECODE_decode_ISO:DEBUG: Decoding filename using Quoted-Printable (%s)\n", FL, iso);
-							MDECODE_decode_qp_ISO(iso);
+							MDECODE_decode_qp_ISO( iso );
 							iso_decoded = 1;
 							break;
 
@@ -561,7 +611,7 @@ int MDECODE_decode_ISO( char *isostring, int size )
 							snprintf( iso_copy, size, "%s%s%c%s", isostring, iso, restore_char, (iso_end?iso_end:"") );
 						} else {
 							DMD LOGGER_log("%s:%d:MDECODE_decode_ISO:DEBUG: Recomposing string with NO restore-char",FL,restore_char);
-						  	snprintf( iso_copy, size, "%s%s%s", isostring, iso, (iso_end?iso_end:"") );
+							snprintf( iso_copy, size, "%s%s%s", isostring, iso, (iso_end?iso_end:"") );
 						}
 
 						/** Switch the new headers over to the original headers again **/
@@ -579,6 +629,8 @@ int MDECODE_decode_ISO( char *isostring, int size )
 	while (iso_decoded == 1 );
 
 	if (iso_copy) free(iso_copy);
+
+  iconvert(isostring);
 
 	return 0;
 

@@ -13,11 +13,13 @@
 #define MDECODE_QPMODE_STD 0
 #define MDECODE_QPMODE_ISO 1
 
+#define MDECODE_ISO_CHARSET_SIZE_MAX 16
 
 int MDECODE_set_debug( int level );
 int MDECODE_set_verbose( int level );
 int MDECODE_set_decode_qp( int level );
 int MDECODE_set_decode_b64( int level );
+int MDECODE_set_out_charset( char *charset );
 int MDECODE_init( void );
 
 int MDECODE_decode_quoted_printable( char *line, int qpmode, char esc_char );

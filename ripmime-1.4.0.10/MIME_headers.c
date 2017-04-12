@@ -1081,10 +1081,12 @@ int MIMEH_read_headers( FFGET_FILE *f )
 	int linesize=0;
 	int totalsize_original=0;
 	int result = 0;
+//	int firstline = 1;
 	int search_count=0;
 	char *tmp;
 	char *tmp_original;
 	char *fget_result = NULL;
+	char *headerline_end;
 	char *p;
 	char *linestart;
 	char *lineend;
@@ -1178,7 +1180,8 @@ int MIMEH_read_headers( FFGET_FILE *f )
 				glb.headerline = tmp;
 				totalsize = linesize;
 				PLD_strncpy(glb.headerline, linestart, (linesize +1));
-				//glb.headerline +totalsize;
+				headerline_end = glb.headerline +totalsize;
+				if (MIMEH_DNORMAL) LOGGER_log("%s:%d:MIMEH_read_headers:DEBUG: Header line end = %p", FL, headerline_end);
 			} // If the global headerline is currently NULL
 			else
 			{
@@ -1264,6 +1267,8 @@ int MIMEH_read_headers( FFGET_FILE *f )
 				FFGET_doubleCR = 0;
 				FFGET_SDL_MODE = 0;
 			} // FFGET_doubleCR test
+
+			//firstline = 0;
 		} // While reading more headers from the source file.
 
 
@@ -2026,6 +2031,23 @@ int MIMEH_parse_contenttype( char *header_name, char *header_value, struct MIMEH
 			FNFILTER_set_mac(hinfo->x_mac);
 		}
 
+    // Get charset name
+    const char ch[] = "charset=";
+    char *ch_begin = strstr(header_value, ch);
+		if (ch_begin) {
+      ch_begin += sizeof(ch) -1;
+      char *ch_end = strpbrk(ch_begin, ";\n\r ");
+      if (!ch_end)
+        ch_end = ch_begin + strlen(ch_begin);
+      ch_end -= 1;
+
+      if (*ch_begin == '"' && *ch_end == '"') {
+        ++ch_begin;
+        --ch_end;
+      }
+      const size_t ch_len = ch_end - ch_begin +2;
+      PLD_strncpy(hinfo->charset, ch_begin, ch_len > _MIMEH_STRLEN_MAX ? _MIMEH_STRLEN_MAX : ch_len);
+    }
 
 		// Copy the string to our content-type string storage field
 		p = header_value;
@@ -2235,7 +2257,7 @@ int MIMEH_parse_contentlocation( char *header_name, char *header_value, struct M
 		{
 			if (MIMEH_DNORMAL) LOGGER_log("%s:%d:MIME_parse_contentlocation:DEBUG: filename = %s\n", FL, p);
 			snprintf(hinfo->name, sizeof(hinfo->name),"%s",p);
-			snprintf(hinfo->filename, sizeof(hinfo->name),"%s",p);
+			snprintf(hinfo->filename, sizeof(hinfo->filename),"%s",p);
 			FNFILTER_filter(hinfo->filename, _MIMEH_FILENAMELEN_MAX);
 			SS_push(&(hinfo->ss_filenames), hinfo->filename, strlen(hinfo->filename));
 
@@ -2716,12 +2738,14 @@ int MIMEH_headers_process( struct MIMEH_header_info *hinfo, char *headers )
 {
 	/** scan through our headers string looking for information that is
 	  ** valid **/
+//	char *safeh, *h, *safehl;
 	char *h, *safehl;
 	char *current_header_position;
 	int headerlength;
 
 	if (MIMEH_DNORMAL) LOGGER_log("%s:%d:MIMEH_parse_headers:DEBUG: Start [hinfo=%p]\n",FL, hinfo);
 
+	//safeh = h = headers;
 	h = headers;
 
 	/** Duplicate the headers for processing - this way we don't 'taint' the
@@ -2924,6 +2948,7 @@ int MIMEH_headers_get( struct MIMEH_header_info *hinfo, FFGET_FILE *f )
 	hinfo->name[0] = '\0';
 	hinfo->content_type = _CTYPE_UNKNOWN;
 	hinfo->subject[0] = '\0';
+	hinfo->charset[0] = '\0';
 
 	// 20040116-1234:PLD - added to appease valgrind
 	hinfo->content_disposition = 0;

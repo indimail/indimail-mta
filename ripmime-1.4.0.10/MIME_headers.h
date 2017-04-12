@@ -120,7 +120,7 @@ struct MIMEH_header_info
 	char content_transfer_encoding_string[ _MIMEH_CONTENT_TRANSFER_ENCODING_MAX +1 ];
 	int content_disposition;
 	char content_disposition_string[ _MIMEH_CONTENT_DISPOSITION_MAX +1 ];
-	int charset;
+	char charset[_MIMEH_STRLEN_MAX +1];
 	int format;
 	int file_has_uuencode;
 	char uudec_name[_MIMEH_FILENAMELEN_MAX +1];	// UUDecode name. This is a post-decode information field.

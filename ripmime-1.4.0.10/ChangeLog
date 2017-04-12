@@ -4,6 +4,13 @@ Format of entry line:
 	- <Developer initials>:<Change made for REL[ease] or DEV[elopment] versions>
 
 CHANGES---------------------------------------------------------------
+Monday Dec 12, 2011
+	-PLD:REL:1.4.0.10
+	Added iconv output support via -x<set> thanks to Константин Молчанов
+	Fixed many compile errors that have come up with newer gcc versions
+	Fixed an incorrectly matched size/var pairing in MIME_headers.c thanks 
+		to David Binderman, Gary Petersen, Dag Andersen and Tullio Andreatta
+
 Fri Nov 08 2008
 	-PLD:REL:1.4.0.9
 	Fixed up the BASE64 decoding detection of boundaries which are
