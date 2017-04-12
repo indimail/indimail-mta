@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.6  2017-04-12 12:31:02+05:30  Cprogrammer
+ *  fixed env_str formatting
+ *
  *  Revision 1.5  2017-04-12 10:20:13+05:30  Cprogrammer
  *  use #ifdef HASDLMOPEN to use dlmopen() function
  *
@@ -18,7 +21,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.5 2017-04-12 10:20:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.6 2017-04-12 12:31:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -118,8 +121,8 @@ tcpserver_plugin(char **envp, int reload_flag)
 		/*- execute function defined by PLUGIN<num>_init */
 		s = env_str;
 		s += (i = fmt_str((char *) s, "PLUGIN"));
-		s += (i += fmt_uint((char *) s, plugin_no));
-		s += (i += fmt_str((char *) s, "_init"));
+		s += (i = fmt_uint((char *) s, plugin_no));
+		s += (i = fmt_str((char *) s, "_init"));
 		*s++ = 0;
 		dlerror(); /*- clear existing error */
 #ifdef HASDLMOPEN
@@ -141,8 +144,8 @@ tcpserver_plugin(char **envp, int reload_flag)
 			/*- change to dir defined by PLUGIN<num>_dir */
 			s = env_str;
 			s += (i = fmt_str((char *) s, "PLUGIN"));
-			s += (i += fmt_uint((char *) s, plugin_no));
-			s += (i += fmt_str((char *) s, "_dir"));
+			s += (i = fmt_uint((char *) s, plugin_no));
+			s += (i = fmt_str((char *) s, "_dir"));
 			*s++ = 0;
 			if ((s = env_get(env_str)) && chdir(s))
 				strerr_die(111, FATAL, "chdir: ", s, ": ", 0, 0, 0, 0, (struct strerr *) 0);
