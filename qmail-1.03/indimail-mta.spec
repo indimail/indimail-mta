@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.88 2017-04-12 14:52:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.89 2017-04-13 00:27:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -521,7 +521,7 @@ fi
 # remove devel files as we are not building a devel package
 %{__rm} -rf %{buildroot}%{mandir}/man3
 %{__rm} -rf %{buildroot}%{_prefix}/include
-%{__rm} -rf %{buildroot}%{qmaildir}/queue
+#%{__rm} -rf %{buildroot}%{qmaildir}/queue
 for i in libdkim libsrs2
 do
 %{__rm} -f  %{buildroot}%{_libdir}/$i.a
@@ -1257,27 +1257,46 @@ done
 %if %build_on_obs == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING
 %license %attr(444,root,qmail)          %{shareddir}/doc/README.licenses
+%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.libdkim
+%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.qhpsi
+%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %else
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING
 %attr(444,root,qmail)                   %{shareddir}/doc/README.licenses
+%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.libdkim
+%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.qhpsi
+%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %endif
-%attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
-%attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
-%attr(444,root,qmail)                   %{shareddir}/doc/TOISP
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
-%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
-%attr(444,root,qmail)                   %{shareddir}/doc/EXTTODO
+%attr(444,root,qail)                    %{shareddir}/doc/README.auth
+%attr(444,root,qail)                    %{shareddir}/doc/README.indimail
+%attr(444,root,qail)                    %{shareddir}/doc/README.newline
+%attr(444,root,qail)                    %{shareddir}/doc/README.qhpsi
+%attr(444,root,qail)                    %{shareddir}/doc/README.qregex
+%attr(444,root,qail)                    %{shareddir}/doc/README.queue-fix
+%attr(444,root,qail)                    %{shareddir}/doc/README.remote-auth
+%attr(444,root,qail)                    %{shareddir}/doc/README.spamcontrol
+%attr(444,root,qail)                    %{shareddir}/doc/README.starttls
+%attr(444,root,qail)                    %{shareddir}/doc/README.status
+%attr(444,root,qail)                    %{shareddir}/doc/README.tls
+%attr(444,root,qail)                    %{shareddir}/doc/README.wildmat
 %attr(444,root,qmail)                   %{shareddir}/doc/README.qmail
 %attr(444,root,qmail)                   %{shareddir}/doc/README.clamav
 %attr(444,root,qmail)                   %{shareddir}/doc/README.greylist
 %attr(444,root,qmail)                   %{shareddir}/doc/README.filters
 %attr(444,root,qmail)                   %{shareddir}/doc/README.moreipme
 %attr(444,root,qmail)                   %{shareddir}/doc/README.recipients
-%if %fedorareview == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/README.logselect
-%endif
 %attr(444,root,qmail)                   %{shareddir}/doc/README.srs
 %attr(444,root,qmail)                   %{shareddir}/doc/README.surbl
+%attr(444,root,qmail)                   %{shareddir}/doc/README.ucspi-tcp
+%attr(444,root,qmail)                   %{shareddir}/doc/README.libdkim
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.libdkim
+%attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
+%attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
+%attr(444,root,qmail)                   %{shareddir}/doc/TOISP
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
+%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
+%attr(444,root,qmail)                   %{shareddir}/doc/EXTTODO
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2alias
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2local
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.nullclient
