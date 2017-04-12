@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.229  2017-04-12 14:52:15+05:30  Cprogrammer
+ * report programs moved to libexecdir
+ *
  * Revision 1.228  2017-04-12 13:21:50+05:30  Cprogrammer
  * create queue base directory
  *
@@ -1024,12 +1027,9 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "maildirserial", auto_uido, auto_gidq, moder_x);
 
 	/* Report Programs */
-	c(auto_qmail_home, "bin", "matchup", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "mlmatchup", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "columnt", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "xqp", auto_uido, auto_gidq, moder_x);
 
 	c(auto_libexec_dir, auto_libexec_base, "svscanboot", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "columnt", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "zoverall", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "zsendmail", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "xsender", auto_uido, auto_gidq, moder_x);
@@ -1054,6 +1054,9 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "zsuids", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "multilog-matchup", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "smtp-matchup", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "matchup", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "mlmatchup", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "xqp", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "rsmtp", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "rsmtpfailures", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "rsmtpsdomains", auto_uido, auto_gidq, moder_x);
@@ -1553,7 +1556,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.228 2017-04-12 13:21:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.229 2017-04-12 14:52:15+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

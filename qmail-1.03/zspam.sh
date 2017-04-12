@@ -1,4 +1,7 @@
 # $Log: zspam.sh,v $
+# Revision 1.8  2017-04-12 14:53:52+05:30  Cprogrammer
+# report programs moved to libexecdir
+#
 # Revision 1.7  2017-03-09 16:40:04+05:30  Cprogrammer
 # FHS changes
 #
@@ -37,7 +40,7 @@ One line per delivery through SPAM Filter. Information on each line:
 (
 echo spambytes spam sbytes mess host
 LIBEXEC/rspamrdomain | sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt
 echo
 exec 0</tmp/smtp.$$
 echo 'Sender domains SPAM filter messages sorted on spambytes and spam

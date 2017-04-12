@@ -1,4 +1,7 @@
 # $Log: zsmtp.sh,v $
+# Revision 1.9  2017-04-12 14:53:48+05:30  Cprogrammer
+# report programs moved to libexecdir
+#
 # Revision 1.8  2017-03-09 16:40:00+05:30  Cprogrammer
 # FHS changes
 #
@@ -47,7 +50,7 @@ One line per SMTP delivery. Information on each line:
 (
 echo sbytes xdelay embryo mess spam success failure host
 LIBEXEC/rsmtp | sort -n -r
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt
 
 echo
 exec 0</tmp/smtp.$$

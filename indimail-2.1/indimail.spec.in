@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.397 2017-04-12 13:20:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.398 2017-04-12 14:51:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1249,13 +1249,11 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/uacl
 %attr(755,root,qmail)                   %{_prefix}/bin/envdir
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbmake
-%attr(755,root,qmail)                   %{_prefix}/bin/mlmatchup
 %attr(755,root,qmail)                   %{_prefix}/bin/sendmail
 %attr(755,root,qmail)                   %{_prefix}/bin/irmail
 %attr(755,root,qmail)                   %{_prefix}/bin/dbinfo
 %attr(755,root,qmail)                   %{_prefix}/bin/sslerator
 %attr(755,root,qmail)                   %{_prefix}/bin/ifaddr
-%attr(755,root,qmail)                   %{_prefix}/bin/matchup
 %attr(755,root,qmail)                   %{_prefix}/bin/softlimit
 %attr(755,root,qmail)                   %{_prefix}/bin/setforward
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbdump
@@ -1286,7 +1284,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-rm
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-pop3d
 %attr(755,root,qmail)                   %{_prefix}/bin/randstr
-%attr(755,root,qmail)                   %{_prefix}/bin/xqp
 %attr(755,root,qmail)                   %{_prefix}/bin/dot-forward
 %attr(755,root,qmail)                   %{_prefix}/bin/datemail
 %attr(755,root,qmail)                   %{_prefix}/bin/qbase64
@@ -1296,7 +1293,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/tai64n
 %attr(755,root,qmail)                   %{_prefix}/bin/qmaildirmake
 %attr(755,root,qmail)                   %{_prefix}/bin/maildir2mbox
-%attr(755,root,qmail)                   %{_prefix}/bin/columnt
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-smtpd
 %attr(755,root,qmail)                   %{_prefix}/bin/qarf
 %attr(755,root,qmail)                   %{_prefix}/bin/qaes
@@ -1432,10 +1428,10 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/yearcal
 %attr(755,root,qmail)                   %{libexecdir}/batv
 
+%attr(755,root,qmail)                   %{libexecdir}/columnt
 %attr(755,root,qmail)                   %{libexecdir}/zsuccesses
 %attr(755,root,qmail)                   %{libexecdir}/deferrals
 %attr(755,root,qmail)                   %{libexecdir}/rsmtprecipients
-%attr(755,root,qmail)                   %{libexecdir}/smtp-matchup
 %attr(755,root,qmail)                   %{libexecdir}/zrecipients
 %attr(755,root,qmail)                   %{libexecdir}/xsender
 %attr(755,root,qmail)                   %{libexecdir}/rxdelay
@@ -1447,7 +1443,11 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/zrxdelay
 %attr(755,root,qmail)                   %{libexecdir}/rspamrdomain
 %attr(755,root,qmail)                   %{libexecdir}/rspamsdomain
+%attr(755,root,qmail)                   %{libexecdir}/matchup
+%attr(755,root,qmail)                   %{libexecdir}/mlmatchup
 %attr(755,root,qmail)                   %{libexecdir}/multilog-matchup
+%attr(755,root,qmail)                   %{libexecdir}/smtp-matchup
+%attr(755,root,qmail)                   %{libexecdir}/xqp
 %attr(755,root,qmail)                   %{libexecdir}/zddist
 %attr(755,root,qmail)                   %{libexecdir}/zsenders
 %attr(755,root,qmail)                   %{libexecdir}/senders

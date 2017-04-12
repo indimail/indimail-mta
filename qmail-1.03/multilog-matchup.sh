@@ -1,5 +1,8 @@
 #
 # $Log: multilog-matchup.sh,v $
+# Revision 1.4  2017-04-12 14:54:12+05:30  Cprogrammer
+# report programs moved to libexecdir
+#
 # Revision 1.3  2017-03-09 16:38:59+05:30  Cprogrammer
 # FHS changes
 #
@@ -10,4 +13,4 @@
 # Initial revision
 #
 #
-exec PREFIX/bin/tai64nunix|PREFIX/bin/matchup
+exec PREFIX/bin/tai64nunix|LIBEXEC/matchup

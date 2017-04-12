@@ -1,5 +1,8 @@
 #
 # $Log: zsuids.sh,v $
+# Revision 1.7  2017-04-12 14:54:01+05:30  Cprogrammer
+# report programs moved to libexecdir
+#
 # Revision 1.6  2017-03-09 16:40:12+05:30  Cprogrammer
 # FHS changes
 #
@@ -33,4 +36,4 @@ One line per sender uid. Information on each line:
 (
 echo mess bytes sbytes rbytes recips tries xdelay uid
 LIBEXEC/suids | sort -n -r -k 1,1 -k 2,2 -k 3,3 -k 4,4
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt

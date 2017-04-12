@@ -1,5 +1,8 @@
 #
 # $Log: zrxdelay.sh,v $
+# Revision 1.6  2017-04-12 14:53:39+05:30  Cprogrammer
+# report programs moved to libexecdir
+#
 # Revision 1.5  2017-03-09 16:39:53+05:30  Cprogrammer
 # FHS changes
 #
@@ -25,4 +28,4 @@ One line per recipient, sorted by avg. Information on each line:
 (
 echo avg tries recipient
 LIBEXEC/recipients | LIBEXEC/rxdelay | sort -n -r -k 1,1
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt

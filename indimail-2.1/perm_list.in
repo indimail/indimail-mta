@@ -68,7 +68,6 @@
 %attr(0755,root,qmail) @prefix@/bin/checkaddr
 %attr(0755,root,qmail) @prefix@/bin/checkdomain
 %attr(0755,root,qmail) @prefix@/bin/cidr
-%attr(0755,root,qmail) @prefix@/bin/columnt
 %attr(0755,root,qmail) @prefix@/bin/condredirect
 %attr(0755,root,qmail) @prefix@/bin/condtomaildir
 %attr(0755,root,qmail) @prefix@/bin/crc
@@ -110,9 +109,7 @@
 %attr(0755,root,qmail) @prefix@/bin/maildirsmtp
 %attr(0755,root,qmail) @prefix@/bin/maildirwatch
 %attr(0755,root,qmail) @prefix@/bin/mailsubj
-%attr(0755,root,qmail) @prefix@/bin/matchup
 %attr(0755,root,qmail) @prefix@/bin/mbox2maildir
-%attr(0755,root,qmail) @prefix@/bin/mlmatchup
 %attr(0755,root,qmail) @prefix@/bin/mpack
 %attr(0755,root,qmail) @prefix@/bin/multilog
 %attr(0755,root,qmail) @prefix@/bin/multipipe
@@ -204,7 +201,6 @@
 %attr(0755,root,qmail) @prefix@/bin/vpriv
 %attr(0755,root,qmail) @prefix@/bin/vproxy
 %attr(0755,root,qmail) @prefix@/bin/vsmtp
-%attr(0755,root,qmail) @prefix@/bin/xqp
 %attr(0755,root,qmail) @prefix@/bin/qlogselect
 %attr(0755,root,qmail) @prefix@/bin/tai2tai64n
 %attr(0755,root,qmail) @prefix@/bin/tai64n2tai
@@ -368,11 +364,11 @@
 %attr(0755,root,qmail) @libexecdir@/upgrade.sh
 %attr(0755,root,qmail) @libexecdir@/qmail-lagcheck
 
+%attr(0755,root,qmail) @libexecdir@/columnt
 %attr(0755,root,qmail) @libexecdir@/zsuids
 %attr(0755,root,qmail) @libexecdir@/ddist
 %attr(0755,root,qmail) @libexecdir@/deferrals
 %attr(0755,root,qmail) @libexecdir@/failures
-%attr(0755,root,qmail) @libexecdir@/multilog-matchup
 %attr(0755,root,qmail) @libexecdir@/recipients
 %attr(0755,root,qmail) @libexecdir@/rhosts
 %attr(0755,root,qmail) @libexecdir@/rsmtp
@@ -387,7 +383,11 @@
 %attr(0755,root,qmail) @libexecdir@/rspamstat
 %attr(0755,root,qmail) @libexecdir@/rxdelay
 %attr(0755,root,qmail) @libexecdir@/senders
+%attr(0755,root,qmail) @libexecdir@/matchup
+%attr(0755,root,qmail) @libexecdir@/mlmatchup
+%attr(0755,root,qmail) @libexecdir@/multilog-matchup
 %attr(0755,root,qmail) @libexecdir@/smtp-matchup
+%attr(0755,root,qmail) @libexecdir@/xqp
 %attr(0755,root,qmail) @libexecdir@/successes
 %attr(0755,root,qmail) @libexecdir@/suids
 %attr(0755,root,qmail) @libexecdir@/xrecipient

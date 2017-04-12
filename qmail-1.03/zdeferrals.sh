@@ -1,5 +1,8 @@
 #
 # $Log: zdeferrals.sh,v $
+# Revision 1.7  2017-04-12 14:53:10+05:30  Cprogrammer
+# report programs moved to libexecdir
+#
 # Revision 1.6  2017-03-09 16:39:40+05:30  Cprogrammer
 # FHS changes
 #
@@ -28,4 +31,4 @@ One line per reason for deferral sorted by xdelay. Information on each line:
 (
 echo del xdelay reason
 LIBEXEC/deferrals | sort -n -r -k 2,2
-) | PREFIX/bin/columnt | tr _ ' '
+) | LIBEXEC/columnt | tr _ ' '
