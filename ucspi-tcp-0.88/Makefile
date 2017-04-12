@@ -805,17 +805,21 @@ compile tcprulescheck.c byte.h buffer.h strerr.h env.h rules.h \
 stralloc.h gen_alloc.h
 	./compile tcprulescheck.c
 
+hasdlmopen.h: \
+choose compile load trydlmopen.c hasdlmopen.h1 hasdlmopen.h2
+	./choose cL trydlmopen hasdlmopen.h1 hasdlmopen.h2 > hasdlmopen.h
+
 load_shared.o: \
-compile load_shared.c str.h strerr.h dlnamespace.h
+compile load_shared.c str.h strerr.h dlnamespace.h hasdlmopen.h
 	./compile `grep -h -v "^#" conf-dlopen` load_shared.c
 
 tcpserver_plugin.o: \
 compile tcpserver_plugin.c str.h stralloc.h strerr.h scan.h \
-fmt.h env.h dlnamespace.h conf-dlopen
+hasdlmopen.h fmt.h env.h dlnamespace.h conf-dlopen
 	./compile `grep -h -v "^#" conf-dlopen` tcpserver_plugin.c
 
 dlnamespace.o: \
-compile dlnamespace.c str.h stralloc.h scan.h fmt.h
+compile dlnamespace.c str.h stralloc.h scan.h fmt.h hasdlmopen.h
 	./compile `grep -h -v "^#" conf-dlopen` dlnamespace.c
 
 tcpserver: \
