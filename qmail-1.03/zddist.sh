@@ -1,5 +1,8 @@
 #
 # $Log: zddist.sh,v $
+# Revision 1.5  2017-04-12 14:53:05+05:30  Cprogrammer
+# report programs moved to libexecdir
+#
 # Revision 1.4  2017-03-09 16:39:37+05:30  Cprogrammer
 # FHS changes
 #
@@ -21,4 +24,4 @@ all happened within doneby seconds. The average ddelay was avg.
 (
 echo doneby avg pct
 LIBEXEC/ddist |sort -n -r
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt

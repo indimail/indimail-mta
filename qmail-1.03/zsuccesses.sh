@@ -1,5 +1,8 @@
 #
 # $Log: zsuccesses.sh,v $
+# Revision 1.7  2017-04-12 14:53:57+05:30  Cprogrammer
+# report programs moved to libexecdir
+#
 # Revision 1.6  2017-03-09 16:40:08+05:30  Cprogrammer
 # FHS changes
 #
@@ -28,4 +31,4 @@ One line per reason for successful delivery. Information on each line:
 (
 echo del xdelay reason
 LIBEXEC/successes | sort -k 2,2 -k 1,1
-) | PREFIX/bin/columnt | tr _ ' '
+) | LIBEXEC/columnt | tr _ ' '

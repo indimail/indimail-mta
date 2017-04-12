@@ -1,5 +1,8 @@
 #
 # $Log: zrhosts.sh,v $
+# Revision 1.7  2017-04-12 14:53:34+05:30  Cprogrammer
+# report programs moved to libexecdir
+#
 # Revision 1.6  2017-03-09 16:39:50+05:30  Cprogrammer
 # FHS changes
 #
@@ -30,4 +33,4 @@ One line per recipient host. Information on each line:
 (
 echo sbytes mess tries xdelay host
 LIBEXEC/rhosts | sort -n -r -k 1.1,1.0 -k 2,2 -k 4,4 -k 3,3
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt

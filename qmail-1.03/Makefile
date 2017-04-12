@@ -4166,6 +4166,7 @@ multilog-matchup: \
 warn-auto.sh multilog-matchup.sh conf-prefix
 	cat warn-auto.sh multilog-matchup.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> multilog-matchup
 
 smtp-matchup: \
