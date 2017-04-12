@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.86 2017-04-11 18:27:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.87 2017-04-12 13:20:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -595,6 +595,7 @@ done
 %dir %attr(555,root,qmail)        %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
+%dir %attr(755,root,qmail)        %{qmaildir}/queue
 %dir %attr(2775,alias,qmail)      %{qmaildir}/alias
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root
