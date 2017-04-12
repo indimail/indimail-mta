@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg7.c,v $
+ * Revision 2.12  2017-04-13 00:43:18+05:30  Cprogrammer
+ * fixed format specifier for bytes
+ *
  * Revision 2.11  2017-04-01 20:25:07+05:30  Cprogrammer
  * added debug option
  *
@@ -69,7 +72,7 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.11 2017-04-01 20:25:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.12 2017-04-13 00:43:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAX_BUFF 1000
@@ -399,7 +402,7 @@ process_file(char *file_name)
 				bytes += atol(tmpstr1);
 			}
 			if (debug)
-				fprintf(stderr, "bytes %d\n", bytes);
+				fprintf(stderr, "bytes %f\n", bytes);
 			break;
 		case 'l':
 			++ttotal;
