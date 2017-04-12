@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.5  2017-04-12 10:18:56+05:30  Cprogrammer
+ * auto configure for dlmopen()
+ *
  * Revision 1.4  2017-04-06 17:24:35+05:30  Cprogrammer
  * added comments/description
  *
@@ -14,7 +17,9 @@
  *
  */
 #ifdef LOAD_SHARED_OBJECTS
+#include "hasdlmopen.h"
 #include <errno.h>
+#ifdef HASDLMOPEN
 #include "str.h"
 #include "fmt.h"
 #include "stralloc.h"
@@ -80,4 +85,17 @@ dlnamespace(char *fn, unsigned long *id)
 		return (-1);
 	return (0);
 }
-#endif
+#else
+int
+dlnamespace(char *fn, unsigned long *id)
+{
+	if (!id) {
+		errno = EINVAL;
+		return (-1);
+	}
+	if (!*id)
+		*id = 0;
+	return (0);
+}
+#endif /*- ifdef HASDLMOPEN */
+#endif /*- ifdef LOAD_SHARED_OBJECTS */
