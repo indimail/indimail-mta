@@ -1218,13 +1218,15 @@ display(FILEDESC * fp)
 	fseek(fp->inf, (long) Seekpts[0], 0);
 	for (Fort_len = 0; fgets(line, sizeof line, fp->inf) != NULL && !STR_ENDSTRING(line, fp->tbl); Fort_len++)
 	{
-		if (fp->tbl.str_flags & STR_ROTATED)
-			for (p = line; (ch = *p); ++p)
+		if (fp->tbl.str_flags & STR_ROTATED) {
+			for (p = line; (ch = *p); ++p) {
 				if (isupper(ch))
 					*p = 'A' + (ch - 'A' + 13) % 26;
 				else
 				if (islower(ch))
 					*p = 'a' + (ch - 'a' + 13) % 26;
+			}
+		}
 		fputs(line, stdout);
 	}
 	fflush(stdout);

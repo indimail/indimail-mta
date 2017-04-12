@@ -180,13 +180,15 @@ display(FILE * fp, STRFILE table)
 	fseek(fp, (long) Seekpts[0], 0);
 	for (i = 0; fgets(line, sizeof line, fp) != NULL && !STR_ENDSTRING(line, table); i++)
 	{
-		if (table.str_flags & STR_ROTATED)
-			for (p = line; (ch = *p); ++p)
+		if (table.str_flags & STR_ROTATED) {
+			for (p = line; (ch = *p); ++p) {
 				if (isupper(ch))
 					*p = 'A' + (ch - 'A' + 13) % 26;
 				else
 				if (islower(ch))
 					*p = 'a' + (ch - 'a' + 13) % 26;
+			}
+		}
 		fputs(line, stdout);
 	}
 	fflush(stdout);
