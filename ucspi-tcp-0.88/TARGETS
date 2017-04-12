@@ -222,3 +222,4 @@ auto_shared.o
 str_cpy.o
 dlnamespace.o
 hasdlmopen.h
+auto_shared.c
