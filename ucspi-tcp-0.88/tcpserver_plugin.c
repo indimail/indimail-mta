@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.5  2017-04-12 10:20:13+05:30  Cprogrammer
+ *  use #ifdef HASDLMOPEN to use dlmopen() function
+ *
  *  Revision 1.4  2017-04-05 03:13:55+05:30  Cprogrammer
  *  changed dlopen() to dlmopen() for private namespace
  *
@@ -15,16 +18,21 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.4 2017-04-05 03:13:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.5 2017-04-12 10:20:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
 
 #ifdef LOAD_SHARED_OBJECTS
+#include "hasdlmopen.h"
+#ifdef HASDLMOPEN
 #define _GNU_SOURCE
+#endif
 #include <unistd.h>
 #include "stralloc.h"
+#ifdef HASDLMOPEN
 #include "dlnamespace.h"
+#endif
 #include "strerr.h"
 #include "str.h"
 #include "env.h"
@@ -44,8 +52,10 @@ tcpserver_plugin(char **envp, int reload_flag)
 	int             i;
 	char           *error, *c, *func_name, *s;
 	char          **ptr1;
+#ifdef HASDLMOPEN
 	char            strnum[FMT_ULONG];
 	Lmid_t          lmid;
+#endif
 
 	for (ptr1 = envp; *ptr1; ptr1++) {
 		if (!str_start(*ptr1, "PLUGIN"))
@@ -60,6 +70,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_0(&shared_objfn))
 			strerr_die2x(111, FATAL, "out of memory");
+#ifdef HASDLMOPEN
 		if (reload_flag) {
 #ifdef RTLD_DEEPBIND
 			if (!(handle = dlmopen(LM_ID_NEWLM, shared_objfn.s, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
@@ -87,13 +98,31 @@ tcpserver_plugin(char **envp, int reload_flag)
 			if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
 				strerr_die(111, FATAL, "dlinfo: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 		}
+#else
+		if (reload_flag) {
+#ifdef RTLD_DEEPBIND
+			if (!(handle = dlopen(shared_objfn.s, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
+#else
+			if (!(handle = dlopen(shared_objfn.s, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
+#endif
+				strerr_die(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				return (1);
+			}
+		} else {
+			if (!(handle = dlopen(shared_objfn.s, RTLD_NOW|RTLD_NOLOAD))) {
+				strerr_die(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				return (1);
+			}
+		}
+#endif /*- ifdef HASDLMOPEN */
 		/*- execute function defined by PLUGIN<num>_init */
 		s = env_str;
 		s += (i = fmt_str((char *) s, "PLUGIN"));
-		s += (i = fmt_uint((char *) s, plugin_no));
-		s += (i = fmt_str((char *) s, "_init"));
+		s += (i += fmt_uint((char *) s, plugin_no));
+		s += (i += fmt_str((char *) s, "_init"));
 		*s++ = 0;
 		dlerror(); /*- clear existing error */
+#ifdef HASDLMOPEN
 		if (reload_flag) {
 			strnum[fmt_ulong(strnum, lmid)] = 0;
 			i = str_chr(shared_objfn.s, '.');
@@ -104,6 +133,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 				c++;
 			strerr_warn4("tcpserver: ", c, ".so: link map ID: ", strnum, 0);
 		}
+#endif
 		if ((func_name = env_get(env_str))) {
 			func = dlsym(handle, func_name);
 			if ((error = dlerror()))
@@ -111,8 +141,8 @@ tcpserver_plugin(char **envp, int reload_flag)
 			/*- change to dir defined by PLUGIN<num>_dir */
 			s = env_str;
 			s += (i = fmt_str((char *) s, "PLUGIN"));
-			s += (i = fmt_uint((char *) s, plugin_no));
-			s += (i = fmt_str((char *) s, "_dir"));
+			s += (i += fmt_uint((char *) s, plugin_no));
+			s += (i += fmt_str((char *) s, "_dir"));
 			*s++ = 0;
 			if ((s = env_get(env_str)) && chdir(s))
 				strerr_die(111, FATAL, "chdir: ", s, ": ", 0, 0, 0, 0, (struct strerr *) 0);
@@ -122,6 +152,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 	return (0);
 }
 #else
+#include <unistd.h>
 int
 tcpserver_plugin(char **envp)
 {

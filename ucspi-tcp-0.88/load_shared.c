@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.8  2017-04-12 10:20:41+05:30  Cprogrammer
+ * use #ifdef HASDLMOPEN to use dlmopen() function
+ *
  * Revision 1.7  2017-04-05 03:12:39+05:30  Cprogrammer
  * changed dlopen() to dlmopen() for private namespace
  *
@@ -23,9 +26,14 @@
  *
  */
 #ifdef LOAD_SHARED_OBJECTS
+#include "hasdlmopen.h"
+#ifdef HASDLMOPEN
 #define _GNU_SOURCE
+#endif
 #include <unistd.h>
+#ifdef HASDLMOPEN
 #include "dlnamespace.h"
+#endif
 #include "strerr.h"
 #include "str.h"
 #include "fmt.h"
@@ -37,18 +45,20 @@
 void
 load_shared(char *file, char **argv, char **envp)
 {
-	int             i, argc, split, loaded = 0;
+	int             argc, split;
 	int             (*func) (int, char **, char **);
 	void           *handle;
 	char           *error, *fptr;
 	char          **ptr;
+#ifdef HASDLMOPEN
 	char            strnum[FMT_ULONG];
 	Lmid_t          lmid;
+#endif
 
-	loaded = 0;
 	if (!str_end(file, ".so")) {
+#ifdef HASDLMOPEN
 		lmid = 0;
-		if ((i = dlnamespace(file, (unsigned long *) &lmid)) < 0)
+		if ((dlnamespace(file, (unsigned long *) &lmid)) < 0)
 			strerr_die(111, FATAL, "dlnamespace: ", file, ": ", 0, 0, 0, 0, (struct strerr *) 0);
 		if (!(handle = dlmopen(lmid, file, RTLD_NOW|RTLD_NOLOAD))) {
 #ifdef RTLD_DEEPBIND
@@ -59,12 +69,23 @@ load_shared(char *file, char **argv, char **envp)
 				strerr_die(111, FATAL, "dlmopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 				return;
 			} 
-			loaded = 1;
 			if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
 				strerr_die(111, FATAL, "dlinfo: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 			if (dlnamespace(file, (unsigned long *) &lmid) < 0)
 				strerr_die(111, FATAL, "dlnamespace: ", file, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
 		}
+#else /*- HASDLMOPEN */
+		if (!(handle = dlopen(file, RTLD_NOW|RTLD_NOLOAD))) {
+#ifdef RTLD_DEEPBIND
+			if (!(handle = dlopen(file, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
+#else
+			if (!(handle = dlopen(file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
+#endif
+				strerr_die(111, FATAL, "dlopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				return;
+			} 
+		}
+#endif /*- ifdef HASDLMOPEN */
 		dlerror(); /*- clear existing error */
 		/*- use the basename of the shared object as the function to execute */
 		split = str_chr(file, '.');
@@ -73,10 +94,10 @@ load_shared(char *file, char **argv, char **envp)
 		for (fptr = file + split;*fptr && *fptr != '/';fptr--);
 		if (*fptr == '/')
 			fptr++;
-		if (loaded) {
-			strnum[fmt_ulong(strnum, lmid)] = 0;
-			strerr_warn4("tcpserver: ", "load_shared", ".so: link map ID: ", strnum, 0);
-		}
+#ifdef HASDLMOPEN
+		strnum[fmt_ulong(strnum, lmid)] = 0;
+		strerr_warn4("tcpserver: ", "load_shared", ".so: link map ID: ", strnum, 0);
+#endif
 		func = dlsym(handle, fptr);
 		if ((error = dlerror()))
 			strerr_die(111, FATAL, "dlsym: ", fptr, ": ", error, 0, 0, 0, (struct strerr *) 0);
