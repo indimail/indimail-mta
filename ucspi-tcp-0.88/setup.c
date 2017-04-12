@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.6  2017-04-13 00:41:00+05:30  Cprogrammer
+ * fixed bug with copying docs to doc subdir
+ *
  * Revision 1.5  2016-05-27 20:45:47+05:30  Cprogrammer
  * fixed shareddir setting
  *
@@ -300,8 +303,6 @@ c(home, subdir, file, uid, gid, mode)
 	}
 	if (fchdir(fdsourcedir) == -1)
 		strerr_die2sys(111, FATAL, "unable to switch back to source directory: ");
-	if (!str_diff(subdir, "doc") && chdir("doc") == -1)
-		strerr_die2sys(111, FATAL, "unable to switch to source doc directory: ");
 	if((fdin = open_read(file)) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", file, ": ");
 	buffer_init(&ssin, read, fdin, inbuf, sizeof inbuf);
