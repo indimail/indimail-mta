@@ -1,5 +1,8 @@
 #
 # $Log: choose.sh,v $
+# Revision 1.3  2017-04-12 10:17:11+05:30  Cprogrammer
+# added -L option for linking with libdl
+#
 # Revision 1.2  2008-07-30 12:11:54+05:30  Cprogrammer
 # added option 'R' which doesn't delete
 #
@@ -8,13 +11,16 @@
 #
 #
 result="$4"
-
 case "$1" in
   *c*) ./compile $2.c >/dev/null 2>&1 || result="$3" ;;
 esac
 
 case "$1" in
   *l*) ./load $2 >/dev/null 2>&1 || result="$3" ;;
+esac
+
+case "$1" in
+  *L*) ./load $2 -ldl >/dev/null 2>&1 || result="$3" ;;
 esac
 
 case "$1" in
@@ -26,7 +32,7 @@ case "$1" in
 esac
 
 case "$1" in
-	*c* | *l* | *r*) rm -f $2.o $2 ;;
+	*c* | *l* | *L* | *r*) rm -f $2.o $2 ;;
 esac
 
 exec cat "$result"
