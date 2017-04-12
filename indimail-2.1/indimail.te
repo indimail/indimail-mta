@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.23  2017-04-12 13:19:20+05:30  Cprogrammer
+# added fifo open, read perm for djbdns supervise
+#
 # Revision 2.22  2017-04-11 01:00:26+05:30  Cprogrammer
 # added rules for tinydnssec
 #
@@ -67,7 +70,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.22 2017-04-11 01:00:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.23 2017-04-12 13:19:20+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -270,7 +273,7 @@ allow svc_start_t var_t:file { create getattr setattr ioctl open read lock write
 allow svc_start_t var_t:fifo_file { open read };
 
 #!!!! WARNING: 'etc_t' is a base type.
-allow svc_start_t etc_t:fifo_file write;
+allow svc_start_t etc_t:fifo_file {open read write};
 
 #============= svc_run_t ==============
 
