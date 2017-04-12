@@ -58,8 +58,18 @@ setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 
 doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf HOWTO.bogofilter \
 	HOWTO.sharedmaildir INSTALL.indimail percenthack.shtml README \
-	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER README.vlimits \
-	indimail_arch.png INSTALL-MINI indimail_queue.png Quick-INSTALL
+	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER \
+	indimail_arch.png INSTALL-MINI indimail_queue.png Quick-INSTALL \
+	AUTHORS.altermime AUTHORS.bogofilter AUTHORS.courier-imap AUTHORS.fortune \
+	AUTHORS.iwebadmin AUTHORS.logalert AUTHORS.nssd AUTHORS.pam-multi \
+	AUTHORS.procmail AUTHORS.ripmime COPYING.bogofilter COPYING.courier-imap \
+	COPYING.flash COPYING.fortune COPYING.iwebadmin COPYING.nssd COPYING.pam-multi \
+	COPYING.procmail COPYRIGHT.flash COPYRIGHT.mpack LICENSE.altermime \
+	LICENSE.ezmlm-idx LICENSE.logalert LICENSE.ripmime README.altermime \
+	README.courier-imap README.djbdns README.ezmlm-idx README.flash \
+	README.iwebadmin README.ldap README.logalert README.mpack README.nssd \
+	README.pam-multi README.procmail README.ripmime README.tinydnssec \
+	README.vlimits softwarelicense1-1.html
 
 COMMONSOURCES = addaliasdomain.c add_control.c add_domain_assign.c adddomain.c addressToken.c \
 add_user_assign.c adduser.c addusercntrl.c add_vacation.c \
@@ -154,7 +164,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar clearopensmtp \
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 execmysql cindimail hashtable displaytop \
 						   indimail_config updatefile mail_report testmra copyemail
-indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime get-cert \
+indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime \
 						  myslave bogofilter-qfe upgrade.sh local_upgrade.sh
 
 indimailauthlib_PROGRAMS = authindi authpgsql
