@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.11  2017-04-13 00:40:49+05:30  Cprogrammer
+ * added README.ucspi-tcp
+ *
  * Revision 1.10  2016-06-20 08:30:59+05:30  Cprogrammer
  * added man page for mconnect-io
  *
@@ -79,20 +82,21 @@ hier(inst_dir, fatal)
 
 	h(auto_ucspi_home, -1, -1, moder_d1);
 	d(auto_ucspi_home, "bin", -1, -1, moder_d2);
+	d(auto_shared,     "doc", -1, -1, moder_d1);
 	d(mandir,          "man", -1, -1, moder_d1);
 	d(mandir,          "man/man1", -1, -1, moder_d1);
-	c(auto_ucspi_home, "bin", "tcpserver", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "tcprules", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "tcprulescheck", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "tcpclient", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "who@", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "date@", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "finger@", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "http@", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "tcpcat", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "mconnect", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "mconnect-io", -1, -1, 0555);
-	c(auto_ucspi_home, "bin", "rblsmtpd", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "tcpserver", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "tcprules", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "tcprulescheck", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "tcpclient", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "who@", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "date@", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "finger@", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "http@", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "tcpcat", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "mconnect", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "mconnect-io", -1, -1, 0555);
+	c(auto_ucspi_home, "bin",      "rblsmtpd", -1, -1, 0555);
 	c(mandir,          "man/man1", "tcpserver.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "tcprules.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "tcprulescheck.1", -1, -1, 0644);
@@ -105,6 +109,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man1", "mconnect.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "mconnect-io.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "rblsmtpd.1", -1, -1, 0644);
+	c(auto_shared,     "doc",      "README.ucspi-tcp", -1, -1, 0444);
 #ifdef LOAD_SHARED_OBJECTS
 	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, 0555);
 	c(auto_ucspi_home, "lib/indimail/plugins", "rblsmtpd.so", -1, -1, 0555);
