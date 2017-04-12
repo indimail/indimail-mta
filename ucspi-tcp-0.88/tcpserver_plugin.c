@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.7  2017-04-12 13:45:35+05:30  Cprogrammer
+ *  made PLUGINn_dir env variable independent of PLUGINn_init
+ *
  *  Revision 1.6  2017-04-12 12:31:02+05:30  Cprogrammer
  *  fixed env_str formatting
  *
@@ -21,7 +24,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.6 2017-04-12 12:31:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.7 2017-04-12 13:45:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -85,9 +88,20 @@ tcpserver_plugin(char **envp, int reload_flag)
 			} else
 			if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
 				strerr_die(111, FATAL, "dlinfo: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+			/*- store the new lmid */
 			if (dlnamespace(shared_objfn.s, (unsigned long *) &lmid) < 0)
 				strerr_die(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
+			/*- display the new lmid in tcpserver log */
+			strnum[fmt_ulong(strnum, lmid)] = 0;
+			i = str_chr(shared_objfn.s, '.');
+			if (i)
+				shared_objfn.s[i--] = 0;
+			for (c = shared_objfn.s + i;*c && *c != '/';c--);
+			if (*c == '/')
+				c++;
+			strerr_warn4("tcpserver: ", c, ".so: link map ID: ", strnum, 0);
 		} else {
+			/*- get the old lmid for this shared object */
 			lmid = 0;
 			if ((i = dlnamespace(shared_objfn.s, (unsigned long *) &lmid)) < 0)
 				strerr_die(111, FATAL, "dlnamespace: ", shared_objfn.s, ": ", 0, 0, 0, 0, (struct strerr *) 0);
@@ -101,7 +115,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 			if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
 				strerr_die(111, FATAL, "dlinfo: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 		}
-#else
+#else /*- #ifdef HASDLMOPEN */
 		if (reload_flag) {
 #ifdef RTLD_DEEPBIND
 			if (!(handle = dlopen(shared_objfn.s, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
@@ -118,6 +132,15 @@ tcpserver_plugin(char **envp, int reload_flag)
 			}
 		}
 #endif /*- ifdef HASDLMOPEN */
+		/*- change to dir defined by PLUGIN<num>_dir */
+		s = env_str;
+		s += (i = fmt_str((char *) s, "PLUGIN"));
+		s += (i = fmt_uint((char *) s, plugin_no));
+		s += (i = fmt_str((char *) s, "_dir"));
+		*s++ = 0;
+		if ((s = env_get(env_str)) && chdir(s))
+			strerr_die(111, FATAL, "chdir: ", s, ": ", 0, 0, 0, 0, (struct strerr *) 0);
+
 		/*- execute function defined by PLUGIN<num>_init */
 		s = env_str;
 		s += (i = fmt_str((char *) s, "PLUGIN"));
@@ -125,30 +148,10 @@ tcpserver_plugin(char **envp, int reload_flag)
 		s += (i = fmt_str((char *) s, "_init"));
 		*s++ = 0;
 		dlerror(); /*- clear existing error */
-#ifdef HASDLMOPEN
-		if (reload_flag) {
-			strnum[fmt_ulong(strnum, lmid)] = 0;
-			i = str_chr(shared_objfn.s, '.');
-			if (i)
-				shared_objfn.s[i--] = 0;
-			for (c = shared_objfn.s + i;*c && *c != '/';c--);
-			if (*c == '/')
-				c++;
-			strerr_warn4("tcpserver: ", c, ".so: link map ID: ", strnum, 0);
-		}
-#endif
 		if ((func_name = env_get(env_str))) {
 			func = dlsym(handle, func_name);
 			if ((error = dlerror()))
 				strerr_die(111, FATAL, "dlsym: ", func_name, ": ", error, 0, 0, 0, (struct strerr *) 0);
-			/*- change to dir defined by PLUGIN<num>_dir */
-			s = env_str;
-			s += (i = fmt_str((char *) s, "PLUGIN"));
-			s += (i = fmt_uint((char *) s, plugin_no));
-			s += (i = fmt_str((char *) s, "_dir"));
-			*s++ = 0;
-			if ((s = env_get(env_str)) && chdir(s))
-				strerr_die(111, FATAL, "chdir: ", s, ": ", 0, 0, 0, 0, (struct strerr *) 0);
 			(*func) (!reload_flag); /*- execute the function */
 		}
 	} /*- for (ptr1 = envp; *ptr1; ptr1++) { */
