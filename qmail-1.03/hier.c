@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.228  2017-04-12 13:21:50+05:30  Cprogrammer
+ * create queue base directory
+ *
  * Revision 1.227  2017-04-11 18:26:51+05:30  Cprogrammer
  * sysconfdir permissions were getting set multiple times
  *
@@ -750,6 +753,7 @@ hier(inst_dir, fatal, dev_package)
 	}
 	d(auto_prefix,     "bin", uidr, gidr, 0555);
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
+	d(auto_qmail_home, "queue", auto_uido, auto_gidq, 0755);
 	d(auto_qmail_home, "domains", auto_uido, auto_gidv, 0775);
 	d(auto_sysconfdir, "etc", auto_uido, auto_gidq, 02755);
 	d(auto_sysconfdir, "certs", auto_uidv, auto_gidq, 02775);
@@ -1549,7 +1553,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.227 2017-04-11 18:26:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.228 2017-04-12 13:21:50+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
