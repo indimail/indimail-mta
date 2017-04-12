@@ -27,6 +27,32 @@ If you manage to get it to compile elsewhere, please let us know.
 
 -->
 
+History: flash was developed by Stephen Fegan of the UCD Internet Society
+(steve@netsoc.ucd.ie) when the UCD Netsoc were just beginning. It was
+used with great success to shelter non-computer-literate users from
+the complicated operating system as well as protecting our setup from
+hackers of all kinds. Unfortunately the original developer no longer
+responds to our emails about the program so we have decided to release
+the program as open source to ensure it will be developed. The original
+developer did actually intend to do this at some point (the GPL
+declarations are his) but just didn't get around to it. Kudos to Steve
+for his work, which built on a very old menu driven shell called 'flin'.
+Steve almost totally rewrote it during the course of the development.
+
+   >why did you call your program "Flash" ..aren't there enough programs out
+   >there with the same name already???  Ever hear of Macromedia Flash?
+
+From Niall R. Murphy:
+There was actually a naming conflict from the beginning, since
+Steve already had another program called flash (which did nasty
+things to world writable ttys). I persuaded him that flash was
+the right name since the menus and backgrounds and so on and forth
+were... well... flashy :)
+This flash was around in 1996. I don't know if that's before
+Macromedia. I don't think either of us had heard of it by then
+anyway.
+-->
+
 Installation:
 
 The creation of the binaries should be as simple as "./configure;make" on a Linux
@@ -122,3 +148,25 @@ Putting it together:
 	at the first line in the menu, or type `flash <menu-name>'.
 
 	A sample menu is provided with this distribution, please examine it.
+
+-->
+
+Contact details:
+
+The latest stable version of flash should always be available at 
+ftp://ftp.netsoc.ucd.ie/pub/computing/flash/flash-stable-latest.tgz -- there
+might be later development versions but you should look at the 
+FTP site for them.
+
+If you want to communicate patches, configuration difficulties, bugs
+or so on to the maintainers, please send an empty message to 
+"flash-subscribe@netsoc.ucd.ie". The actual name of the mailing list is
+"flash@netsoc.ucd.ie".
+
+Finally if you are using flash someone we would really appreciate
+notification. It helps give us warm fuzzies.          
+
+-->
+
+Albert White
+albertw@netsoc.ucd.ie
