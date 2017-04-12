@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.398 2017-04-12 14:51:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.399 2017-04-12 16:21:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1205,8 +1205,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/sbin/osh
 %attr(755,root,qmail)                   %{_prefix}/sbin/postdel
 
-%attr(755,root,qmail)                   %{libexecdir}/get-cert
-%attr(755,root,qmail)                   %{libexecdir}/tls-cert-check
 %attr(755,root,qmail)                   %{libexecdir}/controlsync
 %attr(755,root,qmail)                   %{libexecdir}/mailzipper
 %attr(755,root,qmail)                   %{libexecdir}/updatefile
