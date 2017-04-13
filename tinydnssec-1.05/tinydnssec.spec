@@ -124,7 +124,8 @@ pod2man -s 8 -c '' "tinydns-sign" >tinydns-sign.8
 
 %{_prefix}/bin/*
 
-%doc README doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/README.tinydnssec doc/Thedjbway_djbdns.pdf
+%%doc doc/COPYING.tinydnssec doc/README.tinydnssec doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/Thedjbway_djbdns.pdf
+
 %doc %{_mandir}/man1/*
 %doc %{_mandir}/man5/*
 %doc %{_mandir}/man8/*
