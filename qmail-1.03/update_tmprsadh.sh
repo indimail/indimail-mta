@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.6  2017-04-14 00:17:22+05:30  Cprogrammer
+# added permissions for roundcube to accces certs, spamignore
+#
 # Revision 1.5  2017-03-29 19:11:10+05:30  Cprogrammer
 # added rsa2048.pem, dh2048.pem creation
 #

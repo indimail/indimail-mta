@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.9  2017-04-14 00:16:35+05:30  Cprogrammer
+# added permissions for roundcube to accces certs, spamignore
+#
 # Revision 2.8  2017-04-11 03:44:57+05:30  Cprogrammer
 # documented steps involved in upgrade
 #
