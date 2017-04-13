@@ -987,7 +987,7 @@ it man installer conf-bin conf-etc conf-lang conf-lib conf-man BIN ETC LIB MAN
 	chmod 4755  "$(DESTDIR)"`head -n 1 conf-cgidir`"/ezmlm-cgi"
 	cp README.mysql README.pgsql $(DESTDIR)/$(prefix)/share/docs/ezmlm-idx
 	cp BLURB CHANGES* FAQ INSTALL README README.std ChangeLog $(DESTDIR)/$(prefix)/share/docs/ezmlm-idx
-	cp THANKS TODO UPGRADE DOWNGRADE ezmlmrc.template LICENSE $(DESTDIR)/$(prefix)/share/docs/ezmlm-idx
+	cp LICENSE THANKS TODO UPGRADE DOWNGRADE ezmlmrc.template LICENSE $(DESTDIR)/$(prefix)/share/docs/ezmlm-idx
 
 installer: \
 load installer.o getln.a strerr.a substdio.a stralloc.a alloc.a open.a error.a str.a fs.a
