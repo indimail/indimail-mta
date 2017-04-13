@@ -65,13 +65,13 @@ for i in 512 1024 2048
 do
 	/usr/bin/openssl genrsa -out $CERTDIR/rsa"$i".new $i &&
 	$chmod 600 $CERTDIR/rsa"$i".new &&
-	$chown indimail:indimail $CERTDIR/rsa"$i".new &&
+	$chown indimail:qmail $CERTDIR/rsa"$i".new &&
 	mv -f $CERTDIR/rsa"$i".new $CERTDIR/rsa"$i".pem
 	echo rsa"$i".pem
 
 	/usr/bin/openssl dhparam -2 -out $CERTDIR/dh"$i".new $i &&
 	$chmod 600 $CERTDIR/dh"$i".new &&
-	$chown indimail:indimail $CERTDIR/dh"$i".new &&
+	$chown indimail:qmail $CERTDIR/dh"$i".new &&
 	mv -f $CERTDIR/dh"$i".new $CERTDIR/dh"$i".pem
 	echo dh"$i".pem
 done
