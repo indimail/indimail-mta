@@ -1,32 +1,21 @@
-RoundCube Webmail Installation
-==============================
+RoundCube Webmail Installation with IndiMail
+============================================
 
 These instructions will work on CentOS, RHEL, Fedora. For
 Debian/Ubuntu and other distros, please use your knowledge
-to make changes accordingly
+to make changes accordingly. In this guide, replace indimail.org
+with your own hostname.
 
 Non SSL Version Install/Configuration (look below for SSL config)
-=====================================
+=================================================================
 
-1) Install RoundCube. On older systems, dnf is the yum command
+1) Install RoundCube. On older systems, use the yum command
 
    $ sudo dnf -y install roundcubemail php-mysqlnd
-   
 
-2) change pdo_mysql.default_socket /etc/php.ini
-   For some reason pdo_mysql uses wrong mysql socket on some systems. Uses
-   /var/lib/mysql/mysql.sock instead of /var/run/mysqld/mysqld.sock. You
-   need to edit the file /etc/php.ini and define pdo_mysql.default_socket
-
-   pdo_mysql.default_socket= /var/run/mysqld/mysqld.sock
-
-   You can verifiy if the path has been correctly entered by executing the
-   below command. The command should return without any error
-
-   $ php -r "new PDO('mysql:host=localhost;dbname=RoundCube_db', 'roundcube', 'subscribed');"
-
-3) Connect to MySQL using a privileged user. IndiMail installation creates a privileged
-   mysql user 'mysql'. It does not have the user 'root'
+2) Connect to MySQL using a privileged user. IndiMail installation creates a privileged
+   mysql user 'mysql'. It does not have the user 'root'. Look at the variable PRIV_PASS
+   in /usr/sbin/svctool to know the password.
 
    a) $ /usr/bin/mysql -u mysql -p mysql
       MySQL> create database RoundCube_db;
@@ -36,7 +25,7 @@ Non SSL Version Install/Configuration (look below for SSL config)
       MySQL> QUIT;
    b) /usr/bin/mysql -u mysql -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
 
-4) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube.inc.php
+3) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube.inc.php
    $ sudo cp /etc/roundcube/config.inc.php.sample /etc/roundcubemail/config.inc.php
    Edit the lines in /etc/roundcube/config.inc.php
 
@@ -60,7 +49,7 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ sudo chown root:apache /etc/roundcube/config.inc.php
    $ sudo chmod 640 /etc/roundcube/config.inc.php
 
-5) Edit the lines in /etc/roundcube/defaults.inc.php
+4) Edit the lines in /etc/roundcube/defaults.inc.php
 
    $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
    $config['imap_auth_type'] = 'LOGIN';
@@ -70,19 +59,31 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ sudo chown root:apache /etc/roundcube/defaults.inc.php
    $ sudo chmod 640 /etc/roundcube/defaults.inc.php
 
-6) Change iwebadmin path in /usr/share/roundcubemail/iwebadmin/config.inc.php
+5) Change iwebadmin path in /usr/share/roundcubemail/iwebadmin/config.inc.php
    $rcmail_config['iwebadmin_path'] = 'http://127.0.0.1/cgi-bin/iwebadmin';
 
-7) Change sauserprefs_db_dsnw in /usr/share/roundcubemail/sauserprefs/config.inc.php
+6) Change sauserprefs_db_dsnw in /usr/share/roundcubemail/sauserprefs/config.inc.php
    $rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
 
-8) Restore indimail plugins for roundcube
+7) Restore indimail plugins for roundcube
 
    $ cd /tmp
    $ wget http://downloads.sourceforge.net/indimail/indimail-roundcube-1.0.tar.gz # This file
    $ cd /
    $ sudo tar xvfz /tmp/indimail-roundcube-1.0.tar.gz usr/share/roundcubemail/plugins
    $ /usr/bin/mysql -u mysql -p RoundCube_db < /usr/share/roundcubemail/sauserprefs/sauserprefs.sql
+
+8) change pdo_mysql.default_socket /etc/php.ini
+   For some reason pdo_mysql uses wrong mysql socket on some systems. Uses
+   /var/lib/mysql/mysql.sock instead of /var/run/mysqld/mysqld.sock. You
+   need to edit the file /etc/php.ini and define pdo_mysql.default_socket
+
+   pdo_mysql.default_socket= /var/run/mysqld/mysqld.sock
+
+   You can verifiy if the path has been correctly entered by executing the
+   below command. The command should return without any error
+
+   $ php -r "new PDO('mysql:host=localhost;dbname=RoundCube_db', 'roundcube', 'subscribed');"
 
 9) HTTPD config
 
@@ -127,20 +128,8 @@ Non SSL Version Install/Configuration (look below for SSL config)
 1) Install RoundCube
 
    $ sudo dnf -y install roundcubemail php-mysqlnd
-   
 
-2) change pdo_mysql.default_socket /etc/php.ini
-   For some reason pdo_mysql uses wrong mysql socket on some systems. Uses
-   /var/lib/mysql/mysql.sock instead of /var/run/mysqld/mysqld.sock. You
-   need to edit the file /etc/php.ini and define pdo_mysql.default_socket
-
-   pdo_mysql.default_socket= /var/run/mysqld/mysqld.sock
-
-   You can verifiy if the path has been correctly entered by executing the
-   below command. The command should return without any error
-   php -r "new PDO('mysql:host=localhost;dbname=RoundCube_db', 'roundcube', 'subscribed');"
-
-3) Connect to MySQL using a privileged user
+2) Connect to MySQL using a privileged user
 
    a) $ /usr/bin/mysql -u mysql -p mysql
       MySQL> create database RoundCube_db;
@@ -150,7 +139,7 @@ Non SSL Version Install/Configuration (look below for SSL config)
       MySQL> QUIT;
    b) /usr/bin/mysql -u mysql -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
 
-4) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube.inc.php
+3) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube.inc.php
    $ sudo cp /etc/roundcube/config.inc.php.sample /etc/roundcubemail/config.inc.php
    Edit the lines in /etc/roundcube/config.inc.php
 
@@ -175,7 +164,7 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ sudo chown root:apache /etc/roundcube/config.inc.php
    $ sudo chmod 640 /etc/roundcube/config.inc.php
 
-5) Edit the lines in /etc/roundcube/defaults.inc.php i.e.
+4) Edit the lines in /etc/roundcube/defaults.inc.php i.e.
 
    $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
    $config['default_host'] = 'ssl://indimail.org';
@@ -196,21 +185,32 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ sudo chown root:apache /etc/roundcube/defaults.inc.php
    $ sudo chmod 640 /etc/roundcube/defaults.inc.php
 
-6) Change iwebadmin path in /usr/share/roundcubemail/iwebadmin/config.inc.php
+5) Change iwebadmin path in /usr/share/roundcubemail/iwebadmin/config.inc.php
 
-   $rcmail_config['iwebadmin_path'] = 'https://indimail.org/cgi-bin/iwebadmin';
+   $rcmail_config['iwebadmin_path'] = 'https://127.0.0.1/cgi-bin/iwebadmin';
 
-7) Change sauserprefs_db_dsnw in /usr/share/roundcubemail/sauserprefs/config.inc.php
+6) Change sauserprefs_db_dsnw in /usr/share/roundcubemail/sauserprefs/config.inc.php
 
    $rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
 
-8) Restore indimail plugins for roundcube
+7) Restore indimail plugins for roundcube
 
    $ cd /tmp
    $ wget http://downloads.sourceforge.net/indimail/indimail-roundcube-ssl-1.0.tar.gz # This file
    $ cd /
    $ sudo tar xvfz /tmp/indimail-roundcube-ssl-1.0.tar.gz usr/share/roundcubemail/plugins
    $ /usr/bin/mysql -u mysql -p RoundCube_db < /usr/share/roundcubemail/sauserprefs/sauserprefs.sql
+
+8) change pdo_mysql.default_socket /etc/php.ini
+   For some reason pdo_mysql uses wrong mysql socket on some systems. Uses
+   /var/lib/mysql/mysql.sock instead of /var/run/mysqld/mysqld.sock. You
+   need to edit the file /etc/php.ini and define pdo_mysql.default_socket
+
+   pdo_mysql.default_socket= /var/run/mysqld/mysqld.sock
+
+   You can verifiy if the path has been correctly entered by executing the
+   below command. The command should return without any error
+   php -r "new PDO('mysql:host=localhost;dbname=RoundCube_db', 'roundcube', 'subscribed');"
 
 9) HTTPD config
 
@@ -247,7 +247,8 @@ Non SSL Version Install/Configuration (look below for SSL config)
       $ sudo chmod 644 /etc/httpd/conf.d/roundcubemail.conf
 
    b) This is assuming you have already generated indimail cert after
-      indimail installation. If not execute the following command
+      indimail installation. If not execute the following command. We
+	  will assume that your host is indimail.org
 
       $ sudo /usr/sbin/svctool --postmaster=postmaster@indimail.org --config=cert" --common_name=indimail.org
 
@@ -256,8 +257,16 @@ Non SSL Version Install/Configuration (look below for SSL config)
       SSLCertificateFile /etc/indimail/certs/servercert.pem
 
       Now apache server needs access to servercert.pem. Add apache user
-      to the qmail group
+      to the qmail group. You can chose either of the below two options.
+	  Options 2 is less secure, as it gives httpd access to qmail files
 
+	  Option 1
+	  --------
+	  $ sudo chgrp apache /etc/indimail/certs/servercert.pem
+	  $ sudo chmod 640 /etc/indimail/certs/servercert.pem
+
+	  Option 2
+	  --------
       $ sudo usermod -aG qmail apache
 
       Now you should see apache getting qmail group access
@@ -265,9 +274,10 @@ Non SSL Version Install/Configuration (look below for SSL config)
       $ grep "qmail:x:" /etc/group
       qmail:x:1002:qscand,apache
 
+
    c) Edit file /etc/php.ini. For some funny reason, the cert needs to be mentioned. i.e.
 
-      openssl.cafile=/etc/indimail/control/servercert.pem
+      openssl.cafile=/etc/indimail/certs/servercert.pem
       openssl.capath=/etc/pki/tls/certs
 
       Run the following command to get the cert locations. [ini_cafile] should point to
@@ -302,6 +312,9 @@ Non SSL Version Install/Configuration (look below for SSL config)
       Verify that php is using the correct certificate with proper CN.
 	  Use the program testssl.php download from the location you downloaded
       this README/INSTALL file.
+
+      In Step 9b you created a certificate with common_name as indimail.org.
+	  Use the same host that you gave when creating the certificate.
 
       $ php ./testssl.php indimail.org
       Success
