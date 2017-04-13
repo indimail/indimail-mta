@@ -57,7 +57,7 @@ binary-indep: build install
 	dh_testroot
 	dh_install --sourcedir=$(DESTDIR) -ptinydnssec
 	dh_installchangelogs
-	dh_installdocs INSTALL README doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/README.tinydnssec doc/Thedjbway_djbdns.pdf
+	dh_installdocs doc/COPYING.tinydnssec doc/README.tinydnssec doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/Thedjbway_djbdns.pdf
 	dh_link
 	dh_strip
 	dh_compress
