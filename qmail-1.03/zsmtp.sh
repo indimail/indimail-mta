@@ -1,4 +1,7 @@
 # $Log: zsmtp.sh,v $
+# Revision 1.10  2017-04-13 13:08:57+05:30  Cprogrammer
+# fixed columnt path
+#
 # Revision 1.9  2017-04-12 14:53:48+05:30  Cprogrammer
 # report programs moved to libexecdir
 #
@@ -63,7 +66,7 @@ One line per reason for delivery failure. Information on each line:
 (
 echo del xdelay reason
 LIBEXEC/rsmtpfailures | sort -n -r -k 2,2
-) | PREFIX/bin/columnt | tr _ ' '
+) | LIBEXEC/columnt | tr _ ' '
 
 echo
 exec 0</tmp/smtp.$$
@@ -79,7 +82,7 @@ One line per sender host. Information on each line:
 (
 echo sbytes xdelay mess spam host
 LIBEXEC/rsmtpsdomains | sort -n -r
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -95,7 +98,7 @@ One line per sender host. Information on each line:
 (
 echo sbytes xdelay mess spam host
 LIBEXEC/rsmtprdomains | sort -n -r
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -111,7 +114,7 @@ One line per sender host. Information on each line:
 (
 echo sbytes xdelay mess spam sender
 LIBEXEC/rsmtpsenders | sort -n -r
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -127,6 +130,6 @@ One line per sender host. Information on each line:
 (
 echo sbytes xdelay mess spam recipient
 LIBEXEC/rsmtprecipients | sort -n -r
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt
 
 /bin/rm -f /tmp/smtp.$$
