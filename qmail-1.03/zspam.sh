@@ -1,4 +1,7 @@
 # $Log: zspam.sh,v $
+# Revision 1.9  2017-04-13 13:09:02+05:30  Cprogrammer
+# fixed columnt path
+#
 # Revision 1.8  2017-04-12 14:53:52+05:30  Cprogrammer
 # report programs moved to libexecdir
 #
@@ -56,7 +59,7 @@ One line per delivery through SPAM Filter. Information on each line:
 (
 echo spambytes spam sbytes mess host
 LIBEXEC/rspamsdomain | sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -76,7 +79,7 @@ One line per host/domain. Information on each line:
 (
 echo sbytes mess spam spam_pct unsure unsure_pct ham ham_pct
 LIBEXEC/rspamstat | sort -n -r -k 3,3 -k 2,2 -k 1,1
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -90,6 +93,6 @@ echo 'Histogram of Spam Distribution
 (
 echo spamicity hist mess
 LIBEXEC/rspamhist
-) | PREFIX/bin/columnt
+) | LIBEXEC/columnt
 
 /bin/rm -f /tmp/smtp.$$
