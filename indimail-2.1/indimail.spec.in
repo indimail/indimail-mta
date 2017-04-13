@@ -138,7 +138,7 @@ Source3:  http://downloads.sourceforge.net/%{name}/courier-imap-%{courier_versio
 %endif
 Source4:  http://downloads.sourceforge.net/%{name}/flash-0.9.4.tar.gz
 Source5:  http://downloads.sourceforge.net/%{name}/altermime-0.3.10.tar.gz
-Source6:  http://downloads.sourceforge.net/%{name}/ripmime-1.4.0.9.tar.gz
+Source6:  http://downloads.sourceforge.net/%{name}/ripmime-1.4.0.10.tar.gz
 Source7:  http://downloads.sourceforge.net/%{name}/mpack-1.6.tar.gz
 Source8:  http://downloads.sourceforge.net/%{name}/fortune-%{fortune_version}.tar.gz
 %if %nonssd == 0
@@ -424,7 +424,7 @@ echo pythondir     %{pythondir}
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 
-for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.9 flash-0.9.4 \
+for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.10 flash-0.9.4 \
 mpack-1.6 fortune-%{fortune_version} pam-multi-%{pam_multi_version} \
 qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} nssd-%{nssd_version} \
 bogofilter-%{bogofilter_version} fetchmail-%{fetchmail_version} \
@@ -562,6 +562,7 @@ if [ %{reconfigure_mode} -eq 1 ] ; then
 fi
 
 %configure --prefix=%{_prefix} --sysconfdir=%{sysconfdir} \
+  --mandir=%{_prefix}/share/man --datarootdir=%{_prefix}/share/indimail \
   --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} --enable-domaindir=%{domaindir} \
   --enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
   --libexecdir=%{libexecdir} --mandir=%{mandir} --enable-qmaildir=%{indimaildir} \
@@ -1774,17 +1775,105 @@ fi
 %if %build_on_obs == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING
 %license %attr(444,root,qmail)          %{shareddir}/doc/README.licenses
+%if %nolibdkim == 0
+%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.libdkim
+%endif
+%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.qhpsi
+%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.GPL-2.libsrs2
+%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.altermime
+%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.logalert
+%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.ripmime
+%if %nobogofilter == 0
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.bogofilter
+%endif
+%if %nocourierimap == 0
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.courier-imap
+%endif
+%if %nofetchmail == 0
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.fetchmail
+%endif
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.flash
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.fortune
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.iwebadmin
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.nssd
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.pam-multi
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.procmail
 %else
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING
 %attr(444,root,qmail)                   %{shareddir}/doc/README.licenses
+%if %nolibdkim == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.libdkim
 %endif
-%attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
-%attr(444,root,qmail)                   %{shareddir}/doc/RELEASE-Notes
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
-%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
-%attr(444,root,qmail)                   %{shareddir}/doc/EXTTODO
-%attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
-%attr(444,root,qmail)                   %{shareddir}/doc/TOISP
+%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.qhpsi
+%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.GPL-2.libsrs2
+%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.altermime
+%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.logalert
+%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.ripmime
+%if %nobogofilter == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.bogofilter
+%endif
+%if %nocourierimap == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.courier-imap
+%endif
+%if %nofetchmail == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.fetchmail
+%endif
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.flash
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.fortune
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.iwebadmin
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.nssd
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.pam-multi
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.procmail
+%endif
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYRIGHT.flash
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYRIGHT.mpack
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.altermime
+%if %nobogofilter == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.bogofilter
+%endif
+%if %nocourierimap == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.courier-imap
+%endif
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.fortune
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.iwebadmin
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.logalert
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.nssd
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.pam-multi
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.procmail
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.ripmime
+%if %nofetchmail == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/README-SSL-SERVER.fetchmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README-SSL.fetchmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README-NTLM.fetchmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README.fetchmail
+%endif
+%attr(444,root,qmail)                   %{shareddir}/doc/README.altermime
+%if %nocourierimap == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/README.courier-imap
+%endif
+%attr(444,root,qmail)                   %{shareddir}/doc/README.flash
+%attr(444,root,qmail)                   %{shareddir}/doc/README.iwebadmin
+%attr(444,root,qmail)                   %{shareddir}/doc/README.ldap
+%attr(444,root,qmail)                   %{shareddir}/doc/README.logalert
+%attr(444,root,qmail)                   %{shareddir}/doc/README.nssd
+%attr(444,root,qmail)                   %{shareddir}/doc/README.pam-multi
+%attr(444,root,qmail)                   %{shareddir}/doc/README.procmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README.ripmime
+%if %nolibdkim == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/softwarelicense1-1.html
+%endif
+%attr(444,root,qmail)                   %{shareddir}/doc/README.auth
+%attr(444,root,qmail)                   %{shareddir}/doc/README.indimail
+%attr(444,root,qmail)                   %{shareddir}/doc/README.newline
+%attr(444,root,qmail)                   %{shareddir}/doc/README.qhpsi
+%attr(444,root,qmail)                   %{shareddir}/doc/README.qregex
+%attr(444,root,qmail)                   %{shareddir}/doc/README.queue-fix
+%attr(444,root,qmail)                   %{shareddir}/doc/README.remote-auth
+%attr(444,root,qmail)                   %{shareddir}/doc/README.spamcontrol
+%attr(444,root,qmail)                   %{shareddir}/doc/README.starttls
+%attr(444,root,qmail)                   %{shareddir}/doc/README.status
+%attr(444,root,qmail)                   %{shareddir}/doc/README.tls
+%attr(444,root,qmail)                   %{shareddir}/doc/README.wildmat
 %attr(444,root,qmail)                   %{shareddir}/doc/README.clamav
 %attr(444,root,qmail)                   %{shareddir}/doc/README.filters
 %attr(444,root,qmail)                   %{shareddir}/doc/README.greylist
@@ -1798,6 +1887,18 @@ fi
 %attr(444,root,qmail)                   %{shareddir}/doc/README.vlimits
 %attr(444,root,qmail)                   %{shareddir}/doc/README.mpack
 %attr(444,root,qmail)                   %{shareddir}/doc/README-CLUSTER
+%attr(444,root,qmail)                   %{shareddir}/doc/README.ucspi-tcp
+%if %nolibdkim == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/README.libdkim
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.libdkim
+%endif
+%attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
+%attr(444,root,qmail)                   %{shareddir}/doc/RELEASE-Notes
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
+%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
+%attr(444,root,qmail)                   %{shareddir}/doc/EXTTODO
+%attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
+%attr(444,root,qmail)                   %{shareddir}/doc/TOISP
 %attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.sharedmaildir
 %attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.indimail
 %attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-RPM
@@ -1815,7 +1916,9 @@ fi
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2virt
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaygood
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2rem
+%if %nobogofilter == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.bogofilter
+%endif
 %attr(444,root,qmail)                   %{shareddir}/doc/37rules.pdf
 %attr(444,root,qmail)                   %{shareddir}/doc/indimail_arch.png
 %attr(444,root,qmail)                   %{shareddir}/doc/indimail_queue.png

@@ -65,11 +65,13 @@ doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf HOWTO.bogofilter \
 	AUTHORS.procmail AUTHORS.ripmime COPYING.bogofilter COPYING.courier-imap \
 	COPYING.flash COPYING.fortune COPYING.iwebadmin COPYING.nssd COPYING.pam-multi \
 	COPYING.procmail COPYRIGHT.flash COPYRIGHT.mpack LICENSE.altermime \
-	LICENSE.ezmlm-idx LICENSE.logalert LICENSE.ripmime README.altermime \
-	README.courier-imap README.djbdns README.ezmlm-idx README.flash \
+	LICENSE.logalert LICENSE.ripmime README.altermime \
+	README.courier-imap README.flash \
 	README.iwebadmin README.ldap README.logalert README.nssd \
-	README.pam-multi README.procmail README.ripmime README.tinydnssec \
-	README.vlimits softwarelicense1-1.html
+	README.pam-multi README.procmail README.ripmime \
+	README.vlimits softwarelicense1-1.html README-SSL-SERVER.fetchmail \
+	README-SSL.fetchmail README-NTLM.fetchmail README.fetchmail \
+	COPYING.fetchmail
 
 COMMONSOURCES = addaliasdomain.c add_control.c add_domain_assign.c adddomain.c addressToken.c \
 add_user_assign.c adduser.c addusercntrl.c add_vacation.c \

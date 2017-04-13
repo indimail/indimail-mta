@@ -100,6 +100,7 @@ build-stamp:
 		cd indimail-$(version); \
 		./configure --prefix=$(prefix) --libdir=$(libdir) --datarootdir=$(shareddir) \
 		--with-pkgconfigdir=$(pkgconfigdir) --libexecdir=$(libexecdir) --enable-shareddir=$(shareddir) \
+  		--mandir=$(prefix)/share/man --datarootdir=$(prefix)/share/indimail \
 		--enable-modbase=$(prefix)/lib/indimail --mandir=$(mandir) --sysconfdir=$(sysconfdir) \
 		--enable-qmaildir=$(indimaildir) --enable-domaindir=$(domaindir) \
 		--enable-tcprules-prog=$(prefix)/bin/tcprules \

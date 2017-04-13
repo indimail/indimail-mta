@@ -434,10 +434,10 @@ the installation.
     % ./configure \
         --prefix=@prefix@ \
         --libexecdir=@libexecdir@ \
-        --mandir=@mandir@ \
         --sysconfdir=@sysconfdir@ \
         --with-pkgconfigdir=@pkgconfigdir@ \
         --datarootdir=@shareddir@ \
+        --mandir=@prefix@/share/man \
         --enable-shareddir=@shareddir@ \
         --enable-servicedir=@servicedir@ \
         --enable-domaindir=@indimaildir@
