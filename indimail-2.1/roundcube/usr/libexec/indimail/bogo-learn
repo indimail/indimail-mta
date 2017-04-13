@@ -1,4 +1,8 @@
 #!/bin/sh
+mysql=$(which mysql)
+grep=$(which grep)
+sort=$(which sort)
+cut=$(which cut)
 if [ $# -ne 5 ] ; then
 	echo "usage: bogo-learn mysqlstr user email ham|spam file" 1>&2
 	echo "or" 1>&2
@@ -8,55 +12,55 @@ fi
 
 get_whitelist()
 {
-mysql -s -u $user -p$pass -h $host $dbase <<!
+$mysql -s -u $user -p$pass -h $host $dbase <<!
 select value from userpref where username="$1" and preference='whitelist_from';
 !
 }
 
 get_spamignore()
 {
-mysql -s -u $user -p$pass -h $host $dbase <<!
+$mysql -s -u $user -p$pass -h $host $dbase <<!
 select email from spamignore; 
 !
 }
 
 add_whitelist()
 {
-mysql -s -u $user -p$pass -h $host $dbase <<!
+$mysql -s -u $user -p$pass -h $host $dbase <<!
 insert into spamignore (email) values("$1");
 !
 }
 
 del_whitelist()
 {
-mysql -s -u $user -p$pass -h $host $dbase <<!
+$mysql -s -u $user -p$pass -h $host $dbase <<!
 delete from spamignore where email="$1";
 !
 }
 
-user=`echo $1 | cut -d: -f2|cut -c3-`
-pass=`echo $1 | cut -d: -f3|cut -d@ -f1`
-host=`echo $1 | cut -d: -f3|cut -d@ -f2|cut -d/ -f1`
-dbase=`echo $1 | cut -d: -f3|cut -d@ -f2|cut -d/ -f2`
+user=`echo $1 | $cut -d: -f2|$cut -c3-`
+pass=`echo $1 | $cut -d: -f3|$cut -d@ -f1`
+host=`echo $1 | $cut -d: -f3|$cut -d@ -f2|$cut -d/ -f1`
+dbase=`echo $1 | $cut -d: -f3|$cut -d@ -f2|$cut -d/ -f2`
 
 
 #from=`/usr/bin/822field Return-Path < $5`
-echo $* >> /tmp/bogofilter.cmd
+#echo $* >> /tmp/bogofilter.cmd
 
 SPAMIGNORE=/etc/indimail/control/spamignorepatterns
 case $4 in
 	ham)
-	grep -v X-Bogosity $5 | /usr/bin/bogofilter -d /etc/indimail -Sn
+	$grep -v X-Bogosity $5 | /usr/bin/bogofilter -d /etc/indimail -Sn
 	add_whitelist $3
 	get_spamignore >> $SPAMIGNORE
-	sort -u $SPAMIGNORE -o $SPAMIGNORE
+	$sort -u $SPAMIGNORE -o $SPAMIGNORE
 	;;
 
 	spam)
-	grep -v X-Bogosity $5 | /usr/bin/bogofilter -d /etc/indimail -Ns
+	$grep -v X-Bogosity $5 | /usr/bin/bogofilter -d /etc/indimail -Ns
 	del_whitelist $3
-	grep -v $3 $SPAMIGNORE > "$SPAMIGNORE".tmp
-	sort -u "$SPAMIGNORE".tmp -o $SPAMIGNORE
+	$grep -v $3 $SPAMIGNORE > "$SPAMIGNORE".tmp
+	$sort -u "$SPAMIGNORE".tmp -o $SPAMIGNORE
 	/bin/rm -f "$SPAMIGNORE".tmp
 	;;
 
@@ -66,12 +70,12 @@ case $4 in
 		add)
 		add_whitelist $3
 		get_spamignore >> $SPAMIGNORE
-		sort -u $SPAMIGNORE -o $SPAMIGNORE
+		$sort -u $SPAMIGNORE -o $SPAMIGNORE
 		;;
 		del)
 		del_whitelist $3
 		get_spamignore >> $SPAMIGNORE
-		sort -u $SPAMIGNORE -o $SPAMIGNORE
+		$sort -u $SPAMIGNORE -o $SPAMIGNORE
 		;;
 	esac
 	;;
