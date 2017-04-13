@@ -9,6 +9,7 @@ Build-Depends: debhelper (>= 4.1.16), libmysqlclient-dev, libpq-dev, libsqlite3-
 Package: ezmlm-idx
 Architecture: any
 Depends: ${shlibs:Depends}
+Pre-Depends: indimail-mta (>= 2.0 )
 Description: Easy Mailing List Manager for qmail
  .
  ezmlm lets users set up their own mailing lists within qmail's address
