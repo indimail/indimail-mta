@@ -14,6 +14,9 @@ When in the Junk mailbox:
   The buttons are changed to "mark as not spam" or "this message is not spam"
   and the message is moved to the Inbox
 
+This plugin has been modified for bogofilter used by IndiMail, to work with
+RoundCube by Manvendra Bhangui <manvendra@indimail.org>
+
 ATTENTION
 ---------
 This is just a snapshot from the GIT repository and is **NOT A STABLE version
@@ -65,7 +68,7 @@ An [example driver][jsevents] is available to show how to use the JS events
 
 Several drivers are provided by default they are:
 
-**cmd_learn:** This driver calls an external command (for example salearn) to
+**cmd_learn:** This driver calls an external command (for example bogo-learn) to
 process the message
 
 **dir_learn:** This driver places a copy of the message in a predefined folder,

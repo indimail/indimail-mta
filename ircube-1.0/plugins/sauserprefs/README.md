@@ -10,6 +10,9 @@ Tested with SpamAssassin Version 3.3
 Inspiration for this plugin was taken from:
 [WebUserPrefs][webuserprefs]
 
+This plugin has been modified for bogofilter used by IndiMail, to work with
+RoundCube by Manvendra Bhangui <manvendra@indimail.org>
+
 ATTENTION
 ---------
 This is just a snapshot from the GIT repository and is **NOT A STABLE version

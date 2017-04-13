@@ -213,7 +213,8 @@ make
 %dir %{_prefix}/share/indimail/doc
 %dir %{plugindir}
 
-%doc %{_prefix}/share/indimail/doc/INSTALL
+%doc %{_prefix}/share/indimail/doc/README.ircube
+%doc %{_prefix}/share/indimail/doc/COPYING.ircube
 
 %changelog
 

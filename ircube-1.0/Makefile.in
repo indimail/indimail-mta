@@ -617,7 +617,8 @@ install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)@plugindir@ || exit 1
 	cp -R plugins $(DESTDIR)@plugindir@ || exit 1
 	$(mkinstalldirs) $(DESTDIR)@prefix@/share/indimail/doc || exit 1
-	cp INSTALL $(DESTDIR)@prefix@/share/indimail/doc
+	cp README $(DESTDIR)@prefix@/share/indimail/doc/README.ircube || exit 1
+	cp COPYING $(DESTDIR)@prefix@/share/indimail/doc/COPYING.ircube || exit 1
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

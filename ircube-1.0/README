@@ -48,6 +48,8 @@ Non SSL Version Install/Configuration (look below for SSL config)
    This file should have read permission for apache group
    $ sudo chown root:apache /etc/roundcube/config.inc.php
    $ sudo chmod 640 /etc/roundcube/config.inc.php
+   For markasjunk2 to work you need to set permission for
+   apache to write /etc/indimail/spamignore
 
 4) Edit the lines in /etc/roundcube/defaults.inc.php
 
