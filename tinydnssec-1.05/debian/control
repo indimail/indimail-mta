@@ -10,6 +10,7 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 Package: tinydnssec
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils
+Pre-Depends: daemontools
 Recommends: daemontools, ucspi-tcp
 Description: a collection of Domain Name System tools
  This package includes software for all the fundamental DNS operations:
