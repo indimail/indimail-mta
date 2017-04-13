@@ -23,9 +23,9 @@ Summary: Easy Mailing List Manager + IDX patches
 BuildRequires: rpm >= 3.0.2
 Buildroot: %_tmppath/%name-%version-root
 %if %build_on_obs == 1
-License: GPL-3.0+
+License: GPL-2.0+
 %else
-License: GPLv3
+License: GPLv2
 %endif
 Group: Utilities/System
 Packager: Manvendra Bhangui <manvendra@indimail.org>
@@ -222,6 +222,7 @@ echo file, section 7.
 
 %dir %rcdir
 %config(noreplace) %rcdir/*
+%attr(644,root,root) %ezdocdir/LICENSE
 %attr(644,root,root) %ezdocdir/BLURB
 %attr(644,root,root) %ezdocdir/CHANGES* 
 %attr(644,root,root) %ezdocdir/FAQ
