@@ -7628,7 +7628,7 @@ case $option in
 				# qmail-smtpd, qmail-remote
 				echo "Creating Private Key, Certificate"
 				/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
-				$chown indimail:indimail "$DESTDIR"$sysconfdir/certs/servercert.pem
+				$chown indimail:qmail "$DESTDIR"$sysconfdir/certs/servercert.pem
 				/bin/ln -sr $sysconfdir/certs/servercert.pem "$DESTDIR"$sysconfdir/certs/clientcert.pem
 				echo "Updating temporary RSA and DH keys"
 				"$DESTDIR"$libexecdir/update_tmprsadh --certdir="$DESTDIR"$sysconfdir/certs
@@ -7770,7 +7770,7 @@ case $option in
 	tar cf - `sort_backup $servicedir` | gzip -c > $backupdir/indimail-backup.$EXT.tar.gz
 	$mysqlPrefix/bin/mysqldump -u mysql -p$PRIV_PASS --extended-insert \
 		--compress --add-drop-table --extended-insert --flush-logs --lock-tables \
-		--verbose --delayed -A | gzip -c > $backupdir/dbexport.$EXT.gz
+		--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
 	;;
 
 	14)

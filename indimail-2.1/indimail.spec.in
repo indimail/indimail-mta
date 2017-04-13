@@ -2340,6 +2340,8 @@ fi
 /usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 /usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
 /usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
+# add for roundcube/php to access certs
+/usr/bin/getent group apache    > /dev/null && /usr/sbin/usermod -aG qmail apache || true
 
 /usr/bin/getent passwd %username > /dev/null || /usr/sbin/useradd -r -g %groupname -u %uid -d %{indimaildir} %username || true
 if [ $? = 4 ] ; then

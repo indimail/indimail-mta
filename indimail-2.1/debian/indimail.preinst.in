@@ -62,6 +62,8 @@ case "$1" in
 	/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 	/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
 	/usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
+	# add for roundcube/php to access certs
+	/usr/bin/getent group apache    > /dev/null && /usr/sbin/usermod -aG qmail apache || true
 	
 	for i in indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand
 	do

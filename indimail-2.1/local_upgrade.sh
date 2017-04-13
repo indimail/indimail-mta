@@ -160,3 +160,9 @@ do
 		echo /var/indimail/inquery > /service/$i/variables/FIFODIR
 	fi
 done
+# add for roundcube/php to access certs
+/usr/bin/getent group apache > /dev/null && /usr/sbin/usermod -aG qmail apache || true
+if [ -f /etc/indimail/control/spamignore ] ; then
+	$chgrp apache /etc/indimail/control/spamignore
+	$chmod 664 /etc/indimail/control/spamignore
+fi
