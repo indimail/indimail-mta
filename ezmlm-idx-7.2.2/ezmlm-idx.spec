@@ -23,9 +23,9 @@ Summary: Easy Mailing List Manager + IDX patches
 BuildRequires: rpm >= 3.0.2
 Buildroot: %_tmppath/%name-%version-root
 %if %build_on_obs == 1
-License: GPL-3.0+
+License: GPL-2.0+
 %else
-License: GPLv3
+License: GPLv2
 %endif
 Group: Utilities/System
 Packager: Manvendra Bhangui <manvendra@indimail.org>
@@ -45,10 +45,10 @@ BuildRequires: groff
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
 %endif
+##############################################################################
 %else
 BuildRequires: groff
 %endif
-##############################################################################
 Requires: rpm >= 3.0.2
 Requires: indimail-mta >= 2.0
 Source0: http://ezmlm.org/archive/%{version}/%{name}-%{version}.tar.gz
@@ -200,7 +200,7 @@ find %buildroot/%{mandir} -type f | sed -e "s}%buildroot}}" -e "s}$}*}" > man-li
 
 # copy documents
 for i in BLURB CHANGES FAQ INSTALL README README.mysql README.pgsql README.std \
-	THANKS TODO UPGRADE ChangeLog INSTALL.cgi ezcgirc ezcgi.css
+	THANKS TODO UPGRADE ChangeLog INSTALL.cgi ezcgirc ezcgi.css LICENSE
 do
 	install -m 0644 $i %{buildroot}%{ezdocdir}
 done
@@ -222,6 +222,7 @@ echo file, section 7.
 
 %dir %rcdir
 %config(noreplace) %rcdir/*
+%attr(644,root,root) %ezdocdir/LICENSE
 %attr(644,root,root) %ezdocdir/BLURB
 %attr(644,root,root) %ezdocdir/CHANGES* 
 %attr(644,root,root) %ezdocdir/FAQ
