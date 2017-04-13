@@ -207,6 +207,11 @@ make
 %attr(0644,root,root)      %{plugindir}/plugins/markasjunk2/.gitignore
 %attr(0644,root,root)      %{plugindir}/plugins/markasjunk2/markasjunk2.js
 %attr(0644,root,root)      %{plugindir}/plugins/markasjunk2/CHANGELOG
+%dir /usr/libexec
+%dir %{libexecdir}
+%dir %{_prefix}/share/indimail
+%dir %{_prefix}/share/indimail/doc
+%dir %{plugindir}
 
 %doc %{_prefix}/share/indimail/doc/INSTALL
 
