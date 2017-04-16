@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.89 2017-04-13 00:27:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.90 2017-04-16 13:07:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -763,8 +763,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/822received
 %attr(755,root,qmail)                   %{_prefix}/bin/maildircmd
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-qfilter
-%attr(755,root,qmail)                   %{_prefix}/bin/surblfilter
-%attr(755,root,qmail)                   %{_prefix}/bin/surblqueue
 %attr(755,root,qmail)                   %{_prefix}/bin/spfquery
 %attr(755,root,qmail)                   %{_prefix}/bin/srsfilter
 
@@ -838,6 +836,8 @@ done
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-clean
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-send
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-todo
+%attr(755,root,qmail)                   %{_prefix}/sbin/surblfilter
+%attr(755,root,qmail)                   %{_prefix}/sbin/surblqueue
 
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-getpw
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-local
@@ -1208,8 +1208,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/sbin/readproctitle
 
 # ucspi-tcp
-%attr(755,root,qmail)                   %{_prefix}/bin/greydaemon
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-greyd
 %attr(755,root,root)                    %{_prefix}/bin/mconnect-io
 %attr(755,root,root)                    %{_prefix}/bin/rblsmtpd
 %attr(755,root,root)                    %{_prefix}/bin/tcprulescheck
@@ -1224,6 +1222,8 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/tcprules
 %attr(755,root,qmail)                   %{_prefix}/bin/udpclient
 %attr(755,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(755,root,qmail)                   %{_prefix}/sbin/greydaemon
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-greyd
 %endif
 
 %if %nolibdkim == 0
