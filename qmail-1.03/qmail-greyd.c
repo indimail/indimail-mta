@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.18  2017-04-16 19:52:13+05:30  Cprogrammer
+ * fixed hsearch() logic
+ *
  * Revision 1.17  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -688,6 +691,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	union v46addr   r_ip;
 #ifdef USE_HASH
 	ENTRY           e, *ep;
+	int             found;
 #else
 	int             rpath_len;
 #endif
@@ -733,15 +737,20 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	e.key = remoteip;
 	if (!(ep = hsearch(e, FIND)))
 		return (RECORD_NEW);
-	ptr = (struct greylst *) ep->data;
+	for (found = 0, ptr = (struct greylst *) ep->data;ptr && ptr->ip_next;ptr = ptr->ip_next) {
 #ifdef IPV6
-	if (!compare_ip(ptr->ip.ip6.d, r_ip.ip6.d) && !str_diffn(ptr->rpath, rpath, str_len(rpath))
-		&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
+		if (!compare_ip(ptr->ip.ip6.d, r_ip.ip6.d) && !str_diffn(ptr->rpath, rpath, str_len(rpath))
+			&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
 #else
-	if (!compare_ip(ptr->ip.ip.d, r_ip.ip.d) && !str_diffn(ptr->rpath, rpath, str_len(rpath))
-		&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
+		if (!compare_ip(ptr->ip.ip.d, r_ip.ip.d) && !str_diffn(ptr->rpath, rpath, str_len(rpath))
+			&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
 #endif
-	{ /*- found */
+		{
+			found = 1;
+			break;
+		}
+	}
+	if (found) { 
 		*store = ptr;
 		ptr->attempts++;
 		/*- # not older than timeout days */
@@ -1417,7 +1426,7 @@ main(int argc, char **argv)
 				len = str_len(ptr) + 1;
 				if (*ptr == 'T')
 					rcptlen += len;
-				ptr += len;
+				ptr += len; /*- skip past \0 */
 				if (ptr < (rdata + n - 2))
 					out(" ");
 				if (ptr == rdata + n) {
@@ -1493,7 +1502,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.17 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.18 2017-04-16 19:52:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
