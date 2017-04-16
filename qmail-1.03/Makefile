@@ -5799,7 +5799,7 @@ compile str.h str_cspn.c
 
 surblfilter.8: surblfilter.9 conf-qmail conf-sysconfdir
 	cat surblfilter.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> surblfilter.8
 
