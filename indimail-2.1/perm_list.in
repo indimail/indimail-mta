@@ -92,7 +92,6 @@
 %attr(0755,root,qmail) @prefix@/bin/flash
 %attr(0755,root,qmail) @prefix@/bin/fortune
 %attr(0755,root,qmail) @prefix@/bin/forward
-%attr(0755,root,qmail) @prefix@/bin/greydaemon
 %attr(0755,root,qmail) @prefix@/bin/hostcntrl
 %attr(0755,root,qmail) @prefix@/bin/ifaddr
 %attr(0755,root,qmail) @prefix@/bin/iftocc
@@ -134,7 +133,6 @@
 %attr(0755,root,qmail) @prefix@/bin/qmaildirmake
 %attr(0755,root,qmail) @prefix@/bin/qmail-dk
 %attr(0755,root,qmail) @prefix@/bin/qmail-dkim
-%attr(0755,root,qmail) @prefix@/bin/qmail-greyd
 %attr(0755,root,qmail) @prefix@/bin/qmail-inject
 %attr(0755,root,qmail) @prefix@/bin/qmail-pop3d
 %attr(0755,root,qmail) @prefix@/bin/qmail-popbull
@@ -174,8 +172,6 @@
 %attr(0755,root,qmail) @prefix@/bin/srsfilter
 %attr(0755,root,qmail) @prefix@/bin/sslerator
 %attr(0755,root,qmail) @prefix@/bin/supervise
-%attr(0755,root,qmail) @prefix@/bin/surblfilter
-%attr(0755,root,qmail) @prefix@/bin/surblqueue
 %attr(0755,root,qmail) @prefix@/bin/svc
 %attr(0755,root,qmail) @prefix@/bin/svok
 %attr(0755,root,qmail) @prefix@/bin/svstat
@@ -228,6 +224,10 @@
 %attr(0751,root,qmail) @prefix@/sbin/qmail-clean
 %attr(0751,root,qmail) @prefix@/sbin/qmail-send
 %attr(0751,root,qmail) @prefix@/sbin/qmail-todo
+%attr(0755,root,qmail) @prefix@/sbin/qmail-greyd
+%attr(0755,root,qmail) @prefix@/sbin/greydaemon
+%attr(0755,root,qmail) @prefix@/sbin/surblfilter
+%attr(0755,root,qmail) @prefix@/sbin/surblqueue
 
 %attr(0755,root,qmail) @prefix@/bin/qmail-pw2u
 %attr(0755,root,qmail) @prefix@/bin/qmail-local

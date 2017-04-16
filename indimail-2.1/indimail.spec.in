@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.401 2017-04-14 00:16:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.402 2017-04-16 13:10:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1297,8 +1297,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/qaes
 %attr(755,root,qmail)                   %{_prefix}/bin/qnotify
 %attr(755,root,qmail)                   %{_prefix}/bin/rrt
-%attr(755,root,qmail)                   %{_prefix}/bin/greydaemon
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-greyd
 %attr(755,root,qmail)                   %{_prefix}/bin/drate
 %attr(755,root,qmail)                   %{_prefix}/bin/cidr
 %attr(755,root,qmail)                   %{_prefix}/bin/spawn-filter
@@ -1339,8 +1337,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/multilog
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(755,root,qmail)                   %{_prefix}/bin/srsfilter
-%attr(755,root,qmail)                   %{_prefix}/bin/surblfilter
-%attr(755,root,qmail)                   %{_prefix}/bin/surblqueue
 %attr(755,root,qmail)                   %{_prefix}/bin/setuidgid
 %attr(755,root,qmail)                   %{_prefix}/bin/spfquery
 %attr(755,root,qmail)                   %{_prefix}/bin/tai64nlocal
@@ -1384,6 +1380,8 @@ fi
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-todo
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-clean
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-rspawn
+%attr(755,root,qmail)                   %{_prefix}/sbin/surblfilter
+%attr(755,root,qmail)                   %{_prefix}/sbin/surblqueue
 
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-pw2u
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-local
@@ -1528,6 +1526,9 @@ fi
 %attr(755,root,root)                    %{_prefix}/bin/tcprules
 %attr(755,root,qmail)                   %{_prefix}/bin/udplogger
 %attr(755,root,qmail)                   %{_prefix}/bin/udpclient
+%attr(755,root,qmail)                   %{_prefix}/sbin/greydaemon
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-greyd
+
 # bogofilter
 %if %nobogofilter == 0
 %attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
