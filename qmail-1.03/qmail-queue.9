@@ -208,7 +208,7 @@ for the virus scanner itself.
 
 The QHPSI extension for qmail-queue allows to call an arbitary virus scanner directly,
 scanning the incoming data-stream on STDIN or it allows plugins to be loaded from
-the QMAILHOME/plugins directory. This directory can be changed by defining
+the PREFIX/lib/indimail/plugins directory. This directory can be changed by defining
 \fBPLUGINDIR\fR environment variable. QHPSI can be advised to pass
 multiple arguments to the virus scanner for customization. To run external scanner
 or load scanner plugins, \fBqmail-queue\fR calls \fBqhpsi\fR, a program setuid to \fIqscand\fR.
@@ -262,7 +262,7 @@ is set to list of plugins starting with a keyword 'plugin:'.
 .EE
 
 Sets \fBqmail-queue\fR to load three plugins clamd, fsecure and symantec from
-QMAILHOME/plugins directory.
+PREFIX/lib/indimail/plugins directory.
 
 You can also use the plugin generic.so. generic.so plugin can use any scanner defined
 by the \fBSCANCMD\fR environment variable.

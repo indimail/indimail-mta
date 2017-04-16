@@ -13,7 +13,7 @@ QUEUEDIR environment variable. If you are using \fBqmail-daemon\fR(8) to invoke 
 \fBqmail-daemon\fR will use QUEUE_COUNT, QUEUE_START to invoke multiple qmail-send processes, with
 each having its own queue defined by the \fBQUEUEDIR\fR environment variable.
 
-\fBqmail-send\fR can load startup plugins from QMAILHOME/plugins directory. This directory can
+\fBqmail-send\fR can load startup plugins from PREFIX/usr/lib/indimail/plugins directory. This directory can
 be changed by defining the \fBPLUGINDIR\fR environment variable. By default, qmail-send will
 attempt to load the plugin qmail-send.so. This can be changed by defining \fBSTART_PLUGIN\fR
 environment variable. You can define multiple plugins separated by the space charater in the
