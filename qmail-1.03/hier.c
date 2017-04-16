@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.231  2017-04-16 13:06:55+05:30  Cprogrammer
+ * moved surbfilter, surblqueue, qmail-greyd, greydaemon to sbin
+ *
  * Revision 1.230  2017-04-13 00:26:47+05:30  Cprogrammer
  * updated attribution, licenses for indimail-mta package
  *
@@ -837,15 +840,11 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "mailsubj", auto_uido, auto_gidq, moder_x);
 
 	c(auto_qmail_home, "bin", "qmail-qfilter", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "surblfilter", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "surblqueue", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "drate", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "cidr", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "spawn-filter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-cat", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-greyd", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "greydaemon", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "irmail", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "rrforward", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "maildirdeliver", auto_uido, auto_gidq, moder_x);
@@ -937,6 +936,12 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "sbin", "qmail-rspawn", auto_uido, auto_gidq, moder_t);
 	c(auto_qmail_home, "sbin", "qmail-clean", auto_uido, auto_gidq, moder_t);
 	c(auto_qmail_home, "sbin", "qmail-send", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "svscan", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "readproctitle", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-greyd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "greydaemon", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "surblfilter", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "surblqueue", auto_uido, auto_gidq, moder_x);
 #ifdef EXTERNAL_TODO
 	c(auto_qmail_home, "sbin", "qmail-todo", auto_uido,auto_gidq,moder_t);
 #endif
@@ -1017,8 +1022,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "qlogselect", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "udplogger", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "udpclient", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "svscan", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "readproctitle", auto_uido, auto_gidq, moder_x);
 
 	/* serialmail */
 	c(auto_qmail_home, "bin", "serialcmd", auto_uido, auto_gidq, moder_x);
@@ -1564,7 +1567,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.230 2017-04-13 00:26:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.231 2017-04-16 13:06:55+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
