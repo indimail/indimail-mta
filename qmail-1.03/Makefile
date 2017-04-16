@@ -2015,7 +2015,7 @@ qmail-pw2u.8
 	nroff -man qmail-pw2u.8 > qmail-pw2u.0
 
 qmail-pw2u.8: \
-qmail-pw2u.9 conf-break conf-syconfdir
+qmail-pw2u.9 conf-break conf-sysconfdir
 	cat qmail-pw2u.9 \
 	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
