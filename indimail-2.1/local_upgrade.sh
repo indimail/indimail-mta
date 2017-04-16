@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.10  2017-04-16 19:55:04+05:30  Cprogrammer
+# changed qmail-greyd path to /usr/sbin
+#
 # Revision 2.9  2017-04-14 00:16:35+05:30  Cprogrammer
 # added permissions for roundcube to accces certs, spamignore
 #
@@ -169,3 +172,5 @@ if [ -f /etc/indimail/control/spamignore ] ; then
 	$chgrp apache /etc/indimail/control/spamignore
 	$chmod 664 /etc/indimail/control/spamignore
 fi
+# qmail-greyd, greydaemon path changed to /usr/sbin
+$sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' /service/greylist.1999/run
