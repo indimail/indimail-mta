@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.9  2017-04-16 19:54:12+05:30  Cprogrammer
+ * display lmid only on reload
+ *
  * Revision 1.8  2017-04-12 10:20:41+05:30  Cprogrammer
  * use #ifdef HASDLMOPEN to use dlmopen() function
  *
@@ -45,7 +48,7 @@
 void
 load_shared(char *file, char **argv, char **envp)
 {
-	int             argc, split;
+	int             argc, split, reload_flag = 0;
 	int             (*func) (int, char **, char **);
 	void           *handle;
 	char           *error, *fptr;
@@ -68,12 +71,14 @@ load_shared(char *file, char **argv, char **envp)
 #endif
 				strerr_die(111, FATAL, "dlmopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 				return;
-			} 
+			}
+			reload_flag = 1;
 			if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
 				strerr_die(111, FATAL, "dlinfo: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 			if (dlnamespace(file, (unsigned long *) &lmid) < 0)
 				strerr_die(111, FATAL, "dlnamespace: ", file, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
-		}
+		} else
+			reload_flag = 0;
 #else /*- HASDLMOPEN */
 		if (!(handle = dlopen(file, RTLD_NOW|RTLD_NOLOAD))) {
 #ifdef RTLD_DEEPBIND
@@ -83,8 +88,10 @@ load_shared(char *file, char **argv, char **envp)
 #endif
 				strerr_die(111, FATAL, "dlopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 				return;
-			} 
-		}
+			} else
+				reload_flag = 0;
+		} else
+			reload_flag = 0;
 #endif /*- ifdef HASDLMOPEN */
 		dlerror(); /*- clear existing error */
 		/*- use the basename of the shared object as the function to execute */
@@ -95,8 +102,10 @@ load_shared(char *file, char **argv, char **envp)
 		if (*fptr == '/')
 			fptr++;
 #ifdef HASDLMOPEN
-		strnum[fmt_ulong(strnum, lmid)] = 0;
-		strerr_warn4("tcpserver: ", "load_shared", ".so: link map ID: ", strnum, 0);
+		if (reload_flag) {
+			strnum[fmt_ulong(strnum, lmid)] = 0;
+			strerr_warn4("tcpserver: ", fptr, ".so: link map ID: ", strnum, 0);
+		}
 #endif
 		func = dlsym(handle, fptr);
 		if ((error = dlerror()))
