@@ -2,8 +2,6 @@ usr/bin/tcpserver /usr/bin
 usr/bin/tcprules /usr/bin
 usr/bin/tcprulescheck /usr/bin
 usr/bin/tcpclient /usr/bin
-usr/bin/greydaemon /usr/bin
-usr/bin/qmail-greyd /usr/bin
 usr/bin/udpclient /usr/bin
 usr/bin/udplogger /usr/bin
 usr/bin/who@ /usr/bin
@@ -14,6 +12,8 @@ usr/bin/tcpcat /usr/bin
 usr/bin/mconnect /usr/bin
 usr/bin/mconnect-io /usr/bin
 usr/bin/rblsmtpd /usr/bin
+usr/sbin/greydaemon /usr/sbin
+usr/sbin/qmail-greyd /usr/sbin
 usr/share/man/man1/tcpserver.1.gz /usr/share/man/man1
 usr/share/man/man1/udpclient.1.gz /usr/share/man/man1
 usr/share/man/man1/tcprules.1.gz /usr/share/man/man1
