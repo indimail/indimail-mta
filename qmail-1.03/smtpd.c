@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.194  2017-04-16 13:12:31+05:30  Cprogrammer
+ * use different variable for nodnscheck control file
+ *
  * Revision 1.193  2017-03-21 15:39:52+05:30  Cprogrammer
  * use CERTDIR to override tls/ssl certificates
  *
@@ -743,7 +746,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.193 $";
+char           *revision = "$Revision: 1.194 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -880,6 +883,7 @@ struct constmap maprmf;
 int             nodnschecksok = 0;
 static stralloc nodnschecks = { 0 };
 struct constmap mapnodnschecks;
+char           *nodnsFn;
 /*- badip Check */
 char           *dobadipcheck = (char *) 0;
 char           *badipfn = (char *) 0;
@@ -2983,7 +2987,7 @@ open_control_files()
 	 * Look up "MAIL from:" addresses to skip for DNS check in control/nodnscheck.
 	 */
 	if (!(nodnscheck = env_get("NODNSCHECK")))
-		open_control_once(&nodnschecksok, 0, &bmfFn, 0, 0, 0, "nodnscheck", 0, &nodnschecks, &mapnodnschecks, 0);
+		open_control_once(&nodnschecksok, 0, &nodnsFn, 0, 0, 0, "nodnscheck", 0, &nodnschecks, &mapnodnschecks, 0);
 	/*
 	 * Enable badip if
 	 * BADIPCHECK is defined (default control file badip)
@@ -6890,7 +6894,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.193 2017-03-21 15:39:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.194 2017-04-16 13:12:31+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
