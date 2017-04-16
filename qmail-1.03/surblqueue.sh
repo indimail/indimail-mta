@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: surblqueue.sh,v $
+# Revision 1.6  2017-04-16 13:08:01+05:30  Cprogrammer
+# fixed qmail-multi path
+#
 # Revision 1.5  2017-03-09 16:39:29+05:30  Cprogrammer
 # FHS changes
 #
@@ -17,7 +20,7 @@
 # Initial revision
 #
 #
-# $Id: surblqueue.sh,v 1.5 2017-03-09 16:39:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: surblqueue.sh,v 1.6 2017-04-16 13:08:01+05:30 Cprogrammer Exp mbhangui $
 #
 # I should be called by qmail-smtpd or anything that calls qmail-queue
 #
@@ -36,7 +39,7 @@ fi
 #
 # run surblfilter and feed output to qmail-multi
 #
-PREFIX/bin/surblfilter > $out
+PREFIX/sbin/surblfilter > $out
 status=$?
 if [ $status -eq 0 ] ; then
 	exec 0<$out
@@ -45,7 +48,7 @@ if [ $status -eq 0 ] ; then
 	if [ "$SURBLQUEUE" != "" -a -x "$SURBLQUEUE" ]; then
 		exec $SURBLQUEUE
 	else
-		exec PREFIX/bin/qmail-multi
+		exec PREFIX/sbin/qmail-multi
 	fi
 else
 	/bin/rm -f $out
