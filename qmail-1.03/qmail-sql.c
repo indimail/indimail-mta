@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.3  2017-04-16 19:53:14+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
  * Revision 1.2  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -16,6 +19,7 @@
 #include "auto_uids.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
+#include "auto_sysconfdir.h"
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/stat.h>
@@ -248,8 +252,8 @@ main(int argc, char **argv)
 		die_nomem();
 	if (!stralloc_0(&filename))
 		die_nomem();
-	if (chdir(auto_qmail) == -1)
-		die_control();
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die3sys(111, FATAL, "chdir: ", auto_sysconfdir);
 	if (stat(filename.s, &statbuf))
 		my_error("stat", filename.s, 111);
 	--filename.len;
@@ -326,7 +330,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.2 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.3 2017-04-16 19:53:14+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
