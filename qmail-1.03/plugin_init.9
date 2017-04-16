@@ -65,7 +65,7 @@ gcc -Wall -O2 -fPIC -fno-strict-aliasing -c smtp_plugin.c
 gcc -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin.so smtp_plugin.o
 .EE
 
-You need to copy the plugin in \fIQMAILHOME/plugins\fR directory for it to get loaded by
+You need to copy the plugin in \fIPREFIX/usr/lib/indimail/plugins\fR directory for it to get loaded by
 \fBqmail-smtpd(8)\fR at runtime.
 
 If you desire to write multiple plugins, you should have your plugins as

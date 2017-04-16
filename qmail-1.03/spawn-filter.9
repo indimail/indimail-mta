@@ -58,7 +58,7 @@ file can be used to setup additional filters after running
 the SPAM filters (See Section on Spam Filtering).
 
 .EX
-indimail.org:remote:QMAILHOME/bin/dk-filter
+indimail.org:remote:PREFIX/bin/dk-filter
 .EE
 
 The sequence in which the filter program is run is given below
@@ -280,7 +280,7 @@ where domain is a valid (recipient) domain for which mails are being processed a
 args is a list of aguments to be supplied to the filter program
 
 .EX
-indimail.org:bogofilter -c QMAILHOME/etc/bogofilter.cf -p -3 -d QMAILHOME/etc/indimail.org
+indimail.org:bogofilter -c CONTROL/bogofilter.cf -p -3 -d CONTROL/indimail.org
 .EE
 
 NOTE: For the control files spamfilter, filterargs, rejectspam, spamredirect

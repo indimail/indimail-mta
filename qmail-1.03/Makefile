@@ -584,9 +584,9 @@ warn-auto.sh datemail.sh conf-prefix conf-break conf-split
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> datemail
 
-datemail.1: datemail.9
+datemail.1: datemail.9 conf-prefix
 	cat datemail.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> datemail.1
 
 datetime.a: \
@@ -759,24 +759,6 @@ warn-auto.sh multirotate.sh conf-prefix
 	cat warn-auto.sh multirotate.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> multirotate
-
-qmail-sighup: \
-warn-auto.sh qmail-sighup.sh conf-qmail
-	cat warn-auto.sh qmail-sighup.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	> qmail-sighup
-
-qmail-sigterm: \
-warn-auto.sh qmail-sigterm.sh conf-qmail
-	cat warn-auto.sh qmail-sigterm.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	> qmail-sigterm
-
-qmail-sigalrm: \
-warn-auto.sh qmail-sigalrm.sh conf-qmail
-	cat warn-auto.sh qmail-sigalrm.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	> qmail-sigalrm
 
 qpq: \
 warn-auto.sh qpq.sh conf-qmail conf-prefix
@@ -1083,15 +1065,15 @@ stralloc.h strerr.h auto_prefix.h conf-plugin conf-dlopen
 	conf-batv conf-plugin conf-dlopen` hier.c
 
 home: \
-home.sh conf-qmail
+home.sh conf-prefix
 	cat home.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> home
 
 home+df: \
-home+df.sh conf-qmail
+home+df.sh conf-prefix
 	cat home+df.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> home+df
 
 hostname: \
@@ -1358,9 +1340,9 @@ run-cleanq.8
 	nroff -man run-cleanq.8 > run-cleanq.0
 
 run-cleanq.8: \
-run-cleanq.9
+run-cleanq.9 conf-prefix
 	cat run-cleanq.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> run-cleanq.8
 
 it: \
@@ -1708,16 +1690,14 @@ qmail-control.5
 	nroff -man qmail-control.5 > qmail-control.0
 
 qmail-control.5: \
-qmail-control.9 conf-qmail conf-sysconfdir
+qmail-control.9 conf-sysconfdir
 	cat qmail-control.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-control.5
 
 qmail-srs.5: \
-qmail-srs.9 conf-qmail conf-sysconfdir
+qmail-srs.9 conf-sysconfdir
 	cat qmail-srs.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-srs.5
 
@@ -1769,9 +1749,9 @@ qmail-inject.0: \
 qmail-inject.8
 	nroff -man qmail-inject.8 > qmail-inject.0
 
-qmail-inject.8: qmail-inject.9 conf-qmail conf-sysconfdir
+qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
 	cat qmail-inject.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-inject.8
 
@@ -1828,9 +1808,8 @@ qmail-local.8
 	nroff -man qmail-local.8 > qmail-local.0
 
 qmail-local.8:\
-qmail-local.9 conf-qmail conf-sysconfdir
+qmail-local.9 conf-sysconfdir
 	cat qmail-local.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-local.8
 
@@ -1886,9 +1865,8 @@ qmail-newmrh.8
 	nroff -man qmail-newmrh.8 > qmail-newmrh.0
 
 qmail-newmrh.8: \
-qmail-newmrh.9 conf-qmail conf-sysconfdir
+qmail-newmrh.9 conf-sysconfdir
 	cat qmail-newmrh.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-newmrh.8
 
@@ -1914,7 +1892,6 @@ qmail-cdb.8
 qmail-cdb.8: \
 qmail-cdb.9 conf-break conf-spawn conf-sysconfdir
 	cat qmail-cdb.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
@@ -1938,12 +1915,9 @@ recipient-cdb.8
 	nroff -man recipient-cdb.8 > recipient-cdb.0
 
 recipient-cdb.8: \
-recipient-cdb.9 conf-break conf-spawn conf-sysconfdir
+recipient-cdb.9 conf-sysconfdir
 	cat recipient-cdb.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> recipient-cdb.8
 
 recipient-cdb.o: \
@@ -1965,12 +1939,9 @@ qmail-newu.8
 	nroff -man qmail-newu.8 > qmail-newu.0
 
 qmail-newu.8: \
-qmail-newu.9 conf-break conf-spawn
+qmail-newu.9 conf-sysconfdir
 	cat qmail-newu.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-newu.8
 
 qmail-newu.o: \
@@ -2044,12 +2015,10 @@ qmail-pw2u.8
 	nroff -man qmail-pw2u.8 > qmail-pw2u.0
 
 qmail-pw2u.8: \
-qmail-pw2u.9 conf-break conf-spawn
+qmail-pw2u.9 conf-break conf-syconfdir
 	cat qmail-pw2u.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-pw2u.8
 
 qmail-pw2u.o: \
@@ -2209,15 +2178,16 @@ spawn-filter.8
 	nroff -man spawn-filter.8 > spawn-filter.0
 
 spawn-filter.8: \
-spawn-filter.9
+spawn-filter.9 conf-prefix conf-sysconfdir
 	cat spawn-filter.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}CONTROL}"`head -1 conf-sysconfdir`"}g \
 	> spawn-filter.8
 
 drate.1: \
-drate.9
+drate.9 conf-prefix
 	cat drate.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> drate.1
 
 qmail-queue: \
@@ -2237,7 +2207,7 @@ qmail-queue.8
 	nroff -man qmail-queue.8 > qmail-queue.0
 
 qmail-queue.8: \
-qmail-queue.9
+qmail-queue.9 conf-qmail conf-prefix
 	cat qmail-queue.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
@@ -2317,15 +2287,13 @@ uint64.h variables.h conf-domainkeys auto_control.h
 
 qmail-dk.0: qmail-dk.8
 	nroff -man qmail-dk.8 > qmail-dk.0
-qmail-dk.8: qmail-dk.9 conf-qmail conf-sysconfdir
+qmail-dk.8: qmail-dk.9 conf-sysconfdir
 	cat qmail-dk.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-dk.8
 
-dktest.8: dktest.9 conf-qmail conf-sysconfdir
+dktest.8: dktest.9 conf-sysconfdir
 	cat dktest.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dktest.8
 
@@ -2387,27 +2355,24 @@ auto_qmail.h sgetopt.h case.h env.h control.h domainkeys.h \
 hasdkim.h variables.h auto_control.h
 	./compile -I../libdkim-$(DKIM_VERSION) $(inc_deps) qmail-dkim.c
 
-qmail-dkim.8: qmail-dkim.9 conf-qmail conf-sysconfdir
+qmail-dkim.8: qmail-dkim.9 conf-sysconfdir
 	cat qmail-dkim.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-dkim.8
 
-dk-filter.8: dk-filter.9 conf-qmail conf-sysconfdir
+dk-filter.8: dk-filter.9 conf-prefix conf-sysconfdir
 	cat dk-filter.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dk-filter.8
 
 qnotify.1: qnotify.9 conf-qmail conf-sysconfdir
 	cat qnotify.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qnotify.1
 
-rrt.1: rrt.9 conf-qmail conf-sysconfdir
+rrt.1: rrt.9 conf-sysconfdir
 	cat rrt.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> rrt.1
 
@@ -2709,22 +2674,23 @@ qmail-smtpd.8
 	nroff -man qmail-smtpd.8 > qmail-smtpd.0
 
 qmail-smtpd.8: \
-qmail-smtpd.9 conf-qmail conf-sysconfdir
+qmail-smtpd.9 conf-qmail conf-sysconfdir conf-prefix
 	cat qmail-smtpd.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-smtpd.8
 
 plugin_init.3: \
-plugin_init.9
+plugin_init.9 conf-prefix
 	cat plugin_init.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> plugin_init.3
 
 plugtest.1: \
-plugtest.9
+plugtest.9 conf-prefix
 	cat plugtest.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> plugtest.1
 
 greydaemon.0: \
@@ -2735,9 +2701,9 @@ qmail-poppass.0: \
 qmail-poppass.8
 	nroff -man qmail-poppass.8 > qmail-poppass.0
 qmail-poppass.8: \
-qmail-poppass.9
+qmail-poppass.9 conf-prefix
 	cat qmail-poppass.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qmail-poppass.8
 
 qmail-multi.0: \
@@ -2745,9 +2711,10 @@ qmail-multi.8
 	nroff -man qmail-multi.8 > qmail-multi.0
 
 qmail-multi.8: \
-qmail-multi.9
+qmail-multi.9 conf-prefix conf-qmail
 	cat qmail-multi.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qmail-multi.8
 
 smtpd.o: \
@@ -2784,11 +2751,9 @@ qmail-start.8
 	nroff -man qmail-start.8 > qmail-start.0
 
 qmail-start.8: \
-qmail-start.9 conf-break conf-spawn
+qmail-start.9 conf-qmail
 	cat qmail-start.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-start.8
 
 qmail-start.o: \
@@ -2865,10 +2830,9 @@ hasindimail.h conf-sync
 
 
 qmail-upq: \
-warn-auto.sh qmail-upq.sh conf-qmail conf-break conf-split
+warn-auto.sh qmail-upq.sh conf-qmail conf-split
 	cat warn-auto.sh qmail-upq.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> qmail-upq
 
@@ -2877,12 +2841,10 @@ qmail-users.5
 	nroff -man qmail-users.5 > qmail-users.0
 
 qmail-users.5: \
-qmail-users.9 conf-break conf-spawn
+qmail-users.9 conf-qmail conf-sysconfdir
 	cat qmail-users.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}@assign@}"`head -1 conf-sysconfdir`/users"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-users.5
 
 qmail.0: \
@@ -2909,9 +2871,8 @@ str.a auto_qmail.o scan_ulong.o auto_control.o
 qreceipt.0: \
 qreceipt.1
 	nroff -man qreceipt.1 > qreceipt.0
-qreceipt.1: qreceipt.9 conf-qmail conf-sysconfdir
+qreceipt.1: qreceipt.9 conf-sysconfdir
 	cat qreceipt.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qreceipt.1
 
@@ -2987,9 +2948,8 @@ substdio.a error.a str.a fs.a lock.a seek.a alloc.a
 rrforward.0: \
 rrforward.1
 	nroff -man rrforward.1 > rrforward.0
-rrforward.1: rrforward.9 conf-sysconfdir conf-qmail
+rrforward.1: rrforward.9 conf-sysconfdir
 	cat rrforward.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> rrforward.1
 
@@ -3660,7 +3620,7 @@ substdio.h fmt.h error.h control.h env.h scan.h
 qmail-rm.0: qmail-rm.1
 	nroff -man qmail-rm.1 > qmail-rm.0
 
-qmail-rm.1: qmail-rm.9
+qmail-rm.1: qmail-rm.9 conf-qmail
 	cat qmail-rm.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> qmail-rm.1
@@ -3788,9 +3748,8 @@ open.a wait.a sig.a fd.a fs.a
 maildirserial.0: \
 maildirserial.1
 	nroff -man maildirserial.1 > maildirserial.0
-maildirserial.1: maildirserial.9 conf-qmail conf-sysconfdir
+maildirserial.1: maildirserial.9 conf-sysconfdir
 	cat maildirserial.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> maildirserial.1
 
@@ -4008,9 +3967,9 @@ str.a fs.a case.a
 mlmatchup.0: mlmatchup.8
 	nroff -man mlmatchup.8 > mlmatchup.0
 
-mlmatchup.8: mlmatchup.9
+mlmatchup.8: mlmatchup.9 conf-prefix
 	cat mlmatchup.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> mlmatchup.8
 
 mlmatchup.o: \
@@ -4021,22 +3980,18 @@ str.h fmt.h scan.h case.h
 	
 
 successes: \
-warn-auto.sh successes.sh conf-qmail conf-libexec
+warn-auto.sh successes.sh
 	cat warn-auto.sh successes.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> successes
 
 suids: \
-warn-auto.sh suids.sh conf-qmail
+warn-auto.sh suids.sh
 	cat warn-auto.sh suids.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> suids
 
 xqp: \
-warn-auto.sh xqp.sh conf-qmail
+warn-auto.sh xqp.sh
 	cat warn-auto.sh xqp.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> xqp
 
 xqp.0: \
@@ -4044,9 +3999,8 @@ xqp.1
 	nroff -man xqp.1 > xqp.0
 
 xrecipient: \
-warn-auto.sh xrecipient.sh conf-qmail
+warn-auto.sh xrecipient.sh
 	cat warn-auto.sh xrecipient.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> xrecipient
 
 xrecipient.0: \
@@ -4054,9 +4008,8 @@ xrecipient.1
 	nroff -man xrecipient.1 > xrecipient.0
 
 xsender: \
-warn-auto.sh xsender.sh conf-qmail
+warn-auto.sh xsender.sh
 	cat warn-auto.sh xsender.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> xsender
 
 xsender.0: \
@@ -4064,101 +4017,86 @@ xsender.1
 	nroff -man xsender.1 > xsender.0
 
 zddist: \
-warn-auto.sh zddist.sh conf-prefix conf-libexec
+warn-auto.sh zddist.sh conf-libexec
 	cat warn-auto.sh zddist.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zddist
 
 ddist: \
-warn-auto.sh ddist.sh conf-qmail
+warn-auto.sh ddist.sh
 	cat warn-auto.sh ddist.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> ddist
 
 zdeferrals: \
-warn-auto.sh zdeferrals.sh conf-prefix conf-libexec
+warn-auto.sh zdeferrals.sh conf-libexec
 	cat warn-auto.sh zdeferrals.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zdeferrals
 
-deferrals: warn-auto.sh deferrals.sh conf-qmail
+deferrals: warn-auto.sh deferrals.sh
 	cat warn-auto.sh deferrals.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> deferrals
 
 zfailures: \
-warn-auto.sh zfailures.sh conf-prefix conf-libexec
+warn-auto.sh zfailures.sh conf-libexec
 	cat warn-auto.sh zfailures.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zfailures
 
 failures: \
-warn-auto.sh failures.sh conf-qmail
+warn-auto.sh failures.sh
 	cat warn-auto.sh failures.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> failures
 
 zoverall: \
-warn-auto.sh zoverall.sh conf-qmail
+warn-auto.sh zoverall.sh
 	cat warn-auto.sh zoverall.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> zoverall
 
 zrecipients: \
-warn-auto.sh zrecipients.sh conf-prefix conf-libexec
+warn-auto.sh zrecipients.sh conf-libexec
 	cat warn-auto.sh zrecipients.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrecipients
 
 zrhosts: \
-warn-auto.sh zrhosts.sh conf-prefix conf-libexec
+warn-auto.sh zrhosts.sh conf-libexec
 	cat warn-auto.sh zrhosts.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrhosts
 
 zsmtp: \
-warn-auto.sh zsmtp.sh conf-prefix conf-libexec
+warn-auto.sh zsmtp.sh conf-libexec
 	cat warn-auto.sh zsmtp.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsmtp
 
 zrxdelay: \
-warn-auto.sh zrxdelay.sh conf-prefix conf-libexec
+warn-auto.sh zrxdelay.sh conf-libexec
 	cat warn-auto.sh zrxdelay.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrxdelay
 
 zsenders: \
-warn-auto.sh zsenders.sh conf-prefix conf-libexec
+warn-auto.sh zsenders.sh conf-libexec
 	cat warn-auto.sh zsenders.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsenders
 
 zsendmail: \
-warn-auto.sh zsendmail.sh conf-qmail
+warn-auto.sh zsendmail.sh
 	cat warn-auto.sh zsendmail.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> zsendmail
 
 zsuccesses: \
-warn-auto.sh zsuccesses.sh conf-prefix conf-libexec
+warn-auto.sh zsuccesses.sh conf-libexec
 	cat warn-auto.sh zsuccesses.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> zsuccesses
 
 zsuids: \
-warn-auto.sh zsuids.sh conf-prefix conf-libexec
+warn-auto.sh zsuids.sh conf-libexec
 	cat warn-auto.sh zsuids.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsuids
 
@@ -4170,94 +4108,80 @@ warn-auto.sh multilog-matchup.sh conf-prefix
 	> multilog-matchup
 
 smtp-matchup: \
-warn-auto.sh smtp-matchup.sh conf-qmail
+warn-auto.sh smtp-matchup.sh
 	cat warn-auto.sh smtp-matchup.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> smtp-matchup
 
 recipients: \
-warn-auto.sh recipients.sh conf-qmail
+warn-auto.sh recipients.sh
 	cat warn-auto.sh recipients.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> recipients
 
 rhosts: \
-warn-auto.sh rhosts.sh conf-qmail
+warn-auto.sh rhosts.sh
 	cat warn-auto.sh rhosts.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> rhosts
 
 envmigrate: \
 warn-auto.sh envmigrate.sh
 	cat warn-auto.sh envmigrate.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> envmigrate
 
 rsmtp: \
-warn-auto.sh rsmtp.sh conf-qmail conf-sysconfdir
+warn-auto.sh rsmtp.sh conf-sysconfdir
 	cat warn-auto.sh rsmtp.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtp
 
 rsmtpfailures: \
-warn-auto.sh rsmtpfailures.sh conf-qmail
+warn-auto.sh rsmtpfailures.sh
 	cat warn-auto.sh rsmtpfailures.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> rsmtpfailures
 
 rsmtpsdomains: \
-warn-auto.sh rsmtpsdomains.sh conf-qmail conf-sysconfdir
+warn-auto.sh rsmtpsdomains.sh conf-sysconfdir
 	cat warn-auto.sh rsmtpsdomains.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtpsdomains
 
 rsmtprdomains: \
-warn-auto.sh rsmtprdomains.sh conf-qmail conf-sysconfdir
+warn-auto.sh rsmtprdomains.sh conf-sysconfdir
 	cat warn-auto.sh rsmtprdomains.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtprdomains
 
 rsmtprecipients: \
-warn-auto.sh rsmtprecipients.sh conf-qmail conf-sysconfdir
+warn-auto.sh rsmtprecipients.sh conf-sysconfdir
 	cat warn-auto.sh rsmtprecipients.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtprecipients
 
 rsmtpsenders: \
-warn-auto.sh rsmtpsenders.sh conf-qmail conf-sysconfdir
+warn-auto.sh rsmtpsenders.sh conf-sysconfdir
 	cat warn-auto.sh rsmtpsenders.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtpsenders
 
 rxdelay: \
-warn-auto.sh rxdelay.sh conf-qmail
+warn-auto.sh rxdelay.sh
 	cat warn-auto.sh rxdelay.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> rxdelay
 
 rspamrdomain: \
-warn-auto.sh rspamrdomain.sh conf-qmail conf-sysconfdir
+warn-auto.sh rspamrdomain.sh conf-sysconfdir
 	cat warn-auto.sh rspamrdomain.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rspamrdomain
 
 rspamsdomain: \
-warn-auto.sh rspamsdomain.sh conf-qmail conf-sysconfdir
+warn-auto.sh rspamsdomain.sh conf-sysconfdir
 	cat warn-auto.sh rspamsdomain.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rspamsdomain
 
 zspam: \
-warn-auto.sh zspam.sh conf-prefix conf-libexec
+warn-auto.sh zspam.sh conf-libexec
 	cat warn-auto.sh zspam.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zspam
 
@@ -4435,16 +4359,14 @@ rpmattr.o: compile rpmattr.c substdio.h strerr.h auto_uids.h substdio.h str.h
 	./compile rpmattr.c
 
 rspamstat: \
-warn-auto.sh rspamstat.sh conf-qmail conf-sysconfdir
+warn-auto.sh rspamstat.sh conf-sysconfdir
 	cat warn-auto.sh rspamstat.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rspamstat
 
 rspamhist: \
-warn-auto.sh rspamhist.sh conf-qmail
+warn-auto.sh rspamhist.sh
 	cat warn-auto.sh rspamhist.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> rspamhist
 
 iftocc: load iftocc.o mess822.a getln.a strerr.a substdio.a stralloc.a \
@@ -4663,9 +4585,8 @@ checkdomain.0: checkdomain.1
 
 filterto.0: filterto.1
 	nroff -man filterto.1 > filterto.0
-filterto.1: filterto.9 conf-qmail conf-sysconfdir
+filterto.1: filterto.9 conf-sysconfdir
 	cat filterto.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> filterto.1
 
@@ -4680,9 +4601,8 @@ ifaddr.0: ifaddr.1
 
 replier.0: replier.1
 	nroff -man replier.1 > replier.0
-replier.1: replier.9 conf-qmail conf-sysconfdir
+replier.1: replier.9 conf-sysconfdir
 	cat replier.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> replier.1
 
@@ -4960,9 +4880,8 @@ sig.a seek.a open.a wait.a fd.a fs.a
 dot-forward.0: \
 dot-forward.1
 	nroff -man dot-forward.1 > dot-forward.0
-dot-forward.1: dot-forward.9 conf-qmail conf-sysconfdir
+dot-forward.1: dot-forward.9 conf-sysconfdir
 	cat dot-forward.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dot-forward.1
 
@@ -4988,9 +4907,8 @@ alloc.a error.a case.a str.a fs.a sig.a wait.a seek.a open.a fd.a
 fastforward.0: \
 fastforward.1
 	nroff -man fastforward.1 > fastforward.0
-fastforward.1: fastforward.9 conf-qmail conf-sysconfdir
+fastforward.1: fastforward.9 conf-sysconfdir
 	cat fastforward.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> fastforward.1
 
@@ -5436,9 +5354,9 @@ str_len.o str_diff.o strerr.a substdio.a stralloc.a
 	tai_pack.o taia_pack.o alloc_re.o byte_diff.o byte_cr.o byte_copy.o \
 	str_len.o str_diff.o strerr.a substdio.a stralloc.a
 
-logselect.8: logselect.9
+logselect.8: logselect.9 conf-prefix
 	cat logselect.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> logselect.8
 
 sorted.o: compile sorted.c str.h gen_allocdefs.h sorted.h alloc.h stralloc.h
@@ -5688,12 +5606,12 @@ load qmail-sql.o sgetopt.o str_len.o stralloc.a error_str.o \
 error.o envread.o variables.o subgetopt.o str_diffn.o auto_control.o \
 byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o \
 fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
-sqlmatch.o auto_uids.o auto_qmail.o substdio.a indimail.lib tls.lib
+sqlmatch.o auto_uids.o auto_sysconfdir.o substdio.a indimail.lib tls.lib
 	./load qmail-sql sgetopt.o str_len.o stralloc.a error_str.o \
 	error.o envread.o variables.o subgetopt.o str_diffn.o auto_control.o \
 	byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o \
 	fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
-	sqlmatch.o auto_uids.o auto_qmail.o substdio.a `cat indimail.lib tls.lib`
+	sqlmatch.o auto_uids.o auto_sysconfdir.o substdio.a `cat indimail.lib tls.lib`
 
 qmail-sql.o: \
 compile qmail-sql.c sgetopt.h subfd.h stralloc.h str.h env.h \
@@ -5702,11 +5620,8 @@ fmt.h hasindimail.h substdio.h auto_control.h
 	./compile $(inc_deps) qmail-sql.c
 
 qmail-sql.8: \
-qmail-sql.9 conf-break conf-spawn conf-sysconfdir conf-qmail
+qmail-sql.9 conf-sysconfdir
 	cat qmail-sql.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-sql.8
 
