@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.7  2017-04-18 08:59:53+05:30  Cprogrammer
+ * lock service directory using file .svlock to prevent multiple svscan runs
+ *
  * Revision 1.6  2011-08-05 14:31:05+05:30  Cprogrammer
  * create STATUSFILE on startup and delete on shutdown
  *
@@ -35,9 +38,11 @@
 #include "str.h"
 #include "byte.h"
 #include "scan.h"
+#include "fmt.h"
 #include "pathexec.h"
 
 #define SERVICES 1000
+#define SVLOCK   ".svlock"
 
 #define WARNING "svscan: warning: "
 #define FATAL "svscan: fatal: "
@@ -264,6 +269,7 @@ sigterm(int i)
 
 	if ((s = env_get("STATUSFILE")))
 		unlink(s);
+	unlink(SVLOCK);
 	signal(SIGTERM, sigterm);
 	strerr_warn2(INFO, "Stopping svscan", 0);
 	_exit(0);
@@ -298,6 +304,91 @@ open_svscan_log(void)
 }
 
 int
+get_lock(char *sdir)
+{
+	int             fd, n;
+	pid_t           pid;
+	char            strnum[FMT_ULONG], buf[8];
+	int             fdsourcedir = -1;
+
+	pid = -1;
+	if ((fd = open(SVLOCK, O_CREAT|O_WRONLY|O_EXCL, 0644)) >= 0) {
+		pid = getpid();
+		if (write(fd, (char *) &pid, sizeof(pid_t)) == -1)
+			strerr_die2sys(111, FATAL, "unable to write pid to lock file: ");
+		close(fd);
+		return (0);
+	}
+	if (errno != error_exist)
+		strerr_die4sys(111, FATAL, "unable to obtain lock in ", sdir, ": ");
+	/* .svlock exists */
+	if ((fd = open(SVLOCK, O_RDONLY, 0644)) == -1)
+		strerr_die4sys(111, FATAL, "unable to read lock in ", sdir, ": ");
+	if (read(fd, (char *) &pid, sizeof(pid)) == -1)
+		strerr_die2sys(111, FATAL, "unable to get pid from lock: ");
+	close(fd);
+	errno = 0;
+	if (pid == -1 || (kill(pid, 0) == -1 && errno == error_srch)) { /*- process does not exist */
+		if (unlink(SVLOCK) == -1)
+			strerr_die2sys(111, FATAL, "unable to delete lock: ");
+		return (1);
+	}
+	/*- let us find out if the process is svscan */
+	strnum[fmt_ulong(strnum, pid)] = 0;
+	if (errno)
+		strerr_die4sys(111, FATAL, "unable to get status of pid ", strnum, ": ");
+
+	/*- save the current dir */
+	if ((fdsourcedir = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
+		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+
+	/*- use the /proc filesystem to figure out command name */
+	if (chdir("/proc") == -1) { /*- on systems without /proc filesystem, give up */
+		strerr_warn4(FATAL, sdir, " running with pid ", strnum, 0);
+		_exit (111);
+	}
+	if (chdir(strnum) == -1) { /*- process is now dead */
+		if (fchdir(fdsourcedir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+		close(fdsourcedir);
+		if (unlink(SVLOCK) == -1)
+			strerr_die2sys(111, FATAL, "unable to delete lock: ");
+		return (1);
+	}
+	/*- open 'comm' to get the command name */
+	if ((fd = open("comm", O_RDONLY, 0)) == -1) { /*- process is now dead */
+		if (fchdir(fdsourcedir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+		close(fdsourcedir);
+		if (unlink(SVLOCK) == -1)
+			strerr_die2sys(111, FATAL, "unable to delete lock: ");
+		return (1);
+	}
+	if ((n = read(fd, buf, 7)) != 7) { /*- non-svcan process is running with this pid */
+		close(fd);
+		if (fchdir(fdsourcedir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+		close(fdsourcedir);
+		if (unlink(SVLOCK) == -1)
+			strerr_die2sys(111, FATAL, "unable to delete lock: ");
+		return (1);
+	}
+	close(fd);
+	if (buf[0] == 's' && buf[1] == 'v' && buf[2] == 's' && 
+		buf[3] == 'c' && buf[4] == 'a' && buf[5] == 'n' && buf[6] == '\n') { /*- indeed pid is svscan process */
+		strerr_warn4(FATAL, sdir, " running with pid ", strnum, 0);
+		_exit (111);
+	}
+	/*- some non-svscan process is running with pid */
+	if (fchdir(fdsourcedir) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+	close(fdsourcedir);
+	if (unlink(SVLOCK) == -1)
+		strerr_die2sys(111, FATAL, "unable to delete lock: ");
+	return (1);
+}
+
+int
 main(int argc, char **argv)
 {
 	unsigned long   wait;
@@ -308,7 +399,9 @@ main(int argc, char **argv)
 	{
 		if (chdir(argv[1]) == -1)
 			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[1], ": ");
-	}
+		while (get_lock(argv[1])) ;
+	} else
+		while (get_lock(".")) ;
 	signal(SIGHUP, sighup);
 	signal(SIGTERM, sigterm);
 	if((s = env_get("SCANINTERVAL")))
@@ -337,7 +430,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.6 2011-08-05 14:31:05+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: svscan.c,v 1.7 2017-04-18 08:59:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
