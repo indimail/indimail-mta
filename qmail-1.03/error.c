@@ -1,5 +1,8 @@
 /*
  * $Log: error.c,v $
+ * Revision 1.7  2017-04-18 08:35:54+05:30  Cprogrammer
+ * added error_srch for errno ESRCH
+ *
  * Revision 1.6  2004-10-22 20:24:52+05:30  Cprogrammer
  * added RCS id
  *
@@ -168,10 +171,17 @@ EDQUOT;
 -21;
 #endif
 
+int error_srch =
+#ifdef ESRCH
+ESRCH;
+#else
+-1;
+#endif
+
 void
 getversion_error_c()
 {
-	static char    *x = "$Id: error.c,v 1.6 2004-10-22 20:24:52+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: error.c,v 1.7 2017-04-18 08:35:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

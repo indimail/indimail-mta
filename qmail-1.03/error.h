@@ -1,5 +1,8 @@
 /*
  * $Log: error.h,v $
+ * Revision 1.8  2017-04-18 08:36:29+05:30  Cprogrammer
+ * added error_srch for errno ESRCH
+ *
  * Revision 1.7  2008-08-02 14:20:24+05:30  Cprogrammer
  * added function estack()
  *
@@ -40,6 +43,7 @@ extern int      error_connrefused;
 extern int      error_hostdown;
 extern int      error_netunreach;
 extern int      error_hostunreach;
+extern int      error_srch;
 
 char           *error_str(int);
 char           *estack(int, const char *);
