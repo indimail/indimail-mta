@@ -56,7 +56,8 @@ prevents this from happening by accepting mails only when disk space greater tha
 .PP
 If SPAMFILTER is defined,
 .B qmail-multi
-additionally runs a command defined by SPAMFILTER environment variable. This
+additionally runs a command defined by SPAMFILTER environment variable.
+The SPAMFILTER env variable can contain command line arguments too. This
 gives qmail-multi the ability to filter mail messages. The program defined
 by SPAMFILTER environment variable should read descriptor 0 and write to 
 descriptor 1
@@ -74,8 +75,6 @@ The sequence in which the filter program is run is given below
 This gives the ability for the SPAMFILTER program to read the mail message from
 descriptor 0 before passing it to \fBqmail-queue\fR through the pipe.
 
-Additional arguments if required to be passed to the spam filter program can be done
-by defining the environment variable SPAMFILTERARGS.
 .B qmail-multi
 will attempt to make the descriptor 0 seekable if the environment variable MAKE_SEEKABLE
 is defined. This may be necessary for certain filter programs like bogofilter to
