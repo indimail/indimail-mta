@@ -5205,13 +5205,13 @@ svok.o: compile error.h open.h strerr.h svok.c
 
 svscan: load svscan.o scan_ulong.o coe.o strerr_die.o strerr_sys.o error.o \
 envread.o fd_move.o fd_copy.o wait_nohang.o pathexec_run.o error_str.o \
-alloc.o alloc_re.o substdio.a stralloc.a str.a
+fmt_ulong.o alloc.o alloc_re.o substdio.a stralloc.a str.a
 	./load svscan scan_ulong.o coe.o strerr_die.o strerr_sys.o error.o \
 	envread.o fd_move.o fd_copy.o wait_nohang.o pathexec_run.o error_str.o \
-	alloc.o alloc_re.o substdio.a stralloc.a str.a
+	fmt_ulong.o alloc.o alloc_re.o substdio.a stralloc.a str.a
 
 svscan.o: byte.h coe.h compile direntry.h env.h error.h fd.h \
-pathexec.h str.h strerr.h svscan.c wait.h scan.h
+pathexec.h str.h strerr.h svscan.c wait.h scan.h fmt.h
 	./compile svscan.c
 
 svstat: load svstat.o strerr_die.o strerr_sys.o \
