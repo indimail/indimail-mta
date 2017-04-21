@@ -16,7 +16,7 @@
 
 Name: bogofilter-wordlist
 Version: @version@
-Release: 1%{?dist}
+Release: 1.1%{?dist}
 Summary: SPAM wordlist database for bogofilter
 
 Group: System Environment/Base
@@ -54,7 +54,7 @@ ID=$(id -u)
 %make_install
 
 %files
-%attr(0644,indimail,indimail) %config(noreplace)  %{sysconfdir}/wordlist.db
+%attr(0644,mail,mail) %config(noreplace)  %{sysconfdir}/wordlist.db
 
 %doc
 
