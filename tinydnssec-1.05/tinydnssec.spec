@@ -176,11 +176,11 @@ do
 done
 for i in tinydns dnscache
 do
-  if [ -d /service/$i ] ; then
+  if [ -L /service/$i ] ; then
     echo "Removing service /service/$i"
     %{__rm} -f /service/$i
   fi
-  if [ -d /service/$i ] ; then
+  if [ -d %{_sysconfdir}/$i ] ; then
     echo "Removing preinstalled %{_sysconfdir}/$i"
     %{__rm} -rf %{_sysconfdir}/$i
   fi
@@ -205,4 +205,6 @@ if [ ! -d %{_sysconfdir}/dnscache ] ; then
   if [ $? -eq 0 ] ; then
     ln -s %{_sysconfdir}/dnscache /service/dnscache
   fi
+else
+  ln -sf %{_sysconfdir}/dnscache /service/dnscache
 fi
