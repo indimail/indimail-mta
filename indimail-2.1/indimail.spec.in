@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.402 2017-04-16 13:10:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.403 2017-04-21 10:58:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -958,12 +958,37 @@ do
   $TOUCH %{buildroot}%{sysconfdir}/certs/$i
 done
 ) > config_files.list
+
+%if 0%{?suse_version}
+%{__mkdir_p} %{buildroot}%{logdir}
+for i in deliver.25 greylist.1999 imapd.143 imapd-ssl.993 indisrvr.4000 \
+  inlookup.infifo logfifo mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 \
+  proxyIMAP.4143 proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup \
+  qmqpd.628 qmtpd.209 qscanq smtpd.25 smtpd.366 smtpd.465 smtpd.587 svscan \
+  udplogger.3000
+do
+  %{__mkdir_p} %{buildroot}%{logdir}/$i
+  $TOUCH %{buildroot}%{logdir}/$i/current
+done
+if [ %nofetchmail -eq 0 ] ; then
+  %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
+  $TOUCH %{buildroot}%{logdir}/fetchmail/current
+fi
+if [ %noclamav -eq 0 ] ; then
+  for i in freshclam clamd
+  do
+    %{__mkdir_p} %{buildroot}%{logdir}/$i
+    $TOUCH %{buildroot}%{logdir}/$i/current
+  done
+fi
+%endif
+
 if [ %nobogofilter -eq 0 ] ; then
   $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 fi
 if [ %nofetchmail -eq 0 ] ; then
   $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
-#%%find_lang fetchmail
+  #%%find_lang fetchmail
 fi
 if [ %noclamav -eq 0 ] ; then # clamav >= 0.97.5, without clamav-db
   if [ ! -d %{buildroot}%{indimaildir}/clamd ] ; then
@@ -985,6 +1010,12 @@ fi
                                   %{indimaildir}/users
                                   %{indimaildir}/control
                                   %{indimaildir}/libexec
+# opensuse requres ghost files to be present
+%if 0%{?suse_version}
+%ghost %dir                       %{logdir}
+%ghost %dir                       %{logdir}/*
+%ghost %dir                       %{logdir}/*/*
+%endif
 %dir %attr(555,root,qmail)        %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
@@ -2451,11 +2482,6 @@ if [ ! -d %{logdir} ] ; then
 fi
 %{__chown} -R qmaill:nofiles %{logdir}
 
-if [ -d /service ] ; then
-  echo "UFO found in /service. Moving it to /service.org" 1>&2
-  %{__mv} -f %{servicedir} %{servicedir}.org
-fi
-
 # fifolog service
 %{_prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=%{servicedir}
 
@@ -2829,6 +2855,7 @@ EOF
 #
 if [ %nobogofilter -eq 0 ] ; then
   %{_prefix}/sbin/svctool --config=bogofilter
+  %{__chown} indimail:indimail %{sysconfdir}/wordlist.db
 fi
 
 # rebuild cdb
@@ -2838,7 +2865,7 @@ do
   do
     echo "Creating CDB $j.cdb"
        %{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-      && chown indimail:indimail $j.cdb
+      && %{__chown} indimail:indimail $j.cdb
   done
 done
 
@@ -2899,7 +2926,7 @@ echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@yourdomai
 fi
 
 echo
-echo "Look at /tmp/indimail-install.log for the installation log"
+echo "Look at /tmp/indimail-setup.log for the installation log"
 
 ### SCRIPTLET ###############################################################################
 %preun
@@ -3007,135 +3034,13 @@ if [ $nscd_up -ge 1 ] ; then
   fi
 fi
 
-echo "removing binaries, libraries, libexec, shared dir, modules, queues, man pages"
-if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
-  for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{indimaildir}/queue \
-    %{mandir}/man1 %{mandir}/cat1 %{mandir}/man5 %{mandir}/cat5 \
-    %{mandir}/man7 %{mandir}/cat7 %{mandir}/man8 %{mandir}/cat8
-  do
-    %{__rm} -rf $i || true
-  done
-  for i in `/bin/ls %{shareddir} 2>/dev/null`
-  do
-    %{__rm} -rf %{shareddir}/$i || true
-  done
-else
-  for i in bin sbin control users
-  do
-    echo "removing link $i"
-    %{__rm} -f %{indimaildir}/$i || true
-  done
-  # queue
-  %{__rm} -rf %{indimaildir}/queue || true
-  # modules
-  %{__rm} -rf %{_prefix}/lib/indimail || true
-  # shareddir
-  if [ ! " %{shareddir}" = " /usr/share" ] ; then
-    for i in `/bin/ls %{shareddir} 2>/dev/null`
-    do
-      %{__rm} -rf %{shareddir}/$i || true
-    done
-  fi
-  # libexecdir
-  if [ ! " %{libexecdir}" = " /usr/libexec" ] ; then
-    %{__rm} -rf %{libexecdir} || true
-  fi
-fi
-if [ -d %{mandir} ] ; then
-echo "removing man pages"
-/bin/rmdir --ignore-fail-on-non-empty %{mandir}
-fi
-if [ -d %{shareddir} ] ; then
-echo "removing architecture-independent shared directory"
-/bin/rmdir --ignore-fail-on-non-empty %{shareddir}
-fi
-
-echo "removing configuration"
-for i in indimail.cnf procmailrc
-do
-  %{__rm} -f %{sysconfdir}/$i
-done
-for i in /etc /etc/my.cnf.d /etc/mysql
-do
-  %{__rm} -f $i/indimail.cnf
-done
-
-if [ %nofetchmail -eq 0 ] ; then
-  %{__rm} -f %{sysconfdir}/fetchmailrc
-fi
-if [ %nobogofilter -eq 0 ] ; then
-  %{__rm} -f %{sysconfdir}/bogofilter.cf %{sysconfdir}/bogofilter.cf.example
-fi
-%if %nonssd == 0
-  %{__rm} -f %{sysconfdir}/nssd.conf
-%endif
-
-if [ -f %{sysconfdir}/controlfiles ] ; then
-  echo "Removing default config files from %{sysconfdir}/controlfiles"
-  for i in `%{__cat} %{sysconfdir}/controlfiles`
-  do
-    %{__rm} -f %{sysconfdir}/control/$i
-  done
-else
-  echo "Removing default config files"
-  for i in databytes defaultdelivery defaultdomain localiphost locals \
-    me nodnscheck plusdomain queue_base smtpgreeting \
-    chkrcptdomains defaulthost envnoathost filterargs greylist.white \
-    hostip timeoutremote timeoutsmtpd tlsserverciphers dnsbllist \
-    doublebounceto doublebouncehost tlsservermethod tlsclientmethod
-  do
-    %{__rm} -f %{sysconfdir}/control/$i
-  done
-  for i in rsa2048.pem rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
-  dh2048.pem dh512.pem rsa512.pem servercert.rand clientcert.pem
-  do
-    %{__rm} -f %{sysconfdir}/certs/$i
-  done
-fi
-
-if [ -d %{sysconfdir}/users ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/users
-fi
-
-%{__rm} -f %{sysconfdir}/control/domainkeys/%{dkimkeyfn}.pub %{sysconfdir}/control/domainkeys/%dkimkeyfn
-if [ -d %{sysconfdir}/control/domainkeys ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/control/domainkeys
-fi
-if [ -d %{sysconfdir}/control/defaultqueue ] ; then
-%{__rm} -rf %{sysconfdir}/control/defaultqueue
-fi
-if [ -d %{sysconfdir}/control ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/control
-fi
-if [ -d %{sysconfdir}/certs ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/certs
-fi
-
-if [ -d %{indimaildir}/domains ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/domains
-fi
-
-echo "removing aliases postmaster, mailer-daemon, root"
+echo "removing aliases postmaster, mailer-daemon, root, default domain directory"
 for i in postmaster mailer-daemon root ham spam register-ham register-spam
 do
   %{__rm} -f %{indimaildir}/alias/.qmail-"$i"
 done
-if [ -d %{indimaildir}/alias ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/alias
-fi
-
-for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
-do
-  %{__rm} -f %{indimaildir}/domains/%{default_domain}/$i
-done
-if [ -d %{indimaildir}/domains/%{default_domain} ] ; then
-  /bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/domains/%{default_domain}
-fi
-if [ -d %{indimaildir} ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}
-fi
-%{__rm} -f %{sysconfdir}/imapd.pem %{sysconfdir}/pop3d.pem
-%{__rm} -f %{sysconfdir}/pop3d.cnf.* %{sysconfdir}/imapd.cnf.*
+%{__rm} -rf %{indimaildir}/alias/Maildir
+%{__rm} -rf %{indimaildir}/domains/%{default_domain}
 
 echo "removing startup services"
 if [ %{noclamav} -eq 0 ] ; then
@@ -3148,26 +3053,26 @@ else
   fi
 fi
 if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
-for i in clamd freshclam
-do
-  if [ -d %{servicedir}/$i ] ; then
-    %{__rm} -rf %{servicedir}/$i || true
-  fi
-  %{__rm} -f %{sysconfdir}/$i.conf %{sysconfdir}/$i.conf.disabled
-done
+  for i in clamd freshclam
+  do
+    if [ -d %{servicedir}/$i ] ; then
+      %{__rm} -rf %{servicedir}/$i || true
+    fi
+    %{__rm} -f %{sysconfdir}/$i.conf %{sysconfdir}/$i.conf.disabled
+  done
 fi
-if [ -d %{sysconfdir} ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}
-fi
+%{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
 
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
 pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-logfifo qscanq qmail-imapd.4143 \
 qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
-qmail-poppass.106 greylist.1999 udplogger.3000 .svscan
+qmail-poppass.106 greylist.1999 udplogger.3000 mrtg .svscan dnscache
 do
   if [ -d %{servicedir}/$i ] ; then
     %{__rm} -rf %{servicedir}/$i || true
+  elif [ -L %{servicedir}/$i ] ; then
+    %{__rm} -f %{servicedir}/$i || true
   fi
 done
 if [ %noproxy -eq 0 ] ; then
