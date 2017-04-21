@@ -43,4 +43,6 @@ if [ ! -d ${sysconfdir}/dnscache ] ; then
   if [ $? -eq 0 ] ; then
     ln -s ${sysconfdir}/dnscache /service/dnscache
   fi
+else
+  ln -sf ${sysconfdir}/dnscache /service/dnscache || true
 fi
