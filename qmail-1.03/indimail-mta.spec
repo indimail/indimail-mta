@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.90 2017-04-16 13:07:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.91 2017-04-21 11:00:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -580,6 +580,17 @@ do
 done
 ) > config_files.list 3>%{buildroot}%{qsysconfdir}/controlfiles
 
+%if 0%{?suse_version}
+%{__mkdir_p} %{buildroot}%{logdir}
+for i in deliver.25 greylist.1999 logfifo \
+  qmqpd.628 qmtpd.209 qscanq smtpd.25 \
+  smtpd.366 smtpd.465 smtpd.587 svscan udplogger.3000
+do
+  %{__mkdir_p} %{buildroot}%{logdir}/$i
+  $TOUCH %{buildroot}%{logdir}/$i/current
+done
+%endif
+
 %files -f config_files.list
 %defattr(-, root, root,-)
 #
@@ -591,6 +602,12 @@ done
                                   %{qmaildir}/users
                                   %{qmaildir}/control
                                   %{qmaildir}/libexec
+# opensuse requres ghost files to be present
+%if 0%{?suse_version}
+%ghost %dir                       %{logdir}
+%ghost %dir                       %{logdir}/*
+%ghost %dir                       %{logdir}/*/*
+%endif
 %dir %attr(555,root,root)         %{libexecdir}
 %dir %attr(555,root,qmail)        %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
@@ -1663,11 +1680,6 @@ if [ ! -d %{logdir} ] ; then
 fi
 %{__chown} -R qmaill:nofiles %{logdir}
 
-if [ -d /service ] ; then
-  echo "UFO found in /service. Moving it to /service.org"
-  %{__mv} -f %{servicedir} %{servicedir}.org
-fi
-
 # fifolog service
 %{_prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=%{servicedir}
 
@@ -2044,98 +2056,11 @@ if [ $nscd_up -ge 1 ] ; then
   fi
 fi
 
-if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
-  echo "removing binaries, libraries, queues, man pages"
-  for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{qmaildir}/queue \
-    %{mandir}/man1 %{mandir}/cat1 %{mandir}/man5 %{mandir}/cat5 \
-    %{mandir}/man7 %{mandir}/cat7 %{mandir}/man8 %{mandir}/cat8
-  do
-    %{__rm} -rf $i || true
-  done
-  /bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
-  for i in `/bin/ls %{shareddir} 2>/dev/null`
-  do
-    %{__rm} -rf %{shareddir}/$i || true
-  done
-else
-  for i in bin sbin control users
-  do
-    echo "removing link $i"
-    %{__rm} -f %{qmaildir}/$i || true
-  done
-  # queue
-  %{__rm} -rf %{qmaildir}/queue || true
-  # modules
-  %{__rm} -rf %{_prefix}/lib/indimail || true
-  # shareddir
-  if [ ! " %{shareddir}" = " /usr/share" ] ; then
-    for i in `/bin/ls %{shareddir} 2>/dev/null`
-    do
-      %{__rm} -rf %{shareddir}/$i || true
-    done
-  fi
-  # libexecdir
-  if [ ! " %{libexecdir}" = " /usr/libexec" ] ; then
-    %{__rm} -rf %{libexecdir} || true
-  fi
-fi
-if [ -d %{mandir} ] ; then
-  echo "removing man pages"
-  /bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
-fi
-if [ -d %{shareddir} ] ; then
-  echo "removing architecture-independent shared directory"
-  /bin/rmdir --ignore-fail-on-non-empty %{shareddir} 2>/dev/null
-fi
-
-echo "removing configuration"
-for i in smtp qmtp qmqp
-do
-  for j in `/bin/ls %{qsysconfdir}/tcp*.$i 2>/dev/null`
-  do
-      %{__rm} -f $j.cdb
-  done
-done
-%{__rm} -f %{qsysconfdir}/indimail-mta.te %{qsysconfdir}/indimail-mta.mod %{qsysconfdir}/indimail-mta.pp
-/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir} 2>/dev/null
-for i in assign cdb
-do
-    %{__rm} -f %{qsysconfdir}/users/$i
-done
-/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/users 2>/dev/null
-
-if [ -f %{qsysconfdir}/controlfiles ] ; then
-  echo "Removing default config files from %{qsysconfdir}/controlfiles"
-  for i in `%{__cat} %{qsysconfdir}/controlfiles`
-  do
-    %{__rm} -f %{qsysconfdir}/control/$i
-  done
-else
-  echo "Removing default config files"
-  for i in databytes defaultdelivery defaultdomain localiphost locals \
-    me nodnscheck plusdomain queue_base smtpgreeting signatures \
-    chkrcptdomains defaulthost envnoathost filterargs greylist.white \
-    hostip timeoutremote timeoutsmtpd
-  do
-    %{__rm} -f %{qsysconfdir}/control/$i
-  done
-  for i in rsa2048.pem rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
-  dh2048.pem dh512.pem rsa512.pem servercert.rand clientcert.pem
-  do
-    %{__rm} -f %{qsysconfdir}/certs/$i
-  done
-fi
-%{__rm} -f %{qsysconfdir}/controlfiles
-%{__rm} -f %{qsysconfdir}/control/domainkeys/%{dkimkeyfn}.pub %{qsysconfdir}/control/domainkeys/%dkimkeyfn
-/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/control/domainkeys 2>/dev/null
-/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/control 2>/dev/null
-/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/certs 2>/dev/null
-
 for i in postmaster mailer-daemon root ham spam register-ham register-spam
 do
   %{__rm} -f %{qmaildir}/alias/.qmail-"$i"
 done
-/bin/rmdir --ignore-fail-on-non-empty %{qmaildir}/alias 2>/dev/null
+%{__rm} -rf %{qmaildir}/alias/Maildir
 
 echo "removing startup services"
 if [ %{noclamav} -eq 0 ] ; then
