@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.403 2017-04-21 10:58:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.404 2017-04-21 19:14:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -959,7 +959,7 @@ do
 done
 ) > config_files.list
 
-%if 0%{?suse_version}
+%if %{undefined suse_version} && %{undefined sles_version}
 %{__mkdir_p} %{buildroot}%{logdir}
 for i in deliver.25 greylist.1999 imapd.143 imapd-ssl.993 indisrvr.4000 \
   inlookup.infifo logfifo mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 \
@@ -1011,10 +1011,10 @@ fi
                                   %{indimaildir}/control
                                   %{indimaildir}/libexec
 # opensuse requres ghost files to be present
-%if 0%{?suse_version}
+%if %{undefined suse_version} && %{undefined sles_version}
 %ghost %dir                       %{logdir}
 %ghost %dir                       %{logdir}/*
-%ghost %dir                       %{logdir}/*/*
+%ghost                            %{logdir}/*/*
 %endif
 %dir %attr(555,root,qmail)        %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
