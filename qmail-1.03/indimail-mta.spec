@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.91 2017-04-21 11:00:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.92 2017-04-21 19:15:13+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -580,7 +580,7 @@ do
 done
 ) > config_files.list 3>%{buildroot}%{qsysconfdir}/controlfiles
 
-%if 0%{?suse_version}
+%if %{undefined suse_version} && %{undefined sles_version}
 %{__mkdir_p} %{buildroot}%{logdir}
 for i in deliver.25 greylist.1999 logfifo \
   qmqpd.628 qmtpd.209 qscanq smtpd.25 \
@@ -603,10 +603,10 @@ done
                                   %{qmaildir}/control
                                   %{qmaildir}/libexec
 # opensuse requres ghost files to be present
-%if 0%{?suse_version}
+%if %{undefined suse_version} && %{undefined sles_version}
 %ghost %dir                       %{logdir}
 %ghost %dir                       %{logdir}/*
-%ghost %dir                       %{logdir}/*/*
+%ghost                            %{logdir}/*/*
 %endif
 %dir %attr(555,root,root)         %{libexecdir}
 %dir %attr(555,root,qmail)        %{shareddir}
