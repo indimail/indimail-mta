@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.84 2017-04-05 14:11:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -158,8 +158,11 @@ done
 
 %preun
 argv1=$1
-echo "Giving dnscache exactly 5 seconds to exit nicely" 1>&2
-/usr/bin/svc -dx %{_sysconfdir}/dnscache %{_sysconfdir}/dnscache/log
+echo "Giving tinydns/dnscache exactly 5 seconds to exit nicely" 1>&2
+for i in tinydns dnscache
+do
+  /usr/bin/svc -dx %{_sysconfdir}/$i %{_sysconfdir}/$i/log >/dev/null 2>&1 || true
+done
 sleep 5
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
@@ -170,6 +173,17 @@ do
   echo "Removing user $i"
   /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
   %{__rm} -f /var/spool/$i
+done
+for i in tinydns dnscache
+do
+  if [ -d /service/$i ] ; then
+    echo "Removing service /service/$i"
+    %{__rm} -f /service/$i
+  fi
+  if [ -d /service/$i ] ; then
+    echo "Removing preinstalled %{_sysconfdir}/$i"
+    %{__rm} -rf %{_sysconfdir}/$i
+  fi
 done
 
 %post
