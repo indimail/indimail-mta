@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.11  2017-04-21 10:24:04+05:30  Cprogrammer
+# run upgrade script only on post
+#
 # Revision 2.10  2017-04-16 19:55:04+05:30  Cprogrammer
 # changed qmail-greyd path to /usr/sbin
 #
@@ -44,6 +47,8 @@ rm=$(which rm)
 mv=$(which mv)
 sed=$(which sed)
 
+do_post_upgrade()
+{
 #
 # certs were in /etc/indimail/control
 # they have been moved to /etc/indimail/certs
@@ -174,3 +179,10 @@ if [ -f /etc/indimail/control/spamignore ] ; then
 fi
 # qmail-greyd, greydaemon path changed to /usr/sbin
 $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' /service/greylist.1999/run
+}
+
+case $1 in
+	post)
+	do_post_upgrade
+	;;
+esac
