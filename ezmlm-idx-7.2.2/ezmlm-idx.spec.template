@@ -11,14 +11,15 @@
 %global _hardened_build    1
 %endif
 
-%global ezcgidir /var/www/cgi-bin
-%global rcdir    /etc/indimail/ezmlm
-%global mandir   %{_prefix}/share/man
-%global ezdocdir %{_prefix}/share/doc/ezmlm-idx
+%global ezcgidir   /var/www/cgi-bin
+%global mandir     %{_prefix}/share/man
+%global ezdocdir   %{_prefix}/share/doc/ezmlm-idx
+%global sysconfdir /etc/indimail
+%global rcdir      %{sysconfdir}/ezmlm
 
 Name: ezmlm-idx
 Version: @VERSION@
-Release: 1
+Release: 1.1%{?dist}
 Summary: Easy Mailing List Manager + IDX patches
 BuildRequires: rpm >= 3.0.2
 Buildroot: %{_tmppath}/%{name}-%{version}-root
@@ -196,13 +197,13 @@ ln -s `head -n 1 conf-lang` %{buildroot}/%{rcdir}/default
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 # create file list for man pages
-find %{buildroot}/%{mandir} -type f | sed -e "s/%{buildroot}//" -e "s/$/*/" > man-list
+find %{buildroot}/%{mandir} -type f | sed -e "s}%{buildroot}}}" -e "s}$}*}" > man-list
 
 # copy documents
 for i in BLURB CHANGES FAQ INSTALL README README.mysql README.pgsql README.std \
-	THANKS TODO UPGRADE ChangeLog INSTALL.cgi ezcgirc ezcgi.css LICENSE
+  THANKS TODO UPGRADE ChangeLog INSTALL.cgi ezcgirc ezcgi.css LICENSE
 do
-	install -m 0644 $i %{buildroot}%{ezdocdir}
+  install -m 0644 $i %{buildroot}%{ezdocdir}
 done
 
 %post
