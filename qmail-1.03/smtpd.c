@@ -134,7 +134,7 @@
  * multiple plugin feature
  *
  * Revision 1.151  2011-04-16 14:43:47+05:30  Cprogrammer
- * logfifofd can be confugured using LOGFIFO_FD env variable
+ * logfd can be confugured using LOGFD env variable
  *
  * Revision 1.150  2011-04-13 21:27:15+05:30  Cprogrammer
  * added env variable DISABLE_PLUGIN to disable loading of smtp plugins
@@ -954,7 +954,7 @@ PLUGIN         **plug = (PLUGIN **) 0;
 void           **handle;
 int              plugin_count;
 #endif
-int             logfifofd = 255;
+int             logfd = 255;
 
 struct authcmd
 {
@@ -1304,27 +1304,27 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 		return;
 	}
 	/*
-	 * Read X-Bogosity line from bogofilter on logfifofd. logfifofd would have already
+	 * Read X-Bogosity line from bogofilter on logfd. logfd would have already
 	 * been opened before qmail_open() by create_logfilter() function
 	 */
-	if (!fstat(logfifofd, &statbuf) && statbuf.st_size > 0 && !lseek(logfifofd, 0, SEEK_SET))
+	if (!fstat(logfd, &statbuf) && statbuf.st_size > 0 && !lseek(logfd, 0, SEEK_SET))
 	{
 		if (substdio_puts(&spamout, " ") == -1)
 		{
 			close(logfifo);
-			close(logfifofd);
+			close(logfd);
 			return;
 		}
-		substdio_fdbuf(&spamin, read, logfifofd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&spamin, read, logfd, inbuf, sizeof(inbuf));
 		if (getln(&spamin, line, &match, '\n') == -1)
 		{
 			logerr("qmail-smtpd: read error: ");
 			logerr(error_str(errno));
 			logerrf("\n");
-			close(logfifofd);
+			close(logfd);
 			return;
 		}
-		close(logfifofd);
+		close(logfd);
 		if (!stralloc_0(line))
 			die_nomem();
 		if (line->len)
@@ -5062,15 +5062,15 @@ create_logfilter()
 			die_nomem();
 		if (!stralloc_0(&tmpFile))
 			die_nomem();
-		if ((x = env_get("LOGFIFO_FD")))
-			scan_int(x, &logfifofd);
+		if ((x = env_get("LOGFD")))
+			scan_int(x, &logfd);
 		if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 			die_logfilter();
 		if (unlink(tmpFile.s))
 			die_logfilter();
-		if (dup2(fd, logfifofd) == -1)
+		if (dup2(fd, logfd) == -1)
 			die_logfilter();
-		if (fd != logfifofd)
+		if (fd != logfd)
 			close(fd);
 	}
 	return;
