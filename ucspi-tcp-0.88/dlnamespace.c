@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.6  2017-04-22 12:11:14+05:30  Cprogrammer
+ * use environment variable LMID or envp variable to figure out LMID when namespace variable is absent
+ *
  * Revision 1.5  2017-04-12 10:18:56+05:30  Cprogrammer
  * auto configure for dlmopen()
  *
@@ -24,6 +27,8 @@
 #include "fmt.h"
 #include "stralloc.h"
 #include "scan.h"
+#include "env.h"
+#include "pathexec.h"
 
 static stralloc namespace = {0};
 
@@ -37,11 +42,11 @@ static stralloc namespace = {0};
  * -1 - ENOMEM failure
  */
 int
-dlnamespace(char *fn, unsigned long *id)
+dlnamespace(char *fn, char **envp, unsigned long *id)
 {
-	char           *ptr, *cptr;
-	int             i;
-	char            strnum[FMT_ULONG];
+	char           *ptr, *cptr, *s;
+	int             i, j;
+	char            strnum[FMT_ULONG], env_str[FMT_ULONG + 5]; /*- LMID_NO */
 
 	if (!id) {
 		errno = EINVAL;
@@ -49,6 +54,41 @@ dlnamespace(char *fn, unsigned long *id)
 	}
 	/*- search for loaded module fn. each entry is separated by NULL character */
 	if (!*id) {
+		if (!namespace.len) {
+			for (j = 1;;j++) {
+				s = env_str;
+				s += (i = fmt_str((char *) s, "LMID"));
+				s += (i = fmt_uint((char *) s, j));
+				*s++ = 0;
+				if (!(s = env_get(env_str))) /*- no shared libs loaded/stored using dlmopen */
+					break;
+				if (!str_diff(fn, s)) {
+					*id = j;
+					return (1);
+				}
+			}
+			for (j = 0;envp[j];j++) {
+				if (str_diffn(envp[j], "LMID", 4))
+					continue;
+				for (s = envp[j]; *s; s++) {
+					if (*s != '=')
+						continue;
+					*s = 0;
+					if (str_diff(s + 1, fn)) {
+						*s = '=';
+						break;
+					}
+					ptr = envp[j] + 4;
+					if (*ptr) {
+						scan_ulong(ptr, id);
+						*s = '=';
+						return (1);
+					} else
+						*s = '=';
+					break;
+				} /*- for (s = envp[j]; *s; s++) */
+			} /*- for (j = 0;envp[j];j++) { */
+		}
 		for (cptr = ptr = namespace.s, i = 0; i < namespace.len;ptr++, i++) {
 			if (!*ptr) {
 				cptr = ptr + 1;
@@ -82,6 +122,12 @@ dlnamespace(char *fn, unsigned long *id)
 		return (-1);
 	else
 	if (!stralloc_0(&namespace))
+		return (-1);
+	s = env_str;
+	s += (i = fmt_str((char *) s, "LMID"));
+	s += (i = fmt_ulong((char *) s, *id));
+	*s++ = 0;
+	if (!pathexec_env(env_str, fn))
 		return (-1);
 	return (0);
 }
