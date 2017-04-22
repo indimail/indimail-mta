@@ -11,17 +11,17 @@
 %global _hardened_build    1
 %endif
 
-%global ezcgidir /var/www/cgi-bin}
-%global rcdir /etc/indimail/ezmlm}
-%global mandir %_prefix/share/man
-%global ezdocdir %_prefix/share/doc/ezmlm-idx
+%global ezcgidir /var/www/cgi-bin
+%global rcdir    /etc/indimail/ezmlm
+%global mandir   %{_prefix}/share/man
+%global ezdocdir %{_prefix}/share/doc/ezmlm-idx
 
 Name: ezmlm-idx
 Version: @VERSION@
 Release: 1
 Summary: Easy Mailing List Manager + IDX patches
 BuildRequires: rpm >= 3.0.2
-Buildroot: %_tmppath/%name-%version-root
+Buildroot: %{_tmppath}/%{name}-%{version}-root
 %if %build_on_obs == 1
 License: GPL-2.0+
 %else
@@ -139,7 +139,7 @@ Conflicts: ezmlm ezmlm-idx-std ezmlm-idx-pgsql < 6.0
 SQLite3 support module for ezmlm-idx. Provides sub-sqlite3.so module
 
 %package cgi
-Prefix: %ezcgidir
+Prefix: %{ezcgidir}
 Summary: Web archiver for %name
 Group: Utilities/System 
 Requires: ezmlm-idx
@@ -152,13 +152,13 @@ www archiver for %name.
 %setup
 
 %build 
-echo %rcdir                      >conf-etc
-echo %sysconfdir/indimail        >conf-sysconfdir
-echo %_prefix                    >conf-prefix
-echo %_bindir                    >conf-bin
-echo %{mandir}                   >conf-man
-echo %_prefix/lib/indimail/ezmlm >conf-lib
-echo gcc %optflags -I%_includedir/mysql -I%_includedir/pgsql >conf-cc
+echo %{rcdir}                      >conf-etc
+echo %{sysconfdir}/indimail        >conf-sysconfdir
+echo %{_prefix}                    >conf-prefix
+echo %{_bindir}                    >conf-bin
+echo %{mandir}                     >conf-man
+echo %{_prefix}/lib/indimail/ezmlm >conf-lib
+echo gcc %optflags -I%{_includedir}/mysql -I%{_includedir}/pgsql >conf-cc
 echo gcc %optflags -s -L%{_libdir}/mysql >conf-ld
 
 make all
@@ -166,7 +166,7 @@ make all
 # Create INSTALL file for how to set up ezmlm-cgi
 
 (
-echo "The binary ezmlm-cgi is installed as  %ezcgidir/ezmlm-cgi with"
+echo "The binary ezmlm-cgi is installed as  %{ezcgidir}/ezmlm-cgi with"
 echo "permissions 04555."
 echo ""
 echo "Please see INSTALL 16-22) in this package's doc directory and the"
@@ -182,21 +182,21 @@ echo ""
 %{__mkdir_p} %{buildroot}%{_prefix}/lib/indimail/ezmlm
 %{__mkdir_p} %{buildroot}%{rcdir}
 %{__mkdir_p} %{buildroot}%{ezcgidir}
-%{__mkdir_p} %buildroot%{ezdocdir}
-%{__mkdir_p} %buildroot%{mandir}
+%{__mkdir_p} %{buildroot}%{ezdocdir}
+%{__mkdir_p} %{buildroot}%{mandir}
 
-./installer %buildroot/%rcdir                      < ETC
-./installer %buildroot/%_bindir                    < BIN
+./installer %buildroot/%{rcdir}                    < ETC
+./installer %buildroot/%{_bindir}                  < BIN
 ./installer %buildroot/%{mandir}                   < MAN
 ./installer %buildroot/%_prefix/lib/indimail/ezmlm < LIB
-%{__mv} %buildroot/%_bindir/ezmlm-queue %buildroot/%_prefix/sbin/ezmlm-queue
-%{__mv} %buildroot/%_bindir/ezmlm-cgi   %buildroot/%{ezcgidir}/ezmlm-cgi
-ln -s `head -n 1 conf-lang` %buildroot/%rcdir/default
+%{__mv} %{buildroot}/%{_bindir}/ezmlm-queue %{buildroot}/%{_prefix}/sbin/ezmlm-queue
+%{__mv} %{buildroot}/%{_bindir}/ezmlm-cgi   %{buildroot}/%{ezcgidir}/ezmlm-cgi
+ln -s `head -n 1 conf-lang` %{buildroot}/%{rcdir}/default
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 # create file list for man pages
-find %buildroot/%{mandir} -type f | sed -e "s}%buildroot}}" -e "s}$}*}" > man-list
+find %{buildroot}/%{mandir} -type f | sed -e "s/%{buildroot}//" -e "s/$/*/" > man-list
 
 # copy documents
 for i in BLURB CHANGES FAQ INSTALL README README.mysql README.pgsql README.std \
@@ -214,7 +214,7 @@ echo For currently supported languages, see the INSTALL
 echo file, section 7.
 
 %clean
-/bin/rm -rf %buildroot
+/bin/rm -rf %{buildroot}
 
 %files -f man-list
 
@@ -222,41 +222,45 @@ echo file, section 7.
 
 %dir %rcdir
 %config(noreplace) %rcdir/*
-%attr(644,root,root) %ezdocdir/LICENSE
-%attr(644,root,root) %ezdocdir/BLURB
-%attr(644,root,root) %ezdocdir/CHANGES* 
-%attr(644,root,root) %ezdocdir/FAQ
-%attr(644,root,root) %ezdocdir/INSTALL
-%attr(644,root,root) %ezdocdir/README*
-%attr(644,root,root) %ezdocdir/THANKS
-%attr(644,root,root) %ezdocdir/TODO
-%attr(644,root,root) %ezdocdir/UPGRADE
-%attr(644,root,root) %ezdocdir/ChangeLog
+%attr(644,root,root) %{ezdocdir}/LICENSE
+%attr(644,root,root) %{ezdocdir}/BLURB
+%attr(644,root,root) %{ezdocdir}/CHANGES* 
+%attr(644,root,root) %{ezdocdir}/FAQ
+%attr(644,root,root) %{ezdocdir}/INSTALL
+%attr(644,root,root) %{ezdocdir}/README*
+%attr(644,root,root) %{ezdocdir}/THANKS
+%attr(644,root,root) %{ezdocdir}/TODO
+%attr(644,root,root) %{ezdocdir}/UPGRADE
+%attr(644,root,root) %{ezdocdir}/ChangeLog
 
-%_bindir/*
-%_prefix/sbin/*
-%_prefix/lib/indimail/ezmlm/sub-std.so
+%{_bindir}/*
+%{_prefix}/sbin/*
+%{_prefix}/lib/indimail/ezmlm/sub-std.so
 
 %files cgi
 %defattr(-,root,root)
-%attr(4555,root,root) %ezcgidir/ezmlm-cgi
-%attr(644,root,root)  %ezdocdir/INSTALL.cgi
-%attr(644,root,root)  %ezdocdir/ezcgirc
-%attr(644,root,root)  %ezdocdir/ezcgi.css
+%attr(4555,root,root) %{ezcgidir}/ezmlm-cgi
+%attr(644,root,root)  %{ezdocdir}/INSTALL.cgi
+%attr(644,root,root)  %{ezdocdir}/ezcgirc
+%attr(644,root,root)  %{ezdocdir}/ezcgi.css
 %{mandir}/man1/ezmlm-cgi.1*
 
 %files mysql
 %defattr(-,root,root)
-%_prefix/lib/indimail/ezmlm/sub-mysql.so
+%{_prefix}/lib/indimail/ezmlm/sub-mysql.so
 
-%attr(644,root,root)  %ezdocdir/README.mysql
+%attr(644,root,root)  %{ezdocdir}/README.mysql
 
 %files pgsql
 %defattr(-,root,root)
-%_prefix/lib/indimail/ezmlm/sub-pgsql.so
+%{_prefix}/lib/indimail/ezmlm/sub-pgsql.so
 
-%attr(644,root,root)  %ezdocdir/README.pgsql
+%attr(644,root,root)  %{ezdocdir}/README.pgsql
 
 %files sqlite3
 %defattr(-,root,root)
-%_prefix/lib/indimail/ezmlm/sub-sqlite3.so
+%{_prefix}/lib/indimail/ezmlm/sub-sqlite3.so
+
+%changelog
+* Sat Apr 22 2017 mbhangui@gmail.com @version@-@release@
+1. Added Pre-Depends daemontools
