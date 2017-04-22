@@ -208,3 +208,15 @@ if [ ! -d %{_sysconfdir}/dnscache ] ; then
 else
   ln -sf %{_sysconfdir}/dnscache /service/dnscache
 fi
+
+%changelog
+* Sat Apr 22 2017 mbhangui@gmail.com @version@-@release@
+Release 1.1 Start 11/04/2017
+1. Added dnsgetroot
+2. added str_diffn()
+3. added comments for dempsky's patch djbdns<=1.05 lets AXFRed subdomains overwrite domains
+4. fixed debian/prerm script
+5. added selinux rules for tinydns
+6. added Pre-Depends daemontools
+7. remove tinydns, dnscache service on uninstall
+8. shutdown tinydns, dnsccache service on uninstall
