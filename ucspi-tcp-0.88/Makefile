@@ -467,8 +467,8 @@ gen_alloc.h openreadclose.h stralloc.h
 
 pathexec_env.o: \
 compile pathexec_env.c stralloc.h gen_alloc.h alloc.h str.h byte.h \
-env.h pathexec.h
-	./compile pathexec_env.c
+env.h pathexec.h conf-dlopen
+	./compile `grep -h -v "^#" conf-dlopen` pathexec_env.c
 
 pathexec_rundl.o: \
 compile pathexec_run.c error.h stralloc.h gen_alloc.h str.h env.h \
@@ -497,20 +497,23 @@ load rbl.o commands.o pathexec_rundl.o load_shared.o \
 dlnamespace.o dns.a time.a unix.a byte.a socket.lib
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
-	rbl.o commands.o pathexec_rundl.o load_shared.o \
-	dlnamespace.o dns.a time.a unix.a byte.a  `cat socket.lib`; \
+	fmt_uint.o rbl.o commands.o pathexec_rundl.o load_shared.o \
+	fmt_str.o dlnamespace.o dns.a time.a unix.a byte.a \
+	str_diffn.o `cat socket.lib`; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o rblsmtpd.so \
-	rbl.o commands.o pathexec_rundl.o load_shared.o \
-	dlnamespace.o dns.a time.a unix.a byte.a  `cat socket.lib` -ldl; \
+	fmt_uint.o rbl.o commands.o pathexec_rundl.o load_shared.o \
+	fmt_str.o dlnamespace.o dns.a time.a unix.a byte.a \
+	str_diffn.o `cat socket.lib` -ldl; \
 	fi
 
 rblsmtpd: \
 load rblsmtpd.o commands.o pathexec_rundl.o load_shared.o \
-dlnamespace.o dns.a time.a unix.a byte.a socket.lib
+str_diffn.o fmt_str.o fmt_uint.o dlnamespace.o dns.a time.a \
+unix.a byte.a socket.lib
 	./load rblsmtpd commands.o pathexec_rundl.o load_shared.o \
-	dlnamespace.o dns.a time.a unix.a byte.a  \
-	`cat socket.lib` -ldl
+	str_diffn.o fmt_str.o fmt_uint.o dlnamespace.o dns.a \
+	time.a unix.a byte.a  `cat socket.lib` -ldl
 
 rblsmtpd.o: \
 compile rblsmtpd.c byte.h str.h scan.h fmt.h env.h exit.h sig.h \
@@ -810,7 +813,8 @@ choose compile load trydlmopen.c hasdlmopen.h1 hasdlmopen.h2
 	./choose cL trydlmopen hasdlmopen.h1 hasdlmopen.h2 > hasdlmopen.h
 
 load_shared.o: \
-compile load_shared.c str.h strerr.h dlnamespace.h hasdlmopen.h
+compile load_shared.c str.h strerr.h dlnamespace.h \
+hasdlmopen.h pathexec.h
 	./compile `grep -h -v "^#" conf-dlopen` load_shared.c
 
 tcpserver_plugin.o: \
@@ -819,7 +823,8 @@ hasdlmopen.h fmt.h env.h dlnamespace.h conf-dlopen
 	./compile `grep -h -v "^#" conf-dlopen` tcpserver_plugin.c
 
 dlnamespace.o: \
-compile dlnamespace.c str.h stralloc.h scan.h fmt.h hasdlmopen.h
+compile dlnamespace.c str.h stralloc.h scan.h fmt.h hasdlmopen.h \
+env.h pathexec.h
 	./compile `grep -h -v "^#" conf-dlopen` dlnamespace.c
 
 tcpserver: \
