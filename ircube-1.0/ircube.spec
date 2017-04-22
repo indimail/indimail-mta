@@ -216,4 +216,8 @@ make
 %doc %{_prefix}/share/indimail/doc/COPYING.ircube
 
 %changelog
-
+* Sat Apr 13 2017 mbhangui@gmail.com 1-0
+Release 1.1 Start 13/04/2017
+1. Created package for roundcube plugins
+2. Added INSTALL file
+3. Added testssl.php
