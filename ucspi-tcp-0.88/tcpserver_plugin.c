@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.8  2017-04-22 11:54:07+05:30  Cprogrammer
+ *  added new argument, environ list to dlnamespace()
+ *
  *  Revision 1.7  2017-04-12 13:45:35+05:30  Cprogrammer
  *  made PLUGINn_dir env variable independent of PLUGINn_init
  *
@@ -24,7 +27,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.7 2017-04-12 13:45:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.8 2017-04-22 11:54:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -89,7 +92,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 			if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
 				strerr_die(111, FATAL, "dlinfo: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 			/*- store the new lmid */
-			if (dlnamespace(shared_objfn.s, (unsigned long *) &lmid) < 0)
+			if (dlnamespace(shared_objfn.s, 0, (unsigned long *) &lmid) < 0)
 				strerr_die(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
 			/*- display the new lmid in tcpserver log */
 			strnum[fmt_ulong(strnum, lmid)] = 0;
@@ -103,7 +106,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 		} else {
 			/*- get the old lmid for this shared object */
 			lmid = 0;
-			if ((i = dlnamespace(shared_objfn.s, (unsigned long *) &lmid)) < 0)
+			if ((i = dlnamespace(shared_objfn.s, 0, (unsigned long *) &lmid)) < 0)
 				strerr_die(111, FATAL, "dlnamespace: ", shared_objfn.s, ": ", 0, 0, 0, 0, (struct strerr *) 0);
 			else
 			if (!i)
@@ -111,9 +114,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 			if (!(handle = dlmopen(lmid, shared_objfn.s, RTLD_NOW|RTLD_NOLOAD))) {
 				strerr_die(111, FATAL, "dlmopen: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 				return (1);
-			} else
-			if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
-				strerr_die(111, FATAL, "dlinfo: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+			}
 		}
 #else /*- #ifdef HASDLMOPEN */
 		if (reload_flag) {
