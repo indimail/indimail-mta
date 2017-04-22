@@ -51,14 +51,15 @@ offers the STARTTLS extension to ESMTP.
 If the environment variable \fBLOGFILTER\fR is defined, \fBqmail-smtpd\fR will open a fifo 
 defined by \fBLOGFILTER\fR environment variable in O_WRONLY mode. It will write
 the SMTP transaction log to the fifo. This makes it possible for \fBqmail-smtpd\fR to push
-the SMTP transaction log to exernal programs. \fBqmail-smtpd\fR will also make available file
-descriptor 255 to be available for writing by external programs when \fBQMAILQUEUE\fR or \fBFILTERARGS\fR environment 
-variables are defined. Additionally, \fBqmail-smtpd\fR will read 255 bytes on file
-descriptor 255. The bytes read will be logged to stderr along with the transaction log.
-This makes it possible for programs called during the data phase of SMTP to send back 255 bytes
-of messages back to \fBqmail-smtpd\fR. In fact, this is used to obtain the \fBX-Bogosity\fR
-header from \fBbogofilter(1)\fR when during spam filtering. An example of a SMTP transaction
-log is as below
+the SMTP transaction log to exernal programs. Additionally, if \fBQMAILQUEUE\fR or
+\fBFILTERARGS\fR env variabels are defined, \fBqmail-smtpd\fR will make
+available file descriptor 255 to be available for writing by external programs. Additionally,
+\fBqmail-smtpd\fR will read 255 bytes on file descriptor 255. To use a file descriptor other than
+255, use the LOGFD environment variable.  The bytes read will be logged
+to stderr along with the transaction log. This makes it possible for programs called during
+the data phase of SMTP to send back 255 bytes of messages back to \fBqmail-smtpd\fR. In fact,
+this is used to obtain the \fBX-Bogosity\fR header from \fBbogofilter(1)\fR when during spam
+filtering. An example of a SMTP transaction log is as below
 .PP
 .EX
 qmail-smtpd: pid 14544 from ::ffff:127.0.0.1 HELO <indimail.org> \\
