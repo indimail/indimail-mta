@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.50  2017-04-23 16:16:39+05:30  Cprogrammer
+# added log rotate command
+#
 # Revision 1.49  2016-06-06 14:49:22+05:30  Cprogrammer
 # use runlevel 2 for debian
 #
@@ -295,8 +298,9 @@ restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
   flush -- Schedules queued messages for immediate delivery
  reload -- sends qmail-send HUP, rereading locals and virtualdomains
  status -- status of svscan process & IndiMail services
+ rotate -- rotate all logfiles (sending ALRM to multilog)
   queue -- shows status of queue
-  pause -- temporarily stops mail service (connections accepted, nothing leaves)
+  pause -- temporarily stops mail service (connections accepted, nothing goes out)
    cont -- continues paused mail service
     cdb -- rebuild the tcpserver cdb file for smtp, qmtp, qmqp, imap, pop3 and poppass
 HELP
@@ -469,6 +473,18 @@ case "$1" in
 	echo
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
+ rotate)
+	ret=0
+	for i in `echo $SERVICE/*`
+	do
+		$ECHO -n $"Rotating $i: "
+		PREFIX/bin/svc -a $i && $succ || $fail
+		RETVAL=$?
+		echo
+		let ret+=$RETVAL
+	done
+	[ $ret -eq 0 ] && exit 0 || exit 1
+	;;
   flush)
 	ret=0
 	$ECHO -n $"Flushing timeout table + ALRM signal to qmail-send."
@@ -485,6 +501,7 @@ case "$1" in
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
   status|stat)
+	ret=0
 	if [ -x /sbin/initctl ] ; then
 		/sbin/initctl status svscan
 	else
@@ -576,7 +593,7 @@ case "$1" in
 	exit 0
 	;;
   *)
-    echo "Usage: `basename $0` {start|stop|condrestart|restart|shut|kill|flush|reload|stat|queue|pause|cont|cdb|help}"
+    echo "Usage: `basename $0` {start|stop|condrestart|restart|shut|kill|flush|rotate|reload|stat|queue|pause|cont|cdb|help}"
 	myhelp
 	exit 1
 	;;
