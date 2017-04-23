@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.51  2017-04-23 17:56:04+05:30  Cprogrammer
+# BUG - fixed log rotation
+#
 # Revision 1.50  2017-04-23 16:16:39+05:30  Cprogrammer
 # added log rotate command
 #
@@ -475,13 +478,15 @@ case "$1" in
 	;;
  rotate)
 	ret=0
-	for i in `echo $SERVICE/*`
+	for i in `echo $SERVICE/* $SERviCE/.svscan`
 	do
-		$ECHO -n $"Rotating $i: "
-		PREFIX/bin/svc -a $i && $succ || $fail
-		RETVAL=$?
-		echo
-		let ret+=$RETVAL
+		if [ -d $i/log ] ; then
+			$ECHO -n $"Rotating $i: "
+			PREFIX/bin/svc -a $i/log && $succ || $fail
+			RETVAL=$?
+			echo
+			let ret+=$RETVAL
+		fi
 	done
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
