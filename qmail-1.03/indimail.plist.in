@@ -7,7 +7,7 @@
 	<key>KeepAlive</key>
 	<true/>
 	<key>Program</key>
-	<string>PREFIX/sbin/svscanboot</string>
+	<string>LIBEXEC/svscanboot</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>svscan</string>
