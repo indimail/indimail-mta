@@ -773,8 +773,8 @@ warn-auto.sh qmailctl.sh conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qmailctl
 
-indimail.plist: indimail.plist.in conf-prefix
-	cat indimail.plist.in | sed s}PREFIX}"`head -1 conf-prefix`"}g \
+indimail.plist: indimail.plist.in conf-libexec
+	cat indimail.plist.in | sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> indimail.plist
 
 indimail-mta.fc: \
@@ -824,6 +824,14 @@ svscanboot.9 conf-prefix conf-sysconfdir conf-libexec
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> svscanboot.8
+
+cronlist:cronlist.in conf-prefix conf-libexec
+	( \
+	echo "# WARNING: This file was auto-generated. Do not edit!"; \
+	cat cronlist.in \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
+	) > cronlist
 
 env.a: \
 makelib env.o envread.o
