@@ -653,6 +653,11 @@ if [ -x /bin/systemctl ] ; then
 	/bin/systemctl enable indimail.service
 fi
 
+if [ -f ${sysconfdir}/cronlist ] ; then
+  echo "adding cron entries"
+  /usr/bin/crontab -u root ${sysconfdir}/cronlist
+fi
+
 echo "Checking Installed Permissions"
 if [ -f ${prefix}/bin/instcheck ] ; then
 	${prefix}/bin/instcheck > /dev/null 2>&1
