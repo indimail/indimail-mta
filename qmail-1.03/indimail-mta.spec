@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.92 2017-04-21 19:15:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.93 2017-04-23 18:29:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -539,7 +539,8 @@ else
   TOUCH=/bin/touch
 fi
 # Create these files so that %%ghost does not complain
-for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb
+for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp \
+tcp.qmqp.cdb indimail-mta.pp indimail-mta.mod
 do
   if [ ! -f %{buildroot}%{qsysconfdir}/$i ] ; then
     $TOUCH %{buildroot}%{qsysconfdir}/$i
@@ -659,9 +660,12 @@ done
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.smtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmqp.cdb
+%ghost %attr(0644,root,root)                      %{qsysconfdir}/indimail-mta.pp
+%ghost %attr(0644,root,root)                      %{qsysconfdir}/indimail-mta.mod
 
 %attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/indimail-mta.te
 %attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/indimail-mta.fc
+%attr(444,root,qmail) %config(noreplace)           %{sysconfdir}/cronlist
 %attr(444,root,root)  %config(noreplace)          %{qsysconfdir}/qmailprog.list
 %attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/etc/leapsecs.dat
 %attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/etc/leapsecs.txt
@@ -1911,6 +1915,11 @@ done
 #
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
+
+if [ -f %{sysconfdir}/cronlist ] ; then
+  echo "adding cron entries"
+  /usr/bin/crontab -u root %{sysconfdir}/cronlist
+fi
 
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable indimail.service
