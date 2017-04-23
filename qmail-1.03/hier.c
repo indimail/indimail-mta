@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.232  2017-04-23 18:28:54+05:30  Cprogrammer
+ * added cronlist
+ *
  * Revision 1.231  2017-04-16 13:06:55+05:30  Cprogrammer
  * moved surbfilter, surblqueue, qmail-greyd, greydaemon to sbin
  *
@@ -812,6 +815,7 @@ hier(inst_dir, fatal, dev_package)
 #ifndef INDIMAIL
 	c(auto_sysconfdir, "etc/..", "indimail-mta.te", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, "etc/..", "indimail-mta.fc", auto_uido, auto_gidq, 0644);
+	c(auto_sysconfdir, "etc/..", "cronlist", auto_uido, auto_gidq, 0644);
 #endif
 
 	/* Binaries */
@@ -1567,7 +1571,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.231 2017-04-16 13:06:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.232 2017-04-23 18:28:54+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
