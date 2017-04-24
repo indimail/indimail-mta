@@ -14,12 +14,14 @@ mandir=$(shell echo `head -1 conf-prefix`/share/man 2>/dev/null)
 shareddir=$(shell head -1 conf-shared 2>/dev/null)
 sysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
 libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
-version=$(grep Version: indimail-mta.spec | cut -d: -f2)
-release=$(grep Release: indimail-mta.spec | cut -d: -f2)
+version=$(shell grep Version: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
+release=$(shell grep Release: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
 servicedir=/service
 
 edit = sed \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
@@ -5859,10 +5861,7 @@ compile whois.c subfd.h str.h strerr.h stralloc.h byte.h tcpopen.h sgetopt.h
 	./compile `grep -h -v "^#" conf-ip` whois.c
 
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog
-	(cat indimail-mta.spec.in ;./catChangeLog) \
-	| sed s}@version@}"$(version)"}g \
-	| sed s}@release@}"$(release)"}g \
-	> indimail-mta.spec
+	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
 
 
 ################### PLUGINS ########################################
