@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.94 2017-04-24 09:56:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.95 2017-04-24 14:10:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -112,6 +112,7 @@ Source4: http://downloads.sourceforge.net/indimail/libsrs2-%{libsrs2_version}.ta
 %endif
 Source5: http://downloads.sourceforge.net/indimail/qmail-rpmlintrc
 Source6: http://downloads.sourceforge.net/indimail/svctool
+Source7: http://downloads.sourceforge.net/indimail/svctool.8.gz
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -432,6 +433,13 @@ if [ -d qmail-%{qmail_version} ] ; then
    else
      %{__rm} -f /tmp/conf-groups
    fi
+   %{__cp} qmail-1.03/doc/ChangeLog .
+   if [ -f qmail-1.03/upgrade.sh ] ; then
+   %{__cp} qmail-1.03/upgrade.sh .
+   fi
+   if [ -f qmail-1.03/local_upgrade.sh ] ; then
+   %{__cp} qmail-1.03/local_upgrade.sh .
+   fi
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
@@ -449,6 +457,9 @@ if [ -f ../SOURCES/svctool ] ; then
 fi
 if [ -f ../SOURCES/svctool.gz ] ; then
 gunzip -c ../SOURCES/svctool.gz > ../SOURCES/svctool
+fi
+if [ -f ../SOURCES/svctool.8.gz ] ; then
+%{__cp} ../SOURCES/svctool.8.gz .
 fi
 
 
@@ -479,12 +490,23 @@ do
         %{__mkdir_p} %{buildroot}%{_prefix}/sbin
         %{__cp} ../SOURCES/svctool %{buildroot}%{_prefix}/sbin/svctool
       fi
+      if [ -f ../SOURCES/svctool.8.gz ] ; then
+        %{__mkdir_p} %{buildroot}%{mandir}/man8
+        %{__cp} ../SOURCES/svctool.8.gz %{buildroot}%{mandir}/man8/svctool.8.gz
+      fi
     fi
   fi
 done
 install -m 0644 indimail-mta-release %{buildroot}%{qsysconfdir}/indimail-mta-release
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
-install -m 0644 doc/ChangeLog %{buildroot}%{shareddir}/doc/ChangeLog
+%{__mkdir_p} %{buildroot}%{libexecdir}
+install -m 0644 ChangeLog %{buildroot}%{shareddir}/doc/ChangeLog
+if [ -f upgrade.sh ] ; then
+install -m 0755 upgrade.sh %{buildroot}%{libexecdir}/upgrade.sh
+fi
+if [ -f local_upgrade.sh ] ; then
+install -m 0755 local_upgrade.sh %{buildroot}%{libexecdir}/local_upgrade.sh
+fi
 if [ %nolibdkim -eq 0 ] ; then
   %{__rm} -f %{buildroot}%{_libdir}/libdkim.la
   if [ -x /usr/bin/chrpath ] ; then
@@ -830,6 +852,8 @@ done
 %attr(755,root,qmail)                   %{libexecdir}/ddist
 %attr(755,root,qmail)                   %{libexecdir}/rspamsdomain
 %attr(755,root,qmail)                   %{libexecdir}/zrxdelay
+%attr(755,root,qmail)                   %{libexecdir}/upgrade.sh
+%verify (not md5 size mtime mode)       %{libexecdir}/local_upgrade.sh
 
 %attr(755,root,qmail)                   %{_prefix}/sbin/plugtest
 %attr(755,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
@@ -1081,6 +1105,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/ofmipname.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/ofmipd.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/mlmatchup.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/svctool.8.gz
 %if %nolibdkim == 0
 %attr(0644,root,root)                   %{mandir}/man8/dkim.8.gz
 %endif
@@ -1570,6 +1595,11 @@ else
   fi
 fi
 sleep 5
+if [ -f %{libexecdir}/upgrade.sh ] ; then
+(
+  echo "Running Custom Upgrade Script for pretrans"
+  /bin/sh %{libexecdir}/upgrade.sh pretrans noargs @version@ $*
+) > /tmp/indimail-mta-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %pre 
@@ -1581,6 +1611,12 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
+  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  (
+    echo "Running Custom Upgrade Script for pre upgrade"
+    /bin/sh %{libexecdir}/upgrade.sh pre upgrade @version@ $*
+  ) >> /tmp/indimail-mta-setup.log 2>&1
+  fi
   exit 0
 fi
 #
@@ -1634,16 +1670,16 @@ if [ $ID -ne 0 ] ; then
   exit 1
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
-  if [ -f %{shareddir}/boot/rpm.init ] ; then
-    /sbin/ldconfig
-    echo "Running Custom Upgrade Script for post"
-    /bin/sh %{shareddir}/boot/rpm.init upgrade
-  fi
-  echo "doing post upgrade activities"
   (
+  echo "doing post upgrade activities"
+  if [ -f %{libexecdir}/upgrade.sh ] ; then
+    /sbin/ldconfig
+    echo "Running Custom Upgrade Script for post upgrade"
+    /bin/sh %{libexecdir}/upgrade.sh post upgrade @version@ $*
+  fi
   # selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
-  ) >> /tmp/indimail-mta-install.log 2>&1
+  ) >> /tmp/indimail-mta-setup.log 2>&1
   exit 0
 fi
 if [ -x /bin/touch ] ; then
@@ -1689,11 +1725,6 @@ fi
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
 
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{qmaildir}/alias/Maildir/
-
-if [ -f %{shareddir}/boot/rpm.init ] ; then
-  echo "Running Custom Installation Script for post"
-  /bin/sh %{shareddir}/boot/rpm.init post
-fi
 
 if [ %nodksignatures -eq 0 ] ; then
   if [ -x %{_prefix}/bin/dknewkey ] ; then
@@ -1919,10 +1950,15 @@ if [ -f %{qsysconfdir}/cronlist ] ; then
   /usr/bin/crontab -u root %{qsysconfdir}/cronlist
 fi
 
+if [ -f %{libexecdir}/upgrade.sh ] ; then
+  echo "Running Custom Installation Script for post install"
+  /bin/sh %{libexecdir}/upgrade.sh post install @version@ $*
+fi
+
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable indimail.service
 fi
-) >> /tmp/indimail-mta.install.log 2>&1
+) >> /tmp/indimail-mta-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
   echo "1. Issue /sbin/initctl emit qmailstart to start services"
   count=1
@@ -1949,6 +1985,8 @@ echo "$count. You need to create CERTS for STARTTLS."
 echo "   Run the following command to create Certificate for TLS/SSL"
 echo "   %{_prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
 fi
+echo
+echo "Look at /tmp/indimail-mta-setup.log for the installation log"
 
 ### SCRIPTLET ###############################################################################
 %preun
@@ -1993,14 +2031,19 @@ else
   fi
 fi
 sleep 5
-if [ -f %{shareddir}/boot/rpm.init ] ; then
-  echo "Running Custom Un-Installation Script for preun"
-  /bin/sh %{shareddir}/boot/rpm.init preun "$argv1"
-fi
 
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
+  if [ -f %{libexecdir}/upgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for preun upgrade"
+    /bin/sh %{libexecdir}/upgrade.sh preun upgrade @version@ "$argv1"
+  fi
   exit 0
+fi
+
+if [ -f %{libexecdir}/upgrade.sh ] ; then
+  echo "Running Custom Un-Installation Script for preun pre-uninstall"
+  /bin/sh %{libexecdir}/upgrade.sh preun uninstall @version@ "$argv1"
 fi
 
 if [ -f /etc/init.d/sendmail ] ; then
@@ -2023,7 +2066,7 @@ fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot
-) > /tmp/indimail-mta.uninstall.log 2>&1
+) >> /tmp/indimail-mta-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -2035,6 +2078,12 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
+  (
+  if [ -f %{libexecdir}/upgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for postun upgrade"
+    /bin/sh %{libexecdir}/upgrade.sh postun upgrade @version@ $*
+  fi
+  ) >> /tmp/indimail-mta-setup.log
   echo "recreating ld.so cache"
   /sbin/ldconfig
   exit 0
@@ -2115,11 +2164,11 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
     /usr/sbin/semodule -r indimail-mta
   fi
 fi
-if [ -f %{shareddir}/boot/rpm.init ] ; then
-  echo "Running Custom Un-Installation Script for postun"
-  /bin/sh %{shareddir}/boot/rpm.init postun
+if [ -f %{libexecdir}/upgrade.sh ] ; then
+  echo "Running Custom Un-Installation Script for postun uninstall"
+  /bin/sh %{libexecdir}/upgrade.sh postun uninstall @version@ $*
 fi
-) >> /tmp/indimail-mta.uninstall.log 2>&1
+) >> /tmp/indimail-mta-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %posttrans
@@ -2129,11 +2178,11 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-if [ -f %{shareddir}/boot/rpm.init ] ; then
+if [ -f %{libexecdir}/upgrade.sh ] ; then
+(
   echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{shareddir}/boot/rpm.init posttrans
-fi
-echo ""
+  /bin/sh %{libexecdir}/upgrade.sh posttrans noargs @version@ $*
+) >> /tmp/indimail-mta-setup.log 2>&1
 
 # fix changelog for openSUSE buildservice
 %changelog
