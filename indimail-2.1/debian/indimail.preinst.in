@@ -35,7 +35,7 @@ case "$1" in
 	if [ -f ${libexecdir}/upgrade.sh ] ; then
 	(
 		echo "Running Custom Upgrade Script for pre $1"
-		/bin/sh ${libexecdir}/upgrade.sh pre $1 @version@ $*
+		/bin/sh ${libexecdir}/upgrade.sh pre $1 @version@ $* || true
 	) >> /tmp/indimail-setup.log 2>&1
 	fi
 	if [ " $1" = " upgrade" ] ; then

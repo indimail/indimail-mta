@@ -33,13 +33,13 @@ fi
 
 case "$1" in
     remove|upgrade|deconfigure)
-	(
 	if [ -f ${libexecdir}/upgrade.sh ] ; then
 	(
 		echo "Running Custom Upgrade Script for pre $1"
-		/bin/sh ${libexecdir}/upgrade.sh prerm $1 @version@ $*
+		/bin/sh ${libexecdir}/upgrade.sh prerm $1 @version@ $* || true
 	) >> /tmp/indimail-setup.log 2>&1
 	fi
+	(
 	if [ -f ${prefix}/sbin/initsvc ] ; then
 		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop
 	fi

@@ -140,7 +140,7 @@ fi
 if [ -f /tmp/indimail.upgrade ] ; then # upgrade
 	if [ -f ${libexecdir}/upgrade.sh ] ; then
     	echo "Running Custom Upgrade Script for post upgrade"
-    	/bin/sh ${libexecdir}/upgrade.sh post upgrade @version@ $*
+    	/bin/sh ${libexecdir}/upgrade.sh post upgrade @version@ $* || true
 	fi
 	${rm} -f /tmp/indimail.upgrade
 	exit 0
