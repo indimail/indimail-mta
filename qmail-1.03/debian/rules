@@ -22,6 +22,7 @@ endif
 prefix=/usr
 qmaildir=/var/indimail
 qsysconfdir=/etc/indimail
+libexecdir=$(prefix)/libexec/indimail
 sysconfdir=/etc
 mandir=$(prefix)/share/man
 libdkim_version=1.4
@@ -121,14 +122,22 @@ install: build
 	if [ -f ../SOURCES/svctool.gz ] ; then \
 		gunzip -c ../SOURCES/svctool.gz > $(DESTDIR)/$(prefix)/sbin/svctool; \
 	fi
+	if [ -f ../BUILD/debian/svctool ] ; then \
+		${cp} ../BUILD/debian/svctool $(DESTDIR)/$(prefix)/sbin; \
+	fi
+	if [ -f ../SOURCES/svctool.8.gz ] ; then \
+		mkdir -p $(DESTDIR)$(mandir)/man8
+		${cp} ../SOURCES/svctool.8.gz $(DESTDIR)/$(mandir)/man8; \
+	fi
+	if [ -f ../BUILD/debian/svctool.8.gz ] ; then
+		mkdir -p $(DESTDIR)$(mandir)/man8
+		${cp} ../BUILD/debian/svctool.8.gz $(DESTDIR)/$(mandir)/man8; \
+	fi
 	if [ -f ../SOURCES/usr.sbin.clamd ] ; then \
 		${cp} ../SOURCES/usr.sbin.clamd $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
 	fi
 	if [ -f ../SOURCES/usr.bin.freshclam ] ; then \
 		${cp} ../SOURCES/usr.bin.freshclam $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
-	fi
-	if [ -f ../BUILD/debian/svctool ] ; then \
-		${cp} ../BUILD/debian/svctool $(DESTDIR)/$(prefix)/sbin; \
 	fi
 	if [ -f ../BUILD/debian/usr.sbin.clamd ] ; then \
 		${cp} ../BUILD/debian/usr.sbin.clamd $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
@@ -137,6 +146,14 @@ install: build
 		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
 	fi
 	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
+	if [ -f upgrade.sh ] ; then \
+		mkdir -p $(DESTDIR)$(libexecdir); \
+		install -m 0755 upgrade.sh "$(DESTDIR)$(libexecdir)"/upgrade.sh; \
+	fi
+	if [ -f local_upgrade.sh ] ; then \
+		mkdir -p $(DESTDIR)$(libexecdir); \
+		install -m 0755 local_upgrade.sh "$(DESTDIR)$(libexecdir)"/local_upgrade.sh; \
+	fi
 
 binary-indep: build install
 	dh_testdir
