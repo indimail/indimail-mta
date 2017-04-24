@@ -13,7 +13,12 @@
 # $Id: catChangeLog,v 2.3 2017-04-24 09:09:51+05:30 Cprogrammer Exp mbhangui $
 #
 flag=0
-cat doc/ChangeLog|while read line
+if [ $# -eq 1 ] ; then
+	file=$1
+else
+	file=doc/ChangeLog
+fi
+cat $file |while read line
 do
 	echo "$line"|grep "^*" > /dev/null
 	if [ $? -eq 0 -a $flag -ne 0 ] ; then
