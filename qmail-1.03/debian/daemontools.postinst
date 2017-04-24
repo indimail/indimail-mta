@@ -26,7 +26,7 @@ qbase=${qmaildir}/queue
 mbase=/home/mail
 logdir=/var/log/indimail
 servicedir=/service
-sysconfdir=/etc/indimail
+qsysconfdir=/etc/indimail
 rm=/bin/rm
 mv=/bin/mv
 ####################################
@@ -114,17 +114,17 @@ esac
 #
 # We need to do this for debian. SIGH!!
 #
-if [ -f ${sysconfdir}/daemontools_perm_list ] ; then
+if [ -f ${qsysconfdir}/daemontools_perm_list ] ; then
 	echo "Fixing Permissions (debian stupidity)"
 (
-/bin/grep -v "^#" ${sysconfdir}/daemontools_perm_list | while read line
+/bin/grep -v "^#" ${qsysconfdir}/daemontools_perm_list | while read line
 do
 	if [ " $line" = " " ] ; then
 		continue
 	fi
 	fixperms $line
 done
-) > ${sysconfdir}/daemontools-stat.override
+) > ${qsysconfdir}/daemontools-stat.override
 fi
 
 if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
