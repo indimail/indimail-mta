@@ -133,17 +133,17 @@ done
 ) > ${qsysconfdir}/stat.override
 fi
 
+# indimail-mta.upgrade/indimail-mta.install are created
+# by the preinst script
 if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
-	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "recreating ld.so cache"
-		/sbin/ldconfig
-		echo "Running Custom Upgrade Script"
-		/bin/sh ${shareddir}/boot/rpm.init upgrade
+	if [ -f ${libexecdir}/upgrade.sh ] ; then
+    	echo "Running Custom Upgrade Script for post upgrade"
+    	/bin/sh ${libexecdir}/upgrade.sh post upgrade @version@ $* || true
 	fi
-	${rm} -f /tmp/indimail-mta.upgrade
+	${rm} -f /tmp/indimail.upgrade
 	exit 0
 fi
-${rm} -f /tmp/indimail-mta.install /tmp/indimail-mta.upgrade
+${rm} -f /tmp/indimail-mta.install
 # Recreate ld.so links and cache
 echo "recreating ld.so cache"
 if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
@@ -450,7 +450,7 @@ fi
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
 #
-) >> /tmp/indimail-mta-install.log 2>&1
+) >> /tmp/indimail-mta-setup.log 2>&1
 
 if [ -f ${sysconfdir}/init/svscan.conf -o -f ${sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
@@ -482,6 +482,6 @@ echo "   command to create cert"
 echo "   ${prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
 fi
 echo
-echo "Check /tmp/indimail-mta-install.log for the detailed installation log!!!"
+echo "Check /tmp/indimail-mta-setup.log for the detailed installation log!!!"
 
 exit 0

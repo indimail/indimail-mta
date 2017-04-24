@@ -39,6 +39,12 @@ fi
 
 case "$1" in
     purge|remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+	if [ -f ${libexecdir}/upgrade.sh ] ; then
+	(
+		echo "Running Custom Upgrade Script for pre $1"
+		/bin/sh ${libexecdir}/upgrade.sh postrm $1 @version@ $* || true
+	) >> /tmp/indimail-mta-setup.log 2>&1
+	fi
     ;;
 
     *)
@@ -215,7 +221,7 @@ if [ " $1" = " purge" ] ; then
 		log_dir=${logdir}
 	fi
 	[ "$log_dir" != "/" ] && ${rm} -fr $log_dir
-	) >> /tmp/indimail-mta-uninstall.log 2>&1
+	) >> /tmp/indimail-mta-setup.log 2>&1
 else
 	echo "recreating ld.so cache"
 	/sbin/ldconfig
