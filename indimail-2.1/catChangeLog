@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: catChangeLog,v $
+# Revision 2.3  2017-04-24 09:09:51+05:30  Cprogrammer
+# fixed changelog date
+#
 # Revision 2.2  2017-03-08 18:24:24+05:30  Cprogrammer
 # added version in changelog generation
 #
@@ -7,7 +10,7 @@
 # utility to append changelog to indimail.spec
 #
 #
-# $Id: catChangeLog,v 2.2 2017-03-08 18:24:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: catChangeLog,v 2.3 2017-04-24 09:09:51+05:30 Cprogrammer Exp mbhangui $
 #
 flag=0
 cat doc/ChangeLog|while read line
@@ -21,7 +24,7 @@ do
 		continue
 	fi
 	if [ $flag -eq 0 ] ; then # first line
-		echo "* `date +"%a %b %d %Y"` mbhangui@gmail.com" @version@-@release@
+		echo "* `date +"%a %b %d %Y %H:%S:%M %z"` mbhangui@gmail.com" @version@-@release@
 		flag=1
 		continue
 	elif [ $flag -eq 1 ] ; then
