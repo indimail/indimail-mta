@@ -1,6 +1,7 @@
 qmaildir=/var/indimail
 mandir=/usr/share/man
-sysconfdir=/etc/indimail
+qsysconfdir=/etc/indimail
+sysconfdir=/etc
 shareddir=/usr/share/indimail
 libexecdir=/usr/libexec/indimail
 logdir=/var/log/indimail
@@ -17,6 +18,7 @@ acl_libdirstem=$(shell if [ $(bits) -eq 64 ] ; then echo lib64; else echo lib;fi
 edit = sed \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
