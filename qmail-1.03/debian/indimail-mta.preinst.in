@@ -26,6 +26,15 @@ case "$1" in
     install|upgrade)
 	${rm} -f /tmp/indimail-mta.install /tmp/indimail-mta.upgrade
 	touch /tmp/indimail-mta.$1
+	if [ -f ${libexecdir}/upgrade.sh ] ; then
+	(
+		echo "Running Custom Upgrade Script for pre $1"
+		/bin/sh ${libexecdir}/upgrade.sh pre $1 @version@ $* || true
+	) >> /tmp/indimail-setup.log 2>&1
+	fi
+	if [ " $1" = " upgrade" ] ; then
+		exit 0
+	fi
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
@@ -68,7 +77,7 @@ case "$1" in
 			/etc/init.d/nscd start
 		fi
 	fi
-	) > /tmp/indimail-mta-install.log 2>&1
+	) > /tmp/indimail-mta-setup.log 2>&1
 	;;
 
     abort-upgrade)
