@@ -22,6 +22,7 @@ endif
 prefix=/usr
 qmaildir=/var/indimail
 qsysconfdir=/etc/indimail
+sysconfdir=/etc
 mandir=$(prefix)/share/man
 libdkim_version=1.4
 libsrs2_version=1.0.18
@@ -135,7 +136,7 @@ install: build
 	if [ -f ../BUILD/debian/usr.bin.freshclam ] ; then \
 		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
 	fi
-	install -m 0644 indimail-mta-release "$(DESTDIR)$(sysconfdir)"/indimail-mta-release
+	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
 
 binary-indep: build install
 	dh_testdir
