@@ -1083,3 +1083,4 @@ lock_sh.o
 sig_int.o
 queue-fix.0
 cronlist
+indimail-mta.spec

@@ -14,6 +14,8 @@ mandir=$(shell echo `head -1 conf-prefix`/share/man 2>/dev/null)
 shareddir=$(shell head -1 conf-shared 2>/dev/null)
 sysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
 libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
+version=$(grep Version: indimail-mta.spec | cut -d: -f2)
+release=$(grep Release: indimail-mta.spec | cut -d: -f2)
 servicedir=/service
 
 edit = sed \
@@ -1355,7 +1357,7 @@ run-cleanq.9 conf-prefix
 
 it: \
 indimail-mta.fc perm_list 822date 822field 822header 822print 822received addcr addrlist \
-argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist \
+argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist indimail-mta.spec \
 binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
 datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip \
@@ -5855,6 +5857,13 @@ stralloc.a strerr.a substdio.a str.a
 whois.o:\
 compile whois.c subfd.h str.h strerr.h stralloc.h byte.h tcpopen.h sgetopt.h
 	./compile `grep -h -v "^#" conf-ip` whois.c
+
+indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog
+	(cat indimail-mta.spec.in ;./catChangeLog) \
+	| sed s}@version@}"$(version)"}g \
+	| sed s}@release@}"$(release)"}g \
+	> indimail-mta.spec
+
 
 ################### PLUGINS ########################################
 # dnsblcheck plugin

@@ -536,3 +536,5 @@ yearcal.o
 debian/changelog
 debian/_service
 cronlist
+indimail-mta.spec
+doc/ChangeLog
