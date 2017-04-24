@@ -21,7 +21,7 @@ set -e
 
 prefix=/usr
 qmaildir=/var/indimail
-sysconfdir=/etc/indimail
+qsysconfdir=/etc/indimail
 shareddir=${prefix}/share/indimail
 mandir=${prefix}/share/man
 servicedir=/service
@@ -113,7 +113,7 @@ if [ " $1" = " purge" ] ; then
 	echo "removing tcp configuration"
 	for i in smtp qmtp qmqp
 	do
-		${rm} -f ${sysconfdir}/tcp.$i.cdb ${sysconfdir}/tcp.$i
+		${rm} -f ${qsysconfdir}/tcp.$i.cdb ${qsysconfdir}/tcp.$i
 	done
 	${rm} -f ${sysocnfdir}/control/controlfiles
 	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
@@ -121,12 +121,12 @@ if [ " $1" = " purge" ] ; then
 		procmailrc indimail.settings lib_deps osh.table perm_list \
 		qmailprog.list quotawarnmsg.example services.log
 	do
-		${rm} -f ${sysconfdir}/$i
+		${rm} -f ${qsysconfdir}/$i
 	done
 	for i in rsa2048.pem rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
 		dh2048.pem dh512.pem rsa512.pem servercert.rand clientcert.pem
 	do
-		${rm} -f ${sysconfdir}/certs/$i
+		${rm} -f ${qsysconfdir}/certs/$i
 	done
 
 	echo "removing binaries, libraries, queues"
@@ -173,31 +173,25 @@ if [ " $1" = " purge" ] ; then
 	fi
 	for i in assign cdb
 	do
-    	${rm} -f ${sysconfdir}/users/$i
+    	${rm} -f ${qsysconfdir}/users/$i
 	done
-	if [ -d ${sysconfdir}/users ] ; then
-	${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/users || true
+	if [ -d ${qsysconfdir}/users ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${qsysconfdir}/users || true
 	fi
-	${rm} -f ${sysconfdir}/control/domainkeys/default.pub ${sysconfdir}/control/domainkeys/default
-	if [ -d ${sysconfdir}/control/domainkeys ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control/domainkeys 2>/dev/null || true
+	${rm} -f ${qsysconfdir}/control/domainkeys/default.pub ${qsysconfdir}/control/domainkeys/default
+	if [ -d ${qsysconfdir}/control/domainkeys ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${qsysconfdir}/control/domainkeys 2>/dev/null || true
 	fi
-	if [ -d ${sysconfdir}/control/defaultqueue ] ; then
-	${rm} -rf ${sysconfdir}/control/defaultqueue 2>/dev/null || true
+	if [ -d ${qsysconfdir}/control/defaultqueue ] ; then
+	${rm} -rf ${qsysconfdir}/control/defaultqueue 2>/dev/null || true
 	fi
-	if [ -d ${sysconfdir}/control ] ; then
-	${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control || true
+	if [ -d ${qsysconfdir}/control ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${qsysconfdir}/control || true
 	fi
-	if [ -d ${sysconfdir}/certs ] ; then
-	${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/certs || true
+	if [ -d ${qsysconfdir}/certs ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${qsysconfdir}/certs || true
 	fi
-	${rm} -rf ${sysconfdir} || true
 	echo "removing man pages"
-	${rmdir} --ignore-fail-on-non-empty ${mandir} 2>/dev/null|| true
-	if [ -d ${shareddir} ] ; then
-	echo "removing architecture-independent shared directory"
-	${rmdir} --ignore-fail-on-non-empty ${shareddir} 2>/dev/null || true
-	fi
 	${rmdir} --ignore-fail-on-non-empty ${qmaildir} 2>/dev/null || true
 
 	echo "removing startup services"
@@ -210,11 +204,11 @@ if [ " $1" = " purge" ] ; then
 		fi
 	done
 
-	echo "removing logs"
 	count=`/bin/ls ${servicedir} 2>/dev/null| /usr/bin/wc -l`
 	if [ $count -eq 0 ] ; then
-		${rm} -rf ${servicedir} || true
+		${rmdir} --ignore-fail-on-non-empty ${servicedir} || true
 	fi
+	echo "removing logs"
 	if [ -h ${logdir} ] ; then
 		log_dir=`/bin/ls -ld ${logdir} | /usr/bin/awk '{print $10}'`
 	else
