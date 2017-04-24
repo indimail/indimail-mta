@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.95 2017-04-24 14:10:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.96 2017-04-24 14:23:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1600,6 +1600,7 @@ if [ -f %{libexecdir}/upgrade.sh ] ; then
   echo "Running Custom Upgrade Script for pretrans"
   /bin/sh %{libexecdir}/upgrade.sh pretrans noargs @version@ $*
 ) > /tmp/indimail-mta-setup.log 2>&1
+fi
 
 ### SCRIPTLET ###############################################################################
 %pre 
@@ -2183,6 +2184,7 @@ if [ -f %{libexecdir}/upgrade.sh ] ; then
   echo "Running Custom Installation Script for posttrans"
   /bin/sh %{libexecdir}/upgrade.sh posttrans noargs @version@ $*
 ) >> /tmp/indimail-mta-setup.log 2>&1
+fi
 
 # fix changelog for openSUSE buildservice
 %changelog
