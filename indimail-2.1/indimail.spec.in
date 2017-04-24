@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.405 2017-04-21 19:46:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.406 2017-04-24 15:40:03+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -87,11 +87,7 @@ Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
 Provides: indimail-mta = @version@, daemontools = @version@, ucspi-tcp = @version@, libindimail = @version@
-%if %build_on_obs == 1
-Release: 1.<B_CNT>
-%else
-Release: 1.B_CCNT%{?dist}
-%endif
+Release: 1.1%{?dist}
 
 ## user/group management
 # Note: it is not necessary to assign 555 for uid, gid. The package will use any id assigned to username, groupname
@@ -2306,7 +2302,7 @@ if [ -f %{libexecdir}/upgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for pretrans"
   /bin/sh %{libexecdir}/upgrade.sh pretrans noargs @version@ $*
-) >> /tmp/indimail-setup.log 2>&1
+) > /tmp/indimail-setup.log 2>&1
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -2318,7 +2314,7 @@ if [ $ID -ne 0 ] ; then
   exit 1
 fi
 # initialize setup log file
-> /tmp/indimail-setup.log
+>> /tmp/indimail-setup.log
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
   if [ -f %{libexecdir}/upgrade.sh ] ; then
@@ -2419,12 +2415,12 @@ fi
 
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
+  echo "doing post upgrade activities"
   if [ -f %{libexecdir}/upgrade.sh ] ; then
     /sbin/ldconfig
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/upgrade.sh post upgrade @version@ $*
   fi
-  echo "doing post upgrade activities"
   # selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
   ) >> /tmp/indimail-setup.log 2>&1
