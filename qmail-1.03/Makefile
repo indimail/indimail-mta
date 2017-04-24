@@ -1355,7 +1355,7 @@ run-cleanq.9 conf-prefix
 
 it: \
 indimail-mta.fc perm_list 822date 822field 822header 822print 822received addcr addrlist \
-argv0 atrn autoresponder qbase64 batv binm1 binm1+df \
+argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist \
 binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
 datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip \
