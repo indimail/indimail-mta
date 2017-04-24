@@ -3,6 +3,7 @@ SUBDIRS=@subdir_list@
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
+release=$(shell grep Release: indimail.spec.in | cut -d: -f2|cut -c2-)
 
 DEFS=@DEFS@ -fno-strict-aliasing -I. -Ieps-1.2 @auth_inc@
 cdb_lib=$(top_builddir)/cdb-1.0/libcdb.la
@@ -796,6 +797,7 @@ edit = sed \
 	-e 's,@PACKAGE\@,$(PACKAGE),g' \
 	-e 's,@PACKAGE_VERSION\@,$(PACKAGE_VERSION),g' \
 	-e 's,@version\@,$(VERSION),g' \
+	-e 's,@release\@,$(release),g' \
 	-e 's,@pkgconfigdir\@,$(pkgconfigdir),g' \
 	-e 's,@VERSION\@,$(VERSION),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
