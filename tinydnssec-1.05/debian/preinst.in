@@ -24,9 +24,6 @@ fi
 
 case "$1" in
     upgrade)
-	echo "Giving dnscache exactly 5 seconds to exit nicely" 1>&2
-	$(prefix)/bin/svc -dx ${sysconfdir}/dnscache ${sysconfdir}/dnscache/log || true
-	sleep 5
 	;;
     install)
 	#
