@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.407 2017-04-25 11:14:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.408 2017-04-25 20:53:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2939,34 +2939,6 @@ if [ $ID -ne 0 ] ; then
 fi
 
 (
-if test -f %{_sysconfdir}/init/svscan.conf
-then
-  /sbin/initctl emit qmailstop > /dev/null 2>&1
-  echo "Giving IndiMail exactly 5 seconds to exit nicely"
-  sleep 5
-  if [ $argv1 -ne 1 ] ; then # not an upgrade
-    %{__rm} -f %{_sysconfdir}/init/svscan.conf
-  fi
-elif test -f %{_sysconfdir}/event.d/svscan
-then
-  /sbin/initctl emit qmailstop > /dev/null 2>&1
-  echo "Giving IndiMail exactly 5 seconds to exit nicely"
-  sleep 5
-  if [ $argv1 -ne 1 ] ; then # not an upgrade
-    %{__rm} -f %{_sysconfdir}/event.d/svscan
-  fi
-elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
-then
-  /bin/systemctl stop indimail.service > /dev/null 2>&1
-  echo "Giving IndiMail exactly 5 seconds to exit nicely"
-  sleep 5
-elif test -x %{_prefix}/sbin/initsvc
-then
-  %{_prefix}/sbin/initsvc -off
-  echo "Giving IndiMail exactly 5 seconds to exit nicely"
-  sleep 5
-fi
-
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/upgrade.sh ] ; then
