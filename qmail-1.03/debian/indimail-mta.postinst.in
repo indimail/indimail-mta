@@ -204,10 +204,6 @@ ${prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=${servicedir}
 
 # Misc/Configuration
 ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
-if [ -f ${shareddir}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script"
-	/bin/sh ${shareddir}/boot/rpm.init post
-fi
 
 echo "Creating default qmail configuraton and catch-all alias (${qmaildir}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${qmaildir}/alias/Maildir/
