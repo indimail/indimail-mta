@@ -15,9 +15,10 @@
 
 #ifndef _PRINTTYPE_H
 #define _PRINTTYPE_H
-
+#ifdef DNSSEC
 #include "stralloc.h"
 
 extern int printtype(stralloc *, const char *);
 
+#endif
 #endif

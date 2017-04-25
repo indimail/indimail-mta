@@ -5,7 +5,9 @@
 #include "dns.h"
 #include "printrecord.h"
 #include "printpacket.h"
+#ifdef DNSSEC
 #include "printtype.h"
+#endif
 
 static char *d;
 
@@ -20,6 +22,9 @@ unsigned int printpacket_cat(stralloc *out,char *buf,unsigned int len)
   uint16 numglue;
   unsigned int pos;
   char data[12];
+#ifndef DNSSEC
+  uint16 type;
+#endif
 
   pos = dns_packet_copy(buf,len,0,data,12); if (!pos) return 0;
 
@@ -67,7 +72,12 @@ unsigned int printpacket_cat(stralloc *out,char *buf,unsigned int len)
       X("weird class")
     }
     else {
+#ifdef DNSSEC
       if (!printtype(out,data)) return 0;
+#else
+      uint16_unpack_big(data,&type);
+      NUM(type)
+#endif
       X(" ")
       if (!dns_domain_todot_cat(out,d)) return 0;
     }

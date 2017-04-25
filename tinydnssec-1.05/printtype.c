@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#ifdef DNSSEC
 #include "byte.h"
 #include "dns.h"
 #include "uint16.h"
@@ -45,3 +45,4 @@ uint16 u16;
   uint16_unpack_big(type,&u16);
   return stralloc_catulong0(out,u16,0);
 }
+#endif

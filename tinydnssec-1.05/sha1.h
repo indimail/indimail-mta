@@ -3,7 +3,7 @@
 
 #ifndef __SHA1_H
 #define __SHA1_H
-
+#ifdef DNSSEC
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -25,5 +25,5 @@ void SHA1_Final(SHA1_CTX* context, uint8_t digest[SHA1_DIGEST_SIZE]);
 #ifdef __cplusplus
 }
 #endif
-
+#endif
 #endif /* __SHA1_H */

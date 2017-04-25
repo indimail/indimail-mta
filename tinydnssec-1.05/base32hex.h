@@ -15,9 +15,10 @@
 
 #ifndef _BASE32_HEX_H
 #define _BASE32_HEX_H
-
+#ifdef DNSSEC
 #include <stdint.h>
 
 extern unsigned int base32hex(char *out, uint8_t *in, unsigned int len);
 
+#endif
 #endif
