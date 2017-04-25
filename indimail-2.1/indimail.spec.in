@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.406 2017-04-24 15:40:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.407 2017-04-25 11:14:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2423,6 +2423,12 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   fi
   # selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
+  if [ -f /etc/inittab ] ; then # one of these days, this will disappear
+    /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      %{__sed} -i 's{^#SV:{SV:{' /etc/inittab
+    fi
+  fi
   ) >> /tmp/indimail-setup.log 2>&1
   exit 0
 fi
