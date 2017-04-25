@@ -957,10 +957,10 @@ AC_DEFINE_UNQUOTED(MYSQLBINDIR,"$mysqlbindir",full path to MySQL binaries)
 auth_inc="-I$indimaildir/include -I$mysql_incdir -I$mysql_incdir/mysql"
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L. -L$prefix/lib -lindimail $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
+	auth_libs="-L. -L$prefix/lib -lindimail -L$mysql_libdir -lmysqlclient $LIB_SSL $LIB_CRYPT"
 	;;
 	*)
-	auth_libs="-L. -L$ilibdir -lindimail $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
+	auth_libs="-L. -L$ilibdir -lindimail -L$mysql_libdir -lmysqlclient $LIB_SSL $LIB_CRYPT"
 	;;
 esac
 
