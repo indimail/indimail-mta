@@ -132,12 +132,24 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-echo "Giving tinydns/dnscache exactly 5 seconds to exit nicely" 1>&2
-for i in tinydns dnscache
-do
-  /usr/bin/svc -dx %{_sysconfdir}/$i %{_sysconfdir}/$i/log >/dev/null 2>&1 || true
-done
-sleep 5
+if [ -f %{_prefix}/bin/svok ] ; then
+  status=0
+  for i in tinydns tinydns/log dnscache dnscache/log
+  do
+    %{_prefix}/bin/svok %{_sysconfdir}/$i 2>/dev/null
+    if [ $? -eq 0 ] ; then
+      status=1
+    fi
+  done
+  if [ $status -eq 1 ] ; then
+    echo "Giving tinydns/dnscache exactly 5 seconds to exit nicely" 1>&2
+    for i in tinydns dnscache
+    do
+      %{_prefix}/bin/svc -dx %{_sysconfdir}/$i %{_sysconfdir}/$i/log >/dev/null 2>&1
+    done
+    sleep 5
+  fi
+fi
 
 %pre
 argv1=$1
