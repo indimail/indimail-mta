@@ -28,9 +28,16 @@ if [ $ID -ne 0 ] ; then
 fi
 
 case "$1" in
-    remove|upgrade|deconfigure)
+    remove|deconfigure)
 	echo "Giving tinydns/dnscache exactly 5 seconds to exit nicely" 1>&2
+	for i in tinydns dnscache
+	do
+		/usr/bin/svc -dx ${sysconfdir}/$i ${sysconfdir}/$i/log || true
+	done
+	sleep 5
 	${rm} -f /service/dnscache /service/tinydns
+	;;
+    upgrade)
 	for i in tinydns dnscache
 	do
 		/usr/bin/svc -dx ${sysconfdir}/$i ${sysconfdir}/$i/log || true
