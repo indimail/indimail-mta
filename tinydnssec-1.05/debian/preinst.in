@@ -23,7 +23,12 @@ if [ $ID -ne 0 ] ; then
 fi
 
 case "$1" in
-    install|upgrade)
+    upgrade)
+	echo "Giving dnscache exactly 5 seconds to exit nicely" 1>&2
+	$(prefix)/bin/svc -dx ${sysconfdir}/dnscache ${sysconfdir}/dnscache/log || true
+	sleep 5
+	;;
+    install)
 	#
 	# Create a users and groups. Do not report any problems if they already
 	# exists.
