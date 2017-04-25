@@ -35,7 +35,6 @@ case "$1" in
 		/usr/bin/svc -dx ${sysconfdir}/$i ${sysconfdir}/$i/log || true
 	done
 	sleep 5
-	${rm} -f /service/dnscache /service/tinydns
 	;;
     upgrade)
 	for i in tinydns dnscache
