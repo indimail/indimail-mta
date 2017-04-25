@@ -34,15 +34,7 @@
 %global _prefix            /usr
 Name: tinydnssec
 Version: 1.05
-%if %fedorareview == 0
-%if %build_on_obs == 1
-Release: 1.<B_CNT>
-%else
 Release: 1.1%{?dist}
-%endif
-%else
-Release: 1.1%{?dist}
-%endif
 Summary: DNS suite
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Base
@@ -133,6 +125,20 @@ pod2man -s 8 -c '' "tinydns-sign" >tinydns-sign.8
 %prep
 %setup -q
 
+%pretrans
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+echo "Giving tinydns/dnscache exactly 5 seconds to exit nicely" 1>&2
+for i in tinydns dnscache
+do
+  /usr/bin/svc -dx %{_sysconfdir}/$i %{_sysconfdir}/$i/log >/dev/null 2>&1 || true
+done
+sleep 5
+
 %pre
 argv1=$1
 ID=$(id -u)
@@ -142,9 +148,6 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
-  echo "Giving dnscache exactly 5 seconds to exit nicely" 1>&2
-  /usr/bin/svc -dx %{_sysconfdir}/dnscache %{_sysconfdir}/dnscache/log
-  sleep 5
   exit 0
 fi
 for i in dnscache dnslog tinydns
@@ -158,33 +161,10 @@ done
 
 %preun
 argv1=$1
-echo "Giving tinydns/dnscache exactly 5 seconds to exit nicely" 1>&2
-for i in tinydns dnscache
-do
-  /usr/bin/svc -dx %{_sysconfdir}/$i %{_sysconfdir}/$i/log >/dev/null 2>&1 || true
-done
-sleep 5
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   exit 0
 fi
-for i in tinydns dnslog dnscache
-do
-  echo "Removing user $i"
-  /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
-  %{__rm} -f /var/spool/$i
-done
-for i in tinydns dnscache
-do
-  if [ -L /service/$i ] ; then
-    echo "Removing service /service/$i"
-    %{__rm} -f /service/$i
-  fi
-  if [ -d %{_sysconfdir}/$i ] ; then
-    echo "Removing preinstalled %{_sysconfdir}/$i"
-    %{__rm} -rf %{_sysconfdir}/$i
-  fi
-done
 
 %post
 argv1=$1
@@ -209,8 +189,37 @@ else
   ln -sf %{_sysconfdir}/dnscache /service/dnscache
 fi
 
+%postun
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+  exit 0
+fi
+for i in tinydns dnslog dnscache
+do
+  echo "Removing user $i"
+  /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
+  %{__rm} -f /var/spool/$i
+done
+for i in tinydns dnscache
+do
+  if [ -L /service/$i ] ; then
+    echo "Removing service /service/$i"
+    %{__rm} -f /service/$i
+  fi
+  if [ -d %{_sysconfdir}/$i ] ; then
+    echo "Removing preinstalled %{_sysconfdir}/$i"
+    %{__rm} -rf %{_sysconfdir}/$i
+  fi
+done
+
 %changelog
-* Sat Apr 22 2017 mbhangui@gmail.com @version@-@release@
+* Tue Apr 25 2017 19:04:31 +0530 mbhangui@gmail.com @version@-@release@
 Release 1.1 Start 11/04/2017
 1. Added dnsgetroot
 2. added str_diffn()
@@ -220,3 +229,4 @@ Release 1.1 Start 11/04/2017
 6. added Pre-Depends daemontools
 7. remove tinydns, dnscache service on uninstall
 8. shutdown tinydns, dnsccache service on uninstall
+9. added compile time option to add dnssec, dnscurve support
