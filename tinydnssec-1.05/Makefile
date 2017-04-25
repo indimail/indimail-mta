@@ -358,7 +358,7 @@ libtai.a unix.a byte.a socket.lib
 	./load dnscache droproot.o okclient.o log.o siphash.o cache.o dns_random.o \
 	query.o response.o dd.o roots.o iopause.o prot.o dns.a \
 	env.a alloc.a buffer.a libtai.a unix.a byte.a  `cat \
-	socket.lib nacl.lib`
+	socket.lib`
 
 dnscache-conf: \
 load dnscache-conf.o generic-conf.o auto_home.o libtai.a buffer.a \
