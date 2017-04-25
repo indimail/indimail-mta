@@ -5,11 +5,14 @@
 #include "dns.h"
 #include "printrecord.h"
 #include "ip6.h"
+#ifdef DNSSEC
 #include "base32hex.h"
 #include "printtype.h"
+#endif
 
 static char *d;
 
+#ifdef DNSSEC
 static const char *HEX = "0123456789ABCDEF";
 
 static int hexout(stralloc *out,const char *buf,unsigned int len,unsigned int pos,unsigned int n) {
@@ -23,6 +26,7 @@ static int hexout(stralloc *out,const char *buf,unsigned int len,unsigned int po
   }
   return pos;
 }
+#endif
 
 unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsigned int pos,const char *q,const char qtype[2])
 {
@@ -34,7 +38,9 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
   unsigned int newpos;
   int i;
   unsigned char ch;
+#ifdef DNSSEC
   int rawlen;
+#endif
 
   pos = dns_packet_getname(buf,len,pos,&d); if (!pos) return 0;
   pos = dns_packet_copy(buf,len,pos,misc,10); if (!pos) return 0;
@@ -50,10 +56,10 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
 
   if (!dns_domain_todot_cat(out,d)) return 0;
   if (!stralloc_cats(out," ")) return 0;
+#ifdef DNSSEC
   if (byte_diff(misc,2,DNS_T_OPT)) {
     uint32_unpack_big(misc + 4,&u32);
     if (!stralloc_catulong0(out,u32,0)) return 0;
-
     if (byte_diff(misc + 2,2,DNS_C_IN)) {
       if (!stralloc_cats(out," weird class\n")) return 0;
       return newpos;
@@ -61,9 +67,19 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
   } else {
     if (!stralloc_cats(out,"0")) return 0;
   }
+#else
+  uint32_unpack_big(misc + 4,&u32);
+  if (!stralloc_catulong0(out,u32,0)) return 0;
+  if (byte_diff(misc + 2,2,DNS_C_IN)) {
+    if (!stralloc_cats(out," weird class\n")) return 0;
+    return newpos;
+  }
+#endif
 
   x = 0;
+#ifdef DNSSEC
   rawlen = 0;
+#endif
   if (byte_equal(misc,2,DNS_T_NS)) x = " NS ";
   if (byte_equal(misc,2,DNS_T_PTR)) x = " PTR ";
   if (byte_equal(misc,2,DNS_T_CNAME)) x = " CNAME ";
@@ -114,6 +130,7 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
     stringlen=ip6_fmt(ip6str,misc);
     if (!stralloc_catb(out,ip6str,stringlen)) return 0;
   }
+#ifdef DNSSEC
   else if (byte_equal(misc,2,DNS_T_DNSKEY)) {
     pos = dns_packet_copy(buf,len,pos,misc,4); if (!pos) return 0;
     if (!stralloc_cats(out," DNSKEY ")) return 0;
@@ -218,7 +235,27 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
     if (!stralloc_cats(out," ")) return 0;
     rawlen = datalen;
   }
-    while (rawlen--) {
+  while (rawlen--) {
+    pos = dns_packet_copy(buf,len,pos,misc,1); if (!pos) return 0;
+    if ((misc[0] >= 33) && (misc[0] <= 126) && (misc[0] != '\\')) {
+      if (!stralloc_catb(out,misc,1)) return 0;
+    }
+    else {
+      ch = misc[0];
+      misc[3] = '0' + (7 & ch); ch >>= 3;
+      misc[2] = '0' + (7 & ch); ch >>= 3;
+      misc[1] = '0' + (7 & ch);
+      misc[0] = '\\';
+      if (!stralloc_catb(out,misc,4)) return 0;
+    }
+  }
+#else
+  else {
+    if (!stralloc_cats(out," ")) return 0;
+    uint16_unpack_big(misc,&u16);
+    if (!stralloc_catulong0(out,u16,0)) return 0;
+    if (!stralloc_cats(out," ")) return 0;
+    while (datalen--) {
       pos = dns_packet_copy(buf,len,pos,misc,1); if (!pos) return 0;
       if ((misc[0] >= 33) && (misc[0] <= 126) && (misc[0] != '\\')) {
         if (!stralloc_catb(out,misc,1)) return 0;
@@ -232,6 +269,8 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
         if (!stralloc_catb(out,misc,4)) return 0;
       }
     }
+  }
+#endif
 
   if (!stralloc_cats(out,"\n")) return 0;
   if (pos != newpos) { errno = error_proto; return 0; }

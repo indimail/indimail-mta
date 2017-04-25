@@ -5,8 +5,10 @@
 
 char response[65535];
 unsigned int response_len = 0; /* <= 65535 */
+#ifdef DNSSEC
 unsigned int max_response_len = 0; /* <= 65535 */
 unsigned int do_dnssec = 0;
+#endif
 static unsigned int tctarget;
 
 #define NAMES 100

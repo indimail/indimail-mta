@@ -436,7 +436,11 @@ int main()
 	i = 0;
 	while (i < f[1].len) {
 	  k = f[1].len - i;
+#ifdef DNSSEC
 	  if (k > 255) k = 255;
+#else
+	  if (k > 127) k = 127;
+#endif
 	  ch = k;
 	  rr_add(&ch,1);
 	  rr_add(f[1].s + i,k);

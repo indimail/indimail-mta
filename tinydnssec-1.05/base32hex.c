@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#ifdef DNSSEC
 #include "base32hex.h"
 
 #define to_32hex(c) ((c) < 10 ? (c) + '0' : (c) + 'a' - 10)
@@ -76,4 +76,5 @@ int main(int argc, char **argv) {
     printf("Success!\n");
 }
 
+#endif
 #endif

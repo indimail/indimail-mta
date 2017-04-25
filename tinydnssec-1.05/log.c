@@ -140,13 +140,20 @@ void log_tcpclose(const char client[16],unsigned int port)
   line();
 }
 
+#ifdef DNSCURVE
+void log_tx(const char *q,const char qtype[2],const char *control,const char servers[64],unsigned int flaghavekeys,unsigned int gluelessness)
+#else
 void log_tx(const char *q,const char qtype[2],const char *control,const char servers[256],unsigned int gluelessness)
+#endif
 {
   int i;
 
   string("tx "); number(gluelessness); space();
   logtype(qtype); space(); name(q); space();
   name(control);
+#ifdef DNSCURVE
+  string(flaghavekeys ? " +" : " -");
+#endif
   for (i = 0;i < 256;i += 16)
     if (byte_diff(servers + i,16,V6any)) {
       space();

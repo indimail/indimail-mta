@@ -23,7 +23,9 @@
 #include "response.h"
 #include "ip6.h"
 #include "clientloc.h"
+#ifdef DNSSEC
 #include "edns0.h"
+#endif
 
 extern int respond(char *,char *,char *);
 
@@ -347,8 +349,10 @@ int main()
     if (byte_diff(qclass,2,DNS_C_IN) && byte_diff(qclass,2,DNS_C_ANY))
       strerr_die2x(111,FATAL,"bogus query: bad class");
 
+#ifdef DNSSEC
     pos = check_edns0(header, buf, len, pos);
     if (!pos) die_truncated();
+#endif
 
     qlog(ip,port,header,zone,qtype," ");
 

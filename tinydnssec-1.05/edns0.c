@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#ifdef DNSSEC
 #include "dns.h"
 #include "edns0.h"
 #include "response.h"
@@ -43,3 +43,4 @@ char opt_ttl[4];
   }
   return pos;
 }
+#endif
