@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.408 2017-04-25 20:53:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.409 2017-04-25 22:42:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2279,24 +2279,29 @@ if [ -d %{_prefix} -a -d /service ] ; then
     %{_prefix}/sbin/initsvc -status
   fi
 
-  if test -f %{_sysconfdir}/init/svscan.conf
-  then
-    echo "Giving IndiMail exactly 5 seconds to exit nicely"
-    /sbin/initctl emit qmailstop > /dev/null 2>&1
-  elif test -f %{_sysconfdir}/event.d/svscan
-  then
-    echo "Giving IndiMail exactly 5 seconds to exit nicely"
-    /sbin/initctl emit qmailstop > /dev/null 2>&1
-  elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
-  then
-    echo "Giving IndiMail exactly 5 seconds to exit nicely"
-    /bin/systemctl stop indimail.service > /dev/null 2>&1
-  elif test -x %{_prefix}/sbin/initsvc
-  then
-    echo "Giving IndiMail exactly 5 seconds to exit nicely"
-    %{_prefix}/sbin/initsvc -off
+  if [ -f $prefix/bin/svok ] ; then
+    $prefix/bin/svok /service/.svscan/log
+    if [ $? -eq 0 ] ; then
+      if test -f %{_sysconfdir}/init/svscan.conf
+      then
+        echo "Giving IndiMail exactly 5 seconds to exit nicely"
+        /sbin/initctl emit qmailstop > /dev/null 2>&1
+      elif test -f %{_sysconfdir}/event.d/svscan
+      then
+        echo "Giving IndiMail exactly 5 seconds to exit nicely"
+        /sbin/initctl emit qmailstop > /dev/null 2>&1
+      elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
+      then
+        echo "Giving IndiMail exactly 5 seconds to exit nicely"
+        /bin/systemctl stop indimail.service > /dev/null 2>&1
+      elif test -x %{_prefix}/sbin/initsvc
+      then
+        echo "Giving IndiMail exactly 5 seconds to exit nicely"
+        %{_prefix}/sbin/initsvc -off
+      fi
+      sleep 5
+    fi
   fi
-  sleep 5
 fi
 if [ -f %{libexecdir}/upgrade.sh ] ; then
 (
