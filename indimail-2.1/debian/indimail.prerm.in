@@ -45,28 +45,18 @@ case "$1" in
 	fi
 	if [ -f ${prefix}/bin/svok ] ; then
 		set +e
-		${prefix}/bin/svok /service/.svscan/log
+		${prefix}/bin/svok /service/.svscan/log 2>/dev/null
 		if [ $? -eq 0 ] ; then
 			echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
 			if test -f /lib/systemd/system/indimail.service && test -x /bin/systemctl
 			then
 				/bin/systemctl stop indimail.service > /dev/null 2>&1
-				/bin/systemctl disable indimail.service > /dev/null 2>&1
-				if [ " $1" != " upgrade" ] ; then
-					${rm} -f /lib/systemd/system/indimail.service
-				fi
 			elif test -f /etc/init/svscan.conf
 			then
 				/sbin/initctl emit qmailstop > /dev/null 2>&1
-				if [ " $1" != " upgrade" ] ; then
-					${rm} -f /etc/event.d/svscan
-				fi
 			elif test -f /etc/event.d/svscan
 			then
 				/sbin/initctl emit qmailstop > /dev/null 2>&1
-				if [ " $1" != " upgrade" ] ; then
-					${rm} -f /etc/event.d/svscan
-				fi
 			elif test -x ${prefix}/sbin/initsvc
 			then
 				${prefix}/sbin/initsvc -off
