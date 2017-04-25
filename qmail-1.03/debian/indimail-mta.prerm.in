@@ -40,48 +40,29 @@ case "$1" in
 	) >> /tmp/indimail-mta-setup.log 2>&1
 	fi
 	(
-	echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
-	if test -f /lib/systemd/system/indimail.service && test -x /bin/systemctl
-	then
-		/bin/systemctl stop indimail.service > /dev/null 2>&1 || true
-		/bin/systemctl disable indimail.service > /dev/null 2>&1 || true
-		if [ " $1" != " upgrade" ] ; then
-			${rm} -f /lib/systemd/system/indimail.service || true
-		fi
-	elif test -f /etc/init/svscan.conf
-	then
-		/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
-		if [ " $1" != " upgrade" ] ; then
-			${rm} -f /etc/event.d/svscan
-		fi
-	elif test -f /etc/event.d/svscan
-	then
-		/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
-		if [ " $1" != " upgrade" ] ; then
-			${rm} -f /etc/event.d/svscan || true
-		fi
-	elif test -x ${prefix}/sbin/initsvc
-	then
-		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
-		${prefix}/sbin/initsvc -off || true
-	else
-		/etc/init.d/indimail stop || true
-  		sv=`/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1 || true`
-		if [ -n "$sv" ] ; then
-			/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
-			if [ $? -eq 0 ] ; then
-				/bin/mv /etc/inittab.svctool.$$ /etc/inittab
-				/sbin/init q
+	if [ -f ${prefix}/bin/svok ] ; then
+		set +e
+		${prefix}/bin/svok /service/.svscan/log 2>/dev/null
+		if [ $? -eq 0 ] ; then
+			echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
+			if test -f /lib/systemd/system/indimail.service && test -x /bin/systemctl
+			then
+				/bin/systemctl stop indimail.service > /dev/null 2>&1 || true
+			elif test -f /etc/init/svscan.conf
+			then
+				/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
+			elif test -f /etc/event.d/svscan
+			then
+				/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
+			elif test -x ${prefix}/sbin/initsvc
+			then
+				${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
 			else
-				${rm} -f /etc/inittab.svctool.$$
+				/etc/init.d/indimail stop || true
 			fi
+			sleep 5
 		fi
 	fi
-	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "Running Custom Un-Installation Script for preun" 1>&2
-		/bin/sh ${shareddir}/boot/rpm.init preun
-	fi
-	sleep 5
 	) > /tmp/indimail-mta-setup.log 2>&1
     ;;
 
