@@ -40,38 +40,40 @@ case "$1" in
 	) >> /tmp/indimail-setup.log 2>&1
 	fi
 	(
-	if [ -f ${prefix}/sbin/initsvc ] ; then
+	if [ -f ${prefix}/sbin/initsvc -a -f /etc/init.d/indimail ] ; then
 		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop
 	fi
-	echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
-	if test -f /lib/systemd/system/indimail.service && test -x /bin/systemctl
-	then
-		/bin/systemctl stop indimail.service > /dev/null 2>&1 || true
-		/bin/systemctl disable indimail.service > /dev/null 2>&1 || true
-		if [ " $1" != " upgrade" ] ; then
-			${rm} -f /lib/systemd/system/indimail.service || true
+	if [ -f ${prefix}/bin/svok ] ; then
+		set +e
+		${prefix}/bin/svok /service/.svscan/log
+		if [ $? -eq 0 ] ; then
+			echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
+			if test -f /lib/systemd/system/indimail.service && test -x /bin/systemctl
+			then
+				/bin/systemctl stop indimail.service > /dev/null 2>&1
+				/bin/systemctl disable indimail.service > /dev/null 2>&1
+				if [ " $1" != " upgrade" ] ; then
+					${rm} -f /lib/systemd/system/indimail.service
+				fi
+			elif test -f /etc/init/svscan.conf
+			then
+				/sbin/initctl emit qmailstop > /dev/null 2>&1
+				if [ " $1" != " upgrade" ] ; then
+					${rm} -f /etc/event.d/svscan
+				fi
+			elif test -f /etc/event.d/svscan
+			then
+				/sbin/initctl emit qmailstop > /dev/null 2>&1
+				if [ " $1" != " upgrade" ] ; then
+					${rm} -f /etc/event.d/svscan
+				fi
+			elif test -x ${prefix}/sbin/initsvc
+			then
+				${prefix}/sbin/initsvc -off
+			fi
+			sleep 5
 		fi
-	elif test -f /etc/init/svscan.conf
-	then
-		/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
-		if [ " $1" != " upgrade" ] ; then
-			${rm} -f /etc/event.d/svscan
-		fi
-	elif test -f /etc/event.d/svscan
-	then
-		/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
-		if [ " $1" != " upgrade" ] ; then
-			${rm} -f /etc/event.d/svscan || true
-		fi
-	elif test -x ${prefix}/sbin/initsvc
-	then
-		${prefix}/sbin/initsvc -off || true
 	fi
-	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "Running Custom Un-Installation Script for preun" 1>&2
-		/bin/sh ${shareddir}/boot/rpm.init preun
-	fi
-	sleep 5
 	) >> /tmp/indimail-setup.log 2>&1
     ;;
 

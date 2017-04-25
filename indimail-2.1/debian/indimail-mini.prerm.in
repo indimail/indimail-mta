@@ -18,10 +18,6 @@ fi
 
 case "$1" in
     remove|upgrade|deconfigure)
-	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "Running Custom Un-Installation Script for preun" 1>&2
-		/bin/sh ${shareddir}/boot/rpm.init preun
-	fi
     ;;
 
     failed-upgrade)

@@ -628,10 +628,6 @@ if [ -f ${mandir}/man7/authlib.7.gz ] ; then
 	done
 fi
 
-if [ -f ${shareddir}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script"
-	/bin/sh ${shareddir}/boot/rpm.init post
-fi
 #
 # Install IndiMail to be started on system boot
 # The add-boot command installs svscan to be started by init, systemd, upstart or launchctl

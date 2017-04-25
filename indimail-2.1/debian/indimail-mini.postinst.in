@@ -40,16 +40,6 @@ esac
 
 #DEBHELPER#
 
-if [ -f /tmp/indimail-devel.upgrade ] ; then # upgrade
-	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "recreating ld.so cache"
-		/sbin/ldconfig
-		echo "Running Custom Upgrade Script"
-		/bin/sh ${shareddir}/boot/rpm.init upgrade
-	fi
-	${rm} -f /tmp/indimail-devel.upgrade
-	exit 0
-fi
 ${rm} -f /tmp/indimail-devel.install /tmp/indimail-devel.upgrade
 if [ -f ${prefix}/sbin/qmail-qmqpc ] ; then
 	${rm} -f ${prefix}/sbin/qmail-queue

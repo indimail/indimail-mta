@@ -281,10 +281,6 @@ if [ " $1" = " purge" ] ; then
 else
 	echo "recreating ld.so cache"
 	/sbin/ldconfig
-	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "Running Custom Un-Installation Script for postun"
-		/bin/sh ${shareddir}/boot/rpm.init postun
-	fi
 fi
 ) >> /tmp/indimail-setup.log
 exit 0
