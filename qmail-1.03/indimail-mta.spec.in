@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.97 2017-04-25 11:15:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.98 2017-04-25 20:53:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1585,7 +1585,7 @@ else
   fi
   /bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
   if [ $? -eq 0 ] ; then
-	%{__sed} -i 's{^SV:{#SV:{' /etc/inittab
+    %{__sed} -i 's{^SV:{#SV:{' /etc/inittab
     if [ $? -eq 0 ] ; then
       /sbin/init q
     fi
@@ -1680,7 +1680,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   if [ -f /etc/inittab ] ; then # one of these days, this will disappear
     /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
     if [ $? -eq 0 ] ; then
-	  %{__sed} -i 's{^#SV:{SV:{' /etc/inittab
+      %{__sed} -i 's{^#SV:{SV:{' /etc/inittab
     fi
   fi
   ) >> /tmp/indimail-mta-setup.log 2>&1
@@ -2001,38 +2001,6 @@ if [ $ID -ne 0 ] ; then
   exit 1
 fi
 (
-echo "Giving IndiMail exactly 5 seconds to exit nicely"
-if test -f %{_sysconfdir}/init/svscan.conf
-then
-  /sbin/initctl emit qmailstop > /dev/null 2>&1
-  if [ $argv1 -ne 1 ] ; then # not an upgrade
-    %{__rm} -f %{_sysconfdir}/init/svscan.conf
-  fi
-elif test -f %{_sysconfdir}/event.d/svscan
-then
-  /sbin/initctl emit qmailstop > /dev/null 2>&1
-  if [ $argv1 -ne 1 ] ; then # not an upgrade
-    %{__rm} -f %{_sysconfdir}/event.d/svscan
-  fi
-elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
-then
-  /bin/systemctl stop indimail.service > /dev/null 2>&1
-elif test -x %{_prefix}/sbin/initsvc
-then
-  %{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
-  %{_prefix}/sbin/initsvc -off || true
-else
-  /etc/init.d/indimail stop || true
-  /bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
-  if [ $? -eq 0 ] ; then
-	%{__sed} -i 's{^SV:{#SV:{' /etc/inittab
-    if [ $? -eq 0 ] ; then
-      /sbin/init q
-    fi
-  fi
-fi
-sleep 5
-
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/upgrade.sh ] ; then
