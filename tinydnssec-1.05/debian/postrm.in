@@ -70,6 +70,7 @@ if [ " $1" = " purge" ] ; then
 	sleep 5
 
 	echo "removing configuration"
+	${rm} -f /service/dnscache /service/tinydns
 	for i in tinydns dnscache
 	do
 		${rm} -rf ${sysconfdir}/$i
