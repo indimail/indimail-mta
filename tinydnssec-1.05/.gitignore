@@ -74,3 +74,4 @@ debian/postinst
 debian/preinst
 debian/postrm
 debian/prerm
+nacl-*
