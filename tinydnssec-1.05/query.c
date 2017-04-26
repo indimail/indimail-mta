@@ -13,37 +13,10 @@
 #include "response.h"
 #include "query.h"
 #include "ip6.h"
-#ifdef DNSCURVE
-#include "nacl/crypto_scalarmult_curve25519.h"
-#include "nacl/crypto_box_curve25519xsalsa20poly1305.h"
-
-#define crypto_scalarmult_base crypto_scalarmult_curve25519_base
-#define crypto_box_beforenm crypto_box_curve25519xsalsa20poly1305_beforenm
-#endif
 
 extern stralloc ignoreip;
 
 static int flagforwardonly = 0;
-#ifdef DNSCURVE
-static char secretkey[32];
-static char publickey[32];
-
-void query_init(void)
-{
-  int k;
-
-  /* called after droproot(), can't use crypto_box_keypair (depends on /dev/urandom) */
-  for (k = 0;k < 32;++k) secretkey[k] = dns_random(256);
-  crypto_scalarmult_base((unsigned char *) publickey,(unsigned char *) secretkey);
-}
-
-static int flagusetxtformat = 0;
-
-void query_usetxtformat(void)
-{
-  flagusetxtformat = 1;
-}
-#endif
 
 void query_forwardonly(void)
 {
@@ -64,76 +37,6 @@ static void cachegeneric(const char type[2],const char *d,const char *data,unsig
 
   cache_set(key,len + 2,data,datalen,ttl);
 }
-
-#ifdef DNSCURVE
-/* XXX: move to base32.c */
-static unsigned int base32_decode(char *out,const char *in,unsigned int len,int mode)
-{
-  /*
-   * digits = '0123456789bcdfghjklmnpqrstuvwxyz'
-   * ','.join('%2d' % digits.find(chr(x).lower()) for x in xrange(256))
-   */
-  static const char val[256] = {
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,-1,-1,-1,-1,-1,-1,
-    -1,-1,10,11,12,-1,13,14,15,-1,16,17,18,19,20,-1,
-    21,22,23,24,25,26,27,28,29,30,31,-1,-1,-1,-1,-1,
-    -1,-1,10,11,12,-1,13,14,15,-1,16,17,18,19,20,-1,
-    21,22,23,24,25,26,27,28,29,30,31,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  };
-
-  unsigned int i;
-  unsigned int x, v, vbits;
-  char *out0 = out;
-
-  v = vbits = 0;
-  for (i = 0;i < len;++i) {
-    x = (unsigned char) val[(unsigned char) in[i]];
-    if (x >= 32) return 0;
-    v |= x << vbits;
-    vbits += 5;
-    if (vbits >= 8) {
-      *out++ = v;
-      v >>= 8;
-      vbits -= 8;
-    }
-  }
-
-  if (mode) {
-    if (vbits)
-      *out++ = v;
-  }
-  else if (vbits >= 5 || v)
-    return 0;
-
-  return out - out0;
-}
-
-static int findkey(const char *dn,char key[32])
-{
-  unsigned char c;
-
-  while (c = *dn++) {
-    if (c == 54)
-      if (!case_diffb(dn,3,"uz5"))
-        if (base32_decode(key,dn + 3,51,1) == 32)
-          return 1;
-    dn += (unsigned int) c;
-  }
-
-  return 0;
-}
-#endif
 
 static char save_buf[8192];
 static unsigned int save_len;
@@ -257,30 +160,6 @@ static int smaller(char *buf,unsigned int len,unsigned int pos1,unsigned int pos
   return 0;
 }
 
-#ifdef DNSCURVE
-static void addserver(struct query *z,const char *addr,int flaghaskey,const char *key)
-{
-  int k;
-
-  if (z->flaghavekeys[z->level - 1]) {
-    if (!flaghaskey) return;
-  } else if (flaghaskey) {
-    byte_zero(z->servers[z->level - 1],64);
-    byte_zero(z->keys[z->level - 1],512);
-    z->flaghavekeys[z->level - 1] = 1;
-  }
-
-  for (k = 0;k < 64;k += 4)
-    if (byte_equal(z->servers[z->level - 1] + k,16,V6any)) {
-      byte_copy(z->servers[z->level - 1] + k,12,V4mappedprefix);
-      byte_copy(z->servers[z->level - 1] + k + 12,4,addr);
-      if (flaghaskey)
-        byte_copy(z->keys[z->level - 1] + 8 * k,32,key);
-      break;
-    }
-}
-#endif
-
 static int doit(struct query *z,int state)
 {
   char key[257];
@@ -289,11 +168,6 @@ static int doit(struct query *z,int state)
   char *buf;
   unsigned int len;
   const char *whichserver;
-#ifdef DNSCURVE
-  char *whichkey;
-  char pubkey[32];
-  int flaghaskey;
-#endif
   char header[24];
   char misc[20];
   unsigned int rcode;
@@ -339,16 +213,12 @@ NEWNAME:
 
   if (globalip(d,misc)) {
     if (z->level) {
-#ifdef DNSCURVE
-      addserver(z,misc,0,0);
-#else
       for (k = 0;k < 256;k += 16)
         if (byte_equal(z->servers[z->level - 1] + k,16,V6any)) {
           byte_copy(z->servers[z->level - 1] + k,12,V4mappedprefix);
           byte_copy(z->servers[z->level - 1] + k + 12,4,misc);
           break;
         }
-#endif
       goto LOWERLEVEL;
     }
     if (!rqa(z)) goto DIE;
@@ -637,21 +507,14 @@ NEWNAME:
       }
       if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
         if (z->level) {
-#ifdef DNSCURVE
-          flaghaskey = findkey(d,pubkey);
-#endif
           log_cachedanswer(d,DNS_T_A);
           while (cachedlen >= 4) {
-#ifdef DNSCURVE
-            addserver(z,cached,flaghaskey,pubkey);
-#else
             for (k = 0;k < 256;k += 16)
               if (byte_equal(z->servers[z->level - 1] + k,16,V6any)) {
                 byte_copy(z->servers[z->level - 1] + k,12,V4mappedprefix);
                 byte_copy(z->servers[z->level - 1] + k + 12,4,cached);
                 break;
               }
-#endif
             cached += 4;
             cachedlen -= 4;
           }
@@ -729,9 +592,6 @@ NEWNAME:
 
   for (;;) {
     if (roots(z->servers[z->level],d)) { /* XXX: allow roots() to provide keys */
-#ifdef DNSCURVE
-      z->flaghavekeys[z->level] = 0;
-#endif
       for (j = 0;j < QUERY_MAXNS;++j)
         dns_domain_free(&z->ns[z->level][j]);
       z->control[z->level] = d;
@@ -747,9 +607,6 @@ NEWNAME:
         if (cached && cachedlen) {
           z->control[z->level] = d;
           byte_zero(z->servers[z->level],256);
-#ifdef DNSCURVE
-          z->flaghavekeys[z->level] = 0;
-#endif
           for (j = 0;j < QUERY_MAXNS;++j)
             dns_domain_free(&z->ns[z->level][j]);
           pos = 0;
@@ -788,28 +645,6 @@ HAVENS:
       break;
   if (j == 256) goto SERVFAIL;
 
-#ifdef DNSCURVE
-  if (z->flaghavekeys[z->level]) {
-    byte_copy(key,2,DNS_T_AXFR);
-    for (j = 0;j < 64;j += 4)
-      if (byte_diff(z->servers[z->level] + j,4,"\0\0\0\0")) {
-        whichkey = z->keys[z->level] + 8 * j;
-        byte_copy(key + 2,32,whichkey);
-        cached = cache_get(key,34,&cachedlen,&ttl);
-        if (cached && (cachedlen == 32)) {
-          byte_copy(whichkey,32,cached);
-          continue;
-        }
-        crypto_box_beforenm((unsigned char *) whichkey,(const unsigned char *) whichkey,(const unsigned char *) secretkey);
-        cache_set(key,34,whichkey,32,655360);
-      }
-  }
-  dns_sortip2(z->servers[z->level],z->keys[z->level],16);
-  dtype = z->level ? DNS_T_A : z->type;
-  log_tx(z->name[z->level],dtype,z->control[z->level],z->servers[z->level],z->flaghavekeys[z->level],z->level);
-  control = flagusetxtformat ? z->control[z->level] : 0;
-  if (dns_transmit_start2(&z->dt,z->servers[z->level],flagforwardonly,z->name[z->level],dtype,z->localip,z->flaghavekeys[z->level] ? z->keys[z->level] : 0,publickey,control) == -1) goto DIE;
-#else
   dns_sortip6(z->servers[z->level],256);
   if (z->level) {
     dtype = z->ipv6[z->level] ? DNS_T_AAAA : DNS_T_A;
@@ -820,7 +655,6 @@ HAVENS:
     log_tx(z->name[0],z->type,z->control[0],z->servers[0],0);
     if (dns_transmit_start(&z->dt,z->servers[0],flagforwardonly,z->name[0],z->type,z->localip) == -1) goto DIE;
   }
-#endif
   return 0;
 
 
@@ -1143,9 +977,6 @@ NXDOMAIN:
 
   if (flagout || flagsoa || !flagreferral) {
     if (z->level) {
-#ifdef DNSCURVE
-      flaghaskey = findkey(d,pubkey);
-#endif
       pos = posanswers;
       for (j = 0;j < numanswers;++j) {
         pos = dns_packet_getname(buf,len,pos,&t1); if (!pos) goto DIE;
@@ -1154,12 +985,6 @@ NXDOMAIN:
         if (dns_domain_equal(t1,d))
           if (typematch(header,DNS_T_A))
             if (byte_equal(header + 2,2,DNS_C_IN)) /* should always be true */
-#ifdef DNSCURVE
-              if (datalen == 4) {
-                if (!dns_packet_copy(buf,len,pos,misc,4)) goto DIE;
-                addserver(z,misc,flaghaskey,pubkey);
-              }
-#else
               if (datalen == 4)
                 for (k = 0;k < 256;k += 16)
                   if (byte_equal(z->servers[z->level - 1] + k,16,V6any)) {
@@ -1167,7 +992,6 @@ NXDOMAIN:
                     if (!dns_packet_copy(buf,len,pos,z->servers[z->level - 1] + k + 12,4)) goto DIE;
                     break;
                   }
-#endif
           if (typematch(header,DNS_T_AAAA))
             if (byte_equal(header + 2,2,DNS_C_IN)) /* should always be true */
               if (datalen == 16)
@@ -1232,9 +1056,6 @@ NXDOMAIN:
   control = d + dns_domain_suffixpos(d,referral);
   z->control[z->level] = control;
   byte_zero(z->servers[z->level],256);
-#ifdef DNSCURVE
-  z->flaghavekeys[z->level] = 0;
-#endif
   for (j = 0;j < QUERY_MAXNS;++j)
     dns_domain_free(&z->ns[z->level][j]);
   k = 0;
