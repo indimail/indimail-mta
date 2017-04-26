@@ -27,7 +27,7 @@ case "$1" in
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
-	exit 0
+    exit 0
     ;;
 
     *)
@@ -41,8 +41,12 @@ esac
 if [ ! -d ${sysconfdir}/dnscache ] ; then
   ${prefix}/bin/dnscache-conf dnscache dnslog ${sysconfdir}/dnscache 127.0.0.1
   if [ $? -eq 0 ] ; then
-    ln -s ${sysconfdir}/dnscache /service/dnscache
+    if [ ! -h /service/dnscache ] ; then
+      ln -s ${sysconfdir}/dnscache /service/dnscache || true
+    fi
   fi
 else
-  ln -sf ${sysconfdir}/dnscache /service/dnscache || true
+  if [ ! -h /service/dnscache ] ; then
+    ln -sf ${sysconfdir}/dnscache /service/dnscache || true
+  fi
 fi

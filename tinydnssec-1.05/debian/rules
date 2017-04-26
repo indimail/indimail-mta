@@ -35,6 +35,11 @@ build-stamp:
 	#
 	$(MAKE) -s DESTDIR=$(DESTDIR)
 	pod2man -s 8 -c '' "tinydns-sign" >tinydns-sign.8
+	if [ -d dq-20161210 ] ; then \
+		cd dq-20161210 ; \
+		$(MAKE) -s ; \
+		cd ..; \
+	fi
 	touch build-stamp
 
 clean:
@@ -51,13 +56,18 @@ install: build
 	dh_prep || dh_clean -k
 	dh_installdirs
 	$(MAKE) DESTDIR=$(DESTDIR) -s install
+	if [ -d dq-20161210 ] ; then \
+		cd dq-20161210 ; \
+  		sh make-install.sh $(DESTDIR) ; \
+		cd ..; \
+	fi
 
 binary-indep: build install
 	dh_testdir
 	dh_testroot
 	dh_install --sourcedir=$(DESTDIR) -ptinydnssec
 	dh_installchangelogs
-	dh_installdocs doc/COPYING.tinydnssec doc/README.tinydnssec doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/Thedjbway_djbdns.pdf
+	dh_installdocs dq-20161210/README.dq dq-20161210/INSTALL.dq doc/COPYING.tinydnssec doc/README.tinydnssec doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/Thedjbway_djbdns.pdf
 	dh_link
 	dh_strip
 	dh_compress

@@ -99,24 +99,77 @@ administrators use to diagnose misconfigured remote servers.
 
 See http://cr.yp.to/djbdns.html
 
+It also includes Dq, a package with DNS/DNSCurve related software.
+It contains a recursive DNS server with DNSCurve support called
+dqcache and also a commandline tool to debug DNS/DNScurve called dq.
+
+See https://mojzis.com/software/dq/
+
 %build
 sed -i 's{/usr{%{_prefix}{' conf-home
 %{__make} -s
 pod2man -s 8 -c '' "tinydns-sign" >tinydns-sign.8
+if [ -d dq-20161210 ] ; then
+  cd dq-20161210
+  %{__make} -s
+  cd ..
+fi
 
 %install
 %{__make} -s DESTDIR=%{buildroot} install-strip
+if [ -d dq-20161210 ] ; then
+  cd dq-20161210
+  sh make-install.sh %{buildroot}
+  cd ..
+fi
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
 
 %files
-%defattr(-,root,root,-)
-%config(noreplace)             %{_sysconfdir}/dnsroots.global
+%attr(755,root,root)                   %{_prefix}/bin/dq
+%attr(755,root,root)                   %{_prefix}/bin/axfr-get
+%attr(755,root,root)                   %{_prefix}/bin/axfrdns
+%attr(755,root,root)                   %{_prefix}/bin/axfrdns-conf
+%attr(755,root,root)                   %{_prefix}/bin/dnscache
+%attr(755,root,root)                   %{_prefix}/bin/dnscache-conf
+%attr(755,root,root)                   %{_prefix}/bin/dnsfilter
+%attr(755,root,root)                   %{_prefix}/bin/dnsgetroot
+%attr(755,root,root)                   %{_prefix}/bin/dnsip
+%attr(755,root,root)                   %{_prefix}/bin/dnsip6
+%attr(755,root,root)                   %{_prefix}/bin/dnsip6q
+%attr(755,root,root)                   %{_prefix}/bin/dnsipq
+%attr(755,root,root)                   %{_prefix}/bin/dnsmx
+%attr(755,root,root)                   %{_prefix}/bin/dnsname
+%attr(755,root,root)                   %{_prefix}/bin/dnsnamex
+%attr(755,root,root)                   %{_prefix}/bin/dnsq
+%attr(755,root,root)                   %{_prefix}/bin/dnsqr
+%attr(755,root,root)                   %{_prefix}/bin/dnstrace
+%attr(755,root,root)                   %{_prefix}/bin/dnstracesort
+%attr(755,root,root)                   %{_prefix}/bin/dnstxt
+%attr(755,root,root)                   %{_prefix}/bin/pickdns
+%attr(755,root,root)                   %{_prefix}/bin/pickdns-conf
+%attr(755,root,root)                   %{_prefix}/bin/pickdns-data
+%attr(755,root,root)                   %{_prefix}/bin/random-ip
+%attr(755,root,root)                   %{_prefix}/bin/rbldns
+%attr(755,root,root)                   %{_prefix}/bin/rbldns-conf
+%attr(755,root,root)                   %{_prefix}/bin/rbldns-data
+%attr(755,root,root)                   %{_prefix}/bin/tinydns
+%attr(755,root,root)                   %{_prefix}/bin/tinydns-conf
+%attr(755,root,root)                   %{_prefix}/bin/tinydns-data
+%attr(755,root,root)                   %{_prefix}/bin/tinydns-edit
+%attr(755,root,root)                   %{_prefix}/bin/tinydns-get
+%attr(755,root,root)                   %{_prefix}/bin/tinydns-sign
+%attr(755,root,root)                   %{_prefix}/bin/walldns
+%attr(755,root,root)                   %{_prefix}/bin/walldns-conf
+%attr(755,root,root)                   %{_prefix}/sbin/dqcache
+%attr(755,root,root)                   %{_prefix}/sbin/dqcache-makekey
+%attr(755,root,root)                   %{_prefix}/sbin/dqcache-start
+%config(noreplace)                     %{_sysconfdir}/dnsroots.global
 
-%{_prefix}/bin/*
-
-%%doc doc/COPYING.tinydnssec doc/README.tinydnssec doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/Thedjbway_djbdns.pdf
+%doc dq-20161210/README.dq dq-20161210/INSTALL.dq doc/COPYING.tinydnssec doc/README.tinydnssec
+%doc doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO
+%doc doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/Thedjbway_djbdns.pdf
 
 %doc %{_mandir}/man1/*
 %doc %{_mandir}/man5/*
