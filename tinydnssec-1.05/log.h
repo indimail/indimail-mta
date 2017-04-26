@@ -18,11 +18,7 @@ extern void log_cachedcname(const char *,const char *);
 extern void log_cachednxdomain(const char *);
 extern void log_cachedns(const char *,const char *);
 
-#ifdef DNSCURVE
-extern void log_tx(const char *,const char *,const char *,const char *,unsigned int,unsigned int);
-#else
 extern void log_tx(const char *,const char *,const char *,const char *,unsigned int);
-#endif
 
 extern void log_nxdomain(const char *,const char *,unsigned int);
 extern void log_nodata(const char *,const char *,const char *,unsigned int);
