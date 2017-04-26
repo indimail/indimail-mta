@@ -36,4 +36,10 @@ Description: a collection of Domain Name System tools
  administrators use to diagnose misconfigured remote servers.
  .
  See http://cr.yp.to/djbdns.html
+ .
+ It also includes Dq, a package with DNS/DNSCurve related software.
+ It contains a recursive DNS server with DNSCurve support called
+ dqcache and also a commandline tool to debug DNS/DNScurve called dq.
+ .
+ See https://mojzis.com/software/dq/
 
