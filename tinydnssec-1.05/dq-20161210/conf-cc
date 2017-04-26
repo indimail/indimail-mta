@@ -1,0 +1,3 @@
+cc -s -O3 -fomit-frame-pointer -funroll-loops
+gcc -s -O3 -fomit-frame-pointer -funroll-loops
+clang -s -O3 -fomit-frame-pointer -funroll-loops
