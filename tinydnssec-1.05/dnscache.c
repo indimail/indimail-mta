@@ -472,10 +472,6 @@ int main()
   dns_random_init(seed);
   close(0);
 
-#ifdef DNSCURVE
-  query_init();
-#endif
-
   x = env_get("IPSEND");
   if (!x)
     strerr_die2x(111,FATAL,"$IPSEND not set");
@@ -507,10 +503,6 @@ int main()
     response_hidettl();
   if (env_get("FORWARDONLY"))
     query_forwardonly();
-#ifdef DNSCURVE
-  if (env_get("USETXTFORMAT"))
-    query_usetxtformat();
-#endif
 
   if (!roots_init())
     strerr_die2sys(111,FATAL,"unable to read servers: ");
