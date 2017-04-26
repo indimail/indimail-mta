@@ -1,0 +1,21 @@
+#!/bin/sh
+nacl_dir=nacl-20110221
+host=`uname -n|cut -d. -f1`
+abi=`$nacl_dir/build/$host/bin/okabi`
+if [ ! -h nacl ] ; then
+	if [ -d $nacl_dir/build/$host/include/$abi ] ; then
+		sed -i 's{#-DDNSCURVE{-DDNSCURVE{' conf-dnscurve
+		ln -sr $nacl_dir/build/$host/include/$abi nacl
+	else
+		sed -i 's{-DDNSCURVE{#-DDNSCURVE{' conf-dnscurve
+		/bin/rm -f nacl
+	fi
+else
+	sed -i 's{#-DDNSCURVE{-DDNSCURVE{' conf-dnscurve
+fi
+if [ -f $nacl_dir/build/$host/lib/$abi/libnacl.a ] ; then
+	cp $nacl_dir/build/$host/lib/$abi/libnacl.a .
+	echo libnacl.a > nacl.lib
+else
+	> nacl.lib
+fi
