@@ -15,10 +15,6 @@ struct query {
   char *control[QUERY_MAXLEVEL]; /* pointing inside name */
   char *ns[QUERY_MAXLEVEL][QUERY_MAXNS];
   char servers[QUERY_MAXLEVEL][256];
-#ifdef DNSCURVE
-  char keys[QUERY_MAXLEVEL][512];
-  int flaghavekeys[QUERY_MAXLEVEL];
-#endif
   char *alias[QUERY_MAXALIAS];
   uint32 aliasttl[QUERY_MAXALIAS];
   char ipv6[QUERY_MAXLEVEL];
@@ -34,9 +30,5 @@ extern void query_io(struct query *,iopause_fd *,struct taia *);
 extern int query_get(struct query *,iopause_fd *,struct taia *);
 
 extern void query_forwardonly(void);
-#ifdef DNSCURVE
-extern void query_init(void);
-extern void query_usetxtformat(void);
-#endif
 
 #endif
