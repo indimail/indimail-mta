@@ -195,10 +195,14 @@ fi
 if [ ! -d %{_sysconfdir}/dnscache ] ; then
   %{_prefix}/bin/dnscache-conf dnscache dnslog %{_sysconfdir}/dnscache 127.0.0.1
   if [ $? -eq 0 ] ; then
-    ln -s %{_sysconfdir}/dnscache /service/dnscache
+    if [ ! -h /service/dnscache ] ; then
+      ln -s %{_sysconfdir}/dnscache /service/dnscache
+    fi
   fi
 else
-  ln -sf %{_sysconfdir}/dnscache /service/dnscache
+  if [ ! -h /service/dnscache ] ; then
+    ln -s %{_sysconfdir}/dnscache /service/dnscache
+  fi
 fi
 
 %postun
@@ -241,4 +245,4 @@ Release 1.1 Start 11/04/2017
 6. added Pre-Depends daemontools
 7. remove tinydns, dnscache service on uninstall
 8. shutdown tinydns, dnsccache service on uninstall
-9. added compile time option to add dnssec, dnscurve support
+9. added compile time option to add dnssec support
