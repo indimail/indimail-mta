@@ -42,23 +42,11 @@ struct dns_transmit {
   unsigned int packetlen;
   int s1; /* 0, or 1 + an open file descriptor */
   int tcpstate;
-#ifdef DNSCURVE
-  int flagrecursive;
-#endif
   unsigned int udploop;
   unsigned int curserver;
   struct taia deadline;
   unsigned int pos;
-#ifdef DNSCURVE
-  const char *name;
-#endif
   const char *servers;
-#ifdef DNSCURVE
-  const char *keys;
-  const char *pubkey;
-  const char *suffix;
-  char nonce[12];
-#endif
   char localip[16];
   unsigned int scope_id;
   char qtype[2];
@@ -68,9 +56,6 @@ extern void dns_random_init(const char *);
 extern unsigned int dns_random(unsigned int);
 
 extern void dns_sortip(char *,unsigned int);
-#ifdef DNSCURVE
-extern void dns_sortip2(char *,char *,unsigned int);
-#endif
 extern void dns_sortip6(char *,unsigned int);
 
 extern void dns_domain_free(char **);
@@ -87,9 +72,6 @@ extern unsigned int dns_packet_getname(const char *,unsigned int,unsigned int,ch
 extern unsigned int dns_packet_skipname(const char *,unsigned int,unsigned int);
 
 extern int dns_transmit_start(struct dns_transmit *,const char *,int,const char *,const char *,const char *);
-#ifdef DNSCURVE
-extern int dns_transmit_start2(struct dns_transmit *,const char *,int,const char *,const char *,const char *,const char *,const char *,const char *);
-#endif
 extern void dns_transmit_free(struct dns_transmit *);
 extern void dns_transmit_io(struct dns_transmit *,iopause_fd *,struct taia *);
 extern int dns_transmit_get(struct dns_transmit *,const iopause_fd *,const struct taia *);
