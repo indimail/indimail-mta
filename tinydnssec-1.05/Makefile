@@ -1302,6 +1302,7 @@ load dns-notify.o
 
 clean:
 	rm -f `cat TARGETS` data data.cdb test/[ot]*
+	cd dq-20161210 && make clean && cd ../curvedns-0.87 && make clean
 
 distclean: clean
 	rm -f `cat TARGETS` data data.cdb test/[ot]*
