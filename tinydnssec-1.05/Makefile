@@ -799,7 +799,7 @@ rbldns-data pickdns-conf pickdns pickdns-data tinydns-conf tinydns \
 tinydns-data tinydns-get tinydns-edit axfr-get axfrdns-conf axfrdns \
 dnsip dnsipq dnsname dnstxt dnsmx dnsfilter random-ip dnsqr dnsq \
 dnstrace dnstracesort cachetest utime rts dnsip6 dnsip6q dnsnamex \
-dns-notify dnsgetroot
+dns-notify dnsgetroot dqcache-conf curvedns-conf
 
 prot.o: \
 compile prot.c hasshsgr.h prot.h
@@ -919,7 +919,7 @@ trylsock.c compile load
 	rm -f trylsock.o trylsock
 
 socket_accept.o: \
-compile socket_accept.c byte.h socket.h uint16.h
+compile socket_accept.c byte.h socket.h uint16.h uint32.h
 	./compile socket_accept.c
 
 socket_accept6.o: \
@@ -1278,6 +1278,25 @@ walldns-conf.o: \
 compile walldns-conf.c strerr.h exit.h auto_home.h generic-conf.h \
 buffer.h
 	./compile walldns-conf.c
+
+dqcache-conf: \
+load dqcache-conf.o generic-conf.o auto_home.o buffer.a unix.a byte.a
+	./load dqcache-conf generic-conf.o auto_home.o buffer.a \
+	unix.a byte.a
+dqcache-conf.o: \
+compile dqcache-conf.c strerr.h exit.h auto_home.h generic-conf.h \
+buffer.h error.h open.h
+	./compile dqcache-conf.c
+
+curvedns-conf: \
+load curvedns-conf.o generic-conf.o auto_home.o buffer.a unix.a byte.a
+	./load curvedns-conf generic-conf.o auto_home.o buffer.a \
+	unix.a byte.a
+
+curvedns-conf.o: \
+compile curvedns-conf.c strerr.h exit.h auto_home.h generic-conf.h \
+buffer.h open.h
+	./compile curvedns-conf.c
 
 walldns.o: \
 compile walldns.c byte.h dns.h stralloc.h gen_alloc.h iopause.h \
