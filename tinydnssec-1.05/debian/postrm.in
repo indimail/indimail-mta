@@ -70,13 +70,14 @@ if [ " $1" = " purge" ] ; then
 	sleep 5
 
 	echo "removing configuration"
-	${rm} -f /service/dnscache /service/tinydns
-	for i in tinydns dnscache
+	${rm} -f /service/dnscache /service/tinydns /service/curvedns /service/dqcache
+	for i in tinydns dnscache dqcache dnscurve
 	do
 		${rm} -rf ${sysconfdir}/$i
 	done
-	${rm} -f ${sysocnfdir}/dnsroots.global
-	${rm} -f ${sysocnfdir}/dnsroots.local
+	${rm} -f ${sysconfdir}/dnsroots.global
+	${rm} -f ${sysconfdir}/dnsroots.local
+	${rm} -f ${sysconfdir}/dnsroots.local
 fi
 exit 0
 
