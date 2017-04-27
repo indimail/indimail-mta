@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.37  2017-04-28 01:06:05+05:30  Cprogrammer
+ * fixed infinite loop if hostcntrl was empty
+ *
  * Revision 2.36  2017-03-13 13:43:34+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -201,7 +204,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.36 2017-03-13 13:43:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.37 2017-04-28 01:06:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -286,7 +289,8 @@ findhost(char *email, int connect_primarydb)
 	snprintf(SqlBuf, SQL_BUF_SIZE, "select high_priority host from %s where  pw_name=\"%s\" and pw_domain=\"%s\"",
 		cntrl_table, user, real_domain);
 again:
-	attempt++;
+	if (attempt != -1)
+		attempt++;
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
 		err = mysql_errno(&mysql[0]);
@@ -305,8 +309,10 @@ again:
 			}
 		}
 		return ((char *) 0);
-	} else
-		attempt = 1;
+	} else {
+		if (attempt != -1)
+			attempt = 1;
+	}
 	if (!(res = mysql_store_result(&mysql[0])))
 	{
 		(void) fprintf(stderr, "findhost: mysql_store_result: %s\n", mysql_error(&mysql[0]));
@@ -328,6 +334,7 @@ again:
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 				"select high_priority host from %s where  pw_name=\"*\" and pw_domain=\"%s\"",
 				cntrl_table, real_domain);
+			attempt = -1;
 			goto again;
 		}
 		userNotFound = 1;
