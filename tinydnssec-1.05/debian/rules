@@ -40,6 +40,12 @@ build-stamp:
 		$(MAKE) -s ; \
 		cd ..; \
 	fi
+	if [ -d curvedns-0.87 ] ; then \
+  		cd curvedns-0.87 ; \
+		./curvedns.configure ; \
+		$(MAKE) -s ; \
+		cd .. ; \
+	fi
 	touch build-stamp
 
 clean:
@@ -61,13 +67,27 @@ install: build
   		sh make-install.sh $(DESTDIR) ; \
 		cd ..; \
 	fi
+	if [ -d curvedns-0.87 ] ; then \
+		cd curvedns-0.87 ; \
+		mkdir -p $(DESTDIR)$(prefix)/bin ; \
+		mkdir -p $(DESTDIR)$(prefix)/sbin ; \
+		mkdir -p $(DESTDIR)$(prefix)/share/man/man8 ; \
+		mkdir -p $(DESTDIR)$(sysconfdir) ; \
+		install -m 0755 curvedns $(DESTDIR)$(prefix)/bin ; \
+		install -m 0755 curvedns-keygen $(DESTDIR)$(prefix)/sbin ; \
+		install -m 0644 curvedns.8 curvedns-keygen.8 $(DESTDIR)$(prefix)/share/man/man8 ; \
+		install -m 0600 curvedns.private.key $(DESTDIR)$(sysconfdir)/curvedns.private.key ; \
+		cd .. ; \
+	fi
 
 binary-indep: build install
 	dh_testdir
 	dh_testroot
 	dh_install --sourcedir=$(DESTDIR) -ptinydnssec
 	dh_installchangelogs
-	dh_installdocs dq-20161210/README.dq dq-20161210/INSTALL.dq doc/COPYING.tinydnssec doc/README.tinydnssec doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/Thedjbway_djbdns.pdf
+	dh_installdocs dq-20161210/README.dq dq-20161210/INSTALL.dq doc/COPYING.tinydnssec doc/README.tinydnssec \
+		doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug \
+		doc/Thedjbway_djbdns.pdf curvedns-0.87/LICENSE.curvedns
 	dh_link
 	dh_strip
 	dh_compress
