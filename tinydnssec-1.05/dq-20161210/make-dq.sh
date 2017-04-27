@@ -60,6 +60,7 @@ mkdir -p "${work}"
     ${compiler} -o try try.c || { log2 "${compiler} failed"; continue; }
     log2 "${compiler} ok"
     echo "${compiler}" > compiler
+	cp compiler ../dnscurve.compiler
     break
   done
 )
@@ -73,7 +74,7 @@ mkdir -p "${work}"
   cd "${work}"
   cflags=`cat "${top}/conf-cflags" || :`
   cflags="${CPPFLAGS} ${CFLAGS} ${LDFLAGS} ${cflags}"
-
+  echo $cflags > ../dnscurve.cflags
   for i in ${cflags}; do
     echo 'int main(void) { return 0; }' > try.c
     ${compiler} "${i}" -o try try.c || { log2 "${i} failed"; continue; }
