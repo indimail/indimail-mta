@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_deldomain.c,v $
+ * Revision 2.8  2017-04-28 01:08:41+05:30  Cprogrammer
+ * remove alias entries added by vadddomain when creating a clustered domain
+ *
  * Revision 2.7  2010-02-19 19:34:37+05:30  Cprogrammer
  * delete from smtp_port only if domain is distributed
  *
@@ -58,7 +61,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_deldomain.c,v 2.7 2010-02-19 19:34:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_deldomain.c,v 2.8 2017-04-28 01:08:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -125,8 +128,23 @@ vauth_deldomain(char *domain)
 	err = (valias_delete_domain(domain) ? 1 : err);
 #endif
 #ifdef CLUSTERED_SITE
-	if (is_dist)
+	if (is_dist) {
 		err = (vsmtp_delete_domain(domain) ? 1 : err);
+		if (!(tmpstr = get_local_hostid())) {
+			if (!err)
+				err = 1;
+			fprintf(stderr, "Unable to get hostid\n");
+			return (err);
+		}
+		if (snprintf(SqlBuf, SQL_BUF_SIZE, \
+			"delete low_priority from hostcntrl where pw_domain = \"%s\" and host=\"%s\"", domain, tmpstr) == -1)
+			SqlBuf[SQL_BUF_SIZE - 1] = 0;
+		if (mysql_query(&mysql[0], SqlBuf) && mysql_errno(&mysql[0]) != ER_NO_SUCH_TABLE)
+		{
+			mysql_perror("vauth_deldomain: %s", SqlBuf);
+			err = (err ? 1 : 0);
+		}
+	}
 #endif
 	return (err);
 }
