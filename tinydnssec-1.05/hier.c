@@ -14,19 +14,22 @@ void hier(char *inst_dir)
   h("/etc/indimail",-1,-1,02755);
   c("/etc","indimail","dnsroots.global",-1,-1,0644);
 
-  h(auto_h,-1,-1,02755);
+  h(auto_h,-1,-1,0755);
   h(mandir,-1,-1,0755);
   d(mandir,"man1",-1,-1,0755);
   d(mandir,"man5",-1,-1,0755);
   d(mandir,"man8",-1,-1,0755);
-  d(auto_h,"bin",-1,-1,02755);
+  d(auto_h,"bin",-1,-1,0755);
+  d(auto_h,"sbin",-1,-1,0755);
 
-  c(auto_h,"bin","dnscache-conf",-1,-1,0755);
-  c(auto_h,"bin","tinydns-conf",-1,-1,0755);
-  c(auto_h,"bin","walldns-conf",-1,-1,0755);
-  c(auto_h,"bin","rbldns-conf",-1,-1,0755);
-  c(auto_h,"bin","pickdns-conf",-1,-1,0755);
-  c(auto_h,"bin","axfrdns-conf",-1,-1,0755);
+  c(auto_h,"sbin","dnscache-conf",-1,-1,0755);
+  c(auto_h,"sbin","tinydns-conf",-1,-1,0755);
+  c(auto_h,"sbin","walldns-conf",-1,-1,0755);
+  c(auto_h,"sbin","dqcache-conf",-1,-1,0755);
+  c(auto_h,"sbin","curvedns-conf",-1,-1,0755);
+  c(auto_h,"sbin","rbldns-conf",-1,-1,0755);
+  c(auto_h,"sbin","pickdns-conf",-1,-1,0755);
+  c(auto_h,"sbin","axfrdns-conf",-1,-1,0755);
 
   c(auto_h,"bin","dnscache",-1,-1,0755);
   c(auto_h,"bin","tinydns",-1,-1,0755);
@@ -92,4 +95,6 @@ void hier(char *inst_dir)
   c(mandir,"man8","pickdns.8",-1,-1,0644);
   c(mandir,"man8","pickdns-data.8",-1,-1,0644);
   c(mandir,"man8","pickdns-conf.8",-1,-1,0644);
+  c(mandir,"man8","dqcache-conf.8",-1,-1,0644);
+  c(mandir,"man8","curvedns-conf.8",-1,-1,0644);
 }
