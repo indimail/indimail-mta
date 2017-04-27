@@ -24,6 +24,8 @@ while read x
 do
   if [ x"${x}" = xdq ]; then
     confbin="`head -1 conf-bin`"
+  elif [ x"${x}" = xdqcache ]; then
+    confbin="`head -1 conf-bin`"
   else
     confbin="`head -1 conf-sbin`"
   fi
