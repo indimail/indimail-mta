@@ -253,3 +253,7 @@ dns-notify.o
 dnsnamex
 dnsgetroot
 str_diffn.o
+curvedns-conf.o
+dqcache-conf.o
+curvedns-conf
+dqcache-conf
