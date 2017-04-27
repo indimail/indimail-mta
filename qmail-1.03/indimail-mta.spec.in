@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.100 2017-04-25 23:18:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.101 2017-04-27 17:46:18+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2013,6 +2013,42 @@ if [ $argv1 -eq 1 ] ; then
     /bin/sh %{libexecdir}/upgrade.sh preun upgrade @version@ "$argv1"
   fi
   exit 0
+fi
+if [ -f %{_prefix}/bin/svok ] ; then
+  %{_prefix}/bin/svok /service/.svscan/log 2>/dev/null
+  if [ $? -eq 0 ] ; then
+    echo "Giving indimail-mta exactly 5 seconds to exit nicely"
+    if test -f %{_sysconfdir}/init/svscan.conf
+    then
+      /sbin/initctl emit qmailstop > /dev/null 2>&1
+    elif test -f %{_sysconfdir}/event.d/svscan
+    then
+      /sbin/initctl emit qmailstop > /dev/null 2>&1
+    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
+    then
+      /bin/systemctl stop indimail.service > /dev/null 2>&1
+    elif test -x %{_prefix}/sbin/initsvc
+    then
+      if [ -x /etc/init.d/indimail ] ; then
+        %{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
+      else
+        %{_prefix}/sbin/initsvc -status || true
+      fi
+      %{_prefix}/sbin/initsvc -off || true
+    else
+      if [ -x /etc/init.d/indimail ] ; then
+        /etc/init.d/indimail stop
+      fi
+      /bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+      if [ $? -eq 0 ] ; then
+        %{__sed} -i 's{^SV:{#SV:{' /etc/inittab
+        if [ $? -eq 0 ] ; then
+          /sbin/init q
+        fi
+      fi
+    fi
+    sleep 5
+  fi
 fi
 
 if [ -f %{libexecdir}/upgrade.sh ] ; then
