@@ -20,6 +20,7 @@
 #define DNS_T_SIG "\0\30"
 #define DNS_T_KEY "\0\31"
 #define DNS_T_AAAA "\0\34"
+#define DNS_T_SRV "\0\41"
 #ifdef DNSSEC
 #define DNS_T_OPT "\0\51"
 #define DNS_T_DS "\0\53"
