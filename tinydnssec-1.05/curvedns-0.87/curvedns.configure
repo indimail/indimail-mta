@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+# XXX: make it POSIX-shell compatible (select isn't)
+
+start="`pwd`"
+top="`pwd`/nacl/build"
+bin="$top/bin"
+lib="$top/lib"
+include="$top/include"
+work="$top/work"
+curve="$work/curvedns"
+curve=../dq-20161210/build
+
+PATH="/usr/local/bin:$PATH"
+PATH="/usr/sfw/bin:$PATH"
+PATH="$bin:$PATH"
+export PATH
+
+# ------------------- funcs
+
+doMakefile() {
+  sed -e "s/@CC@/$compiler/" \
+      -e "s/@CFLAGS@/$cflags/" \
+          Makefile.in > Makefile
+}
+
+
+if [ -z "$1" ] && ([ -f "$curve"/dnscurve.compiler ] || [ -f "$curve"/dnscurve.cflags ]); then
+  echo "You have already picked an ABI, compiler, or -options for CurveDNS:"
+  [ -f "$curve"/dnscurve.compiler ] && ( echo -n "Compiler:		"; cat "$curve"/dnscurve.compiler )
+  [ -f "$curve"/dnscurve.cflags ] && ( echo -n "Compiler options:	"; cat "$curve"/dnscurve.cflags )
+  echo
+  if [ -f "$curve"/dnscurve.compiler ] && [ -f "$curve"/dnscurve.cflags ]; then
+    echo
+    echo "Nevertheless, a new Makefile has been generated."
+    compiler=`cat "$curve"/dnscurve.compiler`
+    cflags=`cat "$curve"/dnscurve.cflags`
+    doMakefile
+    exit 0
+  fi
+  exit 1
+fi
+
+# --------------------- Regular configure stuff
+
+cd "$start"
+
+doMakefile
+
+echo "Finished configuring CurveDNS, ready for compiling."
+echo -n "Chosen/picked ABI:		"
+cat "$curve"/abi
+echo -n "Chosen/picked compiler:		"
+cat "$curve"/compiler
+echo -n "Chosen/picked compiler options:	"
+cat "$curve"/cflags
+echo
+echo "We are now ready to compile, run 'make' to do so."
