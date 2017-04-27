@@ -50,9 +50,12 @@ URL: http://cr.yp.to/djbdns.html
 Source0: %{name}-%{version}.tar.gz
 # http://www.fefe.de/dns/
 BuildRequires: perl
+BuildRequires: libev-devel
+%if 0%{?suse_version} < 1120
+BuildRequires: elfutils
+%endif
 ##################################### OBS ####################################
 %if %build_on_obs == 1
-Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
 BuildRequires: libidn-devel
 %if 0%{?rhel_version} == 700
 BuildRequires: groff-doc
@@ -68,6 +71,12 @@ BuildRequires: -post-build-checks
 BuildRequires: groff
 %endif
 ##############################################################################
+%if %build_on_obs == 0
+Requires(pre): shadow-utils
+Requires(postun): shadow-utils
+%else
+Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel /usr/sbin/userdel
+%endif
 Requires: daemontools
 Provides: user(tinydns)  > 999
 Provides: user(dnscache) > 999
@@ -99,18 +108,51 @@ administrators use to diagnose misconfigured remote servers.
 
 See http://cr.yp.to/djbdns.html
 
-It also includes Dq, a package with DNS/DNSCurve related software.
+DQ: A package with DNS/DNSCurve related software.
 It contains a recursive DNS server with DNSCurve support called
 dqcache and also a commandline tool to debug DNS/DNScurve called dq.
 
 See https://mojzis.com/software/dq/
 
+CurveDNS: CurveDNS is the first publicly released forwarding implementation
+that implements the DNSCurve protocol.  DNSCurve uses high-speed
+high-security elliptic-curve cryptography to drastically improve every
+dimension of DNS security.
+
+See http://dnscurve.org/ for protocol details.
+
+curvedns allows any authoritative DNS name server to act as a DNSCurve
+capable one, without changing anything on your current DNS environment.
+The only thing a DNS data manager (that is probably you) has to do is
+to install CurveDNS on a machine, generate a keypair, and update NS
+type records that were pointing towards your authoritative name server
+and let them point to this machine running CurveDNS. Indeed, it is that
+easy to become fully protected against almost any of the currently known
+DNS flaws, such as active and passive cache poisoning.
+
+CurveDNS supports:
+* Forwarding of regular (non-protected) DNS packets;
+* Unboxing of DNSCurve queries and forwarding the regular DNS packets
+* Boxing of regular DNS responses to DNSCurve responses;
+* Both DNSCurve's streamlined- and TXT-format;
+* Caching of shared secrets;
+* Both UDP and TCP;
+* Both IPv4 and IPv6.
+
+See http://curvedns.on2it.net/
+
 %build
-sed -i 's{/usr{%{_prefix}{' conf-home
+%{__sed} -i 's{/usr{%{_prefix}{' conf-home
 %{__make} -s
 pod2man -s 8 -c '' "tinydns-sign" >tinydns-sign.8
 if [ -d dq-20161210 ] ; then
   cd dq-20161210
+  %{__make} -s
+  cd ..
+fi
+if [ -d curvedns-0.87 ] ; then
+  cd curvedns-0.87
+  ./curvedns.configure
   %{__make} -s
   cd ..
 fi
@@ -122,6 +164,18 @@ if [ -d dq-20161210 ] ; then
   sh make-install.sh %{buildroot}
   cd ..
 fi
+if [ -d curvedns-0.87 ] ; then
+  cd curvedns-0.87
+  %{__mkdir_p} %{buildroot}%{_prefix}/bin
+  %{__mkdir_p} %{buildroot}%{_prefix}/sbin
+  %{__mkdir_p} %{buildroot}%{_mandir}/man8
+  %{__mkdir_p} %{buildroot}%{_sysconfdir}
+  %{__install} -m 0755 curvedns %{buildroot}%{_prefix}/bin
+  %{__install} -m 0755 curvedns-keygen %{buildroot}%{_prefix}/sbin
+  %{__install} -m 0644 curvedns.8 curvedns-keygen.8 %{buildroot}%{_mandir}/man8
+  %{__install} -m 0600 curvedns.private.key %{buildroot}%{_sysconfdir}/curvedns.private.key
+  cd ..
+fi
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
@@ -130,9 +184,7 @@ fi
 %attr(755,root,root)                   %{_prefix}/bin/dq
 %attr(755,root,root)                   %{_prefix}/bin/axfr-get
 %attr(755,root,root)                   %{_prefix}/bin/axfrdns
-%attr(755,root,root)                   %{_prefix}/bin/axfrdns-conf
 %attr(755,root,root)                   %{_prefix}/bin/dnscache
-%attr(755,root,root)                   %{_prefix}/bin/dnscache-conf
 %attr(755,root,root)                   %{_prefix}/bin/dnsfilter
 %attr(755,root,root)                   %{_prefix}/bin/dnsgetroot
 %attr(755,root,root)                   %{_prefix}/bin/dnsip
@@ -148,28 +200,36 @@ fi
 %attr(755,root,root)                   %{_prefix}/bin/dnstracesort
 %attr(755,root,root)                   %{_prefix}/bin/dnstxt
 %attr(755,root,root)                   %{_prefix}/bin/pickdns
-%attr(755,root,root)                   %{_prefix}/bin/pickdns-conf
 %attr(755,root,root)                   %{_prefix}/bin/pickdns-data
 %attr(755,root,root)                   %{_prefix}/bin/random-ip
 %attr(755,root,root)                   %{_prefix}/bin/rbldns
-%attr(755,root,root)                   %{_prefix}/bin/rbldns-conf
 %attr(755,root,root)                   %{_prefix}/bin/rbldns-data
 %attr(755,root,root)                   %{_prefix}/bin/tinydns
-%attr(755,root,root)                   %{_prefix}/bin/tinydns-conf
 %attr(755,root,root)                   %{_prefix}/bin/tinydns-data
 %attr(755,root,root)                   %{_prefix}/bin/tinydns-edit
 %attr(755,root,root)                   %{_prefix}/bin/tinydns-get
 %attr(755,root,root)                   %{_prefix}/bin/tinydns-sign
 %attr(755,root,root)                   %{_prefix}/bin/walldns
-%attr(755,root,root)                   %{_prefix}/bin/walldns-conf
-%attr(755,root,root)                   %{_prefix}/sbin/dqcache
+%attr(755,root,root)                   %{_prefix}/bin/curvedns
+%attr(755,root,root)                   %{_prefix}/bin/dqcache
 %attr(755,root,root)                   %{_prefix}/sbin/dqcache-makekey
+%attr(755,root,root)                   %{_prefix}/sbin/curvedns-keygen
 %attr(755,root,root)                   %{_prefix}/sbin/dqcache-start
+%attr(755,root,root)                   %{_prefix}/sbin/axfrdns-conf
+%attr(755,root,root)                   %{_prefix}/sbin/dnscache-conf
+%attr(755,root,root)                   %{_prefix}/sbin/pickdns-conf
+%attr(755,root,root)                   %{_prefix}/sbin/rbldns-conf
+%attr(755,root,root)                   %{_prefix}/sbin/tinydns-conf
+%attr(755,root,root)                   %{_prefix}/sbin/walldns-conf
+%attr(755,root,root)                   %{_prefix}/sbin/dqcache-conf
+%attr(755,root,root)                   %{_prefix}/sbin/curvedns-conf
 %config(noreplace)                     %{_sysconfdir}/dnsroots.global
+%config(noreplace)                     %{_sysconfdir}/curvedns.private.key
 
 %doc dq-20161210/README.dq dq-20161210/INSTALL.dq doc/COPYING.tinydnssec doc/README.tinydnssec
 %doc doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO
 %doc doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/Thedjbway_djbdns.pdf
+%doc curvedns-0.87/LICENSE.curvedns
 
 %doc %{_mandir}/man1/*
 %doc %{_mandir}/man5/*
@@ -187,16 +247,16 @@ if [ $ID -ne 0 ] ; then
 fi
 if [ -f %{_prefix}/bin/svok ] ; then
   status=0
-  for i in tinydns tinydns/log dnscache dnscache/log
+  for i in tinydns tinydns/log dnscache dnscache/log curvedns curvedns/log dqcache dqcache/log
   do
-    %{_prefix}/bin/svok %{_sysconfdir}/$i 2>/dev/null
+    %{_prefix}/bin/svok %{_sysconfdir}/$i >/dev/null 2>&1
     if [ $? -eq 0 ] ; then
       status=1
     fi
   done
   if [ $status -eq 1 ] ; then
-    echo "Giving tinydns/dnscache exactly 5 seconds to exit nicely" 1>&2
-    for i in tinydns dnscache
+    echo "Giving dns services exactly 5 seconds to exit nicely" 1>&2
+    for i in tinydns dnscache curvedns dqcache
     do
       %{_prefix}/bin/svc -dx %{_sysconfdir}/$i %{_sysconfdir}/$i/log >/dev/null 2>&1
     done
@@ -230,6 +290,24 @@ argv1=$1
 if [ $argv1 -eq 1 ] ; then
   exit 0
 fi
+if [ -f %{_prefix}/bin/svok ] ; then
+  status=0
+  for i in tinydns tinydns/log dnscache dnscache/log curvedns curvedns/log dqcache dqcache/log
+  do
+    %{_prefix}/bin/svok %{_sysconfdir}/$i >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      status=1
+    fi
+  done
+  if [ $status -eq 1 ] ; then
+    echo "Giving dns services exactly 5 seconds to exit nicely" 1>&2
+    for i in tinydns dnscache curvedns dqcache
+    do
+      %{_prefix}/bin/svc -dx %{_sysconfdir}/$i %{_sysconfdir}/$i/log >/dev/null 2>&1
+    done
+    sleep 5
+  fi
+fi
 
 %post
 argv1=$1
@@ -246,7 +324,7 @@ fi
 /bin/rmdir --ignore-fail-on-non-empty %{_sysconfdir}/dnscache 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_sysconfdir}/tinydns 2>/dev/null
 if [ ! -d %{_sysconfdir}/dnscache ] ; then
-  %{_prefix}/bin/dnscache-conf dnscache dnslog %{_sysconfdir}/dnscache 127.0.0.1
+  %{_prefix}/sbin/dnscache-conf dnscache dnslog %{_sysconfdir}/dnscache 127.0.0.1
   if [ $? -eq 0 ] ; then
     if [ ! -h /service/dnscache ] ; then
       ln -s %{_sysconfdir}/dnscache /service/dnscache
@@ -257,6 +335,33 @@ else
     ln -s %{_sysconfdir}/dnscache /service/dnscache
   fi
 fi
+for i in tinydns dqcache curvedns
+do
+  if [ " $i" = " dqcache" ] ; then
+    acct=dnscache
+  else
+    acct=tinydns
+  fi
+  if [ " $i" = " curvedns" ] ; then
+    ip=x.x.x.x
+  else
+    ip=127.0.0.1
+  fi
+  if [ ! -d %{_sysconfdir}/$i ] ; then
+    %{_prefix}/sbin/$i-conf $acct dnslog %{_sysconfdir}/$i $ip
+    if [ ! " $i" = " curvedns" ] ; then
+      continue
+    fi
+    if [ -d %{_sysconfdir}/$i ] ; then
+      mask=`umask`
+      umask 077
+      # Generate private key
+      %{__sed} -n \$p %{_sysconfdir}/curvedns.private.key > %{_sysconfdir}/$i/curvedns.keygen
+      /bin/sh %{_sysconfdir}/$i/curvedns.keygen && %{__rm} -f %{_sysconfdir}/$i/curvedns.keygen
+      umask $mask
+    fi
+  fi
+done
 
 %postun
 argv1=$1
@@ -269,13 +374,7 @@ fi
 if [ $argv1 -eq 1 ] ; then
   exit 0
 fi
-for i in tinydns dnslog dnscache
-do
-  echo "Removing user $i"
-  /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
-  %{__rm} -f /var/spool/$i
-done
-for i in tinydns dnscache
+for i in tinydns dnscache curvedns dqcache
 do
   if [ -L /service/$i ] ; then
     echo "Removing service /service/$i"
@@ -286,16 +385,25 @@ do
     %{__rm} -rf %{_sysconfdir}/$i
   fi
 done
+for i in tinydns dnslog dnscache
+do
+  echo "Removing user $i"
+  /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
+  %{__rm} -f /var/spool/$i
+done
 
 %changelog
 * Tue Apr 25 2017 19:04:31 +0530 mbhangui@gmail.com @version@-@release@
 Release 1.1 Start 11/04/2017
-1. Added dnsgetroot
-2. added str_diffn()
-3. added comments for dempsky's patch djbdns<=1.05 lets AXFRed subdomains overwrite domains
-4. fixed debian/prerm script
-5. added selinux rules for tinydns
-6. added Pre-Depends daemontools
-7. remove tinydns, dnscache service on uninstall
-8. shutdown tinydns, dnsccache service on uninstall
-9. added compile time option to add dnssec support
+1.  Added dnsgetroot
+2.  added str_diffn()
+3.  added comments for dempsky's patch djbdns<=1.05 lets AXFRed subdomains overwrite domains
+4.  fixed debian/prerm script
+5.  added selinux rules for tinydns
+6.  added Pre-Depends daemontools
+7.  remove tinydns, dnscache service on uninstall
+8.  shutdown tinydns, dnsccache service on uninstall
+9.  added compile time option to add dnssec support
+10. adds a native SRV type to tinydns-data
+11. makes axfr-get decompose SRV and PTR records and write them out in native format
+12. added curvedns
