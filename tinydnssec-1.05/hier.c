@@ -60,9 +60,12 @@ void hier(char *inst_dir)
   c(auto_h,"bin","tinydns-sign",-1,-1,0755);
   c(mandir,"man1","dnsfilter.1",-1,-1,0644);
   c(mandir,"man1","dnsip.1",-1,-1,0644);
+  c(mandir,"man1","dnsip6.1",-1,-1,0644);
   c(mandir,"man1","dnsipq.1",-1,-1,0644);
+  c(mandir,"man1","dnsip6q.1",-1,-1,0644);
   c(mandir,"man1","dnsmx.1",-1,-1,0644);
   c(mandir,"man1","dnsname.1",-1,-1,0644);
+  c(mandir,"man1","dnsnamex.1",-1,-1,0644);
   c(mandir,"man1","dnsq.1",-1,-1,0644);
   c(mandir,"man1","dnsqr.1",-1,-1,0644);
   c(mandir,"man1","dnstrace.1",-1,-1,0644);
@@ -86,4 +89,7 @@ void hier(char *inst_dir)
   c(mandir,"man8","tinydns-sign.8",-1,-1,0644);
   c(mandir,"man8","walldns.8",-1,-1,0644);
   c(mandir,"man8","walldns-conf.8",-1,-1,0644);
+  c(mandir,"man8","pickdns.8",-1,-1,0644);
+  c(mandir,"man8","pickdns-data.8",-1,-1,0644);
+  c(mandir,"man8","pickdns-conf.8",-1,-1,0644);
 }
