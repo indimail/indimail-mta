@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.410 2017-04-25 23:16:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.411 2017-04-27 17:46:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2951,6 +2951,29 @@ if [ $argv1 -eq 1 ] ; then
     /bin/sh %{libexecdir}/upgrade.sh preun upgrade @version@ "$argv1"
   fi
   exit 0
+fi
+if [ -f %{_prefix}/bin/svok ] ; then
+  %{_prefix}/bin/svok /service/.svscan/log 2>/dev/null
+  if [ $? -eq 0 ] ; then
+    if test -f %{_sysconfdir}/init/svscan.conf
+    then
+      echo "Giving IndiMail exactly 5 seconds to exit nicely"
+      /sbin/initctl emit qmailstop > /dev/null 2>&1
+    elif test -f %{_sysconfdir}/event.d/svscan
+    then
+      echo "Giving IndiMail exactly 5 seconds to exit nicely"
+      /sbin/initctl emit qmailstop > /dev/null 2>&1
+    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
+    then
+      echo "Giving IndiMail exactly 5 seconds to exit nicely"
+      /bin/systemctl stop indimail.service > /dev/null 2>&1
+    elif test -x %{_prefix}/sbin/initsvc
+    then
+      echo "Giving IndiMail exactly 5 seconds to exit nicely"
+      %{_prefix}/sbin/initsvc -off
+    fi
+    sleep 5
+  fi
 fi
 
 if [ -f %{libexecdir}/upgrade.sh ] ; then
