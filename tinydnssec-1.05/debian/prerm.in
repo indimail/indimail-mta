@@ -29,17 +29,17 @@ fi
 
 case "$1" in
     remove|deconfigure)
-	echo "Giving tinydns/dnscache exactly 5 seconds to exit nicely" 1>&2
-	for i in tinydns dnscache
+	echo "Giving dns services exactly 5 seconds to exit nicely" 1>&2
+	for i in tinydns dnscache curvedns dqcache
 	do
-		/usr/bin/svc -dx ${sysconfdir}/$i ${sysconfdir}/$i/log || true
+		/usr/bin/svc -dx ${sysconfdir}/$i ${sysconfdir}/$i/log >/dev/null 2>&1|| true
 	done
 	sleep 5
 	;;
     upgrade)
-	for i in tinydns dnscache
+	for i in tinydns dnscache curvedns dqcache
 	do
-		/usr/bin/svc -dx ${sysconfdir}/$i ${sysconfdir}/$i/log || true
+		/usr/bin/svc -dx ${sysconfdir}/$i ${sysconfdir}/$i/log >/dev/null 2>&1|| true
 	done
 	sleep 5
     ;;
