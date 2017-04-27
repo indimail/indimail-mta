@@ -1,10 +1,13 @@
 .TH dnsname 1
 
 .SH NAME
-dnsname \- does a reverse lookup for the IP address
+dnsname/dnsnamex \- does a reverse lookup for the IP address
 
 .SH SYNOPSIS
-.B dnsname 
+.B dnsname
+.I a.b.c.d
+
+.B dnsnamex
 .I a.b.c.d
 
 .SH DESCRIPTION
@@ -18,6 +21,9 @@ prints a blank line.
 You can list several IP addresses;
 .B dnsname
 prints each result on a separate line.
+
+.BR dnsnamex ,
+works like dnsname(1) but prints all of the names that an IP address maps to, instead of just the first one like dnsname does.
 
 There is also a
 .BR dnsfilter (1)
