@@ -10,3 +10,4 @@ consider dead-server table in dnscache or in kernel
 IPv6 lookups
 maybe reverse IPv6 lookups; what a mess
 DNS over IPv6
+http://lkr.sourceforge.net/djbdns/mywork/jumbo/index.html
