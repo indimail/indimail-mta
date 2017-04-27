@@ -210,6 +210,26 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
     if (!stralloc_cats(&line,".:")) return 0;
     if (!stralloc_catulong0(&line,dist,0)) return 0;
   }
+  else if (byte_equal(data,2,DNS_T_SRV)) {
+    uint16 dist, weight, port;
+    if (!stralloc_copys(&line,"S")) return 0;
+    if (!dns_domain_todot_cat(&line,d1)) return 0;
+    if (!stralloc_cats(&line,"::")) return 0;
+    pos = x_copy(buf,len,pos,data,2);
+    uint16_unpack_big(data,&dist);
+    pos = x_copy(buf,len,pos,data,2);
+    uint16_unpack_big(data,&weight);
+    pos = x_copy(buf,len,pos,data,2);
+    uint16_unpack_big(data,&port);
+    x_getname(buf,len,pos,&d1);
+    if (!dns_domain_todot_cat(&line,d1)) return 0;
+    if (!stralloc_cats(&line,".:")) return 0;
+    if (!stralloc_catulong0(&line,dist,0)) return 0;
+    if (!stralloc_cats(&line,":")) return 0;
+    if (!stralloc_catulong0(&line,weight,0)) return 0;
+    if (!stralloc_cats(&line,":")) return 0;
+    if (!stralloc_catulong0(&line,port,0)) return 0;
+  }
   else if (byte_equal(data,2,DNS_T_A) && (dlen == 4)) {
     char ipstr[IP4_FMT];
     if (!stralloc_copys(&line,"+")) return 0;
@@ -217,6 +237,14 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
     if (!stralloc_cats(&line,":")) return 0;
     x_copy(buf,len,pos,data,4);
     if (!stralloc_catb(&line,ipstr,ip4_fmt(ipstr,data))) return 0;
+  }
+  else if (byte_equal(data,2,DNS_T_PTR)) {
+    if (!stralloc_copys(&line,"^")) return 0;
+    if (!dns_domain_todot_cat(&line,d1)) return 0;
+    if (!stralloc_cats(&line,":")) return 0;
+    x_getname(buf,len,pos,&d1);
+    if (!dns_domain_todot_cat(&line,d1)) return 0;
+    if (!stralloc_cats(&line,".")) return 0;
   }
   else if (byte_equal(data,2,DNS_T_AAAA)) {
     char ipstr[IP6_FMT];
