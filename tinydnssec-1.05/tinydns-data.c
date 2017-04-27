@@ -206,6 +206,7 @@ int main()
   char type[2];
   char soa[20];
   char buf[4];
+  char srv[6];
 
   umask(022);
 
@@ -397,6 +398,43 @@ int main()
 	rr_start(DNS_T_MX,ttl,ttd,loc);
 	uint16_pack_big(buf,u);
 	rr_add(buf,2);
+	rr_addname(d2);
+	rr_finish(d1);
+
+	if (ip4_scan(f[1].s,ip)) {
+	  rr_start(DNS_T_A,ttl,ttd,loc);
+	  rr_add(ip,4);
+	  rr_finish(d2);
+	}
+	break;
+	
+      case 'S':
+	if (!dns_domain_fromdot(&d1,f[0].s,f[0].len)) nomem();
+	if (!stralloc_0(&f[6])) nomem();
+	if (!scan_ulong(f[6].s,&ttl)) ttl = TTL_POSITIVE;
+	ttdparse(&f[7],ttd);
+	locparse(&f[8],loc);
+
+	if (!stralloc_0(&f[1])) nomem();
+
+	if (byte_chr(f[2].s,f[2].len,'.') >= f[2].len) {
+	  if (!stralloc_cats(&f[2],".srv.")) nomem();
+	  if (!stralloc_catb(&f[2],f[0].s,f[0].len)) nomem();
+	}
+	if (!dns_domain_fromdot(&d2,f[2].s,f[2].len)) nomem();
+
+	if (!stralloc_0(&f[4])) nomem();
+	if (!scan_ulong(f[4].s,&u)) u = 0;
+	uint16_pack_big(srv,u);
+	if (!stralloc_0(&f[5])) nomem();
+	if (!scan_ulong(f[5].s,&u)) u = 0;
+	uint16_pack_big(srv + 2,u);
+	if (!stralloc_0(&f[3])) nomem();
+	if (!scan_ulong(f[3].s,&u)) nomem();
+	uint16_pack_big(srv + 4,u);
+
+	rr_start(DNS_T_SRV,ttl,ttd,loc);
+	rr_add(srv,6);
 	rr_addname(d2);
 	rr_finish(d1);
 
