@@ -201,28 +201,9 @@ int main(int argc, char *argv[]) {
 	} else if (!misc_getenv_key("CURVEDNS_PRIVATE_KEY", 1, global_secret_key))
 		return 1;
 
-	// Fetch group id:
-	if (!misc_getenv_int("GID", 1, &gid))
-		return 1;
-
-	// Fetch user id:
-	if (!misc_getenv_int("UID", 1, &uid))
-		return 1;
-
 	// Open UDP and TCP sockets on local address(es):
 	if (!ip_init(local_addresses, local_addresses_count)) {
 		debug_log(DEBUG_FATAL, "ip_init(): failed, are you root?\n");
-		return 1;
-	}
-
-	// Do exactly this ;]
-	debug_log(DEBUG_INFO, "main(): throwing away root privileges\n");
-	if (setgid(gid) != 0) {
-		debug_log(DEBUG_FATAL, "main(): unable to set gid\n");
-		return 1;
-	}
-	if (setuid(uid) != 0) {
-		debug_log(DEBUG_FATAL, "main(): unable to set uid\n");
 		return 1;
 	}
 
