@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.220  2017-04-28 10:19:41+05:30  Cprogrammer
+ * updated timestamp columns default to CURRENT_TIMESTAMP
+ *
  * Revision 2.219  2016-06-09 15:26:55+05:30  Cprogrammer
  * added function check_group()
  *
@@ -973,7 +976,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.219 2016-06-09 15:26:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.220 2017-04-28 10:19:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1054,7 +1057,7 @@ port     int not null, \
 dbname   char(28) not null, \
 user     char(28) not null, \
 passwd   char(28) not null, \
-timestamp TIMESTAMP not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 unique index (filename, domain, server, mdahost, port, dbname, user, passwd), \
 index (domain)"
 
@@ -1174,7 +1177,7 @@ pw_name char(40) not null, \
 pw_domain char(67) not null, \
 pw_passwd char(128) not null, \
 host char(64) not null, \
-timestamp DATETIME DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
+timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \
 primary key (pw_name, pw_domain)"
 
 #define HOST_TABLE_LAYOUT "\
@@ -1196,12 +1199,12 @@ primary key(alias)"
 #define SPAM_TABLE_LAYOUT "\
 email char(64) not null, \
 spam_count int not null, \
-timestamp TIMESTAMP not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 index email (email), index spam_count (spam_count), index timestamp (timestamp)"
 
 #define BADMAILFROM_TABLE_LAYOUT "\
 email char(64) not null, \
-timestamp TIMESTAMP not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 primary key (email)"
 
 extern char     cntrl_host[];
@@ -1235,7 +1238,7 @@ pw_gid int, \
 pw_gecos char(48) not null, \
 pw_dir char(156), \
 pw_shell char(30), \
-timestamp TIMESTAMP not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 primary key (pw_name, pw_domain), index pw_gecos (pw_gecos(25)), index pw_uid (pw_uid) "
 
 /* large site table layout */
@@ -1247,7 +1250,7 @@ pw_gid int, \
 pw_gecos char(48), \
 pw_dir char(156), \
 pw_shell char(30), \
-timestamp TIMESTAMP not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 primary key(pw_name)"
 
 #define RELAY_TABLE_LAYOUT "\
@@ -1283,7 +1286,7 @@ service char(10) not null, \
 remote_ip char(16) not null,  \
 quota int not null, \
 gecos char(48) not null, \
-timestamp DATETIME DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
+timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \
 primary key (user, domain, service), index gecos (gecos), index quota (quota), \
 index timestamp (timestamp)"
 
@@ -1291,7 +1294,7 @@ index timestamp (timestamp)"
 user char(40) not null, \
 domain char(67) not null,\
 quota bigint unsigned not null, \
-timestamp DATETIME DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
+timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \
 primary key(user, domain), index quota (quota)"
 #endif
 
@@ -1332,7 +1335,7 @@ lastupdate int not null, \
 day char(2) not null, \
 attempts int not null, \
 status char(2) not null, \
-zztimestamp TIMESTAMP not null, \
+zztimestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 unique index(user)"
 
 #ifdef ENABLE_MYSQL_LOGGING
@@ -1344,7 +1347,7 @@ domain char(67), \
 logon char(32), \
 remoteip char(18), \
 message varchar(254), \
-timestamp TIMESTAMP, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, \
 error int, \
 index user_idx (user), \
 index domain_idx (domain), \
@@ -1356,7 +1359,7 @@ index message_idx (message)"
 #define BULKMAIL_TABLE_LAYOUT "\
 emailid char(107) not null, \
 filename char(64) not null, \
-zztimestamp TIMESTAMP not null, \
+zztimestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 primary key(emailid, filename)"
 
 #define LARGE_INSERT "insert low_priority into  %s \
