@@ -52,7 +52,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulk_mail.c,v 2.4 2016-05-17 14:41:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: bulk_mail.c,v 2.4 2016-05-17 14:41:16+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

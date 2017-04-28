@@ -138,7 +138,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 2.18 2016-01-19 00:35:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 2.18 2016-01-19 00:35:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifndef ENABLE_AUTH_LOGGING

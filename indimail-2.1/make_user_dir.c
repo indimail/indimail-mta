@@ -53,7 +53,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: make_user_dir.c,v 2.10 2016-05-18 11:46:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: make_user_dir.c,v 2.10 2016-05-18 11:46:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*

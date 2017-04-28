@@ -75,7 +75,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.23 2016-01-28 15:06:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.23 2016-01-28 15:06:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VALIAS

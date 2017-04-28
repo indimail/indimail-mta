@@ -19,7 +19,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 2.2 2014-01-30 13:59:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 2.2 2014-01-30 13:59:55+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL

@@ -100,7 +100,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_adduser.c,v 2.17 2016-05-18 11:47:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_adduser.c,v 2.17 2016-05-18 11:47:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <mysqld_error.h>

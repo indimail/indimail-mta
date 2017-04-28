@@ -124,7 +124,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adduser.c,v 2.24 2016-01-28 00:04:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adduser.c,v 2.24 2016-01-28 00:04:45+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*

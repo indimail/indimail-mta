@@ -92,7 +92,7 @@
 static int      defaultTask(char *, char *, struct passwd *, char *, int);
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 2.13 2013-06-10 15:43:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 2.13 2013-06-10 15:43:40+05:30 Cprogrammer Stab mbhangui $";
 #endif
 /*
 #define iauth ltdl_module_LTX_iauth

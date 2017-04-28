@@ -20,7 +20,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: check_group.c,v 2.1 2016-06-09 15:27:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: check_group.c,v 2.1 2016-06-09 15:27:25+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

@@ -36,7 +36,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpbind.c,v 2.6 2015-12-31 09:07:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpbind.c,v 2.6 2015-12-31 09:07:54+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H

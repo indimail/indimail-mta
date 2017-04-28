@@ -72,7 +72,7 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.12 2017-04-13 00:43:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.12 2017-04-13 00:43:18+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #define MAX_BUFF 1000

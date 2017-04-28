@@ -95,7 +95,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.26 2017-03-27 08:54:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.26 2017-03-27 08:54:04+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);

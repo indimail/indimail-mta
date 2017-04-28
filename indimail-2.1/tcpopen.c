@@ -51,7 +51,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 2.11 2015-08-21 10:47:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpopen.c,v 2.11 2015-08-21 10:47:49+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H

@@ -32,7 +32,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_assign.c,v 2.5 2016-05-18 11:47:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vget_assign.c,v 2.5 2016-05-18 11:47:38+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 extern int      cdb_seek(int, unsigned char *, unsigned int, int *);

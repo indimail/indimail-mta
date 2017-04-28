@@ -67,7 +67,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_real_domain.c,v 2.12 2017-03-13 14:13:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vget_real_domain.c,v 2.12 2017-03-13 14:13:36+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE

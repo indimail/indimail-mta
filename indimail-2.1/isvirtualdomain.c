@@ -34,7 +34,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: isvirtualdomain.c,v 2.6 2017-03-13 14:03:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: isvirtualdomain.c,v 2.6 2017-03-13 14:03:35+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

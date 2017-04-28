@@ -52,7 +52,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: chowkidar.c,v 2.13 2017-03-13 13:37:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: chowkidar.c,v 2.13 2017-03-13 13:37:08+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            usage();

@@ -75,7 +75,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 2.21 2017-03-27 08:53:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 2.21 2017-03-27 08:53:59+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdlib.h>

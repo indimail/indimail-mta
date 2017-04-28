@@ -27,7 +27,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_domain_assign.c,v 2.4 2016-05-18 11:44:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: del_domain_assign.c,v 2.4 2016-05-18 11:44:02+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*

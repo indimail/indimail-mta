@@ -118,7 +118,7 @@ static unsigned char PADDING[64] = {
   }
 
 #ifndef	lint
-static char     sccsid[] = "$Id: md5c.c,v 2.6 2011-12-05 14:48:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: md5c.c,v 2.6 2011-12-05 14:48:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*

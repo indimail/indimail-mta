@@ -74,7 +74,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 2.19 2017-03-13 14:08:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 2.19 2017-03-13 14:08:26+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static char    *parseLine1(char *);

@@ -15,7 +15,7 @@
 #include <sys/types.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: makesalt.c,v 2.2 2015-08-21 10:46:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: makesalt.c,v 2.2 2015-08-21 10:46:58+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int        Arc4random(int, int);

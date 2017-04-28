@@ -87,7 +87,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 2.17 2017-04-28 09:37:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 2.17 2017-04-28 09:37:37+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

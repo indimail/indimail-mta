@@ -38,7 +38,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxypop3.c,v 2.8 2017-03-13 14:06:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxypop3.c,v 2.8 2017-03-13 14:06:44+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

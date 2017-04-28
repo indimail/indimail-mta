@@ -46,7 +46,7 @@ void            ssl_free();
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 2.9 2016-01-28 16:11:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 2.9 2016-01-28 16:11:50+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

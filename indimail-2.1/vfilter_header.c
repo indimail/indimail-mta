@@ -19,7 +19,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_header.c,v 2.5 2016-05-25 09:11:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_header.c,v 2.5 2016-05-25 09:11:06+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VFILTER

@@ -221,7 +221,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.42 2017-03-31 02:17:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.42 2017-03-31 02:17:53+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);

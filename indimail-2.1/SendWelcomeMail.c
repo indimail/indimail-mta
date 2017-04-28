@@ -26,7 +26,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: SendWelcomeMail.c,v 2.6 2016-05-17 14:56:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: SendWelcomeMail.c,v 2.6 2016-05-17 14:56:55+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void

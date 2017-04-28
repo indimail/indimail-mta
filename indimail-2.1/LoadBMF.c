@@ -55,7 +55,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadBMF.c,v 2.17 2017-03-13 14:03:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadBMF.c,v 2.17 2017-03-13 14:03:55+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

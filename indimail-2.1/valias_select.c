@@ -62,7 +62,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_select.c,v 2.9 2014-07-03 00:09:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias_select.c,v 2.9 2014-07-03 00:09:13+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VALIAS

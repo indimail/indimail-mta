@@ -57,7 +57,7 @@ void            ssl_free();
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminCmmd.c,v 2.12 2016-01-28 16:11:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminCmmd.c,v 2.12 2016-01-28 16:11:43+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static int      IOPlex(int, int);

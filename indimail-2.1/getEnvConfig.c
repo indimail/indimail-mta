@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getEnvConfig.c,v 2.2 2015-08-21 10:46:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: getEnvConfig.c,v 2.2 2015-08-21 10:46:32+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*

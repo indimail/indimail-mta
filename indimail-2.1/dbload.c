@@ -74,7 +74,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.20 2017-03-13 13:42:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.20 2017-03-13 13:42:17+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <unistd.h>

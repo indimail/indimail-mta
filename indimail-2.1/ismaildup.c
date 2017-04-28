@@ -20,7 +20,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 2.2 2017-03-13 14:03:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 2.2 2017-03-13 14:03:02+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_SSL 

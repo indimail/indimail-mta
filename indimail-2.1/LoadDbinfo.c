@@ -146,7 +146,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.44 2017-03-13 14:04:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.44 2017-03-13 14:04:14+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <sys/types.h>

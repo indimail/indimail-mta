@@ -72,7 +72,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vaddaliasdomain.c,v 2.7 2016-06-09 15:32:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vaddaliasdomain.c,v 2.7 2016-06-09 15:32:32+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain_old[MAX_BUFF], Domain_new[MAX_BUFF];

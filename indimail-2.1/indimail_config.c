@@ -24,7 +24,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: config_settings.c,v 2.7 2016-05-25 08:59:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: config_settings.c,v 2.7 2016-05-25 08:59:16+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

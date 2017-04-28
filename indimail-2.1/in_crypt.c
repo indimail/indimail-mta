@@ -19,7 +19,7 @@ char           *crypt(const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: in_crypt.c,v 2.2 2015-08-21 10:46:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: in_crypt.c,v 2.2 2015-08-21 10:46:40+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*
