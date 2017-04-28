@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 2.20  2017-04-28 09:35:32+05:30  Cprogrammer
+ * fixed deletion of mcdfile
+ *
  * Revision 2.19  2017-03-13 14:12:26+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -115,7 +118,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.19 2017-03-13 14:12:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.20 2017-04-28 09:35:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -202,7 +205,7 @@ main(argc, argv)
 				else
 					snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 			}
-			if (!access(mcdfile, F_OK) && unlink(mcdFile))
+			if (!access(mcdFile, F_OK) && unlink(mcdFile))
 			{
 				fprintf(stderr, "vdeldomain: unlink: %s: %s\n", mcdFile, strerror(errno));
 				vclose();
