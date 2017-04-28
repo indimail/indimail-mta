@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 2.17  2017-04-28 09:37:37+05:30  Cprogrammer
+ * fixed incorrect handling of return status from del_control()
+ *
  * Revision 2.16  2013-08-03 20:21:51+05:30  Cprogrammer
  * send sighup through post_handle
  *
@@ -84,7 +87,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 2.16 2013-08-03 20:21:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 2.17 2017-04-28 09:37:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -266,7 +269,7 @@ vdeldomain(char *domain)
 	/*
 	 * delete the email domain from the qmail control files 
 	 */
-	if (del_control(domain))
+	if (del_control(domain) == -1)
 		return (-1);
 	/*
 	 * return back to the callers directory 
