@@ -49,7 +49,7 @@ tai64n_decode(stralloc *str, char **endptr)
 void
 getversion_tai64n_decode_c()
 {
-	static char    *x = "$Id: tai64n_decode.c,v 1.1 2016-01-02 19:22:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tai64n_decode.c,v 1.1 2016-01-02 19:22:04+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

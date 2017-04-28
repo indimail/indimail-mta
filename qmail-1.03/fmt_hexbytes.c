@@ -23,7 +23,7 @@ fmt_hexbyte(char *s, unsigned char byte)
 void
 getversion_fmt_hexbytes_c()
 {
-	static char    *x = "$Id: fmt_hexbytes.c,v 1.1 2015-08-24 19:03:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fmt_hexbytes.c,v 1.1 2015-08-24 19:03:00+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

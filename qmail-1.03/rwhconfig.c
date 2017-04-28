@@ -150,7 +150,7 @@ nomem:
 void
 getversion_rwhconfig_c()
 {
-	static char    *x = "$Id: rwhconfig.c,v 1.4 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rwhconfig.c,v 1.4 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

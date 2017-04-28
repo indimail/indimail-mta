@@ -76,7 +76,7 @@ main(argc, argv)
 void
 getversion_dnsmxip_c()
 {
-	static char    *x = "$Id: dnsmxip.c,v 1.7 2015-08-24 19:05:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsmxip.c,v 1.7 2015-08-24 19:05:34+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

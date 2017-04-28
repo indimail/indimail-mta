@@ -311,7 +311,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.10 2016-04-19 10:33:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.10 2016-04-19 10:33:35+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

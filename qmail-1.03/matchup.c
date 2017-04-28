@@ -753,7 +753,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.7 2017-01-04 12:56:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.7 2017-01-04 12:56:35+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -363,7 +363,7 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	static char    *x = "$Id: udplogger.c,v 1.2 2016-04-15 15:42:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udplogger.c,v 1.2 2016-04-15 15:42:09+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

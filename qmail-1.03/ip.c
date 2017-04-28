@@ -362,7 +362,7 @@ ip6_scanbracket(s, ip6)
 void
 getversion_ip_c()
 {
-	static char    *x = "$Id: ip.c,v 1.10 2016-04-10 13:27:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ip.c,v 1.10 2016-04-10 13:27:49+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -153,7 +153,7 @@ main()
 void
 getversion_qmail_newmrh_c()
 {
-	static char    *x = "$Id: qmail-newmrh.c,v 1.10 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-newmrh.c,v 1.10 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

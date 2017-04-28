@@ -511,7 +511,7 @@ main(argc, argv)
 void
 getversion_qmail_pw2u_c()
 {
-	static char    *x = "$Id: qmail-pw2u.c,v 1.8 2016-05-18 15:31:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-pw2u.c,v 1.8 2016-05-18 15:31:28+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

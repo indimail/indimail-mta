@@ -408,7 +408,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.18 2017-03-23 20:06:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.18 2017-03-23 20:06:57+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

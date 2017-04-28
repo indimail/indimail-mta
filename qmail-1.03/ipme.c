@@ -501,7 +501,7 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	static char    *x = "$Id: ipme.c,v 1.23 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipme.c,v 1.23 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

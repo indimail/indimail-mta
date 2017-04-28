@@ -96,7 +96,7 @@ main()
 void
 getversion_parsedate_c()
 {
-	static char    *x = "$Id: parsedate.c,v 1.4 2016-05-21 14:48:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: parsedate.c,v 1.4 2016-05-21 14:48:24+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

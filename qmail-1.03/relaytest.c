@@ -210,7 +210,7 @@ main(argc, argv)
 void
 getversion_relaytest_c()
 {
-	static char    *x = "$Id: relaytest.c,v 1.5 2016-01-02 19:23:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: relaytest.c,v 1.5 2016-01-02 19:23:25+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

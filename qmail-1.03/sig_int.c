@@ -36,7 +36,7 @@ sig_intdefault()
 void
 getversion_sig_int_c()
 {
-	static char    *x = "$Id: sig_int.c,v 1.1 2016-03-31 16:13:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sig_int.c,v 1.1 2016-03-31 16:13:57+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

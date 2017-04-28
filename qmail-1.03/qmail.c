@@ -319,7 +319,7 @@ qmail_close(qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.25 2016-06-03 09:57:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.25 2016-06-03 09:57:41+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

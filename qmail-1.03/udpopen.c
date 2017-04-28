@@ -19,7 +19,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: udpopen.c,v 1.5 2015-08-19 16:27:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: udpopen.c,v 1.5 2015-08-19 16:27:32+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifndef QMAIL_INTERNAL

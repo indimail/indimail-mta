@@ -198,7 +198,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_stdin_c()
 {
-	static char    *x = "$Id: qscanq-stdin.c,v 1.4 2016-06-03 09:58:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq-stdin.c,v 1.4 2016-06-03 09:58:33+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

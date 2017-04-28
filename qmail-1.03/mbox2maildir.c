@@ -379,7 +379,7 @@ usage:
 void
 getversion_mbox2maildir_c()
 {
-	static char    *x = "$Id: mbox2maildir.c,v 1.3 2016-06-20 08:32:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mbox2maildir.c,v 1.3 2016-06-20 08:32:40+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
