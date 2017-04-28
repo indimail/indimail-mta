@@ -157,9 +157,7 @@ For more information, read Basic Installation instructions at the bottom. In all
 a) you are doing this on a fresh system or
 b) in case you are installing this on a live IndiMail System and do not wish
    to do make install or make install-strip immediately.
-c) IndiMail follows FHS. The base directory is installed in @indimaildir@. You may want to set the following
-   in your .profile, or equivalent startup file
-   PATH=$PATH:@prefix@/bin:@prefix@/sbin
+c) IndiMail 2.x follows FHS. The base directory is installed in @indimaildir@ and does not contain binaries.
 
 Which user should I use to run the commands listed below ?
 
