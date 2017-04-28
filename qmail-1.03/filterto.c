@@ -151,7 +151,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: filterto.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -358,7 +358,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpto_c()
 {
-	static char    *x = "$Id: qmail-tcpto.c,v 1.21 2015-08-24 19:08:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-tcpto.c,v 1.21 2015-08-24 19:08:47+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

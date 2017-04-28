@@ -683,7 +683,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.10 2016-05-21 14:48:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.10 2016-05-21 14:48:06+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

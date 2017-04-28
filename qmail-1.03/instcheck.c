@@ -345,7 +345,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.24 2017-01-08 19:04:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.24 2017-01-08 19:04:07+05:30 Cprogrammer Stab mbhangui $";
 	if (x)
 		x++;
 }

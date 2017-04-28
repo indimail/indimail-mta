@@ -51,7 +51,7 @@ caldate_scan(s, cd)
 void
 getversion_caldate_scan_c()
 {
-	static char    *x = "$Id: caldate_scan.c,v 1.1 2016-01-28 01:41:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: caldate_scan.c,v 1.1 2016-01-28 01:41:30+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

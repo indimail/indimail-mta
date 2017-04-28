@@ -66,7 +66,7 @@ main(argc, argv)
 void
 getversion_yearcal_c()
 {
-	static char    *x = "$Id: yearcal.c,v 1.1 2016-01-28 23:42:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: yearcal.c,v 1.1 2016-01-28 23:42:18+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

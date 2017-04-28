@@ -209,7 +209,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_newu_c()
 {
-	static char    *x = "$Id: qmail-newu.c,v 1.9 2016-05-18 15:20:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-newu.c,v 1.9 2016-05-18 15:20:59+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

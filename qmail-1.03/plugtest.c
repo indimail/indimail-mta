@@ -376,7 +376,7 @@ main(int argc, char **argv)
 void
 getversion_plugtest_c()
 {
-	static char    *x = "$Id: plugtest.c,v 1.3 2011-07-08 13:47:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: plugtest.c,v 1.3 2011-07-08 13:47:27+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -103,6 +103,6 @@ estack(int  fderr, const char *errorstr)
 void
 getversion_estack_qc()
 {
-	static char    *x = "$Id: estack.c,v 1.3 2008-08-12 10:16:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: estack.c,v 1.3 2008-08-12 10:16:38+05:30 Cprogrammer Stab mbhangui $";
 	x++; /*- No dollar for OSS/FS */
 }

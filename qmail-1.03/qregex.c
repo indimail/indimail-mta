@@ -79,7 +79,7 @@
  * Initial revision
  *
  * qregex (v2)
- * $Id: qregex.c,v 1.25 2016-06-14 09:10:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.25 2016-06-14 09:10:09+05:30 Cprogrammer Stab mbhangui $
  *
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
@@ -368,7 +368,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.25 2016-06-14 09:10:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.25 2016-06-14 09:10:09+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

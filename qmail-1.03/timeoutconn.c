@@ -410,7 +410,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 void
 getversion_timeoutconn_c()
 {
-	static char    *x = "$Id: timeoutconn.c,v 1.14 2016-04-15 15:43:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: timeoutconn.c,v 1.14 2016-04-15 15:43:35+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

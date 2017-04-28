@@ -486,7 +486,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.6 2014-01-29 14:00:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.6 2014-01-29 14:00:56+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

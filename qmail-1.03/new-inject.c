@@ -697,7 +697,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.9 2016-05-21 14:48:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.9 2016-05-21 14:48:09+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

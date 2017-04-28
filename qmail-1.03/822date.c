@@ -120,7 +120,7 @@ main(argc, argv)
 void
 getversion_822date_c()
 {
-	static char    *x = "$Id: 822date.c,v 1.7 2016-05-21 14:47:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822date.c,v 1.7 2016-05-21 14:47:32+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

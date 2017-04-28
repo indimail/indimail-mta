@@ -55,7 +55,7 @@ matchregex(char *text, char *regex, char **errStr)
 void
 getversion_matchregex_c()
 {
-	static char    *x = "$Id: matchregex.c,v 1.2 2015-07-23 15:01:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchregex.c,v 1.2 2015-07-23 15:01:42+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -653,7 +653,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.27 2016-06-13 17:49:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.27 2016-06-13 17:49:11+05:30 Cprogrammer Stab mbhangui $";
 
 	if (x)
 		x++;

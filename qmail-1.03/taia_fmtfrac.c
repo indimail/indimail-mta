@@ -57,7 +57,7 @@ taia_fmtfrac(s, t)
 void
 getversion_taia_fmtfrac_c()
 {
-	static char    *x = "$Id: taia_fmtfrac.c,v 1.1 2016-01-28 23:43:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: taia_fmtfrac.c,v 1.1 2016-01-28 23:43:09+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

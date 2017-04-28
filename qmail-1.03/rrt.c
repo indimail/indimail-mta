@@ -491,7 +491,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.6 2017-04-10 20:42:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.6 2017-04-10 20:42:36+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

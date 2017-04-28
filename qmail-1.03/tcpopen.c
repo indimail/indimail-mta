@@ -419,7 +419,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.2 2016-06-13 14:17:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.2 2016-06-13 14:17:37+05:30 Cprogrammer Stab mbhangui $";
 #ifdef INDIMAIL
 	char *y = sccsid;
 	if (y)

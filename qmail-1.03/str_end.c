@@ -71,7 +71,7 @@ str_end(s, t)
 void
 getversion_str_end_c()
 {
-	static char    *x = "$Id: str_end.c,v 1.1 2016-02-08 18:27:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: str_end.c,v 1.1 2016-02-08 18:27:16+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

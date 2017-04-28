@@ -31,7 +31,7 @@ tai_decode(stralloc *str, char **endptr)
 void
 getversion_tai_decode_c()
 {
-	static char    *x = "$Id: tai_decode.c,v 1.1 2016-01-02 19:21:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tai_decode.c,v 1.1 2016-01-02 19:21:36+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

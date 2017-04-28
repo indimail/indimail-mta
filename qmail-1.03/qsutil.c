@@ -374,7 +374,7 @@ logsafe(s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.13 2016-03-31 17:37:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.13 2016-03-31 17:37:11+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -462,7 +462,7 @@ main()
 void
 getversion_822print_c()
 {
-	static char    *x = "$Id: 822print.c,v 1.6 2016-05-21 14:47:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822print.c,v 1.6 2016-05-21 14:47:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

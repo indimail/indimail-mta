@@ -63,7 +63,7 @@ tai64n_encode(tai *t, char *buf)
 void
 getversion_tai64n_encode_c()
 {
-	static char    *x = "$Id: tai64n_encode.c,v 1.1 2016-01-02 19:21:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tai64n_encode.c,v 1.1 2016-01-02 19:21:48+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

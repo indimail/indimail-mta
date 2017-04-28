@@ -571,7 +571,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.28 2017-01-08 19:04:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.28 2017-01-08 19:04:26+05:30 Cprogrammer Stab mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;

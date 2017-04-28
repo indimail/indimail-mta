@@ -40,7 +40,7 @@ fmt_xlong(s, u)
 void
 getversion_fmt_xlong_c()
 {
-	static char    *x = "$Id: fmt_xlong.c,v 1.1 2015-08-24 19:03:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fmt_xlong.c,v 1.1 2015-08-24 19:03:07+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

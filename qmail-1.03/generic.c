@@ -66,7 +66,7 @@ virusscan(char *messfn)
 void
 getversion_generic_c()
 {
-	static char    *x = "$Id: generic.c,v 1.3 2009-04-30 16:14:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: generic.c,v 1.3 2009-04-30 16:14:55+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

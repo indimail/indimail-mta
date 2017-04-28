@@ -303,7 +303,7 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	static char    *x = "$Id: qaes.c,v 1.4 2016-01-02 17:45:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qaes.c,v 1.4 2016-01-02 17:45:51+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -30,7 +30,7 @@ lock_ex(fd)
 void
 getversion_lock_sh_c()
 {
-	static char    *x = "$Id: lock_sh.c,v 1.1 2016-03-31 16:14:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: lock_sh.c,v 1.1 2016-03-31 16:14:07+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

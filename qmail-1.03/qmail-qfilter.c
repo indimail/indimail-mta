@@ -460,7 +460,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.10 2016-06-03 09:58:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.10 2016-06-03 09:58:12+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

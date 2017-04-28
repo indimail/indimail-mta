@@ -881,7 +881,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.48 2016-06-13 14:14:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.48 2016-06-13 14:14:27+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

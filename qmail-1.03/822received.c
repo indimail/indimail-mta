@@ -226,7 +226,7 @@ main(argc, argv)
 void
 getversion_822received_c()
 {
-	static char    *x = "$Id: 822received.c,v 1.7 2016-05-21 14:48:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822received.c,v 1.7 2016-05-21 14:48:03+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

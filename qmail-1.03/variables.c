@@ -17,7 +17,7 @@ char           *certdir;
 void
 getversion_variables_c()
 {
-	static char    *x = "$Id: variables.c,v 1.4 2017-03-21 15:40:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: variables.c,v 1.4 2017-03-21 15:40:38+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -52,7 +52,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	static char    *x = "$Id: nowutc.c,v 1.3 2016-05-21 14:48:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: nowutc.c,v 1.3 2016-05-21 14:48:14+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

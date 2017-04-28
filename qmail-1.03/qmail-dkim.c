@@ -1408,7 +1408,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.47 2016-06-03 09:57:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.47 2016-06-03 09:57:59+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

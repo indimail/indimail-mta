@@ -64,7 +64,7 @@ main(argc, argv)
 void
 getversion_dnsptr_c()
 {
-	static char    *x = "$Id: dnsptr.c,v 1.8 2015-08-24 19:05:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsptr.c,v 1.8 2015-08-24 19:05:47+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -113,7 +113,7 @@ main(int argc, char **argv)
 void
 getversion_tai64n2tai_c()
 {
-	static char    *x = "$Id: tai64n2tai.c,v 1.1 2016-01-02 19:21:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tai64n2tai.c,v 1.1 2016-01-02 19:21:19+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

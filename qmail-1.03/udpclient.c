@@ -120,7 +120,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	static char    *x = "$Id: udpclient.c,v 1.4 2016-04-18 16:44:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udpclient.c,v 1.4 2016-04-18 16:44:33+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

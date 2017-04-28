@@ -83,6 +83,6 @@ main(argc, argv)
 void
 getversion_auto_uid_c()
 {
-	static char    *x = "$Id: auto-uid.c,v 1.8 2010-05-16 16:11:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: auto-uid.c,v 1.8 2010-05-16 16:11:44+05:30 Cprogrammer Stab mbhangui $";
 	x++;
 }
