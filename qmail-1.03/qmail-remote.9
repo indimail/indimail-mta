@@ -473,6 +473,8 @@ route may also have the form
 
 .EX
 \fIdomain\fB:\fIrelay\fB:\fIport\fB:\fIpenalty\fB:\fImax_tolerance<sp>username<sp>\fIpassword\fR
+or
+\fIdomain\fB:\fIrelay\fB:\fIport\fB<sp>username<sp>\fIpassword\fR
 .EE
 
 without any extra spaces. If the environment variable
@@ -499,6 +501,7 @@ of the following environment variables
 	DISABLE_CRAM_RIPEMD
 	DISABLE_DIGEST_MD5
 .EE
+
 If you set the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled, unless qmail-remote
 has opened a TLS session wth the remote host. See the control file \fIclientcert.pem\fR
 
@@ -506,18 +509,18 @@ If all connections to the
 .I relay
 server fail for a 
 .I max_tolerance
-seconds further connections to the same server, are avoided for a period of at least
+seconds, further connections to the same server are avoided for a period of at least
 .I penalty
 seconds.
-The default maximum period of failures that will be tolerated
+The default maximum period of failures that will be tolerated - 
 .I max_tolerance 
-is 120 seconds and the minimum penalty
+is 120 seconds and the minimum penalty - 
 .I penalty 
 is 1 hour.
 By setting the 
 .I penalty 
 to 0, connections to the server will be attempted inspite of failures. The default values of 1
-hour for minimum penalty can be changed by setting the environment variable
+hour for minimum penalty, can be changed by setting the environment variable
 .IR MIN_PENALTY .
 The default value of 120 seconds for max_tolerance can be changed by setting the environment
 variable
@@ -532,7 +535,7 @@ in the following format
 <email_address><sp><ip_address>
 .EE
 
-Then run the command in LIBEXEC
+Then run the following command in LIBEXEC directory
 
 .EX
 \fBcdbmake-12\fR \fImoresmtproutes\fR.\fIcdb\fR < \fImoresmtproutes\fR.\fItmp\fR < \fImoresmtproutes\fR.\fIcdb\fR
