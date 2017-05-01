@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.43  2017-05-01 19:49:42+05:30  Cprogrammer
+ * removed mailing list feature from vfilter
+ *
  * Revision 2.42  2017-03-31 02:17:53+05:30  Cprogrammer
  * display quota in mebibyte, gibibyte
  *
@@ -221,7 +224,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.42 2017-03-31 02:17:53+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.43 2017-05-01 19:49:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -609,7 +612,6 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 #ifdef VFILTER
 		int             header_name, comparision, bounce_action, filter_no;
 		char            keyword[MAX_BUFF], folder[MAX_BUFF], forward[AUTH_SIZE], filter_name[MAX_BUFF];
-		char         **mailing_list;
 #endif
 
 		valiasinfo(mypw->pw_name, Domain);
@@ -618,7 +620,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		if (!access(maildir, F_OK))
 		{
 			printf("Filters       :\n");
-			vfilter_display(Email, 0, &filter_no, filter_name, &header_name, &comparision, keyword, folder, &bounce_action, forward, &mailing_list);
+			vfilter_display(Email, 0, &filter_no, filter_name, &header_name, &comparision, keyword, folder, &bounce_action, forward);
 		}
 #endif
 	}
