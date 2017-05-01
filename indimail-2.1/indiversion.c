@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.145  2017-05-01 20:21:15+05:30  Cprogrammer
+ * removed mailing list feature from vfilter
+ *
  * Revision 2.144  2017-03-13 13:45:13+05:30  Cprogrammer
  * replaced INDIMAILDIR, QMAILDIR with PREFIX
  *
@@ -554,7 +557,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.144 2017-03-13 13:45:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.145 2017-05-01 20:21:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -779,7 +782,6 @@ void            getversion_add_control_c();
 void            getversion_autoturn_dir_c();
 void            getversion_pipe_exec_c();
 void            getversion_vfilter_select_c();
-void            getversion_vfilter_mlistOpt_c();
 void            getversion_vfilter_insert_c();
 void            getversion_vfilter_delete_c();
 void            getversion_vfilter_update_c();
@@ -788,13 +790,8 @@ void            getversion_vfilter_filterNo_c();
 void            getversion_parseAddress_c();
 void            getversion_storeHeader_c();
 void            getversion_getmailingList_c();
-void            getversion_mlist_insert_c();
-void            getversion_mlist_update_c();
-void            getversion_mlist_delete_c();
-void            getversion_mlist_filterupdate_c();
 void            getversion_addressToken_c();
 void            getversion_is_mailing_list_c();
-void            getversion_mlist_filterno_c();
 void            getversion_getAddressBook_c();
 void            getversion_deliver_mail_c();
 void            getversion_skip_system_files_c();
@@ -1220,7 +1217,6 @@ getversion(char *id)
 	getversion_add_control_c();
 	getversion_autoturn_dir_c();
 	getversion_pipe_exec_c();
-	getversion_vfilter_mlistOpt_c();
 	getversion_vfilter_select_c();
 	getversion_vfilter_insert_c();
 	getversion_vfilter_delete_c();
@@ -1228,15 +1224,9 @@ getversion(char *id)
 	getversion_vfilter_display_c();
 	getversion_vfilter_filterNo_c();
 	getversion_getmailingList_c();
-	getversion_mlist_insert_c();
-	getversion_mlist_update_c();
-	getversion_mlist_delete_c();
-	getversion_mlist_filterupdate_c();
 	getversion_addressToken_c();
 	getversion_storeHeader_c();
 	getversion_parseAddress_c();
-	getversion_is_mailing_list_c();
-	getversion_mlist_filterno_c();
 	getversion_getAddressBook_c();
 	getversion_deliver_mail_c();
 	getversion_skip_system_files_c();
