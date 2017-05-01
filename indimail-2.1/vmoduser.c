@@ -399,7 +399,7 @@ main(argc, argv)
 	if (!err) {
 		for (i = 1, *tmpbuf = 0; i < argc; i++) {
 			strncat(tmpbuf, " ", MAX_BUFF);
-			strncat(tmpbuf, argv[i], MAX_BUFF);
+			strncat(tmpbuf, argv[i], MAX_BUFF -1);
 		}
 		if (!(ptr = getenv("POST_HANDLE")))
 		{
