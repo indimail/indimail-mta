@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_display.c,v $
+ * Revision 2.12  2017-05-01 20:18:05+05:30  Cprogrammer
+ * removed mailing list feature from vfilter
+ *
  * Revision 2.11  2004-10-08 10:20:23+05:30  Cprogrammer
  * bounds check for headerlist
  *
@@ -40,19 +43,19 @@
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_display.c,v 2.11 2004-10-08 10:20:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter_display.c,v 2.12 2017-05-01 20:18:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
 int
 vfilter_display(char *emailid, int disp_type, int *filter_no, char *filter_name, int *header_name, int *comparision, 
-	char *keyword, char *folder, int *bounce_action, char *forward, char ***mailing_list)
+	char *keyword, char *folder, int *bounce_action, char *forward)
 {
 	int             i, j, status = -1;
 
 	for(j = 0;;)
 	{
-		i = vfilter_select(emailid, filter_no, filter_name, header_name, comparision, keyword, folder, bounce_action, forward, mailing_list);
+		i = vfilter_select(emailid, filter_no, filter_name, header_name, comparision, keyword, folder, bounce_action, forward);
 		if(i == -1)
 		{
 			fprintf(stderr, "vfilter_select: failure\n");
@@ -68,20 +71,6 @@ vfilter_display(char *emailid, int disp_type, int *filter_no, char *filter_name,
 		status = 0;
 		format_filter_display(disp_type, *filter_no, emailid, filter_name, *header_name, *comparision, keyword, folder, 
 			forward, *bounce_action);
-		if(*comparision == 5 || *comparision == 6)
-		{
-			if(*mailing_list && (*mailing_list)[0] && !*((*mailing_list)[0]))
-			{
-				printf("    Mailing Lists\n");
-				printf("             -> Intelligent\n");
-			}
-			for(i = 0;*mailing_list && (*mailing_list)[i] && *((*mailing_list)[i]);i++)
-			{
-				if(!i)
-					printf("    Mailing Lists\n");
-				printf("             -> %s\n", (*mailing_list)[i]);
-			}
-		}
 		if(!disp_type)
 			printf("--------------------------------------------------------------------------------------------------------------------------------------------------\n");
 	}
