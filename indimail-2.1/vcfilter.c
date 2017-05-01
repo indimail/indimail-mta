@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 2.32  2017-05-01 20:15:54+05:30  Cprogrammer
+ * removed mailing list feature from vfilter
+ *
  * Revision 2.31  2016-06-09 15:32:32+05:30  Cprogrammer
  * run if indimail gid is present in process supplementary groups
  *
@@ -102,7 +105,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 2.31 2016-06-09 15:32:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 2.32 2017-05-01 20:15:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -117,23 +120,16 @@ static char     sccsid[] = "$Id: vcfilter.c,v 2.31 2016-06-09 15:32:32+05:30 Cpr
 #define FILTER_INSERT 1
 #define FILTER_DELETE 2
 #define FILTER_UPDATE 3
-#define MLIST_SELECT  4
-#define MLIST_INSERT  5
-#define MLIST_DELETE  6
-#define MLIST_UPDATE  7
-#define MLIST_OPTION  8
 
 int             header_name;
 int             comparision;
 int             bounce_action;
 int             filter_no;
-int             mlist_option;
 char            filter_name[MAX_BUFF];
 char            keyword[MAX_BUFF];
 char            folder[MAX_BUFF];
 char            emailid[AUTH_SIZE];
 char            faddr[AUTH_SIZE];
-char          **mailing_list;
 char          **header_list;
 char           *ptr1, *ptr2;
 int             FilterAction;
@@ -144,7 +140,7 @@ int             get_options(int argc, char **argv, int *, int *);
 int
 main(int argc, char **argv)
 {
-	int             i, j, status = -1, raw = 0, cluster_conn = 0;
+	int             i, status = -1, raw = 0, cluster_conn = 0;
 	uid_t           uid, uidtmp;
 	gid_t           gid, gidtmp;
 	struct passwd  *pw;
@@ -213,20 +209,11 @@ main(int argc, char **argv)
 	}
 	switch (FilterAction)
 	{
-	case MLIST_SELECT:
-		mailing_list = getmailingList(emailid, -1);
-		for (i = 0;mailing_list && mailing_list[i];i++)
-		{
-			if (!i)
-				printf("    Mailing Lists\n");
-			printf("             -> %s\n", mailing_list[i]);
-		}
-		break;
 	case FILTER_SELECT:
-		status = vfilter_display(emailid, raw, &filter_no, filter_name, &header_name, &comparision, keyword, folder, &bounce_action, faddr, &mailing_list);
+		status = vfilter_display(emailid, raw, &filter_no, filter_name, &header_name, &comparision, keyword, folder, &bounce_action, faddr);
 		break;
 	case FILTER_INSERT:
-		status = vfilter_insert(emailid, filter_name, header_name, comparision, keyword, folder, bounce_action, faddr, mailing_list);
+		status = vfilter_insert(emailid, filter_name, header_name, comparision, keyword, folder, bounce_action, faddr);
 		if (!status && strncmp(emailid, "prefilt@", 8) && strncmp(emailid, "postfilt@", 9)
 			&& access(vfilter_file, F_OK))
 		{
@@ -248,62 +235,17 @@ main(int argc, char **argv)
 	case FILTER_DELETE:
 		if (!(status = vfilter_delete(emailid, filter_no)))
 		{
-			if (vfilter_select(emailid, &i, filter_name, &header_name, &comparision, keyword, folder, &bounce_action, faddr, &mailing_list) == -2)
+			if (vfilter_select(emailid, &i, filter_name, &header_name, &comparision, keyword, folder, &bounce_action, faddr) == -2)
 				unlink(vfilter_file);
 		}
 		break;
 	case FILTER_UPDATE:
-		status = vfilter_update(emailid, filter_no, header_name, comparision, keyword, folder, bounce_action, faddr, mailing_list);
-		break;
-	case MLIST_INSERT:
-		if ((filter_no = mlist_filterno(emailid)) == -1)
-		{
-			fprintf(stderr, "failed to get Filter No [for comparision 5/6] for %s\n", emailid);
-			status = -1;
-		} else
-		if (filter_no == -2)
-		{
-			status = 1;
-			fprintf(stderr, "No filter present for this option\n");
-		} else
-		{
-			if (mailing_list && *mailing_list && **mailing_list)
-				status = mlist_insert(emailid, filter_no, mailing_list);
-		}
-		break;
-	case MLIST_UPDATE:
-		status = mlist_update(emailid, mailing_list[0], mailing_list[1]);
-		break;
-	case MLIST_DELETE:
-		for (status = i = 0;mailing_list && mailing_list[i] && *(mailing_list[i]);i++)
-		{
-			if ((j = mlist_delete(emailid, mailing_list[i])))
-				status = j;
-		}
-		break;
-	case MLIST_OPTION:
-		if ((filter_no = mlist_filterno(emailid)) == -1)
-		{
-			fprintf(stderr, "failed to get Filter No [comparision 5/6] for %s\n", emailid);
-			status = -1;
-		} else
-		if (filter_no == -2)
-		{
-			fprintf(stderr, "No filter present for this option\n");
-			status = -1;
-		} else
-			status = vfilter_mlistOpt(emailid, mlist_option);
+		status = vfilter_update(emailid, filter_no, header_name, comparision, keyword, folder, bounce_action, faddr);
 		break;
 	}
 #ifdef DEBUG
 	printf("action %d, header %d keyword [%s] comparision %d folder [%s] bounce_action %d Forward %s email [%s]\n",
 			FilterAction, header_name, keyword, comparision, folder, bounce_action, bounce_action == 2 ? faddr : "N/A", emailid);
-	for (i = 0;mailing_list && mailing_list[i];i++)
-	{
-		if (!i)
-			printf("Mailing Lists\n");
-		printf("%s\n", mailing_list[i]);
-	}
 #endif
 	if (cluster_conn)
 		vclose();
@@ -329,7 +271,7 @@ get_options(int argc, char **argv, int *raw, int *cluster_conn)
 	max_header--;
 	max_comparision--;
 	*cluster_conn = 0;
-	while ((c = getopt(argc, argv, "vCsirm:d:u:h:c:b:k:f:o:t:DU")) != -1)
+	while ((c = getopt(argc, argv, "vCsird:u:h:c:b:k:f:t:")) != -1)
 	{
 		switch (c)
 		{
@@ -348,10 +290,7 @@ get_options(int argc, char **argv, int *raw, int *cluster_conn)
 			*raw = 1;
 			break;
 		case 'i':
-			if (FilterAction != MLIST_SELECT)
-				FilterAction = FILTER_INSERT;
-			else
-				FilterAction = MLIST_INSERT;
+			FilterAction = FILTER_INSERT;
 			break;
 		case 'd':
 			FilterAction = FILTER_DELETE;
@@ -457,30 +396,6 @@ get_options(int argc, char **argv, int *raw, int *cluster_conn)
 			else
 				scopy(folder, "/NoDeliver", 11);
 			break;
-		case 'm':
-			FilterAction = MLIST_SELECT;
-			scopy(emailid, optarg, AUTH_SIZE);
-			break;
-		case 'D':
-			FilterAction = MLIST_DELETE;
-			break;
-		case 'U':
-			FilterAction = MLIST_UPDATE;
-			break;
-		case 'o':
-			FilterAction = MLIST_OPTION;
-			if (isnum(optarg))
-			{
-				mlist_option = atoi(optarg);
-				if (mlist_option != 0 && mlist_option != 1 && mlist_option != 2)
-				{
-					fprintf(stderr, "Comparision value %d out of range\n", mlist_option);
-					usage();
-					return(1);
-				}
-			} else
-				mlist_option = -1;
-			break;
 		default:
 			usage();
 			return(1);
@@ -493,10 +408,7 @@ get_options(int argc, char **argv, int *raw, int *cluster_conn)
 		return(1);
 	}
 	if (optind < argc)
-	{
-		if (FilterAction < MLIST_SELECT)
-			scopy(emailid, argv[optind++], AUTH_SIZE);
-	}
+		scopy(emailid, argv[optind++], AUTH_SIZE);
 	if (!*emailid)
 	{
 		fprintf(stderr, "vcfilter: must supply emailid\n");
@@ -516,7 +428,6 @@ get_options(int argc, char **argv, int *raw, int *cluster_conn)
 			}
 		}
 	}
-	mailing_list = argv + optind;
 	if (comparision == 5 || comparision == 6)
 	{
 		header_name = -1;
@@ -554,42 +465,15 @@ get_options(int argc, char **argv, int *raw, int *cluster_conn)
 		}
 		if (comparision != 5 && comparision != 6)
 		{
-			if (header_name == -1 || !*keyword || (mailing_list && *mailing_list))
+			if (header_name == -1 || !*keyword)
 			{
 				if (header_name == -1)
 					fprintf(stderr, "-h option not specified\n");
 				if (!*keyword)
 					fprintf(stderr, "-k option not specified\n");
-				if (mailing_list && *mailing_list)
-					fprintf(stderr, "mailing list not relevant for Comparision '%s'\n", vfilter_comparision[comparision]);
 				usage();
 				return(1);
 			}
-		}
-		break;
-	case MLIST_INSERT:
-	case MLIST_DELETE:
-		if (!mailing_list || !*mailing_list || !**mailing_list)
-		{
-			fprintf(stderr, "must specify mailing list(s)\n");
-			usage();
-			return(1);
-		}
-		break;
-	case MLIST_UPDATE:
-		if (!mailing_list[0] || !mailing_list[1])
-		{
-			fprintf(stderr, "must specify old mailing list and new mailing list\n");
-			usage();
-			return(1);
-		}
-		break;
-	case MLIST_OPTION:
-		if (mlist_option == -1)
-		{
-			fprintf(stderr, "must specify valid a mailing list option\n");
-			usage();
-			return(1);
 		}
 		break;
 	} /*- switch(FilterAction) */
@@ -601,7 +485,7 @@ usage()
 {
 	int             i;
 
-	fprintf(stderr, "usage: vcfilter [options] emailid [mailing_list1..mailing_listn]\n");
+	fprintf(stderr, "usage: vcfilter [options] emailid\n");
 	fprintf(stderr, "options: -v verbose\n");
 	fprintf(stderr, "         -C connect to Cluster\n");
 	fprintf(stderr, "         -r raw display (for -s option)\n");
@@ -640,7 +524,6 @@ usage()
 			i++;
 		}
 	}
-	fprintf(stderr, "            NOTE: mailing list can be specified for comparision 5 or 6\n");
 	fprintf(stderr, "         -k keyword [\"\" string if comparision (-c option) is 5 or 6]\n");
 	fprintf(stderr, "         -f folder [Specify /NoDeliver for delivery to be junked]\n");
 	fprintf(stderr, "         -b bounce action\n");
@@ -650,17 +533,6 @@ usage()
 	fprintf(stderr, "              2'|program'     - Feed mail to another program\n");
 	fprintf(stderr, "              3'&user@domain' - Forward to another id and Bounce\n");
 	fprintf(stderr, "              3'|program'     - Feed mail to another program and Bounce\n");
-	fprintf(stderr, "                       or                                       \n");
-	fprintf(stderr, "usage: vcfilter -m emailid [options] [mailing_list1..mailing_listn]\n");
-	fprintf(stderr, "options: -v verbose\n");
-	fprintf(stderr, "         -m show   Mailing List(s)\n");
-	fprintf(stderr, "         -i add    Mailing List(s)\n");
-	fprintf(stderr, "         -D delete Mailing List(s)\n");
-	fprintf(stderr, "         -U old_name new_name\n");
-	fprintf(stderr, "         -o option (used only for comparision 5 or 6)\n");
-	fprintf(stderr, "              0 - Do not consider mailing lists in filtering\n");
-	fprintf(stderr, "              1 - Consider mailing lists in filtering intelligently\n");
-	fprintf(stderr, "              2 - Consider mailing lists present in the User's Mailing Lists\n");
 }
 #else
 int
