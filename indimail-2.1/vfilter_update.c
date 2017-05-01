@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_update.c,v $
+ * Revision 2.10  2017-05-01 20:20:19+05:30  Cprogrammer
+ * removed mailing list feature from vfilter
+ *
  * Revision 2.9  2008-09-08 09:57:45+05:30  Cprogrammer
  * removed mysql_escape
  *
@@ -33,7 +36,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_update.c,v 2.9 2008-09-08 09:57:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter_update.c,v 2.10 2017-05-01 20:20:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -43,7 +46,7 @@ static char     sccsid[] = "$Id: vfilter_update.c,v 2.9 2008-09-08 09:57:45+05:3
 
 int
 vfilter_update(char *emailid, int filter_no, int header_name, int comparision, char *keyword, char *folder, int bounce_action, 
-		char *faddr, char **mailing_list)
+		char *faddr)
 {
 	int             err, terr;
 	char            SqlBuf[SQL_BUF_SIZE];
@@ -52,9 +55,9 @@ vfilter_update(char *emailid, int filter_no, int header_name, int comparision, c
 		return (-1);
 	snprintf(SqlBuf, sizeof(SqlBuf),
 		"update low_priority vfilter set header_name=%d, comparision=%d, keyword=\"%s\", \
-		destination=\"%s\", bounce_action=\"%d%s\", mailing_list=%d where emailid=\"%s\" and filter_no=%d", 
+		destination=\"%s\", bounce_action=\"%d%s\" where emailid=\"%s\" and filter_no=%d", 
 		header_name, comparision, keyword, folder, bounce_action, (bounce_action == 2 || bounce_action == 3) ? faddr : "", 
-		(mailing_list && *mailing_list) ? 1 : 0, emailid, filter_no);
+		emailid, filter_no);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
 		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
@@ -71,12 +74,6 @@ vfilter_update(char *emailid, int filter_no, int header_name, int comparision, c
 		return(-1);
 	}
 	terr = 0;
-	if(mailing_list && *mailing_list)
-	{
-		if(mlist_delete(emailid, 0) && verbose)
-			fprintf(stderr, "Failed to delete mailing list(s)\n");
-		terr = mlist_insert(emailid, filter_no, mailing_list);
-	}
 	if(!verbose)
 		return ((err >= 0 && !terr) ? 0 : 1);
 	if(err)
