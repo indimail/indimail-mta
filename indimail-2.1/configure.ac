@@ -676,8 +676,13 @@ AC_ARG_ENABLE(user-cluster, [  --enable-user-cluster=y|n     Turn on (y, default
 	])
 case $CLUSTERED_SITE in
 1*|y*|Y*)
+    if test $SITE_SIZE -eq 1
+	then
+		AC_MSG_ERROR([--enable-large-site=y is incompatible with --enable-user-cluster=y.])
+	else
 	CLUSTERED_SITE=1
 	AC_DEFINE_UNQUOTED(CLUSTERED_SITE,$CLUSTERED_SITE,Enable Clustering)
+	fi
 	;;
 *)
 	;;
