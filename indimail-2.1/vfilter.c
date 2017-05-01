@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 2.51  2017-05-01 20:17:34+05:30  Cprogrammer
+ * removed mailing list feature from vfilter
+ *
  * Revision 2.50  2017-03-13 14:13:16+05:30  Cprogrammer
  * replaced INDIMAILDIR with PREFIX
  *
@@ -163,7 +166,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 2.50 2017-03-13 14:13:16+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 2.51 2017-05-01 20:17:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -185,8 +188,7 @@ static void     usage();
 static int      get_options(int argc, char **argv, char *, char *, char *, char *, char *);
 static int      myExit(int, char **, int, int, char *, char *);
 static void     printBounce(char *);
-static void     process_filter(int, char **, struct header **, char *, int *, char *, int *, int *, char *, char *, int *, char *,
-							   char ***, int);
+static void     process_filter(int, char **, struct header **, char *, int *, char *, int *, int *, char *, char *, int *, char *);
 int             numerical_compare(char *, char *);
 
 int             interactive;
@@ -200,13 +202,12 @@ main(int argc, char **argv)
 	struct header **hptr, **ptr;
 	struct eps_t   *eps = NULL;
 	struct header_t *h = NULL;
-	int             mailingList = 0, ret = 0, fd = 0;
+	int             ret = 0, fd = 0;
 	int             header_name, comparision, bounce_action, filter_no, MsgSize;
 	char            emailid[MAX_BUFF], Maildir[MAX_BUFF], filter_name[MAX_BUFF];
 	char            keyword[MAX_BUFF], folder[MAX_BUFF], filterid[MAX_BUFF];
 	char            bounce[AUTH_SIZE], forward[AUTH_SIZE], user[AUTH_SIZE];
 	char            tmpFlag[MAX_BUFF], domain[AUTH_SIZE];
-	char          **mailing_list;
 
 	*emailid = *user = *domain = *Maildir = 0;
 	setbuf(stdout, 0);
@@ -231,8 +232,6 @@ main(int argc, char **argv)
 		if ((h->name) && h->data)
 		{
 			storeHeader(&hptr, h);
-			if (is_mailing_list((char *) h->name, (char *) h->data))
-				mailingList = 1;
 			if (interactive && verbose)
 				printf("%s: %s\n", h->name, h->data);
 		}
@@ -256,8 +255,6 @@ main(int argc, char **argv)
 			if ((h->name) && (h->data))
 			{
 				storeHeader(&hptr, h);
-				if (is_mailing_list((char *) h->name, (char *) h->data))
-					mailingList = 1;
 				if (interactive && verbose)
 					printf("%s: %s\n", h->name, h->data);
 			}
@@ -292,7 +289,7 @@ main(int argc, char **argv)
 	snprintf(tmpFlag, MAX_BUFF, "%snoprefilt", Maildir);
 	if (access(tmpFlag, F_OK))
 		process_filter(argc, argv, hptr, filterid, &filter_no, filter_name, &header_name,
-			&comparision, keyword, folder, &bounce_action, forward, &mailing_list, mailingList);
+			&comparision, keyword, folder, &bounce_action, forward);
 
 	/*- Process User Filter */
 	snprintf(tmpFlag, MAX_BUFF, "%svfilter", Maildir);
@@ -303,7 +300,7 @@ main(int argc, char **argv)
 		myExit(argc, argv, 0, 0, 0, 0);
 	}
 	process_filter(argc, argv, hptr, emailid, &filter_no, filter_name, &header_name, &comparision,
-		keyword, folder, &bounce_action, forward, &mailing_list, mailingList);
+		keyword, folder, &bounce_action, forward);
 
 	/*- Global postfilt ID Filter */
 	if ((str = strrchr(emailid, '@')))
@@ -313,7 +310,7 @@ main(int argc, char **argv)
 	snprintf(tmpFlag, MAX_BUFF, "%snopostfilt", Maildir);
 	if (access(tmpFlag, F_OK))
 		process_filter(argc, argv, hptr, filterid, &filter_no, filter_name, &header_name,
-			&comparision, keyword, folder, &bounce_action, forward, &mailing_list, mailingList);
+			&comparision, keyword, folder, &bounce_action, forward);
 	if (interactive && verbose)
 		printf("Passed All Filters\n");
 	myExit(argc, argv, 0, 0, 0, 0);
@@ -322,12 +319,11 @@ main(int argc, char **argv)
 
 static void
 process_filter(int argc, char **argv, struct header **hptr, char *filterid, int *filter_no, char *filter_name, int *header_name,
-			   int *comparision, char *keyword, char *folder, int *bounce_action, char *forward, char ***_mailing_list,
-			   int mailingList)
+			   int *comparision, char *keyword, char *folder, int *bounce_action, char *forward)
 {
 	int             i, j, filter_opt, ret = 0, global_filter = 0, max_header_value;
 	char           *str, *real_domain;
-	char          **tmp_ptr, **address_list, **mailing_list;
+	char          **tmp_ptr, **address_list;
 	static char   **header_list;
 	struct header **ptr;
 
@@ -342,8 +338,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 	for (j = 0;;)
 	{
 		i = vfilter_select(filterid, filter_no, filter_name, header_name, comparision,
-			keyword, folder, bounce_action, forward, _mailing_list);
-		mailing_list = *_mailing_list;
+			keyword, folder, bounce_action, forward);
 		if (i == -1)
 		{
 			fprintf(stderr, "vfilter_select: failure\n");
@@ -369,17 +364,6 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 		if (!global_filter && (*comparision == 5 || *comparision == 6))
 		{
 			address_list = getAddressBook(filterid);
-			if (interactive && verbose && mailing_list && mailing_list[0] && !*(mailing_list[0]))
-			{
-				printf("    Mailing Lists\n");
-				printf("             -> Intelligent\n");
-			}
-			for (i = 0; interactive && verbose && mailing_list && mailing_list[i] && *(mailing_list[i]); i++)
-			{
-				if (!i)
-					printf("    Mailing Lists\n");
-				printf("             -> %s\n", mailing_list[i]);
-			}
 			if (interactive && verbose)
 				printf
 					("-----------------------------------------------------------------------------------------------------------------------------------------\n");
@@ -445,19 +429,6 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 							{
 								ret = 1;
 								break;
-							}
-							if (mailing_list && mailing_list[0] && !*mailing_list[0] && mailingList)
-							{
-								ret = 1;
-								break;
-							}
-							for (i = 0; mailing_list && mailing_list[i] && *(mailing_list[i]); i++)
-							{
-								if (!strncasecmp(str, mailing_list[i], MAX_PW_NAME + MAX_DOMAINNAME + 2))
-								{
-									ret = 1;
-									break;
-								}
 							}
 							if (ret)
 								break;
@@ -849,7 +820,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 2.50 $";
+	char           *revision = "$Revision: 2.51 $";
 	char           *ptr, *mda;
 	char            MaildirFolder[MAX_BUFF], XFilter[MAX_BUFF];
 	pid_t           pid;
