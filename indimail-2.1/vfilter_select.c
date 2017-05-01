@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_select.c,v $
+ * Revision 2.12  2017-05-01 20:19:56+05:30  Cprogrammer
+ * removed mailing list feature from vfilter
+ *
  * Revision 2.11  2008-09-08 09:57:37+05:30  Cprogrammer
  * removed mysql_escape
  *
@@ -38,7 +41,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_select.c,v 2.11 2008-09-08 09:57:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter_select.c,v 2.12 2017-05-01 20:19:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -48,9 +51,8 @@ static char     sccsid[] = "$Id: vfilter_select.c,v 2.11 2008-09-08 09:57:37+05:
 
 int
 vfilter_select(char *emailid, int *filter_no, char *filter_name, int *header_name, int *comparision, char *keyword, 
-	char *destination, int *bounce_action, char *forward, char ***mailing_list)
+	char *destination, int *bounce_action, char *forward)
 {
-	char           *(mlist_int[]) = {"", 0};
 	char            SqlBuf[SQL_BUF_SIZE];
 	static MYSQL_RES *res;
 	MYSQL_ROW       row;
@@ -61,7 +63,7 @@ vfilter_select(char *emailid, int *filter_no, char *filter_name, int *header_nam
 			return (-1);
 		snprintf(SqlBuf, SQL_BUF_SIZE,
 			"select high_priority filter_no, filter_name, header_name, comparision, keyword, destination, \
-			bounce_action, mailing_list from vfilter where  emailid = \"%s\" order by filter_no", emailid);
+			bounce_action from vfilter where  emailid = \"%s\" order by filter_no", emailid);
 		if (mysql_query(&mysql[1], SqlBuf))
 		{
 			if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
@@ -90,21 +92,6 @@ vfilter_select(char *emailid, int *filter_no, char *filter_name, int *header_nam
 			scopy(forward, row[6] + 1, AUTH_SIZE);
 		else
 			*forward = 0;
-		if(*comparision == 5 || *comparision == 6)
-		{
-			switch(atoi(row[7]))
-			{
-			case 0:
-				*mailing_list = 0;
-				break;
-			case 1:
-				*mailing_list = mlist_int;
-				break;
-			case 2:
-				*mailing_list = getmailingList(emailid, -1);
-				break;
-			}
-		}
 		return(0);
 	}
 	mysql_free_result(res);
