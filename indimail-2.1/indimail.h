@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.221  2017-05-01 20:20:51+05:30  Cprogrammer
+ * removed mailing list feature from vfilter
+ *
  * Revision 2.220  2017-04-28 10:19:41+05:30  Cprogrammer
  * updated timestamp columns default to CURRENT_TIMESTAMP
  *
@@ -976,7 +979,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.220 2017-04-28 10:19:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.221 2017-05-01 20:20:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -2008,13 +2011,13 @@ int             valias_delete_domain(char *);
 #ifdef VFILTER
 char          **headerList();
 int             vfilter_delete(char *, int);
-int             vfilter_display(char *, int, int *, char *, int *, int *, char *, char *, int *, char *, char ***);
+int             vfilter_display(char *, int, int *, char *, int *, int *, char *, char *, int *, char *);
 void            format_filter_display(int, int, char *, char *, int, int, char *, char *, char *, int);
 int             vfilter_filterNo(char *);
-int             vfilter_insert(char *, char *, int, int, char *, char *, int, char *, char **);
+int             vfilter_insert(char *, char *, int, int, char *, char *, int, char *);
 int             vfilter_mlistOpt(char *, int);
-int             vfilter_select(char *, int *, char *, int *, int *, char *, char *, int *, char *, char ***);
-int             vfilter_update(char *, int, int, int, char *, char *, int, char *, char **);
+int             vfilter_select(char *, int *, char *, int *, int *, char *, char *, int *, char *);
+int             vfilter_update(char *, int, int, int, char *, char *, int, char *);
 int             storeHeader(struct header ***, struct header_t *);
 char          **getmailingList(char *, int);
 int             mlist_filterupdate(char *, int);

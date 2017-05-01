@@ -88,12 +88,11 @@ getlastauth.c get_local_hostid.c get_local_ip.c get_localtime.c getmailingList.c
 get_Mplexdir.c getpeer.c GetPrefix.c GetSmtproute.c get_smtp_service_port.c \
 hmac_sha256.c hostcntrl_select.c host_in_locals.c in_crypt.c inc_dir.c inc_dir_control.c \
 init_dir_control.c inquery.c is_alias_domain.c is_already_running.c ismaildup.c \
-is_distributed_domain.c islocalif.c is_mailing_list.c isnum.c is_user_present.c \
+is_distributed_domain.c islocalif.c isnum.c is_user_present.c \
 isvalid_domain.c isvirtualdomain.c layout.c limits.c loadbalance.c LoadBMF.c \
 LoadDbinfo.c lockfile.c lockTable.c Login_Tasks.c logmysql.c lowerit.c \
 maildir_to_domain.c maildir_to_email.c MailQuotaWarn.c MakeArgs.c makeseekable.c \
 make_user_dir.c makesalt.c md5c.c mdaMysqlConnect.c mgmtpassfuncs.c mkpasswd3.c \
-mlist_delete.c mlist_filterno.c mlist_filterupdate.c mlist_insert.c mlist_update.c \
 monkey.c MoveFile.c mysql_perror.c mysql_query.c next_big_dir.c no_of_days.c \
 open_big_dir.c open_master.c parse_email.c hmac_sha512.c setuserid.c \
 parse_quota.c passwd.c passwd_policy.c pathToFilesystem.c pipe_exec.c post_handle.c \
@@ -115,7 +114,7 @@ vauth_insertaliasdomain.c vauth_munch_domain.c vauth_open.c vauthOpen_user.c \
 vauth_renamedomain.c vauth_setpw.c vauth_setquota.c vauth_updateflag.c vauth_vpasswd.c \
 vclear_open_smtp.c vclose.c vcreate_dir_control.c vdel_atrn_map.c vdel_dir_control.c \
 vdelfiles.c vdel_ip_map.c vfilter_delete.c vfilter_display.c vfilter_filterNo.c \
-vfilter_header.c vfilter_insert.c vfilter_mlistOpt.c vfilter_select.c vfilter_update.c \
+vfilter_header.c vfilter_insert.c vfilter_select.c vfilter_update.c \
 vfstab_delete.c vfstab_insert.c vfstabNew.c vfstab_select.c vfstab_status.c \
 vfstab_update.c vget_assign.c vgetent.c vget_ip_map.c vget_lastauth.c vgetpasswd.c \
 vget_real_domain.c vhostid_delete.c vhostid_insert.c vhostid_select.c vhostid_update.c \
@@ -507,7 +506,6 @@ is_alias_domain.lo: indimail.h config.h
 is_distributed_domain.lo: indimail.h config.h
 isvalid_domain.lo: indimail.h config.h
 islocalif.lo: indimail.h config.h
-is_mailing_list.lo: indimail.h config.h
 is_user_present.lo: indimail.h config.h
 isvirtualdomain.lo: indimail.h config.h
 loadbalance.lo: indimail.h config.h
@@ -521,11 +519,6 @@ md5c.lo: md5.h config.h
 mdaMysqlConnect.lo: indimail.h config.h
 mgmtpassfuncs.lo: indimail.h config.h
 mkpasswd3.lo: indimail.h config.h
-mlist_filterupdate.lo: indimail.h config.h
-mlist_filterno.lo: indimail.h config.h
-mlist_insert.lo: indimail.h config.h
-mlist_update.lo: indimail.h config.h
-mlist_delete.lo: indimail.h config.h
 monkey.lo: indimail.h config.h
 MoveFile.lo: indimail.h config.h
 mysql_perror.lo: indimail.h config.h
@@ -684,7 +677,6 @@ vfilter_display.lo: indimail.h config.h
 vfilter_header.lo: indimail.h config.h
 vfilter_filterNo.lo: indimail.h config.h
 vfilter_insert.lo: indimail.h config.h
-vfilter_mlistOpt.lo: indimail.h config.h
 vfilter_select.lo: indimail.h config.h
 vfilter_update.lo: indimail.h config.h
 vfstabNew.lo: indimail.h config.h
