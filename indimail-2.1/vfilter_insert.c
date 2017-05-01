@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_insert.c,v $
+ * Revision 2.14  2017-05-01 20:18:52+05:30  Cprogrammer
+ * removed mailing list feature from vfilter
+ *
  * Revision 2.13  2008-09-08 09:57:20+05:30  Cprogrammer
  * removed mysql_escape
  *
@@ -45,7 +48,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_insert.c,v 2.13 2008-09-08 09:57:20+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter_insert.c,v 2.14 2017-05-01 20:18:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -55,7 +58,7 @@ static char     sccsid[] = "$Id: vfilter_insert.c,v 2.13 2008-09-08 09:57:20+05:
 
 int
 vfilter_insert(char *emailid, char *filter_name, int header_name, int comparision, char *keyword, char *folder, int bounce_action, 
-	char *faddr, char **mailing_list)
+	char *faddr)
 {
 	int             err, filter_no;
 	char            SqlBuf[SQL_BUF_SIZE];
@@ -71,11 +74,10 @@ vfilter_insert(char *emailid, char *filter_name, int header_name, int comparisio
 		return(-1);
 	}
 	snprintf(SqlBuf, sizeof(SqlBuf), "insert low_priority into vfilter \
-			(emailid, filter_no, filter_name, header_name, comparision, keyword, destination, bounce_action, mailing_list) \
-			values (\"%s\", %d, \"%s\", %d, %d, \"%s\", \"%s\", \"%d%s\", %d)",
+			(emailid, filter_no, filter_name, header_name, comparision, keyword, destination, bounce_action) \
+			values (\"%s\", %d, \"%s\", %d, %d, \"%s\", \"%s\", \"%d%s\")",
 			emailid, filter_no, filter_name, header_name, comparision, keyword, folder, bounce_action,
-			(bounce_action == 2 || bounce_action == 3) ? faddr : "",
-			(mailing_list  && *mailing_list) ? (**mailing_list ? 2 : 1) : 0);
+			(bounce_action == 2 || bounce_action == 3) ? faddr : "");
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
 		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
@@ -97,14 +99,6 @@ vfilter_insert(char *emailid, char *filter_name, int header_name, int comparisio
 	{
 		mysql_perror("mysql_affected_rows");
 		return(-1);
-	}
-	if(mailing_list && *mailing_list && **mailing_list)
-	{
-		if(mlist_insert(emailid, filter_no, mailing_list))
-			fprintf(stderr, "Failed to insert mailing list\n");
-		else
-		if(mlist_filterupdate(emailid, filter_no))
-			fprintf(stderr, "Failed to update filter_no in mailing list\n");
 	}
 	if(!verbose)
 		return (err > 0 ? 0 : 1);
