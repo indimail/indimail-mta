@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.102  2017-05-02 10:21:48+05:30  Cprogrammer
+ * fixed location of tlsclientmethod control file
+ *
  * Revision 1.101  2017-04-10 20:44:39+05:30  Cprogrammer
  * use SMTPS if SMTPS environment variable is set
  * added documentation and better variable name for type
@@ -1387,10 +1390,9 @@ tls_init()
 	int             method = 4; /* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
 	int             method_fail = 1;
 
-	if (!certdir && !(certdir = env_get("CERTDIR")))
-		certdir = auto_control;
-
-	if (!stralloc_copys(&tlsFilename, certdir))
+	if (!controldir && !(controldir = env_get("CONTROLDIR")))
+		controldir = auto_control;
+	if (!stralloc_copys(&tlsFilename, controldir))
 		temp_nomem();
 	if (!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16))
 		temp_nomem();
@@ -1412,6 +1414,8 @@ tls_init()
 	else
 	if (str_equal(ssl_option.s, "TLSv1_2"))
 		method = 6;
+	if (!certdir && !(certdir = env_get("CERTDIR")))
+		certdir = auto_control;
 	if (!stralloc_copys(&tlsFilename, certdir))
 		temp_nomem();
 	if (!stralloc_catb(&tlsFilename, "/clientcert.pem", 15))
@@ -3241,7 +3245,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.101 2017-04-10 20:44:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.102 2017-05-02 10:21:48+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
