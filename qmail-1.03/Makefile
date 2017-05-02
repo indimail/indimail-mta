@@ -3027,7 +3027,7 @@ it man leapsecs.dat conf-sysconfdir perm_list
 	if test ! -d $(DESTDIR)"`head -1 conf-sysconfdir`" ; then \
 		mkdir -p $(DESTDIR)"`head -1 conf-sysconfdir`" ; \
 	fi ;
-	./setup -d $(DESTDIR) $(QMAILDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list && \
+	./setup -d "$(DESTDIR)" $(QMAILDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list && \
 	cp perm_list $(DESTDIR)"`head -1 conf-sysconfdir`"
 
 sgetopt.o: \
