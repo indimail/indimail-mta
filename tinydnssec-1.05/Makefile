@@ -905,7 +905,7 @@ taia.h iopause.h alloc.h str.h edns0.h conf-dnssec
 
 install: \
 it setup
-	./setup -d $(DESTDIR) -m /usr/share/man
+	./setup -d "$(DESTDIR)" -m /usr/share/man
 
 sgetopt.o: \
 compile sgetopt.c buffer.h sgetopt.h subgetopt.h subgetopt.h
