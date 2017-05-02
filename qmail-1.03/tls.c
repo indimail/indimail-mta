@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.6  2017-05-02 16:40:18+05:30  Cprogrammer
+ * avoid potential SIGSEGV
+ *
  * Revision 1.5  2008-06-01 15:33:39+05:30  Cprogrammer
  * new function ssl_error_str() which does not use the strerror() function
  *
@@ -46,7 +49,7 @@ ssl_error()
 {
 	int             r = ERR_get_error();
 	if (!r)
-		return NULL;
+		return "unknown error";
 	SSL_load_error_strings();
 	return ERR_error_string(r, NULL);
 }
@@ -59,7 +62,7 @@ ssl_error_str()
 	if (err)
 		return err;
 	if (!errno)
-		return 0;
+		return "unknown error";
 	return (errno == error_timeout) ? "timed out" : error_str(errno);
 }
 
@@ -78,7 +81,7 @@ ssl_strerror()
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 1.5 2008-06-01 15:33:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tls.c,v 1.6 2017-05-02 16:40:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
