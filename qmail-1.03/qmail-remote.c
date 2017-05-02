@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.103  2017-05-02 16:39:39+05:30  Cprogrammer
+ * added SSL_CTX_free()
+ *
  * Revision 1.102  2017-05-02 10:21:48+05:30  Cprogrammer
  * fixed location of tlsclientmethod control file
  *
@@ -1514,6 +1517,7 @@ tls_init()
 		if (!smtps && !needtlsauth)
 		{
 			alloc_free(tlsFilename.s);
+			SSL_CTX_free(ctx);
 			return 0;
 		}
 		t = (char *) ssl_error();
@@ -1521,6 +1525,7 @@ tls_init()
 			temp_nomem();
 		if (!stralloc_cats(&smtptext, t))
 			temp_nomem();
+		SSL_CTX_free(ctx);
 		tls_quit("ZTLS error initializing ctx: ", t, 0, 0, 0);
 	}
 
@@ -1529,7 +1534,6 @@ tls_init()
 		if (!SSL_CTX_load_verify_locations(ctx, tlsFilename.s, NULL))
 		{
 			t = (char *) ssl_error();
-			SSL_CTX_free(ctx);
 			if (!stralloc_copyb(&smtptext, "TLS unable to load ", 19))
 				temp_nomem();
 			if (!stralloc_cats(&smtptext, tlsFilename.s))
@@ -1538,6 +1542,7 @@ tls_init()
 				temp_nomem();
 			if (!stralloc_cats(&smtptext, t))
 				temp_nomem();
+			SSL_CTX_free(ctx);
 			tls_quit("ZTLS unable to load ", tlsFilename.s, ": ", t, 0);
 		}
 		/*
@@ -1562,16 +1567,17 @@ tls_init()
 	if (!myssl)
 	{
 		t = (char *) ssl_error();
-		SSL_CTX_free(ctx);
 		if (!smtps && !needtlsauth)
 		{
 			alloc_free(tlsFilename.s);
+			SSL_CTX_free(ctx);
 			return 0;
 		}
 		if (!stralloc_copyb(&smtptext, "TLS error initializing ssl: ", 28))
 			temp_nomem();
 		if (!stralloc_cats(&smtptext, t))
 			temp_nomem();
+		SSL_CTX_free(ctx);
 		tls_quit("ZTLS error initializing ssl: ", t, 0, 0, 0);
 	} else
 		SSL_CTX_free(ctx);
@@ -3245,7 +3251,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.102 2017-05-02 10:21:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.103 2017-05-02 16:39:39+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
