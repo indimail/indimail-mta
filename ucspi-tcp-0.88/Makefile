@@ -573,7 +573,7 @@ distclean: clean
 	/bin/rm -f conf-home
 
 install: it setup
-	./setup -d $(DESTDIR) -s "`head -1 conf-shared`" $(INDIDIR)
+	./setup -d "$(DESTDIR)" -s "`head -1 conf-shared`" $(INDIDIR)
 
 sgetopt.o: \
 compile sgetopt.c buffer.h sgetopt.h subgetopt.h subgetopt.h
