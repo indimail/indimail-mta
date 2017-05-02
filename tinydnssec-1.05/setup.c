@@ -270,6 +270,8 @@ int main(int argc, char **argv)
 		}
   }
 
+  if (destdir && !*destdir)
+	destdir = 0;
   umask(077);
   if (optind + 1 != argc)
     hier(0);
