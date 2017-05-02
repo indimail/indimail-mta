@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.29  2017-05-02 11:24:52+05:30  Cprogrammer
+ * fix for destdir
+ *
  * Revision 1.28  2017-01-08 19:04:26+05:30  Cprogrammer
  * added option to skip devel man pages
  *
@@ -538,6 +541,8 @@ main(int argc, char **argv)
 			strerr_die1x(100, usage);
 		}
 	}
+	if (destdir && !*destdir)
+		destdir = 0;
 	if (env_get("FAKED_MODE")) { /*-fix for debian generation */
 		my_uid = 1;
 		my_gid = 1;
@@ -571,7 +576,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.28 2017-01-08 19:04:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.29 2017-05-02 11:24:52+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
