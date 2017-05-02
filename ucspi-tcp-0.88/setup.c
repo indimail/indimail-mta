@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.7  2017-05-02 11:26:07+05:30  Cprogrammer
+ * fix for destdir
+ *
  * Revision 1.6  2017-04-13 00:41:00+05:30  Cprogrammer
  * fixed bug with copying docs to doc subdir
  *
@@ -399,6 +402,8 @@ main(int argc, char **argv)
 			strerr_die1x(100, usage);
 		}
 	}
+	if (destdir && !*destdir)
+		destdir = 0;
 	my_uid = getuid();
 	if ((fdsourcedir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
