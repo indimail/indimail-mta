@@ -1,0 +1,26 @@
+   Link: Courier Unicode Library (start)
+   Link: Courier Unicode Library (parent)
+   Link: Courier Unicode Library (previous)
+   Link: Manual pages (next)
+
+                             Installation and usage
+   Prev                                                                  Next
+
+   --------------------------------------------------------------------------
+
+
+Installation and usage
+
+   Download the current version of the library from
+   http://www.courier-mta.org/download.html#unicode. After unpacking the
+   tarball, run the configure script, which takes the usual options, followed
+   by make, then make install.
+
+   To use the library, “#include <courier-unicode.h>” and link with
+   -lunicode. The starting point is courier-unicode(7). Refer to the included
+   manual pages, and the HTML version of the man pages for more information.
+
+   --------------------------------------------------------------------------
+
+   Prev                                                                  Next
+   Courier Unicode Library                  Home                 Manual pages
