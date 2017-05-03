@@ -404,6 +404,11 @@ Release 1.1 Start 11/04/2017
 7.  remove tinydns, dnscache service on uninstall
 8.  shutdown tinydns, dnsccache service on uninstall
 9.  added compile time option to add dnssec support
+10. tinydnssec - added SRV patch
 10. adds a native SRV type to tinydns-data
 11. makes axfr-get decompose SRV and PTR records and write them out in native format
 12. added curvedns
+13. fixed typo in debian/postrm.in
+14. (rpm, debian) - create tinydnssec, dqcache, curvedns service config
+15. added dqcache-conf, curvedns-conf programs
+16. added compile time option to add dnssec, curvedns support

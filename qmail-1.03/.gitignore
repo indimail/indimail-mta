@@ -5,7 +5,6 @@ debian/indimail-mta.prerm
 debian/indimail-mta.postinst
 debian/indimail-mta.preinst
 auto_libexec.o
-doc/CREDITS
 qmail-srs.5
 indimail-mta.fc
 perm_list
@@ -537,8 +536,6 @@ taia_tai.o
 nowutc
 yearcal
 yearcal.o
-debian/changelog
 debian/_service
 cronlist
 indimail-mta.spec
-doc/ChangeLog
