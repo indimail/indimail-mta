@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.7  2017-05-03 09:33:07+05:30  Cprogrammer
+ * refactored code. Added safety check to ensure cleanq starts in dir owned by qscand
+ *
  * Revision 1.6  2014-07-27 15:16:18+05:30  Cprogrammer
  * change to qscand uid if run through non qscand user
  *
@@ -74,56 +77,39 @@ warn_file(const char *d, const char *w)
 }
 
 void
-direrror(void)
-{
-	strerr_warn2(FATAL, "unable to read directory: ", &strerr_sys);
-}
-
-void
 remove(const char *d)
 {
 	DIR            *dir = 0;
 	struct dirent  *f = 0;
-	int             err = 0;
 
 	/*- Change directories and open */
-	if (chdir(d) == -1)
-	{
+	if (chdir(d) == -1) {
 		strerr_warn4(WARNING, "unable to chdir to ", (char *) d, ": ", &strerr_sys);
 		return;
 	}
-	if (chdir("work") == -1)
-	{
+	if (chdir("work") == -1) {
 		/*- Warn admin */
 		strerr_warn4(WARNING, "unable to chdir to ", (char *) d, "/work: ", &strerr_sys);
 		chdir(".."); /*- get out!  */
-		rmdir(d); /*- no harm in trying */
+		if (rmdir(d)) /*- no harm in trying */
+			strerr_warn4(WARNING, "unable to remove directory ", (char *) d, ": ", &strerr_sys);
 		return;
 	}
-	dir = opendir(".");
-	if (!dir)
-	{
-		direrror();
+	if (!(dir = opendir("."))) {
+		strerr_warn2(FATAL, "unable to read directory 'work': ", &strerr_sys);
 		goto cdup;
 	}
 
 	/*- Scan it */
-	for (;;)
-	{
-		errno = 0;
-		f = readdir(dir);
-		err = errno;
+	for (;;) {
+		if (!(f = readdir(dir)))
+			strerr_warn4(WARNING, "unable to read directory ", (char *) d, "/work: ", &strerr_sys);
 		if (!f)
 			break;
 		if (!str_diff(f->d_name, ".") || !str_diff(f->d_name, ".."))
 			continue;
 		if (unlink(f->d_name) == -1)
-			strerr_warn4(WARNING, "unable to delete ", f->d_name, ": ", &strerr_sys);
-	}
-	if (err)
-	{
-		direrror();
-		strerr_warn4(WARNING, "unable to read directory ", (char *) d, ": ", &strerr_sys);
+			strerr_warn6(WARNING, "unable to delete ", (char *) d, "/", f->d_name, ": ", &strerr_sys);
 	}
 	closedir(dir);
 cdup:
@@ -155,26 +141,23 @@ tryclean(const char *d)
 	if (!str_diff((char *) d, ".") || !str_diff((char *) d, ".."))
 		return;
 	/*- 2 */
-	if (stat(d, &st) == -1)
-	{
+	if (stat(d, &st) == -1) {
 		strerr_warn4(WARNING, "unable to stat ", (char *) d, ": ", &strerr_sys);
 		return;
 	}
-	if ((st.st_mode & S_IFMT) != S_IFDIR)
-	{
+	if ((st.st_mode & S_IFMT) != S_IFDIR) {
 		warn_file(d, "not a directory. Deleting...");
-		unlink(d); /*- If it fails, oh well.  */
+		if (unlink(d)) /*- If it fails, oh well.  */
+			strerr_warn4(WARNING, "unlink: ", (char *) d, ": ", &strerr_sys);
 		return;
 	}
 	/*- 3 */
-	if (d[0] != '@')
-	{
+	if (d[0] != '@') {
 		warn_file(d, "name doesn't start with '@'");
 		return;
 	}
 	/*- 4 */
-	if (!(st.st_mode & S_ISVTX)) /*- not sticky */
-	{
+	if (!(st.st_mode & S_ISVTX)) { /*- not sticky */
 		log_file("deleting: ", d, "not sticky");
 		remove(d);
 		return;
@@ -197,11 +180,11 @@ main(int argc, char **argv)
 	direntry       *d;
 	int             opt;
 	uid_t           uid;
+	struct stat     st;
 
 	if (uidinit(0) == -1)
 		_exit(67);
-	while ((opt = getopt(argc, argv, "l")) != -1)
-	{
+	while ((opt = getopt(argc, argv, "l")) != -1) {
 		switch (opt)
 		{
 		case 'l':
@@ -211,49 +194,44 @@ main(int argc, char **argv)
 			die_usage();
 		}
 	}
-	if (flaglog)
-	{
+	if (flaglog) {
 		my_puts("cleanq starting\n");
 		if (substdio_flush(&ss1) == -1)
 			_exit(111);
 	}
 	uid = getuid();
-	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc))
-	{
+	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc)) {
 		if (flaglog)
 			strerr_die2sys(111, FATAL, "setreuid failed: ");
 		_exit(111);
 	}
+	if (stat(".", &st) == -1) {
+		strerr_warn2(WARNING, "unable to stat '.'", &strerr_sys);
+		_exit(111);
+	}
+	if (st.st_uid != auto_uidc) {
+		strerr_warn2(WARNING, "current directory not owned by qscand", 0);
+		_exit(111);
+	}
 	/*- Open the current directory */
-	dir = opendir(".");
-	if (!dir)
-	{
-		direrror();
+	if (!(dir = opendir("."))) {
+		strerr_warn2(FATAL, "unable to read directory '.': ", &strerr_sys);
 		_exit(1);
 	}
 	/*- Scan it */
-	for (;;)
-	{
-		errno = 0;
-		d = readdir(dir);
-		if (!d)
+	for (;;) {
+		if (!(d = readdir(dir)))
 			break;
 		tryclean(d->d_name);
 	}
-	if (errno)
-	{
-		direrror();
-		closedir(dir);
-		_exit(1);
-	}
 	closedir(dir);
-	_exit(0);
+	_exit(errno ? 111 : 0);
 }
 
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.6 2014-07-27 15:16:18+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.7 2017-05-03 09:33:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
