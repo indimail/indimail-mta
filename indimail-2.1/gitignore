@@ -1,9 +1,9 @@
 tmp
+indimail-release
+vmoduser.1
 indimail.mod
 *_handle
 ChangeLog
-doc/CREDITS
-doc/ChangeLog
 indimail.pp
 indimail.fc
 indisub.c
@@ -20,7 +20,6 @@ README
 Quick-INSTALL
 README-CLUSTER
 RELEASE-Notes
-RELEASE-Notes.in
 bogofilter-qfe
 controlsync
 create_services
@@ -79,14 +78,12 @@ vrenameuser.1
 vpasswd.1
 vmoveuser.1
 vcfilter.1
-RELEASE-Notes.in
 overquota.sh
 doc/ChangeLog
 login_tasks.3
 authgeneric
 debian/*.ex
 debian/changelog
-debian/changelog.in
 debian/files
 debian/indimail.cron.d
 debian/indimail.debhelper.log
@@ -120,7 +117,6 @@ vtable
 indimail-permissions.easy
 indimail-permissions.secure
 indimail-permissions.paranoid
-doc/RELEASE-Notes.in
 libindimail.pc
 obs.mk
 usr.sbin.clamd

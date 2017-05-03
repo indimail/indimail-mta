@@ -18,10 +18,8 @@ altermime-*/missing
 altermime-*/stamp-h1
 bogofilter-*/.deps/
 bogofilter-*/.gitignore
-bogofilter-*/INSTALL
 bogofilter-*/Makefile
 bogofilter-*/Makefile.in
-bogofilter-*/README
 bogofilter-*/aclocal.m4
 bogofilter-*/compile
 bogofilter-*/config.guess
@@ -62,10 +60,7 @@ bogofilter-*/trio/README
 courier-imap-*/courier-imap.spec
 courier-imap-*/m4
 courier-imap-*/.gitignore
-courier-imap-*/COPYING
-courier-imap-*/INSTALL
 courier-imap-*/Makefile.in
-courier-imap-*/README
 courier-imap-*/aclocal.m4
 courier-imap-*/compile
 courier-imap-*/config.guess
@@ -78,10 +73,7 @@ courier-imap-*/libs/makedat/Makefile.in
 courier-imap-*/libs/makedat/aclocal.m4
 courier-imap-*/libs/makedat/config.h.in
 courier-imap-*/libs/makedat/configure
-courier-imap-*/libs/authlib/COPYING
-courier-imap-*/libs/authlib/INSTALL
 courier-imap-*/libs/authlib/Makefile.in
-courier-imap-*/libs/authlib/README
 courier-imap-*/libs/authlib/aclocal.m4
 courier-imap-*/libs/authlib/config.h.in
 courier-imap-*/libs/authlib/configure
@@ -94,7 +86,6 @@ courier-imap-*/libs/gdbmobj/aclocal.m4
 courier-imap-*/libs/gdbmobj/config.h.in
 courier-imap-*/libs/gdbmobj/configure
 courier-imap-*/libs/imap/Makefile.in
-courier-imap-*/libs/imap/README
 courier-imap-*/libs/imap/aclocal.m4
 courier-imap-*/libs/imap/config.h.in
 courier-imap-*/libs/imap/configure
@@ -106,7 +97,6 @@ courier-imap-*/libs/liblock/Makefile.in
 courier-imap-*/libs/liblock/aclocal.m4
 courier-imap-*/libs/liblock/config.h.in
 courier-imap-*/libs/liblock/configure
-courier-imap-*/libs/maildir/INSTALL
 courier-imap-*/libs/maildir/Makefile.in
 courier-imap-*/libs/maildir/aclocal.m4
 courier-imap-*/libs/maildir/config.h.in
@@ -148,10 +138,7 @@ courier-imap-*/libs/tcpd/Makefile.in
 courier-imap-*/libs/tcpd/aclocal.m4
 courier-imap-*/libs/tcpd/config.h.in
 courier-imap-*/libs/tcpd/configure
-courier-imap-*/libs/unicode/COPYING
-courier-imap-*/libs/unicode/INSTALL
 courier-imap-*/libs/unicode/Makefile.in
-courier-imap-*/libs/unicode/README
 courier-imap-*/libs/unicode/aclocal.m4
 courier-imap-*/libs/unicode/compile
 courier-imap-*/libs/unicode/config.guess
@@ -172,11 +159,8 @@ cscope.out
 cscope.po.out
 dist
 fetchmail-*/.deps/
-fetchmail-*/COPYING
-fetchmail-*/INSTALL
 fetchmail-*/Makefile
 fetchmail-*/Makefile.in
-fetchmail-*/README
 fetchmail-*/aclocal.m4
 fetchmail-*/config.guess
 fetchmail-*/config.h
@@ -314,11 +298,8 @@ libdkim-*/m4/
 libdkim-*/missing
 libdkim-*/stamp-h1
 libsrs2-*/.gitignore
-libsrs2-*/COPYING
-libsrs2-*/INSTALL
 libsrs2-*/Makefile
 libsrs2-*/Makefile.in
-libsrs2-*/README
 libsrs2-*/aclocal.m4
 libsrs2-*/compile
 libsrs2-*/config.guess
@@ -346,11 +327,8 @@ libsrs2-*/tools/Makefile
 libsrs2-*/tools/Makefile.in
 logalert-*/.deps/
 logalert-*/.gitignore
-logalert-*/COPYING
-logalert-*/INSTALL
 logalert-*/Makefile
 logalert-*/Makefile.in
-logalert-*/README
 logalert-*/aclocal.m4
 logalert-*/compile
 logalert-*/config.guess
@@ -416,9 +394,7 @@ pam-multi-*/m4/
 pam-multi-*/stamp-h1
 private/
 procmail-*/.gitignore
-procmail-*/COPYING
 procmail-*/Makefile.in
-procmail-*/README
 procmail-*/aclocal.m4
 procmail-*/config.guess
 procmail-*/config.h.in
