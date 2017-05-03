@@ -1,0 +1,2364 @@
+* Wed May 03 2017 mbhangui@gmail.com @version@-@release@
+Release 2.1 Start 16/03/2017
+16/03/2017
+1.   quoted svctool arguments and save install time arguments in variables/.options
+     file
+18/03/2017
+2.   fixed lang and html directory location to /usr/share/iwebadmin
+3.   iwebadmin (user.c) - vsetuserquota returns current quota usage and -1 in case of error.
+     iwebadmin should treat only -1 as error.
+19/03/2017
+4.   Added roundcube plugins, (sauserprefs, markasjunk2) - bogofilter spam
+     training, (iwebadmin) - for setting autoresponder and passwd change
+21/03/2017
+5.   update_tmprsadh, svctool, spec files, debian postinst, postrm - updated certificate
+     location to sysconfdir/certs
+6.   qmail-smtpd, qmail-remote - Env variable CERTDIR to override
+     /etc/indimail/control for certificate location
+7.   Permissions of supervise directory changed to onwer root:indimail 750
+    for services using MAXDAEMONS
+27/03/2017
+8.   renamed qmail-spamfifo service to qmail-logfifo
+9.   Changed inquery path. Added infifo argument for smtp/pop3/imap creation in
+10.  Added FIFODIR env variables for infifo location (inlookup, smtp/pop3/imap
+     services)
+     svctool, spec file, debian postinst, create_services
+11.  Added back AutoReqProv in spec file to provide shared libraries
+29/03/2017
+12.  Upgraded to courier-imap-4.17.3
+13.  added upgrade script upgrade.sh, local_upgrade.sh
+14.  update_tmprsadh - added rsa2048.pem, dh2048.pem
+30/03/2017
+15.  ucspi-tcp - control_readline() did not use CONTROLDIR. Caused problem with
+     qmail_smtpd.so plugin which used the same symbol and was unable to load
+     control files.
+16.  fixed conf_dir variable getting clobbered by qmail-logfifo service creation.
+17.  create tlsservermethod control file in svctool --config=qmail
+18.  Increased compile time default quota for users to 500 mb from earlier
+     value of 5 mb
+19.  renamed functions in ucspi-tcp (rblsmtpd.so) to avoid duplicate symbols with
+     qmail_smtpd.so
+20.  use RTLD_DEEPBIND (if present) in load_shared.c to avoid duplicate symbols
+     when loading multiple shared libs
+31/03/2017
+21.  fixed paths in crontab file
+22.  set DEFAULT_DOMAIN in qmail-send.25/variables as the hostname to handle
+     double bounces better
+23   qmail-todo, qmail-send - display null email address as <> in log_stat()
+24.  svctool --config=qmail - set envnoathost, defaulthost = hostname 
+25.  local_upgrade.sh - fix DEFAULT_HOST, QMAILDEFAULTHOST, envnoathost,
+     defaulthost settings
+01/04/2017
+26.  svctool - MRTG graphs, added --mrtg option
+27.  indimail.mrtg.cfg - New graphs added
+28.  qmailmrtg7.c - added debug option
+29.  indimai.spec - added mrtg in Requires
+30.  mrtg service moved to /service/mrtg from cronlist
+03/04/2017
+31.  added error logging for iwebadmin
+32.  local_upgrade.sh added FIFODIR env variable
+33.  iwebadmin.h - Increaed MAX_LANG_STR length
+34.  util.c - undefine SORT_TABLE_ENTRIES
+35.  iwebadmin - Added Content-type, Content-transfer-encoding headers to lang/en
+36.  iwebadmin - Reserved language template file codes 400 through 450 for custom autoresponder headers
+37.  iwebadmin - Added url for indimail MRTG graphs
+38.  iwebadmin - templace.c - skip custom headers
+39.  iwebadmin - maillinglist.c - changes for ezmlm-idx-7.x
+40.  iwebadmin - mailinglist.c - fixed syntax error when compiling on host with
+     ezmlm-idx
+41.  indimail.te - added rename cabability for iwebadmin on var_t
+05/04/2017
+42.  replace dlopen() with dlmopen to keep tcpserver namespace private
+43.  added dlnamespace for using dlmopen()
+44.  tcpserver.c, prot.c - Changed data types for uid, gid to uid_t, gid_t
+45.  Bug with dlmopen(), glibc wrappers for setgroups, setgid, setuid - use syscall for setgroups, setgid, setuid
+46.  tcpserver - execute tcpserver_plugin after shedding root privileges
+47.  indimail.postinst.in, indimail.spec, local_upgrade.sh,
+48.  iwebadmin.spec - added ezmlm-idx > 7.2 in Requires:
+49.  indimail-mta.postinst.in, indimail-mta.spec - upgraded softmem to 536870912
+06/04/2017
+50.  svctool - Fixed couriersslcache path
+51.  dlnamespace.c - added comments, replace back ':' character removed before
+     string comparision
+52.  qmail-remote.c - fixed tls_quit() function. Avoid mixed usage of
+     tls_quit() and quit() functions
+09/04/2017
+53.  debian - replaced tcl8.4-dev with tcl-dev in indium dsc file
+54.  debian - replaced mutiple dsc files with single dsc file
+55.  debian - use dh_install in rules to fix broken build bogofilter-wordlist,
+     indium, iwebadmin
+10/04/2017
+56.  qmail-remote.c, rrt.c - renamed ONTRANSIENT_REMOTE to ONTEMPORARY_REMOTE
+57.  qmail-rspawn.c Unset QMAILLOCAL in parent & not in child after vfork
+58.  perms of /etc/indimail and subdirectory changed to 2775
+59.  qmail-remote.c - use SMTPS if env variable SMTPS is set
+11/04/2017
+60.  qmail-queue.c - fixed envheader. variable x renamed to field_len and
+     initialized to prevent skipping.
+61.  tinydnssec-1.05 package added. Default installation provides caching dns
+62.  added selinux rules for tinydnssec
+63.  fixed sysconfdir and sysconfdir subdir permissions
+12/04/2017
+64.  use #ifdef HASDLMOPEN to use dlmopen() if present
+65.  tcpserver_plugin.c - use PLUGINn_DIR variable to change directory independent of PLUGINn_init
+     env variable
+66.  create queue base directory in setup
+67.  report programs moved to libexecdir
+16/04/2017
+68.  surblqueue - fixed qmail-multi path
+69.  fixed search using hsearch in qmail-greyd.c
+70.  tcpserver - load_shared.c - print lmid only during reload
+71.  moved qmail-greyd, greydaemon, surblfilter, surbqueue to /usr/sbin
+17/04/2017
+72.  use lockfile .svlock in service directory to prevent multiple svscan
+     to run on a service directory
+21/04/2017
+73.  Major cleanup of indimail.spec, indimail-mta.spec. Removed deletion of
+     files and leave it for rpm -e to do its job
+22/04/2017
+74.  dlnamespace.c, tcpserver_plugin.c, load_shared.c, pathexec_env.c added code
+     to get namespace of shared libraries using env variables / envp variable.
+     use pathexec_dl to execute loaded function 
+23/04/2017
+75.  qmailctl.sh - added multilog rotate command
+76.  indimail-mta - install crontab entries for indimail-mta
+77.  indimail debian - install crontab entries for indimail
+78.  qmail-smtpd - Updated documentation on LOGFILTER
+79.  qmail-smtpd - renamed LOGFILTER_FD to LOGFD
+27/04/2017
+80.  added dqcache, dnscurve
+81.  indimail, indimail-mta - shutdown indimail service in preun
+82.  tinydnssec - fixed typo in debian/postrm.in
+83.  tinydnssec (rpm, debian) - create tinydnssec, dqcache, curvedns service config
+84.  tinydnssec - added dqcache-conf, curvedns-conf programs
+85.  tinydnssec - added SRV patch
+86.  indimail, indimail-mta (rpm, debian) - use svok to figure out if service is up
+87.  indimail - debian scripts cleanup
+88.  svctool - fixed inverted cname-lookup
+89.  indimail, indimail-mta (rpm, debian) - removed duplicate calls to shutdown indimail service
+90.  tinydnssec - added compile time option to add dnssec, dnscurve support
+81.  indimail, indimail-mta (rpm, debian) - use sed to edit inittab
+92.  indimail Makefile.am - removed useless linking if libindimail with other
+     libs
+93.  indimail-mta - added svctool man page
+94.  indimail-mta - fixed sysconfdir variable in debian scripts
+95.  OSx indimail.plist - fixed svscanboot path
+28/04/2017
+96.  indimail.h - changed timestamp columns default to CURRENT_TIMESTAMP
+97.  deldomain.c - fixed incorrect handling of return status from del_control()
+98.  findhost.c - fixed recursive loop in findhost.c if hostcntrl was empty
+99.  vdeldomain.c - fixed deletion of mcdinfo
+100. vauth_deldomain.c - remove alias entries added by vadddomain for a clustered domain
+01/05/2017
+101. made --enable-large-site=y and --enable-user-cluster=y incompatible
+102. removed mailing list code from vfilter
+03/05/2017
+103. fixed DESTDIR in qmail-1.03, ucspi-tcp-1.03 Makefile, setup.c
+104. fixed tlsclientmethod path in qmail-remote
+106. cleanq.c - refactored code. added checks for safety
+
+* Thu Jan 21 2016 mbhangui@gmail.com @version@-@release@
+Release 2.0 Start 21/01/2016
+21/01/2016
+1.  vdominfo.c - Removed compiler warning for fscanf
+27/01/2016
+2.  maildirquota specification for -q option to vadduser
+28/01/2016
+3.  Added leapsecs program, leapsecs.dat
+4.  Added yearcal, nowutc programs
+29/01/2016
+5.  prefix queue name in qmail-send, qmail-todo logs
+6.  BUG - qmail-queue.c: fixed missing null character in extraqueue when EXTRAQUEUE is
+    defined
+01/02/2016
+7.  dkim.c - Use basename of private key as the selector in absense of -y option
+08/02/2016
+8.  spawn.c - add environment variable MESSID (queue filename)
+9.  str_end.c - added str_end() function
+31/03/2016
+10. qmail-send.c, qsutil.c, sig.c, qmail-daemon.c - flush qmail-send logs only on line completion
+04/04/2016
+11. various fixes for debian packaging (lib64, devel, libindimail)
+12. renamed package indimail-shared to libindimail
+13. hier.c - create ratelimit directory
+10/04/2016
+14. qmail-greyd.c - added missing flush statement to flush logs
+15. greylist.c - fixed IPV6 address for connect, fixed incorrect formating of context filename,
+    fixed buffer overflow with ip_str
+16. ip.c - fixed mapped ipv4 address in ip6_scan()
+17. smtpd.c - pass ip6 address to greylist()
+15/04/2016
+18. ipv6 version of udplogger
+19. greylist.c - create ipv4 socket if ipv6 stack is disabled (reported by Andrzej Boreczko)
+20. qmail-greyd.c - set noipv6 if LIBC_HAS_IP6 is not defined
+21. fixed debian mysql config, database creation in postinst.
+17/04/2016
+22. svctool - Another attempt to fix installation issues with Oracle's MySQL
+18/04/2016
+23. udpclient - added -r, -t option to allow reading responses from server
+24. svctool - added option to add udplogger service
+25. debian - create apparmor profile for clamav, freshclam, mysql
+26. create udplogger service during rpm/deb installation
+21/04/2016
+27. created selinux rules for iwebadmin to work with apache2
+22/04/2016
+28. iwebadmin fix - Changed /tmp/mysql.sock to /var/lib/mysql/mysql.sock (for apache2 using a
+    private /tmp directory).
+29/04/2016
+29. Fix MySQL Db creation for missing password filed in mysql user table
+30. Chose MySQL unix domain socket path (/var/lib/mysql/mysql.sock or /var/run/mysqld/mysqld.sock)
+03/05/2016
+31. qmailctl.sh - BUG, replaced failure with $fail
+04/05/2016
+32. initsvc.c - fix for debian8/ubuntu15 migration to systemd from upstart
+33. svctool - fixes for debian8/ubuntu15 migration to systemd from upstart
+34. qmail.spec, indimail.spec, indimail, indimail-mta postinst script fixes
+    for debian8/ubuntu15 migration to systemd from upstart
+35. svctool - create /var/run/mysqld with mysql:mysql permissions in mysql
+    supervise service 
+36. docker images for indimail, indimail-mta
+05/05/2016
+37. tcpserver: ip4_bit.c fix stack smashing - num defined as int instead of unsigned long
+06/05/2016
+38. upgrade courier-imap to version 4.17.0
+14/05/2016
+39. added tcpserver_plugin.c to dynamically load shared objects in tcpserver main()
+40. use RTLD_NOLOAD in load_shared() to load shared objects only once
+41. svctool, indimail.spec, qmail.spec, debain postinst scripts modified to
+    load qmail_smtpd.so instead of qmail-smtpd
+42. smtpd.c - smtp_init() function to load all control files only once
+43. vadddomain post_handle - issue sighup to qmail-smtpd service if tcpserver
+    plugin has been configured (to reload control files)
+17/05/2016
+44. Fix TLS SNI code in libcouriertls.c
+18/05/2016
+45. Massive FHS changes
+09/06/2016
+46. added check_group() function to allow privileged programs to run if
+    supplementary groups has indimail gid
+13/06/2016
+47. qmail-dk.c - BUG - removed extra semicolon after if () statement
+48. tcpopen.c - close socket on connect() failure
+49. adddomain.c - change umask to 0007 to avoid creating .qmail-default with
+    restrictive perms
+50. Allow permissions on setuid programs to processes running with indimail/qmail group
+51. update_rules.c - set umask in the child process instead of parent
+21/06/2016
+52. use SSL_set_cipher_list as part of crypto-policy-compliance - tcpserver.c,
+    tls.c, sslerator.c, indisrvr.c, logclient.c, logsrv.c
+04/01/2017
+53. indimail.service, initsvc.c, hier.c, svctool, perm_list - moved svscanboot to libexec
+54. initsvc.c - remove systemd unit file for -off arg
+55. renamed config_settings to indimail_config in libexecdir
+56. svctool - use indimail_config from libexec
+57. matchup.c - ignore qmail-daemon and debug local:, remote: lines
+58. svctool - fixed indimail.fc not found for --config=selinux
+08/01/2017
+59. spec file - Remove selinux module during rpm uninstall of indimail, indimail-mta
+60. spec file - Fix empty servicedir in selinux config
+61. svctool - Fixed instcheck path
+62. hier.c, instcheck.c, setup.c - skip devel man pages
+09/01/2017
+63. use postmaster@virtualdomain for null user (bounce)
+64. svctool - use control/defaulthost for DEFAULT_DOMAIN in /service/qmail-send.25/variables
+01/03/2017
+65. reset optind as it gets called in tcpserver and rblsmtpd.so might be loaded as
+    shared object
+66. copy perm_list to sysconfigdir in indimail-mta package
+67. fixed libexecdir typo in perm_list
+05/03/2017
+68. renamed imap modules directory to imapmodules (svctool, Makefile.am,
+    indimail.spec)
+69. upgraded courier-imap to 4.17.2
+06/03/2017
+70. added PKG_INSTALLDIR macro for systems having old pkgconfig package
+71. moved wordlist.db installation from Makefile.am to rpm spec file
+72. indimail.spec - use pythondir variable for python site-package directory
+07/03/2017
+73. added dsc files for Ubuntu-16.10
+74. fixed libnss_nssd.so missing in libindimail
+75. Use AutoReqProv = no in indimail.spec
+76. fixed CRYPTO_POLICY_NON_COMPLIANCE in logsrv.c
+77. authindi.c fixed imapodules directory
+09/03/2017
+78. autoresponder - ignore senders listed in badrcptto, badrcpttopatterns,
+    badrcptto.cdb or MySQL table listed in badrcptto.sql
+79. FHS compliance - z*scripts
+10/03/2017
+80. allow configurable n no of Delivered-To in qmail-local, with control file
+    maxdeliveredto
+81. qmail-smtpd, qmail-remote configureable TLS/SSL method
+    TLS protocol method (TLSv1, TLSv1_1, TLSv1_2) in control/tlsclientmethod
+    (qmail-remote) and control/tlsservermethod (qmail-smtpd).
+82. qmail-smtpd - fixed value of protocol line for tls session in Received header
+83. added back SSLv23 method in qmail-remote, qmail-smtpd
+13/03/2017
+84. Replaced INDIMAILDIR with PREFIX, QMAIL with PREFIX
+
+* Thu Aug 13 2015 mbhangui@gmail.com
+Release 1.9.1 Start 13/08/2015
+1.  Added pkgconfig data to configure.ac, Makefile.am. created libindimail.pc
+19/08/2015
+2.  udpopen.c - added missing call to getservbyname()
+3.  batv.c - exit 111 for ENOMEM
+4.  added whois program
+5.  added tcpopen() function
+6   fixed errno getting clobbered in tcpbind()
+21/08/2015
+7.  fix for 'stack smashing detected' when compiled with -fstack-protector
+    (authindi.c, ProcessInFifo.c, makesalt.c, in_crypt.c, getEnvConfig.c,
+    dbload.c, auth_admin.c, adminCmmd.c)
+24/08/2015
+8.  ipme.c - use getifaddrs() to get interface addresses
+9.  ip.c - modifications to use shortened ipv6 addresses
+24/08/2015
+10. indimail.spec changed to use --with-pkgconfigdir
+11. upgrade courier-imap to 4.16.2
+12/12/2015
+12. display aliases for a domain if Email is specified as @domain
+13. Fixed autoresponder for delivery to aliases
+17/12/2015
+14. deliver_mail.c - Fixed X-Forwarded-For, X-Forwarded-To headers for valias delivery
+15. vdelivermail, deliver_mail.c - Honour dot-qmail exit codes for valias based program deliveries
+16. deliver_mail.c - use fork() instead of vfork for makeseekable to work
+24/12/2015
+17. qmail-dk.c - fixed qmail-dk quitting during verfication without writing
+    DomainKey-Status header
+18. svctool - new code to handle MySQL-community-server & MariaDB-server installation
+    removed dependency on mysql_config for getting mysql version
+19. indimail.spec fixed chrpath error for imapd, imaplogin during rpm build
+20. libindimail.pc - fixed package name
+28/12/2015
+21. svctool - set permission of variables directory to 500
+31/12/2015
+22. udpclient - copy data from stdin if message argument not specified on
+    command line
+32. IPV6 code added to qmail-greyd, greylist.c (qmail-smtpd)
+33. greylist.c - Use @ as separator for IP, Port in GREYIP env variable
+34. indisrvr - fixed issue with getnameinfo() hostname not getting set
+35. tcpbind.c - pass hostname parameter to getaddrinfo
+01/01/2016
+36. use qmail-greyd for greylisting+ipv6 instead of greydaemon
+08/01/2016
+37. tcpserver - rules.c - fix bug with tcprules when using compact ipv6
+    notation in tcp.smtp
+12/01/2016
+38. dbload.c total was not correctly assigned if RelayHosts was already
+    obtained
+39. LoadDbInfo.c - set _total for dbcount in localDbinfo()
+40. inquerytest.c - random fifo was not getting selected with infifo=""
+41. pass address family as argument to get_local_ip()
+21/01/2016
+42. multiple fixes to address compatibility with both mysql-community-server and
+    mariadb-server
+43. userinfo.c - user localip for mailstore if MdaServer returns null
+
+* Sat Aug 01 2015 mbhangui@gmail.com
+Release 1.9.0 Start 19/04/2014
+19/04/2014
+1.  added selinux policy file indimail.te
+2.  added option --config=selinux in svctool
+3.  added svctool --config=selinux command during rpm installation/upgrade
+24/04/2014
+4.  fixed update-rc.d syntax for ubuntu
+30/04/2014
+5.  added apparmor rule (usr.sbin.mysqld) for mysqld under indimail
+6.  svctool - add check for mysql_config, configurable service list
+    for addition, removal
+14/05/2014
+7.  use lsb_release to handle distribution specific installation
+8.  preinst, postinst, prerm, postrm fixes for debian/ubuntu installation
+18/05/2014
+9.  svctool - added Show_view_priv, Create_tablespace_priv in
+    create_msyql_db()
+10. svctool - fix for sendmail installations which do not use alternatives
+    command
+22/05/2014
+11. autoresponder - fixed issues with Date field, SIGPIPE resulting in
+duplicate emails. use mktime to use local time
+19/06/2014
+12. added configuration of QHPSI in qmail.spec
+13. do not disable mysql service by default during installation
+23/06/2014
+14. Fixed missing call to write_fifolog in bogofilter
+03/07/2014
+15. added option to track all alias which deliver to an address
+27/07/2014
+16. added timestamp column to indimail tables
+17. added tlsserverciphers configuration in svctool
+18. switch to qscand user when running cleanq or qscanq
+04/11/2014
+19  qmail-lspawn - BUG - fixed incorrect parsing of users with hyphen in username
+18/12/2014
+20. Added helohostbyip control file
+10/04/2015
+21. udpopen.c - use SOCK_DGRAM for UDP
+22. added udplogger, udpclient
+14/04/2015
+23. envrules.c - fixed matching null address
+24. dnsbl.c - skip dnsbl if ip address is unknown
+23/07/2015
+25. matchregex.c - fixed comparsion of constant -1 with 0
+26. Makefile.am - added vdeldomain, vaddaliasdomain, vrenamedomain post_handle
+27. batv.c - added option to pass key validity period 0n days, fixed bug with
+    passing email address without @ sign
+01/08/2015
+28. Removed dummy link to xpg4/bin
+
+* Fri Apr 18 2014 mbhangui@gmail.com
+Release 1.8.9 Start 01/12/2013
+25/11/2013
+1.  fixed qmailctl for debian (make it run at runlevel 2)
+04/12/2013
+2.  qmail-rm.c - fixed -q option not working
+3.  qaes - qmail encryption utility which uses AES
+31/12/2013
+4.  change configure.in to configure.ac
+01/01/2014
+5.  set delayed inserts for lastauth, relay if DELAYED_INSERT environment
+    variable is set
+6.  courier-imap - Fixed bug with setting of MAX_ATOM_SIZE in mainloop.c,
+    imaptoken.c
+09/01/2014
+7.  BUG - rblsmtpd.c - flagip6 was not initialized
+13/01/2014
+8.  vdelivermail - Discard bounce if environment variable DISCARD_BOUNCE is set
+22/01/2014
+9.  hassrs.h dependency added for hier.c, qmail-inject.c, qmail-local.c,
+    qmail-send.c, qmail-showctl.c
+10. qmail-smtpd - fixed DISABLE_AUTH_LOGIN, DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5,
+    DISABLE_CRAM_SHA1, DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA512, CRAM_RIPEMD,
+    DISABLE_RIPEMD5
+11. qmail-smtpd - Added SECURE_AUTH to allow AUTH PLAIN, LOGIN only if TLS is
+    enabled.
+12. qmail-smtpd - set AUTHINFO for successful SMTP AUTH
+13. qmail-dk, qmail-dkim - Treat AUTHINFO environment variable exactly
+    like RELAYCLIENT
+14. Set environment variables from control/auth.envrules if RELAYCLIENT is set
+    or on successful SMTP AUTH
+15. spawn-filter.c - made RATELIMIT_DIR configurable through envrules
+23/01/2014
+16. instcheck.c - Fix locating files in lib64
+29/01/2014
+17. made domainqueue file configurable through env variable DOMAINQUEUE
+18. fixed DNS functions compilation on OS X systems (dns.c, dns_text.c,
+    surblfilter.c)
+19. qmailctl - fix for Fedora where /etc/sysconfig/network is missing
+    or does not have NETWORKING defined
+20. BUG - ldap-checkpwd.c - extra semicolon removed
+21. dns.c - fixed call to resolve() function
+03/02/2014
+22. qsutil.h - added prototype for log7()
+23. qmail-send.c - discard bounce if bounce processor exits 1
+24. vcreate_dir_control.c, vwrite_dir_control.c, vdel_dir_control.c changed mode of .filesystems to 640
+25. authindi - changes to error messages for inquery/vauth_open failures
+26/02/2014
+26. spawn-filter - allow wildcards for rate control using ratecontrol file and
+    default ratelimit using .global file
+07/03/2014
+27. envrules - use env variable USE_FNMATCH to use fnmatch() for pattern matching instead
+    of wildmat_internal
+28. spawn-filter - do not exit for regex compilation failures
+29. mail_acl.c - fix regex match
+10/03/2014
+30. added option --cname-lookup in svctool to Perform CNAME lookup for recipient host in qmail-remote
+12/03/2014
+31. spawn-filter.c - define REG_NOERROR for OSX / Systems with REG_NOERROR undefined
+32. fixed typo in exitcodes.h
+18/03/2014
+33. qmail-remote - Set environment variable OUTGOINGIP
+34. tai64nunix.c, tai64nlocal.c - fixed issue with tai timestamp with non-whitespace
+    after 25 characters
+26/03/2014
+35. spawn-filter. Report Blackholed: filter_script_path in delivery log when filters exits 2
+03/04/2014
+36. qmail-remote - ability to disable AUTH PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1,
+    CRAM-256, CRAM-RIPEMD, DIGEST-MD5
+37. added option to use clamav instead in the OS
+15/04/2014
+38. control.c - copy to sa without \0 in control_readrandom()
+17/04/2014
+39. logalert - add usename argument to set_user()
+40. set supplementary groups for indimai user in vadduser.c, vdeluser.c,
+    vreorg.c, vdominfo.c, printdir.c, vrenameuser.c, vcfilter.c, vbulletin.c
+41. added error message for setuid() in handlers.c
+42. islocalif.c - display hostname in error message
+43. added function setuser_privileges for setting uid, gid and supplementary
+    group ids.
+44. instcheck - ignore man pages error
+45. vdelivermail - delivery to date formated folder
+
+* Sat Nov 23 2013 mbhangui@gmail.com
+Release 1.8.8 Start 13/06/2013
+1.  smtpd.c - fix strnum getting clobbered by log_spam() funtion in err_queue()
+16/07/2013
+2.  dkimsign.cpp - replace % in selector with domain name
+21/07/2013
+3.  vadddomain_handle - fix permission of spamignore
+03/08/2013
+4.  ProcessInFifo.c - close db on sighup so that we reload all new domains
+    added
+5.  vdeldomain - check for host.master to determine if domain is distributed
+6.  vdeldomain, vaddaliasdomain, vrenamedomain - send sighup to qmail-send
+    using post handle
+05/08/2013
+7.  tcpserver - compact ipv6 and CIDR notation support in tcpserver rules file
+8.  rblsmtpd - inverse IPv6 nibble format for RBL and anti-RBL lookups.
+9.  spf.c - ipv6 support by setting SPFIPV6 environment variable
+12/08/2013
+10. surblqueue - figure out mktemp path
+11. made dns_text.c common for both dk and dkim
+13/08/2013
+12. qmail-smtpd - fixed STARTTLS plaintext command injection vulnerability
+13. spf.c - added error message for unknown address family
+17/08.2013
+14. qmail-dk, qmail-dkim - BUG - corrected location of private key when %
+    sign is removed
+15. dk-filter - fixed syntax errors and private key lookup
+18/08/2013
+16. surblqueue - Use SURBLQUEUE to change default queue program from qmail-multi
+    - thanks Roberto Puzzanghera
+20/08/2013
+17. courier-imap - Make IT_MAX_ATOM_SIZE configurable using env variable
+    MAX_ATOM_SIZE
+21/08/2013
+18. qmail-remote.c - bypass tls if clientcert.pem is missing
+19. qmail-remote.c - fix setting of SMTPTEXT for success and failures
+22/08/2013
+20. qmail-qmtpd.c - validity checks to ensure that input actually conforms to
+    the netstring protocol.
+23/08/2013
+21  SRS - modified qmail-send.c, qmail-local.c, qmail-showctl.c,
+    qmail-inject.c, SRS - modified qmail-send.c, qmail-local.c,
+    qmail-showctl.c, hier.c, forward.c, condredirect.c.
+22. SRS - srs.c, srs.h, srsfilter.c
+27/08/2013
+23. spawn-filter - domain based delivery rate limit code
+24. cleanq.c, qmail-local.c - use sticky bit definition from header file
+25. qmail-remote.c - major overhaul to set SMTPTEXT
+29/08/2013
+26. drate - program for controlling domain delivery rate
+27. dk-fiter - sign as default if both DKSIGN and DKIMSIGN are not defined
+06/08/2013
+28. qmail-remote - try next mx on helo failure (problem with broken yahoo mx
+    servers) by setting env variable TRY_NEXT_MX_HELO_FAIL
+13/09/2013
+29. qmail-dk.c, qmail-dkim.c - Use RELAYCLIENT_NODKVERIFY,
+    RELAYCLIENT_NODKIMVERIFY to turn off verification when both DK[IM]VERIFY and
+    RELAYCLIENT are set
+23/09/2013
+30. qmail-send - concurrencylocal, concurrencyremote can be configured queue
+    specific
+31. qmail-send, qmail-todo - display the associated queue directory in logs
+    during startup
+15/11/2013
+32. inquerytest.c - define INFIFO environment variable to select a specific
+    fifo
+33. inquery.c - use specific fifo if INFIFO is defined and do not use
+    balancing
+34. fixed dnscheck setting in svctool, create_service and indimail.spec
+21/11/2013
+35. added domainqueue functionality where one can assign specific queue for
+    recipient domains
+22/11/2013
+36. Added getopt style arguments to inquerytest
+37. inquery.c - Fixed bug with inquery()
+38. ProcessInfifo.c - display SIGTERM message on debug or verbose
+39. svctool - Updated clamd.conf, freshclam.conf
+40. indimail.spec - do not remove clamd.conf.sample, freshclam.conf.sample
+
+* Tue Jun 11 2013 mbhangui@gmail.com
+Release 1.8.7 Start 22/01/2013
+21/02/2013
+1. Fixed typo in Login_tasks.c
+2. fixed IMAP_CAPABILITY, POP3AUTH in imap, pop3 service
+26/02/2013
+3. svctool - Fixed grant privileges for mysql user.
+05/03/2013
+4. fixed Spam rule in vadddomain_handle
+10/03/2013
+5. iwebadmin - use vfilter if configured
+27/04/2013
+6. Disable internal SMTP virus filter if clamav is enabled
+28/04/2013
+7. Fixed QMAILDEFAULTHOST setting for courier-outbox (Adrian Offerman)
+8. Add new domain created to spamignore in vadddomain_handle
+9. vmoduser - Fixed setting quota = NOQUOTA
+07/05/2013
+10. Include hmac_sha1.o in qmail-smtpd compilation for non-indimail system
+11. qmail-sighup - suppress error for non-indimail system
+12. qmailctl - fix for non-indimail system
+08/05/2013
+13. upgraded bogofilter to 1.2.3
+14. created qmail.spec for standalone SMTP package
+15. svctool - fix for systems missing initsvc
+13/05/2013
+16. indimail.spec - Increase softmem for port 587,366
+14/05/2013
+17. indimail.spec - add permissions in selinux for mysql database
+18. qmailctl - add inittab entry (if missing) during startup
+19. indimail.spec - fix for missing maildirmake
+16/05/2013
+20. smtpd.c added checkrecipient as part of non-indimail compiled code
+21. upgraded imap to courier-imap-4.13
+30/05/2013
+22. qmail-queue - control file extraqueue can have multiple lines as
+extra recipients
+04/06/2013
+23. svctool - add ham, spam, register-ham, register-spam alias only if
+    bogofilter is installed
+09/06/2013
+24. dkimsign.cpp - address parsing to fix signing of email generated by cron
+    daemon
+10/06/2013
+25. allow setting of NOQUOTA in vlimits for default user quota
+26. indimail.h, limits.c - changed defaultquota to signed int64
+27. iauth.c, proxylogin.c - set MAILDIRQUOTA=0S for quota=NOQUOTA
+28. vadduser.c, vlimit.c - allow setting of NOQUOTA for default user quota
+29. parse_quota.c - return 0 for quota=NOQUOTA
+30. userinfo.c - set maildir in the correct block
+31. upgraded packages bogofilter(1.2.3), fetchmail(6.3.26), courier-imap(4.13),
+    clamav(0.97.8)
+
+* Tue Jan 22 2013 mbhangui@gmail.com
+Release 1.8.6 Start 05/08/2012
+16/08/2012
+1.  autoresponder.c - Added description for -T option
+2.  dkim.c - do not skip X-Mailer headers
+3.  qmail-dkim.c - do not skip X-Mailer headers
+08/09/2012
+4.  BUG - tcpserver.c - wrong variable used for ip address causing
+    fnrules to fail in ip address matching
+24/09/2012
+5.  made diskquota, maxmsgcount, defaultquota, defaultmaxmsgcount in 
+    vlimits unsigned
+6.  indisrvr.c - removed pidfile
+08/10/2012
+7.  dns.c - added DISABLE_CNAME_LOOKUP for qmail-remote
+23/11/2012
+8.  new program rrt for handling Return Receipts
+9.  qmail-remote - set ONSUCCESS_REMOTE, ONFAILURE_REMOTE, ONTRANSIENT_REMOTE
+    selectively in run_script
+10. qmail-remote - fix SIGSEGV in run_script
+24/11/2012
+11. qmail-remote - set [S|Q]MTPTEXT, [S|Q]MTPCODE for transient errors
+17/12/2012
+12. qmail-remote - fix smtptext during TLS
+01/01/2013
+13. FORCE_TLS functionality in qmail-smtpd
+02/01/2013
+14. Upgraded to fetchmail 6.3.24
+
+* Sun Aug 05 2012 mbhangui@gmail.com
+Release 1.8.5 Start 10/12/2011
+18/12/2011
+1.  token.c (bogofilter). Clear tokens only when allocated
+2.  fixed recursive loop when email is sent to register-spam, register-ham,
+    ham and spam
+3.  bogofilter-qfe.in - use config file and wordlist argument to bogofilter
+4.  fixed abormal exit in DIGEST-MD5 for non existing users
+5.  vchkpass - figure out domain for user for brain dead clients like MS
+    Outlook
+21/12/2011
+6.  swaks - when using AUTH DIGEST-MD5, use realm from control/me
+23/12/2011
+7.  iwebadmin - user.c, util.c - .trivial_password sets password change
+    to clear text
+24/12/2011
+8.  vmoddomain.c - display a more helpful usage option
+9.  vfilter.c - set PWSTRUCT for non-existent user. This will eliminate one
+    database lookup in vdelivermail
+19/01/2012
+10. smtpd.c - allow restricting of MASQUERADE to the value set by MASQUERADE
+    env variable
+10/04/2012
+11. added remoteip argument (ipv4) to spfcheck(). Fixed problem in smtpd,
+    spfquery, parsing ipv4 mapped ipv6 addresses.
+19/04/2012
+12. upgraded to clamav-0.97.4
+22/04/2012
+13. fixed MySQL syntax error in limits.c
+14. use 64bit integer for quota calculations in vadduser.c, adduser.c,
+   vauth_adduser.c
+15. use g/G suffix to specify quota in gb (parse_quota.c, user_over_quota.c)
+16. vuserinfo to display quota in gb if quota > 1Gb.
+23/04/2012
+17. use ipv4 addresses if fakev4 detected or if -4 option is passed
+26/04/2012
+18. fixed SIGSEGV for spf lookups dns_txt() in dns.c
+28/04/2012
+19. Added permission macros to set file permissions as per system
+    security settings.
+12/06/2012
+20. vrenameuser (Name too long bug). Fixed max password length in indimail.h
+21. Added DISABLE_CRYPT env variabel in pw_comp.c to disable crypt method
+22. Added DISABLE_PASS in pop3login.c to disable 'pass'
+26/06/2012
+23. BUG - fix infinite loop in blast() function on EOF.
+03/08/2012
+24. Removed duplicate X-Mailer header in headerlist, variables.c
+25. upgraded to clamav-0.97.5
+04/08/2012
+26. Replaced dupstr() with strdup() in cindimail.c
+
+* Sat Dec 10 2011 mbhangui@gmail.com
+Release 1.8.4 Start 24/10/2011
+25/10/2011
+1.  iwebadmin - added trivial_password option to authenticate when
+    using cram-md5, cram-sha1
+2.  pw_comp.c - interchanged role of challenge, response argument for
+    no-challlenge systems
+3.  authindi.c added cram-md5, cram-sha1 auth
+4.  enabled auth cram-md5, cram-sha1 in courier authlib (configure.in)
+5.  Added AUTH CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 authentication
+    (qmail-smtpd, vchkpass)
+6.  Added ability to pass the auth method to checkpassword interface.
+7.  smtpd.c - added option to disable LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1,
+    CRAM-RIPEMD, DIGEST-MD5, methods using env variables
+29/10/2011
+8.  Added CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 authentication methods in
+    qmail-remote
+06/11/2011
+9.  deliver_mail.c - added command autoresponder for preserving DTLINE
+    env variable for autoresponder
+10. multiple fixes for iwebadmin (autoresponder addition, modification)
+07/11/2011
+11. surblfilter.c - use ERROR_FD, CUSTOM_ERR_FD for standard error
+12. qmail-dk[im].c - set standard error to ERROR_FD, CUSTOM_ERR_FD
+    before calling any functions that might use standard error
+08/11/2011
+13. fixes applied to indimail-1.8.3/Makfile.am, qmail-1.03/Makefile and
+configure scripts to compile on Ubuntu 11.10
+13/11/2011
+14. replaced /bin/sort with sort in z* qmailanalog scripts
+15. svctool - fixed spam_header_name in create_bogofilter_conf()
+16. pw_comp.c - fixed comparision of password (AUTH PLAIN, LOGIN) when
+    password in db is plain text
+17. upgraded to clamav-0.97.3
+16/11/2011
+18. Fixed debian build script to apply clamav patch
+17/11/2011
+19. mail_acl.c - fixed diag message getting printed without verbose flag
+20. smtpd.c - handle the case when recipients.cdb is not present
+18/11/2011
+21. authindi.c - BUG auth failure lead to authindi executing imapd even for
+    pop3 service
+22. fixed compilation of programs needing libtinfo on some systems
+    (displaytop, osh)
+23. fixed freshclam service not terminating freshclam on svc -d
+23/11/2011
+24. Fixed man page for ismaildup not getting installed.
+26/11/2011
+25. fixed iwebadmin/iwebadmin.c and added authentication for change
+    password
+27/11/2011
+26. qnotify - new program for RFC 3798 MDN processing
+27. qarf - check addrparse errors
+01/12/2011
+28. Added -T option to autoresponder to add Content-Type header
+04/12/2011
+29. vacation.c - Added option to specify charset using env variable CHARSET
+30. iwebadmin - use -T option in autoresponder if content-type file is
+    present in the domains directory
+05/12/2011
+31. global.h, md5c.c - use 4 byte word for UINT4 and truncate the extra bits
+    generated from the left shift in ROTATE_LEFT. Fixes md5 on amd64 systems
+32. qnotify - added option to enclose the headers only instead of full message
+07/12/2011
+33. global.h, md5c.c, md5.h - use uint32 data type instead of UINT4
+    (fix for 64 bit system)
+10/12/2011
+34. added IMAP_LOG_DELETIONS, POP3AUTH variable for imap, imaps,
+    pop3, pop3s service creation
+35. upgraded to courier-imap 4.10.0
+36. bogofilter-qfe - use spam_header_name from bogofilter.cf
+37. added AUTH CRAM-SHA256 method in IMAP/POP3
+38. added AUTH CRAM-SHA256 in SMTP and qmail-remote
+
+* Tue Sep 20 2011 mbhangui@gmail.com
+Release 1.8.3 Start 01/07/2011
+02/07/2011
+1.  BUG - Fix null DBINFO entry being returned when no entries in assign file
+03/07/2011
+2.  BUG - balance_outgoing - fixed typo and current working directory
+3.  qmail-remote.c - outgoingip can now have multiple IP addresses for
+    balancing outgoing emails through multiple IPs.
+4.  BUG - initsvc.c - fix for svscan failure due to /dev/console giving EPERM on
+    virtual hosts
+04/07/2011
+5.  qmail-qmqpc.c - outgoingip can now have multiple IP addresses for
+    balancing outgoing emails through multiple IPs.
+07/07/2011
+6.  BUG - vdeloldusers.c - local variable folderlist used outside scope causing segfault
+7.  qmail-local.c - Added branch logic to have if-else type of programming in
+    dot-qmail
+08/07/2011
+8.  smtpd-plugin0.so - Added dnsbl functionality
+13/07/2011
+9.  surblfilter - SURBL functionality
+21/07/2011
+10. initsvc.c - added systemd support
+11. boot/systemd - service description for systemd
+22/07/2011
+12. Added -D option in dktest for setting d= tag
+13. Added DKDOMAIN env variable to set d= tag in qmail-dk
+28/07/2011
+14. BUG - qmail-[dk,dkim].c - fixed opening of private keys with absolute path
+    [#3380999]
+15. qmail-inject.c - chdir to home after envdir_set()
+29/07/2011
+16. BUG - qmail-[dk,dkim].c - format the filename for private key correctly.
+05/08/2011
+17. svscan - create file defined by STATUSFILE on startup and delete the same
+    on shutdown
+18. svscanboot - added back ability to work on multiple service directories
+20/09/2011
+19. upgraded to clamav-0.97.1, fetchmail-6.3.20
+
+* Fri Jul 01 2011 mbhangui@gmail.com
+Release 1.8.2 Start 23/05/2011
+1.  Fixed indiamil startup on debian systems
+2.  Fixed indimail upstart job
+01/06/2011
+3.  added rule in vadddomain post handle to filter virus infected mails into
+    quarantine folder
+02/06/2011
+4.  defer overquota mails in valias process when deliver_mail() returns -5
+04/06/2011
+5.  updates from libdkim-1.0.21
+09/06/2011
+6.  blackhole mail in qmail-multi, spawn-filter if filter program exits 2
+19/06/2011
+7.  Unset QMAILLOCAL in qmail-rspawn, QMAILREMOTE in qmail-lspawn
+20/06/2011
+8.  vauth_getpw.c - fix for incorrect usage of PWSTRUCT when the user was
+    different than set in PWSTRUCT
+9.  vfilter.c - fixed Mail BlackHoled message
+10. vcfilter.c - added description of |program in usage
+21/06/2011
+11. svctool - create default procmailrc
+12. deliver_mail.c - unset RPLINE, DTLINE when calling external programs
+13. vdelivermail.c - set NOALIAS to skip alias when vdelivermail is called by
+    vdelivermail through an alias rule
+24/06/2011
+14. do not unset DTLINE, RPLINE for preline, condtomaildir, qsmhook
+29/06/2011
+15. Fixed stray return code in smtpd-plugin
+30/06/2011
+16. Duplicate eliminator program
+17. upgraded to clamav-0.97.1, fetchmail-6.3.20
+
+* Thu Apr 21 2011 mbhangui@gmail.com
+Release 1.8.1 Start 05/04/2011
+08/04/2011
+1.  Define HAVE_CONFIG_H for including/excluding config.h
+13/04/2011
+2.  added SMTP plugins
+14/04/2011
+3.  upgraded to courier-imap-4.9.1
+16/04/2011
+4.  qmail-send.c - check for write errors
+5.  bogofilter - added logging of subject
+6.  smtpd.c - made spamfd confugurable using SPAMFD env variable
+7.  bogofilter - added logging of subject
+17/04/2011
+8.  smtpd.c - added feature to load multiple plugins
+18/04/2011
+9.  plugtest - SMTP plugin tester
+29/04/2011
+10. svctool.in - added --nooverwrite option to prevent overwriting of
+    configuration
+11. Multiple changes in Makefile, configure.in for debian builds
+12. debian subdir for debian builds
+13. workaround in qmail-1.03/setup.c for debian build
+07/05/2011
+14. fixed few compilation warnings in qmail-1.03, ucspi-tcp-0.88
+12/05/2011
+15. rpmattr.c - fix for non-indimail systems
+17/05/2011
+16. qmail-nullqueue - added timeout
+18/05/2011
+16. qmail-send - close pipe to qmail-queue when bounceprocessor fails. This
+    was causing qmail-queue to forever wait on read(0, ..
+21/05/2011
+17. New program vtable to create MySQL tables from template specified in text
+    files
+18. upgraded to courier-imap-4.9.2
+
+* Tue Apr 05 2011 mbhangui@gmail.com
+Release 1.8 Start 05/11/2010
+12/11/2010
+1.  New authmodule authgeneric
+2.  Return error code 17 in vadduser (EEXISTS) when user exists
+3.  clamav upgraded to clamav-0.96.5
+4.  fetchmail upgraded to fetchmail-6.3.19
+05/01/2011
+5.  qmail-remote.c,qmail-qmqpc.c - OUTGOINGIP to set outgoing IP address without
+    using control files
+6.  qmail-remote.c - Fix SIGSEGV by checking number of arguments
+07/01/2011
+11/01/2011
+7.  courier-imap upgraded to 4.8.1
+14/01/2011
+8.  upgraded Erwin Hoffman's recipients extension to version 0.7.1
+19/01/2011
+9.  BUG - Fixed svctool for ubuntu (database creation, sendmail linking)
+10. BUG - Fixed compilation of ldap-checkpwd.c on systems without ldap-devel package
+20/01/2011
+11. fixed configure.in for cmake based mysql directories
+27/01/2011
+12. svctool - changed TLS_PROTOCOL to SSL23 
+30/01/2011
+13. hier.c - updated for courier-imap-4.8.x
+03/02/2011
+14. svctool - added START_PLUGIN for qmail-send
+05/02/2011
+15. BUG- qmail-dkim.c: fixed SIGSEGV occuring for messages without body
+10/02/2011
+16. BUG - fixed return value of dk-filter
+17. Added env variable DKIMKEY to select dkim key when using RELACLIENT to
+    determine signing or verification
+11/02/2011
+18. upgraded to clamav-0.97
+19. vmoduser.c - Allow 'k', 'K', 'm', 'M' modifier in quota argument
+20. fix for setting/display of > 2Gb values in quota, message counts
+    alter table vlimits   modify diskquota          bigint unsigned not null;
+    alter table vlimits   modify maxmsgcount        bigint unsigned not null;
+    alter table vlimits   modify defaultquota       bigint unsigned not null;
+    alter table vlimits   modify defaultmaxmsgcount bigint unsigned not null;
+    alter table userquota modify quota              bigint unsigned not null;
+12/02/2011
+21. qmail Abuse Report Format generator - qarf
+22. Added display of week days in date822fmt.c
+17/02/2011
+23. lseek envelope fd to beginning to prevent errors in filter programs
+    reading envelope
+18/02/2011
+24. fixed svctool --config=mysql option for new releases of MySQL (creation of
+    indimail.cnf file
+25/02/2011
+25. added logalert program
+12/03/2011
+26. svctool - use update-rc.d for ubuntu to create indimail startup
+31/03/2011
+27. added unicode related changes to courier-imap
+28. added auto provisioning of users for vxxxxone
+02/04/2011
+29. inquerytest.c - fixed printf data type qualifier for 64 bit data type
+03/04/2011
+30. fix for ipv6 in tcpopen.c, udpopen.c
+04/04/2011
+31. Added support plugin feature for enterprise messaging support
+
+* Fri Nov 05 2010 mbhangui@gmail.com
+Release 1.7.11 Start 25/08/2010
+11/09/2010
+1.  smtpd.c - Fixed few environment variables not getting set by envrules [3064035]
+06/10/2010
+2.  smtpd.c - Fixed wrong return value passed to log_rules()
+3.  instcheck.c - Fix for 64 bit systems
+08/10/2010
+4.  vfilter.c - display mda in errors when exec of mda fails
+5.  iwebadmin/user.c - fixed call to vadduser() function
+31/10/2010
+6.  qmail-dkim.c - Improved speed, Fixed SEGV
+03/11/2010
+7.  fetchmail upgraded to fetchmail-6.3.18
+8.  clamav upgraded to clamav-0.96.3
+05/11/2010
+9.  mail_acl() function moved to mail_acl.c
+
+* Tue Aug 24 2010 mbhangui@gmail.com
+Release 1.7.10 Start 05/08/2010
+04/08/2010
+1.  qmail-remote.c - added cram-md5 authentication using Erwin Hoffman's code
+07/08/2010
+2.  vadddomain.c vadduser.c, adduser.c, inc_dir_control.c, make_user_dir.c,
+    next_big_dir.c - make max_users_per_level configureable when adding users [3041182]
+11/08/2010
+3.  vgroup.c - put checks to prevent wrong syntax for group members [3043443]
+11/08/2010
+4.  deldomain.c - remove vfilter rules for prefilt and postfilt when deleting
+    domain
+5.  conf-queue - increase QUEUE_COUNT to 20 for large sites
+13/08/2010
+6.  deliver_mail.c - added X-Forwarded-To, X-Forwarded headers [3044286]
+7.  spawn-filter.c - _RECIPIENT env variable was wrongly set to sender
+15/08/2010
+8.  print_control.c, printdir.c, vdominfo.c - display max users per level
+9.  is_already_running.c - fixed crash due to double fclose [3046262]
+16/08/2010
+10. vcfilter.c   - skip creating Maildir/vfilter for prefilt & postfilt user
+11. vmoddomain.c - fixed usage
+24/08/2010
+12. clamav upgraded to clamav-0.96.2
+
+* Sun Aug 01 2010 mbhangui@gmail.com
+Release 1.7.9 Start 14/07/2010
+14/07/2010
+1.  deliver_mail.c - initialize CurCount, CurBytes [3029854]
+2.  vdelivermail.c - display MAILSIZE_LIMIT, MAILCOUNT_LIMIT
+    error message [3029854]
+    correctly
+15/07/2010
+3.  overquota.sh - fixed multiple mails getting generated for
+    overquota mails [3029854]
+16/07/2010
+4.  qmail-remote.c - execute program defined by ONSUCCESS_REMOTE on
+    successful delivery [3030457]
+5.  qmail-remote.c - use qmail-remote as argv0 when running program
+    defined by ONSUCCESS_REMOTE
+18/07/2010
+6.  qhpsi.c - renamed QUEUE_PLUGIN to QUEUE_PLUGIN_SYMB
+7.  qmail-send.c - added startup plugins functionality [3031243]
+20/07/2010
+8.  qmail-remote.c - execute program defined by ONFAILURE_REMOTE on
+    failed delivery [3032011]
+9.  qmail-remote.c - define environment variables SMTPCODE, SMTPTEXT
+    when calling ONSUCCESS_REMOTE, ONFAILURE_REMOTE programs [3032014]
+10. qmail-send.c - Change order of bounce sender and original recipient
+    when calling bounceprocessor script
+11. qmail-rm.c - process multiple queues [3032414]
+12. qmail-dkim.c, qmail-dk.c, maildirserial.c, rwhconfig.c, qmail-greyd.c
+    - use CONTROLDIR environment variable for the control directory
+21/07/2010
+13. indimail.spec - rc.local to be modified only if /sbin/initctl is present
+14. svctool - fixed syntax for specifying qmail's control directory
+15. qmail-send.c, spawn.c - added code for implementing envheaders [3032886]
+22/07/2010
+16. qmail-queue.c - terminate QQEH with newline
+17. upstart.in - fix for multiple respawn of svscan during reboot/shutdown
+    due to upstart bugs
+23/07/2010
+18. qmail-send.c - fixed bounce.envrules not working
+19. ovequuota.sh - use maildirdeliver to delivery to maildir
+20. svctool.in - extend svctool --backup functionality
+24/07/2010
+21. qmail-qmqpc - distribute load across servers if qmqpservers control file
+    has sticky bit
+22. qmail-remote.c - run failure() only on permanent failure
+23. svctool - fixed svctool --config=users for debian system
+25/07/2010
+24. qmail-remote.c - set env variable ERRTEXT in ONSUCCESS_REMOTE &
+    ONFAILURE_REMOTE scripts [3034033]
+25. qmail-remote.c - replaced success(), failure() with a single script
+26. qmail-remote.c - execute program/script on transient errors [3036446]
+26/07/2010
+27. config-fast - do not put domain in locals if present in virtualdomains
+28. ofmipd.c, serialsmtp.c - added logging of senders & recipients. Original idea
+    by Andrew Richards <ar-djblists@nwdb.co.uk>
+
+* Wed Jul 14 2010 mbhangui@gmail.com
+Release 1.7.8 Start 25/06/2010
+25/06/2010
+1.  indimail.spec.in - use native commands (instead of svctool) to remove boot
+    entries in rpm '%'postun.
+27/06/2010
+2.  qmail-remote.c - display bind ip (outgoing ip) in error messages for
+    failed connections [3022023]
+3.  qmail-queue.c - fixed mailarchival for rules on recipient addresses
+4.  qsutil.c - added log7() function
+5   [qmail-send|qmail-todo].c report all recipients in log_stat() for
+    single transaction multiple recipient emails
+6.  indimail.spec.in - fixed rpmlint errors
+7.  indimail.spec.in - moved removal of boot entries to '%'preun
+28/06/2010
+8.  create_services - added indimail startup
+9.  create_services - added creation of defaultqueue for qmail-queue
+    clients (--queueParam)
+10. create_services - use --fdpass option in clamdscan
+29/06/2010
+11. qmail-queue.c - eliminate duplicates when mailarch rule is applied
+    to an email with multiple recipients.[3022736]
+02/07/2010
+12. smtpd.c - do datasize check strictly in smtp_data() function
+    even for emails where SIZE=size is specified in MAIL FROM:. This
+    will allow notification to be sent to recipients for oversize mails.
+13. smtpd.c size notification message to recipient, when message is
+    rejected due to exceeding data size limit. [3024201]
+14. qmailctl.sh - shutdown indimail earlier during shutdown/reboot
+04/07/2010
+15. Login_Tasks.c - replaced open_smtp_relay() with vopen_smtp_relay()
+16. open_smtp_relay.c - removed this file
+05/07/2010
+17. qmailctl.sh - stop svscan on stop command
+07/07/2010
+18. qmailctl.sh - stop/start all services in /services on stop and start
+08/07/2010
+19. qmail-remote.c - domainbinding on sender address [3026925]
+20. instcheck.c, hier.c - fix permissions for all indimail files.
+09/07/2010
+21. spawn-filter.c - implement sender based envrules [3027173]
+22. echo.c - Added portable echo command. to be used in qmailctl
+10/07/2010
+23. spawn-filter.c - standardized environment variables set for filters
+24. spawn-fitler.c - fixed matching of local/remote directives in filterargs
+    control file [3027779]
+13/07/2010
+25. smtpd.c - fixed accesslist match bug for multiple recipients [3028905]
+14/07/2010
+26. upgraded bogofilter to 1.2.2
+
+* Fri Jun 25 2010 mbhangui@gmail.com
+Release 1.7.7 Start 07/06/2010
+08/06/2010
+1.  New function envdir_set() which has the functionality of envdir.
+2.  pathexec() now returns allocated environment variable on failure
+    envdir.c, sys-checkpwd.c envuidgid.c modified for pathexec() change
+3.  Use envdir_set in qmail-inject.c, replier.c, condredirect.c, dot-forward.c,
+    filterto.c, forward.c, maildirserial.c, new-inject.c qmail-inject.c,
+    qreceipt.c rrforward.c to set default queue
+4.  New option --queueParam=dir in svctool to create queue envdir. This dir
+    can be used as a directory containing environment variables which will be set
+    by clients using qmail-queue
+09/06/2010
+5.  Fixed '%'post, '%'postun scriplet in indimail-mini package
+6.  Eliminated sendmail.sh. One can now use sendmail using
+    /var/indimail/control/defaultqueue without setting queue environment
+    variables externally
+10/06/2010
+7.  Use /usr/sbin/alternatives to install indimail as an alternative mta
+    new option in svctool --config=add-boot and --config=rm-boot to add
+    or remove startup item for IndiMail and use /usr/sbin/alternative to
+    install/remove indimail as a MTA
+    indimail.spec modifed to use /usr/sbin/alternatives for
+    installing/removing indimail as a MTA
+8.  modified qmailctl to be installed as chkconfig complient SYS V script
+   - /etc/init.d/indimail
+14/06/2010
+9.  Do not display "(missing)" for folders on remote mailstore
+18/06/2010
+10. initialize errStr in envrules.c
+11. mail archive rules functionality in qmail-queue. Added mailarchive control
+    file in qmail-queue.c. [3020593]
+19/06/2010
+12. moved /usr/sbin/alternatives invocation to '%'postun script to prevent
+    indimail getting de-installed as default MTA on rpm upgrade
+13. Added UUCP rmail command. 
+24/06/2010
+14. Made outgoingip control filename configurable in qmail-remote [3020575]
+15. messages in qmailctl made like fedora scripts during boot
+16. Added control_readcmd() function which allows commands to be put in qmail
+    control files
+
+* Mon Jun 07 2010 mbhangui@gmail.com
+Release 1.7.6 Start 23/05/2010
+1.  Formatted vdominfo output
+27/05/2010
+2.  Fixed link to NEWS file
+28/05/2010
+3.  qmailctl fixed for Mac OS X
+4.  use QMTP as default in GetSmtproute.c, vdelivermail.c, findhost.c,
+    get_smtp_service_port.c
+5.  MXPS support in qmail-remote [3009347]
+29/05/2010
+6.  skip quota usage in userinfo.c if mailstore is remote
+7.  make QMTPROUTE / SMTPROUTE env variable take higher precedence than
+    control files
+02/06/2010
+8.  added anon bind in ldap-checkpwd.c
+9.  fix ldap-checkpwd.c for users without '@' in username
+10. upgraded to fetchmail-6.3.17 fixes vulnerability CVE-2010-1167
+03/06/2010
+11. update to courier-imap 4.8.0 (patch courier-imap-3.0.8-1.4.patch)
+05/06/2010
+12. ported initsvc.c, indimail.spec for fedora 13 (/etc/event.d to /etc/init
+    migration)
+13. symlink /etc/indimail.cnf to /var/indimail/etc/indimail.cnf when creating
+    MySQL service in svctool
+14. use umask 022 in qmail setup (setup.c) for non-root user during
+    installation
+07/06/2010
+15. preserve tcp.smtp, tcp.imap, etc during rpm removal/upgrades. recreate
+    tcp.*.cdb during installation, upgrade from existing tcp.* files
+16. Fixed segmentatain fault in vpasswd. Added connect_all argument
+    in findmdahost(). Modified call to findmdahost() in vauthOpen_user()
+    bulletin(), ProcessInFifo()
+
+* Sun May 23 2010 mbhangui@gmail.com
+Release 1.7.5 Start 28/04/2010
+29/04/2010
+1.  fixed cdb search for control files badip, badhelo, authdomains &
+    chkrcptdomains in smtpd.c [2994668]
+2.  new program cdbgetm to search for multiple records matching a key
+    in a cdb
+30/04/2010
+3.  fix domainbindings in qmail-remote.c for ipv4 addresses [2994670]
+4.  BUG - illegal free of pointer returned by replacestr() in mysql_query.c
+    [2994664]
+5.  free pointer returned by replacestr() in vrenamedomain.c, vfilter.c
+01/05/2010
+6.  optimized vauthOpen_user to connect to only one MySQL database. Improved
+    speed in non-server programs like iauth, vpasswd, vcfilter, vsetuserquota,
+    vchkpass, vsetpass, sq_vacation, vgroup
+7.  added prefilt, postfilt id creation in vadddomain_handle
+8.  added vfilter rule for automatic delivery of SPAM mails to Spam folder in
+    vadddomain handle
+9   optimized clearopensmtp to run on the local mdahost. Option -C will
+    simulate the old behaviour of running on all mdahosts
+10. added -C option in clearopensmtp to process all mdahosts in MCD file.
+    Without -C option only local mdahost will be processed
+11. added connect_all argument to vclear_open_smtp()
+03/05/2010
+12. added bounce processor in qmail-send
+04/05/2010
+13. [qmail] Fixed DK_SYNTAX error in dk-filter when using buth DKIM, DK Signing
+05/05/2010
+14. set AUTHSERVICE environment variable in iauth, proxylogin
+15. [pam-multi] Added setting of credentials using pam_setcred() in pam-checkpwd
+16. [pam-multi] Added --enable-mysqlprefix to configure
+17. [pam-multi] Added -i option to pam-checkpwd to add authservice
+18. [pam-multi] use AUTHSERVICE environment variable in pam-multi if not set
+    using -i option
+19. [pam-multi] use RTLD_NODELETE in dlopen() to prevent static variables
+    getting reinitialized
+20. [pam-multi] New package pam-multi-1.1
+06/05/2010
+21. added debug argument to defaultTask() in iauth.so
+22. fixed argument getting modified in Login_Tasks() causing auth failure in
+    dovecot imap
+23. Fixed multiple copy of bulletings by fixing BulkMail flag path
+07/05/2010
+24. [nssd] Added program check_getpw
+25. [nssd] New package nssd-1.1
+13/05/2010
+26. added option --no-multi in svctool to skip using qmail-multi
+    for multiple queues
+15/05/2010
+27. fixed creation of qscand user in svctool
+16/05/2010
+28. modified indimail.spec for Mac OS X
+29. use user "daemon" as a substitute for "mail" on OS X
+30. fix path for grep in dknewkey, svctool for Mac OS X
+31. fixed setting BASE PATH in vadduser
+32. added -B option to vadddomain to set BASE PATH
+17/05/2010
+33. create control file .base_path in domains directory for -B option in vadddomain
+34. use control_file .base_path in domains directory in vadddomain, vdeldomain
+35. added display of base path in vdominfo
+36. fixed initsvc -list option on Mac OS X
+37. fixed dkverify and spamfilter options in create_services
+18/05/2010
+38. fixed sslerator path indimail.spec for IMAPS, POP3S services
+39. fixed greylisting, QMTP, QMQP service creation in create_services
+40. fixed initsvc -list error on Mac OS X when svscan is not running
+41. RPM for Darwin Mac OS X
+42. fixed chown of certificate in update_tmprsadh
+19/05/2010
+43. fixed display of only local or only remote queue in qmail-qread
+44. moved qmail-qstat (display queue counts) functionality to qmail-qread.
+20/05/2010
+45. fixed display of only local or only remote queue in qmail-qread
+46. error messages on stderr instead of stdout in vsmtp.c, vpriv.c,
+    vfstab.c, hostcntrl.c, vhostid.c, valias.c vsmtp.c
+47. added package indimail-mini in indimail.spec
+48. added documentation INSTALL-MINI
+23/05/2010
+49. upgrade to clamav-0.96.1
+
+* Wed Apr 28 2010 mbhangui@gmail.com
+Release 1.7.4 Start 14/04/2010
+1.  Add -h argument in vgroup (just like in vadduser)
+15/04/2010
+2.  BUG - Fixed data type of 3rd argument to mysql_options() in
+    set_mysql_options.c
+3.  Added flags argument to set_mysql_options() which can be used in
+    mysql_real_connect()
+16/04/2010
+4.  Fixed setting MYSQL_OPT_CONNECT_TIMEOUT in sqlmatch.c, tcpserver.c
+5.  Fixed sql query syntax error in sqlmatch.c if NO_BACKSLASH_ESCAPES
+    is set for MySQL server
+6.  Upgraded to fetchmail-6.3.16
+17/04/2010
+7.  Removed --skip-safemalloc option for MySQL 5.5.3, 5.5.4 in svctool
+8.  Added fix in mysql_query.c for MySQL server not started with
+    NO_BACKSLASH_ESCAPES
+18/04/2010
+9.  New program qmail-sql
+20/04/2010
+10. fixed hostip softlink in /var/indimail/control
+11. vdominfo to bypass cluster code if host.cntrl is missing
+22/04/2010
+12. Added checkpassword modules sys-checkpwd, ldap-checkpwd
+23/04/2010
+13. renamed nonspam to ham in bogofilter-qfe, svctool.
+14. use spamCount for project id in ftok() in spam.c
+15. for -T, -B, -S option, chdir to qmail control directory in chowkidar.c
+16. Added BADIP functionality in qmail-smtpd
+24/04/2010
+17. set SMTPROUTE / QMTPROUTE in qmail-rspawn based on routes variable
+    [2991775]
+18. use QMTP protocol in qmail-remote, if QMTPROUTE variable set. [2991775]
+19. modified GetSmtproute.c, findmdahost.c, get_smtp_service_port.c, svctool,
+    vdelivermail.c, vmoddomain.c for supporting QMTP [2991775]
+20. add alias to register-spam, register-ham, spam, ham ids in
+    vadddomain_handle [2991775]
+25/04/2010
+21. iwebadmin - Web frontend for IndiMail user administration, built
+    by hacking qmailadmin source code [2992161]
+27/04/2010
+22. Fixed deletion of files during RPM upgrade of indimail-devel,
+    indimail-shared packages [2993010]
+
+* Wed Apr 14 2010 mbhangui@gmail.com
+Release 1.7.3 Start 31/03/2010
+02/04/2010
+1.  Added new program swaks - Swiss Army Knife for SMTP
+2.  Fix extra new lines after Deliverd-To header
+03/04/2010
+3.  fix binding on ipv6 address in timeoutconn.c
+4.  Added option to create QMQP service in svctool, RPM
+5.  configure script now detects missing components
+04/04/2010
+6.  added -fno-strict-aliasing to compilation flags
+07/04/2010
+7.  preline segfaults [2983128]
+8.  use HOSTNAME environment variable to record host in qmail-queue.c (bypass
+    gethostname()
+9.  Change permissions of cdb files to indimail in qmailctl
+08/04/2010
+10. Upgrade to clamav-0.96
+09/04/2010
+11. Define environment variable AUTHSERVICE in courier-imap authmodule
+    authindi to denote authentication for imap, pop3 or webmail
+10/04/2010
+12. Added ACCT_INACT_EXPIRY, PASSWORD_EXPIRY variables in iauth.so pam plugin
+    to enable pam-checkpwd (pam checkpassword) to return failures on account and
+    password expiry
+13. Fixed maths in calculating account/password expiry (iauth.c, pam-multi.c)
+11/04/2010
+14. Added domain limits in iauth.so
+15. fixed domain_expiry, passwd_expiry getting reset in vmoddomlimits
+16. added domain limits query in inlookup (replaced LPWD_QUERY with
+    LIMIT_QUERY)
+12/04/2010
+17. use inquery in vchkpass, authindi, iauth.so for domain limits
+    (when QUERY_CACHE is defined)
+13/04/2010
+18. Renamed vmoddomlimits to vlimit
+19. use 'indimail' in Message-ID
+
+* Wed Mar 31 2010 mbhangui@gmail.com
+Release 1.7.2 Start 15/03/2010
+18/03/2010
+1.  Added unsigned integer overflow check to alloc.c in ucspi-tcp, qmail
+    Matthew Dempsky - http://marc.info/?l=qmail&m=125213850310173&w=2
+22/03/2010
+2.  Added --deliverycount-limit option for vdelivermail to record email
+    delivery counts
+3.  Tested with MariaDB 5.1.42
+4.  fixed calling of overquota command when user becomes overquota [2974478]
+24/03/2010
+5.  Moved overquota.sh to libexec
+25/03/2010
+6.  Added QMTP support in qmail-remote [2976840]
+7.  Added option to create qmail-qmtpd service in svctool, create_services,
+    RPM
+8.  Added dkim man page
+26/03/2010
+9.  Added QUEUEPROG environment variable in qmail-multi to execute alternate
+    queue program instead of qmail-queue
+10. Updated envrules environment variables in qmail-smtpd, qmail-inject,
+    spawn-filter man pages
+11. use tcp.qmtp.cdb for qmtpd service
+28/03/2010
+12. use localiphost instead of hostip for local IP address
+13. use 127.0.0.1 if get_local_ip() fails in inlookup [2977996]
+30/03/2010
+14. BUG - Fixed typo in cronlist.in
+15. BUG - Fixed SIGSEGV in spamReport() function in spam.c [2979103]
+16. BUG - fixed "Invalid TIMESTAMP: Internal Bug problem" in LoadBMF.c
+    [2979103]
+17. BUG - call qmail-cdb instead of qmail-spamdb in spam.c [2979103]
+18. BUG - Fix output being sent to client instead of log in smtpd.c [2979100]
+19. BUG - pass ipv4 address to greylist() in smtpd.c [2979391]
+
+* Mon Mar 15 2010 mbhangui@gmail.com
+Release 1.7.1 Start 04/03/2010
+06/03/2010
+1.  Added STLS capability to proxpop3, STARTTLS capability to proxyimap
+    [2964759]
+2.  New Program sslerator to ssl enable applications [2964759]
+07/03/2010
+3.  Check return value of is_distributed_domain() in all programs
+4.  return failure in open_master if host.master is not present
+5.  disable checking of host.cntrl in findmdahost.c
+6.  Renamed POST HOOK to POST HANDLE in man pages
+7.  host.master path was not set correctly in install_tables.c
+08/03/2010
+8.  renamed qmail-autoresponder to autoresponder to shorten path
+9.  renamed qmail-recipients to recipient-cdb
+09/03/2010
+10. added man page cdbmake, cdbdump, cdbget, cdbstats, cdbtest, predate,
+    datemail, logselect
+11. Expanded indimail man page to include documentation on qmail,
+    courier-imap, bogofilter, fetchmail, altermime, ripmime, mpack, flash
+    packages
+10/03/2010
+12. Backported courier-imap-3.0.8 to courier-imap-4.7.0
+11/03/2010
+13. BUG - initialized maxperip with PerHostLimit in tcpserver.c
+    [2968485]
+12/03/2010
+14. Added SIGUSR1 handler to print connected IPs table in tcpserver
+15. Added clamav-0.96rc1
+
+* Thu Mar 04 2010 mbhangui@gmail.com
+Release 1.7 Start 19/02/2010
+19/02/2010
+1.  BUG - install_tables to skip creating table for distributed setup
+    on a non-clustered setup
+2.  FEATURE - Allow defaults from mysql conf file to be used for mysql_socket,
+    mysql_port
+3.  BUG - set_mysql_options() to be called before each mysql_real_connect()
+4.  BUG - Fixed user, passwd, socket/port getting lost in open_central_db() in
+    findhost.c
+5.  BUG - Delete from smtp_port vsmtp_delete_domain() in vauth_deldmain.c only
+    if domain is distributed
+22/02/2010
+6.  FEATURE - Added logging of senders and recipients in rblsmtpd
+7.  BUG - Fixed SIGSEGV in rblsmtpd when RBLSMTPD was set and empty [2956656]
+8.  FEATURE - Upgrade to fetchmail-6.3.14
+23/02/2010
+9.  Allow MYSQL_SOCKET, MYSQL_VPORT to override indimail.cnf settings
+24/02/2010
+10. Added man page for uacl
+11. Updated indimail documentation (man page indimail(7))
+25/02/2010
+12. Use host.mysql in ProcessInFifo() if host.cntrl is absent
+13. Use host.mysql in findhost if host.cntrl is absent
+14. use host:user:password:socket/port format in vauth_open()
+15. Return host in host:user:password:socket/port format in SqlServer()
+28/02/2010
+16. Use tcprules for opening relay only if OPEN_SMTP is defined in
+    open_smtp_relay
+17. Check value of DEBUG_LOGIN in authindi
+18. Do not remove man, include in main rpm package
+01/03/2010
+19. Advertise STARTTLS capability in IMAP, POP3 ports
+02/03/2010
+20. Changed Username xxx@yyy does not exist to xxx@yyy: No such user in
+    deluser.c, renameuser.c vauth_setquota.c vmoveuser.c
+21. Removed unsupported AUTH methods for pop3 and imap services
+03/03/2010
+22. Merged base64 encoding/decoding in one utility - base64
+23. Create a default host.mysql file in /var/indimail/control
+
+* Fri Feb 19 2010 mbhangui@gmail.com
+Release 1.6.9 Start 01/02/2010
+10/02/2010
+1.  Removed INDIMAIL depencies in qmail-tcpok, qmail-tcpto, qmail-qread
+16/02/2010
+2.  Added abuse, mailer-daemon as alias to postmaster when creating a new
+    domain.
+3.  Added POST Handle for program vadddomain, vdeldomain, vadduser, vdeluser
+    vrenamedomain, vrenameuser, vpasswd, vmoveuser
+4.  BUG - Free memory allocated by vasprintf in error_stack.c
+18/02/2010
+5.  BUG - Fixed creation of indisrvr service when installing RPM
+6.  Changed default mysql socket to /var/lib/mysql/mysql.sock in indimail.h
+19/02/2010
+7.  BUG - localdbinfo() did not use host:user:passwd:socket/port format from
+    host.mysql
+
+* Mon Feb 01 2010 mbhangui@gmail.com
+Release 1.6.8 Start 04/01/2010
+06/01/2010
+1.  host.cntrl, host.mysql, host.master can now accept
+    host:username:password:port/socket
+2.  MYSQL_PASS changed to MYSQL_PASSWD in svctool
+3.  Fixed install_tables attempting to create clustered tables setup
+    on non-clustered setup.
+01/01/2010
+4.  Remove --mysqlhost parameter for indisrvr service creation in
+    indimail.spec
+5.  use mysql user, password from command line in pwdlookup service
+19/01/2010
+6.  Fixed logic in mail_acl() function. accesslist feature in qmail-smtpd
+20/01/2010
+7.  New program uacl to test accesslist
+01/02/2010
+8.  Fixed xtext function in qmail-remote
+
+* Mon Jan 04 2010 mbhangui@gmail.com
+Release 1.6.7 Start 11/12/2009
+16/12/2009
+1.  create log directory in create_services
+2.  replaced all occurences of chown with $chown in svctool
+17/12/2009
+3.  log from and rcpt for qmail-remote
+4.  Modified rsmtp, rsmtprdomains, rsmtpsdomains, rsmptsenders to correctly
+    decipher host from smtp log
+18/12/2009
+5.  Added case for mysql-5.5 in svctool
+19/12/2009
+6.  Use GNU syntax for tail in bogofilter-qfe.in
+21/12/2009
+7.  fixed issue with delivery of mails to register-spam, spam,
+    register-nonspam, nonspam ids
+30/12/2009
+8.  Added vfilter rule for X-Bogosity spam filtering in postfilt in svctool
+9.  Made vcfilter setuid
+10. Modified vcfilter.c, vbulletin.c, vadduser.c, printdir.c, vdeluser.c,
+    vreorg.c, vdominfo.c, vdeldomain.c for running programs with uid,gid of
+    domain
+
+* Fri Dec 11 2009 mbhangui@gmail.com
+Release 1.6.6 Start 25/11/2009
+25/11/2009
+1.  Added repo for openSUSE 11.2, Fedora 12
+2.  Prevent empty alias_line, email addresses getting added in valias
+3.  Removed left over system command from qmailmrtg7
+27/11/2009
+4.  Fixed config in qmail. renamed config shell script to qmailconfig
+5.  Added reports for smtp port 587 in svctool --reports
+6.  Modification to rpm spec file - moved verification to '%'post,
+    added %%verifyscript, added qmailconfig, hostname
+28/11/2009
+7.  Changed iauth.so path to /var/indimail/modules
+01/12/2009
+8.  Fixed error in vset_limit() - limits.c
+9.  Enforce domain limits user quota in vadduser, vmoduser, vsetuserquota
+02/12/2009
+10. Added -l option to vmodddomain to turn on or off domain limits
+11. use .domain_limits in domain directory to turn on domain limits in
+    vadduser, vmoduser, vsetuserquota
+03/12/2009
+12. Use AUTHMODULES environment variable for defining smtp auth modules
+05/12/2009
+13. Added badhost functionality in qmail-smtpd
+14. Added X-Originating-IP header in qmail-queue
+15. Fixed typo in tcpserver '-a' option change to '-c'
+09/12/2009
+16. reconnect to MySQL (findhost.c) if server gone away
+17. Handle MySQL error gracefully in qmail-rspawn
+18. Close passwd, group database in uidinit()
+10/12/2009
+19. Modified spawn.c to display MySQL error in qmail-rspawn
+20. Use hostip also to figure out local interfaces
+21. Fix for DK_SYNTAX_ERR in dkfilter-sh. Also dktest now exits with the DK
+    status instead of 1
+11/12/2009
+22. create environment variable MYSQL_OPT_RECONNECT for indiserver, qmail-send,
+    inlookup service (svctool)
+
+* Wed Nov 25 2009 mbhangui@gmail.com
+Release 1.6.5 Start 13/11/2009
+13/11/2009
+1.  BUG - fixed tcprules going into endless loop with lines neither having
+    allow or deny lines and non-blank lines not have ':' [2897073]
+2.  ANTISPOOF code implemented in MAIL FROM rather than RCPT TO
+    Turn off antispoof if relayclient is set [2897560]
+3.  Record helo name when helo name is rejected by stupid mail servers like MS
+    Exchange
+4.  BUG - Check for return status of tcprules in qmailctl [2897564]
+5.  Reload certificate on SIGHUP in indisrvr - reported peter cheng [2897560]
+6.  If QHPSI program fails (qmail-queue.c, qmail.c), report error using return
+    value 77 [2897382]
+7.  Upgraded clamav to version 0.95.3 [2897567]
+8.  Changed --disable-summary to --no-summary argument to clamdscan [2897567]
+15/11/2009
+9.  BUG - Authenticated SMTP does not work if QUERY_CACHE is turned off [2897954]
+10. Added --query-cache, --password-cache option to svctool when creating
+    SMTP service. Added --query-cache, --password-cache in svctool invocation
+    arguments in indimail.spec, create_services, indimail-epm.list
+11. Upgraded to fetchmail-6.3.13
+16/11/2009
+12. Do not create services for clamd, bogofilter, fetchmail svctool, create_svc,
+    nssd if original executables found missing
+13. BUG - fixed compilation in indisrvr when HAVE_SSL is not defined (SigHup handler)
+14. BUG - Added -lcrypto to linking. 
+17/11/2009
+15. BUG - Fixed fcntl (locking) error on DARWIN (flock structure initialization) [2898949]
+18/11/2009
+16. Added new command vserverinfo
+23/11/2009
+17. Added mrtg support using a modified qmailmrtg7
+24/11/2009
+18. use Maildir path in .qmail-register-spam, .qmail-spam,
+    .qmail-register-nonspam, .qmail-nonspam
+19. Added HAM/SPAM graph for MRTG, qmailmrtg7 modified to handle bogofilter
+
+* Fri Nov 13 2009 mbhangui@gmail.com
+Release 1.6.4 Start 30/10/2009
+31/10/2009
+1.  Use RELAYCLIENT variable in qmail-multi to skip spam filter [2895710]
+03/11/2009
+2.  Unset SPAMFILTER in qmail-send variables [2895711]
+3.  Corrected indimail-epm.list to use greydaemon instead of qmail-greyd.
+    debian package will now use greydaemon just like the rpm package
+    [2895727]
+05/11/2009
+4.  Fix mysql database creation statements in svctool [2895728]
+5.  Print all errors to stderr in svctool [2895712]
+06/11/2009
+6.  added --no-bootstrap option in svctool for internal use [2895714]
+7.  fixed svctool program arguments not getting recorded in poppass run file.
+    [2895732]
+8.  Increase softmem for supervise services on 64bit OS in indimail.spec
+    [2895836]
+9.  Fixed missing newline in .qmail file created in add_vacation.c
+07/11/2009
+10. Renamed PASSWD_CACHE to QUERY_CACHE in iauth.c [2895833]
+11. Added sq_vacation program (backend for squirrelmail autoresponder plugin)
+    [2895715]
+12. Added squirrelmail autoresponder plugin. [2895715]
+13. Added missing declaration in error_stack.c for non-stdarg.h system
+14. Made code more compact in filewrt.c, mysql_perror.c
+08/11/2009
+15. Added option in set_mysql_options.c to set MYSQL_OPT_PROTOCOL. One can now
+    choose TCP or UNIX socket connection to MySQL by specifying MYSQL_OPT_PROTOCOL
+    environment variable. [2895720]
+09/11/2009
+16. Use set_mysql_options to set MySQL options before connecting to MDA MySQL.
+    [2895720]
+17. Added definitions for default MySQL connections in sq_vacation.c
+    [2895715]
+18. Use control file queue_base to process multiple indimail queues in
+    qmail-multi.c, qmail-qread.c, qmail-tcpok.c, qmail-tcpto.c,
+    spawn-filter.c, qmail-daemon.c [2895722]
+19. Added service creation for SMTP submission port 587, enforcing
+    authenticated SMTP (extra options --authsmtp --antispoof), no rbl
+    [2895723]
+10/11/2009
+20. Assign default header name for spamheader_name for qmailanalog scripts
+    [2895841]
+21. --rbl option can be specified multiple times in svctool for configuring
+    multiple rbl lists [2895724]
+11/11/2009
+22. Build cdb with wildcard matching tcp*.smtp, tcp*.imap, tcp*.pop3
+    (qmailctl) [2895725]
+23. Removed option -u passed to bogofilter (for rpm installations).
+    [2895737]
+24. Added man page for queue-fix.
+25. Turned off spam filtering for SMTP service on port 587 (create_services,
+    indimail.spec, indimail-epm.list
+
+* Thu Oct 29 2009 mbhangui@gmail.com
+Release 1.6.3 Start 17/10/2009
+17/10/2009
+1.  Pass argument to rpm.init to distinguish between package removal and
+    upgrade
+2.  include_trash wrongly defined as int in count_dir.c [2883153]
+3.  Fix compilation of pam-multi on Mac OS X [2883154]
+4.  added missing argument real_domain in valias_insert.c
+19/10/2009
+5.  Allow only root/indimail user to execute vpriv
+22/10/2009
+6.  Added man page for initsvc, nssd, nssd.conf
+7.  Fixed compilation/installation problem for nssd when ARCH_LIB was not
+    defined
+24/10/2009
+8.  Added cases for mysql 3.0 in svctool [2885254]
+27/10/2009
+9.  Added cases for MySQL 5.2, 5.3, 5.4.3 in svctool [2887071]
+28/10/2009
+10. BUG - Fixed scan_ip_port in greylist.c [2887721]
+11. remove newline as end of record in greylist.c [2887721]
+12. Removed errorneous free() statements in qmail-greyd.c [2887721]
+13. Temporary fix in qmail-greyd to handle IPv6 addresses [2887721]
+14. Use --use-greydaemon in indimail.spec, create_services to handle
+    IPV6 addresses in greylisting [2887721]
+29/10/2009
+15. svctool - Restart qmail-poppass after cert creation; check certfile before
+    starting indisrvr
+
+* Fri Oct 16 2009 mbhangui@gmail.com
+Release 1.6.2 Start 01/10/2009
+03/10/2009
+1.  O_RDWR mode for fifo in qmail-cat
+2.  Added new fortune cookies (chanakya, vedas, joel-on-software)
+04/10/2009
+3.  Added svctool man page
+06/10/2009
+4.  Added pam-multi, pam-checkpwd, authenticate.so
+09/10/2009
+5.  Added various record states in lastauth as #defines
+10/10/2009
+6.  Run vadduser only as root or indimail
+11/10/2009
+7.  Renamed vauthenticate() to iauth()
+8.  Completed acct_mgmt functions in iauth.c, pam-multi.c
+9.  Do sleep on authentication failure in pam-multi
+13/10/2009
+10. Added Quick-INSTALL
+14/10/2009
+11. Replaced atol() with strtoll() for quota calculations
+12. Added --general-log option and removed --log-isam option from svctool.
+13. Added environment variable INCLUDE_TRASH to include trash mails in quota
+    calculations
+15/10/2009
+14. Use errno == ERANGE instead of LLONG_MAX, LLONG_MIN if LLONG_MAX,
+    LLONG_MIN not defined (when checking return status of strtoll)
+
+* Fri Oct  2 2009 mbhangui@gmail.com
+Release 1.6.1 Start 13/09/2009
+13/09/2009
+1.  Added option to ignore requirement of alias to be local
+15/09/2009
+2.  On error report the target address instead of alias
+3.  Corrected logic for trying alternate MX.
+16/09/2009
+4.  Fixed compilation issue for tls.c, auth_admin.c adminCmmd.c,
+    indisrvr.c when HAVE_SSL was undefined
+17/09/2009
+5.  Removed duplicate entry for ipchange in adminCommands in variables.c
+6.  Fixed sql syntax error (while inserting in MySQL ) in mgmtpassfuncs.c
+7.  Display error message from indisrvr to adminclient
+19/09/2009
+8.  Fix for mandriva 2009.1
+9.  Added definitions for LT_INIT in configure scripts (nssd, flash, indimail,
+    cdb, eps)
+20/09/2009
+10. Added new repository for latest bleeding edge IndiMail RPM
+    http://download.opensuse.org/repositories/home:/indimail
+11. Major changes to indimail.spec to support Mandriva 2009.1 on
+    openSUSE build service (OBS)
+12. Updated autoconf scripts for fortune-1.0.tar.gz libdkim-1.3.tar.gz
+    flash-0.9.4.tar.gz nssd-1.0.tar.gz ripmime-1.4.0.9.tar.gz
+    altermime-0.3.10.tar.gz
+21/09/2009
+13. Created git repository at
+    git://indimail.git.sourceforge.net/gitroot/indimail/indimail
+23. BUG - Fixed segmentation fault in dbinfo when mcdinfo was not present
+24. InLookup to initiate reconnect to hostcntrl database if MySQL goes down
+26/09/2009
+25. mdir_t type change to int64 instead of uint64
+26. Display current quota usage as 0 when maildirsize is absent
+27. Check return status of recalc_quota()
+28. Display for home directory as missing when absent in vuserinfo
+27/09/2009
+29. Set read permissions for mcdfile to prevent permission denied problem
+    when dbinfo is run by non-indimail user
+28/09/2009
+30. New -C option to vadddoamin to allow selective RECIPIENT check for a
+    domain
+31. Added chkrcptdomains to list of control file from which domain should
+    be deleted during vdeldomain
+32. Added 53 man pages for IndiMail commands
+33. Made vmoduser, vsetuserquota, vmovefile setuid
+
+* Fri Sep 11 2009 mbhangui@gmail.com
+Release 1.6 Start 20/08/2009
+22/08/2009
+1.  Added greylisting capability
+    http://www.gossamer-threads.com/lists/qmail/users/136740?page=last
+29/08/2009
+2.  Added qmail-greyd with greylisting capability
+3.  Added flag to matchinet() to specify use of gethostbyname()
+01/09/2009
+4.  BATV patch - http://mipassoc.org/pipermail/batv-tech/2007q4/000032.html
+5.  recipients.c updated to update to RECIPIENTS extension 0.6 by Erwin
+    Hoffmann
+6.  Use auto_break character from auto_break.c
+02/09/2009
+7.  BATV tester program (batv) added
+    http://www.gossamer-threads.com/lists/qmail/users/136776
+8.  Added option to svctool to add greydaemon as Greylisting daemon instead of
+    qmail-greyd
+07/09/2009
+9.  Fix for vulnerability in fetchmail
+    http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2009-2666
+10. Added option to hash IP records in qmail-greyd
+11. Upgraded to bogofilter 1.2.1
+12. renamed connect_db(), create_table() in sqlmatch.c to avoid clash clash
+    with indimail library
+08/09/2009
+13. Compile spam filtering, qhpsi without need of INDIMAIL to be defined
+10/09/2009
+14. Fix creation of qscanq log service in supervise
+
+* Thu Aug 20 2009 mbhangui@gmail.com
+Release 1.5.8 Start 01/08/2009
+1.  New Program qmail-poppass
+2.  Added -B option to vadduser to specify base_path
+05/08/2009
+3.  Removed extra flush() calls in qmail-smtpd
+06/08/2009
+4.  Added option in svctool, spec file to create service for poppassd protocol
+5.  Log all password change attempts in qmail-poppass to descriptor 2
+10/08/2009
+6.  Added TLS encryption to indisrvr.
+11/08/2009
+7.  BUG - Fixed truncation of IPV6 address due to usage of struct sockaddr. Replaced
+    with sockaddr_storage
+8.  Added TLS encryption to adminclient
+9.  Added configurable timeout for admin commands - ADMIN_TIMEOUT
+10. Added -ssl option in svctool to create SSL service for indisrvr
+12/08/2009
+11. Added 5 spam mails to wordlist.db
+13/08/2009
+12. Fixed LOGHEADER functionality in qmail-queue
+13. Added ::1 to tcp.smtp, tcp.imap, tcp.pop3, tcp.poppass for tcprules
+17/08/2009
+14. Fixed svctool for missing libexec directory on SUSE
+18/08/2009
+14. Fixed svctool - MySQL db and config creation for MySQL version 5
+
+* Fri Jul 24 2009 mbhangui@gmail.com
+Release 1.5.7 Start 02/07/2009
+1.  Upgraded to automake-1.11 indimail, fortune, flash, courier-imap
+09/07/2009
+2.  autodetect ipv6 in configure
+3.  IPV6 portable code in getpeer.c, islocalif.c, get_local_ip.c, tcpopen.c
+    tcpbind.c, indisrvr.c
+4.  use rresvport_af() as per RFC 2292
+5.  BUG - Fixed configure.in for BASE_PATH getting clobbered by LOGDIR in config.h
+10/07/2009
+6.  Compiled on FC11
+7.  Fixed check_install in svctool for '.' in ls -l output (selinux)
+23/07/2009
+8.  BUG - Removed double fclose() in LoadDbInfo.c
+
+* Wed Jul 01 2009 mbhangui@gmail.com
+Release 1.5.6 Start 11/06/2009
+1.  Added supplement patch for courier-imap for Mac OS X compilation
+2.  Fixed qmail-1.04/conf-cc for Mac OS X
+16/06/2009
+3.  Added clamav-0.95.2.patch for clamav-0.95.2
+4.  Fixed compilation of qmail-dkim if libdkim is missing in /var/indimail
+17/06/2009
+5.  Added indimail.plist for startup of servies on Mac OS X 10.5.x
+18/06/2009
+5.  Fixed syntax error in svctool which got added while adding -ssl option for
+    smtp
+6.  Added option in initsvc to use launchctl for Mac OS for startup/shutdown
+7.  Fix svctool for creating fetchmail option when --silent was not specified
+22/06/2009
+8.  Upgraded ripmime to 1.4.0.9, altermime to 0.3.10
+23/06/2009
+9.  Added proxy service creation for rpm install
+25/06/2009
+10. Added --enable-logdir, --enable-basepath
+26/06/2009
+11. Major changes in indimail-epm.list for .deb release
+
+* Thu Jun 11 2009 mbhangui@gmail.com
+Release 1.5.5 Start 03/06/2009
+1.  Check return value of recalc_quota
+07/06/2009
+2.  Fixed SPEC file for upgrade (rpm -Uvh)
+08/06/2009
+3.  Added cron entry for backup once a day in cronlist
+4.  Added mysql prefix option in configure
+10/06/2009
+5.  Added mailzipper script
+11/06/2009
+6.  Modified dns_text.c for Mac
+7.  configure for libdkim detects EVP_sha256 or EVP_sha1. Fix for Mac. Fixed
+    version available as libdkim-1.3
+
+* Wed Jun 03 2009 mbhangui@gmail.com
+Release 1.5.4 Start 04/05/2009
+1.  per domain/host outgoingip
+2.  Made domainbindings file name configurable
+3.  Added PTR record check in smtpd.
+27/05/2009
+4.  Added --ssl option in svctool for --smtp option
+5.  Automate creation of SMTPS service in spec file and create_services
+6.  Fixed permissions of PEM files (servercert.pem, imapd.pem, pop3d.pem)
+7.  Validate user as per RFC-5321 in adduser.c
+28/05/2009
+8.  Added program tls-cert-check
+9.  Generate a single SSL Key,Cert for SMTP, IMAP, POP3
+31/05/2009
+10. sync imap version with with courier-imap-4.5.0 (except proxy and tcpd)
+02/06/2009
+11. Division by zero in MailQuotaWarn.c. Handle NOQUOTA cases
+12. use fcntl for getting read lock in check_quota.c, recalc_qutoa,
+    lockfile()
+03/06/2009
+13. Added configure option for using fcntl() for file locking.
+
+* Mon May 04 2009 mbhangui@gmail.com
+Release 1.5.3 Start 20/04/2009
+1.  BUG - Fix memory leakage in MakeArgs.c
+22/04/2009
+2.  Added DKSIGNOPTIONS in qmail-dk
+3.  Made custom error fd in qmail.c, qmail-dkim.c, qmail-dk.c configurable
+4.  Polished qmail-qfilter
+28/04/2009
+5.  Simplified address_match() function
+6.  Speed improvement in cdbmatch() function
+7.  New control file goodrcptto, goodrcptpatterns
+29/04/2009
+8.  address_match() funcation can now lookup cdb.
+9.  New control file blackholercpt, blackholercptpatterns
+10. Control files spamignore, blackholedsender, badmailfrom, relaymailfrom,
+    badrcptto, chkrcptdomains, goodrcptto, blackholercpt can now be
+    specified in cdb format (in addition to current text format).
+11. New program qmail-cdb to generate cdb files.
+30/04/2009
+12. Added sqlmatch() function to have qmail control files in MySQL.
+13. Control files spamignore, blackholedsender, badmailfrom, relaymailfrom,
+    badrcptto, chkrcptdomains, goodrcptto, blackholercpt can now be
+    in MySQL (in addition to current text format and cdb).
+14. instcheck will now check compressed man pages
+01/05/2009
+15. Major change in address_match(), envrules() interface to pass errors
+    back to calling function.
+04/05/2009
+16. BUG - restore_env() freed environ twice. Simplified restore_env().
+    Completed DJB's unfinished env_clear() function.
+17. Fixed argument expected error message in dk-filter
+18. Fixed Extra recipient argument getting passed to BOUNCEPROCESSOR program
+
+* Mon Apr 20 2009 mbhangui@gmail.com
+Release 1.5.2 Start 05/03/2009
+1.  Added preprocessor warnings for spf, dk, dkim programs
+2.  Reopen morercpthosts if descriptor is closed
+3.  added SIGN_PRACTICE to dk-filter, use ietf standard for Yahoo DKIM
+    verification
+07/04/2009
+4.  Use environment variable TMPDIR in qmail-dk, qmail-dkim
+5.  Added option in svctool for domainkey, dkim signing/verification
+6.  Create control/domainkeys directory in hier.c
+7.  Create 0 bytes chkrcptdomains
+08/04/2009
+8.  Added option to add rbl entries
+10/04/2009
+9.  Upgraded RECIPIENTS extension to (0.5.19) by Erwin Hoffmann
+10. Use restore_env() in qmail-send.c to reset environment to original.
+11/04/2009
+11. Add logging information qmail-pop3d on fd 5
+12/04/2009
+12. vadddomain now adds domain to chkrcptdomains
+13/04/2009
+13. upgraded to clamav-0.95.1
+14/04/2009
+14. Added MAXRECIPIENT check in qmail-inject
+15/04/2009
+15. Added DKIMSIGNOPTIONS for qmail-dkim
+16. Added Return-Path to use as domain in dkimsign.cpp
+17. made max_tolerance, min_penalty configurable in qmail-remote
+17/04/2009
+18. BUG - fixed authentication issue with non-existing users (vchkpass.c)
+19. corrected field separator for filterargs in svctool
+19/04/2009
+20. Added DKIMSIGNOPTIONS in dk-filter
+21. Set DOMAIN for FILTERARGS programs/scripts
+
+* Fri Apr 03 2009 mbhangui@gmail.com
+Release 1.5.1 Start 24/03/2009
+28/03/2009
+1.  Added ADSP/SSP to qmail-dkim, libdkim
+2.  Released libdkim-1.1
+3.  Upgraded to bogofilter-1.2.0
+4.  Upgraded to clamav-0.95
+5.  Fixed bugs with DKIM/DK verification
+6.  Added control files signaturedomains, nosignaturedomains
+30/03/2009
+7.  Added control file goodrcptto, goodrcptpatterns
+31/03/2009
+8.  qmail-cat will open non-FIFO files in read-only mode
+02/04/2009
+9.  added dk-filter, qmail-qfilter
+10. unset QMAILLOCAL in qmail-remote code, and unset QMAILREMOTE
+    in qmail-local code of spawn-filter
+03/04/2009
+11. Print error messages to stderr in dk-filter shell script
+04/04/2009
+12. read error messages from pipe in spawn-filter
+13. increased size of error message buffer in qmail.c
+
+* Mon Mar 23 2009 mbhangui@gmail.com
+Release 1.5.0 Start 11/03/2009
+11/03/2009
+1.  Modified checkrecipient extenstion
+12/03/2009
+2.  Upgraded to clamav-0.95rc1
+3.  Upgraded domainkey code to libdomainkeys-0.68
+4.  Added net_read_timeout, net_write_timeout to indimail.cnf
+5.  Added last_error field to dbinfo structure
+6.  Display last_error and remaining retry interval when MySQL
+    connections reach MAX_FAIL_ATTEMPTS
+7.  Removed dnsText() from dns.c. Added dns_text() function in
+    domainkeys.c
+8.  Added -d (to get domainkey record from dns) to dktest program
+9.  Added testtrace program
+10. qmail-dk now will look for domainkey in control/domainkeys by default
+14/03/2009
+11. Upgraded domainkey code to libdomainkeys-0.69
+15/03/2009
+12. BUG - user was incorrectly extracted from domains having '-' in name
+13. Added MYSQL_OPT_READ_TIMEOUT, MYSQL_OPT_WRITE_TIMEOUT,
+    MYSQL_OPT_RECONNECT, MYSQL_SET_CLIENT_IP in set_mysql_options.c
+19/03/2009
+14. Added DKEXCLUDEHADERS to qmail-dk
+15. Added libdkim-1.0 - DKIM signing/verification library by ALT-N
+    technologies. New program dkim for testing dkim signatures
+16. New program qmail-dkim for DKIM-Signature
+20/03/2009
+17. Added BOUNCEQUEUE environment variable to set qmail-queue for bounces
+18. Added patch for selective signing headers in domainkeys
+    Tomo M <bulkstreadm@users.sourceforge.net>
+19. Fixed bug with multi-line headers in DKEXCLUDEHEADERS patch
+20. Fixed bug with multi-line headers in domainkeys
+21/03/2009
+21. Removed domainkey/dkim error codes from qmail.c. Use custom error code
+    support in qmail-queue (exit code 88) instead
+22. Fixed bug with qmail-dkim verification
+23. Added man page for qmail-dkim
+24. Use identity from basename of private key filename or environment variable
+    DKIMIDENTITY
+
+* Wed Mar 11 2009 mbhangui@gmail.com
+Release 1.4.2 Start 02/03/2009
+03/03/2009
+1.  Added --mysqlsocket and --mysqlport option for mysql config creation in
+    svctool
+04/03/2009
+2.  Added documentation for vmoddomain
+05/03/2009
+3.  Do not treat first time missing relay table as error
+06/03/2009
+4.  vadddomain will not exit with error if postmaster@domain exists. This will
+    allow vadddomain to be run on all hosts in a multi-host single domain setup
+5.  Added --wipe option to svctool to wipe users/assign, users/cdb file in
+    svctool --config=qmail
+6.  Added indimail_arch.png
+08/03/2009
+7.  Made vmoddomain setuid
+8.  Create smtp, fetchmail service with virus scanning on by default
+9.  Added all control files in list of config file in rpm
+09/03/2009
+10. Added few latest 419 scam samples to spam database
+11. Removed AC_LIB_PREPARE_MULTILIB for Darwin
+
+* Mon Mar 02 2009 mbhangui@gmail.com
+Release 1.4.1 Start 21/02/2009
+21/02/2009
+1.  libtoolized cdb
+2.  Create prefilt, postfilt table for global filters
+3.  Create spam, nonspam, register-spam, register-nonspam ids by default
+4.  Added maildirmake package from qmail
+5.  Added README.cdb, INSTALL-MYSQL
+6.  Added --base_path option to svctool config=mysql
+7.  Fixed incorrect argument passed in rpm post install script
+8.  Corrected usage of LIBTOOL in Makefile.am - credit "Stanislav Brabec" <sbrabec@suse.cz>
+24/02/2009
+9.  fixed pw_comp usage in indisrvr and proxylogin
+10. removed left over semi-colon in osh.c - which caused problem in reading
+    configuration
+25/02/2009
+11. Added SIGUSR2 handler to toggle verbosity in indisrvr
+12. Modified vatrn -s option to show all entries
+26/02/2009
+13. Removed /etc/event.d/svscan from %%files. This caused initsvc to fail on
+    non-upstart /etc/inittab based systems
+14. Corrected setting perms of setuid programs in Makefile.am
+01/03/2009
+15. Fixed qmailctl (/etc/sysconfig/network, /etc/init.d/functions) on non
+    red-hat systems
+16. Fixed setting of localiphost using ipmeprint in svctool
+17. Added --silent option for fetchmail service creation in svctool
+
+* Thu Feb 19 2009 mbhangui@gmail.com
+Release 1.4 Start 13/02/2009
+15/02/2009
+1.  added call to uidinit() in instcheck.c to correctly set
+    permissions of executables during installation
+2.  Changes to flash configure/Makefile.am to compile curses/ncurses correctly
+3.  create /etc/ld.so.conf.d/indimail-{arch}.conf in create_services
+4.  Corrected MySQL config file in service creation in create_services
+16/02/2009
+5.  Incorporated -version-info, -release in shared libraries
+17/02/2009
+6.  Added tag=CC to libtool invocation in indimail Makefile.am
+7.  Added -lncures -ldl to libflash LDADD
+18/02/2009
+9.  Fixed warnings with fgets in multiple source files
+10. Added AC_LIB_PREPARE_MULTILIB to use acl_libdirstem for multiarch
+    environments
+11. Added mandriva 2009 to the list of supported distros
+
+* Thu Feb 12 2009 mbhangui@gmail.com
+Release 1.3.4 Start 05/02/2009
+1.  Create logdir when creating any service (svctool, rpm)
+2.  Removed root group from conf-users
+3.  make install does not shutdown when doing staged install
+4.  Changed debug level for nssd to error
+06/02/2009
+5.  changed ./configure to %%configure in rpm .spec file
+6.  Fixed potential buffer overflow conditions
+7.  start nscd daemon after configure is over in %%build section
+07/02/2009
+8.  fetchmail upgraded to 6.3.9
+9.  MySQl upgraded to 6.0.9-alpha
+10. removed authpam and add authshadow in courier-imap configure options
+11/02/2009
+11. Modifed mysql_config in svctool to remove skip-federated from my.cnf
+12. Added AC_CHECK_LIB in configure to detect curses, ncurses or termcap
+13. removed bootstrap
+
+--------------------------------------------------------------------------------
+* Wed Feb 04 2009 mbhangui@gmail.com
+Release 1.3.3 Start 29/01/2009
+1.  added toggle option to vmoduser to toggle gid int bit fields
+28/01/2009
+2.  BUG Initialize indimailuid, indimailgid
+3.  added vmodddomain command
+4.  vaddaliasdomain needs to run as root for updation of assign file
+29/01/2009
+5.  BUG - corrected column lenghts for MySQL tables in svctool
+30/01/2009 - Major work for developing RPM
+6.  New program rpmattr
+02/02/2009
+7.  Removed MySQL db creation in during make install/install-strip
+8.  BUG - initsvc returned error first time when svscan was not installed
+04/02/2009
+9.  Added file INSTALL.rpm
+10. Created rpm spec file indimail.spec
+--------------------------------------------------------------------------------
+Release 1.3.2 Start 25/01/2009
+25/01/2009
+1.  svctool - Typo, no creation of config files on error, create imapd.cnf,
+    pop3d.cnf in cert creation.
+2.  move upstart to boot directory, initsvc installs upstart from boot
+3.  Modified INSTALL to rearrange MySQl installation/configuration steps.
+Released 1.3.2, test done on FC10
+--------------------------------------------------------------------------------
+Release 1.3.1 Start 17/01/2009
+1.  dumpconfig in svctool now gives service configuration, software config and
+    indimail's control file information
+20/01/2009
+2.  added stdout, use-grant option in svctool
+3.  use mysqlbindir for MYSQ_BASE in bootstrap
+4.  INSTALL modified to reflect creation of users in MySQL
+5.  Generate INSTALL from INSTALL.in to remove hardcoded directories and
+    version numbers
+6.  Use indimail.cnf as default mysql configuration
+--------------------------------------------------------------------------------
+Release 1.3 Start 03/01/2009 
+07/01/2009
+1.  Added dumpconfig command in svctool. To show all variables configured in
+   supervise
+2.  Made Changes and Corrected typos in INSTALL.
+12/01/2009
+3.  Fixed INSTALLATION issues. Modifed file INSTALL, Makefile.am, svctool.in,
+    bootstrap
+4.  Added function backfill to fill empty slots left (by deleting users) in
+    dir_control
+5.  Create queue_base control file when creating queues
+6.  Added --sql-mode=NO_BACKSLASH_ESCAPES
+13/01/2009
+7.  Added documentation for training bogofilter.
+8.  Created wordlist.db from corpus at
+   http://wwww.spamassassin.apache.org/publiccorpus/
+9.  Create empty wordlist.db if wordlist.db does not exist
+10. Corrected cronlist
+14/01/2009
+11. Completed backfill code for dir_control
+12. Locking can now be specified in --enable-file-locking=y|n|s||l||f
+13. Fixed remove_line() removing all matched line. New option now to remove
+    only the first matched line.
+
+--------------------------------------------------------------------------------
+Release 1.2 Start 08/12/2008 
+1. BUG - valias was not inserting alias entries
+16/12/2008
+2. option to findhost() to restrict wildcard search
+23/12/2008
+3. Corrected/Improved sigscheck, bodycheck functions
+4. Upgraded to clamav-0.94.2
+30/12/2008
+5. Correction to addrparse(). Fixed problem with qmail-smtpd rejecting Null From
+   address <>
+
+--------------------------------------------------------------------------------
+Release 1.1 Start 18/08/2008 
+
+18/08/2008
+1.  Modifed upstart.sh to denote shorter notation for multiple run levels
+2.  courier-imap auth module - authindi
+3.  Added SHA256 and SHA512 password hashing scheme
+31/08/2008
+4.  added --enable-mysql-escape option in configure
+5.  use mysql_real_escape_string() to escape mysql characters (prevent sql
+    injection). Previous function mysql_escape() discarded
+6.  added sql-inject prevention code (use mysql_real_escape_string() API)
+03/09/2008
+7.  added mysql_port, mysql_socket config to svctool
+8.  added Name Service Switch pwdlookup daemon
+11/09/2008
+9.  added configure options --enable-md5-crypt, --enable-sha256-crypt,
+    --enable-sha512-crypt to turn on internal crypt functions
+10. BUG - Permissions for setuid programs were not setup properly in bootstrap
+    script and Makefile.
+14/09/2008
+11. BUG - Fixed problems with creation/deletion of directories in vdeldomain
+15/09/2008
+12. BUG - ipme_init() returned error if network interface did not support ipv6
+16/09/2009
+13. Added hostid argument (-h) to vadduser. -h option renamed to -m
+14. Added dbinfo table for domain field to be renamed in vauth_renamedomain()
+15. Allow vadddomain, vdeldomain, vaddaliasdomain, vrenamedomain, vrenameuser,
+    vdeluser only for root/indimail
+16. Added cdbmake programs
+30/09/2008
+17. Have domainbindings take precedence over outgoingips.
+21/10/2008
+18. Added SSL options for IMAP/POP3
+24/10/2008
+19. BUG - Fixed problem with remove_quotes
+20. Added Domain Password Expiry option
+04/11/2008
+21. Return NOQUOTA if quota is zero
+05/11/2008
+22. Added Andrew Richard's early talker patch via control file greetdelay
+07/11/2008
+23. Cached findhost. Cache reset functions for vauth_getpw, findhost
+24. BUG prevent cloberring of mdahost in vauthOpen_user.c
+25. Display FIFO name in signal handlers of inlookup
+26. Reset cache for password changes
+27. SIGINT in InLookup to close and reopen all database connections
+10/11/2008
+28. Added patch for clamav-0.94.1
+29. Fixed installation errors.
+13/11/2008
+30. BUG - Fixed mysql_close being called twice if vclose is called twice. This
+    would cause glibc free problem
+15/11/2008
+31. Added localdomains control file to qmail-local
+18/11/2008
+32. GREETDELAY functionality in rblsmtpd, %%IP%% substitution in RBLSMTPD
+    variable
+20/11/2008
+33. Modified authindi.c, Login_Tasks for password expiry
+34. Set LAST_PASSWORD_CHANGE in Login_Tasks
+35. BUG - Corrected return status in runcmmd function
+24/11/2008
+36. Added ONERROR_EXIT, ONERROR_MSG
+
+--------------------------------------------------------------------------------
+* Fri Aug 15 2008 mbhangui@gmail.com
+Release 1.0 Start 18/06/2005 
+
+18/06/2005
+1.  BUG - Overquota mails sent to users with NOQUOTA as the quota.
+2.  Feature - Allow inactive users to send mails using Authenticated SMTP by
+    defining ALLOW_INACTIVE env variable.
+3.  Turn on extension address if QMAIL_EXT is defined
+4.  Run script defined by POSTAUTH env variable after successful auth in
+    vchkpass.c
+23/08/2005
+5.  BUG - qregex enabled by default in smtpd
+6.  ELIMINATE_DUPS and ELIMINATE_DUPS_ARGS added to make mail duplicate
+    eliminator configurable
+7.  BUG - fdmoreroutes not initialized in qmail-remote
+8.  BUG - IPV6 corrections to dns.c, dnsfq.c
+9.  Added case 's' in qmail-inject to delete sender. Added -s option when
+    calling qmail-inject in spawn-filter
+10. Added min_backoff argument to tcpto() and max_tolerance arg to tcpto_err()
+11. BUG - Corrected mailfrom_size() in smtpd.c
+12. Made min_backoff, max_tolerance configurable in qmail-remote (smtproutes)
+13. BUG - flagsize reset to 0 in smtp_mail() to avoid databytes errors when multiple
+    mails are sent in a single session in qmail-smtpd.
+23/12/2005
+14. BUG - smtpd accepted blank rcptto in smtpd.c.
+15. Ability to turn off Passwd Cache in LdapGetpw.c
+16. BUG - Prevent segmentation fault in parseAddress.c, storeHeader.c
+17. BUG - Prevent mail delivery to the group id in vdelivermail.c
+18. BUG - Fix segmentation fault in vgroup.c
+19. New control file for queuelifetime of bounce message in qmail-send.c
+27/12/2005
+20. Removed Memory Leaks
+29/12/2005
+21. BUG - Set PWSTRUCT when user not found in qmail-lspawn.c
+22/01/2006
+22. BUG - Spam mails wrongly getting blackholed
+23. Added envheaders control file in qmail-queue.c. Improved header line
+    processing by using mess822_ok()
+24. Ability to have ',' character in environment in envrules.c
+25. Added domain_expiry to limits.c, vmoddomlimits.c
+26. Added 'm' option to vdeloldusers.c, trashpurge.c to purge mails from specified
+    folders
+27. Fix for NOQUOTA in vadduser.c, vauth_adduser.c
+17/02/2006
+28. Display host for which SMTP connection failed in qmail-remote
+01/03/2006
+29. BUG - Skip down MySQL host if user record does not lie on the down MySQL host
+    [inlookup]
+30. BUG - Initialize Message size in smtpd.c for each session.
+31. Added control file logheader
+29/03/2006
+32. Initialize total in LoadDbinfo.c
+19/08/2006
+33. Create non-existing directories when delivering for normal, valias, .qmail
+## Personal ChangeLog #######
+Left   Sify Ltd.
+Joined Yahoo! Inc
+Joined Consim Info Pvt. Ltd.
+Hence No work on IndiMail between 19/08/2006 to 09/06/2007
+#############################
+09/06/2007
+34. Added license API discovery in ucspi, qmail
+35. fixed compile warnings in dns_transmit.c, prot.c
+19/12/2007
+36. Expand Environment variables in MakeArgs
+37. Added LOGHEADERS enviroment variable
+38. Added ENVHEADERS enviroment variable to set specific header values as
+    environment variables. An optional max lenght can be provided for the header
+    value.
+39. BUG - Avoid loops with FILTERARGS, SPAMFILTER
+40. BUG - Incorrect length of addr if INDIMAIL was not defined
+05/02/2008
+41. Added control file domainbindings and domainbinding functionality in
+    qmail-remote
+42. BUG - PARANOID did not work in hostaccess
+43. Process both microsecond and tai64n format in matchup
+21/05/2008
+44. BUG - Corrected vpasswd, vauth_getpw for non-ldap use
+45. BUG - initialized variable action in licgen.c
+26/05/2008
+46. BUG - Fix compilation error in deliver_mail.c if POSTFIXDIR not defined
+47. Removed redundant code (ldap, tcl/tk)
+48. Added argument to setup (qmail), instcheckA
+49. BUG - rspamstat was not processing qmail-local:, qmail-remote: lines
+50. Added fixing of perm/ownership in instcheck.c
+27/05/2008
+51. New Program install_tables to create all indimail tables
+28/05/2008
+52. Removed cdb, ldap code. Made MySQL default
+53. Added option to clearopenstmp for selective option to clear/update relay
+    table or tcp.smtp.cdb
+30/05/2008
+54. Updated TLS code Frederik Vermeulen <qmail-tls akrul inoa.net> 20070408Frederik Vermeulen <qmail-tls akrul inoa.net> 20070408 TLS patch
+02/06/2008
+55. Added max_rcpt_errcount
+03/06/2008
+56. BUG - parse_email SIGSEGV when emailid was null (hostcntrl.c)
+57. Added environment variable LEGACY_SERVER in proxlogin to prevent appending
+    tcpremoteip to the domain
+58. BUG - Added mdahost argument to vadduser
+59. BUG - Padded hostid with leading zeros
+60. Conditional compilation of license code
+61. Made all uids, gids in get_uid.c configurable from conf-users, conf-groups
+62. BUG - Made corrections to ensvc, rmsvc in svctool
+11/06/2008
+63. Made configurable environment variable name for default rules file in
+    envrules.c. Changed smtpd.c, qmail-inject.c, spawn-filter.c
+64. Added envrules for bounces (rule based on bounce recipients)
+65. Upgraded to bogofilter to bogofilter-1.1.7
+66. Added patch for bogofilter-1.1.7, clamav-0.93
+67. Fixed compilation errors/warnings for POP_AUTH_OPEN_RELAY,
+    ENABLE_AUTH_LOGGING, VALIAS, IP_ALIAS_DOMAINS, CLUSTERED_SITE,
+    ENABLE_MYSQL_LOGGING, VFILTER
+17/06/2008
+68. BUG - ix.af not initialized in ipme.c, used inet_pton() to convert
+    addresses
+69. Staged installation (svctool, Makefile.am, bootstrap, qmail-newu,
+    config-fast)
+20/06/2008
+70. inlookup daemon
+71. Upgraded to clamav-93.1
+72. Added Fortune Package
+25/06/2008
+73. Changes for 64 bit (C99 ISO C Standard)
+74. BUG - set umask(022) in update_newu.c for proper permission of cdb file
+26/06/2008
+75. Added documentation for creating ODMR service in INSTALL
+28/06/2008
+76. Added create_services.sh for creating all services
+01/08/2008
+77. Added function error_stack() (estack() in qmail)
