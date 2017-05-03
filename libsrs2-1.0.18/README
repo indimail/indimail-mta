@@ -1,0 +1,11 @@
+TODO:
+	* Write this README.
+
+BEHAVIOUR OF THIS LIBRARY:
+	* This library does not modify the caller's memory.
+	* This library does not use malloc() (except in one place, TBF).
+	* This library is guaranteed compatible with the Perl Mail::SRS.
+
+SUPPORT:
+	* See http://www.libsrs2.org/ where there are much fuller
+	  resources documenting SRS and libsrs2.

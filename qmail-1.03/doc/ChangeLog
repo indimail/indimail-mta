@@ -1,0 +1,75 @@
+* Wed May 03 2017 10:52:51 +0530 mbhangui@gmail.com 2.1-1.1.fc25
+Release 2.1 Start 16/03/2017
+1.  quoted svctool arguments and save install time arguments in variables/.options file
+2.  update_tmprsadh, svctool, spec files, debian postinst, postrm - updated certificate
+    location to sysconfdir/certs
+3.  qmail-smtpd, qmail-remote - Env variable CERTDIR to override
+    /etc/indimail/control for certificate location
+4.  Permissions of supervise directory changed to onwer root:indimail 750
+    for services using MAXDAEMONS
+5.  renamed qmail-spamfifo service to qmail-logfifo
+6.  added upgrade script upgrade.sh, local_upgrade.sh
+7.  update_tmprsadh - added rsa2048.pem, dh2048.pem
+8.  ucspi-tcp - control_readline() did not use CONTROLDIR. Caused problem with
+    qmail_smtpd.so plugin which used the same symbol and was unable to load
+    control files.
+9.  fixed conf_dir variable getting clobbered by qmail-logfifo service creation.
+10. create tlsservermethod control file in svctool --config=qmail
+11. renamed functions in ucspi-tcp (rblsmtpd.so) to avoid duplicate symbols with
+    qmail_smtpd.so
+12. use RTLD_DEEPBIND (if present) in load_shared.c to avoid duplicate symbols
+    when loading multiple shared libs
+13. set DEFAULT_DOMAIN in qmail-send.25/variables as the hostname to handle
+    double bounces better
+14  qmail-todo, qmail-send - display null email address as <> in log_stat()
+15. svctool --config=qmail - set envnoathost, defaulthost = hostname 
+16. local_upgrade.sh - fix DEFAULT_HOST, QMAILDEFAULTHOST, envnoathost,
+    defaulthost settings
+17. svctool - MRTG graphs, added --mrtg option
+18. local_upgrade.sh added FIFODIR env variable
+19. replace dlopen() with dlmopen to keep tcpserver namespace private
+20. added dlnamespace for using dlmopen()
+21. tcpserver.c, prot.c - Changed data types for uid, gid to uid_t, gid_t
+22. Bug with dlmopen(), glibc wrappers for setgroups, setgid, setuid - use syscall for setgroups, setgid, setuid
+23. tcpserver - execute tcpserver_plugin after shedding root privileges
+24. indimail-mta.postinst.in, indimail-mta.spec - upgraded softmem to 536870912
+25. svctool - Fixed couriersslcache path
+26. dlnamespace.c - added comments, replace back ':' character removed before
+    string comparision
+27. qmail-remote.c - fixed tls_quit() function. Avoid mixed usage of
+    tls_quit() and quit() functions
+28. qmail-remote.c, rrt.c - renamed ONTRANSIENT_REMOTE to ONTEMPORARY_REMOTE
+29. qmail-rspawn.c Unset QMAILLOCAL in parent & not in child after vfork
+30. perms of /etc/indimail and subdirectory changed to 2775
+31. qmail-remote.c - use SMTPS if env variable SMTPS is set
+32. qmail-queue.c - fixed envheader. variable x renamed to field_len and
+    initialized to prevent skipping.
+33. fixed sysconfdir and sysconfdir subdir permissions
+34. use #ifdef HASDLMOPEN to use dlmopen() if present
+35. tcpserver_plugin.c - use PLUGINn_DIR variable to change directory independent of PLUGINn_init
+    env variable
+36. create queue base directory in setup
+37. report programs moved to libexecdir
+38. surblqueue - fixed qmail-multi path
+39. fixed search using hsearch in qmail-greyd.c
+40. tcpserver - load_shared.c - print lmid only during reload
+41. moved qmail-greyd, greydaemon, surblfilter, surbqueue to /usr/sbin
+42. use lockfile .svlock in service directory to prevent multiple svscan
+    to run on a service directory
+43. dlnamespace.c, tcpserver_plugin.c, load_shared.c, pathexec_env.c added code
+    to get namespace of shared libraries using env variables / envp variable
+44. qmailctl.sh - added multilog rotate command
+45. indimail-mta - install crontab entries for indimail-mta
+46. qmail-smtpd - Updated documentation on LOGFILTER
+47. qmail-smtpd - renamed LOGFILTER_FD to LOGFD
+48. shutdown indimail service in preun
+49. (rpm, debian) - use svok to figure out if service is up
+50. svctool - fixed inverted cname-lookup
+51. (rpm, debian) - removed duplicate calls to shutdown indimail service
+52. (rpm, debian) - use sed to edit inittab
+53. added svctool man page
+54. fixed sysconfdir variable in debian scripts
+55. OSX indimail.plist - fixed svscanboot path
+56. fixed DESTDIR in qmail-1.03, ucspi-tcp-1.03 Makefile, setup.c
+57. fixed tlsclientmethod path in qmail-remote
+58. cleanq.c - refactored code. added checks for safety
