@@ -71,7 +71,6 @@ eps*/Makefile
 eps*/Makefile.in
 eps*/stamp-h1
 execmysql
-*_handle
 hashtable
 hostcntrl
 hostsync
@@ -131,7 +130,6 @@ patches/qmail-1.03.patch.gz
 patches/ucspi-tcp-0.88.patch.gz
 perm_list
 postdel
-post_handle/*
 printdir
 proxyimap
 proxypop3
@@ -158,13 +156,10 @@ usr.sbin.clamd
 usr.sbin.mysqld
 vacation
 vaddaliasdomain
-vaddaliasdomain_handle
 vadddomain
 vadddomain.1
-vadddomain_handle
 vadduser
 vadduser.1
-vadduser_handle
 valias
 vatrn
 vbulletin
@@ -175,7 +170,6 @@ vcfilter.1
 vchkpass
 vdeldomain
 vdeldomain.1
-vdeldomain_handle
 vdelivermail
 vdelivermail.8
 vdeloldusers
@@ -192,16 +186,20 @@ vlimit
 vmoddomain
 vmoduser
 vmoduser.1
-vmoduser_handle
 vmoveuser
 vmoveuser.1
 vpasswd
 vpasswd.1
-vpasswd_handle
 vpriv
 vproxy
 vrenamedomain
 vrenamedomain.1
+vaddaliasdomain_handle
+vadddomain_handle
+vadduser_handle
+vdeldomain_handle
+vmoduser_handle
+vpasswd_handle
 vrenamedomain_handle
 vrenameuser
 vrenameuser.1
@@ -212,3 +210,6 @@ vsetuserquota
 vsmtp
 vtable
 vuserinfo
+*.lo
+*.o
+autom4te.cache
