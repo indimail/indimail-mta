@@ -1,5 +1,5 @@
 File INSTALL.indimail, Version 2.1
-DATE: Thu May  4 20:32:58 IST 2017
+DATE: Thu May  4 23:09:00 IST 2017
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -378,7 +378,7 @@ the installation.
     % gunzip -c libdkim-1.4.tar.gz | tar xf -
     % cd libdkim-1.4
     % ./configure --prefix=/usr --mandir=/usr/share/man \
-        --libdir=/usr/lib64
+        --libdir=/usr/lib64 # /usr/lib or /usr/lib64 on a 32/debian/64bit system
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
@@ -395,7 +395,7 @@ the installation.
     % gunzip -c libsrs2-1.0.18.tar.gz | tar xf -
     % cd libsrs2-1.0.18
     % ./configure --prefix=/usr --mandir=/usr/share/man \
-        --libdir=/usr/lib64
+        --libdir=/usr/lib64 # /usr/lib or /usr/lib64 on a 32/debian/64bit system
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
@@ -562,9 +562,9 @@ the installation.
     % ./configure --prefix=/usr --disable-root-check --bindir=/usr/bin \
         --with-redhat \
         --mandir=/usr/share/man \
-        --libdir=/usr/lib64 \
+        --libdir=/usr/lib64 \ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
         --sysconfdir=/etc/indimail \
-        --with-certsdir=/etc/indimail/control \
+        --with-certsdir=/etc/indimail/certs \
         --libexecdir=/usr/libexec/indimail \
         --datarootdir=/usr/share/indimail \
         --without-authchangepwdir \
@@ -635,11 +635,6 @@ the installation.
     % sudo chown indimail:indimail /etc/indimail/wordlist.db
     % cd ..
 
-    NOTE: A copy of wordlist.db is present in indimail-2.1/data.
-    So you can skip all the above and just execute the two commands below i.e.
-    % sudo cp indimail-2.1/data/worldlist.db /etc/indimail
-    % sudo chown indimail:indimail /etc/indimail/wordlist.db
-
     NOTE: UPGRADE Information. You can always upgrade to the latest version of bogofilter
     by applying the latest patch available in the indimail source patch subdirectory
     to the orignal latest available bogofilter package.
@@ -661,7 +656,7 @@ the installation.
         --enable-binprefix=/usr \
         --datarootdir=/usr/share/indimail \
         --libexecdir=/usr/libexec/indimail \
-        --libdir=/usr/lib64 \
+        --libdir=/usr/lib64 \ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
         --mandir=/usr/share/man \
         --with-ssl
     % make -s [DESTDIR=staging_directory]
@@ -684,7 +679,7 @@ the installation.
     % ./configure --prefix=/usr --sysconfdir=/etc/indimail \
         --mandir=/usr/share/man --libexecdir=/usr/libexec/indimail \
         --enable-mysqlprefix=/usr \
-        --libdir=/usr/lib64 \ # /usr/lib or /usr/lib64 on a 32/64bit system
+        --libdir=/usr/lib64 \ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
         --enable-default-domain=indimail.org
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
