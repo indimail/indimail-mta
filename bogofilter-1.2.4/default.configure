@@ -1,0 +1,6 @@
+#!/bin/sh
+autoreconf -fiv
+./configure --prefix=/usr --sysconfdir=/etc/indimail --enable-indimail \
+         --libexecdir=/usr/libexec/indimail \
+         --mandir=/usr/share/man
+
