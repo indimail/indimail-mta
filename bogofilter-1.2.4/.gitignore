@@ -55,3 +55,7 @@ src/tests/Makefile.in
 src/tests/README
 trio/Makefile.in
 trio/README
+*.o
+trio/Makefile
+autom4te.cache
+src/tests/Makefile
