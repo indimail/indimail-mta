@@ -601,6 +601,8 @@ the installation.
     % cd ..
     NOTE: If you are installing bogofilter on Mac OS X, you may need to install
     Berkeley db (libdb)
+    In some cases, if bogofilter gives errors for docs, you may need to install
+    xmlto package on some systems
 
     # Training Bogofilter ##### SPAM Filter #######################################
     OK, now onto the corpus description.  It's split into three parts, as follows:
