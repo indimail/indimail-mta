@@ -13,9 +13,7 @@ config.guess
 config.sub
 depcomp
 install-sh
-doc/ChangeLog
 obs.mk
-ChangeLog
 iwebadmin_perm_list
 compile
 debian/obs.mk
