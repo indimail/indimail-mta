@@ -1267,8 +1267,10 @@ auto-strarr: load auto-strarr.o substdio.a error.a str.a
 auto-strarr.o: compile auto-strarr.c substdio.h exit.h
 	./compile auto-strarr.c
 
-cleanq: load cleanq.o get_uid.o auto_uids.o strerr.a error.a substdio.a str.a wait.a getopt.a
-	./load cleanq get_uid.o auto_uids.o strerr.a error.a substdio.a str.a wait.a getopt.a
+cleanq: load cleanq.o get_uid.o auto_uids.o scan_uint.o scan_ulong.o \
+strerr.a error.a substdio.a str.a wait.a getopt.a
+	./load cleanq get_uid.o auto_uids.o scan_uint.o scan_ulong.o \
+	strerr.a error.a substdio.a str.a wait.a getopt.a
 
 cleanq.o: compile cleanq.c substdio.h error.h strerr.h direntry.h \
 auto_ageout.h wait.h sgetopt.h str.h subgetopt.h auto_uids.h
