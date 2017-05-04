@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.6  2017-05-04 20:20:40+05:30  Cprogrammer
+ * close passwd, group database
+ *
  * Revision 1.5  2014-07-27 15:16:57+05:30  Cprogrammer
  * change to qscand uid if run through non qscand user
  *
@@ -80,7 +83,7 @@ main(int argc, char *argv[])
 	pid_t           pid = 0;
 	char           *ptr;
 
-	if (uidinit(0) == -1)
+	if (uidinit(1) == -1)
 		_exit(67);
 	/*- Check whether we should be logging errors */
 	if (env_get("DEBUG"))
@@ -184,7 +187,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.5 2014-07-27 15:16:57+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qscanq.c,v 1.6 2017-05-04 20:20:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

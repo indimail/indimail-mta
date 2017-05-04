@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.61  2017-05-04 20:20:36+05:30  Cprogrammer
+ * close passwd, group database
+ *
  * Revision 1.60  2017-04-11 12:38:45+05:30  Cprogrammer
  * field_len was not initialized. Fixed envheader randomly not working
  *
@@ -801,7 +804,7 @@ main()
 
 	sig_blocknone();
 	umask(033);
-	if (uidinit(0) == -1)
+	if (uidinit(1) == -1)
 		die(67);
 	if (chdir(auto_qmail) == -1)
 		die(61);
@@ -1225,7 +1228,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.60 2017-04-11 12:38:45+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.61 2017-05-04 20:20:36+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

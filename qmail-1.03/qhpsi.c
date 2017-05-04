@@ -1,5 +1,8 @@
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.6  2017-05-04 20:20:22+05:30  Cprogrammer
+ * close passwd, group database
+ *
  * Revision 1.5  2010-07-18 19:17:27+05:30  Cprogrammer
  * renamed QUEUE_PLUGIN to QUEUE_PLUGIN_SYMB
  *
@@ -46,7 +49,7 @@ main(int argc, char **argv)
 	char           *messfn, *error, *queue_plugin_symbol, *plugindir;
 	stralloc        plugin = { 0 };
 
-	if (uidinit(0) == -1)
+	if (uidinit(1) == -1)
 		_exit(67);
 	if (env_get("DEBUG"))
 		flaglog = 1;
@@ -133,6 +136,6 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.5 2010-07-18 19:17:27+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qhpsi.c,v 1.6 2017-05-04 20:20:22+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
