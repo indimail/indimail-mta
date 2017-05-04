@@ -2,7 +2,7 @@
 #
 #
 qcount=5
-tcpserver_plugin=1
+tcpserver_plugin=0
 add_boot=0
 check_install=9
 servicedir=/service
@@ -16,11 +16,12 @@ libexecdir=@libexecdir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.63 2017-03-27 08:49:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.64 2017-05-05 01:18:05+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
-	echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path [--destdir=path] [--shared-objects] [--chk-install]
+	echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path \\"
+	echo "[--destdir=path] [--shared-objects] [--add-boot] [--chk-install]"
 
 	servicedir     - path of Supervise service directory
 	qbase          - path for createing IndiMail's queue collection
