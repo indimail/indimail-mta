@@ -11,3 +11,4 @@ debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/rules
 create_rpm
+autom4te.cache

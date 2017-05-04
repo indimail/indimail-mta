@@ -65,3 +65,7 @@ config.log
 config.status
 doc/Makefile
 src/Makefile
+doc/bf_copy.1in
+doc/bogofilter.1in
+doc/bogoupgrade.1in
+doc/bogoupgrade.htmlin
