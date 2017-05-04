@@ -1,3 +1,4 @@
+debian/README
 adminclient
 authgeneric
 authindi
@@ -10,7 +11,6 @@ cdb*/libtool
 cdb*/Makefile
 cdb*/Makefile.in
 cdb*/stamp-h1
-ChangeLog
 chowkidar
 cindimail
 clearopensmtp
@@ -55,13 +55,6 @@ debian/rules
 debian/_service
 debian/source
 displaytop
-doc/ChangeLog
-doc/INSTALL.indimail
-doc/INSTALL-MYSQL
-doc/INSTALL-RPM
-doc/README-CLUSTER
-doc/README.indimail
-doc/RELEASE-Notes
 eps*/config.h
 eps*/config.log
 eps*/config.status
@@ -99,10 +92,6 @@ initsvc
 inlookup
 inlookup.8
 inquerytest
-INSTALL
-INSTALL-MINI
-INSTALL-MYSQL
-INSTALL-RPM
 install_tables
 ipchange
 ismaildup
@@ -134,10 +123,6 @@ printdir
 proxyimap
 proxypop3
 qmailmrtg7
-Quick-INSTALL
-README
-README-CLUSTER
-RELEASE-Notes
 resetquota
 socket.lib
 sq_vacation
