@@ -1,0 +1,4 @@
+*.o
+autom4te.cache
+mpack
+munpack
