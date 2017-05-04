@@ -1,12 +1,12 @@
+#!/bin/sh
+autoreconf -fiv
 ./configure --prefix=/usr --disable-root-check --bindir=/usr/bin \
         --with-redhat \
         --mandir=/usr/share/man \
-        --libdir=/usr/lib64 \
         --sysconfdir=/etc/indimail \
-        --with-certsdir=/etc/indimail/control \
+        --with-certsdir=/etc/indimail/certs \
         --libexecdir=/usr/libexec/indimail \
         --datarootdir=/usr/share/indimail \
         --without-authchangepwdir \
         --without-authpam --without-authcustom \
         --without-authpwd --with-authshadow
-

@@ -1,0 +1,23 @@
+#!/bin/sh
+autoreconf -fiv
+prefix=/usr
+./configure \
+  --prefix=$prefix \
+  --datarootdir=/usr/share/indimail \
+  --mandir=/usr/share/man \
+  --enable-qmaildir=/var/indimail \
+  --enable-servicedir=/service \
+  --enable-modbase=$prefix/lib/indimail \
+  --libexecdir=/usr/libexec/indimail \
+  --enable-controldir=/etc/indimail/control \
+  --enable-assigndir=/etc/indimail/users \
+  --enable-shareddir=/usr/share/indimail \
+  --enable-domaindir=/var/indimail \
+  --sysconfdir=/etc/indimail \
+  --with-pkgconfigdir=/usr/lib64/pkgconfig \
+  --enable-mysqlprefix=/usr \
+  --enable-logdir=/var/log/indimail \
+  --enable-basepath=/home/mail \
+  --enable-tcprules-prog=/usr/bin/tcprules \
+  --enable-tcpserver-file=/etc/indimail/tcp.smtp \
+  `cat config/indimail.opts`
