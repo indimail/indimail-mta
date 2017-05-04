@@ -8,4 +8,6 @@ config.h.gch
 pam-checkpwd
 pam-multi.8
 pam-support.h.gch
-
+*.o
+*.la
+autom4te.cache
