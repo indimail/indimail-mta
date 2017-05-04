@@ -618,11 +618,12 @@ the installation.
     % mkdir training
     % cd training
     Download spam ham corpus from http://spamassassin.apache.org/publiccorpus/
-    % wget http://spamassassin.apache.org/publiccorpus/20030228_easy_ham_2.tar.bz2
-    % wget http://spamassassin.apache.org/publiccorpus/20030228_easy_ham.tar.bz2
-    % wget http://spamassassin.apache.org/publiccorpus/20030228_hard_ham.tar.bz2
-    % wget http://spamassassin.apache.org/publiccorpus/20030228_spam.tar.bz2
-    % wget http://spamassassin.apache.org/publiccorpus/20050311_spam_2.tar.bz2
+    % wget http://spamassassin.apache.org/old/publiccorpus/20030228_easy_ham_2.tar.bz2
+    % wget http://spamassassin.apache.org/old/publiccorpus/20030228_easy_ham.tar.bz2
+    % wget http://spamassassin.apache.org/old/publiccorpus/20030228_hard_ham.tar.bz2
+    % wget http://spamassassin.apache.org/old/publiccorpus/20030228_spam.tar.bz2
+    % wget http://spamassassin.apache.org/old/publiccorpus/20050311_spam_2.tar.bz2
+     
     % for i in *.bz2; do bzip2 -d -c $i | tar xf -; done
     % @prefix@/bin/bogofilter -d @sysconfdir@ -B -s spam
     % @prefix@/bin/bogofilter -d @sysconfdir@ -B -s spam_2
