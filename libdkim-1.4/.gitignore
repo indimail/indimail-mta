@@ -21,5 +21,6 @@ m4
 missing
 stamp-h1
 *.la
+*.lo
 *.o
 autom4te.cache
