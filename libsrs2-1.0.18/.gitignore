@@ -31,4 +31,5 @@ tools/Makefile
 tools/Makefile.in
 *.la
 *.o
+*.lo
 autom4te.cache
