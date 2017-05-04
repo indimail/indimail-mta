@@ -1,0 +1,10 @@
+datfiles/*.dat
+copy_fortune
+fortune
+randstr
+rot
+stamp-cookies
+strfile
+unstr
+autom4te.cache
+*.o
