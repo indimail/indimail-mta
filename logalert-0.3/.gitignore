@@ -5,6 +5,7 @@ logsrv
 incrmesg
 rpclog
 logclient
+logclient.1
 *.o
 parser.c
 parser.h
