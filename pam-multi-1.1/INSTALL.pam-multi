@@ -12,6 +12,26 @@ without warranty of any kind.
 Basic Installation
 ==================
 
+The most common option would be
+ ./configure --enable-moduledir=/lib/security --enable-default-domain=indimail.org \
+   --prefix=/var/indimail
+
+To INSTALL carry out the following steps
+
+% mkdir -p /home/local/src
+% cd /home/local/src
+% wget http://downloads.sourceforge.net/indimail/pam-multi-1.0.tar.gz
+% gunzip -c pam-multi-1.0.tar.gz | tar xf -
+% cd pam-multi-1.0
+% ./configure --prefix=/var/indimail --enable-mysqlprefix=/usr \
+    --enable-default-domain=indimail.org --enable-moduledir=/lib/security
+% make
+% sudo make install
+(replace indimail.org with your domain)
+
+review the file pam.d/pam-multi and copy it to /etc/pam.d
+
+
    Briefly, the shell command `./configure && make && make install'
 should configure, build, and install this package.  The following
 more-detailed instructions are generic; see the `README' file for
