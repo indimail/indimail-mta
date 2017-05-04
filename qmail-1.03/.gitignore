@@ -494,7 +494,6 @@ ldap-checkpwd
 qmail-sql
 qmail-sql.8
 sys-checkpwd
-sys-checkpwd.8
 cdbgetm
 condredirect.1
 dot-forward.1
@@ -541,3 +540,4 @@ debian/_service
 cronlist
 indimail-mta.spec
 *.a
+*.lib
