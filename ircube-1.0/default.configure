@@ -1,0 +1,3 @@
+#!/bin/sh
+autoreconf -fiv
+./configure --prefix=/usr --libexecdir=/usr/libexec/indimail --enable-plugindir=/usr/share/roundcubemail
