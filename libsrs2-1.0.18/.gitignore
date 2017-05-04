@@ -29,3 +29,6 @@ tools/.deps/
 tools/.libs/
 tools/Makefile
 tools/Makefile.in
+*.la
+*.o
+autom4te.cache
