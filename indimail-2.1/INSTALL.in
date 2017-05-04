@@ -378,7 +378,7 @@ the installation.
     % gunzip -c libdkim-1.4.tar.gz | tar xf -
     % cd libdkim-1.4
     % ./configure --prefix=@prefix@ --mandir=@mandir@ \
-        --libdir=@libdir@
+        --libdir=@libdir@ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
@@ -395,7 +395,7 @@ the installation.
     % gunzip -c libsrs2-1.0.18.tar.gz | tar xf -
     % cd libsrs2-1.0.18
     % ./configure --prefix=@prefix@ --mandir=@mandir@ \
-        --libdir=@libdir@
+        --libdir=@libdir@ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
@@ -562,9 +562,9 @@ the installation.
     % ./configure --prefix=@prefix@ --disable-root-check --bindir=@prefix@/bin \
         --with-redhat \
         --mandir=@mandir@ \
-        --libdir=@libdir@ \
+        --libdir=@libdir@ \ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
         --sysconfdir=@sysconfdir@ \
-        --with-certsdir=@sysconfdir@/control \
+        --with-certsdir=@sysconfdir@/certs \
         --libexecdir=@libexecdir@ \
         --datarootdir=@shareddir@ \
         --without-authchangepwdir \
@@ -635,11 +635,6 @@ the installation.
     % sudo chown indimail:indimail @sysconfdir@/wordlist.db
     % cd ..
 
-    NOTE: A copy of wordlist.db is present in indimail-@version@/data.
-    So you can skip all the above and just execute the two commands below i.e.
-    % sudo cp indimail-@version@/data/worldlist.db @sysconfdir@
-    % sudo chown indimail:indimail @sysconfdir@/wordlist.db
-
     NOTE: UPGRADE Information. You can always upgrade to the latest version of bogofilter
     by applying the latest patch available in the indimail source patch subdirectory
     to the orignal latest available bogofilter package.
@@ -661,7 +656,7 @@ the installation.
         --enable-binprefix=@prefix@ \
         --datarootdir=@shareddir@ \
         --libexecdir=@libexecdir@ \
-        --libdir=@libdir@ \
+        --libdir=@libdir@ \ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
         --mandir=@mandir@ \
         --with-ssl
     % make -s [DESTDIR=staging_directory]
@@ -684,7 +679,7 @@ the installation.
     % ./configure --prefix=@prefix@ --sysconfdir=@sysconfdir@ \
         --mandir=@mandir@ --libexecdir=@libexecdir@ \
         --enable-mysqlprefix=@mysql_prefix@ \
-        --libdir=@libdir@ \ # /usr/lib or /usr/lib64 on a 32/64bit system
+        --libdir=@libdir@ \ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
         --enable-default-domain=indimail.org
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
