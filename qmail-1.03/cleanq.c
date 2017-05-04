@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.8  2017-05-04 20:19:42+05:30  Cprogrammer
+ * make cleanq run continuously
+ *
  * Revision 1.7  2017-05-03 09:33:07+05:30  Cprogrammer
  * refactored code. Added safety check to ensure cleanq starts in dir owned by qscand
  *
@@ -25,6 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include "substdio.h"
 #include "error.h"
 #include "strerr.h"
@@ -33,6 +37,7 @@
 #include "auto_uids.h"
 #include "wait.h"
 #include "str.h"
+#include "scan.h"
 #include <time.h>
 
 #define FATAL "cleanq: fatal: "
@@ -40,12 +45,12 @@
 
 char            buf1[256];
 substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
-static int      flaglog = 0;
+static int      flaglog = 0, dir_flag = 0;
 
 void
 die_usage(void)
 {
-	strerr_die1x(100, "cleanq: usage: cleanq [-l]");
+	strerr_die1x(100, "cleanq: usage: cleanq [-l] [-s interval] [directory]");
 }
 
 void
@@ -77,7 +82,7 @@ warn_file(const char *d, const char *w)
 }
 
 void
-remove(const char *d)
+remove_files(const char *d)
 {
 	DIR            *dir = 0;
 	struct dirent  *f = 0;
@@ -87,10 +92,12 @@ remove(const char *d)
 		strerr_warn4(WARNING, "unable to chdir to ", (char *) d, ": ", &strerr_sys);
 		return;
 	}
+	dir_flag = 1;
 	if (chdir("work") == -1) {
 		/*- Warn admin */
 		strerr_warn4(WARNING, "unable to chdir to ", (char *) d, "/work: ", &strerr_sys);
-		chdir(".."); /*- get out!  */
+		if (!chdir("..")) /*- get out!  */
+			dir_flag = 0;
 		if (rmdir(d)) /*- no harm in trying */
 			strerr_warn4(WARNING, "unable to remove directory ", (char *) d, ": ", &strerr_sys);
 		return;
@@ -119,6 +126,7 @@ cdup:
 		strerr_warn2(WARNING, "unable to remove directory \"work\": ", &strerr_sys);
 	if (chdir("..") == -1)
 		strerr_die1x(100, "Can't chdir to \"..\"; don't know where I am!");
+	dir_flag = 0;
 	if (rmdir(d) == -1)
 		strerr_warn4(WARNING, "unable to remove directory ", (char *) d, ": ", &strerr_sys);
 }
@@ -159,7 +167,7 @@ tryclean(const char *d)
 	/*- 4 */
 	if (!(st.st_mode & S_ISVTX)) { /*- not sticky */
 		log_file("deleting: ", d, "not sticky");
-		remove(d);
+		remove_files(d);
 		return;
 	}
 	/*- 5 */
@@ -170,7 +178,7 @@ tryclean(const char *d)
 	 * Delete it. Optionally, log the action. 
 	 */
 	log_file("deleting: ", d, "too old");
-	remove(d);
+	remove_files(d);
 }
 
 int
@@ -178,60 +186,73 @@ main(int argc, char **argv)
 {
 	DIR            *dir;
 	direntry       *d;
-	int             opt;
+	int             opt, fdsourcedir = -1;
+	unsigned int    interval = 300;
 	uid_t           uid;
 	struct stat     st;
 
-	if (uidinit(0) == -1)
+	if (uidinit(1) == -1)
 		_exit(67);
-	while ((opt = getopt(argc, argv, "l")) != -1) {
+	while ((opt = getopt(argc, argv, "ls:")) != -1) {
 		switch (opt)
 		{
 		case 'l':
 			flaglog = 1;
 			break;
+		case 's':
+			scan_uint(optarg, &interval);
+			break;
 		default:
 			die_usage();
 		}
 	}
-	if (flaglog) {
-		my_puts("cleanq starting\n");
+	if (optind + 1 == argc && chdir(argv[optind++]) == -1)
+		strerr_die3sys(111, FATAL, "chdir: ", argv[optind]);
+	uid = getuid();
+	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc))
+		strerr_die2sys(111, FATAL, "setreuid failed: ");
+	if ((fdsourcedir = open(".", O_RDONLY | O_NDELAY)) == -1)
+		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+	for (;;) {
+		if (flaglog == 1) {
+			flaglog++;
+			my_puts("cleanq starting\n");
+		} else
+		if (flaglog)
+			my_puts("cleanq scanning\n");
 		if (substdio_flush(&ss1) == -1)
 			_exit(111);
+		if (stat(".", &st) == -1)
+			strerr_die2sys(111, FATAL, "unable to stat '.'");
+		if (st.st_uid != auto_uidc) {
+			strerr_warn2(FATAL, "current directory not owned by qscand", 0);
+			_exit(111);
+		}
+		/*- Open the current directory */
+		if (!(dir = opendir("."))) {
+			strerr_warn2(FATAL, "unable to read directory '.': ", &strerr_sys);
+			_exit(1);
+		}
+		/*- Scan it */
+		for (;;) {
+			if (!(d = readdir(dir)))
+				break;
+			tryclean(d->d_name);
+		}
+		closedir(dir);
+		sleep(interval);
+		if (dir_flag && fchdir(fdsourcedir) == -1)
+			strerr_die2sys(111, FATAL, "unable to switch back to original directory: ");
+		else
+			dir_flag = 0;
 	}
-	uid = getuid();
-	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc)) {
-		if (flaglog)
-			strerr_die2sys(111, FATAL, "setreuid failed: ");
-		_exit(111);
-	}
-	if (stat(".", &st) == -1) {
-		strerr_warn2(WARNING, "unable to stat '.'", &strerr_sys);
-		_exit(111);
-	}
-	if (st.st_uid != auto_uidc) {
-		strerr_warn2(WARNING, "current directory not owned by qscand", 0);
-		_exit(111);
-	}
-	/*- Open the current directory */
-	if (!(dir = opendir("."))) {
-		strerr_warn2(FATAL, "unable to read directory '.': ", &strerr_sys);
-		_exit(1);
-	}
-	/*- Scan it */
-	for (;;) {
-		if (!(d = readdir(dir)))
-			break;
-		tryclean(d->d_name);
-	}
-	closedir(dir);
 	_exit(errno ? 111 : 0);
 }
 
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.7 2017-05-03 09:33:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.8 2017-05-04 20:19:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
