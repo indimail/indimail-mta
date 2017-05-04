@@ -1,0 +1,5 @@
+#!/bin/sh
+autoreconf -fiv
+./configure --prefix=/usr --enable-sendmail-prog=/usr/bin/sendmail \
+	--sysconfdir=/etc/indimail
+
