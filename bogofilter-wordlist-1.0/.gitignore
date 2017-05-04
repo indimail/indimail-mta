@@ -1,0 +1,13 @@
+aclocal.m4
+bogofilter-wordlist.spec
+configure
+install-sh
+m4/*
+Makefile.in
+missing
+training
+debian/*.dsc
+debian/debian.tar.gz
+debian/dummy.tar.gz
+debian/rules
+create_rpm
