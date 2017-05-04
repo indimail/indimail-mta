@@ -32,7 +32,7 @@ pam-checkpwd.o: pam-checkpwd.c pam-support.h config.h
 pam-support.o: config.h pam-support.c
 
 MOSTLYCLEANFILES=pam-multi.la pam-checkpwd pam-support.h.gch config.h.gch pam-multi.8
-EXTRA_DIST=COPYING NEWS README CREDITS ChangeLog INSTALL pam-multi.spec.in install-sh missing mkinstalldirs pam-multi.spec
+EXTRA_DIST=COPYING NEWS README CREDITS ChangeLog INSTALL.pam-multi pam-multi.spec.in install-sh missing mkinstalldirs pam-multi.spec
 DISTCLEANFILES=pam-multi.settings
 
 pam-multi.8: pam-multi.9
