@@ -213,3 +213,4 @@ vuserinfo
 *.lo
 *.o
 autom4te.cache
+*.la
