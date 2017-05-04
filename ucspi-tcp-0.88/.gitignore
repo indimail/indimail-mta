@@ -40,3 +40,5 @@ uint64.h
 who@
 rblsmtpd.so
 tcpserver_plugin.o
+*.o
+*.a
