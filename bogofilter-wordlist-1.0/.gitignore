@@ -12,3 +12,6 @@ debian/dummy.tar.gz
 debian/rules
 create_rpm
 autom4te.cache
+Makefile
+config.log
+config.status
