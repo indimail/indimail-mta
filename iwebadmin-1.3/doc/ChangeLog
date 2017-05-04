@@ -1,0 +1,18 @@
+* Mon Apr 03 2017 <mbhangui@gmail.com> @version@-@release@
+Release 1.3 Start 13/05/2016
+Matt Brookings
+1. Reserved language template file codes 400 through 450 for custom autoresponder headers
+2. Added code to support custom autoresponder headers per language
+3. Added IndiMail MRTG Graphs in main.html
+
+Release 1.2-1 Start 13/05/2011
+1. FHS version
+2. removed --enable-indimalidir
+
+* Fri May 13 2011 <mbhangui@gmail.com>
+Release 1.1-1 Start 25/04/2011
+1. Debian Release
+
+* Wed Apr 25 2010 <mbhangui@gmail.com>
+Release 1.0-1 Start 25/04/2010
+1.  Added first release
