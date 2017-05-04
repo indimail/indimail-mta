@@ -862,19 +862,21 @@ README-CLUSTER: README-CLUSTER.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 README: README.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-vadddomain_handle: vadddomain_handle.in
+post_handle:
+	mkdir -p post_handle
+vadddomain_handle: vadddomain_handle.in post_handle
 	$(edit) $@.in > post_handle/vadddomain; ln -sf post_handle/vadddomain $@
-vaddaliasdomain_handle: vaddaliasdomain_handle.in
+vaddaliasdomain_handle: vaddaliasdomain_handle.in post_handle
 	$(edit) $@.in > post_handle/vaddaliasdomain; ln -sf post_handle/vaddaliasdomain $@
-vrenamedomain_handle: vrenamedomain_handle.in
+vrenamedomain_handle: vrenamedomain_handle.in post_handle
 	$(edit) $@.in > post_handle/vrenamedomain; ln -sf post_handle/vrenamedomain $@
-vdeldomain_handle: vdeldomain_handle.in
+vdeldomain_handle: vdeldomain_handle.in post_handle
 	$(edit) $@.in > post_handle/vdeldomain; ln -sf post_handle/vdeldomain $@
-vadduser_handle: vadduser_handle.in
+vadduser_handle: vadduser_handle.in post_handle
 	$(edit) $@.in > post_handle/vadduser; ln -sf post_handle/vadduser $@
-vpasswd_handle: vpasswd_handle.in
+vpasswd_handle: vpasswd_handle.in post_handle
 	$(edit) $@.in > post_handle/vpasswd; ln -sf post_handle/vpasswd $@
-vmoduser_handle: vmoduser_handle.in
+vmoduser_handle: vmoduser_handle.in post_handle
 	$(edit) $@.in > post_handle/vmoduser; ln -sf post_handle/vmoduser $@
 create_services: create_services.in
 	$(edit) $@.in > $@
@@ -1007,12 +1009,6 @@ install-data-hook:
 		$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
 		$(INSTALL_DATA) indimail.fc $(DESTDIR)@sysconfdir@/indimail.fc  || exit 1; \
 	fi
-
-.gitignore: $(PROGRAMS) $(indimailbin_SCRIPTS) $(indimailsbin_SCRIPTS) \
-$(indimaillibexec_SCRIPTS) $(noinst_SCRIPTS) gitignore
-	(for f in $^; do \
-		echo $$f ; \
-	done ;cat gitignore) |grep -v gitignore >> .gitignore; sort -u .gitignore -o .gitignore
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
