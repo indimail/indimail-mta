@@ -570,7 +570,6 @@ choose compile trysysel.c select.h1 select.h2
 
 install-strip: install
 distclean: clean
-	/bin/rm -f conf-home
 
 install: it setup
 	./setup -d "$(DESTDIR)" -s "`head -1 conf-shared`" $(INDIDIR)
