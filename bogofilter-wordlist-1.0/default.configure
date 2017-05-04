@@ -1,0 +1,3 @@
+#!/bin/sh
+autreconf -fi
+./configure --prefix=/usr --sysconfdir=/etc/indimail
