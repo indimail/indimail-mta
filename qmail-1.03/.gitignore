@@ -536,6 +536,8 @@ taia_tai.o
 nowutc
 yearcal
 yearcal.o
+*.o
 debian/_service
 cronlist
 indimail-mta.spec
+*.a
