@@ -1,0 +1,8 @@
+#!/bin/sh
+autoreconf -fi
+./configure --prefix=/usr \
+  --mandir=/usr/share/man \
+  --libexecdir=/usr/libexec/indimail --sysconfdir=/etc/indimail \
+  --enable-shareddir=/usr/share/indimail \
+  --enable-mysqlprefix=/usr
+
