@@ -28,6 +28,5 @@ bogofilter-wordlist.spec: bogofilter-wordlist.spec.in catChangeLog
 create_rpm: create_rpm.in
 	$(edit) $@.in > $@
 wordlist.db: training/easy_ham training/easy_ham_2 training/hard_ham \
-training/spam training/spam_2 training/spam_3
-	./training.sh
-
+training/spam training/spam_2
+	./download.sh && ./training.sh
