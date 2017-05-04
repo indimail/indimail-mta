@@ -10,4 +10,5 @@ pam-multi.8
 pam-support.h.gch
 *.o
 *.la
+*.lo
 autom4te.cache
