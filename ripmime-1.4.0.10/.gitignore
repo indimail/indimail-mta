@@ -1,2 +1,4 @@
 depcomp
 buildcodes.h
+*.o
+autom4te.cache
