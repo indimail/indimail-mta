@@ -109,6 +109,10 @@ This is Release @version@ of IndiMail. The release has both source.tar.gz, RPMs 
   o fixed DESTDIR in qmail-1.03, ucspi-tcp-1.03 Makefile, setup.c
   o fixed tlsclientmethod path in qmail-remote
   o cleanq.c - refactored code. added checks for safety
+  o setup.c, instcheck.c - added logdir
+  o svctool - added --skip-sendmail option to disable checking sendmail path in /usr/lib, /usr/sbin
+  o Added default.configure in all source directories for source compilation using git repo
+  o create_services - added --nomysql  option to skip configuring of mysql services
 
 This release includes the following files
 
@@ -305,3 +309,9 @@ Release 2.1 Start 16/03/2017
 103. fixed DESTDIR in qmail-1.03, ucspi-tcp-1.03 Makefile, setup.c
 104. fixed tlsclientmethod path in qmail-remote
 106. cleanq.c - refactored code. added checks for safety
+107. setup.c, instcheck.c - added logdir
+108. svctool - added --skip-sendmail option to disable checking sendmail path
+     in /usr/lib, /usr/sbin
+109. Added default.configure in all source directories for source compilation
+     using git repo
+110. create_services - added --nomysql  option to skip configuring of mysql services

@@ -105,5 +105,9 @@ indimail (@version@-1) unstable; urgency=low
   * fixed DESTDIR in qmail-1.03, ucspi-tcp-1.03 Makefile, setup.c
   * fixed tlsclientmethod path in qmail-remote
   * cleanq.c - refactored code. added checks for safety
+  * setup.c, instcheck.c - added logdir
+  * svctool - added --skip-sendmail option to disable checking sendmail path in /usr/lib, /usr/sbin
+  * Added default.configure in all source directories for source compilation using git repo
+  * create_services - added --nomysql  option to skip configuring of mysql services
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 03 May 2017 10:52:09 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 05 May 2017 20:42:28 +0530
