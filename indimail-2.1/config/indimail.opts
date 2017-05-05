@@ -1,7 +1,6 @@
 --enable-enterprise-support=y
 --enable-indiuser=indimail
 --enable-indigroup=indimail
---enable-default-domain=indimail.org
 --enable-log-name=indimail
 --enable-roaming-users=y
 --enable-relay-clear-minutes=30

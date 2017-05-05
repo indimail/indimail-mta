@@ -20,4 +20,5 @@ prefix=/usr
   --enable-basepath=/home/mail \
   --enable-tcprules-prog=/usr/bin/tcprules \
   --enable-tcpserver-file=/etc/indimail/tcp.smtp \
+  --enable-default-domain=`uname -n` \
   `cat config/indimail.opts`
