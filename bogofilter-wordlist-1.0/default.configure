@@ -1,3 +1,4 @@
 #!/bin/sh
+./download.sh
 autoreconf -fi
 ./configure --prefix=/usr --sysconfdir=/etc/indimail
