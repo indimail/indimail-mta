@@ -45,5 +45,19 @@ indimail-mta (2.1-1) unstable; urgency=low
   * dlnamespace.c, tcpserver_plugin.c, load_shared.c, pathexec_env.c added code to get namespace of shared libraries using env variables / envp variable
   * qmailctl.sh - added multilog rotate command
   * indimail-mta - install crontab entries for indimail-mta
+  * qmail-smtpd - Updated documentation on LOGFILTER
+  * qmail-smtpd - renamed LOGFILTER_FD to LOGFD
+  * shutdown indimail service in preun
+  * (rpm, debian) - use svok to figure out if service is up
+  * svctool - fixed inverted cname-lookup
+  * (rpm, debian) - removed duplicate calls to shutdown indimail service
+  * (rpm, debian) - use sed to edit inittab
+  * added svctool man page
+  * fixed sysconfdir variable in debian scripts
+  * OSX indimail.plist - fixed svscanboot path
+  * fixed DESTDIR in qmail-1.03, ucspi-tcp-1.03 Makefile, setup.c
+  * fixed tlsclientmethod path in qmail-remote
+  * cleanq.c - refactored code. added checks for safety
+  * setup.c, instcheck.c - added logdir
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 23 Apr 2017 21:32:46 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 05 May 2017 20:44:55 +0530

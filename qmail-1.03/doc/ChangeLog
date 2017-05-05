@@ -73,3 +73,4 @@ Release 2.1 Start 16/03/2017
 56. fixed DESTDIR in qmail-1.03, ucspi-tcp-1.03 Makefile, setup.c
 57. fixed tlsclientmethod path in qmail-remote
 58. cleanq.c - refactored code. added checks for safety
+59. setup.c, instcheck.c - added logdir
