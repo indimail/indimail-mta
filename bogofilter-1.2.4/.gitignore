@@ -36,7 +36,6 @@ src/directories.c
 src/tests/t.config
 src/tests/t.query.config
 src/tests/t.crash-invalid-base64
-ChangeLog
 .deps/
 Makefile.in
 aclocal.m4
@@ -52,9 +51,7 @@ missing
 src/Makefile.in
 src/stamp-h1
 src/tests/Makefile.in
-src/tests/README
 trio/Makefile.in
-trio/README
 *.o
 trio/Makefile
 autom4te.cache
