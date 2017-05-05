@@ -1133,7 +1133,11 @@ auto_prefix.o auto_libexec.o strerr.a substdio.a error.a str.a alloc.a stralloc.
 
 instcheck.o: \
 compile instcheck.c strerr.h error.h exit.h
-	./compile instcheck.c
+	if test -f conf-logdir ; then \
+	./compile instcheck.c -DLOGDIR="\"`cat conf-logdir`\""; \
+	else \
+	./compile instcheck.c -DLOGDIR=\"/var/log/indimail\"; \
+	fi;
 
 ip.o: \
 compile ip.c fmt.h scan.h ip.h byte.h conf-ip
@@ -3025,12 +3029,16 @@ distclean: clean
 	rm -f lib_deps inc_deps
 
 install: \
-it man leapsecs.dat conf-sysconfdir perm_list
+it man leapsecs.dat conf-sysconfdir perm_list conf-logdir
 	if test ! -d $(DESTDIR)"`head -1 conf-sysconfdir`" ; then \
 		mkdir -p $(DESTDIR)"`head -1 conf-sysconfdir`" ; \
 	fi ;
-	./setup -d "$(DESTDIR)" $(QMAILDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list && \
-	cp perm_list $(DESTDIR)"`head -1 conf-sysconfdir`"
+	if test ! -d $(DESTDIR)"`head -1 conf-logdir`" ; then \
+		mkdir -p $(DESTDIR)"`head -1 conf-logdir`" ; \
+	fi ;
+	./setup -d "$(DESTDIR)" -L $(DESTDIR)"`head -1 conf-logdir`" \
+		$(QMAILDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list && \
+		cp perm_list $(DESTDIR)"`head -1 conf-sysconfdir`"
 
 sgetopt.o: \
 compile sgetopt.c subfd.h substdio.h sgetopt.h subgetopt.h \

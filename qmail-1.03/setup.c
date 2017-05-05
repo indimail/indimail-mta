@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.30  2017-05-05 20:11:33+05:30  Cprogrammer
+ * added -L option to specify logdir
+ *
  * Revision 1.29  2017-05-02 11:24:52+05:30  Cprogrammer
  * fix for destdir
  *
@@ -521,18 +524,22 @@ main(int argc, char **argv)
 	int             opt;
 	struct passwd  *pw;
 	struct group   *gr;
+	char           *logdir = 0;
 
 #ifdef DARWIN
 	mailuser = "daemon";
 	mailgroup = "daemon";
 #endif
-	while ((opt = getopt(argc, argv, "ld:s:")) != opteof) {
+	while ((opt = getopt(argc, argv, "ld:s:L:")) != opteof) {
 		switch (opt) {
 		case 'd':
 			destdir = optarg;
 			break;
 		case 's':
 			sharedir = optarg;
+			break;
+		case 'L':
+			logdir = optarg;
 			break;
 		case 'l':
 			lsb = 1;
@@ -570,13 +577,15 @@ main(int argc, char **argv)
 		hier(0, FATAL, 1);
 	else
 		hier(argv[optind++], FATAL, 1);
+	if (!my_uid && logdir)
+		h(logdir, auto_uidl, auto_gidn, 0755);
 	return (0);
 }
 
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.29 2017-05-02 11:24:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.30 2017-05-05 20:11:33+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
