@@ -20,8 +20,8 @@ libexecdir=@libexecdir@
 
 usage()
 {
-	echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path \\"
-	echo "[--destdir=path] [--shared-objects] [--add-boot] [--chk-install]"
+	echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path \\
+	  destdir=path] [--shared-objects] [--add-boot] [--chk-install]
 
 	servicedir     - path of Supervise service directory
 	qbase          - path for createing IndiMail's queue collection
