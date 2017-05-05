@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.25  2017-05-05 20:19:20+05:30  Cprogrammer
+ * added logdir
+ *
  * Revision 1.24  2017-01-08 19:04:07+05:30  Cprogrammer
  * added option to skip devel man pages
  *
@@ -68,6 +71,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "strerr.h"
+#include "auto_uids.h"
 #include "str.h"
 #include "alloc.h"
 #include "error.h"
@@ -339,13 +343,16 @@ main(int argc, char **argv)
 	else
 	for (i = 1;i < argc;i++)
 		hier(argv[i], FATAL, 0);
+#ifdef LOGDIR
+	h(LOGDIR, auto_uidl, auto_gidn, 0755);
+#endif
 	return (0);
 }
 
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.24 2017-01-08 19:04:07+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.25 2017-05-05 20:19:20+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
