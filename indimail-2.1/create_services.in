@@ -11,17 +11,18 @@ prefix=@prefix@
 sysconfdir=@sysconfdir@
 controldir=@controldir@
 libexecdir=@libexecdir@
+default_domain=`uname -n`
 
 #
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.64 2017-05-05 01:18:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.65 2017-05-05 19:36:46+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
 	echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path \\
-	  destdir=path] [--shared-objects] [--add-boot] [--chk-install]
+	  destdir=path] [--shared-objects] [--add-boot] [--chk-install] --nomysql
 
 	servicedir     - path of Supervise service directory
 	qbase          - path for createing IndiMail's queue collection
@@ -31,6 +32,7 @@ usage()
 	shared-objects - Enable loading of shared objects in tcpserver for SMTP
 	add-boot       - Enable indimail/indimail-mta in system startup
 	chk-install    - Check indimail/indimail-mta installation
+	nomysql        - Do not configure MySQL service
 	echo
 	echo Press ENTER or Cntrl C to quit"
 	read key
@@ -48,6 +50,7 @@ nobogofilter=0
 noindimail=0
 noclamav=1
 nonssd=0
+nomysql=0
 nodksignatures=0
 dkimkeyfn=default
 ID=`id -u`
@@ -88,6 +91,11 @@ while test $# -gt 0; do
 
     --no-bogofilter)
 	nobogofilter=1
+	;;
+
+    --nomysql)
+	nomysql=1
+	nonssd=1
 	;;
 
     --no-nssd)
@@ -133,8 +141,14 @@ if [ ! -x $dir_prefix$prefix/bin/vadddomain -a ! -x $prefix/bin/vadddomain ] ; t
 	noindimail=1
 fi
 if [ $noindimail -eq 0 ] ; then
-	if [ " $qbase" = " " -o " $mail_path" = " " -o " $mysql_base" = " " ] ; then
-    	usage 1
+	if [ $nomysql -eq 1 ] ; then
+		if [ " $qbase" = " " -o " $mail_path" = " ] ; then
+    		usage 1
+		fi
+	else
+		if [ " $qbase" = " " -o " $mail_path" = " " -o " $mysql_base" = " " ] ; then
+    		usage 1
+		fi
 	fi
 else
 	if [ " $qbase" = " " ] ; then
@@ -144,7 +158,9 @@ fi
 if [ $ID -eq 0 -a $noindimail -eq 0 -a -z "$dir_prefix" ] ; then
 	if [ -d /etc/ld.so.conf.d ] ; then
 		(
-			echo @mysql_libdir@
+			if [ $nomysql -eq 0 ] ; then
+				echo @mysql_libdir@
+			fi
 			echo @libdir@
 		) > /etc/ld.so.conf.d/indimail-`arch`.conf
 		/sbin/ldconfig
@@ -187,8 +203,10 @@ fi
 if [ ! -x $dir_prefix$prefix/bin/bogofilter -a ! -x $dir_prefix$prefix/bin/bogofilter ] ; then
 	nobogofilter=1
 fi
+if [ $nomysql -eq 0 ] ; then
 if [ ! -x $dir_prefix$prefix/sbin/nssd -a ! -x $dir_prefix$prefix/sbin/nssd ] ; then
 	nonssd=1
+fi
 fi
 if [ ! -x $dir_prefix$prefix/bin/imapd -a ! -x $dir_prefix$prefix/bin/imapd ] ; then
 	nocourierimap=1
@@ -225,18 +243,18 @@ $svctool --config=users $extra_opt
 #
 # MySQL
 #
-if [ $noindimail -eq 0 ] ; then
+if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
 $svctool --config=mysql   --mysqlPrefix=$mysql_base $extra_opt
 $svctool --config=mysqldb --mysqlPrefix=$mysql_base \
     --databasedir=$indimaildir/mysqldb --base_path=$mail_path $extra_opt
 $svctool --mysql=3306 --servicedir=$servicedir \
     --mysqlPrefix=$mysql_base --databasedir=$prefix/mysqldb \
-	--config=$sysconfdir/etc/indimail.cnf --default-domain=indimail.org $extra_opt
+	--config=$sysconfdir/etc/indimail.cnf --default-domain=$default_domain $extra_opt
 fi
 #
 # create qmail config
-$svctool --config=qmail --postmaster=postmaster@indimail.org \
-	--default-domain=indimail.org $extra_opt
+$svctool --config=qmail --postmaster=postmaster@$default_domain \
+	--default-domain=$default_domain $extra_opt
 
 a_arch=`arch`
 if [ " $$a_arch" = " x86_64" ] ; then
@@ -416,7 +434,7 @@ if [ $nofetchmail -eq 0 ] ; then
 		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			$svctool --fetchmail --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--cntrldir=control --default-domain=indimail.org \
+				--cntrldir=control --default-domain=$default_domain \
 				--qhpsi="$qhpsi" \
 				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
 				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
@@ -424,7 +442,7 @@ if [ $nofetchmail -eq 0 ] ; then
 		else
 			$svctool --fetchmail --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--cntrldir=control --default-domain=indimail.org \
+				--cntrldir=control --default-domain=$default_domain \
 				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
 				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
@@ -433,13 +451,13 @@ if [ $nofetchmail -eq 0 ] ; then
 		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			$svctool --fetchmail --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--cntrldir=control --default-domain=indimail.org \
+				--cntrldir=control --default-domain=$default_domain \
 				--qhpsi="$qhpsi" \
 				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
 		else
 			$svctool --fetchmail --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--cntrldir=control --default-domain=indimail.org \
+				--cntrldir=control --default-domain=$default_domain \
 				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
 		fi
 	fi
@@ -452,31 +470,31 @@ fi
 if [ $nocourierimap -eq 0 ] ; then
 	$svctool --imap=143 --servicedir=$servicedir \
 		--starttls --localip=0 --maxdaemons=40 --maxperip=25 --infifo=infifo \
-		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem $extra_opt
+		--query-cache --default-domain=$default_domain --memory=$imap_pop3_mem $extra_opt
 	$svctool --imap=993 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 --infifo=infifo \
-		--query-cache --default-domain=indimail.org --memory=$imapspop3_mem --ssl $extra_opt
+		--query-cache --default-domain=$default_domain --memory=$imapspop3_mem --ssl $extra_opt
 	$svctool --pop3=110 --servicedir=$servicedir --localip=0 \
 		--starttls --maxdaemons=40 --maxperip=25 --infifo=infifo \
-		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem $extra_opt
+		--query-cache --default-domain=$default_domain --memory=$imap_pop3_mem $extra_opt
 	$svctool --pop3=995 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 --infifo=infifo \
-		--query-cache --default-domain=indimail.org --memory=$imapspop3_mem --ssl $extra_opt
+		--query-cache --default-domain=$default_domain --memory=$imapspop3_mem --ssl $extra_opt
 fi
 if [ $noproxy -eq 0 ] ; then
 	$svctool --imap=4143 --servicedir=$servicedir --localip=0 --infifo=infifo \
-		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=indimail.org \
+		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
 		--memory=$imap_pop3_mem --proxy=143 --starttls --tlsprog=$prefix/bin/sslerator \
 		$extra_opt
 	$svctool --imap=9143 --servicedir=$servicedir --localip=0 --infifo=infifo \
-		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=indimail.org \
+		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
 		--memory=$imapspop3_mem --proxy=143 --ssl $extra_opt
 	$svctool --pop3=4110 --servicedir=$servicedir --localip=0 --infifo=infifo \
-		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=indimail.org \
+		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
 		--memory=$imap_pop3_mem --proxy=110 --starttls --tlsprog=$prefix/bin/sslerator \
 		$extra_opt
 	$svctool --pop3=9110 --servicedir=$servicedir --localip=0 --infifo=infifo \
-		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=indimail.org \
+		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
 		--memory=$imapspop3_mem --proxy=110 --ssl $extra_opt
 fi
 
@@ -491,7 +509,7 @@ if [ $noindimail -eq 0 ] ; then
 	$svctool --inlookup=infifo --servicedir=$servicedir --cntrldir=control --threads=5 \
 		--query-cache --password-cache $extra_opt
 	
-	if [ $nonssd -eq 0 ] ; then
+	if [ $nonssd -eq 0 -a $nomysql -eq 0 ] ; then
 		$svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
 			--mysqlhost=localhost --mysqluser=indimail \
 			--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=$servicedir $extra_opt
@@ -520,7 +538,7 @@ fi
 #
 
 # create certs
-$svctool --postmaster=postmaster@indimail.org --config=cert --common_name=indimail.org $extra_opt
+$svctool --postmaster=postmaster@$default_domain --config=cert --common_name=$default_domain $extra_opt
 # create svscan logging in indimail log directory
 $svctool --svscanlog --servicedir=$servicedir $extra_opt
 if [ $add_boot -eq 1 ] ; then
