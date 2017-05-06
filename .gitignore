@@ -3,7 +3,6 @@ osc
 packages
 private
 rpmbuild
-
 ilmgrd-1.0
 icampaign-1.0
 dist

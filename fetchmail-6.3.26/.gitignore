@@ -26,3 +26,5 @@ fetchmailconf
 po/Makefile
 po/POTFILES
 stamp-h1
+*.o
+autom4te.cache

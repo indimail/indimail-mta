@@ -61,3 +61,4 @@ config.log
 config.status
 doc/Makefile
 src/Makefile
+src/config.h
