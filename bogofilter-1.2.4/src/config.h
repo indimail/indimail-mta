@@ -90,7 +90,7 @@
 /* #undef HAVE_DOPRNT */
 
 /* Define to 1 if your compiler supports extern inline storage class. */
-#define HAVE_EXTERN_INLINE 1
+/* #undef HAVE_EXTERN_INLINE */
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
@@ -105,10 +105,10 @@
 #define HAVE_GETPAGESIZE 1
 
 /* Define if you have GNU Scientific Library 1.0 or newer */
-#define HAVE_GSL_10 1
+#define HAVE_GSL_10 /**/
 
 /* Define if you have GNU Scientific Library 1.4 or newer */
-#define HAVE_GSL_14 1
+#define HAVE_GSL_14 /**/
 
 /* Define if you have the iconv() function. */
 #define HAVE_ICONV 1
@@ -266,7 +266,7 @@
 #define ICONV_CONST 
 
 /* Define if you want INDIMAIL support compiled in */
-/* #undef INDIMAIL */
+#define INDIMAIL 1
 
 /* Define to 1 if trio is to be included. */
 /* #undef NEEDTRIO */

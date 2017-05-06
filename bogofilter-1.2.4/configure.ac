@@ -23,10 +23,10 @@ dnl
 AC_PREREQ([2.59])
 AC_CONFIG_MACRO_DIR([m4])
 AC_USE_SYSTEM_EXTENSIONS
-dnl AC_CONFIG_SRCDIR([src/bogofilter.c])
+AC_CONFIG_SRCDIR([src/bogofilter.c])
 AC_CANONICAL_HOST
-dnl AC_CONFIG_HEADERS([src/config.h:config.in])
-dnl AM_INIT_AUTOMAKE([foreign 1.10 dist-bzip2 no-installinfo])
+AC_CONFIG_HEADERS([src/config.h:config.in])
+#AM_INIT_AUTOMAKE([foreign 1.10 dist-bzip2 no-installinfo])
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_PROG_INSTALL
 INSTALL="`pwd`/install-sh -c"
