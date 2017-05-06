@@ -2,7 +2,7 @@ Format: 1.0
 Source: iwebadmin
 Binary: iwebadmin
 Architecture: any
-Version: @version@-1
+Version: @version@-13
 Maintainer: Manvendra Bhangui <manvendra@indimail.org>
 Homepage: http://indimail.sourceforge.net
 Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indimail;a=summary
