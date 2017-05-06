@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.25 2017-05-06 13:02:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.26 2017-05-06 14:16:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -47,7 +47,7 @@ BuildRequires: rpm gcc make binutils coreutils grep
 BuildRequires: glibc glibc-devel procps cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils
-BuildRequires: gzip autoconf indimail-devel
+BuildRequires: gzip autoconf automake libtool indimail-devel
 %if %{undefined rhel_version}
 BuildRequires: sharutils
 %else
@@ -199,8 +199,7 @@ fi
 %attr(444,root,root)                     @imagedir@/uppermiddle1.png
 %attr(444,root,root)                     @imagedir@/uppermiddle2.png
 %attr(444,root,root)                     @imagedir@/upperright.png
-
-%doc README
+%attr(644,root,root)                     @docdir@/README
 
 %clean
 %{__rm} -rf %{buildroot}
