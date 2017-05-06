@@ -21,3 +21,6 @@ install-sh
 ltmain.sh
 m4
 missing
+*.o
+*.lo
+autom4te.cache
