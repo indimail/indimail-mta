@@ -27,3 +27,11 @@ debian/changelog
 debian/README
 ltmain.sh
 m4
+.deps
+autom4te.cache
+config.h
+config.log
+config.status
+libtool
+stamp-h1
+
