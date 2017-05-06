@@ -38,7 +38,6 @@ src/tests/t.query.config
 src/tests/t.crash-invalid-base64
 .deps/
 Makefile.in
-aclocal.m4
 compile
 config.guess
 config.sub
@@ -62,7 +61,3 @@ config.log
 config.status
 doc/Makefile
 src/Makefile
-doc/bf_copy.1in
-doc/bogofilter.1in
-doc/bogoupgrade.1in
-doc/bogoupgrade.htmlin
