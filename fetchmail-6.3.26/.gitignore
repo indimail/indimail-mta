@@ -27,4 +27,5 @@ po/Makefile
 po/POTFILES
 stamp-h1
 *.o
+*.a
 autom4te.cache
