@@ -104,4 +104,6 @@ install-data-local:
 	fi
 install-data-hook:
 	$(mkinstalldirs)         $(DESTDIR)@sysconfdir@
+	$(mkinstalldirs)         $(DESTDIR)@docdir@
 	$(INSTALL_DATA) iwebadmin_perm_list $(DESTDIR)@sysconfdir@/iwebadmin_perm_list  || exit 1
+	$(INSTALL_DATA) README $(DESTDIR)@docdir@/README || exit 1
