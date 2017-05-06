@@ -23,7 +23,7 @@
 #include <config.h>
 #endif
 
-#define _SVID_SOURCE	1	/* Need this to get gethostbyname_r() */
+#define DEFAULT_SOURCE	1	/* Need this to get gethostbyname_r() */
 
 #include <assert.h>
 
