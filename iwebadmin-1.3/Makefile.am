@@ -39,6 +39,7 @@ MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc \
 edit = sed \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@docdir\@,$(docdir),g' \
 	-e 's,@htmldir\@,$(htmldir),g' \
 	-e 's,@htmllibdir\@,$(htmllibdir),g' \
 	-e 's,@sys_libdir\@,$(sys_libdir),g' \
