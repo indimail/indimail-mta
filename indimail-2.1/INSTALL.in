@@ -206,7 +206,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . ripmime-1.4.0.9     (2.1  Mb)
                                . mpack-1.6           (1.5  Mb)
                                . fortune-1.1         (8.4  Mb)
-                               . courier-imap-4.17.2 (75   Mb)
+                               . courier-imap-4.17.3 (75   Mb)
                                . bogofilter-1.2.4    (11.6 Mb)
                                . fetchmail-6.3.26   (10.5 Mb)
                                . iwebadmin-1.2      (3.0  Mb)
@@ -329,7 +329,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.4.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libsrs2-1.0.18.tar.gz
-    % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.2.tar.bz2
+    % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.3.tar.bz2
     % wget http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
     % wget http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
     % wget http://downloads.sourceforge.net/indimail/ripmime-1.4.0.9.tar.gz
@@ -420,7 +420,7 @@ the installation.
 
     % wget http://cr.yp.to/software/qmail-1.03.tar.gz
     % gunzip -c qmail-1.03.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/Patches-2.0/qmail-1.03.patch.gz | patch -p0
+    % gunzip -c indimail-@version@/patches/qmail-1.03.patch.gz | patch -p0
 
     change first line in qmail-1.03/conf-qmail to @indimaildir@
     change first line in qmail-1.03/conf-shared to @shareddir@
@@ -520,7 +520,7 @@ the installation.
     Download the ucspi-tcp package. The latest published ucspi-tcp package is ucspi-tcp-0.88.tar.gz.
     % wget http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz
     % gunzip -c ucspi-tcp-0.88.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/Patches-2.0/ucspi-tcp-0.88.patch.gz | patch -p0
+    % gunzip -c indimail-@version@/patches/ucspi-tcp-0.88.patch.gz | patch -p0
 
     ensure that mysql_config is in the path. This is needed by ucspi-tcp to detect
     MySQL libraries.
@@ -539,22 +539,23 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 6  ##### Courier IMAP/POP3 #####################
-    Install courier-imap (courier-imap-4.17.2.tar.bz2) MD5 345d76780408bd511f97e8fcfed491a6
+    Install courier-imap (courier-imap-4.17.3.tar.bz2) MD5 2f8adc7029116215643f0a498bba47a0
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
-    courier-imap-4.17.2.tar.bz2. The patch brings up the version upto courier-imap to be
+    courier-imap-4.17.3.tar.bz2. The patch brings up the version upto courier-imap to be
     compatible with IndiMail.
 
-    % bzip2 -d -c courier-imap-4.17.2.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/Patch-1.0/courier-imap-4.17.2.patch.gz | patch -p0
-    % cd courier-imap-4.17.2
+    % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.3.tar.bz2
+    % bzip2 -d -c courier-imap-4.17.3.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/courier-imap-4.17.3.patch.gz | patch -p0
+    % cd courier-imap-4.17.3
 
    x-------------------------------- Mac OS X ONLY -----------------------------------------x
    |% bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -                                     |
    |If you are on Mac OS X 10.5.x you will need to apply courier-imap-3.0.8-1.2.patch and   |
    |a supplement patch                                                                      |
-   |% gunzip -c indimail-@version@/Patch-1.0/courier-imap-3.0.8-1.2.patch.gz | patch -p0      |
-   |% gunzip -c indimail-@version@/Patch-1.0/courier-imap-3.0.8-1.2.mac-supplement.patch.gz \ |
+   |% gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.patch.gz | patch -p0      |
+   |% gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz \ |
    | | patch -p0                                                                            |
    |% cd courier-imap-3.0.8                                                                 |
    x----------------------------------------------------------------------------------------x
@@ -590,7 +591,7 @@ the installation.
 
     % wget http://downloads.sourceforge.net/bogofilter/bogofilter-1.2.4.tar.bz2
     % bzip2 -d -c bogofilter-1.2.4.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/Patch-1.0/bogofilter-1.2.4.patch.gz | patch -p0
+    % gunzip -c indimail-@version@/patches/bogofilter-1.2.4.patch.gz | patch -p0
     % cd bogofilter-1.2.4
     % autoreconf -fi
     % ./configure --prefix=@prefix@ --sysconfdir=@sysconfdir@ --enable-indimail \
@@ -648,7 +649,7 @@ the installation.
 
     % wget http://downloads.sourceforge.net/fetchmail/fetchmail-6.3.26.tar.bz2
     % xz -d -c fetchmail-6.3.26.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/Patch-1.0/fetchmail-6.3.26.patch.gz | patch -p0
+    % gunzip -c indimail-@version@/patches/fetchmail-6.3.26.patch.gz | patch -p0
     % cd fetchmail-6.3.26
     % autoreconf -fi
     % ./configure --prefix=@prefix@ --enable-indimail \
