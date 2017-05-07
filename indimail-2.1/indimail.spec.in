@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.411 2017-04-27 17:46:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.412 2017-05-07 20:40:48+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -475,6 +475,7 @@ do
     fi
     #
     # Apply patch picked up from indimail.sourceforge.net
+    # rather than from indimail-x.patches subdir
     #
     if [ " $i" = " courier-imap-%{courier_version}" ] ; then
       continue
@@ -499,12 +500,16 @@ done
 %patch1  -p0
 %patch2  -p0
 
+# skip patch application on obs. Picked the patched source from indimail/obs subdir
+# autoreconf gives issues
 %if %build_on_obs == 0
 %if %nocourierimap == 0
 %patch3  -p0
 %endif
 %endif
 
+# skip patch application on obs. Picked the patched source from indimail/obs subdir
+# autoreconf gives issues
 # Comment out below for openSUSE buildservice
 %if %build_on_obs == 0
 %if %nobogofilter == 0
