@@ -178,7 +178,8 @@ indimailsbin_SCRIPTS = svctool
 noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
 	README INSTALL-MINI vadddomain_handle vadduser_handle vdeldomain_handle \
-	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle
+	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle \
+	create_services
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain
 
@@ -879,7 +880,7 @@ vpasswd_handle: vpasswd_handle.in post_handle
 vmoduser_handle: vmoduser_handle.in post_handle
 	$(edit) $@.in > post_handle/vmoduser; ln -sf post_handle/vmoduser $@
 create_services: create_services.in
-	$(edit) $@.in > $@
+	$(edit) $@.in > $@; chmod 755 $@
 indimail.spec: indimail.spec.in catChangeLog
 	($(edit) $@.in;./catChangeLog) | $(edit) > $@
 indimail-@VERSION@-rpmlintrc: indimail-rpmlintrc.in
@@ -981,8 +982,8 @@ install-data-hook:
 	$(INSTALL_DATA) post_handle/* $(DESTDIR)@libexecdir@ || exit 1
 	for f in $(post_handle_list); do \
 		if [ -f $(DESTDIR)@libexecdir@/$$f ] ; then \
-			chmod 555 $(DESTDIR)@libexecdir@/$$f; \
-			echo "chmod 555 $(DESTDIR)@libexecdir@/$$f"; \
+			chmod 755 $(DESTDIR)@libexecdir@/$$f; \
+			echo "chmod 755 $(DESTDIR)@libexecdir@/$$f"; \
 		fi;\
 	done
 	$(mkinstalldirs) $(DESTDIR)@shareddir@/doc || exit 1
