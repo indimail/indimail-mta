@@ -17,7 +17,7 @@ default_domain=`uname -n`
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.65 2017-05-05 19:36:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.66 2017-05-07 19:15:43+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -33,7 +33,7 @@ usage()
 	add-boot       - Enable indimail/indimail-mta in system startup
 	chk-install    - Check indimail/indimail-mta installation
 	nomysql        - Do not configure MySQL service
-	echo
+
 	echo Press ENTER or Cntrl C to quit"
 	read key
 	exit 1
@@ -142,7 +142,7 @@ if [ ! -x $dir_prefix$prefix/bin/vadddomain -a ! -x $prefix/bin/vadddomain ] ; t
 fi
 if [ $noindimail -eq 0 ] ; then
 	if [ $nomysql -eq 1 ] ; then
-		if [ " $qbase" = " " -o " $mail_path" = " ] ; then
+		if [ " $qbase" = " " -o " $mail_path" = " " ] ; then
     		usage 1
 		fi
 	else
@@ -180,35 +180,48 @@ mkdir -p $dir_prefix$controldir
 mkdir -p $dir_prefix$sysconfdir/users
 mkdir -p $dir_prefix$sysconfdir/control
 mkdir -p $dir_prefix$libexecdir
+mkdir -p $dir_prefix$servicedir
 if [ ! -x $dir_prefix$libexecdir/config-fast -a -x $libexecdir/config-fast ] ; then
 	/bin/cp $libexecdir/config-fast $dir_prefix$libexecdir
 fi
 if [ ! -x $dir_prefix$libexecdir/ipmeprint -a -x $libexecdir/ipmeprint ] ; then
 	/bin/cp $libexecdir/ipmeprint $dir_prefix$libexecdir
 fi
+if [ ! -x $dir_prefix$libexecdir/envmigrate -a -x $libexecdir/envmigrate ] ; then
+	/bin/cp $libexecdir/envmigrate $dir_prefix$libexecdir
+fi
 if [ ! -x $dir_prefix$prefix/bin/queue-fix -a -x $prefix/bin/queue-fix ] ; then
 	/bin/cp $prefix/bin/queue-fix $dir_prefix$prefix/bin/queue-fix
-fi
-if [ ! -f $dir_prefix$sysconfdir/users/assign ] ; then
-	echo "." > $dir_prefix$sysconfdir/users/assign
 fi
 if [ ! -x $dir_prefix$prefix/bin/tcprules -a -x $prefix/bin/tcprules ] ; then
 	/bin/cp $prefix/bin/tcprules $dir_prefix$prefix/bin/tcprules
 fi
+if [ ! -x $dir_prefix$prefix/bin/svc -a -x $prefix/bin/svc ] ; then
+	/bin/cp $prefix/bin/svc $dir_prefix$prefix/bin/svc
+fi
+if [ ! -x $dir_prefix$prefix/bin/bogoutil -a -x $prefix/bin/bogoutil ] ; then
+	/bin/cp $prefix/bin/bogoutil $dir_prefix$prefix/bin/bogoutil
+fi
+if [ ! -f $dir_prefix$sysconfdir/bogofilter.cf.example ] ; then
+	/bin/cp $sysconfdir/bogofilter.cf.example $dir_prefix$sysconfdir/bogofilter.cf.example
+fi
+if [ ! -f $dir_prefix$sysconfdir/users/assign ] ; then
+	echo "." > $dir_prefix$sysconfdir/users/assign
+fi
 ######################
 
-if [ ! -x $dir_prefix$prefix/bin/fetchmail -a ! -x $dir_prefix$prefix/bin/fetchmail ] ; then
+if [ ! -x $dir_prefix$prefix/bin/fetchmail -a ! -x $prefix/bin/fetchmail ] ; then
 	nofetchmail=1
 fi
-if [ ! -x $dir_prefix$prefix/bin/bogofilter -a ! -x $dir_prefix$prefix/bin/bogofilter ] ; then
+if [ ! -x $dir_prefix$prefix/bin/bogofilter -a ! -x $prefix/bin/bogofilter ] ; then
 	nobogofilter=1
 fi
 if [ $nomysql -eq 0 ] ; then
-if [ ! -x $dir_prefix$prefix/sbin/nssd -a ! -x $dir_prefix$prefix/sbin/nssd ] ; then
+if [ ! -x $dir_prefix$prefix/sbin/nssd -a ! -x $prefix/sbin/nssd ] ; then
 	nonssd=1
 fi
 fi
-if [ ! -x $dir_prefix$prefix/bin/imapd -a ! -x $dir_prefix$prefix/bin/imapd ] ; then
+if [ ! -x $dir_prefix$prefix/bin/imapd -a ! -x $prefix/bin/imapd ] ; then
 	nocourierimap=1
 fi
 if [ ! -x $dir_prefix$libexecdir/imapmodules/authindi -a ! -x $libexecdir/imapmodues/authindi ] ; then
@@ -227,9 +240,7 @@ elif [ -x /usr/bin/chown ] ; then
 else
 	chown=/bin/chown
 fi
-if [ $ID -eq 0 ] ; then
-	$chown -R qmaill:nofiles @logdir@
-fi
+[ $ID -eq 0 ] && $chown -R qmaill:nofiles @logdir@
 #
 # create users
 #
@@ -239,7 +250,6 @@ else
 	echo "Creating indimail-mta Users"
 fi
 $svctool --config=users $extra_opt
-
 #
 # MySQL
 #
@@ -296,13 +306,13 @@ if [ $noclamav -eq 0 ] ; then
 	echo "Checking if clamav is installed"
 	clamav_os=0
 	clamdPrefix=$dir_prefix
-	qhpsi="$dir_prefix/bin/clamdscan %s --fdpass --quiet --no-summary"
+	qhpsi="\"$dir_prefix/bin/clamdscan %s --fdpass --quiet --no-summary\""
 	mysysconfdir=$dir_prefix/etc
 else
 	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 		clamav_os=1
 		clamdPrefix="/usr"
-		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
+		qhpsi="\"/usr/bin/clamdscan %s --fdpass --quiet --no-summary\""
 		mysysconfdir=/etc
 	else
 		clamav_os=0
