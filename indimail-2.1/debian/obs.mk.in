@@ -29,7 +29,7 @@ nssd_version=1.1
 #
 pam_multi_version=1.1
 altermime_version=0.3.10
-ripmime_version=1.4.0.9
+ripmime_version=1.4.0.10
 flash_version=0.9.4
 mpack_version=1.6
 logalert_version=0.3
@@ -166,7 +166,7 @@ changelog: changelog.in obs.mk
 
 indimail.dsc: indimail.dsc.in obs.mk changelog.in
 	$(edit) $@.in > $@.tmp; \
-	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
