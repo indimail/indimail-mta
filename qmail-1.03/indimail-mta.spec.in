@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.101 2017-04-27 17:46:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.102 2017-05-07 12:54:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -142,8 +142,8 @@ Conflicts: indimail, indimail-mini, indimail-mta < 2.0
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
-BuildRequires: python-devel flex findutils
-BuildRequires: readline gzip autoconf pkgconfig diffutils
+BuildRequires: python-devel flex findutils diffutils
+BuildRequires: readline gzip autoconf automake libtool pkgconfig
 %if %build_on_obs == 1
 BuildRequires: libidn-devel
 %endif
