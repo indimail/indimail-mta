@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.195  2017-05-08 13:52:14+05:30  Cprogrammer
+ * check for tlsv1_1_server_method() and tlsv1_2_server_method()
+ *
  * Revision 1.194  2017-04-16 13:12:31+05:30  Cprogrammer
  * use different variable for nodnscheck control file
  *
@@ -693,6 +696,8 @@
 #ifdef TLS
 #include "tls.h"
 #include "ssl_timeoutio.h"
+#include "hastlsv1_1_server.h"
+#include "hastlsv1_2_server.h"
 #endif
 #ifdef USE_SPF
 #include "spf.h"
@@ -746,7 +751,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.194 $";
+char           *revision = "$Revision: 1.195 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6422,14 +6427,28 @@ tls_init()
 		tls_err("454 TLS not available: unable to initialize TLSv1 ctx (#4.3.0)\r\n");
 		return;
 	} else
+#ifdef TLSV1_1_SERVER_METHOD
 	if (method == 5 && !(ctx=SSL_CTX_new(TLSv1_1_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize TLSv1_1 ctx (#4.3.0)\r\n");
      	return;
 	} else
+#else
+	if (method == 5) {
+		tls_err("454 TLS not available: unable to initialize TLSv1_1 ctx (#4.3.0)\r\n");
+   		return;
+	} else
+#endif
+#ifdef TLSV1_2_SERVER_METHOD
 	if (method == 6 && !(ctx=SSL_CTX_new(TLSv1_2_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize TLSv1_2 ctx (#4.3.0)\r\n");
 		return;
 	}
+#else
+	if (method == 6) {
+		tls_err("454 TLS not available: unable to initialize TLSv1_2 ctx (#4.3.0)\r\n");
+   		return;
+	}
+#endif
 	if (!certdir)
 	{
 		if (!(certdir = env_get("CERTDIR")))
@@ -6894,7 +6913,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.194 2017-04-16 13:12:31+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.195 2017-05-08 13:52:14+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
