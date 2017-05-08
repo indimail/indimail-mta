@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Thu May  4 23:09:00 IST 2017
+DATE: Mon May  8 14:25:36 IST 2017
 
 This is Release 2.1 of IndiMail. The release has both source.tar.gz, RPMs and debs.
 
@@ -171,8 +171,11 @@ Currently, the list of supported distributions for IndiMail is
     * Debian
           o Debian 8.0
           o Debian 7.0
+          o Ubuntu 17.04
           o Ubuntu 16.10
           o Ubuntu 16.04
+          o Ubuntu 14.04
+          o Ubuntu 12.04
 
 
 ChangeLog
