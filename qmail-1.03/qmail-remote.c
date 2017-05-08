@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.104  2017-05-08 13:20:21+05:30  Cprogrammer
+ * check for tlsv1_1_client_method() and tlsv1_2_client_method()
+ *
  * Revision 1.103  2017-05-02 16:39:39+05:30  Cprogrammer
  * added SSL_CTX_free()
  *
@@ -378,9 +381,11 @@
 #include <openssl/x509v3.h>
 #include "auth_cram.h"
 #include "auth_digest_md5.h"
+#include "hastlsv1_1_client.h"
+#include "hastlsv1_2_client.h"
+#endif
 
 #define EHLO 1
-#endif
 #define HUGESMTPTEXT  5000
 #define MIN_PENALTY   3600
 #define MAX_TOLERANCE 120
@@ -1506,12 +1511,16 @@ tls_init()
 	else
 	if (method == 4 && (ctx=SSL_CTX_new(TLSv1_client_method())))
 		method_fail = 0;
+#ifdef TLSV1_1_CLIENT_METHOD
 	else
 	if (method == 5 && (ctx=SSL_CTX_new(TLSv1_1_client_method())))
 		method_fail = 0;
+#endif
+#ifdef TLSV1_2_CLIENT_METHOD
 	else
 	if (method == 6 && (ctx=SSL_CTX_new(TLSv1_2_client_method())))
 		method_fail = 0;
+#endif
 	if (method_fail) 
 	{
 		if (!smtps && !needtlsauth)
@@ -3251,7 +3260,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.103 2017-05-02 16:39:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.104 2017-05-08 13:20:21+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
