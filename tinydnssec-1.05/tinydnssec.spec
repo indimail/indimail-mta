@@ -181,6 +181,7 @@ fi
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
 
 %files
+%defattr(-, root, root,-)
 %attr(755,root,root)                   %{_prefix}/bin/dq
 %attr(755,root,root)                   %{_prefix}/bin/axfr-get
 %attr(755,root,root)                   %{_prefix}/bin/axfrdns
