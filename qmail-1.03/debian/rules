@@ -73,13 +73,13 @@ build-stamp:
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d qmail-1.03 ]                 ; then $(MAKE) -s -C qmail-1.03 DESTDIR=$(DESTDIR); fi
 	${rm} -rf $(DESTDIR)/$(prefix)/$(libdir)/*.la
-	(
-	echo NAME=indimail-mta
-	echo Description="IndiMail MTA"
-	echo MTA_version=$(version)
-	echo ID=indimail-mta
-	echo HOME_URL="http://www.indimail.org"
-	echo PACKAGE_BUGREPORT='Manvendra Bhangui manvendra@indimail.org'
+	( \
+	echo NAME=indimail-mta; \
+	echo Description="IndiMail MTA"; \
+	echo MTA_version=$(version); \
+	echo ID=indimail-mta; \
+	echo HOME_URL="http://www.indimail.org"; \
+	echo PACKAGE_BUGREPORT='Manvendra Bhangui manvendra@indimail.org'; \
 	) > indimail-mta-release
 	touch build-stamp
 
@@ -126,11 +126,11 @@ install: build
 		${cp} ../BUILD/debian/svctool $(DESTDIR)/$(prefix)/sbin; \
 	fi
 	if [ -f ../SOURCES/svctool.8.gz ] ; then \
-		mkdir -p $(DESTDIR)$(mandir)/man8
+		mkdir -p $(DESTDIR)$(mandir)/man8; \
 		${cp} ../SOURCES/svctool.8.gz $(DESTDIR)/$(mandir)/man8; \
 	fi
-	if [ -f ../BUILD/debian/svctool.8.gz ] ; then
-		mkdir -p $(DESTDIR)$(mandir)/man8
+	if [ -f ../BUILD/debian/svctool.8.gz ] ; then \
+		mkdir -p $(DESTDIR)$(mandir)/man8; \
 		${cp} ../BUILD/debian/svctool.8.gz $(DESTDIR)/$(mandir)/man8; \
 	fi
 	if [ -f ../SOURCES/usr.sbin.clamd ] ; then \
