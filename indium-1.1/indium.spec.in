@@ -59,7 +59,7 @@ BuildRequires: tcl-devel rpm gcc gcc-c++ make binutils coreutils grep
 BuildRequires: tk-devel glibc glibc-devel procps tcl tk cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils openssl-devel openssl
-BuildRequires: gzip autoconf indimail-devel
+BuildRequires: gzip autoconf indimail-devel libindimail
 %if %{undefined rhel_version}
 BuildRequires: sharutils
 %else
