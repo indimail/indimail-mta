@@ -2432,6 +2432,7 @@ ipme.h cdb.h open.h base64.h gen_allocdefs.h str.h now.h \
 datetime.h exit.h constmap.h tcpto.h timeoutconn.h timeoutread.h \
 timeoutwrite.h env.h uint32.h haveip6.h socket.h variables.h \
 byte.h fmt.h conf-tls conf-ip conf-batv conf-mxps wait.h \
+hastlsv1_1_client.h hastlsv1_2_client.h \
 auth_digest_md5.h hasindimail.h auto_control.h
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
 
@@ -2743,6 +2744,7 @@ matchregex.o str.h fmt.h scan.h byte.h case.h env.h now.h datetime.h \
 variables.h exit.h rcpthosts.h timeoutread.h timeoutwrite.h commands.h \
 wait.h etrn.h date822fmt.h fd.h base64.h envrules.h tablematch.h cdb.h \
 uint32.h matchregex.h qregex.h sqlmatch.h hasindimail.h smtp_plugin.h \
+hastlsv1_1_server.h hastlsv1_2_server.h \
 auto_control.h dns.h conf-tls conf-spf conf-ip conf-plugin conf-batv
 	./compile $(inc_deps) `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin` smtpd.c
@@ -5872,6 +5874,34 @@ compile whois.c subfd.h str.h strerr.h stralloc.h byte.h tcpopen.h sgetopt.h
 
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
+
+hastlsv1_1_server.h: \
+trytlsv1_1_server.c compile load
+	(( ./compile trytlsv1_1_server.c && ./load trytlsv1_1_server -lssl -lcrypto) >/dev/null \
+	2>&1 \
+	&& echo \#define TLSV1_1_SERVER_METHOD 1 || exit 0 ) > hastlsv1_1_server.h
+	rm -f trytlsv1_1_server.o trytlsv1_1_server
+
+hastlsv1_2_server.h: \
+trytlsv1_2_server.c compile load
+	(( ./compile trytlsv1_2_server.c && ./load trytlsv1_2_server -lssl -lcrypto) >/dev/null \
+	2>&1 \
+	&& echo \#define TLSV1_2_SERVER_METHOD 1 || exit 0 ) > hastlsv1_2_server.h
+	rm -f trytlsv1_2_server.o trytlsv1_2_server
+
+hastlsv1_1_client.h: \
+trytlsv1_1_client.c compile load
+	(( ./compile trytlsv1_1_client.c && ./load trytlsv1_1_client -lssl -lcrypto) >/dev/null \
+	2>&1 \
+	&& echo \#define TLSV1_1_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_1_client.h
+	rm -f trytlsv1_1_client.o trytlsv1_1_client
+
+hastlsv1_2_client.h: \
+trytlsv1_2_client.c compile load
+	(( ./compile trytlsv1_2_client.c && ./load trytlsv1_2_client -lssl -lcrypto) >/dev/null \
+	2>&1 \
+	&& echo \#define TLSV1_2_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_2_client.h
+	rm -f trytlsv1_2_client.o trytlsv1_2_client
 
 
 ################### PLUGINS ########################################
