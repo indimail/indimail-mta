@@ -1,5 +1,5 @@
-File INSTALL.indimail, Version 2.1
-DATE: Sat May  6 11:36:26 IST 2017
+File INSTALL.indimail, Version 2.2
+DATE: Mon May  8 22:28:26 IST 2017
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -18,17 +18,17 @@ jump to the Section 'Installation Steps' below. However, I would recommend you t
 the Checklist below to understand what is involved in setting up a full featured mail server.
 
 You will also find this file as 
-http://downloads.sourceforge.net/indimail/INSTALL-2.1
+http://downloads.sourceforge.net/indimail/INSTALL-2.2
 
 There is also a 'Installation for Dummies'. For that read INSTALL-RPM. You will also
 find the INSTALL-RPM file as
-http://downloads.sourceforge.net/indimail/INSTALL-RPM-2.1
+http://downloads.sourceforge.net/indimail/INSTALL-RPM-2.2
 
 This document is complicated as it involves installing from multiple sources. However, there
 is a crash course on IndiMail installation if you want to skip the above
-two documents and directly install from the RPM/Deb. Read the file Quick-INSTALL-2.1.
+two documents and directly install from the RPM/Deb. Read the file Quick-INSTALL-2.2.
 You will also find the file as
-http://downloads.sourceforge.net/indimail/Quick-INSTALL-2.1
+http://downloads.sourceforge.net/indimail/Quick-INSTALL-2.2
 
 Using Quick-INSTALL it is possible to setup a fully functional mail server in
 flat 30 minutes and in less than 10 commands;
@@ -182,7 +182,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
     you have to extract minimum of 10 sources as per the directory
     structure below. You may skip extraction of nssd-1.1, fetchmail-6.3.19,
     depending on whether you require them. Most probably you have downloaded
-    indimail-2.1.tar.gz only. You require to additionally download the
+    indimail-2.2.tar.gz only. You require to additionally download the
     following sources mentioned below. Except for qmail, ucspi-tcp, bogofilter,
     fetchmail, all the sources are available at indimail.sourceforge.net.
     The link from which you can download the sources are mentioned in SECTION 3
@@ -195,7 +195,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
     +-/home/local/src/indimail/.+
                                .
                                . libdkim-1.4         (4.0  Mb)
-                               . indimail-2.1  (50   Mb)
+                               . indimail-2.2  (50   Mb)
                                . qmail-1.03          (21   Mb)
                                . ucspi-tcp-0.88      (4.0  Mb)
                                . nssd-1.1            (2.0  Mb)
@@ -321,12 +321,12 @@ the installation.
 
     # mkdir -p /home/local/src
     % cd /home/local/src
-    % wget http://downloads.sourceforge.net/indimail/INSTALL-2.1 # This file
-    % wget http://downloads.sourceforge.net/indimail/INSTALL-RPM-2.1
-    % wget http://downloads.sourceforge.net/indimail/INSTALL-MYSQL-2.1
-    % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL-2.1
+    % wget http://downloads.sourceforge.net/indimail/INSTALL-2.2 # This file
+    % wget http://downloads.sourceforge.net/indimail/INSTALL-RPM-2.2
+    % wget http://downloads.sourceforge.net/indimail/INSTALL-MYSQL-2.2
+    % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL-2.2
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
-    % wget http://downloads.sourceforge.net/indimail/indimail-2.1.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/indimail-2.2.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.4.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libsrs2-1.0.18.tar.gz
     % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.3.tar.bz2
@@ -401,7 +401,7 @@ the installation.
     % cd ..
 
     ##### STEP 4  ##### MOST IMPORTANT STEP ###################
-    Install IndiMail. This step involves extracting both indimail-2.1.tar.gz and
+    Install IndiMail. This step involves extracting both indimail-2.2.tar.gz and
     qmail-1.03.tar.gz. It is important that the extracted qmail source directory (qmail-1.03)
     is present for ./configure to detect qmail. You can also extract optional
     packages (flash, altermime, ripmime, mpack, fortune, nssd, pam-multi, logalert, fetchmail).
@@ -413,14 +413,14 @@ the installation.
     current working directory /home/local/src
     Download the indimail package from http://www.indimail.org
 
-    % gunzip -c indimail-2.1.tar.gz | tar xf -
+    % gunzip -c indimail-2.2.tar.gz | tar xf -
 
     Download qmail-1.03 MD5 622f65f982e380dbe86e6574f3abcb7c. The latest tested qmail
     package is qmail-1.03.tar.gz
 
     % wget http://cr.yp.to/software/qmail-1.03.tar.gz
     % gunzip -c qmail-1.03.tar.gz | tar xf -
-    % gunzip -c indimail-2.1/patches/qmail-1.03.patch.gz | patch -p0
+    % gunzip -c indimail-2.2/patches/qmail-1.03.patch.gz | patch -p0
 
     change first line in qmail-1.03/conf-qmail to /var/indimail
     change first line in qmail-1.03/conf-shared to /usr/share/indimail
@@ -428,7 +428,7 @@ the installation.
     change first line in qmail-1.03/conf-libexec to /usr/libexec/indimail
     change first line in qmail-1.03/conf-sysconfdir to /etc/indimail
 
-    % cd indimail-2.1
+    % cd indimail-2.2
     % ./configure \
         --prefix=/usr \
         --libexecdir=/usr/libexec/indimail \
@@ -446,7 +446,7 @@ the installation.
         --enable-basepath=/home/mail \
         --enable-indiuser=indimail \
         --enable-indigroup=indimail \
-        --enable-default-domain= \
+        --enable-default-domain=indimail.in \
         --enable-log-name=indimail \
         --enable-mysqlprefix=/usr \
         --enable-roaming-users=y \
@@ -520,7 +520,7 @@ the installation.
     Download the ucspi-tcp package. The latest published ucspi-tcp package is ucspi-tcp-0.88.tar.gz.
     % wget http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz
     % gunzip -c ucspi-tcp-0.88.tar.gz | tar xf -
-    % gunzip -c indimail-2.1/patches/ucspi-tcp-0.88.patch.gz | patch -p0
+    % gunzip -c indimail-2.2/patches/ucspi-tcp-0.88.patch.gz | patch -p0
 
     ensure that mysql_config is in the path. This is needed by ucspi-tcp to detect
     MySQL libraries.
@@ -547,15 +547,15 @@ the installation.
 
     % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.3.tar.bz2
     % bzip2 -d -c courier-imap-4.17.3.tar.bz2 | tar xf -
-    % gunzip -c indimail-2.1/patches/courier-imap-4.17.3.patch.gz | patch -p0
+    % gunzip -c indimail-2.2/patches/courier-imap-4.17.3.patch.gz | patch -p0
     % cd courier-imap-4.17.3
 
    x-------------------------------- Mac OS X ONLY -----------------------------------------x
    |% bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -                                     |
    |If you are on Mac OS X 10.5.x you will need to apply courier-imap-3.0.8-1.2.patch and   |
    |a supplement patch                                                                      |
-   |% gunzip -c indimail-2.1/patches/courier-imap-3.0.8-1.2.patch.gz | patch -p0      |
-   |% gunzip -c indimail-2.1/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz \ |
+   |% gunzip -c indimail-2.2/patches/courier-imap-3.0.8-1.2.patch.gz | patch -p0      |
+   |% gunzip -c indimail-2.2/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz \ |
    | | patch -p0                                                                            |
    |% cd courier-imap-3.0.8                                                                 |
    x----------------------------------------------------------------------------------------x
@@ -591,7 +591,7 @@ the installation.
 
     % wget http://downloads.sourceforge.net/bogofilter/bogofilter-1.2.4.tar.bz2
     % bzip2 -d -c bogofilter-1.2.4.tar.bz2 | tar xf -
-    % gunzip -c indimail-2.1/patches/bogofilter-1.2.4.patch.gz | patch -p0
+    % gunzip -c indimail-2.2/patches/bogofilter-1.2.4.patch.gz | patch -p0
     % cd bogofilter-1.2.4
     % autoreconf -fi
     % ./configure --prefix=/usr --sysconfdir=/etc/indimail --enable-indimail \
@@ -649,7 +649,7 @@ the installation.
 
     % wget http://downloads.sourceforge.net/fetchmail/fetchmail-6.3.26.tar.bz2
     % xz -d -c fetchmail-6.3.26.tar.bz2 | tar xf -
-    % gunzip -c indimail-2.1/patches/fetchmail-6.3.26.patch.gz | patch -p0
+    % gunzip -c indimail-2.2/patches/fetchmail-6.3.26.patch.gz | patch -p0
     % cd fetchmail-6.3.26
     % autoreconf -fi
     % ./configure --prefix=/usr --enable-indimail \
@@ -739,7 +739,7 @@ the installation.
         --base_path=/home/mail
 
     ##### STEP 2  ## MySQL Startup ############################
-    If you plan to use an existing MySQL server, read INSTALL-MYSQL in indimail-2.1/doc
+    If you plan to use an existing MySQL server, read INSTALL-MYSQL in indimail-2.2/doc
     directory and proceed to STEP 3 after that. The instructions below are for MySQL to be
     managed by supervise and hence will require you to disable MySQL startup in your OS
     startup/boot scripts.

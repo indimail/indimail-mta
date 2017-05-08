@@ -107,12 +107,12 @@ to make it easy for a newbie to install IndiMail.
 
 To install IndiMail you can take the help of the following documents
 
-INSTALL-2.1               (Source Installation Instructions)
-INSTALL-RPM-2.1           (Install Instructions for RPM)
-INSTALL-MYSQL-2.1         (MySQL specific Installation Instructions)
+INSTALL-2.2               (Source Installation Instructions)
+INSTALL-RPM-2.2           (Install Instructions for RPM)
+INSTALL-MYSQL-2.2         (MySQL specific Installation Instructions)
 README-CLUSTER              (Steps on installing a clustered setup)
-Quick-INSTALL-2.1         (A minimal documentation on Installation/Configuration)
-RELEASE-Notes-2.1         (This file)
+Quick-INSTALL-2.2         (A minimal documentation on Installation/Configuration)
+RELEASE-Notes-2.2         (This file)
 
 You could also look at
 
