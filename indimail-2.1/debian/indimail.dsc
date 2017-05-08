@@ -4,7 +4,7 @@ Section: Misc
 Priority: extra
 Binary: indimail
 Architecture: any
-Version: 2.1-1
+Version: 2.1-3
 Maintainer: Manvendra Bhangui <manvendra@indimail.org>
 Homepage: http://indimail.sourceforge.net
 Debtransform-Files-Tar: debian.tar.gz

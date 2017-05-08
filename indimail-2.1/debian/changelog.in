@@ -1,4 +1,4 @@
-indimail (@version@-1) unstable; urgency=low
+indimail (@version@-3) unstable; urgency=low
 
   * quoted svctool arguments and save install time arguments in variables/.options file
   * fixed lang and html directory location to /usr/share/iwebadmin
