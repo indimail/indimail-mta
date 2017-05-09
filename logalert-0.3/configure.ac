@@ -155,7 +155,7 @@ if test -d /lib64 -a "$acl_libdirstem" = "lib"
 then
 	acl_libdirstem=lib64
 fi
-tlib='${exec_prefix}/lib'
+tlib=${prefix}/lib
 if test x$libdir = x$tlib
 then
 	dnl Does not work on RHEL 5, CentOS 5 64 bit systems
@@ -168,7 +168,7 @@ else
 	ilibdir=$libdir
 fi
 RPATH_LIB="$acl_libdirstem"
-AC_CHECK_LIB(indimail -L$ilibdir, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-L$ilibdir -lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,)
+AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail -lcdb"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,-lindimail -lcdb)
 
 AC_SUBST(indimaildir)
 AC_CONFIG_FILES([Makefile])
