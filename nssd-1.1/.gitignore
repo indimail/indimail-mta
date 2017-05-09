@@ -23,4 +23,5 @@ m4
 missing
 *.o
 *.lo
+*.la
 autom4te.cache
