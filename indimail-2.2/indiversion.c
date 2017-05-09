@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.146  2017-05-09 17:43:26+05:30  Cprogrammer
+ * fixed authindi path
+ *
  * Revision 2.145  2017-05-01 20:21:15+05:30  Cprogrammer
  * removed mailing list feature from vfilter
  *
@@ -557,7 +560,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.145 2017-05-01 20:21:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.146 2017-05-09 17:43:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -939,12 +942,10 @@ char           *sbin_program_list[] =
 
 char           *libexec_program_list[] = 
 {
-	"authlib/authindi",
+	"imapmodules/authindi",
 	"qmailmrtg7",
 	"sq_vacation",
 	"execmysql",
-	"tls-cert-check",
-	"get-cert",
 	"cindimail",
 	"hashtable",
 	"displaytop",
