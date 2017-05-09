@@ -48,7 +48,7 @@ case "$host" in
 *-*-linux*)
 	INSTALL="/usr/bin/install -c"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
-	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
+	CFLAGS="$CFLAGS -Wno-enum-compare -s -O4 -Wall -fPIC"
 	#STRIP_OPT=-s
     LIBVER=2
 	OS=linux
