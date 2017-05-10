@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.412 2017-05-07 20:40:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.413 2017-05-10 19:42:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -130,7 +130,7 @@ Source0:  http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 Source1:  http://cr.yp.to/software/qmail-%{qmail_version}.tar.gz
 Source2:  http://cr.yp.to/ucspi-tcp/ucspi-tcp-%{ucspi_version}.tar.gz
 %if %nocourierimap == 0
-Source3:  http://downloads.sourceforge.net/%{name}/courier-imap-%{courier_version}.tar.bz2
+Source3:  http://downloads.sourceforge.net/courier/courier-imap-%{courier_version}.tar.bz2
 %endif
 Source4:  http://downloads.sourceforge.net/%{name}/flash-0.9.4.tar.gz
 Source5:  http://downloads.sourceforge.net/%{name}/altermime-0.3.10.tar.gz
@@ -2999,6 +2999,7 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
+default_domain=`uname -n`
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (

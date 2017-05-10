@@ -446,7 +446,7 @@ the installation.
         --enable-basepath=@basepath@ \
         --enable-indiuser=indimail \
         --enable-indigroup=indimail \
-        --enable-default-domain=@defaultdomain@ \
+        --enable-default-domain=`uname -n` \
         --enable-log-name=indimail \
         --enable-mysqlprefix=@mysql_prefix@ \
         --enable-roaming-users=y \
@@ -681,7 +681,7 @@ the installation.
         --mandir=@mandir@ --libexecdir=@libexecdir@ \
         --enable-mysqlprefix=@mysql_prefix@ \
         --libdir=@libdir@ \ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
-        --enable-default-domain=indimail.org
+        --enable-default-domain=`uname -n`
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
