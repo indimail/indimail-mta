@@ -1,5 +1,5 @@
 File INSTALL.indimail, Version 2.2
-DATE: Mon May  8 22:28:26 IST 2017
+DATE: Wed May 10 18:43:45 IST 2017
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -446,7 +446,7 @@ the installation.
         --enable-basepath=/home/mail \
         --enable-indiuser=indimail \
         --enable-indigroup=indimail \
-        --enable-default-domain=indimail.in \
+        --enable-default-domain=`uname -n` \
         --enable-log-name=indimail \
         --enable-mysqlprefix=/usr \
         --enable-roaming-users=y \
@@ -681,7 +681,7 @@ the installation.
         --mandir=/usr/share/man --libexecdir=/usr/libexec/indimail \
         --enable-mysqlprefix=/usr \
         --libdir=/usr/lib64 \ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
-        --enable-default-domain=indimail.org
+        --enable-default-domain=`uname -n`
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
