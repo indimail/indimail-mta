@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.5  2017-05-10 12:27:49+05:30  Cprogrammer
+ * use packetsize > 512 to avoid dkim failures for sites having long txt records (hotmail.com)
+ *
  * Revision 1.4  2009-06-11 13:58:39+05:30  Cprogrammer
  * port for DARWIN
  *
@@ -19,6 +22,8 @@
 #include <string.h>
 #include "dns.h"
 
+#define LONGSZ 1024 /*- use this instead of PACKETSZ for long concatenated txt records like those for hotmail.com */
+
 static unsigned short
 getshort(unsigned char *cp)
 {
@@ -34,13 +39,13 @@ getshort(unsigned char *cp)
 char           *
 dns_text(char *dn)
 {
-	u_char          response[PACKETSZ + 1];	/* response */
+	u_char          response[LONGSZ + 1];	/* response */
 	int             responselen;			/* buffer length */
 	int             rc;						/* misc variables */
 	int             ancount, qdcount;		/* answer count and query count */
 	u_short         type, rdlength;			/* fields of records returned */
 	u_char         *eom, *cp;
-	u_char          buf[PACKETSZ + 1];		/* we're storing a TXT record here, not just a DNAME */
+	u_char          buf[LONGSZ + 1];		/* we're storing a TXT record here, not just a DNAME */
 	u_char         *bufptr;
 
 	responselen = res_query(dn, C_IN, T_TXT, response, sizeof (response));
@@ -82,7 +87,7 @@ dns_text(char *dn)
 			unsigned int    cnt;
 
 			cnt = *cp++;		/* http://crynwr.com/rfc1035/rfc1035.html#3.3.14. */
-			if (bufptr - buf + cnt + 1 >= PACKETSZ)
+			if (bufptr - buf + cnt + 1 >= LONGSZ)
 				return strdup("e=perm;");
 			if (cp + cnt > eom)
 				return strdup("e=perm;");
@@ -90,8 +95,8 @@ dns_text(char *dn)
 			rdlength -= cnt + 1;
 			bufptr += cnt;
 			cp += cnt;
-			*bufptr = '\0';
 		}
+		*bufptr = '\0';
 		return (char *) strdup((char *) buf);
 	}
 	return strdup("e=perm;");
@@ -127,7 +132,7 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.4 2009-06-11 13:58:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.5 2017-05-10 12:27:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
