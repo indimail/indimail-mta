@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.7  2017-05-10 16:06:11+05:30  Cprogrammer
+# create link to dh2048.pem for dhparams.pem
+#
 # Revision 1.6  2017-04-14 00:17:22+05:30  Cprogrammer
 # added permissions for roundcube to accces certs, spamignore
 #
@@ -34,6 +37,11 @@ if [ -x /bin/chmod ] ; then
 	chmod=/bin/chmod
 else
 	chmod=/usr/bin/chmod
+fi
+if [ -x /bin/ln ] ; then
+	ln=/bin/ln
+else
+	ln=/usr/bin/ln
 fi
 
 export PATH="$PATH:/usr/local/bin/ssl:/usr/sbin"
@@ -78,3 +86,6 @@ do
 	mv -f $CERTDIR/dh"$i".new $CERTDIR/dh"$i".pem
 	echo dh"$i".pem
 done
+if [ ! -f $CERTDIR/dhparams.pem ] ; then
+	$ln -sr $CERTDIR/dh2048.pem $CERTDIR/dhparams.pem
+fi
