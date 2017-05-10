@@ -72,3 +72,6 @@ Currently, the list of supported distributions for IndiMail is
 ChangeLog
 =========
 Release 2.2 Start 08/05/2017
+1.  indiversion.c - Fixed authindi path
+2.  use packetsize > 512 to avoid dkim failures for sites having long txt
+    records (hotmail.com)

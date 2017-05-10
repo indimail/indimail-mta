@@ -1,4 +1,6 @@
-indimail (@version@-3) unstable; urgency=low
+indimail (@version@-1) unstable; urgency=low
 
+  * indiversion.c - Fixed authindi path
+  * use packetsize > 512 to avoid dkim failures for sites having long txt records (hotmail.com)
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 08 May 2017 22:30:28 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 10 May 2017 12:31:40 +0530
