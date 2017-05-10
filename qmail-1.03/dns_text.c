@@ -1,5 +1,8 @@
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.8  2017-05-10 14:59:59+05:30  Cprogrammer
+ * increase responselen to 1024 for long text records
+ *
  * Revision 1.7  2014-01-29 14:00:24+05:30  Cprogrammer
  * fix for OS x
  *
@@ -56,20 +59,26 @@ getshort(unsigned char *cp)
 char           *
 dns_text(char *dn)
 {
-	u_char          response[PACKETSZ + 1];	/* response */
+	u_char          response[PACKETSZ + PACKETSZ + 1];	/* response */
 	int             responselen;			/* buffer length */
 	int             rc;						/* misc variables */
 	int             ancount, qdcount;		/* answer count and query count */
 	u_short         type, rdlength;			/* fields of records returned */
 	u_char         *eom, *cp;
-	u_char          buf[PACKETSZ + 1];		/* we're storing a TXT record here, not just a DNAME */
+	u_char          buf[PACKETSZ + PACKETSZ + 1];		/* we're storing a TXT record here, not just a DNAME */
 	u_char         *bufptr;
 
-	responselen = res_query(dn, C_IN, T_TXT, response, sizeof (response));
-	if (responselen < 0) {
-		if (h_errno == TRY_AGAIN)
-			return dk_strdup("e=temp;");
+	for (rc = 0, responselen = PACKETSZ;rc < 2;rc++) {
+		if ((responselen = res_query(dn, C_IN, T_TXT, response, responselen)) < 0) {
+			if (h_errno == TRY_AGAIN)
+				return dk_strdup("e=temp;");
+			else
+				return dk_strdup("e=perm;");
+		}
+		if (responselen <= PACKETSZ)
+			break;
 		else
+		if (responselen >= (2 * PACKETSZ))
 			return dk_strdup("e=perm;");
 	}
 	qdcount = getshort(response + 4);	/* http://crynwr.com/rfc1035/rfc1035.html#4.1.1. */
@@ -104,7 +113,7 @@ dns_text(char *dn)
 			unsigned int    cnt;
 
 			cnt = *cp++;		/* http://crynwr.com/rfc1035/rfc1035.html#3.3.14. */
-			if (bufptr - buf + cnt + 1 >= PACKETSZ)
+			if (bufptr - buf + cnt + 1 >= (2 * PACKETSZ))
 				return dk_strdup("e=perm;");
 			if (cp + cnt > eom)
 				return dk_strdup("e=perm;");
@@ -122,7 +131,7 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	static char    *x = "$Id: dns_text.c,v 1.7 2014-01-29 14:00:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dns_text.c,v 1.8 2017-05-10 14:59:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
