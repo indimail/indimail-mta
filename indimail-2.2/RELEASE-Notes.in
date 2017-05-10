@@ -75,3 +75,5 @@ Release 2.2 Start 08/05/2017
 1.  indiversion.c - Fixed authindi path
 2.  use packetsize > 512 to avoid dkim failures for sites having long txt
     records (hotmail.com)
+3.  fixed default domain in cronlist, svctool, create_services
+4.  config-fast removed display of DESTDIR
