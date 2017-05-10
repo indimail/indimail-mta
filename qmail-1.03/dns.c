@@ -1,5 +1,8 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.30  2017-05-10 14:59:19+05:30  Cprogrammer
+ * increase responselen to 1024 for long text records
+ *
  * Revision 1.29  2015-08-24 19:05:12+05:30  Cprogrammer
  * replaced ip_scan() with ip4_scan()
  *
@@ -484,25 +487,31 @@ findtxt(sa, domain)
 	stralloc       *sa;
 	stralloc       *domain;
 {
-	u_char          response[PACKETSZ + 1];	/*- response */
+	u_char          response[PACKETSZ + PACKETSZ + 1];	/*- response */
 	int             responselen;			/*- buffer length */
 	int             rc;						/*- misc variables */
 	int             ancount, qdcount;		/*- answer count and query count */
 	u_short         type, rdlength;			/*- fields of records returned */
 	u_char         *eom, *cp;
-	u_char          buf[PACKETSZ + 1];		/*- we're storing a TXT record here, not just a DNAME */
+	u_char          buf[PACKETSZ + PACKETSZ + 1];		/*- we're storing a TXT record here, not just a DNAME */
 	u_char         *bufptr;
 
 	if (!stralloc_copy(&glue, domain))
 		return DNS_MEM;
 	if (!stralloc_0(&glue))
 		return DNS_MEM;
-	if ((responselen = res_query(glue.s, C_IN, T_TXT, response, sizeof(response))) < 0)
-	{
-		if (h_errno == TRY_AGAIN)
-			return DNS_SOFT;
+	for (rc = 0, responselen = PACKETSZ;rc < 2;rc++) {
+		if ((responselen = res_query(glue.s, C_IN, T_TXT, response, responselen)) < 0) {
+			if (h_errno == TRY_AGAIN)
+				return DNS_SOFT;
+			else
+				return DNS_HARD;
+		}
+		if (responselen <= PACKETSZ)
+			break;
 		else
-			return DNS_HARD;
+		if (responselen >= (2 * PACKETSZ))
+			return DNS_MEM;
 	}
 	qdcount = getshort(response + 4);	/*- http://crynwr.com/rfc1035/rfc1035.html#4.1.1.  */
 	ancount = getshort(response + 6);
@@ -535,7 +544,7 @@ findtxt(sa, domain)
 			int             cnt;
 
 			cnt = *cp++; /*- http://crynwr.com/rfc1035/rfc1035.html#3.3.14.  */
-			if (bufptr - buf + cnt + 1 >= PACKETSZ)
+			if (bufptr - buf + cnt + 1 >= (2 * PACKETSZ))
 				return DNS_HARD;
 			if (cp + cnt > eom)
 				return DNS_HARD;
@@ -1142,7 +1151,7 @@ dns_maps(sa, ip, suffix)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.29 2015-08-24 19:05:12+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.30 2017-05-10 14:59:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
