@@ -1,5 +1,6 @@
 indimail-mta (2.2-1) unstable; urgency=low
 
   * use packetsize > 512 to avoid dkim failures for sites having long txt records (hotmail.com)
+  * config-fast removed display of DESTDIR
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 10 May 2017 12:33:07 +0530
