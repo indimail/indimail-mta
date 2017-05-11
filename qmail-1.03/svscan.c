@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.8  2017-05-11 13:30:34+05:30  Cprogrammer
+ * added option to run initialization command via INITCMD env variable
+ *
  * Revision 1.7  2017-04-18 08:59:53+05:30  Cprogrammer
  * lock service directory using file .svlock to prevent multiple svscan runs
  *
@@ -40,6 +43,7 @@
 #include "scan.h"
 #include "fmt.h"
 #include "pathexec.h"
+#include "auto_sysconfdir.h"
 
 #define SERVICES 1000
 #define SVLOCK   ".svlock"
@@ -51,7 +55,6 @@
 #ifndef SVSCANINFO
 #define SVSCANINFO ".svscan"  /* must begin with dot ('.') */
 #endif
-
 
 struct
 {
@@ -65,6 +68,55 @@ struct
 } x[SERVICES];
 int             numx = 0;
 char            fnlog[260];
+
+void
+init_cmd(char *cmmd, int dowait, char *sdir)
+{
+	int             child, r, wstat;
+	int             fdsourcedir = -1;
+	char           *args[4];
+
+	/*- save the current dir */
+	if ((fdsourcedir = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
+		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, WARNING, "unable to switch to ", auto_sysconfdir, ": ");
+	if (access("resolv.conf", R_OK)) {
+		if (fchdir(fdsourcedir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+		close(fdsourcedir);
+		return;
+	}
+	if (fchdir(fdsourcedir) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+	close(fdsourcedir);
+	switch (child = fork())
+	{
+	case -1:
+		strerr_warn2(WARNING, "unable to fork for init command: ", &strerr_sys);
+		return;
+	case 0:
+		args[0] = "/bin/sh";
+		args[1] = "-c";
+		args[2] = cmmd && *cmmd ? cmmd : ".svscan/run";
+		args[3] = 0;
+		execv(*args, args);
+		strerr_die4sys(111, WARNING, "unable to run", cmmd, ": ");
+	default:
+		break;
+	}
+	for (;;) {
+		r = dowait ? wait_pid(&wstat, child) : wait_nohang(&wstat);
+		if (!r || (dowait && r == child))
+			break;
+		if (r == -1) {
+			if (errno == error_intr)
+				continue;		/*- impossible */
+			break;
+		}
+	}
+	return;
+}
 
 void
 start(char *fn)
@@ -410,12 +462,13 @@ main(int argc, char **argv)
 		wait = 5;
 	if (env_get("SCANLOG"))
 		open_svscan_log();
-	if ((s = env_get("STATUSFILE")))
-	{
+	if ((s = env_get("STATUSFILE"))) {
 		if ((fd = open(s, O_CREAT, 0644)) == -1)
 			strerr_die4sys(111, FATAL, "unable to open ", s, ": ");
 		close(fd);
 	}
+	if ((s = env_get("INITCMD")))
+		init_cmd(s, env_get("WAIT_INITCMD") ? 1 : 0, ".");
 	for (;;)
 	{
 		doit();
@@ -430,7 +483,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.7 2017-04-18 08:59:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: svscan.c,v 1.8 2017-05-11 13:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
