@@ -2,5 +2,6 @@ indimail-mta (2.2-1) unstable; urgency=low
 
   * use packetsize > 512 to avoid dkim failures for sites having long txt records (hotmail.com)
   * config-fast removed display of DESTDIR
+  * svscanboot/svscan option run .svscan/run or INITCMD. Use unshare --mount option to mount private mounts like custom resolv.conf
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 10 May 2017 12:33:07 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 11 May 2017 13:26:55 +0530

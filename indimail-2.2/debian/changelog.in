@@ -2,7 +2,9 @@ indimail (@version@-1) unstable; urgency=low
 
   * indiversion.c - Fixed authindi path
   * use packetsize > 512 to avoid dkim failures for sites having long txt records (hotmail.com)
-  * fixed default domain in cronlist, svctool, create_services
+  * fixed default domain in cronlist, svctool, create_services, config-fast
   * config-fast removed display of DESTDIR
+  * svscanboot/svscan option run .svscan/run or INITCMD. Use unshare --mount option to mount private mounts like custom resolv.conf
+  * svctool - --svscanlog creates .svscan/run and variables in .svscan/variables
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 10 May 2017 12:31:40 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 11 May 2017 13:26:55 +0530
