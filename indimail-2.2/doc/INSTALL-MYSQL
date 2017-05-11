@@ -54,7 +54,7 @@
     Create service in supervise to start mysqld
     # /usr/sbin/svctool --mysql=3306 --servicedir=/service \
         --mysqlPrefix=/usr --databasedir=/var/indimail/mysqldb \
-        --config=/etc/indimail/indimail.cnf --default-domain=indimail.org
+        --config=/etc/indimail/indimail.cnf --default-domain=`uname -n`
 
     ##### STEP 2  ## MySQL Database Creation ##################
     Create MySQL Database. You have to either run option a) or option b) depending on whether
@@ -73,7 +73,7 @@
 
        Create a new MySQL database
        # /usr/sbin/svctool --config=mysqldb --mysqlPrefix=/usr \
-           --databasedir=/var/indimail/mysqldb --default-domain=indimail.org \
+           --databasedir=/var/indimail/mysqldb --default-domain=`uname -n` \
            --base_path=/home/mail
 
        Create a link to IndiMail's MySQL config file
@@ -86,7 +86,7 @@
        Method 1 - Using svctool
        ------------------------
        # /usr/sbin/svctool --config=mysqldb --mysqlPrefix=/usr \
-           --databasedir=/var/indimail/mysqldb --default-domain=indimail.org \
+           --databasedir=/var/indimail/mysqldb --default-domain=`uname -n` \
            --base_path=/home/mail --stdout | mysql -u user -ppassword
 
        Create a link to existing MySQL config file
