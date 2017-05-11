@@ -11,6 +11,7 @@ Release 2.2 Start 08/05/2017
     option to mount private mounts like custom resolv.conf
 5.  svctool - --svscanlog creates .svscan/run and variables in
     .svscan/variables
+6.  svscan - run .svscan/shutdown on SIGTERM
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.1 Start 16/03/2017

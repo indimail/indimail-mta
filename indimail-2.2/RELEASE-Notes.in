@@ -75,5 +75,8 @@ Release 2.2 Start 08/05/2017
 1.  indiversion.c - Fixed authindi path
 2.  use packetsize > 512 to avoid dkim failures for sites having long txt
     records (hotmail.com)
-3.  fixed default domain in cronlist, svctool, create_services
-4.  config-fast removed display of DESTDIR
+3.  fixed default domain in cronlist, svctool, create_services, config-fast
+4.  svscanboot/svscan option run .svscan/run or INITCMD. Use unshare --mount
+    option to mount private mounts like custom resolv.conf
+5.  svctool - --svscanlog - create .svscan/run and variables in .svscan/variables
+6.  svscan - run .svscan/shutdown on SIGTERM
