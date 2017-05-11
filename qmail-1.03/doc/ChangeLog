@@ -7,3 +7,4 @@ Release 2.2 Start 08/05/2017
 11/05/2017
 3.  svscanboot/svscan option run .svscan/run or INITCMD. Use unshare --mount
     option to mount private mounts like custom resolv.conf
+4.  svscan - run .svscan/shutdown on SIGTERM
