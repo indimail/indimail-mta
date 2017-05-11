@@ -829,6 +829,12 @@ svscanboot.9 conf-prefix conf-sysconfdir conf-libexec
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> svscanboot.8
 
+svscan.8: \
+svscan.9 conf-sysconfdir
+	cat svscan.9 \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
+	> svscan.8
+
 cronlist:cronlist.in conf-prefix conf-libexec
 	( \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
@@ -5228,14 +5234,14 @@ svok.o: compile error.h open.h strerr.h svok.c
 	./compile svok.c
 
 svscan: load svscan.o scan_ulong.o coe.o strerr_die.o strerr_sys.o error.o \
-envread.o fd_move.o fd_copy.o wait_nohang.o pathexec_run.o error_str.o \
-fmt_ulong.o alloc.o alloc_re.o substdio.a stralloc.a str.a
+envread.o fd_move.o fd_copy.o wait_pid.o wait_nohang.o pathexec_run.o error_str.o \
+auto_sysconfdir.o fmt_ulong.o alloc.o alloc_re.o substdio.a stralloc.a str.a
 	./load svscan scan_ulong.o coe.o strerr_die.o strerr_sys.o error.o \
-	envread.o fd_move.o fd_copy.o wait_nohang.o pathexec_run.o error_str.o \
-	fmt_ulong.o alloc.o alloc_re.o substdio.a stralloc.a str.a
+	envread.o fd_move.o fd_copy.o wait_pid.o wait_nohang.o pathexec_run.o error_str.o \
+	auto_sysconfdir.o fmt_ulong.o alloc.o alloc_re.o substdio.a stralloc.a str.a
 
 svscan.o: byte.h coe.h compile direntry.h env.h error.h fd.h \
-pathexec.h str.h strerr.h svscan.c wait.h scan.h fmt.h
+pathexec.h str.h strerr.h svscan.c wait.h scan.h fmt.h auto_sysconfdir.h
 	./compile svscan.c
 
 svstat: load svstat.o strerr_die.o strerr_sys.o \
