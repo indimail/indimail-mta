@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.9  2017-05-11 14:24:27+05:30  Cprogrammer
+ * run .svscan/shutdown on SIGTERM
+ *
  * Revision 1.8  2017-05-11 13:30:34+05:30  Cprogrammer
  * added option to run initialization command via INITCMD env variable
  *
@@ -70,38 +73,26 @@ int             numx = 0;
 char            fnlog[260];
 
 void
-init_cmd(char *cmmd, int dowait, char *sdir)
+init_cmd(char *cmmd, int dowait, int shutdown)
 {
 	int             child, r, wstat;
-	int             fdsourcedir = -1;
-	char           *args[4];
+	char           *cpath, *args[4];
 
-	/*- save the current dir */
-	if ((fdsourcedir = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
-		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, WARNING, "unable to switch to ", auto_sysconfdir, ": ");
-	if (access("resolv.conf", R_OK)) {
-		if (fchdir(fdsourcedir) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
-		close(fdsourcedir);
+	cpath = shutdown ? ".svscan/shutdown" : cmmd && *cmmd ? cmmd : ".svscan/run";
+	if (access(cpath, X_OK))
 		return;
-	}
-	if (fchdir(fdsourcedir) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
-	close(fdsourcedir);
 	switch (child = fork())
 	{
 	case -1:
-		strerr_warn2(WARNING, "unable to fork for init command: ", &strerr_sys);
+		strerr_warn4(WARNING, "unable to fork for init command ", cpath, ": ", &strerr_sys);
 		return;
 	case 0:
 		args[0] = "/bin/sh";
 		args[1] = "-c";
-		args[2] = cmmd && *cmmd ? cmmd : ".svscan/run";
+		args[2] = cpath;
 		args[3] = 0;
 		execv(*args, args);
-		strerr_die4sys(111, WARNING, "unable to run", cmmd, ": ");
+		strerr_die4sys(111, WARNING, "unable to run", cpath, ": ");
 	default:
 		break;
 	}
@@ -129,22 +120,18 @@ start(char *fn)
 
 	if (fn[0] == '.' && str_diff(fn, SVSCANINFO))
 		return;
-	if (stat(fn, &st) == -1)
-	{
+	if (stat(fn, &st) == -1) {
 		strerr_warn4(WARNING, "unable to stat ", fn, ": ", &strerr_sys);
 		return;
 	}
 	if ((st.st_mode & S_IFMT) != S_IFDIR)
 		return;
-	for (i = 0; i < numx; ++i)
-	{
+	for (i = 0; i < numx; ++i) {
 		if (x[i].ino == st.st_ino && x[i].dev == st.st_dev)
 			break;
 	}
-	if (i == numx)
-	{
-		if (numx >= SERVICES)
-		{
+	if (i == numx) {
+		if (numx >= SERVICES) {
 			strerr_warn4(WARNING, "unable to start ", fn, ": running too many services", 0);
 			return;
 		}
@@ -155,23 +142,19 @@ start(char *fn)
 		x[i].pidlog = 0;
 		x[i].flaglog = 0;
 		fnlen = str_len(fn);
-		if (fnlen <= 255)
-		{
+		if (fnlen <= 255) {
 			byte_copy(fnlog, fnlen, fn);
 			byte_copy(fnlog + fnlen, 5, "/log");
 			if (stat(fnlog, &st) == 0)
 				x[i].flaglog = 1;
 			else
-			if (errno != error_noent)
-			{
+			if (errno != error_noent) {
 				strerr_warn4(WARNING, "unable to stat ", fn, "/log: ", &strerr_sys);
 				return;
 			}
 		}
-		if (x[i].flaglog)
-		{
-			if (pipe(x[i].pi) == -1)
-			{
+		if (x[i].flaglog) {
+			if (pipe(x[i].pi) == -1) {
 				strerr_warn4(WARNING, "unable to create pipe for ", fn, ": ", &strerr_sys);
 				return;
 			}
@@ -181,8 +164,7 @@ start(char *fn)
 		++numx;
 	}
 	x[i].flagactive = 1;
-	if (!x[i].pid)
-	{
+	if (!x[i].pid) {
 		switch (child = fork())
 		{
 		case -1:
@@ -201,8 +183,7 @@ start(char *fn)
 			x[i].pid = child;
 		}
 	}
-	if (x[i].flaglog && !x[i].pidlog)
-	{
+	if (x[i].flaglog && !x[i].pidlog) {
 		switch (child = fork())
 		{
 		case -1:
@@ -217,7 +198,7 @@ start(char *fn)
 			args[1] = "log";
 			args[2] = 0;
 			pathexec_run(*args, args, environ);
-			strerr_die4sys(111, WARNING, "unable to start supervise ", fn, "/log: ");
+			strerr_die4sys(111, FATAL, "unable to start supervise ", fn, "/log: ");
 		default:
 			x[i].pidlog = child;
 		}
@@ -239,26 +220,20 @@ doit(void)
 	int             r;
 	int             wstat;
 
-	for (;;)
-	{
-		r = wait_nohang(&wstat);
-		if (!r)
+	for (;;) {
+		if (!(r = wait_nohang(&wstat)))
 			break;
-		if (r == -1)
-		{
+		if (r == -1) {
 			if (errno == error_intr)
 				continue;		/*- impossible */
 			break;
 		}
-		for (i = 0; i < numx; ++i)
-		{
-			if (x[i].pid == r)
-			{
+		for (i = 0; i < numx; ++i) {
+			if (x[i].pid == r) {
 				x[i].pid = 0;
 				break;
 			}
-			if (x[i].pidlog == r)
-			{
+			if (x[i].pidlog == r) {
 				x[i].pidlog = 0;
 				break;
 			}
@@ -266,33 +241,26 @@ doit(void)
 	}
 	for (i = 0; i < numx; ++i)
 		x[i].flagactive = 0;
-	if(!(dir = opendir(".")))
-	{
+	if(!(dir = opendir("."))) {
 		direrror();
 		return;
 	}
-	for (;;)
-	{
+	for (;;) {
 		errno = 0;
-		d = readdir(dir);
-		if (!d)
+		if (!(d = readdir(dir)))
 			break;
 		start(d->d_name);
 	}
-	if (errno)
-	{
+	if (errno) {
 		direrror();
 		closedir(dir);
 		return;
 	}
 	closedir(dir);
 	i = 0;
-	while (i < numx)
-	{
-		if (!x[i].flagactive && !x[i].pid && !x[i].pidlog)
-		{
-			if (x[i].flaglog)
-			{
+	while (i < numx) {
+		if (!x[i].flagactive && !x[i].pid && !x[i].pidlog) {
+			if (x[i].flaglog) {
 				close(x[i].pi[0]);
 				close(x[i].pi[1]);
 				x[i].flaglog = 0;
@@ -322,8 +290,9 @@ sigterm(int i)
 	if ((s = env_get("STATUSFILE")))
 		unlink(s);
 	unlink(SVLOCK);
-	signal(SIGTERM, sigterm);
+	signal(SIGTERM, SIG_IGN);
 	strerr_warn2(INFO, "Stopping svscan", 0);
+	init_cmd(0, 1, 1); /*- run .svscan/shutdown */
 	_exit(0);
 }
 
@@ -343,11 +312,9 @@ open_svscan_log(void)
 		(void) open("/dev/null", O_WRONLY);
 	if (fstat(STDERR_FILENO, &st) != 0 && errno == EBADF)
 		(void) open("/dev/null", O_WRONLY);
-	if (stat(fn, &st) == 0)
-	{
+	if (stat(fn, &st) == 0) {
 		start(fn);
-		if (i + 1 == numx && x[i].pidlog != 0)
-		{
+		if (i + 1 == numx && x[i].pidlog != 0) {
 			(void) dup2(x[i].pi[1], STDOUT_FILENO);
 			(void) dup2(x[i].pi[1], STDERR_FILENO);
 			strerr_warn2(INFO, "Starting svscan", 0);
@@ -447,8 +414,7 @@ main(int argc, char **argv)
 	int             fd;
 	char           *s;
 
-	if (argv[0] && argv[1])
-	{
+	if (argv[0] && argv[1]) {
 		if (chdir(argv[1]) == -1)
 			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[1], ": ");
 		while (get_lock(argv[1])) ;
@@ -468,9 +434,8 @@ main(int argc, char **argv)
 		close(fd);
 	}
 	if ((s = env_get("INITCMD")))
-		init_cmd(s, env_get("WAIT_INITCMD") ? 1 : 0, ".");
-	for (;;)
-	{
+		init_cmd(s, env_get("WAIT_INITCMD") ? 1 : 0, 0);
+	for (;;) {
 		doit();
 		if (wait)
 			sleep(wait);
@@ -483,7 +448,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.8 2017-05-11 13:30:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svscan.c,v 1.9 2017-05-11 14:24:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
