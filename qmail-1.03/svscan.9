@@ -94,12 +94,12 @@ undetected for a long time.
 If \fBINITCMD\fR environment variable is defined \fBsvscan\fR runs \fI/directory\fR/.svscan/\fIrun\fR (if it exists).
 \fBINITCMD\fR can be set to full path of an executable or script to override \fBsvscan\fR running \fIrun\fR
 It will additionally wait for the \fIrun\fR to exit, before starting the scan of \fIdirectory\fR. Typical use
-of \fBINITCMD\fR is to mount --bind /etc/indimail/resolv.conf as /etc/resolv.conf to redirect all dns resolver requests
+of \fBINITCMD\fR is to mount --bind SYSCONFDIR/resolv.conf as /etc/resolv.conf to redirect all dns resolver requests
 to locally running \fBdnscache\fR(8). A typical \fIrun\fR looks like this
 
 .EX
 #!/bin/sh
-/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf
+/usr/bin/mount --bind SYSCONFDIR/resolv.conf /etc/resolv.conf
 /usr/bin/mount -l
 .EE
 
