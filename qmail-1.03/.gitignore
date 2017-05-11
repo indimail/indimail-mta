@@ -545,3 +545,4 @@ hastlsv1_1_client.h
 hastlsv1_1_server.h
 hastlsv1_2_client.h
 hastlsv1_2_server.h
+svscan.8
