@@ -3939,7 +3939,7 @@ else
 fi
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
-echo "$prog_args" >> "$DESTDIR"$SERVICEDIR/.svscan/.options
+echo "$prog_args" >> "$DESTDIR"$SERVICEDIR/.svscan/variables/.options
 /bin/mkdir -p "$DESTDIR"$sysconfdir
 (
 echo "# $prog_args"
