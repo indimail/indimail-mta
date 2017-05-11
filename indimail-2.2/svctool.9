@@ -576,7 +576,6 @@ Known values for OPTION are:
   default-domain - default domain name for which this host will handle mails
 
 --qscanq --servicedir=service_path [--scanint=n]
-  scanint      - Repeat interval for command 
 
   service_path - Path where supervise scripts will be installed
   n            - Scan interval for Virus scanning
@@ -618,7 +617,7 @@ Known values for OPTION are:
 --mrtg=htmldir --servicedir=service_path [--scanint=n]
   htmldir      - Path in /var/www/html directory
   service_path - Path where supervise scripts will be installed
-  scanint      - Repeat interval for command 
+  n            - Scan interval for mrtg command
 
 --config=mysql|mysqldb|qmail|users|rmusers|clamd|bogofilter|cert|add-boot|rm-boot|selinux
 	[--postmaster=user[@domain]]
@@ -676,10 +675,11 @@ Known values for OPTION are:
 
   service_path - Path where supervise scripts will be installed
 
---svscanlog --servicedir=service_path --initcmd=cmmd
+--svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
 
   service_path - Path where supervise scripts will be installed
   cmmd         - Program/Script to run instead of .svscan/run
+  n            - Scan interval for svscan command
 
 --backup=backupdir --servicedir=service_path --mysqlPrefix=mysqlPrefix
 
