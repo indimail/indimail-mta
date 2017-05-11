@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.413 2017-05-10 19:42:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.414 2017-05-11 13:33:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2501,7 +2501,7 @@ fi
 %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir}
 
 # svscanlog service
-%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
+%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir} --scanint=60
 
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
   default_domain=`uname -n`

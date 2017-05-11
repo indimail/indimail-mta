@@ -226,7 +226,7 @@ ${prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=${servicedir}
 ${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
 
 # create svscanlog service
-${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
+${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir --scanint=60
 
 echo "Creating default qmail configuraton and catch-all alias (${indimaildir}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${indimaildir}/alias/Maildir/ \
