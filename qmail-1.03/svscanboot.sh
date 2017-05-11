@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.16  2017-05-11 13:29:40+05:30  Cprogrammer
+# use envdir from .svscan/variables and use unshare --mount to run svscan
+#
 # Revision 1.15  2017-03-09 16:39:32+05:30  Cprogrammer
 # FHS changes
 #
@@ -43,7 +46,7 @@
 # Revision 1.2  2002-09-26 20:56:02+05:30  Cprogrammer
 # made service directory configurable
 #
-# $Id: svscanboot.sh,v 1.15 2017-03-09 16:39:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.16 2017-05-11 13:29:40+05:30 Cprogrammer Exp mbhangui $
 
 PATH=PREFIX/bin:PREFIX/sbin:/bin:/sbin:/usr/bin:/usr/sbin
 
@@ -51,18 +54,6 @@ exec </dev/null
 exec >/dev/null
 exec 2>/dev/null
 
-if [ " $CONTROLDIR" = " " ] ; then
-	CONTROLDIR=@controldir@
-fi
-slash=`echo $CONTROLDIR | cut -c1`
-if [ ! " $slash" = " /" ] ; then
-	cd SYSCONFDIR
-fi
-if [ -f  $CONTROLDIR/scaninterval ] ; then
-	SCANINTERVAL=`cat $CONTROLDIR/scaninterval`
-else
-	SCANINTERVAL=300
-fi
 cd /
 use_readproctitle=0
 if [ $# -eq 0 ] ; then
@@ -82,15 +73,22 @@ else
 	STATUSFILE=/tmp/svscan
 fi
 if [ $# -eq 0 -o $# -eq 1 ] ; then
+	VARIABLES=$SERVICEDIR/.svscan/variables
+	if [ ! -f $VARIABLES/SCANLOG -o -z $VARIABLES/SCANLOG ] ; then
+		use_readproctitle=1
+	fi
+	if [ -s $VARIABLES/UNSHARE -a -x /usr/bin/unshare ] ; then
+		MOUNT_CMD="/usr/bin/unshare --mount"
+	else
+		MOUNT_CMD=""
+	fi
 	PREFIX/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
 	if [ $use_readproctitle -eq 1 ] ; then
-		exec env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL \
-			STATUSFILE=$STATUSFILE \
+		exec $MOUNT_CMD envdir  $VARIABLES \
 			PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
-		env - PATH=$PATH PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
+			PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
 	else
-		exec env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
-			STATUSFILE=$STATUSFILE \
+		exec $MOUNT_CMD envdir  $VARIABLES \
 			PREFIX/sbin/svscan $SERVICEDIR
 	fi
 else
@@ -100,13 +98,24 @@ else
 			continue
 		fi
 		SERVICEDIR=$i
+		VARIABLES=$SERVICEDIR/.svscan/variables
 		PREFIX/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log
-		if [ $use_readproctitle -eq 1 ] ; then
-			env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL \
-				PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
-			env - PATH=$PATH PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
+		if [ ! -f $VARIABLES/SCANLOG -o -z $VARIABLES/SCANLOG ] ; then
+			use_readproctitle=1
 		else
-			env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
+			use_readproctitle=0
+		fi
+		if [ -s $VARIABLES/UNSHARE -a -x /usr/bin/unshare ] ; then
+			MOUNT_CMD="/usr/bin/unshare --mount"
+		else
+			MOUNT_CMD=""
+		fi
+		if [ $use_readproctitle -eq 1 ] ; then
+			eval $MOUNT_CMD envdir $VARIABLES \
+				PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
+				PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
+		else
+			eval $MOUNT_CMD envdir $VARIABLES \
 				PREFIX/sbin/svscan $SERVICEDIR &
 		fi
 	done
