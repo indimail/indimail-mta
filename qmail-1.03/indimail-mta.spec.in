@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.104 2017-05-11 13:32:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.105 2017-05-12 18:04:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -805,6 +805,7 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(755,root,qmail)                   %{_prefix}/bin/spfquery
 %attr(755,root,qmail)                   %{_prefix}/bin/srsfilter
+%attr(755,root,qmail)                   %{_prefix}/bin/inotify
 
 %attr(755,root,qmail)                   %{libexecdir}/columnt
 %attr(755,root,qmail)                   %{libexecdir}/rpmattr
@@ -1008,6 +1009,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man1/qmail-cat.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/cidr.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/spfquery.1.gz
+%attr(0644,root,root)                   %{mandir}/man1/inotify.1.gz
 %if %nolibsrs2 == 0
 %attr(0644,root,root)                   %{mandir}/man1/srs.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/srsfilter.1.gz

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.414 2017-05-11 13:33:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.415 2017-05-12 18:05:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1374,6 +1374,7 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/tai64nlocal
 %attr(755,root,qmail)                   %{_prefix}/bin/envuidgid
 %attr(755,root,qmail)                   %{_prefix}/bin/maildircmd
+%attr(755,root,qmail)                   %{_prefix}/bin/inotify
 
 %attr(755,root,qmail)                   %{_prefix}/bin/822headerfilter
 %attr(755,root,qmail)                   %{_prefix}/bin/822print

@@ -170,6 +170,7 @@
 %attr(0755,root,qmail) @prefix@/bin/spfquery
 %attr(0755,root,qmail) @prefix@/bin/spipe
 %attr(0755,root,qmail) @prefix@/bin/srsfilter
+%attr(0755,root,qmail) @prefix@/bin/inotify
 %attr(0755,root,qmail) @prefix@/bin/sslerator
 %attr(0755,root,qmail) @prefix@/bin/supervise
 %attr(0755,root,qmail) @prefix@/bin/svc
@@ -699,6 +700,7 @@
 %attr(0644,root,root)  @mandir@/cat8/spawn-filter.0.gz
 %attr(0644,root,root)  @mandir@/cat8/splogger.0.gz
 %attr(0644,root,root)  @mandir@/man1/srsfilter.1.gz
+%attr(0644,root,root)  @mandir@/man1/inotify.1.gz
 %attr(0644,root,root)  @mandir@/man1/spfquery.1.gz
 %attr(0644,root,root)  @mandir@/man1/crypt.1.gz
 %attr(0644,root,root)  @mandir@/man1/822addr.1.gz
