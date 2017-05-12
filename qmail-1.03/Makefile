@@ -386,11 +386,9 @@ byte_rcspn.o: \
 compile byte_rcspn.c byte.h
 	./compile byte_rcspn.c
 
-
 byte_cspn.o: \
 compile byte_cspn.c byte.h
 	./compile byte_cspn.c
-
 
 byte_diff.o: \
 compile byte_diff.c byte.h
@@ -1372,7 +1370,7 @@ run-cleanq.9 conf-prefix
 it: \
 indimail-mta.fc perm_list 822date 822field 822header 822print 822received addcr addrlist \
 argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist indimail-mta.spec \
-binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm \
+binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm inotify \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
 datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip \
 dnsmxip dnsptr dnstxt dot-forward drate elq envdir envuidgid \
@@ -5908,6 +5906,19 @@ trytlsv1_2_client.c compile load
 	2>&1 \
 	&& echo \#define TLSV1_2_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_2_client.h
 	rm -f trytlsv1_2_client.o trytlsv1_2_client
+
+inotify: \
+load inotify.o fmt_ulong.o scan_ulong.o envread.o \
+sgetopt.o sig_block.o sig_catch.o sig_term.o \
+subgetopt.o strerr.a substdio.a str.a error.a
+	./load inotify fmt_ulong.o scan_ulong.o envread.o \
+	sgetopt.o sig_block.o sig_catch.o sig_term.o \
+	subgetopt.o strerr.a substdio.a str.a error.a
+
+inotify.o: \
+compile inotify.c subfd.h strerr.h env.h scan.h \
+sig.h sgetopt.h
+	./compile inotify.c
 
 
 ################### PLUGINS ########################################
