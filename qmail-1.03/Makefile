@@ -5907,6 +5907,13 @@ trytlsv1_2_client.c compile load
 	&& echo \#define TLSV1_2_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_2_client.h
 	rm -f trytlsv1_2_client.o trytlsv1_2_client
 
+hasinotify.h: \
+tryinotify.c compile load
+	( ( ./compile tryinotify.c && ./load tryinotify ) >/dev/null \
+	2>&1 \
+	&& echo \#define HASINOTIFY 1 || exit 0 ) > hasinotify.h
+	rm -f tryinotify.o tryinotify
+
 inotify: \
 load inotify.o fmt_ulong.o scan_ulong.o envread.o \
 sgetopt.o sig_block.o sig_catch.o sig_term.o \
@@ -5917,7 +5924,7 @@ subgetopt.o strerr.a substdio.a str.a error.a
 
 inotify.o: \
 compile inotify.c subfd.h strerr.h env.h scan.h \
-sig.h sgetopt.h
+sig.h sgetopt.h hasinotify.h
 	./compile inotify.c
 
 
