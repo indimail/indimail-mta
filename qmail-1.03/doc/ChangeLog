@@ -9,3 +9,4 @@ Release 2.2 Start 08/05/2017
     option to mount private mounts like custom resolv.conf
 4.  svscan - run .svscan/shutdown on SIGTERM
 5.  added inotify program to get file system events
+6.  added resolvconf service
