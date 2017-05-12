@@ -1091,3 +1091,6 @@ hastlsv1_2_server.h
 svscan.8
 inotify
 inotify.o
+hasinotify.h
+tryinotify
+tryinotify.o
