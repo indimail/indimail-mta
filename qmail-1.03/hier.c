@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.233  2017-05-12 18:04:36+05:30  Cprogrammer
+ * added inotify - monitor file system events
+ *
  * Revision 1.232  2017-04-23 18:28:54+05:30  Cprogrammer
  * added cronlist
  *
@@ -857,6 +860,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "qnotify", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "rrt", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "inotify", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qpq", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qail", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "elq", auto_uido, auto_gidq, moder_x);
@@ -1224,6 +1228,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/man1", "qnotify.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "rrt.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qarf.1", uidr, gidr, moder_f);
+	c(mandir,          "man/man1", "inotify.1", uidr, gidr, moder_f);
 #ifdef HAVESRS
 	c(mandir,          "man/man1", "srsfilter.1", uidr, gidr, moder_f);
 #endif
@@ -1571,7 +1576,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.232 2017-04-23 18:28:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.233 2017-05-12 18:04:36+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
