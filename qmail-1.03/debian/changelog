@@ -5,5 +5,6 @@ indimail-mta (2.2-1) unstable; urgency=low
   * svscanboot/svscan option run .svscan/run or INITCMD. Use unshare --mount option to mount private mounts like custom resolv.conf
   * svscan - run .svscan/shutdown on SIGTERM
   * added inotify program to get file system events
+  * added resolvconf service
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 12 May 2017 17:54:40 +0530

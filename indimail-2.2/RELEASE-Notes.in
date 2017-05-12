@@ -81,3 +81,4 @@ Release 2.2 Start 08/05/2017
 5.  svctool - --svscanlog - create .svscan/run and variables in .svscan/variables
 6.  svscan - run .svscan/shutdown on SIGTERM
 7.  added inotify program to get file system events
+8.  added resolvconf service

@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Thu May 11 19:14:39 IST 2017
+DATE: Fri May 12 19:30:47 IST 2017
 
 This is Release 2.2 of IndiMail. The release has both source.tar.gz, RPMs and debs.
 
@@ -80,3 +80,4 @@ Release 2.2 Start 08/05/2017
     option to mount private mounts like custom resolv.conf
 5.  svctool - --svscanlog - create .svscan/run and variables in .svscan/variables
 6.  svscan - run .svscan/shutdown on SIGTERM
+7.  added inotify program to get file system events

@@ -8,5 +8,6 @@ indimail (@version@-1) unstable; urgency=low
   * svctool - --svscanlog creates .svscan/run and variables in .svscan/variables
   * svscan - run .svscan/shutdown on SIGTERM
   * added inotify program to get file system events
+  * added resolvconf service
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 12 May 2017 17:54:40 +0530
