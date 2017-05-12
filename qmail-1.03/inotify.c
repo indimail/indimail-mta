@@ -1,5 +1,8 @@
 /*
  * $Log: inotify.c,v $
+ * Revision 1.5  2017-05-12 19:01:46+05:30  Cprogrammer
+ * use compile time inotify(7) api
+ *
  * Revision 1.4  2017-05-12 17:58:09+05:30  Cprogrammer
  * inotify indimail-mta version
  *
@@ -12,6 +15,8 @@
  *
  * This is the sample program to notify us for the file creation and file deletion takes place in “/tmp” directory
  */
+#include "hasinotify.h"
+#ifdef HASINOTIFY
 #include <sys/inotify.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -241,11 +246,23 @@ main(int argc, char **argv)
 	close(ifd);
 	_exit(0);
 }
+#else
+#warning "this system does not support inotify(7)"
+#include <unistd.h>
+#include "subfd.h"
+int
+main(int argc, char **argv)
+{
+	substdio_puts(subfderr, "inotify is missing on your system\n");
+	substdio_flush(subfderr);
+	_exit(111);
+}
+#endif
 
 void
 getversion_inotify_c()
 {
-	static char    *x = "$Id: inotify.c,v 1.4 2017-05-12 17:58:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inotify.c,v 1.5 2017-05-12 19:01:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
