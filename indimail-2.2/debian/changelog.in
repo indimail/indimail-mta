@@ -7,5 +7,6 @@ indimail (@version@-1) unstable; urgency=low
   * svscanboot/svscan option run .svscan/run or INITCMD. Use unshare --mount option to mount private mounts like custom resolv.conf
   * svctool - --svscanlog creates .svscan/run and variables in .svscan/variables
   * svscan - run .svscan/shutdown on SIGTERM
+  * added inotify program to get file system events
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 11 May 2017 13:26:55 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 12 May 2017 17:54:40 +0530
