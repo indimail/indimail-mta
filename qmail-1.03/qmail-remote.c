@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.107  2017-05-15 23:21:07+05:30  Cprogrammer
+ * fix for SMTPROUTE of the form domain:x.x.x.x::penalty:max_tolerance username password
+ *
  * Revision 1.106  2017-05-15 19:18:53+05:30  Cprogrammer
  * use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
  *
@@ -398,7 +401,7 @@
 #define MAX_TOLERANCE 120
 
 #define PORT_SMTP     25 /*- silly rabbit, /etc/services is for users */
-#define PORT_QMTP     209 
+#define PORT_QMTP     209
 
 #ifdef TLS
 int             tls_init();
@@ -453,7 +456,7 @@ stralloc        smtptext = { 0 };
 stralloc        smtpenv = { 0 };
 
 /*- http://mipassoc.org/pipermail/batv-tech/2007q4/000032.html */
-#ifdef BATV 
+#ifdef BATV
 #define BATVLEN 3 /*- number of bytes */
 #include "byte.h"
 #include <openssl/md5.h>
@@ -1194,7 +1197,7 @@ ehlo()
 
 		/*
 		 * keyword should consist of alpha-num and '-'
-		 * broken AUTH might use '=' instead of space 
+		 * broken AUTH might use '=' instead of space
 		 */
 		for (p = sa->s; *p; ++p)
 		{
@@ -1364,7 +1367,7 @@ match_partner(char *s, int len)
 	if (!case_diffb(partner_fqdn, len, (char *) s) && !partner_fqdn[len])
 		return 1;
 	/*
-	 * we also match if the name is *.domainname 
+	 * we also match if the name is *.domainname
 	 */
 	if (*s == '*')
 	{
@@ -1376,7 +1379,7 @@ match_partner(char *s, int len)
 }
 
 /*
- * don't want to fail handshake if certificate can't be verified 
+ * don't want to fail handshake if certificate can't be verified
  */
 int
 verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
@@ -1490,7 +1493,7 @@ tls_init()
 		stralloc       *sa = ehlokw.sa;
 		unsigned int    len = ehlokw.len;
 		/*
-		 * look for STARTTLS among EHLO keywords 
+		 * look for STARTTLS among EHLO keywords
 		 */
 		for (; len && case_diffs(sa->s, "STARTTLS"); ++sa, --len);
 		if (!len)
@@ -1528,7 +1531,7 @@ tls_init()
 	if (method == 6 && (ctx=SSL_CTX_new(TLSv1_2_client_method())))
 		method_fail = 0;
 #endif
-	if (method_fail) 
+	if (method_fail)
 	{
 		if (!smtps && !needtlsauth)
 		{
@@ -1562,13 +1565,13 @@ tls_init()
 			tls_quit("ZTLS unable to load ", tlsFilename.s, ": ", t, 0);
 		}
 		/*
-		 * set the callback here; SSL_set_verify didn't work before 0.9.6c 
+		 * set the callback here; SSL_set_verify didn't work before 0.9.6c
 		 */
 		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
 	}
 
 	/*
-	 * let the other side complain if it needs a cert and we don't have one 
+	 * let the other side complain if it needs a cert and we don't have one
 	 */
 	if (!stralloc_copys(&clientcert, certdir))
 		temp_nomem();
@@ -1602,7 +1605,7 @@ tls_init()
 		substdio_putsflush(&smtpto, "STARTTLS\r\n");
 
 	/*
-	 * while the server is preparing a response, do something else 
+	 * while the server is preparing a response, do something else
 	 */
 	if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1)
 	{
@@ -1624,7 +1627,7 @@ tls_init()
 	SSL_set_fd(myssl, smtpfd);
 
 	/*
-	 * read the response to STARTTLS 
+	 * read the response to STARTTLS
 	 */
 	if (!smtps)
 	{
@@ -1687,7 +1690,7 @@ tls_init()
 
 		/*
 		 * RFC 2595 section 2.4: find a matching name
-		 * first find a match among alternative names 
+		 * first find a match among alternative names
 		 */
 		if ((gens = X509_get_ext_d2i(peercert, NID_subject_alt_name, 0, 0)))
 		{
@@ -1702,7 +1705,7 @@ tls_init()
 		}
 
 		/*
-		 * no alternative name matched, look up commonName 
+		 * no alternative name matched, look up commonName
 		 */
 		if (!gens || i >= r)
 		{
@@ -1966,7 +1969,7 @@ auth_digest_md5(int use_size)
 	mailfrom_xtext(use_size);
 }
 
-void 
+void
 auth_cram(int type, int use_size)
 {
 	int             j, code, iter = 16;
@@ -2222,7 +2225,7 @@ smtp_auth(char *type, int use_size)
 		{
 			auth_login(use_size);
 			return;
-		} 
+		}
 	} else
 	if (!case_diffs(type, "PLAIN"))
 	{
@@ -2230,7 +2233,7 @@ smtp_auth(char *type, int use_size)
 		{
 			auth_plain(use_size);
 			return;
-		} 
+		}
 	} else
 	if (!*type)
 	{
@@ -2293,7 +2296,7 @@ void temp_proto()
  *  QMTP, it tries a QMTP connection to port 209. If the client does not support MXPS or QMTP,
  *  or if the QMTP connection attempt fails, the client tries an SMTP connection to port 25 as
  *  usual. The client does not try SMTP if the QMTP connection attempt succeeds but mail
- *  delivery through that connection fails. 
+ *  delivery through that connection fails.
  */
 int
 qmtp_priority(int pref)
@@ -2322,7 +2325,7 @@ qmtp(stralloc *h, char *ip, int port)
 		quit("Z", "unable to fstat fd 0", -1, -1);
 	len = st.st_size;
 	/*
-	 * the following code was substantially taken from serialmail'ss serialqmtp.c 
+	 * the following code was substantially taken from serialmail'ss serialqmtp.c
 	 */
 	substdio_put(&smtpto, num, fmt_ulong(num, len + 1));
 	substdio_put(&smtpto, ":\n", 2);
@@ -2450,7 +2453,7 @@ smtp()
 	/*
 	 * RFC2487 says we should issue EHLO (even if we might not need
 	 * extensions); at the same time, it does not prohibit a server
-	 * to reject the EHLO and make us fallback to HELO 
+	 * to reject the EHLO and make us fallback to HELO
 	 */
 	if (tls_init())
 		code = ehlo();
@@ -2748,7 +2751,7 @@ getcontrols()
 			if (errno == error_nomem)
 				temp_nomem();
 			temp_control();
-		} else 
+		} else
 		if (r && !env_put2("OUTGOINGIP", outgoingip.s)) {
 			my_error("alert: Out of memory", 0, 0);
 			_exit (1);
@@ -2818,7 +2821,7 @@ getcontrols()
 		if (ip && !*ip)
 			ip = 0;
 		if (ip)
-		{ 
+		{
 			if (!stralloc_copys(&outgoingip, ip))
 				temp_nomem();
 #ifdef IPV6
@@ -2896,17 +2899,17 @@ sign_batv()
 		if (!stralloc_catb(&newsender, md5hex, 2))
 			temp_nomem();
 	}
-	/*-	separator */    
+	/*-	separator */
 	if (!stralloc_catb(&newsender, "=", 1))
-		temp_nomem();    
+		temp_nomem();
 	if (!stralloc_cat(&newsender, &sender))
-		temp_nomem();    
+		temp_nomem();
 	if (!stralloc_copy(&sender, &newsender))
 		temp_nomem();
 }
 #endif
 
-/* 
+/*
  * Original by Richard Lyons
  * Case insensitivity by Ted Fines
  * http://www.apecity.com/qmail/moresmtproutes.txt
@@ -3057,8 +3060,8 @@ main(int argc, char **argv)
 	{
 		if (use_auth_smtp)
 		{
-			/*- 
-			 * test.com:x.x.x.x:x user pass 
+			/*-
+			 * test.com:x.x.x.x:port username password
 			 *         or
 			 * domain:relay:port:penalty:max_tolerance username password
 			 */
@@ -3082,15 +3085,18 @@ main(int argc, char **argv)
 			} else
 				use_auth_smtp = 0;
 		}
-		/*- 
-		 * test.com:x.x.x.x:x user pass 
+		/*-
+		 * test.com:x.x.x.x:port username password
 		 *         or
-		 * domain:relay:port:penalty:max_tolerance
+		 * domain:relay:port:penalty:max_tolerance username password
 		 */
 		i = str_chr(relayhost, ':');
 		if (relayhost[i]) {
-			if (relayhost[i + 1]) { /* port is present */
-				scan_ulong(relayhost + i + 1, &port);
+			if (relayhost[i + 1]) {
+				if (relayhost[i + 1] == ':')
+					port = PORT_SMTP;
+				else /* port is present */
+					scan_ulong(relayhost + i + 1, &port);
 				relayhost[i] = 0;
 				x = relayhost + i + 1; /* port */
 				i = str_chr(x, ':'); /*- : before min_penalty */
@@ -3122,7 +3128,7 @@ main(int argc, char **argv)
 		sender.len--;
 		i = str_rchr(*recips, '@');	/* should check all recips, not just the first */
 		j = str_rchr(sender.s, '@');
-		if (!constmap(&mapnosign, *recips + i + 1, str_len(*recips + i + 1)) 
+		if (!constmap(&mapnosign, *recips + i + 1, str_len(*recips + i + 1))
 				&& !constmap(&mapnosigndoms, sender.s + j + 1, sender.len - (j + 1)))
 			sign_batv(); /*- modifies sender */
 	}
@@ -3253,7 +3259,7 @@ main(int argc, char **argv)
 			 */
 			if (flagtcpto)
 			{
-				errors = (errno == error_timeout || errno == error_connrefused || errno == error_hostdown || 
+				errors = (errno == error_timeout || errno == error_connrefused || errno == error_hostdown ||
 					errno == error_netunreach || errno == error_hostunreach || smtp_error);
 				tcpto_err(&ip.ix[i], errors, max_tolerance);
 			}
@@ -3273,7 +3279,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.106 2017-05-15 19:18:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.107 2017-05-15 23:21:07+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
