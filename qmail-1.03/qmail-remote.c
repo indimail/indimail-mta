@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.105  2017-05-15 15:33:50+05:30  Cprogrammer
+ * use X-SMTPROUTES env variable for setting artificial smtp routes. SMTPROUTES takes precendence over X-SMTPROUTES
+ * bugfix - set port to 25 if relayhost is of the form :relayhost:
+ *
  * Revision 1.104  2017-05-08 13:20:21+05:30  Cprogrammer
  * check for tlsv1_1_client_method() and tlsv1_2_client_method()
  *
@@ -2637,7 +2641,8 @@ getcontrols()
 			temp_nomem();
 		break;
 	}
-	if ((routes = env_get("SMTPROUTE"))) /* mysql */
+	routes = (routes = env_get("SMTPROUTE")) ? routes : env_get("X-SMTPROUTES");
+	if (routes) /* mysql or X-SMTPROUTES from header */
 	{
 		if (!stralloc_copyb(&smtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
@@ -3075,26 +3080,26 @@ main(int argc, char **argv)
 		 * domain:relay:port:penalty:max_tolerance
 		 */
 		i = str_chr(relayhost, ':');
-		if (relayhost[i])
-		{
-			scan_ulong(relayhost + i + 1, &port);
-			relayhost[i] = 0;
-			x = relayhost + i + 1; /* port */
-			i = str_chr(x, ':'); /*- : before min_penalty */
-			if (x[i])
-			{
-				if (x[i + 1] != ':') /*- if penalty figure is present */
-					scan_int(x + i + 1, &min_penalty);
-				x = relayhost + i + 1; /*- min_penalty */
-				i = str_chr(x, ':');
-				if (x[i])
-				{
-					if (x[i + 1] != ':') /*- if tolerance figure is present */
-						scan_ulong(x + i + 1, &max_tolerance);
+		if (relayhost[i]) {
+			if (relayhost[i + 1]) { /* port is present */
+				scan_ulong(relayhost + i + 1, &port);
+				relayhost[i] = 0;
+				x = relayhost + i + 1; /* port */
+				i = str_chr(x, ':'); /*- : before min_penalty */
+				if (x[i]) {
+					if (x[i + 1] != ':') /*- if penalty figure is present */
+						scan_int(x + i + 1, &min_penalty);
+					x = relayhost + i + 1; /*- min_penalty */
+					i = str_chr(x, ':');
+					if (x[i]) {
+						if (x[i + 1] != ':') /*- if tolerance figure is present */
+							scan_ulong(x + i + 1, &max_tolerance);
+					}
+					if (!min_penalty)
+						flagtcpto = 0;
 				}
-				if (!min_penalty)
-					flagtcpto = 0;
-			}
+			} else
+				relayhost[i] = 0;
 		}
 		if (!stralloc_copys(&host, relayhost))
 			temp_nomem();
@@ -3260,7 +3265,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.104 2017-05-08 13:20:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.105 2017-05-15 15:33:50+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
