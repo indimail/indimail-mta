@@ -9,5 +9,7 @@ indimail (@version@-1) unstable; urgency=low
   * svscan - run .svscan/shutdown on SIGTERM
   * added inotify program to get file system events
   * added resolvconf service
+  * qmailctl bug - use sysconfdir instead of INDIMAILDIR
+  * qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes. SMTPROUTES takes precendence over X-SMTPROUTES
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 12 May 2017 17:54:40 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 15 May 2017 15:37:42 +0530

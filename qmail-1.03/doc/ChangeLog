@@ -1,4 +1,4 @@
-* Fri May 12 2017 17:54:40 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
+* Mon May 15 2017 13:38:15 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.2 Start 08/05/2017
 10/05/2011
 1.  use packetsize > 512 to avoid dkim failures for sites having long txt
@@ -10,3 +10,6 @@ Release 2.2 Start 08/05/2017
 4.  svscan - run .svscan/shutdown on SIGTERM
 5.  added inotify program to get file system events
 6.  added resolvconf service
+7.  qmailctl bug - use sysconfdir instead of INDIMAILDIR
+8.  qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes.
+    SMTPROUTES takes precendence over X-SMTPROUTES

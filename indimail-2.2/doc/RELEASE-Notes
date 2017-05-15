@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Fri May 12 19:30:47 IST 2017
+DATE: Mon May 15 11:25:09 IST 2017
 
 This is Release 2.2 of IndiMail. The release has both source.tar.gz, RPMs and debs.
 
@@ -81,3 +81,7 @@ Release 2.2 Start 08/05/2017
 5.  svctool - --svscanlog - create .svscan/run and variables in .svscan/variables
 6.  svscan - run .svscan/shutdown on SIGTERM
 7.  added inotify program to get file system events
+8.  added resolvconf service
+9.  qmailctl bug - use sysconfdir instead of INDIMAILDIR
+10. qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes.
+    SMTPROUTES takes precendence over X-SMTPROUTES
