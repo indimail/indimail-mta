@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.106  2017-05-15 19:18:53+05:30  Cprogrammer
+ * use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
+ *
  * Revision 1.105  2017-05-15 15:33:50+05:30  Cprogrammer
  * use X-SMTPROUTES env variable for setting artificial smtp routes. SMTPROUTES takes precendence over X-SMTPROUTES
  * bugfix - set port to 25 if relayhost is of the form :relayhost:
@@ -2610,6 +2613,7 @@ getcontrols()
 {
 	int             r;
 	char           *routes, *senderdomain, *ip, *x;
+	char           *smtproutefile, *moresmtproutefile, *qmtproutefile;
 	static stralloc controlfile, outgoingipfn;
 
 	if (control_init() == -1)
@@ -2625,8 +2629,10 @@ getcontrols()
 		if (!stralloc_copyb(&qmtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
 		cntrl_stat2 = 2;
-	} else
-		cntrl_stat2 = control_readfile(&qmtproutes, "qmtproutes", 0);
+	} else {
+		qmtproutefile = (qmtproutefile = env_get("QMTPROUTEFILE")) ? qmtproutefile : "qmtproutes";
+		cntrl_stat2 = control_readfile(&qmtproutes, qmtproutefile, 0);
+	}
 	switch (cntrl_stat2)
 	{
 	case -1: /*- error reading qmtproutes */
@@ -2649,7 +2655,9 @@ getcontrols()
 		cntrl_stat1 = 2;
 	} else
 	{
-		cntrl_stat1 = control_readfile(&smtproutes, "smtproutes", 0);
+		smtproutefile = (smtproutefile = env_get("SMTPROUTEFILE")) ? smtproutefile : "smtproutes";
+		moresmtproutefile = (moresmtproutefile = env_get("MORESMTPROUTECDB")) ? moresmtproutefile : "moresmtproutes.cdb";
+		cntrl_stat1 = control_readfile(&smtproutes, smtproutefile, 0);
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -2661,7 +2669,7 @@ getcontrols()
 		if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
 			temp_nomem();
 		else
-		if (!stralloc_cats(&controlfile, "moresmtproutes.cdb"))
+		if (!stralloc_cats(&controlfile, moresmtproutefile))
 			temp_nomem();
 		else
 		if (!stralloc_0(&controlfile))
@@ -3265,7 +3273,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.105 2017-05-15 15:33:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.106 2017-05-15 19:18:53+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
