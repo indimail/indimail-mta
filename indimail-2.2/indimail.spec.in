@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.415 2017-05-12 18:05:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.416 2017-05-15 23:24:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -159,7 +159,7 @@ Source12: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.g
 %endif
 Source13: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
 Source14: http://downloads.sourceforge.net/%{name}/logalert-0.3.tar.gz
-Source15: http://downloads.sourceforge.net/%{name}/%{name}-%{version}-rpmlintrc
+Source15: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 Source16:%{name}-permissions.easy
