@@ -130,7 +130,11 @@ Source0:  http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 Source1:  http://cr.yp.to/software/qmail-%{qmail_version}.tar.gz
 Source2:  http://cr.yp.to/ucspi-tcp/ucspi-tcp-%{ucspi_version}.tar.gz
 %if %nocourierimap == 0
+%if %build_on_obs == 0
 Source3:  http://downloads.sourceforge.net/courier/courier-imap-%{courier_version}.tar.bz2
+%else
+Source3:  http://downloads.sourceforge.net/%{name}/courier-imap-%{courier_version}.tar.bz2
+%endif
 %endif
 Source4:  http://downloads.sourceforge.net/%{name}/flash-0.9.4.tar.gz
 Source5:  http://downloads.sourceforge.net/%{name}/altermime-0.3.10.tar.gz
@@ -141,7 +145,11 @@ Source8:  http://downloads.sourceforge.net/%{name}/fortune-%{fortune_version}.ta
 Source9:  http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
 %endif
 %if %nobogofilter == 0
+%if %build_on_obs == 0
 Source10: http://downloads.sourceforge.net/bogofilter/bogofilter-%{bogofilter_version}.tar.bz2
+%else
+Source10: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_version}.tar.bz2
+%endif
 %endif
 %if %nofetchmail == 0
 Source11: http://downloads.sourceforge.net/fetchmail/fetchmail-%{fetchmail_version}.tar.xz
@@ -169,20 +177,21 @@ Source20:  http://downloads.sourceforge.net/%{name}/libsrs2-%{libsrs2_version}.t
 Patch1:  http://downloads.sourceforge.net/%{name}/Patches-2.0/qmail-%{qmail_version}.patch.gz
 Patch2:  http://downloads.sourceforge.net/%{name}/Patches-2.0/ucspi-tcp-%{ucspi_version}.patch.gz
 
-%if %build_on_obs == 0
-%if %nocourierimap == 0
-Patch3:  http://downloads.sourceforge.net/%{name}/Patches-1.0/courier-imap-%{courier_version}.patch.gz
-%endif
-%endif
-
 # Comment out below for openSUSE buildservice
 %if %build_on_obs == 0
+
+%if %nocourierimap == 0
+Patch3:  http://downloads.sourceforge.net/%{name}/Patches-2.0/courier-imap-%{courier_version}.patch.gz
+%endif
+
 %if %nobogofilter == 0
-Patch10: http://downloads.sourceforge.net/%{name}/Patches-1.0/bogofilter-%{bogofilter_version}.patch.gz
+Patch10: http://downloads.sourceforge.net/%{name}/Patches-2.0/bogofilter-%{bogofilter_version}.patch.gz
 %endif
+
 %if %nofetchmail == 0
-Patch11: http://downloads.sourceforge.net/%{name}/Patches-1.0/fetchmail-%{fetchmail_version}.patch.gz
+Patch11: http://downloads.sourceforge.net/%{name}/Patches-2.0/fetchmail-%{fetchmail_version}.patch.gz
 %endif
+
 %endif
 
 %if %noclamav == 0

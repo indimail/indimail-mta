@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Mon May 15 11:25:09 IST 2017
+DATE: Mon May 15 19:25:18 IST 2017
 
 This is Release 2.2 of IndiMail. The release has both source.tar.gz, RPMs and debs.
 
@@ -85,3 +85,6 @@ Release 2.2 Start 08/05/2017
 9.  qmailctl bug - use sysconfdir instead of INDIMAILDIR
 10. qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes.
     SMTPROUTES takes precendence over X-SMTPROUTES
+11. use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to
+    configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
+12. smtpd.c - fixed spurious error "no valid cert for gateway

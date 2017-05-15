@@ -13,3 +13,6 @@ Release 2.2 Start 08/05/2017
 7.  qmailctl bug - use sysconfdir instead of INDIMAILDIR
 8.  qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes.
     SMTPROUTES takes precendence over X-SMTPROUTES
+9.  use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to
+    configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
+10. smtpd.c - fixed spurious error "no valid cert for gateway

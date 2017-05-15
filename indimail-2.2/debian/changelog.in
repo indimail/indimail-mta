@@ -11,5 +11,7 @@ indimail (@version@-1) unstable; urgency=low
   * added resolvconf service
   * qmailctl bug - use sysconfdir instead of INDIMAILDIR
   * qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes. SMTPROUTES takes precendence over X-SMTPROUTES
+  * use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
+  * smtpd.c - fixed spurious error "no valid cert for gateway
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 15 May 2017 15:37:42 +0530

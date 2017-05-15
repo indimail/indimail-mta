@@ -20,6 +20,9 @@ Release 2.2 Start 08/05/2017
 10. qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes.
     SMTPROUTES takes precendence over X-SMTPROUTES
     qmail-remote - bugfix - set port to 25 if relayhost is of the form :relayhost:
+11. use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to
+    configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
+12. smtpd.c - fixed spurious error "no valid cert for gateway
 
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
