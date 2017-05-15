@@ -177,7 +177,7 @@ indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor
 
 indimailsbin_SCRIPTS = svctool
 
-noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
+noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
 	README INSTALL-MINI vadddomain_handle vadduser_handle vdeldomain_handle \
 	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle \
@@ -188,7 +188,7 @@ post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain
 MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
 svctool indimail_settings.c cronlist crypt \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib \
-indimail-@VERSION@-rpmlintrc mailzipper \
+indimail-rpmlintrc mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
@@ -885,7 +885,7 @@ create_services: create_services.in
 	$(edit) $@.in > $@; chmod 755 $@
 indimail.spec: indimail.spec.in catChangeLog
 	($(edit) $@.in;./catChangeLog) | $(edit) > $@
-indimail-@VERSION@-rpmlintrc: indimail-rpmlintrc.in
+indimail-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 login_tasks.3: login_tasks.9
 	$(editman) login_tasks.9 > $@
@@ -959,7 +959,7 @@ hashtable.$(OBJEXT): hashtable.c
 initsvc$(EXEEXT): $(initsvc_OBJECTS) $(initsvc_DEPENDENCIES)
 	$(LINK) $(initsvc_LDFLAGS) $(initsvc_OBJECTS) fappend.$(OBJEXT) getEnvConfig.$(OBJEXT) $(initsvc_LDADD)
 
-install-data-local: initsvc libindimail.la indimail-@VERSION@-rpmlintrc \
+install-data-local: initsvc libindimail.la indimail-rpmlintrc \
 indimail.spec iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd usr.bin.freshclam
 	if [ " $(DESTDIR)" = " " ] ; then \
 		if test `@idcommand@` != "0" ; then \
