@@ -9,161 +9,8 @@
 # Description:       Starts indimail system and associated services
 # Short-Description: Start/Stop indimail
 ### END INIT INFO
-
-# $Log: qmailctl.sh,v $
-# Revision 1.51  2017-04-23 17:56:04+05:30  Cprogrammer
-# BUG - fixed log rotation
 #
-# Revision 1.50  2017-04-23 16:16:39+05:30  Cprogrammer
-# added log rotate command
-#
-# Revision 1.49  2016-06-06 14:49:22+05:30  Cprogrammer
-# use runlevel 2 for debian
-#
-# Revision 1.48  2016-06-05 13:21:00+05:30  Cprogrammer
-# moved qmail-tcpok to sbin
-#
-# Revision 1.47  2016-06-03 10:10:03+05:30  Cprogrammer
-# use PREFIX instead of QMAIL for binaries
-#
-# Revision 1.46  2016-06-03 10:08:52+05:30  Cprogrammer
-# use PREFIX for binaries
-#
-# Revision 1.45  2016-05-19 09:00:13+05:30  Cprogrammer
-# use iecho instead of echo
-#
-# Revision 1.44  2016-05-03 18:46:26+05:30  Cprogrammer
-# BUG - replaced failure with $fail
-#
-# Revision 1.43  2016-01-09 09:21:48+05:30  Cprogrammer
-# fix for cases where NETWORKING is not defined
-#
-# Revision 1.42  2014-01-29 14:02:13+05:30  Cprogrammer
-# fix for Fedora where /etc/sysconfig/network is missing or does not have NETWORKING defined
-#
-# Revision 1.41  2013-11-25 17:09:54+05:30  Cprogrammer
-# updated for Debian runlevel 2
-#
-# Revision 1.40  2013-05-18 00:07:11+05:30  Cprogrammer
-# removed create_svscan command
-#
-# Revision 1.39  2013-05-15 00:44:07+05:30  Cprogrammer
-# fix for systems having inittab
-#
-# Revision 1.38  2013-05-07 15:51:52+05:30  Cprogrammer
-# startup/shutdown script for non-indimail system
-#
-# Revision 1.37  2011-10-23 08:56:40+05:30  Cprogrammer
-# qmail-qstat removed as qmail-qread has the functionality
-#
-# Revision 1.36  2011-07-22 19:05:23+05:30  Cprogrammer
-# fixed service getting disabled on systems with systemctl
-#
-# Revision 1.35  2011-07-21 13:17:44+05:30  Cprogrammer
-# added systemd support
-#
-# Revision 1.34  2011-05-28 21:25:04+05:30  Cprogrammer
-# play nicely with upstart job control
-#
-# Revision 1.33  2011-05-26 22:37:51+05:30  Cprogrammer
-# fix for debian systems
-#
-# Revision 1.32  2011-04-27 17:18:26+05:30  Cprogrammer
-# added LSB header
-#
-# Revision 1.31  2011-02-07 22:09:29+05:30  Cprogrammer
-# added case for ubuntu
-#
-# Revision 1.30  2010-07-27 10:55:23+05:30  Cprogrammer
-# display status of log services also
-#
-# Revision 1.29  2010-07-26 20:09:35+05:30  Cprogrammer
-# show status of all services in service directory
-#
-# Revision 1.28  2010-07-21 16:26:37+05:30  Cprogrammer
-# fixed typo (/var/lock/subsys)
-#
-# Revision 1.27  2010-07-09 14:49:22+05:30  Cprogrammer
-# added portable echo
-#
-# Revision 1.26  2010-07-07 10:18:10+05:30  Cprogrammer
-# stop and start all services
-#
-# Revision 1.25  2010-07-06 13:16:31+05:30  Cprogrammer
-# stop svscan on stop
-#
-# Revision 1.24  2010-07-02 16:20:22+05:30  Cprogrammer
-# shutdown indimail early
-#
-# Revision 1.23  2010-06-24 16:20:46+05:30  Cprogrammer
-# made messages fedora boot style
-#
-# Revision 1.22  2010-06-11 19:37:54+05:30  Cprogrammer
-# added options for qmailctl to be installed as SYSV style startup script
-#
-# Revision 1.21  2010-05-28 11:52:48+05:30  Cprogrammer
-# fix for Mac OS X
-#
-# Revision 1.20  2010-04-16 09:09:03+05:30  Cprogrammer
-# added description for qmtp in usage
-#
-# Revision 1.19  2010-04-07 20:20:20+05:30  Cprogrammer
-# change ownership of cdb files to indimail
-#
-# Revision 1.18  2010-04-03 16:48:00+05:30  Cprogrammer
-# added option to create tcp.qmqp.cdb
-#
-# Revision 1.17  2010-03-26 15:59:24+05:30  Cprogrammer
-# create tcp.qmtp.cdb
-#
-# Revision 1.16  2010-03-08 15:12:41+05:30  Cprogrammer
-# removed duplicate options doqueue, alrm, hup
-#
-# Revision 1.15  2010-03-08 15:05:40+05:30  Cprogrammer
-# removed redundant functions
-#
-# Revision 1.14  2009-11-12 15:07:15+05:30  Cprogrammer
-# check return status of tcprules
-#
-# Revision 1.13  2009-11-11 13:33:53+05:30  Cprogrammer
-# build cdb files matching wildcards tcp*.smtp, tcp*.imap, tcp*.pop3
-#
-# Revision 1.12  2009-08-15 20:36:57+05:30  Cprogrammer
-# added poppass
-#
-# Revision 1.11  2009-08-13 18:35:51+05:30  Cprogrammer
-# *** empty log message ***
-#
-# Revision 1.10  2009-06-17 14:14:51+05:30  Cprogrammer
-# fix for mac os
-#
-# Revision 1.9  2009-03-08 10:19:12+05:30  Cprogrammer
-# changes for non-redhat systems
-#
-# Revision 1.8  2008-08-14 14:51:30+05:30  Cprogrammer
-# added cdb for imap and pop3
-#
-# Revision 1.7  2008-08-03 18:26:09+05:30  Cprogrammer
-# hack for mac OS X
-#
-# Revision 1.6  2004-01-20 06:54:00+05:30  Cprogrammer
-# renamed VPOPMAILDIR to INDIMAILDIR
-#
-# Revision 1.5  2003-07-30 19:07:51+05:30  Cprogrammer
-# changed default user to indimail
-#
-# Revision 1.4  2003-07-11 20:30:15+05:30  Cprogrammer
-# start or stop all smtp services
-#
-# Revision 1.3  2002-11-24 20:10:02+05:30  Cprogrammer
-# corrected setting of PATH variable
-# changed path of tcp.smtp to /var/vpopmail/etc
-#
-# Revision 1.2  2002-09-08 23:49:17+05:30  Cprogrammer
-# made qmail home dependency on conf-qmail
-#
-# Revision 1.1  2002-08-20 23:42:57+05:30  Cprogrammer
-# Initial revision
+# $Id: qmailctl.sh,v 1.52 2017-05-15 13:29:38+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -559,18 +406,10 @@ case "$1" in
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
   cdb)
-	case "$SYSTEM" in
-		DARWIN*)
-		INDIMAILDIR=`dscl . -read /Users/indimail|/bin/grep NFSHomeDi|awk '{print $2}'`
-		;;
-		*)
-		INDIMAILDIR=`/bin/grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
-		;;
-	esac
     ret=0
 	for i in smtp qmtp qmqp imap pop3 poppass
 	do
-		for j in `/bin/ls $INDIMAILDIR/etc/tcp*.$i.cdb 2>/dev/null`
+		for j in `/bin/ls SYSCONFDIR/tcp*.$i.cdb 2>/dev/null`
 		do
 			t_file=`echo $j | cut -d. -f1,2`
 			if [ ! -f $t_file ] ; then
@@ -581,7 +420,7 @@ case "$1" in
 				let ret+=$RETVAL
 			fi
 		done
-		for j in `/bin/ls $INDIMAILDIR/etc/tcp*.$i 2>/dev/null`
+		for j in `/bin/ls SYSCONFDIR/tcp*.$i 2>/dev/null`
 		do
 			$ECHO -n $"building $j.cdb: "
 			PREFIX/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
