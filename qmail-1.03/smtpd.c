@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.196  2017-05-15 19:21:50+05:30  Cprogrammer
+ * fixed spurious error "no valid cert for gateway
+ *
  * Revision 1.195  2017-05-08 13:52:14+05:30  Cprogrammer
  * check for tlsv1_1_server_method() and tlsv1_2_server_method()
  *
@@ -751,7 +754,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.195 $";
+char           *revision = "$Revision: 1.196 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1699,7 +1702,8 @@ err_nogateway(char *arg1, char *arg2, char *arg3, int flag)
 		out("> ");
 	}
 #ifdef TLS
-	tls_nogateway();
+	if (ssl)
+		tls_nogateway();
 #endif
 	out("#5.7.1\r\n");
 }
@@ -6234,11 +6238,10 @@ void
 tls_nogateway()
 {
 	/*- there may be cases when relayclient is set */
-	if (!ssl || relayclient)
+	if (relayclient)
 		return;
-	out("; no valid cert for gatewaying");
-	if (ssl_verify_err)
-	{
+	out("; no valid cert for gateway");
+	if (ssl_verify_err) {
 		out(": ");
 		out((char *) ssl_verify_err);
 	}
@@ -6913,7 +6916,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.195 2017-05-08 13:52:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.196 2017-05-15 19:21:50+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
