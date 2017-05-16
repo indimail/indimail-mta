@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.14  2017-05-16 20:36:31+05:30  Cprogrammer
+ * free strsalloc structure
+ *
  * Revision 1.13  2015-08-24 19:12:04+05:30  Cprogrammer
  * removed debugging statement
  *
@@ -369,9 +372,10 @@ spfget(stralloc *spf, stralloc *domain)
 			return SPF_NOMEM;
 		r = SPF_OK;
 	}
-#if 0 /*- memory leak */
+#if 1 /*- memory leak */
 	for (j = 0; j < ssa.len; ++j)
-		alloc_free(ssa.sa[j].s);
+		if (ssa.sa[j].a)
+			alloc_free(ssa.sa[j].s);
 #endif
 	alloc_free((char *) ssa.sa);
 	return r;
@@ -814,9 +818,11 @@ spf_ptr(char *spec, char *mask)
 		return SPF_NOMEM;
 	switch (dns_ptr(&ssa, &ip)) {
 	case DNS_MEM:
-#if 0 /*- memory leak */
+#if 1 /*- memory leak */
 		for (j = 0; j < ssa.len; ++j)
-			alloc_free(ssa.sa[j].s);
+			if (ssa.sa[j].a)
+				alloc_free(ssa.sa[j].s);
+		alloc_free((char *) ssa.sa);
 #endif
 		return SPF_NOMEM;
 	case DNS_SOFT:
@@ -898,9 +904,10 @@ spf_ptr(char *spec, char *mask)
 				break;
 		}
 	}
-#if 0 /*- memory leak */
+#if 1 /*- memory leak */
 	for (j = 0; j < ssa.len; ++j)
-		alloc_free(ssa.sa[j].s);
+		if (ssa.sa[j].a)
+			alloc_free(ssa.sa[j].s);
 #endif
 	alloc_free((char *) ssa.sa);
 	alloc_free((char *) ia.ix);
@@ -1510,7 +1517,7 @@ spfinfo(sa)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.13 2015-08-24 19:12:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.14 2017-05-16 20:36:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
