@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.11  2017-05-16 12:35:22+05:30  Cprogrammer
+ * refactored dns_test() function
+ *
  * Revision 1.10  2017-05-10 15:00:18+05:30  Cprogrammer
  * increase responselen to 1024 for long text records
  *
@@ -212,6 +215,155 @@ getshort(unsigned char *cp)
 	return (cp[0] << 8) | cp[1];
 }
 
+static struct
+{
+	unsigned char  *buf;
+} response;
+static int      responsebuflen = 0;
+static int      responselen;
+static unsigned char *responseend;
+static unsigned char *responsepos;
+static u_long   saveresoptions;
+static int      (*lookup) () = res_query;
+static int      numanswers;
+static char     name[MAXDNAME];
+
+static int
+resolve(domain, type)
+	char           *domain;
+	int             type;
+{
+	int             n;
+	int             i;
+
+	errno = 0;
+	if (!responsebuflen)
+	{
+		if ((response.buf = (unsigned char *) alloc(PACKETSZ + 1)))
+			responsebuflen = PACKETSZ + 1;
+		else
+			return DNS_MEM;
+	}
+	responselen = lookup(domain, C_IN, type, response.buf, responsebuflen);
+	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc)))
+	{
+		if (responsebuflen < 65536)
+		{
+			if (alloc_re((char *) &response.buf, responsebuflen, 65536))
+				responsebuflen = 65536;
+			else
+				return DNS_MEM;
+		}
+		saveresoptions = _res.options;
+		_res.options |= RES_USEVC;
+		responselen = lookup(domain, C_IN, type, response.buf, responsebuflen);
+		_res.options = saveresoptions;
+	}
+	if (responselen <= 0)
+	{
+		if (errno == ECONNREFUSED)
+			return DNS_SOFT;
+		if (h_errno == TRY_AGAIN)
+			return DNS_SOFT;
+		return DNS_HARD;
+	}
+	responseend = response.buf + responselen;
+	responsepos = response.buf + sizeof(HEADER);
+	n = ntohs(((HEADER *) response.buf)->qdcount);
+	while (n-- > 0)
+	{
+		if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
+			return DNS_SOFT;
+		responsepos += i;
+		i = responseend - responsepos;
+		if (i < QFIXEDSZ)
+			return DNS_SOFT;
+		responsepos += QFIXEDSZ;
+	}
+	numanswers = ntohs(((HEADER *) response.buf)->ancount);
+	return 0;
+}
+
+static stralloc txt = { 0 };
+static stralloc result = { 0 };
+
+static int
+findtxt(wanttype)
+	int             wanttype;
+{
+	unsigned short  rrtype;
+	unsigned short  rrdlen;
+	int             i;
+
+	if (numanswers <= 0)
+		return 2;
+	--numanswers;
+	if (responsepos == responseend)
+		return DNS_SOFT;
+
+	i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME);
+	if (i < 0)
+		return DNS_SOFT;
+	responsepos += i;
+
+	i = responseend - responsepos;
+	if (i < 4 + 3 * 2)
+		return DNS_SOFT;
+
+	rrtype = getshort(responsepos);
+	rrdlen = getshort(responsepos + 8);
+	responsepos += 10;
+
+	if (rrtype == wanttype) {
+		unsigned short  txtpos;
+		unsigned char   txtlen;
+
+		txt.len = 0;
+		for (txtpos = 0; txtpos < rrdlen; txtpos += txtlen) {
+			txtlen = responsepos[txtpos++];
+			if (txtlen > rrdlen - txtpos)
+				txtlen = rrdlen - txtpos;
+			if (!stralloc_catb(&txt, (char *) &responsepos[txtpos], txtlen))
+				return DNS_MEM;
+		}
+
+		responsepos += rrdlen;
+		return 1;
+	}
+
+	responsepos += rrdlen;
+	return 0;
+}
+
+static int
+dns_txtplus(domain)
+	char           *domain;
+{
+	int             r;
+
+	switch (resolve(domain, T_TXT)) {
+	case DNS_MEM:
+		return DNS_MEM;
+	case DNS_SOFT:
+		return DNS_SOFT;
+	case DNS_HARD:
+		return DNS_HARD;
+	}
+	while ((r = findtxt(T_TXT)) != 2) {
+		if (r == DNS_SOFT)
+			return DNS_SOFT;
+		if (r == 1) {
+			if (!stralloc_cat(&result, &txt))
+				return DNS_MEM;
+		}
+	}
+	if (!stralloc_0(&result))
+		return DNS_MEM;
+	if (result.len)
+		return (0);
+	return DNS_HARD;
+}
+
 static char *
 strdup(const char *str)
 {
@@ -234,69 +386,17 @@ strdup(const char *str)
 char           *
 dns_text(char *dn)
 {
-	u_char          response[PACKETSZ + PACKETSZ + 1];	/* response */
-	int             responselen;			/* buffer length */
-	int             rc;						/* misc variables */
-	int             ancount, qdcount;		/* answer count and query count */
-	u_short         type, rdlength;			/* fields of records returned */
-	u_char         *eom, *cp;
-	u_char          buf[PACKETSZ + PACKETSZ + 1];		/* we're storing a TXT record here, not just a DNAME */
-	u_char         *bufptr;
-
-	for (rc = 0, responselen = PACKETSZ;rc < 2;rc++) {
-		if ((responselen = res_query(dn, C_IN, T_TXT, response, responselen)) < 0) {
-			if (h_errno == TRY_AGAIN)
-				return strdup("e=temp;");
-			else
-				return strdup("e=perm;");
-		}
-		if (responselen <= PACKETSZ)
-			break;
-		else
-		if (responselen >= (2 * PACKETSZ))
-			return strdup("e=perm;");
+	int             r;
+	
+	switch (r = dns_txtplus(dn))
+	{
+	case DNS_MEM:
+	case DNS_SOFT:
+		return strdup("e=temp;");
+	case DNS_HARD:
+		return strdup("e=perm;");
 	}
-	qdcount = getshort(response + 4);	/* http://crynwr.com/rfc1035/rfc1035.html#4.1.1. */
-	ancount = getshort(response + 6);
-	eom = response + responselen;
-	cp = response + HFIXEDSZ;
-	while (qdcount-- > 0 && cp < eom) {
-		rc = dn_expand(response, eom, cp, (char *) buf, MAXDNAME);
-		if (rc < 0)
-			return strdup("e=perm;");
-		cp += rc + QFIXEDSZ;
-	}
-	while (ancount-- > 0 && cp < eom) {
-		if ((rc = dn_expand(response, eom, cp, (char *) buf, MAXDNAME)) < 0)
-			return strdup("e=perm;");
-		cp += rc;
-		if (cp + RRFIXEDSZ >= eom)
-			return strdup("e=perm;");
-		type = getshort(cp + 0);	/* http://crynwr.com/rfc1035/rfc1035.html#4.1.3. */
-		rdlength = getshort(cp + 8);
-		cp += RRFIXEDSZ;
-		if (type != T_TXT) {
-			cp += rdlength;
-			continue;
-		}
-		bufptr = buf;
-		while (rdlength && cp < eom) {
-			unsigned int    cnt;
-
-			cnt = *cp++;		/* http://crynwr.com/rfc1035/rfc1035.html#3.3.14. */
-			if (bufptr - buf + cnt + 1 >= (2 * PACKETSZ))
-				return strdup("e=perm;");
-			if (cp + cnt > eom)
-				return strdup("e=perm;");
-			byte_copy((char *) bufptr, cnt, (char *) cp);
-			rdlength -= cnt + 1;
-			bufptr += cnt;
-			cp += cnt;
-			*bufptr = '\0';
-		}
-		return (char *) strdup((char *) buf);
-	}
-	return strdup("e=perm;");
+	return strdup(result.s);
 }
 
 static char    *
@@ -906,7 +1006,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.10 2017-05-10 15:00:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.11 2017-05-16 12:35:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
