@@ -13,5 +13,7 @@ indimail (@version@-1) unstable; urgency=low
   * qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes. SMTPROUTES takes precendence over X-SMTPROUTES
   * use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
   * smtpd.c - fixed spurious error "no valid cert for gateway
+  * qmail-remote.c - fix for SMTPROUTE of the form domain:x.x.x.x::penalty:max_tolerance username password
+  * refactored dns_text() function in libdkim, surblfilter.c, dns_text.c, dns.c
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 15 May 2017 15:37:42 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 16 May 2017 12:38:18 +0530

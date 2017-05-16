@@ -1,4 +1,4 @@
-* Mon May 15 2017 13:38:15 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
+* Mon May 16 2017 12:39:17 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.2 Start 08/05/2017
 09/05/2017
 1.  indiversion.c - Fixed authindi path
@@ -23,6 +23,11 @@ Release 2.2 Start 08/05/2017
 11. use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to
     configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
 12. smtpd.c - fixed spurious error "no valid cert for gateway
+13. qmail-remote.c - fix for SMTPROUTE of the form
+    domain:x.x.x.x::penalty:max_tolerance username password
+16/05/2017
+14. refactored dns_text() function in libdkim, surblfilter.c, dns_text.c,
+	dns.c
 
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
