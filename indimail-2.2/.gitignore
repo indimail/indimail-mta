@@ -69,7 +69,7 @@ hostcntrl
 hostsync
 iecho
 inc_deps
-indimail-2.1-rpmlintrc
+indimail-rpmlintrc
 indimail.5
 indimail.7
 indimail_config
