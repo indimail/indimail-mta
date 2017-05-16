@@ -2271,7 +2271,7 @@ socket_v4mappedprefix.o socket_v6any.o str.a stralloc.a alloc.a dns.lib
 	scan_xlong.o scan_ulong.o ip.o ipalloc.o error.o strsalloc.o fmt_str.o \
 	socket_v4mappedprefix.o socket_v6any.o str.a stralloc.a alloc.a `cat dns.lib` -lcrypto
 
-dns_text.o: compile dns_text.c domainkeys.h byte.h dns.h
+dns_text.o: compile dns_text.c str.h dns.h error.h alloc.h
 	./compile -DDOMAIN_KEYS dns_text.c
 
 testtrace.o: compile testtrace.c dktrace.h
@@ -2325,6 +2325,8 @@ trydkim.c str_len.o str_cpy.o byte_copy.o dns_text.o compile load conf-dkim dns.
 	( ( ./compile -I../libdkim-$(DKIM_VERSION) \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o str_len.o str_cpy.o byte_copy.o dns_text.o \
+	error.o stralloc_eady.o stralloc_opyb.o stralloc_pend.o stralloc_catb.o \
+	stralloc_cat.o alloc.o alloc_re.o \
 	-L../libdkim-$(DKIM_VERSION)/.libs \
 	-L../libdkim-$(DKIM_VERSION) \
 	`cat dns.lib` -ldkim -lcrypto ) >/dev/null 2>&1 \
@@ -2336,6 +2338,8 @@ str_len.o str_cpy.o byte_copy.o dns_text.o \
 trydkim.c compile load dns.lib dkim.lib conf-indi
 	( ( ./compile -I../libdkim-$(DKIM_VERSION) `grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o str_len.o str_cpy.o byte_copy.o dns_text.o \
+	error.o stralloc_eady.o stralloc_opyb.o stralloc_pend.o stralloc_catb.o \
+	stralloc_cat.o alloc.o alloc_re.o \
 	-L../libdkim-$(DKIM_VERSION)/.libs \
 	-L../libdkim-$(DKIM_VERSION) `cat dkim.lib dns.lib` -lcrypto ) >/dev/null 2>&1 \
 	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h
