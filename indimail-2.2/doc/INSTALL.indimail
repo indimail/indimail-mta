@@ -1,5 +1,5 @@
 File INSTALL.indimail, Version 2.2
-DATE: Wed May 10 18:43:45 IST 2017
+DATE: Tue May 16 12:47:11 IST 2017
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -203,13 +203,13 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . logalert-0.3        (2.0  Mb)
                                . flash-0.9.4         (4.3  Mb)
                                . altermime-0.3.10    (1.5  Mb)
-                               . ripmime-1.4.0.9     (2.1  Mb)
+                               . ripmime-1.4.0.10    (2.1  Mb)
                                . mpack-1.6           (1.5  Mb)
                                . fortune-1.1         (8.4  Mb)
                                . courier-imap-4.17.3 (75   Mb)
                                . bogofilter-1.2.4    (11.6 Mb)
                                . fetchmail-6.3.26   (10.5 Mb)
-                               . iwebadmin-1.2      (3.0  Mb)
+                               . iwebadmin-1.3      (3.0  Mb)
                                ------------------------------
                                  Total              (200  Mb)
 
@@ -332,7 +332,7 @@ the installation.
     % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.3.tar.bz2
     % wget http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
     % wget http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/ripmime-1.4.0.9.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/ripmime-1.4.0.10.tar.gz
     % wget http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz
     % wget http://downloads.sourceforge.net/indimail/fortune-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/nssd-1.1.tar.gz
@@ -370,7 +370,7 @@ the installation.
     http://forge.mysql.com/wiki/Autotools_to_CMake_Transition_Guide
 
     ##### STEP 2  ##### Install libdkim-1.4 ###################
-    Install libdkim-1.4 (libdkim-1.4.tar.bz2) MD5 3871d9e0c211bea2aaefbcb96971682e
+    Install libdkim-1.4 (libdkim-1.4.tar.bz2) MD5 f3309445273a52c0589a6aeed497e3ea
     current working directory /home/local/src
     Download the libdkim package. The latest tested libdkim package is
     libdkim-1.4.tar.bz2
@@ -387,7 +387,7 @@ the installation.
     by doing ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 3  ##### Install libsrs2-1.0.18 ################
-    Install libsrs2-1.0.18 (libsrs2-1.0.18.tar.gz MD5 5a70a83818781551a7bfba31ffc97f8b
+    Install libsrs2-1.0.18 (libsrs2-1.0.18.tar.gz MD5 b91ce86014a9d48523b2f2518363294b
     current working directory /home/local/src
     Download the libsrs2 package. The latest tested libsrs2 package is
     libsrs2-1.0.18.tar.gz
@@ -670,7 +670,7 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 9 ## Optional STEP ## nssd ####################
-    Install nssd MD5 cbb373d0cd43c96aa12dd76608a3af09
+    Install nssd MD5 d101ab93b04ead2ceebf4bc69982e254
     current working directory /home/local/src
     Download the nssd package from http://www.indimail.org
 
@@ -691,10 +691,10 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 10 ## Optional STEP ## iwebadmin ###############
-    Install iwebadmin MD5 c4a98f4907825969d5f69f7c73b7a0f5
-    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.2.tar.gz
-    % gunzip -c iwebadmin-1.2.tar.gz | tar xf -
-    % cd iwebadmin-1.2
+    Install iwebadmin MD5 3e72f205fe17b7b5d148df22b1f9b04f
+    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.3.tar.gz
+    % gunzip -c iwebadmin-1.3.tar.gz | tar xf -
+    % cd iwebadmin-1.3
     % ./configure --prefix=/usr \
         --sysconfdir=/etc/indimail \
         --enable-ezmlmdir=/var/indimail \
