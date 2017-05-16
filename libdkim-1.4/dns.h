@@ -1,5 +1,8 @@
 /*
  * $Log: dns.h,v $
+ * Revision 1.4  2017-05-16 12:40:39+05:30  Cprogrammer
+ * define DNS_SOFT, DNS_HARD and DNS_MEM
+ *
  * Revision 1.3  2009-03-27 20:40:16+05:30  Cprogrammer
  * removed windows definitions
  *
@@ -41,6 +44,10 @@
 #define DNSRESP_DOMAIN_NAME_TOO_LONG	3	// Domain name too long
 #define DNSRESP_NXDOMAIN				4	// DNS server returned Name Error
 #define DNSRESP_EMPTY					5	// DNS server returned successful response but no records
+
+#define DNS_SOFT -1
+#define DNS_HARD -2
+#define DNS_MEM  -3
 
 // Pass in the FQDN to get the TXT record
 int             DNSGetTXT(const char *szFQDN, char *Buffer, int nBufLen);
