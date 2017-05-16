@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.7  2017-05-16 12:40:23+05:30  Cprogrammer
+ * refactored dns_text() function
+ *
  * Revision 1.6  2017-05-10 14:58:06+05:30  Cprogrammer
  * increase responselen to 1024 for long text records
  *
@@ -15,6 +18,7 @@
  */
 #include <netdb.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #ifdef DARWIN
@@ -31,6 +35,214 @@ getshort(unsigned char *cp)
 	return (cp[0] << 8) | cp[1];
 }
 
+static struct
+{
+	unsigned char  *buf;
+} response;
+static int      responsebuflen = 0;
+static int      responselen;
+static unsigned char *responseend;
+static unsigned char *responsepos;
+static u_long   saveresoptions;
+static int      numanswers;
+static char     name[MAXDNAME];
+
+static int
+resolve(char *ddomain, int type)
+{
+	int             n, i;
+	unsigned char  *ptr;
+
+	errno = 0;
+	response.buf = 0;
+	if (!responsebuflen) {
+		if ((response.buf = (unsigned char *) malloc(PACKETSZ + 1)))
+			responsebuflen = PACKETSZ + 1;
+		else
+			return DNS_MEM;
+	}
+	responselen = res_query(ddomain, C_IN, type, response.buf, responsebuflen);
+	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
+		if (responsebuflen < 65536) {
+			if ((ptr = (unsigned char *) realloc((void *) response.buf, 65536))) {
+				if (ptr != (unsigned char *) response.buf)
+					response.buf = ptr;
+				responsebuflen = 65536;
+			} else {
+				free(response.buf);
+				responsebuflen = 0;
+				return DNS_MEM;
+			}
+		}
+		saveresoptions = _res.options;
+		_res.options |= RES_USEVC;
+		responselen = res_query(ddomain, C_IN, type, (unsigned char *) response.buf, responsebuflen);
+		_res.options = saveresoptions;
+	}
+	if (responselen <= 0) {
+		if (errno == ECONNREFUSED)
+			return DNS_SOFT;
+		if (h_errno == TRY_AGAIN)
+			return DNS_SOFT;
+		return DNS_HARD;
+	}
+	responseend = ptr + responselen;
+	responsepos = ptr + sizeof(HEADER);
+	n = ntohs(((HEADER *) ptr)->qdcount);
+	while (n-- > 0)
+	{
+		if ((i = dn_expand(ptr, responseend, responsepos, name, MAXDNAME)) < 0)
+			return DNS_SOFT;
+		responsepos += i;
+		i = responseend - responsepos;
+		if (i < QFIXEDSZ)
+			return DNS_SOFT;
+		responsepos += QFIXEDSZ;
+	}
+	numanswers = ntohs(((HEADER *) ptr)->ancount);
+	return 0;
+}
+
+void
+byte_copy(register char *to, register unsigned int n, register char *from)
+{
+	for (;;) {
+		if (!n)
+			return;
+		*to++ = *from++;
+		--n;
+		if (!n)
+			return;
+		*to++ = *from++;
+		--n;
+		if (!n)
+			return;
+		*to++ = *from++;
+		--n;
+		if (!n)
+			return;
+		*to++ = *from++;
+		--n;
+	}
+}
+
+static char     *txt;
+static int      txtlen;
+
+static int
+findtxt(int wanttype, int *txt_strlen)
+{
+	unsigned short  rrtype, rrdlen;
+	char           *ptr;
+	int             i;
+
+	if (numanswers <= 0)
+		return 2;
+	--numanswers;
+	if (responsepos == responseend)
+		return DNS_SOFT;
+
+	if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
+		return DNS_SOFT;
+	responsepos += i;
+
+	if ((i = responseend - responsepos) < 4 + 3 * 3)
+		return DNS_SOFT;
+
+	rrtype = getshort(responsepos);
+	rrdlen = getshort(responsepos + 8);
+	responsepos += 10;
+
+	*txt_strlen = 0;
+	if (!txtlen) {
+		if (!(txt = (char *) malloc(PACKETSZ * 2 * sizeof(char))))
+			return DNS_MEM;
+		txtlen = PACKETSZ * 2;
+	}
+	if (rrtype == wanttype) {
+		unsigned short  txtpos;
+		unsigned char   n;
+
+		*txt = 0;
+		for (txtpos = 0; txtpos < rrdlen; txtpos += n) {
+			n = responsepos[txtpos++];
+			if (n > rrdlen - txtpos)
+				n = rrdlen - txtpos;
+			if ((*txt_strlen + n + 1) > txtlen) {
+				if (!(ptr = (char *) realloc(txt, (*txt_strlen + n) * 2)))
+					return DNS_MEM;
+				txtlen = (*txt_strlen + n) * 2;
+			}
+			byte_copy(txt + *txt_strlen, n, (char *) &responsepos[txtpos]);
+			*txt_strlen += n;
+		}
+		responsepos += rrdlen;
+		txt[*txt_strlen] = 0;
+		return 1;
+	}
+	responsepos += rrdlen;
+	return 0;
+}
+
+static char    *dnresult;
+static int      dnresultlen;
+
+static int
+dns_txtplus(char *domain)
+{
+	int             r, len, total, newlen;
+	char           *ptr;
+
+	switch (resolve(domain, T_TXT))
+	{
+	case DNS_MEM:
+		return DNS_MEM;
+	case DNS_SOFT:
+		return DNS_SOFT;
+	case DNS_HARD:
+		return DNS_HARD;
+	}
+	total = 0;
+	if (!dnresultlen) {
+		if (!(dnresult = (char *) malloc ((2 * PACKETSZ) * sizeof(char))))
+			return DNS_MEM;
+		dnresultlen = 2 * PACKETSZ;
+	}
+	while ((r = findtxt(T_TXT, &len)) != 2) {
+		if (r == DNS_SOFT) {
+			if (txtlen) {
+				txtlen = 0;
+				free(txt);
+			}
+			return DNS_SOFT;
+		}
+		if (r == 1) {
+			if ((total + len + 1) >= dnresultlen) {
+				if (!(ptr = (char *) realloc(dnresult, (total + len) * 2))) {
+					dnresultlen = 0;
+					if (txtlen) {
+						txtlen = 0;
+						free(txt);
+					}
+					return DNS_MEM;
+				}
+				dnresultlen = (total + len) * 2;
+			}
+			byte_copy(dnresult + total, len, txt);
+			total += len;
+		}
+	}
+	if (txtlen) {
+		txtlen = 0;
+		free(txt);
+	}
+	if (total) {
+		dnresult[total] = 0;
+		return (0);
+	}
+	return DNS_HARD;
+}
+
 /*
  * we always return a null-terminated string which has been malloc'ed.  The string
  * is always in the tag=value form.  If a temporary or permanent error occurs,
@@ -40,75 +252,31 @@ getshort(unsigned char *cp)
 char           *
 dns_text(char *dn)
 {
-	u_char          response[PACKETSZ + PACKETSZ + 1];	/* response */
-	int             responselen;			/* buffer length */
-	int             rc;						/* misc variables */
-	int             ancount, qdcount;		/* answer count and query count */
-	u_short         type, rdlength;			/* fields of records returned */
-	u_char         *eom, *cp;
-	u_char          buf[PACKETSZ + PACKETSZ + 1];		/* we're storing a TXT record here, not just a DNAME */
-	u_char         *bufptr;
-
-	for (rc = 0, responselen = PACKETSZ;rc < 2;rc++) {
-		responselen = res_query(dn, C_IN, T_TXT, response, responselen);
-		if (responselen < 0) {
-			if (h_errno == TRY_AGAIN)
-				return strdup("e=temp;");
-			else
-				return strdup("e=perm;");
-		}
-		if (responselen <= PACKETSZ)
-			break;
-		else
-		if (responselen >= (2 * PACKETSZ))
-			return strdup("e=perm;");
-	}
-	qdcount = getshort(response + 4);	/* http://crynwr.com/rfc1035/rfc1035.html#4.1.1. */
-	ancount = getshort(response + 6);
-	eom = response + responselen;
-	cp = response + HFIXEDSZ;
-	while (qdcount-- > 0 && cp < eom)
+	int             r;
+	
+	switch (r = dns_txtplus(dn))
 	{
-		rc = dn_expand(response, eom, cp, (char *) buf, MAXDNAME);
-		if (rc < 0)
-			return strdup("e=perm;");
-		cp += rc + QFIXEDSZ;
-	}
-	while (ancount-- > 0 && cp < eom)
-	{
-		if ((rc = dn_expand(response, eom, cp, (char *) buf, MAXDNAME)) < 0)
-			return strdup("e=perm;");
-		cp += rc;
-		if (cp + RRFIXEDSZ >= eom)
-			return strdup("e=perm;");
-		type = getshort(cp + 0);	/* http://crynwr.com/rfc1035/rfc1035.html#4.1.3. */
-		rdlength = getshort(cp + 8);
-		cp += RRFIXEDSZ;
-		if (type != T_TXT)
-		{
-			cp += rdlength;
-			continue;
+	case DNS_MEM:
+	case DNS_SOFT:
+		if (responsebuflen) {
+			free(response.buf);
+			responsebuflen = 0;
 		}
-		bufptr = buf;
-		while (rdlength && cp < eom)
-		{
-			unsigned int    cnt;
-
-			cnt = *cp++;		/* http://crynwr.com/rfc1035/rfc1035.html#3.3.14. */
-			if (bufptr - buf + cnt + 1 >= (2 * PACKETSZ))
-				return strdup("e=perm;");
-			if (cp + cnt > eom)
-				return strdup("e=perm;");
-			memcpy((char *) bufptr, (char *) cp, cnt);
-			rdlength -= cnt + 1;
-			bufptr += cnt;
-			cp += cnt;
+		return strdup("e=temp;");
+	case DNS_HARD:
+		if (responsebuflen) {
+			free(response.buf);
+			responsebuflen = 0;
 		}
-		*bufptr = '\0';
-		return (char *) strdup((char *) buf);
+		return strdup("e=perm;");
 	}
-	return strdup("e=perm;");
+	if (responsebuflen) {
+		free(response.buf);
+		responsebuflen = 0;
+	}
+	return dnresult;
 }
+
 
 int
 DNSGetTXT(const char *domain, char *buffer, int maxlen)
@@ -117,22 +285,20 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 	int             len;
 
 	results = dns_text((char *) domain);
-	if (!strcmp(results, "e=perm;"))
-	{
+	if (!strcmp(results, "e=perm;")) {
 		free(results);
 		return DNSRESP_PERM_FAIL;
 	} else
-	if (!strcmp(results, "e=temp;"))
-	{
+	if (!strcmp(results, "e=temp;")) {
 		free(results);
 		return DNSRESP_TEMP_FAIL;
 	}
-	if (strlen(results) > maxlen - 1)
-	{
+	if ((len = strlen(results)) > maxlen - 1) {
 		free(results);
 		return DNSRESP_DOMAIN_NAME_TOO_LONG;
 	}
-	strncpy(buffer, results, maxlen);
+	byte_copy(buffer, len, results);
+	buffer[len] = 0;
 	free(results);
 	return DNSRESP_SUCCESS;
 }
@@ -140,7 +306,7 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.6 2017-05-10 14:58:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.7 2017-05-16 12:40:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
