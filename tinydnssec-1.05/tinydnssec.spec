@@ -47,7 +47,7 @@ License: GPL-3.0+
 License: GPLv3
 %endif
 URL: http://cr.yp.to/djbdns.html
-Source0: %{name}-%{version}.tar.gz
+Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 # http://www.fefe.de/dns/
 BuildRequires: perl
 BuildRequires: libev-devel
@@ -80,7 +80,6 @@ Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel /usr/sbin/user
 Requires: daemontools
 Provides: user(tinydns)  > 999
 Provides: user(dnscache) > 999
-Provides: user(dqscache) > 999
 Provides: user(dnslog)   > 999
 
 %description
@@ -417,3 +416,4 @@ Release 1.1 Start 11/04/2017
 16. added compile time option to add dnssec, curvedns support
 17. added djbdns.7 man page
 18. Changed dns accounts to Gtinydns, Gdnslog, Gdnscache
+19. added man page for random-ip, dnsgetroot
