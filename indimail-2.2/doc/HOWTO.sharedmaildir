@@ -5,7 +5,7 @@
 /var/indimail/bin/maildirmake -s write -f Qmail /usr1/shared/
 /var/indimail/bin/maildirmake -s write -f Test /usr1/shared
 
-3) Create Entry in /var/sifmail/etc/maildirshared
+3) Create Entry in /var/indimail/etc/maildirshared
 qmail	/usr1/shared
 
 Personal Shared Folders
