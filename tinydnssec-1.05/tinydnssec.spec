@@ -234,6 +234,7 @@ fi
 
 %doc %{_mandir}/man1/*
 %doc %{_mandir}/man5/*
+%doc %{_mandir}/man7/*
 %doc %{_mandir}/man8/*
 
 %prep

@@ -18,6 +18,7 @@ void hier(char *inst_dir)
   h(mandir,-1,-1,0755);
   d(mandir,"man1",-1,-1,0755);
   d(mandir,"man5",-1,-1,0755);
+  d(mandir,"man7",-1,-1,0755);
   d(mandir,"man8",-1,-1,0755);
   d(auto_h,"bin",-1,-1,0755);
   d(auto_h,"sbin",-1,-1,0755);
@@ -76,6 +77,7 @@ void hier(char *inst_dir)
   c(mandir,"man1","dnstxt.1",-1,-1,0644);
   c(mandir,"man1","tinydns-get.1",-1,-1,0644);
   c(mandir,"man5","qualification.5",-1,-1,0644);
+  c(mandir,"man7","djbdns.7",-1,-1,0644);
   c(mandir,"man8","axfrdns.8",-1,-1,0644);
   c(mandir,"man8","axfrdns-conf.8",-1,-1,0644);
   c(mandir,"man8","axfr-get.8",-1,-1,0644);
