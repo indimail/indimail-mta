@@ -1873,6 +1873,442 @@ using the same name 144-145.3.2.1.in-addr.arpa selected by the parent administra
 
 Why would anyone want to use classless reverse delegation? Answer: If you were running BIND, you'd find it only a little bit painful to receive a classless reverse delegation (setting up one zone file), while you'd find it much more painful to receive separate reverse delegations (setting up many zone files).
 
+.SH How to run a DNS server in place of an existing BIND server
+
+Here is how to upgrade your DNS servers from BIND to tinydns. The data currently published through your BIND servers will be published through tinydns instead.
+
+These instructions assume that you have already installed daemontools, ucspi-tcp, and djbdns; that svscan is already running; and that you have already stopped using BIND as a DNS cache.
+
+These instructions assume that you have already installed ssh. These instructions can also take advantage of rsync, but rsync is not required.
+
+For concreteness, these instructions assume that you have two BIND DNS servers: dns1.panic.mil on IP address 1.8.7.200, and dns2.panic.mil on IP address 1.8.7.201. You use these servers to publish panic.mil information.
+
+.nr step 1 1
+These instructions assume for simplicity that you do not have any incoming zone transfers. All changes are made on dns1.panic.mil; you transfer zones from dns1.panic.mil to dns2.panic.mil, and perhaps to third-party servers, but you do not provide secondary service for zones whose primaries are at other sites.
+
+.IP \n[step] 4
+On dns1, as root, create UNIX accounts named Gtinydns, Gaxfrdns, and Gdnslog. Repeat on dns2.
+
+.IP \n+[step]
+On dns1, as root, create service directories /etc/tinydns and /etc/axfrdns using the IP address of dns1.panic.mil:
+
+.EX
+     tinydns-conf Gtinydns Gdnslog /etc/tinydns 1.8.7.200
+     axfrdns-conf Gaxfrdns Gdnslog /etc/axfrdns /etc/tinydns 1.8.7.200
+.EE
+
+Repeat on dns2 using the IP address of dns2.panic.mil.
+
+.IP \n+[step]
+On dns1, as root, create /etc/axfrdns/tcp to allow zone transfers from your network (1.8.7.*), to allow zone transfers from any authorized third-party servers (let's say 131.193.178.*), and to allow non-zone-transfer TCP connections from anywhere:
+
+.EX
+     1.8.7.:allow
+     131.193.178.:allow
+     :allow,AXFR=""
+.EE
+
+Compile tcp into a hashed database:
+
+.EX
+     cd /etc/axfrdns
+     make
+.EE
+
+Repeat on dns2.
+
+.IP \n+[step]
+On dns1, as root, edit /etc/tinydns/root/Makefile to replicate /etc/tinydns/root/data from dns1 to dns2:
+
+.EX
+     remote: data.cdb
+             rsync -az -e ssh data.cdb 1.8.7.201:/etc/tinydns/root/data.cdb
+
+     data.cdb: data
+             /usr/local/bin/tinydns-data
+.EE
+
+Alternatively, if you don't have rsync:
+
+.EX
+     remote: data.cdb
+             scp data.cdb 1.8.7.201:/etc/tinydns/root/data.cdb.tmp
+             ssh 1.8.7.201 mv /etc/tinydns/root/data.cdb.tmp \
+             /etc/tinydns/root/data.cdb
+
+     data.cdb: data
+             /usr/local/bin/tinydns-data
+.EE
+
+.IP \n+[step]
+On dns2, as root, edit /etc/tinydns/root/data to remind yourself that DNS data is replicated from dns1 to dns2:
+
+.EX
+     # Do not edit data on dns2! data.cdb is copied from dns1.
+     # The following line protects data.cdb by stopping make.
+     9
+.EE
+
+.IP \n+[step]
+On dns1, as root, transfer the panic.mil zone from BIND:
+
+.EX
+     cd /etc/tinydns/root
+     tcpclient dns1.panic.mil 53 axfr-get panic.mil zone-panic zone-panic.tmp
+.EE
+
+Do the same for all your other zones: for example,
+
+.EX
+     tcpclient dns1.panic.mil 53 axfr-get 8.1.in-addr.arpa zone-8 zone-8.tmp
+.EE
+
+Merge the zones into a data file, and compile the data file into a hashed database for tinydns:
+
+.EX
+     sort -u zone* > data
+     make
+.EE
+
+.IP \n+[step]
+On dns1, check whether tinydns has the same data that BIND is providing:
+
+.EX
+     cd /etc/tinydns/root
+     tinydns-get a www.panic.mil
+     dnsq a www.panic.mil dns1.panic.mil
+.EE
+
+Replace www.panic.mil with various names in your BIND zone files, and replace a with mx and other types in your BIND zone files.
+You may see some minor differences between the behavior of tinydns, as shown in the tinydns-get output, and the behavior of BIND, as shown in the dnsq output. Don't worry about the following differences: BIND repeating answer lines as additional lines when tinydns doesn't; BIND and tinydns putting lines in a different order.
+
+.IP \n+[step]
+On dns1, as root, find and kill the BIND process. Then tell svscan about the new services:
+
+.EX
+     ln -s /etc/tinydns /etc/axfrdns /service
+.EE
+
+The services will start within five seconds. You don't have to rush; caches will talk to dns2 when dns1 isn't responding.
+
+.IP \n+[step]
+Check whether tinydns on dns1 is responding with the same data as BIND on dns2:
+
+.EX
+     dnsq a www.panic.mil dns1.panic.mil
+     dnsq a www.panic.mil dns2.panic.mil
+.EE
+
+As in step 7, try various names.
+
+.IP \n+[step]
+On dns1, as root, make sure that BIND won't be restarted after reboot. For example, under FreeBSD, simply add named_enable=NO to /etc/rc.conf.
+
+.IP \n+[step]
+Repeat steps 8 and 10 on dns2.
+
+.IP \n+[step]
+Set up a public web page saying that your DNS servers are powered by djbdns, so that a Google search for powered djbdns will find your page in a few months. These public statements will encourage other people to deploy djbdns, provide djbdns support services, and develop djbdns-related tools. Please also consider making a donation to the Bernstein Writing Fund.
+.RE
+
+Congratulations! You have escaped your BINDs.
+
+\fBAdministration\fR
+
+After you make changes to data, type make to tell tinydns to publish the new information. If there's a syntax error, make will print a message on your screen, and tinydns will continue using the old information.
+You can maintain data the same way you maintained your BIND zone files. Each line produced by axfr-get (except for the initial # ... auto axfr-get line, which you can remove) corresponds to a line in a BIND zone file:
+
+.EX
+     # panic.mil. 3600 IN SOA dns1.panic.mil. hostmaster.panic.mil. 10455 7200 3600 604800 3600
+     Zpanic.mil:dns1.panic.mil.:hostmaster.panic.mil.:10455:7200:3600:604800:3600:3600
+     # panic.mil. 86400 IN NS dns1.panic.mil.
+     &panic.mil::dns1.panic.mil.:86400
+     # panic.mil. 86400 IN MX 0 mail.panic.mil.
+     @panic.mil::mail.panic.mil.:0:86400
+     # www.panic.mil. 86400 IN A 1.8.7.99
+     +www.panic.mil:1.8.7.99:86400
+     # 99.7.8.1.in-addr.arpa. 86400 IN PTR www.panic.mil.
+     ^99.7.8.1.in-addr.arpa:www.panic.mil.:86400
+.EE
+
+However, you can make your data much more concise and easier to manage by taking advantage of more features of tinydns-data, as described below.
+
+\fBAutomatic serial numbers\fR. With BIND-style administration, you have to increase the serial number in your Z line, 10455 in the above example, every time you change another line. (You don't have to worry about this if you aren't transferring zones to third-party servers; server replication through rsync to dns2.panic.mil doesn't rely on serial numbers.)
+
+You can instead replace :10455: by :: and let tinydns-data generate a serial number from the modification time of the data file. WARNING: If your serial number is around 2000000000, you'll have to set it to 4000000000, and wait for your secondary servers to get the new zone, before you switch to the tinydns-data serial number. See RFC 2182, section 7, for further discussion of this silly procedure. (You don't have to worry about this if your secondary servers are using axfr-get for zone transfers.)
+
+\fBAutomatic TTLs\fR. You can remove the time-to-live field at the end of each line: e.g., +www.panic.mil:1.8.7.99: instead of +www.panic.mil:1.8.7.99:86400. tinydns-data will generate sensible TTLs for you.
+
+\fBAutomatic colons\fR. You can remove any colon at the end of a line: e.g., +www.panic.mil:1.8.7.99 instead of +www.panic.mil:1.8.7.99:.
+
+\fBCombined A and PTR records\fR. You can merge +www.panic.mil:1.8.7.99 and ^99.7.8.1.in-addr.arpa:www.panic.mil. into =www.panic.mil:1.8.7.99. This also tells add-host to avoid reusing that host name or IP address.
+
+\fBCombined MX and A records\fR. You can merge @panic.mil::mail.panic.mil.:0 and +mail.panic.mil:1.8.7.88 into @panic.mil:1.8.7.88:mail.panic.mil.:0.
+
+\fBAutomatic MX preferences\fR. You can omit MX preferences of 0: e.g., @panic.mil:1.8.7.88:mail.panic.mil. instead of @panic.mil:1.8.7.88:mail.panic.mil.:0.
+
+\fBAutomatic final dots\fR. mail.panic.mil and mail.panic.mil. are equivalent: e.g., @panic.mil:1.8.7.88:mail.panic.mil instead of @panic.mil:1.8.7.88:mail.panic.mil.. The final dot doesn't matter in any name that has a dot in the middle. A name without any dots, such as z, will be interpreted as z.mx.panic.mil in this context.
+
+\fBCombined NS and A records\fR. You can merge &panic.mil::dns2.panic.mil and +dns2.panic.mil:1.8.7.55 into &panic.mil:1.8.7.55:dns2.panic.mil.
+
+\fBAutomatic SOA timers\fR. In your Z line you can replace the timers by blanks: e.g., Zpanic.mil:dns1.panic.mil:hostmaster.panic.mil instead of Zpanic.mil:dns1.panic.mil:hostmaster.panic.mil::7200:3600:604800:3600. tinydns-data will choose sensible timers for you.
+
+\fBMore automatic SOA information\fR. A simple Zpanic.mil means Zpanic.mil:a.ns.panic.mil:hostmaster.panic.mil. It isn't worth changing the server names for existing zones, but you can take advantage of the abbreviation for new zones.
+
+\fBCombined SOA, NS, and A records\fR. You can merge Zpanic.mil and &panic.mil:1.8.7.55:dns2.panic.mil into .panic.mil:1.8.7.55:dns2.panic.mil.
+
+.SH How to run an external cache in place of an existing BIND cache, strategy 1
+
+These instructions assume that your network already has a computer using BIND to find addresses of Internet hosts (BIND as a ``DNS cache'') and to publish addresses of your own hosts (BIND as a ``DNS server''). Here is how to use dnscache instead of BIND to find addresses of Internet hosts.
+
+These instructions assume that you can easily change /etc/resolv.conf on all your client machines. If you can't, use strategy 2 or strategy 3 instead.
+
+For concreteness, let's say you have four servers, and any number of client computers:
+
+.EX
+Name	IP address	Currently running	The plan
+wobbly	1.8.7.33	BIND cache+server	BIND server
+shaky	1.8.7.55	BIND cache+server	BIND server
+lion	1.8.7.91	nothing	dnscache
+tiger	1.8.7.92	nothing	dnscache
+.EE
+
+All your computers have nameserver 1.8.7.33 and nameserver 1.8.7.55 in /etc/resolv.conf.
+
+.nr step 1 1
+These instructions assume that you have already installed daemontools and djbdns, and that svscan is already running, on both lion and tiger.
+
+.IP \n[step] 2
+On lion, as root, create UNIX accounts named Gdnscache and Gdnslog. Repeat on tiger.
+
+.IP \n+[step]
+On lion, as root, create an /etc/dnscache service directory for IP address 1.8.7.91, and tell svscan about the new service:
+
+.EX
+     dnscache-conf Gdnscache Gdnslog /etc/dnscache 1.8.7.91
+     ln -s /etc/dnscache /service/dnscache
+.EE
+
+Repeat on tiger with the IP address 1.8.7.92.
+
+.IP \n+[step]
+On lion, as root, create entries in /etc/dnscache/root/ip showing which client IP addresses are authorized to use this cache. For example,
+
+.EX
+     touch /etc/dnscache/root/ip/1.8.7
+.EE
+
+authorizes all clients with IP address 1.8.7.* to use this cache. You can add or remove addresses later. Repeat on tiger.
+
+.IP \n+[step]
+On one of your client computers, as root, put
+
+.EX
+     nameserver 1.8.7.91
+     nameserver 1.8.7.92
+.EE
+
+into /etc/resolv.conf, replacing the previous nameserver lines.
+
+.IP \n+[step]
+Check whether that computer can look up addresses of some Internet hosts:
+
+.EX
+     dnsip www.cnn.com
+     dnsip www.fsf.org
+.EE
+
+Then try surfing the web. If you want to see what dnscache is doing behind the scenes, read /service/dnscache/log/main/current on lion and tiger.
+
+.IP \n+[step]
+Repeat steps 4 and 5 on your other client computers.
+
+.IP \n+[step]
+Optionally, disable BIND's caching features: On wobbly and shaky, as root, put
+
+.EX
+     options {
+       recursion no;
+       fetch-glue no;
+     };
+.EE
+
+into named.conf, and restart BIND. You can skip this step if you're going to eliminate BIND anyway, switching to tinydns to publish information about your own hosts.
+.RE
+
+.SH How to run an external cache in place of an existing BIND cache, strategy 2
+
+These instructions assume that your network already has a computer using BIND to find addresses of Internet hosts (BIND as a ``DNS cache'') and to publish addresses of your own hosts (BIND as a ``DNS server''). Here is how to use dnscache instead of BIND to find addresses of Internet hosts.
+
+If you have taken the recommended approach of having different computers (or at least different IP addresses) for your DNS caches (listed in /etc/resolv.conf) and your DNS servers (listed in NS records), use strategy 3 instead. Strategy 3 is simpler than strategy 2.
+
+If you can easily change /etc/resolv.conf on all your client machines, use strategy 1 instead. Strategy 2 is more complicated but avoids changing /etc/resolv.conf. If you're an ISP and you've given your cache IP address to thousands of client computers, use strategy 2.
+
+\fBSeparating DNS service from DNS caching\fR
+
+For concreteness, let's say you're running BIND on two computers, dns1.panic.mil and dns2.panic.mil, with IP addresses 1.8.7.33 and 1.8.7.55. These computers have two functions:
+
+.IP \[bu] 2
+They are DNS servers, publishing information about your own hosts. You are editing that information on dns1.panic.mil; dns2.panic.mil is using zone transfers to copy the information from 1.8.7.33.
+.IP \[bu]
+They are DNS caches, finding addresses of other Internet hosts. Your client computers have nameserver 1.8.7.33 and nameserver 1.8.7.55 in /etc/resolv.conf.
+.RE
+
+.nr step 1 1
+Before you upgrade from BIND, you will have to put these two different functions on different IP addresses, as explained here.
+.IP \n[step] 2
+Allocate two new public IP addresses in your network, let's say 1.8.7.91 and 1.8.7.92.
+
+.IP \n+[step]
+On dns1.panic.mil, as root: Set up 1.8.7.91 as an IP alias. Restart BIND.
+
+.IP \n+[step]
+On dns2.panic.mil, as root: Set up 1.8.7.92 as an IP alias. Change 1.8.7.33 to 1.8.7.91 in the masters lines in named.conf. Restart BIND.
+
+.IP \n+[step]
+On dns1.panic.mil, as root: In your BIND zone files, change the IP address of dns1.panic.mil from 1.8.7.33 to 1.8.7.91, create a new dnscache1.panic.mil name with IP address 1.8.7.33, change the IP address of dns2.panic.mil from 1.8.7.55 to 1.8.7.92, and create a new dnscache2.panic.mil name with IP address 1.8.7.55. Tell BIND to read the new zone files.
+
+.IP \n+[step]
+Contact the .mil parent server to make the same changes in the IP addresses of dns1.panic.mil and dns2.panic.mil.
+
+.IP \n+[step]
+If you have other NS names pointing to BIND (for example, if dns1.panic.mil is also known as dns1.panic.edu), repeat steps 4 and 5 for those names.
+
+.IP \n+[step]
+Wait a few days for the modified DNS records to spread through the Internet.
+.RE
+
+\fBUpgrading the cache\fR
+
+Here's the current situation:
+
+.IP \[bu] 2
+You have one computer with IP addresses 1.8.7.33 (dnscache1.panic.mil) and 1.8.7.91 (dns1.panic.mil), and another computer with IP addresses 1.8.7.55 (dnscache2.panic.mil) and 1.8.7.92 (dns2.panic.mil).
+.IP \[bu]
+You have DNS servers running on 1.8.7.91 and 1.8.7.92. Computers around the Internet are contacting 1.8.7.91 and 1.8.7.92 for the addresses of your hosts.
+.IP \[bu]
+You have DNS caches running on 1.8.7.33 and 1.8.7.55. Your clients are contacting 1.8.7.33 and 1.8.7.55 for the addresses of Internet hosts.
+.IP \[bu]
+You can now follow the strategy 3 instructions. Those instructions will switch the DNS-cache software from BIND to dnscache, leaving BIND in place as the DNS-server software.
+.RE
+
+.SH How to run an external cache in place of an existing BIND cache, strategy 3
+
+These instructions assume that your network already has a computer using BIND as a DNS cache, i.e., using BIND to find addresses of Internet hosts. Here is how to use dnscache instead of BIND to find addresses of Internet hosts.
+
+These instructions also assume that you have taken the recommended approach of using different IP addresses for DNS caches (listed in /etc/resolv.conf) and DNS servers (listed in NS records). Otherwise you will have to use strategy 1 or strategy 2. Strategy 3 is simpler than strategy 2, and it avoids the strategy 1 requirement to change /etc/resolv.conf.
+
+For concreteness, let's say you have BIND caches running on two computers: dnscache1.panic.mil with IP address 1.8.7.33, and dnscache2.panic.mil with IP address 1.8.7.55. Your client computers have nameserver 1.8.7.33 and nameserver 1.8.7.55 in /etc/resolv.conf.
+
+.nr step 1 1
+These instructions assume that you have already installed daemontools and djbdns, and that svscan is already running, on both computers.
+
+.IP \n[step] 2
+On the first computer, as root, create UNIX accounts named Gdnscache and Gdnslog.
+
+.IP \n+[step]
+On the first computer, as root, create an /etc/dnscache service directory for IP address 1.8.7.33:
+
+.EX
+     dnscache-conf Gdnscache Gdnslog /etc/dnscache 1.8.7.33
+.EE
+
+.IP \n+[step]
+On the first computer, as root, create entries in /etc/dnscache/root/ip showing which client IP addresses are authorized to use this cache. For example,
+
+.EX
+     touch /etc/dnscache/root/ip/1.8.7
+.EE
+
+authorizes all clients with IP address 1.8.7.* to use this cache.
+
+.IP \n+[step]
+On the first computer, as root, put
+
+.EX
+     options {
+       interface-interval 0;
+       listen-on { 1.8.7.91 };
+     };
+.EE
+
+into named.conf. This tells BIND to stop listening on the 1.8.7.33 address.
+
+.IP \n+[step]
+On the first computer, as root, restart BIND. At this point there is no cache running on the first computer; your clients are relying on the second computer.
+
+.IP \n+[step]
+On the first computer, as root, tell svscan about the new caching service:
+
+.EX
+     ln -s /etc/dnscache /service/dnscache
+.EE
+
+dnscache will start running on the first computer within five seconds.
+
+.IP \n+[step]
+Check whether you can look up addresses of some Internet hosts through the new cache:
+
+.EX
+     env DNSCACHEIP=1.8.7.33 dnsip www.cnn.com
+     env DNSCACHEIP=1.8.7.33 dnsip www.fsf.org
+.EE
+
+Then try surfing the web from your client computers. If you want to see what dnscache is doing behind the scenes, read /service/dnscache/log/main/current.
+
+.IP \n+[step]
+Repeat steps 1 through 7 on the second computer, using 1.8.7.55 instead of 1.8.7.33, and using 1.8.7.92 instead of 1.8.7.91.
+.RE
+
+.SH The importance of separating DNS caches from DNS servers
+
+DNS caches should always have separate IP addresses from DNS servers. In other words, the IP addresses listed in /etc/resolv.conf should never match any IP addresses listed in NS records.
+
+This separation is widely recognized as the right way to run DNS. As stated in the ``DNS and BIND'' book, third edition, ``Securing Your Name Server,'' page 255:
+
+.RS 4
+Some of your name servers answer nonrecursive queries from other name servers on the Internet, because your name servers appear in NS records delegating your zones to them. ... You should make sure that these servers don't receive any recursive queries (that is, you don't have any resolvers configured to use these servers, and no name servers use them as forwarders).
+.RE
+
+BIND promoter Brad Knowles, who is usually willing to say anything to try to scare people away from djbdns, admitted in slide 45 of a 2002.11 presentation that servers should be separated from caches:
+
+.RS 4
+Split functions onto separate machines or IP addresses. Authoritative servers should be authoritative-only. ... Recursive/caching servers should not be authoritative.
+.RE
+
+The BIND company (which has always separated its own f.root-servers.net server from its caches) issued a statement in 2002.12 saying the same thing:
+
+.RS 4
+Although BIND can provide both functions (authoritative and non-authoritative) in single instance, ISC recommends always separating these two functions. In other words, you should run one server for your authoritative zones, and another that caches non-authoritative data.
+.RE
+
+If you've made the mistake of setting up a BIND site with a cache and a server on the same IP address, fix it! Step-by-step instructions for this fix are included in the djbdns upgrade instructions. You should correct the mistake even if you aren't upgrading.
+
+Unfortunately, the idea of combining a cache with a server hasn't been stamped out yet. Brad Knowles, in slide 74 of the same presentation, listed as a ``djbdns Con'' the fact that dnscache and tinydns are separate programs that cannot run on the same IP address. The BIND company's software-installation instructions continue to fool unsuspecting users into putting a cache and a server on the same IP address.
+
+The rest of this page explains several reasons that it's important to separate caches from servers.
+
+\fBSecurity and reliability\fR
+
+Suppose an attacker seizes control of your DNS cache. If that same program is also running your DNS server, the attacker can control not only your incoming DNS data, but also your outgoing DNS data. The attacker can misdirect not only your site's outgoing web connections, but also your site's incoming web connections.
+
+As another example, suppose that a local user floods your DNS cache with more work than it can handle. If that same program is also running your DNS server, the flood will disrupt not only your site's outgoing web connections, but also your site's incoming web connections.
+
+By separating DNS caches from DNS servers, you protect your DNS servers from DNS cache problems, and vice versa.
+
+This is why RFC 2010 and RFC 2870 tell root server operators to use separate caches, and why the ``DNS and BIND'' book tells all server operators to use separate caches. In the words of the book, this separation ``eliminates a major vector of attack.''
+
+\fBModularity\fR
+
+Most DNS cache programs do only one thing: retrieve DNS data. They don't publish data. By separating DNS caches from DNS servers, you allow yourself to easily replace your DNS cache software without any effect on your DNS servers. (Analogy: you can upgrade from Squid to another HTTP cache without any effect on Apache.)
+
+Similarly, most DNS server programs do only one thing: publish DNS data. They aren't caches. By separating DNS caches from DNS servers, you allow yourself to easily replace your DNS server software without any effect on your DNS caches. (Analogy: you can upgrade from Apache to another HTTP server without any effect on Squid.)
+
+In short, the separation gives you extra flexibility in choosing software. You aren't tied to monolithic server+cache programs. Look at the picture in RFC 1035, page 6: you can choose different software for the ``user program'' (client), the ``resolver'' (cache), and the ``name server'' (server).
+
+This extra flexibility allows easier competition among DNS implementations. It makes new DNS servers much easier to write, because server implementors don't have to worry about all the complications of caching. Similarly, it makes new DNS caches easier to write.
+
+This competition means that the software evolves more quickly. It keeps implementors on their toes. In the long term, everybody benefits from modularity, flexibility, competition, and evolution; you should support modularity even if you're satisfied with a monolithic server+cache program right now.
 .SH See Also
 resolver(3),
 curvedns(8),
