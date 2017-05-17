@@ -1523,6 +1523,58 @@ Wait a few days for caches to stop contacting the old servers. If you make any c
 Remove the heaven.af.mil data from the old servers. That's it.
 .RE
 
+\fBHow to create local DNS names\fR
+
+Here is how to configure your DNS cache to contact your DNS servers for information about particular names. This feature has two common uses:
+.IP \[bu] 2
+Local names. For example, you can set up the name pop.3 in your DNS server, and tell your DNS cache to contact your DNS server for all .3 information. Clients using your DNS cache can see pop.3.
+.IP \[bu]
+More reliable access to global names. For example, if www.x.org is published by your DNS servers, you can tell your DNS cache to contact your DNS servers for all .x.org information. Clients using your DNS cache can see www.x.org even if your connection to the Internet is down.
+
+It isn't easy to choose a safe top-level local name. The global root operators add new top-level names every once in a while: for example, .info was added in 2001, so people using .info as a local name were unable to reach global .info sites. Software authors sometimes set aside top-level names; for example, I'm told that Mac OS 9 does something weird with .local, so it can't access local names in .local. Here are some reasonable choices of top-level local names:
+
+.EX
+     .0       (good for machine-specific names)
+     .1
+     .2
+     .3       (good for department-specific names)
+     .4
+     .5
+     .6       (good for corporation-specific names)
+     .7
+     .8
+     .9
+     .internal
+.EE
+.RE
+
+.nr step 1 1
+For concreteness, these instructions assume that you're creating .internal, and that you have two computers running DNS servers, the first server on IP address 1.8.7.200 and the second server on IP address 1.8.7.201.
+
+.IP \n[step] 2
+Tell your DNS servers that they should answer questions about .internal, and that they should announce 1.8.7.200 and 1.8.7.201 as the DNS server addresses for .internal:
+
+.EX
+    cd /service/tinydns/root
+    ./add-ns internal 1.8.7.200
+    ./add-ns internal 1.8.7.201
+    make
+.EE
+
+.IP \n+[step]
+Tell your DNS cache that it should contact your DNS servers for information about .internal:
+
+.EX
+    cd /service/dnscache
+    echo 1.8.7.200 > root/servers/internal
+    echo 1.8.7.201 >> root/servers/internal
+    chmod 644 root/servers/internal
+    svc -t .
+.EE
+.RE
+
+The file root/servers/internal applies to the name internal and all names ending with .internal. However, if there is a more specific file such as root/servers/corp.internal listing another server, or if the .internal servers delegate corp.internal to another server, dnscache will contact the other server for information about corp.internal.
+
 .SH How to answer TCP queries
 
 Here is how to configure your DNS server to answer TCP queries. Note that most DNS servers do not need to answer TCP queries.
