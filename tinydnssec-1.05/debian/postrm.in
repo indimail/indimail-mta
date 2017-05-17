@@ -61,7 +61,7 @@ esac
 # Debian silliness
 #
 if [ " $1" = " purge" ] ; then
-	for i in dnscache dnslog tinydns
+	for i in Gdnscache Gdnslog Gtinydns
 	do
 		echo "removing user $i"
 		/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true

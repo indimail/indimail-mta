@@ -80,6 +80,7 @@ Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel /usr/sbin/user
 Requires: daemontools
 Provides: user(tinydns)  > 999
 Provides: user(dnscache) > 999
+Provides: user(dqscache) > 999
 Provides: user(dnslog)   > 999
 
 %description
@@ -277,14 +278,14 @@ fi
 if [ $argv1 -eq 2 ] ; then
   exit 0
 fi
-for i in dnscache dnslog tinydns
+for i in Gdnscache Gdnslog Gtinydns
 do
   %{__rm} -f /var/spool/mail/$i
 done
 /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
-/usr/bin/getent passwd dnscache > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin dnscache || true
-/usr/bin/getent passwd dnslog   > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin dnslog   || true
-/usr/bin/getent passwd tinydns  > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin tinydns  || true
+/usr/bin/getent passwd Gdnscache > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin Gdnscache || true
+/usr/bin/getent passwd Gdnslog   > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin Gdnslog   || true
+/usr/bin/getent passwd Gtinydns  > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin Gtinydns  || true
 
 %preun
 argv1=$1
@@ -326,7 +327,7 @@ fi
 /bin/rmdir --ignore-fail-on-non-empty %{_sysconfdir}/dnscache 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_sysconfdir}/tinydns 2>/dev/null
 if [ ! -d %{_sysconfdir}/dnscache ] ; then
-  %{_prefix}/sbin/dnscache-conf dnscache dnslog %{_sysconfdir}/dnscache 127.0.0.1
+  %{_prefix}/sbin/dnscache-conf Gdnscache Gdnslog %{_sysconfdir}/dnscache 127.0.0.1
   if [ $? -eq 0 ] ; then
     if [ ! -h /service/dnscache ] ; then
       ln -s %{_sysconfdir}/dnscache /service/dnscache
@@ -340,9 +341,9 @@ fi
 for i in tinydns dqcache curvedns
 do
   if [ " $i" = " dqcache" ] ; then
-    acct=dnscache
+    acct=Gdnscache
   else
-    acct=tinydns
+    acct=Gtinydns
   fi
   if [ " $i" = " curvedns" ] ; then
     ip=x.x.x.x
@@ -350,7 +351,7 @@ do
     ip=127.0.0.1
   fi
   if [ ! -d %{_sysconfdir}/$i ] ; then
-    %{_prefix}/sbin/$i-conf $acct dnslog %{_sysconfdir}/$i $ip
+    %{_prefix}/sbin/$i-conf $acct Gdnslog %{_sysconfdir}/$i $ip
     if [ ! " $i" = " curvedns" ] ; then
       continue
     fi
@@ -387,7 +388,7 @@ do
     %{__rm} -rf %{_sysconfdir}/$i
   fi
 done
-for i in tinydns dnslog dnscache
+for i in Gtinydns Gdnslog Gdnscache
 do
   echo "Removing user $i"
   /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
@@ -414,3 +415,5 @@ Release 1.1 Start 11/04/2017
 14. (rpm, debian) - create tinydnssec, dqcache, curvedns service config
 15. added dqcache-conf, curvedns-conf programs
 16. added compile time option to add dnssec, curvedns support
+17. added djbdns.7 man page
+18. Changed dns accounts to Gtinydns, Gdnslog, Gdnscache
