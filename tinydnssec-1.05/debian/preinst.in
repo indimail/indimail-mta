@@ -31,14 +31,14 @@ case "$1" in
 	# exists.
 	#
 	echo "Adding tinydns users/groups"
-	for i in dnscache tinydns dnslog
+	for i in Gdnscache Gtinydns Gdnslog
 	do
 		${rm} -f /var/spool/mail/$i
 	done
     /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
-    /usr/bin/getent passwd dnscache > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin dnscache || true
-    /usr/bin/getent passwd dnslog   > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin dnslog   || true
-    /usr/bin/getent passwd tinydns  > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin tinydns  || true
+    /usr/bin/getent passwd Gdnscache > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin Gdnscache || true
+    /usr/bin/getent passwd Gdnslog   > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin Gdnslog   || true
+    /usr/bin/getent passwd Gtinydns  > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin Gtinydns  || true
 	
 	;;
 

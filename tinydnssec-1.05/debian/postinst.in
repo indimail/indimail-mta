@@ -39,7 +39,7 @@ esac
 /bin/rmdir --ignore-fail-on-non-empty ${sysconfdir}/dnscache 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty ${sysconfdir}/tinydns 2>/dev/null
 if [ ! -d ${sysconfdir}/dnscache ] ; then
-  ${prefix}/sbin/dnscache-conf dnscache dnslog ${sysconfdir}/dnscache 127.0.0.1 || true
+  ${prefix}/sbin/dnscache-conf Gdnscache Gdnslog ${sysconfdir}/dnscache 127.0.0.1 || true
   if [ $? -eq 0 ] ; then
     if [ ! -h /service/dnscache ] ; then
       ln -s ${sysconfdir}/dnscache /service/dnscache || true
@@ -53,9 +53,9 @@ fi
 for i in tinydns dqcache curvedns
 do
   if [ " $i" = " dqcache" ] ; then
-    acct=dnscache
+    acct=Gdnscache
   else
-    acct=tinydns
+    acct=Gtinydns
   fi
   if [ " $i" = " curvedns" ] ; then
     ip=x.x.x.x
@@ -63,7 +63,7 @@ do
     ip=127.0.0.1
   fi
   if [ ! -d ${sysconfdir}/$i ] ; then
-    ${prefix}/sbin/$i-conf $acct dnslog ${sysconfdir}/$i $ip || true
+    ${prefix}/sbin/$i-conf $acct Gdnslog ${sysconfdir}/$i $ip || true
     if [ ! " $i" = " curvedns" ] ; then
       continue
     fi
