@@ -370,7 +370,7 @@ the installation.
     http://forge.mysql.com/wiki/Autotools_to_CMake_Transition_Guide
 
     ##### STEP 2  ##### Install libdkim-1.4 ###################
-    Install libdkim-1.4 (libdkim-1.4.tar.bz2) MD5 f3309445273a52c0589a6aeed497e3ea
+    Install libdkim-1.4 (libdkim-1.4.tar.bz2) MD5 2b7c97c125e768263951ea12694692a9
     current working directory /home/local/src
     Download the libdkim package. The latest tested libdkim package is
     libdkim-1.4.tar.bz2
