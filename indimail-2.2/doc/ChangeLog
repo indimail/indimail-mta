@@ -28,6 +28,9 @@ Release 2.2 Start 08/05/2017
 16/05/2017
 14. refactored dns_text() function in libdkim, surblfilter.c, dns_text.c,
 	dns.c
+23/05/2017
+15. dkimverify.cpp - replace strtok() with strtok_r() for thread safe
+    operation.
 
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}

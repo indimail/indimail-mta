@@ -15,5 +15,6 @@ indimail (@version@-1) unstable; urgency=low
   * smtpd.c - fixed spurious error "no valid cert for gateway
   * qmail-remote.c - fix for SMTPROUTE of the form domain:x.x.x.x::penalty:max_tolerance username password
   * refactored dns_text() function in libdkim, surblfilter.c, dns_text.c, dns.c
+  * dkimverify.cpp - replace strtok() with strtok_r() for thread safe operation.
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 16 May 2017 12:38:18 +0530

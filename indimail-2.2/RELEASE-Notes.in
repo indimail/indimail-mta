@@ -92,3 +92,5 @@ Release 2.2 Start 08/05/2017
     domain:x.x.x.x::penalty:max_tolerance username password
 14. refactored dns_text() function in libdkim, surblfilter.c, dns_text.c,
 	dns.c
+15. dkimverify.cpp - replace strtok() with strtok_r() for thread safe
+    operation.
