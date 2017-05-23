@@ -1,6 +1,6 @@
 prefix=/usr
 version=1.05
-release=1
+release=1.2
 sysconfdir=/etc/indimail
 #
 

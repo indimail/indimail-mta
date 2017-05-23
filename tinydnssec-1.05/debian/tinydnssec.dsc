@@ -2,7 +2,7 @@ Format: 1.0
 Source: tinydnssec
 Binary: tinydnssec
 Architecture: any
-Version: 1.05-1
+Version: 1.05-1.2
 Maintainer: Manvendra Bhangui <manvendra@indimail.org>
 Homepage: http://indimail.sourceforge.net
 Debtransform-Files-Tar: debian.tar.gz

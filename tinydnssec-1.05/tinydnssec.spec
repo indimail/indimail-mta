@@ -395,7 +395,7 @@ do
 done
 
 %changelog
-* Tue Apr 25 2017 19:04:31 +0530 mbhangui@gmail.com @version@-@release@
+* Thu May 18 2017 00:23:47 +0530 mbhangui@gmail.com @version@-@release@
 Release 1.1 Start 11/04/2017
 1.  Added dnsgetroot
 2.  added str_diffn()
