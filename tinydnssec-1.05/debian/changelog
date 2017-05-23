@@ -1,5 +1,24 @@
-tinydnssec (1.05-1) stable; urgency=low
+tinydnssec (1.05-1.2) stable; urgency=low
 
-  * First debian release of tinydnssec for indimail/indimail-mta
+  * Added dnsgetroot
+  * added str_diffn()
+  * added comments for dempsky's patch djbdns<=1.05 lets AXFRed subdomains overwrite domains
+  * fixed debian/prerm script
+  * added selinux rules for tinydns
+  * added Pre-Depends daemontools
+  * remove tinydns, dnscache service on uninstall
+  * shutdown tinydns, dnsccache service on uninstall
+  * added compile time option to add dnssec support
+  * tinydnssec - added SRV patch
+  * adds a native SRV type to tinydns-data
+  * makes axfr-get decompose SRV and PTR records and write them out in native format
+  * added curvedns
+  * fixed typo in debian/postrm.in
+  * (rpm, debian) - create tinydnssec, dqcache, curvedns service config
+  * added dqcache-conf, curvedns-conf programs
+  * added compile time option to add dnssec, curvedns support
+  * added djbdns.7 man page
+  * Changed dns accounts to Gtinydns, Gdnslog, Gdnscache
+  * added man page for random-ip, dnsgetroot
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 09 Apr 2017 11:13:05 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 18 May 2017 00:22:05 +0530
