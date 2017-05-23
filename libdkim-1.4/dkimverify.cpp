@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.12  2017-05-23 09:23:45+05:30  Cprogrammer
+ * use strtok_r instead of strtok() for thread safe operation
+ *
  * Revision 1.11  2016-03-01 16:24:00+05:30  Cprogrammer
  * reverse value of m_SubjectIsRequired
  *
@@ -737,6 +740,7 @@ CDKIMVerify::ParseDKIMSignature(const string & sHeader, SignatureInfo & sig)
 	string          sValue = sHeader.substr(sHeader.find(':') + 1);
 	static const char *tags[] = { "v", "a", "b", "d", "h", "s", "c", "i", "l", "q", "t", "x", "bh", NULL };
 	char           *values[sizeof (tags) / sizeof (tags[0])] = { NULL };
+	char           *saveptr;
 
 	if (!ParseTagValueList((char *) sValue.c_str(), tags, values))
 		return DKIM_BAD_SYNTAX;
@@ -870,13 +874,13 @@ CDKIMVerify::ParseDKIMSignature(const string & sHeader, SignatureInfo & sig)
 
 		// make sure "dns" is in the list
 		bool            HasDNS = false;
-		char           *s = strtok(values[9], ":");
+		char           *s = strtok_r(values[9], ":", &saveptr);
 		while (s != NULL) {
 			if (strncmp(s, "dns", 3) == 0 && (s[3] == '\0' || s[3] == '/')) {
 				HasDNS = true;
 				break;
 			}
-			s = strtok(NULL, ": \t");
+			s = strtok_r(NULL, ": \t", &saveptr);
 		}
 		if (!HasDNS)
 			return DKIM_BAD_SYNTAX;	// todo: maybe create a new error code for unknown query method
@@ -906,7 +910,7 @@ CDKIMVerify::ParseDKIMSignature(const string & sHeader, SignatureInfo & sig)
 	// parse the signed headers list
 	bool            HasFrom = false, HasSubject = false;
 	RemoveSWSP(values[4]);		// header names shouldn't have spaces in them so this should be ok...
-	char           *s = strtok(values[4], ":");
+	char           *s = strtok_r(values[4], ":", &saveptr);
 	while (s != NULL) {
 		if (_stricmp(s, "From") == 0)
 			HasFrom = true;
@@ -914,7 +918,7 @@ CDKIMVerify::ParseDKIMSignature(const string & sHeader, SignatureInfo & sig)
 		if (_stricmp(s, "Subject") == 0)
 			HasSubject = true;
 		sig.SignedHeaders.push_back(s);
-		s = strtok(NULL, ":");
+		s = strtok_r(NULL, ":", &saveptr);
 	}
 	if (!HasFrom)
 		return DKIM_BAD_SYNTAX;	// todo: maybe create a new error code for h= missing From
@@ -1002,6 +1006,8 @@ SelectorInfo::Parse(char *Buffer)
 {
 	static const char *tags[] = { "v", "g", "h", "k", "p", "s", "t", "n", NULL };
 	char           *values[sizeof (tags) / sizeof (tags[0])] = { NULL };
+	char           *saveptr;
+
 	if (!ParseTagValueList(Buffer, tags, values))
 		return DKIM_SELECTOR_INVALID;
 	if (values[0] != NULL) {
@@ -1035,7 +1041,7 @@ SelectorInfo::Parse(char *Buffer)
 #endif
 	} else {
 		// MUST include "sha1" or "sha256"
-		char           *s = strtok(values[2], ":");
+		char           *s = strtok_r(values[2], ":", &saveptr);
 		while (s != NULL) {
 			if (strcmp(s, "sha1") == 0)
 				AllowSHA1 = true;
@@ -1043,7 +1049,7 @@ SelectorInfo::Parse(char *Buffer)
 			else if (strcmp(s, "sha256") == 0)
 				AllowSHA256 = true;
 #endif
-			s = strtok(NULL, ":");
+			s = strtok_r(NULL, ":", &saveptr);
 		}
 #ifdef HAVE_EVP_SHA256
 		if (!(AllowSHA1 || AllowSHA256))
@@ -1062,20 +1068,20 @@ SelectorInfo::Parse(char *Buffer)
 	if (values[5] != NULL) {
 		// make sure "*" or "email" is in the list
 		bool            ServiceTypeMatch = false;
-		char           *s = strtok(values[5], ":");
+		char           *s = strtok_r(values[5], ":", &saveptr);
 		while (s != NULL) {
 			if (strcmp(s, "*") == 0 || strcmp(s, "email") == 0) {
 				ServiceTypeMatch = true;
 				break;
 			}
-			s = strtok(NULL, ":");
+			s = strtok_r(NULL, ":", &saveptr);
 		}
 		if (!ServiceTypeMatch)
 			return DKIM_SELECTOR_INVALID;
 	}
 	// flags
 	if (values[6] != NULL) {
-		char           *s = strtok(values[6], ":");
+		char           *s = strtok_r(values[6], ":", &saveptr);
 		while (s != NULL) {
 			if (strcmp(s, "y") == 0) {
 				Testing = true;
@@ -1083,7 +1089,7 @@ SelectorInfo::Parse(char *Buffer)
 			if (strcmp(s, "s") == 0) {
 				SameDomain = true;
 			}
-			s = strtok(NULL, ":");
+			s = strtok_r(NULL, ":", &saveptr);
 		}
 	}
 	// public key data
@@ -1194,7 +1200,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.11 2016-03-01 16:24:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.12 2017-05-23 09:23:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
