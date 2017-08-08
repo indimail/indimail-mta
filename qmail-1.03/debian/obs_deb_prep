@@ -3,7 +3,7 @@ set -e
 #
 # Unpacker for OpenSUSE build service
 #
-libdkim_version=1.4
+libdkim_version=1.5
 libsrs2_version=1.0.18
 for i in qmail-1.03 ucspi-tcp-0.88 libdkim-"$libdkim_version" libsrs2-"$libsrs2_version"
 do
