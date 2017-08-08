@@ -76,8 +76,15 @@ SignatureInfo::SignatureInfo(bool s)
 {
 	VerifiedBodyCount = 0;
 	UnverifiedBodyCount = 0;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	m_Hdr_ctx = EVP_MD_CTX_new();
+	EVP_MD_CTX_init(m_Hdr_ctx);
+	m_Bdy_ctx = EVP_MD_CTX_new();
+	EVP_MD_CTX_init(m_Bdy_ctx);
+#else
 	EVP_MD_CTX_init(&m_Hdr_ctx);
 	EVP_MD_CTX_init(&m_Bdy_ctx);
+#endif
 	m_pSelector = NULL;
 	Status = DKIM_SUCCESS;
 	m_nHash = 0;
@@ -87,8 +94,13 @@ SignatureInfo::SignatureInfo(bool s)
 
 SignatureInfo::~SignatureInfo()
 {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	EVP_MD_CTX_free(m_Hdr_ctx);
+	EVP_MD_CTX_free(m_Bdy_ctx);
+#else
 	EVP_MD_CTX_cleanup(&m_Hdr_ctx);
 	EVP_MD_CTX_cleanup(&m_Bdy_ctx);
+#endif
 }
 
 inline          bool
@@ -433,7 +445,11 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 				// check the body hash
 				unsigned char   md[EVP_MAX_MD_SIZE];
 				unsigned        len = 0;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+				int             res = EVP_DigestFinal(i->m_Bdy_ctx, md, &len);
+#else
 				int             res = EVP_DigestFinal(&i->m_Bdy_ctx, md, &len);
+#endif
 				if (!res || len != i->BodyHashData.length() || memcmp(i->BodyHashData.data(), md, len) != 0) {
 					// body hash mismatch
 					// if the selector is in testing mode...
@@ -469,8 +485,13 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 			}
 			i->Hash(sSignedSig.c_str(), sSignedSig.length());
 			assert(i->m_pSelector != NULL);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			int             res = EVP_VerifyFinal(i->m_Hdr_ctx, (unsigned char *) i->SignatureData.data(),
+							i->SignatureData.length(), i->m_pSelector->PublicKey);
+#else
 			int             res = EVP_VerifyFinal(&i->m_Hdr_ctx, (unsigned char *) i->SignatureData.data(),
 							i->SignatureData.length(), i->m_pSelector->PublicKey);
+#endif
 			if (res == 1) {
 				if (i->UnverifiedBodyCount == 0)
 					i->Status = DKIM_SUCCESS;
@@ -555,9 +576,17 @@ SignatureInfo::Hash(const char *szBuffer, unsigned nBufLength, bool IsBody)
 		}
 	}
 	if (IsBody && !BodyHashData.empty()) {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+		EVP_DigestUpdate(m_Bdy_ctx, szBuffer, nBufLength);
+#else
 		EVP_DigestUpdate(&m_Bdy_ctx, szBuffer, nBufLength);
+#endif
 	} else {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+		EVP_VerifyUpdate(m_Hdr_ctx, szBuffer, nBufLength);
+#else
 		EVP_VerifyUpdate(&m_Hdr_ctx, szBuffer, nBufLength);
+#endif
 	}
 	if (m_SaveCanonicalizedData) {
 		CanonicalizedData.append(szBuffer, nBufLength);
@@ -617,6 +646,20 @@ CDKIMVerify::ProcessHeaders(void)
 		if (sig.Status != DKIM_SUCCESS)
 			continue;
 		// initialize the hashes
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#ifdef HAVE_EVP_SHA256
+		if (sig.m_nHash == DKIM_HASH_SHA256) {
+			EVP_VerifyInit(sig.m_Hdr_ctx, EVP_sha256());
+			EVP_DigestInit(sig.m_Bdy_ctx, EVP_sha256());
+		} else {
+			EVP_VerifyInit(sig.m_Hdr_ctx, EVP_sha1());
+			EVP_DigestInit(sig.m_Bdy_ctx, EVP_sha1());
+		}
+#else
+		EVP_VerifyInit(sig.m_Hdr_ctx, EVP_sha1());
+		EVP_DigestInit(sig.m_Bdy_ctx, EVP_sha1());
+#endif
+#else
 #ifdef HAVE_EVP_SHA256
 		if (sig.m_nHash == DKIM_HASH_SHA256) {
 			EVP_VerifyInit(&sig.m_Hdr_ctx, EVP_sha256());
@@ -628,6 +671,7 @@ CDKIMVerify::ProcessHeaders(void)
 #else
 		EVP_VerifyInit(&sig.m_Hdr_ctx, EVP_sha1());
 		EVP_DigestInit(&sig.m_Bdy_ctx, EVP_sha1());
+#endif
 #endif
 		// compute the hash of the header
 		vector < list < string >::reverse_iterator > used;
@@ -1097,6 +1141,9 @@ SelectorInfo::Parse(char *Buffer)
 	if (PublicKeyLen == 0) {
 		return DKIM_SELECTOR_KEY_REVOKED;	// this error causes the signature to fail
 	} else {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+		int            rtype;
+#endif
 		unsigned char *PublicKeyData = (unsigned char *) values[4];
 #ifdef DARWIN
 		EVP_PKEY       *pkey = d2i_PUBKEY(NULL, (unsigned char **) &PublicKeyData, PublicKeyLen);
@@ -1106,9 +1153,14 @@ SelectorInfo::Parse(char *Buffer)
 		if (pkey == NULL)
 			return DKIM_SELECTOR_PUBLIC_KEY_INVALID;
 		// make sure public key is the correct type (we only support rsa)
-		if (pkey->type == EVP_PKEY_RSA || pkey->type == EVP_PKEY_RSA2) {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+		rtype = EVP_PKEY_base_id(pkey);
+		if (rtype == EVP_PKEY_RSA || rtype == EVP_PKEY_RSA2)
+#else
+		if (pkey->type == EVP_PKEY_RSA || pkey->type == EVP_PKEY_RSA2)
+#endif
 			PublicKey = pkey;
-		} else {
+		else {
 			EVP_PKEY_free(pkey);
 			return DKIM_SELECTOR_PUBLIC_KEY_INVALID;
 		}

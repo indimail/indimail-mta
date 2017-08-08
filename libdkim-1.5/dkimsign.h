@@ -55,11 +55,23 @@ protected:
 	bool            IsRequiredHeader(const string & sTag);
 	int             ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool bUseSha256);
 	int             AssembleReturnedSig(char *szPrivKey);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	EVP_MD_CTX     *m_Hdr_ietf_sha1ctx;	/* the header hash for ietf sha1  */
+	EVP_MD_CTX     *m_Bdy_ietf_sha1ctx;	/* the body hash for ietf sha1  */
+#ifdef HAVE_EVP_SHA256
+	EVP_MD_CTX     *m_Hdr_ietf_sha256ctx;	/* the header hash for ietf sha256 */
+	EVP_MD_CTX     *m_Bdy_ietf_sha256ctx;	/* the body hash for ietf sha256 */
+#endif
+	EVP_MD_CTX     *m_allman_sha1ctx;	/* the hash for allman sha1  */
+#else
 	EVP_MD_CTX      m_Hdr_ietf_sha1ctx;	/* the header hash for ietf sha1  */
-	EVP_MD_CTX      m_Hdr_ietf_sha256ctx;	/* the header hash for ietf sha256 */
 	EVP_MD_CTX      m_Bdy_ietf_sha1ctx;	/* the body hash for ietf sha1  */
+#ifdef HAVE_EVP_SHA256
+	EVP_MD_CTX      m_Hdr_ietf_sha256ctx;	/* the header hash for ietf sha256 */
 	EVP_MD_CTX      m_Bdy_ietf_sha256ctx;	/* the body hash for ietf sha256 */
+#endif
 	EVP_MD_CTX      m_allman_sha1ctx;	/* the hash for allman sha1  */
+#endif
 	int             m_Canon;	// canonization method
 	int             m_EmptyLineCount;
 	string          hParam;
