@@ -80,8 +80,13 @@ public:
 	time_t          ExpireTime;
 	unsigned        VerifiedBodyCount;
 	unsigned        UnverifiedBodyCount;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	EVP_MD_CTX     *m_Hdr_ctx;
+	EVP_MD_CTX     *m_Bdy_ctx;
+#else
 	EVP_MD_CTX      m_Hdr_ctx;
 	EVP_MD_CTX      m_Bdy_ctx;
+#endif
 	SelectorInfo   *m_pSelector;
 	int             Status;
 	int             m_nHash;	// use one of the DKIM_HASH_xxx constants here
