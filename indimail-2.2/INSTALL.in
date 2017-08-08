@@ -194,7 +194,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
 
     +-/home/local/src/indimail/.+
                                .
-                               . libdkim-1.4         (4.0  Mb)
+                               . libdkim-1.5         (4.0  Mb)
                                . indimail-@version@  (50   Mb)
                                . qmail-1.03          (21   Mb)
                                . ucspi-tcp-0.88      (4.0  Mb)
@@ -206,7 +206,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . ripmime-1.4.0.10    (2.1  Mb)
                                . mpack-1.6           (1.5  Mb)
                                . fortune-1.1         (8.4  Mb)
-                               . courier-imap-4.17.3 (75   Mb)
+                               . courier-imap-4.18.0 (75   Mb)
                                . bogofilter-1.2.4    (11.6 Mb)
                                . fetchmail-6.3.26   (10.5 Mb)
                                . iwebadmin-1.3      (3.0  Mb)
@@ -327,9 +327,9 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL-@version@
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/libdkim-1.4.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/libdkim-1.5.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libsrs2-1.0.18.tar.gz
-    % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.3.tar.bz2
+    % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.0.tar.bz2
     % wget http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
     % wget http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
     % wget http://downloads.sourceforge.net/indimail/ripmime-1.4.0.10.tar.gz
@@ -369,14 +369,14 @@ the installation.
 
     http://forge.mysql.com/wiki/Autotools_to_CMake_Transition_Guide
 
-    ##### STEP 2  ##### Install libdkim-1.4 ###################
-    Install libdkim-1.4 (libdkim-1.4.tar.bz2) MD5 2b7c97c125e768263951ea12694692a9
+    ##### STEP 2  ##### Install libdkim-1.5 ###################
+    Install libdkim-1.5 (libdkim-1.5.tar.bz2) MD5 d01e124933442db7353f76404aad1df0
     current working directory /home/local/src
     Download the libdkim package. The latest tested libdkim package is
-    libdkim-1.4.tar.bz2
+    libdkim-1.5.tar.bz2
 
-    % gunzip -c libdkim-1.4.tar.gz | tar xf -
-    % cd libdkim-1.4
+    % gunzip -c libdkim-1.5.tar.gz | tar xf -
+    % cd libdkim-1.5
     % ./configure --prefix=@prefix@ --mandir=@mandir@ \
         --libdir=@libdir@ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
     % make -s [DESTDIR=staging_directory]
@@ -539,16 +539,16 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 6  ##### Courier IMAP/POP3 #####################
-    Install courier-imap (courier-imap-4.17.3.tar.bz2) MD5 2f8adc7029116215643f0a498bba47a0
+    Install courier-imap (courier-imap-4.18.0.tar.bz2) MD5 ef11dc0ebe9ee27d24f4e892da1296d8
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
-    courier-imap-4.17.3.tar.bz2. The patch brings up the version upto courier-imap to be
+    courier-imap-4.18.0.tar.bz2. The patch brings up the version upto courier-imap to be
     compatible with IndiMail.
 
-    % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.3.tar.bz2
-    % bzip2 -d -c courier-imap-4.17.3.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/courier-imap-4.17.3.patch.gz | patch -p0
-    % cd courier-imap-4.17.3
+    % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.0.tar.bz2
+    % bzip2 -d -c courier-imap-4.18.0.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/courier-imap-4.18.0.patch.gz | patch -p0
+    % cd courier-imap-4.18.0
 
    x-------------------------------- Mac OS X ONLY -----------------------------------------x
    |% bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -                                     |
