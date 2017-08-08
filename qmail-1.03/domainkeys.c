@@ -1,5 +1,8 @@
 /*
  * $Log: domainkeys.c,v $
+ * Revision 1.18  2017-08-08 23:56:03+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
  * Revision 1.17  2014-03-24 12:29:35+05:30  Cprogrammer
  * fixed dkparse822()
  *
@@ -88,6 +91,7 @@
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define memcpy(x,y,z)      byte_copy((x), (z), (y))
+EVP_MD_CTX     *evptr;				/*- the hash */
 
 /* STARTHEAD */
 /*
@@ -190,7 +194,11 @@ typedef struct
 {
 /* STARTPRIV */
 	int             dkmarker;			/*- in case somebody casts in */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	EVP_MD_CTX      mdctx;				/*- the hash */
+#else
+	EVP_MD_CTX     *mdctx;				/*- the hash */
+#endif
 	int             signing;			/*- our current signing/verifying state */
 	int             in_headers;			/*- true if we're still processing headers */
 	char           *header;				/*- points to a malloc'ed block for header.  */
@@ -560,7 +568,20 @@ dk_sign(DK_LIB *dklib, DK_STAT *statp, int canon)
 		return NULL;
 	}
 	dk->canon = canon;			/*- TC13-simple, TC13-nofws */
-	EVP_SignInit(&dk->mdctx, dklib->md);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	if (!(dk->mdctx = EVP_MD_CTX_new())) {
+		DK_MFREE(dk);
+		if (statp)
+			*statp = DKERR(DK_STAT_NORESOURCE);
+		return NULL;
+	}
+#endif
+	EVP_SignInit(dk->mdctx, dklib->md);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	evptr = dk->mdctx;
+#else
+	evptr = &dk->mdctx;
+#endif
 	if (statp)
 		*statp = DKERR(DK_STAT_OK);
 	return dk;
@@ -592,7 +613,7 @@ dk_verify(DK_LIB *dklib, DK_STAT *statp)
 			*statp = DKERR(DK_STAT_NORESOURCE);
 		return NULL;
 	}
-	EVP_VerifyInit(&dk->mdctx, dklib->md);
+	EVP_VerifyInit(evptr, dklib->md);
 	if (statp)
 		*statp = DKERR(DK_STAT_OK);
 	return dk;
@@ -913,14 +934,14 @@ dkhash(DK *dk, const unsigned char *ptr)
 		while (dk->state >= 2)
 		{
 #ifndef DK_HASH_BUFF
-			EVP_DigestUpdate(&dk->mdctx, "\r\n", 2);
+			EVP_DigestUpdate(evptr, "\r\n", 2);
 #else
 			/* buffer hack */
 			dk->hash_buff[dk->hash_buff_len++] = '\r';
 			dk->hash_buff[dk->hash_buff_len++] = '\n';
 			if (dk->hash_buff_len >= (DK_BLOCK - 1))
 			{
-				EVP_DigestUpdate(&dk->mdctx, dk->hash_buff, dk->hash_buff_len);
+				EVP_DigestUpdate(evptr, dk->hash_buff, dk->hash_buff_len);
 				dk->hash_buff_len = 0;
 			}
 		/* buffer hack */
@@ -940,13 +961,13 @@ dkhash(DK *dk, const unsigned char *ptr)
 			if (dk->canon == DK_CANON_SIMPLE)	//if nofws we ignore \r
 			{
 #ifndef DK_HASH_BUFF
-				EVP_DigestUpdate(&dk->mdctx, "\r", 1);
+				EVP_DigestUpdate(evptr, "\r", 1);
 #else
 				/* buffer hack */
 				dk->hash_buff[dk->hash_buff_len++] = '\r';
 				if (dk->hash_buff_len >= (DK_BLOCK - 1))
 				{
-					EVP_DigestUpdate(&dk->mdctx, dk->hash_buff, dk->hash_buff_len);
+					EVP_DigestUpdate(evptr, dk->hash_buff, dk->hash_buff_len);
 					dk->hash_buff_len = 0;
 				}
 				/* buffer hack */
@@ -960,13 +981,13 @@ dkhash(DK *dk, const unsigned char *ptr)
 			dk->state--;
 		}
 #ifndef DK_HASH_BUFF
-		EVP_DigestUpdate(&dk->mdctx, ptr, 1);
+		EVP_DigestUpdate(evptr, ptr, 1);
 #else
     	/* buffer hack */
 		dk->hash_buff[dk->hash_buff_len++] = *ptr;
 		if (dk->hash_buff_len >= (DK_BLOCK - 1))
 		{
-			EVP_DigestUpdate(&dk->mdctx, dk->hash_buff, dk->hash_buff_len);
+			EVP_DigestUpdate(evptr, dk->hash_buff, dk->hash_buff_len);
 			dk->hash_buff_len = 0;
 		}
 		/* buffer hack */
@@ -1632,10 +1653,10 @@ dk_end(DK *dk, DK_FLAGS *dkf)
 		//clean out hash buffer
 		dk->hash_buff[dk->hash_buff_len++] = '\r';
 		dk->hash_buff[dk->hash_buff_len++] = '\n';
-		EVP_DigestUpdate(&dk->mdctx, dk->hash_buff, dk->hash_buff_len);
+		EVP_DigestUpdate(evptr, dk->hash_buff, dk->hash_buff_len);
 		dk->hash_buff_len = 0;
 #else
-		EVP_DigestUpdate(&dk->mdctx, "\r\n", 2);
+		EVP_DigestUpdate(evptr, "\r\n", 2);
 		/*
 		if (dk->trace)
 			dkt_add(dk->trace, DKT_CANON_BODY, "\r\n", 2);
@@ -1803,7 +1824,7 @@ dk_end(DK *dk, DK_FLAGS *dkf)
 			/*
 			 * using that key, verify that the digest is properly signed 
 			 */
-			if ((i = EVP_VerifyFinal(&dk->mdctx, md_value, md_len, publickey)) > 0)
+			if ((i = EVP_VerifyFinal(evptr, md_value, md_len, publickey)) > 0)
 				st = DK_STAT_OK;
 			else
 				st = DK_STAT_BADSIG;
@@ -1891,7 +1912,7 @@ dk_getsig(DK *dk, void *privatekey, unsigned char buf[], size_t len)
 					return DKERR(DK_STAT_BADKEY);
 				siglen = EVP_PKEY_size(pkey);
 				sig = (unsigned char *) OPENSSL_malloc(siglen);
-				EVP_SignFinal(&dk->mdctx, sig, &siglen, pkey);
+				EVP_SignFinal(evptr, sig, &siglen, pkey);
 				EVP_PKEY_free(pkey);
 				if (!(bio = BIO_new(BIO_s_mem())))
 					return DKERR(DK_STAT_NORESOURCE);
@@ -1968,12 +1989,18 @@ dk_free(DK *dk, int doClearErrState)
 #ifdef DK_HASH_BUFF
 	DK_MFREE(dk->hash_buff);
 #endif
-	EVP_MD_CTX_cleanup(&dk->mdctx);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	EVP_MD_CTX_free(evptr);
+#else
+	EVP_MD_CTX_cleanup(evptr);
+#endif
 	DK_MFREE(dk->header);		/*- alloc'ing dk->header is not optional.  */
 	dk->dkmarker = ~DKMARK;
 	DK_MFREE(dk);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	if (doClearErrState)
 		ERR_remove_state(0);
+#endif
 	return DK_STAT_OK;
 }
 
@@ -2080,7 +2107,7 @@ strncasestr(const char *s, const char *find, size_t slen)
 void
 getversion_domainkeys_c()
 {
-	static char    *x = "$Id: domainkeys.c,v 1.17 2014-03-24 12:29:35+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: domainkeys.c,v 1.18 2017-08-08 23:56:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
