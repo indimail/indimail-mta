@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Tue May 16 12:47:11 IST 2017
+DATE: Wed Jul 26 16:05:08 IST 2017
 
 This is Release 2.2 of IndiMail. The release has both source.tar.gz, RPMs and debs.
 
@@ -92,3 +92,5 @@ Release 2.2 Start 08/05/2017
     domain:x.x.x.x::penalty:max_tolerance username password
 14. refactored dns_text() function in libdkim, surblfilter.c, dns_text.c,
 	dns.c
+15. dkimverify.cpp - replace strtok() with strtok_r() for thread safe
+    operation.
