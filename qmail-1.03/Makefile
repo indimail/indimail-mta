@@ -1,6 +1,6 @@
 # Don't edit Makefile! Use conf-* for configuration.
 COFLAGS=-z+05:30
-DKIM_VERSION=1.4
+DKIM_VERSION=1.5
 SRS_VERSION=1.0.18
 QMAILDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
 SYSTEM := $(shell uname -s)
@@ -1257,14 +1257,14 @@ compile taia_tai.c taia.h tai.h uint64.h
 	./compile taia_tai.c
 
 auto_cleaner.c: auto-str conf-qmail
-	./auto-str auto_runcleaner "`head -1 conf-qmail`"/bin/run-cleanq >> \
+	./auto-str auto_runcleaner "`head -1 conf-prefix`"/sbin/run-cleanq >> \
 	auto_cleaner.c.tmp && mv auto_cleaner.c.tmp auto_cleaner.c
 
 auto_cleaner.o: compile auto_cleaner.c
 	./compile auto_cleaner.c
 
 auto_qstdin.c: auto-strarr conf-qmail
-	./auto-strarr auto_qstdin "`head -1 conf-qmail`"/bin/qscanq-stdin > \
+	./auto-strarr auto_qstdin "`head -1 conf-prefix`"/sbin/qscanq-stdin > \
 	auto_qstdin.c.tmp && mv auto_qstdin.c.tmp auto_qstdin.c
 
 auto_qstdin.o: compile auto_qstdin.c
