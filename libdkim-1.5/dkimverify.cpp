@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.13  2017-08-08 23:50:41+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
  * Revision 1.12  2017-05-23 09:23:45+05:30  Cprogrammer
  * use strtok_r instead of strtok() for thread safe operation
  *
@@ -1252,7 +1255,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.12 2017-05-23 09:23:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.13 2017-08-08 23:50:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
