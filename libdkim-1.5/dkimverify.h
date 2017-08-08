@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.5  2017-08-08 23:50:47+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
  * Revision 1.4  2015-12-15 16:03:09+05:30  Cprogrammer
  * use time_t for ExpireTime
  *

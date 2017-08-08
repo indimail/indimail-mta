@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.9  2017-08-08 23:50:19+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
  * Revision 1.8  2013-07-16 20:18:03+05:30  Cprogrammer
  * replace '%' with domain name in selector
  *
@@ -996,7 +999,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.8 2013-07-16 20:18:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.9 2017-08-08 23:50:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

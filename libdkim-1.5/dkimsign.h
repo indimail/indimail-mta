@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.2  2017-08-08 23:50:33+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
  * Revision 1.1  2009-04-16 10:34:02+05:30  Cprogrammer
  * Initial revision
  *
