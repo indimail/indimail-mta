@@ -1,5 +1,5 @@
 File INSTALL.indimail, Version 2.2
-DATE: Tue May 16 12:47:11 IST 2017
+DATE: Wed Jul 26 16:05:08 IST 2017
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -194,7 +194,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
 
     +-/home/local/src/indimail/.+
                                .
-                               . libdkim-1.4         (4.0  Mb)
+                               . libdkim-1.5         (4.0  Mb)
                                . indimail-2.2  (50   Mb)
                                . qmail-1.03          (21   Mb)
                                . ucspi-tcp-0.88      (4.0  Mb)
@@ -327,7 +327,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL-2.2
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-2.2.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/libdkim-1.4.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/libdkim-1.5.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libsrs2-1.0.18.tar.gz
     % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.3.tar.bz2
     % wget http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
@@ -369,14 +369,14 @@ the installation.
 
     http://forge.mysql.com/wiki/Autotools_to_CMake_Transition_Guide
 
-    ##### STEP 2  ##### Install libdkim-1.4 ###################
-    Install libdkim-1.4 (libdkim-1.4.tar.bz2) MD5 f3309445273a52c0589a6aeed497e3ea
+    ##### STEP 2  ##### Install libdkim-1.5 ###################
+    Install libdkim-1.5 (libdkim-1.5.tar.bz2) MD5 d01e124933442db7353f76404aad1df0
     current working directory /home/local/src
     Download the libdkim package. The latest tested libdkim package is
-    libdkim-1.4.tar.bz2
+    libdkim-1.5.tar.bz2
 
-    % gunzip -c libdkim-1.4.tar.gz | tar xf -
-    % cd libdkim-1.4
+    % gunzip -c libdkim-1.5.tar.gz | tar xf -
+    % cd libdkim-1.5
     % ./configure --prefix=/usr --mandir=/usr/share/man \
         --libdir=/usr/lib64 # /usr/lib or /usr/lib64 on a 32/debian/64bit system
     % make -s [DESTDIR=staging_directory]
