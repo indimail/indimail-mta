@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.417 2017-08-08 23:57:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.418 2017-08-09 00:03:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2015,8 +2015,8 @@ fi
 %endif
 
 %if %nocourierimap == 0
-%{_libdir}/libunicode.so.1
-%{_libdir}/libunicode.so.1.1.0
+%{_libdir}/libunicode.so.4
+%{_libdir}/libunicode.so.4.0.0
 %endif
 
 %{_libdir}/libeps-%{eps_version}.so.0
@@ -2140,8 +2140,8 @@ fi
 %endif
 
 %if %nocourierimap == 0
-%{_libdir}/libunicode.so.1
-%{_libdir}/libunicode.so.1.1.0
+%{_libdir}/libunicode.so.4
+%{_libdir}/libunicode.so.4.0.0
 %endif
 
 %{_libdir}/libeps-%{eps_version}.so.0
