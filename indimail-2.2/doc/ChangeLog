@@ -31,6 +31,9 @@ Release 2.2 Start 08/05/2017
 23/05/2017
 15. dkimverify.cpp - replace strtok() with strtok_r() for thread safe
     operation.
+08/08/2017
+16. Port for openssl 1.1.0
+17. Upgraded courier-imap to 4.18.0 for openssl 1.1.0
 
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
