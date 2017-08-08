@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.108  2017-08-08 23:56:27+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
  * Revision 1.107  2017-05-15 23:21:07+05:30  Cprogrammer
  * fix for SMTPROUTE of the form domain:x.x.x.x::penalty:max_tolerance username password
  *
@@ -389,6 +392,7 @@
 #include "tls.h"
 #include "ssl_timeoutio.h"
 #include <openssl/x509v3.h>
+#include <openssl/x509.h>
 #include "auth_cram.h"
 #include "auth_digest_md5.h"
 #include "hastlsv1_1_client.h"
@@ -1295,6 +1299,10 @@ blast()
 
 char           *partner_fqdn = 0;
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#define SSL_ST_BEFORE 0x4000
+#define SSL_ST_OK 0x03
+#endif
 void
 tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 {
@@ -1322,9 +1330,15 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 	}
 
 	/*- shouldn't talk to the client unless in an appropriate state */
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	state = ssl ? SSL_get_state(ssl) : SSL_ST_BEFORE;
+	if ((state & SSL_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
+		substdio_putsflush(&smtpto, "QUIT\r\n");
+#else
 	state = ssl ? ssl->state : SSL_ST_BEFORE;
 	if ((state & SSL_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
 		substdio_putsflush(&smtpto, "QUIT\r\n");
+#endif
 	out(ssl ? "; connected to " : "; connecting to ");
 	outhost();
 	out(".\n");
@@ -1404,12 +1418,15 @@ tls_init()
 	SSL            *myssl;
 	SSL_CTX        *ctx;
 	stralloc        saciphers = {0}, tlsFilename = {0}, clientcert = {0};
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	stralloc        ssl_option = {0};
 	int             method = 4; /* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
+#endif
 	int             method_fail = 1;
 
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	if (!stralloc_copys(&tlsFilename, controldir))
 		temp_nomem();
 	if (!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16))
@@ -1432,6 +1449,7 @@ tls_init()
 	else
 	if (str_equal(ssl_option.s, "TLSv1_2"))
 		method = 6;
+#endif
 	if (!certdir && !(certdir = env_get("CERTDIR")))
 		certdir = auto_control;
 	if (!stralloc_copys(&tlsFilename, certdir))
@@ -1513,6 +1531,7 @@ tls_init()
 		}
 	}
 	SSL_library_init();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	if (method == 2 && (ctx = SSL_CTX_new(SSLv23_client_method())))
 		method_fail = 0;
 	else
@@ -1529,6 +1548,10 @@ tls_init()
 #ifdef TLSV1_2_CLIENT_METHOD
 	else
 	if (method == 6 && (ctx=SSL_CTX_new(TLSv1_2_client_method())))
+		method_fail = 0;
+#endif
+#else
+	if ((ctx = SSL_CTX_new(SSLv23_client_method())))
 		method_fail = 0;
 #endif
 	if (method_fail)
@@ -1714,7 +1737,13 @@ tls_init()
 			i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
 			if (i >= 0)
 			{
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+				X509_NAME_ENTRY *t;
+				t = X509_NAME_get_entry(subj, i);
+				ASN1_STRING *s = X509_NAME_ENTRY_get_data(t);
+#else
 				const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
+#endif
 				if (s)
 				{
 					peer.len = s->length;
@@ -3279,7 +3308,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.107 2017-05-15 23:21:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.108 2017-08-08 23:56:27+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;

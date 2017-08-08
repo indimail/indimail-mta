@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.197  2017-08-08 23:56:33+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
  * Revision 1.196  2017-05-15 19:21:50+05:30  Cprogrammer
  * fixed spurious error "no valid cert for gateway
  *
@@ -754,7 +757,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.196 $";
+char           *revision = "$Revision: 1.197 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6136,6 +6139,10 @@ RSA            *
 tmp_rsa_cb(SSL *ssl, int export, int keylen)
 {
 	stralloc        filename = {0};
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	BIGNUM         *e;
+	RSA            *key;
+#endif
 
 	if (!export)
 		keylen = 512;
@@ -6166,13 +6173,25 @@ tmp_rsa_cb(SSL *ssl, int export, int keylen)
 		}
 		alloc_free(filename.s);
 	}
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	e = BN_new();
+	BN_set_word(e, 65537);
+	key = RSA_new();
+	RSA_generate_key_ex(key, keylen, e, NULL);
+	BN_free(e);
+	return (key);
+#else
 	return RSA_generate_key(keylen, RSA_F4, NULL, NULL);
+#endif
 }
 
 DH             *
 tmp_dh_cb(SSL *ssl, int export, int keylen)
 {
 	stralloc        filename = {0};
+#if OPENSSL_VERSION_NUMBER >= 0x00907000L
+	DH             *client_key;
+#endif
 
 	if (!export)
 		keylen = 1024;
@@ -6222,7 +6241,13 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
 		}
 	}
 	alloc_free(filename.s);
+#if OPENSSL_VERSION_NUMBER >= 0x00907000L
+	client_key = DH_new();
+	DH_generate_parameters_ex(client_key, keylen, DH_GENERATOR_2, NULL);
+	return (client_key);
+#else
 	return DH_generate_parameters(keylen, DH_GENERATOR_2, NULL, NULL);
+#endif
 }
 
 /*
@@ -6349,7 +6374,13 @@ tls_verify()
 		subj = X509_get_subject_name(peercert);
 		if ((n = X509_NAME_get_index_by_NID(subj, NID_pkcs9_emailAddress, -1)) >= 0)
 		{
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			X509_NAME_ENTRY *t;
+			t = X509_NAME_get_entry(subj, n);
+			ASN1_STRING *s = X509_NAME_ENTRY_get_data(t);
+#else
 			const ASN1_STRING *s = X509_NAME_get_entry(subj, n)->value;
+#endif
 			if (s)
 			{
 				email.len = s->length;
@@ -6389,15 +6420,18 @@ void
 tls_init()
 {
 	const char     *ciphers;
-	int             method = 4; /* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
 	SSL            *myssl;
 	SSL_CTX        *ctx;
 	X509_STORE     *store;
 	X509_LOOKUP    *lookup;
 	stralloc        saciphers = { 0 };
 	stralloc        filename = {0};
+#if OPENSSL_VERSION_NUMBER < 0x00907000L
 	stralloc        ssl_option = {0};
+	int             method = 4; /* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
+#endif
 
+#if OPENSSL_VERSION_NUMBER < 0x00907000L
 	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1") != 1)
 		die_control();
 	if (str_equal( ssl_option.s, "SSLv23"))
@@ -6414,10 +6448,12 @@ tls_init()
 	else
 	if (str_equal( ssl_option.s, "TLSv1_2"))
 		method = 6;
+#endif
 	SSL_library_init();
 	/*
 	 * a new SSL context with the bare minimum of options 
 	 */
+#if OPENSSL_VERSION_NUMBER < 0x00907000L
 	if (method == 2 && !(ctx = SSL_CTX_new(SSLv23_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize SSLv23 ctx (#4.3.0)\r\n");
 		return;
@@ -6450,6 +6486,12 @@ tls_init()
 	if (method == 6) {
 		tls_err("454 TLS not available: unable to initialize TLSv1_2 ctx (#4.3.0)\r\n");
    		return;
+	}
+#endif
+#else
+	if (!(ctx = SSL_CTX_new(SSLv23_server_method()))) {
+		tls_err("454 TLS not available: unable to initialize SSLv23 ctx (#4.3.0)\r\n");
+		return;
 	}
 #endif
 	if (!certdir)
@@ -6916,7 +6958,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.196 2017-05-15 19:21:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.197 2017-08-08 23:56:33+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

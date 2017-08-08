@@ -7,6 +7,9 @@
  * Saju Pillai (saju.pillai@gmail.com)
  *
  * $Log: qaes.c,v $
+ * Revision 1.5  2017-08-08 23:56:21+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
  * Revision 1.4  2016-01-02 17:45:51+05:30  Cprogrammer
  * fixed usage and reformatted error strings
  *
@@ -103,7 +106,7 @@ int reversDigits(int num)
  * Fills in the encryption and decryption ctx objects and returns 0 on success
  */
 int
-aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX * e_ctx, EVP_CIPHER_CTX * d_ctx)
+aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx, EVP_CIPHER_CTX *d_ctx)
 {
 	int             i, nrounds = 5;
 	unsigned char   key[32], iv[32];
@@ -133,7 +136,7 @@ aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIP
  * All data going in & out is considered binary (unsigned char[])
  */
 unsigned char  *
-aes_encrypt(EVP_CIPHER_CTX * e, unsigned char *plaintext, int *len)
+aes_encrypt(EVP_CIPHER_CTX *e, unsigned char *plaintext, int *len)
 {
 	/*
 	 * max ciphertext len for a n bytes of plaintext
@@ -165,7 +168,7 @@ aes_encrypt(EVP_CIPHER_CTX * e, unsigned char *plaintext, int *len)
  * Decrypt *len bytes of ciphertext
  */
 unsigned char  *
-aes_decrypt(EVP_CIPHER_CTX * e, unsigned char *ciphertext, int *len)
+aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *len)
 {
 /*
  * because we have padding ON, we must allocate an extra cipher block size of memory 
@@ -193,7 +196,11 @@ main(int argc, char **argv)
 	 * "opaque" encryption, decryption ctx structures that libcrypto uses to record
 	 * status of enc/dec operations 
 	 */
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	EVP_CIPHER_CTX  *en, *de;
+#else
 	EVP_CIPHER_CTX  en, de;
+#endif
 
 	while ((opt = getopt(argc, argv, "k:s:ide")) != opteof) {
 		switch (opt) {
@@ -231,7 +238,19 @@ main(int argc, char **argv)
 	/*
 	 * gen key and iv. init the cipher ctx object 
 	 */
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	if (!(en = EVP_CIPHER_CTX_new())) {
+		logerrf("Couldn't initialize AES cipher\n");
+		return -1;
+	}
+	if (!(de = EVP_CIPHER_CTX_new())) {
+		logerrf("Couldn't initialize AES cipher\n");
+		return -1;
+	}
+	if (aes_init(key_data, key_data_len, (unsigned char *) &salt, en, de)) {
+#else
 	if (aes_init(key_data, key_data_len, (unsigned char *) &salt, &en, &de)) {
+#endif
 		logerrf("Couldn't initialize AES cipher\n");
 		return -1;
 	}
@@ -247,7 +266,11 @@ main(int argc, char **argv)
 			user.len--; /*- remove new line */
 		if (encode) {
 			len = user.len;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			ciphertext = aes_encrypt(en, (unsigned char *) user.s, &len);
+#else
 			ciphertext = aes_encrypt(&en, (unsigned char *) user.s, &len);
+#endif
 			if (len) {
 				if (!stralloc_copyb(&temp, (char *) ciphertext, len))
 					my_error("qaes: out of memory", 0, MEM_ERR);
@@ -270,7 +293,11 @@ main(int argc, char **argv)
 				len = 0;
 			} else {
 				len = userout.len;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+				plaintext = (char *) aes_decrypt(de, (unsigned char *) userout.s, &len);
+#else
 				plaintext = (char *) aes_decrypt(&de, (unsigned char *) userout.s, &len);
+#endif
 			}
 			if (len) {
 				if (substdio_bput(&ssout, plaintext, len) == -1)
@@ -292,8 +319,13 @@ main(int argc, char **argv)
 				my_error("qaes: write", 0, WRITE_ERR);
 		}
 	}
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	EVP_CIPHER_CTX_cleanup(en);
+	EVP_CIPHER_CTX_cleanup(de);
+#else
 	EVP_CIPHER_CTX_cleanup(&en);
 	EVP_CIPHER_CTX_cleanup(&de);
+#endif
 	if (substdio_flush(&ssout) == -1) {
 		my_error("qaes: write", 0, WRITE_ERR);
 	}
@@ -303,7 +335,7 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	static char    *x = "$Id: qaes.c,v 1.4 2016-01-02 17:45:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qaes.c,v 1.5 2017-08-08 23:56:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
