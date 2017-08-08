@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: unicode::linebreak
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/22/2015
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/11/2017
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "UNICODE::LINEBREAK" "3" "06/22/2015" "Courier Unicode Library" "Courier Unicode Library"
+.TH "UNICODE::LINEBREAK" "3" "03/11/2017" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -46,8 +46,8 @@ public:
     }
 };
 
-unicode_char c;
-std::vector<unicode_char> buf;
+char32_t c;
+std::u32string buf;
 
 linebreak compute_linebreak;
 
@@ -71,7 +71,7 @@ public:
 
     using unicode::linebreak_callback_base::operator<<;
     using unicode::linebreak_callback_base::operator();
-    int callback(int linebreak_code, unicode_char ch)
+    int callback(int linebreak_code, char32_t ch)
     {
         // \&.\&.\&.
     }
@@ -79,9 +79,9 @@ public:
 
 // \&.\&.\&.
 
-std::vector<unicode_char> buf;
+std::u32string buf;
 
-typedef unicode::linebreak_iter<std::vector<unicode_char>::const_iterator> iter_t;
+typedef unicode::linebreak_iter<std::u32string::const_iterator> iter_t;
 
 iter_t beg_iter(buf\&.begin(), buf\&.end()), end_iter;
 
@@ -93,13 +93,13 @@ std::copy(beg_iter, end_iter, std::back_insert_iterator<std::vector<int>>(linebr
 
 // \&.\&.\&.
 
-typedef unicode::linebreakc_iter<std::vector<unicode_char>::const_iterator> iter_t;
+typedef unicode::linebreakc_iter<std::u32string::const_iterator> iter_t;
 
 iter_t beg_iter(buf\&.begin(), buf\&.end()), end_iter;
 
 beg_iter\&.set_opts(UNICODE_LB_OPT_SYBREAK);
 
-std::vector<std::pair<int, unicode_char>> linebreaks;
+std::vector<std::pair<int, char32_t>> linebreaks;
 
 std::copy(beg_iter, end_iter, std::back_insert_iterator<std::vector<int>>(linebreaks));
 .fi
@@ -151,11 +151,11 @@ template implements an input iterator over
 ints\&. The template parameter is an input iterator over
 unicode
 chars\&. The constructor\*(Aqs parameters are a beginning and an ending iterator value for a sequence of
-unicode_char\&. This constructs the beginning iterator value for a sequence of
+char32_t\&. This constructs the beginning iterator value for a sequence of
 ints consisting of line\-break values (UNICODE_LB_MANDATORY,
 UNICODE_LB_NONE, or
 UNICODE_LB_ALLOWED) corresponding to each
-unicode_char
+char32_t
 in the underlying sequence\&. The default constructor creates the ending iterator value for the sequence\&.
 .PP
 The iterator implements a
@@ -166,7 +166,7 @@ linebreakc_iter
 template implements a similar input iterator, with the difference that it ends up iterating over a
 std::pair
 of line\-breaking values and the corresponding
-unicode_char
+char32_t
 from the underlying input sequence\&.
 .SH "SEE ALSO"
 .PP

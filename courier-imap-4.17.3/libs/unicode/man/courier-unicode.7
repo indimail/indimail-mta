@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: courier-unicode
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/22/2015
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/11/2017
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "COURIER\-UNICODE" "7" "06/22/2015" "Courier Unicode Library" "Courier Unicode Library"
+.TH "COURIER\-UNICODE" "7" "03/11/2017" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -46,12 +46,16 @@ courier\-unicode\&.h
 defines a special character string
 unicode_x_imap_modutf7
 that specifies the pseudo\-character set for the modified\-UTF7 encoding used in IMAP\&. This string can also be appended by a space, and up to fifteen additional US\-ASCII characters\&. The resulting character set also encodes these additional characters, in addition to unicode characters, with modified\-UTF7\&.
+.PP
+The C++ compiler must have C++11 support\&. Minimum usable version of gcc appears to be gcc 4\&.4 with the
+\-std=c++0x
+flag\&. Current versions of gcc use C++11, or higher, by default and do not require extra flags\&. Consult the packaging documentation for the Courier Unicode Library for information on any compiler flags that are needed to build software that links with this library\&.
 .SH "SEE ALSO"
 .PP
 \fBunicode_convert\fR(3),
 \fBunicode_default_chset\fR(3),
 \fBunicode_html40ent_lookup\fR(3),
-\fBunicode_isspace\fR(3),
+\fBunicode_category_lookup\fR(3),
 \fBunicode_grapheme_break\fR(3),
 \fBunicode_line_break\fR(3),
 \fBunicode_script\fR(3),
@@ -61,6 +65,7 @@ that specifies the pseudo\-character set for the modified\-UTF7 encoding used in
 \fBunicode::iconvert::convert_tocase\fR(3),
 \fBunicode::iconvert::fromu\fR(3),
 \fBunicode::iconvert::tou\fR(3),
+\fBunicode::tolower\fR(3),
 \fBunicode::linebreak\fR(3),
 \fBunicode::wordbreak\fR(3)\&.
 .SH "AUTHOR"

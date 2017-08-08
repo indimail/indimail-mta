@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>couriertcpd</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"/><link rel="home" href="#idm255230255712" title="couriertcpd"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>couriertcpd</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"/><link rel="home" href="#idm139887151144992" title="couriertcpd"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry"><a id="idm255230255712" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>couriertcpd — the <span class="application">Courier</span> mail server
-TCP server daemon</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  [-pid=<em class="replaceable"><code>pidfile</code></em>] [<em class="replaceable"><code>option</code></em>...] {<em class="replaceable"><code>list</code></em>} {<em class="replaceable"><code>program</code></em>} {<em class="replaceable"><code>arg</code></em>...}</p></div><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  {-pid=<em class="replaceable"><code>pidfile</code></em>} {-stop}</p></div><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  {-pid=<em class="replaceable"><code>pidfile</code></em>} {-restart}</p></div></div><div class="refsect1"><a id="idm255229424832" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+--></head><body><div class="refentry"><a id="idm139887151144992" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>couriertcpd — the <span class="application">Courier</span> mail server
+TCP server daemon</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  [-pid=<em class="replaceable"><code>pidfile</code></em>] [<em class="replaceable"><code>option</code></em>...] {<em class="replaceable"><code>list</code></em>} {<em class="replaceable"><code>program</code></em>} {<em class="replaceable"><code>arg</code></em>...}</p></div><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  {-pid=<em class="replaceable"><code>pidfile</code></em>} {-stop}</p></div><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  {-pid=<em class="replaceable"><code>pidfile</code></em>} {-restart}</p></div></div><div class="refsect1"><a id="idm139887155541776" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 <span class="command"><strong>couriertcpd</strong></span> accepts incoming network connections, and runs
 <span class="command"><strong>program</strong></span> after establishing each network connection. The
 <span class="command"><strong>program</strong></span>'s standard input and output are set to the network
@@ -23,7 +23,7 @@ environment inherited by <span class="command"><strong>program</strong></span> w
 inherited by <span class="command"><strong>couriertcpd</strong></span>, plus any additional environment
 variables initialized by <span class="command"><strong>couriertcpd</strong></span>. It is also possible to
 reject certain network connections. Several options are available to specify
-which network connections will be rejected.</p></div><div class="refsect1"><a id="idm255229414400" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">-access=<em class="replaceable"><code>filename</code></em></span></dt><dd><p>
+which network connections will be rejected.</p></div><div class="refsect1"><a id="idm139887155531296" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">-access=<em class="replaceable"><code>filename</code></em></span></dt><dd><p>
 Specifies an optional access
 file. The access file lists the IP addresses from which connections
 should be accepted or rejected. The access file is also used to
@@ -166,7 +166,7 @@ SIGTERM signal.</p></dd><dt><span class="term">-user=<em class="replaceable"><co
 Set <span class="command"><strong>couriertcpd</strong></span>'s user
 ID. Also, the group ID is set to the user's group ID. Using both
 <code class="option">-group</code> and <code class="option">-user</code> is not necessary. Only the
-superuser can specify <code class="option">-user</code>.</p></dd></dl></div></div><div class="refsect1"><a id="idm255229331984" shape="rect"> </a><h2>MULTIPLE PORT LIST</h2><a id="list" shape="rect"> </a><p>
+superuser can specify <code class="option">-user</code>.</p></dd></dl></div></div><div class="refsect1"><a id="idm139887150288528" shape="rect"> </a><h2>MULTIPLE PORT LIST</h2><a id="list" shape="rect"> </a><p>
 The <em class="replaceable"><code>list</code></em> argument can be a comma-separated list of
 multiple port
 numbers. <span class="command"><strong>couriertcpd</strong></span> will create network connections on any
@@ -196,7 +196,7 @@ and</p><div class="informalexample"><pre class="programlisting" xml:space="prese
 couriertcpd -pid=/var/run/smtp.pid -address=127.0.0.1 25,999 <em class="replaceable"><code>program</code></em>
 </pre></div><p>
 will create network connections on ports 25 and 999 of the IP address
-127.0.0.1.</p></div><div class="refsect1"><a id="idm255229307744" shape="rect"> </a><h2>ACCESS FILE</h2><p>
+127.0.0.1.</p></div><div class="refsect1"><a id="idm139887150264288" shape="rect"> </a><h2>ACCESS FILE</h2><p>
 The access file lists IP addresses that <span class="command"><strong>couriertcpd</strong></span> will
 accept or reject connections from. An access file is optional. Without an
 access file <span class="command"><strong>couriertcpd</strong></span> accepts a connection from any IP
@@ -211,7 +211,7 @@ script, such as
 <a class="ulink" href="makeimapaccess.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">makeimapaccess</span>(8)</span></a>,
 from one or more plain text
 files. Blank lines in the text file are ignored. Lines that start with the #
-character are also ignored.</p><div class="refsect2"><a id="idm255229301824" shape="rect"> </a><h3>Rejecting and accepting connections by IP address</h3><p>
+character are also ignored.</p><div class="refsect2"><a id="idm139887150258368" shape="rect"> </a><h3>Rejecting and accepting connections by IP address</h3><p>
 The following line instructs <span class="command"><strong>couriertcpd</strong></span> to reject all
 connections from an IP address range:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 netblock&lt;tab&gt;deny
@@ -240,7 +240,7 @@ If the IP address of the connection is not found in the access file the
 connection is accepted by default. The following line causes unlisted
 connections to be rejected:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 *&lt;tab&gt;deny
-</pre></div></div><div class="refsect2"><a id="idm255229286688" shape="rect"> </a><h3>IPv6 addresses</h3><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+</pre></div></div><div class="refsect2"><a id="idm139887150243232" shape="rect"> </a><h3>IPv6 addresses</h3><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 IPv6 support in the access file is experimental, and is subject to
 change in a future release.  The following syntax is subject to change at any
 time.</p></div><p>
@@ -294,13 +294,9 @@ file, the entry for the most specific IP address.</p><div class="informalexample
 	maximum number of connections from the same IP address. If specified
 	in the access file for an IP address, or an IP address range, the
 	value given by <code class="envar">MAXCPERIP</code> overrides it.
-      </p></div><div class="refsect2"><a id="idm255229264512" shape="rect"> </a><h3>DNS ACCESS LISTS</h3><p>
+      </p></div><div class="refsect2"><a id="idm139887150221056" shape="rect"> </a><h3>DNS ACCESS LISTS</h3><p>
 	An alternative to listing banned IP addresses in access files
 	is to use an external DNS-based IP access list.
-      </p><p>
-	There is no provision to support IPv6-based lists, because none yet
-	exist. IPv6-based access list support will be added in the
-	future.
       </p><p>
 	<span class="command"><strong>couriertcpd</strong></span>'s default configuration
 	does not automatically reject connections from banned IP address
@@ -323,14 +319,18 @@ file, the entry for the most specific IP address.</p><div class="informalexample
 	<span class="command"><strong>couriertcpd</strong></span> makes a DNS query for
 	<span class="quote">“<span class="quote">d.c.b.a.dnswl.example.com</span>”</span>, then, if necessary, for
 	<span class="quote">“<span class="quote">d.c.b.a.dnsbl.example.com</span>”</span>, for a connection from the
-	IP address <em class="replaceable"><code>a.b.c.d</code></em>.
+	IPv4 address <em class="replaceable"><code>a.b.c.d</code></em>.
+      </p><p>
+	For IPv6 addresses, the DNS query consists of individual hexadecimal
+	nybbles (in reverse order, like the IPv4 query).
       </p><p>
 	If the DNS query succeeds (more details below),
 	<code class="option">-allow</code> sets the environment variable to an empty
 	string, and <code class="option">-block</code> sets the environment variable
-	from the <code class="literal">TXT</code> record in the DNS response, or to
-	<span class="quote">“<span class="quote">Access denied.</span>”</span> if the DNS access list did not return
-	a <code class="literal">TXT</code> record. It should be possible to use
+	from the <code class="literal">TXT</code> record in the DNS response, if one
+	was requested (see below), or to a default message for regular
+	DNS queries for <code class="literal">A</code> records.
+	It should be possible to use
 	<span class="command"><strong>couriertcpd</strong></span> with DNS access lists that use either
 	<code class="literal">A</code> or <code class="literal">TXT</code> records.
       </p><p>
@@ -366,12 +366,20 @@ file, the entry for the most specific IP address.</p><div class="informalexample
 	environment variable.
       </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 -block=dnsbl.example.com,BLOCK,Go away</pre></div></blockquote></div><p>
-	The last component specifies a custom message that overrides any
-	<code class="literal">TXT</code> record in the DNS access list.
+	The last component specifies a custom message that overrides the
+	default rejection message.
 	Note that this is a single parameter to
 	<span class="application">couriertcpd</span>, so the parameter must be
 	quoted if it contains any spaces or special
 	shell metacharacters.
+	A message that's specified as <span class="quote">“<span class="quote">*</span>”</span> results in a
+	<code class="literal">TXT</code> query to the DNS access list instead of the
+	regular <code class="literal">A</code> query. This is for DNS access lists
+	that provide <code class="literal">TXT</code> records, that gets copied
+	into the <code class="varname">BLOCK</code> variable (or the custom
+	variable). The <span class="quote">“<span class="quote">*</span>”</span> must also be quoted, since it's
+	also a shell metacharacter, and it cannot be used together with
+	an explicit <code class="literal">A</code> address query, described above.
       </p><p>
 	The custom message parameter gets specified for the
 	<code class="option">-block</code>, option.
@@ -397,7 +405,7 @@ file, the entry for the most specific IP address.</p><div class="informalexample
 	results in <code class="option">-block</code> executing an ordinary
 	<code class="literal">A</code> DNS query.
 	<code class="option">-allow</code> always uses an <code class="literal">A</code> query.
-      </p></div><div class="refsect2"><a id="idm255229218080" shape="rect"> </a><h3>MULTIPLE DNS LISTS</h3><p>
+      </p></div><div class="refsect2"><a id="idm139887150171728" shape="rect"> </a><h3>MULTIPLE DNS LISTS</h3><p>
 	Multiple <code class="option">-block</code>
 	and <code class="option">-allow</code>
 	options can be given. The connecting IP address
@@ -423,7 +431,7 @@ file, the entry for the most specific IP address.</p><div class="informalexample
 	<code class="option">-block</code>s, then more
 	<code class="option">-allow</code>s and
 	<code class="option">-block</code>s.
-      </p></div><div class="refsect2"><a id="idm255229209264" shape="rect"> </a><h3>ADDITIONAL DNS ACCESS LIST VARIABLES</h3><p>
+      </p></div><div class="refsect2"><a id="idm139887150162912" shape="rect"> </a><h3>ADDITIONAL DNS ACCESS LIST VARIABLES</h3><p>
 	Three additional environment variables may get set in conjunction with
 	a successful DNS access list lookup:
       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">BLOCK_IP</span></dt><dd/><dt><span class="term">BLOCK_TXT</span></dt><dd/><dt><span class="term">BLOCK_ZONE</span></dt><dd/></dl></div><p>
@@ -432,14 +440,14 @@ file, the entry for the most specific IP address.</p><div class="informalexample
 	variable name follow the same naming convention, of appending
 	<span class="quote">“<span class="quote">_IP</span>”</span>, <span class="quote">“<span class="quote">_TXT</span>”</span>, and <span class="quote">“<span class="quote">_ZONE</span>”</span>
 	suffix to the name of the custom environment variable.
-      </p></div><div class="refsect2"><a id="idm255229197424" shape="rect"> </a><h3>USING DNS WHITELISTS WITH SPF</h3><p>
+      </p></div><div class="refsect2"><a id="idm139887150151072" shape="rect"> </a><h3>USING DNS WHITELISTS WITH SPF</h3><p>
 	Including <span class="quote">“<span class="quote">allowok</span>”</span> keyword in an SPF setting automatically
 	passes the SPF check for senders whose IP address is found in
 	an <code class="option">-allow</code>-ed access list.
 	See
 	<a class="ulink" href="courier.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">courier</span>(8)</span>
 	</a>.
-      </p></div></div><div class="refsect1"><a id="idm255229193600" shape="rect"> </a><h2>ENVIRONMENT VARIABLES</h2><p>
+      </p></div></div><div class="refsect1"><a id="idm139887150147248" shape="rect"> </a><h2>ENVIRONMENT VARIABLES</h2><p>
 <span class="command"><strong>couriertcpd</strong></span> also initializes the following environment
 variables prior to running <span class="command"><strong>program</strong></span>:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">TCPLOCALHOST</span></dt><dd><p>
 The name of the host on the local end of
@@ -462,5 +470,5 @@ Identification string received from the
 IDENT server on the remote IP address. Not set if the IDENT server
 returned an error, or if the <code class="option">-noidentlookup</code> option was
 specified.</p></dd><dt><span class="term">TCPREMOTEPORT</span></dt><dd><p>
-TCP port of the remote end of the network connection.</p></dd></dl></div></div><div class="refsect1"><a id="idm255229176240" shape="rect"> </a><h2>SEE ALSO</h2><p>
+TCP port of the remote end of the network connection.</p></dd></dl></div></div><div class="refsect1"><a id="idm139887150129888" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="courier.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">courier</span>(8)</span></a>.</p></div></div></body></html>

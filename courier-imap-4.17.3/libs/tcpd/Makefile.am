@@ -82,13 +82,13 @@ couriertcpd.html: couriertcpd.sgml ../docbook/sgml2html
 	../docbook/sgml2html couriertcpd.sgml couriertcpd.html
 
 couriertcpd.1: couriertcpd.sgml ../docbook/sgml2html
-	../docbook/sgml2man couriertcpd.sgml couriertcpd.1
+	../docbook/sgml2man couriertcpd.sgml couriertcpd.1 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 
 couriertls.html: couriertls.sgml ../docbook/sgml2html
 	../docbook/sgml2html couriertls.sgml couriertls.html
 
 couriertls.1: couriertls.sgml ../docbook/sgml2html
-	../docbook/sgml2man couriertls.sgml couriertls.1
+	../docbook/sgml2man couriertls.sgml couriertls.1 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 endif
 
 check-am:

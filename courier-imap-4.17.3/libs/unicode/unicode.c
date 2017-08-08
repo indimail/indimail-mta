@@ -5,14 +5,12 @@
 */
 
 #include	"unicode_config.h"
-#include	"unicode.h"
+#include	"courier-unicode.h"
 #include	<string.h>
 #include	<ctype.h>
 #include	<stdlib.h>
 #include	<iconv.h>
 #include	<errno.h>
-#if	HAVE_LOCALE_H
-#if	HAVE_SETLOCALE
 #include	<locale.h>
 #if	USE_LIBCHARSET
 #if	HAVE_LOCALCHARSET_H
@@ -20,13 +18,46 @@
 #elif	HAVE_LIBCHARSET_H
 #include	<libcharset.h>
 #endif	/* HAVE_LOCALCHARSET_H */
-#elif	HAVE_LANGINFO_CODESET
+#else
 #include	<langinfo.h>
 #endif	/* USE_LIBCHARSET */
-#endif	/* HAVE_SETLOCALE */
-#endif	/* HAVE_LOCALE_H */
 
 static char default_chset_buf[32];
+static const char *fix_charset(const char *);
+
+const char *unicode_locale_chset()
+{
+	const char *c;
+
+#if	USE_LIBCHARSET
+	c=locale_charset();
+#else
+	c=nl_langinfo(CODESET);
+#endif
+	return fix_charset(c);
+}
+
+#if HAVE_LANGINFO_L
+const char *unicode_locale_chset_l(locale_t l)
+{
+	return fix_charset(nl_langinfo_l(CODESET, l));
+}
+#endif
+
+static const char *fix_charset(const char *c)
+{
+	if (!c)
+		c="US-ASCII";
+
+	if (c &&
+
+	    /* Map GNU libc iconv oddity to us-ascii */
+
+	    (strcmp(c, "ANSI_X3.4") == 0 ||
+	     strncmp(c, "ANSI_X3.4-", 10) == 0))
+		c="US-ASCII";
+	return c;
+}
 
 static void init_default_chset()
 {
@@ -42,68 +73,22 @@ static void init_default_chset()
 
 	if (chset == NULL)
 	{
-#if	HAVE_LOCALE_H
-#if	HAVE_SETLOCALE
 		old_locale=setlocale(LC_ALL, "");
 		locale_cpy=old_locale ? strdup(old_locale):NULL;
-#if	USE_LIBCHARSET
-		chset = locale_charset();
-#elif	HAVE_LANGINFO_CODESET
-		chset=nl_langinfo(CODESET);
-#endif
-#endif
-#endif
+		chset=unicode_locale_chset();
 	}
 
 	memset(buf, 0, sizeof(buf));
 
-	if (chset &&
-
-	    /* Map GNU libc iconv oddity to us-ascii */
-
-	    (strcmp(chset, "ANSI_X3.4") == 0 ||
-	     strncmp(chset, "ANSI_X3.4-", 10) == 0))
-		chset="US-ASCII";
-
-	if (chset)
-	{
-		strncat(buf, chset, sizeof(buf)-1);
-	}
-	else
-	{
-		const char *p=getenv("LANG");
-
-		/* LANG is xx_yy.CHARSET@modifier */
-
-		if (p && *p && (p=strchr(p, '.')) != NULL)
-		{
-			const char *q=strchr(++p, '@');
-
-			if (!q)
-				q=p+strlen(p);
-
-			if (q-p >= sizeof(buf)-1)
-				q=p+sizeof(buf)-1;
-
-			memcpy(buf, p, q-p);
-			buf[q-p]=0;
-		}
-		else
-			strcpy(buf, "US-ASCII");
-	}
+	strncat(buf, chset, sizeof(buf)-1);
 
 	memcpy(default_chset_buf, buf, sizeof(buf));
 
-#if	HAVE_LOCALE_H
-#if	HAVE_SETLOCALE
 	if (locale_cpy)
 	{
 		setlocale(LC_ALL, locale_cpy);
 		free(locale_cpy);
 	}
-#endif
-#endif
-
 }
 
 const char *unicode_default_chset()
@@ -427,7 +412,7 @@ static int deinit_toimaputf7(void *ptr, int *errptr)
 
 	if (rc == 0 && toutf7->utf7encodebuf_cnt > 0)
 		rc=toimaputf7_encode_flushfinal(toutf7);
-			
+
 	free(toutf7);
 	return rc;
 }
@@ -793,7 +778,7 @@ static int init_iconv(struct unicode_convert_iconv *h,
 			}
 		}
 	}
-					
+
 	return 0;
 }
 
@@ -1315,15 +1300,15 @@ char *unicode_convert_tobuf(const char *text,
 /*****************************************************************************/
 
 /*
-** Convert text to unicode_chars. Same basic approach as
+** Convert text to char32_ts. Same basic approach as
 ** unicode_convert_tocbuf_init(). The output character set gets specified
 ** as UCS-4, the final output size is divided by 4, and the output buffer gets
-** typed as a unicode_char array.
+** typed as a char32_t array.
 */
 
 struct unicode_convert_buf {
 	struct unicode_convert_buf *next;
-	unicode_char *fragment;
+	char32_t *fragment;
 	size_t fragment_size;
 	size_t max_fragment_size;
 };
@@ -1331,7 +1316,7 @@ struct unicode_convert_buf {
 struct unicode_convert_tou {
 	struct unicode_convert_hdr hdr;
 
-	unicode_char **ucptr_ret;
+	char32_t **ucptr_ret;
 	size_t *ucsize_ret;
 	int errflag;
 	size_t tot_size;
@@ -1347,7 +1332,7 @@ static int deinit_tounicode(void *ptr, int *errptr);
 
 unicode_convert_handle_t
 unicode_convert_tou_init(const char *src_chset,
-			   unicode_char **ucptr_ret,
+			   char32_t **ucptr_ret,
 			   size_t *ucsize_ret,
 			   int nullterminate
 			   )
@@ -1396,7 +1381,7 @@ unicode_convert_fromu_init(const char *dst_chset,
 }
 
 int unicode_convert_uc(unicode_convert_handle_t handle,
-			 const unicode_char *text,
+			 const char32_t *text,
 			 size_t cnt)
 {
 	return unicode_convert(handle, (const char *)text,
@@ -1412,9 +1397,9 @@ static int save_unicode(const char *text, size_t cnt, void *ptr)
 	struct unicode_convert_buf *fragment;
 	size_t tot_size;
 
-	cnt /= sizeof(unicode_char);
+	cnt /= sizeof(char32_t);
 
-	tot_size=p->tot_size + cnt*sizeof(unicode_char);
+	tot_size=p->tot_size + cnt*sizeof(char32_t);
 	/* Keep track of the total size saved */
 
 	if (p->tail)
@@ -1427,10 +1412,10 @@ static int save_unicode(const char *text, size_t cnt, void *ptr)
 		if (n)
 		{
 			memcpy(p->tail->fragment+p->tail->fragment_size,
-			       text, n*sizeof(unicode_char));
+			       text, n*sizeof(char32_t));
 
 			cnt -= n;
-			text += n*sizeof(unicode_char);
+			text += n*sizeof(char32_t);
 			p->tail->fragment_size += n;
 		}
 	}
@@ -1443,7 +1428,7 @@ static int save_unicode(const char *text, size_t cnt, void *ptr)
 			cnt_alloc=16;
 
 		if ((fragment=malloc(sizeof(struct unicode_convert_buf)
-				     +cnt_alloc*sizeof(unicode_char)))
+				     +cnt_alloc*sizeof(char32_t)))
 		    == NULL)
 		{
 			p->errflag=1;
@@ -1451,10 +1436,10 @@ static int save_unicode(const char *text, size_t cnt, void *ptr)
 		}
 
 		fragment->next=NULL;
-		fragment->fragment=(unicode_char *)(fragment+1);
+		fragment->fragment=(char32_t *)(fragment+1);
 		fragment->max_fragment_size=cnt_alloc;
 		fragment->fragment_size=cnt;
-		memcpy(fragment->fragment, text, cnt*sizeof(unicode_char));
+		memcpy(fragment->fragment, text, cnt*sizeof(char32_t));
 
 		*(p->last)=fragment;
 		p->last=&fragment->next;
@@ -1495,7 +1480,7 @@ static int deinit_tounicode(void *ptr, int *errptr)
 
 	if (rc == 0 && p->nullterminate)
 	{
-		unicode_char zero=0;
+		char32_t zero=0;
 
 		rc=save_unicode( (const char *)&zero, sizeof(zero),
 				 p->hdr.ptr);
@@ -1541,7 +1526,7 @@ static int deinit_tounicode(void *ptr, int *errptr)
 int unicode_convert_tou_tobuf(const char *text,
 				size_t text_l,
 				const char *charset,
-				unicode_char **uc,
+				char32_t **uc,
 				size_t *ucsize,
 				int *err)
 {
@@ -1562,7 +1547,7 @@ int unicode_convert_tou_tobuf(const char *text,
 	return 0;
 }
 
-int unicode_convert_fromu_tobuf(const unicode_char *utext,
+int unicode_convert_fromu_tobuf(const char32_t *utext,
 				  size_t utext_l,
 				  const char *charset,
 				  char **c,
@@ -1594,10 +1579,10 @@ int unicode_convert_fromu_tobuf(const unicode_char *utext,
 
 char *unicode_convert_tocase(const char *str,
 			       const char *charset,
-			       unicode_char (*first_char_func)(unicode_char),
-			       unicode_char (*char_func)(unicode_char))
+			       char32_t (*first_char_func)(char32_t),
+			       char32_t (*char_func)(char32_t))
 {
-	unicode_char *uc;
+	char32_t *uc;
 	size_t ucsize;
 	size_t i;
 	int err;

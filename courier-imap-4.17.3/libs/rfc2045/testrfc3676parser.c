@@ -15,7 +15,7 @@ static int line_begin(size_t quote_level, void *arg)
 	return 0;
 }
 
-static int line_contents(const unicode_char *txt,
+static int line_contents(const char32_t *txt,
 			 size_t txt_size,
 			 void *arg)
 {

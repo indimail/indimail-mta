@@ -9,7 +9,7 @@
 #include	<string.h>
 #include	<stdlib.h>
 #include	<errno.h>
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 
 #include	"rfc822hdr.h"
 #include	"rfc2047.h"

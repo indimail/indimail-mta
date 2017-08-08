@@ -9,7 +9,7 @@ my $fh=new IO::File "<EastAsianWidth.txt";
 my $pb=-1;
 my $pe=-1;
 
-print "static const unicode_char unicode_wcwidth_tab[][2]={\n";
+print "static const char32_t unicode_wcwidth_tab[][2]={\n";
 
 sub full($$) {
     my $b=hex(shift);

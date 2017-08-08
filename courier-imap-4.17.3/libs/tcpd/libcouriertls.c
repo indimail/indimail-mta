@@ -62,17 +62,19 @@ struct proto_ops {
 };
 struct proto_ops op_list[] =
 {
-#ifdef HAVE_TLSV1_2_METHOD
+#ifdef SSL_OP_NO_TLSv1
+#ifdef SSL_OP_NO_TLSv1_1
     { "TLSv1.2+",  &SSLv23_method,  SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1 },
-    { "TLSv1.2",   &TLSv1_2_method, SSL_OP_ALL },
+    { "TLSv1.2",   &SSLv23_method,  SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1 },
 #endif
-#ifdef HAVE_TLSV1_1_METHOD
+#endif
+
+#ifdef SSL_OP_NO_TLSv1
     { "TLSv1.1+",  &SSLv23_method,  SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1 },
-    { "TLSv1.1",   &TLSv1_1_method, SSL_OP_ALL },
+    { "TLSv1.1",   &SSLv23_method,  SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1 },
 #endif
-    { "TLSv1+",    &SSLv23_method,  SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3 },
-    { "TLSv1",     &TLSv1_method,   SSL_OP_ALL },
-    { "TLS1",      &TLSv1_method,   SSL_OP_ALL },
+    { "TLSv1",     &SSLv23_method,  SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3 },
+    { "TLS1",      &SSLv23_method,  SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3 },
     { "",          &SSLv23_method,  SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3 },
     { NULL,        &SSLv23_method,  SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3 },
 };
@@ -161,9 +163,9 @@ static int verifypeer(const struct tls_info *info, SSL *ssl)
 	{
 		STACK_OF(X509) *peer_cert_chain=SSL_get_peer_cert_chain(ssl);
 
-		if (peer_cert_chain && peer_cert_chain->stack.num > 0)
+		if (peer_cert_chain && sk_X509_num(peer_cert_chain) > 0)
 		{
-			X509 *xx=(X509 *)peer_cert_chain->stack.data[0];
+			X509 *xx=sk_X509_value(peer_cert_chain, 0);
 
 			if (xx)
 				subj=X509_get_subject_name(xx);
@@ -184,7 +186,7 @@ static int verifypeer(const struct tls_info *info, SSL *ssl)
 		ASN1_STRING *d;
 
 		int dlen;
-		unsigned char *ddata;
+		const unsigned char *ddata;
 
 		e=X509_NAME_get_entry(subj, j);
 		if (!e)
@@ -199,8 +201,11 @@ static int verifypeer(const struct tls_info *info, SSL *ssl)
 		obj_name=OBJ_nid2sn(OBJ_obj2nid(o));
 
 		dlen=ASN1_STRING_length(d);
+#ifdef HAVE_OPENSSL110
+		ddata=ASN1_STRING_get0_data(d);
+#else
 		ddata=ASN1_STRING_data(d);
-
+#endif
 		if (strcasecmp(obj_name, "CN") == 0)
 		{
 			if (dlen >= sizeof(domain)-1)
@@ -426,16 +431,15 @@ static int client_cert_cb(ssl_handle ssl, X509 **x509, EVP_PKEY **pkey)
 			continue;
 		}
 
-		for (i=0; client_cas && i<client_cas->stack.num; i++)
+		for (i=0; client_cas && i<sk_X509_NAME_num(client_cas); i++)
 		{
-			X509_NAME *cert=(X509_NAME *)client_cas->stack.data[i];
+			X509_NAME *cert=sk_X509_NAME_value(client_cas, i);
 
-			if (X509_NAME_cmp(cert,
-					  x->cert_info->issuer) == 0)
+			if (X509_NAME_cmp(cert, X509_get_issuer_name(x)) == 0)
 				break;
 		}
 
-		if (!client_cas || i >= client_cas->stack.num)
+		if (!client_cas || i >= sk_X509_NAME_num(client_cas))
 		{
 			BIO_free(certbio);
 			continue;
@@ -779,6 +783,7 @@ SSL_CTX *tls_create_int(int isserver, const struct tls_info *info,
 				closedir(dirp);
                 }
 	}
+
 	SSL_CTX_set_verify(ctx, get_peer_verify_level(info),
 			   ssl_verify_callback);
 
@@ -811,8 +816,14 @@ void tls_destroy(SSL_CTX *ctx)
 
 static int cache_add(SSL *ssl, SSL_SESSION *sess);
 
+#ifdef HAVE_OPENSSL110
+static SSL_SESSION *cache_get(SSL *ssl, const unsigned char *id, int id_len,
+			      int *copyflag);
+#else
 static SSL_SESSION *cache_get(SSL *ssl, unsigned char *id, int id_len,
 			      int *copyflag);
+#endif
+
 static void cache_del(SSL_CTX *ctx, SSL_SESSION *ssl);
 
 static void init_session_cache(struct tls_info *info, SSL_CTX *ctx)
@@ -854,9 +865,11 @@ static int cache_add(SSL *ssl, SSL_SESSION *sess)
 	unsigned char *ucp;
 	time_t timeout= (time_t)SSL_SESSION_get_time(sess)
 		+ SSL_SESSION_get_timeout(sess);
-	void *session_id=(void *)sess->session_id;
-	size_t session_id_len=sess->session_id_length;
+	unsigned int session_id_len;
+	void *session_id;
 	size_t sess_len=i2d_SSL_SESSION(sess, NULL);
+
+	session_id=(void *)SSL_SESSION_get_id(sess, &session_id_len);
 
 	if (sizeof(timeout) + sizeof(session_id_len) + session_id_len +
 	    sess_len > sizeof(buffer))
@@ -887,7 +900,7 @@ static int cache_add(SSL *ssl, SSL_SESSION *sess)
 }
 
 struct walk_info {
-	unsigned char *id;
+	const unsigned char *id;
 	int id_len;
 	int *copyflag;
 	SSL_SESSION *ret;
@@ -897,8 +910,13 @@ struct walk_info {
 static int get_func(void *rec, size_t recsize,
 		    int *doupdate, void *arg);
 
+#ifdef HAVE_OPENSSL110
+static SSL_SESSION *cache_get(SSL *ssl, const unsigned char *id, int id_len,
+			      int *copyflag)
+#else
 static SSL_SESSION *cache_get(SSL *ssl, unsigned char *id, int id_len,
 			      int *copyflag)
+#endif
 {
 	const struct tls_info *info=SSL_get_app_data(ssl);
 	struct walk_info wi;
@@ -963,11 +981,14 @@ static void cache_del(SSL_CTX *ctx, SSL_SESSION *sess)
 {
 	const struct tls_info *info=SSL_CTX_get_app_data(ctx);
 	struct walk_info wi;
+	unsigned int session_id_len;
+	void *session_id;
 
 	wi.now=0;
 
-	wi.id=(unsigned char *)sess->session_id;
-	wi.id_len=sess->session_id_length;
+	session_id=(void *)SSL_SESSION_get_id(sess, &session_id_len);
+	wi.id=(unsigned char *)session_id;
+	wi.id_len=session_id_len;
 	if (tls_cache_walk(info->tlscache, del_func, &wi) < 0)
 		perror("ALERT: tls_cache_walk: ");
 }
@@ -1138,7 +1159,10 @@ void tls_disconnect(SSL *ssl, int fd)
 	fcntl(fd, F_SETFL, 0);
 	SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
 	SSL_free(ssl);
+#ifdef HAVE_OPENSSL110
+#else
 	ERR_remove_state(0);
+#endif
 }
 
 /* --------------------------------------- */
@@ -1403,7 +1427,7 @@ static void dump_x509(X509 *x509,
 		ASN1_STRING *d;
 
 		int dlen;
-		unsigned char *ddata;
+		const unsigned char *ddata;
 
 		e=X509_NAME_get_entry(subj, j);
 		if (!e)
@@ -1418,7 +1442,11 @@ static void dump_x509(X509 *x509,
 		obj_name=OBJ_nid2sn(OBJ_obj2nid(o));
 
 		dlen=ASN1_STRING_length(d);
+#ifdef HAVE_OPENSSL110
+		ddata=ASN1_STRING_get0_data(d);
+#else
 		ddata=ASN1_STRING_data(d);
+#endif
 
 		(*dump_func)("   ", -1, dump_arg);
 		(*dump_func)(obj_name, -1, dump_arg);
@@ -1481,8 +1509,9 @@ void tls_dump_connection_info(ssl_handle ssl,
 			}
 		}
 
-		for (i=0; peer_cert_chain && i<peer_cert_chain->stack.num; i++)
-			dump_x509((X509 *)peer_cert_chain->stack.data[i],
+		for (i=0; peer_cert_chain && i<sk_X509_num(peer_cert_chain);
+		     i++)
+			dump_x509((X509 *)sk_X509_value(peer_cert_chain, i),
 				  dump_func, dump_arg);
 	}
 
@@ -1660,7 +1689,8 @@ char *tls_cert_name(const char *buf, size_t buf_size)
 
 	if (x)
 	{
-		p=X509_NAME_oneline(x->cert_info->subject, NULL, 0);
+		X509_get_subject_name(x);
+		p=X509_NAME_oneline(X509_get_subject_name(x), NULL, 0);
 		X509_free(x);
 	}
 	ERR_clear_error();

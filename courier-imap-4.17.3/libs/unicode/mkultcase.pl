@@ -75,7 +75,7 @@ print "const unsigned unicode_case_hash=$tabsize;\n";
 print "/* unicode_case_maxbucket="
     . ($maxcnt+2) . "*/\n";
 
-print "const unicode_char unicode_case_tab[][4]={\n";
+print "const char32_t unicode_case_tab[][4]={\n";
 
 my $idx=0;
 

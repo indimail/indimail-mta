@@ -22,7 +22,7 @@
 #include	"rfc822/rfc822hdr.h"
 #include	"rfc822/rfc2047.h"
 #include	"rfc2045/rfc2045.h"
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 #include	"numlib/numlib.h"
 #include	"searchinfo.h"
 #include	"imapwrite.h"
@@ -892,7 +892,7 @@ static int fill_search_header_done(const char *name, void *arg)
 	int issubject=rfc822hdr_namecmp(name, "subject");
 	size_t j;
 	unicode_convert_handle_t conv;
-	unicode_char *ucptr;
+	char32_t *ucptr;
 	size_t ucsize;
 	int rc;
 
@@ -1045,7 +1045,7 @@ static int fill_search_body_ucs4(const char *str, size_t n, void *arg)
 	struct fill_search_body_info *decodeinfo=
 		(struct fill_search_body_info *)arg;
 	struct searchinfo *sip;
-	const unicode_char *u=(const unicode_char *)str;
+	const char32_t *u=(const char32_t *)str;
 	int notfound=1;
 
 	n /= 4;

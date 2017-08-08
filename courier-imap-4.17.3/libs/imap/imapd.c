@@ -87,7 +87,7 @@
 #include	"maildir/maildirinfo.h"
 #include	"maildir/loginexec.h"
 
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 #include	"maildir/maildirkeywords.h"
 
 #define KEYWORD_IMAPVERBOTTEN " (){%*\"\\]"
@@ -4117,7 +4117,7 @@ int folder_rename(struct maildir_info *mi1,
 static int validate_charset(const char *tag, char **charset)
 {
 	unicode_convert_handle_t conv;
-	unicode_char *ucptr;
+	char32_t *ucptr;
 	size_t ucsize;
 
 	if (*charset == NULL)
@@ -6559,7 +6559,7 @@ int main(int argc, char **argv)
 		maildir_newshared_disabled=1;
 	}
 	if (p)
-		free(p);
+		free((char *) p);
 
 	/* Remember my device/inode */
 

@@ -11,7 +11,7 @@
 #include	<string.h>
 #include	<ctype.h>
 #include	<errno.h>
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 #include	"searchinfo.h"
 #include	"imapwrite.h"
 #include	"imaptoken.h"

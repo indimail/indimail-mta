@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: unicode_convert
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/22/2015
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/11/2017
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "UNICODE_CONVERT" "3" "06/22/2015" "Courier Unicode Library" "Courier Unicode Library"
+.TH "UNICODE_CONVERT" "3" "03/11/2017" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -53,11 +53,11 @@ unicode_u_ucs4_native, unicode_u_ucs2_native, unicode_convert_init, unicode_conv
 .HP \w'unicode_convert_handle_t\ unicode_convert_tocbuf_fromutf8_init('u
 .BI "unicode_convert_handle_t unicode_convert_tocbuf_fromutf8_init(const\ char\ *" "dst_chset" ", char\ **" "cbufptr_ret" ", size_t\ *" "cbufsize_ret" ", int\ " "nullterminate" ");"
 .HP \w'unicode_convert_handle_t\ unicode_convert_tou_init('u
-.BI "unicode_convert_handle_t unicode_convert_tou_init(const\ char\ *" "src_chset" ", unicode_char\ **" "ucptr_ret" ", size_t\ *" "ucsize_ret" ", int\ " "nullterminate" ");"
+.BI "unicode_convert_handle_t unicode_convert_tou_init(const\ char\ *" "src_chset" ", char32_t\ **" "ucptr_ret" ", size_t\ *" "ucsize_ret" ", int\ " "nullterminate" ");"
 .HP \w'unicode_convert_handle_t\ unicode_convert_fromu_init('u
 .BI "unicode_convert_handle_t unicode_convert_fromu_init(const\ char\ *" "dst_chset" ", char\ **" "cbufptr_ret" ", size_t\ *" "cbufsize_ret" ", int\ " "nullterminate" ");"
 .HP \w'int\ unicode_convert_uc('u
-.BI "int unicode_convert_uc(unicode_convert_handle_t\ " "handle" ", const\ unicode_char\ *" "text" ", size_t\ " "cnt" ");"
+.BI "int unicode_convert_uc(unicode_convert_handle_t\ " "handle" ", const\ char32_t\ *" "text" ", size_t\ " "cnt" ");"
 .HP \w'char\ *unicode_convert_toutf8('u
 .BI "char *unicode_convert_toutf8(const\ char\ *" "text" ", const\ char\ *" "charset" ", int\ *" "error" ");"
 .HP \w'char\ *unicode_convert_fromutf8('u
@@ -65,23 +65,23 @@ unicode_u_ucs4_native, unicode_u_ucs2_native, unicode_convert_init, unicode_conv
 .HP \w'char\ *unicode_convert_tobuf('u
 .BI "char *unicode_convert_tobuf(const\ char\ *" "text" ", const\ char\ *" "charset" ", const\ char\ *" "dstcharset" ", int\ *" "error" ");"
 .HP \w'int\ unicode_convert_toubuf('u
-.BI "int unicode_convert_toubuf(const\ char\ *" "text" ", size_t\ " "text_l" ", const\ char\ *" "charset" ", unicode_char\ **" "uc" ", size_t\ *" "ucsize" ", int\ *" "error" ");"
+.BI "int unicode_convert_toubuf(const\ char\ *" "text" ", size_t\ " "text_l" ", const\ char\ *" "charset" ", char32_t\ **" "uc" ", size_t\ *" "ucsize" ", int\ *" "error" ");"
 .HP \w'int\ unicode_convert_fromu_tobuf('u
-.BI "int unicode_convert_fromu_tobuf(const\ unicode_char\ *" "utext" ", size_t\ " "utext_l" ", const\ char\ *" "charset" ", char\ **" "c" ", size_t\ *" "csize" ", int\ *" "error" ");"
+.BI "int unicode_convert_fromu_tobuf(const\ char32_t\ *" "utext" ", size_t\ " "utext_l" ", const\ char\ *" "charset" ", char\ **" "c" ", size_t\ *" "csize" ", int\ *" "error" ");"
 .SH "DESCRIPTION"
 .PP
 \fIunicode_u_ucs4_native\fR[] contains the string
 \(lqUCS\-4BE\(rq
 or
 \(lqUCS\-4LE\(rq, matching the native
-unicode_char
+char32_t
 endianness\&.
 .PP
 \fIunicode_u_ucs2_native\fR[] contains the string
 \(lqUCS\-2BE\(rq
 or
 \(lqUCS\-2LE\(rq, matching the native
-unicode_char
+char32_t
 endianness\&.
 .PP
 \fBunicode_convert_init\fR(),
@@ -159,21 +159,21 @@ places a trailing \e0 character after the converted string (this is included in 
 .SS "Converting between character sets and unicode"
 .PP
 \fBunicode_convert_tou_init\fR() converts character text into a
-unicode_char
+char32_t
 buffer\&. It works just like
 \fBunicode_convert_tocbuf_init\fR(), except that only the source character set gets specified and the output buffer is a
-unicode_char
+char32_t
 buffer\&.
 \fInullterminate\fR
 terminates the converted unicode characters with a
 U+0000\&.
 .PP
 \fBunicode_convert_fromu_init\fR() converts
-unicode_chars to the output character set, and also works like
+char32_ts to the output character set, and also works like
 \fBunicode_convert_tocbuf_init\fR()\&. Additionally, in this case,
 \fBunicode_convert_uc\fR() works just like
 \fBunicode_convert\fR() except that the input sequence is a
-unicode_char
+char32_t
 sequence, and the count parameter is th enumber of unicode characters\&.
 .SS "One\-shot conversions"
 .PP

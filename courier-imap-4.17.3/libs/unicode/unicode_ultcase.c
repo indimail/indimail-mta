@@ -5,19 +5,19 @@
 */
 
 #include "unicode_config.h"
-#include "unicode.h"
+#include "courier-unicode.h"
 
 extern const unsigned unicode_case_hash;
-extern const unicode_char unicode_case_tab[][4];
+extern const char32_t unicode_case_tab[][4];
 extern const unsigned unicode_case_offset[];
 
-static unsigned find_case(unicode_char c)
+static unsigned find_case(char32_t c)
 {
 	unsigned idx= c % unicode_case_hash;
 
 	unsigned i=unicode_case_offset[idx];
 
-	unicode_char uc;
+	char32_t uc;
 
 	--i;
 
@@ -31,24 +31,24 @@ static unsigned find_case(unicode_char c)
 	return (0);
 }
 
-unicode_char unicode_uc(unicode_char c)
+char32_t unicode_uc(char32_t c)
 {
 	unsigned i=find_case(c);
 
 	return (unicode_case_tab[i][0] != c ? c:unicode_case_tab[i][1]);
 }
 
-unicode_char unicode_lc(unicode_char c)
+char32_t unicode_lc(char32_t c)
 {
 	unsigned i=find_case(c);
 
 	return (unicode_case_tab[i][0] != c ? c:unicode_case_tab[i][2]);
 }
 
-unicode_char unicode_tc(unicode_char c)
+char32_t unicode_tc(char32_t c)
 {
 	unsigned i;
-	unicode_char oc=c;
+	char32_t oc=c;
 
 	c=unicode_lc(c);
 	i=find_case(c);

@@ -16,7 +16,7 @@ extern "C" {
 		return 0;
 	}
 
-	int mail::tpp_trampoline_line_contents(const unicode_char *ptr,
+	int mail::tpp_trampoline_line_contents(const char32_t *ptr,
 					       size_t cnt, void *arg)
 	{
 		reinterpret_cast<mail::textplainparser *>(arg)
@@ -91,7 +91,7 @@ void mail::textplainparser::line_begin(size_t quote_level)
 {
 	if (quote_level)
 	{
-		std::vector<unicode_char> vec;
+		std::vector<char32_t> vec;
 
 		vec.reserve(quote_level+1);
 		vec.insert(vec.end(), quote_level, '>');
@@ -100,7 +100,7 @@ void mail::textplainparser::line_begin(size_t quote_level)
 	}
 }
 
-void mail::textplainparser::line_contents(const unicode_char *data,
+void mail::textplainparser::line_contents(const char32_t *data,
 					  size_t cnt)
 {
 }
@@ -111,7 +111,7 @@ void mail::textplainparser::line_flowed_notify()
 
 void mail::textplainparser::line_end()
 {
-	unicode_char nl='\n';
+	char32_t nl='\n';
 
 	line_contents(&nl, 1);
 }

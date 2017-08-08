@@ -64,7 +64,7 @@
 #include	"maildir/maildiraclt.h"
 #include	"maildir/maildirnewshared.h"
 #include	"maildir/maildirinfo.h"
-#include    "unicode/unicode.h"
+#include    "unicode/courier-unicode.h"
 #include	"authlib/auth.h"
 
 static const char rcsid[]="$Id: mailboxlist.c,v 1.21 2009/06/27 16:32:38 mrsam Exp $";

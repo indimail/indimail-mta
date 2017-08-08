@@ -1624,11 +1624,11 @@ static void docheckblocklist(struct blocklist_s *p, const char *nameptr)
 	if (p->allow)
 		wanttxt = p->msg != 0;
 	else
-		wanttxt = (p->msg == 0 || *p->msg == 0);
+		wanttxt = p->msg && strcmp(p->msg, "*") == 0;
 
 	(void)rfc1035_resolve_cname(&res,
 			hostname,
-			wanttxt ? RFC1035_TYPE_ANY:RFC1035_TYPE_A,
+			wanttxt ? RFC1035_TYPE_TXT:RFC1035_TYPE_A,
 			RFC1035_CLASS_IN, &replyp, 0);
 
 	if (!replyp)
@@ -1673,12 +1673,24 @@ static void docheckblocklist(struct blocklist_s *p, const char *nameptr)
 		if (!search_txt_records(&res, p->allow, varname, replyp,
 					hostname) && !p->allow)
 		{
+			size_t l=strlen(p->zone)+40;
+			char *buf=malloc(l+1);
+
+			if (!buf)
+			{
+				perror("malloc");
+				_exit(1);
+			}
+
+			buf[snprintf(buf, l, "Blacklisted by %s", p->zone)]=0;
+
 			/*
 			** Even though we did not find a TXT record, we're here
 			** because of an A record, so for -blocks, we must
 			** set varname to something.
 			*/
-			mysetenv(varname, "Access denied.");
+			mkmymsg(varname, buf);
+			free(buf);
 		}
 
 		found=1;

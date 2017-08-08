@@ -1,4 +1,4 @@
-static const unicode_char unicode_wcwidth_tab[][2]={
+static const char32_t unicode_wcwidth_tab[][2]={
 {0x1100, 0x115f},
 {0x2329, 0x232a},
 {0x2e80, 0x2e99},

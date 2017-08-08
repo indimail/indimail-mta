@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: unicode_word_break
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/22/2015
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/11/2017
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "UNICODE_WORD_BREAK" "3" "06/22/2015" "Courier Unicode Library" "Courier Unicode Library"
+.TH "UNICODE_WORD_BREAK" "3" "03/11/2017" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -39,15 +39,15 @@ unicode_wb_init, unicode_wb_next, unicode_wb_next_cnt, unicode_wb_end, unicode_w
 .HP \w'unicode_wb_info_t\ unicode_wb_init('u
 .BI "unicode_wb_info_t unicode_wb_init(int\ (*" "cb_func" ")(int,\ void\ *), void\ *" "cb_arg" ");"
 .HP \w'int\ unicode_wb_next('u
-.BI "int unicode_wb_next(unicode_wb_info_t\ " "wb" ", unicode_char\ " "c" ");"
+.BI "int unicode_wb_next(unicode_wb_info_t\ " "wb" ", char32_t\ " "c" ");"
 .HP \w'int\ unicode_wb_next_cnt('u
-.BI "int unicode_wb_next_cnt(unicode_wb_info_t\ " "wb" ", const\ unicode_char\ *" "cptr" ", size_t\ " "cnt" ");"
+.BI "int unicode_wb_next_cnt(unicode_wb_info_t\ " "wb" ", const\ char32_t\ *" "cptr" ", size_t\ " "cnt" ");"
 .HP \w'int\ unicode_wb_end('u
 .BI "int unicode_wb_end(unicode_wb_info_t\ " "wb" ");"
 .HP \w'unicode_wbscan_info_t\ unicode_wbscan_init('u
 .BI "unicode_wbscan_info_t unicode_wbscan_init(void);"
 .HP \w'int\ unicode_wbscan_next('u
-.BI "int unicode_wbscan_next(unicode_wbscan_info_t\ " "wbs" ", unicode_char\ " "c" ");"
+.BI "int unicode_wbscan_next(unicode_wbscan_info_t\ " "wbs" ", char32_t\ " "c" ");"
 .HP \w'size_t\ unicode_wbscan_end('u
 .BI "size_t unicode_wbscan_end(unicode_wbscan_info_t\ " "wbs" ");"
 .SH "DESCRIPTION"

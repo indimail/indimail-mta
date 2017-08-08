@@ -36,7 +36,7 @@
 
 #include "config.h"
 
-#include "unicode/unicode.h"
+#include "unicode/courier-unicode.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -46,9 +46,9 @@ extern "C" {
 #endif
 
 struct maildir_searchengine {
-	unicode_char *string;
+	char32_t *string;
 	size_t string_l;
-	const unicode_char *ptr;
+	const char32_t *ptr;
 	unsigned *r;    /* Retry backoff indexes */
 	unsigned i;
 	int spc;
@@ -64,7 +64,7 @@ int maildir_search_start_str_chset(struct maildir_searchengine *engine,
 				   const char *string,
 				   const char *chset);
 int maildir_search_start_unicode(struct maildir_searchengine *engine,
-				 const unicode_char *string);
+				 const char32_t *string);
 
 
 #define	maildir_search_reset(si)	((si)->i=0, (si)->ptr=(si)->string)
@@ -79,7 +79,7 @@ int maildir_search_start_unicode(struct maildir_searchengine *engine,
                 {\
                         for (;;) \
                         {\
-                                if ( (unicode_char)(sie)->ptr[(sie)->i] == (unicode_char)(ch) )\
+                                if ( (char32_t)(sie)->ptr[(sie)->i] == (char32_t)(ch) )\
                                         { (sie)->i++; break; }\
                                 if ( (sie)->i == 0) break;\
                                 (sie)->i=(sie)->r[(sie)->i];\
@@ -89,7 +89,7 @@ int maildir_search_start_unicode(struct maildir_searchengine *engine,
 
 #define maildir_search_step_unicode_lc(sie,ch) do	\
 	{						\
-		unicode_char c=(ch);			\
+		char32_t c=(ch);			\
 		int spc=0;				\
 							\
 									\
@@ -162,7 +162,7 @@ class Search {
 
 	void operator<<(char c) { maildir_search_step(&sei, c); }
 
-	void operator<<(unicode_char ch)
+	void operator<<(char32_t ch)
 	{
 		maildir_search_step_unicode_lc(&sei, ch);
 	}
@@ -184,4 +184,3 @@ class Search {
 #endif
 
 #endif
- 

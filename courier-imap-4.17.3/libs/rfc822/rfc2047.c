@@ -9,7 +9,7 @@
 #include	<string.h>
 #include	<stdlib.h>
 #include	<errno.h>
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 
 #include	"rfc822hdr.h"
 #include	"rfc2047.h"
@@ -376,7 +376,7 @@ static int encodeqp(const char *ptr, size_t len,
 ** DOENCODEWORD().
 */
 
-static int encode_word(const unicode_char *uc,
+static int encode_word(const char32_t *uc,
 		       size_t ucsize,
 		       int (*qp_allow)(char),
 
@@ -409,7 +409,7 @@ static int encode_word(const unicode_char *uc,
 ** and keep going as long as encode_word() keeps returning the same value.
 */
 
-static int encode_words(const unicode_char *uc,
+static int encode_words(const char32_t *uc,
 			size_t ucsize,
 			int (*qp_allow)(char),
 
@@ -454,7 +454,7 @@ static int encode_words(const unicode_char *uc,
 /*
 ** Encode a sequence of words.
 */
-static int do_encode_words_method(const unicode_char *uc,
+static int do_encode_words_method(const char32_t *uc,
 				  size_t ucsize,
 				  const char *charset,
 				  int (*qp_allow)(char),
@@ -537,7 +537,7 @@ static int cnt_conv(const char *dummy, size_t n, void *arg)
 ** Encode, or not encode, words.
 */
 
-static int do_encode_words(const unicode_char *uc,
+static int do_encode_words(const char32_t *uc,
 			   size_t ucsize,
 			   const char *charset,
 			   int flag,
@@ -596,7 +596,7 @@ static int do_encode_words(const unicode_char *uc,
 /*
 ** RFC2047-encoding pass.
 */
-static int rfc2047_encode_callback(const unicode_char *uc,
+static int rfc2047_encode_callback(const char32_t *uc,
 				   size_t ucsize,
 				   const char *charset,
 				   int (*qp_allow)(char),
@@ -669,7 +669,7 @@ char *rfc2047_encode_str(const char *str, const char *charset,
 {
 	size_t	i=1;
 	char	*s, *p;
-	unicode_char *uc;
+	char32_t *uc;
 	size_t ucsize;
 	int err;
 

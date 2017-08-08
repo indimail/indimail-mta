@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: unicode::iconvert::fromu
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/22/2015
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/11/2017
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "UNICODE::ICONVERT::F" "3" "06/22/2015" "Courier Unicode Library" "Courier Unicode Library"
+.TH "UNICODE::ICONVERT::F" "3" "03/11/2017" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -41,7 +41,7 @@ unicode::iconvert::fromu \- template for converting text sequence from unicode
 .HP \w'void\ unicode::iconvert::fromu::convert('u
 .BI "void unicode::iconvert::fromu::convert(input_iter_t\ " "beg_iter" ", input_iter_t\ " "end_iter" ", const\ std::string\ &" "charset" ", std::string\ &" "out_buf" ", bool\ &" "errflag" ");"
 .HP \w'std::pair<std::string,\ bool>\ unicode::iconvert::fromu::convert('u
-.BI "std::pair<std::string, bool> unicode::iconvert::fromu::convert(const\ std::vector<unicode_char>\ &" "text" ", const\ std::string\ &" "charset" ");"
+.BI "std::pair<std::string, bool> unicode::iconvert::fromu::convert(const\ std::u32string\ &" "text" ", const\ std::string\ &" "charset" ");"
 .SH "DESCRIPTION"
 .PP
 These template functions convert unicode characters to text in the given character set\&.
@@ -49,7 +49,7 @@ These template functions convert unicode characters to text in the given charact
 and
 \fIend_iter\fR
 define an input sequence of
-unicode_chars\&. They get converted to unicode characters\&.
+char32_ts\&. They get converted to unicode characters\&.
 \fIoutput_iter\fR
 is an output iterator that
 \fBconvert\fR() iterates over
@@ -65,7 +65,7 @@ for a successful conversion\&.
 An overloaded
 \fBconvert\fR() puts the text string into a
 std::string, instead of using an output iterator\&. Finally, a single
-std::vector<unicode_char>
+std::u32string
 specifies the character string, instead of a beginning and an ending iterator\&.
 .SH "SEE ALSO"
 .PP

@@ -5,7 +5,7 @@
 */
 
 #include	"unicode_config.h"
-#include	"unicode.h"
+#include	"courier-unicode.h"
 
 #include <unistd.h>
 #include <stdint.h>
@@ -74,7 +74,7 @@ int unicode_wb_end(unicode_wb_info_t i)
 }
 
 int unicode_wb_next_cnt(unicode_wb_info_t i,
-			const unicode_char *chars,
+			const char32_t *chars,
 			size_t cnt)
 {
 	int rc;
@@ -89,7 +89,7 @@ int unicode_wb_next_cnt(unicode_wb_info_t i,
 	return 0;
 }
 
-int unicode_wb_next(unicode_wb_info_t i, unicode_char ch)
+int unicode_wb_next(unicode_wb_info_t i, char32_t ch)
 {
 	return (*i->next_handler)
 		(i, unicode_tab_lookup(ch,
@@ -529,7 +529,7 @@ unicode_wbscan_info_t unicode_wbscan_init()
 	return i;
 }
 
-int unicode_wbscan_next(unicode_wbscan_info_t i, unicode_char ch)
+int unicode_wbscan_next(unicode_wbscan_info_t i, char32_t ch)
 {
 	if (!i->found)
 		unicode_wb_next(i->wb_handle, ch);

@@ -1,5 +1,5 @@
 #!/bin/sh
-autoreconf -fiv
+#autoreconf -fiv
 ./configure --prefix=/usr --disable-root-check --bindir=/usr/bin \
         --with-redhat \
         --mandir=/usr/share/man \

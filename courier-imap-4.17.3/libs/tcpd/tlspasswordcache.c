@@ -23,7 +23,25 @@ static void sslerror(EVP_CIPHER_CTX *ctx, const char *pfix)
 {
         char errmsg[256];
         int errnum=ERR_get_error();
- 
+
+        ERR_error_string_n(errnum, errmsg, sizeof(errmsg)-1);
+
+	fprintf(stderr, "%s: %s\n", pfix, errmsg);
+}
+
+
+#endif
+
+#if HAVE_OPENSSL110
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
+
+static void sslerror(EVP_CIPHER_CTX *ctx, const char *pfix)
+{
+        char errmsg[256];
+        int errnum=ERR_get_error();
+
         ERR_error_string_n(errnum, errmsg, sizeof(errmsg)-1);
 
 	fprintf(stderr, "%s: %s\n", pfix, errmsg);
@@ -202,7 +220,7 @@ static int EVP_EncryptFinal_ex(EVP_CIPHER_CTX *ctx, unsigned char *out,
 
 			if (!EVP_EncryptUpdate(ctx, out, &n_outl, &pad, 1))
 				return 0;
-				
+
 			out += n_outl;
 			*outl += n_outl;
 		}
@@ -331,6 +349,30 @@ static int EVP_DecryptFinal_ex(EVP_CIPHER_CTX *ctx, unsigned char *outm,
 #define HAVE_OPENSSL097 1
 #endif
 
+
+#if HAVE_OPENSSL110
+
+#define RANDOM_BYTES RAND_bytes
+
+typedef EVP_CIPHER_CTX *CIPHER_CONTEXT;
+
+#define CIPHER_INIT(p) (p=EVP_CIPHER_CTX_new())
+#define CIPHER_CLEANUP(p) (EVP_CIPHER_CTX_free(p))
+#define HAVE_OPENSSL097 1
+#define RANDOM_BYTES RAND_bytes
+#define CONTEXT(ctx) (*(ctx))
+#else
+
+typedef EVP_CIPHER_CTX CIPHER_CONTEXT;
+
+#define CIPHER_INIT(p) EVP_CIPHER_CTX_init(&p)
+#define CIPHER_CLEANUP(p) EVP_CIPHER_CTX_cleanup(&p)
+#define RANDOM_BYTES RAND_pseudo_bytes
+
+#define CONTEXT(ctx) (ctx)
+#endif
+
+
 #if HAVE_OPENSSL097
 
 #if BUFSIZ < 8192
@@ -343,7 +385,7 @@ int tlspassword_init()
 	return 1;
 }
 
-static int save_string(EVP_CIPHER_CTX *,
+static int save_string(CIPHER_CONTEXT *,
 		       const char *, char *,
 		       int (*)(const char *, size_t, void *),
 		       void *);
@@ -363,22 +405,22 @@ int tlspassword_save( const char * const *urls,
 	unsigned char iv2_buf[16];
 	MD5_DIGEST md5_password;
 	int iv_len, key_len;
-	EVP_CIPHER_CTX ctx;
+	CIPHER_CONTEXT ctx;
 	const EVP_CIPHER *des=EVP_des_cbc();
 
 	md5_digest(mpw, strlen(mpw), md5_password);
 
-	EVP_CIPHER_CTX_init(&ctx);
+	CIPHER_INIT(ctx);
 	iv_len=EVP_CIPHER_iv_length(des);
 	key_len=EVP_CIPHER_key_length(des);
 
-	if (RAND_pseudo_bytes(iv1_buf, sizeof(iv1_buf)) < 0 ||
-	    RAND_pseudo_bytes(iv2_buf, sizeof(iv2_buf)) < 0)
+	if (RANDOM_BYTES(iv1_buf, sizeof(iv1_buf)) < 0 ||
+	    RANDOM_BYTES(iv2_buf, sizeof(iv2_buf)) < 0)
 	{
 		fprintf(stderr,
 			"tlspassword_save: internal error - "
-			"RAND_pseudo_bytes() failed.\n");
-		EVP_CIPHER_CTX_cleanup(&ctx);
+			"RANDOM_BYTES() failed.\n");
+		CIPHER_CLEANUP(ctx);
 		errno=EIO;
 		return -1;
 	}
@@ -390,27 +432,27 @@ int tlspassword_save( const char * const *urls,
 		fprintf(stderr,
 			"tlspassword_save: internal error - "
 			"unexpected key sizes.\n");
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		errno=EIO;
 		return -1;
 	}
 
 	p=buf+3;
 
-	if (!EVP_EncryptInit_ex(&ctx, des, NULL,
+	if (!EVP_EncryptInit_ex(CONTEXT(&ctx), des, NULL,
 				(unsigned char *)md5_password,
 				iv1_buf) ||
-	    !EVP_EncryptUpdate(&ctx, (unsigned char *)p, &l,
+	    !EVP_EncryptUpdate(CONTEXT(&ctx), (unsigned char *)p, &l,
 			       (unsigned char *)md5_password + key_len,
 			       sizeof(md5_password)-key_len) ||
-	    !EVP_EncryptUpdate(&ctx, (unsigned char *)(p += l), &l,
+	    !EVP_EncryptUpdate(CONTEXT(&ctx), (unsigned char *)(p += l), &l,
 			       iv2_buf,
 			       iv_len + key_len) ||
-	    !EVP_EncryptFinal_ex(&ctx, (unsigned char *)(p += l), &l))
+	    !EVP_EncryptFinal_ex(CONTEXT(&ctx), (unsigned char *)(p += l), &l))
 
 	{
-		sslerror(&ctx, "EVP_EncryptInit_ex");
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		sslerror(CONTEXT(&ctx), "EVP_EncryptInit_ex");
+		CIPHER_CLEANUP(ctx);
 		errno=EIO;
 		return -1;
 	}
@@ -446,12 +488,12 @@ int tlspassword_save( const char * const *urls,
 	}
 #endif
 
-	if (!EVP_EncryptInit_ex(&ctx, des, NULL,
+	if (!EVP_EncryptInit_ex(CONTEXT(&ctx), des, NULL,
 				(unsigned char *)&iv2_buf,
 				(unsigned char *)&iv2_buf + key_len))
 	{
-		sslerror(&ctx, "EVP_EncryptInit_ex");
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		sslerror(CONTEXT(&ctx), "EVP_EncryptInit_ex");
+		CIPHER_CLEANUP(ctx);
 		errno=EIO;
 		return -1;
 	}
@@ -469,10 +511,10 @@ int tlspassword_save( const char * const *urls,
 			return n;
 	}
 
-	if (!EVP_EncryptFinal_ex(&ctx, (unsigned char *)buf, &l))
+	if (!EVP_EncryptFinal_ex(CONTEXT(&ctx), (unsigned char *)buf, &l))
 	{
-		sslerror(&ctx, "EVP_EncryptInit_ex");
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		sslerror(CONTEXT(&ctx), "EVP_EncryptInit_ex");
+		CIPHER_CLEANUP(ctx);
 		errno=EIO;
 		return -1;
 	}
@@ -480,11 +522,11 @@ int tlspassword_save( const char * const *urls,
 	if (l)
 		l=(*writefunc)(buf, l, writefuncarg);
 
-	EVP_CIPHER_CTX_cleanup(&ctx);
+	CIPHER_CLEANUP(ctx);
 	return l;
 }
 
-static int save_string(EVP_CIPHER_CTX *ctx,
+static int save_string(CIPHER_CONTEXT *ctx,
 		       const char *str, char *buf,
 		       int (*writefunc)(const char *, size_t, void *),
 		       void *writefuncarg)
@@ -505,9 +547,9 @@ static int save_string(EVP_CIPHER_CTX *ctx,
 	b[0]=len / 256;
 	b[1]=len % 256;
 
-	if (!EVP_EncryptUpdate(ctx, (unsigned char *)buf, &l, b, 2))
+	if (!EVP_EncryptUpdate(CONTEXT(ctx), (unsigned char *)buf, &l, b, 2))
 	{
-		sslerror(ctx, "EVP_EncryptUpdate");
+		sslerror(CONTEXT(ctx), "EVP_EncryptUpdate");
 		return -1;
 	}
 
@@ -526,10 +568,10 @@ static int save_string(EVP_CIPHER_CTX *ctx,
 		if (n > BUFSIZ / 4)
 			n=BUFSIZ/4;
 
-		if (!EVP_EncryptUpdate(ctx, (unsigned char *)buf, &l,
+		if (!EVP_EncryptUpdate(CONTEXT(ctx), (unsigned char *)buf, &l,
 				       (unsigned char *)str, n))
 		{
-			sslerror(ctx, "EVP_EncryptUpdate");
+			sslerror(CONTEXT(ctx), "EVP_EncryptUpdate");
 			return -1;
 		}
 
@@ -639,7 +681,7 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 
 	MD5_DIGEST md5_password;
 	int iv_len, key_len;
-	EVP_CIPHER_CTX ctx;
+	CIPHER_CONTEXT ctx;
 	const EVP_CIPHER *des=EVP_des_cbc();
 	struct tlspassword_readinfo readinfo;
 	char header[3];
@@ -656,20 +698,20 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 
 	md5_digest(mpw, strlen(mpw), md5_password);
 
-	EVP_CIPHER_CTX_init(&ctx);
+	CIPHER_INIT(ctx);
 	iv_len=EVP_CIPHER_iv_length(des);
 	key_len=EVP_CIPHER_key_length(des);
 
 	if (tlspassword_read(&readinfo, header, 3) ||
 	    tlspassword_read(&readinfo, iv1_buf, iv_len))
 	{
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		return -1;
 	}
 	if (header[0] != PASSFILEFORMAT)
 	{
 		errno=EINVAL;
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		return -1;
 	}
 
@@ -677,7 +719,7 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 	     + (unsigned char)header[2]) > sizeof(buf) / 4)
 	{
 		errno=EINVAL;
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		return -1;
 	}
 
@@ -685,15 +727,15 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 		return -1;
 
 	p=buf + sizeof(buf)/2;
-	if (!EVP_DecryptInit_ex(&ctx, des, NULL,
+	if (!EVP_DecryptInit_ex(CONTEXT(&ctx), des, NULL,
 				(unsigned char *)md5_password,
 				(unsigned char *)&iv1_buf) ||
-	    !EVP_DecryptUpdate(&ctx, (unsigned char *)p, &outl,
+	    !EVP_DecryptUpdate(CONTEXT(&ctx), (unsigned char *)p, &outl,
 			       (unsigned char *)buf, l) ||
-	    !EVP_DecryptFinal_ex(&ctx, (unsigned char *)(p += outl), &outl))
+	    !EVP_DecryptFinal_ex(CONTEXT(&ctx), (unsigned char *)(p += outl), &outl))
 	{
 		errno=EINVAL;
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		return -1;
 	}
 
@@ -704,7 +746,7 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 		      sizeof(md5_password)-key_len))
 	{
 		errno=EINVAL;
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		return -1;
 	}
 
@@ -720,12 +762,12 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 	}
 #endif
 
-	if (!EVP_DecryptInit_ex(&ctx, des, NULL,
+	if (!EVP_DecryptInit_ex(CONTEXT(&ctx), des, NULL,
 				(unsigned char *)(p-iv_len-key_len),
 				(unsigned char *)(p-iv_len)))
 	{
 		errno=EINVAL;
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		return -1;
 	}
 
@@ -746,7 +788,7 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 			{
 				tlspassword_readcleanup(&readinfo);
 				errno=EINVAL;
-				EVP_CIPHER_CTX_cleanup(&ctx);
+				CIPHER_CLEANUP(ctx);
 				return -1;
 			}
 
@@ -754,13 +796,13 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 			readinfo.bufleft=outl;
 		}
 
-		if (!EVP_DecryptUpdate(&ctx, (unsigned char *)buf, &outl,
+		if (!EVP_DecryptUpdate(CONTEXT(&ctx), (unsigned char *)buf, &outl,
 				       (unsigned char *)
 				       readinfo.bufptr, readinfo.bufleft))
 		{
 			tlspassword_readcleanup(&readinfo);
 			errno=EINVAL;
-			EVP_CIPHER_CTX_cleanup(&ctx);
+			CIPHER_CLEANUP(ctx);
 			return -1;
 		}
 		readinfo.bufleft=0;
@@ -773,7 +815,7 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 			if (n < 0)
 			{
 				tlspassword_readcleanup(&readinfo);
-				EVP_CIPHER_CTX_cleanup(&ctx);
+				CIPHER_CLEANUP(ctx);
 				return -1;
 			}
 
@@ -782,11 +824,11 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 		}
 	}
 
-	if (!EVP_DecryptFinal_ex(&ctx, (unsigned char *)buf, &outl))
+	if (!EVP_DecryptFinal_ex(CONTEXT(&ctx), (unsigned char *)buf, &outl))
 	{
 		tlspassword_readcleanup(&readinfo);
 		errno=EINVAL;
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		return -1;
 	}
 
@@ -799,7 +841,7 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 		{
 			tlspassword_readcleanup(&readinfo);
 			errno=EINVAL;
-			EVP_CIPHER_CTX_cleanup(&ctx);
+			CIPHER_CLEANUP(ctx);
 			return -1;
 		}
 
@@ -812,7 +854,7 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 	{
 		tlspassword_readcleanup(&readinfo);
 		errno=EINVAL;
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		return (-1);
 	}
 
@@ -823,7 +865,7 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 			free(urls);
 
 		tlspassword_readcleanup(&readinfo);
-		EVP_CIPHER_CTX_cleanup(&ctx);
+		CIPHER_CLEANUP(ctx);
 		return (-1);
 	}
 
@@ -844,7 +886,7 @@ int tlspassword_load( int (*callback)(char *, size_t, void *),
 	free(pws);
 
 	tlspassword_readcleanup(&readinfo);
-	EVP_CIPHER_CTX_cleanup(&ctx);
+	CIPHER_CLEANUP(ctx);
 	return 0;
 }
 
@@ -921,6 +963,10 @@ static int read_string(struct tlspassword_readinfo *info, char *p, int n)
 }
 
 #else
+
+
+
+
 
 
 int tlspassword_init()

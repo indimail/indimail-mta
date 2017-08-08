@@ -59,7 +59,7 @@
 #include	"maildir/maildiraclt.h"
 #include	"maildir/maildirnewshared.h"
 #include	"maildir/maildirinfo.h"
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 
 #include	"rfc2045/rfc2045.h"
 #include	"rfc822/rfc822.h"

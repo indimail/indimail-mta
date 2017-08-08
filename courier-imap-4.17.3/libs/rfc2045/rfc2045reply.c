@@ -10,7 +10,7 @@
 #include	"rfc822/rfc2047.h"
 #include	"rfc2045charset.h"
 #include	"rfc822/rfc822.h"
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 #include	<stdio.h>
 #include	<unistd.h>
 #include	<stdlib.h>
@@ -275,7 +275,7 @@ static int reply_begin(size_t quote_level,
 		       void *arg)
 {
 	struct replyinfostruct *s=(struct replyinfostruct *)arg;
-	unicode_char quoteChar='>';
+	char32_t quoteChar='>';
 
 	/*
 	** Save quote level, begin conversion from unicode to the native
@@ -310,11 +310,11 @@ static int reply_begin(size_t quote_level,
 ** RFC 3676: (possibly partial) contents of a deflowed line, as unicode.
 */
 
-static int reply_contents(const unicode_char *txt,
+static int reply_contents(const char32_t *txt,
 			  size_t txt_size,
 			  void *arg)
 {
-	unicode_char spaceChar=' ';
+	char32_t spaceChar=' ';
 	size_t nonspc_cnt;
 
 	struct replyinfostruct *s=(struct replyinfostruct *)arg;
@@ -380,7 +380,7 @@ static int reply_contents(const unicode_char *txt,
 
 static int reply_end(void *arg)
 {
-	unicode_char newLine='\n';
+	char32_t newLine='\n';
 	struct replyinfostruct *s=(struct replyinfostruct *)arg;
 
 	unicode_convert_uc(s->u_handle, &newLine, 1);
@@ -394,7 +394,7 @@ static int reply_end(void *arg)
 */
 static int reply_wrap(void *arg)
 {
-	unicode_char spaceChar=' ';
+	char32_t spaceChar=' ';
 	struct replyinfostruct *s=(struct replyinfostruct *)arg;
 
 	/*

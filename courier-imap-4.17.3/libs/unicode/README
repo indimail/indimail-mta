@@ -37,7 +37,9 @@ Courier Unicode Library
        a unicode character. Also, an adaptation of the iconv(3) API for this
        unicode library.
 
-     * Look up Unicode script property.
+     * Look up the Unicode script property.
+
+     * Look up the category property.
 
    This library also implements C++ bindings for these algorithms.
 

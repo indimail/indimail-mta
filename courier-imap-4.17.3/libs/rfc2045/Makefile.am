@@ -5,6 +5,8 @@
 noinst_LTLIBRARIES=librfc2045.la
 noinst_PROGRAMS=reformime makemime headercheck testrfc3676parser
 
+AM_CXXFLAGS=@COURIER_UNICODE_CXXFLAGS@
+
 BUILT_SOURCES=reformime.html reformime.1 makemime.html makemime.1 \
 	rfc2045.html rfc2045.3
 
@@ -31,43 +33,42 @@ librfc2045_la_SOURCES=rfc2045.c rfc2045.h rfc2045src.h \
 
 reformime_SOURCES=reformime.c
 reformime_DEPENDENCIES =  librfc2045.la ../rfc822/libencode.la ../rfc822/librfc822.la \
-		../numlib/libnumlib.la ../unicode/libunicode.la
-reformime_LDADD = $(reformime_DEPENDENCIES) ../unicode/libunicode.la
+		../numlib/libnumlib.la
+reformime_LDADD = $(reformime_DEPENDENCIES) -lunicode
 reformime_LDFLAGS=-static
 
 makemime_SOURCES=makemime.c
-makemime_DEPENDENCIES= ../rfc822/libencode.la ../rfc822/librfc822.la librfc2045.la \
-		../numlib/libnumlib.la ../unicode/libunicode.la
-makemime_LDADD = $(makemime_DEPENDENCIES) ../unicode/libunicode.la
+makemime_DEPENDENCIES= ../rfc822/libencode.la ../rfc822/librfc822.la librfc2045.la ../numlib/libnumlib.la
+makemime_LDADD = $(makemime_DEPENDENCIES) -lunicode
 makemime_LDFLAGS=-static
 
 headercheck_SOURCES=headercheck.c
-headercheck_DEPENDENCIES=librfc2045.la ../rfc822/librfc822.la ../numlib/libnumlib.la ../unicode/libunicode.la
-headercheck_LDADD=$(headercheck_DEPENDENCIES) ../unicode/libunicode.la
+headercheck_DEPENDENCIES=librfc2045.la ../rfc822/librfc822.la ../numlib/libnumlib.la
+headercheck_LDADD=$(headercheck_DEPENDENCIES) -lunicode
 headercheck_LDFLAGS=-static
 
 testrfc3676parser_SOURCES=testrfc3676parser.c
 testrfc3676parser_DEPENDENCIES=librfc2045.la
-testrfc3676parser_LDADD=$(testrfc3676parser_DEPENDENCIES) ../unicode/libunicode.la
+testrfc3676parser_LDADD=$(testrfc3676parser_DEPENDENCIES) -lunicode
 
 if HAVE_SGML
 reformime.html: reformime.sgml ../docbook/sgml2html
 	../docbook/sgml2html reformime.sgml reformime.html
 
 reformime.1: reformime.sgml ../docbook/sgml2html
-	../docbook/sgml2man reformime.sgml reformime.1
+	../docbook/sgml2man reformime.sgml reformime.1 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
 
 makemime.html: makemime.sgml ../docbook/sgml2html
 	../docbook/sgml2html makemime.sgml makemime.html
 
 makemime.1: makemime.sgml ../docbook/sgml2html
-	../docbook/sgml2man makemime.sgml makemime.1
+	../docbook/sgml2man makemime.sgml makemime.1 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
 
 rfc2045.html: rfc2045.sgml ../docbook/sgml2html
 	../docbook/sgml2html rfc2045.sgml rfc2045.html
 
 rfc2045.3: rfc2045.sgml ../docbook/sgml2html
-	../docbook/sgml2man rfc2045.sgml rfc2045.3
+	../docbook/sgml2man rfc2045.sgml rfc2045.3 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
 endif
 
 if HAVE_LIBIDN

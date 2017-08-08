@@ -3,13 +3,13 @@
 .\"<!-- distribution information. -->
 .\"     Title: couriertcpd
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/27/2015
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/11/2017
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "COURIERTCPD" "1" "06/27/2015" "Courier Mail Server" "Double Precision, Inc."
+.TH "COURIERTCPD" "1" "03/11/2017" "Courier Mail Server" "Double Precision, Inc."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -566,8 +566,6 @@ overrides it\&.
 .PP
 An alternative to listing banned IP addresses in access files is to use an external DNS\-based IP access list\&.
 .PP
-There is no provision to support IPv6\-based lists, because none yet exist\&. IPv6\-based access list support will be added in the future\&.
-.PP
 \fBcouriertcpd\fR\*(Aqs default configuration does not automatically reject connections from banned IP address unless the
 \fB\-drop\fR
 option is present\&. Instead,
@@ -600,8 +598,10 @@ and
 \fBcouriertcpd\fR
 makes a DNS query for
 \(lqd\&.c\&.b\&.a\&.dnswl\&.example\&.com\(rq, then, if necessary, for
-\(lqd\&.c\&.b\&.a\&.dnsbl\&.example\&.com\(rq, for a connection from the IP address
+\(lqd\&.c\&.b\&.a\&.dnsbl\&.example\&.com\(rq, for a connection from the IPv4 address
 \fIa\&.b\&.c\&.d\fR\&.
+.PP
+For IPv6 addresses, the DNS query consists of individual hexadecimal nybbles (in reverse order, like the IPv4 query)\&.
 .PP
 If the DNS query succeeds (more details below),
 \fB\-allow\fR
@@ -609,11 +609,9 @@ sets the environment variable to an empty string, and
 \fB\-block\fR
 sets the environment variable from the
 TXT
-record in the DNS response, or to
-\(lqAccess denied\&.\(rq
-if the DNS access list did not return a
-TXT
-record\&. It should be possible to use
+record in the DNS response, if one was requested (see below), or to a default message for regular DNS queries for
+A
+records\&. It should be possible to use
 \fBcouriertcpd\fR
 with DNS access lists that use either
 A
@@ -688,10 +686,22 @@ and
 .RE
 .\}
 .PP
-The last component specifies a custom message that overrides any
+The last component specifies a custom message that overrides the default rejection message\&. Note that this is a single parameter to
+couriertcpd, so the parameter must be quoted if it contains any spaces or special shell metacharacters\&. A message that\*(Aqs specified as
+\(lq*\(rq
+results in a
 TXT
-record in the DNS access list\&. Note that this is a single parameter to
-couriertcpd, so the parameter must be quoted if it contains any spaces or special shell metacharacters\&.
+query to the DNS access list instead of the regular
+A
+query\&. This is for DNS access lists that provide
+TXT
+records, that gets copied into the
+\fIBLOCK\fR
+variable (or the custom variable)\&. The
+\(lq*\(rq
+must also be quoted, since it\*(Aqs also a shell metacharacter, and it cannot be used together with an explicit
+A
+address query, described above\&.
 .PP
 The custom message parameter gets specified for the
 \fB\-block\fR, option\&.

@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: unicode::iconvert::tou
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/22/2015
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/11/2017
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "UNICODE::ICONVERT::T" "3" "06/22/2015" "Courier Unicode Library" "Courier Unicode Library"
+.TH "UNICODE::ICONVERT::T" "3" "03/11/2017" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -39,9 +39,9 @@ unicode::iconvert::tou \- template for converting text sequence to unicode
 .HP \w'output_iter_t\ convert('u
 .BI "output_iter_t convert(input_iter_t\ " "beg_iter" ", input_iter_t\ " "end_iter" ", const\ std::string\ &" "charset" ", bool\ &" "errflag" ", output_iter_t\ " "output_iter" ");"
 .HP \w'bool\ convert('u
-.BI "bool convert(input_iter_t\ " "beg_iter" ", input_iter_t\ " "end_iter" ", const\ std::string\ &" "charset" ", std::vector<unicode_char>\ &" "out_buf" ");"
-.HP \w'std::pair<std::vector<unicode_char>,\ bool>\ convert('u
-.BI "std::pair<std::vector<unicode_char>, bool> convert(const\ std::string\ &" "text" ", const\ std::string\ &" "charset" ");"
+.BI "bool convert(input_iter_t\ " "beg_iter" ", input_iter_t\ " "end_iter" ", const\ std::string\ &" "charset" ", std::u32string\ &" "out_buf" ");"
+.HP \w'std::pair<std::u32string,\ bool>\ convert('u
+.BI "std::pair<std::u32string, bool> convert(const\ std::string\ &" "text" ", const\ std::string\ &" "charset" ");"
 .SH "DESCRIPTION"
 .PP
 These template functions convert text in a given character set to unicode characters\&.
@@ -55,7 +55,7 @@ character set\&. They get converted to unicode characters\&.
 \fIoutput_iter\fR
 is an output iterator that
 \fBconvert\fR() iterates over
-unicode_chars\&.
+char32_ts\&.
 \fBconvert\fR() returns the value of the output iterator after iterating over the converted character sequence\&.
 \fIerrflag\fR, passed by reference, gets set to
 true
@@ -65,7 +65,7 @@ if the conversion completed without errors\&.
 .PP
 An overloaded
 \fBconvert\fR() puts the unicode character sequence into a vector of
-unicode_chars, instead of an output sequence, and returned the error flag\&. Finally, a single
+char32_ts, instead of an output sequence, and returned the error flag\&. Finally, a single
 std::string
 specifies the character string, instead of a beginning and an ending iterator, and returns a
 std::pair

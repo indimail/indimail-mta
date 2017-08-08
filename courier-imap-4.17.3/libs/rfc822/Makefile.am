@@ -23,13 +23,13 @@ noinst_DATA=$(BUILT_SOURCES)
 
 noinst_PROGRAMS=testsuite reftest
 testsuite_SOURCES=testsuite.c
-testsuite_DEPENDENCIES=librfc822.la ../unicode/libunicode.la
-testsuite_LDADD=librfc822.la ../unicode/libunicode.la
+testsuite_DEPENDENCIES=librfc822.la
+testsuite_LDADD=librfc822.la -lunicode
 testsuite_LDFLAGS=-static
 
 reftest_SOURCES=reftest.c imaprefs.h
-reftest_DEPENDENCIES=librfc822.la ../unicode/libunicode.la
-reftest_LDADD=librfc822.la ../unicode/libunicode.la
+reftest_DEPENDENCIES=librfc822.la
+reftest_LDADD=librfc822.la -lunicode
 reftest_LDFLAGS=-static
 
 EXTRA_DIST=testsuite.txt reftest.txt $(BUILT_SOURCES)
@@ -39,7 +39,7 @@ rfc822.html: rfc822.sgml ../docbook/sgml2html
 	../docbook/sgml2html rfc822.sgml rfc822.html
 
 rfc822.3: rfc822.sgml ../docbook/sgml2html
-	../docbook/sgml2man rfc822.sgml rfc822.3
+	../docbook/sgml2man rfc822.sgml rfc822.3 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 endif
 
 check-am:

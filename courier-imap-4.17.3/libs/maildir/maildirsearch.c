@@ -8,7 +8,7 @@
 
 
 int maildir_search_start_unicode(struct maildir_searchengine *sei,
-				 const unicode_char *s)
+				 const char32_t *s)
 {
 	unsigned i, j, *r;
 
@@ -54,7 +54,7 @@ int maildir_search_start_unicode(struct maildir_searchengine *sei,
 int maildir_search_start_str(struct maildir_searchengine *sei,
 			     const char *s)
 {
-	unicode_char *uc=malloc((strlen(s)+1) * sizeof(unicode_char));
+	char32_t *uc=malloc((strlen(s)+1) * sizeof(char32_t));
 	size_t n;
 	int rc;
 
@@ -75,7 +75,7 @@ int maildir_search_start_str_chset(struct maildir_searchengine *engine,
 {
 #define SPC(s) ((s) == ' '|| (s) == '\t' || (s) == '\r' || (s) == '\n')
 
-	unicode_char *ucptr;
+	char32_t *ucptr;
 	size_t ucsize;
 	unicode_convert_handle_t h=unicode_convert_tou_init(chset, &ucptr,
 								&ucsize, 1);

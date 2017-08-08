@@ -1,12 +1,12 @@
 #include "unicode_config.h"
-#include "unicode.h"
+#include "courier-unicode.h"
 
 #include "eastasianwidth.h"
 #include "linebreaktab_internal.h"
 
 #include <stdlib.h>
 
-int unicode_wcwidth(unicode_char c)
+int unicode_wcwidth(char32_t c)
 {
 	size_t b=0;
 	size_t e=sizeof(unicode_wcwidth_tab)/sizeof(unicode_wcwidth_tab[0]);
@@ -42,24 +42,7 @@ int unicode_wcwidth(unicode_char c)
 	return 1;
 }
 
-int unicode_isspace(unicode_char ch)
-{
-	if (ch == 9)
-		return 1;
-
-	switch (unicode_lb_lookup(ch)) {
-	case UNICODE_LB_BK:
-	case UNICODE_LB_CR:
-	case UNICODE_LB_LF:
-	case UNICODE_LB_NL:
-	case UNICODE_LB_SP:
-		return 1;
-	}
-
-	return 0;
-}
-
-size_t unicode_wcwidth_str(const unicode_char *c)
+size_t unicode_wcwidth_str(const char32_t *c)
 {
 	size_t w=0;
 

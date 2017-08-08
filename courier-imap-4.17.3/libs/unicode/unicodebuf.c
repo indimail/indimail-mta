@@ -5,7 +5,7 @@
 */
 
 #include	"unicode_config.h"
-#include	"unicode.h"
+#include	"courier-unicode.h"
 #include	<stdlib.h>
 #include	<string.h>
 
@@ -24,7 +24,7 @@ void unicode_buf_deinit(struct unicode_buf *p)
 }
 
 int unicode_buf_append(struct unicode_buf *p,
-		       const unicode_char *uc, size_t l)
+		       const char32_t *uc, size_t l)
 {
 	if (l > p->max-p->len)
 		l=p->max-p->len;
@@ -32,7 +32,7 @@ int unicode_buf_append(struct unicode_buf *p,
 	if (p->len + l > p->size)
 	{
 		size_t n=(p->len + l) * 2;
-		unicode_char *newp;
+		char32_t *newp;
 
 		if (n < 256)
 			n=256;
@@ -40,8 +40,8 @@ int unicode_buf_append(struct unicode_buf *p,
 		if (n > p->max)
 			n=p->max;
 
-		newp=p->ptr ? realloc(p->ptr, n * sizeof(unicode_char))
-			: malloc(n * sizeof(unicode_char));
+		newp=p->ptr ? realloc(p->ptr, n * sizeof(char32_t))
+			: malloc(n * sizeof(char32_t));
 
 		if (!newp)
 			return -1;
@@ -50,7 +50,7 @@ int unicode_buf_append(struct unicode_buf *p,
 		p->size=n;
 	}
 
-	memcpy(p->ptr + p->len, uc, l * sizeof(unicode_char));
+	memcpy(p->ptr + p->len, uc, l * sizeof(char32_t));
 
 	p->len += l;
 	return 0;
@@ -60,7 +60,7 @@ void unicode_buf_append_char(struct unicode_buf *dst,
 			     const char *str,
 			     size_t cnt)
 {
-	unicode_char unicode_buf[256];
+	char32_t unicode_buf[256];
 
 	while (cnt)
 	{

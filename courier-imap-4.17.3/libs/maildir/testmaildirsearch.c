@@ -10,7 +10,7 @@ static int testmaildirsearch(const char *chset, const char *needle,
 			     const char *haystack)
 {
 	struct maildir_searchengine se;
-	unicode_char *ucptr;
+	char32_t *ucptr;
 	size_t ucsize;
 	size_t i;
 	unicode_convert_handle_t h=unicode_convert_tou_init(chset, &ucptr,

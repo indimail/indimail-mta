@@ -286,7 +286,8 @@ AC_MSG_RESULT($spipe)
 AC_CHECK_HEADER(openssl/ssl.h,have_ssl_h=yes,have_ssl_h=no)
 AC_CHECK_LIB(ssl, SSL_load_error_strings, have_ssl=yes, have_ssl=no,
 	-lcrypto)
-AC_CHECK_LIB(ssl, OPENSSL_cleanup,have_ssl=yes)
+AC_CHECK_LIB(ssl, SSL_library_init, have_ssl=yes)
+AC_CHECK_LIB(ssl, OPENSSL_init_ssl, have_ssl=yes)
 
 if test "$have_ssl" = "yes"
 then
@@ -505,6 +506,31 @@ RAND_pseudo_bytes(dummy, 1);
 				       [ Whether OpenSSL 0.9.7 is installed ])
 ], [
    AC_MSG_RESULT(no)
+
+
+
+		AC_MSG_CHECKING(for OpenSSL 1.1.0)
+		AC_TRY_LINK( [
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+],
+[
+char dummy[1];
+unsigned char a[1], b[1];
+
+EVP_CIPHER_CTX *ctx=EVP_CIPHER_CTX_new();
+EVP_EncryptInit_ex(ctx, EVP_des_cbc(), NULL, a, b);
+RAND_bytes(dummy, 1);
+
+], [
+   CRYPTLIBS="-lcrypto $KRBLIBS"
+   AC_MSG_RESULT(yes)
+   AC_DEFINE_UNQUOTED(HAVE_OPENSSL110, 1,
+				       [ Whether OpenSSL 1.1.0 is installed ])
+], [
+   AC_MSG_RESULT(no)
+])
+
 ]
 )
 		LIBS="-lssl $LIBS"

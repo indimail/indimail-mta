@@ -16,7 +16,7 @@
 static void emit_line_begin(rfc3676_parser_t handle);
 
 static void emit_line_contents(rfc3676_parser_t handle,
-			       const unicode_char *uc,
+			       const char32_t *uc,
 			       size_t cnt);
 
 static void emit_line_flowed_wrap(rfc3676_parser_t handle);
@@ -27,13 +27,13 @@ static void emit_line_end(rfc3676_parser_t handle);
 static void nonflowed_line_begin(rfc3676_parser_t handle);
 
 static void nonflowed_line_contents(rfc3676_parser_t handle,
-				    const unicode_char *uc,
+				    const char32_t *uc,
 				    size_t cnt);
 
 static void nonflowed_line_end(rfc3676_parser_t handle);
 
 static int nonflowed_line_process(int linebreak_opportunity,
-				  unicode_char ch, void *dummy);
+				  char32_t ch, void *dummy);
 
 #define EMIT_LINE_BEGIN(h) do {			\
 		(*(h)->line_begin_handler)(h);	\
@@ -56,14 +56,14 @@ struct rfc3676_parser_struct {
 
 	/* Receive raw text stream, converted to unicode */
 	size_t (*line_handler)(rfc3676_parser_t,
-			       const unicode_char *ptr, size_t cnt);
+			       const char32_t *ptr, size_t cnt);
 
 	/*
 	** Receive mostly raw text stream: CRs that precede an LF
 	** are removed from the stream received by content_handler.
 	*/
 	size_t (*content_handler)(rfc3676_parser_t,
-				  const unicode_char *ptr, size_t cnt);
+				  const char32_t *ptr, size_t cnt);
 
 	size_t quote_level;
 	size_t sig_block_index;
@@ -86,7 +86,7 @@ struct rfc3676_parser_struct {
 
 	/* Content of this line */
 	void (*line_content_handler)(rfc3676_parser_t handle,
-				     const unicode_char *uc,
+				     const char32_t *uc,
 				     size_t cnt);
 
 	/* End of this line */
@@ -116,7 +116,7 @@ struct rfc3676_parser_struct {
 	/* Current handle of non-flowd content. */
 	void (*nonflowed_line_process)(struct rfc3676_parser_struct *handle,
 				       int linebreak_opportunity,
-				       unicode_char ch,
+				       char32_t ch,
 				       size_t ch_width);
 
 	void (*nonflowed_line_end)(struct rfc3676_parser_struct *handle);
@@ -125,37 +125,37 @@ struct rfc3676_parser_struct {
 static int parse_unicode(const char *, size_t, void *);
 
 static size_t scan_crlf(rfc3676_parser_t handle,
-			const unicode_char *ptr, size_t cnt);
+			const char32_t *ptr, size_t cnt);
 
 static size_t scan_crlf_seen_cr(rfc3676_parser_t handle,
-				const unicode_char *ptr, size_t cnt);
+				const char32_t *ptr, size_t cnt);
 
 static size_t start_of_line(rfc3676_parser_t handle,
-			    const unicode_char *ptr, size_t cnt);
+			    const char32_t *ptr, size_t cnt);
 
 static size_t count_quote_level(rfc3676_parser_t handle,
-				const unicode_char *ptr, size_t cnt);
+				const char32_t *ptr, size_t cnt);
 
 static size_t counted_quote_level(rfc3676_parser_t handle,
-				  const unicode_char *ptr, size_t cnt);
+				  const char32_t *ptr, size_t cnt);
 
 static size_t check_signature_block(rfc3676_parser_t handle,
-				    const unicode_char *ptr, size_t cnt);
+				    const char32_t *ptr, size_t cnt);
 
 static size_t start_content_line(rfc3676_parser_t handle,
-				const unicode_char *ptr, size_t cnt);
+				const char32_t *ptr, size_t cnt);
 
 static size_t scan_content_line(rfc3676_parser_t handle,
-				const unicode_char *ptr, size_t cnt);
+				const char32_t *ptr, size_t cnt);
 
 static size_t seen_sig_block(rfc3676_parser_t handle,
-			     const unicode_char *ptr, size_t cnt);
+			     const char32_t *ptr, size_t cnt);
 
 static size_t seen_notsig_block(rfc3676_parser_t handle,
-				const unicode_char *ptr, size_t cnt);
+				const char32_t *ptr, size_t cnt);
 
 static size_t seen_content_sp(rfc3676_parser_t handle,
-			      const unicode_char *ptr, size_t cnt);
+			      const char32_t *ptr, size_t cnt);
 
 
 /*
@@ -218,21 +218,21 @@ int rfc3676parser(rfc3676_parser_t handle,
 }
 
 /*
-** Convert char stream from iconv into unicode_chars, then pass them to the
-** current handler, until all converted unicode_chars are consumed.
+** Convert char stream from iconv into char32_ts, then pass them to the
+** current handler, until all converted char32_ts are consumed.
 */
 
 static int parse_unicode(const char *ucs4, size_t nbytes, void *arg)
 {
 	rfc3676_parser_t handle=(rfc3676_parser_t)arg;
-	unicode_char ucs4buf[128];
-	const unicode_char *p;
+	char32_t ucs4buf[128];
+	const char32_t *p;
 
 	/* Keep going until there's an error, or everything is consumed. */
 
 	while (handle->errflag == 0 && nbytes)
 	{
-		/* Do it in pieces, using the temporary unicode_char buffer */
+		/* Do it in pieces, using the temporary char32_t buffer */
 
 		size_t cnt=nbytes;
 
@@ -244,7 +244,7 @@ static int parse_unicode(const char *ucs4, size_t nbytes, void *arg)
 		ucs4 += cnt;
 		nbytes -= cnt;
 
-		cnt /= sizeof(unicode_char);
+		cnt /= sizeof(char32_t);
 		p=ucs4buf;
 
 		/* Keep feeding it to the current handler */
@@ -299,7 +299,7 @@ int rfc3676parser_deinit(rfc3676_parser_t handle, int *errptr)
 */
 
 static size_t scan_crlf(rfc3676_parser_t handle,
-			const unicode_char *ptr, size_t cnt)
+			const char32_t *ptr, size_t cnt)
 {
 	size_t i;
 
@@ -342,9 +342,9 @@ static size_t scan_crlf(rfc3676_parser_t handle,
 */
 
 static size_t scan_crlf_seen_cr(rfc3676_parser_t handle,
-				const unicode_char *ptr, size_t cnt)
+				const char32_t *ptr, size_t cnt)
 {
-	unicode_char cr='\r';
+	char32_t cr='\r';
 
 	handle->line_handler=scan_crlf;
 
@@ -374,7 +374,7 @@ static size_t scan_crlf_seen_cr(rfc3676_parser_t handle,
 */
 
 static size_t start_of_line(rfc3676_parser_t handle,
-			    const unicode_char *ptr, size_t cnt)
+			    const char32_t *ptr, size_t cnt)
 {
 	if (ptr == NULL)
 	{
@@ -396,7 +396,7 @@ static size_t start_of_line(rfc3676_parser_t handle,
 */
 
 static size_t count_quote_level(rfc3676_parser_t handle,
-				const unicode_char *ptr, size_t cnt)
+				const char32_t *ptr, size_t cnt)
 {
 	size_t i;
 
@@ -425,7 +425,7 @@ static size_t count_quote_level(rfc3676_parser_t handle,
 */
 
 static size_t counted_quote_level(rfc3676_parser_t handle,
-				  const unicode_char *ptr, size_t cnt)
+				  const char32_t *ptr, size_t cnt)
 {
 	handle->was_previous_quote_level=0;
 
@@ -492,7 +492,7 @@ static size_t counted_quote_level(rfc3676_parser_t handle,
 */
 
 static size_t start_content_line(rfc3676_parser_t handle,
-				const unicode_char *ptr, size_t cnt)
+				const char32_t *ptr, size_t cnt)
 {
 	/*
 	** We'll start scanning for the signature block, as soon as
@@ -500,7 +500,7 @@ static size_t start_content_line(rfc3676_parser_t handle,
 	*/
 	handle->content_handler=check_signature_block;
 	handle->sig_block_index=0;
-	
+
 	if (ptr && *ptr == '\n' && handle->was_previous_quote_level)
 	{
 		EMIT_LINE_END(handle);
@@ -512,12 +512,12 @@ static size_t start_content_line(rfc3676_parser_t handle,
 }
 
 
-static const unicode_char sig_block[]={'-', '-', ' '};
+static const char32_t sig_block[]={'-', '-', ' '};
 
 /* Checking for a magical sig block */
 
 static size_t check_signature_block(rfc3676_parser_t handle,
-				    const unicode_char *ptr, size_t cnt)
+				    const char32_t *ptr, size_t cnt)
 {
 	if (ptr && *ptr == sig_block[handle->sig_block_index])
 	{
@@ -533,7 +533,7 @@ static size_t check_signature_block(rfc3676_parser_t handle,
 }
 
 static size_t seen_sig_block(rfc3676_parser_t handle,
-			     const unicode_char *ptr, size_t cnt)
+			     const char32_t *ptr, size_t cnt)
 {
 	if (ptr == NULL || *ptr == '\n')
 	{
@@ -566,9 +566,9 @@ static size_t seen_sig_block(rfc3676_parser_t handle,
 /* This is not a sig block line */
 
 static size_t seen_notsig_block(rfc3676_parser_t handle,
-				 const unicode_char *newptr, size_t newcnt)
+				 const char32_t *newptr, size_t newcnt)
 {
-	const unicode_char *ptr;
+	const char32_t *ptr;
 	size_t i;
 
 	if (handle->was_previous_quote_level)
@@ -596,7 +596,7 @@ static size_t seen_notsig_block(rfc3676_parser_t handle,
 */
 
 static size_t scan_content_line(rfc3676_parser_t handle,
-				const unicode_char *ptr, size_t cnt)
+				const char32_t *ptr, size_t cnt)
 {
 	size_t i;
 
@@ -627,9 +627,9 @@ static size_t scan_content_line(rfc3676_parser_t handle,
 }
 
 static size_t seen_content_sp(rfc3676_parser_t handle,
-			      const unicode_char *ptr, size_t cnt)
+			      const char32_t *ptr, size_t cnt)
 {
-	unicode_char sp=' ';
+	char32_t sp=' ';
 
 	handle->content_handler=scan_content_line;
 
@@ -690,7 +690,7 @@ static void emit_line_flowed_wrap(rfc3676_parser_t handle)
 }
 
 static void emit_line_contents(rfc3676_parser_t handle,
-			       const unicode_char *uc,
+			       const char32_t *uc,
 			       size_t cnt)
 {
 	if (handle->errflag == 0 && cnt > 0)
@@ -717,7 +717,7 @@ static void emit_line_end(rfc3676_parser_t handle)
 
 static void initial_nonflowed_line(rfc3676_parser_t handle,
 				   int linebreak_opportunity,
-				   unicode_char ch,
+				   char32_t ch,
 				   size_t ch_width);
 
 static void initial_nonflowed_end(rfc3676_parser_t handle);
@@ -772,7 +772,7 @@ static void nonflowed_line_begin(rfc3676_parser_t handle)
 */
 
 static void nonflowed_line_contents(rfc3676_parser_t handle,
-				    const unicode_char *uc,
+				    const char32_t *uc,
 				    size_t cnt)
 {
 	if (!handle->lb)
@@ -814,7 +814,7 @@ static void nonflowed_line_end(rfc3676_parser_t handle)
 ** invoke the current handler.
 */
 static int nonflowed_line_process(int linebreak_opportunity,
-				  unicode_char ch, void *dummy)
+				  char32_t ch, void *dummy)
 {
 	rfc3676_parser_t handle=(rfc3676_parser_t)dummy;
 
@@ -830,7 +830,7 @@ static int nonflowed_line_process(int linebreak_opportunity,
 
 static void initial_nonflowed_line(rfc3676_parser_t handle,
 				   int linebreak_opportunity,
-				   unicode_char ch,
+				   char32_t ch,
 				   size_t ch_width)
 {
 	/*
@@ -889,7 +889,7 @@ static void initial_nonflowed_end(rfc3676_parser_t handle)
 static void check_abnormal_line(rfc3676_parser_t handle)
 {
 	size_t n, i;
-	const unicode_char *p;
+	const char32_t *p;
 
 	if (unicode_buf_len(&handle->nonflowed_line) > 0)
 		return;
@@ -929,7 +929,7 @@ static void check_abnormal_line(rfc3676_parser_t handle)
 
 static void forced_rewrap_line(rfc3676_parser_t handle,
 			       int linebreak_opportunity,
-			       unicode_char ch,
+			       char32_t ch,
 			       size_t ch_width);
 
 static void forced_rewrap_end(rfc3676_parser_t handle);
@@ -959,7 +959,7 @@ static void begin_forced_rewrap(rfc3676_parser_t handle)
 
 static void forced_rewrap_line(rfc3676_parser_t handle,
 			       int linebreak_opportunity,
-			       unicode_char ch,
+			       char32_t ch,
 			       size_t ch_width)
 {
 	if (linebreak_opportunity != UNICODE_LB_NONE)
@@ -1002,4 +1002,3 @@ static void forced_rewrap_end(rfc3676_parser_t handle)
 {
 	initial_nonflowed_end(handle); /* Same logic, for now */
 }
-

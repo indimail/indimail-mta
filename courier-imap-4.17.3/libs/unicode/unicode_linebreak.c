@@ -5,7 +5,7 @@
 */
 
 #include	"unicode_config.h"
-#include	"unicode.h"
+#include	"courier-unicode.h"
 
 #include <unistd.h>
 #include <stdint.h>
@@ -91,7 +91,7 @@ static int end_def(unicode_lb_info_t i)
 #define RESULT(x) (*i->cb_func)((x), i->cb_arg)
 
 int unicode_lb_next_cnt(unicode_lb_info_t i,
-			const unicode_char *chars,
+			const char32_t *chars,
 			size_t cnt)
 {
 	while (cnt)
@@ -107,7 +107,7 @@ int unicode_lb_next_cnt(unicode_lb_info_t i,
 	return 0;
 }
 
-int unicode_lb_lookup(unicode_char ch)
+int unicode_lb_lookup(char32_t ch)
 {
 	return unicode_tab_lookup(ch,
 				  unicode_indextab,
@@ -119,7 +119,7 @@ int unicode_lb_lookup(unicode_char ch)
 }
 
 int unicode_lb_next(unicode_lb_info_t i,
-		    unicode_char ch)
+		    char32_t ch)
 {
 	return (*i->next_handler)(i, (i->opts & UNICODE_LB_OPT_DASHWJ) &&
 				  (ch == 0x2012 || ch == 0x2013)
@@ -596,7 +596,7 @@ struct unicode_lbc_info {
 
 	size_t buf_ptr;
 
-	int (*cb_func)(int, unicode_char, void *);
+	int (*cb_func)(int, char32_t, void *);
 	void *cb_arg;
 };
 
@@ -614,7 +614,7 @@ static int unicode_lbc_callback(int value, void *ptr)
 			     h->cb_arg);
 }
 
-unicode_lbc_info_t unicode_lbc_init(int (*cb_func)(int, unicode_char, void *),
+unicode_lbc_info_t unicode_lbc_init(int (*cb_func)(int, char32_t, void *),
 				    void *cb_arg)
 {
 	unicode_lbc_info_t h=
@@ -641,7 +641,7 @@ void unicode_lbc_set_opts(unicode_lbc_info_t i, int opts)
 }
 
 int unicode_lbc_next_cnt(unicode_lbc_info_t i,
-			 const unicode_char *chars,
+			 const char32_t *chars,
 			 size_t cnt)
 {
 	while (cnt)
@@ -657,7 +657,7 @@ int unicode_lbc_next_cnt(unicode_lbc_info_t i,
 	return 0;
 }
 
-int unicode_lbc_next(unicode_lbc_info_t i, unicode_char ch)
+int unicode_lbc_next(unicode_lbc_info_t i, char32_t ch)
 {
 	if (i->buf_ptr >= unicode_buf_len(&i->buf))
 	{

@@ -1,5 +1,5 @@
 #include	"unicode_config.h"
-#include	"unicode.h"
+#include	"courier-unicode.h"
 
 #include	<iostream>
 #include	<fstream>
@@ -78,7 +78,7 @@ static void testsuite()
 			words.push_back(std::string(p, b));
 		}
 
-		std::vector<unicode_char> ubuf;
+		std::u32string ubuf;
 		std::vector<bool> status;
 
 		while (1)
@@ -102,7 +102,7 @@ static void testsuite()
 
 				std::istringstream i(words.front());
 
-				unicode_char uc;
+				uint32_t uc;
 
 				i >> std::hex >> uc;
 

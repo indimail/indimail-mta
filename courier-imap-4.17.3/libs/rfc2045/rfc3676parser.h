@@ -9,7 +9,7 @@
 */
 
 #include	"rfc2045/rfc2045_config.h"
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 #include	<stdlib.h>
 #include	<string.h>
 
@@ -61,7 +61,7 @@ struct rfc3676_parser_info {
 	** rfc3676_parse() or rfc3676_deinit() returns the non-0 value.
 	*/
 
-	int (*line_contents)(const unicode_char *txt, /* Contents */
+	int (*line_contents)(const char32_t *txt, /* Contents */
 			     size_t txt_size,
 			     /* Count of unicode chars in txt */
 			     void *arg);
@@ -135,7 +135,7 @@ namespace mail {
 
 	extern "C" int tpp_trampoline_line_begin(size_t, void *);
 
-	extern "C" int tpp_trampoline_line_contents(const unicode_char *,
+	extern "C" int tpp_trampoline_line_contents(const char32_t *,
 						    size_t, void *);
 
 	extern "C" int tpp_trampoline_line_flowed_notify(void *);
@@ -185,7 +185,7 @@ namespace mail {
 
 		virtual void line_begin(size_t);
 
-		virtual void line_contents(const unicode_char *,
+		virtual void line_contents(const char32_t *,
 					   size_t);
 
 		virtual void line_flowed_notify();

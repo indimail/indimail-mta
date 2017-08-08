@@ -5,7 +5,7 @@
 */
 
 #include	"unicode_config.h"
-#include	"unicode.h"
+#include	"courier-unicode.h"
 #include	<string.h>
 #include	<stdlib.h>
 #include	<stdio.h>
@@ -70,7 +70,7 @@ static void test1()
 
 static void test2()
 {
-	unicode_char *ucptr;
+	char32_t *ucptr;
 	size_t ucsize;
 	unicode_convert_handle_t h=
 		unicode_convert_tou_init("utf-8", &ucptr, &ucsize, 1);

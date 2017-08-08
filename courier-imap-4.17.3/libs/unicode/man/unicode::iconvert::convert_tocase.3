@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: unicode::iconvert::convert_tocase
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/22/2015
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/11/2017
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "UNICODE::ICONVERT::C" "3" "06/22/2015" "Courier Unicode Library" "Courier Unicode Library"
+.TH "UNICODE::ICONVERT::C" "3" "03/11/2017" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -37,9 +37,9 @@ unicode::iconvert::convert_tocase \- unicode uppercase, lowercase, and titlecase
 .fi
 .ft
 .HP \w'std::string\ unicode::iconvert::convert_tocase('u
-.BI "std::string unicode::iconvert::convert_tocase(const\ std::string\ &" "text" ", const\ std::string\ &" "charset" ", unicode_char\ (*" "first_char_func" ")(unicode_char), unicode_char\ (*" "char_func" ")(unicode_char));"
+.BI "std::string unicode::iconvert::convert_tocase(const\ std::string\ &" "text" ", const\ std::string\ &" "charset" ", char32_t\ (*" "first_char_func" ")(char32_t), char32_t\ (*" "char_func" ")(char32_t));"
 .HP \w'std::string\ unicode::iconvert::convert_tocase('u
-.BI "std::string unicode::iconvert::convert_tocase(const\ std::string\ &" "text" ", const\ std::string\ &" "charset" ", bool\ &" "err" ", unicode_char\ (*" "first_char_func" ")(unicode_char), unicode_char\ (*" "char_func" ")(unicode_char));"
+.BI "std::string unicode::iconvert::convert_tocase(const\ std::string\ &" "text" ", const\ std::string\ &" "charset" ", bool\ &" "err" ", char32_t\ (*" "first_char_func" ")(char32_t), char32_t\ (*" "char_func" ")(char32_t));"
 .SH "DESCRIPTION"
 .PP
 The overloaded

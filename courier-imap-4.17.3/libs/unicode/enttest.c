@@ -1,5 +1,5 @@
 #include	"unicode_config.h"
-#include	"unicode.h"
+#include	"courier-unicode.h"
 
 #include	<string.h>
 #include	<stdio.h>
@@ -8,7 +8,7 @@
 struct i {
 	size_t n_start;
 	size_t n_size;
-	unicode_char v;
+	char32_t v;
 };
 
 #include "unicode_htmlent.h"
@@ -45,6 +45,22 @@ static void testsuite()
 			fprintf(stderr, "Found %s?\n", buf);
 			exit(1);
 		}
+	}
+
+	if (unicode_html40ent_lookup("#13") != 13 ||
+	    unicode_html40ent_lookup("#x100") != 256)
+	{
+		fprintf(stderr, "numeric lookup failed\n");
+		exit(1);
+	}
+
+	if (!unicode_isalpha('A') || !unicode_isupper('A') ||
+	    !unicode_islower('a') || !unicode_isdigit('0') ||
+	    !unicode_isspace(' ') || !unicode_isblank('\t') ||
+	    !unicode_ispunct('['))
+	{
+		fprintf(stderr, "category lookup failed\n");
+		exit(1);
 	}
 }
 

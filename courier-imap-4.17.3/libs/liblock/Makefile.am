@@ -41,5 +41,5 @@ lockmail.html: lockmail.sgml ../docbook/sgml2html
 	../docbook/sgml2html lockmail.sgml lockmail.html
 
 lockmail.1: lockmail.sgml ../docbook/sgml2man
-	../docbook/sgml2man lockmail.sgml lockmail.1
+	../docbook/sgml2man lockmail.sgml lockmail.1 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 endif

@@ -1,5 +1,5 @@
 #include	"unicode_config.h"
-#include	"unicode.h"
+#include	"courier-unicode.h"
 
 #include	<iostream>
 #include	<fstream>
@@ -59,7 +59,7 @@ static void testsuite()
 			words.push_back(std::string(p, b));
 		}
 
-		std::vector<unicode_char> ubuf;
+		std::u32string ubuf;
 		std::vector<int> status;
 
 		while (1)
@@ -90,7 +90,7 @@ static void testsuite()
 
 				std::istringstream i(words.front());
 
-				unicode_char uc;
+				uint32_t uc;
 
 				i >> std::hex >> uc;
 
@@ -110,7 +110,7 @@ static void testsuite()
 
 		std::vector<int> computed_status;
 
-		typedef std::vector<unicode_char>::const_iterator ubuf_iter;
+		typedef std::u32string::const_iterator ubuf_iter;
 		typedef unicode::linebreak_iter<ubuf_iter> lb_iter;
 
 		std::copy(lb_iter(ubuf.begin(), ubuf.end()), lb_iter(),
@@ -138,18 +138,18 @@ static void testsuite()
 
 static void testlinebreakc()
 {
-	static unicode_char str[]={'$', '(', 0x0300, 0x0301, 0x0302, 0x0303,
+	static char32_t str[]={'$', '(', 0x0300, 0x0301, 0x0302, 0x0303,
 				   0x0304, 0x0305, 0x0306, 0x0307, '1', '.',
 				   '2', ' ', 'A'};
 
-	typedef std::vector<std::pair<int, unicode_char> > linebreakvec_t;
+	typedef std::vector<std::pair<int, char32_t> > linebreakvec_t;
 
 	linebreakvec_t linebreakvec;
 
-	std::copy(unicode::linebreakc_iter<unicode_char *>(str,
+	std::copy(unicode::linebreakc_iter<char32_t *>(str,
 							str + sizeof(str)
 							/sizeof(str[0])),
-		  unicode::linebreakc_iter<unicode_char *>(),
+		  unicode::linebreakc_iter<char32_t *>(),
 		  std::back_insert_iterator<linebreakvec_t>
 		  (linebreakvec));
 
@@ -179,7 +179,7 @@ int main(int argc, char **argv)
 
 	std::string convteststr="0000000000000000000000000000000\xe3\x82\xa2";
 
-	std::pair<std::vector<unicode_char>, bool> uc;
+	std::pair<std::u32string, bool> uc;
 
 	uc=unicode::iconvert::tou::convert(convteststr, "utf-8");
 
@@ -189,11 +189,11 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	std::vector<unicode_char>::iterator e(uc.first.end()),
+	std::u32string::iterator e(uc.first.end()),
 		b(std::find_if(uc.first.begin(), e,
-			       std::not1(std::bind2nd(std::equal_to<unicode_char>
+			       std::not1(std::bind2nd(std::equal_to<char32_t>
 						      (),
-						      unicode_char('0')))));
+						      char32_t('0')))));
 
 	if (b == e || *b++ != 0x30A2 || b != e)
 	{

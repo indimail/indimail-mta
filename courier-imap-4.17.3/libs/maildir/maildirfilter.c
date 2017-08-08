@@ -11,7 +11,7 @@
 
 #include	"autoresponse.h"
 #include	"numlib/numlib.h"
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 #include	<stdlib.h>
 #include	<string.h>
 #include	<stdio.h>

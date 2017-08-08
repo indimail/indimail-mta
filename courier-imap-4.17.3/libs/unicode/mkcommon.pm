@@ -16,13 +16,13 @@ our @ISA = qw(Exporter);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
-	
+
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
-	
+
 );
 
 our $VERSION = '0.01';
@@ -33,20 +33,23 @@ my $BLOCK_SIZE=256;
 
 sub new {
 
-    my $this=shift;
+    my ($this, %params) = @_;
 
     my $class = ref($this) || $this;
-    my $self = {};
+    my $self = \%params;
+
     bless $self, $class;
 
-    $$self{'char_array'}=[];
-    $$self{'char_class'}=[];
-    $$self{'char_start'}=[0];
+    $self->{'char_array'}=[];
+    $self->{'char_class'}=[];
+    $self->{'char_start'}=[0];
 
-    $$self{'last_block'}=-1;
-    $$self{'last'}="";
-    $$self{'last_f'}=0;
-    $$self{'last_l'}=0;
+    $self->{'last_block'}=-1;
+    $self->{'last'}="";
+    $self->{'last_f'}=0;
+    $self->{'last_l'}=0;
+
+    $self->{"classtype"} //= "uint8_t";
 
     return $self;
 }
@@ -57,15 +60,15 @@ sub _doemit_block {
     my $f=shift;
     my $l=shift;
 
-    push @{$$this{'char_array'}}, [$f, $l];
-    push @{$$this{'char_class'}}, $$this{'last'};
+    push @{$this->{'char_array'}}, [$f, $l];
+    push @{$this->{'char_class'}}, $this->{'last'};
 }
 
 sub _doemit_endblock {
 
     my $this=shift;
 
-    push @{$$this{'char_start'}}, $#{$$this{'char_array'}}+1;
+    push @{$this->{'char_start'}}, $#{$this->{'char_array'}}+1;
 }
 
 # _doemit invokes _doemit_block() for each unicode char range with a given
@@ -83,23 +86,23 @@ sub _doemit {
     my $this=shift;
 
     $this->_doemit_endblock()
-	if int($$this{'last_f'} / $BLOCK_SIZE)
-	!= $$this{'last_block'} && $$this{'last_block'} != -1;
+	if int($this->{'last_f'} / $BLOCK_SIZE)
+	!= $this->{'last_block'} && $this->{'last_block'} != -1;
 
-    if (int($$this{'last_f'} / $BLOCK_SIZE) != int($$this{'last_l'} / $BLOCK_SIZE))
+    if (int($this->{'last_f'} / $BLOCK_SIZE) != int($this->{'last_l'} / $BLOCK_SIZE))
     {
-	while (int($$this{'last_f'} / $BLOCK_SIZE) != int($$this{'last_l'} / $BLOCK_SIZE))
+	while (int($this->{'last_f'} / $BLOCK_SIZE) != int($this->{'last_l'} / $BLOCK_SIZE))
 	{
-	    my $n=int($$this{'last_f'} / $BLOCK_SIZE) * $BLOCK_SIZE + ($BLOCK_SIZE-1);
+	    my $n=int($this->{'last_f'} / $BLOCK_SIZE) * $BLOCK_SIZE + ($BLOCK_SIZE-1);
 
-	    $this->_doemit_block($$this{'last_f'}, $n);
+	    $this->_doemit_block($this->{'last_f'}, $n);
 	    $this->_doemit_endblock();
-	    $$this{'last_f'}=$n+1;
+	    $this->{'last_f'}=$n+1;
 	}
     }
-    $this->_doemit_block($$this{'last_f'}, $$this{'last_l'});
+    $this->_doemit_block($this->{'last_f'}, $this->{'last_l'});
 
-    $$this{'last_block'}=int($$this{'last_l'} / $BLOCK_SIZE);
+    $this->{'last_block'}=int($this->{'last_l'} / $BLOCK_SIZE);
 }
 
 #
@@ -115,17 +118,17 @@ sub range {
     my $l=shift;
     my $t=shift;
 
-    if ($$this{'last_l'} + 1 == $f && $$this{'last'} eq $t)
+    if ($this->{'last_l'} + 1 == $f && $this->{'last'} eq $t)
     {
-	$$this{'last_l'}=$l;
+	$this->{'last_l'}=$l;
 	return;
     }
 
-    $this->_doemit() if $$this{'last'};  # New linebreaking class
+    $this->_doemit() if $this->{'last'};  # New linebreaking class
 
-    $$this{'last_f'}=$f;
-    $$this{'last_l'}=$l;
-    $$this{'last'}=$t;
+    $this->{'last_f'}=$f;
+    $this->{'last_l'}=$l;
+    $this->{'last'}=$t;
 }
 
 sub output {
@@ -141,7 +144,7 @@ sub output {
 
     my $modulo=sprintf("0x%X", $BLOCK_SIZE-1);
 
-    foreach ( @{$$this{'char_array'}} )
+    foreach ( @{$this->{'char_array'}} )
     {
 	print "${comma}{0x" . sprintf("%04x", $$_[0]) . " & $modulo, 0x"
 	    . sprintf("%04x", $$_[1]) . " & $modulo}";
@@ -150,10 +153,10 @@ sub output {
 
     print "};\n\n";
 
-    print "static const uint8_t unicode_classtab[]={\n";
+    print "static const " . $this->{classtype} . " unicode_classtab[]={\n";
 
     $comma="\t";
-    foreach ( @{$$this{'char_class'}} )
+    foreach ( @{$this->{'char_class'}} )
     {
 	print "${comma}$_";
 	$comma=",\n\t";
@@ -166,14 +169,14 @@ sub output {
     $comma="\t";
 
     my $prev_block=-1;
-    foreach (@{$$this{'char_start'}})
+    foreach (@{$this->{'char_start'}})
     {
 	my $sp=$_;
 	my $cnt=1;
 
-	if ($sp <= $#{$$this{'char_array'}})
+	if ($sp <= $#{$this->{'char_array'}})
 	{
-	    my $block=int($$this{'char_array'}->[$sp]->[0] / $BLOCK_SIZE);
+	    my $block=int($this->{'char_array'}->[$sp]->[0] / $BLOCK_SIZE);
 
 	    $cnt = $block - $prev_block;
 	    $prev_block=$block;

@@ -69,6 +69,8 @@ AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 AC_STRUCT_TM
 AC_SYS_LARGEFILE
+AX_COURIER_UNICODE_CXXFLAGS
+AC_SUBST(COURIER_UNICODE_CXXFLAGS)
 
 dnl Checks for library functions.
 AC_CHECK_HEADER(fam.h, :, :)
@@ -164,4 +166,4 @@ else
 	[ Maildir target separator ])
 fi
 
-AC_OUTPUT(Makefile sharedindexinstall sharedindexsplit sharedindexinstall.1 sharedindexsplit.1)
+AC_OUTPUT(Makefile sharedindexinstall sharedindexsplit)

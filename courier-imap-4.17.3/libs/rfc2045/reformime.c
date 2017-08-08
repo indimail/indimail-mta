@@ -31,7 +31,7 @@
 #include	"rfc822/rfc822.h"
 #include	"rfc822/rfc2047.h"
 #include	"rfc2045charset.h"
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 
 #if HAVE_UNISTD_H
 #include	<unistd.h>

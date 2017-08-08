@@ -17,7 +17,7 @@
 #include	"rfc822/rfc822.h"
 #include	"rfc822/rfc2047.h"
 #include	"rfc822/imaprefs.h"
-#include	"unicode/unicode.h"
+#include	"unicode/courier-unicode.h"
 
 static void thread_os_callback(struct searchinfo *, struct searchinfo *, int,
 	unsigned long, void *);

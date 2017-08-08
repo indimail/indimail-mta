@@ -179,18 +179,35 @@ static int harvest_records(struct rfc1035_res *res,
 	int q_type, int *found,
 	int flags, int port)
 {
-struct rfc1035_reply *areply=0;
-int index;
+	char	lookup_name[RFC1035_MAXNAMESIZE+1];
+
+	struct rfc1035_reply *areply=0;
+	int index;
 #if	RFC1035_IPV6
-struct in6_addr in;
+	struct in6_addr in;
 #else
-struct in_addr in;
+	struct in_addr in;
 #endif
+
+	/*
+	** Make a copy of mxname, because resolve_cname modifies it.
+	** That is rather rude, since harvest_records gets called multiple
+	** times.
+	**
+	** We still need to know what resolve_cname() did, since
+	** after resolve_cname() we call replysearch_all(), which needs to
+	** have the same hostname.
+	**
+	** mxname always points to a char[RFC1035_MAXNAMESIZE_1], so what's
+	** good for the goose is good for the gander.
+	*/
+
+	strcpy(lookup_name, mxname);
 
 	index= -1;
 
 	if (!mxreply || (
-		((index=rfc1035_replysearch_all( res, mxreply, mxname,
+		((index=rfc1035_replysearch_all( res, mxreply, lookup_name,
 					q_type,
 					RFC1035_CLASS_IN,
 					0)) < 0 ||
@@ -198,7 +215,7 @@ struct in_addr in;
 		&& (flags & HARVEST_AUTOQUERY))
 		)
 	{
-		index=rfc1035_resolve_cname(res, mxname,
+		index=rfc1035_resolve_cname(res, lookup_name,
 			q_type,
 			RFC1035_CLASS_IN, &areply, RFC1035_X_RANDOMIZE);
 		if (index < 0)
@@ -223,10 +240,11 @@ struct in_addr in;
 	}
 
 	for ( ; index >= 0 ;
-			index=rfc1035_replysearch_all( res, mxreply, mxname,
-					q_type,
-					RFC1035_CLASS_IN,
-					index+1))
+			index=rfc1035_replysearch_all( res, mxreply,
+						       lookup_name,
+						       q_type,
+						       RFC1035_CLASS_IN,
+						       index+1))
 	{
 		if (mxreply->allrrs[index]->rrtype != q_type)
 			continue;

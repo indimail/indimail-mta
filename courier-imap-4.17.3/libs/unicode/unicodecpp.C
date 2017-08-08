@@ -5,7 +5,9 @@
 */
 
 #include	"unicode_config.h"
-#include	"unicode.h"
+#include	"courier-unicode.h"
+
+#include <algorithm>
 
 extern "C" {
 
@@ -21,7 +23,7 @@ extern "C" {
 			(ptr)).callback(value);
 	}
 
-	int unicode::linebreakc_trampoline(int value, unicode_char ch, void *ptr)
+	int unicode::linebreakc_trampoline(int value, char32_t ch, void *ptr)
 	{
 		return (*reinterpret_cast<unicode::linebreakc_callback_base *>
 			(ptr)).callback(value, ch);
@@ -55,11 +57,26 @@ const char unicode::utf_8[]="utf-8";
 
 const char unicode::iso_8859_1[]="iso-8859-1";
 
-size_t unicode_wcwidth(const std::vector<unicode_char> &uc)
+// Initialize unicode_default_chset() at thread startup.
+
+namespace unicode {
+
+	class init_chset {
+	public:
+		init_chset();
+	};
+};
+
+unicode::init_chset::init_chset()
+{
+	unicode_default_chset();
+}
+
+size_t unicode_wcwidth(const std::u32string &uc)
 {
 	size_t w=0;
 
-	for (std::vector<unicode_char>::const_iterator
+	for (std::u32string::const_iterator
 		     b(uc.begin()), e(uc.end()); b != e; ++b)
 		w += unicode_wcwidth(*b);
 	return w;
@@ -117,7 +134,7 @@ bool unicode::iconvert::operator()(const char *str, size_t cnt)
 	return (unicode_convert(handle, str, cnt) == 0);
 }
 
-bool unicode::iconvert::operator()(const unicode_char *str, size_t cnt)
+bool unicode::iconvert::operator()(const char32_t *str, size_t cnt)
 {
 	if (!handle)
 		return false;
@@ -152,7 +169,7 @@ std::string unicode::iconvert::convert(const std::string &text,
 }
 
 
-std::string unicode::iconvert::convert(const std::vector<unicode_char> &uc,
+std::string unicode::iconvert::convert(const std::u32string &uc,
 				    const std::string &dstcharset,
 				    bool &errflag)
 {
@@ -189,11 +206,11 @@ std::string unicode::iconvert::convert(const std::vector<unicode_char> &uc,
 
 bool unicode::iconvert::convert(const std::string &text,
 			     const std::string &charset,
-			     std::vector<unicode_char> &uc)
+			     std::u32string &uc)
 {
 	int err;
 
-	unicode_char *ucbuf;
+	char32_t *ucbuf;
 	size_t ucsize;
 
 	if (unicode_convert_tou_tobuf(text.c_str(),
@@ -218,7 +235,7 @@ bool unicode::iconvert::convert(const std::string &text,
 	return err == 0;
 }
 
-int unicode::iconvert::tou::converted(const unicode_char *, size_t)
+int unicode::iconvert::tou::converted(const char32_t *, size_t)
 {
 	return 0;
 }
@@ -230,15 +247,15 @@ bool unicode::iconvert::tou::begin(const std::string &chset)
 
 int unicode::iconvert::tou::converted(const char *ptr, size_t cnt)
 {
-	return converted(reinterpret_cast<const unicode_char *>(ptr),
-			 cnt/sizeof(unicode_char));
+	return converted(reinterpret_cast<const char32_t *>(ptr),
+			 cnt/sizeof(char32_t));
 }
 
-std::pair<std::vector<unicode_char>, bool>
+std::pair<std::u32string, bool>
 unicode::iconvert::tou::convert(const std::string &str,
 				const std::string &chset)
 {
-	std::pair<std::vector<unicode_char>, bool> ret;
+	std::pair<std::u32string, bool> ret;
 
 	ret.second=convert(str.begin(), str.end(), chset, ret.first);
 	return ret;
@@ -250,7 +267,7 @@ bool unicode::iconvert::fromu::begin(const std::string &chset)
 }
 
 std::pair<std::string, bool>
-unicode::iconvert::fromu::convert(const std::vector<unicode_char> &ubuf,
+unicode::iconvert::fromu::convert(const std::u32string &ubuf,
 				  const std::string &chset)
 {
 	std::pair<std::string, bool> ret;
@@ -264,8 +281,8 @@ unicode::iconvert::fromu::convert(const std::vector<unicode_char> &ubuf,
 std::string unicode::iconvert::convert_tocase(const std::string &text,
 					   const std::string &charset,
 					   bool &err,
-					   unicode_char (*first_char_func)(unicode_char),
-					   unicode_char (*char_func)(unicode_char))
+					   char32_t (*first_char_func)(char32_t),
+					   char32_t (*char_func)(char32_t))
 {
 	err=false;
 	std::string s;
@@ -316,7 +333,7 @@ int unicode::linebreak_callback_base::callback(int ignore)
 }
 
 unicode::linebreak_callback_base
-&unicode::linebreak_callback_base::operator<<(unicode_char uc)
+&unicode::linebreak_callback_base::operator<<(char32_t uc)
 {
 	if (!handle)
 	{
@@ -365,7 +382,7 @@ unicode::linebreakc_callback_base::~linebreakc_callback_base()
 	finish();
 }
 
-int unicode::linebreakc_callback_base::callback(int dummy1, unicode_char dummy2)
+int unicode::linebreakc_callback_base::callback(int dummy1, char32_t dummy2)
 {
 	return 0;
 }
@@ -379,7 +396,7 @@ void unicode::linebreakc_callback_base::set_opts(int optsArg)
 }
 
 unicode::linebreakc_callback_base
-&unicode::linebreakc_callback_base::operator<<(unicode_char uc)
+&unicode::linebreakc_callback_base::operator<<(char32_t uc)
 {
 	if (handle == NULL)
 	{
@@ -412,7 +429,7 @@ unicode::linebreakc_callback_save_buf::~linebreakc_callback_save_buf()
 {
 }
 
-int unicode::linebreakc_callback_save_buf::callback(int c, unicode_char ch)
+int unicode::linebreakc_callback_save_buf::callback(int c, char32_t ch)
 {
 	lb_buf.push_back(std::make_pair(c, ch));
 	return 0;
@@ -434,7 +451,7 @@ int unicode::wordbreak_callback_base::callback(bool ignore)
 }
 
 unicode::wordbreak_callback_base
-&unicode::wordbreak_callback_base::operator<<(unicode_char uc)
+&unicode::wordbreak_callback_base::operator<<(char32_t uc)
 {
 	if (!handle)
 	{
@@ -468,7 +485,7 @@ unicode::wordbreakscan::~wordbreakscan()
 	finish();
 }
 
-bool unicode::wordbreakscan::operator<<(unicode_char uc)
+bool unicode::wordbreakscan::operator<<(char32_t uc)
 {
 	if (!handle)
 		handle=unicode_wbscan_init();
@@ -489,4 +506,51 @@ size_t unicode::wordbreakscan::finish()
 		handle=NULL;
 	}
 	return n;
+}
+
+std::string unicode::tolower(const std::string &string)
+{
+	return tolower(string, unicode_default_chset());
+}
+
+std::string unicode::tolower(const std::string &string,
+			     const std::string &charset)
+{
+	std::u32string uc;
+
+	unicode::iconvert::convert(string, charset, uc);
+
+	return unicode::iconvert::convert(tolower(uc), charset);
+}
+
+std::u32string unicode::tolower(const std::u32string &u)
+{
+	std::u32string copy=u;
+
+	std::transform(copy.begin(), copy.end(), copy.begin(), unicode_lc);
+	return copy;
+}
+
+std::string unicode::toupper(const std::string &string)
+{
+	return toupper(string, unicode_default_chset());
+}
+
+std::string unicode::toupper(const std::string &string,
+			     const std::string &charset)
+{
+	std::u32string uc;
+
+	unicode::iconvert::convert(string, charset, uc);
+
+	return unicode::iconvert::convert(toupper(uc), charset);
+}
+
+std::u32string unicode::toupper(const std::u32string &u)
+{
+	std::u32string copy=u;
+
+	std::transform(copy.begin(), copy.end(), copy.begin(), unicode_uc);
+
+	return copy;
 }

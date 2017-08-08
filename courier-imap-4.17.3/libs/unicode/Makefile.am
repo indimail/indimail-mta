@@ -1,7 +1,10 @@
 #
-# Copyright 2000-2014 Double Precision, Inc.  See COPYING for
+# Copyright 2000-2017 Double Precision, Inc.  See COPYING for
 # distribution information.
 
+ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
+
+AM_CXXFLAGS= @COURIER_UNICODE_CXXFLAGS@
 
 noinst_SCRIPTS=update.sh \
 	mkultcase.pl unicodefilter.pl \
@@ -12,6 +15,9 @@ noinst_SCRIPTS=update.sh \
 noinst_PROGRAMS=unicodetest graphemetest linebreaktest wordbreaktest \
 	enttest scripttest
 
+aclocaldir=$(datadir)/aclocal
+aclocal_DATA=m4/courier-unicode.m4
+
 update-www:
 	@$(MAKE) update-www-unicode
 	@$(MAKE) update-www-eastasia
@@ -20,6 +26,7 @@ update-www:
 	@$(MAKE) update-www-wordbreak
 	@$(MAKE) update-www-scripts
 	@$(MAKE) update-www-htmlent
+	@$(MAKE) update-www-categories
 
 update-www-unicode:
 	@SHELL@ $(srcdir)/update.sh UnicodeData.txt http://www.unicode.org/Public/UNIDATA/UnicodeData.txt
@@ -47,11 +54,20 @@ update-www-htmlent:
 	@SHELL@ $(srcdir)/update.sh xhtml-symbol.ent http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent
 	@SHELL@ $(srcdir)/update.sh xhtml-special.ent http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent
 
-lib_LTLIBRARIES=libunicode.la
-include_HEADERS=unicode.h
-man_MANS=$(srcdir)/man/courier-unicode.7 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert_tocase.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]fromu.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]tou.3 $(srcdir)/man/unicode[\:][\:]iso_8859_1.3 $(srcdir)/man/unicode[\:][\:]linebreak_callback_base.3 $(srcdir)/man/unicode[\:][\:]linebreak_callback_save_buf.3 $(srcdir)/man/unicode[\:][\:]linebreak_iter.3 $(srcdir)/man/unicode[\:][\:]linebreakc_callback_base.3 $(srcdir)/man/unicode[\:][\:]linebreakc_iter.3 $(srcdir)/man/unicode[\:][\:]ucs_2.3 $(srcdir)/man/unicode[\:][\:]ucs_4.3 $(srcdir)/man/unicode[\:][\:]utf_8.3 $(srcdir)/man/unicode[\:][\:]wordbreak_callback_base.3 $(srcdir)/man/unicode_convert.3 $(srcdir)/man/unicode_convert_deinit.3 $(srcdir)/man/unicode_convert_fromu_init.3 $(srcdir)/man/unicode_convert_fromu_tobuf.3 $(srcdir)/man/unicode_convert_fromutf8.3 $(srcdir)/man/unicode_convert_init.3 $(srcdir)/man/unicode_convert_tobuf.3 $(srcdir)/man/unicode_convert_tocase.3 $(srcdir)/man/unicode_convert_tocbuf_fromutf8_init.3 $(srcdir)/man/unicode_convert_tocbuf_init.3 $(srcdir)/man/unicode_convert_tocbuf_toutf8_init.3 $(srcdir)/man/unicode_convert_tou_init.3 $(srcdir)/man/unicode_convert_tou_tobuf.3 $(srcdir)/man/unicode_convert_toutf8.3 $(srcdir)/man/unicode_convert_uc.3 $(srcdir)/man/unicode_default_chset.3 $(srcdir)/man/unicode_grapheme_break.3 $(srcdir)/man/unicode_html40ent_lookup.3 $(srcdir)/man/unicode_isspace.3 $(srcdir)/man/unicode_lb_end.3 $(srcdir)/man/unicode_lb_init.3 $(srcdir)/man/unicode_lb_next.3 $(srcdir)/man/unicode_lb_next_cnt.3 $(srcdir)/man/unicode_lb_set_opts.3 $(srcdir)/man/unicode_lbc_end.3 $(srcdir)/man/unicode_lbc_init.3 $(srcdir)/man/unicode_lbc_next.3 $(srcdir)/man/unicode_lbc_next_cnt.3 $(srcdir)/man/unicode_lbc_set_opts.3 $(srcdir)/man/unicode_lc.3 $(srcdir)/man/unicode_script.3 $(srcdir)/man/unicode_tc.3 $(srcdir)/man/unicode_u_ucs2_native.3 $(srcdir)/man/unicode_u_ucs4_native.3 $(srcdir)/man/unicode_uc.3 $(srcdir)/man/unicode_wb_end.3 $(srcdir)/man/unicode_wb_init.3 $(srcdir)/man/unicode_wb_next.3 $(srcdir)/man/unicode_wb_next_cnt.3 $(srcdir)/man/unicode_wbscan_end.3 $(srcdir)/man/unicode_wbscan_init.3 $(srcdir)/man/unicode_wbscan_next.3
+update-www-categories:
+	@SHELL@ $(srcdir)/update.sh Categories.txt http://www.unicode.org/notes/tn36/Categories.txt
 
-libunicode_la_SOURCES=unicode.h unicode.c unicodebuf.c \
+lib_LTLIBRARIES=libunicode.la
+include_HEADERS=courier-unicode.h \
+	courier-unicode-categories-tab.h \
+	courier-unicode-script-tab.h
+
+man_MANS=$(srcdir)/man/courier-unicode.7 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert_tocase.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]fromu.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]tou.3 $(srcdir)/man/unicode[\:][\:]iso_8859_1.3 $(srcdir)/man/unicode[\:][\:]linebreak_callback_base.3 $(srcdir)/man/unicode[\:][\:]linebreak_callback_save_buf.3 $(srcdir)/man/unicode[\:][\:]linebreak_iter.3 $(srcdir)/man/unicode[\:][\:]linebreakc_callback_base.3 $(srcdir)/man/unicode[\:][\:]linebreakc_iter.3 $(srcdir)/man/unicode[\:][\:]tolower.3 $(srcdir)/man/unicode[\:][\:]toupper.3 $(srcdir)/man/unicode[\:][\:]ucs_2.3 $(srcdir)/man/unicode[\:][\:]ucs_4.3 $(srcdir)/man/unicode[\:][\:]utf_8.3 $(srcdir)/man/unicode[\:][\:]wordbreak_callback_base.3 $(srcdir)/man/unicode_category_lookup.3 $(srcdir)/man/unicode_convert.3 $(srcdir)/man/unicode_convert_deinit.3 $(srcdir)/man/unicode_convert_fromu_init.3 $(srcdir)/man/unicode_convert_fromu_tobuf.3 $(srcdir)/man/unicode_convert_fromutf8.3 $(srcdir)/man/unicode_convert_init.3 $(srcdir)/man/unicode_convert_tobuf.3 $(srcdir)/man/unicode_convert_tocase.3 $(srcdir)/man/unicode_convert_tocbuf_fromutf8_init.3 $(srcdir)/man/unicode_convert_tocbuf_init.3 $(srcdir)/man/unicode_convert_tocbuf_toutf8_init.3 $(srcdir)/man/unicode_convert_tou_init.3 $(srcdir)/man/unicode_convert_tou_tobuf.3 $(srcdir)/man/unicode_convert_toutf8.3 $(srcdir)/man/unicode_convert_uc.3 $(srcdir)/man/unicode_default_chset.3 $(srcdir)/man/unicode_grapheme_break.3 $(srcdir)/man/unicode_html40ent_lookup.3 $(srcdir)/man/unicode_isalnum.3 $(srcdir)/man/unicode_isalpha.3 $(srcdir)/man/unicode_isblank.3 $(srcdir)/man/unicode_isdigit.3 $(srcdir)/man/unicode_isgraph.3 $(srcdir)/man/unicode_islower.3 $(srcdir)/man/unicode_ispunct.3 $(srcdir)/man/unicode_isspace.3 $(srcdir)/man/unicode_isupper.3 $(srcdir)/man/unicode_lb_end.3 $(srcdir)/man/unicode_lb_init.3 $(srcdir)/man/unicode_lb_next.3 $(srcdir)/man/unicode_lb_next_cnt.3 $(srcdir)/man/unicode_lb_set_opts.3 $(srcdir)/man/unicode_lbc_end.3 $(srcdir)/man/unicode_lbc_init.3 $(srcdir)/man/unicode_lbc_next.3 $(srcdir)/man/unicode_lbc_next_cnt.3 $(srcdir)/man/unicode_lbc_set_opts.3 $(srcdir)/man/unicode_lc.3 $(srcdir)/man/unicode_locale_chset.3 $(srcdir)/man/unicode_script.3 $(srcdir)/man/unicode_tc.3 $(srcdir)/man/unicode_u_ucs2_native.3 $(srcdir)/man/unicode_u_ucs4_native.3 $(srcdir)/man/unicode_uc.3 $(srcdir)/man/unicode_wb_end.3 $(srcdir)/man/unicode_wb_init.3 $(srcdir)/man/unicode_wb_next.3 $(srcdir)/man/unicode_wb_next_cnt.3 $(srcdir)/man/unicode_wbscan_end.3 $(srcdir)/man/unicode_wbscan_init.3 $(srcdir)/man/unicode_wbscan_next.3
+
+libunicode_la_SOURCES=\
+			courier-unicode-categories-tab.h \
+			courier-unicode-script-tab.h \
+			unicode.c unicodebuf.c \
 			unicodecpp.C \
 			unicode_ultcase.c \
 			unicode_ultcasetab.c \
@@ -63,10 +79,15 @@ libunicode_la_SOURCES=unicode.h unicode.c unicodebuf.c \
 			linebreaktab_internal.h \
 			unicode_wordbreak.c wordbreaktab.h scriptstab.h \
 			wordbreaktab_internal.h \
-			unicode_scripts.c
-libunicode_la_LDFLAGS=-version-info 2:0:1
+			unicode_scripts.c \
+			categoriestab.h \
+			unicode_categories.c
 
-EXTRA_DIST=$(noinst_SCRIPTS) $(man_MANS) $(PACKAGE).spec
+libunicode_la_LDFLAGS=-version-info 4:0:0
+
+EXTRA_DIST=$(noinst_SCRIPTS) $(man_MANS) $(PACKAGE).spec \
+	m4/courier-unicode.m4 \
+	packaging/freebsd10/pkg-descr
 
 if UPDATE_UNICODE
 
@@ -91,6 +112,10 @@ wordbreaktab.h: WordBreakProperty.txt mkwordbreak.pl mkcommon.pm
 scriptstab.h: Scripts.txt mkscripts.pl mkcommon.pm
 	@PERL@ $(srcdir)/mkscripts.pl >scriptstab.h.tmp
 	mv scriptstab.h.tmp scriptstab.h
+
+categoriestab.h: Categories.txt mkcategories.pl mkcommon.pm
+	@PERL@ $(srcdir)/mkcategories.pl >categoriestab.h.tmp
+	mv categoriestab.h.tmp categoriestab.h
 
 unicode_htmlent.h: xhtml-lat1.ent xhtml-special.ent xhtml-symbol.ent mkhtmlent.pl
 	@PERL@ $(srcdir)/mkhtmlent.pl >unicode_htmlent.h.tmp
@@ -262,15 +287,13 @@ bump.rpm.release: $(PACKAGE).spec
 	mv $(PACKAGE).spec.new $(PACKAGE).spec
 
 upload-beta:
-	test -z "$(SFPASSWD)" && exit 1; exit 0
 	rm -f @PACKAGE@-@VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE@-@VERSION@.tar.bz2; test -f @PACKAGE@-@VERSION@.tar.bz2.sig || exit 1
-	~/src/sftools/release.pl mrsam $(SFPASSWD) courier @PACKAGE@-devel `echo @VERSION@|sed 's/.*\(........\)/\1/'` @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
+	~/src/sftools/release.pl mrsam courier @PACKAGE@-devel `echo @VERSION@|sed 's/.*\(........\)/\1/'` @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
 
 upload-dist:
-	test -z "$(SFPASSWD)" && exit 1; exit 0
 	rm -f @PACKAGE@-@VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE@-@VERSION@.tar.bz2; test -f @PACKAGE@-@VERSION@.tar.bz2.sig || exit 1
 	set -e; v="@PACKAGE@/@VERSION@/`date +%Y%m%d%H%M%S`"; git tag -s $$v -m 'Tag version @VERSION@'
-	socksify ~/src/sftools/release.pl mrsam $(SFPASSWD) courier $(PACKAGE) @VERSION@ @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
+	socksify ~/src/sftools/release.pl mrsam courier $(PACKAGE) @VERSION@ @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
 
 distrelease:
 	$(MAKE) distcheck

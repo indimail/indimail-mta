@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: unicode::iconvert::convert
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/22/2015
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/11/2017
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "UNICODE::ICONVERT::C" "3" "06/22/2015" "Courier Unicode Library" "Courier Unicode Library"
+.TH "UNICODE::ICONVERT::C" "3" "03/11/2017" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -46,11 +46,11 @@ extern const char unicode::iso_8859_1[];
 .HP \w'std::string\ unicode::iconvert::convert('u
 .BI "std::string unicode::iconvert::convert(const\ std::string\ &" "text" ", const\ std::string\ &" "srccharset" ", const\ std::string\ &" "dstcharset" ", bool\ &" "errflag" ");"
 .HP \w'std::string\ unicode::iconvert::convert('u
-.BI "std::string unicode::iconvert::convert(const\ std::vector<unicode_char>\ &" "text" ", const\ std::string\ &" "dstcharset" ");"
+.BI "std::string unicode::iconvert::convert(const\ std::vector<char32_t>\ &" "text" ", const\ std::string\ &" "dstcharset" ");"
 .HP \w'std::string\ unicode::iconvert::convert('u
-.BI "std::string unicode::iconvert::convert(const\ std::vector<unicode_char>\ &" "text" ", const\ std::string\ &" "dstcharset" ", bool\ &" "errflag" ");"
+.BI "std::string unicode::iconvert::convert(const\ std::vector<char32_t>\ &" "text" ", const\ std::string\ &" "dstcharset" ", bool\ &" "errflag" ");"
 .HP \w'bool\ unicode::iconvert::convert('u
-.BI "bool unicode::iconvert::convert(const\ std::string\ &" "text" ", const\ std::string\ &" "charset" ", std::vector<unicode_char>\ &" "text" ");"
+.BI "bool unicode::iconvert::convert(const\ std::string\ &" "text" ", const\ std::string\ &" "charset" ", std::vector<char32_t>\ &" "text" ");"
 .SH "DESCRIPTION"
 .PP
 The overloaded

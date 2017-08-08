@@ -9,8 +9,8 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
-#undef HAVE_LANGINFO_CODESET
+/* nl_langinfo_l implemented */
+#undef HAVE_LANGINFO_L
 
 /* Define to 1 if you have the `charset' library (-lcharset). */
 #undef HAVE_LIBCHARSET
@@ -21,14 +21,8 @@
 /* Define to 1 if you have the <localcharset.h> header file. */
 #undef HAVE_LOCALCHARSET_H
 
-/* Define to 1 if you have the <locale.h> header file. */
-#undef HAVE_LOCALE_H
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
-
-/* Define to 1 if you have the `setlocale' function. */
-#undef HAVE_SETLOCALE
 
 /* Define to 1 if you have the <stddef.h> header file. */
 #undef HAVE_STDDEF_H
