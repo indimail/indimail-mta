@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 2.3  2017-08-08 19:10:41+05:30  Cprogrammer
+ * port for openssl 1.1.0
+ *
  * Revision 2.2  2017-03-13 14:03:02+05:30  Cprogrammer
  * use PREFIX for bin programs
  *
@@ -20,7 +23,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 2.2 2017-03-13 14:03:02+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 2.3 2017-08-08 19:10:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL 
@@ -104,7 +107,7 @@ ismaildup(char *maildir)
 	char          **argv;
 	char           *ptr;
 	char           *binqqargs[8];
-	EVP_MD_CTX      mdctx;
+	EVP_MD_CTX     *mdctx;
 	const EVP_MD   *md;
 	unsigned char   md_value[EVP_MAX_MD_SIZE];
 
@@ -155,11 +158,16 @@ ismaildup(char *maildir)
 		fprintf(stderr, "Unknown message digest md5");
 		return(0);
 	}
-	EVP_MD_CTX_init(&mdctx);
-	if (!EVP_DigestInit_ex(&mdctx, md, NULL))
+	if (!(mdctx = EVP_MD_CTX_new())) {
+		fprintf(stderr, "Digest Initialization failure");
+		return(0);
+	}
+	EVP_MD_CTX_init(mdctx);
+	if (!EVP_DigestInit_ex(mdctx, md, NULL))
 	{
 		fprintf(stderr, "Digest Initialization failure");
-		EVP_MD_CTX_cleanup(&mdctx);
+		/*- EVP_MD_CTX_cleanup(mdctx); -*/
+		EVP_MD_CTX_free(mdctx);
 		return(0);
 	}
 	error = 0;
@@ -180,7 +188,7 @@ ismaildup(char *maildir)
 		if (!n)
 			break;
 		/*- Calculate Checksum */
-		if (!EVP_DigestUpdate(&mdctx, buffer, n))
+		if (!EVP_DigestUpdate(mdctx, buffer, n))
 		{
 			error = 1;
 			fprintf(stderr, "Digest Update failure");
@@ -217,14 +225,16 @@ ismaildup(char *maildir)
 	}
 	if (!error)
 	{
-		EVP_DigestFinal_ex(&mdctx, md_value, (unsigned int *) &md_len);
-		EVP_MD_CTX_cleanup(&mdctx);
+		EVP_DigestFinal_ex(mdctx, md_value, (unsigned int *) &md_len);
+		/*- EVP_MD_CTX_cleanup(mdctx); -*/
+		EVP_MD_CTX_free(mdctx);
 		for (n = 0; n < md_len; n++)
 			snprintf(buffer + (2 * n), 3, "%02x", md_value[n]);
 		buffer[2 * n] = 0;
 		snprintf(dupfile, sizeof(dupfile), "%s/dupmd5", maildir);
 		return((n = duplicateMD5(dupfile, buffer)) < 0 ? 0 : n);
 	}
+	EVP_MD_CTX_free(mdctx);
 	return(0);
 }
 #endif
