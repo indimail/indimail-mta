@@ -120,7 +120,7 @@ extern uint32_t unicode_tab32_lookup(char32_t ch,
 #define UNICODE_CATEGORY_3   0x0000FF00
 #define UNICODE_CATEGORY_4   0x000000FF
 
-#include <courier-unicode-categories-tab.h>
+#include "unicode/courier-unicode-categories-tab.h"
 
 uint32_t unicode_category_lookup(char32_t);
 
@@ -193,7 +193,7 @@ int unicode_grapheme_break(char32_t a, char32_t b);
 
 typedef enum {
 
-#include <courier-unicode-script-tab.h>
+#include "unicode/courier-unicode-script-tab.h"
 
 } unicode_script_t;
 
