@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.6  2017-08-09 22:03:46+05:30  Cprogrammer
+ * initialized EVP_MD_CTX variables
+ *
  * Revision 1.5  2017-08-08 23:50:47+05:30  Cprogrammer
  * openssl 1.1.0 port
  *
@@ -84,8 +87,8 @@ public:
 	unsigned        VerifiedBodyCount;
 	unsigned        UnverifiedBodyCount;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	EVP_MD_CTX     *m_Hdr_ctx;
-	EVP_MD_CTX     *m_Bdy_ctx;
+	EVP_MD_CTX     *m_Hdr_ctx = NULL;
+	EVP_MD_CTX     *m_Bdy_ctx = NULL;
 #else
 	EVP_MD_CTX      m_Hdr_ctx;
 	EVP_MD_CTX      m_Bdy_ctx;
