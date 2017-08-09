@@ -1,5 +1,8 @@
 /*
  * $Log: domainkeys.c,v $
+ * Revision 1.19  2017-08-09 22:07:51+05:30  Cprogrammer
+ * initialize EVP_MD_CTX variable
+ *
  * Revision 1.18  2017-08-08 23:56:03+05:30  Cprogrammer
  * openssl 1.1.0 port
  *
@@ -91,7 +94,7 @@
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define memcpy(x,y,z)      byte_copy((x), (z), (y))
-EVP_MD_CTX     *evptr;				/*- the hash */
+EVP_MD_CTX     *evptr = NULL; /*- the hash */
 
 /* STARTHEAD */
 /*
@@ -575,13 +578,11 @@ dk_sign(DK_LIB *dklib, DK_STAT *statp, int canon)
 			*statp = DKERR(DK_STAT_NORESOURCE);
 		return NULL;
 	}
-#endif
-	EVP_SignInit(dk->mdctx, dklib->md);
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	evptr = dk->mdctx;
 #else
 	evptr = &dk->mdctx;
 #endif
+	EVP_SignInit(evptr, dklib->md);
 	if (statp)
 		*statp = DKERR(DK_STAT_OK);
 	return dk;
@@ -1990,9 +1991,11 @@ dk_free(DK *dk, int doClearErrState)
 	DK_MFREE(dk->hash_buff);
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	EVP_MD_CTX_free(evptr);
+	if (evptr)
+		EVP_MD_CTX_free(evptr);
 #else
-	EVP_MD_CTX_cleanup(evptr);
+	if (evptr)
+		EVP_MD_CTX_cleanup(evptr);
 #endif
 	DK_MFREE(dk->header);		/*- alloc'ing dk->header is not optional.  */
 	dk->dkmarker = ~DKMARK;
@@ -2107,7 +2110,7 @@ strncasestr(const char *s, const char *find, size_t slen)
 void
 getversion_domainkeys_c()
 {
-	static char    *x = "$Id: domainkeys.c,v 1.18 2017-08-08 23:56:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: domainkeys.c,v 1.19 2017-08-09 22:07:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
