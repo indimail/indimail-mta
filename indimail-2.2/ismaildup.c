@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 2.4  2017-08-09 22:08:47+05:30  Cprogrammer
+ * added #ifdef for openssl version 1.1.0
+ *
  * Revision 2.3  2017-08-08 19:10:41+05:30  Cprogrammer
  * port for openssl 1.1.0
  *
@@ -23,7 +26,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 2.3 2017-08-08 19:10:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 2.4 2017-08-09 22:08:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL 
@@ -166,8 +169,11 @@ ismaildup(char *maildir)
 	if (!EVP_DigestInit_ex(mdctx, md, NULL))
 	{
 		fprintf(stderr, "Digest Initialization failure");
-		/*- EVP_MD_CTX_cleanup(mdctx); -*/
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		EVP_MD_CTX_free(mdctx);
+#else
+		EVP_MD_CTX_cleanup(mdctx);
+#endif
 		return(0);
 	}
 	error = 0;
@@ -226,15 +232,22 @@ ismaildup(char *maildir)
 	if (!error)
 	{
 		EVP_DigestFinal_ex(mdctx, md_value, (unsigned int *) &md_len);
-		/*- EVP_MD_CTX_cleanup(mdctx); -*/
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		EVP_MD_CTX_free(mdctx);
+#else
+		EVP_MD_CTX_cleanup(mdctx);
+#endif
 		for (n = 0; n < md_len; n++)
 			snprintf(buffer + (2 * n), 3, "%02x", md_value[n]);
 		buffer[2 * n] = 0;
 		snprintf(dupfile, sizeof(dupfile), "%s/dupmd5", maildir);
 		return((n = duplicateMD5(dupfile, buffer)) < 0 ? 0 : n);
 	}
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX_free(mdctx);
+#else
+	EVP_MD_CTX_cleanup(mdctx);
+#endif
 	return(0);
 }
 #endif
