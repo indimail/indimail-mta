@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.14  2017-08-09 21:59:39+05:30  Cprogrammer
+ * fixed segmentation fault. Use EVP_MD_CTX_reset() instead of EVP_MD_CTX_free()
+ *
  * Revision 1.13  2017-08-08 23:50:41+05:30  Cprogrammer
  * openssl 1.1.0 port
  *
@@ -80,9 +83,11 @@ SignatureInfo::SignatureInfo(bool s)
 	VerifiedBodyCount = 0;
 	UnverifiedBodyCount = 0;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	m_Hdr_ctx = EVP_MD_CTX_new();
+	if (!m_Hdr_ctx)
+		m_Hdr_ctx = EVP_MD_CTX_new();
 	EVP_MD_CTX_init(m_Hdr_ctx);
-	m_Bdy_ctx = EVP_MD_CTX_new();
+	if (!m_Bdy_ctx)
+		m_Bdy_ctx = EVP_MD_CTX_new();
 	EVP_MD_CTX_init(m_Bdy_ctx);
 #else
 	EVP_MD_CTX_init(&m_Hdr_ctx);
@@ -98,8 +103,10 @@ SignatureInfo::SignatureInfo(bool s)
 SignatureInfo::~SignatureInfo()
 {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	EVP_MD_CTX_free(m_Hdr_ctx);
-	EVP_MD_CTX_free(m_Bdy_ctx);
+	if (m_Hdr_ctx)
+		EVP_MD_CTX_reset(m_Hdr_ctx);
+	if (m_Bdy_ctx)
+		EVP_MD_CTX_reset(m_Bdy_ctx);
 #else
 	EVP_MD_CTX_cleanup(&m_Hdr_ctx);
 	EVP_MD_CTX_cleanup(&m_Bdy_ctx);
@@ -1255,7 +1262,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.13 2017-08-08 23:50:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.14 2017-08-09 21:59:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
