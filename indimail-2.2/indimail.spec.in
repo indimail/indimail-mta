@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.418 2017-08-09 00:03:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.419 2017-08-09 22:10:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2080,7 +2080,10 @@ fi
 %endif
 
 %if %nocourierimap == 0
-%attr(644,root,qmail)                   %{_prefix}/include/unicode.h
+%attr(644,root,qmail)                   %{_prefix}/include/courier-unicode.h
+%attr(644,root,qmail)                   %{_prefix}/include/courier-unicode-categories-tab.h
+%attr(644,root,qmail)                   %{_prefix}/include/courier-unicode-script-tab.h
+%attr(644,root,qmail)                   %{_prefix}/share/aclocal/courier-unicode.m4
 %attr(644,root,qmail)                   %{_libdir}/libunicode.a
 %endif
 
