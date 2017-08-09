@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.222  2017-08-09 23:23:04+05:30  Cprogrammer
+ * increased SQL_BUF_SIZE
+ *
  * Revision 2.221  2017-05-01 20:20:51+05:30  Cprogrammer
  * removed mailing list feature from vfilter
  *
@@ -979,7 +982,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.221 2017-05-01 20:20:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.222 2017-08-09 23:23:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1483,7 +1486,7 @@ primary key(user, program)"
 #define MSG_BUF_SIZE            8192
 #define MAX_BUFF                300
 #define QUOTA_BUFLEN            20
-#define SQL_BUF_SIZE            600
+#define SQL_BUF_SIZE            1024
 #define USE_POP                 0x00
 #define USE_APOP                0x01
 #define ADD_FLAG                2
