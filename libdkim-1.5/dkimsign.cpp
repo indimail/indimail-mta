@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.10  2017-08-09 22:02:13+05:30  Cprogrammer
+ * replaced EVP_MD_CTX_free() with EVP_MD_CTX_reset()
+ *
  * Revision 1.9  2017-08-08 23:50:19+05:30  Cprogrammer
  * openssl 1.1.0 port
  *
@@ -65,16 +68,21 @@ CDKIMSign::CDKIMSign()
 	m_EmptyLineCount = 0;
 	m_pfnHdrCallback = NULL;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	m_allman_sha1ctx = EVP_MD_CTX_new();
+	if (!m_allman_sha1ctx)
+		m_allman_sha1ctx = EVP_MD_CTX_new();
 	EVP_SignInit(m_allman_sha1ctx, EVP_sha1());
-	m_Hdr_ietf_sha1ctx = EVP_MD_CTX_new();
+	if (!m_Hdr_ietf_sha1ctx)
+		m_Hdr_ietf_sha1ctx = EVP_MD_CTX_new();
 	EVP_SignInit(m_Hdr_ietf_sha1ctx, EVP_sha1());
-	m_Bdy_ietf_sha1ctx = EVP_MD_CTX_new();
+	if (!m_Bdy_ietf_sha1ctx)
+		m_Bdy_ietf_sha1ctx = EVP_MD_CTX_new();
 	EVP_DigestInit(m_Bdy_ietf_sha1ctx, EVP_sha1());
 #ifdef HAVE_EVP_SHA256
-	m_Hdr_ietf_sha256ctx = EVP_MD_CTX_new();
+	if (!m_Hdr_ietf_sha256ctx)
+		m_Hdr_ietf_sha256ctx = EVP_MD_CTX_new();
 	EVP_SignInit(m_Hdr_ietf_sha256ctx, EVP_sha256());
-	m_Bdy_ietf_sha256ctx = EVP_MD_CTX_new();
+	if (!m_Bdy_ietf_sha256ctx)
+		m_Bdy_ietf_sha256ctx = EVP_MD_CTX_new();
 	EVP_DigestInit(m_Bdy_ietf_sha256ctx, EVP_sha256());
 #endif
 #else
@@ -91,12 +99,12 @@ CDKIMSign::CDKIMSign()
 CDKIMSign::~CDKIMSign()
 {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	EVP_MD_CTX_free(m_allman_sha1ctx);
-	EVP_MD_CTX_free(m_Hdr_ietf_sha1ctx);
-	EVP_MD_CTX_free(m_Bdy_ietf_sha1ctx);
+	EVP_MD_CTX_reset(m_allman_sha1ctx);
+	EVP_MD_CTX_reset(m_Hdr_ietf_sha1ctx);
+	EVP_MD_CTX_reset(m_Bdy_ietf_sha1ctx);
 #ifdef HAVE_EVP_SHA256
-	EVP_MD_CTX_free(m_Hdr_ietf_sha256ctx);
-	EVP_MD_CTX_free(m_Bdy_ietf_sha256ctx);
+	EVP_MD_CTX_reset(m_Hdr_ietf_sha256ctx);
+	EVP_MD_CTX_reset(m_Bdy_ietf_sha256ctx);
 #endif
 #else
 	EVP_MD_CTX_cleanup(&m_allman_sha1ctx);
@@ -999,7 +1007,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.9 2017-08-08 23:50:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.10 2017-08-09 22:02:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
