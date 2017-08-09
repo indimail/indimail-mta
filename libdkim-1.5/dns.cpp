@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.8  2017-08-09 22:06:33+05:30  Cprogrammer
+ * fixed resolve() function
+ *
  * Revision 1.7  2017-05-16 12:40:23+05:30  Cprogrammer
  * refactored dns_text() function
  *
@@ -48,25 +51,23 @@ static int      numanswers;
 static char     name[MAXDNAME];
 
 static int
-resolve(char *ddomain, int type)
+resolve(char *domain, int type)
 {
 	int             n, i;
 	unsigned char  *ptr;
 
 	errno = 0;
-	response.buf = 0;
 	if (!responsebuflen) {
 		if ((response.buf = (unsigned char *) malloc(PACKETSZ + 1)))
 			responsebuflen = PACKETSZ + 1;
 		else
 			return DNS_MEM;
 	}
-	responselen = res_query(ddomain, C_IN, type, response.buf, responsebuflen);
+	responselen = res_query(domain, C_IN, type, response.buf, responsebuflen);
 	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
 		if (responsebuflen < 65536) {
 			if ((ptr = (unsigned char *) realloc((void *) response.buf, 65536))) {
-				if (ptr != (unsigned char *) response.buf)
-					response.buf = ptr;
+				response.buf = ptr;
 				responsebuflen = 65536;
 			} else {
 				free(response.buf);
@@ -76,7 +77,7 @@ resolve(char *ddomain, int type)
 		}
 		saveresoptions = _res.options;
 		_res.options |= RES_USEVC;
-		responselen = res_query(ddomain, C_IN, type, (unsigned char *) response.buf, responsebuflen);
+		responselen = res_query(domain, C_IN, type, response.buf, responsebuflen);
 		_res.options = saveresoptions;
 	}
 	if (responselen <= 0) {
@@ -86,12 +87,11 @@ resolve(char *ddomain, int type)
 			return DNS_SOFT;
 		return DNS_HARD;
 	}
-	responseend = ptr + responselen;
-	responsepos = ptr + sizeof(HEADER);
-	n = ntohs(((HEADER *) ptr)->qdcount);
-	while (n-- > 0)
-	{
-		if ((i = dn_expand(ptr, responseend, responsepos, name, MAXDNAME)) < 0)
+	responseend = response.buf + responselen;
+	responsepos = response.buf + sizeof(HEADER);
+	n = ntohs(((HEADER *) response.buf)->qdcount);
+	while (n-- > 0) {
+		if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
 			return DNS_SOFT;
 		responsepos += i;
 		i = responseend - responsepos;
@@ -99,7 +99,7 @@ resolve(char *ddomain, int type)
 			return DNS_SOFT;
 		responsepos += QFIXEDSZ;
 	}
-	numanswers = ntohs(((HEADER *) ptr)->ancount);
+	numanswers = ntohs(((HEADER *) response.buf)->ancount);
 	return 0;
 }
 
@@ -306,7 +306,7 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.7 2017-05-16 12:40:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.8 2017-08-09 22:06:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
