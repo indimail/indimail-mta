@@ -24,12 +24,12 @@ noinst_DATA=$(BUILT_SOURCES)
 noinst_PROGRAMS=testsuite reftest
 testsuite_SOURCES=testsuite.c
 testsuite_DEPENDENCIES=librfc822.la
-testsuite_LDADD=librfc822.la -lunicode
+testsuite_LDADD=librfc822.la ../unicode/libunicode.la
 testsuite_LDFLAGS=-static
 
 reftest_SOURCES=reftest.c imaprefs.h
 reftest_DEPENDENCIES=librfc822.la
-reftest_LDADD=librfc822.la -lunicode
+reftest_LDADD=librfc822.la ../unicode/libunicode.la
 reftest_LDFLAGS=-static
 
 EXTRA_DIST=testsuite.txt reftest.txt $(BUILT_SOURCES)

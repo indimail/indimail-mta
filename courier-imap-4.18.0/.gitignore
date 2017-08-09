@@ -407,3 +407,4 @@ maildiracl
 maildiracl.1
 maildirkw
 *.BAK
+libs/unicode/courier-unicode.h
