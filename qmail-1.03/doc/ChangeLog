@@ -1,4 +1,4 @@
-* Mon May 16 2017 12:39:17 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
+* Thu Aug 17 2017 15:31:33 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.2 Start 08/05/2017
 10/05/2011
 1.  use packetsize > 512 to avoid dkim failures for sites having long txt
@@ -22,3 +22,4 @@ Release 2.2 Start 08/05/2017
 	dns.c
 13. dkimverify.cpp - replace strtok() with strtok_r() for thread safe
     operation.
+14. Port for openssl 1.1.0
