@@ -94,3 +94,11 @@ Release 2.2 Start 08/05/2017
 	dns.c
 15. dkimverify.cpp - replace strtok() with strtok_r() for thread safe
     operation.
+16. Port for openssl 1.1.0
+17. Upgraded courier-imap to 4.18.0 for openssl 1.1.0
+18. Updated defaults.inc.php for roundcube 1.3
+19. smtpd.c - replaced SSLv23_server_method() with TLS_server_method()
+20. smtpd.c - fixed ifdefs for openssl 1.0.1 version.
+21. qmail-remote.c replaced SSLv23_client_method() with TLS_client_method()
+22. use tlsclientmethod, tlsservermethod control files only for openssl
+    version < 1.0.1
