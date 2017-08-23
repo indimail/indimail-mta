@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.109  2017-08-23 13:13:07+05:30  Cprogrammer
+ * replaced SSLv23_client_method() with TLS_client_method()
+ *
  * Revision 1.108  2017-08-08 23:56:27+05:30  Cprogrammer
  * openssl 1.1.0 port
  *
@@ -1301,7 +1304,6 @@ char           *partner_fqdn = 0;
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define SSL_ST_BEFORE 0x4000
-#define SSL_ST_OK 0x03
 #endif
 void
 tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
@@ -1329,10 +1331,13 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 		}
 	}
 
-	/*- shouldn't talk to the client unless in an appropriate state */
+	/*- 
+	 * shouldn't talk to the client unless in an appropriate state 
+	 * https://mta.openssl.org/pipermail/openssl-commits/2015-October/002060.html
+	 */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	state = ssl ? SSL_get_state(ssl) : SSL_ST_BEFORE;
-	if ((state & SSL_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
+	if ((state & TLS_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
 		substdio_putsflush(&smtpto, "QUIT\r\n");
 #else
 	state = ssl ? ssl->state : SSL_ST_BEFORE;
@@ -1402,12 +1407,12 @@ verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
 }
 
 /*
- * returns 0 --> fallback to non-tls
+ * 1. returns 0 --> fallback to non-tls
  *    if certs do not exist
  *    host is in notlshosts
  *    smtps == 0 and tls session cannot be initated
- * returns 1 if tls session was initated
- * exits on error, smtps == 1 and tls session did not succeed
+ * 2. returns 1 if tls session was initated
+ * 3. exits on error, if smtps == 1 and tls session did not succeed
  */
 int
 tls_init()
@@ -1551,7 +1556,7 @@ tls_init()
 		method_fail = 0;
 #endif
 #else
-	if ((ctx = SSL_CTX_new(SSLv23_client_method())))
+	if ((ctx = SSL_CTX_new(TLS_client_method())))
 		method_fail = 0;
 #endif
 	if (method_fail)
@@ -3308,7 +3313,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.108 2017-08-08 23:56:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.109 2017-08-23 13:13:07+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
