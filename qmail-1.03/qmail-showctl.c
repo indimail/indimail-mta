@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.59  2017-08-23 13:20:24+05:30  Cprogrammer
+ * use tlsclientmethod, tlsservermethod control files only for openssl version < 1.0.1
+ *
  * Revision 1.58  2017-03-10 11:30:22+05:30  Cprogrammer
  * added control files maxdeliveredto, tlsclientmethod, tlsservermethod
  *
@@ -99,6 +102,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+#include <openssl/ssl.h>
 #include "substdio.h"
 #include "subfd.h"
 #include "exit.h"
@@ -523,8 +527,10 @@ main(int argc, char **argv)
 	do_lst("nosignhosts","Nothing defined.",""," will be excluded for BATV signing (remote hosts).");
 	do_lst("nosignmydoms","Nothing defined.",""," will be excluded for BATV signing (local domain).");
 #endif
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	do_str("tlsclientmethod", 0, "TLSv1", "TLS client method is ");
 	do_str("tlsservermethod", 0, "TLSv1", "TLS server method is ");
+#endif
 
 	while ((d = readdir(dir)))
 	{
@@ -797,7 +803,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.58 2017-03-10 11:30:22+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.59 2017-08-23 13:20:24+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
