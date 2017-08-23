@@ -8,8 +8,10 @@ Release 2.2 Start 08/05/2017
 3.  svscanboot/svscan option run .svscan/run or INITCMD. Use unshare --mount
     option to mount private mounts like custom resolv.conf
 4.  svscan - run .svscan/shutdown on SIGTERM
+12/05/2017
 5.  added inotify program to get file system events
 6.  added resolvconf service
+15/05/2017
 7.  qmailctl bug - use sysconfdir instead of INDIMAILDIR
 8.  qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes.
     SMTPROUTES takes precendence over X-SMTPROUTES
@@ -18,8 +20,16 @@ Release 2.2 Start 08/05/2017
 10. smtpd.c - fixed spurious error "no valid cert for gateway
 11. qmail-remote.c - fix for SMTPROUTE of the form
     domain:x.x.x.x::penalty:max_tolerance username password
+16/05/2017
 12. refactored dns_text() function in libdkim, surblfilter.c, dns_text.c,
 	dns.c
 13. dkimverify.cpp - replace strtok() with strtok_r() for thread safe
     operation.
+08/08/2017
 14. Port for openssl 1.1.0
+23/08/2017
+15. smtpd.c - replaced SSLv23_server_method() with TLS_server_method()
+16. smtpd.c - fixed ifdefs for openssl 1.0.1 version.
+17. qmail-remote.c replaced SSLv23_client_method() with TLS_client_method()
+18. use tlsclientmethod, tlsservermethod control files only for openssl
+    version < 1.0.1
