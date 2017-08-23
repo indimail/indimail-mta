@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.24  2017-08-23 13:24:49+05:30  Cprogrammer
+# added rule for iwebadmin
+#
 # Revision 2.23  2017-04-12 13:19:20+05:30  Cprogrammer
 # added fifo open, read perm for djbdns supervise
 #
@@ -70,7 +73,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.23 2017-04-12 13:19:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.24 2017-08-23 13:24:49+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -158,6 +161,7 @@ allow httpd_t user_home_t:file { read write create unlink setattr };
 allow httpd_t var_t:dir { write remove_name add_name };
 allow httpd_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open };
 allow httpd_t var_t:lnk_file read;
+allow httpd_t var_t:fifo_file write;
 
 #============= httpd_sys_script_t ==============
 
