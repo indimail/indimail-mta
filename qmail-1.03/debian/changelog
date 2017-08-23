@@ -14,5 +14,9 @@ indimail-mta (2.2-1) unstable; urgency=low
   * refactored dns_text() function in libdkim, surblfilter.c, dns_text.c, dns.c
   * dkimverify.cpp - replace strtok() with strtok_r() for thread safe operation.
   * Port for openssl 1.1.0
+  * smtpd.c - replaced SSLv23_server_method() with TLS_server_method()
+  * smtpd.c - fixed ifdefs for openssl 1.0.1 version.
+  * qmail-remote.c replaced SSLv23_client_method() with TLS_client_method()
+  * use tlsclientmethod, tlsservermethod control files only for openssl version < 1.0.1
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 17 Aug 2017 15:30:24 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 22 Aug 2017 13:14:47 +0530
