@@ -23,5 +23,7 @@ indimail (@version@-1) unstable; urgency=low
   * smtpd.c - fixed ifdefs for openssl 1.0.1 version.
   * qmail-remote.c replaced SSLv23_client_method() with TLS_client_method()
   * use tlsclientmethod, tlsservermethod control files only for openssl version < 1.0.1
+  * qmail-smtpd, qmail-remote - improved logging of TLS method errors
+  * ismaildup.c - added #ifdef for openssl 1.1.0
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 22 Aug 2017 13:14:47 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 24 Aug 2017 13:23:13 +0530

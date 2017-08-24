@@ -102,3 +102,5 @@ Release 2.2 Start 08/05/2017
 21. qmail-remote.c replaced SSLv23_client_method() with TLS_client_method()
 22. use tlsclientmethod, tlsservermethod control files only for openssl
     version < 1.0.1
+23. qmail-smtpd, qmail-remote - improved logging of TLS method errors
+24. ismaildup.c - added #ifdef for openssl 1.1.0
