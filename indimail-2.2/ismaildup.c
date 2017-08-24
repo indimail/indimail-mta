@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 2.5  2017-08-24 19:07:35+05:30  Cprogrammer
+ * added #ifdef for openssl 1.1.0
+ *
  * Revision 2.4  2017-08-09 22:08:47+05:30  Cprogrammer
  * added #ifdef for openssl version 1.1.0
  *
@@ -26,7 +29,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 2.4 2017-08-09 22:08:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 2.5 2017-08-24 19:07:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL 
@@ -111,6 +114,9 @@ ismaildup(char *maildir)
 	char           *ptr;
 	char           *binqqargs[8];
 	EVP_MD_CTX     *mdctx;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	EVP_MD_CTX     mdctxO;
+#endif
 	const EVP_MD   *md;
 	unsigned char   md_value[EVP_MAX_MD_SIZE];
 
@@ -161,10 +167,14 @@ ismaildup(char *maildir)
 		fprintf(stderr, "Unknown message digest md5");
 		return(0);
 	}
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	if (!(mdctx = EVP_MD_CTX_new())) {
-		fprintf(stderr, "Digest Initialization failure");
+		fprintf(stderr, "Digest create failure");
 		return(0);
 	}
+#else
+	mdctx = &mdctxO;
+#endif
 	EVP_MD_CTX_init(mdctx);
 	if (!EVP_DigestInit_ex(mdctx, md, NULL))
 	{
