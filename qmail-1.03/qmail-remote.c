@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.110  2017-08-24 13:20:24+05:30  Cprogrammer
+ * improved logging of TLS method errors
+ *
  * Revision 1.109  2017-08-23 13:13:07+05:30  Cprogrammer
  * replaced SSLv23_client_method() with TLS_client_method()
  *
@@ -1542,23 +1545,25 @@ tls_init()
 	else
 	if (method == 3 && (ctx=SSL_CTX_new(SSLv3_client_method())))
 		method_fail = 0;
+#if defined(TLSV1_CLIENT_METHOD) || defined(TLS1_VERSION)
 	else
 	if (method == 4 && (ctx=SSL_CTX_new(TLSv1_client_method())))
 		method_fail = 0;
-#ifdef TLSV1_1_CLIENT_METHOD
+#endif
+#if defined(TLSV1_1_CLIENT_METHOD) || defined(TLS1_1_VERSION)
 	else
 	if (method == 5 && (ctx=SSL_CTX_new(TLSv1_1_client_method())))
 		method_fail = 0;
 #endif
-#ifdef TLSV1_2_CLIENT_METHOD
+#if defined(TLSV1_2_CLIENT_METHOD) || defined(TLS1_2_VERSION)
 	else
 	if (method == 6 && (ctx=SSL_CTX_new(TLSv1_2_client_method())))
 		method_fail = 0;
 #endif
-#else
+#else /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
 	if ((ctx = SSL_CTX_new(TLS_client_method())))
 		method_fail = 0;
-#endif
+#endif /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
 	if (method_fail)
 	{
 		if (!smtps && !needtlsauth)
@@ -1573,7 +1578,24 @@ tls_init()
 		if (!stralloc_cats(&smtptext, t))
 			temp_nomem();
 		SSL_CTX_free(ctx);
-		tls_quit("ZTLS error initializing ctx: ", t, 0, 0, 0);
+		switch (method_fail)
+		{
+		case 2:
+			tls_quit("ZTLS error initializing SSLv23 ctx: ", t, 0, 0, 0);
+			break;
+		case 3:
+			tls_quit("ZTLS error initializing SSLv3 ctx: ", t, 0, 0, 0);
+			break;
+		case 4:
+			tls_quit("ZTLS error initializing TLSv1 ctx: ", t, 0, 0, 0);
+			break;
+		case 5:
+			tls_quit("ZTLS error initializing TLSv1_1 ctx: ", t, 0, 0, 0);
+			break;
+		case 6:
+			tls_quit("ZTLS error initializing TLSv1_2 ctx: ", t, 0, 0, 0);
+			break;
+		}
 	}
 
 	if (needtlsauth)
@@ -3313,7 +3335,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.109 2017-08-23 13:13:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.110 2017-08-24 13:20:24+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
