@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.199  2017-08-24 13:19:33+05:30  Cprogrammer
+ * improved logging of TLS method errors
+ *
  * Revision 1.198  2017-08-23 13:10:50+05:30  Cprogrammer
  * replaced SSLv23_server_method() with TLS_server_method()
  * fixed ifdefs for openssl 1.0.1 version.
@@ -761,7 +764,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.198 $";
+char           *revision = "$Revision: 1.199 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6465,30 +6468,43 @@ tls_init()
 	if (method == 3 && !(ctx=SSL_CTX_new(SSLv3_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize SSLv3 ctx (#4.3.0)\r\n");
 		return;
-	} else
+	}
+#if defined(TLSV1_SERVER_METHOD) || defined(TLS1_VERSION)
+	else
 	if (method == 4 && !(ctx=SSL_CTX_new(TLSv1_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize TLSv1 ctx (#4.3.0)\r\n");
 		return;
-	} else
-#ifdef TLSV1_1_SERVER_METHOD
+	}
+#else
+	else
+	if (method == 4) {
+		tls_err("454 TLS not available: TLSv1_server_method not available (#4.3.0)\r\n");
+   		return;
+	}
+#endif
+#if defined(TLSV1_1_SERVER_METHOD) || defined(TLS1_1_VERSION)
+	else
 	if (method == 5 && !(ctx=SSL_CTX_new(TLSv1_1_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize TLSv1_1 ctx (#4.3.0)\r\n");
      	return;
 	} else
 #else
+	else
 	if (method == 5) {
-		tls_err("454 TLS not available: unable to initialize TLSv1_1 ctx (#4.3.0)\r\n");
+		tls_err("454 TLS not available: TLSv1_1_server_method not available (#4.3.0)\r\n");
    		return;
-	} else
+	}
 #endif
-#ifdef TLSV1_2_SERVER_METHOD
+#if defined(TLSV1_2_SERVER_METHOD) || defined(TLS1_2_VERSION)
+	else
 	if (method == 6 && !(ctx=SSL_CTX_new(TLSv1_2_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize TLSv1_2 ctx (#4.3.0)\r\n");
 		return;
 	}
 #else
+	else
 	if (method == 6) {
-		tls_err("454 TLS not available: unable to initialize TLSv1_2 ctx (#4.3.0)\r\n");
+		tls_err("454 TLS not available: TLSv1_2_server_method not available (#4.3.0)\r\n");
    		return;
 	}
 #endif
@@ -6962,7 +6978,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.198 2017-08-23 13:10:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.199 2017-08-24 13:19:33+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
