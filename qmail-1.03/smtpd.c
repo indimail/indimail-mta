@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.200  2017-08-25 19:33:25+05:30  Cprogrammer
+ * fixed syntax error
+ *
  * Revision 1.199  2017-08-24 13:19:33+05:30  Cprogrammer
  * improved logging of TLS method errors
  *
@@ -764,7 +767,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.199 $";
+char           *revision = "$Revision: 1.200 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6487,7 +6490,7 @@ tls_init()
 	if (method == 5 && !(ctx=SSL_CTX_new(TLSv1_1_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize TLSv1_1 ctx (#4.3.0)\r\n");
      	return;
-	} else
+	}
 #else
 	else
 	if (method == 5) {
@@ -6978,7 +6981,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.199 2017-08-24 13:19:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.200 2017-08-25 19:33:25+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
