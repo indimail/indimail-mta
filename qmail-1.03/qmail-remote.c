@@ -1447,7 +1447,7 @@ tls_init()
 	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1_2") != 1)
 		temp_control();
 	if (!stralloc_0(&ssl_option))
-		die_nomem();
+		temp_nomem();
 	if (str_equal(ssl_option.s, "SSLv23"))
 		method = 2;
 	else
