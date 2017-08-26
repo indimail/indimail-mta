@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.201  2017-08-26 11:05:20+05:30  Cprogrammer
+ * fixed reading tlsservermethod control file
+ *
  * Revision 1.200  2017-08-25 19:33:25+05:30  Cprogrammer
  * fixed syntax error
  *
@@ -767,7 +770,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.200 $";
+char           *revision = "$Revision: 1.201 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6442,21 +6445,23 @@ tls_init()
 #endif
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1") != 1)
+	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1_2") != 1)
 		die_control();
-	if (str_equal( ssl_option.s, "SSLv23"))
+	if (!stralloc_0(&ssl_option))
+		die_nomem();
+	if (str_equal(ssl_option.s, "SSLv23"))
 		method = 2;
 	else
-	if (str_equal( ssl_option.s, "SSLv3"))
+	if (str_equal(ssl_option.s, "SSLv3"))
 		method = 3;
 	else
-	if (str_equal( ssl_option.s, "TLSv1"))
+	if (str_equal(ssl_option.s, "TLSv1"))
 		method = 4;
 	else
-	if (str_equal( ssl_option.s, "TLSv1_1"))
+	if (str_equal(ssl_option.s, "TLSv1_1"))
 		method = 5;
 	else
-	if (str_equal( ssl_option.s, "TLSv1_2"))
+	if (str_equal(ssl_option.s, "TLSv1_2"))
 		method = 6;
 #endif
 	SSL_library_init();
@@ -6981,7 +6986,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.200 2017-08-25 19:33:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.201 2017-08-26 11:05:20+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
