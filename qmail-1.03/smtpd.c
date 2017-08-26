@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.202  2017-08-26 11:41:16+05:30  Cprogrammer
+ * initialize proto.len in smtp_init()
+ *
  * Revision 1.201  2017-08-26 11:05:20+05:30  Cprogrammer
  * fixed reading tlsservermethod control file
  *
@@ -770,7 +773,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.201 $";
+char           *revision = "$Revision: 1.202 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3196,6 +3199,7 @@ smtp_init(int force_flag)
 	bmfFn = bmfFnp = bhsndFn = bhsndFnp = bhrcpFn = bhrcpFnp = rcpFn = rcpFnp = grcptFn = grcptFnp = 0;
 	spfFn = spfFnp = bmfFn = badipfn = badhostfn = badhelofn = accFn = bodyFn = 0;
 	tarpitcountFn = tarpitdelayFn = maxrcptcountFn = sigsFn = greetdelayFn = qregexFn = 0;
+	proto.len = 0;
 #ifdef BATV
 	batvok = 0;
 	signkeystale = 7;
@@ -6986,7 +6990,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.201 2017-08-26 11:05:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.202 2017-08-26 11:41:16+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
