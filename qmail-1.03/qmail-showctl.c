@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.60  2017-08-26 09:17:42+05:30  Cprogrammer
+ * fixed SIGSEGV
+ *
  * Revision 1.59  2017-08-23 13:20:24+05:30  Cprogrammer
  * use tlsclientmethod, tlsservermethod control files only for openssl version < 1.0.1
  *
@@ -441,7 +444,7 @@ main(int argc, char **argv)
 	do_str("plusdomain", 1, "plusdomain", "Plus domain name is ");
 	do_lst("qmqpservers", "No QMQP servers.", "QMQP server: ", ".");
 	do_int("queuelifetime", "604800", "Message lifetime in the queue is ", " seconds");
-	do_int("maxdeliveredto", 0, "Maximum Delivered-To lines: ", "");
+	do_int("maxdeliveredto", "0", "Maximum Delivered-To lines: ", "");
 	do_int("bouncelifetime","604800","Bounce message lifetime in the queue is "," seconds (or max of queuelifetime)");
 	do_int("holdremote", "0", "Hold Remote is ", "");
 	do_int("holdlocal", "0", "Hold Local is ", "");
@@ -803,7 +806,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.59 2017-08-23 13:20:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.60 2017-08-26 09:17:42+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
