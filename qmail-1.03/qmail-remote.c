@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.111  2017-08-26 11:07:08+05:30  Cprogrammer
+ * fixed readling of tlsclientmethod control file
+ *
  * Revision 1.110  2017-08-24 13:20:24+05:30  Cprogrammer
  * improved logging of TLS method errors
  *
@@ -1441,9 +1444,11 @@ tls_init()
 		temp_nomem();
 	if (!stralloc_0(&tlsFilename))
 		temp_nomem();
-	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1") != 1)
+	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1_2") != 1)
 		temp_control();
-	if (str_equal( ssl_option.s, "SSLv23"))
+	if (!stralloc_0(&ssl_option))
+		die_nomem();
+	if (str_equal(ssl_option.s, "SSLv23"))
 		method = 2;
 	else
 	if (str_equal(ssl_option.s, "SSLv3"))
@@ -3335,7 +3340,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.110 2017-08-24 13:20:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.111 2017-08-26 11:07:08+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
