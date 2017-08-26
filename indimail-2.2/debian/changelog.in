@@ -26,5 +26,6 @@ indimail (@version@-1) unstable; urgency=low
   * qmail-smtpd, qmail-remote - improved logging of TLS method errors
   * ismaildup.c - added #ifdef for openssl 1.1.0
   * smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
+  * smtpd.c - initialize proto.len in smtp_init()
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 26 Aug 2017 11:10:46 +0530

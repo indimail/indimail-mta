@@ -105,3 +105,4 @@ Release 2.2 Start 08/05/2017
 23. qmail-smtpd, qmail-remote - improved logging of TLS method errors
 24. ismaildup.c - added #ifdef for openssl 1.1.0
 25. smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
+26. smtpd.c - initialize proto.len in smtp_init()
