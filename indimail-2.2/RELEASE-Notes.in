@@ -106,3 +106,4 @@ Release 2.2 Start 08/05/2017
 24. ismaildup.c - added #ifdef for openssl 1.1.0
 25. smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
 26. smtpd.c - initialize proto.len in smtp_init()
+27. qmail-showctl - fixed SIGSEGV

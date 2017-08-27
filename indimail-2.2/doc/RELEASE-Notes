@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Thu Aug 24 18:59:34 IST 2017
+DATE: Sat Aug 26 21:43:33 IST 2017
 
 This is Release 2.2 of IndiMail. The release has both source.tar.gz, RPMs and debs.
 
@@ -103,3 +103,6 @@ Release 2.2 Start 08/05/2017
 22. use tlsclientmethod, tlsservermethod control files only for openssl
     version < 1.0.1
 23. qmail-smtpd, qmail-remote - improved logging of TLS method errors
+24. ismaildup.c - added #ifdef for openssl 1.1.0
+25. smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
+26. smtpd.c - initialize proto.len in smtp_init()

@@ -21,5 +21,6 @@ indimail-mta (2.2-1) unstable; urgency=low
   * qmail-smtpd, qmail-remote - improved logging of TLS method errors
   * smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
   * smtpd.c - initialize proto.len in smtp_init()
+  * qmail-showctl - fixed SIGSEGV
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 26 Aug 2017 11:10:46 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 27 Aug 2017 13:12:52 +0530
