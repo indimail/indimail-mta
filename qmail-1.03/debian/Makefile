@@ -61,6 +61,8 @@ obs_deb_prep: obs_deb_prep.in
 	$(edit) $@.in > $@
 rules: rules.in
 	$(edit) $@.in > $@
+indimail-mta.dsc: indimail-mta.dsc.in
+	$(edit) $@.in > $@
 indimail-mta.postrm: indimail-mta.postrm.in
 	$(edit) $@.in > $@
 indimail-mta.prerm: indimail-mta.prerm.in
