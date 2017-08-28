@@ -226,3 +226,4 @@ migrate1to2
 missing
 stamp-h1
 doc/RELEASE-Notes
+debian/indimail.dsc
