@@ -1,11 +1,15 @@
-qmaildir=/var/indimail
-mandir=/usr/share/man
-qsysconfdir=/etc/indimail
-sysconfdir=/etc
-shareddir=/usr/share/indimail
-libexecdir=/usr/libexec/indimail
-logdir=/var/log/indimail
 prefix=/usr
+qmaildir=/var/indimail
+sysconfdir=/etc
+qsysconfdir=/etc/indimail
+
+mandir=$(prefix)/share/man
+libexecdir=$(prefix)/libexec/indimail
+shareddir=$(prefix)/share/indimail
+logdir=/var/log/indimail
+
+libdkim_version=1.5
+libsrs2_version=1.0.18
 version=$(shell grep Version: ../indimail-mta.spec.in|cut -d: -f2 | cut -c2-)
 all: rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm indimail-mta.postinst \
 obs_deb_prep indimail-mta.install \
@@ -26,6 +30,8 @@ edit = sed \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
 	-e 's,@acl_libdirstem\@,$(acl_libdirstem),g' \
+	-e 's,@libdkim_version\@,$(libdkim_version),g' \
+	-e 's,@libsrs2_version\@,$(libsrs2_version),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 perm_list: ../perm_list.in
@@ -51,7 +57,10 @@ MOSTLYCLEANFILES= indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-
+obs_deb_prep: obs_deb_prep.in
+	$(edit) $@.in > $@
+rules: rules.in
+	$(edit) $@.in > $@
 indimail-mta.postrm: indimail-mta.postrm.in
 	$(edit) $@.in > $@
 indimail-mta.prerm: indimail-mta.prerm.in
