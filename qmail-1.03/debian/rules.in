@@ -19,16 +19,19 @@ else
 	CFLAGS += -O2 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
 endif
 
-prefix=/usr
-qmaildir=/var/indimail
-qsysconfdir=/etc/indimail
-libexecdir=$(prefix)/libexec/indimail
-sysconfdir=/etc
+prefix=@prefix@
+qmaildir=@qmaildir@
+sysconfdir=@sysconfdir@
+qsysconfdir=@qsysconfdir@
+
 mandir=$(prefix)/share/man
-libdkim_version=1.5
-libsrs2_version=1.0.18
+libexecdir=$(prefix)/libexec/indimail
+
+libdkim_version=@libdkim_version@
+libsrs2_version=@libsrs2_version@
+version=@version@
+
 tcpserver_plugin=1
-version=2.1
 bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
 libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
 cp=/bin/cp
