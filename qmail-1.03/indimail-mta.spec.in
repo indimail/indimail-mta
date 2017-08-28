@@ -25,7 +25,7 @@
 %global qsysconfdir        /etc/indimail
 %global ucspi_version      0.88
 %global qmail_version      1.03
-%global libdkim_version    1.4
+%global libdkim_version    1.5
 %global libsrs2_version    1.0.18
 %global tcpserver_plugin   1
 %global noperms            1
