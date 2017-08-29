@@ -340,7 +340,7 @@ void dump_config(struct runctl *runp, struct query *querylist)
 
 	    strlcpy(namebuf, visbuf(idp->id), sizeof(namebuf));
 	    if (idp->val.id2)
-		fprintf(stdout, "(\"%s\", %s)", namebuf, visbuf(idp->val.id2));
+		fprintf(stdout, "(\"%s\", \"%s\")", namebuf, visbuf(idp->val.id2));
 	    else
 		fprintf(stdout, "\"%s\"", namebuf);
 	    if (idp->next)

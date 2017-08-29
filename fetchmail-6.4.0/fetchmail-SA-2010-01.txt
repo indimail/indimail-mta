@@ -80,7 +80,7 @@ a. Apply the patch found in section B of this announcement to
 
 b. Install fetchmail 6.3.14 or newer after it will have become available.
    The fetchmail source code is always available from
-   <http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+   <http://sourceforge.net/projects/fetchmail/files/>.
 
 
 4. Workaround
@@ -140,7 +140,7 @@ END OF fetchmail-SA-2010-01.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZX0pACg7jUxqFQzdhdVDXk/izXBNkfg
-ZBgAnAhDK4mYPoCzoiaJhEHM6rET4W+v
-=AX1N
+iEYEARECAAYFAlN9DK4ACgkQvmGDOQUufZXgLgCgj6+wbZzyaLBuNZ1rhounuoTb
+UCcAmgN9gAiisBhQRS1juUKx2tb/JBb1
+=uHuw
 -----END PGP SIGNATURE-----

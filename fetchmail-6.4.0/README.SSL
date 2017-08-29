@@ -11,36 +11,46 @@ specific to fetchmail.
 In case of troubles, mail the README.SSL-SERVER file to your ISP and 
 have them check their server configuration against it.
 
-Unfortunately, fetchmail confuses SSL/TLS protocol levels with whether 
-a service needs to use in-band negotiation (STLS/STARTTLS for POP3/IMAP4) or is 
-totally SSL-wrapped on a separate port.  For compatibility reasons, this cannot 
-be fixed in a bugfix release.
+Unfortunately, fetchmail confuses SSL/TLS protocol levels with whether a
+service needs to use in-band negotiation (STLS/STARTTLS for POP3/IMAP4)
+or is totally SSL-wrapped on a separate port.  For compatibility
+reasons, this cannot be fixed in a bugfix or minor release.
 
-	-- Matthias Andree, 2009-05-09
+Also, fetchmail 6.4.0 and newer releases changed some of the semantics
+as the result of a bug-fix, and will auto-negotiate TLSv1 or newer only.
+If your server does not support this, you may have to specify --sslproto
+ssl3+.  This is in order to prefer the newer TLS protocols, because SSLv2
+and v3 are broken.
+
+	-- Matthias Andree, 2016-01-10
 
 
 Quickstart
 ----------
 
+Use an up-to-date release of OpenSSL 1.0.2 or newer, so as to get
+TLSv1.2 support.  Older OpenSSL versions are unsupported upstream, and
+fetchmail rejects them.
+
 For use of SSL or TLS with in-band negotiation on the regular service's port, 
 i. e. with STLS or STARTTLS, use these command line options
 
-    --sslproto tls1 --sslcertck
+    --sslproto auto --sslcertck
 
 or these options in the rcfile (after the respective "user"... options)
 
-      sslproto tls1   sslcertck
+      sslproto auto   sslcertck
 
 
 For use of SSL or TLS on a separate port, if the whole TCP connection is 
-SSL-encrypted from the very beginning, use these command line options (in the 
-rcfile, omit all leading "--"):
+SSL-encrypted from the very beginning (SSL- or TLS-wrapped), use these
+command line options (in the rcfile, omit all leading "--"):
 
-    --ssl --sslproto ssl3 --sslcertck
+    --ssl --sslproto auto --sslcertck
 
 or these options in the rcfile (after the respective "user"... options)
 
-      ssl   sslproto ssl3   sslcertck
+      ssl   sslproto auto   sslcertck
 
 
 Background and use (long version :-))

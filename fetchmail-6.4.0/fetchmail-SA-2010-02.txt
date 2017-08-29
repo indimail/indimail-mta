@@ -90,7 +90,7 @@ b. Install fetchmail 6.3.17 or newer after it will have become available.
    (Note that the announcements may be publicly visible quite some time
    before the release is made, particularly for minor bugs.)
    The fetchmail source code is always available from
-   <http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+   <http://sourceforge.net/projects/fetchmail/files/>.
 
 
 4. Workaround
@@ -140,15 +140,15 @@ index 6f2dbf3..dbcda32 100644
 +++ b/rfc822.c
 @@ -25,6 +25,7 @@ MIT license.  Compile with -DMAIN to build the demonstrator.
  #include  <stdlib.h>
- 
+
  #include "fetchmail.h"
 +#include "sdump.h"
- 
+
  #ifndef MAIN
  #include "i18n.h"
 @@ -74,9 +75,10 @@ char *reply_hack(
      }
- 
+
  #ifndef MAIN
 - -    if (outlevel >= O_DEBUG)
 - -	report_build(stdout, GT_("About to rewrite %.*s...\n"),
@@ -157,12 +157,12 @@ index 6f2dbf3..dbcda32 100644
 +	report_build(stdout, GT_("About to rewrite %s...\n"), (cp = sdump(buf, BEFORE_EOL(buf))));
 +	xfree(cp);
 +    }
- 
+
      /* make room to hack the address; buf must be malloced */
      for (cp = buf; *cp; cp++)
 @@ -211,9 +213,12 @@ char *reply_hack(
      }
- 
+
  #ifndef MAIN
 - -    if (outlevel >= O_DEBUG)
 - -	report_complete(stdout, GT_("...rewritten version is %.*s.\n"),
@@ -181,16 +181,16 @@ index fdc6f5d..9a62ee2 100644
 - --- a/uid.c
 +++ b/uid.c
 @@ -20,6 +20,7 @@
- 
+
  #include "fetchmail.h"
  #include "i18n.h"
 +#include "sdump.h"
- 
+
  /*
   * Machinery for handling UID lists live here.  This is mainly to support
 @@ -249,8 +250,11 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
  	    {
- 		report_build(stdout, GT_("Old UID list from %s:"), 
+ 		report_build(stdout, GT_("Old UID list from %s:"),
  			     ctl->server.pollname);
 - -		for (idp = ctl->oldsaved; idp; idp = idp->next)
 - -		    report_build(stdout, " %s", idp->id);
@@ -247,7 +247,7 @@ index fdc6f5d..9a62ee2 100644
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZVpfQCcD3U6m1MbJOFZV4FgI7e042vF
-HcEAn0j6ZFwp9dh2G7PJSkN9CM0XazyJ
-=JUs1
+iEYEARECAAYFAlN9DK4ACgkQvmGDOQUufZUKUACeOl0QLdcl48bttiIEOF5XKRCF
+wxQAnigEIYE6BlJQ17CSjZ4KfigM3oK6
+=culN
 -----END PGP SIGNATURE-----

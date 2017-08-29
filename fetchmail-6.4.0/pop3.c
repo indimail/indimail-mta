@@ -21,6 +21,7 @@
 #include  "fetchmail.h"
 #include  "socket.h"
 #include  "i18n.h"
+#include  "uid_db.h"
 
 #ifdef OPIE_ENABLE
 #ifdef __cplusplus
@@ -281,6 +282,7 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 #endif /* OPIE_ENABLE */
 #ifdef SSL_ENABLE
     flag connection_may_have_tls_errors = FALSE;
+    char *commonname;
 #endif /* SSL_ENABLE */
 
     done_capa = FALSE;
@@ -393,7 +395,7 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 		(ctl->server.authenticate == A_KERBEROS_V5) ||
 		(ctl->server.authenticate == A_OTP) ||
 		(ctl->server.authenticate == A_CRAM_MD5) ||
-		maybe_tls(ctl))
+		maybe_starttls(ctl))
 	{
 	    if ((ok = capa_probe(sock)) != PS_SUCCESS)
 		/* we are in STAGE_GETAUTH => failure is PS_AUTHFAIL! */
@@ -406,12 +408,12 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 		    (ok == PS_SOCKET && !ctl->wehaveauthed))
 		{
 #ifdef SSL_ENABLE
-		    if (must_tls(ctl)) {
+		    if (must_starttls(ctl)) {
 			/* fail with mandatory STLS without repoll */
 			report(stderr, GT_("TLS is mandatory for this session, but server refused CAPA command.\n"));
 			report(stderr, GT_("The CAPA command is however necessary for TLS.\n"));
 			return ok;
-		    } else if (maybe_tls(ctl)) {
+		    } else if (maybe_starttls(ctl)) {
 			/* defeat opportunistic STLS */
 			xfree(ctl->sslproto);
 			ctl->sslproto = xstrdup("");
@@ -431,24 +433,19 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 	}
 
 #ifdef SSL_ENABLE
-	if (maybe_tls(ctl)) {
-	    char *commonname;
+	commonname = ctl->server.pollname;
+	if (ctl->server.via)
+	    commonname = ctl->server.via;
+	if (ctl->sslcommonname)
+	    commonname = ctl->sslcommonname;
 
-	    commonname = ctl->server.pollname;
-	    if (ctl->server.via)
-		commonname = ctl->server.via;
-	    if (ctl->sslcommonname)
-		commonname = ctl->sslcommonname;
-
-	   if (has_stls
-		   || must_tls(ctl)) /* if TLS is mandatory, ignore capabilities */
+	if (maybe_starttls(ctl)) {
+	   if (has_stls || must_starttls(ctl)) /* if TLS is mandatory, ignore capabilities */
 	   {
-	       /* Use "tls1" rather than ctl->sslproto because tls1 is the only
-		* protocol that will work with STARTTLS.  Don't need to worry
-		* whether TLS is mandatory or opportunistic unless SSLOpen() fails
-		* (see below). */
+	       /* Don't need to worry whether TLS is mandatory or
+		* opportunistic unless SSLOpen() fails (see below). */
 	       if (gen_transact(sock, "STLS") == PS_SUCCESS
-		       && (set_timeout(mytimeout), SSLOpen(sock, ctl->sslcert, ctl->sslkey, "tls1", ctl->sslcertck,
+		       && (set_timeout(mytimeout), SSLOpen(sock, ctl->sslcert, ctl->sslkey, ctl->sslproto, ctl->sslcertck,
 			   ctl->sslcertfile, ctl->sslcertpath, ctl->sslfingerprint, commonname,
 			   ctl->server.pollname, &ctl->remotename)) != -1)
 	       {
@@ -475,7 +472,7 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 		   {
 		       report(stdout, GT_("%s: upgrade to TLS succeeded.\n"), commonname);
 		   }
-	       } else if (must_tls(ctl)) {
+	       } else if (must_starttls(ctl)) {
 		   /* Config required TLS but we couldn't guarantee it, so we must
 		    * stop. */
 		   set_timeout(0);
@@ -495,7 +492,11 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 		   }
 	       }
 	   }
-	} /* maybe_tls() */
+	} else { /* maybe_starttls() */
+	    if (has_stls && outlevel >= O_VERBOSE) {
+		report(stdout, GT_("%s: WARNING: server offered STLS, but sslproto '' given.\n"), commonname);
+	    }
+	} /* maybe_starttls() */
 #endif /* SSL_ENABLE */
 
 	/*
@@ -815,26 +816,25 @@ static int pop3_fastuidl( int sock,  struct query *ctl, unsigned int count, int 
     int ok;
     unsigned int first_nr, last_nr, try_nr;
     char id [IDLEN+1];
-    struct idlist *savep = NULL; /** pointer to cache save_str result, speeds up saves */
 
     first_nr = 0;
     last_nr = count + 1;
     while (first_nr < last_nr - 1)
     {
-	struct idlist	*newl;
+	struct uid_db_record *rec;
 
 	try_nr = (first_nr + last_nr) / 2;
 	if ((ok = pop3_getuidl(sock, try_nr, id, sizeof(id))) != 0)
 	    return ok;
-	if ((newl = str_in_list(&ctl->oldsaved, id, FALSE)))
+	if ((rec = find_uid_by_id(&ctl->oldsaved, id)))
 	{
-	    flag mark = newl->val.status.mark;
+	    flag mark = rec->status;
 	    if (mark == UID_DELETED || mark == UID_EXPUNGED)
 	    {
 		if (outlevel >= O_VERBOSE)
 		    report(stderr, GT_("id=%s (num=%u) was deleted, but is still present!\n"), id, try_nr);
 		/* just mark it as seen now! */
-		newl->val.status.mark = mark = UID_SEEN;
+		rec->status = mark = UID_SEEN;
 	    }
 
 	    /* narrow the search region! */
@@ -848,7 +848,7 @@ static int pop3_fastuidl( int sock,  struct query *ctl, unsigned int count, int 
 		first_nr = try_nr;
 
 	    /* save the number */
-	    newl->val.status.num = try_nr;
+	    set_uid_db_num(&ctl->oldsaved, rec, try_nr);
 	}
 	else
 	{
@@ -857,8 +857,8 @@ static int pop3_fastuidl( int sock,  struct query *ctl, unsigned int count, int 
 	    last_nr = try_nr;
 
 	    /* save it */
-	    savep = save_str(savep ? &savep : &ctl->oldsaved, id, UID_UNSEEN);
-	    savep->val.status.num = try_nr;
+	    rec = uid_db_insert(&ctl->oldsaved, id, UID_UNSEEN);
+	    set_uid_db_num(&ctl->oldsaved, rec, try_nr);
 	}
     }
     if (outlevel >= O_DEBUG && last_nr <= count)
@@ -886,34 +886,38 @@ static int pop3_slowuidl( int sock,  struct query *ctl, int *countp, int *newp)
      *    of messages to get.
      *  + Otherwise run a binary search to determine the last known message
      */
+    struct uid_db_record *rec;
     int ok, nolinear = 0;
-    int first_nr, list_len, try_id, try_nr, add_id;
+    int first_nr, n_recs, try_id, try_nr, add_id;
     int num;
     char id [IDLEN+1];
 
     if ((ok = pop3_gettopid(sock, 1, id, sizeof(id))) != 0)
 	return ok;
 
-    if( ( first_nr = str_nr_in_list(&ctl->oldsaved, id) ) == -1 ) {
+    rec = first_uid_in_db(&ctl->oldsaved, id);
+    if (!rec) {
 	/* the first message is unknown -> all messages are new */
 	*newp = *countp;	
 	return 0;
     }
+    first_nr = rec->pos;
 
     /* check where we expect the latest known message */
-    list_len = count_list( &ctl->oldsaved );
-    try_id = list_len  - first_nr; /* -1 + 1 */
+    n_recs = uid_db_n_records(&ctl->oldsaved);
+    try_id = n_recs  - first_nr; /* -1 + 1 */
     if( try_id > 1 ) {
 	if( try_id <= *countp ) {
 	    if ((ok = pop3_gettopid(sock, try_id, id, sizeof(id))) != 0)
 		return ok;
-    
-	    try_nr = str_nr_last_in_list(&ctl->oldsaved, id);
+
+	    rec = last_uid_in_db(&ctl->oldsaved, id);
+	    try_nr = rec ? rec->pos : -1;
 	} else {
 	    try_id = *countp+1;
 	    try_nr = -1;
 	}
-	if( try_nr != list_len -1 ) {
+	if( try_nr != n_recs -1 ) {
 	    /* some messages inbetween have been deleted... */
 	    if( try_nr == -1 ) {
 		nolinear = 1;
@@ -931,7 +935,9 @@ static int pop3_slowuidl( int sock,  struct query *ctl, int *countp, int *newp)
 		    
 		    if ((ok = pop3_gettopid(sock, try_id, id, sizeof(id))) != 0)
 			return ok;
-		    try_nr = str_nr_in_list(&ctl->oldsaved, id);
+
+		    rec = find_uid_by_id(&ctl->oldsaved, id);
+		    try_nr = rec ? rec->pos : -1;
 		}
 		if( try_nr == -1 ) {
 		    try_id--;
@@ -944,17 +950,16 @@ static int pop3_slowuidl( int sock,  struct query *ctl, int *countp, int *newp)
 	} 
     }
     /* the first try_id messages are known -> copy them to the newsaved list */
-    for( num = first_nr; num < list_len; num++ )
+    for( num = first_nr; num < n_recs; num++ )
     {
-	struct idlist	*newl = save_str(&ctl->newsaved, 
-				str_from_nr_list(&ctl->oldsaved, num),
-				UID_UNSEEN);
-	newl->val.status.num = num - first_nr + 1;
+	rec = find_uid_by_pos(&ctl->oldsaved, num);
+
+	rec = uid_db_insert(&ctl->newsaved, rec->id, rec->status);
+	set_uid_db_num(&ctl->newsaved, rec, num - first_nr + 1);
     }
 
     if( nolinear ) {
-	free_str_list(&ctl->oldsaved);
-	ctl->oldsaved = 0;
+	clear_uid_db(&ctl->oldsaved);
 	last = try_id;
     }
 
@@ -973,7 +978,7 @@ static int pop3_getrange(int sock,
 
     (void)folder;
     /* Ensure that the new list is properly empty */
-    ctl->newsaved = (struct idlist *)NULL;
+    clear_uid_db(&ctl->newsaved);
 
 #ifdef MBOX
     /* Alain Knaff suggests this, but it's not RFC standard */
@@ -1007,6 +1012,9 @@ static int pop3_getrange(int sock,
     {
 	int fastuidl;
 	char id [IDLEN+1];
+
+	set_uid_db_num_pos_0(&ctl->oldsaved, *countp);
+	set_uid_db_num_pos_0(&ctl->newsaved, *countp);
 
 	/* should we do fast uidl this time? */
 	fastuidl = ctl->fastuidl;
@@ -1058,7 +1066,6 @@ static int pop3_getrange(int sock,
 	    {
 		/* UIDL worked - parse reply */
 		unsigned long unum;
-		struct idlist *newl = NULL;
 
 		*newp = 0;
 		while (gen_recv(sock, buf, sizeof(buf)) == PS_SUCCESS)
@@ -1068,14 +1075,13 @@ static int pop3_getrange(int sock,
 
 		    if (parseuid(buf, &unum, id, sizeof(id)) == PS_SUCCESS)
 		    {
-			struct idlist	*old;
+			struct uid_db_record	*old_rec, *new_rec;
 
-			newl = save_str(newl ? &newl : &ctl->newsaved, id, UID_UNSEEN);
-			newl->val.status.num = unum;
+			new_rec = uid_db_insert(&ctl->newsaved, id, UID_UNSEEN);
 
-			if ((old = str_in_list(&ctl->oldsaved, id, FALSE)))
+			if ((old_rec = find_uid_by_id(&ctl->oldsaved, id)))
 			{
-			    flag mark = old->val.status.mark;
+			    flag mark = old_rec->status;
 			    if (mark == UID_DELETED || mark == UID_EXPUNGED)
 			    {
 				/* XXX FIXME: switch 3 occurrences from
@@ -1085,9 +1091,9 @@ static int pop3_getrange(int sock,
 				if (outlevel >= O_VERBOSE)
 				    report(stderr, GT_("id=%s (num=%d) was deleted, but is still present!\n"), id, (int)unum);
 				/* just mark it as seen now! */
-				old->val.status.mark = mark = UID_SEEN;
+				old_rec->status = mark = UID_SEEN;
 			    }
-			    newl->val.status.mark = mark;
+			    new_rec->status = mark;
 			    if (mark == UID_UNSEEN)
 			    {
 				(*newp)++;
@@ -1104,10 +1110,17 @@ static int pop3_getrange(int sock,
 			     * swap the lists (say, due to socket error),
 			     * the same mail will not be downloaded again.
 			     */
-			    old = save_str(&ctl->oldsaved, id, UID_UNSEEN);
+			    old_rec = uid_db_insert(&ctl->oldsaved, id, UID_UNSEEN);
+
 			}
-			/* save the number */
-			old->val.status.num = unum;
+			/*
+			 * save the number if it will be needed later on
+			 * (messsage will either be fetched or deleted)
+			 */
+			if (new_rec->status == UID_UNSEEN || ctl->flush) {
+			    set_uid_db_num(&ctl->oldsaved, old_rec, unum);
+			    set_uid_db_num(&ctl->newsaved, new_rec, unum);
+			}
 		    } else
 			return PS_ERROR;
 		} /* multi-line loop for UIDL reply */
@@ -1176,8 +1189,9 @@ static int pop3_getsizes(int sock, int count, int *sizes)
 static int pop3_is_old(int sock, struct query *ctl, int num)
 /* is the given message old? */
 {
-    struct idlist *newl;
-    if (!ctl->oldsaved)
+    struct uid_db_record *rec;
+
+    if (!uid_db_n_records(&ctl->oldsaved))
 	return (num <= last);
     else if (dofastuidl)
     {
@@ -1188,30 +1202,31 @@ static int pop3_is_old(int sock, struct query *ctl, int num)
 
 	/* in fast uidl, we manipulate the old list only! */
 
-	if ((newl = id_find(&ctl->oldsaved, num)))
+	if ((rec = find_uid_by_num(&ctl->oldsaved, num)))
 	{
 	    /* we already have the id! */
-	    return(newl->val.status.mark != UID_UNSEEN);
+	    return(rec->status != UID_UNSEEN);
 	}
 
 	/* get the uidl first! */
 	if (pop3_getuidl(sock, num, id, sizeof(id)) != PS_SUCCESS)
 	    return(TRUE);
 
-	if ((newl = str_in_list(&ctl->oldsaved, id, FALSE))) {
+	if ((rec = find_uid_by_id(&ctl->oldsaved, id))) {
 	    /* we already have the id! */
-	    newl->val.status.num = num;
-	    return(newl->val.status.mark != UID_UNSEEN);
+	    set_uid_db_num(&ctl->oldsaved, rec, num);
+	    return(rec->status != UID_UNSEEN);
 	}
 
 	/* save it */
-	newl = save_str(&ctl->oldsaved, id, UID_UNSEEN);
-	newl->val.status.num = num;
+	rec = uid_db_insert(&ctl->oldsaved, id, UID_UNSEEN);
+	set_uid_db_num(&ctl->oldsaved, rec, num);
+
 	return(FALSE);
+    } else {
+	rec = find_uid_by_num(&ctl->newsaved, num);
+	return !rec || rec->status != UID_UNSEEN;
     }
-    else
-        return ((newl = id_find(&ctl->newsaved, num)) != NULL &&
-	    newl->val.status.mark != UID_UNSEEN);
 }
 
 #ifdef UNUSED
@@ -1330,28 +1345,31 @@ static int pop3_fetch(int sock, struct query *ctl, int number, int *lenp)
 static void mark_uid_seen(struct query *ctl, int number)
 /* Tell the UID code we've seen this. */
 {
-    struct idlist	*sdp;
+    struct uid_db_record *rec;
 
-    if ((sdp = id_find(&ctl->newsaved, number)))
-	sdp->val.status.mark = UID_SEEN;
+    if ((rec = find_uid_by_num(&ctl->newsaved, number)))
+	rec->status = UID_SEEN;
     /* mark it as seen in oldsaved also! In case, we do not swap the lists
      * (say, due to socket error), the same mail will not be downloaded
      * again.
      */
-    if ((sdp = id_find(&ctl->oldsaved, number)))
-	sdp->val.status.mark = UID_SEEN;
+    if ((rec = find_uid_by_num(&ctl->oldsaved, number)))
+	rec->status = UID_SEEN;
 }
 
 static int pop3_delete(int sock, struct query *ctl, int number)
 /* delete a given message */
 {
+    struct uid_db_record *rec;
     int ok;
     mark_uid_seen(ctl, number);
     /* actually, mark for deletion -- doesn't happen until QUIT time */
     ok = gen_transact(sock, "DELE %d", number);
     if (ok != PS_SUCCESS)
 	return(ok);
-    delete_str(dofastuidl ? &ctl->oldsaved : &ctl->newsaved, number);
+
+    rec = find_uid_by_num(dofastuidl ? &ctl->oldsaved : &ctl->newsaved, number);
+    rec->status = UID_DELETED;
     return(PS_SUCCESS);
 }
 

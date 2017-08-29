@@ -78,7 +78,7 @@ can be used as a workaround.
 Install fetchmail 6.3.20 or newer.
 
 The fetchmail source code is always available from
-<http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+<http://sourceforge.net/projects/fetchmail/files/>.
 
 Distributors are encouraged to review the NEWS file and move forward to
 6.3.20, rather than backport individual security fixes, because doing so
@@ -135,7 +135,7 @@ END of fetchmail-SA-2011-01
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZUICACg5GqwtyAFuOamJ3JtribzMe9U
-k20AnRLlwx4HBC/Gk3AX1dWSrrQc8WYB
-=GFzg
+iEYEARECAAYFAlN9DK4ACgkQvmGDOQUufZWivQCgs1S3ZZHCnBN4bZHuiTwIIzmo
+hzYAoOr6wu0pYwyLhoBrfkHqFotE4mp2
+=XWx6
 -----END PGP SIGNATURE-----

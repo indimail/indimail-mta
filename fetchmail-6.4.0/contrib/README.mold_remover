@@ -1,7 +1,7 @@
 Mold Remover
 
 Mold Remover is a short python script which integrates with fetchmail 
-<http://fetchmail.berlios.de/> and allows the user to specify the 
+<http://fetchmail.sourceforge.net/> and allows the user to specify the 
 number of days that mail should remain on the pop3 server before being 
 deleted. 
 

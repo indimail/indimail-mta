@@ -51,29 +51,78 @@ removed from a 6.4.0 or newer release.)
 * The --bsmtp - mode of operation may be removed in a future release.
 * Given that OpenSSL is severely underdocumented, and needs license exceptions,
   fetchmail may switch to a different SSL library.
-* SSLv2 support will be removed from a future fetchmail release. It has been
-  obsolete for more than a decade.
+* SSLv3 support may be removed from a future fetchmail release. It has been
+  obsolete for many years and found insecure. Use TLS.
 
 --------------------------------------------------------------------------------
 
-fetchmail-6.3.26 (released 2013-04-23, 26180 LoC):
+fetchmail-6.4.0 (not yet released):
 
 # NOTE THAT FETCHMAIL IS NO LONGER PUBLISHED THROUGH IBIBLIO.
 * They have stopped accepting submissions and consider themselves an archive.
 
-# CRITICAL BUG FIX for setups using "mimedecode":
-* The mimedecode feature failed to ship the last line of the body if it was
-  encoded as quoted-printable and had a MIME soft line break in the very last
-  line.  Reported by Lars Hecking in June 2011.
+## SECURITY FIXES THAT AFFECT BEHAVIOUR AND MAY REQUIRE RECONFIGURATION
+* Fetchmail no longer supports SSLv2.
 
-  Bug introduced on 1998-03-20 when the mimedecode support was added by ESR
-  before release 4.4.1 through code contributed by Henrik Storner.
-  Workaround for older releases: do not use mimedecode feature.
+* Fetchmail no longer attempts to negotiate SSLv3 by default,
+  even with --sslproto ssl23. Fetchmail can now use SSLv3, or TLSv1.1 or a newer
+  TLS version, with STLS/STARTTLS (it would previously force TLSv1.0 with
+  STARTTLS).  If the OpenSSL version used at build and run-time supports these
+  versions, --sslproto ssl3 and --sslproto ssl3+ can be used to re-enable SSLv3.
+  Doing so is discouraged because the SSLv3 protocol is broken.
 
-  Earlier versions of this NEWS file claimed this bug fixed in fetchmail-6.3.23,
-  but it was not.
+  Along the lines suggested - as patch - by Kurt Roeckx, Debian Bug #768843.
 
-  Fixes Launchpad Bug#1171818.
+  While this change is supposed to be compatible with common configurations,
+  users may have to and are advised to change all explicit --sslproto ssl2
+  (change to newer protocols required), --sslproto ssl3, --sslproto tls1 to
+  --sslproto auto, so that they can benefit from TLSv1.1 and TLSv1.2 where
+  supported by the server.
+
+  The --sslproto option now understands the values auto, ssl3+, tls1+, tls1.1, 
+  tls1.1+, tls1.2, tls1.2+ (case insensitively), see CHANGES below for details.
+
+* Fetchmail defaults to --sslcertck behaviour. A new option --nosslcertck to
+  override this has been added, but may be removed in future fetchmail versions
+  in favour of another configuration option that makes the insecurity in using
+  this option clearer.
+
+## CHANGES
+* fetchmail 6.3.X is unsupported.
+* fetchmail now requires OpenSSL v1.0.2 or newer.
+* fetchmail now configures OpenSSL support by default.
+* Fetchmail now supports --sslproto auto and --sslproto tls1+ (same as ssl23).
+* --sslproto tls1.1+ and tls1.2+ are now supported for auto-negotiation with a
+  minimum specified TLS protocol version, and --sslproto tls1.1 and --sslproto
+  tls1.2 to force the specified TLS protocol version.
+* Fetchmail now detects if the server hangs up prematurely during SSL_connect()
+  and reports this condition as such, and not just as SSL connection failure.
+  (OpenSSL 1.0.2 reported incompatible with pop3.live.com by Jerry Seibert).
+* A foreground fetchmail can now accept a few more options while another copy is
+  running in the background.
+* fetchmail now handles POP3 --keep UID lists more efficiently, by using Rainer
+  Weikusat's P-Tree implementation. This reduces the complexity for handling
+  a large UIDL from O(n^2) to O(n log n) and becomes noticably faster with
+  thousands of kept messages. (IMAP does not track UIDs and is unaffected.)
+  At the same time, the UIDL emulation code for deficient servers has been
+  removed. It never worked really well.  Servers that do not implement the
+  optional UIDL command only work with --fetchall option set, which in itself is
+  incompatible with the --keep option (it would cause message duplication).
+
+## FIXES
+* Fix a typo in the FAQ. Submitted by David Lawyer, Debian Bug#706776.
+* Do not translate header tags such as "Subject:".  Reported by Gonzalo Pérez de
+  Olaguer Córdoba, Debian Bug#744907.
+* Convert most links from berlios.de to sourceforge.net.
+* Report error to stderr, and exit, if --idle is combined with multiple
+  accounts.
+* Point to --idle from GENERAL OPERATION to clarify --idle and multiple
+  mailboxes do not mix.  In response to Jeremy Chadwick's trouble 2014-11-19,
+  fetchmail-users mailing list.
+* Fix SSL-enabled build on systems that do not declare SSLv3_client_method(),
+  or that #define OPENSSL_NO_SSL3 inside #include <openssl/ssl.h>
+  Related to Debian Bug#775255. Fixes Debian Bug #804604.
+* Version report lists -SSLv3 on SSL-enabled no-ssl3 builds.
 
 # KNOWN BUGS AND WORKAROUNDS
   (This section floats upwards through the NEWS file so it stays with the
@@ -94,6 +143,24 @@ fetchmail-6.3.26 (released 2013-04-23, 26180 LoC):
 * Kerberos 5 may be broken, particularly on Heimdal, and provide bogus error
   messages. This will not be fixed, because the maintainer has no Kerberos 5
   server to test against. Use GSSAPI.
+
+--------------------------------------------------------------------------------
+
+fetchmail-6.3.26 (released 2013-04-23, 26180 LoC):
+
+# CRITICAL BUG FIX for setups using "mimedecode":
+* The mimedecode feature failed to ship the last line of the body if it was
+  encoded as quoted-printable and had a MIME soft line break in the very last
+  line.  Reported by Lars Hecking in June 2011.
+
+  Bug introduced on 1998-03-20 when the mimedecode support was added by ESR
+  before release 4.4.1 through code contributed by Henrik Storner.
+  Workaround for older releases: do not use mimedecode feature.
+
+  Earlier versions of this NEWS file claimed this bug fixed in fetchmail-6.3.23,
+  but it was not.
+
+  Fixes Launchpad Bug#1171818.
 
 
 fetchmail-6.3.25 (released 2013-03-18, 26149 LoC):
@@ -239,7 +306,7 @@ fetchmail-6.3.22 (released 2012-08-29, 26077 LoC):
 * On systems where SSLv2_client_method isn't defined in OpenSSL (such as
   newer Debian, and Ubuntu starting with 11.10 oneiric ocelot), don't
   reference it (to fix the build) and if configured, print a run-time error 
-  that the OS does not support SSLv2. Fixes Debian Bug #622054, 
+  that the OS does not support SSLv2. Fixes Debian Bug #622054,
   but note that that bug report has a more thorough patch that does away with
   SSLv2 altogether.
 

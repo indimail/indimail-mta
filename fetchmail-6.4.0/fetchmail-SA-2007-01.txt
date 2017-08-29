@@ -13,8 +13,8 @@ Impact:		password disclosure possible
 Danger:		low
 Credits:	Gaëtan Leurent
 CVE Name:	CVE-2007-1558
-URL:		http://fetchmail.berlios.de/fetchmail-SA-2007-01.txt
-Project URL:	http://fetchmail.berlios.de/
+URL:		http://fetchmail.sourceforge.net/fetchmail-SA-2007-01.txt
+Project URL:	http://fetchmail.sourceforge.net/
 
 Affects:	fetchmail release < 6.3.8
 
@@ -76,7 +76,7 @@ C. If you must continue to use APOP without SSL/TLS, then install
    fetchmail 6.3.8 or newer, as it is less susceptible to the attack by
    validating the APOP challenge more strictly to make the attack
    harder. The fetchmail 6.3.8 source code is available from
-   <http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+   <http://sourceforge.net/projects/fetchmail/files/>.
 
 
 A. Copyright, License and Warranty
@@ -107,7 +107,7 @@ END OF fetchmail-SA-2007-01.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZVn6wCgkC9pMA9HxXG6lgbgoixd73Tn
-Cz4AoKG+qB47vhGdXSTDDXDFgMDrMJ24
-=BKzz
+iEYEARECAAYFAlN9DK0ACgkQvmGDOQUufZXpcQCgxzyViEuWv9/kZ6aE8PvfeEev
+8ZsAoLQCAZbK1MHuP/FLeviuVOeHRxO1
+=FH2Q
 -----END PGP SIGNATURE-----

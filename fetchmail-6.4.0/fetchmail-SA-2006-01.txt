@@ -14,9 +14,9 @@ Impact:		fetchmail crashes
 Danger:		low
 Credits:	Nathaniel W. Turner (bug report)
 CVE Name:	CVE-2006-0321
-URL:		http://fetchmail.berlios.de/fetchmail-SA-2006-01.txt
+URL:		http://fetchmail.sourceforge.net/fetchmail-SA-2006-01.txt
 		http://bugs.debian.org/348747
-Project URL:	http://fetchmail.berlios.de/
+Project URL:	http://fetchmail.sourceforge.net/
 
 Affects:	fetchmail release >= 6.3.0
 		fetchmail release <  6.3.2
@@ -74,7 +74,7 @@ None known at this time.
 
 Download and install fetchmail 6.3.2 or a newer stable release from
 fetchmail's project site at
-<http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+<http://sourceforge.net/projects/fetchmail/files/>.
 
 
 5. End of life announcement
@@ -115,7 +115,7 @@ END OF fetchmail-SA-2006-01.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZVnOgCfVyOBUSVgRSjBtqzjaLwKEg0K
-30YAoJiFeNUcNBO3oKfq5rMdSEeNAfGP
-=Gvze
+iEYEARECAAYFAlN9DK0ACgkQvmGDOQUufZUBxACdHYpE68rvXlETUZb+pwr7fJ2n
+dF0An2yoLVhY7KUENyxhnN57aQ0Ro6BK
+=66Zk
 -----END PGP SIGNATURE-----

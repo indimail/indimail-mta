@@ -9,7 +9,7 @@ dnl Process this file with autoconf to produce a configure script.
 dnl
 
 dnl XXX - if bumping version here, check fetchmail.man, too!
-AC_INIT([fetchmail],[6.3.26],[fetchmail-users@lists.berlios.de])
+AC_INIT([fetchmail],[6.4.0],[fetchmail-users@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([fetchmail.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_LIBOBJ_DIR([.])
@@ -17,7 +17,7 @@ AC_CONFIG_LIBOBJ_DIR([.])
 AC_CANONICAL_HOST
 
 dnl automake options are in Makefile.am
-AC_PREREQ(2.59)
+AC_PREREQ(2.60)
 dnl 2.60 required for AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE([silent-rules -Wall])
 AM_SILENT_RULES
@@ -103,6 +103,7 @@ AC_CHECK_DECLS([h_errno],,,[
 ])
 
 AC_C_CONST			dnl getopt needs this.
+AC_C_INLINE			dnl uid_db.? need this.
 
 AM_PROG_LEX
 AC_PROG_MAKE_SET
@@ -139,7 +140,7 @@ AC_CACHE_SAVE
 
 dnl i18n
 AM_GNU_GETTEXT([external], [need-ngettext])
-AM_GNU_GETTEXT_VERSION([0.17])
+AM_GNU_GETTEXT_VERSION([0.18.3])
 dnl end i18n
 
 # Under sysV68, socket and friends are provided by the C library.
@@ -733,8 +734,7 @@ AM_CONDITIONAL(KERBEROS_V4_ENABLE, test "$KERBEROS_V4" = 1)
 AC_ARG_WITH(ssl,
 	[  --with-ssl=[DIR]        enable SSL support using libraries in DIR],
 	[with_ssl=$withval],
-	[with_ssl=no])
-test "$with_ssl" != "no" && AC_DEFINE(SSL_ENABLE,1,Define if you want SSL support compiled in)
+	[with_ssl=yes])
 
 if test "$with_ssl" = "yes"
 then
@@ -803,36 +803,16 @@ then
   if test "$i" = "" ; then i="(none)" ; fi
   AC_MSG_RESULT($i)
   dnl XXX FIXME: use pkg-config if available!
-  AC_DEFINE(SSL_ENABLE)
+  AC_DEFINE(SSL_ENABLE, 1, [Define if you want SSL support compiled in])
 else
   AC_MSG_WARN(Disabling SSL support.)
   AC_MSG_WARN(Consider re-running configure --with-ssl.)
 fi
 
 case "$LIBS" in *-lssl*)
-	AC_CHECK_DECLS([SSLv2_client_method],,,[#include <openssl/ssl.h>])
+	AC_CHECK_DECLS([SSLv3_client_method],,,[#include <openssl/ssl.h>])
 	;;
 esac
-
-binprefix=""
-for f in /var/indimail /usr
-do
-	if test -d $f
-	then
-		binprefix=$f
-	fi
-done
-
-AC_ARG_ENABLE(binprefix, [  --enable-binprefix=dir   directory where IndiMail is installed.],
-	binprefix="$enableval",
-	[
-		if test "$binprefix" = ""
-		then
-			AC_MSG_ERROR([Unable to find your indimail bin prefix, specify --enable-binprefix.])
-		fi
-	])
-AC_DEFINE_UNQUOTED(BINPREFIX,"$binprefix", directory for IndiMail installation)
-AC_SUBST(binprefix)
 
 ###	use option --with-socks=DIR to point at SOCKS library
 AC_ARG_WITH(socks,
@@ -876,7 +856,7 @@ dnl for libesmtp/ modules:
 ACX_WHICH_GETHOSTBYNAME_R
 
 ###	use option --with-hesiod=DIR to point at a HESIOD directory
-#AC_ma_SEARCH_PACKAGE(hesiod, hesiod_getmailhost, /usr/athena /usr /usr/local,hesiod, hesiod.h)
+AC_ma_SEARCH_PACKAGE(hesiod, hesiod_getmailhost, /usr/athena /usr /usr/local,hesiod, hesiod.h)
 
 ###	use option --with-gssapi=DIR to compile in GSSAPI support
 AC_ARG_WITH(gssapi,

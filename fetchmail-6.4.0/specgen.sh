@@ -9,7 +9,7 @@ if [ -z "$version" ] ; then
     exit 1
 fi
 
-email="fetchmail-devel@lists.berlios.de"
+email="fetchmail-devel@lists.sourceforge.net"
 packager="Fetchmail Developers <$email>"
 rpmver=`echo "$version" | sed 's/-/./g'`
 if test $rpmver = $version ; then
@@ -35,7 +35,7 @@ Version:	$rpmver
 Release:	1
 Vendor:		The Community Fetchmail Project
 Packager:	$packager
-URL:		http://developer.berlios.de/projects/fetchmail
+URL:		http://sourceforge.net/projects/fetchmail
 Source:		%{name}-${vervar}.tar.bz2
 Group:		Applications/Mail
 Group(pt_BR):	Aplicações/Correio Eletrônico
@@ -60,7 +60,7 @@ Summary(tr):	POP2, POP3, APOP, IMAP protokolleri ile uzaktan mektup alma yazıl�
 Summary(vi):	trình nền lấy thư POP/IMAP có tính năng đầy đủ
 BuildRoot: %{_tmppath}/%{name}-root
 #Keywords: mail, client, POP3, APOP, KPOP, IMAP, ETRN, ODMR, SMTP, ESMTP, GSSAPI, RPA, NTLM, CRAM-MD5, SASL
-#Destinations:	fetchmail-users@lists.berlios.de, fetchmail-announce@lists.berlios.de
+#Destinations:	fetchmail-users@lists.sourceforge.net, fetchmail-announce@lists.sourceforge.net
 
 %description
 Fetchmail is a free, full-featured, robust, and well-documented remote

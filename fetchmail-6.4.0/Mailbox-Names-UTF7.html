@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.6" />
+<meta name="generator" content="AsciiDoc 8.6.9" />
 <title>IMAP4r1 Mailbox Names vs. Unicode</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
@@ -87,9 +87,15 @@ ul, ol, li > p {
 ul > li     { color: #aaa; }
 ul > li > * { color: black; }
 
-pre {
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
   padding: 0;
   margin: 0;
+}
+pre {
+  white-space: pre-wrap;
 }
 
 #author {
@@ -219,7 +225,7 @@ div.exampleblock > div.content {
 }
 
 div.imageblock div.content { padding-left: 0; }
-span.image img { border-style: none; }
+span.image img { border-style: none; vertical-align: text-bottom; }
 a.image:visited { color: white; }
 
 dl {
@@ -349,7 +355,7 @@ div.colist td img {
   margin-bottom: 0.1em;
 }
 
-div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
   margin-top: 0;
   margin-bottom: 0;
 }
@@ -407,17 +413,13 @@ span.underline { text-decoration: underline; }
 span.overline { text-decoration: overline; }
 span.line-through { text-decoration: line-through; }
 
+div.unbreakable { page-break-inside: avoid; }
+
 
 /*
  * xhtml11 specific
  *
  * */
-
-tt {
-  font-family: monospace;
-  font-size: inherit;
-  color: navy;
-}
 
 div.tableblock {
   margin-top: 1.0em;
@@ -451,12 +453,6 @@ div.tableblock > table[frame="vsides"] {
  * html5 specific
  *
  * */
-
-.monospaced {
-  font-family: monospace;
-  font-size: inherit;
-  color: navy;
-}
 
 table.tableblock {
   margin-top: 1.0em;
@@ -537,6 +533,8 @@ body.manpage div.sectionbody {
 @media print {
   body.manpage div#toc { display: none; }
 }
+
+
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
@@ -581,7 +579,7 @@ toc: function (toclevels) {
 
   function tocEntries(el, toclevels) {
     var result = new Array;
-    var re = new RegExp('[hH]([2-'+(toclevels+1)+'])');
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
     // Function that scans the DOM tree for header elements (the DOM2
     // nodeIterator API would be a better technique but not supported by all
     // browsers).
@@ -610,7 +608,7 @@ toc: function (toclevels) {
   var i;
   for (i = 0; i < toc.childNodes.length; i++) {
     var entry = toc.childNodes[i];
-    if (entry.nodeName == 'div'
+    if (entry.nodeName.toLowerCase() == 'div'
      && entry.getAttribute("class")
      && entry.getAttribute("class").match(/^toclevel/))
       tocEntriesToRemove.push(entry);
@@ -656,7 +654,7 @@ footnotes: function () {
   var entriesToRemove = [];
   for (i = 0; i < noteholder.childNodes.length; i++) {
     var entry = noteholder.childNodes[i];
-    if (entry.nodeName == 'div' && entry.getAttribute("class") == "footnote")
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
       entriesToRemove.push(entry);
   }
   for (i = 0; i < entriesToRemove.length; i++) {
@@ -737,7 +735,7 @@ asciidoc.install(2);
 <div id="header">
 <h1>IMAP4r1 Mailbox Names vs. Unicode</h1>
 <span id="author">Matthias_Andree_(ed.)_and_Mark_Crispin</span><br />
-<span id="email"><tt>&lt;<a href="mailto:matthias.andree@gmx.de">matthias.andree@gmx.de</a>&gt;</tt></span><br />
+<span id="email"><code>&lt;<a href="mailto:matthias.andree@gmx.de">matthias.andree@gmx.de</a>&gt;</code></span><br />
 <span id="revnumber">version 1.001,</span>
 <span id="revdate">2010-05-28</span>
 <div id="toc">
@@ -928,63 +926,56 @@ curiousity since no clients do that with ASCII names.</p></div>
 <table><tr>
 <td class="icon">
 <img alt="Warning" src="data:image/png;base64,
-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
-/F/lgJiyQFHragAAAABJRU5ErkJggg==" />
+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" />
 </td>
 <td class="content">
 <div class="title">Incomplete specification:</div>This section and its subsections are not normative references,
@@ -1069,7 +1060,8 @@ Multilingual Plane, but maps the entire Unicode range.</p></div>
 <div id="footer">
 <div id="footer-text">
 Version 1.001<br />
-Last updated 2013-01-02 23:38:24 CET
+Last updated
+ 2015-12-04 01:51:55 CET
 </div>
 </div>
 </body>

@@ -71,7 +71,7 @@ other accounts' data.
 Install fetchmail 6.3.22 or newer.
 
 The fetchmail source code is always available from
-<http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+<http://sourceforge.net/projects/fetchmail/files/>.
 
 Distributors are encouraged to review the NEWS file and move forward to
 6.3.22, rather than backport individual security fixes, because doing so
@@ -111,7 +111,7 @@ END of fetchmail-SA-2012-02
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAlA+n3kACgkQvmGDOQUufZWzKwCfcOJF35eJ/bOio0VRfFFOiBsq
-dNwAnicBBiqQOq9i7atwBr4gdZ5x+SUM
-=+hqO
+iEYEARECAAYFAlN9DK4ACgkQvmGDOQUufZWDzACgkyvYcMCskG/b3cYoNKioRuZF
+kZcAn0OKGe0JuS88V9lrzRYAUme27zbh
+=ZMfO
 -----END PGP SIGNATURE-----

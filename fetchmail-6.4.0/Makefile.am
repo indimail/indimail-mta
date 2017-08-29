@@ -1,14 +1,18 @@
 # Makefile for fetchmail
 
 SUBDIRS=		. po
-AUTOMAKE_OPTIONS=	1.11 foreign no-dist-gzip dist-bzip2 dist-xz
+AUTOMAKE_OPTIONS=	1.11 foreign no-dist-gzip dist-xz subdir-objects
 
 AM_CPPFLAGS=		-I$(srcdir)/libesmtp
 ACLOCAL_AMFLAGS=	-I m4 -I m4-local
 AM_YFLAGS=		-d
-BUILT_SOURCES=		rcfile_y.h
+# listing socket.$(OBJEXT) here is a hack to compile socket.c pretty
+# early in order to fail it early on outdated OpenSSL libraries,
+# without building a few dozen other files first.
+BUILT_SOURCES=		rcfile_y.h socket.$(OBJEXT)
 
 bin_PROGRAMS=		fetchmail
+
 dist_noinst_SCRIPTS=	specgen.sh
 dist_man1_MANS=		fetchmail.man
 
@@ -22,7 +26,7 @@ dist_man1_MANS+=	$(pym)
 CLEANFILES=		$(nodist_bin_SCRIPTS)
 
 # for gettext (used by fetchmail.c, NOT by GNU gettext)
-localedir=		$(datarootdir)/locale
+localedir=		$(datadir)/locale
 DEFS=			@DEFS@ -DLOCALEDIR=\"$(localedir)\"
 
 noinst_LIBRARIES=	libfm.a
@@ -30,7 +34,7 @@ libfm_a_SOURCES=	xmalloc.c base64.c rfc822.c report.c rfc2047e.c \
 			servport.c ntlm.h smbbyteorder.h smbdes.h smbmd4.h \
 			smbencrypt.h smbdes.c smbencrypt.c smbmd4.c smbutil.c \
 			libesmtp/gethostbyname.h libesmtp/gethostbyname.c \
-			smbtypes.h fm_getaddrinfo.c tls.c rfc822valid.c \
+			smbtypes.h fm_getaddrinfo.c starttls.c rfc822valid.c \
 			xmalloc.h sdump.h sdump.c x509_name_match.c \
 			fm_strl.h md5c.c
 if NTLM_ENABLE
@@ -44,7 +48,7 @@ DEPENDENCIES=		libfm.a $(LIBOBJS)
 check_PROGRAMS=
 
 TESTS=			t.smoke t.validate-xhtml10 t.validate-xhtml t.x509_name_match
-TESTS_ENVIRONMENT=	srcdir="$(srcdir)" LC_ALL=C TZ=UTC SHELL="$(SHELL)" $(SHELL)
+LOG_COMPILER=		env LC_ALL=C TZ=UTC $(SHELL)
 
 if NEED_TRIO
 noinst_LIBRARIES+=	libtrio.a
@@ -65,7 +69,7 @@ fetchmail_SOURCES=	fetchmail.h getopt.h \
 		driver.c transact.c sink.c smtp.c \
 		idlist.c uid.c mxget.c md5ify.c cram.c gssapi.c \
 		opie.c interface.c netrc.c \
-		unmime.c conf.c checkalias.c \
+		unmime.c conf.c checkalias.c uid_db.h uid_db.c\
 		lock.h lock.c \
 		rcfile_l.l rcfile_y.y \
 		ucs/norm_charmap.c ucs/norm_charmap.h

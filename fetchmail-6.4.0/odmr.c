@@ -84,9 +84,9 @@ static int odmr_getrange(int sock, struct query *ctl, const char *id,
 		return (1);
 #else
     /* authenticate via CRAM-MD5 */
-	ok = do_cram_md5(sock, "AUTH", ctl, "334 ");
-	if (ok)
-		return(ok);
+    ok = do_cram_md5(sock, "AUTH", ctl, "334 ");
+    if (ok)
+	return(ok);
 #endif
 
     /*
@@ -183,7 +183,7 @@ static int odmr_getrange(int sock, struct query *ctl, const char *id,
 		/*- Remote SMTP - ODMR */
 		if (odmr_up && FD_ISSET(sock, &readfds))
 #else
-		if (FD_ISSET(sock, &readfds))
+	    if (FD_ISSET(sock, &readfds))
 #endif
 	    {
 		int n = SockRead(sock, buf, sizeof(buf));

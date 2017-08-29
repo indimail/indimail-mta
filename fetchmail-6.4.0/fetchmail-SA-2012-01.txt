@@ -80,7 +80,7 @@ OpenSSL versions, please see <http://www.openssl.org/~bodo/tls-cbc.txt>.
 Install fetchmail 6.3.22 or newer.
 
 The fetchmail source code is always available from
-<http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+<http://sourceforge.net/projects/fetchmail/files/>.
 
 Distributors are encouraged to review the NEWS file and move forward to
 6.3.22, rather than backport individual security fixes, because doing so
@@ -120,7 +120,7 @@ END of fetchmail-SA-2012-01
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEUEARECAAYFAlA+h6EACgkQvmGDOQUufZVxcQCWJ4Oza6u2OtWZErSf415uBneQ
-0gCfbaE1JSkrd0uXzwWDMAbBnSqY9lY=
-=2BVL
+iEYEARECAAYFAlN9DK4ACgkQvmGDOQUufZVCbwCgoQriSlTKD7T6wLSW/4nxvWan
+sGAAnRsgZqpyHgunCA8VUlUQNKO5Z4z1
+=nvvD
 -----END PGP SIGNATURE-----

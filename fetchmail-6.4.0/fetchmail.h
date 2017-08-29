@@ -39,6 +39,8 @@ struct addrinfo;
 #  include "trio/trio.h"
 #endif
 
+#include "uid_db.h"
+
 /* We need this for strstr */
 #if !defined(HAVE_STRSTR) && !defined(strstr)
 char *strstr(const char *, const char *);
@@ -215,7 +217,7 @@ UID_SEEN=	1,		/**< id was seen, but not deleted */
 UID_DELETED=	2,		/**< this message has been marked deleted */
 UID_EXPUNGED=	3		/**< this message has been expunged */
 };
-/*@}*/
+/**/
 
 
 struct query;
@@ -392,8 +394,7 @@ struct query
     int smtp_socket;		/* socket descriptor for SMTP connection */
     unsigned int uid;		/* UID of user to deliver to */
     struct idlist *skipped;	/* messages skipped on the mail server */
-    struct idlist *oldsaved, *newsaved;
-    struct idlist **oldsavedend;
+    struct uid_db oldsaved, newsaved;
     char lastdigest[DIGESTLEN];	/* last MD5 hash seen on this connection */
     char *folder;		/* folder currently being polled */
 
@@ -596,8 +597,11 @@ void release_sink(struct query *);
 int close_sink(struct query *, struct msgblk *, flag);
 int open_warning_by_mail(struct query *);
 #if defined(HAVE_STDARG_H)
-void stuff_warning(const char *, struct query *, const char *, ... )
-    __attribute__ ((format (printf, 3, 4)))
+void stuff_warning(const char *,
+                   struct query *,
+                   const char *pfx,
+                   const char *fmt, ...)
+    __attribute__ ((format (printf, 4, 5)))
     ;
 #else
 void stuff_warning();
@@ -679,7 +683,7 @@ int do_otp(int sock, const char *command, struct query *ctl);
 extern char currentwd[1024], rcfiledir[1024];
 
 struct query *hostalloc(struct query *); 
-int parsecmdline (int, char **, struct runctl *, struct query *);
+int parsecmdline (int, char **, struct runctl *, struct query *, flag *);
 char *prependdir (const char *, const char *);
 char *MD5Digest (unsigned const char *);
 void hmac_md5 (const unsigned char *, size_t, const unsigned char *, size_t, unsigned char *, size_t);
@@ -774,9 +778,9 @@ int servport(const char *service);
 int fm_getaddrinfo(const char *node, const char *serv, const struct addrinfo *hints, struct addrinfo **res);
 void fm_freeaddrinfo(struct addrinfo *ai);
 
-/* prototypes from tls.c */
-int maybe_tls(struct query *ctl);
-int must_tls(struct query *ctl);
+/* prototypes from starttls.c */
+int maybe_starttls(struct query *ctl);
+int must_starttls(struct query *ctl);
 
 /* prototype from rfc822valid.c */
 int rfc822_valid_msgid(const unsigned char *);

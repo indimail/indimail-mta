@@ -6,6 +6,7 @@
  */
 
 #include "config.h"
+#include "xmalloc.h"
 #include <sys/types.h>
 #include <stdio.h>
 #include <errno.h>
@@ -15,12 +16,6 @@
 #endif
 #include "fetchmail.h"
 #include "i18n.h"
-
-#if defined(HAVE_VOIDPOINTER)
-#define XMALLOCTYPE void
-#else
-#define XMALLOCTYPE char
-#endif
 
 XMALLOCTYPE *
 xmalloc (size_t n)

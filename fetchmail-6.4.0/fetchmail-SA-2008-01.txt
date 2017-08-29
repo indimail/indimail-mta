@@ -6,7 +6,7 @@ fetchmail-SA-2008-01: Crash on large log messages in verbose mode
 Topics:		Crash in large log messages in verbose mode.
 
 Author:		Matthias Andree
-Version:	1.2
+Version:	1.3
 Announced:	2008-06-17
 Type:		Dereferencing garbage pointer triggered by outside circumstances
 Impact:		denial of service possible
@@ -28,7 +28,6 @@ Not affected:	fetchmail release 6.3.9 and newer
 Corrected:	2008-06-24 fetchmail SVN (rev 5205)
 
 References:	<https://bugzilla.novell.com/show_bug.cgi?id=354291>
-		<http://developer.berlios.de/patch/?func=detailpatch&patch_id=2492&group_id=1824>
 
 
 0. Release history
@@ -38,7 +37,8 @@ References:	<https://bugzilla.novell.com/show_bug.cgi?id=354291>
 		posted to oss-security)
 2008-06-17 1.0	published on http://www.fetchmail.info/
 2008-06-17 1.1	Corrected typo in Type: above (trigged -> triggered)
-2008-06-24 1.2  also fixed issue in report_complete (reported by Petr Uzel)
+2008-06-24 1.2	also fixed issue in report_complete (reported by Petr Uzel)
+2014-05-21 1.3	drop obsolete BerliOS link from References: in header above
 
 
 1. Background
@@ -90,7 +90,7 @@ a. Apply the patch found in section B of this announcement to
 
 b. Install fetchmail 6.3.9 or newer after it will have become available.
    The fetchmail source code is always available from
-   <http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+   <http://sourceforge.net/projects/fetchmail/files/>.
 
 
 4. Workaround
@@ -196,7 +196,7 @@ END OF fetchmail-SA-2008-01.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZVbTACeOfZU3NVlDF675SDiVqPL4uAl
-fsgAoMEqf6cpav6sDdEobMHV3UzHSOJV
-=uvVR
+iEYEARECAAYFAlN9DK4ACgkQvmGDOQUufZV5ygCg6VQ+GzxusnaijUWIKKu29mQy
+wrMAoPHktP1LYWR3eJmoG8palU2lAM1L
+=C7We
 -----END PGP SIGNATURE-----

@@ -14,7 +14,7 @@
 <!-- .mso www.tmac -->
 <!-- ignored unsupported tag .mso -->
 <!-- .\" -->
-<!-- .TH fetchmail 1 "fetchmail 6.3.26" "fetchmail" "fetchmail reference manual" -->
+<!-- .TH fetchmail 1 "fetchmail 6.4.0" "fetchmail" "fetchmail reference manual" -->
 <CENTER>
 <H1><HR><I>Manual Reference Pages &nbsp;-&nbsp;</I><NOBR>fetchmail (1)</NOBR><HR></H1>
 </CENTER>
@@ -180,7 +180,7 @@ env LC_ALL=C fetchmail -vvv  --nodetach --nosyslog
 </TD></TR>
 <!-- PP ends table -->
 <TR></TR></TABLE>Also see
-<!-- .URL "http://fetchmail.berlios.de/fetchmail-FAQ.html#G3" "item #G3 in fetchmail's FAQ" -->
+<!-- .URL "http://fetchmail.sourceforge.net/fetchmail-FAQ.html#G3" "item #G3 in fetchmail's FAQ" -->
 <!-- ignored unsupported tag .URL -->
 <!-- .PP -->
 <P>
@@ -309,9 +309,9 @@ the <B>fetchmailconf</B> program edits).  Command-line options override
 <!-- .PP -->
 <P>
 Each server name that you specify following the options on the command
-line will be queried.  If you don&#146;t specify any servers on the command
+line will be queried.  If you do not specify any servers on the command
 line, each &#146;poll&#146; entry in your <I>~/.fetchmailrc</I> file will be
-queried.
+queried, unless the idle option is used, which see.
 <!-- .PP -->
 <P>
 To facilitate the use of <B>fetchmail</B> in scripts and pipelines, it
@@ -339,6 +339,12 @@ in sections on AUTHENTICATION and DAEMON MODE which follow.
 <BLOCKQUOTE>
 <!-- .TP -->
 <TABLE cellpadding=3>
+<TR valign=top><TD colspan=2>
+<!-- .B \-? | \-\-help -->
+<B>-? | --help</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
+Displays option help.
+<!-- .TP -->
+</TD></TR>
 <TR valign=top><TD colspan=2>
 <!-- .B \-V | \-\-version -->
 <B>-V | --version</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
@@ -604,11 +610,12 @@ also: --idfile.
 <!-- .br -->
 <!-- Need break --><BR>
 Enable IDLE use (effective only with IMAP). Note that this works with
-only one folder at a given time.  While the idle rcfile keyword had been
-supported for a long time, the --idle command-line option was added in
-version 6.3.3. IDLE use means that fetchmail tells the IMAP server to
-send notice of new messages, so they can be retrieved sooner than would
-be possible with regular polls.
+only one account and one folder at a given time, other folders or
+accounts will not be polled when idle is in effect!  While the idle rcfile
+keyword had been supported for a long time, the --idle command-line
+option was added in version 6.3.3. IDLE use means that fetchmail tells
+the IMAP server to send notice of new messages, so they can be retrieved
+sooner than would be possible with regular polls.
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
@@ -737,21 +744,18 @@ from. The folder information is written only since version 6.3.4.
 (Keyword: ssl)
 <!-- .br -->
 <!-- Need break --><BR>
-Causes the connection to the mail server to be encrypted
-via SSL.  Connect to the server using the specified base protocol over a
-connection secured by SSL. This option defeats opportunistic starttls
-negotiation. It is highly recommended to use --sslproto &#146;SSL3&#146;
---sslcertck to validate the certificates presented by the server and
-defeat the obsolete SSLv2 negotiation. More information is available in
-the <I>README.SSL</I> file that ships with fetchmail.
+Causes the connection to the mail server to be encrypted via SSL, by
+negotiating SSL directly after connecting (SSL-wrapped mode).
+Please see the description of --sslproto below!  More information is
+available in the <I>README.SSL</I> file that ships with fetchmail.
 <!-- .IP -->
 </TD></TR>
 <TR valign=top><TD width=6%>
 
 </TD><TD>
-Note that fetchmail may still try to negotiate SSL through starttls even
-if this option is omitted. You can use the --sslproto option to defeat
-this behavior or tell fetchmail to negotiate a particular SSL protocol.
+Note that even if this option is omitted, fetchmail may still negotiate
+SSL in-band for POP3 or IMAP, through the STLS or STARTTLS feature.  You
+can use the --sslproto option to modify that behavior.
 <!-- .IP -->
 </TD></TR>
 <TR valign=top><TD width=6%>
@@ -761,7 +765,7 @@ If no port is specified, the connection is attempted to the well known
 port of the SSL version of the base protocol.  This is generally a
 different port than the port used by the base protocol.  For IMAP, this
 is port 143 for the clear protocol and port 993 for the SSL secured
-protocol, for POP3, it is port 110 for the clear text and port 995 for
+protocol; for POP3, it is port 110 for the clear text and port 995 for
 the encrypted variant.
 <!-- .IP -->
 </TD></TR>
@@ -826,53 +830,141 @@ Also see --sslcert above.
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
-<!-- .B \-\-sslproto <name> -->
-<B>--sslproto &lt;name&gt;</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
-(Keyword: sslproto)
+<!-- .B \-\-sslproto <value> -->
+<B>--sslproto &lt;value&gt;</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
+(Keyword: sslproto, NOTE: semantic changes since v6.4.0)
 <!-- .br -->
 <!-- Need break --><BR>
-Forces an SSL/TLS protocol. Possible values are <B>&#146;&#146;</B>,
-&#146;<B>SSL2</B>&#146; (not supported on all systems),
-&#146;<B>SSL23</B>&#146;, (use of these two values is discouraged
-and should only be used as a last resort) &#146;<B>SSL3</B>&#146;, and
-&#146;<B>TLS1</B>&#146;.  The default behaviour if this option is unset is: for
-connections without --ssl, use &#146;<B>TLS1</B>&#146; so that fetchmail will
-opportunistically try STARTTLS negotiation with TLS1. You can configure
-this option explicitly if the default handshake (TLS1 if --ssl is not
-used) does not work for your server.
-<!-- .IP -->
+This option has a dual use, out of historic fetchmail behaviour. It
+controls both the SSL/TLS protocol version and, if --ssl is not
+specified, the STARTTLS behaviour (upgrading the protocol to an SSL or
+TLS connection in-band). Some other options may however make TLS
+mandatory.
+<!-- .PP -->
+</TD></TR>
+<!-- Found tag RS -->
+<TR><TD colspan=2>
+Only if this option and --ssl are both missing for a poll, there will
+be opportunistic TLS for POP3 and IMAP, where fetchmail will attempt to
+upgrade to TLSv1 or newer.
+<!-- .PP -->
+</TD></TR>
+<!-- Found tag RS -->
+<TR><TD colspan=2>
+Recognized values for --sslproto are given below. You should normally
+chose one of the auto-negotiating options, i. e. &#146;<B>auto</B>&#146; or one of
+the options ending in a plus (<B>+</B>) character. Note that depending
+on OpenSSL library version and configuration, some options cause
+run-time errors because the requested SSL or TLS versions are not
+supported by the particular installed OpenSSL library.
+<!-- .RS -->
+</TD></TR>
+<TR><TD width=6%>&nbsp;</TD><TD>
+<!-- .IP "\fB''\fP, the empty string" -->
+<TABLE width=100% cellpadding=3>
+<TR valign=top><TD width=6%>
+<B>&#146;&#146;</B>, the empty string
+</TD><TD>
+Disable STARTTLS. If --ssl is given for the same server, log an error
+and pretend that &#146;<B>auto</B>&#146; had been used instead.
+<!-- .IP '\fBauto\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>auto</B>&#146;
+</TD><TD>
+(default). Since v6.4.0. Require TLS. Auto-negotiate TLSv1 or newer, disable SSLv3 downgrade.
+(fetchmail 6.3.26 and older have auto-negotiated all protocols that
+their OpenSSL library supported, including the broken SSLv3).
+<!-- .IP "\&'\fBSSL23\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>SSL23</B>&#146;
+</TD><TD>
+see &#146;<B>auto</B>&#146;.
+<!-- .IP \&'\fBSSL3\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>SSL3</B>&#146;
+</TD><TD>
+Require SSLv3 exactly. SSLv3 is broken, not supported on all systems, avoid it
+if possible.  This will make fetchmail negotiate SSLv3 only, and is the
+only way besides &#146;<B>SSL3+</B>&#146; to have fetchmail 6.4.0 or newer permit SSLv3.
+<!-- .IP \&'\fBSSL3+\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>SSL3+</B>&#146;
+</TD><TD>
+same as &#146;<B>auto</B>&#146;, but permit SSLv3 as well. This is the only way
+besides &#146;<B>SSL3</B>&#146; to have fetchmail 6.4.0 or newer permit SSLv3.
+<!-- .IP \&'\fBTLS1\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>TLS1</B>&#146;
+</TD><TD>
+Require TLSv1. This does not negotiate TLSv1.1 or newer, and is
+discouraged. Replace by TLS1+ unless the latter chokes your server.
+<!-- .IP \&'\fBTLS1+\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>TLS1+</B>&#146;
+</TD><TD>
+Since v6.4.0. See &#146;<B>auto</B>&#146;.
+<!-- .IP \&'\fBTLS1.1\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>TLS1.1</B>&#146;
+</TD><TD>
+Since v6.4.0. Require TLS v1.1 exactly.
+<!-- .IP \&'\fBTLS1.1+\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>TLS1.1+</B>&#146;
+</TD><TD>
+Since v6.4.0. Require TLS. Auto-negotiate TLSv1.1 or newer.
+<!-- .IP \&'\fBTLS1.2\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>TLS1.2</B>&#146;
+</TD><TD>
+Since v6.4.0. Require TLS v1.2 exactly.
+<!-- .IP '\fBTLS1.2+\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>TLS1.2+</B>&#146;
+</TD><TD>
+Since v6.4.0. Require TLS. Auto-negotiate TLSv1.2 or newer.
+<!-- .IP "Unrecognized parameters" -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+Unrecognized parameters
+</TD><TD>
+are treated the same as &#146;<B>auto</B>&#146;.
+<!-- .RE -->
+</TD></TR>
+<TR></TR></TABLE><!-- .IP -->
 </TD></TR>
 <TR valign=top><TD width=6%>
 
 </TD><TD>
-Use this option with &#146;<B>TLS1</B>&#146; value to enforce a STARTTLS
-connection. In this mode, it is highly recommended to also use
---sslcertck (see below).  Note that this will then cause fetchmail
-v6.3.19 to force STARTTLS negotiation even if it is not advertised by
-the server.
-<!-- .IP -->
-</TD></TR>
-<TR valign=top><TD width=6%>
-
-</TD><TD>
-To defeat opportunistic TLSv1 negotiation when the server advertises
-STARTTLS or STLS, and use a cleartext connection use <B>&#146;&#146;</B>.  This
-option, even if the argument is the empty string, will also suppress the
-diagnostic &#146;SERVER: opportunistic upgrade to TLS.&#146; message in verbose
-mode. The default is to try appropriate protocols depending on context.
+NOTE: you should hardly ever need to use anything other than &#146;&#146; (to
+force an unencrypted connection) or &#146;auto&#146; (to enforce TLS).
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
 <!-- .B \-\-sslcertck -->
 <B>--sslcertck</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
-(Keyword: sslcertck)
+(Keyword: sslcertck, default enabled since v6.4.0)
 <!-- .br -->
+<!-- .B \-\-sslcertck causes fetchmail to require that SSL/TLS be used and -->
 <!-- Need break --><BR>
-Causes fetchmail to strictly check the server certificate against a set of
-local trusted certificates (see the <B>sslcertfile</B> and <B>sslcertpath</B>
-options). If the server certificate cannot be obtained or is not signed by one
-of the trusted ones (directly or indirectly), the SSL connection will fail,
-regardless of the <B>sslfingerprint</B> option.
+<B>--sslcertck causes fetchmail to require that SSL/TLS be used and</B> disconnect if it can not successfully negotiate SSL or TLS, or if it
+cannot successfully verify and validate the certificate and follow it to
+a trust anchor (or trusted root certificate). The trust anchors are
+given as a set of local trusted certificates (see the <B>sslcertfile</B>
+and <B>sslcertpath</B> options). If the server certificate cannot be
+obtained or is not signed by one of the trusted ones (directly or
+indirectly), fetchmail will disconnect, regardless of the
+<B>sslfingerprint</B> option.
 <!-- .IP -->
 </TD></TR>
 <TR valign=top><TD width=6%>
@@ -891,9 +983,17 @@ fetchmail versions.
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
+<!-- .B \-\-nosslcertck -->
+<B>--nosslcertck</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
+(Keyword: no sslcertck, only in v6.4.X)
+<!-- .br -->
+<!-- Need break --><BR>
+The opposite of --sslcertck, this is a disouraged option. It permits
+fetchmail to continue connecting even if the server certificate failed
+the verification checks.  Should only be used together with
+--sslfingerprint.
 <!-- .B \-\-sslcertfile <file> -->
-<B>--sslcertfile &lt;file&gt;</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
-(Keyword: sslcertfile, since v6.3.17)
+<B>--sslcertfile &lt;file&gt;</B> (Keyword: sslcertfile, since v6.3.17)
 <!-- .br -->
 <!-- Need break --><BR>
 Sets the file fetchmail uses to look up local certificates.  The default is
@@ -979,7 +1079,7 @@ fingerprint with the given one, and the connection will fail if they do not
 match, regardless of the <B>sslcertck</B> setting. The connection will
 also fail if fetchmail cannot obtain an SSL certificate from the server.
 This can be used to prevent man-in-the-middle attacks, but the finger
-print from the server needs to be obtained or verified over a secure
+print from the server must be obtained or verified over a secure
 channel, and certainly not over the same Internet connection that
 fetchmail would use.
 <!-- .IP -->
@@ -988,7 +1088,7 @@ fetchmail would use.
 
 </TD><TD>
 Using this option will prevent printing certificate verification errors
-as long as --sslcertck is unset.
+as long as --nosslcertck is in effect.
 <!-- .IP -->
 </TD></TR>
 <TR valign=top><TD width=6%>
@@ -1045,6 +1145,14 @@ Example:
 <P>
 This option can be used with ODMR, and will make fetchmail a relay
 between the ODMR server and SMTP or LMTP receiver.
+<!-- .IP -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+
+</TD><TD>
+WARNING: if you use address numeric IP addresses here, be sure to use
+--smtpaddress or --smtpname (either of which see) with a valid SMTP
+address literal!
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
@@ -1064,10 +1172,19 @@ default is the FQDN of the machine running <B>fetchmail</B>.
 (Keyword: smtpaddress)
 <!-- .br -->
 <!-- Need break --><BR>
-Specify the domain to be appended to addresses
-in RCPT TO lines shipped to SMTP. When this is not specified, the name
-of the SMTP server (as specified by --smtphost) is used for SMTP/LMTP
-and &#146;localhost&#146; is used for UNIX socket/BSMTP.
+Specify the domain to be appended to addresses in RCPT TO lines shipped
+to SMTP. When this is not specified, the name of the SMTP server (as
+specified by --smtphost) is used for SMTP/LMTP and &#146;localhost&#146; is used
+for UNIX socket/BSMTP.
+<!-- .IP -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+
+</TD><TD>
+NOTE: if you intend to use numeric addresses, or so-called address
+literals per the SMTP standard, write them in proper SMTP syntax, for
+instance --smtpaddress "[192.0.2.6]" or --smtpaddress
+"[IPv6:2001:DB8::6]".
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
@@ -1077,7 +1194,8 @@ and &#146;localhost&#146; is used for UNIX socket/BSMTP.
 <!-- .br -->
 <!-- Need break --><BR>
 Specify the domain and user to be put in RCPT TO lines shipped to SMTP.
-The default user is the current local user.
+The default user is the current local user. Please also see the NOTE
+about --smtpaddress and address literals above.
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
@@ -1089,7 +1207,11 @@ The default user is the current local user.
 Specifies the list of numeric SMTP errors that are to be interpreted
 as a spam-block response from the listener.  A value of -1 disables
 this option.  For the command-line option, the list values should
-be comma-separated.
+be comma-separated.  Note that the antispam values only apply to "MAIL
+FROM" responses in the SMTP/LMTP dialogue, but several MTAs (Postfix in
+its default configuration, qmail) defer the anti-spam response code
+until after the RCPT TO. --antispam does not work in these
+circumstances.  Also see --softbounce (default) and its inverse.
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
@@ -1600,10 +1722,11 @@ sent to &#146;username@userhost.userdom.dom.com&#146; having a
 
 </TD><TD>
 Delivered-To: mbox-userstr-username@userhost.example.com
-<!-- .PP -->
+<!-- .IP -->
 </TD></TR>
-<!-- Found tag TP -->
-<TR><TD colspan=2>
+<TR valign=top><TD width=6%>
+
+</TD><TD>
 The ISP can make the &#146;mbox-userstr-&#146; prefix anything they choose
 but a string matching the user host name is likely.
 By using the option &#146;envelope Delivered-To:&#146; you can make fetchmail reliably
@@ -1620,6 +1743,13 @@ specified, and dump a configuration report to standard output.  The
 configuration report is a data structure assignment in the language
 Python.  This option is meant to be used with an interactive
 <I>~/.fetchmailrc</I> editor like <B>fetchmailconf</B>, written in Python.
+<!-- .TP -->
+</TD></TR>
+<TR valign=top><TD colspan=2>
+<!-- .B \-y | \-\-yydebug -->
+<B>-y | --yydebug</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
+Enables parser debugging, this option is meant to be used by developers
+only.
 <P>
 <!-- .SS Removed Options -->
 </TD></TR>
@@ -1871,6 +2001,10 @@ username and the part to the right as the NTLM domain.
     <H4>&nbsp; &nbsp; Secure Socket Layers (SSL) and Transport Layer Security (TLS)</H4>
 </A>
 <BLOCKQUOTE>
+<!-- .PP All retrieval protocols can use SSL or TLS wrapping for the -->
+<P>
+transport. Additionally, POP3 and IMAP retrival can also negotiate
+SSL/TLS by means of STARTTLS (or STLS).
 <!-- .PP -->
 <P>
 Note that fetchmail currently uses the OpenSSL library, which is
@@ -1878,27 +2012,26 @@ severely underdocumented, so failures may occur just because the
 programmers are not aware of OpenSSL&#146;s requirement of the day.
 For instance, since v6.3.16, fetchmail calls
 OpenSSL_add_all_algorithms(), which is necessary to support certificates
-using SHA256 on OpenSSL 0.9.8 -- this information is deeply hidden in the
-documentation and not at all obvious.  Please do not hesitate to report
-subtle SSL failures.
+using SHA256 on OpenSSL 0.9.8 -- this information is deeply hidden in
+the documentation and not at all obvious.  Please do not hesitate to
+report subtle SSL failures.
 <!-- .PP -->
 <P>
-You can access SSL encrypted services by specifying the --ssl option.
-You can also do this using the "ssl" user option in the .fetchmailrc
-file. With SSL encryption enabled, queries are initiated over a
-connection after negotiating an SSL session, and the connection fails if
-SSL cannot be negotiated.  Some services, such as POP3 and IMAP, have
+You can access SSL encrypted services by specifying the options starting
+with --ssl, such as --ssl, --sslproto, --sslcertck, and others.
+You can also do this using the corresponding user options in the .fetchmailrc
+file.  Some services, such as POP3 and IMAP, have
 different well known ports defined for the SSL encrypted services.  The
 encrypted ports will be selected automatically when SSL is enabled and
-no explicit port is specified. The --sslproto &#146;SSL3&#146; option should be
-used to select the SSLv3 protocol (default if unset: v2 or v3).  Also,
-the --sslcertck command line or sslcertck run control file option
-should be used to force strict certificate checking - see below.
+no explicit port is specified.   Also, the --sslcertck command line or
+sslcertck run control file option should be used to force strict
+certificate checking - see below.
 <!-- .PP -->
 <P>
 If SSL is not configured, fetchmail will usually opportunistically try to use
-STARTTLS. STARTTLS can be enforced by using --sslproto "TLS1". TLS
-connections use the same port as the unencrypted version of the
+STARTTLS. STARTTLS can be enforced by using --sslproto~auto and
+defeated by using --sslproto~&#146;&#146;.
+TLS connections use the same port as the unencrypted version of the
 protocol and negotiate TLS via special command. The --sslcertck
 command line or sslcertck run control file option should be used to
 force strict certificate checking - see below.
@@ -1918,7 +2051,7 @@ control file option is used, fetchmail will instead abort if any of
 these checks fail, because it must assume that there is a
 man-in-the-middle attack in this scenario, hence fetchmail must not
 expose cleartext passwords. Use of the sslcertck or --sslcertck option
-is therefore advised.
+is therefore advised; it has become the default in fetchmail 6.4.0.
 <!-- .PP -->
 <P>
 Some SSL encrypted servers may request a client side certificate.  A client
@@ -2048,6 +2181,8 @@ authentication or multiple timeouts.
 <!-- .PP -->
 <P>
 The option
+<!-- .B \-q -->
+<B>-q</B> or
 <!-- .B \-\-quit -->
 <B>--quit</B> will kill a running daemon process instead of waking it up (if there
 is no such process, <B>fetchmail</B> will notify you).
@@ -2696,10 +2831,22 @@ local user name if followed by &#146;here&#146;.
 <TD>sslcert</TD><TD></TD><TD></TD><TD>Specify file for <B>client side</B> public SSL certificate
 </TD></TR>
 <TR valign=top>
+<TD>sslcertck</TD><TD></TD><TD></TD><TD>Enable strict certificate checking and abort connection on failure.
+</TD></TR>
+<TR valign=top>
+<TD>no sslcertck</TD><TD></TD><TD></TD><TD>Disable strict certificate checking and permit connections to continue
+on failed verification. Discouraged. Should only be used together with
+sslfingerprint.
+</TD></TR>
+<TR valign=top>
 <TD>sslcertfile</TD><TD></TD><TD></TD><TD>Specify file with trusted CA certificates
 </TD></TR>
 <TR valign=top>
 <TD>sslcertpath</TD><TD></TD><TD></TD><TD>Specify c_rehash-ed directory with trusted CA certificates.
+</TD></TR>
+<TR valign=top>
+<TD>sslfingerprint</TD><TD>&lt;HASH&gt; </TD><TD></TD><TD>Specify the expected server certificat finger print. Fetchmail will
+disconnect and log an error if it does not match.
 </TD></TR>
 <TR valign=top>
 <TD>sslkey</TD><TD></TD><TD></TD><TD>Specify file for <B>client side</B> private SSL key
@@ -2729,7 +2876,7 @@ local user name if followed by &#146;here&#146;.
 <TD>mda</TD><TD>-m</TD><TD></TD><TD>Specify MDA for local delivery
 </TD></TR>
 <TR valign=top>
-<TD>bsmtp</TD><TD>-o</TD><TD></TD><TD>Specify BSMTP batch file to append to
+<TD>bsmtp</TD><TD></TD><TD></TD><TD>Specify BSMTP batch file to append to
 </TD></TR>
 <TR valign=top>
 <TD>preconnect</TD><TD></TD><TD></TD><TD>Command to be executed before each connection
@@ -3008,7 +3155,7 @@ connection is taken down.
 <P>
 The &#146;forcecr&#146; option controls whether lines terminated by LF only are
 given CRLF termination before forwarding.  Strictly speaking RFC821
-requires this, but few MTAs enforce the requirement it so this option
+requires this, but few MTAs enforce the requirement so this option
 is normally off (only one such MTA, qmail, is in significant use at
 time of writing).
 <!-- .PP -->
@@ -4209,13 +4356,13 @@ messages behind.
 <!-- .PP -->
 <P>
 Send comments, bug reports, gripes, and the like to the
-<!-- .MTO "fetchmail-devel@lists.berlios.de" "fetchmail-devel list" -->
+<!-- .MTO "fetchmail-devel@lists.sourceforge.net" "fetchmail-devel list" -->
 <!-- ignored unsupported tag .MTO -->
 <P>
 <!-- .PP -->
 <P>
 An
-<!-- .URL "http://fetchmail.berlios.de/fetchmail-FAQ.html" "HTML FAQ" -->
+<!-- .URL "http://fetchmail.sourceforge.net/fetchmail-FAQ.html" "HTML FAQ" -->
 <!-- ignored unsupported tag .URL -->
 is available at the fetchmail home page, it should also accompany your
 installation.
@@ -4283,7 +4430,12 @@ Beinert, and H[&#146;e]ctor Garc[&#146;i]a.
 <P>
 <!-- .PP -->
 <P>
-<!-- .URL "http://fetchmail.berlios.de/" "The fetchmail home page." -->
+<!-- .URL "http://www.fetchmail.info/" "The fetchmail home page." -->
+<!-- ignored unsupported tag .URL -->
+<P>
+<!-- .PP -->
+<P>
+<!-- .URL "http://fetchmail.sourceforge.net/" "The fetchmail home page (alternative URI)." -->
 <!-- ignored unsupported tag .URL -->
 <P>
 <!-- .PP -->
@@ -4398,5 +4550,5 @@ RFC 2595.
 </TD></TR>
 <TR></TR></TABLE></BLOCKQUOTE>
 <P><HR>
-<TABLE width=100%><TR> <TD width=33%><I>fetchmail</I></TD> <TD width=33% align=center>fetchmail (1)</TD> <TD align=right width=33%><I>fetchmail 6.3.26</I></TD> </TR></TABLE><FONT SIZE=-1>Generated by <A HREF="http://www.squarebox.co.uk/users/rolf/download/manServer.shtml">manServer 1.07+ma1</A> from ../fetchmail.man using man macros with tbl support.</FONT>
+<TABLE width=100%><TR> <TD width=33%><I>fetchmail</I></TD> <TD width=33% align=center>fetchmail (1)</TD> <TD align=right width=33%><I>fetchmail 6.4.0</I></TD> </TR></TABLE><FONT SIZE=-1>Generated by <A HREF="http://www.squarebox.co.uk/users/rolf/download/manServer.shtml">manServer 1.07+ma1</A> from ../fetchmail.man using man macros with tbl support.</FONT>
 </BODY></HTML>

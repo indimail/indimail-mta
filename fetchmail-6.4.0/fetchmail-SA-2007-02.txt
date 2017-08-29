@@ -12,7 +12,7 @@ Type:		NULL pointer dereference trigged by outside circumstances
 Impact:		denial of service possible
 Danger:		low
 CVSS V2 vector: (AV:N/AC:M/Au:N/C:N/I:N/A:C/E:?/RL:O/RC:C)
-		
+
 Credits:	Earl Chew
 CVE Name:	CVE-2007-4565
 URL:		http://www.fetchmail.info/fetchmail-SA-2007-02.txt
@@ -48,25 +48,25 @@ control) files for fetchmail.
 2. Problem description and Impact
 =================================
 
-fetchmail will generate warning messages in certain circumstances and 
-send them to the local postmaster or the user starting it. Such warning 
-messages can be generated, for instance, if logging into an upstream 
-server fails repeatedly or if messages beyond the size limit (if 
+fetchmail will generate warning messages in certain circumstances and
+send them to the local postmaster or the user starting it. Such warning
+messages can be generated, for instance, if logging into an upstream
+server fails repeatedly or if messages beyond the size limit (if
 configured, default: no limit) are left on the server.
 
-If this warning message is then refused by the SMTP listener that 
-fetchmail is forwarding the message to, fetchmail attempts to 
-dereference a NULL pointer when trying to find out if it should allow a 
+If this warning message is then refused by the SMTP listener that
+fetchmail is forwarding the message to, fetchmail attempts to
+dereference a NULL pointer when trying to find out if it should allow a
 bounce message to be sent.
 
-This causes fetchmail to crash and not collect further messages until it 
+This causes fetchmail to crash and not collect further messages until it
 is restarted.
 
-Risk assessment: low. In default configuration, fetchmail will talk 
-through the loopback interface, that means to the SMTP server on the same 
-computer as it is running on. Otherwise, it will commonly be configured 
-to talk to trusted SMTP servers, so a compromise or misconfiguration of 
-a trusted or the same computer is required to exploit this problem - 
+Risk assessment: low. In default configuration, fetchmail will talk
+through the loopback interface, that means to the SMTP server on the same
+computer as it is running on. Otherwise, it will commonly be configured
+to talk to trusted SMTP servers, so a compromise or misconfiguration of
+a trusted or the same computer is required to exploit this problem -
 which usually opens up much easier ways of denying service, or worse.
 
 
@@ -78,11 +78,11 @@ There are two alternatives, either of them by itself is sufficient:
 a. Apply the patch found in section B of this announcement to fetchmail 6.3.8,
    recompile and reinstall it.
 
-b. Install fetchmail 6.3.9 or newer when it becomes available.  The 
-   fetchmail source code is available from 
-   <http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+b. Install fetchmail 6.3.9 or newer when it becomes available.  The
+   fetchmail source code is available from
+   <http://sourceforge.net/projects/fetchmail/files/>.
 
-Note there are no workarounds presented here since all known workarounds 
+Note there are no workarounds presented here since all known workarounds
 are more intrusive than the actual solution.
 
 
@@ -119,7 +119,7 @@ Index: sink.c
 +++ sink.c	(revision 5119)
 @@ -262,7 +262,7 @@
      const char *md1 = "MAILER-DAEMON", *md2 = "MAILER-DAEMON@";
- 
+
      /* don't bounce in reply to undeliverable bounces */
 - -    if (!msg->return_path[0] ||
 +    if (!msg || !msg->return_path[0] ||
@@ -131,7 +131,7 @@ END OF fetchmail-SA-2007-02.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZWWKwCfX4Ri89SzzUcXYxughs1CdnAk
-Z6IAniD4DzayVUR6UxA5K1OqX1CUDOhM
-=+YME
+iEYEARECAAYFAlN9DK0ACgkQvmGDOQUufZWetACggVJsyo1c2oL/Fjqi9Z/myw6j
+6eMAmgLJS8tWjBE7C5gdW3TLRQTUeFU8
+=9cUO
 -----END PGP SIGNATURE-----

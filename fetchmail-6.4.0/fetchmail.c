@@ -54,6 +54,10 @@
 #define ENETUNREACH   128       /* Interactive doesn't know this */
 #endif /* ENETUNREACH */
 
+#ifdef SSL_ENABLE
+#include <openssl/ssl.h>	/* for OPENSSL_NO_SSL2 and ..._SSL3 checks */
+#endif
+
 /* prototypes for internal functions */
 static int load_params(int, char **, int);
 static void dump_params (struct runctl *runp, struct query *, flag implicit);
@@ -141,7 +145,7 @@ static void printcopyright(FILE *fp) {
 		   "Copyright (C) 2004 Matthias Andree, Eric S. Raymond,\n"
 		   "                   Robert M. Funk, Graham Wilson\n"
 		   "Copyright (C) 2005 - 2012 Sunil Shetye\n"
-		   "Copyright (C) 2005 - 2013 Matthias Andree\n"
+		   "Copyright (C) 2005 - 2016 Matthias Andree\n"
 		   ));
 	fprintf(fp, GT_("Fetchmail comes with ABSOLUTELY NO WARRANTY. This is free software, and you\n"
 		   "are welcome to redistribute it under certain conditions. For details,\n"
@@ -158,6 +162,8 @@ int main(int argc, char **argv)
 {
     int bkgd = FALSE;
     int implicitmode = FALSE;
+    flag safewithbg = FALSE; /** if parsed options are compatible with a
+			      fetchmail copy running in the background */
     struct query *ctl;
     netrc_entry *netrc_list;
     char *netrc_file, *tmpbuf;
@@ -201,7 +207,7 @@ int main(int argc, char **argv)
 
 #define IDFILE_NAME	".fetchids"
     run.idfile = prependdir (IDFILE_NAME, fmhome);
-  
+
     outlevel = O_NORMAL;
 
     /*
@@ -225,7 +231,7 @@ int main(int argc, char **argv)
     {
 	int i;
 
-	i = parsecmdline(argc, argv, &cmd_run, &cmd_opts);
+	i = parsecmdline(argc, argv, &cmd_run, &cmd_opts, &safewithbg);
 	if (i < 0)
 	    exit(PS_SYNTAX);
 
@@ -265,6 +271,10 @@ int main(int argc, char **argv)
 #endif /* ODMR_ENABLE */
 #ifdef SSL_ENABLE
 	"+SSL"
+	"-SSLv2"
+#if (HAVE_DECL_SSLV3_CLIENT_METHOD + 0 == 0) || defined(OPENSSL_NO_SSL3)
+	"-SSLv3"
+#endif
 #endif
 #ifdef OPIE_ENABLE
 	"+OPIE"
@@ -536,17 +546,23 @@ int main(int argc, char **argv)
 	else if (getpid() == pid)
 	    /* this test enables re-execing on a changed rcfile */
 	    fm_lock_assert();
-	else if (argc > 1)
+	else if (argc > 1 && !safewithbg)
 	{
 	    fprintf(stderr,
 		    GT_("fetchmail: can't accept options while a background fetchmail is running.\n"));
+	    {
+		int i;
+		fprintf(stderr, "argc = %d, arg list:\n", argc);
+		for (i = 1; i < argc; i++) fprintf(stderr, "arg %d = \"%s\"\n", i, argv[i]);
+	    }
 	    return(PS_EXCLUDE);
 	}
 	else if (kill(pid, SIGUSR1) == 0)
 	{
-	    fprintf(stderr,
-		    GT_("fetchmail: background fetchmail at %ld awakened.\n"),
-		    (long)pid);
+	    if (outlevel > O_SILENT)
+		fprintf(stderr,
+			GT_("fetchmail: background fetchmail at %ld awakened.\n"),
+			(long)pid);
 	    return(0);
 	}
 	else
@@ -1041,6 +1057,8 @@ static int load_params(int argc, char **argv, int optind)
     struct query def_opts, *ctl;
     struct stat rcstat;
     char *p;
+    unsigned int mboxcount = 0;
+    unsigned int idlecount = 0;
 
     run.bouncemail = TRUE;
     run.softbounce = TRUE;	/* treat permanent errors as temporary */
@@ -1245,7 +1263,7 @@ static int load_params(int argc, char **argv, int optind)
 
 	/*
 	 * We no longer do DNS lookups at startup.
-	 * This is a kluge.  It enables users to edit their
+	 * This is a kludge.  It enables users to edit their
 	 * configurations when DNS isn't available.
 	 */
 	ctl->server.truename = xstrdup(ctl->server.queryname);
@@ -1267,7 +1285,7 @@ static int load_params(int argc, char **argv, int optind)
 	    DEFAULT(ctl->server.dns, TRUE);
 	    DEFAULT(ctl->server.uidl, FALSE);
 	    DEFAULT(ctl->use_ssl, FALSE);
-	    DEFAULT(ctl->sslcertck, FALSE);
+	    DEFAULT(ctl->sslcertck, TRUE);
 	    DEFAULT(ctl->server.checkalias, FALSE);
 #ifndef SSL_ENABLE
 	    /*
@@ -1395,7 +1413,16 @@ static int load_params(int argc, char **argv, int optind)
 		(void) fprintf(stderr,
 			       GT_("Both fetchall and keep on in daemon or idle mode is a mistake!\n"));
 	    }
+
+	    if (ctl->idle) ++idlecount;
+	    mboxcount += count_list(&ctl->mailboxes);
 	}
+    }
+
+    if (idlecount && mboxcount > 1) {
+	fprintf(stderr,
+		GT_("fetchmail: Error: idle mode does not work for multiple folders or accounts!\n"));
+	exit(PS_SYNTAX);
     }
 
     /*
@@ -1579,6 +1606,14 @@ static int query_host(struct query *ctl)
     return(st);
 }
 
+static int print_id_of(struct uid_db_record *rec, void *unused)
+{
+    (void)unused;
+
+    printf("\t%s\n", rec->id);
+    return 0;
+}
+
 static void dump_params (struct runctl *runp,
 			 struct query *querylist, flag implicit)
 /* display query parameters in English */
@@ -1710,6 +1745,8 @@ static void dump_params (struct runctl *runp,
 	    printf(GT_("  SSL protocol: %s.\n"), ctl->sslproto);
 	if (ctl->sslcertck) {
 	    printf(GT_("  SSL server certificate checking enabled.\n"));
+	} else {
+	    printf(GT_("  SSL server certificate checking disabled.\n"));
 	}
 	if (ctl->sslcertfile != NULL)
 		printf(GT_("  SSL trusted certificate file: %s\n"), ctl->sslcertfile);
@@ -1984,20 +2021,14 @@ static void dump_params (struct runctl *runp,
 
 	if (ctl->server.protocol > P_POP2 && MAILBOX_PROTOCOL(ctl))
 	{
-	    if (!ctl->oldsaved)
+	    int count;
+
+	    if (!(count = uid_db_n_records(&ctl->oldsaved)))
 		printf(GT_("  No UIDs saved from this host.\n"));
 	    else
 	    {
-		struct idlist *idp;
-		int count = 0;
-
-		for (idp = ctl->oldsaved; idp; idp = idp->next)
-		    ++count;
-
 		printf(GT_("  %d UIDs saved.\n"), count);
-		if (outlevel >= O_VERBOSE)
-		    for (idp = ctl->oldsaved; idp; idp = idp->next)
-			printf("\t%s\n", idp->id);
+		traverse_uid_db(&ctl->oldsaved, print_id_of, NULL);
 	    }
 	}
 

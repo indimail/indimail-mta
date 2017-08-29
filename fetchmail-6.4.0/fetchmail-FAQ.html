@@ -42,7 +42,7 @@ case you need the new option.</p>
 
 <p>If you have a question or answer you think ought to be added to
 this FAQ list, file it to one of the trackers at <a
-    href="http://developer.berlios.de/projects/fetchmail/">our BerliOS
+    href="http://sourceforge.net/projects/fetchmail/">our SourceForge.net
     project site</a> or post to one of the fetchmail mailing lists (see
 below).</p>
 
@@ -336,13 +336,13 @@ fetchmail sources?</a></h2>
 <p>The latest HTML FAQ is available alongside the latest fetchmail
 sources at the fetchmail home page: <a
 href="http://www.fetchmail.info/">http://www.fetchmail.info/</a>.
-You can also usually find both in the <a
-href="http://www.ibiblio.org/pub/Linux/system/mail/pop/!INDEX.short.html">
-POP mail tools directory on iBiblio</a>.</p>
+We used to have new versions in the iBiblio site, but they have stopped accepting uploads, and the fetchmail versions on iBiblio are outdated.</p>
 
 <p>A text dump of this FAQ is included in the fetchmail
 distribution. Because it freezes at distribution release time, it
 may not be completely current.</p>
+
+<p>The fetchmail sources are also available in the Git repositories at <a href="https://gitlab.com/fetchmail/fetchmail">https://gitlab.com/fetchmail/fetchmail</a> and <a href="https://sourceforge.net/p/fetchmail/git/">https://sourceforge.net/p/fetchmail/git/</a>.</p>
 
 <h2><a id="G3" name="G3">G3. Something does not work/I think I've found a bug. Will you fix it?</a></h2>
 
@@ -353,7 +353,7 @@ save us both time if you upgrade and test with <a href="#G2">the latest
 
 <p>Bugs will be fixed, provided you include enough diagnostic information
 for me to go on. Send bugs to <a
-href="mailto:fetchmail-users@lists.berlios.de">fetchmail-users</a>.
+href="mailto:fetchmail-users@lists.sourceforge.net">fetchmail-users</a>.
 When sending bugs or asking for help, please <strong>do not make up
     information except your password</strong> and please
 <strong>report</strong> the following:</p>
@@ -388,8 +388,8 @@ any suspicion that the bug was triggered by a particular message,
 please include a copy of the message that triggered the bug.</p>
 
 <p>If your bug is something that used to work but stopped working
-when you upgraded, then you can help pin the bug down by trying <a
-href="http://download.berlios.de/fetchmail/">intermediate versions
+when you upgraded, then you can help pin the bug down by bisecting, i. e. trying <a
+href="http://sourceforge.net/p/fetchmail/git/ci/legacy_63/tree/">intermediate versions
 of fetchmail</a> until you identify the revision that broke your
 feature. The smart way to do this is by binary search on the
 version sequence. First, try the version halfway between your last
@@ -489,20 +489,20 @@ spare time of developers permitting.</p>
 tips?</a></h2>
 
 <p>There is a fetchmail-users list
-&lt;fetchmail-users@lists.berlios.de&gt;
+&lt;fetchmail-users@lists.sourceforge.net&gt;
 for bug reports and people who want to discuss configuration issues of
 fetchmail. Please see <a href="#G3">G3 above for information you need to
 report.</a> It's a Mailman list, see <a
-    href="http://lists.berlios.de/mailman/listinfo/fetchmail-users">http://lists.berlios.de/mailman/listinfo/fetchmail-users</a>
+    href="http://lists.sourceforge.net/mailman/listinfo/fetchmail-users">http://lists.sourceforge.net/mailman/listinfo/fetchmail-users</a>
 for info and subscription.</p>
 <p>There is a fetchmail-devel list
-&lt;fetchmail-devel@lists.berlios.de&gt; for people who want to discuss
+&lt;fetchmail-devel@lists.sourceforge.net&gt; for people who want to discuss
 fixes and improvements in fetchmail and help co-develop it. It's a
 Mailman list, which you can sign up for at <a
-href="http://lists.berlios.de/mailman/listinfo/fetchmail-devel">http://lists.berlios.de/mailman/listinfo/fetchmail-devel</a>.</p>
+href="http://lists.sourceforge.net/mailman/listinfo/fetchmail-devel">http://lists.sourceforge.net/mailman/listinfo/fetchmail-devel</a>.</p>
 <p>There is also an announcements-only list,
-&lt;fetchmail-announce@lists.berlios.de&gt;, which you can sign up for at <a
-href="http://lists.berlios.de/mailman/listinfo/fetchmail-announce">http://lists.berlios.de/mailman/listinfo/fetchmail-announce</a>.</p>
+&lt;fetchmail-announce@lists.sourceforge.net&gt;, which you can sign up for at <a
+href="http://lists.sourceforge.net/mailman/listinfo/fetchmail-announce">http://lists.sourceforge.net/mailman/listinfo/fetchmail-announce</a>.</p>
 
 <h2><a id="G7" name="G7">G7. So, what's this I hear about a
 fetchmail paper?</a></h2>
@@ -667,8 +667,8 @@ because there is not currently a standard way to do this; fetchmail
 also uses this method, so the two will interoperate happily. They
 better, because this is how Craig gets his mail ;-)</p>
 
-<p>Finally, you can use <a href="#K5">SSL</a> for complete
-end-to-end encryption if you have an SSL-enabled mailserver.</p>
+<p>Finally, you can use <a href="#K5">SSL or TLS</a> for complete
+end-to-end encryption if you have a TLS-enabled mailserver.</p>
 
 <h2><a id="G11" name="G11">G11. Is any special configuration needed
 to use a dynamic IP address?</a></h2>
@@ -688,7 +688,7 @@ client machine had when it started up.</p>
 time) doesn't match the original, the most benign possible result
 is that your MTA thinks it's seeing a relaying attempt and refuses.
 More frequently, fetchmail will try to connect to a nonexistent
-host address and time out. Worst case, you could up forwarding your
+host address and time out. Worst case, you could end up forwarding your
 mail to the wrong machine!</p>
 
 <p>Use the <code>smtpaddress</code> option to force the appended
@@ -1995,6 +1995,15 @@ sites.)</p>
 
 <h2><a id="I9" name="I9">I9. How can I use fetchmail with GMail/Google Mail?</a></h2>
 
+<p>Google has started pushing towards more complex authentication
+schemes based on OAuth 2.0 that require clients and users
+to jump through quite a few hoops, and use web browsers for signing in.
+If this hinders access to your account through fetchmail, you may need to turn on access for "less secure apps" at <a
+    href="https://www.google.com/settings/security/lesssecureapps">https://www.google.com/settings/security/lesssecureapps</a>.<br/>
+It is disputable whether an application that does not include web
+browsing capabilities or heavy-weight libraries is "less secure" as
+Google claims.</p>
+
 <p>Google's IMAP servers, as of April 2008, are broken and re-encode
 MIME-encoded headers improperly and are not feature-complete yet. The
 model how their servers organize mail also deviates in significant ways
@@ -2120,7 +2129,7 @@ SSL?</a></h2>
 
 <p>You'll need to have the <a
 href="http://www.openssl.org/">OpenSSL</a> libraries installed, and they
-should at least be version 0.9.7.
+should at least be version 0.9.8, with 1.0.1 preferred.
 Configure with --with-ssl. If you have the OpenSSL libraries
 installed in commonly-used default locations, this will
 suffice. If you have them installed in a non-default location,
@@ -2130,7 +2139,7 @@ to --with-ssl after an equal sign.</p>
 <p>Fetchmail binaries built this way support <code>ssl</code>,
 <code>sslkey</code>, and <code>sslcert</code> options that control
 SSL encryption, and will automatically use <code>tls</code> if the
-server offers it. You will need to have an SSL-enabled mailserver to
+server offers it. You will need to have an SSL/TLS-enabled mailserver to
 use these options. See the manual page for details and some words
 of care on the limited security provided.</p>
 
@@ -2155,13 +2164,14 @@ poll MYSERVER port 993 plugin "openssl s_client -connect %h:%p"
         protocol imap username MYUSERNAME password MYPASSWORD
 </pre>
 
-<p>You should note that SSL is only secure against a "man-in-the-middle"
-attack if the client is able to verify that the peer's public key is the
-correct one, and has not been substituted by an attacker. fetchmail can do
-this in one of two ways: by verifying the SSL certificate, or by checking
-the fingerprint of the peer's public key.</p>
+<p>You should note that SSL or TLS are only secure against a
+"man-in-the-middle" attack if the client is able to verify that the
+peer's public key is the correct one, and has not been substituted by an
+attacker. fetchmail can do this in one of two ways: by verifying the SSL
+certificate, or by checking the fingerprint of the peer's public
+key.</p>
 
-<p>There are three parts to SSL certificate verification: checking that the
+<p>There are three parts to TLS certificate verification: checking that the
 domain name in the certificate matches the hostname you asked to connect to;
 checking that the certificate expiry date has not passed; and checking that
 the certificate has been signed by a known Certificate Authority (CA). This
@@ -2227,8 +2237,12 @@ will automatically attempt TLS negotiation if SSL was enabled at compile
 time.  This can however cause problems if the upstream didn't configure
 his certificates properly.</p>
 
-<p>In order to prevent fetchmail from trying TLS (STLS, STARTTLS)
-negotiation, add this option:</p>
+<p>In order to prevent fetchmail 6.4.0 and newer versions from trying
+STLS or STARTTLS negotiation, add this option:</p>
+<pre>sslproto ''</pre>
+
+<p>In order to prevent older fetchmail versions from trying TLS (STLS, STARTTLS)
+negotiation where the above does not work, try this option:</p>
 
 <pre>sslproto ssl23</pre>
 
@@ -2876,15 +2890,22 @@ need to say something like '<code>envelope 1 Received</code>' or
 
 <pre>
 Received: from send103.yahoomail.com (send103.yahoomail.com [205.180.60.92])
-    by iserv.ttns.net (8.8.5/8.8.5) with SMTP id RAA10088
-    for &lt;ksturgeon@fbceg.org&gt;; Wed, 9 Sep 1998 17:01:59 -0700
+    by iserv.example.net (8.8.5/8.8.5) with SMTP id RAA10088
+    for &lt;ksturgeon@fbceg.example.org&gt;; Wed, 9 Sep 1998 17:01:59 -0700
 </pre>
 
-<p>it checks to see if 'iserv.ttns.net' is a DNS alias of your
-mailserver before accepting 'ksturgeon@fbceg.org' as an envelope
+<p>it checks to see if 'iserv.example.net' is a DNS alias of your
+mailserver before accepting 'ksturgeon@fbceg.example.org' as an envelope
 address. This check might fail if your DNS were misconfigured, or
-if you were using 'no dns' and had failed to declare iserv.ttns.net
-as an alias of your server.</p>
+if you were using 'no dns' and had failed to declare iserv.example.net
+as an alias of your server. The typical hint is logging similar to:
+<code>line rejected, iserv.example.net is not an alias of the mailserver</code>,
+if you use fetchmail in verbose mode.</p>
+
+<p><strong>Workaround:</strong> You can specify the alias explicitly, with <code>aka
+    <em>iserv.example.net</em></code> statements in the rcfile. Replace
+<em>iserv.example.net</em> by the name you find in <strong>your</strong>
+'by' part of the 'Received:' line.</p>
 
 <h2><a id="M8" name="M8">M8. Users are getting multiple copies of
 messages.</a></h2>
@@ -3237,6 +3258,8 @@ Hayes mode escape "+++".</p>
 <h2><a id="X8" name="X8">X8. A spurious ) is being appended to my
 messages.</a></h2>
 
+<p><em>Fetchmail 6.3.5 and newer releases are supposed to fix this.</em></p>
+
 <p>Due to the problem described in <a href="#S2">S2</a>, the
 IMAP support in fetchmail cannot follow the IMAP protocol 100&nbsp;%.
 Most of the time it doesn't matter, but if you combine it with an
@@ -3278,8 +3301,6 @@ stated message size because Microsoft Exchange goofs it up.</li>
 it at the end of the message it forwards on. If you have verbosity
 on, you'll get a message about actual != expected.</li>
 </ol>
-
-<p>There is no fix for this.</p>
 
 <h2><a id="X9" name="X9">X9. Missing "Content-Transfer-Encoding" header
 	with Domino IMAP</a></h2>

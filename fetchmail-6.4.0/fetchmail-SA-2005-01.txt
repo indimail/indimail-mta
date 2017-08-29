@@ -16,7 +16,7 @@ Danger:		high: in sensitive configurations, a full system
 		(for 6.2.5.1: denial of service for the whole fetchmail
 		system is possible)
 CVE Name:	CVE-2005-2335
-URL:		http://fetchmail.berlios.de/fetchmail-SA-2005-01.txt
+URL:		http://fetchmail.sourceforge.net/fetchmail-SA-2005-01.txt
 		http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=212762
 		http://www.vuxml.org/freebsd/3497d7be-2fef-45f4-8162-9063751b573a.html
 		http://www.vuxml.org/freebsd/3f4ac724-fa8b-11d9-afcf-0060084a00e5.html
@@ -103,11 +103,11 @@ No reasonable workaround can be offered at this time.
 
 Upgrade your fetchmail package to version 6.3.0 or newer.
 
-<http://developer.berlios.de/project/showfiles.php?group_id=1824>
+<http://sourceforge.net/projects/fetchmail/files/>
 
 A. References
 
-fetchmail home page: <http://fetchmail.berlios.de/>
+fetchmail home page: <http://fetchmail.sourceforge.net/>
 
 B. Copyright, License and Warranty
 
@@ -134,7 +134,7 @@ END OF fetchmail-SA-2005-01.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZVgGgCfer/s64xaU71GiAQ6bpu5Lrei
-ysgAnj2MQhFOxIzzw7V9qyp095NotaOO
-=uLfy
+iEYEARECAAYFAlN9DK0ACgkQvmGDOQUufZWmcQCdGrMPh1DY+Uqi5gmRbL+uUsOd
+BpQAn3pBsk4fCeMY61d2ltjcp+CXj8Bi
+=WTmI
 -----END PGP SIGNATURE-----

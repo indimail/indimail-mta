@@ -15,10 +15,10 @@ Danger:		low
 Credits:	Daniel Drake, Gentoo (bug report)
 		Sunil Shetye (bug fix)
 CVE Name:	CVE-2005-4348
-URL:		http://fetchmail.berlios.de/fetchmail-SA-2005-03.txt
+URL:		http://fetchmail.sourceforge.net/fetchmail-SA-2005-03.txt
 		http://article.gmane.org/gmane.mail.fetchmail.user/7573
 		http://bugs.debian.org/343836
-Project URL:	http://fetchmail.berlios.de/
+Project URL:	http://fetchmail.sourceforge.net/
 
 Affects:	fetchmail version 6.2.5.4
 		fetchmail version 6.3.0
@@ -79,7 +79,7 @@ For sites, where multidrop mode is required, no workaround is known.
 
 Download and install fetchmail 6.3.1 or a newer stable release from
 fetchmail's project site at
-<http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+<http://sourceforge.net/projects/fetchmail/files/>.
 
 The fix has also been backported to the 6.2.5.5 legacy release which is
 available from the same site.
@@ -125,7 +125,7 @@ END OF fetchmail-SA-2005-03.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZWToACfZyLSqP8dWVIB6rX56d+Kr1sc
-iXEAoNszsDwKI1O5lh7R70etYL9jAtiq
-=Zz4j
+iEYEARECAAYFAlN9DK0ACgkQvmGDOQUufZVR6wCePBum0D/6j2Mmzc9eDttcckfu
+100AoJoy6OdYYvUDCfEjjog+aAo72NXI
+=L83l
 -----END PGP SIGNATURE-----

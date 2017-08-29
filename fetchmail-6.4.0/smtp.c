@@ -178,6 +178,7 @@ SMTP_auth(int sock, char smtp_mode, char *username, char *password, char *buf)
 #ifdef INDIMAIL
 		if (outlevel >= O_MONITOR)
 			report(stdout, is_odmr ? GT_("ODMR> %s\n") : GT_("ESMTP> %s\n"), (b64buf));
+		/*- Step 1 */
 		SockRead(sock, smtp_response, sizeof(smtp_response) - 1);
 		strncpy(tmp, smtp_response, sizeof(tmp));
 		tmp[sizeof(tmp) - 1] = '\0';

@@ -14,7 +14,7 @@ Danger:		medium
 Credits:	Thomas Wolff, Miloslav Trmac for pointing out
 		that fetchmailconf 1.43.1 was also flawed
 CVE Name:	CVE-2005-3088
-URL:		http://fetchmail.berlios.de/fetchmail-SA-2005-02.txt
+URL:		http://fetchmail.sourceforge.net/fetchmail-SA-2005-02.txt
 
 Affects:	fetchmail version 6.2.5.2
 		fetchmail version 6.2.5
@@ -74,12 +74,12 @@ fetchmailconf has finished, you can restore your old umask.
 
 Download and install fetchmail 6.3.0 or a newer stable release from
 fetchmail's project site at
-<http://developer.berlios.de/project/showfiles.php?group_id=1824&release_id=6617>.
+<http://sourceforge.net/projects/fetchmail/files/&release_id=6617>.
 
 A. References
 =============
 
-fetchmail home page: <http://fetchmail.berlios.de/>
+fetchmail home page: <http://fetchmail.sourceforge.net/>
 
 B. Copyright, License and Warranty
 ==================================
@@ -107,7 +107,7 @@ END OF fetchmail-SA-2005-02.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZWoPgCdG1P0n27En0VPMiY3+d0NSwfy
-4rgAn037UM4pEf7E94HZQOmGUR//pM6q
-=q8j6
+iEYEARECAAYFAlN9DK0ACgkQvmGDOQUufZUzEQCg4GOxtrGvWtdZG0NE99DMmPOY
+Tb8AnixEWIjzEr7D/FYxK3Hj2nl6f+pG
+=Dzx9
 -----END PGP SIGNATURE-----

@@ -45,6 +45,7 @@ enum {
     LA_SSLCERT,
     LA_SSLPROTO,
     LA_SSLCERTCK,
+    LA_NOSSLCERTCK,
     LA_SSLCERTFILE,
     LA_SSLCERTPATH,
     LA_SSLCOMMONNAME,
@@ -61,9 +62,9 @@ enum {
     LA_BADHEADER
 };
 
-/* options still left: CgGhHjJoORTWxXYz */
+/* options still left: ACgGhHjJoORTWxXYz */
 static const char *shortoptions = 
-	"?Vcsvd:NqL:f:i:p:UP:A:t:E:Q:u:akKFnl:r:S:Z:b:B:e:m:I:M:yw:D:";
+	"?Vcsvd:NqL:f:i:p:UP:t:E:Q:u:akKFnl:r:S:Z:b:B:e:m:I:M:yw:D:";
 
 static const struct option longoptions[] = {
 /* this can be const because all flag fields are 0 and will never get set */
@@ -138,6 +139,7 @@ static const struct option longoptions[] = {
   {"sslcert",	required_argument, (int *) 0, LA_SSLCERT },
   {"sslproto",	 required_argument, (int *) 0, LA_SSLPROTO },
   {"sslcertck", no_argument,	   (int *) 0, LA_SSLCERTCK },
+  {"nosslcertck", no_argument,	   (int *) 0, LA_NOSSLCERTCK },
   {"sslcertfile",   required_argument, (int *) 0, LA_SSLCERTFILE },
   {"sslcertpath",   required_argument, (int *) 0, LA_SSLCERTPATH },
   {"sslcommonname",    required_argument, (int *) 0, LA_SSLCOMMONNAME },
@@ -237,7 +239,10 @@ static int xatoi(char *s, int *errflagptr)
 int parsecmdline (int argc /** argument count */,
 		  char **argv /** argument strings */,
 		  struct runctl *rctl /** global run controls to modify */,
-		  struct query *ctl /** option record to initialize */)
+		  struct query *ctl /** option record to initialize */,
+		  flag *safewithbg /** set to whether options are
+				     compatible with another copy
+				     running in the background */)
 {
     /*
      * return value: if positive, argv index of last parsed option + 1
@@ -252,9 +257,12 @@ int parsecmdline (int argc /** argument count */,
     int errflag = 0;	/* TRUE when a syntax error is detected */
     int helpflag = 0;	/* TRUE when option help was explicitly requested */
     int option_index;
+    int option_safe;	/* to track if option currently parsed is safe
+			   with a background copy */
     char *buf, *cp;
 
     rctl->poll_interval = -1;
+    *safewithbg = TRUE;
 
     memset(ctl, '\0', sizeof(struct query));    /* start clean */
     ctl->smtp_socket = -1;
@@ -263,21 +271,26 @@ int parsecmdline (int argc /** argument count */,
 	   (c = getopt_long(argc,argv,shortoptions,
 			    longoptions, &option_index)) != -1)
     {
+	option_safe = FALSE;
+
 	switch (c) {
 	case 'V':
 	    versioninfo = TRUE;
+	    option_safe = TRUE;
 	    break;
 	case 'c':
 	    check_only = TRUE;
 	    break;
 	case 's':
 	    outlevel = O_SILENT;
+	    option_safe = 1;
 	    break;
 	case 'v':
 	    if (outlevel >= O_VERBOSE)
 		outlevel = O_DEBUG;
 	    else
 		outlevel = O_VERBOSE;
+	    option_safe = TRUE;
 	    break;
 	case 'd':
 	    rctl->poll_interval = xatoi(optarg, &errflag);
@@ -573,6 +586,10 @@ int parsecmdline (int argc /** argument count */,
 	    ctl->sslcertck = FLAG_TRUE;
 	    break;
 
+	case LA_NOSSLCERTCK:
+	    ctl->sslcertck = FLAG_FALSE;
+	    break;
+
 	case LA_SSLCERTFILE:
 	    ctl->sslcertfile = prependdir(optarg, currentwd);
 	    break;
@@ -605,6 +622,7 @@ int parsecmdline (int argc /** argument count */,
 
 	case LA_CONFIGDUMP:
 	    configdump = TRUE;
+	    option_safe = TRUE;
 	    break;
 
 	case LA_SYSLOG:
@@ -620,9 +638,11 @@ int parsecmdline (int argc /** argument count */,
 	    break;
 
 	case '?':
+	    helpflag = 1;
 	default:
-	    helpflag++;
+	    break;
 	}
+	*safewithbg &= option_safe;
     }
 
     if (errflag || ocount > 1 || helpflag) {
@@ -641,6 +661,7 @@ int parsecmdline (int argc /** argument count */,
 	P(GT_("  -q, --quit        kill daemon process\n"));
 	P(GT_("  -L, --logfile     specify logfile name\n"));
 	P(GT_("      --syslog      use syslog(3) for most messages when running as a daemon\n"));
+	P(GT_("      --nosyslog    turns off use of syslog(3)\n"));
 	P(GT_("      --invisible   don't write Received & enable host spoofing\n"));
 	P(GT_("  -f, --fetchmailrc specify alternate run control file\n"));
 	P(GT_("  -i, --idfile      specify alternate UIDs file\n"));
@@ -658,6 +679,7 @@ int parsecmdline (int argc /** argument count */,
 	P(GT_("      --sslkey      ssl private key file\n"));
 	P(GT_("      --sslcert     ssl client certificate\n"));
 	P(GT_("      --sslcertck   do strict server certificate check (recommended)\n"));
+	P(GT_("      --nosslcertck skip strict server certificate check (insecure)\n"));
 	P(GT_("      --sslcertfile path to trusted-CA ssl certificate file\n"));
 	P(GT_("      --sslcertpath path to trusted-CA ssl certificate directory\n"));
 	P(GT_("      --sslcommonname  expect this CommonName from server (discouraged)\n"));
@@ -669,8 +691,9 @@ int parsecmdline (int argc /** argument count */,
 	P(GT_("      --bad-header {reject|accept}\n"
 	      "                    specify policy for handling messages with bad headers\n"));
 
-	P(GT_("  -p, --protocol    specify retrieval protocol (see man page)\n"));
+	P(GT_("  -p, --proto[col]  specify retrieval protocol (see man page)\n"));
 	P(GT_("  -U, --uidl        force the use of UIDLs (pop3 only)\n"));
+	P(GT_("      --idle        tells the IMAP server to send notice of new messages\n"));
 	P(GT_("      --port        TCP port to connect to (obsolete, use --service)\n"));
 	P(GT_("  -P, --service     TCP service to connect to (can be numeric TCP port)\n"));
 	P(GT_("      --auth        authentication type (password/kerberos/ssh/otp)\n"));
@@ -683,7 +706,7 @@ int parsecmdline (int argc /** argument count */,
 	P(GT_("      --principal   mail service principal\n"));
 	P(GT_("      --tracepolls  add poll-tracing information to Received header\n"));
 
-	P(GT_("  -u, --username    specify users's login on server\n"));
+	P(GT_("  -u, --user[name]  specify users's login on server\n"));
 	P(GT_("  -a, --[fetch]all  retrieve old and new messages\n"));
 	P(GT_("  -K, --nokeep      delete new messages after retrieval\n"));
 	P(GT_("  -k, --keep        save new messages after retrieval\n"));

@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: fetchmail 6.2.2\n"
-"Report-Msgid-Bugs-To: fetchmail-devel@lists.berlios.de\n"
-"POT-Creation-Date: 2013-04-23 23:24+0200\n"
+"Report-Msgid-Bugs-To: fetchmail-devel@lists.sourceforge.net\n"
+"POT-Creation-Date: 2016-12-12 03:03+0100\n"
 "PO-Revision-Date: 2003-05-06 01:03+0300\n"
 "Last-Translator: Dokianakis Theofanis <madf@hellug.gr>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -62,7 +62,7 @@ msgid "krb5_sendauth: %s [server says '%s']\n"
 msgstr "krb5_sendauth: %s [ο διαχειριστής λέει '%*s'] \n"
 
 #: driver.c:345
-msgid "Subject: Fetchmail oversized-messages warning"
+msgid "Fetchmail oversized-messages warning"
 msgstr ""
 
 #: driver.c:349
@@ -192,7 +192,7 @@ msgstr "λήξη χρόνου μετά από %d δεύτερα.\n"
 
 #: driver.c:926
 #, fuzzy
-msgid "Subject: fetchmail sees repeated timeouts"
+msgid "fetchmail sees repeated timeouts"
 msgstr "Subject: το fetchmail βλέπει επαναλαμβανόμενες λήξεις ορίων χρόνου\n"
 
 #: driver.c:929
@@ -279,7 +279,7 @@ msgstr ""
 
 #: driver.c:1201
 #, fuzzy, c-format
-msgid "Subject: fetchmail authentication failed on %s@%s"
+msgid "fetchmail authentication failed on %s@%s"
 msgstr "Subject: fetchmail αποτυχία εξουσιοδότησης στο %s@%s\n"
 
 #: driver.c:1205
@@ -373,7 +373,7 @@ msgstr "Εξουσιοδότηση πέτυχε στον %s@%s\n"
 
 #: driver.c:1276
 #, fuzzy, c-format
-msgid "Subject: fetchmail authentication OK on %s@%s"
+msgid "fetchmail authentication OK on %s@%s"
 msgstr "Subject: εξουσιοδότηση του fetchmail πέτυχε στο %s@%s\n"
 
 #: driver.c:1280
@@ -399,7 +399,7 @@ msgstr "επιλογή ή επανα-συγκέντρωση εξ'ορισμού φακέλου\n"
 msgid "%s at %s (folder %s)"
 msgstr "%s στο  %s (φάκελος %s)"
 
-#: driver.c:1334 rcfile_y.y:390
+#: driver.c:1334 rcfile_y.y:391
 #, c-format
 msgid "%s at %s"
 msgstr "%s στο  %s"
@@ -657,105 +657,105 @@ msgstr "Η επιλογή --flush δεν υποστηρίζετε με το ETRN\n"
 msgid "Option --check is not supported with ETRN\n"
 msgstr "Η επιλογή --check δεν υποστηρίζετε με το ETRN\n"
 
-#: fetchmail.c:137
+#: fetchmail.c:141
 msgid ""
 "Copyright (C) 2002, 2003 Eric S. Raymond\n"
 "Copyright (C) 2004 Matthias Andree, Eric S. Raymond,\n"
 "                   Robert M. Funk, Graham Wilson\n"
 "Copyright (C) 2005 - 2012 Sunil Shetye\n"
-"Copyright (C) 2005 - 2013 Matthias Andree\n"
+"Copyright (C) 2005 - 2016 Matthias Andree\n"
 msgstr ""
 
-#: fetchmail.c:143
+#: fetchmail.c:147
 msgid ""
 "Fetchmail comes with ABSOLUTELY NO WARRANTY. This is free software, and you\n"
 "are welcome to redistribute it under certain conditions. For details,\n"
 "please see the file COPYING in the source or documentation directory.\n"
 msgstr ""
 
-#: fetchmail.c:181
+#: fetchmail.c:187
 msgid "WARNING: Running as root is discouraged.\n"
 msgstr ""
 
-#: fetchmail.c:193
+#: fetchmail.c:199
 msgid "fetchmail: invoked with"
 msgstr "fetchmail: καλέστηκε με"
 
-#: fetchmail.c:217
+#: fetchmail.c:223
 msgid "could not get current working directory\n"
 msgstr "αδυναμία λήψης του τρέχοντος φακέλου εργασίας (cwd)\n"
 
-#: fetchmail.c:288
+#: fetchmail.c:298
 #, c-format
 msgid "This is fetchmail release %s"
 msgstr "Αυτό είναι το fetchmail έκδοση %s"
 
-#: fetchmail.c:313
+#: fetchmail.c:323
 msgid "The nodetach option is in effect, ignoring logfile option.\n"
 msgstr ""
 
-#: fetchmail.c:320
+#: fetchmail.c:330
 msgid "Not running in daemon mode, ignoring logfile option.\n"
 msgstr ""
 
-#: fetchmail.c:327
+#: fetchmail.c:337
 #, c-format
 msgid "Logfile \"%s\" does not exist, ignoring logfile option.\n"
 msgstr ""
 
-#: fetchmail.c:333
+#: fetchmail.c:343
 #, c-format
 msgid "Logfile \"%s\" is not writable, aborting.\n"
 msgstr ""
 
-#: fetchmail.c:351
+#: fetchmail.c:361
 #, c-format
 msgid ""
 "syslog and logfile options are both set, ignoring syslog, and logging to %s"
 msgstr ""
 
-#: fetchmail.c:439
+#: fetchmail.c:449
 #, c-format
 msgid "Taking options from command line%s%s\n"
 msgstr "Λήψη παραμετρων από την γραμμή εντολών%s%s\n"
 
-#: fetchmail.c:440
+#: fetchmail.c:450
 msgid " and "
 msgstr " και "
 
-#: fetchmail.c:445
+#: fetchmail.c:455
 #, c-format
 msgid "No mailservers set up -- perhaps %s is missing?\n"
 msgstr ""
 "Δεν έχουν οριστεί διαχειριστές αλληλογραφίας -- ίσως το %s να λείπει;\n"
 
-#: fetchmail.c:466
+#: fetchmail.c:476
 msgid "fetchmail: no mailservers have been specified.\n"
 msgstr "fetchmail: δεν έχουν οριστεί διαχειριστές αλληλογραφίας.\n"
 
-#: fetchmail.c:478
+#: fetchmail.c:488
 msgid "fetchmail: no other fetchmail is running\n"
 msgstr "fetchmail: δεν τρέχει άλλο fetchmail\n"
 
-#: fetchmail.c:484
+#: fetchmail.c:494
 #, fuzzy, c-format
 msgid "fetchmail: error killing %s fetchmail at %ld; bailing out.\n"
 msgstr "fetchmail: σφάλμα στη θανάτωση του %s fetchmail στο %d; εγκατάλειψη.\n"
 
-#: fetchmail.c:485 fetchmail.c:494
+#: fetchmail.c:495 fetchmail.c:504
 msgid "background"
 msgstr "υπόβαθρο"
 
-#: fetchmail.c:485 fetchmail.c:494
+#: fetchmail.c:495 fetchmail.c:504
 msgid "foreground"
 msgstr "προσκήνιο"
 
-#: fetchmail.c:493
+#: fetchmail.c:503
 #, fuzzy, c-format
 msgid "fetchmail: %s fetchmail at %ld killed.\n"
 msgstr "fetchmail: το %s fetchmail στο %d τερματίστηκε.\n"
 
-#: fetchmail.c:516
+#: fetchmail.c:526
 msgid ""
 "fetchmail: can't check mail while another fetchmail to same host is "
 "running.\n"
@@ -763,7 +763,7 @@ msgstr ""
 "fetchmail: αδυναμία ελέγχου αλληλογραφίας όταν ένα άλλο fetchmail τρέχειστο "
 "ίδιο σύστημα.\n"
 
-#: fetchmail.c:522
+#: fetchmail.c:532
 #, fuzzy, c-format
 msgid ""
 "fetchmail: can't poll specified hosts with another fetchmail running at "
@@ -772,230 +772,230 @@ msgstr ""
 "fetchmail: αδυναμία ερώτησης των ορισμένων διακομιστών ενώ τρέχει άλλο\n"
 "           fetchmail στο %d.\n"
 
-#: fetchmail.c:529
+#: fetchmail.c:539
 #, fuzzy, c-format
 msgid "fetchmail: another foreground fetchmail is running at %ld.\n"
 msgstr "fetchmail: κάποιο άλλο fetchmail τρέχει στο προσκήνιο στο %d.\n"
 
-#: fetchmail.c:539
+#: fetchmail.c:549
 msgid ""
 "fetchmail: can't accept options while a background fetchmail is running.\n"
 msgstr ""
 "fetchmail: εντολές μη δεκτές όταν ένα fetchmail τρέχει στο παρασκήνιο.\n"
 
-#: fetchmail.c:545
+#: fetchmail.c:561
 #, fuzzy, c-format
 msgid "fetchmail: background fetchmail at %ld awakened.\n"
 msgstr "fetchmail: αφύπνιση παρασκηνιακού fetchmail στο %d.\n"
 
-#: fetchmail.c:557
+#: fetchmail.c:573
 #, fuzzy, c-format
 msgid "fetchmail: elder sibling at %ld died mysteriously.\n"
 msgstr ""
 "fetchmail: ηλικιωμένος ετεροθαλείς αδερφός πέθανε μυστηριοδώς στο %d.\n"
 
-#: fetchmail.c:572
+#: fetchmail.c:588
 #, c-format
 msgid "fetchmail: can't find a password for %s@%s.\n"
 msgstr "fetchmail: αδυναμία εύρεση λέξης κλειδί για το %s@%s.\n"
 
-#: fetchmail.c:576
+#: fetchmail.c:592
 #, c-format
 msgid "Enter password for %s@%s: "
 msgstr "Πληκτρολογήστε την λέξη κλειδί για το %s@%s: "
 
-#: fetchmail.c:618
+#: fetchmail.c:634
 #, fuzzy
 msgid "fetchmail: Cannot detach into background. Aborting.\n"
 msgstr "fetchmail: δεν τρέχει άλλο fetchmail\n"
 
-#: fetchmail.c:622
+#: fetchmail.c:638
 #, fuzzy, c-format
 msgid "starting fetchmail %s daemon\n"
 msgstr "εκκίνηση δαίμονα fetchmail %s \n"
 
-#: fetchmail.c:638 fetchmail.c:640
+#: fetchmail.c:654 fetchmail.c:656
 #, fuzzy, c-format
 msgid "could not open %s to append logs to\n"
 msgstr "αδυναμία ανοίγματος του %s για πρόσθεση καταγραφών σε αυτό \n"
 
-#: fetchmail.c:659
+#: fetchmail.c:675
 msgid "--check mode enabled, not fetching mail\n"
 msgstr ""
 
-#: fetchmail.c:681
+#: fetchmail.c:697
 #, c-format
 msgid "couldn't time-check %s (error %d)\n"
 msgstr "αδυναμία ελέγχου-ώρας %s (σφάλμα %d)\n"
 
-#: fetchmail.c:686
+#: fetchmail.c:702
 #, c-format
 msgid "restarting fetchmail (%s changed)\n"
 msgstr "επανεκκίνηση fetchmail (%s άλλαξε)\n"
 
-#: fetchmail.c:691
+#: fetchmail.c:707
 msgid "attempt to re-exec may fail as directory has not been restored\n"
 msgstr ""
 "η προσπάθεια για επανεκκ ίσως αποτύχει αφού ο φάκελος δεν έχει "
 "αποκατασταθεί\n"
 
-#: fetchmail.c:718
+#: fetchmail.c:734
 msgid "attempt to re-exec fetchmail failed\n"
 msgstr "η απόπειρα για επανεκκίνηση του fetchmail απέτυχε\n"
 
-#: fetchmail.c:748
+#: fetchmail.c:764
 #, c-format
 msgid "poll of %s skipped (failed authentication or too many timeouts)\n"
 msgstr ""
 "παράβλεψη ερώτησης του %s (απέτυχε η εξουσιοδότηση ή πολλές λήξεις χρόνου)\n"
 
-#: fetchmail.c:760
+#: fetchmail.c:776
 #, c-format
 msgid "interval not reached, not querying %s\n"
 msgstr "το δίαλλειμα δεν έφτασε, δεν γίνετε ερώτηση %s\n"
 
-#: fetchmail.c:798
+#: fetchmail.c:814
 msgid "Query status=0 (SUCCESS)\n"
 msgstr "Κατάστασης Ερώτησης=0 (SUCCESS)\n"
 
-#: fetchmail.c:800
+#: fetchmail.c:816
 msgid "Query status=1 (NOMAIL)\n"
 msgstr "Κατάστασης Ερώτησης=1 (NOMAIL)\n"
 
-#: fetchmail.c:802
+#: fetchmail.c:818
 msgid "Query status=2 (SOCKET)\n"
 msgstr "Κατάστασης Ερώτησης=2 (SOCKET)\n"
 
-#: fetchmail.c:804
+#: fetchmail.c:820
 msgid "Query status=3 (AUTHFAIL)\n"
 msgstr "Κατάστασης Ερώτησης=3 (AUTHFAIL)\n"
 
-#: fetchmail.c:806
+#: fetchmail.c:822
 msgid "Query status=4 (PROTOCOL)\n"
 msgstr "Κατάστασης Ερώτησης=4 (PROTOCOL)\n"
 
-#: fetchmail.c:808
+#: fetchmail.c:824
 msgid "Query status=5 (SYNTAX)\n"
 msgstr "Κατάστασης Ερώτησης=5 (SYNTAX)\n"
 
-#: fetchmail.c:810
+#: fetchmail.c:826
 msgid "Query status=6 (IOERR)\n"
 msgstr "Κατάστασης Ερώτησης=6 (IOERR)\n"
 
-#: fetchmail.c:812
+#: fetchmail.c:828
 msgid "Query status=7 (ERROR)\n"
 msgstr "Κατάστασης Ερώτησης=7 (ERROR)\n"
 
-#: fetchmail.c:814
+#: fetchmail.c:830
 msgid "Query status=8 (EXCLUDE)\n"
 msgstr "Κατάστασης Ερώτησης=8 (EXCLUDE)\n"
 
-#: fetchmail.c:816
+#: fetchmail.c:832
 msgid "Query status=9 (LOCKBUSY)\n"
 msgstr "Κατάστασης Ερώτησης=9 (LOCKBUSY)\n"
 
-#: fetchmail.c:818
+#: fetchmail.c:834
 msgid "Query status=10 (SMTP)\n"
 msgstr "Κατάστασης Ερώτησης=10 (SMTP)\n"
 
-#: fetchmail.c:820
+#: fetchmail.c:836
 msgid "Query status=11 (DNS)\n"
 msgstr "Κατάστασης Ερώτησης=11 (DNS)\n"
 
-#: fetchmail.c:822
+#: fetchmail.c:838
 msgid "Query status=12 (BSMTP)\n"
 msgstr "Κατάστασης Ερώτησης=12 (BSMTP)\n"
 
-#: fetchmail.c:824
+#: fetchmail.c:840
 msgid "Query status=13 (MAXFETCH)\n"
 msgstr "Κατάστασης Ερώτησης=13 (MAXFETCH)\n"
 
-#: fetchmail.c:826
+#: fetchmail.c:842
 #, c-format
 msgid "Query status=%d\n"
 msgstr "Κατάστασης Ερώτησης=%d\n"
 
-#: fetchmail.c:868
+#: fetchmail.c:884
 msgid "All connections are wedged.  Exiting.\n"
 msgstr "Όλες οι συνδέσεις έχουν μπλοκάρει. Εγκατάλειψη.\n"
 
-#: fetchmail.c:876
+#: fetchmail.c:892
 #, fuzzy, c-format
 msgid "sleeping at %s for %d seconds\n"
 msgstr "αδρανές στο %s\n"
 
-#: fetchmail.c:900
+#: fetchmail.c:916
 #, c-format
 msgid "awakened by %s\n"
 msgstr "αφυπνίστηκε από το %s\n"
 
-#: fetchmail.c:903
+#: fetchmail.c:919
 #, c-format
 msgid "awakened by signal %d\n"
 msgstr "αφυπνίστηκε από σήμα %d\n"
 
-#: fetchmail.c:911
+#: fetchmail.c:927
 #, c-format
 msgid "awakened at %s\n"
 msgstr "αφυπνίστηκε στο %s\n"
 
-#: fetchmail.c:916
+#: fetchmail.c:932
 #, c-format
 msgid "normal termination, status %d\n"
 msgstr "φυσιολογικός τερματισμός, κατάσταση %d\n"
 
-#: fetchmail.c:1075
+#: fetchmail.c:1093
 msgid "couldn't time-check the run-control file\n"
 msgstr "αδυναμία ελέγχου-ώρας του αρχείο run-control\n"
 
-#: fetchmail.c:1109
+#: fetchmail.c:1127
 #, c-format
 msgid "Warning: multiple mentions of host %s in config file\n"
 msgstr ""
 "Προειδοποίηση: πολλαπλές αναφορές του διακομιστή %s στο αρχείο ρυθμίσεων\n"
 
-#: fetchmail.c:1148
+#: fetchmail.c:1166
 #, fuzzy
 msgid "fetchmail: Error: multiple \"defaults\" records in config file.\n"
 msgstr ""
 "Προειδοποίηση: πολλαπλές αναφορές του διακομιστή %s στο αρχείο ρυθμίσεων\n"
 
-#: fetchmail.c:1270
+#: fetchmail.c:1288
 msgid "SSL support is not compiled in.\n"
 msgstr "η υποστήριξη για SSL δεν έχει μπει στη μετάφραση.\n"
 
-#: fetchmail.c:1277
+#: fetchmail.c:1295
 #, fuzzy
 msgid "KERBEROS v4 support is configured, but not compiled in.\n"
 msgstr "η υποστήριξη για SSL δεν έχει μπει στη μετάφραση.\n"
 
-#: fetchmail.c:1283
+#: fetchmail.c:1301
 #, fuzzy
 msgid "KERBEROS v5 support is configured, but not compiled in.\n"
 msgstr "η υποστήριξη για SSL δεν έχει μπει στη μετάφραση.\n"
 
-#: fetchmail.c:1289
+#: fetchmail.c:1307
 #, fuzzy
 msgid "GSSAPI support is configured, but not compiled in.\n"
 msgstr "η υποστήριξη για SSL δεν έχει μπει στη μετάφραση.\n"
 
-#: fetchmail.c:1319
+#: fetchmail.c:1337
 #, c-format
 msgid ""
 "fetchmail: warning: no DNS available to check multidrop fetches from %s\n"
 msgstr ""
 "fetchmail: προειδοποίηση: κανένα διαθέσιμο DNS για έλεγχο λήψεων από %s\n"
 
-#: fetchmail.c:1330
+#: fetchmail.c:1348
 #, c-format
 msgid "warning: multidrop for %s requires envelope option!\n"
 msgstr ""
 
-#: fetchmail.c:1331
+#: fetchmail.c:1349
 msgid "warning: Do not ask for support if all mail goes to postmaster!\n"
 msgstr ""
 
-#: fetchmail.c:1348
+#: fetchmail.c:1366
 #, fuzzy, c-format
 msgid ""
 "fetchmail: %s configuration invalid, specify positive port number for "
@@ -1003,316 +1003,326 @@ msgid ""
 msgstr ""
 "μη έγκυρες ρυθμίσεις %s, ο αριθμός θύρας δεν μπορεί να είναι αρνητικός\n"
 
-#: fetchmail.c:1355
+#: fetchmail.c:1373
 #, fuzzy, c-format
 msgid "fetchmail: %s configuration invalid, RPOP requires a privileged port\n"
 msgstr "μη έγκυρες ρυθμίσεις %s, το RPOP απαιτεί προνομιούχα θύρα\n"
 
-#: fetchmail.c:1373
+#: fetchmail.c:1391
 #, c-format
 msgid "%s configuration invalid, LMTP can't use default SMTP port\n"
 msgstr ""
 "μη έγκυρες ρυθμίσεις %s, το LMTP δεν κάνει χρήση της εξ ορισμού θύρας SMTP\n"
 
-#: fetchmail.c:1387
+#: fetchmail.c:1405
 #, fuzzy
 msgid "Both fetchall and keep on in daemon or idle mode is a mistake!\n"
 msgstr "Είναι λάθος το fetchall και μαζί το παραμονή σε κατάσταση δαίμονα!\n"
 
-#: fetchmail.c:1412
+#: fetchmail.c:1415
+msgid ""
+"fetchmail: Error: idle mode does not work for multiple folders or accounts!\n"
+msgstr ""
+
+#: fetchmail.c:1439
 #, c-format
 msgid "terminated with signal %d\n"
 msgstr "έληξε με σήμα %d\n"
 
-#: fetchmail.c:1485
+#: fetchmail.c:1512
 #, c-format
 msgid "%s querying %s (protocol %s) at %s: poll started\n"
 msgstr "%s ερώτηση %s (πρωτόκολλο %s) στο %s: άρχισε η ερώτηση\n"
 
-#: fetchmail.c:1510
+#: fetchmail.c:1537
 msgid "POP2 support is not configured.\n"
 msgstr "Δεν έχει ρυθμιστεί η υποστήριξη POP2.\n"
 
-#: fetchmail.c:1522
+#: fetchmail.c:1549
 msgid "POP3 support is not configured.\n"
 msgstr "Δεν έχει ρυθμιστεί η υποστήριξη POP3.\n"
 
-#: fetchmail.c:1532
+#: fetchmail.c:1559
 msgid "IMAP support is not configured.\n"
 msgstr "Δεν έχει ρυθμιστεί η υποστήριξη IMAP.\n"
 
-#: fetchmail.c:1538
+#: fetchmail.c:1565
 msgid "ETRN support is not configured.\n"
 msgstr "Δεν έχει ρυθμιστεί η υποστήριξη ETRN.\n"
 
-#: fetchmail.c:1546
+#: fetchmail.c:1573
 msgid "ODMR support is not configured.\n"
 msgstr "Δεν έχει ρυθμιστεί η υποστήριξη ODMR.\n"
 
-#: fetchmail.c:1553
+#: fetchmail.c:1580
 msgid "unsupported protocol selected.\n"
 msgstr "επιλέχθηκε μη υποστηριζόμενο πρωτόκολλο.\n"
 
-#: fetchmail.c:1563
+#: fetchmail.c:1590
 #, c-format
 msgid "%s querying %s (protocol %s) at %s: poll completed\n"
 msgstr "%s ερώτηση %s (πρωτόκολλο %s) στο %s: ολοκληρώθηκε η ερώτηση\n"
 
-#: fetchmail.c:1580
+#: fetchmail.c:1615
 #, c-format
 msgid "Poll interval is %d seconds\n"
 msgstr "Διάλλειμα ερώτησης είναι %d δευτερόλεπτα\n"
 
-#: fetchmail.c:1582
+#: fetchmail.c:1617
 #, c-format
 msgid "Logfile is %s\n"
 msgstr "Αρχείο καταχώρισης είναι το %s\n"
 
-#: fetchmail.c:1584
+#: fetchmail.c:1619
 #, c-format
 msgid "Idfile is %s\n"
 msgstr "Αρχείο Id είναι το %s\n"
 
-#: fetchmail.c:1587
+#: fetchmail.c:1622
 msgid "Progress messages will be logged via syslog\n"
 msgstr "Τα μηνύματα προόδου θα καταχωριθούν μέσω του syslog\n"
 
-#: fetchmail.c:1590
+#: fetchmail.c:1625
 msgid "Fetchmail will masquerade and will not generate Received\n"
 msgstr "Το fetchmail θα αποκρυφθεί και δε θα παράγει Received\n"
 
-#: fetchmail.c:1592
+#: fetchmail.c:1627
 msgid "Fetchmail will show progress dots even in logfiles.\n"
 msgstr "Το fetchmail θα δείχνει τελείες προόδου και στα αρχεία καταγραφής.\n"
 
-#: fetchmail.c:1594
+#: fetchmail.c:1629
 #, c-format
 msgid "Fetchmail will forward misaddressed multidrop messages to %s.\n"
 msgstr "Το fetchmail θα προωθεί multidrop μηνύματα με κακή διεύθυνση στο %s.\n"
 
-#: fetchmail.c:1598
+#: fetchmail.c:1633
 msgid "Fetchmail will direct error mail to the postmaster.\n"
 msgstr "Το fetchmail θα δρομολογεί αλληλογραφία σφαλμάτων στο postmaster.\n"
 
-#: fetchmail.c:1600
+#: fetchmail.c:1635
 msgid "Fetchmail will direct error mail to the sender.\n"
 msgstr "Το fetchmail θα δρομολογεί αλληλογραφία σφαλμάτων στο αποστολέα.\n"
 
-#: fetchmail.c:1603
+#: fetchmail.c:1638
 #, fuzzy
 msgid "Fetchmail will treat permanent errors as permanent (drop messages).\n"
 msgstr "Το fetchmail θα προωθεί multidrop μηνύματα με κακή διεύθυνση στο %s.\n"
 
-#: fetchmail.c:1605
+#: fetchmail.c:1640
 #, fuzzy
 msgid "Fetchmail will treat permanent errors as temporary (keep messages).\n"
 msgstr "Το fetchmail θα δρομολογεί αλληλογραφία σφαλμάτων στο αποστολέα.\n"
 
-#: fetchmail.c:1612
+#: fetchmail.c:1647
 #, c-format
 msgid "Options for retrieving from %s@%s:\n"
 msgstr "Επιλογές για λήψη από %s@%s:\n"
 
-#: fetchmail.c:1616
+#: fetchmail.c:1651
 #, c-format
 msgid "  Mail will be retrieved via %s\n"
 msgstr "  Η αλληλογραφία θα ληφθεί μέσω του %s\n"
 
-#: fetchmail.c:1619
+#: fetchmail.c:1654
 #, fuzzy, c-format
 msgid "  Poll of this server will occur every %d interval.\n"
 msgid_plural "  Poll of this server will occur every %d intervals.\n"
 msgstr[0] "  Ερώτηση σε αυτό το διαχειριστή θα συμβεί κάθε %d διαλείματα.\n"
 msgstr[1] "  Ερώτηση σε αυτό το διαχειριστή θα συμβεί κάθε %d διαλείματα.\n"
 
-#: fetchmail.c:1623
+#: fetchmail.c:1658
 #, c-format
 msgid "  True name of server is %s.\n"
 msgstr "  Το αληθινό όνομα του διαχειριστή είναι %s.\n"
 
-#: fetchmail.c:1626
+#: fetchmail.c:1661
 #, fuzzy
 msgid "  This host will not be queried when no host is specified.\n"
 msgstr "  Αυτός ο διακομιστής %s θα ερωτηθεί όταν δεν έχει οριστεί κανένας.\n"
 
-#: fetchmail.c:1627
+#: fetchmail.c:1662
 #, fuzzy
 msgid "  This host will be queried when no host is specified.\n"
 msgstr "  Αυτός ο διακομιστής %s θα ερωτηθεί όταν δεν έχει οριστεί κανένας.\n"
 
-#: fetchmail.c:1631
+#: fetchmail.c:1666
 msgid "  Password will be prompted for.\n"
 msgstr "  Η λέξη κλειδί θα ερωτάτε.\n"
 
-#: fetchmail.c:1635
+#: fetchmail.c:1670
 #, c-format
 msgid "  APOP secret = \"%s\".\n"
 msgstr "  μυστικό APOP = \"%s\".\n"
 
-#: fetchmail.c:1638
+#: fetchmail.c:1673
 #, c-format
 msgid "  RPOP id = \"%s\".\n"
 msgstr "  RPOP id = \"%s\".\n"
 
-#: fetchmail.c:1641
+#: fetchmail.c:1676
 #, c-format
 msgid "  Password = \"%s\".\n"
 msgstr "  Λέξη κλειδί = \"%s\".\n"
 
-#: fetchmail.c:1650
+#: fetchmail.c:1685
 #, c-format
 msgid "  Protocol is KPOP with Kerberos %s authentication"
 msgstr "  Το πρωτόκολλο είναι KPOP με εξουσιοδότηση Kerberos %s"
 
-#: fetchmail.c:1653
+#: fetchmail.c:1688
 #, c-format
 msgid "  Protocol is %s"
 msgstr "  Το πρωτόκολλο είναι %s"
 
-#: fetchmail.c:1655
+#: fetchmail.c:1690
 #, c-format
 msgid " (using service %s)"
 msgstr " (χρήση υπηρεσίας %s)"
 
-#: fetchmail.c:1657
+#: fetchmail.c:1692
 msgid " (using default port)"
 msgstr " (χρησιμοποίηση θύρας εξ'ορισμού)"
 
-#: fetchmail.c:1659
+#: fetchmail.c:1694
 msgid " (forcing UIDL use)"
 msgstr " (εξαναγκασμός χρήσης UIDL)"
 
-#: fetchmail.c:1665
+#: fetchmail.c:1700
 msgid "  All available authentication methods will be tried.\n"
 msgstr "  Όλες οι διαθέσιμες μέθοδοι εξουσιοδότησης θα δοκιμαστούν.\n"
 
-#: fetchmail.c:1668
+#: fetchmail.c:1703
 msgid "  Password authentication will be forced.\n"
 msgstr "  Θα εξαναγκαστεί η εξουσιοδότηση με λέξη κλειδί.\n"
 
-#: fetchmail.c:1671
+#: fetchmail.c:1706
 #, fuzzy
 msgid "  MSN authentication will be forced.\n"
 msgstr "  Θα εξαναγκαστεί η εξουσιοδότηση NTLM.\n"
 
-#: fetchmail.c:1674
+#: fetchmail.c:1709
 msgid "  NTLM authentication will be forced.\n"
 msgstr "  Θα εξαναγκαστεί η εξουσιοδότηση NTLM.\n"
 
-#: fetchmail.c:1677
+#: fetchmail.c:1712
 msgid "  OTP authentication will be forced.\n"
 msgstr "  Θα εξαναγκαστεί η εξουσιοδότηση OTP.\n"
 
-#: fetchmail.c:1680
+#: fetchmail.c:1715
 #, fuzzy
 msgid "  CRAM-MD5 authentication will be forced.\n"
 msgstr "  Θα εξαναγκαστεί η εξουσιοδότηση CRAM-Md5.\n"
 
-#: fetchmail.c:1683
+#: fetchmail.c:1718
 msgid "  GSSAPI authentication will be forced.\n"
 msgstr "  Θα εξαναγκαστεί η εξουσιοδότηση GSSAPI.\n"
 
-#: fetchmail.c:1686
+#: fetchmail.c:1721
 msgid "  Kerberos V4 authentication will be forced.\n"
 msgstr "  Θα εξαναγκαστεί η εξουσιοδότηση Kerberos V4.\n"
 
-#: fetchmail.c:1689
+#: fetchmail.c:1724
 msgid "  Kerberos V5 authentication will be forced.\n"
 msgstr "  Θα εξαναγκαστεί η εξουσιοδότηση Kerberos V5.\n"
 
-#: fetchmail.c:1692
+#: fetchmail.c:1727
 msgid "  End-to-end encryption assumed.\n"
 msgstr "  Κρυπτογράφηση άκρη-με-άκρη θεωρήθηκε.\n"
 
-#: fetchmail.c:1696
+#: fetchmail.c:1731
 #, c-format
 msgid "  Mail service principal is: %s\n"
 msgstr "  Διευθυντής υπηρεσίας αλληλογραφίας είναι: %s\n"
 
-#: fetchmail.c:1699
+#: fetchmail.c:1734
 msgid "  SSL encrypted sessions enabled.\n"
 msgstr "  Ενεργοποίηση κρυπτογραφημένων SSL συνεδριών.\n"
 
-#: fetchmail.c:1701
+#: fetchmail.c:1736
 #, c-format
 msgid "  SSL protocol: %s.\n"
 msgstr "  Πρωτόκολλο SSL: %s.\n"
 
-#: fetchmail.c:1703
+#: fetchmail.c:1738
 msgid "  SSL server certificate checking enabled.\n"
 msgstr "  Ενεργοποίηση ελέγχου πιστοποιητικού διαχειριστή SSL.\n"
 
-#: fetchmail.c:1706
+#: fetchmail.c:1740
+#, fuzzy
+msgid "  SSL server certificate checking disabled.\n"
+msgstr "  Ενεργοποίηση ελέγχου πιστοποιητικού διαχειριστή SSL.\n"
+
+#: fetchmail.c:1743
 #, fuzzy, c-format
 msgid "  SSL trusted certificate file: %s\n"
 msgstr "  Φάκελος εμπιστευμένου πιστοποιητικού SSL: %s\n"
 
-#: fetchmail.c:1708
+#: fetchmail.c:1745
 #, c-format
 msgid "  SSL trusted certificate directory: %s\n"
 msgstr "  Φάκελος εμπιστευμένου πιστοποιητικού SSL: %s\n"
 
-#: fetchmail.c:1710
+#: fetchmail.c:1747
 #, fuzzy, c-format
 msgid "  SSL server CommonName: %s\n"
 msgstr "ΚοινόΌνομα Διαχειριστή: %s\n"
 
-#: fetchmail.c:1712
+#: fetchmail.c:1749
 #, c-format
 msgid "  SSL key fingerprint (checked against the server key): %s\n"
 msgstr "  Αποτύπωμα κλειδιού SSL (σε σύγκριση με το κλειδί διαχειριστή): %s\n"
 
-#: fetchmail.c:1715
+#: fetchmail.c:1752
 #, c-format
 msgid "  Server nonresponse timeout is %d seconds"
 msgstr "  Λήξη χρόνου όχι-απάντησης από το διαχειριστή είναι %d δευτερόλεπτα"
 
-#: fetchmail.c:1717
+#: fetchmail.c:1754
 msgid " (default).\n"
 msgstr " (εξ'ορισμού).\n"
 
-#: fetchmail.c:1724
+#: fetchmail.c:1761
 msgid "  Default mailbox selected.\n"
 msgstr "  Εξ ορισμού γραμματοκιβώτιο επιλέχθηκε.\n"
 
-#: fetchmail.c:1729
+#: fetchmail.c:1766
 msgid "  Selected mailboxes are:"
 msgstr "  Επιλεγμένα γραμματοκιβώτια είναι:"
 
-#: fetchmail.c:1735
+#: fetchmail.c:1772
 #, fuzzy
 msgid "  All messages will be retrieved (--all on).\n"
 msgstr "  %s μηνύματα θα ληφθούν (--all %s).\n"
 
-#: fetchmail.c:1736
+#: fetchmail.c:1773
 #, fuzzy
 msgid "  Only new messages will be retrieved (--all off).\n"
 msgstr "  %s μηνύματα θα ληφθούν (--all %s).\n"
 
-#: fetchmail.c:1738
+#: fetchmail.c:1775
 #, fuzzy
 msgid "  Fetched messages will be kept on the server (--keep on).\n"
 msgstr "  Ληφθέντα μηνύματα %s θα κρατηθούν στο διαχειριστή (--keep %s).\n"
 
-#: fetchmail.c:1739
+#: fetchmail.c:1776
 #, fuzzy
 msgid "  Fetched messages will not be kept on the server (--keep off).\n"
 msgstr "  Ληφθέντα μηνύματα %s θα κρατηθούν στο διαχειριστή (--keep %s).\n"
 
-#: fetchmail.c:1741
+#: fetchmail.c:1778
 #, fuzzy
 msgid "  Old messages will be flushed before message retrieval (--flush on).\n"
 msgstr ""
 "  Παλιά μηνύματα %s θα διαγραφούν πριν τη λήψη μηνυμάτων (--flush %s).\n"
 
-#: fetchmail.c:1742
+#: fetchmail.c:1779
 #, fuzzy
 msgid ""
 "  Old messages will not be flushed before message retrieval (--flush off).\n"
 msgstr ""
 "  Παλιά μηνύματα %s θα διαγραφούν πριν τη λήψη μηνυμάτων (--flush %s).\n"
 
-#: fetchmail.c:1744
+#: fetchmail.c:1781
 #, fuzzy
 msgid ""
 "  Oversized messages will be flushed before message retrieval (--limitflush "
@@ -1320,7 +1330,7 @@ msgid ""
 msgstr ""
 "  Παλιά μηνύματα %s θα διαγραφούν πριν τη λήψη μηνυμάτων (--flush %s).\n"
 
-#: fetchmail.c:1745
+#: fetchmail.c:1782
 #, fuzzy
 msgid ""
 "  Oversized messages will not be flushed before message retrieval (--"
@@ -1328,359 +1338,359 @@ msgid ""
 msgstr ""
 "  Παλιά μηνύματα %s θα διαγραφούν πριν τη λήψη μηνυμάτων (--flush %s).\n"
 
-#: fetchmail.c:1747
+#: fetchmail.c:1784
 #, fuzzy
 msgid "  Rewrite of server-local addresses is enabled (--norewrite off).\n"
 msgstr ""
 "  Επανεγγραφή των τοπικών-διαχειριστή διευθύνσεων %s (--norewrite %s).\n"
 
-#: fetchmail.c:1748
+#: fetchmail.c:1785
 #, fuzzy
 msgid "  Rewrite of server-local addresses is disabled (--norewrite on).\n"
 msgstr ""
 "  Επανεγγραφή των τοπικών-διαχειριστή διευθύνσεων %s (--norewrite %s).\n"
 
-#: fetchmail.c:1750
+#: fetchmail.c:1787
 #, fuzzy
 msgid "  Carriage-return stripping is enabled (stripcr on).\n"
 msgstr "  Αφαίρεση του Carriage-return είναι %s (stripcr %s).\n"
 
-#: fetchmail.c:1751
+#: fetchmail.c:1788
 #, fuzzy
 msgid "  Carriage-return stripping is disabled (stripcr off).\n"
 msgstr "  Αφαίρεση του Carriage-return είναι %s (stripcr %s).\n"
 
-#: fetchmail.c:1753
+#: fetchmail.c:1790
 #, fuzzy
 msgid "  Carriage-return forcing is enabled (forcecr on).\n"
 msgstr "  Εξαναγκασμός του Carriage-return είναι %s (forcecr %s).\n"
 
-#: fetchmail.c:1754
+#: fetchmail.c:1791
 #, fuzzy
 msgid "  Carriage-return forcing is disabled (forcecr off).\n"
 msgstr "  Εξαναγκασμός του Carriage-return είναι %s (forcecr %s).\n"
 
-#: fetchmail.c:1756
+#: fetchmail.c:1793
 #, fuzzy
 msgid ""
 "  Interpretation of Content-Transfer-Encoding is disabled (pass8bits on).\n"
 msgstr "  Μετάφραση του Content-Transfer-Encoding είναι %s (pass8bits %s).\n"
 
-#: fetchmail.c:1757
+#: fetchmail.c:1794
 #, fuzzy
 msgid ""
 "  Interpretation of Content-Transfer-Encoding is enabled (pass8bits off).\n"
 msgstr "  Μετάφραση του Content-Transfer-Encoding είναι %s (pass8bits %s).\n"
 
-#: fetchmail.c:1759
+#: fetchmail.c:1796
 #, fuzzy
 msgid "  MIME decoding is enabled (mimedecode on).\n"
 msgstr "  Αποκωδικοποίηση MIME είναι %s (mimedecode %s).\n"
 
-#: fetchmail.c:1760
+#: fetchmail.c:1797
 #, fuzzy
 msgid "  MIME decoding is disabled (mimedecode off).\n"
 msgstr "  Αποκωδικοποίηση MIME είναι %s (mimedecode %s).\n"
 
-#: fetchmail.c:1762
+#: fetchmail.c:1799
 #, fuzzy
 msgid "  Idle after poll is enabled (idle on).\n"
 msgstr "  Ηρεμία μετά την ερώτηση είναι %s (idle %s).\n"
 
-#: fetchmail.c:1763
+#: fetchmail.c:1800
 #, fuzzy
 msgid "  Idle after poll is disabled (idle off).\n"
 msgstr "  Ηρεμία μετά την ερώτηση είναι %s (idle %s).\n"
 
-#: fetchmail.c:1765
+#: fetchmail.c:1802
 #, fuzzy
 msgid "  Nonempty Status lines will be discarded (dropstatus on)\n"
 msgstr "  Οι γραμμές Nonempty Status θα %s (dropstatus %s)\n"
 
-#: fetchmail.c:1766
+#: fetchmail.c:1803
 #, fuzzy
 msgid "  Nonempty Status lines will be kept (dropstatus off)\n"
 msgstr "  Οι γραμμές Nonempty Status θα %s (dropstatus %s)\n"
 
-#: fetchmail.c:1768
+#: fetchmail.c:1805
 #, fuzzy
 msgid "  Delivered-To lines will be discarded (dropdelivered on)\n"
 msgstr "  Οι γραμμές Delivered-To θα %s (dropdelivered %s)\n"
 
-#: fetchmail.c:1769
+#: fetchmail.c:1806
 #, fuzzy
 msgid "  Delivered-To lines will be kept (dropdelivered off)\n"
 msgstr "  Οι γραμμές Delivered-To θα %s (dropdelivered %s)\n"
 
-#: fetchmail.c:1773
+#: fetchmail.c:1810
 #, c-format
 msgid "  Message size limit is %d octets (--limit %d).\n"
 msgstr "  Το όριο μεγέθουν μηνύματος είναι %d octets (--limit %d).\n"
 
-#: fetchmail.c:1776
+#: fetchmail.c:1813
 msgid "  No message size limit (--limit 0).\n"
 msgstr "  Κανένα όριο μεγέθους μηνύματος (--limit 0).\n"
 
-#: fetchmail.c:1778
+#: fetchmail.c:1815
 #, c-format
 msgid "  Message size warning interval is %d seconds (--warnings %d).\n"
 msgstr ""
 "  Περίοδος προειδοποίησης μεγέθους μηνύματος είναι %d δεύτερα (--warnings "
 "%d).\n"
 
-#: fetchmail.c:1781
+#: fetchmail.c:1818
 msgid "  Size warnings on every poll (--warnings 0).\n"
 msgstr "  Προειδοποιήσεις μεγέθους σε κάθε ερώτηση (--warnings 0).\n"
 
-#: fetchmail.c:1784
+#: fetchmail.c:1821
 #, c-format
 msgid "  Received-message limit is %d (--fetchlimit %d).\n"
 msgstr "  Όριο παραληφθέν-μηνύματος είναι %d (--fetchlimit %d).\n"
 
-#: fetchmail.c:1787
+#: fetchmail.c:1824
 msgid "  No received-message limit (--fetchlimit 0).\n"
 msgstr "  Κανένα όριο παραληφθέν-μηνύματος (--fetchlimit 0).\n"
 
-#: fetchmail.c:1789
+#: fetchmail.c:1826
 #, fuzzy, c-format
 msgid "  Fetch message size limit is %d (--fetchsizelimit %d).\n"
 msgstr "  Όριο παραληφθέν-μηνύματος είναι %d (--fetchlimit %d).\n"
 
-#: fetchmail.c:1792
+#: fetchmail.c:1829
 #, fuzzy
 msgid "  No fetch message size limit (--fetchsizelimit 0).\n"
 msgstr "  Κανένα όριο μεγέθους μηνύματος (--limit 0).\n"
 
-#: fetchmail.c:1796
+#: fetchmail.c:1833
 msgid "  Do binary search of UIDs during each poll (--fastuidl 1).\n"
 msgstr ""
 
-#: fetchmail.c:1798
+#: fetchmail.c:1835
 #, c-format
 msgid "  Do binary search of UIDs during %d out of %d polls (--fastuidl %d).\n"
 msgstr ""
 
-#: fetchmail.c:1801
+#: fetchmail.c:1838
 msgid "   Do linear search of UIDs during each poll (--fastuidl 0).\n"
 msgstr ""
 
-#: fetchmail.c:1803
+#: fetchmail.c:1840
 #, c-format
 msgid "  SMTP message batch limit is %d.\n"
 msgstr "  Όριο δέσμης μηνύματος SMTP είναι %d.\n"
 
-#: fetchmail.c:1805
+#: fetchmail.c:1842
 msgid "  No SMTP message batch limit (--batchlimit 0).\n"
 msgstr "  Κανένα όριο δέσμης μηνύματος SMTP (--batchlimit 0).\n"
 
-#: fetchmail.c:1809
+#: fetchmail.c:1846
 #, c-format
 msgid "  Deletion interval between expunges forced to %d (--expunge %d).\n"
 msgstr ""
 "  Περίοδος διαγραφής μεταξύ εξαλείψεων εξαναγκάστηκε σε %d (--expunge %d).\n"
 
-#: fetchmail.c:1811
+#: fetchmail.c:1848
 msgid "  No forced expunges (--expunge 0).\n"
 msgstr "  Καμμιά εξαναγκασμένη εξάλειψη (--expunge 0).\n"
 
-#: fetchmail.c:1818
+#: fetchmail.c:1855
 msgid "  Domains for which mail will be fetched are:"
 msgstr "  Περιοχές για τις οποίες αλληλογραφία θα ληφθεί είναι:"
 
-#: fetchmail.c:1823 fetchmail.c:1843
+#: fetchmail.c:1860 fetchmail.c:1880
 msgid " (default)"
 msgstr " (εξ'ορισμού)"
 
-#: fetchmail.c:1828
+#: fetchmail.c:1865
 #, c-format
 msgid "  Messages will be appended to %s as BSMTP\n"
 msgstr "  Τα μηνύματα θα προστεθούν σε %s σαν BSMTP\n"
 
-#: fetchmail.c:1830
+#: fetchmail.c:1867
 #, c-format
 msgid "  Messages will be delivered with \"%s\".\n"
 msgstr "  Τα μηνύματα θα διανεμηθούν με \"%s\".\n"
 
-#: fetchmail.c:1837
+#: fetchmail.c:1874
 #, c-format
 msgid "  Messages will be %cMTP-forwarded to:"
 msgstr "  Τα μηνύματα θα προωθηθούν %cMTP σε:"
 
-#: fetchmail.c:1848
+#: fetchmail.c:1885
 #, c-format
 msgid "  Host part of MAIL FROM line will be %s\n"
 msgstr "  Το μέρος διακομιστή της γραμμής MAIL FROM θα είναι %s\n"
 
-#: fetchmail.c:1851
+#: fetchmail.c:1888
 #, c-format
 msgid "  Address to be put in RCPT TO lines shipped to SMTP will be %s\n"
 msgstr ""
 "  Διεύθυνση που θα μπουν στις γραμμές RCPT TO που αποστέλλονται μέσω\n"
 "   SMTP θα είναι %s\n"
 
-#: fetchmail.c:1860
+#: fetchmail.c:1897
 msgid "  Recognized listener spam block responses are:"
 msgstr "  Αναγνωρισμένες απαντήσεις μπλοκαρίσματος spam ακροατή είναι:"
 
-#: fetchmail.c:1866
+#: fetchmail.c:1903
 msgid "  Spam-blocking disabled\n"
 msgstr "  Απενεργοποίηση μπλοκαρίσματος-spam\n"
 
-#: fetchmail.c:1869
+#: fetchmail.c:1906
 #, c-format
 msgid "  Server connection will be brought up with \"%s\".\n"
 msgstr "  Η σύνδεση διαχειριστή θα αρχινά με \"%s\".\n"
 
-#: fetchmail.c:1872
+#: fetchmail.c:1909
 msgid "  No pre-connection command.\n"
 msgstr "  Καμμιά εντολή προ-σύνδεσης.\n"
 
-#: fetchmail.c:1874
+#: fetchmail.c:1911
 #, c-format
 msgid "  Server connection will be taken down with \"%s\".\n"
 msgstr "  Η σύνδεση διαχειριστή θα τερματίζεται με \"%s\".\n"
 
-#: fetchmail.c:1877
+#: fetchmail.c:1914
 msgid "  No post-connection command.\n"
 msgstr "  Καμμιά εντολή μετά-σύνδεσης.\n"
 
-#: fetchmail.c:1880
+#: fetchmail.c:1917
 msgid "  No localnames declared for this host.\n"
 msgstr "  Κανένα τοπικό όνομα δεν ορίστηκε για αυτό το διακομιστή.\n"
 
-#: fetchmail.c:1890
+#: fetchmail.c:1927
 msgid "  Multi-drop mode: "
 msgstr "  Κατάσταση multi-drop: "
 
-#: fetchmail.c:1892
+#: fetchmail.c:1929
 msgid "  Single-drop mode: "
 msgstr "  Κατάσταση single-drop: "
 
-#: fetchmail.c:1894
+#: fetchmail.c:1931
 #, fuzzy, c-format
 msgid "%d local name recognized.\n"
 msgid_plural "%d local names recognized.\n"
 msgstr[0] "%d τοπικό όνομα(τα) αναγνωρίστηκαν.\n"
 msgstr[1] "%d τοπικό όνομα(τα) αναγνωρίστηκαν.\n"
 
-#: fetchmail.c:1909
+#: fetchmail.c:1946
 #, fuzzy
 msgid "  DNS lookup for multidrop addresses is enabled.\n"
 msgstr "  Αναζήτηση DNS για τις διευθύνσεις multidrop είναι %s.\n"
 
-#: fetchmail.c:1910
+#: fetchmail.c:1947
 #, fuzzy
 msgid "  DNS lookup for multidrop addresses is disabled.\n"
 msgstr "  Αναζήτηση DNS για τις διευθύνσεις multidrop είναι %s.\n"
 
-#: fetchmail.c:1914
+#: fetchmail.c:1951
 #, fuzzy
 msgid ""
 "  Server aliases will be compared with multidrop addresses by IP address.\n"
 msgstr "  Τα ψευδώνυμα διαχειριστή θα συγκριθούν με διευθύνσεις multidrop με "
 
-#: fetchmail.c:1916
+#: fetchmail.c:1953
 #, fuzzy
 msgid "  Server aliases will be compared with multidrop addresses by name.\n"
 msgstr "  Τα ψευδώνυμα διαχειριστή θα συγκριθούν με διευθύνσεις multidrop με "
 
-#: fetchmail.c:1919
+#: fetchmail.c:1956
 msgid "  Envelope-address routing is disabled\n"
 msgstr "  Απενεργοποιήθηκε η δρομολόγηση Επικεφαλίδα-φακέλου\n"
 
-#: fetchmail.c:1922
+#: fetchmail.c:1959
 #, c-format
 msgid "  Envelope header is assumed to be: %s\n"
 msgstr "Επικεφαλίδα φακέλου θεωρείτε να είναι: %s\n"
 
-#: fetchmail.c:1925
+#: fetchmail.c:1962
 #, fuzzy, c-format
 msgid "  Number of envelope headers to be skipped over: %d\n"
 msgstr "  Αριθμός επικεφαλίδας φακέλου που θα επεξεργαστούν: %d\n"
 
-#: fetchmail.c:1928
+#: fetchmail.c:1965
 #, c-format
 msgid "  Prefix %s will be removed from user id\n"
 msgstr "  Το πρόθεμα %s θα αφαιρεθεί από το user id\n"
 
-#: fetchmail.c:1931
+#: fetchmail.c:1968
 msgid "  No prefix stripping\n"
 msgstr "  Καμμιά αφαίρεση προθέματος\n"
 
-#: fetchmail.c:1936
+#: fetchmail.c:1973
 msgid "  Predeclared mailserver aliases:"
 msgstr "Προδηλωμένα ψευδώνυμα διαχειριστή-αλληλογραφίας:"
 
-#: fetchmail.c:1944
+#: fetchmail.c:1981
 msgid "  Local domains:"
 msgstr "  Τοπικές περιοχές:"
 
-#: fetchmail.c:1954
+#: fetchmail.c:1991
 #, c-format
 msgid "  Connection must be through interface %s.\n"
 msgstr "  Η σύνδεση πρέπει να είναι μέσω του interface %s.\n"
 
-#: fetchmail.c:1956
+#: fetchmail.c:1993
 msgid "  No interface requirement specified.\n"
 msgstr "  Δεν ορίστηκαν απαιτήσεις interface.\n"
 
-#: fetchmail.c:1958
+#: fetchmail.c:1995
 #, c-format
 msgid "  Polling loop will monitor %s.\n"
 msgstr "  Βρόγχος ερώτησης θα παρακολουθεί το %s.\n"
 
-#: fetchmail.c:1960
+#: fetchmail.c:1997
 msgid "  No monitor interface specified.\n"
 msgstr "  Δεν ορίστηκε interface παρακολούθησης.\n"
 
-#: fetchmail.c:1964
+#: fetchmail.c:2001
 #, c-format
 msgid "  Server connections will be made via plugin %s (--plugin %s).\n"
 msgstr "  Συνδέσεις διαχειριστή θα γίνουν μέσω του plugin %s (--plugin %s).\n"
 
-#: fetchmail.c:1966
+#: fetchmail.c:2003
 msgid "  No plugin command specified.\n"
 msgstr "  Δεν ορίστηκε εντολή plugin.\n"
 
-#: fetchmail.c:1968
+#: fetchmail.c:2005
 #, c-format
 msgid "  Listener connections will be made via plugout %s (--plugout %s).\n"
 msgstr "  Συνδέσεις ακροατή θα γίνουν μέσω του plugout %s (--plugout %s).\n"
 
-#: fetchmail.c:1970
+#: fetchmail.c:2007
 msgid "  No plugout command specified.\n"
 msgstr "  Δεν ορίστηκε εντολή plugout.\n"
 
-#: fetchmail.c:1975
+#: fetchmail.c:2014
 msgid "  No UIDs saved from this host.\n"
 msgstr "  Δεν αποθηκεύτηκαν UID από αυτό το διακομιστή.\n"
 
-#: fetchmail.c:1984
+#: fetchmail.c:2017
 #, c-format
 msgid "  %d UIDs saved.\n"
 msgstr "  %d UID αποθηκεύτηκαν.\n"
 
-#: fetchmail.c:1992
+#: fetchmail.c:2023
 msgid "  Poll trace information will be added to the Received header.\n"
 msgstr ""
 "  Πληροφορίες εντοπισμού ερώτησης θα προστεθεί στην επικεφαλίδα Received.\n"
 
-#: fetchmail.c:1994
+#: fetchmail.c:2025
 #, fuzzy
 msgid "  No poll trace information will be added to the Received header.\n"
 msgstr ""
 "  Καμμιά πληροφορία εντοπισμού ερώτησης δε θα προστεθεί στην επικεφαλίδα\n"
 "Received.\n"
 
-#: fetchmail.c:1999
+#: fetchmail.c:2030
 msgid "  Messages with bad headers will be rejected.\n"
 msgstr ""
 
-#: fetchmail.c:2002
+#: fetchmail.c:2033
 msgid "  Messages with bad headers will be passed on.\n"
 msgstr ""
 
-#: fetchmail.c:2007
+#: fetchmail.c:2038
 #, c-format
 msgid "  Pass-through properties \"%s\".\n"
 msgstr "  Ιδιότητες Pass-through \"%s\".\n"
@@ -1809,98 +1819,103 @@ msgstr "Ταυτοποίηση πρωτοκόλλου σαν IMAP2 ή IMAP2BIS\n"
 msgid "will idle after poll\n"
 msgstr "θα ηρεμήσει μετά την ερώτηση\n"
 
-#: imap.c:471 pop3.c:476
+#: imap.c:469 pop3.c:473
 #, c-format
 msgid "%s: upgrade to TLS succeeded.\n"
 msgstr ""
 
-#: imap.c:477 pop3.c:482
+#: imap.c:475 pop3.c:479
 #, c-format
 msgid "%s: upgrade to TLS failed.\n"
 msgstr ""
 
-#: imap.c:482
+#: imap.c:480
 #, c-format
 msgid "%s: opportunistic upgrade to TLS failed, trying to continue\n"
 msgstr ""
 
-#: imap.c:598
+#: imap.c:495
+#, c-format
+msgid "%s: WARNING: server offered STARTTLS but sslproto '' given.\n"
+msgstr ""
+
+#: imap.c:600
 msgid "Required OTP capability not compiled into fetchmail\n"
 msgstr "Απαιτούμενη ικανότητα OTP δεν μεταγλωττίστηκε στο fetchmail\n"
 
-#: imap.c:618 pop3.c:558
+#: imap.c:620 pop3.c:559
 msgid "Required NTLM capability not compiled into fetchmail\n"
 msgstr "Απαιτούμενη ικανότητα NTLM δεν μεταγλωττίστηκε στο fetchmail\n"
 
-#: imap.c:627
+#: imap.c:629
 msgid "Required LOGIN capability not supported by server\n"
 msgstr "Απαιτούμενη ικανότητα LOGIN δεν μεταγλωττίστηκε στο fetchmail\n"
 
-#: imap.c:691
+#: imap.c:693
 #, fuzzy, c-format
 msgid "mail expunge mismatch (%d actual != %d expected)\n"
 msgstr ""
 "το μήνυμα %s@%s:%d δεν είχε το αναμενόμενο μήκος(%d πραγματικο !=%d "
 "αναμενόμενο)\n"
 
-#: imap.c:818
+#: imap.c:820
 #, fuzzy, c-format
 msgid "%lu is unseen\n"
 msgstr "%u δεν έχει ειδωθεί\n"
 
-#: imap.c:868 pop3.c:844 pop3.c:856 pop3.c:1095 pop3.c:1102
+#: imap.c:870 pop3.c:844 pop3.c:856 pop3.c:1101 pop3.c:1108
 #, c-format
 msgid "%u is unseen\n"
 msgstr "%u δεν έχει ειδωθεί\n"
 
-#: imap.c:903 imap.c:962
+#: imap.c:905 imap.c:964
 msgid "re-poll failed\n"
 msgstr "επανερώτηση απέτυχε\n"
 
-#: imap.c:911 imap.c:967
+#: imap.c:913 imap.c:969
 #, fuzzy, c-format
 msgid "%d message waiting after re-poll\n"
 msgid_plural "%d messages waiting after re-poll\n"
 msgstr[0] "%d μηνύματα αναμένουν μετά την απανερώτηση\n"
 msgstr[1] "%d μηνύματα αναμένουν μετά την απανερώτηση\n"
 
-#: imap.c:928
+#: imap.c:930
 msgid "mailbox selection failed\n"
 msgstr "η επιλογή γραμματοκιβωτίου απέτυχε\n"
 
-#: imap.c:932
+#: imap.c:934
 #, fuzzy, c-format
 msgid "%d message waiting after first poll\n"
 msgid_plural "%d messages waiting after first poll\n"
 msgstr[0] "%d μηνύματα αναμένουν μετά την πρώτη ερώτηση\n"
 msgstr[1] "%d μηνύματα αναμένουν μετά την πρώτη ερώτηση\n"
 
-#: imap.c:946
+#: imap.c:948
 msgid "expunge failed\n"
 msgstr "εξάλειψη απέτυχε\n"
 
-#: imap.c:950
+#: imap.c:952
 #, fuzzy, c-format
 msgid "%d message waiting after expunge\n"
 msgid_plural "%d messages waiting after expunge\n"
 msgstr[0] "%d μηνύματα αναμένουν μετά την εξάλειψη\n"
 msgstr[1] "%d μηνύματα αναμένουν μετά την εξάλειψη\n"
 
-#: imap.c:989
+#: imap.c:991
 msgid "search for unseen messages failed\n"
 msgstr "αναζήτηση για μη ιδωμένα μηνύματα απέτυχε\n"
 
-#: imap.c:994 pop3.c:865
+#: imap.c:996 pop3.c:865
 #, c-format
 msgid "%u is first unseen\n"
 msgstr "%u είναι το πρώτο μη ιδωμένο\n"
 
-#: imap.c:1078
+#: imap.c:1080
 msgid ""
 "Warning: ignoring bogus data for message sizes returned by the server.\n"
 msgstr ""
 
-#: imap.c:1177 imap.c:1184
+#: imap.c:1179 imap.c:1186
 #, c-format
 msgid "Incorrect FETCH response: %s.\n"
 msgstr ""
@@ -2099,88 +2114,88 @@ msgstr "διαχειριστής έλαβε θανάσιμο\n"
 msgid "Could not decode OTP challenge\n"
 msgstr "Αδυναμία αποκωδικοποίησης πρόκλησης OTP\n"
 
-#: opie.c:64 pop3.c:585
+#: opie.c:64 pop3.c:586
 msgid "Secret pass phrase: "
 msgstr "Μυστική φράση κλειδί: "
 
-#: options.c:176 options.c:220
+#: options.c:178 options.c:222
 #, c-format
 msgid "String '%s' is not a valid number string.\n"
 msgstr "Η συμβολοσειρά '%s' δεν είναι έγκυρη συμβολοσειρά αριθμού.\n"
 
-#: options.c:185
+#: options.c:187
 #, c-format
 msgid "Value of string '%s' is %s than %d.\n"
 msgstr "Τιμή της συμβολοσειράς '%s' είναι %s αντί %d.\n"
 
-#: options.c:186
+#: options.c:188
 msgid "smaller"
 msgstr "μικρότερο"
 
-#: options.c:186
+#: options.c:188
 msgid "larger"
 msgstr "μεγαλύτερο"
 
-#: options.c:323
+#: options.c:336
 #, fuzzy, c-format
 msgid "Invalid bad-header policy `%s' specified.\n"
 msgstr "Ορίστηκε μη έγκυρο πρωτόκολλο `%s'.\n"
 
-#: options.c:364
+#: options.c:377
 #, c-format
 msgid "Invalid protocol `%s' specified.\n"
 msgstr "Ορίστηκε μη έγκυρο πρωτόκολλο `%s'.\n"
 
-#: options.c:411
+#: options.c:424
 #, c-format
 msgid "Invalid authentication `%s' specified.\n"
 msgstr "Ορίστηκε μη έγκυρη εξουσιοδότηση `%s'.\n"
 
-#: options.c:620
+#: options.c:640
 msgid "usage:  fetchmail [options] [server ...]\n"
 msgstr "χρήση: fetchmail [επιλογές] [διαχειριστής ...]\n"
 
-#: options.c:621
+#: options.c:641
 msgid "  Options are as follows:\n"
 msgstr "  Οι επιλογές είναι οι ακόλουθες:\n"
 
-#: options.c:622
+#: options.c:642
 msgid "  -?, --help        display this option help\n"
 msgstr "  -?, --help        απεικόνιση αυτού του μηνύματος βοηθείας\n"
 
-#: options.c:623
+#: options.c:643
 msgid "  -V, --version     display version info\n"
 msgstr "  -V, --version     απεικόνιση πληροφορίες εκδόσεως\n"
 
-#: options.c:625
+#: options.c:645
 msgid "  -c, --check       check for messages without fetching\n"
 msgstr "  -c, --check       έλεγχος για μηνύματα χωρίς παραλαβή\n"
 
-#: options.c:626
+#: options.c:646
 msgid "  -s, --silent      work silently\n"
 msgstr "  -s, --silent      αθόρυβη εργασία\n"
 
-#: options.c:627
+#: options.c:647
 msgid "  -v, --verbose     work noisily (diagnostic output)\n"
 msgstr "  -v, --verbose     θορυβώδης εργασία (διαγνωστική έξοδος)\n"
 
-#: options.c:628
+#: options.c:648
 msgid "  -d, --daemon      run as a daemon once per n seconds\n"
 msgstr "  -d, --daemon      εκτέλεση σαν δαίμονας μια φορά κάθε n δεύτερα\n"
 
-#: options.c:629
+#: options.c:649
 msgid "  -N, --nodetach    don't detach daemon process\n"
 msgstr "  -N, --nodetach    ακύρωση αφαίρεσης διεργασίας του δαίμονα\n"
 
-#: options.c:630
+#: options.c:650
 msgid "  -q, --quit        kill daemon process\n"
 msgstr "  -q, --quit        τερματισμός διεργασίας δαίμονα\n"
 
-#: options.c:631
+#: options.c:651
 msgid "  -L, --logfile     specify logfile name\n"
 msgstr "  -L, --logfile     καθορισμός ονόματος αρχείου καταγραφής\n"
 
-#: options.c:632
+#: options.c:652
 msgid ""
 "      --syslog      use syslog(3) for most messages when running as a "
 "daemon\n"
@@ -2188,307 +2203,328 @@ msgstr ""
 "      --syslog      χρησιμοποίηση του syslog(3) για τα περισσότερα μηνύματα\n"
 "                    όταν εκτελείτε σαν δαίμονας\n"
 
-#: options.c:633
+#: options.c:653
+msgid "      --nosyslog    turns off use of syslog(3)\n"
+msgstr ""
+
+#: options.c:654
 msgid "      --invisible   don't write Received & enable host spoofing\n"
 msgstr ""
 "      --invisible   μη εγγραφή Received & λειτουργία της απόκρυψης "
 "συστήματος\n"
 
-#: options.c:634
+#: options.c:655
 msgid "  -f, --fetchmailrc specify alternate run control file\n"
 msgstr "  -f, --fetchmailrc ορισμός εναλλακτικού αρχείου προτιμήσεων\n"
 
-#: options.c:635
+#: options.c:656
 msgid "  -i, --idfile      specify alternate UIDs file\n"
 msgstr "  -i, --idfile      ορισμός εναλλακτικού αρχείου με UIDs\n"
 
-#: options.c:636
+#: options.c:657
 #, fuzzy
 msgid "      --pidfile     specify alternate PID (lock) file\n"
 msgstr "  -i, --idfile      ορισμός εναλλακτικού αρχείου με UIDs\n"
 
-#: options.c:637
+#: options.c:658
 msgid "      --postmaster  specify recipient of last resort\n"
 msgstr "      --postmaster  ορισμός παραλήπτη σαν τελευταία λύση\n"
 
-#: options.c:638
+#: options.c:659
 msgid "      --nobounce    redirect bounces from user to postmaster.\n"
 msgstr ""
 "      --nobounce    αναδρομολόγηση των αναπηδήσεων από χρήστη σε "
 "postmaster.\n"
 
-#: options.c:639
+#: options.c:660
 msgid ""
 "      --nosoftbounce fetchmail deletes permanently undeliverable messages.\n"
 msgstr ""
 
-#: options.c:640
+#: options.c:661
 msgid ""
 "      --softbounce  keep permanently undeliverable messages on server "
 "(default).\n"
 msgstr ""
 
-#: options.c:642
+#: options.c:663
 msgid "  -I, --interface   interface required specification\n"
 msgstr "  -I, --interface   απαιτούμενος ορισμός interface\n"
 
-#: options.c:643
+#: options.c:664
 msgid "  -M, --monitor     monitor interface for activity\n"
 msgstr "  -M, --monitor     παρακολούθηση interface για δραστηριότητα\n"
 
-#: options.c:646
+#: options.c:667
 msgid "      --ssl         enable ssl encrypted session\n"
 msgstr "      --ssl         ενεργοποίηση ssl κρυπτογραφημένης συνεδρίας\n"
 
-#: options.c:647
+#: options.c:668
 msgid "      --sslkey      ssl private key file\n"
 msgstr "      --sslkey      προσωπικό αρχείο κλειδιού ssl\n"
 
-#: options.c:648
+#: options.c:669
 msgid "      --sslcert     ssl client certificate\n"
 msgstr "      --sslcert     πιστοποιητικό πελάτη ssl\n"
 
-#: options.c:649
+#: options.c:670
 #, fuzzy
 msgid "      --sslcertck   do strict server certificate check (recommended)\n"
 msgstr "      --sslcert     πιστοποιητικό πελάτη ssl\n"
 
-#: options.c:650
+#: options.c:671
+#, fuzzy
+msgid "      --nosslcertck skip strict server certificate check (insecure)\n"
+msgstr "      --sslcert     πιστοποιητικό πελάτη ssl\n"
+
+#: options.c:672
 #, fuzzy
 msgid "      --sslcertfile path to trusted-CA ssl certificate file\n"
 msgstr "      --sslcert     πιστοποιητικό πελάτη ssl\n"
 
-#: options.c:651
+#: options.c:673
 #, fuzzy
 msgid "      --sslcertpath path to trusted-CA ssl certificate directory\n"
 msgstr "      --sslcert     πιστοποιητικό πελάτη ssl\n"
 
-#: options.c:652
+#: options.c:674
 msgid ""
 "      --sslcommonname  expect this CommonName from server (discouraged)\n"
 msgstr ""
 
-#: options.c:653
+#: options.c:675
 msgid ""
 "      --sslfingerprint fingerprint that must match that of the server's "
 "cert.\n"
 msgstr ""
 
-#: options.c:654
+#: options.c:676
 #, fuzzy
 msgid "      --sslproto    force ssl protocol (SSL2/SSL3/TLS1)\n"
 msgstr "      --sslproto    εξαναγκασμός πρωτοκόλλου ssl (ssl2/ssl3/tls1)\n"
 
-#: options.c:656
+#: options.c:678
 msgid "      --plugin      specify external command to open connection\n"
 msgstr ""
 "      --plugin      καθορισμός εξωτερικής εντολής για άνοιγμα σύνδεσης\n"
 
-#: options.c:657
+#: options.c:679
 msgid "      --plugout     specify external command to open smtp connection\n"
 msgstr ""
 "      --plugout     καθορισμός εξωτερικής εντολής για άνοιγμα smtp σύνδεσης\n"
 
-#: options.c:658
+#: options.c:680
 msgid ""
 "      --bad-header {reject|accept}\n"
 "                    specify policy for handling messages with bad headers\n"
 msgstr ""
 
-#: options.c:661
-msgid "  -p, --protocol    specify retrieval protocol (see man page)\n"
+#: options.c:683
+#, fuzzy
+msgid "  -p, --proto[col]  specify retrieval protocol (see man page)\n"
 msgstr ""
 "  -p, --protocol    καθορισμός πρωτοκόλλου ανάκτησης (δείτε σελίδα man)\n"
 
-#: options.c:662
+#: options.c:684
 msgid "  -U, --uidl        force the use of UIDLs (pop3 only)\n"
 msgstr "  -U, --uidl        εξαναγκασμός χρήσης των UIDL (pop3 μόνο)\n"
 
-#: options.c:663
+#: options.c:685
+msgid ""
+"      --idle        tells the IMAP server to send notice of new messages\n"
+msgstr ""
+
+#: options.c:686
 #, fuzzy
 msgid "      --port        TCP port to connect to (obsolete, use --service)\n"
 msgstr "  -P, --port        θύρα υπηρεσίας TCP/IP για σύνδεση σε αυτή\n"
 
-#: options.c:664
+#: options.c:687
 #, fuzzy
 msgid ""
 "  -P, --service     TCP service to connect to (can be numeric TCP port)\n"
 msgstr "  -P, --port        θύρα υπηρεσίας TCP/IP για σύνδεση σε αυτή\n"
 
-#: options.c:665
+#: options.c:688
 msgid "      --auth        authentication type (password/kerberos/ssh/otp)\n"
 msgstr "      --auth        τύπος εξουσιοδότησης (password/kerberos/ssh/otp)\n"
 
-#: options.c:666
+#: options.c:689
 msgid "  -t, --timeout     server nonresponse timeout\n"
 msgstr "  -t, --timeout     χρόνος λήξης μη-απάντησης διακομιστή\n"
 
-#: options.c:667
+#: options.c:690
 msgid "  -E, --envelope    envelope address header\n"
 msgstr "  -E, --envelope    τύλιγμα επικεφαλίδας διεύθυνσης\n"
 
-#: options.c:668
+#: options.c:691
 msgid "  -Q, --qvirtual    prefix to remove from local user id\n"
 msgstr "  -Q, --qvirtual    πρόθεμα για αφαίρεση από το τοπικό user id\n"
 
-#: options.c:669
+#: options.c:692
 msgid "      --principal   mail service principal\n"
 msgstr "      --principal   διευθυντής υπηρεσίας αλληλογραφίας\n"
 
-#: options.c:670
+#: options.c:693
 msgid "      --tracepolls  add poll-tracing information to Received header\n"
 msgstr ""
 "      --tracepolls  προσθήκη πληροφόριας εντοπισμού-ερώτησης στο Received\n"
 
-#: options.c:672
-msgid "  -u, --username    specify users's login on server\n"
+#: options.c:695
+#, fuzzy
+msgid "  -u, --user[name]  specify users's login on server\n"
 msgstr "  -u, --username    ορισμός του user login στο διαχειριστή\n"
 
-#: options.c:673
+#: options.c:696
 #, fuzzy
 msgid "  -a, --[fetch]all  retrieve old and new messages\n"
 msgstr "  -a, --all         λήψη παλιών και νέων μηνυμάτων\n"
 
-#: options.c:674
+#: options.c:697
 msgid "  -K, --nokeep      delete new messages after retrieval\n"
 msgstr "  -K, --nokeep      διαγραφή νέων μηνυμάτων μετά την λήψη\n"
 
-#: options.c:675
+#: options.c:698
 msgid "  -k, --keep        save new messages after retrieval\n"
 msgstr "  -k, --keep        αποθήκευση νέων μηνυμάτων μετά την λήψη\n"
 
-#: options.c:676
+#: options.c:699
 msgid "  -F, --flush       delete old messages from server\n"
 msgstr "  -F, --flush       παλιών μηνυμάτων από το διαχειριστή\n"
 
-#: options.c:677
+#: options.c:700
 #, fuzzy
 msgid "      --limitflush  delete oversized messages\n"
 msgstr "  -F, --flush       παλιών μηνυμάτων από το διαχειριστή\n"
 
-#: options.c:678
+#: options.c:701
 msgid "  -n, --norewrite   don't rewrite header addresses\n"
 msgstr "  -n, --norewrite   όχι επανεγγραφή της επικεφαλίδας διευθύνσεων\n"
 
-#: options.c:679
+#: options.c:702
 msgid "  -l, --limit       don't fetch messages over given size\n"
 msgstr "  -l, --limit       όχι λήψη μηνυμάτων πάνω από το δοσμένο μέγεθος\n"
 
-#: options.c:680
+#: options.c:703
 msgid "  -w, --warnings    interval between warning mail notification\n"
 msgstr ""
 "  -w, --warnings    περίοδος μεταξύ ειδοποιητικού μηνύματος προειδοποίησης\n"
 
-#: options.c:682
+#: options.c:705
 msgid "  -S, --smtphost    set SMTP forwarding host\n"
 msgstr "  -S, --smtphost    ορισμός διακομιστή SMTP για προώθηση\n"
 
-#: options.c:683
+#: options.c:706
 msgid "      --fetchdomains fetch mail for specified domains\n"
 msgstr "      --fetchdomains λήψη αλληλογραφίας από καθορισμένες περιοχές\n"
 
-#: options.c:684
+#: options.c:707
 msgid "  -D, --smtpaddress set SMTP delivery domain to use\n"
 msgstr "  -D, --smtpaddress ορισμός περιοχών παράδοσης SMTP για χρήση\n"
 
-#: options.c:685
+#: options.c:708
 msgid "      --smtpname    set SMTP full name username@domain\n"
 msgstr "      --smtpname    ορισμός πλήρη ονόματοςSMTP username@domain\n"
 
-#: options.c:686
+#: options.c:709
 msgid "  -Z, --antispam,   set antispam response values\n"
 msgstr "  -Z, --antispam,   ορισμός τιμών απαντήσεων αντι-spam\n"
 
-#: options.c:687
+#: options.c:710
 msgid "  -b, --batchlimit  set batch limit for SMTP connections\n"
 msgstr "  -b, --batchlimit  ορισμός ορίου δέσμης για τις συνδέσεις SMTP\n"
 
-#: options.c:688
+#: options.c:711
 msgid "  -B, --fetchlimit  set fetch limit for server connections\n"
 msgstr ""
 "  -B, --fetchlimit  ορισμός ορίου λήψης για τις συνδέσεις διαχειριστή\n"
 
-#: options.c:689
+#: options.c:712
 #, fuzzy
 msgid "      --fetchsizelimit set fetch message size limit\n"
 msgstr "      --fetchdomains λήψη αλληλογραφίας από καθορισμένες περιοχές\n"
 
-#: options.c:690
+#: options.c:713
 msgid "      --fastuidl    do a binary search for UIDLs\n"
 msgstr ""
 
-#: options.c:691
+#: options.c:714
 msgid "  -e, --expunge     set max deletions between expunges\n"
 msgstr "  -e, --expunge     ορισμός μέγιστων διαγραφών μεταξύ εξαλείψεων\n"
 
-#: options.c:692
+#: options.c:715
 msgid "  -m, --mda         set MDA to use for forwarding\n"
 msgstr "  -m, --mda         ορισμός MDA για χρήση σε προώθηση\n"
 
-#: options.c:693
+#: options.c:716
 msgid "      --bsmtp       set output BSMTP file\n"
 msgstr "      --bsmtp       ορισμός αρχείου εξόδου BSMTP\n"
 
-#: options.c:694
+#: options.c:717
 msgid "      --lmtp        use LMTP (RFC2033) for delivery\n"
 msgstr "      --lmtp        ορισμός LMTP (RFC2033) για παράδοση\n"
 
-#: options.c:695
+#: options.c:718
 msgid "  -r, --folder      specify remote folder name\n"
 msgstr "  -r, --folder      καθορισμός ονόματος απομακρυσμένου φακέλου\n"
 
-#: options.c:696
+#: options.c:719
 msgid "      --showdots    show progress dots even in logfiles\n"
 msgstr ""
 "      --showdots    εμφάνιση τελείων προόδου και στα αρχεία καταγραφής\n"
 
-#: pop3.c:327
+#: pop3.c:329
 msgid ""
 "Warning: \"Maillennium POP3\" found, using RETR command instead of TOP.\n"
 msgstr ""
 
-#: pop3.c:411
+#: pop3.c:413
 msgid "TLS is mandatory for this session, but server refused CAPA command.\n"
 msgstr ""
 
-#: pop3.c:412
+#: pop3.c:414
 msgid "The CAPA command is however necessary for TLS.\n"
 msgstr ""
 
-#: pop3.c:494
+#: pop3.c:491
 #, c-format
 msgid "%s: opportunistic upgrade to TLS failed, trying to continue.\n"
 msgstr ""
 
-#: pop3.c:621
+#: pop3.c:497
+#, c-format
+msgid "%s: WARNING: server offered STLS, but sslproto '' given.\n"
+msgstr ""
+
+#: pop3.c:622
 msgid "We've run out of allowed authenticators and cannot continue.\n"
 msgstr ""
 
-#: pop3.c:635
+#: pop3.c:636
 msgid "Required APOP timestamp not found in greeting\n"
 msgstr "Δε βρέθηκε η απαιτούμενη χρονολόγηση στο χαιρετισμό\n"
 
-#: pop3.c:644
+#: pop3.c:645
 msgid "Timestamp syntax error in greeting\n"
 msgstr "Συντακτικό σφάλμα χρονολόγησης στο χαιρετισμό\n"
 
-#: pop3.c:660
+#: pop3.c:661
 msgid "Invalid APOP timestamp.\n"
 msgstr ""
 
-#: pop3.c:684
+#: pop3.c:685
 msgid "Undefined protocol request in POP3_auth\n"
 msgstr "Μη ορισμένη αίτηση πρωτοκόλλου στο POP3_auth\n"
 
-#: pop3.c:705
+#: pop3.c:706
 msgid "lock busy!  Is another session active?\n"
 msgstr "απασχολημένο κλείδωμα!  Είναι ενεργή κάποια άλλη συνεδρία;\n"
 
-#: pop3.c:784
+#: pop3.c:785
 msgid "Cannot handle UIDL response from upstream server.\n"
 msgstr ""
 
-#: pop3.c:807
+#: pop3.c:808
 msgid "Server responded with UID for wrong message.\n"
 msgstr ""
 
@@ -2497,25 +2533,25 @@ msgstr ""
 msgid "id=%s (num=%u) was deleted, but is still present!\n"
 msgstr ""
 
-#: pop3.c:941
+#: pop3.c:947
 msgid "Messages inserted into list on server. Cannot handle this.\n"
 msgstr ""
 "Τα μηνύματα εισέρχονται σε λίστα στο διαχειριστή. Αδυναμία χειρισμού αυτού.\n"
 
-#: pop3.c:1037
+#: pop3.c:1045
 msgid "protocol error\n"
 msgstr "σφάλμα πρωτοκόλλου\n"
 
-#: pop3.c:1053
+#: pop3.c:1061
 msgid "protocol error while fetching UIDLs\n"
 msgstr "σφάλμα πρωτοκόλλου κατά τη λήψη UIDL\n"
 
-#: pop3.c:1086
+#: pop3.c:1092
 #, c-format
 msgid "id=%s (num=%d) was deleted, but is still present!\n"
 msgstr ""
 
-#: pop3.c:1424
+#: pop3.c:1442
 #, fuzzy
 msgid "Option --folder is not supported with POP3\n"
 msgstr "Η επιλογή --remote δεν υποστηρίζεται με το POP3\n"
@@ -2548,21 +2584,21 @@ msgstr ""
 msgid "SSL is not enabled"
 msgstr "το SSL δεν έχει ενεργοποιηθεί"
 
-#: rcfile_y.y:391
+#: rcfile_y.y:392
 msgid "end of input"
 msgstr "τέλος εισόδου"
 
-#: rcfile_y.y:429
+#: rcfile_y.y:430
 #, c-format
 msgid "File %s must be a regular file.\n"
 msgstr "Το αρχείο %s πρέπει να είναι κανονικό αρχείο.\n"
 
-#: rcfile_y.y:439
+#: rcfile_y.y:440
 #, fuzzy, c-format
 msgid "File %s must have no more than -rwx------ (0700) permissions.\n"
 msgstr "Το αρχείο %s δε πρέπει να έχει πάνω από -rwx--x--- (0710) άδειες.\n"
 
-#: rcfile_y.y:451
+#: rcfile_y.y:452
 #, c-format
 msgid "File %s must be owned by you.\n"
 msgstr "Το αρχείο %s πρέπει να ανήκει σε εσάς.\n"
@@ -2907,11 +2943,9 @@ msgstr "Σφάλμα διανομής LMTP στο  EOM\n"
 msgid "Unexpected non-503 response to LMTP EOM: %s\n"
 msgstr "Μη αναμενόμενη απάντηση όχι-503 στο LMTP EOM: %s\n"
 
-#: sink.c:1620
+#: sink.c:1623
 #, fuzzy
-msgid ""
-"-- \n"
-"The Fetchmail Daemon"
+msgid "The Fetchmail Daemon"
 msgstr ""
 "--\n"
 "\t\t\t\tΟ Δαίμονας  Fetchmail\n"
@@ -3027,134 +3061,134 @@ msgid ""
 "%s"
 msgstr ""
 
-#: socket.c:387
+#: socket.c:404
 #, c-format
 msgid "OpenSSL reported: %s\n"
 msgstr ""
 
-#: socket.c:622
+#: socket.c:639
 #, fuzzy
 msgid "Server certificate:\n"
 msgstr "Δεν έχει οριστεί όνομα διακομιστή στο πιστοποιητικό!\n"
 
-#: socket.c:627
+#: socket.c:644
 #, c-format
 msgid "Certificate chain, from root to peer, starting at depth %d:\n"
 msgstr ""
 
-#: socket.c:630
+#: socket.c:647
 #, c-format
 msgid "Certificate at depth %d:\n"
 msgstr ""
 
-#: socket.c:636
+#: socket.c:653
 #, c-format
 msgid "Issuer Organization: %s\n"
 msgstr "Οργανισμός Εκδότη: %s\n"
 
-#: socket.c:639
+#: socket.c:656
 msgid "Warning: Issuer Organization Name too long (possibly truncated).\n"
 msgstr ""
 "Προειδοποίηση: υπερβολικά μεγάλο Όνομα Οργανισμού Εκδότη (πιθανά κομμένο).\n"
 
-#: socket.c:641
+#: socket.c:658
 msgid "Unknown Organization\n"
 msgstr "Άγνωστος Οργανισμός\n"
 
-#: socket.c:643
+#: socket.c:660
 #, c-format
 msgid "Issuer CommonName: %s\n"
 msgstr "ΚοινόΌνομα Εκδότη: %s\n"
 
-#: socket.c:646
+#: socket.c:663
 msgid "Warning: Issuer CommonName too long (possibly truncated).\n"
 msgstr ""
 "Προειδοποίηση: ΚοινόΌνομα Εκδότη είναι υπερβολικά μεγάλο (πιθανά κομμένο).\n"
 
-#: socket.c:648
+#: socket.c:665
 msgid "Unknown Issuer CommonName\n"
 msgstr "Άγνωστο ΚοινόΌνομα Εκδότη\n"
 
-#: socket.c:654
+#: socket.c:671
 #, fuzzy, c-format
 msgid "Subject CommonName: %s\n"
 msgstr "ΚοινόΌνομα Εκδότη: %s\n"
 
-#: socket.c:660
+#: socket.c:677
 msgid "Bad certificate: Subject CommonName too long!\n"
 msgstr "Κακό πιστοποιητικό: Subject ΚοινόΌνομα υπερβολικά μεγάλο!\n"
 
-#: socket.c:666
+#: socket.c:683
 #, fuzzy
 msgid "Bad certificate: Subject CommonName contains NUL, aborting!\n"
 msgstr "Κακό πιστοποιητικό: Subject ΚοινόΌνομα υπερβολικά μεγάλο!\n"
 
-#: socket.c:694
+#: socket.c:711
 #, c-format
 msgid "Subject Alternative Name: %s\n"
 msgstr ""
 
-#: socket.c:700
+#: socket.c:717
 #, fuzzy
 msgid "Bad certificate: Subject Alternative Name contains NUL, aborting!\n"
 msgstr "Κακό πιστοποιητικό: Subject ΚοινόΌνομα υπερβολικά μεγάλο!\n"
 
-#: socket.c:717
+#: socket.c:734
 #, c-format
 msgid "Server CommonName mismatch: %s != %s\n"
 msgstr "Μη ταίριασμα ΚοινούΟνόματος Διακομιστή: %s != %s\n"
 
-#: socket.c:724
+#: socket.c:741
 msgid "Server name not set, could not verify certificate!\n"
 msgstr ""
 "Δεν έχει οριστεί όνομα διαχειριστή, αδυναμία επαλήθευσης πιστοποιητικού!\n"
 
-#: socket.c:729
+#: socket.c:746
 msgid "Unknown Server CommonName\n"
 msgstr "Άγνωστο ΚοινόΌνομα Διακομιστή\n"
 
-#: socket.c:731
+#: socket.c:748
 msgid "Server name not specified in certificate!\n"
 msgstr "Δεν έχει οριστεί όνομα διακομιστή στο πιστοποιητικό!\n"
 
-#: socket.c:743
+#: socket.c:760
 msgid "EVP_md5() failed!\n"
 msgstr "EVP_md5() απέτυχε!\n"
 
-#: socket.c:747
+#: socket.c:764
 msgid "Out of memory!\n"
 msgstr "Σώθηκε η μνήμη!\n"
 
-#: socket.c:755
+#: socket.c:772
 msgid "Digest text buffer too small!\n"
 msgstr "Η προσωρινή μνήμη κειμένου περίληψης είναι υπερβολικά μικρή!\n"
 
-#: socket.c:761
+#: socket.c:778
 #, c-format
 msgid "%s key fingerprint: %s\n"
 msgstr "%s αποτύπωμα κλειδιού: %s\n"
 
-#: socket.c:765
+#: socket.c:782
 #, c-format
 msgid "%s fingerprints match.\n"
 msgstr "%s αποτυπώματα ταιριάζουν.\n"
 
-#: socket.c:767
+#: socket.c:784
 #, c-format
 msgid "%s fingerprints do not match!\n"
 msgstr "%s αποτυπώματα δεν ταιριάζουν!\n"
 
-#: socket.c:779
+#: socket.c:796
 #, fuzzy, c-format
 msgid "Server certificate verification error: %s\n"
 msgstr "Προειδοποίηση: επαλήθευση πιστοποιητικού διακομιστή: %s\n"
 
-#: socket.c:794
+#: socket.c:811
 #, c-format
 msgid "Broken certification chain at: %s\n"
 msgstr ""
 
-#: socket.c:796
+#: socket.c:813
 msgid ""
 "This could mean that the server did not provide the intermediate CA's "
 "certificate(s), which is nothing fetchmail could do anything about.  For "
@@ -3162,12 +3196,12 @@ msgid ""
 "fetchmail.\n"
 msgstr ""
 
-#: socket.c:806
+#: socket.c:823
 #, c-format
 msgid "Missing trust anchor certificate: %s\n"
 msgstr ""
 
-#: socket.c:809
+#: socket.c:826
 msgid ""
 "This could mean that the root CA's signing certificate is not in the trusted "
 "CA certificate location, or that c_rehash needs to be run on the certificate "
@@ -3175,34 +3209,78 @@ msgid ""
 "sslcertfile in the manual page.\n"
 msgstr ""
 
-#: socket.c:902
+#: socket.c:899 socket.c:962
+msgid "Your OpenSSL version does not support SSLv3.\n"
+msgstr ""
+
+#: socket.c:917 socket.c:980
+msgid "Your OpenSSL version does not support TLS v1.1.\n"
+msgstr ""
+
+#: socket.c:928 socket.c:992
+msgid "Your OpenSSL version does not support TLS v1.2.\n"
+msgstr ""
+
+#: socket.c:937 socket.c:1001
+#, fuzzy, c-format
+msgid "Invalid SSL protocol '%s' specified, using default autoselect (auto).\n"
+msgstr "Καθορίστηκε άκυρο προτόκολλο SSL '%s', χρήση εξ ορισμού (SSLv23).\n"
+
+#: socket.c:1029
+#, c-format
+msgid ""
+"Loaded OpenSSL library %#lx older than headers %#lx, refusing to work.\n"
+msgstr ""
+
+#: socket.c:1034
+#, c-format
+msgid ""
+"Loaded OpenSSL library %#lx newer than headers %#lx, trying to continue.\n"
+msgstr ""
+
+#: socket.c:1054
 msgid "File descriptor out of range for SSL"
 msgstr "Ο περιγραφέας αρχείου εκτός κλίμακας για το SSL"
 
-#: socket.c:913
-msgid "Your operating system does not support SSLv2.\n"
+#: socket.c:1074
+msgid ""
+"Note that some distributions disable older protocol versions in weird non-"
+"standard ways. Try a newer protocol version.\n"
 msgstr ""
 
-#: socket.c:923
-#, c-format
-msgid "Invalid SSL protocol '%s' specified, using default (SSLv23).\n"
-msgstr "Καθορίστηκε άκυρο προτόκολλο SSL '%s', χρήση εξ ορισμού (SSLv23).\n"
+#: socket.c:1162
+msgid "Server shut down connection prematurely during SSL_connect().\n"
+msgstr ""
 
-#: socket.c:1022
+#: socket.c:1164
+#, c-format
+msgid "System error during SSL_connect(): %s\n"
+msgstr ""
+
+#: socket.c:1184
+msgid "Cannot obtain current SSL/TLS cipher - no session established?\n"
+msgstr ""
+
+#: socket.c:1187
+#, c-format
+msgid "SSL/TLS: using protocol %s, cipher %s, %d/%d secret/processed bits\n"
+msgstr ""
+
+#: socket.c:1194
 msgid "Certificate/fingerprint verification was somehow skipped!\n"
 msgstr "Επαλήθευση πιστοποιητικού/αποτυπώματος κάπως παραλήφθηκε!\n"
 
-#: socket.c:1039
+#: socket.c:1211
 msgid ""
 "Warning: the connection is insecure, continuing anyways. (Better use --"
 "sslcertck!)\n"
 msgstr ""
 
-#: socket.c:1081
+#: socket.c:1253
 msgid "Cygwin socket read retry\n"
 msgstr "Επαναπροσπάθεια ανάγνωσης υποδοχής Cygwin\n"
 
-#: socket.c:1084
+#: socket.c:1256
 msgid "Cygwin socket read retry failed!\n"
 msgstr "Επαναπροσπάθεια ανάγνωσης υποδοχής Cygwin απέτυχε!\n"
 
@@ -3316,82 +3394,82 @@ msgstr "εγγραφή κειμένου μηνύματος\n"
 msgid "Buffer too small. This is a bug in the caller of %s:%lu.\n"
 msgstr ""
 
-#: uid.c:249
-#, c-format
-msgid "Old UID list from %s:"
+#: uid.c:262
+#, fuzzy, c-format
+msgid "Old UID list from %s:\n"
 msgstr "Παλιά λίστα UID από %s:"
 
-#: uid.c:253 uid.c:264 uid.c:309
+#: uid.c:266 uid.c:275 uid.c:343
 msgid " <empty>"
 msgstr " <άδειο>"
 
-#: uid.c:262
-msgid "Scratch list of UIDs:"
+#: uid.c:273
+#, fuzzy
+msgid "Scratch list of UIDs:\n"
 msgstr "Πρόχειρη λίστα με UID:"
 
-#: uid.c:325 uid.c:374
+#: uid.c:357 uid.c:401
 #, fuzzy, c-format
-msgid "Merged UID list from %s:"
+msgid "Merged UID list from %s:\n"
 msgstr "Παλιά λίστα UID από %s:"
 
-#: uid.c:328
-#, c-format
-msgid "New UID list from %s:"
+#: uid.c:360
+#, fuzzy, c-format
+msgid "New UID list from %s:\n"
 msgstr "Νέα λίστα UID από %s:"
 
-#: uid.c:355
-msgid "swapping UID lists\n"
-msgstr "ανταλλαγή λιστών UID\n"
-
-#: uid.c:363
+#: uid.c:390
 msgid "not swapping UID lists, no UIDs seen this query\n"
 msgstr "όχι ανταλλαγή λιστών UID, δε βρέθηκε κανένα UID σε αυτή την ερώτηση\n"
 
-#: uid.c:383
+#: uid.c:410
 #, fuzzy
 msgid "discarding new UID list\n"
 msgstr "ανταλλαγή λιστών UID\n"
 
-#: uid.c:419
+#: uid.c:466
 msgid "Deleting fetchids file.\n"
 msgstr "Διαγραφή αρχείου fetchids.\n"
 
-#: uid.c:422
+#: uid.c:469
 #, fuzzy, c-format
 msgid "Error deleting %s: %s\n"
 msgstr "Σφάλμα στην απελευθέρωση διαπιστευτηρίων\n"
 
-#: uid.c:428
+#: uid.c:475
 msgid "Writing fetchids file.\n"
 msgstr "Εγγραφή αρχείου fetchids\n"
 
-#: uid.c:439 uid.c:447
+#: uid.c:488 uid.c:497
 #, fuzzy, c-format
 msgid "Write error on fetchids file %s: %s\n"
 msgstr "Εγγραφή αρχείου fetchids\n"
 
-#: uid.c:459
+#: uid.c:509
 #, c-format
 msgid "Error writing to fetchids file %s, old file left in place.\n"
 msgstr ""
 
-#: uid.c:463
+#: uid.c:513
 #, c-format
 msgid "Cannot rename fetchids file %s to %s: %s\n"
 msgstr ""
 
-#: uid.c:467
+#: uid.c:517
 #, c-format
 msgid "Cannot open fetchids file %s for writing: %s\n"
 msgstr ""
 
-#: xmalloc.c:33
+#: xmalloc.c:28
 msgid "malloc failed\n"
 msgstr "απέτυχε το malloc\n"
 
-#: xmalloc.c:47
+#: xmalloc.c:42
 msgid "realloc failed\n"
 msgstr "απέτυχε το realloc\n"
+
+#~ msgid "swapping UID lists\n"
+#~ msgstr "ανταλλαγή λιστών UID\n"
 
 #~ msgid ""
 #~ "Subject: Fetchmail oversized-messages warning.\n"

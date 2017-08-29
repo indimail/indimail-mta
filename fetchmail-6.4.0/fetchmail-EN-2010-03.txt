@@ -6,7 +6,7 @@ fetchmail-EN-2010-03: fetchmail SASL bugs prevent successful authentication
 Topics:		Authentication incapability in older fetchmail versions
 
 Author:		Matthias Andree
-Version:	1.0
+Version:	1.1
 Announced:	2010-10-16
 Impact:		Denial of service
 
@@ -29,6 +29,7 @@ Corrected:	2010-10-09 Git, required commit:
 ==================
 
 2010-10-16 1.0	complete
+2014-05-21 1.1	update BerliOS links
 
 
 1. Background
@@ -78,7 +79,7 @@ and all previous releases.
 Install fetchmail release 6.3.18 or newer.
 
 The fetchmail source code is always available from
-<http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+<http://sourceforge.net/projects/fetchmail/files/>.
 
 Since the changes are non-trivial, 6.3.18 contains other unrelated
 important fixes (such as applying timeout to the authentication phase,
@@ -87,7 +88,7 @@ have been tested, no separate patch is made available.
 
 For details on what else changed in release 6.3.18, please see the NEWS
 file shipping with fetchmail 6.3.18, or its online copy at
-<http://developer.berlios.de/project/shownotes.php?group_id=1824&release_id=17957>.
+<http://sourceforge.net/projects/fetchmail/files/branch_6.3/>
 
 
 4. Workaround
@@ -125,7 +126,7 @@ Use the information herein at your own risk.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/YgsACgkQvmGDOQUufZWwQwCgvBxomOVufQuUh96nEq95Mnz4
-5m8AoKkBIERmVh9MzN4aJBKbqRQX+2Hq
-=GwOi
+iEYEARECAAYFAlN9DK0ACgkQvmGDOQUufZWdAQCfYcPWZiMcEl9H2SXKf80eMktw
+Wc8AoNt/rtXWGD/FpPvhlBSr95eO6PF1
+=5MPV
 -----END PGP SIGNATURE-----

@@ -108,6 +108,19 @@ int dofastuidl = 0;
 static struct idlist *scratchlist;
 
 /** Read saved IDs from \a idfile and attach to each host in \a hostlist. */
+static int dump_saved_uid(struct uid_db_record *rec, void *unused)
+{
+    char *t;
+
+    (void)unused;
+
+    t = sdump(rec->id, rec->id_len);
+    report_build(stdout, " %s\n", t);
+    free(t);
+
+    return 0;
+}
+
 void initialize_saved_lists(struct query *hostlist, const char *idfile)
 {
     struct stat statbuf;
@@ -117,9 +130,9 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
     /* make sure lists are initially empty */
     for (ctl = hostlist; ctl; ctl = ctl->next) {
 	ctl->skipped = (struct idlist *)NULL;
-	ctl->oldsaved = (struct idlist *)NULL;
-	ctl->newsaved = (struct idlist *)NULL;
-	ctl->oldsavedend = &ctl->oldsaved;
+
+	init_uid_db(&ctl->oldsaved);
+	init_uid_db(&ctl->newsaved);
     }
 
     errno = 0;
@@ -156,10 +169,10 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
 	while (fgets(buf, POPBUFSIZE, tmpfp) != (char *)NULL)
 	{
 	    /*
-	     * At this point, we assume the bug has two fields -- a user@host 
+	     * At this point, we assume the bug has two fields -- a user@host
 	     * part, and an ID part. Either field may contain spurious @ signs.
-	     * The previous version of this code presumed one could split at 
-	     * the rightmost '@'.  This is not correct, as InterMail puts an 
+	     * The previous version of this code presumed one could split at
+	     * the rightmost '@'.  This is not correct, as InterMail puts an
 	     * '@' in the UIDL.
 	     */
 
@@ -173,7 +186,7 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
 	     * instead of a Message-ID, as GMX's (www.gmx.net) POP3
 	     * StreamProxy V1.0 does.
 	     *
-	     * this is one other trick. The userhost part 
+	     * this is one other trick. The userhost part
 	     * may contain ' ' in the user part, at least in
 	     * the lotus notes case.
 	     * So we start looking for the '@' after which the
@@ -189,7 +202,7 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
 		    if ((*delimp1 != ' ') && (*delimp1 != '\t'))
 			break;
 
-		/* 
+		/*
 		 * It should be safe to assume that id starts after
 		 * the " " - after all, we're writing the " "
 		 * ourselves in write_saved_lists() :-)
@@ -212,15 +225,15 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
 		*atsign = '\0';
 		host = atsign + 1;
 
-		/* find proper list and save it */
+		/* find uidl db and save it */
 		for (ctl = hostlist; ctl; ctl = ctl->next) {
 		    if (strcasecmp(host, ctl->server.queryname) == 0
 			    && strcasecmp(user, ctl->remotename) == 0) {
-			save_str(&ctl->oldsaved, id, UID_SEEN);
+			uid_db_insert(&ctl->oldsaved, id, UID_SEEN);
 			break;
 		    }
 		}
-		/* 
+		/*
 		 * If it's not in a host we're querying,
 		 * save it anyway.  Otherwise we'd lose UIDL
 		 * information any time we queried an explicit
@@ -246,22 +259,20 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
 
 	for (ctl = hostlist; ctl; ctl = ctl->next)
 	    {
-		report_build(stdout, GT_("Old UID list from %s:"), 
+		report_build(stdout, GT_("Old UID list from %s:\n"),
 			     ctl->server.pollname);
-		idp = ctl->oldsaved;
-		if (!idp)
-		    report_build(stdout, GT_(" <empty>"));
-		else for (idp = ctl->oldsaved; idp; idp = idp->next) {
-		    char *t = sdump(idp->id, strlen(idp->id)-1);
-		    report_build(stdout, " %s\n", t);
-		    free(t);
-		}
+
+		if (!uid_db_n_records(&ctl->oldsaved))
+		    report_build(stdout, "%s\n", GT_(" <empty>"));
+		else
+		    traverse_uid_db(&ctl->oldsaved, dump_saved_uid, NULL);
+
 		report_complete(stdout, "\n");
 	    }
 
-	report_build(stdout, GT_("Scratch list of UIDs:"));
+	report_build(stdout, GT_("Scratch list of UIDs:\n"));
 	if (!scratchlist)
-		report_build(stdout, GT_(" <empty>"));
+		report_build(stdout, "%s\n", GT_(" <empty>"));
 	else for (idp = scratchlist; idp; idp = idp->next) {
 		char *t = sdump(idp->id, strlen(idp->id)-1);
 		report_build(stdout, " %s\n", t);
@@ -273,13 +284,18 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
 
 /** Assert that all UIDs marked deleted in query \a ctl have actually been
 expunged. */
+static int mark_as_expunged_if(struct uid_db_record *rec, void *unused)
+{
+    (void)unused;
+
+    if (rec->status == UID_DELETED) rec->status = UID_EXPUNGED;
+    return 0;
+}
+
 void expunge_uids(struct query *ctl)
 {
-    struct idlist *idl;
-
-    for (idl = dofastuidl ? ctl->oldsaved : ctl->newsaved; idl; idl = idl->next)
-	if (idl->val.status.mark == UID_DELETED)
-	    idl->val.status.mark = UID_EXPUNGED;
+    traverse_uid_db(dofastuidl ? &ctl->oldsaved : &ctl->newsaved,
+		     mark_as_expunged_if, NULL);
 }
 
 static const char *str_uidmark(int mark)
@@ -303,30 +319,46 @@ static const char *str_uidmark(int mark)
 	}
 }
 
-static void dump_list(const struct idlist *idp)
+static int dump_uid_db_record(struct uid_db_record *rec, void *arg)
 {
-	if (!idp) {
+	unsigned *n_recs;
+	char *t;
+
+	n_recs = (unsigned int *)arg;
+	--*n_recs;
+
+	t = sdump(rec->id, rec->id_len);
+	report_build(stdout, " %s = %s\n", t, str_uidmark(rec->status));
+	free(t);
+
+	return 0;
+}
+
+static void dump_uid_db(struct uid_db *db)
+{
+	unsigned n_recs;
+
+	n_recs = uid_db_n_records(db);
+	if (!n_recs) {
 		report_build(stdout, GT_(" <empty>"));
-	} else while (idp) {
-	    char *t = sdump(idp->id, strlen(idp->id));
-	    report_build(stdout, " %s = %s%s", t, str_uidmark(idp->val.status.mark), idp->next ? "," : "");
-	    free(t);
-	    idp = idp->next;
+		return;
 	}
+
+	traverse_uid_db(db, dump_uid_db_record, &n_recs);
 }
 
 /* finish a query */
-void uid_swap_lists(struct query *ctl) 
+void uid_swap_lists(struct query *ctl)
 {
     /* debugging code */
     if (outlevel >= O_DEBUG)
     {
 	if (dofastuidl) {
-	    report_build(stdout, GT_("Merged UID list from %s:"), ctl->server.pollname);
-	    dump_list(ctl->oldsaved);
+	    report_build(stdout, GT_("Merged UID list from %s:\n"), ctl->server.pollname);
+	    dump_uid_db(&ctl->oldsaved);
 	} else {
-	    report_build(stdout, GT_("New UID list from %s:"), ctl->server.pollname);
-	    dump_list(ctl->newsaved);
+	    report_build(stdout, GT_("New UID list from %s:\n"), ctl->server.pollname);
+	    dump_uid_db(&ctl->newsaved);
 	}
 	report_complete(stdout, "\n");
     }
@@ -347,15 +379,10 @@ void uid_swap_lists(struct query *ctl)
      * with UIDLs from that account in .fetchids, there is no way for
      * them to ever get garbage-collected.
      */
-    if (ctl->newsaved)
+    if (uid_db_n_records(&ctl->newsaved))
     {
-	/* old state of mailbox may now be irrelevant */
-	struct idlist *temp = ctl->oldsaved;
-	if (outlevel >= O_DEBUG)
-	    report(stdout, GT_("swapping UID lists\n"));
-	ctl->oldsaved = ctl->newsaved;
-	ctl->newsaved = (struct idlist *) NULL;
-	free_str_list(&temp);
+	swap_uid_db_data(&ctl->newsaved, &ctl->oldsaved);
+	clear_uid_db(&ctl->newsaved);
     }
     /* in fast uidl, there is no need to swap lists: the old state of
      * mailbox cannot be discarded! */
@@ -371,30 +398,54 @@ void uid_discard_new_list(struct query *ctl)
     {
 	/* this is now a merged list! the mails which were seen in this
 	 * poll are marked here. */
-	report_build(stdout, GT_("Merged UID list from %s:"), ctl->server.pollname);
-	dump_list(ctl->oldsaved);
+	report_build(stdout, GT_("Merged UID list from %s:\n"), ctl->server.pollname);
+	dump_uid_db(&ctl->oldsaved);
 	report_complete(stdout, "\n");
     }
 
-    if (ctl->newsaved)
+    if (uid_db_n_records(&ctl->newsaved))
     {
 	/* new state of mailbox is not reliable */
 	if (outlevel >= O_DEBUG)
 	    report(stdout, GT_("discarding new UID list\n"));
-	free_str_list(&ctl->newsaved);
-	ctl->newsaved = (struct idlist *) NULL;
+	clear_uid_db(&ctl->newsaved);
     }
 }
 
 /** Reset the number associated with each id */
 void uid_reset_num(struct query *ctl)
 {
-    struct idlist *idp;
-    for (idp = ctl->oldsaved; idp; idp = idp->next)
-	idp->val.status.num = 0;
+    reset_uid_db_nums(&ctl->oldsaved);
 }
 
 /** Write list of seen messages, at end of run. */
+static int count_seen_deleted(struct uid_db_record *rec, void *arg)
+{
+    if (rec->status == UID_SEEN || rec->status == UID_DELETED)
+	++*(long *)arg;
+    return 0;
+}
+
+struct write_saved_info {
+    struct query *ctl;
+    FILE *fp;
+};
+
+static int write_uid_db_record(struct uid_db_record *rec, void *arg)
+{
+    struct write_saved_info *info;
+    int rc;
+
+    if (!(rec->status == UID_SEEN || rec->status == UID_DELETED))
+	return 0;
+
+    info = (struct write_saved_info *)arg;
+    rc = fprintf(info->fp, "%s@%s %s\n",
+		 info->ctl->remotename, info->ctl->server.queryname,
+		 rec->id);
+    return rc < 0 ? -1 : 0;
+}
+
 void write_saved_lists(struct query *hostlist, const char *idfile)
 {
     long	idcount;
@@ -404,12 +455,8 @@ void write_saved_lists(struct query *hostlist, const char *idfile)
 
     /* if all lists are empty, nuke the file */
     idcount = 0;
-    for (ctl = hostlist; ctl; ctl = ctl->next) {
-	for (idp = ctl->oldsaved; idp; idp = idp->next)
-	    if (idp->val.status.mark == UID_SEEN
-		    || idp->val.status.mark == UID_DELETED)
-		idcount++;
-    }
+    for (ctl = hostlist; ctl; ctl = ctl->next)
+	traverse_uid_db(&ctl->oldsaved, count_seen_deleted, &idcount);
 
     /* either nuke the file or write updated last-seen IDs */
     if (!idcount && !scratchlist)
@@ -428,19 +475,22 @@ void write_saved_lists(struct query *hostlist, const char *idfile)
 	    report(stdout, GT_("Writing fetchids file.\n"));
 	(void)unlink(newnam); /* remove file/link first */
 	if ((tmpfp = fopen(newnam, "w")) != (FILE *)NULL) {
+	    struct write_saved_info info;
 	    int errflg = 0;
+
+	    info.fp = tmpfp;
+
 	    for (ctl = hostlist; ctl; ctl = ctl->next) {
-		for (idp = ctl->oldsaved; idp; idp = idp->next)
-		    if (idp->val.status.mark == UID_SEEN
-				|| idp->val.status.mark == UID_DELETED)
-			if (fprintf(tmpfp, "%s@%s %s\n",
-			    ctl->remotename, ctl->server.queryname, idp->id) < 0) {
-			    int e = errno;
-			    report(stderr, GT_("Write error on fetchids file %s: %s\n"), newnam, strerror(e));
-			    errflg = 1;
-			    goto bailout;
-			}
+		info.ctl = ctl;
+
+		if (traverse_uid_db(&ctl->oldsaved, write_uid_db_record, &info) < 0) {
+		    int e = errno;
+		    report(stderr, GT_("Write error on fetchids file %s: %s\n"), newnam, strerror(e));
+		    errflg = 1;
+		    goto bailout;
+		}
 	    }
+
 	    for (idp = scratchlist; idp; idp = idp->next)
 		if (EOF == fputs(idp->id, tmpfp)) {
 			    int e = errno;

@@ -85,7 +85,7 @@ a. Apply the patch found in section B of this announcement to
 
 b. Install fetchmail 6.3.11 or newer after it will have become available.
    The fetchmail source code is always available from
-   <http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+   <http://sourceforge.net/projects/fetchmail/files/>.
 
 
 4. Workaround
@@ -123,9 +123,9 @@ Use the information herein at your own risk.
 B. Patch to remedy the problem
 ==============================
 
-Note that when taking this from a GnuPG clearsigned file, the lines 
-starting with a "-" character are prefixed by another "- " (dash + 
-blank) combination. Either feed this file through GnuPG to strip them, 
+Note that when taking this from a GnuPG clearsigned file, the lines
+starting with a "-" character are prefixed by another "- " (dash +
+blank) combination. Either feed this file through GnuPG to strip them,
 or strip them manually.
 
 Whitespace differences can usually be ignored by invoking "patch -l",
@@ -176,7 +176,7 @@ END OF fetchmail-SA-2009-01.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZUQ7ACgheMkM4k7NLg6cz8ys3jk9C/P
-uxgAnRzc38wIDR+8Pio9CmDLheOcuskK
-=OYqf
+iEYEARECAAYFAlN9DK4ACgkQvmGDOQUufZWmFwCfUNG9bP8z+YxzM+JYN2YO8Rjr
+eAQAoKa732cxnsq5vUPUdhwZs5PRSNhL
+=2qIK
 -----END PGP SIGNATURE-----

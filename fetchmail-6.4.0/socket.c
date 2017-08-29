@@ -372,11 +372,29 @@ va_dcl {
 }
 
 #ifdef SSL_ENABLE
+#define OPENSSL_NO_DEPRECATED 23
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
 #include <openssl/rand.h>
+
+/*- #define fm_MIN_OPENSSL_VER 0x1000200fL -*/
+#define fm_MIN_OPENSSL_VER 0x00907000L
+
+#ifdef LIBRESSL_VERSION_NUMBER
+#pragma message "WARNING - LibreSSL is unsupported. Use at your own risk."
+#endif
+
+#if OPENSSL_VERSION_NUMBER < fm_MIN_OPENSSL_VER
+#error Your OpenSSL version must be at least 1.0.2 release. Older OpenSSL versions are unsupported.
+#else
+/*
+#define __fm_ossl_ver(x) #x
+#define _fm_ossl_ver(x) __fm_ossl_ver(x)
+#pragma message "Building with OpenSSL headers version " _fm_ossl_ver(OPENSSL_VERSION_NUMBER) ", " OPENSSL_VERSION_TEXT
+*/
+#endif
 
 static void report_SSL_errors(FILE *stream)
 {
@@ -866,6 +884,129 @@ static const char *SSLCertGetCN(const char *mycert,
 	return ret;
 }
 
+#if defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER < 0x1010000fL
+/* OSSL_proto_version_logic for OpenSSL 1.0.x and LibreSSL */
+static int OSSL10X_proto_version_logic(int sock, const char **myproto, int *avoid_ssl_versions)
+{
+	if (!*myproto) {
+	    *myproto = "auto";
+	}
+
+	if (!strcasecmp("ssl3", *myproto)) {
+#if (HAVE_DECL_SSLV3_CLIENT_METHOD > 0) && (0 == OPENSSL_NO_SSL3 + 0)
+		_ctx[sock] = SSL_CTX_new(SSLv3_client_method());
+		*avoid_ssl_versions &= ~SSL_OP_NO_SSLv3;
+#else
+		report(stderr, GT_("Your OpenSSL version does not support SSLv3.\n"));
+		return -1;
+#endif
+	} else if (!strcasecmp("ssl3+", *myproto)) {
+		*avoid_ssl_versions &= ~SSL_OP_NO_SSLv3;
+		*myproto = NULL;
+	} else if (!strcasecmp("tls1", *myproto)) {
+		_ctx[sock] = SSL_CTX_new(TLSv1_client_method());
+	} else if (!strcasecmp("tls1+", *myproto)) {
+		*myproto = NULL;
+#if defined(TLS1_1_VERSION)
+	} else if (!strcasecmp("tls1.1", *myproto)) {
+		_ctx[sock] = SSL_CTX_new(TLSv1_1_client_method());
+	} else if (!strcasecmp("tls1.1+", *myproto)) {
+		*myproto = NULL;
+		*avoid_ssl_versions |= SSL_OP_NO_TLSv1;
+#else
+	} else if(!strcasecmp("tls1.1",*myproto) || !strcasecmp("tls1.1+", *myproto)) {
+		report(stderr, GT_("Your OpenSSL version does not support TLS v1.1.\n"));
+		return -1;
+#endif
+#if defined(TLS1_2_VERSION)
+	} else if (!strcasecmp("tls1.2", *myproto)) {
+		_ctx[sock] = SSL_CTX_new(TLSv1_2_client_method());
+	} else if (!strcasecmp("tls1.2+", *myproto)) {
+		*myproto = NULL;
+		*avoid_ssl_versions |= SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1;
+#else
+	} else if(!strcasecmp("tls1.2",*myproto) || !strcasecmp("tls1.2+", *myproto)) {
+		report(stderr, GT_("Your OpenSSL version does not support TLS v1.2.\n"));
+		return -1;
+#endif
+	} else if (!strcasecmp("ssl23", *myproto)
+	        || 0 == strcasecmp("auto", *myproto))
+	{
+		*myproto = NULL;
+	} else {
+		report(stderr,
+		        GT_("Invalid SSL protocol '%s' specified, using default autoselect (auto).\n"),
+		        *myproto);
+		*myproto = NULL;
+	}
+	return 0;
+}
+#define OSSL_proto_version_logic(a,b,c) OSSL10X_proto_version_logic((a),(b),(c))
+#else
+/* implementation for OpenSSL 1.1.0 */
+static int OSSL110_proto_version_logic(int sock, const char **myproto,
+        int *avoid_ssl_versions)
+{
+	_ctx[sock] = SSL_CTX_new(TLS_client_method());
+	SSL_CTX_set_min_proto_version(_ctx[sock], TLS1_VERSION);
+
+	if (!*myproto) {
+	    *myproto = "auto";
+	}
+
+	if (!strcasecmp("ssl3", *myproto)) {
+#if (0 == OPENSSL_NO_SSL3 + 0)
+		SSL_CTX_set_min_proto_version(_ctx[sock], SSL3_VERSION);
+		SSL_CTX_set_max_proto_version(_ctx[sock], SSL3_VERSION);
+		*avoid_ssl_versions &= ~SSL_OP_NO_SSLv3;
+#else
+		report(stderr, GT_("Your OpenSSL version does not support SSLv3.\n"));
+		return -1;
+#endif
+	} else if (!strcasecmp("ssl3+", *myproto)) {
+		SSL_CTX_set_min_proto_version(_ctx[sock], SSL3_VERSION);
+		*avoid_ssl_versions &= ~SSL_OP_NO_SSLv3;
+	} else if (!strcasecmp("tls1", *myproto)) {
+		SSL_CTX_set_max_proto_version(_ctx[sock], TLS1_VERSION);
+	} else if (!strcasecmp("tls1+", *myproto)) {
+		/* do nothing, min_proto_version is already at TLS1_VERSION */
+#if defined(TLS1_1_VERSION)
+	} else if (!strcasecmp("tls1.1", *myproto)) {
+		SSL_CTX_set_min_proto_version(_ctx[sock], TLS1_1_VERSION);
+		SSL_CTX_set_max_proto_version(_ctx[sock], TLS1_1_VERSION);
+	} else if (!strcasecmp("tls1.1+", *myproto)) {
+		SSL_CTX_set_min_proto_version(_ctx[sock], TLS1_1_VERSION);
+#else
+	} else if(!strcasecmp("tls1.1",*myproto) || !strcasecmp("tls1.1+", *myproto)) {
+		report(stderr, GT_("Your OpenSSL version does not support TLS v1.1.\n"));
+		return -1;
+#endif
+#if defined(TLS1_2_VERSION)
+	} else if (!strcasecmp("tls1.2", *myproto)) {
+		SSL_CTX_set_min_proto_version(_ctx[sock], TLS1_2_VERSION);
+		SSL_CTX_set_max_proto_version(_ctx[sock], TLS1_2_VERSION);
+	} else if (!strcasecmp("tls1.2+", *myproto)) {
+		SSL_CTX_set_min_proto_version(_ctx[sock], TLS1_2_VERSION);
+		*myproto = NULL;
+#else
+	} else if(!strcasecmp("tls1.2",*myproto) || !strcasecmp("tls1.2+", *myproto)) {
+		report(stderr, GT_("Your OpenSSL version does not support TLS v1.2.\n"));
+		return -1;
+#endif
+	} else if (!strcasecmp("ssl23", *myproto)
+	        || 0 == strcasecmp("auto", *myproto))
+	{
+		/* do nothing */
+	} else {
+		report(stderr,
+		        GT_("Invalid SSL protocol '%s' specified, using default autoselect (auto).\n"),
+		        *myproto);
+	}
+	return 0;
+}
+#define OSSL_proto_version_logic(a,b,c) OSSL110_proto_version_logic((a),(b),(c))
+#endif
+
 /* performs initial SSL handshake over the connected socket
  * uses SSL *ssl global variable, which is currently defined
  * in this file
@@ -876,11 +1017,23 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 {
         struct stat randstat;
         int i;
-	long sslopts = SSL_OP_ALL;
+	int avoid_ssl_versions = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3;
+	long sslopts = SSL_OP_ALL | SSL_OP_SINGLE_DH_USE;
+	int ssle_connect = 0;
+	long ver;
 
 	SSL_load_error_strings();
 	SSL_library_init();
 	OpenSSL_add_all_algorithms(); /* see Debian Bug#576430 and manpage */
+
+	if ((ver = SSLeay()) < OPENSSL_VERSION_NUMBER) {
+	    report(stderr, GT_("Loaded OpenSSL library %#lx older than headers %#lx, refusing to work.\n"), (long)ver, (long)(OPENSSL_VERSION_NUMBER));
+	    return -1;
+	}
+
+	if (ver > OPENSSL_VERSION_NUMBER && outlevel >= O_VERBOSE) {
+	    report(stdout, GT_("Loaded OpenSSL library %#lx newer than headers %#lx, trying to continue.\n"), (long)ver, (long)(OPENSSL_VERSION_NUMBER));
+	}
 
         if (stat("/dev/random", &randstat)  &&
             stat("/dev/urandom", &randstat)) {
@@ -905,30 +1058,22 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 
 	/* Make sure a connection referring to an older context is not left */
 	_ssl_context[sock] = NULL;
-	if(myproto) {
-		if(!strcasecmp("ssl2",myproto)) {
-#if HAVE_DECL_SSLV2_CLIENT_METHOD + 0 > 0
-			_ctx[sock] = SSL_CTX_new(SSLv2_client_method());
-#else
-			report(stderr, GT_("Your operating system does not support SSLv2.\n"));
-			return -1;
-#endif
-		} else if(!strcasecmp("ssl3",myproto)) {
-			_ctx[sock] = SSL_CTX_new(SSLv3_client_method());
-		} else if(!strcasecmp("tls1",myproto)) {
-			_ctx[sock] = SSL_CTX_new(TLSv1_client_method());
-		} else if (!strcasecmp("ssl23",myproto)) {
-			myproto = NULL;
-		} else {
-			report(stderr,GT_("Invalid SSL protocol '%s' specified, using default (SSLv23).\n"), myproto);
-			myproto = NULL;
-		}
+	{
+		int rc = OSSL_proto_version_logic(sock, &myproto, &avoid_ssl_versions);
+		if (rc) return rc;
 	}
-	if(!myproto) {
+	/* do not combine into an else { } as myproto may be nulled above! */
+	if (!myproto) {
+		/* SSLv23 is a misnomer and will in fact use the best
+		 available protocol, subject to SSL_OP_NO* constraints. */
 		_ctx[sock] = SSL_CTX_new(SSLv23_client_method());
 	}
 	if(_ctx[sock] == NULL) {
+		unsigned long ec = ERR_peek_last_error();
 		ERR_print_errors_fp(stderr);
+		if (ERR_GET_REASON(ec) == SSL_R_NULL_SSL_METHOD_PASSED) {
+		    report(stderr, GT_("Note that some distributions disable older protocol versions in weird non-standard ways. Try a newer protocol version.\n"));
+		}
 		return(-1);
 	}
 
@@ -938,7 +1083,7 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 		sslopts &= ~ SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 	}
 
-	SSL_CTX_set_options(_ctx[sock], sslopts);
+	SSL_CTX_set_options(_ctx[sock], sslopts | avoid_ssl_versions);
 
 	if (certck) {
 		SSL_CTX_set_verify(_ctx[sock], SSL_VERIFY_PEER, SSL_ck_verify_callback);
@@ -1008,13 +1153,41 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 	}
 
 	if (SSL_set_fd(_ssl_context[sock], sock) == 0 
-	    || SSL_connect(_ssl_context[sock]) < 1) {
+	    || (ssle_connect = SSL_connect(_ssl_context[sock])) < 1) {
+		int e = errno;
+		unsigned long ssle_err_from_queue = ERR_peek_error();
+		unsigned long ssle_err_from_get_error = SSL_get_error(_ssl_context[sock], ssle_connect);
 		ERR_print_errors_fp(stderr);
+		if (SSL_ERROR_SYSCALL == ssle_err_from_get_error && 0 == ssle_err_from_queue) {
+		    if (0 == ssle_connect) {
+			report(stderr, GT_("Server shut down connection prematurely during SSL_connect().\n"));
+		    } else if (ssle_connect < 0) {
+			report(stderr, GT_("System error during SSL_connect(): %s\n"), strerror(e));
+		    }
+		}
 		SSL_free( _ssl_context[sock] );
 		_ssl_context[sock] = NULL;
 		SSL_CTX_free(_ctx[sock]);
 		_ctx[sock] = NULL;
 		return(-1);
+	}
+
+	if (outlevel >= O_VERBOSE) {
+	    SSL_CIPHER const *sc;
+	    int bitsmax, bitsused;
+
+	    const char *ver;
+
+	    ver = SSL_get_version(_ssl_context[sock]);
+
+	    sc = SSL_get_current_cipher(_ssl_context[sock]);
+	    if (!sc) {
+		report (stderr, GT_("Cannot obtain current SSL/TLS cipher - no session established?\n"));
+	    } else {
+		bitsused = SSL_CIPHER_get_bits(sc, &bitsmax);
+		report(stdout, GT_("SSL/TLS: using protocol %s, cipher %s, %d/%d secret/processed bits\n"),
+			ver, SSL_CIPHER_get_name(sc), bitsused, bitsmax);
+	    }
 	}
 
 	/* Paranoia: was the callback not called as we expected? */

@@ -14,8 +14,8 @@ Impact:		fetchmail can expose cleartext password over unsecure link
 Danger:		medium
 Credits:	Isaac Wilcox (bug report, testing, collaboration on fix)
 CVE Name:	CVE-2006-5867
-URL:		http://fetchmail.berlios.de/fetchmail-SA-2006-02.txt
-Project URL:	http://fetchmail.berlios.de/
+URL:		http://fetchmail.sourceforge.net/fetchmail-SA-2006-02.txt
+Project URL:	http://fetchmail.sourceforge.net/
 
 Affects:	fetchmail releases <= 6.3.5
 		fetchmail release candidates 6.3.6-rc1, -rc2, -rc3
@@ -100,7 +100,7 @@ or equivalent in the run control file.  This encrypts the whole session.
 
 Download and install fetchmail 6.3.7 or a newer stable release from
 fetchmail's project site at
-<http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+<http://sourceforge.net/projects/fetchmail/files/>.
 
 
 5. Acknowledgments
@@ -138,7 +138,7 @@ END OF fetchmail-SA-2006-02.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZVAlACglBU+3L80GdwXRplGD0jLEPYp
-C8QAoJHEGU8xtgurUjt/mYiwz8u85vYY
-=Io6N
+iEYEARECAAYFAlN9DK0ACgkQvmGDOQUufZU41wCfaHJrbV3wTOWIYY6ExBcmboy1
+BC8AoOphRY3GVah+xgHg+mOjIPQ4eXeO
+=wjDV
 -----END PGP SIGNATURE-----

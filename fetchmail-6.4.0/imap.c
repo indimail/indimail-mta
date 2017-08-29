@@ -405,6 +405,8 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 /* apply for connection authorization */
 {
     int ok = 0;
+    char *commonname;
+
     (void)greeting;
 
     /*
@@ -429,25 +431,21 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
         return(PS_SUCCESS);
     }
 
+    commonname = ctl->server.pollname;
+    if (ctl->server.via)
+	commonname = ctl->server.via;
+    if (ctl->sslcommonname)
+	commonname = ctl->sslcommonname;
+
 #ifdef SSL_ENABLE
-    if (maybe_tls(ctl)) {
-	char *commonname;
-
-	commonname = ctl->server.pollname;
-	if (ctl->server.via)
-	    commonname = ctl->server.via;
-	if (ctl->sslcommonname)
-	    commonname = ctl->sslcommonname;
-
-	if (strstr(capabilities, "STARTTLS")
-		|| must_tls(ctl)) /* if TLS is mandatory, ignore capabilities */
+    if (maybe_starttls(ctl)) {
+	if ((strstr(capabilities, "STARTTLS") && maybe_starttls(ctl))
+		|| must_starttls(ctl)) /* if TLS is mandatory, ignore capabilities */
 	{
-	    /* Use "tls1" rather than ctl->sslproto because tls1 is the only
-	     * protocol that will work with STARTTLS.  Don't need to worry
-	     * whether TLS is mandatory or opportunistic unless SSLOpen() fails
-	     * (see below). */
+	    /* Don't need to worry whether TLS is mandatory or
+	     * opportunistic unless SSLOpen() fails (see below). */
 	    if (gen_transact(sock, "STARTTLS") == PS_SUCCESS
-		    && (set_timeout(mytimeout), SSLOpen(sock, ctl->sslcert, ctl->sslkey, "tls1", ctl->sslcertck,
+		    && (set_timeout(mytimeout), SSLOpen(sock, ctl->sslcert, ctl->sslkey, ctl->sslproto, ctl->sslcertck,
 			ctl->sslcertfile, ctl->sslcertpath, ctl->sslfingerprint, commonname,
 			ctl->server.pollname, &ctl->remotename)) != -1)
 	    {
@@ -470,7 +468,7 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 		{
 		    report(stdout, GT_("%s: upgrade to TLS succeeded.\n"), commonname);
 		}
-	    } else if (must_tls(ctl)) {
+	    } else if (must_starttls(ctl)) {
 		/* Config required TLS but we couldn't guarantee it, so we must
 		 * stop. */
 		set_timeout(0);
@@ -491,6 +489,10 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 		}
 		/* Usable.  Proceed with authenticating insecurely. */
 	    }
+	}
+    } else {
+	if (strstr(capabilities, "STARTTLS") && outlevel >= O_VERBOSE) {
+	    report(stdout, GT_("%s: WARNING: server offered STARTTLS but sslproto '' given.\n"), commonname);
 	}
     }
 #endif /* SSL_ENABLE */

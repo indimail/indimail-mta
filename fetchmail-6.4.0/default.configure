@@ -2,7 +2,6 @@
 autoreconf -fiv
 ./configure --prefix=/usr --enable-indimail \
   --sysconfdir=/etc/indimail \
-  --enable-binprefix=/usr \
   --datarootdir=/usr/share/indimail \
   --libexecdir=/usr/libexec/indimail \
   --mandir=/usr/share/man \

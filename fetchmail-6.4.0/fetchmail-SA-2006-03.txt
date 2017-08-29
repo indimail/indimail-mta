@@ -13,8 +13,8 @@ Impact:		fetchmail aborts prematurely
 Danger:		low
 Credits:	Neil Hoggarth (bug report and analysis)
 CVE Name:	CVE-2006-5974
-URL:		http://fetchmail.berlios.de/fetchmail-SA-2006-03.txt
-Project URL:	http://fetchmail.berlios.de/
+URL:		http://fetchmail.sourceforge.net/fetchmail-SA-2006-03.txt
+Project URL:	http://fetchmail.sourceforge.net/
 
 Affects:	fetchmail release = 6.3.5
 		fetchmail release candidates 6.3.6-rc1, -rc2
@@ -63,7 +63,7 @@ Avoid the mda option and ship to a local SMTP or LMTP server instead.
 
 Download and install fetchmail 6.3.6 or a newer stable release from
 fetchmail's project site at
-<http://developer.berlios.de/project/showfiles.php?group_id=1824>.
+<http://sourceforge.net/projects/fetchmail/files/>.
 
 
 
@@ -94,7 +94,7 @@ END OF fetchmail-SA-2006-03.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk9/Yg4ACgkQvmGDOQUufZWnJACgxlN1s2Y3gO/Nap72VG7EaAyV
-PAEAoKChr5sNMsU9k9LJeYvMYOua7IC1
-=Vx/n
+iEYEARECAAYFAlN9DK0ACgkQvmGDOQUufZUF1wCgvRVApGvyCvrXg84xt4SLtHxe
+v34AoObhRk3Q95bukkY2sAMunVkBkV1q
+=IF8k
 -----END PGP SIGNATURE-----

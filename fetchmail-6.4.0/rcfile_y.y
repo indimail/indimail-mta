@@ -362,7 +362,8 @@ user_option	: TO mapping_list HERE
 		| NO MIMEDECODE		{current.mimedecode  = FLAG_FALSE;}
 		| NO IDLE		{current.idle        = FLAG_FALSE;}
 
-		| NO SSL 	        {current.use_ssl     = FLAG_FALSE;}
+		| NO SSL		{current.use_ssl     = FLAG_FALSE;}
+		| NO SSLCERTCK		{current.sslcertck   = FLAG_FALSE;}
 
 		| LIMIT NUMBER		{current.limit       = NUM_VALUE_IN($2);}
 		| WARNINGS NUMBER	{current.warnings    = NUM_VALUE_IN($2);}

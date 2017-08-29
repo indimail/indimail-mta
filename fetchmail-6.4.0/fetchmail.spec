@@ -4,11 +4,11 @@
 %define have_python 1
 
 Name:		fetchmail
-Version:	6.3.26
+Version:	6.4.0.beta2
 Release:	1
 Vendor:		The Community Fetchmail Project
-Packager:	Fetchmail Developers <fetchmail-devel@lists.berlios.de>
-URL:		http://developer.berlios.de/projects/fetchmail
+Packager:	Fetchmail Developers <fetchmail-devel@lists.sourceforge.net>
+URL:		http://sourceforge.net/projects/fetchmail
 Source:		%{name}-%{version}.tar.bz2
 Group:		Applications/Mail
 Group(pt_BR):	Aplicações/Correio Eletrônico
@@ -33,7 +33,7 @@ Summary(tr):	POP2, POP3, APOP, IMAP protokolleri ile uzaktan mektup alma yazıl�
 Summary(vi):	trình nền lấy thư POP/IMAP có tính năng đầy đủ
 BuildRoot: %{_tmppath}/%{name}-root
 #Keywords: mail, client, POP3, APOP, KPOP, IMAP, ETRN, ODMR, SMTP, ESMTP, GSSAPI, RPA, NTLM, CRAM-MD5, SASL
-#Destinations:	fetchmail-users@lists.berlios.de, fetchmail-announce@lists.berlios.de
+#Destinations:	fetchmail-users@lists.sourceforge.net, fetchmail-announce@lists.sourceforge.net
 
 %description
 Fetchmail is a free, full-featured, robust, and well-documented remote
@@ -205,5 +205,5 @@ rm -rf $RPM_BUILD_ROOT %{_builddir}/%name-%version
 %endif
 
 %changelog
-* Tue Apr 23 2013 <fetchmail-devel@lists.berlios.de> 6.3.26
+* Mon Dec 12 2016 <fetchmail-devel@lists.sourceforge.net> 6.4.0.beta2
 - See the project NEWS file for recent changes.
