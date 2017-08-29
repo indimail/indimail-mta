@@ -28,5 +28,6 @@ indimail (@version@-1) unstable; urgency=low
   * smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
   * smtpd.c - initialize proto.len in smtp_init()
   * qmail-showctl - fixed SIGSEGV
+  * upgraded fetchmail to version 6.4.0
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 27 Aug 2017 13:12:52 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 29 Aug 2017 14:12:14 +0530

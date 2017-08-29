@@ -1,5 +1,5 @@
 1.  conf.c - authmeth
-2.  configure.ac - --enable-indimaildir=dir
+2.  configure.ac - --enable-indimail and --enable-binprefix=dir
 3.  fetchmail.c - authmeth
 4.  fetchmailconf.py - authmeth
 5.  fetchmail.h - authmeth
@@ -10,12 +10,8 @@
 9.  rcfile_y.y - authmeth
 10. rcfile_l.l - authmeth
 11. smtp.c
-12. Makefile.am
 
-10. rcfile_y.c - authmeth
-11. rcfile_y.h - authmeth
-
-Checklist for Adding Options
+                          Checklist for Adding Options
 
    Adding a control option is not complicated in principle, but there are
    a lot of fiddly details in the process. You'll need to do the following

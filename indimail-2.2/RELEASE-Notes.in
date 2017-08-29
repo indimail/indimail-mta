@@ -4,6 +4,25 @@ DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz, RPMs and debs.
 
+Following are the main features of this release
+
+o OpenSSL 1.1.0 ready
+o svscanboot/svscan option run .svscan/run or INITCMD. This can be used to run
+  unshare --mount option and mount private mounts like custom resolv.conf
+o svscan - added ability to run a custom shutdown command on svscan shutdown
+o added inotify program to get file system events
+o added resolvconf service for a custom /etc/resolv.conf
+o qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes.
+  SMTPROUTES takes precendence over X-SMTPROUTES. This allows emails to be routed
+  using X-SMTPROUTES in email header.
+o use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to
+  configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
+o refactored dns_text() function in libdkim, surblfilter.c, dns_text.c, dns.c
+o Upgraded courier-imap to 4.18.0 for openssl 1.1.0
+o Upgraded fetchmail to version 6.4.0
+o Updated defaults.inc.php for roundcube 1.3
+o qmail-smtpd, qmail-remote - improved logging of TLS method errors
+
 
 This release includes the following files
 
@@ -107,3 +126,4 @@ Release 2.2 Start 08/05/2017
 25. smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
 26. smtpd.c - initialize proto.len in smtp_init()
 27. qmail-showctl - fixed SIGSEGV
+28. upgraded fetchmail to version 6.4.0

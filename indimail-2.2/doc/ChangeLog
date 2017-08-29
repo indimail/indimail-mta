@@ -49,6 +49,8 @@ Release 2.2 Start 08/05/2017
 25. smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
 26. smtpd.c - initialize proto.len in smtp_init()
 27. qmail-showctl - fixed SIGSEGV
+29/08/2017
+28. upgraded fetchmail to version 6.4.0
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.1 Start 16/03/2017
