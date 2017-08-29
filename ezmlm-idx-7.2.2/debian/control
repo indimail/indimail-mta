@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Manvendra Bhangui <manvendra@indimail.org>
 Standards-Version: 3.9.1
 Homepage: http://indimail.sourceforge.net/
-Build-Depends: debhelper (>= 4.1.16), libmysqlclient-dev, libpq-dev, libsqlite3-dev
+Build-Depends: debhelper (>= 4.1.16), libpq-dev, libsqlite3-dev
 
 Package: ezmlm-idx
 Architecture: any
