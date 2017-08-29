@@ -1,5 +1,7 @@
 #!/bin/sh
+if [ $# -eq 0 ] ; then
 autoreconf -fi
+fi
 ./configure --prefix=/usr \
   --mandir=/usr/share/man \
   --libexecdir=/usr/libexec/indimail --sysconfdir=/etc/indimail \

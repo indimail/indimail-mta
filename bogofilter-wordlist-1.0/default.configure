@@ -3,5 +3,7 @@ if [ ! -d m4 ] ; then
 mkdir m4
 fi
 ./download.sh
+if [ $# -eq 0 ] ; then
 autoreconf -fi
+fi
 ./configure --prefix=/usr --sysconfdir=/etc/indimail

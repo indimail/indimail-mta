@@ -1,3 +1,5 @@
 #!/bin/sh
+if [ $# -eq 0 ] ; then
 autoreconf -fi
+fi
 ./configure --prefix=/usr --enable-mysqlprefix=/usr --enable-moduledir=/lib/security --enable-default-domain=`uname -n`

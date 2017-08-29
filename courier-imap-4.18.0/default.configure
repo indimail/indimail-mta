@@ -1,5 +1,7 @@
 #!/bin/sh
+if [ $# -eq 0 ] ; then
 autoreconf -fiv
+fi
 ./configure --prefix=/usr --disable-root-check --bindir=/usr/bin \
         --with-redhat \
         --mandir=/usr/share/man \
@@ -10,3 +12,6 @@ autoreconf -fiv
         --without-authchangepwdir \
         --without-authpam --without-authcustom \
         --without-authpwd --with-authshadow
+if [ ! -f depcomp ] ; then
+	cp libs/unicode/depcomp .
+fi
