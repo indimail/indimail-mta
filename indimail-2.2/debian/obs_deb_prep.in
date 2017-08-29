@@ -77,7 +77,7 @@ do
 		echo "no source archive for $i"
 		exit 1
 	fi
-	# skip bogofilter and fetchmail patch for obs
+	# skip bogofilter, fetchmail, courier-imap patch for obs
 	if [ " $i" = " bogofilter-"$bogofilter_version"" -o " $i" = " fetchmail-"$fetchmail_version"" ] ; then
 		continue
 	fi
@@ -92,30 +92,17 @@ do
 			continue
 		fi
 	fi
-	# courier-imap patch
-	if [ " $i" = " courier-imap-"$courier_version"" ] ; then
-		if [ -f ../SOURCES/$i.patch.gz ] ; then
-			echo "applying patch for $i"
-			gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
-			continue
-		fi
+	# apply from the obs directory
+	if [ -f ../SOURCES/$i.patch.gz ] ; then
+		echo "applying patch for $i"
+		gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
+		continue
+	elif [ -f ../SOURCES/$i.patch ] ; then
+		echo "applying patch for $i"
+		patch -p0 < ../SOURCES/$i.patch > /dev/null
+		continue
 	fi
-	# clamav patch
-	if [ " $i" = " clamav-"$clamav_version"" ] ; then
-		if [ -f ../SOURCES/$i.patch.gz ] ; then
-			echo "applying patch for $i"
-			gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
-			continue
-		fi
-	fi
-	# qmail patch
-	if [ " $i" = " qmail-1.03" ] ; then
-		if [ -f ../SOURCES/$i.patch.gz ] ; then
-			echo "applying patch for $i"
-			gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
-			continue
-		fi
-	fi
+	# apply patch from indimail-x/patches subdir
 	if [ -f indimail-"$version"/patches/$i.patch.gz ] ; then
 		echo "applying patch for $i"
 		gunzip -c indimail-"$version"/patches/$i.patch.gz | patch -p0 > /dev/null
