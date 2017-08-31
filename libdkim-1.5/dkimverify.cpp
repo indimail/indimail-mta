@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.15  2017-08-31 17:04:34+05:30  Cprogrammer
+ * replaced d2i_PUBKEY() with dkimd2i_PUBKEY() to avoid SIGSEGV on X509_PUBKEY_free()
+ *
  * Revision 1.14  2017-08-09 21:59:39+05:30  Cprogrammer
  * fixed segmentation fault. Use EVP_MD_CTX_reset() instead of EVP_MD_CTX_free()
  *
@@ -442,7 +445,7 @@ int
 CDKIMVerify::GetResults(int *sCount, int *sSize)
 {
 	ProcessFinal();
-	int             SuccessCount = 0;
+	unsigned int    SuccessCount = 0;
 	int             TestingFailures = 0;
 	int             RealFailures = 0;
 	list <string>   SuccessfulDomains;	// can contain duplicates
@@ -1030,7 +1033,7 @@ CDKIMVerify::ProcessBody(char *szBuffer, int nBufLength, bool bEOF)
 	return DKIM_SUCCESS;
 }
 
-SelectorInfo::SelectorInfo(const string & sSelector, const string & sDomain):Selector(sSelector), Domain(sDomain)
+SelectorInfo::SelectorInfo(const string &sSelector, const string &sDomain):Selector(sSelector), Domain(sDomain)
 {
 	AllowSHA1 = true;
 #ifdef HAVE_EVP_SHA256
@@ -1049,6 +1052,18 @@ SelectorInfo::SelectorInfo(const string & sSelector, const string & sDomain):Sel
 	}
 }
 
+EVP_PKEY *dkimd2i_PUBKEY(const unsigned char **pp,
+	     long length)
+{
+	X509_PUBKEY *xpk;
+	EVP_PKEY *pktmp;
+
+	if (!(xpk = d2i_X509_PUBKEY(NULL, pp, length)))
+		return NULL;
+	if (!(pktmp = X509_PUBKEY_get0(xpk)))
+		return NULL;
+	return pktmp;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // 
@@ -1070,7 +1085,7 @@ SelectorInfo::Parse(char *Buffer)
 		if (strcmp(values[0], "DKIM1") != 0)
 			return DKIM_SELECTOR_INVALID;	// todo: maybe create a new error code for unsupported selector version
 		// make sure v= is the first tag in the response    // todo: maybe don't enforce this, it seems unnecessary
-		for (int j = 1; j < sizeof (values) / sizeof (values[0]); j++) {
+		for (unsigned int j = 1; j < sizeof (values) / sizeof (values[0]); j++) {
 			if (values[j] != NULL && values[j] < values[0]) {
 				return DKIM_SELECTOR_INVALID;
 			}
@@ -1146,23 +1161,27 @@ SelectorInfo::Parse(char *Buffer)
 			s = strtok_r(NULL, ":", &saveptr);
 		}
 	}
-	// public key data
+#define M_ToConstUCharPtr(p)       reinterpret_cast<const unsigned char*>(p)          // Cast to unsigned char*
+	/*- public key data */
 	unsigned        PublicKeyLen = DecodeBase64(values[4]);
-	if (PublicKeyLen == 0) {
+	if (PublicKeyLen == 0)
 		return DKIM_SELECTOR_KEY_REVOKED;	// this error causes the signature to fail
-	} else {
+	else {
+		EVP_PKEY       *pkey;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-		int            rtype;
+		int             rtype;
 #endif
-		unsigned char *PublicKeyData = (unsigned char *) values[4];
+		const unsigned char  *qq; /*- public key data */
+
+		qq = M_ToConstUCharPtr(values[4]);
 #ifdef DARWIN
-		EVP_PKEY       *pkey = d2i_PUBKEY(NULL, (unsigned char **) &PublicKeyData, PublicKeyLen);
+		pkey = d2i_PUBKEY(NULL, (unsigned char **) &qq, PublicKeyLen);
 #else
-		EVP_PKEY       *pkey = d2i_PUBKEY(NULL, (const unsigned char **) &PublicKeyData, PublicKeyLen);
+		pkey = dkimd2i_PUBKEY(&qq, PublicKeyLen);
 #endif
-		if (pkey == NULL)
+		if (!pkey)
 			return DKIM_SELECTOR_PUBLIC_KEY_INVALID;
-		// make sure public key is the correct type (we only support rsa)
+		/*- make sure public key is the correct type (we only support rsa) */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		rtype = EVP_PKEY_base_id(pkey);
 		if (rtype == EVP_PKEY_RSA || rtype == EVP_PKEY_RSA2)
@@ -1262,7 +1281,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.14 2017-08-09 21:59:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.15 2017-08-31 17:04:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
