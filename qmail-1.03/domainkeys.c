@@ -1,5 +1,8 @@
 /*
  * $Log: domainkeys.c,v $
+ * Revision 1.20  2017-08-31 10:36:07+05:30  Cprogrammer
+ * added missing call to EVP_MD_CTX_new()
+ *
  * Revision 1.19  2017-08-09 22:07:51+05:30  Cprogrammer
  * initialize EVP_MD_CTX variable
  *
@@ -614,6 +617,17 @@ dk_verify(DK_LIB *dklib, DK_STAT *statp)
 			*statp = DKERR(DK_STAT_NORESOURCE);
 		return NULL;
 	}
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	if (!(dk->mdctx = EVP_MD_CTX_new())) {
+		DK_MFREE(dk);
+		if (statp)
+			*statp = DKERR(DK_STAT_NORESOURCE);
+		return NULL;
+	}
+	evptr = dk->mdctx;
+#else
+	evptr = &dk->mdctx;
+#endif
 	EVP_VerifyInit(evptr, dklib->md);
 	if (statp)
 		*statp = DKERR(DK_STAT_OK);
@@ -2110,7 +2124,7 @@ strncasestr(const char *s, const char *find, size_t slen)
 void
 getversion_domainkeys_c()
 {
-	static char    *x = "$Id: domainkeys.c,v 1.19 2017-08-09 22:07:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: domainkeys.c,v 1.20 2017-08-31 10:36:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
