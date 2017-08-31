@@ -42,4 +42,3 @@ libtool: $(LIBTOOL_DEPS)
 install-data-local:
 	$(mkinstalldirs)  $(DESTDIR)@libdir@
 	$(mkinstalldirs)  $(DESTDIR)@prefix@/include/indimail
-#	$(CXX) $(DEFS) -c dkim.c
