@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.7  2017-08-31 17:07:45+05:30  Cprogrammer
+ * fixed g++ compiler warning
+ *
  * Revision 1.6  2017-08-09 22:03:46+05:30  Cprogrammer
  * initialized EVP_MD_CTX variables
  *
@@ -84,7 +87,7 @@ public:
 	unsigned        HeaderCanonicalization;
 	unsigned        BodyCanonicalization;
 	time_t          ExpireTime;
-	unsigned        VerifiedBodyCount;
+	int             VerifiedBodyCount;
 	unsigned        UnverifiedBodyCount;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX     *m_Hdr_ctx = NULL;
