@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.9  2017-09-01 12:46:27+05:30  Cprogrammer
+ * fixed double free() of dnresult
+ *
  * Revision 1.8  2017-08-09 22:06:33+05:30  Cprogrammer
  * fixed resolve() function
  *
@@ -287,26 +290,30 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 	results = dns_text((char *) domain);
 	if (!strcmp(results, "e=perm;")) {
 		free(results);
+		dnresultlen = 0;
 		return DNSRESP_PERM_FAIL;
 	} else
 	if (!strcmp(results, "e=temp;")) {
 		free(results);
+		dnresultlen = 0;
 		return DNSRESP_TEMP_FAIL;
 	}
 	if ((len = strlen(results)) > maxlen - 1) {
 		free(results);
+		dnresultlen = 0;
 		return DNSRESP_DOMAIN_NAME_TOO_LONG;
 	}
 	byte_copy(buffer, len, results);
 	buffer[len] = 0;
 	free(results);
+	dnresultlen = 0;
 	return DNSRESP_SUCCESS;
 }
 
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.8 2017-08-09 22:06:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.9 2017-09-01 12:46:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
