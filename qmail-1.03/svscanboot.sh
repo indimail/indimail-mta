@@ -1,9 +1,12 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.18  2017-09-01 14:24:20+05:30  Cprogrammer
+# skip envdir if .svscan/variables directory is missing
+#
 # Revision 1.17  2017-05-11 15:49:45+05:30  Cprogrammer
 # removed RCS log.
 #
 #
-# $Id: svscanboot.sh,v 1.17 2017-05-11 15:49:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.18 2017-09-01 14:24:20+05:30 Cprogrammer Exp mbhangui $
 
 PATH=PREFIX/bin:/bin:/usr/local/bin:PREFIX/sbin:/sbin
 
@@ -36,12 +39,21 @@ if [ $# -eq 0 -o $# -eq 1 ] ; then
 	fi
 	PREFIX/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
 	if [ $use_readproctitle -eq 1 ] ; then
+		if [ -d $VARIABLES ] ; then
 		exec $MOUNT_CMD envdir $VARIABLES \
 			PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
 			PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
+		else
+		exec $MOUNT_CMD PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
+			PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
+		fi
 	else
+		if [ -d $VARIABLES ] ; then
 		exec $MOUNT_CMD envdir $VARIABLES \
 			PREFIX/sbin/svscan $SERVICEDIR
+		else
+		exec $MOUNT_CMD PREFIX/sbin/svscan $SERVICEDIR
+		fi
 	fi
 else
 	for i in $*
@@ -63,12 +75,21 @@ else
 			MOUNT_CMD=""
 		fi
 		if [ $use_readproctitle -eq 1 ] ; then
+			if [ -d $VARIABLES ] ; then
 			eval $MOUNT_CMD envdir $VARIABLES \
 				PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
 				PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
+			else
+			eval $MOUNT_CMD PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
+				PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
+			fi
 		else
+			if [ -d $VARIABLES ] ; then
 			eval $MOUNT_CMD envdir $VARIABLES \
 				PREFIX/sbin/svscan $SERVICEDIR &
+			else
+			eval $MOUNT_CMD PREFIX/sbin/svscan $SERVICEDIR &
+			fi
 		fi
 	done
 	if [ -d /var/lock/subsys ] ; then
