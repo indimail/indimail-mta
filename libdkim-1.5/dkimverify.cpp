@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.16  2017-09-01 12:46:05+05:30  Cprogrammer
+ * removed dkimd2i_PUBKEY function
+ *
  * Revision 1.15  2017-08-31 17:04:34+05:30  Cprogrammer
  * replaced d2i_PUBKEY() with dkimd2i_PUBKEY() to avoid SIGSEGV on X509_PUBKEY_free()
  *
@@ -1052,19 +1055,6 @@ SelectorInfo::SelectorInfo(const string &sSelector, const string &sDomain):Selec
 	}
 }
 
-EVP_PKEY *dkimd2i_PUBKEY(const unsigned char **pp,
-	     long length)
-{
-	X509_PUBKEY *xpk;
-	EVP_PKEY *pktmp;
-
-	if (!(xpk = d2i_X509_PUBKEY(NULL, pp, length)))
-		return NULL;
-	if (!(pktmp = X509_PUBKEY_get0(xpk)))
-		return NULL;
-	return pktmp;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // 
 // Parse - Parse a DKIM selector
@@ -1177,7 +1167,7 @@ SelectorInfo::Parse(char *Buffer)
 #ifdef DARWIN
 		pkey = d2i_PUBKEY(NULL, (unsigned char **) &qq, PublicKeyLen);
 #else
-		pkey = dkimd2i_PUBKEY(&qq, PublicKeyLen);
+		pkey = d2i_PUBKEY(NULL, &qq, PublicKeyLen);
 #endif
 		if (!pkey)
 			return DKIM_SELECTOR_PUBLIC_KEY_INVALID;
@@ -1281,7 +1271,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.15 2017-08-31 17:04:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.16 2017-09-01 12:46:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
