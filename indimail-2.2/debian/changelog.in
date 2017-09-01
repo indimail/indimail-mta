@@ -29,5 +29,7 @@ indimail (@version@-1) unstable; urgency=low
   * smtpd.c - initialize proto.len in smtp_init()
   * qmail-showctl - fixed SIGSEGV
   * upgraded fetchmail to version 6.4.0
+  * libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
+  * skip envdir if .svscan/variables directory is missing
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 29 Aug 2017 14:12:14 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 01 Sep 2017 14:26:45 +0530
