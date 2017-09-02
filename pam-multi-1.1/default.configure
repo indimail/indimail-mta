@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ $# -eq 0 ] ; then
-autoreconf -fi
+if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
+autoreconf -fiv
 fi
 ./configure --prefix=/usr --enable-mysqlprefix=/usr --enable-moduledir=/lib/security --enable-default-domain=`uname -n`

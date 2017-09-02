@@ -110,13 +110,6 @@ obs_deb_prep
 obs.mk
 osh
 overquota.sh
-patches/courier-imap-3.0.8.patch.gz
-patches/courier-imap-4.8.2.patch.gz
-patches/courier-imap-4.9.1.patch.gz
-patches/courier-imap-4.9.2.patch.gz
-patches/fetchmail-6.3.9.patch.gz
-patches/qmail-1.03.patch.gz
-patches/ucspi-tcp-0.88.patch.gz
 perm_list
 postdel
 printdir
@@ -200,7 +193,6 @@ vuserinfo
 autom4te.cache
 *.la
 .libs
-patches
 README.vmware
 aclocal.m4
 cdb-1.0/aclocal.m4

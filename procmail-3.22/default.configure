@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ $# -eq 0 ] ; then
+if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
 autoreconf -fiv
 fi
 ./configure --prefix=/usr --enable-sendmail-prog=/usr/bin/sendmail \
