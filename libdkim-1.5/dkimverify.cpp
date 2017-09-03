@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.17  2017-09-03 14:02:04+05:30  Cprogrammer
+ * call EVP_MD_CTX_init() only once
+ *
  * Revision 1.16  2017-09-01 12:46:05+05:30  Cprogrammer
  * removed dkimd2i_PUBKEY function
  *
@@ -89,12 +92,14 @@ SignatureInfo::SignatureInfo(bool s)
 	VerifiedBodyCount = 0;
 	UnverifiedBodyCount = 0;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	if (!m_Hdr_ctx)
+	if (m_Hdr_ctx)
+		EVP_MD_CTX_init(m_Hdr_ctx);
+	else
 		m_Hdr_ctx = EVP_MD_CTX_new();
-	EVP_MD_CTX_init(m_Hdr_ctx);
-	if (!m_Bdy_ctx)
+	if (m_Bdy_ctx)
+		EVP_MD_CTX_init(m_Bdy_ctx);
+	else
 		m_Bdy_ctx = EVP_MD_CTX_new();
-	EVP_MD_CTX_init(m_Bdy_ctx);
 #else
 	EVP_MD_CTX_init(&m_Hdr_ctx);
 	EVP_MD_CTX_init(&m_Bdy_ctx);
@@ -1271,7 +1276,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.16 2017-09-01 12:46:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.17 2017-09-03 14:02:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
