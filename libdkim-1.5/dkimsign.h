@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.4  2017-09-05 10:59:20+05:30  Cprogrammer
+ * removed compiler warnings
+ *
  * Revision 1.3  2017-08-09 22:03:09+05:30  Cprogrammer
  * initialized EVP_MD_CTX variables
  *
@@ -40,7 +43,7 @@ public:
 	CDKIMSign();
 	~CDKIMSign();
 	int             Init(DKIMSignOptions * pOptions);
-	int             GetSig(char *szPrivKey, char *szSignature, int nSigLength);
+	int             GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLength);
 	int             GetSig2(char *szPrivKey, char **pszSignature);
 	virtual int     ProcessHeaders(void);
 	virtual int     ProcessBody(char *szBuffer, int nBufLength, bool bEOF);
