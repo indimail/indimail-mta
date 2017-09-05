@@ -41,6 +41,7 @@ case "$host" in
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
 	STRIP_OPT=-s
 	;;
 *-*-solaris*)
@@ -48,6 +49,7 @@ case "$host" in
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
 	STRIP_OPT=-s
 	;;
 *-*-linux*)
@@ -55,6 +57,7 @@ case "$host" in
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
 	STRIP_OPT=-s
 	;;
 *-*-darwin*)
@@ -62,12 +65,14 @@ case "$host" in
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
 	CFLAGS="$CFLAGS -O4 -Wall -pie"
+	CXXFLAGS="$CXXFLAGS -DDARWIN -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
 	STRIP_OPT=-S
 	;;
 *)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
 	STRIP_OPT=-s
 	;;
 esac
