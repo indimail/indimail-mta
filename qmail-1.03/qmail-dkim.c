@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.48  2017-09-05 12:37:16+05:30  Cprogrammer
+ * added missing DKIM_MFREE()
+ *
  * Revision 1.47  2016-06-03 09:57:59+05:30  Cprogrammer
  * moved qmail-multi to sbin
  *
@@ -468,7 +471,7 @@ write_signature(char *domain, char *keyfn)
 }
 
 #include <openssl/evp.h>
-#define DKIM_MALLOC(s)     OPENSSL_malloc(s)
+#define DKIM_MALLOC(n)     OPENSSL_malloc(n)
 #define DKIM_MFREE(s)      OPENSSL_free(s); s = NULL;
 char           *dns_text(char *);
 
@@ -607,14 +610,15 @@ checkADSP(char *domain)
 	if (!str_diff(results, "e=perm;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_SCOPE;
-	}
-	else
+	} else
 	if (!str_diff(results, "e=temp;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_TEMPFAIL;
 	}
-	if (!(query = DKIM_MALLOC(str_len("_adsp._domainkey.") + str_len(domain) + 1)))
+	if (!(query = DKIM_MALLOC(str_len("_adsp._domainkey.") + str_len(domain) + 1))) {
+		DKIM_MFREE(results);
 		die(51, 0);
+	}
 	sprintf(query, "_adsp._domainkey.%s", domain);
 	results = dns_text(query);
 	DKIM_MFREE(query);
@@ -1408,7 +1412,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.47 2016-06-03 09:57:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.48 2017-09-05 12:37:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
