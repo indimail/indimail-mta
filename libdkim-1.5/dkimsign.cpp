@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.11  2017-09-05 10:59:03+05:30  Cprogrammer
+ * removed compiler warnings
+ *
  * Revision 1.10  2017-08-09 22:02:13+05:30  Cprogrammer
  * replaced EVP_MD_CTX_free() with EVP_MD_CTX_reset()
  *
@@ -556,7 +559,7 @@ void CDKIMSign::AddTagToSig(char *Tag, const string & sValue, char cbrk, bool bF
 void CDKIMSign::AddTagToSig(char *Tag, unsigned long nValue)
 {
 	char            szValue[64];
-	sprintf(szValue, "%u", nValue);
+	sprintf(szValue, "%lu", nValue);
 	AddTagToSig(Tag, szValue, 0, false);
 }
 
@@ -644,7 +647,7 @@ void CDKIMSign::AddFoldedValueToSig(const string & sValue, char cbrk)
 // GetSig - compute hash and return signature header in szSignature
 //
 ////////////////////////////////////////////////////////////////////////////////
-int CDKIMSign::GetSig(char *szPrivKey, char *szSignature, int nSigLength)
+int CDKIMSign::GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLength)
 {
 	if (szPrivKey == NULL) {
 		return DKIM_BAD_PRIVATE_KEY;
@@ -723,7 +726,7 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 	EVP_PKEY       *pkey;
 	BIO            *bio, *b64;
 	unsigned int    siglen;
-	int             size, len, pos = 0;
+	int             size, len;
 	char           *buf, *cptr; 
 	const char     *ptr, *dptr, *sptr;
 	EVP_MD_CTX     *p1, *p2, *p3, *p4, *p5;
@@ -832,7 +835,7 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 		}
 		BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
 		BIO_push(b64, bio);
-		if (BIO_write(b64, Hash, nHashLen) < nHashLen) {
+		if (BIO_write(b64, Hash, nHashLen) < (int) nHashLen) {
 			BIO_free_all(b64);
 			return DKIM_OUT_OF_MEMORY;
 		}
@@ -912,7 +915,7 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 	}
 	BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
 	BIO_push(b64, bio);
-	if (BIO_write(b64, sig, siglen) < siglen) {
+	if (BIO_write(b64, sig, siglen) < (int) siglen) {
 		OPENSSL_free(sig);
 		BIO_free_all(b64);
 		return DKIM_OUT_OF_MEMORY;
@@ -1007,7 +1010,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.10 2017-08-09 22:02:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.11 2017-09-05 10:59:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
