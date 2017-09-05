@@ -129,3 +129,6 @@ Release 2.2 Start 08/05/2017
 28. upgraded fetchmail to version 6.4.0
 29. libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
 30. skip envdir if .svscan/variables directory is missing
+31. libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
+32. libdkim - removed compiler warnings
+33. qmail-dkim - added missing DKIM_MFREE

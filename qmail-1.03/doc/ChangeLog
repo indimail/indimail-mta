@@ -44,3 +44,6 @@ Release 2.2 Start 08/05/2017
 01/09/2017
 24. libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
 25. skip envdir if .svscan/variables directory is missing
+26. libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
+27. libdkim - removed compiler warnings
+28. qmail-dkim - added missing DKIM_MFREE

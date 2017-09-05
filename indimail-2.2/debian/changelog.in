@@ -31,5 +31,8 @@ indimail (@version@-1) unstable; urgency=low
   * upgraded fetchmail to version 6.4.0
   * libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
   * skip envdir if .svscan/variables directory is missing
+  * libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
+  * libdkim - removed compiler warnings
+  * qmail-dkim - added missing DKIM_MFREE
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 01 Sep 2017 14:26:45 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 05 Sep 2017 11:12:03 +0530
