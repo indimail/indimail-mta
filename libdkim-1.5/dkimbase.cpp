@@ -1,5 +1,8 @@
 /*
  * $Log: dkimbase.cpp,v $
+ * Revision 1.4  2017-09-05 10:58:26+05:30  Cprogrammer
+ * removed compiler warnings
+ *
  * Revision 1.3  2009-03-26 15:10:32+05:30  Cprogrammer
  * fixed indentation
  *
@@ -305,17 +308,17 @@ string CDKIMBase::RelaxHeader(const string &sHeader)
 
 	CompressSWSP(sTemp);
 
-	unsigned cpos = sTemp.find(':');
+	int cpos = sTemp.find(':');
 	if (cpos == -1) {
 	// no colon?!
 	} else {
 	// lower case the header field name
-		for (unsigned i = 0; i < cpos; i++) {
+		for (int i = 0; i < cpos; i++) {
 			if (sTemp[i] >= 'A' && sTemp[i] <= 'Z')
 				sTemp[i] += 'a' - 'A';
 		}
 	// remove the space after the :
-		if (cpos + 1 < sTemp.length() && sTemp[cpos + 1] == ' ')
+		if ((unsigned int) (cpos + 1) < sTemp.length() && sTemp[cpos + 1] == ' ')
 			sTemp.erase(cpos + 1, 1);
 	// remove the space before the :
 		if (cpos > 0 && sTemp[cpos - 1] == ' ')
@@ -327,7 +330,7 @@ string CDKIMBase::RelaxHeader(const string &sHeader)
 void
 getversion_dkimbase_cpp()
 {
-	static char    *x = (char *) "$Id: dkimbase.cpp,v 1.3 2009-03-26 15:10:32+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = (char *) "$Id: dkimbase.cpp,v 1.4 2017-09-05 10:58:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
