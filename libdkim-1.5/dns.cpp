@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.10  2017-09-05 11:01:06+05:30  Cprogrammer
+ * removed unused variables
+ *
  * Revision 1.9  2017-09-01 12:46:27+05:30  Cprogrammer
  * fixed double free() of dnresult
  *
@@ -193,7 +196,7 @@ static int      dnresultlen;
 static int
 dns_txtplus(char *domain)
 {
-	int             r, len, total, newlen;
+	int             r, len, total;
 	char           *ptr;
 
 	switch (resolve(domain, T_TXT))
@@ -313,7 +316,7 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.9 2017-09-01 12:46:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.10 2017-09-05 11:01:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
