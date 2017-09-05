@@ -2321,7 +2321,7 @@ dktest.8: dktest.9 conf-sysconfdir
 	> dktest.8
 
 dkim.lib: \
-trydkim.c str_len.o str_cpy.o byte_copy.o dns_text.o compile load conf-dkim dns.lib
+trydkim.c str_len.o str_cpy.o byte_copy.o dns_text.o compile conf-dkim dns.lib
 	( ( ./compile -I../libdkim-$(DKIM_VERSION) \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o str_len.o str_cpy.o byte_copy.o dns_text.o \
