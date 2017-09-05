@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.18  2017-09-05 11:00:33+05:30  Cprogrammer
+ * removed extra whitespace
+ *
  * Revision 1.17  2017-09-03 14:02:04+05:30  Cprogrammer
  * call EVP_MD_CTX_init() only once
  *
@@ -641,10 +644,10 @@ CDKIMVerify::ProcessHeaders(void)
 		return DKIM_NO_SIGNATURES;
 	bool            ValidSigFound = false;
 	for (list < SignatureInfo >::iterator s = Signatures.begin(); s != Signatures.end(); ++s) {
-		SignatureInfo & sig = *s;
+		SignatureInfo &sig = *s;
 		if (sig.Status != DKIM_SUCCESS)
 			continue;
-		SelectorInfo & sel = GetSelector(sig.Selector, sig.Domain);
+		SelectorInfo &sel = GetSelector(sig.Selector, sig.Domain);
 		sig.m_pSelector = &sel;
 		if (sel.Status != DKIM_SUCCESS) {
 			sig.Status = sel.Status;
@@ -797,7 +800,7 @@ ParseUnsigned(const char *s, unsigned long *result)
 
 // ParseDKIMSignature - Parse a DKIM-Signature header field
 int
-CDKIMVerify::ParseDKIMSignature(const string & sHeader, SignatureInfo & sig)
+CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 {
 
 	// save header for later
@@ -1193,7 +1196,7 @@ SelectorInfo::Parse(char *Buffer)
 }
 
 // GetSelector - Get a DKIM selector for a domain
-SelectorInfo & CDKIMVerify::GetSelector(const string & sSelector, const string & sDomain)
+SelectorInfo &CDKIMVerify::GetSelector(const string &sSelector, const string &sDomain)
 {
 
 	// see if we already have this selector
@@ -1203,7 +1206,7 @@ SelectorInfo & CDKIMVerify::GetSelector(const string & sSelector, const string &
 		}
 	}
 	Selectors.push_back(SelectorInfo(sSelector, sDomain));
-	SelectorInfo & sel = Selectors.back();
+	SelectorInfo &sel = Selectors.back();
 	string sFQDN = sSelector;
 	sFQDN += "._domainkey.";
 	sFQDN += sDomain;
@@ -1276,7 +1279,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.17 2017-09-03 14:02:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.18 2017-09-05 11:00:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
