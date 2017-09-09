@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.106 2017-09-02 15:37:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.107 2017-09-09 11:47:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1419,8 +1419,12 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscan
 %attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
+%attr(755,root,qmail)                   %{_prefix}/sbin/svctool
 
 %attr(555,root,qmail)                   %{libexecdir}/svscanboot
+
+%attr(444,root,qmail)                   %{shareddir}/boot/upstart
+%attr(444,root,qmail)                   %{shareddir}/boot/systemd
 
 %if %fedorareview == 0
 %docdir %{mandir}
@@ -1454,6 +1458,7 @@ done
 %attr(0644,root,qmail)                  %{mandir}/man8/tai64nunix.8.gz
 %attr(0644,root,qmail)                  %{mandir}/man8/logselect.8.gz
 %attr(0644,root,qmail)                  %{mandir}/man8/svscanboot.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/svctool.8.gz
 
 %files -n ucspi-tcp
 %attr(555,root,qmail)                   %{_prefix}/bin/tcpserver
