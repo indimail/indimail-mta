@@ -50,7 +50,8 @@ clean:
 
 noinst_SCRIPTS = indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				 indimail-mta.postinst indimail-mta.install daemontools.install \
-				 daemontools.preinst ucspi-tcp.install rules obs_deb_prep
+				 daemontools.preinst daemontools.postinst daemontools.prerm daemontools.postrm \
+				 ucspi-tcp.install rules obs_deb_prep
 MOSTLYCLEANFILES= indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				  indimail-mta.postinst rules obs_deb_prep changelog \
 				  debian.tar.gz dummy.tar.gz
@@ -74,8 +75,10 @@ indimail-mta.preinst: indimail-mta.preinst.in
 
 debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
 indimail-mta.postrm rules changelog compat obs_deb_prep control perm_list usr.bin.freshclam \
-usr.sbin.clamd daemontools.install daemontools.preinst ucspi-tcp.install indimail-mta.install
+usr.sbin.clamd daemontools.install daemontools.preinst daemontools.postinst daemontools.prerm \
+daemontools.postrm ucspi-tcp.install indimail-mta.install
 	tar cf - copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
 		indimail-mta.postrm rules changelog compat obs_deb_prep ucspi-tcp.install \
-		daemontools.install daemontools.preinst control perm_list usr.bin.freshclam usr.sbin.clamd \
+		daemontools.install daemontools.preinst daemontools.postinst daemontools.prerm \
+		daemontools.postrm control perm_list usr.bin.freshclam usr.sbin.clamd \
 		indimail-mta.install | gzip > $@
