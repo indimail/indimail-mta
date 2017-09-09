@@ -137,5 +137,13 @@ if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
 	${rm} -f /tmp/daemontools.upgrade
 	exit 0
 fi
+${rm} -f /tmp/daemontools.install
+
+SERVICE_LIST="."
+export SERVICE_LIST
+${prefix}/sbin/svctool --config=add-boot
+if [ -x /bin/systemctl ] ; then
+  /bin/systemctl enable indimail.service
+fi
 
 exit 0

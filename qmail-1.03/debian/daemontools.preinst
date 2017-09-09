@@ -25,10 +25,8 @@ case "$1" in
 	${rm} -f /tmp/daemontools.install /tmp/daemontools.upgrade
 	touch /tmp/daemontools.$1
 	if [ -f ${libexecdir}/upgrade.sh ] ; then
-	(
 		echo "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/upgrade.sh pre $1 2.2 $* || true
-	) >> /tmp/daemontools-setup.log 2>&1
 	fi
 	if [ " $1" = " upgrade" ] ; then
 		exit 0
@@ -43,7 +41,6 @@ case "$1" in
 	# Create a users and groups. Do not report any problems if they already
 	# exists.
 	#
-	(
 	echo "Adding IndiMail users/groups"
 	/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
 	if [ $nscd_up -ge 1 ] ; then
@@ -51,7 +48,6 @@ case "$1" in
 			/etc/init.d/nscd start
 		fi
 	fi
-	) > /tmp/daemontools-setup.log 2>&1
 	;;
 
     abort-upgrade)
