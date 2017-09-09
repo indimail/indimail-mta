@@ -47,3 +47,5 @@ Release 2.2 Start 08/05/2017
 26. libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
 27. libdkim - removed compiler warnings
 28. qmail-dkim - added missing DKIM_MFREE
+09/09/2017
+29. indimail-mta, added svctool, systemctl unit file for daemontools package

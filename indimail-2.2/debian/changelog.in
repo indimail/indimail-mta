@@ -34,5 +34,6 @@ indimail (@version@-1) unstable; urgency=low
   * libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
   * libdkim - removed compiler warnings
   * qmail-dkim - added missing DKIM_MFREE
+  * indimail-mta, added svctool, systemctl unit file for daemontools package
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 05 Sep 2017 11:12:03 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 09 Sep 2017 11:45:58 +0530
