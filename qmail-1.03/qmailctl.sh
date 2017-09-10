@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop indimail
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.52 2017-05-15 13:29:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.53 2017-09-10 13:08:59+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -19,6 +19,8 @@ SERVICE=/service
 #
 if [ -f /etc/lsb-release -o -f /etc/debian_version ] ; then
 	SYSTEM=Debian
+elif [ -f /etc/SuSE-release ] ; then
+	SYSTEM=SuSE
 else
 	SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
 fi
@@ -28,7 +30,7 @@ else
 	ECHO=echo
 fi
 case "$SYSTEM" in
-	DARWIN*|Debian)
+	DARWIN*|Debian|SuSE)
 		RES_COL=60
 		MOVE_TO_COL="$ECHO -en \\033[${RES_COL}G"
 		SETCOLOR_SUCCESS="$ECHO -en \\033[1;32m"
@@ -111,7 +113,7 @@ case "$SYSTEM" in
 	succ=mysuccess
 	fail=myfailure
 	;;
-	Debian)
+	Debian|SuSE)
 	succ=mysuccess
 	fail=myfailure
 	;;
