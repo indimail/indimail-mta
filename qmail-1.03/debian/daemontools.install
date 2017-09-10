@@ -15,6 +15,7 @@ usr/bin/tai64nlocal /usr/bin
 usr/bin/tai2tai64n /usr/bin
 usr/bin/tai64n2tai /usr/bin
 usr/bin/tai64nunix /usr/bin
+usr/bin/qmailctl /usr/bin
 usr/libexec/indimail/leapsecs /usr/libexec/indimail
 usr/libexec/indimail/nowutc /usr/libexec/indimail
 usr/libexec/indimail/yearcal /usr/libexec/indimail
@@ -61,3 +62,4 @@ usr/share/man/man8/tai64nunix.8.gz /usr/share/man/man8
 usr/share/man/man8/logselect.8.gz /usr/share/man/man8
 usr/share/man/man8/svscanboot.8.gz /usr/share/man/man8
 usr/share/man/man8/svctool.8.gz /usr/share/man/man8
+usr/share/man/man8/qmailctl.8.gz /usr/share/man/man8
