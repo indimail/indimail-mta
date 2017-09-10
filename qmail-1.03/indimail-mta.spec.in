@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.108 2017-09-09 19:14:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.109 2017-09-10 13:08:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1386,6 +1386,15 @@ done
 #
 # Directories
 #
+%if %{undefined suse_version} && %{undefined sles_version}
+%ghost %dir                             %{logdir}
+%ghost %dir                             %{logdir}/*
+%ghost                                  %{logdir}/*/*
+%endif
+
+%dir %attr(555,root,root)               %{libexecdir}
+%dir %attr(555,root,qmail)              %{shareddir}
+%dir %attr(555,root,qmail)              %{shareddir}/boot
 %dir %attr(555,root,qmail)              %{shareddir}/doc
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)               %{mandir}
@@ -1417,6 +1426,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/multitail
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
 %attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
+%attr(755,root,qmail)                   %{_prefix}/bin/qmailctl
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscan
 %attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
 %attr(755,root,qmail)                   %{_prefix}/sbin/svctool
@@ -1459,6 +1469,7 @@ done
 %attr(0644,root,qmail)                  %{mandir}/man8/logselect.8.gz
 %attr(0644,root,qmail)                  %{mandir}/man8/svscanboot.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svctool.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/qmailctl.8.gz
 
 %files -n ucspi-tcp
 %attr(555,root,qmail)                   %{_prefix}/bin/tcpserver
@@ -2259,12 +2270,23 @@ fi
 
 ### SCRIPTLET ###############################################################################
 %pre -n daemontools
-/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
+/usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
+/usr/bin/getent group  qmail    > /dev/null || /usr/sbin/groupadd qmail    || true
+/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir} -s /sbin/nologin qmaill || true
 
 ### SCRIPTLET ###############################################################################
 %post -n daemontools
+echo "Creating %{logdir}"
+if [ ! -d %{logdir} ] ; then
+  %{__mkdir_p} %{logdir}
+fi
+%{__chown} -R qmaill:nofiles %{logdir}
 echo "adding indimail startup"
+SERVICE_LIST="."
+export SERVICE_LIST
 %{_prefix}/sbin/svctool --config=add-boot
+# svscanlog service
+%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir} --scanint=60
 
 ### SCRIPTLET ###############################################################################
 %preun -n daemontools
@@ -2327,6 +2349,8 @@ fi
 
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
+SERVICE_LIST="."
+export SERVICE_LIST
 %{_prefix}/sbin/svctool --config=rm-boot
 ) >> /tmp/daemontools-setup.log 2>&1
 
@@ -2340,17 +2364,14 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-  (
   if [ -f %{libexecdir}/upgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
     /bin/sh %{libexecdir}/upgrade.sh postun upgrade @version@ $*
   fi
-  ) >> /tmp/daemontools-setup.log
   echo "recreating ld.so cache"
   /sbin/ldconfig
   exit 0
 fi
-(
 # remove users / groups
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
@@ -2358,8 +2379,14 @@ if [ $nscd_up -ge 1 ] ; then
     %{_sysconfdir}/init.d/nscd stop
   fi
 fi
-echo "Removing group qmail"
-/usr/bin/getent group qmail > /dev/null && /usr/sbin/groupdel qmail  >/dev/null || true
+echo "Removing user qmaill"
+/usr/bin/getent passwd qmaill > /dev/null && /usr/sbin/userdel qmaill >/dev/null || true
+
+for i in qmail nofiles
+do
+  echo "Removing group $i"
+  /usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
+done
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
