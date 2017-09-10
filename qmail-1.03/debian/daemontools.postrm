@@ -59,12 +59,6 @@ esac
 #DEBHELPER#
 
 # we are doing upgrade or removal
-if [ " $1" = " upgrade" ] ; then
-	echo "recreating ld.so cache"
-	/sbin/ldconfig
-	exit 0
-fi
-
 case "$1" in
     failed-upgrade|abort-install|abort-upgrade|disappear)
 	exit 0
@@ -80,17 +74,17 @@ if [ " $1" = " purge" ] ; then
 			/etc/init.d/nscd stop
 		fi
 	fi
-	(
-	echo "removing group qmail"
-	/usr/bin/getent group qmail > /dev/null && /usr/sbin/groupdel qmail  >/dev/null || true
+	echo "removing user qmaill"
+	/usr/bin/getent passwd qmaill > /dev/null && /usr/sbin/userdel qmaill >/dev/null || true
+	for i in nofiles qmail
+	do
+		echo "removing group $i"
+		/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
+	done
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
 		fi
 	fi
-	) >> /tmp/daemontools-setup.log 2>&1
-else
-	echo "recreating ld.so cache"
-	/sbin/ldconfig
 fi
 exit 0

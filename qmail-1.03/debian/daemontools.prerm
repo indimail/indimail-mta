@@ -90,7 +90,7 @@ if [ -s ${qsysconfdir}/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
-SERVICE_LIST="sendmail exim4 mysql"
+SERVICE_LIST="."
 export SERVICE_LIST
-$prefix/sbin/svctool --config=rm-boot
+$prefix/sbin/svctool --config=rm-boot >/dev/null || true
 exit 0
