@@ -702,20 +702,15 @@ str.h scan.h dns.h dnsdoe.h ip.h exit.h conf-spf
 	./compile `grep -h -v "^#" conf-spf` dnsptr.c
 
 dnstxt: \
-load dnstxt.o dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-case_diffb.o case_diffs.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
-dns_text.o dktrace.o domainkeys.o stralloc.a alloc.a \
-substdio.a error.a str.a fs.a dns.lib socket.lib
-	./load dnstxt dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-	case_diffb.o case_diffs.o scan_xlong.o socket_v4mappedprefix.o \
-	socket_v6any.o dns_text.o dktrace.o domainkeys.o stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a `cat dns.lib socket.lib` -lcrypto
+load dnstxt.o dns_text.o fmt_ulong.o substdio.a stralloc.a \
+alloc.a str.a error.a
+	./load dnstxt dns_text.o fmt_ulong.o substdio.a stralloc.a \
+	alloc.a str.a error.a `cat dns.lib socket.lib` -lcrypto
 
 dnstxt.o: \
 compile dnstxt.c substdio.h subfd.h strsalloc.h stralloc.h gen_alloc.h \
-str.h scan.h dns.h dnsdoe.h ip.h exit.h fmt.h conf-spf
-	./compile `grep -h -v "^#" conf-spf conf-domainkeys` dnstxt.c
-
+str.h scan.h dns.h dnsdoe.h ip.h exit.h fmt.h
+	./compile dnstxt.c
 
 dot-qmail.0: \
 dot-qmail.5
