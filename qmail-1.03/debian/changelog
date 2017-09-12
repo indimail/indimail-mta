@@ -30,4 +30,4 @@ indimail-mta (2.2-1) unstable; urgency=low
   * qmail-dkim - added missing DKIM_MFREE
   * indimail-mta, added svctool, systemctl unit file for daemontools package
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 09 Sep 2017 11:45:58 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 12 Sep 2017 10:47:32 +0530

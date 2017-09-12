@@ -35,5 +35,6 @@ indimail (@version@-1) unstable; urgency=low
   * libdkim - removed compiler warnings
   * qmail-dkim - added missing DKIM_MFREE
   * indimail-mta, added svctool, systemctl unit file for daemontools package
+  * fixed svctool for daemontools add-boot command
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 09 Sep 2017 11:45:58 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 12 Sep 2017 10:47:32 +0530

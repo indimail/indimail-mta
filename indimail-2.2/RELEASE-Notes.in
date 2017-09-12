@@ -133,3 +133,4 @@ Release 2.2 Start 08/05/2017
 32. libdkim - removed compiler warnings
 33. qmail-dkim - added missing DKIM_MFREE
 34. indimail-mta, added svctool, systemctl unit file for daemontools package
+35. fixed svctool for daemontools add-boot command

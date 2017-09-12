@@ -1,5 +1,5 @@
 File INSTALL.indimail, Version 2.2
-DATE: Thu Aug 31 17:12:18 IST 2017
+DATE: Sat Sep  9 20:52:03 IST 2017
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -370,7 +370,7 @@ the installation.
     http://forge.mysql.com/wiki/Autotools_to_CMake_Transition_Guide
 
     ##### STEP 2  ##### Install libdkim-1.5 ###################
-    Install libdkim-1.5 (libdkim-1.5.tar.bz2) MD5 6d1f5b53ed9726e030d8d237cea750c2
+    Install libdkim-1.5 (libdkim-1.5.tar.bz2) MD5 bbf3ec94370ee0ac6ad8796811ec2f8e
     current working directory /home/local/src
     Download the libdkim package. The latest tested libdkim package is
     libdkim-1.5.tar.bz2
