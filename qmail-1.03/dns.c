@@ -1,7 +1,7 @@
 /*
  * $Log: dns.c,v $
  * Revision 1.31  2017-05-16 12:30:52+05:30  Cprogrammer
- * refactored dns_text() code
+ * refactored dns_txt() code
  *
  * Revision 1.30  2017-05-10 14:59:19+05:30  Cprogrammer
  * increase responselen to 1024 for long text records
