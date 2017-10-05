@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cdb.c,v $
+ * Revision 1.8  2017-10-05 08:46:33+05:30  Cprogrammer
+ * fixed wrong control filename display in error message
+ *
  * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -43,19 +46,19 @@
 int             rename(const char *, const char *);
 
 void
-die_read()
+die_read(char *s)
 {
 	if(!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-	strerr_die4sys(111, FATAL, "unable to read ", controldir, "/morercpthosts: ");
+	strerr_die6sys(111, FATAL, "unable to read ", controldir, "/", s, ": ");
 }
 
 void
-die_write()
+die_write(char *s)
 {
 	if(!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-	strerr_die4sys(111, FATAL, "unable to write to ", controldir, "/morercpthosts.tmp: ");
+	strerr_die6sys(111, FATAL, "unable to write to ", controldir, "/", s, ": ");
 }
 
 int
@@ -101,7 +104,7 @@ main(int argc, char **argv)
 	} else
 		return(0);
 	if((fd = open_read(controlfile2.s)) == -1)
-		die_read();
+		die_read(controlfile2.s);
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
 	controlfile1.len--;
 	if (!stralloc_cats(&controlfile1, ".tmp"))
@@ -109,13 +112,13 @@ main(int argc, char **argv)
 	if (!stralloc_0(&controlfile1))
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	if((fdtemp = open_trunc(controlfile1.s)) == -1)
-		die_write();
+		die_write(controlfile1.s);
 	if (cdbmss_start(&cdbmss, fdtemp) == -1)
-		die_write();
+		die_write(controlfile1.s);
 	for (;;)
 	{
 		if (getln(&ssin, &line, &match, '\n') != 0)
-			die_read();
+			die_read(controlfile2.s);
 		case_lowerb(line.s, line.len);
 		while (line.len)
 		{
@@ -136,18 +139,18 @@ main(int argc, char **argv)
 			}
 			if (line.s[0] != '#')
 				if (cdbmss_add(&cdbmss, (unsigned char *) line.s, line.len, (unsigned char *) "", 0) == -1)
-					die_write();
+					die_write(controlfile1.s);
 			break;
 		}
 		if (!match)
 			break;
 	}
 	if (cdbmss_finish(&cdbmss) == -1)
-		die_write();
+		die_write(controlfile1.s);
 	if (fsync(fdtemp) == -1)
-		die_write();
+		die_write(controlfile1.s);
 	if (close(fdtemp) == -1)
-		die_write();/*- NFS stupidity */
+		die_write(controlfile1.s); /*- NFS stupidity */
 
 	if (!stralloc_copys(&controlfile2, controldir))
 		strerr_die2sys(111, FATAL, "out of memory: ");
@@ -167,7 +170,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	static char    *x = "$Id: qmail-cdb.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-cdb.c,v 1.8 2017-10-05 08:46:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
