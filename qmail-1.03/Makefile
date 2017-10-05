@@ -2603,7 +2603,7 @@ wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
 base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o greylist.o \
-auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
+auto_break.o auto_control.o auto_assign.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so smtpd.o rcpthosts.o \
@@ -2613,13 +2613,13 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
-	wait.a datetime.a greylist.o auto_break.o auto_control.o \
+	wait.a datetime.a greylist.o auto_break.o auto_control.o auto_assign.o \
 	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so smtpd.o rcpthosts.o \
-	recipients.o commands.o timeoutread.o auto_control.o \
+	recipients.o commands.o timeoutread.o auto_control.o auto_assign.o \
 	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
@@ -2638,7 +2638,7 @@ received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a auto_cont
 wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
-base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o greylist.o \
+base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o greylist.o auto_assign.o \
 auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
@@ -2647,7 +2647,7 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
-	wait.a datetime.a greylist.o auto_break.o auto_control.o \
+	wait.a datetime.a greylist.o auto_break.o auto_control.o auto_assign.o \
 	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib` -ldl
@@ -2701,6 +2701,7 @@ qmail-smtpd.9 conf-qmail conf-sysconfdir conf-prefix
 	cat qmail-smtpd.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-smtpd.8
 
@@ -2938,7 +2939,7 @@ auto_control.h
 recipients.o: \
 compile recipients.c cdb.h uint32.h byte.h open.h error.h control.h \
 constmap.h stralloc.h gen_alloc.h recipients.h case.h str.h \
-sig.h wait.h substdio.h fd.h auto_break.h
+sig.h wait.h substdio.h fd.h auto_break.h env.h auto_assign.h
 	./compile recipients.c
 
 readsubdir.o: \
