@@ -36,5 +36,7 @@ indimail (@version@-1) unstable; urgency=low
   * qmail-dkim - added missing DKIM_MFREE
   * indimail-mta, added svctool, systemctl unit file for daemontools package
   * fixed svctool for daemontools add-boot command
+  * qmail-cdb.c - fixed wrong control filename display in error message
+  * recipients.c use users/recipients instead of control/recipients
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 12 Sep 2017 10:47:32 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 05 Oct 2017 08:48:43 +0530
