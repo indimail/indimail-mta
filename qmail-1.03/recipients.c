@@ -1,5 +1,8 @@
 /*
  * $Log: recipients.c,v $
+ * Revision 1.8  2017-10-05 08:51:20+05:30  Cprogrammer
+ * use /etc/indimail/users/recipients instead of /etc/indimail/control/recipients
+ *
  * Revision 1.7  2011-01-14 22:19:52+05:30  Cprogrammer
  * upgrade to verion 0.7 of EH's recipients extension
  *
@@ -25,6 +28,7 @@
 #include <unistd.h>
 #include "cdb.h"
 #include "auto_break.h"
+#include "auto_assign.h"
 #include "case.h"
 #include "uint32.h"
 #include "byte.h"
@@ -39,6 +43,7 @@
 #include "wait.h"
 #include "substdio.h"
 #include "fd.h"
+#include "env.h"
 
 static stralloc key = { 0 };
 static stralloc domain = { 0 };
@@ -177,7 +182,19 @@ callapam(pam, addr)
 int
 recipients_init()
 {
-	flagrcpts = control_readfile(&rcptline, "recipients", 0);
+	static stralloc controlfile = {0};
+	char           *assigndir;
+
+	assigndir = (assigndir = env_get("ASSIGNDIR")) ? assigndir : auto_assign;
+	if (!stralloc_copys(&controlfile, assigndir))
+		return(-1);
+	if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
+		return(-1);
+	if (!stralloc_catb(&controlfile, "recipients", 10))
+		return(-1);
+	if (!stralloc_0(&controlfile))
+		return(-1);
+	flagrcpts = control_readfile(&rcptline, controlfile.s, 0);
 	if (flagrcpts != 1)
 		return flagrcpts;
 	return 0;
@@ -353,7 +370,7 @@ recipients(buf, len)
 void
 getversion_recipients_c()
 {
-	static char    *x = "$Id: recipients.c,v 1.7 2011-01-14 22:19:52+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: recipients.c,v 1.8 2017-10-05 08:51:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
