@@ -104,7 +104,9 @@ To use the cdb format, the control files should be converted to cdb using
 .BR qmail-cdb
 and have a .cdb extension. To have the control files in MySQL, you should have the control file
 with a .sql extension and a colon separated list of paramaters for connecting to MySQL
-specified in the file. The parameters are as given below.
+specified in the file. If the files are present in all the 3 formats, cdb file will be used.
+
+The parameters are as given below.
 
 .BR db_server_ip:db_user:db_password:db_name:table_name .
 
