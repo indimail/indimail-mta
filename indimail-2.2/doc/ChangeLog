@@ -64,6 +64,8 @@ Release 2.2 Start 08/05/2017
 05/10/2017
 36. qmail-cdb.c - fixed wrong control filename display in error message
 37. recipients.c use users/recipients instead of control/recipients
+11/10/2017
+38. renamed systemd unit file indimail.service to svscan.service
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.1 Start 16/03/2017

@@ -646,7 +646,7 @@ SERVICE_LIST="sendmail exim4 mysql"
 export SERVICE_LIST
 ${prefix}/sbin/svctool --config=add-boot
 if [ -x /bin/systemctl ] ; then
-	/bin/systemctl enable indimail.service
+	/bin/systemctl enable svscan.service
 fi
 
 if [ -f ${sysconfdir}/cronlist ] ; then
@@ -670,8 +670,8 @@ fi
 if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
-elif [ -f /etc/systemd/system/multi-user.target.wants/indimail.service ] ; then
-	echo "1. Issue /bin/systemctl start indimail.service to start services"
+elif [ -f /etc/systemd/system/multi-user.target.wants/svscan.service ] ; then
+	echo "1. Issue /bin/systemctl start svscan to start services"
 	count=1
 else
 	echo "1. Issue ${prefix}/sbin/initsvc -on"

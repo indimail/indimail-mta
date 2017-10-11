@@ -136,3 +136,4 @@ Release 2.2 Start 08/05/2017
 35. fixed svctool for daemontools add-boot command
 36. qmail-cdb.c - fixed wrong control filename display in error message
 37. recipients.c use users/recipients instead of control/recipients
+38. renamed systemd unit file indimail.service to svscan.service

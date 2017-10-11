@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.24  2017-10-11 10:46:50+05:30  Cprogrammer
+ * renamed systemd unit file indimail.service to svscan.service
+ *
  * Revision 2.23  2017-01-04 21:46:51+05:30  Cprogrammer
  * remove indimail.service for -off argument
  *
@@ -81,7 +84,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.23 2017-01-04 21:46:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.24 2017-10-11 10:46:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -115,8 +118,8 @@ systemd_control(char *operation)
 		fprintf(stderr, "initsvc: fork: %s\n", strerror(errno));
 		return (1);
 	case 0:
-		execl("/bin/systemctl", "systemctl", operation, "indimail.service", (char *) 0);
-		fprintf(stderr, "systemctl %s indimail.service: %s\n", operation, strerror(errno));
+		execl("/bin/systemctl", "systemctl", operation, "svscan.service", (char *) 0);
+		fprintf(stderr, "systemctl %s svscan.service: %s\n", operation, strerror(errno));
 	default:
 		if ((pid = wait(&wStat)) == -1)
 		{
@@ -132,8 +135,8 @@ systemd_control(char *operation)
 			if (!(status = WEXITSTATUS(wStat))) {
 				if (!strncmp(operation, "status", 6)) {
 					if (!(pid = fork())) {
-						execl("/bin/systemctl", "systemctl", cmd, "indimail.service", (char *) 0);
-						fprintf(stderr, "systemctl %s indimail.service: %s\n", cmd, strerror(errno));
+						execl("/bin/systemctl", "systemctl", cmd, "svscan.service", (char *) 0);
+						fprintf(stderr, "systemctl %s svscan.service: %s\n", cmd, strerror(errno));
 					} else
 					if (pid == -1)
 						return (1);
@@ -151,15 +154,15 @@ systemd_control(char *operation)
 					else
 						return (-1);
 				} else {
-					execl("/bin/systemctl", "systemctl", cmd, "indimail.service", (char *) 0);
-					fprintf(stderr, "systemctl %s indimail.service: %s\n", cmd, strerror(errno));
+					execl("/bin/systemctl", "systemctl", cmd, "svscan.service", (char *) 0);
+					fprintf(stderr, "systemctl %s svscan.service: %s\n", cmd, strerror(errno));
 					return (1);
 				}
 			} else {
 				if (!strncmp(operation, "status", 6)) {
 					if (!(pid = fork())) {
-						execl("/bin/systemctl", "systemctl", cmd, "indimail.service", (char *) 0);
-						fprintf(stderr, "systemctl %s indimail.service: %s\n", cmd, strerror(errno));
+						execl("/bin/systemctl", "systemctl", cmd, "svscan.service", (char *) 0);
+						fprintf(stderr, "systemctl %s svscan.service: %s\n", cmd, strerror(errno));
 					} else
 					if (pid == -1)
 						return (1);
@@ -229,21 +232,21 @@ main(int argc, char **argv)
 	getEnvConfigStr(&libexecdir, "LIBEXECDIR", LIBEXECDIR);
 	if (!access("/bin/systemctl", X_OK))
 	{
-		/* Install indimail.service */
-		if (access("/lib/systemd/system/indimail.service", F_OK))
+		/* Install svscan.service */
+		if (access("/lib/systemd/system/svscan.service", F_OK))
 		{
 			if (flag == SV_OFF)
 				return (0);
-			printf("Installing indimail.service\n");
+			printf("Installing svscan.service\n");
 			if (chdir(SHAREDDIR) || chdir("boot"))
 			{
 				fprintf(stderr, "chdir %s/boot: %s\n", SHAREDDIR, strerror(errno));
 				return (1);
 			} else
-			if (fappend("systemd", "/lib/systemd/system/indimail.service", "w", 0644, 0, getgid()))
+			if (fappend("systemd", "/lib/systemd/system/svscan.service", "w", 0644, 0, getgid()))
 			{
 				fprintf(stderr, "fappend %s %s: %s\n", "systemd", 
-					"/lib/systemd/system/indimail.service", strerror(errno));
+					"/lib/systemd/system/svscan.service", strerror(errno));
 				return (1);
 			}
 		}
@@ -253,19 +256,19 @@ main(int argc, char **argv)
 				return (systemd_control("enable"));
 				break;
 			case SV_OFF:
-				unlink("/lib/systemd/system/indimail.service");
+				unlink("/lib/systemd/system/svscan.service");
 				return (systemd_control("disable"));
 				break;
 			case SV_STAT:
-				printf("indimail.service is %s\n", systemd_control("status") ? "disabled" : "enabled");
+				printf("svscan.service is %s\n", systemd_control("status") ? "disabled" : "enabled");
 				fflush(stdout);
 				execl("/bin/sh", "sh", "-c",
-					"/bin/ls -l /lib/systemd/system/indimail.service", (char *) 0);
-				perror("/bin/systemctl status indimail.service");
+					"/bin/ls -l /lib/systemd/system/svscan.service", (char *) 0);
+				perror("/bin/systemctl status svscan.service");
 				break;
 			case SV_PRINT:
 				execl("/bin/sh", "sh", "-c",
-				"/bin/cat /lib/systemd/system/indimail.service;/bin/ls -l /lib/systemd/system/indimail.service",
+				"/bin/cat /lib/systemd/system/svscan.service;/bin/ls -l /lib/systemd/system/svscan.service",
 				(char *) 0);
 				perror("/bin/ls");
 				break;

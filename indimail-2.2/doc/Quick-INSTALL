@@ -48,7 +48,7 @@
     or
    # service indimail start
     or
-   # systemctl start indimail.service
+   # systemctl start indimail
     or
    # /etc/init.d/indimail start
    # exit

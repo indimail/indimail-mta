@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.420 2017-08-29 14:27:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.421 2017-10-11 10:43:26+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2318,10 +2318,10 @@ if [ -d %{_prefix} -a -d /service ] ; then
       then
         echo "Giving IndiMail exactly 5 seconds to exit nicely"
         /sbin/initctl emit qmailstop > /dev/null 2>&1
-      elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
+      elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
       then
         echo "Giving IndiMail exactly 5 seconds to exit nicely"
-        /bin/systemctl stop indimail.service > /dev/null 2>&1
+        /bin/systemctl stop indimail > /dev/null 2>&1
       elif test -x %{_prefix}/sbin/initsvc
       then
         echo "Giving IndiMail exactly 5 seconds to exit nicely"
@@ -2924,14 +2924,14 @@ if [ -f %{libexecdir}/upgrade.sh ] ; then
 fi
 
 if [ -x /bin/systemctl ] ; then
-  /bin/systemctl enable indimail.service
+  /bin/systemctl enable svscan.service
 fi
 ) >> /tmp/indimail-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
   echo "1. Issue /sbin/initctl emit qmailstart to start services"
   count=1
-elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service ] ; then
-  echo "1. Issue /bin/systemctl start indimail.service to start services"
+elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service ] ; then
+  echo "1. Issue /bin/systemctl start indimail to start services"
   count=1
 else
   echo "1. Issue %{_prefix}/sbin/initsvc -on"
@@ -2991,10 +2991,10 @@ if [ -f %{_prefix}/bin/svok ] ; then
     then
       echo "Giving IndiMail exactly 5 seconds to exit nicely"
       /sbin/initctl emit qmailstop > /dev/null 2>&1
-    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
+    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
     then
       echo "Giving IndiMail exactly 5 seconds to exit nicely"
-      /bin/systemctl stop indimail.service > /dev/null 2>&1
+      /bin/systemctl stop indimail > /dev/null 2>&1
     elif test -x %{_prefix}/sbin/initsvc
     then
       echo "Giving IndiMail exactly 5 seconds to exit nicely"

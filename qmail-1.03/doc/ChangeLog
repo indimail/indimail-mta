@@ -51,3 +51,4 @@ Release 2.2 Start 08/05/2017
 29. indimail-mta, added svctool, systemctl unit file for daemontools package
 30. qmail-cdb.c - fixed wrong control filename display in error message
 31. recipients.c use users/recipients instead of control/recipients
+32. renamed systemd unit file indimail.service to svscan.service

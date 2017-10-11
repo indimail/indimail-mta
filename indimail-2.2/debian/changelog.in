@@ -1,4 +1,4 @@
-indimail (@version@-1) unstable; urgency=low
+indimail (@version@-2) unstable; urgency=low
 
   * indiversion.c - Fixed authindi path
   * use packetsize > 512 to avoid dkim failures for sites having long txt records (hotmail.com)
@@ -38,5 +38,6 @@ indimail (@version@-1) unstable; urgency=low
   * fixed svctool for daemontools add-boot command
   * qmail-cdb.c - fixed wrong control filename display in error message
   * recipients.c use users/recipients instead of control/recipients
+  * renamed systemd unit file indimail.service to svscan.service
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 05 Oct 2017 08:48:43 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 11 Oct 2017 10:51:35 +0530

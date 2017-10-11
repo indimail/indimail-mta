@@ -148,7 +148,7 @@ SERVICE_LIST="."
 export SERVICE_LIST
 ${prefix}/sbin/svctool --config=add-boot
 if [ -x /bin/systemctl ] ; then
-  /bin/systemctl enable indimail.service
+  /bin/systemctl enable svscan.service
 fi
 # svscanlog service
 ${prefix}/sbin/svctool --svscanlog --servicedir=${servicedir} --scanint=60 > /dev/null || true

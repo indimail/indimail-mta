@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop indimail
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.53 2017-09-10 13:08:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.54 2017-10-11 10:53:24+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -78,7 +78,7 @@ myfailure() {
 # Check that we're a privileged user
 [ `id -u` = 0 ] || exit 4
 if [ -x /bin/systemctl ] ; then
-	/bin/systemctl is-enabled indimail.service > /dev/null
+	/bin/systemctl is-enabled svscan > /dev/null
 	if [ $? -ne 0 ] ; then
 		SYSTEMCTL_SKIP_REDIRECT=1
 		if [ -f /etc/rc.d/init.d/functions ] ; then
