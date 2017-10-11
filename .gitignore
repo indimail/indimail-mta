@@ -9,3 +9,4 @@ dist
 COMMIT_ID
 VERSION
 patches
+cscope.*
