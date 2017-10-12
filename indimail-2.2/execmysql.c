@@ -1,5 +1,8 @@
 /*
  * $Log: execmysql.c,v $
+ * Revision 2.9  2017-10-12 13:11:20+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 2.8  2011-11-09 19:44:09+05:30  Cprogrammer
  * removed getversion
  *
@@ -28,7 +31,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: execmysql.c,v 2.8 2011-11-09 19:44:09+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: execmysql.c,v 2.9 2017-10-12 13:11:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
