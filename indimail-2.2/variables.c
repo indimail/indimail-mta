@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.57  2017-10-12 13:26:24+05:30  Cprogrammer
+ * removed indiversion
+ *
  * Revision 2.56  2017-03-13 14:11:43+05:30  Cprogrammer
  * replaced INDIMAILDIR with PREFIX
  *
@@ -216,7 +219,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.56 2017-03-13 14:11:43+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.57 2017-10-12 13:26:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -366,7 +369,6 @@ ADMINCOMMAND adminCommands[] = {
 	{PREFIX"/bin/vrenameuser", "Rename a user"},
 	{PREFIX"/bin/crc", "Calculate Checksums of files/directories"},
 	{PREFIX"/bin/vcfilter", "Create Filters"},
-	{PREFIX"/bin/indiversion", "List out Version Numbers for IndiMail Components"},
 	{PREFIX"/bin/vsmtp", "Add/Modify/Delete SMTP Routes"},
 	{PREFIX"/bin/dbinfo", "Add/Modify/Delete Mail Control Defination"},
 	{PREFIX"/bin/vhostid", "Add/Modify/Delete Host IDs"},
