@@ -2,7 +2,7 @@
 int
 main()
 {
-	getversion(0);
+	vclose(0);
 	return(0);
 }
 #else
