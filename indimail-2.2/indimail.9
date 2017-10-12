@@ -534,6 +534,17 @@ SMTP_PLUGIN_SYMB   |qmail-smtpd  |used    |The function to be called after loadi
                    |             |        |SMTP plugins. Default is 'plugin_init'
 DISABLE_PLUGIN     |qmail-smtpd  |used    |If set, loading of SMTP plugin is
                    |             |        |disabled
+-------------------|-------------|--------|----------------------------------------
+PLUGINn            |tcpserver    |used    |Here n is 0, 1, 2, ...
+PLUGINn_dir        |             |        |You can preload shared objects in tcpserver
+PLUGINn_init       |             |        |by using PLUGINn variable. PLUGIN_DIR,
+                   |             |        |and PLUGIN_init variable can be used
+                   |             |        |to modify the cwd and a function to be
+                   |             |        |called for initializatoin purposes
+                   |             |        |Note: This feature should be used
+                   |             |        |when you specifiy this plugins instead
+                   |             |        |of executables on the command line
+-------------------|-------------|--------|----------------------------------------
 DISABLE_AUTH_LOGIN |qmail-smtpd  |        |Disable AUTH Login method
                    |qmail-remote |        |
 DISABLE_AUTH_PLAIN |qmail-smtpd  |        |Disable AUTH Login method
