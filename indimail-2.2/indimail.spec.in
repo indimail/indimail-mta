@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.424 2017-10-12 13:43:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.425 2017-10-12 14:14:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2451,7 +2451,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/upgrade.sh post upgrade @version@ $*
   fi
-  if [ -d /etc/init.d/indimail ] ; then
+  if [ -f /etc/init.d/indimail ] ; then
     cmp -s %{_prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1
     if [ $? -ne 0 ] ; then
       %{__cp} %{_prefix}/bin/qmailctl /etc/init.d/indimail

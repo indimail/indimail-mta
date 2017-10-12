@@ -143,7 +143,7 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh ${libexecdir}/upgrade.sh post upgrade @version@ $* || true
   fi
-  if [ -d /etc/init.d/indimail ] ; then
+  if [ -f /etc/init.d/indimail ] ; then
     cmp -s ${prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1 || true
     if [ $? -ne 0 ] ; then
       ${cp} ${prefix}/bin/qmailctl /etc/init.d/indimail
