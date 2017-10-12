@@ -882,7 +882,7 @@ install -m 644 %{S:17} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissi
 
 if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-  for i in dbinfo flash hostcntrl indiversion printdir \
+  for i in dbinfo flash hostcntrl printdir \
     proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
     valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
     vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
@@ -1217,7 +1217,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/vcalias
 %attr(755,root,qmail)                   %{_prefix}/bin/vhostid
 %attr(755,root,qmail)                   %{_prefix}/bin/vatrn
-%attr(755,root,qmail)                   %{_prefix}/bin/indiversion
 %attr(755,root,qmail)                   %{_prefix}/bin/vlimit
 %attr(755,root,qmail)                   %{_prefix}/bin/crypt
 %attr(755,root,qmail)                   %{_prefix}/bin/vpriv
@@ -1260,7 +1259,6 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/controlsync
 %attr(755,root,qmail)                   %{libexecdir}/mailzipper
 %attr(755,root,qmail)                   %{libexecdir}/updatefile
-%attr(755,root,qmail)                   %{libexecdir}/indimail_config
 %attr(755,root,qmail)                   %{libexecdir}/displaytop
 %attr(755,root,qmail)                   %{libexecdir}/hashtable
 %attr(755,root,qmail)                   %{libexecdir}/cindimail

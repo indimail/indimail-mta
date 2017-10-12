@@ -41,7 +41,7 @@ pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA = libindimail.pc
 
 man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl.8 hostsync.8 \
-	initsvc.1 indisrvr.8 indiversion.8 inlookup.8 InLookup.8 inquerytest.8 ipchange.8 \
+	initsvc.1 indisrvr.8 inlookup.8 InLookup.8 inquerytest.8 ipchange.8 \
 	logmonitor.8 mgmtpass.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 resetquota.8 \
 	vacation.8 vaddaliasdomain.1 vadddomain.1 valias.1 vatrn.1 vbulletin.1 vcalias.8 \
 	vcaliasrev.8 vcfilter.1 vchkpass.8 vdeldomain.1 vdelivermail.8 vdeloldusers.8 \
@@ -80,7 +80,7 @@ AliasInLookup.c atrn_access.c autoturn_dir.c backfill.c bulk_mail.c bulletin.c \
 Check_Login.c checkPerm.c check_quota.c close_big_dir.c cntrl_clearaddflag.c \
 cntrl_cleardelflag.c compile_morercpthosts.c CopyEmailFile.c copyPwdStruct.c \
 count_dir.c count_rcpthosts.c count_table.c CreateDomainDirs.c create_table.c \
-check_group.c dbinfoAdd.c dbinfoDel.c dbinfoSelect.c dbinfoUpdate.c dbload.c indisub.c \
+check_group.c dbinfoAdd.c dbinfoDel.c dbinfoSelect.c dbinfoUpdate.c dbload.c \
 dec_dir_control.c del_control.c del_domain_assign.c deldomain.c digest_md5.c \
 deliver_mail.c delunreadmails.c del_user_assign.c deluser.c delusercntrl.c \
 Dirname.c error_stack.c error_temp.c evaluate.c fappend.c FifoCreate.c \
@@ -153,7 +153,7 @@ lib_deps: configure Makefile
 	fi ; \
 	echo "@auth_libs@ -lcdb" > lib_deps
 
-indimailbin_PROGRAMS = crc crcdiff dbinfo hostcntrl indiversion \
+indimailbin_PROGRAMS = crc crcdiff dbinfo hostcntrl \
 	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
 	vadduser valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser \
 	vdominfo vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv ismaildup \
@@ -165,7 +165,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar clearopensmtp \
 	vmoddomain vreorg vtable
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 execmysql cindimail hashtable displaytop \
-						   indimail_config updatefile mail_report testmra copyemail
+						   updatefile mail_report testmra copyemail
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime \
 						  myslave bogofilter-qfe upgrade.sh local_upgrade.sh
 
@@ -186,12 +186,12 @@ noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain
 
 MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
-svctool indimail_settings.c cronlist crypt \
+svctool cronlist crypt \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib \
 indimail-rpmlintrc mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
-vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
+vcfilter.1 indimail.7 svctool.8 indimail.mrtg.cfg overquota.sh \
 vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
 vrenamedomain_handle login_tasks.3 authgeneric obs.mk usr.sbin.mysqld usr.sbin.clamd \
 vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp
@@ -364,9 +364,6 @@ resetquota_LDADD = @auth_libs@ $(cdb_lib)
 testmra_SOURCES = testmra.c 
 testmra_LDADD = @auth_libs@ $(cdb_lib) $(shell cat socket.lib 2>/dev/null)
 
-indimail_config_SOURCES=indimail_config.c
-indimail_config_LDADD=
-
 crc_SOURCES=crc.c
 crc_LDADD=
 
@@ -432,13 +429,6 @@ install_tables_LDADD = @auth_libs@ $(cdb_lib)
 
 vtable_SOURCES = vtable.c
 vtable_LDADD = @auth_libs@ $(cdb_lib)
-
-indiversion_SOURCE = indiversion.c
-indiversion_DEPENDENCIES = indimail_settings.lo tls.lo proxylogin.lo auth_admin.lo \
-						   adminCmmd.lo storeHeader.lo parseAddress.lo
-indiversion_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo storeHeader.lo \
-					parseAddress.lo @auth_libs@ $(top_builddir)/eps-1.2/libeps.la \
-					$(cdb_lib)
 
 iecho_SOURCES=iecho.c
 iecho_LDADD=
@@ -639,9 +629,6 @@ inquery.lo: indimail.h config.h
 postdel.lo: indimail.h config.h
 ProcessInFifo.lo: indimail.h config.h
 PwdInLookup.lo: indimail.h config.h
-indimail_config.lo: indimail.h config.h
-indimail_settings.c: indimail.settings indimail_config
-	./indimail_config > indimail_settings.c
 parseAddress.lo: indimail.h config.h
 storeHeader.lo: indimail.h config.h
 ssl_timeout.lo: config.h
@@ -937,15 +924,6 @@ displaytop.$(OBJEXT): displaytop.c
 	$(COMPILE) $(DEFS) -DMAIN -c displaytop.c
 displaytop$(EXEEXT): $(displaytop_DEPENDENCIES) $(displaytop_OBJECTS)
 	$(LINK) $@.$(OBJEXT) $(displaytop_LDADD)
-
-indisub.c: indiversion.c
-	$(RM) indisub.c
-	egrep -v "storeHeader|parseAddress" indiversion.c > indisub.c
-
-indiversion.$(OBJEXT): indiversion.c
-	$(COMPILE) $(DEFS) -DMAIN -c indiversion.c
-indiversion$(EXEEXT): $(indiversion_OBJECTS) $(indiversion_DEPENDENCIES)
-	$(LINK) $@.$(OBJEXT) indimail_settings.$(OBJEXT) $(indiversion_LDADD)
 
 osh$(EXEEXT): $(osh_DEPENDENCIES) $(osh_OBJECTS)
 	$(LINK) $@.$(OBJEXT) exp.$(OBJEXT) handlers.$(OBJEXT) getEnvConfig.$(OBJEXT) $(osh_LDADD)

@@ -43,7 +43,7 @@ main(int argc, char **argv)
 	DBINFO        **rhostsptr;
 	char           *mdahost, *domain = 0;
 	int             total;
-	char            cmdbuf[MAX_BUFF];
+	char            cmdbuf[SQL_BUF_SIZE];
 
 	if (get_options(argc, argv, &mdahost, &domain))
 		return (1);
