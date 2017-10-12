@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.423 2017-10-12 13:12:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.424 2017-10-12 13:43:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1229,7 +1229,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/proxypop3
 %attr(755,root,qmail)                   %{_prefix}/bin/crc
 %attr(755,root,qmail)                   %{_prefix}/bin/iecho
-%attr(755,root,qmail)                   %{_prefix}/bin/versioninfo
 %attr(755,root,qmail)                   %{_prefix}/sbin/vserverinfo
 %attr(755,root,qmail)                   %{_prefix}/sbin/adminclient
 %attr(755,root,qmail)                   %{_prefix}/sbin/chowkidar

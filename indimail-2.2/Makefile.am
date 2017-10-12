@@ -50,7 +50,7 @@ man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl
 	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.8 vuserinfo.1 indimail.7 IndiMail.7 \
 	updaterules.8 osh.8 svctool.8 systpass.8 vserverinfo.1 sslerator.1 iecho.1 \
 	ismaildup.1 login_tasks.3 vtable.1 install_tables.8 displaytop.8 hashtable.8 \
-	versioninfo.8 crc.1 crcdiff.1 vsetpass.8 crypt.1 
+	crc.1 crcdiff.1 vsetpass.8 crypt.1 
 
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \
@@ -173,7 +173,7 @@ indimailauthlib_PROGRAMS = authindi authpgsql
 
 indimailauthlib_SCRIPTS = authgeneric
 
-indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor
+indimailbin_SCRIPTS = vcaliasrev logmonitor
 
 indimailsbin_SCRIPTS = svctool
 
@@ -185,7 +185,7 @@ noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain
 
-MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
+MOSTLYCLEANFILES=vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
 svctool cronlist crypt \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib \
 indimail-rpmlintrc mailzipper \
@@ -794,8 +794,6 @@ editman = sed \
 indimail.fc: indimail.fc.in
 	$(edit) $@.in > $@
 controlsync: controlsync.in
-	$(edit) $@.in > $@
-versioninfo: versioninfo.in
 	$(edit) $@.in > $@
 mailzipper: mailzipper.in
 	$(edit) $@.in > $@

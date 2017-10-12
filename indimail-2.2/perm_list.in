@@ -96,7 +96,6 @@
 %attr(0755,root,qmail) @prefix@/bin/ifaddr
 %attr(0755,root,qmail) @prefix@/bin/iftocc
 %attr(0755,root,qmail) @prefix@/bin/iftoccfrom
-%attr(0755,root,qmail) @prefix@/bin/indiversion
 %attr(0755,root,qmail) @prefix@/bin/ismaildup
 %attr(0755,root,qmail) @prefix@/bin/logmonitor
 %attr(0755,root,qmail) @prefix@/bin/logselect
@@ -189,7 +188,6 @@
 %attr(0755,root,qmail) @prefix@/bin/vatrn
 %attr(0755,root,qmail) @prefix@/bin/vcalias
 %attr(0755,root,qmail) @prefix@/bin/vcaliasrev
-%attr(0755,root,qmail) @prefix@/bin/versioninfo
 %attr(0755,root,qmail) @prefix@/bin/vgroup
 %attr(0755,root,qmail) @prefix@/bin/vhostid
 %attr(0755,root,qmail) @prefix@/bin/vipmap
@@ -971,7 +969,6 @@
 %attr(0644,root,root)  @mandir@/man8/hostsync.8.gz
 %attr(0644,root,root)  @mandir@/man8/imapd.8.gz
 %attr(0644,root,root)  @mandir@/man8/indisrvr.8.gz
-%attr(0644,root,root)  @mandir@/man8/indiversion.8.gz
 %attr(0644,root,root)  @mandir@/man8/inlookup.8.gz
 %attr(0644,root,root)  @mandir@/man8/InLookup.8.gz
 %attr(0644,root,root)  @mandir@/man8/inquerytest.8.gz
