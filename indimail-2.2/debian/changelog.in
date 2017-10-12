@@ -39,5 +39,6 @@ indimail (@version@-2) unstable; urgency=low
   * qmail-cdb.c - fixed wrong control filename display in error message
   * recipients.c use users/recipients instead of control/recipients
   * renamed systemd unit file indimail.service to svscan.service
+  * upgrade boot scripts if new package has updates
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 11 Oct 2017 10:51:35 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 12 Oct 2017 12:32:14 +0530
