@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.110 2017-10-11 10:53:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.112 2017-10-12 12:29:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1698,6 +1698,28 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/upgrade.sh post upgrade @version@ $*
   fi
+  if [ -d /etc/init.d/indimail ] ; then
+    cmp -s %{_prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{_prefix}/bin/qmailctl /etc/init.d/indimail
+    fi
+  fi
+  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/systemd /lib/systemd/system/svscan.service
+  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+  elif [ -f /sbin/initctl -a -d /etc/init ] ; then
+    cmp -s %{shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/upstart /etc/init/svscan.conf
+  elif [ -d /etc/event.d ] ; then
+    cmp -s %{shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/upstart /etc/event.d
+  elif [ -d /System/Library/LaunchDaemons ] ; then
+    cmp -s %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+  fi
   # selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
   if [ -f /etc/inittab ] ; then # one of these days, this will disappear
@@ -2276,6 +2298,40 @@ fi
 
 ### SCRIPTLET ###############################################################################
 %post -n daemontools
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ $argv1 -eq 2 ] ; then # upgrade
+  (
+  echo "doing post upgrade activities"
+  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/systemd /lib/systemd/system/svscan.service
+  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+  elif [ -f /sbin/initctl -a -d /etc/init ] ; then
+    cmp -s %{shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/upstart /etc/init/svscan.conf
+  elif [ -d /etc/event.d ] ; then
+    cmp -s %{shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/upstart /etc/event.d
+  elif [ -d /System/Library/LaunchDaemons ] ; then
+    cmp -s %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+  fi
+  if [ -f /etc/inittab ] ; then # one of these days, this will disappear
+    /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      %{__sed} -i 's{^#SV:{SV:{' /etc/inittab
+    fi
+  fi
+  ) >> /tmp/indimail-mta-setup.log 2>&1
+  exit 0
+fi
 echo "Creating %{logdir}"
 if [ ! -d %{logdir} ] ; then
   %{__mkdir_p} %{logdir}

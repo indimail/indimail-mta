@@ -27,6 +27,7 @@ mbase=/home/mail
 logdir=/var/log/indimail
 servicedir=/service
 qsysconfdir=/etc/indimail
+cp=/bin/cp
 rm=/bin/rm
 mv=/bin/mv
 ####################################
@@ -128,14 +129,30 @@ done
 fi
 
 if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
-	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "recreating ld.so cache"
-		/sbin/ldconfig
-		echo "Running Custom Upgrade Script"
-		/bin/sh ${shareddir}/boot/rpm.init upgrade
-	fi
-	${rm} -f /tmp/daemontools.upgrade
-	exit 0
+  if [ -f ${shareddir}/boot/rpm.init ] ; then
+    echo "recreating ld.so cache"
+    /sbin/ldconfig
+    echo "Running Custom Upgrade Script"
+    /bin/sh ${shareddir}/boot/rpm.init upgrade
+  fi
+  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service
+  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+  elif [ -f /sbin/initctl -a -d /etc/init ] ; then
+    cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf
+  elif [ -d /etc/event.d ] ; then
+    cmp -s ${shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/upstart /etc/event.d
+  elif [ -d /System/Library/LaunchDaemons ] ; then
+    cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+  fi
+  ${rm} -f /tmp/daemontools.upgrade
+  exit 0
 fi
 ${rm} -f /tmp/daemontools.install
 
