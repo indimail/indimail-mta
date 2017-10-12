@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.421 2017-10-11 10:43:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.422 2017-10-12 12:18:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2453,6 +2453,28 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     /sbin/ldconfig
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/upgrade.sh post upgrade @version@ $*
+  fi
+  if [ -d /etc/init.d/indimail ] ; then
+    cmp -s %{_prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{_prefix}/bin/qmailctl /etc/init.d/indimail
+    fi
+  fi
+  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/systemd /lib/systemd/system/svscan.service
+  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+  elif [ -f /sbin/initctl -a -d /etc/init ] ; then
+    cmp -s %{shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/upstart /etc/init/svscan.conf
+  elif [ -d /etc/event.d ] ; then
+    cmp -s %{shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/upstart /etc/event.d
+  elif [ -d /System/Library/LaunchDaemons ] ; then
+    cmp -s %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
+    %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
   fi
   # selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux

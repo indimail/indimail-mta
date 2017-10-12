@@ -28,6 +28,7 @@ logdir=@logdir@
 mysqlPrefix=@mysql_prefix@
 servicedir=/service
 sysconfdir=@sysconfdir@
+cp=/bin/cp
 rm=/bin/rm
 mv=/bin/mv
 ####################################
@@ -138,12 +139,34 @@ fi
 # indimail.upgrade/indimail.install are created
 # by the preinst script
 if [ -f /tmp/indimail.upgrade ] ; then # upgrade
-	if [ -f ${libexecdir}/upgrade.sh ] ; then
-    	echo "Running Custom Upgrade Script for post upgrade"
-    	/bin/sh ${libexecdir}/upgrade.sh post upgrade @version@ $* || true
-	fi
-	${rm} -f /tmp/indimail.upgrade
-	exit 0
+  if [ -f ${libexecdir}/upgrade.sh ] ; then
+    echo "Running Custom Upgrade Script for post upgrade"
+    /bin/sh ${libexecdir}/upgrade.sh post upgrade @version@ $* || true
+  fi
+  if [ -d /etc/init.d/indimail ] ; then
+    cmp -s ${prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1 || true
+    if [ $? -ne 0 ] ; then
+      ${cp} ${prefix}/bin/qmailctl /etc/init.d/indimail
+    fi
+  fi
+  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service
+  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+  elif [ -f /sbin/initctl -a -d /etc/init ] ; then
+    cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf
+  elif [ -d /etc/event.d ] ; then
+    cmp -s ${shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/upstart /etc/event.d
+  elif [ -d /System/Library/LaunchDaemons ] ; then
+    cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
+    ${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+  fi
+  ${rm} -f /tmp/indimail.upgrade
+  exit 0
 fi
 ${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 # Recreate ld.so links and cache
