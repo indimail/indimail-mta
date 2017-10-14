@@ -75,7 +75,7 @@ fixperms()
 	own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
 	grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
 	if [ -f $file ] ; then
-		if [ $perm_f1 -eq 0 ] ; then # 4755, 0644
+		if [ $perm_f1 -eq 0 ] ; then # perm_f1 is 4755, 0644
 			/bin/chown $own:$grp $file
 			/bin/chmod $perm $file
 		else
@@ -87,6 +87,9 @@ fixperms()
 				/bin/chmod $perm $file
 			fi
 		fi
+	elif [ -d $file ] ; then
+		/bin/chown $own:$grp $file
+		/bin/chmod $perm $file
 	fi
 }
 
