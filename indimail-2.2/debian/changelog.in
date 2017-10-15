@@ -40,5 +40,7 @@ indimail (@version@-2) unstable; urgency=low
   * recipients.c use users/recipients instead of control/recipients
   * renamed systemd unit file indimail.service to svscan.service
   * upgrade boot scripts if new package has updates
+  * config-fast.sh - fixed syntax error due to unterminated variable
+  * svctool --config=mysqldb indimail mysql db wasn't getting created
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 12 Oct 2017 12:32:14 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 15 Oct 2017 12:04:38 +0530

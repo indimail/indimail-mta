@@ -68,6 +68,9 @@ Release 2.2 Start 08/05/2017
 38. renamed systemd unit file indimail.service to svscan.service
 12/10/2017
 39. upgrade boot scripts if new package has updates
+15/10/2017
+40. config-fast.sh - fixed syntax error due to unterminated variable
+41. svctool --config=mysqldb indimail mysql db wasn't getting created
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.1 Start 16/03/2017
