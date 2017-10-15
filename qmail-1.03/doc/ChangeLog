@@ -53,3 +53,4 @@ Release 2.2 Start 08/05/2017
 31. recipients.c use users/recipients instead of control/recipients
 32. renamed systemd unit file indimail.service to svscan.service
 33. upgrade boot scripts if new package has updates
+40. config-fast.sh - fixed syntax error due to unterminated variable
