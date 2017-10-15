@@ -36,7 +36,7 @@ chmod 644 "$DESTDIR"/$CONTROLDIR/me
 
 grep $fqdn "$DESTDIR"/$CONTROLDIR/virtualdomains > /dev/null 2>&1
 if [ $? -ne 0 ] ; then
-	echo Putting "$fqdn" into "$CONTROLDIR/locals...
+	echo Putting "$fqdn" into $CONTROLDIR/locals...
 	echo "$fqdn" >> "$DESTDIR"/$CONTROLDIR/locals
 	sort -u "$DESTDIR"/$CONTROLDIR/locals -o "$DESTDIR"/$CONTROLDIR/locals
 	chmod 644 "$DESTDIR"/$CONTROLDIR/locals
