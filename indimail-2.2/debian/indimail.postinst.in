@@ -40,7 +40,6 @@ nofetchmail=0
 nobogofilter=0
 nodksignature=0
 tcpserver_plugin=1
-default_domain=@defaultdomain@
 dkimkeyfn=default
 mysqlSocket=/var/run/mysqld/mysqld.sock
 
@@ -254,6 +253,11 @@ ${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
 # create svscanlog service
 ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir --scanint=60
 
+if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+  default_domain=`uname -n`
+else
+  default_domain=@defaultdomain@
+fi
 echo "Creating default qmail configuraton and catch-all alias (${indimaildir}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${indimaildir}/alias/Maildir/ \
 	--mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket}
@@ -314,15 +318,17 @@ if [ " $a_arch" = " x86_64" ] ; then
 	smtp_soft_mem=536870912
 	qmtp_soft_mem=104857600
 	qmqp_soft_mem=104857600
-	imap_pop3_mem=209715200
-	poppass_mem=52428800
+	imap_pop3_mem=524288000
+	imapspop3_mem=524288000
+	poppass_mem=104857600
 else
 	fetchmail_mem=72428800
 	smtp_soft_mem=52428800
 	qmtp_soft_mem=52428800
 	qmqp_soft_mem=52428800
-	imap_pop3_mem=10485760
-	poppass_mem=10485760
+	imap_pop3_mem=52428800
+	imapspop3_mem=52428800
+	poppass_mem=52428800
 fi
 echo "Checking if clamav is installed"
 if [ $noclamav -eq 0 ] ; then
@@ -519,13 +525,13 @@ ${prefix}/sbin/svctool --imap=143 --servicedir=$servicedir --localip=0 \
 	--starttls --default-domain=${default_domain} --memory=$imap_pop3_mem
 ${prefix}/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 \
 	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imap_pop3_mem --ssl
+	--default-domain=${default_domain} --memory=$imapspop3_mem --ssl
 ${prefix}/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 \
 	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--starttls --default-domain=${default_domain} --memory=$imap_pop3_mem
 ${prefix}/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 \
 	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imap_pop3_mem --ssl
+	--default-domain=${default_domain} --memory=$imapspop3_mem --ssl
 fi
 if [ $noproxy -eq 0 ] ; then
 ${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
@@ -534,14 +540,14 @@ ${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
 	--starttls
 ${prefix}/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
 	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 --ssl
+	--default-domain=${default_domain} --memory=$imapspop3_mem --proxy=143 --ssl
 ${prefix}/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
 	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 \
 	--starttls
 ${prefix}/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
 	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 --ssl
+	--default-domain=${default_domain} --memory=$imapspop3_mem --proxy=110 --ssl
 fi
 
 # IndiMail Daemons
@@ -644,8 +650,9 @@ do
 	done
 done
 
-echo "compressing man pages"
-find ${mandir} -type f -exec gzip -q {} \;
+if [ -f ${mandir}/man7/authlib.7 ] ;
+	gzip ${mandir}/man7/authlib.7
+fi
 if [ -f ${mandir}/man7/authlib.7.gz ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
 	do
@@ -681,8 +688,8 @@ if [ -f ${sysconfdir}/cronlist ] ; then
 fi
 
 echo "Checking Installed Permissions"
-if [ -f ${prefix}/bin/instcheck ] ; then
-	${prefix}/bin/instcheck > /dev/null 2>&1
+if [ -f ${libexecdir}/instcheck ] ; then
+	${libexecdir}/instcheck > /dev/null 2>&1
 fi
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
@@ -722,9 +729,13 @@ echo "   you can start sending emails. Look at ${logdir}/freshclam/current"
 fi
 if [ ! -f ${sysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
-echo "$count. You also need to create CERTS for SSL/TLS. run the following"
-echo "   command to create cert"
-echo "   ${prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
+if ${nocourierimap} -eq 0
+echo "$count. You need to create CERTS for STARTTLS / SSL enabled IMAP/POP3."
+else
+echo "$count. You need to create CERTS for STARTTLS."
+fi
+echo "   Run the following command to create Certificate for TLS/SSL"
+echo "   ${prefix}/sbin/svctool --config=cert --postmaster=postmaster@yourdomain --common_name=${default_domain}"
 fi
 echo
 echo "Check /tmp/indimail-setup.log for the detailed installation log!!!"
