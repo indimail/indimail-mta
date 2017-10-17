@@ -465,6 +465,10 @@ if [ -f ${qsysconfdir}/cronlist ] ; then
   echo "adding cron entries"
   /usr/bin/crontab -u root ${qsysconfdir}/cronlist
 fi
+echo "Checking Installed Permissions"
+if [ -f ${libexecdir}/instcheck ] ; then
+	${libexecdir}/instcheck > /dev/null 2>&1
+fi
 
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
