@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.426 2017-10-15 12:00:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.427 2017-10-17 14:09:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2935,6 +2935,9 @@ done
 #
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
+if [ -x /bin/systemctl ] ; then
+  /bin/systemctl enable svscan.service
+fi
 
 if [ -f %{sysconfdir}/cronlist ] ; then
   echo "adding cron entries"
@@ -2944,10 +2947,6 @@ fi
 if [ -f %{libexecdir}/upgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
   /bin/sh %{libexecdir}/upgrade.sh post install @version@ $*
-fi
-
-if [ -x /bin/systemctl ] ; then
-  /bin/systemctl enable svscan.service
 fi
 ) >> /tmp/indimail-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
@@ -2979,11 +2978,11 @@ echo "$count. You need to create CERTS for STARTTLS / SSL enabled IMAP/POP3."
 echo "$count. You need to create CERTS for STARTTLS."
 %endif
 echo "   Run the following command to create Certificate for TLS/SSL"
-echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
+echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@yourdomain --common_name=%{default_domain}"
 fi
 
 echo
-echo "Look at /tmp/indimail-setup.log for the installation log"
+echo "Check /tmp/indimail-setup.log for the detailed installation log!!!"
 
 ### SCRIPTLET ###############################################################################
 %preun
