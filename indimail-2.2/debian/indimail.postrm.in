@@ -35,7 +35,6 @@ noclamav=1
 nofetchmail=0
 nobogofilter=0
 nonssd=0
-default_domain=@defaultdomain@
 
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
@@ -76,6 +75,7 @@ case "$1" in
 	exit 0
     ;;
 esac
+default_domain=`uname -n`
 #
 # Debian silliness
 #
