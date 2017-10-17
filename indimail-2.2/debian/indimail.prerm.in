@@ -35,7 +35,7 @@ case "$1" in
     remove|upgrade|deconfigure)
 	if [ -f ${libexecdir}/upgrade.sh ] ; then
 	(
-		echo "Running Custom Upgrade Script for pre $1"
+		echo "Running Custom Upgrade Script for prerm $1"
 		/bin/sh ${libexecdir}/upgrade.sh prerm $1 @version@ $* || true
 	) >> /tmp/indimail-setup.log 2>&1
 	fi
@@ -85,7 +85,7 @@ esac
 if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 	exit 0
 fi
-
+(
 if [ -s ${sysconfdir}/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 	echo "reverting permissions"
 	/bin/cat ${sysconfdir}/stat.override | while read line
@@ -96,16 +96,24 @@ if [ -s ${sysconfdir}/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 		fi
 	done
 fi
+if [ -f ${mandir}/man8/rmail_i.8.gz ] ; then
 ${mv} ${mandir}/man8/rmail_i.8.gz ${mandir}/man8/rmail.8.gz || true
+fi
+if [ -f ${mandir}/man8/rmail_i.8 ] ; then
+${mv} ${mandir}/man8/rmail_i.8 ${mandir}/man8/rmail.8 || true
+fi
+if [ -f ${mandir}/man1/newaliases_i.1.gz ] ; then
 ${mv} ${mandir}/man1/newaliases_i.1.gz ${mandir}/man1/newaliases.1.gz || true
+fi
+if [ -f ${mandir}/man1/newaliases_i.1 ] ; then
+${mv} ${mandir}/man1/newaliases_i.1 ${mandir}/man1/newaliases.1 || true
+fi
+if [ -f ${prefix}/bin/newaliases_i ] ; then
 ${mv} ${prefix}/bin/newaliases_i ${prefix}/bin/newaliases || true
+fi
+if [ -f ${prefix}/bin/rmail_i ] ; then
 ${mv} ${prefix}/bin/rmail_i ${prefix}/bin/rmail || true
-# Remove IndiMail being started on system boot
-echo "removing indimail startup"
-SERVICE_LIST="sendmail exim4 mysql"
-export SERVICE_LIST
-$prefix/sbin/svctool --config=rm-boot
-
+fi
 if [ $nocourierimap -eq 0 ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
 	do
@@ -120,4 +128,16 @@ do
 		${mv} /usr/$i/sendmail.old /usr/$i/sendmail || true
 	fi
 done
+
+if [ -f ${libexecdir}/upgrade.sh ] ; then
+echo "Running Custom Upgrade Script for prerm $1"
+/bin/sh ${libexecdir}/upgrade.sh prerm uninstall @version@ $* || true
+fi
+
+# Remove IndiMail being started on system boot
+echo "removing indimail startup"
+SERVICE_LIST="sendmail exim4 mysql"
+export SERVICE_LIST
+$prefix/sbin/svctool --config=rm-boot
+) >> /tmp/indimail-setup.log 2>&1
 exit 0
