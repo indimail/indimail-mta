@@ -735,7 +735,7 @@ else
 echo "$count. You need to create CERTS for STARTTLS."
 fi
 echo "   Run the following command to create Certificate for TLS/SSL"
-echo "   ${prefix}/sbin/svctool --config=cert --postmaster=postmaster@yourdomain --common_name=${default_domain}"
+echo "   ${prefix}/sbin/svctool --config=cert --postmaster=postmaster@${default_domain} --common_name=${default_domain}"
 fi
 echo
 echo "Check /tmp/indimail-setup.log for the detailed installation log!!!"
