@@ -490,6 +490,7 @@ else
 	echo "2. Issue /sbin/init q to start services"
 	count=2
 fi
+default_domain=`uname -n`
 echo "   You can also use the 'service' command to start indimail-mta"
 echo "   sudo service indimail start"
 count=`expr $count + 1`
@@ -502,7 +503,7 @@ if [ ! -f ${qsysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You also need to create CERTS for SSL/TLS. run the following"
 echo "   command to create cert"
-echo "   ${prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
+echo "   ${prefix}/sbin/svctool --config=cert --postmaster=postmaster@${default_domain} --common_name=${default_domain}"
 fi
 echo
 echo "Check /tmp/indimail-mta-setup.log for the detailed installation log!!!"
