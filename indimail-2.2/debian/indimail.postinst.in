@@ -650,7 +650,7 @@ do
 	done
 done
 
-if [ -f ${mandir}/man7/authlib.7 ] ;
+if [ -f ${mandir}/man7/authlib.7 ] ; then
 	gzip ${mandir}/man7/authlib.7
 fi
 if [ -f ${mandir}/man7/authlib.7.gz ] ; then
@@ -729,7 +729,7 @@ echo "   you can start sending emails. Look at ${logdir}/freshclam/current"
 fi
 if [ ! -f ${sysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
-if ${nocourierimap} -eq 0
+if [ ${nocourierimap} -eq 0 ] ; then
 echo "$count. You need to create CERTS for STARTTLS / SSL enabled IMAP/POP3."
 else
 echo "$count. You need to create CERTS for STARTTLS."
