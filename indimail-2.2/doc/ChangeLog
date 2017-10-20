@@ -71,6 +71,8 @@ Release 2.2 Start 08/05/2017
 15/10/2017
 40. config-fast.sh - fixed syntax error due to unterminated variable
 41. svctool --config=mysqldb indimail mysql db wasn't getting created
+20/10/2017
+42. svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.1 Start 16/03/2017
