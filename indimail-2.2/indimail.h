@@ -1326,7 +1326,7 @@ level_index0, level_index1, level_index2, the_dir"
 #define VALIAS_TABLE_LAYOUT "\
 alias  char(40) not null, \
 domain char(67) not null, \
-valias_line char(254) not null, \
+valias_line char(190) not null, \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 unique index(alias, domain, valias_line), index (alias, domain)"
 #endif
