@@ -35,7 +35,6 @@ mv=/bin/mv
 nodksignature=0
 noclamav=1
 tcpserver_plugin=1
-default_domain=indimail.org
 dkimkeyfn=default
 
 setperm()
@@ -282,6 +281,7 @@ fi
 # SMTP
 for port in 465 25 587
 do
+	extra_opt=""
 	if [ $port -eq 465 ] ; then
 		extra_opt="--skipsend --ssl"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
@@ -301,67 +301,61 @@ do
 		extra_opt="$extra_opt --shared-objects=1"
 	fi
 	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-		${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
-			--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-			--query-cache --dnscheck --password-cache \
-			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-			--starttls --fsync --syncdir --memory=$smtp_soft_mem \
-			--chkrecipient --chkrelay --masquerade \
-			--min-free=52428800 --content-filter \
-			--qhpsi="$qhpsi" \
-			--dmasquerade --infifo=infifo \
-			--dkverify=both \
-			--dksign=both --private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
-			$extra_opt
-	else
-		${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
-			--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-			--query-cache --dnscheck --password-cache \
-			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-			--starttls --fsync --syncdir --memory=$smtp_soft_mem \
-			--chkrecipient --chkrelay --masquerade \
-			--min-free=52428800 --content-filter --virus-filter \
-			--dmasquerade --infifo=infifo \
-			--dkverify=both \
-			--dksign=both --private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
-			$extra_opt
+		extra_opt="$extra_opt --qhpsi=$qhpsi"
 	fi
-	echo "1" > $servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN
+	eval ${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
+		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+		--query-cache --dnscheck --password-cache \
+		--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+		--starttls --fsync --syncdir --memory=$smtp_soft_mem \
+		--chkrecipient --chkrelay --masquerade \
+		--min-free=52428800 --content-filter --virus-filter \
+		--dmasquerade --infifo=infifo \
+		--dkverify=both \
+		--dksign=both --private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
+		$extra_opt
+	if [ -d ${servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN ] ; then
+		echo "1" > $servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN
+	fi
 done
+
+# queue parameters in control/defaultqueue for qmail-inject, sendmail
+extra_opt=""
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-	${prefix}/sbin/svctool --queueParam=defaultqueue \
-		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-		--min-free=52428800 --fsync --syncdir \
-		--qhpsi="$qhpsi" \
-		--dkverify="none" --dksign=$sign_opt \
-		--private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
-		$extra_opt
-else
-	${prefix}/sbin/svctool --queueParam=defaultqueue \
-		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-		--min-free=52428800 --fsync --syncdir --virus-filter \
-		--dkverify="none" --dksign=$sign_opt \
-		--private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
-		$extra_opt
+	extra_opt="--qhpsi=$qhpsi"
 fi
+eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
+	--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+	--min-free=52428800 --fsync --syncdir --virus-filter \
+	--dkverify="none" --dksign=$sign_opt \
+	--private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
+	$extra_opt
+
+#odmr
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
 	--infifo="" --query-cache --password-cache
-echo "1" > $servicedir/qmail-smtpd.366/variables/DISABLE_PLUGIN
+if [ -d ${servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN ] ; then
+	echo "1" > $servicedir/qmail-smtpd.366/variables/DISABLE_PLUGIN
+fi
+
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
     --hash-size=65536 --save-interval=5 --whitelist=greylist.white
+
 # qmail-qmtpd service
 ${prefix}/sbin/svctool --qmtp=209 --servicedir=$servicedir --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
 	--maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmtp_soft_mem --min-free=52428800
+
 # qmail-qmqpd service
 ${prefix}/sbin/svctool --qmqp=628 --servicedir=$servicedir --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
 	--maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmqp_soft_mem --min-free=52428800
 /bin/touch $servicedir/qmail-qmqpd.628/down
+
 # virus/spam filtering
 ${prefix}/sbin/svctool --qscanq --servicedir=${servicedir} --scanint=200
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
