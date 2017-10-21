@@ -43,5 +43,6 @@ indimail (@version@-2) unstable; urgency=low
   * config-fast.sh - fixed syntax error due to unterminated variable
   * svctool --config=mysqldb indimail mysql db wasn't getting created
   * svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
+  * svctool,create_services,postinst - refactored code by improving calls to svctool
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 20 Oct 2017 18:40:15 +0530

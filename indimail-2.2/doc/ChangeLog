@@ -73,6 +73,8 @@ Release 2.2 Start 08/05/2017
 41. svctool --config=mysqldb indimail mysql db wasn't getting created
 20/10/2017
 42. svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
+21/10/2017
+43. svctool,create_services,postinst - refactored code by improving calls to svctool
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.1 Start 16/03/2017

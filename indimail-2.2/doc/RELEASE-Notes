@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Fri Oct 13 14:01:01 IST 2017
+DATE: Sat Oct 21 10:59:27 IST 2017
 
 Announcing Release 2.2 of IndiMail. This release has both source.tar.gz, RPMs and debs.
 
@@ -140,3 +140,5 @@ Release 2.2 Start 08/05/2017
 39. upgrade boot scripts if new package has updates
 40. config-fast.sh - fixed syntax error due to unterminated variable
 41. svctool --config=mysqldb indimail mysql db wasn't getting created
+42. svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
+43. svctool,create_services,postinst - refactored code by improving calls to svctool
