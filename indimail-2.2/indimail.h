@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.223  2017-10-21 15:20:37+05:30  Cprogrammer
+ * reduced index length
+ *
  * Revision 2.222  2017-08-09 23:23:04+05:30  Cprogrammer
  * increased SQL_BUF_SIZE
  *
@@ -982,7 +985,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.222 2017-08-09 23:23:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.223 2017-10-21 15:20:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
