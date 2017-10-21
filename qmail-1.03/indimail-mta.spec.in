@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.113 2017-10-12 14:16:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.114 2017-10-21 15:20:03+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1838,6 +1838,7 @@ fi
 # SMTP ports
 for port in 465 25 587
 do
+  extra_opt=""
   if [ $port -eq 465 ] ; then
     extra_opt="--skipsend --ssl"
     extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
@@ -1852,54 +1853,41 @@ do
     extra_opt="$extra_opt --shared-objects=1"
 %endif
   if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
-    %{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
-      --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-      --query-cache --dnscheck --password-cache \
-      --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-      --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-      --min-free=52428800 --content-filter \
-      --qhpsi="$qhpsi" \
-      --dmasquerade --infifo=infifo \
-      --dkverify=both \
-      --dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
-      $extra_opt
-  else
-    %{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
-      --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-      --query-cache --dnscheck --password-cache \
-      --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-      --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-      --min-free=52428800 --content-filter --virus-filter \
-      --dmasquerade --infifo=infifo \
-      --dkverify=both \
-      --dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
-      $extra_opt
+    extra_opt="$extra_opt --qhpsi=$qhpsi"
   fi
-  echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
+  eval %{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+    --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+    --query-cache --dnscheck --password-cache \
+    --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+    --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
+    --min-free=52428800 --content-filter --virus-filter \
+    --dmasquerade --infifo=infifo \
+    --dkverify=both \
+    --dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+    $extra_opt
+  if [ -d %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN ] ; then
+    echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
+  fi
 done
 
 # queue parameters in control/defaultqueue for qmail-inject, sendmail
+extra_opt=""
 if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
-  %{_prefix}/sbin/svctool --queueParam=defaultqueue \
-    --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-    --min-free=52428800 --fsync --syncdir \
-    --qhpsi="$qhpsi" \
-    --dkverify="none" --dksign=$sign_opt \
-    --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
-    $extra_opt
-else
-  %{_prefix}/sbin/svctool --queueParam=defaultqueue \
-    --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-    --min-free=52428800 --fsync --syncdir --virus-filter \
-    --dkverify="none" --dksign=$sign_opt \
-    --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
-    $extra_opt
+  extra_opt="--qhpsi=$qhpsi"
 fi
+eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
+  --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+  --min-free=52428800 --fsync --syncdir --virus-filter \
+  --dkverify="none" --dksign=$sign_opt \
+  --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+  $extra_opt
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
   --infifo="" --query-cache --password-cache --memory=%{smtp_soft_mem}
-echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
+if [ -d %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN ] ; then
+  echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
+fi
 
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
@@ -2023,6 +2011,7 @@ else
   echo "2. Issue /sbin/init q to start services"
   count=2
 fi
+default_domain=`uname -n`
 count=`expr $count + 1`
 echo "$count. Change your default domain in %{qsysconfdir}/control/defaultdomain"
 count=`expr $count + 1`
@@ -2032,7 +2021,7 @@ if [ ! -f %{qsysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You need to create CERTS for STARTTLS."
 echo "   Run the following command to create Certificate for TLS/SSL"
-echo "   %{_prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
+echo "   %{_prefix}/sbin/svctool --config-cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
 fi
 echo
 echo "Look at /tmp/indimail-mta-setup.log for the installation log"

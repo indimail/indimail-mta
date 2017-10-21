@@ -20,7 +20,7 @@ default_domain=`uname -n`
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.67 2017-05-10 19:41:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.68 2017-10-21 15:20:28+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -338,81 +338,41 @@ do
 	if [ $tcpserver_plugin -eq 1 ] ; then
 		e_opt="$e_opt --shared-objects=1"
 	fi
+	append_opt=""
 	if [ $nobogofilter -eq 0 ] ; then
-		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-			$svctool --smtp=$port --servicedir=$servicedir \
-				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --dnscheck --password-cache \
-				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter \
-				--qhpsi="$qhpsi" \
-				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
-				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
-				--dmasquerade --infifo=infifo \
-				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
-				$e_opt $extra_opt
-		else
-			$svctool --smtp=$port --servicedir=$servicedir \
-				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --dnscheck --password-cache \
-				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter \
-				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
-				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
-				--dmasquerade --infifo=infifo \
-				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
-				$e_opt $extra_opt
-		fi
-	else
-		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-			$svctool --smtp=$port --servicedir=$servicedir \
-				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --dnscheck --password-cache \
-				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter \
-				--qhpsi="$qhpsi" \
-				--dmasquerade --infifo=infifo \
-				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
-				$e_opt $extra_opt
-		else
-			$svctool --smtp=$port --servicedir=$servicedir \
-				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --dnscheck --password-cache \
-				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter \
-				--dmasquerade --infifo=infifo \
-				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
-				$e_opt $extra_opt
-		fi
+		append_opt="--spamfilter=\"$prefix/bin/bogofilter -p -d $sysconfdir\"" 
+		append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
 	fi
-	echo "1" > $dir_prefix$servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN
+	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+		append_opt="$append_opt --qhpsi=$qhpsi"
+	fi
+	eval $svctool --smtp=$port --servicedir=$servicedir \
+		--qbase=$qbase --qcount=$qcount --qstart=1 \
+		--query-cache --dnscheck --password-cache \
+		--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+		--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
+		--min-free=52428800 --content-filter --virus-filter \
+		--dmasquerade --infifo=infifo \
+		--dkverify=$ver_opt \
+		--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
+		$append_opt $e_opt $extra_opt
+	if [ -d $dir_prefix$servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN ] ; then
+		echo "1" > $dir_prefix$servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN
+	fi
 	nobogofilter=$orig_bogofilter
 done
 
+append_opt=""
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-	$svctool --queueParam=defaultqueue \
-		--qbase=$qbase --qcount=$qcount --qstart=1 \
-		--min-free=52428800 --fsync --syncdir --virus-filter \
-		--qhpsi="$qhpsi" \
-		--dkverify="none" --dksign=$sign_opt \
-		--private_key=$controldir/domainkeys/%/$dkimkeyfn \
-		$e_opt $extra_opt
-else
-	$svctool --queueParam=defaultqueue \
-		--qbase=$qbase --qcount=$qcount --qstart=1 \
-		--min-free=52428800 --fsync --syncdir --virus-filter \
-		--dkverify="none" --dksign=$sign_opt \
-		--private_key=$controldir/domainkeys/%/$dkimkeyfn \
-		$e_opt $extra_opt
+	append_opt="--qhpsi=$qhpsi"
 fi
+eval $svctool --queueParam=defaultqueue \
+	--qbase=$qbase --qcount=$qcount --qstart=1 \
+	--min-free=52428800 --fsync --syncdir --virus-filter \
+	--qhpsi="$qhpsi" \
+	--dkverify="none" --dksign=$sign_opt \
+	--private_key=$controldir/domainkeys/%/$dkimkeyfn \
+	$append_opt $extra_opt
 
 $svctool --smtp=366 --odmr --servicedir=$servicedir \
 	--infifo="" --query-cache --password-cache --memory=$smtp_soft_mem $extra_opt
@@ -444,37 +404,19 @@ $svctool --qmqp=628 --servicedir=$servicedir \
 # fetchmail
 #
 if [ $nofetchmail -eq 0 ] ; then
+	append_opt=""
 	if [ $nobogofilter -eq 0 ] ; then
-		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-			$svctool --fetchmail --servicedir=$servicedir \
-				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--cntrldir=control --default-domain=$default_domain \
-				--qhpsi="$qhpsi" \
-				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
-				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
-				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
-		else
-			$svctool --fetchmail --servicedir=$servicedir \
-				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--cntrldir=control --default-domain=$default_domain \
-				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
-				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
-				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
-		fi
-	else
-		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-			$svctool --fetchmail --servicedir=$servicedir \
-				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--cntrldir=control --default-domain=$default_domain \
-				--qhpsi="$qhpsi" \
-				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
-		else
-			$svctool --fetchmail --servicedir=$servicedir \
-				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--cntrldir=control --default-domain=$default_domain \
-				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
-		fi
+		append_opt="--spamfilter=\"$prefix/bin/bogofilter -p -d $sysconfdir\"" 
+		append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
 	fi
+	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+		append_opt="$append_opt --qhpsi=$qhpsi"
+	fi
+	eval $svctool --fetchmail --servicedir=$servicedir \
+		--qbase=$qbase --qcount=$qcount --qstart=1 \
+		--cntrldir=control --default-domain=$default_domain \
+		--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt \
+		$append_opt $extra_opt
 	touch $dir_prefix$servicedir/fetchmail/down
 fi
 
@@ -528,9 +470,9 @@ if [ $noindimail -eq 0 ] ; then
 			--mysqlhost=localhost --mysqluser=indimail \
 			--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=$servicedir $extra_opt
 	fi
-#
-# poppassd protocol
-#
+    #
+    # poppassd protocol
+    #
 	$svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 		--memory=$poppass_mem \
 		--certfile=$controldir/servercert.pem --ssl \
@@ -543,6 +485,12 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	$svctool --qscanq --servicedir=$servicedir --clamdPrefix=$prefix \
 		--scanint=200 $extra_opt
 	$svctool --config=clamd $extra_opt
+	$svctool --clamd --servicedir=$servicedir --clamdPrefix=$prefix \
+		--sysconfdir=$sysconfdir
+	if [ $clamav_os -eq 1 ] ; then
+		touch $dir_prefix$servicedir/clamd/down
+		touch $dir_prefix$servicedir/freshclam/down
+	fi
 fi
 if [ $nobogofilter -eq 0 ] ; then
 	$svctool --config=bogofilter $extra_opt
@@ -553,6 +501,13 @@ fi
 
 # create certs
 $svctool --postmaster=postmaster@$default_domain --config=cert --common_name=$default_domain $extra_opt
+
+# fifolog service
+$svctool --fifologger=/tmp/logfifo --servicedir=$servicedir
+
+# mrtg service
+$svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir
+
 # create svscan logging in indimail log directory
 $svctool --svscanlog --servicedir=$servicedir $extra_opt
 if [ $add_boot -eq 1 ] ; then
