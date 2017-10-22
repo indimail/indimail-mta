@@ -36,5 +36,6 @@ indimail-mta (2.2-2) unstable; urgency=low
   * config-fast.sh - fixed syntax error due to unterminated variable
   * svctool,create_services,postinst - refactored code by improving calls to svctool
   * fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
+  * do systemctl daemon-reload if systemd unit file is changed
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 22 Oct 2017 12:49:52 +0530
