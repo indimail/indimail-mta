@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.115 2017-10-22 12:51:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.116 2017-10-22 15:30:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1707,9 +1707,11 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s %{shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
     %{__cp} %{shareddir}/boot/systemd /lib/systemd/system/svscan.service
+	/bin/systemctl daemon-reload
   elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
     cmp -s %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
     %{__cp} %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+	/bin/systemctl daemon-reload
   elif [ -f /sbin/initctl -a -d /etc/init ] ; then
     cmp -s %{shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
     %{__cp} %{shareddir}/boot/upstart /etc/init/svscan.conf

@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.12  2017-10-22 15:27:23+05:30  Cprogrammer
+# remove redundant indimail.service during upgrade
+#
 # Revision 2.11  2017-04-21 10:24:04+05:30  Cprogrammer
 # run upgrade script only on post
 #
@@ -49,6 +52,15 @@ sed=$(which sed)
 
 do_post_upgrade()
 {
+if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
+  systemctl is-enabled svscan >/dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+	  systemctl disable indimail > /dev/null 2>&1
+	  systemctl enable svscan > /dev/null 2>&1
+  fi
+fi
+/bin/rm -f /lib/systemd/system/indimail.service
+/bin/rm -f /usr/lib/systemd/system/indimail.service
 #
 # certs were in /etc/indimail/control
 # they have been moved to /etc/indimail/certs
