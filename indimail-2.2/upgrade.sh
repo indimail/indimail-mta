@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: upgrade.sh,v $
+# Revision 2.5  2017-10-22 18:53:22+05:30  Cprogrammer
+# refactored upgrade.sh
+#
 # Revision 2.4  2017-03-29 22:37:06+05:30  Cprogrammer
 # added case for pretrans
 #
@@ -13,7 +16,7 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: upgrade.sh,v 2.4 2017-03-29 22:37:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: upgrade.sh,v 2.5 2017-10-22 18:53:22+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
@@ -28,8 +31,12 @@ do_upgrade()
 
 do_pre()
 {
-	RPM_VER=`rpm -qf /etc/indimail/indimail-release`
-	echo "RPM Version  $RPM_VER"
+	if [ -f /usr/bin/rpm ] ; then
+	PKG_VER=`rpm -qf /etc/indimail/indimail-release`
+	else
+	PKG_VER=`dpkg -S /etc/indimail/indimail-release`
+	fi
+	echo "RPM/DEB Version  $PKG_VER"
 	if [ -f /etc/indimail/indimail-release ] ; then
 		. /etc/indimail/indimail-release
 	fi
@@ -46,8 +53,12 @@ do_pre()
 
 do_post()
 {
-	RPM_VER=`rpm -qf /etc/indimail/indimail-release`
-	echo "RPM Version  $RPM_VER"
+	if [ -f /usr/bin/rpm ] ; then
+	PKG_VER=`rpm -qf /etc/indimail/indimail-release`
+	else
+	PKG_VER=`dpkg -S /etc/indimail/indimail-release`
+	fi
+	echo "RPM/DEB Version  $PKG_VER"
 	if [ -f /etc/indimail/indimail-release ] ; then
 		. /etc/indimail/indimail-release
 	fi
@@ -64,9 +75,13 @@ do_post()
 
 do_preun()
 {
-	RPM_VER=`rpm -qf /etc/indimail/indimail-release`
-	echo $RPM_VER > /tmp/indimail-rpm.old
-	echo "RPM Version  $RPM_VER"
+	if [ -f /usr/bin/rpm ] ; then
+	PKG_VER=`rpm -qf /etc/indimail/indimail-release`
+	else
+	PKG_VER=`dpkg -S /etc/indimail/indimail-release`
+	fi
+	echo "RPM/DEB Version  $PKG_VER"
+	echo $PKG_VER > /tmp/indimail-pkg.old
 	if [ -f /etc/indimail/indimail-release ] ; then
 		. /etc/indimail/indimail-release
 	fi
@@ -89,8 +104,12 @@ do_preun()
 
 do_postun()
 {
-	RPM_VER=`rpm -qf /etc/indimail/indimail-release`
-	echo "RPM Version  $RPM_VER"
+	if [ -f /usr/bin/rpm ] ; then
+	PKG_VER=`rpm -qf /etc/indimail/indimail-release`
+	else
+	PKG_VER=`dpkg -S /etc/indimail/indimail-release`
+	fi
+	echo "RPM/DEB Version  $PKG_VER"
 	if [ -f /etc/indimail/indimail-release ] ; then
 		. /etc/indimail/indimail-release
 	fi
@@ -110,8 +129,12 @@ do_postun()
 
 do_prettrans()
 {
-	RPM_VER=`rpm -qf /etc/indimail/indimail-release`
-	echo "RPM Version $RPM_VER"
+	if [ -f /usr/bin/rpm ] ; then
+	PKG_VER=`rpm -qf /etc/indimail/indimail-release`
+	else
+	PKG_VER=`dpkg -S /etc/indimail/indimail-release`
+	fi
+	echo "RPM/DEB Version  $PKG_VER"
 	if [ -f /etc/indimail/indimail-release ] ; then
 		. /etc/indimail/indimail-release
 	fi
@@ -125,11 +148,15 @@ do_prettrans()
 
 do_posttrans()
 {
-	RPM_VER=`rpm -qf /etc/indimail/indimail-release`
-	if [ -f /tmp/indimail-rpm.old ] ; then
-		OLD_RPM_VER=`cat /tmp/indimail-rpm.old`
+	if [ -f /usr/bin/rpm ] ; then
+	PKG_VER=`rpm -qf /etc/indimail/indimail-release`
+	else
+	PKG_VER=`dpkg -S /etc/indimail/indimail-release`
 	fi
-	echo "RPM Version old $OLD_RPM_VER new $RPM_VER"
+	if [ -f /tmp/indimail-pkg.old ] ; then
+		OLD_PKG_VER=`cat /tmp/indimail-pkg.old`
+	fi
+	echo "RPM/DEB Version old $OLD_PKG_VER new $PKG_VER"
 	if [ -f /etc/indimail/indimail-release ] ; then
 		. /etc/indimail/indimail-release
 	fi
