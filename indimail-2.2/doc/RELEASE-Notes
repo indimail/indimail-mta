@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Sat Oct 21 14:08:07 IST 2017
+DATE: Sun Oct 22 15:34:00 IST 2017
 
 Announcing Release 2.2 of IndiMail. This release has both source.tar.gz, RPMs and debs.
 
@@ -145,3 +145,5 @@ Release 2.2 Start 08/05/2017
 41. svctool --config=mysqldb indimail mysql db wasn't getting created
 42. svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
 43. svctool,create_services,postinst - refactored code by improving calls to svctool
+44. fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
+45. do systemctl daemon-reload if systemd unit file is changed
