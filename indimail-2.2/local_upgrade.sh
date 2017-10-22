@@ -1,5 +1,11 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.14  2017-10-22 19:03:41+05:30  Cprogrammer
+# overwrite LOGFILTER only if it is already set
+#
+# Revision 2.13  2017-10-22 18:57:27+05:30  Cprogrammer
+# fixed rcs id
+#
 # Revision 2.12  2017-10-22 15:27:23+05:30  Cprogrammer
 # remove redundant indimail.service during upgrade
 #
@@ -37,7 +43,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $ID:$
+# $Id: local_upgrade.sh,v 2.14 2017-10-22 19:03:41+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -149,16 +155,18 @@ if [ -d /service/qmail-spamlog ] ; then
 fi
 
 # for bogofilter to send back X-Bogosity back to qmail-smtpd as well as log entry
-# to /var/log/indimail/logfifo/current
+# to /var/log/indimail/logfifo/current (fifologger service)
 # for qmail-send it is required if you run bogofilter during remote/local delivery,
 # in which case it will be logged to /var/log/indimail/logfifo/current
 for i in qmail-smtpd.25 qmail-smtpd.465 fetchmail qmail-send.25
 do
-	if [ -d /service/$i ] ; then
+	if [ -d /service/$i -a -s /service/$i/variables/LOGFILTER ] ; then
 		echo /tmp/logfifo > /service/$i/variables/LOGFILTER
 	fi
 done
+if [ -s /etc/indimail/control/defaultqueue/LOGFILTER ] ; then
 echo /tmp/logfifo > /etc/indimail/control/defaultqueue/LOGFILTER
+fi
 #
 # tcpserver uses -c option to set concurrency and uses MAXDAEMON config file
 # on sighup, since tcpserver is no longer root, it is unable to read MAXDAEMON config
