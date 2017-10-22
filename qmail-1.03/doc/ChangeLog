@@ -55,3 +55,4 @@ Release 2.2 Start 08/05/2017
 33. upgrade boot scripts if new package has updates
 34. config-fast.sh - fixed syntax error due to unterminated variable
 35. svctool,create_services,postinst - refactored code by improving calls to svctool
+36. fixes for latest clamd/freshclam versions (ClamAV 0.99.2)

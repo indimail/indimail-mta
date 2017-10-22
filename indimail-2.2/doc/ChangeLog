@@ -1,4 +1,4 @@
-* Thu Aug 17 2017 15:31:33 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
+* Sat Oct 21 2017 19:10:08 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.2 Start 08/05/2017
 09/05/2017
 1.  indiversion.c - Fixed authindi path
@@ -75,8 +75,10 @@ Release 2.2 Start 08/05/2017
 42. svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
 21/10/2017
 43. svctool,create_services,postinst - refactored code by improving calls to svctool
+22/10/2017
+44. fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
 
-* Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
+* Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.1-1.1%{?dist}
 Release 2.1 Start 16/03/2017
 16/03/2017
 1.   quoted svctool arguments and save install time arguments in variables/.options
@@ -244,7 +246,7 @@ Release 2.1 Start 16/03/2017
 111. smtpd.c, qmail-remote.c - conditional compilation of
      TLSv1_[1|2]_[client|server]_method()
 
-* Thu Jan 21 2016 mbhangui@gmail.com 2.0-1.1%{?dist}
+* Mon Mar 13 2017 mbhangui@gmail.com 2.0-1.1%{?dist}
 Release 2.0 Start 21/01/2016
 21/01/2016
 1.  vdominfo.c - Removed compiler warning for fscanf

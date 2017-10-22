@@ -22,6 +22,9 @@ o Upgraded courier-imap to 4.18.0 for openssl 1.1.0
 o Upgraded fetchmail to version 6.4.0
 o Updated defaults.inc.php for roundcube 1.3
 o qmail-smtpd, qmail-remote - improved logging of TLS method errors
+o added svctool, systemctl unit file for daemontools package
+o renamed systemd unit file indimail.service to svscan.service
+o multiple fixes for MySQL/MariaDB database creation during RPM/Deb install
 
 
 This release includes the following files
@@ -30,7 +33,7 @@ README-@version@                (Introduction to IndiMail)
 INSTALL-@version@               (Source Installation Instructions)
 INSTALL-RPM-@version@           (Install Instructions using RPM)
 INSTALL-MYSQL-@version@         (MySQL specific Installation Instructions)
-README-CLUSTER              (Steps on configuring a clustered setup)
+README-CLUSTER            (Steps on configuring a clustered setup)
 Quick-INSTALL-@version@         (A minimal documentation on Installation/Configuration)
 RELEASE-Notes-@version@         (This file)
 indimail-@version@.tar.gz       (IndiMail source)
@@ -142,3 +145,4 @@ Release 2.2 Start 08/05/2017
 41. svctool --config=mysqldb indimail mysql db wasn't getting created
 42. svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
 43. svctool,create_services,postinst - refactored code by improving calls to svctool
+44. fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
