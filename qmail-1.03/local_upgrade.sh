@@ -1,7 +1,10 @@
 #!/bin/sh
-# $Log: $
+# $Log: local_upgrade.sh,v $
+# Revision 1.1  2017-10-22 15:27:47+05:30  Cprogrammer
+# Initial revision
 #
-# $Id:$
+#
+# $Id: local_upgrade.sh,v 1.1 2017-10-22 15:27:47+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -16,6 +19,15 @@ sed=$(which sed)
 
 do_post_upgrade()
 {
+if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
+  systemctl is-enabled svscan >/dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+	  systemctl disable indimail > /dev/null 2>&1
+	  systemctl enable svscan > /dev/null 2>&1
+  fi
+fi
+/bin/rm -f /lib/systemd/system/indimail.service
+/bin/rm -f /usr/lib/systemd/system/indimail.service
 #
 # certs were in /etc/indimail/control
 # they have been moved to /etc/indimail/certs
