@@ -868,7 +868,7 @@ vmoduser_handle: vmoduser_handle.in post_handle
 	$(edit) $@.in > post_handle/vmoduser; ln -sf post_handle/vmoduser $@
 create_services: create_services.in
 	$(edit) $@.in > $@; chmod 755 $@
-indimail.spec: indimail.spec.in catChangeLog
+indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog
 	($(edit) $@.in;./catChangeLog) | $(edit) > $@
 indimail-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
