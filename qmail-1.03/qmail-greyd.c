@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.19  2017-10-28 11:39:46+05:30  Cprogrammer
+ * fixed search record failure when linked list contained just 1 entry
+ *
  * Revision 1.18  2017-04-16 19:52:13+05:30  Cprogrammer
  * fixed hsearch() logic
  *
@@ -737,7 +740,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	e.key = remoteip;
 	if (!(ep = hsearch(e, FIND)))
 		return (RECORD_NEW);
-	for (found = 0, ptr = (struct greylst *) ep->data;ptr && ptr->ip_next;ptr = ptr->ip_next) {
+	for (found = 0, ptr = (struct greylst *) ep->data;ptr;ptr = ptr->ip_next) {
 #ifdef IPV6
 		if (!compare_ip(ptr->ip.ip6.d, r_ip.ip6.d) && !str_diffn(ptr->rpath, rpath, str_len(rpath))
 			&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
@@ -1207,20 +1210,17 @@ main(int argc, char **argv)
 		whitelist_init(whitefn);
 		sig_catch(SIGHUP, sighup);
 	}
-#ifndef NETQMAIL
-	if (!stralloc_copys(&context_file, controldir))
-#else
-	if (!stralloc_copys(&context_file, "control"))
-#endif
-		die_nomem();
-	if (!stralloc_cats(&context_file, "/"))
-		die_nomem();
 	for (ptr = argv[optind++]; *ptr;ptr++);
-	for (;ptr != argv[optind -1];ptr--) {
-		if (*ptr == '/') {
-			ptr++;
-			break;
-		}
+	ptr = argv[optind - 1];
+	if (*ptr != '/') {
+#ifndef NETQMAIL
+		if (!stralloc_copys(&context_file, controldir))
+#else
+		if (!stralloc_copys(&context_file, "control"))
+#endif
+			die_nomem();
+		if (!stralloc_cats(&context_file, "/"))
+			die_nomem();
 	}
 	if (!stralloc_cats(&context_file, ptr))
 		die_nomem();
@@ -1502,7 +1502,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.18 2017-04-16 19:52:13+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.19 2017-10-28 11:39:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
