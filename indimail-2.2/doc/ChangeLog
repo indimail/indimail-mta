@@ -78,6 +78,8 @@ Release 2.2 Start 08/05/2017
 22/10/2017
 44. fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
 45. do systemctl daemon-reload if systemd unit file is changed
+46. fixes in upgrade.sh, local_upgrade.sh scripts
+47. qmail-greyd.c - fixed search record failure when linked list contained just 1 entry
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.1-1.1%{?dist}
 Release 2.1 Start 16/03/2017

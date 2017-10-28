@@ -46,5 +46,7 @@ indimail (@version@-2) unstable; urgency=low
   * svctool,create_services,postinst - refactored code by improving calls to svctool
   * fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
   * do systemctl daemon-reload if systemd unit file is changed
+  * fixes in upgrade.sh, local_upgrade.sh scripts
+  * qmail-greyd.c - fixed search record failure when linked list contained just 1 entry
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 22 Oct 2017 12:49:52 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 28 Oct 2017 11:41:53 +0530
