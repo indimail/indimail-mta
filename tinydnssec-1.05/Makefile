@@ -332,8 +332,8 @@ dns.h stralloc.h gen_alloc.h iopause.h taia.h
 
 dns_sortip.o: \
 compile dns_sortip.c byte.h dns.h stralloc.h gen_alloc.h iopause.h \
-taia.h tai.h uint64.h taia.h conf-dnscurve
-	./compile `grep -h -v "^#" conf-dnscurve` dns_sortip.c
+taia.h tai.h uint64.h taia.h
+	./compile dns_sortip.c
 
 dns_sortip6.o: \
 compile dns_sortip6.c byte.h dns.h stralloc.h gen_alloc.h iopause.h \
@@ -343,8 +343,8 @@ taia.h tai.h uint64.h taia.h
 dns_transmit.o: \
 compile dns_transmit.c socket.h uint16.h alloc.h error.h byte.h \
 uint16.h dns.h stralloc.h gen_alloc.h iopause.h taia.h tai.h uint64.h \
-taia.h conf-dnscurve
-	./compile `grep -h -v "^#" conf-dnscurve` dns_transmit.c
+taia.h
+	./compile dns_transmit.c
 
 dns_txt.o: \
 compile dns_txt.c stralloc.h gen_alloc.h uint16.h byte.h dns.h \
@@ -354,11 +354,11 @@ stralloc.h iopause.h taia.h tai.h uint64.h taia.h
 dnscache: \
 load dnscache.o droproot.o okclient.o log.o siphash.o cache.o dns_random.o query.o \
 response.o dd.o roots.o iopause.o prot.o dns.a env.a alloc.a buffer.a \
-libtai.a unix.a byte.a socket.lib nacl.lib
+libtai.a unix.a byte.a socket.lib
 	./load dnscache droproot.o okclient.o log.o siphash.o cache.o dns_random.o \
 	query.o response.o dd.o roots.o iopause.o prot.o dns.a \
 	env.a alloc.a buffer.a libtai.a unix.a byte.a  `cat \
-	socket.lib nacl.lib`
+	socket.lib
 
 dnscache-conf: \
 load dnscache-conf.o generic-conf.o auto_home.o libtai.a buffer.a \
@@ -378,14 +378,14 @@ uint16.h uint64.h socket.h uint16.h dns.h stralloc.h gen_alloc.h \
 iopause.h taia.h tai.h uint64.h taia.h taia.h byte.h roots.h fmt.h \
 iopause.h query.h dns.h uint32.h alloc.h response.h uint32.h cache.h \
 uint32.h uint64.h ndelay.h log.h uint64.h okclient.h droproot.h \
-openreadclose.h conf-dnscurve
-	./compile `grep -h -v "^#" conf-dnscurve` dnscache.c
+openreadclose.h
+	./compile dnscache.c
 
 dnsfilter: \
 load dnsfilter.o iopause.o getopt.a dns.a env.a libtai.a alloc.a \
-buffer.a unix.a byte.a socket.lib nacl.lib
+buffer.a unix.a byte.a socket.lib
 	./load dnsfilter iopause.o getopt.a dns.a env.a libtai.a \
-	alloc.a buffer.a unix.a byte.a  `cat socket.lib nacl.lib`
+	alloc.a buffer.a unix.a byte.a  `cat socket.lib`
 
 dnsfilter.o: \
 compile dnsfilter.c strerr.h buffer.h stralloc.h gen_alloc.h alloc.h \
@@ -395,9 +395,9 @@ scan.h taia.h sgetopt.h subgetopt.h iopause.h error.h exit.h
 
 dnsip: \
 load dnsip.o iopause.o dns.a env.a libtai.a alloc.a buffer.a unix.a \
-byte.a socket.lib nacl.lib
+byte.a socket.lib
 	./load dnsip iopause.o dns.a env.a libtai.a alloc.a \
-	buffer.a unix.a byte.a  `cat socket.lib nacl.lib`
+	buffer.a unix.a byte.a  `cat socket.lib`
 
 dnsip.o: \
 compile dnsip.c buffer.h exit.h strerr.h ip4.h dns.h stralloc.h \
@@ -406,9 +406,9 @@ gen_alloc.h iopause.h taia.h tai.h uint64.h taia.h
 
 dnsip6: \
 load dnsip6.o iopause.o dns.a env.a libtai.a alloc.a buffer.a unix.a \
-byte.a socket.lib nacl.lib
+byte.a socket.lib
 	./load dnsip6 iopause.o dns.a env.a libtai.a alloc.a \
-	buffer.a unix.a byte.a  `cat socket.lib nacl.lib`
+	buffer.a unix.a byte.a  `cat socket.lib`
 
 dnsip6.o: \
 compile dnsip6.c buffer.h exit.h strerr.h ip6.h dns.h stralloc.h \
@@ -417,9 +417,9 @@ gen_alloc.h iopause.h taia.h tai.h uint64.h
 
 dnsipq: \
 load dnsipq.o iopause.o dns.a env.a libtai.a alloc.a buffer.a unix.a \
-byte.a socket.lib nacl.lib
+byte.a socket.lib
 	./load dnsipq iopause.o dns.a env.a libtai.a alloc.a \
-	buffer.a unix.a byte.a  `cat socket.lib nacl.lib`
+	buffer.a unix.a byte.a  `cat socket.lib`
 
 dnsipq.o: \
 compile dnsipq.c buffer.h exit.h strerr.h ip4.h dns.h stralloc.h \
@@ -428,9 +428,9 @@ gen_alloc.h iopause.h taia.h tai.h uint64.h taia.h
 
 dnsip6q: \
 load dnsip6q.o iopause.o dns.a env.a libtai.a alloc.a buffer.a unix.a \
-byte.a socket.lib nacl.lib
+byte.a socket.lib
 	./load dnsip6q iopause.o dns.a env.a libtai.a alloc.a \
-	buffer.a unix.a byte.a  `cat socket.lib nacl.lib`
+	buffer.a unix.a byte.a  `cat socket.lib`
 
 dnsip6q.o: \
 compile dnsip6q.c buffer.h exit.h strerr.h ip4.h dns.h stralloc.h \
@@ -439,9 +439,9 @@ gen_alloc.h iopause.h taia.h tai.h uint64.h taia.h
 
 dnsmx: \
 load dnsmx.o iopause.o dns.a env.a libtai.a alloc.a buffer.a unix.a \
-byte.a socket.lib nacl.lib
+byte.a socket.lib
 	./load dnsmx iopause.o dns.a env.a libtai.a alloc.a \
-	buffer.a unix.a byte.a  `cat socket.lib nacl.lib`
+	buffer.a unix.a byte.a  `cat socket.lib`
 
 dnsmx.o: \
 compile dnsmx.c buffer.h exit.h strerr.h uint16.h byte.h str.h fmt.h \
@@ -450,9 +450,9 @@ dns.h stralloc.h gen_alloc.h iopause.h taia.h tai.h uint64.h taia.h
 
 dnsname: \
 load dnsname.o iopause.o dns.a env.a libtai.a alloc.a buffer.a unix.a \
-byte.a socket.lib nacl.lib
+byte.a socket.lib
 	./load dnsname iopause.o dns.a env.a libtai.a alloc.a \
-	buffer.a unix.a byte.a  `cat socket.lib nacl.lib`
+	buffer.a unix.a byte.a  `cat socket.lib`
 
 dnsname.o: \
 compile dnsname.c buffer.h exit.h strerr.h ip4.h dns.h stralloc.h \
@@ -466,9 +466,9 @@ stralloc.h iopause.h taia.h tai.h uint64.h taia.h
 
 dnsnamex: \
 load dnsnamex.o dns_namex.o iopause.o dns.a env.a libtai.a alloc.a buffer.a unix.a \
-byte.a socket.lib nacl.lib
+byte.a socket.lib
 	./load dnsnamex dns_namex.o iopause.o dns.a env.a libtai.a alloc.a \
-		buffer.a unix.a byte.a  `cat socket.lib nacl.lib`
+		buffer.a unix.a byte.a  `cat socket.lib`
 
 dnsnamex.o: \
 compile dnsnamex.c buffer.h exit.h strerr.h ip4.h dns.h stralloc.h \
@@ -478,10 +478,10 @@ gen_alloc.h iopause.h taia.h tai.h uint64.h taia.h
 dnsq: \
 load dnsq.o iopause.o printrecord.o printpacket.o parsetype.o dns.a \
 env.a libtai.a buffer.a alloc.a unix.a byte.a socket.lib printtype.o \
-base32hex.o nacl.lib
+base32hex.o
 	./load dnsq iopause.o printrecord.o printpacket.o \
 	parsetype.o dns.a env.a libtai.a buffer.a alloc.a unix.a \
-	byte.a  `cat socket.lib nacl.lib` printtype.o base32hex.o
+	byte.a  `cat socket.lib` printtype.o base32hex.o
 
 dnsq.o: \
 compile dnsq.c uint16.h strerr.h buffer.h scan.h str.h byte.h error.h \
@@ -492,10 +492,10 @@ gen_alloc.h parsetype.h dns.h stralloc.h iopause.h taia.h
 dnsqr: \
 load dnsqr.o iopause.o printrecord.o printpacket.o parsetype.o dns.a \
 env.a libtai.a buffer.a alloc.a unix.a byte.a socket.lib printtype.o \
-base32hex.o nacl.lib
+base32hex.o
 	./load dnsqr iopause.o printrecord.o printpacket.o \
 	parsetype.o dns.a env.a libtai.a buffer.a alloc.a unix.a \
-	byte.a  `cat socket.lib nacl.lib` printtype.o base32hex.o
+	byte.a  `cat socket.lib` printtype.o base32hex.o
 
 dnsqr.o: \
 compile dnsqr.c uint16.h strerr.h buffer.h scan.h str.h byte.h \
@@ -505,11 +505,10 @@ gen_alloc.h parsetype.h dns.h stralloc.h iopause.h taia.h
 
 dnstrace: \
 load dnstrace.o dd.o iopause.o printrecord.o parsetype.o dns.a env.a \
-libtai.a alloc.a buffer.a unix.a byte.a socket.lib printtype.o base32hex.o \
-nacl.lib
+libtai.a alloc.a buffer.a unix.a byte.a socket.lib printtype.o base32hex.o
 	./load dnstrace dd.o iopause.o printrecord.o parsetype.o \
 	dns.a env.a libtai.a alloc.a buffer.a unix.a byte.a  `cat \
-	socket.lib nacl.lib` printtype.o base32hex.o
+	socket.lib` printtype.o base32hex.o
 
 dnstrace.o: \
 compile dnstrace.c uint16.h uint32.h fmt.h str.h byte.h ip4.h \
@@ -534,9 +533,9 @@ warn-auto.sh dnsgetroot.in conf-home
 
 dnstxt: \
 load dnstxt.o iopause.o dns.a env.a libtai.a alloc.a buffer.a unix.a \
-byte.a socket.lib nacl.lib
+byte.a socket.lib
 	./load dnstxt iopause.o dns.a env.a libtai.a alloc.a \
-	buffer.a unix.a byte.a  `cat socket.lib nacl.lib`
+	buffer.a unix.a byte.a  `cat socket.lib`
 
 dnstxt.o: \
 compile dnstxt.c buffer.h exit.h strerr.h dns.h stralloc.h \
@@ -688,8 +687,8 @@ warn-auto.sh conf-ld
 
 log.o: \
 compile log.c buffer.h uint32.h uint16.h error.h byte.h log.h \
-uint64.h conf-dnscurve
-	./compile `grep -h -v "^#" conf-dnscurve` log.c
+uint64.h
+	./compile log.c
 
 makelib: \
 warn-auto.sh systype
@@ -813,8 +812,8 @@ query.o: \
 compile query.c error.h roots.h log.h uint64.h case.h cache.h \
 uint32.h uint64.h byte.h dns.h stralloc.h gen_alloc.h iopause.h \
 taia.h tai.h uint64.h taia.h uint64.h uint32.h uint16.h dd.h alloc.h \
-response.h uint32.h query.h dns.h uint32.h conf-dnscurve
-	./compile `grep -h -v "^#" conf-dnscurve` query.c
+response.h uint32.h query.h dns.h uint32.h
+	./compile query.c
 
 random-ip: \
 load random-ip.o dns.a libtai.a buffer.a unix.a byte.a
