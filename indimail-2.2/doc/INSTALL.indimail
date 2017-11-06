@@ -1,5 +1,5 @@
 File INSTALL.indimail, Version 2.2
-DATE: Sat Sep  9 20:52:03 IST 2017
+DATE: Tue Nov  7 00:17:27 IST 2017
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -444,7 +444,7 @@ the installation.
         --enable-qmaildir=/var/indimail \
         --enable-modbase=/usr/lib/indimail \
         --enable-moduledir=/usr/lib64/security
-        --enable-logdir=/var/log/indimail \
+        --enable-logdir=/var/log/svc \
         --enable-basepath=/home/mail \
         --enable-indiuser=indimail \
         --enable-indigroup=indimail \
@@ -1521,71 +1521,71 @@ smmsp     2506  0.0  0.0   9180  1512 ?        Ss   14:21   0:00 sendmail: Queue
 root     31328  0.0  0.0   2944  1024 ?        Ss   15:24   0:00 /bin/sh /usr/sbin/svscanboot /service /service1
 root     31330  0.0  0.0   1908   388 ?        S    15:24   0:00 /usr/sbin/svscan /service
 root     31331  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31332  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/svscan
+qmaill   31332  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/svscan
 root     31333  0.0  0.0   1728   268 ?        S    15:24   0:00 /usr/sbin/readproctitle /service errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
 root     31334  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-imapd-ssl.993
 indimail 31335  0.0  0.0   5928  1188 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/qmail-imapd-ssl.993/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 993 /usr/bin/couriertls -server -tcpd /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpam /usr/bin/imapd Maildir
 root     31337  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log
-qmaill   31338  0.0  0.0   1756   312 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/imapd-ssl.993
+qmaill   31338  0.0  0.0   1756   312 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/imapd-ssl.993
 root     31339  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-pop3d-ssl.995
 indimail 31341  0.0  0.0   5928  1184 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/qmail-pop3d-ssl.995/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 995 /usr/bin/couriertls -server -tcpd /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpam /usr/bin/pop3d Maildir
 root     31343  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31345  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/pop3d-ssl.995
+qmaill   31345  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/pop3d-ssl.995
 root     31347  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise pwdlookup
 indimail 31348  0.0  0.0  44344  1288 ?        Sl   15:24   0:00 /usr/sbin/nssd -d debug
 root     31354  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
 root     31355  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise indisrvr.4000
 root     31356  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31357  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/pwdlookup
+qmaill   31357  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/pwdlookup
 indimail 31358  0.0  0.0   6360  1320 ?        S    15:24   0:00 /usr/sbin/indisrvr -i 0 -p 4000 -b 40
-qmaill   31360  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/indisrvr.4000
+qmaill   31360  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/indisrvr.4000
 root     31361  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise qscanq
 root     31363  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31364  0.0  0.0   1756   304 ?        S    15:24   0:00 /usr/bin/multilog t -* cleanq starting -* deleting: *: not sticky/var/log/indimail/qscanq
+qmaill   31364  0.0  0.0   1756   304 ?        S    15:24   0:00 /usr/bin/multilog t -* cleanq starting -* deleting: *: not sticky/var/log/svc/qscanq
 root     31366  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-imapd.143
 indimail 31367  0.0  0.0   5928  1204 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/qmail-imapd.143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 143 /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpam /usr/bin/imapd Maildir
 root     31368  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log
-qmaill   31369  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/imapd.143
+qmaill   31369  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/imapd.143
 root     31370  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise qmail-pop3d.110
 indimail 31371  0.0  0.0   5928  1196 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/qmail-pop3d.110/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 110 /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpam /usr/bin/pop3d Maildir
 root     31372  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31373  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/pop3d.110
+qmaill   31373  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/pop3d.110
 root     31374  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise fetchmail
 indimail 31375  0.0  0.1   6392  2828 ?        S    15:24   0:03 /usr/bin/fetchmail --nodetach -f /etc/indimail/fetchmailrc
 root     31376  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31377  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/fetchmail
+qmaill   31377  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/fetchmail
 root     31379  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise proxy-imapd-ssl.9143
 indimail 31380  0.0  0.0   5928  1196 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/proxy-imapd-ssl.9143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 9143 /usr/bin/couriertls -server -tcpd /usr/bin/proxyimap /usr/bin/imapd Maildir
 root     31383  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31384  0.0  0.0   1756   328 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/proxyIMAP.9143
+qmaill   31384  0.0  0.0   1756   328 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/proxyIMAP.9143
 root     31387  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise proxy-imapd.4143
 indimail 31388  0.0  0.0   5928  1188 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/proxy-imapd.4143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 4143 /usr/bin/proxyimap /usr/bin/imapd Maildir
 root     31393  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31395  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/proxyIMAP.4143
+qmaill   31395  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/proxyIMAP.4143
 root     31396  0.0  0.0   1744   328 ?        S    15:24   0:00 supervise proxy-pop3d-ssl.9110
 indimail 31397  0.0  0.0   5928  1316 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/proxy-pop3d-ssl.9110/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 9110 /usr/bin/couriertls -server -tcpd /usr/bin/proxypop3 /usr/bin/pop3d Maildir
 root     31400  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31401  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/proxyPOP3.9110
+qmaill   31401  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/proxyPOP3.9110
 root     31404  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise freshclam
 qscand   31405  0.0  0.0   3500  1332 ?        S    15:24   0:00 /usr/bin/freshclam -v --stdout --datadir=/var/indimail/clamd -f -d -c 2
 root     31406  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log
-qmaill   31407  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/freshclam
+qmaill   31407  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/freshclam
 root     31408  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise qmail-smtpd.366
 indimail 31409  0.0  0.0   5928  1188 ?        S    15:24   0:00 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp.smtp.cdb -c /service/qmail-smtpd.366/variables/MAXDAEMONS -o -b 150 -u 555 -g 555 0 366 /usr/bin/qmail-smtpd indimail.org /usr/sbin/vchkpass /usr/sbin/systpass /bin/false
 root     31414  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31415  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/smtpd.366
+qmaill   31415  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/smtpd.366
 root     31418  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise proxy-pop3d.4110
 indimail 31420  0.0  0.0   5928  1192 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/proxy-pop3d.4110/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 4110 /usr/bin/proxypop3 /usr/bin/pop3d Maildir
 root     31424  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31425  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/proxyPOP3.4110
+qmaill   31425  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/proxyPOP3.4110
 root     31426  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise qmail-send.25
 root     31427  0.0  0.0   1748   308 ?        S    15:24   0:00 qmail-daemon ./Maildir/
 root     31428  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
 root     31429  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-smtpd.25
 indimail 31430  0.0  0.0   5928  1184 ?        S    15:24   0:00 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp.smtp.cdb -c /service/qmail-smtpd.25/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 25 /usr/bin/qmail-smtpd indimail.org /usr/sbin/vchkpass /usr/sbin/systpass /bin/false
-qmaill   31431  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/deliver.25
+qmaill   31431  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/deliver.25
 root     31435  0.0  0.0   1744   328 ?        S    15:24   0:00 supervise log
-qmaill   31437  0.0  0.0   1756   324 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/smtpd.25
+qmaill   31437  0.0  0.0   1756   324 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/smtpd.25
 qmails   31438  0.0  0.0   1928   420 ?        S    15:24   0:00 qmail-send
 root     31439  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise clamd
 root     31440  0.0  0.0   6456  1392 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
@@ -1601,13 +1601,13 @@ qmails   31453  0.0  0.0   1928   428 ?        S    15:24   0:00 qmail-send
 qmailr   31454  0.0  0.0   6468  1396 ?        S    15:24   0:00 qmail-rspawn
 root     31455  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise qmail-spamlog
 indimail 31456  0.0  0.0   1740   280 ?        S    15:24   0:00 /usr/bin/qmail-cat /tmp/spamfifo
-qmaill   31457  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/clamd
+qmaill   31457  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/clamd
 root     31458  0.0  0.0   6456  1428 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
 qmails   31461  0.0  0.0   1928   424 ?        S    15:24   0:00 qmail-send
 qmailq   31462  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 root     31463  0.0  0.0   6456  1432 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
 root     31464  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log
-qmaill   31465  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/spamlog
+qmaill   31465  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/spamlog
 qmails   31467  0.0  0.0   1928   428 ?        S    15:24   0:00 qmail-send
 qmailr   31468  0.0  0.0   6468  1528 ?        S    15:24   0:00 qmail-rspawn
 root     31469  0.0  0.0   6456  1564 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
@@ -1621,7 +1621,7 @@ qmailq   31476  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 root     31477  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise mysql.3306
 root     31478  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
 mysql    31479  0.0  0.3  36652  6364 ?        Sl   15:24   0:00 /usr/libexec/mysqld --defaults-file=/etc/indimail/indimail.cnf --port=3306 --basedir=/usr --datadir=/var/indimail/mysqldb/data --myisam-recover=backup,force --memlock --skip-external-locking --delay-key-write=all --skip-safemalloc --sql-mode=NO_BACKSLASH_ESCAPES --log=/var/indimail/mysqldb/logs/logquery --log-output=FILE --log-isam=/var/indimail/mysqldb/logs/logisam --log-slow-queries=/var/indimail/mysqldb/logs/logslow --log-queries-not-using-indexes --log-warnings=2 --pid-file=/tmp/mysql.3306.pid
-qmaill   31480  0.0  0.0   1756   324 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/mysql.3306
+qmaill   31480  0.0  0.0   1756   324 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/mysql.3306
 qmails   31481  0.0  0.0   1900   404 ?        S    15:24   0:00 qmail-todo
 qmails   31482  0.0  0.0   1928   420 ?        S    15:24   0:00 qmail-send
 root     31483  0.0  0.0   6456  1528 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
@@ -1633,7 +1633,7 @@ indimail 31489  0.0  0.0   6356  1260 ?        S    15:24   0:00 /usr/sbin/inloo
 qmailr   31490  0.0  0.0   6468  1396 ?        S    15:24   0:00 qmail-rspawn
 qmails   31491  0.0  0.0   1900   400 ?        S    15:24   0:00 qmail-todo
 root     31492  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31493  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/inlookup.infifo
+qmaill   31493  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/inlookup.infifo
 qmailq   31494  0.0  0.0   1872   372 ?        S    15:24   0:00 qmail-clean
 indimail 31495  0.0  0.0   6572   860 ?        S    15:24   0:00 /usr/sbin/inlookup -i 5
 indimail 31496  0.0  0.0   6572   860 ?        S    15:24   0:00 /usr/sbin/inlookup -i 5
@@ -1645,10 +1645,10 @@ qmails   31501  0.0  0.0   1900   392 ?        S    15:24   0:00 qmail-todo
 qmailq   31502  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 root      1056  0.0  0.0   1740   316 ?        S    15:24   0:00 supervise qmail-qmtpd.209
 indimail  1078  0.0  0.0   6640  1108 ?        S    15:24   0:00 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp.qmtp.cdb -c /service/qmail-qmtpd.209/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 209 /usr/bin/qmail-qmtpd
-qmaill    1089  0.0  0.0   1756   336 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/qmtpd.209
+qmaill    1089  0.0  0.0   1756   336 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/qmtpd.209
 root      1058  0.0  0.0   1740   316 ?        S    15:24   0:00 supervise qmail-qmqpd.628
 indimail  1102  0.0  0.0   6640   836 ?        S    15:24   0:00 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp.qmqp.cdb -c /service/qmail-qmqpd.628/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 628 /usr/bin/qmail-qmqpd
-qmaill    1110  0.0  0.0   1756   288 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/indimail/qmqpd.628
+qmaill    1110  0.0  0.0   1756   288 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/qmqpd.628
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 Basic Installation
 ==================
