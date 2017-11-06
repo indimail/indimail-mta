@@ -150,7 +150,6 @@
 %attr(0755,root,qmail) @prefix@/bin/recordio
 %attr(0755,root,qmail) @prefix@/bin/replier
 %attr(0755,root,qmail) @prefix@/bin/replier-config
-%attr(0755,root,qmail) @prefix@/bin/resetquota
 %attr(0755,root,qmail) @prefix@/bin/ripmime
 %attr(0755,root,qmail) @prefix@/bin/ripole
 %attr(0755,root,qmail) @prefix@/bin/rmail
@@ -303,6 +302,7 @@
 %attr(0755,root,qmail) @prefix@/sbin/vserverinfo
 %attr(0755,root,qmail) @prefix@/sbin/vsetpass
 %attr(0755,root,qmail) @prefix@/sbin/vtable
+%attr(0755,root,qmail) @prefix@/sbin/resetquota
 
 %attr(0755,root,qmail) @prefix@/sbin/cleanq
 %attr(0755,root,qmail) @prefix@/sbin/qscanq-stdin
@@ -357,9 +357,6 @@
 %attr(0755,root,qmail) @libexecdir@/yearcal
 %attr(0755,root,qmail) @libexecdir@/batv
 %attr(0755,root,qmail) @libexecdir@/bogofilter-qfe
-%attr(0755,root,qmail) @libexecdir@/testmra
-%attr(0755,root,qmail) @libexecdir@/mail_report
-%attr(0755,root,qmail) @libexecdir@/copyemail
 %attr(0755,root,qmail) @libexecdir@/upgrade.sh
 %attr(0755,root,qmail) @libexecdir@/qmail-lagcheck
 
@@ -485,7 +482,6 @@
 %attr(0755,root,qmail) @libexecdir@/hashtable
 %attr(0755,root,qmail) @libexecdir@/cindimail
 %attr(0755,root,qmail) @libexecdir@/cputime
-%attr(0755,root,qmail) @libexecdir@/execmysql
 %attr(0755,root,qmail) @libexecdir@/myslave
 %attr(0755,root,qmail) @libexecdir@/overquota.sh
 %attr(0755,root,qmail) @libexecdir@/qmailmrtg7
