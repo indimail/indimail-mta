@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: upgrade.sh,v $
+# Revision 1.2  2017-11-06 21:46:24+05:30  Cprogrammer
+# fixed upgrade script for posttrans
+#
 # Revision 1.1  2017-10-22 18:53:47+05:30  Cprogrammer
 # Initial revision
 #
@@ -16,13 +19,13 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: upgrade.sh,v 1.1 2017-10-22 18:53:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: upgrade.sh,v 1.2 2017-11-06 21:46:24+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
 	if [ -f /usr/libexec/indimail/local_upgrade.sh ] ; then
 		echo "Running upgrade script for $1"
-		sh /usr/libexec/indimail/local_upgrade.sh
+		sh /usr/libexec/indimail/local_upgrade.sh $1
 		#if [ $? -eq 0 ] ; then
 		#	/bin/rm -f /usr/libexec/indimail/local_upgrade.sh
 		#fi
