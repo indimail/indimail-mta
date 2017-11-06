@@ -1136,7 +1136,7 @@ compile instcheck.c strerr.h error.h exit.h
 	if test -f conf-logdir ; then \
 	./compile instcheck.c -DLOGDIR="\"`cat conf-logdir`\""; \
 	else \
-	./compile instcheck.c -DLOGDIR=\"/var/log/indimail\"; \
+	./compile instcheck.c -DLOGDIR=\"/var/log/svc\"; \
 	fi;
 
 ip.o: \
