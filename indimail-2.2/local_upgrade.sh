@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.15  2017-11-06 21:45:42+05:30  Cprogrammer
+# fixed upgrade script for posttrans
+#
 # Revision 2.14  2017-10-22 19:03:41+05:30  Cprogrammer
 # overwrite LOGFILTER only if it is already set
 #
@@ -43,7 +46,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: local_upgrade.sh,v 2.14 2017-10-22 19:03:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: local_upgrade.sh,v 2.15 2017-11-06 21:45:42+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -58,6 +61,7 @@ sed=$(which sed)
 
 do_post_upgrade()
 {
+date
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -67,6 +71,12 @@ if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 fi
 /bin/rm -f /lib/systemd/system/indimail.service
 /bin/rm -f /usr/lib/systemd/system/indimail.service
+if [ -d /var/log/indimail -a ! -d /var/log/svc ] ; then
+	$mv /var/log/indimail /var/log/svc
+	if [ $? -eq 0 ] ; then
+		$sed -i 's{/var/log/indimail{/var/log/svc{' /service/*/log/run
+	fi
+fi
 #
 # certs were in /etc/indimail/control
 # they have been moved to /etc/indimail/certs
@@ -148,10 +158,8 @@ if [ -d /service/qmail-spamlog ] ; then
 	$chown root:indimail /service/qmail-logfifo/variables
 	$chmod 775 /service/qmail-logfifo/variables
 	echo /tmp/logfifo > /service/qmail-logfifo/variables/LOGFILTER
-	$sed -e 's{smtpd.25{logfifo{' /service/qmail-logfifo/run > /tmp/logfifo.$$
-	$mv /tmp/logfifo.$$ /service/qmail-logfifo/run
-	$sed -e 's{spamlog{logfifo{' /service/qmail-logfifo/log/run > /tmp/logfifo.$$
-	$mv /tmp/logfifo.$$ /service/qmail-logfifo/log/run
+	$sed -i 's{smtpd.25{logfifo{' /service/qmail-logfifo/run
+	$sed -i 's{spamlog{logfifo{' /service/qmail-logfifo/log/run
 fi
 
 # for bogofilter to send back X-Bogosity back to qmail-smtpd as well as log entry
@@ -172,10 +180,12 @@ fi
 # on sighup, since tcpserver is no longer root, it is unable to read MAXDAEMON config
 # file. Better solution is to move MAXDAEMON config file out of /service/*/variables
 # directory
-for i in indisrvr.4000 proxy-* qmail-*imapd* qmail-*pop3d* qmail-*qm?pd.* qmail-smtpd.* qmail-poppass.*
+for i in /service/indisrvr.4000 /service/proxy-* /service/qmail-*imapd* \
+	/service/qmail-*pop3d* /service/qmail-*qm?pd.* /service/qmail-smtpd.* \
+	/service/qmail-poppass.*
 do
-	$chown root:indimail /service/$i/variables
-	$chmod 755 /service/$i/variables
+	$chown root:indimail $i/variables
+	$chmod 755 $i/variables
 done
 
 $uname -n > /service/qmail-send.25/variables/DEFAULT_DOMAIN
@@ -185,10 +195,11 @@ if [ -f /service/fetchmail/variables/QMAILDEFAULTHOST ] ; then
 	$rm -f /service/fetchmamil/variables/QMAILDEFAULTHOST
 fi
 # changed fifo location from /etc/indimail/inquery to /var/indimail/inquery
-for i in inlookup.infifo qmail-imapd* qmail-pop3d* qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587
+for i in /service/inlookup.infifo /service/qmail-imapd* /service/qmail-pop3d* \
+	/service/qmail-smtpd.25 /service/qmail-smtpd.465 /service/qmail-smtpd.587
 do
-	if [ -d /service/$i ] ; then
-		echo /var/indimail/inquery > /service/$i/variables/FIFODIR
+	if [ -d $i ] ; then
+		echo /var/indimail/inquery > $i/variables/FIFODIR
 	fi
 done
 # add for roundcube/php to access certs
@@ -202,7 +213,7 @@ $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' /service/greylist.1999/run
 }
 
 case $1 in
-	post)
+	post|posttrans)
 	do_post_upgrade
 	;;
 esac

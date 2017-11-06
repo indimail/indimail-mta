@@ -1,10 +1,13 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 1.2  2017-11-06 21:46:12+05:30  Cprogrammer
+# fixed upgrade script for posttrans
+#
 # Revision 1.1  2017-10-22 15:27:47+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: local_upgrade.sh,v 1.1 2017-10-22 15:27:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: local_upgrade.sh,v 1.2 2017-11-06 21:46:12+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -28,6 +31,12 @@ if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 fi
 /bin/rm -f /lib/systemd/system/indimail.service
 /bin/rm -f /usr/lib/systemd/system/indimail.service
+if [ -d /var/log/indimail -a ! -d /var/log/svc ] ; then
+	$mv /var/log/indimail /var/log/svc
+	if [ $? -eq 0 ] ; then
+		$sed -i 's{/var/log/indimail{/var/log/svc{' /service/*/log/run
+	fi
+fi
 #
 # certs were in /etc/indimail/control
 # they have been moved to /etc/indimail/certs
@@ -100,10 +109,8 @@ if [ -d /service/qmail-spamlog ] ; then
 	$chown root:indimail /service/qmail-logfifo/variables
 	$chmod 775 /service/qmail-logfifo/variables
 	echo /tmp/logfifo > /service/qmail-logfifo/variables/LOGFILTER
-	$sed -e 's{smtpd.25{logfifo{' /service/qmail-logfifo/run > /tmp/logfifo.$$
-	$mv /tmp/logfifo.$$ /service/qmail-logfifo/run
-	$sed -e 's{spamlog{logfifo{' /service/qmail-logfifo/log/run > /tmp/logfifo.$$
-	$mv /tmp/logfifo.$$ /service/qmail-logfifo/log/run
+	$sed -i 's{smtpd.25{logfifo{' /service/qmail-logfifo/run
+	$sed -i 's{spamlog{logfifo{' /service/qmail-logfifo/log/run
 fi
 
 # for bogofilter to send back X-Bogosity back to qmail-smtpd as well as log entry
@@ -124,10 +131,10 @@ fi
 # on sighup, since tcpserver is no longer root, it is unable to read MAXDAEMON config
 # file. Better solution is to move MAXDAEMON config file out of /service/*/variables
 # directory
-for i in qmail-*qm?pd.* qmail-smtpd.*
+for i in /service/qmail-*qm?pd.* /service/qmail-smtpd.*
 do
-	$chown root:indimail /service/$i/variables
-	$chmod 755 /service/$i/variables
+	$chown root:indimail $i/variables
+	$chmod 755 $i/variables
 done
 
 $uname -n > /service/qmail-send.25/variables/DEFAULT_DOMAIN
@@ -141,7 +148,7 @@ $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' /service/greylist.1999/run
 }
 
 case $1 in
-	post)
+	post|posttrans)
 	do_post_upgrade
 	;;
 esac
