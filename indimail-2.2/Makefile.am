@@ -154,7 +154,7 @@ lib_deps: configure Makefile
 	echo "@auth_libs@ -lcdb" > lib_deps
 
 indimailbin_PROGRAMS = crc crcdiff dbinfo hostcntrl \
-	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
+	printdir proxyimap proxypop3 sslerator vacation vaddaliasdomain vadddomain \
 	vadduser valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser \
 	vdominfo vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv ismaildup \
 	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo crypt iecho
@@ -162,10 +162,10 @@ indimailsbin_PROGRAMS = adminclient chowkidar clearopensmtp \
 	hostsync indisrvr initsvc inlookup inquerytest install_tables \
 	ipchange mgmtpass osh postdel systpass updaterules \
 	vserverinfo vchkpass vsetpass vdelivermail vdeloldusers vfilter vfstab \
-	vmoddomain vreorg vtable
+	vmoddomain vreorg vtable resetquota
 
-indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 execmysql cindimail hashtable displaytop \
-						   updatefile mail_report testmra copyemail
+indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 cindimail hashtable displaytop \
+						   updatefile
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime \
 						  myslave bogofilter-qfe upgrade.sh local_upgrade.sh
 
@@ -361,9 +361,6 @@ ipchange_LDADD = @auth_libs@ $(cdb_lib)
 resetquota_SOURCES = resetquota.c 
 resetquota_LDADD = @auth_libs@ $(cdb_lib)
 
-testmra_SOURCES = testmra.c 
-testmra_LDADD = @auth_libs@ $(cdb_lib) $(shell cat socket.lib 2>/dev/null)
-
 crc_SOURCES=crc.c
 crc_LDADD=
 
@@ -387,21 +384,11 @@ vmoddomain_LDADD= @auth_libs@ $(cdb_lib)
 vcfilter_SOURCES=vcfilter.c
 vcfilter_LDADD= @auth_libs@ $(cdb_lib)
 
-copyemail_SOURCES=copyemail.c
-copyemail_LDADD= @auth_libs@ $(cdb_lib)
-
-mail_report_SOURCES=mail_report.c
-mail_report_LDADD= @auth_libs@ $(cdb_lib)
-
-
 chowkidar_SOURCES = chowkidar.c
 chowkidar_LDADD = @auth_libs@ $(cdb_lib)
 
 postdel_SOURCES = postdel.c
 postdel_LDADD = @auth_libs@ $(cdb_lib)
-
-execmysql_SOURCES = execmysql.c
-execmysql_LDADD = @auth_libs@ $(cdb_lib)
 
 vserverinfo_SOURCES = vserverinfo.c
 vserverinfo_LDADD = @auth_libs@ $(cdb_lib)
@@ -634,7 +621,6 @@ storeHeader.lo: indimail.h config.h
 ssl_timeout.lo: config.h
 strToPw.lo: indimail.h config.h
 chowkidar.lo: indimail.h config.h
-testmra.lo: indimail.h config.h
 findmdahost.lo: indimail.h config.h
 fstabChangeCounters.lo: indimail.h config.h
 FifoCreate.lo: indimail.h config.h
@@ -715,7 +701,6 @@ vupdate_rules.lo: indimail.h config.h
 vuserinfo.lo: indimail.h config.h
 vlimit.lo: indimail.h config.h
 cindimail.lo: indimail.h config.h
-execmysql.lo: indimail.h config.h
 vserverinfo.lo: indimail.h config.h
 filewrt.lo: indimail.h config.h
 vwrite_dir_control.lo: indimail.h config.h

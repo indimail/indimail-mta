@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.430 2017-11-06 21:44:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.431 2017-11-09 10:14:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -887,7 +887,7 @@ install -m 644 %{S:17} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissi
 if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
   for i in dbinfo flash hostcntrl printdir \
-    proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
+    proxyimap proxypop3 sigtool vacation vaddaliasdomain vadddomain vadduser \
     valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
     vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
     vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver ismaildup
@@ -914,11 +914,11 @@ if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{moduledir}/alarms
   /usr/bin/chrpath -d %{buildroot}%{moduledir}/countdown
 
-  for i in adminclient chowkidar cindimail clearopensmtp copyemail execmysql \
-  hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
-  mgmtpass postdel systpass testmra updatefile updaterules vchkpass vdelivermail \
+  for i in adminclient chowkidar cindimail clearopensmtp \
+  hostsync indisrvr inlookup inquerytest install_tables ipchange \
+  mgmtpass postdel systpass updatefile updaterules vchkpass vdelivermail \
   vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw \
-  vtable
+  vtable resetquota
   do
     if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
       /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
@@ -1217,7 +1217,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/logmonitor
 %attr(755,root,qmail)                   %{_prefix}/bin/hostcntrl
 %attr(755,root,qmail)                   %{_prefix}/bin/vpasswd
-%attr(755,root,qmail)                   %{_prefix}/bin/resetquota
 %attr(755,root,qmail)                   %{_prefix}/bin/vcalias
 %attr(755,root,qmail)                   %{_prefix}/bin/vhostid
 %attr(755,root,qmail)                   %{_prefix}/bin/vatrn
@@ -1233,6 +1232,7 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/proxypop3
 %attr(755,root,qmail)                   %{_prefix}/bin/crc
 %attr(755,root,qmail)                   %{_prefix}/bin/iecho
+%attr(755,root,qmail)                   %{_prefix}/sbin/resetquota
 %attr(755,root,qmail)                   %{_prefix}/sbin/vserverinfo
 %attr(755,root,qmail)                   %{_prefix}/sbin/adminclient
 %attr(755,root,qmail)                   %{_prefix}/sbin/chowkidar
@@ -1266,12 +1266,8 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/hashtable
 %attr(755,root,qmail)                   %{libexecdir}/cindimail
 %attr(755,root,qmail)                   %{libexecdir}/cputime
-%attr(755,root,qmail)                   %{libexecdir}/execmysql
 %attr(755,root,qmail)                   %{libexecdir}/myslave
 %attr(755,root,qmail)                   %{libexecdir}/bogofilter-qfe
-%attr(755,root,qmail)                   %{libexecdir}/testmra
-%attr(755,root,qmail)                   %{libexecdir}/mail_report
-%attr(755,root,qmail)                   %{libexecdir}/copyemail
 %attr(755,root,qmail)                   %{libexecdir}/upgrade.sh
 %verify (not md5 size mtime mode)       %{libexecdir}/local_upgrade.sh
 
