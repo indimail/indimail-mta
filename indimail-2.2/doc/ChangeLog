@@ -84,6 +84,9 @@ Release 2.2 Start 08/05/2017
 46. fixes in upgrade.sh, local_upgrade.sh scripts
 47. qmail-greyd.c - fixed search record failure when linked list contained just 1 entry
 ---------- Fourth release of 2.2 -------------------
+07/11/2017
+48. changed logdir to /var/log/svc
+49. removed programs copyemail, testmra, mail_report, execmysql
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.1-1.1%{?dist}
 Release 2.1 Start 16/03/2017
