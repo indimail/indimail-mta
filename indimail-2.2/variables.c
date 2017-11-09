@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.58  2017-11-09 10:15:15+05:30  Cprogrammer
+ * fixed paths
+ *
  * Revision 2.57  2017-10-12 13:26:24+05:30  Cprogrammer
  * removed indiversion
  *
@@ -219,7 +222,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.57 2017-10-12 13:26:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.58 2017-11-09 10:15:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -372,25 +375,21 @@ ADMINCOMMAND adminCommands[] = {
 	{PREFIX"/bin/vsmtp", "Add/Modify/Delete SMTP Routes"},
 	{PREFIX"/bin/dbinfo", "Add/Modify/Delete Mail Control Defination"},
 	{PREFIX"/bin/vhostid", "Add/Modify/Delete Host IDs"},
-	{PREFIX"/bin/mgmtpass", "Manage Admin Client Passwords"},
-	{PREFIX"/bin/inquerytest", "Test Database Server"},
 	{PREFIX"/bin/printdir", "Print Mail Hash Directory Info"},
 	{PREFIX"/bin/svstat", "Get Service Status for IndiMail Services"},
 	{PREFIX"/bin/vaddaliasdomain", "Add an Alias Domain"},
 	{PREFIX"/bin/vadddomain", "Add a Virtual Domain"},
 	{PREFIX"/bin/vcalias", "Convert .qmail files to valias format"},
-	{PREFIX"/bin/vcaliasrev.sh", "Convert Alias to .qmail format"},
+	{PREFIX"/bin/vcaliasrev", "Convert Alias to .qmail format"},
 	{PREFIX"/bin/vdeldomain", "Delete a Virtual Domain"},
 	{PREFIX"/bin/vrenamedomain", "Rename a Virtual Domain"},
 	{PREFIX"/bin/vdominfo", "Domain Information"},
-	{PREFIX"/bin/vfstab", "Add/Modify/Delete Filesystem Balancing for Mail filesystems"},
 	{PREFIX"/bin/vgroup", "Add/Modify/Delete Groups "},
 	{PREFIX"/bin/vatrn", "Add ATRN Maps for ODMR"},
 	{PREFIX"/bin/vpriv", "Add Privileges to Program for IndiSrvr"},
 	{PREFIX"/bin/vlimit", "Administer Domain Wide Limits"},
 	{PREFIX"/bin/hostcntrl", "Administer Hostcntrl Entries"},
 	{PREFIX"/sbin/resetquota", "Reset/Correct quota for a Maildir"},
-	{PREFIX"/sbin/updatefile", "Update Control Files"},
 	{PREFIX"/sbin/vreorg", "Reorganize Mail Database"},
 	{PREFIX"/sbin/vdeloldusers", "Delete Old Mail Users"},
 	{PREFIX"/sbin/ipchange", "Change/Update IP Address changes in IndiMail"},
@@ -399,7 +398,10 @@ ADMINCOMMAND adminCommands[] = {
 	{PREFIX"/sbin/hostsync", "Sync Hostcntrl Information"},
 	{PREFIX"/sbin/inquerytest", "Test inlookup queries"},
 	{PREFIX"/sbin/vmoddomain", "Modify Domain Information"},
-	{PREFIX"/bin/vserverinfo", "Mail Server Information"},
+	{PREFIX"/sbin/vserverinfo", "Mail Server Information"},
+	{PREFIX"/sbin/mgmtpass", "Manage Admin Client Passwords"},
+	{PREFIX"/sbin/vfstab", "Add/Modify/Delete Filesystem Balancing for Mail filesystems"},
+	{LIBEXECDIR"/updatefile", "Update Control Files"},
 	{(char *) NULL, (char *) NULL}
 };
 
