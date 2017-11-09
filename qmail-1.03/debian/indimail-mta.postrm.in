@@ -19,13 +19,13 @@ set -e
 # the debian-policy package
 
 
-prefix=/usr
-qmaildir=/var/indimail
-qsysconfdir=/etc/indimail
-shareddir=${prefix}/share/indimail
-mandir=${prefix}/share/man
-servicedir=/service
-logdir=/var/log/indimail
+prefix=@prefix@
+qmaildir=@qmaildir@
+qsysconfdir=@qsysconfdir@
+shareddir=@shareddir@
+mandir=@mandir@
+servicedir=@servicedir@
+logdir=@logdir@
 rm=/bin/rm
 rmdir=/bin/rmdir
 ####################################

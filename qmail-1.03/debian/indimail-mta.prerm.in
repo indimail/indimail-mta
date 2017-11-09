@@ -16,11 +16,11 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-prefix=/usr
-qmaildir=/var/indimail
-shareddir=${prefix}/share/indimail
-mandir=${prefix}/share/man
-qsysconfdir=/etc/indimail
+prefix=@prefix@
+qmaildir=@qmaildir@
+shareddir=@shareddir@
+mandir=@mandir@
+qsysconfdir=@qsysconfdir@
 rm=/bin/rm
 mv=/bin/mv
 nocourierimap=0

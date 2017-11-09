@@ -2,11 +2,12 @@ prefix=/usr
 qmaildir=/var/indimail
 sysconfdir=/etc
 qsysconfdir=/etc/indimail
-
+mbase=/home/mail
+servicedir=/service
 mandir=$(prefix)/share/man
 libexecdir=$(prefix)/libexec/indimail
 shareddir=$(prefix)/share/indimail
-logdir=/var/log/indimail
+logdir=/var/log/svc
 
 libdkim_version=1.5
 libsrs2_version=1.0.18
@@ -24,6 +25,8 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@mbase\@,$(mbase),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
@@ -34,14 +37,14 @@ edit = sed \
 	-e 's,@libsrs2_version\@,$(libsrs2_version),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-perm_list: ../perm_list.in
+perm_list: ../perm_list.in Makefile
 	$(edit) ../$@.in > $@
 
 install: all
 install-strip: install
 distclean: clean
 
-indimail-mta.install: indimail-mta.install.in
+indimail-mta.install: indimail-mta.install.in Makefile
 	$(edit) $@.in > $@
 
 clean:
@@ -58,19 +61,19 @@ MOSTLYCLEANFILES= indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-obs_deb_prep: obs_deb_prep.in
+obs_deb_prep: obs_deb_prep.in Makefile
 	$(edit) $@.in > $@
-rules: rules.in
+rules: rules.in Makefile
 	$(edit) $@.in > $@
-indimail-mta.dsc: indimail-mta.dsc.in
+indimail-mta.dsc: indimail-mta.dsc.in Makefile
 	$(edit) $@.in > $@
-indimail-mta.postrm: indimail-mta.postrm.in
+indimail-mta.postrm: indimail-mta.postrm.in Makefile
 	$(edit) $@.in > $@
-indimail-mta.prerm: indimail-mta.prerm.in
+indimail-mta.prerm: indimail-mta.prerm.in Makefile
 	$(edit) $@.in > $@
-indimail-mta.postinst: indimail-mta.postinst.in
+indimail-mta.postinst: indimail-mta.postinst.in Makefile
 	$(edit) $@.in > $@
-indimail-mta.preinst: indimail-mta.preinst.in
+indimail-mta.preinst: indimail-mta.preinst.in Makefile
 	$(edit) $@.in > $@
 
 debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
