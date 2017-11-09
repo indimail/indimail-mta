@@ -4,8 +4,8 @@
 # see: dh_installdeb(1)
 
 set -e
-prefix=/usr
-qmaildir=/var/indimail
+prefix=@prefix@
+qmaildir=@qmaildir@
 rm=/bin/rm
 
 # summary of how this script can be called:
