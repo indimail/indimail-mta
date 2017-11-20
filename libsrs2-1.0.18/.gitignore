@@ -16,6 +16,7 @@ configure
 depcomp
 dist/
 install-sh
+mkinstalldirs
 libsrs2/.deps/
 libsrs2/.libs/
 libsrs2/Makefile
