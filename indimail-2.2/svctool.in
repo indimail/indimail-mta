@@ -3382,7 +3382,7 @@ fi
 if [ " $use_btree" = " " ] ; then
 	> $conf_dir/USE_BTREE
 else
-	echo > $conf_dir/USE_BTREE
+	echo 1 > $conf_dir/USE_BTREE
 fi
 if [ ! " $domainlimits" = " " ] ; then
 	echo "DOMAIN_LIMITS=\"\"" > $conf_dir/DOMAIN_LIMITS
