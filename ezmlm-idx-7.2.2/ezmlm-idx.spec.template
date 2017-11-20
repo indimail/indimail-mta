@@ -207,10 +207,6 @@ do
 done
 
 %post
-echo To create an ezmlmrc file for a language other than US English
-echo go to this package\'s doc directory, and type 
-echo "    make iso"
-echo 'where "iso" is the ISO language designation.' 
 echo For currently supported languages, see the INSTALL
 echo file, section 7.
 
