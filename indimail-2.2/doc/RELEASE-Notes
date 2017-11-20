@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Thu Nov  9 09:16:50 IST 2017
+DATE: Mon Nov 20 19:18:18 IST 2017
 
 Announcing Release 2.2 of IndiMail. This release has both source.tar.gz, RPMs and debs.
 
@@ -151,3 +151,4 @@ Release 2.2 Start 08/05/2017
 47. qmail-greyd.c - fixed search record failure when linked list contained just 1 entry
 48. changed logdir to /var/log/svc
 49. removed programs copyemail, testmra, mail_report, execmysql
+50. binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
