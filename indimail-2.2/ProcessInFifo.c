@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.44  2017-11-21 01:12:27+05:30  Cprogrammer
+ * use binary tree algorithm if USE_BTREE env variable is defined
+ *
  * Revision 2.43  2017-11-20 23:23:22+05:30  Cprogrammer
  * binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
  *
@@ -144,7 +147,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.43 2017-11-20 23:23:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.44 2017-11-21 01:12:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -324,7 +327,7 @@ do_startup(int instNum)
 int
 ProcessInFifo(int instNum)
 {
-	int             rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout, relative;
+	int             rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout, relative, use_btree;
 	INENTRY        *in, *re, *retval;
 	struct passwd  *pw;
 	FILE           *fp;
@@ -438,6 +441,8 @@ ProcessInFifo(int instNum)
 		fprintf(stderr, "InLookup: signal: %s: %s\n", InFifo, strerror(errno));
 		return (-1);
 	}
+	ptr = getenv("USE_BTREE");
+	use_btree = ((ptr && *ptr == '1') ? 1 : 0);
 	for (bytes = 0;getppid() != 1;)
 	{
 		if ((idx = read(rfd, (char *) &bytes, sizeof(int))) == -1)
@@ -594,8 +599,8 @@ ProcessInFifo(int instNum)
 		switch(*QueryBuf)
 		{
 			case USER_QUERY:
-				if (!(in = mk_in_entry(email)))
-					status = -1;
+				if (!use_btree || !(in = mk_in_entry(email)))
+					status = UserInLookup(email);
 				else
 				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
 					in_free_func(in);
@@ -630,7 +635,7 @@ ProcessInFifo(int instNum)
 				break;
 #ifdef CLUSTERED_SITE
 			case HOST_QUERY:
-				if (!(in = mk_in_entry(email)))
+				if (!use_btree || !(in = mk_in_entry(email)))
 					ptr = findmdahost(email, 0);
 				else
 				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
@@ -669,7 +674,7 @@ ProcessInFifo(int instNum)
 				break;
 #endif
 			case ALIAS_QUERY:
-				if (!(in = mk_in_entry(email)))
+				if (!use_btree || !(in = mk_in_entry(email)))
 					ptr = AliasInLookup(email);
 				else
 				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
@@ -711,7 +716,7 @@ ProcessInFifo(int instNum)
 #endif
 				break;
 			case PWD_QUERY:
-				if (!(in = mk_in_entry(email)))
+				if (!use_btree || !(in = mk_in_entry(email)))
 					pw = PwdInLookup(email);
 				else
 				if (!(retval = tsearch(in, &in_root, in_compare_func))) {

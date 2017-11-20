@@ -499,7 +499,7 @@ ${prefix}/sbin/svctool --indisrvr=4000 --servicedir=$servicedir \
     --certfile=${sysconfdir}/certs/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=${mbase}
 ${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir \
-	--cntrldir=control --threads=5 --password-cache
+	--cntrldir=control --threads=5 --password-cache --use-btree
 if [ $nonssd -eq 0 ] ; then
 ${prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
 	--mysqlhost=localhost --mysqluser=indimail \
