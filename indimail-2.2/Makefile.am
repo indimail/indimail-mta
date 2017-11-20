@@ -76,7 +76,7 @@ doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf HOWTO.bogofilter \
 
 COMMONSOURCES = addaliasdomain.c add_control.c add_domain_assign.c adddomain.c addressToken.c \
 add_user_assign.c adduser.c addusercntrl.c add_vacation.c \
-AliasInLookup.c atrn_access.c autoturn_dir.c backfill.c bulk_mail.c bulletin.c \
+atrn_access.c autoturn_dir.c backfill.c bulk_mail.c bulletin.c \
 Check_Login.c checkPerm.c check_quota.c close_big_dir.c cntrl_clearaddflag.c \
 cntrl_cleardelflag.c compile_morercpthosts.c CopyEmailFile.c copyPwdStruct.c \
 count_dir.c count_rcpthosts.c count_table.c CreateDomainDirs.c create_table.c \
@@ -98,15 +98,15 @@ make_user_dir.c makesalt.c md5c.c mdaMysqlConnect.c mgmtpassfuncs.c mkpasswd3.c 
 monkey.c MoveFile.c mysql_perror.c mysql_query.c next_big_dir.c no_of_days.c \
 open_big_dir.c open_master.c parse_email.c hmac_sha512.c setuserid.c \
 parse_quota.c passwd.c passwd_policy.c pathToFilesystem.c pipe_exec.c post_handle.c \
-print_control.c ProcessInFifo.c purge_files.c pw_comp.c pwcomp.c \
-PwdInLookup.c qmail_remote.c r_chown.c recalc_quota.c RelayInLookup.c relay_select.c \
+print_control.c purge_files.c pw_comp.c pwcomp.c \
+qmail_remote.c r_chown.c recalc_quota.c relay_select.c \
 RemoteBulkMail.c remove_line.c remove_quotes.c renameuser.c replacestr.c r_mkdir.c \
 runcmmd.c ScanDir.c scat.c scopy.c SendWelcomeMail.c set_mysql_options.c setsockbuf.c \
 setuserquota.c sha256_crypt.c sha512_crypt.c signal_process.c site_size.c \
 skip_relay.c skip_system_files.c slen.c hmac_sha1.c sha1.c hmac_ripemd.c ripemd.c \
 md5_crypt.c hmac_md5.c sockread.c sockwrite.c spam.c SqlServer.c strToPw.c tcpbind.c \
 tcpopen.c timeoutio.c trashpurge.c udpopen.c unsetenv.c update_file.c update_newu.c \
-update_quota.c update_rules.c updusercntrl.c userinfo.c UserInLookup.c user_over_quota.c \
+update_quota.c update_rules.c updusercntrl.c userinfo.c user_over_quota.c \
 vadd_atrn_map.c vadd_ip_map.c valiasCount.c valias_delete.c valias_delete_domain.c \
 valiasinfo.c valias_insert.c valias_select_all.c valias_select.c valias_update.c \
 variables.c vauth_active.c vauth_adddomain.c vauth_adduser.c vauth_delaliasdomain.c \
@@ -120,7 +120,7 @@ vfilter_header.c vfilter_insert.c vfilter_select.c vfilter_update.c \
 vfstab_delete.c vfstab_insert.c vfstabNew.c vfstab_select.c vfstab_status.c \
 vfstab_update.c vget_assign.c vgetent.c vget_ip_map.c vget_lastauth.c vgetpasswd.c \
 vget_real_domain.c vhostid_delete.c vhostid_insert.c vhostid_select.c vhostid_update.c \
-VlimitInLookup.c vlog.c vmake_maildir.c vopen_smtp_relay.c vpriv_delete.c vpriv_insert.c \
+vlog.c vmake_maildir.c vopen_smtp_relay.c vpriv_delete.c vpriv_insert.c \
 vpriv_select.c vpriv_update.c vquota_select.c vread_dir_control.c vset_default_domain.c \
 vset_lastauth.c vset_lastdeliver.c vshow_atrn_map.c vshow_ip_map.c vsmtp_delete.c \
 vsmtp_delete_domain.c vsmtp_insert.c vsmtp_select.c vsmtp_update.c vupdate_rules.c \
@@ -331,10 +331,16 @@ dbinfo_SOURCES = dbinfo.c
 dbinfo_LDADD = @auth_libs@ $(cdb_lib)
 
 inquerytest_SOURCES = inquerytest.c 
-inquerytest_LDADD = @auth_libs@ $(cdb_lib)
+inquerytest_LDADD = @auth_libs@ $(cdb_lib) ProcessInFifo.lo  AliasInLookup.lo PwdInLookup.lo \
+	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo -ldl
+inquerytest_DEPENDENCIES = ProcessInFifo.lo  AliasInLookup.lo PwdInLookup.lo RelayInLookup.lo \
+	UserInLookup.lo VlimitInLookup.lo
 
 inlookup_SOURCES = inlookup.c 
-inlookup_LDADD = @auth_libs@ $(cdb_lib)
+inlookup_LDADD = @auth_libs@ $(cdb_lib) ProcessInFifo.lo AliasInLookup.lo PwdInLookup.lo \
+	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo -ldl
+inlookup_DEPENDENCIES = ProcessInFifo.lo AliasInLookup.lo PwdInLookup.lo RelayInLookup.lo \
+	UserInLookup.lo VlimitInLookup.lo
 
 mgmtpass_SOURCES = mgmtpass.c 
 mgmtpass_LDADD = @auth_libs@ $(cdb_lib)
