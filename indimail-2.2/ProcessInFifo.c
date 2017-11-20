@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.43  2017-11-20 23:23:22+05:30  Cprogrammer
+ * binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
+ *
  * Revision 2.42  2017-03-27 08:53:35+05:30  Cprogrammer
  * added FIFODIR variable for location of infifo
  *
@@ -141,19 +144,31 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.42 2017-03-27 08:53:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.43 2017-11-20 23:23:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
-#include <errno.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#include <errno.h>
 #include <signal.h>
 #include <time.h>
 #include <sys/socket.h>
 #include "indimail.h"
 #include "error_stack.h"
+#include "in_bsearch.h"
 #ifdef ENABLE_ENTERPRISE
 #include <dlfcn.h>
 #endif
@@ -164,6 +179,7 @@ time_t          start_time;
 #ifdef CLUSTERED_SITE
 int             host_query_count;
 #endif
+static void    *in_root = 0;
 
 #ifdef DARWIN
 static void     sig_usr1();
@@ -178,6 +194,79 @@ static void     sig_block(int);
 static char    *getFifo_name();
 static void     getTimeoutValues(int *, int *, char *, char *);
 static char    *query_type(int);
+
+/*-
+typedef struct
+{
+	char           *in_key;
+	struct passwd   in_pw;
+	char           *aliases;
+	char           *mdahost;
+	 *
+	 *  0: User is fine
+	 *  1: User is not present
+	 *  2: User is Inactive
+	 *  3: User is overquota
+	 * -1: System Error
+	 *
+	int             in_userStatus;
+} INENTRY;
+*/
+
+INENTRY        *
+mk_in_entry(char *key)
+{
+	INENTRY        *in;
+
+	if (!(in = (INENTRY *) malloc(sizeof (INENTRY))))
+		return ((INENTRY *) 0);
+	in->in_key = strdup(key);
+	in->aliases = in->mdahost = (char *) 0;
+	in->in_userStatus = -1;
+	in->in_pw.pw_name = (char *) 0;
+	in->in_pw.pw_passwd = (char *) 0;
+	in->in_pw.pw_gecos = (char *) 0;
+	in->in_pw.pw_dir = (char *) 0;
+	in->in_pw.pw_shell = (char *) 0;
+	return in;
+}
+
+void
+in_free_func(void *in_data)
+{
+	INENTRY        *m = in_data;
+	if (!m)
+		return;
+	if (m->in_key) {
+		free(m->in_key);
+		free(m->aliases);
+		free(m->mdahost);
+		free(m->in_pw.pw_name);
+		free(m->in_pw.pw_passwd);
+		free(m->in_pw.pw_gecos);
+		free(m->in_pw.pw_dir);
+		free(m->in_pw.pw_shell);
+		m->in_key = 0;
+	}
+	free(in_data);
+	return;
+}
+
+int
+in_compare_func(const void *l, const void *r)
+{
+	return strcmp(*(char **) l, *(char **) r);
+}
+
+void
+walk_entry(const void *in_data, VISIT x, int level)
+{
+	INENTRY        *m = *(INENTRY **) in_data;
+	printf("<%d>Walk on node %s %s %s  \n", level,
+		   x == preorder ? "preorder" : x == postorder ? "postorder" : x == endorder ? "endorder" : x == leaf ? "leaf" : "unknown",
+		   m->in_key, m->in_pw.pw_passwd);
+	return;
+}
 
 #ifdef ENABLE_ENTERPRISE
 int
@@ -236,6 +325,7 @@ int
 ProcessInFifo(int instNum)
 {
 	int             rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout, relative;
+	INENTRY        *in, *re, *retval;
 	struct passwd  *pw;
 	FILE           *fp;
 	char            InFifo[MAX_BUFF], pwbuf[MAX_BUFF], host_path[MAX_BUFF], tmpbuf[MAX_BUFF];
@@ -483,12 +573,12 @@ ProcessInFifo(int instNum)
 		for (;*ptr;ptr++);
 		ptr++;
 		remoteip = ptr;
+		if ((cptr = strrchr(InFifo, '/')))
+			cptr++;
+		else
+			cptr = InFifo;
 		if (verbose || _debug)
 		{
-			if ((cptr = strrchr(InFifo, '/')))
-				cptr++;
-			else
-				cptr = InFifo;
 			printf("%s->%s, Bytes %d, Query %d, User %s, RemoteIp %s\n", 
 				cptr, myFifo, bytes, *QueryBuf, email, *QueryBuf == 2 ? remoteip : "N/A");
 			fflush(stdout);
@@ -504,7 +594,30 @@ ProcessInFifo(int instNum)
 		switch(*QueryBuf)
 		{
 			case USER_QUERY:
-				status = UserInLookup(email);
+				if (!(in = mk_in_entry(email)))
+					status = -1;
+				else
+				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
+					in_free_func(in);
+					status = UserInLookup(email);
+				} else {
+					re = *(INENTRY **) retval;
+					if (re != in) { /*- existing data */
+						status = re->in_userStatus;
+						if (status < 0) {
+							status = UserInLookup(email);
+							re->in_userStatus = status;
+						} else
+						if (verbose || _debug) {
+							printf("%s->%s, Query %d, User %s cache hit\n", cptr, myFifo, *QueryBuf, email);
+							fflush(stdout);
+						}
+						in_free_func(in); /*- Prevents data leak: in was already present.  */
+					} else {/*- New entry in was added.  */
+						status = UserInLookup(email);
+						in->in_userStatus = status;
+					}
+				}
 				if (timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1)
 					fprintf(stderr, "InLookup: write-UserInLookup: %s\n", strerror(errno));
 				close(wfd);
@@ -517,7 +630,30 @@ ProcessInFifo(int instNum)
 				break;
 #ifdef CLUSTERED_SITE
 			case HOST_QUERY:
-				ptr = findmdahost(email, 0);
+				if (!(in = mk_in_entry(email)))
+					ptr = findmdahost(email, 0);
+				else
+				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
+					in_free_func(in);
+					ptr = findmdahost(email, 0);
+				} else {
+					re = *(INENTRY **) retval;
+					if (re != in) { /*- existing data */
+						ptr = re->mdahost;
+						if (!ptr) {
+							if ((ptr = findmdahost(email, 0)))
+								re->mdahost = strdup(ptr);
+						} else
+						if (verbose || _debug) {
+							printf("%s->%s, Query %d, User %s cache hit\n", cptr, myFifo, *QueryBuf, email);
+							fflush(stdout);
+						}
+						in_free_func(in); /*- Prevents data leak: in was already present.  */
+					} else {/*- New entry in was added.  */
+						if ((ptr = findmdahost(email, 0)))
+							in->mdahost = strdup(ptr);
+					}
+				}
 				if (ptr)
 					bytes = slen(ptr) + 1;
 				else
@@ -533,13 +669,34 @@ ProcessInFifo(int instNum)
 				break;
 #endif
 			case ALIAS_QUERY:
-				ptr = AliasInLookup(email);
-				if (ptr && *ptr)
-				{
+				if (!(in = mk_in_entry(email)))
+					ptr = AliasInLookup(email);
+				else
+				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
+					in_free_func(in);
+					ptr = AliasInLookup(email);
+				} else {
+					re = *(INENTRY **) retval;
+					if (re != in) { /*- existing data */
+						ptr = re->aliases;
+						if (!ptr) {
+							if ((ptr = AliasInLookup(email)))
+								re->aliases = strdup(ptr);
+						} else
+						if (verbose || _debug) {
+							printf("%s->%s, Query %d, User %s cache hit\n", cptr, myFifo, *QueryBuf, email);
+							fflush(stdout);
+						}
+						in_free_func(in); /*- Prevents data leak: in was already present.  */
+					} else {/*- New entry in was added.  */
+						if ((ptr = AliasInLookup(email)))
+							in->aliases = strdup(ptr);
+					}
+				}
+				if (ptr && *ptr) {
 					if ((bytes = slen(ptr) + 1) > pipe_size)
 						bytes = -1;
-				} else
-				{
+				} else {
 					bytes = 1; /*- write Null Byte */
 					ptr = "\0";
 				}
@@ -554,8 +711,50 @@ ProcessInFifo(int instNum)
 #endif
 				break;
 			case PWD_QUERY:
+				if (!(in = mk_in_entry(email)))
+					pw = PwdInLookup(email);
+				else
+				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
+					in_free_func(in);
+					pw = PwdInLookup(email);
+				} else {
+					re = *(INENTRY **) retval;
+					if (re != in) { /*- existing data */
+						if (!re->pwStat) {
+							if ((pw = PwdInLookup(email))) {
+								re->in_pw.pw_uid = pw->pw_uid;
+								re->in_pw.pw_gid = pw->pw_gid;
+								re->in_pw.pw_name = strdup(pw->pw_name);
+								re->in_pw.pw_passwd = strdup(pw->pw_passwd);
+								re->in_pw.pw_gecos = strdup(pw->pw_gecos);
+								re->in_pw.pw_dir = strdup(pw->pw_dir);
+								re->in_pw.pw_shell = strdup(pw->pw_shell);
+								re->pwStat = 1;
+							}
+						} else {
+							pw = &re->in_pw;
+							if (verbose || _debug) {
+								printf("%s->%s, Query %d, User %s cache hit\n", cptr, myFifo, *QueryBuf, email);
+								fflush(stdout);
+							}
+						}
+						in_free_func(in); /*- Prevents data leak: in was already present.  */
+					} else {/*- New entry in was added.  */
+						if ((pw = PwdInLookup(email))) {
+							in->in_pw.pw_uid = pw->pw_uid;
+							in->in_pw.pw_gid = pw->pw_gid;
+							in->in_pw.pw_name = strdup(pw->pw_name);
+							in->in_pw.pw_passwd = strdup(pw->pw_passwd);
+							in->in_pw.pw_gecos = strdup(pw->pw_gecos);
+							in->in_pw.pw_dir = strdup(pw->pw_dir);
+							in->in_pw.pw_shell = strdup(pw->pw_shell);
+							in->pwStat = 1;
+						} else
+							in->pwStat = 0;
+					}
+				}
 				/*- Connect to mysql after fetching ip host details for the user from hostcntrl.*/
-				if ((pw = PwdInLookup(email)))
+				if (pw)
 				{
 					snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
 						email,
@@ -595,10 +794,10 @@ ProcessInFifo(int instNum)
 						bytes = -1;
 				}
 				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
-					fprintf(stderr, "InLookup: write-PwdInLookup: %s\n", strerror(errno));
+					fprintf(stderr, "InLookup: write-VlimitInLookup: %s\n", strerror(errno));
 				else
 				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, (char *) &limits, bytes) == -1)
-					fprintf(stderr, "InLookup: write-PwdInLookup: %s\n", strerror(errno));
+					fprintf(stderr, "InLookup: write-VlimitInLookup: %s\n", strerror(errno));
 				close(wfd);
 				break;
 #endif
@@ -705,6 +904,7 @@ sig_usr1()
 	printf("End   Time: %s", ctime(&cur_time));
 	printf("Queries %ld, Total Time %ld secs, Query/Sec = %.02f\n", total_count, (cur_time - start_time), 
 		(float) ((float) total_count/(cur_time - start_time)));
+	twalk(in_root, walk_entry);
 	fflush(stdout);
 	signal(SIGUSR1, (void(*)()) sig_usr1);
 	errno = EINTR;
@@ -746,6 +946,8 @@ sig_hup()
 	vget_assign_cache(0);
 	vget_real_domain_cache(0);
 #endif
+	tdestroy(in_root, in_free_func);
+	in_root = 0;
 	fflush(stdout);
 	signal(SIGHUP, (void(*)()) sig_hup);
 	errno = EINTR;
@@ -842,6 +1044,8 @@ sig_hand(sig, code, scp, addr)
 			printf("End   Time: %s", ctime(&cur_time));
 			printf("Queries %ld, Total Time %ld secs, Query/Sec = %.02f\n", total_count, (cur_time - start_time), 
 				(float) ((float) total_count/(cur_time - start_time)));
+			if (sig == SIGUSR1)
+				twalk(in_root, walk_entry);
 			if (sig == SIGTERM)
 			{
 				fflush(stdout);
@@ -868,6 +1072,8 @@ sig_hand(sig, code, scp, addr)
 			vget_assign_cache(0);
 			vget_real_domain_cache(0);
 #endif
+			tdestroy(in_root, in_free_func);
+			in_root = 0;
 		break;
 		case SIGINT:
 			printf("%d %s closing db\n", (int) getpid(), fifo_name);
