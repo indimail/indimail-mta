@@ -203,10 +203,12 @@ if [ " $1" = " purge" ] ; then
 	echo "removing startup services"
 	for i in clamd freshclam qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq \
 	qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
-	greylist.1999 udplogger.3000 .svscan
+	greylist.1999 udplogger.3000 .svscan resolvconf dnscache
 	do
 		if [ -d ${servicedir}/$i ] ; then
 			${rm} -rf ${servicedir}/$i >/dev/null 2>&1 || true
+		elif [ -f ${servicedir}/$i ] ; then
+			${rm} -f ${servicedir}/$i >/dev/null 2>&1 || true
 		fi
 	done
 
