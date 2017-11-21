@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.45  2017-11-21 14:41:16+05:30  Cprogrammer
+ * use MAX_BTREE_COUNT to limit btree search nodes
+ *
  * Revision 2.44  2017-11-21 01:12:27+05:30  Cprogrammer
  * use binary tree algorithm if USE_BTREE env variable is defined
  *
@@ -147,7 +150,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.44 2017-11-21 01:12:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.45 2017-11-21 14:41:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -177,7 +180,7 @@ static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.44 2017-11-21 01:12:27+05:3
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
-int             limit_query_count, dom_query_count, _debug;
+int             limit_query_count, dom_query_count, btree_count, _debug;
 time_t          start_time;
 #ifdef CLUSTERED_SITE
 int             host_query_count;
@@ -283,8 +286,7 @@ do_startup(int instNum)
 
 	if (!(plugindir = getenv("PLUGINDIR")))
 		plugindir = "plugins";
-	if (strchr(plugindir, '/'))
-	{
+	if (strchr(plugindir, '/')) {
 		fprintf(stderr, "alert: plugindir cannot have an absolute path\n");
 		return (-1);
 	}
@@ -293,20 +295,17 @@ do_startup(int instNum)
 	if (!(start_plugin = getenv("START_PLUGIN")))
 		start_plugin = "indimail-license.so";
 	snprintf(plugin, MAX_BUFF - 1, "/usr/lib/indimail/%s/%s", plugindir, start_plugin);
-	if (access(plugin, F_OK))
-	{
+	if (access(plugin, F_OK)) {
 		fprintf(stderr, "InLookup[%d] plugin %s: %s\n", instNum, plugin, strerror(errno));
 		return (2);
 	}
-	if (!(handle = dlopen(plugin, RTLD_LAZY|RTLD_GLOBAL)))
-	{
+	if (!(handle = dlopen(plugin, RTLD_LAZY|RTLD_GLOBAL))) {
 		fprintf(stderr, "InLookup[%d] dlopen failed for %s: %s\n", instNum, plugin, dlerror());
 		return (-1);
 	}
 	dlerror(); /*- man page told me to do this */
 	func = dlsym(handle, plugin_symb);
-	if ((error = dlerror()))
-	{
+	if ((error = dlerror())) {
 		fprintf(stderr, "InLookup[%d] dlsym %s failed: %s\n", instNum, plugin_symb, error);
 		_exit(111);
 	}
@@ -315,8 +314,7 @@ do_startup(int instNum)
 	if ((status = (*func) ()))
 		fprintf(stderr, "InLookup[%d] function %s failed with status %d\n",
 			instNum, plugin_symb, status);
-	if (dlclose(handle))
-	{
+	if (dlclose(handle)) {
 		fprintf(stderr, "InLookup[%d] dlclose for %s failed: %s\n", instNum, plugin, error);
 		return (-1);
 	}
@@ -328,13 +326,15 @@ int
 ProcessInFifo(int instNum)
 {
 	int             rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout, relative, use_btree;
+	int             max_btree_count;
 	INENTRY        *in, *re, *retval;
 	struct passwd  *pw;
 	FILE           *fp;
 	char            InFifo[MAX_BUFF], pwbuf[MAX_BUFF], host_path[MAX_BUFF], tmpbuf[MAX_BUFF];
-	char           *ptr, *cptr, *sysconfdir, *infifo_dir, *controldir, *QueryBuf, *email, *myFifo,
+	char           *ptr, *fifoName, *sysconfdir, *infifo_dir, *controldir, *QueryBuf, *email, *myFifo,
 				   *remoteip, *infifo, *local_ip, *cntrl_host, *real_domain;
 	void            (*pstat) ();
+	void           *(*search_func) (const void *key, void *const *rootp, int (*compar)(const void *, const void *));
 	time_t          prev_time = 0l;
 #ifdef ENABLE_DOMAIN_LIMITS
 	struct vlimits  limits;
@@ -360,10 +360,8 @@ ProcessInFifo(int instNum)
 	signal(SIGINT, (void(*)()) sig_hand);
 #endif
 #ifdef ENABLE_ENTERPRISE
-	for (;;)
-	{
-		if ((count = count_table("indimail")) == -1)
-		{
+	for (;;) {
+		if ((count = count_table("indimail")) == -1) {
 			flush_stack();
 			printf("InLookup[%d] PPID %d PID %d unable to get count\n",
 				instNum, getppid(), getpid());
@@ -373,8 +371,7 @@ ProcessInFifo(int instNum)
 		}
 		vclose();
 		getEnvConfigLong(&ucount, "MAXUSERS", 10000);
-		if (count > ucount && (idx = do_startup(instNum)))
-		{
+		if (count > ucount && (idx = do_startup(instNum))) {
 			printf("enterprise version requires plugin\n");
 			if (idx)
 				printf("invalid plugin\n");
@@ -407,23 +404,19 @@ ProcessInFifo(int instNum)
 	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getTimeoutValues(&readTimeout, &writeTimeout, sysconfdir, controldir);
 	/*- Open the Fifos */
-	if (FifoCreate(InFifo) == -1)
-	{
+	if (FifoCreate(InFifo) == -1) {
 		fprintf(stderr, "InLookup: FifoCreate: %s: %s\n", InFifo, strerror(errno));
 		return (-1);
 	} else
-	if ((rfd = open(InFifo, O_RDWR, 0)) == -1)
-	{
+	if ((rfd = open(InFifo, O_RDWR, 0)) == -1) {
 		fprintf(stderr, "InLookup: open: %s: %s\n", InFifo, strerror(errno));
 		return (-1);
 	} else 
-	if ((pipe_size = fpathconf(rfd, _PC_PIPE_BUF)) == -1)
-	{
+	if ((pipe_size = fpathconf(rfd, _PC_PIPE_BUF)) == -1) {
 		fprintf(stderr, "InLookup: fpathconf: %s: %s\n", InFifo, strerror(errno));
 		return (-1);
 	} else
-	if (!(QueryBuf = (char *) malloc(pipe_size * sizeof(char))))
-	{
+	if (!(QueryBuf = (char *) malloc(pipe_size * sizeof(char)))) {
 		fprintf(stderr, "InLookup: malloc(%d bytes): %s: %s\n", pipe_size, InFifo, strerror(errno));
 		return (-1);
 	}
@@ -431,22 +424,24 @@ ProcessInFifo(int instNum)
 #ifdef CLUSTERED_SITE
 	host_query_count = 0;
 #endif
-	if (!(local_ip = get_local_ip(PF_INET)))
-	{
+	if (!(local_ip = get_local_ip(PF_INET))) {
 		local_ip = "127.0.0.1";
 		fprintf(stderr, "ProcessInFifo: get_local_ip failed. using localhost\n");
 	}
-	if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
-	{
+	if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
 		fprintf(stderr, "InLookup: signal: %s: %s\n", InFifo, strerror(errno));
 		return (-1);
 	}
 	ptr = getenv("USE_BTREE");
 	use_btree = ((ptr && *ptr == '1') ? 1 : 0);
-	for (bytes = 0;getppid() != 1;)
-	{
-		if ((idx = read(rfd, (char *) &bytes, sizeof(int))) == -1)
-		{
+	max_btree_count = ((ptr = getenv("MAX_BTREE_COUNT")) && *ptr ? atoi(ptr) : -1);
+	search_func = tsearch; /*- this adds a record if not found */
+	if ((fifoName = strrchr(InFifo, '/')))
+		fifoName++;
+	else
+		fifoName = InFifo;
+	for (bytes = 0;getppid() != 1;) {
+		if ((idx = read(rfd, (char *) &bytes, sizeof(int))) == -1) {
 #ifdef ERESTART
 			if (errno != EINTR && errno != ERESTART)
 #else
@@ -455,33 +450,27 @@ ProcessInFifo(int instNum)
 				fprintf(stderr, "InLookup: read: %s\n", strerror(errno));
 			continue;
 		} else
-		if (!idx)
-		{
+		if (!idx) {
 			close(rfd);
-			if ((rfd = open(InFifo, O_RDWR, 0)) == -1)
-			{
+			if ((rfd = open(InFifo, O_RDWR, 0)) == -1) {
 				fprintf(stderr, "InLookup: open: %s: %s\n", InFifo, strerror(errno));
 				signal(SIGPIPE, pstat);
 				return (-1);
 			} else
 				continue;
 		} else
-		if (bytes > pipe_size)
-		{
+		if (bytes > pipe_size) {
 			errno = EMSGSIZE;
 			fprintf(stderr, "InLookup: bytes %d, pipe_size %d, %s\n", bytes, pipe_size, strerror(errno));
 			continue;
 		} else
-		if ((idx = timeoutread(readTimeout, rfd, QueryBuf, bytes)) == -1)
-		{
+		if ((idx = timeoutread(readTimeout, rfd, QueryBuf, bytes)) == -1) {
 			fprintf(stderr, "InLookup: read-int: %s\n", strerror(errno));
 			continue;
 		} else
-		if (!idx)
-		{
+		if (!idx) {
 			close(rfd);
-			if ((rfd = open(InFifo, O_RDWR, 0)) == -1)
-			{
+			if ((rfd = open(InFifo, O_RDWR, 0)) == -1) {
 				fprintf(stderr, "InLookup: open: %s: %s\n", InFifo, strerror(errno));
 				signal(SIGPIPE, pstat);
 				return (-1);
@@ -503,14 +492,11 @@ ProcessInFifo(int instNum)
 		}
 		if (access(host_path, F_OK))
 			cntrl_host = 0;
-		else
-		{
+		else {
 			if (!(fp = fopen(host_path, "r")))
 				cntrl_host = 0;
-			else
-			{
-				if (!fgets(tmpbuf, MAX_BUFF - 2, fp))
-				{
+			else {
+				if (!fgets(tmpbuf, MAX_BUFF - 2, fp)) {
 					fprintf(stderr, "fgets: %s\n", strerror(errno));
 					fclose(fp);
 					cntrl_host = 0;
@@ -522,19 +508,16 @@ ProcessInFifo(int instNum)
 				cntrl_host = tmpbuf;
 			}
 		}
-		if (!isopen_cntrl && open_central_db(cntrl_host))
-		{
+		if (!isopen_cntrl && open_central_db(cntrl_host)) {
 			fprintf(stderr, "InLookup: Unable to open central db\n");
 			signal(SIGPIPE, pstat);
 			return (-1);
 		}
-		if (mysql_ping(&mysql[0]))
-		{
+		if (mysql_ping(&mysql[0])) {
 			fprintf(stderr, "mysql_ping: %s: Reconnecting to central db...\n", mysql_error(&mysql[0]));
 			mysql_close(&mysql[0]);
 			isopen_cntrl = 0;
-			if (open_central_db(cntrl_host))
-			{
+			if (open_central_db(cntrl_host)) {
 				fprintf(stderr, "InLookup: Unable to open central db\n");
 				signal(SIGPIPE, pstat);
 				return (-1);
@@ -578,18 +561,12 @@ ProcessInFifo(int instNum)
 		for (;*ptr;ptr++);
 		ptr++;
 		remoteip = ptr;
-		if ((cptr = strrchr(InFifo, '/')))
-			cptr++;
-		else
-			cptr = InFifo;
-		if (verbose || _debug)
-		{
+		if (verbose || _debug) {
 			printf("%s->%s, Bytes %d, Query %d, User %s, RemoteIp %s\n", 
-				cptr, myFifo, bytes, *QueryBuf, email, *QueryBuf == 2 ? remoteip : "N/A");
+				fifoName, myFifo, bytes, *QueryBuf, email, *QueryBuf == 2 ? remoteip : "N/A");
 			fflush(stdout);
 		}
-		if ((wfd = open(myFifo, O_RDWR, 0)) == -1)
-		{
+		if ((wfd = open(myFifo, O_RDWR, 0)) == -1) {
 			fprintf(stderr, "InLookup: open-probably-timeout: %s: QueryType %s: %s\n", myFifo, query_type(*QueryBuf), strerror(errno));
 			if (errno != ENOENT)
 				unlink(myFifo);
@@ -602,7 +579,7 @@ ProcessInFifo(int instNum)
 				if (!use_btree || !(in = mk_in_entry(email)))
 					status = UserInLookup(email);
 				else
-				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
+				if (!(retval = search_func (in, &in_root, in_compare_func))) {
 					in_free_func(in);
 					status = UserInLookup(email);
 				} else {
@@ -614,13 +591,16 @@ ProcessInFifo(int instNum)
 							re->in_userStatus = status;
 						} else
 						if (verbose || _debug) {
-							printf("%s->%s, Query %d, User %s cache hit\n", cptr, myFifo, *QueryBuf, email);
+							printf("%s->%s, cache hit\n", fifoName, myFifo);
 							fflush(stdout);
 						}
 						in_free_func(in); /*- Prevents data leak: in was already present.  */
 					} else {/*- New entry in was added.  */
 						status = UserInLookup(email);
 						in->in_userStatus = status;
+						btree_count++;
+						if (max_btree_count > 0 && btree_count >= max_btree_count)
+							search_func = tfind;
 					}
 				}
 				if (timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1)
@@ -638,7 +618,7 @@ ProcessInFifo(int instNum)
 				if (!use_btree || !(in = mk_in_entry(email)))
 					ptr = findmdahost(email, 0);
 				else
-				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
+				if (!(retval = search_func (in, &in_root, in_compare_func))) {
 					in_free_func(in);
 					ptr = findmdahost(email, 0);
 				} else {
@@ -650,13 +630,16 @@ ProcessInFifo(int instNum)
 								re->mdahost = strdup(ptr);
 						} else
 						if (verbose || _debug) {
-							printf("%s->%s, Query %d, User %s cache hit\n", cptr, myFifo, *QueryBuf, email);
+							printf("%s->%s, cache hit\n", fifoName, myFifo);
 							fflush(stdout);
 						}
 						in_free_func(in); /*- Prevents data leak: in was already present.  */
 					} else {/*- New entry in was added.  */
 						if ((ptr = findmdahost(email, 0)))
 							in->mdahost = strdup(ptr);
+						btree_count++;
+						if (max_btree_count > 0 && btree_count >= max_btree_count)
+							search_func = tfind;
 					}
 				}
 				if (ptr)
@@ -677,7 +660,7 @@ ProcessInFifo(int instNum)
 				if (!use_btree || !(in = mk_in_entry(email)))
 					ptr = AliasInLookup(email);
 				else
-				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
+				if (!(retval = search_func (in, &in_root, in_compare_func))) {
 					in_free_func(in);
 					ptr = AliasInLookup(email);
 				} else {
@@ -689,13 +672,16 @@ ProcessInFifo(int instNum)
 								re->aliases = strdup(ptr);
 						} else
 						if (verbose || _debug) {
-							printf("%s->%s, Query %d, User %s cache hit\n", cptr, myFifo, *QueryBuf, email);
+							printf("%s->%s, cache hit\n", fifoName, myFifo);
 							fflush(stdout);
 						}
 						in_free_func(in); /*- Prevents data leak: in was already present.  */
 					} else {/*- New entry in was added.  */
 						if ((ptr = AliasInLookup(email)))
 							in->aliases = strdup(ptr);
+						btree_count++;
+						if (max_btree_count > 0 && btree_count >= max_btree_count)
+							search_func = tfind;
 					}
 				}
 				if (ptr && *ptr) {
@@ -719,7 +705,7 @@ ProcessInFifo(int instNum)
 				if (!use_btree || !(in = mk_in_entry(email)))
 					pw = PwdInLookup(email);
 				else
-				if (!(retval = tsearch(in, &in_root, in_compare_func))) {
+				if (!(retval = search_func (in, &in_root, in_compare_func))) {
 					in_free_func(in);
 					pw = PwdInLookup(email);
 				} else {
@@ -739,7 +725,7 @@ ProcessInFifo(int instNum)
 						} else {
 							pw = &re->in_pw;
 							if (verbose || _debug) {
-								printf("%s->%s, Query %d, User %s cache hit\n", cptr, myFifo, *QueryBuf, email);
+								printf("%s->%s, cache hit\n", fifoName, myFifo);
 								fflush(stdout);
 							}
 						}
@@ -756,11 +742,13 @@ ProcessInFifo(int instNum)
 							in->pwStat = 1;
 						} else
 							in->pwStat = 0;
+						btree_count++;
+						if (max_btree_count > 0 && btree_count >= max_btree_count)
+							search_func = tfind;
 					}
 				}
 				/*- Connect to mysql after fetching ip host details for the user from hostcntrl.*/
-				if (pw)
-				{
+				if (pw) {
 					snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
 						email,
 						pw->pw_passwd,
@@ -772,8 +760,7 @@ ProcessInFifo(int instNum)
 					if ((bytes = (slen(pwbuf) + 1)) > pipe_size)
 						bytes = -1;
 				} else
-				if (userNotFound)
-				{
+				if (userNotFound) {
 					snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=No such user %s", email);
 					bytes = slen(pwbuf) + 1;
 				} else
@@ -792,8 +779,7 @@ ProcessInFifo(int instNum)
 				else
 				if (status) /*- user not found */
 					bytes = 0;
-				else
-				{
+				else {
 					bytes = sizeof(struct vlimits);
 					if (bytes > pipe_size)
 						bytes = -1;
@@ -820,8 +806,7 @@ ProcessInFifo(int instNum)
 				close(wfd);
 				break;
 		} /*- switch(*QueryBuf) */
-		if (verbose || _debug)
-		{
+		if (verbose || _debug) {
 			printf("%ld %s -> %s\n", time(0) - prev_time, query_type(*QueryBuf), myFifo);
 			fflush(stdout);
 		}
@@ -871,8 +856,7 @@ getFifo_name()
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
 	if (*infifo == '/' || *infifo == '.')
 		snprintf(inFifo, MAX_BUFF, "%s", infifo);
-	else
-	{
+	else {
 		getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
 		if (*infifo_dir == '/')
 			snprintf(inFifo, MAX_BUFF, "%s/%s", infifo_dir, infifo);
@@ -895,14 +879,14 @@ sig_usr1()
 	printf("%d %s Dumping Stats\n", (int) getpid(), fifo_name);
 	cur_time = time(0);
 #ifdef CLUSTERED_SITE
-	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d\n", 
+	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d Cached Nodes %d\n", 
 		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, 
-		host_query_count, dom_query_count);
+		host_query_count, dom_query_count, btree_count);
 	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + 
 		host_query_count + dom_query_count;
 #else
-	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Domain Query %d\n", 
-		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, dom_query_count);
+	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Domain Query %d Cached Nodes %d\n", 
+		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, dom_query_count, btree_count);
 	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #endif
 	printf("Start Time: %s", ctime(&start_time));
@@ -953,6 +937,7 @@ sig_hup()
 #endif
 	tdestroy(in_root, in_free_func);
 	in_root = 0;
+	btree_count = 0;
 	fflush(stdout);
 	signal(SIGHUP, (void(*)()) sig_hup);
 	errno = EINTR;
@@ -989,14 +974,14 @@ sig_term()
 	}
 	cur_time = time(0);
 #ifdef CLUSTERED_SITE
-	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d\n", 
+	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d Cached Nodes %d\n", 
 		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, 
-		host_query_count, dom_query_count);
+		host_query_count, dom_query_count, btree_count);
 	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + 
 		host_query_count + dom_query_count;
 #else
-	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Domain Query %d\n", 
-		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, dom_query_count);
+	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Domain Query %d Cached Nodes %d\n", 
+		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, dom_query_count, btree_count);
 	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #endif
 	printf("Start Time: %s", ctime(&start_time));
@@ -1020,8 +1005,7 @@ sig_hand(sig, code, scp, addr)
 	time_t          cur_time;
 
 	fifo_name = getFifo_name();
-	if (sig == SIGTERM)
-	{
+	if (sig == SIGTERM) {
 		sig_block(sig);
 		if (verbose || _debug) 
 			printf("%d %s ARGH!! Committing suicide on SIGTERM\n", (int) getpid(), fifo_name);
@@ -1035,15 +1019,17 @@ sig_hand(sig, code, scp, addr)
 		case SIGTERM:
 			cur_time = time(0);
 #ifdef CLUSTERED_SITE
-			printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d\n", 
+			printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d Cached Nodes %d\n", 
 				user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, 
-				host_query_count, dom_query_count);
+				host_query_count, dom_query_count, btree_count);
 			total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + 
 				host_query_count + dom_query_count;
 #else
-			printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Domain Query %d\n", 
-				user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, dom_query_count);
-			total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
+			printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Domain Query %d Cached Nodes %d\n", 
+				user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count,
+				dom_query_count, btree_count);
+			total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count +
+				alias_query_count + dom_query_count;
 #endif
 			printf("Start Time: %s", ctime(&start_time));
 			printf("End   Time: %s", ctime(&cur_time));
@@ -1051,8 +1037,7 @@ sig_hand(sig, code, scp, addr)
 				(float) ((float) total_count/(cur_time - start_time)));
 			if (sig == SIGUSR1)
 				twalk(in_root, walk_entry);
-			if (sig == SIGTERM)
-			{
+			if (sig == SIGTERM) {
 				fflush(stdout);
 				close_db();
 				unlink(fifo_name);
@@ -1079,6 +1064,7 @@ sig_hand(sig, code, scp, addr)
 #endif
 			tdestroy(in_root, in_free_func);
 			in_root = 0;
+			btree_count = 0;
 		break;
 		case SIGINT:
 			printf("%d %s closing db\n", (int) getpid(), fifo_name);
@@ -1116,10 +1102,8 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 		snprintf(TmpBuf, MAX_BUFF, "%s/timeoutread", controldir);
 	else
 		snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutread", sysconfdir, controldir);
-	if ((fp = fopen(TmpBuf, "r")))
-	{
-		if (fgets(TmpBuf, MAX_BUFF - 2, fp))
-		{
+	if ((fp = fopen(TmpBuf, "r"))) {
+		if (fgets(TmpBuf, MAX_BUFF - 2, fp)) {
 			if (sscanf(TmpBuf, "%d", readTimeout) != 1)
 				*readTimeout = 4;
 		}
@@ -1130,10 +1114,8 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 		snprintf(TmpBuf, MAX_BUFF, "%s/timeoutwrite", controldir);
 	else
 		snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutwrite", sysconfdir, controldir);
-	if ((fp = fopen(TmpBuf, "r")))
-	{
-		if (fgets(TmpBuf, MAX_BUFF - 2, fp))
-		{
+	if ((fp = fopen(TmpBuf, "r"))) {
+		if (fgets(TmpBuf, MAX_BUFF - 2, fp)) {
 			if (sscanf(TmpBuf, "%d", writeTimeout) != 1)
 				*writeTimeout = 4;
 		}
