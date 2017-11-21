@@ -435,7 +435,7 @@ ProcessInFifo(int instNum)
 	ptr = getenv("USE_BTREE");
 	use_btree = ((ptr && *ptr == '1') ? 1 : 0);
 	max_btree_count = ((ptr = getenv("MAX_BTREE_COUNT")) && *ptr ? atoi(ptr) : -1);
-	search_func = tsearch; /*- this adds a record if not found */
+	search_func = (void *) tsearch; /*- this adds a record if not found */
 	if ((fifoName = strrchr(InFifo, '/')))
 		fifoName++;
 	else
