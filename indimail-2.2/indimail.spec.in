@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.432 2017-11-21 01:14:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.433 2017-11-21 23:08:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -989,7 +989,7 @@ for i in deliver.25 greylist.1999 imapd.143 imapd-ssl.993 indisrvr.4000 \
   inlookup.infifo logfifo mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 \
   proxyIMAP.4143 proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup \
   qmqpd.628 qmtpd.209 qscanq smtpd.25 smtpd.366 smtpd.465 smtpd.587 svscan \
-  udplogger.3000
+  udplogger.3000 resolvconf
 do
   %{__mkdir_p} %{buildroot}%{logdir}/$i
   $TOUCH %{buildroot}%{logdir}/$i/current
@@ -2684,7 +2684,7 @@ do
     extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
   fi
   if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-    extra_opt="$extra_opt --qhpsi=$qhpsi"
+    extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
   fi
   eval %{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
     --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
@@ -2705,7 +2705,7 @@ done
 #
 extra_opt=""
 if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-    extra_opt="--qhpsi=$qhpsi"
+    extra_opt="--qhpsi=\"$qhpsi\""
 fi
 eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
@@ -2746,7 +2746,7 @@ if [ %nofetchmail -eq 0 ] ; then
     extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
   fi
   if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-    extra_opt="$extra_opt --qhpsi=$qhpsi"
+    extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
   fi
   eval %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
     --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
@@ -3075,7 +3075,7 @@ for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
 pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-logfifo qscanq qmail-imapd.4143 \
 qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
-qmail-poppass.106 greylist.1999 udplogger.3000 mrtg .svscan dnscache
+qmail-poppass.106 greylist.1999 udplogger.3000 mrtg .svscan dnscache resolvconf
 do
   if [ -d %{servicedir}/$i ] ; then
     %{__rm} -rf %{servicedir}/$i || true
