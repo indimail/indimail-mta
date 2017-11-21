@@ -38,7 +38,9 @@ use localhost to connect to MySQL. Other defaults will be taken from the file
 INDIMAIL/etc/indimail.cnf. \fBinlookup\fR(8) logs all messages and diagnostics to
 LOGDIR/inlookup.infifo/current
 
-\fBinlookup\fR(8) uses tsearch(3) for a binary search implementation for User Query, Password Query, Host Query, Alias Query.
+if the environment variable \fBUSE_BTREE\fR is defined, \fBinlookup\fR(8) uses tsearch(3) for a binary search implementation.
+This search is currently implemnted for User Query, Password Query, Host Query, Alias Query. You can limit the number
+of search nodes by setting the \fBMAX_BTREE_COUNT\fR environment variable.
 
 .PP
 The program \fBinquerytest(8)\fR simulates all the queries which \fBinlookup\fR(8) supports. It can be used as a
