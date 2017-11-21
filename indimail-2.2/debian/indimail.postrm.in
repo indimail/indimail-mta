@@ -249,10 +249,12 @@ if [ " $1" = " purge" ] ; then
 	pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 	qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-logfifo qscanq qmail-imapd.4143 \
 	qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
-	qmail-poppass.106 greylist.1999 udplogger.3000 .svscan
+	qmail-poppass.106 greylist.1999 udplogger.3000 .svscan resolvconf dnscache
 	do
 		if [ -d ${servicedir}/$i ] ; then
 			${rm} -rf ${servicedir}/$i >/dev/null 2>&1 || true
+		elif [ -f ${servicedir}/$i ] ; then
+			${rm} -f ${servicedir}/$i >/dev/null 2>&1 || true
 		fi
 	done
 	if [ $noproxy -eq 0 ] ; then
