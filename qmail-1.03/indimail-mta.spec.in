@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.116 2017-10-22 15:30:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.117 2017-11-21 23:12:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -603,7 +603,7 @@ done
 %if %{undefined suse_version} && %{undefined sles_version}
 %{__mkdir_p} %{buildroot}%{logdir}
 for i in deliver.25 greylist.1999 logfifo \
-  qmqpd.628 qmtpd.209 qscanq smtpd.25 \
+  qmqpd.628 qmtpd.209 qscanq smtpd.25 resolvconf \
   smtpd.366 smtpd.465 smtpd.587 svscan udplogger.3000
 do
   %{__mkdir_p} %{buildroot}%{logdir}/$i
@@ -1855,7 +1855,7 @@ do
     extra_opt="$extra_opt --shared-objects=1"
 %endif
   if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
-    extra_opt="$extra_opt --qhpsi=$qhpsi"
+    extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
   fi
   eval %{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
     --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
@@ -1875,7 +1875,7 @@ done
 # queue parameters in control/defaultqueue for qmail-inject, sendmail
 extra_opt=""
 if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
-  extra_opt="--qhpsi=$qhpsi"
+  extra_opt="--qhpsi=\"$qhpsi\""
 fi
 eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
@@ -2179,7 +2179,7 @@ done
 fi
 for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
 qmail-spamlog qscanq qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 \
-qmail-qmqpd.628 greylist.1999 udplogger.3000 .svscan
+qmail-qmqpd.628 greylist.1999 resolvconf udplogger.3000 .svscan
 do
   if [ -d %{servicedir}/$i ] ; then
     %{__rm} -rf %{servicedir}/$i || true
