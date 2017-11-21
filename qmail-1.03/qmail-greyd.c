@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.20  2017-11-21 18:49:24+05:30  Cprogrammer
+ * added documentation
+ *
  * Revision 1.19  2017-10-28 11:39:46+05:30  Cprogrammer
  * fixed search record failure when linked list contained just 1 entry
  *
@@ -37,7 +40,7 @@
  * fix segmentation fault due to free()
  *
  * Revision 1.7  2009-09-07 13:58:02+05:30  Cprogrammer
- * fix compilation if USE_HAS was not defined
+ * fix compilation if USE_HASH was not defined
  *
  * Revision 1.6  2009-09-07 10:20:26+05:30  Cprogrammer
  * use select to perform non-blocking recvfrom()
@@ -534,21 +537,26 @@ create_hash(struct greylst *curr)
 		hdestroy();
 		hcount = 0;
 	}
-	if (!(hcount % hash_size)) {
+	if (!(hcount % hash_size)) { /*- hash table full. recreate it */
 		if (h_allocated++) {
+			/*-
+			 * keep count of hash table recreation 
+			 * If this happens too often, increase
+			 * the hash table size on command line
+			 */
 			hdestroy();
 			hcount = 0;
 			curr = 0;
 			logerr("WARNING!! recreating hash table, size=");
-		} else
+		} else /*- first time */
 			logerr("creating hash table, size=");
 		strnum[fmt_ulong(strnum, (unsigned long) (2 * hash_size * h_allocated))] = 0;
 		logerr(strnum);
 		logerrf("\n");
-		if (!hcreate(h_allocated * (2 * hash_size)))
+		if (!hcreate(h_allocated * (2 * hash_size))) /*- be generous */
 			strerr_die2sys(111, FATAL, "unable to create hash table: ");
 	}
-	for (ptr = (curr ? curr : head);ptr;ptr = ptr->next) {
+	for (ptr = (curr ? curr : head);ptr;ptr = ptr->next) { /*- added entries when hash table is new or after destruction */
 		e.key = ptr->ip_str;
 		if (!(ep = hsearch(e, FIND))) {
 			e.data = ptr;
@@ -735,7 +743,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 		return (0);
 	}
 #ifdef USE_HASH
-	if (!hash_size)
+	if (!hash_size) /*- use sequential search if hash create failed earlier */
 		return (seq_search(r_ip, ptr, rpath, rcpt, rcptlen, min_resend, resend_win, cur_time, store));
 	e.key = remoteip;
 	if (!(ep = hsearch(e, FIND)))
@@ -811,7 +819,7 @@ add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey
 #ifdef USE_HASH
 	if (hash_size > 0) {
 		byte_copy(ptr->ip_str, str_len(ip) + 1, ip);
-		if (create_hash(ptr))
+		if (create_hash(ptr)) /*- add the record to hash list */
 			die_nomem();
 	}
 #endif
@@ -1018,7 +1026,7 @@ load_context()
 #ifdef USE_HASH
 		if (hash_size > 0) {
 			byte_copy(ptr->ip_str, str_len(ip) + 1, ip);
-			if (create_hash(ptr))
+			if (create_hash(ptr)) /*- load previous context into hash table */
 				die_nomem();
 		}
 #endif
@@ -1502,7 +1510,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.19 2017-10-28 11:39:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.20 2017-11-21 18:49:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
