@@ -303,7 +303,7 @@ do
 		extra_opt="$extra_opt --shared-objects=1"
 	fi
 	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-		extra_opt="$extra_opt --qhpsi=$qhpsi"
+		extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
 	fi
 	eval ${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
 		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
@@ -324,7 +324,7 @@ done
 # queue parameters in control/defaultqueue for qmail-inject, sendmail
 extra_opt=""
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-	extra_opt="--qhpsi=$qhpsi"
+	extra_opt="--qhpsi=\"$qhpsi\""
 fi
 eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 	--qbase=${qbase} --qcount=${qcount} --qstart=1 \
