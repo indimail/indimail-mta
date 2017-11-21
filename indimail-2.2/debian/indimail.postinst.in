@@ -382,7 +382,7 @@ do
 		extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
 	fi
 	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-		extra_opt="$extra_opt --qhpsi=$qhpsi"
+		extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
 	fi
 	eval ${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
 		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
@@ -404,7 +404,7 @@ done
 #
 extra_opt=""
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-	extra_opt="--qhpsi=$qhpsi"
+	extra_opt="--qhpsi=\"$qhpsi\""
 fi
 eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 	--qbase=${qbase} --qcount=${qcount} --qstart=1 \
@@ -447,7 +447,7 @@ if [ $nofetchmail -eq 0 ] ; then
 		extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
 	fi
 	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-		extra_opt="$extra_opt --qhpsi=$qhpsi"
+		extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
 	fi
 	eval ${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
 		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
