@@ -48,7 +48,7 @@ BuildRequires: -post-build-checks
 %if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
 BuildRequires: libidn-devel
-BuildRequires: coreutils sh-utils
+BuildRequires: coreutils
 %endif
 
 Requires: coreutils grep /bin/sh glibc

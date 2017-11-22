@@ -57,7 +57,7 @@ URL: http://www.indimail.org
 %if %build_on_obs == 1
 BuildRequires: libidn-devel
 %endif
-BuildRequires: coreutils sh-utils
+BuildRequires: coreutils
 
 Requires: coreutils grep /bin/sh /usr/bin/id glibc openssl
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
