@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.21  2017-11-22 22:38:13+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.20  2017-11-21 18:49:24+05:30  Cprogrammer
  * added documentation
  *
@@ -150,10 +153,10 @@ struct greylst
 	unsigned int    rcptlen;
 	time_t          timestamp;
 	int             attempts;
-	char            status;
-	struct greylst *prev, *next;
+	char            status; /*- greylisting status */
+	struct greylst *prev, *next; /*- prev, next of linked list of greylst structures */
 #ifdef USE_HASH
-	struct greylst *ip_prev, *ip_next;
+	struct greylst *ip_prev, *ip_next; /*- group records for an ip address together */
 #endif
 };
 struct greylst *head;
@@ -556,9 +559,12 @@ create_hash(struct greylst *curr)
 		if (!hcreate(h_allocated * (2 * hash_size))) /*- be generous */
 			strerr_die2sys(111, FATAL, "unable to create hash table: ");
 	}
-	for (ptr = (curr ? curr : head);ptr;ptr = ptr->next) { /*- added entries when hash table is new or after destruction */
+	for (ptr = (curr ? curr : head);ptr;ptr = ptr->next) { /*- 
+															* if curr is null -> add all entries from linked list.
+															* this will happen if hash table is new
+															*/
 		e.key = ptr->ip_str;
-		if (!(ep = hsearch(e, FIND))) {
+		if (!(ep = hsearch(e, FIND))) { /*- add entries when hash table is new or after destruction */
 			e.data = ptr;
 			if (!(ep = hsearch(e, ENTER))) {
 				logerrf("unable to add to hash table\n");
@@ -566,14 +572,15 @@ create_hash(struct greylst *curr)
 			} else
 				hcount++;
 		} else { /*- add new entry to end of linked list */
+			/*- multiple entries for an IP gets linked through ip_next and ip_prev */
 			for (ip_ptr = (struct greylst *) ep->data;ip_ptr && ip_ptr->ip_next;ip_ptr = ip_ptr->ip_next);
-			if (!ip_ptr->ip_next) {
+			if (!ip_ptr->ip_next) { /*- we are now at the end of the linked list */
 				ip_ptr->ip_next = ptr;
 				ptr->ip_next = 0;
 				ptr->ip_prev = ip_ptr;
 			}
 		}
-		if (curr)
+		if (curr) /*- add only one entry */
 			break;
 	}
 	return (0);
@@ -1510,7 +1517,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.20 2017-11-21 18:49:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.21 2017-11-22 22:38:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
