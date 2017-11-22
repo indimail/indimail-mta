@@ -364,6 +364,7 @@ https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indi
 Currently, the list of supported distributions for IndiMail is
 
     * SUSE
+          o openSUSE_Leap_42.3
           o openSUSE_Leap_42.2
           o openSUSE 13.2
           o openSUSE 13.1
@@ -372,8 +373,8 @@ Currently, the list of supported distributions for IndiMail is
           o SUSE Linux Enterprise 12
 
     * Red Hat
-          o Fedora 25
-          o Fedora 24
+          o Fedora 27
+          o Fedora 26
           o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 6
           o CentOS 7
@@ -382,31 +383,12 @@ Currently, the list of supported distributions for IndiMail is
     * Debian
           o Debian 8.0
           o Debian 7.0
+          o Ubuntu 17.04
           o Ubuntu 16.10
           o Ubuntu 16.04
+          o Ubuntu 14.04
+          o Ubuntu 12.04
 
-
-Enterprise Support
-------------------
-
-If you are a commercial distributor (such as OEMs, ISVs and VARs) or plan to have greater
-than 10,000 users on a server, you need an IndiMail Commercial License. The cost of license
-is $1 per user per annum. The license enables you to ask for bug fixes,
-installation/configuraton help 24 X 5 throughout the validity period of the license. I am
-willing to work with you for a customized support package.
-
-You can request for a commercial license by writing to
-
-"License Support" license-support@indimail.org
-
-If you are a student or belong to a charitable organization/trust or a NGO or have an OSS
-project requiring more than 10,000 users, you can obtain a IndiMail Commercial
-License, free of cost, by writing to the above email address.
-
-To enable IndiMail function for more than 10,000 users, you need to install the
-indimail-enterprise package from
-
-http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/
 
 Developing IndiMail is my hobby. To continue working on IndiMail, I need people/organization
 who like the project to support me, by buying software support from me. If you can afford to

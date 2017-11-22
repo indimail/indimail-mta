@@ -7,9 +7,9 @@ Announcing Release @version@ of IndiMail. This release has both source.tar.gz, R
 Following are the main features of this release
 
 o OpenSSL 1.1.0 ready
-o svscanboot/svscan option run .svscan/run or INITCMD. This can be used to run
+o svscanboot/svscan option to run .svscan/run or INITCMD. This can be used to run
   unshare --mount option and mount private mounts like custom resolv.conf
-o svscan - added ability to run a custom shutdown command on svscan shutdown
+o svscan - added ability to run a custom shutdown command in svacan/shutdown on shutdown
 o added inotify program to get file system events
 o added resolvconf service for a custom /etc/resolv.conf
 o qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes.
@@ -25,6 +25,8 @@ o qmail-smtpd, qmail-remote - improved logging of TLS method errors
 o added svctool, systemctl unit file for daemontools package
 o renamed systemd unit file indimail.service to svscan.service
 o multiple fixes for MySQL/MariaDB database creation during RPM/Deb install
+o Logdir changed to /var/log/svc
+o Use Binary Search algorithm, using tsearch in inlookup (Knuth (6.2.2) Algorithm T)
 
 
 This release includes the following files
@@ -66,6 +68,7 @@ https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indi
 Currently, the list of supported distributions for IndiMail is
 
     * SUSE
+          o openSUSE_Leap_42.3
           o openSUSE_Leap_42.2
           o openSUSE 13.2
           o openSUSE 13.1
@@ -74,8 +77,8 @@ Currently, the list of supported distributions for IndiMail is
           o SUSE Linux Enterprise 12
 
     * Red Hat
-          o Fedora 25
-          o Fedora 24
+          o Fedora 27
+          o Fedora 26
           o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 6
           o CentOS 7
