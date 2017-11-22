@@ -20,7 +20,7 @@ default_domain=`uname -n`
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.70 2017-11-21 13:35:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.71 2017-11-22 12:28:31+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -344,7 +344,7 @@ do
 		append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
 	fi
 	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-		append_opt="$append_opt --qhpsi=$qhpsi"
+		append_opt="$append_opt --qhpsi=\"$qhpsi\""
 	fi
 	eval $svctool --smtp=$port --servicedir=$servicedir \
 		--qbase=$qbase --qcount=$qcount --qstart=1 \
@@ -364,12 +364,11 @@ done
 
 append_opt=""
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-	append_opt="--qhpsi=$qhpsi"
+	append_opt="--qhpsi=\"$qhpsi\""
 fi
 eval $svctool --queueParam=defaultqueue \
 	--qbase=$qbase --qcount=$qcount --qstart=1 \
 	--min-free=52428800 --fsync --syncdir --virus-filter \
-	--qhpsi="$qhpsi" \
 	--dkverify="none" --dksign=$sign_opt \
 	--private_key=$controldir/domainkeys/%/$dkimkeyfn \
 	$append_opt $extra_opt
@@ -410,7 +409,7 @@ if [ $nofetchmail -eq 0 ] ; then
 		append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
 	fi
 	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-		append_opt="$append_opt --qhpsi=$qhpsi"
+		append_opt="$append_opt --qhpsi=\"$qhpsi\""
 	fi
 	eval $svctool --fetchmail --servicedir=$servicedir \
 		--qbase=$qbase --qcount=$qcount --qstart=1 \
