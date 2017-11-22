@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.16  2017-11-22 22:37:32+05:30  Cprogrammer
+# logdir changed to /var/log/svc
+#
 # Revision 2.15  2017-11-06 21:45:42+05:30  Cprogrammer
 # fixed upgrade script for posttrans
 #
@@ -46,7 +49,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: local_upgrade.sh,v 2.15 2017-11-06 21:45:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: local_upgrade.sh,v 2.16 2017-11-22 22:37:32+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -163,9 +166,9 @@ if [ -d /service/qmail-spamlog ] ; then
 fi
 
 # for bogofilter to send back X-Bogosity back to qmail-smtpd as well as log entry
-# to /var/log/indimail/logfifo/current (fifologger service)
+# to /var/log/svc/logfifo/current (fifologger service)
 # for qmail-send it is required if you run bogofilter during remote/local delivery,
-# in which case it will be logged to /var/log/indimail/logfifo/current
+# in which case it will be logged to /var/log/svc/logfifo/current
 for i in qmail-smtpd.25 qmail-smtpd.465 fetchmail qmail-send.25
 do
 	if [ -d /service/$i -a -s /service/$i/variables/LOGFILTER ] ; then

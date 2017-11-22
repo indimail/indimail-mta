@@ -149,7 +149,7 @@ mysql_host:mysql_user:mysql_pass:mysql_port
 Proceed to SECTION 8, STEP 2 in the file INSTALL-@version@ for further instruction on 
 configuration of IndiMail
 
-Log files are creaed in /var/log/indimail/*
+Log files are created in /var/log/svc/*
 
 
 How to install MySQL

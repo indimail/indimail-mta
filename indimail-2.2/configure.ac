@@ -286,7 +286,7 @@ AC_ARG_ENABLE(basepath,   [  --enable-basepath=dir         Base Path for User's 
 AC_DEFINE_UNQUOTED(BASE_PATH,"$basepath",Directory where User's Home Directories get created)
 AC_SUBST(basepath)
 
-logdir="/var/log/indimail"
+logdir="/var/log/svc"
 AC_ARG_ENABLE(logdir,   [  --enable-logdir=dir           Base Path for System logs.],
 	logdir="$enableval",
 	[
