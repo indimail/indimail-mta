@@ -1,5 +1,5 @@
 File INSTALL-RPM, Version 2.2
-DATE: Mon May  8 22:28:26 IST 2017
+DATE: Thu Nov 23 17:01:31 IST 2017
 
 This section covers installing IndiMail from rpm/deb. This is the easy way to install IndiMail.
 If you are looking for something more simpler, then you need the Install IndiMail for
@@ -50,7 +50,7 @@ A) Package Installation/Upgrade
    6. Installs 5 queues in /var/indimail/queue (queue1, queue2, ... queue5)
    7. Install MTA as the alterntive MTA. Creates link sendmail in /usr/sbin or
       /usr/lib to /usr/bin/sendmail
-   8. Creates directory for supervise logs in /var/log/indimail
+   8. Creates directory for supervise logs in /var/log/svc
    9. Sets up svscan to be run by init (/etc/inittab), upstart (/etc/event.d) or
       by systemctl (/lib/systemd/system)
 
@@ -149,7 +149,7 @@ mysql_host:mysql_user:mysql_pass:mysql_port
 Proceed to SECTION 8, STEP 2 in the file INSTALL-2.2 for further instruction on 
 configuration of IndiMail
 
-Log files are creaed in /var/log/indimail/*
+Log files are created in /var/log/svc/*
 
 
 How to install MySQL
