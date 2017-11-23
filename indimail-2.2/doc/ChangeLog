@@ -91,6 +91,8 @@ Release 2.2 Start 08/05/2017
 50. binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
 21/11/2017
 51. fixed syntax error with --qhpsi option changes in point 43
+24/11/2017
+52. qmail-greyd.c - added verbose variable to suppress few messages
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.1-1.1%{?dist}
 Release 2.1 Start 16/03/2017

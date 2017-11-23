@@ -52,5 +52,6 @@ indimail (@version@-2) unstable; urgency=low
   * removed programs copyemail, testmra, mail_report, execmysql
   * binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
   * fixed syntax error with --qhpsi option changes in postinst file
+  * qmail-greyd.c - added verbose variable to suppress few messages
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 21 Nov 2017 23:15:54 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 24 Nov 2017 03:00:45 +0530

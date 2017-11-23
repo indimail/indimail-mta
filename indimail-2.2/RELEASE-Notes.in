@@ -156,3 +156,4 @@ Release 2.2 Start 08/05/2017
 49. removed programs copyemail, testmra, mail_report, execmysql
 50. binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
 51. fixed syntax error with --qhpsi option changes in spec/postinst file
+52. qmail-greyd.c - added verbose variable to suppress few messages
