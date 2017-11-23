@@ -216,6 +216,7 @@ If the status of the recipient fall into any of the above category, the mail is 
 NOTE: To turn on User Status Check for selected domains, include the domains
 in the control file
 .IR chkrcptdomains .
+Check the \fBCONTROL FILES\fR section below for the syntax for \fIchkrcptdomains\fR control file.
 If the control file 
 .I chkrcptdomains
 is absent, the  User Status Check is turned on for all domains.  If the environment variable
@@ -323,7 +324,7 @@ domains, include non ETRN/AUTOTURN/ODMR domains in the control file
 .IR chkrcptdomains .
 If the control file 
 .I chkrcptdomains
-is absent and User Status Check is enabled, the  User Status Check is turned on for all domains and mails to
+is absent and User Status Check is enabled, the  User Status Check is turned on for all domains. In this case mails to
 ETRN/AUTOTURN/ODMR domains will bounce.
 
 .SH TRANSPARENCY
@@ -1289,7 +1290,7 @@ Legacy format:
    etc/fastforward.cdb
 .EE
 
-Note: Particular domains starting with a '!' or
+NOTE: Particular domains starting with a '!' or
 a '@' should be placed in the beginning of the 
 .I recipients
 file for performance reasons, while the pass-thru
