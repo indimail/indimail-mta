@@ -10,6 +10,9 @@ qmail-greyd \- greylisting daemon for \fBIndiMail\fR, \fBqmail\fR and \fBnetqmai
 .B -h
 .I hash_size
 ]\ [\c
+.B -v
+.I verbosity
+]\ [\c
 .B \-g
 .I resend_window (hr)\c
 ]\ [\c
@@ -93,23 +96,33 @@ packet and then reads the entire packet in one operation.
 
 .SH OPTIONS
 .TP
+.B -v \fIverbosity
+Set verbosity. 0 - minimal, 1 - moderate, 2 - maximum\fR
+
+.TP
 .B -h \fIhash_size
 specify the memory for creating a hash using \fBhcreate(3)\fR
+
 .TP
 .B -w \fIfilename
 specify whitelist of IP ranges not subject to greylisting.
+
 .TP
 .B -t \fIdays
 timeout for known IPs in days; defaults to 7.
+
 .TP
 .B -g \fIhours
 grey resend window, in hours; defaults to 12.
+
 .TP
 .B -m \fIminutes
 min resend accept time, in minutes; defaults to 5.
+
 .TP
 .B -f \fIminutes
 periodic interval, in minutes, after which entries older than \fItimeout\fR days are expired; defaults to 5
+
 .TP
 .B -s \fIminutes
 save interval for context file, in minutes; defaults to 5
