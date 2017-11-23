@@ -69,3 +69,4 @@ Release 2.2 Start 08/05/2017
 40. changed logdir to /var/log/svc
 21/11/2017
 41. fixed syntax error with --qhpsi option changes in spec/postinst file
+42. qmail-greyd.c - added verbose variable to suppress few messages
