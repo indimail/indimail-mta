@@ -5588,7 +5588,7 @@ fmt.h str.h subfd.h byte.h strerr.h scan.h getln.h \
 env.h stralloc.h constmap.h control.h error.h \
 uint32.h open.h cdb.h variables.h sig.h greylist.h \
 tablematch.h socket.h haveip6.h conf-ip auto_control.h
-	./compile -DUSE_HASH -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` qmail-greyd.c
+	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` qmail-greyd.c
 
 qmail-greyd.0: \
 qmail-greyd.8
