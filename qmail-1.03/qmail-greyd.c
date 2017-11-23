@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.22  2017-11-24 02:58:37+05:30  Cprogrammer
+ * added verbose variable to suppress few messages
+ *
  * Revision 1.21  2017-11-22 22:38:13+05:30  Cprogrammer
  * added comments
  *
@@ -106,6 +109,7 @@
 #endif
 #include "greylist.h"
 #include "socket.h"
+#include <search.h>
 
 #define FATAL "qmail-greyd: fatal: "
 #define WARN  "qmail-greyd: warning: "
@@ -121,11 +125,7 @@
 #define RECORD_IPV6   7
 #define BUILD_IP(IP) ((IP[0]<<24) | (IP[1]<<16) | (IP[2]<<8) | IP[3])
 #define VALID_IP(IP) ((IP[0]<256) && (IP[1]<256) && (IP[2]<256) && (IP[3]<256))
-
-#ifdef USE_HASH
-#include <search.h>
 #define BLOCK_SIZE 32768
-#endif
 
 union sockunion
 {
@@ -141,13 +141,12 @@ int             noipv6 = 0;
 #else
 int             noipv6 = 1;
 #endif
+int             verbose = 0;
 
 struct greylst
 {
 	union v46addr   ip;
-#ifdef USE_HASH
 	char            ip_str[IPFMT];
-#endif
 	char           *rpath;
 	char           *rcpt; /* Trcpt1\0Trcpt2\0.....Trcptn\0 */
 	unsigned int    rcptlen;
@@ -155,16 +154,12 @@ struct greylst
 	int             attempts;
 	char            status; /*- greylisting status */
 	struct greylst *prev, *next; /*- prev, next of linked list of greylst structures */
-#ifdef USE_HASH
 	struct greylst *ip_prev, *ip_next; /*- group records for an ip address together */
-#endif
 };
 struct greylst *head;
 struct greylst *tail;
 int             grey_count, hcount;
-#ifdef USE_HASH
 int             hash_size, h_allocated = 0;
-#endif
 unsigned long   timeout;
 char           *whitefn = 0;
 stralloc        context_file = { 0 };
@@ -265,8 +260,10 @@ struct constmap mapwhite;
 void
 whitelist_init(char *arg)
 {
-	out("initializing whitelist\n");
-	flush();
+	if (verbose) {
+		out("initializing whitelist\n");
+		flush();
+	}
 #ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
 	static stralloc controlfile = {0};
 
@@ -526,7 +523,6 @@ compare_ip(unsigned char *ip1, unsigned char *ip2)
 	return (0);
 }
 
-#ifdef USE_HASH
 int
 create_hash(struct greylst *curr)
 {
@@ -534,8 +530,6 @@ create_hash(struct greylst *curr)
 	ENTRY           e, *ep;
 	char            strnum[FMT_ULONG];
 
-	if (hash_size <= 0)
-		return (0);
 	if (!curr) {
 		hdestroy();
 		hcount = 0;
@@ -551,12 +545,18 @@ create_hash(struct greylst *curr)
 			hcount = 0;
 			curr = 0;
 			logerr("WARNING!! recreating hash table, size=");
-		} else /*- first time */
-			logerr("creating hash table, size=");
-		strnum[fmt_ulong(strnum, (unsigned long) (2 * hash_size * h_allocated))] = 0;
-		logerr(strnum);
-		logerrf("\n");
-		if (!hcreate(h_allocated * (2 * hash_size))) /*- be generous */
+			strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
+			logerr(strnum);
+			logerrf("\n");
+		} else { /*- first time */
+			if (verbose) {
+				out("creating hash table, size=");
+				strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
+				out(strnum);
+				out("\n");
+			}
+		}
+		if (!hcreate(2 * hash_size * h_allocated)) /*- be generous */
 			strerr_die2sys(111, FATAL, "unable to create hash table: ");
 	}
 	for (ptr = (curr ? curr : head);ptr;ptr = ptr->next) { /*- 
@@ -585,7 +585,6 @@ create_hash(struct greylst *curr)
 	}
 	return (0);
 }
-#endif
 
 void
 expire_records(time_t cur_time)
@@ -593,13 +592,16 @@ expire_records(time_t cur_time)
 	struct greylst *ptr;
 	time_t          start;
 
-	out("expiring records\n");
-	flush();
+	if (verbose) {
+		out("expiring records\n");
+		flush();
+	}
 	/*- find the first record that is not expired */
 	start = cur_time - timeout;
 	for (ptr = head;ptr && ptr->timestamp < start;ptr = ptr->next) {
-		print_record(ptr->ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
-			ptr->status, 1);
+		if (verbose == 2)
+			print_record(ptr->ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
+				ptr->status, 1);
 		grey_count--;
 		head = ptr->next;
 		head->prev = 0;
@@ -607,57 +609,9 @@ expire_records(time_t cur_time)
 		free(ptr->rcpt);
 		free(ptr);
 	}
-#ifdef USE_HASH
-	if (hash_size > 0 && create_hash(0))
+	if (create_hash(0))
 		die_nomem();
-#endif
 	return;
-}
-
-int
-seq_search(union v46addr r_ip, struct greylst *ptr, char *rpath, char *rcpt, int rcptlen,
-	int min_resend, int resend_win, time_t cur_time, struct greylst **store)
-{
-	int             rpath_len;
-
-	for (rpath_len = str_len(rpath);;) { /*- sequential search */
-#ifdef IPV6
-		if (!compare_ip(ptr->ip.ip6.d, r_ip.ip6.d) && !str_diffn(ptr->rpath, rpath, rpath_len)
-			&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
-#else
-		if (!compare_ip(ptr->ip.ip.d, r_ip.ip.d) && !str_diffn(ptr->rpath, rpath, rpath_len)
-			&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
-#endif
-		{ /*- found */
-			*store = ptr;
-			ptr->attempts++;
-			/*- # not older than timeout days */
-			if ((ptr->status == RECORD_GREY || ptr->status == RECORD_OK)
-				&& (ptr->timestamp > cur_time - timeout)) {
-				ptr->timestamp = cur_time;
-				ptr->status = RECORD_OK;
-				return (RECORD_OK); /*- "\1\2" */
-			} else
-			if (cur_time < ptr->timestamp + min_resend) {
-				/*- too early */
-				ptr->status = RECORD_EARLY;
-				return (RECORD_EARLY); /*- "\0\2" */
-			} else
-			if (cur_time > ptr->timestamp + resend_win) {
-				ptr->timestamp = cur_time;
-				ptr->status = RECORD_STALE;
-				return (RECORD_STALE); /*- "\0\3" */
-			} else {
-				ptr->timestamp = cur_time;
-				ptr->status = (*rpath ? RECORD_GREY : RECORD_BOUNCE); /*- expire bounces */
-				return (*rpath ? RECORD_GREY : RECORD_BOUNCE); /*- "\1\3" */
-			}
-		}
-		if (!ptr->next)
-			break;
-		ptr = ptr->next;
-	} /* for (ip_len = str_len(ip), rpath_len = str_len(rpath);;) { */
-	return (RECORD_NEW);
 }
 
 struct greylst *grey_index;
@@ -707,12 +661,8 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	struct greylst *ptr;
 	time_t          cur_time, start;
 	union v46addr   r_ip;
-#ifdef USE_HASH
 	ENTRY           e, *ep;
 	int             found;
-#else
-	int             rpath_len;
-#endif
 
 	*store = (struct greylst *) 0;
 	if (whitelistok && is_white(remoteip))
@@ -749,9 +699,6 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 		logerrf("]\n");
 		return (0);
 	}
-#ifdef USE_HASH
-	if (!hash_size) /*- use sequential search if hash create failed earlier */
-		return (seq_search(r_ip, ptr, rpath, rcpt, rcptlen, min_resend, resend_win, cur_time, store));
 	e.key = remoteip;
 	if (!(ep = hsearch(e, FIND)))
 		return (RECORD_NEW);
@@ -794,9 +741,6 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 		}
 	}
 	return (RECORD_NEW);
-#else
-	return (seq_search(r_ip, ptr, rpath, rcpt, rcptlen, min_resend, resend_win, cur_time, store));
-#endif
 }
 
 struct greylst *
@@ -807,11 +751,7 @@ add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey
 	if (!head) {
 		if (!(ptr = (struct greylst *) malloc(sizeof(struct greylst))))
 			die_nomem();
-#ifdef USE_HASH
 		ptr->prev = ptr->next = ptr->ip_next = ptr->ip_prev = 0;
-#else
-		ptr->prev = ptr->next = 0;
-#endif
 		head = tail = ptr;
 	} else {
 		if (!(ptr = (struct greylst *) malloc(sizeof(struct greylst))))
@@ -819,17 +759,11 @@ add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey
 		ptr->prev = tail;
 		tail->next = ptr;
 		tail = ptr;
-#ifdef USE_HASH
 		ptr->ip_prev = ptr->ip_next = 0;
-#endif
 	}
-#ifdef USE_HASH
-	if (hash_size > 0) {
-		byte_copy(ptr->ip_str, str_len(ip) + 1, ip);
-		if (create_hash(ptr)) /*- add the record to hash list */
-			die_nomem();
-	}
-#endif
+	byte_copy(ptr->ip_str, str_len(ip) + 1, ip);
+	if (create_hash(ptr)) /*- add the record to hash list */
+		die_nomem();
 	*grey = ptr;
 	grey_count++;
 	ptr->timestamp = time(0);
@@ -938,8 +872,10 @@ save_context()
 
 	if (!grey_count)
 		return;
-	out("saving context file\n");
-	flush();
+	if (verbose) {
+		out("saving context file\n");
+		flush();
+	}
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
 	for (ptr = head;ptr;ptr = ptr->next) {
@@ -980,8 +916,10 @@ load_context()
 	char           *cptr, *ip, *rpath, *rcpt;
 	struct greylst *ptr;
 
-	out("loading context\n");
-	flush();
+	if (verbose) {
+		out("loading context\n");
+		flush();
+	}
 	if ((fd = open(context_file.s, O_RDONLY)) == -1) {
 		if (errno == error_noent)
 			return;
@@ -993,7 +931,6 @@ load_context()
 		if (getln(&ss, &line, &match, '\n') == -1)
 			break;
 		if (!match && !line.len) {
-			flush();
 			close(fd);
 			return;
 		}
@@ -1012,11 +949,13 @@ load_context()
 		scan_ulong(cptr, (unsigned long *) &timestamp);
 		cptr += str_len(cptr) + 1;
 		status = *cptr;
-		if (timestamp < cur_time - timeout) {
-			print_record(ip, rpath, rcpt, rcptlen, timestamp, status, 1);
-			continue;
-		} else
-			print_record(ip, rpath, rcpt, rcptlen, timestamp, status, 0);
+		if (verbose == 2) {
+			if (timestamp < cur_time - timeout) {
+				print_record(ip, rpath, rcpt, rcptlen, timestamp, status, 1);
+				continue;
+			} else
+				print_record(ip, rpath, rcpt, rcptlen, timestamp, status, 0);
+			}
 		if (!head) {
 			if (!(ptr = (struct greylst *) malloc(sizeof(struct greylst))))
 				die_nomem();
@@ -1030,28 +969,21 @@ load_context()
 			tail->next = ptr;
 			tail = ptr;
 		}
-#ifdef USE_HASH
-		if (hash_size > 0) {
-			byte_copy(ptr->ip_str, str_len(ip) + 1, ip);
-			if (create_hash(ptr)) /*- load previous context into hash table */
-				die_nomem();
-		}
-#endif
+		byte_copy(ptr->ip_str, str_len(ip) + 1, ip);
+		if (create_hash(ptr)) /*- load previous context into hash table */
+			die_nomem();
 		grey_count++;
 		ptr->timestamp = timestamp;
 		ptr->status = status;
 		if (copy_grey(ptr, ip, rpath, rcpt, rcptlen)) {
-			flush();
 			free(ptr);
 			return;
 		}
 		if (!match) {
-			flush();
 			close(fd);
 			return;
 		}
 	} /*- for (;;) { */
-	flush();
 	close(fd);
 	return;
 }
@@ -1128,6 +1060,7 @@ print_status(char status)
 char           *usage =
 				"usage: qmail-greyd [options] ipaddr context_file\n"
 				"Options [ wstgmf ]\n"
+				"        [ -v 0, 1 or 2]\n"
 				"        [ -w whitelist ]\n"
 				"        [ -t timeout (days) ]\n"
 				"        [ -g resend window (hours) ]\n"
@@ -1163,13 +1096,12 @@ main(int argc, char **argv)
 	resend_window = 12 * 3600; /*- 12 hours */
 	min_resend = 5 * 60;       /*- 5 minutes */
 	free_interval = 5 * 60;    /*- 5 minutes */
-#ifdef USE_HASH
 	hash_size = BLOCK_SIZE;
-	while ((opt = getopt(argc, argv, "w:s:t:g:m:h:p:")) != opteof) {
-#else
-	while ((opt = getopt(argc, argv, "w:s:t:g:m:p:")) != opteof) {
-#endif
+	while ((opt = getopt(argc, argv, "v:w:s:t:g:m:h:p:")) != opteof) {
 		switch (opt) {
+		case 'v':
+			scan_int(optarg, &verbose);
+			break;
 		case 'w':
 			whitefn = optarg;
 			break;
@@ -1185,11 +1117,9 @@ main(int argc, char **argv)
 			scan_ulong(optarg, &resend_window);
 			resend_window *= 3600; /*- convert to seconds */
 			break;
-#ifdef USE_HASH
 		case 'h':
 			scan_int(optarg, &hash_size);
 			break;
-#endif
 		case 'm':
 			scan_ulong(optarg, &min_resend);
 			min_resend *= 60; /*- convert to seconds */
@@ -1311,16 +1241,12 @@ main(int argc, char **argv)
 	out("Ready for connections, grey_count=");
 	strnum[fmt_ulong(strnum, (unsigned long) grey_count)] = 0;
 	out(strnum);
-#ifdef USE_HASH
-	if (hash_size > 0) {
-		out(", hcount=");
-		strnum[fmt_ulong(strnum, (unsigned long) hcount)] = 0;
-		out(strnum);
-	}
-	out(", hash_size=");
-	strnum[fmt_ulong(strnum, (unsigned long) (h_allocated * 2 * hash_size))] = 0;
+	out(", hcount=");
+	strnum[fmt_ulong(strnum, (unsigned long) hcount)] = 0;
 	out(strnum);
-#endif
+	out(", hash_size=");
+	strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
+	out(strnum);
 	out("\n");
 	flush();
 	for (buf_len = 0, rdata_len = 0;;) {
@@ -1388,28 +1314,30 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "recvfrom: ");
 		}
 		save = 1;
-		out("qmail-greyd IP: ");
+		if (verbose) {
+			out("qmail-greyd IP: ");
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
-		if (noipv6)
-			out(inet_ntoa(from.sa4.sin_addr));
-		else {
-			static char     addrBuf[INET6_ADDRSTRLEN];
-			if (from.sa.sa_family == AF_INET) {
-				out((char *) inet_ntop(AF_INET,
-					(void *) &from.sa4.sin_addr, addrBuf,
-					INET_ADDRSTRLEN));
-			} else
-			if (from.sa.sa_family == AF_INET6) {
-				out((char *) inet_ntop(AF_INET6,
-					(void *) &from.sa6.sin6_addr, addrBuf,
-					INET6_ADDRSTRLEN));
-			} else
-			if (from.sa.sa_family == AF_UNSPEC)
-				out("::1");
-		}
+			if (noipv6)
+				out(inet_ntoa(from.sa4.sin_addr));
+			else {
+				static char     addrBuf[INET6_ADDRSTRLEN];
+				if (from.sa.sa_family == AF_INET) {
+					out((char *) inet_ntop(AF_INET,
+						(void *) &from.sa4.sin_addr, addrBuf,
+						INET_ADDRSTRLEN));
+				} else
+				if (from.sa.sa_family == AF_INET6) {
+					out((char *) inet_ntop(AF_INET6,
+						(void *) &from.sa6.sin6_addr, addrBuf,
+						INET6_ADDRSTRLEN));
+				} else
+				if (from.sa.sa_family == AF_UNSPEC)
+					out("::1");
+			}
 #else
-		out(inet_ntoa(from.sa4.sin_addr));
+			out(inet_ntoa(from.sa4.sin_addr));
 #endif
+		}
 		/*- 
 		 * greylist(3) protocol
 		 * packet structure -
@@ -1517,7 +1445,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.21 2017-11-22 22:38:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.22 2017-11-24 02:58:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
