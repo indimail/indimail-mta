@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.23  2017-11-25 18:34:49+05:30  Cprogrammer
+ * initialize h_allocated. Fixed signal handler for SIGUSR2, expire records when loading context file
+ *
  * Revision 1.22  2017-11-24 02:58:37+05:30  Cprogrammer
  * added verbose variable to suppress few messages
  *
@@ -532,9 +535,9 @@ create_hash(struct greylst *curr)
 
 	if (!curr) {
 		hdestroy();
-		hcount = 0;
+		h_allocated = hcount = 0;
 	}
-	if (!(hcount % hash_size)) { /*- hash table full. recreate it */
+	if (!(hcount % hash_size)) { /*- first time or hash table full. recreate it */
 		if (h_allocated++) {
 			/*-
 			 * keep count of hash table recreation 
@@ -556,7 +559,7 @@ create_hash(struct greylst *curr)
 				out("\n");
 			}
 		}
-		if (!hcreate(2 * hash_size * h_allocated)) /*- be generous */
+		if (!hcreate((125 * hash_size * h_allocated)/100)) /*- be 25% generous */
 			strerr_die2sys(111, FATAL, "unable to create hash table: ");
 	}
 	for (ptr = (curr ? curr : head);ptr;ptr = ptr->next) { /*- 
@@ -609,6 +612,7 @@ expire_records(time_t cur_time)
 		free(ptr->rcpt);
 		free(ptr);
 	}
+	/*- destroy and recreate the hash */
 	if (create_hash(0))
 		die_nomem();
 	return;
@@ -863,6 +867,10 @@ write_0(int fd)
 	return (i);
 }
 
+/*
+ * save records on shutdown, in a context file so that they
+ * can be reloaded on restart
+ */
 void
 save_context()
 {
@@ -879,6 +887,8 @@ save_context()
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
 	for (ptr = head;ptr;ptr = ptr->next) {
+		if (ptr->timestamp < time(0) - timeout) /*- don't save expired records */
+			continue;
 		rcptlen[fmt_ulong(rcptlen, ptr->rcptlen)] = 0;
 		timestamp[fmt_ulong(timestamp, ptr->timestamp)] = 0;
 		if (write_file(context_fd, ptr->ip_str, str_len(ptr->ip_str)) == -1
@@ -905,6 +915,10 @@ save_context()
 stralloc        context = { 0 };
 stralloc        line = { 0 };
 
+/*-
+ * load records on startup from a context file which
+ * was saved on shutdown (SIGTERM)
+ */
 void
 load_context()
 {
@@ -950,7 +964,7 @@ load_context()
 		cptr += str_len(cptr) + 1;
 		status = *cptr;
 		if (verbose == 2) {
-			if (timestamp < cur_time - timeout) {
+			if (timestamp < cur_time - timeout) { /*- expired records */
 				print_record(ip, rpath, rcpt, rcptlen, timestamp, status, 1);
 				continue;
 			} else
@@ -988,6 +1002,9 @@ load_context()
 	return;
 }
 
+/*
+ * Reload whitelist on sighup
+ */
 void
 sighup()
 {
@@ -999,6 +1016,9 @@ sighup()
 	sig_unblock(SIGHUP);
 }
 
+/*-
+ * save context file on SIGUSR1
+ */
 void
 sigusr1()
 {
@@ -1009,12 +1029,15 @@ sigusr1()
 	return;
 }
 
+/*-
+ * expire records on SIGUSR2
+ */
 void
 sigusr2()
 {
-	sig_block(SIGUSR1);
+	sig_block(SIGUSR2);
 	expire_records(time(0));
-	sig_unblock(SIGUSR1);
+	sig_unblock(SIGUSR2);
 	return;
 }
 
@@ -1445,7 +1468,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.22 2017-11-24 02:58:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.23 2017-11-25 18:34:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
