@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Thu Nov 23 17:01:31 IST 2017
+DATE: Fri Nov 24 03:19:49 IST 2017
 
 Announcing Release 2.2 of IndiMail. This release has both source.tar.gz, RPMs and debs.
 
@@ -156,3 +156,4 @@ Release 2.2 Start 08/05/2017
 49. removed programs copyemail, testmra, mail_report, execmysql
 50. binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
 51. fixed syntax error with --qhpsi option changes in spec/postinst file
+52. qmail-greyd.c - added verbose variable to suppress few messages

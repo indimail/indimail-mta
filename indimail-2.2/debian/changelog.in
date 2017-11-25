@@ -53,5 +53,6 @@ indimail (@version@-2) unstable; urgency=low
   * binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
   * fixed syntax error with --qhpsi option changes in postinst file
   * qmail-greyd.c - added verbose variable to suppress few messages
+  * qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler, expire records when loading context file
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 24 Nov 2017 03:00:45 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 25 Nov 2017 21:32:36 +0530
