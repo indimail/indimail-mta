@@ -70,3 +70,5 @@ Release 2.2 Start 08/05/2017
 21/11/2017
 41. fixed syntax error with --qhpsi option changes in spec/postinst file
 42. qmail-greyd.c - added verbose variable to suppress few messages
+43. qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler,
+    expire records when loading context file
