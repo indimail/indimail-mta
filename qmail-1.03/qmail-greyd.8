@@ -61,6 +61,7 @@ of restart. To keep the in-memory search as efficient as possible, entries older
 \fItimeout_days\fR are expired during every request. To keep the in-memory database as
 small as possible, records older than \fItimeout_days\fR are periodically removed. The
 default interval is 5 minutes and can be changed by specifiying the \fB-f\fR option.
+You can force removal of expired records by issuing \fISIGUSR2\fR signal to \fBqmail-greyd\fR.
 \fBqmail-greyd\fR also backups the in-memory database to \fIcontextFile\fR on receipt
 of \fISIGTERM\fR or \fISIGUSR1\fR signal. The \fIcontextFile\fR and its containing directory
 should be writeable by the user with which \fBqmail-greyd\fR process runs. At start-up the file
@@ -144,7 +145,7 @@ by a ASCII 0 character.
 .EE
 
 .SH "SEE ALSO"
-qmail-smtpd(8), greylist(3), bogofilter(1), hcreate(3), recvfrom(2).
+qmail-smtpd(8), greylist(3), bogofilter(1), hcreate(3), hsearch(3), hdestroy(3), recvfrom(2).
 
 .SH REFERENCES
 
