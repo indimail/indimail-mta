@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.24  2017-11-26 12:58:39+05:30  Cprogrammer
+ * fixed expire logic
+ *
  * Revision 1.23  2017-11-25 18:34:49+05:30  Cprogrammer
  * initialize h_allocated. Fixed signal handler for SIGUSR2, expire records when loading context file
  *
@@ -157,7 +160,7 @@ struct greylst
 	int             attempts;
 	char            status; /*- greylisting status */
 	struct greylst *prev, *next; /*- prev, next of linked list of greylst structures */
-	struct greylst *ip_prev, *ip_next; /*- group records for an ip address together */
+	struct greylst *ip_prev, *ip_next; /*- group records for an ip address+rpath+rcpt together */
 };
 struct greylst *head;
 struct greylst *tail;
@@ -263,10 +266,7 @@ struct constmap mapwhite;
 void
 whitelist_init(char *arg)
 {
-	if (verbose) {
-		out("initializing whitelist\n");
-		flush();
-	}
+	logerr("initializing whitelist\n");
 #ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
 	static stralloc controlfile = {0};
 
@@ -283,6 +283,7 @@ whitelist_init(char *arg)
 		die_control(arg);
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
+	logerrf("initialized  whitelist\n");
 	return;
 }
 
@@ -551,7 +552,7 @@ create_hash(struct greylst *curr)
 			strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
 			logerr(strnum);
 			logerrf("\n");
-		} else { /*- first time */
+		} else { /*- first time/expiry */
 			if (verbose) {
 				out("creating hash table, size=");
 				strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
@@ -595,23 +596,27 @@ expire_records(time_t cur_time)
 	struct greylst *ptr;
 	time_t          start;
 
-	if (verbose) {
-		out("expiring records\n");
-		flush();
-	}
-	/*- find the first record that is not expired */
+	logerr("expiring records\n");
+	/*- find all records that are expired where timestamp < start */
 	start = cur_time - timeout;
-	for (ptr = head;ptr && ptr->timestamp < start;ptr = ptr->next) {
-		if (verbose == 2)
+	for (ptr = head; ptr; ptr = ptr->next) {
+		if (ptr->timestamp >= start)
+			continue;
+		if (verbose > 1)
 			print_record(ptr->ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
 				ptr->status, 1);
 		grey_count--;
-		head = ptr->next;
-		head->prev = 0;
+		if (ptr == head) {
+			head = ptr->next;
+			head->prev = 0;
+		}
+		(ptr->prev)->next = ptr->next;
+		(ptr->next)->prev = ptr->prev;
 		free(ptr->rpath);
 		free(ptr->rcpt);
 		free(ptr);
 	}
+	logerrf("expired  records\n");
 	/*- destroy and recreate the hash */
 	if (create_hash(0))
 		die_nomem();
@@ -674,6 +679,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	if (!head)
 		return (RECORD_NEW);
 	cur_time = time(0);
+	/* point ptr to the latest unexpired entry */
 	if (cur_time - timeout > head->timestamp) {
 		/*- records waiting to be expired */
 		if (!(cur_time % fr_int)) {
@@ -681,15 +687,15 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 			expire_records(cur_time);
 			if (!head)
 				return (RECORD_NEW);
-			ptr = head;
+			ptr = head; /*- latest unexpired entry */
 		} else {
 			start = cur_time - timeout;
-			for (ptr = head;ptr && ptr->timestamp < start; ptr = ptr->next);
+			for (ptr = head;ptr && ptr->timestamp < start; ptr = ptr->next); /*- latest unexpired entry */
 			if (!ptr)
 				return (RECORD_NEW);
 		}
 	} else
-		ptr = head;
+		ptr = head; /*- latest unexpired entry */
 #ifdef IPV6
 	byte_zero((char *) &r_ip, sizeof(union v46addr));
 	if (!ip6_scan(remoteip, &r_ip.ip6))
@@ -747,6 +753,11 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	return (RECORD_NEW);
 }
 
+/*
+ * add entry to link list
+ * group in the link list if found in hash list
+ * added to hash list if not found in hash list
+ */
 struct greylst *
 add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey)
 {
@@ -766,7 +777,7 @@ add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey
 		ptr->ip_prev = ptr->ip_next = 0;
 	}
 	byte_copy(ptr->ip_str, str_len(ip) + 1, ip);
-	if (create_hash(ptr)) /*- add the record to hash list */
+	if (create_hash(ptr)) /*- add the record to hash list if new. group on ip_str if not new */
 		die_nomem();
 	*grey = ptr;
 	grey_count++;
@@ -880,10 +891,7 @@ save_context()
 
 	if (!grey_count)
 		return;
-	if (verbose) {
-		out("saving context file\n");
-		flush();
-	}
+	logerr("saving context file\n");
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
 	for (ptr = head;ptr;ptr = ptr->next) {
@@ -909,6 +917,7 @@ save_context()
 			break;
 	} /*- for (ptr = head;ptr;ptr = ptr->next) */
 	close(context_fd);
+	logerrf("saved  context file\n");
 	return;
 }
 
@@ -963,7 +972,7 @@ load_context()
 		scan_ulong(cptr, (unsigned long *) &timestamp);
 		cptr += str_len(cptr) + 1;
 		status = *cptr;
-		if (verbose == 2) {
+		if (verbose > 1) {
 			if (timestamp < cur_time - timeout) { /*- expired records */
 				print_record(ip, rpath, rcpt, rcptlen, timestamp, status, 1);
 				continue;
@@ -1029,15 +1038,54 @@ sigusr1()
 	return;
 }
 
+void
+ready()
+{
+	char            strnum[FMT_ULONG];
+	out("Ready for connections, grey_count=");
+	strnum[fmt_ulong(strnum, (unsigned long) grey_count)] = 0;
+	out(strnum);
+	out(", hcount=");
+	strnum[fmt_ulong(strnum, (unsigned long) hcount)] = 0;
+	out(strnum);
+	out(", hash_size=");
+	strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
+	out(strnum);
+	out("\n");
+	flush();
+}
+
 /*-
  * expire records on SIGUSR2
  */
 void
 sigusr2()
 {
+	struct greylst *ptr, *ip_ptr;
+	int             i, j;
+	char            strnum[FMT_ULONG];
+
 	sig_block(SIGUSR2);
 	expire_records(time(0));
+	if (verbose > 2) {
+		for (i = 1, ptr = head; ptr; ptr = ptr->next, i++) {
+			strnum[fmt_ulong(strnum, (unsigned long) i)] = 0;
+			out(strnum);
+			out(" ");
+			print_record(ptr->ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
+				ptr->status, 0);
+			for (j = 1, ip_ptr = ptr->ip_next;ip_ptr;ip_ptr = ip_ptr->ip_next, j++) {
+				out(" ");
+				strnum[fmt_ulong(strnum, (unsigned long) j)] = 0;
+				out(strnum);
+				out(" ");
+				print_record(ip_ptr->ip_str, ip_ptr->rpath, ip_ptr->rcpt, ip_ptr->rcptlen, ip_ptr->timestamp,
+					ptr->status, 0);
+			}
+		}
+	}
 	sig_unblock(SIGUSR2);
+	ready();
 	return;
 }
 
@@ -1084,12 +1132,13 @@ char           *usage =
 				"usage: qmail-greyd [options] ipaddr context_file\n"
 				"Options [ wstgmf ]\n"
 				"        [ -v 0, 1 or 2]\n"
-				"        [ -w whitelist ]\n"
+				"        [ -h hash size]\n"
 				"        [ -t timeout (days) ]\n"
 				"        [ -g resend window (hours) ]\n"
 				"        [ -m minimum resend time (min) ]\n"
 				"        [ -f free interval (min) ]\n"
-				"        [ -s save interval (min) ]";
+				"        [ -s save interval (min) ]\n"
+				"        [ -w whitelist ]\n";
 int
 main(int argc, char **argv)
 {
@@ -1159,6 +1208,8 @@ main(int argc, char **argv)
 			break;
 		}
 	} /*- while ((opt = getopt(argc, argv, "dw:s:t:g:m:")) != opteof) */
+	if (hash_size <= 0 || save_interval <= 0 || resend_window <= 0 || min_resend <= 0 || free_interval <= 0)
+		strerr_die1x(100, usage);
 	if (optind + 2 != argc)
 		strerr_die1x(100, usage);
 	ipaddr = argv[optind++];
@@ -1261,17 +1312,7 @@ main(int argc, char **argv)
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGUSR1, sigusr1);
 	sig_catch(SIGUSR2, sigusr2);
-	out("Ready for connections, grey_count=");
-	strnum[fmt_ulong(strnum, (unsigned long) grey_count)] = 0;
-	out(strnum);
-	out(", hcount=");
-	strnum[fmt_ulong(strnum, (unsigned long) hcount)] = 0;
-	out(strnum);
-	out(", hash_size=");
-	strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
-	out(strnum);
-	out("\n");
-	flush();
+	ready();
 	for (buf_len = 0, rdata_len = 0;;) {
 		char            save = 0;
 		int             ret;
@@ -1468,7 +1509,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.23 2017-11-25 18:34:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.24 2017-11-26 12:58:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
