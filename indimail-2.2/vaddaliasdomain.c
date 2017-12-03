@@ -1,5 +1,8 @@
 /*
  * $Log: vaddaliasdomain.c,v $
+ * Revision 2.8  2017-12-03 15:58:06+05:30  Cprogrammer
+ * added post handle functionality
+ *
  * Revision 2.7  2016-06-09 15:32:32+05:30  Cprogrammer
  * run if indimail gid is present in process supplementary groups
  *
@@ -72,7 +75,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vaddaliasdomain.c,v 2.7 2016-06-09 15:32:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vaddaliasdomain.c,v 2.8 2017-12-03 15:58:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain_old[MAX_BUFF], Domain_new[MAX_BUFF];
@@ -85,6 +88,7 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
+	char           *ptr, *base_argv0;
 	int             err;
 	uid_t           uid;
 	gid_t           gid;
@@ -108,6 +112,13 @@ main(argc, argv)
 	if((err = vaddaliasdomain(Domain_old, Domain_new)) != VA_SUCCESS)
 		error_stack(stderr, 0);
 	vclose();
+	if (!(ptr = getenv("POST_HANDLE")))
+	{
+		if (!(base_argv0 = strrchr(argv[0], '/')))
+			base_argv0 = argv[0];
+		return(post_handle("%s/%s %s %s", LIBEXECDIR, base_argv0, Domain_new, Domain_old));
+	} else
+		return(post_handle("%s %s %s", ptr, Domain_new, Domain_old));
 	return(err);
 }
 
