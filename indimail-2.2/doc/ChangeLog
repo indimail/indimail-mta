@@ -97,6 +97,11 @@ Release 2.2 Start 08/05/2017
 25/11/2017
 53. qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler,
     expire records when loading context file
+26/11/2017
+54. qmail-greyd.c - fixed record expiry logic
+---------- sixth release of 2.2 -------------------
+02/12/2017
+55. added post handle call in vaddaliasdomain
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.1-1.1%{?dist}
 Release 2.1 Start 16/03/2017

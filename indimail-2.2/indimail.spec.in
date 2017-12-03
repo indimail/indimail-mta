@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.433 2017-11-21 23:08:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.434 2017-12-03 16:26:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -582,7 +582,7 @@ fi
   --libexecdir=%{libexecdir} --mandir=%{mandir} --enable-qmaildir=%{indimaildir} \
   --enable-shareddir=%{shareddir} --datarootdir=%{shareddir} \
   --enable-modbase=%{_prefix}/lib/indimail \
-  --enable-basepath=@basepath@ --enable-logdir=@logdir@ \
+  --enable-basepath=@basepath@ --enable-logdir=%{logdir} \
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp.smtp \
   --enable-moduledir=%pam_module_dir `%{__cat} config/indimail.opts`
 %if %{tcpserver_plugin} == 1
@@ -1539,6 +1539,8 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/vdeldomain
 %attr(755,root,qmail)                   %{libexecdir}/vadduser
 %attr(755,root,qmail)                   %{libexecdir}/vmoduser
+%attr(755,root,qmail)                   %{libexecdir}/vdeluser
+%attr(755,root,qmail)                   %{libexecdir}/vrenameuser
 %attr(755,root,qmail)                   %{libexecdir}/overquota.sh
 %attr(755,root,qmail)                   %{libexecdir}/qmailmrtg7
 %attr(4755,root,qmail)                  %{libexecdir}/sq_vacation

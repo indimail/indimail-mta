@@ -29,6 +29,12 @@ Send SIGHUP to qmail-send.
 .IP \n+[step]
 Add entry to .aliasdomains in the domains directory for the domain old_domain.
 
+.SH POST HANDLE
+If the environment variable POST_HANDLE is set, \fBvaddaliasdomain\fR executes the program defined by
+the POST_HANDLE environment variable, passing \fInew_domain\fR \fIold_domain\fR as arguments. If POST_HANDLE
+is not defined, the program/script LIBEXECDIR/vaddaliasdomain will be executed with \fInew_domain\fR,\fIold_domain\fR
+as arguments.
+
 .SH OPTIONS
 .PP
 .TP

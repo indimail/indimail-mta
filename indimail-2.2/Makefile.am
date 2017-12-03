@@ -181,12 +181,13 @@ noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
 	README INSTALL-MINI vadddomain_handle vadduser_handle vdeldomain_handle \
 	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle \
-	create_services
+	vdeluser_handle vrenameuser_handle create_services
 
-post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain
+post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
+				   vdeluser_handle vrenameuser_handle
 
 MOSTLYCLEANFILES=vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
-svctool cronlist crypt \
+svctool cronlist crypt vdeluser_handle vrenameuser_handle \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib \
 indimail-rpmlintrc mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
@@ -841,6 +842,7 @@ README-CLUSTER: README-CLUSTER.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 README: README.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
+
 post_handle:
 	mkdir -p post_handle
 vadddomain_handle: vadddomain_handle.in post_handle
@@ -857,6 +859,11 @@ vpasswd_handle: vpasswd_handle.in post_handle
 	$(edit) $@.in > post_handle/vpasswd; ln -sf post_handle/vpasswd $@
 vmoduser_handle: vmoduser_handle.in post_handle
 	$(edit) $@.in > post_handle/vmoduser; ln -sf post_handle/vmoduser $@
+vdeluser_handle: vdeluser_handle.in post_handle
+	$(edit) $@.in > post_handle/vdeluser; ln -sf post_handle/vdeluser $@
+vrenameuser_handle: vrenameuser_handle.in post_handle
+	$(edit) $@.in > post_handle/vrenameuser; ln -sf post_handle/vrenameuser $@
+
 create_services: create_services.in
 	$(edit) $@.in > $@; chmod 755 $@
 indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog

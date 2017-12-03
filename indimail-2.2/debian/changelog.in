@@ -54,5 +54,7 @@ indimail (@version@-2) unstable; urgency=low
   * fixed syntax error with --qhpsi option changes in postinst file
   * qmail-greyd.c - added verbose variable to suppress few messages
   * qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler, expire records when loading context file
+  * qmail-greyd.c - fixed record expiry logic
+  * added post handle call in vaddaliasdomain
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 25 Nov 2017 21:32:36 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 02 Dec 2017 15:47:43 +0530

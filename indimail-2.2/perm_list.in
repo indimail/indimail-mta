@@ -415,6 +415,8 @@
 %attr(0755,root,qmail) @libexecdir@/vadduser
 %attr(0755,root,qmail) @libexecdir@/vpasswd
 %attr(0755,root,qmail) @libexecdir@/vmoduser
+%attr(0755,root,qmail) @libexecdir@/vdeluser
+%attr(0755,root,qmail) @libexecdir@/vrenameuser
 #
 # Setuid
 #

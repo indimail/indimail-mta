@@ -1,6 +1,6 @@
 RELEASE NOTES
 =============
-DATE: Fri Nov 24 03:19:49 IST 2017
+DATE: Tue Nov 28 10:37:44 IST 2017
 
 Announcing Release 2.2 of IndiMail. This release has both source.tar.gz, RPMs and debs.
 
@@ -27,7 +27,8 @@ o renamed systemd unit file indimail.service to svscan.service
 o multiple fixes for MySQL/MariaDB database creation during RPM/Deb install
 o Logdir changed to /var/log/svc
 o Use Binary Search algorithm, using tsearch in inlookup (Knuth (6.2.2) Algorithm T)
-
+o qmail-greyd - Mutiple optimization/improvements for hash search
+o added post handle call in vaddaliasdomain
 
 This release includes the following files
 
@@ -157,3 +158,7 @@ Release 2.2 Start 08/05/2017
 50. binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
 51. fixed syntax error with --qhpsi option changes in spec/postinst file
 52. qmail-greyd.c - added verbose variable to suppress few messages
+53. qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler,
+    expire records when loading context file
+54. qmail-greyd.c - fixed record expiry logic
+55. added post handle call in vaddaliasdomain

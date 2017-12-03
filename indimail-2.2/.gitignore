@@ -178,6 +178,8 @@ vadduser_handle
 vdeldomain_handle
 vmoduser_handle
 vpasswd_handle
+vdeluser_handle
+vrenameuser_handle
 vrenamedomain_handle
 vrenameuser
 vrenameuser.1
