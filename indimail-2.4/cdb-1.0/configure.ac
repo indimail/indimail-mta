@@ -32,7 +32,7 @@ case "$host" in
 esac
 
 defaultprefix="/var/indimail"
-LIBVER=0:0:0
+LIBVER=1:0:0
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(defaultprefix)
 AC_SUBST(LIBVER)

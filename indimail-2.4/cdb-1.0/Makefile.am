@@ -19,7 +19,7 @@ INC = $(include_HEADERS)
 libcdb_LTLIBRARIES = libcdb.la
 libcdb_la_SOURCES=$(COMMONSOURCES) 
 libcdb_la_LIBADD =
-libcdb_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
+libcdb_la_LDFLAGS = -version-info @LIBVER@
 libcdbdir=@libdir@
 
 MOSTLYCLEANFILES= uint32.h load compile
