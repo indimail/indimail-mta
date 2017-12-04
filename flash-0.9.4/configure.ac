@@ -14,7 +14,7 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_LIB_PREPARE_MULTILIB
 
-LIBVER=0:0:0
+LIBVER=1:0:0
 defaultprefix="/usr"
 
 if test x$prefix = xNONE
