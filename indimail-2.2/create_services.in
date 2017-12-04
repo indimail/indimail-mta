@@ -20,7 +20,7 @@ default_domain=`uname -n`
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.71 2017-11-22 12:28:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.72 2017-12-04 08:25:01+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -383,7 +383,7 @@ fi
 #
 $svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-	--hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon $extra_opt
+	--hash-size=65536 --save-interval=5 --whitelist=greylist.white $extra_opt
 #
 # qmtpd service
 #
