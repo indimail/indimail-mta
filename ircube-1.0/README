@@ -250,7 +250,7 @@ Non SSL Version Install/Configuration (look below for SSL config)
 
    b) This is assuming you have already generated indimail cert after
       indimail installation. If not execute the following command. We
-	  will assume that your host is indimail.org
+      will assume that your host is indimail.org
 
       $ sudo /usr/sbin/svctool --postmaster=postmaster@indimail.org --config=cert" --common_name=indimail.org
 
@@ -260,15 +260,15 @@ Non SSL Version Install/Configuration (look below for SSL config)
 
       Now apache server needs access to servercert.pem. Add apache user
       to the qmail group. You can chose either of the below two options.
-	  Options 2 is less secure, as it gives httpd access to qmail files
+      Options 2 is less secure, as it gives httpd access to qmail files
 
-	  Option 1
-	  --------
-	  $ sudo chgrp apache /etc/indimail/certs/servercert.pem
-	  $ sudo chmod 640 /etc/indimail/certs/servercert.pem
+      Option 1
+      --------
+      $ sudo chgrp apache /etc/indimail/certs/servercert.pem
+      $ sudo chmod 640 /etc/indimail/certs/servercert.pem
 
-	  Option 2
-	  --------
+      Option 2
+      --------
       $ sudo usermod -aG qmail apache
 
       Now you should see apache getting qmail group access
@@ -312,11 +312,11 @@ Non SSL Version Install/Configuration (look below for SSL config)
       for mismatched hostnames in the request and certificate.
 
       Verify that php is using the correct certificate with proper CN.
-	  Use the program testssl.php download from the location you downloaded
+      Use the program testssl.php download from the location you downloaded
       this README/INSTALL file.
 
       In Step 9b you created a certificate with common_name as indimail.org.
-	  Use the same host that you gave when creating the certificate.
+      Use the same host that you gave when creating the certificate.
 
       $ php ./testssl.php indimail.org
       Success
