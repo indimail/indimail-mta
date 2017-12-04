@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.434 2017-12-03 16:26:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.435 2017-12-04 19:22:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -86,7 +86,7 @@
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
-Provides: indimail-mta = @version@, daemontools = @version@, ucspi-tcp = @version@, libindimail = @version@
+Provides: indimail-mta = %{version} daemontools = %{version} ucspi-tcp = %{version} libindimail = %{version}
 Release: 1.1%{?dist}
 
 ## user/group management
@@ -2333,7 +2333,7 @@ fi
 if [ -f %{libexecdir}/upgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for pretrans"
-  /bin/sh %{libexecdir}/upgrade.sh pretrans noargs @version@ $*
+  /bin/sh %{libexecdir}/upgrade.sh pretrans noargs %{version} $*
 ) > /tmp/indimail-setup.log 2>&1
 fi
 
@@ -2352,7 +2352,7 @@ if [ $argv1 -eq 2 ] ; then
   if [ -f %{libexecdir}/upgrade.sh ] ; then
   (
     echo "Running Custom Upgrade Script for pre upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh pre upgrade @version@ $*
+    /bin/sh %{libexecdir}/upgrade.sh pre upgrade %{version} $*
   ) >> /tmp/indimail-setup.log 2>&1
   fi
   exit 0
@@ -2451,7 +2451,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   if [ -f %{libexecdir}/upgrade.sh ] ; then
     /sbin/ldconfig
     echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh post upgrade @version@ $*
+    /bin/sh %{libexecdir}/upgrade.sh post upgrade %{version} $*
   fi
   if [ -f /etc/init.d/indimail ] ; then
     cmp -s %{_prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1
@@ -2901,7 +2901,7 @@ fi
 
 if [ -f %{libexecdir}/upgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
-  /bin/sh %{libexecdir}/upgrade.sh post install @version@ $*
+  /bin/sh %{libexecdir}/upgrade.sh post install %{version} $*
 fi
 ) >> /tmp/indimail-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
@@ -2956,7 +2956,7 @@ fi
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/upgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh preun upgrade @version@ "$argv1"
+    /bin/sh %{libexecdir}/upgrade.sh preun upgrade %{version} "$argv1"
   fi
   exit 0
 fi
@@ -2986,7 +2986,7 @@ fi
 
 if [ -f %{libexecdir}/upgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/upgrade.sh preun uninstall @version@ "$argv1"
+  /bin/sh %{libexecdir}/upgrade.sh preun uninstall %{version} "$argv1"
 fi
 
 # Remove IndiMail being started on system boot
@@ -3008,7 +3008,7 @@ if [ $argv1 -eq 1 ] ; then
   (
   if [ -f %{libexecdir}/upgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh postun upgrade @version@ $*
+    /bin/sh %{libexecdir}/upgrade.sh postun upgrade %{version} $*
   fi
   ) >> /tmp/indimail-setup.log
   echo "recreating ld.so cache"
@@ -3121,7 +3121,7 @@ fi
 
 if [ -f %{libexecdir}/upgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
-  /bin/sh %{libexecdir}/upgrade.sh postun uninstall @version@ $*
+  /bin/sh %{libexecdir}/upgrade.sh postun uninstall %{version} $*
 fi
 ) >> /tmp/indimail-setup.log 2>&1
 
@@ -3136,7 +3136,7 @@ fi
 if [ -f %{libexecdir}/upgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{libexecdir}/upgrade.sh posttrans noargs @version@ $*
+  /bin/sh %{libexecdir}/upgrade.sh posttrans noargs %{version} $*
 ) >> /tmp/indimail-setup.log 2>&1
 fi
 
