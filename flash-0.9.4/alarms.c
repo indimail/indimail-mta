@@ -1,5 +1,8 @@
 /*
  * $Log: alarms.c,v $
+ * Revision 1.5  2017-12-04 20:49:04+05:30  Cprogrammer
+ * fixed possible overflow
+ *
  * Revision 1.4  2009-06-04 10:45:44+05:30  Cprogrammer
  * added conditional inclusion of ncurses
  *
@@ -90,7 +93,7 @@ FindNextAlarm(time_t * altime)
 static WINDOW  *
 DrawAlarmWin(struct Alarm *x)
 {
-	char            message[COLS], fmt[30];
+	char            message[COLS], fmt[128];
 	WINDOW         *WAwin;
 	int             cols;
 
