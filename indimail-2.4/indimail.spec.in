@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.435 2017-12-04 19:22:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.436 2017-12-04 21:52:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -25,6 +25,7 @@
 %global mandir             @mandir@
 %global shareddir          @shareddir@
 %global defaultDomain      @defaultdomain@
+%global mta_version        2.2
 %global courier_version    4.18.0
 %global bogofilter_version 1.2.4
 %global pam_multi_version  1.1
@@ -86,7 +87,10 @@
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
-Provides: indimail-mta = %{version} daemontools = %{version} ucspi-tcp = %{version} libindimail = %{version}
+Provides: indimail-mta = %{mta_version}
+Provides: daemontools = %{mta_version}
+Provides: ucspi-tcp = %{mta_version}
+Provides: libindimail = %{version}
 Release: 1.1%{?dist}
 
 ## user/group management
@@ -2019,27 +2023,27 @@ fi
 %endif
 
 %if %nolibsrs2 == 0
-%{_libdir}/libsrs2-%{libsrs2_version}.so.0
-%{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
+%{_libdir}/libsrs2.so.1
+%{_libdir}/libsrs2.so.1.0.0
+%endif
+
+%{_libdir}/libeps.so.1
+%{_libdir}/libeps.so.1.0.0
+%{_libdir}/libcdb.so.1
+%{_libdir}/libcdb.so.1.0.0
+%{_libdir}/libflash.so.1
+%{_libdir}/libflash.so.1.0.0
+%{_libdir}/libindimail.so.2
+%{_libdir}/libindimail.so.2.0.0
+
+%if %nonssd == 0
+                                        %{_libdir}/libnss_nssd.so.2
+%attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
 %endif
 
 %if %nocourierimap == 0
 %{_libdir}/libunicode.so.4
 %{_libdir}/libunicode.so.4.0.0
-%endif
-
-%{_libdir}/libeps-%{eps_version}.so.0
-%{_libdir}/libeps-%{eps_version}.so.0.0.0
-%{_libdir}/libcdb-%{cdb_version}.so.0
-%{_libdir}/libcdb-%{cdb_version}.so.0.0.0
-%{_libdir}/libflash-%{flash_version}.so.0
-%{_libdir}/libflash-%{flash_version}.so.0.0.0
-%{_libdir}/libindimail-%{version}.so.0
-%{_libdir}/libindimail-%{version}.so.0.0.0
-
-%if %nonssd == 0
-                                        %{_libdir}/libnss_nssd.so.2
-%attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
 %endif
 
 %files devel
@@ -2147,8 +2151,22 @@ fi
 %endif
 
 %if %nolibsrs2 == 0
-%{_libdir}/libsrs2-%{libsrs2_version}.so.0
-%{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
+%{_libdir}/libsrs2.so.1
+%{_libdir}/libsrs2.so.1.0.0
+%endif
+
+%{_libdir}/libeps.so.1
+%{_libdir}/libeps.so.1.0.0
+%{_libdir}/libcdb.so.1
+%{_libdir}/libcdb.so.1.0.0
+%{_libdir}/libflash.so.1
+%{_libdir}/libflash.so.1.0.0
+%{_libdir}/libindimail.so.2
+%{_libdir}/libindimail.so.2.0.0
+
+%if %nonssd == 0
+                                        %{_libdir}/libnss_nssd.so.2
+%attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
 %endif
 
 %if %nocourierimap == 0
@@ -2156,19 +2174,6 @@ fi
 %{_libdir}/libunicode.so.4.0.0
 %endif
 
-%{_libdir}/libeps-%{eps_version}.so.0
-%{_libdir}/libeps-%{eps_version}.so.0.0.0
-%{_libdir}/libcdb-%{cdb_version}.so.0
-%{_libdir}/libcdb-%{cdb_version}.so.0.0.0
-%{_libdir}/libflash-%{flash_version}.so.0
-%{_libdir}/libflash-%{flash_version}.so.0.0.0
-%{_libdir}/libindimail-%{version}.so.0
-%{_libdir}/libindimail-%{version}.so.0.0.0
-
-%if %nonssd == 0
-                                        %{_libdir}/libnss_nssd.so.2
-%attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
-%endif
 %{_pkg_config_path}/libindimail.pc
 
 %files mini
@@ -3168,22 +3173,22 @@ echo "removing shared libraries"
 
 %if %nolibsrs2 == 0
 %{__rm} -f %{_libdir}/libsrs2.so
-%{__rm} -f %{_libdir}/libsrs2-%{libsrs2_version}.so.0
-%{__rm} -f %{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
+%{__rm} -f %{_libdir}/libsrs2.so.1
+%{__rm} -f %{_libdir}/libsrs2.so.1.0.0
 %endif
 
 %{__rm} -f %{_libdir}/libeps.so
-%{__rm} -f %{_libdir}/libeps-%{eps_version}.so.0
-%{__rm} -f %{_libdir}/libeps-%{eps_version}.so.0.0.0
+%{__rm} -f %{_libdir}/libeps.so.1
+%{__rm} -f %{_libdir}/libeps.so.1.0.0
 %{__rm} -f %{_libdir}/libcdb.so
-%{__rm} -f %{_libdir}/libcdb-%{cdb_version}.so.0
-%{__rm} -f %{_libdir}/libcdb-%{cdb_version}.so.0.0.0
+%{__rm} -f %{_libdir}/libcdb.so.1
+%{__rm} -f %{_libdir}/libcdb.so.1.0.0
 %{__rm} -f %{_libdir}/libflash.so
-%{__rm} -f %{_libdir}/libflash-%{flash_version}.so.0
-%{__rm} -f %{_libdir}/libflash-%{flash_version}.so.0.0.0
+%{__rm} -f %{_libdir}/libflash.so.1
+%{__rm} -f %{_libdir}/libflash.so.1.0.0
 %{__rm} -f %{_libdir}/libindimail.so
-%{__rm} -f %{_libdir}/libindimail-%{version}.so.0
-%{__rm} -f %{_libdir}/libindimail-%{version}.so.0.0.0
+%{__rm} -f %{_libdir}/libindimail.so.2
+%{__rm} -f %{_libdir}/libindimail.so.2.0.0
 /sbin/ldconfig
 
 %postun devel
