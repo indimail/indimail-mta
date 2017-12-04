@@ -4,6 +4,8 @@ Announcing Release @version@ of IndiMail.
 
 Following are the main features of this release
 
+o Removed version numbers from shared library filenames
+
 This release includes the following files (Note: Files may be suffied with -@version@)
 
 README                (Introduction to IndiMail)
@@ -69,3 +71,8 @@ http://download.opensuse.org/repositories/home:/mbhangui/
 Install Instructions
 https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
 
+ChangeLog
+
+Release 2.4 Start 04/12/2017
+01. remove -release version_number from la_LDFLAGS in indimail, libcdb,
+	libeps, libsrs2, libflash 

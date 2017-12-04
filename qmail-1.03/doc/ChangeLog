@@ -76,3 +76,5 @@ Release 2.2 Start 08/05/2017
     expire records when loading context file
 26/11/2017
 44. qmail-greyd.c - fixed record expiry logic
+04/12/2017
+45. removed version number from libsrs2 filename
