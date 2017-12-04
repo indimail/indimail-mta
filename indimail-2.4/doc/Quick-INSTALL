@@ -34,9 +34,9 @@
     or
    https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
     or
-   % sudo rpm -ivh indimail-2.3-1.1.i386.rpm (for RPM)
+   % sudo rpm -ivh filename.rpm (for RPM)
     or
-   % sudo dpkg -i indimail_2.3-1_i386.deb (for Debian)
+   % sudo dpkg -i filename.deb (for Debian)
 
    Create a basic configuration file required by IndiMail
    % cd /etc/indimail/control
@@ -98,9 +98,9 @@
    ---------------------------
 
    Install IndiMail from RPM / Debian
-   % sudo rpm -ivh indimail-2.3-1.1.i386.rpm
+   % sudo rpm -ivh filename.rpm
     or
-   % sudo dpkg -i indimail_2.3-1_i386.deb (for Debian)
+   % sudo dpkg -i filename.deb (for Debian)
 
    Create basic configuration files required by IndiMail
    % cd /etc/indimail/control

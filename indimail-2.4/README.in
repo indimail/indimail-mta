@@ -107,12 +107,14 @@ to make it easy for a newbie to install IndiMail.
 
 To install IndiMail you can take the help of the following documents
 
-INSTALL-@version@               (Source Installation Instructions)
-INSTALL-RPM-@version@           (Install Instructions for RPM)
-INSTALL-MYSQL-@version@         (MySQL specific Installation Instructions)
-README-CLUSTER              (Steps on installing a clustered setup)
-Quick-INSTALL-@version@         (A minimal documentation on Installation/Configuration)
-RELEASE-Notes-@version@         (This file)
+README                (Introduction to IndiMail)
+INSTALL               (Source Installation Instructions)
+INSTALL-RPM           (Install Instructions using RPM)
+INSTALL-MYSQL         (MySQL specific Installation Instructions)
+README-CLUSTER        (Steps on configuring a clustered setup)
+Quick-INSTALL         (A minimal documentation on Installation/Configuration)
+RELEASE-Notes         (This file)
+indimail-@version@.tar.gz   (IndiMail source)
 
 You could also look at
 

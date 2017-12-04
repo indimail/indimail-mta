@@ -1,3 +1,10 @@
+* Mon Dec 04 2017 19:19:11 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
+Release 2.4 Start 04/12/2017
+04/12/2017
+01. remove -release version_number from la_LDFLAGS in indimail, libcdb Makefile.am
+02. changed LIBVER to 2 in indimail configure.ac
+03. changed LIBVER to 1 in libcdb configure.ac
+
 * Mon Dec 04 2017 18:10:11 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 01/09/2017
 01/09/2017

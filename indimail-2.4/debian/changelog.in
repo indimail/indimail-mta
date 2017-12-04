@@ -1,34 +1,5 @@
-indimail (@version@-2) unstable; urgency=low
+indimail (@version@-1) unstable; urgency=low
 
-  * indiversion.c - Fixed authindi path
-  * use packetsize > 512 to avoid dkim failures for sites having long txt records (hotmail.com)
-  * fixed default domain in cronlist, svctool, create_services, config-fast
-  * config-fast removed display of DESTDIR
-  * svscanboot/svscan option run .svscan/run or INITCMD. Use unshare --mount option to mount private mounts like custom resolv.conf
-  * svctool - --svscanlog creates .svscan/run and variables in .svscan/variables
-  * svscan - run .svscan/shutdown on SIGTERM
-  * added inotify program to get file system events
-  * added resolvconf service
-  * qmailctl bug - use sysconfdir instead of INDIMAILDIR
-  * qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes. SMTPROUTES takes precendence over X-SMTPROUTES
-  * use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
-  * smtpd.c - fixed spurious error "no valid cert for gateway
-  * qmail-remote.c - fix for SMTPROUTE of the form domain:x.x.x.x::penalty:max_tolerance username password
-  * refactored dns_text() function in libdkim, surblfilter.c, dns_text.c, dns.c
-  * dkimverify.cpp - replace strtok() with strtok_r() for thread safe operation.
-  * Port for openssl 1.1.0
-  * Upgraded courier-imap to 4.18.0 for openssl 1.1.0
-  * Updated defaults.inc.php for roundcube 1.3
-  * smtpd.c - replaced SSLv23_server_method() with TLS_server_method()
-  * smtpd.c - fixed ifdefs for openssl 1.0.1 version.
-  * qmail-remote.c replaced SSLv23_client_method() with TLS_client_method()
-  * use tlsclientmethod, tlsservermethod control files only for openssl version < 1.0.1
-  * qmail-smtpd, qmail-remote - improved logging of TLS method errors
-  * ismaildup.c - added #ifdef for openssl 1.1.0
-  * smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
-  * smtpd.c - initialize proto.len in smtp_init()
-  * qmail-showctl - fixed SIGSEGV
-  * upgraded fetchmail to version 6.4.0
   * libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
   * skip envdir if .svscan/variables directory is missing
   * libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
@@ -57,4 +28,4 @@ indimail (@version@-2) unstable; urgency=low
   * qmail-greyd.c - fixed record expiry logic
   * added post handle call in vaddaliasdomain
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 02 Dec 2017 15:47:43 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 04 Dec 2017 09:13:33 +0530

@@ -1,4 +1,4 @@
-    Do not read this without reading INSTALL-2.3. This is a important file. Most users
+    Do not read this without reading INSTALL. This is a important file. Most users
     in my experience have got stuck with MySQL installation and configuration. Following
     are the three most common issues that users have experienced installing IndiMail
     If you have done a RPM/DEB/yum/dnf/dpkg/apt-get installation, all these steps

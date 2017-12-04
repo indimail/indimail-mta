@@ -18,17 +18,17 @@ jump to the Section 'Installation Steps' below. However, I would recommend you t
 the Checklist below to understand what is involved in setting up a full featured mail server.
 
 You will also find this file as 
-http://downloads.sourceforge.net/indimail/INSTALL-@version@
+http://downloads.sourceforge.net/indimail/INSTALL
 
 There is also a 'Installation for Dummies'. For that read INSTALL-RPM. You will also
 find the INSTALL-RPM file as
-http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
+http://downloads.sourceforge.net/indimail/INSTALL-RPM
 
 This document is complicated as it involves installing from multiple sources. However, there
 is a crash course on IndiMail installation if you want to skip the above
-two documents and directly install from the RPM/Deb. Read the file Quick-INSTALL-@version@.
+two documents and directly install from the RPM/Deb. Read the file Quick-INSTALL.
 You will also find the file as
-http://downloads.sourceforge.net/indimail/Quick-INSTALL-@version@
+http://downloads.sourceforge.net/indimail/Quick-INSTALL
 
 Using Quick-INSTALL it is possible to setup a fully functional mail server in
 flat 30 minutes and in less than 10 commands;
@@ -321,10 +321,10 @@ the installation.
 
     # mkdir -p /home/local/src
     % cd /home/local/src
-    % wget http://downloads.sourceforge.net/indimail/INSTALL-@version@ # This file
-    % wget http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
-    % wget http://downloads.sourceforge.net/indimail/INSTALL-MYSQL-@version@
-    % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL-@version@
+    % wget http://downloads.sourceforge.net/indimail/INSTALL # This file
+    % wget http://downloads.sourceforge.net/indimail/INSTALL-RPM
+    % wget http://downloads.sourceforge.net/indimail/INSTALL-MYSQL
+    % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.5.tar.gz

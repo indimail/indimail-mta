@@ -1,20 +1,19 @@
-RELEASE NOTES
 DATE: @DATE@
 
 Announcing Release @version@ of IndiMail.
 
 Following are the main features of this release
 
-This release includes the following files
+This release includes the following files (Note: Files may be suffied with -@version@)
 
-README-@version@                (Introduction to IndiMail)
-INSTALL-@version@               (Source Installation Instructions)
-INSTALL-RPM-@version@           (Install Instructions using RPM)
-INSTALL-MYSQL-@version@         (MySQL specific Installation Instructions)
-README-CLUSTER            (Steps on configuring a clustered setup)
-Quick-INSTALL-@version@         (A minimal documentation on Installation/Configuration)
-RELEASE-Notes-@version@         (This file)
-indimail-@version@.tar.gz       (IndiMail source)
+README                (Introduction to IndiMail)
+INSTALL               (Source Installation Instructions)
+INSTALL-RPM           (Install Instructions using RPM)
+INSTALL-MYSQL         (MySQL specific Installation Instructions)
+README-CLUSTER        (Steps on configuring a clustered setup)
+Quick-INSTALL         (A minimal documentation on Installation/Configuration)
+RELEASE-Notes         (This file)
+indimail-@version@.tar.gz   (IndiMail source)
 
 
 IndiMail has two RPM / DEB / yum / apt repositories for most of the Linux Distros at
@@ -56,7 +55,7 @@ Currently, the list of supported distributions for IndiMail is
 
 
 ChangeLog
-=========
+
 Release 2.4 Start 04/12/2017
 
 Bleeding Edge Releases

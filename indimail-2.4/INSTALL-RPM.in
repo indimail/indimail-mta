@@ -3,17 +3,17 @@ DATE: @DATE@
 
 This section covers installing IndiMail from rpm/deb. This is the easy way to install IndiMail.
 If you are looking for something more simpler, then you need the Install IndiMail for
-dummies - instructions for which are in the file Quick-INSTALL-@version@.
+dummies - instructions for which are in the file Quick-INSTALL.
 
-There is also an Installation for Experts. For that read INSTALL-@version@. I would
-recommend you to go through the file INSTALL-@version@ so that you undertand IndiMail
-better. INSTALL-@version@ gives instructions for installing from source and could be
+There is also an Installation for Experts. For that read INSTALL. I would
+recommend you to go through the file INSTALL so that you undertand IndiMail
+better. INSTALL gives instructions for installing from source and could be
 challenging for those who are not accustomed with compilation, make, GNU autotools process.
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
 You will also find this file as 
-http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
+http://downloads.sourceforge.net/indimail/INSTALL-RPM
 
 IndiMail also has yum/apt-get repositories for RPM/Deb of most of the Linux Distros at
 
@@ -82,18 +82,18 @@ available rpm for MySQL from www.mysql.com
 
 1) Package Install Instruction
    ---------------------------
-   % sudo rpm -ivh indimail-@version@-1.i386.rpm
-   % sudo dpkg -i indimail_@version@-1_386.deb
+   % sudo rpm -ivh filename.rpm
+   % sudo dpkg -i filename.deb
 
 2) Package Upgrade Instruction
    ---------------------------
-   % sudo rpm -Uvh indimail-@version@-1.i386.rpm
-   % sudo dpkg -i indimail_@version@-1_386.deb
+   % sudo rpm -Uvh filename.rpm
+   % sudo dpkg -i filename.deb
 
 3) Package Removal Instrucation
    ----------------------------
-   % sudo rpm -e indimail-@version@-1.i386.rpm
-   % sudo dpkg -r indimail_@version@-1_386.deb
+   % sudo rpm -e indimail
+   % sudo dpkg -r indimail
 
 Start IndiMail Services
 -----------------------
@@ -146,7 +146,7 @@ or
 
 mysql_host:mysql_user:mysql_pass:mysql_port
 
-Proceed to SECTION 8, STEP 2 in the file INSTALL-@version@ for further instruction on 
+Proceed to SECTION 8, STEP 2 in the file INSTALL for further instruction on 
 configuration of IndiMail
 
 Log files are created in /var/log/svc/*
