@@ -47,7 +47,7 @@ dbase=`echo $1 | $cut -d: -f3|$cut -d@ -f2|$cut -d/ -f2`
 #from=`/usr/bin/822field Return-Path < $5`
 #echo $* >> /tmp/bogofilter.cmd
 
-SPAMIGNORE=/etc/indimail/control/spamignorepatterns
+SPAMIGNORE=/etc/indimail/control/spamignore
 case $4 in
 	ham)
 	$grep -v X-Bogosity $5 | /usr/bin/bogofilter -d /etc/indimail -Sn
