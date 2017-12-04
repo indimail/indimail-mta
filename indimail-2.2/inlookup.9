@@ -15,7 +15,7 @@ of the query back.
 \fBinlookup\fR(8) creates a read FIFO determined by the environment variable INFIFO. If INFIFO is
 not defined, the default FIFO used is INDIMAILDIR/inquery/infifo. \fBinlookup\fR(8) then goes
 into an infinite loop reading this FIFO. If INFIFO is not an absolute path, \fBinlookup\fR(8) uses
-FIFODIR to look for INFIFO,
+FIFODIR to look for INFIFO.
 
 .PP
 Clients use the API function \fBinquery()\fR to use the \fBinlookup\fR(8) service. The write FIFO is
