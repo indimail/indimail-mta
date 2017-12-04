@@ -1,0 +1,72 @@
+RELEASE NOTES
+DATE: @DATE@
+
+Announcing Release @version@ of IndiMail.
+
+Following are the main features of this release
+
+This release includes the following files
+
+README-@version@                (Introduction to IndiMail)
+INSTALL-@version@               (Source Installation Instructions)
+INSTALL-RPM-@version@           (Install Instructions using RPM)
+INSTALL-MYSQL-@version@         (MySQL specific Installation Instructions)
+README-CLUSTER            (Steps on configuring a clustered setup)
+Quick-INSTALL-@version@         (A minimal documentation on Installation/Configuration)
+RELEASE-Notes-@version@         (This file)
+indimail-@version@.tar.gz       (IndiMail source)
+
+
+IndiMail has two RPM / DEB / yum / apt repositories for most of the Linux Distros at
+
+Repository Location
+http://download.opensuse.org/repositories/home:/indimail/
+
+Install Instructions
+https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail
+
+
+Currently, the list of supported distributions for IndiMail is
+
+    * SUSE
+          o openSUSE_Leap_42.3
+          o openSUSE_Leap_42.2
+          o openSUSE 13.2
+          o openSUSE 13.1
+          o SUSE Linux Enterprise 12 SP2
+          o SUSE Linux Enterprise 12 SP1
+          o SUSE Linux Enterprise 12
+
+    * Red Hat
+          o Fedora 27
+          o Fedora 26
+          o Red Hat Enterprise Linux 7
+          o Red Hat Enterprise Linux 6
+          o CentOS 7
+          o CentOS 6
+
+    * Debian
+          o Debian 8.0
+          o Debian 7.0
+          o Ubuntu 17.04
+          o Ubuntu 16.10
+          o Ubuntu 16.04
+          o Ubuntu 14.04
+          o Ubuntu 12.04
+
+
+ChangeLog
+=========
+Release 2.4 Start 04/12/2017
+
+Bleeding Edge Releases
+----------------------
+IndiMail has RPM / yum repositories for the latest features being added. You will find
+the RPMs at
+
+Repository Location
+http://download.opensuse.org/repositories/home:/mbhangui/
+
+Install Instructions
+https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
+
