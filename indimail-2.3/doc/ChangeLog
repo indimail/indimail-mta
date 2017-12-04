@@ -1,4 +1,52 @@
-* Sat Oct 21 2017 19:10:08 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
+* Mon Dec 04 2017 18:10:11 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
+Release 2.3 Start 01/09/2017
+01/09/2017
+01. libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
+02. skip envdir if .svscan/variables directory is missing
+05/09/2017
+03. libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
+04. libdkim - removed compiler warnings
+05. qmail-dkim - added missing DKIM_MFREE
+09/09/2017
+06. indimail-mta, added svctool, systemctl unit file for daemontools package
+07. fixed svctool for daemontools add-boot command
+05/10/2017
+08. qmail-cdb.c - fixed wrong control filename display in error message
+09. recipients.c use users/recipients instead of control/recipients
+11/10/2017
+10. renamed systemd unit file indimail.service to svscan.service
+11/10/2017
+11. upgrade boot scripts if new package has updates
+15/10/2017
+12. config-fast.sh - fixed syntax error due to unterminated variable
+13. svctool --config=mysqldb indimail mysql db wasn't getting created
+20/10/2017
+14. svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
+21/10/2017
+15. svctool,create_services,postinst - refactored code by improving calls to svctool
+22/10/2017
+16. fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
+17. do systemctl daemon-reload if systemd unit file is changed
+18. fixes in upgrade.sh, local_upgrade.sh scripts
+19. qmail-greyd.c - fixed search record failure when linked list contained just 1 entry
+07/11/2017
+20. changed logdir to /var/log/svc
+21. removed programs copyemail, testmra, mail_report, execmysql
+20/11/2017
+22. binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
+21/11/2017
+23. fixed syntax error with --qhpsi option changes in point 43
+24/11/2017
+24. qmail-greyd.c - added verbose variable to suppress few messages
+25/11/2017
+25. qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler,
+    expire records when loading context file
+26/11/2017
+26. qmail-greyd.c - fixed record expiry logic
+02/12/2017
+27. added post handle call in vaddaliasdomain
+
+* Tue Aug 29 2017 14:40:39 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.2 Start 08/05/2017
 09/05/2017
 1.  indiversion.c - Fixed authindi path
@@ -51,57 +99,6 @@ Release 2.2 Start 08/05/2017
 27. qmail-showctl - fixed SIGSEGV
 29/08/2017
 28. upgraded fetchmail to version 6.4.0
----------- First release of 2.2 -------------------
-01/09/2017
-29. libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
-30. skip envdir if .svscan/variables directory is missing
----------- Second release of 2.2 -------------------
-05/09/2017
-31. libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
-32. libdkim - removed compiler warnings
-33. qmail-dkim - added missing DKIM_MFREE
-09/09/2017
-34. indimail-mta, added svctool, systemctl unit file for daemontools package
-35. fixed svctool for daemontools add-boot command
-05/10/2017
-36. qmail-cdb.c - fixed wrong control filename display in error message
-37. recipients.c use users/recipients instead of control/recipients
-11/10/2017
-38. renamed systemd unit file indimail.service to svscan.service
-12/10/2017
-39. upgrade boot scripts if new package has updates
-15/10/2017
-40. config-fast.sh - fixed syntax error due to unterminated variable
-41. svctool --config=mysqldb indimail mysql db wasn't getting created
-20/10/2017
-42. svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
-21/10/2017
-43. svctool,create_services,postinst - refactored code by improving calls to svctool
----------- Third release of 2.2 -------------------
-22/10/2017
-44. fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
-45. do systemctl daemon-reload if systemd unit file is changed
-46. fixes in upgrade.sh, local_upgrade.sh scripts
-47. qmail-greyd.c - fixed search record failure when linked list contained just 1 entry
----------- Fourth release of 2.2 -------------------
-07/11/2017
-48. changed logdir to /var/log/svc
-49. removed programs copyemail, testmra, mail_report, execmysql
-20/11/2017
-50. binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
-21/11/2017
-51. fixed syntax error with --qhpsi option changes in point 43
----------- Fifth release of 2.2 -------------------
-24/11/2017
-52. qmail-greyd.c - added verbose variable to suppress few messages
-25/11/2017
-53. qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler,
-    expire records when loading context file
-26/11/2017
-54. qmail-greyd.c - fixed record expiry logic
----------- sixth release of 2.2 -------------------
-02/12/2017
-55. added post handle call in vaddaliasdomain
 
 * Mon May 08 2017 22:28:26 +0530 mbhangui@gmail.com 2.1-1.1%{?dist}
 Release 2.1 Start 16/03/2017

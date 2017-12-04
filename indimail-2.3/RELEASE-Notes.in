@@ -1,0 +1,109 @@
+RELEASE NOTES
+=============
+DATE: @DATE@
+
+Announcing Release @version@ of IndiMail. This release has both source.tar.gz, RPMs and debs.
+
+Following are the main features of this release
+
+o added svctool, systemctl unit file for daemontools package
+o renamed systemd unit file indimail.service to svscan.service
+o multiple fixes for MySQL/MariaDB database creation during RPM/Deb install
+o Logdir changed to /var/log/svc
+o Use Binary Search algorithm, using tsearch in inlookup (Knuth (6.2.2) Algorithm T)
+o qmail-greyd - Mutiple optimization/improvements for hash search
+o added post handle call in vaddaliasdomain
+
+This release includes the following files
+
+README-@version@                (Introduction to IndiMail)
+INSTALL-@version@               (Source Installation Instructions)
+INSTALL-RPM-@version@           (Install Instructions using RPM)
+INSTALL-MYSQL-@version@         (MySQL specific Installation Instructions)
+README-CLUSTER            (Steps on configuring a clustered setup)
+Quick-INSTALL-@version@         (A minimal documentation on Installation/Configuration)
+RELEASE-Notes-@version@         (This file)
+indimail-@version@.tar.gz       (IndiMail source)
+
+
+IndiMail has two RPM / DEB / yum / apt repositories for most of the Linux Distros at
+
+Repository Location
+http://download.opensuse.org/repositories/home:/indimail/
+
+Install Instructions
+https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail
+
+
+Currently, the list of supported distributions for IndiMail is
+
+    * SUSE
+          o openSUSE_Leap_42.3
+          o openSUSE_Leap_42.2
+          o openSUSE 13.2
+          o openSUSE 13.1
+          o SUSE Linux Enterprise 12 SP2
+          o SUSE Linux Enterprise 12 SP1
+          o SUSE Linux Enterprise 12
+
+    * Red Hat
+          o Fedora 27
+          o Fedora 26
+          o Red Hat Enterprise Linux 7
+          o Red Hat Enterprise Linux 6
+          o CentOS 7
+          o CentOS 6
+
+    * Debian
+          o Debian 8.0
+          o Debian 7.0
+          o Ubuntu 17.04
+          o Ubuntu 16.10
+          o Ubuntu 16.04
+          o Ubuntu 14.04
+          o Ubuntu 12.04
+
+
+ChangeLog
+=========
+Release 2.2 Start 08/05/2017
+01. libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
+02. skip envdir if .svscan/variables directory is missing
+03. libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
+04. libdkim - removed compiler warnings
+05. qmail-dkim - added missing DKIM_MFREE
+06. indimail-mta, added svctool, systemctl unit file for daemontools package
+07. fixed svctool for daemontools add-boot command
+08. qmail-cdb.c - fixed wrong control filename display in error message
+09. recipients.c use users/recipients instead of control/recipients
+10. renamed systemd unit file indimail.service to svscan.service
+11. upgrade boot scripts if new package has updates
+12. config-fast.sh - fixed syntax error due to unterminated variable
+13. svctool --config=mysqldb indimail mysql db wasn't getting created
+14. svctool --config=mysqldb fix user creation for oracle's brain dead mysql db
+15. svctool,create_services,postinst - refactored code by improving calls to svctool
+16. fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
+17. do systemctl daemon-reload if systemd unit file is changed
+18. fixes in upgrade.sh, local_upgrade.sh scripts
+19. qmail-greyd.c - fixed search record failure when linked list contained just 1 entry
+20. changed logdir to /var/log/svc
+21. removed programs copyemail, testmra, mail_report, execmysql
+22. binary search implementation for USER_QUERY, PWD_QUERY, HOST_QUERY, ALIAS_QUERY
+23. fixed syntax error with --qhpsi option changes in spec/postinst file
+24. qmail-greyd.c - added verbose variable to suppress few messages
+25. qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler,
+    expire records when loading context file
+26. qmail-greyd.c - fixed record expiry logic
+27. added post handle call in vaddaliasdomain
+
+Bleeding Edge Releases
+----------------------
+IndiMail has RPM / yum repositories for the latest features being added. You will find
+the RPMs at
+
+Repository Location
+http://download.opensuse.org/repositories/home:/mbhangui/
+
+Install Instructions
+https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
+
