@@ -9,7 +9,7 @@ includedir=@prefix@/include/indimail
 
 lib_LTLIBRARIES = libsrs2.la
 libsrs2_la_SOURCES = srs2.c sha1.c
-libsrs2_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
+libsrs2_la_LDFLAGS = -version-info @LIBVER@
 libsrs2_la_CFLAGS = -fPIC
 
 srs2.$(OBJEXT): srs2.h win32.h
