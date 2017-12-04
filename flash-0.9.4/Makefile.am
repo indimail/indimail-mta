@@ -9,7 +9,7 @@ COMMONSOURCES= debug.c event.c exec.c menu.c misc.c module.c parse.c parseline.c
 libflash_LTLIBRARIES = libflash.la
 libflash_la_SOURCES=$(COMMONSOURCES) 
 libflash_la_LIBADD = @LIB_CURSES@ @LIB_DLOPEN@
-libflash_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
+libflash_la_LDFLAGS = -version-info @LIBVER@
 libflashdir=@libdir@
 
 INSTALL_PROGRAM = ${INSTALL} -c
