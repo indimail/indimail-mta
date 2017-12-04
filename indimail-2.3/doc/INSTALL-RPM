@@ -1,19 +1,19 @@
-File INSTALL-RPM, Version 2.2
-DATE: Thu Nov 23 17:01:31 IST 2017
+File INSTALL-RPM, Version 2.3
+DATE: Mon Dec  4 08:31:07 IST 2017
 
 This section covers installing IndiMail from rpm/deb. This is the easy way to install IndiMail.
 If you are looking for something more simpler, then you need the Install IndiMail for
-dummies - instructions for which are in the file Quick-INSTALL-2.2.
+dummies - instructions for which are in the file Quick-INSTALL-2.3.
 
-There is also an Installation for Experts. For that read INSTALL-2.2. I would
-recommend you to go through the file INSTALL-2.2 so that you undertand IndiMail
-better. INSTALL-2.2 gives instructions for installing from source and could be
+There is also an Installation for Experts. For that read INSTALL-2.3. I would
+recommend you to go through the file INSTALL-2.3 so that you undertand IndiMail
+better. INSTALL-2.3 gives instructions for installing from source and could be
 challenging for those who are not accustomed with compilation, make, GNU autotools process.
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
 You will also find this file as 
-http://downloads.sourceforge.net/indimail/INSTALL-RPM-2.2
+http://downloads.sourceforge.net/indimail/INSTALL-RPM-2.3
 
 IndiMail also has yum/apt-get repositories for RPM/Deb of most of the Linux Distros at
 
@@ -82,18 +82,18 @@ available rpm for MySQL from www.mysql.com
 
 1) Package Install Instruction
    ---------------------------
-   % sudo rpm -ivh indimail-2.2-1.i386.rpm
-   % sudo dpkg -i indimail_2.2-1_386.deb
+   % sudo rpm -ivh indimail-2.3-1.i386.rpm
+   % sudo dpkg -i indimail_2.3-1_386.deb
 
 2) Package Upgrade Instruction
    ---------------------------
-   % sudo rpm -Uvh indimail-2.2-1.i386.rpm
-   % sudo dpkg -i indimail_2.2-1_386.deb
+   % sudo rpm -Uvh indimail-2.3-1.i386.rpm
+   % sudo dpkg -i indimail_2.3-1_386.deb
 
 3) Package Removal Instrucation
    ----------------------------
-   % sudo rpm -e indimail-2.2-1.i386.rpm
-   % sudo dpkg -r indimail_2.2-1_386.deb
+   % sudo rpm -e indimail-2.3-1.i386.rpm
+   % sudo dpkg -r indimail_2.3-1_386.deb
 
 Start IndiMail Services
 -----------------------
@@ -146,7 +146,7 @@ or
 
 mysql_host:mysql_user:mysql_pass:mysql_port
 
-Proceed to SECTION 8, STEP 2 in the file INSTALL-2.2 for further instruction on 
+Proceed to SECTION 8, STEP 2 in the file INSTALL-2.3 for further instruction on 
 configuration of IndiMail
 
 Log files are created in /var/log/svc/*
