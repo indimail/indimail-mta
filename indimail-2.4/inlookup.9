@@ -3,7 +3,7 @@
 inlookup \- Connection Pooling server for Name Lookups
 
 .SH SYNOPSYS
-\fBinlookup\fR [\fB\-f\fR \fIinfifo\fR \fB\-i\fR \fIinstance\fR \fB\-v\fR]
+\fBinlookup\fR [\fB\-f\fR \fIinfifo\fR \fB\-i\fR \fIinstance\fR \fB\-c\fR \fIactiveSecs\fR \fB\-v\fR]
 
 .SH DESCRIPTION
 .PP
@@ -50,15 +50,22 @@ test/diagnostic tool for submitting queries to \fBinlookup\fR(8).
 .TP
 \fB\-v\fR
 Sets verbose option.
+
 .TP
 [\fB\-f\fR \fIinfifo\fR]
 Name of a FIFO to read query requests for back end database like MySQL(1). This overrides the
 environment variable INFIFO.
+
 .TP
 [\fB\-i\fR \fIinstance\fR]
 Start multiple instances of \fBinlookup\fR(8) (as given by 'instance') for load balancing purpose. The
 default is one instance. If you find that your queries are taking a long time, you can increase
 this value.
+
+.TP
+[\fB\-c\fR \fIactiveSecs\fR]
+cache active records which have been active in the last \fIactiveSecs\fR seconds. This works only if \fBUSE_BTREE\fR
+environment variable is defined. Without \fBUSE_BTREE\fR, caching will be silently ignored
 
 .SH SIGNALS
 \fBinlookup\fR(8) reacts to a set of signals.
