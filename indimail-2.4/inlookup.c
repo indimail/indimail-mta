@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 2.18  2017-12-11 15:50:33+05:30  Cprogrammer
+ * added feature to precache active login records
+ *
  * Revision 2.17  2011-04-03 17:59:39+05:30  Cprogrammer
  * pass instance number to ProcessInFifo()
  *
@@ -54,7 +57,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 2.17 2011-04-03 17:59:39+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 2.18 2017-12-11 15:50:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "indimail.h"
@@ -79,6 +82,8 @@ static void     sig_hand(int, int, struct sigcontext *, char *);
 static void     sig_catch(int, void(*)());
 #endif
 static void     sig_block(int);
+int             cache_active_pwd(time_t);
+extern int      btree_count;
 
 struct pidtab
 {
@@ -93,7 +98,7 @@ main(int argc, char **argv)
 {
 	char            envbuf[MAX_BUFF];
 	int             idx, pid, wStat, tmp_stat;
-	char           *infifo, *ptr, *instance = "1";
+	char           *infifo, *ptr, *instance = "1", *seconds_active = "0";
 
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
 	if ((ptr = strrchr(argv[0], '/')))
@@ -112,11 +117,14 @@ main(int argc, char **argv)
 		case 'i':
 			instance = *(argv + idx + 1);
 			break;
+		case 'c':
+			seconds_active = *(argv + idx + 1);
+			break;
 		case 'v':
 			verbose = 1;
 			break;
 		default:
-			printf("USAGE: %s [-f infifo] [-i instance] [-v]\n", ptr);
+			printf("USAGE: %s [-f infifo] [-i instance] [-c activeSecs] [-v]\n", ptr);
 			return(1);
 		}
 	}
@@ -145,6 +153,15 @@ main(int argc, char **argv)
 		sig_catch(SIGHUP, sig_hand);
 		sig_catch(SIGINT, sig_hand);
 #endif
+		if ((tmp_stat = atoi(seconds_active)) > 0) {
+			if ((wStat = cache_active_pwd(tmp_stat)) == -1)
+				return (1);
+			else
+			if (!wStat) {
+				printf("cached %d records\n", btree_count);
+				fflush(stdout);
+			}
+		}
 		for (idx = 0; idx < inst_count; idx++)
 		{
 			if (fork_child(infifo, idx) == -1) /*- parent returns */

@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.46  2017-12-11 15:51:15+05:30  Cprogrammer
+ * added function cache_active_pwd() to precache active login passwords in memory
+ *
  * Revision 2.45  2017-11-21 14:41:16+05:30  Cprogrammer
  * use MAX_BTREE_COUNT to limit btree search nodes
  *
@@ -150,7 +153,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.45 2017-11-21 14:41:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.46 2017-12-11 15:51:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -180,7 +183,7 @@ static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.45 2017-11-21 14:41:16+05:3
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
-int             limit_query_count, dom_query_count, btree_count, _debug;
+int             limit_query_count, dom_query_count, btree_count = 0, _debug;
 time_t          start_time;
 #ifdef CLUSTERED_SITE
 int             host_query_count;
@@ -208,6 +211,7 @@ typedef struct
 	struct passwd   in_pw;
 	char           *aliases;
 	char           *mdahost;
+	char           *domain;
 	 *
 	 *  0: User is fine
 	 *  1: User is not present
@@ -227,7 +231,7 @@ mk_in_entry(char *key)
 	if (!(in = (INENTRY *) malloc(sizeof (INENTRY))))
 		return ((INENTRY *) 0);
 	in->in_key = strdup(key);
-	in->aliases = in->mdahost = (char *) 0;
+	in->aliases = in->mdahost = in->domain = (char *) 0;
 	in->in_userStatus = -1;
 	in->in_pw.pw_name = (char *) 0;
 	in->in_pw.pw_passwd = (char *) 0;
@@ -247,6 +251,7 @@ in_free_func(void *in_data)
 		free(m->in_key);
 		free(m->aliases);
 		free(m->mdahost);
+		free(m->domain);
 		free(m->in_pw.pw_name);
 		free(m->in_pw.pw_passwd);
 		free(m->in_pw.pw_gecos);
@@ -272,6 +277,93 @@ walk_entry(const void *in_data, VISIT x, int level)
 		   x == preorder ? "preorder" : x == postorder ? "postorder" : x == endorder ? "endorder" : x == leaf ? "leaf" : "unknown",
 		   m->in_key, m->in_pw.pw_passwd);
 	return;
+}
+
+static int      pwdCache; /*- for sighup to figure out if caching was selected on startup */
+
+int
+cache_active_pwd(time_t tval)
+{
+	MYSQL_RES      *res;
+	MYSQL_ROW       row;
+	char            SqlBuf[SQL_BUF_SIZE], email[MAX_BUFF];
+	int             use_btree, max_btree_count, err;
+	static time_t   act_secs;
+	char           *ptr;
+	INENTRY        *in, *re, *retval;
+
+	if (tval)
+		act_secs = tval;
+	pwdCache = 1;
+	ptr = getenv("USE_BTREE");
+	use_btree = ((ptr && *ptr == '1') ? 1 : 0);
+	if (!use_btree)
+		return (0);
+	max_btree_count = ((ptr = getenv("MAX_BTREE_COUNT")) && *ptr ? atoi(ptr) : -1);
+	if (in_root) {
+		tdestroy(in_root, in_free_func);
+		in_root = 0;
+		btree_count = 0;
+	}
+	snprintf(SqlBuf, SQL_BUF_SIZE - 1,
+		"SELECT "
+		"    pw_name, pw_domain, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell "
+		"FROM"
+		"    indimail"
+		"        JOIN"
+		"    lastauth ON pw_name = user AND pw_domain = domain "
+		"WHERE"
+		"    UNIX_timestamp(timestamp) >= UNIX_timestamp() - %ld "
+		"AND"
+		"	service in (\"imap\", \"pop3\", \"wtbm\") "
+		"GROUP BY pw_name, pw_domain "
+		"ORDER BY timestamp desc", act_secs);
+
+	if ((err = vauth_open((char *) 0)) != 0)
+		return (-1);
+	if (mysql_query(&mysql[1], SqlBuf)) {
+		mysql_perror("cache_active_pwd-mysql_query: %s", SqlBuf);
+		return (-1);
+	}
+	if (!(res = mysql_store_result(&mysql[1]))) {
+		mysql_perror("cache_active_pwd-mysql_store_result");
+		return (-1);
+	}
+	for(;(row = mysql_fetch_row(res));) {
+		snprintf(email, sizeof(email) - 1, "%s@%s", row[0], row[1]);
+		if (!(in = mk_in_entry(email))) {
+			mysql_free_result(res);
+			return (-1);
+		}
+		if (!(retval = tsearch (in, &in_root, in_compare_func))) {
+			in_free_func(in);
+			mysql_free_result(res);
+			return (-1);
+		} else {
+			re = *(INENTRY **) retval;
+			if (re != in) { /*- existing data, shouldn't happen */
+				in_free_func(in);
+				mysql_free_result(res);
+				return (1);
+			} else {/*- New entry in was added.  */
+				in->in_pw.pw_name = strdup(row[0]);
+				in->domain = strdup(row[1]);
+				in->in_pw.pw_passwd = strdup(row[2]);
+				in->in_pw.pw_uid = atoi(row[3]);
+				in->in_pw.pw_gid = atoi(row[4]);
+				in->in_pw.pw_gecos = strdup(row[5]);
+				in->in_pw.pw_dir = strdup(row[6]);
+				in->in_pw.pw_shell = strdup(row[7]);
+				in->pwStat = 1;
+				btree_count++;
+				if (max_btree_count > 0 && btree_count >= max_btree_count)
+					break;
+			}
+		}
+	}
+	mysql_free_result(res);
+	vclose();
+	return (0);
 }
 
 #ifdef ENABLE_ENTERPRISE
@@ -384,6 +476,10 @@ ProcessInFifo(int instNum)
 		fflush(stdout);
 		break;
 	}
+#else
+	printf("InLookup[%d] PPID %d PID %d\n",
+		instNum, getppid(), getpid());
+	fflush(stdout);
 #endif
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
@@ -702,6 +798,11 @@ ProcessInFifo(int instNum)
 #endif
 				break;
 			case PWD_QUERY:
+				if (!(real_domain = strrchr(email, '@'))) {
+					if (!(real_domain = getenv("DEFAULT_DOMAIN")))
+						real_domain = DEFAULT_DOMAIN;
+				} else
+					real_domain++;
 				if (!use_btree || !(in = mk_in_entry(email)))
 					pw = PwdInLookup(email);
 				else
@@ -711,19 +812,21 @@ ProcessInFifo(int instNum)
 				} else {
 					re = *(INENTRY **) retval;
 					if (re != in) { /*- existing data */
-						if (!re->pwStat) {
+						if (!re->pwStat) { /*- incomplete existing data */
 							if ((pw = PwdInLookup(email))) {
 								re->in_pw.pw_uid = pw->pw_uid;
 								re->in_pw.pw_gid = pw->pw_gid;
 								re->in_pw.pw_name = strdup(pw->pw_name);
+								re->domain = strdup(real_domain);
 								re->in_pw.pw_passwd = strdup(pw->pw_passwd);
 								re->in_pw.pw_gecos = strdup(pw->pw_gecos);
 								re->in_pw.pw_dir = strdup(pw->pw_dir);
 								re->in_pw.pw_shell = strdup(pw->pw_shell);
 								re->pwStat = 1;
 							}
-						} else {
+						} else { /*- completed existing data */
 							pw = &re->in_pw;
+							real_domain = re->domain;
 							if (verbose || _debug) {
 								printf("%s->%s, cache hit\n", fifoName, myFifo);
 								fflush(stdout);
@@ -735,6 +838,7 @@ ProcessInFifo(int instNum)
 							in->in_pw.pw_uid = pw->pw_uid;
 							in->in_pw.pw_gid = pw->pw_gid;
 							in->in_pw.pw_name = strdup(pw->pw_name);
+							in->domain = strdup(real_domain);
 							in->in_pw.pw_passwd = strdup(pw->pw_passwd);
 							in->in_pw.pw_gecos = strdup(pw->pw_gecos);
 							in->in_pw.pw_dir = strdup(pw->pw_dir);
@@ -747,10 +851,10 @@ ProcessInFifo(int instNum)
 							search_func = tfind;
 					}
 				}
-				/*- Connect to mysql after fetching ip host details for the user from hostcntrl.*/
 				if (pw) {
-					snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
-						email,
+					snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=%s@%s:%s:%d:%d:%s:%s:%s:%d", 
+						pw->pw_name,
+						real_domain,
 						pw->pw_passwd,
 						pw->pw_uid,
 						pw->pw_gid,
@@ -938,6 +1042,10 @@ sig_hup()
 	tdestroy(in_root, in_free_func);
 	in_root = 0;
 	btree_count = 0;
+	if (pwdCache) {
+		cache_active_pwd(0);
+		printf("cached %d records\n", btree_count);
+	}
 	fflush(stdout);
 	signal(SIGHUP, (void(*)()) sig_hup);
 	errno = EINTR;
