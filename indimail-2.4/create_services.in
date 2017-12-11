@@ -20,7 +20,7 @@ default_domain=`uname -n`
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.72 2017-12-04 08:25:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.73 2017-12-11 15:50:02+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -462,7 +462,8 @@ if [ $noindimail -eq 0 ] ; then
 		--certfile=$controldir/servercert.pem --ssl \
 		--hardquota=52428800 --base_path=$mail_path $extra_opt
 	$svctool --inlookup=infifo --servicedir=$servicedir --cntrldir=control --threads=5 \
-		--query-cache --password-cache --use-btree --max-btree-count=10000 $extra_opt
+		--activeDays=60 --query-cache --password-cache --use-btree \
+		--max-btree-count=10000 $extra_opt
 	
 	if [ $nonssd -eq 0 -a $nomysql -eq 0 ] ; then
 		$svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \

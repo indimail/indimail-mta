@@ -914,8 +914,8 @@ the installation.
 
     % sudo @prefix@/sbin/svctool --inlookup=infifo --servicedir=@servicedir@ \
         --cntrldir=@sysconfdir@/control --threads=5 \
-        --password-cache --query-cache --use-btree \
-		--max-btree-count=10000
+        --activeDays=60 --password-cache --query-cache \
+        --use-btree --max-btree-count=10000
 
     ##### STEP 7  ## SPAM/VIRUS Filtering Service ##################
     Install clamav (see instructions for your OS)

@@ -1,5 +1,5 @@
 File INSTALL.indimail, Version 2.4
-DATE: Mon Dec  4 19:06:48 IST 2017
+DATE: Tue Dec  5 10:25:11 IST 2017
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -914,8 +914,8 @@ the installation.
 
     % sudo /usr/sbin/svctool --inlookup=infifo --servicedir=/service \
         --cntrldir=/etc/indimail/control --threads=5 \
-        --password-cache --query-cache --use-btree \
-		--max-btree-count=10000
+        --activeDays=60 --password-cache --query-cache \
+        --use-btree --max-btree-count=10000
 
     ##### STEP 7  ## SPAM/VIRUS Filtering Service ##################
     Install clamav (see instructions for your OS)
