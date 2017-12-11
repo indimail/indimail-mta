@@ -1,5 +1,8 @@
 /*
  * $Log: in_bsearch.h,v $
+ * Revision 2.2  2017-12-11 13:36:00+05:30  Cprogrammer
+ * added new member 'domain'
+ *
  * Revision 2.1  2017-11-20 23:22:32+05:30  Cprogrammer
  * header for binary search
  *
@@ -22,6 +25,7 @@ typedef struct
 	char            pwStat;
 	char           *aliases;
 	char           *mdahost;
+	char           *domain;
 	/*-
 	 *  0: User is fine
 	 *  1: User is not present
