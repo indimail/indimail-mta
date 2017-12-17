@@ -1,5 +1,11 @@
 /*
  * $Log: pathexec_run.c,v $
+ * Revision 1.4  2017-12-17 19:11:37+05:30  Cprogrammer
+ * added documentation
+ *
+ * Revision 1.3  2017-12-17 19:08:45+05:30  Cprogrammer
+ * added documentation
+ *
  * Revision 1.2  2016-02-08 21:30:19+05:30  Cprogrammer
  * load shared objects if file has .so extension
  *
@@ -23,12 +29,11 @@ pathexec_run(char *file, char **argv, char **envp)
 	unsigned int    split;
 	int             savederrno;
 
-	if (file[str_chr(file, '/')])
-	{
+	if (file[str_chr(file, '/')]) {
 #ifdef LOAD_SHARED_OBJECTS
-		load_shared(file, argv, envp);
+		load_shared(file, argv, envp); /*- does not return */
 #else
-		execve(file, argv, envp);
+		execve(file, argv, envp); /*- does not return */
 #endif
 		return;
 	}
@@ -38,8 +43,7 @@ pathexec_run(char *file, char **argv, char **envp)
 		path = "/bin:/usr/bin";
 
 	savederrno = 0;
-	for (;;)
-	{
+	for (;;) {
 		split = str_chr(path, ':');
 		if (!stralloc_copyb(&tmp, path, split))
 			return;
@@ -53,15 +57,13 @@ pathexec_run(char *file, char **argv, char **envp)
 		if (!stralloc_0(&tmp))
 			return;
 		execve(tmp.s, argv, envp);
-		if (errno != error_noent)
-		{
+		if (errno != error_noent) {
 			savederrno = errno;
 			if ((errno != error_acces) && (errno != error_perm) && (errno != error_isdir))
 				return;
 		}
 
-		if (!path[split])
-		{
+		if (!path[split]) {
 			if (savederrno)
 				errno = savederrno;
 			return;
