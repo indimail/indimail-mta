@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_env.c,v $
+ * Revision 1.4  2017-12-17 19:08:19+05:30  Cprogrammer
+ * added documentation.
+ *
  * Revision 1.3  2017-04-22 11:53:05+05:30  Cprogrammer
  * added pathexec_dl() function
  *
@@ -27,8 +30,7 @@ pathexec_env(char *s, char *t)
 		return 1;
 	if (!stralloc_copys(&tmp, s))
 		return 0;
-	if (t)
-	{
+	if (t) {
 		if (!stralloc_cats(&tmp, "="))
 			return 0;
 		if (!stralloc_cats(&tmp, t))
@@ -53,30 +55,29 @@ pathexec_dl(int argc, char **argv, char **envp, int (*func) (int, char **, char 
 	if (!stralloc_cats(&plus, ""))
 		return;
 	elen = 0;
-	for (i = 0; envp[i]; ++i)
+	for (i = 0; envp[i]; ++i) /*- existing environ count */
 		++elen;
-	for (i = 0; i < plus.len; ++i)
-	{
+	for (i = 0; i < plus.len; ++i) { /*- additional environ count in plus */
 		if (!plus.s[i])
 			++elen;
 	}
 	if(!(e = (char **) alloc((elen + 1) * sizeof(char *))))
 		return;
 	elen = 0;
-	for (i = 0; envp[i]; ++i)
+	for (i = 0; envp[i]; ++i) /*- copy the existing/old environ variables */
 		e[elen++] = envp[i];
 	j = 0;
-	for (i = 0; i < plus.len; ++i)
-	{
-		if (!plus.s[i])
-		{
+	for (i = 0; i < plus.len; ++i) {
+		if (!plus.s[i]) {
 			split = str_chr(plus.s + j, '=');
-			for (t = 0; t < elen; ++t)
-			{
-				if (byte_equal(plus.s + j, split, e[t]))
-				{
-					if (e[t][split] == '=')
-					{
+			for (t = 0; t < elen; ++t) {
+				/*- 
+				 * if existing variable with same
+				 * exists, replace that variable with
+				 * the new definition in plus variable
+				 */
+				if (byte_equal(plus.s + j, split, e[t])) {
+					if (e[t][split] == '=') {
 						--elen;
 						e[t] = e[elen];
 						break;
@@ -88,7 +89,7 @@ pathexec_dl(int argc, char **argv, char **envp, int (*func) (int, char **, char 
 			j = i + 1;
 		}
 	}
-	e[elen] = 0;
+	e[elen] = (char *) 0;
 	(*func) (argc, argv, e); /*- execute the function */
 	alloc_free(e);
 }
@@ -106,32 +107,30 @@ pathexec(char **argv)
 
 	if (!stralloc_cats(&plus, ""))
 		return;
-
 	elen = 0;
-	for (i = 0; environ[i]; ++i)
+	for (i = 0; environ[i]; ++i) /*- existing environ count */
 		++elen;
-	for (i = 0; i < plus.len; ++i)
-	{
+	for (i = 0; i < plus.len; ++i) { /* count of environ added in plus */
 		if (!plus.s[i])
 			++elen;
 	}
-	if(!(e = (char **) alloc((elen + 1) * sizeof(char *))))
+	if(!(e = (char **) alloc((elen + 1) * sizeof(char *)))) /*- allocate existing + plus */
 		return;
 	elen = 0;
-	for (i = 0; environ[i]; ++i)
+	for (i = 0; environ[i]; ++i) /*- copy the existing/old environ variables */
 		e[elen++] = environ[i];
 	j = 0;
-	for (i = 0; i < plus.len; ++i)
-	{
-		if (!plus.s[i])
-		{
+	for (i = 0; i < plus.len; ++i) {
+		if (!plus.s[i]) {
 			split = str_chr(plus.s + j, '=');
-			for (t = 0; t < elen; ++t)
-			{
-				if (byte_equal(plus.s + j, split, e[t]))
-				{
-					if (e[t][split] == '=')
-					{
+			for (t = 0; t < elen; ++t) {
+				/*- 
+				 * if existing variable with same
+				 * exists, replace that variable with
+				 * the new definition in plus variable
+				 */
+				if (byte_equal(plus.s + j, split, e[t])) {
+					if (e[t][split] == '=') {
 						--elen;
 						e[t] = e[elen];
 						break;
