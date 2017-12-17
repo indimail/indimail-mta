@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.11  2017-12-17 14:41:38+05:30  Cprogrammer
+ * use the last period in filename to determine shared lib name
+ *
  * Revision 1.10  2017-04-22 12:13:31+05:30  Cprogrammer
  * use pathexec_dl() to execute dynamically loaded functions
  *
@@ -116,7 +119,7 @@ load_shared(char *file, char **argv, char **envp)
 #endif /*- ifdef HASDLMOPEN */
 		dlerror(); /*- clear existing error */
 		/*- use the basename of the shared object as the function to execute */
-		split = str_chr(file, '.');
+		split = str_rchr(file, '.');
 		if (split)
 			file[split--] = 0;
 		for (fptr = file + split;*fptr && *fptr != '/';fptr--);
