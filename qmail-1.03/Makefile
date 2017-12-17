@@ -2564,24 +2564,17 @@ conf-srs conf-spf conf-batv
 	qmail-showctl.c
 
 plugtest: \
-load plugtest.o timeoutwrite.o strsalloc.o control.o constmap.o \
-date822fmt.o now.o qmail.o variables.o cdb.a fd.a wildmat.o \
-wait.a datetime.a getln.a envrules.o bodycheck.o auto_control.o \
-sqlmatch.o matchregex.o scan_xlong.o sgetopt.o subgetopt.o \
-ipalloc.o ip.o socket_v4mappedprefix.o socket_v6any.o \
-open.a sig.a case.a dns.o auto_qmail.o auto_uids.o base64sub.o \
-auto_break.o strerr_die.o strerr_sys.o ndelay.o ndelay_off.o \
-env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
-socket.lib tai.lib dns.lib indimail.lib tls.lib
-	./load plugtest strsalloc.o control.o constmap.o wildmat.o \
-	date822fmt.o now.o qmail.o variables.o ndelay.o ndelay_off.o \
-	envrules.o bodycheck.o dns.o auto_qmail.o sqlmatch.o auto_control.o \
-	matchregex.o scan_xlong.o sgetopt.o subgetopt.o ipalloc.o \
-	ip.o auto_uids.o base64sub.o strerr_die.o strerr_sys.o \
-	cdb.a fd.a wait.a datetime.a auto_break.o socket_v4mappedprefix.o \
-	socket_v6any.o getln.a open.a sig.a case.a env.a stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a lock.a \
-	`cat socket.lib tai.lib dns.lib indimail.lib tls.lib` -ldl
+load plugtest.o subfdout.o substdo.o subfderr.o fmt_ulong.o auto_qmail.o \
+envread.o str_chr.o stralloc_opys.o stralloc_pend.o stralloc_cats.o \
+stralloc_eady.o strerr_sys.o strerr_die.o str_len.o str_diffn.o \
+byte_copy.o sgetopt.o subgetopt.o \
+stralloc_opyb.o stralloc_catb.o alloc.o alloc_re.o error_str.o error.o
+	./load plugtest subfdout.o substdo.o subfderr.o fmt_ulong.o auto_qmail.o \
+	envread.o str_chr.o stralloc_opys.o stralloc_pend.o stralloc_cats.o \
+	stralloc_eady.o strerr_sys.o strerr_die.o str_len.o str_diffn.o \
+	byte_copy.o sgetopt.o subgetopt.o \
+	stralloc_opyb.o stralloc_catb.o alloc.o alloc_re.o error_str.o error.o \
+	-ldl
 
 plugtest.o: \
 compile plugtest.c sgetopt.h alloc.h str.h strerr.h env.h stralloc.h \
