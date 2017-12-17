@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.9  2017-12-17 19:12:31+05:30  Cprogrammer
+ *  use the last period in filename to determine shared lib name
+ *
  *  Revision 1.8  2017-04-22 11:54:07+05:30  Cprogrammer
  *  added new argument, environ list to dlnamespace()
  *
@@ -27,7 +30,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.8 2017-04-22 11:54:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.9 2017-12-17 19:12:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -96,7 +99,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 				strerr_die(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
 			/*- display the new lmid in tcpserver log */
 			strnum[fmt_ulong(strnum, lmid)] = 0;
-			i = str_chr(shared_objfn.s, '.');
+			i = str_rchr(shared_objfn.s, '.');
 			if (i)
 				shared_objfn.s[i--] = 0;
 			for (c = shared_objfn.s + i;*c && *c != '/';c--);
