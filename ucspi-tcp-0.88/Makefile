@@ -320,7 +320,7 @@ compile getln2.c byte.h getln.h buffer.h stralloc.h gen_alloc.h
 	./compile getln2.c
 
 hasmysql.h: \
-choose compile load mysql_config.c hasmysql.h1 hasmysql.h2
+choose compile load mysql_config.c hasmysql.h1 hasmysql.h2 mysql_config
 	./choose R "./mysql_config --include" hasmysql.h1 hasmysql.h2 > hasmysql.h
 hassgact.h: \
 choose compile load trysgact.c hassgact.h1 hassgact.h2
@@ -848,7 +848,7 @@ alloc.h buffer.h error.h strerr.h sgetopt.h subgetopt.h pathexec.h \
 socket.h uint32.h ndelay.h tcpremoteinfo.h stralloc.h rules.h \
 stralloc.h sig.h dns.h stralloc.h iopause.h taia.h tai.h uint64.h \
 ip6.h conf-tls conf-ip haveip6.h conf-mysqlrules \
-conf-dlopen hasmysql.h
+conf-dlopen hasmysql.h mysql_config
 	./compile $(SSLINCS) $(mysql_inc) \
 	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen` \
 	tcpserver.c
