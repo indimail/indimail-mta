@@ -1,672 +1,3 @@
-/*
- * $Log: smtpd.c,v $
- * Revision 1.202  2017-08-26 11:41:16+05:30  Cprogrammer
- * initialize proto.len in smtp_init()
- *
- * Revision 1.201  2017-08-26 11:05:20+05:30  Cprogrammer
- * fixed reading tlsservermethod control file
- *
- * Revision 1.200  2017-08-25 19:33:25+05:30  Cprogrammer
- * fixed syntax error
- *
- * Revision 1.199  2017-08-24 13:19:33+05:30  Cprogrammer
- * improved logging of TLS method errors
- *
- * Revision 1.198  2017-08-23 13:10:50+05:30  Cprogrammer
- * replaced SSLv23_server_method() with TLS_server_method()
- * fixed ifdefs for openssl 1.0.1 version.
- *
- * Revision 1.197  2017-08-08 23:56:33+05:30  Cprogrammer
- * openssl 1.1.0 port
- *
- * Revision 1.196  2017-05-15 19:21:50+05:30  Cprogrammer
- * fixed spurious error "no valid cert for gateway
- *
- * Revision 1.195  2017-05-08 13:52:14+05:30  Cprogrammer
- * check for tlsv1_1_server_method() and tlsv1_2_server_method()
- *
- * Revision 1.194  2017-04-16 13:12:31+05:30  Cprogrammer
- * use different variable for nodnscheck control file
- *
- * Revision 1.193  2017-03-21 15:39:52+05:30  Cprogrammer
- * use CERTDIR to override tls/ssl certificates
- *
- * Revision 1.192  2017-03-10 17:56:07+05:30  Cprogrammer
- * fixed value of protocol line for tls session in Received header
- *
- * Revision 1.191  2017-03-10 11:33:05+05:30  Cprogrammer
- * TLS server method configurable through control file tlsservermethod
- *
- * Revision 1.190  2017-03-09 14:36:39+05:30  Cprogrammer
- * added comments to describe open_control_once() function.
- *
- * Revision 1.189  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.188  2016-05-16 22:33:11+05:30  Cprogrammer
- * new function smtp_init() to load control files. For tcpserver_plugin()
- *
- * Revision 1.187  2016-05-15 22:46:20+05:30  Cprogrammer
- * prevent setup() getting executed multiple times
- *
- * Revision 1.186  2016-04-19 10:24:37+05:30  Cprogrammer
- * added argument to err_grey_tmpfail() for additional diagnostic
- *
- * Revision 1.185  2016-04-10 22:22:21+05:30  Cprogrammer
- * pass ip6 address to greylist()
- *
- * Revision 1.184  2016-04-03 09:35:13+05:30  Cprogrammer
- * fixed useless compilation warning
- *
- * Revision 1.183  2015-08-24 19:08:53+05:30  Cprogrammer
- * replaced ip_scanbracket() with ip4_scanbracket()
- *
- * Revision 1.182  2014-04-03 21:39:09+05:30  Cprogrammer
- * conditional compilation of secure auth code
- *
- * Revision 1.181  2014-01-29 14:04:06+05:30  Cprogrammer
- * made domainqueue file configurable through env variable DOMAINQUEUE
- *
- * Revision 1.180  2014-01-22 22:46:46+05:30  Cprogrammer
- * fixed DISABLE_AUTH_LOGIN, DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5,
- * DISABLE_CRAM_SHA1, DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA512, CRAM_RIPEMD,
- * DISABLE_RIPEMD5. set env variables on RELAYCLIENT/AUTH SMTP using auth.envrules
- * Added SECURE_AUTH to allow AUTH PLAIN, LOGIN only if TLS is enabled
- * set AUTHINFO environment variable for successful SMTP AUTH
- *
- * Revision 1.179  2014-01-13 08:06:53+05:30  Cprogrammer
- * log authentication failures to stderr
- *
- * Revision 1.178  2013-11-21 15:41:05+05:30  Cprogrammer
- * added domainqueue functionality
- *
- * Revision 1.177  2013-09-24 19:04:27+05:30  Cprogrammer
- * reload control files if envrules was used in previous smtp session
- *
- * Revision 1.176  2013-09-04 12:52:12+05:30  Cprogrammer
- * added CRAM-SHA512
- *
- * Revision 1.175  2013-08-22 11:12:45+05:30  Cprogrammer
- * fix compilation warning with sqlmatch
- *
- * Revision 1.174  2013-08-13 10:43:06+05:30  Cprogrammer
- * fixed STARTTLS plaintext command injection vulnerability
- *
- * Revision 1.173  2013-08-06 11:15:25+05:30  Cprogrammer
- * use SPFIPV6 env variable to use spf ipv6 code
- *
- * Revision 1.172  2013-07-16 20:27:14+05:30  Cprogrammer
- * fix size getting clobbered by strnum in log_fifo() function
- *
- * Revision 1.171  2013-06-09 17:03:49+05:30  Cprogrammer
- * shortened variable declartion in addrparse() function
- *
- * Revision 1.170  2013-05-16 23:33:16+05:30  Cprogrammer
- * added checkrecipient as part of non-indimail code
- *
- * Revision 1.169  2013-01-02 08:59:12+05:30  Cprogrammer
- * use FORCE_TLS env variable to enforce STARTTLS during AUTH
- *
- * Revision 1.168  2012-06-26 19:17:21+05:30  Cprogrammer
- * fix infinite loop in blast() function on EOF
- *
- * Revision 1.167  2012-04-26 18:06:35+05:30  Cprogrammer
- * removed memory leaks
- *
- * Revision 1.166  2012-04-10 20:32:39+05:30  Cprogrammer
- * use ipv4 address for spf
- *
- * Revision 1.165  2012-01-19 16:40:44+05:30  Cprogrammer
- * allow restricting of MASQUERADE to the value set by MASQUERADE env variable
- *
- * Revision 1.164  2011-12-22 12:02:30+05:30  Cprogrammer
- * use AUTH methods defines from indimail.h
- *
- * Revision 1.163  2011-12-18 11:17:25+05:30  Cprogrammer
- * fixed abnormal exit in DIGEST-MD5 for non-existing users
- *
- * Revision 1.162  2011-12-10 15:23:20+05:30  Cprogrammer
- * added CRAM-SHA256 auth
- *
- * Revision 1.161  2011-11-17 20:31:09+05:30  Cprogrammer
- * handle the case when recipients.cdb is not present
- *
- * Revision 1.160  2011-11-16 16:19:49+05:30  Cprogrammer
- * fix errStr, errstr variables
- *
- * Revision 1.159  2011-11-07 09:32:17+05:30  Cprogrammer
- * removed unused variable qop
- *
- * Revision 1.158  2011-10-29 20:40:58+05:30  Cprogrammer
- * compute len directly instead of using str_len()
- *
- * Revision 1.157  2011-10-28 17:58:09+05:30  Cprogrammer
- * added AUTH CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5
- *
- * Revision 1.156  2011-10-25 21:16:20+05:30  Cprogrammer
- * option to disable LOGIN, PLAIN, CRAM-MD5 using env variables
- *
- * Revision 1.155  2011-07-29 09:30:05+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.154  2011-07-08 22:04:00+05:30  Cprogrammer
- * added logging of plugin errors to fd 2
- *
- * Revision 1.153  2011-07-08 13:48:08+05:30  Cprogrammer
- * execute plugins towards the end of MAIL, RCPT, DATA functions
- *
- * Revision 1.152  2011-04-17 18:31:32+05:30  Cprogrammer
- * multiple plugin feature
- *
- * Revision 1.151  2011-04-16 14:43:47+05:30  Cprogrammer
- * logfd can be confugured using LOGFD env variable
- *
- * Revision 1.150  2011-04-13 21:27:15+05:30  Cprogrammer
- * added env variable DISABLE_PLUGIN to disable loading of smtp plugins
- *
- * Revision 1.149  2011-04-13 20:45:21+05:30  Cprogrammer
- * added smtp plugin feature
- *
- * Revision 1.148  2010-11-05 06:28:45+05:30  Cprogrammer
- * moved mail_acl() function to mail_acl.c
- *
- * Revision 1.147  2010-10-06 21:59:24+05:30  Cprogrammer
- * fixed wrong return value passed to log_rules()
- *
- * Revision 1.146  2010-09-11 15:26:25+05:30  Cprogrammer
- * reopen all setup control files after envrules
- *
- * Revision 1.145  2010-09-11 10:20:50+05:30  Cprogrammer
- * fixed few environment variables not geting set by envrules
- *
- * Revision 1.144  2010-07-13 16:26:50+05:30  Cprogrammer
- * fix accesslist problems occurring with multiple rcpt
- *
- * Revision 1.143  2010-07-02 16:18:29+05:30  Cprogrammer
- * new function msg_notify() for short email notifications to recipients
- * notify recipients when message size exceeds databyte limits
- *
- * Revision 1.142  2010-04-29 12:09:53+05:30  Cprogrammer
- * fixed cdb search for control files badip, badhelo, authdomains & chkrcptdomains
- *
- * Revision 1.141  2010-04-23 19:20:52+05:30  Cprogrammer
- * added badip functionality
- * fixed setup_state with badhost functionality
- *
- * Revision 1.140  2010-03-30 16:43:44+05:30  Cprogrammer
- * fix for IPV6 hosts
- *
- * Revision 1.139  2010-03-30 16:25:32+05:30  Cprogrammer
- * use ipv4 address for greylisting
- *
- * Revision 1.138  2010-03-30 09:09:12+05:30  Cprogrammer
- * greylisting error was being sent to client instead of log files
- *
- * Revision 1.137  2010-02-10 08:59:41+05:30  Cprogrammer
- * trivial change for #ifdef INDIMAIL
- *
- * Revision 1.136  2010-01-20 11:26:46+05:30  Cprogrammer
- * new improved logic for accesslist
- *
- * Revision 1.135  2009-12-05 19:47:54+05:30  Cprogrammer
- * ansic conversion
- *
- * Revision 1.134  2009-12-05 11:26:43+05:30  Cprogrammer
- * added badhost check
- * display value of TCPPARANOID, REQPTR in error messages
- *
- * Revision 1.133  2009-11-12 19:28:50+05:30  Cprogrammer
- * do antispoofing in smtp_mail()
- * bypass antispoofing if relayclient is set
- *
- * Revision 1.132  2009-09-08 12:34:21+05:30  Cprogrammer
- * removed dependency of INDIMAIL on spam filtering
- *
- * Revision 1.131  2009-09-07 13:56:54+05:30  Cprogrammer
- * disable sqlmatch if INDIMAIL is not defined
- *
- * Revision 1.130  2009-09-05 22:47:55+05:30  Cprogrammer
- * made servercert, clientca, clientca filename configurable using
- * environment varables SERVERCERT, CLIENTCA, CLIENTCRL
- *
- * Revision 1.129  2009-09-01 21:58:36+05:30  Cprogrammer
- * added Bounce Address Tag Validation (BATV)
- *
- * Revision 1.128  2009-08-24 11:06:06+05:30  Cprogrammer
- * added greylisting
- *
- * Revision 1.127  2009-08-05 14:47:08+05:30  Cprogrammer
- * removed extra flush() function calls
- *
- * Revision 1.126  2009-05-26 12:23:01+05:30  Cprogrammer
- * added PTR check and Paranoid check
- *
- * Revision 1.125  2009-05-03 22:47:04+05:30  Cprogrammer
- * restore_env() now returns void
- *
- * Revision 1.124  2009-05-01 12:46:05+05:30  Cprogrammer
- * use constants from qregex.h for envrules return status
- *
- * Revision 1.123  2009-05-01 12:41:05+05:30  Cprogrammer
- * removed exit() from err_addressmatch()
- *
- * Revision 1.122  2009-05-01 10:43:12+05:30  Cprogrammer
- * added errstr argument to address_match(), matchregex() and envrules()
- *
- * Revision 1.121  2009-04-30 22:18:09+05:30  Cprogrammer
- * removed chkrcptdomains from cdb and MySQL
- *
- * Revision 1.120  2009-04-30 18:51:22+05:30  Cprogrammer
- * removed authdomains from cdb and MySQL
- *
- * Revision 1.119  2009-04-29 21:03:32+05:30  Cprogrammer
- * check address_match() for failure
- *
- * Revision 1.118  2009-04-29 16:22:48+05:30  Cprogrammer
- * bypass badrcptto, badrcptpatterns for addresses listed in goodrcptto, goodrcptpatterns
- *
- * Revision 1.117  2009-04-29 15:16:32+05:30  Cprogrammer
- * goodrcptto overrides badrcpto
- *
- * Revision 1.116  2009-04-29 10:34:36+05:30  Cprogrammer
- * added cdb lookup for spamignore, blackholedsender, badmailfrom,relaymailfrom,authdomains,
- * badrcptto,chkrcptdomains,goodrcptto,blackholedrcpt
- *
- * Revision 1.115  2009-04-17 21:09:53+05:30  Cprogrammer
- * added SMTP error message for temporary auth failure
- *
- * Revision 1.114  2009-04-14 11:31:38+05:30  Cprogrammer
- * set rcptcount to zero in each session
- *
- * Revision 1.113  2009-04-10 12:32:00+05:30  Cprogrammer
- * added RECIPIENTS extension (0.5.19) by Erwin Hoffmann
- *
- * Revision 1.112  2009-03-30 21:42:31+05:30  Cprogrammer
- * added #ifdef for goodrcptto
- *
- * Revision 1.111  2009-03-30 16:33:02+05:30  Cprogrammer
- * added goodrcptto, goodrcptpatterns
- *
- * Revision 1.110  2009-03-21 12:36:52+05:30  Cprogrammer
- * conditional compilation of check_recipient code
- *
- * Revision 1.109  2009-03-11 20:21:40+05:30  Cprogrammer
- * modified checkrecipient extension
- *
- * Revision 1.108  2009-01-06 20:45:34+05:30  Cprogrammer
- * added greetdelay functionality
- * fixed addrparse() function
- * fixed sigscheck()
- *
- * Revision 1.107  2008-07-15 20:06:14+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.106  2008-06-12 08:40:46+05:30  Cprogrammer
- * added rulesfile argument
- *
- * Revision 1.105  2008-06-03 22:03:38+05:30  Cprogrammer
- * reject helo if relayclient is not set and helo hostname is a local host
- * reject if errors equals/exceeds MAX_RCPT_ERRCOUNT
- *
- * Revision 1.104  2008-06-01 15:39:52+05:30  Cprogrammer
- * Frederik Vermeulen <qmail-tls akrul inoa.net> 20070408Frederik Vermeulen <qmail-tls akrul inoa.net> 20070408 TLS patch
- *
- * Revision 1.103  2007-12-21 13:58:06+05:30  Cprogrammer
- * fix null termination bug of address
- *
- * Revision 1.102  2007-12-20 13:51:13+05:30  Cprogrammer
- * removed compiler warning
- *
- * Revision 1.101  2006-03-02 20:46:28+05:30  Cprogrammer
- * initialize message size for each SMTP session
- *
- * Revision 1.100  2005-12-29 14:01:53+05:30  Cprogrammer
- * prevent NULL rcptto
- *
- * Revision 1.99  2005-08-25 23:58:49+05:30  Cprogrammer
- * gcc 4 compliance
- * BUG Fix - QREGEX was by default enabled
- * avoid confusion with precedence in mailfrom_size()
- *
- * Revision 1.98  2005-06-17 21:50:36+05:30  Cprogrammer
- * replaced struct ip_address with a shorter typedef
- *
- * Revision 1.97  2005-06-11 21:27:06+05:30  Cprogrammer
- * ipv6 address support
- * accept mails only from email having fqdn
- *
- * Revision 1.96  2005-05-31 15:46:30+05:30  Cprogrammer
- * fixed null termination problem with tls code
- *
- * Revision 1.95  2005-04-05 12:05:36+05:30  Cprogrammer
- * reject mails if OPENRELAY is set
- *
- * Revision 1.94  2005-04-02 23:06:23+05:30  Cprogrammer
- * replaced wildmat with wildmat_internal
- *
- * Revision 1.93  2005-02-14 23:08:07+05:30  Cprogrammer
- * added qregex control file
- * added RFC 3848
- * use regex/wildmat for matching senders/recipients in accesslist control file
- *
- * Revision 1.92  2005-01-22 00:39:37+05:30  Cprogrammer
- * BUG - Fix for ANTISPOOFING
- *
- * Revision 1.91  2005-01-18 13:48:53+05:30  Cprogrammer
- * BUG - Added case for NO_RELAY for LOGIN, PLAIN, CRAM-MD5 authentication
- *
- * Revision 1.90  2005-01-17 16:05:37+05:30  Cprogrammer
- * prevent DOS in CUGMAIL
- * added new case in smtp_auth() for NO_RELAY
- *
- * Revision 1.89  2004-10-22 20:11:12+05:30  Cprogrammer
- * removed readwrite.h
- * added RCS id
- * standardized "Unable to queue messages"
- *
- * Revision 1.88  2004-10-11 14:20:42+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.87  2004-10-09 23:32:38+05:30  Cprogrammer
- * BUG Fixes - Corrected typos
- *
- * Revision 1.86  2004-09-26 00:00:59+05:30  Cprogrammer
- * added access list for email transactions
- *
- * Revision 1.85  2004-09-22 22:27:21+05:30  Cprogrammer
- * replaced atoi() with scan_int/scan_ulong
- *
- * Revision 1.84  2004-09-22 16:55:53+05:30  Cprogrammer
- * added recipient extension
- * expanded meaning of VIRUSCHECK environment variable
- *
- * Revision 1.83  2004-08-28 01:04:50+05:30  Cprogrammer
- * added message submission port
- *
- * Revision 1.82  2004-08-14 02:27:35+05:30  Cprogrammer
- * removed compilation warning
- *
- * Revision 1.81  2004-08-14 01:47:31+05:30  Cprogrammer
- * added SPF code
- *
- * Revision 1.80  2004-08-13 00:15:50+05:30  Cprogrammer
- * blackhole code for virus check and content filter
- *
- * Revision 1.79  2004-07-30 18:46:56+05:30  Cprogrammer
- * removed sig_alarmcatch() as it is handled in ssl_timeoutio
- *
- * Revision 1.78  2004-07-30 18:40:46+05:30  Cprogrammer
- * TLS code overhaul - Fredrik Vermeulen 20040519
- *
- * Revision 1.77  2004-07-13 22:42:22+05:30  Cprogrammer
- * added control file maxcmdlen - max length a smtp command may have
- *
- * Revision 1.76  2004-06-15 22:47:32+05:30  Cprogrammer
- * concatenate split header lines before passing it to bodycheck()
- *
- * Revision 1.75  2004-05-29 21:04:59+05:30  Cprogrammer
- * chkusrdomains renamed to chkrcptdomains
- * CHECKSENDER renamed to CUGMAIL
- *
- * Revision 1.74  2004-05-27 22:59:25+05:30  Cprogrammer
- * fixed problem of Null string environment variables
- * made badmailpatterns, badrcptto, badrcptpatterns,
- * spamignore, spamignorepatterns, signatures, bodycheck
- * configurable through environment variables
- *
- * Revision 1.73  2004-05-26 09:34:03+05:30  Cprogrammer
- * ability to run sigscheck selectively on header/body/both
- *
- * Revision 1.72  2004-05-23 22:18:05+05:30  Cprogrammer
- * added envrules filename as argument
- *
- * Revision 1.71  2004-05-19 23:14:58+05:30  Cprogrammer
- * added comments
- *
- * Revision 1.70  2004-05-19 11:49:04+05:30  Cprogrammer
- * added host access control
- *
- * Revision 1.69  2004-05-07 10:30:31+05:30  Cprogrammer
- * use original environment variables in each session. - envrules bug
- *
- * Revision 1.68  2004-04-29 22:41:20+05:30  Cprogrammer
- * multiline greeting capability added
- * unset NULLQUEUE before starting mail session
- *
- * Revision 1.67  2004-03-17 12:17:25+05:30  Cprogrammer
- * fixed bug with virus scanning and pattern scanning with multiple
- * transaction in a single SMTP session
- *
- * Revision 1.66  2004-02-17 14:07:49+05:30  Cprogrammer
- * added envrules
- * added bodycheck
- * check real domain in authenticated smtp
- *
- * Revision 1.65  2004-01-20 06:56:02+05:30  Cprogrammer
- * give syntax error if arg passed to rset
- *
- * Revision 1.64  2004-01-20 02:11:21+05:30  Cprogrammer
- * ISO C conformance
- *
- * Revision 1.63  2004-01-20 01:53:37+05:30  Cprogrammer
- * removed badheader code
- * prevent overflow of pos variable in blast()
- * fixed call to err_nogateway()
- * replaced helocheck() with address_match()
- *
- * Revision 1.62  2004-01-10 16:10:43+05:30  Cprogrammer
- * incorporated Erwin Hoffman's changes to sizelimit()
- * added Paul Gregg's rejection of HELO commands without dot
- *
- * Revision 1.61  2004-01-08 00:32:24+05:30  Cprogrammer
- * use TMPDIR environment variable for temporary directory
- * send spam to central spam logger
- *
- * Revision 1.60  2004-01-05 19:23:34+05:30  Cprogrammer
- * tmpFile was not initialized
- *
- * Revision 1.59  2004-01-04 23:16:23+05:30  Cprogrammer
- * standardization of error reporting for rsmtp reporting scripts
- *
- * Revision 1.58  2003-12-30 00:35:53+05:30  Cprogrammer
- * use address_match() generic functions to search control files
- *
- * Revision 1.57  2003-12-25 15:38:12+05:30  Cprogrammer
- * blackhole code fools the client that message has been accepted
- * added anti-spoofing code
- *
- * Revision 1.56  2003-12-24 17:28:17+05:30  Cprogrammer
- * changed isspam() to cdbstr()
- *
- * Revision 1.55  2003-12-22 18:32:25+05:30  Cprogrammer
- * moved regex match routines to qregex.c
- * renamed pattern_find() to address_match()
- *
- * Revision 1.54  2003-12-22 10:04:31+05:30  Cprogrammer
- * generalized function pattern_find()
- *
- * Revision 1.53  2003-12-20 13:53:43+05:30  Cprogrammer
- * added qregex for pattern functionality in badmailfrom
- * and badrcptto
- * changed atoi to strtol
- *
- * Revision 1.52  2003-12-20 01:49:25+05:30  Cprogrammer
- * added checking for spamdb, spamdb.cdb file
- * use stralloc for preparing control file
- *
- * Revision 1.51  2003-12-15 13:50:31+05:30  Cprogrammer
- * renamed QMAILFILTER to SPAMFILTER
- *
- * Revision 1.50  2003-12-07 13:07:25+05:30  Cprogrammer
- * conditional compilation for INDIMAIL
- *
- * Revision 1.49  2003-11-29 23:45:09+05:30  Cprogrammer
- * spamignore control file added
- *
- * Revision 1.48  2003-10-30 00:15:13+05:30  Cprogrammer
- * vclose() did not get called if atrn was rejected
- *
- * Revision 1.47  2003-10-28 20:02:49+05:30  Cprogrammer
- * conditional compilation for INDIMAIL
- *
- * Revision 1.46  2003-10-27 00:52:03+05:30  Cprogrammer
- * added CHECKSENDER code
- *
- * Revision 1.45  2003-10-23 01:28:21+05:30  Cprogrammer
- * modified err_queue() to log full transaction
- * fixed compilation warnings
- *
- * Revision 1.44  2003-10-18 18:33:08+05:30  Cprogrammer
- * removed SPAMTHROTTLE
- *
- * Revision 1.43  2003-10-18 00:14:32+05:30  Cprogrammer
- * close mysql connections in smtp_atrn()
- *
- * Revision 1.42  2003-10-17 21:13:58+05:30  Cprogrammer
- * added ETRN, ATRN capability in help
- *
- * Revision 1.41  2003-10-16 01:21:18+05:30  Cprogrammer
- * corrected printing of negative queue suffix values in queueforward
- *
- * Revision 1.40  2003-10-13 18:31:16+05:30  Cprogrammer
- * made turning on of badhelo through env variable
- * LOGFILTER to turn on additional status retrieval from QMAILQUEUE programs
- *
- * Revision 1.39  2003-10-11 00:13:44+05:30  Cprogrammer
- * added badhelo control file
- * corrected call to vshow_atrn_map()
- *
- * Revision 1.38  2003-10-03 11:49:31+05:30  Cprogrammer
- * moved qforward code to qforward.c
- * addrparse() function bug
- *
- * Revision 1.37  2003-09-29 14:09:37+05:30  Cprogrammer
- * fd 3 was wrongly closed causing failure if morercpthosts was opened
- *
- * Revision 1.36  2003-09-27 21:12:12+05:30  Cprogrammer
- * change in rcpthosts() function
- *
- * Revision 1.35  2003-09-21 18:55:15+05:30  Cprogrammer
- * change in comment
- *
- * Revision 1.34  2003-09-16 18:00:56+05:30  Cprogrammer
- * correctness of RFC
- *
- * Revision 1.33  2003-07-20 17:16:12+05:30  Cprogrammer
- * added startls
- * corrected reading of badheaders
- * env variable REQUIREAUTH added
- *
- * Revision 1.32  2003-07-10 15:38:48+05:30  Cprogrammer
- * RFC-2554, RFC-2222 compliance
- *
- * Revision 1.31  2003-07-07 00:06:19+05:30  Cprogrammer
- * added list of HELP in ehlo
- *
- * Revision 1.30  2003-07-05 18:16:07+05:30  Cprogrammer
- * added odmr, RFC 2645 support
- *
- * Revision 1.29  2003-06-18 01:24:38+05:30  Cprogrammer
- * added code to forward bounces
- * added AUTH_DOMAINS functionality
- *
- * Revision 1.28  2003-06-09 22:47:42+05:30  Cprogrammer
- * added new spam control features
- * badheaders, queueforward, blackholedpatterns
- *
- * Revision 1.27  2002-12-11 00:09:20+05:30  Cprogrammer
- * added termination check
- *
- * Revision 1.26  2002-11-24 16:11:12+05:30  Cprogrammer
- * check relaying for all domains if AUTH_ALL is set
- *
- * Revision 1.25  2002-10-29 00:24:21+05:30  Cprogrammer
- * added control files maxrecipients and blackholedsender
- *
- * Revision 1.24  2002-10-25 17:03:04+05:30  Cprogrammer
- * made name of badmailfrom configurable
- *
- * Revision 1.23  2002-10-19 17:59:10+05:30  Cprogrammer
- * added missing else
- *
- * Revision 1.22  2002-09-30 22:57:18+05:30  Cprogrammer
- * included spamdef.h
- *
- * Revision 1.21  2002-09-15 15:19:55+05:30  Cprogrammer
- * added datetime.h
- *
- * Revision 1.20  2002-09-11 15:41:24+05:30  Cprogrammer
- * added option to masquerade for authenticated SMTP
- *
- * Revision 1.19  2002-09-10 20:42:49+05:30  Cprogrammer
- * corrections in DSNs
- *
- * Revision 1.18  2002-09-10 20:06:37+05:30  Cprogrammer
- * added env variable SHUTDOWN to indicate shutdown
- * initialize during helo command
- * removed redundant code under #ifdef VIOLATE_RFC
- *
- * Revision 1.17  2002-09-09 01:29:42+05:30  Cprogrammer
- * error messages changed to match with RFC 1893 DSNs
- *
- * Revision 1.16  2002-09-04 20:25:40+05:30  Cprogrammer
- * enhanced smtp logging
- * added code to allow aliases in User Status Check
- *
- * Revision 1.15  2002-09-04 04:31:38+05:30  Cprogrammer
- * do not advertise auth if correct arguments are not supplied
- *
- * Revision 1.14  2002-09-04 01:50:30+05:30  Cprogrammer
- * conditional compilation of indimail code
- * added selective checking of user status for domains through control file chkusrdomains
- * set remotehost to remoteip if REMOTEHOST environment variable is not set
- *
- * Revision 1.13  2002-09-02 17:57:40+05:30  Cprogrammer
- * removed stupid oops in error messages
- * removed unused variables
- * put parenthesis around b64decode() return values
- *
- * Revision 1.12  2002-09-02 16:44:05+05:30  Cprogrammer
- * organized global variables
- * enhanced log_trans to log the auth method
- *
- * Revision 1.11  2002-08-31 16:26:40+05:30  Cprogrammer
- * added case -1 in smtp_auth
- * added time in smtp greeting
- *
- * Revision 1.10  2002-08-31 14:24:02+05:30  Cprogrammer
- * missing break statement added
- *
- * Revision 1.9  2002-08-30 23:33:35+05:30  Cprogrammer
- * added more error messages
- *
- * Revision 1.8  2002-08-25 19:45:27+05:30  Cprogrammer
- * etrn support modified
- * dnscheck() function modified
- *
- * Revision 1.7  2002-08-25 03:27:51+05:30  Cprogrammer
- * added etrn support
- *
- * Revision 1.6  2002-08-15 19:43:46+05:30  Cprogrammer
- * changes for configurable control dir
- *
- * Revision 1.5  2002-08-15 00:50:12+05:30  Cprogrammer
- * do not print size when databytes is 0
- *
- * Revision 1.4  2002-07-14 10:36:22+05:30  Cprogrammer
- * extensive RFC support added
- *
- * Revision 1.3  2002-04-17 13:59:40+05:30  Cprogrammer
- * added maxhops control file
- * changed err_log() to log_trans()
- *
- * Revision 1.2  2002-04-09 13:53:21+05:30  Cprogrammer
- * *** empty log message ***
- *
- * Revision 1.1  2002-04-08 04:46:10+05:30  Cprogrammer
- * Initial revision
- *
- */
 #include "sig.h"
 #include "stralloc.h"
 #include "substdio.h"
@@ -773,7 +104,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.202 $";
+char           *revision = "$Revision: 1.203 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3005,7 +2336,7 @@ open_control_files()
 	open_control_once(&bhrcpok, &bhbrpok, &bhrcpFn, &bhrcpFnp, "BLACKHOLERCPT", "BLACKHOLERCPTPATTERNS", "blackholercpt", "blackholercptpatterns", &bhrcp, &mapbhrcp, &bhbrp);
 	/*- BADRECIPIENT Patch - include Control file */
 	open_control_once(&rcpok, &brpok, &rcpFn, &rcpFnp, "BADRCPTTO", "BADRCPTPATTERNS", "badrcptto", "badrcptpatterns", &rcp, &maprcp, &brp);
-	/*- goodrcpt */
+	/*- goodrcptto */
 	open_control_once(&chkgrcptok, &chkgrcptokp, &grcptFn, &grcptFnp, "GOODRCPTTO", "GOODRCPTPATTERNS", "goodrcptto", "goodrcptpatterns", &grcpt, &mapgrcpt, &grcptp);
 	/*- Spam Ignore Patch - include Control file */
 	if (env_get("SPAMFILTER"))
@@ -4405,7 +3736,7 @@ smtp_rcpt(char *arg)
 		err_relay();
 		return;
 	}
-	/*- goodrcpt, goodrcptpatterns */
+	/*- goodrcptto, goodrcptpatterns */
 	switch (address_match(grcptFn, &addr, chkgrcptok ? &grcpt : 0, chkgrcptok ? &mapgrcpt : 0, chkgrcptokp ? &grcptp : 0, &errStr))
 	{
 	case 1:
@@ -4419,7 +3750,7 @@ smtp_rcpt(char *arg)
 		return;
 	}
 	/*- RECIPIENT BAD check */
-	if (isgoodrcpt != 4)
+	if (isgoodrcpt != 4) /*- not in goodrcptto, goodrcptpatterns */
 	{
 		/*- badrcptto, badrcptpatterns */
 		switch (address_match(rcpFn, &addr, rcpok ? &rcp : 0, rcpok ? &maprcp : 0, brpok ? &brp : 0, &errStr))
@@ -4505,7 +3836,7 @@ smtp_rcpt(char *arg)
 		}
 		if (!chkrcptok) 
 		{
-			if (isgoodrcpt != 4)
+			if (isgoodrcpt != 4) /*- not in goodrcptto, goodrcptpatterns */
 			{
 #ifdef INDIMAIL
 				if (*tmp)
@@ -4558,7 +3889,7 @@ smtp_rcpt(char *arg)
 		return;
 	}
 	/*- RECIPIENT BLACKHOLE */
-	if (isgoodrcpt != 4)
+	if (isgoodrcpt != 4) /*- not in goodrcptto, goodrcptpatterns */
 	{
 		/*- blackholedrcpt, blackholedrcptpatterns */
 		switch (address_match(bhrcpFn, &addr, bhrcpok ? &bhrcp : 0, bhrcpok ? &mapbhrcp : 0, bhbrpok ? &bhbrp : 0, &errStr))
@@ -6987,10 +6318,54 @@ addrrelay() /*- Rejection of relay probes. */
 	return 0;
 }
 
+/*
+ * $Log: smtpd.c,v $
+ * Revision 1.203  2017-12-17 19:12:52+05:30  Cprogrammer
+ * moved RCS log to bottom and added documentation.
+ *
+ * Revision 1.202  2017-08-26 11:41:16+05:30  Cprogrammer
+ * initialize proto.len in smtp_init()
+ *
+ * Revision 1.201  2017-08-26 11:05:20+05:30  Cprogrammer
+ * fixed reading tlsservermethod control file
+ *
+ * Revision 1.200  2017-08-25 19:33:25+05:30  Cprogrammer
+ * fixed syntax error
+ *
+ * Revision 1.199  2017-08-24 13:19:33+05:30  Cprogrammer
+ * improved logging of TLS method errors
+ *
+ * Revision 1.198  2017-08-23 13:10:50+05:30  Cprogrammer
+ * replaced SSLv23_server_method() with TLS_server_method()
+ * fixed ifdefs for openssl 1.0.1 version.
+ *
+ * Revision 1.197  2017-08-08 23:56:33+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
+ * Revision 1.196  2017-05-15 19:21:50+05:30  Cprogrammer
+ * fixed spurious error "no valid cert for gateway
+ *
+ * Revision 1.195  2017-05-08 13:52:14+05:30  Cprogrammer
+ * check for tlsv1_1_server_method() and tlsv1_2_server_method()
+ *
+ * Revision 1.194  2017-04-16 13:12:31+05:30  Cprogrammer
+ * use different variable for nodnscheck control file
+ *
+ * Revision 1.193  2017-03-21 15:39:52+05:30  Cprogrammer
+ * use CERTDIR to override tls/ssl certificates
+ *
+ * Revision 1.192  2017-03-10 17:56:07+05:30  Cprogrammer
+ * fixed value of protocol line for tls session in Received header
+ *
+ * Revision 1.191  2017-03-10 11:33:05+05:30  Cprogrammer
+ * TLS server method configurable through control file tlsservermethod
+ *
+ */
+
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.202 2017-08-26 11:41:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.203 2017-12-17 19:12:52+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
