@@ -82,14 +82,14 @@ byte_zero.o case_diffb.o case_diffs.o fmt_ulong.o ip4_fmt.o str_end.o \
 ip4_scan.o ip6_scan.o scan_ulong.o scan_uint.o str_chr.o str_diff.o \
 str_len.o str_start.o uint16_pack.o uint16_unpack.o uint32_pack.o \
 uint32_unpack.o ip6_compactaddr.o ip6_fmt.o scan_xlong.o fmt_xlong.o \
-ip6_expandaddr.o hexconversion.o
+ip6_expandaddr.o hexconversion.o str_rchr.o
 	./makelib byte.a byte_chr.o byte_copy.o byte_cr.o \
 	byte_diff.o byte_rchr.o byte_zero.o case_diffb.o str_end.o \
 	case_diffs.o fmt_ulong.o ip4_fmt.o ip4_scan.o ip6_scan.o \
 	scan_ulong.o scan_uint.o str_chr.o str_diff.o str_len.o \
 	str_start.o uint16_pack.o uint16_unpack.o uint32_pack.o \
 	uint32_unpack.o ip6_compactaddr.o ip6_fmt.o scan_xlong.o \
-	fmt_xlong.o ip6_expandaddr.o hexconversion.o
+	fmt_xlong.o ip6_expandaddr.o hexconversion.o str_rchr.o
 
 byte_chr.o: \
 compile byte_chr.c byte.h
@@ -649,6 +649,10 @@ str_chr.o: \
 compile str_chr.c str.h
 	./compile str_chr.c
 
+str_rchr.o: \
+compile str_rchr.c str.h
+	./compile str_rchr.c
+
 str_diff.o: \
 compile str_diff.c str.h
 	./compile str_diff.c
@@ -808,8 +812,8 @@ stralloc.h gen_alloc.h
 	./compile tcprulescheck.c
 
 hasdlmopen.h: \
-choose compile load trydlmopen.c hasdlmopen.h1 hasdlmopen.h2
-	./choose cL trydlmopen hasdlmopen.h1 hasdlmopen.h2 > hasdlmopen.h
+choose compile load trydlmopen.c hasdlmopen.h1 hasdlmopen.h2 conf-dlmopen
+	./choose CL trydlmopen hasdlmopen.h1 hasdlmopen.h2 > hasdlmopen.h
 
 load_shared.o: \
 compile load_shared.c str.h strerr.h dlnamespace.h \
@@ -844,7 +848,7 @@ alloc.h buffer.h error.h strerr.h sgetopt.h subgetopt.h pathexec.h \
 socket.h uint32.h ndelay.h tcpremoteinfo.h stralloc.h rules.h \
 stralloc.h sig.h dns.h stralloc.h iopause.h taia.h tai.h uint64.h \
 ip6.h conf-tls conf-ip haveip6.h conf-mysqlrules \
-conf-dlopen mysql_config hasmysql.h
+conf-dlopen hasmysql.h
 	./compile $(SSLINCS) $(mysql_inc) \
 	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen` \
 	tcpserver.c
