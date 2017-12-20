@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.47  2017-12-20 13:42:58+05:30  Cprogrammer
+ * BUG - initialize pwStat
+ *
  * Revision 2.46  2017-12-11 15:51:15+05:30  Cprogrammer
  * added function cache_active_pwd() to precache active login passwords in memory
  *
@@ -153,7 +156,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.46 2017-12-11 15:51:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.47 2017-12-20 13:42:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -233,6 +236,7 @@ mk_in_entry(char *key)
 	in->in_key = strdup(key);
 	in->aliases = in->mdahost = in->domain = (char *) 0;
 	in->in_userStatus = -1;
+	in->pwStat = 0;
 	in->in_pw.pw_name = (char *) 0;
 	in->in_pw.pw_passwd = (char *) 0;
 	in->in_pw.pw_gecos = (char *) 0;
