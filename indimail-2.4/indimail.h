@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.224  2017-12-20 13:44:03+05:30  Cprogrammer
+ * added timestamp column
+ *
  * Revision 2.223  2017-10-21 15:20:37+05:30  Cprogrammer
  * reduced index length
  *
@@ -985,7 +988,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.223 2017-10-21 15:20:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.224 2017-12-20 13:44:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1192,28 +1195,31 @@ primary key (pw_name, pw_domain)"
 #define HOST_TABLE_LAYOUT "\
 host char(64) not null, \
 ipaddr char(16) not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key (host), index ipaddr (ipaddr)"
 
 #define SMTP_TABLE_LAYOUT "\
 host char(64) not null, \
 src_host char(64) not null, \
 domain char(64) not null, port int, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key (domain, host, src_host)"
 
 #define ALIASDOMAIN_TABLE_LAYOUT "\
 alias char(64) not null, \
 domain char(67), \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key(alias)"
 
 #define SPAM_TABLE_LAYOUT "\
 email char(64) not null, \
 spam_count int not null, \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 index email (email), index spam_count (spam_count), index timestamp (timestamp)"
 
 #define BADMAILFROM_TABLE_LAYOUT "\
 email char(64) not null, \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key (email)"
 
 extern char     cntrl_host[];
@@ -1315,6 +1321,7 @@ level_start0 int, level_start1 int, level_start2 int, \
 level_end0 int, level_end1 int, level_end2 int, \
 level_mod0 int, level_mod1 int, level_mod2 int, \
 level_index0 int , level_index1 int, level_index2 int, the_dir char(156), \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 unique index (domain)"
 
 #define DIR_CONTROL_SELECT "\
@@ -1437,33 +1444,34 @@ primary key(emailid, mailing_list), index emailid (emailid, filter_no)"
 
 #ifdef ENABLE_DOMAIN_LIMITS
 #define LIMITS_TABLE_LAYOUT " \
-	domain                   CHAR(67) NOT NULL, \
-	domain_expiry            INT(10) NOT NULL DEFAULT -1, \
-	passwd_expiry            INT(10) NOT NULL DEFAULT -1, \
-	maxpopaccounts           INT(10) NOT NULL DEFAULT -1, \
-	maxaliases               INT(10) NOT NULL DEFAULT -1, \
-	maxforwards              INT(10) NOT NULL DEFAULT -1, \
-	maxautoresponders        INT(10) NOT NULL DEFAULT -1, \
-	maxmailinglists          INT(10) NOT NULL DEFAULT -1, \
-	diskquota                BIGINT UNSIGNED NOT NULL DEFAULT 0, \
-	maxmsgcount              BIGINT UNSIGNED NOT NULL DEFAULT 0, \
-	defaultquota             BIGINT NOT NULL DEFAULT 0, \
-	defaultmaxmsgcount       BIGINT UNSIGNED NOT NULL DEFAULT 0, \
-	disable_pop              TINYINT(1) NOT NULL DEFAULT 0, \
-	disable_imap             TINYINT(1) NOT NULL DEFAULT 0, \
-	disable_dialup           TINYINT(1) NOT NULL DEFAULT 0, \
-	disable_passwordchanging TINYINT(1) NOT NULL DEFAULT 0, \
-	disable_webmail          TINYINT(1) NOT NULL DEFAULT 0, \
-	disable_relay            TINYINT(1) NOT NULL DEFAULT 0, \
-	disable_smtp             TINYINT(1) NOT NULL DEFAULT 0, \
-	perm_account             TINYINT(2) NOT NULL DEFAULT 0, \
-	perm_alias               TINYINT(2) NOT NULL DEFAULT 0, \
-	perm_forward             TINYINT(2) NOT NULL DEFAULT 0, \
-	perm_autoresponder       TINYINT(2) NOT NULL DEFAULT 0, \
-	perm_maillist            TINYINT(4) NOT NULL DEFAULT 0, \
-	perm_quota               TINYINT(2) NOT NULL DEFAULT 0, \
-	perm_defaultquota        TINYINT(2) NOT NULL DEFAULT 0, \
-	primary key(domain)"
+domain                   CHAR(67) NOT NULL, \
+domain_expiry            INT(10) NOT NULL DEFAULT -1, \
+passwd_expiry            INT(10) NOT NULL DEFAULT -1, \
+maxpopaccounts           INT(10) NOT NULL DEFAULT -1, \
+maxaliases               INT(10) NOT NULL DEFAULT -1, \
+maxforwards              INT(10) NOT NULL DEFAULT -1, \
+maxautoresponders        INT(10) NOT NULL DEFAULT -1, \
+maxmailinglists          INT(10) NOT NULL DEFAULT -1, \
+diskquota                BIGINT UNSIGNED NOT NULL DEFAULT 0, \
+maxmsgcount              BIGINT UNSIGNED NOT NULL DEFAULT 0, \
+defaultquota             BIGINT NOT NULL DEFAULT 0, \
+defaultmaxmsgcount       BIGINT UNSIGNED NOT NULL DEFAULT 0, \
+disable_pop              TINYINT(1) NOT NULL DEFAULT 0, \
+disable_imap             TINYINT(1) NOT NULL DEFAULT 0, \
+disable_dialup           TINYINT(1) NOT NULL DEFAULT 0, \
+disable_passwordchanging TINYINT(1) NOT NULL DEFAULT 0, \
+disable_webmail          TINYINT(1) NOT NULL DEFAULT 0, \
+disable_relay            TINYINT(1) NOT NULL DEFAULT 0, \
+disable_smtp             TINYINT(1) NOT NULL DEFAULT 0, \
+perm_account             TINYINT(2) NOT NULL DEFAULT 0, \
+perm_alias               TINYINT(2) NOT NULL DEFAULT 0, \
+perm_forward             TINYINT(2) NOT NULL DEFAULT 0, \
+perm_autoresponder       TINYINT(2) NOT NULL DEFAULT 0, \
+perm_maillist            TINYINT(4) NOT NULL DEFAULT 0, \
+perm_quota               TINYINT(2) NOT NULL DEFAULT 0, \
+perm_defaultquota        TINYINT(2) NOT NULL DEFAULT 0, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
+primary key(domain)"
 #endif
 
 #define ATRN_MAP_LAYOUT "\
