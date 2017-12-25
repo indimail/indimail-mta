@@ -78,3 +78,8 @@ Release 2.2 Start 08/05/2017
 44. qmail-greyd.c - fixed record expiry logic
 04/12/2017
 45. removed version number from libsrs2 filename
+25/12/2017
+46. tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen()
+    to be called for loading shared library
+47. svctool - add option --use-dlmopen to configure tcpserver to use dlmopen()
+    instead of dlopen() to load shared objects
