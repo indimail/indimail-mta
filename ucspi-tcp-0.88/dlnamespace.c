@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.7  2017-12-25 15:20:38+05:30  Cprogrammer
+ * added rcsid
+ *
  * Revision 1.6  2017-04-22 12:11:14+05:30  Cprogrammer
  * use environment variable LMID or envp variable to figure out LMID when namespace variable is absent
  *
@@ -29,6 +32,10 @@
 #include "scan.h"
 #include "env.h"
 #include "pathexec.h"
+
+#ifndef	lint
+static char     sccsid[] = "$Id: dlnamespace.c,v 1.7 2017-12-25 15:20:38+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 static stralloc namespace = {0};
 
@@ -145,3 +152,10 @@ dlnamespace(char *fn, unsigned long *id)
 }
 #endif /*- ifdef HASDLMOPEN */
 #endif /*- ifdef LOAD_SHARED_OBJECTS */
+
+extern void write(int, char *, int);
+void
+getversion_dlnamespace_c()
+{
+	write(1, sccsid, 0);
+}
