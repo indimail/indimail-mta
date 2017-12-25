@@ -498,22 +498,22 @@ dlnamespace.o dns.a time.a unix.a byte.a socket.lib
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
 	fmt_uint.o rbl.o commands.o pathexec_rundl.o load_shared.o \
-	fmt_str.o dlnamespace.o dns.a time.a unix.a byte.a \
+	fmt_str.o tcdlmopen.o dlnamespace.o dns.a time.a unix.a byte.a \
 	str_diffn.o `cat socket.lib`; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o rblsmtpd.so \
 	fmt_uint.o rbl.o commands.o pathexec_rundl.o load_shared.o \
-	fmt_str.o dlnamespace.o dns.a time.a unix.a byte.a \
+	fmt_str.o dlnamespace.o tcdlmopen.o dns.a time.a unix.a byte.a \
 	str_diffn.o `cat socket.lib` -ldl; \
 	fi
 
 rblsmtpd: \
 load rblsmtpd.o commands.o pathexec_rundl.o load_shared.o \
-str_diffn.o fmt_str.o fmt_uint.o dlnamespace.o dns.a time.a \
-unix.a byte.a socket.lib
+str_diffn.o fmt_str.o fmt_uint.o dlnamespace.o \
+tcdlmopen.o dns.a time.a unix.a byte.a socket.lib
 	./load rblsmtpd commands.o pathexec_rundl.o load_shared.o \
-	str_diffn.o fmt_str.o fmt_uint.o dlnamespace.o dns.a \
-	time.a unix.a byte.a  `cat socket.lib` -ldl
+	str_diffn.o fmt_str.o fmt_uint.o dlnamespace.o \
+	tcdlmopen.o dns.a time.a unix.a byte.a  `cat socket.lib` -ldl
 
 rblsmtpd.o: \
 compile rblsmtpd.c byte.h str.h scan.h fmt.h env.h exit.h sig.h \
@@ -820,6 +820,11 @@ compile load_shared.c str.h strerr.h dlnamespace.h \
 hasdlmopen.h pathexec.h
 	./compile `grep -h -v "^#" conf-dlopen` load_shared.c
 
+tcdlmopen.o: \
+compile tcdlmopen.c env.h dlnamespace.h \
+hasdlmopen.h conf-dlopen
+	./compile `grep -h -v "^#" conf-dlopen` tcdlmopen.c
+
 tcpserver_plugin.o: \
 compile tcpserver_plugin.c str.h stralloc.h strerr.h scan.h \
 hasdlmopen.h fmt.h env.h dlnamespace.h conf-dlopen
@@ -833,11 +838,11 @@ env.h pathexec.h
 tcpserver: \
 load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o pathexec_rundl.o \
 tcpserver_plugin.o load_shared.o control.o str_diffn.o auto_home.o \
-fmt_str.o fmt_uint.o scan_uint.o dlnamespace.o \
+fmt_str.o fmt_uint.o scan_uint.o dlnamespace.o tcdlmopen.o \
 cdb.a dns.a time.a unix.a byte.a socket.lib mysql_config
 	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o \
 	control.o str_diffn.o auto_home.o tcpserver_plugin.o load_shared.o \
-	fmt_str.o fmt_uint.o scan_uint.o dlnamespace.o \
+	fmt_str.o fmt_uint.o scan_uint.o dlnamespace.o tcdlmopen.o \
 	pathexec_rundl.o cdb.a dns.a time.a unix.a byte.a `cat socket.lib` \
 	$(SSLLIBS) $(mysql_libs) -ldl
 
