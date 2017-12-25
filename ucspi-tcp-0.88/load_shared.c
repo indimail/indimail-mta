@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.12  2017-12-25 15:21:10+05:30  Cprogrammer
+ * ability to chose at runtime dlopen(), dlmopen()
+ *
  * Revision 1.11  2017-12-17 14:41:38+05:30  Cprogrammer
  * use the last period in filename to determine shared lib name
  *
@@ -46,11 +49,22 @@
 #include "strerr.h"
 #include "str.h"
 #include "fmt.h"
+#include "env.h"
 #include "pathexec.h"
 #include <link.h>
+#ifndef HASDLMOPEN
 #include <dlfcn.h>
+#endif
 
 #define FATAL "tcpserver: fatal: "
+
+#ifndef	lint
+static char     sccsid[] = "$Id: load_shared.c,v 1.12 2017-12-25 15:21:10+05:30 Cprogrammer Exp mbhangui $";
+#endif
+
+#ifdef HASDLMOPEN
+extern void    *tcdlmopen(Lmid_t, char *, int);
+#endif
 
 void
 load_shared(char *file, char **argv, char **envp)
@@ -62,49 +76,54 @@ load_shared(char *file, char **argv, char **envp)
 	char          **ptr;
 #ifdef HASDLMOPEN
 	char            strnum[FMT_ULONG];
-	int             i, reload_flag = 0;
+	int             i, loadedNew = 0, use_dlmopen;
 	Lmid_t          lmid;
 #endif
 
 	if (!str_end(file, ".so")) {
 #ifdef HASDLMOPEN
-		lmid = 0;
+		i = lmid = 0;
+		use_dlmopen = env_get("USE_DLMOPEN") ? 1 : 0;
 		/*- get lmid */
-		if ((i = dlnamespace(file, envp, (unsigned long *) &lmid)) < 0)
+		if (use_dlmopen && (i = dlnamespace(file, envp, (unsigned long *) &lmid)) < 0)
 			strerr_die(111, FATAL, "dlnamespace: ", file, ": ", 0, 0, 0, 0, (struct strerr *) 0);
-		if (!i) {
+		if (!i) { /*- No existing entry for lmid (loaded libs) found */
 #ifdef RTLD_DEEPBIND
-			if (!(handle = dlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
+			if (!(handle = tcdlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
 #else
-			if (!(handle = dlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
+			if (!(handle = tcdlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
-				strerr_die(111, FATAL, "dlmopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die(111, FATAL, "tcdlmopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 				return;
 			}
-			reload_flag = 1;
-			if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
-				strerr_die(111, FATAL, "dlinfo: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
-			/*- store the new lmid */
-			if (dlnamespace(file, 0, (unsigned long *) &lmid) < 0)
-				strerr_die(111, FATAL, "dlnamespace: ", file, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
-		} else
-		if (!(handle = dlmopen(lmid, file, RTLD_NOW|RTLD_NOLOAD))) {
+			if (use_dlmopen) {
+				loadedNew = 1; /*- indicator for newly loaded shared lib */
+				if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
+					strerr_die(111, FATAL, "dlinfo: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				/*- store the new lmid */
+				if (dlnamespace(file, 0, (unsigned long *) &lmid) < 0)
+					strerr_die(111, FATAL, "dlnamespace: ", file, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
+			}
+		} else /*- loaded earlier so use RTLD_NOLOAD */
+		if (!(handle = tcdlmopen(lmid, file, RTLD_NOW|RTLD_NOLOAD))) { /*- load it again (may have been dlclosed */
 #ifdef RTLD_DEEPBIND
-			if (!(handle = dlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
+			if (!(handle = tcdlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
 #else
-			if (!(handle = dlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
+			if (!(handle = tcdlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
-				strerr_die(111, FATAL, "dlmopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die(111, FATAL, "tcdlmopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 				return;
 			}
-			reload_flag = 1;
-			if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
-				strerr_die(111, FATAL, "dlinfo: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
-			/*- store the new lmid */
-			if (dlnamespace(file, 0, (unsigned long *) &lmid) < 0)
-				strerr_die(111, FATAL, "dlnamespace: ", file, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
+			if (use_dlmopen) {
+				loadedNew = 1; /*- indicator for newly loaded shared lib */
+				if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
+					strerr_die(111, FATAL, "dlinfo: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				/*- store the new lmid */
+				if (dlnamespace(file, 0, (unsigned long *) &lmid) < 0)
+					strerr_die(111, FATAL, "dlnamespace: ", file, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
+			}
 		} else
-			reload_flag = 0;
+			loadedNew = 0;
 #else /*- HASDLMOPEN */
 		if (!(handle = dlopen(file, RTLD_NOW|RTLD_NOLOAD))) {
 #ifdef RTLD_DEEPBIND
@@ -126,7 +145,7 @@ load_shared(char *file, char **argv, char **envp)
 		if (*fptr == '/')
 			fptr++;
 #ifdef HASDLMOPEN
-		if (reload_flag) {
+		if (use_dlmopen && loadedNew) {
 			strnum[fmt_ulong(strnum, lmid)] = 0;
 			strerr_warn4("tcpserver: ", fptr, ".so: link map ID: ", strnum, 0);
 		}
@@ -153,3 +172,9 @@ load_shared(char *file, char **argv, char **envp)
 	execve(file, argv, envp);
 }
 #endif
+
+void
+getversion_load_shared_c()
+{
+	write(1, sccsid, 0);
+}
