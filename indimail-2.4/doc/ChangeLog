@@ -4,9 +4,16 @@ Release 2.4 Start 04/12/2017
 01. remove -release version_number from la_LDFLAGS in indimail, libcdb,
 	libeps, libsrs2, libflash 
 11/12/2017
-02. inlookup - cache active login records using cache_active_pwd()
+02. inlookup - pre-cache active login records using cache_active_pwd()
 03. svctool - added option --activeDays to specify duration of active records
      to cache for inlookup
+20/12/2017
+04. ProcessInFifo.c - initialize pwstat
+25/12/2017
+05. tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen()
+    to be called for loading shared library
+06. svctool - add option --use-dlmopen to configure tcpserver to use dlmopen()
+    instead of dlopen() to load shared objects
 
 * Mon Dec 04 2017 18:10:11 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 01/09/2017

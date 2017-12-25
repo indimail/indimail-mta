@@ -1,4 +1,4 @@
-DATE: Tue Dec  5 10:25:11 IST 2017
+DATE: Mon Dec 25 15:39:40 IST 2017
 
 Announcing Release 2.4 of IndiMail.
 
@@ -80,3 +80,8 @@ Release 2.4 Start 04/12/2017
 02. inlookup - cache active login records using cache_active_pwd()
 03. svctool - added option --activeDays to specify duration of active records
      to cache for inlookup
+04. ProcessInFifo.c - initialize pwstat
+05. tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen()
+    to be called for loading shared library
+06. svctool - add option --use-dlmopen to configure tcpserver to use dlmopen()
+    instead of dlopen() to load shared objects

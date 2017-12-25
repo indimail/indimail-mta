@@ -3,5 +3,8 @@ indimail (@version@-1) unstable; urgency=low
   * remove -release version_number from la_LDFLAGS in indimail, libcdb, libeps, libsrs2, libflash 
   * inlookup - cache active login records using cache_active_pwd()
   * svctool - added option --activeDays to specify duration of active records to cache for inlookup
+  * ProcessInFifo.c - initialize pwstat
+  * tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen() to be called for loading shared library
+  * svctool - add option --use-dlmopen to configure tcpserver to use dlmopen() instead of dlopen() to load shared objects
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 11 Dec 2017 10:26:10 +0530

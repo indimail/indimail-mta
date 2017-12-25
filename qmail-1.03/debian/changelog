@@ -44,5 +44,7 @@ indimail-mta (2.2-2) unstable; urgency=low
   * qmail-greyd.c - added verbose variable to suppress few messages
   * qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler, expire records when loading context file
   * qmail-greyd.c - fixed record expiry logic
+  * tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen() to be called for loading shared library
+  * svctool - add option --use-dlmopen to configure tcpserver to use dlmopen() instead of dlopen() to load shared objects
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 26 Nov 2017 13:01:04 +0530
