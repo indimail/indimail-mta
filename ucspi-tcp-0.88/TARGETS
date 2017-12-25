@@ -224,3 +224,4 @@ dlnamespace.o
 hasdlmopen.h
 auto_shared.c
 str_rchr.o
+tcdlmopen.o
