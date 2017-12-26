@@ -961,7 +961,7 @@ dk-filter
 dk-filter.8
 qmail-qfilter.0
 matchregex.o
-qregex_smtpd.o
+qregex_sql.o
 sqlmatch.o
 indimail.plist
 qmail-poppass
