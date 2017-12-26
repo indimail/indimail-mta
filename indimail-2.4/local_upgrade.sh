@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.17  2017-12-26 23:34:03+05:30  Cprogrammer
+# update control files only if changed
+#
 # Revision 2.16  2017-11-22 22:37:32+05:30  Cprogrammer
 # logdir changed to /var/log/svc
 #
@@ -49,7 +52,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: local_upgrade.sh,v 2.16 2017-11-22 22:37:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: local_upgrade.sh,v 2.17 2017-12-26 23:34:03+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -61,6 +64,14 @@ mkdir=$(which mkdir)
 rm=$(which rm)
 mv=$(which mv)
 sed=$(which sed)
+
+check_update_if_diff()
+{
+	val=`cat $1 2>/dev/null`
+	if [ ! " $val" = " $2" ] ; then
+		echo $2 > $1
+	fi
+}
 
 do_post_upgrade()
 {
@@ -137,20 +148,20 @@ $ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/certs/clientcert.pem
 # Certificate location changed from /etc/indimail/control to /etc/indimail/certs
 for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25
 do
-	echo /etc/indimail/certs > /service/$i/variables/CERTDIR
+	check_update_if_diff /service/$i/variables/CERTDIR /etc/indimail/certs
 	# increase for using dlmopen()
 	if [ ! " $i" = " qmail-send.25" ] ; then
-		echo 536870912 > /service/$i/variables/SOFT_MEM
+		check_update_if_diff /service/$i/variables/SOFT_MEM 536870912
 	fi
 done
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
-	echo /etc/indimail/certs/couriersslcache > $i/variables/TLS_CACHEFILE
-	echo /etc/indimail/certs/servercert.pem  > $i/variables/TLS_CERTFILE
+	check_update_if_diff $i/variables/TLS_CACHEFILE /etc/indimail/certs/courierslcache
+	check_update_if_diff $i/variables/TLS_CERTFILE /etc/indimail/certs/servercert.pem
 done
 for i in /service/qmail-poppass* /service/indisrvr.*
 do
-	echo /etc/indimail/certs/servercert.pem  > $i/variables/CERTFILE
+	check_update_if_diff $i/variables/CERTFILE /etc/indimail/certs/servercert.pem
 done
 
 # service qmail-spamlog has been renamed to qmail-logfifo
@@ -172,11 +183,11 @@ fi
 for i in qmail-smtpd.25 qmail-smtpd.465 fetchmail qmail-send.25
 do
 	if [ -d /service/$i -a -s /service/$i/variables/LOGFILTER ] ; then
-		echo /tmp/logfifo > /service/$i/variables/LOGFILTER
+		check_update_if_diff /service/$i/variables/LOGFILTER /tmp/logfifo
 	fi
 done
 if [ -s /etc/indimail/control/defaultqueue/LOGFILTER ] ; then
-echo /tmp/logfifo > /etc/indimail/control/defaultqueue/LOGFILTER
+	check_update_if_diff /etc/indimail/control/defaultqueue/LOGFILTER /tmp/logfifo
 fi
 #
 # tcpserver uses -c option to set concurrency and uses MAXDAEMON config file
@@ -202,7 +213,7 @@ for i in /service/inlookup.infifo /service/qmail-imapd* /service/qmail-pop3d* \
 	/service/qmail-smtpd.25 /service/qmail-smtpd.465 /service/qmail-smtpd.587
 do
 	if [ -d $i ] ; then
-		echo /var/indimail/inquery > $i/variables/FIFODIR
+		check_update_if_diff $i/variables/FIFODIR /var/indimail/inquery
 	fi
 done
 # add for roundcube/php to access certs
