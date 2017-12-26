@@ -4,6 +4,7 @@
 #include "alloc.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
+#include "auto_prefix.h"
 #include "control.h"
 #include "received.h"
 #include "constmap.h"
@@ -63,8 +64,8 @@
 
 #ifdef BATV
 #include "cdb.h"
-#define BATVLEN 3		/* number of bytes */
-#define BATVSTALE 7		/* accept for a week */
+#define BATVLEN 3	/* number of bytes */
+#define BATVSTALE 7	/* accept for a week */
 #include <openssl/md5.h>
 #endif
 #ifdef SMTP_PLUGIN
@@ -104,15 +105,17 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.203 $";
+char           *revision = "$Revision: 1.204 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
 static stralloc greeting = { 0 };
+
 #ifdef USE_SPF
 stralloc        spflocal = { 0 };
 stralloc        spfguess = { 0 };
 stralloc        spfexp = { 0 };
+
 int             flagbarfspf;
 unsigned int    spfbehavior = 0;
 char           *spfbehaviorFn = 0;
@@ -133,9 +136,11 @@ static stralloc resp = { 0 };
 static stralloc slop = { 0 };
 
 #ifdef BATV
-stralloc        signkey = {0};
+stralloc        signkey = { 0 };
+
 char           *batvfn = 0;
-stralloc        nosign = {0};
+stralloc        nosign = { 0 };
+
 int             batvok;
 int             signkeystale = 7; /*- accept signkey for a week */
 char           *signkeystaleFn = 0;
@@ -147,9 +152,8 @@ char            isbounce;
 static char     strnum[FMT_ULONG];
 static char     accept_buf[FMT_ULONG];
 
-char           *remoteip, *remotehost, *remoteinfo, *local, *relayclient,
-			   *nodnscheck, *msgsize, *fakehelo, *hostname, *bouncemail, *requireauth,
-			   *localip, *greyip;
+char           *remoteip, *remotehost, *remoteinfo, *local, *relayclient, *nodnscheck, *msgsize, *fakehelo;
+char           *hostname, *bouncemail, *requireauth, *localip, *greyip;
 #ifdef IPV6
 char           *remoteip4;
 #endif
@@ -160,7 +164,7 @@ static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof (sserrbuf));
 static char     upbuf[128];
 static substdio ssup;
 
@@ -192,93 +196,115 @@ char           *errStr = 0;
 /*- badmailfrom */
 int             bmfok = 0;
 static stralloc bmf = { 0 };
+
 struct constmap mapbmf;
 int             bmpok = 0;
 static stralloc bmp = { 0 };
+
 char           *bmfFn = 0;
 char           *bmfFnp = 0;
 /*- blackholedrcpt */
 int             bhrcpok = 0;
 static stralloc bhrcp = { 0 };
+
 struct constmap mapbhrcp;
 int             bhbrpok = 0;
 static stralloc bhbrp = { 0 };
+
 char           *bhrcpFn = 0;
 char           *bhrcpFnp = 0;
 /*- BLACKHOLE Sender Check Variables */
 int             bhfok = 0;
 stralloc        bhf = { 0 };
+
 struct constmap mapbhf;
 int             bhpok = 0;
 static stralloc bhp = { 0 };
+
 char           *bhsndFn = 0;
 char           *bhsndFnp = 0;
 /*- badrcptto */
 int             rcpok = 0;
 static stralloc rcp = { 0 };
+
 struct constmap maprcp;
 int             brpok = 0;
 static stralloc brp = { 0 };
+
 char           *rcpFn = 0;
 char           *rcpFnp = 0;
 /*- accesslist */
 int             acclistok = 0;
 static stralloc acclist = { 0 };
+
 char           *accFn = 0;
 /*- RELAYCLIENT Check Variables */
 int             relayclientsok = 0;
 static stralloc relayclients = { 0 };
+
 struct constmap maprelayclients;
 /*- RELAYDOMAIN Check Variables */
 int             relaydomainsok = 0;
 static stralloc relaydomains = { 0 };
+
 struct constmap maprelaydomains;
 /*- RELAYMAILFROM Check Variables */
 int             rmfok = 0;
 static stralloc rmf = { 0 };
+
 struct constmap maprmf;
 /*- NODNSCHECK Check Variables */
 int             nodnschecksok = 0;
 static stralloc nodnschecks = { 0 };
+
 struct constmap mapnodnschecks;
 char           *nodnsFn;
 /*- badip Check */
 char           *dobadipcheck = (char *) 0;
 char           *badipfn = (char *) 0;
 int             briok = 0;
-stralloc        bri = {0};
+stralloc        bri = { 0 };
+
 char           *badhostfn = (char *) 0;
-stralloc        ipaddr = {0};
+stralloc        ipaddr = { 0 };
+
 struct constmap mapbri;
 /*- badhost Check */
 char           *dobadhostcheck = (char *) 0;
 int             brhok = 0;
-stralloc        brh = {0};
+stralloc        brh = { 0 };
+
 struct constmap mapbrh;
 /*- Helo Check */
 char           *dohelocheck = (char *) 0;
 char           *badhelofn = (char *) 0;
 int             badhelook = 0;
 stralloc        badhelo = { 0 };
+
 struct constmap maphelo;
 /*- authdomains */
 int             chkdomok;
 static stralloc chkdom = { 0 };
+
 struct constmap mapchkdom;
 /*- goodrcptto */
 int             chkgrcptok = 0;
 static stralloc grcpt = { 0 };
+
 struct constmap mapgrcpt;
 int             chkgrcptokp = 0;
 static stralloc grcptp = { 0 };
+
 char           *grcptFn = 0;
 char           *grcptFnp = 0;
 /*- SPAM Ingore Sender Check Variables */
 int             spfok = 0;
 stralloc        spf = { 0 };
+
 struct constmap mapspf;
 int             sppok = 0;
 static stralloc spp = { 0 };
+
 char           *spfFn = 0;
 char           *spfFnp = 0;
 /*-
@@ -287,6 +313,7 @@ char           *spfFnp = 0;
  */
 int             chkrcptok = 0;
 static stralloc chkrcpt = { 0 };
+
 struct constmap mapchkrcpt;
 /*- TARPIT Check Variables */
 int             tarpitcount = 0;
@@ -301,25 +328,25 @@ int             sigsok = 0;
 char           *sigsFn = 0;
 int             sigsok_orig = 0;
 stralloc        sigs = { 0 };
+
 char           *virus_desc;
 int             bodyok = 0;
 int             bodyok_orig = 0;
 stralloc        body = { 0 };
+
 char           *bodyFn = 0;
 char           *content_desc;
 #ifdef SMTP_PLUGIN
-PLUGIN         **plug = (PLUGIN **) 0;
-void           **handle;
-int              plugin_count;
+PLUGIN        **plug = (PLUGIN **) 0;
+void          **plughandle;
+int             plugin_count;
 #endif
 int             logfd = 255;
 
-struct authcmd
-{
+struct authcmd {
 	char           *text;
 	int             (*fun) ();
-} authcmds[] =
-{
+} authcmds[] = {
 	{"login", auth_login},
 	{"plain", auth_plain},
 	{"cram-md5", auth_cram_md5},
@@ -486,23 +513,19 @@ die_plugin(char *arg1, char *arg2, char *arg3, char *arg4)
 	logerr(remoteip);
 	logerr(": ");
 	out("451 ");
-	if (arg1)
-	{
+	if (arg1) {
 		logerr(arg1);
 		out(arg1);
 	}
-	if (arg2)
-	{
+	if (arg2) {
 		logerr(arg2);
 		out(arg2);
 	}
-	if (arg3)
-	{
+	if (arg3) {
 		logerr(arg3);
 		out(arg3);
 	}
-	if (arg4)
-	{
+	if (arg4) {
 		logerr(arg4);
 		out(arg4);
 	}
@@ -539,7 +562,7 @@ die_addressmatch(char *errstr)
 	out(errstr);
 	out(" (#4.3.0)\r\n");
 	flush();
-	_exit (1);
+	_exit(1);
 }
 
 void
@@ -577,7 +600,7 @@ addrallowed(char *rcpt)
 }
 
 void
-log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
+log_fifo(char *arg1, char *arg2, unsigned long size, stralloc * line)
 {
 	int             logfifo, match;
 	char           *fifo_name;
@@ -593,8 +616,7 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 		return;
 	if (*fifo_name != '/')
 		return;
-	if ((logfifo = open(fifo_name, O_NDELAY | O_WRONLY)) == -1)
-	{
+	if ((logfifo = open(fifo_name, O_NDELAY | O_WRONLY)) == -1) {
 		if (errno == ENXIO)
 			return;
 		logerr("qmail-smtpd: ");
@@ -613,69 +635,57 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 	 * write the SMTP transaction line to LOGFILTER fifo. All lines written
 	 * to this fifo will be read by the qmail-cat spamlogger service
 	 */
-	substdio_fdbuf(&spamout, write, logfifo, spambuf, sizeof(spambuf));
-	if (substdio_puts(&spamout, "qmail-smtpd: ") == -1)
-	{
+	substdio_fdbuf(&spamout, write, logfifo, spambuf, sizeof (spambuf));
+	if (substdio_puts(&spamout, "qmail-smtpd: ") == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, "pid ") == -1)
-	{
+	if (substdio_puts(&spamout, "pid ") == -1) {
 		close(logfifo);
 		return;
 	}
 	strnum[fmt_ulong(strnum, getpid())] = 0;
-	if (substdio_puts(&spamout, strnum) == -1)
-	{
+	if (substdio_puts(&spamout, strnum) == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, " MAIL from <") == -1)
-	{
+	if (substdio_puts(&spamout, " MAIL from <") == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, arg1) == -1)
-	{
+	if (substdio_puts(&spamout, arg1) == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, "> RCPT <") == -1)
-	{
+	if (substdio_puts(&spamout, "> RCPT <") == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, arg2) == -1)
-	{
+	if (substdio_puts(&spamout, arg2) == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, "> Size: ") == -1)
-	{
+	if (substdio_puts(&spamout, "> Size: ") == -1) {
 		close(logfifo);
 		return;
 	}
 	strnum[fmt_ulong(strnum, msg_size)] = 0;
-	if (substdio_puts(&spamout, strnum) == -1)
-	{
+	if (substdio_puts(&spamout, strnum) == -1) {
 		close(logfifo);
 		return;
 	}
-	/*
+	/*-
 	 * Read X-Bogosity line from bogofilter on logfd. logfd would have already
 	 * been opened before qmail_open() by create_logfilter() function
 	 */
-	if (!fstat(logfd, &statbuf) && statbuf.st_size > 0 && !lseek(logfd, 0, SEEK_SET))
-	{
-		if (substdio_puts(&spamout, " ") == -1)
-		{
+	if (!fstat(logfd, &statbuf) && statbuf.st_size > 0 && !lseek(logfd, 0, SEEK_SET)) {
+		if (substdio_puts(&spamout, " ") == -1) {
 			close(logfifo);
 			close(logfd);
 			return;
 		}
-		substdio_fdbuf(&spamin, read, logfd, inbuf, sizeof(inbuf));
-		if (getln(&spamin, line, &match, '\n') == -1)
-		{
+		substdio_fdbuf(&spamin, read, logfd, inbuf, sizeof (inbuf));
+		if (getln(&spamin, line, &match, '\n') == -1) {
 			logerr("qmail-smtpd: read error: ");
 			logerr(error_str(errno));
 			logerrf("\n");
@@ -685,24 +695,20 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 		close(logfd);
 		if (!stralloc_0(line))
 			die_nomem();
-		if (line->len)
-		{
-			if (substdio_puts(&spamout, line->s) == -1)
-			{
+		if (line->len) {
+			if (substdio_puts(&spamout, line->s) == -1) {
 				logerr("qmail-smtpd: write error: ");
 				logerr(error_str(errno));
 				logerrf("\n");
 			}
 		}
 	}
-	if (substdio_puts(&spamout, "\n") == -1)
-	{
+	if (substdio_puts(&spamout, "\n") == -1) {
 		logerr("qmail-smtpd: write error: ");
 		logerr(error_str(errno));
 		logerrf("\n");
 	}
-	if (substdio_flush(&spamout) == -1)
-	{
+	if (substdio_flush(&spamout) == -1) {
 		close(logfifo);
 		return;
 	}
@@ -717,20 +723,15 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 	int             idx;
 	stralloc        tmpLine = { 0 };
 
-	for (ptr = arg3 + 1, idx = 0; idx < len; idx++)
-	{
-		if (!arg3[idx])
-		{
-			/*
-			 * write data to spamlogger and get X-Bogosity line in tmpLine
-			 */
+	for (ptr = arg3 + 1, idx = 0; idx < len; idx++) {
+		if (!arg3[idx]) {
+			/*- write data to spamlogger and get X-Bogosity line in tmpLine */
 			if (!notify)
 				log_fifo(arg2, ptr, msg_size, &tmpLine);
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(arg1);
-			if (!notify)
-			{
+			if (!notify) {
 				logerr(" HELO <");
 				logerr(helohost.s);
 				logerr("> ");
@@ -740,14 +741,11 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 			logerr(arg2);
 			logerr("> RCPT <");
 			logerr(ptr);
-			if (!notify)
-			{
+			if (!notify) {
 				logerr("> AUTH <");
-				if (arg4 && *arg4)
-				{
+				if (arg4 && *arg4) {
 					logerr(arg4);
-					switch (authd)
-					{
+					switch (authd) {
 					case 0:
 						break;
 					case 1:
@@ -773,8 +771,7 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 						break;
 					}
 				}
-				if (addrallowed(ptr))
-				{
+				if (addrallowed(ptr)) {
 					if (arg4 && *arg4)
 						logerr(": ");
 					logerr("local-rcpt");
@@ -785,8 +782,7 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 			logerr("> Size: ");
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
 			logerr(strnum);
-			if (!notify && tmpLine.len)
-			{
+			if (!notify && tmpLine.len) {
 				logerr(" ");
 				logerr(tmpLine.s);
 			}
@@ -799,8 +795,7 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 }
 
 void
-err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
-	int permanent, unsigned long qp)
+err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, int permanent, unsigned long qp)
 {
 	char           *ptr;
 	int             idx;
@@ -809,13 +804,11 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
 	size[fmt_ulong(size, msg_size)] = 0;
-	for (ptr = arg3 + 1, idx = 0; idx < len; idx++)
-	{
-		if (!arg3[idx])
-		{
-			/*
-			 * write data to spamlogger 
-			 */
+	for (ptr = arg3 + 1, idx = 0; idx < len; idx++) {
+		if (!arg3[idx]) {
+		/*
+		 * write data to spamlogger 
+		 */
 			log_fifo(arg2, ptr, msg_size, &tmpLine);
 			logerr("qmail-smtpd: ");
 			logerrpid();
@@ -833,11 +826,9 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 			logerr("> RCPT <");
 			logerr(ptr);
 			logerr("> AUTH <");
-			if (arg4 && *arg4)
-			{
+			if (arg4 && *arg4) {
 				logerr(arg4);
-				switch (authd)
-				{
+				switch (authd) {
 				case 0:
 					break;
 				case 1:
@@ -863,8 +854,7 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 					break;
 				}
 			}
-			if (addrallowed(ptr))
-			{
+			if (addrallowed(ptr)) {
 				if (arg4 && *arg4)
 					logerr(": ");
 				logerr("local-rcpt");
@@ -873,8 +863,7 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 				logerr("auth-ip/pop");
 			logerr("> Size: ");
 			logerr(size);
-			if (tmpLine.len)
-			{
+			if (tmpLine.len) {
 				logerr(" ");
 				logerr(tmpLine.s); /*- X-Bogosity line */
 			}
@@ -896,8 +885,7 @@ msg_notify()
 	char            buf[DATE822FMT];
 	struct datetime dt;
 
-	if (qmail_open(&qqt) == -1)
-	{
+	if (qmail_open(&qqt) == -1) {
 		logerr("qmail-smtpd: ");
 		logerrpid();
 		logerr(remoteip);
@@ -905,8 +893,7 @@ msg_notify()
 		return;
 	}
 	qp = qmail_qp(&qqt); /*- pid of queue process */
-	if (proto.len)
-	{
+	if (proto.len) {
 		if (!stralloc_0(&proto))
 			die_nomem();
 		protocol = proto.s;
@@ -929,13 +916,11 @@ msg_notify()
 	qmail_from(&qqt, mailfrom.s);
 	qmail_put(&qqt, rcptto.s, rcptto.len);
 	qqx = qmail_close(&qqt);
-	if (!*qqx) /*- mail is now in queue */
-	{
+	if (!*qqx) { /*- mail is now in queue */
 		log_trans(remoteip, mailfrom.s, rcptto.s, rcptto.len, 0, 1);
 		return;
 	}
-	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len,
-		authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
+	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
 }
 
 void
@@ -953,10 +938,8 @@ err_size(char *rip, char *mailfrom, char *rcpt, int len)
 	out("552 sorry, that message size exceeds my databytes limit (#5.3.4)\r\n");
 	if (env_get("DATABYTES_NOTIFY"))
 		msg_notify();
-	for (ptr = rcpt + 1, idx = 0; idx < len; idx++)
-	{
-		if (!rcpt[idx])
-		{
+	for (ptr = rcpt + 1, idx = 0; idx < len; idx++) {
+		if (!rcpt[idx]) {
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(rip);
@@ -1082,18 +1065,15 @@ err_spf()
 {
 	int             i, j;
 
-	for (i = 0; i < spfbarfmsg.len; i = j + 1)
-	{
+	for (i = 0; i < spfbarfmsg.len; i = j + 1) {
 		j = byte_chr(spfbarfmsg.s + i, spfbarfmsg.len - i, '\n') + i;
-		if (j < spfbarfmsg.len)
-		{
+		if (j < spfbarfmsg.len) {
 			out("550-");
 			spfbarfmsg.s[j] = 0;
 			out(spfbarfmsg.s);
 			spfbarfmsg.s[j] = '\n';
 			out("\r\n");
-		} else
-		{
+		} else {
 			out("550 ");
 			out(spfbarfmsg.s);
 			out(" (#5.7.1)\r\n");
@@ -1120,10 +1100,8 @@ log_virus(char *arg1, char *arg2, char *arg3, char *arg4, int len, int blackhole
 	int             idx;
 	char           *ptr;
 
-	for (ptr = arg4 + 1, idx = 0; idx < len; idx++)
-	{
-		if (!arg4[idx])
-		{
+	for (ptr = arg4 + 1, idx = 0; idx < len; idx++) {
+		if (!arg4[idx]) {
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(arg1);
@@ -1142,8 +1120,7 @@ log_virus(char *arg1, char *arg2, char *arg3, char *arg4, int len, int blackhole
 	}
 	if (substdio_flush(&sserr) == -1)
 		_exit(1);
-	if (!blackhole)
-	{
+	if (!blackhole) {
 		out("552-we don't accept email with the below content (#5.3.4)\r\n");
 		out("552 Further Information: ");
 		out(arg2);
@@ -1238,8 +1215,7 @@ smtp_paranoid(char *arg)
 	ptr = env_get("TCPPARANOID");
 	out("553 sorry, your IP address (");
 	out(arg);
-	if (ptr && *ptr)
-	{
+	if (ptr && *ptr) {
 		out(") PTR (reverse DNS) record points to wrong hostname ");
 		out(ptr);
 		out(" (#5.7.1)\r\n");
@@ -1260,14 +1236,12 @@ smtp_ptr(char *arg)
 	sleep(5);
 	ptr = env_get("REQPTR");
 	out("553 ");
-	if (*ptr)
-	{
+	if (*ptr) {
 		out(ptr);
 		out(": from ");
 		out(arg);
 		out(": (#5.7.1)\r\n");
-	} else
-	{
+	} else {
 		out(" Sorry, no PTR (reverse DNS) record for (");
 		out(arg);
 		out(") (#5.7.1)\r\n");
@@ -1286,10 +1260,8 @@ log_rules(char *arg1, char *arg2, char *arg3, int arg4, int arg5)
 	logerr(strnum);
 	logerr(": MAIL from <");
 	logerr(arg2);
-	if (authd)
-	{
-		switch (authd)
-		{
+	if (authd) {
+		switch (authd) {
 		case 1:
 			logerr("> AUTH LOGIN <");
 			break;
@@ -1331,8 +1303,7 @@ err_unimpl(char *arg)
 {
 	if (!case_diffs(arg, "unimplemented"))
 		out("502 unimplemented (#5.5.1)\r\n");
-	else
-	{
+	else {
 		out("500 command ");
 		out(arg);
 		out(" not recognized (#5.5.2)\r\n");
@@ -1420,13 +1391,11 @@ err_mrc(char *arg1, char *arg2, char *arg3)
 void
 smtp_noop(char *arg)
 {
-	if (arg && *arg)
-	{
+	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
 		return;
 	}
-	switch (setup_state)
-	{
+	switch (setup_state) {
 	case 0:
 		break;
 	case 1:
@@ -1455,8 +1424,7 @@ smtp_noop(char *arg)
 void
 smtp_vrfy(char *arg)
 {
-	switch (setup_state)
-	{
+	switch (setup_state) {
 	case 0:
 		break;
 	case 1:
@@ -1488,7 +1456,7 @@ err_qqt(char *arg)
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(arg);
-	logerrf(" qqt failure");
+	logerrf(" qqt failure\n");
 }
 
 int
@@ -1676,10 +1644,8 @@ err_grey()
 	int             idx;
 
 	arg = rcptto.s;
-	for (ptr = arg + 1, idx = 0; idx < rcptto.len; idx++)
-	{
-		if (!arg[idx])
-		{
+	for (ptr = arg + 1, idx = 0; idx < rcptto.len; idx++) {
+		if (!arg[idx]) {
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(remoteip);
@@ -1701,7 +1667,7 @@ err_grey()
 	logerr(arg + 1);
 	logerr(">");
 	if (rcptcount > 1)
-		logerr("..."); /* > 1 address sent for greylist check */
+		logerr("...");			/* > 1 address sent for greylist check */
 	logerr("\n");
 	out("450 try again later (#4.3.0)\r\n");
 	return;
@@ -1711,25 +1677,22 @@ int             flagblackhole;
 stralloc        Desc = { 0 };
 
 int
-sigscheck(stralloc *line, char **desc, int in_header)
+sigscheck(stralloc * line, char **desc, int in_header)
 {
 	int             i, j, k, len, pos1, pos2, header_check, body_check;
 	char           *ptr;
 
 	*desc = "unknown";
-	for (i = j = 0; i < sigs.len; i++)
-	{
+	for (i = j = 0; i < sigs.len; i++) {
 		header_check = body_check = flagblackhole = 0;
-		if (!sigs.s[i])
-		{
+		if (!sigs.s[i]) {
 			for (k = i, len = 0; sigs.s[k] != ':' && k > j; k--)
 				len++;
 			pos1 = pos2 = 0;
-			if (sigs.s[k] == ':')
-			{
+			if (sigs.s[k] == ':') {
 				sigs.s[k] = 0;
 				pos2 = k;
-				for (ptr = sigs.s + k + 1;*ptr && isspace(*ptr);ptr++);
+				for (ptr = sigs.s + k + 1; *ptr && isspace(*ptr); ptr++);
 				if (!str_diffn(ptr, "-headerblackhole", 16))
 					header_check = flagblackhole = 1;
 				else
@@ -1741,29 +1704,24 @@ sigscheck(stralloc *line, char **desc, int in_header)
 				else
 				if (!str_diffn(ptr, "-body", 5))
 					body_check = 1;
-				if (header_check || flagblackhole || body_check)
-				{
-					for (;sigs.s[k] != ':' && k > j; k--)
+				if (header_check || flagblackhole || body_check) {
+					for (; sigs.s[k] != ':' && k > j; k--)
 						len++;
-					if (sigs.s[k] == ':')
-					{
+					if (sigs.s[k] == ':') {
 						pos1 = k;
 						sigs.s[k] = 0;
 						if (!stralloc_copys(&Desc, sigs.s + pos1 + 1))
 							die_nomem();
-					} else
-					{
+					} else {
 						if (!stralloc_copys(&Desc, sigs.s + j))
 							die_nomem();
 						len -= (pos2 - k);
 					}
-				} else
-				{
+				} else {
 					if (!stralloc_copys(&Desc, sigs.s + pos2 + 1))
 						die_nomem();
 				}
-			} else
-			{
+			} else {
 				if (!stralloc_copys(&Desc, sigs.s + j))
 					die_nomem();
 				len = 0; /*- handle signatures without comments */
@@ -1772,20 +1730,18 @@ sigscheck(stralloc *line, char **desc, int in_header)
 				sigs.s[pos1] = ':';
 			if (pos2)
 				sigs.s[pos2] = ':';
-			if ((body_check && in_header) || (header_check && !in_header))
-			{
+			if ((body_check && in_header) || (header_check && !in_header)) {
 				j = i + 1;
 				continue;
 			}
-			if ((i - j - len) < line->len && !str_diffn(line->s, sigs.s + j, i - j - len))
-			{
+			if ((i - j - len) < line->len && !str_diffn(line->s, sigs.s + j, i - j - len)) {
 				if (!stralloc_0(&Desc))
 					die_nomem();
 				*desc = Desc.s;
 				return 1;
 			}
 			j = i + 1;
-		}	  /*- if (!sigs.s[i]) */
+		}		  /*- if (!sigs.s[i]) */
 	} /*- for (;;) */
 	return 0;
 }
@@ -1801,15 +1757,14 @@ check_recipient_cdb(char *rcpt)
 	int             r;
 
 	r = recipients(rcpt, str_len(rcpt));
-	switch (r)
-	{
+	switch (r) {
 	case -1:
 		die_control();
 		break;
 	case -2:
 		die_nomem();
 		break;
-	case 10: /*- recipient cdb does not exist */
+	case 10:/*- recipient cdb does not exist */
 		return 0;
 	case -3:
 	case 111:
@@ -1838,12 +1793,11 @@ check_recipient_sql(char *rcpt)
 {
 	char           *ptr;
 
-	if ((ptr = inquery(USER_QUERY, rcpt, 0)))
-	{
-		if (*ptr == 4) /*- allow aliases */
+	if ((ptr = inquery(USER_QUERY, rcpt, 0))) {
+		if (*ptr == 4)	   /*- allow aliases */
 			return (0);
 		return (*ptr);
-	} 
+	}
 	if (userNotFound)
 		return (1);
 	out("451 Requested action aborted: database error (#4.3.2)\r\n");
@@ -1867,27 +1821,23 @@ dnscheck(char *addr, int len, int paranoid)
 
 	if (str_equal(addr, "#@[]") || !len)
 		return (0);
-	if (nodnschecksok)
-	{
+	if (nodnschecksok) {
 		if (constmap(&mapnodnschecks, addr, len))
 			return 0;
-		if ((j = byte_rchr(addr, len, '@')) < (len - 1))
-		{
+		if ((j = byte_rchr(addr, len, '@')) < (len - 1)) {
 			if (constmap(&mapnodnschecks, addr + j, len - j))
 				return 0;
 		}
 	}
 	random = now() + (getpid() << 16);
-	if ((j = byte_rchr(addr, len, '@')) < (len - 1))
-	{
+	if ((j = byte_rchr(addr, len, '@')) < (len - 1)) {
 		if (!stralloc_copys(&sa, addr + j + 1))
 			die_nomem();
 		dns_init(0);
 		if ((j = dns_mxip(&ia, &sa, random)) < 0)
 			return j;
 	} else
-	if (paranoid)
-	{
+	if (paranoid) {
 		if (!stralloc_copys(&sa, addr))
 			die_nomem();
 		dns_init(0);
@@ -1904,13 +1854,11 @@ log_etrn(char *arg1, char *arg2, char *arg3)
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(arg1);
-	if (arg3)
-	{
+	if (arg3) {
 		logerr(" ");
 		logerr(arg3);
 	}
-	if (arg2)
-	{
+	if (arg2) {
 		logerr(" ETRN ");
 		logerr(arg2);
 	}
@@ -1924,18 +1872,15 @@ log_atrn(char *arg1, char *arg2, char *arg3, char *arg4)
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(arg1);
-	if (arg2)
-	{
+	if (arg2) {
 		logerr(" ");
 		logerr(arg2);
 	}
-	if (arg3)
-	{
+	if (arg3) {
 		logerr(" ATRN ");
 		logerr(arg3);
 	}
-	if (arg4)
-	{
+	if (arg4) {
 		logerr(": ");
 		logerr(arg4);
 	}
@@ -1966,10 +1911,8 @@ esmtp_print()
 	struct datetime dt;
 
 	substdio_puts(&ssout, " (NO UCE) ESMTP IndiMail ");
-	for (ptr = (revision + 11); *ptr; ptr++)
-	{
-		if (*ptr == ' ')
-		{
+	for (ptr = (revision + 11); *ptr; ptr++) {
+		if (*ptr == ' ') {
 			out(" ");
 			break;
 		}
@@ -1986,8 +1929,7 @@ smtp_greet(char *code)
 {
 	int             i, j, esmtp;
 
-	if (code[3] != ' ')
-	{
+	if (code[3] != ' ') {
 		substdio_puts(&ssout, code);
 		substdio_puts(&ssout, greeting.s);
 		return;
@@ -1996,15 +1938,12 @@ smtp_greet(char *code)
 		esmtp = 1;
 	else
 		esmtp = 0;
-	for (i = 0, j = 0; i < greeting.len - 1; i++)
-	{
-		if (greeting.s[i] == '\0')
-		{
+	for (i = 0, j = 0; i < greeting.len - 1; i++) {
+		if (greeting.s[i] == '\0') {
 			substdio_put(&ssout, code, 3);
 			substdio_puts(&ssout, "-");
 			substdio_put(&ssout, greeting.s + j, i - j);
-			if (esmtp)
-			{
+			if (esmtp) {
 				esmtp_print();
 				esmtp = 0;
 			}
@@ -2014,8 +1953,7 @@ smtp_greet(char *code)
 	}
 	substdio_puts(&ssout, code);
 	substdio_put(&ssout, greeting.s + j, greeting.len - 1 - j);
-	if (esmtp)
-	{
+	if (esmtp) {
 		esmtp_print();
 		esmtp = 0;
 	}
@@ -2027,11 +1965,9 @@ smtp_help(char *arg)
 	char           *ptr;
 
 	ptr = revision + 11;
-	if (*ptr)
-	{
+	if (*ptr) {
 		out("214-This is IndiMail SMTP Version ");
-		for (; *ptr; ptr++)
-		{
+		for (; *ptr; ptr++) {
 			if (*ptr == ' ')
 				break;
 			substdio_put(&ssout, ptr, 1);
@@ -2039,30 +1975,26 @@ smtp_help(char *arg)
 	}
 	out("\r\n");
 	out("214-This server supports the following commands:\r\n");
-	switch (smtp_port)
-	{
+	switch (smtp_port) {
 #ifdef INDIMAIL
-	case ODMR_PORT: /*- RFC 2645 */
+	case ODMR_PORT:/*- RFC 2645 */
 		out("214 HELO EHLO AUTH ATRN HELP QUIT\r\n");
 		break;
 #endif
-	case SUBM_PORT: /*- RFC 2476 */
+	case SUBM_PORT:/*- RFC 2476 */
+		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
 		if (hostname && *hostname && childargs && *childargs)
-			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA AUTH VRFY HELP QUIT\r\n");
-		else
-			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA VRFY HELP QUIT\r\n");
+			out("AUTH ");
+		out("VRFY HELP QUIT\r\n");
 		break;
 	default:
-		if (hostname && *hostname && childargs && *childargs)
-		{
+		if (hostname && *hostname && childargs && *childargs) {
 			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA AUTH VRFY ETRN ");
 #ifdef INDIMAIL
 			out("ATRN ");
 #endif
 			out("HELP QUIT\r\n");
-		}
-		else
-		{
+		} else {
 			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA VRFY ETRN ");
 #ifdef INDIMAIL
 			out("ATRN ");
@@ -2084,8 +2016,9 @@ smtp_quit(char *arg)
 	out(" closing connection\r\n");
 	flush();
 #ifdef SMTP_PLUGIN
-	for (i = 0;i < plugin_count;i++)
-		dlclose(handle[i]);
+	for (i = 0; plughandle && i < plugin_count; i++)
+ 		if (plughandle[i])
+			dlclose(plughandle[i]);
 #endif
 	_exit(0);
 }
@@ -2098,10 +2031,8 @@ badipcheck(char *arg)
 		die_nomem();
 	if (!stralloc_0(&ipaddr))
 		die_nomem();
-	switch (address_match((badipfn && *badipfn) ? badipfn : "badip", 
-		&ipaddr, briok ? &bri : 0, briok ? &mapbri : 0, 0, &errStr))
-	{
-	case 1: 
+	switch (address_match((badipfn && *badipfn) ? badipfn : "badip", &ipaddr, briok ? &bri : 0, briok ? &mapbri : 0, 0, &errStr)) {
+	case 1:
 		return (1);
 	case 0:
 		return (0);
@@ -2158,10 +2089,8 @@ dohelo(char *arg)
 		die_nomem();
 	if (!stralloc_0(&helohost))
 		die_nomem();
-	if (!relayclient) /*- turn on if user not authenticated */
-	{
-		if (env_get("ENFORCE_FQDN_HELO"))
-		{
+	if (!relayclient) { /*- turn on if user not authenticated */
+		if (env_get("ENFORCE_FQDN_HELO")) {
 			i = str_chr(arg, '.');
 			if (!arg[i])
 				die_nohelofqdn(arg);
@@ -2172,11 +2101,11 @@ dohelo(char *arg)
 			return;
 	}
 	/*- badhelo */
-	if (dohelocheck)
-	{
-		switch (address_match((badhelofn && *badhelofn) ? badhelofn : "badhelo", 
-			&helohost, badhelook ? &badhelo : 0, badhelook ? &maphelo : 0, 0, &errStr))
-		{
+	if (dohelocheck) {
+		switch (address_match
+				((badhelofn
+				  && *badhelofn) ? badhelofn : "badhelo", &helohost, badhelook ? &badhelo : 0, badhelook ? &maphelo : 0, 0,
+				 &errStr)) {
 		case 1:
 			err_badhelo(remoteip, helohost.s, remotehost);
 			return;
@@ -2189,12 +2118,9 @@ dohelo(char *arg)
 			return;
 		}
 	}
-	if ((fakehelo = case_diffs(remotehost, helohost.s) ? helohost.s : 0))
-	{
-		if (dohelocheck && !nodnscheck)
-		{
-			switch (dnscheck(helohost.s, helohost.len - 1, 1))
-			{
+	if ((fakehelo = case_diffs(remotehost, helohost.s) ? helohost.s : 0)) {
+		if (dohelocheck && !nodnscheck) {
+			switch (dnscheck(helohost.s, helohost.len - 1, 1)) {
 			case DNS_HARD:
 				err_hmf(remoteip, arg, 0);
 				return;
@@ -2216,19 +2142,16 @@ greetdelay_check(int delay)
 {
 	int             r;
 
-	if (delay > 0)
-	{
-		sleep (delay);
+	if (delay > 0) {
+		sleep(delay);
 		return;
 	} else
 		delay = -delay;
-	if ((r = timeoutread(delay, 0, ssinbuf, sizeof ssinbuf)) == -1)
-	{
-  		if (errno == error_timeout)
-			return; /* Timeout ==> No early talking */
+	if ((r = timeoutread(delay, 0, ssinbuf, sizeof ssinbuf)) == -1) {
+		if (errno == error_timeout)
+			return;				/* Timeout ==> No early talking */
 	}
-	if (r <= 0)
-	{
+	if (r <= 0) {
 		logerr("qmail-smtpd: ");
 		logerrpid();
 		logerr(remoteip);
@@ -2241,7 +2164,7 @@ greetdelay_check(int delay)
 	logerrpid();
 	logerr(remoteip);
 	logerrf(" SMTP Protocol violation - Early Talking\n");
-   	out("554 SMTP protocol violation. Polite people say hello after the server greets them (#5.7.1)\r\n");
+	out("554 SMTP protocol violation. Polite people say hello after the server greets them (#5.7.1)\r\n");
 	flush();
 	_exit(1);
 }
@@ -2256,8 +2179,7 @@ databytes_setup()
 {
 	char           *x;
 
-	if (!(x = env_get("DATABYTES")))
-	{
+	if (!(x = env_get("DATABYTES"))) {
 		if (control_readulong(&databytes, "databytes") == -1)
 			die_control();
 	} else
@@ -2268,7 +2190,7 @@ databytes_setup()
 
 void
 open_control_once(int *open_flag, int *open_flagp, char **fn, char **fn_p, char *envstr, char *envstr_p, char *cfn, char *cfn_p,
-	stralloc *sfn, struct constmap *mapvar, stralloc *sfn_p)
+				  stralloc * sfn, struct constmap *mapvar, stralloc * sfn_p)
 {
 	char           *x;
 
@@ -2306,11 +2228,10 @@ void
 open_control_once_int(int *val, char **fn, char *envstr, char *cfn, int neg_allowed)
 {
 	char           *x;
-	
+
 	if (envstr && (x = env_get(envstr)))
 		scan_int(x, val);
-	else
-	{
+	else {
 		if (fn && !(*fn) && control_readint(val, cfn) == -1)
 			die_control();
 		if (fn && cfn)
@@ -2329,58 +2250,62 @@ open_control_files()
 	char           *x;
 
 	/*- BADMAILFROM */
-	open_control_once(&bmfok, &bmpok, &bmfFn, &bmfFnp, "BADMAILFROM", "BADMAILPATTERNS", "badmailfrom", "badmailpatterns", &bmf, &mapbmf, &bmp);
+	open_control_once(&bmfok, &bmpok, &bmfFn, &bmfFnp, "BADMAILFROM", "BADMAILPATTERNS", "badmailfrom", "badmailpatterns", &bmf,
+					  &mapbmf, &bmp);
 	/*- BLACKHOLE Sender Patch - include Control file */
-	open_control_once(&bhfok, &bhpok, &bhsndFn, &bhsndFnp, "BLACKHOLEDSENDER", "BLACKHOLEDPATTERNS", "blackholedsender", "blackholedpatterns", &bhf, &mapbhf, &bhp);
+	open_control_once(&bhfok, &bhpok, &bhsndFn, &bhsndFnp, "BLACKHOLEDSENDER", "BLACKHOLEDPATTERNS", "blackholedsender",
+					  "blackholedpatterns", &bhf, &mapbhf, &bhp);
 	/*- BLACKHOLE RECIPIENT Patch - include Control file */
-	open_control_once(&bhrcpok, &bhbrpok, &bhrcpFn, &bhrcpFnp, "BLACKHOLERCPT", "BLACKHOLERCPTPATTERNS", "blackholercpt", "blackholercptpatterns", &bhrcp, &mapbhrcp, &bhbrp);
+	open_control_once(&bhrcpok, &bhbrpok, &bhrcpFn, &bhrcpFnp, "BLACKHOLERCPT", "BLACKHOLERCPTPATTERNS", "blackholercpt",
+					  "blackholercptpatterns", &bhrcp, &mapbhrcp, &bhbrp);
 	/*- BADRECIPIENT Patch - include Control file */
-	open_control_once(&rcpok, &brpok, &rcpFn, &rcpFnp, "BADRCPTTO", "BADRCPTPATTERNS", "badrcptto", "badrcptpatterns", &rcp, &maprcp, &brp);
+	open_control_once(&rcpok, &brpok, &rcpFn, &rcpFnp, "BADRCPTTO", "BADRCPTPATTERNS", "badrcptto", "badrcptpatterns", &rcp,
+					  &maprcp, &brp);
 	/*- goodrcptto */
-	open_control_once(&chkgrcptok, &chkgrcptokp, &grcptFn, &grcptFnp, "GOODRCPTTO", "GOODRCPTPATTERNS", "goodrcptto", "goodrcptpatterns", &grcpt, &mapgrcpt, &grcptp);
+	open_control_once(&chkgrcptok, &chkgrcptokp, &grcptFn, &grcptFnp, "GOODRCPTTO", "GOODRCPTPATTERNS", "goodrcptto",
+					  "goodrcptpatterns", &grcpt, &mapgrcpt, &grcptp);
 	/*- Spam Ignore Patch - include Control file */
 	if (env_get("SPAMFILTER"))
-		open_control_once(&spfok, &sppok, &spfFn, &spfFnp, "SPAMIGNORE", "SPAMIGNOREPATTERNS", "spamignore", "spamignorepatterns", &spf, &mapspf, &spp);
+		open_control_once(&spfok, &sppok, &spfFn, &spfFnp, "SPAMIGNORE", "SPAMIGNOREPATTERNS", "spamignore", "spamignorepatterns",
+						  &spf, &mapspf, &spp);
 	/*-
 	 * DNSCHECK Patch - include Control file
 	 * Look up "MAIL from:" addresses to skip for DNS check in control/nodnscheck.
 	 */
 	if (!(nodnscheck = env_get("NODNSCHECK")))
 		open_control_once(&nodnschecksok, 0, &nodnsFn, 0, 0, 0, "nodnscheck", 0, &nodnschecks, &mapnodnschecks, 0);
-	/*
-	 * Enable badip if
-	 * BADIPCHECK is defined (default control file badip)
-	 * or
-	 * BADIP (control file defined by BADIP env variable)
-	 * is defined
-	 */
+/*
+ * Enable badip if
+ * BADIPCHECK is defined (default control file badip)
+ * or
+ * BADIP (control file defined by BADIP env variable)
+ * is defined
+ */
 	if ((dobadipcheck = (env_get("BADIPCHECK") ? "" : env_get("BADIP"))))
 		open_control_once(&briok, 0, &badipfn, 0, "BADIP", 0, "badip", 0, &bri, &mapbri, 0);
-	/*
-	 * Enable badhost if
-	 * BADHOSTCHECK is defined (default control file badhost)
-	 * or
-	 * BADHOST (control file defined by BADHOST env variable)
-	 * is defined
-	 */
+/*
+ * Enable badhost if
+ * BADHOSTCHECK is defined (default control file badhost)
+ * or
+ * BADHOST (control file defined by BADHOST env variable)
+ * is defined
+ */
 	if ((dobadhostcheck = (env_get("BADHOSTCHECK") ? "" : env_get("BADHOST"))))
 		open_control_once(&brhok, 0, &badhostfn, 0, "BADHOST", 0, "badhost", 0, &brh, &mapbrh, 0);
-	/*
-	 * Enable badhelo if
-	 * BADHELOCHECK is defined (default control file badhelo)
-	 * or
-	 * BADHELO (control file defined by BADHELO env variable)
-	 * is defined
-	 */
+/*
+ * Enable badhelo if
+ * BADHELOCHECK is defined (default control file badhelo)
+ * or
+ * BADHELO (control file defined by BADHELO env variable)
+ * is defined
+ */
 	if ((dohelocheck = (env_get("BADHELOCHECK") ? "" : env_get("BADHELO"))))
 		open_control_once(&badhelook, 0, &badhelofn, 0, "BADHELO", 0, "badhelo", 0, &badhelo, &maphelo, 0);
 #ifdef BATV
 	open_control_once(&batvok, 0, &batvfn, 0, "SIGNKEY", 0, "signkey", 0, &signkey, 0, 0);
-	if (batvok)
-	{
+	if (batvok) {
 		if (!nosign.len) {
-			switch (control_readfile(&nosign, "nosignhosts",0))
-			{
+			switch (control_readfile(&nosign, "nosignhosts", 0)) {
 			case -1:
 				die_control();
 			case 0:
@@ -2405,36 +2330,34 @@ open_control_files()
 	open_control_once_int((int *) &spfbehavior, &spfbehaviorFn, "SPFBEHAVIOR", "spfbehavior", 0);
 	open_control_once_int((int *) &spfipv6, &spfipv6Fn, "SPFIPV6", "spfipv6", 0);
 #endif
-	/*
-	 * TARPIT Patch - include Control Files 
-	 */
+/*
+ * TARPIT Patch - include Control Files 
+ */
 	open_control_once_int(&tarpitcount, &tarpitcountFn, "TARPITCOUNT", "tarpitcount", 0);
 	open_control_once_int(&tarpitdelay, &tarpitdelayFn, "TARPITDELAY", "tarpitdelay", 0);
 	/*- MAXRECPIENTS - include Control Files */
 	open_control_once_int(&maxrcptcount, &maxrcptcountFn, "MAXRECIPIENTS", "maxrecipients", 0);
-	if ((x = env_get("VIRUSCHECK")))
-	{
+	if ((x = env_get("VIRUSCHECK"))) {
 		unsigned long   u;
 		if (!*x)
 			x = "1";
 		scan_ulong(x, &u);
-		switch (u)
-		{
-			case 1: /*- Virus Scanner (Internal) */
-			case 2: /*- Virus Scanner (Internal + External) */
-			case 3: /*- Virus Scanner (Internal) + Bad Attachment Scan */
-			case 4: /*- Virus Scanner (Internal + External) + Bad Attachment Scan */
-				open_control_once(&sigsok, 0, &sigsFn, 0, "SIGNATURES", 0, "signatures", 0, &sigs, 0, 0);
-				/*
-				if ((sigsok = control_readfile(&sigs, (x = env_get("SIGNATURES")) && *x ? x : "signatures", 0)) == -1)
-					die_control();
-				*/
-				sigsok_orig = sigsok;
-				break;
-			case 5: /*- Virus Scanner (External) + Bad Attachment Scan*/
-			case 6: /*- Virus Scanner (External) */
-			case 7: /*- Bad Attachment scan */
-				break;
+		switch (u) {
+		case 1:	/*- Virus Scanner (Internal) */
+		case 2:	/*- Virus Scanner (Internal + External) */
+		case 3:	/*- Virus Scanner (Internal) + Bad Attachment Scan */
+		case 4:	/*- Virus Scanner (Internal + External) + Bad Attachment Scan */
+			open_control_once(&sigsok, 0, &sigsFn, 0, "SIGNATURES", 0, "signatures", 0, &sigs, 0, 0);
+		/*
+		 * if ((sigsok = control_readfile(&sigs, (x = env_get("SIGNATURES")) && *x ? x : "signatures", 0)) == -1)
+		 * die_control();
+		 */
+			sigsok_orig = sigsok;
+			break;
+		case 5:	/*- Virus Scanner (External) + Bad Attachment Scan*/
+		case 6:	/*- Virus Scanner (External) */
+		case 7:	/*- Bad Attachment scan */
+			break;
 		}
 	}
 	open_control_once_int(&greetdelay, &greetdelayFn, "GREETDELAY", "greetdelay", 0);
@@ -2467,9 +2390,9 @@ smtp_init(int force_flag)
 		die_control();
 	if (maxhops <= 0)
 		maxhops = MAXHOPS;
-	/*
-	 * buffer limit for commands 
-	 */
+/*
+ * buffer limit for commands 
+ */
 	if (control_readint(&ctl_maxcmdlen, "maxcmdlen") == -1)
 		die_control();
 	if (ctl_maxcmdlen < 0)
@@ -2491,9 +2414,9 @@ smtp_init(int force_flag)
 		if (relaydomainsok && !constmap_init(&maprelaydomains, relaydomains.s, relaydomains.len, 0))
 			die_nomem();
 	}
-	/*
-	 * RELAYMAILFROM Patch - include Control File 
-	 */
+/*
+ * RELAYMAILFROM Patch - include Control File 
+ */
 	if ((rmfok = control_readfile(&rmf, "relaymailfrom", 0)) == -1)
 		die_control();
 	if (rmfok && !constmap_init(&maprmf, rmf.s, rmf.len, 0))
@@ -2594,12 +2517,12 @@ setup()
 	/*- Attempt to look up the host name in control/relaydomains. */
 	if (relaydomainsok) {
 		for (i = 0, len = str_len(remotehost); i <= len; i++)
-			if (((i == 0) || (i == len) || (remotehost[i] == '.')) && (relayclient = constmap(&maprelaydomains, remotehost + i, len - i)))
+			if (((i == 0) || (i == len) || (remotehost[i] == '.'))
+				&& (relayclient = constmap(&maprelaydomains, remotehost + i, len - i)))
 				break;
 	}
 #ifdef TLS
-	if (env_get("SMTPS"))
-	{
+	if (env_get("SMTPS")) {
 		smtps = 1;
 		tls_init();
 	} else
@@ -2649,8 +2572,7 @@ addrparse(char *arg)
 		} else {
 			if (!flagquoted && ch == terminator)
 				break;
-			switch (ch)
-			{
+			switch (ch) {
 			case '\\':
 				flagesc = 1;
 				break;
@@ -2696,8 +2618,7 @@ void
 smtp_helo(char *arg)
 {
 	seenmail = 0;
-	switch (setup_state)
-	{
+	switch (setup_state) {
 	case 0:
 		break;
 	case 1:
@@ -2720,8 +2641,7 @@ smtp_helo(char *arg)
 		return;
 	}
 	smtp_greet("250 ");
-	if (!arg || !*arg)
-	{
+	if (!arg || !*arg) {
 		out(" [");
 		out(remoteip);
 		out("]");
@@ -2739,8 +2659,7 @@ smtp_ehlo(char *arg)
 	char            size_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 
 	seenmail = 0;
-	switch (setup_state)
-	{
+	switch (setup_state) {
 	case 0:
 		break;
 	case 1:
@@ -2763,18 +2682,15 @@ smtp_ehlo(char *arg)
 		return;
 	}
 	smtp_greet("250-");
-	if (!arg || !*arg)
-	{
+	if (!arg || !*arg) {
 		out(" [");
 		out(remoteip);
 		out("]");
 	}
 	out("\r\n");
-	if (hostname && *hostname && childargs && *childargs)
-	{
-		char *no_auth_login, *no_auth_plain, *no_cram_md5,
-			 *no_cram_sha1, *no_cram_sha256, *no_cram_sha512, *no_cram_ripemd,
-			 *no_digest_md5;
+	if (hostname && *hostname && childargs && *childargs) {
+		char           *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha256, *no_cram_sha512;
+		char           *no_cram_ripemd, *no_digest_md5;
 #ifdef TLS
 		no_auth_login = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_LOGIN");
 		no_auth_plain = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_PLAIN");
@@ -2783,22 +2699,20 @@ smtp_ehlo(char *arg)
 		no_auth_plain = env_get("DISABLE_AUTH_PLAIN");
 #endif
 		no_cram_md5 = env_get("DISABLE_CRAM_MD5");
-		no_cram_sha1= env_get("DISABLE_CRAM_SHA1");
-		no_cram_sha256= env_get("DISABLE_CRAM_SHA256");
-		no_cram_sha512= env_get("DISABLE_CRAM_SHA512");
-		no_cram_ripemd= env_get("DISABLE_CRAM_RIPEMD");
-		no_digest_md5= env_get("DISABLE_DIGEST_MD5");
+		no_cram_sha1 = env_get("DISABLE_CRAM_SHA1");
+		no_cram_sha256 = env_get("DISABLE_CRAM_SHA256");
+		no_cram_sha512 = env_get("DISABLE_CRAM_SHA512");
+		no_cram_ripemd = env_get("DISABLE_CRAM_RIPEMD");
+		no_digest_md5 = env_get("DISABLE_DIGEST_MD5");
 
-		if (!no_auth_login && !no_auth_plain && !no_cram_md5 && !no_cram_sha1
-			&& !no_cram_sha256 && !no_cram_sha512 && !no_cram_ripemd && !no_digest_md5)
-		{
+		if (!no_auth_login && !no_auth_plain && !no_cram_md5 && !no_cram_sha1 && !no_cram_sha256 && !no_cram_sha512
+			&& !no_cram_ripemd && !no_digest_md5) {
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
 			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
-		} else 
-		if (!no_auth_login || !no_auth_plain || !no_cram_md5 || !no_cram_sha1 ||
-			!no_cram_sha256 || !no_cram_sha512 || !no_cram_ripemd)
-		{
-			int flag = 0;
+		} else
+		if (!no_auth_login || !no_auth_plain || !no_cram_md5 || !no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512
+				   || !no_cram_ripemd) {
+			int             flag = 0;
 
 			out("250-AUTH");
 			if (!no_auth_login)
@@ -2818,56 +2732,46 @@ smtp_ehlo(char *arg)
 			if (!no_digest_md5)
 				out(" DIGEST-MD5");
 			out("\r\n");
-			if (!no_auth_login)
-			{
+			if (!no_auth_login) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("LOGIN");
 			}
-			if (!no_auth_plain)
-			{
+			if (!no_auth_plain) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("PLAIN");
 			}
-			if (!no_cram_md5)
-			{
+			if (!no_cram_md5) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("CRAM-MD5");
 			}
-			if (!no_cram_sha1)
-			{
+			if (!no_cram_sha1) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("CRAM-SHA1");
 			}
-			if (!no_cram_sha256)
-			{
+			if (!no_cram_sha256) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("CRAM-SHA256");
 			}
-			if (!no_cram_sha512)
-			{
+			if (!no_cram_sha512) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("CRAM-SHA512");
 			}
-			if (!no_cram_ripemd)
-			{
+			if (!no_cram_ripemd) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("CRAM-RIPEMD");
 			}
-			if (!no_digest_md5)
-			{
+			if (!no_digest_md5) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("DIGEST-MD5");
 			}
 			out("\r\n");
 		}
-	} 
+	}
 #ifdef INDIMAIL
-	if (smtp_port != ODMR_PORT)
-	{
+	if (smtp_port != ODMR_PORT) {
 		out("250-PIPELINING\r\n");
 		out("250-8BITMIME\r\n");
-		if (databytes)
-		{
+		if (databytes) {
 			size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
 			out("250-SIZE ");
 			out(size_buf);
@@ -2880,8 +2784,7 @@ smtp_ehlo(char *arg)
 #else
 	out("250-PIPELINING\r\n");
 	out("250-8BITMIME\r\n");
-	if (databytes)
-	{
+	if (databytes) {
 		size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
 		out("250-SIZE ");
 		out(size_buf);
@@ -2891,13 +2794,11 @@ smtp_ehlo(char *arg)
 		out("250-ETRN\r\n");
 #endif
 #ifdef TLS
-	if (!ssl && env_get("STARTTLS"))
-	{
-		stralloc        filename = {0};
+	if (!ssl && env_get("STARTTLS")) {
+		stralloc        filename = { 0 };
 		struct stat     st;
 
-		if (!certdir)
-		{
+		if (!certdir) {
 			if (!(certdir = env_get("CERTDIR")))
 				certdir = auto_control;
 		}
@@ -2926,8 +2827,7 @@ void
 smtp_rset(char *arg)
 {
 	seenmail = 0;
-	if (arg && *arg)
-	{
+	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
 		return;
 	}
@@ -3019,16 +2919,15 @@ pop_bef_smtp(char *mailfrom)
 {
 	char           *ptr;
 
-	if ((ptr = inquery(RELAY_QUERY, mailfrom, remoteip)))
-	{
+	if ((ptr = inquery(RELAY_QUERY, mailfrom, remoteip))) {
 		if ((authenticated = *ptr))
 			relayclient = "";
-	} else
-	{
-		if (userNotFound)
+		env_put2("AUTHENTICATED", authenticated == 1 ? "1" : "0");
+	} else {
+		if (userNotFound) {
 			authenticated = -1;
-		else
-		{
+			env_put2("AUTHENTICATED", "0");
+		} else {
 			out("451 Requested action aborted: database error (#4.3.2)\r\n");
 			logerr("qmail-smtpd: ");
 			logerrpid();
@@ -3048,14 +2947,11 @@ domain_compare(char *dom1, char *dom2)
 {
 	char           *tmpdom1, *tmpdom2;
 
-	if (str_diff(dom1, dom2))
-	{
-		if (!(tmpdom1 = inquery(DOMAIN_QUERY, dom1, 0)))
-		{
+	if (str_diff(dom1, dom2)) {
+		if (!(tmpdom1 = inquery(DOMAIN_QUERY, dom1, 0))) {
 			if (userNotFound)
 				tmpdom1 = dom1;
-			else
-			{
+			else {
 				out("451 Requested action aborted: database error (#4.3.2)\r\n");
 				logerr("qmail-smtpd: ");
 				logerrpid();
@@ -3063,12 +2959,10 @@ domain_compare(char *dom1, char *dom2)
 				return (-1);
 			}
 		}
-		if (!(tmpdom2 = inquery(DOMAIN_QUERY, dom2, 0)))
-		{
+		if (!(tmpdom2 = inquery(DOMAIN_QUERY, dom2, 0))) {
 			if (userNotFound)
 				tmpdom2 = dom2;
-			else
-			{
+			else {
 				out("451 Requested action aborted: database error (#4.3.2)\r\n");
 				logerr("qmail-smtpd: ");
 				logerrpid();
@@ -3076,8 +2970,7 @@ domain_compare(char *dom1, char *dom2)
 				return (-1);
 			}
 		}
-		if (str_diff(tmpdom1, tmpdom2))
-		{
+		if (str_diff(tmpdom1, tmpdom2)) {
 			err_nogateway(remoteip, mailfrom.s, 0, 1);
 			return (1);
 		}
@@ -3110,25 +3003,19 @@ mailfrom_auth(char *arg, int len)
 		return;
 	if (!stralloc_copys(&user, ""))
 		die_nomem();
-	if (case_starts(arg, "<>"))
-	{
+	if (case_starts(arg, "<>")) {
 		if (!stralloc_cats(&user, "unknown"))
 			die_nomem();
-	} else
-	{
-		while (len)
-		{
-			if (*arg == '+')
-			{
-				if (case_starts(arg, "+3D"))
-				{
+	} else {
+		while (len) {
+			if (*arg == '+') {
+				if (case_starts(arg, "+3D")) {
 					arg = arg + 2;
 					len = len - 2;
 					if (!stralloc_cats(&user, "="))
 						die_nomem();
 				}
-				if (case_starts(arg, "+2B"))
-				{
+				if (case_starts(arg, "+2B")) {
 					arg = arg + 2;
 					len = len - 2;
 					if (!stralloc_cats(&user, "+"))
@@ -3143,8 +3030,7 @@ mailfrom_auth(char *arg, int len)
 	}
 	if (!stralloc_0(&user))
 		die_nomem();
-	if (!remoteinfo)
-	{
+	if (!remoteinfo) {
 		remoteinfo = user.s;
 		if (!env_unset("TCPREMOTEINFO"))
 			die_nomem();
@@ -3165,16 +3051,12 @@ mailfrom_parms(char *arg)
 	if (!stralloc_copys(&mfparms, ""))
 		die_nomem();
 	i = byte_chr(arg, len, '>');
-	if (i > 4 && i < len)
-	{
-		while (len)
-		{
+	if (i > 4 && i < len) {
+		while (len) {
 			arg++;
 			len--;
-			if (*arg == ' ' || *arg == '\0')
-			{
-				if (case_starts(mfparms.s, "SIZE=") && mailfrom_size(mfparms.s + 5))
-				{
+			if (*arg == ' ' || *arg == '\0') {
+				if (case_starts(mfparms.s, "SIZE=") && mailfrom_size(mfparms.s + 5)) {
 					flagsize = 1;
 					return;
 				}
@@ -3207,21 +3089,17 @@ smtp_mail(char *arg)
 	int             r;
 #endif
 
-	/*
-	 * If this is the second session
-	 * restore original environment.
-	 * This is because envrules(), domainqueues could
-	 * have modified the environmnent
-	 * in the previous session
+	/*-
+	 * If this is the second session restore original environment.
+	 * This is because envrules(), domainqueues could have modified
+	 * the environmnent in the previous session
 	 */
 	restore_env();
-	if (f_envret || d_envret || a_envret) /* reload control files if in an earlier session, envrules was used */
-	{
+	if (f_envret || d_envret || a_envret) {	/* reload control files if in an earlier session, envrules was used */
 		open_control_files();
 		f_envret = 0;
 	}
-	switch (setup_state)
-	{
+	switch (setup_state) {
 	case 0:
 		break;
 	case 1:
@@ -3245,8 +3123,7 @@ smtp_mail(char *arg)
 	}
 	if (!env_put2("SPFRESULT", "unknown"))
 		die_nomem();
-	if (!seenhelo)
-	{
+	if (!seenhelo) {
 		out("503 Polite people say hello first (#5.5.4)\r\n");
 		return;
 	}
@@ -3258,8 +3135,7 @@ smtp_mail(char *arg)
 #endif
 	if (authd && !stralloc_append(&proto, "A"))
 		die_nomem();
-	if (!addrparse(arg))
-	{
+	if (!addrparse(arg)) {
 		err_syntax();
 		return;
 	}
@@ -3267,8 +3143,7 @@ smtp_mail(char *arg)
 	if (batvok)
 		(void) check_batv_sig(); /*- unwrap in case it's ours */
 #endif
-	switch ((f_envret = envrules(addr.s, "from.envrules", "FROMRULES", &errStr)))
-	{
+	switch ((f_envret = envrules(addr.s, "from.envrules", "FROMRULES", &errStr))) {
 	case AM_MEMORY_ERR:
 		die_nomem();
 	case AM_FILE_ERR:
@@ -3278,9 +3153,8 @@ smtp_mail(char *arg)
 	case 0:
 		break;
 	default:
-		if (f_envret > 0)
-		{
-			/*
+		if (f_envret > 0) {
+			/*-
 			 * No point in setting Following environment variables as they have been
 			 * read in the function setup() which gets called only once
 			 * SMTPS, RELAYCLIENT, TCPREMOTEINFO, TCPREMOTEHOST, TCPLOCALIP
@@ -3292,8 +3166,7 @@ smtp_mail(char *arg)
 		}
 		break;
 	}
-	if (!(ret = tablematch("hostaccess", remoteip, addr.s + str_chr(addr.s, '@'))))
-	{
+	if (!(ret = tablematch("hostaccess", remoteip, addr.s + str_chr(addr.s, '@')))) {
 		err_hostaccess(remoteip, addr.s);
 		return;
 	} else
@@ -3304,15 +3177,13 @@ smtp_mail(char *arg)
 		die_nomem();
 	flagsize = 0;
 	mailfrom_parms(arg);
-	if ((requireauth = env_get("REQUIREAUTH")) && !authd)
-	{
+	if ((requireauth = env_get("REQUIREAUTH")) && !authd) {
 		err_authrequired();
 		return;
 	}
 	/*- Terminate SMTP Session immediatly if BLACKHOLED Sender is seen */
-	switch (address_match(bhsndFn, &addr, bhfok ? &bhf : 0, bhfok ? &mapbhf : 0, bhpok ? &bhp : 0, &errStr))
-	{
-	case 1: /*- flow through */
+	switch (address_match(bhsndFn, &addr, bhfok ? &bhf : 0, bhfok ? &mapbhf : 0, bhpok ? &bhp : 0, &errStr)) {
+	case 1:/*- flow through */
 		err_bhf(remoteip, addr.s); /*- This sets NULLQUEUE */
 	case 0:
 		break;
@@ -3323,8 +3194,7 @@ smtp_mail(char *arg)
 		return;
 	}
 	/*- badmailfrom, badmailpatterns */
-	switch (address_match(bmfFn, &addr, bmfok ? &bmf : 0, bmfok ? &mapbmf : 0, bmpok ? &bmp : 0, &errStr))
-	{
+	switch (address_match(bmfFn, &addr, bmfok ? &bmf : 0, bmfok ? &mapbmf : 0, bmpok ? &bmp : 0, &errStr)) {
 	case 1:
 		err_bmf(remoteip, addr.s);
 		return;
@@ -3337,10 +3207,8 @@ smtp_mail(char *arg)
 		return;
 	}
 
-	if (!nodnscheck)
-	{
-		switch (dnscheck(addr.s, addr.len - 1, 0))
-		{
+	if (!nodnscheck) {
+		switch (dnscheck(addr.s, addr.len - 1, 0)) {
 		case DNS_HARD:
 			err_hmf(remoteip, arg, 1);
 			return;
@@ -3351,16 +3219,13 @@ smtp_mail(char *arg)
 			die_nomem();
 		}
 	}
-	if ((bouncemail = env_get("BOUNCEMAIL")))
-	{
+	if ((bouncemail = env_get("BOUNCEMAIL"))) {
 		err_maps(bouncemail, remoteip, addr.s);
 		return;
 	}
-	if (env_get("SPAMFILTER"))
-	{
+	if (env_get("SPAMFILTER")) {
 		/*- spamignore, spamignorepatterns */
-		switch (address_match(spfFn, &addr, spfok ? &spf : 0, spfok ? &mapspf : 0, sppok ? &spp : 0, &errStr))
-		{
+		switch (address_match(spfFn, &addr, spfok ? &spf : 0, spfok ? &mapspf : 0, sppok ? &spp : 0, &errStr)) {
 		case 1:
 			if (!env_unset("SPAMFILTER"))
 				die_nomem();
@@ -3385,10 +3250,8 @@ smtp_mail(char *arg)
 		max_rcpt_errcount = -1;
 	rcptcount = rcpt_errcount = 0;
 	/*- relaymailfrom */
-	if (!relayclient)
-	{
-		switch (address_match("relaymailfrom", &mailfrom, rmfok ? &rmf : 0, rmfok ? &maprmf : 0, 0, &errStr))
-		{
+	if (!relayclient) {
+		switch (address_match("relaymailfrom", &mailfrom, rmfok ? &rmf : 0, rmfok ? &maprmf : 0, 0, &errStr)) {
 		case 1:
 			relayclient = "";
 		case 0:
@@ -3401,15 +3264,13 @@ smtp_mail(char *arg)
 		}
 	}
 #ifdef INDIMAIL
-	/*
+	/*-
 	 * closed user group mailing
 	 * allow only sender domains listed in rcpthosts to
 	 * send mails.
 	 */
-	if (env_get("CUGMAIL"))
-	{
-		if (!addrallowed(addr.s))
-		{
+	if (env_get("CUGMAIL")) {
+		if (!addrallowed(addr.s)) {
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(remoteip);
@@ -3419,10 +3280,8 @@ smtp_mail(char *arg)
 			out("553 SMTP Access denied (#5.7.1)\r\n");
 			return;
 		}
-		if (!(pw = inquery(PWD_QUERY, mailfrom.s, 0)))
-		{
-			if (userNotFound)
-			{
+		if (!(pw = inquery(PWD_QUERY, mailfrom.s, 0))) {
+			if (userNotFound) {
 				/*- 
 				 * Accept the mail as denial could be stupid
 				 * like the vrfy command
@@ -3436,8 +3295,7 @@ smtp_mail(char *arg)
 				out("553 SMTP Access denied (#5.7.1)\r\n");
 				sleep(5); /*- Prevent DOS */
 				return;
-			} else
-			{
+			} else {
 				logerr("qmail-smtpd: ");
 				logerrpid();
 				logerr(remoteip);
@@ -3446,8 +3304,7 @@ smtp_mail(char *arg)
 				return;
 			}
 		} else
-		if (is_inactive || pw->pw_gid & NO_SMTP)
-		{
+		if (is_inactive || pw->pw_gid & NO_SMTP) {
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(remoteip);
@@ -3458,7 +3315,7 @@ smtp_mail(char *arg)
 			out("553 SMTP Access denied (#5.7.1)\r\n");
 			return;
 		}
-	}	  /*- if (env_get("CUGMAIL")) */
+	} /*- if (env_get("CUGMAIL")) */
 	/*-
 	 * ANTISPOOFING 
 	 * Delivery to local domains
@@ -3466,12 +3323,10 @@ smtp_mail(char *arg)
 	 * receipt without authentication (unless MASQUERADE is set).
 	 * (do not allow spoofing for local users)
 	 */
-	if (!relayclient && !authd && env_get("ANTISPOOFING") && addrallowed(mailfrom.s))
-	{
-		if (pop_bef_smtp(mailfrom.s)) /*- will set the variable authenticated */
-			return; /*- temp error */
-		if (authenticated != 1) /*- in case pop-bef-smtp also is negative */
-		{
+	if (!relayclient && !authd && env_get("ANTISPOOFING") && addrallowed(mailfrom.s)) {
+		if (pop_bef_smtp(mailfrom.s))	  /*- will set the variable authenticated */
+			return;	/*- temp error */
+		if (authenticated != 1) { /*- in case pop-bef-smtp also is negative */
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(remoteip);
@@ -3494,11 +3349,10 @@ smtp_mail(char *arg)
 				return;
 			}
 			mailfrom.s[at1] = 0;
-			for (flag = 0, iter_pass = 0;;iter_pass++) {
+			for (flag = 0, iter_pass = 0;; iter_pass++) {
 				if (x && *x) {
 					allowed = iter_pass ? remoteinfo : x;
-				}
-				else {
+				} else {
 					allowed = remoteinfo;
 					iter_pass++;
 				}
@@ -3510,17 +3364,13 @@ smtp_mail(char *arg)
 						flag = 1;
 					}
 					allowed[at2] = '@';
-					/*
-					 * now compare domains 
-					 */
+					/*- now compare domains */
 					if (domain_compare(dom1, dom2) == 1)
 						flag = 1;
 				} else {
 					if (str_diff(mailfrom.s, allowed))
 						flag = 1;
-					/*
-					 * now compare mailfrom domain with $DEFAULT_DOMAIN
-					 */
+					/*- now compare mailfrom domain with $DEFAULT_DOMAIN */
 					if ((dom2 = env_get("DEFAULT_DOMAIN"))) {
 						if (domain_compare(dom1, dom2) == 1)
 							flag = 1;
@@ -3553,8 +3403,7 @@ smtp_mail(char *arg)
 #endif
 #ifdef USE_SPF
 	flagbarfspf = 0;
-	if (spfbehavior && !relayclient)
-	{
+	if (spfbehavior && !relayclient) {
 #ifdef IPV6
 		switch (r = spfcheck(spfipv6 ? remoteip : remoteip4))
 #else
@@ -3590,8 +3439,7 @@ smtp_mail(char *arg)
 				die_nomem();
 			break;
 		}
-		switch (r)
-		{
+		switch (r) {
 		case SPF_NOMEM:
 			die_nomem();
 		case SPF_ERROR:
@@ -3620,17 +3468,14 @@ smtp_mail(char *arg)
 		}
 	} else
 		env_unset("SPFRESULT");
-	if (flagbarfspf)
-	{
+	if (flagbarfspf) {
 		err_spf();
 		return;
 	}
 #endif /*- #ifdef USE_SPF */
 	/*- authdomains */
-	if (chkdomok)
-	{
-		switch (address_match("authdomains", &mailfrom, chkdomok ? &chkdom : 0, chkdomok ? &mapchkdom : 0, 0, &errStr))
-		{
+	if (chkdomok) {
+		switch (address_match("authdomains", &mailfrom, chkdomok ? &chkdom : 0, chkdomok ? &mapchkdom : 0, 0, &errStr)) {
 		case 0:
 			chkdomok = 0;
 		case 1:
@@ -3643,12 +3488,10 @@ smtp_mail(char *arg)
 		}
 	}
 #ifdef SMTP_PLUGIN
-	for (i = 0;i < plugin_count;i++)
-	{
+	for (i = 0; i < plugin_count; i++) {
 		if (!plug[i] || !plug[i]->mail_func)
 			continue;
-		if (plug[i]->mail_func(remoteip, addr.s, &mesg))
-		{
+		if (plug[i]->mail_func(remoteip, addr.s, &mesg)) {
 			out(mesg);
 			logerr("qmail-smtpd: ");
 			logerrpid();
@@ -3663,15 +3506,13 @@ smtp_mail(char *arg)
 	}
 #endif
 #if BATV
-	if (batvok)
-	{
+	if (batvok) {
 		isbounce = 0;
 		if (addr.len <= 1 /*- null term */
-				|| stralloc_starts(&addr, "mailer-daemon@") 
-				|| stralloc_starts(&addr, "Mailer-Daemon@") 
-				|| stralloc_starts(&addr, "MAILER-DAEMON@"))
-		{
-			ret = str_rchr(addr.s,'@');
+			|| stralloc_starts(&addr, "mailer-daemon@")
+			|| stralloc_starts(&addr, "Mailer-Daemon@")
+			|| stralloc_starts(&addr, "MAILER-DAEMON@")) {
+			ret = str_rchr(addr.s, '@');
 			if (!addr.s[ret] || !constmap(&mapnosign, addr.s + ret + 1, addr.len - ret - 2))
 				isbounce = 1;
 		}
@@ -3694,8 +3535,7 @@ smtp_rcpt(char *arg)
 	int             i;
 #endif
 
-	switch (setup_state)
-	{
+	switch (setup_state) {
 	case 0:
 		break;
 	case 1:
@@ -3717,13 +3557,11 @@ smtp_rcpt(char *arg)
 		smtp_badip(remoteip);
 		return;
 	}
-	if (!seenmail)
-	{
+	if (!seenmail) {
 		err_wantmail();
 		return;
 	}
-	if (!addrparse(arg))
-	{
+	if (!addrparse(arg)) {
 		err_syntax();
 		return;
 	}
@@ -3731,14 +3569,12 @@ smtp_rcpt(char *arg)
 	if (batvok)
 		ws = check_batv_sig(); /*- always strip sig, even if it's not a bounce */
 #endif
-	if (addrrelay())
-	{
+	if (addrrelay()) {
 		err_relay();
 		return;
 	}
 	/*- goodrcptto, goodrcptpatterns */
-	switch (address_match(grcptFn, &addr, chkgrcptok ? &grcpt : 0, chkgrcptok ? &mapgrcpt : 0, chkgrcptokp ? &grcptp : 0, &errStr))
-	{
+	switch (address_match(grcptFn, &addr, chkgrcptok ? &grcpt : 0, chkgrcptok ? &mapgrcpt : 0, chkgrcptokp ? &grcptp : 0, &errStr)) {
 	case 1:
 		isgoodrcpt = 4;
 	case 0:
@@ -3750,11 +3586,9 @@ smtp_rcpt(char *arg)
 		return;
 	}
 	/*- RECIPIENT BAD check */
-	if (isgoodrcpt != 4) /*- not in goodrcptto, goodrcptpatterns */
-	{
+	if (isgoodrcpt != 4) { /*- not in goodrcptto, goodrcptpatterns */
 		/*- badrcptto, badrcptpatterns */
-		switch (address_match(rcpFn, &addr, rcpok ? &rcp : 0, rcpok ? &maprcp : 0, brpok ? &brp : 0, &errStr))
-		{
+		switch (address_match(rcpFn, &addr, rcpok ? &rcp : 0, rcpok ? &maprcp : 0, brpok ? &brp : 0, &errStr)) {
 		case 1:
 			err_rcp(remoteip, mailfrom.s, addr.s);
 			return;
@@ -3767,10 +3601,8 @@ smtp_rcpt(char *arg)
 			return;
 		}
 	}
-	if (acclistok)
-	{
-		switch (mail_acl(&acclist, qregex, mailfrom.s, addr.s, 0))
-		{
+	if (acclistok) {
+		switch (mail_acl(&acclist, qregex, mailfrom.s, addr.s, 0)) {
 		case 1:
 			err_acl(remoteip, mailfrom.s, addr.s);
 			return;
@@ -3787,26 +3619,21 @@ smtp_rcpt(char *arg)
 			return;
 		}
 	}
-	/*
-	 * If AUTH_ALL is defined, allowed_rcpthosts = 0 
-	 */
+	/*- If AUTH_ALL is defined, allowed_rcpthosts = 0 */
 	if (!chkdomok && !env_get("AUTH_ALL"))
 		allowed_rcpthosts = addrallowed(addr.s);
-	if (relayclient)
-	{
+	if (relayclient) {
 		--addr.len;
 		if (!stralloc_cats(&addr, relayclient))
 			die_nomem();
 		if (!stralloc_0(&addr))
 			die_nomem();
-	} else	   /*- RELAYCLIENT not set */
-	if (!allowed_rcpthosts)	/*- not in rcpthosts - delivery to remote domains */
-	{
+	} else /*- RELAYCLIENT not set */
+	if (!allowed_rcpthosts) { /*- not in rcpthosts - delivery to remote domains */
 #ifdef INDIMAIL
 		if (env_get("CHECKRELAY") && pop_bef_smtp(mailfrom.s))
 			return;
-		if (authenticated != 1)
-		{
+		if (authenticated != 1) {
 			err_nogateway(remoteip, mailfrom.s, addr.s, 0);
 			return;
 		}
@@ -3814,16 +3641,14 @@ smtp_rcpt(char *arg)
 		err_nogateway(remoteip, mailfrom.s, addr.s, 0);
 		return;
 #endif /*- #ifdef INDIMAIL */
-	}	  /*- if (!allowed_rcpthosts) */
-	/*
+	} /*- if (!allowed_rcpthosts) */
+	/*-
 	 * If rcptto is local, check status of recipients
 	 * (do not allow mail to be sent to invalid users)
 	 */
-	if (allowed_rcpthosts == 1 && (tmp = env_get("CHECKRECIPIENT")))
-	{
+	if (allowed_rcpthosts == 1 && (tmp = env_get("CHECKRECIPIENT"))) {
 		/*- chkrcptdomains */
-		switch (address_match("chkrcptdomains", &addr, chkrcptok ? &chkrcpt : 0, chkrcptok ? &mapchkrcpt : 0, 0, &errStr))
-		{
+		switch (address_match("chkrcptdomains", &addr, chkrcptok ? &chkrcpt : 0, chkrcptok ? &mapchkrcpt : 0, 0, &errStr)) {
 		case 1:
 			chkrcptok = 0;
 		case 0:
@@ -3834,43 +3659,38 @@ smtp_rcpt(char *arg)
 			err_addressmatch(errStr);
 			return;
 		}
-		if (!chkrcptok) 
-		{
-			if (isgoodrcpt != 4) /*- not in goodrcptto, goodrcptpatterns */
-			{
+		if (!chkrcptok) {
+			if (isgoodrcpt != 4) { /*- not in goodrcptto, goodrcptpatterns */
 #ifdef INDIMAIL
 				if (*tmp)
 					scan_int(tmp, &isgoodrcpt);
 				else
 #endif
-					isgoodrcpt = 3; /*- default is cdb */
+					isgoodrcpt = 3;	/*- default is cdb */
 			}
-			switch (isgoodrcpt)
-			{
+			switch (isgoodrcpt) {
 #ifdef INDIMAIL
-				case 1: /* reject if user not in sql db */
+			case 1:			/* reject if user not in sql db */
+				result = check_recipient_sql(addr.s);
+				break;
+			case 2:			/* reject if user not in both recipient.cdb and sql db */
+				if ((result = !check_recipient_cdb(addr.s)))
 					result = check_recipient_sql(addr.s);
-					break;
-				case 2: /* reject if user not in both recipient.cdb and sql db */
-					if ((result = !check_recipient_cdb(addr.s)))
-						result = check_recipient_sql(addr.s);
-					break;
+				break;
 #endif
-				case 4:
-					result = 0;
-					break;
-				case 3: /* reject if user not in recipient */
-				default:
-					result = (!check_recipient_cdb(addr.s) ? 1 : 0);
-					break;
+			case 4:
+				result = 0;
+				break;
+			case 3:			/* reject if user not in recipient */
+			default:
+				result = (!check_recipient_cdb(addr.s) ? 1 : 0);
+				break;
 			}
-			if (result > 0)
-			{
+			if (result > 0) {
 				rcpt_errcount++;
 				sleep(5); /*- Prevent DOS */
 			}
-			switch (result)
-			{
+			switch (result) {
 			case 1:
 				err_mailbox(mailfrom.s, addr.s, "is absent on this domain (#5.1.1)");
 				return;
@@ -3881,19 +3701,16 @@ smtp_rcpt(char *arg)
 				err_mailbox(mailfrom.s, addr.s, "is overquota on this domain (#5.2.2)");
 				return;
 			}
-		} 
+		}
 	}
-	if (max_rcpt_errcount != -1 && rcpt_errcount >= max_rcpt_errcount)
-	{
+	if (max_rcpt_errcount != -1 && rcpt_errcount >= max_rcpt_errcount) {
 		err_rcpt_errcount(mailfrom.s, rcpt_errcount);
 		return;
 	}
 	/*- RECIPIENT BLACKHOLE */
-	if (isgoodrcpt != 4) /*- not in goodrcptto, goodrcptpatterns */
-	{
+	if (isgoodrcpt != 4) { /*- not in goodrcptto, goodrcptpatterns */
 		/*- blackholedrcpt, blackholedrcptpatterns */
-		switch (address_match(bhrcpFn, &addr, bhrcpok ? &bhrcp : 0, bhrcpok ? &mapbhrcp : 0, bhbrpok ? &bhbrp : 0, &errStr))
-		{
+		switch (address_match(bhrcpFn, &addr, bhrcpok ? &bhrcp : 0, bhrcpok ? &mapbhrcp : 0, bhbrpok ? &bhbrp : 0, &errStr)) {
 		case 1:
 			err_bhrcp(remoteip, mailfrom.s, addr.s);
 		case 0:
@@ -3906,7 +3723,7 @@ smtp_rcpt(char *arg)
 		}
 	}
 #if BATV
-	/* if wasn't signed and was bounce, sideline it */
+	/*- if wasn't signed and was bounce, sideline it */
 	if (batvok && !relayclient && !ws && isbounce) {
 		logerr("qmail-smtpd: ");
 		logerrpid();
@@ -3920,12 +3737,10 @@ smtp_rcpt(char *arg)
 	}
 #endif
 #ifdef SMTP_PLUGIN
-	for (i = 0;i < plugin_count;i++)
-	{
+	for (i = 0; i < plugin_count; i++) {
 		if (!plug[i] || !plug[i]->rcpt_func)
 			continue;
-		if (plug[i]->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg))
-		{
+		if (plug[i]->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg)) {
 			out(mesg);
 			logerr("qmail-smtpd: ");
 			logerrpid();
@@ -3940,21 +3755,18 @@ smtp_rcpt(char *arg)
 	}
 #endif
 	/*- Check on max. number of RCPTS */
-	if (maxrcptcount > 0 && (rcptcount + 1) > maxrcptcount)
-	{
+	if (maxrcptcount > 0 && (rcptcount + 1) > maxrcptcount) {
 		err_mrc(remoteip, mailfrom.s, arg);
 		return;
 	}
 	if (tarpitcount && (rcptcount + 1) >= tarpitcount)
 		while (sleep(tarpitdelay));	/*- TARPIT Delay */
-	if (mailfrom.len == 1 && (rcptcount + 1) > 1)
-	{
+	if (mailfrom.len == 1 && (rcptcount + 1) > 1) {
 		err_badbounce();
 		return;
 	}
-	/* domain based queue */
-	switch ((d_envret = domainqueue(addr.s, "domainqueue", "DOMAINQUEUE", &errStr)))
-	{
+	/*- domain based queue */
+	switch ((d_envret = domainqueue(addr.s, "domainqueue", "DOMAINQUEUE", &errStr))) {
 	case AM_MEMORY_ERR:
 		die_nomem();
 	case AM_FILE_ERR:
@@ -3991,8 +3803,7 @@ saferead(int fd, char *buf, int len)
 #else
 	r = timeoutread(timeout, fd, buf, len);
 #endif
-	if (r == -1)
-	{
+	if (r == -1) {
 		if (errno == error_timeout)
 			die_alarm();
 	}
@@ -4004,7 +3815,6 @@ saferead(int fd, char *buf, int len)
 /*-
  * =0 after boundary is found in body,
  * until blank line
- *
  */
 int             linespastheader;
 int             flagexecutable, flagbody, flagqsbmf, boundary_start;
@@ -4042,8 +3852,7 @@ put(char *ch)
 	char           *cp, *cpstart, *cpafter;
 	unsigned int    len;
 
-	if (!sigsok && !bodyok)
-	{
+	if (!sigsok && !bodyok) {
 		if (BytesToOverflow && !--BytesToOverflow)
 			qmail_fail(&qqt);
 		msg_size++;
@@ -4052,59 +3861,46 @@ put(char *ch)
 	}
 	if (line.len < 1024 && !stralloc_catb(&line, ch, 1))
 		die_nomem();
-	if (*ch == '\n' && (sigsok || bodyok))
-	{
-		if (linespastheader == 0)
-		{
-			if (line.len > 1 && isspace(line.s[0]))
-			{
+	if (*ch == '\n' && (sigsok || bodyok)) {
+		if (linespastheader == 0) {
+			if (line.len > 1 && isspace(line.s[0])) {
 				if (!stralloc_cat(&pline, &line))
 					die_nomem();
 			} else
 			if (!stralloc_copy(&pline, &line))
 				die_nomem();
 		}
-		if (bodycheck(&body, &pline, &content_desc, linespastheader == 0) == 1)
-		{
+		if (bodycheck(&body, &pline, &content_desc, linespastheader == 0) == 1) {
 			flagbody = 1;
 			/*- turn off virus/content-filtering on first match */
 			sigsok = bodyok = 0;
 			qmail_fail(&qqt);
 		}
-		if (linespastheader == 0)
-		{
-			if (line.len == 1)
-			{
+		if (linespastheader == 0) {
+			if (line.len == 1) {
 				linespastheader = 1;
-				if (flagqsbmf)
-				{
+				if (flagqsbmf) {
 					flagqsbmf = 0;
 					linespastheader = 0;
 				}
-				if (content.len) /*- MIME header */
-				{
+				if (content.len) { /*- MIME header */
 					cp = content.s;
 					len = content.len;
-					while (len && (*cp == ' ' || *cp == '\t'))
-					{
+					while (len && (*cp == ' ' || *cp == '\t')) {
 						++cp;
 						--len;
 					}
 					cpstart = cp;
-					if (len && *cp == '"') /*- might be commented */
-					{
+					if (len && *cp == '"') { /*- might be commented */
 						++cp;
 						--len;
 						cpstart = cp;
-						while (len && *cp != '"')
-						{
+						while (len && *cp != '"') {
 							++cp;
 							--len;
 						}
-					} else
-					{
-						while (len && *cp != ' ' && *cp != '\t' && *cp != ';')
-						{
+					} else {
+						while (len && *cp != ' ' && *cp != '\t' && *cp != ';') {
 							++cp;
 							--len;
 						}
@@ -4112,27 +3908,23 @@ put(char *ch)
 					if (!case_diffb(cpstart, cp - cpstart, "message/rfc822"))
 						linespastheader = 0;
 					cpafter = content.s + content.len;
-					while ((cp += byte_chr(cp, cpafter - cp, ';')) != cpafter)
-					{
+					while ((cp += byte_chr(cp, cpafter - cp, ';')) != cpafter) {
 						++cp;
 						while (cp < cpafter && (*cp == ' ' || *cp == '\t'))
 							++cp;
-						if (case_startb(cp, cpafter - cp, "boundary="))
-						{
+						if (case_startb(cp, cpafter - cp, "boundary=")) {
 							cp += 9;	/*- after boundary= */
-							if (cp < cpafter && *cp == '"')
-							{
+							if (cp < cpafter && *cp == '"') {
 								++cp;
 								cpstart = cp;
 								while (cp < cpafter && *cp != '"')
 									++cp;
-							} else
-							{
+							} else {
 								cpstart = cp;
 								while (cp < cpafter && *cp != ';' && *cp != ' ' && *cp != '\t')
 									++cp;
 							}
-							/*
+							/*-
 							 * push the current boundary. 
 							 * Append a null and remember start. 
 							 */
@@ -4147,12 +3939,9 @@ put(char *ch)
 						}
 					}
 				}
-			} else
-			{	/*- non-blank header line */
-				if ((*line.s == ' ' || *line.s == '\t'))
-				{
-					switch (linetype)
-					{
+			} else { /*- non-blank header line */
+				if ((*line.s == ' ' || *line.s == '\t')) {
+					switch (linetype) {
 					case 'C':
 						if (!stralloc_catb(&content, line.s, line.len - 1))
 							die_nomem();
@@ -4160,10 +3949,8 @@ put(char *ch)
 					default:
 						break;
 					}
-				} else
-				{
-					if (case_startb(line.s, line.len, "content-type:"))
-					{
+				} else {
+					if (case_startb(line.s, line.len, "content-type:")) {
 						if (!stralloc_copyb(&content, line.s + 13, line.len - 14))
 							die_nomem();
 						linetype = 'C';
@@ -4171,17 +3958,11 @@ put(char *ch)
 						linetype = ' ';
 				}
 			}
-		} else	   /*- non-header line */
-		{
-			if (boundary.len - boundary_start && *line.s == '-' && line.len > (boundary.len - boundary_start) &&
-				!str_diffn(line.s, boundary.s + boundary_start, boundary.len - boundary_start))
-			{	/*- matches a boundary */
-				if (line.len > boundary.len - boundary_start + 2 && line.s[boundary.len - boundary_start + 0] == '-' &&
-					line.s[boundary.len - boundary_start + 1] == '-')
-				{
-					/*
-					 * XXXX - pop the boundary here 
-					 */
+		} else { /*- non-header line */
+			if (boundary.len - boundary_start && *line.s == '-' && line.len > (boundary.len - boundary_start) && !str_diffn(line.s, boundary.s + boundary_start, boundary.len - boundary_start)) {
+				/*- matches a boundary */
+				if (line.len > boundary.len - boundary_start + 2 && line.s[boundary.len - boundary_start + 0] == '-'
+					&& line.s[boundary.len - boundary_start + 1] == '-') { /*- XXXX - pop the boundary here */
 					if (boundary_start)
 						boundary.len = boundary_start - 1;
 					boundary_start = boundary.len;
@@ -4193,18 +3974,16 @@ put(char *ch)
 				} else
 					linespastheader = 0;
 			} else
-			if (linespastheader == 1)
-			{	/*- first line -- match a signature?  */
+			if (linespastheader == 1) { /*- first line -- match a signature?  */
 				if (/*- mailfrom.s[0] == '\0' && */
 					   str_start(line.s, "Hi. This is the "))
 					flagqsbmf = 1;
 				else
 				if (/*- mailfrom.s[0] == '\0' && */
-					   str_start(line.s, "This message was created automatically by mail delivery software"))
+							str_start(line.s, "This message was created automatically by mail delivery software"))
 					flagqsbmf = 1;
 				else
-				if (sigscheck(&line, &virus_desc, linespastheader == 0))
-				{
+				if (sigscheck(&line, &virus_desc, linespastheader == 0)) {
 					flagexecutable = 1;
 					/*- turn off virus/content-filtering on first match */
 					sigsok = bodyok = 0;
@@ -4243,14 +4022,11 @@ blast(int *hops)
 	flagmaybew = flagmaybex = flagmaybey = flagmaybez = 1;
 	msg_size = 0;
 	seencr = 0;	/*- qmail-smtpd-newline patch */
-	for (;;)
-	{
+	for (;;) {
 		if ((err = substdio_get(&ssin, &ch, 1)) <= 0)
 			return (1);
-		if (ch == '\n')
-		{
-			if (seencr == 0)
-			{
+		if (ch == '\n') {
+			if (seencr == 0) {
 				substdio_seek(&ssin, -1);
 				ch = '\r';
 			}
@@ -4259,25 +4035,22 @@ blast(int *hops)
 			seencr = 1;
 		else
 			seencr = 0;
-		if (flaginheader)
-		{
-			if (pos > 8 && pos < 14)
-			{
+		if (flaginheader) {
+			if (pos > 8 && pos < 14) {
 				if (ch != "return-receipt"[pos] && ch != "RETURN-RECEIPT"[pos])
 					flagmaybew = 0;
 				if (flagmaybew && pos == 13)
 					dsn = 1;
 			}
-			if (pos < 9)
-			{
+			if (pos < 9) {
 				if (ch != "delivered"[pos] && ch != "DELIVERED"[pos])
 					flagmaybez = 0;
 				if (flagmaybez && pos == 8)
-					++*hops;
+					++ * hops;
 				if (pos < 8 && ch != "received"[pos] && ch != "RECEIVED"[pos])
 					flagmaybex = 0;
 				if (flagmaybex && pos == 7)
-					++*hops;
+					++ * hops;
 				if (pos < 2 && ch != "\r\n"[pos])
 					flagmaybey = 0;
 				if (flagmaybey && pos == 1)
@@ -4289,68 +4062,59 @@ blast(int *hops)
 			 */
 			if (pos < 14)
 				++pos;
-			if (ch == '\n')
-			{
+			if (ch == '\n') {
 				pos = 0;
 				flagmaybew = flagmaybex = flagmaybey = flagmaybez = 1;
 			}
 		}
-		switch (state)
-		{
+		switch (state) {
 		case 0:
 			if (ch == '\n')
 				straynewline();
-			if (ch == '\r')
-			{
+			if (ch == '\r') {
 				state = 4;
 				continue;
 			}
 			break;
-		case 1:/*- \r\n */
+		case 1: /*- \r\n */
 			if (ch == '\n')
 				straynewline();
-			if (ch == '.')
-			{
+			if (ch == '.') {
 				state = 2;
 				continue;
 			}
-			if (ch == '\r')
-			{
+			if (ch == '\r') {
 				state = 4;
 				continue;
 			}
 			state = 0;
 			break;
-		case 2:/*- \r\n + . */
+		case 2: /*- \r\n + . */
 			if (ch == '\n')
 				straynewline();
-			if (ch == '\r')
-			{
+			if (ch == '\r') {
 				state = 3;
 				continue;
 			}
 			state = 0;
 			break;
-		case 3:/*- \r\n + .\r */
+		case 3: /*- \r\n + .\r */
 			if (ch == '\n')
 				return (0);
 			put(".");
 			put("\r");
-			if (ch == '\r')
-			{
+			if (ch == '\r') {
 				state = 4;
 				continue;
 			}
 			state = 0;
 			break;
-		case 4:/*- + \r */
-			if (ch == '\n')
-			{
+		case 4: /*- + \r */
+			if (ch == '\n') {
 				state = 1;
 				break;
 			}
-			if (ch != '\r')
-			{
+			if (ch != '\r') {
 				put("\r");
 				state = 0;
 			}
@@ -4378,8 +4142,7 @@ spfreceived()
 		die_nomem();
 	if (!stralloc_append(&rcvd_spf, "\n"))
 		die_nomem();
-	if (BytesToOverflow)
-	{
+	if (BytesToOverflow) {
 		BytesToOverflow -= rcvd_spf.len;
 		if (BytesToOverflow <= 0)
 			qmail_fail(&qqt);
@@ -4410,8 +4173,7 @@ create_logfilter()
 	char           *tmpdir, *x;
 	static stralloc tmpFile = { 0 };
 
-	if (env_get("LOGFILTER"))
-	{
+	if (env_get("LOGFILTER")) {
 		if (!(tmpdir = env_get("TMPDIR")))
 			tmpdir = "/tmp";
 		if (!stralloc_copys(&tmpFile, tmpdir))
@@ -4450,26 +4212,21 @@ smtp_data(char *arg)
 #ifdef INDIMAIL
 	sqlmatch_close_db();
 #endif
-	if (arg && *arg)
-	{
+	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
 		return;
 	}
-	if (!seenmail)
-	{
+	if (!seenmail) {
 		err_wantmail();
 		return;
 	}
-	if (!rcptto.len || !rcptcount)
-	{
+	if (!rcptto.len || !rcptcount) {
 		err_wantrcpt();
 		return;
 	}
-	if (greyip && !relayclient)
-	{
-		switch (greylist(greyip, remoteip, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
-		{
-		case 1: /*- success */
+	if (greyip && !relayclient) {
+		switch (greylist(greyip, remoteip, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail)) {
+		case 1:/*- success */
 			break;
 		case 0:
 			err_grey();
@@ -4482,15 +4239,13 @@ smtp_data(char *arg)
 	}
 	seenmail = 0;
 	/*- Return error if incoming SMTP msg exceeds DATABYTES */
-	if (flagsize)
-	{
+	if (flagsize) {
 		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
 	if (databytes)
 		BytesToOverflow = databytes + 1;
-	if (sigsok)
-	{
+	if (sigsok) {
 		boundary.len = 0;
 		boundary_start = 0;
 		content.len = 0;
@@ -4502,8 +4257,7 @@ smtp_data(char *arg)
 	}
 	create_logfilter();
 	if (relayclient || authd) {
-		switch ((a_envret = envrules("", "auth.envrules", "AUTHRULES", &errStr)))
-		{
+		switch ((a_envret = envrules("", "auth.envrules", "AUTHRULES", &errStr))) {
 		case AM_MEMORY_ERR:
 			die_nomem();
 		case AM_FILE_ERR:
@@ -4519,15 +4273,13 @@ smtp_data(char *arg)
 			break;
 		}
 	}
-	if (qmail_open(&qqt) == -1)
-	{
+	if (qmail_open(&qqt) == -1) {
 		err_qqt(remoteip);
 		return;
 	}
 	qp = qmail_qp(&qqt); /*- pid of queue process */
 	out("354 go ahead\r\n");
-	if (proto.len)
-	{
+	if (proto.len) {
 		if (!stralloc_0(&proto))
 			die_nomem();
 		protocol = proto.s;
@@ -4542,12 +4294,10 @@ smtp_data(char *arg)
 		if (hops)
 			qmail_fail(&qqt);
 #ifdef SMTP_PLUGIN
-		for (i = 0;i < plugin_count;i++)
-		{
+		for (i = 0; i < plugin_count; i++) {
 			if (!plug[i] || !plug[i]->data_func)
 				continue;
-			if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg))
-			{
+			if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg)) {
 				out(mesg);
 				logerr("qmail-smtpd: ");
 				logerrpid();
@@ -4566,44 +4316,38 @@ smtp_data(char *arg)
 	/*- write the envelope */
 	qmail_from(&qqt, mailfrom.s);
 	qmail_put(&qqt, rcptto.s, rcptto.len);
-	/* 
+	/*-
 	 * RFC 1047, In case we are accepting the mail
 	 * we should immediately respond
 	 * back to client as early as possible to
 	 * avoid message duplication
 	 */
 	qqx = qmail_close(&qqt);
-	if (!*qqx) /*- mail is now in queue */
-	{
+	if (!*qqx) { /*- mail is now in queue */
 		acceptmessage(qp);
 		log_trans(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, 0);
 		return;
 	}
 	/*- you will reach here if qmail_fail() was called or if qmail_close returns error */
-	if (flagexecutable || flagbody)
-	{
+	if (flagexecutable || flagbody) {
 		sigsok = sigsok_orig;
 		bodyok = bodyok_orig;
-		if (flagexecutable)
-		{
+		if (flagexecutable) {
 			log_virus(remoteip, virus_desc, mailfrom.s, rcptto.s, rcptto.len, flagblackhole);
 			flagexecutable = flagblackhole = 0;
 			return;
 		}
-		if (flagbody)
-		{
+		if (flagbody) {
 			log_virus(remoteip, content_desc, mailfrom.s, rcptto.s, rcptto.len, flagblackhole);
 			flagbody = flagblackhole = 0;
 			return;
 		}
 	}
-	if (hops)
-	{
+	if (hops) {
 		err_hops();
 		return;
 	}
-	if (databytes && !BytesToOverflow)
-	{
+	if (databytes && !BytesToOverflow) {
 		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
@@ -4613,8 +4357,7 @@ smtp_data(char *arg)
 		out("451 ");
 	out(qqx + 1);
 	out("\r\n");
-	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len,
-		authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
+	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
 }
 
 int
@@ -4624,8 +4367,7 @@ authgetl(void)
 
 	if (!stralloc_copys(&authin, ""))
 		die_nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (!stralloc_readyplus(&authin, 1))
 			die_nomem(); /*- XXX */
 		i = substdio_get(&ssin, authin.s + authin.len, 1);
@@ -4656,8 +4398,8 @@ authgetl(void)
 #define AUTH_DIGEST_MD5  8
 #endif
 
-int             po[2] = {-1, -1};
-stralloc        authmethod = {0};
+int             po[2] = { -1, -1 };
+stralloc        authmethod = { 0 };
 
 int
 authenticate(int method)
@@ -4676,21 +4418,18 @@ authenticate(int method)
 		return err_pipe();
 	if (pipe(po) == -1)
 		return err_pipe();
-	switch (child = fork())
-	{
+	switch (child = fork()) {
 	case -1:
 		return err_fork();
 	case 0:
 		close(pi[1]);
 		close(po[0]);
-		if (pi[0] != 3)
-		{
+		if (pi[0] != 3) {
 			if (dup2(pi[0], 3) == -1)
 				return err_write();
 			close(pi[0]);
 		}
-		if (po[1] != 6)
-		{
+		if (po[1] != 6) {
 			if (dup2(po[1], 6) == -1)
 				return err_write();
 			close(po[1]);
@@ -4741,12 +4480,12 @@ authenticate(int method)
 		slop.s[slop.len] = 0;
 		if (b64encode(&slop, &resp) < 0)
 			die_nomem();
-		resp.s[resp.len]=0;
+		resp.s[resp.len] = 0;
 		out("334 ");
 		out(resp.s);
 		out("\r\n");
 		flush();
-		/* digest-md5 requires a special okay response ... */
+		/*- digest-md5 requires a special okay response ...  */
 		if ((n = saferead(0, respbuf, 512)) == -1)
 			die_read();
 		if (n)
@@ -4763,12 +4502,10 @@ auth_login(char *arg)
 
 	if (secure_auth && !ssl)
 		return err_noauthallowed();
-	if (*arg)
-	{
+	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &user)) == 1)
 			return err_input();
-	} else
-	{
+	} else {
 		out("334 VXNlcm5hbWU6\r\n");
 		flush(); /*- Username: */
 		if (authgetl() < 0)
@@ -4801,12 +4538,10 @@ auth_plain(char *arg)
 
 	if (secure_auth && !ssl)
 		return err_noauthallowed();
-	if (*arg)
-	{
+	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
 			return err_input();
-	} else
-	{
+	} else {
 		out("334 \r\n");
 		flush();
 		if (authgetl() < 0)
@@ -4846,7 +4581,7 @@ auth_cram(int method)
 	*s++ = '@';
 	*s++ = 0;
 
-	if (!stralloc_copys(&pass, "<")) /*- generate challenge */
+	if (!stralloc_copys(&pass, "<"))	 /*- generate challenge */
 		die_nomem();
 	if (!stralloc_cats(&pass, unique))
 		die_nomem();
@@ -4863,7 +4598,7 @@ auth_cram(int method)
 	out(slop.s);
 	out("\r\n");
 	flush();
-	if (authgetl() < 0)	/*- got response */
+	if (authgetl() < 0)		/*- got response */
 		return -1;
 	if ((r = b64decode((const unsigned char *) authin.s, authin.len, &slop)) == 1)
 		return err_input();
@@ -4874,9 +4609,9 @@ auth_cram(int method)
 	while (*s == ' ')
 		++s;
 	slop.s[i] = 0;
-	if (!stralloc_copys(&user, slop.s))	/*- userid */
+	if (!stralloc_copys(&user, slop.s))		/*- userid */
 		die_nomem();
-	if (!stralloc_copys(&resp, s)) /*- digest */
+	if (!stralloc_copys(&resp, s))	   /*- digest */
 		die_nomem();
 	if (!user.len || !resp.len)
 		return err_input();
@@ -4916,34 +4651,36 @@ auth_cram_ripemd()
 	return (auth_cram(AUTH_CRAM_RIPEMD));
 }
 
-/* parse digest response */
+/*
+ * parse digest response 
+ */
 unsigned int
-scan_response(stralloc *dst, stralloc *src, const char *search)
+scan_response(stralloc * dst, stralloc * src, const char *search)
 {
 	char           *x = src->s;
 	int             i, len;
 	unsigned int    slen;
 
 	slen = str_len((char *) search);
-	if (!stralloc_copys(dst,""))
+	if (!stralloc_copys(dst, ""))
 		die_nomem();
-	for (i=0; src->len>i+slen; i+=str_chr(x+i, ',')+1) {
-		char *s=x+i;
+	for (i = 0; src->len > i + slen; i += str_chr(x + i, ',') + 1) {
+		char           *s = x + i;
 		if (case_diffb(s, slen, (char *) search) == 0) {
-			s += slen; /* skip name */
+			s += slen;			/* skip name */
 			if (*s++ != '=')
-				return 0; /* has to be here! */
-			if (*s == '"') { /* var="value" */
+				return 0;		/* has to be here! */
+			if (*s == '"') {	/* var="value" */
 				s++;
 				len = str_chr(s, '"');
 				if (!len)
 					return 0;
 				if (!stralloc_catb(dst, s, len))
 					die_nomem();
-			} else { /* var=value */
+			} else {			/* var=value */
 				len = str_chr(s, ',');
 				if (!len)
-					str_len(s); /* should be the end */
+					str_len(s);	/* should be the end */
 				if (!stralloc_catb(dst, s, len))
 					die_nomem();
 			}
@@ -4958,16 +4695,17 @@ scan_response(stralloc *dst, stralloc *src, const char *search)
  *
  * sets all 3 variables: user\0pass\0resp\0
  */
-char            hextab[]="0123456789abcdef";
+char            hextab[] = "0123456789abcdef";
 
 int
 auth_digest_md5()
 {
 	unsigned char   unique[FMT_ULONG + FMT_ULONG + 3];
 	unsigned char   digest[20], encrypted[41];
-	unsigned char  *s, *x=encrypted;
+	unsigned char  *s, *x = encrypted;
 	int             i, r, len = 0; /*- qop = 1; */
-	stralloc        tmp = {0}, nonce = {0};
+	stralloc        tmp = { 0 }, nonce = {
+	0};
 
 	s = unique;
 	s += (i = fmt_uint((char *) s, getpid()));
@@ -4979,12 +4717,14 @@ auth_digest_md5()
 	s += (i = fmt_str((char *) s, "@"));
 	len += i;
 	*s++ = 0;
-	hmac_sha1(unique, len, unique + 3, len - 3, digest); /* should be enough :) */
+	hmac_sha1(unique, len, unique + 3, len - 3, digest);	/* should be enough :) */
 	for (i = 0; i < 20; i++) {
-		*x = hextab[digest[i]/16]; ++x;
-		*x = hextab[digest[i]%16]; ++x;
+		*x = hextab[digest[i] / 16];
+		++x;
+		*x = hextab[digest[i] % 16];
+		++x;
 	}
-	*x=0;
+	*x = 0;
 	if (!stralloc_copys(&tmp, (char *) encrypted))
 		die_nomem();
 	if (b64encode(&tmp, &nonce) != 0)
@@ -5009,7 +4749,7 @@ auth_digest_md5()
 	out("\r\n");
 	flush();
 
-	/* get digest-response */
+	/*- get digest-response */
 	if (authgetl() < 0)
 		return -1;
 	if ((r = b64decode((const unsigned char *) authin.s, authin.len, &slop)) == 1)
@@ -5017,7 +4757,7 @@ auth_digest_md5()
 	if (!stralloc_0(&slop))
 		die_nomem();
 
-	/* scan slop for all required fields, fill resp for later auth.  */
+	/*- scan slop for all required fields, fill resp for later auth.  */
 	if (scan_response(&user, &slop, "username") == 0)
 		return (err_input());
 	if (scan_response(&tmp, &slop, "digest-uri") == 0)
@@ -5027,57 +4767,63 @@ auth_digest_md5()
 	if (!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
-	/* check nc field */
+	/*- check nc field */
 	if (scan_response(&tmp, &slop, "nc") == 0)
 		return (err_input());
 	if (tmp.len != 8)
 		return (err_input());
 	if (case_diffb("00000001", 8, tmp.s) != 0)
 		return (err_input());
-	if (!stralloc_cats(&resp, "\nnc=")) die_nomem();
-	if (!stralloc_cat(&resp, &tmp)) die_nomem();
+	if (!stralloc_cats(&resp, "\nnc="))
+		die_nomem();
+	if (!stralloc_cat(&resp, &tmp))
+		die_nomem();
 
-	/* check nonce */
+	/*- check nonce */
 	if (scan_response(&tmp, &slop, "nonce") == 0)
 		return (err_input());
 	if (tmp.len != nonce.len)
 		return (err_input());
 	if (case_diffb(nonce.s, tmp.len, tmp.s) != 0)
 		return (err_input());
-	if (!stralloc_cats(&resp, "\nnonce=")) die_nomem();
-	if (!stralloc_cat(&resp, &tmp)) die_nomem();
+	if (!stralloc_cats(&resp, "\nnonce="))
+		die_nomem();
+	if (!stralloc_cat(&resp, &tmp))
+		die_nomem();
 
-	/* check cnonce */
-	if (scan_response(&tmp, &slop,  "cnonce") == 0)
+	/*- check cnonce */
+	if (scan_response(&tmp, &slop, "cnonce") == 0)
 		return (err_input());
-	if (!stralloc_cats(&resp, "\ncnonce=")) die_nomem();
-	if (!stralloc_cat(&resp, &tmp)) die_nomem();
+	if (!stralloc_cats(&resp, "\ncnonce="))
+		die_nomem();
+	if (!stralloc_cat(&resp, &tmp))
+		die_nomem();
 
-	/* check qop */
+	/*- check qop */
 	if (scan_response(&tmp, &slop, "qop") == 0)
 		return (err_input());
 	switch (tmp.len) {
-		case 4: /*- qop=1; */
-			if (case_diffb("auth", 4, tmp.s) != 0)
-				return (err_input());
-			break;
-		case 8: /*- qop=2; */
-			if (case_diffb("auth-int", 8, tmp.s) != 0)
-				return (err_input());
-			break;
-		case 9: /*- qop=3; */
-			if (case_diffb("auth-conf", 9, tmp.s) != 0)
-				return (err_input());
-			break;
-		default:
+	case 4:	/*- qop=1; */
+		if (case_diffb("auth", 4, tmp.s) != 0)
 			return (err_input());
+		break;
+	case 8:	/*- qop=2; */
+		if (case_diffb("auth-int", 8, tmp.s) != 0)
+			return (err_input());
+		break;
+	case 9:	/*- qop=3; */
+		if (case_diffb("auth-conf", 9, tmp.s) != 0)
+			return (err_input());
+		break;
+	default:
+		return (err_input());
 	}
 	if (!stralloc_cats(&resp, "\nqop="))
 		die_nomem();
 	if (!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
-	/* xxx: todo / check realm against control/realms or so ?! */
+	/*- xxx: todo / check realm against control/realms or so ?!  */
 	if (scan_response(&tmp, &slop, "realm") == 0)
 		return (err_input());
 	if (!stralloc_cats(&resp, "\nrealm="))
@@ -5085,13 +4831,14 @@ auth_digest_md5()
 	if (!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
-	/* check response */
+	/*- check response */
 	if (scan_response(&pass, &slop, "response") == 0)
 		return (err_input());
 	if (pass.len != 32)
 		return (err_input());
 
-	/* user=username
+	/*
+	 * user=username
 	 * pass=response (md5 hash = 32)
 	 * resp=authfile (with all required vars for the checkpassword utility)
 	 *      -> nc,qop,realm,nonce,cnonce,digesturi
@@ -5101,7 +4848,6 @@ auth_digest_md5()
 	 * qop=auth-*: a2 = 'AUTHENTICATE' : digesturi : '00000000000000000000000000000000'
 	 * resp = md5(a1) + nonce + nc + conce + qop + md5(a2)
 	 */
-
 	if (!user.len || !pass.len || !resp.len)
 		return (err_input());
 	r = authenticate(AUTH_DIGEST_MD5);
@@ -5116,8 +4862,7 @@ smtp_auth(char *arg)
 	int             i, j;
 	char           *cmd = arg;
 
-	switch (setup_state)
-	{
+	switch (setup_state) {
 	case 0:
 		break;
 	case 1:
@@ -5139,30 +4884,25 @@ smtp_auth(char *arg)
 		smtp_badip(remoteip);
 		return;
 	}
-	if (!hostname || !*hostname || !childargs || !*childargs)
-	{
+	if (!hostname || !*hostname || !childargs || !*childargs) {
 		out("503 auth not available (#5.3.3)\r\n");
 		return;
 	}
-	if (authd)
-	{
+	if (authd) {
 		err_authd();
 		return;
 	}
 
-	/* forcetls patch */
+	/*- forcetls patch */
 #ifdef TLS
-	if (env_get("FORCE_TLS"))
-	{
-		if (!ssl)
-		{
+	if (env_get("FORCE_TLS")) {
+		if (!ssl) {
 			out("530 must issue STARTTLS first (#5.7.0)\r\n");
 			return;
 		}
 	}
 #endif
-	if (seenmail)
-	{
+	if (seenmail) {
 		err_transaction("auth");
 		return;
 	}
@@ -5177,16 +4917,14 @@ smtp_auth(char *arg)
 	while (*arg == ' ')
 		++arg;
 	cmd[i] = 0;
-	for (i = 0; authcmds[i].text; ++i)
-	{
+	for (i = 0; authcmds[i].text; ++i) {
 		if (case_equals(authcmds[i].text, cmd))
 			break;
 	}
-	switch ((j = authcmds[i].fun(arg)))
-	{
+	switch ((j = authcmds[i].fun(arg))) {
 	case 0:
 		relayclient = "";
-	case 3: /*- relayclient is not set, relaying is denied */
+	case 3:/*- relayclient is not set, relaying is denied */
 		remoteinfo = user.s;
 		if (!env_unset("TCPREMOTEINFO"))
 			die_nomem();
@@ -5196,8 +4934,8 @@ smtp_auth(char *arg)
 			die_nomem();
 		out("235 ok, go ahead (#2.0.0)\r\n");
 		break;
-	case 1: /*- auth fail */
-	case 2: /*- misuse */
+	case 1:/*- auth fail */
+	case 2:/*- misuse */
 		err_authfailure(remoteip, user.s, j);
 		sleep(5);
 		out("535 authorization failed (#5.7.1)\r\n");
@@ -5221,37 +4959,31 @@ smtp_etrn(char *arg)
 	int             status, i;
 	char            tmpbuf[1024], err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 
-	if (!*arg)
-	{
+	if (!*arg) {
 		err_syntax();
 		return;
 	}
-	if (!seenhelo)
-	{
+	if (!seenhelo) {
 		out("503 Polite people say hello first (#5.5.4)\r\n");
 		return;
 	}
-	if (seenmail)
-	{
+	if (seenmail) {
 		err_transaction("ETRN");
 		return;
 	}
 	if (!isalnum((int) *arg))
 		arg++;
-	if (!valid_hostname(arg))
-	{
+	if (!valid_hostname(arg)) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
 		return;
 	}
-	if (!nodnscheck)
-	{
+	if (!nodnscheck) {
 		i = fmt_str(tmpbuf, "@");
 		i += fmt_strn(tmpbuf + i, arg, 1022);
 		if (i > 1023)
 			die_nomem();
 		tmpbuf[i] = 0;
-		switch (dnscheck(tmpbuf, i, 1))
-		{
+		switch (dnscheck(tmpbuf, i, 1)) {
 		case DNS_HARD:
 			err_hmf(remoteip, tmpbuf, 1);
 			return;
@@ -5262,14 +4994,13 @@ smtp_etrn(char *arg)
 			die_nomem();
 		}
 	}
-	/*
+	/*-
 	 * XXX The implementation borrows heavily from the code that implements
 	 * UCE restrictions. These typically return 450 or 550 when a request is
 	 * rejected. RFC 1985 requires that 459 be sent when the server refuses
 	 * to perform the request.
 	 */
-	switch ((status = etrn_queue(arg, remoteip)))
-	{
+	switch ((status = etrn_queue(arg, remoteip))) {
 	case 0:
 		log_etrn(remoteip, arg, 0);
 		out("250 OK, queueing for node <");
@@ -5298,8 +5029,7 @@ smtp_etrn(char *arg)
 		return;
 	default:
 		status_buf[fmt_ulong(status_buf, (unsigned long) status)] = 0;
-		if (status > 0)
-		{
+		if (status > 0) {
 			out("253 OK, <");
 			out(status_buf);
 			out("> pending message for node <");
@@ -5334,70 +5064,56 @@ smtp_atrn(char *arg)
 	char            user[MAX_BUFF], domain[MAX_BUFF];
 	stralloc        domBuf = { 0 };
 
-	if (!authd)
-	{
+	if (!authd) {
 		err_authrequired();
 		return;
 	}
-	if (!seenhelo)
-	{
+	if (!seenhelo) {
 		out("503 Polite people say hello first (#5.5.4)\r\n");
 		return;
 	}
-	if (seenmail)
-	{
+	if (seenmail) {
 		err_transaction("ATRN");
 		return;
 	}
 	for (; *arg && !isalnum((int) *arg); arg++);
 	if (*arg)
 		domain_ptr = arg;
-	else
-	{
+	else {
 		parse_email(remoteinfo, user, domain, MAX_BUFF);
-		for (user_tmp = user, domain_tmp = domain, end_flag = 0;;)
-		{
+		for (user_tmp = user, domain_tmp = domain, end_flag = 0;;) {
 			if (!(ptr = vshow_atrn_map(&user_tmp, &domain_tmp)))
 				break;
-			if (end_flag)
-			{
-				if (!stralloc_cats(&domBuf, " "))
-				{
+			if (end_flag) {
+				if (!stralloc_cats(&domBuf, " ")) {
 					vclose();
 					die_nomem();
 				}
 			}
-			if (!stralloc_cats(&domBuf, ptr))
-			{
+			if (!stralloc_cats(&domBuf, ptr)) {
 				vclose();
 				die_nomem();
 			}
 			end_flag = 1;
 		}
-		if (!stralloc_0(&domBuf))
-		{
+		if (!stralloc_0(&domBuf)) {
 			vclose();
 			die_nomem();
 		}
 		domain_ptr = domBuf.s;
 	}
-	for (cptr = domain_ptr;; cptr++)
-	{
-		if (*cptr == ' ' || *cptr == ',' || !*cptr)
-		{
-			if (*cptr)
-			{
+	for (cptr = domain_ptr;; cptr++) {
+		if (*cptr == ' ' || *cptr == ',' || !*cptr) {
+			if (*cptr) {
 				end_flag = 0;
 				*cptr = 0;
 			} else
 				end_flag = 1;
-			if (!valid_hostname(arg))
-			{
+			if (!valid_hostname(arg)) {
 				out("501 invalid parameter syntax (#5.3.2)\r\n");
 				return;
 			}
-			if (atrn_access(remoteinfo, domain_ptr))
-			{
+			if (atrn_access(remoteinfo, domain_ptr)) {
 				Reject = 1;
 				break;
 			} else
@@ -5410,8 +5126,7 @@ smtp_atrn(char *arg)
 		}
 	}
 	vclose();
-	if (Reject)
-	{
+	if (Reject) {
 		log_atrn(remoteip, remoteinfo, domain_ptr, "ATRN Rejected");
 		if (Accept)
 			out("450 atrn service unavailable (#5.7.1)\r\n");
@@ -5419,8 +5134,7 @@ smtp_atrn(char *arg)
 			out("553 atrn service unavailable (#5.7.1)\r\n");
 		return;
 	}
-	switch ((status = atrn_queue(arg, remoteip)))
-	{
+	switch ((status = atrn_queue(arg, remoteip))) {
 	case 0:
 		log_atrn(remoteip, remoteinfo, arg, 0);
 		out("QUIT\r\n");
@@ -5446,8 +5160,7 @@ smtp_atrn(char *arg)
 		return;
 	default:
 		status_buf[fmt_ulong(status_buf, (unsigned long) status)] = 0;
-		if (status > 0)
-		{
+		if (status > 0) {
 			i = fmt_str(err_buff, "unable to talk to fast flush service status <");
 			i += fmt_ulong(err_buff + i, (unsigned long) status);
 			if (i > 1023)
@@ -5484,9 +5197,9 @@ smtp_tls(char *arg)
 }
 
 RSA            *
-tmp_rsa_cb(SSL *ssl, int export, int keylen)
+tmp_rsa_cb(SSL * ssl, int export, int keylen)
 {
-	stralloc        filename = {0};
+	stralloc        filename = { 0 };
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	BIGNUM         *e;
 	RSA            *key;
@@ -5494,12 +5207,10 @@ tmp_rsa_cb(SSL *ssl, int export, int keylen)
 
 	if (!export)
 		keylen = 512;
-	if (keylen == 512)
-	{
+	if (keylen == 512) {
 		FILE           *in;
 
-		if (!certdir)
-		{
+		if (!certdir) {
 			if (!(certdir = env_get("CERTDIR")))
 				certdir = auto_control;
 		}
@@ -5509,12 +5220,10 @@ tmp_rsa_cb(SSL *ssl, int export, int keylen)
 			die_nomem();
 		if (!stralloc_0(&filename))
 			die_nomem();
-		if ((in = fopen(filename.s, "r")))
-		{
+		if ((in = fopen(filename.s, "r"))) {
 			RSA            *rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL);
 			fclose(in);
-			if (rsa)
-			{
+			if (rsa) {
 				alloc_free(filename.s);
 				return rsa;
 			}
@@ -5534,22 +5243,20 @@ tmp_rsa_cb(SSL *ssl, int export, int keylen)
 }
 
 DH             *
-tmp_dh_cb(SSL *ssl, int export, int keylen)
+tmp_dh_cb(SSL * ssl, int export, int keylen)
 {
-	stralloc        filename = {0};
+	stralloc        filename = { 0 };
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	DH             *client_key;
 #endif
 
 	if (!export)
 		keylen = 1024;
-	if (!certdir)
-	{
+	if (!certdir) {
 		if (!(certdir = env_get("CERTDIR")))
 			certdir = auto_control;
 	}
-	if (keylen == 512)
-	{
+	if (keylen == 512) {
 		FILE           *in;
 		if (!stralloc_copys(&filename, certdir))
 			die_nomem();
@@ -5557,19 +5264,16 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
 			die_nomem();
 		if (!stralloc_0(&filename))
 			die_nomem();
-		if ((in = fopen(filename.s, "r")))
-		{
+		if ((in = fopen(filename.s, "r"))) {
 			DH             *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
 			fclose(in);
-			if (dh)
-			{
+			if (dh) {
 				alloc_free(filename.s);
 				return dh;
 			}
 		}
 	}
-	if (keylen == 1024)
-	{
+	if (keylen == 1024) {
 		FILE           *in;
 		if (!stralloc_copys(&filename, certdir))
 			die_nomem();
@@ -5577,12 +5281,10 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
 			die_nomem();
 		if (!stralloc_0(&filename))
 			die_nomem();
-		if ((in = fopen(filename.s, "r")))
-		{
+		if ((in = fopen(filename.s, "r"))) {
 			DH             *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
 			fclose(in);
-			if (dh)
-			{
+			if (dh) {
 				alloc_free(filename.s);
 				return dh;
 			}
@@ -5602,7 +5304,7 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
  * don't want to fail handshake if cert isn't verifiable 
  */
 int
-verify_cb(int preverify_ok, X509_STORE_CTX *ctx)
+verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
 {
 	return 1;
 }
@@ -5626,8 +5328,7 @@ tls_out(const char *s1, const char *s2)
 {
 	out("454 TLS ");
 	out((char *) s1);
-	if (s2)
-	{
+	if (s2) {
 		out(": ");
 		out((char *) s2);
 	}
@@ -5646,29 +5347,27 @@ tls_err(const char *s)
 int
 tls_verify()
 {
-	stralloc        clients = { 0 }, filename = { 0 };
+	stralloc        clients = { 0 }, filename = {
+	0};
 	struct constmap mapclients;
 
 	if (!ssl || relayclient || ssl_verified)
 		return 0;
 	ssl_verified = 1;	/*- don't do this twice */
-	/*
+	/*-
 	 * request client cert to see if it can be verified by one of our CAs
 	 * and the associated email address matches an entry in tlsclients 
 	 */
-	switch (control_readfile(&clients, "tlsclients", 0))
-	{
+	switch (control_readfile(&clients, "tlsclients", 0)) {
 	case 1:
-		if (constmap_init(&mapclients, clients.s, clients.len, 0))
-		{
-			/*
+		if (constmap_init(&mapclients, clients.s, clients.len, 0)) {
+			/*-
 			 * if clientca.pem contains all the standard root certificates, a
 			 * 0.9.6b client might fail with SSL_R_EXCESSIVE_MESSAGE_SIZE;
 			 * it is probably due to 0.9.6b supporting only 8k key exchange
 			 * data while the 0.9.6c release increases that limit to 100k 
 			 */
-			if (!certdir)
-			{
+			if (!certdir) {
 				if (!(certdir = env_get("CERTDIR")))
 					certdir = auto_control;
 			}
@@ -5683,8 +5382,7 @@ tls_verify()
 				die_nomem();
 			STACK_OF(X509_NAME) * sk = SSL_load_client_CA_file(filename.s);
 			alloc_free(filename.s);
-			if (sk)
-			{
+			if (sk) {
 				SSL_set_client_CA_list(ssl, sk);
 				SSL_set_verify(ssl, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, NULL);
 				break;
@@ -5698,39 +5396,34 @@ tls_verify()
 		die_control();
 	}
 
-	if (ssl_timeoutrehandshake(timeout, ssl_rfd, ssl_wfd, ssl) <= 0)
-	{
+	if (ssl_timeoutrehandshake(timeout, ssl_rfd, ssl_wfd, ssl) <= 0) {
 		const char     *err = ssl_error_str();
 		tls_out("rehandshake failed", err);
 		die_read();
 	}
 
-	do /*- one iteration */
-	{
+	do { /*- one iteration */
 		X509           *peercert;
 		X509_NAME      *subj;
 		stralloc        email = { 0 };
 
 		int             n = SSL_get_verify_result(ssl);
-		if (n != X509_V_OK)
-		{
+		if (n != X509_V_OK) {
 			ssl_verify_err = X509_verify_cert_error_string(n);
 			break;
 		}
 		if (!(peercert = SSL_get_peer_certificate(ssl)))
 			break;
 		subj = X509_get_subject_name(peercert);
-		if ((n = X509_NAME_get_index_by_NID(subj, NID_pkcs9_emailAddress, -1)) >= 0)
-		{
+		if ((n = X509_NAME_get_index_by_NID(subj, NID_pkcs9_emailAddress, -1)) >= 0) {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 			X509_NAME_ENTRY *t;
 			t = X509_NAME_get_entry(subj, n);
-			ASN1_STRING *s = X509_NAME_ENTRY_get_data(t);
+			ASN1_STRING    *s = X509_NAME_ENTRY_get_data(t);
 #else
 			const ASN1_STRING *s = X509_NAME_get_entry(subj, n)->value;
 #endif
-			if (s)
-			{
+			if (s) {
 				email.len = s->length;
 				email.s = (char *) s->data;
 			}
@@ -5740,25 +5433,20 @@ tls_verify()
 		else
 		if (!constmap(&mapclients, email.s, email.len))
 			ssl_verify_err = "email address not in my list of tlsclients";
-		else
-		{
-			/*
-			 * add the cert email to the proto if it helped allow relaying 
-			 */
-			if (!stralloc_cats(&proto, "\n  (cert ")	/*- continuation line */
-				|| !stralloc_catb(&proto, email.s, email.len)
+		else { /*- add the cert email to the proto if it helped allow relaying */
+			if (!stralloc_cats(&proto, "\n  (cert ")		/*- continuation line */
+				||!stralloc_catb(&proto, email.s, email.len)
 				|| !stralloc_cats(&proto, ")"))
 				die_nomem();
 			authenticated = 1;
+			env_put2("AUTHENTICATED", "1");
 			relayclient = "";
 		}
 		X509_free(peercert);
 	} while (0);
 	constmap_free(&mapclients);
 	alloc_free(clients.s);
-	/*
-	 * we are not going to need this anymore: free the memory 
-	 */
+	/*- we are not going to need this anymore: free the memory */
 	SSL_set_client_CA_list(ssl, NULL);
 	SSL_set_verify(ssl, SSL_VERIFY_NONE, NULL);
 	return relayclient ? 1 : 0;
@@ -5773,10 +5461,10 @@ tls_init()
 	X509_STORE     *store;
 	X509_LOOKUP    *lookup;
 	stralloc        saciphers = { 0 };
-	stralloc        filename = {0};
+	stralloc        filename = { 0 };
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-	stralloc        ssl_option = {0};
-	int             method = 4; /* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
+	stralloc        ssl_option = { 0 };
+	int             method = 4;	/* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
 #endif
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
@@ -5800,21 +5488,19 @@ tls_init()
 		method = 6;
 #endif
 	SSL_library_init();
-	/*
-	 * a new SSL context with the bare minimum of options 
-	 */
+	/*- a new SSL context with the bare minimum of options */
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	if (method == 2 && !(ctx = SSL_CTX_new(SSLv23_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize SSLv23 ctx (#4.3.0)\r\n");
 		return;
 	} else
-	if (method == 3 && !(ctx=SSL_CTX_new(SSLv3_server_method()))) {
+	if (method == 3 && !(ctx = SSL_CTX_new(SSLv3_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize SSLv3 ctx (#4.3.0)\r\n");
 		return;
 	}
 #if defined(TLSV1_SERVER_METHOD) || defined(TLS1_VERSION)
 	else
-	if (method == 4 && !(ctx=SSL_CTX_new(TLSv1_server_method()))) {
+	if (method == 4 && !(ctx = SSL_CTX_new(TLSv1_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize TLSv1 ctx (#4.3.0)\r\n");
 		return;
 	}
@@ -5822,25 +5508,25 @@ tls_init()
 	else
 	if (method == 4) {
 		tls_err("454 TLS not available: TLSv1_server_method not available (#4.3.0)\r\n");
-   		return;
+		return;
 	}
 #endif
 #if defined(TLSV1_1_SERVER_METHOD) || defined(TLS1_1_VERSION)
 	else
-	if (method == 5 && !(ctx=SSL_CTX_new(TLSv1_1_server_method()))) {
+	if (method == 5 && !(ctx = SSL_CTX_new(TLSv1_1_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize TLSv1_1 ctx (#4.3.0)\r\n");
-     	return;
+		return;
 	}
 #else
 	else
 	if (method == 5) {
 		tls_err("454 TLS not available: TLSv1_1_server_method not available (#4.3.0)\r\n");
-   		return;
+		return;
 	}
 #endif
 #if defined(TLSV1_2_SERVER_METHOD) || defined(TLS1_2_VERSION)
 	else
-	if (method == 6 && !(ctx=SSL_CTX_new(TLSv1_2_server_method()))) {
+	if (method == 6 && !(ctx = SSL_CTX_new(TLSv1_2_server_method()))) {
 		tls_err("454 TLS not available: unable to initialize TLSv1_2 ctx (#4.3.0)\r\n");
 		return;
 	}
@@ -5848,7 +5534,7 @@ tls_init()
 	else
 	if (method == 6) {
 		tls_err("454 TLS not available: TLSv1_2_server_method not available (#4.3.0)\r\n");
-   		return;
+		return;
 	}
 #endif
 #else /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
@@ -5857,8 +5543,7 @@ tls_init()
 		return;
 	}
 #endif /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
-	if (!certdir)
-	{
+	if (!certdir) {
 		if (!(certdir = env_get("CERTDIR")))
 			certdir = auto_control;
 	}
@@ -5871,8 +5556,7 @@ tls_init()
 		die_nomem();
 	if (!stralloc_0(&filename))
 		die_nomem();
-	if (!SSL_CTX_use_certificate_chain_file(ctx, filename.s))
-	{
+	if (!SSL_CTX_use_certificate_chain_file(ctx, filename.s)) {
 		SSL_CTX_free(ctx);
 		tls_err("missing certificate");
 		return;
@@ -5888,9 +5572,7 @@ tls_init()
 		die_nomem();
 	SSL_CTX_load_verify_locations(ctx, filename.s, NULL);
 #if OPENSSL_VERSION_NUMBER >= 0x00907000L
-	/*
-	 * crl checking 
-	 */
+	/*- crl checking */
 	store = SSL_CTX_get_cert_store(ctx);
 	if (!stralloc_copys(&filename, certdir))
 		die_nomem();
@@ -5901,27 +5583,20 @@ tls_init()
 		die_nomem();
 	if (!stralloc_0(&filename))
 		die_nomem();
-	if ((lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file())) &&
-		(X509_load_crl_file(lookup, filename.s, X509_FILETYPE_PEM) == 1))
+	if ((lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))
+		&& (X509_load_crl_file(lookup, filename.s, X509_FILETYPE_PEM) == 1))
 		X509_STORE_set_flags(store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
 #endif
-	/*
-	 * set the callback here; SSL_set_verify didn't work before 0.9.6c 
-	 */
+	/*- set the callback here; SSL_set_verify didn't work before 0.9.6c */
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, verify_cb);
-	/*
-	 * a new SSL object, with the rest added to it directly to avoid copying 
-	 */
+	/*- a new SSL object, with the rest added to it directly to avoid copying */
 	myssl = SSL_new(ctx);
 	SSL_CTX_free(ctx);
-	if (!myssl)
-	{
+	if (!myssl) {
 		tls_err("unable to initialize ssl");
 		return;
 	}
-	/*
-	 * this will also check whether public and private keys match 
-	 */
+	/*- this will also check whether public and private keys match */
 	if (!stralloc_copys(&filename, certdir))
 		die_nomem();
 	if (!stralloc_catb(&filename, "/", 1))
@@ -5931,23 +5606,19 @@ tls_init()
 		die_nomem();
 	if (!stralloc_0(&filename))
 		die_nomem();
-	if (!SSL_use_RSAPrivateKey_file(myssl, filename.s, SSL_FILETYPE_PEM))
-	{
+	if (!SSL_use_RSAPrivateKey_file(myssl, filename.s, SSL_FILETYPE_PEM)) {
 		SSL_free(myssl);
 		alloc_free(filename.s);
 		tls_err("no valid RSA private key");
 		return;
 	}
 	alloc_free(filename.s);
-	if (!(ciphers = env_get("TLSCIPHERS")))
-	{
-		if (control_readfile(&saciphers, "tlsserverciphers", 0) == -1)
-		{
+	if (!(ciphers = env_get("TLSCIPHERS"))) {
+		if (control_readfile(&saciphers, "tlsserverciphers", 0) == -1) {
 			SSL_free(myssl);
 			die_control();
 		}
-		if (saciphers.len)
-		{
+		if (saciphers.len) {
 			int             i;
 			/*- convert all '\0's except the last one to ':' */
 			for (i = 0; i < saciphers.len - 1; ++i)
@@ -5964,25 +5635,19 @@ tls_init()
 	SSL_set_tmp_dh_callback(myssl, tmp_dh_cb);
 	SSL_set_rfd(myssl, ssl_rfd = substdio_fileno(&ssin));
 	SSL_set_wfd(myssl, ssl_wfd = substdio_fileno(&ssout));
-	if (!smtps)
-	{
+	if (!smtps) {
 		out("220 ready for tls\r\n");
 		flush();
 	}
-	if (ssl_timeoutaccept(timeout, ssl_rfd, ssl_wfd, myssl) <= 0)
-	{
-		/*
-		 * neither cleartext nor any other response here is part of a standard 
-		 */
+	if (ssl_timeoutaccept(timeout, ssl_rfd, ssl_wfd, myssl) <= 0) {
+		/*- neither cleartext nor any other response here is part of a standard */
 		const char     *err = ssl_error_str();
 		ssl_free(myssl);
 		tls_out("connection failed", err);
 		die_read();
 	}
 	ssl = myssl;
-	/*
-	 * populate the protocol string, used in Received 
-	 */
+	/*- populate the protocol string, used in Received */
 	if (!stralloc_append(&proto, "("))
 		die_nomem();
 	if (!stralloc_cats(&proto, (char *) SSL_get_version(ssl)))
@@ -5993,9 +5658,7 @@ tls_init()
 		die_nomem();
 	if (!stralloc_catb(&proto, " encrypted) ", 12))
 		die_nomem();
-	/*
-	 * have to discard the pre-STARTTLS HELO/EHLO argument, if any 
-	 */
+	/*- have to discard the pre-STARTTLS HELO/EHLO argument, if any */
 	dohelo(remotehost);
 }
 #endif
@@ -6060,14 +5723,18 @@ load_plugin(char *library, char *plugin_symb, int j)
 	PLUGIN         *(*func) (void);
 	char           *error;
 
-	if (!(handle[j] = dlopen(library, RTLD_NOW|RTLD_GLOBAL)))
+#ifdef RTLD_DEEPBIND
+	if (!(plughandle[j] = dlopen(library, RTLD_LAZY | RTLD_LOCAL | RTLD_NODELETE | RTLD_DEEPBIND)))
+#else
+	if (!(plughandle[j] = dlopen(library, RTLD_LAZY | RTLD_LOCAL | RTLD_NODELETE)))
+#endif
 		die_plugin("dlopen failed for ", library, ": ", dlerror());
 	dlerror(); /*- man page told me to do this */
-	*(void **) (&func) = dlsym(handle[j], plugin_symb);
+	*(void **) (&func) = dlsym(plughandle[j], plugin_symb);
 	if ((error = dlerror()))
 		die_plugin("dlsym ", plugin_symb, " failed: ", error);
 	/*- execute the function */
-	if (!(plug[j] = (*func) ())) /*- this function returns a pointer to PLUGIN */
+	if (!(plug[j] = (*func) ()))	 /*- this function returns a pointer to PLUGIN */
 		die_plugin("function ", plugin_symb, " failed", 0);
 	return;
 }
@@ -6084,8 +5751,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	stralloc        plugin = { 0 };
 #endif
 
-	if (argc > 2)
-	{
+	if (argc > 2) {
 		hostname = argv[1];
 		childargs = argv + 2;
 	}
@@ -6094,8 +5760,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		scan_int(ptr, &smtp_port);
 	else
 		smtp_port = -1;
-	if (smtp_port == ODMR_PORT && (!hostname || !*hostname || !childargs || !*childargs))
-	{
+	if (smtp_port == ODMR_PORT && (!hostname || !*hostname || !childargs || !*childargs)) {
 		if (!env_put("SHUTDOWN=1"))
 			die_nomem();
 	}
@@ -6105,7 +5770,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	sig_pipeignore();
 	if (chdir(auto_qmail) == -1)
 		die_control();
-	/*
+	/*-
 	 * setup calls databytes_setup(), which sets
 	 * databytes
 	 */
@@ -6114,43 +5779,36 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		die_ipme();
 	if (greetdelay)
 		greetdelay_check(greetdelay);
-	if (env_get("SHUTDOWN"))
-	{
+	if (env_get("SHUTDOWN")) {
 		smtp_greet("554 ");
 		setup_state = 1;
-	} else
-	{
-		if (dobadipcheck && badipcheck(remoteip))
-		{
+	} else {
+		if (dobadipcheck && badipcheck(remoteip)) {
 			smtp_greet("421 ");
 			out(" sorry, your IP (");
 			out(remoteip);
 			out(") is temporarily denied (#4.7.1)");
 			setup_state = 6;
 		} else
-		if (dobadhostcheck && badhostcheck())
-		{
+		if (dobadhostcheck && badhostcheck()) {
 			smtp_greet("553 ");
 			out(" sorry, your host (");
 			out(remotehost);
 			out(") has been denied (#5.7.1)");
 			setup_state = 5;
 		} else
-		if (env_get("OPENRELAY"))
-		{
+		if (env_get("OPENRELAY")) {
 			smtp_greet("553 ");
 			out(" No mail accepted from an open relay (");
 			out(remoteip);
 			out("); check your server configs (#5.7.1)");
 			setup_state = 2;
 		} else
-		if ((ptr = env_get("TCPPARANOID")))
-		{
+		if ((ptr = env_get("TCPPARANOID"))) {
 			smtp_greet("553 ");
 			out(" sorry, your IP address (");
 			out(remoteip);
-			if (*ptr)
-			{
+			if (*ptr) {
 				out(") PTR (reverse DNS) record points to wrong hostname ");
 				out(ptr);
 				out(" (#5.7.1)");
@@ -6158,18 +5816,15 @@ qmail_smtpd(int argc, char **argv, char **envp)
 				out(") PTR (reverse DNS) record points to wrong hostname (#5.7.1)");
 			setup_state = 3;
 		} else
-		if ((ptr = env_get("REQPTR")) && str_equal(remotehost, "unknown"))
-		{
+		if ((ptr = env_get("REQPTR")) && str_equal(remotehost, "unknown")) {
 			smtp_greet("553 ");
-			if (*ptr)
-			{
+			if (*ptr) {
 				out(" ");
 				out(ptr);
 				out(": from ");
 				out(remoteip);
 				out(": (#5.7.1)");
-			} else
-			{
+			} else {
 				out(" Sorry, no PTR (reverse DNS) record for (");
 				out(remoteip);
 				out(") (#5.7.1)");
@@ -6179,12 +5834,11 @@ qmail_smtpd(int argc, char **argv, char **envp)
 			smtp_greet("220 ");
 	}
 	out("\r\n");
-	switch (smtp_port)
-	{
-	case ODMR_PORT: /*- RFC 2645 */
+	switch (smtp_port) {
+	case ODMR_PORT:/*- RFC 2645 */
 		cmdptr = odmrcommands;
 		break;
-	case SUBM_PORT: /*- RFC 2476 */
+	case SUBM_PORT:/*- RFC 2476 */
 		cmdptr = submcommands;
 		break;
 	case SMTP_PORT:
@@ -6195,20 +5849,27 @@ qmail_smtpd(int argc, char **argv, char **envp)
 #ifdef SMTP_PLUGIN
 	if (env_get("DISABLE_PLUGIN"))
 		goto command;
-	if (!(plugindir = env_get("PLUGINDIR")))
-		plugindir = "plugins";
-	if (plugindir[i = str_chr(plugindir, '/')])
-		die_plugin(plugindir, "plugindir cannot have an absolute path", 0, 0);
 	if (!(plugin_symb = env_get("SMTP_PLUGIN_SYMB")))
 		plugin_symb = "plugin_init";
-	if (!stralloc_copys(&plugin, auto_qmail))
-		die_nomem();
-	if (!stralloc_append(&plugin, "/"))
-		die_nomem();
-	if (!stralloc_cats(&plugin, plugindir))
-		die_nomem();
-	if (!stralloc_append(&plugin, "/"))
-		die_nomem();
+
+	if (!(plugindir = env_get("PLUGINDIR"))) {
+		if (!stralloc_copys(&plugin, auto_prefix))
+			die_nomem();
+		if (!stralloc_catb(&plugin, "/lib/indimail/", 14))
+			die_nomem();
+		if (!stralloc_cats(&plugin, plugindir))
+			die_nomem();
+		if (!stralloc_append(&plugin, "/"))
+			die_nomem();
+	} else {
+		if (*plugindir != '/')
+			die_plugin(plugindir, "plugindir must have an absolute path", 0, 0);
+		if (!stralloc_copys(&plugin, plugindir))
+			die_nomem();
+		if (!stralloc_append(&plugin, "/"))
+			die_nomem();
+	}
+
 	if (!(start_plugin = env_get("SMTP_PLUGIN")))
 		start_plugin = "smtpd-plugin.so";
 	if (!stralloc_cats(&plugin, start_plugin))
@@ -6217,7 +5878,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		die_nomem();
 	len = plugin.len;
 	/*- figure out plugin count */
-	for (i = plugin_count = 0;;plugin_count++) {
+	for (i = plugin_count = 0;; plugin_count++) {
 		if (!plugin_count) {
 			if (access(plugin.s, R_OK)) {
 				plugin.len -= 4;
@@ -6244,16 +5905,16 @@ qmail_smtpd(int argc, char **argv, char **envp)
 				break;
 		}
 	}
-	if (!(handle = (void **) alloc(sizeof(void *) * plugin_count)))
+	if (!(plughandle = (void **) alloc(sizeof (void *) * plugin_count)))
 		die_nomem();
-	if (!(plug = (PLUGIN **) alloc(sizeof(PLUGIN *) * plugin_count)))
+	if (!(plug = (PLUGIN **) alloc(sizeof (PLUGIN *) * plugin_count)))
 		die_nomem();
 	plugin.len = len - 4;
 	if (!stralloc_cats(&plugin, ".so"))
 		die_nomem();
 	if (!stralloc_0(&plugin))
 		die_nomem();
-	for (i = j = 0;i < plugin_count;) {
+	for (i = j = 0; i < plugin_count;) {
 		if (!j) {
 			if (access(plugin.s, R_OK)) { /*- smtpd-plugin.so */
 				plugin.len -= 4;
@@ -6264,7 +5925,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 					die_nomem();
 				if (!stralloc_0(&plugin))
 					die_nomem();
-				if (access(plugin.s, R_OK)) /*- smtpd-plugin0.so */
+				if (access(plugin.s, R_OK))		/*- smtpd-plugin0.so */
 					goto command;
 				load_plugin(plugin.s, plugin_symb, j++);
 				i++;
@@ -6296,8 +5957,9 @@ command:
 }
 
 int
-addrrelay() /*- Rejection of relay probes. */
+addrrelay()
 {
+/*- Rejection of relay probes. */
 	int             j;
 
 	j = addr.len;
@@ -6306,8 +5968,7 @@ addrrelay() /*- Rejection of relay probes. */
 			break;
 	if (j < 0)
 		j = addr.len;
-	while (--j >= 0)
-	{
+	while (--j >= 0) {
 		if (addr.s[j] == '@')
 			return 1;
 		if (addr.s[j] == '%')
@@ -6320,6 +5981,11 @@ addrrelay() /*- Rejection of relay probes. */
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.204  2017-12-26 15:26:06+05:30  Cprogrammer
+ * make PLUGINDIR path absolute
+ * use auto_prefix for plugindir path
+ * set environment variable AUTHENTICATED
+ *
  * Revision 1.203  2017-12-17 19:12:52+05:30  Cprogrammer
  * moved RCS log to bottom and added documentation.
  *
@@ -6365,7 +6031,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.203 2017-12-17 19:12:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.204 2017-12-26 15:26:06+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
@@ -6373,6 +6039,6 @@ getversion_smtpd_c()
 #else
 	if (x)
 		x++;
-	x=sccsidauthcramh;
+	x = sccsidauthcramh;
 #endif
 }
