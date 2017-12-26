@@ -1,5 +1,8 @@
 /*
  * $Log: plugtest.c,v $
+ * Revision 1.4  2017-12-26 15:24:45+05:30  Cprogrammer
+ * use auto_prefix for plugin directory & make PLUGINDIR path absolute
+ *
  * Revision 1.3  2011-07-08 13:47:27+05:30  Cprogrammer
  * added setting of authenticated, relayclient variables
  *
@@ -20,6 +23,7 @@
 #include "stralloc.h"
 #include "fmt.h"
 #include "auto_qmail.h"
+#include "auto_prefix.h"
 #include "subfd.h"
 #include "smtp_plugin.h"
 
@@ -185,26 +189,34 @@ main(int argc, char **argv)
 	}
 	if (chdir(auto_qmail) == -1)
 		strerr_die2sys(111, FATAL, auto_qmail);
-	if (!(plugindir = env_get("PLUGINDIR")))
-		plugindir = "plugins";
-	if (plugindir[i = str_chr(plugindir, '/')])
-		die_plugin(plugindir, "plugindir cannot have an absolute path", 0, 0);
 	if (!(plugin_symb = env_get("SMTP_PLUGIN_SYMB")))
 		plugin_symb = "plugin_init";
-	if (!stralloc_copys(&plugin, auto_qmail))
-		die_nomem();
-	if (!stralloc_append(&plugin, "/"))
-		die_nomem();
-	if (!stralloc_cats(&plugin, plugindir))
-		die_nomem();
-	if (!stralloc_append(&plugin, "/"))
-		die_nomem();
+
+	if (!(plugindir = env_get("PLUGINDIR"))) {
+		if (!stralloc_copys(&plugin, auto_prefix))
+			die_nomem();
+		if (!stralloc_catb(&plugin, "/lib/indimail/", 14))
+			die_nomem();
+		if (!stralloc_cats(&plugin, plugindir))
+			die_nomem();
+		if (!stralloc_append(&plugin, "/"))
+			die_nomem();
+	} else {
+		if (*plugindir != '/')
+			die_plugin(plugindir, "plugindir must have an absolute path", 0, 0);
+		if (!stralloc_copys(&plugin, plugindir))
+			die_nomem();
+		if (!stralloc_append(&plugin, "/"))
+			die_nomem();
+	}
+
 	if (!(start_plugin = env_get("SMTP_PLUGIN")))
 		start_plugin = "smtpd-plugin.so";
 	if (!stralloc_cats(&plugin, start_plugin))
 		die_nomem();
 	if (!stralloc_0(&plugin))
 		die_nomem();
+
 	len = plugin.len;
 	/*- figure out plugin count */
 	for (i = plugin_count = 0;;plugin_count++) {
@@ -376,7 +388,7 @@ main(int argc, char **argv)
 void
 getversion_plugtest_c()
 {
-	static char    *x = "$Id: plugtest.c,v 1.3 2011-07-08 13:47:27+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: plugtest.c,v 1.4 2017-12-26 15:24:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
