@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.204 $";
+char           *revision = "$Revision: 1.205 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5855,11 +5855,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	if (!(plugindir = env_get("PLUGINDIR"))) {
 		if (!stralloc_copys(&plugin, auto_prefix))
 			die_nomem();
-		if (!stralloc_catb(&plugin, "/lib/indimail/", 14))
-			die_nomem();
-		if (!stralloc_cats(&plugin, plugindir))
-			die_nomem();
-		if (!stralloc_append(&plugin, "/"))
+		if (!stralloc_catb(&plugin, "/lib/indimail/plugins/", 22))
 			die_nomem();
 	} else {
 		if (*plugindir != '/')
@@ -5981,6 +5977,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.205  2017-12-26 21:58:06+05:30  Cprogrammer
+ * BUGFIX - Fixed wrong copy of PLUGINDIR
+ *
  * Revision 1.204  2017-12-26 15:26:06+05:30  Cprogrammer
  * make PLUGINDIR path absolute
  * use auto_prefix for plugindir path
@@ -6031,7 +6030,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.204 2017-12-26 15:26:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.205 2017-12-26 21:58:06+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
