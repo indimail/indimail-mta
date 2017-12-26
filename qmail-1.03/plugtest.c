@@ -1,5 +1,8 @@
 /*
  * $Log: plugtest.c,v $
+ * Revision 1.5  2017-12-26 21:57:28+05:30  Cprogrammer
+ * BUGFIX - fixed wrong copy of plugindir
+ *
  * Revision 1.4  2017-12-26 15:24:45+05:30  Cprogrammer
  * use auto_prefix for plugin directory & make PLUGINDIR path absolute
  *
@@ -195,11 +198,7 @@ main(int argc, char **argv)
 	if (!(plugindir = env_get("PLUGINDIR"))) {
 		if (!stralloc_copys(&plugin, auto_prefix))
 			die_nomem();
-		if (!stralloc_catb(&plugin, "/lib/indimail/", 14))
-			die_nomem();
-		if (!stralloc_cats(&plugin, plugindir))
-			die_nomem();
-		if (!stralloc_append(&plugin, "/"))
+		if (!stralloc_catb(&plugin, "/lib/indimail/plugins/", 22))
 			die_nomem();
 	} else {
 		if (*plugindir != '/')
@@ -388,7 +387,7 @@ main(int argc, char **argv)
 void
 getversion_plugtest_c()
 {
-	static char    *x = "$Id: plugtest.c,v 1.4 2017-12-26 15:24:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: plugtest.c,v 1.5 2017-12-26 21:57:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
