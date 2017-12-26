@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.118 2017-12-04 21:52:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.119 2017-12-26 21:57:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -138,7 +138,7 @@ NoSource: 4
 
 URL: http://www.indimail.org
 #AutoReqProv: No
-Conflicts: indimail, indimail-mini, indimail-mta < 2.0
+Conflicts: indimail, indimail-mini, indimail-mta < 2.0 daemontools ucspi-tcp
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
@@ -234,9 +234,9 @@ Original Author: Dan J. Bernstein <djb@cr.yp.to>
 %package -n daemontools
 Summary: A collection of tools for managing UNIX services
 %if %fedorareview == 0
-Conflicts: indimail daemontools ucspi-tcp
+Conflicts: indimail indimail-mta ucspi-tcp
 %else
-Conflicts: indimail
+Conflicts: indimail indimail-mta
 %endif
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Base
@@ -261,9 +261,9 @@ Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
 %package -n ucspi-tcp
 %if %fedorareview == 0
-Conflicts: indimail daemontools ucspi-tcp
+Conflicts: indimail daemontools indimail-mta
 %else
-Conflicts: indimail
+Conflicts: indimail indimail-mta
 %endif
 Summary: A collection of tools for building TCP client-server applications
 %if %{undefined suse_version} && %{undefined sles_version}
