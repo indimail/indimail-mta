@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.5  2017-12-26 15:18:08+05:30  Cprogrammer
+ * use env variable to avoid using undefined variables when used as plugin
+ *
  * Revision 1.4  2015-08-26 14:11:52+05:30  Cprogrammer
  * replaced ip_fmt() with ip4_fm()
  *
@@ -21,8 +24,6 @@
 #include "str.h"
 #include "control.h"
 
-extern int      authenticated;
-extern char    *relayclient;
 int             dnsblok, skipdnsbl = 0;
 stralloc        dnsblhost = { 0 }, dnsbl_mesg = { 0 }, dnsbllist = { 0 };
 char           *dnsblFn;
@@ -129,7 +130,8 @@ dnsblcheck(char **mesg, char *remoteip)
 static int
 mailfrom_hook(char *remoteip, char *from, char **mesg)
 {
-	char           *x;
+	char           *x, *_relayclient;
+	int             _authenticated;
 
 	if (env_get("SKIPDNSBL")) {
 		skipdnsbl = 1;
@@ -142,7 +144,12 @@ mailfrom_hook(char *remoteip, char *from, char **mesg)
 		*mesg = "451 Requested action aborted: unable to read controls (#4.3.0)\r\n";
 		return (1);
 	}
-	if ((!authenticated && !relayclient && !skipdnsbl) && dnsblcheck(mesg, remoteip)) {
+	_relayclient = env_get("RELAYCLIENT");
+	if (!(x = env_get("AUTHENTICATED")))
+		_authenticated = 0;
+	else
+		_authenticated = *x == '1' ? 1 : 0;
+	if ((!_authenticated && !_relayclient && !skipdnsbl) && dnsblcheck(mesg, remoteip)) {
 		die_dnsbl(mesg);
 		return (1);
 	}
