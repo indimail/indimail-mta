@@ -53,6 +53,7 @@ Known values for OPTION are:
 	[--odmr]
 	[--ssl]
 	[--shared-objects=0|1]
+	[--use-dlmopen=0|1]
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
 	[--password-cache] [--query-cache]
@@ -143,6 +144,7 @@ Known values for OPTION are:
   password-cache - Enable caching of passwords (auth smtp)
   query-cache    - Enable caching of queries   (auth smtp)
   shared-objects - Enabled tcpserver plugins, 0 - disabled, 1 - enabled
+  use-dlmopen    - Use dlmopen() instead of dlopen() to load shared objects
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
 	--servicedir=service_path
@@ -439,11 +441,11 @@ Known values for OPTION are:
 
   Shows Qmail Control Information for Control Directory at DIR
 
---dumpconfig --servicedir=service_path --controldir=controldir
+--dumpconfig --servicedir=service_path --cntrldir=cntrl_path
 
   Dumps all service configuration for Supervise Scripts, control files and software information
   service_path - Path where supervise scripts will be installed
-  controldir   - Path where qmail/indimail control files lie
+  cntrl_path   - Path where Qmail control files are stored
 
 --queuefix=queue_path
 
@@ -466,9 +468,12 @@ Known values for OPTION are:
                    "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
 
 --inlookup=fifo_path --threads=N
-	--domainlimits
-	[--routes=smtp|qmtp|static]
 	--servicedir=service_path
+	--domainlimits
+	[--activeDays=A]
+	[--use-btree]
+	[--max-btree-count=max_nodes]
+	[--routes=smtp|qmtp|static]
 	[--cntrldir=cntrl_path]
 	[--password-cache] [--query-cache]
 
@@ -476,9 +481,12 @@ Known values for OPTION are:
   fifo_path      - Install fifo specified by this path
                    (e.g. @qmaildir@/inquery/infifo)
   N              - No of parallel inlookup threads to spawn
+  A              - Max days for which a user has been active
   service_path   - Path where supervise scripts will be installed
   cntrl_path     - Path where Qmail control files are stored
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
+  use-btree      - Use Binary Tree algorithm to search for User records
+  max_nodes      - Maximum number of Binary Nodes to allow
   password-cache - Enable caching of passwords
   query-cache    - Enable caching of queries
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
