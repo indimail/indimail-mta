@@ -6,7 +6,6 @@ QMAILDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
 SYSTEM := $(shell uname -s)
 SHELL=/bin/sh
 inc_deps := -DHAVE_CONFIG_H `cat ./inc_deps 2>/dev/null`
-#lib_deps := `cat ./lib_deps 2>/dev/null`
 lib_deps=$(shell cat ./lib_deps 2>/dev/null)
 prefix=$(shell head -1 conf-prefix 2>/dev/null)
 qmaildir=$(shell head -1 conf-qmail 2>/dev/null)
@@ -2567,18 +2566,18 @@ plugtest: \
 load plugtest.o subfdout.o substdo.o subfderr.o fmt_ulong.o auto_qmail.o \
 envread.o str_chr.o stralloc_opys.o stralloc_pend.o stralloc_cats.o \
 stralloc_eady.o strerr_sys.o strerr_die.o str_len.o str_diffn.o \
-byte_copy.o sgetopt.o subgetopt.o \
+byte_copy.o sgetopt.o subgetopt.o auto_prefix.o \
 stralloc_opyb.o stralloc_catb.o alloc.o alloc_re.o error_str.o error.o
 	./load plugtest subfdout.o substdo.o subfderr.o fmt_ulong.o auto_qmail.o \
 	envread.o str_chr.o stralloc_opys.o stralloc_pend.o stralloc_cats.o \
 	stralloc_eady.o strerr_sys.o strerr_die.o str_len.o str_diffn.o \
-	byte_copy.o sgetopt.o subgetopt.o \
+	byte_copy.o sgetopt.o subgetopt.o auto_prefix.o \
 	stralloc_opyb.o stralloc_catb.o alloc.o alloc_re.o error_str.o error.o \
 	-ldl
 
 plugtest.o: \
 compile plugtest.c sgetopt.h alloc.h str.h strerr.h env.h stralloc.h \
-fmt.h auto_qmail.h subfd.h smtp_plugin.h
+fmt.h auto_qmail.h auto_prefix.h subfd.h smtp_plugin.h
 	./compile plugtest.c
 
 hmac_sha1.obj: \
@@ -2594,9 +2593,10 @@ timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constma
 received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a \
 wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
-socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
-base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o greylist.o \
-auto_break.o auto_control.o auto_assign.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
+socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o \
+auto_uids.o auto_prefix.o base64sub.o qregex_sql.o tablematch.o ndelay.o \
+ndelay_off.o greylist.o auto_break.o auto_control.o auto_assign.o env.a \
+stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so smtpd.o rcpthosts.o \
@@ -2605,9 +2605,9 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
-	base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
+	base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
 	wait.a datetime.a greylist.o auto_break.o auto_control.o auto_assign.o \
-	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
+	auto_prefix.o `cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`; \
 	else \
@@ -2617,8 +2617,8 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
-	base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
-	wait.a datetime.a greylist.o auto_break.o \
+	base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
+	auto_prefix.o wait.a datetime.a greylist.o auto_break.o \
 	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`; \
@@ -2628,10 +2628,10 @@ qmail-smtpd: \
 load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a auto_control.o \
-wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
+auto_prefix.o wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
-base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o greylist.o auto_assign.o \
+base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o greylist.o auto_assign.o \
 auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
@@ -2639,7 +2639,7 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
-	base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
+	auto_prefix.o base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
 	wait.a datetime.a greylist.o auto_break.o auto_control.o auto_assign.o \
 	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
@@ -2656,10 +2656,10 @@ error.h control.h variables.h hasindimail.h auto_control.h
 	./compile $(inc_deps) qregex.c
 
 # qregex.c compiled with sqlmatch()
-qregex_smtpd.o: \
+qregex_sql.o: \
 compile qregex.c qregex.h sqlmatch.h case.h stralloc.h constmap.h matchregex.h byte.h env.h \
 str.h cdb.h uint32.h open.h error.h control.h variables.h
-	./compile -DUSE_SQL $(inc_deps) qregex.c -o qregex_smtpd.o
+	./compile -DUSE_SQL $(inc_deps) qregex.c -o qregex_sql.o
 
 matchregex.o: \
 compile matchregex.c stralloc.h error.h qregex.h
@@ -2742,7 +2742,7 @@ matchregex.o str.h fmt.h scan.h byte.h case.h env.h now.h datetime.h \
 variables.h exit.h rcpthosts.h timeoutread.h timeoutwrite.h commands.h \
 wait.h etrn.h date822fmt.h fd.h base64.h envrules.h tablematch.h cdb.h \
 uint32.h matchregex.h qregex.h sqlmatch.h hasindimail.h smtp_plugin.h \
-hastlsv1_1_server.h hastlsv1_2_server.h \
+hastlsv1_1_server.h hastlsv1_2_server.h auto_prefix.h \
 auto_control.h dns.h conf-tls conf-spf conf-ip conf-plugin conf-batv
 	./compile $(inc_deps) `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin` smtpd.c
@@ -5853,7 +5853,7 @@ compile udpopen.c subfd.h udpopen.h strerr.h fmt.h hasindimail.h byte.h
 	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` udpopen.c
 
 tcpopen.o: \
-compile tcpopen.c subfd.h tcpopen.h strerr.h fmt.h hasindimail.h fmt.h byte.h strerr.h
+compile tcpopen.c subfd.h tcpopen.h strerr.h fmt.h hasindimail.h byte.h strerr.h
 	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` tcpopen.c
 
 udpclient.o: \
@@ -5924,11 +5924,29 @@ sig.h sgetopt.h hasinotify.h
 
 ################### PLUGINS ########################################
 # dnsblcheck plugin
-smtpd-plugin0.so: dnsbl.o
+smtpd-plugin0.so: dnsbl.o envread.o \
+envread.o str_diffn.o str_len.o control.o auto_control.o variables.o error.o \
+stralloc_opys.o stralloc_opyb.o stralloc_eady.o alloc.o byte_copy.o \
+stralloc_cats.o stralloc_catb.o stralloc_pend.o alloc_re.o open_read.o \
+substdio.o substdi.o getln.o getln2.o byte_cr.o byte_chr.o \
+socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
+scan_ulong.o stralloc_cat.o stralloc_copy.o dns.o
 	if test $(SYSTEM) = Darwin ; then \
-	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin0.so dnsbl.o; \
+	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin0.so dnsbl.o \
+	envread.o str_diffn.o str_len.o control.o auto_control.o variables.o error.o \
+	stralloc_opys.o stralloc_opyb.o stralloc_eady.o alloc.o byte_copy.o \
+	stralloc_cats.o stralloc_catb.o stralloc_pend.o alloc_re.o open_read.o \
+	substdio.o substdi.o getln.o getln2.o byte_cr.o byte_chr.o \
+	socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
+	scan_ulong.o stralloc_cat.o stralloc_copy.o dns.o -lresolv; \
 	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin0.so dnsbl.o; \
+	$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin0.so dnsbl.o \
+	envread.o str_diffn.o str_len.o control.o auto_control.o variables.o error.o \
+	stralloc_opys.o stralloc_opyb.o stralloc_eady.o alloc.o byte_copy.o \
+	stralloc_cats.o stralloc_catb.o stralloc_pend.o alloc_re.o open_read.o \
+	substdio.o substdi.o getln.o getln2.o byte_cr.o byte_chr.o \
+	socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
+	scan_ulong.o stralloc_cat.o stralloc_copy.o dns.o -lresolv; \
 	fi
 dnsbl.o: compile dnsbl.c smtp_plugin.h stralloc.h dns.h env.h control.h str.h
 	./compile dnsbl.c
@@ -5938,7 +5956,7 @@ smtpd-plugin.so:smtp_plugin.o
 	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
 	smtp_plugin.o; \
 	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin.so \
+	$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin.so \
 	smtp_plugin.o; fi
 
 smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
