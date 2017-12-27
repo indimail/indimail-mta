@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.6  2017-12-27 00:32:44+05:30  Cprogrammer
+ * fixed RCS id
+ *
  * Revision 1.5  2017-12-26 15:18:08+05:30  Cprogrammer
  * use env variable to avoid using undefined variables when used as plugin
  *
@@ -176,6 +179,6 @@ plugin_init()
 void
 getversion_dnsbl_c()
 {
-	static char    *x = "$id: $";
+	static char    *x = "$Id: dnsbl.c,v 1.6 2017-12-27 00:32:44+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
