@@ -265,15 +265,15 @@ if [ " $1" = " purge" ] ; then
 			fi
 		done
 	fi
+	if [ $count -eq 0 ] ; then # ignore disabled services
+		${rm} -rf ${servicedir} || true
+	fi
 
 	echo "removing logs"
 	${rm} -f ${indimaildir}/mysqldb/logs/logisam.log
 	${rm} -f ${indimaildir}/mysqldb/logs/logquery
 	${rm} -f ${indimaildir}/mysqldb/logs/logslow
 	count=`/bin/ls ${servicedir} 2>/dev/null| /usr/bin/wc -l`
-	if [ $count -eq 0 ] ; then # ignore disabled services
-		${rm} -rf ${servicedir} || true
-	fi
 	if [ -h ${logdir} ] ; then
 		log_dir=`/bin/ls -ld ${logdir} | /usr/bin/awk '{print $10}'`
 	else
