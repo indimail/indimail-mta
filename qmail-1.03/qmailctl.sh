@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop indimail
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.55 2017-12-27 00:26:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.56 2017-12-27 20:13:58+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -425,15 +425,19 @@ case "$1" in
 		for j in `/bin/ls SYSCONFDIR/tcp*.$i 2>/dev/null`
 		do
 			t1=`date +'%s' -r $j`
-			t2=`date +'%s' -r $j.cdb`
-			if [ $t1 -gt $t2 ] ; then
-			$ECHO -n $"building $j.cdb: "
-			PREFIX/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-				&& /bin/chown indimail:indimail $j.cdb && $succ || $fail
-			RETVAL=$?
-			echo
+			if [ -f $j.cdb ] ; then
+				t2=`date +'%s' -r $j.cdb`
 			else
-			RETVAL=0
+				t2=0
+			fi
+			if [ $t1 -gt $t2 ] ; then
+				$ECHO -n $"building $j.cdb: "
+				PREFIX/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+					&& /bin/chown indimail:indimail $j.cdb && $succ || $fail
+				RETVAL=$?
+				echo
+			else
+				RETVAL=0
 			fi
 			let ret+=$RETVAL
 		done
