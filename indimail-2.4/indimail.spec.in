@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.437 2017-12-11 15:50:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.438 2017-12-27 20:12:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2532,7 +2532,7 @@ echo "20. Configure inlookup service"
 echo "21. Configure qscanq/clamd/freshclam service"
 echo "22. Configure %{sysconfdir}/control/signatures"
 echo "23. Configure SPAM filter configuration"
-echo "24. Configure tcprules database for SMTP, IMAP, POP3, popass"
+echo "24. Configure tcprules database for SMTP, QMQP, QMTP, IMAP, POP3, popass"
 echo "25. Configure selinux configuration"
 echo "26. Configure indimail startup"
 echo "27. Configure default cron entries"
@@ -2703,9 +2703,6 @@ do
     --dkverify=$ver_opt \
     --dksign=$sign_opt --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
     $extra_opt
-  if [ -d %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN ] ; then
-    echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
-  fi
 done
 #
 # qmail-inject, sendmail default configuration
@@ -2725,9 +2722,6 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
 #
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
   --infifo="" --query-cache --password-cache --memory=%{smtp_soft_mem}
-if [ -d %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN ] ; then
-  echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
-fi
 
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
@@ -2880,9 +2874,17 @@ for i in smtp qmtp qmqp imap pop3 poppass
 do
   for j in `/bin/ls %{sysconfdir}/tcp*.$i 2>/dev/null`
   do
-    echo "Creating CDB $j.cdb"
-       %{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-      && %{__chown} indimail:indimail $j.cdb
+    t1=`date +'%s' -r $j`
+    if [ -f $j.cdb ] ; then
+      t2=`date +'%s' -r $j.cdb`
+    else
+      t2=0
+    fi
+    if [ $t1 -gt $t2 ] ; then
+      echo "Creating CDB $j.cdb"
+      %{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+        && %{__chown} indimail:indimail $j.cdb
+    fi
   done
 done
 
@@ -3098,15 +3100,15 @@ do
   fi
 done
 fi
+count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
+if [ $count -eq 0 ] ; then # ignore disabled services
+  %{__rm} -rf %{servicedir} || true
+fi
 
 echo "removing logs"
 %{__rm} -f %{indimaildir}/mysqldb/logs/logisam.log
 %{__rm} -f %{indimaildir}/mysqldb/logs/logquery
 %{__rm} -f %{indimaildir}/mysqldb/logs/logslow
-count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
-if [ $count -eq 0 ] ; then # ignore disabled services
-  %{__rm} -rf %{servicedir} || true
-fi
 if [ -h %{logdir} ] ; then
   log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
 else
