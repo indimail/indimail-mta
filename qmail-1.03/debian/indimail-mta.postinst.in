@@ -316,9 +316,6 @@ do
 		--dkverify=both \
 		--dksign=both --private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
 		$extra_opt
-	if [ -d ${servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN ] ; then
-		echo "1" > $servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN
-	fi
 done
 
 # queue parameters in control/defaultqueue for qmail-inject, sendmail
@@ -336,9 +333,6 @@ eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 #odmr
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
 	--infifo="" --query-cache --password-cache
-if [ -d ${servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN ] ; then
-	echo "1" > $servicedir/qmail-smtpd.366/variables/DISABLE_PLUGIN
-fi
 
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
@@ -420,9 +414,17 @@ for i in smtp qmtp qmqp
 do
 	for j in `/bin/ls ${qsysconfdir}/tcp.$i 2>/dev/null`
 	do
-		echo "Creating CDB $j.cdb"
-   		${prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-			&& chown indimail:indimail $j.cdb
+		t1=`date +'%s' -r $j`
+		if [ -f $j.cdb ] ; then
+			t2=`date +'%s' -r $j.cdb`
+		else
+			t2=0
+		fi
+    	if [ $t1 -gt $t2 ] ; then
+			echo "Creating CDB $j.cdb"
+   			${prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+				&& chown indimail:indimail $j.cdb
+		fi
 	done
 done
 
