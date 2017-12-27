@@ -1,4 +1,4 @@
-* Thu Aug 17 2017 15:31:33 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
+* Wed Dec 27 2017 00:00:45 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.2 Start 08/05/2017
 10/05/2011
 1.  use packetsize > 512 to avoid dkim failures for sites having long txt
@@ -83,3 +83,9 @@ Release 2.2 Start 08/05/2017
     to be called for loading shared library
 47. svctool - add option --use-dlmopen to configure tcpserver to use dlmopen()
     instead of dlopen() to load shared objects
+48. fixed smtp plugin by setting PLUGINDIR correctly
+49. Fixed dlopen() flags for loading smtp plugins
+50. qmailctl - update cdb only when input file date is newer than cdb file
+51. svctool - fixed conf_dir variable getting clobbered by create_fifologger,
+    preventing creation of LOGFILTER service variable
+52. fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
