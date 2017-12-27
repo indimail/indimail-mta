@@ -1,4 +1,4 @@
-DATE: Mon Dec 25 15:39:40 IST 2017
+DATE: Wed Dec 27 18:42:49 IST 2017
 
 Announcing Release 2.4 of IndiMail.
 
@@ -85,3 +85,11 @@ Release 2.4 Start 04/12/2017
     to be called for loading shared library
 06. svctool - add option --use-dlmopen to configure tcpserver to use dlmopen()
     instead of dlopen() to load shared objects
+07. fixed smtp plugin by setting PLUGINDIR correctly
+08. Fixed dlopen() flags for loading smtp plugins
+09. qmailctl - update cdb only when input file date is newer than cdb file
+10. svctool - fixed conf_dir variable getting clobbered by create_fifologger,
+    preventing creation of LOGFILTER service variable
+11. fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
+12. svctool - new funtion default_indimail_control for creating
+    indimail specific control files
