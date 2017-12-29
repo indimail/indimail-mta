@@ -20,7 +20,7 @@ default_domain=`uname -n`
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.73 2017-12-11 15:50:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.74 2017-12-29 18:58:20+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -356,9 +356,6 @@ do
 		--dkverify=$ver_opt \
 		--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
 		$append_opt $e_opt $extra_opt
-	if [ -d $dir_prefix$servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN ] ; then
-		echo "1" > $dir_prefix$servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN
-	fi
 	nobogofilter=$orig_bogofilter
 done
 
@@ -375,9 +372,6 @@ eval $svctool --queueParam=defaultqueue \
 
 $svctool --smtp=366 --odmr --servicedir=$servicedir \
 	--infifo="" --query-cache --password-cache --memory=$smtp_soft_mem $extra_opt
-if [ -d $dir_prefix$servicedir/qmail-smtpd.366/variables ] ; then
-	echo "1" > $dir_prefix$servicedir/qmail-smtpd.366/variables/DISABLE_PLUGIN
-fi
 #
 # Greylist
 #
