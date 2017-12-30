@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.18  2017-12-30 21:50:01+05:30  Cprogrammer
+# create environment variable DISABLE_PLUGIN
+#
 # Revision 2.17  2017-12-26 23:34:03+05:30  Cprogrammer
 # update control files only if changed
 #
@@ -52,7 +55,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: local_upgrade.sh,v 2.17 2017-12-26 23:34:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: local_upgrade.sh,v 2.18 2017-12-30 21:50:01+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -152,6 +155,12 @@ do
 	# increase for using dlmopen()
 	if [ ! " $i" = " qmail-send.25" ] ; then
 		check_update_if_diff /service/$i/variables/SOFT_MEM 536870912
+	fi
+	if [ "$i" = "qmail-send.25" ] ; then
+		continue
+	fi
+	if [ ! -f /service/$i/variables/DISABLE_PLUGIN ] ; then
+	echo > /service/$i/variables/DISABLE_PLUGIN
 	fi
 done
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
