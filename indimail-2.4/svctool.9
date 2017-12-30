@@ -57,6 +57,7 @@ Known values for OPTION are:
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
 	[--password-cache] [--query-cache]
+	[--smtp-plugin]
 	--default-domain=domain
 
  Installs a new queue with a SMTP Listener
@@ -145,6 +146,7 @@ Known values for OPTION are:
   query-cache    - Enable caching of queries   (auth smtp)
   shared-objects - Enabled tcpserver plugins, 0 - disabled, 1 - enabled
   use-dlmopen    - Use dlmopen() instead of dlopen() to load shared objects
+  smtp-plugin    - Enable SMTP Plugin support
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
 	--servicedir=service_path
