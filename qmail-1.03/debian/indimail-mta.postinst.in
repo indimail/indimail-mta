@@ -420,9 +420,9 @@ do
 		else
 			t2=0
 		fi
-    	if [ $t1 -gt $t2 ] ; then
+		if [ $t1 -gt $t2 ] ; then
 			echo "Creating CDB $j.cdb"
-   			${prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+			${prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
 				&& chown indimail:indimail $j.cdb
 		fi
 	done
