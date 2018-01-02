@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 1.3  2018-01-02 16:28:53+05:30  Cprogrammer
+# upgrade variables only when changed
+#
 # Revision 1.2  2017-11-06 21:46:12+05:30  Cprogrammer
 # fixed upgrade script for posttrans
 #
@@ -7,7 +10,7 @@
 # Initial revision
 #
 #
-# $Id: local_upgrade.sh,v 1.2 2017-11-06 21:46:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: local_upgrade.sh,v 1.3 2018-01-02 16:28:53+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -20,8 +23,17 @@ rm=$(which rm)
 mv=$(which mv)
 sed=$(which sed)
 
+check_update_if_diff()
+{
+	val=`cat $1 2>/dev/null`
+	if [ ! " $val" = " $2" ] ; then
+		echo $2 > $1
+	fi
+}
+
 do_post_upgrade()
 {
+date
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -94,10 +106,16 @@ $ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/certs/clientcert.pem
 # Certificate location changed from /etc/indimail/control to /etc/indimail/certs
 for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25
 do
-	echo /etc/indimail/certs > /service/$i/variables/CERTDIR
+	check_update_if_diff /service/$i/variables/CERTDIR /etc/indimail/certs
 	# increase for using dlmopen()
 	if [ ! " $i" = " qmail-send.25" ] ; then
-		echo 536870912 > /service/$i/variables/SOFT_MEM
+		check_update_if_diff /service/$i/variables/SOFT_MEM 536870912
+	fi
+	if [ "$i" = "qmail-send.25" ] ; then
+		continue
+	fi
+	if [ ! -f /service/$i/variables/DISABLE_PLUGIN ] ; then
+	echo > /service/$i/variables/DISABLE_PLUGIN
 	fi
 done
 
@@ -114,17 +132,17 @@ if [ -d /service/qmail-spamlog ] ; then
 fi
 
 # for bogofilter to send back X-Bogosity back to qmail-smtpd as well as log entry
-# to /var/log/indimail/logfifo/current
+# to /var/log/svc/logfifo/current (fifologger service)
 # for qmail-send it is required if you run bogofilter during remote/local delivery,
-# in which case it will be logged to /var/log/indimail/logfifo/current
+# in which case it will be logged to /var/log/svc/logfifo/current
 for i in qmail-smtpd.25 qmail-smtpd.465 qmail-send.25
 do
 	if [ -d /service/$i -a -s /service/$i/variables/LOGFILTER ] ; then
-		echo /tmp/logfifo > /service/$i/variables/LOGFILTER
+		check_update_if_diff /service/$i/variables/LOGFILTER /tmp/logfifo
 	fi
 done
 if [ -s /etc/indimail/control/defaultqueue/LOGFILTER ] ; then
-echo /tmp/logfifo > /etc/indimail/control/defaultqueue/LOGFILTER
+	check_update_if_diff /etc/indimail/control/defaultqueue/LOGFILTER /tmp/logfifo
 fi
 #
 # tcpserver uses -c option to set concurrency and uses MAXDAEMON config file
