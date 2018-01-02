@@ -781,6 +781,7 @@ editman = sed \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,CONTROLDIR,$(controldir),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 indimail.fc: indimail.fc.in
