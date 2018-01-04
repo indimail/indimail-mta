@@ -165,7 +165,7 @@ do_posttrans()
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
 		fi
-		echo "RPM/DEB Version old [OLD_PKG_VER] new [$PKG_VER]"
+		echo "RPM/DEB Version old [$OLD_PKG_VER] new [$PKG_VER]"
 		. /etc/indimail/indimail-mta-release
 	fi
 	case $1 in
