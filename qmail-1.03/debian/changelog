@@ -51,5 +51,6 @@ indimail-mta (2.2-2) unstable; urgency=low
   * qmailctl - update cdb only when input file date is newer than cdb file
   * svctool - fixed conf_dir variable getting clobbered by create_fifologger, preventing creation of LOGFILTER service variable
   * fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
+  * svctool - seperated out qmail, indimail config
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 27 Dec 2017 00:00:45 +0530

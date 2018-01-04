@@ -89,3 +89,4 @@ Release 2.2 Start 08/05/2017
 51. svctool - fixed conf_dir variable getting clobbered by create_fifologger,
     preventing creation of LOGFILTER service variable
 52. fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
+53. svctool - seperated out qmail, indimail config
