@@ -23,6 +23,8 @@ Release 2.4 Start 04/12/2017
 27/12/2017
 12. svctool - new funtion default_indimail_control for creating
     indimail specific control files
+04/01/2018
+13. svctool - seperated out qmail, indimail config
 
 * Mon Dec 04 2017 18:10:11 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 01/09/2017
