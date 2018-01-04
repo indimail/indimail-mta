@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.120 2017-12-27 20:15:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.121 2018-01-04 08:44:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -16,13 +16,13 @@
 %global _hardened_build    1
 %endif
 
-%global qmaildir           /var/indimail
-%global _prefix            /usr
-%global libexecdir         %{_prefix}/libexec/indimail
-%global shareddir          %{_prefix}/share/indimail
-%global mandir             %{_prefix}/share/man
+%global qmaildir           @qmaildir@
+%global _prefix            @prefix@
+%global libexecdir         @libexecdir@
+%global shareddir          @shareddir@
+%global mandir             @mandir@
+%global qsysconfdir        @sysconfdir@
 %global plugindir          %{_prefix}/lib/indimail/plugins
-%global qsysconfdir        /etc/indimail
 %global ucspi_version      0.88
 %global qmail_version      1.03
 %global libdkim_version    1.5
@@ -348,12 +348,12 @@ done
 %build
 ID=$(id -u)
 (
-echo NAME=indimail-mta
-echo Description="IndiMail MTA"
-echo MTA_version="%{version}"
-echo ID=indimail-mta
-echo HOME_URL="http://www.indimail.org"
-echo PACKAGE_BUGREPORT='Manvendra Bhangui manvendra@indimail.org'
+echo "NAME=indimail-mta"
+echo "Description=\"IndiMail MTA\""
+echo "MTA_version="%{version}""
+echo "ID=indimail-mta"
+echo "HOME_URL="http://www.indimail.org""
+echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui manvendra@indimail.org\""
 ) > indimail-mta-release
 
 #### LIBDKIM ######################
@@ -1709,7 +1709,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
   fi
   # selinux
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux
   if [ -f /etc/inittab ] ; then # one of these days, this will disappear
     /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
     if [ $? -eq 0 ] ; then
@@ -1811,7 +1811,7 @@ if [ %{noclamav} -eq 0 ] ; then
   clamav_os=0
   clamdPrefix=%{_prefix}
   qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
-  mysysconfdir=%{sysconfdir}
+  mysysconfdir=%{qsysconfdir}
 else
   if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
     clamav_os=1
@@ -1968,7 +1968,7 @@ do
 done
 
 # selinux
-%{_prefix}/sbin/svctool --servicedir=/service --config=selinux
+%{_prefix}/sbin/svctool --servicedir=/service --config=qselinux
 #
 # Install IndiMail to be started on system boot
 # The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
