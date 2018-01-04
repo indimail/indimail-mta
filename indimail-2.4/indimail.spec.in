@@ -2483,7 +2483,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
   fi
   # selinux
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
   if [ -f /etc/inittab ] ; then # one of these days, this will disappear
     /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
     if [ $? -eq 0 ] ; then
@@ -2560,8 +2560,9 @@ else
   default_domain=%{defaultDomain}
 fi
 echo "Creating default qmail configuraton and catch-all alias (%{indimaildir}/alias/Maildir) for all system users"
-%{_prefix}/sbin/svctool --config=qmail --postmaster=%{indimaildir}/alias/Maildir/ \
-  --mysqlhost=localhost --mysqluser=indimail  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
+%{_prefix}/sbin/svctool --config=qmail --postmaster=%{qmaildir}/alias/Maildir/
+%{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail \
+ --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
 
 # MySQL
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
@@ -2889,7 +2890,7 @@ do
 done
 
 # selinux
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
 
 #
 # Install IndiMail to be started on system boot
