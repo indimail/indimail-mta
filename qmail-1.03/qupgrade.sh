@@ -1,5 +1,8 @@
 #!/bin/sh
-# $Log: upgrade.sh,v $
+# $Log: qupgrade.sh,v $
+# Revision 1.4  2018-01-06 12:18:47+05:30  Cprogrammer
+# renamed upgrade.sh, local_upgrade.sh to qupgrade.sh, qlocal_upgrade.sh
+#
 # Revision 1.3  2018-01-02 16:29:34+05:30  Cprogrammer
 # use indimail-mta-release instead of indimail-release
 #
@@ -22,15 +25,15 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: upgrade.sh,v 1.3 2018-01-02 16:29:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: qupgrade.sh,v 1.4 2018-01-06 12:18:47+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
-	if [ -f /usr/libexec/indimail/local_upgrade.sh ] ; then
+	if [ -f /usr/libexec/indimail/qlocal_upgrade.sh ] ; then
 		echo "Running upgrade script for $1"
-		sh /usr/libexec/indimail/local_upgrade.sh $1
+		sh /usr/libexec/indimail/qlocal_upgrade.sh $1
 		#if [ $? -eq 0 ] ; then
-		#	/bin/rm -f /usr/libexec/indimail/local_upgrade.sh
+		#	/bin/rm -f /usr/libexec/indimail/qlocal_upgrade.sh
 		#fi
 	fi
 }

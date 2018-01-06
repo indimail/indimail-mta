@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Log: local_upgrade.sh,v $
+# $Log: qlocal_upgrade.sh,v $
 # Revision 1.3  2018-01-02 16:28:53+05:30  Cprogrammer
 # upgrade variables only when changed
 #
@@ -10,7 +10,7 @@
 # Initial revision
 #
 #
-# $Id: local_upgrade.sh,v 1.3 2018-01-02 16:28:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.3 2018-01-02 16:28:53+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)

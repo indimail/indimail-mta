@@ -438,11 +438,11 @@ if [ -d qmail-%{qmail_version} ] ; then
      %{__rm} -f /tmp/conf-groups
    fi
    %{__cp} qmail-1.03/doc/ChangeLog .
-   if [ -f qmail-1.03/upgrade.sh ] ; then
-   %{__cp} qmail-1.03/upgrade.sh .
+   if [ -f qmail-1.03/qupgrade.sh ] ; then
+   %{__cp} qmail-1.03/qupgrade.sh .
    fi
-   if [ -f qmail-1.03/local_upgrade.sh ] ; then
-   %{__cp} qmail-1.03/local_upgrade.sh .
+   if [ -f qmail-1.03/qlocal_upgrade.sh ] ; then
+   %{__cp} qmail-1.03/qlocal_upgrade.sh .
    fi
 fi
 #### ucspi-tcp ######################
@@ -505,11 +505,11 @@ install -m 0644 indimail-mta-release %{buildroot}%{qsysconfdir}/indimail-mta-rel
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 %{__mkdir_p} %{buildroot}%{libexecdir}
 install -m 0644 ChangeLog %{buildroot}%{shareddir}/doc/ChangeLog
-if [ -f upgrade.sh ] ; then
-install -m 0755 upgrade.sh %{buildroot}%{libexecdir}/upgrade.sh
+if [ -f qupgrade.sh ] ; then
+install -m 0755 qupgrade.sh %{buildroot}%{libexecdir}/qupgrade.sh
 fi
-if [ -f local_upgrade.sh ] ; then
-install -m 0755 local_upgrade.sh %{buildroot}%{libexecdir}/local_upgrade.sh
+if [ -f qlocal_upgrade.sh ] ; then
+install -m 0755 qlocal_upgrade.sh %{buildroot}%{libexecdir}/qlocal_upgrade.sh
 fi
 if [ %nolibdkim -eq 0 ] ; then
   %{__rm} -f %{buildroot}%{_libdir}/libdkim.la
@@ -839,8 +839,8 @@ done
 %attr(755,root,qmail)                   %{libexecdir}/ddist
 %attr(755,root,qmail)                   %{libexecdir}/rspamsdomain
 %attr(755,root,qmail)                   %{libexecdir}/zrxdelay
-%attr(755,root,qmail)                   %{libexecdir}/upgrade.sh
-%verify (not md5 size mtime mode)       %{libexecdir}/local_upgrade.sh
+%attr(755,root,qmail)                   %{libexecdir}/qupgrade.sh
+%verify (not md5 size mtime mode)       %{libexecdir}/qlocal_upgrade.sh
 
 %attr(755,root,qmail)                   %{_prefix}/sbin/plugtest
 %attr(755,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
@@ -1601,10 +1601,10 @@ if [ -f %{_prefix}/bin/svok ] ; then
     sleep 5
   fi
 fi
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Upgrade Script for pretrans"
-  /bin/sh %{libexecdir}/upgrade.sh pretrans noargs @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs @version@ $*
 ) > /tmp/indimail-mta-setup.log 2>&1
 fi
 
@@ -1618,10 +1618,10 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
   (
     echo "Running Custom Upgrade Script for pre upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh pre upgrade @version@ $*
+    /bin/sh %{libexecdir}/qupgrade.sh pre upgrade @version@ $*
   ) >> /tmp/indimail-mta-setup.log 2>&1
   fi
   exit 0
@@ -1679,10 +1679,10 @@ fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
   echo "doing post upgrade activities"
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
     /sbin/ldconfig
     echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh post upgrade @version@ $*
+    /bin/sh %{libexecdir}/qupgrade.sh post upgrade @version@ $*
   fi
   if [ -f /etc/init.d/indimail ] ; then
     cmp -s %{_prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1
@@ -1981,9 +1981,9 @@ if [ -f %{qsysconfdir}/cronlist ] ; then
   /usr/bin/crontab -u root %{qsysconfdir}/cronlist
 fi
 
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
-  /bin/sh %{libexecdir}/upgrade.sh post install @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh post install @version@ $*
 fi
 
 if [ -x /bin/systemctl ] ; then
@@ -2031,9 +2031,9 @@ fi
 (
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh preun upgrade @version@ "$argv1"
+    /bin/sh %{libexecdir}/qupgrade.sh preun upgrade @version@ "$argv1"
   fi
   exit 0
 fi
@@ -2074,9 +2074,9 @@ if [ -f %{_prefix}/bin/svok ] ; then
   fi
 fi
 
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/upgrade.sh preun uninstall @version@ "$argv1"
+  /bin/sh %{libexecdir}/qupgrade.sh preun uninstall @version@ "$argv1"
 fi
 
 if [ -f /etc/init.d/sendmail ] ; then
@@ -2112,9 +2112,9 @@ fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh postun upgrade @version@ $*
+    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade @version@ $*
   fi
   ) >> /tmp/indimail-mta-setup.log
   echo "recreating ld.so cache"
@@ -2198,9 +2198,9 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
     /usr/sbin/semodule -r indimail-mta
   fi
 fi
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
-  /bin/sh %{libexecdir}/upgrade.sh postun uninstall @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh postun uninstall @version@ $*
 fi
 ) >> /tmp/indimail-mta-setup.log 2>&1
 
@@ -2212,10 +2212,10 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{libexecdir}/upgrade.sh posttrans noargs @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh posttrans noargs @version@ $*
 ) >> /tmp/indimail-mta-setup.log 2>&1
 fi
 
@@ -2267,10 +2267,10 @@ if [ -f %{_prefix}/bin/svok ] ; then
     sleep 5
   fi
 fi
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Upgrade Script for pretrans"
-  /bin/sh %{libexecdir}/upgrade.sh pretrans noargs @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs @version@ $*
 ) > /tmp/daemontools-setup.log 2>&1
 fi
 
@@ -2339,9 +2339,9 @@ fi
 (
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh preun upgrade @version@ "$argv1"
+    /bin/sh %{libexecdir}/qupgrade.sh preun upgrade @version@ "$argv1"
   fi
   exit 0
 fi
@@ -2382,9 +2382,9 @@ if [ -f %{_prefix}/bin/svok ] ; then
   fi
 fi
 
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/upgrade.sh preun uninstall @version@ "$argv1"
+  /bin/sh %{libexecdir}/qupgrade.sh preun uninstall @version@ "$argv1"
 fi
 
 # Remove IndiMail being started on system boot
@@ -2404,9 +2404,9 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh postun upgrade @version@ $*
+    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade @version@ $*
   fi
   echo "recreating ld.so cache"
   /sbin/ldconfig
