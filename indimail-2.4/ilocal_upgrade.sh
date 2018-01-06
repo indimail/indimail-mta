@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Log: local_upgrade.sh,v $
+# $Log: ilocal_upgrade.sh,v $
 # Revision 2.18  2017-12-30 21:50:01+05:30  Cprogrammer
 # create environment variable DISABLE_PLUGIN
 #
@@ -55,7 +55,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: local_upgrade.sh,v 2.18 2017-12-30 21:50:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.18 2017-12-30 21:50:01+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)

@@ -167,7 +167,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar clearopensmtp \
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 cindimail hashtable displaytop \
 						   updatefile
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime \
-						  myslave bogofilter-qfe upgrade.sh local_upgrade.sh
+						  myslave bogofilter-qfe iupgrade.sh ilocal_upgrade.sh
 
 indimailauthlib_PROGRAMS = authindi authpgsql
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Log: upgrade.sh,v $
+# $Log: iupgrade.sh,v $
 # Revision 2.6  2017-11-06 21:45:55+05:30  Cprogrammer
 # fixed upgrade script for posttrans
 #
@@ -19,7 +19,7 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: upgrade.sh,v 2.6 2017-11-06 21:45:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: iupgrade.sh,v 2.6 2017-11-06 21:45:55+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {

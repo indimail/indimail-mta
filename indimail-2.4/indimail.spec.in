@@ -1272,8 +1272,8 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/cputime
 %attr(755,root,qmail)                   %{libexecdir}/myslave
 %attr(755,root,qmail)                   %{libexecdir}/bogofilter-qfe
-%attr(755,root,qmail)                   %{libexecdir}/upgrade.sh
-%verify (not md5 size mtime mode)       %{libexecdir}/local_upgrade.sh
+%attr(755,root,qmail)                   %{libexecdir}/iupgrade.sh
+%verify (not md5 size mtime mode)       %{libexecdir}/ilocal_upgrade.sh
 
 # qmail binaries
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-popbull
@@ -2335,10 +2335,10 @@ if [ -d %{_prefix} -a -d /service ] ; then
     fi
   fi
 fi
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/iupgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for pretrans"
-  /bin/sh %{libexecdir}/upgrade.sh pretrans noargs %{version} $*
+  /bin/sh %{libexecdir}/iupgrade.sh pretrans noargs %{version} $*
 ) > /tmp/indimail-setup.log 2>&1
 fi
 
@@ -2354,10 +2354,10 @@ fi
 >> /tmp/indimail-setup.log
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/iupgrade.sh ] ; then
   (
     echo "Running Custom Upgrade Script for pre upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh pre upgrade %{version} $*
+    /bin/sh %{libexecdir}/iupgrade.sh pre upgrade %{version} $*
   ) >> /tmp/indimail-setup.log 2>&1
   fi
   exit 0
@@ -2453,10 +2453,10 @@ fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
   echo "doing post upgrade activities"
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/iupgrade.sh ] ; then
     /sbin/ldconfig
     echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh post upgrade %{version} $*
+    /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $*
   fi
   if [ -f /etc/init.d/indimail ] ; then
     cmp -s %{_prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1
@@ -2907,9 +2907,9 @@ if [ -f %{sysconfdir}/cronlist ] ; then
   /usr/bin/crontab -u root %{sysconfdir}/cronlist
 fi
 
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/iupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
-  /bin/sh %{libexecdir}/upgrade.sh post install %{version} $*
+  /bin/sh %{libexecdir}/iupgrade.sh post install %{version} $*
 fi
 ) >> /tmp/indimail-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
@@ -2962,9 +2962,9 @@ fi
 (
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/iupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh preun upgrade %{version} "$argv1"
+    /bin/sh %{libexecdir}/iupgrade.sh preun upgrade %{version} "$argv1"
   fi
   exit 0
 fi
@@ -2992,9 +2992,9 @@ if [ -f %{_prefix}/bin/svok ] ; then
   fi
 fi
 
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/iupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/upgrade.sh preun uninstall %{version} "$argv1"
+  /bin/sh %{libexecdir}/iupgrade.sh preun uninstall %{version} "$argv1"
 fi
 
 # Remove IndiMail being started on system boot
@@ -3014,9 +3014,9 @@ default_domain=`uname -n`
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (
-  if [ -f %{libexecdir}/upgrade.sh ] ; then
+  if [ -f %{libexecdir}/iupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/upgrade.sh postun upgrade %{version} $*
+    /bin/sh %{libexecdir}/iupgrade.sh postun upgrade %{version} $*
   fi
   ) >> /tmp/indimail-setup.log
   echo "recreating ld.so cache"
@@ -3127,9 +3127,9 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
   fi
 fi
 
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/iupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
-  /bin/sh %{libexecdir}/upgrade.sh postun uninstall %{version} $*
+  /bin/sh %{libexecdir}/iupgrade.sh postun uninstall %{version} $*
 fi
 ) >> /tmp/indimail-setup.log 2>&1
 
@@ -3141,10 +3141,10 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-if [ -f %{libexecdir}/upgrade.sh ] ; then
+if [ -f %{libexecdir}/iupgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{libexecdir}/upgrade.sh posttrans noargs %{version} $*
+  /bin/sh %{libexecdir}/iupgrade.sh posttrans noargs %{version} $*
 ) >> /tmp/indimail-setup.log 2>&1
 fi
 
