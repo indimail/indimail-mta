@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.19  2018-01-08 10:52:23+05:30  Cprogrammer
+# fixed typo
+#
 # Revision 2.18  2017-12-30 21:50:01+05:30  Cprogrammer
 # create environment variable DISABLE_PLUGIN
 #
@@ -55,7 +58,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.18 2017-12-30 21:50:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.19 2018-01-08 10:52:23+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -165,7 +168,7 @@ do
 done
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
-	check_update_if_diff $i/variables/TLS_CACHEFILE /etc/indimail/certs/courierslcache
+	check_update_if_diff $i/variables/TLS_CACHEFILE /etc/indimail/certs/couriersslcache
 	check_update_if_diff $i/variables/TLS_CERTFILE /etc/indimail/certs/servercert.pem
 done
 for i in /service/qmail-poppass* /service/indisrvr.*
