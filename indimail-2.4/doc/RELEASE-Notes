@@ -1,4 +1,4 @@
-DATE: Wed Dec 27 18:42:49 IST 2017
+DATE: Sat Jan  6 12:27:28 IST 2018
 
 Announcing Release 2.4 of IndiMail.
 
@@ -93,3 +93,4 @@ Release 2.4 Start 04/12/2017
 11. fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
 12. svctool - new funtion default_indimail_control for creating
     indimail specific control files
+13. svctool - seperated out qmail, indimail config
