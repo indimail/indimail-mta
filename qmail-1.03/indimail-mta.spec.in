@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.121 2018-01-04 08:44:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.122 2018-01-08 10:55:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1767,6 +1767,7 @@ if [ %nodksignatures -eq 0 ] ; then
   if [ -x %{_prefix}/bin/dknewkey ] ; then
     ver_opt="both"
     sign_opt="both"
+    key_bit=$KEYBIT # set KEYBIT in environment variable
     if [ " $key_bit" = " " ] ; then
       key_bit=1024
     fi
