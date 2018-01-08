@@ -149,13 +149,13 @@ install: build
 		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
 	fi
 	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
-	if [ -f upgrade.sh ] ; then \
+	if [ -f qmail-1.03/qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 upgrade.sh "$(DESTDIR)$(libexecdir)"/upgrade.sh; \
+		install -m 0755 qmail-1.03/qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
 	fi
-	if [ -f local_upgrade.sh ] ; then \
+	if [ -f qmail-1.03/qlocal_upgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 local_upgrade.sh "$(DESTDIR)$(libexecdir)"/local_upgrade.sh; \
+		install -m 0755 qmail-1.03/qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
 	fi
 
 binary-indep: build install
