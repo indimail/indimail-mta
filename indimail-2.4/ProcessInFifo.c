@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.48  2018-01-08 10:46:52+05:30  Cprogrammer
+ * create lastauth table if not existing
+ *
  * Revision 2.47  2017-12-20 13:42:58+05:30  Cprogrammer
  * BUG - initialize pwStat
  *
@@ -156,7 +159,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.47 2017-12-20 13:42:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.48 2018-01-08 10:46:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -179,6 +182,7 @@ static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.47 2017-12-20 13:42:58+05:3
 #include <time.h>
 #include <sys/socket.h>
 #include "indimail.h"
+#include <mysqld_error.h>
 #include "error_stack.h"
 #include "in_bsearch.h"
 #ifdef ENABLE_ENTERPRISE
@@ -326,6 +330,11 @@ cache_active_pwd(time_t tval)
 	if ((err = vauth_open((char *) 0)) != 0)
 		return (-1);
 	if (mysql_query(&mysql[1], SqlBuf)) {
+		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
+			create_table(ON_LOCAL, "lastauth", LASTAUTH_TABLE_LAYOUT);
+			vclose();
+			return (0);
+		}
 		mysql_perror("cache_active_pwd-mysql_query: %s", SqlBuf);
 		return (-1);
 	}
