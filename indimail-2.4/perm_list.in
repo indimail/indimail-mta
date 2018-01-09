@@ -357,7 +357,8 @@
 %attr(0755,root,qmail) @libexecdir@/yearcal
 %attr(0755,root,qmail) @libexecdir@/batv
 %attr(0755,root,qmail) @libexecdir@/bogofilter-qfe
-%attr(0755,root,qmail) @libexecdir@/upgrade.sh
+%attr(0755,root,qmail) @libexecdir@/iupgrade.sh
+%attr(0755,root,qmail) @libexecdir@/ilocal_upgrade.sh
 %attr(0755,root,qmail) @libexecdir@/qmail-lagcheck
 
 %attr(0755,root,qmail) @libexecdir@/columnt
@@ -502,13 +503,13 @@
 #
 # Config files
 #
-%attr(0444,root,root)          @sysconfdir@/controlfiles
-%attr(0444,root,root)          @sysconfdir@/cronlist
+%attr(0444,root,root)          @sysconfdir@/controlfiles.i
+%attr(0444,root,root)          @sysconfdir@/cronlist.i
 %attr(0444,root,root)          @sysconfdir@/headerlist
 %attr(0444,root,root)          @sysconfdir@/indimail.mrtg.cfg
 %attr(0444,root,root)          @sysconfdir@/indimail.settings
 %attr(0444,root,root)          @sysconfdir@/osh.table
-%attr(0444,root,root)          @sysconfdir@/perm_list
+%attr(0444,root,root)          @sysconfdir@/perm_list.i
 %attr(0444,root,root)          @sysconfdir@/qmailprog.list
 %attr(0444,root,root)          @sysconfdir@/system.flashlogin
 %attr(0444,root,root)          @sysconfdir@/system.menu
