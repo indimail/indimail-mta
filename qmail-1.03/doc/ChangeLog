@@ -1,93 +1,35 @@
-* Tue Jan 09 2018 08:44:34 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
-Release 2.2 Start 08/05/2017
-10/05/2017
-1.  use packetsize > 512 to avoid dkim failures for sites having long txt
-    records (hotmail.com)
-2.  config-fast removed display of DESTDIR
-11/05/2017
-3.  svscanboot/svscan option run .svscan/run or INITCMD. Use unshare --mount
-    option to mount private mounts like custom resolv.conf
-4.  svscan - run .svscan/shutdown on SIGTERM
-12/05/2017
-5.  added inotify program to get file system events
-6.  added resolvconf service
-15/05/2017
-7.  qmailctl bug - use sysconfdir instead of INDIMAILDIR
-8.  qmail-remote - use X-SMTPROUTES env variable for setting artificial smtp routes.
-    SMTPROUTES takes precendence over X-SMTPROUTES
-9.  use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to
-    configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
-10. smtpd.c - fixed spurious error "no valid cert for gateway
-11. qmail-remote.c - fix for SMTPROUTE of the form
-    domain:x.x.x.x::penalty:max_tolerance username password
-16/05/2017
-12. refactored dns_text() function in libdkim, surblfilter.c, dns_text.c,
-    dns.c
-13. dkimverify.cpp - replace strtok() with strtok_r() for thread safe
-    operation.
-08/08/2017
-14. Port for openssl 1.1.0
-23/08/2017
-15. smtpd.c - replaced SSLv23_server_method() with TLS_server_method()
-16. smtpd.c - fixed ifdefs for openssl 1.0.1 version.
-17. qmail-remote.c replaced SSLv23_client_method() with TLS_client_method()
-18. use tlsclientmethod, tlsservermethod control files only for openssl
-    version < 1.0.1
-24/08/2017
-19. qmail-smtpd, qmail-remote - improved logging of TLS method errors
-26/08/2017
-20. smtpd.c qmail-remote.c - fixed readling of tlsservermethod, tlsclientmethod control file
-21. smtpd.c - initialize proto.len in smtp_init()
-22. qmail-showctl - fixed SIGSEGV
-29/08/2017
-23. upgraded fetchmail to version 6.4.0
-01/09/2017
-24. libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
-25. skip envdir if .svscan/variables directory is missing
-26. libdkim - added CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder to configure.ac
-27. libdkim - removed compiler warnings
-28. qmail-dkim - added missing DKIM_MFREE
-09/09/2017
-29. indimail-mta, added svctool, systemctl unit file for daemontools package
-05/10/2017
-30. qmail-cdb.c - fixed wrong control filename display in error message
-31. recipients.c use users/recipients instead of control/recipients
-11/10/2017
-32. renamed systemd unit file indimail.service to svscan.service
-12/10/2017
-33. upgrade boot scripts if new package has updates
-15/10/2017
-34. config-fast.sh - fixed syntax error due to unterminated variable
-21/10/2017
-35. svctool,create_services,postinst - refactored code by improving calls to svctool
-22/10/2017
-36. fixes for latest clamd/freshclam versions (ClamAV 0.99.2)
-37. do systemctl daemon-reload if systemd unit file is changed
-38. fixes in upgrade.sh, local_upgrade.sh scripts
-39. qmail-greyd.c - fixed search record failure when linked list contained just 1 entry
-07/11/2017
-40. changed logdir to /var/log/svc
-21/11/2017
-41. fixed syntax error with --qhpsi option changes in spec/postinst file
-24/11/2017
-42. qmail-greyd.c - added verbose variable to suppress few messages
-25/11/2017
-43. qmail-greyd.c - initialize h_allocated, fix SIGUSR1 sig handler,
-    expire records when loading context file
-26/11/2017
-44. qmail-greyd.c - fixed record expiry logic
-04/12/2017
-45. removed version number from libsrs2 filename
+* Tue Jan 09 2018 08:49:24 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
+Release 2.3 Start 25/12/2017
 25/12/2017
-46. tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen()
+1.  tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen()
     to be called for loading shared library
-47. svctool - add option --use-dlmopen to configure tcpserver to use dlmopen()
+2.  svctool - add option --use-dlmopen to configure tcpserver to use dlmopen()
     instead of dlopen() to load shared objects
-48. fixed smtp plugin by setting PLUGINDIR correctly
-49. Fixed dlopen() flags for loading smtp plugins
-50. qmailctl - update cdb only when input file date is newer than cdb file
-51. svctool - fixed conf_dir variable getting clobbered by create_fifologger,
+3.  fixed smtp plugin by setting PLUGINDIR correctly
+4.  Fixed dlopen() flags for loading smtp plugins
+5.  qmailctl - update cdb only when input file date is newer than cdb file
+6.  svctool - fixed conf_dir variable getting clobbered by create_fifologger,
     preventing creation of LOGFILTER service variable
-52. fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
-53. svctool - seperated out qmail, indimail config
-54. Renamed controlfiles to controlfiles.q
+7.  fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
+8.  svctool - seperated out qmail, indimail config
+9.  Renamed controlfiles to controlfiles.q
+09/01/2018
+10. etrn.c - load count_dir() using loadLibrary()
+11. moved svctool to qmail-1.03
+12. hier.c - renamed cronlist to cronlist.q
+13. hier.c - added populated nodnscheck control file
+14. hier.c - moved leapsecs.dat, leapsecs.txt to /etc/indimail
+15. hier.c - added software license for yahoo domainkeys
+16. instcheck.c - removed unused function ci()
+17. leapsecs_read.c - moved leapsecs.dat to /etc/indimail
+18. updated indimail-mta.spec, qupgrade.sh, qlocal_upgrade.sh, Makefile
+    for v2.3 indimail-mta
+19. qmail-lspawn.c - use loadLibrary() to load vauth_open(), vauth_getpw(),
+	vclose(), isvirtualdomain() functions
+20. qmail-queue.c - use indimail-mta identifier in received headers
+21. qmail-rspawn.c - use loadLibrary() to load vget_real_domain(),
+	is_distributed_domain(), findhost()
+22. qmail-send.c, qmail-todo.c - removed non-indimail code
+23. qmail-showctl - use loadLibrary() to load indimail code
+24. qmail-sql - link with MySQL lib without requirein indimail
+25. qregex.c - compile sql code with USE_MYSQL definition
