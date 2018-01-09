@@ -148,7 +148,6 @@ install: build
 	if [ -f ../BUILD/debian/usr.bin.freshclam ] ; then \
 		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
 	fi
-	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
 	if [ -f qmail-1.03/qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
 		install -m 0755 qmail-1.03/qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
@@ -157,6 +156,7 @@ install: build
 		mkdir -p $(DESTDIR)$(libexecdir); \
 		install -m 0755 qmail-1.03/qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
 	fi
+	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
 
 binary-indep: build install
 	dh_testdir
@@ -165,6 +165,7 @@ binary-indep: build install
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mta
 	dh_install --sourcedir=$(DESTDIR) -pdaemontools
 	dh_install --sourcedir=$(DESTDIR) -pucspi-tcp
+	dh_install --sourcedir=$(DESTDIR) -pindimail-mini
 	dh_installchangelogs
 	dh_installdocs
 	dh_link
