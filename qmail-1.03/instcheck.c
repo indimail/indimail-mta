@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.26  2018-01-09 11:43:43+05:30  Cprogrammer
+ * removed unused function ci()
+ *
  * Revision 1.25  2017-05-05 20:19:20+05:30  Cprogrammer
  * added logdir
  *
@@ -282,39 +285,6 @@ c(home, subdir, file, uid, gid, mode)
 	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 1);
 }
 
-#ifdef INDIMAIL
-void
-ci(home, subdir, file, uid, gid, mode)
-	char           *home;
-	char           *subdir;
-	char           *file;
-	int             uid;
-	int             gid;
-	int             mode;
-{
-	if (chdir(home) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	if (chdir(subdir) == -1)
-	{
-		if (errno == error_noent)
-		{
-			if (!str_diff(subdir, "lib"))
-			{
-				if (chdir("lib64") == -1)
-				{
-					if (errno == error_noent)
-						return;
-					strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
-				} /*- fall through */
-			} else
-				return;
-		} else
-			strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
-	}
-	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 0);
-}
-#endif
-
 void
 cd(home, subdir, file, uid, gid, mode)
 	char           *home;
@@ -352,7 +322,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.25 2017-05-05 20:19:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.26 2018-01-09 11:43:43+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
