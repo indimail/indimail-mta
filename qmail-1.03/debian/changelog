@@ -52,5 +52,6 @@ indimail-mta (2.2-2) unstable; urgency=low
   * svctool - fixed conf_dir variable getting clobbered by create_fifologger, preventing creation of LOGFILTER service variable
   * fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
   * svctool - seperated out qmail, indimail config
+  * Renamed controlfiles to controlfiles.q
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 27 Dec 2017 00:00:45 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 09 Jan 2018 09:22:12 +0530

@@ -1,4 +1,4 @@
-* Wed Dec 27 2017 00:00:45 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
+* Tue Jan 09 2018 09:19:33 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
 04/12/2017
 01. remove -release version_number from la_LDFLAGS in indimail, libcdb,
@@ -25,6 +25,8 @@ Release 2.4 Start 04/12/2017
     indimail specific control files
 04/01/2018
 13. svctool - seperated out qmail, indimail config
+08/01/2018
+14. ProcessInFifo.c - create lastauth if not existing
 
 * Mon Dec 04 2017 18:10:11 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 01/09/2017
