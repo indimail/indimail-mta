@@ -9,38 +9,19 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 
 Package: indimail
 Architecture: any
-Pre-Depends: virtual-mysql-server, bogofilter-wordlist, mrtg
+Pre-Depends: indimail-mta, virtual-mysql-server, bogofilter-wordlist, mrtg
 Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils
-Replaces: indimail-mini, libindimail, indimail-mta
-Conflicts: indimail-mini, indimail-mta
-Provides: libindimail, indimail-mini, indimail-mta
-Description: IndiMail is a messaging platform for Mail Service Providers
- It is built using the following packages
+Provides: libindimail
+Replaces: libindimail
+Description: IndiMail is a messaging platform providing multi-cluster domain support.
+ It provides IMAP/POP3 protocol using Courier Imap, SPAM filtering using
+ bogofilter (A Bayesian Spam Filter), mail retreival using Fetchmail.
+ Additionally it packages other useful utilities like mpack, unpack,
+ altermime, ripmime, fortune, flash.
  .
- qmail,
- serialmail,
- qmailanalog,
- dotforward,
- fastforward,
- mess822,
- daemontools,
- ucspi-tcp,
- Courier IMAP/POP3,
- Bogofilter - A Bayesian Spam Filter,
- Clam AntiVirus - GPL anti-virus toolkit for UNIX,
- Fetchmail,
- other useful utilities (mpack, unpack, altermime, ripmime, fortune, flash).
- . 
- IndiMail also provides Management of Virtual domains. Lot of the
- integration has been done by modifying some of the core components.
- You can read the feature list to get an idea of the changes and new
- features that have been added over the original packages.
- . 
- The package combines qmail with other packages like courier-imap for
- IMAP/POP3, bogofilter for SPAM control, fetchmail for hosts with 
- intermittent connectivity. IndiMail provides ability for a single domain
- to have users across multiple hosts (even across different geographical
- locations) and tools to manage virtual domains ?
+ IndiMail provides ability for a single domain to have users across multiple
+ hosts (even across different geographical locations) and tools to manage
+ virtual domains.
 
 Package: indimail-devel
 Depends: ${misc:Depends}
@@ -57,15 +38,3 @@ Architecture: any
 Description: IndiMail - Development libraries
  This package contains the development libraries
  necessary to develop IndiMail client applications.
-
-Package: indimail-mini
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils
-Section: misc
-Architecture: any
-Breaks: indimail
-Description: IndiMail - Mini Client Installation
- This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
- programs to have a mini-indimail installation.
- .
- A mini-indimail installation doesn't have a mail queue. It gives each new message to a
- central server using QMQP.
