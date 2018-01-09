@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: catChangeLog,v $
+# Revision 2.4  2018-01-09 12:07:45+05:30  Cprogrammer
+# renamed ChangeLog to ChangeLog.indimail
+#
 # Revision 2.3  2017-04-24 09:09:51+05:30  Cprogrammer
 # fixed changelog date
 #
@@ -10,10 +13,10 @@
 # utility to append changelog to indimail.spec
 #
 #
-# $Id: catChangeLog,v 2.3 2017-04-24 09:09:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: catChangeLog,v 2.4 2018-01-09 12:07:45+05:30 Cprogrammer Exp mbhangui $
 #
 flag=0
-cat doc/ChangeLog|while read line
+cat doc/ChangeLog.indimail|while read line
 do
 	echo "$line"|grep "^*" > /dev/null
 	if [ $? -eq 0 -a $flag -ne 0 ] ; then
