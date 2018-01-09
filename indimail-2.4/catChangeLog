@@ -16,7 +16,12 @@
 # $Id: catChangeLog,v 2.4 2018-01-09 12:07:45+05:30 Cprogrammer Exp mbhangui $
 #
 flag=0
-cat doc/ChangeLog.indimail|while read line
+if [ $# -eq 1 ] ; then
+	file=$1
+else
+	file=doc/ChangeLog.indimail
+fi
+cat $file|while read line
 do
 	echo "$line"|grep "^*" > /dev/null
 	if [ $? -eq 0 -a $flag -ne 0 ] ; then
