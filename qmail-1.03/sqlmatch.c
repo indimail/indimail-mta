@@ -28,8 +28,8 @@
  * Initial revision
  *
  */
-#include "hasindimail.h"
-#ifdef INDIMAIL
+#include "hasmysql.h"
+#ifdef HAS_MYSQL
 #include "stralloc.h"
 #include "byte.h"
 #include "error.h"
@@ -542,8 +542,5 @@ getversion_sqlmatch_c()
 {
 	static char    *x = "$Id: sqlmatch.c,v 1.8 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
 
-#ifdef INDIMAIL
-	x = sccsidh;
-#endif
 	x++;
 }
