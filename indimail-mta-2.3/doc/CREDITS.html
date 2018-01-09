@@ -1,0 +1,485 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 2.3  (Linux)">
+	<META NAME="AUTHOR" CONTENT="Manvendra Bhangui">
+	<META NAME="CREATED" CONTENT="20080610;20210500">
+	<META NAME="CHANGEDBY" CONTENT="Manvendra Bhangui">
+	<META NAME="CHANGED" CONTENT="20080626;10584700">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { size: 8.5in 11in; margin: 0.79in }
+		P { margin-bottom: 0.08in }
+		H1 { margin-bottom: 0.08in }
+		H1.western { font-family: "Liberation Sans", sans-serif; font-size: 16pt }
+		H1.cjk { font-family: "DejaVu LGC Sans"; font-size: 16pt }
+		H1.ctl { font-family: "Tahoma"; font-size: 16pt }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<H1 CLASS="western">What is IndiMail</H1>
+<P><BR><BR>
+</P>
+<P STYLE="margin-bottom: 0in">Would anybody be interested in a
+package which combines qmail with other packages like courier-imap
+for IMAP/POP3, bogofilter for SPAM control, fetchmail for hosts with
+intermittent connectivity, ability for a single domain to have users
+across multiple hosts (even across different geographical locations)
+and tools to manage virtual domains ?<BR><BR>As a hobby way back in
+2001, I started playing with qmail. Over the years, i learnt how to
+use qmail and put together a complete solution which worked quite
+well for me and can work for large ISP installations (&gt; 8 million+
+users in a single domain across multiple hosts and more than 4
+million deliveries per day). Maybe some of the stuff could prove
+useful for someone who had the same situation as me (very little
+budget to buy costly NAS filers, availability of simple hardware,
+etc). So with this thoughts, I am attempting my first big
+contribution to open source. I am not sure how one releases code. But
+I have opened a project called '<A HREF="http://www.indimail.org/" NAME="Indimail - Reclaim Your Email">IndiMail</A>'.</P>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<P STYLE="margin-bottom: 0in">Since I know very little of how to
+release an open source package (GPL), i would most likely could do
+well with suggestions/ideas. I do not have my own hosting site. So I
+am thinking of using sourceforge. I hope using sourceforge will not
+be a rocket science for me. I have a full time job and that is one
+thing that may not allow me to put my full time on this. Also this
+was one of the reason, I have hesitated for so long to release this.
+Now that DJB has released some of his code to <A HREF="http://cr.yp.to/distributors.html">public
+domain</A>. But better late than never. I am currently reading up on
+how to use sourceforge. I have done most of the documentation. But
+need some time to start uploading things on sourceforge so that
+everyone can use it. Is there any sourceforge for dummies? The
+INSTALL is <A HREF="http://indimail.blogspot.com/2008/06/installing-indimail.html">here.</A></P>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<P STYLE="margin-bottom: 0in"><B>DISCLAIMER</B></P>
+<P STYLE="margin-bottom: 0in">There is no warranty implied or
+otherwise with this package. I believe in OpenSource Philosophy and
+this is simply an attempt to give back to the OpenSource community.
+Other than that I do not desire any monetory or material benifit out
+of this.</P>
+<P STYLE="margin-bottom: 0in"><BR><FONT SIZE=4 STYLE="font-size: 15pt"><B>What
+will you find in this package</B></FONT><BR><BR>Integrated solution
+of the following packages <A HREF="http://cr.yp.to/qmail.html">qmail</A>,
+<A HREF="http://cr.yp.to/serialmail.html">serialmail</A>,
+<A HREF="http://cr.yp.to/qmailanalog.html">qmailanalog</A>,
+<A HREF="http://cr.yp.to/dot-forward.html">dotforward</A>,
+<A HREF="http://cr.yp.to/fastforward.html">fastforward</A>, <A HREF="http://cr.yp.to/mess822.html">mess822</A>,
+<A HREF="http://cr.yp.to/daemontools.html">daemontools</A>,
+<A HREF="http://cr.yp.to/ucspi-tcp.html">ucspi-tcp</A>, <A HREF="http://indimail.sourceforge.net/">Indimail
+- Management of Virtual domains</A>, <A HREF="http://www.courier-mta.org/imap/">Courier
+IMAP/POP3</A>, <A HREF="http://www.bogofilter.org/">Bogofilter - A
+Bayesian Spam Filter</A>, <A HREF="http://www.catb.org/%7Eesr/fetchmail/">Fetchmail</A>,
+other useful utilities.</P>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<P STYLE="margin-bottom: 0in">If any modification or addition has
+been done to DJB's code, it has been done in the same style (not
+using the standard C library and using only DJB's functions like
+substdio, stralloc, etc). All man pages have been modified to reflect
+changes.<BR><BR>This package also allows me to split my users in a
+single domain across multiple hosts without using NFS. I haven't
+looked at qmail-ldap but maybe this package does something like
+qmail-ldap but with MySQL as the backend for storing user
+information. The tools for administering virtual domains/users will
+have a lot in similarity to the vpopmail package from inter7.com. The
+table structures are the same. Plenty of code (for managing virtual
+domains/users) has been borrowed from there. Since the user get split
+across multiple hosts, IndiMail also provides two proxies for IMAP &amp;
+POP3 protocol. The proxy servers run using daemontools and are by
+default set under supervise. You can use any IMAP/POP3 server behind
+the proxy. IndiMail also allows you to add any proprietory mail
+server serving some of the users of any domain which you want to
+configure under indimail. This makes it easy to migrate from an
+existing proprietory mail server like MS Exchange in 5 steps. The
+Steps are</P>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<OL>
+	<LI><P STYLE="margin-bottom: 0in">You simply set up a new
+	installation with IndiMail with the existing domain</P>
+	<LI><P STYLE="margin-bottom: 0in">Add the IP address of the Exchange
+	Server in host_table and the SMTP port of the Exchange Server in the
+	table smtp_port</P>
+	<LI><P STYLE="margin-bottom: 0in">Add users on the exchange server
+	to a table called hostcntrl (either manually or using the utility
+	hostcntrl).</P>
+	<LI><P STYLE="margin-bottom: 0in">Set up SMTP, IMAP Proxy, POP3
+	Proxy on the IndiMail server</P>
+	<LI><P STYLE="margin-bottom: 0in">Change the MX to point to the
+	IndiMail server</P>
+</OL>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<P STYLE="margin-bottom: 0in">Some of the features available in this
+package</P>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<OL>
+	<LI><P STYLE="margin-bottom: 0in">Identation of djb's code (using
+	indent) so that a mortal like me could understand it :)</P>
+	<LI><P STYLE="margin-bottom: 0in">use getpwnam to use uids/gids from
+	/etc/passwd, /etc/group (allows me to transfer the installation to
+	any host regardless of the ids in /etc/passwd)</P>
+	<LI><P STYLE="margin-bottom: 0in">configurable control directory
+	(using CONTROLDIR environment variable) (allows me to have multiple
+	running copies of qmail using a single binary installation)</P>
+	<LI><P STYLE="margin-bottom: 0in">configurable queue directory
+	(using QUEUEDIR environment variable) (allows me to have multiple
+	queues on a host with a single qmail installation). 
+	</P>
+	<P STYLE="margin-bottom: 0in">qmail-multi (queue load balancer) uses
+	qmail-queue to deposit mails across multiple queues. Each queue has
+	its own qmail-send process. You can spread the individual queues
+	across multiple filesystems on different controllers to maximize on
+	IO throughput.</P>
+	<P STYLE="margin-bottom: 0in">The number of queues is configurable
+	by three environment variables QUEUE_BASE, QUEUE_COUNT, and
+	QUEUE_START.</P>
+	<P STYLE="margin-bottom: 0in">A queue in indimail is defined as a
+	collection of multiple queues. Each queue in the collection can have
+	one or more SMTP listener but a single delivery (qmail-send)
+	processes. It is possible to have the entire queue collection
+	without a delivery process (e.g. SMTP on port 366 – ODMR). The
+	QUEUE_COUNT can be defined based on how powerful your host is (IO
+	bandwidth, etc).</P>
+	<LI><P STYLE="margin-bottom: 0in">ETRN, ATRN, ODMR (RFC 2645)
+	support</P>
+	<LI><P STYLE="margin-bottom: 0in">accesslist - restrictions between
+	mail transactions between email ids (you can decide who can send
+	mails to whom)</P>
+	<LI><P STYLE="margin-bottom: 0in">bodycheck - checks on header/body
+	on incoming emails (for spam, virus security and other needs)</P>
+	<LI><P STYLE="margin-bottom: 0in">hostaccess - provides domain, IP
+	address pair access list control. e.g. you can define from which set
+	of addresses mail from yahoo.com will be accepted.</P>
+	<LI><P STYLE="margin-bottom: 0in">chkrcptdomains - rcpt check on
+	selective domains</P>
+	<LI><P STYLE="margin-bottom: 0in">NULLQUEUE, qmail-nullqueue
+	(blackhole support - like qmail-queue but mails go into a
+	blackhole). I typically uses this in conjuction with envrules to
+	trash the mail into blackhole without spending any disk IO.</P>
+	<LI><P STYLE="margin-bottom: 0in">envrules - recipient/sender based
+	set or unset environment variables (qmail-smtpd, qmail-inject,
+	qmail-local, qmail-remote) any variables which controls the
+	behaviour of qmail-smtpd, qmail-inject, qmail-local, qmail-remote
+	e.g. NODNSCHECKS, DATABYTES, RELAYCLIENT, BADMAILFROM, etc can be
+	defined individually for a particular recipient or sender rather
+	than only in the run file</P>
+	<LI><P STYLE="margin-bottom: 0in">qmail-multi - run multiple filters
+	(qmail-smtpd) (something like qmail-qfilter). Also distributes mails
+	across multiple queues to do a load balancing act. qmail-multi
+	allowed me to process massive rate of incoming mails at my earlier
+	job with a ISP.</P>
+	<LI><P STYLE="margin-bottom: 0in">envheaders - Any thing defined
+	here e.g. Return-Path, qmail-queue sets Return-Path as an
+	environment variable with the value found in Return-Path header in
+	the email. This environment variable gets passed across the queue
+	and is also available to qmail-local, qmail-remote</P>
+	<LI><P STYLE="margin-bottom: 0in">logheaders - Any header defined in
+	this control file, gets written to file descriptor 2 with the value
+	found in the email.</P>
+	<LI><P STYLE="margin-bottom: 0in">removeheaders - Any header defined
+	here, qmail-queue will remove that header from the email</P>
+	<LI><P STYLE="margin-bottom: 0in">quarantine or QUARANTINE env
+	variable causes qmail-queue to replace the recipient list with the
+	value defined in the control file or the environment variable.
+	Additionally an environment variable X-Quarantine-ID: is set which
+	holds the orignal recipient list.</P>
+	<LI><P STYLE="margin-bottom: 0in">Added ability in qmail-queue to do
+	line processing. Line processing allows qmail-queue to do some of
+	the stuff mentioned above</P>
+	<LI><P STYLE="margin-bottom: 0in">plugins support for QHPSI
+	interface (qmail-queue). qmail-queue will use dlopen to load any
+	shared objected defined by PLUGINDIR environment. Multiple plugins
+	can be loaded. For details see man qmail-queue</P>
+	<LI><P STYLE="margin-bottom: 0in">QMAILLOCAL - Run executable
+	defined by this instead of qmail-local (qmail-local)<BR>QMAILREMOTE
+	- Run executable defined by this instead of qmail-remote
+	(qmail-remote)<BR>Theoretically one can exploit QMAILLOCAL,
+	QMAILREMOTE variables to route mails for a domain across multiple
+	mail stores.</P>
+	<LI><P STYLE="margin-bottom: 0in">qmail-rspawn hack which connects
+	to MySQL and keeps the connection open. This gives qmail-rspawn to
+	do high speed user lookups in MySQL and to deliver the mail for a
+	single domain split across multiple mail stores.</P>
+	<LI><P STYLE="margin-bottom: 0in">Message Submission Port (port 587)
+	RFC 2476</P>
+	<LI><P STYLE="margin-bottom: 0in">Integrated Authenticted SMTP with
+	Indimail (PLAIN, LOGIN, CRAM-MD5, pop-bef-smtp)</P>
+	<LI><P STYLE="margin-bottom: 0in">qmail-remote can do User Based
+	Routing via SMTPROUTE environment. qmail-rspawn has the ability to
+	connect to MySQL and set SMTPROUTES. This gives split a domain
+	across multiple hosts without using NFS to mount multiple
+	filesystems on any host. One can even use a shell script, set the
+	environment variable and deliver mails to users across multiple
+	hosts. I call this dynamic SMTPROUTE</P>
+	<LI><P STYLE="margin-bottom: 0in">duplicate eliminator using
+	822header</P>
+	<LI><P STYLE="margin-bottom: 0in">qmail-remote has configurable TCP
+	timeout table (max_tolerance, min_backoff periods can be configured
+	in smtproutes)</P>
+	<LI><P STYLE="margin-bottom: 0in">Ability to change concurrency of
+	tcpserver without restarting tcpserver</P>
+	<LI><P STYLE="margin-bottom: 0in">Ability to restrict connections
+	per IP</P>
+	<LI><P STYLE="margin-bottom: 0in">multilog replaced buffer funtions
+	with substdio</P>
+	<LI><P STYLE="margin-bottom: 0in">supervise can run script shutdown
+	if present on svc -d</P>
+	<LI><P STYLE="margin-bottom: 0in">rfc3834 compliance for
+	qmail-autoresponder (provide Auto-Submitted, In-Reply-To, References
+	fields (RFC 3834))</P>
+	<LI><P STYLE="margin-bottom: 0in">ability to add disclaimer to
+	messages.</P>
+	<LI><P STYLE="margin-bottom: 0in">Proxy for IMAP and POP3. Allows
+	IMAP/POP3 protocol for users in a domain to be split across multiple
+	hosts. Also allows seamless integration of proprietary email servers
+	with indimail.</P>
+	<LI><P STYLE="margin-bottom: 0in">Dbserver</P>
+	<P STYLE="margin-bottom: 0in">serves as a high performance user
+	lookup daemon for qmail-smtpd (rcpt checks, authenticated SMTP,
+	RELAY check). Even the IMAP, POP3 authentication gets served by
+	inlookup. inlookup preforks configurable number of daemons which
+	opens multiple connections to MySQL and keep the connection
+	open.<BR>This gives inlookup a decent database performance when
+	handling millions of lookups in few hours. inlookup uses a fifo to
+	communicate with qmail-smtpd</P>
+	<LI><P STYLE="margin-bottom: 0in">indisrvr</P>
+	<P STYLE="margin-bottom: 0in">Was written to ease mail server
+	administration across multiple hosts. Allows ones to create, delete,
+	modify users and run any command as defined in variables.c. indisrvr
+	listens on a AF_INET socket.</P>
+	<LI><P STYLE="margin-bottom: 0in">svctool</P>
+	<P STYLE="margin-bottom: 0in">A simple tool which helps you to
+	configure any configuration item in indimail (creation of supervise
+	scripts, qmail configuration, installation of all default MySQL
+	tables, creation of default aliases, users, etc)</P>
+</OL>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<P STYLE="margin-bottom: 0in">Other features are as below which I
+have incorporated manually by hand as and when they came up at Qmail
+List &lt;<A HREF="mailto:Qmail%20List%20%3Cqmail@list.cr.yp.to%3E">qmail@list.cr.yp.to</A>&gt;</P>
+<H1 CLASS="western">CREDITS</H1>
+<P STYLE="margin-bottom: 0in"><BR>The credit for inspiration to
+write/put together this package is entire due to Dr. Daniel
+Bernstein. Had he not written qmail the way it is written, i wouldn't
+probably have fallen in love with the code. In no way is this package
+endorsed by DJB. Though I have put in lot of effort putting together
+this package, any bugs or flaws could be entirely due to me. So I
+would be glad if the community could further improve this. Since I
+have gained so much personally as well as professionally due to
+qmail, the least I can do is to put back my experiences and learnings
+for anyone who would be interested. I release my entire code as Open
+Source GPL.<BR><BR>My contribution is miniscule compared to what I
+have picked up from others in building the packages. Since this was
+being done for my own personal use, over the years, I may have missed
+mentioning some parts of the code that has been written by others. In
+case you know that I have missed out giving credit to anyone for any
+of the code or idea, let me know and I will be glad to add it here.</P>
+<P STYLE="margin-bottom: 0in"><A HREF="http://cr.yp.to/qmail.html">qmail</A>,
+<A HREF="http://cr.yp.to/serialmail.html">serialmail</A>,
+<A HREF="http://cr.yp.to/qmailanalog.html">qmailanalog</A>,
+<A HREF="http://cr.yp.to/dot-forward.html">dotforward</A>,
+<A HREF="http://cr.yp.to/fastforward.html">fastforward</A>, <A HREF="http://cr.yp.to/mess822.html">mess822</A>,
+<A HREF="http://cr.yp.to/daemontools.html">daemontools</A>,
+<A HREF="http://cr.yp.to/ucspi-tcp.html">ucspi-tcp</A>, Indimail -
+Management of Virtual domains, <A HREF="http://www.courier-mta.org/imap/">Courier
+IMAP/POP3</A>, <A HREF="http://www.bogofilter.org/">Bogofilter - A
+Bayesian Spam Filter</A>, <A HREF="http://www.catb.org/%7Eesr/fetchmail/">Fetchmail</A>,
+other useful utilities</P>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<P STYLE="margin-bottom: 0in">Dr. Daniel Bernstein for the following
+original packages which are there are <A HREF="http://cr.yp.to/">http://cr.yp.to</A></P>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<OL>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://cr.yp.to/qmail.html">qmail-1.03</A></P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://cr.yp.to/dot-forward.html">dotforward</A></P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://cr.yp.to/fastforward.html">fastforward</A></P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://cr.yp.to/qmailanalog.html">qmailanalog</A></P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://cr.yp.to/serialmail.html">serialmail</A></P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://cr.yp.to/ucspi-tcp.html">ucspi-tcp</A></P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://cr.yp.to/daemontools.html">daemontools</A></P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://cr.yp.to/mess822.html">mess822</A></P>
+	<LI><P STYLE="margin-bottom: 0in">checkpassword</P>
+</OL>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<P STYLE="margin-bottom: 0in">The site <A HREF="http://qmail.org/">http://qmail.org</A>
+and the qmail mailing list for wealth of information</P>
+<P STYLE="margin-bottom: 0in"><BR>
+</P>
+<OL>
+	<LI><P STYLE="margin-bottom: 0in">Russel Nelson - qmail-lint,
+	qmail-dk, big-todo, antivirus patch for qmail-smtpd, selfhelo,
+	reject relay probes, logselect</P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://www.inter7.com/">http://www.inter7.com</A>
+	- <A HREF="http://www.inter7.com/index.php?page=vpopmail">vpopmail</A>
+	- Chris Johnson, Ken Jones, Bill Shupp, Tom Collins</P>
+	<LI><P STYLE="margin-bottom: 0in">Chris Johnson - tarpitting,
+	RELAYMAILFROM patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Chris Kennedy – Blackhole</P>
+	<LI><P STYLE="margin-bottom: 0in">Charles Cazabon -
+	doublebounce-trim-patch <A HREF="http://www.qmail.org/doublebounce-trim.patch">http://www.qmail.org/doublebounce-trim.patch</A></P>
+	<LI><P STYLE="margin-bottom: 0in">Klaus Reimer - bouncecontrol patch
+		</P>
+	<LI><P STYLE="margin-bottom: 0in">Johannes Erdfelt - big-concurrency
+	patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Scott Gifford - 0.0.0.0 patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Chuck Foster - binding outgoing
+	connections to local interface</P>
+	<LI><P STYLE="margin-bottom: 0in">Andre Oppermann – ext-todo</P>
+	<LI><P STYLE="margin-bottom: 0in">Andreas Aardal Hanssen - ext-todo
+	and big-todo</P>
+	<LI><P STYLE="margin-bottom: 0in">Bruce Guenter - QMAILQUEUE,
+	qmail-qstat</P>
+	<LI><P STYLE="margin-bottom: 0in">Bruce Guenter - rate limiting
+	autoresponder based on Eric Huss's design</P>
+	<LI><P STYLE="margin-bottom: 0in">Bruce Guenter – syncdir</P>
+	<LI><P STYLE="margin-bottom: 0in">Bruce Guenter - qmail-qfilter,
+	QUEUE_EXTRA patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Dave Sill - Life with qmail,
+	inst_check script</P>
+	<LI><P STYLE="margin-bottom: 0in">Erwin Hoffman - QHPSI,
+	Authenticated SMTP, RFC1870 SMTP SIZE, SPAMCONTROL</P>
+	<LI><P STYLE="margin-bottom: 0in">Gerrit Pape - Man pages for
+	ucspi-tcp, daemontools-0.76</P>
+	<LI><P STYLE="margin-bottom: 0in">Peter Samuels – tai64nunix</P>
+	<LI><P STYLE="margin-bottom: 0in">John Levine - patch to matchup.c
+	to accept tai64n dates</P>
+	<LI><P STYLE="margin-bottom: 0in">John Levine - Auth SMTP for
+	ofmipd.c</P>
+	<LI><P STYLE="margin-bottom: 0in">Georg Lehner - qmailanalog better
+	integrated with multilog</P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://www.magma.com.ni/moin/TipsAnd/QmailAnalog">http://www.magma.com.ni/moin/TipsAnd/QmailAnalog</A></P>
+	<LI><P STYLE="margin-bottom: 0in">Chris Garrigues - pretty-print
+	Received: lines.</P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="ftp://ftp.foxharp.boston.ma.us/pub/pgf/qmail/mailroute.pl">ftp://ftp.foxharp.boston.ma.us/pub/pgf/qmail/mailroute.pl</A></P>
+	<LI><P STYLE="margin-bottom: 0in">Matt Ranney – qmail-lagcheck</P>
+	<LI><P STYLE="margin-bottom: 0in">Michele Beltrame - qmhandle
+	<A HREF="http://sourceforge.net/projects/qmhandle">http://sourceforge.net/projects/qmhandle</A></P>
+	<LI><P STYLE="margin-bottom: 0in">Eric Huss - queue-fix (with patch
+	by Matthew Harrel to work for big-todo)</P>
+	<LI><P STYLE="margin-bottom: 0in">Eric Huss - qmail-qmqpc timeout
+	patch</P>
+	<LI><P STYLE="margin-bottom: 0in">William E Baxtar - qtools -
+	<A HREF="http://www.superscript.com/qtools/intro.html">http://www.superscript.com/qtools/intro.html</A></P>
+	<LI><P STYLE="margin-bottom: 0in">Linux Magic - qmail-remove
+	<A HREF="http://www.linuxmagic.com/opensource/qmail/qmail-remove/">http://www.linuxmagic.com/opensource/qmail/qmail-remove/</A></P>
+	<LI><P STYLE="margin-bottom: 0in">Alex Kramarov –
+	qmail-print-queue</P>
+	<LI><P STYLE="margin-bottom: 0in">Folkert van Heusden – multitail</P>
+	<LI><P STYLE="margin-bottom: 0in">Russ Nelson/Ivan Kohler –
+	mbox2maildir.pl</P>
+	<LI><P STYLE="margin-bottom: 0in">Tetsu Ushijima - maildirdeliver -
+	<A HREF="http://www.din.or.jp/~ushijima/maildirdeliver.html">http://www.din.or.jp/~ushijima/maildirdeliver.html</A></P>
+	<LI><P STYLE="margin-bottom: 0in">Evan Champion - patch to
+	condredirect</P>
+	<LI><P STYLE="margin-bottom: 0in">John Saunders - patch to
+	date822fmt.c (emit dates in local timezones), newline patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Robert Sander - RECIPIENT
+	Extension</P>
+	<LI><P STYLE="margin-bottom: 0in">Chuck Foster - bindroutes patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Nick Leverton - holdremote patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Fred Lindberg - Preserve MIME-ness
+	of message when bouncing MIME message</P>
+	<LI><P STYLE="margin-bottom: 0in">Krzysztof Dabrowski -
+	Authenticated SMTP Patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Frederik Vermeulen – starttls</P>
+	<LI><P STYLE="margin-bottom: 0in">Frank DENIS - patch to truncate
+	bounce messages</P>
+	<LI><P STYLE="margin-bottom: 0in">Matthias Andree - Found the
+	'qmail-local tab' bug and introduced the 'sendmail -N dsn'
+	compatibility</P>
+	<LI><P STYLE="margin-bottom: 0in">Scott Gifford - ipme, moreipme
+	patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Charles Cazabon - patch to enforce
+	single recipients on bounces.</P>
+	<LI><P STYLE="margin-bottom: 0in">Jay Soffian - auth smtp patch for
+	qmail-remote</P>
+	<LI><P STYLE="margin-bottom: 0in">Adrian Ho - RFC 2821 in
+	qmail-remote</P>
+	<LI><P STYLE="margin-bottom: 0in">Ingo Rohloff - SMTP authentication
+	support to serialsmtp</P>
+	<LI><P STYLE="margin-bottom: 0in">Ward Vandewege - badrcptto patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Kazinori Fujiwara - ipv6 patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Len Budney – qscanq</P>
+	<LI><P STYLE="margin-bottom: 0in">Christophe Saout - SPF checker</P>
+	<LI><P STYLE="margin-bottom: 0in">David Phillips - qmail's
+	sendmail's -f set the default for the username like sendmail does.</P>
+	<LI><P STYLE="margin-bottom: 0in">Mark Belnap - Bounce Lifetime
+	patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Christopher K. Davis' DNS patch
+	handles a problem qmail has with DNS responses larger than the
+	standard</P>
+	<LI><P STYLE="margin-bottom: 0in">512 bytes.
+	<A HREF="http://www.ckdhr.com/ckd/qmail-103.patch">http://www.ckdhr.com/ckd/qmail-103.patch</A>
+	and</P>
+	<LI><P STYLE="margin-bottom: 0in">Mark Delany - wildmat patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Nagy Balazs - patch to ensure that
+	the domain name on the envelope sender is a valid DNS name.</P>
+	<LI><P STYLE="margin-bottom: 0in">re-read concurrencylocal
+	concurrency remote on SIGHUP.</P>
+	<LI><P STYLE="margin-bottom: 0in">Erik Sj&ouml;lund - qmail-local
+	tab patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Frank Denis - Patched qmail-send
+	to limit the size of bounces</P>
+	<P STYLE="margin-bottom: 0in">- MAXRECIPIENT<BR>- maxhop control
+	file</P>
+	<LI><P STYLE="margin-bottom: 0in">Paul Gregg - ENFORCE_FQDN_HELO
+	patch 29/08/2003</P>
+	<LI><P STYLE="margin-bottom: 0in">qmail-remove from LinuxMagic is
+	the development arm of Wizard Tower TechnoServices Ltd</P>
+	<LI><P STYLE="margin-bottom: 0in">qtools - from <A HREF="http://www.superscript.com/">www.superscript.com</A></P>
+	<P STYLE="margin-bottom: 0in">SIGINT to multilog to stop writing to
+	log</P>
+	<LI><P STYLE="margin-bottom: 0in">Qmail Holdremote Patch by Nick
+	Leverton</P>
+	<LI><P STYLE="margin-bottom: 0in">ripMIME/altermime by PLDaniels,</P>
+	<LI><P STYLE="margin-bottom: 0in">evaluate - evaluate algebraic
+	strings(C) 2000-2002 Kyzer/CSG.
+	<A HREF="http://www.kyzer.me.uk/code/evaluate/">http://www.kyzer.me.uk/code/evaluate/</A></P>
+	<LI><P STYLE="margin-bottom: 0in">make seekable patch &quot;Marcus
+	Williams&quot; marcus at quintic.co.uk.</P>
+	<LI><P STYLE="margin-bottom: 0in">daemontools patches from
+	(additional signals to svc, svscan logging</P>
+	<P STYLE="margin-bottom: 0in"><A HREF="http://www.gluelogic.com/code/daemontools/">http://www.gluelogic.com/code/daemontools/</A>)</P>
+	<LI><P STYLE="margin-bottom: 0in">Save/discard logs with multilog
+	(SIGINT/SIGHUP to toggle) -
+	<A HREF="http://www.superscript.com/patches/intro.html">http://www.superscript.com/patches/intro.html</A></P>
+	<LI><P STYLE="margin-bottom: 0in">timed log rotation for multilog -
+	Jos Backus 
+	</P>
+	<LI><P STYLE="margin-bottom: 0in">Alin-Adrian Anton - Fixed
+	qmail-smtpd vulnurability for very long header lines</P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://www.esat.kuleuven.ac.be/~vermeule/qmail/tls.patch">http://www.esat.kuleuven.ac.be/~vermeule/qmail/tls.patch</A>
+	STARTTLS</P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://members.elysium.pl/brush/qmail-smtpd-auth/">http://members.elysium.pl/brush/qmail-smtpd-auth/</A>
+	SMTP AUTH</P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://www.netable.com/~dburkes/qmail-smtpd-requireauth/">http://www.netable.com/~dburkes/qmail-smtpd-requireauth/</A>
+	Require AUTH</P>
+	<LI><P STYLE="margin-bottom: 0in"><A HREF="http://www.elysium.pl/members/brush/cmd5checkpw/">http://www.elysium.pl/members/brush/cmd5checkpw/</A>
+	CRAM-MD5 Checkpassword<BR>RFC-2554, RFC-2222 compliance</P>
+	<LI><P STYLE="margin-bottom: 0in">Rask Ingemann Lambertsen - who
+	provided the original RELAY Patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Markus Stumpf - provided the
+	original LOGGING patch</P>
+	<LI><P STYLE="margin-bottom: 0in">Charles Cazabon - Author of the
+	NULL-Sender modifcation</P>
+	<LI><P STYLE="margin-bottom: 0in">Bjoern Kalkbrenner - Initial
+	auther of the qmail-smtp-auth-send patch.</P>
+	<LI><P STYLE="margin-bottom: 0in">Peter Ladwig - had the idea to use
+	hard tarpitting in case of too many invalid RECIPIENTS.</P>
+	<LI><P STYLE="margin-bottom: 0in">Flash Secure Menu Shell - WWW:
+	<A HREF="http://www.netsoc.ucd.ie/flash/">http://www.netsoc.ucd.ie/flash/</A>
+	Author: Steve Fegan</P>
+</OL>
+</BODY>
+</HTML>

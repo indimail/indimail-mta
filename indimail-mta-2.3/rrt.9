@@ -1,0 +1,54 @@
+.TH rrt 1
+.SH NAME
+rrt \- respond to Return Receipts
+.SH SYNOPSIS
+.B rrt
+[-\fBn\fR]
+.I host
+.I sender
+.I qqeh
+.I size
+.I recip
+[ \fIrecip\fR ... ]
+
+.SH DESCRIPTION
+\fBrrt\fR(1) implements Return Receipt in \fBqmail-remote\fR(8) for emails having the
+\fBReturn-Receipt-To\fR (RRT) header. A sender can request a return-receipt by
+including this header field. The return-receipt is sent to the Return-Path
+address of the email and not to the address specified in the
+Return-Receipt-To header field. This header is non-standard and mostly not supported.
+Even if RRT is supported, there is no guarantee of a receipt being sent by other systems.
+You can use \fBqnotify\fR(1) to implement Message Disposition Notification (MDN) by having
+Disposition-Notification-To header instead.
+
+\fBrrt\fR(1) can be enabled by setting \fBONSUCCESS_REMOTE\fR, \fBONFAILURE_REMOTE\fR,
+\fBONTEMPORARY_REMOTE\fR environment variables to the path of \fBrrt\fR binary.
+\fBrrt\fR(1) uses \fBqmail-queue\fR(8) to queue the Return Receipt and uses environment
+variables according to files in @controldir@/defaultqueue directory.
+
+.SH OPTIONS
+.PP
+.TP
+\fB-n\fR
+Print the message rather than feeding it to
+.BR qmail-queue .
+.TP
+\fB-b\fR
+enclose the full email body rather than the headers
+
+.SH RETURN VALUE
+ 0 for success
+ 1 for read errors
+ 2 for write erros
+ 3 for memory allocation error
+ 4 for file open errors
+ 5 for failure to dup file descriptors
+ 6 for lseek system call error
+ 7 for usage error
+ 8 parsing error
+
+.SH "SEE ALSO"
+qmail-remote(8),
+qmail-queue(8),
+qnotify(1),
+qmail-queue(8),

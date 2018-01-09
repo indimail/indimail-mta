@@ -1,0 +1,224 @@
+Zach White <zwhite@netlsd.org> 20010812
+http://drpepper.org/~zwhite/qmail-1.03-starttls-requireauth
+
+This patch combines 3 patches that seem to conflict with one another.
+The first is Frederick Wermeulen's tls.patch to implement STARTTLS in
+qmail-smtpd and qmail-remote. The other two are for SMTP AUTH, so you can
+authenticate a user before allowing them to relay. The first is Krzysztof 
+Dabrowski's patch to implement SMTP AUTH, the second is dburkes@netable.com's
+patch to require AUTH.
+
+Frederick Wermeulen released his patch under the same license as qmail, 
+however after consulting him the license was more restrictive than he
+intended, and he has granted me permission to incorporate his patch into
+this patch.
+
+Sources:
+http://www.esat.kuleuven.ac.be/~vermeule/qmail/tls.patch  STARTTLS
+http://members.elysium.pl/brush/qmail-smtpd-auth/         SMTP AUTH
+http://www.netable.com/~dburkes/qmail-smtpd-requireauth/  Require AUTH
+http://www.elysium.pl/members/brush/cmd5checkpw/          CRAM-MD5 Checkpassword
+
+Usage:
+
+Apply this patch. Compile, install, blah, blah. Put your pem enceded server
+key in /var/qmail/control/servercert.pem. Chown it to qmails, chmod it 600.
+Change your qmail-smtpd invoction to call "qmail-smtpd <checkpassword> <path 
+to true> <cram-md5 checkpassword> <pah to true>" instead of just qmail-send. 
+Setup either tcp wrappers or your tcprules file to add the environment 
+variable REQUIREAUTH="" for IP's you wish to require authentication from.
+
+If you run into problems with this patch, tcpdump and strace are your friend.
+
+This was tested using Netscape 4.75's mail client, with the require TLS option
+checked. It asked me for a password and then sent the mail. You should see
+headers similer to the following if everything worked correctly:
+
+Received: from unknown (HELO netlsd.org) (192.168.0.13) by 192.168.0.1 with RC4-MD5 encrypted SMTP; 12 Aug 2001 23:26:59 -0000
+
+The Recieved header indicates that tls was used and what cipher type.
+
+Questions, comments, and deathtreats can be sent to zwhite@netlsd.org. If you
+are having problems getting it to work, I probably won't help you, I do 
+enough of that with my real job. If you've found a bug and have a patch, 
+I'd love to see it. If you've found a bug and don't know how to fix it,
+I'll see if I can (But I'm not a programmer, and I'm not really sure this
+is the best way to have combined the patches. I'm just a sysadmin who needed
+this to work.)
+
+I've attached all the original documentation. You may find it useful.
+
+---- Included at the top of the starttls patchfile ----
+Frederik Vermeulen <jos-tls@kotnet.org> 20010627
+http://www.esat.kuleuven.ac.be/~vermeule/qmail/tls.patch
+
+This patch implements RFC2487 in qmail. This means you can 
+get SSL or TLS encrypted and authenticated SMTP between 
+the MTAs and between MTA and an MUA like Netscape. 
+The code is considered experimental (but has worked for
+many since its first release on 1999-03-21).
+
+Usage: - install OpenSSL-0.9.6a http://www.openssl.org/
+       - apply patch to qmail-1.03 http://www.qmail.org/ 
+         Makefile and conf-cc were patched for appropriate
+         linking. Apart from that, the patches to qmail-remote.c
+         and qmail-smtpd.c can be applied separately.
+       - provide a server certificate in /var/qmail/control/servercert.pem.
+         "make cert" makes a self-signed certificate.
+         "make cert-req" makes a certificate request.
+         Note: you can add the CA certificate and intermediate
+         certs to the end of servercert.pem.
+       - replace qmail-smtpd and/or qmail-remote binary
+       - verify operation (header information should show
+         somothing like
+         "Received [..] with DES-CBC3-SHA encrypted SMTP;")
+         If you don't have a server to test with, you can test
+         by sending mail to ping@mail.linux.student.kuleuven.ac.be,
+         which will bounce your mail.
+
+Optional: - when DEBUG is defined, some extra TLS info will be logged
+          - qmail-remote will authenticate with the certificate in
+            /var/qmail/control/clientcert.pem. By preference this is
+            the same as servercert.pem, where nsCertType should be 
+            == server,client or be a generic certificate (no usage specified). 
+          - when a 512 RSA key is provided in /var/qmail/control/rsa512.pem,
+            this key will be used instead of on-the-fly generation by
+            qmail-smtpd. Periodical replacement can be done by crontab:
+            01 01 * * *  umask 0077; /usr/local/ssl/bin/openssl genrsa \
+             -out /var/qmail/control/rsa512.new 512 > /dev/null 2>&1;\
+             chmod 600 /var/qmail/control/rsa512.new; chown qmaild.qmail \
+             /var/qmail/control/rsa512.new; /bin/mv -f \
+             /var/qmail/control/rsa512.new /var/qmail/control/rsa512.pem
+          - server authentication:
+            qmail-remote requires authentication from servers for which
+            /var/qmail/control/tlshosts/host.dom.ain.pem exists.
+            The .pem file contains the validating CA certificates
+            (or self-signed server certificate with openssl-0.9.5).
+            CommonName has to match.
+            WARNING: this option may cause mail to be delayed, bounced,
+            doublebounced, and lost.
+          - client authentication:
+            when relay rules would reject an incoming mail, 
+            qmail-smtpd can allow the mail based on a presented cert.
+            Certs are verified against a CA list in 
+            /var/qmail/control/clientca.pem (eg. http://www.modssl.org/
+            source/cvs/exp/mod_ssl/pkg.mod_ssl/pkg.sslcfg/ca-bundle.crt)
+            and the cert email-address has to match a line in
+            /var/qmail/control/tlsclients. This email-address is logged
+            in the headers.
+          - cipher selection:
+            qmail-remote: 
+              openssl cipher string read from 
+              /var/qmail/control/tlsclientciphers
+            qmail-smtpd: 
+              openssl cipher string read from TLSCIPHERS environment variable
+              (can be different based on client IP address e.g.)
+              or if that is not available /var/qmail/control/tlsserverciphers
+
+Caveats: - from this version on the server cert is in servercert.pem.
+         - binaries dynamically linked with current openssl versions need
+           recompilation when the shared openssl libs are upgraded.
+         - this patch could conflict with other patches (notably those
+           replacing \n with \r\n, which is a bad idea on encrypted links).
+         - some broken servers have a problem with TLSv1 compatibility.
+           Uncomment the line where we set the SSL_OP_NO_TLSv1 option.
+
+Copyright: Same terms as qmail
+           Links with OpenSSL
+           Inspiration and code from examples in SSLeay (E. Young
+           <eay@cryptsoft.com> and T. Hudson <tjh@cryptsoft.com>),
+           stunnel (M. Trojnara <mtrojnar@ddc.daewoo.com.pl>),
+           Postfix/TLS (L. Jaenicke <Lutz.Jaenicke@aet.tu-cottbus.de>),
+           and modssl (R. Engelschall <rse@engelschall.com>).
+           Debug code, tlscipher selection, many feature suggestions,
+           French docs https://www.TBS-internet.com/ssl/qmail-tls.html 
+           from Jean-Philippe Donnio <tag-ssl@tbs-internet.com>
+           Openssl usage consulting from Bodo M"oller <bmoeller@acm.org>
+           Bug report from Andy Dustman <adustman@comstar.net>
+
+Bug reports: mailto:<jos-tls@kotnet.org>
+
+----- README file from qmail-smtpd-auth-0.26 -----
+
+This patch adds support for smtp auth authetication protocol to qmail.
+It's based on Mrs.Brisby's smtp-auth patch with large enhancemets from me.
+
+You can always get the newest version from:
+http://members.elysium.pl/brush/qmail-smtpd-auth/
+
+To use all of it's fuctionality you will also have to obtain and install
+my cmd5checkpw utility available at:
+http://members.elysium.pl/brush/cmd5checkpw/
+
+If you need more information about SMTP-AUTH itself and the client/server
+support and configuration, visit: 
+http://members.elysium.pl/brush/smtp-auth/
+
+How to install it:
+
+Simply patch your qmail-1.03 distribution with the included patch file and
+recompile & install like usual.
+Also obtain, unpack , compile and isntall cmd5checkpw utility and add sample
+account to /etc/poppasswd file.
+
+How to use it:
+
+Patched qmail-smtpd should be invoked from inetd or tcpserver like this:
+
+smtp stream tcp nowait qmaild /var/qmail/bin/tcp-env tcp-env /var/qmail/bin/qmail-smtpd /bin/checkpassword /bin/true /bin/cmd5checkpw /bin/true
+
+the first parameter for qmail-smtpd is a checkpassword utility for clear
+text auth types, the second is arg for checkpassword, the third is a name of
+cram-md5 checkpassword utlity (my cmd5checkpw) and fourth is arg for it.
+
+give yout inetd a kill -HUP or restart tcpserver and here you go.
+
+Features:
+
+This patch supports the following auth methods: LOGIN, PLAIN and CRAM-MD5
+
+Compatibility :
+
+The following MUA's are confirmed to work with this patch:
+
+Eudora 4.2.2		-	CRAM-MD5
+The Bat 1.39		-	LOGIN & CRAM-MD5
+Outlook Express 4	- 	LOGIN
+Outlook Express 5	-	LOGIN
+Netscape 4.x		-	LOGIN
+Netscape 4.0x		-	LOGIN
+Pegassus Mail 3.1x	-	CRAM-MD5
+
+Various compatibility issues:
+
+There used to be a problem with Netscape's Messenger but it's over.
+
+After test with Pegasus Mail 3.1 i've added the new style (rfc
+recommended) greeting message. Yoo can select beetwen them by #defining or
+ew#undefining USE_NEW_GREETING and USE_OLD_GREETING on the begining of 
+qmail-smtpd.c (around line 30). You can even enable both to maintain highest degree of 
+compatibility with various clients. This fix was suggested by 
+David Harris <David.Harris@pmail.gen.nz>, the developer of Pegasus Mail.
+
+----- README file from qmail-smtpd-requireauth-0.30 -----
+
+This patch enables you to optionally require authentication for qmail-smtpd 
+clients.
+
+How to install it:
+
+First, apply Krzysztof Dabrowski's qmail-smtpd-auth patch version 0.30 (see 
+http://members.elysium.pl/brush/qmail-smtpd-auth/).  Then, simply patch the 
+resulting qmail-smtpd.c with the included patch file.  Recompile and install 
+as usual.
+
+How to use it:
+
+If the REQUIREAUTH environment variable is set to anything (empty or 
+non-empty), the patched qmail-smtpd will require the client to authenticate 
+before accepting any MAIL FROM commands.
+
+See http://www.netable.com/~dburkes/qmail-smtpd-requireauth/index.html for a 
+practical usage scenario.
+
+----- End of Included documentation, patch below -----

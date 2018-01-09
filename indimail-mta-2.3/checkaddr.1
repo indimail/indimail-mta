@@ -1,0 +1,30 @@
+.TH checkaddr 1
+.SH NAME
+checkaddr
+.SH SYNOPSIS
+.B checkaddr
+.I addr ...
+where
+.I addr
+is an email header name.
+.SH DESCRIPTION
+.B checkaddr
+reads email addresses from standard input, and compares them with each addr without regard to case.
+If no addr appears, 
+.B checkaddr
+uses $RECIPIENT as addr. If it finds a match, checkaddr exits 0.
+Otherwise, checkaddr exits 100.
+
+.B
+checkaddr
+reads addresses in the form output by 
+.B 822addr.
+Each address appears as a null-terminated line with an introductory character.
+A + character introduces a delivery address, and a ( character introduces a comment.
+The introductory characters are not part of the address. 
+.B checkaddr
+compares its arguments only with delivery addresses, and ignores comments.
+
+If 
+.B checkaddr
+finds an address matching addr, it exits 0. Otherwise, it exits 100. 

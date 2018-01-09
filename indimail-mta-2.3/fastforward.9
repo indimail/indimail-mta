@@ -1,0 +1,118 @@
+.TH fastforward 1
+.SH NAME
+fastforward \- forward mail according to a cdb database
+.SH SYNOPSIS
+in
+.BR .qmail-default :
+.B | fastforward
+[
+.B \-nNpPdD
+]
+.I cdb
+.SH DESCRIPTION
+.B fastforward
+forwards each incoming message
+according to instructions in
+.I cdb
+created by
+.BR setforward .
+
+If there is no forwarding instruction in
+.I cdb
+for the incoming recipient address,
+.B fastforward
+will bounce the message.
+
+You can override
+.B .qmail-default
+with a specific
+.BR .qmail-\fIrecipient ;
+see
+.BR dot-qmail (5).
+
+Warning to system administrators:
+Messages do not reach
+.B ~alias/.qmail-default
+unless they are controlled by the
+.B alias
+user.
+See
+.BR qmail-getpw (8).
+
+\fBfastforward\fR uses environment modified according to files in 
+@controldir@/defaultqueue directory.
+
+.B SECURITY WARNING:
+If
+.I cdb
+includes instructions pointing to a mailing list owned by another user,
+that user gains some amount of control over
+.BR fastforward 's
+behavior.
+In particular, he can force
+.B fastforward
+to open any file that you can access,
+and to read any world-readable file that you own,
+even if the file is in a world-inaccessible directory.
+.SH "OPTIONS"
+.TP 5
+.B \-n
+No delivery.
+.B fastforward
+will print a description of its actions,
+but will not actually read or forward a message.
+.TP
+.B \-N
+(Default.)
+Forward a message as usual.
+.TP
+.B \-p
+Pass through.
+If
+.B fastforward
+does not find the recipient in
+.IR cdb ,
+it exits 0,
+giving the message to further commands in
+.BR .qmail-default .
+If
+.B fastforward
+finds the recipient,
+it forwards the message and exits 99,
+so that further commands are skipped.
+.TP
+.B \-P
+(Default.)
+Do not pass through.
+If
+.B fastforward
+finds the recipient,
+it forwards the message and exits 0.
+Otherwise it bounces the message.
+.TP
+.B \-d
+Use
+.B $DEFAULT@$HOST
+as the recipient address, or
+.B $EXT@$HOST
+if
+.B $DEFAULT
+is not set.
+.TP
+.B \-D
+(Default.)
+Use
+.B $RECIPIENT
+as the recipient address.
+.SH VERSION
+This is
+.B fastforward
+0.51.
+.SH "SEE ALSO"
+newaliases(1),
+printforward(1),
+setforward(1),
+dot-qmail(5),
+qmail-command(8),
+qmail-local(8),
+qmail-getpw(8)

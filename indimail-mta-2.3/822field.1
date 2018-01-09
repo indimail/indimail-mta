@@ -1,0 +1,29 @@
+.TH 822field 1
+.SH NAME
+822field \- print the value of a header field in a mail message
+.SH SYNOPSIS
+.B 822field
+[
+.I name
+]
+.SH DESCRIPTION
+.B 822field
+reads an 822-format mail message from its standard input.
+For each header field named
+.IR name ,
+.B 822field
+prints one line containing the value of the field.
+
+If there is no such field,
+.B 822field
+exits 100.
+
+If
+.I name
+is not supplied,
+.B 822field
+looks for
+.B Subject
+fields.
+.SH "SEE ALSO"
+822header(1)

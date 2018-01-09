@@ -1,0 +1,25 @@
+.TH qfilelog 1
+.SH NAME
+qfilelog \- log messages to a single file
+.SH SYNOPSIS
+.B qfilelog
+.I filename
+.SH DESCRIPTION
+.B qfilelog
+appends from standard input to a single named file.
+If
+.B qfilelog
+is sent the
+.I HUP
+signal, it syncs, closes, and re-opens the output file.
+.SH RETURN VALUE
+Exits 0 when it successfully reaches end-of-file on standard input.
+Otherwise it exits 1 after printing an error diagnostic to standard
+error.
+.SH SEE ALSO
+cyclog(1),
+splogger(8)
+.SH NOTES
+If any of the write operations fail,
+.B qfilelog
+prints a warning to standard error and pauses for 60 seconds.

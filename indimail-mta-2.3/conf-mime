@@ -1,0 +1,4 @@
+#
+# define if you want bounces to be enclosed as mime
+#
+-DMIME

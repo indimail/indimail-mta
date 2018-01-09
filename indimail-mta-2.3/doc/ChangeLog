@@ -1,0 +1,35 @@
+* Tue Jan 09 2018 08:49:24 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
+Release 2.3 Start 25/12/2017
+25/12/2017
+1.  tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen()
+    to be called for loading shared library
+2.  svctool - add option --use-dlmopen to configure tcpserver to use dlmopen()
+    instead of dlopen() to load shared objects
+3.  fixed smtp plugin by setting PLUGINDIR correctly
+4.  Fixed dlopen() flags for loading smtp plugins
+5.  qmailctl - update cdb only when input file date is newer than cdb file
+6.  svctool - fixed conf_dir variable getting clobbered by create_fifologger,
+    preventing creation of LOGFILTER service variable
+7.  fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
+8.  svctool - seperated out qmail, indimail config
+9.  Renamed controlfiles to controlfiles.q
+09/01/2018
+10. etrn.c - load count_dir() using loadLibrary()
+11. moved svctool to qmail-1.03
+12. hier.c - renamed cronlist to cronlist.q
+13. hier.c - added populated nodnscheck control file
+14. hier.c - moved leapsecs.dat, leapsecs.txt to /etc/indimail
+15. hier.c - added software license for yahoo domainkeys
+16. instcheck.c - removed unused function ci()
+17. leapsecs_read.c - moved leapsecs.dat to /etc/indimail
+18. updated indimail-mta.spec, qupgrade.sh, qlocal_upgrade.sh, Makefile
+    for v2.3 indimail-mta
+19. qmail-lspawn.c - use loadLibrary() to load vauth_open(), vauth_getpw(),
+	vclose(), isvirtualdomain() functions
+20. qmail-queue.c - use indimail-mta identifier in received headers
+21. qmail-rspawn.c - use loadLibrary() to load vget_real_domain(),
+	is_distributed_domain(), findhost()
+22. qmail-send.c, qmail-todo.c - removed non-indimail code
+23. qmail-showctl - use loadLibrary() to load indimail code
+24. qmail-sql - link with MySQL lib without requirein indimail
+25. qregex.c - compile sql code with USE_MYSQL definition

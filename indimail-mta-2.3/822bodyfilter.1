@@ -1,0 +1,20 @@
+.TH 822bodyfilter 1
+.SH NAME
+822bodyfilter \- filter message body through a program.
+.SH SYNOPSIS
+.B 822bodyfilter
+.I prog
+.SH DESCRIPTION
+.B 822bodyfilter
+reads an 822-format email message from standard input.
+It executes prog with the body of the message on standard input, and prints
+the message headers followed by the output from prog to standard output.  
+If 822bodyfilter encounters a temporary error in executing prog, it exits 111.
+If 822bodyfilter encounters a permanent error in executing prog, it exits 100.
+Normally, 822bodyfilter yields the same exit code as prog. The standard input
+to 822bodyfilter must be seekable.
+
+822bodyfilter considers the end of the message or the first line that cannot be
+part of an 822-format header field to terminate the message headers. A nonblank
+line that terminates the headers is part of the message body. 
+

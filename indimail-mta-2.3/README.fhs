@@ -1,0 +1,21 @@
+indimail-mta is fhs compliant. You need to edit the following files
+
+conf-prefix       - this is where bin, sbin go
+conf-shared       - this is where boot, doc go (conf-prefix/share/indimail)
+conf-sysconfdir   - this is where etc, control, users go
+conf-libexec      - this is where private scripts/executables go
+conf-qmail        - domains, alias, queue, autoturn, qscanq, symlinks control, users, bin and sbin
+
+You can have the old non-fhs behaviour by having /var/indimail in the above 4 files. In addition
+to the above, indimail uses the hardcoded directory /usr/lib/indimail in build scripts
+
+/usr/lib/indimail - plugins, modules (architecture-dependent files)
+
+Some settings
+=============
+
+conf-shared       - /usr/share/indimail
+conf-prefix       - /usr
+conf-sysconfdir   - /etc/indimail
+conf-libexec      - /usr/libexec/indimail
+conf-qmail        - /var/indimail

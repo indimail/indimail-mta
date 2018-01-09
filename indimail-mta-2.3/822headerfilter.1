@@ -1,0 +1,17 @@
+.TH 822headerfilter 1
+.SH NAME
+822headerfilter \- filter message header through a program.
+.SH SYNOPSIS
+.B 822headerfilter
+.I prog
+.SH DESCRIPTION
+.B 822headerfilter
+reads an 822-format email message from standard input. It executes prog with
+the header of the message on standard input. If it encounters a permanent error
+in reading input or executing prog, 822headerfilter exits 100. If it encounters
+a temporary error in reading input or executing prog, 822headerfilter exits 111.
+Otherwise, 822headerfilter yields the same exit code as prog.
+
+822headerfilter considers the end of the message or the first line that cannot
+be part of an 822-format header field to terminate the headers. 
+

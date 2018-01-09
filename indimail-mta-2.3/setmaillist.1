@@ -1,0 +1,72 @@
+.TH setmaillist 1
+.SH NAME
+setmaillist \- create a binary mailing list
+.SH SYNOPSIS
+.B setmaillist
+.I bin
+.I tmp
+.SH DESCRIPTION
+.B setmaillist
+reads a mailing list from its standard input.
+
+.B setmaillist
+writes the mailing list in a binary format to
+.IR tmp ;
+it then moves
+.I tmp
+to
+.IR bin .
+.I tmp
+and
+.I bin
+must be on the same filesystem.
+
+If there is a problem creating
+.IR tmp ,
+.B setmaillist
+complains and leaves
+.I bin
+alone.
+
+The binary mailing list format is portable across machines.
+
+.B setmaillist
+always creates
+.I bin
+world-readable.
+.SH "MAILING LIST FORMAT"
+The mailing list read by
+.B setmaillist
+is a series of lines.
+NUL bytes are not allowed.
+
+If a line begins with a dot or slash,
+.B setmaillist
+takes the entire line as an include file name.
+
+If a line begins with an ampersand,
+.B setmaillist
+takes the rest of the line as a recipient address.
+If a line begins with a letter or number,
+.B setmaillist
+takes the entire line as a recipient address.
+Each recipient address must include a fully qualified domain name.
+Recipient addresses longer than 800 bytes are not allowed.
+
+.B setmaillist
+ignores blank lines
+and lines beginning with #.
+It also ignores spaces and tabs at the ends of lines.
+
+For example,
+
+.EX
+   god@heaven.af.mil
+   djb@silverton.berkeley.edu
+.EE
+
+is a mailing list with two addresses.
+.SH "SEE ALSO"
+setforward(1),
+newinclude(1),
+printmaillist(1)
