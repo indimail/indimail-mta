@@ -11,7 +11,7 @@ Package: indimail-mta
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils
 Provides: indimail-mini, daemontools, ucspi-tcp
-Conflicts: indimail, indimail-mini, daemontools, ucspi-tcp
+Conflicts: indimail-mini, daemontools, ucspi-tcp
 Replaces: indimail-mini, daemontools, ucspi-tcp
 Description: indimail-mta provides a standalone SMTP server that is part of the IndiMail
  messaging platform. It comprises of the following packages
@@ -73,3 +73,15 @@ Description: tcpserver and tcpclient are easy-to-use command-line tools for buil
  tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
  Interface, using the TCP protocol. UCSPI tools are available for several
  different networks.
+
+Package: indimail-mini
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils
+Section: misc
+Architecture: any
+Breaks: indimail-mta
+Description: IndiMail - Mini Client Installation
+ This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
+ programs to have a mini-indimail installation.
+ .
+ A mini-indimail installation doesn't have a mail queue. It gives each new message to a
+ central server using QMQP.
