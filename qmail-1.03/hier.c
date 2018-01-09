@@ -1,5 +1,11 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.234  2018-01-09 11:41:09+05:30  Cprogrammer
+ * renamed cronlist to cronlist.q
+ * added nodnscheck control file
+ * moved leapsecs.dat, leapsecs.txt to /etc/indimail
+ * added software licenses for yahoo domainkeys
+ *
  * Revision 1.233  2017-05-12 18:04:36+05:30  Cprogrammer
  * added inotify - monitor file system events
  *
@@ -579,7 +585,6 @@
 #include "fmt.h"
 #include "fifo.h"
 #include "tcpto.h"
-#include "hasindimail.h"
 #include "hassrs.h"
 
 void            d(char *, char *, int, int, int);
@@ -770,16 +775,13 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
 	d(auto_qmail_home, "queue", auto_uido, auto_gidq, 0755);
 	d(auto_qmail_home, "domains", auto_uido, auto_gidv, 0775);
-	d(auto_sysconfdir, "etc", auto_uido, auto_gidq, 02755);
 	d(auto_sysconfdir, "certs", auto_uidv, auto_gidq, 02775);
 	d(auto_qmail_home, "qscanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root/scanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "alias", auto_uida, auto_gidq, 02775);
 	d(auto_qmail_home, "autoturn", auto_uidv, auto_gidq, 02775);
-#ifdef INDIMAIL
 	d(auto_qmail_home, "inquery", auto_uidv, auto_gidq, 0775);
-#endif
 	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 02755);
 	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/defaultqueue", auto_uidv, auto_gidq, 0755);
@@ -813,13 +815,10 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "boot", "StartupParameters.plist", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "boot", "indimail.plist", auto_uido, auto_gidq, 0444);
 #endif
-	c(auto_sysconfdir, "etc", "leapsecs.dat", auto_uido, auto_gidq, 0644);
-	c(auto_sysconfdir, "etc", "leapsecs.txt", auto_uido, auto_gidq, 0644);
-#ifndef INDIMAIL
-	c(auto_sysconfdir, "etc/..", "indimail-mta.te", auto_uido, auto_gidq, 0644);
-	c(auto_sysconfdir, "etc/..", "indimail-mta.fc", auto_uido, auto_gidq, 0644);
-	c(auto_sysconfdir, "etc/..", "cronlist", auto_uido, auto_gidq, 0644);
-#endif
+	c(auto_sysconfdir, "control", "nodnscheck", auto_uido, auto_gidq, 0644);
+	c(auto_sysconfdir, ".", "leapsecs.dat", auto_uido, auto_gidq, 0644);
+	c(auto_sysconfdir, ".", "leapsecs.txt", auto_uido, auto_gidq, 0644);
+	c(auto_sysconfdir, ".", "cronlist.q", auto_uido, auto_gidq, 0444);
 
 	/* Binaries */
 	c(auto_qmail_home, "bin", "qmail-inject", auto_uido, auto_gidq, moder_x);
@@ -884,9 +883,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "qmail-newmrh", auto_uido, auto_gidq, moder_t);
 	c(auto_qmail_home, "bin", "recipient-cdb", auto_uido, auto_gidq, moder_t);
 	c(auto_qmail_home, "bin", "qmail-cdb", auto_uido, auto_gidq, moder_t);
-#ifdef INDIMAIL
 	c(auto_qmail_home, "bin", "qmail-sql", auto_uido, auto_gidq, moder_t);
-#endif
 	c(auto_qmail_home, "bin", "cdbmake", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "cdbget", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "cdbgetm", auto_uido, auto_gidq, moder_x);
@@ -956,6 +953,7 @@ hier(inst_dir, fatal, dev_package)
 #ifdef SMTP_PLUGIN
 	c(auto_qmail_home, "sbin", "plugtest", auto_uido, auto_gidq, moder_x);
 #endif
+	c(auto_qmail_home, "sbin", "svctool", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "dnscname", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "dnsptr", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "dnsip", auto_uido, auto_gidq, moder_x);
@@ -1122,6 +1120,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "doc", "LICENSE.libdkim", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "LICENSE.qhpsi", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "LICENSE.GPL-2.libsrs2", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "softwarelicense1-1.html", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "CREDITS", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.licenses", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.qmail", auto_uido, auto_gidq, 0444);
@@ -1449,6 +1448,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/cat8", "qmail-queue.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-nullqueue.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-popbull.8", uidr, gidr, moder_f);
+	c(mandir,          "man/man8", "svctool.8", uidr, gidr, moder_f);
 
 #ifdef HASDKIM
 	c(mandir,          "man/man8", "qmail-dkim.8", uidr, gidr, moder_f);
@@ -1576,13 +1576,8 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.233 2017-05-12 18:04:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.234 2018-01-09 11:41:09+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }
