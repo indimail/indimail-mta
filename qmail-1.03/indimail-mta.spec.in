@@ -570,7 +570,7 @@ do
   fi
 done
 (
-for i in `cat qmail-%{qmail_version}/controlfiles`
+for i in `cat qmail-%{qmail_version}/controlfiles.q`
 do
   echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/control/$i"
   echo $i 1>&3
@@ -584,7 +584,7 @@ do
   echo ../certs/$i 1>&3
   $TOUCH %{buildroot}%{qsysconfdir}/certs/$i
 done
-) > config_files.list 3>%{buildroot}%{qsysconfdir}/controlfiles
+) > config_files.list 3>%{buildroot}%{qsysconfdir}/controlfiles.q
 
 %if %{undefined suse_version} && %{undefined sles_version}
 %{__mkdir_p} %{buildroot}%{logdir}
@@ -653,7 +653,7 @@ done
 %endif
 %dir %attr(555,root,qmail)            %{plugindir}
 
-%attr(444,root,root) %config(noreplace)           %{qsysconfdir}/controlfiles
+%attr(444,root,root) %config(noreplace)           %{qsysconfdir}/controlfiles.q
 %attr(444,root,root) %config(noreplace)           %{qsysconfdir}/perm_list
 
 %ghost %config(noreplace,missingok)               %{qsysconfdir}/tcp.smtp
