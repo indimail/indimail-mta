@@ -32,7 +32,9 @@ edit = sed \
 	-e 's,@mysql_libdir\@,$(mysql_libdir),g' \
 	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@HOST\@,$(HOST),g' \
-	-e 's,@prefix\@,$(prefix),g'
+	-e 's,@prefix\@,$(prefix),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g'
 
 default: it man leapsecs.dat
 
