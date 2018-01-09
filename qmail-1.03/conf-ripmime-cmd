@@ -1,6 +1,0 @@
-/usr/bin/ripmime -i - -d .
-
-The first line of this file gives command-line for the ripmime executable
-or other program for extracting parts of a MIME encoded file. The defaults
-supplied with this package request that the message be read from standard
-input, and the parts be extracted to the current directory.
