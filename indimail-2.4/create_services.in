@@ -20,7 +20,7 @@ default_domain=`uname -n`
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.74 2017-12-29 18:58:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.75 2018-01-09 12:02:43+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -336,7 +336,7 @@ do
 		e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
 	if [ $tcpserver_plugin -eq 1 ] ; then
-		e_opt="$e_opt --shared-objects=1"
+		e_opt="$e_opt --shared-objects=1 --use-dlmopen=1"
 	fi
 	append_opt=""
 	if [ $nobogofilter -eq 0 ] ; then
@@ -512,6 +512,8 @@ if [ $add_boot -eq 1 ] ; then
 	echo "adding indimail startup"
 	$svctool --config=add-boot $extra_opt
 fi
+$svctool --servicedir=$servicedir --config=qselinux
+$svctool --servicedir=$servicedir --config=iselinux
 if [ $check_install -eq 1 ] ; then
 	$svctool --check-install --servicedir=$servicedir \
 		--qbase=$qbase --qcount=$qcount --qstart=1 $extra_opt
