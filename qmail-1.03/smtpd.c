@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.202 $";
+char           *revision = "$Revision: 1.206 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6011,6 +6011,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.206  2018-01-09 12:34:23+05:30  Cprogrammer
+ * use loadLibrary() function to load indimail functions
+ *
  * Revision 1.205  2017-12-26 21:58:06+05:30  Cprogrammer
  * BUGFIX - Fixed wrong copy of PLUGINDIR
  *
@@ -6064,7 +6067,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.205 2017-12-26 21:58:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.206 2018-01-09 12:34:23+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
