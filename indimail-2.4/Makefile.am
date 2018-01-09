@@ -173,8 +173,7 @@ post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain 
 
 MOSTLYCLEANFILES=vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
 cronlist.i crypt vdeluser_handle vrenameuser_handle \
-indimail.spec cscope.* *.dSYM socket.lib \
-indimail-rpmlintrc mailzipper \
+cscope.* *.dSYM socket.lib indimail-rpmlintrc mailzipper \
 perm_list.i dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
