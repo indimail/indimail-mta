@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.24  2018-01-09 11:47:38+05:30  Cprogrammer
+ * use loadLibrary() to load vauth_open(), vauth_getpw(), vclose(), isvirtualdomain() functions
+ *
  * Revision 1.23  2017-04-11 03:45:52+05:30  Cprogrammer
  * unset QMAILREMOTE in parent
  *
@@ -73,7 +76,6 @@
  */
 #include <pwd.h>
 #include <unistd.h>
-#include "hasindimail.h"
 #include "fd.h"
 #include "wait.h"
 #include "prot.h"
@@ -87,12 +89,14 @@
 #include "slurpclose.h"
 #include "auto_qmail.h"
 #include "auto_assign.h"
+#include "indimail_stub.h"
 #include "auto_uids.h"
 #include "qlx.h"
 #include "open.h"
 #include "byte.h"
 #include "env.h"
 #include "str.h"
+#include "fmt.h"
 
 char           *aliasempty;
 
@@ -291,6 +295,73 @@ nughde_get(local)
 	}
 }
 
+stralloc        pwstruct = { 0 };
+static char     strnum[FMT_ULONG];
+
+int
+copy_pwstruct(struct passwd *pw, char *recip, int at)
+{
+	if (!stralloc_copyb(&pwstruct, "PWSTRUCT=", 9))
+		return (-1);
+	else
+	if (!stralloc_cats(&pwstruct, pw->pw_name))
+		return (-1);
+	else
+	if (!stralloc_append(&pwstruct, "@"))
+		return (-1);
+	else
+	if (!stralloc_cats(&pwstruct, recip + at + 1))
+		return (-1);
+	else
+	if (!stralloc_append(&pwstruct, ":"))
+		return (-1);
+	else
+	if (!stralloc_cats(&pwstruct, pw->pw_passwd))
+		return (-1);
+	else
+	if (!stralloc_append(&pwstruct, ":"))
+		return (-1);
+	strnum[fmt_uint(strnum, pw->pw_uid)] = 0;
+	if (!stralloc_cats(&pwstruct, strnum))
+		return (-1);
+	else
+	if (!stralloc_append(&pwstruct, ":"))
+		return (-1);
+	strnum[fmt_uint(strnum, pw->pw_gid)] = 0;
+	if (!stralloc_cats(&pwstruct, strnum))
+		return (-1);
+	else
+	if (!stralloc_append(&pwstruct, ":"))
+		return (-1);
+	else
+	if (!stralloc_cats(&pwstruct, pw->pw_gecos))
+		return (-1);
+	else
+	if (!stralloc_append(&pwstruct, ":"))
+		return (-1);
+	else
+	if (!stralloc_cats(&pwstruct, pw->pw_dir))
+		return (-1);
+	else
+	if (!stralloc_append(&pwstruct, ":"))
+		return (-1);
+	else
+	if (!stralloc_cats(&pwstruct, pw->pw_shell))
+		return (-1);
+	else
+	if (!stralloc_append(&pwstruct, ":"))
+		return (-1);
+	strnum[fmt_uint(strnum, is_inactive)] = 0;
+	if (!stralloc_cats(&pwstruct, strnum))
+		return (-1);
+	else
+	if (!stralloc_0(&pwstruct))
+		return (-1);
+	return (0);
+}
+
+stralloc        user = { 0 };
+
 int
 spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 	int             fdmess;
@@ -301,55 +372,92 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 	char           *recip;
 	int             at;
 {
-	int             f;
+	int             f, len;
 	char           *ptr;
-#ifdef INDIMAIL
-	register char  *cptr;
-	char            user[1024], pwstruct[1024];
+	void           *handle;
+	/*- indimail */
 	struct passwd  *pw;
-#endif
+	void            (*vclose) (void);
+	int             (*isvirtualdomain) (char *);
+	int             (*vauth_open) (char *);
+	struct passwd*  (*vauth_getpw) (char *, char *);
 
 	if (!env_unset("QMAILREMOTE"))
 		_exit(-1);
-#ifdef INDIMAIL
-/*
- * saldo-biuro.com.pl-david-goliath@saldo-biuro.com.pl
- */
-	if (env_get("AUTHSELF") && isvirtualdomain(recip + at + 1) && !vauth_open((char *) 0))
-	{
+	/*- indimail */
+	handle = loadLibrary(&f, 0);
+	if (f)
+		_exit(-1);
+	if (!env_get("AUTHSELF") || !handle)
+		goto noauthself;
+	if (!(isvirtualdomain = getFunction("isvirtualdomain", 0)))
+		_exit (1);
+	else
+	if (!(vauth_open = getFunction("vauth_open", 0)))
+		_exit (1);
+	else
+	if (!(vauth_getpw = getFunction("vauth_getpw", 0)))
+		_exit (1);
+	else
+	if (!(vclose = getFunction("vclose", 0)))
+		_exit (1);
+	/*-
+	 * saldo-biuro.com.pl-david-goliath@saldo-biuro.com.pl
+	 */
+	if (env_get("QUERY_CACHE")) {
+		if ((*isvirtualdomain) (recip + at + 1)) {
+			f = str_len(recip + at + 1);
+			if (!env_unset("PWSTRUCT"))
+				return (-1);
+			if ((pw = inquery(PWD_QUERY, recip + f + 1, 0))) {
+				if (copy_pwstruct(pw, recip, at))
+					return (-1);
+				if (!env_put(pwstruct.s))
+					return (-1);
+			}
+		}
+	} else
+	if ((*isvirtualdomain) (recip + at + 1) && !(*vauth_open) ((char *) 0)) {
 		f = str_len(recip + at + 1);
 		if (!env_unset("PWSTRUCT"))
 			return (-1);
-		for(cptr = user, ptr = recip + f + 1;*ptr && *ptr != '@';*cptr++ = *ptr++);
-		*cptr = 0;
-		if ((pw = (struct passwd *) vauth_getpw(*user ? user : "postmaster", recip + at + 1)))
-		{
-			snprintf(pwstruct, sizeof(pwstruct), "PWSTRUCT=%s@%s:%s:%d:%d:%s:%s:%s:%d", 
-				pw->pw_name,
-				recip + at + 1,
-				pw->pw_passwd,
-				pw->pw_uid,
-				pw->pw_gid,
-				pw->pw_gecos,
-				pw->pw_dir,
-				pw->pw_shell, is_inactive);
-			if (!env_put(pwstruct))
+		for(len = 0, ptr = recip + f + 1;*ptr && *ptr != '@';ptr++, len++);
+		if (!stralloc_copyb(&user,recip + f + 1, len))
+			return (-1);
+		if (!stralloc_0(&user))
+			return (-1);
+		if ((pw = (struct passwd *) (*vauth_getpw)(user.len ? user.s : "postmaster", recip + at + 1))) {
+			if (copy_pwstruct(pw, recip, at))
 				return (-1);
-		}  else
-		{
-			if (userNotFound)
-			{
-				snprintf(pwstruct, sizeof(pwstruct), "PWSTRUCT=No such user %s@%s", *user ? user : "postmaster", recip + at + 1);
-				if (!env_put(pwstruct))
+			if (!env_put(pwstruct.s))
+				return (-1);
+		}  else {
+			if (userNotFound) {
+				if (!stralloc_copys(&pwstruct, "PWSTRUCT=No such user "))
 					return (-1);
-			} else
-			{
+				else
+				if (!stralloc_cats(&pwstruct, user.len ? user.s : "postmaster"))
+					return (-1);
+				else
+				if (!stralloc_append(&pwstruct, "@"))
+					return (-1);
+				else
+				if (!stralloc_cats(&pwstruct, recip + at + 1))
+					return (-1);
+				else
+				if (!stralloc_0(&pwstruct))
+					return (-1);
+				else
+				if (!env_put(pwstruct.s))
+					return (-1);
+			} else {
 				vclose();
 				return (-2);
 			}
 		}
 	}
-#endif
+	/*- end indimail */
+noauthself:
 	if (!(f = fork()))
 	{
 		char           *(args[12]);
@@ -440,13 +548,8 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.23 2017-04-11 03:45:52+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.24 2018-01-09 11:47:38+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }

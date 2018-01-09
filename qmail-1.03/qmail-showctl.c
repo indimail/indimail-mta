@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.61  2018-01-09 11:53:53+05:30  Cprogrammer
+ * use loadLibrary() to load indimail code
+ *
  * Revision 1.60  2017-08-26 09:17:42+05:30  Cprogrammer
  * fixed SIGSEGV
  *
@@ -124,8 +127,8 @@
 #include "auto_control.h"
 #include "env.h"
 #include "variables.h"
-#include "hasindimail.h"
 #include "hassrs.h"
+#include "indimail_stub.h"
 #ifdef USE_SPF
 #include "spf.h"
 #endif
@@ -287,13 +290,12 @@ main(int argc, char **argv)
 {
 	DIR            *dir;
 	direntry       *d;
-	char           *ptr, *local_ip, *qbase;
-#ifdef INDIMAIL
-	char           *local_id;
-#endif
-	int             verbose = 0;
-	struct stat     stmrh;
-	struct stat     stmrhcdb;
+	void           *handle;
+	char           *ptr, *local_ip, *qbase, *local_id, *errstr;
+	int             i, verbose = 0;
+	struct stat     stmrh, stmrhcdb;
+	char *          (*get_local_ip) (void);
+	char *          (*get_local_hostid) (void);
 
 	if (argc == 2 && str_equal(argv[1], "-v"))
 		verbose = 1;
@@ -391,12 +393,33 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		_exit(111);
 	}
-#ifdef INDIMAIL
-	local_ip = get_local_ip();
-	local_id = get_local_hostid();
-#else
-	local_ip = "127.0.0.1";
-#endif
+	handle = loadLibrary(&i, &errstr);
+	if (i) {
+		substdio_puts(subfderr, "error loading shared library: ");
+		substdio_puts(subfderr, errstr);
+		substdio_puts(subfderr, "\n");
+		substdio_flush(subfderr);
+		_exit(111);
+	}
+	if (handle) {
+		if (!(get_local_ip = getFunction("get_local_ip", &errstr))) {
+			substdio_puts(subfderr, "getFunction: get_local_ip: ");
+			substdio_puts(subfderr, errstr);
+			substdio_puts(subfderr, "\n");
+			substdio_flush(subfderr);
+			_exit(111);
+		} else
+			local_ip = (*get_local_ip) ();
+		if (!(get_local_hostid = getFunction("get_local_hostid", &errstr))) {
+			substdio_puts(subfderr, "getFunction: get_local_hostid: ");
+			substdio_puts(subfderr, errstr);
+			substdio_puts(subfderr, "\n");
+			substdio_flush(subfderr);
+			_exit(111);
+		} else
+			local_id = (*get_local_hostid) ();
+	} else
+		local_ip = "127.0.0.1";
 	do_lst("blackholedsender",  "Any SMTP connection is allowed.", "", " is immediately dropped for MAIL FROM.");
 	do_lst("blackholedpatterns","Any SMTP connection is allowed.", "", " is immediately dropped for MAIL FROM. (Not if line starts with !).");
 	do_lst("blackholedrcpt",  "Any SMTP connection is allowed.", "", " is immediately dropped for RCPT TO.");
@@ -500,16 +523,14 @@ main(int argc, char **argv)
 	do_lst("maxrecipients","No limit on number of Recipients defined.","Actual Maxrecipients: ","");
 	do_lst("tarpitdelay", "No Tarpitdelay defined.", "Actual Tarpitdelay: ", "");
 	do_str("defaultdelivery", 0, "undefined! Uh-oh", "Default Delivery is: ");
-#ifdef INDIMAIL
-#ifdef CLUSTERED_SITE
-	do_str("host.master", 0, MASTER_HOST, "Master Host: ");
-	do_str("host.cntrl", 0, CNTRL_HOST, "Control Host: ");
-#endif
-	do_str("host.mysql", 0, MYSQL_HOST, "Mysql Host: ");
-	do_str("hostip", 0, local_ip ? local_ip : "127.0.0.1", "Host Local Ip: ");
-	do_str("hostid", 0, local_id ? local_id : "?", "Host Local Id: ");
-	do_lst("relayhosts", "No relay host for domains on this host.", "Relay Hosts: ", "");
-#endif
+	if (handle) {
+		do_str("host.master", 0, MASTER_HOST, "Master Host: ");
+		do_str("host.cntrl", 0, CNTRL_HOST, "Control Host: ");
+		do_str("host.mysql", 0, MYSQL_HOST, "Mysql Host: ");
+		do_str("hostip", 0, local_ip ? local_ip : "127.0.0.1", "Host Local Ip: ");
+		do_str("hostid", 0, local_id ? local_id : "?", "Host Local Id: ");
+		do_lst("relayhosts", "No relay host for domains on this host.", "Relay Hosts: ", "");
+	}
 	do_int("maxcmdlen", "0", "Max SMTP Command Length is ", "");
 	do_lst("signatures", "No virus signatures defined.", "virus signatures: ", "");
 	do_lst("bodycheck", "No Content-filters.", "Content-filters: ", "");
@@ -806,13 +827,8 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.60 2017-08-26 09:17:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.61 2018-01-09 11:53:53+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }

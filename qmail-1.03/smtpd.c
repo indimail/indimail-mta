@@ -39,13 +39,14 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include "hasindimail.h"
+#include "indimail_stub.h"
 #include "envrules.h"
 #include "matchregex.h"
 #include "tablematch.h"
 #include "bodycheck.h"
 #include "getln.h"
 #include "qregex.h"
+#include "hasmysql.h"
 #include "mail_acl.h"
 #ifdef TLS
 #include "tls.h"
@@ -56,9 +57,8 @@
 #ifdef USE_SPF
 #include "spf.h"
 #endif
-#ifndef INDIMAIL
 #include "auth_cram.h"
-#else
+#ifdef HAS_MYSQL
 #include "sqlmatch.h"
 #endif
 
@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.205 $";
+char           *revision = "$Revision: 1.202 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -172,6 +172,7 @@ unsigned long   databytes = 0;
 unsigned long   msg_size = 0;
 unsigned long   BytesToOverflow = 0;
 
+int             hasvirtual = 0;
 int             liphostok = 0;
 int             maxhops = MAXHOPS;
 int             ctl_maxcmdlen;	  /*- max length a smtp command may have */
@@ -1467,6 +1468,19 @@ err_child()
 }
 
 int
+err_library(char *arg)
+{
+	out("451 Requested action aborted: problem with loading shared libs (#4.3.0)\r\n");
+	if (arg) {
+		logerr("qmail-smtpd: ");
+		logerrpid();
+		logerr(arg);
+		logerrf("\n");
+	}
+	return -1;
+}
+
+int
 err_fork()
 {
 	out("451 Requested action aborted: child won't start and I can't auth (#4.3.0)\r\n");
@@ -1779,7 +1793,7 @@ check_recipient_cdb(char *rcpt)
 	return r;
 }
 
-#ifdef INDIMAIL
+#ifdef HAS_MYSQL
 /*
  * This function returns
  *  0: User is fine
@@ -1865,7 +1879,6 @@ log_etrn(char *arg1, char *arg2, char *arg3)
 	logerrf("\n");
 }
 
-#ifdef INDIMAIL
 void
 log_atrn(char *arg1, char *arg2, char *arg3, char *arg4)
 {
@@ -1886,7 +1899,6 @@ log_atrn(char *arg1, char *arg2, char *arg3, char *arg4)
 	}
 	logerrf("\n");
 }
-#endif
 
 void
 sigterm()
@@ -1976,11 +1988,16 @@ smtp_help(char *arg)
 	out("\r\n");
 	out("214-This server supports the following commands:\r\n");
 	switch (smtp_port) {
-#ifdef INDIMAIL
 	case ODMR_PORT:/*- RFC 2645 */
-		out("214 HELO EHLO AUTH ATRN HELP QUIT\r\n");
+		if (hasvirtual)
+			out("214 HELO EHLO AUTH ATRN HELP QUIT\r\n");
+		else { /*- since we don't have ATRN mechanism, behave like any other non-special port */
+			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
+			if (hostname && *hostname && childargs && *childargs)
+				out("AUTH ");
+			out("VRFY ETRN HELP QUIT\r\n");
+		}
 		break;
-#endif
 	case SUBM_PORT:/*- RFC 2476 */
 		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
 		if (hostname && *hostname && childargs && *childargs)
@@ -1988,19 +2005,10 @@ smtp_help(char *arg)
 		out("VRFY HELP QUIT\r\n");
 		break;
 	default:
-		if (hostname && *hostname && childargs && *childargs) {
-			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA AUTH VRFY ETRN ");
-#ifdef INDIMAIL
-			out("ATRN ");
-#endif
-			out("HELP QUIT\r\n");
-		} else {
-			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA VRFY ETRN ");
-#ifdef INDIMAIL
-			out("ATRN ");
-#endif
-			out("HELP QUIT\r\n");
-		}
+		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
+		if (hostname && *hostname && childargs && *childargs)
+			out("AUTH ");
+		out("VRFY ETRN HELP QUIT\r\n");
 		break;
 	}
 }
@@ -2015,10 +2023,12 @@ smtp_quit(char *arg)
 	smtp_greet("221 ");
 	out(" closing connection\r\n");
 	flush();
+	closeLibrary();
 #ifdef SMTP_PLUGIN
-	for (i = 0; plughandle && i < plugin_count; i++)
- 		if (plughandle[i])
+	for (i = 0; plughandle && i < plugin_count; i++) {
+		if (plughandle[i])
 			dlclose(plughandle[i]);
+	}
 #endif
 	_exit(0);
 }
@@ -2250,24 +2260,24 @@ open_control_files()
 	char           *x;
 
 	/*- BADMAILFROM */
-	open_control_once(&bmfok, &bmpok, &bmfFn, &bmfFnp, "BADMAILFROM", "BADMAILPATTERNS", "badmailfrom", "badmailpatterns", &bmf,
-					  &mapbmf, &bmp);
+	open_control_once(&bmfok, &bmpok, &bmfFn, &bmfFnp,
+		"BADMAILFROM", "BADMAILPATTERNS", "badmailfrom", "badmailpatterns", &bmf, &mapbmf, &bmp);
 	/*- BLACKHOLE Sender Patch - include Control file */
-	open_control_once(&bhfok, &bhpok, &bhsndFn, &bhsndFnp, "BLACKHOLEDSENDER", "BLACKHOLEDPATTERNS", "blackholedsender",
-					  "blackholedpatterns", &bhf, &mapbhf, &bhp);
+	open_control_once(&bhfok, &bhpok, &bhsndFn, &bhsndFnp,
+		"BLACKHOLEDSENDER", "BLACKHOLEDPATTERNS", "blackholedsender", "blackholedpatterns", &bhf, &mapbhf, &bhp);
 	/*- BLACKHOLE RECIPIENT Patch - include Control file */
-	open_control_once(&bhrcpok, &bhbrpok, &bhrcpFn, &bhrcpFnp, "BLACKHOLERCPT", "BLACKHOLERCPTPATTERNS", "blackholercpt",
-					  "blackholercptpatterns", &bhrcp, &mapbhrcp, &bhbrp);
+	open_control_once(&bhrcpok, &bhbrpok, &bhrcpFn, &bhrcpFnp,
+		"BLACKHOLERCPT", "BLACKHOLERCPTPATTERNS", "blackholercpt", "blackholercptpatterns", &bhrcp, &mapbhrcp, &bhbrp);
 	/*- BADRECIPIENT Patch - include Control file */
-	open_control_once(&rcpok, &brpok, &rcpFn, &rcpFnp, "BADRCPTTO", "BADRCPTPATTERNS", "badrcptto", "badrcptpatterns", &rcp,
-					  &maprcp, &brp);
+	open_control_once(&rcpok, &brpok, &rcpFn, &rcpFnp,
+		"BADRCPTTO", "BADRCPTPATTERNS", "badrcptto", "badrcptpatterns", &rcp, &maprcp, &brp);
 	/*- goodrcptto */
-	open_control_once(&chkgrcptok, &chkgrcptokp, &grcptFn, &grcptFnp, "GOODRCPTTO", "GOODRCPTPATTERNS", "goodrcptto",
-					  "goodrcptpatterns", &grcpt, &mapgrcpt, &grcptp);
+	open_control_once(&chkgrcptok, &chkgrcptokp, &grcptFn, &grcptFnp,
+		"GOODRCPTTO", "GOODRCPTPATTERNS", "goodrcptto", "goodrcptpatterns", &grcpt, &mapgrcpt, &grcptp);
 	/*- Spam Ignore Patch - include Control file */
 	if (env_get("SPAMFILTER"))
-		open_control_once(&spfok, &sppok, &spfFn, &spfFnp, "SPAMIGNORE", "SPAMIGNOREPATTERNS", "spamignore", "spamignorepatterns",
-						  &spf, &mapspf, &spp);
+		open_control_once(&spfok, &sppok, &spfFn, &spfFnp,
+			"SPAMIGNORE", "SPAMIGNOREPATTERNS", "spamignore", "spamignorepatterns", &spf, &mapspf, &spp);
 	/*-
 	 * DNSCHECK Patch - include Control file
 	 * Look up "MAIL from:" addresses to skip for DNS check in control/nodnscheck.
@@ -2421,12 +2431,12 @@ smtp_init(int force_flag)
 		die_control();
 	if (rmfok && !constmap_init(&maprmf, rmf.s, rmf.len, 0))
 		die_nomem();
-#ifdef INDIMAIL
-	if ((chkrcptok = control_readfile(&chkrcpt, "chkrcptdomains", 0)) == -1)
-		die_control();
-	if (chkrcptok && !constmap_init(&mapchkrcpt, chkrcpt.s, chkrcpt.len, 0))
-		die_nomem();
-#endif
+	if (hasvirtual) {
+		if ((chkrcptok = control_readfile(&chkrcpt, "chkrcptdomains", 0)) == -1)
+			die_control();
+		if (chkrcptok && !constmap_init(&mapchkrcpt, chkrcpt.s, chkrcpt.len, 0))
+			die_nomem();
+	}
 	if ((chkdomok = control_readfile(&chkdom, "authdomains", 0)) == -1)
 		die_control();
 	if (chkdomok && !constmap_init(&mapchkdom, chkdom.s, chkdom.len, 0))
@@ -2689,8 +2699,8 @@ smtp_ehlo(char *arg)
 	}
 	out("\r\n");
 	if (hostname && *hostname && childargs && *childargs) {
-		char           *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha256, *no_cram_sha512;
-		char           *no_cram_ripemd, *no_digest_md5;
+		char           *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha256;
+		char           *no_cram_sha512, *no_cram_ripemd, *no_digest_md5;
 #ifdef TLS
 		no_auth_login = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_LOGIN");
 		no_auth_plain = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_PLAIN");
@@ -2767,8 +2777,21 @@ smtp_ehlo(char *arg)
 			out("\r\n");
 		}
 	}
-#ifdef INDIMAIL
-	if (smtp_port != ODMR_PORT) {
+	if (hasvirtual) {
+		if (smtp_port != ODMR_PORT) {
+			out("250-PIPELINING\r\n");
+			out("250-8BITMIME\r\n");
+			if (databytes) {
+				size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
+				out("250-SIZE ");
+				out(size_buf);
+				out("\r\n");
+			}
+			if (smtp_port != SUBM_PORT)
+				out("250-ETRN\r\n");
+		} else
+			out("250-ATRN\r\n");
+	} else {
 		out("250-PIPELINING\r\n");
 		out("250-8BITMIME\r\n");
 		if (databytes) {
@@ -2779,20 +2802,7 @@ smtp_ehlo(char *arg)
 		}
 		if (smtp_port != SUBM_PORT)
 			out("250-ETRN\r\n");
-	} else
-		out("250-ATRN\r\n");
-#else
-	out("250-PIPELINING\r\n");
-	out("250-8BITMIME\r\n");
-	if (databytes) {
-		size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
-		out("250-SIZE ");
-		out(size_buf);
-		out("\r\n");
 	}
-	if (smtp_port != SUBM_PORT)
-		out("250-ETRN\r\n");
-#endif
 #ifdef TLS
 	if (!ssl && env_get("STARTTLS")) {
 		stralloc        filename = { 0 };
@@ -2913,14 +2923,13 @@ check_batv_sig()
 }
 #endif /*- #ifdef BATV */
 
-#ifdef INDIMAIL
 int
 pop_bef_smtp(char *mailfrom)
 {
 	char           *ptr;
 
 	if ((ptr = inquery(RELAY_QUERY, mailfrom, remoteip))) {
-		if ((authenticated = *ptr))
+		if ((authenticated = *ptr)) /*- also set authenticated variable */
 			relayclient = "";
 		env_put2("AUTHENTICATED", authenticated == 1 ? "1" : "0");
 	} else {
@@ -2977,7 +2986,6 @@ domain_compare(char *dom1, char *dom2)
 	}
 	return (0);
 }
-#endif
 
 int             flagsize = 0;
 stralloc        mfparms = { 0 };
@@ -3076,9 +3084,7 @@ static int      f_envret = 0, d_envret = 0, a_envret = 0;
 void
 smtp_mail(char *arg)
 {
-#ifdef INDIMAIL
 	struct passwd  *pw;
-#endif
 	char           *x;
 	int             ret;
 #ifdef SMTP_PLUGIN
@@ -3263,7 +3269,8 @@ smtp_mail(char *arg)
 			return;
 		}
 	}
-#ifdef INDIMAIL
+	if (!hasvirtual)
+		goto nohasvirtual;
 	/*-
 	 * closed user group mailing
 	 * allow only sender domains listed in rcpthosts to
@@ -3400,7 +3407,7 @@ smtp_mail(char *arg)
 			}
 		}
 	}
-#endif
+nohasvirtual:
 #ifdef USE_SPF
 	flagbarfspf = 0;
 	if (spfbehavior && !relayclient) {
@@ -3630,17 +3637,17 @@ smtp_rcpt(char *arg)
 			die_nomem();
 	} else /*- RELAYCLIENT not set */
 	if (!allowed_rcpthosts) { /*- not in rcpthosts - delivery to remote domains */
-#ifdef INDIMAIL
-		if (env_get("CHECKRELAY") && pop_bef_smtp(mailfrom.s))
-			return;
-		if (authenticated != 1) {
+		if (hasvirtual) {
+			if (env_get("CHECKRELAY") && pop_bef_smtp(mailfrom.s))
+				return;
+			if (authenticated != 1) {
+				err_nogateway(remoteip, mailfrom.s, addr.s, 0);
+				return;
+			}
+		} else {
 			err_nogateway(remoteip, mailfrom.s, addr.s, 0);
 			return;
 		}
-#else
-		err_nogateway(remoteip, mailfrom.s, addr.s, 0);
-		return;
-#endif /*- #ifdef INDIMAIL */
 	} /*- if (!allowed_rcpthosts) */
 	/*-
 	 * If rcptto is local, check status of recipients
@@ -3649,7 +3656,7 @@ smtp_rcpt(char *arg)
 	if (allowed_rcpthosts == 1 && (tmp = env_get("CHECKRECIPIENT"))) {
 		/*- chkrcptdomains */
 		switch (address_match("chkrcptdomains", &addr, chkrcptok ? &chkrcpt : 0, chkrcptok ? &mapchkrcpt : 0, 0, &errStr)) {
-		case 1:
+		case 1: /*- in chkrcptdomains */
 			chkrcptok = 0;
 		case 0:
 			break;
@@ -3661,15 +3668,16 @@ smtp_rcpt(char *arg)
 		}
 		if (!chkrcptok) {
 			if (isgoodrcpt != 4) { /*- not in goodrcptto, goodrcptpatterns */
-#ifdef INDIMAIL
-				if (*tmp)
-					scan_int(tmp, &isgoodrcpt);
-				else
-#endif
+				if (hasvirtual) {
+					if (*tmp)
+						scan_int(tmp, &isgoodrcpt);
+					else
+						isgoodrcpt = 3;	/*- default is cdb */
+				} else
 					isgoodrcpt = 3;	/*- default is cdb */
 			}
 			switch (isgoodrcpt) {
-#ifdef INDIMAIL
+#ifdef HAS_MYSQL
 			case 1:			/* reject if user not in sql db */
 				result = check_recipient_sql(addr.s);
 				break;
@@ -3825,7 +3833,7 @@ stralloc        line = { 0 };
 stralloc        content = { 0 };
 stralloc        boundary = { 0 };
 
-/*
+/*-
  * def put(ch):
  * line.append(ch)
  * if ch == '\n':
@@ -3978,9 +3986,8 @@ put(char *ch)
 				if (/*- mailfrom.s[0] == '\0' && */
 					   str_start(line.s, "Hi. This is the "))
 					flagqsbmf = 1;
-				else
-				if (/*- mailfrom.s[0] == '\0' && */
-							str_start(line.s, "This message was created automatically by mail delivery software"))
+				else /*- mailfrom.s[0] == '\0' && */
+				if ( str_start(line.s, "This message was created automatically by mail delivery software"))
 					flagqsbmf = 1;
 				else
 				if (sigscheck(&line, &virus_desc, linespastheader == 0)) {
@@ -4056,7 +4063,7 @@ blast(int *hops)
 				if (flagmaybey && pos == 1)
 					flaginheader = 0;
 			}
-			/*
+			/*-
 			 * We are interested only in return-receipt, delivered, received
 			 * headers. So no point in checking beyond pos = 13
 			 */
@@ -4209,8 +4216,9 @@ smtp_data(char *arg)
 	char           *mesg;
 #endif
 
-#ifdef INDIMAIL
-	sqlmatch_close_db();
+#ifdef HAS_MYSQL
+	if (hasvirtual)
+		sqlmatch_close_db();
 #endif
 	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
@@ -4387,7 +4395,6 @@ authgetl(void)
 	return (authin.len);
 }
 
-#ifndef INDIMAIL
 #define AUTH_LOGIN       1
 #define AUTH_PLAIN       2
 #define AUTH_CRAM_MD5    3
@@ -4396,7 +4403,6 @@ authgetl(void)
 #define AUTH_CRAM_SHA512 6
 #define AUTH_CRAM_RIPEMD 7
 #define AUTH_DIGEST_MD5  8
-#endif
 
 int             po[2] = { -1, -1 };
 stralloc        authmethod = { 0 };
@@ -4581,7 +4587,7 @@ auth_cram(int method)
 	*s++ = '@';
 	*s++ = 0;
 
-	if (!stralloc_copys(&pass, "<"))	 /*- generate challenge */
+	if (!stralloc_copys(&pass, "<")) /*- generate challenge */
 		die_nomem();
 	if (!stralloc_cats(&pass, unique))
 		die_nomem();
@@ -4594,11 +4600,11 @@ auth_cram(int method)
 	if (!stralloc_0(&slop))
 		die_nomem();
 
-	out("334 ");	/*- "334 mychallenge \r\n" */
+	out("334 "); /*- "334 mychallenge \r\n" */
 	out(slop.s);
 	out("\r\n");
 	flush();
-	if (authgetl() < 0)		/*- got response */
+	if (authgetl() < 0) /*- got response */
 		return -1;
 	if ((r = b64decode((const unsigned char *) authin.s, authin.len, &slop)) == 1)
 		return err_input();
@@ -4609,9 +4615,9 @@ auth_cram(int method)
 	while (*s == ' ')
 		++s;
 	slop.s[i] = 0;
-	if (!stralloc_copys(&user, slop.s))		/*- userid */
+	if (!stralloc_copys(&user, slop.s)) /*- userid */
 		die_nomem();
-	if (!stralloc_copys(&resp, s))	   /*- digest */
+	if (!stralloc_copys(&resp, s)) /*- digest */
 		die_nomem();
 	if (!user.len || !resp.len)
 		return err_input();
@@ -4651,9 +4657,7 @@ auth_cram_ripemd()
 	return (auth_cram(AUTH_CRAM_RIPEMD));
 }
 
-/*
- * parse digest response 
- */
+/*- parse digest response */
 unsigned int
 scan_response(stralloc * dst, stralloc * src, const char *search)
 {
@@ -4893,7 +4897,7 @@ smtp_auth(char *arg)
 		return;
 	}
 
-	/*- forcetls patch */
+/*- forcetls patch */
 #ifdef TLS
 	if (env_get("FORCE_TLS")) {
 		if (!ssl) {
@@ -5054,15 +5058,18 @@ smtp_etrn(char *arg)
 	return;
 }
 
-#ifdef INDIMAIL
 void
 smtp_atrn(char *arg)
 {
-	char           *ptr, *cptr, *domain_ptr, *user_tmp, *domain_tmp;
+	char           *ptr, *cptr, *domain_ptr, *user_tmp, *domain_tmp, *errstr;
 	int             i, end_flag, status, Reject = 0, Accept = 0;
 	char            err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 	char            user[MAX_BUFF], domain[MAX_BUFF];
 	stralloc        domBuf = { 0 };
+	void            (*vclose) (void);
+	int             (*parse_email) (char *, char *, char *, int);
+	char           *(*vshow_atrn_map) (char **, char **);
+	int             (*atrn_access) (char *, char *);
 
 	if (!authd) {
 		err_authrequired();
@@ -5076,13 +5083,33 @@ smtp_atrn(char *arg)
 		err_transaction("ATRN");
 		return;
 	}
+	if (!hasvirtual) {
+		err_library("libindimail.so not loaded");
+		return;
+	}
+	if (!(parse_email = getFunction("parse_email", &errstr))) {
+		err_library(errstr);
+		return;
+	} else
+	if (!(vclose = getFunction("vclose", &errstr))) {
+		err_library(errstr);
+		return;
+	} else
+	if (!(vshow_atrn_map = getFunction("vshow_atrn_map", &errstr))) {
+		err_library(errstr);
+		return;
+	} else
+	if (!(atrn_access = getFunction("atrn_access", &errstr))) {
+		err_library(errstr);
+		return;
+	}
 	for (; *arg && !isalnum((int) *arg); arg++);
 	if (*arg)
 		domain_ptr = arg;
 	else {
 		parse_email(remoteinfo, user, domain, MAX_BUFF);
 		for (user_tmp = user, domain_tmp = domain, end_flag = 0;;) {
-			if (!(ptr = vshow_atrn_map(&user_tmp, &domain_tmp)))
+			if (!(ptr = (*vshow_atrn_map) (&user_tmp, &domain_tmp)))
 				break;
 			if (end_flag) {
 				if (!stralloc_cats(&domBuf, " ")) {
@@ -5178,7 +5205,6 @@ smtp_atrn(char *arg)
 	}
 	return;
 }
-#endif
 
 #ifdef TLS
 int             ssl_verified = 0;
@@ -5676,9 +5702,7 @@ struct commands smtpcommands[] = {
 	{"noop", smtp_noop, flush},
 	{"vrfy", smtp_vrfy, flush},
 	{"etrn", smtp_etrn, flush},
-#ifdef INDIMAIL
 	{"atrn", smtp_atrn, flush},
-#endif
 #ifdef TLS
 	{"starttls", smtp_tls, flush_io},
 #endif
@@ -5692,9 +5716,7 @@ struct commands odmrcommands[] = {
 	{"ehlo", smtp_ehlo, flush},
 	{"help", smtp_help, flush},
 	{"etrn", smtp_etrn, flush},
-#ifdef INDIMAIL
 	{"atrn", smtp_atrn, flush},
-#endif
 	{0, err_unimpl, flush}
 };
 
@@ -5724,9 +5746,9 @@ load_plugin(char *library, char *plugin_symb, int j)
 	char           *error;
 
 #ifdef RTLD_DEEPBIND
-	if (!(plughandle[j] = dlopen(library, RTLD_LAZY | RTLD_LOCAL | RTLD_NODELETE | RTLD_DEEPBIND)))
+	if (!(plughandle[j] = dlopen(library, RTLD_LAZY|RTLD_LOCAL|RTLD_NODELETE|RTLD_DEEPBIND)))
 #else
-	if (!(plughandle[j] = dlopen(library, RTLD_LAZY | RTLD_LOCAL | RTLD_NODELETE)))
+	if (!(plughandle[j] = dlopen(library, RTLD_LAZY|RTLD_LOCAL|RTLD_NODELETE)))
 #endif
 		die_plugin("dlopen failed for ", library, ": ", dlerror());
 	dlerror(); /*- man page told me to do this */
@@ -5743,8 +5765,9 @@ load_plugin(char *library, char *plugin_symb, int j)
 void
 qmail_smtpd(int argc, char **argv, char **envp)
 {
-	char           *ptr;
+	char           *ptr, *errstr;
 	struct commands *cmdptr;
+	void           *phandle;
 #ifdef SMTP_PLUGIN
 	int             i, j, len;
 	char           *start_plugin, *plugin_symb, *plugindir;
@@ -5770,6 +5793,17 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	sig_pipeignore();
 	if (chdir(auto_qmail) == -1)
 		die_control();
+	/*- load virtual package library */
+	phandle = loadLibrary(&i, &errstr);
+	if (i) {
+		logerr("Error loading virtual package shared lib: ");
+		logerr(errstr);
+		logerrf("\n");
+		out("451 Requested action aborted: unable to load shared library (#4.3.0)\r\n");
+		flush();
+		_exit(1);
+	}
+	hasvirtual = phandle ? 1 : 0;
 	/*-
 	 * setup calls databytes_setup(), which sets
 	 * databytes
@@ -5952,10 +5986,10 @@ command:
 	die_nomem();
 }
 
+/*- Rejection of relay probes. */
 int
 addrrelay()
 {
-/*- Rejection of relay probes. */
 	int             j;
 
 	j = addr.len;
@@ -6032,12 +6066,7 @@ getversion_smtpd_c()
 {
 	static char    *x = "$Id: smtpd.c,v 1.205 2017-12-26 21:58:06+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
 	x = sccsidauthcramh;
-#endif
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.10  2018-01-09 11:36:22+05:30  Cprogrammer
+ * load count_dir() using loadLibrary()
+ *
  * Revision 1.9  2011-07-29 09:28:21+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -39,134 +42,29 @@
 #include "fmt.h"
 #include "auto_qmail.h"
 #include "wait.h"
+#include "indimail_stub.h"
 #include <ctype.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 int             err_child();
+int             err_library();
 void            die_nomem();
 void            die_control();
 
 static char    *binetrnargs[3] = { 0, 0, 0 };
 
-#include "hasindimail.h"
-#ifndef INDIMAIL
-#include <stdio.h>
-#include <errno.h>
-#include <dirent.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-
-size_t count_dir(char *dir_name, size_t *mailcount)
-{
-	DIR            *entry;
-	struct dirent  *dp;
-	struct stat     statbuf;
-	size_t          file_size, len, flen;
-	size_t          count;
-	int             is_trash;
-	char           *tmpstr, *ptr;
-
-	if (!dir_name || !*dir_name)
-		return (0);
-	if (!(entry = opendir(dir_name)))
-		return (0);
-	if (strstr(dir_name, "/Maildir/.Trash"))
-		is_trash = 1;
-	else
-		is_trash = 0;
-	if (mailcount)
-		*mailcount = 0;
-	for (file_size = 0, tmpstr = 0;;)
-	{
-		if (!(dp = readdir(entry)))
-			break;
-		if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, ".."))
-			continue;
-		else
-		if (!strcmp(dp->d_name, ".Trash"))
-			continue;
-		else
-		if (!strcmp(dp->d_name, ".current_size"))
-			continue;
-		else
-		if (!strcmp(dp->d_name, "maildirsize"))
-			continue;
-		else
-		if (!strcmp(dp->d_name, "maildirfolder"))
-			continue;
-		else
-		if (!strcmp(dp->d_name, "core"))
-			continue;
-		else
-		if (!strncmp(dp->d_name, "sqwebmail", 9))
-			continue;
-		else
-		if (!strncmp(dp->d_name, "courier", 7))
-			continue;
-		else
-		if (!strcmp(dp->d_name, ".domain"))
-			continue;
-		else
-		if (!strcmp(dp->d_name, ".QuotaWarn"))
-			continue;
-		else
-		if (!strcmp(dp->d_name, ".BulkMail"))
-			continue;
-		flen = strlen(dp->d_name);
-		len = flen + strlen(dir_name) + 2;
-		if (!(tmpstr = (char *) realloc(tmpstr, (len * sizeof(char)))))
-		{
-			fprintf(stderr, "realloc: %d bytes: %s\n", (int) len, strerror(errno));
-			closedir(entry);
-			return(-1);
-		}
-		snprintf(tmpstr, len, "%s/%s", dir_name, dp->d_name);
-		if ((ptr = strstr(tmpstr, ",S=")) != NULL)
-		{
-			ptr += 3;
-			file_size += atoi(ptr);
-			if (mailcount)
-				(*mailcount)++;
-		} else
-		if (!stat(tmpstr, &statbuf))
-		{
-			if (S_ISDIR(statbuf.st_mode))
-			{
-				file_size += count_dir(tmpstr, &count);
-				if (mailcount)
-					*mailcount += count;
-			}
-			else
-			{
-				if (*(dp->d_name + flen - 1) == 'T' || is_trash)
-					continue;
-				if (mailcount)
-					(*mailcount)++;
-				file_size += statbuf.st_size;
-			}
-		}
-	}
-	closedir(entry);
-	free(tmpstr);
-	return (file_size);
-}
-#endif
-
 int
 etrn_queue(char *arg, char *remoteip)
 {
 	int             child, r, flagetrn, len, exitcode, wstat;
-#ifndef INDIMAIL
 	size_t          mailcount;
-#else
-	mdir_t          mailcount;
-#endif
 	stralloc        etrn = { 0 };
 	char            maildir1[1024], maildir2[1024];
+	char           *errstr;
 	struct constmap mapetrn;
 	static int      flagrcpt = 1;
+	size_t          (*count_dir) (char *, size_t *);
 
 	if (flagrcpt)
 		flagrcpt = rcpthosts_init();
@@ -199,6 +97,10 @@ etrn_queue(char *arg, char *remoteip)
 	maildir2[r] = 0;
 
 	mailcount = 0;
+	if (!loadLibrary(0, &errstr))
+		return (err_library(errstr));
+	if (!(count_dir = getFunction("count_dir", &errstr)))
+		return (err_library(errstr));
 	if (!access(maildir1, F_OK))
 		count_dir(maildir1, &mailcount);
 	else
@@ -279,13 +181,8 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.9 2011-07-29 09:28:21+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.10 2018-01-09 11:36:22+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }
