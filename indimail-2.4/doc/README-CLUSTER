@@ -1,5 +1,5 @@
 File README-CLUSTER, Version 2.4
-DATE: Mon Dec  4 19:06:48 IST 2017
+DATE: Wed Dec 27 00:42:10 IST 2017
 
     IndiMail supports a cluster of servers for a domain. A cluster is a set of servers
     having the same domain. In other words, a clustered domain is a domain which has been
