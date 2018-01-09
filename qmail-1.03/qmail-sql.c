@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.4  2018-01-09 11:54:26+05:30  Cprogrammer
+ * link with MySQL without indimail
+ *
  * Revision 1.3  2017-04-16 19:53:14+05:30  Cprogrammer
  * use auto_sysconfdir instead of auto_qmail
  *
@@ -10,12 +13,11 @@
  * Initial revision
  *
  */
-
 #include <unistd.h>
-#include "hasindimail.h"
 #include "subfd.h"
 #include "substdio.h"
-#ifdef INDIMAIL
+#include "hasmysql.h"
+#ifdef HAS_MYSQL
 #include "auto_uids.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
@@ -317,11 +319,11 @@ main(int argc, char **argv)
 	return (0);
 }
 #else
-#warning "not compiled with -DINDIMAIL. Probably IndiMail is missing"
+#warning "not compiled with -DHAS_MYSQL. Probably MySQL lib is missing"
 int
 main(int argc, char **argv)
 {
-	substdio_puts(subfderr, "not compiled with -DINDIMAIL. Probably IndiMail is missing\n");
+	substdio_puts(subfderr, "not compiled with -DHAS_MYSQL. Probably MySQL lib is missing\n");
 	substdio_flush(subfderr);
 	_exit(111);
 }
@@ -330,10 +332,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.3 2017-04-16 19:53:14+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.4 2018-01-09 11:54:26+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	x = sccsidh;
-#endif
 	x++;
 }
