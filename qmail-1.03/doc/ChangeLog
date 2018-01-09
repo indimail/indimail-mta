@@ -1,6 +1,6 @@
-* Wed Dec 27 2017 00:00:45 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
+* Tue Jan 09 2018 08:44:34 +0530 mbhangui@gmail.com 2.2-1.1%{?dist}
 Release 2.2 Start 08/05/2017
-10/05/2011
+10/05/2017
 1.  use packetsize > 512 to avoid dkim failures for sites having long txt
     records (hotmail.com)
 2.  config-fast removed display of DESTDIR
@@ -90,3 +90,4 @@ Release 2.2 Start 08/05/2017
     preventing creation of LOGFILTER service variable
 52. fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
 53. svctool - seperated out qmail, indimail config
+54. Renamed controlfiles to controlfiles.q
