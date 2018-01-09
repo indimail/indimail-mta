@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.62  2018-01-09 11:49:26+05:30  Cprogrammer
+ * use indimail-mta identifier in Received: headers
+ *
  * Revision 1.61  2017-05-04 20:20:36+05:30  Cprogrammer
  * close passwd, group database
  *
@@ -194,7 +197,6 @@
 #include "scan.h"
 #include "mess822.h"
 #include "wait.h"
-#include "hasindimail.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR  1003
@@ -339,11 +341,7 @@ receivedfmt(char *s)
 	unsigned int    i;
 	unsigned int    len;
 	len = 0;
-#ifdef INDIMAIL
-	i = fmt_str(s, "Received: (indimail ");
-#else
-	i = fmt_str(s, "Received: (indimail-smtp ");
-#endif
+	i = fmt_str(s, "Received: (indimail-mta ");
 	len += i;
 	if (s)
 		s += i;
@@ -847,11 +845,7 @@ main()
 		flagarchive = 1;
 #endif
 	if (!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
 		queuedir = "queue1";
-#else
-		queuedir = "queue";
-#endif
 	if (chdir(queuedir) == -1)
 		die(62);
 #ifdef USE_FSYNC
@@ -1228,13 +1222,8 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.61 2017-05-04 20:20:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.62 2018-01-09 11:49:26+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }
