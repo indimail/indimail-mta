@@ -1,6 +1,6 @@
 qmail-srs.5
 indimail-mta.fc
-perm_list
+perm_list.q
 auto_libexec.c
 auto_libexec.o
 auto_prefix.c
@@ -1082,8 +1082,7 @@ str_end.o
 lock_sh.o
 sig_int.o
 queue-fix.0
-cronlist
-indimail-mta.spec
+cronlist.q
 hastlsv1_1_client.h
 hastlsv1_1_server.h
 hastlsv1_2_client.h
@@ -1094,3 +1093,9 @@ inotify.o
 hasinotify.h
 tryinotify
 tryinotify.o
+mysql_config
+indimail_stub.o
+hasmysql.h
+mysql_config.o
+svctool.8
+svctool

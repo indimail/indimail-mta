@@ -271,6 +271,7 @@
 %attr(0755,root,qmail) @libexecdir@/zsuccesses
 %attr(0755,root,qmail) @libexecdir@/zsuids
 %attr(0755,root,qmail) @libexecdir@/qupgrade.sh
+%attr(0755,root,qmail) @libexecdir@/qlocal_upgrade.sh
 
 %attr(0751,root,qmail) @prefix@/bin/qmail-getpw
 %attr(0751,root,qmail) @prefix@/bin/qmail-local
@@ -324,7 +325,9 @@
 #
 # Config files
 #
-%attr(0444,root,root)  @sysconfdir@/perm_list
+%attr(0444,root,root)  @sysconfdir@/perm_list.q
+%attr(0444,root,root)  @sysconfdir@/cronlist.q
+%attr(0444,root,root)  @sysconfdir@/controlfiles.q
 %attr(0444,root,root)  @sysconfdir@/qmailprog.list
 %attr(0644,root,root)  @sysconfdir@/etc/leapsecs.txt
 %attr(0644,root,root)  @sysconfdir@/etc/leapsecs.dat
