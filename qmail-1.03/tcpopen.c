@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.3  2018-01-09 12:37:04+05:30  Cprogrammer
+ * removed header hasindimail.h
+ *
  * Revision 1.2  2016-06-13 14:17:37+05:30  Cprogrammer
  * close socket on connect() failure
  *
@@ -8,11 +11,6 @@
  *
  *
  */
-#ifndef QMAIL_INTERNAL
-#include "hasindimail.h"
-#endif
-
-#ifndef INDIMAIL
 #include <stdlib.h>
 #include <netdb.h>
 #include <unistd.h>
@@ -414,16 +412,10 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	}
 	return (fd);
 }	/*- end tcp_open */
-#endif
 
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.2 2016-06-13 14:17:37+05:30 Cprogrammer Stab mbhangui $";
-#ifdef INDIMAIL
-	char *y = sccsid;
-	if (y)
-		y = sccsidh;
-#endif
+	static char    *x = "$Id: tcpopen.c,v 1.3 2018-01-09 12:37:04+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

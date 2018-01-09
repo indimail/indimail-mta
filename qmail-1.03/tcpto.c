@@ -1,5 +1,8 @@
 /*
  * $Log: tcpto.c,v $
+ * Revision 1.14  2018-01-09 12:37:11+05:30  Cprogrammer
+ * removed header hasindimail.h
+ *
  * Revision 1.13  2011-07-29 09:30:09+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -42,7 +45,6 @@
 #include "tcpto.h"
 #include "datetime.h"
 #include "variables.h"
-#include "hasindimail.h"
 
 char            tcpto_buf[TCPTO_BUFSIZ];
 
@@ -57,11 +59,7 @@ getbuf()
 	if(!queuedir)
 	{
 		if(!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
 			queuedir = "queue1";
-#else
-			queuedir = "queue";
-#endif
 	}
 	if ((r = fmt_strn(lockfile, queuedir, 1024)) > 1012)
 		return(0);
@@ -275,13 +273,8 @@ tcpto_err(ix, flagerr, max_tolerance)
 void
 getversion_tcpto_c()
 {
-	static char    *x = "$Id: tcpto.c,v 1.13 2011-07-29 09:30:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tcpto.c,v 1.14 2018-01-09 12:37:11+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }

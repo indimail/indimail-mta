@@ -1,5 +1,8 @@
 /*
  * $Log: udpopen.c,v $
+ * Revision 1.6  2018-01-09 12:37:19+05:30  Cprogrammer
+ * removed header hasindimail.h
+ *
  * Revision 1.5  2015-08-19 16:27:32+05:30  Cprogrammer
  * added missing call to getservbyname()
  *
@@ -19,14 +22,9 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: udpopen.c,v 1.5 2015-08-19 16:27:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: udpopen.c,v 1.6 2018-01-09 12:37:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-#ifndef QMAIL_INTERNAL
-#include "hasindimail.h"
-#endif
-
-#ifndef INDIMAIL
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -171,17 +169,11 @@ udpopen(char *rhost, char *servicename)
 #endif
 	return(fd);
 }
-#endif
 
 void
 getversion_udpopen_c()
 {
 	char *x = sccsid;
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }
