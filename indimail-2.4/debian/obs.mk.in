@@ -48,8 +48,8 @@ pkgconfigdir=@prefix@/lib/pkgconfig
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep gen_control indimail.install indimail.dsc \
 indimail-devel32 indimail-devel64 libindimail32 libindimail64 indimail-devel.postinst \
-indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
-indimail-mini.postrm indimail-mini.postinst debian.tar.gz dummy.tar.gz
+indimail-devel.postrm \
+debian.tar.gz dummy.tar.gz
 
 install: all
 install-strip: install
@@ -60,23 +60,18 @@ clean:
 	indimail.postinst obs_deb_prep indimail-devel32 \
 	libindimail32 libindimail64 indimail.install \
 	indimail-devel64 indimail-devel.postinst indimail-devel.postrm \
-	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
-	indimail-mini.postinst debian.tar.gz dummy.tar.gz *.dsc
+	debian.tar.gz dummy.tar.gz *.dsc
 
 noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm \
 				 indimail.postinst rules obs_deb_prep gen_control \
 				 indimail-devel32 indimail-devel64 indimail.install \
 				 libindimail32 libindimail64 \
-				 indimail-devel.postinst indimail-devel.postrm \
-				 indimail-mini.prerm indimail-mini.preinst \
-				 indimail-mini.postrm indimail-mini.postinst
+				 indimail-devel.postinst indimail-devel.postrm
 MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm \
 				  indimail.postinst rules obs_deb_prep gen_control \
 				  indimail-devel32 indimail-devel64 indimail.install \
 				  libindimail32 libindimail64 \
 				  indimail-devel.postinst indimail-devel.postrm \
-				  indimail-mini.prerm indimail-mini.preinst \
-				  indimail-mini.postrm indimail-mini.postinst \
 				  changelog debian.tar.gz dummy.tar.gz
 
 edit = sed \
@@ -146,15 +141,6 @@ libindimail32: libindimail32.in
 libindimail64: libindimail64.in
 	$(edit) $@.in > $@;
 
-indimail-mini.prerm: indimail-mini.prerm.in
-	$(edit) $@.in > $@;
-indimail-mini.preinst: indimail-mini.preinst.in
-	$(edit) $@.in > $@;
-indimail-mini.postrm: indimail-mini.postrm.in
-	$(edit) $@.in > $@;
-indimail-mini.postinst: indimail-mini.postinst.in
-	$(edit) $@.in > $@;
-
 indimail.cron.d: indimail.cron.d.in
 	$(edit) $@.in > $@
 
@@ -174,14 +160,12 @@ debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm \
 indimail.postrm rules changelog compat indimail-devel32 \
 indimail-devel64 obs_deb_prep indimail-devel.postinst \
 libindimail32 libindimail64 indimail.install \
-indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
-indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
+indimail-devel.postrm \
 gen_control obs.mk control indimail.cron.d control
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
 		indimail.postrm rules changelog compat obs_deb_prep \
 		indimail-devel32 indimail-devel64 indimail.install \
 		libindimail32 libindimail64 control \
 		indimail-devel.postinst gen_control \
-		indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
-		indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
+		indimail-devel.postrm \
 		indimail.cron.d |gzip > $@
