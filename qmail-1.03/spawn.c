@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.20  2018-01-09 12:35:11+05:30  Cprogrammer
+ * use loadLibrary() to access indimail functions()
+ *
  * Revision 1.19  2016-02-08 17:29:14+05:30  Cprogrammer
  * set environment variable MESSID
  *
@@ -41,6 +44,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "indimail_stub.h"
 #include "sig.h"
 #include "wait.h"
 #include "substdio.h"
@@ -58,7 +62,6 @@
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "auto_spawn.h"
-#include "hasindimail.h"
 
 extern int      truncreport;
 int             spawn(int, int, unsigned long, char *, char *, char *, int);
@@ -440,11 +443,7 @@ main(argc, argv)
 	if (chdir(auto_qmail) == -1)
 		_exit(111);
 	if (!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
 		queuedir = "queue1";
-#else
-		queuedir = "queue";
-#endif
 	if (chdir(queuedir) == -1)
 		_exit(111);
 	if (chdir("mess") == -1)
@@ -474,6 +473,8 @@ main(argc, argv)
 		d[i].used = 0;
 		d[i].output.s = 0;
 	}
+	if (!loadLibrary(&i, 0) && i)
+		_exit(111);
 	for (;;)
 	{
 		if (!flagreading)
@@ -548,10 +549,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.19 2016-02-08 17:29:14+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.20 2018-01-09 12:35:11+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	x = sccsidh;
-#endif
 	x++;
 }
