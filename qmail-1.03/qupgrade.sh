@@ -1,10 +1,7 @@
 #!/bin/sh
 # $Log: qupgrade.sh,v $
-# Revision 1.4  2018-01-06 12:18:47+05:30  Cprogrammer
-# renamed upgrade.sh, local_upgrade.sh to qupgrade.sh, qlocal_upgrade.sh
-#
-# Revision 1.3  2018-01-02 16:29:34+05:30  Cprogrammer
-# use indimail-mta-release instead of indimail-release
+# Revision 1.5  2018-01-09 11:57:28+05:30  Cprogrammer
+# updated for v2.3 indimail-mta
 #
 # Revision 1.2  2017-11-06 21:46:24+05:30  Cprogrammer
 # fixed upgrade script for posttrans
@@ -25,7 +22,7 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: qupgrade.sh,v 1.4 2018-01-06 12:18:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: qupgrade.sh,v 1.5 2018-01-09 11:57:28+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
@@ -46,7 +43,7 @@ do_pre()
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
 		fi
-		echo "RPM/DEB Version  $PKG_VER"
+		echo "RPM/DEB Version $PKG_VER"
 		. /etc/indimail/indimail-mta-release
 	fi
 	case $1 in
