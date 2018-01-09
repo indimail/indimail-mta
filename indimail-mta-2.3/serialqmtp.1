@@ -1,0 +1,65 @@
+.TH serialqmtp 1
+.SH NAME
+serialqmtp \- blast files across QMTP
+.SH SYNOPSIS
+.B serialqmtp
+.I prefix
+.SH DESCRIPTION
+.B serialqmtp
+sends messages to a QMTP server.
+It expects to be run under an UCSPI client;
+it sends data to the server on descriptor 7,
+and reads data from the server on descriptor 6.
+
+.B serialqmtp
+reads the messages from separate files.
+It reads the filenames from stdin.
+Each filename is terminated by a 0 byte.
+
+.B serialqmtp
+retrieves a message's envelope sender address and envelope recipient address
+from the
+.B Return-Path
+and
+.B Delivered-To
+lines at the top of the message header.
+It removes these lines before passing the message along.
+
+.B serialqmtp
+removes
+.I prefix
+from the beginning of each envelope recipient address.
+It ignores any message whose recipient address does not begin with
+.IR prefix .
+
+.B serialqmtp
+reports its results on stdout.
+Each result is a 0-terminated filename,
+followed by a status byte,
+followed by an LF-terminated readable status message.
+The status byte is K if the QMTP server
+has accepted responsibility for the message,
+Z if the QMTP server
+has temporarily rejected the message,
+and
+D if the QMTP server
+has permanently rejected the message.
+.B serialqmtp
+silently truncates excessively long status messages.
+.B serialqmtp
+does not necessarily print a result for every file:
+it may skip files,
+it may have trouble reading a file from disk,
+or it may have trouble talking to the QMTP server.
+
+.B serialqmtp
+uses a 73-second timeout on each network write.
+.SH REFERENCES
+See
+.B http://pobox.com/~djb/proto/qmtp.txt
+for further information about QMTP.
+.SH "SEE ASO"
+tcpclient(1),
+serialsmtp(1),
+maildirserial(1),
+qmail-qmtpd(8)

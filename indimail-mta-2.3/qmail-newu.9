@@ -1,0 +1,53 @@
+.TH qmail-newu 8
+.SH NAME
+qmail-newu \- prepare address assignments for qmail-lspawn
+.SH SYNOPSIS
+.B qmail-newu
+[
+.I directory
+]
+.SH DESCRIPTION
+.B qmail-newu
+reads the assignments in
+.B directory/assign
+and writes them into
+.B directory/cdb
+in a binary format suited
+for quick access by
+.BR qmail-lspawn .
+If
+.I directory
+is omitted
+.B qmail-newu
+uses ASSIGN. Extra arguments provided after
+.I directory
+are silently ignored.
+
+If there is a problem with
+.BR directory/assign ,
+.B qmail-newu
+complains and leaves
+.B directory/cdb
+alone.
+
+.B qmail-newu
+ensures that
+.B directory/cdb
+is updated atomically,
+so
+.B qmail-lspawn
+never has to wait for
+.B qmail-newu
+to finish.
+However,
+.B qmail-newu
+makes no attempt to protect against two simultaneous updates of
+.BR directory/cdb .
+
+The binary
+.B directory/cdb
+format is portable across machines.
+.SH "SEE ALSO"
+qmail-users(5),
+qmail-lspawn(8),
+qmail-pw2u(8)

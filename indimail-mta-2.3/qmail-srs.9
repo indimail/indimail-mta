@@ -1,0 +1,60 @@
+.TH qmail-srs 5
+
+.SH "NAME"
+qmail-srs \- qmail srs configuration files
+
+.SH "INTRODUCTION"
+You can configure indimail system by modifying
+.BR qmail 's
+.I control files
+in
+.BR @controldir@ .
+
+.SH CONTROL FILES
+
+.TP
+.I srs_domain
+A domain to use in rewritten address. If not set, SRS is disabled. You must create a MX record srs\.\fIdomain\fR.
+If your \fIdomain\fR is example.com, this will be.
+
+.EX
+srs.example.com
+.EE
+
+.TP
+.I srs_secrets
+A random string to generate and check SRS addresses. You can specify a list of secrets (one per line).
+The first secret in the list is used for generating new SRS addresses. All secrets on the list may be used to verify
+SRS addresses.
+
+.TP 5
+.I srs_maxage
+The maximum permitted age of a rewritten address. SRS rewritten addresses expire after a specified number of days.
+libsrs2 default is 21. But a week is enough to get all bounces. Recommended value is 7
+
+.TP 5
+.I srs_hashlength
+The hash length to generate in a rewritten address. The hash length is a measure of security in the SRS system; longer
+is more secure. Recommended value 4
+
+.TP 5
+.I srs_hashmin
+The hash length to require when checking an address. If the hash length is increased, there may be SRS addresses from
+your MTA in the wild which use a shorted hash length. This paramter may be sit to permit checking of hashes shorter
+than \fIsrs_hashlength\fR. This parameter should be at most \fIsrs_hashlength\fR. Recommended value 4
+
+.TP 5
+.I srs_separator
+The separator to appear immediately after SRS[01] in rewritten addresses. This must be \-, + or =. Default value is =
+
+.TP 5
+.I srs_alwaysrewrite
+Skip \fIrcpthosts\fR check and perform SRS rewriting for all forwarding, even when not required. This must be 0 (disabled)
+or 1 (enabled). Default value is 0
+
+.SH "SEE ALSO"
+qmail-control(5),
+qmail-inject(8),
+qmail-local(8),
+sendmail(1),
+srsfilter(1),

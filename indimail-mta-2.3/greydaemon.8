@@ -1,0 +1,127 @@
+.TH greydaemon 8
+.SH NAME
+greydaemon \- greylisting daemon
+.SH SYNOPSIS
+.B greydaemon
+[\c
+.B \-u
+.I username\c
+]\ [\c
+.B \-w
+.I whitelist\c
+]\ [\c
+.B \-t
+.I timeout_days\c
+]\ [\c
+.B \-g
+.I resend_window_hours\c
+]\ [\c
+.B \-m
+.I min_resend_minutes\c
+]\ [\c
+.B \-s
+.I save_interval_minutes\c
+]
+.I ipaddr savefile
+.SH DESCRIPTION
+.B greydaemon
+is a greylisting daemon responding to UDP query packets, typically
+sent by a modified
+.B qmail-smtpd.
+Queries consist of the sending IP address, the sender address and
+one or more recipient addresses. 
+
+If the IP address was previously successful for a greylisting check and
+was last queried within
+.I timeout_days
+the check succeeds. Alternatively if
+one of the supplied triplets of
+IP address / sender / recipient have previously been seen within
+.I resend_window_hours
+but at least
+.I min_resend_minutes
+ago, the check succeeds and future checks within
+.I resend_window_hours
+for the IP address will succeed.
+Otherwise the triplet(s) supplied are added to the greylisting database
+to check against future queries, and the check fails (meaning
+.B qmail-smtpd
+will reject the message).
+
+.B greydaemon
+must be started as root but quickly changes its effective
+user/group id to that specified by
+.I username.
+
+.B greydaemon
+maintains its database in memory, thus
+avoiding complicated schemes to manage greylisting data on disk -
+as well as benefitting from being faster than disk-based
+approaches. Nevertheless periodic backups of the database are made to 
+.I savefile
+on the disk to enable
+.B greydaemon
+to start with existing greylisting data if greydaemon restarts, such
+as when the machine is rebooted.
+
+At start-up the file
+.I savefile
+is read. This contains the list of currently greylisted addresses;
+.B greydaemon
+writes a new
+.I savefile
+periodically (about every 10 minutes).
+This period can be changed by specifying the
+.B -s
+option. Since
+.B greydaemon
+runs as
+.IR username ,
+.I savefile
+and its containing directory should be writeable by
+.IR username .
+
+.B greydaemon
+listens on IP address
+.I ipaddr\c
+, port 1999 for incoming UDP queries. 127.0.0.1 (the loopback address)
+is recommended for
+.I ipaddr
+if
+.B greydaemon
+is to serve queries on the same machine.
+
+.SH OPTIONS
+.TP
+.B -u \fI username
+run as user
+.I username
+.TP
+.B -w \fI filename
+specify whitelist of IP ranges not subject to greylisting
+.TP
+.B -t \fIdays
+timeout for known IPs in days; defaults to 7.
+.TP
+.B -g \fIhours
+grey resend window, in hours; defaults to 12.
+.TP
+.B -m \fIminutes
+min resend accept time, in minutes; defaults to 5.
+.TP
+.B -s \fIminutes
+save interval for context file, in minutes; defaults to 10
+
+.SH "QUERY FORMAT"
+Queries to greydaemon are UDP packets containing the IP address (as a string)
+preceded by I; the sender address preceded by F and the recipient address
+preceded by T. Each of these fields is separated by an ASCII 0 (null) character.
+Additional recipient addresses may be appended to this structure - each time
+preceded with T and with an ASCII 0 as separator.
+
+.SH "SEE ALSO"
+qmail-smtpd(8).
+
+.SH AUTHORS
+.B greydaemon
+is written by John Levine. This man page is written by Andrew Richards.

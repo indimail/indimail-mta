@@ -1,0 +1,48 @@
+.TH qnotify 1
+.SH NAME
+qnotify \- respond to Message Disposition Notifications
+.SH SYNOPSIS
+in
+.BR .qmail :
+.B |qnotify
+[-h]
+[-n]
+
+.SH DESCRIPTION
+\fBqnotify\fR(1) reads an rfc822 email on stdin and generates a MDN as required by
+RFC3798. 
+\fBqnotify\fR(1) uses environment variable \fBSENDER\fR, \fBRPLINE\fR or \fBReturn-Path\fR
+header to compare the address with Disposition header. By default, \fBqnotify\fR uses 
+\fBDisposition-Notification-To\fR header. You can use a different header by setting
+the environment variable \fBDISPOSITION_HEADER\fR. \fBqnotify\fR(1) also uses the environment
+variable \fBRECIPIENT\fR to generate the MDN. \fBqnotify\fR(1) silently exits with zero return
+status in case it does not get the required information from the environment variables or
+the headers in the email.
+
+\fBqnotify\fR(1) uses \fBqmail-queue\fR(8) to queue the Return Receipt and uses environment
+variables according to files in @controldir@/defaultqueue directory.
+
+.SH OPTIONS
+.PP
+.TP
+\fB-n\fR
+Print the message rather than feeding it to
+.BR qmail-queue .
+.TP
+\fB-h\fR
+enclose the headers rather than the original email
+
+.SH RETURN VALUE
+ 0 for success
+ 1 for read errors
+ 2 for write erros
+ 3 for memory allocation error
+ 4 for file open errors
+ 5 for failure to dup file descriptors
+ 6 for lseek system call error
+ 7 for usage error
+
+.SH "SEE ALSO"
+qreceipt(1),
+dot-qmail(5),
+envelopes(5)

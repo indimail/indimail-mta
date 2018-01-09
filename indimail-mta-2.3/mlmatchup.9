@@ -1,0 +1,33 @@
+.TH mlmatchup 8
+.SH NAME
+mlmatchup \- collect information on messages and deliveries through multilog
+.SH SYNTAX
+.B mlmatchup
+.SH DESCRIPTION
+.B mlmatchup
+behaves exactly like
+.BR matchup(1)
+with the difference, that it first reads (pending delivery) lines
+from file descriptor 4.  This makes
+.B mlmatchup
+suitable as a procesor action for multilog.
+
+If you use multilog to process
+.B qmail-send
+logfiles expand the run file of qmail-send's log services like this:
+
+.EX
+   exec setuidgid qmaill multilog t ./main \\
+.br
+     !PREFIX/bin/mlmatchup ./qmailanalog
+.EE
+
+.SH "SEE ALSO"
+multilog(8),
+matchup(1),
+xqp(1),
+xrecipient(1),
+xsender(1),
+accustamp(1),
+qmail-log(5),
+splogger(8)

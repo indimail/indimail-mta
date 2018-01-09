@@ -1,0 +1,31 @@
+Docs for http://www.qmail.org/qmail-remote_authenticated_smtp.patch
+a patch to convince qmail-remote to use Authenticated SMTP when
+talking to certain hosts.
+
+This version of the patch has been modified by Robert Sanders so that
+base64 encoding of usernames and passwords is done automatically by
+qmail-remote.
+
+After applying the patch, the username password go into
+/var/qmail/control/smtproutes like so:
+
+domain:relay username password
+
+The domain:relay part is identical to a normal smtproutes entry (see
+the qmail-remote man page). For sites that require authentication, you
+simply add two space separated fields to the line, where the first
+field is the username, the second is the password. For example:
+
+inside.af.mil:firewall.af.mil:26 johndoe secret
+
+would send mail for inside.af.mil to firewall.af.mil, port 26 using
+username 'johndoe' and password 'secret'
+
+Since smtproutes will contain plain text usernames and passwords
+you might want to make the file owned by qmailr and set its permissions
+to 0600. Of course, the entries are going to go over the wire in the clear
+anyway as part of the SMTP transaction.
+
+Good luck.
+
+j.

@@ -1,0 +1,87 @@
+.\" Manpage for serialcmd, version 0.1.0
+.\" (C) Sun Feb  7 18:24:57 EST 1999, Len Budney
+.\"
+.TH "serialcmd" 1 "0.1.0"
+
+
+.SH NAME
+serialcmd \- Pipe files through a command
+
+
+.SH SYNOPSIS
+.B serialcmd 
+.I prefix
+.I command
+
+.SH DESCRIPTION
+.B serialcmd
+is similar to
+.B serialsmtp
+and
+.BR serialqmtp ,
+except that it runs
+.I command 
+under
+.IR /bin/sh ,
+with the message as its standard input.
+.I serialcmd
+ensures that the standard input is seekable, so scripts can review the
+message as often as desired, for example to perform multiple actions on
+the same message.
+
+At the moment,
+.I prefix
+is ignored. It cannot be omitted, however, and may be used for something
+in the future.
+
+The standard output of
+.I command
+is assumed to be a one-line, LF-terminated, human-readable status
+message. This message is printed to the standard output of
+.IR serialcmd ,
+preceeded by a null-terminated filename and a status byte, as required
+by
+.IR maildirserial .
+Status is determined by the exit status of
+.IR program .
+
+.SH EXIT CODES
+.I command's
+exit codes are interpreted as follows: 0 means that the message was
+successfully processed (and so will be deleted from the maildir); 100
+means that processing has failed
+.I permanently
+for the message; 111 means that processing has failed but should be
+tried again later.
+
+For compatability with sendmail-oriented filters, exit codes 64, 65,
+70, 76, 77, 78, and 112 are also considered fatal errors, and other
+exit codes are considered temporary errors, as in qmail-command(8).
+New filters should not rely on this behavior.
+
+.SH "ENVIRONMENT VARIABLES"
+
+The variable AGE is set to the number of seconds elapsed since the
+message was stored in the maildir. Further,
+.I serialcmd
+tries to set the same environment variables as
+.IR qmail-local ,
+but some cannot be set since they are not known when invoking 
+.IR serialcmd :
+NEWSENDER cannot be known; DEFAULT cannot be reliably determined; and
+EXT, EXT1, EXT2, EXT3, and EXT4 can only be guessed (but are likely to
+be guessed correctly).
+
+The remaining variables specified in qmail-command(8) are set
+identically by
+.IR serialcmd .
+
+In addition to variables explicitly set by
+.IR serialcmd ,
+any variables inherited by
+.I serialcmd
+will be passed to
+.IR command .
+
+.SH "SEE ALSO"
+qmail-command(8), maildircmd(1), env(1), serialsmtp(1).

@@ -1,0 +1,348 @@
+.TH new-inject 1
+.SH NAME
+new-inject \- preprocess a mail message
+.SH SYNOPSIS
+.B new-inject
+[
+.B \-nNaAhHFIMRS
+]
+[
+.B \-f\fIsender
+]
+[
+.I recip ...
+]
+.SH DESCRIPTION
+With the (default)
+.B \-N
+option,
+.B new-inject
+reads a mail message from its standard input,
+rewrites the message header,
+and feeds the rewritten message to
+.BR qmail-queue .
+
+With the
+.B \-n
+option,
+.B new-inject
+prints the message rather than feeding it to
+.BR qmail-queue .
+
+See
+.B http://pobox.com/~djb/proto/immhf.html
+for a complete description of the Internet mail message header format.
+
+The
+.B FIMRS
+options can be set as letters inside the
+.B $QMAILINJECT
+environment variable.
+.SH "ADDRESS REWRITING"
+.B new-inject
+transforms each address according to the control files
+.IR defaultdomain ,
+.IR defaulthost ,
+.IR me ,
+.IR plusdomain ,
+and
+.IR rewrite .
+See
+.BR rewriting (5)
+for further details.
+If you set the environment variable
+.BR $QMAILREWRITEFILE ,
+and that file exists,
+it overrides
+.IR rewrite .
+.SH "ENVELOPE ADDRESSES"
+.B new-inject
+builds an envelope for the message:
+a list of recipient addresses that will receive the message,
+and a sender address that will receive bounces.
+
+If
+.B new-inject
+is printing the message rather than feeding it to
+.BR qmail-queue ,
+it prints an
+.B Envelope-Sender
+field and an 
+.B Envelope-Recipients
+field
+at the top of the new message header.
+
+With the
+.B \-a
+option,
+.B new-inject
+builds the envelope recipient list from the argument recipients,
+i.e., all
+.I recip
+addresses listed on the command line.
+With the
+.B \-h
+option,
+.B new-inject
+builds the envelope recipient list from the header recipients,
+i.e., all addresses listed in the incoming message under
+.BR Envelope-Recipients ,
+or under
+.BR To ,
+.BR Cc ,
+.BR Bcc ,
+and
+.B Apparently-To
+if
+.B Envelope-Recipients
+is not supplied.
+With the
+.B \-H
+option,
+.B new-inject
+uses both argument recipients and header recipients.
+With the (default)
+.B \-A
+option,
+.B new-inject
+uses argument recipients,
+or header recipients if there are no argument recipients.
+
+The envelope sender is set by
+the
+.B \-f
+option if it is supplied;
+otherwise, the incoming
+.B Envelope-Sender
+field, if there is one;
+otherwise, the incoming
+.B Return-Path
+field, if there is one,
+and if the
+.B \-S
+option is not set;
+otherwise, the default envelope sender, as described below.
+Incoming
+.B Envelope-Sender
+and 
+.B Return-Path
+fields
+are removed in any case.
+
+The default envelope sender contains a user name,
+a per-message VERP,
+a per-recipient VERP,
+and a host name.
+The user name is set by an environment variable:
+.BR $QMAILSUSER ,
+.BR $QMAILUSER ,
+.BR $MAILUSER ,
+.BR $USER ,
+or
+.BR $LOGNAME ,
+whichever comes first.
+If the
+.B \-M
+option is set, the per-message VERP
+contains a dash, the current time, and the process ID;
+otherwise it is empty.
+If the
+.B \-R
+option is set, the per-recipient VERP
+contains a dash, the envelope recipient user name,
+an equals sign, and the envelope recipient host name;
+otherwise it is empty.
+(If there are several recipients,
+each recipient sees a different sender address.)
+The host name is set by
+.BR $QMAILSHOST ,
+.BR $QMAILHOST ,
+.BR $MAILHOST ,
+or the empty string,
+subject to rewriting.
+.SH "RECIPIENTS"
+.B new-inject
+rewrites addresses in
+.BR To ,
+.BR Cc ,
+and
+.B Notice-Requested-Upon-Delivery-To
+fields.
+It
+cleans up the spacing,
+adds missing commas,
+trims extra commas,
+adds missing quotes,
+wraps lines at a reasonable length,
+converts source routes into comments,
+etc.
+If there are several
+.B To
+fields,
+.B new-inject
+merges them into a single
+.B To
+field.
+
+.B new-inject
+removes all incoming
+.B Bcc
+and
+.B Apparently-To
+fields.
+.SH "SENDERS"
+.B new-inject
+rewrites addresses in
+.B From
+and
+.B Sender
+fields.
+
+If the incoming message does not contain a
+.B From
+field,
+.B new-inject
+creates a new
+.B From
+field.
+
+If the
+.B \-F
+option is set,
+.B new-inject
+discards any incoming
+.B From
+field,
+and creates a new
+.B From
+field.
+
+The new
+.B From
+field
+contains a personal name, a user name, and a host name.
+The personal name is set by
+.BR $QMAILNAME ,
+.BR $MAILNAME ,
+or
+.BR $NAME ,
+whichever comes first;
+if none of these variables are set, the personal name is omitted.
+The user name is set by
+.BR $QMAILUSER ,
+.BR $MAILUSER ,
+.BR $USER ,
+or
+.BR $LOGNAME .
+The host name is set by
+.BR $QMAILHOST ,
+.BR $MAILHOST ,
+or the empty string,
+subject to rewriting.
+.SH "RESPONSE TARGETS"
+.B new-inject
+rewrites
+addresses in
+.BR Reply-To ,
+.BR Mail-Reply-To ,
+and
+.B Mail-Followup-To
+fields.
+
+If the environment variable
+.B $QMAILMFTFILE
+is set,
+.B new-inject
+reads a list of mailing list addresses,
+one per line,
+from that file.
+If To+Cc includes one of those addresses (without regard to case),
+and if the incoming message does not contain a
+.B Mail-Followup-To
+field,
+.B new-inject
+adds a
+.B Mail-Followup-To
+field
+with all the To+Cc addresses.
+.SH "DATE FIELDS"
+If the incoming message has comprehensible
+.B Date
+fields,
+.B new-inject
+takes the last one and rewrites it in a standard format.
+It transforms 2-digit (and 3-digit) years into 4-digit years.
+It also transforms obsolete time zone names into numeric time zones.
+
+Otherwise
+.B new-inject
+makes a new
+.B Date
+field with the current time in UTC, counting leap seconds.
+.SH "THREADING"
+If the incoming message does not contain a
+.B Message-ID
+field,
+.B new-inject
+creates a new
+.B Message-ID
+field.
+
+If the
+.B \-I
+option is set,
+.B new-inject
+discards any incoming
+.B Message-ID
+field,
+and creates a new
+.B Message-ID
+field.
+
+.B new-inject
+uses the control file
+.I idhost
+(overridden by he environment variable
+.BR $QMAILIDHOST ;
+defaulting to
+.IR me )
+in its new
+.B Message-ID
+field.
+.I idhost
+need not be the current host's name.
+It is your responsibility to obtain authorization
+from the owner of the
+.I idhost
+domain.
+.SH "MISCELLANY"
+.B new-inject
+puts
+.BR Received ,
+.BR Delivered-To ,
+.BR Errors-To ,
+.BR Return-Receipt-To ,
+.BR Resent-Sender ,
+.BR Resent-From ,
+.BR Resent-Reply-To ,
+.BR Resent-To ,
+.BR Resent-Cc ,
+.BR Resent-Bcc ,
+.BR Resent-Date ,
+and
+.B Resent-Message-ID
+fields at the top of the header.
+It does not rewrite any of these fields;
+it follows the 822bis approach of treating
+.B Resent-*
+as trace fields.
+
+.B new-inject
+discards incoming
+.B Content-Length
+fields.
+.SH "SEE ALSO"
+leapsecs(3),
+qmail-control(5),
+rewriting(5),
+qmail-queue(8)

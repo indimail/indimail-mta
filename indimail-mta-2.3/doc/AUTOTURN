@@ -1,0 +1,90 @@
+Situation: You are big.isp. You have assigned a static IP address, say
+1.2.3.4, to a dialup customer. The customer would like you to receive
+mail for virt.dom and forward it to 1.2.3.4 whenever 1.2.3.4 makes an
+SMTP connection to mail.big.isp.
+
+These instructions assume that you have already installed serialmail and
+ucspi-tcp, and that you are running qmail-smtpd from tcpserver -v as
+described in /var/qmail/doc/FAQ 5.1, with tcpserver's messages piped
+through splogger or cyclog.
+
+These instructions _do not_ require that your customer install special
+ETRN software. AutoTURN works with all SMTP clients.
+
+
+1. Make a /var/qmail/autoturn directory:
+
+      # mkdir /var/qmail/autoturn
+      # chgrp qmail /var/qmail/autoturn
+      # chmod 2755 /var/qmail/autoturn
+
+2. Put the line
+
+      +autoturn-:qmaild:7770:2108:/var/qmail/autoturn:-::
+
+   into /var/qmail/users/assign, replacing 7770 with the qmaild uid and
+   2108 with the nofiles gid. Run qmail-newu. Now mail for autoturn-blah
+   will be controlled by /var/qmail/autoturn/.qmail-blah.
+
+   Exception: If you have already been using qmail-pw2u to create
+   /var/qmail/users/assign, put the above line into
+   /var/qmail/users/append and then run qmail-pw2u as usual.
+
+3. Replace
+
+      /var/qmail/bin/qmail-smtpd
+   
+   with
+
+      sh -c '
+        /var/qmail/bin/qmail-smtpd
+        cd /var/qmail/autoturn
+        exec setlock -nx $TCPREMOTEIP/seriallock \
+        maildirsmtp $TCPREMOTEIP autoturn-$TCPREMOTEIP- $TCPREMOTEIP AutoTURN
+      '
+
+   in the tcpserver invocation in your boot scripts. Reports from
+   maildirsmtp will be sent to the same place as reports from tcpserver.
+
+4. Make sure that there is an MX record for virt.dom:
+
+      virt.dom IN MX 10 mail.big.isp
+
+   Now any host on the Internet with mail for virt.dom will send it to
+   mail.big.isp.
+
+5. Put virt.dom into /var/qmail/control/rcpthosts. Now qmail-smtpd will
+   accept mail for virt.dom.
+
+6. Put virt.dom:autoturn-1.2.3.4 into /var/qmail/control/virtualdomains,
+   and give qmail-send a SIGHUP. Now all messages for whatever@virt.dom
+   will be delivered to autoturn-1.2.3.4-whatever.
+
+7. Set up maildir delivery for autoturn-1.2.3.4-whatever:
+
+      # cd /var/qmail/autoturn
+      # maildirmake 1.2.3.4
+      # chown -R qmaild 1.2.3.4
+      # echo ./1.2.3.4/ > .qmail-1:2:3:4-default
+      # chmod 644 .qmail-1:2:3:4-default
+
+   Make sure to include the trailing slash on ./1.2.3.4/ and the colons
+   in .qmail-1:2:3:4-default.
+
+
+If you have more customers who want AutoTURN service, repeat steps 4
+through 7 for them.
+
+Security note: Both qmail-smtpd and maildirsmtp will run as qmaild;
+neither one is protected against security holes in the other. You may
+prefer to set up a separate autoturn user, and run maildirsmtp on a
+separate TCP port under that user. One good choice is port 1789, the
+Hello port. Here is the complete specification of the Hello protocol:
+
+   The client connects to the Hello port on the server. It immediately
+   disconnects. The server also immediately disconnects. The point of
+   this protocol is to inform the server that the client is alive and
+   reachable.
+
+In this case your customer can use any program that can make a
+connection to port 1789.

@@ -1,0 +1,25 @@
+.TH qmail-nullqueue 8
+.SH NAME
+qmail-nullqueue - dissapear a mail
+.SH SYNOPSIS
+.B qmail-nullqueue
+.SH DESCRIPTION
+.B qmail-nullqueue
+reads a mail message from descriptor 0.
+It then reads envelope information from descriptor 1.
+It places the message for discarding instead of future delivery by \fBqmail-send\fR.
+\fBqmail-nullqueue\fR sets an alarm of 300 seconds after which it exits with code 52. This
+timeout can be changed by setting the environment variable \fBDEATH\fR. You should never be using
+this program unless you know what you are doing.
+
+.SH "SEE ALSO"
+addresses(5),
+envelopes(5),
+qmail-header(5),
+qmail-inject(8),
+qmail-control(5),
+qmail-qmqpc(8),
+qmail-send(8),
+qmail-smtpd(8),
+qmail-internals(8),
+qmail-multi(8)
