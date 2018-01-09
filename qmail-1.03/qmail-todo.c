@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.36  2018-01-09 11:55:07+05:30  Cprogrammer
+ * removed non-indimail code
+ *
  * Revision 1.35  2017-03-31 21:10:34+05:30  Cprogrammer
  * log null addresses in log_stat() as <>
  *
@@ -97,7 +100,6 @@
 #include "env.h"
 #include "variables.h"
 #include "trigger.h"
-#include "hasindimail.h"
 
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
@@ -1024,11 +1026,7 @@ reread(void)
 	if(!queuedir)
 	{
 		if(!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
 			queuedir = "queue1";
-#else
-			queuedir = "queue";
-#endif
 	}
 	while (chdir(queuedir) == -1)
 	{
@@ -1049,11 +1047,7 @@ main()
 	if(!queuedir)
 	{
 		if(!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
 			queuedir = "queue1";
-#else
-			queuedir = "queue";
-#endif
 	}
 	for (queuedesc = queuedir;*queuedesc;queuedesc++);
 	for (;queuedesc != queuedir && *queuedesc != '/';queuedesc--);
@@ -1163,13 +1157,8 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.35 2017-03-31 21:10:34+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.36 2018-01-09 11:55:07+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }

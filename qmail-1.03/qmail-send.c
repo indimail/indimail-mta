@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.62  2018-01-09 11:53:03+05:30  Cprogrammer
+ * removed non-indimail code
+ *
  * Revision 1.61  2017-03-31 21:10:10+05:30  Cprogrammer
  * log null addresses in log_stat() as <>
  *
@@ -191,7 +194,6 @@
 #include "srs.h"
 #endif
 #include "wait.h"
-#include "hasindimail.h"
 
 /* critical timing feature #1: if not triggered, do not busy-loop */
 /* critical timing feature #2: if triggered, respond within fixed time */
@@ -319,11 +321,7 @@ chdir_toqueue()
 	if (!queuedir)
 	{
 		if (!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
 			queuedir = "queue1";
-#else
-			queuedir = "queue";
-#endif
 	}
 	while (chdir(queuedir) == -1)
 	{
@@ -2864,11 +2862,7 @@ main()
 	stralloc        plugin = { 0 }, splugin = { 0 };
 
 	if (!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
 		queuedir = "queue1";
-#else
-		queuedir = "queue";
-#endif
 	for (queuedesc = queuedir;*queuedesc;queuedesc++);
 	for (;queuedesc != queuedir && *queuedesc != '/';queuedesc--);
 	if (*queuedesc == '/')
@@ -2895,11 +2889,7 @@ main()
 	}
 #endif
 	if (!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
 		queuedir = "queue1";
-#else
-		queuedir = "queue";
-#endif
 	if (!getcontrols())
 	{
 		log3("alert: ", queuedesc, ": cannot start: unable to read controls\n");
@@ -3104,13 +3094,8 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.61 2017-03-31 21:10:10+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.62 2018-01-09 11:53:03+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }
