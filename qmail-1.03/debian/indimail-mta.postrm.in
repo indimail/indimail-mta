@@ -121,10 +121,10 @@ if [ " $1" = " purge" ] ; then
 	do
 		${rm} -f ${qsysconfdir}/tcp.$i.cdb ${qsysconfdir}/tcp.$i
 	done
-	${rm} -f ${sysocnfdir}/control/controlfiles
-	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
+	${rm} -f ${sysocnfdir}/control/controlfiles.q
+	for i in indimail.cnf stat.override backup.conf cronlist.q headerlist \
 		inc_deps indimail.mrtg.cfg \
-		procmailrc indimail.settings lib_deps osh.table perm_list \
+		procmailrc indimail.settings lib_deps osh.table perm_list.q \
 		qmailprog.list quotawarnmsg.example services.log
 	do
 		${rm} -f ${qsysconfdir}/$i
