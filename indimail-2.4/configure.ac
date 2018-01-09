@@ -128,7 +128,7 @@ AC_SUBST(defaultprefix)
 dnl configure only packages for whom the subdirectories which are present
 subdir_list=""
 for i in cdb-1.0 eps-1.2 ../flash-0.9.4 ../ripmime-1.4.0.10 ../altermime-0.3.10 \
-		../mpack-1.6 ../fortune-1.1 ../pam-multi-1.1 ../logalert-0.3 . ../qmail-1.03
+		../mpack-1.6 ../fortune-1.1 ../pam-multi-1.1 ../logalert-0.3 .
 do
 	if test -d $i
 	then
@@ -1271,57 +1271,6 @@ AC_CONFIG_FILES([indimail-release:indimail-release.in],[], [])
 
 AC_OUTPUT(Makefile)
 
-if test -d ../qmail-1.03
-then
-	echo "-I../indimail-"$VERSION" -I../indimail-"$VERSION"/eps-1.2 $auth_inc" > ../qmail-1.03/inc_deps; \
-	echo "-L../indimail-"$VERSION"/.libs -L../indimail-"$VERSION"/eps-1.2/.libs -L../indimail-"$VERSION"/cdb-1.0/.libs $auth_libs -lcdb" > ../qmail-1.03/lib_deps
-
-	sed "s{QMAIL{$qmaildir{" ../qmail-1.03/conf-qmail.in > /tmp/conf-qmail
-	diff /tmp/conf-qmail ../qmail-1.03/conf-qmail > /dev/null 2>&1
-	if test $? -ne 0  ; then
-		mv /tmp/conf-qmail ../qmail-1.03/conf-qmail
-	else
-		/bin/rm -f /tmp/conf-qmail
-	fi
-
-	sed "s{PREFIX{$prefix{" ../qmail-1.03/conf-prefix.in > /tmp/conf-prefix
-	diff /tmp/conf-prefix ../qmail-1.03/conf-prefix > /dev/null 2>&1
-	if test $? -ne 0  ; then
-		mv /tmp/conf-prefix ../qmail-1.03/conf-prefix
-	else
-		/bin/rm -f /tmp/conf-prefix
-	fi
-
-	q_sysconfdir=`dirname $sysconfdir`
-	(
-	if test "$q_sysconfdir" = "$qmaildir"; then
-		sed "s{SYSCONFDIR{$qmaildir{" ../qmail-1.03/conf-sysconfdir.in
-	else
-		q_sysconfdir=$sysconfdir
-		sed "s{SYSCONFDIR{$sysconfdir{" ../qmail-1.03/conf-sysconfdir.in
-	fi
-	) > /tmp/conf-sysconfdir
-	diff /tmp/conf-sysconfdir ../qmail-1.03/conf-sysconfdir > /dev/null 2>&1
-	if test $? -ne 0  ; then
-		mv /tmp/conf-sysconfdir ../qmail-1.03/conf-sysconfdir
-	else
-		/bin/rm -f /tmp/conf-sysconfdir
-	fi
-	(
-	if test "$shareddir" = "$qmaildir"; then
-		sed "s{SHAREDDIR{$qmaildir{" ../qmail-1.03/conf-shared.in
-	else
-		sed "s{SHAREDDIR{$shareddir{" ../qmail-1.03/conf-shared.in
-	fi
-	) > /tmp/conf-shared
-	diff /tmp/conf-shared ../qmail-1.03/conf-shared > /dev/null 2>&1
-	if test $? -ne 0  ; then
-		mv /tmp/conf-shared ../qmail-1.03/conf-shared
-	else
-		/bin/rm -f /tmp/conf-shared
-	fi
-fi
-
 (
 echo "---------- $PACKAGE $VERSION $target ----------"
 echo "Date                 = $DATE"
@@ -1640,10 +1589,6 @@ then
 	echo
 	echo "Download and extract the following additional component(s)"
 	echo
-	if ! test -d ../qmail-1.03
-	then
-		echo "http://cr.yp.to/software/qmail-1.03.tar.gz"
-	fi
 	if ! test -d ../flash-0.9.4
 	then
 		echo "http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz"
@@ -1677,17 +1622,6 @@ then
 	echo
 	sleep 20
 else
-	if ! test -f ../qmail-1.03/tryindimail.c
-	then
-		clear
-		echo "My dear friend"
-		echo "you need to do (at your shell prompt)"
-		echo "cd .."
-		echo "gunzip -c $PWD/patches/qmail-1.03.patch.gz | patch -p0"
-		echo "It might be wise to read the INSTALL* documents now"
-  		AC_MSG_ERROR([qmail-1.03 source found but not patched; functionality will be limited. aborting])
-	else
-		echo "CONGRATULATIONS!! All IndiMail components found"
-	fi
+	echo "CONGRATULATIONS!! All IndiMail components found"
 fi
 ) | tee indimail.settings
