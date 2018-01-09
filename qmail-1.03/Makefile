@@ -5,8 +5,6 @@ SRS_VERSION=1.0.18
 QMAILDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
 SYSTEM := $(shell uname -s)
 SHELL=/bin/sh
-inc_deps := -DHAVE_CONFIG_H `cat ./inc_deps 2>/dev/null`
-lib_deps=$(shell cat ./lib_deps 2>/dev/null)
 prefix=$(shell head -1 conf-prefix 2>/dev/null)
 qmaildir=$(shell head -1 conf-qmail 2>/dev/null)
 mandir=$(shell echo `head -1 conf-prefix`/share/man 2>/dev/null)
@@ -15,28 +13,40 @@ sysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
 libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
 version=$(shell grep Version: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
 release=$(shell grep Release: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
+DEFS := $(shell uname -s | tr "[:lower:]" "[:upper:]")
+mysql_libs = $(shell sh ./mysql_libs $(DEFS))
+mysql_inc  = $(shell ./mysql_config --include)
+mysql_libdir=$(shell ./mysql_config --variable=pkglibdir)
+HOST=$(shell echo "`uname -m`-pc-`uname -s`-`uname -o|cut -d/ -f1`"|tr "[:upper:]" "[:lower:]")
 servicedir=/service
+logdir=$(shell cat conf-logdir)
 
 edit = sed \
+	-e 's,@indimaildir\@,$(qmaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
-	-e 's,@version\@,$(version),g' \
-	-e 's,@release\@,$(release),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
+	-e 's,@mysql_libdir\@,$(mysql_libdir),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
+	-e 's,@HOST\@,$(HOST),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 default: it man leapsecs.dat
 
 all:it man leapsecs.dat
 
-show:
-	echo $(inc_deps);echo ----;echo $(lib_deps)
+perm_list.q: perm_list.in mysql_config
+	$(edit) perm_list.in > $@ && cp $@ debian
 
-perm_list: perm_list.in
-	$(edit) $@.in > $@ && cp $@ debian
+svctool: svctool.in mysql_config
+	$(edit) $@.in > $@
+
+svctool.8: svctool.9 conf-qmail conf-sysconfdir Makefile mysql_config
+	$(edit) svctool.9 > $@
+
 
 addresses.0: \
 addresses.5
@@ -514,6 +524,15 @@ choose: choose.sh warn-auto.sh
 	cat warn-auto.sh choose.sh > choose
 	chmod 555 choose
 
+hasmysql.h: \
+choose compile load mysql_config hasmysql.h1 hasmysql.h2
+	./choose R "./mysql_config --include" hasmysql.h1 hasmysql.h2 > hasmysql.h
+
+mysql_config.o: compile mysql_config.c conf-mysqlrules
+	./compile `grep -h -v "^#" conf-mysqlrules` mysql_config.c
+mysql_config: load mysql_config.o
+	./load mysql_config
+
 condredirect: \
 load condredirect.o qmail.o envdir_set.o pathexec_env.o \
 open_read.o openreadclose.o auto_qmail.o variables.o \
@@ -828,13 +847,13 @@ svscan.9 conf-sysconfdir
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> svscan.8
 
-cronlist:cronlist.in conf-prefix conf-libexec
+cronlist.q:cronlist.in conf-prefix conf-libexec
 	( \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
 	cat cronlist.in \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
-	) > cronlist
+	) > cronlist.q
 
 env.a: \
 makelib env.o envread.o
@@ -1067,11 +1086,11 @@ compile hfield.c hfield.h
 
 hier.o: \
 compile hier.c auto_qmail.h auto_split.h auto_uids.h fmt.h fifo.h \
-qmail-todo.h hasindimail.h tcpto.h ip.h ipalloc.h hassrs.h \
+qmail-todo.h tcpto.h ip.h ipalloc.h hassrs.h \
 conf-domainkeys conf-srs conf-spf conf-ip conf-dkim conf-batv \
 auto_shared.h auto_control.h auto_assign.h auto_sysconfdir.h \
 stralloc.h strerr.h auto_prefix.h conf-plugin conf-dlopen
-	./compile $(inc_deps) \
+	./compile \
 	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim \
 	conf-batv conf-plugin conf-dlopen` hier.c
 
@@ -1118,9 +1137,9 @@ auto_libexec.o auto_shared.o stralloc.a alloc.a stralloc.a
 
 setup.o: \
 compile setup.c substdio.h strerr.h error.h open.h env.h stralloc.h \
-exit.h subfd.h str.h auto_uids.h hasindimail.h \
+exit.h subfd.h str.h auto_uids.h \
 sgetopt.h
-	./compile $(inc_deps) setup.c
+	./compile setup.c
 
 instcheck: \
 load instcheck.o hier.o auto_qmail.o get_uid.o auto_uids.o \
@@ -1179,7 +1198,7 @@ env.a str.a stralloc.a alloc.a strerr.a substdio.a
 
 qhpsi.o: compile qhpsi.c strerr.h env.h str.h auto_qmail.h \
 stralloc.h auto_uids.h
-	./compile $(inc_deps) qhpsi.c
+	./compile qhpsi.c
 
 qscanq: load qscanq.o auto_uids.o get_uid.o substdio.a strerr.a env.a str.a wait.a error.a \
 timestamp.o libtaia.a fd.a auto_spool.o mkfn.o fmt_xpid.o do_cleanq.o \
@@ -1316,9 +1335,9 @@ do_ripmime.o: compile do_ripmime.c wait.h sig.h exitcodes.h \
 strerr.h
 	./compile do_ripmime.c
 
-do_scan.o: compile do_scan.c wait.h sig.h exitcodes.h strerr.h env.h hasindimail.h \
+do_scan.o: compile do_scan.c wait.h sig.h exitcodes.h strerr.h env.h \
 qregex.h control.h str.h auto_qmail.h scan.h variables.h auto_control.h
-	./compile $(inc_deps) do_scan.c
+	./compile do_scan.c
 
 auto_ripmime_cmd.c: auto-strarr conf-ripmime-cmd
 	./auto-strarr auto_ripmime_cmd `head -1 conf-ripmime-cmd` > \
@@ -1363,11 +1382,11 @@ run-cleanq.9 conf-prefix
 	> run-cleanq.8
 
 it: \
-indimail-mta.fc perm_list 822date 822field 822header 822print 822received addcr addrlist \
-argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist indimail-mta.spec \
+indimail-mta.fc perm_list.q 822date 822field 822header 822print 822received addcr addrlist \
+argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q indimail-mta.spec \
 binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm inotify \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
-datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip \
+datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip svctool \
 dnsmxip dnsptr dnstxt dot-forward drate elq envdir envuidgid \
 etrn except fastforward fghack fixcrio forward generic.so greydaemon \
 home home+df hostname idedit iftocc indimail.plist instcheck ipmeprint \
@@ -1537,7 +1556,7 @@ qmail-showctl.0 qmail-newu.0 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 qmail-pw2u.0 qmail-qread.0 qmail-tcpto.0 qmail-tcpok.0 svscan.8 \
 qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
-dktest.8 svscanboot.0 plugtest.1 surblfilter.8 \
+dktest.8 svscanboot.0 plugtest.1 surblfilter.8 svctool.8 \
 qmail-multi.0 spawn-filter.0 tcp-env.0 qmail-greyd.0 \
 qmail-newmrh.0 recipient-cdb.0 qmail-cdb.0 qmail-sql.8 qreceipt.0 forward.0 \
 rrforward.0 preline.0 condredirect.0 bouncesaying.0 except.0 \
@@ -1696,7 +1715,7 @@ direntry.h getln.h stralloc.h gen_alloc.h subfd.h \
 substdio.h byte.h scan.h fmt.h error.h exit.h fmtqfn.h auto_qmail.h \
 env.h variables.h
 
-	./compile $(inc_deps) qmail-clean.c
+	./compile qmail-clean.c
 
 qmail-command.0: \
 qmail-command.8
@@ -1847,20 +1866,23 @@ qmail-log.5
 qmail-lspawn.o: \
 compile qmail-lspawn.c fd.h wait.h prot.h substdio.h stralloc.h \
 gen_alloc.h scan.h exit.h error.h cdb.h uint32.h case.h open.h byte.h str.h \
-slurpclose.h auto_qmail.h auto_uids.h qlx.h env.h hasindimail.h auto_assign.h
-	./compile $(inc_deps) qmail-lspawn.c
+slurpclose.h auto_qmail.h auto_uids.h qlx.h env.h auto_assign.h indimail_stub.h \
+fmt.h
+	./compile qmail-lspawn.c
 
 qmail-lspawn: \
 load qmail-lspawn.o spawn.o prot.o slurpclose.o coe.o get_uid.o sig.a wait.a \
+auto_sysconfdir.o auto_control.o timeoutread.o timeoutwrite.o \
 strerr.a case.a cdb.a fd.a open.a stralloc.a alloc.a substdio.a error.a str.a \
 fs.a auto_qmail.o auto_uids.o auto_spawn.o auto_assign.o env.o str_diffn.o str_cpy.o \
-envread.o variables.o indimail.lib dns.lib
+indimail_stub.o envread.o variables.o dns.lib
 	./load qmail-lspawn spawn.o prot.o slurpclose.o coe.o auto_uids.o get_uid.o \
+	auto_sysconfdir.o auto_control.o timeoutread.o timeoutwrite.o \
 	auto_qmail.o auto_spawn.o env.o str_diffn.o str_cpy.o \
-	envread.o variables.o auto_assign.o \
+	indimail_stub.o envread.o variables.o auto_assign.o \
 	sig.a wait.a case.a cdb.a fd.a open.a stralloc.a alloc.a \
 	strerr.a substdio.a error.a str.a fs.a \
-	`cat indimail.lib` `cat dns.lib`
+	`cat dns.lib` -ldl
 
 qmail-lspawn.0: \
 qmail-lspawn.8
@@ -2131,11 +2153,11 @@ compile qmail-qread.c stralloc.h gen_alloc.h substdio.h subfd.h \
 fmt.h str.h getln.h fmtqfn.h readsubdir.h direntry.h \
 control.h auto_qmail.h open.h datetime.h date822fmt.h error.h \
 scan.h exit.h env.h envdir.h pathexec.h variables.h \
-hasindimail.h conf-queue auto_control.h
+conf-queue auto_control.h
 	if test -f conf-queue ; then \
-	./compile $(inc_deps) -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
+	./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
 	else \
-	./compile $(inc_deps) -DQUEUE_COUNT=10 qmail-qread.c; \
+	./compile -DQUEUE_COUNT=10 qmail-qread.c; \
 	fi;
 
 queue-fix.0: \
@@ -2234,9 +2256,9 @@ qmail-queue.o: \
 compile qmail-queue.c sig.h exit.h open.h seek.h fmt.h tai.h matchregex.h \
 alloc.h substdio.h datetime.h now.h datetime.h triggerpull.h stralloc.h \
 control.h auto_qmail.h auto_uids.h date822fmt.h fmtqfn.h error.h env.h \
-mess822.h scan.h str.h variables.h hasindimail.h wait.h getln.h \
+mess822.h scan.h str.h variables.h wait.h getln.h \
 conf-sync conf-qhpsi conf-ip conf-mailarch
-	./compile $(inc_deps) `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
+	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
 		qmail-queue.c
 
 domainkeys.o: compile domainkeys.c case.h alloc.h str.h byte.h conf-domainkeys
@@ -2374,7 +2396,7 @@ compile qmail-dkim.c substdio.h open.h sig.h fmt.h fd.h \
 qmail.h alloc.h str.h stralloc.h datetime.h now.h wait.h \
 auto_qmail.h sgetopt.h case.h env.h control.h domainkeys.h \
 hasdkim.h variables.h auto_control.h
-	./compile -I../libdkim-$(DKIM_VERSION) $(inc_deps) qmail-dkim.c
+	./compile -I../libdkim-$(DKIM_VERSION) qmail-dkim.c
 
 qmail-dkim.8: qmail-dkim.9 conf-sysconfdir
 	cat qmail-dkim.9 \
@@ -2436,7 +2458,7 @@ datetime.h exit.h constmap.h tcpto.h timeoutconn.h timeoutread.h \
 timeoutwrite.h env.h uint32.h haveip6.h socket.h variables.h \
 byte.h fmt.h conf-tls conf-ip conf-batv conf-mxps wait.h \
 hastlsv1_1_client.h hastlsv1_2_client.h \
-auth_digest_md5.h hasindimail.h auto_control.h
+auth_digest_md5.h auto_control.h
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
 
 qmail-rspawn: \
@@ -2446,14 +2468,16 @@ auto_qmail.o auto_uids.o auto_spawn.o constmap.o rcpthosts.o case_diffb.o \
 control.o case_lowerb.o getln.o getln2.o byte_chr.o cdb_seek.o cdb_unpack.o \
 cdb_hash.o stralloc_copy.o stralloc_cat.o scan_ulong.o substdi.c byte_cr.o \
 env.o str_diffn.o str_cpy.o envread.o variables.o fmt_ulong.o fmt_str.o \
-auto_control.o fmt_strn.o indimail.lib dns.lib
+timeoutread.o timeoutwrite.o scan_uint.o str_chr.o str_rchr.o auto_sysconfdir.o \
+auto_control.o fmt_strn.o dns.lib indimail_stub.o
 	./load qmail-rspawn spawn.o tcpto_clean.o now.o coe.o get_uid.o \
 	auto_spawn.o constmap.o rcpthosts.o case_diffb.o control.o case_lowerb.o getln.o getln2.o \
 	byte_chr.o cdb_seek.o cdb_unpack.o cdb_hash.o stralloc_copy.o stralloc_cat.o \
 	scan_ulong.o substdi.c byte_cr.o env.o str_cpy.o envread.o variables.o \
 	strerr.a sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a \
+	timeoutread.o timeoutwrite.o scan_uint.o str_chr.o str_rchr.o auto_sysconfdir.o \
 	substdio.a error.a str.a auto_qmail.o auto_uids.o fmt_ulong.o fmt_str.o \
-	auto_control.o fmt_strn.o `cat indimail.lib` `cat dns.lib`
+	indimail_stub.o auto_control.o fmt_strn.o `cat dns.lib` -ldl
 
 qmail-rspawn.0: \
 qmail-rspawn.8
@@ -2461,9 +2485,9 @@ qmail-rspawn.8
 
 qmail-rspawn.o: \
 compile qmail-rspawn.c fd.h wait.h substdio.h exit.h error.h str.h \
-tcpto.h env.h rcpthosts.h fmt.h auto_qmail.h \
-hasindimail.h ipalloc.h conf-tls conf-ip
-	./compile $(inc_deps) `grep -h -v "^#" conf-tls conf-ip` qmail-rspawn.c
+tcpto.h env.h rcpthosts.h fmt.h auto_qmail.h indimail_stub.h \
+ipalloc.h conf-tls conf-ip
+	./compile `grep -h -v "^#" conf-tls conf-ip` qmail-rspawn.c
 
 qmail-send: \
 load qmail-send.o qsutil.o control.o constmap.o newfield.o prioq.o \
@@ -2505,9 +2529,9 @@ substdio.h alloc.h error.h stralloc.h gen_alloc.h str.h byte.h fmt.h \
 scan.h case.h auto_qmail.h trigger.h newfield.h stralloc.h quote.h \
 qmail.h qsutil.h prioq.h datetime.h gen_alloc.h constmap.h envrules.h \
 fmtqfn.h readsubdir.h direntry.h variables.h env.h qmail-todo.h \
-hasindimail.h auto_control.h conf-mime conf-sync conf-batv \
+auto_control.h conf-mime conf-sync conf-batv \
 hassrs.h conf-srs conf-locklogs
-	./compile $(inc_deps) `grep -h -v "^#" conf-mime \
+	./compile `grep -h -v "^#" conf-mime \
 		conf-sync conf-batv conf-locklogs` qmail-send.c
 
 qmail-daemon: \
@@ -2540,14 +2564,16 @@ compile get_uid.c auto_uids.h strerr.h str.h
 qmail-showctl: \
 load qmail-showctl.o auto_uids.o control.o open.a getln.a \
 stralloc.a dns.lib strerr.a alloc.a substdio.a now.o \
-error.a str.a fs.a auto_qmail.o auto_break.o indimail.lib \
+error.a str.a fs.a auto_qmail.o auto_break.o indimail_stub.o \
 auto_patrn.o auto_spawn.o auto_split.o envread.o str_diffn.o \
-variables.o get_uid.o auto_control.o
+timeoutread.o timeoutwrite.o \
+variables.o get_uid.o auto_control.o auto_sysconfdir.o
 	./load qmail-showctl auto_uids.o control.o auto_qmail.o \
 	auto_break.o auto_patrn.o auto_spawn.o now.o auto_control.o \
-	auto_split.o envread.o str_diffn.o variables.o get_uid.o \
+	auto_split.o envread.o str_diffn.o variables.o get_uid.o indimail_stub.o \
+	timeoutread.o timeoutwrite.o \
 	strerr.a open.a getln.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a `cat indimail.lib` `cat dns.lib`
+	str.a fs.a `cat dns.lib` auto_sysconfdir.o -ldl
 
 qmail-showctl.0: \
 qmail-showctl.8
@@ -2557,9 +2583,9 @@ qmail-showctl.o: \
 compile qmail-showctl.c substdio.h subfd.h exit.h fmt.h \
 str.h control.h constmap.h stralloc.h gen_alloc.h direntry.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
-auto_split.h spf.h env.h variables.h hasindimail.h auto_control.h \
+auto_split.h spf.h env.h variables.h auto_control.h indimail_stub.h \
 conf-srs conf-spf conf-batv
-	./compile $(inc_deps) `grep -h -v "^#" conf-spf conf-batv` \
+	./compile `grep -h -v "^#" conf-spf conf-batv` \
 	qmail-showctl.c
 
 plugtest: \
@@ -2580,36 +2606,30 @@ compile plugtest.c sgetopt.h alloc.h str.h strerr.h env.h stralloc.h \
 fmt.h auto_qmail.h auto_prefix.h subfd.h smtp_plugin.h
 	./compile plugtest.c
 
-hmac_sha1.obj: \
-tryindimail.c compile load indimail.lib conf-indi hmac_sha1.o
-	( ( ./compile `grep -h -v "^#" conf-indi` tryindimail.c && \
-	./load tryindimail `cat indimail.lib`) >/dev/null 2>&1 \
-	&& echo || echo hmac_sha1.o) > hmac_sha1.obj
-	rm -f tryindimail.o tryindimail 1>&2
 
 qmail_smtpd.so: \
-smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
+smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o indimail_stub.o \
 timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a \
 wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
-socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o \
-auto_uids.o auto_prefix.o base64sub.o qregex_sql.o tablematch.o ndelay.o \
-ndelay_off.o greylist.o auto_break.o auto_control.o auto_assign.o env.a \
-stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
-socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
+socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
+base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o greylist.o \
+auto_break.o auto_control.o auto_assign.o env.a stralloc.a alloc.a substdio.a \
+auto_prefix.o auto_sysconfdir.o error.a str.a fs.a lock.a \
+socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so smtpd.o rcpthosts.o \
-	recipients.o commands.o timeoutread.o \
+	recipients.o commands.o timeoutread.o indimail_stub.o \
 	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
 	wait.a datetime.a greylist.o auto_break.o auto_control.o auto_assign.o \
-	auto_prefix.o `cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
+	auto_prefix.o auto_sysconfdir.o hmac_sha1.o getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`; \
+	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` $(mysql_libs) ; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so smtpd.o rcpthosts.o \
 	recipients.o commands.o timeoutread.o auto_control.o auto_assign.o \
@@ -2618,48 +2638,53 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
-	auto_prefix.o wait.a datetime.a greylist.o auto_break.o \
-	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
+	wait.a datetime.a greylist.o auto_break.o indimail_stub.o \
+	auto_prefix.o auto_sysconfdir.o hmac_sha1.o getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`; \
+	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` $(mysql_libs) ; \
 	fi
 
 qmail-smtpd: \
 load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a auto_control.o \
-auto_prefix.o wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
+wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o indimail_stub.o \
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
 base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o greylist.o auto_assign.o \
-auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
-socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
+auto_sysconfdir.o auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
+auto_prefix.o socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
-	auto_prefix.o base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
-	wait.a datetime.a greylist.o auto_break.o auto_control.o auto_assign.o \
-	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
+	base64sub.o indimail_stub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
+	wait.a datetime.a greylist.o auto_break.o auto_control.o auto_assign.o hmac_sha1.o \
+	auto_sysconfdir.o auto_prefix.o getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib` -ldl
+	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` $(mysql_libs) -ldl
 
 mail_acl.o: \
 compile mail_acl.c str.h matchregex.h fmt.h stralloc.h
 	./compile mail_acl.c
 
+indimail_stub.o: \
+compile indimail_stub.c auto_qmail.h auto_sysconfdir.h auto_uids.h auto_control.h \
+timeoutread.h timeoutwrite.h stralloc.h env.h fmt.h scan.h strerr.h str.h variables.h
+	./compile indimail_stub.c
+
 qregex.o: \
 compile qregex.c qregex.h case.h stralloc.h constmap.h \
 matchregex.h byte.h env.h str.h cdb.h uint32.h open.h \
-error.h control.h variables.h hasindimail.h auto_control.h
-	./compile $(inc_deps) qregex.c
+error.h control.h variables.h auto_control.h
+	./compile qregex.c
 
 # qregex.c compiled with sqlmatch()
 qregex_sql.o: \
 compile qregex.c qregex.h sqlmatch.h case.h stralloc.h constmap.h matchregex.h byte.h env.h \
-str.h cdb.h uint32.h open.h error.h control.h variables.h
-	./compile -DUSE_SQL $(inc_deps) qregex.c -o qregex_sql.o
+str.h cdb.h uint32.h open.h error.h control.h variables.h hasmysql.h mysql_config
+	./compile -DUSE_SQL $(mysql_inc) qregex.c -o qregex_sql.o
 
 matchregex.o: \
 compile matchregex.c stralloc.h error.h qregex.h
@@ -2741,16 +2766,16 @@ error.h ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
 matchregex.o str.h fmt.h scan.h byte.h case.h env.h now.h datetime.h \
 variables.h exit.h rcpthosts.h timeoutread.h timeoutwrite.h commands.h \
 wait.h etrn.h date822fmt.h fd.h base64.h envrules.h tablematch.h cdb.h \
-uint32.h matchregex.h qregex.h sqlmatch.h hasindimail.h smtp_plugin.h \
-hastlsv1_1_server.h hastlsv1_2_server.h auto_prefix.h \
-auto_control.h dns.h conf-tls conf-spf conf-ip conf-plugin conf-batv
-	./compile $(inc_deps) `grep -h -v "^#" conf-tls conf-spf \
+uint32.h matchregex.h qregex.h sqlmatch.h smtp_plugin.h auto_prefix.h \
+hastlsv1_1_server.h hastlsv1_2_server.h hasmysql.h indimail_stub.h \
+auto_control.h dns.h conf-tls conf-spf conf-ip conf-plugin conf-batv mysql_config
+	./compile $(mysql_inc) `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin` smtpd.c
 
 sqlmatch.o: \
 compile sqlmatch.c stralloc.h byte.h error.h env.h open.h variables.h scan.h \
-sqlmatch.h qregex.h hasindimail.h auto_control.h
-	./compile $(inc_deps) sqlmatch.c
+sqlmatch.h qregex.h auto_control.h mysql_config
+	./compile $(mysql_inc) sqlmatch.c
 
 greylist.o: \
 compile greylist.c stralloc.h ip.h scan.h byte.h greylist.h error.h \
@@ -2796,9 +2821,9 @@ compile qmail-tcpok.c strerr.h substdio.h lock.h open.h \
 auto_qmail.h exit.h env.h variables.h scan.h stralloc.h fmt.h \
 control.h subfd.h conf-queue
 	if test -f conf-queue ; then \
-	./compile $(inc_deps) -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpok.c; \
+	./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpok.c; \
 	else \
-	./compile $(inc_deps) -DQUEUE_COUNT=10 qmail-tcpok.c; \
+	./compile -DQUEUE_COUNT=10 qmail-tcpok.c; \
 	fi;
 
 qmail-tcpto: \
@@ -2823,9 +2848,9 @@ fmt.h ip.h lock.h error.h exit.h datetime.h now.h datetime.h env.h \
 variables.h open.h byte.h scan.h stralloc.h subfd.h \
 control.h tcpto.h ipalloc.h conf-tls conf-ip conf-queue
 	if test -f conf-queue ; then \
-	./compile $(inc_deps) -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpto.c; \
+	./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpto.c; \
 	else \
-	./compile $(inc_deps) -DQUEUE_COUNT=10 qmail-tcpto.c; \
+	./compile -DQUEUE_COUNT=10 qmail-tcpto.c; \
 	fi;
 
 qmail-todo: \
@@ -2843,8 +2868,8 @@ compile qmail-todo.c alloc.h auto_qmail.h byte.h constmap.h control.h \
 direntry.h error.h exit.h fmt.h fmtqfn.h getln.h open.h ndelay.h now.h \
 readsubdir.h sig.h scan.h select.h str.h stralloc.h substdio.h \
 trigger.h env.h variables.h qmail-todo.h auto_control.h \
-hasindimail.h conf-sync
-	./compile $(inc_deps) `grep -h -v "^#" conf-sync` qmail-todo.c
+conf-sync
+	./compile `grep -h -v "^#" conf-sync` qmail-todo.c
 
 
 qmail-upq: \
@@ -3029,7 +3054,7 @@ distclean: clean
 	rm -f lib_deps inc_deps
 
 install: \
-it man leapsecs.dat conf-sysconfdir perm_list conf-logdir
+it man leapsecs.dat conf-sysconfdir perm_list.q conf-logdir
 	if test ! -d $(DESTDIR)"`head -1 conf-sysconfdir`" ; then \
 		mkdir -p $(DESTDIR)"`head -1 conf-sysconfdir`" ; \
 	fi ;
@@ -3038,7 +3063,7 @@ it man leapsecs.dat conf-sysconfdir perm_list conf-logdir
 	fi ;
 	./setup -d "$(DESTDIR)" -L $(DESTDIR)"`head -1 conf-logdir`" \
 		$(QMAILDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list && \
-		cp perm_list $(DESTDIR)"`head -1 conf-sysconfdir`"
+		cp perm_list.q $(DESTDIR)"`head -1 conf-sysconfdir`"
 
 sgetopt.o: \
 compile sgetopt.c subfd.h substdio.h sgetopt.h subgetopt.h \
@@ -3202,27 +3227,12 @@ ssl_timeoutio.o: \
 compile ssl_timeoutio.c ssl_timeoutio.h select.h error.h ndelay.h conf-tls
 	./compile `grep -h -v "^#" conf-tls` ssl_timeoutio.c
 
-hasindimail.h: \
-tryindimail.c compile load indimail.lib conf-indi
-	( ( ./compile `grep -h -v "^#" conf-indi` tryindimail.c && \
-	./load tryindimail `cat indimail.lib`) >/dev/null 2>&1 \
-	&& (echo \#define INDIMAIL 1;echo \#ifdef INDIMAIL; \
-	echo \#include \"indimail.h\"; \
-	echo \#endif) || exit 0 ) > hasindimail.h
-	rm -f tryindimail.o tryindimail 1>&2
-
-indimail.lib: tryindimail.c compile load conf-indi
-	( ( ./compile `grep -h -v "^#" conf-indi` tryindimail.c && \
-	./load tryindimail $(lib_deps) ) >/dev/null 2>&1 \
-	&& echo "$(lib_deps) -L$(DESTDIR)/usr/lib" || exit 0 ) > indimail.lib
-	rm -f tryindimail.o tryindimail 1>&2
-
 spawn.o: \
 compile chkspawn spawn.c sig.h wait.h substdio.h byte.h str.h \
 stralloc.h gen_alloc.h select.h exit.h coe.h open.h error.h alloc.h \
-auto_qmail.h auto_uids.h auto_spawn.h env.h variables.h hasindimail.h
+auto_qmail.h auto_uids.h auto_spawn.h env.h variables.h indimail_stub.h
 	./chkspawn
-	./compile $(inc_deps) spawn.c
+	./compile spawn.c
 
 spf.o: \
 compile spf.c stralloc.h gen_alloc.h alloc.h ipme.h ip.h ipalloc.h \
@@ -3279,7 +3289,7 @@ hassrs.h:  trysrs.c compile load srs.lib conf-indi
 
 srs.o: \
 compile srs.c hassrs.h srs.h auto_qmail.h stralloc.h control.h rcpthosts.h str.h
-	./compile $(inc_deps) -I../libsrs2-$(SRS_VERSION)/libsrs2 srs.c
+	./compile -I../libsrs2-$(SRS_VERSION)/libsrs2 srs.c
 
 
 srsfilter: \
@@ -3508,9 +3518,9 @@ tcp-environ.5
 
 tcpto.o: \
 compile tcpto.c tcpto.h open.h lock.h seek.h now.h datetime.h ip.h fmt.h \
-byte.h datetime.h env.h variables.h hasindimail.h ipalloc.h tcpto.h \
+byte.h datetime.h env.h variables.h ipalloc.h tcpto.h \
 conf-tls conf-ip
-	./compile $(inc_deps) `grep -h -v "^#" conf-tls conf-ip` tcpto.c
+	./compile `grep -h -v "^#" conf-tls conf-ip` tcpto.c
 
 tcpto_clean.o: \
 compile tcpto_clean.c tcpto.h open.h substdio.h ipalloc.h \
@@ -3570,8 +3580,8 @@ compile wait_pid.c error.h haswaitp.h
 	./compile wait_pid.c
 
 wildmat.o: \
-compile wildmat.c hasindimail.h
-	./compile $(inc_deps) wildmat.c
+compile wildmat.c
+	./compile wildmat.c
 
 variables.o: \
 compile variables.c variables.h
@@ -3579,13 +3589,13 @@ compile variables.c variables.h
 
 etrn.o: \
 compile etrn.c etrn.h rcpthosts.h case.h sig.h stralloc.h constmap.h wait.h \
-auto_qmail.h hasindimail.h control.h fmt.h str.h
-	./compile $(inc_deps) etrn.c
+auto_qmail.h control.h fmt.h str.h indimail_stub.h
+	./compile etrn.c
 
 atrn.o: \
 compile atrn.c etrn.h rcpthosts.h case.h sig.h stralloc.h constmap.h wait.h \
-hasindimail.h control.h str.h
-	./compile $(inc_deps) atrn.c
+control.h str.h
+	./compile atrn.c
 
 ############### Begin queue-fix
 
@@ -5628,18 +5638,18 @@ load qmail-sql.o sgetopt.o str_len.o stralloc.a error_str.o \
 error.o envread.o variables.o subgetopt.o str_diffn.o auto_control.o \
 byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o \
 fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
-sqlmatch.o auto_uids.o auto_sysconfdir.o substdio.a indimail.lib tls.lib
+sqlmatch.o auto_uids.o auto_sysconfdir.o substdio.a tls.lib mysql_config
 	./load qmail-sql sgetopt.o str_len.o stralloc.a error_str.o \
 	error.o envread.o variables.o subgetopt.o str_diffn.o auto_control.o \
 	byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o \
 	fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
-	sqlmatch.o auto_uids.o auto_sysconfdir.o substdio.a `cat indimail.lib tls.lib`
+	sqlmatch.o auto_uids.o auto_sysconfdir.o substdio.a `cat tls.lib` $(mysql_libs)
 
 qmail-sql.o: \
 compile qmail-sql.c sgetopt.h subfd.h stralloc.h str.h env.h \
 sqlmatch.h auto_qmail.h variables.h error.h strerr.h auto_uids.h \
-fmt.h hasindimail.h substdio.h auto_control.h
-	./compile $(inc_deps) qmail-sql.c
+fmt.h substdio.h auto_control.h hasmysql.h mysql_config
+	./compile $(mysql_inc) qmail-sql.c
 
 qmail-sql.8: \
 qmail-sql.9 conf-sysconfdir
@@ -5849,11 +5859,11 @@ timeoutread.o scan_ulong.o strerr.a substdio.a str.a error.a
 	timeoutread.o scan_ulong.o strerr.a substdio.a str.a error.a
 
 udpopen.o: \
-compile udpopen.c subfd.h udpopen.h strerr.h fmt.h hasindimail.h byte.h
+compile udpopen.c subfd.h udpopen.h strerr.h fmt.h byte.h
 	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` udpopen.c
 
 tcpopen.o: \
-compile tcpopen.c subfd.h tcpopen.h strerr.h fmt.h hasindimail.h byte.h strerr.h
+compile tcpopen.c subfd.h tcpopen.h strerr.h fmt.h byte.h strerr.h
 	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` tcpopen.c
 
 udpclient.o: \
@@ -5870,7 +5880,7 @@ whois.o:\
 compile whois.c subfd.h str.h strerr.h stralloc.h byte.h tcpopen.h sgetopt.h
 	./compile `grep -h -v "^#" conf-ip` whois.c
 
-indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog
+indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
 
 hastlsv1_1_server.h: \
