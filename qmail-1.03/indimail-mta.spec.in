@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.123 2018-01-09 11:42:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.124 2018-01-09 14:49:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -449,12 +449,6 @@ if [ -d qmail-%{qmail_version} ] ; then
    if [ -f qmail-1.03/qlocal_upgrade.sh ] ; then
    %{__cp} qmail-1.03/qlocal_upgrade.sh .
    fi
-   if [ -f qmail-1.03/indimail-mta.fc ] ; then
-   %{__cp} qmail-1.03/indimail-mta.fc .
-   fi
-   if [ -f qmail-1.03/indimail-mta.te ] ; then
-   %{__cp} qmail-1.03/indimail-mta.te .
-   fi
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
@@ -504,11 +498,11 @@ fi
 if [ -f qlocal_upgrade.sh ] ; then
 install -m 0755 qlocal_upgrade.sh %{buildroot}%{libexecdir}/qlocal_upgrade.sh
 fi
-if [ -f indimail-mta.fc ] ; then
-install -m 0755 indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
+if [ -f qmail-1.03/indimail-mta.fc ] ; then
+install -m 0755 qmail-1.03/indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
 fi
-if [ -f indimail-mta.te ] ; then
-install -m 0755 indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
+if [ -f qmail-1.03/indimail-mta.te ] ; then
+install -m 0755 qmail-1.03/indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
 fi
 
 if [ %nolibdkim -eq 0 ] ; then
