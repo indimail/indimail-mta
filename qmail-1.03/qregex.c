@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.c,v $
+ * Revision 1.26  2018-01-09 11:55:42+05:30  Cprogrammer
+ * compile sql code with USE_MYSQL definition
+ *
  * Revision 1.25  2016-06-14 09:10:09+05:30  Cprogrammer
  * updated with original authors and maintainers
  *
@@ -79,12 +82,12 @@
  * Initial revision
  *
  * qregex (v2)
- * $Id: qregex.c,v 1.25 2016-06-14 09:10:09+05:30 Cprogrammer Stab mbhangui $
+ * $Id: qregex.c,v 1.26 2018-01-09 11:55:42+05:30 Cprogrammer Exp mbhangui $
  *
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2016-06-14 09:10:09+05:30 $
- * Revision: $Revision: 1.25 $
+ * Modified: $Date: 2018-01-09 11:55:42+05:30 $
+ * Revision: $Revision: 1.26 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -122,7 +125,6 @@
  *       http://cr.yp.to/qmail/guarantee.html
  * 
  */
-#include "hasindimail.h"
 #include "case.h"
 #include "scan.h"
 #include "stralloc.h"
@@ -266,7 +268,7 @@ address_match(char *fn, stralloc *addr, stralloc *bhf, struct constmap *mapbhf,
 		*errStr = 0;
 	if (fn && (x = cdbmatch(fn, addr->s, str_len(addr->s), 0, errStr)))
 		return (x);
-#if defined(USE_SQL) && defined(INDIMAIL)
+#if defined(USE_SQL) && defined(USE_MYSQL)
 	if (fn && (x = sqlmatch(fn, addr->s, str_len(addr->s), errStr)))
 		return (x);
 #endif
@@ -368,10 +370,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.25 2016-06-14 09:10:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.26 2018-01-09 11:55:42+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	x = sccsidh;
-#endif
 	x++;
 }
