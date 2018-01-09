@@ -247,9 +247,7 @@ if [ " $1" = " purge" ] ; then
 	echo "removing startup services"
 	for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
 	pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
-	qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-logfifo qscanq qmail-imapd.4143 \
-	qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
-	qmail-poppass.106 greylist.1999 udplogger.3000 .svscan resolvconf dnscache
+	qmail-imapd.4143 qmail-pop3d.4110 qmail-poppass.106
 	do
 		if [ -d ${servicedir}/$i ] ; then
 			${rm} -rf ${servicedir}/$i >/dev/null 2>&1 || true
@@ -265,6 +263,7 @@ if [ " $1" = " purge" ] ; then
 			fi
 		done
 	fi
+	count=`/bin/ls ${servicedir} 2>/dev/null| /usr/bin/wc -l`
 	if [ $count -eq 0 ] ; then # ignore disabled services
 		${rm} -rf ${servicedir} || true
 	fi
@@ -273,13 +272,17 @@ if [ " $1" = " purge" ] ; then
 	${rm} -f ${indimaildir}/mysqldb/logs/logisam.log
 	${rm} -f ${indimaildir}/mysqldb/logs/logquery
 	${rm} -f ${indimaildir}/mysqldb/logs/logslow
-	count=`/bin/ls ${servicedir} 2>/dev/null| /usr/bin/wc -l`
 	if [ -h ${logdir} ] ; then
 		log_dir=`/bin/ls -ld ${logdir} | /usr/bin/awk '{print $10}'`
 	else
 		log_dir=${logdir}
 	fi
-	[ "$log_dir" != "/" ] && ${rm} -fr $log_dir
+	for i in fetchmail imapd.143 imapd-ssl.993 indisrvr.4000 inlookup.infifo \
+	mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 proxyIMAP.4143 \
+	proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup
+	do
+		${rm} -rf $log_dir/$i
+	done
 else
 	echo "recreating ld.so cache"
 	/sbin/ldconfig
