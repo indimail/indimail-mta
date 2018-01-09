@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.123 2018-01-09 11:59:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.123 2018-01-09 11:42:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -60,7 +60,7 @@
 
 Summary: A Flexible SMTP server
 Name: indimail-mta
-Version: 2.2
+Version: 2.3
 %if %fedorareview == 0
 Provides: daemontools = %{version}, ucspi-tcp = %{version}
 %endif
@@ -111,8 +111,6 @@ Source3: http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}.ta
 Source4: http://downloads.sourceforge.net/indimail/libsrs2-%{libsrs2_version}.tar.gz
 %endif
 Source5: http://downloads.sourceforge.net/indimail/qmail-rpmlintrc
-Source6: http://downloads.sourceforge.net/indimail/svctool
-Source7: http://downloads.sourceforge.net/indimail/svctool.8.gz
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -138,11 +136,11 @@ NoSource: 4
 
 URL: http://www.indimail.org
 #AutoReqProv: No
-Conflicts: indimail
+Conflicts: indimail-mini
 Conflicts: daemontools
 Conflicts: ucspi-tcp
-Conflicts: indimail-mini
 Conflicts: indimail-mta < 2.0
+Obsoletes: indimail-mta < 2.0
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
@@ -237,11 +235,7 @@ Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
 %package -n daemontools
 Summary: A collection of tools for managing UNIX services
-%if %fedorareview == 0
-Conflicts: indimail indimail-mta ucspi-tcp
-%else
-Conflicts: indimail indimail-mta
-%endif
+Conflicts: indimail-mta
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Base
 %else
@@ -264,11 +258,7 @@ again, without losing any data.
 Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
 %package -n ucspi-tcp
-%if %fedorareview == 0
-Conflicts: indimail daemontools indimail-mta
-%else
-Conflicts: indimail indimail-mta
-%endif
+Conflicts: indimail-mta
 Summary: A collection of tools for building TCP client-server applications
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Base
@@ -307,6 +297,21 @@ Interface, using the TCP protocol. UCSPI tools are available for several
 different networks.
 
 Original Author: Dan J. Bernstein <djb@cr.yp.to>
+
+%package -n indimail-mini
+Summary: IndiMail - Mini Client Installation
+Group: Productivity/Networking/Email/Clients
+Conflicts: %{name}
+Conflicts: indimail-mini < 2.0
+
+%description -n indimail-mini
+This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
+programs to have a mini-indimail installation.
+
+A mini-indimail installation doesn't have a mail queue. It gives each
+new message to a central server using QMQP.
+
+%{see_base}
 
 %prep
 echo "---------------- INFORMATION ------------------------"
@@ -444,6 +449,12 @@ if [ -d qmail-%{qmail_version} ] ; then
    if [ -f qmail-1.03/qlocal_upgrade.sh ] ; then
    %{__cp} qmail-1.03/qlocal_upgrade.sh .
    fi
+   if [ -f qmail-1.03/indimail-mta.fc ] ; then
+   %{__cp} qmail-1.03/indimail-mta.fc .
+   fi
+   if [ -f qmail-1.03/indimail-mta.te ] ; then
+   %{__cp} qmail-1.03/indimail-mta.te .
+   fi
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
@@ -455,17 +466,6 @@ if [ -d ucspi-tcp-%{ucspi_version} ] ; then
     %{__rm} -f ucspi-tcp-%{ucspi_version}/conf-dlopen
   %endif
 fi
-#### svctool ########################
-if [ -f ../SOURCES/svctool ] ; then
-%{__cp} ../SOURCES/svctool .
-fi
-if [ -f ../SOURCES/svctool.gz ] ; then
-gunzip -c ../SOURCES/svctool.gz > ../SOURCES/svctool
-fi
-if [ -f ../SOURCES/svctool.8.gz ] ; then
-%{__cp} ../SOURCES/svctool.8.gz .
-fi
-
 
 %install
 ID=$(id -u)
@@ -489,21 +489,14 @@ do
       %{__make} DESTDIR=%{buildroot} install-strip
     fi
     cd ..
-    if [ " $i" = " qmail-%{qmail_version}" ] ; then
-      if [ -f ../SOURCES/svctool ] ; then
-        %{__mkdir_p} %{buildroot}%{_prefix}/sbin
-        %{__cp} ../SOURCES/svctool %{buildroot}%{_prefix}/sbin/svctool
-      fi
-      if [ -f ../SOURCES/svctool.8.gz ] ; then
-        %{__mkdir_p} %{buildroot}%{mandir}/man8
-        %{__cp} ../SOURCES/svctool.8.gz %{buildroot}%{mandir}/man8/svctool.8.gz
-      fi
-    fi
   fi
 done
+
+#copy files not copied by setup
 install -m 0644 indimail-mta-release %{buildroot}%{qsysconfdir}/indimail-mta-release
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 %{__mkdir_p} %{buildroot}%{libexecdir}
+%{__mkdir_p} %{buildroot}%{qsysconfdir}
 install -m 0644 ChangeLog %{buildroot}%{shareddir}/doc/ChangeLog
 if [ -f qupgrade.sh ] ; then
 install -m 0755 qupgrade.sh %{buildroot}%{libexecdir}/qupgrade.sh
@@ -511,6 +504,13 @@ fi
 if [ -f qlocal_upgrade.sh ] ; then
 install -m 0755 qlocal_upgrade.sh %{buildroot}%{libexecdir}/qlocal_upgrade.sh
 fi
+if [ -f indimail-mta.fc ] ; then
+install -m 0755 indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
+fi
+if [ -f indimail-mta.te ] ; then
+install -m 0755 indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
+fi
+
 if [ %nolibdkim -eq 0 ] ; then
   %{__rm} -f %{buildroot}%{_libdir}/libdkim.la
   if [ -x /usr/bin/chrpath ] ; then
@@ -534,7 +534,6 @@ install -m 644 %{S:7} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 %endif
 
 if [ -x /usr/bin/chrpath ] ; then
-  /usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
   for i in tcpserver ismaildup
   do
     if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
@@ -545,11 +544,21 @@ fi
 # remove devel files as we are not building a devel package
 %{__rm} -rf %{buildroot}%{mandir}/man3
 %{__rm} -rf %{buildroot}%{_prefix}/include
-for i in libdkim libsrs2
-do
-%{__rm} -f  %{buildroot}%{_libdir}/$i.a
-%{__rm} -f  %{buildroot}%{_libdir}/$i.so
-done
+
+if [ %nolibdkim -eq 0 ] ; then
+if [ -x /usr/bin/chrpath ] ; then
+  /usr/bin/chrpath -d %{buildroot}%{_libdir}/libdkim*.so
+fi
+%{__rm} -f  %{buildroot}%{_libdir}/libdkim.a
+%{__rm} -f  %{buildroot}%{_libdir}/libdkim.so
+fi
+if [ %nolibsrs2 -eq 0 ] ; then
+if [ -x /usr/bin/chrpath ] ; then
+  /usr/bin/chrpath -d %{buildroot}%{_libdir}/libsrs2*.so
+fi
+%{__rm} -f  %{buildroot}%{_libdir}/libsrs2.a
+%{__rm} -f  %{buildroot}%{_libdir}/libsrs2.so
+fi
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
@@ -624,7 +633,6 @@ done
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root/scanq
 %dir %attr(2755,root,qmail)       %{qsysconfdir}
-%dir %attr(2755,root,qmail)       %{qsysconfdir}/etc
 %dir %attr(2775,indimail,qmail)   %{qsysconfdir}/users
 %dir %attr(2775,indimail,qmail)   %{qsysconfdir}/certs
 %dir %attr(2775,indimail,qmail)   %{qsysconfdir}/control
@@ -653,33 +661,34 @@ done
 %endif
 %dir %attr(555,root,qmail)            %{plugindir}
 
-%attr(444,root,root) %config(noreplace)           %{qsysconfdir}/controlfiles.q
-%attr(444,root,root) %config(noreplace)           %{qsysconfdir}/perm_list
+%attr(444,root,root) %config(noreplace)            %{qsysconfdir}/controlfiles.q
+%attr(444,root,root) %config(noreplace)            %{qsysconfdir}/perm_list.q
 
-%ghost %config(noreplace,missingok)               %{qsysconfdir}/tcp.smtp
-%ghost %config(noreplace,missingok)               %{qsysconfdir}/tcp.qmtp
-%ghost %config(noreplace,missingok)               %{qsysconfdir}/tcp.qmqp
+%ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp.smtp
+%ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp.qmtp
+%ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp.qmqp
 #
 # These files will get removed during uninstallation
 #
-%ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.smtp.cdb
-%ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmtp.cdb
-%ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmqp.cdb
-%ghost %attr(0644,root,root)                      %{qsysconfdir}/indimail-mta.pp
-%ghost %attr(0644,root,root)                      %{qsysconfdir}/indimail-mta.mod
+%ghost %attr(0644,indimail,indimail)               %{qsysconfdir}/tcp.smtp.cdb
+%ghost %attr(0644,indimail,indimail)               %{qsysconfdir}/tcp.qmtp.cdb
+%ghost %attr(0644,indimail,indimail)               %{qsysconfdir}/tcp.qmqp.cdb
+%ghost %attr(0644,root,root)                       %{qsysconfdir}/indimail-mta.pp
+%ghost %attr(0644,root,root)                       %{qsysconfdir}/indimail-mta.mod
 
-%attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/indimail-mta.te
-%attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/indimail-mta.fc
-%attr(444,root,qmail) %config(noreplace)          %{qsysconfdir}/cronlist
-%attr(444,root,root)  %config(noreplace)          %{qsysconfdir}/qmailprog.list
-%attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/etc/leapsecs.dat
-%attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/etc/leapsecs.txt
-%attr(444,root,root)  %config(noreplace)          %{qsysconfdir}/indimail-mta-release
+%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/indimail-mta.te
+%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/indimail-mta.fc
+%attr(444,root,qmail) %config(noreplace)           %{qsysconfdir}/cronlist.q
+%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/qmailprog.list
+%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/leapsecs.dat
+%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/leapsecs.txt
+%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta-release
+%attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/nodnscheck
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions
-%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%attr(644,root,root)                               %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root)                               %{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 %endif
 
@@ -790,7 +799,9 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/maildircmd
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(755,root,qmail)                   %{_prefix}/bin/spfquery
+%if %nolibsrs2 == 0
 %attr(755,root,qmail)                   %{_prefix}/bin/srsfilter
+%endif
 %attr(755,root,qmail)                   %{_prefix}/bin/inotify
 
 %attr(755,root,qmail)                   %{libexecdir}/columnt
@@ -856,6 +867,7 @@ done
 %attr(751,root,qmail)                   %{_prefix}/bin/qmail-newu
 %attr(751,root,qmail)                   %{_prefix}/bin/qmail-newmrh
 %attr(751,root,qmail)                   %{_prefix}/bin/qmail-cdb
+%attr(751,root,qmail)                   %{_prefix}/bin/qmail-sql
 %attr(751,root,qmail)                   %{_prefix}/bin/recipient-cdb
 
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-daemon
@@ -1298,6 +1310,7 @@ done
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.qhpsi
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %endif
+%attr(444,root,qmail)                   %{shareddir}/doc/softwarelicense1-1.html
 %attr(444,root,qmail)                   %{shareddir}/doc/README.auth
 %attr(444,root,qmail)                   %{shareddir}/doc/README.indimail
 %attr(444,root,qmail)                   %{shareddir}/doc/README.newline
@@ -1351,8 +1364,6 @@ done
 %endif
 
 # Shared libraries (omit for architectures that don't support them)
-
-
 %if %nolibdkim == 0
 %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
@@ -1362,10 +1373,6 @@ done
 %{_libdir}/libsrs2.so.1
 %{_libdir}/libsrs2.so.1.0.0
 %endif
-
-# a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
-# and /var/qmail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
-# this host's name in /var/qmail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision
 
 %files -n daemontools
 %defattr(-, root, root,-)
@@ -1508,6 +1515,63 @@ done
 %attr(0644,root,qmail)                  %{mandir}/cat8/greydaemon.0.gz
 %attr(0644,root,qmail)                  %{mandir}/cat8/qmail-greyd.0.gz
 
+%files -n indimail-mini
+%defattr(-, root, root, 0555)
+#
+# Directories
+#
+%dir %attr(555,root,qmail)        %{qmaildir}
+                                  %{qmaildir}/bin
+                                  %{qmaildir}/sbin
+                                  %{qmaildir}/users
+                                  %{qmaildir}/control
+%dir %attr(755,indimail,indimail) %{qsysconfdir}/control
+%dir %attr(755,root,root)         %{mandir}
+%dir %attr(755,root,root)         %{mandir}/man1
+%dir %attr(755,root,root)         %{mandir}/cat1
+%dir %attr(755,root,root)         %{mandir}/man8
+%dir %attr(755,root,root)         %{mandir}/cat8
+#
+%attr(755,root,qmail)             %{_prefix}/bin/sendmail
+%attr(755,root,qmail)             %{_prefix}/bin/qmail-inject
+%attr(755,root,qmail)             %{_prefix}/bin/forward
+%attr(755,root,qmail)             %{_prefix}/bin/predate
+%attr(755,root,qmail)             %{_prefix}/bin/datemail
+%attr(755,root,qmail)             %{_prefix}/bin/mailsubj
+%attr(755,root,qmail)             %{_prefix}/bin/qmail-showctl
+%attr(755,root,qmail)             %{_prefix}/bin/qmaildirmake
+%attr(755,root,qmail)             %{_prefix}/bin/maildir2mbox
+%attr(755,root,qmail)             %{_prefix}/bin/maildirwatch
+%attr(755,root,qmail)             %{_prefix}/sbin/qmail-qmqpc
+#
+%attr(444,root,qmail)             %{mandir}/man1/forward.1.gz
+%attr(444,root,qmail)             %{mandir}/man1/predate.1.gz
+%attr(444,root,qmail)             %{mandir}/man1/datemail.1.gz
+%attr(444,root,qmail)             %{mandir}/man1/mailsubj.1.gz
+%attr(444,root,qmail)             %{mandir}/man1/qmaildirmake.1.gz
+%attr(444,root,qmail)             %{mandir}/man1/maildir2mbox.1.gz
+%attr(444,root,qmail)             %{mandir}/man1/maildirwatch.1.gz
+%attr(444,root,qmail)             %{mandir}/cat1/forward.0.gz
+%attr(444,root,qmail)             %{mandir}/cat1/mailsubj.0.gz
+%attr(444,root,qmail)             %{mandir}/cat1/qmaildirmake.0.gz
+%attr(444,root,qmail)             %{mandir}/cat1/maildir2mbox.0.gz
+%attr(444,root,qmail)             %{mandir}/cat1/maildirwatch.0.gz
+#
+%attr(444,root,qmail)             %{mandir}/man8/qmail-showctl.8.gz
+%attr(444,root,qmail)             %{mandir}/man8/qmail-inject.8.gz
+%attr(444,root,qmail)             %{mandir}/man8/isendmail.8.gz
+%attr(444,root,qmail)             %{mandir}/man8/qmail-qmqpc.8.gz
+%attr(444,root,qmail)             %{mandir}/cat8/qmail-showctl.0.gz
+%attr(444,root,qmail)             %{mandir}/cat8/qmail-inject.0.gz
+%attr(444,root,qmail)             %{mandir}/cat8/qmail-qmqpc.0.gz
+
+# a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
+# and /var/qmail/control/plusdomain from your central server, so that
+# qmail-inject uses appropriate host names in outgoing mail; and
+# this host's name in /var/qmail/control/idhost, so that
+# qmail-inject generates Message-ID without any risk of collision
+
+
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
 
@@ -1604,7 +1668,7 @@ fi
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Upgrade Script for pretrans"
-  /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs %{version} $*
 ) > /tmp/indimail-mta-setup.log 2>&1
 fi
 
@@ -1621,7 +1685,7 @@ if [ $argv1 -eq 2 ] ; then
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
   (
     echo "Running Custom Upgrade Script for pre upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh pre upgrade @version@ $*
+    /bin/sh %{libexecdir}/qupgrade.sh pre upgrade %{version} $*
   ) >> /tmp/indimail-mta-setup.log 2>&1
   fi
   exit 0
@@ -1682,7 +1746,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
     /sbin/ldconfig
     echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh post upgrade @version@ $*
+    /bin/sh %{libexecdir}/qupgrade.sh post upgrade %{version} $*
   fi
   if [ -f /etc/init.d/indimail ] ; then
     cmp -s %{_prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1
@@ -1730,7 +1794,7 @@ fi
 echo "Doing post installation activities for the following"
 echo ""
 echo " 1. Configure %{logdir} for multilog"
-echo " 2. Configure %{servicedir}. Move existing services to %{servicedir}.org"
+echo " 2. Configure %{servicedir}"
 echo " 3. Configure svscanlog service"
 echo " 4. Configure standard catch-all accounts, default qmail configuration"
 echo " 5. Configure DKIM, Domainkeys signature"
@@ -1818,8 +1882,8 @@ else
     clamav_os=1
     clamdPrefix="/usr"
     qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-    if [ -d /etc/clamav ] ; then
-      mysysconfdir=/etc/clamav
+    if [ -d %{_sysconfdir}/clamav ] ; then
+      mysysconfdir=%{_sysconfdir}/clamav
     else
       mysysconfdir=%{_sysconfdir}
     fi
@@ -1827,7 +1891,6 @@ else
     clamav_os=0
   fi
 fi
-
 # SMTP ports
 for port in 465 25 587
 do
@@ -1843,7 +1906,7 @@ do
     extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   fi
 %if %{tcpserver_plugin} == 1
-    extra_opt="$extra_opt --shared-objects=1"
+    extra_opt="$extra_opt --shared-objects=1 --use-dlmopen=1"
 %endif
   if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
     extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
@@ -1977,14 +2040,19 @@ done
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 
-if [ -f %{qsysconfdir}/cronlist ] ; then
+if [ -f %{qsysconfdir}/cronlist.q ] ; then
   echo "adding cron entries"
-  /usr/bin/crontab -u root %{qsysconfdir}/cronlist
+  (
+  crontab -u root -l
+  %{__cat} %{qsysconfdir}/cronlist.q
+  ) > /tmp/cron.indimail-mta.$$
+  crontab -u root /tmp/cron.indimail-mta.$$
+  /bin/rm -f /tmp/cron.indimail-mta.$$
 fi
 
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
-  /bin/sh %{libexecdir}/qupgrade.sh post install @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh post install %{version} $*
 fi
 
 if [ -x /bin/systemctl ] ; then
@@ -2034,7 +2102,7 @@ fi
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh preun upgrade @version@ "$argv1"
+    /bin/sh %{libexecdir}/qupgrade.sh preun upgrade %{version} "$argv1"
   fi
   exit 0
 fi
@@ -2077,7 +2145,7 @@ fi
 
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/qupgrade.sh preun uninstall @version@ "$argv1"
+  /bin/sh %{libexecdir}/qupgrade.sh preun uninstall %{version} "$argv1"
 fi
 
 if [ -f /etc/init.d/sendmail ] ; then
@@ -2115,7 +2183,7 @@ if [ $argv1 -eq 1 ] ; then
   (
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade @version@ $*
+    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
   fi
   ) >> /tmp/indimail-mta-setup.log
   echo "recreating ld.so cache"
@@ -2201,7 +2269,7 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
 fi
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
-  /bin/sh %{libexecdir}/qupgrade.sh postun uninstall @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh postun uninstall %{version} $*
 fi
 ) >> /tmp/indimail-mta-setup.log 2>&1
 
@@ -2216,7 +2284,7 @@ fi
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{libexecdir}/qupgrade.sh posttrans noargs @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh posttrans noargs %{version} $*
 ) >> /tmp/indimail-mta-setup.log 2>&1
 fi
 
@@ -2271,7 +2339,7 @@ fi
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Upgrade Script for pretrans"
-  /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs @version@ $*
+  /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs %{version} $*
 ) > /tmp/daemontools-setup.log 2>&1
 fi
 
@@ -2342,7 +2410,7 @@ fi
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh preun upgrade @version@ "$argv1"
+    /bin/sh %{libexecdir}/qupgrade.sh preun upgrade %{version} "$argv1"
   fi
   exit 0
 fi
@@ -2385,7 +2453,7 @@ fi
 
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/qupgrade.sh preun uninstall @version@ "$argv1"
+  /bin/sh %{libexecdir}/qupgrade.sh preun uninstall %{version} "$argv1"
 fi
 
 # Remove IndiMail being started on system boot
@@ -2407,7 +2475,7 @@ fi
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade @version@ $*
+    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
   fi
   echo "recreating ld.so cache"
   /sbin/ldconfig
@@ -2433,6 +2501,177 @@ if [ $nscd_up -ge 1 ] ; then
     %{_sysconfdir}/init.d/nscd start
   fi
 fi
+
+%post -n indimail-mini
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+# we are doing upgrade
+if [ $argv1 -eq 2 ] ; then
+  exit 0
+fi
+#
+# Create user/groups indimail. Do not report any problems if it already
+# exists.
+#
+nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+if [ $nscd_up -ge 1 ] ; then
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd stop
+  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
+  fi
+fi
+echo "Adding IndiMail users/groups"
+/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
+if [ $? = 4 ] ; then
+  /usr/sbin/groupadd indimail
+fi
+/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
+/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
+
+%{__rm} -f /var/spool/mail/indimail
+
+/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{qmaildir} indimail || true
+if [ $? = 4 ] ; then
+  /usr/sbin/useradd -r -g indimail -d %{qmaildir} indimail
+fi
+if [ $nscd_up -ge 1 ] ; then
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
+  fi
+fi
+
+if [ -f %{_prefix}/sbin/qmail-qmqpc ] ; then
+  %{__rm} -f %{_prefix}/sbin/qmail-queue
+fi
+cd %{_prefix}/sbin
+/bin/ln -sf qmail-qmqpc qmail-queue
+if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
+  %{_sysconfdir}/init.d/sendmail stop
+  if [ -f /sbin/chkconfig ] ; then
+    /sbin/chkconfig --del sendmail
+  fi
+fi
+if [ -x /usr/sbin/alternatives ] ; then
+  alternatives_cmd=/usr/sbin/alternatives
+elif [ -x /usr/sbin/update-alternatives ] ; then
+  alternatives_cmd=/usr/sbin/update-alternatives
+else
+  alternatives_cmd=""
+fi
+if [ -n $alternatives_cmd ] ; then
+  for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+    if [ -f $i -a ! -L $i ]; then
+      echo "! $i is a file, should be a link" 1>&2
+      %{__mv} $i $i.old
+    fi
+  done
+  for i in mailq newaliases; do
+    if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
+      echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
+      %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+    fi
+  done
+  if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
+    echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
+    %{__mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
+  fi
+  $alternatives_cmd --install \
+    /usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
+    --slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
+      %{mandir}/man8/isendmail.8.gz \
+    --slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
+    --slave /usr/bin/rmail mta-rmail %{_prefix}/bin/irmail
+  $alternatives_cmd --set mta %{_prefix}/bin/sendmail
+else
+  for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+    if [ -f $i -a ! -L $i ]; then
+      echo "! $i is a file, should be a link" 1>&2
+      %{__mv} $i $i.old
+      /bin/ln -s %{_prefix}/bin/sendmail $i
+    elif [ -L $i ];then
+      %{__mv} $i $i.old
+      /bin/ln -s %{_prefix}/bin/sendmail $i
+    elif [ ! -f $i ];then
+      echo "! $i is missing"
+      /bin/ln -s %{_prefix}/bin/sendmail $i
+    fi
+  done
+  if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
+    echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
+    %{__mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
+    /bin/ln -s /etc/pam.d/pam.multi /etc/pam.d/smtp
+  fi
+  for i in mailq newaliases; do
+    if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
+      echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
+      %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+    fi
+  done
+fi
+
+# a copy of following control files from your central server
+# /var/indimail/control/me
+# /var/indimail/control/defaultdomain,
+# /var/indimail/control/plusdomain
+# so that qmail-inject uses appropriate host names in outgoing mail; and
+# this host's name in /var/indimail/control/idhost, so that qmail-inject
+# generates Message-ID without any risk of collision
+if [ ! -f %{qsysconfdir}/control/idhost ] ; then
+  uname -n > %{qsysconfdir}/control/idhost
+fi
+
+%postun -n indimail-mini
+argv1=$1
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+  exit 0
+fi
+if [ -x /usr/sbin/alternatives ] ; then
+  alternatives_cmd=/usr/sbin/alternatives
+elif [ -x /usr/sbin/update-alternatives ] ; then
+  alternatives_cmd=/usr/sbin/update-alternatives
+else
+  alternatives_cmd=""
+fi
+if [ -n $alternatives_cmd ] ; then
+  $alternatives_cmd --remove mta %{_prefix}/bin/sendmail
+  $alternatives_cmd --auto mta
+  for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
+    if [ -f $i.old -o -L $i.old ]; then
+      echo "restoring $i"
+      %{__rm} -f $i
+      %{__mv} $i.old $i
+    fi
+  done
+else
+  if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
+    if [ -f /sbin/chkconfig ] ; then
+      /sbin/chkconfig --add sendmail
+      echo "to start sendmail, issue"
+      echo "%{_sysconfdir}/init.d/sendmail start"
+    fi
+  fi
+fi
+for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
+  if [ -f $i.old -o -L $i.old ]; then
+    echo "restoring $i"
+    %{__rm} -f $i
+    %{__mv} $i.old $i
+  fi
+done
+for i in mailq newaliases; do
+  if [ -f /usr/share/man/man1/$i.old.1.gz ] ; then
+    echo "restoring /usr/share/man/man1/$i.1.gz"
+    %{__mv} /usr/share/man/man1/$i.old.1.gz /usr/share/man/man1/$i.1.gz
+  fi
+done
 
 # fix changelog for openSUSE buildservice
 %changelog
