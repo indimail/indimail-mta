@@ -1,7 +1,7 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
-# Revision 1.3  2018-01-02 16:28:53+05:30  Cprogrammer
-# upgrade variables only when changed
+# Revision 1.4  2018-01-09 11:46:40+05:30  Cprogrammer
+# updated for v2.3 indimail-mta
 #
 # Revision 1.2  2017-11-06 21:46:12+05:30  Cprogrammer
 # fixed upgrade script for posttrans
@@ -10,7 +10,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.3 2018-01-02 16:28:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.4 2018-01-09 11:46:40+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -93,6 +93,7 @@ fi
 if [ -f /etc/indimail/certs/clientcert.pem ] ; then
 	$rm -f /etc/indimail/certs/clientcert.pem
 fi
+
 for i in servercert.pem dh2048.pem rsa2048.pem dh1024.pem rsa1024.pem dh512.pem rsa512.pem
 do
 	# roundcube (php) will require read access to certs
@@ -126,7 +127,7 @@ if [ -d /service/qmail-spamlog ] ; then
 	$mkdir -p /service/qmail-logfifo/variables
 	$chown root:indimail /service/qmail-logfifo/variables
 	$chmod 775 /service/qmail-logfifo/variables
-	echo /tmp/logfifo > /service/qmail-logfifo/variables/LOGFILTER
+	check_update_if_diff /service/qmail-logfifo/variables/LOGFILTER /tmp/logfifo
 	$sed -i 's{smtpd.25{logfifo{' /service/qmail-logfifo/run
 	$sed -i 's{spamlog{logfifo{' /service/qmail-logfifo/log/run
 fi
@@ -135,7 +136,7 @@ fi
 # to /var/log/svc/logfifo/current (fifologger service)
 # for qmail-send it is required if you run bogofilter during remote/local delivery,
 # in which case it will be logged to /var/log/svc/logfifo/current
-for i in qmail-smtpd.25 qmail-smtpd.465 qmail-send.25
+for i in qmail-smtpd.25 qmail-smtpd.465 fetchmail qmail-send.25
 do
 	if [ -d /service/$i -a -s /service/$i/variables/LOGFILTER ] ; then
 		check_update_if_diff /service/$i/variables/LOGFILTER /tmp/logfifo
@@ -154,13 +155,11 @@ do
 	$chown root:indimail $i/variables
 	$chmod 755 $i/variables
 done
+host=`uname -n`
+check_update_if_diff /service/qmail-send.25/variables/DEFAULT_DOMAIN $host
+check_update_if_diff /etc/indimail/control/envnoathost $host
+check_update_if_diff /etc/indimail/control/defaulthost $host
 
-$uname -n > /service/qmail-send.25/variables/DEFAULT_DOMAIN
-$uname -n > /etc/indimail/control/envnoathost
-$uname -n > /etc/indimail/control/defaulthost
-if [ -f /service/fetchmail/variables/QMAILDEFAULTHOST ] ; then
-	$rm -f /service/fetchmamil/variables/QMAILDEFAULTHOST
-fi
 # qmail-greyd, greydaemon path changed to /usr/sbin
 $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' /service/greylist.1999/run
 }
