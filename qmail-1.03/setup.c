@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.31  2018-01-09 12:33:33+05:30  Cprogrammer
+ * removed unused ci() function
+ *
  * Revision 1.30  2017-05-05 20:11:33+05:30  Cprogrammer
  * added -L option to specify logdir
  *
@@ -94,7 +97,6 @@
 #include "error.h"
 #include "open.h"
 #include "exit.h"
-#include "hasindimail.h"
 #include "stralloc.h"
 #include "sgetopt.h"
 
@@ -507,15 +509,6 @@ c(home, subdir, file, uid, gid, mode)
 	df(uid, gid, mode, file, tmpdir.s, subd, is_prog ? 1 : 0);
 }
 
-#ifdef INDIMAIL
-/* dummy function for setup. It works only in instcheck. */
-void
-ci(char *home, char *subdir, char *file, int uid, int gid, int mode)
-{
-	return;
-}
-#endif
-
 char           *usage = "usage: setup -d destdir [-s sharedir] [instdir]";
 
 int
@@ -585,12 +578,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.30 2017-05-05 20:11:33+05:30 Cprogrammer Exp mbhangui $";
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
+	static char    *x = "$Id: setup.c,v 1.31 2018-01-09 12:33:33+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
-#endif
 }
