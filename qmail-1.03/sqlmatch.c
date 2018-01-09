@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.9  2018-01-09 12:36:24+05:30  Cprogrammer
+ * replaced #ifdef INDIMAIL with #ifdef HAS_MYSQL
+ *
  * Revision 1.8  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -540,7 +543,7 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.8 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.9 2018-01-09 12:36:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
