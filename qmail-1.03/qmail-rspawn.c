@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.30  2018-01-09 11:51:07+05:30  Cprogrammer
+ * use loadLibrary() to load vget_real_domain(), is_distributed_domain(), findhost()
+ *
  * Revision 1.29  2017-04-11 03:46:12+05:30  Cprogrammer
  * move out QMAILLOCAL unset out of vfork()
  *
@@ -94,7 +97,7 @@
 #include "rcpthosts.h"
 #include "fmt.h"
 #include "auto_qmail.h"
-#include "hasindimail.h"
+#include "indimail_stub.h"
 
 void
 initialize(argc, argv)
@@ -216,12 +219,15 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	int             f;
 	char           *ptr, *(args[7]);
 	char            size_buf[FMT_ULONG];
-#ifdef INDIMAIL
+	/*- indimail */
 	int             i;
 	char           *ip, *real_domain;
 	static char     smtproute[MAX_BUFF], CurDir[MAX_BUFF]; 
 	static int      rcptflag = 1;
-#endif
+	void           *handle;
+	int             (*is_distributed_domain) (char *);
+	char *          (*vget_real_domain) (char *);
+	char *          (*findhost) (char *, int);
 
 	size_buf[fmt_ulong(size_buf, msgsize)] = 0;
 	args[0] = "qmail-remote";
@@ -231,7 +237,12 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	args[4] = size_buf;			/*- size */
 	args[5] = r;				/*- recipient */
 	args[6] = 0;
-#ifdef INDIMAIL
+
+	handle = loadLibrary(&i, 0);
+	if (i)
+		return (-1);
+	if (!handle)
+		goto noroutes;
 	*smtproute = 0;
 	if (!env_unset("SMTPROUTE"))
 		return (-1);
@@ -244,10 +255,10 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	 * long as rcptflag is not reinitialized. Static smtproutes will
 	 * be used instead.
 	 */
-	if ((ptr = env_get("ROUTES")) && (!str_diffn(ptr, "smtp", 4) || !str_diffn(ptr, "qmtp", 4)))
-	{
-		if (rcptflag)
-		{
+	if (!(ptr = env_get("ROUTES")))
+		goto noroutes;
+	if ((!str_diffn(ptr, "smtp", 4) || !str_diffn(ptr, "qmtp", 4))) {
+		if (rcptflag) {
 			if (!getcwd(CurDir, MAX_BUFF - 1))
 				return (-1);
 			if (chdir(auto_qmail))
@@ -256,13 +267,16 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 			if (chdir(CurDir))
 				return (-1);
 		}
-		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1)
-		{
-			if ((real_domain = vget_real_domain(r + at + 1))
-				&& (is_distributed_domain(real_domain) == 1))
-			{
-				if ((ip = findhost(r, 0)) != (char *) 0)
-				{
+		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1) {
+			if (!(vget_real_domain = getFunction("vget_real_domain", 0)))
+				return (-1);
+			if (!(is_distributed_domain = getFunction("is_distributed_domain", 0)))
+				return (-1);
+			if (!(findhost = getFunction("findhost", 0)))
+				return (-1);
+			if ((real_domain = (*vget_real_domain) (r + at + 1))
+				&& ((*is_distributed_domain) (real_domain) == 1)) {
+				if ((ip = (*findhost) (r, 0)) != (char *) 0) {
 					i = fmt_str(smtproute, !str_diffn(ptr, "smtp", 4) ? "SMTPROUTE=" : "QMTPROUTE=");
 					i += fmt_strn(smtproute + i, ip, MAX_BUFF - 11);
 					if (i > MAX_BUFF - 1)
@@ -276,7 +290,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 			}
 		}
 	}
-#endif
+noroutes:
 	if (!env_unset("QMAILLOCAL"))
 		_exit(111);
 	if (!(f = vfork()))
@@ -301,7 +315,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.29 2017-04-11 03:46:12+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.30 2018-01-09 11:51:07+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
