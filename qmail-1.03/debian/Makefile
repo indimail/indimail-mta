@@ -12,7 +12,10 @@ logdir=/var/log/svc
 libdkim_version=1.5
 libsrs2_version=1.0.18
 version=$(shell grep Version: ../indimail-mta.spec.in|cut -d: -f2 | cut -c2-)
-all: rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm indimail-mta.postinst \
+all: rules indimail-mta.prerm indimail-mta.preinst \
+indimail-mta.postrm indimail-mta.postinst \
+indimail-mini.prerm indimail-mini.preinst \
+indimail-mini.postrm indimail-mini.postinst \
 obs_deb_prep indimail-mta.install \
 indimail-mta.dsc debian.tar.gz dummy.tar.gz
 
@@ -49,14 +52,20 @@ indimail-mta.install: indimail-mta.install.in Makefile
 
 clean:
 	/bin/rm -f rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
+	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
+	indimail-mini.postinst \
 	indimail-mta.install indimail-mta.postinst obs_deb_prep debian.tar.gz dummy.tar.gz
 
 noinst_SCRIPTS = indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				 indimail-mta.postinst indimail-mta.install daemontools.install \
+				 indimail-mini.prerm indimail-mini.preinst \
+				 indimail-mini.postrm indimail-mini.postinst \
 				 daemontools.preinst daemontools.postinst daemontools.prerm daemontools.postrm \
 				 ucspi-tcp.install rules obs_deb_prep
 MOSTLYCLEANFILES= indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				  indimail-mta.postinst rules obs_deb_prep changelog \
+				  indimail-mini.prerm indimail-mini.preinst \
+				  indimail-mini.postrm indimail-mini.postinst \
 				  debian.tar.gz dummy.tar.gz
 
 dummy.tar.gz: README
@@ -75,13 +84,25 @@ indimail-mta.postinst: indimail-mta.postinst.in Makefile
 	$(edit) $@.in > $@
 indimail-mta.preinst: indimail-mta.preinst.in Makefile
 	$(edit) $@.in > $@
+indimail-mini.prerm: indimail-mini.prerm.in
+	$(edit) $@.in > $@;
+indimail-mini.preinst: indimail-mini.preinst.in
+	$(edit) $@.in > $@;
+indimail-mini.postrm: indimail-mini.postrm.in
+	$(edit) $@.in > $@;
+indimail-mini.postinst: indimail-mini.postinst.in
+	$(edit) $@.in > $@;
 
 debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
 indimail-mta.postrm rules changelog compat obs_deb_prep control perm_list usr.bin.freshclam \
 usr.sbin.clamd daemontools.install daemontools.preinst daemontools.postinst daemontools.prerm \
+indimail-mini.prerm indimail-mini.preinst \
+indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
 daemontools.postrm ucspi-tcp.install indimail-mta.install
 	tar cf - copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
 		indimail-mta.postrm rules changelog compat obs_deb_prep ucspi-tcp.install \
 		daemontools.install daemontools.preinst daemontools.postinst daemontools.prerm \
 		daemontools.postrm control perm_list usr.bin.freshclam usr.sbin.clamd \
+		indimail-mini.prerm indimail-mini.preinst \
+		indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
 		indimail-mta.install | gzip > $@
