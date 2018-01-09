@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.20  2018-01-09 12:11:40+05:30  Cprogrammer
+# removed indimail-mta specific code
+#
 # Revision 2.19  2018-01-08 10:52:23+05:30  Cprogrammer
 # fixed typo
 #
@@ -58,18 +61,13 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.19 2018-01-08 10:52:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.20 2018-01-09 12:11:40+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
-chown=$(which chown)
 chgrp=$(which chgrp)
-ln=$(which ln)
-uname=$(which uname)
 chmod=$(which chmod)
-mkdir=$(which mkdir)
+chown=$(which chown)
 rm=$(which rm)
-mv=$(which mv)
-sed=$(which sed)
 
 check_update_if_diff()
 {
@@ -82,90 +80,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
-  systemctl is-enabled svscan >/dev/null 2>&1
-  if [ $? -ne 0 ] ; then
-	  systemctl disable indimail > /dev/null 2>&1
-	  systemctl enable svscan > /dev/null 2>&1
-  fi
-fi
-/bin/rm -f /lib/systemd/system/indimail.service
-/bin/rm -f /usr/lib/systemd/system/indimail.service
-if [ -d /var/log/indimail -a ! -d /var/log/svc ] ; then
-	$mv /var/log/indimail /var/log/svc
-	if [ $? -eq 0 ] ; then
-		$sed -i 's{/var/log/indimail{/var/log/svc{' /service/*/log/run
-	fi
-fi
-#
-# certs were in /etc/indimail/control
-# they have been moved to /etc/indimail/certs
-#
-if [ ! -d /etc/indimail/certs ] ; then
-	$mkdir -p /etc/indimail/certs
-	if [ $? -ne 0 ] ; then
-		exit 1
-	fi
-	$chown indimail:qmail /etc/indimail/certs
-	if [ $? -ne 0 ] ; then
-		exit 1
-	fi
-	$chmod 2775 /etc/indimail/certs
-	if [ $? -ne 0 ] ; then
-		exit 1
-	fi
-fi
-# move existing certs in control directory to /etc/indimail/certs
-for i in servercert.pem clientcert.pem dh1024.pem dh512.pem \
-	rsa2048.pem dh2048.pem rsa512.pem couriersslcache servercert.cnf \
-	servercert.rand tlshosts notlshosts
-do
-	if [ -f /etc/indimail/control/$i -a ! -L /etc/indimail/control/$i ] ; then
-		$mv /etc/indimail/control/$i /etc/indimail/certs/$i
-		if [ $? -ne 0 ] ; then
-			exit 1
-		fi
-	fi
-	if [ -d /etc/indimail/control/$i -a ! -L /etc/indimail/control/$i ] ; then
-		$mv /etc/indimail/control/$i /etc/indimail/certs/$i
-		if [ $? -ne 0 ] ; then
-			exit 1
-		fi
-		$ln -rsf /etc/indimail/certs/$i /etc/indimail/control/$i
-	fi
-done
-# remove clientcert.pem link to servercert.pem in control directory
-if [ -f /etc/indimail/control/clientcert.pem ] ; then
-	$rm -f /etc/indimail/control/clientcert.pem
-fi
-if [ -f /etc/indimail/certs/clientcert.pem ] ; then
-	$rm -f /etc/indimail/certs/clientcert.pem
-fi
-for i in servercert.pem dh2048.pem rsa2048.pem dh1024.pem rsa1024.pem dh512.pem rsa512.pem
-do
-	# roundcube (php) will require read access to certs
-	if [ -f /etc/indimail/certs/$i ] ; then
-		$chgrp apache /etc/indimail/certs/$i
-	fi
-done
-$ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/control/servercert.pem
-$ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/control/clientcert.pem
-$ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/certs/clientcert.pem
-# Certificate location changed from /etc/indimail/control to /etc/indimail/certs
-for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25
-do
-	check_update_if_diff /service/$i/variables/CERTDIR /etc/indimail/certs
-	# increase for using dlmopen()
-	if [ ! " $i" = " qmail-send.25" ] ; then
-		check_update_if_diff /service/$i/variables/SOFT_MEM 536870912
-	fi
-	if [ "$i" = "qmail-send.25" ] ; then
-		continue
-	fi
-	if [ ! -f /service/$i/variables/DISABLE_PLUGIN ] ; then
-	echo > /service/$i/variables/DISABLE_PLUGIN
-	fi
-done
+# Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
 	check_update_if_diff $i/variables/TLS_CACHEFILE /etc/indimail/certs/couriersslcache
@@ -176,47 +91,18 @@ do
 	check_update_if_diff $i/variables/CERTFILE /etc/indimail/certs/servercert.pem
 done
 
-# service qmail-spamlog has been renamed to qmail-logfifo
-# fifo is now /tmp/logfifo instead of /tmp/spamfifo
-if [ -d /service/qmail-spamlog ] ; then
-	$mv /service/qmail-spamlog /service/qmail-logfifo
-	$mkdir -p /service/qmail-logfifo/variables
-	$chown root:indimail /service/qmail-logfifo/variables
-	$chmod 775 /service/qmail-logfifo/variables
-	echo /tmp/logfifo > /service/qmail-logfifo/variables/LOGFILTER
-	$sed -i 's{smtpd.25{logfifo{' /service/qmail-logfifo/run
-	$sed -i 's{spamlog{logfifo{' /service/qmail-logfifo/log/run
-fi
-
-# for bogofilter to send back X-Bogosity back to qmail-smtpd as well as log entry
-# to /var/log/svc/logfifo/current (fifologger service)
-# for qmail-send it is required if you run bogofilter during remote/local delivery,
-# in which case it will be logged to /var/log/svc/logfifo/current
-for i in qmail-smtpd.25 qmail-smtpd.465 fetchmail qmail-send.25
-do
-	if [ -d /service/$i -a -s /service/$i/variables/LOGFILTER ] ; then
-		check_update_if_diff /service/$i/variables/LOGFILTER /tmp/logfifo
-	fi
-done
-if [ -s /etc/indimail/control/defaultqueue/LOGFILTER ] ; then
-	check_update_if_diff /etc/indimail/control/defaultqueue/LOGFILTER /tmp/logfifo
-fi
 #
 # tcpserver uses -c option to set concurrency and uses MAXDAEMON config file
 # on sighup, since tcpserver is no longer root, it is unable to read MAXDAEMON config
 # file. Better solution is to move MAXDAEMON config file out of /service/*/variables
 # directory
 for i in /service/indisrvr.4000 /service/proxy-* /service/qmail-*imapd* \
-	/service/qmail-*pop3d* /service/qmail-*qm?pd.* /service/qmail-smtpd.* \
-	/service/qmail-poppass.*
+	/service/qmail-*pop3d* /service/qmail-poppass.*
 do
 	$chown root:indimail $i/variables
 	$chmod 755 $i/variables
 done
 
-$uname -n > /service/qmail-send.25/variables/DEFAULT_DOMAIN
-$uname -n > /etc/indimail/control/envnoathost
-$uname -n > /etc/indimail/control/defaulthost
 if [ -f /service/fetchmail/variables/QMAILDEFAULTHOST ] ; then
 	$rm -f /service/fetchmamil/variables/QMAILDEFAULTHOST
 fi
@@ -228,14 +114,13 @@ do
 		check_update_if_diff $i/variables/FIFODIR /var/indimail/inquery
 	fi
 done
+
 # add for roundcube/php to access certs
 /usr/bin/getent group apache > /dev/null && /usr/sbin/usermod -aG qmail apache || true
 if [ -f /etc/indimail/control/spamignore ] ; then
 	$chgrp apache /etc/indimail/control/spamignore
 	$chmod 664 /etc/indimail/control/spamignore
 fi
-# qmail-greyd, greydaemon path changed to /usr/sbin
-$sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' /service/greylist.1999/run
 }
 
 case $1 in
