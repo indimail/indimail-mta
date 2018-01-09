@@ -61,7 +61,6 @@ me
 moreipme
 morercpthosts
 morercpthosts.cdb
-nodnscheck
 nosignaturedomains
 notipme
 outgoingip
