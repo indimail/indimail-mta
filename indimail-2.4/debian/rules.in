@@ -199,7 +199,6 @@ binary-indep: build install
 	dh_install --sourcedir=$(DESTDIR) -pindimail
 	dh_install --sourcedir=$(DESTDIR) -pindimail-devel
 	dh_install --sourcedir=$(DESTDIR) -plibindimail
-	dh_install --sourcedir=$(DESTDIR) -pindimail-mini
 	dh_installchangelogs
 	dh_installdocs
 	dh_link
