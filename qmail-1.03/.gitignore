@@ -4,6 +4,10 @@ debian/indimail-mta.postrm
 debian/indimail-mta.prerm
 debian/indimail-mta.postinst
 debian/indimail-mta.preinst
+debian/indimail-mini.postinst
+debian/indimail-mini.postrm
+debian/indimail-mini.preinst
+debian/indimail-mini.prerm
 auto_libexec.o
 qmail-srs.5
 indimail-mta.fc
@@ -11,6 +15,7 @@ perm_list
 conf-prefix
 conf-shared
 conf-sysconfdir
+conf-qmail
 leapsecs.dat
 udplogger
 udpclient
@@ -121,7 +126,6 @@ condtomaildir.0
 qmailconfig
 config.0
 config-fast
-conf-qmail
 datemail
 ddist
 deferrals
@@ -549,3 +553,7 @@ svscan.8
 inotify
 inotify.o
 hasinotify.h
+hasmysql.h
+mysql_config
+mysql_config.o
+indimail_stub.o

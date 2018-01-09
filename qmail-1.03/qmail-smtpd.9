@@ -1630,6 +1630,16 @@ change this by defining \fBPLUGINDIR\fR environment variable. You can also load 
 plugins by creating smtpd-plugin0.so, smtpd-plugin1.so, and so on. You can also test
 the plugins using the \fBplugtest(1)\fR command.
 
+.SH Virtual Package Functionality
+\fBqmail-smtpd\fR can load an external library to add functionality. The virtual package
+can be loaded by setting the environment variable \fBVIRTUAL_PACKAGE\fR. This is set to
+\fIlibindimail\fR.\fIso\fR by default.
+
+Following functions should be provided by the shared library
+parse_function(), vshow_atrn_map(), vclose(), atrn_access(), isvirtualdomain(),
+vauth_open(), vauth_getpw(), vget_real_domain(), is_distributed_domain(),
+findhost(), get_local_ip(), get_local_hostid(),
+
 .SH GREYLISTING
 .B qmail-smtpd
 has the ability to greylist incoming mails. Subject to the environment variable
