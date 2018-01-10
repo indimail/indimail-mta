@@ -1,5 +1,4 @@
 debian/indimail-mta.install
-debian/perm_list
 debian/indimail-mta.postrm
 debian/indimail-mta.prerm
 debian/indimail-mta.postinst
@@ -11,7 +10,8 @@ debian/indimail-mini.prerm
 auto_libexec.o
 qmail-srs.5
 indimail-mta.fc
-perm_list
+debian/perm_list.q
+perm_list.q
 conf-prefix
 conf-shared
 conf-sysconfdir
@@ -541,7 +541,7 @@ yearcal
 yearcal.o
 *.o
 debian/_service
-cronlist
+cronlist.q
 indimail-mta.spec
 *.a
 *.lib
@@ -557,3 +557,8 @@ hasmysql.h
 mysql_config
 mysql_config.o
 indimail_stub.o
+cronlist.q
+debian/perm_list.q
+perm_list.q
+svctool
+svctool.8

@@ -8,7 +8,7 @@ icampaign-1.0
 dist
 COMMIT_ID
 VERSION
-QMAIL_VERSION
+MTA_VERSION
 patches
 cscope.*
 .gitignore
