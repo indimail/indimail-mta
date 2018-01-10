@@ -2673,7 +2673,8 @@ compile mail_acl.c str.h matchregex.h fmt.h stralloc.h
 
 indimail_stub.o: \
 compile indimail_stub.c auto_qmail.h auto_sysconfdir.h auto_uids.h auto_control.h \
-timeoutread.h timeoutwrite.h stralloc.h env.h fmt.h scan.h strerr.h str.h variables.h
+timeoutread.h timeoutwrite.h stralloc.h env.h fmt.h scan.h strerr.h str.h \
+error.h variables.h
 	./compile indimail_stub.c
 
 qregex.o: \
@@ -3053,7 +3054,6 @@ substdio.h alloc.h auto_qmail.h exit.h env.h str.h
 install-strip: install
 
 distclean: clean
-	rm -f lib_deps inc_deps
 
 install: \
 it man leapsecs.dat conf-sysconfdir perm_list.q conf-logdir
