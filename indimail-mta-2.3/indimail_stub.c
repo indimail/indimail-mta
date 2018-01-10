@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.2  2018-01-10 11:59:09+05:30  Cprogrammer
+ * return success if library path does not exist
+ *
  * Revision 1.1  2018-01-09 10:41:16+05:30  Cprogrammer
  * Initial revision
  *
@@ -26,7 +29,9 @@
 #include "fmt.h"
 #include "scan.h"
 #include "str.h"
+#include "error.h"
 #include "variables.h"
+#include "indimail_stub.h"
 
 /*- Fifo Server Definitions */
 #define USER_QUERY   1
@@ -89,12 +94,33 @@ loadLibrary(int *errflag, char **errstr)
 			*errstr = (char *) 0;
 		return (handle);
 	}
-	if (!(ptr = env_get("VIRTUAL_PACKAGE")))
-		ptr = "libindimail.so.2";
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
+		ptr = VIRTUAL_PKG_LIB;
 	if (errflag)
 		*errflag = -1;
 	if (errstr)
 		*errstr = (char *) 0;
+	if (access(ptr, R_OK)) {
+		if (errno == 2 && errflag) {
+			*errflag = 0;
+			if (errstr)
+				*errstr = (char *) 0;
+			return ((void *) 0);
+		}
+		if (errflag)
+			*errflag = errno;
+		if (!stralloc_copys(&errbuf, error_str(errno))) {
+			if (errstr)
+				*errstr = (char *) 0;
+		} else
+		if (!stralloc_0(&errbuf)) {
+			if (errstr)
+				*errstr = (char *) 0;
+		} else
+		if (errstr)
+			*errstr = errbuf.s;
+		return ((void *) 0);
+	}
 #ifdef RTLD_DEEPBIND
 	if (!(handle = dlopen(ptr, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
 #else
@@ -715,7 +741,7 @@ inquery(char query_type, char *email, char *ip)
 void
 getversion_inquery_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.1 2018-01-09 10:41:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.2 2018-01-10 11:59:09+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
