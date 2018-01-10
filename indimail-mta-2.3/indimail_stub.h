@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: indimail_stub.h,v $
+ * Revision 1.1  2018-01-10 11:30:04+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 /* gid flags */
 #include <pwd.h>
@@ -30,6 +33,8 @@
 #define CNTRL_HOST              "localhost"
 #define MASTER_HOST             "localhost"
 #define MYSQL_HOST              "localhost"
+
+#define VIRTUAL_PKG_LIB         "libindimail.so"
 
 extern int      userNotFound;
 extern int      is_inactive;
