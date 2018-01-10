@@ -40,22 +40,28 @@ then runs
 .B qmail-local
 under the user's uid and gid.
 It does not set up any supplementary groups. If the environment variable AUTHSELF is set,
-.B
-qmail-lspawn
-connects to MySQL(1) and sets the environment variable PWSTRUCT having the passwd structure for the user. The
-environment variable is set to "No such user" in case the user is not found in the local MySQL database. This
-environment variable can be used by delivery agents without having to read the passwd file or a database. For a
-user-cluster domain, if a mail is injected for a user not found in the local MySQL database,
-.B qmail-lspawn
-will set PWSTRUCT to "No such user". However, a delivery agent like
-.B vdelivermail
-reroutes the email to the correct destination host which has the user account, using
-.B qmail-remote
-
 .B qmail-lspawn
 treats an empty mailbox name as a trash address. If connecton to MySQL fails,
+
+.SH Virtual Package Functionality
+\fBqmail-lspawn\fR can load an external library to add functionality. The virtual package
+can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR. This is set to
+\fIlibindimail\fR.\fIso\fR by default.
+
+Following functions should be provided by the shared library for adding features to
+qmail-lspawn - isvirtualdomain(), vauth_open(), vauth_getpw(), vclose(). If such a
+library is opened \fBqmail-lspawn\fR connects to MySQL(1) and sets the environment variable
+\fBPWSTRUCT\fR having the passwd structure for the user. The environment variable is set to
+"No such user" in case the user is not found in the local MySQL database. This
+environment variable can be used by delivery agents without having to read the passwd
+file or a database. For a user-cluster domain, if a mail is injected for a user not
+found in the local MySQL database, \fBqmail-lspawn\fR will set PWSTRUCT to
+"No such user". However, a delivery agent like \fBvdelivermail(8)\fR reroutes the
+email to the correct destination host which has the user account, using \fBqmail-remote\fR.
+
 .B
-qmail-lspawn goes ahead as if AUTHSELF was not set.
+qmail-lspawn goes ahead without attempting to load external library if AUTHSELF was not set.
+
 .SH "SEE ALSO"
 envelopes(5),
 qmail-users(5),
