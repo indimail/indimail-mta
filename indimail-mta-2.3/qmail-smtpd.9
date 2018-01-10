@@ -1632,13 +1632,12 @@ the plugins using the \fBplugtest(1)\fR command.
 
 .SH Virtual Package Functionality
 \fBqmail-smtpd\fR can load an external library to add functionality. The virtual package
-can be loaded by setting the environment variable \fBVIRTUAL_PACKAGE\fR. This is set to
+can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR. This is set to
 \fIlibindimail\fR.\fIso\fR by default.
 
 Following functions should be provided by the shared library
-parse_function(), vshow_atrn_map(), vclose(), atrn_access(), isvirtualdomain(),
-vauth_open(), vauth_getpw(), vget_real_domain(), is_distributed_domain(),
-findhost(), get_local_ip(), get_local_hostid(),
+parse_function(), vshow_atrn_map(), atrn_access(),
+vauth_open(), vclose(), vauth_getpw(), vget_real_domain()
 
 .SH GREYLISTING
 .B qmail-smtpd
@@ -1806,7 +1805,7 @@ See rfc-1893(5) for an explanation of the error codes in parentheses.
 
 .SH "SEE ALSO"
 mysqld(1), tcp-env(1), tcp-environ(5), tcpserver(1), tcprules(1), uacl(1),
-qmail-control(5), MCDFILE(5), indimail.patch(5), qmail-inject(8), qmail-newmrh(8),
+qmail-control(5), MCDFILE(5), qmail-inject(8), qmail-newmrh(8),
 qmail-queue(8), qmail-multi(8), qscanq(8), qmail-remote(8), qmail-send(8), qmail-cdb(8),
 recipient-cdb(8), pam-multi(8), pam-checkpwd(8), inlookup(8), vchkpass(8), systpass(8),
 plugin_init(3), dlopen(3), plugtest(1), bogofilter(1), greydaemon(8), qmail-greyd(8),

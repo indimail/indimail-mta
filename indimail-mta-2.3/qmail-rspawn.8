@@ -19,7 +19,16 @@ sets the environment variable MESSID pointing message file in the queue.
 invokes
 .B qmail-remote
 asynchronously,
-so the results may not be in the same order as the commands. For a clustered domain, it queries
+so the results may not be in the same order as the commands.
+
+.SH Virtual Package Functionality
+\fBqmail-rspawn\fR can load an external library to add functionality. The virtual package
+can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR. This is set to
+\fIlibindimail\fR.\fIso\fR by default.
+
+Following functions should be provided by the shared library for adding features to
+qmail-lspawn - vget_real_domain(), is_distributed_domain(), findhost() If such a
+library is opened \fBqmail-rspawn\fR connects to MySQL(1) and for a clustered domain, it queries
 .B hostcntrl
 in
 .B MySQL(1)
@@ -36,6 +45,7 @@ If QMTPROUTE is set
 qmail-remote
 uses QMTPROUTE variables instead of control file qmtproutes and uses QMTP. \fBqmail-remote\fR prefers
 QMTP over SMTP.
+
 .SH "SEE ALSO"
 qmail-send(8),
 qmail-remote(8)
