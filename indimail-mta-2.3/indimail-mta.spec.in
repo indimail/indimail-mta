@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.124 2018-01-09 14:49:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.125 2018-01-10 11:28:29+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -24,7 +24,7 @@
 %global qsysconfdir        @sysconfdir@
 %global plugindir          %{_prefix}/lib/indimail/plugins
 %global ucspi_version      0.88
-%global qmail_version      1.03
+%global mta_version        2.3
 %global libdkim_version    1.5
 %global libsrs2_version    1.0.18
 %global tcpserver_plugin   1
@@ -102,7 +102,7 @@ Group: System Environment/Base
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-Source1: http://cr.yp.to/software/qmail-%{qmail_version}.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/indimail-mta-%{mta_version}.tar.gz
 Source2: http://cr.yp.to/ucspi-tcp/ucspi-tcp-%{ucspi_version}.tar.gz
 %if %nolibdkim == 0
 Source3: http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}.tar.gz
@@ -120,7 +120,6 @@ Source9:%{name}-permissions.paranoid
 %endif
 %endif
 
-Patch1: http://downloads.sourceforge.net/indimail/Patches/qmail-%{qmail_version}.patch.gz
 Patch2: http://downloads.sourceforge.net/indimail/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
 
 %if 0 != 0
@@ -323,7 +322,7 @@ echo target_vendor %_target_vendor
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
 echo "------------------------------------------------------"
 
-for i in qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} \
+for i in indimail-mta-%{mta_version} ucspi-tcp-%{ucspi_version} \
 libdkim-%{libdkim_version} libsrs2-%{libsrs2_version}
 do
 (
@@ -347,7 +346,6 @@ do
 )
 done
 
-%patch1  -p0
 %patch2  -p0
 
 %build
@@ -388,15 +386,15 @@ if [ -d libsrs2-%{libsrs2_version} ] ; then
 fi
 
 #### qmail ######################
-if [ -d qmail-%{qmail_version} ] ; then
-  %{__sed} 's{QMAIL{%{qmaildir}{' qmail-%{qmail_version}/conf-qmail.in > qmail-%{qmail_version}/conf-qmail
-  %{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' qmail-%{qmail_version}/conf-sysconfdir.in > qmail-%{qmail_version}/conf-sysconfdir
-  %{__sed} 's{SHAREDDIR{%{shareddir}{' qmail-%{qmail_version}/conf-shared.in > qmail-%{qmail_version}/conf-shared
-  %{__sed} 's{PREFIX{%{_prefix}{' qmail-%{qmail_version}/conf-prefix.in > qmail-%{qmail_version}/conf-prefix
+if [ -d indimail-mta-%{mta_version} ] ; then
+  %{__sed} 's{QMAIL{%{qmaildir}{' indimail-mta-%{mta_version}/conf-qmail.in > indimail-mta-%{mta_version}/conf-qmail
+  %{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' indimail-mta-%{mta_version}/conf-sysconfdir.in > indimail-mta-%{mta_version}/conf-sysconfdir
+  %{__sed} 's{SHAREDDIR{%{shareddir}{' indimail-mta-%{mta_version}/conf-shared.in > indimail-mta-%{mta_version}/conf-shared
+  %{__sed} 's{PREFIX{%{_prefix}{' indimail-mta-%{mta_version}/conf-prefix.in > indimail-mta-%{mta_version}/conf-prefix
   %if %{tcpserver_plugin} == 1
-    echo "-DLOAD_SHARED_OBJECTS" > qmail-%{qmail_version}/conf-dlopen
+    echo "-DLOAD_SHARED_OBJECTS" > indimail-mta-%{mta_version}/conf-dlopen
   %else
-    %{__rm} -f qmail-%{qmail_version}/conf-dlopen
+    %{__rm} -f indimail-mta-%{mta_version}/conf-dlopen
   %endif
   # create conf-users
   (
@@ -419,9 +417,9 @@ if [ -d qmail-%{qmail_version} ] ; then
   echo "passwd user, the queue user, the remote user, the send user, the"
   echo "indimail user and the virus scan user."
   ) > /tmp/conf-users
-  diff /tmp/conf-users qmail-%{qmail_version}/conf-users > /dev/null 2>&1
+  diff /tmp/conf-users indimail-mta-%{mta_version}/conf-users > /dev/null 2>&1
   if [ $? -ne 0 ] ; then
-    %{__mv} /tmp/conf-users qmail-%{qmail_version}/conf-users
+    %{__mv} /tmp/conf-users indimail-mta-%{mta_version}/conf-users
   else
     %{__rm} -f /tmp/conf-users
   fi
@@ -436,18 +434,18 @@ if [ -d qmail-%{qmail_version} ] ; then
    echo "any files, but it must be usable for processes; this requirement"
    echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
    ) > /tmp/conf-groups
-   diff /tmp/conf-groups qmail-%{qmail_version}/conf-groups > /dev/null 2>&1
+   diff /tmp/conf-groups indimail-mta-%{mta_version}/conf-groups > /dev/null 2>&1
    if [ $? -ne 0 ] ; then
-     %{__mv} /tmp/conf-groups qmail-%{qmail_version}/conf-groups
+     %{__mv} /tmp/conf-groups indimail-mta-%{mta_version}/conf-groups
    else
      %{__rm} -f /tmp/conf-groups
    fi
-   %{__cp} qmail-1.03/doc/ChangeLog .
-   if [ -f qmail-1.03/qupgrade.sh ] ; then
-   %{__cp} qmail-1.03/qupgrade.sh .
+   %{__cp} indimail-mta-%{mta_version}/doc/ChangeLog .
+   if [ -f indimail-mta-%{mta_version}/qupgrade.sh ] ; then
+   %{__cp} indimail-mta-%{mta_version}/qupgrade.sh .
    fi
-   if [ -f qmail-1.03/qlocal_upgrade.sh ] ; then
-   %{__cp} qmail-1.03/qlocal_upgrade.sh .
+   if [ -f indimail-mta-%{mta_version}/qlocal_upgrade.sh ] ; then
+   %{__cp} indimail-mta-%{mta_version}/qlocal_upgrade.sh .
    fi
 fi
 #### ucspi-tcp ######################
@@ -465,7 +463,7 @@ fi
 ID=$(id -u)
 %{__mkdir_p} %{buildroot}%{_prefix}
 for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} \
-qmail-%{qmail_version} ucspi-tcp-%{ucspi_version}
+indimail-mta-%{mta_version} ucspi-tcp-%{ucspi_version}
 do
   if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
     continue
@@ -498,11 +496,11 @@ fi
 if [ -f qlocal_upgrade.sh ] ; then
 install -m 0755 qlocal_upgrade.sh %{buildroot}%{libexecdir}/qlocal_upgrade.sh
 fi
-if [ -f qmail-1.03/indimail-mta.fc ] ; then
-install -m 0755 qmail-1.03/indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
+if [ -f indimail-mta-%{mta_version}/indimail-mta.fc ] ; then
+install -m 0755 indimail-mta-%{mta_version}/indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
 fi
-if [ -f qmail-1.03/indimail-mta.te ] ; then
-install -m 0755 qmail-1.03/indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
+if [ -f indimail-mta-%{mta_version}/indimail-mta.te ] ; then
+install -m 0755 indimail-mta-%{mta_version}/indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
 fi
 
 if [ %nolibdkim -eq 0 ] ; then
@@ -573,7 +571,7 @@ do
   fi
 done
 (
-for i in `cat qmail-%{qmail_version}/controlfiles.q`
+for i in `cat indimail-mta-%{mta_version}/controlfiles.q`
 do
   echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/control/$i"
   echo $i 1>&3
