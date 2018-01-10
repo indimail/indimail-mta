@@ -183,11 +183,11 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
     structure below. You may skip extraction of nssd-1.1, fetchmail-6.3.19,
     depending on whether you require them. Most probably you have downloaded
     indimail-@version@.tar.gz only. You require to additionally download the
-    following sources mentioned below. Except for qmail, ucspi-tcp, bogofilter,
+    following sources mentioned below. Except for ucspi-tcp, bogofilter,
     fetchmail, all the sources are available at indimail.sourceforge.net.
     The link from which you can download the sources are mentioned in SECTION 3
-    below. Also remember that IndiMail requires patch to be applied to qmail,
-    ucspi-tcp, courier-imap, bogofilter and fetchmail to make all
+    below. Also remember that IndiMail requires patch to be applied to ucspi-tcp,
+    courier-imap, bogofilter and fetchmail to make all
     components work seamlessly with each other.
 
     NOTE: nssd does not compile on Mac OS X
@@ -196,7 +196,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                .
                                . libdkim-1.5         (4.0  Mb)
                                . indimail-@version@  (50   Mb)
-                               . qmail-1.03          (21   Mb)
+                               . indimail-mta-2.3    (18   Mb)
                                . ucspi-tcp-0.88      (4.0  Mb)
                                . nssd-1.1            (2.0  Mb)
                                . pam-multi-1.1       (3.0  Mb)
@@ -327,6 +327,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/indimail-mta-2.3.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.5.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libsrs2-1.0.18.tar.gz
     % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.0.tar.bz2
@@ -400,29 +401,13 @@ the installation.
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
 
-    ##### STEP 4  ##### MOST IMPORTANT STEP ###################
-    Install IndiMail. This step involves extracting both indimail-@version@.tar.gz and
-    qmail-1.03.tar.gz. It is important that the extracted qmail source directory (qmail-1.03)
-    is present for ./configure to detect qmail. You can also extract optional
-    packages (flash, altermime, ripmime, mpack, fortune, nssd, pam-multi, logalert, fetchmail).
-    The configure script will detect these packages if present in /home/local/src
-
-    This step also involves applying a patch to qmail-1.03. This patch adds many features
-    missing in stock qmail/netqmail installations.
-
+    ##### STEP 4  ##### indimail-mta ##########################
+    Install indimail-mta MD5 39b619147db54687c4a583a7a94c9163
     current working directory /home/local/src
-    Download the indimail package from http://www.indimail.org
+    Download the indimail-mta package. The latest published ucspi-tcp package is indimail-mta-2.3.tar.gz.
 
-    % gunzip -c indimail-@version@.tar.gz | tar xf -
-
-    Download qmail-1.03 MD5 622f65f982e380dbe86e6574f3abcb7c. The latest tested qmail
-    package is qmail-1.03.tar.gz
-
-    % wget http://cr.yp.to/software/qmail-1.03.tar.gz
-    % gunzip -c qmail-1.03.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/qmail-1.03.patch.gz | patch -p0
-    NOTE: if patches subdir is missing, download the patch from
-          https://sourceforge.net/projects/indimail/files/Patches-2.0
+    % gunzip -c indimail-mta-2.3.tar.gz | tar xf -
+    % cd indimail-mta-2.3
 
     change first line in qmail-1.03/conf-qmail to @indimaildir@
     change first line in qmail-1.03/conf-shared to @shareddir@
@@ -430,6 +415,27 @@ the installation.
     change first line in qmail-1.03/conf-libexec to @libexecdir@
     change first line in qmail-1.03/conf-sysconfdir to @sysconfdir@
 
+    % make -s
+
+    Run the following command to create all default users
+
+    % sudo sh ./svctool --config=users --nolog
+    Once you have created all users required by IndiMail you can
+    continue the make below
+
+    % sudo make -s install [DESTDIR=staging_directory]
+    % cd ..
+
+    ##### STEP 5  ##### indimail ##############################
+    Install IndiMail.
+    You can also extract optional packages (flash, altermime, ripmime, mpack,
+    fortune, nssd, pam-multi, logalert, fetchmail). The configure script will
+    detect these packages if present in /home/local/src
+
+    current working directory /home/local/src
+    Download the indimail package from http://www.indimail.org
+
+    % gunzip -c indimail-@version@.tar.gz | tar xf -
     % cd indimail-@version@
     % ./configure \
         --prefix=@prefix@ \
@@ -487,12 +493,6 @@ the installation.
 
     % make -s [DESTDIR=staging_directory]
 
-    Run the following command to create all default users
-
-    % sudo sh ./svctool --config=users --nolog
-    Once you have created all users required by IndiMail you can
-    continue the make below
-
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
 
@@ -509,14 +509,7 @@ the installation.
 
     BUT DO NOT START THE SERVICES NOW (unless you are upgrading IndiMail)
 
-    NOTE: UPGRADE Information. You can always upgrade to the latest version of qmail by
-    applying the latest patch qmail-1.03.patch.gz available in the indimail source patch
-    subdirectory to the orignal qmail package.
-    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
-    You can always upgrade to the latest version of IndiMail by doing extracting IndiMail and
-    ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
-
-    ##### STEP 5  ##### UCSPI TCP #############################
+    ##### STEP 6  ##### UCSPI TCP #############################
     Install ucspi-tcp MD5 39b619147db54687c4a583a7a94c9163
     current working directory /home/local/src
     Download the ucspi-tcp package. The latest published ucspi-tcp package is ucspi-tcp-0.88.tar.gz.
@@ -542,7 +535,7 @@ the installation.
     to the orignal ucspi-tcp package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 6  ##### Courier IMAP/POP3 #####################
+    ##### STEP 7  ##### Courier IMAP/POP3 #####################
     Install courier-imap (courier-imap-4.18.0.tar.bz2) MD5 ef11dc0ebe9ee27d24f4e892da1296d8
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
@@ -589,7 +582,7 @@ the installation.
     using PAM or getpwnam(3), getspnam(3). This happens transparently by using pam-multi(8) in
     conjunction with nssd(8)
 
-    ##### STEP 7  ##### SPAM Filter ###########################
+    ##### STEP 8  ##### SPAM Filter ###########################
     Install Bogofilter (http://www.bogofilter.org) MD5 d0a5eebb3274b23ceabe766a6443a1c5 
     current working directory /home/local/src
     Download the bogofilter package. The latest tested bogofilter package is
@@ -649,7 +642,7 @@ the installation.
     to the orignal latest available bogofilter package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 8  ## Optional STEP ##### Fetchmail ############
+    ##### STEP 9  ## Optional STEP ##### Fetchmail ############
     Install fetchmail MD5 47733e70bf336d8c1b66c3834725107f  
     current working directory /home/local/src
     Download the fetchmail package. The latest tested fetchmail package tested is
@@ -681,7 +674,7 @@ the installation.
     to the orignal latest available fetchmail package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 9 ## Optional STEP ## nssd ####################
+    ##### STEP 10 ## Optional STEP ## nssd ####################
     Install nssd MD5 d101ab93b04ead2ceebf4bc69982e254
     current working directory /home/local/src
     Download the nssd package from http://www.indimail.org
@@ -702,7 +695,7 @@ the installation.
     by downloading the latest nssd package
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 10 ## Optional STEP ## iwebadmin ###############
+    ##### STEP 11 ## Optional STEP ## iwebadmin ###############
     Install iwebadmin MD5 3e72f205fe17b7b5d148df22b1f9b04f
     % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.3.tar.gz
     % gunzip -c iwebadmin-1.3.tar.gz | tar xf -
@@ -1057,8 +1050,9 @@ the installation.
 
    % sudo /usr/sbin/svctool --config=add-boot
 
-   The above command will install svscanboot (in inittab, /etc/init or /etc/event.d). It
-   will also set IndiMail as an alternative MTA and replace /usr/sbin/sendmail or
+   The above command will install svscan.service/svscanboot (in inittab,
+   /usr/lib/systemd/system, /etc/init or /etc/event.d). It will also set
+   IndiMail as an alternative MTA and replace /usr/sbin/sendmail or
    /usr/lib/sendmail as link to @prefix@/bin/sendmail
 
    To make sure that sendmail is disabled on your system
