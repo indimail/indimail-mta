@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.206 $";
+char           *revision = "$Revision: 1.207 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -606,9 +606,9 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc * line)
 	int             logfifo, match;
 	char           *fifo_name;
 	struct stat     statbuf;
-	static char     spambuf[256], inbuf[1024];
-	static substdio spamin;
-	static substdio spamout;
+	static char     fifobuf[256], inbuf[1024];
+	static substdio logfifo_in;
+	static substdio logfifo_out;
 
 	if (!env_get("SPAMFILTER"))
 		return;
@@ -636,42 +636,42 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc * line)
 	 * write the SMTP transaction line to LOGFILTER fifo. All lines written
 	 * to this fifo will be read by the qmail-cat spamlogger service
 	 */
-	substdio_fdbuf(&spamout, write, logfifo, spambuf, sizeof (spambuf));
-	if (substdio_puts(&spamout, "qmail-smtpd: ") == -1) {
+	substdio_fdbuf(&logfifo_out, write, logfifo, fifobuf, sizeof (fifobuf));
+	if (substdio_puts(&logfifo_out, "qmail-smtpd: ") == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, "pid ") == -1) {
+	if (substdio_puts(&logfifo_out, "pid ") == -1) {
 		close(logfifo);
 		return;
 	}
 	strnum[fmt_ulong(strnum, getpid())] = 0;
-	if (substdio_puts(&spamout, strnum) == -1) {
+	if (substdio_puts(&logfifo_out, strnum) == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, " MAIL from <") == -1) {
+	if (substdio_puts(&logfifo_out, " MAIL from <") == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, arg1) == -1) {
+	if (substdio_puts(&logfifo_out, arg1) == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, "> RCPT <") == -1) {
+	if (substdio_puts(&logfifo_out, "> RCPT <") == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, arg2) == -1) {
+	if (substdio_puts(&logfifo_out, arg2) == -1) {
 		close(logfifo);
 		return;
 	}
-	if (substdio_puts(&spamout, "> Size: ") == -1) {
+	if (substdio_puts(&logfifo_out, "> Size: ") == -1) {
 		close(logfifo);
 		return;
 	}
 	strnum[fmt_ulong(strnum, msg_size)] = 0;
-	if (substdio_puts(&spamout, strnum) == -1) {
+	if (substdio_puts(&logfifo_out, strnum) == -1) {
 		close(logfifo);
 		return;
 	}
@@ -680,13 +680,13 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc * line)
 	 * been opened before qmail_open() by create_logfilter() function
 	 */
 	if (!fstat(logfd, &statbuf) && statbuf.st_size > 0 && !lseek(logfd, 0, SEEK_SET)) {
-		if (substdio_puts(&spamout, " ") == -1) {
+		if (substdio_puts(&logfifo_out, " ") == -1) {
 			close(logfifo);
 			close(logfd);
 			return;
 		}
-		substdio_fdbuf(&spamin, read, logfd, inbuf, sizeof (inbuf));
-		if (getln(&spamin, line, &match, '\n') == -1) {
+		substdio_fdbuf(&logfifo_in, read, logfd, inbuf, sizeof (inbuf));
+		if (getln(&logfifo_in, line, &match, '\n') == -1) {
 			logerr("qmail-smtpd: read error: ");
 			logerr(error_str(errno));
 			logerrf("\n");
@@ -697,19 +697,19 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc * line)
 		if (!stralloc_0(line))
 			die_nomem();
 		if (line->len) {
-			if (substdio_puts(&spamout, line->s) == -1) {
+			if (substdio_puts(&logfifo_out, line->s) == -1) {
 				logerr("qmail-smtpd: write error: ");
 				logerr(error_str(errno));
 				logerrf("\n");
 			}
 		}
 	}
-	if (substdio_puts(&spamout, "\n") == -1) {
+	if (substdio_puts(&logfifo_out, "\n") == -1) {
 		logerr("qmail-smtpd: write error: ");
 		logerr(error_str(errno));
 		logerrf("\n");
 	}
-	if (substdio_flush(&spamout) == -1) {
+	if (substdio_flush(&logfifo_out) == -1) {
 		close(logfifo);
 		return;
 	}
@@ -1783,10 +1783,10 @@ check_recipient_cdb(char *rcpt)
 	case -3:
 	case 111:
 		out("451 unable to check recipients (#4.3.2)\r\n");
+		flush();
 		logerr("qmail-smtpd: ");
 		logerrpid();
 		logerrf("recipients database error\n");
-		flush();
 		_exit(1);
 		/*- Not Reached */
 	}
@@ -1815,10 +1815,10 @@ check_recipient_sql(char *rcpt)
 	if (userNotFound)
 		return (1);
 	out("451 Requested action aborted: database error (#4.3.2)\r\n");
+	flush();
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerrf("sql database error\n");
-	flush();
 	_exit(1);
 	/*- Not Reached */
 	return (0);
@@ -1905,12 +1905,12 @@ sigterm()
 {
 	smtp_greet("421 ");
 	out(" Service not available, closing tranmission channel (#4.3.2)\r\n");
+	flush();
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(remoteip);
 	logerr(" going down on SIGTERM");
 	logerrf("\n");
-	flush();
 	_exit(1);
 }
 
@@ -6011,6 +6011,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.207  2018-01-15 09:22:04+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.206  2018-01-09 12:34:23+05:30  Cprogrammer
  * use loadLibrary() function to load indimail functions
  *
@@ -6067,7 +6070,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.206 2018-01-09 12:34:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.207 2018-01-15 09:22:04+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
