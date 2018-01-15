@@ -1356,9 +1356,10 @@ auto_scancmd.o: compile auto_scancmd.c
 	./compile auto_scancmd.c
 
 qscanq.8: \
-qscanq.9
+qscanq.9 conf-logdir conf-sysconfdir
 	cat qscanq.9 \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
+	| sed s}@LOGDIR\@}"`head -1 conf-logdir`"}g \
 	> qscanq.8
 
 qscanq.0: \
