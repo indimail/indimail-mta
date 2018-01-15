@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.125 2018-01-10 11:28:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.126 2018-01-15 09:21:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -110,7 +110,7 @@ Source3: http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}.ta
 %if %nolibsrs2 == 0
 Source4: http://downloads.sourceforge.net/indimail/libsrs2-%{libsrs2_version}.tar.gz
 %endif
-Source5: http://downloads.sourceforge.net/indimail/qmail-rpmlintrc
+Source5: http://downloads.sourceforge.net/indimail/indimail-mta-rpmlintrc
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -2231,7 +2231,7 @@ do
 done
 fi
 for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
-qmail-spamlog qscanq qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 \
+qmail-logfifo qscanq qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 \
 qmail-qmqpd.628 greylist.1999 resolvconf udplogger.3000 .svscan
 do
   if [ -d %{servicedir}/$i ] ; then
