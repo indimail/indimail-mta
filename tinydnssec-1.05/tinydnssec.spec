@@ -78,9 +78,10 @@ Requires(postun): shadow-utils
 Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel /usr/sbin/userdel
 %endif
 Requires: daemontools
-Provides: user(tinydns)  > 999
-Provides: user(dnscache) > 999
-Provides: user(dnslog)   > 999
+Requires: group(nofiles)
+Provides: user(Gtinydns)  > 999
+Provides: user(Gdnscache) > 999
+Provides: user(Gdnslog)   > 999
 
 %description
 A collection of Domain Name System tools
@@ -280,11 +281,8 @@ fi
 for i in Gdnscache Gdnslog Gtinydns
 do
   %{__rm} -f /var/spool/mail/$i
+  /usr/bin/getent passwd $i > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin $i || true
 done
-/usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
-/usr/bin/getent passwd Gdnscache > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin Gdnscache || true
-/usr/bin/getent passwd Gdnslog   > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin Gdnslog   || true
-/usr/bin/getent passwd Gtinydns  > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin Gtinydns  || true
 
 %preun
 argv1=$1
@@ -387,7 +385,7 @@ do
     %{__rm} -rf %{_sysconfdir}/$i
   fi
 done
-for i in Gtinydns Gdnslog Gdnscache
+for i in Gtinydns Gdnscache Gdnslog
 do
   echo "Removing user $i"
   /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
