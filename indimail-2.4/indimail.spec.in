@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.438 2018-01-09 12:13:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.439 2018-01-15 20:34:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -93,18 +93,15 @@ Release: 1.1%{?dist}
 %global groupname          indimail
 # Note: 999 indimail-mta does not require any specific values for uids/gids. 999 is just
 # for rpmlint to shut up and stop complaining
-Provides: user(%username)   = %uid
-Provides: user(alias)       > 999
-Provides: user(qmaild)      > 999
-Provides: user(qmaill)      > 999
-Provides: user(qmailp)      > 999
-Provides: user(qmailq)      > 999
-Provides: user(qmailr)      > 999
-Provides: user(qmails)      > 999
-Provides: group(%groupname) = %gid
-Provides: group(nofiles)    > 999
-Provides: group(qmail)      > 999
-Provides: group(qscand)     > 999
+Requires: user(alias)
+Requires: user(qmaill)
+Requires: user(indimail)
+Requires: user(qscand)
+Requires: group(qmail)
+Requires: group(nofiles)
+Requires: group(qscand)
+Requires: group(indimail)
+
 %if %build_on_obs == 0
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
