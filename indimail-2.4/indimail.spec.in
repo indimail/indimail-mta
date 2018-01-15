@@ -497,6 +497,7 @@ if [ -d ../courier-imap-%{courier_version} ] ; then
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --bindir=%{_prefix}/bin \
   --mandir=%{mandir} --sysconfdir=%{sysconfdir} --libdir=%{_libdir} \
   --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/control \
+  --with-mailer=%{_prefix}/bin/sendmail \
   `%{__cat} ../%{name}-%{version}/config/courier-imap.opts`
 fi
 %endif

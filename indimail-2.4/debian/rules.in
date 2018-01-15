@@ -113,6 +113,7 @@ build-stamp:
 		cd courier-imap-$(courier_version) ; \
 		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
 		--libexecdir=$(libexecdir) --datarootdir=$(shareddir) --mandir=$(mandir) \
+		--with-mailer=${prefix}/bin/sendmail \
 		`cat ../indimail-$(version)/config/courier-imap.opts`; \
 		cd ..; \
 	fi
