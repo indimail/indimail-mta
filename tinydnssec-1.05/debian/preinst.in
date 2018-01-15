@@ -34,11 +34,8 @@ case "$1" in
 	for i in Gdnscache Gtinydns Gdnslog
 	do
 		${rm} -f /var/spool/mail/$i
+    	/usr/bin/getent passwd $i > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin $i || true
 	done
-    /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
-    /usr/bin/getent passwd Gdnscache > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin Gdnscache || true
-    /usr/bin/getent passwd Gdnslog   > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin Gdnslog   || true
-    /usr/bin/getent passwd Gtinydns  > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin Gtinydns  || true
 	
 	;;
 
