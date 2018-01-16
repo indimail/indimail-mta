@@ -33,3 +33,5 @@ Release 2.3 Start 25/12/2017
 23. qmail-showctl - use loadLibrary() to load indimail code
 24. qmail-sql - link with MySQL lib without requirein indimail
 25. qregex.c - compile sql code with USE_MYSQL definition
+26. svctool, indimail-mta.spec, debian/indimail-mta.preinst - changed homedir of
+    qmaill to /var/log/svc
