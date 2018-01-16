@@ -10,11 +10,11 @@
 #include "buffer.h"
 #include "uint32.h"
 #include "taia.h"
-#include "str.h"
 #include "open.h"
 #include "error.h"
 #include "exit.h"
 #include "auto_home.h"
+#include "auto_sysconfdir.h"
 #include "generic-conf.h"
 
 #define FATAL "dnscache-conf: fatal: "
@@ -86,28 +86,19 @@ int main(int argc,char **argv)
   if (!pw)
     strerr_die3x(111,FATAL,"unknown account ",loguser);
 
-  if (chdir(pw->pw_dir) == -1)
-    strerr_die4sys(111,FATAL,"unable to switch to ",pw->pw_dir,": ");
+  if (chdir(auto_sysconfdir) == -1)
+    strerr_die4sys(111,FATAL,"unable to switch to ",auto_sysconfdir,": ");
 
-  fdrootservers = open_read("dnsroots.local");
-  if (fdrootservers == -1) {
+  if ((fdrootservers = open_read("dnsroots.local")) == -1) {
     if (errno != error_noent)
       strerr_die2sys(111,FATAL,"unable to open dnsroots.local: ");
-    fdrootservers = open_read("dnsroots.global");
-    if (fdrootservers == -1)
+    if ((fdrootservers = open_read("dnsroots.global")) == -1)
       strerr_die2sys(111,FATAL,"unable to open dnsroots.global: ");
   }
 
   init(dir,FATAL);
+  seed_addtime(); makelog(dir, pw->pw_dir, loguser, pw->pw_uid,pw->pw_gid);
 
-  seed_addtime(); makedir("log");
-  seed_addtime(); perm(02755);
-  seed_addtime(); makedir("log/main");
-  seed_addtime(); owner(pw->pw_uid,pw->pw_gid);
-  seed_addtime(); perm(02755);
-  seed_addtime(); start("log/status"); finish();
-  seed_addtime(); owner(pw->pw_uid,pw->pw_gid);
-  seed_addtime(); perm(0644);
   seed_addtime(); makedir("env");
   seed_addtime(); perm(02755);
   seed_addtime(); start("env/ROOT"); outs(dir); outs("/root\n"); finish();
@@ -125,10 +116,7 @@ int main(int argc,char **argv)
   outs(" softlimit -o250 -d \"$DATALIMIT\" ");
   outs(auto_home); outs("/bin/dnscache\n'\n"); finish();
   seed_addtime(); perm(0755);
-  seed_addtime(); start("log/run");
-  outs("#!/bin/sh\nexec setuidgid "); outs(loguser);
-  outs(" multilog t ./main\n"); finish();
-  seed_addtime(); perm(0755);
+
   seed_addtime(); makedir("root");
   seed_addtime(); perm(02755);
   seed_addtime(); makedir("root/ip");

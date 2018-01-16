@@ -79,9 +79,9 @@ Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel /usr/sbin/user
 %endif
 Requires: daemontools
 Requires: group(nofiles)
+Requires: user(qmaill)
 Provides: user(Gtinydns)  > 999
 Provides: user(Gdnscache) > 999
-Provides: user(Gdnslog)   > 999
 
 %description
 A collection of Domain Name System tools
@@ -278,7 +278,7 @@ fi
 if [ $argv1 -eq 2 ] ; then
   exit 0
 fi
-for i in Gdnscache Gdnslog Gtinydns
+for i in Gdnscache Gtinydns
 do
   %{__rm} -f /var/spool/mail/$i
   /usr/bin/getent passwd $i > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d %{_sysconfdir} -s /sbin/nologin $i || true
@@ -324,7 +324,7 @@ fi
 /bin/rmdir --ignore-fail-on-non-empty %{_sysconfdir}/dnscache 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_sysconfdir}/tinydns 2>/dev/null
 if [ ! -d %{_sysconfdir}/dnscache ] ; then
-  %{_prefix}/sbin/dnscache-conf Gdnscache Gdnslog %{_sysconfdir}/dnscache 127.0.0.1
+  %{_prefix}/sbin/dnscache-conf Gdnscache qmaill %{_sysconfdir}/dnscache 127.0.0.1
   if [ $? -eq 0 ] ; then
     if [ ! -h /service/dnscache ] ; then
       ln -s %{_sysconfdir}/dnscache /service/dnscache
@@ -348,7 +348,7 @@ do
     ip=127.0.0.1
   fi
   if [ ! -d %{_sysconfdir}/$i ] ; then
-    %{_prefix}/sbin/$i-conf $acct Gdnslog %{_sysconfdir}/$i $ip
+    %{_prefix}/sbin/$i-conf $acct qmaill %{_sysconfdir}/$i $ip
     if [ ! " $i" = " curvedns" ] ; then
       continue
     fi
@@ -385,7 +385,7 @@ do
     %{__rm} -rf %{_sysconfdir}/$i
   fi
 done
-for i in Gtinydns Gdnscache Gdnslog
+for i in Gtinydns Gdnscache
 do
   echo "Removing user $i"
   /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
@@ -415,3 +415,4 @@ Release 1.1 Start 11/04/2017
 18. added djbdns.7 man page
 19. Changed dns accounts to Gtinydns, Gdnslog, Gdnscache
 20. added man page for random-ip, dnsgetroot
+21. use qmaill for loguser
