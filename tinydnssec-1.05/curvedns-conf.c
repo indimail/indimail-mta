@@ -5,6 +5,7 @@
 #include "exit.h"
 #include "open.h"
 #include "auto_home.h"
+#include "auto_sysconfdir.h"
 #include "generic-conf.h"
 
 #define FATAL "curvedns-conf: fatal: "
@@ -55,13 +56,14 @@ int main(int argc,char **argv)
   if (!pw)
     strerr_die3x(111,FATAL,"unknown account ",loguser);
 
-  if (chdir(pw->pw_dir) == -1)
-    strerr_die4sys(111,FATAL,"unable to switch to ",pw->pw_dir,": ");
+  if (chdir(auto_sysconfdir) == -1)
+    strerr_die4sys(111,FATAL,"unable to switch to ",auto_sysconfdir,": ");
   privatekeyfd = open_read("curvedns.private.key");
   if (privatekeyfd == -1)
     strerr_die2sys(111,FATAL,"unable to open curvedns.private.key: ");
+
   init(dir,FATAL);
-  makelog(loguser,pw->pw_uid,pw->pw_gid);
+  makelog(dir,pw->pw_dir,loguser,pw->pw_uid,pw->pw_gid);
 
   makedir("env");
   perm(02755);
@@ -81,9 +83,6 @@ int main(int argc,char **argv)
   outs(" softlimit -o250 -d \"$DATALIMIT\" ");
   outs(auto_home); outs("/bin/curvedns $LISTEN_IPS $LISTEN_PORT $TARGET_IP $TARGET_PORT\n'\n"); finish();
   perm(0755);
-  start("log/run");
-  outs("#!/bin/sh\nexec setuidgid "); outs(loguser);
-  outs(" multilog t ./main\n"); finish();
   start("private.key");
   buffer_init(&sspbuf,buffer_unixread,privatekeyfd,pbuf,sizeof pbuf);
   copyfrom(&sspbuf);

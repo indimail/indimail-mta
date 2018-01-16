@@ -6,6 +6,7 @@
 #include "exit.h"
 #include "open.h"
 #include "auto_home.h"
+#include "auto_sysconfdir.h"
 #include "generic-conf.h"
 
 #define FATAL "dqcache-conf: fatal: "
@@ -41,9 +42,8 @@ int main(int argc,char **argv)
   if (!pw)
     strerr_die3x(111,FATAL,"unknown account ",loguser);
 
-  if (chdir(pw->pw_dir) == -1)
-    strerr_die4sys(111,FATAL,"unable to switch to ",pw->pw_dir,": ");
-
+  if (chdir(auto_sysconfdir) == -1)
+    strerr_die4sys(111,FATAL,"unable to switch to ",auto_sysconfdir,": ");
   fdrootservers = open_read("dnsroots.local");
   if (fdrootservers == -1) {
     if (errno != error_noent)
@@ -54,7 +54,7 @@ int main(int argc,char **argv)
   }
 
   init(dir,FATAL);
-  makelog(loguser,pw->pw_uid,pw->pw_gid);
+  makelog(dir,pw->pw_dir,loguser,pw->pw_uid,pw->pw_gid);
 
   makedir("env");
   perm(02755);

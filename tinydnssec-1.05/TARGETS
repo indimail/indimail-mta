@@ -257,3 +257,5 @@ curvedns-conf.o
 dqcache-conf.o
 curvedns-conf
 dqcache-conf
+auto_sysconfdir.c
+auto_sysconfdir.o

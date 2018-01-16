@@ -2,7 +2,6 @@
 *.a
 *.lib
 select.h
-conf-home
 load
 compile
 systype
@@ -81,3 +80,4 @@ curvedns-conf
 dqcache-conf
 curvedns-0.87/curvedns
 curvedns-0.87/curvedns-keygen
+auto_sysconfdir.c

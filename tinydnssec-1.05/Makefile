@@ -39,6 +39,14 @@ auto_home.o: \
 compile auto_home.c
 	./compile auto_home.c
 
+auto_sysconfdir.c: \
+auto-str conf-sysconfdir
+	./auto-str auto_sysconfdir `head -1 conf-sysconfdir` > auto_sysconfdir.c
+
+auto_sysconfdir.o: \
+compile auto_sysconfdir.c
+	./compile auto_sysconfdir.c
+
 axfr-get: \
 load axfr-get.o iopause.o timeoutread.o timeoutwrite.o dns.a libtai.a \
 alloc.a buffer.a unix.a byte.a
@@ -61,9 +69,14 @@ cdb.a buffer.a unix.a byte.a sha1.o base32hex.o edns0.o
 	alloc.a env.a cdb.a buffer.a unix.a byte.a  sha1.o base32hex.o edns0.o
 
 axfrdns-conf: \
-load axfrdns-conf.o generic-conf.o auto_home.o buffer.a unix.a byte.a
-	./load axfrdns-conf generic-conf.o auto_home.o buffer.a \
-	unix.a byte.a
+load axfrdns-conf.o generic-conf.o auto_home.o \
+stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+stralloc_cats.o stralloc_pend.o \
+buffer.a unix.a byte.a alloc.a
+	./load axfrdns-conf generic-conf.o auto_home.o \
+	stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+	stralloc_cats.o stralloc_pend.o \
+	buffer.a unix.a byte.a alloc.a
 
 axfrdns-conf.o: \
 compile axfrdns-conf.c strerr.h exit.h auto_home.h generic-conf.h \
@@ -360,15 +373,19 @@ libtai.a unix.a byte.a socket.lib
 	env.a alloc.a buffer.a libtai.a unix.a byte.a  `cat socket.lib`
 
 dnscache-conf: \
-load dnscache-conf.o generic-conf.o auto_home.o libtai.a buffer.a \
-unix.a byte.a
-	./load dnscache-conf generic-conf.o auto_home.o libtai.a \
-	buffer.a unix.a byte.a
+load dnscache-conf.o generic-conf.o auto_home.o \
+stralloc_opyb.o stralloc_opys.o stralloc_catb.o stralloc_cats.o \
+stralloc_pend.o auto_sysconfdir.o \
+libtai.a buffer.a unix.a byte.a alloc.a
+	./load dnscache-conf generic-conf.o auto_home.o \
+	stralloc_opyb.o stralloc_opys.o stralloc_cats.o \
+	stralloc_pend.o auto_sysconfdir.o \
+	libtai.a buffer.a unix.a byte.a alloc.a
 
 dnscache-conf.o: \
 compile dnscache-conf.c hasdevtcp.h strerr.h buffer.h uint32.h taia.h \
-tai.h uint64.h str.h open.h error.h exit.h auto_home.h generic-conf.h \
-buffer.h
+tai.h uint64.h open.h error.h exit.h auto_home.h generic-conf.h \
+buffer.h auto_sysconfdir.h
 	./compile dnscache-conf.c
 
 dnscache.o: \
@@ -576,7 +593,7 @@ compile fmt_xlong.c scan.h
 
 generic-conf.o: \
 compile generic-conf.c strerr.h buffer.h open.h generic-conf.h \
-buffer.h
+buffer.h stralloc.h
 	./compile generic-conf.c
 
 getln.o: \
@@ -746,9 +763,14 @@ env.a libtai.a cdb.a alloc.a buffer.a unix.a byte.a socket.lib edns0.o
 	byte.a  `cat socket.lib` edns0.o
 
 pickdns-conf: \
-load pickdns-conf.o generic-conf.o auto_home.o buffer.a unix.a byte.a
-	./load pickdns-conf generic-conf.o auto_home.o buffer.a \
-	unix.a byte.a
+load pickdns-conf.o generic-conf.o auto_home.o \
+stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+stralloc_cats.o stralloc_pend.o \
+buffer.a unix.a byte.a alloc.a
+	./load pickdns-conf generic-conf.o auto_home.o \
+	stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+	stralloc_cats.o stralloc_pend.o \
+	buffer.a unix.a byte.a alloc.a
 
 pickdns-conf.o: \
 compile pickdns-conf.c strerr.h exit.h auto_home.h generic-conf.h \
@@ -831,9 +853,14 @@ env.a libtai.a cdb.a alloc.a buffer.a unix.a byte.a socket.lib edns0.o
 	byte.a  `cat socket.lib` edns0.o
 
 rbldns-conf: \
-load rbldns-conf.o generic-conf.o auto_home.o buffer.a unix.a byte.a
-	./load rbldns-conf generic-conf.o auto_home.o buffer.a \
-	unix.a byte.a
+load rbldns-conf.o generic-conf.o auto_home.o \
+stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+stralloc_cats.o stralloc_pend.o \
+buffer.a unix.a byte.a alloc.a
+	./load rbldns-conf generic-conf.o auto_home.o \
+	stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+	stralloc_cats.o stralloc_pend.o \
+	buffer.a unix.a byte.a alloc.a
 
 rbldns-conf.o: \
 compile rbldns-conf.c strerr.h exit.h auto_home.h generic-conf.h \
@@ -1157,9 +1184,14 @@ socket.lib sha1.o base32hex.o edns0.o
 	unix.a byte.a  `cat socket.lib` sha1.o base32hex.o edns0.o
 
 tinydns-conf: \
-load tinydns-conf.o generic-conf.o auto_home.o buffer.a unix.a byte.a
-	./load tinydns-conf generic-conf.o auto_home.o buffer.a \
-	unix.a byte.a
+load tinydns-conf.o generic-conf.o auto_home.o \
+stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+stralloc_cats.o stralloc_pend.o \
+buffer.a unix.a byte.a alloc.a
+	./load tinydns-conf generic-conf.o auto_home.o \
+	stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+	stralloc_cats.o stralloc_pend.o \
+	buffer.a unix.a byte.a alloc.a
 
 tinydns-conf.o: \
 compile tinydns-conf.c strerr.h exit.h auto_home.h generic-conf.h \
@@ -1268,9 +1300,14 @@ dns.a env.a cdb.a alloc.a buffer.a unix.a byte.a socket.lib edns0.o
 	byte.a  `cat socket.lib` edns0.o
 
 walldns-conf: \
-load walldns-conf.o generic-conf.o auto_home.o buffer.a unix.a byte.a
-	./load walldns-conf generic-conf.o auto_home.o buffer.a \
-	unix.a byte.a
+load walldns-conf.o generic-conf.o auto_home.o \
+stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+stralloc_cats.o stralloc_pend.o \
+buffer.a unix.a byte.a alloc.a
+	./load walldns-conf generic-conf.o auto_home.o \
+	stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+	stralloc_cats.o stralloc_pend.o \
+	buffer.a unix.a byte.a alloc.a
 
 walldns-conf.o: \
 compile walldns-conf.c strerr.h exit.h auto_home.h generic-conf.h \
@@ -1278,22 +1315,33 @@ buffer.h
 	./compile walldns-conf.c
 
 dqcache-conf: \
-load dqcache-conf.o generic-conf.o auto_home.o buffer.a unix.a byte.a
-	./load dqcache-conf generic-conf.o auto_home.o buffer.a \
-	unix.a byte.a
+load dqcache-conf.o generic-conf.o auto_home.o \
+stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+stralloc_cats.o stralloc_pend.o auto_sysconfdir.o \
+buffer.a unix.a byte.a alloc.a
+	./load dqcache-conf generic-conf.o auto_home.o \
+	stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+	stralloc_cats.o stralloc_pend.o auto_sysconfdir.o \
+	buffer.a unix.a byte.a alloc.a
+
 dqcache-conf.o: \
 compile dqcache-conf.c strerr.h exit.h auto_home.h generic-conf.h \
-buffer.h error.h open.h
+buffer.h error.h open.h auto_sysconfdir.h
 	./compile dqcache-conf.c
 
 curvedns-conf: \
-load curvedns-conf.o generic-conf.o auto_home.o buffer.a unix.a byte.a
-	./load curvedns-conf generic-conf.o auto_home.o buffer.a \
-	unix.a byte.a
+load curvedns-conf.o generic-conf.o auto_home.o \
+stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+stralloc_cats.o stralloc_pend.o auto_sysconfdir.o \
+buffer.a unix.a byte.a alloc.a
+	./load curvedns-conf generic-conf.o auto_home.o \
+	stralloc_opyb.o stralloc_opys.o stralloc_catb.o \
+	stralloc_cats.o stralloc_pend.o auto_sysconfdir.o \
+	buffer.a unix.a byte.a alloc.a
 
 curvedns-conf.o: \
 compile curvedns-conf.c strerr.h exit.h auto_home.h generic-conf.h \
-buffer.h open.h
+buffer.h open.h auto_sysconfdir.h
 	./compile curvedns-conf.c
 
 walldns.o: \

@@ -30,12 +30,11 @@ int main(int argc,char **argv)
   myip = argv[4];
   if (!myip) usage();
 
-  pw = getpwnam(loguser);
-  if (!pw)
+  if (!(pw = getpwnam(loguser)))
     strerr_die3x(111,FATAL,"unknown account ",loguser);
 
   init(dir,FATAL);
-  makelog(loguser,pw->pw_uid,pw->pw_gid);
+  makelog(dir,pw->pw_dir,loguser,pw->pw_uid,pw->pw_gid);
 
   makedir("env");
   perm(02755);

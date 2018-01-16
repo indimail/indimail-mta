@@ -3,12 +3,15 @@
 #include <sys/stat.h>
 #include "strerr.h"
 #include "buffer.h"
+#include "stralloc.h"
 #include "open.h"
+#include "str.h"
 #include "generic-conf.h"
 
 static const char *fatal;
 static const char *dir;
 static const char *fn;
+static stralloc target;
 
 static int fd;
 static char buf[1024];
@@ -27,15 +30,36 @@ void init(const char *d,const char *f)
     strerr_die4sys(111,fatal,"unable to switch to ",dir,": ");
 }
 
+void failmem()
+{
+  strerr_die2sys(111,fatal,"out of memory: ");
+}
+
 void fail(void)
 {
   strerr_die6sys(111,fatal,"unable to create ",dir,"/",fn,": ");
+}
+
+void faill(const char *s, const char *t)
+{
+  strerr_die6sys(111,fatal,"unable to link ",s," to ",t,": ");
 }
 
 void makedir(const char *s)
 {
   fn = s;
   if (mkdir(fn,0700) == -1) fail();
+}
+
+void makelink(const char *s, const char *sdir, const char *t)
+{
+  if (!stralloc_copys(&target, sdir)) failmem();
+  if (!stralloc_catb(&target, "/", 1)) failmem();
+  if (!stralloc_cats(&target, t)) failmem();
+  if (!stralloc_0(&target)) failmem();
+  if (access(target.s, F_OK) && mkdir(target.s,0700) == -1) fail();
+  if (access(s, F_OK) && symlink(target.s,s) == -1) faill(s,t);
+  fn = target.s;
 }
 
 void start(const char *s)
@@ -68,21 +92,27 @@ void finish(void)
   close(fd);
 }
 
-void perm(int mode)
+void perm(mode_t mode)
 {
   if (chmod(fn,mode) == -1) fail();
 }
 
-void owner(int uid,int gid)
+void owner(uid_t uid,gid_t gid)
 {
   if (chown(fn,uid,gid) == -1) fail();
 }
 
-void makelog(const char *user,int uid,int gid)
+void makelog(const char *sdir, const char *logdir, const char *user,uid_t uid,gid_t gid)
 {
+  int i;
+
   makedir("log");
   perm(02755);
-  makedir("log/main");
+  if (sdir) {
+    i = str_rchr(sdir,'/');
+    makelink("log/main", logdir, i ? sdir + i + 1 : sdir);
+  } else
+    makedir("log/main");
   owner(uid,gid);
   perm(02755);
   start("log/status");
