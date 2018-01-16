@@ -6,6 +6,7 @@
 set -e
 prefix=@prefix@
 qmaildir=@qmaildir@
+logdir=@logdir@
 rm=/bin/rm
 
 # summary of how this script can be called:
@@ -66,7 +67,7 @@ case "$1" in
 	fi
 	/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}/alias  -s /sbin/nologin  alias || true
 	/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}        -s /sbin/nologin qmaild || true
-	/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}        -s /sbin/nologin qmaill || true
+	/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${logdir}          -s /sbin/nologin qmaill || true
 	/usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}        -s /sbin/nologin qmailp || true
 	/usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${qmaildir}        -s /sbin/nologin qmailq || true
 	/usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${qmaildir}        -s /sbin/nologin qmailr || true
