@@ -31,7 +31,7 @@ case "$1" in
 	# exists.
 	#
 	echo "Adding tinydns users/groups"
-	for i in Gdnscache Gtinydns Gdnslog
+	for i in Gdnscache Gtinydns
 	do
 		${rm} -f /var/spool/mail/$i
     	/usr/bin/getent passwd $i > /dev/null || /usr/sbin/useradd -l -M -g nofiles  -d ${sysconfdir} -s /sbin/nologin $i || true
