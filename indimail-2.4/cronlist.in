@@ -9,12 +9,15 @@
 #
 #chowkidar
 #
-#24 0,4,8,12,16,20 * * * @prefix@/sbin/chowkidar -f /var/log/svc/deliver.25/current -o @controldir@/badmailfrom -n 300 -B > /dev/null 2>&1
+#24 0,4,8,12,16,20 * * * @prefix@/sbin/chowkidar -f @logdir@/deliver.25/current -o @controldir@/badmailfrom -n 300 -B > /dev/null 2>&1
 #0 0 * * * @prefix@/sbin/chowkidar -r -B -q > /dev/null 2>&1
-#24 0,4,8,12,16,20 * * * @prefix@/sbin/chowkidar -f /var/log/svc/deliver.25/current -o @controldir@/badrcptto -n 300 -T > /dev/null 2>&1
+#24 0,4,8,12,16,20 * * * @prefix@/sbin/chowkidar -f @logdir@/deliver.25/current -o @controldir@/badrcptto -n 300 -T > /dev/null 2>&1
 #0 0 * * * @prefix@/sbin/chowkidar -r -T -q > /dev/null 2>&1
 #
 # Build fast CDB spam database
 #
-#24 0,4,8,12,16,20 * * * @prefix@/sbin/chowkidar -f /var/log/svc/smtpd.25/current -o @controldir@/spamdb -n 1 -S > /dev/null 2>&1
+#24 0,4,8,12,16,20 * * * @prefix@/sbin/chowkidar -f @logdir@/smtpd.25/current -o @controldir@/spamdb -n 1 -S > /dev/null 2>&1
 #0 0 * * * @prefix@/sbin/chowkidar -r -S -q > /dev/null 2>&1
+#
+#
+10 0 * * * @prefix@/sbin/svctool --backup=@basepath@/backup --mysqlPrefix=@mysql_prefix@ --servicedir=@servicedir@

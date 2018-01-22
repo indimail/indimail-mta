@@ -14,6 +14,3 @@
 # Clean Temp directories created by qscanq
 #
 12 * * * *	PREFIX/sbin/run-cleanq
-#
-#
-10 0 * * * PREFIX/sbin/svctool --backup=/home/mail/backup --servicedir=/service
