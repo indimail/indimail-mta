@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.129 2018-01-23 22:01:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.130 2018-01-23 22:19:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -26,7 +26,6 @@
 %global servicedir         @servicedir@
 %global plugindir          %{_prefix}/lib/indimail/plugins
 %global ucspi_version      0.88
-%global mta_version        2.3
 %global libdkim_version    1.5
 %global libsrs2_version    1.0.18
 %global tcpserver_plugin   1
@@ -103,7 +102,7 @@ Group: System Environment/Base
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-Source1: http://downloads.sourceforge.net/indimail/indimail-mta-%{mta_version}.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source2: http://cr.yp.to/ucspi-tcp/ucspi-tcp-%{ucspi_version}.tar.gz
 %if %nolibdkim == 0
 Source3: http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}.tar.gz
@@ -111,7 +110,7 @@ Source3: http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}.ta
 %if %nolibsrs2 == 0
 Source4: http://downloads.sourceforge.net/indimail/libsrs2-%{libsrs2_version}.tar.gz
 %endif
-Source5: http://downloads.sourceforge.net/indimail/indimail-mta-rpmlintrc
+Source5: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -326,7 +325,7 @@ echo target_vendor %_target_vendor
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
 echo "------------------------------------------------------"
 
-for i in indimail-mta-%{mta_version} ucspi-tcp-%{ucspi_version} \
+for i in %{name}-%{version} ucspi-tcp-%{ucspi_version} \
 libdkim-%{libdkim_version} libsrs2-%{libsrs2_version}
 do
 (
@@ -355,13 +354,13 @@ done
 %build
 ID=$(id -u)
 (
-echo "NAME=indimail-mta"
+echo "NAME=%{name}"
 echo "Description=\"IndiMail MTA\""
 echo "MTA_version="%{version}""
-echo "ID=indimail-mta"
+echo "ID=%{name}"
 echo "HOME_URL="http://www.indimail.org""
 echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui manvendra@indimail.org\""
-) > indimail-mta-release
+) > %{name}-release
 
 #### LIBDKIM ######################
 if [ -d libdkim-%{libdkim_version} ] ; then
@@ -390,15 +389,15 @@ if [ -d libsrs2-%{libsrs2_version} ] ; then
 fi
 
 #### qmail ######################
-if [ -d indimail-mta-%{mta_version} ] ; then
-  %{__sed} 's{QMAIL{%{qmaildir}{' indimail-mta-%{mta_version}/conf-qmail.in > indimail-mta-%{mta_version}/conf-qmail
-  %{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' indimail-mta-%{mta_version}/conf-sysconfdir.in > indimail-mta-%{mta_version}/conf-sysconfdir
-  %{__sed} 's{SHAREDDIR{%{shareddir}{' indimail-mta-%{mta_version}/conf-shared.in > indimail-mta-%{mta_version}/conf-shared
-  %{__sed} 's{PREFIX{%{_prefix}{' indimail-mta-%{mta_version}/conf-prefix.in > indimail-mta-%{mta_version}/conf-prefix
+if [ -d %{name}-%{version} ] ; then
+  %{__sed} 's{QMAIL{%{qmaildir}{' %{name}-%{version}/conf-qmail.in > %{name}-%{version}/conf-qmail
+  %{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' %{name}-%{version}/conf-sysconfdir.in > %{name}-%{version}/conf-sysconfdir
+  %{__sed} 's{SHAREDDIR{%{shareddir}{' %{name}-%{version}/conf-shared.in > %{name}-%{version}/conf-shared
+  %{__sed} 's{PREFIX{%{_prefix}{' %{name}-%{version}/conf-prefix.in > %{name}-%{version}/conf-prefix
   %if %{tcpserver_plugin} == 1
-    echo "-DLOAD_SHARED_OBJECTS" > indimail-mta-%{mta_version}/conf-dlopen
+    echo "-DLOAD_SHARED_OBJECTS" > %{name}-%{version}/conf-dlopen
   %else
-    %{__rm} -f indimail-mta-%{mta_version}/conf-dlopen
+    %{__rm} -f %{name}-%{version}/conf-dlopen
   %endif
   # create conf-users
   (
@@ -421,9 +420,9 @@ if [ -d indimail-mta-%{mta_version} ] ; then
   echo "passwd user, the queue user, the remote user, the send user, the"
   echo "indimail user and the virus scan user."
   ) > /tmp/conf-users
-  diff /tmp/conf-users indimail-mta-%{mta_version}/conf-users > /dev/null 2>&1
+  diff /tmp/conf-users %{name}-%{version}/conf-users > /dev/null 2>&1
   if [ $? -ne 0 ] ; then
-    %{__mv} /tmp/conf-users indimail-mta-%{mta_version}/conf-users
+    %{__mv} /tmp/conf-users %{name}-%{version}/conf-users
   else
     %{__rm} -f /tmp/conf-users
   fi
@@ -438,18 +437,18 @@ if [ -d indimail-mta-%{mta_version} ] ; then
    echo "any files, but it must be usable for processes; this requirement"
    echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
    ) > /tmp/conf-groups
-   diff /tmp/conf-groups indimail-mta-%{mta_version}/conf-groups > /dev/null 2>&1
+   diff /tmp/conf-groups %{name}-%{version}/conf-groups > /dev/null 2>&1
    if [ $? -ne 0 ] ; then
-     %{__mv} /tmp/conf-groups indimail-mta-%{mta_version}/conf-groups
+     %{__mv} /tmp/conf-groups %{name}-%{version}/conf-groups
    else
      %{__rm} -f /tmp/conf-groups
    fi
-   %{__cp} indimail-mta-%{mta_version}/doc/ChangeLog .
-   if [ -f indimail-mta-%{mta_version}/qupgrade.sh ] ; then
-   %{__cp} indimail-mta-%{mta_version}/qupgrade.sh .
+   %{__cp} %{name}-%{version}/doc/ChangeLog .
+   if [ -f %{name}-%{version}/qupgrade.sh ] ; then
+   %{__cp} %{name}-%{version}/qupgrade.sh .
    fi
-   if [ -f indimail-mta-%{mta_version}/qlocal_upgrade.sh ] ; then
-   %{__cp} indimail-mta-%{mta_version}/qlocal_upgrade.sh .
+   if [ -f %{name}-%{version}/qlocal_upgrade.sh ] ; then
+   %{__cp} %{name}-%{version}/qlocal_upgrade.sh .
    fi
 fi
 #### ucspi-tcp ######################
@@ -467,7 +466,7 @@ fi
 ID=$(id -u)
 %{__mkdir_p} %{buildroot}%{_prefix}
 for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} \
-indimail-mta-%{mta_version} ucspi-tcp-%{ucspi_version}
+%{name}-%{version} ucspi-tcp-%{ucspi_version}
 do
   if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
     continue
@@ -489,7 +488,7 @@ do
 done
 
 #copy files not copied by setup
-install -m 0644 indimail-mta-release %{buildroot}%{qsysconfdir}/indimail-mta-release
+install -m 0644 %{name}-release %{buildroot}%{qsysconfdir}/%{name}-release
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 %{__mkdir_p} %{buildroot}%{libexecdir}
 %{__mkdir_p} %{buildroot}%{qsysconfdir}
@@ -500,11 +499,11 @@ fi
 if [ -f qlocal_upgrade.sh ] ; then
 install -m 0755 qlocal_upgrade.sh %{buildroot}%{libexecdir}/qlocal_upgrade.sh
 fi
-if [ -f indimail-mta-%{mta_version}/indimail-mta.fc ] ; then
-install -m 0755 indimail-mta-%{mta_version}/indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
+if [ -f %{name}-%{version}/indimail-mta.fc ] ; then
+install -m 0755 %{name}-%{version}/indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
 fi
-if [ -f indimail-mta-%{mta_version}/indimail-mta.te ] ; then
-install -m 0755 indimail-mta-%{mta_version}/indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
+if [ -f %{name}-%{version}/indimail-mta.te ] ; then
+install -m 0755 %{name}-%{version}/indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
 fi
 
 if [ %nolibdkim -eq 0 ] ; then
@@ -575,7 +574,7 @@ do
   fi
 done
 (
-for i in `cat indimail-mta-%{mta_version}/controlfiles.q`
+for i in `cat %{name}-%{version}/controlfiles.q`
 do
   echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/control/$i"
   echo $i 1>&3
@@ -678,7 +677,7 @@ done
 %attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/qmailprog.list
 %attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/leapsecs.dat
 %attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/leapsecs.txt
-%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta-release
+%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/%{name}-release
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/nodnscheck
 
 %if %noperms == 0
@@ -1628,7 +1627,7 @@ fi
 if [ -f %{_prefix}/bin/svok ] ; then
   %{_prefix}/bin/svok /service/.svscan/log 2>/dev/null
   if [ $? -eq 0 ] ; then
-    echo "Giving indimail-mta exactly 5 seconds to exit nicely"
+    echo "Giving %{name} exactly 5 seconds to exit nicely"
     if test -f %{_sysconfdir}/init/svscan.conf
     then
       /sbin/initctl emit qmailstop > /dev/null 2>&1
@@ -1665,7 +1664,7 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Upgrade Script for pretrans"
   /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs %{version} $*
-) > /tmp/indimail-mta-setup.log 2>&1
+) > /tmp/%{name}-setup.log 2>&1
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -1682,7 +1681,7 @@ if [ $argv1 -eq 2 ] ; then
   (
     echo "Running Custom Upgrade Script for pre upgrade"
     /bin/sh %{libexecdir}/qupgrade.sh pre upgrade %{version} $*
-  ) >> /tmp/indimail-mta-setup.log 2>&1
+  ) >> /tmp/%{name}-setup.log 2>&1
   fi
   exit 0
 fi
@@ -1776,7 +1775,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       %{__sed} -i 's{^#SV:{SV:{' /etc/inittab
     fi
   fi
-  ) >> /tmp/indimail-mta-setup.log 2>&1
+  ) >> /tmp/%{name}-setup.log 2>&1
   exit 0
 fi
 if [ -x /bin/touch ] ; then
@@ -1805,7 +1804,7 @@ echo "13. Configure udplogger service"
 echo "14. Configure qscanq/clamd/freshclam service"
 echo "15. Configure %{qsysconfdir}/control/signatures"
 echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
-echo "17. Configure indimail-mta startup"
+echo "17. Configure %{name} startup"
 echo ""
 
 (
@@ -2050,7 +2049,7 @@ fi
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan
 fi
-) >> /tmp/indimail-mta-setup.log 2>&1
+) >> /tmp/%{name}-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
   echo "1. Issue /sbin/initctl emit qmailstart to start services"
   count=1
@@ -2079,7 +2078,7 @@ echo "   Run the following command to create Certificate for TLS/SSL"
 echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
 fi
 echo
-echo "Look at /tmp/indimail-mta-setup.log for the installation log"
+echo "Look at /tmp/%{name}-setup.log for the installation log"
 
 ### SCRIPTLET ###############################################################################
 %preun
@@ -2101,7 +2100,7 @@ fi
 if [ -f %{_prefix}/bin/svok ] ; then
   %{_prefix}/bin/svok /service/.svscan/log 2>/dev/null
   if [ $? -eq 0 ] ; then
-    echo "Giving indimail-mta exactly 5 seconds to exit nicely"
+    echo "Giving %{name} exactly 5 seconds to exit nicely"
     if test -f %{_sysconfdir}/init/svscan.conf
     then
       /sbin/initctl emit qmailstop > /dev/null 2>&1
@@ -2160,7 +2159,7 @@ fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot
-) >> /tmp/indimail-mta-setup.log 2>&1
+) >> /tmp/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -2177,7 +2176,7 @@ if [ $argv1 -eq 1 ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
     /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
   fi
-  ) >> /tmp/indimail-mta-setup.log
+  ) >> /tmp/%{name}-setup.log
   echo "recreating ld.so cache"
   /sbin/ldconfig
   exit 0
@@ -2268,7 +2267,7 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
   /bin/sh %{libexecdir}/qupgrade.sh postun uninstall %{version} $*
 fi
-) >> /tmp/indimail-mta-setup.log 2>&1
+) >> /tmp/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %posttrans
@@ -2282,7 +2281,7 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for posttrans"
   /bin/sh %{libexecdir}/qupgrade.sh posttrans noargs %{version} $*
-) >> /tmp/indimail-mta-setup.log 2>&1
+) >> /tmp/%{name}-setup.log 2>&1
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -2300,7 +2299,7 @@ fi
 if [ -f %{_prefix}/bin/svok ] ; then
   %{_prefix}/bin/svok /service/.svscan/log 2>/dev/null
   if [ $? -eq 0 ] ; then
-    echo "Giving indimail-mta exactly 5 seconds to exit nicely"
+    echo "Giving %{name} exactly 5 seconds to exit nicely"
     if test -f %{_sysconfdir}/init/svscan.conf
     then
       /sbin/initctl emit qmailstop > /dev/null 2>&1
@@ -2379,7 +2378,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       %{__sed} -i 's{^#SV:{SV:{' /etc/inittab
     fi
   fi
-  ) >> /tmp/indimail-mta-setup.log 2>&1
+  ) >> /tmp/%{name}-setup.log 2>&1
   exit 0
 fi
 echo "Creating %{logdir}"
@@ -2414,7 +2413,7 @@ fi
 if [ -f %{_prefix}/bin/svok ] ; then
   %{_prefix}/bin/svok /service/.svscan/log 2>/dev/null
   if [ $? -eq 0 ] ; then
-    echo "Giving indimail-mta exactly 5 seconds to exit nicely"
+    echo "Giving %{name} exactly 5 seconds to exit nicely"
     if test -f %{_sysconfdir}/init/svscan.conf
     then
       /sbin/initctl emit qmailstop > /dev/null 2>&1
