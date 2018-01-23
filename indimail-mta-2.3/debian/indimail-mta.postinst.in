@@ -136,9 +136,9 @@ fi
 # indimail-mta.upgrade/indimail-mta.install are created
 # by the preinst script
 if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
-  if [ -f ${libexecdir}/upgrade.sh ] ; then
+  if [ -f ${libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh ${libexecdir}/upgrade.sh post upgrade @version@ $* || true
+    /bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
   fi
   if [ -f /etc/init.d/indimail ] ; then
     cmp -s ${prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1 || true
@@ -454,14 +454,11 @@ if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
 fi
 
-if [ -f ${qsysconfdir}/cronlist.q ] ; then
+if [ -f ${sysconfdir}/cronlist.q -a -d /etc/cron.d ] ; then
   echo "adding cron entries"
-  (
-  crontab -u root -l
-  /bin/cat ${qsysconfdir}/cronlist.q
-  ) > /tmp/cron.indimail-mta.$$
-  crontab -u root /tmp/cron.indimail-mta.$$
+  ${cp} ${sysconfdir}/cronlist.q
 fi
+
 echo "Checking Installed Permissions"
 if [ -f ${libexecdir}/instcheck ] ; then
 	${libexecdir}/instcheck > /dev/null 2>&1
