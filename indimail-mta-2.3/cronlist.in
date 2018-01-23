@@ -4,13 +4,13 @@
 # $Id: cronlist.in,v 1.1 2017-04-23 18:18:09+05:30 Cprogrammer Exp mbhangui $
 #
 # Rotate the logs at midnight
-5    0 * * * PREFIX/bin/svc -a /service/*/log > /dev/null 2>&1
-0    0 * * * PREFIX/sbin/svctool --report=all --attach --postmaster=postmaster
+5    0 * * * root PREFIX/bin/svc -a /service/*/log > /dev/null 2>&1
+0    0 * * * root PREFIX/sbin/svctool --report=all --attach --postmaster=postmaster
 #
 # qmail-smtpd TLS
 #
-01 01 * * * LIBEXEC/update_tmprsadh > /dev/null 2>&1
+01 01 * * * root LIBEXEC/update_tmprsadh > /dev/null 2>&1
 #
 # Clean Temp directories created by qscanq
 #
-12 * * * *	PREFIX/sbin/run-cleanq
+12 * * * *	root PREFIX/sbin/run-cleanq

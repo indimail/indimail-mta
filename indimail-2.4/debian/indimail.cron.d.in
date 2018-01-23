@@ -1,40 +1,19 @@
 #
 # Regular cron jobs for the indimail package
 #
-#2,32 * * * * @prefix@/sbin/hostsync -d indimail.org
-5,35 * * * * @prefix@/sbin/clearopensmtp
-# Rotate the logs at midnight
-5    0 * * * @prefix@/bin/svc -a /service*/*/log > /dev/null 2>&1
-0    0 * * * @prefix@/sbin/svctool --report=all --attach --postmaster=postmaster
-#0    5 * * * @prefix@/sbin/vdeloldusers -d indimail.org -u -1 -t 2 >/dev/null 2>&1
-#7    * * * * @prefix@/sbin/vfstab -b
-#
-# qmail-smtpd TLS
-#
-01 01 * * * @prefix@/bin/update_tmprsadh > /dev/null 2>&1
-#
-# fetchmail
-#
-#5,35 * * * * @prefix@/bin/fetchmail.cron dialup
-#5,35 * * * * @prefix@/bin/fetchmail.cron ethernet
-#
-# Clean Temp directories created by qscanq
-#
-12 * * * *	@prefix@/bin/run-cleanq
+#2,32 * * * * indimail @prefix@/sbin/hostsync -d indimail.org
+5,35 * * * * indimail @prefix@/sbin/clearopensmtp
+#0    5 * * * root @prefix@/sbin/vdeloldusers -d indimail.org -u -1 -t 2 >/dev/null 2>&1
+#7    * * * * root @prefix@/sbin/vfstab -b
 #
 #chowkidar
 #
-#24 0,4,8,12,16,20 * * * @prefix@/sbin/chowkidar -f /var/log/indimail/deliver.25/current -o @sysconfdir@/control/badmailfrom -n 300 -B > /dev/null 2>&1
-#0 0 * * * @prefix@/sbin/chowkidar -r -B -q > /dev/null 2>&1
-#24 0,4,8,12,16,20 * * * @prefix@/sbin/chowkidar -f /var/log/indimail/deliver.25/current -o @sysconfdir@/control/badrcptto -n 300 -T > /dev/null 2>&1
-#0 0 * * * @prefix@/sbin/chowkidar -r -T -q > /dev/null 2>&1
+#24 0,4,8,12,16,20 * * * indimail @prefix@/sbin/chowkidar -f /var/log/indimail/deliver.25/current -o @sysconfdir@/control/badmailfrom -n 300 -B > /dev/null 2>&1
+#0 0 * * * indimail @prefix@/sbin/chowkidar -r -B -q > /dev/null 2>&1
+#24 0,4,8,12,16,20 * * * indimail @prefix@/sbin/chowkidar -f /var/log/indimail/deliver.25/current -o @sysconfdir@/control/badrcptto -n 300 -T > /dev/null 2>&1
+#0 0 * * * indimail @prefix@/sbin/chowkidar -r -T -q > /dev/null 2>&1
 #
 # Build fast CDB spam database
 #
-#24 0,4,8,12,16,20 * * * @prefix@/sbin/chowkidar -f /var/log/indimail/smtpd.25/current -o @sysconfdir@/control/spamdb -n 1 -S > /dev/null 2>&1
-#0 0 * * * @prefix@/sbin/chowkidar -r -S -q > /dev/null 2>&1
-#10 0 * * * @prefix@/sbin/svctool --backup=/home/mail/backup --servicedir=/service --mysqlPrefix=/usr/local/mysql
-#
-# MRTG
-#
-*/5 * * * * /usr/bin/mrtg /var/www/html/mailmrtg/indimail.mrtg.cfg 2>&1 > /dev/null
+#24 0,4,8,12,16,20 * * * indimail @prefix@/sbin/chowkidar -f /var/log/indimail/smtpd.25/current -o @sysconfdir@/control/spamdb -n 1 -S > /dev/null 2>&1
+#0 0 * * * indimail @prefix@/sbin/chowkidar -r -S -q > /dev/null 2>&1
