@@ -21,7 +21,7 @@ cputime
 crc
 crcdiff
 create_services
-cronlist
+cronlist.i
 crypt
 dbinfo
 dbinfo.8
