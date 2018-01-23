@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: catChangeLog,v $
+# Revision 2.5  2018-01-23 22:03:32+05:30  Cprogrammer
+# fixed ChangeLog path
+#
 # Revision 2.4  2018-01-09 12:07:45+05:30  Cprogrammer
 # renamed ChangeLog to ChangeLog.indimail
 #
@@ -13,7 +16,7 @@
 # utility to append changelog to indimail.spec
 #
 #
-# $Id: catChangeLog,v 2.4 2018-01-09 12:07:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: catChangeLog,v 2.5 2018-01-23 22:03:32+05:30 Cprogrammer Exp mbhangui $
 #
 flag=0
 if [ $# -eq 1 ] ; then
