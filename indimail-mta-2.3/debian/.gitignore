@@ -5,3 +5,4 @@ indimail-mta.install
 indimail-mta.dsc
 README
 rules
+indimail-mta.cron.d
