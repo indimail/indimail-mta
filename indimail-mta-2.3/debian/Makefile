@@ -92,17 +92,19 @@ indimail-mini.postrm: indimail-mini.postrm.in
 	$(edit) $@.in > $@;
 indimail-mini.postinst: indimail-mini.postinst.in
 	$(edit) $@.in > $@;
+indimail-mta.cron.d: indimail-mta.cron.d.in
+	$(edit) $@.in > $@
 
 debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
 indimail-mta.postrm rules changelog compat obs_deb_prep control perm_list usr.bin.freshclam \
 usr.sbin.clamd daemontools.install daemontools.preinst daemontools.postinst daemontools.prerm \
-indimail-mini.prerm indimail-mini.preinst \
+indimail-mini.prerm indimail-mini.preinst indimail-mta.cron.d \
 indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
 daemontools.postrm ucspi-tcp.install indimail-mta.install
 	tar cf - copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
 		indimail-mta.postrm rules changelog compat obs_deb_prep ucspi-tcp.install \
 		daemontools.install daemontools.preinst daemontools.postinst daemontools.prerm \
 		daemontools.postrm control perm_list usr.bin.freshclam usr.sbin.clamd \
-		indimail-mini.prerm indimail-mini.preinst \
+		indimail-mini.prerm indimail-mini.preinst indimail-mta.cron.d \
 		indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
 		indimail-mta.install | gzip > $@
