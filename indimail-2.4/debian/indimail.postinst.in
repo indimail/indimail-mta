@@ -447,16 +447,6 @@ if [ -f ${mandir}/man7/authlib.7.gz ] ; then
 	done
 fi
 
-if [ -f ${sysconfdir}/cronlist.i ] ; then
-  echo "adding cron entries"
-  (
-  crontab -u root -l
-  /bin/cat ${sysconfdir}/cronlist.i
-  ) > /tmp/cron.indimail.$$
-  crontab -u root /tmp/cron.indimail.$$
-  /bin/rm -f /tmp/cron.indimail.$$
-fi
-
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
 #
