@@ -5,7 +5,7 @@ set -e
 prefix=@prefix@
 logdir=@logdir@
 mandir=@mandir@
-sysconfdir=@sysconfdir@
+qsysconfdir=@qsysconfdir@
 shareddir=@shareddir@
 rm=/bin/rm
 mv=/bin/mv
@@ -103,7 +103,7 @@ else
 		fi
 	done
 fi
-if [ ! -f ${sysconfdir}/control/idhost ] ; then
-	uname -n > ${sysconfdir}/control/idhost
+if [ ! -f ${qsysconfdir}/control/idhost ] ; then
+	uname -n > ${qsysconfdir}/control/idhost
 fi
 exit 0
