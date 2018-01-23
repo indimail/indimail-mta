@@ -33,10 +33,10 @@ fi
 
 case "$1" in
     remove|upgrade|deconfigure)
-	if [ -f ${libexecdir}/upgrade.sh ] ; then
+	if [ -f ${libexecdir}/iupgrade.sh ] ; then
 	(
 		echo "Running Custom Upgrade Script for prerm $1"
-		/bin/sh ${libexecdir}/upgrade.sh prerm $1 @version@ $* || true
+		/bin/sh ${libexecdir}/iupgrade.sh prerm $1 @version@ $* || true
 	) >> /tmp/indimail-setup.log 2>&1
 	fi
 	(
@@ -129,15 +129,9 @@ do
 	fi
 done
 
-if [ -f ${libexecdir}/upgrade.sh ] ; then
+if [ -f ${libexecdir}/iupgrade.sh ] ; then
 echo "Running Custom Upgrade Script for prerm $1"
-/bin/sh ${libexecdir}/upgrade.sh prerm uninstall @version@ $* || true
+/bin/sh ${libexecdir}/iupgrade.sh prerm uninstall @version@ $* || true
 fi
-
-# Remove IndiMail being started on system boot
-echo "removing indimail startup"
-SERVICE_LIST="sendmail exim4 mysql"
-export SERVICE_LIST
-$prefix/sbin/svctool --config=rm-boot
 ) >> /tmp/indimail-setup.log 2>&1
 exit 0
