@@ -50,11 +50,11 @@ build-stamp:
 	# run configure script
 	#
 	if [ $(tcpserver_plugin) -eq 1 ] ; then \
-		echo "-DLOAD_SHARED_OBJECTS" > qmail-1.03/conf-dlopen; \
+		echo "-DLOAD_SHARED_OBJECTS" > indimail-mta-$(version)/conf-dlopen; \
 		echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-dlopen; \
 	else \
-		/bin/rm -f qmail-1.03/conf-dlopen; \
-		/bin/rm -f ucspi-tcp-1.03/conf-dlopen; \
+		/bin/rm -f indimail-mta-$(version)/conf-dlopen; \
+		/bin/rm -f ucspi-tcp-0.88/conf-dlopen; \
 	fi
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then \
@@ -69,12 +69,12 @@ build-stamp:
 	# run make
 	#
 	if [ -d ucspi-tcp-0.88 ] ; then echo $(prefix)   > ucspi-tcp-0.88/conf-home; fi
-	if [ -d qmail-1.03 ]     ; then echo $(qmaildir) > qmail-1.03/conf-qmail; fi
-	if [ -d qmail-1.03 ]     ; then echo $(qsysconfdir) > qmail-1.03/conf-sysconfdir; fi
+	if [ -d indimail-mta-$(version) ]     ; then echo $(qmaildir) > indimail-mta-$(version)/conf-qmail; fi
+	if [ -d indimail-mta-$(version) ]     ; then echo $(qsysconfdir) > indimail-mta-$(version)/conf-sysconfdir; fi
 	if [ -d ucspi-tcp-0.88 ]             ; then $(MAKE) -s -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
-	if [ -d qmail-1.03 ]                 ; then $(MAKE) -s -C qmail-1.03 DESTDIR=$(DESTDIR); fi
+	if [ -d indimail-mta-$(version) ]                 ; then $(MAKE) -s -C indimail-mta-$(version) DESTDIR=$(DESTDIR); fi
 	${rm} -rf $(DESTDIR)/$(prefix)/$(libdir)/*.la
 	( \
 	echo NAME=indimail-mta; \
@@ -94,7 +94,7 @@ clean:
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) clean||true; fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) distclean||true; fi
 	if [ -d ucspi-tcp-0.88 ]             ; then $(MAKE) -s -C ucspi-tcp-0.88 clean||true; fi
-	if [ -d qmail-1.03 ]                 ; then $(MAKE) -s -C qmail-1.03 clean||true; fi
+	if [ -d indimail-mta-$(version) ]                 ; then $(MAKE) -s -C indimail-mta-$(version) clean||true; fi
 	dh_testdir
 	dh_testroot
 	dh_clean
@@ -107,7 +107,7 @@ install: build
 	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s install -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s install -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d ucspi-tcp-0.88 ]             ; then       $(MAKE) -s install -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
-	if [ -d qmail-1.03 ]                 ; then       $(MAKE) -s install -C qmail-1.03 DESTDIR=$(DESTDIR); fi
+	if [ -d indimail-mta-$(version) ]                 ; then       $(MAKE) -s install -C indimail-mta-$(version) DESTDIR=$(DESTDIR); fi
 	${rm} -rf $(DESTDIR)/$(mandir)/man3
 	${rm} -rf $(DESTDIR)/$(prefix)/include
 	${rm} -rf $(DESTDIR)/$(prefix)/queue
@@ -148,13 +148,13 @@ install: build
 	if [ -f ../BUILD/debian/usr.bin.freshclam ] ; then \
 		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
 	fi
-	if [ -f qmail-1.03/qupgrade.sh ] ; then \
+	if [ -f indimail-mta-$(version)/qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 qmail-1.03/qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
+		install -m 0755 indimail-mta-$(version)/qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
 	fi
-	if [ -f qmail-1.03/qlocal_upgrade.sh ] ; then \
+	if [ -f indimail-mta-$(version)/qlocal_upgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 qmail-1.03/qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
+		install -m 0755 indimail-mta-$(version)/qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
 	fi
 	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
 
