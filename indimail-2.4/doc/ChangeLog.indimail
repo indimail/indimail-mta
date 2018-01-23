@@ -26,7 +26,10 @@ Release 2.4 Start 04/12/2017
 04/01/2018
 13. svctool - separated out qmail, indimail config
 08/01/2018
-14. ProcessInFifo.c - create lastauth if not existing
+14. made indimail, indimail-mta packages independent.
+15. ProcessInFifo.c - create lastauth if not existing
+23/01/2018
+16. moved cron entries to /etc/cron.d
 
 * Mon Dec 04 2017 18:10:11 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 01/09/2017

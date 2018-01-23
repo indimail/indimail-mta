@@ -91,6 +91,9 @@ Release 2.4 Start 04/12/2017
 10. svctool - fixed conf_dir variable getting clobbered by create_fifologger,
     preventing creation of LOGFILTER service variable
 11. fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
-12. svctool, indimail-mta.spec, debian/indimail-mta.preinst - changed homedir of
-    qmaill to /var/log/svc
-13. made indimail, indimail-mta packages independent.
+12. svctool - new funtion default_indimail_control for creating
+    indimail specific control files
+13. svctool - separated out qmail, indimail config
+14. made indimail, indimail-mta packages independent.
+15. ProcessInFifo.c - create lastauth if not existing
+16. moved cron entries to /etc/cron.d
