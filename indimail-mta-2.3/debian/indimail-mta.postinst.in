@@ -454,11 +454,6 @@ if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
 fi
 
-if [ -f ${sysconfdir}/cronlist.q -a -d /etc/cron.d ] ; then
-  echo "adding cron entries"
-  ${cp} ${sysconfdir}/cronlist.q
-fi
-
 echo "Checking Installed Permissions"
 if [ -f ${libexecdir}/instcheck ] ; then
 	${libexecdir}/instcheck > /dev/null 2>&1

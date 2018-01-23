@@ -107,11 +107,6 @@ if [ " $1" = " purge" ] ; then
 	fi
 	${rmdir} --ignore-fail-on-non-empty ${qmaildir}/domains 2>/dev/null || true
 
-	if [ -d /etc/cron.d ] ; then
-  		echo "removing cron entries"
-  		${rm} -f /etc/cron.d/cronlist.q
-	fi
-
 	echo "removing aliases postmaster, mailer-daemon, root"
 	for i in postmaster mailer-daemon root
 	do
