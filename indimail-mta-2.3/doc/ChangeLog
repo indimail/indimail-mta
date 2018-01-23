@@ -35,3 +35,6 @@ Release 2.3 Start 25/12/2017
 25. qregex.c - compile sql code with USE_MYSQL definition
 26. svctool, indimail-mta.spec, debian/indimail-mta.preinst - changed homedir of
     qmaill to /var/log/svc
+23/01/2018
+27. moved cron entries to /etc/cron.d
+28. updated debian/* for v2.3 of indimail-mta
