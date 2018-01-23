@@ -541,7 +541,6 @@ yearcal
 yearcal.o
 *.o
 debian/_service
-cronlist.q
 indimail-mta.spec
 *.a
 *.lib
