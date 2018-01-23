@@ -2029,6 +2029,7 @@ done
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=/service --config=qselinux
+
 #
 # Install IndiMail to be started on system boot
 # The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
@@ -2036,14 +2037,9 @@ done
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 
-if [ -f %{qsysconfdir}/cronlist.q ] ; then
+if [ -f %{sysconfdir}/cronlist.q -a -d /etc/cron.d ] ; then
   echo "adding cron entries"
-  (
-  crontab -u root -l
-  %{__cat} %{qsysconfdir}/cronlist.q
-  ) > /tmp/cron.indimail-mta.$$
-  crontab -u root /tmp/cron.indimail-mta.$$
-  /bin/rm -f /tmp/cron.indimail-mta.$$
+  %{__cp} %{sysconfdir}/cronlist.q /etc/cron.d
 fi
 
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
@@ -2245,6 +2241,11 @@ done
 count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
 if [ $count -eq 0 ] ; then # ignore disabled services
   %{__rm} -rf %{servicedir} || true
+fi
+
+if [ -d /etc/cron.d ] ; then
+  echo "removing cron entries"
+  %{__rm} -f /etc/cron.d/cronlist.q
 fi
 
 echo "removing logs"
