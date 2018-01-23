@@ -9,7 +9,7 @@ prefix=$(shell head -1 conf-prefix 2>/dev/null)
 qmaildir=$(shell head -1 conf-qmail 2>/dev/null)
 mandir=$(shell echo `head -1 conf-prefix`/share/man 2>/dev/null)
 shareddir=$(shell head -1 conf-shared 2>/dev/null)
-sysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
+qsysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
 libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
 version=$(shell grep Version: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
 release=$(shell grep Release: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
@@ -25,7 +25,8 @@ edit = sed \
 	-e 's,@indimaildir\@,$(qmaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
-	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
+	-e 's,@sysconfdir\@,$(qsysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
