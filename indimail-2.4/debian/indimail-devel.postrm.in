@@ -46,20 +46,10 @@ esac
 
 #DEBHELPER#
 if [ "$1" = "remove" ]; then
-	if [ ! "@prefix@" = "/usr" ] ; then
-	echo "recreating ld.so cache"
-	/sbin/ldconfig
-	echo "removing man pages, include files"
-	for i in ${prefix}/include ${mandir}/man3
-	do
-		${rm} -rf $i || true
-	done
-	${rmdir} --ignore-fail-on-non-empty ${mandir} 2>/dev/null || true
 	echo "removing static libraries"
 	${rm} -f ${libdir}/libeps.a
 	${rm} -f ${libdir}/libcdb.a
 	${rm} -f ${libdir}/libflash.a
 	${rm} -f ${libdir}/libindimail.a
-	fi
 fi
 exit 0
