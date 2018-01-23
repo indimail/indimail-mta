@@ -2008,14 +2008,9 @@ done
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
 
-if [ -f %{sysconfdir}/cronlist.i ] ; then
+if [ -f %{sysconfdir}/cronlist.i -a -d /etc/cron.d ] ; then
   echo "adding cron entries"
-  (
-  crontab -u root -l
-  %{__cat} %{sysconfdir}/cronlist.i
-  ) > /tmp/cron.indimail.$$
-  crontab -u root /tmp/cron.indimail.$$
-  /bin/rm -f /tmp/cron.indimail.$$
+  %{__cp} %{sysconfdir}/cronlist.i /etc/cron.d
 fi
 
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
@@ -2170,10 +2165,26 @@ if [ $count -eq 0 ] ; then # ignore disabled services
   %{__rm} -rf %{servicedir} || true
 fi
 
+if [ -d /etc/cron.d ] ; then
+  echo "removing cron entries"
+  %{__rm} -f /etc/cron.d/cronlist.i
+fi
+
 echo "removing logs"
 %{__rm} -f %{indimaildir}/mysqldb/logs/logisam.log
 %{__rm} -f %{indimaildir}/mysqldb/logs/logquery
 %{__rm} -f %{indimaildir}/mysqldb/logs/logslow
+if [ -h %{logdir} ] ; then
+  log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
+else
+  log_dir=%{logdir}
+fi
+for i in fetchmail imapd.143 imapd-ssl.993 indisrvr.4000 inlookup.infifo \
+mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 proxyIMAP.4143 \
+proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup
+do
+  %{__rm} -rf $log_dir/$i
+done
 
 echo "recreating ld.so cache"
 /sbin/ldconfig
