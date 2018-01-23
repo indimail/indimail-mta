@@ -25,7 +25,7 @@ qsysconfdir=/etc/indimail
 shareddir=${prefix}/share/indimail
 mandir=${prefix}/share/man
 servicedir=/service
-logdir=/var/log/indimail
+logdir=/var/log/svc
 rm=/bin/rm
 rmdir=/bin/rmdir
 ####################################
