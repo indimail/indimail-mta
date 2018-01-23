@@ -27,7 +27,6 @@ version=@version@
 sysconfdir=@sysconfdir@
 libexecdir=@libexecdir@
 mandir=@mandir@
-clamav_version=@clamav_version@
 libdkim_version=@libdkim_version@
 libsrs2_version=@libsrs2_version@
 courier_version=@courier_version@
@@ -77,24 +76,6 @@ build-stamp:
 	#
 	# run configure script
 	#
-	if [ $(tcpserver_plugin) -eq 1 ] ; then \
-		echo "-DLOAD_SHARED_OBJECTS" > qmail-1.03/conf-dlopen; \
-		echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-dlopen; \
-	else \
-		/bin/rm -f qmail-1.03/conf-dlopen; \
-		/bin/rm -f ucspi-tcp-1.03/conf-dlopen; \
-	fi
-	#
-	if [ -d libdkim-$(libdkim_version) ] ; then \
-		cd libdkim-$(libdkim_version) ; \
-		./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(mandir) ; \
-		cd ..; \
-	fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then \
-		cd libsrs2-$(libsrs2_version) ; \
-		./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(mandir) ; \
-		cd ..; \
-	fi
 	if [ -d indimail-$(version) ] ; then \
 		FAKED_MODE=1;export FAKED_MODE; \
 		cd indimail-$(version); \
@@ -136,42 +117,24 @@ build-stamp:
 		--mandir=$(mandir) --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; \
 		cd ..; \
 	fi
-	if [ -d clamav-$(clamav_version) ] ; then  \
-		cd clamav-$(clamav_version) ; \
-		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --with-dbdir=$(prefix)/share/clamd \
-		--libexecdir=$(libexecdir) --mandir=$(mandir) `cat ../indimail-$(version)/config/clamav.opts`; \
-		cd ..; \
-	fi
 	#
 	# run make
 	#
-	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d indimail-$(version) ] ; then \
 		FAKED_MODE=1;export FAKED_MODE; \
 		$(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR); \
 		cd ..;unset FAKED_MODE; \
 	fi
-	if [ -d ucspi-tcp-0.88 ] ; then                   echo $(prefix) > ucspi-tcp-0.88/conf-home; fi
-	if [ -d ucspi-tcp-0.88 ] ; then                   echo $(shareddir) > ucspi-tcp-0.88/conf-shared; fi
-	if [ -d ucspi-tcp-0.88 ] ; then                   $(MAKE) -s -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d courier-imap-$(courier_version) ] ; then  $(MAKE) -s -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then   $(MAKE) -s -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	if [ -d nssd-$(nssd_version) ] ; then             $(MAKE) -s -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
-	if [ -d clamav-$(clamav_version) ] ; then         $(MAKE) -s -C clamav-$(clamav_version) DESTDIR=$(DESTDIR); fi
 	${rm} -rf $(DESTDIR)/$(prefix)/$(libdir)/*.la
 	touch build-stamp
 
 clean:
 	${rm} -f build-stamp configure-stamp
 	${rm} -rf $(DESTDIR)
-	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) clean||true; fi
-	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) distclean||true; fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) clean||true; fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) distclean||true; fi
-	if [ -d ucspi-tcp-0.88 ]             ; then $(MAKE) -s -C ucspi-tcp-0.88 clean||true; fi
-	if [ -d qmail-1.03 ]                 ; then $(MAKE) -s -C qmail-1.03 clean||true; fi
 	$(MAKE) -s clean; $(MAKE) -s distclean || true
 	dh_testdir
 	dh_testroot
@@ -183,14 +146,10 @@ install: build
 	dh_testroot
 	dh_prep || dh_clean -k
 	dh_installdirs
-	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s install -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s install -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
-	if [ -d ucspi-tcp-0.88 ] ; then                   $(MAKE) -s install -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d courier-imap-$(courier_version) ] ; then  $(MAKE) -s install -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s install -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then   $(MAKE) -s install -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	if [ -d nssd-$(nssd_version) ] ; then             $(MAKE) -s install -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
-	if [ -d clamav-$(clamav_version) ] ; then         $(MAKE) -s install -C clamav-$(clamav_version) DESTDIR=$(DESTDIR); fi
 	if [ -d indimail-$(version) ] ; then              $(MAKE) -s install -C indimail-$(version) DESTDIR=$(DESTDIR); fi
 
 binary-indep: build install
