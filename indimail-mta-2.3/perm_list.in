@@ -25,14 +25,13 @@
 %dir %attr(0755,root,root)         @mandir@/man7
 %dir %attr(0755,root,root)         @mandir@/man8
 %dir %attr(0555,root,qmail)        @prefix@/lib/indimail/plugins
-%dir %attr(2755,root,qmail)        @sysconfdir@
-%dir %attr(2755,root,qmail)        @sysconfdir@/etc
-%dir %attr(2775,indimail,qmail)    @sysconfdir@/certs
-%dir %attr(2775,indimail,qmail)    @sysconfdir@/users
-%dir %attr(2775,indimail,qmail)    @sysconfdir@/control
-%dir %attr(2755,indimail,qmail)    @sysconfdir@/control/domainkeys
-%dir %attr(2775,qmailr,qmail)      @sysconfdir@/control/ratelimit
-%dir %attr(0755,indimail,qmail)    @sysconfdir@/control/defaultqueue
+%dir %attr(2755,root,qmail)        @qsysconfdir@
+%dir %attr(2775,indimail,qmail)    @qsysconfdir@/certs
+%dir %attr(2775,indimail,qmail)    @qsysconfdir@/users
+%dir %attr(2775,indimail,qmail)    @qsysconfdir@/control
+%dir %attr(2755,indimail,qmail)    @qsysconfdir@/control/domainkeys
+%dir %attr(2775,qmailr,qmail)      @qsysconfdir@/control/ratelimit
+%dir %attr(0755,indimail,qmail)    @qsysconfdir@/control/defaultqueue
 #
 # Binaries
 #
@@ -325,14 +324,14 @@
 #
 # Config files
 #
-%attr(0444,root,root)  @sysconfdir@/perm_list.q
-%attr(0444,root,root)  @sysconfdir@/cronlist.q
-%attr(0444,root,root)  @sysconfdir@/controlfiles.q
-%attr(0444,root,root)  @sysconfdir@/qmailprog.list
-%attr(0644,root,root)  @sysconfdir@/etc/leapsecs.txt
-%attr(0644,root,root)  @sysconfdir@/etc/leapsecs.dat
-%attr(0644,root,root)  @sysconfdir@/procmailrc
-%attr(0644,root,root)  @sysconfdir@/indimail-mta-release
+%attr(0444,root,root)  @qsysconfdir@/perm_list.q
+%attr(0444,root,root)  @qsysconfdir@/cronlist.q
+%attr(0444,root,root)  @qsysconfdir@/controlfiles.q
+%attr(0444,root,root)  @qsysconfdir@/qmailprog.list
+%attr(0644,root,root)  @qsysconfdir@/etc/leapsecs.txt
+%attr(0644,root,root)  @qsysconfdir@/etc/leapsecs.dat
+%attr(0644,root,root)  @qsysconfdir@/procmailrc
+%attr(0644,root,root)  @qsysconfdir@/indimail-mta-release
 #
 # docs
 #
