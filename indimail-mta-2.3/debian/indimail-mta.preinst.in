@@ -27,10 +27,10 @@ case "$1" in
     install|upgrade)
 	${rm} -f /tmp/indimail-mta.install /tmp/indimail-mta.upgrade
 	touch /tmp/indimail-mta.$1
-	if [ -f ${libexecdir}/upgrade.sh ] ; then
+	if [ -f ${libexecdir}/qupgrade.sh ] ; then
 	(
 		echo "Running Custom Upgrade Script for pre $1"
-		/bin/sh ${libexecdir}/upgrade.sh pre $1 @version@ $* || true
+		/bin/sh ${libexecdir}/qupgrade.sh pre $1 @version@ $* || true
 	) >> /tmp/indimail-mta-setup.log 2>&1
 	fi
 	if [ " $1" = " upgrade" ] ; then
