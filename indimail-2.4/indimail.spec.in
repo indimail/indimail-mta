@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.439 2018-01-15 20:34:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.440 2018-01-23 22:03:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2008,9 +2008,9 @@ done
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
 
-if [ -f %{sysconfdir}/cronlist.i -a -d /etc/cron.d ] ; then
+if [ -f %{_sysconfdir}/cronlist.i -a -d /etc/cron.d ] ; then
   echo "adding cron entries"
-  %{__cp} %{sysconfdir}/cronlist.i /etc/cron.d
+  %{__cp} %{_sysconfdir}/cronlist.i /etc/cron.d
 fi
 
 if [ -f %{libexecdir}/iupgrade.sh ] ; then

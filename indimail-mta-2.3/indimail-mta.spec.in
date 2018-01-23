@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.128 2018-01-16 10:07:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.129 2018-01-23 22:01:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2037,9 +2037,9 @@ done
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 
-if [ -f %{sysconfdir}/cronlist.q -a -d /etc/cron.d ] ; then
+if [ -f %{_sysconfdir}/cronlist.q -a -d /etc/cron.d ] ; then
   echo "adding cron entries"
-  %{__cp} %{sysconfdir}/cronlist.q /etc/cron.d
+  %{__cp} %{_sysconfdir}/cronlist.q /etc/cron.d
 fi
 
 if [ -f %{libexecdir}/qupgrade.sh ] ; then

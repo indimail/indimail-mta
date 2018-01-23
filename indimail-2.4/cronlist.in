@@ -1,5 +1,5 @@
 #
-# $Id: cronlist.in,v 2.24 2018-01-09 12:12:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: cronlist.in,v 2.25 2018-01-23 22:03:44+05:30 Cprogrammer Exp mbhangui $
 #
 #2,32 * * * * indimail @prefix@/sbin/hostsync -d `uname -n`
 5,35 * * * * indimail @prefix@/sbin/clearopensmtp
