@@ -1831,6 +1831,8 @@ if [ %nodksignatures -eq 0 ] ; then
       key_bit=1024
     fi
     %{_prefix}/bin/dknewkey %{qsysconfdir}/control/domainkeys/%{dkimkeyfn} $key_bit
+	%{__chown} indimail:qmail %{qsysconfdir}/control/domainkeys/%{dkimkeyfn}
+	/bin/chmod 640 %{qsysconfdir}/control/domainkeys/%{dkimkeyfn}
   else
     ver_opt="none"
     sign_opt="none"
