@@ -402,18 +402,18 @@ the installation.
     % cd ..
 
     ##### STEP 4  ##### indimail-mta ##########################
-    Install indimail-mta MD5 39b619147db54687c4a583a7a94c9163
+    Install indimail-mta MD5 9feb27750d7729611b760863f9953c6b
     current working directory /home/local/src
     Download the indimail-mta package. The latest published ucspi-tcp package is indimail-mta-2.3.tar.gz.
 
     % gunzip -c indimail-mta-2.3.tar.gz | tar xf -
     % cd indimail-mta-2.3
 
-    change first line in qmail-1.03/conf-qmail to @indimaildir@
-    change first line in qmail-1.03/conf-shared to @shareddir@
-    change first line in qmail-1.03/conf-prefix to @prefix@
-    change first line in qmail-1.03/conf-libexec to @libexecdir@
-    change first line in qmail-1.03/conf-sysconfdir to @sysconfdir@
+    change first line in indimail-mta-2.3/conf-qmail to @indimaildir@
+    change first line in indimail-mta-2.3/conf-shared to @shareddir@
+    change first line in indimail-mta-2.3/conf-prefix to @prefix@
+    change first line in indimail-mta-2.3/conf-libexec to @libexecdir@
+    change first line in indimail-mta-2.3/conf-sysconfdir to @sysconfdir@
 
     % make -s
 
@@ -489,7 +489,8 @@ the installation.
 
     NOTES: To get a complete list of configure options type: ./configure --help
     If you change --enable-indiuser or --enable-indigroup to something different from
-    indimail:indimail, change conf-users or conf-groups in qmail-1.03 subdirectory
+    indimail:indimail, change conf-users or conf-groups in indimail-mta-2.3 subdirectory
+    and recompile/install indimail-mta-2.3
 
     % make -s [DESTDIR=staging_directory]
 
