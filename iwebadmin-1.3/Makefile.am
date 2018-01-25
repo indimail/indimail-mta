@@ -1,7 +1,7 @@
 @SET_MAKE@
 ACLOCAL_AMFLAGS=-I m4
 
-EXTRA_DIST=BUGS FAQ TRANSLATORS README.hooks html lang images contrib
+EXTRA_DIST=BUGS FAQ TRANSLATORS html lang images contrib
 
 htmllibdir=@htmllibdir@
 htmldir=@htmldir@
@@ -108,3 +108,6 @@ install-data-hook:
 	$(mkinstalldirs)         $(DESTDIR)@docdir@
 	$(INSTALL_DATA) iwebadmin_perm_list $(DESTDIR)@sysconfdir@/iwebadmin_perm_list  || exit 1
 	$(INSTALL_DATA) README $(DESTDIR)@docdir@/README || exit 1
+	$(INSTALL_DATA) README.hooks $(DESTDIR)@docdir@/README.hooks || exit 1
+	$(INSTALL_DATA) COPYING $(DESTDIR)@docdir@/COPYING || exit 1
+	$(INSTALL_DATA) AUTHORS $(DESTDIR)@docdir@/AUTHORS || exit 1
