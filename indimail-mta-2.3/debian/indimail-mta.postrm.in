@@ -118,17 +118,18 @@ if [ " $1" = " purge" ] ; then
 	fi
 
 	echo "removing tcp configuration"
+	${rm} -f ${qsysconfdir}/resolv.conf
 	for i in smtp qmtp qmqp
 	do
 		${rm} -f ${qsysconfdir}/tcp.$i.cdb ${qsysconfdir}/tcp.$i
 	done
 	${rm} -f ${qsysocnfdir}/control/controlfiles.q
-	for i in chkrcptdomains defaulthost greylist.white me signatures tlsclientmethod
+	for i in chkrcptdomains defaulthost greylist.white me signatures tlsclientmethod \
 		databytes dnsbllist hostip plusdomain smtpgreeting tlsserverciphers \
 		defaultdelivery envnoathost localiphost queue_base timeoutremote tlsservermethod \
 		defaultdomain filterargs locals rcpthosts timeoutsmtpd
 	do
-		${rm} -f ${qsysconfdir}/$i
+		${rm} -f ${qsysconfdir}/control/$i
 	done
 	for i in indimail.cnf stat.override backup.conf cronlist.q headerlist \
 		inc_deps indimail.mrtg.cfg \
