@@ -1,4 +1,4 @@
-DATE: Wed Dec 27 00:42:10 IST 2017
+DATE: Wed Jan 24 11:04:10 IST 2018
 
 Announcing Release 2.4 of IndiMail.
 
@@ -76,10 +76,10 @@ ChangeLog
 
 Release 2.4 Start 04/12/2017
 01. remove -release version_number from la_LDFLAGS in indimail, libcdb,
-	libeps, libsrs2, libflash 
+    libeps, libsrs2, libflash 
 02. inlookup - cache active login records using cache_active_pwd()
 03. svctool - added option --activeDays to specify duration of active records
-     to cache for inlookup
+    to cache for inlookup
 04. ProcessInFifo.c - initialize pwstat
 05. tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen()
     to be called for loading shared library
@@ -91,3 +91,9 @@ Release 2.4 Start 04/12/2017
 10. svctool - fixed conf_dir variable getting clobbered by create_fifologger,
     preventing creation of LOGFILTER service variable
 11. fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
+12. svctool - new funtion default_indimail_control for creating
+    indimail specific control files
+13. svctool - separated out qmail, indimail config
+14. made indimail, indimail-mta packages independent.
+15. ProcessInFifo.c - create lastauth if not existing
+16. moved cron entries to /etc/cron.d
