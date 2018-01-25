@@ -2,6 +2,7 @@ etc/pam.d              /etc
 etc/indimail           /etc
 lib/security           /lib
 var/indimail/domains   @indimaildir@
+var/indimail/inquery   @indimaildir@
 usr/bin                @prefix@
 usr/sbin               @prefix@
 usr/share/indimail/*   @shareddir@
