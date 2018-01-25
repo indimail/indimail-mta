@@ -542,7 +542,7 @@
 %attr(0444,root,qmail) @shareddir@/doc/37rules.pdf
 %attr(0444,root,qmail) @shareddir@/doc/AUTOTURN
 %attr(0444,root,qmail) @shareddir@/doc/ChangeLog
-%attr(0444,root,qmail) @shareddir@/doc/COPYING
+%attr(0444,root,qmail) @shareddir@/doc/COPYING.indimail
 %attr(0444,root,qmail) @shareddir@/doc/CREDITS
 %attr(0444,root,qmail) @shareddir@/doc/EXTTODO
 %attr(0444,root,qmail) @shareddir@/doc/FAQ.pdf
