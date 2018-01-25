@@ -97,8 +97,12 @@ procmail_perm_list: procmail_perm_list.in
 	$(edit) $@.in > $@
 
 install-data-hook:
+	$(mkinstalldirs)         $(DESTDIR)@docdir@
 	$(INSTALL_DATA) procmail_perm_list $(DESTDIR)$(sysconfdir)/procmail_perm_list  || exit 1
 	if test `@idcommand@` = "0" ; then \
 		chown root:indimail $(DESTDIR)$(bindir)/procmail || true; \
 		chmod 4511 $(DESTDIR)$(bindir)/procmail || true; \
 	fi
+	$(INSTALL_DATA) AUTHORS $(DESTDIR)@docdir@/AUTHORS || exit 1
+	$(INSTALL_DATA) COPYING $(DESTDIR)@docdir@/COPYING || exit 1
+	$(INSTALL_DATA) INSTALL.procmail $(DESTDIR)@docdir@/INSTALL.procmail || exit 1
