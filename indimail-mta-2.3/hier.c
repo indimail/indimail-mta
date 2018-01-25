@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.235  2018-01-25 16:16:09+05:30  Cprogrammer
+ * inquery, domains directory are part of indimail package
+ *
  * Revision 1.234  2018-01-09 11:41:09+05:30  Cprogrammer
  * renamed cronlist to cronlist.q
  * added nodnscheck control file
@@ -774,14 +777,12 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_prefix,     "bin", uidr, gidr, 0555);
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
 	d(auto_qmail_home, "queue", auto_uido, auto_gidq, 0755);
-	d(auto_qmail_home, "domains", auto_uido, auto_gidv, 0775);
 	d(auto_sysconfdir, "certs", auto_uidv, auto_gidq, 02775);
 	d(auto_qmail_home, "qscanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root/scanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "alias", auto_uida, auto_gidq, 02775);
 	d(auto_qmail_home, "autoturn", auto_uidv, auto_gidq, 02775);
-	d(auto_qmail_home, "inquery", auto_uidv, auto_gidq, 0775);
 	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 02755);
 	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/defaultqueue", auto_uidv, auto_gidq, 0755);
@@ -1576,7 +1577,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.234 2018-01-09 11:41:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.235 2018-01-25 16:16:09+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
