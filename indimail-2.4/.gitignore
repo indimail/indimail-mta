@@ -110,7 +110,7 @@ obs_deb_prep
 obs.mk
 osh
 overquota.sh
-perm_list
+perm_list.i
 postdel
 printdir
 proxyimap
