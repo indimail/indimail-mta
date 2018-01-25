@@ -140,13 +140,13 @@ install: build
 		${cp} ../SOURCES/usr.sbin.clamd $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
 	if [ -f ../SOURCES/usr.bin.freshclam ] ; then \
-		${cp} ../SOURCES/usr.bin.freshclam $((DESTDIR)$(sysconfdir)/apparmor.d/local; \
+		${cp} ../SOURCES/usr.bin.freshclam $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
 	if [ -f ../BUILD/debian/usr.sbin.clamd ] ; then \
-		${cp} ../BUILD/debian/usr.sbin.clamd $((DESTDIR)$(sysconfdir)/apparmor.d/local; \
+		${cp} ../BUILD/debian/usr.sbin.clamd $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
 	if [ -f ../BUILD/debian/usr.bin.freshclam ] ; then \
-		${cp} ../BUILD/debian/usr.bin.freshclam $((DESTDIR)$(sysconfdir)/apparmor.d/local; \
+		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
 	if [ -f indimail-mta-$(version)/qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
@@ -162,7 +162,7 @@ install: build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	find $((DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mta
 	dh_install --sourcedir=$(DESTDIR) -pdaemontools
 	dh_install --sourcedir=$(DESTDIR) -pucspi-tcp
