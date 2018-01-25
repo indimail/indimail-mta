@@ -127,8 +127,6 @@ build-stamp:
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then   $(MAKE) -s -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	if [ -d nssd-$(nssd_version) ] ; then             $(MAKE) -s -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
-	mkdir -p $(DESTDIR)$(domaindir)/domains
-	mkdir -p $(DESTDIR)$(indimaildir)/inquery
 	${rm} -rf $(DESTDIR)/$(prefix)/$(libdir)/*.la
 	touch build-stamp
 
@@ -151,6 +149,8 @@ install: build
 	if [ -d fetchmail-$(fetchmail_version) ] ; then   $(MAKE) -s install -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	if [ -d nssd-$(nssd_version) ] ; then             $(MAKE) -s install -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
 	if [ -d indimail-$(version) ] ; then              $(MAKE) -s install -C indimail-$(version) DESTDIR=$(DESTDIR); fi
+	mkdir -p $(DESTDIR)$(domaindir)/domains
+	mkdir -p $(DESTDIR)$(indimaildir)/inquery
 
 binary-indep: build install
 	dh_testdir
