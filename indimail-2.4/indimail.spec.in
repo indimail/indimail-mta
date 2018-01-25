@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.440 2018-01-23 22:03:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.441 2018-01-25 16:08:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -821,6 +821,7 @@ fi
 %ghost                            %{logdir}/*/*
 %endif
 
+%dir %attr(775,root,indimail)     %{domaindir}/domains
 %dir %attr(775,indimail,qmail)    %{indimaildir}/inquery
 %dir %attr(555,root,root)         %{libexecdir}/imapmodules
 %if "%{mandir}" != "/usr/share/man"
@@ -841,8 +842,6 @@ fi
 %if %nofetchmail == 0
 %dir %attr(755,root,root)         %{shareddir}/locale
 %endif
-
-%dir %attr(775,root,indimail)     %{domaindir}/domains
 
 %if %noclamav == 0
 %dir %attr(755,root,root)         %{_libdir}/pkgconfig
@@ -1288,7 +1287,7 @@ fi
 %attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
 
 %if %build_on_obs == 0
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.indimail
 %license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.altermime
 %license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.logalert
 %license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.ripmime
@@ -1303,10 +1302,8 @@ fi
 %endif
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.flash
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.fortune
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.iwebadmin
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.nssd
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.pam-multi
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.procmail
 %else
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.altermime
@@ -1323,10 +1320,8 @@ fi
 %endif
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.flash
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.fortune
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.iwebadmin
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.nssd
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.pam-multi
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.procmail
 %endif
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYRIGHT.flash
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYRIGHT.mpack
@@ -1338,11 +1333,9 @@ fi
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.courier-imap
 %endif
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.fortune
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.iwebadmin
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.logalert
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.nssd
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.pam-multi
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.procmail
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.ripmime
 
 %if %nofetchmail == 0
@@ -1371,13 +1364,11 @@ fi
 %attr(444,root,qmail)                   %{shareddir}/doc/README-CLUSTER
 %attr(444,root,qmail)                   %{shareddir}/doc/README.cdb
 %attr(444,root,qmail)                   %{shareddir}/doc/README.flash
-%attr(444,root,qmail)                   %{shareddir}/doc/README.iwebadmin
 %attr(444,root,qmail)                   %{shareddir}/doc/README.ldap
 %attr(444,root,qmail)                   %{shareddir}/doc/README.logalert
 %attr(444,root,qmail)                   %{shareddir}/doc/README.mpack
 %attr(444,root,qmail)                   %{shareddir}/doc/README.nssd
 %attr(444,root,qmail)                   %{shareddir}/doc/README.pam-multi
-%attr(444,root,qmail)                   %{shareddir}/doc/README.procmail
 %attr(444,root,qmail)                   %{shareddir}/doc/README.ripmime
 %attr(444,root,qmail)                   %{shareddir}/doc/README.vlimits
 %attr(444,root,qmail)                   %{shareddir}/doc/RELEASE-Notes
@@ -1406,7 +1397,6 @@ fi
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vcfilter
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vbulletin
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/sbin/systpass
-%verify (not user group mode) %attr(2755, alias, qmail)    %{indimaildir}/alias
 %verify (not user group mode) %attr(4755, root, qmail)     %{libexedir}/sq_vacation
 %verify (not user group mode) %attr(4755, root, root)      %{libexedir}/imapmodules/authshadow
 %endif
@@ -1591,8 +1581,6 @@ fi
 %verify_permissions -e %{_prefix}/sbin/systpass
 %verify_permissions -e %{libexecdir}/sq_vacation
 %verify_permissions -e %{libexecdir}/imapmodules/authshadow
-%verify_permissions -e %{indimaildir}/alias
-%verify_permissions -e %{indimaildir}/autoturn
 %endif
 %endif
 
