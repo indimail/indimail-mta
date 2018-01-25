@@ -112,7 +112,7 @@ if [ " $1" = " purge" ] ; then
 	do
 		${rm} -f ${qmaildir}/alias/.qmail-"$i"
 	done
-	${rm} -rf ${qmaildir}/Maildir
+	${rm} -rf ${qmaildir}/Maildir ${qmaildir}/alias/Maildir
 	if [ -d ${qmaildir}/alias ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${qmaildir}/alias 2>/dev/null || true
 	fi
@@ -122,7 +122,14 @@ if [ " $1" = " purge" ] ; then
 	do
 		${rm} -f ${qsysconfdir}/tcp.$i.cdb ${qsysconfdir}/tcp.$i
 	done
-	${rm} -f ${sysocnfdir}/control/controlfiles.q
+	${rm} -f ${qsysocnfdir}/control/controlfiles.q
+	for i in chkrcptdomains defaulthost greylist.white me signatures tlsclientmethod
+		databytes dnsbllist hostip plusdomain smtpgreeting tlsserverciphers \
+		defaultdelivery envnoathost localiphost queue_base timeoutremote tlsservermethod \
+		defaultdomain filterargs locals rcpthosts timeoutsmtpd
+	do
+		${rm} -f ${qsysconfdir}/$i
+	done
 	for i in indimail.cnf stat.override backup.conf cronlist.q headerlist \
 		inc_deps indimail.mrtg.cfg \
 		procmailrc indimail.settings lib_deps osh.table perm_list.q \
@@ -131,7 +138,7 @@ if [ " $1" = " purge" ] ; then
 		${rm} -f ${qsysconfdir}/$i
 	done
 	for i in rsa2048.pem rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
-		dh2048.pem dh512.pem rsa512.pem servercert.rand clientcert.pem
+		dh2048.pem dh512.pem rsa512.pem servercert.rand clientcert.pem dhparams.pem
 	do
 		${rm} -f ${qsysconfdir}/certs/$i
 	done
@@ -225,8 +232,7 @@ if [ " $1" = " purge" ] ; then
 	fi
 	[ "$log_dir" != "/" ] && ${rm} -fr $log_dir
 	) >> /tmp/indimail-mta-setup.log 2>&1
-else
-	echo "recreating ld.so cache"
-	/sbin/ldconfig
 fi
+echo "recreating ld.so cache"
+/sbin/ldconfig
 exit 0
