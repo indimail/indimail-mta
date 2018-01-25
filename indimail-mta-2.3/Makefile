@@ -42,7 +42,7 @@ default: it man leapsecs.dat
 all:it man leapsecs.dat
 
 perm_list.q: perm_list.in mysql_config
-	$(edit) perm_list.in > $@ && cp $@ debian
+	$(edit) perm_list.in > $@
 
 svctool: svctool.in mysql_config
 	$(edit) $@.in > $@
