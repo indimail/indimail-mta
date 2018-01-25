@@ -135,8 +135,8 @@ building few missing features (building web administration frontend, testing and
 LICENSING
 ---------
 
-IndiMail uses GPLv3 License. See file COPYING. The code uses libdomainkeys. Code related to
-domainkey is subjected to licensing terms detailed in softwarelicense1-1.html
+IndiMail uses GPLv3 License. See file COPYING.indimail. The code uses libdomainkeys. Code related
+to domainkey is subjected to licensing terms detailed in softwarelicense1-1.html
 
 BRIEF FEATURE LIST
 ------------------
