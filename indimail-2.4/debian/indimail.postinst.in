@@ -325,7 +325,7 @@ done
 
 if [ $nofetchmail -eq 0 ] ; then
 	# fetchmail
-	if [ $nodksignatures -eq 0 ] ; then
+	if [ $nodksignature -eq 0 ] ; then
 		if [ -x ${prefix}/bin/dknewkey ] ; then
 			ver_opt="both"
 			sign_opt="both"
