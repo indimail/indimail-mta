@@ -16,7 +16,6 @@ release=$(shell grep Release: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
 DEFS := $(shell uname -s | tr "[:lower:]" "[:upper:]")
 mysql_libs = $(shell sh ./mysql_libs $(DEFS))
 mysql_inc  = $(shell ./mysql_config --include)
-mysql_libdir=$(shell ./mysql_config --variable=pkglibdir)
 HOST=$(shell echo "`uname -m`-pc-`uname -s`-`uname -o|cut -d/ -f1`"|tr "[:upper:]" "[:lower:]")
 servicedir=/service
 logdir=$(shell cat conf-logdir)
@@ -30,7 +29,6 @@ edit = sed \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
-	-e 's,@mysql_libdir\@,$(mysql_libdir),g' \
 	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@HOST\@,$(HOST),g' \
 	-e 's,@prefix\@,$(prefix),g' \
