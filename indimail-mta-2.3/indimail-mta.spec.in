@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.133 2018-01-26 12:32:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.134 2018-01-26 23:32:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -145,6 +145,7 @@ BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils diffutils
 BuildRequires: readline gzip autoconf automake libtool pkgconfig
+BuildRequires: mysql-devel
 %if %build_on_obs == 1
 BuildRequires: libidn-devel
 %endif
