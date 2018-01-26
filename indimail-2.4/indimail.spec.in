@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.441 2018-01-25 16:08:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.442 2018-01-26 12:04:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -62,7 +62,7 @@
 %global logdir             @logdir@
 %global moduledir          %{_prefix}/lib/indimail/modules
 %global servicedir         @servicedir@
-%global pam_confdir        /etc/pam.d
+%global pam_confdir        %{_sysconfdir}/pam.d
 %global pam_module_dir     /%{_lib}/security
 %global _pkg_config_path   /usr/%{_lib}/pkgconfig
 %global mysqlSocket        /var/run/mysqld/mysqld.sock
@@ -1731,12 +1731,6 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   fi
   # selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
-  if [ -f /etc/inittab ] ; then # one of these days, this will disappear
-    /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
-    if [ $? -eq 0 ] ; then
-      %{__sed} -i 's{^#SV:{SV:{' /etc/inittab
-    fi
-  fi
   ) >> /tmp/indimail-setup.log 2>&1
   exit 0
 fi
@@ -1866,8 +1860,8 @@ else
     clamav_os=1
     clamdPrefix="/usr"
     qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-    if [ -d /etc/clamav ] ; then
-      mysysconfdir=/etc/clamav
+    if [ -d %{_sysconfdir}/clamav ] ; then
+      mysysconfdir=%{_sysconfdir}/clamav
     else
       mysysconfdir=%{_sysconfdir}
     fi
@@ -1996,9 +1990,9 @@ done
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
 
-if [ -f %{_sysconfdir}/cronlist.i -a -d /etc/cron.d ] ; then
+if [ -f %{sysconfdir}/cronlist.i -a -d %{_sysconfdir}/cron.d ] ; then
   echo "adding cron entries"
-  %{__cp} %{_sysconfdir}/cronlist.i /etc/cron.d
+  %{__cp} %{sysconfdir}/cronlist.i %{_sysconfdir}/cron.d
 fi
 
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
@@ -2153,9 +2147,9 @@ if [ $count -eq 0 ] ; then # ignore disabled services
   %{__rm} -rf %{servicedir} || true
 fi
 
-if [ -d /etc/cron.d ] ; then
+if [ -d %{_sysconfdir}/cron.d ] ; then
   echo "removing cron entries"
-  %{__rm} -f /etc/cron.d/cronlist.i
+  %{__rm} -f %{_sysconfdir}/cron.d/cronlist.i
 fi
 
 echo "removing logs"
