@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# $Log: vdeldomain_handle.in,v $
+# Revision 2.3  2018-01-27 09:05:18+05:30  Cprogrammer
+# remove domain from spamigore, nodnscheck file on domain deletion
+#
+# Revision 2.2  2016-05-22 23:22:56+05:30  Cprogrammer
+# fhs compliance
+#
+# Revision 2.1  2013-08-26 15:23:25+05:30  Cprogrammer
+# script to issue sighup to inlookup, qmail-send on domain deletion
+#
+#
+#
+# $Id: vdeldomain_handle.in,v 2.3 2018-01-27 09:05:18+05:30 Cprogrammer Exp mbhangui $
+
+# get securely chown, chmod path
+PATH=/usr/bin:/bin
+chown=$(which chown)
+chmod=$(which chmod)
+grep=$(which grep)
+mv=$(which mv)
+# send sighup to qmail-send, inlookup
+# remove domain from spamignore nodnscheck
+for i in spamignore nodnscheck
+do
+	echo "removing $1 from $i control file"
+	if [ -f @controldir@/$i ] ; then
+		$grep -w @"$1" @controldir@/$i > /dev/null
+		if [ $? -eq 0 ] ; then
+			$grep -v -w  @"$1" @controldir@/$i > /tmp/$i.$$
+			$mv /tmp/$i.$$ @controldir@/$i
+		fi
+	fi
+	$chown indimail:indimail @controldir@/$i
+	$chmod 644 @controldir@/$i
+done
+@prefix@/bin/svc -h /service/inlookup.* /service*/qmail-send.* 2>/dev/null
+exit 0

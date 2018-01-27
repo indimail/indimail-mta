@@ -1,0 +1,14 @@
+Makefile
+Makefile.in
+config.h
+config.log
+config.status
+libtool
+stamp-h1
+compile
+config.guess
+config.sub
+install-sh
+libeps.la
+ltmain.sh
+missing

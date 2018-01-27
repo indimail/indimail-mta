@@ -1,0 +1,36 @@
+.TH crypt 1
+
+.SH NAME
+crypt
+
+.SH SYNOPSYS
+crypt
+.I key
+.I salt
+
+.SH DESCRIPTION
+crypt is a command line impementation of crypt(3) password encryption function.
+It is based on the Data Encryption Standard algorithm with variations
+intended (among other things) to discourage use of hardware implementations of a key search.
+
+\fIkey\fR is a user's typed password.
+
+\fIsalt\fR is a two-character string chosen from the set [a-zA-Z0-9./]. This string is used to perturb the algorithm in one of
+4096 different ways.
+
+By taking the lowest 7 bits of each of the first eight characters of the key, a 56-bit key is obtained. This 56-bit key
+is used to encrypt repeatedly a constant string (usually a string consisting of all zeros). The returned value points to
+the encrypted password, a series of 13 printable ASCII characters (the first two characters represent the salt itself).
+The return value points to static data whose content is overwritten by each call.
+
+Warning: The key space consists of 2**56 equal 7.2e16 possible values. Exhaustive searches of this key space are possi‐
+ble using massively parallel computers. Software, such as crack(1), is available which will search the portion of this
+key space that is generally used by humans for passwords. Hence, password selection should, at minimum, avoid common
+words and names. The use of a passwd(1) program that checks for crackable passwords during the selection process is rec‐
+ommended.
+
+.SH RETURN VALUES
+On success, the encrypted password is printed on stdout. On error, non zero status is returned.
+
+.SH SEE ALSO
+crypt(3)
