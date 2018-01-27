@@ -28,4 +28,4 @@ indimail-mta (2.3-1) unstable; urgency=low
   * svctool, indimail-mta.spec, debian/indimail-mta.preinst - changed homedir of qmaill to /var/log/svc
   * moved cron entries to /etc/cron.d
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 23 Jan 2018 22:25:30 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 27 Jan 2018 12:22:15 +0530

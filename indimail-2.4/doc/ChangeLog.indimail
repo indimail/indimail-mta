@@ -1,4 +1,4 @@
-* Tue Jan 08 2018 09:19:27 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
+* Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
 04/12/2017
 01. remove -release version_number from la_LDFLAGS in indimail, libcdb,
@@ -30,6 +30,8 @@ Release 2.4 Start 04/12/2017
 15. ProcessInFifo.c - create lastauth if not existing
 23/01/2018
 16. moved cron entries to /etc/cron.d
+27/01/2018
+17. upgraded courier-imap to v4.18.2
 
 * Mon Dec 04 2017 18:10:11 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 01/09/2017

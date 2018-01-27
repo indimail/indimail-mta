@@ -1,4 +1,4 @@
-DATE: Wed Jan 24 11:04:10 IST 2018
+DATE: Sat Jan 27 08:56:50 IST 2018
 
 Announcing Release 2.4 of IndiMail.
 
@@ -6,6 +6,11 @@ Following are the main features of this release
 
 o Removed version numbers from shared library filenames
 o Cache active login records in inlookup during startup
+o Ability to switch between dlopen(), dlmopen() via environment
+  variable USE_DLMOPEN
+o Made indimail, indimail-mta packages independent. indimail-mta
+  now provides features of indimail by just loading libindimail.so
+o Upgraded courier-imap to v4.18.2
 
 This release includes the following files (Note: Files may be suffied with -2.4)
 
@@ -97,3 +102,4 @@ Release 2.4 Start 04/12/2017
 14. made indimail, indimail-mta packages independent.
 15. ProcessInFifo.c - create lastauth if not existing
 16. moved cron entries to /etc/cron.d
+17. upgraded courier-imap to v4.18.2

@@ -15,5 +15,6 @@ indimail (@version@-1) unstable; urgency=low
   * svctool - separated out qmail, indimail config
   * ProcessInFifo.c - create lastauth if not existing
   * moved cron entries to /etc/cron.d
+  * upgraded courier-imap to v4.18.2
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 23 Jan 2018 22:22:55 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 27 Jan 2018 12:22:15 +0530
