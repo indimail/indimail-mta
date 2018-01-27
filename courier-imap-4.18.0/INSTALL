@@ -1,370 +1,693 @@
-Installation Instructions
-*************************
-
-Copyright (C) 1994-1996, 1999-2002, 2004-2013 Free Software Foundation,
-Inc.
-
-   Copying and distribution of this file, with or without modification,
-are permitted in any medium without royalty provided the copyright
-notice and this notice are preserved.  This file is offered as-is,
-without warranty of any kind.
-
-Basic Installation
-==================
-
-   Briefly, the shell command `./configure && make && make install'
-should configure, build, and install this package.  The following
-more-detailed instructions are generic; see the `README' file for
-instructions specific to this package.  Some packages provide this
-`INSTALL' file but do not implement all of the features documented
-below.  The lack of an optional feature in a given package is not
-necessarily a bug.  More recommendations for GNU packages can be found
-in *note Makefile Conventions: (standards)Makefile Conventions.
-
-   The `configure' shell script attempts to guess correct values for
-various system-dependent variables used during compilation.  It uses
-those values to create a `Makefile' in each directory of the package.
-It may also create one or more `.h' files containing system-dependent
-definitions.  Finally, it creates a shell script `config.status' that
-you can run in the future to recreate the current configuration, and a
-file `config.log' containing compiler output (useful mainly for
-debugging `configure').
-
-   It can also use an optional file (typically called `config.cache'
-and enabled with `--cache-file=config.cache' or simply `-C') that saves
-the results of its tests to speed up reconfiguring.  Caching is
-disabled by default to prevent problems with accidental use of stale
-cache files.
-
-   If you need to do unusual things to compile the package, please try
-to figure out how `configure' could check whether to do them, and mail
-diffs or instructions to the address given in the `README' so they can
-be considered for the next release.  If you are using the cache, and at
-some point `config.cache' contains results you don't want to keep, you
-may remove or edit it.
-
-   The file `configure.ac' (or `configure.in') is used to create
-`configure' by a program called `autoconf'.  You need `configure.ac' if
-you want to change it or regenerate `configure' using a newer version
-of `autoconf'.
-
-   The simplest way to compile this package is:
-
-  1. `cd' to the directory containing the package's source code and type
-     `./configure' to configure the package for your system.
-
-     Running `configure' might take a while.  While running, it prints
-     some messages telling which features it is checking for.
-
-  2. Type `make' to compile the package.
-
-  3. Optionally, type `make check' to run any self-tests that come with
-     the package, generally using the just-built uninstalled binaries.
-
-  4. Type `make install' to install the programs and any data files and
-     documentation.  When installing into a prefix owned by root, it is
-     recommended that the package be configured and built as a regular
-     user, and only the `make install' phase executed with root
-     privileges.
-
-  5. Optionally, type `make installcheck' to repeat any self-tests, but
-     this time using the binaries in their final installed location.
-     This target does not install anything.  Running this target as a
-     regular user, particularly if the prior `make install' required
-     root privileges, verifies that the installation completed
-     correctly.
-
-  6. You can remove the program binaries and object files from the
-     source code directory by typing `make clean'.  To also remove the
-     files that `configure' created (so you can compile the package for
-     a different kind of computer), type `make distclean'.  There is
-     also a `make maintainer-clean' target, but that is intended mainly
-     for the package's developers.  If you use it, you may have to get
-     all sorts of other programs in order to regenerate files that came
-     with the distribution.
-
-  7. Often, you can also type `make uninstall' to remove the installed
-     files again.  In practice, not all packages have tested that
-     uninstallation works correctly, even though it is required by the
-     GNU Coding Standards.
-
-  8. Some packages, particularly those that use Automake, provide `make
-     distcheck', which can by used by developers to test that all other
-     targets like `make install' and `make uninstall' work correctly.
-     This target is generally not run by end users.
-
-Compilers and Options
-=====================
-
-   Some systems require unusual options for compilation or linking that
-the `configure' script does not know about.  Run `./configure --help'
-for details on some of the pertinent environment variables.
-
-   You can give `configure' initial values for configuration parameters
-by setting variables in the command line or in the environment.  Here
-is an example:
-
-     ./configure CC=c99 CFLAGS=-g LIBS=-lposix
-
-   *Note Defining Variables::, for more details.
-
-Compiling For Multiple Architectures
-====================================
-
-   You can compile the package for more than one kind of computer at the
-same time, by placing the object files for each architecture in their
-own directory.  To do this, you can use GNU `make'.  `cd' to the
-directory where you want the object files and executables to go and run
-the `configure' script.  `configure' automatically checks for the
-source code in the directory that `configure' is in and in `..'.  This
-is known as a "VPATH" build.
-
-   With a non-GNU `make', it is safer to compile the package for one
-architecture at a time in the source code directory.  After you have
-installed the package for one architecture, use `make distclean' before
-reconfiguring for another architecture.
-
-   On MacOS X 10.5 and later systems, you can create libraries and
-executables that work on multiple system types--known as "fat" or
-"universal" binaries--by specifying multiple `-arch' options to the
-compiler but only a single `-arch' option to the preprocessor.  Like
-this:
-
-     ./configure CC="gcc -arch i386 -arch x86_64 -arch ppc -arch ppc64" \
-                 CXX="g++ -arch i386 -arch x86_64 -arch ppc -arch ppc64" \
-                 CPP="gcc -E" CXXCPP="g++ -E"
-
-   This is not guaranteed to produce working output in all cases, you
-may have to build one architecture at a time and combine the results
-using the `lipo' tool if you have problems.
-
-Installation Names
-==================
-
-   By default, `make install' installs the package's commands under
-`/usr/local/bin', include files under `/usr/local/include', etc.  You
-can specify an installation prefix other than `/usr/local' by giving
-`configure' the option `--prefix=PREFIX', where PREFIX must be an
-absolute file name.
-
-   You can specify separate installation prefixes for
-architecture-specific files and architecture-independent files.  If you
-pass the option `--exec-prefix=PREFIX' to `configure', the package uses
-PREFIX as the prefix for installing programs and libraries.
-Documentation and other data files still use the regular prefix.
-
-   In addition, if you use an unusual directory layout you can give
-options like `--bindir=DIR' to specify different values for particular
-kinds of files.  Run `configure --help' for a list of the directories
-you can set and what kinds of files go in them.  In general, the
-default for these options is expressed in terms of `${prefix}', so that
-specifying just `--prefix' will affect all of the other directory
-specifications that were not explicitly provided.
-
-   The most portable way to affect installation locations is to pass the
-correct locations to `configure'; however, many packages provide one or
-both of the following shortcuts of passing variable assignments to the
-`make install' command line to change installation locations without
-having to reconfigure or recompile.
-
-   The first method involves providing an override variable for each
-affected directory.  For example, `make install
-prefix=/alternate/directory' will choose an alternate location for all
-directory configuration variables that were expressed in terms of
-`${prefix}'.  Any directories that were specified during `configure',
-but not in terms of `${prefix}', must each be overridden at install
-time for the entire installation to be relocated.  The approach of
-makefile variable overrides for each directory variable is required by
-the GNU Coding Standards, and ideally causes no recompilation.
-However, some platforms have known limitations with the semantics of
-shared libraries that end up requiring recompilation when using this
-method, particularly noticeable in packages that use GNU Libtool.
-
-   The second method involves providing the `DESTDIR' variable.  For
-example, `make install DESTDIR=/alternate/directory' will prepend
-`/alternate/directory' before all installation names.  The approach of
-`DESTDIR' overrides is not required by the GNU Coding Standards, and
-does not work on platforms that have drive letters.  On the other hand,
-it does better at avoiding recompilation issues, and works well even
-when some directory options were not specified in terms of `${prefix}'
-at `configure' time.
-
-Optional Features
-=================
-
-   If the package supports it, you can cause programs to be installed
-with an extra prefix or suffix on their names by giving `configure' the
-option `--program-prefix=PREFIX' or `--program-suffix=SUFFIX'.
-
-   Some packages pay attention to `--enable-FEATURE' options to
-`configure', where FEATURE indicates an optional part of the package.
-They may also pay attention to `--with-PACKAGE' options, where PACKAGE
-is something like `gnu-as' or `x' (for the X Window System).  The
-`README' should mention any `--enable-' and `--with-' options that the
-package recognizes.
-
-   For packages that use the X Window System, `configure' can usually
-find the X include and library files automatically, but if it doesn't,
-you can use the `configure' options `--x-includes=DIR' and
-`--x-libraries=DIR' to specify their locations.
-
-   Some packages offer the ability to configure how verbose the
-execution of `make' will be.  For these packages, running `./configure
---enable-silent-rules' sets the default to minimal output, which can be
-overridden with `make V=1'; while running `./configure
---disable-silent-rules' sets the default to verbose, which can be
-overridden with `make V=0'.
-
-Particular systems
-==================
-
-   On HP-UX, the default C compiler is not ANSI C compatible.  If GNU
-CC is not installed, it is recommended to use the following options in
-order to use an ANSI C compiler:
-
-     ./configure CC="cc -Ae -D_XOPEN_SOURCE=500"
-
-and if that doesn't work, install pre-built binaries of GCC for HP-UX.
-
-   HP-UX `make' updates targets which have the same time stamps as
-their prerequisites, which makes it generally unusable when shipped
-generated files such as `configure' are involved.  Use GNU `make'
-instead.
-
-   On OSF/1 a.k.a. Tru64, some versions of the default C compiler cannot
-parse its `<wchar.h>' header file.  The option `-nodtk' can be used as
-a workaround.  If GNU CC is not installed, it is therefore recommended
-to try
-
-     ./configure CC="cc"
-
-and if that doesn't work, try
-
-     ./configure CC="cc -nodtk"
-
-   On Solaris, don't put `/usr/ucb' early in your `PATH'.  This
-directory contains several dysfunctional programs; working variants of
-these programs are available in `/usr/bin'.  So, if you need `/usr/ucb'
-in your `PATH', put it _after_ `/usr/bin'.
-
-   On Haiku, software installed for all users goes in `/boot/common',
-not `/usr/local'.  It is recommended to use the following options:
-
-     ./configure --prefix=/boot/common
-
-Specifying the System Type
-==========================
-
-   There may be some features `configure' cannot figure out
-automatically, but needs to determine by the type of machine the package
-will run on.  Usually, assuming the package is built to be run on the
-_same_ architectures, `configure' can figure that out, but if it prints
-a message saying it cannot guess the machine type, give it the
-`--build=TYPE' option.  TYPE can either be a short name for the system
-type, such as `sun4', or a canonical name which has the form:
-
-     CPU-COMPANY-SYSTEM
-
-where SYSTEM can have one of these forms:
-
-     OS
-     KERNEL-OS
-
-   See the file `config.sub' for the possible values of each field.  If
-`config.sub' isn't included in this package, then this package doesn't
-need to know the machine type.
-
-   If you are _building_ compiler tools for cross-compiling, you should
-use the option `--target=TYPE' to select the type of system they will
-produce code for.
-
-   If you want to _use_ a cross compiler, that generates code for a
-platform different from the build platform, you should specify the
-"host" platform (i.e., that on which the generated programs will
-eventually be run) with `--host=TYPE'.
-
-Sharing Defaults
-================
-
-   If you want to set default values for `configure' scripts to share,
-you can create a site shell script called `config.site' that gives
-default values for variables like `CC', `cache_file', and `prefix'.
-`configure' looks for `PREFIX/share/config.site' if it exists, then
-`PREFIX/etc/config.site' if it exists.  Or, you can set the
-`CONFIG_SITE' environment variable to the location of the site script.
-A warning: not all `configure' scripts look for a site script.
-
-Defining Variables
-==================
-
-   Variables not defined in a site shell script can be set in the
-environment passed to `configure'.  However, some packages may run
-configure again during the build, and the customized values of these
-variables may be lost.  In order to avoid this problem, you should set
-them in the `configure' command line, using `VAR=value'.  For example:
-
-     ./configure CC=/usr/local2/bin/gcc
-
-causes the specified `gcc' to be used as the C compiler (unless it is
-overridden in the site shell script).
-
-Unfortunately, this technique does not work for `CONFIG_SHELL' due to
-an Autoconf limitation.  Until the limitation is lifted, you can use
-this workaround:
-
-     CONFIG_SHELL=/bin/bash ./configure CONFIG_SHELL=/bin/bash
-
-`configure' Invocation
-======================
-
-   `configure' recognizes the following options to control how it
-operates.
-
-`--help'
-`-h'
-     Print a summary of all of the options to `configure', and exit.
-
-`--help=short'
-`--help=recursive'
-     Print a summary of the options unique to this package's
-     `configure', and exit.  The `short' variant lists options used
-     only in the top level, while the `recursive' variant lists options
-     also present in any nested packages.
-
-`--version'
-`-V'
-     Print the version of Autoconf used to generate the `configure'
-     script, and exit.
-
-`--cache-file=FILE'
-     Enable the cache: use and save the results of the tests in FILE,
-     traditionally `config.cache'.  FILE defaults to `/dev/null' to
-     disable caching.
-
-`--config-cache'
-`-C'
-     Alias for `--cache-file=config.cache'.
-
-`--quiet'
-`--silent'
-`-q'
-     Do not print messages saying which checks are being made.  To
-     suppress all normal output, redirect it to `/dev/null' (any error
-     messages will still be shown).
-
-`--srcdir=DIR'
-     Look for the package's source code in directory DIR.  Usually
-     `configure' can determine that directory automatically.
-
-`--prefix=DIR'
-     Use DIR as the installation prefix.  *note Installation Names::
-     for more details, including other options available for fine-tuning
-     the installation locations.
-
-`--no-create'
-`-n'
-     Run the configure checks, but stop before creating any output
-     files.
-
-`configure' also accepts some other, not widely useful, options.  Run
-`configure --help' for more details.
+                                  Courier-IMAP
+
+   For a general introduction and configuration settings for some popular
+   IMAP clients, go and read imap/README(.html).
+
+   In this document:
+
+     * Requirements
+     * Upgrading
+     * Installation
+     * IMAP configuration file
+     * Account initialization hook
+     * Using shared folders
+     * CRAM-MD5 Authentication
+     * Certificate Authentication
+     * Sending mail via an IMAP connection
+     * Realtime folder status updates
+     * Account OPTIONS
+     * SMAP
+
+Requirements
+
+   Now is the good time to read the FAQ, before you start. The FAQ is located
+   in the file imap/FAQ(.html?).
+
+     * C++ compiler - A C++ compiler is required. The server is written in C,
+       but there are some configuration scripts that use C++ code.
+     * make - The GNU make is recommended. Solaris's make is to be avoided.
+       xBSD already has a gmake port, install it and use it (use gmake
+       everywhere this document refers to make).
+     * GDBM/DB - either the GDBM or the Berkeley DB library is required.
+     * The GNU IDN library (http://www.gnu.org/software/libidn/).
+     * Gamin (http://www.gnome.org/~veillard/gamin/) or FAM
+       (http://oss.sgi.com/projects/fam/) -- either one -- is optional. If
+       Gamin or FAM is installed, it is used for an enhanced IMAP IDLE
+       implementation that provides real-time folder status updates to
+       concurrent IMAP clients that have the same folder opened.
+     * The Courier authentication library. Before installing Courier-IMAP,
+       download and install http://www.courier-mta.org/authlib/.
+
+UPGRADING
+
+  Upgrading from Courier-IMAP 4.14, and earlier
+
+   Version 4.15 removes the TLS_DHCERTFILE parameter from imap, and pop3d
+   configuration files. DH parameters, and DH parameters only, get read from
+   the new TLS_DHPARAMS file (and the other functionaly of TLS_DHCERTFILE,
+   for DSA certificates, is merged into TLS_CERTFILE). After upgrading, run
+   the mkdhparams script to create a new TLS_DHPARAMS file.
+
+  Upgrading from Courier-IMAP 4.9.3, and earlier
+
+   In 4.10.0, the IMAP server resets the epoch for an internal sequence
+   number generator for new mailboxes. This is an internal attribute of
+   individual IMAP folders, that's defined by the IMAP specification. Each
+   folder in a mailbox carries an individual sequence number, it is defined
+   as a 32 bit integer value, and required to be a monotonically increasing
+   value. and RFC 2060 recommended that "... a good value to use for the
+   unique identifier validity value is a 32-bit representation of the
+   creation date/time of the mailbox."
+
+   On modern platforms, the system time is now a 64 bit value (even on the
+   remaining 32 bit platforms). With Y2038K on the horizon, it's time to
+   reset the epoch (the new epoch, for anyone who cares, runs until the year
+   2069). The upgrade impact on existing systems is as follows.
+
+   There is no impact on existing folders in existing mailboxes. New folders
+   will have their internal sequence number in the new epoch.
+
+   One potential issue exists if a folder gets deleted by the IMAP client,
+   and then recreated later. The new folder will now get a lower sequence
+   number. Although this is technically not allowed, it's unlikely to cause
+   problems with most IMAP clients. If the same IMAP client deletes and
+   recreated the mailbox, the client should be completely up to speed. If,
+   however, there's an IMAP client that accesses the same folder, and some
+   other IMAP client deletes and recreates the same folder, this might cause
+   confusion. Most IMAP clients are likely to recover automatically; most
+   IMAP clients only care that the new sequence number they see is different
+   from the previous one, in order to trigger a full resynchronization with
+   the server. In case an IMAP client fails to resynchronize, the remedy is
+   to remove the IMAP account configuration from the client, and add it back
+   in.
+
+   Copying a mailbox by directly copying the files in maildirs preserves each
+   folder's epoch. However if a mailbox gets migrated by copying its contents
+   over IMAP, the folders on the destination IMAP server will not necessarily
+   have a monotonically higher value -- neither does IMAP guarantee that
+   different IMAP servers must be in agreement with each other on the subject
+   of sequence numbers -- and if IMAP clients are repointed to a new server
+   they may experience problems opening existing mailboxes. To remedy this
+   situation it will be necessary to completely remove and then reconfigure
+   the IMAP account, in the IMAP client. Again, verbatim copying of maildirs
+   has no issues.
+
+   A marginal situation exists where if a server completely runs of disk
+   space, or if there's a hardware failure, and the IMAP server is unable to
+   retrieve or save an existing folder's sequence number, and must now start
+   afresh and generate a new one, the IMAP server running on a new epoch will
+   recover with a lower sequence than the one that existed before. The
+   rememdy is the same: remove the IMAP account configuration from the
+   client, and then recreate it.
+
+  Upgrading from Courier-IMAP 3, and earlier.
+
+   Beginning with 4.0, the authentication library that used to be a part of
+   Courier-IMAP's source has been spun off into a standalone authentication
+   library.
+
+   You must download and install the Courier Authentication Library from
+   http://www.courier-mta.org/authlib/ before upgrading. Review the
+   documentation in the courier-authlib package for more information.
+
+   After upgrading to 4.0, or later, to avoid future confusion the old copies
+   of these configuration files (including the .dist files), should be
+   removed from Courier-IMAP's configuration directory. They now live in
+   Courier-authlib's configuration directory (/usr/local/etc/authlib, or
+   whatever was specified to Courier-authlib's configure script).
+
+  Upgrading from Courier-IMAP 1.7.3, and earlier.
+
+   After upgrading from Courier-IMAP 1.7.3, or earlier, any existing mail in
+   POP3 mailboxes may show up as new mail, by some mail clients. Other mail
+   clients may end up downloading a second copy of any message that was left
+   in the mailbox before the upgrade. This is a one-time event. Courier-IMAP
+   2.0.0 uses a different mechanism for generating POP3 message identifiers.
+   Mail clients that use POP3 identifiers will behave as if all messages,
+   that were left in the POP3 mailbox before the upgrade, were removed, and
+   replaced by new messages that happen to be the same content. Depending on
+   how the POP3 mail client works, it will either flag all messages in the
+   mailbox as unread, or download a second copy of the message.
+
+   Upgrading from Courier-IMAP 1.3.0, and later versions, is a
+   straightforward process. Follow the instructions in the INSTALLATION
+   section, below, to install the new version. The "make install-configure"
+   command automatically preserves the existing system configuration.
+   However, note that new versions of Courier-IMAP will often introduce
+   additional configuration options. After make install-configure a cursory
+   inspection of configuration files in /usr/lib/courier-imap/etc (the
+   default location of the configuration directory) is recommended, in order
+   to identify any new configuration settings that might need adjustment.
+
+  Upgrading from Courier-IMAP 1.3.8.2 and earlier
+
+   The default configuration options have slightly changed. The default
+   configuration script will now always build the authdaemon module, and
+   build all real authentication modules inside authdaemond. This is true
+   even with the authvchkpw module.
+
+  Upgrading from Courier-IMAP 1.2.3 and earlier
+
+   Courier-IMAP 1.3.0 introduced a new configuration file format that allows
+   configuration files to be automatically upgraded. Additionally, several
+   existing configuration files have been renamed in order for their names to
+   be consistent with the Courier build:
+
+ Courier-IMAP < 1.3  Courier-IMAP 1.3.0
+ --------            ---------
+ imapd.config        imapd
+ imapd-ssl.config    imapd-ssl
+ pop3d.config        pop3d
+ pop3d-ssl.config    pop3d-ssl
+
+   The NEWS file has a detailed explanation of how configuration files are
+   now installed. Basically, make install now installs configfilename.dist,
+   and make install-configure copies configfilename.dist to configfilename,
+   becoming the actual configuration file. If there is an existing
+   configfilename, the old settings in configfilename which are still valid
+   will be kept in the new configfilename.
+
+   This only works as long as both the old and the new configuration files
+   are in the new format, so this will actually take effect with your next
+   upgrade Courier-IMAP. If the previous installed version of Courier-IMAP
+   did not use the new format for configuration files (1.2.3 and earlier),
+   the old configuration file is backed up to configfilename.bak.
+
+   The recommended procedure for upgrading from versions 1.2.3 and earlier is
+   as follows:
+
+   The recommended upgrade procedure is as follows:
+
+     * Back up /usr/lib/courier-imap/etc
+     * Follow the installation procedures, below
+     * After installing, manually edit all configuration files. Restore, by
+       hand, any custom configuration settings.
+
+   All configuration files are kept in the configuration directory. Nothing
+   else in /usr/lib/courier-imap is configurable. Do not simply overwrite
+   1.3.0 configuration files with configuration files from the previous
+   version. It's tempting, but don't do it. It may work, but you will lose
+   the automatic upgrade capability for future releases.
+
+  Upgrading from Courier-IMAP 1.1 or earlier
+
+   Note that Courier-IMAP 1.2 includes a compatible POP3 server, and the
+   installation script will also install a POP3 server on your system. Even
+   though it is installed, you are not required to use it, but you still need
+   to be aware of its existence. If you install the RPM build of
+   Courier-IMAP, you're going to get the POP3 server started at system boot.
+   If you do not need POP3 services, edit both the pop3d.config and
+   pop3d-ssl.config configuration files, and set POP3DSTART and POP3DSSLSTART
+   to NO
+
+  Upgrading from Courier-IMAP 1.0 or earlier
+
+   If the server is running, manually stop the server before installing the
+   new version.
+
+INSTALLATION
+
+   To compile and install the Courier-IMAP server (this is the short version,
+   a longer version follows):
+
+
+ $ ./configure [ options, see below ]
+ $ make
+ $ make check       # Note - the --enable-workarounds-for-imap-client-bugs
+                    # option to configure will result in make check FAILING.
+ $ su root
+ # make install     # Or, make install-strip, to strip the executables.
+ # make install-configure   # Install configuration files.
+
+                    # Start the authdaemond process
+
+     NOTE
+
+     You MUST run the configure script as normal user, not root. Did you
+     extract the tarball as root? It won't work. Remove the extracted source
+     code. Log in as a normal user. Extract the source code as a normal user,
+     then run configure. You will do everything as a normal user, except for
+     the final step of installing the compiled software.
+
+     NOTE
+
+     Courier-IMAP does not use inetd or xinetd. Any inetd or xinetd
+     configuration settings for the IMAP and POP3 ports must be turned off.
+     Courier-IMAP will not start if inetd or xinetd is listening for IMAP or
+     POP3 connections.
+
+   --------------------------------------------------------------------------
+
+   As mentioned in "Requirements", above, if you are using xBSD, you must use
+   gmake instead of make.
+
+   --------------------------------------------------------------------------
+
+   NOTE: The configure script may run as much as 5-10 minutes on slow
+   machines. It may appear that configure is stuck in a loop, but that's an
+   illusion. Courier-IMAP is built from a collection of modular components,
+   each with its own configuration script. The configuration scripts share a
+   lot of common code, leading to an initial impression that the same
+   configuration script is being repeatedly run.
+
+   See below for a description of the options to the configure script.
+
+   WARNING: set your umask to 022 before running make install or make
+   install-strip.
+
+   You should try make install-strip first. Use make install if make
+   install-strip fails.
+
+   The configure script accepts certain options, but the defaults should be
+   fine most of the time. make install puts everything in
+   /usr/lib/courier-imap. If the directory /etc/pam.d exists, make install
+   creates /etc/pam.d/imap and /etc/pam.d/pop3, overwriting any existing
+   files. If you have some other IMAP server installed, this means that you
+   will want to save your existing configuration in /etc/pam.d/{imap|pop3}.
+
+   "make check" performs some internal sanity checks. If make check fails,
+   something is wrong, and Courier-IMAP may not work for you reliably.
+   Certain options are documented to cause make check to fail, due to
+   different IMAP protocol behavior. If you need to use those options, first
+   compile Courier-IMAP without them, run make check, and if all goes well
+   extract the source code again in a different directory, then build it for
+   the second time using your options.
+
+   After installation, you will need to review the files in
+   /usr/lib/courier-imap/etc and make any changes you deem necessary.
+
+   After running make install or make install-strip you will then have to
+   modify your system's startup scripts to run Courier-IMAP when your system
+   boots.
+
+   Use the following command to start the Courier-IMAP server:
+
+
+ $ /usr/lib/courier-imap/libexec/imapd.rc start
+
+   This assumes that Courier-IMAP is installed in /usr/lib/courier-imap. Use
+   the following command to stop Courier-IMAP:
+
+
+ $ /usr/lib/courier-imap/libexec/imapd.rc stop
+
+   You will have to add these commands to your system startup/shutdown
+   scripts.
+
+    IMAP over SSL
+
+   To add SSL support you have to install OpenSSL or GnuTLS before installing
+   Courier-IMAP. Download OpenSSL from http://www.openssl.org/, or GnuTLS
+   from http://www.gnutls.org.
+
+   Follow OpenSSL's or GnuTLS's installation instructions, then build
+   Courier-IMAP.
+
+     NOTE: Most systems already have an available OpenSSL or GnuTLS package.
+     Do not build OpenSSL or GnuTLS yourself, if a prebuilt package is
+     already available. Just install the prebuilt package.
+
+     NOTE: The development libraries must be installed in addition to the
+     runtime package, in order to build Courier-IMAP. On most systems, the
+     development files (header files, libraries, etc...) are provided in a
+     separate "devel" package. The base OpenSSL/GnuTLS package is not
+     sufficient to build Courier-IMAP, the development libraries must be
+     installed.
+
+   The OpenSSL library is selected when both OpenSSL and GnuTLS libraries are
+   found by the configure script. Use the --with-gnutls option to explicitly
+   select the GnuTLS library over OpenSSL.
+
+   The /usr/lib/courier-imap/etc/imapd-ssl configuration file sets some
+   additional options for SSL support, which you may need to adjust. Consult
+   that configuration file for additional information. Then, you also have to
+   run the /usr/lib/courier-imap/libexec/imapd-ssl.rc script from your system
+   startup and shutdown scripts, just like the
+   /usr/lib/courier-imap/libexec/imapd.rc script. You may accept both SSL and
+   non-SSL connections by running both scripts.
+
+   Note that SSL requires a valid, signed, X.509 certificate to be installed
+   where Courier-IMAP expects to find it. The default location for the X.509
+   certificate, in PEM format, is /usr/lib/courier-imap/share/imapd.pem. The
+   X.509 certificate must be signed by a certificate authority that is known
+   to the IMAP client. You can generate your own self-signed certificate by
+   running the script /usr/lib/courier-imap/share/mkimapdcert which will work
+   too, except that IMAP clients using SSL will display a warning message the
+   first time they connect to the server. To get rid of the warning message
+   you'll have to pay for a signed X.509 certificate. The gory details of
+   setting up SSL is beyond the scope of this document, and you should
+   consult the OpenSSL documentation for more information.
+
+   The mkimapdcert script will not overwrite an existing imapd.pem
+   certificate, in order to allow precompiled packages to simply call
+   mkimapdcert after installation, without worry.
+
+    Initial parameters, and a monthly cron job to generate DH parameters
+
+   Run the mkdhparams script to create a DH parameter file. A monthly cron
+   job should be created to run the mkdhparams script, in order to
+   periodically generate a new set of DH parameters. mkdhparams checks if the
+   DH parameter file's timestamp is older than 25 days, and creates a new
+   file if it is. DH parameters are used to set up encrypted connections.
+
+    The bundled POP3 server
+
+   The POP3 server included with Courier-IMAP provides POP3 access to INBOX,
+   and that's about it. Enabling the POP3 server is very similar to enabling
+   the IMAP server, with the following differences:
+
+   The configuration files are /usr/lib/courier-imap/etc/pop3dand
+   /usr/lib/courier-imap/etc/pop3d-ssl.
+
+   The startup/shutdown scripts are /usr/lib/courier-imap/libexec/pop3d.rcand
+   /usr/lib/courier-imap/libexec/pop3d-ssl.rc.
+
+   The SSL certificate is /usr/lib/courier-imap/share/pop3d.pem, and the
+   /usr/lib/courier-imap/share/mkpop3dcert script can be used to create a
+   self-signed SSL certificate for testing purposes.
+
+    System-V style startup
+
+   If your system uses System-V style startup scripts, take a look at
+   courier-imap.sysvinit - this is a sample /etc/init.d script.
+   courier-imap.sysvinit is created by configure. In most cases it can be
+   merely copied to /etc/init.d and /etc/rc?.d directories (with the execute
+   permission bit turned on).
+
+   The sample startup script will check if IMAP or POP3 over SSL is enabled.
+   The sample startup script automatically creates dummy SSL certificates the
+   first time it is executed.
+
+    Options to configure:
+
+     * --prefix=pathname - install here, instead of /usr/lib/courier-imap
+     * --without-ipv6 - do not compile IPv6 support. The configure
+       automatically checks if IPv6 support is available, and enables it
+       automatically. This option suppresses IPv6 support, even if it's
+       available. IPv6 support means that Courier-IMAP will create an IPv6
+       socket and accept IPv6 connections. --without-ipv6 should be used if
+       your system does not fully support IPv6, or if its implementation is
+       buggy. Most Linux distributions now ship with IPv6 support in glibc,
+       but without compiling the kernel for IPv6 support. This results in
+       modprobe regularly complaining in /var/log/messages about the fact
+       that it can't load the IPv6 module. Use --without-ipv6 to turn off
+       IPv6 support, if that bothers you.
+     * --bindir=pathname , --mandir=pathname - override default names of
+       subdirectories under prefix. See below for more information.
+     * --with-db=db - Use the DB library instead of the GDBM library You must
+       have either the GDBM or the DB library installed. If both are present,
+       GDBM is selected unless you use this option. The GDBM/DB library is
+       used by Courier for certain functions.
+     * --with-gnutls - Use the GnuTLS library even if the OpenSSL library is
+       also installed. Courier-IMAP automatically uses whichever one is
+       available. The OpenSSL library is selected if both are present. Use
+       this option to override and select GnuTLS instead.
+     * --with-piddir=dir - use dir/imapd.pid to store couriertcpd's process
+       ID.
+     * --with-userdb=file - use file instead of /etc/userdb (also means that
+       userdb.dat and userdbshadow.dat are appropriately renamed).
+     * --enable-workarounds-for-imap-client-bugs - there are a number of
+       various bugs in certain IMAP clients. The current list of broken IMAP
+       clients consists of Netscape Messenger and Sun's StarOffice. This
+       option enables some workarounds for some bugs in these clients,
+       however, note that this may break compatibility with software that
+       correctly implements IMAP4rev1. Additionally, "make check" will fail
+       when this option is used. See imap/BUGS.(html|txt) for more
+       information. NOTE - if this option is used, make check WILL FAIL. You
+       should first configure Courier-IMAP without this option, run make
+       check, then reconfigure Courier-IMAP with this option.
+     * --with-trashquota - include deleted messages, and the Trash folder, in
+       the estimated quota usage for maildirs. Quotas are optional, see the
+       file maildir/README.maildirquota.html for more information. The
+       default configuration does not count messages marked as deleted (but
+       not yet expunged) and the contents of the Trash folder (which are
+       automatically purged by the server) against the quota usage. NOTE - if
+       this option is used, make check WILL FAIL. You should first configure
+       Courier-IMAP without this option, run make check, then reconfigure
+       Courier-IMAP with this option.
+     * --with-dirsync - after saving a new message to a maildir (the IMAP
+       COPY and APPEND commands) explicitly sync the maildir's directory
+       directory. There's a school of thought which believes that the Linux
+       ext2 filesystem requires the parent directory to be synced, in
+       addition to the new message file that's just been written to disk.
+       There's another school of thought that thinks that this issue is
+       completely blown out of proportion, and is really nothing more than a
+       tempest in a teapot. However -- to accomodate the former school of
+       thought -- this option adds a little bit of extra code to sync the
+       parent directory.
+
+    Installation directories
+
+   Unless the options --prefix, --bindir, or --mandir are used, everything
+   will be installed in the directory /usr/lib/courier-imap.
+
+   Use the --prefix option to specify a different directory. This directory
+   will have the following subdirectories:
+
+     * etc - configuration files
+     * bin - binaries
+     * sbin - superuser binaries
+     * libexec - additional binaries
+     * man - manual pages
+     * share - scripts and data files
+     * var - temporary files used by the authdaemond, daemon process (if the
+       authdaemon authentication module is selected).
+
+   Having everything installed underneath one directory allows its contents
+   to be easily backed up, before a newer version of courier-imap is
+   installed. Reverting to a previous version is as simple as restoring from
+   backup.
+
+   Because some binaries in bin and sbin may be executed from the command
+   line, it will be necessary to change your systemwide global startup script
+   to add this directory to the default PATH. Additionally, it will also be
+   necessary to modify the configuration of the man(1) command so that it can
+   find Courier-IMAP's manual pages in this directory:
+
+         PATH="/usr/lib/courier-imap/bin:$PATH"
+         if test -w /etc
+         then
+                 PATH="/usr/lib/courier-imap/sbin:$PATH"
+         fi
+         export PATH
+         MANPATH="/usr/lib/courier-imap/man:$MANPATH"
+         export MANPATH
+
+   As an alternative, you may use the --bindir and --mandir options in order
+   to install binaries to /usr/local/bin and the manual pages to
+   /usr/local/man, which should already be searched by default:
+
+         ./configure --bindir=/usr/local/bin --mandir=/usr/local/man
+
+   Other familiar configure options, such as --sysconfdir and --datadir work
+   too, for those who know how to properly use them.
+
+Configuration file
+
+   The /usr/lib/courier-imap/etc/imapd configuration file sets some
+   configurable options. Each setting has a brief description. Review each
+   setting, and make any necessary adjustments.
+
+   The /usr/lib/courier-imap/etc/imapd-ssl configuration file sets additional
+   configuration setting for the server running IMAP over TLS or SSL on port
+   993. Note that, by default, the regular IMAP server on port 143 also
+   supports encrypted connections, and the default startup script for the
+   port 143 server reads both configuration files.
+
+   The /usr/lib/courier-imap/etc/pop3d and the
+   /usr/lib/courier-imap/etc/pop3d-ssl configuration files set options of the
+   POP3 server.
+
+   NOTE: the actual location of the configuration file directory is itself
+   configured at compilation time.
+
+ACCOUNT INITIALIZATION HOOK
+
+   If there is a file or a symbolic link in the maildir called "loginexec",
+   and if it is executable, then the executable file will be invoked after a
+   succesful login. If the program terminates with an exit code of 0, the
+   "loginexec" file (or a symbolic link) will be removed.
+
+USING SHARED FOLDERS
+
+   Courier-IMAP supports shared folders. See the file
+   README.sharedfolders.html for information on how to set up shared folders.
+
+CRAM-MD5 AUTHENTICATION
+
+   CRAM-MD5 authentication allows IMAP clients to authenticate themselves
+   without sending the password in clear-text over the network. Courier-IMAP
+   now supports CRAM-MD5 by default, but is not enabled for reasons explained
+   below. CRAM-MD5 support is implemented by the authcram module, with one
+   exception - authldap, authpgsql, and authmysql support CRAM-MD5
+   authentication if the LDAP or the MySQL/PostgreSQL server stores
+   clear-text passwords, and not crypt-ed passwords.
+
+   To use CRAM-MD5 it is necessary to use an IMAP client that support
+   CRAM-MD5 authentication, of course. That's the easy part.
+
+   The problem is that it is not possible to use the system password when
+   logging in using CRAM-MD5. That's because CRAM-MD5 requires the knowledge
+   of the actual password, in the clear, in order to calculate authentication
+   tokens (even though that the password itself is not sent in the clear over
+   the network).
+
+   So, implementation of CRAM-MD5 is an advanced task that should be
+   attempted only when you are comfortable with, and fully understand how
+   Courier-IMAP works in general. Here's an overview of this procedure:
+
+     * Install and implement /etc/userdb, because CRAM-MD5 authentication
+       uses the /etc/userdb database (but see below for LDAP-specific notes).
+     * Figure out which accounts are going to use CRAM-MD5 authentication.
+       People who do not use an IMAP client that supports CRAM-MD5 can
+       continue and log in with the existing system password. But everyone
+       who runs a client that supports CRAM-MD5 authentication will need a
+       new password. Also, it will be necessary to set up CRAM-MD5 passwords
+       for everyone at the same time. As soon as CRAM-MD5 authentication is
+       enabled, all CRAM-MD5 enabled clients will attempt to use it. If no
+       password is available, Courier-IMAP has no choice but to reject the
+       authentication attempt. Once that happens, the client will correctly
+       interpret it as an authentication failure (and it is), and the client
+       will not even try to authenticate using the system password. Use the
+       following command to assign a CRAM-MD5 password:
+
+ userdbpw -hmac-md5 | userdb userdb set hmac-md5pw
+
+
+       Then run the makeuserdb command, as always.
+     * NOTE: CRAM-MD5 authentication is also be supported by authldap,
+       authpgsql and authmysql, as long as clear-text passwords are used. See
+       below for more information. Therefore, if you use LDAP, PostgreSQL, or
+       MySQL, and you store clear-text passwords, you should all set and
+       ready to go, and you do not need to install /etc/userdb, as described
+       in this section.
+
+  Enabling CRAM-MD5 authentication
+
+   Because of these unfortunate complexities, CRAM-MD5 authentication is
+   disabled after installation. When you're ready to use CRAM-MD5, edit the
+   imapd configuration file and add the "AUTH=CRAM-MD5" keyword to the
+   IMAP_CAPABILITY environment variable, then restart Courier-IMAP. There are
+   instructions in the imapd configuration file to that effect.
+
+   If you do not intend to ever use CRAM-MD5 authentication, you can either
+   specify --without-authcram option to the configure script, or simply edit
+   imapd and remove authcram from the AUTHMODULES setting.
+
+CERTIFICATE AUTHENTICATION
+
+   Courier-IMAP can use SSL certificates for authentication purposes. For
+   certificate authentication purposes, one of the fields in your
+   certificates' subject must match the login ID in the authentication
+   database. Consider the following certificate:
+
+ ...
+ Subject: C=US,ST=New York,L=New York,O=Acme Widgets Inc,CN=John Smith,emailAddress=johnsmith@example.com
+
+   If the emailAddress field is configured as the login ID, the
+   authentication database must provide login details for
+   johnsmith@example.com. To enable certificate authentication, edit the
+   imapd-ssl and pop3d-ssl configuration files, and make the following
+   changes:
+
+     * Set TLS_TRUSTCERTS to the filename with your certificate authority's
+       X.509 certificate.
+
+     * Change the TLS_VERIFYPEER setting to "PEER". The setting can also be
+       changed to "REQUIREPEER" to require all SSL/TLS connections to provide
+       a certificate. Otherwise, it is optional. If the mail client provides
+       an SSL certificate, it may be used to authenticate. Without a
+       certificate, password-based authentication remains an option.
+
+     * Change the TLS_EXTERNAL setting to the name of the certificate subject
+       field that gives the login ID. In the above example, this would be
+       "TLS_EXTERNAL=emailaddress".
+
+         NOTE: GnuTLS's certtool uses "email" as the name of this field. If
+         Courier-IMAP is compiled with GnuTLS, you should still specify this
+         field as "emailaddress".
+
+SENDING MAIL VIA AN IMAP CONNECTION
+
+   This server allows using the IMAP connection to send E-mail. Normally, the
+   IMAP protocol provides only access to mail in an existing mail account,
+   and mail clients must use SMTP in order to send mail. The Courier-IMAP
+   server has an optional setting to enable mail to be send via an IMAP
+   connection in a manner that should work with all existing IMAP mail
+   clients. This can be useful when an account is logged in from a shared
+   access pool which normally blocks most access to the SMTP port.
+
+   This is implemented by enabling a setting in the imapd configuration file
+   that designates a folder as a special "Outbox" folder. The default setting
+   is a folder called "Outbox" (IMAP path INBOX.Outbox), but the name can be
+   changed to anything. This folder, for the most part, is no different than
+   any other folder. If a folder by that name doesn't exist, it needs to be
+   created, just like any other IMAP folder. It looks and acts like any other
+   folder, except that each message added to the folder, via IMAP's APPEND or
+   COPY command, will also be mailed out by the Courier-IMAP server to the
+   addresses listed in the To:, Cc:, and Bcc: headers.
+
+   It should be possible to use this to send mail from any IMAP client by:
+
+    1. Composing a draft message, telling the IMAP client to save the draft
+       message in its drafts folder on the IMAP server.
+    2. Opening the drafts folder, and moving or copying the message to the
+       Outbox folder.
+    3. The act of copying the message into the Outbox folder will send the
+       mail. There won't be any explicit notification to the fact that the
+       message was sent, so it's a good idea to include your own E-mail
+       address on the Cc: list.
+
+     NOTE: it is tempting to configure the IMAP mail client to use Outbox as
+     its default folder for saving drafts. Resist the temptation. If you
+     forget, you'll save a partially completed draft, which will be then
+     obediently mailed out.
+
+     NOTE: the message, in addition to being sent, will be saved in the
+     folder in the normal fashion. After saving the message, reopen the
+     Outbox folder and delete the sent message, or move it someplace else.
+
+     NOTE: when enabled, the Courier-IMAP server will advertize a private
+     XCOURIEROUTBOX IMAP capability. It is theoretically possible to code an
+     IMAP mail client that reads this capability and automatically configures
+     itself accordingly -- when this IMAP capability is present -- to send
+     E-mail in the normal way but using the IMAP connection. At this time,
+     I'm not aware of any actual mail clients that know how to do this.
+
+     NOTE: many mail clients save some additional internal information in
+     headers of draft messages. The internal information is normally removed
+     before the mail client sends the message. Make sure that none of this
+     extra information is something that should not be mailed out.
+
+REALTIME FOLDER STATUS UPDATES
+
+   If Gamin (http://www.gnome.org/~veillard/gamin/) or FAM
+   (http://oss.sgi.com/projects/fam/) is installed it will be possible to
+   allow multiple clients to open the same folder, and have all clients to be
+   simultaneously notified of any changes to the folder contents.
+
+   After installing the server see the imapd(8) manual page for more
+   information.
+
+Account OPTIONS
+
+   If the option 'disableimap' or 'disablepop3' is set to a non-zero value,
+   then logins via IMAP or POP3 respectively will be disabled for that
+   account. You can use the DEFAULTOPTIONS setting to disable a service
+   globally and then re-enable it for individual accounts; for example,
+   setting DEFAULTOPTIONS="disableimap=1" will disable IMAP access for all
+   accounts except those which have option disableimap=0
+
+   See README_authlib.html in the courier-authlib package for information on
+   how to set per-account options.
+
+SMAP
+
+   Starting with Courier-IMAP 2.0, the server supports an experimental mail
+   access protocol, dubbed "Simple Mail Access Protocol". SMAP is an
+   experiment to provide enhanced mail processing beyond what's currently
+   possible with IMAP. SMAP's purpose is to prototype and develop advanced
+   mail access functionality that's not possible with IMAP. SMAP is disabled
+   by default. Uncomment the SMAP_CAPABILITY setting in the imapd
+   configuration file in order to enable SMAP. The Cone mail client supports
+   SMAP.
