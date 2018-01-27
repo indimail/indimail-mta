@@ -25,6 +25,8 @@ indimail-@version@.tar.gz   (IndiMail source)
 
 
 IndiMail has two RPM / DEB / yum / apt repositories for most of the Linux Distros at
+1) Stable Releases
+   ---------------
 
 Repository Location
 http://download.opensuse.org/repositories/home:/indimail/
@@ -61,13 +63,8 @@ Currently, the list of supported distributions for IndiMail is
           o Ubuntu 14.04
           o Ubuntu 12.04
 
-
-ChangeLog
-
-Release 2.4 Start 04/12/2017
-
-Bleeding Edge Releases
-----------------------
+2) Bleeding Edge Releases
+   ----------------------
 IndiMail has RPM / yum repositories for the latest features being added. You will find
 the RPMs at
 
