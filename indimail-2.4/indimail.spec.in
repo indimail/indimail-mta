@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.442 2018-01-26 12:04:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.443 2018-01-27 21:04:48+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -604,11 +604,6 @@ do
       %{__cp} %{name}-permissions.paranoid ../../SOURCES/%{name}-permissions.paranoid
     fi
 %endif
-    # courier-imap installations misses out on this
-    if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
-      %{__mkdir_p} %{buildroot}%{mandir}/man1
-      %{__cp} libs/tcpd/couriertls.1 %{buildroot}%{mandir}/man1/couriertls.1
-    fi
     cd ..
   fi
 done
@@ -1305,7 +1300,7 @@ fi
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.nssd
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.pam-multi
 %else
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.indimail
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.altermime
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.logalert
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.ripmime
