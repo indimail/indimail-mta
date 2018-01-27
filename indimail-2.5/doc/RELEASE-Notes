@@ -1,18 +1,12 @@
-DATE: Sat Jan 27 08:56:50 IST 2018
+DATE: Sat Jan 27 21:55:49 IST 2018
 
-Announcing Release 2.4 of IndiMail.
+Announcing Release 2.5 of IndiMail.
 
 Following are the main features of this release
 
-o Removed version numbers from shared library filenames
-o Cache active login records in inlookup during startup
-o Ability to switch between dlopen(), dlmopen() via environment
-  variable USE_DLMOPEN
-o Made indimail, indimail-mta packages independent. indimail-mta
-  now provides features of indimail by just loading libindimail.so
-o Upgraded courier-imap to v4.18.2
+o
 
-This release includes the following files (Note: Files may be suffied with -2.4)
+This release includes the following files (Note: Files may be suffied with -2.5)
 
 README                (Introduction to IndiMail)
 INSTALL               (Source Installation Instructions)
@@ -21,10 +15,12 @@ INSTALL-MYSQL         (MySQL specific Installation Instructions)
 README-CLUSTER        (Steps on configuring a clustered setup)
 Quick-INSTALL         (A minimal documentation on Installation/Configuration)
 RELEASE-Notes         (This file)
-indimail-2.4.tar.gz   (IndiMail source)
+indimail-2.5.tar.gz   (IndiMail source)
 
 
 IndiMail has two RPM / DEB / yum / apt repositories for most of the Linux Distros at
+1) Stable Releases
+-- ---------------
 
 Repository Location
 http://download.opensuse.org/repositories/home:/indimail/
@@ -61,13 +57,8 @@ Currently, the list of supported distributions for IndiMail is
           o Ubuntu 14.04
           o Ubuntu 12.04
 
-
-ChangeLog
-
-Release 2.4 Start 04/12/2017
-
-Bleeding Edge Releases
-----------------------
+2) Bleeding Edge Releases
+-- ----------------------
 IndiMail has RPM / yum repositories for the latest features being added. You will find
 the RPMs at
 
@@ -79,27 +70,4 @@ https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indi
 
 ChangeLog
 
-Release 2.4 Start 04/12/2017
-01. remove -release version_number from la_LDFLAGS in indimail, libcdb,
-    libeps, libsrs2, libflash 
-02. inlookup - cache active login records using cache_active_pwd()
-03. svctool - added option --activeDays to specify duration of active records
-    to cache for inlookup
-04. ProcessInFifo.c - initialize pwstat
-05. tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen()
-    to be called for loading shared library
-06. svctool - add option --use-dlmopen to configure tcpserver to use dlmopen()
-    instead of dlopen() to load shared objects
-07. fixed smtp plugin by setting PLUGINDIR correctly
-08. Fixed dlopen() flags for loading smtp plugins
-09. qmailctl - update cdb only when input file date is newer than cdb file
-10. svctool - fixed conf_dir variable getting clobbered by create_fifologger,
-    preventing creation of LOGFILTER service variable
-11. fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
-12. svctool - new funtion default_indimail_control for creating
-    indimail specific control files
-13. svctool - separated out qmail, indimail config
-14. made indimail, indimail-mta packages independent.
-15. ProcessInFifo.c - create lastauth if not existing
-16. moved cron entries to /etc/cron.d
-17. upgraded courier-imap to v4.18.2
+Release 2.5 Start 27/01/2018

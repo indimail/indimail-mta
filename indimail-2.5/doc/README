@@ -114,7 +114,7 @@ INSTALL-MYSQL         (MySQL specific Installation Instructions)
 README-CLUSTER        (Steps on configuring a clustered setup)
 Quick-INSTALL         (A minimal documentation on Installation/Configuration)
 RELEASE-Notes         (This file)
-indimail-2.4.tar.gz   (IndiMail source)
+indimail-2.5.tar.gz   (IndiMail source)
 
 You could also look at
 
