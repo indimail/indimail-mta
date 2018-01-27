@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.17  2018-01-27 10:11:44+05:30  Cprogrammer
+# updated comment
+#
 # Revision 2.16  2017-03-29 22:11:31+05:30  Cprogrammer
 # add domain entry to nodnscheck
 #
@@ -51,7 +54,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.16 2017-03-29 22:11:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.17 2018-01-27 10:11:44+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
 (
@@ -93,7 +96,7 @@ chown=$(which chown)
 chmod=$(which chmod)
 sort=$(which sort)
 grep=$(which grep)
-# add the domain to spamignore
+# add the domain to spamignore, nodnscheck
 for i in spamignore nodnscheck
 do
 	echo "adding $1 to $i control file"
