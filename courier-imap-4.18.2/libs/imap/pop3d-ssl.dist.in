@@ -1,4 +1,4 @@
-##VERSION: $Id: dd1ec1a65ba3ed030069698824a4b3eabc58b455-20170113192021$
+##VERSION: $Id: ad219be4de0f2e1416afe5857afbb3badd520aca-20170725210259$
 #
 # pop3d-ssl created from pop3d-ssl.dist by sysconftool
 #
@@ -121,14 +121,11 @@ COURIERTLS=@bindir@/couriertls
 #
 # OpenSSL:
 #
-# TLSv11 - TLS1
-# TLSv1.1 - TLS1.1
-# TLSv1.2 - TLS1.2
+# TLSv1 - TLS 1.0, or higher.
+# TLSv1.1 - TLS1.1, or higher.
+# TLSv1.2 - TLS1.2, or higher.
 #
-# TLSv1+, TLSv1.1+, and TLSv1.2+ - the corresponding protocol, and all
-# higher protocols.
-#
-# The default value is TLSv1+
+# The default value is TLSv1.
 
 ##NAME: TLS_STARTTLS_PROTOCOL:0
 #
@@ -168,6 +165,15 @@ TLS_STARTTLS_PROTOCOL="$TLS_PROTOCOL"
 #
 # See GnuTLS documentation, gnutls_priority_init(3) for additional
 # documentation.
+
+##NAME: TLS_STARTTLS_PROTOCOL:0
+#
+# TLS_STARTTLS_PROTOCOL is used instead of TLS_PROTOCOL for the IMAP STARTTLS
+# extension, as opposed to IMAP over SSL on port 993.
+#
+# It takes the same values for OpenSSL as TLS_PROTOCOL
+
+TLS_STARTTLS_PROTOCOL="$TLS_PROTOCOL"
 
 ##NAME: TLS_MIN_DH_BITS:0
 #

@@ -131,7 +131,7 @@ int rfc822_display_name_int(const struct rfc822a *rfcp, int index,
 
 	if (chset == NULL)
 	{
-		s.chset="iso-8859-1";
+		s.chset="utf-8";
 	}
 	else
 	{
@@ -991,7 +991,7 @@ int rfc2047_decoder(const char *text,
 		}
 
 		if (i)
-			(*callback)("iso-8859-1", "", text, i, ptr);
+			(*callback)("utf-8", "", text, i, ptr);
 
 		text += i;
 
@@ -1006,7 +1006,7 @@ int rfc2047_decoder(const char *text,
 
 		if (rc == 0)
 		{
-			(*callback)("iso-8859-1", "", text, 2, ptr);
+			(*callback)("utf-8", "", text, 2, ptr);
 			text += 2;
 			continue;
 		}

@@ -4121,7 +4121,7 @@ static int validate_charset(const char *tag, char **charset)
 	size_t ucsize;
 
 	if (*charset == NULL)
-		*charset=my_strdup("ISO-8859-1");
+		*charset=my_strdup("UTF-8");
 
 	conv=unicode_convert_tou_init(*charset, &ucptr, &ucsize, 1);
 

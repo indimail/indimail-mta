@@ -780,7 +780,7 @@ static int mkforward(struct rfc2045_mkreplyinfo *ri)
 				char *p=rfc2047_encode_str(ri->forwarddescr,
 							   ri->charset ?
 							   ri->charset
-							   : "iso-8859-1",
+							   : "utf-8",
 							   rfc2047_qp_allow_any
 							   );
 
@@ -1525,7 +1525,7 @@ static void copyheaders(struct rfc2045_mkreplyinfo *ri)
 	char	*header, *value;
 
 
-	writes(ri, "\nContent-Type: text/rfc822-headers; charset=\"iso-8859-1\"\n"
+	writes(ri, "\nContent-Type: text/rfc822-headers; charset=\"utf-8\"\n"
 	       "Content-Disposition: attachment\n"
 	       "Content-Transfer-Encoding: 8bit\n\n"
 	       );

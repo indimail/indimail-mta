@@ -4,7 +4,7 @@ dnl Copyright 1998 - 2016 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
 AC_PREREQ(2.59)
-AC_INIT(courier-imap, 4.18.0, [courier-imap@lists.sourceforge.net])
+AC_INIT(courier-imap, 4.18.2, [courier-imap@lists.sourceforge.net])
 AC_CONFIG_SRCDIR(libs/imap/imapd.c)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
@@ -80,22 +80,6 @@ then
 		;;
 	esac
 fi
-
-AC_ARG_ENABLE(unicode,
-	[],
-	[
-	unicode="$enableval"
-
-	if test "$unicode" != "yes"
-	then
-		AC_MSG_ERROR(This option is no longer supported)
-	fi
-	],
-	[
-	ac_configure_args="$ac_configure_args --enable-unicode"
-	unicode="yes"
-	]
-)
 
 if test x$prefix = xNONE
 then

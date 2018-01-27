@@ -51,17 +51,13 @@ distclean-local:
 	-rm -rf .deps libs/*/.deps autom4te.cache libs/*/autom4te.cache
 
 imaplogin: libs/imap/imaplogin
-	mkdir -p .libs
 	cp libs/imap/imaplogin .
-	cp libs/imap/.libs/imaplogin .libs
 
 maildirkw: libs/maildir/maildirkw
 	cp libs/maildir/maildirkw .
 
 imapd: libs/imap/imapd
-	mkdir -p .libs
 	cp libs/imap/imapd .
-	cp libs/imap/.libs/imapd .libs
 
 sharedindexinstall: libs/maildir/sharedindexinstall
 	cp libs/maildir/sharedindexinstall .

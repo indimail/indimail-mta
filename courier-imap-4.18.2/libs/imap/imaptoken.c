@@ -149,7 +149,7 @@ int n = 0;
 
 void readflush()
 {
-   imap_readptrleft=0;
+	imap_readptrleft=0;
 }
 
 void readfill()

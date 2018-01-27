@@ -79,7 +79,7 @@ AC_DEFINE_UNQUOTED(RFC2045VER,"$version", [ Package that uses librfc2045.a ])
 
 AC_ARG_ENABLE(mimecharset,
 	[  --enable-mimecharset=charset   Default MIME charset to set on new messages],
-	RFC2045CHARSET="$enableval", RFC2045CHARSET="iso-8859-1")
+	RFC2045CHARSET="$enableval", RFC2045CHARSET="utf-8")
 
 CFLAGS="$CFLAGS -I.. -I${srcdir}/.."
 CXXFLAGS="$CXXFLAGS -I.. -I${srcdir}/.."

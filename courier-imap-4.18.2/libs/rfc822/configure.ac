@@ -64,23 +64,13 @@ AC_CACHE_CHECK([how to calculate alternate timezone],librfc822_cv_SYS_TIMEZONE,
 AC_TRY_COMPILE([
 #include	<time.h>
 ],[
-int main()
-{
 time_t	t=altzone;
-
-	return (0);
-}
 ], librfc822_cv_SYS_TIMEZONE=altzone,
 
 	AC_TRY_COMPILE([
 #include	<time.h>
 ],[
-int main()
-{
 int	n=daylight;
-
-	return (0);
-}
 	], librfc822_cv_SYS_TIMEZONE=daylight,
 
 	AC_TRY_COMPILE([
@@ -88,12 +78,7 @@ int	n=daylight;
 
 extern struct tm dummy;
 ],[
-int main()
-{
 long	n=dummy.tm_gmtoff;
-
-	return (0);
-}
 	] ,librfc822_cv_SYS_TIMEZONE=tm_gmtoff,
 		librfc822_cv_SYS_TIMEZONE=unknown
 			)

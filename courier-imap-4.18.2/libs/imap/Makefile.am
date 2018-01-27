@@ -161,42 +161,42 @@ imapd.html.in: imapd.sgml ../docbook/sgml2html
 	../docbook/sgml2html imapd.sgml imapd.html.in
 
 imapd.8.in: imapd.sgml ../docbook/sgml2man
-	../docbook/sgml2man imapd.sgml imapd.8.in
+	../docbook/sgml2man imapd.sgml imapd.8.in "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 	mv imapd.8 imapd.8.in
 
 makeimapaccess.html.in: makeimapaccess.sgml ../docbook/sgml2html
 	../docbook/sgml2html makeimapaccess.sgml makeimapaccess.html.in
 
 makeimapaccess.8.in: makeimapaccess.sgml ../docbook/sgml2man
-	../docbook/sgml2man makeimapaccess.sgml makeimapaccess.8.in
+	../docbook/sgml2man makeimapaccess.sgml makeimapaccess.8.in "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 	mv makeimapaccess.8 makeimapaccess.8.in
 
 mkdhparams.html.in: mkdhparams.sgml ../docbook/sgml2html
 	../docbook/sgml2html mkdhparams.sgml mkdhparams.html.in
 
 mkdhparams.8.in: mkdhparams.sgml ../docbook/sgml2man
-	../docbook/sgml2man mkdhparams.sgml mkdhparams.8.in
+	../docbook/sgml2man mkdhparams.sgml mkdhparams.8.in "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 	mv mkdhparams.8 mkdhparams.8.in
 
 mkimapdcert.html.in: mkimapdcert.sgml ../docbook/sgml2html
 	../docbook/sgml2html mkimapdcert.sgml mkimapdcert.html.in
 
 mkimapdcert.8.in: mkimapdcert.sgml ../docbook/sgml2man
-	../docbook/sgml2man mkimapdcert.sgml mkimapdcert.8.in
+	../docbook/sgml2man mkimapdcert.sgml mkimapdcert.8.in "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 	mv mkimapdcert.8 mkimapdcert.8.in
 
 mkpop3dcert.html.in: mkpop3dcert.sgml ../docbook/sgml2html
 	../docbook/sgml2html mkpop3dcert.sgml mkpop3dcert.html.in
 
 mkpop3dcert.8.in: mkpop3dcert.sgml ../docbook/sgml2man
-	../docbook/sgml2man mkpop3dcert.sgml mkpop3dcert.8.in
+	../docbook/sgml2man mkpop3dcert.sgml mkpop3dcert.8.in "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 	mv mkpop3dcert.8 mkpop3dcert.8.in
 
 pop3d.html.in: pop3d.sgml ../docbook/sgml2html
 	../docbook/sgml2html pop3d.sgml pop3d.html.in
 
 pop3d.8.in: pop3d.sgml ../docbook/sgml2man
-	../docbook/sgml2man pop3d.sgml pop3d.8.in
+	../docbook/sgml2man pop3d.sgml pop3d.8.in "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
 	mv pop3d.8 pop3d.8.in
 
 endif

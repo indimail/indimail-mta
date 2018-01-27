@@ -3,13 +3,13 @@
 .\"<!-- distribution information. -->
 .\"     Title: mkdhparams
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/27/2015
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 07/24/2017
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MKDHPARAMS" "8" "06/27/2015" "Courier Mail Server" "Double Precision, Inc."
+.TH "MKDHPARAMS" "8" "07/24/2017" "Courier Mail Server" "Double Precision, Inc."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -81,5 +81,5 @@ Author
 .IP " 1." 4
 \fBcourier\fR(8)
 .RS 4
-\%[set $man.base.url.for.relative.links]/courier.html
+\%http://www.courier-mta.org/courier.html
 .RE

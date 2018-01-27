@@ -762,7 +762,7 @@ const char *orig_charset=m->textplaincharset;
 	if (m->contentname && *m->contentname)
 	{
 		const char *chset=m->textplaincharset ? m->textplaincharset
-			: "iso-8859-1";
+			: "utf-8";
 
 		rfc2231_attrCreate("name", m->contentname, chset, NULL,
 				   do_printRfc2231Attr, m);
@@ -1108,4 +1108,3 @@ static void opencreatemultipartmime(struct mimestruct *m)
 		m->inputfp1=openfile_or_pipe(m->inputfile1, "r");
 	openoutput(m);
 }
-

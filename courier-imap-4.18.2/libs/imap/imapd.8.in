@@ -3,13 +3,13 @@
 .\"<!-- distribution information. -->
 .\"     Title: imapd
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/27/2015
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 07/24/2017
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "IMAPD" "8" "06/27/2015" "Courier Mail Server" "Double Precision, Inc."
+.TH "IMAPD" "8" "07/24/2017" "Courier Mail Server" "Double Precision, Inc."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -31,13 +31,11 @@
 .\" -----------------------------------------------------------------
 .SH "NAME"
 imapd \- The Courier IMAP server
-
 .SH "SYNOPSIS"
 .HP \w'\fB@libexecdir@/couriertcpd\fR\ 'u
 \fB@libexecdir@/couriertcpd\fR {couriertcpd\ options} {@prefix@/sbin/imaplogin} [\fImodules\fR...] {@prefix@/bin/imapd} {\&./Maildir}
 .HP \w'\fB@prefix@/bin/imapd\fR\ 'u
 \fB@prefix@/bin/imapd\fR {\&./Maildir}
-
 .SH "DESCRIPTION"
 .PP
 \fBimapd\fR
@@ -504,7 +502,7 @@ Author
 .IP " 1." 4
 \fBauthlib\fR(7)
 .RS 4
-\%[set $man.base.url.for.relative.links]/authlib.html
+\%http://www.courier-mta.org/authlib.html
 .RE
 .IP " 2." 4
 RFC 2060
@@ -524,5 +522,5 @@ FAM
 .IP " 5." 4
 \fBuserdb\fR(8)
 .RS 4
-\%[set $man.base.url.for.relative.links]/userdb.html
+\%http://www.courier-mta.org/userdb.html
 .RE

@@ -1,3 +1,33 @@
+4.18.2
+
+2017-09-27  Giovanni Bechis <giovanni@paclan.it>
+
+	* Fix to configure.ac
+
+2017-09-19  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* courier: switch default header encoding to UTF-8.
+
+4.18.1
+
+2017-08-19  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* OpenSSL 1.1.0 compilation fixes.
+
+4.18.0
+
+2017-06-17  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* libs/maildir/maildirquota.c (docheckquota): Skip DT_LNK.
+
+2017-03-11  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* courier-unicode library API update.
+
+2017-02-07  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* libs/tcpd/libcouriertls.c: OpenSSL API update.
+
 4.17.3
 
 2016-09-20  "Hanno Böck" <hanno@hboeck.de>
