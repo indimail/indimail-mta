@@ -3,9 +3,7 @@
 # distribution information.
 
 
-noinst_PROGRAMS=@makedatprog_target@
-
-EXTRA_PROGRAMS=makedatprog
+libexec_PROGRAMS=makedatprog
 
 makedatprog_SOURCES=makedatprog.c
 makedatprog_DEPENDENCIES=@dblibrary@

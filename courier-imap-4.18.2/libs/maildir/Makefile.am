@@ -22,8 +22,8 @@ BUILT_SOURCES=maildirsharedrc.h maildirfilterconfig.h quotawarnmsg.h \
 	mailbot.h autoresponsequota.h $(noinst_DATA)
 endif
 
-noinst_DATA=deliverquota.html maildirmake.html deliverquota.8 maildirmake.1 \
-	maildiracl.html maildiracl.1 maildir.libdeps
+noinst_DATA=deliverquota.html maildirmake.html maildiracl.html maildir.libdeps
+man_MANS=deliverquota.8 maildirmake.1 maildiracl.1 sharedindexinstall.1 sharedindexsplit.1 maildirkw.1
 
 libmaildir_la_SOURCES=autoresponse.c autoresponse.h \
 	maildiraclt.c maildiraclt.h \
@@ -48,8 +48,9 @@ libmaildir_la_SOURCES=autoresponse.c autoresponse.h \
 	maildirquota.c maildirquota.h maildirrequota.c maildirrequota.h \
 	maildirwatch.c maildirwatch.h loginexec.c loginexec.h
 
-noinst_PROGRAMS=deliverquota maildirmake testmaildirfilter maildirkwtest \
-	maildirkw maildiracl maildiraclttest testmaildirsearch
+bin_PROGRAMS=deliverquota maildirmake maildirkw maildiracl
+noinst_PROGRAMS=testmaildirfilter maildirkwtest maildiraclttest testmaildirsearch
+sbin_SCRIPTS=sharedindexinstall sharedindexsplit
 
 deliverquota_SOURCES=deliverquota.c
 deliverquota_DEPENDENCIES=libmaildir.la ../rfc822/librfc822.la \

@@ -81,6 +81,22 @@ then
 	esac
 fi
 
+AC_ARG_ENABLE(unicode,
+	[],
+	[
+	unicode="$enableval"
+
+	if test "$unicode" != "yes"
+	then
+		AC_MSG_ERROR(This option is no longer supported)
+	fi
+	],
+	[
+	ac_configure_args="$ac_configure_args --enable-unicode"
+	unicode="yes"
+	]
+)
+
 if test x$prefix = xNONE
 then
 	prefix="$defaultprefix"
@@ -91,11 +107,6 @@ if test x$exec_prefix = xNONE
 then
 	exec_prefix="$prefix"
 fi
-
-eval "exec_prefix=$exec_prefix"
-eval "libexecdir=$libexecdir"
-eval "localstatedir=$localstatedir"
-eval "datarootdir=$datarootdir"
 eval "datadir=$datadir"
 
 AC_ARG_WITH(certsdir, [ --with-certsdir Directory where certs are created ],
@@ -233,14 +244,6 @@ AC_SUBST(ULIMIT)
 #
 
 ac_given_INSTALL="$INSTALL"
-
-binPROGRAMS_exec='${binPROGRAMS}'
-sbinPROGRAMS_exec='${sbinPROGRAMS}'
-libexecPROGRAMS_exec='${libexecPROGRAMS}'
-
-AC_SUBST(binPROGRAMS_exec)
-AC_SUBST(sbinPROGRAMS_exec)
-AC_SUBST(libexecPROGRAMS_exec)
 
 AC_ARG_WITH(package, [], package="$withval",
 	[

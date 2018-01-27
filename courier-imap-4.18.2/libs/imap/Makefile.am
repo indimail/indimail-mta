@@ -23,15 +23,15 @@ EXTRA_DIST=testsuite testsuite.txt smaptestsuite smaptestsuite.txt \
 	pop3d.html.in pop3d.8.in \
 	imapd.cnf.gnutls pop3d.cnf.gnutls
 
-noinst_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams
-noinst_PROGRAMS=imaplogin imapd pop3login pop3d
+bin_PROGRAMS=imapd pop3d
+sbin_PROGRAMS=imaplogin pop3login
+libexec_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams
 
-noinst_DATA=imapd.8 imapd.html imapd.cnf pop3d.cnf \
-	makeimapaccess.html makeimapaccess.8 \
-	mkdhparams.html mkdhparams.8 \
-	mkimapdcert.html mkimapdcert.8 \
-	mkpop3dcert.html mkpop3dcert.8 \
-	pop3d.html pop3d.8
+sysconf_DATA = imapd.dist imapd-ssl.dist pop3d.dist pop3d-ssl.dist imapd.cnf pop3d.cnf
+noinst_DATA=imapd.html makeimapaccess.html mkdhparams.html mkimapdcert.html \
+	mkpop3dcert.html pop3d.html 
+man_MANS=mkdhparams.8 mkimapdcert.8 mkpop3dcert.8 imapd.8 pop3d.8 imaplogin.8 pop3login.8 \
+		 makeimapaccess.8
 
 imapd.cnf: imapd.cnf.@ssllib@
 	cp imapd.cnf.@ssllib@ imapd.cnf
@@ -146,12 +146,11 @@ pop3d.html: pop3d.html.in
 pop3d.8: pop3d.8.in
 	./config.status --file=pop3d.8
 
-BUILT_SOURCES = imapd.dist imapd-ssl.dist pop3d.dist pop3d-ssl.dist
 if HAVE_SGML
 
 GITFILES=imapd.dist.in imapd-ssl.dist.in pop3d.dist.in pop3d-ssl.dist.in
 
-BUILT_SOURCES += $(GITFILES)
+BUILT_SOURCES = $(GITFILES)
 
 $(GITFILES): %: %.git
 	perl -p -e 's/\$$Id:[^\$$]*/\$$Id: '"`git log --pretty=format:\"%H\" -n 1 -- $<`-`date +%Y%m%d%H%M%S`/" <$< >$@.tmp

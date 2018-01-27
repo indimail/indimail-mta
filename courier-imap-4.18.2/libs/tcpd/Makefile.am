@@ -5,9 +5,11 @@
 
 DISTCLEANFILES=couriertls.config
 
-noinst_PROGRAMS=@COURIERTCPD@ @STARTTLS@ tlscachetest
-EXTRA_PROGRAMS=couriertls couriertcpd
+noinst_PROGRAMS=tlscachetest
+bin_PROGRAMS=couriertls
+libexec_PROGRAMS=couriertcpd
 EXTRA_LTLIBRARIES=libcouriertls.la libcouriertlsopenssl.la libcouriertlsgnutls.la
+man_MANS=couriertcpd.1 couriertls.1
 
 BUILT_SOURCES=  couriertcpd.html couriertcpd.1 \
 		couriertls.html couriertls.1
