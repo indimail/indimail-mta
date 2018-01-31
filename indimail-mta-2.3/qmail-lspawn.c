@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.25  2018-01-31 12:06:54+05:30  Cprogrammer
+ * moved qmail-getpw, qmail-local to sbin
+ *
  * Revision 1.24  2018-01-09 11:47:38+05:30  Cprogrammer
  * use loadLibrary() to load vauth_open(), vauth_getpw(), vclose(), isvirtualdomain() functions
  *
@@ -265,7 +268,7 @@ nughde_get(local)
 	}
 	if (pipe(pi) == -1)
 		_exit(QLX_SYS);
-	args[0] = "bin/qmail-getpw";
+	args[0] = "sbin/qmail-getpw";
 	args[1] = local;
 	args[2] = 0;
 	switch (gpwpid = vfork())
@@ -476,7 +479,7 @@ noauthself:
 		nughde_get(recip);
 		x = nughde.s;
 		xlen = nughde.len;
-		args[0] = "bin/qmail-local";
+		args[0] = "sbin/qmail-local";
 		args[1] = "--";
 		args[2] = x; /*- user */
 		n = byte_chr(x, xlen, 0);
@@ -548,7 +551,7 @@ noauthself:
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.24 2018-01-09 11:47:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.25 2018-01-31 12:06:54+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
