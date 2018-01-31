@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.66  2018-01-31 12:08:27+05:30  Cprogrammer
+ * moved qmail-local, qmail-remote to sbin
+ *
  * Revision 1.65  2016-06-05 13:22:05+05:30  Cprogrammer
  * fixed stupid error message
  *
@@ -913,7 +916,7 @@ main(int argc, char **argv)
 	ptr += 6;
 	if (*ptr == 'l') /*- qmail-local Filter */
 	{
-		mailprog = "bin/qmail-local";
+		mailprog = "sbin/qmail-local";
 		domain = argv[7];
 		ext = argv[6];
 		qqeh = argv[10];
@@ -948,7 +951,7 @@ main(int argc, char **argv)
 	} else
 	if (*ptr == 'r') /*- qmail-remote Filter */
 	{
-		mailprog = "bin/qmail-remote";
+		mailprog = "sbin/qmail-remote";
 		domain = argv[1];
 		ext = argv[5];
 		qqeh = argv[3];
@@ -1155,7 +1158,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.65 2016-06-05 13:22:05+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.66 2018-01-31 12:08:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
