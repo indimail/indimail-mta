@@ -172,6 +172,7 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
   do
     svc_list="$svc_list ${servicedir}/$i"
   done
+  svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
   ${rm} -f /tmp/indimail-mta.upgrade
   exit 0
