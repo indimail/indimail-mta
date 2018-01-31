@@ -84,7 +84,6 @@
 %attr(0755,root,qmail) @prefix@/bin/maildirwatch
 %attr(0755,root,qmail) @prefix@/bin/mailsubj
 %attr(0755,root,qmail) @prefix@/bin/mbox2maildir
-%attr(0755,root,qmail) @prefix@/bin/multilog
 %attr(0755,root,qmail) @prefix@/bin/multipipe
 %attr(0755,root,qmail) @prefix@/bin/multitail
 %attr(0755,root,qmail) @prefix@/bin/inewaliases
@@ -102,7 +101,6 @@
 %attr(0755,root,qmail) @prefix@/bin/qmailctl
 %attr(0755,root,qmail) @prefix@/bin/qmaildirmake
 %attr(0755,root,qmail) @prefix@/bin/qmail-inject
-%attr(0755,root,qmail) @prefix@/bin/qmail-popbull
 %attr(0755,root,qmail) @prefix@/bin/qmail-qfilter
 %attr(0755,root,qmail) @prefix@/bin/qmail-qread
 %attr(0755,root,qmail) @prefix@/bin/qmail-rm
@@ -147,10 +145,12 @@
 %attr(0755,root,qmail) @prefix@/bin/tai2tai64n
 %attr(0755,root,qmail) @prefix@/bin/tai64n2tai
 %attr(0755,root,qmail) @prefix@/bin/udpclient
-%attr(0755,root,qmail) @prefix@/bin/udplogger
+%attr(0755,root,qmail) @prefix@/sbin/udplogger
 #
 # sbin
 #
+%attr(0755,root,qmail) @prefix@/sbin/qmail-popbull
+%attr(0755,root,qmail) @prefix@/sbin/multilog
 %attr(0755,root,qmail) @prefix@/sbin/ofmipd
 %attr(0755,root,qmail) @prefix@/sbin/qmail-smtpd
 %attr(0755,root,qmail) @prefix@/sbin/qmail-qmqpd
