@@ -90,7 +90,6 @@
 %attr(0755,root,qmail) @prefix@/bin/inewaliases
 %attr(0755,root,qmail) @prefix@/bin/newinclude
 %attr(0755,root,qmail) @prefix@/bin/new-inject
-%attr(0755,root,qmail) @prefix@/bin/ofmipd
 %attr(0755,root,qmail) @prefix@/bin/ofmipname
 %attr(0755,root,qmail) @prefix@/bin/pgrphack
 %attr(0755,root,qmail) @prefix@/bin/predate
@@ -102,19 +101,12 @@
 %attr(0755,root,qmail) @prefix@/bin/qmail-cat
 %attr(0755,root,qmail) @prefix@/bin/qmailctl
 %attr(0755,root,qmail) @prefix@/bin/qmaildirmake
-%attr(0755,root,qmail) @prefix@/bin/qmail-dk
-%attr(0755,root,qmail) @prefix@/bin/qmail-dkim
 %attr(0755,root,qmail) @prefix@/bin/qmail-inject
-%attr(0755,root,qmail) @prefix@/bin/qmail-pop3d
 %attr(0755,root,qmail) @prefix@/bin/qmail-popbull
-%attr(0755,root,qmail) @prefix@/bin/qmail-poppass
 %attr(0755,root,qmail) @prefix@/bin/qmail-qfilter
-%attr(0755,root,qmail) @prefix@/bin/qmail-qmqpd
-%attr(0755,root,qmail) @prefix@/bin/qmail-qmtpd
 %attr(0755,root,qmail) @prefix@/bin/qmail-qread
 %attr(0755,root,qmail) @prefix@/bin/qmail-rm
 %attr(0755,root,qmail) @prefix@/bin/qmail-showctl
-%attr(0755,root,qmail) @prefix@/bin/qmail-smtpd
 %attr(0755,root,qmail) @prefix@/bin/qnotify
 %attr(0755,root,qmail) @prefix@/bin/qreceipt
 %attr(0755,root,qmail) @prefix@/bin/queue-fix
@@ -156,10 +148,18 @@
 %attr(0755,root,qmail) @prefix@/bin/tai64n2tai
 %attr(0755,root,qmail) @prefix@/bin/udpclient
 %attr(0755,root,qmail) @prefix@/bin/udplogger
-%attr(0751,root,qmail) @prefix@/bin/qmail-popup
 #
 # sbin
 #
+%attr(0755,root,qmail) @prefix@/sbin/ofmipd
+%attr(0755,root,qmail) @prefix@/sbin/qmail-smtpd
+%attr(0755,root,qmail) @prefix@/sbin/qmail-qmqpd
+%attr(0755,root,qmail) @prefix@/sbin/qmail-qmtpd
+%attr(0755,root,qmail) @prefix@/sbin/qmail-dk
+%attr(0755,root,qmail) @prefix@/sbin/qmail-dkim
+%attr(0751,root,qmail) @prefix@/sbin/qmail-popup
+%attr(0755,root,qmail) @prefix@/sbin/qmail-pop3d
+%attr(0755,root,qmail) @prefix@/sbin/qmail-poppass
 %attr(0755,root,qmail) @prefix@/sbin/cdbdump
 %attr(0755,root,qmail) @prefix@/sbin/cdbstats
 %attr(0755,root,qmail) @prefix@/sbin/cdbtest
