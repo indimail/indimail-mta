@@ -24,7 +24,7 @@ or
 .SH DESCRIPTION
 \fBdrate\fR(1) displays or sets delivery rate for \fBqmail-remote\fR(8). The actual rate
 limiting happens in \fBspawn-filter\fR(8). Hence, QMAILREMOTE should be set to
-PREFIX/bin/spawn-filter. You must also set the environment variable \fBRATELIMIT_DIR\fR
+PREFIX/sbin/spawn-filter. You must also set the environment variable \fBRATELIMIT_DIR\fR
 to the full path of the directory where you will keep the rate definition files created by
 \fBdrate\fR(1). \fBdrate\fR(1) locks the file \fIdomain\fR in \fIratelimit_dir\fR before
 writing the following four lines.
