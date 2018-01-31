@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.446 2018-01-31 20:13:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.447 2018-01-31 21:36:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -142,7 +142,7 @@ Source8: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_versio
 %endif
 %endif
 %if %nofetchmail == 0
-Source9: http://downloads.sourceforge.net/fetchmail/fetchmail-%{fetchmail_version}.tar.xz
+Source9: http://downloads.sourceforge.net/%{name}/fetchmail-%{fetchmail_version}.tar.xz
 %endif
 %if %noclamav == 0
 Source10: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
