@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.10  2018-01-31 14:25:07+05:30  Cprogrammer
+ * moved qmail-smtpd to sbin
+ *
  * Revision 1.9  2010-06-11 16:32:36+05:30  Cprogrammer
  * added more sendmail compatible options (but to be ignored)
  *
@@ -40,7 +43,7 @@ die_usage()
 	_exit(100);
 }
 
-char           *smtpdarg[] = { "bin/qmail-smtpd", 0 };
+char           *smtpdarg[] = { "sbin/qmail-smtpd", 0 };
 void
 smtpd()
 {
@@ -260,7 +263,7 @@ main(argc, argv)
 void
 getversion_sendmail_c()
 {
-	static char    *x = "$Id: sendmail.c,v 1.9 2010-06-11 16:32:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: sendmail.c,v 1.10 2018-01-31 14:25:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
