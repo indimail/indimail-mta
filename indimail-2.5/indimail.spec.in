@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.443 2018-01-27 21:04:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.444 2018-01-31 12:00:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -185,7 +185,7 @@ AutoReqProv: No
 %else
 AutoReqProv: Yes
 %endif
-Requires: indimail-mta > 2.2
+Requires: indimail-mta > 2.3
 Conflicts: %{name} < 2.0
 Obsoletes: %{name} < 2.0
 
