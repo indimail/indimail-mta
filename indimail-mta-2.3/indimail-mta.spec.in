@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.134 2018-01-26 23:32:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.135 2018-01-31 12:05:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -59,7 +59,7 @@
 
 Summary: A Flexible SMTP server
 Name: indimail-mta
-Version: 2.3
+Version: 2.4
 %if %fedorareview == 0
 Provides: daemontools = %{version}, ucspi-tcp = %{version}
 %endif
@@ -139,6 +139,7 @@ Conflicts: indimail-mini
 Conflicts: daemontools
 Conflicts: ucspi-tcp
 Conflicts: indimail-mta < 2.0
+Conflicts: indimail < 2.5
 Obsoletes: indimail-mta < 2.0
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
@@ -693,12 +694,6 @@ done
 #
 # Binaries
 #
-%attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
-%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
-%attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
-%attr(2551,root,qscand)                 %{_prefix}/sbin/run-cleanq
-
-%attr(755,root,qmail)                   %{_prefix}/sbin/qscanq-stdin
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-popbull
 %attr(755,root,qmail)                   %{_prefix}/bin/ofmipd
 %attr(755,root,qmail)                   %{_prefix}/bin/queue-fix
@@ -714,14 +709,12 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/newinclude
 %attr(755,root,qmail)                   %{_prefix}/bin/recordio
 %attr(755,root,qmail)                   %{_prefix}/bin/uacl
-%attr(755,root,qmail)                   %{_prefix}/bin/cdbmake
 %attr(755,root,qmail)                   %{_prefix}/bin/822print
 %attr(755,root,qmail)                   %{_prefix}/bin/sendmail
 %attr(755,root,qmail)                   %{_prefix}/bin/irmail
 %attr(755,root,qmail)                   %{_prefix}/bin/ifaddr
 %attr(755,root,qmail)                   %{_prefix}/bin/setforward
 %attr(755,root,qmail)                   %{_prefix}/bin/822date
-%attr(755,root,qmail)                   %{_prefix}/bin/cdbdump
 %attr(755,root,qmail)                   %{_prefix}/bin/iftocc
 %attr(755,root,qmail)                   %{_prefix}/bin/serialqmtp
 %attr(755,root,qmail)                   %{_prefix}/bin/delcr
@@ -732,10 +725,7 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/mbox2maildir
 %attr(755,root,qmail)                   %{_prefix}/bin/printforward
 %attr(755,root,qmail)                   %{_prefix}/bin/preline
-%attr(755,root,qmail)                   %{_prefix}/bin/cdbget
-%attr(755,root,qmail)                   %{_prefix}/bin/cdbgetm
 %attr(755,root,qmail)                   %{_prefix}/bin/822addr
-%attr(755,root,qmail)                   %{_prefix}/bin/cdbstats
 %attr(755,root,qmail)                   %{_prefix}/bin/maildirserial
 %attr(755,root,qmail)                   %{_prefix}/bin/822fields
 %attr(755,root,qmail)                   %{_prefix}/bin/ofmipname
@@ -752,7 +742,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/qbase64
 %attr(755,root,qmail)                   %{_prefix}/bin/swaks
 %attr(755,root,qmail)                   %{_prefix}/bin/replier
-%attr(755,root,qmail)                   %{_prefix}/bin/cdbtest
 %attr(755,root,qmail)                   %{_prefix}/bin/822header
 %attr(755,root,qmail)                   %{_prefix}/bin/qmaildirmake
 %attr(755,root,qmail)                   %{_prefix}/bin/maildir2mbox
@@ -763,7 +752,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/rrt
 %attr(755,root,qmail)                   %{_prefix}/bin/drate
 %attr(755,root,qmail)                   %{_prefix}/bin/cidr
-%attr(755,root,qmail)                   %{_prefix}/bin/spawn-filter
 %attr(755,root,qmail)                   %{_prefix}/bin/tcp-env
 %attr(755,root,qmail)                   %{_prefix}/bin/rrforward
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-dk
@@ -801,6 +789,53 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/srsfilter
 %endif
 %attr(755,root,qmail)                   %{_prefix}/bin/inotify
+%attr(755,root,qmail)                   %{_prefix}/bin/qmail-popup
+
+%attr(755,root,qmail)                   %{_prefix}/sbin/spawn-filter
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-getpw
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-local
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-remote
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-pw2u
+%attr(751,root,qmail)                   %{_prefix}/sbin/recipient-cdb
+%attr(755,root,qmail)                   %{_prefix}/sbin/cdbtest
+%attr(755,root,qmail)                   %{_prefix}/sbin/cdbstats
+%attr(755,root,qmail)                   %{_prefix}/sbin/cdbdump
+%attr(755,root,qmail)                   %{_prefix}/sbin/cdbget
+%attr(755,root,qmail)                   %{_prefix}/sbin/cdbgetm
+%attr(755,root,qmail)                   %{_prefix}/sbin/cdbmake
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-newmrh
+%attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
+%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
+%attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
+%attr(2551,root,qscand)                 %{_prefix}/sbin/run-cleanq
+%attr(755,root,qmail)                   %{_prefix}/sbin/qscanq-stdin
+
+%attr(755,root,qmail)                   %{_prefix}/sbin/plugtest
+%attr(755,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
+%attr(755,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
+%attr(755,root,qmail)                   %{_prefix}/sbin/svctool
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-nullqueue
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-multi
+%attr(755,root,qmail)                   %{_prefix}/sbin/cleanq
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-tcpok
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-tcpto
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-qmqpc
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-newu
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-cdb
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-sql
+
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-daemon
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-start
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-lspawn
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-rspawn
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-clean
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-send
+%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-todo
+%attr(755,root,qmail)                   %{_prefix}/sbin/surblfilter
+%attr(755,root,qmail)                   %{_prefix}/sbin/surblqueue
+
+%attr(755,root,qmail)                   %{_prefix}/sbin/relaytest
+%attr(755,root,qmail)                   %{_prefix}/sbin/splogger
 
 %attr(755,root,qmail)                   %{libexecdir}/columnt
 %attr(755,root,qmail)                   %{libexecdir}/rpmattr
@@ -850,42 +885,6 @@ done
 %attr(755,root,qmail)                   %{libexecdir}/zrxdelay
 %attr(755,root,qmail)                   %{libexecdir}/qupgrade.sh
 %verify (not md5 size mtime mode)       %{libexecdir}/qlocal_upgrade.sh
-
-%attr(755,root,qmail)                   %{_prefix}/sbin/plugtest
-%attr(755,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
-%attr(755,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
-%attr(755,root,qmail)                   %{_prefix}/sbin/svctool
-%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-nullqueue
-%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-multi
-%attr(755,root,qmail)                   %{_prefix}/sbin/cleanq
-%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-tcpok
-%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-tcpto
-%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-qmqpc
-
-%attr(751,root,qmail)                   %{_prefix}/bin/qmail-newu
-%attr(751,root,qmail)                   %{_prefix}/bin/qmail-newmrh
-%attr(751,root,qmail)                   %{_prefix}/bin/qmail-cdb
-%attr(751,root,qmail)                   %{_prefix}/bin/qmail-sql
-%attr(751,root,qmail)                   %{_prefix}/bin/recipient-cdb
-
-%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-daemon
-%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-start
-%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-lspawn
-%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-rspawn
-%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-clean
-%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-send
-%attr(751,root,qmail)                   %{_prefix}/sbin/qmail-todo
-%attr(755,root,qmail)                   %{_prefix}/sbin/surblfilter
-%attr(755,root,qmail)                   %{_prefix}/sbin/surblqueue
-
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-getpw
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-local
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-remote
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-pw2u
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-popup
-
-%attr(755,root,qmail)                   %{_prefix}/sbin/relaytest
-%attr(755,root,qmail)                   %{_prefix}/sbin/splogger
 
 %attr(755,root,qmail)                   %{libexecdir}/svscanboot
 %attr(755,root,qmail)                   %{libexecdir}/atrn
