@@ -51,12 +51,6 @@
 %attr(0755,root,qmail) @prefix@/bin/autoresponder
 %attr(0755,root,qmail) @prefix@/bin/qbase64
 %attr(0755,root,qmail) @prefix@/bin/bouncesaying
-%attr(0755,root,qmail) @prefix@/bin/cdbdump
-%attr(0755,root,qmail) @prefix@/bin/cdbget
-%attr(0755,root,qmail) @prefix@/bin/cdbgetm
-%attr(0755,root,qmail) @prefix@/bin/cdbmake
-%attr(0755,root,qmail) @prefix@/bin/cdbstats
-%attr(0755,root,qmail) @prefix@/bin/cdbtest
 %attr(0755,root,qmail) @prefix@/bin/checkaddr
 %attr(0755,root,qmail) @prefix@/bin/checkdomain
 %attr(0755,root,qmail) @prefix@/bin/cidr
@@ -162,13 +156,17 @@
 %attr(0755,root,qmail) @prefix@/bin/tai64n2tai
 %attr(0755,root,qmail) @prefix@/bin/udpclient
 %attr(0755,root,qmail) @prefix@/bin/udplogger
-%attr(0550,root,qmail) @prefix@/bin/qmail-cdb
-%attr(0550,root,qmail) @prefix@/bin/qmail-newmrh
-%attr(0550,root,qmail) @prefix@/bin/qmail-newu
-%attr(0550,root,qmail) @prefix@/bin/recipient-cdb
+%attr(0751,root,qmail) @prefix@/bin/qmail-popup
 #
 # sbin
 #
+%attr(0755,root,qmail) @prefix@/sbin/cdbdump
+%attr(0755,root,qmail) @prefix@/sbin/cdbstats
+%attr(0755,root,qmail) @prefix@/sbin/cdbtest
+%attr(0755,root,qmail) @prefix@/sbin/cdbget
+%attr(0755,root,qmail) @prefix@/sbin/cdbgetm
+%attr(0755,root,qmail) @prefix@/sbin/cdbmake
+%attr(0751,root,qmail) @prefix@/sbin/qmail-newmrh
 %attr(0755,root,qmail) @prefix@/sbin/qmail-tcpok
 %attr(0755,root,qmail) @prefix@/sbin/qmail-tcpto
 %attr(0755,root,qmail) @prefix@/sbin/qmail-multi
@@ -194,6 +192,16 @@
 %attr(0755,root,qmail) @prefix@/sbin/greydaemon
 %attr(0755,root,qmail) @prefix@/sbin/surblfilter
 %attr(0755,root,qmail) @prefix@/sbin/surblqueue
+%attr(0751,root,qmail) @prefix@/sbin/qmail-getpw
+%attr(0751,root,qmail) @prefix@/sbin/qmail-local
+%attr(0751,root,qmail) @prefix@/sbin/qmail-remote
+%attr(0751,root,qmail) @prefix@/sbin/qmail-pw2u
+%attr(0751,root,qmail) @prefix@/sbin/relaytest
+%attr(0751,root,qmail) @prefix@/sbin/splogger
+%attr(0751,root,qmail) @prefix@/sbin/qmail-cdb
+%attr(0751,root,qmail) @prefix@/sbin/qmail-sql
+%attr(0751,root,qmail) @prefix@/sbin/qmail-newu
+%attr(0751,root,qmail) @prefix@/sbin/recipient-cdb
 
 %attr(0755,root,qmail) @libexecdir@/svscanboot
 %attr(0755,root,qmail) @libexecdir@/cdbmake-12
@@ -271,14 +279,6 @@
 %attr(0755,root,qmail) @libexecdir@/zsuids
 %attr(0755,root,qmail) @libexecdir@/qupgrade.sh
 %attr(0755,root,qmail) @libexecdir@/qlocal_upgrade.sh
-
-%attr(0751,root,qmail) @prefix@/bin/qmail-getpw
-%attr(0751,root,qmail) @prefix@/bin/qmail-local
-%attr(0751,root,qmail) @prefix@/bin/qmail-remote
-%attr(0751,root,qmail) @prefix@/bin/qmail-pw2u
-%attr(0751,root,qmail) @prefix@/bin/qmail-popup
-%attr(0751,root,qmail) @prefix@/sbin/relaytest
-%attr(0751,root,qmail) @prefix@/sbin/splogger
 #
 # Setuid
 #
