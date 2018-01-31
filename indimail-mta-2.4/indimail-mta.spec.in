@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.136 2018-01-31 14:24:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.137 2018-01-31 14:37:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -694,7 +694,6 @@ done
 #
 # Binaries
 #
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-popbull
 %attr(755,root,qmail)                   %{_prefix}/bin/queue-fix
 %attr(755,root,qmail)                   %{_prefix}/bin/maildirwatch
 %attr(755,root,qmail)                   %{_prefix}/bin/bouncesaying
@@ -782,13 +781,14 @@ done
 %endif
 %attr(755,root,qmail)                   %{_prefix}/bin/inotify
 
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-popbull
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-popup
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-pop3d
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-poppass
 %attr(755,root,qmail)                   %{_prefix}/sbin/ofmipd
-%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-qmtpd
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-smtpd
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-qmqpd
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-qmtpd
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-dkim
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-dk
 %attr(755,root,qmail)                   %{_prefix}/sbin/spawn-filter
@@ -1223,7 +1223,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/envdir
 %attr(755,root,qmail)                   %{_prefix}/bin/envuidgid
 %attr(755,root,qmail)                   %{_prefix}/bin/fghack
-%attr(755,root,qmail)                   %{_prefix}/bin/multilog
 %attr(755,root,qmail)                   %{_prefix}/bin/pgrphack
 %attr(755,root,qmail)                   %{_prefix}/bin/setlock
 %attr(755,root,qmail)                   %{_prefix}/bin/setuidgid
@@ -1246,6 +1245,7 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/qlogselect
 %attr(755,root,qmail)                   %{_prefix}/sbin/svscan
 %attr(755,root,qmail)                   %{_prefix}/sbin/readproctitle
+%attr(755,root,qmail)                   %{_prefix}/sbin/multilog
 
 # ucspi-tcp
 %attr(755,root,root)                    %{_prefix}/bin/mconnect-io
@@ -1261,7 +1261,7 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/http@
 %attr(755,root,root)                    %{_prefix}/bin/tcprules
 %attr(755,root,qmail)                   %{_prefix}/bin/udpclient
-%attr(755,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(755,root,qmail)                   %{_prefix}/sbin/udplogger
 %attr(755,root,qmail)                   %{_prefix}/sbin/greydaemon
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-greyd
 %endif
@@ -1395,7 +1395,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/envdir
 %attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
 %attr(555,root,qmail)                   %{_prefix}/bin/fghack
-%attr(555,root,qmail)                   %{_prefix}/bin/multilog
 %attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
 %attr(555,root,qmail)                   %{_prefix}/bin/setlock
 %attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
@@ -1419,6 +1418,7 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/qmailctl
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscan
 %attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
+%attr(555,root,qmail)                   %{_prefix}/sbin/multilog
 %attr(755,root,qmail)                   %{_prefix}/sbin/svctool
 
 %attr(555,root,qmail)                   %{libexecdir}/svscanboot
@@ -1475,7 +1475,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/mconnect-io
 %attr(555,root,qmail)                   %{_prefix}/bin/rblsmtpd
 %attr(555,root,qmail)                   %{_prefix}/bin/udpclient
-%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(555,root,qmail)                   %{_prefix}/sbin/udplogger
 %attr(555,root,qmail)                   %{_prefix}/sbin/greydaemon
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmail-greyd
 
