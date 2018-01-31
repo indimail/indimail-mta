@@ -1,5 +1,6 @@
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.5 Start 27/01/2018
+1. moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
