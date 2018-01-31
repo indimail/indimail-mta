@@ -19,14 +19,10 @@
 @prefix@/bin/vrenamedomain          root:root      4555
 @prefix@/bin/vsetuserquota          root:root      4555
 @prefix@/bin/vmoveuser              root:root      4555
-@prefix@/bin/qhpsi                  qscand:qmail   6511
-@prefix@/bin/run-cleanq             root:qscand    2511
 @prefix@/bin/vuserinfo              root:root      4555
-@prefix@/bin/qmail-queue            qmailq:qmail   6511
 @prefix@/bin/vdeldomain             root:root      4555
 @prefix@/bin/vadddomain             root:root      4555
 @prefix@/bin/bogofilter             root:indimail  6511
-@prefix@/bin/qscanq                 qscand:qscand  4555
 @prefix@/bin/vdominfo               root:root      4511
 @prefix@/bin/vrenameuser            root:root      4555
 @prefix@/bin/printdir               root:root      4555
@@ -36,9 +32,3 @@
 @libexecdir@/sq_vacation        root:qmail     4555
 @libexecdir@/imapmodules/authshadow root:root      4555
 @prefix@/sbin/systpass              root:root      4555
-
-#
-# Directories
-#
-@indimaildir@/alias                      alias:qmail    2555
-@indimaildir@/autoturn                   indimail:qmail 2755
