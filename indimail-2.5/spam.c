@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 2.20  2018-01-31 11:58:10+05:30  Cprogrammer
+ * moved qmail-cdb to sbin
+ *
  * Revision 2.19  2017-03-13 14:08:26+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir, use PREFIX for bin prefix
  *
@@ -74,7 +77,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 2.19 2017-03-13 14:08:26+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 2.20 2018-01-31 11:58:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *parseLine1(char *);
@@ -294,7 +297,7 @@ spamReport(int spamNumber, char *outfile)
 	fprintf(stderr, "%d Spammers detected\n", spamcnt);
 	if (flag && spamcnt)
 	{
-		spamprog[0] = PREFIX"/bin/qmail-cdb";
+		spamprog[0] = PREFIX"/sbin/qmail-cdb";
 		if ((ptr = strrchr(outfile, '/')))
 			ptr++;
 		else
