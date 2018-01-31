@@ -1,5 +1,8 @@
 /*
  * $Log: qmail_remote.c,v $
+ * Revision 2.11  2018-01-31 11:57:50+05:30  Cprogrammer
+ * moved qmail-remote to sbin
+ *
  * Revision 2.10  2017-03-13 14:08:00+05:30  Cprogrammer
  * replaced QMAILDIR with PREFIX
  *
@@ -53,7 +56,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: qmail_remote.c,v 2.10 2017-03-13 14:08:00+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: qmail_remote.c,v 2.11 2018-01-31 11:57:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -105,7 +108,7 @@ qmail_remote(char *user, char *domain)
 		binqqargs[4] = mail_size;
 		binqqargs[5] = recipient;
 		binqqargs[6] = 0;
-		execv(PREFIX"/bin/qmail-remote", binqqargs);
+		execv(PREFIX"/sbin/qmail-remote", binqqargs);
 		if(error_temp(errno))
 			exit(111);
 		exit(100);
