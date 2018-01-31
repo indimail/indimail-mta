@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.5  2018-01-31 16:21:36+05:30  Cprogrammer
+# update QMAILLOCAL, QMAILREMOTE for qmail-local, qmail-remote in sbin
+#
 # Revision 1.4  2018-01-09 11:46:40+05:30  Cprogrammer
 # updated for v2.3 indimail-mta
 #
@@ -10,7 +13,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.4 2018-01-09 11:46:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.5 2018-01-31 16:21:36+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -123,13 +126,8 @@ done
 # service qmail-spamlog has been renamed to qmail-logfifo
 # fifo is now /tmp/logfifo instead of /tmp/spamfifo
 if [ -d /service/qmail-spamlog ] ; then
-	$mv /service/qmail-spamlog /service/qmail-logfifo
-	$mkdir -p /service/qmail-logfifo/variables
-	$chown root:indimail /service/qmail-logfifo/variables
-	$chmod 775 /service/qmail-logfifo/variables
-	check_update_if_diff /service/qmail-logfifo/variables/LOGFILTER /tmp/logfifo
-	$sed -i 's{smtpd.25{logfifo{' /service/qmail-logfifo/run
-	$sed -i 's{spamlog{logfifo{' /service/qmail-logfifo/log/run
+	/bin/rm -rf /service/qmail-spamlog
+	/usr/sbin/svctool --fifologger=/tmp/logfifo --servicedir=/service
 fi
 
 # for bogofilter to send back X-Bogosity back to qmail-smtpd as well as log entry
@@ -142,6 +140,12 @@ do
 		check_update_if_diff /service/$i/variables/LOGFILTER /tmp/logfifo
 	fi
 done
+if [ -s /service/qmail-send.25/variables/QMAILLOCAL ] ; then
+	check_update_if_diff /service/qmail-send.25/variables/QMAILLOCAL /usr/sbin/qmail-local
+fi
+if [ -s /service/qmail-send.25/variables/QMAILREMOTE ] ; then
+	check_update_if_diff /service/qmail-send.25/variables/QMAILREMOTE /usr/sbin/qmail-remote
+fi
 if [ -s /etc/indimail/control/defaultqueue/LOGFILTER ] ; then
 	check_update_if_diff /etc/indimail/control/defaultqueue/LOGFILTER /tmp/logfifo
 fi
