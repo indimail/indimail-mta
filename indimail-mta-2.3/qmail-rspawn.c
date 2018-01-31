@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.31  2018-01-31 12:07:59+05:30  Cprogrammer
+ * moved qmail-remote to sbin
+ *
  * Revision 1.30  2018-01-09 11:51:07+05:30  Cprogrammer
  * use loadLibrary() to load vget_real_domain(), is_distributed_domain(), findhost()
  *
@@ -230,7 +233,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	char *          (*findhost) (char *, int);
 
 	size_buf[fmt_ulong(size_buf, msgsize)] = 0;
-	args[0] = "qmail-remote";
+	args[0] = "sbin/qmail-remote";
 	args[1] = r + at + 1;		/*- domain */
 	args[2] = s;				/*- sender */
 	args[3] = qqeh;				/*- qqeh */
@@ -315,13 +318,8 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.30 2018-01-09 11:51:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.31 2018-01-31 12:07:59+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }
