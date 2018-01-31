@@ -1099,3 +1099,6 @@ hasmysql.h
 mysql_config.o
 svctool.8
 svctool
+indimail-mta-permissions.easy
+indimail-mta-permissions.paranoid
+indimail-mta-permissions.secure
