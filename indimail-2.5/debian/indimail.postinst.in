@@ -169,6 +169,15 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
     cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
     ${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
   fi
+  svc_list=""
+  for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+    qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
+    proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
+    pwdlookup qmail-poppass.106 
+  do
+    svc_list="$svc_list ${servicedir}/$i"
+  done
+  ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
   ${rm} -f /tmp/indimail.upgrade
   exit 0
 fi

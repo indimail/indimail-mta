@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.444 2018-01-31 12:00:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.445 2018-01-31 16:23:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1717,6 +1717,7 @@ else
 fi
 
 if [ $argv1 -eq 2 ] ; then # upgrade
+# we are doing upgrade
   (
   echo "doing post upgrade activities"
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
@@ -1725,7 +1726,18 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $*
   fi
   # selinux
+
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
+  # refresh indimail services
+  svc_list=""
+  for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+    qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
+    proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
+    pwdlookup qmail-poppass.106 
+  do
+    svc_list="$svc_list %{servicedir}/$i"
+  done
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
   ) >> /tmp/indimail-setup.log 2>&1
   exit 0
 fi
