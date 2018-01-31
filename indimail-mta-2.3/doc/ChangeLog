@@ -1,3 +1,9 @@
+* Wed Jan 31 2018 10:56:08 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
+Release 2.4 Start 31/12/2017
+1. svctool - added option to refresh services
+2. moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
+3. moved system binaries to sbin
+
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017
 25/12/2017
@@ -38,3 +44,4 @@ Release 2.3 Start 25/12/2017
 23/01/2018
 27. moved cron entries to /etc/cron.d
 28. updated debian/* for v2.3 of indimail-mta
+---------- Released with IndiMail 2.4 ----------------
