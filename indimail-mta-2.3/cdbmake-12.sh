@@ -1,5 +1,8 @@
 #
 # $Log: cdbmake-12.sh,v $
+# Revision 1.3  2018-01-31 12:02:29+05:30  Cprogrammer
+# moved cdbmake to sbin
+#
 # Revision 1.2  2017-03-09 16:38:00+05:30  Cprogrammer
 # FHS changes
 #
@@ -14,4 +17,4 @@ awk '
 	END {
 		print ""
 	}
-' | PREFIX/bin/cdbmake "$@"
+' | PREFIX/sbin/cdbmake "$@"
