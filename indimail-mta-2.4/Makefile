@@ -1410,7 +1410,8 @@ srsfilter supervise surblfilter surblqueue svc svok svscan svscanboot \
 svstat swaks sys-checkpwd systemd tai2tai64n tai64n tai64n2tai tai64nlocal \
 tai64nunix tcp-env testzero tokenize uacl udpclient udplogger update_tmprsadh \
 upstart viruscanner whois yearcal \
-analyzer qtools qlog
+analyzer qtools qlog \
+indimail-mta-permissions.easy indimail-mta-permissions.paranoid indimail-mta-permissions.secure
 
 analyzer: \
 mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
@@ -5988,3 +5989,9 @@ byte_copy.o alloc.o alloc_re.o stralloc.a str_diffn.o error.o str_len.o
 #	$(LD) -G -Bdynamic -o generic.so generic.o wait_pid.o \
 
 #################################################################
+indimail-mta-permissions.easy: indimail-mta-permissions.easy.in
+	$(edit) $@.in > $@
+indimail-mta-permissions.secure: indimail-mta-permissions.secure.in
+	$(edit) $@.in > $@
+indimail-mta-permissions.paranoid: indimail-mta-permissions.paranoid.in
+	$(edit) $@.in > $@
