@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.135 2018-01-31 12:05:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.136 2018-01-31 14:24:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -695,7 +695,6 @@ done
 # Binaries
 #
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-popbull
-%attr(755,root,qmail)                   %{_prefix}/bin/ofmipd
 %attr(755,root,qmail)                   %{_prefix}/bin/queue-fix
 %attr(755,root,qmail)                   %{_prefix}/bin/maildirwatch
 %attr(755,root,qmail)                   %{_prefix}/bin/bouncesaying
@@ -736,7 +735,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/fastforward
 %attr(755,root,qmail)                   %{_prefix}/bin/inewaliases
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-rm
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-pop3d
 %attr(755,root,qmail)                   %{_prefix}/bin/dot-forward
 %attr(755,root,qmail)                   %{_prefix}/bin/datemail
 %attr(755,root,qmail)                   %{_prefix}/bin/qbase64
@@ -745,7 +743,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/822header
 %attr(755,root,qmail)                   %{_prefix}/bin/qmaildirmake
 %attr(755,root,qmail)                   %{_prefix}/bin/maildir2mbox
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-smtpd
 %attr(755,root,qmail)                   %{_prefix}/bin/qarf
 %attr(755,root,qmail)                   %{_prefix}/bin/qaes
 %attr(755,root,qmail)                   %{_prefix}/bin/qnotify
@@ -754,14 +751,11 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/cidr
 %attr(755,root,qmail)                   %{_prefix}/bin/tcp-env
 %attr(755,root,qmail)                   %{_prefix}/bin/rrforward
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-dk
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-dkim
 %attr(755,root,qmail)                   %{_prefix}/bin/dk-filter
 %attr(755,root,qmail)                   %{_prefix}/bin/mailsubj
 %attr(755,root,qmail)                   %{_prefix}/bin/condtomaildir
 %attr(755,root,qmail)                   %{_prefix}/bin/822field
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-cat
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-poppass
 %attr(755,root,qmail)                   %{_prefix}/bin/replier-config
 %attr(755,root,qmail)                   %{_prefix}/bin/forward
 %attr(755,root,qmail)                   %{_prefix}/bin/new-inject
@@ -771,12 +765,10 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/dktest
 %attr(755,root,qmail)                   %{_prefix}/bin/iftoccfrom
 %attr(755,root,qmail)                   %{_prefix}/bin/qreceipt
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-qmqpd
 %attr(755,root,qmail)                   %{_prefix}/bin/except
 %attr(755,root,qmail)                   %{_prefix}/bin/dknewkey
 %attr(755,root,qmail)                   %{_prefix}/bin/maildirsmtp
 %attr(755,root,qmail)                   %{_prefix}/bin/argv0
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-qmtpd
 %attr(755,root,qmail)                   %{_prefix}/bin/addcr
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-inject
 %attr(755,root,qmail)                   %{_prefix}/bin/serialcmd
@@ -789,8 +781,16 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/srsfilter
 %endif
 %attr(755,root,qmail)                   %{_prefix}/bin/inotify
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-popup
 
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-popup
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-pop3d
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-poppass
+%attr(755,root,qmail)                   %{_prefix}/sbin/ofmipd
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-qmtpd
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-smtpd
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-qmqpd
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-dkim
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-dk
 %attr(755,root,qmail)                   %{_prefix}/sbin/spawn-filter
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-getpw
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-local
