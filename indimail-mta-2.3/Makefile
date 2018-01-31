@@ -1906,9 +1906,10 @@ qmail-newmrh.8
 	nroff -man qmail-newmrh.8 > qmail-newmrh.0
 
 qmail-newmrh.8: \
-qmail-newmrh.9 conf-sysconfdir
+qmail-newmrh.9 conf-sysconfdir conf-prefix
 	cat qmail-newmrh.9 \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	| sed s}@prefix\@}"`head -1 conf-prefix`"}g \
 	> qmail-newmrh.8
 
 qmail-newmrh.o: \
