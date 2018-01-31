@@ -1,5 +1,8 @@
 /*
  * $Log: compile_morercpthosts.c,v $
+ * Revision 2.3  2018-01-31 11:56:59+05:30  Cprogrammer
+ * moved qmail-newmrh to sbin
+ *
  * Revision 2.2  2017-03-13 13:38:04+05:30  Cprogrammer
  * use PREFIX for bin programs
  *
@@ -23,7 +26,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: compile_morercpthosts.c,v 2.2 2017-03-13 13:38:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: compile_morercpthosts.c,v 2.3 2018-01-31 11:56:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -37,7 +40,7 @@ compile_morercpthosts()
 	pid = vfork();
 	if (pid == 0)
 	{
-		execl(PREFIX"/bin/qmail-newmrh", "qmail-newmrh", NULL);
+		execl(PREFIX"/sbin/qmail-newmrh", "qmail-newmrh", NULL);
 		exit(127);
 	} else
 		wait(&pid);
