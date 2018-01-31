@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.236  2018-01-31 12:04:51+05:30  Cprogrammer
+ * moved system binaries to sbin
+ *
  * Revision 1.235  2018-01-25 16:16:09+05:30  Cprogrammer
  * inquery, domains directory are part of indimail package
  *
@@ -849,7 +852,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "qmail-qfilter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "drate", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "cidr", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "spawn-filter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-cat", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "irmail", auto_uido, auto_gidq, moder_x);
@@ -861,6 +863,15 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "rrt", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "inotify", auto_uido, auto_gidq, moder_x);
+#if defined(HASDKIM) || defined(DOMAIN_KEYS)
+	c(auto_qmail_home, "bin", "dk-filter", auto_uido, auto_gidq, moder_x);
+#endif
+	c(auto_qmail_home, "bin", "queue-fix", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qbase64", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "swaks", auto_uido, auto_gidq, moder_x);
+
 	c(auto_libexec_dir, auto_libexec_base, "qpq", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qail", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "elq", auto_uido, auto_gidq, moder_x);
@@ -870,27 +881,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "etrn", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "atrn", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qmail-lagcheck", auto_uido, auto_gidq, moder_x);
-#if defined(HASDKIM) || defined(DOMAIN_KEYS)
-	c(auto_qmail_home, "bin", "dk-filter", auto_uido, auto_gidq, moder_x);
-#endif
-	c(auto_qmail_home, "bin", "queue-fix", auto_uido, auto_gidq, moder_x);
-
-	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qbase64", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "swaks", auto_uido, auto_gidq, moder_x);
-
-	c(auto_qmail_home, "bin", "qmail-newu", auto_uido, auto_gidq, moder_t);
-	c(auto_qmail_home, "bin", "qmail-newmrh", auto_uido, auto_gidq, moder_t);
-	c(auto_qmail_home, "bin", "recipient-cdb", auto_uido, auto_gidq, moder_t);
-	c(auto_qmail_home, "bin", "qmail-cdb", auto_uido, auto_gidq, moder_t);
-	c(auto_qmail_home, "bin", "qmail-sql", auto_uido, auto_gidq, moder_t);
-	c(auto_qmail_home, "bin", "cdbmake", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "cdbget", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "cdbgetm", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "cdbdump", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "cdbstats", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "cdbtest", auto_uido, auto_gidq, moder_x);
 #ifdef TLS
 	c(auto_libexec_dir, auto_libexec_base, "update_tmprsadh", auto_uido, auto_gidq, moder_x);
 #endif
@@ -923,12 +913,21 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "addcr", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "delcr", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "fixcrio", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-getpw", auto_uido, auto_gidq, moder_u);
-	c(auto_qmail_home, "bin", "qmail-local", auto_uido, auto_gidq, moder_u);
-	c(auto_qmail_home, "bin", "qmail-remote", auto_uido, auto_gidq, moder_u);
-	c(auto_qmail_home, "bin", "qmail-pw2u", auto_uido, auto_gidq, moder_u);
 	c(auto_qmail_home, "bin", "qmail-popup", auto_uido, auto_gidq, moder_u);
 
+	c(auto_qmail_home, "sbin", "spawn-filter", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-local", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "sbin", "qmail-remote", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "sbin", "recipient-cdb", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "qmail-getpw", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "sbin", "qmail-pw2u", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "sbin", "cdbdump", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "cdbstats", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "cdbtest", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "cdbget", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "cdbgetm", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "cdbmake", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-newmrh", auto_uido, auto_gidq, moder_t);
 	c(auto_qmail_home, "sbin", "relaytest", auto_uido, auto_gidq, moder_u);
 	c(auto_qmail_home, "sbin", "splogger", auto_uido, auto_gidq, moder_u);
 	c(auto_qmail_home, "sbin", "qmail-tcpto", auto_uido, auto_gidq, moder_x);
@@ -955,6 +954,11 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "sbin", "plugtest", auto_uido, auto_gidq, moder_x);
 #endif
 	c(auto_qmail_home, "sbin", "svctool", auto_uido, auto_gidq, moder_x);
+
+	c(auto_qmail_home, "sbin", "qmail-newu", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "qmail-cdb", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "qmail-sql", auto_uido, auto_gidq, moder_t);
+
 	c(auto_libexec_dir, auto_libexec_base, "dnscname", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "dnsptr", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "dnsip", auto_uido, auto_gidq, moder_x);
@@ -1577,7 +1581,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.235 2018-01-25 16:16:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.236 2018-01-31 12:04:51+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
