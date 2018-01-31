@@ -1,5 +1,8 @@
 /*
  * $Log: update_newu.c,v $
+ * Revision 2.4  2018-01-31 11:59:21+05:30  Cprogrammer
+ * moved qmail-newu to sbin
+ *
  * Revision 2.3  2017-03-13 14:10:05+05:30  Cprogrammer
  * use PREFIX for bin prefix
  *
@@ -26,7 +29,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_newu.c,v 2.3 2017-03-13 14:10:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: update_newu.c,v 2.4 2018-01-31 11:59:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -41,7 +44,7 @@ update_newu()
 	if (pid == 0)
 	{
 		umask(022);
-		execl(PREFIX"/bin/qmail-newu", "qmail-newu", NULL);
+		execl(PREFIX"/sbin/qmail-newu", "qmail-newu", NULL);
 		exit(127);
 	} else
 		wait(&pid);
