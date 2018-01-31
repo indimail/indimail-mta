@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.237  2018-01-31 14:18:56+05:30  Cprogrammer
+ * moved qmail-pop3d, qmail-qmqpd, qmail-qmtpd, qmail-smtpd, qmail-poppass, qmail-dk, qmail-dkim, qmail-popup, ofmipd to sbin
+ *
  * Revision 1.236  2018-01-31 12:04:51+05:30  Cprogrammer
  * moved system binaries to sbin
  *
@@ -828,11 +831,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "qmail-inject", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-showctl", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-qread", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-pop3d", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-popbull", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-qmqpd", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-qmtpd", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-smtpd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "sendmail", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "tcp-env", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qreceipt", auto_uido, auto_gidq, moder_x);
@@ -853,7 +852,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "drate", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "cidr", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-cat", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "irmail", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "rrforward", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "maildirdeliver", auto_uido, auto_gidq, moder_x);
@@ -902,10 +900,10 @@ hier(inst_dir, fatal, dev_package)
 #ifdef DOMAIN_KEYS
 	c(auto_qmail_home, "bin", "dknewkey", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "dktest", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-dk", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-dk", auto_uido, auto_gidq, moder_x);
 #endif
 #ifdef HASDKIM
-	c(auto_qmail_home, "bin", "qmail-dkim", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-dkim", auto_uido, auto_gidq, moder_x);
 #endif
 
 	c(auto_qmail_home, "bin", "recordio", auto_uido, auto_gidq, moder_x);
@@ -913,8 +911,13 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "addcr", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "delcr", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "fixcrio", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-popup", auto_uido, auto_gidq, moder_u);
 
+	c(auto_qmail_home, "sbin", "qmail-popup", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "sbin", "qmail-poppass", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-pop3d", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-qmqpd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-qmtpd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-smtpd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "spawn-filter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "qmail-local", auto_uido, auto_gidq, moder_u);
 	c(auto_qmail_home, "sbin", "qmail-remote", auto_uido, auto_gidq, moder_u);
@@ -972,7 +975,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "nowutc", auto_uido, auto_gidq, moder_x);
 
 	/* mess822 */
-	c(auto_qmail_home, "bin", "ofmipd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "ofmipname", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "iftocc", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "iftoccfrom", auto_uido, auto_gidq, moder_x);
@@ -995,6 +997,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "condtomaildir", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "replier", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "replier-config", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "ofmipd", auto_uido, auto_gidq, moder_x);
 
 	/* fastforward */
 	c(auto_qmail_home, "bin", "dot-forward", auto_uido, auto_gidq, moder_x);
@@ -1581,7 +1584,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.236 2018-01-31 12:04:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.237 2018-01-31 14:18:56+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
