@@ -29,7 +29,11 @@
 %global libdkim_version    1.5
 %global libsrs2_version    1.0.18
 %global tcpserver_plugin   1
+%if 0%{?suse_version}
 %global noperms            1
+%else
+%global noperms            0
+%endif
 %global see_base           For a description of IndiMail visit http://www.indimail.org
 %global nolibdkim          0
 %global nolibsrs2          0
@@ -114,9 +118,9 @@ Source5: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source7:%{name}-permissions.easy
-Source8:%{name}-permissions.secure
-Source9:%{name}-permissions.paranoid
+Source6:%{name}-permissions.easy
+Source7:%{name}-permissions.secure
+Source8:%{name}-permissions.paranoid
 %endif
 %endif
 
