@@ -89,7 +89,7 @@ need qmail-smtpd to accept messages through SMTP. You can survive with a tiny
 configuration:
 
     * /usr/sbin/qmail-qmqpc;
-    * /usr/bin/qmail-smtpd;
+    * /usr/sbin/qmail-smtpd;
     * a symbolic link to qmail-qmqpc from /usr/sbin/qmail-queue;
     * the internal gateway's IP address in /etc/indimail/control/qmqpservers;
     * the firewall host's name in /etc/indimail/control/me; and

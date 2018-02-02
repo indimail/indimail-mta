@@ -1,5 +1,5 @@
 File INSTALL-RPM, Version 2.5
-DATE: Sat Jan 27 21:55:49 IST 2018
+DATE: Fri Feb  2 18:58:49 IST 2018
 
 This section covers installing IndiMail from rpm/deb. This is the easy way to install IndiMail.
 If you are looking for something more simpler, then you need the Install IndiMail for
@@ -26,9 +26,9 @@ http://download.opensuse.org/repositories/home:/mbhangui/
 You can install indimail using yum by using the following command (depending on
 your architecture)
 
-# yum install indimail
+# yum install indimail indimail-mta
    or
-# dnf install indimail
+# dnf install indimail indimail-mta
 
 What the RPM/Deb does
 ---------------------
