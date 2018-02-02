@@ -19,6 +19,15 @@ Clam AntiVirus - GPL anti-virus toolkit for UNIX,
 Fetchmail,
 and other useful utilities (mpack, unpack, altermime, ripmime, fortune, flash).
 
+IndiMail consists of two packages - indimail-mta and indimail. indimail-mta is
+a re-engineered version of qmail (http://cr.yp.to/qmail.html). The
+indimail-mta provides you a MTA with all the functions of qmail with
+additional features.
+
+When you install IndiMail package along with indimail-mta, a shared library
+from IndiMail package are dynamically loaded to provide virtual domain
+functionality along with the ability to work with IMAP/POP3 retrieval daemons.
+
 IndiMail also provides programs to manage virtual domains. IndiMail allows extending a domain
 across multiple servers. IndiMail can act as an SMTP router/interceptor. This is a very
 powerful feature which allows IndiMail to provide native horizontal scalability. It knows the

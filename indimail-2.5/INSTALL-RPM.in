@@ -26,9 +26,9 @@ http://download.opensuse.org/repositories/home:/mbhangui/
 You can install indimail using yum by using the following command (depending on
 your architecture)
 
-# yum install indimail
+# yum install indimail indimail-mta
    or
-# dnf install indimail
+# dnf install indimail indimail-mta
 
 What the RPM/Deb does
 ---------------------

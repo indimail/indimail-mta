@@ -80,19 +80,18 @@ Before starting the installation, there are a few things you need to think about
 
   * If possible, install IndiMail on a "practice" system. This will give you a chance to make
     mistakes without losing important mail or interrupting mail service to your users. You can
-    also use
+    also use, while issuing the 'make install' command
 
     DESTDIR=staging_directory
 
-    to install indimail in a staging directory before copying to the actual destination.
-    Pre-pending the variable DESTDIR to each target in this way provides for staged installs, where
-    the installed files are not placed directly into their expected location but are instead
+    to install indimail in a staging directory, before copying to the actual destination.
+    Pre-pending the variable DESTDIR to each target in this way provides for staged installs,
+    where the installed files are not placed directly into their expected location but are instead
     copied into a temporary location (DESTDIR). However, installed files maintain their relative
-    directory structure and any embedded file names will not be modified.
-    DESTDIR support is commonly used in package creation. It is also helpful to users who want to
-    understand what a given package will install where, and to allow users, who don't normally have
-    permissions to install into protected areas, to build and install before gaining those
-    permissions.
+    directory structure. DESTDIR support is commonly used in package creation. It is also helpful
+    to users who want to understand what a given package will install where, and to allow users,
+    who don't normally have permissions to install into protected areas, to build and install before
+    gaining those permissions.
     Finally, it can be useful with tools such as stow, where code is installed in one place but
     made to appear to be installed somewhere else using symbolic links or special mount operations.
   * If you don't have a spare system, and your system is already handling mail using sendmail, smail,
@@ -195,8 +194,8 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
     +-/home/local/src/indimail/.+
                                .
                                . libdkim-1.5         (4.0  Mb)
-                               . indimail-@version@  (50   Mb)
-                               . indimail-mta-2.3    (18   Mb)
+                               . indimail-@version@  (20   Mb)
+                               . indimail-mta-2.4    (18   Mb)
                                . ucspi-tcp-0.88      (4.0  Mb)
                                . nssd-1.1            (2.0  Mb)
                                . pam-multi-1.1       (3.0  Mb)
@@ -206,19 +205,21 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . ripmime-1.4.0.10    (2.1  Mb)
                                . mpack-1.6           (1.5  Mb)
                                . fortune-1.1         (8.4  Mb)
-                               . courier-imap-4.18.0 (75   Mb)
+                               . courier-imap-4.18.2 (23   Mb)
                                . bogofilter-1.2.4    (11.6 Mb)
-                               . fetchmail-6.4.0    (10.5 Mb)
-                               . iwebadmin-1.3      (3.0  Mb)
+                               . fetchmail-6.4.0     (10.5 Mb)
+                               . iwebadmin-1.3       (3.0  Mb)
                                ------------------------------
-                                 Total              (200  Mb)
+                                 Total               (200  Mb)
 
 ########### SECTION 2  ##### USER/GROUP Creation ########################
 1. add groups and users and home directory
     For Linux (I presume this should hold good for OS like Solaris too)
     You will have to run this commands under root. The commands may be
     different for the OS you are running. Please consult your OS man pages/documentation
-    for the exact syntax.
+    for the exact syntax. Also note that the exact value of uids, gids aren't important
+    Note: You can skip this entire section and create the users in SECTION 3, STEP 4,
+    by using the svctool command
 
     % su
     # groupadd -g 555 indimail
@@ -327,11 +328,12 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/indimail-mta-2.3.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/indimail-mta-2.4.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.5.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libsrs2-1.0.18.tar.gz
-    % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.0.tar.bz2
+    % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.2.tar.bz2
     % wget http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/fetchmail-6.4.0.tar.xz
     % wget http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
     % wget http://downloads.sourceforge.net/indimail/ripmime-1.4.0.10.tar.gz
     % wget http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz
@@ -346,6 +348,8 @@ the installation.
     need DKIM Signatures for signing for verification
 
     ##### STEP 1  ##### Install MySQL #########################
+    The version number is given just as an example. You may use the latest
+    version available and also chose to install the binary using rpm/deb packages
     Install MySQL 5.5.2-m2 with MD5 cd3254f29561953ffb7c023cb1b825d2
     (You can install MySQL 5.1.x and greater)
     current working directory /home/local/src
@@ -388,7 +392,7 @@ the installation.
     by doing ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 3  ##### Install libsrs2-1.0.18 ################
-    Install libsrs2-1.0.18 (libsrs2-1.0.18.tar.gz MD5 b91ce86014a9d48523b2f2518363294b
+    Install libsrs2-1.0.18 (libsrs2-1.0.18.tar.gz MD5 994194fe64b959a7ecdb2e5814bac7cb
     current working directory /home/local/src
     Download the libsrs2 package. The latest tested libsrs2 package is
     libsrs2-1.0.18.tar.gz
@@ -402,18 +406,18 @@ the installation.
     % cd ..
 
     ##### STEP 4  ##### indimail-mta ##########################
-    Install indimail-mta MD5 9feb27750d7729611b760863f9953c6b
+    Install indimail-mta MD5 8a1a7cf86d311a3d195276995fbdb0b3
     current working directory /home/local/src
-    Download the indimail-mta package. The latest published ucspi-tcp package is indimail-mta-2.3.tar.gz.
+    Download the indimail-mta package. The latest published ucspi-tcp package is indimail-mta-2.4.tar.gz.
 
-    % gunzip -c indimail-mta-2.3.tar.gz | tar xf -
-    % cd indimail-mta-2.3
+    % gunzip -c indimail-mta-2.4.tar.gz | tar xf -
+    % cd indimail-mta-2.4
 
-    change first line in indimail-mta-2.3/conf-qmail to @indimaildir@
-    change first line in indimail-mta-2.3/conf-shared to @shareddir@
-    change first line in indimail-mta-2.3/conf-prefix to @prefix@
-    change first line in indimail-mta-2.3/conf-libexec to @libexecdir@
-    change first line in indimail-mta-2.3/conf-sysconfdir to @sysconfdir@
+    change first line in indimail-mta-2.4/conf-qmail to @indimaildir@
+    change first line in indimail-mta-2.4/conf-shared to @shareddir@
+    change first line in indimail-mta-2.4/conf-prefix to @prefix@
+    change first line in indimail-mta-2.4/conf-libexec to @libexecdir@
+    change first line in indimail-mta-2.4/conf-sysconfdir to @sysconfdir@
 
     % make -s
 
@@ -489,8 +493,8 @@ the installation.
 
     NOTES: To get a complete list of configure options type: ./configure --help
     If you change --enable-indiuser or --enable-indigroup to something different from
-    indimail:indimail, change conf-users or conf-groups in indimail-mta-2.3 subdirectory
-    and recompile/install indimail-mta-2.3
+    indimail:indimail, change conf-users or conf-groups in indimail-mta-2.4 subdirectory
+    and recompile/install indimail-mta-2.4
 
     % make -s [DESTDIR=staging_directory]
 
@@ -537,28 +541,18 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 7  ##### Courier IMAP/POP3 #####################
-    Install courier-imap (courier-imap-4.18.0.tar.bz2) MD5 ef11dc0ebe9ee27d24f4e892da1296d8
+    Install courier-imap (courier-imap-4.18.2.tar.bz2) MD5 6af3e78d3206518aab5510638cd620c2
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
-    courier-imap-4.18.0.tar.bz2. The patch brings up the version upto courier-imap to be
+    courier-imap-4.18.2.tar.bz2. The patch brings up the version upto courier-imap to be
     compatible with IndiMail.
 
-    % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.0.tar.bz2
-    % bzip2 -d -c courier-imap-4.18.0.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/courier-imap-4.18.0.patch.gz | patch -p0
+    % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.2.tar.bz2
+    % bzip2 -d -c courier-imap-4.18.2.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/courier-imap-4.18.2.patch.gz | patch -p0
     NOTE: if patches subdir is missing, download the patch from
           https://sourceforge.net/projects/indimail/files/Patches-2.0
-    % cd courier-imap-4.18.0
-
-   x-------------------------------- Mac OS X ONLY -----------------------------------------x
-   |% bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -                                     |
-   |If you are on Mac OS X 10.5.x you will need to apply courier-imap-3.0.8-1.2.patch and   |
-   |a supplement patch                                                                      |
-   |% gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.patch.gz | patch -p0      |
-   |% gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz \ |
-   | | patch -p0                                                                            |
-   |% cd courier-imap-3.0.8                                                                 |
-   x----------------------------------------------------------------------------------------x
+    % cd courier-imap-4.18.2
 
     % ./configure --prefix=@prefix@ --disable-root-check --bindir=@prefix@/bin \
         --with-redhat \
@@ -644,7 +638,7 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 9  ## Optional STEP ##### Fetchmail ############
-    Install fetchmail MD5 47733e70bf336d8c1b66c3834725107f  
+    Install fetchmail MD5 cb3de7eff720b9af77ae9d1e381349eb
     current working directory /home/local/src
     Download the fetchmail package. The latest tested fetchmail package tested is
     fetchmail-6.4.0.tar.bz2.
@@ -652,6 +646,8 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/obs/fetchmail-6.4.0.tar.bz2
     % xz -d -c fetchmail-6.4.0.tar.bz2 | tar xf -
     ##################### Do not carry out the below patch instruction ###########
+    do not carry out this patch instruction as the patch has been applied to
+    fetchmail-6.4.0.tar.bz2 downloaded from obs subdir
     % gunzip -c indimail-@version@/patches/fetchmail-6.4.0.patch.gz | patch -p0
     NOTE: if patches subdir is missing, download the patch from
           https://sourceforge.net/projects/indimail/files/Patches-2.0
@@ -697,7 +693,7 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 11 ## Optional STEP ## iwebadmin ###############
-    Install iwebadmin MD5 3e72f205fe17b7b5d148df22b1f9b04f
+    Install iwebadmin MD5 7a83a7b1977be0639c1d6826e78ee797
     % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.3.tar.gz
     % gunzip -c iwebadmin-1.3.tar.gz | tar xf -
     % cd iwebadmin-1.3
