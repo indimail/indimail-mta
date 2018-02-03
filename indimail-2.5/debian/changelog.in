@@ -2,5 +2,6 @@ indimail (@version@-1) unstable; urgency=low
 
   * moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
   * changed data type to TIMESTAMP from DATETIME for timestamp column in hostcntrl, lastauth
+  * updated flash menu for changes in program paths in indimail-mta
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 03 Feb 2018 18:22:34 +0530
