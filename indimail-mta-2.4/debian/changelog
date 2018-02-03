@@ -3,5 +3,8 @@ indimail-mta (2.4-1) unstable; urgency=low
   * svctool - added option to refresh services
   * moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
   * moved system binaries to sbin
+  * added permissions files for openSUSE
+  * svctool - inlookup supervise/control fifo - allow svc -h permission for vdeluser POST_HANDLE script
+  * svctool - updated sql-mode in mysqld run file
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 31 Jan 2018 10:58:08 +0530
