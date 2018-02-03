@@ -1,8 +1,15 @@
 * Wed Jan 31 2018 10:56:08 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
-Release 2.4 Start 31/12/2017
-1. svctool - added option to refresh services
-2. moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
-3. moved system binaries to sbin
+Release 2.4 Start 31/01/2018
+31/01/2018
+1.  svctool - added option to refresh services
+2.  moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
+3.  moved system binaries to sbin
+01/02/2018
+4.  added permissions files for openSUSE
+03/02/2018
+5.  svctool - inlookup supervise/control fifo - allow svc -h permission for
+    vdeluser POST_HANDLE script
+6.  svctool - updated sql-mode in mysqld run file
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017
