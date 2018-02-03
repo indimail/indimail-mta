@@ -5,8 +5,8 @@ This section covers installing IndiMail from rpm/deb. This is the easy way to in
 If you are looking for something more simpler, then you need the Install IndiMail for
 dummies - instructions for which are in the file Quick-INSTALL.
 
-There is also an Installation for Experts. For that read INSTALL. I would
-recommend you to go through the file INSTALL so that you undertand IndiMail
+There is also an Installation for Experts, involving source compilation. For that read INSTALL.
+I would recommend you to go through the file INSTALL so that you undertand IndiMail
 better. INSTALL gives instructions for installing from source and could be
 challenging for those who are not accustomed with compilation, make, GNU autotools process.
 
@@ -26,17 +26,24 @@ http://download.opensuse.org/repositories/home:/mbhangui/
 You can install indimail using yum by using the following command (depending on
 your architecture)
 
-# yum install indimail indimail-mta
-   or
-# dnf install indimail indimail-mta
+Follow the instrucations at
 
-What the RPM/Deb does
----------------------
+https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail
+or
+https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
+
+# yum install indimail
+   or
+# dnf install indimail
+
+What happens during installation?
+---------------------------------
 
 It depends on whether you are Installing, upgrading or removing IndiMail using the rpm
 version. Following are the steps carried out during RPM/Deb installation.
 
 A) Package Installation/Upgrade
+===============================
    1. Stops IndiMail services (in case the system already has IndiMail installed)
    2. Add users (indimail, alias, qmaild, qmaill, qmailp, qmailq, qmailr, qmails, qscand)
       and groups (indimail, nofiles, qmail, qscand)
@@ -51,10 +58,12 @@ A) Package Installation/Upgrade
    7. Install MTA as the alterntive MTA. Creates link sendmail in /usr/sbin or
       /usr/lib to @prefix@/bin/sendmail
    8. Creates directory for supervise logs in @logdir@
-   9. Sets up svscan to be run by init (/etc/inittab), upstart (/etc/event.d) or
+   9. Configures selinux/apparmor
+  10. Sets up svscan to be run by init (/etc/inittab), upstart (/etc/event.d) or
       by systemctl (/lib/systemd/system)
 
 B) Package Removal
+==================
    1. Stops IndiMail services (in case the system already has IndiMail installed)
    2. Delete users (indimail, alias, qmaild, qmaill, qmailp, qmailq, qmailr, qmails, qscand)
       and groups (indimail, nofiles, qmail, qscand)
@@ -63,37 +72,20 @@ B) Package Removal
        smtp, smtp - odmr, qmtp, qmqp, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup,
        clamav antivirus service, freshclam - virus signature update service,
        bogofilter spam filter service
-   5. removes svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d). removes
+   5. Remove selinux/apparmor rules
+   6. removes svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d). removes
       all startup scripts
-   6. Sets the original sendmail as the MTA.
+   7. Sets the original sendmail as the MTA.
    NOTE: MySQL database is not removed, config files in @sysconfdir@/etc,
          @sysconfdir@/control, @sysconfdir@/users, .qmail files in @indimaildir@/alias,
          domain information in @indimaildir@/domains are not removed.
 
-What the RPM/Deb does not do
-------------------------
+What the Installation doesn't do
+--------------------------------
+
 1. Install and configure MySQL (See How to install MySQL below)
 2. Configure IndiMail
 
-How to INSTALL
---------------
-You need to have MySQL installed on your system (see below on how to install). You can also use an
-available rpm for MySQL from www.mysql.com
-
-1) Package Install Instruction
-   ---------------------------
-   % sudo rpm -ivh filename.rpm
-   % sudo dpkg -i filename.deb
-
-2) Package Upgrade Instruction
-   ---------------------------
-   % sudo rpm -Uvh filename.rpm
-   % sudo dpkg -i filename.deb
-
-3) Package Removal Instrucation
-   ----------------------------
-   % sudo rpm -e indimail
-   % sudo dpkg -r indimail
 
 Start IndiMail Services
 -----------------------
@@ -150,20 +142,3 @@ Proceed to SECTION 8, STEP 2 in the file INSTALL for further instruction on
 configuration of IndiMail
 
 Log files are created in /var/log/svc/*
-
-
-How to install MySQL
---------------------
-
-NOTE: Replace 5.5.2-m2 with your favourite version
-    You can download mysql-5.5.2-m2.tar.gz from dev.mysql.com
-    Install MySQL 5.5.2-m2 with MD5 cd3254f29561953ffb7c023cb1b825d2
-    (You can install MySQL 5.1.x and greater)
-    current working directory /home/local/src
-    % You can download mysql-5.5.2-m2.tar.gz from dev.mysql.com
-    % gunzip -c mysql-5.5.2-m2.tar.gz |tar xf -
-    % cd mysql-5.5.2-m2
-    % ./configure --prefix=@mysql_prefix@ --enable-local-infile
-    % make -s DESTDIR=staging_directory
-    % sudo make install-strip DESTDIR=staging_directory
-    cd ..

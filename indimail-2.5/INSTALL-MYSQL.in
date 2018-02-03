@@ -1,10 +1,12 @@
-    Do not read this without reading INSTALL. This is a important file. Most users
+    Do not read this without reading INSTALL. This is an important file. Most users
     in my experience have got stuck with MySQL installation and configuration. Following
     are the three most common issues that users have experienced installing IndiMail
     If you have done a RPM/DEB/yum/dnf/dpkg/apt-get installation, all these steps
-    are automatically taken care by the post-installation scripts.
+    are automatically taken care by the post-installation scripts. However, in some cases,
+    even the post-install scripts fail due to frequent incompatible changes made by folks
+    at Oracle & Mariadb.
 
-    1. MySQL version : As far as possible use mysql 5.1.x or greater. If you use an
+    1. MySQL version : As far as possible use mysql 5.7.x or greater. If you use an
        unsupported version of MySQL, you might face the following problems
        a) MySQL fails to startup under supervise
        b) svctool fails to create a default MySQL database for IndiMail during RPM
@@ -63,9 +65,8 @@
 
     a) For creation of a brand new MySQL database
        Create MySQL Options file @sysconfdir@/indimail.cnf
-       However, a bug was detected in how the MySQL server parses the
-       output of `mysql_real_escape_string()'.
-       so have `sql-mode=NO_BACKSLASH_ESCAPES' in the server option
+       sql_mode="NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES"
+	   --sql-mode="NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,STRICT_TRANS_TABLES"
        file (@sysconfdir@/indimail.cnf)
 
        # @prefix@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
