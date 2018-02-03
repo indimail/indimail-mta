@@ -1189,7 +1189,7 @@ pw_name char(40) not null, \
 pw_domain char(67) not null, \
 pw_passwd char(128) not null, \
 host char(64) not null, \
-timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, \
 primary key (pw_name, pw_domain)"
 
 #define HOST_TABLE_LAYOUT "\
@@ -1301,7 +1301,7 @@ service char(10) not null, \
 remote_ip char(16) not null,  \
 quota int not null, \
 gecos char(48) not null, \
-timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, \
 primary key (user, domain, service), index gecos (gecos), index quota (quota), \
 index timestamp (timestamp)"
 
@@ -1309,7 +1309,7 @@ index timestamp (timestamp)"
 user char(40) not null, \
 domain char(67) not null,\
 quota bigint unsigned not null, \
-timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, \
 primary key(user, domain), index quota (quota)"
 #endif
 
