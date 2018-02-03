@@ -185,7 +185,7 @@ AutoReqProv: No
 %else
 AutoReqProv: Yes
 %endif
-Requires: indimail-mta > 2.3
+Requires: indimail-mta > 2.3 # few binaries were moved to sbin and indimail >= 2.5 depends on that
 Conflicts: %{name} < 2.0
 Obsoletes: %{name} < 2.0
 
