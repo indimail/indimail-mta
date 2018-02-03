@@ -1,20 +1,6 @@
 indimail (@version@-1) unstable; urgency=low
 
-  * remove -release version_number from la_LDFLAGS in indimail, libcdb, libeps, libsrs2, libflash 
-  * inlookup - cache active login records using cache_active_pwd()
-  * svctool - added option --activeDays to specify duration of active records to cache for inlookup
-  * ProcessInFifo.c - initialize pwstat
-  * tcpserver - USE_DLMOPEN env variable to decide if dlmopen() or dlopen() to be called for loading shared library
-  * svctool - add option --use-dlmopen to configure tcpserver to use dlmopen() instead of dlopen() to load shared objects
-  * fixed smtp plugin by setting PLUGINDIR correctly
-  * Fixed dlopen() flags for loading smtp plugins
-  * qmailctl - update cdb only when input file date is newer than cdb file
-  * svctool - fixed conf_dir variable getting clobbered by create_fifologger, preventing creation of LOGFILTER service variable
-  * fixed dlopen/linker errors for smtpd-plugin0 (dnsbl.c)
-  * svctool - new funtion default_indimail_control for creating indimail specific control files
-  * svctool - separated out qmail, indimail config
-  * ProcessInFifo.c - create lastauth if not existing
-  * moved cron entries to /etc/cron.d
-  * upgraded courier-imap to v4.18.2
+  * moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
+  * changed data type to TIMESTAMP from DATETIME for timestamp column in hostcntrl, lastauth
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 27 Jan 2018 12:22:15 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 03 Feb 2018 18:22:34 +0530
