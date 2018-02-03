@@ -115,7 +115,6 @@ EndMenu
 
 Menu Top Right Offset 1 -1 qmail-admin
 	Title:Qmail  User   Administration:h:
-	Args:Queue          Statistics:P:@prefix@/bin/qmail-qstat:qstat Options:
 	Args:Queue               Print:P:@libexecdir@/qpq:qpq Options:
 	Exec:Print    Qmail      Queue:P:@prefix@/bin/qmail-qread::
 	Nop::
@@ -126,16 +125,16 @@ Menu Top Right Offset 1 -1 qmail-admin
 	Args:Supervise         Control::@prefix@/bin/svc:svc Options:
 	Args:Supervise          Status:P:@prefix@/bin/svstat:svstat Options:
 	Nop::
-	Exec:IP       Address     Info::@libexecdir@/bin/ipmeprint::
-	Args:DNS                 Cname::@libexecdir@/bin/dnscname:dnscname Options:
-	Args:DNS                   ptr::@libexecdir@/bin/dnsptr:dnsptr Options:
-	Args:DNS                    fq::@libexecdir@/bin/dnsfq:dnsfq Options:
-	Args:DNS                    IP::@libexecdir@/bin/dnsip:dnsip Options:
-	Args:DNS                  MXIP::@libexecdir@/bin/dnsmxip:dnsmxip Options:
+	Exec:IP       Address     Info::@libexecdir@/ipmeprint::
+	Args:DNS                 Cname::@libexecdir@/dnscname:dnscname Options:
+	Args:DNS                   ptr::@libexecdir@/dnsptr:dnsptr Options:
+	Args:DNS                    fq::@libexecdir@/dnsfq:dnsfq Options:
+	Args:DNS                    IP::@libexecdir@/dnsip:dnsip Options:
+	Args:DNS                  MXIP::@libexecdir@/dnsmxip:dnsmxip Options:
 	Nop::
 	Args:Fix       Qmail     Queue:P:@prefix@/bin/queue-fix:queue-fix Options:
-	Exec:Rebuild   Qmail       CDB::@prefix@/bin/qmail-newu::
-	Exec:Rebuild morercpthosts.cdb::@prefix@/bin/qmail-newmrh::
+	Exec:Rebuild   Qmail       CDB::@prefix@/sbin/qmail-newu::
+	Exec:Rebuild morercpthosts.cdb::@prefix@/sbin/qmail-newmrh::
 	Nop::
 	Exec:Qmail     Control    Info:P:@prefix@/bin/qmail-showctl::
 EndMenu
@@ -192,7 +191,6 @@ Menu Top Right Offset 1 -1 qmail-man
 	Exec:qmail-newu:N:/usr/bin/man qmail-newu:
 	Exec:qmail-pw2u:N:/usr/bin/man qmail-pw2u:
 	Exec:qmail-qread:N:/usr/bin/man qmail-qread:
-	Exec:qmail-qstat:N:/usr/bin/man qmail-qstat:
 	Exec:qmail-tcpok:N:/usr/bin/man qmail-tcpok:
 	Exec:qmail-tcpto:N:/usr/bin/man qmail-tcpto:
 	Exec:qmail-smtpd:N:/usr/bin/man qmail-smtpd:
@@ -273,8 +271,7 @@ Menu Top Right Offset 1 -1 misc-tools
 	Exec:MySql                 Top:N:/usr/bin/mytop::
 	Nop::
 	Args:Checksums                :P:@prefix@/bin/crc -v:Directory/Files:
-	Exec:IndiMail Version (Adv)   :P:@prefix@/bin/indiversion::
-	Exec:IndiMail Version (Simple):N:@prefix@/bin/versioninfo::
+	Exec:IndiMail Version         :P:/bin/cat @sysconfdir@/indimail-release::
 	Nop::
 	Args:Connect     To      Mysql:N:@libexecdir@/execmysql:-d domain host:
 EndMenu
