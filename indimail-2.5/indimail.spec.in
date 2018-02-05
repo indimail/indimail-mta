@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.447 2018-01-31 21:36:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.448 2018-02-05 12:27:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -185,7 +185,8 @@ AutoReqProv: No
 %else
 AutoReqProv: Yes
 %endif
-Requires: indimail-mta > 2.3 # few binaries were moved to sbin and indimail >= 2.5 depends on that
+# few binaries were moved to sbin and indimail >= 2.5 depends on that
+Requires: indimail-mta > 2.3
 Conflicts: %{name} < 2.0
 Obsoletes: %{name} < 2.0
 
@@ -1350,7 +1351,6 @@ fi
 %attr(444,root,qmail)                   %{shareddir}/doc/ChangeLog.indimail
 %attr(444,root,qmail)                   %{shareddir}/doc/FAQ.pdf
 %attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.sharedmaildir
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-MINI
 %attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-MYSQL
 %attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-RPM
 %attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.indimail

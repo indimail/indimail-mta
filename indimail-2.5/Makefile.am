@@ -60,7 +60,7 @@ setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 doc_list= 37rules.pdf ChangeLog.indimail COPYING.indimail FAQ.pdf HOWTO.bogofilter \
 	HOWTO.sharedmaildir INSTALL.indimail percenthack.shtml README \
 	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER \
-	indimail_arch.png INSTALL-MINI indimail_queue.png Quick-INSTALL \
+	indimail_arch.png indimail_queue.png Quick-INSTALL \
 	AUTHORS.altermime AUTHORS.bogofilter AUTHORS.courier-imap AUTHORS.fortune \
 	AUTHORS.logalert AUTHORS.nssd AUTHORS.pam-multi \
 	AUTHORS.ripmime COPYING.bogofilter COPYING.courier-imap \
@@ -164,7 +164,7 @@ indimailbin_SCRIPTS = vcaliasrev logmonitor
 
 noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
-	README INSTALL-MINI vadddomain_handle vadduser_handle vdeldomain_handle \
+	README vadddomain_handle vadduser_handle vdeldomain_handle \
 	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle \
 	vdeluser_handle vrenameuser_handle create_services
 
@@ -814,8 +814,6 @@ INSTALL: INSTALL.in configure.ac
 Quick-INSTALL: Quick-INSTALL.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 INSTALL-RPM: INSTALL-RPM.in configure.ac
-	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-INSTALL-MINI: INSTALL-MINI.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 INSTALL-MYSQL: INSTALL-MYSQL.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
