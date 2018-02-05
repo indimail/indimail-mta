@@ -5,12 +5,12 @@ These instructions assume that serialmail and ucspi-tcp/tcpclient are
 already installed on your computer.
 
 
-1. Put :alias-ppp into /var/qmail/control/virtualdomains, and give
+1. Put :alias-ppp into /etc/indimail/control/virtualdomains, and give
    qmail-send a SIGHUP.
 
 2. As the alias user (not as root): Run
 
-      maildirmake ~/pppdir
+   maildirmake ~/pppdir
 
    and put ./pppdir/ (including the final slash) into
    ~/.qmail-ppp-default. Now all outgoing messages will be stored in
@@ -21,12 +21,12 @@ already installed on your computer.
 
 4. To send messages to mail.big.isp, run
    
-      maildirsmtp ~alias/pppdir alias-ppp- 1.2.3.4 `hostname`
+   maildirsmtp ~alias/pppdir alias-ppp- 1.2.3.4 `hostname`
    
    Replace 1.2.3.4 with the IP address of mail.big.isp.
 
    For faster transfers, if your ISP has set up a QMTP server, run
 
-      maildirqmtp ~alias/pppdir alias-ppp- 1.2.3.4
+   maildirqmtp ~alias/pppdir alias-ppp- 1.2.3.4
 
    instead.

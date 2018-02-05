@@ -10,7 +10,7 @@ entry in control/rcpthosts or control/morercpthosts.cdb.
 The existence of a mailbox/maildir for the corresponding
 SMTP recipient is checked later in the delivery chain.
 
-In case no Mailbox/Maildir exists, the message is bounced
+In case Mailbox/Maildir doesn't exist, the message is bounced
 back to the SMTP sender ("MAIL From: <send@example.com>").
 
 For normal SMTP mail traffic thats fine as long as the rate 
@@ -122,22 +122,8 @@ are not evaluated, thus are treated as comment lines.
 
 4. Generating a cdb with recipient addresses:
 
-a) Build a list of recipients (with full qualified address). 
--  Use 'qmail-pwd2recipients' to build this list for 
-   local system users.
--  Use 'qmail-alias2recipients' to build this list for
-   qmail alias users (ie. postmaster, root).
--  Use 'qmail-users2recipients' to build this list for 
-   qmail users (as per users/assign).
--  You can use 'qmail-vpopmail2recipients' for 
-   vpopmail users.
-
-   Verify that list to be found under users/recipients.
-   If you have a different Qmail home directory, modify the
-   above scripts.
-
-   You may need to change "localhost" in the above scripts
-   to the real hostname.
+a) Build a list of recipients (with full qualified address).
+   The recipient file should be in /etc/indimail/users
 
 b) Run recipient-cdb to transform that list into a cdb:
    users/recipients.cdb
@@ -179,40 +165,40 @@ b) Simply put the full qualified list name apppended with the VERP
 
 c) Sample: If your list is called:
    
-	mylist@example.com 
+   mylist@example.com 
 
    define 
 
-  	mylist-@example.com
+   mylist-@example.com
 
    This makes VERP addresses distinguishable from normal addresses.
 
 d) In order to support generic and VERP addresses, you have to 
    add both address schemes into the recipient database:
   
- 	me@example.com
-	me-@example.com
+   me@example.com
+   me-@example.com
  
 
 6. Using a checkpassword compatible PAM:
 
 The checkpassword API is defined in:
 
-      http://cr.yp.to/checkpwd/interface.html
+  http://cr.yp.to/checkpwd/interface.html
 
 and typically consists of the string: 
 
-      username\0password\0timestamp\0otherdata\0
+  username\0password\0timestamp\0otherdata\0
 
 written to file descriptor 3 (FD 3) to be read by the 
 checkpassword compatible PAM.
 
 For email address (recipient) verification, we replace
-      username\0
+username\0
 with
-      email-address\0
+email-address\0
 ie.
-      recipient@domain.tld\0 
+recipient@domain.tld\0 
 
 The PAM fetches this information and checks for it's
 existance in any external resource, for example a LDAP 
@@ -223,33 +209,5 @@ otherwise a '1'; and perhaps a '111' in case of problems.
 
 RECIPIENT's checkpassword API allows to enter up to five
 additional arguments; which are specific to the PAM. 
-
-The attached PERL ldap_mail.pl serves as a sample.
-
-
-7. Customization:
-
-The RECIPIENTS extension needs no customization except for 
-the following circumstances:
-
-a) You may need to adjust the provided scripts
-   'qmail-pwd2recipients', 'qmail-users2recipients', and
-   'qmail-alias2recipient' to your need; these are samples.
-
-b) The script 'qmail-vpopmail2recipients' is contributed
-   by David Du SERRE-TELMON, pls. check whether it 
-   suits your vpopmail installation.
-
-c) A phyton script to generate "Recipients" users out of
-   - /var/qmail/users/assign
-   - /var/qmail/alias
-   -/etc/aliases
-   and the vpopmail's virtual users can be found at:
-
-    http://www.epigenomics.org/software/oss/qmail/create_recipients.py
-
-   Contributed by Robert Sander
-
-
 
 Erwin Hoffmann (www.fehcom.de) - Cologne 2010-12-16

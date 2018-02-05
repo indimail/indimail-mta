@@ -38,34 +38,32 @@ Examples:
 1) Moving your queue.
      a) Shut down qmail-send.  Wait for exiting to show up in the log.
         Shut down qmail-smptd:
-             - if inetd, comment out of /etc/inetd.conf and send inetd
-               a HUP.
-             - if supervise, use svc -d to bring it down
+        - if inetd, comment out of /etc/inetd.conf and send inetd
+          a HUP.
+        - if supervise, use svc -d to bring it down
         Shut down any processes which may run qmail-queue.  This includes,
         but is not limited to qmqpd, pop, imapd, etc.
      b) Choose the location for the new home of your queue.  In this
-        example:  originally in /var/qmail/queue
-                  moving to /other/qmail/queue
-     c) cd /var/qmail
-     d) mv queue /other/qmail
-     e) queue-fix -i /other/qmail/queue
+        example:  originally in /var/indimail/queue
+                  moving to /other/indimail/queue
+     c) cd /var/indimail/queue
+     d) mv queue2 /other/indimail/queue
+     e) queue-fix -i /other/indimail/queue/queue2
      f) Run queue-fix again just to make sure it worked.  If it prints
         anything other than finished, then something is seriously
         wrong.
-     g) Either make a link to the new queue location, or recompile
-        qmail with the new queue location.
-     h) Restart qmail and test it.
+     g) Restart qmail and test it.
 
 2) Reconstructing the file system.
      a) Shut down qmail-send.  Wait for exiting to show up in the log.
         Shut down qmail-smptd:
-             - if inetd, comment out of /etc/inetd.conf and send inetd
-               a HUP.
-             - if supervise, use svc -d to bring it down
+        - if inetd, comment out of /etc/inetd.conf and send inetd
+          a HUP.
+        - if supervise, use svc -d to bring it down
         Shut down any processes which may run qmail-queue.  This includes,
         but is not limited to qmqpd, pop, imapd, etc.
      b) Do whatever file system changes that you need to do.
-     c) queue-fix -i /var/qmail/queue
+     c) queue-fix -i /var/indimail/queue
      d) Run queue-fix again just to make sure it worked.  If it prints
         anything other than finished, then something is seriously
         wrong.
@@ -77,13 +75,13 @@ You must ensure that no other program modifies the queue while queue-fix
 is running.  If you are unsure whether or not something will try to use
 the queue, type:
 
-     chmod 0 /var/qmail/bin/qmail-queue
+     chmod 0 /usr/sbin/qmail-queue
 
 before running queue-fix.  This will assume that MUA's and other applications
 that inject mail will recognize the failure to run qmail-queue.
 Once you are done, type:
 
-     chmod 4711 /var/qmail/bin/qmail-queue
+     chmod 4711 /usr/sbin/qmail-queue
 
 to get it going again.
 

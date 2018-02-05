@@ -27,10 +27,10 @@
    reason for list inclusion, but the A record is the strongly preferred response for automated
    use.
 
-      Using the combined list multi.surbl.org, results will be bitmasked as described in the
-      Lists section. In this case, membership in multiple lists is encoded according to
-      respective bit positions in the returned Address value, and programs should decode these
-      results into their respective individual lists.
+     Using the combined list multi.surbl.org, results will be bitmasked as described in the
+     Lists section. In this case, membership in multiple lists is encoded according to
+     respective bit positions in the returned Address value, and programs should decode these
+     results into their respective individual lists.
 
 5. Handle numeric IPs in URIs similarly, but reverse the octet ordering before comparison
    against the DNSBL. This is a standard practice for DNSBLs. For example, http://10.20.30.40/

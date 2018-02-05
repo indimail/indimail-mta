@@ -1,6 +1,7 @@
-The qmail package includes a local delivery agent, qmail-local, which
-provides user-controlled mailing lists, cross-host alias loop detection,
-and many other important qmail features.
+The indimail-mta package includes a local delivery agent,
+qmail-local, which provides user-controlled mailing lists,
+cross-host alias loop detection, and many other important
+indimail-mta features.
 
 There's one important difference between qmail-local and binmail:
 qmail-local delivers mail by default into ~user/Mailbox, rather than

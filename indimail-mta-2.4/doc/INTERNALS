@@ -84,13 +84,13 @@ At that instant the message has been successfully preprocessed.
 Messages at S5 are handled as follows. Each address in local/457 and
 remote/457 is marked either NOT DONE or DONE.
 
-   DONE: The message was successfully delivered, or the last delivery
-         attempt met with permanent failure. Either way, qmail-send
-	 should not attempt further delivery to this address.
+    DONE: The message was successfully delivered, or the last delivery
+          attempt met with permanent failure. Either way, qmail-send
+          should not attempt further delivery to this address.
 
-   NOT DONE: If there have been any delivery attempts, they have all
-             met with temporary failure. Either way, qmail-send should
-             try delivery in the future.
+NOT DONE: If there have been any delivery attempts, they have all
+          met with temporary failure. Either way, qmail-send should
+          try delivery in the future.
 
 qmail-send may at its leisure try to deliver a message to a NOT DONE
 address. If the message is successfully delivered, qmail-send marks the

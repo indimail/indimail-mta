@@ -119,7 +119,8 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 74. Alin-Adrian Anton - Fixed qmail-smtpd vulnurability for very long header lines
 75. http://www.esat.kuleuven.ac.be/~vermeule/qmail/tls.patch STARTTLS
 76. http://members.elysium.pl/brush/qmail-smtpd-auth/ SMTP AUTH
-77. http://www.netable.com/~dburkes/qmail-smtpd-requireauth/ Require AUTH
+77. Zach White <zwhite@netlsd.org> 20010812
+    http://www.netable.com/~dburkes/qmail-smtpd-requireauth/ Require AUTH
 78. http://www.elysium.pl/members/brush/cmd5checkpw/ CRAM-MD5 Checkpassword
     RFC-2554, RFC-2222 compliance
 79. Rask Ingemann Lambertsen - who provided the original RELAY Patch

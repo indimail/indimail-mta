@@ -8,7 +8,7 @@ already installed on mail.big.isp.
 
 1. Make sure that there is an MX record for virt.dom:
 
-      virt.dom IN MX 10 mail.big.isp
+   virt.dom IN MX 10 mail.big.isp
 
    Now any host on the Internet with mail for virt.dom will send it to
    mail.big.isp.
@@ -24,7 +24,7 @@ already installed on mail.big.isp.
 
 4. Log into yourunixaccount. Run
 
-      maildirmake ~/pppdir
+   maildirmake ~/pppdir
 
    and put ./pppdir/ (including the final slash) into
    ~/.qmail-ppp-default. Now all messages for virt.dom will be delivered
@@ -32,13 +32,13 @@ already installed on mail.big.isp.
 
 5. To retrieve messages from pppdir next time you log in, run
 
-      maildirsmtp ~/pppdir yourunixaccount-ppp- 1.2.3.4 `hostname`
+   maildirsmtp ~/pppdir yourunixaccount-ppp- 1.2.3.4 `hostname`
 
    Replace 1.2.3.4 with the IP address of your computer. Messages will
    be transferred from pppdir to your computer by SMTP.
 
    For faster transfers, set up a QMTP server on your computer, and run
 
-      maildirqmtp ~/pppdir yourunixaccount-ppp- 1.2.3.4
+   maildirqmtp ~/pppdir yourunixaccount-ppp- 1.2.3.4
 
    instead.

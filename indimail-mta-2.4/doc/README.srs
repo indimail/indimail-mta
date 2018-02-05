@@ -1,49 +1,13 @@
 Marcelo Coelho - qmail-srs-0.4.patch
 
-Changes
+Configure instructions
+======================
 
-2011-03-30 (0.8):
-    Fixed bug reading configuration files.
-2007-06-05 (0.7):
-    New QMAILINJECT_FORCE_SRS and QMAILINJECT_SKIP_SRS environment variables can force or skip envelope rewriting in qmail-inject.
-2007-05-31 (0.6):
-    qmail-inject only will rewrite envelope if EXT and HOST variables are set.
-    Fixed bug in qmail-send handling chdir() calls (Special Thanks to Werner Fleck).
-2007-01-11 (0.5):
-    Added parameters srs_separator and srs_alwaysrewrite from libsrs2.
-2007-01-10 (0.4):
-    If srs_domain is empty or not set, SRS is disabled.
-2006-12-18 (0.3):
-    forward and condredirect: modified to work with SRS.
-2006-12-17 (0.2):
-    srsfilter: now rewrites To header with the SRS decoded address.
-    srsfilter: only accepts messages from null-sender, Return-Path: <>.
-    srsfilter: modified to reject messages without body.
-    qmail-inject: error message detailed.
-    If optional parameters are not set, will use libsrs2 defaults.
-    Install instructions revised.
-2006-12-15 (0.1):
-    First release.
-
-Install instructions
-====================
-
-1. Download and install libsrs2 from http://www.libsrs2.org/download.html.
-
-2. Download qmail-srs-0.8.patch.
-
-3. Apply this patch:
-   tar -xzf /path/to/qmail-1.03.tar.gz
-   cd qmail-1.03
-   patch -p1 < qmail-srs-0.8.patch
-
-   And follow your qmail instalation (config, make, make setup check, ...)
-
-4. Configure some parameters in /var/qmail/control.
+1. Configure some parameters in /etc/indimail/control.
    Required parameters:
 
-   echo srs.YOURDOMAIN > /var/qmail/control/srs_domain
-   echo SECRET > /var/qmail/control/srs_secrets
+   echo srs.YOURDOMAIN > /etc/indimail/control/srs_domain
+   echo SECRET > /etc/indimail/control/srs_secrets
 
    YOURDOMAIN: Replace with your domain name, e.g. srs.foo-bar.com
    SECRET: Replace with a random string
@@ -52,16 +16,16 @@ Install instructions
 
    Optional parameters:
 
-   echo 7 > /var/qmail/control/srs_maxage
-   echo 4 > /var/qmail/control/srs_hashlength
-   echo 4 > /var/qmail/control/srs_hashmin
-   echo = > /var/qmail/control/srs_separator
-   echo 0 > /var/qmail/control/srs_alwaysrewrite
+   echo 7 > /etc/indimail/control/srs_maxage
+   echo 4 > /etc/indimail/control/srs_hashlength
+   echo 4 > /etc/indimail/control/srs_hashmin
+   echo = > /etc/indimail/control/srs_separator
+   echo 0 > /etc/indimail/control/srs_alwaysrewrite
 
-5. Configure your SRS domain.
-   echo srs.YOURDOMAIN >> /var/qmail/control/rcpthosts
-   echo srs.YOURDOMAIN:srs >> /var/qmail/control/virtualdomains
-   echo "| /var/qmail/bin/srsfilter" > /var/qmail/alias/.qmail-srs-default
+2. Configure your SRS domain.
+   echo srs.YOURDOMAIN >> /etc/indimail/control/rcpthosts
+   echo srs.YOURDOMAIN:srs >> /etc/indimail/control/virtualdomains
+   echo "| /usr/bin/srsfilter" > /var/indimail/alias/.qmail-srs-default
 
    YOURDOMAIN: Replace with your domain name, e.g. srs.foo-bar.com.
 
