@@ -105,9 +105,18 @@ libsrs2       - You may use, at your discretion, either the GPL or the BSD licen
                 this software. Users should contact Shevek at <srs@anarres.org> with
                 specific requirements for licensing or support. Be optimistic. Such
                 requirements can almost certainly be met.
-qhpsi           QHPSI is free software.
+qhpsi           QHPSI is free software written by Erwin Hoffman
                 This includes:
-	                You can download and use QHPSI (and parts of it) as you like.
-	                You can modify the source code without notification to or permission by the author.
+	            You can download and use QHPSI (and parts of it) as you like.
+	            You can modify the source code without notification to or permission by the author.
                 Please check:
-	                http://www.cr.yp.to/softwarelaw.html
+	            http://cr.yp.to/softwarelaw.html
+libdkim         Alt-N DKIM Open Source Project
+                Copyright 2008 Alt-N Technologies, Ltd.
+
+                This code incorporates intellectual property owned by Yahoo! and licensed 
+                pursuant to the Yahoo! DomainKeys Patent License Agreement.
+
+                By making, using, selling, offering for sale, importing, and/or sublicensing 
+                Implementations as permitted, you agree to the terms and conditions of the 
+                Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.

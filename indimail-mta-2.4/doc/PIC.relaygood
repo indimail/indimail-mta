@@ -27,7 +27,7 @@ qmail-rspawn    Run qmail-remote.
 
 qmail-remote    Look at host name, irs.gov.
                 Is irs.gov listed in smtproutes? No.
-		Look up DNS MX/A for irs.gov and connect to it by SMTP:
+                Look up DNS MX/A for irs.gov and connect to it by SMTP:
                    
                    MAIL FROM:<joe@heaven.af.mil>
                    RCPT TO:<bill@irs.gov>

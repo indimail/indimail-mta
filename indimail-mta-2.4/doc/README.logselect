@@ -4,13 +4,13 @@ From:       Russell Nelson <nelson () crynwr ! com>
 Date:       2000-08-12 3:45:58
 
 I've released my logselect program as a patch to daemontools-0.70.
-It's at http://www.qmail.org/logselect-0.70.patch .  If you guessed
+It's at http://www.qmail.org/logselect-0.70.patch. If you guessed
 that logselect was used to select parts of a log, you're a happy
-winner!  It's intended to be used in a multi-server environment.  By
-itself it is of little use.  It's just a back-end.  It needs a client
+winner!  It's intended to be used in a multi-server environment. By
+itself it is of little use.  It's just a back-end. It needs a client
 program (as yet unwritten) to be useful.
 
-You should patch daemontools, and make/make setup as usual.  Then you
+You should patch daemontools, and make/make setup as usual. Then you
 can create a service whose run file looks like this:
 
 #!/bin/sh

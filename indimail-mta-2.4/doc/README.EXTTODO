@@ -105,7 +105,7 @@ todo -> send:
    L<string>\0
           Dump string to the logger without adding additional \n or similar.
 send -> todo:
-   H      Got a SIGHUP reread ~/control/locals and ~/control/virtualdomains
+   H      Got a SIGHUP reread /etc/control/locals and /etc/control/virtualdomains
    X      Quit ASAP.
 
 qmail-todo sends "\0" terminated messages whereas qmail-send just send one

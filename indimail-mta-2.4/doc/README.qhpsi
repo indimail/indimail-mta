@@ -54,7 +54,6 @@ After patching Qmail 1.03 (or netqmail) with the QHPSI
 extension, you have to make the environment variables
 
  - QHPSI, 
- - (perhaps) QHSPIARG1, QHPSIARG2,  QHPSIARG3, 
  - (if ever) QHPSIMINSIZE, QHPSIMAXSIZE, and
  - (in some cases) QHPSIRC 
 
@@ -68,7 +67,7 @@ Samples with clamd/clamdscan:
 Here is a typical sample how to customize QHPSI together
 with Clam AV (clamd/clamdscan) for a tcpserver tcp.smtpd file:
 
-:allow,QHPSI='clamdscan',QHPSIARG1='--disable-summary'
+:allow,QHPSI='/usr/bin/clamdscan %s --fdpass --quiet --no-summary'
 
 Comments:
 
@@ -76,20 +75,20 @@ Comments:
   the standard path (/usr/local/bin).
 - In the configuration file clamav.conf, the option
   'ScanMail' has to be enabled; clamd has to run as 'root'.
-- The argument QHPSIARG1='--disable-summary' tells Clam AV
+- The argument '--no-summary' tells Clam AV
   to provide a single line output of the scan results.
 - The argument QHPSIRC is not necessary, because
-  'clanmdscan' return with 'RC=1' (the default) in 
+  'clamdscan' return with 'RC=1' (the default) in 
   case a virus infection is recognized.
 
 
 Sample with McAfee's uvscan:
 
-:allow,QHPSI='uvscan',QHPSIARG1='--secure',QHPSIMAXSIZE='9000000',QHPSIRC='13'
+:allow,QHPSI='uvscan --secure',QHPSIMAXSIZE='9000000',QHPSIRC='13'
 
 Comments:
 
-- The path of 'uvscan' is '/usr/lcoal/bin' and can be ommitted.
+- The path of 'uvscan' is '/usr/local/bin' and can be ommitted.
 - 'uvscan' returns with RC=13 in case a virus is found,
   therefore, QHPSIRC has to provide this value.
 - The virus scanning is omitted, if the size of the message
@@ -104,9 +103,8 @@ If you need to scan in addition outgoing emails, you have to
 write a wrapper for e.g. qmail-inject:
 
 #!/bin/sh
-export QHPSI='clamdscan'
-export QHPSIARG1='--disable-summary'
-exec /var/qmail/bin/qmail-queue
+export QHPSI='/usr/bin/clamdscan %s --fdpass --quiet --no-summary'
+exec /usr/sbin/qmail-queue
 
 
 5. Results:
@@ -121,11 +119,11 @@ b) In case the virus scanner can not be called propperly or has
 
 c) Eventually, the scan results show up in the logs.
    Here is a sample of Clam AV without and with the 
-   argument "--disable-summary":
+   argument "--no-summary":
 
    @... tcpserver: pid 49943 from 192.168.192.11
    @... tcpserver: ok 49943 qmailer.fehnet.de:192.168.192.2:25 arkon.fehnet.de:192.168.192.11::1074
-   @... /var/qmail/queue/mess/4/89439: Worm.Klez.H FOUND
+   @... /var/indimail/queue/queue3/mess/4/89439: Worm.Klez.H FOUND
    @...
    @... ----------- SCAN SUMMARY -----------
    @... Infected files: 1
@@ -135,7 +133,7 @@ c) Eventually, the scan results show up in the logs.
 
    @... tcpserver: pid 49989 from 192.168.192.11
    @... tcpserver: ok 49989 qmailer.fehnet.de:192.168.192.2:25 arkon.fehnet.de:192.168.192.11::1077
-   @... /var/qmail/queue/mess/4/89543: Worm.Klez.H FOUND
+   @... /var/indimail/queue/queue3/mess/4/89543: Worm.Klez.H FOUND
    @... tcpserver: end 49989 status 256
 
 

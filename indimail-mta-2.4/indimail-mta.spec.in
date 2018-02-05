@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.140 2018-01-31 20:16:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.141 2018-02-05 12:40:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1312,37 +1312,35 @@ done
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %endif
 %attr(444,root,qmail)                   %{shareddir}/doc/softwarelicense1-1.html
-%attr(444,root,qmail)                   %{shareddir}/doc/README.auth
-%attr(444,root,qmail)                   %{shareddir}/doc/README.indimail
-%attr(444,root,qmail)                   %{shareddir}/doc/README.newline
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.alias
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.control
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.maildir
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.mbox
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-MINI
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.vsm
+%attr(444,root,qmail)                   %{shareddir}/doc/README.clamav
+%attr(444,root,qmail)                   %{shareddir}/doc/README.EXTTODO
+%attr(444,root,qmail)                   %{shareddir}/doc/README.filters
+%attr(444,root,qmail)                   %{shareddir}/doc/README.greylist
+%attr(444,root,qmail)                   %{shareddir}/doc/README.indimail-mta
 %attr(444,root,qmail)                   %{shareddir}/doc/README.qhpsi
 %attr(444,root,qmail)                   %{shareddir}/doc/README.qregex
 %attr(444,root,qmail)                   %{shareddir}/doc/README.queue-fix
-%attr(444,root,qmail)                   %{shareddir}/doc/README.remote-auth
-%attr(444,root,qmail)                   %{shareddir}/doc/README.spamcontrol
-%attr(444,root,qmail)                   %{shareddir}/doc/README.starttls
 %attr(444,root,qmail)                   %{shareddir}/doc/README.status
-%attr(444,root,qmail)                   %{shareddir}/doc/README.tls
-%attr(444,root,qmail)                   %{shareddir}/doc/README.wildmat
-%attr(444,root,qmail)                   %{shareddir}/doc/README.qmail
-%attr(444,root,qmail)                   %{shareddir}/doc/README.clamav
-%attr(444,root,qmail)                   %{shareddir}/doc/README.greylist
-%attr(444,root,qmail)                   %{shareddir}/doc/README.filters
-%attr(444,root,qmail)                   %{shareddir}/doc/README.moreipme
 %attr(444,root,qmail)                   %{shareddir}/doc/README.recipients
+%attr(444,root,qmail)                   %{shareddir}/doc/README.libdkim
 %attr(444,root,qmail)                   %{shareddir}/doc/README.logselect
 %attr(444,root,qmail)                   %{shareddir}/doc/README.srs
 %attr(444,root,qmail)                   %{shareddir}/doc/README.surbl
 %attr(444,root,qmail)                   %{shareddir}/doc/README.ucspi-tcp
-%attr(444,root,qmail)                   %{shareddir}/doc/README.libdkim
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.libdkim
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.libsrs2
 %attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
+%attr(444,root,qmail)                   %{shareddir}/doc/ChangeLog
+%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
 %attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
 %attr(444,root,qmail)                   %{shareddir}/doc/TOISP
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
-%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
-%attr(444,root,qmail)                   %{shareddir}/doc/EXTTODO
-%attr(444,root,qmail)                   %{shareddir}/doc/ChangeLog
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2alias
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2local
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.nullclient
@@ -1516,6 +1514,8 @@ done
 %attr(0644,root,qmail)                  %{mandir}/cat8/greydaemon.0.gz
 %attr(0644,root,qmail)                  %{mandir}/cat8/qmail-greyd.0.gz
 
+%attr(444,root,qmail)                   %{shareddir}/doc/README.ucspi-tcp
+
 %files -n indimail-mini
 %defattr(-, root, root, 0555)
 #
@@ -1565,6 +1565,8 @@ done
 %attr(444,root,qmail)             %{mandir}/cat8/qmail-showctl.0.gz
 %attr(444,root,qmail)             %{mandir}/cat8/qmail-inject.0.gz
 %attr(444,root,qmail)             %{mandir}/cat8/qmail-qmqpc.0.gz
+
+%attr(444,root,qmail)             %{shareddir}/doc/INSTALL-MINI
 
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
 # and /var/qmail/control/plusdomain from your central server, so that

@@ -19,17 +19,15 @@ The following run script can be used:
 
 #!/bin/sh
 exec softlimit -m 200000000 \
-       /usr/local/sbin/clamd -c /usr/local/etc/clamav.conf 2>&1
+       /usr/sbin/clamd -c /etc/clamd.conf 2>&1
 
 Note: 
 
-a) After invokation, clamd runs typically as user 'clamav'.
+a) After invokation, clamd runs typically as user 'qscand'.
 
 b) The softlimit setting depends on your system.
 
 c) The location of clamd's customization file may be different.
-
-d) clamd does not log on STDOUT/STDERR; see clamav.conf.
 
 
 
@@ -44,35 +42,32 @@ a) Comment the 'Example' --> '#Example'
 
 b) To be used with supervise, it is absolutely necessary to run
    clamd in the foreground:
-   '#Foreground' --> 'Foreground'
+   '#Foreground yes' --> 'Foreground yes'
 
 c) Raw emails have to be scanned:
-   '#ScanMail' --> '#ScanMail'
+   '#ScanMail' --> '#ScanMail yes'
 
 Optional steps:
 ---------------
 
-d) Set the location of the log file; default: '#LogFile /tmp/clamd.log'
-   Make sure, the log file is rotating.
-
-e) Set the location of the temporay directory (staging area);
+d) Set the location of the temporay directory (staging area);
    default: '#TemporaryDirectory /var/tmp'
    has to be world-writeable and large enough.
 
-f) It is adviceable to remove stale sockets in case of unclean shutdown:
+e) It is adviceable to remove stale sockets in case of unclean shutdown:
    '#FixStaleSocket' --> 'FixStaleSocket'
 
 Performance relevant steps:
 ---------------------------
 
-g) # Maximal number of a threads running at the same time.
+f) # Maximal number of a threads running at the same time.
    # Default is 5, and it should be sufficient for a typical workstation.
    # You may need to increase threads number for a server machine.
    #MaxThreads 10
 
    Set this to the number of maximum incoming connections.
 
-h) # Maximum length the queue of pending connections may grow to.
+g) # Maximum length the queue of pending connections may grow to.
    # Default is 15.
    #MaxConnectionQueueLength 30
 
@@ -82,6 +77,9 @@ h) # Maximum length the queue of pending connections may grow to.
 Customization:
 --------------
 
-a) QHPSI='clamdscan'
-
-b) QHPSIARG1='--disable-summary' (note: there is a bug in display clamdscan -h).
+set environment variable QHPSI for qmail-queue to use QHPSI.
+You should set QHPSI on your incoming SMTP port and at points
+where users inject email into your system.
+.e.g. in  /service/qmail-smtpd.25/variables/QHPSI,
+/etc/indimail/control/defaultqueue/QHPSI
+  /usr/bin/clamdscan %s --fdpass --quiet --no-summary
