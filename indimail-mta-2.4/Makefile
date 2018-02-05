@@ -1583,6 +1583,8 @@ qscanq-stdin.0 cleanq.0 run-cleanq.0 dot-forward.0 \
 fastforward.0 printforward.0 setforward.0 newaliases.0 \
 printmaillist.0 setmaillist.0 newinclude.0 qmaildirmake.0 qmail-srs.5
 
+doc/INSTALL-MINI: doc/INSTALL-MINI.in
+	$(edit) $@.in > $@
 mbox.0: \
 mbox.5
 	nroff -man mbox.5 > mbox.0
