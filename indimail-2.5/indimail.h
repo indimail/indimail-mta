@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.225  2018-02-05 12:26:05+05:30  Cprogrammer
+ * changed datatype of timestamp column in hostcntrl, lastauth, userquota to TIMESTAMP from DATETIME
+ *
  * Revision 2.224  2017-12-20 13:44:03+05:30  Cprogrammer
  * added timestamp column
  *
@@ -988,7 +991,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.224 2017-12-20 13:44:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.225 2018-02-05 12:26:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
