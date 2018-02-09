@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.448 2018-02-05 12:27:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.450 2018-02-09 22:04:48+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -941,7 +941,6 @@ fi
 #
 %attr(4555,root,root)                   %{_prefix}/bin/vrenameuser
 %attr(4555,root,root)                   %{_prefix}/bin/vmoveuser
-%attr(4555,root,root)                   %{_prefix}/bin/vuserinfo
 %attr(4555,root,root)                   %{_prefix}/bin/vrenamedomain
 %attr(4555,root,root)                   %{_prefix}/bin/vmoduser
 %attr(4555,root,root)                   %{_prefix}/bin/vcfilter
@@ -957,6 +956,7 @@ fi
 %attr(4555,root,root)                   %{_prefix}/sbin/systpass
 
 # indimail binaries
+%attr(755,root,qmail)                   %{_prefix}/bin/vuserinfo
 %attr(755,root,qmail)                   %{_prefix}/bin/logmonitor
 %attr(755,root,qmail)                   %{_prefix}/bin/hostcntrl
 %attr(755,root,qmail)                   %{_prefix}/bin/vpasswd
@@ -1379,7 +1379,6 @@ fi
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vrenamedomain
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vsetuserquota
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vmoveuser
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vuserinfo
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vdeldomain
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vadddomain
 %if %nobogofilter == 0
@@ -1561,7 +1560,6 @@ fi
 %verify_permissions -e %{_prefix}/bin/vrenamedomain
 %verify_permissions -e %{_prefix}/bin/vsetuserquota
 %verify_permissions -e %{_prefix}/bin/vmoveuser
-%verify_permissions -e %{_prefix}/bin/vuserinfo
 %verify_permissions -e %{_prefix}/bin/vdeldomain
 %verify_permissions -e %{_prefix}/bin/vadddomain
 %if %nobogofilter == 0

@@ -63,6 +63,7 @@
 %attr(0755,root,root) @prefix@/bin/maildirkw
 %attr(0755,root,root) @prefix@/bin/maildirmake
 %attr(0755,root,root) @prefix@/bin/pop3d
+%attr(0755,root,root) @prefix@/bin/vuserinfo
 
 %attr(0755,root,qmail) @prefix@/sbin/adminclient
 %attr(0755,root,qmail) @prefix@/sbin/check_getpw
@@ -146,7 +147,6 @@
 %attr(4755,root,root)     @prefix@/bin/vrenamedomain
 %attr(4755,root,root)     @prefix@/bin/vrenameuser
 %attr(4755,root,root)     @prefix@/bin/vsetuserquota
-%attr(4755,root,root)     @prefix@/bin/vuserinfo
 %attr(4755,root,root)     @prefix@/sbin/systpass
 %attr(4755,root,root)     @libexecdir@/imapmodules/authshadow
 %attr(6551,root,indimail) @prefix@/bin/bogofilter
