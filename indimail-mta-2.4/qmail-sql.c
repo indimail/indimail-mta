@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.5  2018-02-11 21:20:48+05:30  Cprogrammer
+ * use USE_SQL to compile sql support
+ *
  * Revision 1.4  2018-01-09 11:54:26+05:30  Cprogrammer
  * link with MySQL without indimail
  *
@@ -16,6 +19,7 @@
 #include <unistd.h>
 #include "subfd.h"
 #include "substdio.h"
+#ifdef USE_SQL
 #include "hasmysql.h"
 #ifdef HAS_MYSQL
 #include "auto_uids.h"
@@ -319,11 +323,14 @@ main(int argc, char **argv)
 	return (0);
 }
 #else
-#warning "not compiled with -DHAS_MYSQL. Probably MySQL lib is missing"
+#error "MySQL libs required for -DUSE_SQL"
+#endif
+#else
+#warning "not compiled with -DUSE_SQL."
 int
 main(int argc, char **argv)
 {
-	substdio_puts(subfderr, "not compiled with -DHAS_MYSQL. Probably MySQL lib is missing\n");
+	substdio_puts(subfderr, "not compiled with -DUSE_SQL. Probably MySQL lib is missing\n");
 	substdio_flush(subfderr);
 	_exit(111);
 }
@@ -332,7 +339,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.4 2018-01-09 11:54:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.5 2018-02-11 21:20:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

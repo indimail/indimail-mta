@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.10  2018-02-11 21:21:16+05:30  Cprogrammer
+ * use USE_SQL to compile sql support
+ *
  * Revision 1.9  2018-01-09 12:36:24+05:30  Cprogrammer
  * replaced #ifdef INDIMAIL with #ifdef HAS_MYSQL
  *
@@ -31,6 +34,7 @@
  * Initial revision
  *
  */
+#ifdef USE_SQL
 #include "hasmysql.h"
 #ifdef HAS_MYSQL
 #include "stralloc.h"
@@ -50,15 +54,16 @@
 #include <mysqld_error.h>
 #include <unistd.h>
 
-stralloc        dbserver = {0};
-stralloc        dbuser = {0};
-stralloc        dbpass = {0};
-stralloc        dbname = {0};
-stralloc        dbtable = {0};
+stralloc        dbserver = { 0 };
+stralloc        dbuser = { 0 };
+stralloc        dbpass = { 0 };
+stralloc        dbname = { 0 };
+stralloc        dbtable = { 0 };
+
 MYSQL          *db_mysql = (MYSQL *) 0;
 
 int
-connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
+connect_sqldb(char *fn, MYSQL ** conn, char **table_name, char **error)
 {
 	char           *x, *m_timeout;
 	int             fd, i = 0;
@@ -67,8 +72,7 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 
 	if (conn)
 		*conn = (MYSQL *) 0;
-	if (db_mysql)
-	{
+	if (db_mysql) {
 		if (conn)
 			*conn = db_mysql;
 		return (0);
@@ -76,41 +80,38 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 	if (!(m_timeout = env_get("MYSQL_TIMEOUT")))
 		m_timeout = "30";
 	scan_int(m_timeout, (int *) &mysql_timeout);
-	if ((fd = open_read(fn)) == -1)
-	{
-		if (error) 
+	if ((fd = open_read(fn)) == -1) {
+		if (error)
 			*error = error_str(errno);
 		if (errno == error_noent)
 			return 0;
 		return (AM_FILE_ERR);
 	}
-	if (fstat(fd, &st) == -1)
-	{
-		if (error) 
+	if (fstat(fd, &st) == -1) {
+		if (error)
 			*error = error_str(errno);
 		close(fd);
 		return (AM_FILE_ERR);
 	}
-	if (st.st_size <= 0xffffffff)
-	{
+	if (st.st_size <= 0xffffffff) {
 		x = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
 		xlen = st.st_size;
-		while ((next = byte_chr(x, xlen, ':')) < xlen)
-		{
-			switch (i)
-			{
+		/*- 
+		 * Format of controlfile.sql should be
+		 * server:user:pass:dbname:tablename
+		 */
+		while ((next = byte_chr(x, xlen, ':')) < xlen) {
+			switch (i) {
 			case 0:
-				if (!stralloc_copyb(&dbserver, x, next))
-				{
-					if (error) 
+				if (!stralloc_copyb(&dbserver, x, next)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
 					return (AM_MEMORY_ERR);
 				}
-				if (!stralloc_0(&dbserver))
-				{
-					if (error) 
+				if (!stralloc_0(&dbserver)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
@@ -118,17 +119,15 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 				}
 				break;
 			case 1:
-				if (!stralloc_copyb(&dbuser, x, next))
-				{
-					if (error) 
+				if (!stralloc_copyb(&dbuser, x, next)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
 					return (AM_MEMORY_ERR);
 				}
-				if (!stralloc_0(&dbuser))
-				{
-					if (error) 
+				if (!stralloc_0(&dbuser)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
@@ -136,17 +135,15 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 				}
 				break;
 			case 2:
-				if (!stralloc_copyb(&dbpass, x, next))
-				{
-					if (error) 
+				if (!stralloc_copyb(&dbpass, x, next)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
 					return (AM_MEMORY_ERR);
 				}
-				if (!stralloc_0(&dbpass))
-				{
-					if (error) 
+				if (!stralloc_0(&dbpass)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
@@ -154,17 +151,15 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 				}
 				break;
 			case 3:
-				if (!stralloc_copyb(&dbname, x, next))
-				{
-					if (error) 
+				if (!stralloc_copyb(&dbname, x, next)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
 					return (AM_MEMORY_ERR);
 				}
-				if (!stralloc_0(&dbname))
-				{
-					if (error) 
+				if (!stralloc_0(&dbname)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
@@ -172,17 +167,15 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 				}
 				break;
 			case 4:
-				if (!stralloc_copyb(&dbtable, x, next))
-				{
-					if (error) 
+				if (!stralloc_copyb(&dbtable, x, next)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
 					return (AM_MEMORY_ERR);
 				}
-				if (!stralloc_0(&dbtable))
-				{
-					if (error) 
+				if (!stralloc_0(&dbtable)) {
+					if (error)
 						*error = error_str(errno);
 					munmap(x, st.st_size);
 					close(fd);
@@ -195,42 +188,35 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 			x += next;
 			xlen -= next;
 		}
-		if (i < 4)
-		{
+		if (i < 4) {
 			if (error)
-				*error = "Invalid db.conf";
+				*error = "Invalid database config in control file";
 			return (AM_CONFIG_ERR);
 		}
-		if (i == 4)
-		{
-			if (!*x || *x == '\n')
-			{
+		if (i == 4) {
+			if (!*x || *x == '\n') {
 				if (error)
-					*error = "Invalid db.conf";
+					*error = "Invalid database config in control file";
 				return (AM_CONFIG_ERR);
 			}
-			if (!stralloc_copys(&dbtable, x))
-			{
-				if (error) 
+			if (!stralloc_copys(&dbtable, x)) {
+				if (error)
 					*error = error_str(errno);
 				munmap(x, st.st_size);
 				close(fd);
 				return (AM_MEMORY_ERR);
 			}
-			if (*(dbtable.s + dbtable.len -1) == '\n')
-				*(dbtable.s + dbtable.len -1) = 0;
-			else
-			if (!stralloc_0(&dbtable))
-			{
-				if (error) 
+			if (*(dbtable.s + dbtable.len - 1) == '\n')
+				*(dbtable.s + dbtable.len - 1) = 0;
+			else if (!stralloc_0(&dbtable)) {
+				if (error)
 					*error = error_str(errno);
 				munmap(x, st.st_size);
 				close(fd);
 				return (AM_MEMORY_ERR);
 			}
 		}
-	} else
-	{
+	} else {
 		if (error)
 			*error = "file to large";
 		close(fd);
@@ -238,26 +224,22 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 	}
 	close(fd);
 	munmap(x, st.st_size);
-	if (!(db_mysql = mysql_init(0)))
-	{
+	if (!(db_mysql = mysql_init(0))) {
 		if (error)
 			*error = "mysql_init: no memory";
 		return (AM_MEMORY_ERR);
 	}
-	if (mysql_options(db_mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout))
-	{
+	if (mysql_options(db_mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout)) {
 		if (error)
 			*error = "unable to set MYSQL_OPT_CONNECT_TIMEOUT";
 		return (AM_CONFIG_ERR);
 	}
-	if (mysql_options(db_mysql, MYSQL_OPT_LOCAL_INFILE, 0))
-	{
+	if (mysql_options(db_mysql, MYSQL_OPT_LOCAL_INFILE, 0)) {
 		if (error)
 			*error = "unable to set MYSQL_OPT_LOCAL_INFILE";
 		return (AM_CONFIG_ERR);
 	}
-	if (!mysql_real_connect(db_mysql, dbserver.s, dbuser.s, dbpass.s, dbname.s, 0, NULL, 0))
-	{
+	if (!mysql_real_connect(db_mysql, dbserver.s, dbuser.s, dbpass.s, dbname.s, 0, NULL, 0)) {
 		if (error)
 			*error = (char *) mysql_error(db_mysql);
 		return (AM_MYSQL_ERR);
@@ -270,52 +252,44 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 }
 
 int
-create_sqltable(MYSQL *conn, char *table_name, char **error)
+create_sqltable(MYSQL * conn, char *table_name, char **error)
 {
 	static stralloc sql = { 0 };
 
-	if (!stralloc_copys(&sql, "create table "))
-	{
+	if (!stralloc_copys(&sql, "create table ")) {
 		if (error)
 			*error = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_cats(&sql, table_name))
-	{
+	if (!stralloc_cats(&sql, table_name)) {
 		if (error)
 			*error = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
 	if (!stralloc_cats(&sql, " (email char(64) NOT NULL, timestamp timestamp NOT NULL, \
-		primary key (email), index timestamp (timestamp))"))
-	{
+		primary key (email), index timestamp (timestamp))")) {
 		if (error)
 			*error = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_0(&sql))
-	{
+	if (!stralloc_0(&sql)) {
 		if (error)
 			*error = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (mysql_query(conn, sql.s))
-	{
+	if (mysql_query(conn, sql.s)) {
 		sql.len--;
-		if (!stralloc_cats(&sql, ": "))
-		{
+		if (!stralloc_cats(&sql, ": ")) {
 			if (error)
 				*error = error_str(errno);
 			return (AM_MEMORY_ERR);
 		}
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn)))
-		{
+		if (!stralloc_cats(&sql, (char *) mysql_error(conn))) {
 			if (error)
 				*error = (char *) mysql_error(conn);
 			return (AM_MEMORY_ERR);
 		}
-		if (!stralloc_0(&sql))
-		{
+		if (!stralloc_0(&sql)) {
 			if (error)
 				*error = error_str(errno);
 			return (AM_MEMORY_ERR);
@@ -326,7 +300,7 @@ create_sqltable(MYSQL *conn, char *table_name, char **error)
 }
 
 int
-check_db(MYSQL *conn, char *addr, unsigned long *row_count, unsigned long *tmval, char *envStr, char **errStr)
+check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmval, char *envStr, char **errStr)
 {
 
 	MYSQL_RES      *res;
@@ -337,101 +311,83 @@ check_db(MYSQL *conn, char *addr, unsigned long *row_count, unsigned long *tmval
 
 	if (!conn)
 		return (0);
-	if (!stralloc_copys(&sql, "select UNIX_TIMESTAMP(timestamp) from "))
-	{
-		if (errStr) 
+	if (!stralloc_copys(&sql, "select UNIX_TIMESTAMP(timestamp) from ")) {
+		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_cats(&sql, dbtable.s))
-	{
-		if (errStr) 
+	if (!stralloc_cats(&sql, dbtable.s)) {
+		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_cats(&sql, " where email=\""))
-	{
-		if (errStr) 
+	if (!stralloc_cats(&sql, " where email=\"")) {
+		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_cats(&sql, addr))
-	{
-		if (errStr) 
+	if (!stralloc_cats(&sql, addr)) {
+		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_cats(&sql, "\""))
-	{
-		if (errStr) 
+	if (!stralloc_cats(&sql, "\"")) {
+		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-again:
-	if (!stralloc_0(&sql))
-	{
-		if (errStr) 
+  again:
+	if (!stralloc_0(&sql)) {
+		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (mysql_query(conn, sql.s))
-	{
-		if ((m_error = mysql_errno(conn)) == ER_NO_SUCH_TABLE)
-		{
+	if (mysql_query(conn, sql.s)) {
+		if ((m_error = mysql_errno(conn)) == ER_NO_SUCH_TABLE) {
 			if (create_sqltable(conn, dbtable.s, errStr))
 				return (AM_MYSQL_ERR);
 			return (0);
-		} else
-		if (m_error == ER_PARSE_ERROR)
-		{
-			if (!stralloc_copys(&sql, "select UNIX_TIMESTAMP(timestamp) from "))
-			{
-				if (errStr) 
+		} else if (m_error == ER_PARSE_ERROR) {
+			if (!stralloc_copys(&sql, "select UNIX_TIMESTAMP(timestamp) from ")) {
+				if (errStr)
 					*errStr = error_str(errno);
 				return (AM_MEMORY_ERR);
 			}
-			if (!stralloc_cats(&sql, dbtable.s))
-			{
-				if (errStr) 
+			if (!stralloc_cats(&sql, dbtable.s)) {
+				if (errStr)
 					*errStr = error_str(errno);
 				return (AM_MEMORY_ERR);
 			}
-			if (!stralloc_cats(&sql, " where email='"))
-			{
-				if (errStr) 
+			if (!stralloc_cats(&sql, " where email='")) {
+				if (errStr)
 					*errStr = error_str(errno);
 				return (AM_MEMORY_ERR);
 			}
-			if (!stralloc_cats(&sql, addr))
-			{
-				if (errStr) 
+			if (!stralloc_cats(&sql, addr)) {
+				if (errStr)
 					*errStr = error_str(errno);
 				return (AM_MEMORY_ERR);
 			}
-			if (!stralloc_cats(&sql, "'"))
-			{
-				if (errStr) 
+			if (!stralloc_cats(&sql, "'")) {
+				if (errStr)
 					*errStr = error_str(errno);
 				return (AM_MEMORY_ERR);
 			}
 			goto again;
 		}
 		sql.len--;
-		if (!stralloc_cats(&sql, ": "))
-		{
-			if (errStr) 
+		if (!stralloc_cats(&sql, ": ")) {
+			if (errStr)
 				*errStr = error_str(errno);
 			return (AM_MEMORY_ERR);
 		}
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn)))
-		{
-			if (errStr) 
+		if (!stralloc_cats(&sql, (char *) mysql_error(conn))) {
+			if (errStr)
 				*errStr = (char *) mysql_error(conn);
 			return (AM_MEMORY_ERR);
 		}
-		if (!stralloc_0(&sql))
-		{
-			if (errStr) 
+		if (!stralloc_0(&sql)) {
+			if (errStr)
 				*errStr = error_str(errno);
 			return (AM_MEMORY_ERR);
 		}
@@ -439,24 +395,20 @@ again:
 			*errStr = sql.s;
 		return (AM_MYSQL_ERR);
 	}
-	if (!(res = mysql_store_result(conn)))
-	{
+	if (!(res = mysql_store_result(conn))) {
 		sql.len--;
-		if (!stralloc_cats(&sql, "mysql_store_result: "))
-		{
-			if (errStr) 
+		if (!stralloc_cats(&sql, "mysql_store_result: ")) {
+			if (errStr)
 				*errStr = error_str(errno);
 			return (AM_MEMORY_ERR);
 		}
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn)))
-		{
-			if (errStr) 
+		if (!stralloc_cats(&sql, (char *) mysql_error(conn))) {
+			if (errStr)
 				*errStr = (char *) mysql_error(conn);
 			return (AM_MEMORY_ERR);
 		}
-		if (!stralloc_0(&sql))
-		{
-			if (errStr) 
+		if (!stralloc_0(&sql)) {
+			if (errStr)
 				*errStr = error_str(errno);
 			return (AM_MEMORY_ERR);
 		}
@@ -465,15 +417,12 @@ again:
 	num = mysql_num_rows(res);
 	if (row_count)
 		*row_count = num;
-	for (;(row = mysql_fetch_row(res));)
-	{
+	for (; (row = mysql_fetch_row(res));) {
 		if (tmval)
 			*tmval = scan_ulong(row[0], tmval);
-		if (envStr)
-		{
-			if (!stralloc_copys(&envStore, row[1]))
-			{
-				if (errStr) 
+		if (envStr) {
+			if (!stralloc_copys(&envStore, row[1])) {
+				if (errStr)
 					*errStr = error_str(errno);
 				mysql_free_result(res);
 				return (AM_MEMORY_ERR);
@@ -487,15 +436,14 @@ again:
 int
 sqlmatch(char *fn, char *addr, int len, char **errStr)
 {
-	static stralloc controlfile = {0};
+	static stralloc controlfile = { 0 };
 	int             cntrl_ok;
 	MYSQL          *conn;
 
 	if (!len || !*addr || !fn)
 		return (0);
-	if (!controldir)
-	{
-		if(!(controldir = env_get("CONTROLDIR")))
+	if (!controldir) {
+		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
 	if (errStr)
@@ -526,7 +474,10 @@ sqlmatch_close_db(void)
 	db_mysql = (MYSQL *) 0;
 }
 #else
-#warning "not compiled with -DINDIMAIL"
+#error "MySQL libs required for -DUSE_SQL"
+#endif /*- #ifdef HAS_MYSQL*/
+#else  /*- #ifdef USE_SQL */
+#warning "not compiled with -DUSE_SQL"
 int
 sqlmatch(char *fn, char *addr, int len, char **errStr)
 {
@@ -538,12 +489,12 @@ sqlmatch_close_db(void)
 {
 	return;
 }
-#endif
+#endif /*- #ifdef USE_SQL */
 
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.9 2018-01-09 12:36:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.10 2018-02-11 21:21:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
