@@ -161,8 +161,6 @@ if [ ! -d ${logdir} ] ; then
 	/bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
-SERVICE_LIST="."
-export SERVICE_LIST
 ${prefix}/sbin/svctool --config=add-boot
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
