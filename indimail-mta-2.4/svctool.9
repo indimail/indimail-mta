@@ -481,6 +481,18 @@ Known values for OPTION are:
                    "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
   run-file-only  - Recreate run files but not variables
 
+--add-service service_name
+
+  Add a service to be started at system boot. The unit file for the service should exist
+  service_name   - name of a service or list of services to be added
+                   This should be a SYSV style service, systemd, event.d unit file
+
+--remove-service service_name
+
+  Remove a service to be started at system boot. The unit file for the service should exist
+  service_name   - name of a service or list of services to be removed
+                   This should be a SYSV style service, systemd, event.d unit file
+
 --inlookup=fifo_path --threads=N
 	--servicedir=service_path
 	--domainlimits
