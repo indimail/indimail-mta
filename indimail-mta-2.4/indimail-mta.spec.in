@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.141 2018-02-05 12:40:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.142 2018-02-11 16:19:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2409,8 +2409,6 @@ if [ ! -d %{logdir} ] ; then
 fi
 %{__chown} -R qmaill:nofiles %{logdir}
 echo "adding indimail startup"
-SERVICE_LIST="."
-export SERVICE_LIST
 %{_prefix}/sbin/svctool --config=add-boot
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir} --scanint=60
@@ -2476,8 +2474,6 @@ fi
 
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
-SERVICE_LIST="."
-export SERVICE_LIST
 %{_prefix}/sbin/svctool --config=rm-boot
 ) >> /tmp/daemontools-setup.log 2>&1
 
