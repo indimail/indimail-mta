@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.c,v $
+ * Revision 1.27  2018-02-11 21:21:05+05:30  Cprogrammer
+ * use USE_SQL to compile sql support
+ *
  * Revision 1.26  2018-01-09 11:55:42+05:30  Cprogrammer
  * compile sql code with USE_MYSQL definition
  *
@@ -82,12 +85,12 @@
  * Initial revision
  *
  * qregex (v2)
- * $Id: qregex.c,v 1.26 2018-01-09 11:55:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.27 2018-02-11 21:21:05+05:30 Cprogrammer Exp mbhangui $
  *
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2018-01-09 11:55:42+05:30 $
- * Revision: $Revision: 1.26 $
+ * Modified: $Date: 2018-02-11 21:21:05+05:30 $
+ * Revision: $Revision: 1.27 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -268,7 +271,7 @@ address_match(char *fn, stralloc *addr, stralloc *bhf, struct constmap *mapbhf,
 		*errStr = 0;
 	if (fn && (x = cdbmatch(fn, addr->s, str_len(addr->s), 0, errStr)))
 		return (x);
-#if defined(USE_SQL) && defined(USE_MYSQL)
+#if defined(USE_SQL)
 	if (fn && (x = sqlmatch(fn, addr->s, str_len(addr->s), errStr)))
 		return (x);
 #endif
@@ -370,7 +373,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.26 2018-01-09 11:55:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.27 2018-02-11 21:21:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
