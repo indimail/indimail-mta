@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.450 2018-02-09 22:04:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.451 2018-02-11 11:09:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1798,7 +1798,7 @@ if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
   %{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --mysqlsocket=%{mysqlSocket}
   # MySQL Database Creation
   %{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
-      --databasedir=%{indimaildir}/mysqldb --base_path=%{mbase} --mysqlsocket=%{mysqlSocket}
+      --databasedir=%{indimaildir}/mysqldb --base_path=%{mbase} --mysqlsocket="%{mysqlSocket}".tmp
   # MySQL Supervise creation
   %{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
     --databasedir=%{indimaildir}/mysqldb --config=%{sysconfdir}/indimail.cnf --default-domain=$default_domain
