@@ -106,8 +106,7 @@ Makefile
 Makefile.in
 mgmtpass
 myslave
-obs_deb_prep
-obs.mk
+debian/Makefile
 osh
 overquota.sh
 perm_list.i
