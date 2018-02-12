@@ -178,7 +178,7 @@ perm_list.i dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
 vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
-vrenamedomain_handle login_tasks.3 authgeneric obs.mk usr.sbin.mysqld usr.sbin.clamd \
+vrenamedomain_handle login_tasks.3 authgeneric usr.sbin.mysqld usr.sbin.clamd \
 vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp
 
 #DISTCLEANFILES=.gitignore
@@ -805,9 +805,8 @@ usr.sbin.clamd: usr.sbin.clamd.in
 usr.bin.freshclam: usr.bin.freshclam.in
 	$(edit) $@.in > $@
 
-obs.mk: debian/obs.mk.in
-	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@ debian/Makefile; \
-		ln -s debian/$@ $@;ln -s $@ debian/Makefile
+debian/Makefile: debian/Makefile.in
+	$(edit) $@.in > $@;
 
 INSTALL: INSTALL.in configure.ac
 	$(edit) $@.in > doc/$@.indimail; rm -f $@;ln -sf doc/$@.indimail $@
