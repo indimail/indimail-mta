@@ -112,7 +112,7 @@ edit = sed \
 	-e 's,@fortune_version\@,$(fortune_version),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-rules: rules.in obs.mk
+rules: rules.in Makefile
 	$(edit) $@.in > $@; chmod +x $@;
 indimail.install: indimail.install.in
 	$(edit) $@.in > $@
@@ -141,16 +141,16 @@ libindimail64: libindimail64.in
 indimail.cron.d: indimail.cron.d.in
 	$(edit) $@.in > $@
 
-obs_deb_prep: obs_deb_prep.in obs.mk
+obs_deb_prep: obs_deb_prep.in Makefile
 	$(edit) $@.in > $@;
 
-changelog: changelog.in obs.mk
+changelog: changelog.in Makefile
 	$(edit) $@.in > $@;
 
-indimail.dsc: indimail.dsc.in obs.mk changelog.in
+indimail.dsc: indimail.dsc.in Makefile changelog.in
 	$(edit) $@.in > $@.tmp; \
 	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
-indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in obs.mk changelog.in
+indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile changelog.in
 	$(edit) $@.in > $@.tmp; \
 	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
@@ -161,7 +161,7 @@ indimail.postrm rules changelog compat indimail-devel32 \
 indimail-devel64 obs_deb_prep indimail-devel.postinst \
 libindimail32 libindimail64 indimail.install \
 indimail-devel.postrm \
-gen_control obs.mk control indimail.cron.d control
+gen_control Makefile control indimail.cron.d control
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
 		indimail.postrm rules changelog compat obs_deb_prep \
 		indimail-devel32 indimail-devel64 indimail.install \
