@@ -45,7 +45,7 @@ pkgconfigdir=@prefix@/lib/pkgconfig
 
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
-obs_deb_prep gen_control indimail.install indimail.dsc \
+obs_deb_prep gen_control indimail.install indimail.dsc indimail-Debian_9.0.dsc \
 indimail-devel32 indimail-devel64 libindimail32 libindimail64 indimail-devel.postinst \
 indimail-devel.postrm \
 debian.tar.gz dummy.tar.gz
@@ -148,6 +148,9 @@ changelog: changelog.in obs.mk
 	$(edit) $@.in > $@;
 
 indimail.dsc: indimail.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in obs.mk changelog.in
 	$(edit) $@.in > $@.tmp; \
 	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
