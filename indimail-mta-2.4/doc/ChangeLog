@@ -6,13 +6,6 @@ Release 2.4 Start 31/01/2018
 3.  moved system binaries to sbin
 01/02/2018
 4.  added permissions files for openSUSE
-03/02/2018
-5.  svctool - inlookup supervise/control fifo - allow svc -h permission for
-    vdeluser POST_HANDLE script
-6.  svctool - updated sql-mode in mysqld run file
-10/02/2018
-7.  svctool - refactored code for MySQL db creation
-8.  svctool - use .mylogin.cnf created by mysql_config_editor
 11/02/2018
 9.  svctool - use SHA-512 encryption for indisrvr admin password
 10. svctool - moved enabling/disabling of services to separate functions
