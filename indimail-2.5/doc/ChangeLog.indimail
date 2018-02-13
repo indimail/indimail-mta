@@ -6,8 +6,18 @@ Release 2.5 Start 27/01/2018
 2.  changed data type to TIMESTAMP from DATETIME for timestamp column in
 hostcntrl, lastauth
 3.  updated flash menu for changes in program paths in indimail-mta
+03/02/2018
+4.  svctool - inlookup supervise/control fifo - allow svc -h permission for
+    vdeluser POST_HANDLE script
+5.  svctool - updated sql-mode in mysqld run file
+10/02/2018
+6.  svctool - refactored code for MySQL db creation
+7.  svctool - use .mylogin.cnf created by mysql_config_editor
 11/02/2018
-4.  use /var/run/mysqld/mysqld.sock.tmp as socket for mysqldb creation
+8.  use /var/run/mysqld/mysqld.sock.tmp as socket for mysqldb creation
+13/02/2018
+11. svctool - use mysqld --verbose --check to check existence of a command
+    line option
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017

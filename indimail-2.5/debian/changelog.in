@@ -3,5 +3,11 @@ indimail (@version@-1) unstable; urgency=low
   * moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
   * changed data type to TIMESTAMP from DATETIME for timestamp column in hostcntrl, lastauth
   * updated flash menu for changes in program paths in indimail-mta
+  * svctool - inlookup supervise/control fifo - allow svc -h permission for vdeluser POST_HANDLE script
+  * svctool - updated sql-mode in mysqld run file
+  * svctool - refactored code for MySQL db creation
+  * svctool - use .mylogin.cnf created by mysql_config_editor
+  * use /var/run/mysqld/mysqld.sock.tmp as socket for mysqldb creation
+  * svctool - use mysqld --verbose --check to check existence of a command line option
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 03 Feb 2018 18:22:34 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 13 Feb 2018 17:06:22 +0530
