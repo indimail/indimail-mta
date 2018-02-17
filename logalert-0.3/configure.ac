@@ -168,7 +168,7 @@ else
 	ilibdir=$libdir
 fi
 RPATH_LIB="$acl_libdirstem"
-AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail -lcdb"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,-lindimail -lcdb)
+AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,-lindimail -lcdb)
 
 AC_SUBST(indimaildir)
 AC_CONFIG_FILES([Makefile])
