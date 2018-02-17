@@ -1,5 +1,8 @@
 /*
  * $Log: vuserinfo.c,v $
+ * Revision 2.8  2018-02-17 13:37:49+05:30  Cprogrammer
+ * userinfo privilege only for root or indimail users
+ *
  * Revision 2.7  2011-11-09 19:46:44+05:30  Cprogrammer
  * removed getversion
  *
@@ -87,7 +90,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vuserinfo.c,v 2.7 2011-11-09 19:46:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vuserinfo.c,v 2.8 2018-02-17 13:37:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            usage();
@@ -97,10 +100,12 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             c, errflag, version_flag;
+	int             c, errflag;
 	char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], opt_str[56];
 	int             DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir, DisplayQuota;
 	int             DisplayLastAuth, DisplayAll, DisplayMail, DisplayFilter, tmpAll;
+	uid_t           uid;
+	gid_t           gid;
 
 	DisplayName = DisplayPasswd = DisplayUid = DisplayGid = DisplayComment = DisplayDir = 0;
 	DisplayQuota = DisplayLastAuth = DisplayMail = DisplayFilter = 0;
@@ -109,7 +114,7 @@ main(argc, argv)
 	memset(User, 0, MAX_BUFF);
 	memset(Email, 0, MAX_BUFF);
 	memset(Domain, 0, MAX_BUFF);
-	version_flag = errflag = 0;
+	errflag = 0;
 	snprintf(opt_str, sizeof(opt_str), "anpugcdqm");
 #ifdef ENABLE_AUTH_LOGGING
 	strncat(opt_str, "l", 1);
@@ -180,24 +185,29 @@ main(argc, argv)
 	}
 	if (optind < argc)
 		scopy(Email, argv[optind++], MAX_BUFF);
-	if (!*Email && !version_flag)
+	if (!*Email)
 	{
 		usage();
 		return(1);
 	}
-	if(*Email)
+	if (indimailuid == -1 || indimailgid == -1)
+		GetIndiId(&indimailuid, &indimailgid);
+	uid = getuid();
+	gid = getgid();
+	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid) != 1)
 	{
-		if (parse_email(Email, User, Domain, MAX_BUFF))
-		{
-			fprintf(stderr, "%s: Email too long\n", Email);
-			return(1);
-		}
-		errflag = vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir, 
-			DisplayQuota, DisplayLastAuth, DisplayMail, DisplayFilter, DisplayAll);
-		vclose();
-		return(errflag);
+		error_stack(stderr, "you must be root or indimail to run this program\n");
+		return(1);
 	}
-	return(1);
+	if (parse_email(Email, User, Domain, MAX_BUFF))
+	{
+		fprintf(stderr, "%s: Email too long\n", Email);
+		return(1);
+	}
+	errflag = vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir, 
+		DisplayQuota, DisplayLastAuth, DisplayMail, DisplayFilter, DisplayAll);
+	vclose();
+	return(errflag);
 }
 
 void
