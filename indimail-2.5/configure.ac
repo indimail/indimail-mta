@@ -955,8 +955,13 @@ else
 	fi
 	mysqlbindir=$mysql_prefix/bin
 fi
+saveLIBS="$LIBS"
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
+LIBS="$LIBS -lmysqlclient"
+AC_CHECK_FUNC(mysql_optionsv, have_mysqloptionsv=1)
+LIBS=$saveLIBS
+
 AC_DEFINE_UNQUOTED(MYSQLBINDIR,"$mysqlbindir",full path to MySQL binaries)
 
 auth_inc="-I$indimaildir/include -I$mysql_incdir -I$mysql_incdir/mysql"
@@ -973,6 +978,7 @@ dnl AC_ARG_ENABLE(HAVE_IPV6, [  --enable-ipv6                 if your system sup
 dnl 	[with_ipv6=$enableval],
 dnl 	[with_ipv6=yes])
 dnl test "$with_ipv6" = "yes" && AC_DEFINE(HAVE_IPV6,1,Define if you want ipv6 support compiled in)
+
 
 AC_ARG_ENABLE(HAVE_MD5_CRYPT,    [  --enable-md5-crypt            if your system crypt does not support md5],
 	[with_md5crypt=$enableval],
@@ -1082,6 +1088,11 @@ case $mysql_escape in
 	;;
 esac
 test "$mysql_escape" = "yes" && AC_DEFINE_UNQUOTED(mysql_query(x,y),_mysql_Query(x,y),mysql_real_escape_string)
+case $have_mysqloptionsv in
+	1*|y*|Y*)
+	AC_DEFINE_UNQUOTED(HAVE_MYSQL_OPTIONSV,$have_mysqloptionsv, "Enable mysql_optionsv()")
+	;;
+esac
 
 ### turn on enterprise support to enable support from IndiMail Support <manvendra@indimail.org>
 AC_ARG_ENABLE(enterprise-support, [  --enable-enterprise-support=y|n     Turn on (y) or (n, default) Turn on Enterprise Messaging for Support],
@@ -1324,6 +1335,11 @@ case $mysql_escape in
 	;;
 	2|n*|N*)
 	echo "      mysql escape = disabled"
+	;;
+esac
+case $have_mysqloptionsv in
+	1*|y*|Y*)
+	echo "  mysql_optionsv() = enabled"
 	;;
 esac
 case $POPRELAY in
