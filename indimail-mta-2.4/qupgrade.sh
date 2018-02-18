@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qupgrade.sh,v $
+# Revision 1.6  2018-02-18 19:07:04+05:30  Cprogrammer
+# fix for rpm path on suse
+#
 # Revision 1.5  2018-01-09 11:57:28+05:30  Cprogrammer
 # updated for v2.3 indimail-mta
 #
@@ -22,7 +25,7 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: qupgrade.sh,v 1.5 2018-01-09 11:57:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: qupgrade.sh,v 1.6 2018-02-18 19:07:04+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
@@ -38,7 +41,7 @@ do_upgrade()
 do_pre()
 {
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
-		if [ -f /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
@@ -60,7 +63,7 @@ do_pre()
 do_post()
 {
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
-		if [ -f /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
@@ -82,7 +85,7 @@ do_post()
 do_preun()
 {
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
-		if [ -f /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
@@ -113,7 +116,7 @@ do_preun()
 do_postun()
 {
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
-		if [ -f /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
@@ -138,7 +141,7 @@ do_postun()
 do_prettrans()
 {
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
-		if [ -f /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
@@ -160,7 +163,7 @@ do_posttrans()
 		OLD_PKG_VER=`cat /tmp/indimail-mta-pkg.old`
 	fi
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
-		if [ -f /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
