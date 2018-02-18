@@ -1,7 +1,6 @@
 usr/bin/envdir /usr/bin
 usr/bin/envuidgid /usr/bin
 usr/bin/fghack /usr/bin
-usr/bin/multilog /usr/bin
 usr/bin/pgrphack /usr/bin
 usr/bin/setlock /usr/bin
 usr/bin/setuidgid /usr/bin
@@ -26,6 +25,7 @@ usr/bin/teepipe /usr/bin
 usr/bin/multitail /usr/bin
 usr/bin/logselect /usr/bin
 usr/bin/qlogselect /usr/bin
+usr/sbin/multilog /usr/sbin
 usr/sbin/readproctitle /usr/sbin
 usr/sbin/svscan /usr/sbin
 usr/sbin/svctool /usr/sbin
