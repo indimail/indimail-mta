@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.10  2018-02-18 16:08:51+05:30  Cprogrammer
+ * use mysql_optionsv() with mariadb
+ *
  * Revision 2.9  2014-01-02 23:54:03+05:30  Cprogrammer
  * set delayed_insert variable for MYSQL delayed insert
  *
@@ -32,8 +35,18 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.9 2014-01-02 23:54:03+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.10 2018-02-18 16:08:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
+
+int
+int_mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg)
+{
+#ifdef HAVE_MYSQL_OPTIONSV
+	return (mysql_options(mysql, option, arg)); /*- at the moment mysql_optionsv() does a core dump */
+#else
+	return (mysql_options(mysql, option, arg));
+#endif
+}
 
 int
 set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
@@ -50,18 +63,6 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 		*flags += CLIENT_COMPRESS;
 	if (getenv("CLIENT_INTERACTIVE"))
 		*flags += CLIENT_INTERACTIVE;
-#if 0
-	if (getenv("CLIENT_FOUND_ROWS"))
-		*flags += CLIENT_FOUND_ROWS;
-	if (getenv("CLIENT_IGNORE_SPACE"))
-		*flags += CLIENT_IGNORE_SPACE;
-	if (getenv("CLIENT_NO_SCHEMA"))
-		*flags += CLIENT_NO_SCHEMA;
-	if (getenv("CLIENT_ODBC"))
-		*flags += CLIENT_ODBC;
-	if (getenv("CLIENT_TRANSACTIONS"))
-		*flags += CLIENT_TRANSACTIONS;
-#endif
 	getEnvConfigStr(&init_cmd, "MYSQL_INIT_COMMAND", 0);
 	getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", file);
 	getEnvConfigStr(&default_group, "MYSQL_READ_DEFAULT_GROUP", group);
@@ -78,30 +79,30 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	connect_timeout = atoi(c_timeout);
 	read_timeout = atoi(r_timeout);
 	write_timeout = atoi(w_timeout);
-	if (init_cmd && mysql_options(mysql, MYSQL_INIT_COMMAND, init_cmd))
+	if (init_cmd && int_mysql_options(mysql, MYSQL_INIT_COMMAND, init_cmd))
 		return (1);
-	if (mysql_options(mysql, MYSQL_READ_DEFAULT_FILE, default_file))
+	if (int_mysql_options(mysql, MYSQL_READ_DEFAULT_FILE, default_file))
 		return (1);
-	if (mysql_options(mysql, MYSQL_READ_DEFAULT_GROUP, default_group))
+	if (int_mysql_options(mysql, MYSQL_READ_DEFAULT_GROUP, default_group))
 		return (1);
-	if (mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &connect_timeout))
+	if (int_mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &connect_timeout))
 		return (1);
-	if (mysql_options(mysql, MYSQL_OPT_READ_TIMEOUT, (char *) &read_timeout))
+	if (int_mysql_options(mysql, MYSQL_OPT_READ_TIMEOUT, (char *) &read_timeout))
 		return (1);
-	if (mysql_options(mysql, MYSQL_OPT_WRITE_TIMEOUT, (char *) &write_timeout))
+	if (int_mysql_options(mysql, MYSQL_OPT_WRITE_TIMEOUT, (char *) &write_timeout))
 		return (1);
 	if (getenv("MYSQL_SET_CLIENT_IP") && 
-			mysql_options(mysql, MYSQL_SET_CLIENT_IP, set_client_ip))
+			int_mysql_options(mysql, MYSQL_SET_CLIENT_IP, set_client_ip))
 		return (1);
 	if (getenv("MYSQL_OPT_RECONNECT") &&
-			mysql_options(mysql, MYSQL_OPT_RECONNECT, (char *) &o_reconnect))
+			int_mysql_options(mysql, MYSQL_OPT_RECONNECT, (char *) &o_reconnect))
 		return (1);
 	/*-
 	 * enum mysql_protocol_type 
 	 * MYSQL_PROTOCOL_DEFAULT, MYSQL_PROTOCOL_TCP, MYSQL_PROTOCOL_SOCKET,
 	 * MYSQL_PROTOCOL_PIPE, MYSQL_PROTOCOL_MEMORY
 	 */
-	if (mysql_options(mysql, MYSQL_OPT_PROTOCOL, (char *) &protocol))
+	if (int_mysql_options(mysql, MYSQL_OPT_PROTOCOL, (char *) &protocol))
 		return (1);
 	return (0);
 }
