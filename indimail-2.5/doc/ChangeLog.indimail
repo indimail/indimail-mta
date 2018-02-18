@@ -18,6 +18,9 @@ hostcntrl, lastauth
 13/02/2018
 11. svctool - use mysqld --verbose --check to check existence of a command
     line option
+17/02/2018
+12. restrict userinfo privilege to root, indimail user/group
+13. use configure.ac to use mysql_optionsv(), if available, instead of mysql_options()
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017

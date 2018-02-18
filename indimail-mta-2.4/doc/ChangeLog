@@ -7,8 +7,8 @@ Release 2.4 Start 31/01/2018
 01/02/2018
 4.  added permissions files for openSUSE
 11/02/2018
-9.  svctool - use SHA-512 encryption for indisrvr admin password
-10. svctool - moved enabling/disabling of services to separate functions
+5.  svctool - use SHA-512 encryption for indisrvr admin password
+6.  svctool - moved enabling/disabling of services to separate functions
     --enable-service, --disable-service
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}

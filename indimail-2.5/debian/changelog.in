@@ -9,5 +9,8 @@ indimail (@version@-1) unstable; urgency=low
   * svctool - use .mylogin.cnf created by mysql_config_editor
   * use /var/run/mysqld/mysqld.sock.tmp as socket for mysqldb creation
   * svctool - use mysqld --verbose --check to check existence of a command line option
+  * restrict userinfo privilege to root, indimail user/group
+  * restrict userinfo privilege to root, indimail user/group
+  * use configure.ac to use mysql_optionsv(), if available, instead of mysql_options()
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 13 Feb 2018 17:06:22 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 17 Feb 2018 13:40:39 +0530
