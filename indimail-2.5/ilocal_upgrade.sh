@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.21  2018-02-18 21:42:17+05:30  Cprogrammer
+# update cron entries
+#
 # Revision 2.20  2018-01-09 12:11:40+05:30  Cprogrammer
 # removed indimail-mta specific code
 #
@@ -61,13 +64,14 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.20 2018-01-09 12:11:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.21 2018-02-18 21:42:17+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
 chmod=$(which chmod)
 chown=$(which chown)
 rm=$(which rm)
+cp=$(which cp)
 
 check_update_if_diff()
 {
@@ -121,8 +125,14 @@ if [ -f /etc/indimail/control/spamignore ] ; then
 	$chgrp apache /etc/indimail/control/spamignore
 	$chmod 664 /etc/indimail/control/spamignore
 fi
-}
-
+# copy updated cron entries
+if [ -f /etc/indimail/cronlist.i -a -d /etc/cron.d ] ; then
+	diff /etc/indimail/cronlist.i /etc/cron.d/cronlist.i >/dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		$cp /etc/indimail/cronlist.i /etc/cron.d/cronlist.i
+	fi
+fi
+} 
 case $1 in
 	post|posttrans)
 	do_post_upgrade
