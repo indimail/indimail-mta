@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.6  2018-02-18 22:23:31+05:30  Cprogrammer
+# pass argument to do_post_upgrade()
+#
 # Revision 1.5  2018-01-31 16:21:36+05:30  Cprogrammer
 # update QMAILLOCAL, QMAILREMOTE for qmail-local, qmail-remote in sbin
 #
@@ -13,7 +16,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.5 2018-01-31 16:21:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.6 2018-02-18 22:23:31+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -25,6 +28,7 @@ mkdir=$(which mkdir)
 rm=$(which rm)
 mv=$(which mv)
 sed=$(which sed)
+cp=$(which cp)
 
 check_update_if_diff()
 {
@@ -37,6 +41,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.6 2018-02-18 22:23:31+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -166,10 +171,18 @@ check_update_if_diff /etc/indimail/control/defaulthost $host
 
 # qmail-greyd, greydaemon path changed to /usr/sbin
 $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' /service/greylist.1999/run
+
+# copy updated cron entries
+if [ -f /etc/indimail/cronlist.q -a -d /etc/cron.d ] ; then
+	diff /etc/indimail/cronlist.q /etc/cron.d/cronlist.q >/dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		$cp /etc/indimail/cronlist.q /etc/cron.d/cronlist.q
+	fi
+fi
 }
 
 case $1 in
 	post|posttrans)
-	do_post_upgrade
+	do_post_upgrade $1
 	;;
 esac
