@@ -153,7 +153,12 @@ BuildRequires: readline gzip autoconf automake libtool pkgconfig
 %if %build_on_obs == 1
 BuildRequires: libidn-devel
 %endif
-BuildRequires: mysql-devel mysql-libs
+BuildRequires: mysql-devel
+%if 0%{?suse_version}
+BuildRequires: libmysqlclient18
+%else
+BuildRequires: mysql-libs
+%endif
 
 %if %build_on_obs == 1
 ##################################### OBS ####################################
@@ -211,7 +216,11 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 %endif
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
+%if 0%{?suse_version}
+Requires: libmysqlclient18
+%else
 Requires: mysql-libs
+%endif
 #
 # IndiMail is choosy and runs on reliable OS only
 #
