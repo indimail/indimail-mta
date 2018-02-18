@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.22  2018-02-18 22:17:58+05:30  Cprogrammer
+# pass argument to do_post_upgrade()
+#
 # Revision 2.21  2018-02-18 21:42:17+05:30  Cprogrammer
 # update cron entries
 #
@@ -64,7 +67,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.21 2018-02-18 21:42:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.22 2018-02-18 22:17:58+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -84,6 +87,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
+echo "Running $1 - $Id: ilocal_upgrade.sh,v 2.22 2018-02-18 22:17:58+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -135,6 +139,6 @@ fi
 } 
 case $1 in
 	post|posttrans)
-	do_post_upgrade
+	do_post_upgrade $1
 	;;
 esac
