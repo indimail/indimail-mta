@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.451 2018-02-11 11:09:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.452 2018-02-21 22:30:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1006,8 +1006,25 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/sbin/vfstab
 %attr(755,root,qmail)                   %{_prefix}/sbin/vmoddomain
 %attr(755,root,qmail)                   %{_prefix}/sbin/vreorg
+%attr(755,root,qmail)                   %{_prefix}/bin/valias
+%attr(755,root,qmail)                   %{_prefix}/bin/vproxy
 %attr(755,root,qmail)                   %{_prefix}/sbin/osh
 %attr(755,root,qmail)                   %{_prefix}/sbin/postdel
+%attr(755,root,qmail)                   %{_prefix}/bin/ismaildup
+
+%attr(755,root,qmail)                   %{_prefix}/bin/mpack
+%attr(755,root,qmail)                   %{_prefix}/bin/munpack
+%attr(755,root,qmail)                   %{_prefix}/bin/fortune
+%attr(755,root,qmail)                   %{_prefix}/sbin/rot
+%attr(755,root,qmail)                   %{_prefix}/sbin/strfile
+%attr(755,root,qmail)                   %{_prefix}/sbin/unstr
+%attr(755,root,qmail)                   %{_prefix}/bin/flash
+%attr(755,root,qmail)                   %{_prefix}/bin/ripole
+
+%if %nonssd == 0
+%attr(755,root,qmail)                   %{_prefix}/sbin/nssd
+%attr(755,root,qmail)                   %{libexecdir}/check_getpw
+%endif
 
 %attr(755,root,qmail)                   %{libexecdir}/controlsync
 %attr(755,root,qmail)                   %{libexecdir}/mailzipper
@@ -1021,23 +1038,6 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/iupgrade.sh
 %verify (not md5 size mtime mode)       %{libexecdir}/ilocal_upgrade.sh
 
-%if %nonssd == 0
-%attr(755,root,qmail)                   %{_prefix}/sbin/nssd
-%attr(755,root,qmail)                   %{libexecdir}/check_getpw
-%endif
-
-%attr(755,root,qmail)                   %{_prefix}/bin/mpack
-%attr(755,root,qmail)                   %{_prefix}/bin/munpack
-%attr(755,root,qmail)                   %{_prefix}/bin/fortune
-%attr(755,root,qmail)                   %{_prefix}/sbin/rot
-%attr(755,root,qmail)                   %{_prefix}/sbin/strfile
-%attr(755,root,qmail)                   %{_prefix}/sbin/unstr
-
-%attr(755,root,qmail)                   %{_prefix}/bin/ismaildup
-%attr(755,root,qmail)                   %{_prefix}/bin/flash
-%attr(755,root,qmail)                   %{_prefix}/bin/ripole
-%attr(755,root,qmail)                   %{_prefix}/bin/valias
-%attr(755,root,qmail)                   %{_prefix}/bin/vproxy
 %attr(755,root,qmail)                   %{libexecdir}/vadddomain
 %attr(755,root,qmail)                   %{libexecdir}/vaddaliasdomain
 %attr(755,root,qmail)                   %{libexecdir}/vpasswd
@@ -1719,7 +1719,9 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   (
   echo "doing post upgrade activities"
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
-    /sbin/ldconfig
+    if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+      /sbin/ldconfig
+    fi
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $*
   fi
@@ -1741,17 +1743,12 @@ if [ $argv1 -eq 2 ] ; then # upgrade
 fi
 
 # Recreate ld.so links and cache
-if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
-  (
-    echo %{_libdir}
-    if [ -f %{mysqlPrefix}/%{_lib}/mysql/libmysqlclient.so ] ; then
-      echo %{mysqlPrefix}/%{_lib}/mysql
-    elif [ -f %{mysqlPrefix}/%{_lib}/libmysqlclient.so ] ; then
-      echo %{mysqlPrefix}/%{_lib}
-    fi
-  ) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
+    echo %{_libdir} > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
+  fi
+  /sbin/ldconfig
 fi
-/sbin/ldconfig
 
 echo "Doing post installation activities for the following"
 echo ""
@@ -2113,7 +2110,9 @@ if [ $argv1 -eq 1 ] ; then
   fi
   ) >> /tmp/indimail-setup.log
   echo "recreating ld.so cache"
-  /sbin/ldconfig
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    /sbin/ldconfig
+  fi
   exit 0
 fi
 
@@ -2173,8 +2172,10 @@ do
   %{__rm} -rf $log_dir/$i
 done
 
-echo "recreating ld.so cache"
-/sbin/ldconfig
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  echo "recreating ld.so cache"
+  /sbin/ldconfig
+fi
 
 if [ -x /usr/sbin/selinuxenabled ] ; then
   /usr/sbin/selinuxenabled
@@ -2210,7 +2211,9 @@ fi
 
 ### SCRIPTLET ###############################################################################
 %post -n libindimail
-/sbin/ldconfig
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  /sbin/ldconfig
+fi
 
 ### SCRIPTLET ###############################################################################
 %postun -n libindimail
@@ -2237,7 +2240,9 @@ echo "removing shared libraries"
 %{__rm} -f %{_libdir}/libindimail.so
 %{__rm} -f %{_libdir}/libindimail.so.2
 %{__rm} -f %{_libdir}/libindimail.so.2.0.0
-/sbin/ldconfig
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  /sbin/ldconfig
+fi
 
 %postun devel
 argv1=$1
