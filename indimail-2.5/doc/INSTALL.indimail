@@ -1,5 +1,5 @@
 File INSTALL.indimail, Version 2.5
-DATE: Sat Feb 17 21:47:59 IST 2018
+DATE: Wed Feb 28 08:59:43 IST 2018
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -1031,7 +1031,8 @@ the installation.
 
 ########### SECTION 5  ### Start Services ###############################
 5. Start your services
-   IndiMail puts shared libs in /usr/lib64. You need to put
+   IndiMail puts shared libs in /usr/lib64. In case this is not /usr/lib, or /usr/lib64,
+   You need to put
    /usr/lib64 in /etc/ld.so.conf.d/indimail.conf
 
    % su
