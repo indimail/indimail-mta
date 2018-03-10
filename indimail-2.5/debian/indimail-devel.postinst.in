@@ -39,13 +39,13 @@ if [ -d ${mandir}/man3 ] ; then
 	find ${mandir}/man3 -type f -exec gzip -q {} \;
 fi
 echo "recreating ld.so cache"
-if [ ! "@prefix@" = "/usr" ] ; then
+if [ ! "${prefix}" = "/usr" ] ; then
 if [ -d /etc/ld.so.conf.d ] ; then
 	(
-		if [ -d @prefix@/lib64 ] ; then
-			echo @prefix@/lib64
+		if [ -d ${prefix}/lib64 ] ; then
+			echo ${prefix}/lib64
 		else
-			echo @prefix@/lib
+			echo ${prefix}/lib
 		fi
 	) > /etc/ld.so.conf.d/indimail-devel-`uname -m`.conf
 fi

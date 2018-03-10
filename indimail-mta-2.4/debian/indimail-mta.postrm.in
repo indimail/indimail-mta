@@ -60,8 +60,10 @@ esac
 
 # we are doing upgrade or removal
 if [ " $1" = " upgrade" ] ; then
-	echo "recreating ld.so cache"
-	/sbin/ldconfig
+	if [ ! "${prefix}" = "/usr" ] ; then
+		echo "recreating ld.so cache"
+		/sbin/ldconfig
+	fi
 	exit 0
 fi
 
@@ -234,6 +236,8 @@ if [ " $1" = " purge" ] ; then
 	[ "$log_dir" != "/" ] && ${rm} -fr $log_dir
 	) >> /tmp/indimail-mta-setup.log 2>&1
 fi
-echo "recreating ld.so cache"
-/sbin/ldconfig
+if [ ! "${prefix}" = "/usr" ] ; then
+	echo "recreating ld.so cache"
+	/sbin/ldconfig
+fi
 exit 0

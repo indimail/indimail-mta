@@ -1031,7 +1031,8 @@ the installation.
 
 ########### SECTION 5  ### Start Services ###############################
 5. Start your services
-   IndiMail puts shared libs in @libdir@. You need to put
+   IndiMail puts shared libs in @libdir@. In case this is not /usr/lib, or /usr/lib64,
+   You need to put
    @libdir@ in /etc/ld.so.conf.d/indimail.conf
 
    % su

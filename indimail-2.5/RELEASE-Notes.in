@@ -71,3 +71,28 @@ https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indi
 ChangeLog
 
 Release 2.5 Start 27/01/2018
+* Wed Feb 21 2018 22:31:59 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+Release 2.5 Start 27/01/2018
+1.  moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
+    moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
+    moved system binaries to sbin
+2.  changed data type to TIMESTAMP from DATETIME for timestamp column in
+3.  updated flash menu for changes in program paths in indimail-mta
+4.  svctool - added option to refresh services
+5.  svctool - inlookup supervise/control fifo - allow svc -h permission for
+    vdeluser POST_HANDLE script
+6.  svctool - updated sql-mode in mysqld run file
+7.  svctool - refactored code for MySQL db creation
+8.  svctool - use .mylogin.cnf created by mysql_config_editor
+9.  svctool - use SHA-512 encryption for indisrvr admin password
+10. svctool - moved enabling/disabling of services to separate functions
+    --enable-service, --disable-service
+11. use /var/run/mysqld/mysqld.sock.tmp as socket for mysqldb creation
+12. svctool - use mysqld --verbose --check to check existence of a command
+    line option
+13. restrict userinfo privilege to root, indimail user/group
+14. use configure.ac to use mysql_optionsv(), if available, instead of mysql_options()
+15. svctool - inlookup service creation, activeDays default set to 7 days
+16. added permissions files for openSUSE
+17. create ld.so cache for indimail only when libdir is not /usr/lib or
+    /usr/lib64

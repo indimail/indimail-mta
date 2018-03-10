@@ -1,4 +1,4 @@
-* Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
+* Wed Feb 21 2018 22:31:59 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
 Release 2.5 Start 27/01/2018
 27/01/2018
 1.  moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
@@ -21,6 +21,11 @@ hostcntrl, lastauth
 17/02/2018
 12. restrict userinfo privilege to root, indimail user/group
 13. use configure.ac to use mysql_optionsv(), if available, instead of mysql_options()
+18/02/2018
+14. svctool - inlookup service creation, activeDays default set to 7 days
+21/02/2018
+15. create ld.so cache for indimail only when libdir is not /usr/lib or
+    /usr/lib64
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
