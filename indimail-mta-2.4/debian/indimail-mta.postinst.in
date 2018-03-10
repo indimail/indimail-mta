@@ -178,17 +178,19 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
   exit 0
 fi
 ${rm} -f /tmp/indimail-mta.install
-# Recreate ld.so links and cache
-echo "recreating ld.so cache"
-if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
+if [ ! "${prefix}" = "/usr" ] ; then
+	# Recreate ld.so links and cache
+	echo "recreating ld.so cache"
+	if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 	(
 		if [ -d /usr/lib64 ] ; then
 			echo /usr/lib64
 		else
 			echo /usr/lib
 		fi
-	) > ${sysconfdir}/ld.so.conf.d/indimail-`uname -m`.conf
+	) > ${sysconfdir}/ld.so.conf.d/indimail-mta-`uname -m`.conf
 	/sbin/ldconfig
+	fi
 fi
 
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
