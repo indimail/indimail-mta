@@ -1,5 +1,11 @@
 #!/bin/sh
 # $Log: iupgrade.sh,v $
+# Revision 2.10  2018-03-13 14:14:04+05:30  Cprogrammer
+# fixed syntax error
+#
+# Revision 2.9  2018-03-13 14:10:29+05:30  Cprogrammer
+# fixed rpm path
+#
 # Revision 2.8  2018-02-18 19:06:01+05:30  Cprogrammer
 # fix for opensuse rpm path
 #
@@ -25,7 +31,7 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: iupgrade.sh,v 2.8 2018-02-18 19:06:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: iupgrade.sh,v 2.10 2018-03-13 14:14:04+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
@@ -41,7 +47,7 @@ do_upgrade()
 do_pre()
 {
 	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /bin/rpm -o /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
@@ -63,7 +69,7 @@ do_pre()
 do_post()
 {
 	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
@@ -85,7 +91,7 @@ do_post()
 do_preun()
 {
 	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
@@ -116,7 +122,7 @@ do_preun()
 do_postun()
 {
 	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
@@ -141,7 +147,7 @@ do_postun()
 do_prettrans()
 {
 	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
@@ -163,7 +169,7 @@ do_posttrans()
 		OLD_PKG_VER=`cat /tmp/indimail-pkg.old`
 	fi
 	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o /usr/bin/rpm ] ; then
+		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
 		else
 			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
