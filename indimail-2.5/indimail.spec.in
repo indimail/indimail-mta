@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.452 2018-02-21 22:30:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.453 2018-03-19 15:53:15+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -278,9 +278,7 @@ Requires: coreutils grep /bin/sh glibc openssl
 # rpm -qp --queryformat %%{arch} some-file.rpm
 # rpm --showrc for all macros
 # rpm -qlp some-file.rpm
-%if %build_on_obs == 1
 Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
-%endif
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 
 %if 0%{?suse_version}
