@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.145 2018-02-28 08:56:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.146 2018-03-19 15:51:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -135,6 +135,10 @@ NoSource: 3
 %if %nolibsrs2 == 0
 NoSource: 4
 %endif
+NoSource: 5
+NoSource: 6
+NoSource: 7
+NoSource: 8
 %endif
 
 URL: http://www.indimail.org
@@ -211,9 +215,9 @@ BuildRequires: db4-devel
 # rpm --showrc for all macros
 # rpm -qlp some-file.rpm
 %if %build_on_obs == 1
-Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 %endif
+Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
 #
