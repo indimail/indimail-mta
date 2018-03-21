@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.13  2018-03-21 08:08:50+05:30  Cprogrammer
+ * use conditional defines from configure.ac to compile in mysql options
+ *
  * Revision 2.12  2018-03-20 12:16:13+05:30  Cprogrammer
  * added #ifdef statements for conditional compilation of setting SSL/TLS options
  *
@@ -41,7 +44,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.12 2018-03-20 12:16:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.13 2018-03-21 08:08:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -113,55 +116,61 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 
 	/*- SSL options */
 
-#ifdef MYSQL_OPT_SSL_CA
+#ifdef HAVE_MYSQL_OPT_SSL_CA
 	/*-
 	 * MYSQL_OPT_SSL_CA - The path name of the Certificate Authority (CA) certificate file.
 	 * This option, if used, must specify the same certificate used by the server.
+	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CA")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CA, ptr))
 		return (1);
 #endif
-#ifdef MYSQL_OPT_SSL_CAPATH
+#ifdef HAVE_MYSQL_OPT_SSL_CAPATH
 	/*-
 	 * MYSQL_OPT_SSL_CAPATH
 	 * The path name of the directory that contains trusted SSL CA certificate files.
+	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CAPATH")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CAPATH, ptr))
 		return (1);
 #endif
-#ifdef MYSQL_OPT_SSL_CERT
+#ifdef HAVE_MYSQL_OPT_SSL_CERT
 	/*-
 	 * MYSQL_OPT_SSL_CERT
 	 * The path name of the client public key certificate file.
+	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CERT")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CERT, ptr))
 		return (1);
 #endif
-#ifdef MYSQL_OPT_SSL_CIPHER
+#ifdef HAVE_MYSQL_OPT_SSL_CIPHER
 	/*-
 	 * MYSQL_OPT_SSL_CIPHER
 	 * The list of permitted ciphers for SSL encryption.
+	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CIPHER")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CIPHER, ptr))
 		return (1);
 #endif
-#ifdef MYSQL_OPT_SSL_CRL
+#ifdef HAVE_MYSQL_OPT_SSL_CRL
 	/*
 	 * MYSQL_OPT_SSL_CRL (argument type: char *)
 	 * The path name of the file containing certificate revocation lists.
+	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CRL")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CRL, ptr))
 		return (1);
 #endif
-#ifdef MYSQL_OPT_SSL_CRLPATH
+#ifdef HAVE_MYSQL_OPT_SSL_CRLPATH
 	/*-
 	 * MYSQL_OPT_SSL_CRLPATH (argument type: char *)
 	 * The path name of the directory that contains files containing certificate revocation lists.
+	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CRLPATH")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CRLPATH, ptr))
 		return (1);
 #endif
-#ifdef MYSQL_OPT_SSL_ENFORCE
+#ifdef HAVE_MYSQL_OPT_SSL_ENFORCE
 	/*-
 	 * MYSQL_OPT_SSL_ENFORCE (argument type: my_bool *)
 	 *
@@ -173,7 +182,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if ((ptr = getenv("MYSQL_OPT_SSL_ENFORCE")) && int_mysql_options(mysql, MYSQL_OPT_SSL_ENFORCE, ptr))
 		return (1);
 #endif
-#ifdef MYSQL_OPT_SSL_VERIFY_SERVER_CERT
+#ifdef HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT
 	/*-
 	 * MYSQL_OPT_SSL_VERIFY_SERVER_CERT (argument type: my_bool *)
 	 * Enable or disable verification of the server's Common Name identity in its certificate
@@ -186,11 +195,11 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_VERIFY_SERVER_CERT"))) {
 		tmpv_c = atoi(ptr) ? 1 : 0;
-		if (int_mysql_options(mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, tmpv_c))
+		if (int_mysql_options(mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &tmpv_c))
 			return (1);
 	}
 #endif
-#ifdef MYSQL_OPT_SSL_MODE
+#ifdef HAVE_MYSQL_OPT_SSL_MODE
 	/*-
 	 * MYSQL_OPT_SSL_MODE (argument type: unsigned int *)
 	 *
@@ -206,13 +215,16 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 			return (1);
 	}
 #endif
-#ifdef MYSQL_OPT_SSL_KEY
+#ifdef HAVE_MYSQL_OPT_SSL_KEY
 	/*-
 	 * MYSQL_OPT_SSL_KEY (argument type: char *)
 	 * The path name of the client private key file.
+	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_KEY")) && int_mysql_options(mysql, MYSQL_OPT_SSL_KEY, ptr))
 		return (1);
+#endif
+#ifdef HAVE_MYSQL_OPT_TLS_VERSION
 	/*-
 	 * MYSQL_OPT_TLS_VERSION (argument type: char *)
 	 * The protocols permitted by the client for encrypted connections.
