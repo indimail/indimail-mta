@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.27  2018-03-21 11:13:09+05:30  Cprogrammer
+ * added error_mysql_options_str() function to display the exact mysql_option() error
+ *
  * Revision 2.26  2017-03-13 14:12:07+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -111,7 +114,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.26 2017-03-13 14:12:07+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.27 2018-03-21 11:13:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -214,17 +217,17 @@ vauth_open(char *dbhost)
 	if (!isopen_cntrl || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
 	{
 #endif
-		if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))
+		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags)))
 		{
-			fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+			fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return(-1);
 		}
 		if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd,
 			mysql_database, mysqlport, mysql_socket, flags)))
 		{
-			if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))
+			if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags)))
 			{
-				fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+				fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 				return(-1);
 			}
 			if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd, NULL,

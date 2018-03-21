@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.38  2018-03-21 11:13:02+05:30  Cprogrammer
+ * added error_mysql_options_str() function to display the exact mysql_option() error
+ *
  * Revision 2.37  2017-04-28 01:06:05+05:30  Cprogrammer
  * fixed infinite loop if hostcntrl was empty
  *
@@ -204,7 +207,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.37 2017-04-28 01:06:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.38 2018-03-21 11:13:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -485,16 +488,16 @@ open_central_db(char *dbhost)
 	 */
 	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
 	{
-		if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))
+		if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags)))
 		{
-			fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+			fprintf(stderr, "mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return(-1);
 		}
 		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, flags)))
 		{
-			if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))
+			if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags)))
 			{
-				fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+				fprintf(stderr, "mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 				return(-1);
 			}
 			if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, NULL, mysqlport, cntrl_socket, flags)))

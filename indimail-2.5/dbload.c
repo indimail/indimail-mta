@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.21  2018-03-21 11:12:58+05:30  Cprogrammer
+ * added error_mysql_options_str() function to display the exact mysql_option() error
+ *
  * Revision 2.20  2017-03-13 13:42:17+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -74,7 +77,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.20 2017-03-13 13:42:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.21 2018-03-21 11:12:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -90,9 +93,9 @@ OpenDatabases()
 {
 	static MYSQL    dummy; /*- some bug in mysql. Do mysql_init() to prevent it */
 	MYSQL         **mysqlptr;
-	int             count, idx;
-	static int      total;
 	DBINFO        **ptr;
+	static int      total;
+	int             count, idx;
 	int             fd[3];
 	extern int      loadDbinfoTotal();
 
@@ -215,8 +218,8 @@ int
 connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 {
 	char            mcdFile[MAX_BUFF];
-	char           *sysconfdir, *controldir, *mcdfile, *server;
-	int             maxattempts, retry_interval;
+	char           *sysconfdir, *controldir, *mcdfile, *server, *str;
+	int             maxattempts, retry_interval, count;
 	unsigned int    flags;
 
 	if ((*ptr)->failed_attempts)
@@ -253,9 +256,9 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		fprintf(stderr, "MYSQL Init Error: %s@%s\n", (*ptr)->database, (*ptr)->server);
 		return (1);
 	}
-	if (set_mysql_options(*mysqlptr, "indimail.cnf", "indimail", &flags))
+	if ((count = set_mysql_options(*mysqlptr, "indimail.cnf", "indimail", &flags)))
 	{
-		fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+		fprintf(stderr, "mysql_options: %s\n", (str = error_mysql_options_str(count)) ? str : "unknown error");
 		return(-1);
 	}
 	if (islocalif((*ptr)->server) || !strncmp((*ptr)->server, "localhost", 10))

@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.226  2018-03-21 11:13:12+05:30  Cprogrammer
+ * added error_mysql_options_str() function to display the exact mysql_option() error
+ *
  * Revision 2.225  2018-02-05 12:26:05+05:30  Cprogrammer
  * changed datatype of timestamp column in hostcntrl, lastauth, userquota to TIMESTAMP from DATETIME
  *
@@ -991,7 +994,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.225 2018-02-05 12:26:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.226 2018-03-21 11:13:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1920,6 +1923,7 @@ int             vadd_atrn_map(char *, char *, char *);
 int             vdel_atrn_map(char *, char *, char *);
 int             vupd_atrn_map(char *, char *, char *, char *);
 int             set_mysql_options(MYSQL *, char *, char *, unsigned int *);
+char           *error_mysql_options_str(unsigned int);
 int             vauth_renamedomain(char *, char *, char *);
 int             vset_lastdeliver(char *, char *, int);
 int             disable_mysql_escape(int);

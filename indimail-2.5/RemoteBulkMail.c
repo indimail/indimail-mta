@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 2.12  2018-03-21 11:12:52+05:30  Cprogrammer
+ * added error_mysql_options_str() function to display the exact mysql_option() error
+ *
  * Revision 2.11  2016-05-17 14:56:36+05:30  Cprogrammer
  * use control directory defined by configure
  *
@@ -50,7 +53,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.11 2016-05-17 14:56:36+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.12 2018-03-21 11:12:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -161,9 +164,9 @@ bulk_host_connect()
 		if (!port && !(port = (char *) getenv("BULK_VPORT")))
 			port = "0";
 		mysql_init(&bulkMySql);
-		if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))
+		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags)))
 		{
-			fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+			fprintf(stderr, "mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return ((MYSQL *) 0);
 		}
 		bulk_port = atoi(port);
