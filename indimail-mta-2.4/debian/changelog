@@ -7,5 +7,6 @@ indimail-mta (2.4-1) unstable; urgency=low
   * svctool - use SHA-512 encryption for indisrvr admin password
   * svctool - moved enabling/disabling of services to separate functions --enable-service, --disable-service
   * create ld.so cache only when libdir is not /usr/lib or /usr/lib64
+  * svctool - added --require-secure-transport command line option for mysqld
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 13 Feb 2018 17:06:22 +0530
