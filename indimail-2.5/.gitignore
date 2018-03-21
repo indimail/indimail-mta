@@ -220,4 +220,6 @@ missing
 stamp-h1
 doc/RELEASE-Notes
 doc/INSTALL.indimail
+doc/INSTALL-RPM
+doc/README-CLUSTER
 debian/indimail.dsc
