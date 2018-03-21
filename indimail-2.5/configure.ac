@@ -24,9 +24,8 @@ dnl Checks for header files.
 AC_ISC_POSIX
 AC_HEADER_STDC
 AC_CHECK_HEADERS(crypt.h openssl/evp.h inttypes.h)
-AC_CHECK_HEADERS(unistd.h dirent.h fnmatch.h stdarg.h fcntl.h limits.h udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/wait.h xcoff.h)
-AC_EGREP_HEADER(in_addr_t, netinet/in.h, AC_DEFINE_UNQUOTED(HAVE_IN_ADDR_T,$HAVE_IN_ADDR_T,""))
-AC_EGREP_HEADER(MYSQL_OPT_LOCAL_INFILE, $mysql_incdir/mysql.h, AC_DEFINE_UNQUOTED(HAVE_LOCAL_INFILE, $HAVE_LOCAL_INFILE,""))
+AC_CHECK_HEADERS(unistd.h dirent.h fnmatch.h stdarg.h fcntl.h limits.h udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/wait.h)
+AC_EGREP_HEADER(in_addr_t, netinet/in.h, AC_DEFINE(HAVE_IN_ADDR_T, 1, "have in_addr_t data type"))
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -895,6 +894,7 @@ mysql_incdir="$enableval",
 	fi
 ])
 
+
 mysql_libdir=""
 for f in /usr/local/mysql/lib64/mysql /usr/local/mysql/lib64 /usr/local/mysql/lib/mysql /usr/local/mysql/lib /usr/lib/mysql
 do
@@ -933,10 +933,14 @@ mysqlbindir="$enableval",
 ])
 mysql_prefix=`dirname $mysqlbindir`
 else
-	if test -d $mysql_prefix/include
-	then
-		mysql_incdir=$mysql_prefix/include
-	fi
+	for f in $mysql_prefix/include/mysql.h $mysql_prefix/include/mysql/mysql.h
+	do
+		if test -f $f
+		then
+			mysql_incdir=`dirname $f`
+			break
+		fi
+	done
 
 	if test -d $mysql_prefix/lib64/mysql
 	then
@@ -955,6 +959,19 @@ else
 	fi
 	mysqlbindir=$mysql_prefix/bin
 fi
+AC_EGREP_HEADER(MYSQL_OPT_LOCAL_INFILE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_LOCAL_INFILE, 1, "local inflie support"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_VERIFY_SERVER_CERT, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT, 1, "verify server cert"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_KEY, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_KEY, 1, "ssl key"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CERT, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CERT, 1, "ssl cert"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CA, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CA, 1, "ssl ca"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CAPATH, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CAPATH, 1, "ssl capath"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CIPHER, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CIPHER, 1, "ssl cipher"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CRL, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CRL, 1, "ssl cert revocation list"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CRLPATH, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CRLPATH, 1, "ssl cert revocation list path"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_ENFORCE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_ENFORCE, 1, "enforce ssl/tls"))
+AC_EGREP_HEADER(MYSQL_OPT_TLS_VERSION, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_TLS_VERSION, 1, "tls version"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_MODE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_MODE, 1, "ssl mmode"))
+
 saveLIBS="$LIBS"
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
