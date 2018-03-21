@@ -14,5 +14,8 @@ indimail (@version@-1) unstable; urgency=low
   * use configure.ac to use mysql_optionsv(), if available, instead of mysql_options()
   * svctool - inlookup service creation, activeDays default set to 7 days
   * create ld.so cache for indimail only when libdir is not /usr/lib or /usr/lib64
+  * set_mysql_options.c - set MySQL options for SSL/TLS connections
+  * added error_mysql_options_str() function to display the exact mysql_option() error
+  * svctool - added --require-secure-transport command line option for mysqld
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 21 Feb 2018 22:31:59 +0530

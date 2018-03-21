@@ -1,4 +1,4 @@
-* Wed Feb 21 2018 22:31:59 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+* Wed Mar 20 2018 11:26:39 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
 Release 2.5 Start 27/01/2018
 27/01/2018
 1.  moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
@@ -26,6 +26,12 @@ hostcntrl, lastauth
 21/02/2018
 15. create ld.so cache for indimail only when libdir is not /usr/lib or
     /usr/lib64
+20/03/2018
+16. set_mysql_options.c - set MySQL options for SSL/TLS connections
+21/03/2018
+17. added error_mysql_options_str() function to display the exact
+    mysql_option() error
+18. svctool - added --require-secure-transport command line option for mysqld
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
