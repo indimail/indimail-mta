@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.14  2018-03-21 11:11:05+05:30  Cprogrammer
+ * added error_mysql_options_str() function to display the exact mysql_option() error
+ *
  * Revision 2.13  2018-03-21 08:08:50+05:30  Cprogrammer
  * use conditional defines from configure.ac to compile in mysql options
  *
@@ -44,8 +47,34 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.13 2018-03-21 08:08:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.14 2018-03-21 11:11:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
+
+#define max_mysql_option_err_num 21
+static char *mysql_option_err[] = {
+	"No Error",
+	"MYSQL_INIT_COMMAND",
+	"MYSQL_READ_DEFAULT_FILE",
+	"MYSQL_READ_DEFAULT_GROUP",
+	"MYSQL_OPT_CONNECT_TIMEOUT",
+	"MYSQL_OPT_READ_TIMEOUT",
+	"MYSQL_OPT_WRITE_TIMEOUT",
+	"MYSQL_SET_CLIENT_IP",
+	"MYSQL_OPT_RECONNECT",
+	"MYSQL_OPT_PROTOCOL",
+	"MYSQL_OPT_SSL_CA",
+	"MYSQL_OPT_SSL_CAPATH",
+	"MYSQL_OPT_SSL_CERT",
+	"MYSQL_OPT_SSL_CIPHER",
+	"MYSQL_OPT_SSL_CRL",
+	"MYSQL_OPT_SSL_CRLPATH",
+	"MYSQL_OPT_SSL_ENFORCE",
+	"MYSQL_OPT_SSL_VERIFY_SERVER_CERT",
+	"MYSQL_OPT_SSL_MODE",
+	"MYSQL_OPT_SSL_KEY",
+	"MYSQL_OPT_TLS_VERSION",
+	0
+};
 
 int
 int_mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg)
@@ -55,6 +84,12 @@ int_mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg)
 #else
 	return (mysql_options(mysql, option, arg));
 #endif
+}
+
+char *
+error_mysql_options_str(unsigned int errnum)
+{
+	return ((errnum > max_mysql_option_err_num) ? 0 : mysql_option_err[errnum]);
 }
 
 int
@@ -91,28 +126,28 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if (init_cmd && int_mysql_options(mysql, MYSQL_INIT_COMMAND, init_cmd))
 		return (1);
 	if (int_mysql_options(mysql, MYSQL_READ_DEFAULT_FILE, default_file))
-		return (1);
+		return (2);
 	if (int_mysql_options(mysql, MYSQL_READ_DEFAULT_GROUP, default_group))
-		return (1);
+		return (3);
 	if (int_mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &connect_timeout))
-		return (1);
+		return (4);
 	if (int_mysql_options(mysql, MYSQL_OPT_READ_TIMEOUT, (char *) &read_timeout))
-		return (1);
+		return (5);
 	if (int_mysql_options(mysql, MYSQL_OPT_WRITE_TIMEOUT, (char *) &write_timeout))
-		return (1);
+		return (6);
 	if (getenv("MYSQL_SET_CLIENT_IP") && 
 			int_mysql_options(mysql, MYSQL_SET_CLIENT_IP, set_client_ip))
-		return (1);
+		return (7);
 	if (getenv("MYSQL_OPT_RECONNECT") &&
 			int_mysql_options(mysql, MYSQL_OPT_RECONNECT, (char *) &o_reconnect))
-		return (1);
+		return (8);
 	/*-
 	 * enum mysql_protocol_type 
 	 * MYSQL_PROTOCOL_DEFAULT, MYSQL_PROTOCOL_TCP, MYSQL_PROTOCOL_SOCKET,
 	 * MYSQL_PROTOCOL_PIPE, MYSQL_PROTOCOL_MEMORY
 	 */
 	if (int_mysql_options(mysql, MYSQL_OPT_PROTOCOL, (char *) &protocol))
-		return (1);
+		return (9);
 
 	/*- SSL options */
 
@@ -123,7 +158,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CA")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CA, ptr))
-		return (1);
+		return (10);
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_CAPATH
 	/*-
@@ -132,7 +167,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CAPATH")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CAPATH, ptr))
-		return (1);
+		return (11);
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_CERT
 	/*-
@@ -141,7 +176,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CERT")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CERT, ptr))
-		return (1);
+		return (12);
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_CIPHER
 	/*-
@@ -150,7 +185,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CIPHER")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CIPHER, ptr))
-		return (1);
+		return (13);
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_CRL
 	/*
@@ -159,7 +194,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CRL")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CRL, ptr))
-		return (1);
+		return (14);
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_CRLPATH
 	/*-
@@ -168,7 +203,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_CRLPATH")) && int_mysql_options(mysql, MYSQL_OPT_SSL_CRLPATH, ptr))
-		return (1);
+		return (15);
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_ENFORCE
 	/*-
@@ -180,7 +215,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * Instead, use MYSQL_OPT_SSL_MODE with a value of SSL_MODE_REQUIRED.
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_ENFORCE")) && int_mysql_options(mysql, MYSQL_OPT_SSL_ENFORCE, ptr))
-		return (1);
+		return (16);
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT
 	/*-
@@ -196,7 +231,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if ((ptr = getenv("MYSQL_OPT_SSL_VERIFY_SERVER_CERT"))) {
 		tmpv_c = atoi(ptr) ? 1 : 0;
 		if (int_mysql_options(mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &tmpv_c))
-			return (1);
+			return (17);
 	}
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_MODE
@@ -212,7 +247,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if ((ptr = getenv("MYSQL_OPT_SSL_MODE"))) {
 		ssl_mode = atoi(ptr);
 		if (int_mysql_options(mysql, MYSQL_OPT_SSL_MODE, &ssl_mode))
-			return (1);
+			return (18);
 	}
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_KEY
@@ -222,7 +257,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * community/mariadb
 	 */
 	if ((ptr = getenv("MYSQL_OPT_SSL_KEY")) && int_mysql_options(mysql, MYSQL_OPT_SSL_KEY, ptr))
-		return (1);
+		return (19);
 #endif
 #ifdef HAVE_MYSQL_OPT_TLS_VERSION
 	/*-
@@ -236,7 +271,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * When compiled using the bundled version of yaSSL, MySQL supports the TLSv1 and TLSv1.1 protocols.
 	 */
 	if ((ptr = getenv("MYSQL_OPT_TLS_VERSION")) && int_mysql_options(mysql, MYSQL_OPT_TLS_VERSION, ptr))
-		return (1);
+		return (20);
 #endif
 	return (0);
 }
