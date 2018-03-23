@@ -1,5 +1,8 @@
 /*
  * $Log: mysql_query.c,v $
+ * Revision 2.9  2018-03-23 11:09:03+05:30  Cprogrammer
+ * use mysql_real_escape_string only if ENABLE_MYSQL_ESCAPE env variable is defined
+ *
  * Revision 2.8  2010-04-30 14:43:12+05:30  Cprogrammer
  * fixed illegal free of pointer returned by replacestr()
  *
@@ -32,7 +35,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: mysql_query.c,v 2.8 2010-04-30 14:43:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: mysql_query.c,v 2.9 2018-03-23 11:09:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char    *replacestr(char *, char *, char *);
@@ -45,23 +48,20 @@ _mysql_Query(MYSQL *mysql, char *query_str)
 	int             i, ret, len, end;
 	char           *ptr, *rptr;
 
-	if (_es_opt)
-		return(mysql_query(mysql, query_str));
-	for (i = 0,ptr = query_str;*ptr;ptr++,i++);
-	len = ++i;
+	ptr = getenv("ENABLE_MYSQL_ESCAPE");
+	if (!ptr || _es_opt)
+		return (mysql_query(mysql, query_str));
+	for (i = 0, ptr = query_str; *ptr; ptr++, i++);
+	len = i;
 	i = (i * 2) + 1;
 	errno = 0;
 	if (!(ptr = (char *) malloc(sizeof(char) * i)))
 		return (-1);
 	end = mysql_real_escape_string(mysql, ptr, query_str, len);
 	ptr[end] = 0;
-	ptr[end - 1] = 0;
 	ret = mysql_query(mysql, (const char *) ptr);
-	if (mysql_errno(mysql) == ER_PARSE_ERROR) /*- NO_BACKSLASH_ESCAPES stupidity */
-	{
-		ptr[end - 2] = 0;
-		if (!(rptr = replacestr(ptr, "\\\"", "'")))
-		{
+	if (mysql_errno(mysql) == ER_PARSE_ERROR) { /*- NO_BACKSLASH_ESCAPES stupidity */
+		if (!(rptr = replacestr(ptr, "\\\"", "'"))) {
 			i = errno;
 			free(ptr);
 			errno = i;
