@@ -99,4 +99,7 @@ Release 2.5 Start 27/01/2018
 18. set_mysql_options.c - set MySQL options for SSL/TLS connections
 19. added error_mysql_options_str() function to display the exact
     mysql_option() error
-20. added --require-secure-transport command line option for mysqld
+20. added --ssl, --require-secure-transport command line option for mysqld
+21. use mysql_real_escape_string only if ENABLE_MYSQL_ESCAPE env variable is defined
+22. svctool - added SSL/TLS paramters for MySQL service, config
+23. ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent

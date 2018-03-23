@@ -31,7 +31,11 @@ hostcntrl, lastauth
 21/03/2018
 17. added error_mysql_options_str() function to display the exact
     mysql_option() error
-18. svctool - added --require-secure-transport command line option for mysqld
+18. svctool - added --ssl, --require-secure-transport command line option for mysqld
+23/03/2018
+19. use mysql_real_escape_string only if ENABLE_MYSQL_ESCAPE env variable is defined
+20. svctool - added SSL/TLS paramters for MySQL service, config
+21. ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017

@@ -16,6 +16,9 @@ indimail (@version@-1) unstable; urgency=low
   * create ld.so cache for indimail only when libdir is not /usr/lib or /usr/lib64
   * set_mysql_options.c - set MySQL options for SSL/TLS connections
   * added error_mysql_options_str() function to display the exact mysql_option() error
-  * svctool - added --require-secure-transport command line option for mysqld
+  * svctool - added --ssl, --require-secure-transport command line option for mysqld
+  * use mysql_real_escape_string only if ENABLE_MYSQL_ESCAPE env variable is defined
+  * svctool - added SSL/TLS paramters for MySQL service, config
+  * ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 21 Feb 2018 22:31:59 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 23 Feb 2018 11:11:11 +0530

@@ -13,7 +13,7 @@ Release 2.4 Start 31/01/2018
 21/02/2018
 7.  create ld.so cache only when libdir is not /usr/lib or /usr/lib64
 21/03/2018
-8.  svctool - added --require-secure-transport command line option for mysqld
+8.  svctool - added --ssl, --require-secure-transport command line option for mysqld
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017
