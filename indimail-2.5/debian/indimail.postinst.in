@@ -236,7 +236,8 @@ echo "Creating Database/Service for MySQL"
 # MySQL Config Creation
 if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
 	error=`ps -e|grep mysqld|grep -v grep|wc -l`
-	${prefix}/sbin/svctool --config=mysql --mysqlPrefix=${mysqlPrefix} --mysqlsocket=${mysqlSocket}
+	${prefix}/sbin/svctool --config=mysql --mysqlPrefix=${mysqlPrefix} --mysqlsocket=${mysqlSocket} \
+		--databasedir=${indimaildir}/mysqldb
 	# MySQL Database Creation
 	${prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=${mysqlPrefix} \
     	--databasedir=${indimaildir}/mysqldb --base_path=${mbase} --mysqlsocket="${mysqlSocket}".tmp

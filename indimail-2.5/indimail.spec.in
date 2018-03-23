@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.453 2018-03-19 15:53:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.454 2018-03-23 12:24:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1790,7 +1790,8 @@ if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
   error=`ps -e|grep mysqld|grep -v grep|wc -l` # another mysqld instance running ?
   echo "Creating Database/Service for MySQL"
   # MySQL Config Creation
-  %{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --mysqlsocket=%{mysqlSocket}
+  %{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --mysqlsocket=%{mysqlSocket} \
+	  --databasedir=%{indimaildir}/mysqldb
   # MySQL Database Creation
   %{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
       --databasedir=%{indimaildir}/mysqldb --base_path=%{mbase} --mysqlsocket="%{mysqlSocket}".tmp
