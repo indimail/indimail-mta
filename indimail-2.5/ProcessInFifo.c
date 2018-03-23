@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.49  2018-03-23 12:48:22+05:30  Cprogrammer
+ * avoid connection to hostcntrl if host.cntrl is absent
+ *
  * Revision 2.48  2018-01-08 10:46:52+05:30  Cprogrammer
  * create lastauth table if not existing
  *
@@ -159,7 +162,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.48 2018-01-08 10:46:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.49 2018-03-23 12:48:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -593,12 +596,6 @@ ProcessInFifo(int instNum)
 			snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", sysconfdir, controldir);
 		else
 			snprintf(host_path, MAX_BUFF, "%s/host.cntrl", controldir);
-		if (access(host_path, F_OK)) {
-			if (relative)
-				snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", sysconfdir, controldir);
-			else
-				snprintf(host_path, MAX_BUFF, "%s/host.mysql", controldir);
-		}
 		if (access(host_path, F_OK))
 			cntrl_host = 0;
 		else {
@@ -617,19 +614,21 @@ ProcessInFifo(int instNum)
 				cntrl_host = tmpbuf;
 			}
 		}
-		if (!isopen_cntrl && open_central_db(cntrl_host)) {
-			fprintf(stderr, "InLookup: Unable to open central db\n");
-			signal(SIGPIPE, pstat);
-			return (-1);
-		}
-		if (mysql_ping(&mysql[0])) {
-			fprintf(stderr, "mysql_ping: %s: Reconnecting to central db...\n", mysql_error(&mysql[0]));
-			mysql_close(&mysql[0]);
-			isopen_cntrl = 0;
-			if (open_central_db(cntrl_host)) {
+		if (cntrl_host) {
+			if (!isopen_cntrl && open_central_db(cntrl_host)) {
 				fprintf(stderr, "InLookup: Unable to open central db\n");
 				signal(SIGPIPE, pstat);
 				return (-1);
+			}
+			if (mysql_ping(&mysql[0])) {
+				fprintf(stderr, "mysql_ping: %s: Reconnecting to central db...\n", mysql_error(&mysql[0]));
+				mysql_close(&mysql[0]);
+				isopen_cntrl = 0;
+				if (open_central_db(cntrl_host)) {
+					fprintf(stderr, "InLookup: Unable to open central db\n");
+					signal(SIGPIPE, pstat);
+					return (-1);
+				}
 			}
 		}
 #endif
