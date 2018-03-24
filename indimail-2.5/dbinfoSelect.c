@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoSelect.c,v $
+ * Revision 2.7  2018-03-24 17:05:02+05:30  Cprogrammer
+ * display "auto" when filename is null
+ *
  * Revision 2.6  2010-03-07 09:28:11+05:30  Cprogrammer
  * check return value of is_distributed_domain for error
  *
@@ -22,7 +25,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.6 2010-03-07 09:28:11+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.7 2018-03-24 17:05:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -56,7 +59,7 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 		{
 			first_flag++;
 			printf("%s %s %d %s %s %d %s %s %s\n", 
-				filename, (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
+				filename ? filename : "auto", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
 				(*rhostsptr)->server, (*rhostsptr)->mdahost, (*rhostsptr)->port, (*rhostsptr)->database,
 				(*rhostsptr)->user, (*rhostsptr)->password);
 			continue;
