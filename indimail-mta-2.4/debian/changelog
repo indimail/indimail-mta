@@ -8,5 +8,6 @@ indimail-mta (2.4-1) unstable; urgency=low
   * svctool - moved enabling/disabling of services to separate functions --enable-service, --disable-service
   * create ld.so cache only when libdir is not /usr/lib or /usr/lib64
   * svctool - added --ssl, --require-secure-transport command line option for mysqld
+  * svctool - create env variable VIRTUAL_PKG_LIB with libindimail.so to provide indimail functionality
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 13 Feb 2018 17:06:22 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 24 Mar 2018 23:29:29 +0530
