@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.16  2018-03-24 22:25:43+05:30  Cprogrammer
+ * use mysql_ssl_set() for mariadb ssl connection issue
+ *
  * Revision 2.15  2018-03-24 17:09:54+05:30  Cprogrammer
  * shortened env variable MYSQL_OPT_SSL_VERIFY_SERVER_CERT to MYSQL_OPT_SSL_VERIFY_CERT
  *
@@ -50,7 +53,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.15 2018-03-24 17:09:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.16 2018-03-24 22:25:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -104,6 +107,9 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	char            temp[4];
 	char            o_reconnect, tmpv_c;
 	unsigned int    protocol, connect_timeout, read_timeout, write_timeout, ssl_mode;
+#ifdef LIBMARIADB
+	char           *cipher;
+#endif
 
 	*flags = 0;
 	if (getenv("CLIENT_COMPRESS"))
@@ -152,6 +158,10 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 		return (9);
 
 	/*- SSL options */
+#ifdef LIBMARIADB
+	getEnvConfigStr(&cipher, "CIPHER", 0); /*- DHE-RSA-AES256-SHA */
+	mysql_ssl_set(mysql, 0, 0, 0, 0, cipher); /*- this always returns 0 */
+#endif
 
 #ifdef HAVE_MYSQL_OPT_SSL_CA
 	/*-
