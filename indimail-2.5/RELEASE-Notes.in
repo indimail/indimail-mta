@@ -104,3 +104,4 @@ Release 2.5 Start 27/01/2018
 22. svctool - added SSL/TLS paramters for MySQL service, config
 23. ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
 24. set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when using libmariadb
+25. svctool - create env variable VIRTUAL_PKG_LIB with libindimail.so to provide indimail functionality
