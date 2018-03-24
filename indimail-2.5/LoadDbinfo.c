@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.45  2018-03-24 22:24:51+05:30  Cprogrammer
+ * idented code
+ *
  * Revision 2.44  2017-03-13 14:04:14+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -146,7 +149,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.44 2017-03-13 14:04:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.45 2018-03-24 22:24:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -202,66 +205,54 @@ LoadDbInfo_TXT(int *total)
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if (*mcdfile == '/' || *mcdfile == '.')
 		snprintf(mcdFile, MAX_BUFF, "%s", mcdfile);
-	else {
-		if (relative)
-			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
-		else
-			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
-	}
-	if (stat(mcdFile, &statbuf))
-	{
+	else
+	if (relative)
+		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
+	else
+		snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
+	if (stat(mcdFile, &statbuf)) {
 		if (verbose)
 			fprintf(stderr, "LoadDbInfo_TXT: stat: %s: %s\n", mcdFile, strerror(errno));
 		sync_file = 1;
 		file_time = 0l;
-	} else
-	{
+	} else {
 		file_time = statbuf.st_mtime;
 		if (verbose)
 			printf("File UNIX  %s Modification Time %s", mcdFile, ctime(&file_time));
 	}
-	if (open_master())
-	{
-		if (sync_file)
-		{
+	if (open_master()) {
+		if (sync_file) {
 			fprintf(stderr, "LoadDbInfo_TXT: Failed to open Master Db\n");
 			return ((DBINFO **) 0);
 		} else
 			return (LoadDbInfo_TXT_internal(total));
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE, "select UNIX_TIMESTAMP(timestamp) from dbinfo where filename=\"%s\"", mcdFile);
-	if (mysql_query(&mysql[0], SqlBuf) && ((err = mysql_errno(&mysql[0])) != ER_NO_SUCH_TABLE))
-	{
+	if (mysql_query(&mysql[0], SqlBuf) && ((err = mysql_errno(&mysql[0])) != ER_NO_SUCH_TABLE)) {
 		fprintf(stderr, "LoadDbInfo_TXT: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		if (sync_file)
 			return ((DBINFO **) 0);
 		else
 			return (LoadDbInfo_TXT_internal(total));
 	}
-	if (err == ER_NO_SUCH_TABLE)
-	{
-		if (create_table(ON_MASTER, "dbinfo", DBINFO_TABLE_LAYOUT))
-		{
+	if (err == ER_NO_SUCH_TABLE) {
+		if (create_table(ON_MASTER, "dbinfo", DBINFO_TABLE_LAYOUT)) {
 			if (sync_file)
 				return ((DBINFO **) 0);
 			else
 				return (LoadDbInfo_TXT_internal(total));
 		}
 		sync_mcd = 1;
-	} else 
-	{
-		if (!(res = mysql_store_result(&mysql[0])))
-		{
+	} else {
+		if (!(res = mysql_store_result(&mysql[0]))) {
 			(void) fprintf(stderr, "LoadDbInfo_TXT: mysql_store_result: %s\n", mysql_error(&mysql[0]));
 			if (sync_file)
 				return ((DBINFO **) 0);
 			else
 				return (LoadDbInfo_TXT_internal(total));
 		}
-		if (!(num_rows = mysql_num_rows(res)))
-		{
-			if (sync_file)
-			{
+		if (!(num_rows = mysql_num_rows(res))) {
+			if (sync_file) {
 				mysql_free_result(res);
 				errno = ENOENT;
 				return ((DBINFO **) 0);
@@ -269,17 +260,14 @@ LoadDbInfo_TXT(int *total)
 			sync_mcd = 1;
 			row = mysql_fetch_row(res);
 			mysql_free_result(res);
-		} else
-		{
-			for (mcd_time = 0l;(row = mysql_fetch_row(res));)
-			{
+		} else {
+			for (mcd_time = 0l;(row = mysql_fetch_row(res));) {
 				mtime = atol(row[0]);
 				if (mtime > mcd_time)
 					mcd_time = mtime;
 			}
 			mysql_free_result(res);
-			if (verbose)
-			{
+			if (verbose) {
 				printf("File MySQL %s Modification Time %s", mcdFile, ctime(&mcd_time));
 				if (mcd_time == file_time)
 					printf("Nothing to update\n");
@@ -287,31 +275,26 @@ LoadDbInfo_TXT(int *total)
 			if (mcd_time == file_time)
 				return (LoadDbInfo_TXT_internal(total));
 			else
-			if (mcd_time > file_time)
-			{
+			if (mcd_time > file_time) {
 				sync_file = 1;
 				sync_mcd = 0;
 			} else
-			if (mcd_time < file_time)
-			{
+			if (mcd_time < file_time) {
 				sync_file = 0;
 				sync_mcd = 1;
 			}
 		}
 	}
-	if (sync_mcd)
-	{
+	if (sync_mcd) {
 		if (verbose)
 			printf("Updating Table dbinfo\n");
-		if (!(relayhosts = LoadDbInfo_TXT_internal(total)))
-		{
+		if (!(relayhosts = LoadDbInfo_TXT_internal(total))) {
 			perror("LoadDbInfo_TXT_internal");
 			return ((DBINFO **) 0);
 		}
 		if (delete_dbinfo_rows(mcdFile))
 			return (relayhosts);
-		for (err = 0, ptr = relayhosts;(*ptr);ptr++)
-		{
+		for (err = 0, ptr = relayhosts;(*ptr);ptr++) {
 			if ((*ptr)->isLocal)
 				continue;
 			snprintf(SqlBuf, SQL_BUF_SIZE, "replace low_priority into dbinfo \
@@ -319,8 +302,7 @@ LoadDbInfo_TXT(int *total)
 				values (\"%s\", \"%s\", %d, \"%s\", \"%s\", %d, \"%s\", \"%s\", \"%s\", FROM_UNIXTIME(%ld) + 0)", 
 				mcdFile, (*ptr)->domain, (*ptr)->distributed, (*ptr)->server, (*ptr)->mdahost, (*ptr)->port, 
 				(*ptr)->database, (*ptr)->user, (*ptr)->password, file_time);
-			if (mysql_query(&mysql[0], SqlBuf))
-			{
+			if (mysql_query(&mysql[0], SqlBuf)) {
 				fprintf(stderr, "LoadDbInfo_TXT: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 				err = 1;
 				continue;
@@ -328,31 +310,27 @@ LoadDbInfo_TXT(int *total)
 		}
 		return (relayhosts);
 	} else
-	if (sync_file)
-	{
+	if (sync_file) {
 		if (verbose)
 			printf("Updating File %s\n", mcdFile);
 		snprintf(SqlBuf, SQL_BUF_SIZE,
 			"select high_priority domain, distributed, server, mdahost, port, dbname, user, passwd, timestamp \
 			from dbinfo where filename=\"%s\"", mcdFile);
-		if (mysql_query(&mysql[0], SqlBuf))
-		{
+		if (mysql_query(&mysql[0], SqlBuf)) {
 			fprintf(stderr, "LoadDbInfo_TXT: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 			if (access(mcdFile, F_OK))
 				return ((DBINFO **) 0);
 			else
 				return (LoadDbInfo_TXT_internal(total));
 		}
-		if (!(res = mysql_store_result(&mysql[0])))
-		{
+		if (!(res = mysql_store_result(&mysql[0]))) {
 			(void) fprintf(stderr, "LoadDbInfo_TXT: mysql_store_result: %s\n", mysql_error(&mysql[0]));
 			if (access(mcdFile, F_OK))
 				return ((DBINFO **) 0);
 			else
 				return (LoadDbInfo_TXT_internal(total));
 		}
-		if (!(num_rows = mysql_num_rows(res)))
-		{
+		if (!(num_rows = mysql_num_rows(res))) {
 			mysql_free_result(res);
 			fprintf(stderr, "LoadDbInfo_TXT: No rows selected\n");
 			if (access(mcdFile, F_OK))
@@ -362,8 +340,7 @@ LoadDbInfo_TXT(int *total)
 		}
 		if (total)
 			_total = (*total += num_rows);
-		if (!(relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * (num_rows + 1))))
-		{
+		if (!(relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * (num_rows + 1)))) {
 			perror("malloc");
 			mysql_free_result(res);
 			if (access(mcdFile, F_OK))
@@ -371,10 +348,8 @@ LoadDbInfo_TXT(int *total)
 			else
 				return (LoadDbInfo_TXT_internal(total));
 		}
-		for (ptr = relayhosts, idx = 0;(row = mysql_fetch_row(res));idx++, ptr++)
-		{
-			if (!((*ptr) = (DBINFO *) malloc(sizeof(DBINFO))))
-			{
+		for (ptr = relayhosts, idx = 0;(row = mysql_fetch_row(res));idx++, ptr++) {
+			if (!((*ptr) = (DBINFO *) malloc(sizeof(DBINFO)))) {
 				perror("malloc");
 				free(relayhosts);
 				mysql_free_result(res);
@@ -412,14 +387,12 @@ delete_dbinfo_rows(char *filename)
 {
 	char            SqlBuf[SQL_BUF_SIZE];
 
-	if (open_master())
-	{
+	if (open_master()) {
 		fprintf(stderr, "delete_dbinfo_rows: Failed to open Master Db\n");
 		return (-1);
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from dbinfo where filename=\"%s\"", filename);
-	if (mysql_query(&mysql[0], SqlBuf))
-	{
+	if (mysql_query(&mysql[0], SqlBuf)) {
 		fprintf(stderr, "delete_dbinfo: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		return (-1);
 	}
@@ -441,18 +414,16 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if (*mcdfile == '/' || *mcdfile == '.')
 		snprintf(mcdFile, MAX_BUFF, "%s", mcdfile);
+	else 
+	if (*controldir == '/')
+		snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
 	else {
-		if (*controldir == '/')
-			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
-		else {
-			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
-		}
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 	}
 	if (!rhostsptr)
 		return (1);
-	if (!(fp = fopen(mcdFile, "w")))
-	{
+	if (!(fp = fopen(mcdFile, "w"))) {
 		fprintf(stderr, "writedbinfo: %s: %s\n", mcdFile, strerror(errno));
 		return (1);
 	}
@@ -465,8 +436,7 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 	else
 	if (fchmod(fileno(fp), INDIMAIL_QMAIL_MODE))
 		fprintf(stderr, "fchmod: %s: %s\n", mcdFile, strerror(errno));
-	for (ptr = rhostsptr;(*ptr);ptr++)
-	{
+	for (ptr = rhostsptr;(*ptr);ptr++) {
 		if ((*ptr)->isLocal)
 			continue;
 		fprintf(fp, "domain   %-28s %d\n", (*ptr)->domain, (*ptr)->distributed);
@@ -506,24 +476,20 @@ LoadDbInfo_TXT_internal(int *total)
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if (*mcdfile == '/' || *mcdfile == '.')
 		scopy(mcdFile, mcdfile, MAX_BUFF);
+	else 
+	if (*controldir == '/')
+		snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
 	else {
-		if (*controldir == '/')
-			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
-		else {
-			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
-		}
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 	}
 	count = 0;
 	relayhosts = (DBINFO **) 0;
 	if (!(fp = fopen(mcdFile, "r")))
 		return (localDbinfo(total, &relayhosts));
-	else
-	{
-		for (;;)
-		{
-			if (!fgets(buffer, MAX_BUFF, fp))
-			{
+	else {
+		for (;;) {
+			if (!fgets(buffer, MAX_BUFF, fp)) {
 				if (feof(fp))
 					break;
 				fprintf(stderr, "loadDbInfo_TXT_internal: fgets: %s\n", strerror(errno));
@@ -538,30 +504,25 @@ LoadDbInfo_TXT_internal(int *total)
 				count++;
 		}
 	}
-	if (!count)
-	{
+	if (!count) {
 		fclose(fp);
 		return (localDbinfo(total, &relayhosts));
 	} else
 	if (total)
 		_total = (*total += count);
-	if (!(relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * (count + 1))))
-	{
+	if (!(relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * (count + 1)))) {
 		perror("malloc");
 		fclose(fp);
 		return ((DBINFO **) 0);
 	}
 	rewind(fp);
-	for (*dombuf = 0, items = 0, count = 1, rhostsptr = relayhosts;; count++)
-	{
-		if (!fgets(buffer, MAX_BUFF, fp))
-		{
+	for (*dombuf = 0, items = 0, count = 1, rhostsptr = relayhosts;; count++) {
+		if (!fgets(buffer, MAX_BUFF, fp)) {
 			if (feof(fp))
 				break;
 			fprintf(stderr, "loadDbInfo_TXT_internal: fgets: %s\n", strerror(errno));
 		}
-		if (buffer[strlen(buffer) - 1] != '\n')
-		{
+		if (buffer[strlen(buffer) - 1] != '\n') {
 			fprintf(stderr, "Line No %d in %s Exceeds %d chars\n", count, mcdFile, MAX_BUFF);
 			fclose(fp);
 			free(relayhosts);
@@ -572,15 +533,13 @@ LoadDbInfo_TXT_internal(int *total)
 		for (ptr = buffer; *ptr && isspace((int) *ptr); ptr++);
 		if (!*ptr)
 			continue;
-		if ((ret = sscanf(buffer, "%s %s", dummy1, dummy2)) != 2)
-		{
+		if ((ret = sscanf(buffer, "%s %s", dummy1, dummy2)) != 2) {
 			fprintf(stderr, "Line No %d in %s has no value line is %s", count, mcdFile, buffer);
 			fclose(fp);
 			free(relayhosts);
 			return ((DBINFO **) 0);
 		}
-		if (!strncmp(dummy1, "domain", 6))
-		{
+		if (!strncmp(dummy1, "domain", 6)) {
 			scopy(dombuf, dummy2, DBINFO_BUFF);
 			if ((ret = sscanf(buffer, "%s %s %d", dummy1, dummy2, &distributed)) != 3)
 				distributed = 0;
@@ -594,18 +553,15 @@ LoadDbInfo_TXT_internal(int *total)
 		else
 		if (!strncmp(dummy1, "time", 4))
 			continue;
-		if (!strncmp(dummy1, "server", 6))
-		{
-			if (items)
-			{
+		if (!strncmp(dummy1, "server", 6)) {
+			if (items) {
 				fprintf(stderr, "Line Preceding %d in %s is incomplete\n", count, mcdFile);
 				fclose(fp);
 				free(relayhosts);
 				errno = EINVAL;
 				return ((DBINFO **) 0);
 			}
-			if (!((*rhostsptr) = (DBINFO *) malloc(sizeof(DBINFO))))
-			{
+			if (!((*rhostsptr) = (DBINFO *) malloc(sizeof(DBINFO)))) {
 				perror("malloc");
 				fclose(fp);
 				free(relayhosts);
@@ -618,48 +574,37 @@ LoadDbInfo_TXT_internal(int *total)
 			(*rhostsptr)->failed_attempts = 0;
 			scopy((*rhostsptr)->server, dummy2, DBINFO_BUFF);
 		} else
-		if ((*rhostsptr))
-		{
-			if (!strncmp(dummy1, "mdahost", 7))
-			{
+		if ((*rhostsptr)) {
+			if (!strncmp(dummy1, "mdahost", 7)) {
 				items++;
 				scopy((*rhostsptr)->mdahost, dummy2, DBINFO_BUFF);
 			} else
-			if (!strncmp(dummy1, "port", 4))
-			{
+			if (!strncmp(dummy1, "port", 4)) {
 				items++;
 				(*rhostsptr)->port = atoi(dummy2);
 			} else
-			if (!strncmp(dummy1, "database", 8))
-			{
+			if (!strncmp(dummy1, "database", 8)) {
 				items++;
 				scopy((*rhostsptr)->database, dummy2, DBINFO_BUFF);
 			} else
-			if (!strncmp(dummy1, "user", 4))
-			{
+			if (!strncmp(dummy1, "user", 4)) {
 				items++;
 				scopy((*rhostsptr)->user, dummy2, DBINFO_BUFF);
 			} else
-			if (!strncmp(dummy1, "pass", 4))
-			{
+			if (!strncmp(dummy1, "pass", 4)) {
 				items++;
 				scopy((*rhostsptr)->password, dummy2, DBINFO_BUFF);
-			} else
-			{
+			} else {
 				fprintf(stderr, "Invalid Syntax at line %d  file %s - [%s]", count, mcdFile, buffer);
 				fclose(fp);
 				free(relayhosts);
 				return ((DBINFO **) 0);
 			}
-			if (items == 6)
-			{
-				if (*dombuf)
-				{
+			if (items == 6) {
+				if (*dombuf) {
 					scopy((*rhostsptr)->domain, dombuf, DBINFO_BUFF);
 					(*rhostsptr)->distributed = distributed;
-				}
-				else
-				{
+				} else {
 					scopy((*rhostsptr)->domain, "unknown domain", DBINFO_BUFF);
 					(*rhostsptr)->distributed = -1;
 				}
@@ -670,20 +615,17 @@ LoadDbInfo_TXT_internal(int *total)
 		}
 	}
 	fclose(fp);
-	if (items)
-	{
+	if (items) {
 		fprintf(stderr, "Incomplete Structure in file %s\n", mcdFile);
 		free(relayhosts);
 		errno = EINVAL;
 		return ((DBINFO **) 0);
 	}
 	(*rhostsptr) = (DBINFO *) 0; /*- Null structure to end relayhosts */
-#if 1
 	if (!(rhostsptr = localDbinfo(total, &relayhosts)))
 		fprintf(stderr, "LoadDbInfo_TXT_internal: No local Dbinfo\n");
 	else
 		relayhosts = rhostsptr;
-#endif
 	_total = *total;
 	return (relayhosts);
 }
@@ -702,24 +644,20 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	relayhosts = *rhosts;
 	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
 	snprintf(TmpBuf, MAX_BUFF, "%s/assign", assigndir);
-	if (!(fp = fopen(TmpBuf, "r")))
-	{
+	if (!(fp = fopen(TmpBuf, "r"))) {
 		fprintf(stderr, "fopen: %s: %s\n", TmpBuf, strerror(errno));
 		return ((DBINFO **) 0);
 	}
 	/*- +indimail.org-:indimail.org:508:508:/var/indimail/domains/indimail.org:-:: -*/
-	for (count = 0;;)
-	{
-		if (!fgets(TmpBuf, MAX_BUFF, fp))
-		{
+	for (count = 0;;) {
+		if (!fgets(TmpBuf, MAX_BUFF, fp)) {
 			if (feof(fp))
 				break;
 			fprintf(stderr, "localDbinfo: fgets: %s\n", strerror(errno));
 		}
 		if (!(ptr = strchr(TmpBuf, ':')))
 			continue;
-		if (relayhosts)
-		{
+		if (relayhosts) {
 			ptr++;
 			domain = ptr;
 			for (;*ptr && *ptr != ':';ptr++);
@@ -729,10 +667,8 @@ localDbinfo(int *total, DBINFO ***rhosts)
 				continue;
 			if (is_alias_domain(domain))
 				continue;
-			for (found = 0,tmpPtr = relayhosts;*tmpPtr;tmpPtr++)
-			{
-				if (!strncmp((*tmpPtr)->domain, domain, DBINFO_BUFF))
-				{
+			for (found = 0,tmpPtr = relayhosts;*tmpPtr;tmpPtr++) {
+				if (!strncmp((*tmpPtr)->domain, domain, DBINFO_BUFF)) {
 					found = 1;
 					break;
 				}
@@ -749,35 +685,28 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	if (*controldir == '/') {
 		if (snprintf(host_path, MAX_BUFF, "%s/host.mysql", controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
-	}
-	else {
+	} else {
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", sysconfdir, controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	}
-	if (!*mysqlhost_buf && !access(host_path, F_OK))
-	{
+	if (!*mysqlhost_buf && !access(host_path, F_OK)) {
 		if (!(mfp = fopen(host_path, "r")))
 			scopy(mysqlhost_buf, MYSQL_HOST, MAX_BUFF);
-		else
-		{
+		else {
 			if (!fgets(mysqlhost_buf, MAX_BUFF - 2, mfp))
 				scopy(mysqlhost_buf, MYSQL_HOST, MAX_BUFF);
 			else
-			{
-				if ((ptr = strrchr(mysqlhost_buf, '\n')))
-					*ptr = 0;
-			}
+			if ((ptr = strrchr(mysqlhost_buf, '\n')))
+				*ptr = 0;
 			fclose(mfp);
 		}
 	} else
 	if (!*mysqlhost_buf)
 		scopy(mysqlhost_buf, MYSQL_HOST, MAX_BUFF);
 	mysqlhost = mysqlhost_buf;
-	for (field_count = 0,ptr = mysqlhost_buf;*ptr;ptr++)
-	{
-		if (*ptr == ':')
-		{
+	for (field_count = 0,ptr = mysqlhost_buf;*ptr;ptr++) {
+		if (*ptr == ':') {
 			*ptr = 0;
 			switch (field_count++)
 			{
@@ -805,23 +734,19 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	if (!mysql_port && !(mysql_port = (char *) getenv("MYSQL_VPORT")))
 		mysql_port = "0";
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
-	if (!count)
-	{
+	if (!count) {
 		fclose(fp);
-		if (total)
-		{
+		if (total) {
 			relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + 2));
 			rhostsptr = relayhosts + *total;
 			for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + 2;tmpPtr++)
 				*tmpPtr = (DBINFO *) 0;
 			(*total) += 1;
-		} else
-		{
+		} else {
 			relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * 2);
 			rhostsptr = relayhosts;
 		} 
-		if (!((*rhostsptr) = (DBINFO *) malloc(sizeof(DBINFO))))
-		{
+		if (!((*rhostsptr) = (DBINFO *) malloc(sizeof(DBINFO)))) {
 			perror("malloc");
 			free(relayhosts);
 			return ((DBINFO **) 0);
@@ -846,29 +771,24 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr) = (DBINFO *) 0;
 		return (relayhosts);
 	}
-	if (total)
-	{
+	if (total) {
 		relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + count + 1));
 		rhostsptr = relayhosts + *total;
 		for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + count + 1;tmpPtr++)
 			*tmpPtr = (DBINFO *) 0;
 		_total = (*total) += count;
-	} else
-	{
+	} else {
 		relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * (count + 1));
 		rhostsptr = relayhosts;
 	} 
-	if (!relayhosts)
-	{
+	if (!relayhosts) {
 		perror("malloc");
 		fclose(fp);
 		return ((DBINFO **) 0);
 	}
 	rewind(fp);
-	for (;;)
-	{
-		if (!fgets(TmpBuf, MAX_BUFF, fp))
-		{
+	for (;;) {
+		if (!fgets(TmpBuf, MAX_BUFF, fp)) {
 			if (feof(fp))
 				break;
 			fprintf(stderr, "localDbinfo: fgets: %s\n", strerror(errno));
@@ -884,18 +804,15 @@ localDbinfo(int *total, DBINFO ***rhosts)
 			continue;
 		if (is_alias_domain(domain))
 			continue;
-		for (found = 0,tmpPtr = relayhosts;*tmpPtr;tmpPtr++)
-		{
-			if (!strncmp((*tmpPtr)->domain, domain, DBINFO_BUFF))
-			{
+		for (found = 0,tmpPtr = relayhosts;*tmpPtr;tmpPtr++) {
+			if (!strncmp((*tmpPtr)->domain, domain, DBINFO_BUFF)) {
 				found = 1;
 				break;
 			}
 		}
 		if (found)
 			continue;
-		if (!((*rhostsptr) = (DBINFO *) malloc(sizeof(DBINFO))))
-		{
+		if (!((*rhostsptr) = (DBINFO *) malloc(sizeof(DBINFO)))) {
 			perror("malloc");
 			free(relayhosts);
 			fclose(fp);
