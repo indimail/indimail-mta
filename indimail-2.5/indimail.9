@@ -235,6 +235,14 @@ file can be seen by running the \fBdbinfo(8)\fR program. Whenever a new \fImails
 added/removed, the entry for the \fImailstore\fR and the corresponding MySQL \fBlocal database\fR
 needs to be added/removed in the \fIdbinfo\fR table or \fImcdinfo\fR file. In short, the entries
 in the \fIdbinfo\fR table and the \fImcdinfo\fR control file on all servers are kept in sync.
+
+.PP
+It may be noted that the connection to MySQL can be fine tuned by editing the file
+@sysconfdir@/indimail.cnf. This file has [client] section that all indimail programs use. It
+also has [mysqld] section which is used my \fBmysqld(8)\fR, if it is managed by \fBsupervise(8)\fR.
+You can also change the behaviour of the MySQL connections by setting enviroment variables. Please
+see the section on 'Environment Variables' to understand that.
+
 .PP
 In case you do not require a multi-host setup, IndiMail does not require \fBcentral database\fR.
 Programs just need to connect to the \fBlocal database\fR which can be configured by having the
@@ -244,13 +252,13 @@ control file CONTROLDIR/host.mysql.
 .PP
 IndiMail has an idea of email domains that are "local" and "virtual". Local domains are ones
 which primarily match against /etc/passwd. Virtual domains match against domains listed in
-the control file CONTROLDIR/virtualdomains. IndiMail makes use of the INDIMAIL/users/assign
+the control file CONTROLDIR/virtualdomains. IndiMail makes use of the INDIMAILDIR/users/assign
 file and \fIvirtualdomains\fR file. The \fIusers/assign\fR file gets compiled into a \fIusers/cdb\fR
 file. It is a hashed database to speed searches for patterns. If a pattern is matched then
 IndiMail delivers the email to the directory defined in the file using the uid and gid which is
 also defined. IndiMail makes use of this method to deliver all virtual domain email as the
 single uid/gid indimail/indimail. It also uses it to take delivery instructions from
-INDIMAIL/domains/<virtualdomain>/.qmail-default file. Once qmail-local gets the information from the \fIusers/assign\fR file it performs standard .qmail
+INDIMAILDIR/domains/<virtualdomain>/.qmail-default file. Once qmail-local gets the information from the \fIusers/assign\fR file it performs standard .qmail
 file processing in the directory. Normal .qmail-<user> files can be used for forwarding, aliases
 or invoking programs such as ezmlm. If no matches are found qmail-local looks for a .qmail-default
 file. This is the last stage in qmail-local's delivery mechanism. qmail-local uses this file to
@@ -281,32 +289,42 @@ for indimail.org and 25 is the SMTP port.
 
 .SH Directory structure
 .PP
-IndiMail gets it's own home directory. A typical IndiMail installation willl have the following
-directories in the directory INDIMAIL.
+IndiMail gets it's own home directory. A typical IndiMail installation will have the following
+directories in the directory INDIMAILDIR.
+
 .TS
 l l.
 Directory     | Description
 _
-bin           | All user binaries
-sbin          | Binaries required by administrators
-lib           | Shared/Development Libraries
-include       | Include files for development
-users         | assign, cdb file
 alias         | System aliases postmaster, mailer-daemon, root
 domains       | Virtual domain directories, each having .qmail-default file
-control       | Most of IndiMail's configuration file lie here
-plugins       | Plugins for qmail-queue
-modules       | Loadable modules for flash (ncurses based menu system)
-man           | Man pages
-doc           | Documentation
 mysqldb       | Local MySQL database (MySQL database in data, logs in logs)
-boot          | Startup files
 autoturn      | Domains supporting ETRN, AUTOTURN support
 qscanq        | Directory for virus scanning if qscanq is used
-share         | clamd virus signature database
-libexec       | Authentication modules for courier-imap
-etc           | bogofilter.cf, spam wordlist, tcp.[smtp,imap,pop3].cdb, etc
+clamd         | clamd virus signature database
+.TE
 
+.PP
+Binaries, shared libraries, documentation, development files, etc lie in the following directores
+
+.TS
+l l.
+Directory                         | Description
+_
+@prefix@/bin                          | All user binaries
+@prefix@/sbin                         | Binaries required by administrators
+@prefix@/lib64                        | Shared/Development Libraries (lib for 32 bit)
+@prefix@/include                      | Include files for IndiMail API
+@prefix@/lib/indimail/plugins         | Plugins for qmail-queue, tcpserver, etc
+@prefix@/lib/indimail/modules         | Loadable modules for flash menu system
+@prefix@/libexec/indimail/imapmodules | Authentication modules for courier-imap
+@prefix@/share/indimail/doc           | Documentation
+@prefix@/share/indimail/boot          | Startup files
+@prefix@/share/man                    | Man pages
+@sysconfdir@/users               | assign, cdb file
+CONTROLDIR             | Most of IndiMail's configuration file lie here
+@sysconfdir@                     | bogofilter.cf, spam wordlist, tcp.[smtp,imap,pop3].cdb, etc
+@sysconfdir@/certs               | SSL/TLS Certificates
 .TE
 
 .PP
@@ -342,8 +360,9 @@ inlookup.infifo | Log for inlookup server
 pwdlookup       | Log for NSS daemon for password lookups
 poppass.106     | Log for poppassd protocol daemon
 mysql.3306      | Log for MySQL service
-spamlog         | Spam attemtps gets logged here
+qmail-logfifo   | Log for clients using fifologger
 svscan          | Log for svscan service
+udplogger       | Log for udplogger service
 .TE
 
 .SH Virtual Domain Directory Structure Layout
@@ -1175,14 +1194,6 @@ MCDFILE            |InLookup     |used    |Mail Control Definition file. Specifi
                    |dbinfo       |        |the list of all MySQL servers
                    |vuserinfo    |        |participating in a clustered setup.
                    |vserverinfo  |        |
-MYSQL_TABLE        |             |used    |Name of the default indimail
-                   |             |        |authentication table containing active
-                   |             |        |users. If not set, this defaults to
-                   |             |        |'indimail'
-MYSQL_INACTIVE_TAB |             |        |Name of the default indimail
--LE                |             |        |authentication table containing inactive
-                   |             |        |users. If not set, this defaults to
-                   |             |        |'indibak'
 MAXADDR            |chowkidar    |used    |Number of addresses to load in chowkidar
 -------------------|-------------|--------|----------------------------------------
 TCPLOCALHOST       |tcpclient    |set     |The domain name of the local host. If
@@ -1215,7 +1226,7 @@ POST_HANDLE        |vadddomain   |used    |Used to set the path to program that
                    |vrenamedomain|        |of the program. If not set, program with
                    |vadduser     |        |the same name as that of the calling
                    |vdeluser     |        |program will be executed in the directory
-                   |vrenameuser  |        |INDIMAIL/libexec. If the program exists,
+                   |vrenameuser  |        |INDIMAILDIR/libexec. If the program exists,
                    |vmoveuser    |        |then return status of the handle will be
                    |vpasswd      |        |returned
 -------------------|-------------|--------|----------------------------------------
@@ -1261,13 +1272,47 @@ DISCARD_BOUNCE     |vdelivermail |used    |Discard bounces if set
 -------------------|-------------|--------|----------------------------------------
 AUTHINFO           |qmail-smtpd  |set     |set to the authenticated username
 -------------------|-------------|--------|----------------------------------------
-MYSQL_OPT_RECONNECT       |any indimail   |Reconnect automatically after failure
-MYSQL_OPT_READ_TIMEOUT    |program that   |Read timeout from MySQL
-MYSQL_OPT_WRITE_TIMEOUT   |connects to    |Write timeout writing to MySQL
-MYSQL_OPT_CONNECT_TIMEOUT |MySQL          |Connect timeout for MySQL
-MYSQL_OPT_PROTOCOL        |               |Set unix domain or tcp/ip sockets
-MYSQL_SET_CLIENT_IP       |               |Set the client ip when connecting 
---------------------------|---------------|----------------------------------------
+.TE
+
+.TS
+l l.
+Environ  Variable         |Program       |Purpose
+--------------------------|--------------|-------------------------------------
+MYSQL_TABLE               |              |Name of the default indimail
+                          |              |authentication table containing active
+                          |              |users. If not set, this defaults to
+                          |              |'indimail'
+MYSQL_INACTIVE_TABLE      |              |Name of the default indimail
+                          |              |authentication table containing inactive
+                          |              |users. If not set, this defaults to
+                          |              |'indibak'
+ENABLE_MYSQL_ESCAPE       |              |If set, all queries to MySQL will be
+                          |              |escaped before sending to mysqld.
+MYSQL_INIT_COMMAND        |              |
+MYSQL_READ_DEFAULT_FILE   |              |
+MYSQL_READ_DEFAULT_GROUP  |              |
+MYSQL_OPT_RECONNECT       |any indimail  |Reconnect automatically after failure
+MYSQL_OPT_READ_TIMEOUT    |program that  |Read timeout from MySQL
+MYSQL_OPT_WRITE_TIMEOUT   |connects to   |Write timeout writing to MySQL
+MYSQL_OPT_CONNECT_TIMEOUT |MySQL         |Connect timeout for MySQL
+MYSQL_OPT_PROTOCOL        |              |Set unix domain or tcp/ip sockets
+MYSQL_SET_CLIENT_IP       |              |Set the client ip when connecting 
+MYSQL_OPT_SSL_CA          |              |Certificate Authority (CA) file path
+MYSQL_OPT_SSL_CAPATH      |              |directory that contains trusted SSL CA
+MYSQL_OPT_SSL_CERT        |              |client public key certificate file
+MYSQL_OPT_SSL_CIPHER      |              |permitted cipher list for SSL encryption
+MYSQL_OPT_SSL_CRL         |              |certificate revocation lists file
+MYSQL_OPT_SSL_CRLPATH     |              |certificate revocation lists directory
+MYSQL_OPT_SSL_ENFORCE     |              |Enforce SSL connection
+MYSQL_OPT_SSL_VERIFY_CERT |              |Enable verification of the server's CN 
+MYSQL_OPT_SSL_MODE        |              |security state to use for the connection 
+                          |              |SSL_MODE_DISABLED, SSL_MODE_PREFERRED,
+                          |              |SSL_MODE_REQUIRED, SSL_MODE_VERIFY_CA,
+                          |              |SSL_MODE_VERIFY_IDENTITY.
+MYSQL_OPT_SSL_KEY         |              |client private key file
+MYSQL_OPT_TLS_VERSION     |              |for opessl TLSv1, TLSv1.1, TLSv1.2
+                          |              |for yaSSL TLSv1, TLSv1.1 protocols
+--------------------------|--------------|--------------------------------------
 .TE
 
 Some of these environment variables have default values. The table below lists some of these.
@@ -1355,10 +1400,10 @@ any of the following two commands to start IndiMail on all systems
 
 .SH POST Execution Handle
 Some indimail programs have a post execution handle. A post execution handle is a program with
-the same name as that of the calling program but in the directory INDIMAIL/libexec.
+the same name as that of the calling program but in the directory INDIMAILDIR/libexec.
 On successful completion, such programs execute the handle program and return
 the status of the called handle program. If the handle program is not accessible, the return
-status is zero. Normally, the handle program always gets executed from INDIMAIL/libexec
+status is zero. Normally, the handle program always gets executed from INDIMAILDIR/libexec
 directory, but you can override the program called by setting the environment variable
 \fBPOST_HANDLE\fR.
 
@@ -1375,7 +1420,7 @@ The distribution includes two post execution handles \fBvadddomain\fR and \fBvad
 
 .SH PROGRAMS
 
-IndiMail has more than 250 programs installed in INDIMAIL/bin, INDIMAIL/sbin.
+IndiMail has more than 250 programs installed in INDIMAILDIR/bin, INDIMAILDIR/sbin.
 
 .nr step 1 1
 .IP \n[step] 4
