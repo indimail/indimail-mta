@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.3  2018-03-24 23:34:27+05:30  Cprogrammer
+ * return success if VIRTUAL_PKG_LIB is not defined
+ *
  * Revision 1.2  2018-01-10 11:59:09+05:30  Cprogrammer
  * return success if library path does not exist
  *
@@ -87,6 +90,13 @@ loadLibrary(int *errflag, char **errstr)
 	char           *ptr;
 	static stralloc errbuf = { 0 };
 
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (errflag)
+			*errflag = 0;
+		if (errstr)
+			*errstr = (char *) 0;
+		return ((void *) 0);
+	} else
 	if (handle) {
 		if (errflag)
 			*errflag = 0;
@@ -94,8 +104,6 @@ loadLibrary(int *errflag, char **errstr)
 			*errstr = (char *) 0;
 		return (handle);
 	}
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
-		ptr = VIRTUAL_PKG_LIB;
 	if (errflag)
 		*errflag = -1;
 	if (errstr)
@@ -741,7 +749,7 @@ inquery(char query_type, char *email, char *ip)
 void
 getversion_inquery_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.2 2018-01-10 11:59:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.3 2018-03-24 23:34:27+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
