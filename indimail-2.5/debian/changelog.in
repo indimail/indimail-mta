@@ -20,5 +20,6 @@ indimail (@version@-1) unstable; urgency=low
   * use mysql_real_escape_string only if ENABLE_MYSQL_ESCAPE env variable is defined
   * svctool - added SSL/TLS paramters for MySQL service, config
   * ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
+  * set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when using libmariadb
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 23 Feb 2018 11:11:11 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 24 Feb 2018 22:27:46 +0530

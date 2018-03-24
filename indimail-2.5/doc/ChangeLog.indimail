@@ -1,4 +1,4 @@
-* Wed Mar 20 2018 11:26:39 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+* Sat Mar 24 2018 22:27:46 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
 Release 2.5 Start 27/01/2018
 27/01/2018
 1.  moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
@@ -36,6 +36,8 @@ hostcntrl, lastauth
 19. use mysql_real_escape_string only if ENABLE_MYSQL_ESCAPE env variable is defined
 20. svctool - added SSL/TLS paramters for MySQL service, config
 21. ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
+24/03/2018
+22. set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when using libmariadb
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017

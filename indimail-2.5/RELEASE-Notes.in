@@ -103,3 +103,4 @@ Release 2.5 Start 27/01/2018
 21. use mysql_real_escape_string only if ENABLE_MYSQL_ESCAPE env variable is defined
 22. svctool - added SSL/TLS paramters for MySQL service, config
 23. ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
+24. set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when using libmariadb
