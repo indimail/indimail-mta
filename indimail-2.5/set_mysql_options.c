@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.15  2018-03-24 17:09:54+05:30  Cprogrammer
+ * shortened env variable MYSQL_OPT_SSL_VERIFY_SERVER_CERT to MYSQL_OPT_SSL_VERIFY_CERT
+ *
  * Revision 2.14  2018-03-21 11:11:05+05:30  Cprogrammer
  * added error_mysql_options_str() function to display the exact mysql_option() error
  *
@@ -47,7 +50,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.14 2018-03-21 11:11:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.15 2018-03-24 17:09:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -117,7 +120,6 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	getEnvConfigStr(&opt_reconnect, "MYSQL_OPT_RECONNECT", "0");
 	snprintf(temp, sizeof(temp) - 1, "%d", MYSQL_PROTOCOL_DEFAULT);
 	getEnvConfigStr(&opt_protocol, "MYSQL_OPT_PROTOCOL", temp);
-	delayed_insert = ((char *) getenv("DELAYED_INSERT") ? 1 : 0);
 	protocol = atoi(opt_protocol);
 	o_reconnect = atoi(opt_reconnect);
 	connect_timeout = atoi(c_timeout);
@@ -228,7 +230,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * server name as the Common Name value.
 	 *
 	 */
-	if ((ptr = getenv("MYSQL_OPT_SSL_VERIFY_SERVER_CERT"))) {
+	if ((ptr = getenv("MYSQL_OPT_SSL_VERIFY_CERT"))) {
 		tmpv_c = atoi(ptr) ? 1 : 0;
 		if (int_mysql_options(mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &tmpv_c))
 			return (17);
