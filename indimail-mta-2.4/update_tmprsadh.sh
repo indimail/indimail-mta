@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.8  2018-03-25 15:13:42+05:30  Cprogrammer
+# fix for system where ln doesn't have -r option
+#
 # Revision 1.7  2017-05-10 16:06:11+05:30  Cprogrammer
 # create link to dh2048.pem for dhparams.pem
 #
@@ -87,5 +90,9 @@ do
 	echo dh"$i".pem
 done
 if [ ! -f $CERTDIR/dhparams.pem ] ; then
-	$ln -sr $CERTDIR/dh2048.pem $CERTDIR/dhparams.pem
+	$ln -sr $CERTDIR/dh2048.pem $CERTDIR/dhparams.pem > /dev/null 2>&1
+	if [ $? -ne 1 ] ; then
+		cd $CERTDIR
+		$ln -s dh2048.pem dhparams.pem
+	fi
 fi
