@@ -1,4 +1,4 @@
-* Sat Mar 24 2018 22:27:46 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+* Sat Mar 25 2018 15:09:37 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
 Release 2.5 Start 27/01/2018
 27/01/2018
 1.  moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
@@ -38,6 +38,8 @@ hostcntrl, lastauth
 21. ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
 24/03/2018
 22. set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when using libmariadb
+25/03/2018
+23. fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017

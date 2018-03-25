@@ -21,5 +21,6 @@ indimail (@version@-1) unstable; urgency=low
   * svctool - added SSL/TLS paramters for MySQL service, config
   * ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
   * set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when using libmariadb
+  * fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 24 Feb 2018 22:27:46 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 25 Mar 2018 15:10:13 +0530
