@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.50  2018-03-25 13:56:18+05:30  Cprogrammer
+ * fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
+ *
  * Revision 2.49  2018-03-23 12:48:22+05:30  Cprogrammer
  * avoid connection to hostcntrl if host.cntrl is absent
  *
@@ -162,7 +165,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.49 2018-03-23 12:48:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.50 2018-03-25 13:56:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -324,11 +327,11 @@ cache_active_pwd(time_t tval)
 		"        JOIN"
 		"    lastauth ON pw_name = user AND pw_domain = domain "
 		"WHERE"
-		"    UNIX_timestamp(timestamp) >= UNIX_timestamp() - %ld "
+		"    UNIX_timestamp(lastauth.timestamp) >= UNIX_timestamp() - %ld "
 		"AND"
 		"	service in (\"imap\", \"pop3\", \"wtbm\") "
 		"GROUP BY pw_name, pw_domain "
-		"ORDER BY timestamp desc", act_secs);
+		"ORDER BY lastauth.timestamp desc", act_secs);
 
 	if ((err = vauth_open((char *) 0)) != 0)
 		return (-1);
