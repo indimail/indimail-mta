@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.7  2018-03-25 20:05:19+05:30  Cprogrammer
+# removed chmod of variables directory as it is redundant now with read perm for indimail group
+#
 # Revision 1.6  2018-02-18 22:23:31+05:30  Cprogrammer
 # pass argument to do_post_upgrade()
 #
@@ -16,7 +19,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.6 2018-02-18 22:23:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.7 2018-03-25 20:05:19+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -41,7 +44,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.6 2018-02-18 22:23:31+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.7 2018-03-25 20:05:19+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -154,16 +157,7 @@ fi
 if [ -s /etc/indimail/control/defaultqueue/LOGFILTER ] ; then
 	check_update_if_diff /etc/indimail/control/defaultqueue/LOGFILTER /tmp/logfifo
 fi
-#
-# tcpserver uses -c option to set concurrency and uses MAXDAEMON config file
-# on sighup, since tcpserver is no longer root, it is unable to read MAXDAEMON config
-# file. Better solution is to move MAXDAEMON config file out of /service/*/variables
-# directory
-for i in /service/qmail-*qm?pd.* /service/qmail-smtpd.*
-do
-	$chown root:indimail $i/variables
-	$chmod 755 $i/variables
-done
+
 host=`uname -n`
 check_update_if_diff /service/qmail-send.25/variables/DEFAULT_DOMAIN $host
 check_update_if_diff /etc/indimail/control/envnoathost $host
