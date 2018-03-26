@@ -164,6 +164,7 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
     cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
     ${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
   fi
+  (
   # refresh indimail-mta services
   svc_list=""
   for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
@@ -174,6 +175,7 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
   done
   svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+  ) >> /tmp/indimail-mta-setup.log
   ${rm} -f /tmp/indimail-mta.upgrade
   exit 0
 fi
