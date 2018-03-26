@@ -443,7 +443,7 @@ AC_SUBST(domaindir)
 AC_SUBST(assigndir)
 AC_SUBST(shareddir)
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",IndiMail Home Directory)
-AC_DEFINE_UNQUOTED(PREFIX,"$prefix",Bin Prefix)
+AC_DEFINE_UNQUOTED(PREFIX,"$prefix",Prefix)
 rm -f indimail.dir
 
 indimailuid=`cat indimail.uid`
@@ -971,6 +971,12 @@ AC_EGREP_HEADER(MYSQL_OPT_SSL_CRLPATH, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYS
 AC_EGREP_HEADER(MYSQL_OPT_SSL_ENFORCE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_ENFORCE, 1, "enforce ssl/tls"))
 AC_EGREP_HEADER(MYSQL_OPT_TLS_VERSION, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_TLS_VERSION, 1, "tls version"))
 AC_EGREP_HEADER(MYSQL_OPT_SSL_MODE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_MODE, 1, "ssl mmode"))
+if [ -x /usr/bin/readelf ] ; then
+	/usr/bin/readelf -d /usr/lib/x86_64-linux-gnu/libmariadbclient.so.18|grep SONAME |grep libmariadbclient > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		AC_DEFINE([LIBMARIADBCLIENT], [1],[We are using MariaDB client library])
+	fi
+fi
 
 saveLIBS="$LIBS"
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
@@ -990,12 +996,6 @@ case "$host" in
 	auth_libs="-L. -L$ilibdir -lindimail -L$mysql_libdir -lmysqlclient $LIB_SSL $LIB_CRYPT"
 	;;
 esac
-
-dnl AC_ARG_ENABLE(HAVE_IPV6, [  --enable-ipv6                 if your system supports ipv6],
-dnl 	[with_ipv6=$enableval],
-dnl 	[with_ipv6=yes])
-dnl test "$with_ipv6" = "yes" && AC_DEFINE(HAVE_IPV6,1,Define if you want ipv6 support compiled in)
-
 
 AC_ARG_ENABLE(HAVE_MD5_CRYPT,    [  --enable-md5-crypt            if your system crypt does not support md5],
 	[with_md5crypt=$enableval],
