@@ -974,7 +974,7 @@ AC_EGREP_HEADER(MYSQL_OPT_SSL_MODE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_
 if [ -x /usr/bin/readelf ] ; then
 	/usr/bin/readelf -d /usr/lib/x86_64-linux-gnu/libmariadbclient.so.18|grep SONAME |grep libmariadbclient > /dev/null 2>&1
 	if [ $? -eq 0 ] ; then
-		AC_DEFINE([LIBMARIADBCLIENT], [1],[We are using MariaDB client library])
+		AC_DEFINE([HAVE_LIBMARIADBCLIENT], [1],[We are using MariaDB client library])
 	fi
 fi
 
