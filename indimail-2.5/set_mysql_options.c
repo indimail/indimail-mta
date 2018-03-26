@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.17  2018-03-26 10:41:47+05:30  Cprogrammer
+ * renamed LIBMARIADB to HAVE_LIBMARIADBCLIENT
+ *
  * Revision 2.16  2018-03-24 22:25:43+05:30  Cprogrammer
  * use mysql_ssl_set() for mariadb ssl connection issue
  *
@@ -53,7 +56,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.16 2018-03-24 22:25:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.17 2018-03-26 10:41:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -107,7 +110,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	char            temp[4];
 	char            o_reconnect, tmpv_c;
 	unsigned int    protocol, connect_timeout, read_timeout, write_timeout, ssl_mode;
-#ifdef LIBMARIADB
+#ifdef HAVE_LIBMARIADBCLIENT
 	char           *cipher;
 #endif
 
@@ -158,7 +161,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 		return (9);
 
 	/*- SSL options */
-#ifdef LIBMARIADB
+#ifdef HAVE_LIBMARIADBCLIENT
 	getEnvConfigStr(&cipher, "CIPHER", 0); /*- DHE-RSA-AES256-SHA */
 	mysql_ssl_set(mysql, 0, 0, 0, 0, cipher); /*- this always returns 0 */
 #endif
