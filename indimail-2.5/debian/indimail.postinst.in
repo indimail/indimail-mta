@@ -141,6 +141,7 @@ fi
 # indimail.upgrade/indimail.install are created
 # by the preinst script
 if [ -f /tmp/indimail.upgrade ] ; then # upgrade
+  (
   if [ -f ${libexecdir}/iupgrade.sh ] ; then
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh ${libexecdir}/iupgrade.sh post upgrade @version@ $* || true
@@ -160,6 +161,7 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
     svc_list="$svc_list ${servicedir}/$i"
   done
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+  ) >> /tmp/indimail-setup.log
   ${rm} -f /tmp/indimail.upgrade
   exit 0
 fi
