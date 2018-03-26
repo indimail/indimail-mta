@@ -106,3 +106,4 @@ Release 2.5 Start 27/01/2018
 24. set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when using libmariadb
 25. svctool - create env variable VIRTUAL_PKG_LIB with libindimail.so to provide indimail functionality
 26. fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
+27. use readelf to set HAVE_LIBMARIADBCLIENT in config.h and call mysql_ssl_set() if linked with MariaDB
