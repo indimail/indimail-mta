@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.22  2018-03-27 12:11:34+05:30  Cprogrammer
+ * set use_ssl flag for set_mysql_options to call mysql_ssl_set()
+ *
  * Revision 2.21  2018-03-21 11:12:58+05:30  Cprogrammer
  * added error_mysql_options_str() function to display the exact mysql_option() error
  *
@@ -77,7 +80,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.21 2018-03-21 11:12:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.22 2018-03-27 12:11:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -256,6 +259,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		fprintf(stderr, "MYSQL Init Error: %s@%s\n", (*ptr)->database, (*ptr)->server);
 		return (1);
 	}
+	flags = (*ptr)->use_ssl;
 	if ((count = set_mysql_options(*mysqlptr, "indimail.cnf", "indimail", &flags)))
 	{
 		fprintf(stderr, "mysql_options: %s\n", (str = error_mysql_options_str(count)) ? str : "unknown error");
