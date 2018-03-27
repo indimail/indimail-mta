@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.40  2018-03-27 17:52:40+05:30  Cprogrammer
+ * code indented in k&r style
+ *
  * Revision 2.39  2018-03-27 12:13:10+05:30  Cprogrammer
  * load use_ssl parameter from host.master/host.cntrl, set use_ssl flag for set_mysql_options to call mysql_ssl_set()
  *
@@ -210,7 +213,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.39 2018-03-27 12:13:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.40 2018-03-27 17:52:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -244,15 +247,13 @@ findhost(char *email, int connect_primarydb)
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 
-	if (!email || !*email)
-	{
+	if (!email || !*email) {
 		userNotFound = 1;
 		return ((char *) 0);
 	}
 	len = strlen(email);
 #ifdef QUERY_CACHE
-	if (_cacheSwitch && getenv("QUERY_CACHE") && *mailhost && !strncmp(email, prevEmail, len))
-	{
+	if (_cacheSwitch && getenv("QUERY_CACHE") && *mailhost && !strncmp(email, prevEmail, len)) {
 		if (!mlen)
 			mlen = strlen(mailhost) + 1;
 		strncpy(_mailhost, mailhost, mlen);
@@ -269,22 +270,18 @@ findhost(char *email, int connect_primarydb)
 	if (open_central_db(0)) /*- open connection to mysql (cntrl_host or assign opened connection to primary db */
 		return ((char *) 0);
 	scopy(user, email, MAX_BUFF);
-	if ((ptr = strchr(user, '@')) != (char *) 0)
-	{
-		if (*(ptr + 1))
-		{
+	if ((ptr = strchr(user, '@')) != (char *) 0) {
+		if (*(ptr + 1)) {
 			scopy(domain, ptr + 1, MAX_BUFF);
 			if (!(real_domain = vget_real_domain(domain)))
 				return ((char *) 0);
-		} else
-		{
+		} else {
 			getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 			scopy(domain, ptr, MAX_BUFF);
 			real_domain = domain;
 		}
 		*ptr = 0;
-	} else
-	{
+	} else {
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 		scopy(domain, ptr, MAX_BUFF);
 		real_domain = domain;
@@ -297,8 +294,7 @@ findhost(char *email, int connect_primarydb)
 again:
 	if (attempt != -1)
 		attempt++;
-	if (mysql_query(&mysql[0], SqlBuf))
-	{
+	if (mysql_query(&mysql[0], SqlBuf)) {
 		err = mysql_errno(&mysql[0]);
 		(void) fprintf(stderr, "findhost: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		if (err == ER_NO_SUCH_TABLE && create_table(ON_MASTER, cntrl_table, CNTRL_TABLE_LAYOUT))
@@ -306,10 +302,8 @@ again:
 		if (err == ER_NO_SUCH_TABLE || err == ER_SYNTAX_ERROR)
 			userNotFound = 1;
 		/*- reconnect to MySQL if server gone away */
-		if (mysql_ping(&mysql[0]))
-		{
-			if (attempt == 1)
-			{
+		if (mysql_ping(&mysql[0])) {
+			if (attempt == 1) {
 				vclose_cntrl();
 				goto again;
 			}
@@ -319,22 +313,18 @@ again:
 		if (attempt != -1)
 			attempt = 1;
 	}
-	if (!(res = mysql_store_result(&mysql[0])))
-	{
+	if (!(res = mysql_store_result(&mysql[0]))) {
 		(void) fprintf(stderr, "findhost: mysql_store_result: %s\n", mysql_error(&mysql[0]));
 		return ((char *) 0);
 	}
-	if (mysql_num_rows(res) == 0)
-	{
-		if (connect_primarydb > 1)
-		{
+	if (mysql_num_rows(res) == 0) {
+		if (connect_primarydb > 1) {
 			userNotFound = 1;
 			mysql_free_result(res);
 			return ((char *) 0);
 		}
 		/*- connect_primarydb == 2 or connect_primarydb == 3 */
-		if (attempt == 1)
-		{
+		if (attempt == 1) {
 			mysql_free_result(res);
 			/*- look for default entry (pw_name = '*' */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
@@ -348,26 +338,22 @@ again:
 		return ((char *) 0);
 	}
 	row = mysql_fetch_row(res);
-	if (!(ip_addr = vauth_getipaddr(row[0])))
-	{
+	if (!(ip_addr = vauth_getipaddr(row[0]))) {
 		(void) fprintf(stderr, "findhost: vauth_getipaddr: %s\n", mysql_error(&mysql[0]));
 		mysql_free_result(res);
 		return ((char *) 0);
 	}
 	scopy(hostid, row[0], MAX_BUFF);
 	mysql_free_result(res);
-	if (connect_primarydb == 1 || connect_primarydb == 3)
-	{
-		if (!(ptr = SqlServer(ip_addr, real_domain)))
-		{
+	if (connect_primarydb == 1 || connect_primarydb == 3) {
+		if (!(ptr = SqlServer(ip_addr, real_domain))) {
 			fprintf(stderr, "findhost: SqlServer: Unable to find SqlServer IP for mailstore %s, %s\n", ip_addr, real_domain);
 			return ((char *) 0);
 		}
 		if (vauth_open(ptr)) /*- connect to primary db */
 			return ((char *) 0);
 	}
-	if ((port = get_smtp_service_port(0, real_domain, hostid)) == -1)
-	{
+	if ((port = get_smtp_service_port(0, real_domain, hostid)) == -1) {
 		(void) fprintf(stderr, "findhost: failed to get smtp port for %s %s\n", 
 		   real_domain, hostid);
 		return ((char *) 0);
@@ -417,17 +403,13 @@ open_central_db(char *dbhost)
 		if (access(host_path, F_OK) && snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", sysconfdir, controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	}
-	if (!*cntrl_host && !access(host_path, F_OK))
-	{
-		if (!(fp = fopen(host_path, "r")))
-		{
-			fprintf(stderr, "fopen: %s: %s\n", host_path, strerror(errno));
+	if (!*cntrl_host && !access(host_path, F_OK)) {
+		if (!(fp = fopen(host_path, "r"))) {
+			fprintf(stderr, "open_central_db: fopen: %s: %s\n", host_path, strerror(errno));
 			return(-1);
-		} else
-		{
-			if (!fgets(cntrl_host, MAX_BUFF - 2, fp))
-			{
-				fprintf(stderr, "fgets: %s\n", strerror(errno));
+		} else {
+			if (!fgets(cntrl_host, MAX_BUFF - 2, fp)) {
+				fprintf(stderr, "open_central_db: fgets: %s\n", strerror(errno));
 				fclose(fp);
 				return(-1);
 			}
@@ -442,16 +424,13 @@ open_central_db(char *dbhost)
 	if (!atexit_registered++)
 		atexit(vclose_cntrl);
 #ifdef HAVE_LOCAL_INFILE
-	if (mysql_options(&mysql[0], MYSQL_OPT_LOCAL_INFILE, 0))
-	{
-		fprintf(stderr, "mysql_options: MYSQL_OPT_LOCAL_INFILE: unknown option\n");
+	if (mysql_options(&mysql[0], MYSQL_OPT_LOCAL_INFILE, 0)) {
+		fprintf(stderr, "open_central_db: mysql_options: MYSQL_OPT_LOCAL_INFILE: unknown option\n");
 		return(-1);
 	}
 #endif
-	for (count = 0,ptr = cntrl_host;*ptr;ptr++)
-	{
-		if (*ptr == ':')
-		{
+	for (count = 0,ptr = cntrl_host;*ptr;ptr++) {
+		if (*ptr == ':') {
 			*ptr = 0;
 			switch (count++)
 			{
@@ -495,43 +474,35 @@ open_central_db(char *dbhost)
 	 * is_open == 1 &&  cntrl_host != mysql_host && cntrl_port == indi_port -> connect to cntrl_host -> connect cntrl_host
 	 * is_open == 1 &&  cntrl_host == mysql_host && cntrl_port != indi_port -> connect to cntrl_host -> connect cntrl_host
 	 */
-	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
-	{
+	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF)) {
 		flags = use_ssl;
-		if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags)))
-		{
-			fprintf(stderr, "mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
+		if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
+			fprintf(stderr, "open_central_db: mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return(-1);
 		}
-		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, flags)))
-		{
+		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, flags))) {
 			flags = use_ssl;
-			if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags)))
-			{
-				fprintf(stderr, "mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
+			if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
+				fprintf(stderr, "open_central_db: mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 				return(-1);
 			}
-			if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, NULL, mysqlport, cntrl_socket, flags)))
-			{
+			if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, NULL, mysqlport, cntrl_socket, flags))) {
 				fprintf(stderr, "open_central_db: mysql_real_connect: %s: %s\n", cntrl_host, mysql_error(&mysql[0]));
 				return (-1);
 			}
 			if (snprintf(SqlBuf, SQL_BUF_SIZE, "create database %s", mysql_database) == -1)
 				SqlBuf[SQL_BUF_SIZE - 1] = 0;
-			if (mysql_query(&mysql[0], SqlBuf))
-			{
-				fprintf(stderr, "mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
+			if (mysql_query(&mysql[0], SqlBuf)) {
+				fprintf(stderr, "open_central_db: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 				return (-1);
 			}
-			if (mysql_select_db(&mysql[0], mysql_database))
-			{
-				fprintf(stderr, "mysql_select_db: %s: %s\n", mysql_database, mysql_error(&mysql[0]));
+			if (mysql_select_db(&mysql[0], mysql_database)) {
+				fprintf(stderr, "open_central_db: mysql_select_db: %s: %s\n", mysql_database, mysql_error(&mysql[0]));
 				return (-1);
 			}
 		}
 		isopen_cntrl = 1;
-	} else
-	{
+	} else {
 		mysql[0] = mysql[1];
 		mysql[0].affected_rows= ~(my_ulonglong) 0;
 		isopen_cntrl = 2; /*- same connection as from host.mysql */
@@ -545,8 +516,7 @@ vclose_cntrl()
 	/*
 	 * disconnection from the database 
 	 */
-	if (isopen_cntrl == 1)
-	{
+	if (isopen_cntrl == 1) {
 		isopen_cntrl = 0;
 		mysql_close(&mysql[0]);
 	}
@@ -572,8 +542,7 @@ findhost(char *email, int connect_primarydb)
 		return ((char *) 0);
 	*tmpbuf = *domain = 0;
 	scopy(tmpbuf, email, MAX_BUFF);
-	if ((ptr = strchr(tmpbuf, '@')) != (char *) 0)
-	{
+	if ((ptr = strchr(tmpbuf, '@')) != (char *) 0) {
 		if (*(ptr + 1))
 			scopy(domain, ptr + 1, MAX_BUFF);
 		*ptr = 0;
