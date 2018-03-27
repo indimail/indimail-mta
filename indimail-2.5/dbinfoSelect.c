@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoSelect.c,v $
+ * Revision 2.8  2018-03-27 12:08:12+05:30  Cprogrammer
+ * display use_ssl field
+ *
  * Revision 2.7  2018-03-24 17:05:02+05:30  Cprogrammer
  * display "auto" when filename is null
  *
@@ -25,7 +28,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.7 2018-03-24 17:05:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.8 2018-03-27 12:08:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -58,10 +61,16 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 		if (row_format)
 		{
 			first_flag++;
-			printf("%s %s %d %s %s %d %s %s %s\n", 
+			if ((*mysqlptr)->unix_socket)
+			printf("%s %s %d %s %s %s 0 %s %s %s\n", 
 				filename ? filename : "auto", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
-				(*rhostsptr)->server, (*rhostsptr)->mdahost, (*rhostsptr)->port, (*rhostsptr)->database,
+				(*rhostsptr)->server, (*rhostsptr)->mdahost, (*mysqlptr)->unix_socket, (*rhostsptr)->database,
 				(*rhostsptr)->user, (*rhostsptr)->password);
+			else
+			printf("%s %s %d %s %s %d %d %s %s %s\n", 
+				filename ? filename : "auto", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
+				(*rhostsptr)->server, (*rhostsptr)->mdahost, (*rhostsptr)->port, (*rhostsptr)->use_ssl,
+				(*rhostsptr)->database, (*rhostsptr)->user, (*rhostsptr)->password);
 			continue;
 		}
 		if (!first_flag++)
@@ -79,12 +88,16 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 			printf("mda host       %s\n", (*rhostsptr)->mdahost);
 		if ((*mysqlptr)->unix_socket)
 			printf("Unix   Socket  %s\n", (*mysqlptr)->unix_socket);
-		else
+		else {
 			printf("TCP/IP Port    %d\n", (*rhostsptr)->port);
+			printf("Use SSL        %s\n", (*rhostsptr)->use_ssl ? "Yes" : "No");
+   			printf("SSL Cipher     %s\n", mysql_get_ssl_cipher(*mysqlptr));
+		}
 		printf("database       %s\n", (*rhostsptr)->database);
 		printf("user           %s\n", (*rhostsptr)->user);
 		printf("password       %s\n", (*rhostsptr)->password);
 		printf("fd             %d\n", (*rhostsptr)->fd);
+		if ((*rhostsptr)->use_ssl)
 		printf("DBINFO Method  %s\n", (*rhostsptr)->isLocal ? "Auto" : "DBINFO");
 		if ((*rhostsptr)->fd == -1)
 			printf("MySQL Stat     mysql_real_connect: %s\n", mysql_error((*mysqlptr)));
