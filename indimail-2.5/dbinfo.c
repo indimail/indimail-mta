@@ -204,9 +204,9 @@ editdbinfo(char *filename)
 	getchar();
 	if (rhostsptr && access(mcdFile, F_OK))
 	{
-		if (writedbinfo(rhostsptr, time(0)))
+		if (writemcdinfo(rhostsptr, time(0)))
 		{
-			fprintf(stderr, "writedbinfo failed\n");
+			fprintf(stderr, "writemcdinfo failed\n");
 			return(1);
 		}
 	}
