@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.28  2018-03-27 12:15:14+05:30  Cprogrammer
+ * load use_ssl parameter from host.mysql, set use_ssl flag for set_mysql_options to call mysql_ssl_set()'
+ *
  * Revision 2.27  2018-03-21 11:13:09+05:30  Cprogrammer
  * added error_mysql_options_str() function to display the exact mysql_option() error
  *
@@ -114,7 +117,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.27 2018-03-21 11:13:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.28 2018-03-27 12:15:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -130,7 +133,7 @@ vauth_open(char *dbhost)
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
 		           *mysql_socket = 0, *sysconfdir, *controldir;
 	int             mysqlport = -1, count;
-	unsigned int    flags;
+	unsigned int    flags = 0, use_ssl = 0;
 	FILE           *fp;
 
 	if (is_open == 1)
@@ -179,6 +182,10 @@ vauth_open(char *dbhost)
 		scopy(mysql_host, MYSQL_HOST, MAX_BUFF);
 	mysql_init(&mysql[1]);
 	atexit(vclose);
+	/*- 
+	 * localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:ssl
+	 * localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:nossl
+	 */
 	for (count = 0,ptr = mysql_host;*ptr;ptr++)
 	{
 		if (*ptr == ':')
@@ -189,15 +196,21 @@ vauth_open(char *dbhost)
 			case 0: /*- mysql user */
 				if (*(ptr + 1))
 					mysql_user = ptr + 1;
+				break;
 			case 1: /*- mysql passwd */
 				if (*(ptr + 1))
 					mysql_passwd = ptr + 1;
+				break;
 			case 2: /*- mysql socket/port */
 				if (*(ptr + 1) == '/' || *(ptr + 1) == '.')
 					mysql_socket = ptr + 1;
 				else
 				if (*(ptr + 1))
 					indi_port = ptr + 1;
+				break;
+			case 3: /*- ssl/nossl */
+				use_ssl = strncmp(ptr + 1, "ssl", 3) ? 0 : 1;
+				break;
 			}
 		}
 	}
@@ -217,6 +230,7 @@ vauth_open(char *dbhost)
 	if (!isopen_cntrl || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
 	{
 #endif
+		flags = use_ssl;
 		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags)))
 		{
 			fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
@@ -225,6 +239,7 @@ vauth_open(char *dbhost)
 		if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd,
 			mysql_database, mysqlport, mysql_socket, flags)))
 		{
+			flags = use_ssl;
 			if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags)))
 			{
 				fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
