@@ -355,7 +355,7 @@
  * added vlimits_get_flag_mask()
  *
  * Revision 2.114  2003-10-24 00:28:45+05:30  Cprogrammer
- * added writedbinfo()
+ * added writemcdinfo()
  *
  * Revision 2.113  2003-10-23 14:14:43+05:30  Cprogrammer
  * added NO_SMTP and V_OVERRIDE flags
@@ -1904,7 +1904,7 @@ char           *SqlServer(char *, char *);
 char           *MdaServer(char *, char *);
 MYSQL         **mdaMysqlConnect(char *, char *);
 DBINFO        **LoadDbInfo_TXT(int *);
-int             writedbinfo(DBINFO **, time_t);
+int             writemcdinfo(DBINFO **, time_t);
 char          **LoadBMF(int *, char *);
 int             UpdateSpamTable(char *);
 void           *inquery(char, char *, char *);
