@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.18  2018-03-27 12:14:12+05:30  Cprogrammer
+ * call mysql_ssl_set() if flags is set
+ *
  * Revision 2.17  2018-03-26 10:41:47+05:30  Cprogrammer
  * renamed LIBMARIADB to HAVE_LIBMARIADBCLIENT
  *
@@ -56,7 +59,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.17 2018-03-26 10:41:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.18 2018-03-27 12:14:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -108,12 +111,11 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 				   *r_timeout, *w_timeout, *init_cmd, *ptr,
 				   *set_client_ip, *opt_reconnect, *opt_protocol;
 	char            temp[4];
-	char            o_reconnect, tmpv_c;
+	char            o_reconnect, tmpv_c, use_ssl = 0;
 	unsigned int    protocol, connect_timeout, read_timeout, write_timeout, ssl_mode;
-#ifdef HAVE_LIBMARIADBCLIENT
 	char           *cipher;
-#endif
 
+	use_ssl = (*flags == 1 ? 1 : 0);
 	*flags = 0;
 	if (getenv("CLIENT_COMPRESS"))
 		*flags += CLIENT_COMPRESS;
@@ -161,10 +163,10 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 		return (9);
 
 	/*- SSL options */
-#ifdef HAVE_LIBMARIADBCLIENT
-	getEnvConfigStr(&cipher, "CIPHER", 0); /*- DHE-RSA-AES256-SHA */
-	mysql_ssl_set(mysql, 0, 0, 0, 0, cipher); /*- this always returns 0 */
-#endif
+	if (use_ssl) {
+		getEnvConfigStr(&cipher, "CIPHER", 0); /*- DHE-RSA-AES256-SHA */
+		mysql_ssl_set(mysql, 0, 0, 0, 0, cipher); /*- this always returns 0 */
+	}
 
 #ifdef HAVE_MYSQL_OPT_SSL_CA
 	/*-
