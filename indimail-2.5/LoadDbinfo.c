@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.48  2018-03-27 17:51:15+05:30  Cprogrammer
+ * added documentation
+ *
  * Revision 2.47  2018-03-27 12:06:05+05:30  Cprogrammer
  * added use_ssl filed to dbinfo table, mcdinfo control file
  *
@@ -93,7 +96,7 @@
  *
  * Revision 2.17  2003-10-24 22:41:09+05:30  Cprogrammer
  * overhauled code for getting local domain entries
- * writedbinfo() made visible
+ * writemcdinfo() made visible
  *
  * Revision 2.16  2003-10-18 00:16:14+05:30  Cprogrammer
  * added code for future loading of non dbinfo domains
@@ -136,7 +139,7 @@
  * set total only if not null
  *
  * Revision 2.3  2002-05-13 03:12:40+05:30  Cprogrammer
- * added writedbinfo()
+ * added writemcdinfo()
  * correction made for correct updation of timestamps
  *
  * Revision 2.2  2002-05-13 02:26:01+05:30  Cprogrammer
@@ -155,7 +158,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.47 2018-03-27 12:06:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.48 2018-03-27 17:51:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -171,7 +174,7 @@ static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.47 2018-03-27 12:06:05+05:30 C
 #include <sys/socket.h>
 #include <mysqld_error.h>
 
-static DBINFO **LoadDbInfo_TXT_internal(int *);
+static DBINFO **loadMCDInfo(int *);
 static DBINFO **localDbinfo(int *, DBINFO ***);
 
 static int      _total;
@@ -206,8 +209,8 @@ LoadDbInfo_TXT(int *total)
 		snprintf(TmpBuf, MAX_BUFF, "%s/host.master", controldir);
 	if (total)
 		_total = *total = 0;
-	if (access(TmpBuf, F_OK))
-		return (LoadDbInfo_TXT_internal(total));
+	if (access(TmpBuf, F_OK)) /*- return dbinfo structure loaded from local mcdinfo if host.master is absent */
+		return (loadMCDInfo(total));
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if (*mcdfile == '/' || *mcdfile == '.')
 		snprintf(mcdFile, MAX_BUFF, "%s", mcdfile);
@@ -227,38 +230,38 @@ LoadDbInfo_TXT(int *total)
 			printf("File UNIX  %s Modification Time %s", mcdFile, ctime(&file_time));
 	}
 	if (open_master()) {
-		if (sync_file) {
+		if (sync_file) { /*- in absense of mcdinfo, we can't proceed further */
 			fprintf(stderr, "LoadDbInfo_TXT: Failed to open Master Db\n");
 			return ((DBINFO **) 0);
-		} else
-			return (LoadDbInfo_TXT_internal(total));
+		} else /*- get records from mcdinfo file */
+			return (loadMCDInfo(total));
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE, "select UNIX_TIMESTAMP(timestamp) from dbinfo where filename=\"%s\"", mcdFile);
 	if (mysql_query(&mysql[0], SqlBuf) && ((err = mysql_errno(&mysql[0])) != ER_NO_SUCH_TABLE)) {
 		fprintf(stderr, "LoadDbInfo_TXT: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-		if (sync_file)
+		if (sync_file) /*- in absense of mcdinfo, we can't proceed further */
 			return ((DBINFO **) 0);
-		else
-			return (LoadDbInfo_TXT_internal(total));
+		else /*- get records from mcdinfo file */
+			return (loadMCDInfo(total));
 	}
 	if (err == ER_NO_SUCH_TABLE) {
 		if (create_table(ON_MASTER, "dbinfo", DBINFO_TABLE_LAYOUT)) {
-			if (sync_file)
+			if (sync_file) /*- in absense of mcdinfo, we can't proceed further */
 				return ((DBINFO **) 0);
-			else
-				return (LoadDbInfo_TXT_internal(total));
+			else /*- get records from mcdinfo file */
+				return (loadMCDInfo(total));
 		}
 		sync_mcd = 1;
-	} else {
+	} else { /*- figure out if mcdfile or dbinfo needs to be updated */
 		if (!(res = mysql_store_result(&mysql[0]))) {
 			(void) fprintf(stderr, "LoadDbInfo_TXT: mysql_store_result: %s\n", mysql_error(&mysql[0]));
 			if (sync_file)
 				return ((DBINFO **) 0);
-			else
-				return (LoadDbInfo_TXT_internal(total));
+			else /*- get records from mcdinfo file */
+				return (loadMCDInfo(total));
 		}
-		if (!(num_rows = mysql_num_rows(res))) {
-			if (sync_file) {
+		if (!(num_rows = mysql_num_rows(res))) { /*- dbinfo table is empty */
+			if (sync_file) { /*- in absense of mcdinfo, we can't proceed further */
 				mysql_free_result(res);
 				errno = ENOENT;
 				return ((DBINFO **) 0);
@@ -266,11 +269,11 @@ LoadDbInfo_TXT(int *total)
 			sync_mcd = 1;
 			row = mysql_fetch_row(res);
 			mysql_free_result(res);
-		} else {
+		} else { /*- figure out which is newer - dbinfo or mcdinfo */
 			for (mcd_time = 0l;(row = mysql_fetch_row(res));) {
 				mtime = atol(row[0]);
 				if (mtime > mcd_time)
-					mcd_time = mtime;
+					mcd_time = mtime; /*- get the time of the newest dbinfo record */
 			}
 			mysql_free_result(res);
 			if (verbose) {
@@ -278,8 +281,8 @@ LoadDbInfo_TXT(int *total)
 				if (mcd_time == file_time)
 					printf("Nothing to update\n");
 			}
-			if (mcd_time == file_time)
-				return (LoadDbInfo_TXT_internal(total));
+			if (mcd_time == file_time) /*- nothing to update */
+				return (loadMCDInfo(total));
 			else
 			if (mcd_time > file_time) {
 				sync_file = 1;
@@ -291,17 +294,21 @@ LoadDbInfo_TXT(int *total)
 			}
 		}
 	}
-	if (sync_mcd) {
+	if (sync_mcd) {  /*- sync dbinfo table */
+		/* 
+		 * update dbinfo table with latest modification in mcdfile
+		 * and time = file modification time of mcdinfo
+		 */
 		if (verbose)
 			printf("Updating Table dbinfo\n");
-		if (!(relayhosts = LoadDbInfo_TXT_internal(total))) {
-			perror("LoadDbInfo_TXT_internal");
+		if (!(relayhosts = loadMCDInfo(total))) {
+			perror("loadMCDInfo");
 			return ((DBINFO **) 0);
 		}
-		if (delete_dbinfo_rows(mcdFile))
+		if (delete_dbinfo_rows(mcdFile)) /*- delete from dbinfo records for mcdFile */
 			return (relayhosts);
 		for (err = 0, ptr = relayhosts;(*ptr);ptr++) {
-			if ((*ptr)->isLocal)
+			if ((*ptr)->isLocal) /*- don't insert dbinfo obtained from localDbInfo() */
 				continue;
 			snprintf(SqlBuf, SQL_BUF_SIZE, "replace low_priority into dbinfo \
 				(filename, domain, distributed, server, mdahost, port, use_ssl, dbname, user, passwd, timestamp) \
@@ -324,45 +331,45 @@ LoadDbInfo_TXT(int *total)
 			from dbinfo where filename=\"%s\"", mcdFile);
 		if (mysql_query(&mysql[0], SqlBuf)) {
 			fprintf(stderr, "LoadDbInfo_TXT: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-			if (access(mcdFile, F_OK))
+			if (access(mcdFile, F_OK)) /*- no records in dbinfo as well as mcdinfo */
 				return ((DBINFO **) 0);
 			else
-				return (LoadDbInfo_TXT_internal(total));
+				return (loadMCDInfo(total));
 		}
 		if (!(res = mysql_store_result(&mysql[0]))) {
 			(void) fprintf(stderr, "LoadDbInfo_TXT: mysql_store_result: %s\n", mysql_error(&mysql[0]));
-			if (access(mcdFile, F_OK))
+			if (access(mcdFile, F_OK)) /*- no records in dbinfo as well as mcdinfo */
 				return ((DBINFO **) 0);
 			else
-				return (LoadDbInfo_TXT_internal(total));
+				return (loadMCDInfo(total));
 		}
 		if (!(num_rows = mysql_num_rows(res))) {
 			mysql_free_result(res);
 			fprintf(stderr, "LoadDbInfo_TXT: No rows selected\n");
-			if (access(mcdFile, F_OK))
+			if (access(mcdFile, F_OK)) /*- no records in dbinfo as well as mcdinfo */
 				return ((DBINFO **) 0);
 			else
-				return (LoadDbInfo_TXT_internal(total));
+				return (loadMCDInfo(total));
 		}
 		if (total)
 			_total = (*total += num_rows);
 		if (!(relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * (num_rows + 1)))) {
 			perror("malloc");
 			mysql_free_result(res);
-			if (access(mcdFile, F_OK))
+			if (access(mcdFile, F_OK)) /*- no records in dbinfo as well as mcdinfo */
 				return ((DBINFO **) 0);
 			else
-				return (LoadDbInfo_TXT_internal(total));
+				return (loadMCDInfo(total));
 		}
 		for (ptr = relayhosts, idx = 0;(row = mysql_fetch_row(res));idx++, ptr++) {
 			if (!((*ptr) = (DBINFO *) malloc(sizeof(DBINFO)))) {
 				perror("malloc");
 				free(relayhosts);
 				mysql_free_result(res);
-				if (access(mcdFile, F_OK))
+				if (access(mcdFile, F_OK)) /*- no records in dbinfo as well as mcdinfo */
 					return ((DBINFO **) 0);
 				else
-					return (LoadDbInfo_TXT_internal(total));
+					return (loadMCDInfo(total));
 			}
 			scopy((*ptr)->domain, row[0], DBINFO_BUFF);
 			(*ptr)->distributed = atoi(row[1]);
@@ -378,15 +385,16 @@ LoadDbInfo_TXT(int *total)
 			(*ptr)->failed_attempts = 0;
 			(*ptr)->isLocal = 0;
 		}
-		if (writedbinfo(relayhosts, mcd_time))
-			fprintf(stderr, "LoadDbInfo_TXT: writedbinfo failed\n");
+ 		/* write dbinfo records to mcdinfo and set file modification time to mcd_time */
+		if (writemcdinfo(relayhosts, mcd_time))
+			fprintf(stderr, "LoadDbInfo_TXT: writemcdinfo failed\n");
 		(*ptr) = (DBINFO *) 0;
 		mysql_free_result(res);
 		return (relayhosts);
 	} else
 	if (verbose)
 		printf("Nothing to update\n");
-	return (LoadDbInfo_TXT_internal(total));
+	return (loadMCDInfo(total));
 }
 
 static int
@@ -406,8 +414,11 @@ delete_dbinfo_rows(char *filename)
 	return (0);
 }
 
+/*
+ * write dbinfo records to mcdinfo
+ */
 int
-writedbinfo(DBINFO **rhostsptr, time_t mtime)
+writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 {
 	char            mcdFile[MAX_BUFF];
 	char           *sysconfdir, *mcdfile, *controldir;
@@ -431,7 +442,7 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 	if (!rhostsptr)
 		return (1);
 	if (!(fp = fopen(mcdFile, "w"))) {
-		fprintf(stderr, "writedbinfo: %s: %s\n", mcdFile, strerror(errno));
+		fprintf(stderr, "writemcdinfo: %s: %s\n", mcdFile, strerror(errno));
 		return (1);
 	}
 	if (indimailuid == -1 || indimailgid == -1)
@@ -439,10 +450,10 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 	uid = indimailuid;
 	gid = indimailgid;
 	if (fchown(fileno(fp), uid, gid))
-		fprintf(stderr, "fchown: %s: %s\n", mcdFile, strerror(errno));
+		fprintf(stderr, "writemcdinfo: fchown: %s: %s\n", mcdFile, strerror(errno));
 	else
 	if (fchmod(fileno(fp), INDIMAIL_QMAIL_MODE))
-		fprintf(stderr, "fchmod: %s: %s\n", mcdFile, strerror(errno));
+		fprintf(stderr, "writemcdinfo: fchmod: %s: %s\n", mcdFile, strerror(errno));
 	for (ptr = rhostsptr;(*ptr);ptr++) {
 		if ((*ptr)->isLocal)
 			continue;
@@ -459,19 +470,22 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 	ubuf.actime = time(0);
 	ubuf.modtime = mtime;
 	if (utime(mcdFile, &ubuf))
-		fprintf(stderr, "utime: %s: %s\n", mcdFile, strerror(errno));
+		fprintf(stderr, "writemcdinfo: utime: %s: %s\n", mcdFile, strerror(errno));
 	return (0);
 }
 #else
 DBINFO **
 LoadDbInfo_TXT(int *total)
 {
-	return (LoadDbInfo_TXT_internal(total));
+	return (loadMCDInfo(total));
 }
 #endif
 
+/*
+ * Load records fromm the file mcdinfo
+ */
 static DBINFO **
-LoadDbInfo_TXT_internal(int *total)
+loadMCDInfo(int *total)
 {
 	char            mcdFile[MAX_BUFF], dombuf[DBINFO_BUFF];
 	char           *sysconfdir, *mcdfile, *controldir, *ptr; 
@@ -496,11 +510,15 @@ LoadDbInfo_TXT_internal(int *total)
 	if (!(fp = fopen(mcdFile, "r")))
 		return (localDbinfo(total, &relayhosts));
 	else {
+		/*- 
+		 * get count of dbinfo records each
+		 * dbinfo record has a 'server line
+		 */
 		for (;;) {
 			if (!fgets(buffer, MAX_BUFF, fp)) {
 				if (feof(fp))
 					break;
-				fprintf(stderr, "loadDbInfo_TXT_internal: fgets: %s\n", strerror(errno));
+				fprintf(stderr, "loadMCDInfo: fgets: %s\n", strerror(errno));
 				return ((DBINFO **) 0);
 			}
 			if ((ptr = strchr(buffer, '#')))
@@ -528,7 +546,7 @@ LoadDbInfo_TXT_internal(int *total)
 		if (!fgets(buffer, MAX_BUFF, fp)) {
 			if (feof(fp))
 				break;
-			fprintf(stderr, "loadDbInfo_TXT_internal: fgets: %s\n", strerror(errno));
+			fprintf(stderr, "loadMCDInfo: fgets: %s\n", strerror(errno));
 		}
 		if (buffer[strlen(buffer) - 1] != '\n') {
 			fprintf(stderr, "Line No %d in %s Exceeds %d chars\n", count, mcdFile, MAX_BUFF);
@@ -669,7 +687,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		}
 		if (!(ptr = strchr(TmpBuf, ':')))
 			continue;
-		if (relayhosts) { /*- if already an entry then skip */
+		if (relayhosts) { /*- check for entries for domain in relayhosts */
 			ptr++;
 			domain = ptr;
 			for (;*ptr && *ptr != ':';ptr++);
@@ -681,6 +699,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 				continue;
 			for (found = 0,tmpPtr = relayhosts;*tmpPtr;tmpPtr++) {
 				if (!strncmp((*tmpPtr)->domain, domain, DBINFO_BUFF)) {
+					/*- if relayhosts already has an entry then skip */
 					found = 1;
 					break;
 				}
@@ -755,6 +774,12 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	if (!count) { /*- no domains found in assign file */
 		fclose(fp);
 		if (total) {
+			/*- 
+			 * remember that total is one less than the actual number of records allocated
+			 * in loadMCDInfo(). So for one more record we have to allocate total + 1 + 1
+			 * The new allocated becomes total + 1 plus 1 for the last NULL dbinfo structure
+			 * The new total becoems total + 1
+			 */
 			relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + 2));
 			rhostsptr = relayhosts + *total;
 			for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + 2;tmpPtr++)
@@ -770,11 +795,11 @@ localDbinfo(int *total, DBINFO ***rhosts)
 			return ((DBINFO **) 0);
 		}
 		/*- Should check virtual domains and smtproutes */
-		(*rhostsptr)->isLocal = 1;
+		(*rhostsptr)->isLocal = 1; /*- this indicates that this record was created automatically */
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->failed_attempts = 0;
-		if (!(localhost = get_local_ip(AF_INET)))
+		if (!(localhost = get_local_ip(AF_INET))) /*- entry in control/localiphost */
 			localhost = "localhost";
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
 		scopy((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
@@ -790,7 +815,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr) = (DBINFO *) 0;
 		return (relayhosts);
 	}
-	if (total) {
+	if (total) { /*- we found domains in the assign file */
 		relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + count + 1));
 		rhostsptr = relayhosts + *total;
 		for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + count + 1;tmpPtr++)
@@ -825,6 +850,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 			continue;
 		for (found = 0,tmpPtr = relayhosts;*tmpPtr;tmpPtr++) {
 			if (!strncmp((*tmpPtr)->domain, domain, DBINFO_BUFF)) {
+				/*- if relayhosts already has an entry then skip */
 				found = 1;
 				break;
 			}
@@ -838,11 +864,11 @@ localDbinfo(int *total, DBINFO ***rhosts)
 			return ((DBINFO **) 0);
 		}
 		/*- Should check virtual domains and smtproutes */
-		(*rhostsptr)->isLocal = 1;
+		(*rhostsptr)->isLocal = 1; /*- indicate that we were created automatically */
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->failed_attempts = 0;
-		if (!(localhost = get_local_ip(AF_INET)))
+		if (!(localhost = get_local_ip(AF_INET))) /*- entry in control/localiphost */
 			localhost = "localhost";
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
 		scopy((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
