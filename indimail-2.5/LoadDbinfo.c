@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.46  2018-03-27 10:41:07+05:30  Cprogrammer
+ * set use_ssl if specified in host.cntrl/host.master
+ *
  * Revision 2.45  2018-03-24 22:24:51+05:30  Cprogrammer
  * idented code
  *
@@ -149,7 +152,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.45 2018-03-24 22:24:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.46 2018-03-27 10:41:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -638,7 +641,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	char           *mysql_database = 0, *sysconfdir, *assigndir, *controldir, *ptr, *domain;
 	char           *localhost, *mysql_socket = 0, *mysql_port = 0;
 	char            host_path[MAX_BUFF], mysqlhost_buf[MAX_BUFF], TmpBuf[MAX_BUFF];
-	int             count, field_count, found;
+	int             count, field_count, found, use_ssl = 0;
 	DBINFO        **relayhosts, **rhostsptr, **tmpPtr;
 
 	relayhosts = *rhosts;
@@ -657,7 +660,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		}
 		if (!(ptr = strchr(TmpBuf, ':')))
 			continue;
-		if (relayhosts) {
+		if (relayhosts) { /*- if already an entry then skip */
 			ptr++;
 			domain = ptr;
 			for (;*ptr && *ptr != ':';ptr++);
@@ -713,15 +716,21 @@ localDbinfo(int *total, DBINFO ***rhosts)
 			case 0: /*- mysql user */
 				if (*(ptr + 1))
 					mysql_user = ptr + 1;
+				break;
 			case 1: /*- mysql passwd */
 				if (*(ptr + 1))
 					mysql_passwd = ptr + 1;
+				break;
 			case 2: /*- mysql socket/port */
 				if (*(ptr + 1) == '/' || *(ptr + 1) == '.')
 					mysql_socket = ptr + 1;
 				else
 				if (*(ptr + 1))
 					mysql_port = ptr + 1;
+				break;
+			case 3: /*- ssl/nossl */
+				use_ssl = (strncmp(ptr + 1, "ssl", 3) ? 0 : 1);
+				break;
 			}
 		}
 	}
@@ -734,7 +743,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	if (!mysql_port && !(mysql_port = (char *) getenv("MYSQL_VPORT")))
 		mysql_port = "0";
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
-	if (!count) {
+	if (!count) { /*- no domains found in assign file */
 		fclose(fp);
 		if (total) {
 			relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + 2));
@@ -756,6 +765,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->failed_attempts = 0;
+		(*rhostsptr)->use_ssl = use_ssl;
 		if (!(localhost = get_local_ip(AF_INET)))
 			localhost = "localhost";
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
@@ -823,6 +833,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->failed_attempts = 0;
+		(*rhostsptr)->use_ssl = use_ssl;
 		if (!(localhost = get_local_ip(AF_INET)))
 			localhost = "localhost";
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
