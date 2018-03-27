@@ -109,7 +109,7 @@ For a non-clustered architecture, you need a local MySQL database. To connect to
 database, you need to have a control file \fBhost\.mysql\fR. This control file contains the
 IP address or hostname of the MySQL database corresponding to the \fBlocal database\fR. If
 the control file \fBhost\.mysql\fR is missing, programs will use \fIlocalhost\fR to connect
-to MySQL. One can also use \fIhost:user:password:socket/port\fR format for \fBhost.mysql\fR.
+to MySQL. One can also use \fIhost:user:password:socket/port[:ssl]\fR format for \fBhost.mysql\fR.
 
 The local database consists of the following tables
 
@@ -198,14 +198,14 @@ host.master
 host.cntrl
 .PP
 These control file contains the IP address or hostname of the MySQL database corresponding to
-the \fBcentral database\fR. You can also use \fIhost:user:password:socket/port\fR format for
+the \fBcentral database\fR. You can also use \fIhost:user:password:socket/port[:ssl]\fR format for
 these control files. If you plan to have a master-slave MySQL architecture, you can have
 entry in \fIhost.master\fR pointing to the MySQL master database and have entry in
 \fIhost.cntrl\fR pointing to the MySQL slave database. With these control files, all indimail
 programs ensure that all writes go to the master database and reads happen only from the slave
 database. The control files \fIhost.master\fR, \fIhost.cntrl\fR can be overriden by the
 environment variables \fBMASTER_HOST\fR and \fBCNTRL_HOST\fR. One can also give
-host:user:password:mysql_socket/port as the format for \fIhost.master\fR and \fIhost.cntrl\fR.
+host:user:password:mysql_socket/port[:ssl] as the format for \fIhost.master\fR and \fIhost.cntrl\fR.
 .PP
 IndiMail uses \fBgethostid(3)\fR and \fBgetaddrinfo(3)\fR to figure out its identity.
 \fBgetaddrinfo(3)\fR requires your hosts address to be either resolved by dns or be present
