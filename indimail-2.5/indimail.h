@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.227  2018-03-27 12:06:44+05:30  Cprogrammer
+ * added use_ssl field to dbinfo table, structure
+ *
  * Revision 2.226  2018-03-21 11:13:12+05:30  Cprogrammer
  * added error_mysql_options_str() function to display the exact mysql_option() error
  *
@@ -994,7 +997,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.226 2018-03-21 11:13:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.227 2018-03-27 12:06:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1072,6 +1075,7 @@ distributed int not null, \
 server   char(28) not null, \
 mdahost  char(28) not null, \
 port     int not null, \
+use_ssl  int not null, \
 dbname   char(28) not null, \
 user     char(28) not null, \
 passwd   char(28) not null, \
@@ -1088,6 +1092,7 @@ struct dbinfo
 	char            mdahost[DBINFO_BUFF];  /*- server for imap, pop3, delivery */
 	char            server[DBINFO_BUFF];   /*- mysql server */
 	int             port;                  /*- mysql port */
+	char            use_ssl;               /*- set for ssl connection */
 	char            database[DBINFO_BUFF]; /*- mysql database */
 	char            user[DBINFO_BUFF];     /*- mysql user */
 	char            password[DBINFO_BUFF]; /*- mysql passwd */
