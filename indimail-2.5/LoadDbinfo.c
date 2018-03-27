@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.47  2018-03-27 12:06:05+05:30  Cprogrammer
+ * added use_ssl filed to dbinfo table, mcdinfo control file
+ *
  * Revision 2.46  2018-03-27 10:41:07+05:30  Cprogrammer
  * set use_ssl if specified in host.cntrl/host.master
  *
@@ -152,7 +155,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.46 2018-03-27 10:41:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.47 2018-03-27 12:06:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -301,10 +304,10 @@ LoadDbInfo_TXT(int *total)
 			if ((*ptr)->isLocal)
 				continue;
 			snprintf(SqlBuf, SQL_BUF_SIZE, "replace low_priority into dbinfo \
-				(filename, domain, distributed, server, mdahost, port, dbname, user, passwd, timestamp) \
-				values (\"%s\", \"%s\", %d, \"%s\", \"%s\", %d, \"%s\", \"%s\", \"%s\", FROM_UNIXTIME(%ld) + 0)", 
+				(filename, domain, distributed, server, mdahost, port, use_ssl, dbname, user, passwd, timestamp) \
+				values (\"%s\", \"%s\", %d, \"%s\", \"%s\", %d, %d, \"%s\", \"%s\", \"%s\", FROM_UNIXTIME(%ld) + 0)", 
 				mcdFile, (*ptr)->domain, (*ptr)->distributed, (*ptr)->server, (*ptr)->mdahost, (*ptr)->port, 
-				(*ptr)->database, (*ptr)->user, (*ptr)->password, file_time);
+				(*ptr)->use_ssl, (*ptr)->database, (*ptr)->user, (*ptr)->password, file_time);
 			if (mysql_query(&mysql[0], SqlBuf)) {
 				fprintf(stderr, "LoadDbInfo_TXT: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 				err = 1;
@@ -317,7 +320,7 @@ LoadDbInfo_TXT(int *total)
 		if (verbose)
 			printf("Updating File %s\n", mcdFile);
 		snprintf(SqlBuf, SQL_BUF_SIZE,
-			"select high_priority domain, distributed, server, mdahost, port, dbname, user, passwd, timestamp \
+			"select high_priority domain, distributed, server, mdahost, port, use_ssl, dbname, user, passwd, timestamp \
 			from dbinfo where filename=\"%s\"", mcdFile);
 		if (mysql_query(&mysql[0], SqlBuf)) {
 			fprintf(stderr, "LoadDbInfo_TXT: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
@@ -366,9 +369,10 @@ LoadDbInfo_TXT(int *total)
 			scopy((*ptr)->server, row[2], DBINFO_BUFF);
 			scopy((*ptr)->mdahost, row[3], DBINFO_BUFF);
 			(*ptr)->port = atoi(row[4]);
-			scopy((*ptr)->database, row[5], DBINFO_BUFF);
-			scopy((*ptr)->user, row[6], DBINFO_BUFF);
-			scopy((*ptr)->password, row[7], DBINFO_BUFF);
+			(*ptr)->use_ssl = atoi(row[5]);
+			scopy((*ptr)->database, row[6], DBINFO_BUFF);
+			scopy((*ptr)->user, row[7], DBINFO_BUFF);
+			scopy((*ptr)->password, row[8], DBINFO_BUFF);
 			(*ptr)->fd = -1;
 			(*ptr)->last_error = 0;
 			(*ptr)->failed_attempts = 0;
@@ -446,6 +450,7 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 		fprintf(fp, "server   %s\n", (*ptr)->server);
 		fprintf(fp, "mdahost  %s\n", (*ptr)->mdahost);
 		fprintf(fp, "port     %d\n", (*ptr)->port);
+		fprintf(fp, "use_ssl  %d\n", (*ptr)->use_ssl);
 		fprintf(fp, "database %s\n", (*ptr)->database);
 		fprintf(fp, "user     %s\n", (*ptr)->user);
 		fprintf(fp, "pass     %s\n\n", (*ptr)->password);
@@ -586,6 +591,10 @@ LoadDbInfo_TXT_internal(int *total)
 				items++;
 				(*rhostsptr)->port = atoi(dummy2);
 			} else
+			if (!strncmp(dummy1, "use_ssl", 7)) {
+				items++;
+				(*rhostsptr)->use_ssl = (atoi(dummy2) ? 1 : 0);
+			} else
 			if (!strncmp(dummy1, "database", 8)) {
 				items++;
 				scopy((*rhostsptr)->database, dummy2, DBINFO_BUFF);
@@ -603,7 +612,7 @@ LoadDbInfo_TXT_internal(int *total)
 				free(relayhosts);
 				return ((DBINFO **) 0);
 			}
-			if (items == 6) {
+			if (items == 7) {
 				if (*dombuf) {
 					scopy((*rhostsptr)->domain, dombuf, DBINFO_BUFF);
 					(*rhostsptr)->distributed = distributed;
@@ -626,7 +635,7 @@ LoadDbInfo_TXT_internal(int *total)
 	}
 	(*rhostsptr) = (DBINFO *) 0; /*- Null structure to end relayhosts */
 	if (!(rhostsptr = localDbinfo(total, &relayhosts)))
-		fprintf(stderr, "LoadDbInfo_TXT_internal: No local Dbinfo\n");
+		fprintf(stderr, "localDbinfo: No local Dbinfo\n");
 	else
 		relayhosts = rhostsptr;
 	_total = *total;
@@ -765,7 +774,6 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->failed_attempts = 0;
-		(*rhostsptr)->use_ssl = use_ssl;
 		if (!(localhost = get_local_ip(AF_INET)))
 			localhost = "localhost";
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
@@ -773,6 +781,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 		scopy((*rhostsptr)->domain, ptr, DBINFO_BUFF);
 		(*rhostsptr)->port = atoi(mysql_port);
+		(*rhostsptr)->use_ssl = use_ssl;
 		scopy((*rhostsptr)->database, mysql_database, DBINFO_BUFF);
 		scopy((*rhostsptr)->user, mysql_user, DBINFO_BUFF);
 		scopy((*rhostsptr)->password, mysql_passwd, DBINFO_BUFF);
@@ -833,13 +842,13 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->failed_attempts = 0;
-		(*rhostsptr)->use_ssl = use_ssl;
 		if (!(localhost = get_local_ip(AF_INET)))
 			localhost = "localhost";
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
 		scopy((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
 		scopy((*rhostsptr)->domain, domain, DBINFO_BUFF);
 		(*rhostsptr)->port = atoi(mysql_port);
+		(*rhostsptr)->use_ssl = use_ssl;
 		scopy((*rhostsptr)->database, mysql_database, DBINFO_BUFF);
 		scopy((*rhostsptr)->user, mysql_user, DBINFO_BUFF);
 		scopy((*rhostsptr)->password, mysql_passwd, DBINFO_BUFF);
