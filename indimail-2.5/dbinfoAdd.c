@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoAdd.c,v $
+ * Revision 2.6  2018-03-27 12:04:59+05:30  Cprogrammer
+ * renamed indicorp to indimail
+ *
  * Revision 2.5  2017-03-13 13:40:13+05:30  Cprogrammer
  * replace qmaildir with sysconfdir
  *
@@ -20,14 +23,14 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoAdd.c,v 2.5 2017-03-13 13:40:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbinfoAdd.c,v 2.6 2018-03-27 12:04:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
 /*
  *
  * File      : controldir/mcdinfo
- * domain    : indicorp.com
+ * domain    : indimail.org
  * distFlag  : 0
  * server    : 210.210.122.80
  * mdahost   : 210.210.122.80
