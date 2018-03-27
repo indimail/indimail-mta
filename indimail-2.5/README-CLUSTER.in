@@ -113,7 +113,7 @@ DATE: @DATE@
     echo "server   192.168.2.115" # MySQL Server for Mail Store1
     echo "mdahost  192.168.2.115" # Mail Store1
     echo "port     3306"
-	echo "use_ssl  1"
+    echo "use_ssl  1"
     echo "database indimail"
     echo "user     indimail"
     echo "pass     ssh-1.5-"
@@ -122,7 +122,7 @@ DATE: @DATE@
     echo "server   192.168.2.116" # MySQL Server for Mail Store2
     echo "mdahost  192.168.2.116" # Mail Store2
     echo "port     3306"
-	echo "use_ssl  1"
+    echo "use_ssl  0"
     echo "database indimail"
     echo "user     indimail"
     echo "pass     ssh-1.5-"
