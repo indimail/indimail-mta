@@ -971,12 +971,6 @@ AC_EGREP_HEADER(MYSQL_OPT_SSL_CRLPATH, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYS
 AC_EGREP_HEADER(MYSQL_OPT_SSL_ENFORCE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_ENFORCE, 1, "enforce ssl/tls"))
 AC_EGREP_HEADER(MYSQL_OPT_TLS_VERSION, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_TLS_VERSION, 1, "tls version"))
 AC_EGREP_HEADER(MYSQL_OPT_SSL_MODE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_MODE, 1, "ssl mmode"))
-if [ -x /usr/bin/readelf ] ; then
-	/usr/bin/readelf -d /usr/lib/x86_64-linux-gnu/libmariadbclient.so.18|grep SONAME |grep libmariadbclient > /dev/null 2>&1
-	if [ $? -eq 0 ] ; then
-		AC_DEFINE([HAVE_LIBMARIADBCLIENT], [1],[We are using MariaDB client library])
-	fi
-fi
 
 saveLIBS="$LIBS"
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
