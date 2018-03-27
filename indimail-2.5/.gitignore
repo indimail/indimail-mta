@@ -221,5 +221,6 @@ stamp-h1
 doc/RELEASE-Notes
 doc/INSTALL.indimail
 doc/INSTALL-RPM
+doc/INSTALL-MYSQL
 doc/README-CLUSTER
 debian/indimail.dsc
