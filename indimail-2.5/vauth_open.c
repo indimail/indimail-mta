@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.29  2018-03-27 12:45:45+05:30  Cprogrammer
+ * use localhost if server is local
+ *
  * Revision 2.28  2018-03-27 12:15:14+05:30  Cprogrammer
  * load use_ssl parameter from host.mysql, set use_ssl flag for set_mysql_options to call mysql_ssl_set()'
  *
@@ -117,7 +120,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.28 2018-03-27 12:15:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.29 2018-03-27 12:45:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -131,7 +134,7 @@ vauth_open(char *dbhost)
 {
 	char            SqlBuf[SQL_BUF_SIZE], host_path[MAX_BUFF];
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
-		           *mysql_socket = 0, *sysconfdir, *controldir;
+		           *mysql_socket = 0, *sysconfdir, *controldir, *server;
 	int             mysqlport = -1, count;
 	unsigned int    flags = 0, use_ssl = 0;
 	FILE           *fp;
@@ -236,7 +239,8 @@ vauth_open(char *dbhost)
 			fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return(-1);
 		}
-		if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd,
+		server = (islocalif(mysql_host) ? "localhost" : mysql_host);
+		if (!(mysql_real_connect(&mysql[1], server, mysql_user, mysql_passwd,
 			mysql_database, mysqlport, mysql_socket, flags)))
 		{
 			flags = use_ssl;
@@ -245,7 +249,7 @@ vauth_open(char *dbhost)
 				fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 				return(-1);
 			}
-			if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd, NULL,
+			if (!(mysql_real_connect(&mysql[1], server, mysql_user, mysql_passwd, NULL,
 				mysqlport, mysql_socket, flags)))
 			{
 				mysql_perror("mysql_real_connect: %s", mysql_host);
