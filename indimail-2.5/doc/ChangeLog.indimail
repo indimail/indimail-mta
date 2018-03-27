@@ -1,4 +1,4 @@
-* Mon Mar 27 2018 12:16:45 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+* Mon Mar 27 2018 19:02:46 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
 Release 2.5 Start 27/01/2018
 27/01/2018
 1.  moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
@@ -41,7 +41,8 @@ hostcntrl, lastauth
 25/03/2018
 23. fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
 27/03/2018
-24. set use_ssl paramter for MySQL connnections
+24. added ability to use SSL/TLS encryption for MySQL connections. set use_ssl paramter
+    for MySQL connnections
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
