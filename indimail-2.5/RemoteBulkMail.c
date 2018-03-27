@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 2.13  2018-03-27 10:42:12+05:30  Cprogrammer
+ * set use_ssl if specified in BULK_HOST
+ *
  * Revision 2.12  2018-03-21 11:12:52+05:30  Cprogrammer
  * added error_mysql_options_str() function to display the exact mysql_option() error
  *
@@ -53,7 +56,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.12 2018-03-21 11:12:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.13 2018-03-27 10:42:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -125,7 +128,7 @@ bulk_host_connect()
 	char           *bulk_host, *bulk_user = 0, *bulk_passwd = 0, *bulk_database,
 				   *bulk_socket = 0, *port = 0, *ptr;
 	int             bulk_port, count;
-	unsigned int    flags;
+	unsigned int    flags, use_ssl = 0;
 	static MYSQL    bulkMySql;
 
 	if ((bulk_host = (char *) getenv("BULK_HOST")) == (char *) 0)
@@ -142,15 +145,21 @@ bulk_host_connect()
 				case 0: /*- mysql user */
 					if (*(ptr + 1))
 						bulk_user = ptr + 1;
+					break;
 				case 1: /*- mysql passwd */
 					if (*(ptr + 1))
 						bulk_passwd = ptr + 1;
+					break;
 				case 2: /*- mysql socket/port */
 					if (*(ptr + 1) == '/' || *(ptr + 1) == '.')
 						bulk_socket = ptr + 1;
 					else
 					if (*(ptr + 1))
 						port = ptr + 1;
+					break;
+				case 3: /*- ssl/nossl */
+					use_ssl = (strncmp(ptr + 1, "ssl", 3) ? 0 : 1);
+					break;
 				}
 			}
 		}
@@ -164,6 +173,7 @@ bulk_host_connect()
 		if (!port && !(port = (char *) getenv("BULK_VPORT")))
 			port = "0";
 		mysql_init(&bulkMySql);
+		flags = use_ssl;
 		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags)))
 		{
 			fprintf(stderr, "mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
