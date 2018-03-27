@@ -1140,7 +1140,7 @@ You can go on to add a virtual domain and users if you wish
 
     % cd @sysconfdir@/control
     % su
-    # echo "localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock" > host.mysql
+    # echo "localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:nossl" > host.mysql
       or
     # echo localhost > host.mysql
 

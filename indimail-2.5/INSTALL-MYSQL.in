@@ -126,11 +126,13 @@ and
 
 The format for this file is
 
-mysql_host:mysql_user:mysql_pass:mysql_socket
+mysql_host:mysql_user:mysql_pass:mysql_socket[:use_ssl]
 
 or
 
-mysql_host:mysql_user:mysql_pass:mysql_port
+mysql_host:mysql_user:mysql_pass:mysql_port[:use_ssl]
+
+where use_ssl is the keyword "ssl" or "nossl", or it can be omitted entirely.
 
 NOTE: You can email me at manvendra@indimail.org, if you find this confusing or need any
 help/clarification.

@@ -54,10 +54,11 @@ DATE: @DATE@
 
     # echo localhost > @indimaildir@/control/host.mysql (MySQL host to which all programs will
                                                          connect)
-    NOTE: you can also use host:user:password:socket or host:user:password:port format
+    NOTE: you can also use host:user:password:socket[:ssl] or host:user:password:port[:ssl]
+    format. Here the optional use_ssl is "ssl" or "nossl"
     for host.mysql (for IndiMail 1.6.9 and above)
 
-    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
+    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock:ssl" > host.mysql
 
     Clustered Domain
     ----------------
@@ -104,7 +105,7 @@ DATE: @DATE@
     e.g. run the following command to create a clustered domain with just two mail clusters on
     hosts 192.168.2.115 and 192.168.2.116. The cluster information for all users will be
     maintained on the MySQL host at 192.168.2.110. Updating the file on any host updates the
-	file mcdinfo on all hosts. You can use any text editor to edit this file.
+    file mcdinfo on all hosts. You can use any text editor to edit this file.
 
 
     (
@@ -112,6 +113,7 @@ DATE: @DATE@
     echo "server   192.168.2.115" # MySQL Server for Mail Store1
     echo "mdahost  192.168.2.115" # Mail Store1
     echo "port     3306"
+	echo "use_ssl  1"
     echo "database indimail"
     echo "user     indimail"
     echo "pass     ssh-1.5-"
@@ -120,6 +122,7 @@ DATE: @DATE@
     echo "server   192.168.2.116" # MySQL Server for Mail Store2
     echo "mdahost  192.168.2.116" # Mail Store2
     echo "port     3306"
+	echo "use_ssl  1"
     echo "database indimail"
     echo "user     indimail"
     echo "pass     ssh-1.5-"
