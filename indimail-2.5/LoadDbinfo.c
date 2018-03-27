@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.49  2018-03-27 19:01:13+05:30  Cprogrammer
+ * corrected error text
+ *
  * Revision 2.48  2018-03-27 17:51:15+05:30  Cprogrammer
  * added documentation
  *
@@ -158,7 +161,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.48 2018-03-27 17:51:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.49 2018-03-27 19:01:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -408,7 +411,7 @@ delete_dbinfo_rows(char *filename)
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from dbinfo where filename=\"%s\"", filename);
 	if (mysql_query(&mysql[0], SqlBuf)) {
-		fprintf(stderr, "delete_dbinfo: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
+		fprintf(stderr, "delete_dbinfo_rows: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		return (-1);
 	}
 	return (0);
@@ -788,7 +791,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		} else {
 			relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * 2);
 			rhostsptr = relayhosts;
-		} 
+		}
 		if (!((*rhostsptr) = (DBINFO *) malloc(sizeof(DBINFO)))) {
 			perror("malloc");
 			free(relayhosts);
@@ -824,7 +827,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	} else {
 		relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * (count + 1));
 		rhostsptr = relayhosts;
-	} 
+	}
 	if (!relayhosts) {
 		perror("malloc");
 		fclose(fp);
