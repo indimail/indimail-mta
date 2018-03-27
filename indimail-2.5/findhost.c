@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.39  2018-03-27 12:13:10+05:30  Cprogrammer
+ * load use_ssl parameter from host.master/host.cntrl, set use_ssl flag for set_mysql_options to call mysql_ssl_set()
+ *
  * Revision 2.38  2018-03-21 11:13:02+05:30  Cprogrammer
  * added error_mysql_options_str() function to display the exact mysql_option() error
  *
@@ -207,7 +210,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.38 2018-03-21 11:13:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.39 2018-03-27 12:13:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -384,7 +387,7 @@ open_central_db(char *dbhost)
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
 				   *cntrl_socket = 0, *sysconfdir, *controldir;
 	int             mysqlport = -1, count;
-	unsigned int    flags;
+	unsigned int    flags, use_ssl = 0;
 	FILE           *fp;
 
 	if (isopen_cntrl == 1)
@@ -455,15 +458,21 @@ open_central_db(char *dbhost)
 			case 0: /*- mysql user */
 				if (*(ptr + 1))
 					mysql_user = ptr + 1;
+				break;
 			case 1: /*- mysql passwd */
 				if (*(ptr + 1))
 					mysql_passwd = ptr + 1;
+				break;
 			case 2: /*- mysql socket/port */
 				if (*(ptr + 1) == '/' || *(ptr + 1) == '.')
 					cntrl_socket = ptr + 1;
 				else
 				if (*(ptr + 1))
 					cntrl_port = ptr + 1;
+				break;
+			case 3: /*- ssl/nossl */
+				use_ssl = (strncmp(ptr + 1, "ssl", 3) ? 0 : 1);
+				break;
 			}
 		}
 	}
@@ -488,6 +497,7 @@ open_central_db(char *dbhost)
 	 */
 	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
 	{
+		flags = use_ssl;
 		if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags)))
 		{
 			fprintf(stderr, "mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
@@ -495,6 +505,7 @@ open_central_db(char *dbhost)
 		}
 		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, flags)))
 		{
+			flags = use_ssl;
 			if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags)))
 			{
 				fprintf(stderr, "mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
