@@ -24,5 +24,8 @@ indimail (@version@-3) unstable; urgency=low
   * fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
   * set use_ssl paramter for MySQL connnections
   * added ability to use SSL/TLS encryption for MySQL connections. set use_ssl paramter for MySQL connnections
+  * mysql_options() in libmariadb is unable to locate cnf files without an absolute path
+  * LoadDbInfo.c - set mysql_socket for local dbinfo structure
+  * dbload.c - pass socket argument to mysql_real_connect() to prevent failure for local connect with libmariadbclient
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 27 Mar 2018 19:02:46 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 30 Mar 2018 09:34:02 +0530

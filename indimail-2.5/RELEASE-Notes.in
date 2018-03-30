@@ -110,3 +110,7 @@ Release 2.5 Start 27/01/2018
 26. fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
 27. added ability to use SSL/TLS encryption for MySQL connections. set use_ssl paramter
     for MySQL connnections
+28. mysql_options() in libmariadb is unable to locate cnf files without an absolute path
+29. LoadDbInfo.c - set mysql_socket for local dbinfo structure
+30. dbload.c - pass socket argument to mysql_real_connect() to prevent failure for
+    local connect with libmariadbclient
