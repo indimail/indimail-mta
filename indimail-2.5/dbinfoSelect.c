@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoSelect.c,v $
+ * Revision 2.9  2018-03-30 22:59:54+05:30  Cprogrammer
+ * display SSL Cipher only when use_ssl is set
+ *
  * Revision 2.8  2018-03-27 12:08:12+05:30  Cprogrammer
  * display use_ssl field
  *
@@ -28,7 +31,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.8 2018-03-27 12:08:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.9 2018-03-30 22:59:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -91,13 +94,13 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 		else {
 			printf("TCP/IP Port    %d\n", (*rhostsptr)->port);
 			printf("Use SSL        %s\n", (*rhostsptr)->use_ssl ? "Yes" : "No");
-   			printf("SSL Cipher     %s\n", mysql_get_ssl_cipher(*mysqlptr));
+			if ((*rhostsptr)->use_ssl)
+   				printf("SSL Cipher     %s\n", mysql_get_ssl_cipher(*mysqlptr));
 		}
 		printf("database       %s\n", (*rhostsptr)->database);
 		printf("user           %s\n", (*rhostsptr)->user);
 		printf("password       %s\n", (*rhostsptr)->password);
 		printf("fd             %d\n", (*rhostsptr)->fd);
-		if ((*rhostsptr)->use_ssl)
 		printf("DBINFO Method  %s\n", (*rhostsptr)->isLocal ? "Auto" : "DBINFO");
 		if ((*rhostsptr)->fd == -1)
 			printf("MySQL Stat     mysql_real_connect: %s\n", mysql_error((*mysqlptr)));
