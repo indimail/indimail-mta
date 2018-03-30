@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.4  2018-03-31 00:00:41+05:30  Cprogrammer
+ * fixed spurious chown in r_mkdir()
+ *
  * Revision 1.3  2018-03-24 23:34:27+05:30  Cprogrammer
  * return success if VIRTUAL_PKG_LIB is not defined
  *
@@ -195,11 +198,10 @@ r_mkdir(dir, mode, uid, gid)
 	for (ptr = dirbuf.s + 1;*ptr;ptr++) {
 		if (*ptr == '/') {
 			*ptr = 0;
-			if (access(dirbuf.s, F_OK) && (i = mkdir(dirbuf.s, mode)) == -1)
-				return (i);
-			else
-			if ((i = chown(dirbuf.s, uid, gid)) == -1)
-				return (i);
+			if (access(dirbuf.s, F_OK)) {
+				if ((i = mkdir(dirbuf.s, mode)) == -1 || (i = chown(dirbuf.s, uid, gid)) == -1)
+					return (i);
+			}
 			*ptr = '/';
 		}
 	}
@@ -749,7 +751,7 @@ inquery(char query_type, char *email, char *ip)
 void
 getversion_inquery_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.3 2018-03-24 23:34:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.4 2018-03-31 00:00:41+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
