@@ -9,5 +9,7 @@ indimail-mta (2.4-3) unstable; urgency=low
   * create ld.so cache only when libdir is not /usr/lib or /usr/lib64
   * svctool - added --ssl, --require-secure-transport command line option for mysqld
   * svctool - create env variable VIRTUAL_PKG_LIB with libindimail.so to provide indimail functionality
+  * BUG - indimail_stub.c:  fixed spurious chown() in r_mkdir()
+  * svctool - fix creation of env variable VIRTUAL_PKG_LIB
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 24 Mar 2018 23:29:29 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 31 Mar 2018 00:01:12 +0530
