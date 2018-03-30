@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.228  2018-03-30 09:31:40+05:30  Cprogrammer
+ * added socket member to dbinfo structure
+ *
  * Revision 2.227  2018-03-27 12:06:44+05:30  Cprogrammer
  * added use_ssl field to dbinfo table, structure
  *
@@ -997,7 +1000,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.227 2018-03-27 12:06:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.228 2018-03-30 09:31:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1092,6 +1095,7 @@ struct dbinfo
 	char            mdahost[DBINFO_BUFF];  /*- server for imap, pop3, delivery */
 	char            server[DBINFO_BUFF];   /*- mysql server */
 	int             port;                  /*- mysql port */
+	char           *socket;                /*- mysql_socket */
 	char            use_ssl;               /*- set for ssl connection */
 	char            database[DBINFO_BUFF]; /*- mysql database */
 	char            user[DBINFO_BUFF];     /*- mysql user */
