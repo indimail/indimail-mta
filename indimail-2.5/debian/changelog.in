@@ -27,5 +27,8 @@ indimail (@version@-3) unstable; urgency=low
   * mysql_options() in libmariadb is unable to locate cnf files without an absolute path
   * LoadDbInfo.c - set mysql_socket for local dbinfo structure
   * dbload.c - pass socket argument to mysql_real_connect() to prevent failure for local connect with libmariadbclient
+  * vauth_open.c, dbload.c - use local interface only when mysql socket is defined in host.mysql
+  * vuserinfo, dbinfo - display SSL Cipher when use_ssl is set
+  * use full path of cnf file for libmariadbclient bug
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 30 Mar 2018 09:34:02 +0530
