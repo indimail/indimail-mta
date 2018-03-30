@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.44  2018-03-30 23:03:58+05:30  Cprogrammer
+ * display MySQL socket info and SSL Cipher if use_ssl is set
+ *
  * Revision 2.43  2017-05-01 19:49:42+05:30  Cprogrammer
  * removed mailing list feature from vfilter
  *
@@ -224,7 +227,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.43 2017-05-01 19:49:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.44 2018-03-30 23:03:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -239,10 +242,11 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 	struct passwd  *mypw;
 	char           *ptr, *real_domain, *mailstore, *sysconfdir, *controldir, *passwd_hash;
 	FILE           *fp;
+	MYSQL          *mptr;
 #ifdef CLUSTERED_SITE
 	int             is_dist = 0;
 #endif
-	int             islocal = 1;
+	int             use_ssl = 0, islocal = 1;
 	char            maildir[MAX_BUFF], tmpbuf[MAX_BUFF];
 	uid_t           uid;
 	gid_t           gid;
@@ -486,6 +490,19 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 #else
 		printf("Sql Database  : %s\n", mysql_host);
 #endif
+		mptr = &mysql[1];
+		if (mptr->unix_socket)
+			printf("Unix   Socket : %s\n", mptr->unix_socket);
+		else {
+			printf("TCP/IP Port   : %d\n", mptr->port);
+			if (mysql_get_option(mptr, MYSQL_OPT_SSL_ENFORCE, &use_ssl)) {
+				mysql_perror("mysql_get_option: %s");
+				return (1);
+			}
+			printf("Use SSL       : %s\n", use_ssl ? "Yes" : "No");
+			if (use_ssl)
+   				printf("SSL Cipher    : %s\n", mysql_get_ssl_cipher(mptr));
+		}
 	}
 #ifdef ENABLE_AUTH_LOGGING
 	if (Domain && *Domain && DisplayAll)
