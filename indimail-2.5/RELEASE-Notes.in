@@ -117,3 +117,5 @@ Release 2.5 Start 27/01/2018
 31. vauth_open.c, dbload.c - use local interface only when mysql socket is defined in host.mysql
 32. vuserinfo, dbinfo - display SSL Cipher when use_ssl is set
 33. use full path of cnf file for libmariadbclient bug
+34. BUG - indimail_stub.c:  fixed spurious chown() in r_mkdir()
+35. svctool - fix creation of env variable VIRTUAL_PKG_LIB

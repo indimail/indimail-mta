@@ -30,5 +30,6 @@ indimail (@version@-3) unstable; urgency=low
   * vauth_open.c, dbload.c - use local interface only when mysql socket is defined in host.mysql
   * vuserinfo, dbinfo - display SSL Cipher when use_ssl is set
   * use full path of cnf file for libmariadbclient bug
+  * svctool - fix creation of env variable VIRTUAL_PKG_LIB
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 30 Mar 2018 09:34:02 +0530

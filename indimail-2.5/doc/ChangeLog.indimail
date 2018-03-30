@@ -51,6 +51,7 @@ hostcntrl, lastauth
 28. vauth_open.c, dbload.c - use local interface only when mysql socket is defined in host.mysql
 29. vuserinfo, dbinfo - display SSL Cipher when use_ssl is set
 30. use full path of cnf file for libmariadbclient bug
+31. svctool - fix creation of env variable VIRTUAL_PKG_LIB
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
