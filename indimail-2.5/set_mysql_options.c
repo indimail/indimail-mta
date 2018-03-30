@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.19  2018-03-30 09:32:26+05:30  Cprogrammer
+ * mysql_options() in libmariadb is unable to locate cnf files without an absolute path
+ *
  * Revision 2.18  2018-03-27 12:14:12+05:30  Cprogrammer
  * call mysql_ssl_set() if flags is set
  *
@@ -59,7 +62,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.18 2018-03-27 12:14:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.19 2018-03-30 09:32:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -112,7 +115,14 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 				   *set_client_ip, *opt_reconnect, *opt_protocol;
 	char            temp[4];
 	char            o_reconnect, tmpv_c, use_ssl = 0;
-	unsigned int    protocol, connect_timeout, read_timeout, write_timeout, ssl_mode;
+	unsigned int    protocol, connect_timeout, read_timeout, write_timeout;
+#ifdef LIBMARIADB
+	char            fpath[MAX_BUFF];
+	char           *sysconfdir;
+#endif
+#ifdef HAVE_MYSQL_OPT_SSL_MODE
+	unsigned int    ssl_mode;
+#endif
 	char           *cipher;
 
 	use_ssl = (*flags == 1 ? 1 : 0);
@@ -122,7 +132,13 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if (getenv("CLIENT_INTERACTIVE"))
 		*flags += CLIENT_INTERACTIVE;
 	getEnvConfigStr(&init_cmd, "MYSQL_INIT_COMMAND", 0);
+#ifdef LIBMARIADB
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+	snprintf(fpath, sizeof(fpath) - 1, "%s/%s", sysconfdir, file);
+	getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", fpath);
+#else
 	getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", file);
+#endif
 	getEnvConfigStr(&default_group, "MYSQL_READ_DEFAULT_GROUP", group);
 	getEnvConfigStr(&c_timeout, "MYSQL_OPT_CONNECT_TIMEOUT", "120");
 	getEnvConfigStr(&r_timeout, "MYSQL_OPT_READ_TIMEOUT", "20");
