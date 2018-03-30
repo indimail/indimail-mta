@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.23  2018-03-30 09:36:12+05:30  Cprogrammer
+ * pass socket argument to mysql_real_connect() to prevent failure for local connect with libmariadbclient
+ *
  * Revision 2.22  2018-03-27 12:11:34+05:30  Cprogrammer
  * set use_ssl flag for set_mysql_options to call mysql_ssl_set()
  *
@@ -80,7 +83,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.22 2018-03-27 12:11:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.23 2018-03-30 09:36:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -271,7 +274,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		server = (*ptr)->server;
 	(*ptr)->last_attempted = time(0);
 	if (!mysql_real_connect(*mysqlptr, server, (*ptr)->user,
-			(*ptr)->password, (*ptr)->database, (*ptr)->port, NULL, flags))
+			(*ptr)->password, (*ptr)->database, (*ptr)->port, (*ptr)->socket, flags))
 	{
 		char           *my_error;
 		int             my_error_len;
