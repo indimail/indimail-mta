@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.24  2018-03-30 23:03:02+05:30  Cprogrammer
+ * use local interface only when mysql socket is defined in host.mysql
+ *
  * Revision 2.23  2018-03-30 09:36:12+05:30  Cprogrammer
  * pass socket argument to mysql_real_connect() to prevent failure for local connect with libmariadbclient
  *
@@ -83,7 +86,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.23 2018-03-30 09:36:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.24 2018-03-30 23:03:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -268,10 +271,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		fprintf(stderr, "mysql_options: %s\n", (str = error_mysql_options_str(count)) ? str : "unknown error");
 		return(-1);
 	}
-	if (islocalif((*ptr)->server) || !strncmp((*ptr)->server, "localhost", 10))
-		server = "localhost";
-	else
-		server = (*ptr)->server;
+	server = ((*ptr)->socket && islocalif((*ptr)->server) ? "localhost" : (*ptr)->server);
 	(*ptr)->last_attempted = time(0);
 	if (!mysql_real_connect(*mysqlptr, server, (*ptr)->user,
 			(*ptr)->password, (*ptr)->database, (*ptr)->port, (*ptr)->socket, flags))
@@ -290,9 +290,9 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 			strncpy((*ptr)->last_error, my_error, my_error_len);
 		}
 		if (verbose)
-			fprintf(stderr, "MYSQLconnect: %s@%s: Domain %s Port %d %s\n",
+			fprintf(stderr, "MYSQLconnect: %s@%s: Domain %s Port %d Socket %s: %s\n",
 				(*ptr)->database, server, (*ptr)->domain, (*ptr)->port,
-				mysql_error(*mysqlptr));
+				(*ptr)->socket ? (*ptr)->socket : "TCP/IP", mysql_error(*mysqlptr));
 		(*ptr)->failed_attempts++;
 		return (1);
 	}
