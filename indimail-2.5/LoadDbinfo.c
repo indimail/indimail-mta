@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.50  2018-03-30 09:35:29+05:30  Cprogrammer
+ * set socket for local dbinfo structure
+ *
  * Revision 2.49  2018-03-27 19:01:13+05:30  Cprogrammer
  * corrected error text
  *
@@ -161,7 +164,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.49 2018-03-27 19:01:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.50 2018-03-30 09:35:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -379,6 +382,7 @@ LoadDbInfo_TXT(int *total)
 			scopy((*ptr)->server, row[2], DBINFO_BUFF);
 			scopy((*ptr)->mdahost, row[3], DBINFO_BUFF);
 			(*ptr)->port = atoi(row[4]);
+			(*ptr)->socket = (char *) 0;
 			(*ptr)->use_ssl = atoi(row[5]);
 			scopy((*ptr)->database, row[6], DBINFO_BUFF);
 			scopy((*ptr)->user, row[7], DBINFO_BUFF);
@@ -809,6 +813,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 		scopy((*rhostsptr)->domain, ptr, DBINFO_BUFF);
 		(*rhostsptr)->port = atoi(mysql_port);
+		(*rhostsptr)->socket = mysql_socket;
 		(*rhostsptr)->use_ssl = use_ssl;
 		scopy((*rhostsptr)->database, mysql_database, DBINFO_BUFF);
 		scopy((*rhostsptr)->user, mysql_user, DBINFO_BUFF);
@@ -877,6 +882,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		scopy((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
 		scopy((*rhostsptr)->domain, domain, DBINFO_BUFF);
 		(*rhostsptr)->port = atoi(mysql_port);
+		(*rhostsptr)->socket = mysql_socket;
 		(*rhostsptr)->use_ssl = use_ssl;
 		scopy((*rhostsptr)->database, mysql_database, DBINFO_BUFF);
 		scopy((*rhostsptr)->user, mysql_user, DBINFO_BUFF);
