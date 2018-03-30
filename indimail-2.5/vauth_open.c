@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.30  2018-03-30 23:01:23+05:30  Cprogrammer
+ * use local interface only when mysql socket is defined in host.mysql
+ *
  * Revision 2.29  2018-03-27 12:45:45+05:30  Cprogrammer
  * use localhost if server is local
  *
@@ -120,7 +123,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.29 2018-03-27 12:45:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.30 2018-03-30 23:01:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -128,6 +131,7 @@ static char     sccsid[] = "$Id: vauth_open.c,v 2.29 2018-03-27 12:45:45+05:30 C
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <mysqld_error.h>
 
 int
 vauth_open(char *dbhost)
@@ -162,16 +166,12 @@ vauth_open(char *dbhost)
 		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", sysconfdir, controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	}
-	if (!*mysql_host && !access(host_path, F_OK))
-	{
-		if (!(fp = fopen(host_path, "r")))
-		{
+	if (!*mysql_host && !access(host_path, F_OK)) {
+		if (!(fp = fopen(host_path, "r"))) {
 			fprintf(stderr, "open: %s: %s\n", host_path, strerror(errno));
 			return (1);
-		} else
-		{
-			if (!fgets(mysql_host, MAX_BUFF - 2, fp))
-			{
+		} else {
+			if (!fgets(mysql_host, MAX_BUFF - 2, fp)) {
 				fprintf(stderr, "fgets: %s\n", strerror(errno));
 				fclose(fp);
 				return (1);
@@ -189,10 +189,8 @@ vauth_open(char *dbhost)
 	 * localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:ssl
 	 * localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:nossl
 	 */
-	for (count = 0,ptr = mysql_host;*ptr;ptr++)
-	{
-		if (*ptr == ':')
-		{
+	for (count = 0,ptr = mysql_host;*ptr;ptr++) {
+		if (*ptr == ':') {
 			*ptr = 0;
 			switch (count++)
 			{
@@ -230,48 +228,46 @@ vauth_open(char *dbhost)
 	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
 	mysqlport = atoi(indi_port);
 #ifdef CLUSTERED_SITE
-	if (!isopen_cntrl || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
-	{
+	if (!isopen_cntrl || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF)) {
 #endif
 		flags = use_ssl;
-		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags)))
-		{
+		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
 			fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return(-1);
 		}
-		server = (islocalif(mysql_host) ? "localhost" : mysql_host);
+		server = (mysql_socket && islocalif(mysql_host) ? "localhost" : mysql_host);
 		if (!(mysql_real_connect(&mysql[1], server, mysql_user, mysql_passwd,
-			mysql_database, mysqlport, mysql_socket, flags)))
-		{
+			mysql_database, mysqlport, mysql_socket, flags))) {
 			flags = use_ssl;
-			if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags)))
-			{
+			if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
 				fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 				return(-1);
 			}
+			if ((count = mysql_errno(&mysql[1])) != ER_DATABASE_NAME) {
+				mysql_perror("mysql_real_connect: %s@%s user %s port %d socket %s", server, 
+					mysql_database, mysql_user, mysqlport, mysql_socket ? mysql_socket : "TCP/IP");
+				return (-1);
+			} 
 			if (!(mysql_real_connect(&mysql[1], server, mysql_user, mysql_passwd, NULL,
-				mysqlport, mysql_socket, flags)))
-			{
-				mysql_perror("mysql_real_connect: %s", mysql_host);
+				mysqlport, mysql_socket, flags))) {
+				mysql_perror("mysql_real_connect: %s user %s port %d socket %s", server,
+					mysql_user, mysqlport, mysql_socket ? mysql_socket : "TCP/IP");
 				return (-1);
 			}
 			if (snprintf(SqlBuf, SQL_BUF_SIZE, "CREATE DATABASE %s", mysql_database) == -1)
 				SqlBuf[SQL_BUF_SIZE - 1] = 0;
-			if (mysql_query(&mysql[1], SqlBuf))
-			{
+			if (mysql_query(&mysql[1], SqlBuf)) {
 				mysql_perror("mysql_query: %s", SqlBuf);
 				return (-1);
 			}
-			if (mysql_select_db(&mysql[1], mysql_database))
-			{
+			if (mysql_select_db(&mysql[1], mysql_database)) {
 				mysql_perror("mysql_select_db: %s", mysql_database);
 				return (-1);
 			}
 		}
 		is_open = 1;
 #ifdef CLUSTERED_SITE
-	} else
-	{
+	} else {
 		mysql[1] = mysql[0];
 		mysql[1].affected_rows= ~(my_ulonglong) 0;
 		is_open = 2;
