@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 2.14  2018-03-31 20:29:29+05:30  Cprogrammer
+ * display mysql_option() error index
+ *
  * Revision 2.13  2018-03-27 10:42:12+05:30  Cprogrammer
  * set use_ssl if specified in BULK_HOST
  *
@@ -56,7 +59,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.13 2018-03-27 10:42:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.14 2018-03-31 20:29:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -176,7 +179,8 @@ bulk_host_connect()
 		flags = use_ssl;
 		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags)))
 		{
-			fprintf(stderr, "mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
+			fprintf(stderr, "mysql_options(%d): %s\n", count,
+				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return ((MYSQL *) 0);
 		}
 		bulk_port = atoi(port);
