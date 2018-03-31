@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.456 2018-03-30 09:38:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.457 2018-03-31 11:50:15+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1844,7 +1844,8 @@ do
     echo 0 > %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
     echo 1 > %{servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
     echo /tmp/logfifo > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
-    options="`cat %{servicedir}/qmail-smtpd.$port/variables/.options` --spamfilter=\"%{_prefix}/bogofilter -p -d %{sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+    # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+    options="`cat %{servicedir}/qmail-smtpd.$port/variables/.options` --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
     echo $options > %{servicedir}/qmail-smtpd.$port/variables/.options
   fi
 done
@@ -1901,6 +1902,12 @@ if [ %nofetchmail -eq 0 ] ; then
     --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
     --cntrldir=control --memory=%{fetchmail_mem} --fsync --syncdir \
     --dkverify=$ver_opt $extra_opt
+  echo 0 > %{servicedir}/fetchmail/variables/SPAMEXITCODE
+  echo 0 > %{servicedir}/fetchmail/variables/REJECTSPAM
+  echo 1 > %{servicedir}/fetchmail/variables/MAKE_SEEKABLE
+  echo /tmp/logfifo > %{servicedir}/fetchmail/variables/LOGFILTER
+  options="`cat %{servicedir}/fetchmail/variables/.options` --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+  echo $options > %{servicedir}/fetchmail/variables/.options
   #
   # user has to create fetchmailrc before which fetchmail cannot be started
   #
