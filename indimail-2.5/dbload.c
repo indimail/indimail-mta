@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.25  2018-03-31 12:48:19+05:30  Cprogrammer
+ * obtain use_ssl setting using mysql_get_option - MYSQL_OPT_SSL_ENFORCE
+ *
  * Revision 2.24  2018-03-30 23:03:02+05:30  Cprogrammer
  * use local interface only when mysql socket is defined in host.mysql
  *
@@ -86,7 +89,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.24 2018-03-30 23:03:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.25 2018-03-31 12:48:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -229,6 +232,9 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	char            mcdFile[MAX_BUFF];
 	char           *sysconfdir, *controldir, *mcdfile, *server, *str;
 	int             maxattempts, retry_interval, count;
+#ifdef HAVE_MYSQL_OPT_SSL_ENFORCE
+	int             use_ssl = 0;
+#endif
 	unsigned int    flags;
 
 	if ((*ptr)->failed_attempts)
@@ -296,6 +302,13 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		(*ptr)->failed_attempts++;
 		return (1);
 	}
+#ifdef HAVE_MYSQL_OPT_SSL_ENFORCE
+	if (mysql_get_option(*mysqlptr, MYSQL_OPT_SSL_ENFORCE, &use_ssl)) {
+		fprintf(stderr, "mysql_get_option: MYSQL_OPT_SSL_ENFORCE: %s\n", mysql_error(*mysqlptr));
+		return (1);
+	}
+	(*ptr)->use_ssl = use_ssl;
+#endif
 	(*ptr)->failed_attempts = 0;
 	if ((*ptr)->last_error)
 	{
