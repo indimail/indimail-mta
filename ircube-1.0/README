@@ -23,7 +23,7 @@ Non SSL Version Install/Configuration (look below for SSL config)
       MySQL> GRANT ALL PRIVILEGES on RoundCube_db.* to roundcube;
       MySQL> FLUSH PRIVILEGES;
       MySQL> QUIT;
-   b) /usr/bin/mysql -u mysql -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
+   b) /usr/bin/mysql -u roundcube -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
 
 3) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube.inc.php
    $ sudo cp /etc/roundcube/config.inc.php.sample /etc/roundcubemail/config.inc.php
@@ -73,7 +73,8 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ wget http://downloads.sourceforge.net/indimail/indimail-roundcube-1.0.tar.gz # This file
    $ cd /
    $ sudo tar xvfz /tmp/indimail-roundcube-1.0.tar.gz usr/share/roundcubemail/plugins
-   $ /usr/bin/mysql -u mysql -p RoundCube_db < /usr/share/roundcubemail/sauserprefs/sauserprefs.sql
+   $ /usr/bin/mysql -u roundcube -p RoundCube_db <
+       /usr/share/roundcubemail/plugins/sauserprefs/sauserprefs.sql
 
 8) change pdo_mysql.default_socket /etc/php.ini
    For some reason pdo_mysql uses wrong mysql socket on some systems. Uses
@@ -139,7 +140,7 @@ Non SSL Version Install/Configuration (look below for SSL config)
       MySQL> GRANT ALL PRIVILEGES on RoundCube_db.* to roundcube;
       MySQL> FLUSH PRIVILEGES;
       MySQL> QUIT;
-   b) /usr/bin/mysql -u mysql -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
+   b) /usr/bin/mysql -u roundcube -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
 
 3) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube.inc.php
    $ sudo cp /etc/roundcube/config.inc.php.sample /etc/roundcubemail/config.inc.php
@@ -201,7 +202,8 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ wget http://downloads.sourceforge.net/indimail/indimail-roundcube-ssl-1.0.tar.gz # This file
    $ cd /
    $ sudo tar xvfz /tmp/indimail-roundcube-ssl-1.0.tar.gz usr/share/roundcubemail/plugins
-   $ /usr/bin/mysql -u mysql -p RoundCube_db < /usr/share/roundcubemail/sauserprefs/sauserprefs.sql
+   $ /usr/bin/mysql -u roundcube -p RoundCube_db <
+      /usr/share/roundcubemail/plugins/sauserprefs/sauserprefs.sql
 
 8) change pdo_mysql.default_socket /etc/php.ini
    For some reason pdo_mysql uses wrong mysql socket on some systems. Uses
