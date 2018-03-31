@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.26  2018-03-31 20:30:59+05:30  Cprogrammer
+# added rule for iwebadmin connect to mysql on 3306
+#
 # Revision 2.25  2018-01-09 12:13:18+05:30  Cprogrammer
 # removed indimail-mta specific entries
 #
@@ -76,7 +79,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.25 2018-01-09 12:13:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.26 2018-03-31 20:30:59+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -140,6 +143,7 @@ allow httpd_sys_script_t user_tmp_t:lnk_file read;
 allow httpd_sys_script_t var_t:dir { create read write remove_name add_name rmdir setattr };
 allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_trans write getattr rename unlink open lock };
 allow httpd_sys_script_t var_t:lnk_file read;
+allow httpd_sys_script_t mysqld_port_t:tcp_socket name_connect;
 
 #============= mysqld_t ==============
 allow mysqld_t usr_t:file { append create rename write unlink };
