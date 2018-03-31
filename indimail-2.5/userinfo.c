@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.45  2018-03-31 11:51:20+05:30  Cprogrammer
+ * conditionally compile ssl code
+ *
  * Revision 2.44  2018-03-30 23:03:58+05:30  Cprogrammer
  * display MySQL socket info and SSL Cipher if use_ssl is set
  *
@@ -225,9 +228,10 @@
 #include <ctype.h>
 #include <errno.h>
 #include <sys/socket.h>
+#include <mysql.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.44 2018-03-30 23:03:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.45 2018-03-31 11:51:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -495,10 +499,14 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 			printf("Unix   Socket : %s\n", mptr->unix_socket);
 		else {
 			printf("TCP/IP Port   : %d\n", mptr->port);
+#ifdef HAVE_MYSQL_OPT_SSL_ENFORCE
 			if (mysql_get_option(mptr, MYSQL_OPT_SSL_ENFORCE, &use_ssl)) {
 				mysql_perror("mysql_get_option: %s");
 				return (1);
 			}
+#else
+			use_ssl = 0;
+#endif
 			printf("Use SSL       : %s\n", use_ssl ? "Yes" : "No");
 			if (use_ssl)
    				printf("SSL Cipher    : %s\n", mysql_get_ssl_cipher(mptr));
