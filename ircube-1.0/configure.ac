@@ -14,7 +14,7 @@ AM_INIT_AUTOMAKE
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
-AC_ARG_ENABLE(plugindir, [  --enable-plugindir=dir         directory where roundcube plugins is installed.],
+AC_ARG_ENABLE(plugindir, [  --enable-plugindir=dir    directory where roundcube plugins directory is present.],
 	plugindir="$enableval",
 	[
 		if test "$plugindir" = ""
