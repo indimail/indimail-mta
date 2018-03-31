@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.41  2018-03-31 20:30:39+05:30  Cprogrammer
+ * display mysql_option() error index
+ *
  * Revision 2.40  2018-03-27 17:52:40+05:30  Cprogrammer
  * code indented in k&r style
  *
@@ -213,7 +216,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.40 2018-03-27 17:52:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.41 2018-03-31 20:30:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -477,13 +480,15 @@ open_central_db(char *dbhost)
 	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF)) {
 		flags = use_ssl;
 		if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
-			fprintf(stderr, "open_central_db: mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
+			fprintf(stderr, "open_central_db: mysql_options(%d): %s\n", count,
+				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return(-1);
 		}
 		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, flags))) {
 			flags = use_ssl;
 			if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
-				fprintf(stderr, "open_central_db: mysql_options: %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
+				fprintf(stderr, "open_central_db: mysql_options(%d): %s\n", count,
+					(ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 				return(-1);
 			}
 			if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, NULL, mysqlport, cntrl_socket, flags))) {
