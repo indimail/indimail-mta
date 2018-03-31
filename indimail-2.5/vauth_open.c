@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.31  2018-03-31 20:30:20+05:30  Cprogrammer
+ * display mysql_option() error index
+ *
  * Revision 2.30  2018-03-30 23:01:23+05:30  Cprogrammer
  * use local interface only when mysql socket is defined in host.mysql
  *
@@ -123,7 +126,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.30 2018-03-30 23:01:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.31 2018-03-31 20:30:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -232,7 +235,8 @@ vauth_open(char *dbhost)
 #endif
 		flags = use_ssl;
 		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
-			fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
+			fprintf(stderr, "mysql_options(%d): error setting %s\n", count,
+				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return(-1);
 		}
 		server = (mysql_socket && islocalif(mysql_host) ? "localhost" : mysql_host);
@@ -240,7 +244,8 @@ vauth_open(char *dbhost)
 			mysql_database, mysqlport, mysql_socket, flags))) {
 			flags = use_ssl;
 			if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
-				fprintf(stderr, "mysql_options: error setting %s\n", (ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
+				fprintf(stderr, "mysql_options(%d): error setting %s\n", count,
+					(ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 				return(-1);
 			}
 			if ((count = mysql_errno(&mysql[1])) != ER_DATABASE_NAME) {
