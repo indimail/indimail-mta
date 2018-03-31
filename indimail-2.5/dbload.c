@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.26  2018-03-31 20:30:03+05:30  Cprogrammer
+ * display mysql_option() error index
+ *
  * Revision 2.25  2018-03-31 12:48:19+05:30  Cprogrammer
  * obtain use_ssl setting using mysql_get_option - MYSQL_OPT_SSL_ENFORCE
  *
@@ -89,7 +92,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.25 2018-03-31 12:48:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.26 2018-03-31 20:30:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -274,7 +277,8 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	flags = (*ptr)->use_ssl;
 	if ((count = set_mysql_options(*mysqlptr, "indimail.cnf", "indimail", &flags)))
 	{
-		fprintf(stderr, "mysql_options: %s\n", (str = error_mysql_options_str(count)) ? str : "unknown error");
+		fprintf(stderr, "mysql_options(%d): %s\n", count, 
+			(str = error_mysql_options_str(count)) ? str : "unknown error");
 		return(-1);
 	}
 	server = ((*ptr)->socket && islocalif((*ptr)->server) ? "localhost" : (*ptr)->server);
