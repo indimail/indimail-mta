@@ -305,7 +305,7 @@ else
 	fi
 fi
 # SMTP
-for port in 465 25 587
+for port in 465 25
 do
 	if [ ${nobogofilter} -eq 0 ] ; then
 		echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
@@ -313,7 +313,8 @@ do
 		echo 0 > ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
 		echo 1 > ${servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
 		echo /tmp/logfifo > ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER
-		options="`cat ${servicedir}/qmail-smtpd.$port/variables/.options` --spamfilter=\"${prefix}/bogofilter -p -d ${sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+		# update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+		options="`cat ${servicedir}/qmail-smtpd.$port/variables/.options` --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
 		echo $options > ${servicedir}/qmail-smtpd.$port/variables/.options
 	fi
 done
@@ -351,6 +352,13 @@ if [ $nofetchmail -eq 0 ] ; then
 		--memory=$fetchmail_mem --fsync --syncdir \
 		--dkverify=$ver_opt \
 		$extra_opt
+	echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/fetchmail/variables/SPAMFILTER
+	echo 0 > ${servicedir}/fetchmail/variables/SPAMEXITCODE
+	echo 0 > ${servicedir}/fetchmail/variables/REJECTSPAM
+	echo 1 > ${servicedir}/fetchmail/variables/MAKE_SEEKABLE
+	echo /tmp/logfifo > ${servicedir}/fetchmail/variables/LOGFILTER
+	options="`cat ${servicedir}/fetchmail/variables/.options` --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+	echo $options > ${servicedir}/fetchmail/variables/.options
 	#
 	# user has to create fetchmailrc before which fetchmail cannot be started
 	#
