@@ -19,9 +19,7 @@ the command \fBsvctool --config=add-boot\fR.
 \fBsvctool\fR requires root privilege to run.
 
 .EX
-Usage: svctool [OPTION]
-
-Known values for OPTION are:
+Known values for \fIoptions\fR are:
 
 --smtp=Port --qbase=queue_path --qcount=N --qstart=I
   --servicedir=service_path
@@ -655,7 +653,7 @@ Known values for OPTION are:
   service_path - Path where supervise scripts will be installed
   n            - Scan interval for mrtg command
 
---config=mysql|mysqldb|qmail|users|rmusers|clamd|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
+--config=mysql|sqlssl|mysqldb|qmail|users|rmusers|clamd|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
   [--postmaster=user[@domain]]
   [--common_name=CN]
   [--default-domain=domain]
@@ -668,8 +666,8 @@ Known values for OPTION are:
   [--wipe]
 
   mysql          - Create @sysconfdir@/indimail.cnf
-  imap           - Create @sysconfdir@/imapd
-  pop3           - Create @sysconfdir@/pop3d
+  mysqldb        - Create an initidalized MySQL db for IndiMail
+  sqlssl         - Create SSL/TLS Certs for MariaDB
   qmail          - Create default qmail control files
   users          - Create Internal System Users used by IndiMail
   rmusers        - Remove Internal System Users used by IndiMail
@@ -682,7 +680,6 @@ Known values for OPTION are:
                    Also remove indimail as the default MTA
   iselinux       - Enable selinux module for indimail
   qselinux       - Enable selinux module for indimail-mta
-  all            - Create All the above configuration files
   postmaster     - name of the user who will recieve bounces on the local host.
                    This can also be a remote user i.e. &postmaster@indi.com
   common_name    - Common Name (CN) for server
