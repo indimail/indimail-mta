@@ -1,4 +1,4 @@
-indimail-mta (2.4-3) unstable; urgency=low
+indimail-mta (2.4-4) unstable; urgency=low
 
   * svctool - added option to refresh services
   * moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
@@ -12,5 +12,6 @@ indimail-mta (2.4-3) unstable; urgency=low
   * BUG - indimail_stub.c:  fixed spurious chown() in r_mkdir()
   * svctool - fix creation of env variable VIRTUAL_PKG_LIB
   * svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
+  * svctool - autofix QHPSI during clamd service creation
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 01 Apr 2018 13:03:12 +0530
