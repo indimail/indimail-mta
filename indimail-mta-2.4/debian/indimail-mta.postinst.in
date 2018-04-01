@@ -285,6 +285,8 @@ else
 		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
 		if [ -d ${sysconfdir}/clamav ] ; then
 			mysysconfdir=${sysconfdir}/clamav
+		elif [ -d ${qsysconfdir}] ; then
+			mysysconfdir=${qsysconfdir}
 		else
 			mysysconfdir=${sysconfdir}
 		fi
