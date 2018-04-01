@@ -120,5 +120,5 @@ Release 2.5 Start 27/01/2018
 34. BUG - indimail_stub.c:  fixed spurious chown() in r_mkdir()
 35. svctool - fix creation of env variable VIRTUAL_PKG_LIB
 36. create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
-37. svctool - autofix QHPSI during clamd service creation
+37. svctool - autofix QHPSI during clamd service creation for smtpd, qmqpd, qmtpd
 38. svctool - skip service refresh if .norefreshsvc file is present in variables directory
