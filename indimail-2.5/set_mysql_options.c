@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.20  2018-04-01 12:59:29+05:30  Cprogrammer
+ * use MARIADB_BASE_VERSION additionally to LIBMARIADB
+ *
  * Revision 2.19  2018-03-30 09:32:26+05:30  Cprogrammer
  * mysql_options() in libmariadb is unable to locate cnf files without an absolute path
  *
@@ -62,7 +65,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.19 2018-03-30 09:32:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.20 2018-04-01 12:59:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -116,7 +119,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	char            temp[4];
 	char            o_reconnect, tmpv_c, use_ssl = 0;
 	unsigned int    protocol, connect_timeout, read_timeout, write_timeout;
-#ifdef LIBMARIADB
+#if defined(LIBMARIADB) || defined(MARIADB_BASE_VERSION)
 	char            fpath[MAX_BUFF];
 	char           *sysconfdir;
 #endif
@@ -132,7 +135,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if (getenv("CLIENT_INTERACTIVE"))
 		*flags += CLIENT_INTERACTIVE;
 	getEnvConfigStr(&init_cmd, "MYSQL_INIT_COMMAND", 0);
-#ifdef LIBMARIADB
+#if defined(LIBMARIADB) || defined(MARIADB_BASE_VERSION)
 	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	snprintf(fpath, sizeof(fpath) - 1, "%s/%s", sysconfdir, file);
 	getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", fpath);
