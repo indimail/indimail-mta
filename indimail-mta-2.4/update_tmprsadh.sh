@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.9  2018-04-01 15:15:10+05:30  Cprogrammer
+# fixed wrong return value
+#
 # Revision 1.8  2018-03-25 15:13:42+05:30  Cprogrammer
 # fix for system where ln doesn't have -r option
 #
@@ -91,7 +94,7 @@ do
 done
 if [ ! -f $CERTDIR/dhparams.pem ] ; then
 	$ln -sr $CERTDIR/dh2048.pem $CERTDIR/dhparams.pem > /dev/null 2>&1
-	if [ $? -ne 1 ] ; then
+	if [ $? -ne 0 ] ; then
 		cd $CERTDIR
 		$ln -s dh2048.pem dhparams.pem
 	fi
