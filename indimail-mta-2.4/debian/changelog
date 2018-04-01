@@ -11,5 +11,6 @@ indimail-mta (2.4-3) unstable; urgency=low
   * svctool - create env variable VIRTUAL_PKG_LIB with libindimail.so to provide indimail functionality
   * BUG - indimail_stub.c:  fixed spurious chown() in r_mkdir()
   * svctool - fix creation of env variable VIRTUAL_PKG_LIB
+  * svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 31 Mar 2018 00:01:12 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 01 Apr 2018 13:03:12 +0530

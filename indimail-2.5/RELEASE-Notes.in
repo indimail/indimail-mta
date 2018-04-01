@@ -119,3 +119,4 @@ Release 2.5 Start 27/01/2018
 33. use full path of cnf file for libmariadbclient bug
 34. BUG - indimail_stub.c:  fixed spurious chown() in r_mkdir()
 35. svctool - fix creation of env variable VIRTUAL_PKG_LIB
+36. create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server

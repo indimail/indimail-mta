@@ -1,4 +1,4 @@
-* Sat Mar 31 2018 00:01:12 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
+* Sun Apr 01 2018 13:03:12 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 31/01/2018
 31/01/2018
 1.  svctool - added option to refresh services
@@ -19,6 +19,9 @@ Release 2.4 Start 31/01/2018
 31/03/2018
 10. BUG - indimail_stub.c:  fixed spurious chown() in r_mkdir()
 11. svctool - fix creation of env variable VIRTUAL_PKG_LIB
+01/04/2018
+12. svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for
+    mysql-community-server
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017
