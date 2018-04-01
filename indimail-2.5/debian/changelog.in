@@ -33,5 +33,6 @@ indimail (@version@-4) unstable; urgency=low
   * svctool - fix creation of env variable VIRTUAL_PKG_LIB
   * svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
   * svctool - autofix QHPSI during clamd service creation
+  * svctool - skip service refresh if .norefreshsvc file is present in variables directory
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 01 Apr 2018 13:01:35 +0530
