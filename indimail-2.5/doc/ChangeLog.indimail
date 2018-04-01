@@ -56,6 +56,7 @@ hostcntrl, lastauth
 32. svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
 33. svctool - autofix QHPSI during clamd service creation for smtpd, qmqpd, qmtpd
 34. svctool - skip service refresh if .norefreshsvc file is present in variables directory
+35. svctool - added --config=sqlssl for creating SSL/TLS config for mariadb
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017

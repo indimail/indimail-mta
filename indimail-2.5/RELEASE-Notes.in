@@ -122,3 +122,4 @@ Release 2.5 Start 27/01/2018
 36. create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
 37. svctool - autofix QHPSI during clamd service creation for smtpd, qmqpd, qmtpd
 38. svctool - skip service refresh if .norefreshsvc file is present in variables directory
+39. svctool - added --config=sqlssl for creating SSL/TLS config for mariadb
