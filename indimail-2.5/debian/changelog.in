@@ -1,4 +1,4 @@
-indimail (@version@-3) unstable; urgency=low
+indimail (@version@-4) unstable; urgency=low
 
   * moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
   * changed data type to TIMESTAMP from DATETIME for timestamp column in hostcntrl, lastauth
@@ -31,6 +31,7 @@ indimail (@version@-3) unstable; urgency=low
   * vuserinfo, dbinfo - display SSL Cipher when use_ssl is set
   * use full path of cnf file for libmariadbclient bug
   * svctool - fix creation of env variable VIRTUAL_PKG_LIB
-  * create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
+  * svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
+  * svctool - autofix QHPSI during clamd service creation
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 01 Apr 2018 13:01:35 +0530

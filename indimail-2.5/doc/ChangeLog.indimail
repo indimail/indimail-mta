@@ -53,7 +53,8 @@ hostcntrl, lastauth
 30. use full path of cnf file for libmariadbclient bug
 31. svctool - fix creation of env variable VIRTUAL_PKG_LIB
 01/04/2018
-32. create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
+32. svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
+33. svctool - autofix QHPSI during clamd service creation
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
