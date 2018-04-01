@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.146 2018-03-19 15:51:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.147 2018-04-01 15:17:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1911,6 +1911,8 @@ else
     qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
     if [ -d %{_sysconfdir}/clamav ] ; then
       mysysconfdir=%{_sysconfdir}/clamav
+    elif [ -d %{qsysconfdir} ] ; then
+      mysysconfdir=%{qysconfdir}
     else
       mysysconfdir=%{_sysconfdir}
     fi
