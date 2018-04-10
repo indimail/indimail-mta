@@ -16,8 +16,8 @@ hostcntrl, lastauth
 11/02/2018
 8.  use /var/run/mysqld/mysqld.sock.tmp as socket for mysqldb creation
 13/02/2018
-11. svctool - use mysqld --verbose --check to check existence of a command
-    line option
+11. svctool - use mysqld --no-defaults --verbose --help to check existence of
+    a command line option or variable
 17/02/2018
 12. restrict userinfo privilege to root, indimail user/group
 13. use configure.ac to use mysql_optionsv(), if available, instead of mysql_options()
@@ -37,25 +37,31 @@ hostcntrl, lastauth
 20. svctool - added SSL/TLS paramters for MySQL service, config
 21. ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
 24/03/2018
-22. set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when using libmariadb
+22. set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when
+    using libmariadb
 25/03/2018
-23. fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
+23. fixed ambiguous select statement in join statement with timestamp column
+    in indimail, lastauth table
 27/03/2018
 24. added ability to use SSL/TLS encryption for MySQL connections. set use_ssl paramter
     for MySQL connnections
 30/03/2018
-25. mysql_options() in libmariadb is unable to locate cnf files without an absolute path
+25. mysql_options() in libmariadb is unable to locate cnf files without an
+    absolute path
 26. LoadDbInfo.c - set mysql_socket for local dbinfo structure
 27. dbload.c - pass socket argument to mysql_real_connect() to prevent failure for
     local connect with libmariadbclient
-28. vauth_open.c, dbload.c - use local interface only when mysql socket is defined in host.mysql
+28. vauth_open.c, dbload.c - use local interface only when mysql socket is
+    defined in host.mysql
 29. vuserinfo, dbinfo - display SSL Cipher when use_ssl is set
 30. use full path of cnf file for libmariadbclient bug
 31. svctool - fix creation of env variable VIRTUAL_PKG_LIB
 01/04/2018
-32. svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
+32. svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup
+    utility for mysql-community-server
 33. svctool - autofix QHPSI during clamd service creation for smtpd, qmqpd, qmtpd
-34. svctool - skip service refresh if .norefreshsvc file is present in variables directory
+34. svctool - skip service refresh if .norefreshsvc file is present in
+    variables directory
 35. svctool - added --config=sqlssl for creating SSL/TLS config for mariadb
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}

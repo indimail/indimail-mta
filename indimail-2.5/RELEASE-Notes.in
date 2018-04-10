@@ -4,9 +4,21 @@ Announcing Release @version@ of IndiMail.
 
 Following are the main features of this release
 
-o added ability to use SSL/TLS encryption for MySQL connections. set use_ssl paramter
-  for MySQL connnections Table dbinfo needs additional field with the following SQL stmt
-  alter table dbinfo add column use_ssl int after port;
+o added ability to use SSL/TLS encryption for MySQL connections. set
+  use_ssl paramter for MySQL connnections Table dbinfo needs additional
+  field with the following SQL stmt
+  'alter table dbinfo add column use_ssl int after port;'
+o RPM/DEB installation will now recreate services with the same options
+  given during first installation. This will ensure creation of new env
+  variables added in new releases
+o New script in svctool for MySQL db creation
+o svctool can use .mylogin.cnf created by mysql_config_editor, allowing
+  MySQL admin passwords to be stored externally
+o set_mysql_options.c - set MySQL options for SSL/TLS connections.
+o removed legacy MYSQL_ESCAPE
+o svctool - added --config=sqlssl to create MariaDB SSL/TLS config
+  (similar to MySQL's mysql_rsa_setup)
+o Fixed Bug with VIRTUAL_PKG_LIB env variable
 
 This release includes the following files (Note: Files may be suffied with -@version@)
 
@@ -21,6 +33,7 @@ indimail-@version@.tar.gz   (IndiMail source)
 
 
 IndiMail has two RPM / DEB / yum / apt repositories for most of the Linux Distros at
+
 1) Stable Releases
 -- ---------------
 
@@ -72,13 +85,13 @@ https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indi
 
 ChangeLog
 
-Release 2.5 Start 27/01/2018
-* Wed Feb 21 2018 22:31:59 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+* Sun Apr 01 2018 13:01:35 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
 Release 2.5 Start 27/01/2018
 1.  moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
     moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
     moved system binaries to sbin
 2.  changed data type to TIMESTAMP from DATETIME for timestamp column in
+    hostcntrl, lastauth
 3.  updated flash menu for changes in program paths in indimail-mta
 4.  svctool - added option to refresh services
 5.  svctool - inlookup supervise/control fifo - allow svc -h permission for
@@ -90,8 +103,8 @@ Release 2.5 Start 27/01/2018
 10. svctool - moved enabling/disabling of services to separate functions
     --enable-service, --disable-service
 11. use /var/run/mysqld/mysqld.sock.tmp as socket for mysqldb creation
-12. svctool - use mysqld --verbose --check to check existence of a command
-    line option
+12. svctool - use mysqld --no-defaults --verbose --help to check existence of a command
+    line option or variable
 13. restrict userinfo privilege to root, indimail user/group
 14. use configure.ac to use mysql_optionsv(), if available, instead of mysql_options()
 15. svctool - inlookup service creation, activeDays default set to 7 days
@@ -107,7 +120,7 @@ Release 2.5 Start 27/01/2018
 23. ProcessInFifo.c - avoid connection to hostcntrl if host.cntrl is absent
 24. set_mysql_option.c - use mysql_ssl_set() to fix ssl/tls connection issue when using libmariadb
 25. svctool - create env variable VIRTUAL_PKG_LIB with libindimail.so to provide indimail functionality
-26. fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
+26. fixed ambiguous select statement in join statement with timestamp column in indimail, lastauth table
 27. added ability to use SSL/TLS encryption for MySQL connections. set use_ssl paramter
     for MySQL connnections
 28. mysql_options() in libmariadb is unable to locate cnf files without an absolute path
