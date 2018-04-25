@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.26  2018-04-26 00:31:09+05:30  Cprogrammer
+ * fixed verbosity of log messages
+ *
  * Revision 1.25  2018-04-25 22:48:58+05:30  Cprogrammer
  * fixed display of options and verbosity of messages
  *
@@ -268,7 +271,7 @@ struct constmap mapwhite;
 void
 whitelist_init(char *arg)
 {
-	if (verbose > 3)
+	if (verbose > 2)
 		logerr("initializing whitelist\n");
 #ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
 	static stralloc controlfile = {0};
@@ -286,7 +289,7 @@ whitelist_init(char *arg)
 		die_control(arg);
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
-	if (verbose > 3)
+	if (verbose > 2)
 		logerrf("initialized  whitelist\n");
 	return;
 }
@@ -559,7 +562,7 @@ create_hash(struct greylst *curr)
 			logerr(strnum);
 			logerrf("\n");
 		} else { /*- first time/expiry */
-			if (verbose > 3) {
+			if (verbose > 2) {
 				out("creating hash table, size=");
 				strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
 				out(strnum);
@@ -898,7 +901,8 @@ save_context()
 
 	if (!grey_count)
 		return;
-	logerr("saving context file\n");
+	if (verbose > 2)
+		logerr("saving context file\n");
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
 	for (ptr = head;ptr;ptr = ptr->next) {
@@ -924,7 +928,8 @@ save_context()
 			break;
 	} /*- for (ptr = head;ptr;ptr = ptr->next) */
 	close(context_fd);
-	logerrf("saved  context file\n");
+	if (verbose > 2)
+		logerrf("saved  context file\n");
 	return;
 }
 
@@ -946,7 +951,7 @@ load_context()
 	char           *cptr, *ip, *rpath, *rcpt;
 	struct greylst *ptr;
 
-	if (verbose > 3) {
+	if (verbose > 2) {
 		out("loading context\n");
 		flush();
 	}
@@ -1521,7 +1526,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.25 2018-04-25 22:48:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.26 2018-04-26 00:31:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
