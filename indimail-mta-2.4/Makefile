@@ -48,6 +48,10 @@ svctool: svctool.in mysql_config
 svctool.8: svctool.9 conf-qmail conf-sysconfdir Makefile mysql_config
 	$(edit) svctool.9 > $@
 
+daneprog: \
+warn-auto.sh daneprog.sh
+	cat warn-auto.sh daneprog.sh > daneprog
+	chmod 755 daneprog
 
 addresses.0: \
 addresses.5
@@ -1396,11 +1400,11 @@ ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirq
 maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate inewaliases newinclude \
 new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest \
 predate preline printforward printmaillist proc proc+df qaes qail \
-qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl \
+qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl daneprog \
 qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
 qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-pop3d qmail-popbull qmail-poppass \
 qmail-popup qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
-qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl \
+qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-dane \
 qmail-smtpd qmail_smtpd.so qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmail-upq \
 qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
 recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
@@ -2621,6 +2625,7 @@ wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
 base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o greylist.o \
+query_skt.o fn_handler.o \
 auto_break.o auto_control.o auto_assign.o env.a stralloc.a alloc.a substdio.a \
 auto_prefix.o auto_sysconfdir.o error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
@@ -2633,6 +2638,7 @@ socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
 	wait.a datetime.a greylist.o auto_break.o auto_control.o auto_assign.o \
+	query_skt.o fn_handler.o \
 	auto_prefix.o auto_sysconfdir.o hmac_sha1.o getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` $(mysql_libs) ; \
@@ -2645,6 +2651,7 @@ socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
 	wait.a datetime.a greylist.o auto_break.o indimail_stub.o \
+	query_skt.o fn_handler.o \
 	auto_prefix.o auto_sysconfdir.o hmac_sha1.o getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` $(mysql_libs) ; \
@@ -2658,6 +2665,7 @@ wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o indimai
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
 base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o greylist.o auto_assign.o \
+query_skt.o fn_handler.o \
 auto_sysconfdir.o auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 auto_prefix.o socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
@@ -2667,6 +2675,7 @@ auto_prefix.o socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-s
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	base64sub.o indimail_stub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
 	wait.a datetime.a greylist.o auto_break.o auto_control.o auto_assign.o hmac_sha1.o \
+	query_skt.o fn_handler.o \
 	auto_sysconfdir.o auto_prefix.o getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` $(mysql_libs) -ldl
@@ -2786,8 +2795,17 @@ sqlmatch.h qregex.h auto_control.h mysql_config conf-sql
 
 greylist.o: \
 compile greylist.c stralloc.h ip.h scan.h byte.h greylist.h error.h \
-timeoutread.h timeoutwrite.h haveip6.h fmt.h conf-ip
+query_skt.h fn_handler.h haveip6.h fmt.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` greylist.c
+
+query_skt.o: \
+compile query_skt.c timeoutread.h timeoutwrite.h fn_handler.h \
+stralloc.h
+	./compile query_skt.c
+
+fn_handler.o: \
+compile fn_handler.c
+	./compile fn_handler.c
 
 qmail-start: \
 load qmail-start.o prot.o fd.a auto_uids.o get_uid.o \
@@ -5602,6 +5620,44 @@ tablematch.h socket.h haveip6.h conf-ip auto_control.h
 qmail-greyd.0: \
 qmail-greyd.8
 	nroff -man qmail-greyd.8 > qmail-greyd.0
+
+qmail-dane: \
+load qmail-dane.o sgetopt.o subgetopt.o \
+error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
+str_len.o str_cpy.o str_chr.o str_diff.o str_diffn.o \
+ip.o socket_v6any.o socket_v4mappedprefix.o fmt_hexbytes.o \
+envread.o open_read.o constmap.o variables.o auto_control.o \
+case_diffb.o getln.o getln2.o fmt_ulong.o fmt_xlong.o \
+byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
+alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
+cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
+sig_block.o sig_catch.o now.o byte_zero.o str_cpyb.o \
+MakeArgs.o wait_pid.o substdio.a stralloc.a
+	./load qmail-dane sgetopt.o subgetopt.o auto_control.o \
+	error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
+	str_len.o str_cpy.o str_chr.o str_diff.o str_diffn.o \
+	ip.o socket_v6any.o socket_v4mappedprefix.o fmt_hexbytes.o \
+	envread.o open_read.o constmap.o variables.o \
+	case_diffb.o getln.o getln2.o fmt_ulong.o fmt_xlong.o \
+	byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
+	alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
+	cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
+	sig_block.o sig_catch.o now.o byte_zero.o str_cpyb.o \
+	MakeArgs.o wait_pid.o substdio.a stralloc.a -lm
+
+qmail-dane.o: \
+compile qmail-dane.c sgetopt.h auto_qmail.h \
+fmt.h str.h subfd.h byte.h strerr.h scan.h getln.h \
+env.h stralloc.h constmap.h control.h error.h \
+uint32.h open.h variables.h sig.h haveip6.h \
+haveip6.h conf-ip auto_control.h wait.h \
+tlsacheck.h
+	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` qmail-dane.c
+
+tlsacheck.o: \
+compile tlsacheck.c haveip6.h stralloc.h ip.h fmt.h byte.h \
+scan.h tlsacheck.h error.h fn_handler.h query_skt.h
+	./compile `grep -h -v "^#" conf-ip` tlsacheck.c
 
 batv: \
 load batv.o sgetopt.o subgetopt.o str_len.o \
