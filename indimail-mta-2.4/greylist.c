@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.11  2018-04-25 21:39:39+05:30  Cprogrammer
+ * moved query_skt(), fn_handler() to its own source file
+ *
  * Revision 1.10  2016-04-19 10:33:35+05:30  Cprogrammer
  * added additional diagnostics when logging errors
  *
@@ -39,8 +42,8 @@
 #include "byte.h"
 #include "scan.h"
 #include "greylist.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
+#include "query_skt.h"
+#include "fn_handler.h"
 #include "error.h"
 #include <unistd.h>
 #include <sys/types.h>
@@ -61,21 +64,6 @@ int             noipv6 = 0;
 #else
 int             noipv6 = 1;
 #endif
-
-
-static int 
-fn_handler(errfn, timeoutfn, option, arg)
-	void              (*errfn)();
-	void              (*timeoutfn)();
-	int               option;
-	char             *arg;
-{
-	if (!option)
-		(*errfn)(arg);
-	else
-		(*timeoutfn)();
-	return (-1);
-}
 
 /*
  * Takes a string specifying IP address and port, separated by '@' If IP
@@ -202,29 +190,6 @@ connect_udp(ip, port, errfn)
 	return (fd);
 }
 
-int 
-query_skt(fd, ipaddr, queryp, responsep, maxresponsesize, timeout, timeoutfn, errfn)
-	int             fd;
-	char           *ipaddr;
-	stralloc       *queryp;
-	char           *responsep;
-	int             maxresponsesize, timeout;
-	void            (*errfn) (), (*timeoutfn) ();
-{
-	int             r = 0;
-
-	if (timeoutwrite(timeout, fd, queryp->s, queryp->len) < 0)
-		return (errfn ? fn_handler(errfn, 0, 0, "write") : -1);
-	if ((r = timeoutread(timeout, fd, responsep, maxresponsesize)) == -1) {
-  		if (errno == error_timeout) {
-			responsep[0] = 2;
-			return (errfn ? fn_handler(errfn, timeoutfn, 1, 0) : -1);
-		}
-		return (errfn ? fn_handler(errfn, 0, 0, ipaddr) : -1);
-	}
-	return (r);
-}
-
 /*
  * Check given greylist triple: Pass connectingip+from+tolist to greydaemon
  * on IP address gip. timeoutfn and errfn passed in case of error. Note that
@@ -260,7 +225,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 #else
 		len = ip4_fmt(z, &ip.ip);
 #endif
-		if (!stralloc_copyb(&ipbuf, "timeoutread: ip[", 16))
+		if (!stralloc_copyb(&ipbuf, "greylist: ip[", 16))
 			return (-2);
 		else
 		if (!stralloc_catb(&ipbuf, z, len))
@@ -311,7 +276,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.10 2016-04-19 10:33:35+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.11 2018-04-25 21:39:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
