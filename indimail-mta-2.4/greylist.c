@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.12  2018-04-25 22:48:02+05:30  Cprogrammer
+ * fixed error message length
+ *
  * Revision 1.11  2018-04-25 21:39:39+05:30  Cprogrammer
  * moved query_skt(), fn_handler() to its own source file
  *
@@ -225,7 +228,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 #else
 		len = ip4_fmt(z, &ip.ip);
 #endif
-		if (!stralloc_copyb(&ipbuf, "greylist: ip[", 16))
+		if (!stralloc_copyb(&ipbuf, "greylist: ip[", 13))
 			return (-2);
 		else
 		if (!stralloc_catb(&ipbuf, z, len))
@@ -245,29 +248,33 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 		if ((sockfd = connect_udp(&ip, port, errfn)) == -1)
 			return (errfn ? fn_handler(errfn, 0, 0, "connect_udp") : -1);
 	}
-	if (!stralloc_copys(&chkpacket, "I"))
+	if (!stralloc_copyb(&chkpacket, "I", 1))
 		return (-2); /*- ENOMEM */
+	else
 	if (!stralloc_cats(&chkpacket, connectingip))
 		return (-2);
+	else
 	if (!stralloc_0(&chkpacket))
 		return (-2);
+	else
 	if (!stralloc_append(&chkpacket, "F"))
 		return (-2);
+	else
 	if (!stralloc_cats(&chkpacket, from))
 		return (-2);
+	else
 	if (!stralloc_0(&chkpacket))
 		return (-2);
+	else
 	if (!stralloc_catb(&chkpacket, tolist, tolen))
 		return (-2);
-#if 0 /*- causes problem with greydaemon */
-	if (!stralloc_append(&chkpacket, "\n")) /* newline to end a record */
-		return (-2);
-#else
+	else
 	if (!stralloc_0(&chkpacket))
 		return (-2);
-#endif
+	else
 	if ((r = query_skt(sockfd, ipbuf.s, &chkpacket, rbuf, sizeof rbuf, GREYTIMEOUT, timeoutfn, errfn)) == -1)
 		return -1;	/*- Permit connection (soft fail) - probably timeout */
+	else
 	if (rbuf[0] == 0)
 		return (0);	/* greylist */
 	return (1);
@@ -276,7 +283,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.11 2018-04-25 21:39:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.12 2018-04-25 22:48:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
