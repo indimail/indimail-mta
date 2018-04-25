@@ -565,3 +565,9 @@ indimail-mta-permissions.easy
 indimail-mta-permissions.paranoid
 indimail-mta-permissions.secure
 doc/INSTALL-MINI
+fn_handler.o
+query_skt.o
+qmail-dane.o
+qmail-dane
+tlsacheck.o
+daneprog
