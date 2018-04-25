@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.240  2018-04-25 21:44:27+05:30  Cprogrammer
+ * added qmail-dane, daneprog
+ *
  * Revision 1.239  2018-02-05 12:40:29+05:30  Cprogrammer
  * updated doc list
  *
@@ -954,6 +957,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "sbin", "readproctitle", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "qmail-greyd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "greydaemon", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-dane", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "surblfilter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "surblqueue", auto_uido, auto_gidq, moder_x);
 #ifdef EXTERNAL_TODO
@@ -979,6 +983,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "leapsecs", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "yearcal", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "nowutc", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "daneprog", auto_uido, auto_gidq, moder_x);
 
 	/* mess822 */
 	c(auto_qmail_home, "bin", "ofmipname", auto_uido, auto_gidq, moder_x);
@@ -1572,7 +1577,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.239 2018-02-05 12:40:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.240 2018-04-25 21:44:27+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
