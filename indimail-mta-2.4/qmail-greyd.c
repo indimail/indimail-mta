@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.25  2018-04-25 22:48:58+05:30  Cprogrammer
+ * fixed display of options and verbosity of messages
+ *
  * Revision 1.24  2017-11-26 12:58:39+05:30  Cprogrammer
  * fixed expire logic
  *
@@ -80,7 +83,6 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
-#include <math.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -266,7 +268,8 @@ struct constmap mapwhite;
 void
 whitelist_init(char *arg)
 {
-	logerr("initializing whitelist\n");
+	if (verbose > 3)
+		logerr("initializing whitelist\n");
 #ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
 	static stralloc controlfile = {0};
 
@@ -283,7 +286,8 @@ whitelist_init(char *arg)
 		die_control(arg);
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
-	logerrf("initialized  whitelist\n");
+	if (verbose > 3)
+		logerrf("initialized  whitelist\n");
 	return;
 }
 
@@ -332,7 +336,7 @@ cdb_match(char *fn, char *addr, int len)
 }
 
 int
-ip_match(char *fn, stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
+ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 	char **errStr)
 {
 	int             x, len, mask;
@@ -343,11 +347,13 @@ ip_match(char *fn, stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 
 	if (errStr)
 		*errStr = 0;
-	if (fn && (x = cdb_match(fn, ipaddr->s, ipaddr->len - 1)))
+	if (whitefn && (x = cdb_match(whitefn, ipaddr->s, ipaddr->len - 1)))
 		return (x);
 	else
 	if (ptrmap && constmap(ptrmap, ipaddr->s, ipaddr->len - 1))
 		return 1;
+	if (!content)
+		return (0);
 	for (len = 0, ptr = content->s;len < content->len;) {
 		x = str_chr(ptr, '/');
 		if (ptr[x]) {
@@ -394,8 +400,9 @@ is_white(char *ip)
 		die_nomem();
 	if (!stralloc_0(&ipaddr))
 		die_nomem();
-	switch (ip_match("whitelist.cdb", &ipaddr, whitelistok ? &whitelist : 0, 
-			whitelistok ? &mapwhite : 0, &errStr)) {
+	switch (ip_match(&ipaddr, whitelistok ? &whitelist : 0, 
+			whitelistok ? &mapwhite : 0, &errStr))
+	{
 	case 1:
 		return (1);
 	case 0:
@@ -432,8 +439,7 @@ copy_grey(struct greylst *ptr, char *ipaddr, char *rpath, char *rcpt, int rcptle
 	len = str_len(rpath);
 	if (!(ptr->rpath = (char *) malloc(len + 1)))
 		die_nomem();
-	if (str_copy(ptr->rpath, rpath) != len)
-	{
+	if (str_copy(ptr->rpath, rpath) != len) {
 		free(ptr->rpath);
 		return (-1);
 	}
@@ -553,7 +559,7 @@ create_hash(struct greylst *curr)
 			logerr(strnum);
 			logerrf("\n");
 		} else { /*- first time/expiry */
-			if (verbose) {
+			if (verbose > 3) {
 				out("creating hash table, size=");
 				strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
 				out(strnum);
@@ -777,8 +783,6 @@ add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey
 		ptr->ip_prev = ptr->ip_next = 0;
 	}
 	byte_copy(ptr->ip_str, str_len(ip) + 1, ip);
-	if (create_hash(ptr)) /*- add the record to hash list if new. group on ip_str if not new */
-		die_nomem();
 	*grey = ptr;
 	grey_count++;
 	ptr->timestamp = time(0);
@@ -794,7 +798,7 @@ add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey
 int
 send_response(int s, union sockunion *from, int fromlen, char *ip, char *rpath,
 	char *rcpt, int rcptlen, int min_resend, int resend_win, int fr_int,
-	struct greylst **grey)
+	struct greylst **grey, int *record_added)
 {
 	char           *resp;
 	int             i, n = 0;
@@ -803,6 +807,7 @@ send_response(int s, union sockunion *from, int fromlen, char *ip, char *rpath,
 #endif
 
 	*grey = (struct greylst *) 0;
+	*record_added = 0;
 #ifndef IPV6
 	if ((i = inet_pton(AF_INET6, ip, ibuf)) == 1) {
 		resp = "\1\4";
@@ -821,8 +826,10 @@ send_response(int s, union sockunion *from, int fromlen, char *ip, char *rpath,
 			logerrf("unable to add record\n");
 			resp = "\0\4";
 			n = -4;
-		} else
+		} else {
+			*record_added = 1;
 			resp = "\0\1";
+		}
 		break;
 	case RECORD_EARLY:
 		resp = "\0\2";
@@ -939,7 +946,7 @@ load_context()
 	char           *cptr, *ip, *rpath, *rcpt;
 	struct greylst *ptr;
 
-	if (verbose) {
+	if (verbose > 3) {
 		out("loading context\n");
 		flush();
 	}
@@ -1102,7 +1109,8 @@ sigterm()
 char           *
 print_status(char status)
 {
-	switch (status) {
+	switch (status)
+	{
 	case RECORD_NEW:
 		return ("RECORD NEW");
 	case RECORD_EARLY:
@@ -1130,7 +1138,7 @@ print_status(char status)
  */
 char           *usage =
 				"usage: qmail-greyd [options] ipaddr context_file\n"
-				"Options [ wstgmf ]\n"
+				"Options [ vhtgmfspw ]\n"
 				"        [ -v 0, 1 or 2]\n"
 				"        [ -h hash size]\n"
 				"        [ -t timeout (days) ]\n"
@@ -1138,11 +1146,12 @@ char           *usage =
 				"        [ -m minimum resend time (min) ]\n"
 				"        [ -f free interval (min) ]\n"
 				"        [ -s save interval (min) ]\n"
+				"        [ -p port]\n"
 				"        [ -w whitelist ]\n";
 int
 main(int argc, char **argv)
 {
-	int             s = -1, buf_len, rdata_len, n, port, opt, fromlen, rcptlen, len, state;
+	int             s = -1, buf_len, rdata_len, n, port, opt, fromlen, rcptlen, len, state, rec_added;
 	union sockunion sin, from;
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 	struct addrinfo hints, *res, *res0;
@@ -1170,7 +1179,8 @@ main(int argc, char **argv)
 	free_interval = 5 * 60;    /*- 5 minutes */
 	hash_size = BLOCK_SIZE;
 	while ((opt = getopt(argc, argv, "v:w:s:t:g:m:h:p:")) != opteof) {
-		switch (opt) {
+		switch (opt)
+		{
 		case 'v':
 			scan_int(optarg, &verbose);
 			break;
@@ -1412,7 +1422,8 @@ main(int argc, char **argv)
 		case 'I': /*- process exactly like greydaemon */
 			out(" [");
 			for (state = 0, ptr = rdata, rcpt_head = (char *) 0, rcptlen = 0;ptr < rdata + n - 1;) {
-				switch (*ptr) {
+				switch (*ptr)
+				{
 					case 'I':
 						out("Remote IP: ");
 						client_ip = ptr + 1;
@@ -1436,9 +1447,8 @@ main(int argc, char **argv)
 				ptr += len; /*- skip past \0 */
 				if (ptr < (rdata + n - 2))
 					out(" ");
-				if (ptr == rdata + n) {
+				if (ptr == rdata + n)
 					state = 0;
-				}
 			} /*- for (ptr = rdata;ptr < rdata + n - 1;) */
 			out("] bufsiz=");
 			strnum[fmt_ulong(strnum, (unsigned long) n)] = 0;
@@ -1451,7 +1461,7 @@ main(int argc, char **argv)
 				break;
 			} else
 			n = send_response(s, &from, fromlen, client_ip, rpath, rcpt_head, rcptlen,
-					min_resend, resend_window, free_interval, &grey);
+					min_resend, resend_window, free_interval, &grey, &rec_added);
 			if (n == -2) {
 				logerrf("qmail-greyd: invalid send_response - report bug to author\n");
 			} else
@@ -1474,6 +1484,8 @@ main(int argc, char **argv)
 				n == -3 ? out(print_status(RECORD_IPV6)) : out(print_status(RECORD_WHITE));
 			}
 			out("\n");
+			if (rec_added && grey && create_hash(grey)) /*- add the record to hash list if new. group on ip_str if not new */
+				die_nomem();
 			break;
 		/*- 
 		 * maybe we should fork here
@@ -1502,14 +1514,14 @@ main(int argc, char **argv)
 			break;
 		} /*- switch (rdata[0]) */
 		flush();
-	} /*- for (i = 0, j = 0;;) */
+	} /*- for (buf_len = 0, rdata_len = 0;;) { */
 	return (0);
 }
 
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.24 2017-11-26 12:58:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.25 2018-04-25 22:48:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
