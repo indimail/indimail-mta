@@ -24,6 +24,9 @@ qmail-dane \- TLSA Record Checker for \fBIndiMail\fR
 ]\ [\c
 .B \-w
 .IR whitelist_file
+]\ [\c
+.B \-i
+.IR tlsadomains_file
 [.cdb]
 ]
 .I ipaddr contextFile
@@ -83,24 +86,33 @@ exec /usr/bin/danetool --quiet --check $mx --proto tcp --starttls-proto=smtp
 
 \fBqmail-dane\fR maintains its database in memory. Periodic backups of the
 database are made to \fIcontextFile\fR on the disk, to enable
-\fBqmail-dane\fR to start with existing greylisting data, in case of
+\fBqmail-dane\fR to start with existing tlsa verification data, in case of
 restart. To keep the in-memory search as efficient as possible, entries
 older than \fItimeout_days\fR are expired during every request. To keep
 the in-memory database as small as possible, records older than
 \fItimeout_days\fR are periodically removed. The default interval is 5
 minutes and can be changed by specifiying the \fB-f\fR option.  You can
 force removal of expired records by issuing \fISIGUSR2\fR signal to
-\fBqmail-dane\fR.  \fBqmail-greyd\fR also backups the in-memory database to
+\fBqmail-dane\fR.  \fBqmail-dane\fR also backups the in-memory database to
 \fIcontextFile\fR on receipt of \fISIGTERM\fR or \fISIGUSR1\fR signal. The
 \fIcontextFile\fR and its containing directory should be writeable by the
-user with which \fBqmail-greyd\fR process runs. At start-up the file
+user with which \fBqmail-dane\fR process runs. At start-up the file
 \fIcontextFile\fR is read and all records older than \fItimeout\fR days are
 expired. \fBqmail-dane\fR can maintain an internal hash table for fast
 domain lookup using the \fBhsearch(3)\fR function.
 
+A control file having the list of domains for which TLSA records needs
+to be verified, can be maintained in a control file, specified by the
+\fB-i\fR \fIfilename\fR option. If this control file is present, TLSA
+verification will be skipped for all domains not in this file. If a file
+with the name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-dane\fR will use
+\fBcdb(3)\fR lookup in addition to the normal in-memory search in a table
+of tlsa verification enforced domains. \fBqmail-dane\fR re-reads this list
+of domains on receipt of signal \fISIGHUP\fR.
+
 A whitelist of domains not subject to tlsa checking can be specified to
 \fBqmail-dane\fR by the \fB-w\fR \fIfilename\fR option. If a file with the
-name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-greyd\fR will use \fBcdb(3)\fR
+name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-dane\fR will use \fBcdb(3)\fR
 lookup in addition to the normal in-memory search in a table of whitelisted
 domains. \fBqmail-dane\fR re-reads the whitelist on receipt of signal
 \fISIGHUP\fR.
@@ -126,7 +138,7 @@ specify the memory for creating a hash using \fBhcreate(3)\fR
 
 .TP
 .B -w \fIfilename
-specify whitelist of IP ranges not subject to greylisting.
+specify whitelist of IP ranges not subject to tlsa verification.
 
 .TP
 .B -t \fIdays
