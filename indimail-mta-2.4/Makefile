@@ -5656,7 +5656,7 @@ tlsacheck.h
 
 tlsacheck.o: \
 compile tlsacheck.c haveip6.h stralloc.h ip.h fmt.h byte.h \
-scan.h tlsacheck.h error.h fn_handler.h query_skt.h
+scan.h tlsacheck.h error.h fn_handler.h query_skt.h env.h
 	./compile `grep -h -v "^#" conf-ip` tlsacheck.c
 
 batv: \
