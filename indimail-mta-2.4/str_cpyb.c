@@ -1,5 +1,8 @@
 /*
  * $Log: str_cpyb.c,v $
+ * Revision 1.3  2018-04-25 21:37:41+05:30  Cprogrammer
+ * BUG - Fixed extra copy
+ *
  * Revision 1.2  2004-10-22 20:30:54+05:30  Cprogrammer
  * added RCS id
  *
@@ -18,23 +21,7 @@ str_copyb(s, t, max)
 	register int    len;
 
 	len = 0;
-	while (max-- > 0)
-	{
-		if (!(*s = *t))
-			return len;
-		++s;
-		++t;
-		++len;
-		if (!(*s = *t))
-			return len;
-		++s;
-		++t;
-		++len;
-		if (!(*s = *t))
-			return len;
-		++s;
-		++t;
-		++len;
+	while (max-- > 0) {
 		if (!(*s = *t))
 			return len;
 		++s;
@@ -47,7 +34,7 @@ str_copyb(s, t, max)
 void
 getversion_str_cpyb_c()
 {
-	static char    *x = "$Id: str_cpyb.c,v 1.2 2004-10-22 20:30:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: str_cpyb.c,v 1.3 2018-04-25 21:37:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
