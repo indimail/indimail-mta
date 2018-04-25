@@ -7,6 +7,9 @@ qmail-greyd \- greylisting daemon for \fBIndiMail\fR, \fBqmail\fR and \fBnetqmai
 .B \-t
 .I timeout (days)\c
 ]\ [\c
+.B \-p
+.I port\c
+]\ [\c
 .B -h
 .I hash_size
 ]\ [\c
@@ -123,6 +126,10 @@ periodic interval, in minutes, after which entries older than \fItimeout\fR days
 .TP
 .B -s \fIminutes
 save interval for context file, in minutes; defaults to 5
+
+.TP
+.B -p \fIport
+Alternate port to listen instead of the default 1999
 
 .SH "QUERY FORMAT"
 Queries to
