@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.148 2018-04-01 16:45:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.149 2018-04-25 21:44:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -925,6 +925,7 @@ done
 %attr(755,root,qmail)                   %{libexecdir}/pinq
 %attr(755,root,qmail)                   %{libexecdir}/qail
 %attr(755,root,qmail)                   %{libexecdir}/qpq
+%attr(755,root,qmail)                   %{libexecdir}/daneprog
 
 %if %fedorareview == 0
 %docdir %{mandir}
@@ -1276,6 +1277,7 @@ done
 %attr(755,root,qmail)                   %{_prefix}/sbin/udplogger
 %attr(755,root,qmail)                   %{_prefix}/sbin/greydaemon
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-greyd
+%attr(755,root,qmail)                   %{_prefix}/sbin/qmail-dane
 %endif
 
 %if %nolibdkim == 0
