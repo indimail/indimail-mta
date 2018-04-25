@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dane.c,v $
+ * Revision 1.2  2018-04-26 01:32:30+05:30  Cprogrammer
+ * added tlsadomains control file
+ *
  * Revision 1.1  2018-04-25 23:01:47+05:30  Cprogrammer
  * Initial revision
  *
@@ -81,7 +84,7 @@ int             dane_count, hcount;
 int             hash_size, h_allocated = 0;
 int             verbose = 0;
 unsigned long   timeout;
-char           *whitefn = 0;
+char           *whitefn = 0, *tlsadomainsfn = 0;
 char           *daneprog;
 stralloc        context_file = { 0 };
 stralloc        daneprogargs = { 0 };
@@ -155,17 +158,46 @@ logerrf(char *str)
 int             whitelistok = 0;
 stralloc        whitelist = { 0 };
 struct constmap mapwhite;
+int             tlsadomainsok = 0;
+stralloc        tlsadomains = { 0 };
+struct constmap maptlsadomains;
+
+void
+tlsadomains_init(char *arg)
+{
+	if (verbose > 2)
+		logerr("initializing tlsadomains\n");
+#ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
+	static stralloc controlfile = {0};
+
+	if (!stralloc_copys(&controlfile, "control/"))
+		die_nomem();
+	if (!stralloc_cats(&controlfile, arg))
+		die_nomem();
+	if (!stralloc_0(&controlfile))
+		die_nomem();
+	if ((tlsadomainsok = control_readfile(&tlsadomains, controlfile.s, 0)) == -1)
+#else /*- look for control files in $CONTROLDIR/control */
+	if ((tlsadomainsok = control_readfile(&tlsadomains, arg, 0)) == -1)
+#endif
+		die_control(arg);
+	if (tlsadomainsok && !constmap_init(&maptlsadomains, tlsadomains.s, tlsadomains.len, 0))
+		die_nomem();
+	if (verbose > 2)
+		logerrf("initialized  tlsadomains\n");
+	return;
+}
 
 void
 whitelist_init(char *arg)
 {
-	if (verbose > 3)
+	if (verbose > 2)
 		logerr("initializing whitelist\n");
 	if ((whitelistok = control_readfile(&whitelist, arg, 0)) == -1)
 		die_control(arg);
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
-	if (verbose > 3)
+	if (verbose > 2)
 		logerrf("initialized  whitelist\n");
 	return;
 }
@@ -209,15 +241,15 @@ cdb_match(char *fn, char *addr, int len)
 }
 
 int
-domain_match(stralloc *domain, stralloc *content, struct constmap *ptrmap,
-	char **errStr)
+domain_match(char *fn, stralloc *domain, stralloc *content,
+	struct constmap *ptrmap, char **errStr)
 {
 	int             x, len;
 	char           *ptr;
 
 	if (errStr)
 		*errStr = 0;
-	if (whitefn && (x = cdb_match(whitefn, domain->s, domain->len - 1)))
+	if (fn && (x = cdb_match(fn, domain->s, domain->len - 1)))
 		return (x);
 	else
 	if (ptrmap && constmap(ptrmap, domain->s, domain->len - 1))
@@ -234,6 +266,33 @@ domain_match(stralloc *domain, stralloc *content, struct constmap *ptrmap,
 }
 
 int
+is_tlsadomain(char *domain)
+{
+	char           *errStr = 0;
+	static stralloc _domain = { 0 };
+
+	if (!stralloc_copys(&_domain, domain))
+		die_nomem();
+	if (!stralloc_0(&_domain))
+		die_nomem();
+	switch (domain_match(tlsadomainsfn, &_domain, tlsadomainsok ? &tlsadomains : 0, 
+			tlsadomainsok ? &maptlsadomains : 0, &errStr))
+	{
+	case 1:
+		return (1);
+	case 0:
+		return (0);
+	default:
+		logerr("error in domain match: ");
+		logerr(errStr);
+		logerrf("\n");
+		_exit (1);
+	}
+	/*- Not reached */
+	return (0);
+}
+
+int
 is_white(char *domain)
 {
 	char           *errStr = 0;
@@ -243,7 +302,7 @@ is_white(char *domain)
 		die_nomem();
 	if (!stralloc_0(&_domain))
 		die_nomem();
-	switch (domain_match(&_domain, whitelistok ? &whitelist : 0, 
+	switch (domain_match(whitefn, &_domain, whitelistok ? &whitelist : 0, 
 			whitelistok ? &mapwhite : 0, &errStr))
 	{
 	case 1:
@@ -349,7 +408,7 @@ create_hash(struct danerec *curr)
 			logerr(strnum);
 			logerrf("\n");
 		} else { /*- first time/expiry */
-			if (verbose > 3) {
+			if (verbose > 2) {
 				out("creating hash table, size=");
 				strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
 				out(strnum);
@@ -422,7 +481,7 @@ search_record(char *domain, int fr_int, struct danerec **store)
 	ENTRY           e, *ep;
 
 	*store = (struct danerec *) 0;
-	if (is_white(domain))
+	if (whitelistok && is_white(domain))
 		return (RECORD_WHITE);
 	if (!head)
 		return (RECORD_NEW);
@@ -528,7 +587,8 @@ save_context()
 
 	if (!dane_count)
 		return;
-	logerr("saving context file\n");
+	if (verbose > 2)
+		logerr("saving context file\n");
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
 	for (ptr = head;ptr;ptr = ptr->next) {
@@ -549,7 +609,8 @@ save_context()
 			break;
 	} /*- for (ptr = head;ptr;ptr = ptr->next) */
 	close(context_fd);
-	logerrf("saved  context file\n");
+	if (verbose > 2)
+		logerrf("saved  context file\n");
 	return;
 }
 
@@ -569,7 +630,7 @@ load_context()
 	char            dnstate;
 	struct danerec *ptr;
 
-	if (verbose > 3) {
+	if (verbose > 2) {
 		out("loading context\n");
 		flush();
 	}
@@ -758,7 +819,9 @@ get_dane_record(char *domain)
 			_exit(2);
 		if (dup2(pipefd[1], 1) == -1 || close(pipefd[0]) == -1)
 			_exit(3);
-		if (pipefd[1] != 1)
+		if (dup2(pipefd[1], 2) == -1)
+			_exit(3);
+		if (pipefd[1] != 1 && pipefd[1] != 2)
 			close(pipefd[1]);
 		execv(*Argv, Argv);
 		_exit(4);
@@ -830,8 +893,13 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	char            dane_state, rbuf[2];
 	int             i, n = 0;
 
-	*dnrecord = (struct danerec *) 0;
 	*record_added = 0;
+	*dnrecord = (struct danerec *) 0;
+	if (tlsadomainsok && !is_tlsadomain(domain)) {
+		resp = "\1\3";
+		*org_state = RECORD_OK;
+		return (sendto(s, resp, 2, 0, (struct sockaddr *) from, fromlen));
+	}
 	*org_state = -1;
 	switch ((dane_state = search_record(domain, fr_int, dnrecord)))
 	{
@@ -839,6 +907,9 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	case RECORD_FAIL: /*- \1\4 */
 		*org_state = dane_state;
 		dane_state = get_dane_record(domain);
+		if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40)) {
+			dane_state = RECORD_OK;
+		}
 		if (!add_record(domain, dane_state, dnrecord)) {
 			logerrf("unable to add record\n");
 			resp = "\0\1";
@@ -894,7 +965,8 @@ char           *usage =
 				"        [ -t timeout (days) ]\n"
 				"        [ -f free interval (min) ]\n"
 				"        [ -s save interval (min) ]\n"
-				"        [ -w whitelist ]\n";
+				"        [ -w whitelist ]\n"
+				"        [ -i tlsadomains ]\n";
 int
 main(int argc, char **argv)
 {
@@ -928,10 +1000,13 @@ main(int argc, char **argv)
 	timeout = 7 * 24 * 3600;   /*- 7 days */
 	free_interval = 5 * 60;    /*- 5 minutes */
 	hash_size = BLOCK_SIZE;
-	while ((opt = getopt(argc, argv, "v:w:s:t:h:f:p:")) != opteof) {
+	while ((opt = getopt(argc, argv, "v:w:i:s:t:h:f:p:")) != opteof) {
 		switch (opt) {
 		case 'v':
 			scan_int(optarg, &verbose);
+			break;
+		case 'i':
+			tlsadomainsfn = optarg;
 			break;
 		case 'w':
 			whitefn = optarg;
@@ -974,10 +1049,12 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to chdir: ", auto_qmail, ": ");
 	if(!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-	if (whitefn) {
+	if (tlsadomainsfn)
+		tlsadomains_init(tlsadomainsfn);
+	if (whitefn)
 		whitelist_init(whitefn);
+	if (whitefn || tlsadomainsfn)
 		sig_catch(SIGHUP, sighup);
-	}
 	for (ptr = argv[optind++]; *ptr;ptr++);
 	ptr = argv[optind - 1];
 	if (*ptr != '/') {
@@ -1184,7 +1261,7 @@ main(int argc, char **argv)
 			} else {
 				if (verbose) {
 					out(", Reponse: ");
-					out(print_status(RECORD_WHITE));
+					out(print_status(o_s));
 				}
 			}
 			if (verbose)
@@ -1204,7 +1281,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-dane.c,v 1.1 2018-04-25 23:01:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dane.c,v 1.2 2018-04-26 01:32:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
