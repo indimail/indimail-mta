@@ -190,6 +190,7 @@
 %attr(0751,root,qmail) @prefix@/sbin/qmail-todo
 %attr(0755,root,qmail) @prefix@/sbin/qmail-greyd
 %attr(0755,root,qmail) @prefix@/sbin/greydaemon
+%attr(0755,root,qmail) @prefix@/sbin/qmail-dane
 %attr(0755,root,qmail) @prefix@/sbin/surblfilter
 %attr(0755,root,qmail) @prefix@/sbin/surblqueue
 %attr(0751,root,qmail) @prefix@/sbin/qmail-getpw
@@ -279,6 +280,7 @@
 %attr(0755,root,qmail) @libexecdir@/zsuids
 %attr(0755,root,qmail) @libexecdir@/qupgrade.sh
 %attr(0755,root,qmail) @libexecdir@/qlocal_upgrade.sh
+%attr(0755,root,qmail) @libexecdir@/daneprog
 #
 # Setuid
 #
