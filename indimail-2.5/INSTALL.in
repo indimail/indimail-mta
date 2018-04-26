@@ -845,11 +845,18 @@ the installation.
 
     % sudo @prefix@/sbin/svctool --greylist=1999 --servicedir=@servicedir@ --min-resend-min=2 \
         --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-        --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
+        --hash-size=65536 --save-interval=5 --whitelist=greylist.white
 
     If you decide to use greylisting, have the following in tcp.smtp
 
     :allow,GREYIP=":" in the file @sysconfdir@/tcp.smtp
+
+    You can enforce DANE by configuring qmail-dane TLSA verification daemon by executing
+    the command
+
+    % sudo @prefix@/sbin/svctool --tlsa=1998 --servicedir=@servicedir@ \
+        --timeout-days=30 --context-file=tlsa.context \
+        --hash-size=65536 --save-interval=5 --whitelist=tlsa.white
 
     ##### STEP 5  ## IMAP/POP3 Service ##################
     The commands below will create listeners for IMAP and POP3 service.
