@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.150 2018-04-26 11:41:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.151 2018-04-26 23:29:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1987,6 +1987,10 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
     --hash-size=65536 --save-interval=5 --whitelist=greylist.white
+# qmail-dane tlsa daemon
+%{_prefix}/sbin/svctool --tlsa=1998 --servicedir=%{servicedir} \
+    --timeout-days=30 --context-file=tlsa.context \
+    --hash-size=65536 --save-interval=5 --whitelist=tlsa.white
 # qmail-qmtpd service
 %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
   --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
