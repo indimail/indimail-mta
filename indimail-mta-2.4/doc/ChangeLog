@@ -25,8 +25,12 @@ Release 2.4 Start 31/01/2018
 13. svctool - autofix QHPSI during clamd service creation for smtpd, qmqpd, qmtpd
 14. svctool - skip service refresh if .norefreshsvc file is present in variables directory
 15. svctool - added --config=sqlssl for creating SSL/TLS config for mariadb
+25/04/2018
 16. str_cpyb.c - fixed extra bytes getting copied
+26/04/2018
 17. qmail-dane - DANE implementation for IndiMail/indimail-mta
+18. daneq - Tool to query qmail-dane for TLSA RRs
+19. tlsacheck() function to send queries to qmail-dane.
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017

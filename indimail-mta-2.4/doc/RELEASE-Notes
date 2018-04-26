@@ -1,0 +1,56 @@
+DATE: Thu Apr 26 14:40:06 IST 2018
+
+Announcing Release 2.4 of indimail-mta
+
+Following are the main features of this release
+
+o svctool option to refresh services. This ensures lates variables
+  get created
+o moved multiple system binaries to sbin
+o svctool - use SHA-512 encryption for indisrvr admin password
+o svctool - moved enabling/disabling of services to separate functions
+  --enable-service, --disable-service
+o svctool - added --ssl, --require-secure-transport command line option
+  for mysqld
+o svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup
+  utility for mysql-community-server
+o BUG - str_cpyb.c - fixed extra bytes getting copied
+o Fixed Bug with VIRTUAL_PKG_LIB env variable
+o qmail-dane(8), daneq(1), tlsacheck(3) - DANE implementation for
+  indimail-mta
+
+indimail-mta has RPM / DEB / yum / apt repository for most of the
+Linux Distros at
+
+http://download.opensuse.org/repositories/home:/indimail/
+
+Install Instructions
+https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail-mta
+
+Currently, the list of supported distributions for indimail-mta is
+
+    * SUSE
+          o openSUSE_Leap_42.3
+          o openSUSE_Leap_42.2
+          o openSUSE 13.2
+          o openSUSE 13.1
+          o SUSE Linux Enterprise 12 SP2
+          o SUSE Linux Enterprise 12 SP1
+          o SUSE Linux Enterprise 12
+
+    * Red Hat
+          o Fedora 27
+          o Fedora 26
+          o Red Hat Enterprise Linux 7
+          o Red Hat Enterprise Linux 6
+          o CentOS 7
+          o CentOS 6
+
+    * Debian
+          o Debian 8.0
+          o Debian 7.0
+          o Ubuntu 17.04
+          o Ubuntu 16.10
+          o Ubuntu 16.04
+          o Ubuntu 14.04
+          o Ubuntu 12.04
