@@ -24,6 +24,7 @@ qmail-dane \- TLSA Record Checker for \fBIndiMail\fR
 ]\ [\c
 .B \-w
 .IR whitelist_file
+[.cdb]
 ]\ [\c
 .B \-i
 .IR tlsadomains_file
@@ -79,7 +80,6 @@ else
 		mx=`/usr/bin/host -tmx $1 | sort -g -k 6 | head -1 | awk '{print $7}' | sed 's/.$//'`
 	fi
 fi
-echo $mx
 cd /tmp
 exec /usr/bin/danetool --quiet --check $mx --proto tcp --starttls-proto=smtp
 .EE
@@ -167,7 +167,7 @@ with the record terminated by a ASCII 0 character.
 .EE
 
 .SH "SEE ALSO"
-qmail-remote(8), hcreate(3), hsearch(3), hdestroy(3), recvfrom(2).
+qmail-remote(8), daneq(1), tlsacheck(3), hcreate(3), hsearch(3), hdestroy(3), recvfrom(2).
 
 .SH AUTHORS
 .B qmail-dane
