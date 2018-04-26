@@ -1,0 +1,33 @@
+.TH daneq 1
+.SH NAME
+daneq \- Query qmail-dane - TLSA verification daemon
+.SH SYNOPSIS
+.B daneq
+-\fBd\fR
+.I domain
+.I host
+
+.SH DESCRIPTION
+\fBdaneq\fR(1) sends qmail-dane(8) protocol packets in UDP, to \fIhost\fR
+on port 1998, for verifying TLSA records, for domain \fIdomain\fR.
+\fIhost\fR can be of the form \fIhost\fR@\fIport\fR, to specify an
+alternate port. The default timeout for response from \fBqmail-dane\fR
+is 10 seconds, but can be changed by setting the DANETIMEOUT environment
+variable.
+
+.SH OPTIONS
+.PP
+
+.TP
+.B -d \fIdomain
+domain to be queried for TLSA records
+
+.SH RETURN VALUE
+  0 for success
+  1 for failure in TLSA verification
+ -1 for system error
+ -2 for memory allocation error
+
+.SH "SEE ALSO"
+qmail-dane(8),
+tlsacheck(3),
