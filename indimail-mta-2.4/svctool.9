@@ -288,6 +288,20 @@ Known values for \fIoptions\fR are:
   whitelist      - List of whitelisted IP
   use-greydaemon - Use John Levine's greydaemon
 
+--tlsa=port --timeout-days=t --context-file=f --save_interval=s --whitelist=w
+  --hash-size=s --localip=a
+
+  Installs a new qmail-dane TLSA verification Daemon
+  a              - IP Address to listen
+  Port           - Bind on this port for qmail-greyd
+  service_path   - Path where supervise scripts will be installed
+  t              - Max period for a mail to be received after which IP will be removed
+                   from whitelist
+  s              - Size of hash table (0 to disable hashing)
+  context_file   - File in which context information is saved for startup
+  save_interval  - Time interval in which context file gets saved
+  whitelist      - List of whitelisted IP
+
 --qmtp=Port --qbase=queue_path --qcount=N --qstart=I
   --servicedir=service_path
   [--cntrldir=cntrl_path]
