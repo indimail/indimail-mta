@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.21  2018-04-26 23:26:28+05:30  Cprogrammer
+ * set MYSQL_OPT_SSL_ENFORCE & MYSQL_OPT_SSL_MODE if use_ssl is set
+ *
  * Revision 2.20  2018-04-01 12:59:29+05:30  Cprogrammer
  * use MARIADB_BASE_VERSION additionally to LIBMARIADB
  *
@@ -65,7 +68,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.20 2018-04-01 12:59:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.21 2018-04-26 23:26:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -123,7 +126,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	char            fpath[MAX_BUFF];
 	char           *sysconfdir;
 #endif
-#ifdef HAVE_MYSQL_OPT_SSL_MODE
+#if defined(HAVE_MYSQL_OPT_SSL_MODE) || defined(HAVE_MYSQL_OPT_SSL_ENFORCE)
 	unsigned int    ssl_mode;
 #endif
 	char           *cipher;
@@ -250,8 +253,27 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * This option is deprecated as of MySQL 5.7.11 and is removed in MySQL 8.0.
 	 * Instead, use MYSQL_OPT_SSL_MODE with a value of SSL_MODE_REQUIRED.
 	 */
-	if ((ptr = getenv("MYSQL_OPT_SSL_ENFORCE")) && int_mysql_options(mysql, MYSQL_OPT_SSL_ENFORCE, ptr))
-		return (16);
+	if (((ptr = getenv("MYSQL_OPT_SSL_ENFORCE")) && atoi(ptr)) || use_ssl) {
+		ssl_mode = 1;
+		if (int_mysql_options(mysql, MYSQL_OPT_SSL_ENFORCE, &ssl_mode))
+			return (16);
+	}
+#endif
+#ifdef HAVE_MYSQL_OPT_SSL_MODE
+	/*-
+	 * MYSQL_OPT_SSL_MODE (argument type: unsigned int *)
+	 *
+	 * The security state to use for the connection to the server: 
+	 * SSL_MODE_DISABLED, SSL_MODE_PREFERRED, SSL_MODE_REQUIRED, SSL_MODE_VERIFY_CA,
+	 * SSL_MODE_VERIFY_IDENTITY.
+	 * The default is SSL_MODE_PREFERRED. These modes are the permitted values of
+	 * the mysql_ssl_mode enumeration defined in mysql.h.
+	 */
+	if ((ptr = getenv("MYSQL_OPT_SSL_MODE")) || use_ssl) {
+		ssl_mode = ptr ? atoi(ptr) : SSL_MODE_REQUIRED;
+		if (int_mysql_options(mysql, MYSQL_OPT_SSL_MODE, &ssl_mode))
+			return (18);
+	}
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT
 	/*-
@@ -268,22 +290,6 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 		tmpv_c = atoi(ptr) ? 1 : 0;
 		if (int_mysql_options(mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &tmpv_c))
 			return (17);
-	}
-#endif
-#ifdef HAVE_MYSQL_OPT_SSL_MODE
-	/*-
-	 * MYSQL_OPT_SSL_MODE (argument type: unsigned int *)
-	 *
-	 * The security state to use for the connection to the server: 
-	 * SSL_MODE_DISABLED, SSL_MODE_PREFERRED, SSL_MODE_REQUIRED, SSL_MODE_VERIFY_CA,
-	 * SSL_MODE_VERIFY_IDENTITY.
-	 * The default is SSL_MODE_PREFERRED. These modes are the permitted values of
-	 * the mysql_ssl_mode enumeration defined in mysql.h.
-	 */
-	if ((ptr = getenv("MYSQL_OPT_SSL_MODE"))) {
-		ssl_mode = atoi(ptr);
-		if (int_mysql_options(mysql, MYSQL_OPT_SSL_MODE, &ssl_mode))
-			return (18);
 	}
 #endif
 #ifdef HAVE_MYSQL_OPT_SSL_KEY
