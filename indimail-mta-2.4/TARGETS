@@ -1108,3 +1108,5 @@ qmail-dane.o
 qmail-dane
 tlsacheck.o
 daneprog
+daneq
+daneq.o
