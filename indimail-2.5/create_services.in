@@ -20,7 +20,7 @@ default_domain=`uname -n`
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.75 2018-01-09 12:02:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.76 2018-04-26 23:27:35+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -378,6 +378,11 @@ $svctool --smtp=366 --odmr --servicedir=$servicedir \
 $svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
 	--hash-size=65536 --save-interval=5 --whitelist=greylist.white $extra_opt
+
+# qmail-dane tlsa daemon
+$svctool --tlsa=1998 --servicedir=$servicedir --timeout-days=30 \
+	--context-file=tlsa.context --hash-size=65536 --save-interval=5 \
+	--whitelist=tlsa.white $extra_opt
 #
 # qmtpd service
 #
