@@ -1,4 +1,4 @@
-indimail-mta (2.4-4) unstable; urgency=low
+indimail-mta (2.4-5) unstable; urgency=low
 
   * svctool - added option to refresh services
   * moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
@@ -15,5 +15,9 @@ indimail-mta (2.4-4) unstable; urgency=low
   * svctool - autofix QHPSI during clamd service creation for smtpd, qmqpd, qmtpd
   * svctool - skip service refresh if .norefreshsvc file is present in variables directory
   * svctool - added --config=sqlssl for creating SSL/TLS config for mariadb
+  * str_cpyb.c - fixed extra bytes getting copied
+  * qmail-dane - DANE implementation for IndiMail/indimail-mta
+  * daneq - Tool to query qmail-dane for TLSA RRs
+  * tlsacheck() function to send queries to qmail-dane.
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 01 Apr 2018 13:03:12 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 26 Apr 2018 14:51:56 +0530
