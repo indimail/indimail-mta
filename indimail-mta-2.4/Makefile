@@ -1393,7 +1393,7 @@ argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q indimail-mta.spe
 binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm inotify \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
 datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip svctool \
-dnsmxip dnsptr dnstxt dot-forward drate elq envdir envuidgid \
+dnsmxip dnsptr dnstxt dot-forward drate elq envdir envuidgid daneq \
 etrn except fastforward fghack fixcrio forward generic.so greydaemon \
 home home+df hostname idedit iftocc indimail.plist instcheck ipmeprint \
 ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
@@ -5658,6 +5658,30 @@ tlsacheck.o: \
 compile tlsacheck.c haveip6.h stralloc.h ip.h fmt.h byte.h \
 scan.h tlsacheck.h error.h fn_handler.h query_skt.h env.h
 	./compile `grep -h -v "^#" conf-ip` tlsacheck.c
+
+daneq: \
+load daneq.o subfdout.o strerr_sys.o strerr_die.o \
+tlsacheck.o substdo.o str_len.o byte_copy.o error_str.o \
+subfderr.o scan_ulong.o sgetopt.o error.o ip.o envread.o \
+query_skt.o fn_handler.o stralloc_cats.o stralloc_catb.o \
+timeoutread.o timeoutwrite.o fmt_str.o fmt_ulong.o \
+byte_zero.o stralloc_opyb.o scan_xlong.o byte_diff.o \
+stralloc_eady.o fmt_hexbytes.o fmt_xlong.o alloc.o alloc_re.o \
+str_diffn.o subgetopt.o stralloc_pend.o socket_v4mappedprefix.o \
+socket_v6loopback.o socket_ip4loopback.o socket_v6any.o
+	./load daneq subfdout.o strerr_sys.o strerr_die.o \
+	tlsacheck.o substdo.o str_len.o byte_copy.o error_str.o \
+	subfderr.o scan_ulong.o sgetopt.o error.o ip.o envread.o \
+	query_skt.o fn_handler.o stralloc_cats.o stralloc_catb.o \
+	timeoutread.o timeoutwrite.o fmt_str.o fmt_ulong.o \
+	byte_zero.o stralloc_opyb.o scan_xlong.o byte_diff.o \
+	stralloc_eady.o fmt_hexbytes.o fmt_xlong.o alloc.o alloc_re.o \
+	str_diffn.o subgetopt.o stralloc_pend.o socket_v4mappedprefix.o \
+	socket_v6loopback.o socket_ip4loopback.o socket_v6any.o
+
+daneq.o: \
+compile daneq.c
+	./compile daneq.c
 
 batv: \
 load batv.o sgetopt.o subgetopt.o str_len.o \
