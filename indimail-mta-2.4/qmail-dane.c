@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dane.c,v $
+ * Revision 1.3  2018-04-27 10:47:53+05:30  Cprogrammer
+ * fixed memory leak due to multiple records getting added
+ *
  * Revision 1.2  2018-04-26 01:32:30+05:30  Cprogrammer
  * added tlsadomains control file
  *
@@ -52,6 +55,7 @@
 #define RECORD_OK     2
 #define RECORD_NOVRFY 3
 #define RECORD_FAIL   4
+#define RECORD_STALE  5
 #define BLOCK_SIZE 32768
 
 union sockunion
@@ -166,7 +170,7 @@ void
 tlsadomains_init(char *arg)
 {
 	if (verbose > 2)
-		logerr("initializing tlsadomains\n");
+		out("initializing tlsadomains\n");
 #ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
 	static stralloc controlfile = {0};
 
@@ -184,7 +188,7 @@ tlsadomains_init(char *arg)
 	if (tlsadomainsok && !constmap_init(&maptlsadomains, tlsadomains.s, tlsadomains.len, 0))
 		die_nomem();
 	if (verbose > 2)
-		logerrf("initialized  tlsadomains\n");
+		out("initialized  tlsadomains\n");
 	return;
 }
 
@@ -192,13 +196,13 @@ void
 whitelist_init(char *arg)
 {
 	if (verbose > 2)
-		logerr("initializing whitelist\n");
+		out("initializing whitelist\n");
 	if ((whitelistok = control_readfile(&whitelist, arg, 0)) == -1)
 		die_control(arg);
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
 	if (verbose > 2)
-		logerrf("initialized  whitelist\n");
+		out("initialized  whitelist\n");
 	return;
 }
 
@@ -376,6 +380,9 @@ print_record(char *domain, time_t timestamp, char status, int expire_flag)
 	case RECORD_FAIL:
 		out("RECORD_FAIL");
 		break;
+	case RECORD_STALE:
+		out("RECORD_STALE");
+		break;
 	}
 	out(expire_flag ? " expired\n" : "\n");
 	flush();
@@ -428,7 +435,7 @@ create_hash(struct danerec *curr)
 		if (!(ep = hsearch(e, FIND))) { /*- add entries when hash table is new or after destruction */
 			e.data = ptr;
 			if (!(ep = hsearch(e, ENTER))) {
-				logerrf("unable to add to hash table\n");
+				strerr_warn2(WARN, "unable to add to hash table: ", &strerr_sys);
 				return (-1);
 			} else
 				hcount++;
@@ -513,12 +520,11 @@ search_record(char *domain, int fr_int, struct danerec **store)
 	if ((ptr->status == RECORD_OK) && (ptr->timestamp > cur_time - timeout))
 		return (RECORD_OK);
 	else
-		return (RECORD_NEW);
+		return (RECORD_STALE);
 }
 
 /*
  * add entry to link list
- * group in the link list if found in hash list
  * added to hash list if not found in hash list
  */
 struct danerec *
@@ -588,7 +594,7 @@ save_context()
 	if (!dane_count)
 		return;
 	if (verbose > 2)
-		logerr("saving context file\n");
+		out("saving context file\n");
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
 	for (ptr = head;ptr;ptr = ptr->next) {
@@ -610,7 +616,7 @@ save_context()
 	} /*- for (ptr = head;ptr;ptr = ptr->next) */
 	close(context_fd);
 	if (verbose > 2)
-		logerrf("saved  context file\n");
+		out("saved  context file\n");
 	return;
 }
 
@@ -785,8 +791,12 @@ print_status(char status)
 		return ("RECORD WHITE");
 	case RECORD_NOVRFY:
 		return ("RECORD NOVERIFY");
-	case RECORD_OK :
+	case RECORD_OK:
 		return ("RECORD OK");
+	case RECORD_STALE:
+		return ("RECORD STALE");
+	case RECORD_FAIL:
+		return ("RECORD FAIL");
 	}
 	return ("RECORD UNKNOWN");
 }
@@ -795,6 +805,7 @@ int
 get_dane_record(char *domain)
 {
 	char          **Argv;
+	char            strnum[FMT_ULONG];
 	int             dane_pid, wstat, dane_exitcode, match;
 	int             pipefd[2];
 	char            inbuf[2048];
@@ -868,6 +879,8 @@ get_dane_record(char *domain)
 		logerrf("child: exec failed\n");
 		break;
 	default:
+		strnum[fmt_ulong(strnum, (unsigned long) dane_exitcode)] = 0;
+		strerr_warn4(WARN, "error with child: exit code [", strnum, "]", &strerr_sys);
 		break;
 	}
 	return (RECORD_FAIL);
@@ -904,12 +917,10 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	switch ((dane_state = search_record(domain, fr_int, dnrecord)))
 	{
 	case RECORD_NEW:  /*- \1\0 */
-	case RECORD_FAIL: /*- \1\4 */
 		*org_state = dane_state;
 		dane_state = get_dane_record(domain);
-		if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40)) {
+		if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40))
 			dane_state = RECORD_OK;
-		}
 		if (!add_record(domain, dane_state, dnrecord)) {
 			logerrf("unable to add record\n");
 			resp = "\0\1";
@@ -929,6 +940,22 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 			rbuf[0] = (dane_state == RECORD_OK ? 1 : 0);
 			rbuf[1] = dane_state;
 		}
+		break;
+	case RECORD_FAIL: /*- \1\4 */
+	case RECORD_STALE:
+		*org_state = dane_state;
+		ptr = *dnrecord;
+		ptr->status = get_dane_record(domain);
+		if (save.len) {
+			if (!(ptr->data = (char *) realloc(ptr->data, save.len + 1)))
+				die_nomem();
+			if (str_copyb(ptr->data, save.s, save.len) != save.len) {
+				die_nomem();
+			}
+			ptr->data[save.len] = 0;
+		}
+		rbuf[0] = (dane_state == RECORD_OK ? 1 : 0);
+		rbuf[1] = dane_state;
 		break;
 	case RECORD_NOVRFY: /*- \0\3 */
 		*org_state = dane_state;
@@ -1281,7 +1308,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-dane.c,v 1.2 2018-04-26 01:32:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dane.c,v 1.3 2018-04-27 10:47:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
