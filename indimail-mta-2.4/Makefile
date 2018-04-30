@@ -1806,7 +1806,7 @@ subfd.h sgetopt.h subgetopt.h getln.h alloc.h str.h fmt.h \
 hfield.h token822.h control.h env.h gen_allocdefs.h error.h \
 qmail.h now.h datetime.h exit.h quote.h headerbody.h envdir.h \
 auto_qmail.h newfield.h constmap.h envrules.h scan.h pathexec.h \
-variables.h conf-srs auto_control.h
+variables.h conf-srs auto_control.h hassrs.h
 	./compile qmail-inject.c
 
 envrules.o: \
