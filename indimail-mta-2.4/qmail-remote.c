@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.112  2018-05-01 01:42:57+05:30  Cprogrammer
+ * indented code
+ *
  * Revision 1.111  2017-08-26 11:07:08+05:30  Cprogrammer
  * fixed readling of tlsclientmethod control file
  *
@@ -425,19 +428,22 @@ unsigned long   port = PORT_SMTP;
 GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
 GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, i, n, x, 10, saa_readyplus)
 
-static stralloc sauninit = { 0 };
+stralloc        sauninit = { 0 };
 stralloc        helohost = { 0 };
 stralloc        senderbind = { 0 };
 stralloc        localips = { 0 };
 stralloc        helohosts = { 0 };
 stralloc        outgoingip = { 0 };
+
 int             cntrl_stat1, cntrl_stat2;
 stralloc        smtproutes = { 0 };
 stralloc        qmtproutes = { 0 };
+
 struct constmap mapsmtproutes;
 struct constmap mapqmtproutes;
-stralloc        bounce = {0};
-int             protocol_t = 0; /*- defines smtps, smtp, qmtp */
+stralloc        bounce = { 0 };
+
+int             protocol_t = 0;	/*- defines smtps, smtp, qmtp */
 #ifdef MXPS
 int             mxps = 0;
 #endif
@@ -449,9 +455,10 @@ stralloc        sender = { 0 };
 stralloc        qqeh = { 0 };
 stralloc        user = { 0 };
 stralloc        pass = { 0 };
-stralloc        slop  = { 0 };
-stralloc        chal  = { 0 };
+stralloc        slop = { 0 };
+stralloc        chal = { 0 };
 saa             reciplist = { 0 };
+
 struct ip_mx    partner;
 union v46addr   outip;
 static int      inside_greeting = 0;
@@ -474,9 +481,10 @@ stralloc        smtpenv = { 0 };
 #include "byte.h"
 #include <openssl/md5.h>
 char            batvok = 0;
-stralloc        signkey = {0};
-stralloc        nosign = {0};
-stralloc        nosigndoms = {0};
+stralloc        signkey = { 0 };
+stralloc        nosign = { 0 };
+stralloc        nosigndoms = { 0 };
+
 struct constmap mapnosign;
 struct constmap mapnosigndoms;
 #endif
@@ -494,15 +502,13 @@ my_error(char *s1, char *s2, char *s3)
 {
 	if (substdio_puts(subfderr, s1) == -1)
 		_exit(0);
-	if (s2)
-	{
+	if (s2) {
 		if (substdio_puts(subfderr, ": ") == -1)
 			_exit(0);
 		if (substdio_puts(subfderr, s2) == -1)
 			_exit(0);
 	}
-	if (s3)
-	{
+	if (s3) {
 		if (substdio_puts(subfderr, ": ") == -1)
 			_exit(0);
 		if (substdio_puts(subfderr, s3) == -1)
@@ -532,13 +538,13 @@ run_script(char code, int succ)
 
 	switch (succ)
 	{
-	case 1: /*- success */
+	case 1:/*- success */
 		str = "ONSUCCESS_REMOTE";
 		break;
-	case 0: /*- failure */
+	case 0:/*- failure */
 		str = "ONFAILURE_REMOTE";
 		break;
-	case -1: /*- transient error */
+	case -1:/*- transient error */
 		str = "ONTEMPORARY_REMOTE";
 		break;
 	default:
@@ -549,12 +555,11 @@ run_script(char code, int succ)
 	remote_code[0] = code;
 	if (!env_put2("SMTPSTATUS", remote_code)) {
 		my_error("alert: Out of memory", 0, 0);
-		_exit (1);
+		_exit(1);
 	}
-	if (!(args = (char **) alloc(my_argc + 1)))
-	{
+	if (!(args = (char **) alloc(my_argc + 1))) {
 		my_error("alert: Out of memory", 0, 0);
-		_exit (1);
+		_exit(1);
 	}
 	switch (child = fork())
 	{
@@ -565,50 +570,49 @@ run_script(char code, int succ)
 	case 0:
 		switch (succ)
 		{
-		case 1: /*- success */
+		case 1:/*- success */
 			if (!env_unset("ONFAILURE_REMOTE")) {
 				my_error("alert: out of memory", 0, 0);
-				_exit (1);
+				_exit(1);
 			}
 			if (!env_unset("ONTEMPORARY_REMOTE")) {
 				my_error("alert: out of memory", 0, 0);
-				_exit (1);
+				_exit(1);
 			}
 			break;
-		case 0: /*- failure */
+		case 0:/*- failure */
 			if (!env_unset("ONSUCCESS_REMOTE")) {
 				my_error("alert: Out of memory", 0, 0);
-				_exit (1);
+				_exit(1);
 			}
 			if (!env_unset("ONTEMPORARY_REMOTE")) {
 				my_error("alert: Out of memory", 0, 0);
-				_exit (1);
+				_exit(1);
 			}
 			break;
 		case -1:
 			if (!env_unset("ONSUCCESS_REMOTE")) {
 				my_error("alert: Out of memory", 0, 0);
-				_exit (1);
+				_exit(1);
 			}
 			if (!env_unset("ONFAILURE_REMOTE")) {
 				my_error("alert: Out of memory", 0, 0);
-				_exit (1);
+				_exit(1);
 			}
 			break;
 		}
 		/*- copy all arguments */
-		for (i = 0;i < my_argc;i++)
+		for (i = 0; i < my_argc; i++)
 			args[i] = my_argv[i];
 		args[i] = 0;
 		execv(prog, args);
 		my_error("alert: Unable to run", prog, 0);
-		_exit (1);
+		_exit(1);
 	}
 	wait_pid(&wstat, child);
-	if (wait_crashed(wstat))
-	{
+	if (wait_crashed(wstat)) {
 		my_error("alert", prog, "crashed");
-		_exit (1);
+		_exit(1);
 	}
 	return (wait_exitcode(wstat));
 }
@@ -639,8 +643,7 @@ outsafe(stralloc *sa)
 	int             i;
 	char            ch;
 
-	for (i = 0; i < sa->len; ++i)
-	{
+	for (i = 0; i < sa->len; ++i) {
 		ch = sa->s[i];
 		if (ch < 33)
 			ch = '?';
@@ -664,8 +667,7 @@ int
 setsmtptext(int code, int type)
 {
 	if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE")
-			||env_get("ONTEMPORARY_REMOTE"))
-	{
+		|| env_get("ONTEMPORARY_REMOTE")) {
 		char            strnum[FMT_ULONG];
 
 		/*- copy smtptext to smtpenv */
@@ -682,8 +684,7 @@ setsmtptext(int code, int type)
 				return (1);
 			}
 		}
-		if (code >= 0)
-		{
+		if (code >= 0) {
 			strnum[fmt_ulong(strnum, code)] = 0;
 			if (!env_put2("SMTPCODE", strnum))
 				return (1);
@@ -708,8 +709,7 @@ temp_nomem()
 void
 temp_noip()
 {
-	if (!controldir)
-	{
+	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
@@ -859,8 +859,7 @@ perm_ambigmx()
 {
 	char           *r = "DSorry. Although I'm listed as a best-preference MX or A for that host,\nit isn't in my ";
 
-	if (!controldir)
-	{
+	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
@@ -928,16 +927,13 @@ dropped()
 	if (flagcritical) {
 		out("Possible duplicate! ");
 		if (!stralloc_cats(&smtptext, "Possible duplicate! "))
-		temp_nomem();
-	}
-	else
-	if (inside_greeting) /*- RFC 2821 - client should treat connection failures as temporary error */
-	{
+			temp_nomem();
+	} else
+	if (inside_greeting) { /*- RFC 2821 - client should treat connection failures as temporary error */
 		out("Will try alternate MX. ");
 		if (!stralloc_cats(&smtptext, "Will try alternate MX. "))
 			temp_nomem();
-		if (flagtcpto)
-		{
+		if (flagtcpto) {
 			out("tcpto interval ");
 			strnum[fmt_ulong(strnum, max_tolerance)] = 0;
 			out(strnum);
@@ -952,8 +948,7 @@ dropped()
 		}
 	}
 #ifdef TLS
-	if (ssl_err_str)
-	{
+	if (ssl_err_str) {
 		out((char *) ssl_err_str);
 		out(" ");
 		if (!stralloc_cats(&smtptext, (char *) ssl_err_str))
@@ -992,8 +987,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 		_exit(0);
 	if (!stralloc_catb(&smtptext, h->s, h->len))
 		temp_nomem();
-	if (ip)
-	{
+	if (ip) {
 		temp_noconn_out(" to ");
 		temp_noconn_out(ip);
 		temp_noconn_out(" port ");
@@ -1027,8 +1021,7 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 	temp_noconn_out("ZSorry, I wasn't able to establish an QMTP connection for ");
 	if (substdio_put(subfdoutsmall, h->s, h->len) == -1)
 		_exit(0);
-	if (ip)
-	{
+	if (ip) {
 		temp_noconn_out(" to ");
 		temp_noconn_out(ip);
 		temp_noconn_out(" port ");
@@ -1067,8 +1060,7 @@ saferead(int fd, char *buf, int len)
 	int             r;
 
 #ifdef TLS
-	if (ssl)
-	{
+	if (ssl) {
 		if ((r = ssl_timeoutread(timeout, smtpfd, smtpfd, ssl, buf, len)) < 0)
 			ssl_err_str = ssl_error_str();
 	} else
@@ -1087,8 +1079,7 @@ safewrite(int fd, char *buf, int len)
 	int             r;
 
 #ifdef TLS
-	if (ssl)
-	{
+	if (ssl) {
 		if ((r = ssl_timeoutwrite(timeout, smtpfd, smtpfd, ssl, buf, len)) < 0)
 			ssl_err_str = ssl_error_str();
 	} else
@@ -1112,10 +1103,8 @@ void
 get(char *ch)
 {
 	substdio_get(&smtpfrom, ch, 1);
-	if (*ch != '\r')
-	{
-		if (smtptext.len < HUGESMTPTEXT)
-		{
+	if (*ch != '\r') {
+		if (smtptext.len < HUGESMTPTEXT) {
 			if (!stralloc_append(&smtptext, ch))
 				temp_nomem();
 		}
@@ -1136,8 +1125,7 @@ smtpcode()
 	code = code * 10 + (ch - '0');
 	get((char *) &ch);
 	code = code * 10 + (ch - '0');
-	for (;;)
-	{
+	for (;;) {
 		get((char *) &ch);
 		if (ch != '-')
 			break;
@@ -1153,6 +1141,7 @@ smtpcode()
 }
 
 saa             ehlokw = { 0 };	/*- list of EHLO keywords and parameters */
+
 int             maxehlokwlen = 0;
 
 unsigned long
@@ -1165,7 +1154,7 @@ ehlo()
 	if (ehlokw.len > maxehlokwlen)
 		maxehlokwlen = ehlokw.len;
 	ehlokw.len = 0;
-	if (protocol_t == 'q') /* QMTP */
+	if (protocol_t == 'q')		/* QMTP */
 		return 0;
 	substdio_puts(&smtpto, "EHLO ");
 	substdio_put(&smtpto, helohost.s, helohost.len);
@@ -1176,8 +1165,7 @@ ehlo()
 	s = smtptext.s;
 	while (*s++ != '\n');		/*- skip the first line: contains the domain */
 	e = smtptext.s + smtptext.len - 6;	/*- 250-?\n */
-	while (s <= e)
-	{
+	while (s <= e) {
 		int             wasspace = 0;
 
 		if (!saa_readyplus(&ehlokw, 1))
@@ -1189,10 +1177,8 @@ ehlo()
 			sa->len = 0;
 
 		/*- smtptext is known to end in a '\n' */
-		for (p = (s += 4);; ++p)
-		{
-			if (*p == '\n' || *p == ' ' || *p == '\t')
-			{
+		for (p = (s += 4);; ++p) {
+			if (*p == '\n' || *p == ' ' || *p == '\t') {
 				if (!wasspace)
 					if (!stralloc_catb(sa, s, p - s) || !stralloc_0(sa))
 						temp_nomem();
@@ -1200,8 +1186,7 @@ ehlo()
 					break;
 				wasspace = 1;
 			} else
-			if (wasspace == 1)
-			{
+			if (wasspace == 1) {
 				wasspace = 0;
 				s = p;
 			}
@@ -1212,10 +1197,8 @@ ehlo()
 		 * keyword should consist of alpha-num and '-'
 		 * broken AUTH might use '=' instead of space
 		 */
-		for (p = sa->s; *p; ++p)
-		{
-			if (*p == '=')
-			{
+		for (p = sa->s; *p; ++p) {
+			if (*p == '=') {
 				*p = 0;
 				break;
 			}
@@ -1229,11 +1212,9 @@ outsmtptext()
 {
 	int             i;
 
-	if (smtptext.s && smtptext.len)
-	{
+	if (smtptext.s && smtptext.len) {
 		out("Remote host said: ");
-		for (i = 0; i < smtptext.len; ++i)
-		{
+		for (i = 0; i < smtptext.len; ++i) {
 			if (!smtptext.s[i])
 				smtptext.s[i] = '?';
 		}
@@ -1274,22 +1255,19 @@ blast()
 	int             r;
 	char            ch;
 
-	for (r = 0; r < qqeh.len; r++)
-	{
+	for (r = 0; r < qqeh.len; r++) {
 		if (qqeh.s[r] == '\n')
 			substdio_put(&smtpto, "\r", 1);
 		substdio_put(&smtpto, qqeh.s + r, 1);
 	}
-	for (;;)
-	{
+	for (;;) {
 		if (!(r = substdio_get(&ssin, &ch, 1)))
 			break;
 		if (r == -1)
 			temp_read();
 		if (ch == '.')
 			substdio_put(&smtpto, ".", 1);
-		while (ch != '\n')
-		{
+		while (ch != '\n') {
 			substdio_put(&smtpto, &ch, 1);
 			r = substdio_get(&ssin, &ch, 1);
 			if (r == 0)
@@ -1325,8 +1303,7 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 	if (s4)
 		out((char *) s4);
 	if (sa && sa->len) {
-		for (i = 0; i < sa->len; ++i)
-		{
+		for (i = 0; i < sa->len; ++i) {
 			ch = sa->s[i];
 			if (ch < 33)
 				ch = '?';
@@ -1355,8 +1332,7 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 	out(".\n");
 	setsmtptext(-1, 0);
 	outsmtptext();
-	if (env_get("DEBUG") && ssl)
-	{
+	if (env_get("DEBUG") && ssl) {
 		X509           *peercert;
 
 		out("STARTTLS proto=");
@@ -1365,8 +1341,7 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 		out((char *) SSL_get_cipher(ssl));
 
 		/*- we want certificate details */
-		if ((peercert = SSL_get_peer_certificate(ssl)))
-		{
+		if ((peercert = SSL_get_peer_certificate(ssl))) {
 			char           *str;
 
 			str = X509_NAME_oneline(X509_get_subject_name(peercert), NULL, 0);
@@ -1391,11 +1366,8 @@ match_partner(char *s, int len)
 {
 	if (!case_diffb(partner_fqdn, len, (char *) s) && !partner_fqdn[len])
 		return 1;
-	/*
-	 * we also match if the name is *.domainname
-	 */
-	if (*s == '*')
-	{
+	/*- we also match if the name is *.domainname */
+	if (*s == '*') {
 		const char     *domain = partner_fqdn + str_chr(partner_fqdn, '.');
 		if (!case_diffb((char *) domain, --len, (char *) ++s) && !domain[len])
 			return 1;
@@ -1428,10 +1400,10 @@ tls_init()
 	char           *t;
 	SSL            *myssl;
 	SSL_CTX        *ctx;
-	stralloc        saciphers = {0}, tlsFilename = {0}, clientcert = {0};
+	stralloc        saciphers = { 0 }, tlsFilename = { 0 }, clientcert = { 0 };
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-	stralloc        ssl_option = {0};
-	int             method = 4; /* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
+	stralloc        ssl_option = { 0 };
+	int             method = 4;	/* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
 #endif
 	int             method_fail = 1;
 
@@ -1475,8 +1447,7 @@ tls_init()
 		alloc_free(tlsFilename.s);
 		return (0);
 	}
-	if (partner_fqdn)
-	{
+	if (partner_fqdn) {
 		struct stat     st;
 		if (!stralloc_copys(&tlsFilename, certdir))
 			temp_nomem();
@@ -1488,8 +1459,7 @@ tls_init()
 			temp_nomem();
 		if (!stralloc_0(&tlsFilename))
 			temp_nomem();
-		if (stat(tlsFilename.s, &st))
-		{
+		if (stat(tlsFilename.s, &st)) {
 			needtlsauth = 0;
 			if (!stralloc_copys(&tlsFilename, certdir))
 				temp_nomem();
@@ -1499,8 +1469,7 @@ tls_init()
 				temp_nomem();
 			if (!stralloc_0(&tlsFilename))
 				temp_nomem();
-			if (!stat(tlsFilename.s, &st))
-			{
+			if (!stat(tlsFilename.s, &st)) {
 				alloc_free(tlsFilename.s);
 				return (0);
 			}
@@ -1510,8 +1479,7 @@ tls_init()
 				temp_nomem();
 			if (!stralloc_0(&tlsFilename))
 				temp_nomem();
-			if (!stat(tlsFilename.s, &st))
-			{
+			if (!stat(tlsFilename.s, &st)) {
 				alloc_free(tlsFilename.s);
 				return (0);
 			}
@@ -1519,18 +1487,13 @@ tls_init()
 			needtlsauth = 1;
 	}
 
-	if (!smtps)
-	{
+	if (!smtps) {
 		stralloc       *sa = ehlokw.sa;
 		unsigned int    len = ehlokw.len;
-		/*
-		 * look for STARTTLS among EHLO keywords
-		 */
+		/* look for STARTTLS among EHLO keywords */
 		for (; len && case_diffs(sa->s, "STARTTLS"); ++sa, --len);
-		if (!len)
-		{
-			if (!needtlsauth)
-			{
+		if (!len) {
+			if (!needtlsauth) {
 				alloc_free(tlsFilename.s);
 				return 0;
 			}
@@ -1548,31 +1511,29 @@ tls_init()
 	if (method == 2 && (ctx = SSL_CTX_new(SSLv23_client_method())))
 		method_fail = 0;
 	else
-	if (method == 3 && (ctx=SSL_CTX_new(SSLv3_client_method())))
+	if (method == 3 && (ctx = SSL_CTX_new(SSLv3_client_method())))
 		method_fail = 0;
 #if defined(TLSV1_CLIENT_METHOD) || defined(TLS1_VERSION)
 	else
-	if (method == 4 && (ctx=SSL_CTX_new(TLSv1_client_method())))
+	if (method == 4 && (ctx = SSL_CTX_new(TLSv1_client_method())))
 		method_fail = 0;
 #endif
 #if defined(TLSV1_1_CLIENT_METHOD) || defined(TLS1_1_VERSION)
 	else
-	if (method == 5 && (ctx=SSL_CTX_new(TLSv1_1_client_method())))
+	if (method == 5 && (ctx = SSL_CTX_new(TLSv1_1_client_method())))
 		method_fail = 0;
 #endif
 #if defined(TLSV1_2_CLIENT_METHOD) || defined(TLS1_2_VERSION)
 	else
-	if (method == 6 && (ctx=SSL_CTX_new(TLSv1_2_client_method())))
+	if (method == 6 && (ctx = SSL_CTX_new(TLSv1_2_client_method())))
 		method_fail = 0;
 #endif
 #else /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
 	if ((ctx = SSL_CTX_new(TLS_client_method())))
 		method_fail = 0;
 #endif /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
-	if (method_fail)
-	{
-		if (!smtps && !needtlsauth)
-		{
+	if (method_fail) {
+		if (!smtps && !needtlsauth) {
 			alloc_free(tlsFilename.s);
 			SSL_CTX_free(ctx);
 			return 0;
@@ -1603,10 +1564,8 @@ tls_init()
 		}
 	}
 
-	if (needtlsauth)
-	{
-		if (!SSL_CTX_load_verify_locations(ctx, tlsFilename.s, NULL))
-		{
+	if (needtlsauth) {
+		if (!SSL_CTX_load_verify_locations(ctx, tlsFilename.s, NULL)) {
 			t = (char *) ssl_error();
 			if (!stralloc_copyb(&smtptext, "TLS unable to load ", 19))
 				temp_nomem();
@@ -1619,15 +1578,11 @@ tls_init()
 			SSL_CTX_free(ctx);
 			tls_quit("ZTLS unable to load ", tlsFilename.s, ": ", t, 0);
 		}
-		/*
-		 * set the callback here; SSL_set_verify didn't work before 0.9.6c
-		 */
+		/*- set the callback here; SSL_set_verify didn't work before 0.9.6c */
 		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
 	}
 
-	/*
-	 * let the other side complain if it needs a cert and we don't have one
-	 */
+	/*- let the other side complain if it needs a cert and we don't have one */
 	if (!stralloc_copys(&clientcert, certdir))
 		temp_nomem();
 	if (!stralloc_catb(&clientcert, "/clientcert.pem", 15))
@@ -1638,11 +1593,9 @@ tls_init()
 		SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert.s, SSL_FILETYPE_PEM);
 	alloc_free(clientcert.s);
 	myssl = SSL_new(ctx);
-	if (!myssl)
-	{
+	if (!myssl) {
 		t = (char *) ssl_error();
-		if (!smtps && !needtlsauth)
-		{
+		if (!smtps && !needtlsauth) {
 			alloc_free(tlsFilename.s);
 			SSL_CTX_free(ctx);
 			return 0;
@@ -1659,16 +1612,12 @@ tls_init()
 	if (!smtps)
 		substdio_putsflush(&smtpto, "STARTTLS\r\n");
 
-	/*
-	 * while the server is preparing a response, do something else
-	 */
-	if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1)
-	{
+	/*- while the server is preparing a response, do something else */
+	if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1) {
 		SSL_free(myssl);
 		temp_control();
 	}
-	if (saciphers.len)
-	{
+	if (saciphers.len) {
 		for (i = 0; i < saciphers.len - 1; ++i)
 			if (!saciphers.s[i])
 				saciphers.s[i] = ':';
@@ -1681,16 +1630,11 @@ tls_init()
 	/*- SSL_set_options(myssl, SSL_OP_NO_TLSv1); */
 	SSL_set_fd(myssl, smtpfd);
 
-	/*
-	 * read the response to STARTTLS
-	 */
-	if (!smtps)
-	{
-		if (smtpcode() != 220)
-		{
+	/*- read the response to STARTTLS */
+	if (!smtps) {
+		if (smtpcode() != 220) {
 			SSL_free(myssl);
-			if (!needtlsauth)
-			{
+			if (!needtlsauth) {
 				alloc_free(tlsFilename.s);
 				return 0;
 			}
@@ -1704,8 +1648,7 @@ tls_init()
 		}
 	}
 	ssl = myssl;
-	if (ssl_timeoutconn(timeout, smtpfd, smtpfd, ssl) <= 0)
-	{
+	if (ssl_timeoutconn(timeout, smtpfd, smtpfd, ssl) <= 0) {
 		t = (char *) ssl_error_str();
 		if (!stralloc_copyb(&smtptext, "TLS connect failed: ", 20))
 			temp_nomem();
@@ -1713,14 +1656,12 @@ tls_init()
 			temp_nomem();
 		tls_quit("ZTLS connect failed: ", t, 0, 0, 0);
 	}
-	if (needtlsauth)
-	{
+	if (needtlsauth) {
 		X509           *peercert;
-		STACK_OF(GENERAL_NAME) *gens;
+		STACK_OF(GENERAL_NAME) * gens;
 
 		int             r = SSL_get_verify_result(ssl);
-		if (r != X509_V_OK)
-		{
+		if (r != X509_V_OK) {
 			t = (char *) X509_verify_cert_error_string(r);
 			if (!stralloc_copyb(&smtptext, "TLS unable to verify server with ", 33))
 				temp_nomem();
@@ -1732,8 +1673,7 @@ tls_init()
 				temp_nomem();
 			tls_quit("ZTLS unable to verify server with ", tlsFilename.s, ": ", t, 0);
 		}
-		if (!(peercert = SSL_get_peer_certificate(ssl)))
-		{
+		if (!(peercert = SSL_get_peer_certificate(ssl))) {
 			if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
 				temp_nomem();
 			if (!stralloc_cats(&smtptext, partner_fqdn))
@@ -1743,14 +1683,12 @@ tls_init()
 			tls_quit("ZTLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
 		}
 
-		/*
+		/*-
 		 * RFC 2595 section 2.4: find a matching name
 		 * first find a match among alternative names
 		 */
-		if ((gens = X509_get_ext_d2i(peercert, NID_subject_alt_name, 0, 0)))
-		{
-			for (i = 0, r = sk_GENERAL_NAME_num(gens); i < r; ++i)
-			{
+		if ((gens = X509_get_ext_d2i(peercert, NID_subject_alt_name, 0, 0))) {
+			for (i = 0, r = sk_GENERAL_NAME_num(gens); i < r; ++i) {
 				const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
 				if (gn->type == GEN_DNS)
 					if (match_partner((char *) gn->d.ia5->data, gn->d.ia5->length))
@@ -1759,31 +1697,25 @@ tls_init()
 			sk_GENERAL_NAME_pop_free(gens, GENERAL_NAME_free);
 		}
 
-		/*
-		 * no alternative name matched, look up commonName
-		 */
-		if (!gens || i >= r)
-		{
+		/*- no alternative name matched, look up commonName */
+		if (!gens || i >= r) {
 			stralloc        peer = { 0 };
 			X509_NAME      *subj = X509_get_subject_name(peercert);
 			i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
-			if (i >= 0)
-			{
+			if (i >= 0) {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 				X509_NAME_ENTRY *t;
 				t = X509_NAME_get_entry(subj, i);
-				ASN1_STRING *s = X509_NAME_ENTRY_get_data(t);
+				ASN1_STRING    *s = X509_NAME_ENTRY_get_data(t);
 #else
 				const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
 #endif
-				if (s)
-				{
+				if (s) {
 					peer.len = s->length;
 					peer.s = (char *) s->data;
 				}
 			}
-			if (peer.len <= 0)
-			{
+			if (peer.len <= 0) {
 				if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
 					temp_nomem();
 				if (!stralloc_cats(&smtptext, partner_fqdn))
@@ -1792,8 +1724,7 @@ tls_init()
 					temp_nomem();
 				tls_quit("ZTLS unable to verify server ", partner_fqdn, ": certificate contains no valid commonName", 0, 0);
 			}
-			if (!match_partner((char *) peer.s, peer.len))
-			{
+			if (!match_partner((char *) peer.s, peer.len)) {
 				if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
 					temp_nomem();
 				if (!stralloc_cats(&smtptext, partner_fqdn))
@@ -1827,20 +1758,16 @@ xtext(stralloc *ptr, char *s, int len)
 
 	if (!stralloc_copys(ptr, ""))
 		temp_nomem();
-	for (i = 0; i < len; i++)
-	{
-		if (s[i] == '+')
-		{
+	for (i = 0; i < len; i++) {
+		if (s[i] == '+') {
 			if (!stralloc_cats(ptr, "+2B"))
 				temp_nomem();
 		} else
-		if (s[i] == '=')
-		{
+		if (s[i] == '=') {
 			if (!stralloc_cats(ptr, "+3D"))
 				temp_nomem();
 		} else
-		if ((int) s[i] < 33 || (int) s[i] > 126)
-		{
+		if ((int) s[i] < 33 || (int) s[i] > 126) {
 			if (!stralloc_cats(ptr, "+3F"))
 				temp_nomem();	/*- ok. not correct */
 		} else
@@ -1855,8 +1782,7 @@ mailfrom(int use_size)
 {
 	substdio_puts(&smtpto, "MAIL FROM:<");
 	substdio_put(&smtpto, sender.s, sender.len);
-	if (use_size)
-	{
+	if (use_size) {
 		substdio_puts(&smtpto, "> SIZE=");
 		substdio_puts(&smtpto, msgsize);
 		substdio_puts(&smtpto, "\r\n");
@@ -1871,8 +1797,7 @@ mailfrom_xtext(int use_size)
 		temp_nomem();
 	substdio_puts(&smtpto, "MAIL FROM:<");
 	substdio_put(&smtpto, sender.s, sender.len);
-	if (use_size)
-	{
+	if (use_size) {
 		substdio_puts(&smtpto, "> SIZE=");
 		substdio_puts(&smtpto, msgsize);
 		substdio_puts(&smtpto, " AUTH=<");
@@ -1884,9 +1809,11 @@ mailfrom_xtext(int use_size)
 }
 
 static char     hextab[] = "0123456789abcdef";
-stralloc        realm = {0}, nonce = {0}, digesturi = {0};
+stralloc        realm = { 0 }, nonce = { 0 }, digesturi = { 0 };
 
-/* parse digest response */
+/*
+ * parse digest response 
+ */
 unsigned int
 scan_response(stralloc *dst, stralloc *src, const char *search)
 {
@@ -1895,25 +1822,25 @@ scan_response(stralloc *dst, stralloc *src, const char *search)
 	unsigned int    slen;
 
 	slen = str_len((char *) search);
-	if (!stralloc_copys(dst,""))
+	if (!stralloc_copys(dst, ""))
 		temp_nomem();
-	for (i=0; src->len>i+slen; i+=str_chr(x+i, ',')+1) {
-		char *s=x+i;
+	for (i = 0; src->len > i + slen; i += str_chr(x + i, ',') + 1) {
+		char           *s = x + i;
 		if (case_diffb(s, slen, (char *) search) == 0) {
-			s += slen; /* skip name */
+			s += slen;			/* skip name */
 			if (*s++ != '=')
-				return 0; /* has to be here! */
-			if (*s == '"') { /* var="value" */
+				return 0;		/* has to be here! */
+			if (*s == '"') {	/* var="value" */
 				s++;
 				len = str_chr(s, '"');
 				if (!len)
 					return 0;
 				if (!stralloc_catb(dst, s, len))
 					temp_nomem();
-			} else { /* var=value */
+			} else {			/* var=value */
 				len = str_chr(s, ',');
 				if (!len)
-					str_len(s); /* should be the end */
+					str_len(s);	/* should be the end */
 				if (!stralloc_catb(dst, s, len))
 					temp_nomem();
 			}
@@ -1928,7 +1855,7 @@ auth_digest_md5(int use_size)
 {
 	unsigned char   unique[FMT_ULONG + FMT_ULONG + 3];
 	unsigned char   digest[20], cnonce[41];
-	unsigned char  *s, *x=cnonce;
+	unsigned char  *s, *x = cnonce;
 	unsigned long   i, len = 0;
 	int             code;
 	char            z[IPFMT];
@@ -1937,8 +1864,7 @@ auth_digest_md5(int use_size)
 	substdio_flush(&smtpto);
 	if ((code = smtpcode()) != 334)
 		quit("ZConnected to ", " but authentication was rejected (AUTH DIGEST-MD5).", code, -1);
-	if ((i = str_chr(smtptext.s + 5, '\n')) > 0) /* Challenge */
-	{
+	if ((i = str_chr(smtptext.s + 5, '\n')) > 0) {	/* Challenge */
 		slop.len = 0;
 		if (!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
 			temp_nomem();
@@ -1961,10 +1887,12 @@ auth_digest_md5(int use_size)
 	*s++ = 0;
 	hmac_sha1(unique, len, unique + 3, len - 3, digest);
 	for (i = 0; i < 20; i++) {
-		*x = hextab[digest[i]/16]; ++x;
-		*x = hextab[digest[i]%16]; ++x;
+		*x = hextab[digest[i] / 16];
+		++x;
+		*x = hextab[digest[i] % 16];
+		++x;
 	}
-	*x=0;
+	*x = 0;
 	if (!stralloc_copyb(&slop, "cnonce=\"", 8))
 		temp_nomem();
 	if (!stralloc_catb(&slop, (char *) cnonce, 32))
@@ -2004,9 +1932,10 @@ auth_digest_md5(int use_size)
 		temp_nomem();
 	if (!stralloc_catb(&slop, "\",response=", 11))
 		temp_nomem();
-	if (!(s = (unsigned char *) digest_md5(user.s, user.len, realm.s, realm.len,
-		pass.s, pass.len, 0, nonce.s, nonce.len, digesturi.s, digesturi.len,
-		(char *) cnonce, "00000001", "auth")))
+	if (!
+		(s =
+		 (unsigned char *) digest_md5(user.s, user.len, realm.s, realm.len, pass.s, pass.len, 0, nonce.s, nonce.len, digesturi.s,
+									  digesturi.len, (char *) cnonce, "00000001", "auth")))
 		quit("ZConnected to ", " but unable to generate response.", -1, -1);
 	if (!stralloc_cats(&slop, (char *) s))
 		temp_nomem();
@@ -2068,8 +1997,7 @@ auth_cram(int type, int use_size)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-RIPEMD).", code, -1);
 		break;
 	}
-	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) /* Challenge */
-	{
+	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) {	/* Challenge */
 		if (!stralloc_copys(&slop, ""))
 			temp_nomem();
 		if (!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
@@ -2095,16 +2023,19 @@ auth_cram(int type, int use_size)
 	}
 
 	for (j = 0, e = encrypted; j < iter; j++) {	/* HEX => ASCII */
-		*e = hextab[digest[j]/16]; ++e;
-		*e = hextab[digest[j]%16]; ++e;
-	} *e = 0;
+		*e = hextab[digest[j] / 16];
+		++e;
+		*e = hextab[digest[j] % 16];
+		++e;
+	}
+	*e = 0;
 
 	if (!stralloc_copy(&slop, &user))
-		temp_nomem();	/* user-id */
+		temp_nomem();			/* user-id */
 	if (!stralloc_catb(&slop, " ", 1))
 		temp_nomem();
 	if (!stralloc_cats(&slop, (char *) encrypted))
-		temp_nomem();	/* digest */
+		temp_nomem();			/* digest */
 
 	if (b64encode(&slop, &auth))
 		quit("ZConnected to ", " but unable to base64encode username+digest.", -1, -1);
@@ -2182,25 +2113,20 @@ auth_login(int use_size)
 void
 smtp_auth(char *type, int use_size)
 {
-	int             i = 0, j, login_supp = 0, plain_supp = 0, cram_md5_supp = 0,
-					cram_sha1_supp = 0, cram_sha256_supp = 0, cram_rmd_supp = 0,
-					digest_md5_supp = 0, secure_auth;
-	char           *ptr, *no_auth_login, *no_auth_plain, *no_cram_md5,
-		           *no_cram_sha1, *no_cram_sha256, *no_cram_ripemd,
-		           *no_digest_md5;
+	int             i = 0, j, login_supp = 0, plain_supp = 0, cram_md5_supp = 0, cram_sha1_supp = 0, cram_sha256_supp =
+		0, cram_rmd_supp = 0, digest_md5_supp = 0, secure_auth;
+	char           *ptr, *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha256, *no_cram_ripemd,
+		*no_digest_md5;
 
-	if (!type)
-	{
+	if (!type) {
 		mailfrom(use_size);
 		return;
 	}
 	while ((i += str_chr(smtptext.s + i, '\n') + 1) && (i + 8 < smtptext.len)
-		&& str_diffn(smtptext.s + i + 4, "AUTH ", 5));
+		   && str_diffn(smtptext.s + i + 4, "AUTH ", 5));
 
-	for (ptr = smtptext.s + i + 4 + 5;*ptr != '\n' && ptr < smtptext.s + smtptext.len; ptr++)
-	{
-		if (*ptr == '-')
-		{
+	for (ptr = smtptext.s + i + 4 + 5; *ptr != '\n' && ptr < smtptext.s + smtptext.len; ptr++) {
+		if (*ptr == '-') {
 			if (case_starts(ptr - 6, "DIGEST-MD5"))
 				digest_md5_supp = 1;
 			else
@@ -2217,13 +2143,13 @@ smtp_auth(char *type, int use_size)
 				cram_md5_supp = 1;
 		}
 	}
-	if ((j = str_chr(smtptext.s + i + 8, 'L')) > 0)	/*- AUTH LOGIN */
-	{
+	/*- AUTH LOGIN */
+	if ((j = str_chr(smtptext.s + i + 8, 'L')) > 0) {
 		if (case_starts(smtptext.s + i + 8 + j, "LOGIN"))
 			login_supp = 1;
 	}
-	if ((j = str_chr(smtptext.s + i + 8, 'P')) > 0)	/*- AUTH PLAIN */
-	{
+	/*- AUTH PLAIN */
+	if ((j = str_chr(smtptext.s + i + 8, 'P')) > 0) {
 		if (case_starts(smtptext.s + i + 8 + j, "PLAIN"))
 			plain_supp = 1;
 	}
@@ -2236,100 +2162,78 @@ smtp_auth(char *type, int use_size)
 	no_auth_plain = env_get("DISABLE_AUTH_PLAIN");
 #endif
 	no_cram_md5 = env_get("DISABLE_CRAM_MD5");
-	no_cram_sha1= env_get("DISABLE_CRAM_SHA1");
-	no_cram_sha256= env_get("DISABLE_CRAM_SHA256");
-	no_cram_ripemd= env_get("DISABLE_CRAM_RIPEMD");
-	no_digest_md5= env_get("DISABLE_DIGEST_MD5");
-	if (!case_diffs(type, "DIGEST-MD5"))
-	{
-		if (digest_md5_supp)
-		{
+	no_cram_sha1 = env_get("DISABLE_CRAM_SHA1");
+	no_cram_sha256 = env_get("DISABLE_CRAM_SHA256");
+	no_cram_ripemd = env_get("DISABLE_CRAM_RIPEMD");
+	no_digest_md5 = env_get("DISABLE_DIGEST_MD5");
+	if (!case_diffs(type, "DIGEST-MD5")) {
+		if (digest_md5_supp) {
 			auth_digest_md5(use_size);
 			return;
 		}
 	} else
-	if (!case_diffs(type, "CRAM-RIPEMD"))
-	{
-		if (cram_rmd_supp)
-		{
+	if (!case_diffs(type, "CRAM-RIPEMD")) {
+		if (cram_rmd_supp) {
 			auth_cram(6, use_size);
 			return;
 		}
 	} else
-	if (!case_diffs(type, "CRAM-SHA256"))
-	{
-		if (cram_sha256_supp)
-		{
+	if (!case_diffs(type, "CRAM-SHA256")) {
+		if (cram_sha256_supp) {
 			auth_cram(5, use_size);
 			return;
 		}
 	} else
-	if (!case_diffs(type, "CRAM-SHA1"))
-	{
-		if (cram_sha1_supp)
-		{
+	if (!case_diffs(type, "CRAM-SHA1")) {
+		if (cram_sha1_supp) {
 			auth_cram(4, use_size);
 			return;
 		}
 	} else
-	if (!case_diffs(type, "CRAM-MD5"))
-	{
-		if (cram_md5_supp)
-		{
+	if (!case_diffs(type, "CRAM-MD5")) {
+		if (cram_md5_supp) {
 			auth_cram(3, use_size);
 			return;
 		}
 	} else
-	if (!case_diffs(type, "LOGIN"))
-	{
-		if (login_supp)
-		{
+	if (!case_diffs(type, "LOGIN")) {
+		if (login_supp) {
 			auth_login(use_size);
 			return;
 		}
 	} else
-	if (!case_diffs(type, "PLAIN"))
-	{
-		if (plain_supp)
-		{
+	if (!case_diffs(type, "PLAIN")) {
+		if (plain_supp) {
 			auth_plain(use_size);
 			return;
 		}
 	} else
-	if (!*type)
-	{
-		if (!no_digest_md5 && digest_md5_supp)
-		{
+	if (!*type) {
+		if (!no_digest_md5 && digest_md5_supp) {
 			auth_digest_md5(use_size);
 			return;
 		}
-		if (!no_cram_ripemd && cram_rmd_supp)
-		{
+		if (!no_cram_ripemd && cram_rmd_supp) {
 			auth_cram(6, use_size);
 			return;
 		}
-		if (!no_cram_sha256 && cram_sha256_supp)
-		{
+		if (!no_cram_sha256 && cram_sha256_supp) {
 			auth_cram(5, use_size);
 			return;
 		}
-		if (!no_cram_sha1 && cram_sha1_supp)
-		{
+		if (!no_cram_sha1 && cram_sha1_supp) {
 			auth_cram(4, use_size);
 			return;
 		}
-		if (!no_cram_md5 && cram_md5_supp)
-		{
+		if (!no_cram_md5 && cram_md5_supp) {
 			auth_cram(3, use_size);
 			return;
 		}
-		if (!no_auth_login && login_supp)
-		{
+		if (!no_auth_login && login_supp) {
 			auth_login(use_size);
 			return;
 		}
-		if (!no_auth_plain && plain_supp)
-		{
+		if (!no_auth_plain && plain_supp) {
 			auth_plain(use_size);
 			return;
 		}
@@ -2339,7 +2243,8 @@ smtp_auth(char *type, int use_size)
 	return;
 }
 
-void temp_proto()
+void
+temp_proto()
 {
 	out("Zrecipient did not talk proper QMTP (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, "recipient did not talk proper QMTP (#4.3.0)"))
@@ -2385,9 +2290,9 @@ qmtp(stralloc *h, char *ip, int port)
 	if (fstat(0, &st) == -1)
 		quit("Z", "unable to fstat fd 0", -1, -1);
 	len = st.st_size;
-	/*
-	 * the following code was substantially taken from serialmail'ss serialqmtp.c
-	 */
+	/*-
+ 	 * the following code was substantially taken from serialmail'ss serialqmtp.c
+ 	 */
 	substdio_put(&smtpto, num, fmt_ulong(num, len + 1));
 	substdio_put(&smtpto, ":\n", 2);
 	while (len > 0) {
@@ -2455,7 +2360,8 @@ qmtp(stralloc *h, char *ip, int port)
 		smtptext.s[smtptext.len - 1] = '\n';
 		if (smtptext.s[0] == 'K')
 			out("r");
-		else if (smtptext.s[0] == 'D') {
+		else
+		if (smtptext.s[0] == 'D') {
 			out("h");
 			flagallok = 0;
 		} else {				/* if (smtptext.s[0] == 'Z') */
@@ -2479,7 +2385,7 @@ qmtp(stralloc *h, char *ip, int port)
 	}
 }
 
-stralloc         helo_str = { 0 };
+stralloc        helo_str = { 0 };
 
 void
 smtp()
@@ -2504,40 +2410,37 @@ smtp()
 		quit("DConnected to ", " but greeting failed", code, 1);
 	else
 	if (code >= 400 && code < 500)
-		return; /* try next MX, see RFC-2821 */
+		return;					/* try next MX, see RFC-2821 */
 	else
 	if (code != 220)
 		quit("ZConnected to ", " but greeting failed", code, -1);
 #ifdef TLS
 	if (!smtps)
 		code = ehlo();
-	/*
-	 * RFC2487 says we should issue EHLO (even if we might not need
-	 * extensions); at the same time, it does not prohibit a server
-	 * to reject the EHLO and make us fallback to HELO
-	 */
+	/*-
+ 	 * RFC2487 says we should issue EHLO (even if we might not need
+ 	 * extensions); at the same time, it does not prohibit a server
+ 	 * to reject the EHLO and make us fallback to HELO
+ 	 */
 	if (tls_init())
 		code = ehlo();
 #else
 	code = ehlo();
 #endif
-	if (!use_auth_smtp)
-	{
-		if (code >= 500)
-		{
+	if (!use_auth_smtp) {
+		if (code >= 500) {
 			is_esmtp = 0;
-			substdio_puts(&smtpto,"HELO ");
-			substdio_put(&smtpto,helohost.s,helohost.len);
-			substdio_puts(&smtpto,"\r\n");
+			substdio_puts(&smtpto, "HELO ");
+			substdio_put(&smtpto, helohost.s, helohost.len);
+			substdio_puts(&smtpto, "\r\n");
 			substdio_flush(&smtpto);
 			code = smtpcode();
 		}
 	}
-	/* for broken servers like yahoo */
+	/*- for broken servers like yahoo */
 	if (env_get("TRY_NEXT_MX_HELO_FAIL") && code >= 400 && code < 500)
 		return;
-	if (code != 250)
-	{
+	if (code != 250) {
 		if (!stralloc_copys(&helo_str, " but my name -->"))
 			temp_nomem();
 		if (!stralloc_cat(&helo_str, &helohost))
@@ -2546,14 +2449,13 @@ smtp()
 			temp_nomem();
 		if (!stralloc_0(&helo_str))
 			temp_nomem();
-		quit(code >= 500 ? "DConnected to " : "ZConnected to " , helo_str.s, code, code >= 500 ? 1 : -1);
+		quit(code >= 500 ? "DConnected to " : "ZConnected to ", helo_str.s, code, code >= 500 ? 1 : -1);
 	}
-	/*
-	 * go through all lines of the multi line answer until one begins
-	 * with "XXX[ -]SIZE" or we reach the last line
-	 */
-	if (is_esmtp)
-	{
+	/*-
+ 	 * go through all lines of the multi line answer until one begins
+ 	 * with "XXX[ -]SIZE" or we reach the last line
+ 	 */
+	if (is_esmtp) {
 		i = 0;
 		do {
 			i += 5 + str_chr(smtptext.s + i, '\n');
@@ -2570,15 +2472,13 @@ smtp()
 	if (code >= 400)
 		quit("ZConnected to ", " but sender was rejected", code, -1);
 	flagbother = 0;
-	for (i = 0; i < reciplist.len; ++i)
-	{
+	for (i = 0; i < reciplist.len; ++i) {
 		substdio_puts(&smtpto, "RCPT TO:<");
 		substdio_put(&smtpto, reciplist.sa[i].s, reciplist.sa[i].len);
 		substdio_puts(&smtpto, ">\r\n");
 		substdio_flush(&smtpto);
 		code = smtpcode();
-		if (code >= 500)
-		{
+		if (code >= 500) {
 			out("hFrom: <");
 			outsafe(&sender);
 			out("> RCPT: <");
@@ -2589,8 +2489,7 @@ smtp()
 			outsmtptext();
 			zero();
 		} else
-		if (code >= 400)
-		{
+		if (code >= 400) {
 			out("sFrom: <");
 			outsafe(&sender);
 			out("> RCPT: <");
@@ -2600,8 +2499,7 @@ smtp()
 			out(" does not like recipient.\n");
 			outsmtptext();
 			zero();
-		} else
-		{
+		} else {
 			out("rFrom: <");
 			outsafe(&sender);
 			out("> RCPT: <");
@@ -2632,15 +2530,14 @@ smtp()
 stralloc        canonhost = { 0 };
 stralloc        canonbox = { 0 };
 
-void /*- host has to be canonical, box has to be quoted */
+void	 /*- host has to be canonical, box has to be quoted */
 addrmangle(stralloc *saout, char *s, int *flagalias, int flagcname)
 {
 	int             j;
 
 	*flagalias = flagcname;
 	j = str_rchr(s, '@');
-	if (!s[j])
-	{
+	if (!s[j]) {
 		if (!stralloc_copys(saout, s))
 			temp_nomem();
 		return;
@@ -2654,8 +2551,7 @@ addrmangle(stralloc *saout, char *s, int *flagalias, int flagcname)
 		temp_nomem();
 	if (!stralloc_copys(&canonhost, s + j + 1))
 		temp_nomem();
-	if (flagcname)
-	{
+	if (flagcname) {
 		switch (dns_cname(&canonhost))
 		{
 		case 0:
@@ -2665,7 +2561,7 @@ addrmangle(stralloc *saout, char *s, int *flagalias, int flagcname)
 			temp_nomem();
 		case DNS_SOFT:
 			temp_dnscanon();
-		case DNS_HARD:;		/*- alias loop, not our problem */
+		case DNS_HARD:;	/*- alias loop, not our problem */
 		}
 	}
 	if (!stralloc_cat(saout, &canonhost))
@@ -2688,8 +2584,7 @@ getcontrols()
 		temp_control();
 	if (control_rldef(&helohost, "helohost", 1, (char *) 0) != 1)
 		temp_control();
-	if ((routes = env_get("QMTPROUTE"))) /* mysql */
-	{
+	if ((routes = env_get("QMTPROUTE"))) {	/* mysql */
 		if (!stralloc_copyb(&qmtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
 		cntrl_stat2 = 2;
@@ -2699,31 +2594,28 @@ getcontrols()
 	}
 	switch (cntrl_stat2)
 	{
-	case -1: /*- error reading qmtproutes */
+	case -1:/*- error reading qmtproutes */
 		temp_control();
-	case 0: /*- qmtproutes absent */
+	case 0:/*- qmtproutes absent */
 		if (!constmap_init(&mapqmtproutes, "", 0, 1))
 			temp_nomem();
 		break;
-	case 1: /*- qmtproutes present */
+	case 1:/*- qmtproutes present */
 	case 2:
 		if (!constmap_init(&mapqmtproutes, qmtproutes.s, qmtproutes.len, 1))
 			temp_nomem();
 		break;
 	}
 	routes = (routes = env_get("SMTPROUTE")) ? routes : env_get("X-SMTPROUTES");
-	if (routes) /* mysql or X-SMTPROUTES from header */
-	{
+	if (routes) {				/* mysql or X-SMTPROUTES from header */
 		if (!stralloc_copyb(&smtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
 		cntrl_stat1 = 2;
-	} else
-	{
+	} else {
 		smtproutefile = (smtproutefile = env_get("SMTPROUTEFILE")) ? smtproutefile : "smtproutes";
 		moresmtproutefile = (moresmtproutefile = env_get("MORESMTPROUTECDB")) ? moresmtproutefile : "moresmtproutes.cdb";
 		cntrl_stat1 = control_readfile(&smtproutes, smtproutefile, 0);
-		if (!controldir)
-		{
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
@@ -2739,21 +2631,20 @@ getcontrols()
 		if (!stralloc_0(&controlfile))
 			temp_nomem();
 		else
-		if ((fdmoreroutes = open_read(controlfile.s)) == -1)
-		{
+		if ((fdmoreroutes = open_read(controlfile.s)) == -1) {
 			if (errno != error_noent)
 				cntrl_stat1 = -1;
 		}
 	}
 	switch (cntrl_stat1)
 	{
-	case -1: /*- error reading smtproutes */
+	case -1:/*- error reading smtproutes */
 		temp_control();
-	case 0: /*- smtproutes absent */
+	case 0:/*- smtproutes absent */
 		if (!constmap_init(&mapsmtproutes, "", 0, 1))
 			temp_nomem();
 		break;
-	case 1: /*- smtproutes present */
+	case 1:/*- smtproutes present */
 	case 2:
 		if (!constmap_init(&mapsmtproutes, smtproutes.s, smtproutes.len, 1))
 			temp_nomem();
@@ -2762,9 +2653,9 @@ getcontrols()
 #ifdef BATV
 	if ((batvok = control_readline(&signkey, (x = env_get("SIGNKEY")) ? x : "signkey")) == -1)
 		temp_control();
-	if (batvok)
-	{
-		switch (control_readfile(&nosign, "nosignhosts",0)) {
+	if (batvok) {
+		switch (control_readfile(&nosign, "nosignhosts", 0))
+		{
 		case -1:
 			temp_control();
 		case 0:
@@ -2776,7 +2667,8 @@ getcontrols()
 				temp_nomem();
 			break;
 		}
-		switch (control_readfile(&nosigndoms, "nosignmydoms", 0)) {
+		switch (control_readfile(&nosigndoms, "nosignmydoms", 0))
+		{
 		case -1:
 			temp_control();
 		case 0:
@@ -2790,13 +2682,13 @@ getcontrols()
 		}
 	}
 #endif
-	if ((x = env_get("OUTGOINGIP")) && *x)
-	{
+	if ((x = env_get("OUTGOINGIP")) && *x) {
 		if (!stralloc_copys(&outgoingip, x))
 			temp_nomem();
 		r = 1;
-	} else /*- per recipient domain outgoingip */
-	{
+	} else {
+/*- per recipient domain outgoingip */
+
 		if (!stralloc_copys(&outgoingipfn, "outgoingip."))
 			temp_nomem();
 		else
@@ -2807,27 +2699,24 @@ getcontrols()
 			temp_nomem();
 		if (!(r = control_readrandom(&outgoingip, outgoingipfn.s)))
 			r = control_readrandom(&outgoingip, "outgoingip");
-		if (r == -1)
-		{
+		if (r == -1) {
 			if (errno == error_nomem)
 				temp_nomem();
 			temp_control();
 		} else
 		if (r && !env_put2("OUTGOINGIP", outgoingip.s)) {
 			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
+			_exit(1);
 		}
 	}
 #ifdef IPV6
 	if (0 == r && !stralloc_copys(&outgoingip, "::"))
 		temp_nomem();
-	if (0 == str_diffn(outgoingip.s, "::", 2))
-	{
+	if (0 == str_diffn(outgoingip.s, "::", 2)) {
 		int             i;
-		for (i = 0;i < 16;i++)
+		for (i = 0; i < 16; i++)
 			outip.ip6.d[i] = 0;
-	} else
-	{
+	} else {
 		if (!ip6_scan(outgoingip.s, &outip.ip6))
 			temp_noip();
 		if (ip6_isv4mapped(&outip.ip6.d) && !ip4_scan(outgoingip.s, &outip.ip))
@@ -2836,10 +2725,9 @@ getcontrols()
 #else
 	if (0 == r && !stralloc_copys(&outgoingip, "0.0.0.0"))
 		temp_nomem();
-	if (0 == str_diffn(outgoingip.s, "0.0.0.0", 7))
-	{
+	if (0 == str_diffn(outgoingip.s, "0.0.0.0", 7)) {
 		int             i;
-		for (i = 0;i < 4;i++)
+		for (i = 0; i < 4; i++)
 			outip.ip.d[i] = 0;
 	} else
 	if (!ip4_scan(outgoingip.s, &outip.ip))
@@ -2860,8 +2748,7 @@ getcontrols()
 		break;
 	}
 	senderdomain = 0;
-	if (sender.len)
-	{
+	if (sender.len) {
 		int             i;
 
 		if ((i = str_rchr(sender.s, '@')))
@@ -2871,18 +2758,15 @@ getcontrols()
 		ip = constmap(&maplocalips, sender.s, sender.len);
 		if (ip && !*ip)
 			ip = 0;
-		for (i = 0;!ip && i <= senderbind.len;++i)
-		{
-			if (!i || i == senderbind.len || senderbind.s[i] == '.')
-			{
+		for (i = 0; !ip && i <= senderbind.len; ++i) {
+			if (!i || i == senderbind.len || senderbind.s[i] == '.') {
 				if ((ip = constmap(&maplocalips, senderbind.s + i, senderbind.len - i)))
 					break;
 			}
 		}
 		if (ip && !*ip)
 			ip = 0;
-		if (ip)
-		{
+		if (ip) {
 			if (!stralloc_copys(&outgoingip, ip))
 				temp_nomem();
 #ifdef IPV6
@@ -2979,14 +2863,13 @@ char           *
 lookup_host(char *host, int len)
 {
 	static stralloc morerelayhost = { 0 };
-	stralloc        h = {0};
+	static stralloc h = { 0 };
 	uint32          dlen;
 
 	if (!stralloc_copyb(&h, host, len))
 		temp_nomem();
 	case_lowerb(h.s, h.len);
-	if (fdmoreroutes != -1 && cdb_seek(fdmoreroutes, h.s, h.len, &dlen) == 1)
-	{
+	if (fdmoreroutes != -1 && cdb_seek(fdmoreroutes, h.s, h.len, &dlen) == 1) {
 		if (!stralloc_ready(&morerelayhost, (unsigned int) (dlen + 1)))
 			temp_nomem();
 		morerelayhost.len = dlen;
@@ -3056,7 +2939,7 @@ main(int argc, char **argv)
 	my_argv = argv;
 	if (chdir(auto_qmail) == -1)
 		temp_chdir();
-	if (!stralloc_copys(&host, argv[1])) /*- host required by getcontrols below */
+	if (!stralloc_copys(&host, argv[1]))	 /*- host required by getcontrols below */
 		temp_nomem();
 	addrmangle(&sender, argv[2], &flagalias, 0);
 	if (!stralloc_copys(&qqeh, argv[3]))
@@ -3070,7 +2953,7 @@ main(int argc, char **argv)
 	relayhost = lookup_host(*recips, str_len(*recips));
 	min_penalty = (x = env_get("MIN_PENALTY")) ? scan_int(x, &min_penalty) : MIN_PENALTY;
 	max_tolerance = (x = env_get("MAX_TOLERANCE")) ? scan_ulong(x, &max_tolerance) : MAX_TOLERANCE;
-	if (sender.len == 0) {     /* bounce routes */
+	if (sender.len == 0) {		/* bounce routes */
 		if (!stralloc_copys(&bounce, "!@"))
 			temp_nomem();
 		if ((relayhost = constmap(&mapqmtproutes, bounce.s, bounce.len))) {
@@ -3082,21 +2965,17 @@ main(int argc, char **argv)
 	}
 	if (relayhost && !*relayhost)
 		relayhost = 0;
-	if (cntrl_stat1 ||  cntrl_stat2) /*- set in getcontrols() above */
-	{
+	if (cntrl_stat1 || cntrl_stat2) { /*- set in getcontrols() above */
 		/*- Look at qmtproutes/smtproutes */
-		for (i = 0; !relayhost && i <= host.len; ++i)
-		{
-			if ((i == 0) || (i == host.len) || (host.s[i] == '.'))
-			{
-				/* default qmtproutes */
+		for (i = 0; !relayhost && i <= host.len; ++i) {
+			if ((i == 0) || (i == host.len) || (host.s[i] == '.')) {
+				/*- default qmtproutes */
 				if (cntrl_stat2 == 2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
 					protocol_t = 'q';
 					port = PORT_QMTP;
 					break;
 				} else
-				if (cntrl_stat1 == 2 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i)))
-				{
+				if (cntrl_stat1 == 2 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i))) {
 					port = PORT_SMTP;
 					break;
 				} else
@@ -3105,8 +2984,7 @@ main(int argc, char **argv)
 					port = PORT_QMTP;
 					break;
 				} else
-				if (cntrl_stat1 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i)))
-				{
+				if (cntrl_stat1 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i))) {
 					port = PORT_SMTP;
 					break;
 				} else
@@ -3117,25 +2995,20 @@ main(int argc, char **argv)
 		if (relayhost && !*relayhost)
 			relayhost = 0;
 	}
-	if (relayhost)
-	{
-		if (use_auth_smtp)
-		{
+	if (relayhost) {
+		if (use_auth_smtp) {
 			/*-
 			 * test.com:x.x.x.x:port username password
 			 *         or
 			 * domain:relay:port:penalty:max_tolerance username password
 			 */
 			i = str_chr(relayhost, ' ');
-			if (relayhost[i])
-			{
+			if (relayhost[i]) {
 				relayhost[i] = 0;
 				j = str_chr(relayhost + i + 1, ' ');
-				if (relayhost[i + j + 1]) /*- if password is present */
-				{
+				if (relayhost[i + j + 1]) { /*- if password is present */
 					relayhost[i + j + 1] = 0;
-					if (relayhost[i + 1] && relayhost[i + j + 2]) /* both user and password are present */
-					{
+					if (relayhost[i + 1] && relayhost[i + j + 2]) {	/* both user and password are present */
 						if (!stralloc_copys(&user, relayhost + i + 1))
 							temp_nomem();
 						if (!stralloc_copys(&pass, relayhost + i + j + 2))
@@ -3156,18 +3029,18 @@ main(int argc, char **argv)
 			if (relayhost[i + 1]) {
 				if (relayhost[i + 1] == ':')
 					port = PORT_SMTP;
-				else /* port is present */
+				else			/* port is present */
 					scan_ulong(relayhost + i + 1, &port);
 				relayhost[i] = 0;
-				x = relayhost + i + 1; /* port */
+				x = relayhost + i + 1;	/* port */
 				i = str_chr(x, ':'); /*- : before min_penalty */
 				if (x[i]) {
-					if (x[i + 1] != ':') /*- if penalty figure is present */
+					if (x[i + 1] != ':')	 /*- if penalty figure is present */
 						scan_int(x + i + 1, &min_penalty);
 					x = relayhost + i + 1; /*- min_penalty */
 					i = str_chr(x, ':');
 					if (x[i]) {
-						if (x[i + 1] != ':') /*- if tolerance figure is present */
+						if (x[i + 1] != ':')	 /*- if tolerance figure is present */
 							scan_ulong(x + i + 1, &max_tolerance);
 					}
 					if (!min_penalty)
@@ -3185,12 +3058,12 @@ main(int argc, char **argv)
 		int             j;
 
 		if (!stralloc_0(&sender))
-			temp_nomem(); /* null terminate */
+			temp_nomem();		/* null terminate */
 		sender.len--;
 		i = str_rchr(*recips, '@');	/* should check all recips, not just the first */
 		j = str_rchr(sender.s, '@');
 		if (!constmap(&mapnosign, *recips + i + 1, str_len(*recips + i + 1))
-				&& !constmap(&mapnosigndoms, sender.s + j + 1, sender.len - (j + 1)))
+			&& !constmap(&mapnosigndoms, sender.s + j + 1, sender.len - (j + 1)))
 			sign_batv(); /*- modifies sender */
 	}
 #endif
@@ -3200,8 +3073,7 @@ main(int argc, char **argv)
 		temp_oserr();
 	flagallaliases = 1;
 	i = (env_get("DISABLE_CNAME_LOOKUP") ? 0 : !relayhost);
-	while (*recips)
-	{
+	while (*recips) {
 		if (!saa_readyplus(&reciplist, 1))
 			temp_nomem();
 		reciplist.sa[reciplist.len] = sauninit;
@@ -3227,10 +3099,8 @@ main(int argc, char **argv)
 	if (ip.len <= 0)
 		perm_nomx();
 	prefme = 100000;
-	for (i = 0; i < ip.len; ++i)
-	{
-		if (ipme_is46(&ip.ix[i]))
-		{
+	for (i = 0; i < ip.len; ++i) {
+		if (ipme_is46(&ip.ix[i])) {
 			if (ip.ix[i].pref < prefme)
 				prefme = ip.ix[i].pref;
 		}
@@ -3239,16 +3109,14 @@ main(int argc, char **argv)
 		prefme = 300000;
 	if (flagallaliases)
 		prefme = 500000;
-	for (i = 0; i < ip.len; ++i)
-	{
+	for (i = 0; i < ip.len; ++i) {
 		if (ip.ix[i].pref < prefme)
 			break;
 	}
 	if (i >= ip.len)
 		perm_ambigmx();
 	x = 0;
-	for (i = j = 0; i < ip.len; ++i)
-	{
+	for (i = j = 0; i < ip.len; ++i) {
 #ifdef MXPS
 		mxps = 0;
 		if (qmtp_priority(ip.ix[i].pref))
@@ -3263,11 +3131,10 @@ main(int argc, char **argv)
 #ifdef IPV6
 			if ((smtpfd = (ip.ix[i].af == AF_INET ? socket_tcp4() : socket_tcp6())) == -1)
 #else
-    		if ((smtpfd = socket_tcp4()) == -1)
+			if ((smtpfd = socket_tcp4()) == -1)
 #endif
 				temp_oserr();
-			if (!x)
-			{
+			if (!x) {
 				if (!(x = alloc(IPFMT + 1)))
 					temp_nomem();
 			} else
@@ -3276,11 +3143,9 @@ main(int argc, char **argv)
 			j += ip4_fmt(x + j, &ip.ix[i].addr.ip);
 			x[j++] = ',';
 			x[j] = 0;
-			for (;;)
-			{
-				if (!timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconnect))
-				{
-					if (flagtcpto) /*- clear the error */
+			for (;;) {
+				if (!timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconnect)) {
+					if (flagtcpto)	   /*- clear the error */
 						tcpto_err(&ip.ix[i], 0, max_tolerance);
 					partner = ip.ix[i];
 #ifdef TLS
@@ -3296,14 +3161,13 @@ main(int argc, char **argv)
 							x[j - 1] = 0;
 						qmtp(&host, x, port); /*- does not return */
 					} else
-						smtp(); /*- only returns when the next MX is to be tried */
+						smtp();	/*- only returns when the next MX is to be tried */
 					smtp_error = 1;
 					break;
-				} else /*- connect failed */
-				{
+				} else { /*- connect failed */
+
 #ifdef MXPS
-					if (mxps) /*- QMTP failed; try SMTP */
-					{
+					if (mxps) { /*- QMTP failed; try SMTP */
 						mxps = -1;
 						port = PORT_SMTP;
 						continue;
@@ -3318,30 +3182,28 @@ main(int argc, char **argv)
 			 * Add the IP address to tcp timeout table
 			 * and try the next MX
 			 */
-			if (flagtcpto)
-			{
-				errors = (errno == error_timeout || errno == error_connrefused || errno == error_hostdown ||
-					errno == error_netunreach || errno == error_hostunreach || smtp_error);
+			if (flagtcpto) {
+				errors = (errno == error_timeout || errno == error_connrefused || errno == error_hostdown
+						  || errno == error_netunreach || errno == error_hostunreach || smtp_error);
 				tcpto_err(&ip.ix[i], errors, max_tolerance);
 			}
 			close(smtpfd);
 		}
 	} /*- for (i = j = 0; i < ip.len; ++i) */
-	if (j)
-	{
+	if (j) {
 		x[j - 1] = 0; /*- remove the last ',' */
 		temp_noconn(&host, x, port);
 	} else
 		temp_noconn(&host, 0, 0);
 	/*- Not reached */
-	return(0);
+	return (0);
 }
 
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.111 2017-08-26 11:07:08+05:30 Cprogrammer Exp mbhangui $";
-	x=sccsidauthcramh;
-	x=sccsidauthdigestmd5h;
+	static char    *x = "$Id: qmail-remote.c,v 1.112 2018-05-01 01:42:57+05:30 Cprogrammer Exp mbhangui $";
+	x = sccsidauthcramh;
+	x = sccsidauthdigestmd5h;
 	x++;
 }

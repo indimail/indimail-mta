@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.29  2018-05-01 01:42:41+05:30  Cprogrammer
+ * indented code
+ *
  * Revision 1.28  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -316,13 +319,13 @@ doordie(sa, r)
 GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
 GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, i, n, x, 10, saa_readyplus)
 
-static stralloc sauninit = { 0 };
-saa savedh = { 0 };
-saa hrlist = { 0 };
-saa tocclist = { 0 };
-saa hrrlist = { 0 };
-saa reciplist = { 0 };
-int flagresent;
+stralloc        sauninit = { 0 };
+saa             savedh = { 0 };
+saa             hrlist = { 0 };
+saa             tocclist = { 0 };
+saa             hrrlist = { 0 };
+saa             reciplist = { 0 };
+int             flagresent;
 
 int
 spfcheck(stralloc *sa)
@@ -333,21 +336,17 @@ spfcheck(stralloc *sa)
 	char            subvalue;
 
 	case_lowerb(sa->s, sa->len); /*- convert into lower case */
-	if (spfok)
-	{
+	if (spfok) {
 		if (constmap(&mapspf, sa->s, sa->len - 1))
 			return 1;
 		if ((j = byte_rchr(sa->s, sa->len, '@')) < sa->len && constmap(&mapspf, sa->s + j, sa->len -j - 1))
 			return 1;
 	}
 	/*- Include control file control/blackholedpatterns and evaluate with Wildmat check */
-	if (sppok)
-	{
+	if (sppok) {
 		i = 0;
-		for (j = 0; j < spp.len; ++j)
-		{
-			if (!spp.s[j])
-			{
+		for (j = 0; j < spp.len; ++j) {
+			if (!spp.s[j]) {
 				subvalue = spp.s[i] != '!';
 				if (!subvalue)
 					i++;
@@ -368,8 +367,7 @@ exitnicely()
 
 	if (!flagqueue)
 		substdio_flush(subfdout);
-	if (flagqueue)
-	{
+	if (flagqueue) {
 		int             i;
 
 		if (!stralloc_0(&sender))
@@ -398,27 +396,20 @@ exitnicely()
 	}
 #endif
 		qmail_from(&qqt, sender.s);
-		for (i = 0; i < reciplist.len; ++i)
-		{
+		for (i = 0; i < reciplist.len; ++i) {
 			if (!stralloc_0(&reciplist.sa[i]))
 				die_nomem();
 			qmail_to(&qqt, reciplist.sa[i].s);
 		}
-		if (flagrh)
-		{
-			if (flagresent)
-			{
-				for (i = 0; i < hrrlist.len; ++i)
-				{
+		if (flagrh) {
+			if (flagresent) {
+				for (i = 0; i < hrrlist.len; ++i) {
 					if (!stralloc_0(&hrrlist.sa[i]))
 						die_nomem();
 					qmail_to(&qqt, hrrlist.sa[i].s);
 				}
-			}
-			else
-			{
-				for (i = 0; i < hrlist.len; ++i)
-				{
+			} else {
+				for (i = 0; i < hrlist.len; ++i) {
 					if (!stralloc_0(&hrlist.sa[i]))
 						die_nomem();
 					qmail_to(&qqt, hrlist.sa[i].s);
@@ -426,8 +417,7 @@ exitnicely()
 			}
 		}
 		qqx = qmail_close(&qqt);
-		if (*qqx)
-		{
+		if (*qqx) {
 			if (databytes && size > databytes)
 				die_size();
 			substdio_puts(subfderr, "qmail-inject: fatal: ");
@@ -472,10 +462,8 @@ void
 rwroute(addr)
 	token822_alloc *addr;
 {
-	if (addr->t[addr->len - 1].type == TOKEN822_AT)
-	{
-		while (addr->len)
-		{
+	if (addr->t[addr->len - 1].type == TOKEN822_AT) {
+		while (addr->len) {
 			if (addr->t[--addr->len].type == TOKEN822_COLON)
 				return;
 		}
@@ -487,8 +475,8 @@ rwextraat(addr)
 	token822_alloc *addr;
 {
 	int             i;
-	if (addr->t[0].type == TOKEN822_AT)
-	{
+
+	if (addr->t[0].type == TOKEN822_AT) {
 		--addr->len;
 		for (i = 0; i < addr->len; ++i)
 			addr->t[i] = addr->t[i + 1];
@@ -500,8 +488,8 @@ rwextradot(addr)
 	token822_alloc *addr;
 {
 	int             i;
-	if (addr->t[0].type == TOKEN822_DOT)
-	{
+
+	if (addr->t[0].type == TOKEN822_DOT) {
 		--addr->len;
 		for (i = 0; i < addr->len; ++i)
 			addr->t[i] = addr->t[i + 1];
@@ -515,8 +503,7 @@ rwnoat(addr)
 	int             i;
 	int             shift;
 
-	for (i = 0; i < addr->len; ++i)
-	{
+	for (i = 0; i < addr->len; ++i) {
 		if (addr->t[i].type == TOKEN822_AT)
 			return;
 	}
@@ -536,15 +523,14 @@ rwnodot(addr)
 {
 	int             i;
 	int             shift;
-	for (i = 0; i < addr->len; ++i)
-	{
+
+	for (i = 0; i < addr->len; ++i) {
 		if (addr->t[i].type == TOKEN822_DOT)
 			return;
 		if (addr->t[i].type == TOKEN822_AT)
 			break;
 	}
-	for (i = 0; i < addr->len; ++i)
-	{
+	for (i = 0; i < addr->len; ++i) {
 		if (addr->t[i].type == TOKEN822_LITERAL)
 			return;
 		if (addr->t[i].type == TOKEN822_AT)
@@ -590,12 +576,9 @@ rwgeneric(addr)
 {
 	if (!addr->len)
 		return;	/*- don't rewrite <> */
-	if (addr->len >= 2)
-	{
-		if (addr->t[1].type == TOKEN822_AT)
-		{
-			if (addr->t[0].type == TOKEN822_LITERAL)
-			{
+	if (addr->len >= 2) {
+		if (addr->t[1].type == TOKEN822_AT) {
+			if (addr->t[0].type == TOKEN822_LITERAL) {
 				if (!addr->t[0].slen)	/*- don't rewrite <foo@[]> */
 					return;
 			}
@@ -619,8 +602,7 @@ int
 setreturn(addr)
 	token822_alloc *addr;
 {
-	if (!sender.s)
-	{
+	if (!sender.s) {
 		token822_reverse(addr);
 		if (token822_unquote(&sender, addr) != 1)
 			die_nomem();
@@ -746,8 +728,7 @@ doheaderfield(h)
 		rw = rwsender;
 		break;
 	}
-	if (rw)
-	{
+	if (rw) {
 		doordie(h, token822_parse(&hfin, h, &hfbuf));
 		doordie(h, token822_addrlist(&hfrewrite, &hfaddr, &hfin, rw));
 		if (token822_unparse(h, &hfrewrite, LINELEN) != 1)
@@ -819,8 +800,7 @@ defaultfrommake()
 	++df.len;
 	df.t[df.len].type = TOKEN822_COLON;
 	++df.len;
-	if (fullname && !flagnamecomment)
-	{
+	if (fullname && !flagnamecomment) {
 		df.t[df.len].type = TOKEN822_QUOTE;
 		df.t[df.len].s = fullname;
 		df.t[df.len].slen = str_len(fullname);
@@ -832,8 +812,7 @@ defaultfrommake()
 	df.t[df.len].s = mailuser;
 	df.t[df.len].slen = str_len(mailuser);
 	++df.len;
-	if (mailhost)
-	{
+	if (mailhost) {
 		df.t[df.len].type = TOKEN822_AT;
 		++df.len;
 		df.t[df.len].type = TOKEN822_ATOM;
@@ -841,13 +820,11 @@ defaultfrommake()
 		df.t[df.len].slen = str_len(mailhost);
 		++df.len;
 	}
-	if (fullname && !flagnamecomment)
-	{
+	if (fullname && !flagnamecomment) {
 		df.t[df.len].type = TOKEN822_RIGHT;
 		++df.len;
 	}
-	if (fullname && flagnamecomment)
-	{
+	if (fullname && flagnamecomment) {
 		df.t[df.len].type = TOKEN822_COMMENT;
 		df.t[df.len].s = fullname;
 		df.t[df.len].slen = str_len(fullname);
@@ -871,8 +848,7 @@ dodefaultreturnpath()
 {
 	if (!stralloc_copys(&hackedruser, mailruser))
 		die_nomem();
-	if (flaghackmess)
-	{
+	if (flaghackmess) {
 		if (!stralloc_cats(&hackedruser, "-"))
 			die_nomem();
 		if (!stralloc_catb(&hackedruser, strnum, fmt_ulong(strnum, (unsigned long) starttime)))
@@ -897,8 +873,7 @@ dodefaultreturnpath()
 	drp.t[drp.len].s = hackedruser.s;
 	drp.t[drp.len].slen = hackedruser.len;
 	++drp.len;
-	if (mailrhost)
-	{
+	if (mailrhost) {
 		drp.t[drp.len].type = TOKEN822_AT;
 		++drp.len;
 		drp.t[drp.len].type = TOKEN822_ATOM;
@@ -946,8 +921,7 @@ finishmft()
 		return;
 	if (htypeseen[H_MAILFOLLOWUPTO])
 		return;
-	for (i = 0; i < tocclist.len; ++i)
-	{
+	for (i = 0; i < tocclist.len; ++i) {
 		if (constmap(&mapmft, tocclist.sa[i].s, tocclist.sa[i].len))
 			break;
 	}
@@ -955,8 +929,7 @@ finishmft()
 		return;
 	my_puts("Mail-Followup-To: ");
 	i = tocclist.len;
-	while (i--)
-	{
+	while (i--) {
 		if (!stralloc_copy(&sa, &tocclist.sa[i]))
 			die_nomem();
 		if (!stralloc_0(&sa))
@@ -979,8 +952,7 @@ finishheader()
 		htypeseen[H_R_BCC] || htypeseen[H_R_DATE] || htypeseen[H_R_MESSAGEID];
 	if (!sender.s)
 		dodefaultreturnpath();
-	if (!flagqueue)
-	{
+	if (!flagqueue) {
 		static stralloc sa = { 0 };
 		static stralloc sa2 = { 0 };
 
@@ -997,8 +969,7 @@ finishheader()
 	/*
 	 * could check at this point whether there are any recipients 
 	 */
-	if (flagqueue)
-	{
+	if (flagqueue) {
 		static stralloc satmp = { 0 };
 	
 		if (!stralloc_copy(&satmp, &sender))
@@ -1021,54 +992,45 @@ finishheader()
 		else
 		if (ret == -4)
 			die_regex();
-		if (env_get("SPAMFILTER") && spfcheck(&satmp))
-		{
+		if (env_get("SPAMFILTER") && spfcheck(&satmp)) {
 			if (!env_unset("SPAMFILTER"))
 				die_nomem();
 		}
 		if (qmail_open(&qqt) == -1)
 			die_qqt();
 	} /*- if (flagqueue) */
-	if (flagresent)
-	{
-		if (!htypeseen[H_R_DATE])
-		{
+	if (flagresent) {
+		if (!htypeseen[H_R_DATE]) {
 			if (!newfield_datemake(starttime))
 				die_nomem();
 			my_puts("Resent-");
 			put(newfield_date.s, newfield_date.len);
 		}
-		if (!htypeseen[H_R_MESSAGEID])
-		{
+		if (!htypeseen[H_R_MESSAGEID]) {
 			if (!newfield_msgidmake(control_idhost.s, control_idhost.len, starttime))
 				die_nomem();
 			my_puts("Resent-");
 			put(newfield_msgid.s, newfield_msgid.len);
 		}
-		if (!htypeseen[H_R_FROM])
-		{
+		if (!htypeseen[H_R_FROM]) {
 			defaultfrommake();
 			my_puts("Resent-");
 			put(defaultfrom.s, defaultfrom.len);
 		}
 		if (!htypeseen[H_R_TO] && !htypeseen[H_R_CC])
 			my_puts("Resent-Cc: recipient list not shown: ;\n");
-	} else
-	{
-		if (!htypeseen[H_DATE])
-		{
+	} else {
+		if (!htypeseen[H_DATE]) {
 			if (!newfield_datemake(starttime))
 				die_nomem();
 			put(newfield_date.s, newfield_date.len);
 		}
-		if (!htypeseen[H_MESSAGEID])
-		{
+		if (!htypeseen[H_MESSAGEID]) {
 			if (!newfield_msgidmake(control_idhost.s, control_idhost.len, starttime))
 				die_nomem();
 			put(newfield_msgid.s, newfield_msgid.len);
 		}
-		if (!htypeseen[H_FROM])
-		{
+		if (!htypeseen[H_FROM]) {
 			defaultfrommake();
 			put(defaultfrom.s, defaultfrom.len);
 		}
@@ -1092,17 +1054,14 @@ getcontrols()
 		die_chdir();
 	if (control_init() == -1)
 		die_read();
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
-		if (!controldir)
-		{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			die_controldir(controldir);
-		if (!access("defaultqueue", X_OK))
-		{
+		if (!access("defaultqueue", X_OK)) {
 			envdir_set("defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
@@ -1110,8 +1069,7 @@ getcontrols()
 		if (chdir(auto_qmail) == -1)
 			die_chdir();
 	}
-	if (!(x = env_get("QMAILDEFAULTDOMAIN")))
-	{
+	if (!(x = env_get("QMAILDEFAULTDOMAIN"))) {
 		if (control_rldef(&control_defaultdomain, "defaultdomain", 1, "defaultdomain") != 1)
 			die_read();
 	} else
@@ -1122,8 +1080,7 @@ getcontrols()
 	if (!stralloc_cat(&sa, &control_defaultdomain))
 		die_nomem();
 	doordie(&sa, token822_parse(&defaultdomain, &sa, &defaultdomainbuf));
-	if (!(x = env_get("QMAILDEFAULTHOST")))
-	{
+	if (!(x = env_get("QMAILDEFAULTHOST"))) {
 		if (control_rldef(&control_defaulthost, "defaulthost", 1, "defaulthost") != 1)
 			die_read();
 	} else
@@ -1134,8 +1091,7 @@ getcontrols()
 	if (!stralloc_cat(&sa, &control_defaulthost))
 		die_nomem();
 	doordie(&sa, token822_parse(&defaulthost, &sa, &defaulthostbuf));
-	if (!(x = env_get("QMAILPLUSDOMAIN")))
-	{
+	if (!(x = env_get("QMAILPLUSDOMAIN"))) {
 		if (control_rldef(&control_plusdomain, "plusdomain", 1, "plusdomain") != 1)
 			die_read();
 	} else
@@ -1146,23 +1102,20 @@ getcontrols()
 	if (!stralloc_cat(&sa, &control_plusdomain))
 		die_nomem();
 	doordie(&sa, token822_parse(&plusdomain, &sa, &plusdomainbuf));
-	if (!(x = env_get("QMAILIDHOST")))
-	{
+	if (!(x = env_get("QMAILIDHOST"))) {
 		if (control_rldef(&control_idhost, "idhost", 1, "idhost") != 1)
 			die_read();
 	} else
 	if (!stralloc_copys(&control_idhost, x))
 		die_nomem();
-	if (!(x = env_get("DATABYTES")))
-	{
+	if (!(x = env_get("DATABYTES"))) {
 		if (control_readulong(&databytes, "databytes") == -1)
 			die_read();
 	} else
 		scan_ulong(x, &databytes);
 	if (!(databytes + 1))
 		--databytes;
-	if (!(x = env_get("MAXRECIPIENTS")))
-	{
+	if (!(x = env_get("MAXRECIPIENTS"))) {
 		if (control_readint(&maxrcptcount,"maxrecipients") == -1)
 			die_read();
 		if (maxrcptcount < 0)
@@ -1176,8 +1129,7 @@ getcontrols()
 	/*
 	 * Spam Ignore Patch - include Control file 
 	 */
-	if (env_get("SPAMFILTER"))
-	{
+	if (env_get("SPAMFILTER")) {
 		if ((spfok = control_readfile(&spf, "spamignore", 0)) == -1)
 			die_read();
 		if (spfok && !constmap_init(&mapspf, spf.s, spf.len, 0))
@@ -1206,10 +1158,8 @@ main(argc, argv)
 	sig_pipeignore();
 	starttime = now();
 	qmopts = env_get("QMAILINJECT");
-	if (qmopts)
-	{
-		while (*qmopts)
-		{
+	if (qmopts) {
+		while (*qmopts) {
 			switch (*qmopts++)
 			{
 			case 'c':
@@ -1264,8 +1214,7 @@ main(argc, argv)
 	if (!saa_readyplus(&reciplist, 1))
 		die_nomem();
 	rcptcount = 0;
-	while ((opt = getopt(argc, argv, "asAhHnNf:")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "asAhHnNf:")) != opteof) {
 		switch (opt)
 		{
 		case 'a':
@@ -1308,8 +1257,7 @@ main(argc, argv)
 	argv += optind;
 	if (recipstrategy == RECIP_DEFAULT)
 		recipstrategy = (*argv ? RECIP_ARGS : RECIP_HEADER);
-	if (recipstrategy != RECIP_HEADER)
-	{
+	if (recipstrategy != RECIP_HEADER) {
 		while (*argv)
 			dorecip(*argv++);
 	}
@@ -1324,7 +1272,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.28 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.29 2018-05-01 01:42:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
