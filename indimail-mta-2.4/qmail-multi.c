@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.49  2018-05-05 18:23:23+05:30  Cprogrammer
+ * fixed qscanq path
+ *
  * Revision 1.48  2016-06-03 09:58:05+05:30  Cprogrammer
  * moved qmail-queue to sbin
  *
@@ -215,7 +218,7 @@ main(int argc, char **argv)
 		scan_int(ptr, &n);
 		if (1 < n && 8 > n)
 		{
-			execv("bin/qscanq", argv);
+			execv("sbin/qscanq", argv);
 			_exit(75);
 		}
 	}
@@ -678,6 +681,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.48 2016-06-03 09:58:05+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.49 2018-05-05 18:23:23+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
