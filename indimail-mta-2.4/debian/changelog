@@ -19,5 +19,6 @@ indimail-mta (2.4-5) unstable; urgency=low
   * qmail-dane - DANE implementation for IndiMail/indimail-mta
   * daneq - Tool to query qmail-dane for TLSA RRs
   * tlsacheck() function to send queries to qmail-dane.
+  * qmail-multi.c - fixed qscanq path to sbin
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 26 Apr 2018 14:51:56 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 05 May 2018 18:25:22 +0530

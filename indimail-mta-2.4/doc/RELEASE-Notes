@@ -18,6 +18,7 @@ o BUG - str_cpyb.c - fixed extra bytes getting copied
 o Fixed Bug with VIRTUAL_PKG_LIB env variable
 o qmail-dane(8), daneq(1), tlsacheck(3) - DANE implementation for
   indimail-mta
+o qmail-multi - fixed qscanq path to sbin
 
 indimail-mta has RPM / DEB / yum / apt repository for most of the
 Linux Distros at
