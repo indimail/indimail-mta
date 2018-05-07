@@ -23,7 +23,7 @@ static char     sccsid[] = "$Id: vgetent.c,v 1.3 2001-11-24 12:22:01+05:30 Cprog
  * line in a file 
  */
 struct passwd  *
-vgetent(FILE * pw)
+vgetent(FILE *pw)
 {
 	static struct passwd pwent;
 	static char     line[MAX_BUFF];
