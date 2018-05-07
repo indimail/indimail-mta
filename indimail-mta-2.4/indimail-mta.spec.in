@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.152 2018-04-27 10:47:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.153 2018-05-07 17:07:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -514,10 +514,10 @@ if [ -f qlocal_upgrade.sh ] ; then
 install -m 0755 qlocal_upgrade.sh %{buildroot}%{libexecdir}/qlocal_upgrade.sh
 fi
 if [ -f %{name}-%{version}/indimail-mta.fc ] ; then
-install -m 0755 %{name}-%{version}/indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
+install -m 0644 %{name}-%{version}/indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
 fi
 if [ -f %{name}-%{version}/indimail-mta.te ] ; then
-install -m 0755 %{name}-%{version}/indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
+install -m 0644 %{name}-%{version}/indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
 fi
 
 if [ %nolibdkim -eq 0 ] ; then
