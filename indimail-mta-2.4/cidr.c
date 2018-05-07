@@ -1,5 +1,8 @@
 /*
  * $Log: cidr.c,v $
+ * Revision 1.2  2018-05-07 17:06:36+05:30  Cprogrammer
+ * removed compilation warnings
+ *
  * Revision 1.1  2013-09-03 17:05:04+05:30  Cprogrammer
  * Initial revision
  *
@@ -45,9 +48,7 @@ ipToBin(uint32_t ip, char *pOut)
 	int             len;
 	char            pTmp[2];
 	int             tmp;
-/*
- * XXX: Could use bit operations instead but was easier to debug
- */
+	/*- XXX: Could use bit operations instead but was easier to debug */
 	char            binMap[16][5] = {
 		"0000", "0001", "0010", "0011", "0100",
 		"0101", "0110", "0111", "1000", "1001",
@@ -58,15 +59,11 @@ ipToBin(uint32_t ip, char *pOut)
 	len = sprintf(hex, "%x", ip);
 
 	for (i = 0; i < len; i++) {
-	/*
-	 * Ugly but to use strtol , we need the last byte as null 
-	 */
+		/*- Ugly but to use strtol , we need the last byte as null */
 		pTmp[0] = hex[i];
 		errno = 0;
 		tmp = strtol(pTmp, 0x0, 16);
-	/*
-	 * Should not happen 
-	 */
+		/*- Should not happen */
 		if (errno != 0) {
 			memset(pOut, '0', IP_BINARY_LENGTH - 1);
 #if 0
@@ -79,24 +76,22 @@ ipToBin(uint32_t ip, char *pOut)
 #if 0
 	DEBUG("bits %u printed for ip address for hex len %u\n", result, len);
 #endif
-/*
- * if length is not 32 , pad the start with zeros
- */
+	/*- if length is not 32 , pad the start with zeros */
 	if (result < IP_BINARY_LENGTH - 1) {
-		char            pSwap[IP_BINARY_LENGTH];
+		char            pSwap[IP_BINARY_LENGTH + 1];
 		strncpy(pSwap, pOut, IP_BINARY_LENGTH);
-		memset(pOut, '0', IP_BINARY_LENGTH);
-		strncpy(pOut + IP_BINARY_LENGTH - 1 - result, pSwap, result);
+		memset(pOut, '0', IP_BINARY_LENGTH + 1);
+		strncpy(pOut + IP_BINARY_LENGTH - 1 - result, pSwap, result + 3);
 #if 0
 		DEBUG("corrected length to 32\n");
 #endif
-	} else if (result > IP_BINARY_LENGTH - 1)
+	} else
+	if (result > IP_BINARY_LENGTH - 1)
 		return -1;
 	return 0;
 }
 
-/*
- *
+/*-
  * rangeToCidr - convert an ip Range to CIDR, and call 'callback' to handle
  * the value. 
  * 
@@ -195,7 +190,7 @@ error:
 void
 getversion_cidr_c()
 {
-	static char    *x = "$Id: cidr.c,v 1.1 2013-09-03 17:05:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: cidr.c,v 1.2 2018-05-07 17:06:36+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
