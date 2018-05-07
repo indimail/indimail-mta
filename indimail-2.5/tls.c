@@ -204,7 +204,7 @@ myssl_error_str()
 }
 
 int
-ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL * ssl, char *buf, int len)
+ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *ssl, char *buf, int len)
 {
 	int             n = 0;
 	const long      end = t + time(NULL);
@@ -245,7 +245,7 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL * ssl, char *buf, int
 }
 
 int
-ssl_timeoutread(long t, int rfd, int wfd, SSL * ssl, char *buf, int len)
+ssl_timeoutread(long t, int rfd, int wfd, SSL *ssl, char *buf, int len)
 {
 	if (!buf)
 		return 0;
@@ -255,7 +255,7 @@ ssl_timeoutread(long t, int rfd, int wfd, SSL * ssl, char *buf, int len)
 }
 
 int
-ssl_timeoutwrite(long t, int rfd, int wfd, SSL * ssl, char *buf, int len)
+ssl_timeoutwrite(long t, int rfd, int wfd, SSL *ssl, char *buf, int len)
 {
 	if (!buf)
 		return 0;
