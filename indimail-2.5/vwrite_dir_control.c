@@ -57,7 +57,7 @@ static char     sccsid[] = "$Id: vwrite_dir_control.c,v 2.4 2009-02-18 21:36:29+
 #endif
 
 int
-vwrite_dir_control(char *table_name, vdir_type * vdir, char *domain, uid_t dummy1, gid_t dummy2)
+vwrite_dir_control(char *table_name, vdir_type *vdir, char *domain, uid_t dummy1, gid_t dummy2)
 {
 	char            SqlBuf[SQL_BUF_SIZE], tmpbuf[MAX_BUFF];
 	uid_t           uid = 0;
