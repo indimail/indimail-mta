@@ -19,6 +19,8 @@ o removed legacy MYSQL_ESCAPE
 o svctool - added --config=sqlssl to create MariaDB SSL/TLS config
   (similar to MySQL's mysql_rsa_setup)
 o Fixed Bug with VIRTUAL_PKG_LIB env variable
+o removed logalert
+o run clearopensmtp as root in cron
 
 This release includes the following files (Note: Files may be suffied with -@version@)
 

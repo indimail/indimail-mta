@@ -1,4 +1,4 @@
-* Sun Apr 01 2018 13:01:35 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+* Mon May 07 2018 17:03:34 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
 Release 2.5 Start 27/01/2018
 27/01/2018
 1.  moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
@@ -63,6 +63,11 @@ hostcntrl, lastauth
 34. svctool - skip service refresh if .norefreshsvc file is present in
     variables directory
 35. svctool - added --config=sqlssl for creating SSL/TLS config for mariadb
+36. set_mysql_options.c - set MYSQL_OPT_SSL_ENFORCE & MYSQL_OPT_SSL_MODE if
+    use_ssl is set
+07/05/2018
+37. removed logalert
+38. run clearopensmtp as root in cron
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
