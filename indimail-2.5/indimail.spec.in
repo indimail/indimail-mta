@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.458 2018-04-01 20:17:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.459 2018-05-07 17:01:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -147,13 +147,12 @@ Source9: http://downloads.sourceforge.net/%{name}/fetchmail-%{fetchmail_version}
 Source10: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
 %endif
 Source11: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
-Source12: http://downloads.sourceforge.net/%{name}/logalert-0.3.tar.gz
-Source13: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
+Source12: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source14:%{name}-permissions.easy
-Source15:%{name}-permissions.secure
-Source16:%{name}-permissions.paranoid
+Source13:%{name}-permissions.easy
+Source14:%{name}-permissions.secure
+Source15:%{name}-permissions.paranoid
 %endif
 %endif
 
@@ -351,9 +350,9 @@ echo "------------------------------------------------------"
 
 for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.10 flash-0.9.4 \
 mpack-1.6 fortune-%{fortune_version} pam-multi-%{pam_multi_version} \
-nssd-%{nssd_version} logalert-0.3 \
-bogofilter-%{bogofilter_version} fetchmail-%{fetchmail_version} \
-courier-imap-%{courier_version} clamav-%{clamav_version}
+nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
+fetchmail-%{fetchmail_version} courier-imap-%{courier_version} \
+clamav-%{clamav_version}
 do
   (
   if [ -d $i ] ; then
@@ -908,8 +907,6 @@ fi
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.te
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.fc
 %attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail-release
-# logalert
-%attr(444,root,qmail) %config(noreplace)          %{sysconfdir}/logalert_perm_list
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -1089,13 +1086,6 @@ fi
 %attr(755,root,root)                    %{_prefix}/bin/clamconf
 %attr(755,root,root)                    %{_prefix}/sbin/clamd
 %endif
-# logalert
-%attr(0755,root,root)                    %{_prefix}/bin/logalert
-%attr(0755,root,root)                   %{_prefix}/bin/logclient
-%attr(0755,root,root)                   %{_prefix}/bin/incrmesg
-%attr(0755,root,root)                   %{_prefix}/bin/showbytes
-%attr(0755,root,root)                   %{_prefix}/sbin/rpclog
-%attr(0755,root,root)                   %{_prefix}/sbin/logsrv
 
 # fetchmail
 %if %nofetchmail == 0
@@ -1282,7 +1272,6 @@ fi
 %if %build_on_obs == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.indimail
 %license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.altermime
-%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.logalert
 %license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.ripmime
 %if %nobogofilter == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.bogofilter
@@ -1300,7 +1289,6 @@ fi
 %else
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.indimail
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.altermime
-%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.logalert
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.ripmime
 %if %nobogofilter == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.bogofilter
@@ -1326,7 +1314,6 @@ fi
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.courier-imap
 %endif
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.fortune
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.logalert
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.nssd
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.pam-multi
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.ripmime
@@ -1357,7 +1344,6 @@ fi
 %attr(444,root,qmail)                   %{shareddir}/doc/README.cdb
 %attr(444,root,qmail)                   %{shareddir}/doc/README.flash
 %attr(444,root,qmail)                   %{shareddir}/doc/README.ldap
-%attr(444,root,qmail)                   %{shareddir}/doc/README.logalert
 %attr(444,root,qmail)                   %{shareddir}/doc/README.mpack
 %attr(444,root,qmail)                   %{shareddir}/doc/README.nssd
 %attr(444,root,qmail)                   %{shareddir}/doc/README.pam-multi
