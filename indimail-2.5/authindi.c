@@ -140,7 +140,7 @@ build_decoding_table()
 }
 
 static char    *
-b64_decode(const unsigned char *data, size_t input_length, size_t * output_length)
+b64_decode(const unsigned char *data, size_t input_length, size_t *output_length)
 {
 	int i, j;
 
