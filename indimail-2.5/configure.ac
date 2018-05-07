@@ -127,7 +127,7 @@ AC_SUBST(defaultprefix)
 dnl configure only packages for whom the subdirectories which are present
 subdir_list=""
 for i in cdb-1.0 eps-1.2 ../flash-0.9.4 ../ripmime-1.4.0.10 ../altermime-0.3.10 \
-		../mpack-1.6 ../fortune-1.1 ../pam-multi-1.1 ../logalert-0.3 .
+		../mpack-1.6 ../fortune-1.1 ../pam-multi-1.1 .
 do
 	if test -d $i
 	then
@@ -163,9 +163,6 @@ do
 				;;
 				../pam-multi-1.1)
 				AC_CONFIG_SUBDIRS([../pam-multi-1.1])
-				;;
-				../logalert-0.3)
-				AC_CONFIG_SUBDIRS([../logalert-0.3])
 				;;
 			esac
 		fi
@@ -1639,10 +1636,6 @@ then
 	if ! test -d ../pam-multi-1.1
 	then
 		echo "http://downloads.sourceforge.net/indimail/pam-multi-1.1.tar.gz"
-	fi
-	if ! test -d ../logalert-0.3
-	then
-		echo "http://downloads.sourceforge.net/indimail/logalert-0.3.tar.gz"
 	fi
 	echo
 	echo "in the directory `dirname $PWD`"
