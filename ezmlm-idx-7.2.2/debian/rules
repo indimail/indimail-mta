@@ -16,7 +16,6 @@ CFLAGS += -O2
 endif
 
 NAME=ezmlm-idx
-DESTDIR=debian/$(NAME)
 PREFIX=/usr
 BINDIR=$(PREFIX)/bin
 LIBDIR=$(PREFIX)/lib/indimail/ezmlm
