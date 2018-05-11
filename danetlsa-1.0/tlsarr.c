@@ -4,8 +4,6 @@
 #include <netdb.h>
 #include "query-getdns.h"
 
-int             attempt_dane = 0;
-
 void
 cleanup(int status)
 {
@@ -26,30 +24,24 @@ main(int argc, char **argv)
 	}
 	do_dns_queries(argv[1], 25, 1);
 	if (dns_bogus_or_indeterminate) {
-		fprintf(stdout, "DNSSEC status of responses is bogus or indeterminate.\n");
+		fprintf(stderr, "DNSSEC status of responses is bogus or indeterminate.\n");
 		cleanup(1);
 	}
-	if (addresses == NULL) {
-		fprintf(stdout, "No address records found, exiting.\n");
-		cleanup(1);
+	if (!addresses) {
+		fprintf(stderr, "No address records found, exiting[%d].\n", tlsa_count);
+		cleanup(0);
 	}
-    if (auth_mode == MODE_DANE || auth_mode == MODE_BOTH) {
-		if (tlsa_rdata_list == NULL) {
-			fprintf(stdout, "No TLSA records found.\n");
-			if (auth_mode == MODE_DANE)
-				cleanup(1);
-		} else
-		if (tlsa_authenticated == 0) {
-			fprintf(stdout, "Insecure TLSA records.\n");
-			if (auth_mode == MODE_DANE)
-				cleanup(1);
-		} else
-		if (v4_authenticated == 0 || v6_authenticated == 0) {
-			fprintf(stdout, "Insecure Address records.\n");
-			if (auth_mode == MODE_DANE)
-				cleanup(1);
-		} else
-			attempt_dane = 1;
+	if (!tlsa_rdata_list) {
+		fprintf(stderr, "No TLSA records found.\n");
+		cleanup(0);
+	} else
+	if (!tlsa_authenticated) {
+		fprintf(stderr, "Insecure TLSA records.\n");
+		cleanup(0);
+	} else
+	if (!v4_authenticated || !v6_authenticated) {
+		fprintf(stderr, "Insecure Address records.\n");
+		cleanup(0);
 	}
     if (tlsa_rdata_list) {
         fprintf(stdout, "TLSA records found: %ld\n", tlsa_count);
