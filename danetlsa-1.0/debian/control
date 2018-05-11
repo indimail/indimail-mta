@@ -1,0 +1,30 @@
+Source: danetlsa
+Section: misc
+Priority: optional
+Maintainer: Manvendra Bhangui <manvendra@indimail.org>
+Build-Depends: debhelper (>> 3.0.0), autoconf (>= 2.53-2 ), gcc, file
+Standards-Version: 3.9.1
+Homepage: http://indimail.sourceforge.net
+
+Package: danetlsa
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: libdanetlsa
+Pre-Depends: libgetdns, libunbound
+Description: Library for DANE TLSA RR lookup
+
+Package: danetlsa-dev
+Depends: ${misc:Depends}
+Section: devel
+Architecture: any
+Pre-Depends: libgetdns-dev, libunbound-dev, libevent-dev
+Description: Development lib/headers for the danetlsa
+ libdanetlsa provides functions to query DNS TLSA RR lookups
+
+Package: libdanetlsa
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: libgetdns, libunbound, libevent
+Description: Library for DANE TLSA RR lookups
+ libdanetlsa provides functions to query DNS TLSA RR 
