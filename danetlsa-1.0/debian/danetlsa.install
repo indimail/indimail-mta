@@ -1,0 +1,2 @@
+usr/libexec/indimail/* /usr/libexec/indimail
+usr/lib/*.so.* /usr/lib

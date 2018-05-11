@@ -1,0 +1,7 @@
+This library is dervied from danetls by Shumon Huque
+
+# danetls - A program to test DANE enabled TLS services.  
+Author: Shumon Huque  
+
+This library looks up address records and DANE TLSA records for the 
+specified TLS server and port
