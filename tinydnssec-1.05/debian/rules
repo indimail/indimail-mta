@@ -22,6 +22,7 @@ endif
 prefix=/usr
 sysconfdir=/etc/indimail
 version=1.05
+curvedns_version=0.88
 #
 DESTDIR=$(CURDIR)/debian/tinydnssec.tmp
 
@@ -40,8 +41,8 @@ build-stamp:
 		$(MAKE) -s ; \
 		cd ..; \
 	fi
-	if [ -d curvedns-0.87 ] ; then \
-  		cd curvedns-0.87 ; \
+	if [ -d curvedns-$(curvedns_version) ] ; then \
+  		cd curvedns-$(curvedns_version) ; \
 		./curvedns.configure ; \
 		$(MAKE) -s ; \
 		cd .. ; \
@@ -67,8 +68,8 @@ install: build
   		sh make-install.sh $(DESTDIR) ; \
 		cd ..; \
 	fi
-	if [ -d curvedns-0.87 ] ; then \
-		cd curvedns-0.87 ; \
+	if [ -d curvedns-$(curvedns_version) ] ; then \
+		cd curvedns-$(curvedns_version) ; \
 		mkdir -p $(DESTDIR)$(prefix)/bin ; \
 		mkdir -p $(DESTDIR)$(prefix)/sbin ; \
 		mkdir -p $(DESTDIR)$(prefix)/share/man/man8 ; \
@@ -87,7 +88,7 @@ binary-indep: build install
 	dh_installchangelogs
 	dh_installdocs dq-20161210/README.dq dq-20161210/INSTALL.dq doc/COPYING.tinydnssec doc/README.tinydnssec \
 		doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug \
-		doc/Thedjbway_djbdns.pdf curvedns-0.87/LICENSE.curvedns
+		doc/Thedjbway_djbdns.pdf curvedns-$(curvedns_version)/LICENSE.curvedns
 	dh_link
 	dh_strip
 	dh_compress

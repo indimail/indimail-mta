@@ -29,6 +29,7 @@
 %global dist %{?dist}
 %global disttag fedora
 %endif
+%global curvedns_version 0.88
 
 %global _sysconfdir /etc/indimail
 %global _prefix            /usr
@@ -151,8 +152,8 @@ if [ -d dq-20161210 ] ; then
   %{__make} -s
   cd ..
 fi
-if [ -d curvedns-0.87 ] ; then
-  cd curvedns-0.87
+if [ -d curvedns-%{curvedns_version} ] ; then
+  cd curvedns-%{curvedns_version}
   ./configure.nacl
   ./configure.curvedns
   %{__make} -s
@@ -166,8 +167,8 @@ if [ -d dq-20161210 ] ; then
   sh make-install.sh %{buildroot}
   cd ..
 fi
-if [ -d curvedns-0.87 ] ; then
-  cd curvedns-0.87
+if [ -d curvedns-%{curvedns_version} ] ; then
+  cd curvedns-%{curvedns_version}
   %{__mkdir_p} %{buildroot}%{_prefix}/bin
   %{__mkdir_p} %{buildroot}%{_prefix}/sbin
   %{__mkdir_p} %{buildroot}%{_mandir}/man8
@@ -232,7 +233,7 @@ fi
 %doc dq-20161210/README.dq dq-20161210/INSTALL.dq doc/COPYING.tinydnssec doc/README.tinydnssec
 %doc doc/README-ipv6.tinydnssec doc/djbdnsFAQ.pdf doc/HOWTO
 %doc doc/LifeWithdjbdns.pdf doc/README.dnstransmit.bug doc/Thedjbway_djbdns.pdf
-%doc curvedns-0.87/LICENSE.curvedns
+%doc curvedns-%{curvedns_version}/LICENSE.curvedns
 
 %doc %{_mandir}/man1/*
 %doc %{_mandir}/man5/*
