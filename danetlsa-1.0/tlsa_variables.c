@@ -26,7 +26,7 @@ struct addrinfo *addresses;
 size_t          tlsa_count;
 tlsa_rdata     *tlsa_rdata_list;
 
-enum AUTH_MODE  auth_mode = MODE_BOTH;
+/*- enum AUTH_MODE  auth_mode = MODE_BOTH; -*/
 
 /*- error handling */
 int             danetlsa_error;

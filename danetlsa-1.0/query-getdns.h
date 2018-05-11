@@ -30,12 +30,6 @@ typedef struct qinfo {
 
 typedef struct addrinfo addrinf;
 
-enum AUTH_MODE {
-    MODE_BOTH=0,
-    MODE_DANE,
-    MODE_PKIX
-};
-
 tlsa_rdata     *insert_tlsa_rdata(tlsa_rdata **, tlsa_rdata *, tlsa_rdata *);
 void            free_tlsa(tlsa_rdata *);
 void            print_tlsa(tlsa_rdata *);
@@ -52,7 +46,6 @@ extern int      tlsa_authenticated;
 extern size_t   tlsa_count;
 extern      int danetlsa_error;
 extern    char *danetlsa_err_str;
-extern enum AUTH_MODE auth_mode;
 extern tlsa_rdata *tlsa_rdata_list;
 
 #define GETDNS_NO_ERR                  0
