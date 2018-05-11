@@ -615,25 +615,21 @@ do_dns_queries(const char *hostname, uint16_t port, int recursive)
 	}
 
 	/*- TLSA Records lookup */
-	if (auth_mode != MODE_PKIX) {
-		snprintf(domainstring, sizeof (domainstring), "_%d._tcp.%s", port, hostname);
-		qip = (qinfo *) malloc(sizeof (qinfo));
-		if (!qip) {
-			danetlsa_error = GETDNS_MEM_ERR;
-			return 0;
-		}
-		qip->qname = domainstring;
-		qip->qtype = GETDNS_RRTYPE_TLSA;
-		qip->port = port;
-		if ((rc = getdns_general(context, domainstring, GETDNS_RRTYPE_TLSA, extensions, (void *) qip,
-				&tid, cb_tlsa)) != GETDNS_RETURN_GOOD) {
-			asprintf(&danetlsa_err_str, "ERROR: %s TLSA query failed: %s\n", domainstring, getdns_get_errorstr_by_id(rc));
-			event_base_free(evb);
-			getdns_context_destroy(context);
-			return 0;
-		}
+	snprintf(domainstring, sizeof (domainstring), "_%d._tcp.%s", port, hostname);
+	if (!(qip = (qinfo *) malloc(sizeof (qinfo)))) {
+		danetlsa_error = GETDNS_MEM_ERR;
+		return 0;
 	}
-
+	qip->qname = domainstring;
+	qip->qtype = GETDNS_RRTYPE_TLSA;
+	qip->port = port;
+	if ((rc = getdns_general(context, domainstring, GETDNS_RRTYPE_TLSA, extensions, (void *) qip,
+			&tid, cb_tlsa)) != GETDNS_RETURN_GOOD) {
+		asprintf(&danetlsa_err_str, "ERROR: %s TLSA query failed: %s\n", domainstring, getdns_get_errorstr_by_id(rc));
+		event_base_free(evb);
+		getdns_context_destroy(context);
+		return 0;
+	}
 	if (event_base_dispatch(evb) == -1) {
 		asprintf(&danetlsa_err_str, "Error in dispatching events.\n");
 		return 0;
