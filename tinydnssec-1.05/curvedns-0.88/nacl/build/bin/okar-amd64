@@ -1,4 +1,0 @@
-#!/bin/sh
-PATH="/usr/local/src/indimail/tinydnssec-1.05/curvedns-0.87/nacl/build/bin:/usr/sfw/bin:/usr/local/bin:/usr/share/Modules/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/home/mbhangui/.composer/vendor/bin:/usr/local/bin:/home/mbhangui/bin:/usr/local/mysql/bin:/var/indimail/bin:/var/indimail/sbin:/usr/local/bin:/home/mbhangui/bin:/usr/local/mysql/bin:/var/indimail/bin:/var/indimail/sbin"
-export PATH
-ar "$@"
