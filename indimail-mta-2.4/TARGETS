@@ -1112,3 +1112,4 @@ daneq
 daneq.o
 hastlsa.h
 tlsa.lib
+trytlsa.o
