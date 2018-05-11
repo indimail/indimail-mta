@@ -1,6 +1,7 @@
 # Don't edit Makefile! Use conf-* for configuration.
 COFLAGS=-z+05:30
 DKIM_VERSION=1.5
+DANE_VERSION=1.0
 SRS_VERSION=1.0.18
 QMAILDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
 SYSTEM := $(shell uname -s)
@@ -2418,6 +2419,24 @@ dk-filter.8: dk-filter.9 conf-prefix conf-sysconfdir
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dk-filter.8
+
+hastlsa.h: trytlsa.c compile load conf-tls conf-tlsa tlsa.lib
+	( ( ./compile -I../danetlsa-$(DANE_VERSION) \
+	`grep -h -v "^#" conf-tlsa conf-tls` trytlsa.c && \
+	./load trytlsa -L../danetlsa-$(DANE_VERSION)/.libs \
+	-L../danetlsa-$(DANE_VERSION) -ldanetlsa `cat tlsa.lib`) >/dev/null 2>&1 \
+	&& (echo \#define HASTLSA 1) || exit 0 ) > hastlsa.h
+	rm -f trytlsa.o trytlsa
+
+tlsa.lib: \
+trytlsa.c conf-tlsa
+	( ( ./compile -I../danetlsa-$(DANE_VERSION) \
+		`grep -h -v "^#" conf-tlsa` trytlsa.c && \
+	./load trytlsa -L../danetlsa-$(DANE_VERSION)/.libs \
+	-L../danetlsa-$(DANE_VERSION) -ldanetlsa) >/dev/null 2>&1 \
+	&& echo "-L../danetlsa-$(DANE_VERSION)/.libs \
+	-L../danetlsa-$(DANE_VERSION) -ldanetlsa" || exit 0 ) > tlsa.lib
+	rm -f trydkim.o trydkim
 
 qnotify.1: qnotify.9 conf-qmail conf-sysconfdir
 	cat qnotify.9 \
