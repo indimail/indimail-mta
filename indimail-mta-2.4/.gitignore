@@ -573,3 +573,4 @@ tlsacheck.o
 daneprog
 daneq
 daneq.o
+hastlsa.h
