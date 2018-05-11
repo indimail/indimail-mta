@@ -1,5 +1,8 @@
 /*
  * $Log: error_stack.c,v $
+ * Revision 2.7  2018-05-11 14:43:21+05:30  Cprogrammer
+ * use ferr only if set
+ *
  * Revision 2.6  2011-04-08 17:26:04+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -31,7 +34,7 @@
 #include "error_stack.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: error_stack.c,v 2.6 2011-04-08 17:26:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: error_stack.c,v 2.7 2018-05-11 14:43:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -80,8 +83,10 @@ va_dcl
 		va_start(ap, fmt);
 #endif
 		if (vasprintf(&errorstr, fmt, ap) == -1) {
-			fprintf(ferr, "error_stack: vasprintf: %s\n", strerror(errno));
-			fflush(ferr);
+			if (ferr) {
+				fprintf(ferr, "error_stack: vasprintf: %s\n", strerror(errno));
+				fflush(ferr);
+			}
 			return ((char *) 0);
 		}
 		va_end(ap);
@@ -89,20 +94,24 @@ va_dcl
 		if (!(error_store = realloc(error_store, mylen + len + 1))) {	/*- The man page is wierd on Mac OS */
 			fprintf(ferr, "%s", errorstr);
 			free(errorstr);
-			fprintf(ferr, "error_stack: realloc: %s\n", strerror(errno));
-			fflush(ferr);
+			if (ferr) {
+				fprintf(ferr, "error_stack: realloc: %s\n", strerror(errno));
+				fflush(ferr);
+			}
 			return ((char *) 0);
 		}
-		if (setvbuf(ferr, sserrbuf, _IOFBF, 512) == EOF)
-		{
-			fprintf(ferr, "error_stack: setvbuf: %s\n", strerror(errno));
-			fflush(ferr);
+		if (setvbuf(ferr, sserrbuf, _IOFBF, 512) == EOF) {
+			if (ferr) {
+				fprintf(ferr, "error_stack: setvbuf: %s\n", strerror(errno));
+				fflush(ferr);
+			}
 			return((char *) 0);
 		}
-		if (!mylen && atexit(flush_stack))
-		{
-			fprintf(ferr, "atexit: %s\n", strerror(errno));
-			fflush(ferr);
+		if (!mylen && atexit(flush_stack)) {
+			if (ferr) {
+				fprintf(ferr, "atexit: %s\n", strerror(errno));
+				fflush(ferr);
+			}
 			free(errorstr);
 			return((char *) 0);
 		}
@@ -118,7 +127,6 @@ va_dcl
 			free((void *) error_store);
 			error_store = (char *) 0;
 			mylen = 0;
-			fflush(ferr);
 			return ((char *) 0);
 		}
 		for (ptr = error_store, i = len = 0; len < mylen; len++, ptr++) {
@@ -127,7 +135,8 @@ va_dcl
 				i = len + 1;
 			}
 		}
-		fflush(ferr);
+		if (ferr)
+			fflush(ferr);
 		free((void *) error_store);
 		error_store = (char *) 0;
 		mylen = 0;
