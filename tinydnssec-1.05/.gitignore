@@ -78,6 +78,6 @@ doc/*.patch
 curvedns-0.87/Makefile.org
 curvedns-conf
 dqcache-conf
-curvedns-0.87/curvedns
-curvedns-0.87/curvedns-keygen
+curvedns-*/curvedns
+curvedns-*/curvedns-keygen
 auto_sysconfdir.c
