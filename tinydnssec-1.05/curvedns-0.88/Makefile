@@ -2,8 +2,9 @@
 #
 # The @VAR@ tokens will be replaced by configure.curvedns
 
-NACLLIB=../dq-20161210/build/lib/
-NACLINC=../dq-20161210/build/include/
+ABI=amd64
+NACLLIB=nacl/build/lib/$(ABI)
+NACLINC=nacl/build/include/$(ABI)
 CDNSCFLAGS=-Wall -fno-strict-aliasing -O3 -I$(NACLINC)
 
 # If you have libev at a non-standard place, specify that here:
@@ -11,8 +12,8 @@ CDNSCFLAGS=-Wall -fno-strict-aliasing -O3 -I$(NACLINC)
 #EVCFLAGS=-I$(EV)/include
 #EVLDFLAGS=-L$(EV)/lib
 
-CC=cc -s -O3 -fomit-frame-pointer -funroll-loops
-CFLAGS=-pedantic -Wall -Wno-long-long -Wno-overlength-strings -Wno-unused-function -Wshadow -Wdeclaration-after-statement -Wwrite-strings -Wmissing-declarations -Wmissing-prototypes -Wunused-value -Wundef -Wno-parentheses -fwrapv -fno-strict-overflow $(CDNSCFLAGS) $(EVCFLAGS)
+CC=gcc
+CFLAGS=-m64 -O3 -fomit-frame-pointer -funroll-loops $(CDNSCFLAGS) $(EVCFLAGS)
 LDFLAGS=-L$(NACLLIB) $(EVLDFLAGS)
 
 # do not edit below
@@ -79,7 +80,7 @@ curvedns-keygen.o: curvedns-keygen.c
 
 # The targets:
 curvedns: debug.o ip.o misc.o cache.a event.a dnscurve.o dns.o curvedns.o
-	$(CC) $(LDFLAGS) debug.o ip.o misc.o dnscurve.o dns.o cache.a event.a curvedns.o $(EXTRALIB) -ltinynacl -o curvedns
+	$(CC) $(LDFLAGS) debug.o ip.o misc.o dnscurve.o dns.o cache.a event.a curvedns.o $(EXTRALIB) -lnacl -o curvedns
 
 curvedns-keygen: curvedns-keygen.o debug.o ip.o misc.o
-	$(CC) $(LDFLAGS) curvedns-keygen.o debug.o ip.o misc.o -ltinynacl -o curvedns-keygen
+	$(CC) $(LDFLAGS) curvedns-keygen.o debug.o ip.o misc.o -lnacl -o curvedns-keygen

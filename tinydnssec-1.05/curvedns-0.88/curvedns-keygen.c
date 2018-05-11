@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: curvedns-keygen.c 26 2010-12-28 08:20:42Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-12-28 09:20:42 +0100 (Tue, 28 Dec 2010) $
- * $Revision: 26 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #include <stdio.h>

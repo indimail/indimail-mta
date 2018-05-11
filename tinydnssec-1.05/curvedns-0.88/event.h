@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: event.h 4 2010-10-23 12:51:51Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-10-23 14:51:51 +0200 (Sat, 23 Oct 2010) $
- * $Revision: 4 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #ifndef EVENT_H_
@@ -122,8 +122,7 @@ struct event_tcp_entry {
 	int intsock;
 	int extsock;
 	ev_io write_watcher;
-	ev_io read_int_watcher;
-	ev_io read_ext_watcher;
+	ev_io read_watcher;
 	ev_timer timeout_watcher;
 	event_tcp_state_t state;
 };

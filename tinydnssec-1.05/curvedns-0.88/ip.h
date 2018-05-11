@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: ip.h 22 2010-12-04 15:29:36Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-12-04 16:29:36 +0100 (Sat, 04 Dec 2010) $
- * $Revision: 22 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #ifndef IP_H_
