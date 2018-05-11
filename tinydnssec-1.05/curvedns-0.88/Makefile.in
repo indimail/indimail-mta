@@ -28,6 +28,7 @@ targets: $(TARGETS)
 
 clean:
 	rm -f *.a *.o $(TARGETS)
+	rm -rf nacl/build
 
 distclean: clean
 	rm -f Makefile
