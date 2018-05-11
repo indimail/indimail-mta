@@ -153,7 +153,8 @@ if [ -d dq-20161210 ] ; then
 fi
 if [ -d curvedns-0.87 ] ; then
   cd curvedns-0.87
-  ./curvedns.configure
+  ./configure.nacl
+  ./configure.curvedns
   %{__make} -s
   cd ..
 fi
