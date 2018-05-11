@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: event_udp.c 24 2010-12-27 22:27:28Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-12-27 23:27:28 +0100 (Mon, 27 Dec 2010) $
- * $Revision: 24 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #include "event.h"
@@ -79,16 +79,6 @@ void event_udp_timeout_cb(struct ev_loop *loop, ev_timer *w, int revent) {
 	}
 
 	return;
-
-/*
-nxdomain:
-	ev_io_stop(loop, &entry->read_int_watcher);
-	ev_timer_stop(loop, &entry->timeout_int_watcher);
-
-	if (!dns_reply_nxdomain_query_udp(general_entry)) {
-		debug_log(DEBUG_WARN, "event_udp_timeout_cb(): unable to send NXDOMAIN response\n");
-	}
-*/
 
 wrong:
 	event_cleanup_entry(loop, general_entry);
@@ -190,6 +180,7 @@ void event_udp_ext_cb(struct ev_loop *loop, ev_io *w, int revent) {
 	entry->retries = 0;
 	entry->sock = sock;
 	entry->state = EVENT_UDP_EXT_READING;
+	entry->read_int_watcher.fd = -1;
 
 	n = recvfrom(w->fd, entry->buffer, entry->bufferlen, MSG_DONTWAIT,
 			(struct sockaddr *) &entry->address.sa, &addresslen);

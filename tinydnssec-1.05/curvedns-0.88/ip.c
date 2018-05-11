@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: ip.c 24 2010-12-27 22:27:28Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-12-27 23:27:28 +0100 (Mon, 27 Dec 2010) $
- * $Revision: 24 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #include "ip.h"

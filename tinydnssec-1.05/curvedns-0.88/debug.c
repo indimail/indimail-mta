@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: debug.c 4 2010-10-23 12:51:51Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-10-23 14:51:51 +0200 (Sat, 23 Oct 2010) $
- * $Revision: 4 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #include "debug.h"

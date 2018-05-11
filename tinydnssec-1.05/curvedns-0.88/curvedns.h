@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: curvedns.h 15 2010-10-25 12:47:13Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-10-25 14:47:13 +0200 (Mon, 25 Oct 2010) $
- * $Revision: 15 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #ifndef CURVEDNS_H_

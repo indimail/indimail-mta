@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: misc.h 13 2010-10-25 12:21:22Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-10-25 14:21:22 +0200 (Mon, 25 Oct 2010) $
- * $Revision: 13 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #ifndef MISC_H_

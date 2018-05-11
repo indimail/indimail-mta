@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: event_tcp.c 19 2010-10-25 16:17:49Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-10-25 18:17:49 +0200 (Mon, 25 Oct 2010) $
- * $Revision: 19 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #include "event.h"
@@ -43,10 +43,8 @@ void event_cleanup_tcp_entry(struct ev_loop *loop, struct event_tcp_entry *entry
 	if (entry) {
 		if (ev_is_active(&entry->timeout_watcher))
 			ev_timer_stop(loop, &entry->timeout_watcher);
-		if (ev_is_active(&entry->read_int_watcher))
-			ev_io_stop(loop, &entry->read_int_watcher);
-		if (ev_is_active(&entry->read_ext_watcher))
-			ev_io_stop(loop, &entry->read_ext_watcher);
+		if (ev_is_active(&entry->read_watcher))
+			ev_io_stop(loop, &entry->read_watcher);
 		if (ev_is_active(&entry->write_watcher))
 			ev_io_stop(loop, &entry->write_watcher);
 		if (entry->extsock >= 0) {
@@ -197,7 +195,7 @@ void event_tcp_write_cb(struct ev_loop *loop, ev_io *w, int revent) {
 		entry->bufferat = 0;
 		entry->packetsize = 0;
 
-		ev_io_start(loop, &entry->read_int_watcher);
+		ev_io_start(loop, &entry->read_watcher);
 		ev_timer_again(loop, &entry->timeout_watcher);
 	} else {
 		debug_log(DEBUG_INFO, "event_tcp_write_cb(): we have sent the entire packet towards the client, packetsize = %zu, listening again\n", entry->packetsize);
@@ -210,8 +208,7 @@ void event_tcp_write_cb(struct ev_loop *loop, ev_io *w, int revent) {
 		entry->bufferat = 0;
 		entry->packetsize = 0;
 
-		ev_io_start(loop, &entry->read_int_watcher);
-		ev_io_start(loop, &entry->read_ext_watcher);
+		ev_io_start(loop, &entry->read_watcher);
 		ev_timer_again(loop, &entry->timeout_watcher);
 	}
 
@@ -238,17 +235,7 @@ void event_tcp_read_cb(struct ev_loop *loop, ev_io *w, int revent) {
 	if (entry->bufferat >= entry->bufferlen)
 		goto wrong;
 
-	debug_log(DEBUG_DEBUG, "event_tcp_read_cb(): starting with state %d @ %d bytes\n",
-		  entry->state, entry->bufferat);
-
-	if (entry->bufferat == 0 && entry->intsock >= 0
-		&& (entry->state == EVENT_TCP_INT_READING_INIT
-		    || entry->state == EVENT_TCP_EXT_READING_INIT)) {
-		initial = 1;
-		internal = w == &entry->read_int_watcher;
-		ev_io_stop(loop, internal ? &entry->read_ext_watcher : &entry->read_int_watcher);
-		entry->state = internal ? EVENT_TCP_INT_READING_INIT : EVENT_TCP_EXT_READING_INIT;
-	} else if (entry->state == EVENT_TCP_INT_READING_INIT)	{
+	if (entry->state == EVENT_TCP_INT_READING_INIT)	{
 		internal = 1; initial = 1;
 	} else if (entry->state == EVENT_TCP_INT_READING_MORE) {
 		internal = 1; initial = 0;
@@ -310,8 +297,13 @@ void event_tcp_read_cb(struct ev_loop *loop, ev_io *w, int revent) {
 	// Done with reading, so stop the watchers involved:
 	if (internal) {
 		// Stop listening on the internal connection:
-		ev_io_stop(loop, &entry->read_int_watcher);
+		ev_io_stop(loop, &entry->read_watcher);
 		ev_timer_stop(loop, &entry->timeout_watcher);
+
+		// We received the answer from the authoritative name server,
+		// so close this connection:
+		ip_tcp_close(entry->intsock);
+		entry->intsock = -1;
 
 		// Let's see what kind of packet we are dealing with:
 		if (!dns_analyze_reply_query(general_entry)) {
@@ -331,13 +323,14 @@ void event_tcp_read_cb(struct ev_loop *loop, ev_io *w, int revent) {
 
 		ev_timer_set(&entry->timeout_watcher, 0., global_ip_tcp_external_timeout);
 		ev_io_set(&entry->write_watcher, entry->extsock, EV_WRITE);
+		ev_io_set(&entry->read_watcher, entry->extsock, EV_READ);
 
 		ev_io_start(loop, &entry->write_watcher);
 		ev_timer_again(loop, &entry->timeout_watcher);
 
 	} else {
 		// Reading from client done, stop the watchers + timeout:
-		ev_io_stop(loop, &entry->read_ext_watcher);
+		ev_io_stop(loop, &entry->read_watcher);
 		ev_timer_stop(loop, &entry->timeout_watcher);
 
 		// Let's see what kind of packet we are dealing with:
@@ -347,21 +340,10 @@ void event_tcp_read_cb(struct ev_loop *loop, ev_io *w, int revent) {
 		}
 
 		// Now forward the packet towards the authoritative name server:
-		if (entry->intsock < 0) {
-		    if (!dns_forward_query_tcp(general_entry)) {
+		if (!dns_forward_query_tcp(general_entry)) {
 			debug_log(DEBUG_WARN, "event_tcp_read_cb(): failed to forward query towards authoritative name server\n");
 			goto wrong;
-		    }
-		    ev_io_init(&entry->read_int_watcher, event_tcp_read_cb, entry->intsock, EV_READ);
 		}
-		// Now generate a new TXID to forecome any poisoning:
-		entry->buffer[0] = misc_crypto_random(256);
-		entry->buffer[1] = misc_crypto_random(256);
-		// XXX: do this platform safe (i.e. ntoh)
-		entry->dns.dsttxid = (entry->buffer[0] << 8) + entry->buffer[1];
-
-		debug_log(DEBUG_INFO, "event_tcp_read_cb(): forwarding query to authoritative name server (prev id = %d, new id = %d)\n",
-			entry->dns.srctxid, entry->dns.dsttxid);
 
 		// Now get ready for sending a TCP query towards the authoritative name server:
 		entry->state = EVENT_TCP_INT_WRITING_INIT;
@@ -369,6 +351,7 @@ void event_tcp_read_cb(struct ev_loop *loop, ev_io *w, int revent) {
 
 		ev_timer_set(&entry->timeout_watcher, 0., global_ip_internal_timeout);
 		ev_io_set(&entry->write_watcher, entry->intsock, EV_WRITE);
+		ev_io_set(&entry->read_watcher, entry->intsock, EV_READ);
 
 		ev_io_start(loop, &entry->write_watcher);
 		ev_timer_again(loop, &entry->timeout_watcher);
@@ -411,9 +394,6 @@ void event_tcp_accept_cb(struct ev_loop *loop, ev_io *w, int revent) {
 		debug_log(DEBUG_INFO, "event_tcp_accept_cb(): reached maximum number of TCP connections, temporarily waiting\n");
 		event_tcp_startstop_watchers(loop, 0);
 	}
-	if (!ip_nonblock(entry->extsock)) {
-		debug_log(DEBUG_WARN, "Failed to set O_NONBLOCK on socket (%s)\n", strerror(errno));
-	}
 
 	// We have a new connection, set up the buffer:
 	entry->buffer = (uint8_t *) malloc(global_ip_tcp_buffersize);
@@ -427,15 +407,14 @@ void event_tcp_accept_cb(struct ev_loop *loop, ev_io *w, int revent) {
 	entry->intsock = -1;
 
 	// Set the general entry pointer in the watcher's data pointer:
-	entry->read_int_watcher.data = general_entry;
-	entry->read_ext_watcher.data = general_entry;
+	entry->read_watcher.data = general_entry;
 	entry->write_watcher.data = general_entry;
 	entry->timeout_watcher.data = general_entry;
 
 	// Initialize the timers (for timeouts), and the i/o watchers for the external socket:
 	ev_timer_init(&entry->timeout_watcher, event_tcp_timeout_cb, 0., global_ip_tcp_external_timeout);
 	ev_io_init(&entry->write_watcher, event_tcp_write_cb, entry->extsock, EV_WRITE);
-	ev_io_init(&entry->read_ext_watcher, event_tcp_read_cb, entry->extsock, EV_READ);
+	ev_io_init(&entry->read_watcher, event_tcp_read_cb, entry->extsock, EV_READ);
 
 	if (debug_level >= DEBUG_INFO) {
 		char s[52];
@@ -444,7 +423,7 @@ void event_tcp_accept_cb(struct ev_loop *loop, ev_io *w, int revent) {
 	}
 
 	// Now start the read watcher and an associated timeout:
-	ev_io_start(loop, &entry->read_ext_watcher);
+	ev_io_start(loop, &entry->read_watcher);
 	ev_timer_again(loop, &entry->timeout_watcher);
 
 	return;

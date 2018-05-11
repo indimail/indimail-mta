@@ -1,0 +1,1915 @@
+=== Fri May 11 20:44:17 IST 2018 === starting
+=== Fri May 11 20:44:17 IST 2018 === hostname
+indimail.in
+=== Fri May 11 20:44:17 IST 2018 === uname -a
+Linux indimail.in 4.16.7-300.fc28.x86_64 #1 SMP Wed May 2 20:09:13 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+=== Fri May 11 20:44:17 IST 2018 === uname -M
+uname: invalid option -- 'M'
+Try 'uname --help' for more information.
+=== Fri May 11 20:44:17 IST 2018 === uname -F
+uname: invalid option -- 'F'
+Try 'uname --help' for more information.
+=== Fri May 11 20:44:17 IST 2018 === /usr/sbin/lscfg | grep proc
+./configure.nacl: line 59: /usr/sbin/lscfg: No such file or directory
+=== Fri May 11 20:44:17 IST 2018 === /usr/sbin/lsattr -El proc0
+./configure.nacl: line 61: /usr/sbin/lsattr: No such file or directory
+=== Fri May 11 20:44:17 IST 2018 === cat /proc/cpuinfo
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i5-3337U CPU @ 1.80GHz
+stepping	: 9
+microcode	: 0x1f
+cpu MHz		: 853.714
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 2
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm cpuid_fault epb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt ibpb ibrs stibp dtherm ida arat pln pts
+bugs		: cpu_meltdown spectre_v1 spectre_v2
+bogomips	: 3591.80
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i5-3337U CPU @ 1.80GHz
+stepping	: 9
+microcode	: 0x1f
+cpu MHz		: 962.779
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 2
+apicid		: 1
+initial apicid	: 1
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm cpuid_fault epb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt ibpb ibrs stibp dtherm ida arat pln pts
+bugs		: cpu_meltdown spectre_v1 spectre_v2
+bogomips	: 3591.80
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i5-3337U CPU @ 1.80GHz
+stepping	: 9
+microcode	: 0x1f
+cpu MHz		: 879.001
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 4
+core id		: 1
+cpu cores	: 2
+apicid		: 2
+initial apicid	: 2
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm cpuid_fault epb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt ibpb ibrs stibp dtherm ida arat pln pts
+bugs		: cpu_meltdown spectre_v1 spectre_v2
+bogomips	: 3591.80
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i5-3337U CPU @ 1.80GHz
+stepping	: 9
+microcode	: 0x1f
+cpu MHz		: 982.905
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 4
+core id		: 1
+cpu cores	: 2
+apicid		: 3
+initial apicid	: 3
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm cpuid_fault epb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt ibpb ibrs stibp dtherm ida arat pln pts
+bugs		: cpu_meltdown spectre_v1 spectre_v2
+bogomips	: 3591.80
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+=== Fri May 11 20:44:17 IST 2018 === cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+853714
+=== Fri May 11 20:44:17 IST 2018 === cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+800000
+=== Fri May 11 20:44:17 IST 2018 === cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+2700000
+=== Fri May 11 20:44:17 IST 2018 === cat /sys/devices/system/cpu/cpu0/clock_tick
+cat: /sys/devices/system/cpu/cpu0/clock_tick: No such file or directory
+=== Fri May 11 20:44:17 IST 2018 === sysctl hw.model
+sysctl: cannot stat /proc/sys/hw/model: No such file or directory
+=== Fri May 11 20:44:17 IST 2018 === sysctl machdep.tsc_freq
+sysctl: cannot stat /proc/sys/machdep/tsc_freq: No such file or directory
+=== Fri May 11 20:44:18 IST 2018 === /usr/sbin/psrinfo -v
+./configure.nacl: line 77: /usr/sbin/psrinfo: No such file or directory
+=== Fri May 11 20:44:18 IST 2018 === building okcompilers
+=== Fri May 11 20:44:18 IST 2018 === checking gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:18 IST 2018 === success: gcc -m64 -fomit-frame-pointer is ok
+=== Fri May 11 20:44:18 IST 2018 === checking gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:18 IST 2018 === success: gcc -m64 -O -fomit-frame-pointer is ok
+=== Fri May 11 20:44:18 IST 2018 === checking gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:18 IST 2018 === success: gcc -m64 -O3 -fomit-frame-pointer -funroll-loops is ok
+=== Fri May 11 20:44:18 IST 2018 === checking gcc -m32 -fomit-frame-pointer
+/usr/bin/ld: cannot find crt1.o: No such file or directory
+/usr/bin/ld: cannot find crti.o: No such file or directory
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find -lc
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find crtn.o: No such file or directory
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:18 IST 2018 === checking gcc -m32 -O -fomit-frame-pointer
+/usr/bin/ld: cannot find crt1.o: No such file or directory
+/usr/bin/ld: cannot find crti.o: No such file or directory
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find -lc
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find crtn.o: No such file or directory
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:18 IST 2018 === checking gcc -m32 -O3 -fomit-frame-pointer -funroll-loops
+/usr/bin/ld: cannot find crt1.o: No such file or directory
+/usr/bin/ld: cannot find crti.o: No such file or directory
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find -lc
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find crtn.o: No such file or directory
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:18 IST 2018 === checking spu-gcc -mstdmain -march=cell -O -fomit-frame-pointer -Drandom=rand -Dsrandom=srand
+./test-okc: line 4: spu-gcc: command not found
+=== Fri May 11 20:44:18 IST 2018 === checking spu-gcc -mstdmain -march=cell -O3 -funroll-loops -fomit-frame-pointer -Drandom=rand -Dsrandom=srand
+./test-okc: line 4: spu-gcc: command not found
+=== Fri May 11 20:44:18 IST 2018 === checking g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:19 IST 2018 === success: g++ -m64 -fomit-frame-pointer is ok
+=== Fri May 11 20:44:19 IST 2018 === checking g++ -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:19 IST 2018 === success: g++ -m64 -O -fomit-frame-pointer is ok
+=== Fri May 11 20:44:19 IST 2018 === checking g++ -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:19 IST 2018 === success: g++ -m64 -O3 -fomit-frame-pointer -funroll-loops is ok
+=== Fri May 11 20:44:19 IST 2018 === checking g++ -m32 -fomit-frame-pointer
+/usr/bin/ld: cannot find crt1.o: No such file or directory
+/usr/bin/ld: cannot find crti.o: No such file or directory
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libstdc++.so when searching for -lstdc++
+/usr/bin/ld: cannot find -lstdc++
+/usr/bin/ld: cannot find -lm
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find -lc
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find crtn.o: No such file or directory
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:19 IST 2018 === checking g++ -m32 -O -fomit-frame-pointer
+/usr/bin/ld: cannot find crt1.o: No such file or directory
+/usr/bin/ld: cannot find crti.o: No such file or directory
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libstdc++.so when searching for -lstdc++
+/usr/bin/ld: cannot find -lstdc++
+/usr/bin/ld: cannot find -lm
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find -lc
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find crtn.o: No such file or directory
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:19 IST 2018 === checking g++ -m32 -O3 -fomit-frame-pointer -funroll-loops
+/usr/bin/ld: cannot find crt1.o: No such file or directory
+/usr/bin/ld: cannot find crti.o: No such file or directory
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libstdc++.so when searching for -lstdc++
+/usr/bin/ld: cannot find -lstdc++
+/usr/bin/ld: cannot find -lm
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find -lc
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-redhat-linux/8/libgcc_s.so when searching for -lgcc_s
+/usr/bin/ld: cannot find -lgcc_s
+/usr/bin/ld: cannot find crtn.o: No such file or directory
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:19 IST 2018 === checking spu-g++ -mstdmain -march=cell -O -fomit-frame-pointer -Drandom=rand -Dsrandom=srand
+./test-okc: line 4: spu-g++: command not found
+=== Fri May 11 20:44:19 IST 2018 === checking spu-g++ -mstdmain -march=cell -O3 -funroll-loops -fomit-frame-pointer -Drandom=rand -Dsrandom=srand
+./test-okc: line 4: spu-g++: command not found
+=== Fri May 11 20:44:19 IST 2018 === checking compatibility with gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:19 IST 2018 === checking gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:19 IST 2018 === success: gcc -m64 -fomit-frame-pointer is compatible
+=== Fri May 11 20:44:19 IST 2018 === checking gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:20 IST 2018 === success: gcc -m64 -O -fomit-frame-pointer is compatible
+=== Fri May 11 20:44:20 IST 2018 === checking gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:20 IST 2018 === success: gcc -m64 -O3 -fomit-frame-pointer -funroll-loops is compatible
+=== Fri May 11 20:44:20 IST 2018 === checking compatibility with gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:20 IST 2018 === checking g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:20 IST 2018 === success: g++ -m64 -fomit-frame-pointer is compatible
+=== Fri May 11 20:44:20 IST 2018 === checking g++ -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:20 IST 2018 === success: g++ -m64 -O -fomit-frame-pointer is compatible
+=== Fri May 11 20:44:20 IST 2018 === checking g++ -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:20 IST 2018 === success: g++ -m64 -O3 -fomit-frame-pointer -funroll-loops is compatible
+=== Fri May 11 20:44:20 IST 2018 === checking -lm
+=== Fri May 11 20:44:20 IST 2018 === checking -lnsl
+/usr/bin/ld: cannot find -lnsl
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:20 IST 2018 === checking -lsocket
+/usr/bin/ld: cannot find -lsocket
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:20 IST 2018 === checking archiver ar
+=== Fri May 11 20:44:20 IST 2018 === success: archiver ar is ok
+=== Fri May 11 20:44:21 IST 2018 === building cpuid
+=== Fri May 11 20:44:21 IST 2018 === Trying x86.c with gcc -m64 -fomit-frame-pointer...
+GenuineIntel-000306a9-bfebfbff
+=== Fri May 11 20:44:21 IST 2018 === building inttypes
+=== Fri May 11 20:44:21 IST 2018 === amd64 trying signed char as int8 under gcc -m64 -fomit-frame-pointer...
+=== Fri May 11 20:44:21 IST 2018 === amd64 trying short as int16 under gcc -m64 -fomit-frame-pointer...
+=== Fri May 11 20:44:21 IST 2018 === amd64 trying int as int32 under gcc -m64 -fomit-frame-pointer...
+=== Fri May 11 20:44:21 IST 2018 === amd64 trying long long as int64 under gcc -m64 -fomit-frame-pointer...
+=== Fri May 11 20:44:21 IST 2018 === amd64 trying unsigned char as uint8 under gcc -m64 -fomit-frame-pointer...
+=== Fri May 11 20:44:21 IST 2018 === amd64 trying unsigned short as uint16 under gcc -m64 -fomit-frame-pointer...
+=== Fri May 11 20:44:21 IST 2018 === amd64 trying unsigned int as uint32 under gcc -m64 -fomit-frame-pointer...
+=== Fri May 11 20:44:21 IST 2018 === amd64 trying unsigned long long as uint64 under gcc -m64 -fomit-frame-pointer...
+=== Fri May 11 20:44:21 IST 2018 === building cpucycles
+=== Fri May 11 20:44:21 IST 2018 === Trying amd64tscfreq.c with gcc -m64 -fomit-frame-pointer...
+cpucycles-impl.c: In function 'cpucycles_amd64tscfreq_persecond':
+cpucycles-impl.c:16:3: warning: implicit declaration of function 'sysctlbyname' [-Wimplicit-function-declaration]
+   sysctlbyname("machdep.tsc_freq",&result,&resultlen,0,0);
+   ^~~~~~~~~~~~
+cpucycles-impl.o: In function `cpucycles_amd64tscfreq_persecond':
+cpucycles-impl.c:(.text+0x4a): undefined reference to `sysctlbyname'
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:21 IST 2018 === Trying amd64tscfreq.c with gcc -m64 -O -fomit-frame-pointer...
+cpucycles-impl.c: In function 'cpucycles_amd64tscfreq_persecond':
+cpucycles-impl.c:16:3: warning: implicit declaration of function 'sysctlbyname' [-Wimplicit-function-declaration]
+   sysctlbyname("machdep.tsc_freq",&result,&resultlen,0,0);
+   ^~~~~~~~~~~~
+cpucycles-impl.o: In function `cpucycles_amd64tscfreq_persecond':
+cpucycles-impl.c:(.text+0x3d): undefined reference to `sysctlbyname'
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:22 IST 2018 === Trying amd64tscfreq.c with gcc -m64 -O3 -fomit-frame-pointer -funroll-loops...
+cpucycles-impl.c: In function 'cpucycles_amd64tscfreq_persecond':
+cpucycles-impl.c:16:3: warning: implicit declaration of function 'sysctlbyname' [-Wimplicit-function-declaration]
+   sysctlbyname("machdep.tsc_freq",&result,&resultlen,0,0);
+   ^~~~~~~~~~~~
+cpucycles-impl.o: In function `cpucycles_amd64tscfreq_persecond':
+cpucycles-impl.c:(.text+0x3a): undefined reference to `sysctlbyname'
+collect2: error: ld returned 1 exit status
+=== Fri May 11 20:44:22 IST 2018 === Trying amd64cpuinfo.c with gcc -m64 -fomit-frame-pointer...
+amd64cpuinfo 2700000000 1795767220 18 32 14 14 14 30 14 14 14 30 14 14 14 30 14 14 14 44 14 14 32 12 14 14 32 12 14 14 32 12 14 14 32 12 14 14 32 12 14 14 32 12 14 14 32 12 14 14 32 12 14 14 32 12 14 14 32 12 14 14 32 12 14 14
+=== Fri May 11 20:44:22 IST 2018 === Success. Using amd64cpuinfo.c.
+=== Fri May 11 20:44:22 IST 2018 === building randombytes
+=== Fri May 11 20:44:22 IST 2018 === Trying devurandom.c with gcc -m64 -fomit-frame-pointer...
+=== Fri May 11 20:44:22 IST 2018 === Success. Using devurandom.c.
+=== Fri May 11 20:44:22 IST 2018 === amd64 crypto_verify/16
+=== Fri May 11 20:44:22 IST 2018 === amd64 crypto_verify/16/ref
+=== Fri May 11 20:44:22 IST 2018 === amd64 crypto_verify/16/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:22 IST 2018 === amd64 crypto_verify/16/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:23 IST 2018 === amd64 crypto_verify/16/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:23 IST 2018 === amd64 crypto_verify/16/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:23 IST 2018 === amd64 crypto_verify/16/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:23 IST 2018 === amd64 crypto_verify/16 measuring
+=== Fri May 11 20:44:23 IST 2018 === amd64 crypto_verify/32
+=== Fri May 11 20:44:23 IST 2018 === amd64 crypto_verify/32/ref
+=== Fri May 11 20:44:24 IST 2018 === amd64 crypto_verify/32/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:24 IST 2018 === amd64 crypto_verify/32/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:24 IST 2018 === amd64 crypto_verify/32/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:24 IST 2018 === amd64 crypto_verify/32/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:25 IST 2018 === amd64 crypto_verify/32/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:25 IST 2018 === amd64 crypto_verify/32/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:25 IST 2018 === amd64 crypto_verify/32 measuring
+=== Fri May 11 20:44:25 IST 2018 === amd64 crypto_core/hsalsa20
+=== Fri May 11 20:44:25 IST 2018 === amd64 crypto_core/hsalsa20/ref
+=== Fri May 11 20:44:25 IST 2018 === amd64 crypto_core/hsalsa20/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:26 IST 2018 === amd64 crypto_core/hsalsa20/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:26 IST 2018 === amd64 crypto_core/hsalsa20/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:26 IST 2018 === amd64 crypto_core/hsalsa20/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:26 IST 2018 === amd64 crypto_core/hsalsa20/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:27 IST 2018 === amd64 crypto_core/hsalsa20/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:27 IST 2018 === amd64 crypto_core/hsalsa20/ref2
+=== Fri May 11 20:44:27 IST 2018 === amd64 crypto_core/hsalsa20/ref2 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:27 IST 2018 === amd64 crypto_core/hsalsa20/ref2 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:28 IST 2018 === amd64 crypto_core/hsalsa20/ref2 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:28 IST 2018 === amd64 crypto_core/hsalsa20 measuring
+=== Fri May 11 20:44:28 IST 2018 === amd64 crypto_core/salsa20
+=== Fri May 11 20:44:28 IST 2018 === amd64 crypto_core/salsa20/ref
+=== Fri May 11 20:44:28 IST 2018 === amd64 crypto_core/salsa20/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:28 IST 2018 === amd64 crypto_core/salsa20/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:29 IST 2018 === amd64 crypto_core/salsa20/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:29 IST 2018 === amd64 crypto_core/salsa20/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:29 IST 2018 === amd64 crypto_core/salsa20/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:30 IST 2018 === amd64 crypto_core/salsa20/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:30 IST 2018 === amd64 crypto_core/salsa20 measuring
+=== Fri May 11 20:44:30 IST 2018 === amd64 crypto_core/salsa2012
+=== Fri May 11 20:44:30 IST 2018 === amd64 crypto_core/salsa2012/ref
+=== Fri May 11 20:44:30 IST 2018 === amd64 crypto_core/salsa2012/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:30 IST 2018 === amd64 crypto_core/salsa2012/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:30 IST 2018 === amd64 crypto_core/salsa2012/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:31 IST 2018 === amd64 crypto_core/salsa2012/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:31 IST 2018 === amd64 crypto_core/salsa2012/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:31 IST 2018 === amd64 crypto_core/salsa2012/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:31 IST 2018 === amd64 crypto_core/salsa2012 measuring
+=== Fri May 11 20:44:31 IST 2018 === amd64 crypto_core/salsa208
+=== Fri May 11 20:44:31 IST 2018 === amd64 crypto_core/salsa208/ref
+=== Fri May 11 20:44:31 IST 2018 === amd64 crypto_core/salsa208/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:32 IST 2018 === amd64 crypto_core/salsa208/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:32 IST 2018 === amd64 crypto_core/salsa208/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:32 IST 2018 === amd64 crypto_core/salsa208/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:32 IST 2018 === amd64 crypto_core/salsa208/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:33 IST 2018 === amd64 crypto_core/salsa208/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:33 IST 2018 === amd64 crypto_core/salsa208 measuring
+=== Fri May 11 20:44:33 IST 2018 === amd64 crypto_hashblocks/sha256
+=== Fri May 11 20:44:33 IST 2018 === amd64 crypto_hashblocks/sha256/inplace
+=== Fri May 11 20:44:33 IST 2018 === amd64 crypto_hashblocks/sha256/inplace gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:34 IST 2018 === amd64 crypto_hashblocks/sha256/inplace g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:34 IST 2018 === amd64 crypto_hashblocks/sha256/inplace gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:35 IST 2018 === amd64 crypto_hashblocks/sha256/inplace g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:35 IST 2018 === amd64 crypto_hashblocks/sha256/inplace gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:36 IST 2018 === amd64 crypto_hashblocks/sha256/inplace g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:36 IST 2018 === amd64 crypto_hashblocks/sha256/ref
+=== Fri May 11 20:44:36 IST 2018 === amd64 crypto_hashblocks/sha256/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:37 IST 2018 === amd64 crypto_hashblocks/sha256/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:38 IST 2018 === amd64 crypto_hashblocks/sha256/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:39 IST 2018 === amd64 crypto_hashblocks/sha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:39 IST 2018 === amd64 crypto_hashblocks/sha256 measuring
+=== Fri May 11 20:44:39 IST 2018 === amd64 crypto_hashblocks/sha512
+=== Fri May 11 20:44:39 IST 2018 === amd64 crypto_hashblocks/sha512/inplace
+=== Fri May 11 20:44:39 IST 2018 === amd64 crypto_hashblocks/sha512/inplace gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:40 IST 2018 === amd64 crypto_hashblocks/sha512/inplace g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:40 IST 2018 === amd64 crypto_hashblocks/sha512/inplace gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:41 IST 2018 === amd64 crypto_hashblocks/sha512/inplace g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:41 IST 2018 === amd64 crypto_hashblocks/sha512/inplace gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:42 IST 2018 === amd64 crypto_hashblocks/sha512/inplace g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:42 IST 2018 === amd64 crypto_hashblocks/sha512/ref
+=== Fri May 11 20:44:42 IST 2018 === amd64 crypto_hashblocks/sha512/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:43 IST 2018 === amd64 crypto_hashblocks/sha512/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:44 IST 2018 === amd64 crypto_hashblocks/sha512/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:45 IST 2018 === amd64 crypto_hashblocks/sha512/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:45 IST 2018 === amd64 crypto_hashblocks/sha512 measuring
+=== Fri May 11 20:44:45 IST 2018 === amd64 crypto_hash/sha256
+=== Fri May 11 20:44:45 IST 2018 === amd64 crypto_hash/sha256/ref
+=== Fri May 11 20:44:45 IST 2018 === amd64 crypto_hash/sha256/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:46 IST 2018 === amd64 crypto_hash/sha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:46 IST 2018 === amd64 crypto_hash/sha256/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:47 IST 2018 === amd64 crypto_hash/sha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:47 IST 2018 === amd64 crypto_hash/sha256/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:47 IST 2018 === amd64 crypto_hash/sha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:48 IST 2018 === amd64 crypto_hash/sha256 measuring
+=== Fri May 11 20:44:48 IST 2018 === amd64 crypto_hash/sha512
+=== Fri May 11 20:44:48 IST 2018 === amd64 crypto_hash/sha512/ref
+=== Fri May 11 20:44:48 IST 2018 === amd64 crypto_hash/sha512/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:48 IST 2018 === amd64 crypto_hash/sha512/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:49 IST 2018 === amd64 crypto_hash/sha512/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:49 IST 2018 === amd64 crypto_hash/sha512/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:49 IST 2018 === amd64 crypto_hash/sha512/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:50 IST 2018 === amd64 crypto_hash/sha512/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:50 IST 2018 === amd64 crypto_hash/sha512 measuring
+=== Fri May 11 20:44:50 IST 2018 === amd64 crypto_stream/aes128ctr
+=== Fri May 11 20:44:50 IST 2018 === amd64 crypto_stream/aes128ctr/core2
+=== Fri May 11 20:44:51 IST 2018 === amd64 crypto_stream/aes128ctr/core2 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:52 IST 2018 === amd64 crypto_stream/aes128ctr/core2 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:52 IST 2018 === amd64 crypto_stream/aes128ctr/core2 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:52 IST 2018 === amd64 crypto_stream/aes128ctr/core2 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:44:53 IST 2018 === amd64 crypto_stream/aes128ctr/core2 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:53 IST 2018 === amd64 crypto_stream/aes128ctr/core2 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:44:53 IST 2018 === amd64 crypto_stream/aes128ctr/core2 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:44:54 IST 2018 === amd64 crypto_stream/aes128ctr/portable
+=== Fri May 11 20:44:54 IST 2018 === amd64 crypto_stream/aes128ctr/portable gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:02 IST 2018 === amd64 crypto_stream/aes128ctr/portable gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:10 IST 2018 === amd64 crypto_stream/aes128ctr/portable gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:18 IST 2018 === amd64 crypto_stream/aes128ctr measuring
+=== Fri May 11 20:45:18 IST 2018 === amd64 crypto_stream/salsa20
+=== Fri May 11 20:45:18 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6
+=== Fri May 11 20:45:18 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:19 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:19 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:19 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:20 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:20 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:21 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:21 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:22 IST 2018 === amd64 crypto_stream/salsa20/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:22 IST 2018 === amd64 crypto_stream/salsa20/ref
+=== Fri May 11 20:45:22 IST 2018 === amd64 crypto_stream/salsa20/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:23 IST 2018 === amd64 crypto_stream/salsa20/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:24 IST 2018 === amd64 crypto_stream/salsa20/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:24 IST 2018 === amd64 crypto_stream/salsa20/x86_xmm5
+=== Fri May 11 20:45:25 IST 2018 === amd64 crypto_stream/salsa20/x86_xmm5 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:25 IST 2018 === amd64 crypto_stream/salsa20/x86_xmm5 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:25 IST 2018 === amd64 crypto_stream/salsa20/x86_xmm5 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:26 IST 2018 === amd64 crypto_stream/salsa20 measuring
+=== Fri May 11 20:45:26 IST 2018 === amd64 crypto_stream/salsa2012
+=== Fri May 11 20:45:26 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6
+=== Fri May 11 20:45:26 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:27 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:27 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:27 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:28 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:28 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:29 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:29 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:30 IST 2018 === amd64 crypto_stream/salsa2012/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:30 IST 2018 === amd64 crypto_stream/salsa2012/ref
+=== Fri May 11 20:45:30 IST 2018 === amd64 crypto_stream/salsa2012/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:31 IST 2018 === amd64 crypto_stream/salsa2012/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:32 IST 2018 === amd64 crypto_stream/salsa2012/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:32 IST 2018 === amd64 crypto_stream/salsa2012/x86_xmm5
+=== Fri May 11 20:45:33 IST 2018 === amd64 crypto_stream/salsa2012/x86_xmm5 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:33 IST 2018 === amd64 crypto_stream/salsa2012/x86_xmm5 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:33 IST 2018 === amd64 crypto_stream/salsa2012/x86_xmm5 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:34 IST 2018 === amd64 crypto_stream/salsa2012 measuring
+=== Fri May 11 20:45:34 IST 2018 === amd64 crypto_stream/salsa208
+=== Fri May 11 20:45:34 IST 2018 === amd64 crypto_stream/salsa208/amd64_xmm6
+=== Fri May 11 20:45:34 IST 2018 === amd64 crypto_stream/salsa208/amd64_xmm6 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:35 IST 2018 === amd64 crypto_stream/salsa208/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:35 IST 2018 === amd64 crypto_stream/salsa208/amd64_xmm6 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:35 IST 2018 === amd64 crypto_stream/salsa208/amd64_xmm6 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:36 IST 2018 === amd64 crypto_stream/salsa208/amd64_xmm6 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:37 IST 2018 === amd64 crypto_stream/salsa208/ref
+=== Fri May 11 20:45:37 IST 2018 === amd64 crypto_stream/salsa208/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:37 IST 2018 === amd64 crypto_stream/salsa208/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:38 IST 2018 === amd64 crypto_stream/salsa208/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:39 IST 2018 === amd64 crypto_stream/salsa208/x86_xmm5
+=== Fri May 11 20:45:39 IST 2018 === amd64 crypto_stream/salsa208/x86_xmm5 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:39 IST 2018 === amd64 crypto_stream/salsa208/x86_xmm5 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:40 IST 2018 === amd64 crypto_stream/salsa208/x86_xmm5 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:40 IST 2018 === amd64 crypto_stream/salsa208 measuring
+=== Fri May 11 20:45:40 IST 2018 === amd64 crypto_stream/xsalsa20
+=== Fri May 11 20:45:41 IST 2018 === amd64 crypto_stream/xsalsa20/ref
+=== Fri May 11 20:45:41 IST 2018 === amd64 crypto_stream/xsalsa20/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:42 IST 2018 === amd64 crypto_stream/xsalsa20/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:42 IST 2018 === amd64 crypto_stream/xsalsa20/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:42 IST 2018 === amd64 crypto_stream/xsalsa20/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:43 IST 2018 === amd64 crypto_stream/xsalsa20/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:43 IST 2018 === amd64 crypto_stream/xsalsa20 measuring
+=== Fri May 11 20:45:43 IST 2018 === amd64 crypto_onetimeauth/poly1305
+=== Fri May 11 20:45:43 IST 2018 === amd64 crypto_onetimeauth/poly1305/53
+=== Fri May 11 20:45:44 IST 2018 === amd64 crypto_onetimeauth/poly1305/53 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:44 IST 2018 === amd64 crypto_onetimeauth/poly1305/53 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:44 IST 2018 === amd64 crypto_onetimeauth/poly1305/53 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:45 IST 2018 === amd64 crypto_onetimeauth/poly1305/53 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:45 IST 2018 === amd64 crypto_onetimeauth/poly1305/53 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:46 IST 2018 === amd64 crypto_onetimeauth/poly1305/53 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:46 IST 2018 === amd64 crypto_onetimeauth/poly1305/53 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:47 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64
+=== Fri May 11 20:45:47 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:47 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:47 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:48 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:48 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:48 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:49 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:50 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:50 IST 2018 === amd64 crypto_onetimeauth/poly1305/amd64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:50 IST 2018 === amd64 crypto_onetimeauth/poly1305/ref
+=== Fri May 11 20:45:50 IST 2018 === amd64 crypto_onetimeauth/poly1305/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:55 IST 2018 === amd64 crypto_onetimeauth/poly1305/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:57 IST 2018 === amd64 crypto_onetimeauth/poly1305/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:45:59 IST 2018 === amd64 crypto_onetimeauth/poly1305/x86
+=== Fri May 11 20:45:59 IST 2018 === amd64 crypto_onetimeauth/poly1305/x86 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:45:59 IST 2018 === amd64 crypto_onetimeauth/poly1305/x86 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:45:59 IST 2018 === amd64 crypto_onetimeauth/poly1305/x86 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:00 IST 2018 === amd64 crypto_onetimeauth/poly1305 measuring
+=== Fri May 11 20:46:00 IST 2018 === amd64 crypto_auth/hmacsha256
+=== Fri May 11 20:46:00 IST 2018 === amd64 crypto_auth/hmacsha256/ref
+=== Fri May 11 20:46:00 IST 2018 === amd64 crypto_auth/hmacsha256/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:01 IST 2018 === amd64 crypto_auth/hmacsha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:02 IST 2018 === amd64 crypto_auth/hmacsha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:02 IST 2018 === amd64 crypto_auth/hmacsha256/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:46:03 IST 2018 === amd64 crypto_auth/hmacsha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:03 IST 2018 === amd64 crypto_auth/hmacsha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:03 IST 2018 === amd64 crypto_auth/hmacsha256/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:04 IST 2018 === amd64 crypto_auth/hmacsha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:05 IST 2018 === amd64 crypto_auth/hmacsha256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:05 IST 2018 === amd64 crypto_auth/hmacsha256 measuring
+=== Fri May 11 20:46:05 IST 2018 === amd64 crypto_auth/hmacsha512256
+=== Fri May 11 20:46:05 IST 2018 === amd64 crypto_auth/hmacsha512256/ref
+=== Fri May 11 20:46:05 IST 2018 === amd64 crypto_auth/hmacsha512256/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:06 IST 2018 === amd64 crypto_auth/hmacsha512256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:06 IST 2018 === amd64 crypto_auth/hmacsha512256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:06 IST 2018 === amd64 crypto_auth/hmacsha512256/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:46:07 IST 2018 === amd64 crypto_auth/hmacsha512256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:07 IST 2018 === amd64 crypto_auth/hmacsha512256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:08 IST 2018 === amd64 crypto_auth/hmacsha512256/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:09 IST 2018 === amd64 crypto_auth/hmacsha512256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:09 IST 2018 === amd64 crypto_auth/hmacsha512256/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:09 IST 2018 === amd64 crypto_auth/hmacsha512256 measuring
+=== Fri May 11 20:46:09 IST 2018 === amd64 crypto_secretbox/xsalsa20poly1305
+=== Fri May 11 20:46:09 IST 2018 === amd64 crypto_secretbox/xsalsa20poly1305/ref
+=== Fri May 11 20:46:09 IST 2018 === amd64 crypto_secretbox/xsalsa20poly1305/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:10 IST 2018 === amd64 crypto_secretbox/xsalsa20poly1305/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:10 IST 2018 === amd64 crypto_secretbox/xsalsa20poly1305/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:10 IST 2018 === amd64 crypto_secretbox/xsalsa20poly1305/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:46:11 IST 2018 === amd64 crypto_secretbox/xsalsa20poly1305/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:12 IST 2018 === amd64 crypto_secretbox/xsalsa20poly1305 measuring
+=== Fri May 11 20:46:12 IST 2018 === amd64 crypto_scalarmult/curve25519
+=== Fri May 11 20:46:12 IST 2018 === amd64 crypto_scalarmult/curve25519/athlon
+=== Fri May 11 20:46:13 IST 2018 === amd64 crypto_scalarmult/curve25519/athlon gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:13 IST 2018 === amd64 crypto_scalarmult/curve25519/athlon gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:46:14 IST 2018 === amd64 crypto_scalarmult/curve25519/athlon gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:14 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64
+=== Fri May 11 20:46:15 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:15 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:16 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:16 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:46:16 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:17 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:17 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:18 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:18 IST 2018 === amd64 crypto_scalarmult/curve25519/donna_c64 g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:18 IST 2018 === amd64 crypto_scalarmult/curve25519/ref
+=== Fri May 11 20:46:18 IST 2018 === amd64 crypto_scalarmult/curve25519/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:25 IST 2018 === amd64 crypto_scalarmult/curve25519/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:46:27 IST 2018 === amd64 crypto_scalarmult/curve25519/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:30 IST 2018 === amd64 crypto_scalarmult/curve25519 measuring
+=== Fri May 11 20:46:30 IST 2018 === amd64 crypto_box/curve25519xsalsa20poly1305
+=== Fri May 11 20:46:30 IST 2018 === amd64 crypto_box/curve25519xsalsa20poly1305/ref
+=== Fri May 11 20:46:30 IST 2018 === amd64 crypto_box/curve25519xsalsa20poly1305/ref gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:33 IST 2018 === amd64 crypto_box/curve25519xsalsa20poly1305/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:33 IST 2018 === amd64 crypto_box/curve25519xsalsa20poly1305/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:33 IST 2018 === amd64 crypto_box/curve25519xsalsa20poly1305/ref g++ -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:33 IST 2018 === amd64 crypto_box/curve25519xsalsa20poly1305/ref gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:46:37 IST 2018 === amd64 crypto_box/curve25519xsalsa20poly1305/ref gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:40 IST 2018 === amd64 crypto_box/curve25519xsalsa20poly1305 measuring
+=== Fri May 11 20:46:40 IST 2018 === starting commandline/nacl-sha256
+=== Fri May 11 20:46:40 IST 2018 === commandline/nacl-sha256 amd64 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:41 IST 2018 === starting commandline/nacl-sha512
+=== Fri May 11 20:46:41 IST 2018 === commandline/nacl-sha512 amd64 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:41 IST 2018 === starting tests/auth
+=== Fri May 11 20:46:41 IST 2018 === tests/auth amd64 gcc -m64 -fomit-frame-pointer
+auth.c:10:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:41 IST 2018 === tests/auth amd64 gcc -m64 -O -fomit-frame-pointer
+auth.c:10:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:41 IST 2018 === tests/auth amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+auth.c:10:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:41 IST 2018 === starting tests/auth2
+=== Fri May 11 20:46:41 IST 2018 === tests/auth2 amd64 gcc -m64 -fomit-frame-pointer
+auth2.c:25:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:41 IST 2018 === tests/auth2 amd64 gcc -m64 -O -fomit-frame-pointer
+auth2.c:25:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:41 IST 2018 === tests/auth2 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+auth2.c:25:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:41 IST 2018 === starting tests/auth3
+=== Fri May 11 20:46:41 IST 2018 === tests/auth3 amd64 gcc -m64 -fomit-frame-pointer
+auth3.c:30:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:41 IST 2018 === tests/auth3 amd64 gcc -m64 -O -fomit-frame-pointer
+auth3.c:30:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:41 IST 2018 === tests/auth3 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+auth3.c:30:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:41 IST 2018 === starting tests/auth5
+=== Fri May 11 20:46:41 IST 2018 === tests/auth5 amd64 gcc -m64 -fomit-frame-pointer
+auth5.c:10:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:43 IST 2018 === tests/auth5 amd64 gcc -m64 -O -fomit-frame-pointer
+auth5.c:10:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:44 IST 2018 === tests/auth5 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+auth5.c:10:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:45 IST 2018 === starting tests/box
+=== Fri May 11 20:46:45 IST 2018 === tests/box amd64 gcc -m64 -fomit-frame-pointer
+box.c:51:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:45 IST 2018 === tests/box amd64 gcc -m64 -O -fomit-frame-pointer
+box.c:51:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:45 IST 2018 === tests/box amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+box.c:51:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:46 IST 2018 === starting tests/box2
+=== Fri May 11 20:46:46 IST 2018 === tests/box2 amd64 gcc -m64 -fomit-frame-pointer
+box2.c:51:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:46 IST 2018 === tests/box2 amd64 gcc -m64 -O -fomit-frame-pointer
+box2.c:51:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:46 IST 2018 === tests/box2 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+box2.c:51:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:46 IST 2018 === starting tests/box7
+=== Fri May 11 20:46:46 IST 2018 === tests/box7 amd64 gcc -m64 -fomit-frame-pointer
+box7.c:14:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:46 IST 2018 === tests/box7 amd64 gcc -m64 -O -fomit-frame-pointer
+box7.c:14:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:47 IST 2018 === tests/box7 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+box7.c:14:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:47 IST 2018 === starting tests/box8
+=== Fri May 11 20:46:47 IST 2018 === tests/box8 amd64 gcc -m64 -fomit-frame-pointer
+box8.c:14:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+box8.c: In function 'main':
+box8.c:28:9: warning: implicit declaration of function 'random' [-Wimplicit-function-declaration]
+       c[random() % (mlen + crypto_box_ZEROBYTES)] = random();
+         ^~~~~~
+=== Fri May 11 20:46:49 IST 2018 === tests/box8 amd64 gcc -m64 -O -fomit-frame-pointer
+box8.c:14:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+box8.c: In function 'main':
+box8.c:28:9: warning: implicit declaration of function 'random' [-Wimplicit-function-declaration]
+       c[random() % (mlen + crypto_box_ZEROBYTES)] = random();
+         ^~~~~~
+=== Fri May 11 20:46:51 IST 2018 === tests/box8 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+box8.c:14:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+box8.c: In function 'main':
+box8.c:28:9: warning: implicit declaration of function 'random' [-Wimplicit-function-declaration]
+       c[random() % (mlen + crypto_box_ZEROBYTES)] = random();
+         ^~~~~~
+=== Fri May 11 20:46:53 IST 2018 === starting tests/core1
+=== Fri May 11 20:46:53 IST 2018 === tests/core1 amd64 gcc -m64 -fomit-frame-pointer
+core1.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:53 IST 2018 === tests/core1 amd64 gcc -m64 -O -fomit-frame-pointer
+core1.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:53 IST 2018 === tests/core1 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+core1.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:53 IST 2018 === starting tests/core2
+=== Fri May 11 20:46:53 IST 2018 === tests/core2 amd64 gcc -m64 -fomit-frame-pointer
+core2.c:23:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:53 IST 2018 === tests/core2 amd64 gcc -m64 -O -fomit-frame-pointer
+core2.c:23:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:53 IST 2018 === tests/core2 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+core2.c:23:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:53 IST 2018 === starting tests/core3
+=== Fri May 11 20:46:53 IST 2018 === tests/core3 amd64 gcc -m64 -fomit-frame-pointer
+core3.c:27:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:53 IST 2018 === tests/core3 amd64 gcc -m64 -O -fomit-frame-pointer
+core3.c:27:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:53 IST 2018 === tests/core3 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+core3.c:27:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === starting tests/core4
+=== Fri May 11 20:46:54 IST 2018 === tests/core4 amd64 gcc -m64 -fomit-frame-pointer
+core4.c:23:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === tests/core4 amd64 gcc -m64 -O -fomit-frame-pointer
+core4.c:23:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === tests/core4 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+core4.c:23:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === starting tests/core5
+=== Fri May 11 20:46:54 IST 2018 === tests/core5 amd64 gcc -m64 -fomit-frame-pointer
+core5.c:23:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === tests/core5 amd64 gcc -m64 -O -fomit-frame-pointer
+core5.c:23:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === tests/core5 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+core5.c:23:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === starting tests/core6
+=== Fri May 11 20:46:54 IST 2018 === tests/core6 amd64 gcc -m64 -fomit-frame-pointer
+core6.c:35:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === tests/core6 amd64 gcc -m64 -O -fomit-frame-pointer
+core6.c:35:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === tests/core6 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+core6.c:35:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:54 IST 2018 === starting tests/hash
+=== Fri May 11 20:46:54 IST 2018 === tests/hash amd64 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:54 IST 2018 === tests/hash amd64 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:46:54 IST 2018 === tests/hash amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:54 IST 2018 === starting tests/hash3
+=== Fri May 11 20:46:54 IST 2018 === tests/hash3 amd64 gcc -m64 -fomit-frame-pointer
+=== Fri May 11 20:46:54 IST 2018 === tests/hash3 amd64 gcc -m64 -O -fomit-frame-pointer
+=== Fri May 11 20:46:55 IST 2018 === tests/hash3 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+=== Fri May 11 20:46:55 IST 2018 === starting tests/onetimeauth
+=== Fri May 11 20:46:55 IST 2018 === tests/onetimeauth amd64 gcc -m64 -fomit-frame-pointer
+onetimeauth.c:33:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:55 IST 2018 === tests/onetimeauth amd64 gcc -m64 -O -fomit-frame-pointer
+onetimeauth.c:33:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:55 IST 2018 === tests/onetimeauth amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+onetimeauth.c:33:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:55 IST 2018 === starting tests/onetimeauth2
+=== Fri May 11 20:46:55 IST 2018 === tests/onetimeauth2 amd64 gcc -m64 -fomit-frame-pointer
+onetimeauth2.c:36:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:55 IST 2018 === tests/onetimeauth2 amd64 gcc -m64 -O -fomit-frame-pointer
+onetimeauth2.c:36:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:55 IST 2018 === tests/onetimeauth2 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+onetimeauth2.c:36:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:55 IST 2018 === starting tests/onetimeauth7
+=== Fri May 11 20:46:55 IST 2018 === tests/onetimeauth7 amd64 gcc -m64 -fomit-frame-pointer
+onetimeauth7.c:10:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:56 IST 2018 === tests/onetimeauth7 amd64 gcc -m64 -O -fomit-frame-pointer
+onetimeauth7.c:10:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:56 IST 2018 === tests/onetimeauth7 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+onetimeauth7.c:10:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === starting tests/scalarmult
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult amd64 gcc -m64 -fomit-frame-pointer
+scalarmult.c:13:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult amd64 gcc -m64 -O -fomit-frame-pointer
+scalarmult.c:13:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+scalarmult.c:13:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === starting tests/scalarmult2
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult2 amd64 gcc -m64 -fomit-frame-pointer
+scalarmult2.c:13:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult2 amd64 gcc -m64 -O -fomit-frame-pointer
+scalarmult2.c:13:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult2 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+scalarmult2.c:13:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === starting tests/scalarmult5
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult5 amd64 gcc -m64 -fomit-frame-pointer
+scalarmult5.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult5 amd64 gcc -m64 -O -fomit-frame-pointer
+scalarmult5.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult5 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+scalarmult5.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:57 IST 2018 === starting tests/scalarmult6
+=== Fri May 11 20:46:57 IST 2018 === tests/scalarmult6 amd64 gcc -m64 -fomit-frame-pointer
+scalarmult6.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === tests/scalarmult6 amd64 gcc -m64 -O -fomit-frame-pointer
+scalarmult6.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === tests/scalarmult6 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+scalarmult6.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === starting tests/secretbox
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox amd64 gcc -m64 -fomit-frame-pointer
+secretbox.c:44:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox amd64 gcc -m64 -O -fomit-frame-pointer
+secretbox.c:44:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+secretbox.c:44:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === starting tests/secretbox2
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox2 amd64 gcc -m64 -fomit-frame-pointer
+secretbox2.c:44:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox2 amd64 gcc -m64 -O -fomit-frame-pointer
+secretbox2.c:44:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox2 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+secretbox2.c:44:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === starting tests/secretbox7
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox7 amd64 gcc -m64 -fomit-frame-pointer
+secretbox7.c:11:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox7 amd64 gcc -m64 -O -fomit-frame-pointer
+secretbox7.c:11:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox7 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+secretbox7.c:11:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:58 IST 2018 === starting tests/secretbox8
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox8 amd64 gcc -m64 -fomit-frame-pointer
+secretbox8.c:11:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+secretbox8.c: In function 'main':
+secretbox8.c:24:9: warning: implicit declaration of function 'random' [-Wimplicit-function-declaration]
+       c[random() % (mlen + crypto_secretbox_ZEROBYTES)] = random();
+         ^~~~~~
+=== Fri May 11 20:46:58 IST 2018 === tests/secretbox8 amd64 gcc -m64 -O -fomit-frame-pointer
+secretbox8.c:11:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+secretbox8.c: In function 'main':
+secretbox8.c:24:9: warning: implicit declaration of function 'random' [-Wimplicit-function-declaration]
+       c[random() % (mlen + crypto_secretbox_ZEROBYTES)] = random();
+         ^~~~~~
+=== Fri May 11 20:46:59 IST 2018 === tests/secretbox8 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+secretbox8.c:11:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+secretbox8.c: In function 'main':
+secretbox8.c:24:9: warning: implicit declaration of function 'random' [-Wimplicit-function-declaration]
+       c[random() % (mlen + crypto_secretbox_ZEROBYTES)] = random();
+         ^~~~~~
+=== Fri May 11 20:46:59 IST 2018 === starting tests/stream
+=== Fri May 11 20:46:59 IST 2018 === tests/stream amd64 gcc -m64 -fomit-frame-pointer
+stream.c:22:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:59 IST 2018 === tests/stream amd64 gcc -m64 -O -fomit-frame-pointer
+stream.c:22:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:59 IST 2018 === tests/stream amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+stream.c:22:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:59 IST 2018 === starting tests/stream2
+=== Fri May 11 20:46:59 IST 2018 === tests/stream2 amd64 gcc -m64 -fomit-frame-pointer
+stream2.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:59 IST 2018 === tests/stream2 amd64 gcc -m64 -O -fomit-frame-pointer
+stream2.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:59 IST 2018 === tests/stream2 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+stream2.c:20:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:59 IST 2018 === starting tests/stream3
+=== Fri May 11 20:46:59 IST 2018 === tests/stream3 amd64 gcc -m64 -fomit-frame-pointer
+stream3.c:19:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:59 IST 2018 === tests/stream3 amd64 gcc -m64 -O -fomit-frame-pointer
+stream3.c:19:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:46:59 IST 2018 === tests/stream3 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+stream3.c:19:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:47:00 IST 2018 === starting tests/stream4
+=== Fri May 11 20:47:00 IST 2018 === tests/stream4 amd64 gcc -m64 -fomit-frame-pointer
+stream4.c:43:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:47:00 IST 2018 === tests/stream4 amd64 gcc -m64 -O -fomit-frame-pointer
+stream4.c:43:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:47:00 IST 2018 === tests/stream4 amd64 gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
+stream4.c:43:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+=== Fri May 11 20:47:00 IST 2018 === starting tests/auth4
+=== Fri May 11 20:47:00 IST 2018 === tests/auth4 amd64 g++ -m64 -fomit-frame-pointer
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+auth4.cpp:30:1: error: narrowing conversion of '249' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '144' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '244' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '212' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '231' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '211' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '215' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '179' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:32:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:00 IST 2018 === tests/auth4 amd64 g++ -m64 -O -fomit-frame-pointer
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+auth4.cpp:30:1: error: narrowing conversion of '249' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '144' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '244' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '212' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '231' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '211' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '215' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '179' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:32:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:00 IST 2018 === tests/auth4 amd64 g++ -m64 -O3 -fomit-frame-pointer -funroll-loops
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:23:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+auth4.cpp:30:1: error: narrowing conversion of '249' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '144' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '244' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '212' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '231' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '211' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '215' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:30:1: error: narrowing conversion of '179' from 'int' to 'char' inside { } [-Wnarrowing]
+auth4.cpp:32:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:00 IST 2018 === starting tests/auth6
+=== Fri May 11 20:47:00 IST 2018 === tests/auth6 amd64 g++ -m64 -fomit-frame-pointer
+auth6.cpp:8:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:02 IST 2018 === tests/auth6 amd64 g++ -m64 -O -fomit-frame-pointer
+auth6.cpp:8:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:04 IST 2018 === tests/auth6 amd64 g++ -m64 -O3 -fomit-frame-pointer -funroll-loops
+auth6.cpp:8:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:06 IST 2018 === starting tests/box3
+=== Fri May 11 20:47:06 IST 2018 === tests/box3 amd64 g++ -m64 -fomit-frame-pointer
+box3.cpp:11:1: error: narrowing conversion of '165' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:11:1: error: narrowing conversion of '193' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '178' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '223' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '135' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '192' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '153' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '251' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '165' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '185' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '222' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:18:1: error: narrowing conversion of '158' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '219' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '193' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '211' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '236' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '228' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '200' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '173' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '136' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '233' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:24:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '168' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '214' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '130' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '190' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:44:1: error: narrowing conversion of '197' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '129' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '242' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '213' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '207' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '197' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '203' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '212' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '132' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '229' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '236' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '186' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '175' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '199' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '212' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '220' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '244' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '219' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '232' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '234' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '161' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '128' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '226' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '246' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '214' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '138' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '143' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '175' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '222' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '245' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '159' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '253' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '202' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '144' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '160' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '188' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '130' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '249' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:46:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:06 IST 2018 === tests/box3 amd64 g++ -m64 -O -fomit-frame-pointer
+box3.cpp:11:1: error: narrowing conversion of '165' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:11:1: error: narrowing conversion of '193' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '178' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '223' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '135' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '192' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '153' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '251' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '165' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '185' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '222' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:18:1: error: narrowing conversion of '158' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '219' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '193' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '211' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '236' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '228' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '200' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '173' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '136' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '233' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:24:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '168' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '214' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '130' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '190' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:44:1: error: narrowing conversion of '197' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '129' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '242' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '213' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '207' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '197' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '203' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '212' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '132' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '229' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '236' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '186' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '175' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '199' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '212' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '220' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '244' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '219' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '232' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '234' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '161' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '128' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '226' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '246' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '214' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '138' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '143' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '175' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '222' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '245' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '159' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '253' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '202' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '144' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '160' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '188' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '130' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '249' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:46:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:07 IST 2018 === tests/box3 amd64 g++ -m64 -O3 -fomit-frame-pointer -funroll-loops
+box3.cpp:11:1: error: narrowing conversion of '165' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:11:1: error: narrowing conversion of '193' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '178' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '223' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '135' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '192' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '153' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '251' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '165' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:11:1: error: narrowing conversion of '185' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '222' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:18:1: error: narrowing conversion of '158' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '219' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '193' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '211' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '236' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '228' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '200' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '173' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:18:1: error: narrowing conversion of '136' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '233' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:24:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '168' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '214' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '130' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:24:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '190' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box3.cpp:44:1: error: narrowing conversion of '197' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '129' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '242' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '213' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '207' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '197' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '203' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '212' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '132' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '229' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '236' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '186' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '175' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '199' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '212' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '220' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '244' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '219' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '232' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '234' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '161' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '128' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '226' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '246' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '214' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '138' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '143' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '175' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '222' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '245' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '159' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '253' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '202' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '144' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '160' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '188' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '130' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:44:1: error: narrowing conversion of '249' from 'int' to 'char' inside { } [-Wnarrowing]
+box3.cpp:46:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:07 IST 2018 === starting tests/box4
+=== Fri May 11 20:47:07 IST 2018 === tests/box4 amd64 g++ -m64 -fomit-frame-pointer
+box4.cpp:11:1: error: narrowing conversion of '171' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:11:1: error: narrowing conversion of '138' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '225' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '139' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '128' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '230' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '253' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '139' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '255' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '136' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '133' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:18:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '139' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '220' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '247' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '191' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '244' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '164' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '169' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '142' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '170' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '233' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:24:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '168' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '214' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '130' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '243' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:46:1: error: narrowing conversion of '255' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '199' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '148' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '229' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '251' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '217' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '142' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '153' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '159' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '150' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '186' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '150' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '164' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '184' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '197' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '161' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '192' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '223' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '193' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '152' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '220' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '232' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '236' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '201' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '210' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '146' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '143' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '226' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '184' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '213' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '142' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '238' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '227' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '204' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '138' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '185' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '229' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '174' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '144' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '207' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '234' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '179' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '192' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '233' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '218' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '153' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '202' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '222' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '158' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '136' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '213' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '249' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '179' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '246' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '164' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '166' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '227' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '165' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:48:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:07 IST 2018 === tests/box4 amd64 g++ -m64 -O -fomit-frame-pointer
+box4.cpp:11:1: error: narrowing conversion of '171' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:11:1: error: narrowing conversion of '138' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '225' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '139' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '128' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '230' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '253' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '139' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '255' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '136' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '133' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:18:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '139' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '220' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '247' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '191' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '244' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '164' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '169' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '142' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '170' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '233' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:24:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '168' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '214' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '130' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '243' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:46:1: error: narrowing conversion of '255' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '199' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '148' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '229' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '251' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '217' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '142' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '153' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '159' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '150' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '186' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '150' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '164' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '184' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '197' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '161' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '192' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '223' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '193' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '152' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '220' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '232' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '236' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '201' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '210' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '146' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '143' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '226' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '184' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '213' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '142' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '238' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '227' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '204' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '138' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '185' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '229' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '174' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '144' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '207' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '234' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '179' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '192' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '233' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '218' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '153' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '202' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '222' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '158' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '136' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '213' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '249' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '179' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '246' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '164' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '166' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '227' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '165' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:48:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:07 IST 2018 === tests/box4 amd64 g++ -m64 -O3 -fomit-frame-pointer -funroll-loops
+box4.cpp:11:1: error: narrowing conversion of '171' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:11:1: error: narrowing conversion of '138' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '225' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '139' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '128' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '230' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '177' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '253' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '139' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '255' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '136' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:11:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '133' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:18:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '137' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '139' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '220' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '247' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '191' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '244' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '235' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '164' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '169' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '142' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '170' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:18:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '233' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:24:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '205' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '168' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '214' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '130' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:24:1: error: narrowing conversion of '224' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '243' from 'int' to 'char' inside { } [-Wnarrowing]
+ } ;
+ ^
+box4.cpp:46:1: error: narrowing conversion of '255' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '199' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '148' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '229' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '251' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '217' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '142' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '153' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '159' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '150' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '186' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '252' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '206' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '150' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '164' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '184' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '197' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '161' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '192' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '223' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '193' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '152' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '220' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '232' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '240' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '236' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '201' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '210' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '194' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '146' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '143' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '226' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '184' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '213' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '142' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '238' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '227' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '167' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '204' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '138' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '185' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '229' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '174' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '144' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '207' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '234' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '189' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '179' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '192' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '233' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '218' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '153' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '131' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '202' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '182' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '222' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '158' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '136' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '213' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '249' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '179' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '246' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '164' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '166' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '155' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '180' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '227' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:46:1: error: narrowing conversion of '165' from 'int' to 'char' inside { } [-Wnarrowing]
+box4.cpp:48:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:07 IST 2018 === starting tests/box5
+=== Fri May 11 20:47:07 IST 2018 === tests/box5 amd64 g++ -m64 -fomit-frame-pointer
+box5.cpp:7:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:08 IST 2018 === tests/box5 amd64 g++ -m64 -O -fomit-frame-pointer
+box5.cpp:7:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:09 IST 2018 === tests/box5 amd64 g++ -m64 -O3 -fomit-frame-pointer -funroll-loops
+box5.cpp:7:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:10 IST 2018 === starting tests/box6
+=== Fri May 11 20:47:10 IST 2018 === tests/box6 amd64 g++ -m64 -fomit-frame-pointer
+box6.cpp:8:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^
+=== Fri May 11 20:47:12 IST 2018 === tests/box6 amd64 g++ -m64 -O -fomit-frame-pointer
+box6.cpp:8:6: warning: ISO C++ forbids declaration of 'main' with no type [-Wreturn-type]
+ main()
+      ^

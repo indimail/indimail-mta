@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: curvedns.c 23 2010-12-04 15:53:04Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-12-04 16:53:04 +0100 (Sat, 04 Dec 2010) $
- * $Revision: 23 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #include <sys/socket.h>		/* for AF_UNSPEC */
@@ -55,8 +55,6 @@ static int usage(const char *argv0) {
 	debug_log(DEBUG_FATAL, "Usage: %s <listening IPs (sep. by comma)> <listening port> <target DNS server IP> <target DNS server port>\n\n", argv0);
 	debug_log(DEBUG_FATAL, "Environment options (between []'s are optional):\n");
 	debug_log(DEBUG_FATAL, " CURVEDNS_PRIVATE_KEY\n\tThe hexidecimal representation of the server's private (secret) key\n");
-	debug_log(DEBUG_FATAL, " or CURVEDNS_PRIVATE_KEY_FILE\n\tThe name of a file from which to read the hexidecimal representation of the server's private (secret) key\n");
-	debug_log(DEBUG_FATAL, " or CURVEDNS_PRIVATE_KEY_FD\n\tThe number of a file descriptor from which to read the hexidecimal representation of the server's private (secret) key\n");
 	debug_log(DEBUG_FATAL, " UID\n\tNon-root user id to run under\n");
 	debug_log(DEBUG_FATAL, " GID\n\tNon-root user group id to run under\n");
 	debug_log(DEBUG_FATAL, " [CURVEDNS_SOURCE_IP]\n\tThe IP to bind on when target server is contacted (default: [none])\n");
@@ -66,7 +64,6 @@ static int usage(const char *argv0) {
 	debug_log(DEBUG_FATAL, " [CURVEDNS_TCP_TIMEOUT]\n\tNumber of seconds before TCP session to client times out (default: 60.0)\n");
 	debug_log(DEBUG_FATAL, " [CURVEDNS_SHARED_SECRETS]\n\tNumber of shared secrets that can be cached (default: 5000)\n");
 	debug_log(DEBUG_FATAL, " [CURVEDNS_DEBUG]\n\tDebug level, 1: fatal, 2: error, 3: warning, 4: info, 5: debug (default: 2)\n");
-	debug_log(DEBUG_FATAL, "Exactly one of the CURVEDNS_PRIVATE_KEY* variables is required.\n");
 	return 1;
 }
 
@@ -141,7 +138,6 @@ static int getenvoptions() {
 
 int main(int argc, char *argv[]) {
 	int uid, gid, tmp;
-	char *fn, hexkey[65];
 
 	if (argc != 5)
 		return usage(argv[0]);
@@ -178,32 +174,31 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Fetch the secret key from environment and setup:
-	tmp = -1;
-	if ((fn = getenv("CURVEDNS_PRIVATE_KEY_FILE"))) {
-		if ((tmp = open(fn, O_RDONLY)) < 0) {
-			debug_log(DEBUG_FATAL, "failed to open CURVEDNS_PRIVATE_KEY_FILE\n");
-			return 1;
-		}
-	} else if (!misc_getenv_int("CURVEDNS_PRIVATE_KEY_FD", 0, &tmp)) {
-		tmp = -1;
-	}
-	if (tmp >= 0) {
-		if (read(tmp, hexkey, sizeof(hexkey) - 1) != sizeof(hexkey) - 1) {
-			debug_log(DEBUG_FATAL, "short read from CURVEDNS_PRIVATE_KEY_F*\n");
-			return 1;
-		}
-		close(tmp);
-		hexkey[sizeof(hexkey) - 1] = 0;
-		if (!misc_hex_decode(hexkey, global_secret_key)) {
-			debug_log(DEBUG_FATAL, "read invalid hex data from CURVEDNS_PRIVATE_KEY_F*\n");
-			return 1;
-		}
-	} else if (!misc_getenv_key("CURVEDNS_PRIVATE_KEY", 1, global_secret_key))
+	if (!misc_getenv_key("CURVEDNS_PRIVATE_KEY", 1, global_secret_key))
+		return 1;
+
+	// Fetch group id:
+	if (!misc_getenv_int("GID", 1, &gid))
+		return 1;
+
+	// Fetch user id:
+	if (!misc_getenv_int("UID", 1, &uid))
 		return 1;
 
 	// Open UDP and TCP sockets on local address(es):
 	if (!ip_init(local_addresses, local_addresses_count)) {
 		debug_log(DEBUG_FATAL, "ip_init(): failed, are you root?\n");
+		return 1;
+	}
+
+	// Do exactly this ;]
+	debug_log(DEBUG_INFO, "main(): throwing away root privileges\n");
+	if (setgid(gid) != 0) {
+		debug_log(DEBUG_FATAL, "main(): unable to set gid\n");
+		return 1;
+	}
+	if (setuid(uid) != 0) {
+		debug_log(DEBUG_FATAL, "main(): unable to set uid\n");
 		return 1;
 	}
 

@@ -28,10 +28,10 @@
  */
 
 /*
- * $Id: event_main.c 18 2010-10-25 14:06:52Z hvt $ 
- * $Author: hvt $
- * $Date: 2010-10-25 16:06:52 +0200 (Mon, 25 Oct 2010) $
- * $Revision: 18 $
+ * $Id$ 
+ * $Author$
+ * $Date$
+ * $Revision$
  */
 
 #include "event.h"
