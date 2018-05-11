@@ -1,5 +1,8 @@
 /*
  * $Log: do_scan.c,v $
+ * Revision 1.14  2018-05-11 14:37:51+05:30  Cprogrammer
+ * BUG - fixed prohibited extensions scanning
+ *
  * Revision 1.13  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -103,13 +106,11 @@ scan_badattachments(char *dir_name)
 		return (0);
 	if (!(dir = opendir(dir_name)))
 		die(61);
-	if (!controldir)
-	{
+	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
-	if (*controldir != '/')
-	{
+	if (*controldir != '/') {
 		if (!stralloc_copys(&cdir, auto_qmail))
 			die_nomem();
 		if (!stralloc_append(&cdir, "/"))
@@ -131,8 +132,7 @@ scan_badattachments(char *dir_name)
 		die_control();
 	unlink("control");
 	setdotChar('.');
-	for(match = 0;;)
-	{
+	for(match = 0;;) {
 		if(!(dp = readdir(dir)))
 			break;
 		if (!str_diff(dp->d_name, ".") || !str_diff(dp->d_name, ".."))
@@ -144,6 +144,9 @@ scan_badattachments(char *dir_name)
 		/*- badext, badextpatterns */
 		switch (address_match(0, &addr, extok ? &ext : 0, extok ? &mapext : 0, brpok ? &brp : 0, 0))
 		{
+		case 0:
+			match = 0;
+			break;
 		case 1:
 			match = 1;
 			break;
@@ -202,12 +205,10 @@ do_scan()
 		case 0:
 			close(0); /*- Don't let it fiddle with message */
 			close(1); /*- Don't let it fiddle with envelope */
-			if ((ptr = env_get("SCANCMD")))
-			{
+			if ((ptr = env_get("SCANCMD"))) {
 				if (!(scancmd = MakeArgs(ptr)))
 					_exit(51);
-				for (i = 1;scancmd[i];i++)
-				{
+				for (i = 1;scancmd[i];i++) {
 					if (!str_diffn(scancmd[i], "%s", 2))
 						scancmd[i] = ".";
 				}
@@ -221,14 +222,12 @@ do_scan()
 		/*- Allow alarms */
 		sig_alarmunblock();
 		/*- Catch the exit status */
-		if (wait_pid(&avstat, pid) == -1)
-		{
+		if (wait_pid(&avstat, pid) == -1) {
 			if (flaglog)
 				strerr_warn1("qscanq-stdin: waitpid failed: ", &strerr_sys);
 			return EX_TMPERR;
 		}
-		if (wait_crashed(avstat))
-		{
+		if (wait_crashed(avstat)) {
 			if (flaglog)
 				strerr_warn1("qscanq-stdin: virus scanner crashed: ", &strerr_sys);
 			return EX_TMPERR;
@@ -243,7 +242,7 @@ do_scan()
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.13 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: do_scan.c,v 1.14 2018-05-11 14:37:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
