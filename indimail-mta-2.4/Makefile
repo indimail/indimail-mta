@@ -2431,12 +2431,12 @@ hastlsa.h: trytlsa.c compile load conf-tls conf-tlsa tlsa.lib
 tlsa.lib: \
 trytlsa.c conf-tlsa
 	( ( ./compile -I../danetlsa-$(DANE_VERSION) \
-		`grep -h -v "^#" conf-tlsa` trytlsa.c && \
+	`grep -h -v "^#" conf-tlsa conf-tls` trytlsa.c && \
 	./load trytlsa -L../danetlsa-$(DANE_VERSION)/.libs \
 	-L../danetlsa-$(DANE_VERSION) -ldanetlsa) >/dev/null 2>&1 \
 	&& echo "-L../danetlsa-$(DANE_VERSION)/.libs \
 	-L../danetlsa-$(DANE_VERSION) -ldanetlsa" || exit 0 ) > tlsa.lib
-	rm -f trydkim.o trydkim
+	rm -f trytlsa.o.o trytlsa
 
 qnotify.1: qnotify.9 conf-qmail conf-sysconfdir
 	cat qnotify.9 \
@@ -2456,7 +2456,7 @@ md5c.o hmac_md5.o hmac_sha1.o hmac_sha256.o hmac_sha512.o hmac_ripemd.o sha1.o r
 digest_md5.o ndelay.a case.a sig.a open.a lock.a seek.a getln.a stralloc.a \
 alloc.a socket_v4mappedprefix.o scan_xlong.o socket_tcp.o socket_tcp6.o wait_pid.o \
 substdio.a str.a fs.a cdb.a auto_qmail.o envread.o error.a dns.lib socket.lib \
-tls.lib
+tls.lib tlsa.lib
 	./load qmail-remote control.o constmap.o timeoutread.o base64sub.o \
 	auto_control.o timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.o scan_xlong.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o ipalloc.o env.o \
@@ -2465,7 +2465,7 @@ tls.lib
 	variables.o socket_tcp.o socket_tcp6.o ndelay.a case.a sig.a open.a \
 	hmac_sha256.o hmac_sha512.o lock.a seek.a getln.a stralloc.a alloc.a substdio.a \
 	str.a fs.a cdb.a auto_qmail.o envread.o error.a `cat dns.lib socket.lib \
-	tls.lib`
+	tls.lib tlsa.lib`
 
 qmail-remote.0: \
 qmail-remote.8
@@ -2486,9 +2486,9 @@ ipme.h cdb.h open.h base64.h gen_allocdefs.h str.h now.h \
 datetime.h exit.h constmap.h tcpto.h timeoutconn.h timeoutread.h \
 timeoutwrite.h env.h uint32.h haveip6.h socket.h variables.h \
 byte.h fmt.h conf-tls conf-ip conf-batv conf-mxps wait.h \
-hastlsv1_1_client.h hastlsv1_2_client.h \
-auth_digest_md5.h auto_control.h
-	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
+hastlsv1_1_client.h hastlsv1_2_client.h conf-tlsa \
+auth_digest_md5.h auto_control.h hastlsa.h
+	./compile -I../danetlsa-$(DANE_VERSION) `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
 
 qmail-rspawn: \
 load qmail-rspawn.o spawn.o tcpto_clean.o now.o coe.o get_uid.o sig.a open.a \
