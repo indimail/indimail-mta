@@ -1,4 +1,4 @@
-indimail-mta (2.4-5) unstable; urgency=low
+indimail-mta (2.4-6) unstable; urgency=low
 
   * svctool - added option to refresh services
   * moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
@@ -20,5 +20,6 @@ indimail-mta (2.4-5) unstable; urgency=low
   * daneq - Tool to query qmail-dane for TLSA RRs
   * tlsacheck() function to send queries to qmail-dane.
   * qmail-multi.c - fixed qscanq path to sbin
+  * fixed do_scan() for badattachment check
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 05 May 2018 18:25:22 +0530
