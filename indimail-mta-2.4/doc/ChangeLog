@@ -33,6 +33,8 @@ Release 2.4 Start 31/01/2018
 19. tlsacheck() function to send queries to qmail-dane.
 05/05/2018
 20. qmail-multi.c - fixed qscanq path to sbin
+11/05/2018
+21. fixed do_scan() for badattachment check
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017
