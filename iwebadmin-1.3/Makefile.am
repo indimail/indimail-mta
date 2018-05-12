@@ -33,7 +33,7 @@ iwebadmin_CFLAGS = @auth_incs@ $(AM_CFLAGS)
 
 noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
 
-MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc \
+MOSTLYCLEANFILES = iwebadmin-@VERSION@-rpmlintrc \
 				   iwebadmin_perm_list obs.mk
 
 edit = sed \
