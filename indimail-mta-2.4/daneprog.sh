@@ -1,5 +1,8 @@
 #
 # $Log: daneprog.sh,v $
+# Revision 1.2  2018-05-13 21:34:03+05:30  Cprogrammer
+# fix for non-existing mxdomains
+#
 # Revision 1.1  2018-04-25 22:57:23+05:30  Cprogrammer
 # Initial revision
 #
@@ -29,6 +32,9 @@ else
 		mx=`/usr/bin/host -tmx $1 | sort -g -k 6 | head -1 | awk '{print $7}' | sed 's/.$//'`
 	fi
 fi
-echo $mx
 cd /tmp
-exec /usr/bin/danetool --quiet --check $mx --proto tcp --starttls-proto=smtp
+if [ -z "$mx" ] ; then
+	exit 1
+else
+	exec /usr/bin/danetool --quiet --check $mx --proto tcp --starttls-proto=smtp
+fi
