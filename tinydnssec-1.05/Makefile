@@ -1,6 +1,7 @@
 # Don't edit Makefile! Use conf-* for configuration.
 
 SHELL=/bin/sh
+curvedns_version=0.88
 
 default: it
 
@@ -1367,7 +1368,7 @@ load dns-notify.o
 
 clean:
 	rm -f `cat TARGETS` data data.cdb test/[ot]*
-	cd dq-20161210 && make clean && cd ../curvedns-0.87 && make clean
+	cd dq-20161210 && make clean && cd ../curvedns-$(curvedns_version) && make clean
 
 distclean: clean
 	rm -f `cat TARGETS` data data.cdb test/[ot]*

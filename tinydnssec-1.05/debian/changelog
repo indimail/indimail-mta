@@ -1,4 +1,4 @@
-tinydnssec (1.05-1.2) stable; urgency=low
+tinydnssec (1.05-1.3) stable; urgency=low
 
   * Added dnsgetroot
   * added str_diffn()
@@ -20,5 +20,6 @@ tinydnssec (1.05-1.2) stable; urgency=low
   * added djbdns.7 man page
   * Changed dns accounts to Gtinydns, Gdnslog, Gdnscache
   * added man page for random-ip, dnsgetroot
+  * upgraded curvedns to version 0.88
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 18 May 2017 00:22:05 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 13 May 2018 14:34:03 +0530
