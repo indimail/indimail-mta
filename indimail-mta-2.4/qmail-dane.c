@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dane.c,v $
+ * Revision 1.4  2018-05-13 21:34:29+05:30  Cprogrammer
+ * renamed RECORD_STALE to RECORD_OLD
+ *
  * Revision 1.3  2018-04-27 10:47:53+05:30  Cprogrammer
  * fixed memory leak due to multiple records getting added
  *
@@ -55,7 +58,7 @@
 #define RECORD_OK     2
 #define RECORD_NOVRFY 3
 #define RECORD_FAIL   4
-#define RECORD_STALE  5
+#define RECORD_OLD    5
 #define BLOCK_SIZE 32768
 
 union sockunion
@@ -197,8 +200,20 @@ whitelist_init(char *arg)
 {
 	if (verbose > 2)
 		out("initializing whitelist\n");
+#ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
+	static stralloc controlfile = {0};
+
+	if (!stralloc_copys(&controlfile, "control/"))
+		die_nomem();
+	if (!stralloc_cats(&controlfile, arg))
+		die_nomem();
+	if (!stralloc_0(&controlfile))
+		die_nomem();
+	if ((tlsadomainsok = control_readfile(&tlsadomains, controlfile.s, 0)) == -1)
+#else /*- look for control files in $CONTROLDIR/control */
 	if ((whitelistok = control_readfile(&whitelist, arg, 0)) == -1)
 		die_control(arg);
+#endif
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
 	if (verbose > 2)
@@ -380,8 +395,8 @@ print_record(char *domain, time_t timestamp, char status, int expire_flag)
 	case RECORD_FAIL:
 		out("RECORD_FAIL");
 		break;
-	case RECORD_STALE:
-		out("RECORD_STALE");
+	case RECORD_OLD:
+		out("RECORD_OLD");
 		break;
 	}
 	out(expire_flag ? " expired\n" : "\n");
@@ -520,7 +535,7 @@ search_record(char *domain, int fr_int, struct danerec **store)
 	if ((ptr->status == RECORD_OK) && (ptr->timestamp > cur_time - timeout))
 		return (RECORD_OK);
 	else
-		return (RECORD_STALE);
+		return (RECORD_OLD);
 }
 
 /*
@@ -793,8 +808,8 @@ print_status(char status)
 		return ("RECORD NOVERIFY");
 	case RECORD_OK:
 		return ("RECORD OK");
-	case RECORD_STALE:
-		return ("RECORD STALE");
+	case RECORD_OLD:
+		return ("RECORD OLD");
 	case RECORD_FAIL:
 		return ("RECORD FAIL");
 	}
@@ -919,6 +934,9 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	case RECORD_NEW:  /*- \1\0 */
 		*org_state = dane_state;
 		dane_state = get_dane_record(domain);
+		if (!save.len) {
+			dane_state = RECORD_OK;
+		} else
 		if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40))
 			dane_state = RECORD_OK;
 		if (!add_record(domain, dane_state, dnrecord)) {
@@ -942,7 +960,7 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 		}
 		break;
 	case RECORD_FAIL: /*- \1\4 */
-	case RECORD_STALE:
+	case RECORD_OLD:
 		*org_state = dane_state;
 		ptr = *dnrecord;
 		ptr->status = get_dane_record(domain);
@@ -1308,7 +1326,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-dane.c,v 1.3 2018-04-27 10:47:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dane.c,v 1.4 2018-05-13 21:34:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
