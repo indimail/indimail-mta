@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.207 $";
+char           *revision = "$Revision: 1.208 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5568,6 +5568,8 @@ tls_init()
 		tls_err("454 TLS not available: unable to initialize SSLv23 ctx (#4.3.0)\r\n");
 		return;
 	}
+	/*- POODLE Vulnerability */
+	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
 #endif /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
 	if (!certdir) {
 		if (!(certdir = env_get("CERTDIR")))
@@ -6011,6 +6013,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.208  2018-05-13 15:52:36+05:30  Cprogrammer
+ * disable SSLv2, SSLv3 to fix Poodle vulnerability
+ *
  * Revision 1.207  2018-01-15 09:22:04+05:30  Cprogrammer
  * refactored code
  *
@@ -6070,7 +6075,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.207 2018-01-15 09:22:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.208 2018-05-13 15:52:36+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
