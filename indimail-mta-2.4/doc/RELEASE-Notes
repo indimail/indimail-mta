@@ -19,6 +19,8 @@ o Fixed Bug with VIRTUAL_PKG_LIB env variable
 o qmail-dane(8), daneq(1), tlsacheck(3) - DANE implementation for
   indimail-mta
 o qmail-multi - fixed qscanq path to sbin
+o fixed do_scan() for badattachment check
+o qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
 
 indimail-mta has RPM / DEB / yum / apt repository for most of the
 Linux Distros at
