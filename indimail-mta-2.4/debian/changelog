@@ -21,5 +21,6 @@ indimail-mta (2.4-6) unstable; urgency=low
   * tlsacheck() function to send queries to qmail-dane.
   * qmail-multi.c - fixed qscanq path to sbin
   * fixed do_scan() for badattachment check
+  * qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 05 May 2018 18:25:22 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 13 May 2018 15:48:08 +0530

@@ -1,4 +1,4 @@
-* Sat May 04 2018 18:24:43 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
+* Sun May 13 2018 15:48:08 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 31/01/2018
 31/01/2018
 1.  svctool - added option to refresh services
@@ -35,6 +35,8 @@ Release 2.4 Start 31/01/2018
 20. qmail-multi.c - fixed qscanq path to sbin
 11/05/2018
 21. fixed do_scan() for badattachment check
+13/05/2018
+22. qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017
