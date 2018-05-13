@@ -43,7 +43,8 @@ build-stamp:
 	fi
 	if [ -d curvedns-$(curvedns_version) ] ; then \
   		cd curvedns-$(curvedns_version) ; \
-		./curvedns.configure ; \
+		./configure.nacl ; \
+		./configure.curvedns ; \
 		$(MAKE) -s ; \
 		cd .. ; \
 	fi

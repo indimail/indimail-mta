@@ -395,7 +395,7 @@ do
 done
 
 %changelog
-* Thu May 18 2017 00:23:47 +0530 mbhangui@gmail.com @version@-@release@
+* Sun May 13 2017 14:34:34 +0530 mbhangui@gmail.com @version@-@release@
 Release 1.1 Start 11/04/2017
 1.  Added dnsgetroot
 2.  added str_diffn()
@@ -418,3 +418,4 @@ Release 1.1 Start 11/04/2017
 19. Changed dns accounts to Gtinydns, Gdnslog, Gdnscache
 20. added man page for random-ip, dnsgetroot
 21. use qmaill for loguser
+22. upgraded dnscurve to version 0.88
