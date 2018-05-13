@@ -1,5 +1,8 @@
 #
 # $Log: daneprog.sh,v $
+# Revision 1.3  2018-05-13 21:37:32+05:30  Cprogrammer
+# print error message for non-existent mxdomain
+#
 # Revision 1.2  2018-05-13 21:34:03+05:30  Cprogrammer
 # fix for non-existing mxdomains
 #
@@ -34,6 +37,7 @@ else
 fi
 cd /tmp
 if [ -z "$mx" ] ; then
+	echo "dane_query_tlsa: No DANE data were found" 2>&1
 	exit 1
 else
 	exec /usr/bin/danetool --quiet --check $mx --proto tcp --starttls-proto=smtp
