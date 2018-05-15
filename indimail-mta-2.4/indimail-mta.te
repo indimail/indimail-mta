@@ -1,5 +1,8 @@
 #
 # $Log: indimail-mta.te,v $
+# Revision 1.7  2018-05-15 18:31:23+05:30  Cprogrammer
+# added dac_read_search capability for svc
+#
 # Revision 1.6  2017-04-12 13:19:56+05:30  Cprogrammer
 # added fifo open, read perm for djbdns supervise
 #
@@ -20,7 +23,7 @@
 #
 #
 #
-# $Id: indimail-mta.te,v 1.6 2017-04-12 13:19:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.te,v 1.7 2018-05-15 18:31:23+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -169,7 +172,7 @@ allow svc_start_t root_t:fifo_file { write open read create };
 allow svc_start_t root_t:file { getattr ioctl open read write unlink append lock create rename execute execute_no_trans };
 
 allow svc_start_t self:process { execmem ptrace };
-allow svc_start_t self:capability { chown setuid setgid dac_override fsetid fowner sys_ptrace };
+allow svc_start_t self:capability { chown setuid setgid dac_override fsetid fowner sys_ptrace dac_read_search };
 allow svc_start_t self:netlink_route_socket { getattr bind read write create nlmsg_read };
 allow svc_start_t self:udp_socket { connect read write create getattr };
 allow svc_start_t sssd_public_t:dir search;
