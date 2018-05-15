@@ -22,5 +22,6 @@ indimail-mta (2.4-6) unstable; urgency=low
   * qmail-multi.c - fixed qscanq path to sbin
   * fixed do_scan() for badattachment check
   * qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
+  * remove hardcoded servicedir in spec file
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 13 May 2018 15:48:08 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 15 May 2018 13:03:30 +0530
