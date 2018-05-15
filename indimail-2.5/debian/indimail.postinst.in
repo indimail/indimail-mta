@@ -161,6 +161,11 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
     svc_list="$svc_list ${servicedir}/$i"
   done
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+  #update VIRTUAL_PKG_LIB for smtp service
+  for port in 25 465 587
+  do
+    echo "/usr/lib*/libindimail.so.*.*.*" > $servicedir/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+  done
   ) >> /tmp/indimail-setup.log
   ${rm} -f /tmp/indimail.upgrade
   exit 0
@@ -449,6 +454,11 @@ if [ -f ${mandir}/man7/authlib.7.gz ] ; then
 		ln -sf ${mandir}/man7/authlib.7.gz ${mandir}/man7/$i.gz
 	done
 fi
+#update VIRTUAL_PKG_LIB for smtp service
+for port in 25 465 587
+do
+  echo "/usr/lib*/libindimail.so.*.*.*" > $servicedir/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+done
 
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
