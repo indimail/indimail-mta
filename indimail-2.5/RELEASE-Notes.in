@@ -21,6 +21,7 @@ o svctool - added --config=sqlssl to create MariaDB SSL/TLS config
 o Fixed Bug with VIRTUAL_PKG_LIB env variable
 o removed logalert
 o run clearopensmtp as root in cron
+o remove hardcoded servicedir in spec file
 
 This release includes the following files (Note: Files may be suffied with -@version@)
 

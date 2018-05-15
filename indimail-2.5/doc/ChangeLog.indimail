@@ -1,4 +1,4 @@
-* Mon May 07 2018 17:03:34 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+* Tue May 15 2018 13:01:28 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
 Release 2.5 Start 27/01/2018
 27/01/2018
 1.  moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
@@ -68,6 +68,9 @@ hostcntrl, lastauth
 07/05/2018
 37. removed logalert
 38. run clearopensmtp as root in cron
+15/05/2018
+39. remove hardcoded servicedir in spec file
+40. create VIRTUAL_PKG_LIB env variable for smtp, on install/upgrade
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 04/12/2017
