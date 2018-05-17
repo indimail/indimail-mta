@@ -1,5 +1,8 @@
 /*
  * $Log: dnsmxip.c,v $
+ * Revision 1.8  2018-05-17 16:10:24+05:30  Cprogrammer
+ * print the mx domain along with the ip
+ *
  * Revision 1.7  2015-08-24 19:05:34+05:30  Cprogrammer
  * replace ip_fmt() with ip4_fmt()
  *
@@ -52,6 +55,8 @@ main(argc, argv)
 	dnsdoe(dns_mxip(&ia, &sa, r));
 	for (j = 0; j < ia.len; ++j)
 	{
+		substdio_puts(subfdout, ia.ix[j].fqdn);
+		substdio_put(subfdout, " ", 1);
 		switch(ia.ix[j].af)
 		{
 		case AF_INET:
@@ -76,7 +81,7 @@ main(argc, argv)
 void
 getversion_dnsmxip_c()
 {
-	static char    *x = "$Id: dnsmxip.c,v 1.7 2015-08-24 19:05:34+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dnsmxip.c,v 1.8 2018-05-17 16:10:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
