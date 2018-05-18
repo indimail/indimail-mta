@@ -21,6 +21,8 @@ o qmail-dane(8), daneq(1), tlsacheck(3) - DANE implementation for
 o qmail-multi - fixed qscanq path to sbin
 o fixed do_scan() for badattachment check
 o qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
+o added foxhole_all.cdb for banned extensions in clamav
+o BUG - do_scan.c - break out of loop if file extension matches a line in badext
 
 indimail-mta has RPM / DEB / yum / apt repository for most of the
 Linux Distros at

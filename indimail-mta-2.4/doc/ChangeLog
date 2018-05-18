@@ -1,4 +1,4 @@
-* Tue May 15 2018 13:02:45 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
+* Fri May 18 2018 17:59:16 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 31/01/2018
 31/01/2018
 1.  svctool - added option to refresh services
@@ -39,6 +39,10 @@ Release 2.4 Start 31/01/2018
 22. qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
 15/05/2018
 23. remove hardcoded servicedir in spec file
+18/05/2018
+24. added foxhole_all.cdb for banned extensions in clamav
+25. svctool option --config=foxhole for creating foxhole_all.cdb
+26. BUG - do_scan.c - break out of loop if file extension matches a line in badext
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017
