@@ -1,5 +1,8 @@
 /*
  * $Log: do_scan.c,v $
+ * Revision 1.15  2018-05-18 17:39:05+05:30  Cprogrammer
+ * BUG - break out of loop if file extension matches a line in badext
+ *
  * Revision 1.14  2018-05-11 14:37:51+05:30  Cprogrammer
  * BUG - fixed prohibited extensions scanning
  *
@@ -132,7 +135,7 @@ scan_badattachments(char *dir_name)
 		die_control();
 	unlink("control");
 	setdotChar('.');
-	for(match = 0;;) {
+	for (match = 0; !match;) {
 		if(!(dp = readdir(dir)))
 			break;
 		if (!str_diff(dp->d_name, ".") || !str_diff(dp->d_name, ".."))
@@ -242,7 +245,7 @@ do_scan()
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.14 2018-05-11 14:37:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_scan.c,v 1.15 2018-05-18 17:39:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
