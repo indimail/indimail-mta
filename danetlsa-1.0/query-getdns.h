@@ -15,6 +15,8 @@ typedef struct tlsa_rdata {
 	uint8_t         mtype;
 	unsigned long   data_len;
 	uint8_t        *data;
+	char           *host;
+	unsigned long   hostlen;
 	struct tlsa_rdata *next;
 } tlsa_rdata;
 
@@ -30,7 +32,7 @@ typedef struct qinfo {
 
 typedef struct addrinfo addrinf;
 
-tlsa_rdata     *insert_tlsa_rdata(tlsa_rdata **, tlsa_rdata *, tlsa_rdata *);
+tlsa_rdata     *insert_tlsa_rdata(tlsa_rdata **, tlsa_rdata *);
 void            free_tlsa(tlsa_rdata *);
 void            print_tlsa(tlsa_rdata *);
 addrinf        *insert_addrinfo(addrinf *, addrinf *);
