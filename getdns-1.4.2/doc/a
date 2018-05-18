@@ -1,0 +1,17 @@
+MANPAGES3="libgetdns.3 getdns_address.3 getdns_cancel_callback.3 getdns_context.3 getdns_context_set.3 getdns_context_set_context_update_callback.3 getdns_convert.3 getdns_dict.3 getdns_dict_get.3 getdns_dict_set.3 getdns_display_ip_address.3 getdns_general.3 getdns_hostname.3 getdns_list.3 getdns_list_get.3 getdns_list_set.3 getdns_pretty_print_dict.3 getdns_root_trust_anchor.3 getdns_service.3 getdns_validate_dnssec.3"
+DESTDIR=/tmp/abcd
+mandir=/usr/share/man
+mkdir /tmp/abcd
+INSTALL=insall
+for x in $MANPAGES3
+do
+	echo $(INSTALL) -m 644 $x $DESTDIR"$mandir"/man3
+	#$INSTALL -m 644 $x $DESTDIR"$mandir"/man3
+	for altpg in $(./manpgaltnames $x)
+	do
+		echo "cp $x $altpg"
+		echo $INSTALL -m 644 $altpg $DESTDIR"$mandir"/man3
+		#$INSTALL -m 644 $altpg $DESTDIR"$mandir"/man3
+	done
+done
+

@@ -1,0 +1,17 @@
+#!/bin/sh
+set -x
+rcsflag=0
+make clean
+make distclean
+ver=1.4.2
+if [ -d RCS ] ; then
+	rcsflag=1
+	mv RCS ../RCSgetdns
+fi
+cd ..
+tar cf - getdns-$ver |gzip -c > /usr/local/src/indimail/rpmbuild/SOURCES/getdns-$ver.tar.gz
+cd getdns-$ver
+if [ $rcsflag -eq 1 ] ; then
+	mv ../RCSgetdns ./RCS
+fi
+rpmbuild -bb getdns.spec

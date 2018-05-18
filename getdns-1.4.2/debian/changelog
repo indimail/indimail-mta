@@ -1,0 +1,5 @@
+getdns (1.4-2-1.0) stable; urgency=low
+
+  * Added getdns
+
+ -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 09 May 2018 07:35:21 +0530
