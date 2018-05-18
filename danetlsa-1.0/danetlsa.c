@@ -350,17 +350,40 @@ cleanup:
 
 /*-
  * tlsa_rdata: structure to hold TLSA record rdata.
- * insert_tlsa_rdata(): insert node at tail of linked list of tlsa_rdata.
+ * insert_tlsa_rdata(): 
+ * new records     - insert node at tail of linked list of tlsa_rdata.
+ * existing record - return the tail
  * free_tlsa(): free memory in the linked list.
  */
 
 tlsa_rdata *
-insert_tlsa_rdata(tlsa_rdata **headp, tlsa_rdata *current, tlsa_rdata *new)
+insert_tlsa_rdata(tlsa_rdata **headp, tlsa_rdata *new)
 {
-    if (current == NULL)
+	tlsa_rdata     *rp;
+	char           *cp1, *cp2;
+	int             len;
+	tlsa_rdata     *ptr;
+
+    if (*headp == NULL)
         *headp = new;
-    else
-        current->next = new;
+	else {
+		for (ptr = rp = *headp; rp != NULL; rp = rp->next) {
+			ptr = rp;
+			cp1 = bin2hexstring(rp->data, rp->data_len);
+			cp2 = bin2hexstring(new->data, new->data_len);
+			len = strlen(cp1);
+			if (rp->usage == new->usage && rp->selector == new->selector &&
+				rp->mtype == new->mtype && !memcmp(rp->data, new->data, rp->data_len)
+				&&!memcmp(rp->host, new->host, rp->hostlen) && !memcmp(cp1, cp2, len)) {
+					free(cp1);
+					free(cp2);
+					return ((tlsa_rdata *) 0);
+			}
+			free(cp1);
+			free(cp2);
+		}
+        ptr->next = new;
+	}
     return new;
 }
 
@@ -452,7 +475,6 @@ cb_tlsa(getdns_context *ctx, getdns_callback_type_t cb_type, getdns_dict *respon
 		goto cleanup;
 	}
 
-	tlsa_rdata     *current = tlsa_rdata_list;
 	size_t          auth_count = 0;
 
 	for (i = 0; i < num_replies; i++) {
@@ -539,10 +561,20 @@ cb_tlsa(getdns_context *ctx, getdns_callback_type_t cb_type, getdns_dict *respon
 				danetlsa_error = GETDNS_MEM_ERR;
 				return;
 			}
+			rp->hostlen = strlen(qip->qname);
+			if (!(rp->host = malloc(rp->hostlen + 1))) {
+				danetlsa_error = GETDNS_MEM_ERR;
+				return;
+			}
+			memcpy(rp->host, qip->qname, rp->hostlen + 1);
 			memcpy(rp->data, certdata->data, certdata->size);
 			rp->next = NULL;
-			current = insert_tlsa_rdata(&tlsa_rdata_list, current, rp);
-			tlsa_count++;
+			if (!(insert_tlsa_rdata(&tlsa_rdata_list, rp))) {
+				free(rp->data);
+				free(rp->host);
+				free(rp);
+			} else
+				tlsa_count++;
 		}
 	}
 	if (auth_count == num_replies)
@@ -634,10 +666,8 @@ do_dns_queries(const char *hostname, uint16_t port, int recursive)
 		asprintf(&danetlsa_err_str, "Error in dispatching events.\n");
 		return 0;
 	}
-
 	event_base_free(evb);
 	getdns_context_destroy(context);
-
 	return 1;
 }
 
