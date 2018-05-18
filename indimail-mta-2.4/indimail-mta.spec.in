@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.154 2018-05-15 12:56:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.155 2018-05-18 19:39:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -695,6 +695,7 @@ done
 %attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/leapsecs.txt
 %attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/%{name}-release
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/nodnscheck
+%attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/foxhole_all.cdb
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -2005,6 +2006,7 @@ $TOUCH %{servicedir}/qmail-qmqpd.628/down
 %{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --scanint=200
 if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
   %{_prefix}/sbin/svctool --config=clamd
+  %{_prefix}/sbin/svctool --config=foxhole
   # create clamd, freshclam service
   %{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
     --sysconfdir=$mysysconfdir
