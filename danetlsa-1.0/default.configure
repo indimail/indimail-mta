@@ -2,4 +2,10 @@
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
 autoreconf -fiv
 fi
-./configure --prefix=/usr --libexecdir=/usr/libexec/indimail
+if [ -d /usr/lib64 ] ; then
+	libdir=/usr/lib64
+else
+	libdir=/usr/lib
+fi
+./configure --prefix=/usr --libdir=$libdir \
+	--libexecdir=/usr/libexec/indimail --datarootdir=/usr/share/indimail
