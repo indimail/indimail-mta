@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.8  2018-05-18 19:40:01+05:30  Cprogrammer
+# added --config=foxhole to create foxhole_all.cdb for clamd
+#
 # Revision 1.7  2018-03-25 20:05:19+05:30  Cprogrammer
 # removed chmod of variables directory as it is redundant now with read perm for indimail group
 #
@@ -19,7 +22,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.7 2018-03-25 20:05:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.8 2018-05-18 19:40:01+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -44,7 +47,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.7 2018-03-25 20:05:19+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.8 2018-05-18 19:40:01+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -173,6 +176,8 @@ if [ -f /etc/indimail/cronlist.q -a -d /etc/cron.d ] ; then
 		$cp /etc/indimail/cronlist.q /etc/cron.d/cronlist.q
 	fi
 fi
+# create foxhole_all.cdb in /var/indimail/clamd
+/usr/sbin/svctool --config=foxhole
 }
 
 case $1 in
