@@ -23,5 +23,8 @@ indimail-mta (2.4-6) unstable; urgency=low
   * fixed do_scan() for badattachment check
   * qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
   * remove hardcoded servicedir in spec file
+  * added foxhole_all.cdb for banned extensions in clamav
+  * svctool option --config=foxhole for creating foxhole_all.cdb
+  * BUG - do_scan.c - break out of loop if file extension matches a line in badext
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 15 May 2018 13:03:30 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 18 May 2018 17:59:16 +0530
