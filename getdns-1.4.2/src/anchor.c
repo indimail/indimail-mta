@@ -183,13 +183,13 @@ typedef struct ta_iter {
 	const char     *start;
 	const char     *ptr;
 	const char     *end;
-	char            zone[1024];
+	char            zone[1025];
 	time_t          validFrom;
 	time_t          validUntil;
-	char            keytag[6];
-	char            algorithm[4];
-	char            digesttype[4];
-	char            digest[2048];
+	char            keytag[7];
+	char            algorithm[5];
+	char            digesttype[5];
+	char            digest[2049];
 } ta_iter;
 
 /*-
@@ -302,7 +302,8 @@ ta_iter_next(ta_iter * ta)
 		/*- Find <Zone> */
 		level = 0;
 		while (!ta_iter_done(ta) && !ta->zone[0]) {
-			switch ((r = yxml_parse(&ta->x, *ta->ptr))) {
+			switch ((r = yxml_parse(&ta->x, *ta->ptr)))
+			{
 			case YXML_ELEMSTART:
 				level += 1;
 				if (level == 1 && strcasecmp(ta->x.elem, "zone") == 0) {
@@ -317,7 +318,7 @@ ta_iter_next(ta_iter * ta)
 					return ta_iter_next(ta);
 				else
 				if (level == 0 && cur) { /*- <Zone> content ready */
-					(void) memcpy(ta->zone, value, sizeof (ta->zone));
+					(void) memcpy(ta->zone, value, sizeof (ta->zone) - 1);
 					/*- Reset to start of <TrustAnchor> */
 					cur = NULL;
 					ta->ptr = ta_start;
@@ -371,14 +372,18 @@ ta_iter_next(ta_iter * ta)
 	DEBUG_ANCHOR("Found <KeyDigest>, Parse attributes\n");
 
 	ta->validFrom = ta->validUntil = 0;
-	*ta->keytag = *ta->algorithm = *ta->digesttype = *ta->digest = 0;
+	(void) memset(ta->keytag, 0, sizeof(ta->keytag));
+	(void) memset(ta->algorithm, 0, sizeof(ta->algorithm));
+	(void) memset(ta->digesttype, 0, sizeof(ta->digesttype));
+	(void) memset(ta->digest, 0, sizeof(ta->digest));
 
 	cur = NULL;
 	value[0] = 0;
 	attr_type = -1;
 
 	while (!ta_iter_done(ta)) {
-		switch ((r = yxml_parse(&ta->x, *ta->ptr))) {
+		switch ((r = yxml_parse(&ta->x, *ta->ptr)))
+		{
 		case YXML_ELEMSTART:
 			break;
 		case YXML_ELEMEND: /*- End of <KeyDigest> section, try next */
@@ -401,7 +406,8 @@ ta_iter_next(ta_iter * ta)
 				break;
 			cur = NULL;
 			DEBUG_ANCHOR("attrval: %s\n", value);
-			switch (attr_type) {
+			switch (attr_type)
+			{
 			case VALIDFROM:
 				ta->validFrom = _getdns_xml_convertdate(value);
 				break;
@@ -444,7 +450,8 @@ ta_iter_next(ta_iter * ta)
 	elem_type = -1;
 
 	for (;;) {
-		switch (r) {
+		switch (r)
+		{
 		case YXML_ELEMSTART:
 			level += 1;
 			DEBUG_ANCHOR("elem start: %s, level: %d\n", ta->x.elem, level);
@@ -479,18 +486,19 @@ ta_iter_next(ta_iter * ta)
 
 			cur = NULL;
 			DEBUG_ANCHOR("elem end: %s\n", value);
-			switch (elem_type) {
+			switch (elem_type)
+			{
 			case KEYTAG:
-				(void) memcpy(ta->keytag, value, sizeof (ta->keytag));
+				(void) memcpy(ta->keytag, value, sizeof (ta->keytag) - 1);
 				break;
 			case ALGORITHM:
-				(void) memcpy(ta->algorithm, value, sizeof (ta->algorithm));
+				(void) memcpy(ta->algorithm, value, sizeof (ta->algorithm) - 1);
 				break;
 			case DIGESTTYPE:
-				(void) memcpy(ta->digesttype, value, sizeof (ta->digesttype));
+				(void) memcpy(ta->digesttype, value, sizeof (ta->digesttype) - 1);
 				break;
 			case DIGEST:
-				(void) memcpy(ta->digest, value, sizeof (ta->digest));
+				(void) memcpy(ta->digest, value, sizeof (ta->digest) - 1);
 				break;
 			}
 			break;
