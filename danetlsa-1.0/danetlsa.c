@@ -343,7 +343,6 @@ cb_address(getdns_context *ctx, getdns_callback_type_t cb_type, getdns_dict *res
 	}
 
 cleanup:
-	free(qip);
 	getdns_dict_destroy(response);
 	return;
 }
@@ -395,7 +394,9 @@ free_tlsa(tlsa_rdata *head)
     while ((current = head) != NULL) {
 		head = head->next;
 		free(current->data);
+		free(current->host);
 		current->data = 0;
+		current->host = 0;
 		free(current);
     }
     return;
@@ -480,13 +481,13 @@ cb_tlsa(getdns_context *ctx, getdns_callback_type_t cb_type, getdns_dict *respon
 	for (i = 0; i < num_replies; i++) {
 		if ((rc = getdns_list_get_dict(replies_tree, i, &reply))) {
 			danetlsa_error = GETDNS_DICT_RESPONSE_ERR;
-			/*- asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting reply: %s\n", hostname, getdns_get_errorstr_by_id(rc)); -*/
+			asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting reply: %s\n", hostname, getdns_get_errorstr_by_id(rc));
 			break;
 		}
 
 		if ((rc = getdns_dict_get_int(reply, "dnssec_status", &dstatus))) {
 			danetlsa_error = GETDNS_DNSSEC_STATUS_ERR;
-			/*- asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: error obtaining dnssec status: %s\n", hostname, getdns_get_errorstr_by_id(rc)); -*/
+			asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: error obtaining dnssec status: %s\n", hostname, getdns_get_errorstr_by_id(rc));
 			goto cleanup;
 		}
 
@@ -504,7 +505,7 @@ cb_tlsa(getdns_context *ctx, getdns_callback_type_t cb_type, getdns_dict *respon
 
 		if ((rc = getdns_dict_get_list(reply, "answer", &answer))) {
 			danetlsa_error = GETDNS_DICT_ANSWER_ERR;
-			/*- asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting answer section: %s\n", hostname, getdns_get_errorstr_by_id(rc)); -*/
+			asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting answer section: %s\n", hostname, getdns_get_errorstr_by_id(rc));
 			break;
 		}
 
@@ -517,35 +518,35 @@ cb_tlsa(getdns_context *ctx, getdns_callback_type_t cb_type, getdns_dict *respon
 
 			if ((rc = getdns_list_get_dict(answer, j, &rr))) {
 				danetlsa_error = GETDNS_DICT_ANSWER_ERR;
-				/*- asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting rr %zu: %s\n", hostname, j, getdns_get_errorstr_by_id(rc)); -*/
+				asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting rr %zu: %s\n", hostname, j, getdns_get_errorstr_by_id(rc));
 				break;
 			}
 
 			if ((rc = getdns_dict_get_int(rr, "/type", &rrtype))) {
 				danetlsa_error = GETDNS_DICT_ANSWER_ERR;
-				/*- asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting rrtype: %s\n", hostname, getdns_get_errorstr_by_id(rc)); -*/
+				asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting rrtype: %s\n", hostname, getdns_get_errorstr_by_id(rc));
 				break;
 			}
 			if (rrtype != GETDNS_RRTYPE_TLSA)
 				continue;
 			if ((rc = getdns_dict_get_int(rr, "/rdata/certificate_usage", &usage))) {
 				danetlsa_error = GETDNS_DICT_ANSWER_ERR;
-				/*- asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting usage: %s\n", hostname, getdns_get_errorstr_by_id(rc)); -*/
+				asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting usage: %s\n", hostname, getdns_get_errorstr_by_id(rc));
 				break;
 			}
 			if ((rc = getdns_dict_get_int(rr, "/rdata/selector", &selector))) {
 				danetlsa_error = GETDNS_DICT_ANSWER_ERR;
-				/*- asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting selector: %s\n", hostname, getdns_get_errorstr_by_id(rc)); -*/
+				asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting selector: %s\n", hostname, getdns_get_errorstr_by_id(rc));
 				break;
 			}
 			if ((rc = getdns_dict_get_int(rr, "/rdata/matching_type", &mtype))) {
 				danetlsa_error = GETDNS_DICT_ANSWER_ERR;
-				/*- asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting mtype: %s\n", hostname, getdns_get_errorstr_by_id(rc)); -*/
+				asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting mtype: %s\n", hostname, getdns_get_errorstr_by_id(rc));
 				break;
 			}
 			if ((rc = getdns_dict_get_bindata(rr, "/rdata/certificate_association_data", &certdata))) {
 				danetlsa_error = GETDNS_DICT_ANSWER_ERR;
-				/*- asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting certdata: %s\n", hostname, getdns_get_errorstr_by_id(rc)); -*/
+				asprintf(&danetlsa_err_str, "FAIL: %s/TLSA: getting certdata: %s\n", hostname, getdns_get_errorstr_by_id(rc));
 				break;
 			}
 			tlsa_rdata     *rp = (tlsa_rdata *) malloc(sizeof (tlsa_rdata));
@@ -559,12 +560,12 @@ cb_tlsa(getdns_context *ctx, getdns_callback_type_t cb_type, getdns_dict *respon
 			rp->data_len = certdata->size;
 			if (!(rp->data = malloc(certdata->size))) {
 				danetlsa_error = GETDNS_MEM_ERR;
-				return;
+				goto cleanup;
 			}
 			rp->hostlen = strlen(qip->qname);
 			if (!(rp->host = malloc(rp->hostlen + 1))) {
 				danetlsa_error = GETDNS_MEM_ERR;
-				return;
+				goto cleanup;
 			}
 			memcpy(rp->host, qip->qname, rp->hostlen + 1);
 			memcpy(rp->data, certdata->data, certdata->size);
@@ -581,7 +582,6 @@ cb_tlsa(getdns_context *ctx, getdns_callback_type_t cb_type, getdns_dict *respon
 		tlsa_authenticated = 1;
 
 cleanup:
-	free(qip);
 	getdns_dict_destroy(response);
 	return;
 }
@@ -599,6 +599,7 @@ do_dns_queries(const char *hostname, uint16_t port, int recursive)
 	getdns_context *context = NULL;
 	getdns_dict    *extensions = NULL;
 	getdns_return_t rc;
+	qinfo          *qip;
 	struct event_base *evb;
 
 	if ((rc = getdns_context_create(&context, 1)) != GETDNS_RETURN_GOOD) {
@@ -630,9 +631,10 @@ do_dns_queries(const char *hostname, uint16_t port, int recursive)
 	getdns_transaction_t tid = 0;
 
 	/*- Address Records lookup */
-	qinfo          *qip = (qinfo *) malloc(sizeof (qinfo));
-	if (!qip) {
+	if (!(qip = (qinfo *) malloc(sizeof (qinfo)))) {
 		danetlsa_error = GETDNS_MEM_ERR;
+		event_base_free(evb);
+		getdns_context_destroy(context);
 		return 0;
 	}
 	qip->qname = hostname;
@@ -641,6 +643,7 @@ do_dns_queries(const char *hostname, uint16_t port, int recursive)
 	if ((rc = getdns_address(context, hostname, extensions, (void *) qip, &tid,
 			cb_address)) != GETDNS_RETURN_GOOD) {
 		asprintf(&danetlsa_err_str, "ERROR: %s address query failed: %s\n", hostname, getdns_get_errorstr_by_id(rc));
+		free(qip);
 		event_base_free(evb);
 		getdns_context_destroy(context);
 		return 0;
@@ -648,24 +651,25 @@ do_dns_queries(const char *hostname, uint16_t port, int recursive)
 
 	/*- TLSA Records lookup */
 	snprintf(domainstring, sizeof (domainstring), "_%d._tcp.%s", port, hostname);
-	if (!(qip = (qinfo *) malloc(sizeof (qinfo)))) {
-		danetlsa_error = GETDNS_MEM_ERR;
-		return 0;
-	}
 	qip->qname = domainstring;
 	qip->qtype = GETDNS_RRTYPE_TLSA;
 	qip->port = port;
 	if ((rc = getdns_general(context, domainstring, GETDNS_RRTYPE_TLSA, extensions, (void *) qip,
 			&tid, cb_tlsa)) != GETDNS_RETURN_GOOD) {
 		asprintf(&danetlsa_err_str, "ERROR: %s TLSA query failed: %s\n", domainstring, getdns_get_errorstr_by_id(rc));
+		free(qip);
 		event_base_free(evb);
 		getdns_context_destroy(context);
 		return 0;
 	}
 	if (event_base_dispatch(evb) == -1) {
 		asprintf(&danetlsa_err_str, "Error in dispatching events.\n");
+		free(qip);
+		event_base_free(evb);
+		getdns_context_destroy(context);
 		return 0;
 	}
+	free(qip);
 	event_base_free(evb);
 	getdns_context_destroy(context);
 	return 1;
