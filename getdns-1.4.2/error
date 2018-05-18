@@ -1,0 +1,9 @@
+./anchor.c: In function ‘ta_iter_next’:
+./anchor.c:490:12: warning: ‘strncpy’ output may be truncated copying 4 bytes from a string of length 1023 [-Wstringop-truncation]
+     (void) strncpy(ta->digesttype, value, sizeof (ta->digesttype));
+            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+./anchor.c:487:12: warning: ‘strncpy’ output may be truncated copying 4 bytes from a string of length 1023 [-Wstringop-truncation]
+     (void) strncpy(ta->algorithm, value, sizeof (ta->algorithm));
+            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+./anchor.c:484:12: warning: ‘strncpy’ output may be truncated copying 6 bytes from a string of length 1023 [-Wstringop-truncation]
+     (void) strncpy(ta->keytag, value, sizeof (ta->keytag));
