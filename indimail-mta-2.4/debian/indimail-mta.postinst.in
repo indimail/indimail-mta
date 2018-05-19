@@ -376,6 +376,7 @@ ${prefix}/sbin/svctool --qmqp=628 --servicedir=$servicedir --qbase=${qbase} \
 ${prefix}/sbin/svctool --qscanq --servicedir=${servicedir} --scanint=200
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	${prefix}/sbin/svctool --config=clamd
+	${prefix}/sbin/svctool --config=foxhole
 	# create clamd, freshclam service
 	${prefix}/sbin/svctool --clamd --servicedir=${servicedir} --clamdPrefix=$clamdPrefix \
 		--sysconfdir=$mysysconfdir
