@@ -23,6 +23,7 @@ o fixed do_scan() for badattachment check
 o qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
 o added foxhole_all.cdb for banned extensions in clamav
 o BUG - do_scan.c - break out of loop if file extension matches a line in badext
+o dnsmxip - print host along with ip
 
 indimail-mta has RPM / DEB / yum / apt repository for most of the
 Linux Distros at
