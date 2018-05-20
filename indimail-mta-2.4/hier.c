@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.242  2018-05-20 09:56:00+05:30  Cprogrammer
+ * renamed qmail-dane to qmail-daned
+ *
  * Revision 1.241  2018-04-26 11:39:02+05:30  Cprogrammer
  * added daneq, daneq man page, tlsacheck(), greylist(), qmail-dane man pages
  *
@@ -1585,7 +1588,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.241 2018-04-26 11:39:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.242 2018-05-20 09:56:00+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
