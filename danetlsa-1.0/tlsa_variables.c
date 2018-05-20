@@ -26,8 +26,8 @@ struct addrinfo *addresses;
 size_t          tlsa_count;
 tlsa_rdata     *tlsa_rdata_list;
 
-/*- enum AUTH_MODE  auth_mode = MODE_BOTH; -*/
-
-/*- error handling */
-int             danetlsa_error;
-char           *danetlsa_err_str;
+/*-
+ * mx_count: count of MX records
+ */
+size_t          mx_count;
+mx_rdata       *mx_rdata_list;
