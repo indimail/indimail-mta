@@ -31,8 +31,6 @@ doc_list= COPYING README.danetlsa CREDITS.danetlsa
 libdanetlsadir=@libdir@
 danetlsalibexecdir=@libexecdir@
 
-#LIBS_GETDNS2  = -lssl -lcrypto -lgetdns_ext_event -lgetdns -levent_core -lunbound
-
 MOSTLYCLEANFILES=libdanetlsa.la
 EXTRA_DIST=COPYING NEWS README CREDITS ChangeLog INSTALL.danetlsa install-sh missing mkinstalldirs
 
