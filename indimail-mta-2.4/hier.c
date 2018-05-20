@@ -961,7 +961,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "sbin", "readproctitle", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "qmail-greyd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "greydaemon", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "qmail-dane", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-daned", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "surblfilter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "surblqueue", auto_uido, auto_gidq, moder_x);
 #ifdef EXTERNAL_TODO
@@ -1513,7 +1513,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/cat8", "qmail-smtpd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-greyd.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-greyd.0", uidr, gidr, moder_f);
-	c(mandir,          "man/man8", "qmail-dane.8", uidr, gidr, moder_f);
+	c(mandir,          "man/man8", "qmail-daned.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "greydaemon.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "greydaemon.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-poppass.8", uidr, gidr, moder_f);
