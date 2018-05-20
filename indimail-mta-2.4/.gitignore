@@ -567,8 +567,8 @@ indimail-mta-permissions.secure
 doc/INSTALL-MINI
 fn_handler.o
 query_skt.o
-qmail-dane.o
-qmail-dane
+qmail-daned.o
+qmail-daned
 tlsacheck.o
 daneprog
 daneq
