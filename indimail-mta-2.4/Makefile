@@ -1405,7 +1405,7 @@ qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl daneprog \
 qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
 qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-pop3d qmail-popbull qmail-poppass \
 qmail-popup qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
-qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-dane \
+qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-daned \
 qmail-smtpd qmail_smtpd.so qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmail-upq \
 qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
 recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
@@ -2423,8 +2423,7 @@ dk-filter.8: dk-filter.9 conf-prefix conf-sysconfdir
 hastlsa.h: trytlsa.c compile load conf-tls conf-tlsa tlsa.lib
 	( ( ./compile -I../danetlsa-$(DANE_VERSION) \
 	`grep -h -v "^#" conf-tlsa conf-tls` trytlsa.c && \
-	./load trytlsa -L../danetlsa-$(DANE_VERSION)/.libs \
-	-L../danetlsa-$(DANE_VERSION) -ldanetlsa `cat tlsa.lib`) >/dev/null 2>&1 \
+	./load trytlsa `cat tlsa.lib`) >/dev/null 2>&1 \
 	&& (echo \#define HASTLSA 1) || exit 0 ) > hastlsa.h
 	rm -f trytlsa.o trytlsa
 
@@ -2486,7 +2485,7 @@ ipme.h cdb.h open.h base64.h gen_allocdefs.h str.h now.h \
 datetime.h exit.h constmap.h tcpto.h timeoutconn.h timeoutread.h \
 timeoutwrite.h env.h uint32.h haveip6.h socket.h variables.h \
 byte.h fmt.h conf-tls conf-ip conf-batv conf-mxps wait.h \
-hastlsv1_1_client.h hastlsv1_2_client.h conf-tlsa \
+hastlsv1_1_client.h hastlsv1_2_client.h \
 auth_digest_md5.h auto_control.h hastlsa.h
 	./compile -I../danetlsa-$(DANE_VERSION) `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
 
@@ -5640,8 +5639,8 @@ qmail-greyd.0: \
 qmail-greyd.8
 	nroff -man qmail-greyd.8 > qmail-greyd.0
 
-qmail-dane: \
-load qmail-dane.o sgetopt.o subgetopt.o \
+qmail-daned: \
+load qmail-daned.o sgetopt.o subgetopt.o \
 error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
 str_len.o str_cpy.o str_chr.o str_diff.o str_diffn.o \
 ip.o socket_v6any.o socket_v4mappedprefix.o fmt_hexbytes.o \
@@ -5651,8 +5650,10 @@ byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
 alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
 sig_block.o sig_catch.o now.o byte_zero.o str_cpyb.o \
-MakeArgs.o wait_pid.o substdio.a stralloc.a
-	./load qmail-dane sgetopt.o subgetopt.o auto_control.o \
+ipalloc.o dns.o dnsdoe.o strsalloc.o \
+MakeArgs.o wait_pid.o substdio.a stralloc.a tlsa.lib \
+dns.lib
+	./load qmail-daned sgetopt.o subgetopt.o auto_control.o \
 	error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
 	str_len.o str_cpy.o str_chr.o str_diff.o str_diffn.o \
 	ip.o socket_v6any.o socket_v4mappedprefix.o fmt_hexbytes.o \
@@ -5662,16 +5663,19 @@ MakeArgs.o wait_pid.o substdio.a stralloc.a
 	alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 	cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
 	sig_block.o sig_catch.o now.o byte_zero.o str_cpyb.o \
-	MakeArgs.o wait_pid.o substdio.a stralloc.a -lm
+	ipalloc.o dns.o dnsdoe.o strsalloc.o \
+	MakeArgs.o wait_pid.o substdio.a stralloc.a `cat dns.lib tlsa.lib` -lm
 
-qmail-dane.o: \
-compile qmail-dane.c sgetopt.h auto_qmail.h \
+qmail-daned.o: \
+compile qmail-daned.c sgetopt.h auto_qmail.h \
 fmt.h str.h subfd.h byte.h strerr.h scan.h getln.h \
 env.h stralloc.h constmap.h control.h error.h \
 uint32.h open.h variables.h sig.h haveip6.h \
-haveip6.h conf-ip auto_control.h wait.h \
-tlsacheck.h
-	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` qmail-dane.c
+haveip6.h conf-ip conf-tls auto_control.h wait.h \
+tlsacheck.h dns.h dnsdoe.h ip.h ipalloc.h now.h \
+hastlsa.h
+	./compile -I../danetlsa-$(DANE_VERSION) -DDYNAMIC_BUF \
+		`grep -h -v "^#" conf-ip conf-tls` qmail-daned.c
 
 tlsacheck.o: \
 compile tlsacheck.c haveip6.h stralloc.h ip.h fmt.h byte.h \
