@@ -354,7 +354,7 @@ ${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
     --hash-size=65536 --save-interval=5 --whitelist=greylist.white
 
-# qmail-dane tlsa daemon
+# qmail-daned tlsa daemon
 ${prefix}/sbin/svctool --tlsa=1998 --servicedir=$servicedir \
     --timeout-days=30 --context-file=tlsa.context \
     --hash-size=65536 --save-interval=5 --whitelist=tlsa.white
