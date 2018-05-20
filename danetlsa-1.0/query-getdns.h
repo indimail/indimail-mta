@@ -6,8 +6,8 @@
 
 /*-
  * tlsa_rdata: structure to hold TLSA record rdata.
- * insert_tlsa_rdata(): insert node at tail of linked list of tlsa_rdata.
- * free_tlsa(): free memory in the linked list.
+ * insert_tlsa_rdata() - insert node at tail of linked list of tlsa_rdata.
+ * free_tlsa() - free memory in the linked list.
  */
 typedef struct tlsa_rdata {
 	uint8_t         usage;
@@ -21,6 +21,19 @@ typedef struct tlsa_rdata {
 } tlsa_rdata;
 
 /*-
+ * mx_rdata: structure to hold MX recrord data
+ * insert_mx_rdata() - insert node at tail of linked list of mx_rdata
+ * free_mx() - free memory in the linked list
+ */
+typedef struct mx_rdata {
+	uint8_t         pref;
+	unsigned long   data_len;
+	uint8_t        *data;
+	struct mx_rdata *next;
+} mx_rdata;
+
+
+/*-
  * qinfo: structure to hold query information to be passed to
  * callback functions.
  */
@@ -32,12 +45,17 @@ typedef struct qinfo {
 
 typedef struct addrinfo addrinf;
 
-tlsa_rdata     *insert_tlsa_rdata(tlsa_rdata **, tlsa_rdata *);
 void            free_tlsa(tlsa_rdata *);
-void            print_tlsa(tlsa_rdata *);
-addrinf        *insert_addrinfo(addrinf *, addrinf *);
+void            free_mx(mx_rdata *);
 int             do_dns_queries(const char *, uint16_t, int);
+int             do_mx_queries(const char *, int);
 char           *bin2hexstring(uint8_t *, size_t);
+char           *bin2txt(uint8_t *, size_t);
+#ifdef HAVE_STDARG_H
+char           *print_stack __P((const char *, ...));
+#else
+char           *print_stack();
+#endif
 
 extern addrinf *addresses;
 extern int      dns_bogus_or_indeterminate;
@@ -45,10 +63,12 @@ extern int      address_authenticated;
 extern int      v4_authenticated;
 extern int      v6_authenticated;
 extern int      tlsa_authenticated;
+extern int      danetlsa_error;
+extern char    *danetlsa_err_str;
 extern size_t   tlsa_count;
-extern      int danetlsa_error;
-extern    char *danetlsa_err_str;
 extern tlsa_rdata *tlsa_rdata_list;
+extern size_t    mx_count;
+extern mx_rdata *mx_rdata_list;
 
 #define GETDNS_NO_ERR                  0
 #define GETDNS_MEM_ERR                 1
