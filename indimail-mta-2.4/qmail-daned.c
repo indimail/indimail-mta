@@ -1326,7 +1326,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-dane.c,v 1.4 2018-05-13 21:34:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dane.c,v 1.4 2018-05-13 21:34:29+05:30 Cprogrammer Exp $";
 
 	x++;
 }
