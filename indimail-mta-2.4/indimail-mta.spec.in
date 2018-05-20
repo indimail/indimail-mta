@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.155 2018-05-18 19:39:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.156 2018-05-20 11:25:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1122,7 +1122,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/udplogger.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/greydaemon.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-greyd.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-dane.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/qmail-daned.8.gz
 %if %nolibdkim == 0
 %attr(0644,root,root)                   %{mandir}/man8/dkim.8.gz
 %endif
@@ -1287,7 +1287,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/udplogger
 %attr(755,root,root)                    %{_prefix}/sbin/greydaemon
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-greyd
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-dane
+%attr(755,root,root)                    %{_prefix}/sbin/qmail-daned
 %endif
 
 %if %nolibdkim == 0
@@ -1501,7 +1501,7 @@ done
 %attr(555,root,root)                    %{_prefix}/sbin/udplogger
 %attr(555,root,root)                    %{_prefix}/sbin/greydaemon
 %attr(555,root,root)                    %{_prefix}/sbin/qmail-greyd
-%attr(555,root,root)                    %{_prefix}/sbin/qmail-dane
+%attr(555,root,root)                    %{_prefix}/sbin/qmail-daned
 
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)         %{mandir}
@@ -1534,7 +1534,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/udplogger.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/greydaemon.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-greyd.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-dane.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/qmail-daned.8.gz
 %attr(0644,root,root)                   %{mandir}/cat8/greydaemon.0.gz
 %attr(0644,root,root)                   %{mandir}/cat8/qmail-greyd.0.gz
 
@@ -1988,7 +1988,7 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
     --hash-size=65536 --save-interval=5 --whitelist=greylist.white
-# qmail-dane tlsa daemon
+# qmail-daned tlsa daemon
 %{_prefix}/sbin/svctool --tlsa=1998 --servicedir=%{servicedir} \
     --timeout-days=30 --context-file=tlsa.context \
     --hash-size=65536 --save-interval=5 --whitelist=tlsa.white
