@@ -484,6 +484,10 @@ if [ -f ${libexecdir}/instcheck ] ; then
 	${libexecdir}/instcheck > /dev/null 2>&1
 fi
 
+if [ ! -f ${qsysconfdir}/certs/getdns-root.key ] ; then
+/usr/sbin/unbound-anchor -a /etc/indimail/certs/getdns-root.key || true
+fi
+
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
 #

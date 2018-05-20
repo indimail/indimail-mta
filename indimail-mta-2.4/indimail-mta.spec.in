@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.156 2018-05-20 11:25:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.157 2018-05-20 23:14:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -219,7 +219,7 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 %endif
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
-Requires: coreutils grep /bin/sh glibc openssl
+Requires: coreutils grep /bin/sh glibc openssl /usr/sbin/unbound-anchor
 #
 # IndiMail is choosy and runs on reliable OS only
 #
@@ -696,6 +696,7 @@ done
 %attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/%{name}-release
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/nodnscheck
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/foxhole_all.cdb
+%attr(644,root,root)  %config(noreplace,missingok) %{qsysconfdir}/certs/getdns-root.key
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -2098,7 +2099,9 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
   /bin/sh %{libexecdir}/qupgrade.sh post install %{version} $*
 fi
-
+if [ ! -f %{qsysconfdir}/certs/getdns-root.key ] ; then
+/usr/sbin/unbound-anchor -a /etc/indimail/certs/getdns-root.key
+fi
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan
 fi

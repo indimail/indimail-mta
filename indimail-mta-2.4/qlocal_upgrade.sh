@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.9  2018-05-20 23:14:29+05:30  Cprogrammer
+# create getdns-root.key
+#
 # Revision 1.8  2018-05-18 19:40:01+05:30  Cprogrammer
 # added --config=foxhole to create foxhole_all.cdb for clamd
 #
@@ -22,7 +25,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.8 2018-05-18 19:40:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.9 2018-05-20 23:14:29+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -47,7 +50,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.8 2018-05-18 19:40:01+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.9 2018-05-20 23:14:29+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -80,6 +83,9 @@ if [ ! -d /etc/indimail/certs ] ; then
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
+fi
+if [ ! -f /etc/indimail/certs/getdns-root.key ] ; then
+	/usr/sbin/unbound-anchor -a /etc/indimail/certs/getdns-root.key
 fi
 # move existing certs in control directory to /etc/indimail/certs
 for i in servercert.pem clientcert.pem dh1024.pem dh512.pem \
