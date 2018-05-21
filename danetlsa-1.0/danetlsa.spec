@@ -75,11 +75,11 @@ make %{?_smp_mflags}
 %files devel
 %attr(644,root,root)                   %{_prefix}/include/indimail/query-getdns.h
 %{_libdir}/libdanetlsa.so
+%{_libdir}/libdanetlsa.a
 
 %files -n libdanetlsa
 %{_libdir}/libdanetlsa-1.0.so.0
 %{_libdir}/libdanetlsa-1.0.so.0.0.0
-%{_libdir}/libdanetlsa.a
 
 %docdir %{shareddir}/doc
 %doc
