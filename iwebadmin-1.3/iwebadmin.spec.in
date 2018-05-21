@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.28 2018-03-31 20:41:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.29 2018-05-21 18:00:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -48,6 +48,7 @@ BuildRequires: glibc glibc-devel procps cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils
 BuildRequires: gzip autoconf automake libtool indimail-devel libindimail
+BuildRequires: mysql-devel
 %if %{undefined rhel_version}
 BuildRequires: sharutils
 %else
@@ -56,11 +57,6 @@ BuildRequires: sharutils
 %endif
 %endif
 
-%if %build_on_obs == 1
-BuildRequires: mysql-devel libidn-devel
-%else
-BuildRequires: mysql-devel
-%endif
 %if %{undefined centos_version} && %{undefined rhel_version}
 BuildRequires: chrpath
 %endif
