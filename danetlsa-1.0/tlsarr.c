@@ -70,9 +70,9 @@ main(int argc, char **argv)
 			fflush(stdout);
 		}
 		if ((err = do_mx_queries(host, recursive)))  {
-			printf("do_mx_query error %d\n", err);
+			print_stack("%s\n", get_tlsa_err_str(err));
 			print_stack(0);
-			return (1);
+			return (err);
 		}
 		if (verbose) {
 			printf("MX query finished\n");
@@ -93,18 +93,14 @@ main(int argc, char **argv)
 					fflush(stdout);
 				}
 				if ((err = do_dns_queries(cp, port, recursive))) {
-					free(cp);
-					if (dns_bogus_or_indeterminate) {
-						fprintf(stderr, "DNSSEC status of responses is bogus or indeterminate.\n");
-						cleanup(1);
-					}
 					if (!addresses) {
 						fprintf(stderr, "No address records found\n");
 						cleanup(1);
 					}
+					print_stack("%s\n", get_tlsa_err_str(err));
 					print_stack(0);
 					return (err);
-				} 
+				}
 				free(cp);
 				if (verbose) {
 					printf("TLSA query finished\n");
@@ -142,14 +138,11 @@ main(int argc, char **argv)
 		fflush(stdout);
 	}
 	if ((err = do_dns_queries(mxhost, port, recursive))) {
-		if (dns_bogus_or_indeterminate) {
-			fprintf(stderr, "DNSSEC status of responses is bogus or indeterminate.\n");
-			cleanup(1);
-		}
 		if (!addresses) {
 			fprintf(stderr, "No address records found\n");
 			cleanup(1);
 		}
+		print_stack("%s\n", get_tlsa_err_str(err));
 		print_stack(0);
 		return (err);
 	} else
