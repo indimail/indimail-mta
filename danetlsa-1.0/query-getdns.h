@@ -56,6 +56,7 @@ char           *print_stack __P((const char *, ...));
 #else
 char           *print_stack();
 #endif
+char           *get_tlsa_err_str(int);
 
 extern addrinf *addresses;
 extern int      dns_bogus_or_indeterminate;
@@ -70,19 +71,20 @@ extern tlsa_rdata *tlsa_rdata_list;
 extern size_t    mx_count;
 extern mx_rdata *mx_rdata_list;
 
-#define GETDNS_NO_ERR                  0
-#define GETDNS_MEM_ERR                 1
-#define GETDNS_TIMEOUT_ERR             2
-#define GETDNS_CALLBACK_ERR            3
-#define GETDNS_CALLBACKCANCEL_ERR      4
-#define GETDNS_NO_EXIST_DOMAIN_ERR     5
-#define GETDNS_NO_SECURE_ANSWER_ERR    6
-#define GETDNS_ALL_BOGUS_ANSWER_ERR    7
-#define GETDNS_RES_INDETERMINATE_ERR   8
-#define GETDNS_DICT_RESPONSE_ERR       9
-#define GETDNS_DICT_ANSWER_ERR         10
-#define GETDNS_ZERO_REPLY_ERR          11
-#define GETDNS_DNSSEC_STATUS_ERR       12
-#define GETDNS_DNSSEC_INSECURE_ERR     13
+#define GETDNS_NO_ERR                           0
+#define GETDNS_MEM_ERR                          1
+#define GETDNS_TIMEOUT_ERR                      2
+#define GETDNS_CALLBACK_ERR                     3
+#define GETDNS_CALLBACKCANCEL_ERR               4
+#define GETDNS_NO_EXIST_DOMAIN_ERR              5
+#define GETDNS_NO_SECURE_ANSWER_ERR             6
+#define GETDNS_ALL_BOGUS_ANSWER_ERR             7
+#define GETDNS_RES_INDETERMINATE_ERR            8
+#define GETDNS_BOGUS_OR_RES_INDETERMINATE_ERR   9
+#define GETDNS_DICT_RESPONSE_ERR                10
+#define GETDNS_DICT_ANSWER_ERR                  11
+#define GETDNS_ZERO_REPLY_ERR                   12
+#define GETDNS_DNSSEC_STATUS_ERR                13
+#define GETDNS_DNSSEC_INSECURE_ERR              14
 
 #endif /*- __QUERY_GETDNS_H__ */
