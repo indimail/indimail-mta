@@ -31,6 +31,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	./configure --prefix=$(prefix) --libdir=$(libdir) \
+		--with-trust-anchor=/etc/indimail/certs/getdns-root.key \
 		--with-libevent --without-libidn --without-libidn2
 	$(MAKE) clean
 	$(MAKE) all
