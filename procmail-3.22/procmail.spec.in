@@ -54,9 +54,6 @@ BuildRequires: -post-build-checks
 %endif
 URL: http://www.indimail.org
 
-%if %build_on_obs == 1
-BuildRequires: libidn-devel
-%endif
 BuildRequires: coreutils
 
 Requires: coreutils grep /bin/sh /usr/bin/id glibc openssl
