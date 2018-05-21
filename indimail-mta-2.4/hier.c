@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.243  2018-05-21 07:22:37+05:30  Cprogrammer
+ * added foxhole_all.cdb file
+ *
  * Revision 1.242  2018-05-20 09:56:00+05:30  Cprogrammer
  * renamed qmail-dane to qmail-daned
  *
@@ -841,6 +844,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_sysconfdir, ".", "leapsecs.dat", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, ".", "leapsecs.txt", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, ".", "cronlist.q", auto_uido, auto_gidq, 0444);
+	c(auto_sysconfdir, ".", "foxhole_all.cdb", auto_uido, auto_gidq, 0644);
 
 	/* Binaries */
 	c(auto_qmail_home, "bin", "qmail-inject", auto_uido, auto_gidq, moder_x);
@@ -1588,7 +1592,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.242 2018-05-20 09:56:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.243 2018-05-21 07:22:37+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
