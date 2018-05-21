@@ -51,9 +51,6 @@ URL: http://sourceforge.net/indimail
 Source0: %{name}-%{version}.tar.gz
 
 BuildRequires: coreutils
-%if %build_on_obs == 1
-BuildRequires: libidn-devel
-%endif
 Requires: roundcubemail
 Requires: iwebadmin
 Requires: indimail >= 2.0
