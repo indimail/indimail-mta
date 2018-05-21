@@ -9,4 +9,4 @@ else
 fi
 ./configure --prefix=/usr --libdir=$libdir \
   --with-trust-anchor=/etc/indimail/certs/getdns-root.key \
-  --with-libevent --without-libidn --without-libidn2
+  --with-libevent --without-libidn --without-libidn2 $*
