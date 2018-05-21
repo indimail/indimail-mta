@@ -57,7 +57,6 @@ BuildRequires: elfutils
 %endif
 ##################################### OBS ####################################
 %if %build_on_obs == 1
-BuildRequires: libidn-devel
 %if 0%{?rhel_version} == 700
 BuildRequires: groff-doc
 %else
