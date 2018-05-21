@@ -122,6 +122,46 @@ va_dcl
 	}
 }
 
+char *
+get_tlsa_err_str(int err)
+{
+	switch (err)
+	{
+	case GETDNS_NO_ERR:
+		return ("No error");
+	case GETDNS_MEM_ERR:
+		return ("memory error");
+	case GETDNS_TIMEOUT_ERR:
+		return ("timeout error");
+	case GETDNS_CALLBACK_ERR:
+		return ("callback error");
+	case GETDNS_CALLBACKCANCEL_ERR:
+		return ("callback cancel error");
+	case GETDNS_NO_EXIST_DOMAIN_ERR:
+		return ("domain does not exist");
+	case GETDNS_NO_SECURE_ANSWER_ERR:
+		return ("no secure answers");
+	case GETDNS_ALL_BOGUS_ANSWER_ERR:
+		return ("all bogus answers");
+	case GETDNS_RES_INDETERMINATE_ERR:
+		return ("result indeterminate");
+	case GETDNS_BOGUS_OR_RES_INDETERMINATE_ERR:
+		return ("DNSSEC status of responses is bogus or indeterminate");
+	case GETDNS_DICT_RESPONSE_ERR:
+		return ("dictionary response error");
+	case GETDNS_DICT_ANSWER_ERR:
+		return ("dictionary answer error");
+	case GETDNS_ZERO_REPLY_ERR:
+		return ("zero reply error");
+	case GETDNS_DNSSEC_STATUS_ERR:
+		return ("dnssec status error");
+	case GETDNS_DNSSEC_INSECURE_ERR:
+		return ("dnssec insecure error");
+	default:
+		return ("unknown error");
+	}
+}
+
 static struct addrinfo *
 insert_addrinfo(struct addrinfo *current, struct addrinfo *new)
 {
@@ -272,6 +312,9 @@ cb_address(getdns_context *ctx, getdns_callback_type_t cb_type, getdns_dict *res
 		address_authenticated = 1;
 		v4_authenticated = 1;
 		v6_authenticated = 1;
+	} else {
+		cb_address_error = GETDNS_BOGUS_OR_RES_INDETERMINATE_ERR;
+		return;
 	}
 
 	if (getdns_dict_get_int(response, "status", &status)) {
@@ -577,6 +620,15 @@ cleanup:
 	return;
 }
 
+static void
+free_addr()
+{
+	if (addresses) {
+		freeaddrinfo(addresses);
+		addresses = (addrinf *) 0;
+	}
+}
+
 /*
  * do_dns_queries()
  * asynchronously dispatch address and TLSA queries & wait for results.
@@ -642,7 +694,7 @@ do_dns_queries(const char *hostname, uint16_t port, int recursive)
 		getdns_context_destroy(context);
 		return (1);
 	}
-
+	free_addr();
 	/*- TLSA Records lookup */
 	snprintf(domainstring, sizeof (domainstring), "_%d._tcp.%s", port, hostname);
 	qip.qname = domainstring;
@@ -942,5 +994,5 @@ do_mx_queries(const char *hostname, int recursive)
 	event_base_free(evb);
 	getdns_dict_destroy(extensions);
 	getdns_context_destroy(context);
-	return (cb_address_error);
+	return (cb_mx_error);
 }
