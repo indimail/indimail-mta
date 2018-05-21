@@ -1,5 +1,5 @@
 /*
- * $Log: qmail-dane.c,v $
+ * $Log: qmail-daned.c,v $
  * Revision 1.4  2018-05-13 21:34:29+05:30  Cprogrammer
  * renamed RECORD_STALE to RECORD_OLD
  *
@@ -1326,7 +1326,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-dane.c,v 1.4 2018-05-13 21:34:29+05:30 Cprogrammer Exp $";
+	static char    *x = "$Id: qmail-daned.c,v 1.4 2018-05-13 21:34:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
