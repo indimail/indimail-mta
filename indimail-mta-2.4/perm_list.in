@@ -191,7 +191,7 @@
 %attr(0751,root,qmail) @prefix@/sbin/qmail-todo
 %attr(0755,root,qmail) @prefix@/sbin/qmail-greyd
 %attr(0755,root,qmail) @prefix@/sbin/greydaemon
-%attr(0755,root,qmail) @prefix@/sbin/qmail-dane
+%attr(0755,root,qmail) @prefix@/sbin/qmail-daned
 %attr(0755,root,qmail) @prefix@/sbin/surblfilter
 %attr(0755,root,qmail) @prefix@/sbin/surblqueue
 %attr(0751,root,qmail) @prefix@/sbin/qmail-getpw
@@ -650,7 +650,7 @@
 %attr(0644,root,root) @mandir@/man8/qmail-dkim.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-getpw.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-greyd.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-dane.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-daned.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-inject.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-internals.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-local.8.gz
