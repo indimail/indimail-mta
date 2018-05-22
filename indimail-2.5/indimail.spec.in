@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.460 2018-05-15 12:57:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.461 2018-05-22 11:04:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -197,7 +197,7 @@ BuildRequires: xz
 BuildRequires: mysql-devel pam-devel
 
 %if %nocourierimap == 0
-BuildRequires: libidn-devel gdbm-devel
+BuildRequires: gdbm-devel
 %endif
 
 %if %{defined fedora_version}
@@ -209,12 +209,6 @@ BuildRequires: redhat-lsb
 
 %if %{undefined centos_version} && %{undefined rhel_version}
 BuildRequires: chrpath
-%endif
-
-%if 0%{?rhel_version} == 700
-BuildRequires: groff-doc
-%else
-BuildRequires: groff
 %endif
 
 %if %{undefined rhel_version}
