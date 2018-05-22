@@ -57,18 +57,10 @@ BuildRequires: elfutils
 %endif
 ##################################### OBS ####################################
 %if %build_on_obs == 1
-%if 0%{?rhel_version} == 700
-BuildRequires: groff-doc
-%else
-BuildRequires: groff
-%endif
-
 %if 0%{?suse_version}
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
 %endif
-%else
-BuildRequires: groff
 %endif
 ##############################################################################
 %if %build_on_obs == 0
