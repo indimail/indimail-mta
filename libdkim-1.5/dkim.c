@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.20  2018-05-22 10:03:26+05:30  Cprogrammer
+ * changed return type of writeHeader() to void
+ *
  * Revision 1.19  2016-03-01 16:23:38+05:30  Cprogrammer
  * added -S option to allow email with unsigned subject
  *
@@ -207,7 +210,7 @@ dkim_error(int e)
 /*
  * Allows you to add the headers contain the results and DKIM ADSP
  */
-int writeHeader(int ret, int resDKIMSSP, int resDKIMADSP, int useSSP, int useADSP )
+void writeHeader(int ret, int resDKIMSSP, int resDKIMADSP, int useSSP, int useADSP )
 {
 	char           *dkimStatus, *sspStatus, *adspStatus;
 
@@ -893,7 +896,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.19 2016-03-01 16:23:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.20 2018-05-22 10:03:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
