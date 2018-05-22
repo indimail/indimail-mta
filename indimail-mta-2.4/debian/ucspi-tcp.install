@@ -15,7 +15,7 @@ usr/sbin/udplogger /usr/sbin
 usr/bin/rblsmtpd /usr/bin
 usr/sbin/greydaemon /usr/sbin
 usr/sbin/qmail-greyd /usr/sbin
-usr/sbin/qmail-dane /usr/sbin
+usr/sbin/qmail-daned /usr/sbin
 usr/share/man/man1/tcpserver.1.gz /usr/share/man/man1
 usr/share/man/man1/udpclient.1.gz /usr/share/man/man1
 usr/share/man/man1/tcprules.1.gz /usr/share/man/man1
@@ -31,5 +31,5 @@ usr/share/man/man1/rblsmtpd.1.gz /usr/share/man/man1
 usr/share/man/man1/daneq.1.gz /usr/share/man/man1
 usr/share/man/man8/greydaemon.8.gz /usr/share/man/man8
 usr/share/man/man8/qmail-greyd.8.gz /usr/share/man/man8
-usr/share/man/man8/qmail-dane.8.gz /usr/share/man/man8
+usr/share/man/man8/qmail-daned.8.gz /usr/share/man/man8
 usr/share/man/man8/udplogger.8.gz /usr/share/man/man8
