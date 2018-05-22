@@ -39,7 +39,7 @@ BuildRequires: chkconfig
 ##################################### OBS ####################################
 %if %build_on_obs == 1
 %if 0%{?rhel_version} == 700
-BuildRequires: groff-doc
+BuildRequires: groff-base
 %else
 BuildRequires: groff
 %endif
