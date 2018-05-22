@@ -386,7 +386,7 @@ do
 done
 
 %changelog
-* Sun May 13 2017 14:34:34 +0530 mbhangui@gmail.com @version@-@release@
+* Tue May 22 2018 12:45:06 +0530 mbhangui@gmail.com 1.05--1.1%{?dist}
 Release 1.1 Start 11/04/2017
 1.  Added dnsgetroot
 2.  added str_diffn()
