@@ -11,13 +11,12 @@
 %global sysconfdir         @sysconfdir@
 %define debug_package %{nil}
 
-%if 0%{?opensuse_bs}
+%if %{defined _project}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
-%define fast_mode          1
 %else
+%define _project           local
 %define build_on_obs       0
-%define fast_mode          0
 %endif
 
 %if %build_on_obs == 1
