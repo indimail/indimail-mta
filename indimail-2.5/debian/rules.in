@@ -37,7 +37,6 @@ altermime_version=@altermime_version@
 ripmime_version=@ripmime_version@
 flash_version=@flash_version@
 mpack_version=@mpack_version@
-logalert_version=@logalert_version@
 fortune_version=@fortune_version@
 tcpserver_plugin=1
 rm=/bin/rm

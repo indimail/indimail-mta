@@ -15,7 +15,6 @@ altermime_version=@altermime_version@
 ripmime_version=@ripmime_version@
 flash_version=@flash_version@
 mpack_version=@mpack_version@
-logalert_version=@logalert_version@
 fortune_version=@fortune_version@
 #############
 noproxy=0
@@ -29,7 +28,7 @@ nopam_multi=0
 for i in indimail-"$version" courier-imap-"$courier_version" nssd-"$nssd_version" \
 	pam-multi-"$pam_multi_version" altermime-"$altermime_version" \
 	ripmime-"$ripmime_version" flash-"$flash_version" mpack-"$mpack_version" \
-	logalert-"$logalert_version" fortune-"$fortune_version" \
+	fortune-"$fortune_version" \
 	bogofilter-"$bogofilter_version" fetchmail-"$fetchmail_version"
 do
 	/bin/rm -rf $i
