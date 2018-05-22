@@ -1,4 +1,4 @@
-indimail-mta (2.4-6) unstable; urgency=low
+indimail-mta (2.4-7) unstable; urgency=low
 
   * svctool - added option to refresh services
   * moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
