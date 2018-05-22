@@ -34,6 +34,7 @@ mv=/bin/mv
 ####################################
 nodksignature=0
 noclamav=1
+nogetdns=1
 tcpserver_plugin=1
 dkimkeyfn=default
 
@@ -484,8 +485,12 @@ if [ -f ${libexecdir}/instcheck ] ; then
 	${libexecdir}/instcheck > /dev/null 2>&1
 fi
 
-if [ ! -f ${qsysconfdir}/certs/getdns-root.key ] ; then
-/usr/sbin/unbound-anchor -a /etc/indimail/certs/getdns-root.key || true
+if [ $nogetdns -eq 0 ] ; then
+	if [ -x /usr/sbin/unbound-anchor -a ! -f ${qsysconfdir}/certs/getdns-root.key ] ; then
+		/usr/sbin/unbound-anchor -a /etc/indimail/certs/getdns-root.key || true
+	else
+		echo "/usr/sbin/unbound-anchor: No such file for directory" 1>&2
+	fi
 fi
 
 #
