@@ -1,17 +1,20 @@
 #
 #
-# $Id: indium.spec.in,v 1.18 2018-05-21 18:01:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.19 2018-05-22 13:30:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
-%define _unpackaged_files_terminate_build 1
+%global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
 
 %if %{defined _project}
-# define to 1 if building on openSUSE build service
-%define build_on_obs       1
-%define fast_mode          1
+# define if building on openSUSE build service
+%global build_on_obs       1
+%global reconfigure_mode   0
+%global _verbose           1
 %else
+%define _project           local
 %define build_on_obs       0
-%define fast_mode          1
+%global reconfigure_mode   0
+%global _verbose           0
 %global _hardened_build    1
 %endif
 
@@ -21,7 +24,6 @@
 %define libexecdir         @libexecdir@
 %define sysconfdir         @sysconfdir@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
-%define _verbose           1
 %define tai_version        @version@
 %define fbsql_version      @version@
 %define bwidget_version    1.8.0
@@ -38,11 +40,7 @@
 Summary: TCL/TK based Administration GUI for IndiMail
 Name: indium
 Version: @version@
-%if %build_on_obs == 1
-Release: 1.<B_CNT>
-%else
-Release: 1.B_CCNT%{?dist}
-%endif
+Release: 1.1%{?dist}
 
 %if %build_on_obs == 1
 License: GPL-3.0+
@@ -148,12 +146,6 @@ if [ $ID -eq 0 ] ; then
 	fi
 fi
 
-if [ %{_verbose} -eq 0 ] ; then
-	DEVICE=/dev/null
-else
-	DEVICE=/dev/tty
-fi
-echo "Will send output to $DEVICE"
 #### Stupid Mandriva ######################
 %if 0%{?mandriva_version} > 2009
 %ifarch x86_64
@@ -166,7 +158,7 @@ echo "Will send output to $DEVICE"
 %endif
 
 cd %{name}-%{version}
-if [ %{fast_mode} -eq 0 ] ; then
+if [ %{reconfigure_mode} -eq 0 ] ; then
 if [ %{build_on_obs} -eq 0 ] ; then
 	echo "reconfiguring..."
 	autoreconf -fi
