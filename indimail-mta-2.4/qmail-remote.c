@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.113  2018-05-23 20:15:52+05:30  Cprogrammer
+ * added dane verification code
+ *
  * Revision 1.112  2018-05-01 01:42:57+05:30  Cprogrammer
  * indented code
  *
@@ -405,11 +408,20 @@
 #include "ssl_timeoutio.h"
 #include <openssl/x509v3.h>
 #include <openssl/x509.h>
+#include "hastlsa.h"
+#ifdef HASTLSA
+#include <netdb.h>
+#include <query-getdns.h> /*- danetlsa package */
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#else
+#warning "tlsa code not compiled"
+#endif /*- #ifdef HASTLSA */
 #include "auth_cram.h"
 #include "auth_digest_md5.h"
 #include "hastlsv1_1_client.h"
 #include "hastlsv1_2_client.h"
-#endif
+#endif /*- #ifdef TLS */
 
 #define EHLO 1
 #define HUGESMTPTEXT  5000
@@ -418,10 +430,6 @@
 
 #define PORT_SMTP     25 /*- silly rabbit, /etc/services is for users */
 #define PORT_QMTP     209
-
-#ifdef TLS
-int             tls_init();
-#endif
 
 unsigned long   port = PORT_SMTP;
 
@@ -467,13 +475,17 @@ char          **my_argv;
 int             my_argc;
 #ifdef TLS
 const char     *ssl_err_str = 0;
+stralloc        saciphers = { 0 }, tlsFilename = { 0 }, clientcert = { 0 };
+SSL_CTX        *ctx;
 #endif
+
 int             fdmoreroutes = -1;
 int             flagtcpto = 1;
 int             min_penalty = MIN_PENALTY;
 unsigned long   max_tolerance = MAX_TOLERANCE;
 stralloc        smtptext = { 0 };
 stralloc        smtpenv = { 0 };
+stralloc        helo_str = { 0 };
 
 /*- http://mipassoc.org/pipermail/batv-tech/2007q4/000032.html */
 #ifdef BATV
@@ -488,6 +500,11 @@ stralloc        nosigndoms = { 0 };
 struct constmap mapnosign;
 struct constmap mapnosigndoms;
 #endif
+
+#ifdef HASTLSA
+char           *do_tlsa = 0;
+#endif
+
 void            temp_nomem();
 
 void
@@ -523,7 +540,8 @@ my_error(char *s1, char *s2, char *s3)
 	substdio_flush(subfderr);
 }
 
-/*
+/*-
+ * run script defined by ONSUCCESS_REMOTE, ONFAILURE_REMOTE, ONTEMPORARY_REMOTE
  * succ  1 - success
  * succ  0 - perm failure
  * succ -1 - temp failure
@@ -624,14 +642,20 @@ zero()
 		_exit(0);
 }
 
-/*
+/*-
+ * RETURN VALUES:
  * succ  1 - success
  * succ  0 - perm failure
  * succ -1 - temp failure
+ * execute user definded script/executable using run_script()
  */
 void
 zerodie(char *s1, int succ)
 {
+	if (ssl) {
+		while (SSL_shutdown(ssl) == 0);
+		SSL_free(ssl);
+	}
 	zero();
 	substdio_flush(subfdoutsmall);
 	_exit(run_script(s1 ? s1[0] : 'Z', succ));
@@ -1141,7 +1165,6 @@ smtpcode()
 }
 
 saa             ehlokw = { 0 };	/*- list of EHLO keywords and parameters */
-
 int             maxehlokwlen = 0;
 
 unsigned long
@@ -1154,7 +1177,7 @@ ehlo()
 	if (ehlokw.len > maxehlokwlen)
 		maxehlokwlen = ehlokw.len;
 	ehlokw.len = 0;
-	if (protocol_t == 'q')		/* QMTP */
+	if (protocol_t == 'q')		/*- QMTP */
 		return 0;
 	substdio_puts(&smtpto, "EHLO ");
 	substdio_put(&smtpto, helohost.s, helohost.len);
@@ -1375,13 +1398,102 @@ match_partner(char *s, int len)
 	return 0;
 }
 
-/*
+/*-
  * don't want to fail handshake if certificate can't be verified
  */
 int
-verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
+verify_cb(int preverify_ok, X509_STORE_CTX *ctx)
 {
 	return 1;
+}
+
+void
+do_pkix(char *servercert)
+{
+	X509           *peercert;
+	STACK_OF(GENERAL_NAME) *gens;
+	int             r, i;
+	char           *t;
+
+	/*- PKIX */
+	if ((r = SSL_get_verify_result(ssl)) != X509_V_OK) {
+		t = (char *) X509_verify_cert_error_string(r);
+		if (!stralloc_copyb(&smtptext, "TLS unable to verify server with ", 33))
+			temp_nomem();
+		if (!stralloc_cats(&smtptext, servercert))
+			temp_nomem();
+		if (!stralloc_catb(&smtptext, ": ", 2))
+			temp_nomem();
+		if (!stralloc_cats(&smtptext, t))
+			temp_nomem();
+		tls_quit("ZTLS unable to verify server with ", servercert, ": ", t, 0);
+	}
+	if (!(peercert = SSL_get_peer_certificate(ssl))) {
+		if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
+			temp_nomem();
+		if (!stralloc_cats(&smtptext, partner_fqdn))
+			temp_nomem();
+		if (!stralloc_catb(&smtptext, ": no certificate provided", 25))
+			temp_nomem();
+		tls_quit("ZTLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
+	}
+
+	/*-
+	 * RFC 2595 section 2.4: find a matching name
+	 * first find a match among alternative names
+	 */
+	if ((gens = X509_get_ext_d2i(peercert, NID_subject_alt_name, 0, 0))) {
+		for (i = 0, r = sk_GENERAL_NAME_num(gens); i < r; ++i) {
+			const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
+			if (gn->type == GEN_DNS)
+				if (match_partner((char *) gn->d.ia5->data, gn->d.ia5->length))
+					break;
+		}
+		sk_GENERAL_NAME_pop_free(gens, GENERAL_NAME_free);
+	}
+
+	/*- no alternative name matched, look up commonName */
+	if (!gens || i >= r) {
+		stralloc        peer = { 0 };
+		X509_NAME      *subj = X509_get_subject_name(peercert);
+		if ((i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1)) >= 0) {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			X509_NAME_ENTRY *t;
+			t = X509_NAME_get_entry(subj, i);
+			ASN1_STRING    *s = X509_NAME_ENTRY_get_data(t);
+#else
+			const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
+#endif
+			if (s) {
+				peer.len = s->length;
+				peer.s = (char *) s->data;
+			}
+		}
+		if (peer.len <= 0) {
+			if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, partner_fqdn))
+				temp_nomem();
+			if (!stralloc_catb(&smtptext, ": certificate contains no valid commonName", 42))
+				temp_nomem();
+			tls_quit("ZTLS unable to verify server ", partner_fqdn, ": certificate contains no valid commonName", 0, 0);
+		}
+		if (!match_partner((char *) peer.s, peer.len)) {
+			if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, partner_fqdn))
+				temp_nomem();
+			if (!stralloc_catb(&smtptext, ": received certificate for ", 27))
+				temp_nomem();
+			if (!stralloc_cat(&smtptext, &peer))
+				temp_nomem();
+			if (!stralloc_0(&smtptext))
+				temp_nomem();
+			tls_quit("ZTLS unable to verify server ", partner_fqdn, ": received certificate for ", 0, &peer);
+		}
+	}
+	X509_free(peercert);
+	return;
 }
 
 /*
@@ -1393,20 +1505,36 @@ verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
  * 3. exits on error, if smtps == 1 and tls session did not succeed
  */
 int
-tls_init()
+tls_init(int pkix, int *needtlsauth, char **scert)
 {
-	int             code, i = 0, needtlsauth = 0;
-	const char     *ciphers;
-	char           *t;
-	SSL            *myssl;
-	SSL_CTX        *ctx;
-	stralloc        saciphers = { 0 }, tlsFilename = { 0 }, clientcert = { 0 };
+	int             code, i = 0, _needtlsauth = 0;
+	static char     ssl_initialized;
+	const char     *ciphers = 0;
+	char           *t, *servercert = 0;
+	static SSL     *myssl;
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	stralloc        ssl_option = { 0 };
-	int             method = 4;	/* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
+	int             method = 4;	/*- (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
 #endif
 	int             method_fail = 1;
 
+	if (needtlsauth)
+		*needtlsauth = 0;
+	if (scert)
+		*scert = 0;
+	/*- 
+	 * tls_init() gets called in smtp()
+	 * if smtp() returns for trying next mx
+	 * we need to re-initialize
+	 */
+	if (ctx) {
+		SSL_CTX_free(ctx);
+		ctx = (SSL_CTX *) 0;
+	}
+	if (myssl) {
+		SSL_free(myssl);
+		ssl = myssl = (SSL *) 0;
+	}
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
@@ -1437,16 +1565,14 @@ tls_init()
 #endif
 	if (!certdir && !(certdir = env_get("CERTDIR")))
 		certdir = auto_control;
-	if (!stralloc_copys(&tlsFilename, certdir))
+	if (!stralloc_copys(&clientcert, certdir))
 		temp_nomem();
-	if (!stralloc_catb(&tlsFilename, "/clientcert.pem", 15))
+	if (!stralloc_catb(&clientcert, "/clientcert.pem", 15))
 		temp_nomem();
-	if (!stralloc_0(&tlsFilename))
+	if (!stralloc_0(&clientcert))
 		temp_nomem();
-	if (access(tlsFilename.s, F_OK)) {
-		alloc_free(tlsFilename.s);
+	if (access(clientcert.s, F_OK))
 		return (0);
-	}
 	if (partner_fqdn) {
 		struct stat     st;
 		if (!stralloc_copys(&tlsFilename, certdir))
@@ -1460,7 +1586,9 @@ tls_init()
 		if (!stralloc_0(&tlsFilename))
 			temp_nomem();
 		if (stat(tlsFilename.s, &st)) {
-			needtlsauth = 0;
+			_needtlsauth = 0;
+			if (needtlsauth)
+				*needtlsauth = 0;
 			if (!stralloc_copys(&tlsFilename, certdir))
 				temp_nomem();
 			if (!stralloc_catb(&tlsFilename, "/notlshosts/", 12))
@@ -1469,44 +1597,44 @@ tls_init()
 				temp_nomem();
 			if (!stralloc_0(&tlsFilename))
 				temp_nomem();
-			if (!stat(tlsFilename.s, &st)) {
-				alloc_free(tlsFilename.s);
+			if (!stat(tlsFilename.s, &st))
 				return (0);
-			}
 			if (!stralloc_copys(&tlsFilename, certdir))
 				temp_nomem();
 			if (!stralloc_catb(&tlsFilename, "/tlshosts/exhaustivelist", 24))
 				temp_nomem();
 			if (!stralloc_0(&tlsFilename))
 				temp_nomem();
-			if (!stat(tlsFilename.s, &st)) {
-				alloc_free(tlsFilename.s);
+			if (!stat(tlsFilename.s, &st))
 				return (0);
-			}
-		} else
-			needtlsauth = 1;
+		} else {
+			*scert = servercert = tlsFilename.s;
+			_needtlsauth = 1;
+			if (needtlsauth)
+				*needtlsauth = 1;
+		}
 	}
 
 	if (!smtps) {
 		stralloc       *sa = ehlokw.sa;
 		unsigned int    len = ehlokw.len;
-		/* look for STARTTLS among EHLO keywords */
+
+		/*- look for STARTTLS among EHLO keywords */
 		for (; len && case_diffs(sa->s, "STARTTLS"); ++sa, --len);
 		if (!len) {
-			if (!needtlsauth) {
-				alloc_free(tlsFilename.s);
-				return 0;
-			}
+			if (!_needtlsauth)
+				return (0);
 			if (!stralloc_copyb(&smtptext, "No TLS achieved while ", 22))
 				temp_nomem();
-			if (!stralloc_cats(&smtptext, tlsFilename.s))
+			if (!stralloc_cats(&smtptext, servercert))
 				temp_nomem();
 			if (!stralloc_catb(&smtptext, " exists", 7))
 				temp_nomem();
 			tls_quit("ZNo TLS achieved while", tlsFilename.s, " exists", 0, 0);
 		}
 	}
-	SSL_library_init();
+	if (!ssl_initialized++)
+		SSL_library_init();
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	if (method == 2 && (ctx = SSL_CTX_new(SSLv23_client_method())))
 		method_fail = 0;
@@ -1531,12 +1659,14 @@ tls_init()
 #else /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
 	if ((ctx = SSL_CTX_new(TLS_client_method())))
 		method_fail = 0;
+	/*- SSL_OP_NO_SSLv3, SSL_OP_NO_TLSv1, SSL_OP_NO_TLSv1_1 and SSL_OP_NO_TLSv1_2 */
+	/*- POODLE Vulnerability */
+	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
 #endif /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
 	if (method_fail) {
-		if (!smtps && !needtlsauth) {
-			alloc_free(tlsFilename.s);
+		if (!smtps && !_needtlsauth) {
 			SSL_CTX_free(ctx);
-			return 0;
+			return (0);
 		}
 		t = (char *) ssl_error();
 		if (!stralloc_copyb(&smtptext, "TLS error initializing ctx: ", 28))
@@ -1564,41 +1694,33 @@ tls_init()
 		}
 	}
 
-	if (needtlsauth) {
-		if (!SSL_CTX_load_verify_locations(ctx, tlsFilename.s, NULL)) {
+	if (_needtlsauth) {
+		if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
 			t = (char *) ssl_error();
 			if (!stralloc_copyb(&smtptext, "TLS unable to load ", 19))
 				temp_nomem();
-			if (!stralloc_cats(&smtptext, tlsFilename.s))
+			if (!stralloc_cats(&smtptext, servercert))
 				temp_nomem();
 			if (!stralloc_catb(&smtptext, ": ", 2))
 				temp_nomem();
 			if (!stralloc_cats(&smtptext, t))
 				temp_nomem();
 			SSL_CTX_free(ctx);
-			tls_quit("ZTLS unable to load ", tlsFilename.s, ": ", t, 0);
+			tls_quit("ZTLS unable to load ", servercert, ": ", t, 0);
 		}
 		/*- set the callback here; SSL_set_verify didn't work before 0.9.6c */
 		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
 	}
 
 	/*- let the other side complain if it needs a cert and we don't have one */
-	if (!stralloc_copys(&clientcert, certdir))
-		temp_nomem();
-	if (!stralloc_catb(&clientcert, "/clientcert.pem", 15))
-		temp_nomem();
-	if (!stralloc_0(&clientcert))
-		temp_nomem();
 	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert.s))
 		SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert.s, SSL_FILETYPE_PEM);
-	alloc_free(clientcert.s);
-	myssl = SSL_new(ctx);
-	if (!myssl) {
+
+	if (!(myssl = SSL_new(ctx))) {
 		t = (char *) ssl_error();
-		if (!smtps && !needtlsauth) {
-			alloc_free(tlsFilename.s);
+		if (!smtps && !_needtlsauth) {
 			SSL_CTX_free(ctx);
-			return 0;
+			return (0);
 		}
 		if (!stralloc_copyb(&smtptext, "TLS error initializing ssl: ", 28))
 			temp_nomem();
@@ -1613,19 +1735,21 @@ tls_init()
 		substdio_putsflush(&smtpto, "STARTTLS\r\n");
 
 	/*- while the server is preparing a response, do something else */
-	if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1) {
-		SSL_free(myssl);
-		temp_control();
+	if (!ciphers) {
+		if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1) {
+			while (SSL_shutdown(myssl) == 0);
+			SSL_free(myssl);
+			temp_control();
+		}
+		if (saciphers.len) {
+			for (i = 0; i < saciphers.len - 1; ++i)
+				if (!saciphers.s[i])
+					saciphers.s[i] = ':';
+			ciphers = saciphers.s;
+		} else
+			ciphers = "DEFAULT";
 	}
-	if (saciphers.len) {
-		for (i = 0; i < saciphers.len - 1; ++i)
-			if (!saciphers.s[i])
-				saciphers.s[i] = ':';
-		ciphers = saciphers.s;
-	} else
-		ciphers = "DEFAULT";
 	SSL_set_cipher_list(myssl, ciphers);
-	alloc_free(saciphers.s);
 
 	/*- SSL_set_options(myssl, SSL_OP_NO_TLSv1); */
 	SSL_set_fd(myssl, smtpfd);
@@ -1633,11 +1757,11 @@ tls_init()
 	/*- read the response to STARTTLS */
 	if (!smtps) {
 		if (smtpcode() != 220) {
+			while (SSL_shutdown(myssl) == 0);
 			SSL_free(myssl);
-			if (!needtlsauth) {
-				alloc_free(tlsFilename.s);
-				return 0;
-			}
+			ssl = myssl = (SSL *) 0;
+			if (!_needtlsauth)
+				return (0);
 			if (!stralloc_copyb(&smtptext, "STARTTLS rejected while ", 24))
 				temp_nomem();
 			if (!stralloc_cats(&smtptext, tlsFilename.s))
@@ -1656,96 +1780,279 @@ tls_init()
 			temp_nomem();
 		tls_quit("ZTLS connect failed: ", t, 0, 0, 0);
 	}
-	if (needtlsauth) {
-		X509           *peercert;
-		STACK_OF(GENERAL_NAME) * gens;
-
-		int             r = SSL_get_verify_result(ssl);
-		if (r != X509_V_OK) {
-			t = (char *) X509_verify_cert_error_string(r);
-			if (!stralloc_copyb(&smtptext, "TLS unable to verify server with ", 33))
-				temp_nomem();
-			if (!stralloc_cats(&smtptext, tlsFilename.s))
-				temp_nomem();
-			if (!stralloc_catb(&smtptext, ": ", 2))
-				temp_nomem();
-			if (!stralloc_cats(&smtptext, t))
-				temp_nomem();
-			tls_quit("ZTLS unable to verify server with ", tlsFilename.s, ": ", t, 0);
-		}
-		if (!(peercert = SSL_get_peer_certificate(ssl))) {
-			if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
-				temp_nomem();
-			if (!stralloc_cats(&smtptext, partner_fqdn))
-				temp_nomem();
-			if (!stralloc_catb(&smtptext, ": no certificate provided", 25))
-				temp_nomem();
-			tls_quit("ZTLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
-		}
-
-		/*-
-		 * RFC 2595 section 2.4: find a matching name
-		 * first find a match among alternative names
-		 */
-		if ((gens = X509_get_ext_d2i(peercert, NID_subject_alt_name, 0, 0))) {
-			for (i = 0, r = sk_GENERAL_NAME_num(gens); i < r; ++i) {
-				const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
-				if (gn->type == GEN_DNS)
-					if (match_partner((char *) gn->d.ia5->data, gn->d.ia5->length))
-						break;
-			}
-			sk_GENERAL_NAME_pop_free(gens, GENERAL_NAME_free);
-		}
-
-		/*- no alternative name matched, look up commonName */
-		if (!gens || i >= r) {
-			stralloc        peer = { 0 };
-			X509_NAME      *subj = X509_get_subject_name(peercert);
-			i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
-			if (i >= 0) {
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-				X509_NAME_ENTRY *t;
-				t = X509_NAME_get_entry(subj, i);
-				ASN1_STRING    *s = X509_NAME_ENTRY_get_data(t);
-#else
-				const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
-#endif
-				if (s) {
-					peer.len = s->length;
-					peer.s = (char *) s->data;
-				}
-			}
-			if (peer.len <= 0) {
-				if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
-					temp_nomem();
-				if (!stralloc_cats(&smtptext, partner_fqdn))
-					temp_nomem();
-				if (!stralloc_catb(&smtptext, ": certificate contains no valid commonName", 42))
-					temp_nomem();
-				tls_quit("ZTLS unable to verify server ", partner_fqdn, ": certificate contains no valid commonName", 0, 0);
-			}
-			if (!match_partner((char *) peer.s, peer.len)) {
-				if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
-					temp_nomem();
-				if (!stralloc_cats(&smtptext, partner_fqdn))
-					temp_nomem();
-				if (!stralloc_catb(&smtptext, ": received certificate for ", 27))
-					temp_nomem();
-				if (!stralloc_cat(&smtptext, &peer))
-					temp_nomem();
-				if (!stralloc_0(&smtptext))
-					temp_nomem();
-				tls_quit("ZTLS unable to verify server ", partner_fqdn, ": received certificate for ", 0, &peer);
-			}
-		}
-		X509_free(peercert);
-	}
-	alloc_free(tlsFilename.s);
 	if (smtps && (code = smtpcode()) != 220)
 		quit("ZTLS Connected to ", " but greeting failed", code, -1);
-	return 1;
+	if (pkix && _needtlsauth) /*- 220 ready for tls */
+		do_pkix(servercert);
+	return (1);
 }
+
+#ifdef HASTLSA
+void
+tlsa_cleanup()
+{
+	if (addresses) {
+		freeaddrinfo(addresses);
+		addresses = (addrinf *) 0;
+	}
+	if (tlsa_rdata_list) {
+		free_tlsa(tlsa_rdata_list);
+		tlsa_rdata_list = (tlsa_rdata *) 0;
+	}
+}
+
+void
+tlsa_error(char *str)
+{
+	out("Z");
+	out(str);
+	out(": Unable to fetch TLSA RR. (#4.5.0)\n");
+	if (!stralloc_copys(&smtptext, str))
+		temp_nomem();
+	if (!stralloc_catb(&smtptext, ": Unable to fetch TLSA RR. (#4.5.0)", 35))
+		temp_nomem();
+	if (setsmtptext(0, protocol_t))
+		smtpenv.len = 0;
+	tlsa_cleanup();
+	zerodie("Z", -1);
+}
+
+stralloc temphost = { 0 };
+void
+get_tlsa_rr(char *mxhost, int port)
+{
+	int             err;
+
+	if (temphost.len && !str_diff(temphost.s, mxhost))
+		return;
+	if (!stralloc_copys(&temphost, mxhost) || !stralloc_0(&temphost))
+		temp_nomem();
+	if ((err = do_dns_queries(mxhost, port, 1)))
+		tlsa_error(get_tlsa_err_str(err));
+	else
+	if (!tlsa_rdata_list)
+		tlsa_cleanup();
+	return;
+}
+
+/*-
+ * USAGE
+ * 0, 1, 2, 3, 255
+ * 255 PrivCert
+ * 
+ * SELECTOR
+ * --------
+ * 0, 1, 255
+ * 255 PrivSel
+ * 
+ * Matching Type
+ * -------------
+ * 0, 1, 2, 255
+ * 255 PrivMatch
+ *
+ * Return Value
+ * 0   - match target certificate & payload data
+ * 1,2 - successful match
+ */
+stralloc        certData = { 0 };
+int
+tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, char **err_str )
+{
+	EVP_MD_CTX     *mdctx;
+	const EVP_MD   *md = 0;
+	BIO            *membio = 0;
+	EVP_PKEY       *pkey = 0;
+	X509           *xs = 0;
+	STACK_OF(X509) *sk;
+	static char     errbuf[256];
+	char            buffer[1024];
+	unsigned char   md_value[EVP_MAX_MD_SIZE];
+	unsigned char  *ptr, *cp;
+	int             i, len;
+	unsigned int    md_len;
+
+	if (!ssl)
+		return (-1);
+	switch (usage)
+	{
+	/*- Trust anchor */
+	case 0: /*- PKIX-TA(0) maps to DANE-TA(2) */
+		/*- flow through */
+	case 2: /*- DANE-TA(2) */
+		usage = 2;
+		break;
+	case 1: /*- PKIX-EE(1) maps to DANE-EE(3) */
+		/*- flow through */
+	case 3: /*- DANE-EE(3) */
+		usage = 3;
+		break;
+	default:
+		return (-2);
+	}
+	switch (selector) /*- match full certificate or subjectPublicKeyInfo */
+	{
+	case 0: /*- Cert(0) - match full certificate   data/SHA256fingerprint/SHA512fingerprint */
+		break;
+	case 1: /*- SPKI(1) - match subject public key data/SHA256fingerprint/SHA512fingerprint  */
+		break;
+	default:
+		return (-2);
+	}
+	switch (match_type) /*- sha256, sha512 */
+	{
+	case 0: /*- Full(0) - match full cert data or subjectPublicKeyInfo data */
+		break;
+	case 1: /*- SHA256(1) fingerprint - servers should publish this mandatorily */
+		md = EVP_get_digestbyname("sha256");
+		break;
+	case 2: /*- SHA512(2)  fingerprint - servers should not exclusively publish this */
+		md = EVP_get_digestbyname("sha512");
+		break;
+	default:
+		return (-2);
+	}
+	/*- SSL_ctrl(ssl, SSL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, servername); -*/
+	if (!(sk =  SSL_get_peer_cert_chain(ssl))) {
+		if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
+			temp_nomem();
+		if (!stralloc_cats(&smtptext, partner_fqdn))
+			temp_nomem();
+		if (!stralloc_catb(&smtptext, ": no certificate provided", 25))
+			temp_nomem();
+		tls_quit("ZTLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
+	}
+	/*- 
+	 * the server certificate is generally presented
+	 * as the first certificate in the stack along with
+	 * the remaining chain.
+	 * last certificate in the list is a trust anchor
+	 * 5.2.2.  Trust Anchor Digests and Server Certificate Chain
+	 * https://tools.ietf.org/html/rfc7671
+	 *
+	 * for Usage 2, check the last  certificate - sk_X509_value(sk, sk_509_num(sk) - 1)
+	 * for Usage 3, check the first certificate - sk_X509_value(sk, 0)
+	 */
+	/*- for (i = (usage == 2 ? 1 : 0); i < (usage == 2 ? sk_X509_num(sk) : 1); i++) -*/
+	i = (usage == 2 ? sk_X509_num(sk) - 1 : 0);
+	xs = sk_X509_value(sk, i);
+	/*- 
+	 * DANE Validation 
+	 * case 1 - match full certificate data
+	 * case 2 - match full subjectPublicKeyInfo data
+	 * case 3 - match  SHA512/SHA256 fingerprint of full certificate
+	 * case 4 - match  SHA512/SHA256 fingerprint of subjectPublicKeyInfo
+	 */
+	if (match_type == 0 && selector == 0) { /*- match full certificate data */
+		if (!(membio = BIO_new(BIO_s_mem()))) {
+			*err_str = ERR_error_string(ERR_get_error(), errbuf);
+			tls_quit("ZDANE unable to create membio: ", *err_str, 0, 0, 0);
+		}
+		if (!PEM_write_bio_X509(membio, xs)) {
+			*err_str = ERR_error_string(ERR_get_error(), errbuf);
+			tls_quit("ZDANE unable to create write to membio: ", *err_str, 0, 0, 0);
+		}
+		for (certData.len = 0;;) {
+			if (!BIO_gets(membio, buffer, sizeof(buffer) - 2))
+				break;
+			if (str_start(buffer, "-----BEGIN CERTIFICATE-----"))
+				continue;
+			if (str_start(buffer, "-----END CERTIFICATE-----"))
+				continue;
+			buffer[i = str_chr(buffer, '\n')] = 0;
+			if (!stralloc_cats(&certData, buffer))
+				temp_nomem();
+		}
+		if (!stralloc_0(&certData))
+			temp_nomem();
+		certData.len--;
+		BIO_free_all(membio);
+		if (!str_diffn(certData.s, certDataField, certData.len))
+			return (0);
+		return (1);
+	}
+	if (match_type == 0 && selector == 1) { /*- match full subjectPublicKeyInfo data */
+		if (!(membio = BIO_new(BIO_s_mem()))) {
+			*err_str = ERR_error_string(ERR_get_error(), errbuf);
+			tls_quit("ZDANE unable to create membio: ", *err_str, 0, 0, 0);
+		}
+		if (!(pkey = X509_get_pubkey(xs))) {
+			*err_str = ERR_error_string(ERR_get_error(), errbuf);
+			tls_quit("ZDANE unable to get pubkey: ", *err_str, 0, 0, 0);
+		}
+		if (!PEM_write_bio_PUBKEY(membio, pkey)) {
+			*err_str = ERR_error_string(ERR_get_error(), errbuf);
+			tls_quit("ZDANE unable to write pubkey to membio: ", *err_str, 0, 0, 0);
+		}
+		for (;;) {
+			if (!BIO_gets(membio, buffer, sizeof(buffer) - 2))
+				break;
+			if (str_start(buffer, "-----BEGIN PUBLIC KEY-----"))
+				continue;
+			if (str_start(buffer, "-----END PUBLIC KEY-----"))
+				continue;
+			buffer[i = str_chr(buffer, '\n')] = 0;
+			if (!stralloc_cats(&certData, buffer))
+				temp_nomem();
+		}
+		if (!stralloc_0(&certData))
+			temp_nomem();
+		certData.len--;
+		BIO_free_all(membio);
+		if (!str_diffn(certData.s, certDataField, certData.len))
+			return (0);
+		return (1);
+	}
+	/*- SHA512/SHA256 fingerprint of full certificate */
+	if ((match_type == 2 || match_type == 1) && selector == 0) {
+		if (!X509_digest(xs, md, md_value, &md_len))
+			tls_quit("ZTLS Unable go get peer cerficatte digest", 0, 0, 0, 0);
+		cp = (unsigned char *) bin2hexstring(md_value, md_len);
+		if (!str_diff(certDataField, (char *) cp)) {
+			free(cp);
+			return (0);
+		}
+		free(cp);
+		return (1);
+	}
+	/*- SHA512/SHA256 fingerprint of subjectPublicKeyInfo */
+	if ((match_type == 2 || match_type == 1) && selector == 1) {
+		unsigned char  *tmpbuf = (unsigned char *) 0;
+
+		if (!(mdctx = EVP_MD_CTX_new()))
+			temp_nomem();
+		if (!(pkey = X509_get_pubkey(xs)))
+			tls_quit("ZTLS Unable to get public key", 0, 0, 0, 0);
+		if (!EVP_DigestInit_ex(mdctx, md, NULL))
+			tls_quit("ZTLS Unable to initialize EVP Digest", 0, 0, 0, 0);
+		if ((len = i2d_PUBKEY(pkey, NULL)) < 0)
+			tls_quit("TLS failed to encode public key", 0, 0, 0, 0);
+		if (!(tmpbuf = (unsigned char *) OPENSSL_malloc(len * sizeof(char))))
+			temp_nomem();
+		ptr = tmpbuf;
+		if ((len = i2d_PUBKEY(pkey, &ptr)) < 0)
+			tls_quit("TLS failed to encode public key", 0, 0, 0, 0);
+		if (!EVP_DigestUpdate(mdctx, tmpbuf, len))
+			tls_quit("ZTLS Unable to update EVP Digest", 0, 0, 0, 0);
+		OPENSSL_free(tmpbuf);
+		if (!EVP_DigestFinal_ex(mdctx, md_value, &md_len))
+			tls_quit("ZTLS Unable to compute EVP Digest", 0, 0, 0, 0);
+		cp = (unsigned char *) bin2hexstring(md_value, md_len);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+		EVP_MD_CTX_free(mdctx);
+#else
+		EVP_MD_CTX_cleanup(mdctx);
 #endif
+		if (!str_diff(certDataField, (char *) cp)) {
+			free(cp);
+			return (0);
+		}
+		free(cp);
+		return (1);
+	}
+	return (1);
+}
+#endif /*- #ifdef HASTLSA */
+#endif /*- #ifdef TLS */
 
 stralloc        xuser = { 0 };
 stralloc        auth = { 0 };
@@ -1811,9 +2118,7 @@ mailfrom_xtext(int use_size)
 static char     hextab[] = "0123456789abcdef";
 stralloc        realm = { 0 }, nonce = { 0 }, digesturi = { 0 };
 
-/*
- * parse digest response 
- */
+/*- parse digest response */
 unsigned int
 scan_response(stralloc *dst, stralloc *src, const char *search)
 {
@@ -1827,20 +2132,20 @@ scan_response(stralloc *dst, stralloc *src, const char *search)
 	for (i = 0; src->len > i + slen; i += str_chr(x + i, ',') + 1) {
 		char           *s = x + i;
 		if (case_diffb(s, slen, (char *) search) == 0) {
-			s += slen;			/* skip name */
+			s += slen;			/*- skip name */
 			if (*s++ != '=')
-				return 0;		/* has to be here! */
-			if (*s == '"') {	/* var="value" */
+				return 0;		/*- has to be here! */
+			if (*s == '"') {	/*- var="value" */
 				s++;
 				len = str_chr(s, '"');
 				if (!len)
 					return 0;
 				if (!stralloc_catb(dst, s, len))
 					temp_nomem();
-			} else {			/* var=value */
+			} else {			/*- var=value */
 				len = str_chr(s, ',');
 				if (!len)
-					str_len(s);	/* should be the end */
+					str_len(s);	/*- should be the end */
 				if (!stralloc_catb(dst, s, len))
 					temp_nomem();
 			}
@@ -1864,7 +2169,7 @@ auth_digest_md5(int use_size)
 	substdio_flush(&smtpto);
 	if ((code = smtpcode()) != 334)
 		quit("ZConnected to ", " but authentication was rejected (AUTH DIGEST-MD5).", code, -1);
-	if ((i = str_chr(smtptext.s + 5, '\n')) > 0) {	/* Challenge */
+	if ((i = str_chr(smtptext.s + 5, '\n')) > 0) {	/*- Challenge */
 		slop.len = 0;
 		if (!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
 			temp_nomem();
@@ -1997,7 +2302,7 @@ auth_cram(int type, int use_size)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-RIPEMD).", code, -1);
 		break;
 	}
-	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) {	/* Challenge */
+	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) {	/*- Challenge */
 		if (!stralloc_copys(&slop, ""))
 			temp_nomem();
 		if (!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
@@ -2022,7 +2327,7 @@ auth_cram(int type, int use_size)
 		break;
 	}
 
-	for (j = 0, e = encrypted; j < iter; j++) {	/* HEX => ASCII */
+	for (j = 0, e = encrypted; j < iter; j++) {	/*- HEX => ASCII */
 		*e = hextab[digest[j] / 16];
 		++e;
 		*e = hextab[digest[j] % 16];
@@ -2031,11 +2336,11 @@ auth_cram(int type, int use_size)
 	*e = 0;
 
 	if (!stralloc_copy(&slop, &user))
-		temp_nomem();			/* user-id */
+		temp_nomem();			/*- user-id */
 	if (!stralloc_catb(&slop, " ", 1))
 		temp_nomem();
 	if (!stralloc_cats(&slop, (char *) encrypted))
-		temp_nomem();			/* digest */
+		temp_nomem();			/*- digest */
 
 	if (b64encode(&slop, &auth))
 		quit("ZConnected to ", " but unable to base64encode username+digest.", -1, -1);
@@ -2297,7 +2602,7 @@ qmtp(stralloc *h, char *ip, int port)
 	substdio_put(&smtpto, ":\n", 2);
 	while (len > 0) {
 		if ((n = substdio_feed(&ssin)) <= 0)
-			_exit(32);			/* wise guy again */
+			_exit(32);	/*- wise guy again */
 		x = substdio_PEEK(&ssin);
 		substdio_put(&smtpto, x, n);
 		substdio_SEEK(&ssin, n);
@@ -2364,7 +2669,7 @@ qmtp(stralloc *h, char *ip, int port)
 		if (smtptext.s[0] == 'D') {
 			out("h");
 			flagallok = 0;
-		} else {				/* if (smtptext.s[0] == 'Z') */
+		} else {				/*- if (smtptext.s[0] == 'Z') */
 			out("s");
 			flagallok = -1;
 		}
@@ -2385,14 +2690,18 @@ qmtp(stralloc *h, char *ip, int port)
 	}
 }
 
-stralloc        helo_str = { 0 };
-
 void
 smtp()
 {
 	unsigned long   code;
 	int             flagbother;
 	int             i, use_size = 0, is_esmtp = 1;
+#ifdef HASTLSA
+    char           *cp, *err_str = 0, *servercert = 0;
+	int             tlsa_status, authfullMatch, authsha256, authsha512,
+					match0Or512, needtlsauth, usage;
+    tlsa_rdata     *rp;
+#endif
 
 	inside_greeting = 1;
 #ifdef TLS
@@ -2410,7 +2719,7 @@ smtp()
 		quit("DConnected to ", " but greeting failed", code, 1);
 	else
 	if (code >= 400 && code < 500)
-		return;					/* try next MX, see RFC-2821 */
+		return;		/*- try next MX, see RFC-2821 */
 	else
 	if (code != 220)
 		quit("ZConnected to ", " but greeting failed", code, -1);
@@ -2422,8 +2731,60 @@ smtp()
  	 * extensions); at the same time, it does not prohibit a server
  	 * to reject the EHLO and make us fallback to HELO
  	 */
-	if (tls_init())
+#ifdef HASTLSA
+	if (do_tlsa) {
+		if (tlsa_count && tlsa_rdata_list) { /*- do DANE validation */
+			match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
+			if (!tls_init(0, &needtlsauth, &servercert)) /*- tls is needed for DANE */
+				quit("ZConnected to ", " but unable to intiate TLS for DANE", 530, -1);
+        	for (usage = -1, rp = tlsa_rdata_list; rp; rp = rp->next) {
+				if (!rp->mtype || rp->mtype == 2)
+					match0Or512 = 1;
+				cp = bin2hexstring(rp->data, rp->data_len);
+				if (!(tlsa_status = tlsa_vrfy_records(cp, rp->usage, rp->selector, rp->mtype, &err_str))) {
+					switch(rp->mtype)
+					{
+					case 0:
+						authfullMatch = 1;
+						break;
+					case 1:
+						authsha256 = 1;
+						break;
+					case 2:
+						authsha512 = 1;
+						break;
+					}
+				}
+            	free(cp);
+				if (!rp->usage || rp->usage == 2)
+					usage = 2;
+				if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
+					break;
+        	} /*- for (rp = tlsa_rdata_list; rp != NULL; rp = rp->next) */
+			tlsa_cleanup(); /*- free addresses, tlsa_rdata_list */
+			/*-
+			 * client SHOULD accept a server public key that
+			 * matches either the "3 1 0" record or the "3 1 2" record, but it
+			 * SHOULD NOT accept keys that match only the weaker "3 1 1" record.
+			 * 9.  Digest Algorithm Agility
+			 * https://tools.ietf.org/html/rfc7671
+			 */
+			if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512))) {
+				if (needtlsauth && (!usage || usage == 2))
+					do_pkix(servercert);
+				code = ehlo();
+			} else /*- dane validation failed */
+				quit("DConnected to ", " but recpient failed DANE validation", 534, 1);
+		}  else
+		if (tls_init(1, 0, 0))
+			code = ehlo();
+	} else /*- no tlsa rr records */
+	if (tls_init(1, 0, 0))
 		code = ehlo();
+#else
+	if (tls_init(1, 0, 0))
+		code = ehlo();
+#endif
 #else
 	code = ehlo();
 #endif
@@ -2584,7 +2945,7 @@ getcontrols()
 		temp_control();
 	if (control_rldef(&helohost, "helohost", 1, (char *) 0) != 1)
 		temp_control();
-	if ((routes = env_get("QMTPROUTE"))) {	/* mysql */
+	if ((routes = env_get("QMTPROUTE"))) {	/*- mysql */
 		if (!stralloc_copyb(&qmtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
 		cntrl_stat2 = 2;
@@ -2607,7 +2968,7 @@ getcontrols()
 		break;
 	}
 	routes = (routes = env_get("SMTPROUTE")) ? routes : env_get("X-SMTPROUTES");
-	if (routes) {				/* mysql or X-SMTPROUTES from header */
+	if (routes) {				/*- mysql or X-SMTPROUTES from header */
 		if (!stralloc_copyb(&smtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
 		cntrl_stat1 = 2;
@@ -2686,9 +3047,7 @@ getcontrols()
 		if (!stralloc_copys(&outgoingip, x))
 			temp_nomem();
 		r = 1;
-	} else {
-/*- per recipient domain outgoingip */
-
+	} else { /*- per recipient domain outgoingip */
 		if (!stralloc_copys(&outgoingipfn, "outgoingip."))
 			temp_nomem();
 		else
@@ -2816,7 +3175,7 @@ sign_batv()
 
 	if (stralloc_starts(&sender, "prvs="))
 		return;	/*- already signed */
-	if (stralloc_starts(&sender, "sb*-")) {	/* don't sign this */
+	if (stralloc_starts(&sender, "sb*-")) {	/*- don't sign this */
 		sender.len -= 4;
 		byte_copy(sender.s, sender.len, sender.s + 4);
 		return;
@@ -2953,7 +3312,7 @@ main(int argc, char **argv)
 	relayhost = lookup_host(*recips, str_len(*recips));
 	min_penalty = (x = env_get("MIN_PENALTY")) ? scan_int(x, &min_penalty) : MIN_PENALTY;
 	max_tolerance = (x = env_get("MAX_TOLERANCE")) ? scan_ulong(x, &max_tolerance) : MAX_TOLERANCE;
-	if (sender.len == 0) {		/* bounce routes */
+	if (sender.len == 0) {		/*- bounce routes */
 		if (!stralloc_copys(&bounce, "!@"))
 			temp_nomem();
 		if ((relayhost = constmap(&mapqmtproutes, bounce.s, bounce.len))) {
@@ -3008,7 +3367,7 @@ main(int argc, char **argv)
 				j = str_chr(relayhost + i + 1, ' ');
 				if (relayhost[i + j + 1]) { /*- if password is present */
 					relayhost[i + j + 1] = 0;
-					if (relayhost[i + 1] && relayhost[i + j + 2]) {	/* both user and password are present */
+					if (relayhost[i + 1] && relayhost[i + j + 2]) {	/*- both user and password are present */
 						if (!stralloc_copys(&user, relayhost + i + 1))
 							temp_nomem();
 						if (!stralloc_copys(&pass, relayhost + i + j + 2))
@@ -3029,10 +3388,10 @@ main(int argc, char **argv)
 			if (relayhost[i + 1]) {
 				if (relayhost[i + 1] == ':')
 					port = PORT_SMTP;
-				else			/* port is present */
+				else			/*- port is present */
 					scan_ulong(relayhost + i + 1, &port);
 				relayhost[i] = 0;
-				x = relayhost + i + 1;	/* port */
+				x = relayhost + i + 1;	/*- port */
 				i = str_chr(x, ':'); /*- : before min_penalty */
 				if (x[i]) {
 					if (x[i + 1] != ':')	 /*- if penalty figure is present */
@@ -3058,9 +3417,9 @@ main(int argc, char **argv)
 		int             j;
 
 		if (!stralloc_0(&sender))
-			temp_nomem();		/* null terminate */
+			temp_nomem();		/*- null terminate */
 		sender.len--;
-		i = str_rchr(*recips, '@');	/* should check all recips, not just the first */
+		i = str_rchr(*recips, '@');	/*- should check all recips, not just the first */
 		j = str_rchr(sender.s, '@');
 		if (!constmap(&mapnosign, *recips + i + 1, str_len(*recips + i + 1))
 			&& !constmap(&mapnosigndoms, sender.s + j + 1, sender.len - (j + 1)))
@@ -3143,6 +3502,10 @@ main(int argc, char **argv)
 			j += ip4_fmt(x + j, &ip.ix[i].addr.ip);
 			x[j++] = ',';
 			x[j] = 0;
+#ifdef HASTLSA
+			if (!relayhost && (do_tlsa = env_get("DANE_VERIFICATION")))
+				get_tlsa_rr(ip.ix[i].fqdn, port); /*- get_tlsa_rr() function will exit on error */
+#endif
 			for (;;) {
 				if (!timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconnect)) {
 					if (flagtcpto)	   /*- clear the error */
@@ -3202,7 +3565,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.112 2018-05-01 01:42:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.113 2018-05-23 20:15:52+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
