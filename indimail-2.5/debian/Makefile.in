@@ -15,7 +15,7 @@ mysql_prefix=@mysql_prefix@
 mysql_incdir=@mysql_incdir@
 mysql_libdir=@mysql_libdir@
 defaultdomain=@defaultdomain@
-release := $(shell head -1 changelog.in | awk '{print $2}' | cut -d'-' -f2 | cut -c-1)
+release := $(shell head -1 changelog.in | awk '{print $$2}' | cut -d'-' -f2 | cut -c-1)
 version=@version@
 prefix=@prefix@
 #
@@ -47,7 +47,7 @@ pkgconfigdir=@prefix@/lib/pkgconfig
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep gen_control indimail.install indimail.dsc indimail-Debian_9.0.dsc \
 indimail-devel32 indimail-devel64 libindimail32 libindimail64 indimail-devel.postinst \
-indimail-devel.postrm \
+indimail-devel.postrm indimail-xUbuntu_18.04.dsc \
 debian.tar.gz dummy.tar.gz
 
 install: all
@@ -151,6 +151,9 @@ indimail.dsc: indimail.dsc.in Makefile changelog.in
 	$(edit) $@.in > $@.tmp; \
 	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile changelog.in
 	$(edit) $@.in > $@.tmp; \
 	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
