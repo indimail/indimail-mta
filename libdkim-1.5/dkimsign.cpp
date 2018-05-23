@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.12  2018-05-23 13:07:58+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.11  2017-09-05 10:59:03+05:30  Cprogrammer
  * removed compiler warnings
  *
@@ -775,20 +778,18 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 		dptr = sDomain.c_str();
 		for (sptr = ptr, len = 0;*sptr;sptr++) {
 			if (*sptr == '%')
-				len += (int) strlen(dptr);
+				len += (int) strlen(dptr) + 1;
 			else
 				len++;
 		}
-		if (!(buf = new char[len])) {
+		if (!(buf = new char[len]))
 			return DKIM_OUT_OF_MEMORY;
-		}
 		for (cptr = buf, sptr = ptr; *sptr; sptr++) {
 			if (*sptr == '%') {
-				strncpy(cptr, dptr, (len = strlen(dptr)));
+				memcpy(cptr, dptr, (len = strlen(dptr)));
 				cptr += len;
-			} else {
+			} else
 				*cptr++ = *sptr;
-			}
 		}
 		*cptr = 0;
 		sSelector.assign(buf);
@@ -1010,7 +1011,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.11 2017-09-05 10:59:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.12 2018-05-23 13:07:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
