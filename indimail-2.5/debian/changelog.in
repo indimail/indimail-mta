@@ -1,4 +1,4 @@
-indimail (@version@-8) unstable; urgency=low
+indimail (@version@-6) unstable; urgency=low
 
   * moved qmail-newmrh, qmail-remote, qmail-newu, qmail-cdb to sbin
   * changed data type to TIMESTAMP from DATETIME for timestamp column in hostcntrl, lastauth
