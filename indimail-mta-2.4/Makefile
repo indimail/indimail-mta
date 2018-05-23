@@ -5650,9 +5650,12 @@ byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
 alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
 sig_block.o sig_catch.o now.o byte_zero.o str_cpyb.o \
-ipalloc.o dns.o dnsdoe.o strsalloc.o \
+ipalloc.o dns.o dnsdoe.o strsalloc.o timeoutread.o \
+timeoutwrite.o case_diffs.o str_start.o socket_tcp.o \
+socket_tcp6.o ndelay.o ndelay_off.o timeoutconn.o \
+socket_ip4loopback.o socket_v6loopback.o \
 MakeArgs.o wait_pid.o substdio.a stralloc.a tlsa.lib \
-dns.lib
+dns.lib tls.lib
 	./load qmail-daned sgetopt.o subgetopt.o auto_control.o \
 	error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
 	str_len.o str_cpy.o str_chr.o str_diff.o str_diffn.o \
@@ -5663,17 +5666,21 @@ dns.lib
 	alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 	cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
 	sig_block.o sig_catch.o now.o byte_zero.o str_cpyb.o \
-	ipalloc.o dns.o dnsdoe.o strsalloc.o \
-	MakeArgs.o wait_pid.o substdio.a stralloc.a `cat dns.lib tlsa.lib` -lm
+	ipalloc.o dns.o dnsdoe.o strsalloc.o timeoutread.o \
+	timeoutwrite.o case_diffs.o str_start.o socket_tcp.o \
+	socket_tcp6.o ndelay.o ndelay_off.o timeoutconn.o \
+	socket_ip4loopback.o socket_v6loopback.o \
+	MakeArgs.o wait_pid.o substdio.a stralloc.a \
+	`cat dns.lib tls.lib tlsa.lib` -lm
 
 qmail-daned.o: \
 compile qmail-daned.c sgetopt.h auto_qmail.h \
 fmt.h str.h subfd.h byte.h strerr.h scan.h getln.h \
 env.h stralloc.h constmap.h control.h error.h \
 uint32.h open.h variables.h sig.h haveip6.h \
-haveip6.h conf-ip conf-tls auto_control.h wait.h \
-tlsacheck.h dns.h dnsdoe.h ip.h ipalloc.h now.h \
-hastlsa.h
+haveip6.h auto_control.h wait.h tlsacheck.h \
+dns.h dnsdoe.h ip.h ipalloc.h now.h \
+hastlsa.h conf-ip conf-tls
 	./compile -I../danetlsa-$(DANE_VERSION) -DDYNAMIC_BUF \
 		`grep -h -v "^#" conf-ip conf-tls` qmail-daned.c
 
