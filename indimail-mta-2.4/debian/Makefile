@@ -7,6 +7,7 @@ servicedir=/service
 mandir=$(prefix)/share/man
 libexecdir=$(prefix)/libexec/indimail
 shareddir=$(prefix)/share/indimail
+release=$(shell head -1 changelog |awk '{print $$2}'|cut -d'-' -f2|cut -c-1)
 logdir=/var/log/svc
 
 libdkim_version=1.5
@@ -19,7 +20,7 @@ indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst \
 obs_deb_prep indimail-mta.install \
 indimail-mta.dsc indimail-mta-Debian_9.0.dsc \
-debian.tar.gz dummy.tar.gz
+indimail-mta-xUbuntu_18.04.dsc debian.tar.gz dummy.tar.gz
 
 #bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
 bits=32
@@ -40,6 +41,7 @@ edit = sed \
 	-e 's,@acl_libdirstem\@,$(acl_libdirstem),g' \
 	-e 's,@libdkim_version\@,$(libdkim_version),g' \
 	-e 's,@libsrs2_version\@,$(libsrs2_version),g' \
+	-e 's,@release\@,$(release),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 install: all
@@ -52,7 +54,7 @@ indimail-mta.install: indimail-mta.install.in Makefile
 clean:
 	/bin/rm -f rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
-	indimail-mini.postinst \
+	indimail-mini.postinst *.dsc \
 	indimail-mta.install indimail-mta.postinst obs_deb_prep debian.tar.gz dummy.tar.gz
 
 noinst_SCRIPTS = indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
@@ -73,9 +75,11 @@ obs_deb_prep: obs_deb_prep.in Makefile
 	$(edit) $@.in > $@
 rules: rules.in Makefile
 	$(edit) $@.in > $@
-indimail-mta.dsc: indimail-mta.dsc.in Makefile
+indimail-mta.dsc: indimail-mta.dsc.in Makefile changelog
 	$(edit) $@.in > $@
-indimail-mta-Debian_9.0.dsc: indimail-mta-Debian_9.0.dsc.in Makefile
+indimail-mta-Debian_9.0.dsc: indimail-mta-Debian_9.0.dsc.in Makefile changelog
+	$(edit) $@.in > $@
+indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile changelog
 	$(edit) $@.in > $@
 indimail-mta.postrm: indimail-mta.postrm.in Makefile
 	$(edit) $@.in > $@
