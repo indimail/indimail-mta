@@ -1,5 +1,8 @@
 /*
  * $Log: substdio.h,v $
+ * Revision 1.6  2018-05-24 16:23:49+05:30  Cprogrammer
+ * added subsdio_discard() function to discard unflushed data
+ *
  * Revision 1.5  2008-09-16 08:25:54+05:30  Cprogrammer
  * added substdio_putalign
  *
@@ -31,6 +34,7 @@ substdio;
 
 void            substdio_fdbuf(substdio *, ssize_t (*op) (), int, char *, int);
 int             substdio_flush(substdio *);
+void            substdio_discard(substdio *);
 int             substdio_putalign(substdio *,char *,unsigned int);
 int             substdio_put(substdio *, char *, int);
 int             substdio_bput(substdio *, char *, int);
