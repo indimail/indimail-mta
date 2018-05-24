@@ -27,5 +27,7 @@ indimail-mta (2.4-7) unstable; urgency=low
   * added foxhole_all.cdb for banned extensions in clamav
   * svctool option --config=foxhole for creating foxhole_all.cdb
   * BUG - do_scan.c - break out of loop if file extension matches a line in badext
+  * qmail-remote, qmail-daned - added dane verification code using getdns
+  * substdo.c - added subsdio_discard() function to discard unflushed data
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 18 May 2018 17:59:16 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 24 May 2018 16:25:27 +0530

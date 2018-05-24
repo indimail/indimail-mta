@@ -1,6 +1,6 @@
-DATE: Thu Apr 26 14:40:06 IST 2018
+DATE: Thu May 24 16:25:07 IST 2018
 
-Announcing Release 2.4 of indimail-mta
+Announcing Release 2.5 of indimail-mta
 
 Following are the main features of this release
 
@@ -24,6 +24,8 @@ o qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
 o added foxhole_all.cdb for banned extensions in clamav
 o BUG - do_scan.c - break out of loop if file extension matches a line in badext
 o dnsmxip - print host along with ip
+o qmail-remote, qmail-daned - added dane verification code using getdns
+o substdo.c - added subsdio_discard() function to discard unflushed data
 
 indimail-mta has RPM / DEB / yum / apt repository for most of the
 Linux Distros at
