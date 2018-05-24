@@ -1,5 +1,8 @@
 /*
  * $Log: substdo.c,v $
+ * Revision 1.6  2018-05-24 16:23:19+05:30  Cprogrammer
+ * added subsdio_discard() function to discard unflushed data
+ *
  * Revision 1.5  2014-01-29 14:04:26+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -41,6 +44,14 @@ allwrite(op, fd, buf, len)
 		len -= w;
 	}
 	return 0;
+}
+
+void
+substdio_discard(s)
+	register substdio *s;
+{
+	s->p = 0;
+	return;
 }
 
 int
@@ -174,7 +185,7 @@ substdio_putsflush(s, buf)
 void
 getversion_substdo_c()
 {
-	static char    *x = "$Id: substdo.c,v 1.5 2014-01-29 14:04:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: substdo.c,v 1.6 2018-05-24 16:23:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
