@@ -1,8 +1,0 @@
-usr/include/getdns/* /usr/include/getdns
-usr/lib/libgetdns.a /usr/lib
-usr/lib/libgetdns_ext_event.a /usr/lib
-usr/lib/pkgconfig/getdns.pc /usr/lib
-usr/lib/pkgconfig/getdns_ext_event.pc /usr/lib
-usr/lib/libgetdns.so /usr/lib
-usr/lib/libgetdns_ext_event.so /usr/lib
-usr/share/man/man3/* /usr/share/man/man3
