@@ -1,7 +1,6 @@
 # Don't edit Makefile! Use conf-* for configuration.
 COFLAGS=-z+05:30
 DKIM_VERSION=1.5
-DANE_VERSION=1.0
 SRS_VERSION=1.0.18
 QMAILDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
 SYSTEM := $(shell uname -s)
@@ -2421,20 +2420,16 @@ dk-filter.8: dk-filter.9 conf-prefix conf-sysconfdir
 	> dk-filter.8
 
 hastlsa.h: trytlsa.c compile load conf-tls conf-tlsa tlsa.lib
-	( ( ./compile -I../danetlsa-$(DANE_VERSION) \
-	`grep -h -v "^#" conf-tlsa conf-tls` trytlsa.c && \
-	./load trytlsa `cat tlsa.lib`) >/dev/null 2>&1 \
+	( ( ./compile `grep -h -v "^#" conf-tlsa conf-tls` \
+	trytlsa.c && ./load trytlsa `cat tlsa.lib`) >/dev/null 2>&1 \
 	&& (echo \#define HASTLSA 1) || exit 0 ) > hastlsa.h
 	rm -f trytlsa.o trytlsa
 
 tlsa.lib: \
 trytlsa.c conf-tlsa
-	( ( ./compile -I../danetlsa-$(DANE_VERSION) \
-	`grep -h -v "^#" conf-tlsa conf-tls` trytlsa.c && \
-	./load trytlsa -L../danetlsa-$(DANE_VERSION)/.libs \
-	-L../danetlsa-$(DANE_VERSION) -ldanetlsa) >/dev/null 2>&1 \
-	&& echo "-L../danetlsa-$(DANE_VERSION)/.libs \
-	-L../danetlsa-$(DANE_VERSION) -ldanetlsa" || exit 0 ) > tlsa.lib
+	( ( ./compile `grep -h -v "^#" conf-tlsa conf-tls` \
+	trytlsa.c && ./load trytlsa -ltlsarr) >/dev/null 2>&1 \
+	&& echo "-ltlsarr" || exit 0 ) > tlsa.lib
 	rm -f trytlsa.o.o trytlsa
 
 qnotify.1: qnotify.9 conf-qmail conf-sysconfdir
@@ -2487,7 +2482,7 @@ timeoutwrite.h env.h uint32.h haveip6.h socket.h variables.h \
 byte.h fmt.h conf-tls conf-ip conf-batv conf-mxps wait.h \
 hastlsv1_1_client.h hastlsv1_2_client.h \
 auth_digest_md5.h auto_control.h hastlsa.h
-	./compile -I../danetlsa-$(DANE_VERSION) `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
+	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
 
 qmail-rspawn: \
 load qmail-rspawn.o spawn.o tcpto_clean.o now.o coe.o get_uid.o sig.a open.a \
@@ -5681,8 +5676,8 @@ uint32.h open.h variables.h sig.h haveip6.h \
 haveip6.h auto_control.h wait.h tlsacheck.h \
 dns.h dnsdoe.h ip.h ipalloc.h now.h \
 hastlsa.h conf-ip conf-tls
-	./compile -I../danetlsa-$(DANE_VERSION) -DDYNAMIC_BUF \
-		`grep -h -v "^#" conf-ip conf-tls` qmail-daned.c
+	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls` \
+	qmail-daned.c
 
 tlsacheck.o: \
 compile tlsacheck.c haveip6.h stralloc.h ip.h fmt.h byte.h \
@@ -6098,7 +6093,6 @@ byte_copy.o alloc.o alloc_re.o stralloc.a str_diffn.o error.o str_len.o
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o generic.so generic.o wait_pid.o \
 	envread.o auto_scancmd.o MakeArgs.o byte_copy.o alloc.o \
 	alloc_re.o stralloc.a str_diffn.o error.o str_len.o; fi
-#	$(LD) -G -Bdynamic -o generic.so generic.o wait_pid.o \
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in

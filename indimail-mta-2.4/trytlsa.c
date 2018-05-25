@@ -1,8 +1,8 @@
-#include "query-getdns.h"
+#include "tlsaquery.h"
 int main()
 {
 #if defined(HASTLSA) && defined(TLS)
-	do_dns_queries("ietf.org", 25, 1);
+	do_dns_query("mail.ietf.org", 25);
 #else
 	:
 #endif
