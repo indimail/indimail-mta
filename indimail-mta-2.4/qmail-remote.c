@@ -1,5 +1,11 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.115  2018-05-25 08:41:09+05:30  Cprogrammer
+ * renamed do_dns_query() to do_tlsa_query()
+ *
+ * Revision 1.114  2018-05-25 08:34:01+05:30  Cprogrammer
+ * removed getdns
+ *
  * Revision 1.113  2018-05-23 20:15:52+05:30  Cprogrammer
  * added dane verification code
  *
@@ -411,7 +417,7 @@
 #include "hastlsa.h"
 #ifdef HASTLSA
 #include <netdb.h>
-#include <query-getdns.h> /*- danetlsa package */
+#include <querytlsa.h> /*- danetlsa package */
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #else
@@ -1827,7 +1833,7 @@ get_tlsa_rr(char *mxhost, int port)
 		return;
 	if (!stralloc_copys(&temphost, mxhost) || !stralloc_0(&temphost))
 		temp_nomem();
-	if ((err = do_dns_queries(mxhost, port, 1)))
+	if ((err = do_tlsa_query(mxhost, port, 1)))
 		tlsa_error(get_tlsa_err_str(err));
 	else
 	if (!tlsa_rdata_list)
@@ -3565,7 +3571,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.113 2018-05-23 20:15:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.115 2018-05-25 08:41:09+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
