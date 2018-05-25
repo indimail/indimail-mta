@@ -2,7 +2,7 @@
 int main()
 {
 #if defined(HASTLSA) && defined(TLS)
-	do_dns_query("mail.ietf.org", 25);
+	do_tlsa_query("mail.ietf.org", 25);
 #else
 	:
 #endif
