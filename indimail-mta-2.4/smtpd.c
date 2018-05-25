@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.208 $";
+char           *revision = "$Revision: 1.209 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5461,7 +5461,7 @@ tls_verify()
 			ssl_verify_err = "email address not in my list of tlsclients";
 		else { /*- add the cert email to the proto if it helped allow relaying */
 			if (!stralloc_cats(&proto, "\n  (cert ")		/*- continuation line */
-				||!stralloc_catb(&proto, email.s, email.len)
+				|| !stralloc_catb(&proto, email.s, email.len)
 				|| !stralloc_cats(&proto, ")"))
 				die_nomem();
 			authenticated = 1;
@@ -6013,6 +6013,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.209  2018-05-25 08:44:38+05:30  Cprogrammer
+ * added whitespace for readability
+ *
  * Revision 1.208  2018-05-13 15:52:36+05:30  Cprogrammer
  * disable SSLv2, SSLv3 to fix Poodle vulnerability
  *
@@ -6075,7 +6078,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.208 2018-05-13 15:52:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.209 2018-05-25 08:44:38+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
