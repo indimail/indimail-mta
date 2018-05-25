@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.116  2018-05-25 08:44:14+05:30  Cprogrammer
+ * removed extra white spaces
+ *
  * Revision 1.115  2018-05-25 08:41:09+05:30  Cprogrammer
  * renamed do_dns_query() to do_tlsa_query()
  *
@@ -1343,8 +1346,8 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 		}
 	}
 
-	/*- 
-	 * shouldn't talk to the client unless in an appropriate state 
+	/*-
+	 * shouldn't talk to the client unless in an appropriate state
 	 * https://mta.openssl.org/pipermail/openssl-commits/2015-October/002060.html
 	 */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -1528,7 +1531,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		*needtlsauth = 0;
 	if (scert)
 		*scert = 0;
-	/*- 
+	/*-
 	 * tls_init() gets called in smtp()
 	 * if smtp() returns for trying next mx
 	 * we need to re-initialize
@@ -1845,12 +1848,12 @@ get_tlsa_rr(char *mxhost, int port)
  * USAGE
  * 0, 1, 2, 3, 255
  * 255 PrivCert
- * 
+ *
  * SELECTOR
  * --------
  * 0, 1, 255
  * 255 PrivSel
- * 
+ *
  * Matching Type
  * -------------
  * 0, 1, 2, 255
@@ -1927,7 +1930,7 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 			temp_nomem();
 		tls_quit("ZTLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
 	}
-	/*- 
+	/*-
 	 * the server certificate is generally presented
 	 * as the first certificate in the stack along with
 	 * the remaining chain.
@@ -1941,8 +1944,8 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	/*- for (i = (usage == 2 ? 1 : 0); i < (usage == 2 ? sk_X509_num(sk) : 1); i++) -*/
 	i = (usage == 2 ? sk_X509_num(sk) - 1 : 0);
 	xs = sk_X509_value(sk, i);
-	/*- 
-	 * DANE Validation 
+	/*-
+	 * DANE Validation
 	 * case 1 - match full certificate data
 	 * case 2 - match full subjectPublicKeyInfo data
 	 * case 3 - match  SHA512/SHA256 fingerprint of full certificate
@@ -2703,10 +2706,10 @@ smtp()
 	int             flagbother;
 	int             i, use_size = 0, is_esmtp = 1;
 #ifdef HASTLSA
-    char           *cp, *err_str = 0, *servercert = 0;
+	char           *cp, *err_str = 0, *servercert = 0;
 	int             tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage;
-    tlsa_rdata     *rp;
+	tlsa_rdata     *rp;
 #endif
 
 	inside_greeting = 1;
@@ -2743,7 +2746,7 @@ smtp()
 			match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
 			if (!tls_init(0, &needtlsauth, &servercert)) /*- tls is needed for DANE */
 				quit("ZConnected to ", " but unable to intiate TLS for DANE", 530, -1);
-        	for (usage = -1, rp = tlsa_rdata_list; rp; rp = rp->next) {
+			for (usage = -1, rp = tlsa_rdata_list; rp; rp = rp->next) {
 				if (!rp->mtype || rp->mtype == 2)
 					match0Or512 = 1;
 				cp = bin2hexstring(rp->data, rp->data_len);
@@ -2761,12 +2764,12 @@ smtp()
 						break;
 					}
 				}
-            	free(cp);
+				free(cp);
 				if (!rp->usage || rp->usage == 2)
 					usage = 2;
 				if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
 					break;
-        	} /*- for (rp = tlsa_rdata_list; rp != NULL; rp = rp->next) */
+			} /*- for (rp = tlsa_rdata_list; rp != NULL; rp = rp->next) */
 			tlsa_cleanup(); /*- free addresses, tlsa_rdata_list */
 			/*-
 			 * client SHOULD accept a server public key that
@@ -3571,7 +3574,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.115 2018-05-25 08:41:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.116 2018-05-25 08:44:14+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
