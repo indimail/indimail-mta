@@ -1,5 +1,8 @@
 /*
  * $Log: dns.h1,v $
+ * Revision 1.9  2018-05-26 15:54:49+05:30  Cprogrammer
+ * added dns_tlsarr() function for getting TLSA RR
+ *
  * Revision 1.8  2005-06-15 20:28:08+05:30  Cprogrammer
  * ipv6 implementation
  *
@@ -28,6 +31,7 @@
 #include "ipalloc.h"
 #include "stralloc.h"
 #include "strsalloc.h"
+#include "tlsarralloc.h"
 
 void            dns_init(int);
 int             dns_cname(stralloc *);
@@ -49,6 +53,9 @@ int             dns_ptr6(stralloc *, struct ip6_address *);
 int             dns_maps(stralloc *, struct ip6_address *, char *);
 #else
 int             dns_maps(stralloc *, struct ip_address *, char *);
+#endif
+#ifdef HASTLSA
+int             dns_tlsarr(tlsarralloc *, stralloc *);
 #endif
 
 #endif
