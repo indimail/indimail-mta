@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.244  2018-05-26 15:46:13+05:30  Cprogrammer
+ * added dnstlsarr program
+ *
  * Revision 1.243  2018-05-21 07:22:37+05:30  Cprogrammer
  * added foxhole_all.cdb file
  *
@@ -613,6 +616,7 @@
 #include "fifo.h"
 #include "tcpto.h"
 #include "hassrs.h"
+#include "hastlsa.h"
 
 void            d(char *, char *, int, int, int);
 void            h(char *, int, int, int);
@@ -968,7 +972,9 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "sbin", "readproctitle", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "qmail-greyd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "greydaemon", auto_uido, auto_gidq, moder_x);
+#ifdef HASTLSA
 	c(auto_qmail_home, "sbin", "qmail-daned", auto_uido, auto_gidq, moder_x);
+#endif
 	c(auto_qmail_home, "sbin", "surblfilter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "surblqueue", auto_uido, auto_gidq, moder_x);
 #ifdef EXTERNAL_TODO
@@ -990,6 +996,9 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "dnsfq", auto_uido, auto_gidq, moder_x);
 #ifdef USE_SPF
 	c(auto_libexec_dir, auto_libexec_base, "dnstxt", auto_uido, auto_gidq, moder_x);
+#endif
+#ifdef HASTLSA
+	c(auto_qmail_home, "sbin", "dnstlsarr", auto_uido, auto_gidq, moder_x);
 #endif
 	c(auto_libexec_dir, auto_libexec_base, "leapsecs", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "yearcal", auto_uido, auto_gidq, moder_x);
@@ -1520,7 +1529,9 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/cat8", "qmail-smtpd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-greyd.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-greyd.0", uidr, gidr, moder_f);
+#ifdef HASTLSA
 	c(mandir,          "man/man8", "qmail-daned.8", uidr, gidr, moder_f);
+#endif
 	c(mandir,          "man/man8", "greydaemon.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "greydaemon.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-poppass.8", uidr, gidr, moder_f);
@@ -1592,7 +1603,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.243 2018-05-21 07:22:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.244 2018-05-26 15:46:13+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
