@@ -575,3 +575,5 @@ daneq
 daneq.o
 hastlsa.h
 *.dsc
+dnstlsarr
+dnstlsarr.o
