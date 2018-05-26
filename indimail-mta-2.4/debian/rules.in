@@ -32,6 +32,7 @@ libsrs2_version=@libsrs2_version@
 version=@version@
 
 tcpserver_plugin=1
+notlsarr=0
 bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
 libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
 cp=/bin/cp
@@ -55,6 +56,11 @@ build-stamp:
 	else \
 		/bin/rm -f indimail-mta-$(version)/conf-dlopen; \
 		/bin/rm -f ucspi-tcp-0.88/conf-dlopen; \
+	fi
+	if [ $(notlsarr) -eq 0 ] ; then \
+		echo "-DHASTLSA" > indimail-mta-$(version)/conf-tlsa; \
+	else \
+		/bin/rm -f indimail-mta-$(version)/conf-tlsa; \
 	fi
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then \
