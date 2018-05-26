@@ -1,5 +1,9 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.32  2018-05-26 12:41:25+05:30  Cprogrammer
+ * fixed memory leak dns_mxip()
+ * added functions for getting TLSA RR.
+ *
  * Revision 1.31  2017-05-16 12:30:52+05:30  Cprogrammer
  * refactored dns_txt() code
  *
@@ -91,6 +95,9 @@
 #ifdef USE_SPF
 #include "strsalloc.h"
 #endif
+#ifdef HASTLSA
+#include "tlsarralloc.h"
+#endif
 #include "fmt.h"
 #include "alloc.h"
 #include "str.h"
@@ -179,6 +186,11 @@ static int      (*lookup) () = res_query;
 static int      iaafmt6(char *, ip6_addr *, char *);
 #endif
 static int      dns_ptrplus(strsalloc *, ip_addr *);
+#ifdef HASTLSA
+static tlsarr   tlsaRR;
+ns_rr           rr;
+ns_msg          msg;
+#endif
 
 static int
 resolve(domain, type)
@@ -193,18 +205,18 @@ resolve(domain, type)
 		return DNS_MEM;
 	if (!stralloc_0(&glue))
 		return DNS_MEM;
-	if (!responsebuflen)
-	{
+	if (!responsebuflen) {
 		if ((response.buf = (unsigned char *) alloc(PACKETSZ + 1)))
 			responsebuflen = PACKETSZ + 1;
 		else
 			return DNS_MEM;
 	}
 	responselen = lookup(glue.s, C_IN, type, response.buf, responsebuflen);
-	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc)))
-	{
-		if (responsebuflen < 65536)
-		{
+#ifdef HASTLSA
+	ns_initparse(response.buf, responselen, &msg);
+#endif
+	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
+		if (responsebuflen < 65536) {
 			if (alloc_re((char *) &response.buf, responsebuflen, 65536))
 				responsebuflen = 65536;
 			else
@@ -215,8 +227,7 @@ resolve(domain, type)
 		responselen = lookup(glue.s, C_IN, type, response.buf, responsebuflen);
 		_res.options = saveresoptions;
 	}
-	if (responselen <= 0)
-	{
+	if (responselen <= 0) {
 		if (errno == ECONNREFUSED)
 			return DNS_SOFT;
 		if (h_errno == TRY_AGAIN)
@@ -226,8 +237,7 @@ resolve(domain, type)
 	responseend = response.buf + responselen;
 	responsepos = response.buf + sizeof(HEADER);
 	n = ntohs(((HEADER *) response.buf)->qdcount);
-	while (n-- > 0)
-	{
+	while (n-- > 0) {
 		if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
 			return DNS_SOFT;
 		responsepos += i;
@@ -263,8 +273,7 @@ findname(wanttype)
 	rrtype = getshort(responsepos);
 	rrdlen = getshort(responsepos + 8);
 	responsepos += 10;
-	if (rrtype == wanttype)
-	{
+	if (rrtype == wanttype) {
 		if (dn_expand(response.buf, responseend, responsepos, name, MAXDNAME) < 0)
 			return DNS_SOFT;
 		responsepos += rrdlen;
@@ -296,8 +305,7 @@ findip(wanttype)
 	rrtype = getshort(responsepos);
 	rrdlen = getshort(responsepos + 8);
 	responsepos += 10;
-	if (rrtype == wanttype)
-	{
+	if (rrtype == wanttype) {
 		if (rrdlen < 4)
 			return DNS_SOFT;
 		ip.d[0] = responsepos[0];
@@ -334,8 +342,7 @@ findip6(wanttype)
 	rrtype = getshort(responsepos);
 	rrdlen = getshort(responsepos + 8);
 	responsepos += 10;
-	if (rrtype == wanttype)
-	{
+	if (rrtype == wanttype) {
 		if (rrdlen < 16)
 			return DNS_SOFT;
 		byte_copy((char *) &ip6.d, 16, (char *) &responsepos[0]);
@@ -363,14 +370,12 @@ findmx(wanttype)
 	if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
 		return DNS_SOFT;
 	responsepos += i;
-	i = responseend - responsepos;
-	if (i < 4 + 3 * 2)
+	if ((i = responseend - responsepos) < 4 + 3 * 2)
 		return DNS_SOFT;
 	rrtype = getshort(responsepos);
 	rrdlen = getshort(responsepos + 8);
 	responsepos += 10;
-	if (rrtype == wanttype)
-	{
+	if (rrtype == wanttype) {
 		if (rrdlen < 3)
 			return DNS_SOFT;
 		pref = (responsepos[0] << 8) + responsepos[1];
@@ -399,14 +404,12 @@ dns_cname(sa)
 	int             r;
 	int             loop;
 
-	for (loop = 0; loop < 10; ++loop)
-	{
+	for (loop = 0; loop < 10; ++loop) {
 		if (!sa->len)
 			return loop;
 		if (sa->s[sa->len - 1] == ']')
 			return loop;
-		if (sa->s[sa->len - 1] == '.')
-		{
+		if (sa->s[sa->len - 1] == '.') {
 			--sa->len;
 			continue;
 		}
@@ -419,12 +422,10 @@ dns_cname(sa)
 		case DNS_HARD:
 			return loop;
 		default:
-			while ((r = findname(T_CNAME)) != 2)
-			{
+			while ((r = findname(T_CNAME)) != 2) {
 				if (r == DNS_SOFT)
 					return DNS_SOFT;
-				if (r == 1)
-				{
+				if (r == 1) {
 					if (!stralloc_copys(sa, name))
 						return DNS_MEM;
 					break;
@@ -502,19 +503,14 @@ findtxt(wanttype)
 	if (responsepos == responseend)
 		return DNS_SOFT;
 
-	i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME);
-	if (i < 0)
+	if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
 		return DNS_SOFT;
 	responsepos += i;
-
-	i = responseend - responsepos;
-	if (i < 4 + 3 * 2)
+	if ((i = responseend - responsepos) < 4 + 3 * 2)
 		return DNS_SOFT;
-
 	rrtype = getshort(responsepos);
 	rrdlen = getshort(responsepos + 8);
 	responsepos += 10;
-
 	if (rrtype == wanttype) {
 		unsigned short  txtpos;
 		unsigned char   txtlen;
@@ -527,11 +523,9 @@ findtxt(wanttype)
 			if (!stralloc_catb(&txt, (char *) &responsepos[txtpos], txtlen))
 				return DNS_MEM;
 		}
-
 		responsepos += rrdlen;
 		return 1;
 	}
-
 	responsepos += rrdlen;
 	return 0;
 }
@@ -543,7 +537,8 @@ dns_txtplus(ssa, sa)
 {
 	int             r;
 
-	switch (resolve(sa, T_TXT)) {
+	switch (resolve(sa, T_TXT))
+	{
 	case DNS_MEM:
 		return DNS_MEM;
 	case DNS_SOFT:
@@ -618,12 +613,10 @@ dns_ptrplus(ssa, ip)
 	case DNS_HARD:
 		return DNS_HARD;
 	}
-	while ((r = findname(T_PTR)) != 2)
-	{
+	while ((r = findname(T_PTR)) != 2) {
 		if (r == DNS_SOFT)
 			return DNS_SOFT;
-		if (r == 1)
-		{
+		if (r == 1) {
 			if (!stralloc_copys(&tmpsa, name))
 				return DNS_MEM;
 			if (!strsalloc_append(ssa, &tmpsa))
@@ -654,12 +647,10 @@ dns_ptr(sa, ip)
 	case DNS_HARD:
 		return DNS_HARD;
 	}
-	while ((r = findname(T_PTR)) != 2)
-	{
+	while ((r = findname(T_PTR)) != 2) {
 		if (r == DNS_SOFT)
 			return DNS_SOFT;
-		if (r == 1)
-		{
+		if (r == 1) {
 			if (!stralloc_copys(sa, name))
 				return DNS_MEM;
 			return 0;
@@ -679,10 +670,8 @@ iaafmt6(s, ip, dom)
 	int             j;
 	static char     data[] = "0123456789abcdef";
 
-	if (s)
-	{
-		for (j = 15; j >= 0; j--)
-		{
+	if (s) {
+		for (j = 15; j >= 0; j--) {
 			*s++ = data[ip->d[j] & 0x0f];
 			*s++ = '.';
 			*s++ = data[(ip->d[j] >> 4) & 0x0f];
@@ -719,12 +708,10 @@ dns_ptr6(ssa, ip)
 	case DNS_HARD:
 		return DNS_HARD;
 	}
-	while ((r = findname(T_PTR)) != 2)
-	{
+	while ((r = findname(T_PTR)) != 2) {
 		if (r == DNS_SOFT)
 			return DNS_SOFT;
-		if (r == 1)
-		{
+		if (r == 1) {
 #ifdef USE_SPF
 			if (!stralloc_copys(&tmpsa, name))
 				return DNS_MEM;
@@ -773,12 +760,10 @@ dns_ipplus(ia, sa, pref)
 		return DNS_MEM;
 	if (!stralloc_0(&glue))
 		return DNS_MEM;
-	if (glue.s[0])
-	{
+	if (glue.s[0]) {
 		ix.pref = 0;
 		ix.af = AF_INET;
-		if (!glue.s[ip4_scan(glue.s, &ix.addr.ip)] || !glue.s[ip4_scanbracket(glue.s, &ix.addr.ip)])
-		{
+		if (!glue.s[ip4_scan(glue.s, &ix.addr.ip)] || !glue.s[ip4_scanbracket(glue.s, &ix.addr.ip)]) {
 			if (!ipalloc_append(ia, &ix))
 				return DNS_MEM;
 			return 0;
@@ -786,8 +771,7 @@ dns_ipplus(ia, sa, pref)
 	}
 #ifdef NO_VERISIGN_WILDCARD
 	j = byte_rchr(sa->s,sa->len,'.');
-	if (j + 2 < sa->len)
-	{
+	if (j + 2 < sa->len) {
 		if(!stralloc_copys(&tld, "*"))
 			return DNS_MEM;
 		if(!stralloc_catb(&tld, sa->s+j, sa->len-j))
@@ -802,8 +786,7 @@ dns_ipplus(ia, sa, pref)
 		case DNS_SOFT:
 			return DNS_SOFT;
 		default:
-			while ((r = findip(T_A)) != 2)
-			{
+			while ((r = findip(T_A)) != 2) {
 				if (r == DNS_SOFT)
 					return DNS_SOFT;
 				if (r == 1)
@@ -829,18 +812,15 @@ dns_ipplus(ia, sa, pref)
 		err6 = DNS_HARD;
 		break;
 	default:
-		while ((r = findip6(T_AAAA)) != 2)
-		{
+		while ((r = findip6(T_AAAA)) != 2) {
 			ix.af = AF_INET6;
 			ix.addr.ip6 = ip6;
 			ix.pref = pref;
-			if (r == DNS_SOFT)
-			{
+			if (r == DNS_SOFT) {
 				err6 = DNS_SOFT;
 				break;
 			}
-			if (r == 1)
-			{
+			if (r == 1) {
 #ifdef NO_VERISIGN_WILDCARD
 				if (!byte_diff((char *) &tldip, sizeof(tldip), (char *) &ip6))
 					continue;
@@ -848,8 +828,7 @@ dns_ipplus(ia, sa, pref)
 #ifdef TLS
 				ix.fqdn = glue.s;
 #endif
-				if (!ipalloc_append(ia, &ix))
-				{
+				if (!ipalloc_append(ia, &ix)) {
 					err6 = DNS_MEM;
 					break;
 				}
@@ -870,18 +849,15 @@ dns_ipplus(ia, sa, pref)
 		err4 = DNS_HARD;
 		break;
 	default:
-		while ((r = findip(T_A)) != 2)
-		{
+		while ((r = findip(T_A)) != 2) {
 			ix.af = AF_INET;
 			ix.addr.ip = ip;
 			ix.pref = pref;
-			if (r == DNS_SOFT)
-			{
+			if (r == DNS_SOFT) {
 				err4 = DNS_SOFT;
 				break;
 			}
-			if (r == 1)
-			{
+			if (r == 1) {
 #ifdef NO_VERISIGN_WILDCARD
 				if (!byte_diff((char *) &tldip, sizeof(tldip), (char *) &ip))
 					continue;
@@ -889,8 +865,7 @@ dns_ipplus(ia, sa, pref)
 #ifdef TLS
 				ix.fqdn = glue.s;
 #endif
-				if (!ipalloc_append(ia, &ix))
-				{
+				if (!ipalloc_append(ia, &ix)) {
 					err4 = DNS_MEM;
 					break;
 				}
@@ -899,8 +874,7 @@ dns_ipplus(ia, sa, pref)
 		break;
 	} /*- switch(resolve(sa,T_A)) */
 #ifdef TLS
-	if (glue.s)
-	{
+	if (glue.s) {
 		alloc_free(glue.s);
 		glue.s = 0;
 	}
@@ -955,12 +929,10 @@ dns_mxip(ia, sa, random)
 		return DNS_MEM;
 	if (!stralloc_0(&glue))
 		return DNS_MEM;
-	if (glue.s[0])
-	{
+	if (glue.s[0]) {
 		ix.af = AF_INET;
 		ix.pref = 0;
-		if (!glue.s[ip4_scan(glue.s, &ix.addr.ip)] || !glue.s[ip4_scanbracket(glue.s, &ix.addr.ip)])
-		{
+		if (!glue.s[ip4_scan(glue.s, &ix.addr.ip)] || !glue.s[ip4_scanbracket(glue.s, &ix.addr.ip)]) {
 			if (!ipalloc_append(ia, &ix))
 				return DNS_MEM;
 			return 0;
@@ -978,19 +950,15 @@ dns_mxip(ia, sa, random)
 	if (!(mx = (struct mx *) alloc(numanswers * sizeof(struct mx))))
 		return DNS_MEM;
 	nummx = 0;
-	while ((r = findmx(T_MX)) != 2)
-	{
-		if (r == DNS_SOFT)
-		{
+	while ((r = findmx(T_MX)) != 2) {
+		if (r == DNS_SOFT) {
 			alloc_free((char *) mx);
 			return DNS_SOFT;
 		}
-		if (r == 1)
-		{
+		if (r == 1) {
 			mx[nummx].p = pref;
 			mx[nummx].sa.s = 0;
-			if (!stralloc_copys(&mx[nummx].sa, name))
-			{
+			if (!stralloc_copys(&mx[nummx].sa, name)) {
 				while (nummx > 0)
 					alloc_free(mx[--nummx].sa.s);
 				alloc_free((char *) mx);
@@ -999,24 +967,22 @@ dns_mxip(ia, sa, random)
 			++nummx;
 		}
 	}
-	if (!nummx)
+	if (!nummx) {
+		alloc_free((char *) mx);
 		return dns_ip(ia, sa);	/*- e.g., CNAME -> A */
+	}
 	flagsoft = 0;
-	while (nummx > 0)
-	{
+	while (nummx > 0) {
 		unsigned long   numsame;
 
 		i = 0;
 		numsame = 1;
-		for (j = 1; j < nummx; ++j)
-		{
-			if (mx[j].p < mx[i].p)
-			{
+		for (j = 1; j < nummx; ++j) {
+			if (mx[j].p < mx[i].p) {
 				i = j;
 				numsame = 1;
 			} else
-			if (mx[j].p == mx[i].p)
-			{
+			if (mx[j].p == mx[i].p) {
 				++numsame;
 				random = random * 69069 + 1;
 				if ((random / 2) < (2147483647 / numsame))
@@ -1050,20 +1016,16 @@ findstring(wanttype)
 	--numanswers;
 	if (responsepos == responseend)
 		return DNS_SOFT;
-	i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME);
-	if (i < 0)
+	if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
 		return DNS_SOFT;
 	responsepos += i;
-	i = responseend - responsepos;
-	if (i < 4 + 3 * 2)
+	if ((i = responseend - responsepos) < 4 + 3 * 2)
 		return DNS_SOFT;
 	rrtype = getshort(responsepos);
 	rrdlen = getshort(responsepos + 8);
 	responsepos += 10;
-	if (rrtype == wanttype)
-	{
-		i = *responsepos;
-		if (i > MAXDNAME - 1)
+	if (rrtype == wanttype) {
+		if ((i = *responsepos) > MAXDNAME - 1)
 			return DNS_SOFT;
 		if (responsepos + i > responseend)
 			return DNS_SOFT;
@@ -1112,12 +1074,10 @@ dns_maps(sa, ip, suffix)
 	case DNS_HARD:
 		return DNS_HARD;
 	}
-	while ((r = findstring(T_TXT)) != 2)
-	{
+	while ((r = findstring(T_TXT)) != 2) {
 		if (r == DNS_SOFT)
 			return DNS_SOFT;
-		if (r == 1)
-		{
+		if (r == 1) {
 			if (!stralloc_copys(sa, name))
 				return DNS_MEM;
 			return 0;
@@ -1136,12 +1096,10 @@ dns_maps(sa, ip, suffix)
 	case DNS_HARD:
 		return DNS_HARD;
 	}
-	while ((r = findip(T_A)) != 2)
-	{
+	while ((r = findip(T_A)) != 2) {
 		if (r == DNS_SOFT)
 			return DNS_SOFT;
-		if (r == 1)
-		{
+		if (r == 1) {
 			if (!stralloc_copys(sa, "This host is blackholed.  No further information is known. "))
 				return DNS_MEM;
 			if (!stralloc_cats(sa, "["))
@@ -1156,10 +1114,98 @@ dns_maps(sa, ip, suffix)
 	return DNS_HARD;
 }
 
+#ifdef HASTLSA
+static int
+findtlsa(wanttype)
+	int             wanttype;
+{
+	unsigned short  rrtype;
+	unsigned short  rrdlen;
+	int             i;
+
+	if (numanswers <= 0)
+		return 2;
+	--numanswers;
+	if (responsepos == responseend)
+		return DNS_SOFT;
+	if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME))  < 0)
+		return DNS_SOFT;
+	responsepos += i;
+	if ((i = responseend - responsepos) < 4 + 3 * 2)
+		return DNS_SOFT;
+	rrtype = getshort(responsepos);
+	rrdlen = getshort(responsepos + 8);
+	responsepos += 10;
+	if (rrtype == wanttype) {
+		if (rrdlen < 4)
+			return DNS_SOFT;
+		tlsaRR.usage = responsepos[0];
+		tlsaRR.selector = responsepos[1];
+		tlsaRR.mtype = responsepos[2];
+		tlsaRR.data_len = rrdlen - 3;
+		if (!(tlsaRR.data = (uint8_t *) alloc(tlsaRR.data_len * sizeof(uint8_t))))
+			return DNS_MEM;
+		byte_copy((char *) tlsaRR.data, tlsaRR.data_len, (char *) responsepos + 3);
+		responsepos += rrdlen;
+		return 1;
+	} 
+	responsepos += rrdlen;
+	return 0;
+}
+
+static int
+dns_tlsarrplus(ta, sa)
+	tlsarralloc    *ta;
+	stralloc       *sa;
+{
+	int             r, i = 0;
+	uint32_t        ttl;
+	char           *cp;
+
+	switch (resolve(sa, T_TLSA)) {
+	case DNS_MEM:
+		return DNS_MEM;
+	case DNS_SOFT:
+		return DNS_SOFT;
+	case DNS_HARD:
+		return DNS_HARD;
+	}
+	while ((r = findtlsa(T_TLSA)) != 2) {
+		if (r == DNS_SOFT)
+			return DNS_SOFT;
+		ns_parserr(&msg, ns_s_an, i++, &rr);
+		ttl = ns_rr_ttl(rr);
+		if (r == 1) {
+			cp = ns_rr_name(rr);
+			tlsaRR.hostlen = str_len(cp);
+			tlsaRR.ttl = ttl;
+			if (!(tlsaRR.host = (char *) alloc(tlsaRR.hostlen * sizeof(char))))
+				return DNS_MEM;
+			byte_copy(tlsaRR.host, tlsaRR.hostlen, cp);
+			if (!tlsarralloc_append(ta, &tlsaRR))
+				return DNS_MEM;
+		} else
+			i++;
+	}
+	return 0;
+}
+
+int
+dns_tlsarr(ta, sa)
+	tlsarralloc    *ta;
+	stralloc       *sa;
+{
+	if (!tlsarralloc_readyplus(ta, 0))
+		return DNS_MEM;
+	ta->len = 0;
+	return dns_tlsarrplus(ta, sa);
+}
+#endif
+
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.31 2017-05-16 12:30:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.32 2018-05-26 12:41:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
