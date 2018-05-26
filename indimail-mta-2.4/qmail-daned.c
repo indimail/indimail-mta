@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.6  2018-05-26 16:00:30+05:30  Cprogrammer
+ * replaced getdns lib with inbuilt dns_tlsarr() function in dns.c
+ *
  * Revision 1.5  2018-05-25 08:33:40+05:30  Cprogrammer
  * use do_tlsa_query() to get TLSA RR
  *
@@ -29,13 +32,14 @@
 #include <search.h>
 #define __USE_GNU
 #include <netdb.h>
-#include "hastlsa.h"
-#include "stralloc.h"
-#ifdef HASTLSA
-#include "case.h"
 #define _ALLOC_
 #include "alloc.h"
 #undef _ALLOC_
+#include "stralloc.h"
+#include "hastlsa.h"
+#ifdef HASTLSA
+#include "tlsarralloc.h"
+#include "case.h"
 #include "socket.h"
 #include "timeoutconn.h"
 #include "timeoutread.h"
@@ -48,7 +52,6 @@
 #include <openssl/x509.h>
 #include <openssl/err.h>
 #include <sys/stat.h>
-#include <querytlsa.h>
 #else
 #warning "tlsa code not compiled"
 #endif
@@ -75,7 +78,6 @@
 #include "tlsacheck.h"
 #include "haveip6.h"
 #include "dns.h"
-#include "dnsdoe.h"
 #include "ip.h"
 #include "ipalloc.h"
 #include "now.h"
@@ -127,8 +129,41 @@ ipalloc         ia = { 0 };
 struct substdio ssin;
 
 extern char   **MakeArgs(char *);
+#ifdef HASTLSA
+tlsarralloc     ta = { 0 };
+stralloc        hexstring = { 0 };
+#endif
 
-#ifndef HASTLSA
+void
+out(char *str)
+{
+	if (!str || !*str)
+		return;
+	if (substdio_puts(subfdout, str) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	return;
+}
+
+void
+flush()
+{
+	if (substdio_flush(subfdout) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	return;
+}
+
+#if defined(HASTLSA) && defined(TLS)
+void
+die(int e)
+{
+	if (ssl) {
+		while (SSL_shutdown(ssl) == 0);
+		SSL_free(ssl);
+		ssl = 0;
+	}
+	_exit (e);
+}
+#else
 #define die(e) _exit((e))
 #endif
 
@@ -152,24 +187,6 @@ die_control(char *arg)
 	substdio_puts(subfderr, "\n");
 	substdio_flush(subfderr);
 	die (111);
-}
-
-void
-out(char *str)
-{
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfdout, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
-}
-
-void
-flush()
-{
-	if (substdio_flush(subfdout) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
 }
 
 void
@@ -880,17 +897,6 @@ int             smtpfd;
 const char     *ssl_err_str = 0;
 
 void
-die(int e)
-{
-	if (ssl) {
-		while (SSL_shutdown(ssl) == 0);
-		SSL_free(ssl);
-		ssl = 0;
-	}
-	_exit (e);
-}
-
-void
 outhost()
 {
 	char            x[IPFMT];
@@ -981,51 +987,98 @@ char            smtpfrombuf[128];
 substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
 
 void
-tlsa_cleanup(char *str)
+perm_dns()
 {
-	if (str) {
-		logerr(str);
-		logerrf("\n");
-	}
-	if (addresses) {
-		freeaddrinfo(addresses);
-		addresses = (addrinf *) 0;
-	}
-	if (tlsa_rdata_list) {
-		free_tlsa(tlsa_rdata_list);
-		tlsa_rdata_list = (tlsa_rdata *) 0;
-	}
-	return;
+	out("Sorry, I couldn't find any host named ");
+	out(partner_fqdn);
+	out("\n");
+	flush();
+	die (111);
+}
+
+void
+temp_dns()
+{
+	out("no host by that name ");
+	out(partner_fqdn);
+	out("\n");
+	flush();
+	die (111);
+}
+
+void
+temp_oserr()
+{
+	out("System resources temporarily unavailable\n");
+	flush();
+	die (111);
 }
 
 int
 get_tlsa_rr(char *domain, int mxhost, int port)
 {
-	int             j, err;
+	int             j;
 	unsigned long   r;
+	char            strnum[FMT_ULONG];
 
 	if (!stralloc_copys(&sa, domain))
 		die_nomem();
 	if (mxhost) {
-		if ((err = do_tlsa_query(domain, port))) {
-			tlsa_cleanup(get_tlsa_err_str(err));
-			die (111);
+		if (!stralloc_copyb(&sa, "_", 1))
+			die_nomem();
+		if (!stralloc_catb(&sa, strnum, fmt_uint(strnum, port)))
+			die_nomem();
+		if (!stralloc_catb(&sa, "._tcp.", 6))
+			die_nomem();
+		if (!stralloc_cats(&sa, domain))
+			die_nomem();
+		dns_init(0);
+		r = dns_tlsarr(&ta, &sa);
+		switch (r)
+		{
+		case DNS_HARD:
+			perm_dns();
+		case DNS_SOFT:
+			temp_dns();
+		case DNS_MEM:
+			die_nomem();
 		}
 	} else {
-		r = now() + getpid();
 		dns_init(0);
-		dnsdoe(dns_mxip(&ia, &sa, r));
+		r = now() + getpid();
+		r = dns_mxip(&ia, &sa, r);
+		switch (r)
+		{
+		case DNS_HARD:
+			perm_dns();
+		case DNS_SOFT:
+			temp_dns();
+		case DNS_MEM:
+			die_nomem();
+		}
 		for (j = 0; j < ia.len; ++j) {
 			if (j && !str_diff(ia.ix[j].fqdn, ia.ix[j - 1].fqdn))
 				continue;
-			if ((err = do_tlsa_query(ia.ix[j].fqdn, port))) {
-				tlsa_cleanup(get_tlsa_err_str(err));
-				die (111);
+			if (!stralloc_copyb(&sa, "_", 1))
+				die_nomem();
+			if (!stralloc_catb(&sa, strnum, fmt_uint(strnum, port)))
+				die_nomem();
+			if (!stralloc_catb(&sa, "._tcp.", 6))
+				die_nomem();
+			if (!stralloc_cats(&sa, ia.ix[j].fqdn))
+				die_nomem();
+			r = dns_tlsarr(&ta, &sa);
+			switch (r)
+			{
+			case DNS_HARD:
+				perm_dns();
+			case DNS_SOFT:
+				temp_dns();
+			case DNS_MEM:
+				die_nomem();
 			}
 		} /*- for (j = 0; j < ia.len; ++j) */
 	}
-	if (!tlsa_rdata_list) /*- No TLSA records found */
-		tlsa_cleanup(0);
 	return (0);
 }
 
@@ -1068,34 +1121,6 @@ smtpcode()
 	while (ch != '\n')
 		get((char *) &ch);
 	return code;
-}
-
-void
-perm_dns()
-{
-	out("Sorry, I couldn't find any host named ");
-	out(partner_fqdn);
-	out("\n");
-	flush();
-	die (111);
-}
-
-void
-temp_dns()
-{
-	out("no host by that name ");
-	out(partner_fqdn);
-	out("\n");
-	flush();
-	die (111);
-}
-
-void
-temp_oserr()
-{
-	out("System resources temporarily unavailable\n");
-	flush();
-	die (111);
 }
 
 int
@@ -1723,9 +1748,10 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	X509           *xs = 0;
 	STACK_OF(X509) *sk;
 	static char     errbuf[256];
-	char            buffer[512];
+	char            buffer[512], hex[2];
 	unsigned char   md_value[EVP_MAX_MD_SIZE];
-	unsigned char  *ptr, *cp;
+	unsigned char  *ptr;
+	char           *cp;
 	int             i, len;
 	unsigned int    md_len;
 
@@ -1863,13 +1889,15 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	/*- SHA512/SHA256 fingerprint of full certificate */
 	if ((match_type == 2 || match_type == 1) && selector == 0) {
 		if (!X509_digest(xs, md, md_value, &md_len))
-			tls_quit("TLS Unable go get peer cerficatte digest", 0, 0, 0, 0);
-		cp = (unsigned char *) bin2hexstring(md_value, md_len);
-		if (!str_diff(certDataField, (char *) cp)) {
-			free(cp);
-			return (0);
+			tls_quit("TLS Unable to get peer cerficatte digest", 0, 0, 0, 0);
+		for (i = hexstring.len = 0; i < md_len; i++) {
+			fmt_hexbyte(hex, (md_value + i)[0]);
+			if (!stralloc_catb(&hexstring, hex, 2))
+				die_nomem();
 		}
-		free(cp);
+		cp = hexstring.s;
+		if (!str_diffn(certDataField, (char *) cp, hexstring.len))
+			return (0);
 		return (1);
 	}
 	/*- SHA512/SHA256 fingerprint of subjectPublicKeyInfo */
@@ -1893,17 +1921,19 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 		OPENSSL_free(tmpbuf);
 		if (!EVP_DigestFinal_ex(mdctx, md_value, &md_len))
 			tls_quit("TLS Unable to compute EVP Digest", 0, 0, 0, 0);
-		cp = (unsigned char *) bin2hexstring(md_value, md_len);
+		for (i = hexstring.len = 0; i < md_len; i++) {
+			fmt_hexbyte(hex, (md_value + i)[0]);
+			if (!stralloc_catb(&hexstring, hex, 2))
+				die_nomem();
+		}
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		EVP_MD_CTX_free(mdctx);
 #else
 		EVP_MD_CTX_cleanup(mdctx);
 #endif
-		if (!str_diff(certDataField, (char *) cp)) {
-			free(cp);
+		cp = hexstring.s;
+		if (!str_diffn(certDataField, (char *) cp, hexstring.len))
 			return (0);
-		}
-		free(cp);
 		return (1);
 	}
 	return (1);
@@ -1914,11 +1944,11 @@ do_work(char *host, int port)
 {
 	static ipalloc  ip = { 0 };
     char           *cp, *err_str = 0, *servercert = 0;
-	char            strnum[FMT_ULONG];
+	char            strnum[FMT_ULONG], hex[2];
 	int             i, j, tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage;
 	unsigned long   code;
-    tlsa_rdata     *rp;
+    tlsarr         *rp;
 
 	if (!stralloc_copys(&sa, host))
 		die_nomem();
@@ -1936,7 +1966,7 @@ do_work(char *host, int port)
 			temp_dns();
 	}
 	get_tlsa_rr(host, 1, port);
-	if (!tlsa_count) {
+	if (!ta.len) {
 		out("dane_query_tlsa: No DANE data were found\n");
 		flush();
 		_exit (0);
@@ -1976,75 +2006,79 @@ do_work(char *host, int port)
 		quit("Connected to ", " but greeting failed", code, code);
 	if (!smtps)
 		code = ehlo();
-	if (tlsa_count && tlsa_rdata_list) { /*- do DANE validation */
-		match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
-		if (!tls_init(0, &needtlsauth, &servercert)) {/*- tls is needed for DANE */
-			out("Connected to ");
-			outhost();
-			out(" but unable to intiate TLS for DANE\n");
-			flush();
-			die (111);
+	match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
+	if (!tls_init(0, &needtlsauth, &servercert)) {/*- tls is needed for DANE */
+		out("Connected to ");
+		outhost();
+		out(" but unable to intiate TLS for DANE\n");
+		flush();
+		die (111);
+	}
+   	/*- for (i = 1, usage = -1, rp = tlsa_rdata_list; rp; rp = rp->next, i++) { -*/
+	for (j = 0, usage = -1; j < ta.len; ++j) {
+		rp = &(ta.rr[j]);
+		if (!rp->mtype || rp->mtype == 2)
+			match0Or512 = 1;
+		for (i = hexstring.len = 0; i < rp->data_len; i++) {
+			fmt_hexbyte(hex, (rp->data + i)[0]);
+			if (!stralloc_catb(&hexstring, hex, 2))
+				die_nomem();
 		}
-       	for (i = 1, usage = -1, rp = tlsa_rdata_list; rp; rp = rp->next, i++) {
-			if (!rp->mtype || rp->mtype == 2)
-				match0Or512 = 1;
-			cp = bin2hexstring(rp->data, rp->data_len);
-			out("TLSA[");
-			strnum[fmt_ulong(strnum, (unsigned long) i)] = 0;
-			out(strnum);
-			out("]:");
-			out(rp->host);
-			out(" IN TLSA ");
-			out("( ");
-			strnum[fmt_ulong(strnum, (unsigned long) rp->usage)] = 0;
-			out(strnum);
-			out(" ");
-			strnum[fmt_ulong(strnum, (unsigned long) rp->selector)] = 0;
-			out(strnum);
-			out(" ");
-			strnum[fmt_ulong(strnum, (unsigned long) rp->mtype)] = 0;
-			out(strnum);
-			out(" ");
-			out(cp);
-			out(" )\n");
-			flush();
-			if (!(tlsa_status = tlsa_vrfy_records(cp, rp->usage, rp->selector, rp->mtype, &err_str))) {
-				switch(rp->mtype)
-				{
-				case 0:
-					authfullMatch = 1;
-					break;
-				case 1:
-					authsha256 = 1;
-					break;
-				case 2:
-					authsha512 = 1;
-					break;
-				}
-			}
-           	free(cp);
-			if (!rp->usage || rp->usage == 2)
-				usage = 2;
-			if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
+		if (!stralloc_0(&hexstring))
+			die_nomem();
+		cp = hexstring.s;
+		out("TLSA[");
+		strnum[fmt_ulong(strnum, (unsigned long) i)] = 0;
+		out(strnum);
+		out("]:");
+		out(rp->host);
+		out(" IN TLSA ");
+		out("( ");
+		strnum[fmt_ulong(strnum, (unsigned long) rp->usage)] = 0;
+		out(strnum);
+		out(" ");
+		strnum[fmt_ulong(strnum, (unsigned long) rp->selector)] = 0;
+		out(strnum);
+		out(" ");
+		strnum[fmt_ulong(strnum, (unsigned long) rp->mtype)] = 0;
+		out(strnum);
+		out(" ");
+		out(cp);
+		out(" )\n");
+		flush();
+		if (!(tlsa_status = tlsa_vrfy_records(cp, rp->usage, rp->selector, rp->mtype, &err_str))) {
+			switch(rp->mtype)
+			{
+			case 0:
+				authfullMatch = 1;
 				break;
-       	} /*- for (rp = tlsa_rdata_list; rp != NULL; rp = rp->next) */
-		tlsa_cleanup(0); /*- free addresses, tlsa_rdata_list */
-		/*-
-		 * client SHOULD accept a server public key that
-		 * matches either the "3 1 0" record or the "3 1 2" record, but it
-		 * SHOULD NOT accept keys that match only the weaker "3 1 1" record.
-		 * 9.  Digest Algorithm Agility
-		 * https://tools.ietf.org/html/rfc7671
-		 */
-		if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512))) {
-			if (needtlsauth && usage == 2)
-				do_pkix(servercert);
-			code = ehlo();
-		} else /*- dane validation failed */
-			quit("Connected to ", " but recpient failed DANE validation", 534, 1);
-	}  else
-	if (tls_init(1, 0, 0))
+			case 1:
+				authsha256 = 1;
+				break;
+			case 2:
+				authsha512 = 1;
+				break;
+			}
+		}
+       	free(cp);
+		if (!rp->usage || rp->usage == 2)
+			usage = 2;
+		if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
+			break;
+   } /*- for (i = 1, usage == -1, rp = tlsa_rdata_list; rp != NULL; rp = rp->next) */
+	/*-
+	 * client SHOULD accept a server public key that
+	 * matches either the "3 1 0" record or the "3 1 2" record, but it
+	 * SHOULD NOT accept keys that match only the weaker "3 1 1" record.
+	 * 9.  Digest Algorithm Agility
+	 * https://tools.ietf.org/html/rfc7671
+	 */
+	if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512))) {
+		if (needtlsauth && usage == 2)
+			do_pkix(servercert);
 		code = ehlo();
+	} else /*- dane validation failed */
+		quit("Connected to ", " but recpient failed DANE validation", 534, 1);
 	_exit (0);
 	/*- not reached */
 	return (0);
@@ -2667,7 +2701,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.5 2018-05-25 08:33:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.6 2018-05-26 16:00:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
