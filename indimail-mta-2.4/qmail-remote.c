@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.117  2018-05-26 15:59:35+05:30  Cprogrammer
+ * replaced getdns lib with inbuilt dns_tlsarr() function in dns.c
+ *
  * Revision 1.116  2018-05-25 08:44:14+05:30  Cprogrammer
  * removed extra white spaces
  *
@@ -387,6 +390,15 @@
 #include "auto_qmail.h"
 #include "auto_control.h"
 #include "control.h"
+#include "hastlsa.h"
+#ifdef HASTLSA
+#include "tlsarralloc.h"
+#include <netdb.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#else
+#warning "tlsa code not compiled"
+#endif /*- #ifdef HASTLSA */
 #include "dns.h"
 #define _ALLOC_
 #include "alloc.h"
@@ -417,15 +429,6 @@
 #include "ssl_timeoutio.h"
 #include <openssl/x509v3.h>
 #include <openssl/x509.h>
-#include "hastlsa.h"
-#ifdef HASTLSA
-#include <netdb.h>
-#include <querytlsa.h> /*- danetlsa package */
-#include <openssl/bio.h>
-#include <openssl/err.h>
-#else
-#warning "tlsa code not compiled"
-#endif /*- #ifdef HASTLSA */
 #include "auth_cram.h"
 #include "auth_digest_md5.h"
 #include "hastlsv1_1_client.h"
@@ -512,6 +515,8 @@ struct constmap mapnosigndoms;
 
 #ifdef HASTLSA
 char           *do_tlsa = 0;
+tlsarralloc     ta = { 0 };
+stralloc        hexstring = { 0 };
 #endif
 
 void            temp_nomem();
@@ -1179,7 +1184,7 @@ int             maxehlokwlen = 0;
 unsigned long
 ehlo()
 {
-	stralloc       *sa;
+	stralloc       *saptr;
 	char           *s, *e, *p;
 	unsigned long   code;
 
@@ -1202,17 +1207,17 @@ ehlo()
 
 		if (!saa_readyplus(&ehlokw, 1))
 			temp_nomem();
-		sa = ehlokw.sa + ehlokw.len++;
+		saptr = ehlokw.sa + ehlokw.len++;
 		if (ehlokw.len > maxehlokwlen)
-			*sa = sauninit;
+			*saptr = sauninit;
 		else
-			sa->len = 0;
+			saptr->len = 0;
 
 		/*- smtptext is known to end in a '\n' */
 		for (p = (s += 4);; ++p) {
 			if (*p == '\n' || *p == ' ' || *p == '\t') {
 				if (!wasspace)
-					if (!stralloc_catb(sa, s, p - s) || !stralloc_0(sa))
+					if (!stralloc_catb(saptr, s, p - s) || !stralloc_0(saptr))
 						temp_nomem();
 				if (*p == '\n')
 					break;
@@ -1229,7 +1234,7 @@ ehlo()
 		 * keyword should consist of alpha-num and '-'
 		 * broken AUTH might use '=' instead of space
 		 */
-		for (p = sa->s; *p; ++p) {
+		for (p = saptr->s; *p; ++p) {
 			if (*p == '=') {
 				*p = 0;
 				break;
@@ -1322,7 +1327,7 @@ char           *partner_fqdn = 0;
 #define SSL_ST_BEFORE 0x4000
 #endif
 void
-tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
+tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *saptr)
 {
 	char            ch;
 	int             i, state;
@@ -1334,9 +1339,9 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 		out((char *) s3);
 	if (s4)
 		out((char *) s4);
-	if (sa && sa->len) {
-		for (i = 0; i < sa->len; ++i) {
-			ch = sa->s[i];
+	if (saptr && saptr->len) {
+		for (i = 0; i < saptr->len; ++i) {
+			ch = saptr->s[i];
 			if (ch < 33)
 				ch = '?';
 			if (ch > 126)
@@ -1625,11 +1630,11 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	}
 
 	if (!smtps) {
-		stralloc       *sa = ehlokw.sa;
+		stralloc       *saptr = ehlokw.sa;
 		unsigned int    len = ehlokw.len;
 
 		/*- look for STARTTLS among EHLO keywords */
-		for (; len && case_diffs(sa->s, "STARTTLS"); ++sa, --len);
+		for (; len && case_diffs(saptr->s, "STARTTLS"); ++saptr, --len);
 		if (!len) {
 			if (!_needtlsauth)
 				return (0);
@@ -1798,19 +1803,6 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 
 #ifdef HASTLSA
 void
-tlsa_cleanup()
-{
-	if (addresses) {
-		freeaddrinfo(addresses);
-		addresses = (addrinf *) 0;
-	}
-	if (tlsa_rdata_list) {
-		free_tlsa(tlsa_rdata_list);
-		tlsa_rdata_list = (tlsa_rdata *) 0;
-	}
-}
-
-void
 tlsa_error(char *str)
 {
 	out("Z");
@@ -1822,25 +1814,39 @@ tlsa_error(char *str)
 		temp_nomem();
 	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
-	tlsa_cleanup();
 	zerodie("Z", -1);
 }
 
-stralloc temphost = { 0 };
+stralloc        temphost = { 0 };
+stralloc        sa = { 0 };
 void
 get_tlsa_rr(char *mxhost, int port)
 {
-	int             err;
+	char            strnum[FMT_ULONG];
+	int             r;
 
-	if (temphost.len && !str_diff(temphost.s, mxhost))
+	if (temphost.len && !str_diffn(temphost.s, mxhost, temphost.len))
 		return;
 	if (!stralloc_copys(&temphost, mxhost) || !stralloc_0(&temphost))
 		temp_nomem();
-	if ((err = do_tlsa_query(mxhost, port, 1)))
-		tlsa_error(get_tlsa_err_str(err));
-	else
-	if (!tlsa_rdata_list)
-		tlsa_cleanup();
+	if (!stralloc_copyb(&sa, "_", 1))
+		temp_nomem();
+	if (!stralloc_catb(&sa, strnum, fmt_uint(strnum, port)))
+		temp_nomem();
+	if (!stralloc_catb(&sa, "._tcp.", 6))
+		temp_nomem();
+	if (!stralloc_cats(&sa, mxhost))
+		temp_nomem();
+	r = dns_tlsarr(&ta, &sa);
+	switch (r)
+	{
+	case DNS_HARD:
+		perm_dns();
+	case DNS_SOFT:
+		temp_dns();
+	case DNS_MEM:
+		temp_nomem();
+	}
 	return;
 }
 
@@ -1874,9 +1880,10 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	X509           *xs = 0;
 	STACK_OF(X509) *sk;
 	static char     errbuf[256];
-	char            buffer[1024];
+	char            buffer[1024], hex[2];
 	unsigned char   md_value[EVP_MAX_MD_SIZE];
-	unsigned char  *ptr, *cp;
+	unsigned char  *ptr;
+	char           *cp;
 	int             i, len;
 	unsigned int    md_len;
 
@@ -1941,7 +1948,6 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	 * for Usage 2, check the last  certificate - sk_X509_value(sk, sk_509_num(sk) - 1)
 	 * for Usage 3, check the first certificate - sk_X509_value(sk, 0)
 	 */
-	/*- for (i = (usage == 2 ? 1 : 0); i < (usage == 2 ? sk_X509_num(sk) : 1); i++) -*/
 	i = (usage == 2 ? sk_X509_num(sk) - 1 : 0);
 	xs = sk_X509_value(sk, i);
 	/*-
@@ -2014,13 +2020,15 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	/*- SHA512/SHA256 fingerprint of full certificate */
 	if ((match_type == 2 || match_type == 1) && selector == 0) {
 		if (!X509_digest(xs, md, md_value, &md_len))
-			tls_quit("ZTLS Unable go get peer cerficatte digest", 0, 0, 0, 0);
-		cp = (unsigned char *) bin2hexstring(md_value, md_len);
-		if (!str_diff(certDataField, (char *) cp)) {
-			free(cp);
-			return (0);
+			tls_quit("ZTLS Unable to get peer cerficatte digest", 0, 0, 0, 0);
+		for (i = hexstring.len = 0; i < md_len; i++) {
+			fmt_hexbyte(hex, (md_value + i)[0]);
+			if (!stralloc_catb(&hexstring, hex, 2))
+				temp_nomem();
 		}
-		free(cp);
+		cp = hexstring.s;
+		if (!str_diffn(certDataField, (char *) cp, hexstring.len))
+			return (0);
 		return (1);
 	}
 	/*- SHA512/SHA256 fingerprint of subjectPublicKeyInfo */
@@ -2045,17 +2053,19 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 		OPENSSL_free(tmpbuf);
 		if (!EVP_DigestFinal_ex(mdctx, md_value, &md_len))
 			tls_quit("ZTLS Unable to compute EVP Digest", 0, 0, 0, 0);
-		cp = (unsigned char *) bin2hexstring(md_value, md_len);
+		for (i = hexstring.len = 0; i < md_len; i++) {
+			fmt_hexbyte(hex, (md_value + i)[0]);
+			if (!stralloc_catb(&hexstring, hex, 2))
+				temp_nomem();
+		}
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		EVP_MD_CTX_free(mdctx);
 #else
 		EVP_MD_CTX_cleanup(mdctx);
 #endif
-		if (!str_diff(certDataField, (char *) cp)) {
-			free(cp);
+		cp = hexstring.s;
+		if (!str_diffn(certDataField, (char *) cp, hexstring.len))
 			return (0);
-		}
-		free(cp);
 		return (1);
 	}
 	return (1);
@@ -2704,12 +2714,13 @@ smtp()
 {
 	unsigned long   code;
 	int             flagbother;
-	int             i, use_size = 0, is_esmtp = 1;
+	int             i, j, use_size = 0, is_esmtp = 1;
 #ifdef HASTLSA
 	char           *cp, *err_str = 0, *servercert = 0;
 	int             tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage;
-	tlsa_rdata     *rp;
+	char            hex[2];
+	tlsarr         *rp;
 #endif
 
 	inside_greeting = 1;
@@ -2742,14 +2753,22 @@ smtp()
  	 */
 #ifdef HASTLSA
 	if (do_tlsa) {
-		if (tlsa_count && tlsa_rdata_list) { /*- do DANE validation */
+		if (ta.len) { /*- do DANE validation */
 			match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
 			if (!tls_init(0, &needtlsauth, &servercert)) /*- tls is needed for DANE */
 				quit("ZConnected to ", " but unable to intiate TLS for DANE", 530, -1);
-			for (usage = -1, rp = tlsa_rdata_list; rp; rp = rp->next) {
+			for (j = 0, usage = -1; j < ta.len; ++j) {
+				rp = &(ta.rr[j]);
 				if (!rp->mtype || rp->mtype == 2)
 					match0Or512 = 1;
-				cp = bin2hexstring(rp->data, rp->data_len);
+				for (i = hexstring.len = 0; i < rp->data_len; i++) {
+					fmt_hexbyte(hex, (rp->data + i)[0]);
+					if (!stralloc_catb(&hexstring, hex, 2))
+						temp_nomem();
+				}
+				if (!stralloc_0(&hexstring))
+					temp_nomem();
+				cp = hexstring.s;
 				if (!(tlsa_status = tlsa_vrfy_records(cp, rp->usage, rp->selector, rp->mtype, &err_str))) {
 					switch(rp->mtype)
 					{
@@ -2769,8 +2788,7 @@ smtp()
 					usage = 2;
 				if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
 					break;
-			} /*- for (rp = tlsa_rdata_list; rp != NULL; rp = rp->next) */
-			tlsa_cleanup(); /*- free addresses, tlsa_rdata_list */
+			} /*- for (j = 0, usage = -1; j < ta.len; ++j) */
 			/*-
 			 * client SHOULD accept a server public key that
 			 * matches either the "3 1 0" record or the "3 1 2" record, but it
@@ -3315,6 +3333,7 @@ main(int argc, char **argv)
 	msgsize = argv[4];
 	recips = argv + 5;
 	getcontrols();
+	dns_init(0);
 	protocol_t = env_get("SMTPS") ? 'S' : 's';
 	use_auth_smtp = env_get("AUTH_SMTP");
 	/*- Per user SMTPROUTE functionality using moresmtproutes.cdb */
@@ -3574,7 +3593,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.116 2018-05-25 08:44:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.117 2018-05-26 15:59:35+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
