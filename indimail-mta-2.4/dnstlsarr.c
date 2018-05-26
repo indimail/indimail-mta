@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.2  2018-05-26 16:10:14+05:30  Cprogrammer
+ * removed leftover debugging code
+ *
  * Revision 1.1  2018-05-26 12:37:25+05:30  Cprogrammer
  * Initial revision
  *
@@ -44,8 +47,6 @@ main(argc, argv)
 	char           *port = "25", *host = (char *) 0;
 	char            hex[2];
 
-	if (!argv[1])
-		_exit(100);
 	while ((opt = getopt(argc,argv,"mp:")) != opteof) {
     	switch(opt)
 		{
@@ -103,7 +104,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.1 2018-05-26 12:37:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.2 2018-05-26 16:10:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
