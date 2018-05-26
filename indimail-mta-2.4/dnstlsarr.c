@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.4  2018-05-26 19:17:35+05:30  Cprogrammer
+ * fixed program name in usage
+ *
  * Revision 1.3  2018-05-26 19:08:41+05:30  Cprogrammer
  * removed -m option to query mx records
  *
@@ -35,7 +38,7 @@ die_nomem()
 void
 usage()
 {
-	substdio_puts(subfderr,      "usage: dnstlsa [-p port] host\n");
+	substdio_puts(subfderr,      "usage: dnstlsarr [-p port] host\n");
 	substdio_putsflush(subfderr, "         -p port  port to connect to\n");
 	_exit (100);
 }
@@ -104,7 +107,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.3 2018-05-26 19:08:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.4 2018-05-26 19:17:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
