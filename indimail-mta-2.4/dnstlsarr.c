@@ -7,7 +7,7 @@
 #include "substdio.h"
 #include "subfd.h"
 #include "exit.h"
-#ifdef HHASTLSA
+#ifdef HASTLSA
 #include "stralloc.h"
 #include "fmt.h"
 #include "dns.h"
