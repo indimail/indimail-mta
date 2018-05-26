@@ -34,7 +34,7 @@ mv=/bin/mv
 ####################################
 nodksignature=0
 noclamav=1
-nogetdns=1
+notlsarr=0
 tcpserver_plugin=1
 dkimkeyfn=default
 
@@ -355,10 +355,12 @@ ${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
     --hash-size=65536 --save-interval=5 --whitelist=greylist.white
 
+if [ $notlsarr -eq 0 ] ; then
 # qmail-daned tlsa daemon
 ${prefix}/sbin/svctool --tlsa=1998 --servicedir=$servicedir \
     --timeout-days=30 --context-file=tlsa.context \
     --hash-size=65536 --save-interval=5 --whitelist=tlsa.white
+fi
 
 # qmail-qmtpd service
 ${prefix}/sbin/svctool --qmtp=209 --servicedir=$servicedir --qbase=${qbase} \
@@ -483,14 +485,6 @@ fi
 echo "Checking Installed Permissions"
 if [ -f ${libexecdir}/instcheck ] ; then
 	${libexecdir}/instcheck > /dev/null 2>&1
-fi
-
-if [ $nogetdns -eq 0 ] ; then
-	if [ -x /usr/sbin/unbound-anchor -a ! -f ${qsysconfdir}/certs/getdns-root.key ] ; then
-		/usr/sbin/unbound-anchor -a /etc/indimail/certs/getdns-root.key || true
-	else
-		echo "/usr/sbin/unbound-anchor: No such file for directory" 1>&2
-	fi
 fi
 
 #
