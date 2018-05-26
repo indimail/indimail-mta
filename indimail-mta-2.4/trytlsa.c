@@ -1,8 +1,9 @@
-#include "tlsaquery.h"
+#include "stralloc.h"
+#include "tlsarralloc.h"
 int main()
 {
-#if defined(HASTLSA) && defined(TLS)
-	do_tlsa_query("mail.ietf.org", 25);
+#if defined(HASTLSA)
+	dns_tlsarr();
 #else
 	:
 #endif
