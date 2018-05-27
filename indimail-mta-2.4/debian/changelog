@@ -16,8 +16,8 @@ indimail-mta (2.4-7) unstable; urgency=low
   * svctool - skip service refresh if .norefreshsvc file is present in variables directory
   * svctool - added --config=sqlssl for creating SSL/TLS config for mariadb
   * str_cpyb.c - fixed extra bytes getting copied
-  * qmail-dane - DANE implementation for IndiMail/indimail-mta
-  * daneq - Tool to query qmail-dane for TLSA RRs
+  * qmail-daned - DANE implementation for IndiMail/indimail-mta
+  * daneq - Tool to query qmail-daned for TLSA RRs
   * tlsacheck() function to send queries to qmail-dane.
   * qmail-multi.c - fixed qscanq path to sbin
   * fixed do_scan() for badattachment check
@@ -29,5 +29,12 @@ indimail-mta (2.4-7) unstable; urgency=low
   * BUG - do_scan.c - break out of loop if file extension matches a line in badext
   * qmail-remote, qmail-daned - added dane verification code using getdns
   * substdo.c - added subsdio_discard() function to discard unflushed data
+  * qmail-remote.c - added inbuilt DANE verification function using dns_tlsarr() function
+  * qmail-remote.c - added DANE verification function via qmail-daned
+  * qmail-remote.c - added tlsadomains control file check
+  * qmail-daned.c - removed DANE verification via external DANEPROG script
+  * qmail-daned.c - use dns_tlsarr() function.
+  * tlsacheck.c - modified for qmail-remote query/update
+  * daneq.c - modified for qmail-remote query/update
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 24 May 2018 16:25:27 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 27 May 2018 23:40:08 +0530

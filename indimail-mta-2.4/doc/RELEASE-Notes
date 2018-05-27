@@ -1,4 +1,4 @@
-DATE: Thu May 24 16:25:07 IST 2018
+DATE: Sun May 27 23:40:08 IST 2018
 
 Announcing Release 2.5 of indimail-mta
 
@@ -16,7 +16,7 @@ o svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup
   utility for mysql-community-server
 o BUG - str_cpyb.c - fixed extra bytes getting copied
 o Fixed Bug with VIRTUAL_PKG_LIB env variable
-o qmail-dane(8), daneq(1), tlsacheck(3) - DANE implementation for
+o qmail-daned(8), daneq(1), tlsacheck(3) - DANE implementation for
   indimail-mta
 o qmail-multi - fixed qscanq path to sbin
 o fixed do_scan() for badattachment check
@@ -26,6 +26,14 @@ o BUG - do_scan.c - break out of loop if file extension matches a line in badext
 o dnsmxip - print host along with ip
 o qmail-remote, qmail-daned - added dane verification code using getdns
 o substdo.c - added subsdio_discard() function to discard unflushed data
+o dns.c - added dns_tlsarr() function to query TLSA records
+o qmail-remote.c - added inbuilt DANE verification function using dns_tlsarr() function
+o qmail-remote.c - added DANE verification function via qmail-daned
+o qmail-remote.c - added tlsadomains control file check
+o qmail-daned.c - removed DANE verification via external DANEPROG script
+o qmail-daned.c - use dns_tlsarr() function.
+o tlsacheck.c - modified for qmail-remote query/update
+o daneq.c - modified for qmail-remote query/update
 
 indimail-mta has RPM / DEB / yum / apt repository for most of the
 Linux Distros at
