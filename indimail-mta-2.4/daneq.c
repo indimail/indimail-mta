@@ -1,7 +1,7 @@
 /*
  * $Log: daneq.c,v $
  * Revision 1.3  2018-05-27 22:15:49+05:30  mbhangui
- * *** empty log message ***
+ * added defintions for qmail-daned modes
  *
  * Revision 1.2  2018-05-27 17:47:16+05:30  Cprogrammer
  * added option for qmail-remote to query/update records
