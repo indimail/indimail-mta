@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.119 2018-05-27 17:49:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.120 2018-05-27 22:18:01+05:30 mbhangui Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -22,6 +22,7 @@
 #include "hastlsa.h"
 #ifdef HASTLSA
 #include "tlsarralloc.h"
+#include "fn_handler.h"
 #include <netdb.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
@@ -63,6 +64,9 @@
 #include "hastlsv1_1_client.h"
 #include "hastlsv1_2_client.h"
 #endif /*- #ifdef TLS */
+#ifdef HASTLSA
+#include "tlsacheck.h"
+#endif
 
 #define EHLO 1
 #define HUGESMTPTEXT  5000
@@ -144,6 +148,7 @@ struct constmap mapnosigndoms;
 
 #ifdef HASTLSA
 char           *do_tlsa = 0;
+int             use_daned = 0;
 tlsarralloc     ta = { 0 };
 stralloc        hexstring = { 0 };
 #endif
@@ -296,7 +301,8 @@ void
 zerodie(char *s1, int succ)
 {
 	if (ssl) {
-		while (SSL_shutdown(ssl) == 0);
+		while (SSL_shutdown(ssl) == 0)
+			usleep(100);
 		SSL_free(ssl);
 	}
 	zero();
@@ -670,7 +676,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 
 	if (!stralloc_copys(&smtptext, ""))
 		temp_nomem();
-	temp_noconn_out("ZSorry, I wasn't able to establish an ");
+	temp_noconn_out("ZSorry, I wasn't able to establish a ");
 	temp_noconn_out((protocol_t == 'q' || mxps) ? "QMTP connection for " : "SMTP connection for ");
 	if (substdio_put(subfdoutsmall, h->s, h->len) == -1)
 		_exit(0);
@@ -707,7 +713,7 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 {
 	char            strnum[FMT_ULONG];
 
-	temp_noconn_out("ZSorry, I wasn't able to establish an QMTP connection for ");
+	temp_noconn_out("ZSorry, I wasn't able to establish a QMTP connection for ");
 	if (substdio_put(subfdoutsmall, h->s, h->len) == -1)
 		_exit(0);
 	if (ip) {
@@ -2239,7 +2245,7 @@ temp_proto()
  *
  *  - 12801, 12817, 12833, 12849, 12865, ..., 13041: QMTP. If the client supports MXPS and
  *  QMTP, it tries a QMTP connection to port 209. If the client does not support MXPS or QMTP,
- *  or if the QMTP connection attempt fails, the client tries an SMTP connection to port 25 as
+ *  or if the QMTP connection attempt fails, the client tries a SMTP connection to port 25 as
  *  usual. The client does not try SMTP if the QMTP connection attempt succeeds but mail
  *  delivery through that connection fails.
  */
@@ -2364,6 +2370,36 @@ qmtp(stralloc *h, char *ip, int port)
 	}
 }
 
+#ifdef HASTLSA
+void
+timeoutfn()
+{
+	out("Zerror connecting to DANE verification service. (#4.4.2)\n");
+	if (!stralloc_copys(&smtptext, "Zerror connecting to DANE verification service. (#4.4.2)\n"))
+		temp_nomem();
+	if (setsmtptext(0, protocol_t))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
+}
+
+void
+err_tmpfail(char *arg)
+{
+	out("ZTemporory failure with DANE verification service [");
+	out(arg);
+	out("]. (#4.3.0)\n");
+	if (!stralloc_copys(&smtptext, "ZTemporory failure with DANE verification service ["))
+		temp_nomem();
+	if (!stralloc_cats(&smtptext, arg))
+		temp_nomem();
+	if (!stralloc_catb(&smtptext, "]. (#4.3.0)\n", 12))
+		temp_nomem();
+	if (setsmtptext(0, protocol_t))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
+}
+#endif
+
 void
 smtp()
 {
@@ -2374,7 +2410,7 @@ smtp()
 	char           *err_str = 0, *servercert = 0;
 	int             tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage;
-	char            hex[2];
+	char            hex[2], rbuf[2];
 	tlsarr         *rp;
 #endif
 
@@ -2449,11 +2485,15 @@ smtp()
 		 * https://tools.ietf.org/html/rfc7671
 		 */
 		if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512))) {
+			(void) tlsacheck(do_tlsa, partner_fqdn, 2, rbuf, timeoutfn, err_tmpfail);
 			if (needtlsauth && (!usage || usage == 2))
 				do_pkix(servercert);
 			code = ehlo();
-		} else /*- dane validation failed */
+		} else { /*- dane validation failed */
+			if (use_daned)
+				(void) tlsacheck(do_tlsa, partner_fqdn, 3, rbuf, timeoutfn, err_tmpfail);
 			quit("DConnected to ", " but recpient failed DANE validation", 534, 1);
+		}
 	} else /*- no tlsa rr records */
 	if (tls_init(1, 0, 0))
 		code = ehlo();
@@ -2966,6 +3006,10 @@ main(int argc, char **argv)
 	unsigned long   random, prefme;
 	char          **recips;
 	char           *relayhost, *x;
+#ifdef HASTLSA
+	int             e;
+	char            rbuf[2];
+#endif
 
 	sig_pipeignore();
 	if (argc < 6)
@@ -3152,6 +3196,10 @@ main(int argc, char **argv)
 	if (i >= ip.len)
 		perm_ambigmx();
 	x = 0;
+#ifdef HASTLSA
+	if (!relayhost)
+		do_tlsa = env_get("DANE_VERIFICATION");
+#endif
 	for (i = j = 0; i < ip.len; ++i) {
 #ifdef MXPS
 		mxps = 0;
@@ -3164,6 +3212,26 @@ main(int argc, char **argv)
 		{
 			if (flagtcpto && tcpto(&ip.ix[i], min_penalty))
 				continue;
+#ifdef HASTLSA
+			use_daned = 0;
+			if (do_tlsa) {
+				for (x = do_tlsa; *x; x++)
+					if (*x == '@')
+						break;
+				if (*x == '@') {
+					/*- connect to qmail-daned */
+					e = tlsacheck(do_tlsa, ip.ix[i].fqdn, 1, rbuf, timeoutfn, err_tmpfail);
+					if (e && rbuf[1] == RECORD_OK)
+						do_tlsa = (char *) 0;
+					else
+					if (e && rbuf[1] == RECORD_NOVRFY)
+						quit("DConnected to ", " but recpient failed DANE validation", 534, 1);
+					else
+					if (!e)
+						use_daned = 1; /*- do inbuilt DANE Verification and update qmail-daned */
+				}
+			}
+#endif
 #ifdef IPV6
 			if ((smtpfd = (ip.ix[i].af == AF_INET ? socket_tcp4() : socket_tcp6())) == -1)
 #else
@@ -3180,7 +3248,7 @@ main(int argc, char **argv)
 			x[j++] = ',';
 			x[j] = 0;
 #ifdef HASTLSA
-			if (!relayhost && (do_tlsa = env_get("DANE_VERIFICATION"))) {
+			if (!relayhost && do_tlsa) {
 				switch (get_tlsa_rr(ip.ix[i].fqdn, port))
 				{
 				case DNS_HARD:
@@ -3252,7 +3320,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.119 2018-05-27 17:49:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.120 2018-05-27 22:18:01+05:30 mbhangui Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3260,6 +3328,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.120  2018-05-27 22:18:01+05:30  mbhangui
+ * added DANE verication using qmail-daned
+ *
  * Revision 1.119  2018-05-27 17:49:02+05:30  Cprogrammer
  * refactored code for TLSA
  *
