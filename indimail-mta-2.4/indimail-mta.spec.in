@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.163 2018-05-26 15:46:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.164 2018-05-27 14:11:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -936,7 +936,6 @@ done
 %attr(755,root,root)                    %{libexecdir}/pinq
 %attr(755,root,root)                    %{libexecdir}/qail
 %attr(755,root,root)                    %{libexecdir}/qpq
-%attr(755,root,root)                    %{libexecdir}/daneprog
 
 %if %fedorareview == 0
 %docdir %{mandir}
