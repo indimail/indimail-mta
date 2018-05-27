@@ -2517,7 +2517,7 @@ datetime.h exit.h constmap.h tcpto.h timeoutconn.h timeoutread.h \
 timeoutwrite.h env.h uint32.h haveip6.h socket.h variables.h \
 byte.h fmt.h wait.h hastlsv1_1_client.h hastlsv1_2_client.h \
 auth_digest_md5.h auto_control.h hastlsa.h tlsacheck.h fn_handler.h \
-conf-tls conf-ip conf-batv conf-mxps
+tlsarralloc.h conf-tls conf-ip conf-batv conf-mxps
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
 
 qmail-rspawn: \
@@ -5710,14 +5710,15 @@ dns.lib tls.lib
 	`cat dns.lib tls.lib` -lm
 
 qmail-daned.o: \
-compile qmail-daned.c sgetopt.h auto_qmail.h \
-fmt.h str.h subfd.h byte.h strerr.h scan.h getln.h \
-env.h stralloc.h constmap.h control.h error.h \
-uint32.h open.h variables.h sig.h haveip6.h \
-haveip6.h auto_control.h wait.h tlsacheck.h \
-dns.h dnsdoe.h ip.h ipalloc.h now.h \
-hastlsa.h conf-ip conf-tls
-	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls` \
+compile qmail-daned.c hastlsa.h subfd.h exit.h \
+alloc.h stralloc.h tlsarralloc.h \
+case.h socket.h timeoutconn.h timeoutread.h timeoutwrite.h \
+tls.h ssl_timeoutio.h gen_alloc.h gen_allocdefs.h constmap.h \
+env.h control.h strerr.h uint32.h sig.h getln.h fmt.h \
+wait.h str.h byte.h scan.h variables.h open.h error.h \
+cdb.h sgetopt.h auto_qmail.h auto_control.h tlsacheck.h \
+haveip6.h dns.h ip.h ipalloc.h now.h conf-ip conf-tls conf-tlsa
+	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls conf-tlsa` \
 	qmail-daned.c
 
 tlsacheck.o: \
@@ -5746,7 +5747,7 @@ socket_v6loopback.o socket_ip4loopback.o socket_v6any.o
 	socket_v6loopback.o socket_ip4loopback.o socket_v6any.o
 
 daneq.o: \
-compile daneq.c
+compile daneq.c subfd.h sgetopt.h strerr.h tlsacheck.h
 	./compile daneq.c
 
 batv: \
