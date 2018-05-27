@@ -1,8 +1,8 @@
-.TH qmail-dane 8
+.TH qmail-daned 8
 .SH NAME
-qmail-dane \- TLSA Record Checker for \fBIndiMail\fR
+qmail-daned \- TLSA Record Checker for \fBIndiMail\fR
 .SH SYNOPSIS
-.B qmail-dane
+.B qmail-daned
 [\c
 .B \-t
 .I timeout (days)\c
@@ -26,14 +26,14 @@ qmail-dane \- TLSA Record Checker for \fBIndiMail\fR
 .IR whitelist_file
 [.cdb]
 ]\ [\c
-.B \-i
+.B \-T
 .IR tlsadomains_file
 [.cdb]
 ]
 .I ipaddr contextFile
 
 .SH DESCRIPTION
-\fBqmail-dane\fR is a daemon to check DNS resource records for the
+\fBqmail-daned\fR is a daemon to check DNS resource records for the
 DANE protocol. ”DANE” defines the protocol for storing TLS certificates
 in the DNS for a variety of applications using them. DNS-based
 Authentication of Named Entities (DANE) is a great feature that uses the
@@ -41,90 +41,56 @@ advantages of a DNSSEC signed zone in order to tell the client which TLS
 certificate one has to expect when connecting to a secure destination
 over HTTPS or SMTPS.
 
-\fBqmail-dane\fR is a TLSA record checker daemon responding to UDP query
+\fBqmail-daned\fR is a DANE verification daemon responding to UDP query
 packets, typically sent by a using \fBtlsacheck(3)\fR function in
-\fBqmail-remote(8)\fR. The query packet consists of the sending the domain
-name. If the domain was previously successful for a tlsa check, and was
-last queried within \fItimeout_days\fR, the check succeeds. Otherwise the
-domain name supplied is added to a in memory TLSA database to check against
-future queries, and the check fails (meaning \fBqmail-remote(8)\fR will
-reject the message).
+\fBqmail-remote(8)\fR. The query packet consists of the sending the MX
+domain name. If the domain was previously successful for a tlsa check, and
+was last queried within \fItimeout_days\fR, the check succeeds. Otherwise
+the domain name supplied and the result of DANE verfication is added to a
+in memory TLSA database to check against future queries, and the check
+fails (meaning \fBqmail-remote(8)\fR will reject the message).
 
-\fBqmail-dane\fR doesn't to the TLSA verification by itself, but rather
-requires an external program defined by the DANEPROG environment variable.
-The domain name is passed as an argument to this program. This
-environment variable should be a path to a program/script which can check
-resource records for the DANE protocol. An example of such a program is
-danetool(1) from the GnuTLS package.
-
-.EX
-#!/bin/sh
-if [ ! -x /usr/bin/host ] ; then
-	echo "/usr/bin/host from bind-utils package not found" 1>&2
-	exit 111
-elif [ ! -x /usr/bin/danetool ] ; then
-	echo "/usr/bin/danetool from gnutls-utils package not found" 1>&2
-	exit 111
-fi
-if [ -x /usr/bin/ipcalc ] ; then
-	ipcalc -c $1 >/dev/null 2>&1
-	if [ $? -eq 0 ] ; then
-		mx=$1
-	else
-		mx=`/usr/bin/host -tmx $1 | sort -g -k 6 | head -1 | awk '{print $7}' | sed 's/.$//'`
-	fi
-else
-	if [[ $1 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-		mx=$1
-	else
-		mx=`/usr/bin/host -tmx $1 | sort -g -k 6 | head -1 | awk '{print $7}' | sed 's/.$//'`
-	fi
-fi
-cd /tmp
-exec /usr/bin/danetool --quiet --check $mx --proto tcp --starttls-proto=smtp
-.EE
-
-\fBqmail-dane\fR maintains its database in memory. Periodic backups of the
+\fBqmail-daned\fR maintains its database in memory. Periodic backups of the
 database are made to \fIcontextFile\fR on the disk, to enable
-\fBqmail-dane\fR to start with existing tlsa verification data, in case of
+\fBqmail-daned\fR to start with existing tlsa verification data, in case of
 restart. To keep the in-memory search as efficient as possible, entries
 older than \fItimeout_days\fR are expired during every request. To keep
 the in-memory database as small as possible, records older than
 \fItimeout_days\fR are periodically removed. The default interval is 5
 minutes and can be changed by specifiying the \fB-f\fR option.  You can
 force removal of expired records by issuing \fISIGUSR2\fR signal to
-\fBqmail-dane\fR.  \fBqmail-dane\fR also backups the in-memory database to
+\fBqmail-daned\fR.  \fBqmail-daned\fR also backups the in-memory database to
 \fIcontextFile\fR on receipt of \fISIGTERM\fR or \fISIGUSR1\fR signal. The
 \fIcontextFile\fR and its containing directory should be writeable by the
-user with which \fBqmail-dane\fR process runs. At start-up the file
+user with which \fBqmail-daned\fR process runs. At start-up the file
 \fIcontextFile\fR is read and all records older than \fItimeout\fR days are
-expired. \fBqmail-dane\fR can maintain an internal hash table for fast
+expired. \fBqmail-daned\fR can maintain an internal hash table for fast
 domain lookup using the \fBhsearch(3)\fR function.
 
 A control file having the list of domains for which TLSA records needs
 to be verified, can be maintained in a control file, specified by the
-\fB-i\fR \fIfilename\fR option. If this control file is present, TLSA
+\fB-T\fR \fIfilename\fR option. If this control file is present, TLSA
 verification will be skipped for all domains not in this file. If a file
-with the name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-dane\fR will use
+with the name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-daned\fR will use
 \fBcdb(3)\fR lookup in addition to the normal in-memory search in a table
-of tlsa verification enforced domains. \fBqmail-dane\fR re-reads this list
+of tlsa verification enforced domains. \fBqmail-daned\fR re-reads this list
 of domains on receipt of signal \fISIGHUP\fR.
 
 A whitelist of domains not subject to tlsa checking can be specified to
-\fBqmail-dane\fR by the \fB-w\fR \fIfilename\fR option. If a file with the
-name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-dane\fR will use \fBcdb(3)\fR
+\fBqmail-daned\fR by the \fB-w\fR \fIfilename\fR option. If a file with the
+name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-daned\fR will use \fBcdb(3)\fR
 lookup in addition to the normal in-memory search in a table of whitelisted
-domains. \fBqmail-dane\fR re-reads the whitelist on receipt of signal
+domains. \fBqmail-daned\fR re-reads the whitelist on receipt of signal
 \fISIGHUP\fR.
 
-\fBqmail-dane\fR listens on IP address \fIipaddr\fR, port 1998 for incoming
+\fBqmail-daned\fR listens on IP address \fIipaddr\fR, port 1998 for incoming
 UDP queries. 127.0.0.1 (the loopback address) is recommended for
-\fIipaddr\fR if \fBqmail-dane\fR is to serve queries on the same machine.
-You can specify :: for \fBqmail-dane\fR to listen on wildcard IPV6 address.
-Specifiying * for \fIipaddr\fR causes \fBqmail-dane\fR to listen on all
+\fIipaddr\fR if \fBqmail-daned\fR is to serve queries on the same machine.
+You can specify :: for \fBqmail-daned\fR to listen on wildcard IPV6 address.
+Specifiying * for \fIipaddr\fR causes \fBqmail-daned\fR to listen on all
 addresses.
 
-\fBqmail-dane\fR uses \fIMSG_PEEK\fR flag in \fBrecvfrom(2)\fR to determine
+\fBqmail-daned\fR uses \fIMSG_PEEK\fR flag in \fBrecvfrom(2)\fR to determine
 the length of the packet and then reads the entire packet in one operation.
 
 .SH OPTIONS
@@ -158,7 +124,7 @@ Alternate port to listen instead of the default 1998
 
 .SH "QUERY FORMAT"
 Queries to
-\fBqmail-dane\fR are UDP packets containing the domain name(as a string) preceded by
+\fBqmail-daned\fR are UDP packets containing the domain name(as a string) preceded by
 .BR D ,
 with the record terminated by a ASCII 0 character.
 
@@ -170,6 +136,6 @@ with the record terminated by a ASCII 0 character.
 qmail-remote(8), daneq(1), tlsacheck(3), hcreate(3), hsearch(3), hdestroy(3), recvfrom(2).
 
 .SH AUTHORS
-.B qmail-dane
+.B qmail-daned
 is currenty being maintained by Manvendra Bhangui <mbhangui@gmail.com> and
 is part of the IndiMail package at http://www.indimail.org

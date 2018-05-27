@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.8  2018-05-27 14:06:14+05:30  Cprogrammer
+ * removed DANEPROG execution method
+ *
  * Revision 1.7  2018-05-27 12:32:40+05:30  Cprogrammer
  * refactored code. Organized error messages and error codes in child
  *
@@ -22,6 +25,10 @@
  * Initial revision
  *
  */
+#include "hastlsa.h"
+#include "subfd.h"
+#include "exit.h"
+#if defined(HASTLSA) && defined(TLS)
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
@@ -39,8 +46,6 @@
 #include "alloc.h"
 #undef _ALLOC_
 #include "stralloc.h"
-#include "hastlsa.h"
-#ifdef HASTLSA
 #include "tlsarralloc.h"
 #include "case.h"
 #include "socket.h"
@@ -55,13 +60,9 @@
 #include <openssl/x509.h>
 #include <openssl/err.h>
 #include <sys/stat.h>
-#else
-#warning "tlsa code not compiled"
-#endif
 #include "constmap.h"
 #include "env.h"
 #include "control.h"
-#include "subfd.h"
 #include "strerr.h"
 #include "uint32.h"
 #include "sig.h"
@@ -132,10 +133,8 @@ ipalloc         ia = { 0 };
 struct substdio ssin;
 
 extern char   **MakeArgs(char *);
-#ifdef HASTLSA
 tlsarralloc     ta = { 0 };
 stralloc        hexstring = { 0 };
-#endif
 
 void
 out(char *str)
@@ -155,7 +154,6 @@ flush()
 	return;
 }
 
-#if defined(HASTLSA) && defined(TLS)
 void
 die(int e)
 {
@@ -176,9 +174,6 @@ die_nomem_child()
 	substdio_flush(subfderr);
 	die (2);
 }
-#else
-#define die(e) _exit((e))
-#endif
 
 void
 die_nomem()
@@ -889,7 +884,6 @@ print_status(char status)
 	return ("RECORD UNKNOWN");
 }
 
-#if defined(HASTLSA) && defined(TLS)
 #define HUGESMTPTEXT  5000
 GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
 GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, i, n, x, 10, saa_readyplus)
@@ -947,12 +941,10 @@ dropped()
 	logerr("Connected to ");
 	outhost();
 	logerr(" but connection died");
-#ifdef TLS
 	if (ssl_err_str) {
 		logerr(": ");
 		logerr((char *) ssl_err_str);
 	}
-#endif
 	logerrf("\n");
 	die (111);
 }
@@ -962,15 +954,11 @@ saferead(int fd, char *buf, int len)
 {
 	int             r;
 
-#ifdef TLS
 	if (ssl) {
 		if ((r = ssl_timeoutread(ssltimeout, smtpfd, smtpfd, ssl, buf, len)) < 0)
 			ssl_err_str = ssl_error_str();
 	} else
 		r = timeoutread(ssltimeout, smtpfd, buf, len);
-#else
-	r = timeoutread(ssltimeout, smtpfd, buf, len);
-#endif
 	if (r <= 0)
 		dropped();
 	return r;
@@ -981,15 +969,11 @@ safewrite(int fd, char *buf, int len)
 {
 	int             r;
 
-#ifdef TLS
 	if (ssl) {
 		if ((r = ssl_timeoutwrite(ssltimeout, smtpfd, smtpfd, ssl, buf, len)) < 0)
 			ssl_err_str = ssl_error_str();
 	} else
 		r = timeoutwrite(ssltimeout, smtpfd, buf, len);
-#else
-	r = timeoutwrite(ssltimeout, smtpfd, buf, len);
-#endif
 	if (r <= 0)
 		dropped();
 	return r;
@@ -2033,9 +2017,7 @@ do_work(char *host, int port)
 			continue;
 		}
 		partner = ip.ix[i];
-#ifdef TLS
 		partner_fqdn = ip.ix[i].fqdn;
-#endif
 		break;
 	}
 	code = smtpcode();
@@ -2221,94 +2203,6 @@ get_dane_records(char *host)
 	}
 	return (RECORD_FAIL);
 }
-#else
-int
-get_dane_records(char *host)
-{
-	char          **Argv;
-	char            strnum[FMT_ULONG];
-	int             dane_pid, wstat, dane_exitcode, match;
-	int             pipefd[2];
-	char            inbuf[2048];
-
-	if (pipe(pipefd) == -1)
-		strerr_die2sys(111, FATAL, "unable to create pipe: ");
-	substdio_fdbuf(&ssin, read, pipefd[0], inbuf, sizeof(inbuf));
-	switch ((dane_pid = fork()))
-	{
-	case -1:
-		strerr_die2sys(111, FATAL, "unable to fork: ");
-	case 0:
-		if (!stralloc_copys(&daneprogargs, daneprog))
-			_exit(2);
-		if (!stralloc_catb(&daneprogargs, " ", 1))
-			_exit(2);
-		if (!stralloc_cats(&daneprogargs, host))
-			_exit(2);
-		if (!stralloc_0(&daneprogargs))
-			_exit(2);
-		if (!(Argv = MakeArgs(daneprogargs.s)))
-			_exit(2);
-		if (dup2(pipefd[1], 1) == -1 || close(pipefd[0]) == -1)
-			_exit(3);
-		if (dup2(pipefd[1], 2) == -1)
-			_exit(3);
-		if (pipefd[1] != 1 && pipefd[1] != 2)
-			close(pipefd[1]);
-		execv(*Argv, Argv);
-		_exit(4);
-	default:
-		close(pipefd[1]);
-		break;
-	}
-	for (save.len = 0;;) {
-		if (getln(&ssin, &line, &match, '\n') == -1)
-			break;
-		if (!match && !line.len)
-			break;
-		line.len--; /*- remove newline */
-		if (!stralloc_cat(&save, &line))
-			die_nomem();
-		if (!stralloc_0(&save))
-			die_nomem();
-		if (verbose == 2 && substdio_put(subfdout, line.s, line.len) == -1)
-			strerr_die2sys(111, FATAL, "write: ");
-	}
-	close(pipefd[0]);
-	if (substdio_flush(subfdout) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	if (wait_pid(&wstat, dane_pid) != dane_pid) {
-		_exit(111);
-	}
-	if (wait_crashed(wstat)) {
-		logerr("program ");
-		logerr(daneprog);
-		logerrf(" crashed\n");
-		_exit(111);
-	}
-	switch (dane_exitcode = wait_exitcode(wstat))
-	{
-	case 0:
-		return (RECORD_OK);
-	case 1:
-		return (RECORD_NOVRFY);
-	case 2:
-		logerrf("child: out of memory\n");
-		break;
-	case 3:
-		logerrf("child: unable to dup pipefd\n");
-		break;
-	case 4:
-		logerrf("child: exec failed\n");
-		break;
-	default:
-		strnum[fmt_ulong(strnum, (unsigned long) dane_exitcode)] = 0;
-		strerr_warn4(WARN, "error with child: exit code [", strnum, "]", &strerr_sys);
-		break;
-	}
-	return (RECORD_FAIL);
-}
-#endif
 
 /*
  * Responses
@@ -2416,14 +2310,14 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 
 char           *pusage =
 				"usage: qmail-daned [options] ipaddr context_file\n"
-				"Options [ vhtfsw ]\n"
+				"Options [ vhtfswi ]\n"
 				"        [ -v 0, 1 or 2]\n"
 				"        [ -h hash size]\n"
 				"        [ -t timeout (days) ]\n"
 				"        [ -f free interval (min) ]\n"
 				"        [ -s save interval (min) ]\n"
 				"        [ -w whitelist ]\n"
-				"        [ -i tlsadomains ]\n";
+				"        [ -T tlsadomains ]\n";
 int
 main(int argc, char **argv)
 {
@@ -2448,19 +2342,12 @@ main(int argc, char **argv)
 	fd_set          rfds;
 	struct timeval  tv;
 
-#if defined(HASTLSA) && defined(TLS)
 	if (control_init() == -1)
 		die_control("me");
 	if (control_readint(&timeoutconnect, "timeoutconnect") == -1)
 		die_control("timeoutconnect");
 	if (control_rldef(&helohost, "helohost", 1, (char *) 0) == -1)
 		die_control("helohost");
-#else
-	if (!(daneprog = env_get("DANEPROG"))) {
-		logerrf("dane verifier program DANEPROG not defined in environment\n");
-		_exit (111);
-	}
-#endif
 	/*- defaults */
 	save_interval = 5 * 60;    /*- 5 mins */
 	timeout = 7 * 24 * 3600;   /*- 7 days */
@@ -2471,7 +2358,7 @@ main(int argc, char **argv)
 		case 'v':
 			scan_int(optarg, &verbose);
 			break;
-		case 'i':
+		case 'T':
 			tlsadomainsfn = optarg;
 			break;
 		case 'w':
@@ -2750,11 +2637,21 @@ main(int argc, char **argv)
 	} /*- for (buf_len = 0, rdata_len = 0;;) */
 	return (0);
 }
+#else
+#warning "TLSA, TLS code not compiled"
+int
+main()
+{
+	substdio_puts(subfderr, "not compiled with -DHASTLSA & -DTLS. Check conf-tlsa, conf-tls\n");
+	substdio_flush(subfderr);
+	_exit (100);
+}
+#endif
 
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.7 2018-05-27 12:32:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.8 2018-05-27 14:06:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
