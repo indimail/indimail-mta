@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.10  2018-05-28 01:16:18+05:30  Cprogrammer
+ * removed redundant setting of smtptext
+ *
  * Revision 1.9  2018-05-27 17:46:06+05:30  Cprogrammer
  * added option for qmail-remote to query/update records
  *
@@ -886,7 +889,7 @@ GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, i, n, x, 10, saa_readyplus)
 stralloc        saciphers = { 0 }, tlsFilename = { 0 }, clientcert = { 0 };
 stralloc        smtptext = { 0 };
 stralloc        host = { 0 };
-stralloc        rhost = { 0 }; /*- host to which qmail-remote ultimately connects */
+stralloc        rhost = { 0 }; /*- host ip to which qmail-remote ultimately connects */
 stralloc        sauninit = { 0 };
 stralloc        helohost = { 0 };
 SSL_CTX        *ctx;
@@ -1232,7 +1235,7 @@ outsmtptext()
  * code =    0 - temporary failure
  */
 void
-quit(char *prepend, char *append, int code, int e)
+quit(char *prepend, char *append, int e)
 {
 	substdio_putsflush(&smtpto, "QUIT\r\n");
 	/*- waiting for remote side is just too ridiculous */
@@ -1349,25 +1352,10 @@ do_pkix(char *servercert)
 	/*- PKIX */
 	if ((r = SSL_get_verify_result(ssl)) != X509_V_OK) {
 		t = (char *) X509_verify_cert_error_string(r);
-		if (!stralloc_copyb(&smtptext, "TLS unable to verify server with ", 33))
-			die_nomem();
-		if (!stralloc_cats(&smtptext, servercert))
-			die_nomem();
-		if (!stralloc_catb(&smtptext, ": ", 2))
-			die_nomem();
-		if (!stralloc_cats(&smtptext, t))
-			die_nomem();
 		tls_quit("TLS unable to verify server with ", servercert, ": ", t, 0);
 	}
-	if (!(peercert = SSL_get_peer_certificate(ssl))) {
-		if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
-			die_nomem();
-		if (!stralloc_cats(&smtptext, partner_fqdn))
-			die_nomem();
-		if (!stralloc_catb(&smtptext, ": no certificate provided", 25))
-			die_nomem();
+	if (!(peercert = SSL_get_peer_certificate(ssl)))
 		tls_quit("TLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
-	}
 
 	/*-
 	 * RFC 2595 section 2.4: find a matching name
@@ -1400,28 +1388,10 @@ do_pkix(char *servercert)
 				peer.s = (char *) s->data;
 			}
 		}
-		if (peer.len <= 0) {
-			if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
-				die_nomem();
-			if (!stralloc_cats(&smtptext, partner_fqdn))
-				die_nomem();
-			if (!stralloc_catb(&smtptext, ": certificate contains no valid commonName", 42))
-				die_nomem();
+		if (peer.len <= 0)
 			tls_quit("TLS unable to verify server ", partner_fqdn, ": certificate contains no valid commonName", 0, 0);
-		}
-		if (!match_partner((char *) peer.s, peer.len)) {
-			if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
-				die_nomem();
-			if (!stralloc_cats(&smtptext, partner_fqdn))
-				die_nomem();
-			if (!stralloc_catb(&smtptext, ": received certificate for ", 27))
-				die_nomem();
-			if (!stralloc_cat(&smtptext, &peer))
-				die_nomem();
-			if (!stralloc_0(&smtptext))
-				die_nomem();
+		if (!match_partner((char *) peer.s, peer.len))
 			tls_quit("TLS unable to verify server ", partner_fqdn, ": received certificate for ", 0, &peer);
-		}
 	}
 	X509_free(peercert);
 	return;
@@ -1555,12 +1525,6 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		if (!len) {
 			if (!_needtlsauth)
 				return (0);
-			if (!stralloc_copyb(&smtptext, "No TLS achieved while ", 22))
-				die_nomem();
-			if (!stralloc_cats(&smtptext, servercert))
-				die_nomem();
-			if (!stralloc_catb(&smtptext, " exists", 7))
-				die_nomem();
 			tls_quit("No TLS achieved while", tlsFilename.s, " exists", 0, 0);
 		}
 	}
@@ -1600,10 +1564,6 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 			return (0);
 		}
 		t = (char *) ssl_error();
-		if (!stralloc_copyb(&smtptext, "TLS error initializing ctx: ", 28))
-			die_nomem();
-		if (!stralloc_cats(&smtptext, t))
-			die_nomem();
 		SSL_CTX_free(ctx);
 		switch (method_fail)
 		{
@@ -1628,14 +1588,6 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	if (_needtlsauth) {
 		if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
 			t = (char *) ssl_error();
-			if (!stralloc_copyb(&smtptext, "TLS unable to load ", 19))
-				die_nomem();
-			if (!stralloc_cats(&smtptext, servercert))
-				die_nomem();
-			if (!stralloc_catb(&smtptext, ": ", 2))
-				die_nomem();
-			if (!stralloc_cats(&smtptext, t))
-				die_nomem();
 			SSL_CTX_free(ctx);
 			tls_quit("TLS unable to load ", servercert, ": ", t, 0);
 		}
@@ -1653,10 +1605,6 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 			SSL_CTX_free(ctx);
 			return (0);
 		}
-		if (!stralloc_copyb(&smtptext, "TLS error initializing ssl: ", 28))
-			die_nomem();
-		if (!stralloc_cats(&smtptext, t))
-			die_nomem();
 		SSL_CTX_free(ctx);
 		tls_quit("TLS error initializing ssl: ", t, 0, 0, 0);
 	} else
@@ -1693,26 +1641,16 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 			ssl = myssl = (SSL *) 0;
 			if (!_needtlsauth)
 				return (0);
-			if (!stralloc_copyb(&smtptext, "STARTTLS rejected while ", 24))
-				die_nomem();
-			if (!stralloc_cats(&smtptext, tlsFilename.s))
-				die_nomem();
-			if (!stralloc_catb(&smtptext, " exists", 7))
-				die_nomem();
 			tls_quit("STARTTLS rejected while ", tlsFilename.s, " exists", 0, 0);
 		}
 	}
 	ssl = myssl;
 	if (ssl_timeoutconn(ssltimeout, smtpfd, smtpfd, ssl) <= 0) {
 		t = (char *) ssl_error_str();
-		if (!stralloc_copyb(&smtptext, "TLS connect failed: ", 20))
-			die_nomem();
-		if (!stralloc_cats(&smtptext, t))
-			die_nomem();
 		tls_quit("TLS connect failed: ", t, 0, 0, 0);
 	}
 	if (smtps && (code = smtpcode()) != 220) /*- 220 ready for tls */
-		quit("TLS Connected to ", " but greeting failed", code, code);
+		quit("TLS Connected to ", " but greeting failed", code);
 	if (pkix && _needtlsauth)
 		do_pkix(servercert);
 	return (1);
@@ -1795,15 +1733,8 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 		return (-2);
 	}
 	/*- SSL_ctrl(ssl, SSL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, servername); -*/
-	if (!(sk =  SSL_get_peer_cert_chain(ssl))) {
-		if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
-			die_nomem();
-		if (!stralloc_cats(&smtptext, partner_fqdn))
-			die_nomem();
-		if (!stralloc_catb(&smtptext, ": no certificate provided", 25))
-			die_nomem();
+	if (!(sk =  SSL_get_peer_cert_chain(ssl)))
 		tls_quit("TLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
-	}
 	/*- 
 	 * the server certificate is generally presented
 	 * as the first certificate in the stack along with
@@ -2017,13 +1948,13 @@ do_work(char *host, int port)
 	}
 	code = smtpcode();
 	if (code >= 500 && code < 600)
-		quit("Connected to ", " but greeting failed", code, code);
+		quit("Connected to ", " but greeting failed", code);
 	else
 	if (code >= 400 && code < 500)
-		quit("Connected to ", " but greeting failed", code, code);
+		quit("Connected to ", " but greeting failed", code);
 	else
 	if (code != 220)
-		quit("Connected to ", " but greeting failed", code, code);
+		quit("Connected to ", " but greeting failed", code);
 	if (!smtps)
 		code = ehlo();
 	match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
@@ -2075,8 +2006,14 @@ do_work(char *host, int port)
 		if (needtlsauth && usage == 2)
 			do_pkix(servercert);
 		code = ehlo();
-	} else /*- dane validation failed */
-		quit("Connected to ", " but recpient failed DANE validation", 534, 1);
+	} else { /*- dane validation failed */
+		substdio_putsflush(&smtpto, "QUIT\r\n");
+		logerr("Connected to ");
+		outhost();
+		logerr(" but recipient failed DANE validation.\n");
+		substdio_flush(subfderr);
+		die (1);
+	}
 	_exit (0);
 	/*- not reached */
 	return (0);
@@ -2726,7 +2663,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.9 2018-05-27 17:46:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.10 2018-05-28 01:16:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
