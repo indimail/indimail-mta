@@ -48,11 +48,6 @@ svctool: svctool.in mysql_config
 svctool.8: svctool.9 conf-qmail conf-sysconfdir Makefile mysql_config
 	$(edit) svctool.9 > $@
 
-daneprog: \
-warn-auto.sh daneprog.sh
-	cat warn-auto.sh daneprog.sh > daneprog
-	chmod 755 daneprog
-
 addresses.0: \
 addresses.5
 	nroff -man addresses.5 > addresses.0
@@ -1431,7 +1426,7 @@ ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirq
 maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate inewaliases newinclude \
 new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest \
 predate preline printforward printmaillist proc proc+df qaes qail \
-qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl daneprog \
+qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl \
 qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
 qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-pop3d qmail-popbull qmail-poppass \
 qmail-popup qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
