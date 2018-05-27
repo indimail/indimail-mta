@@ -1,380 +1,6 @@
-/*
- * $Log: qmail-remote.c,v $
- * Revision 1.118  2018-05-27 11:18:20+05:30  Cprogrammer
- * check substdio_put() for error
- *
- * Revision 1.117  2018-05-26 15:59:35+05:30  Cprogrammer
- * replaced getdns lib with inbuilt dns_tlsarr() function in dns.c
- *
- * Revision 1.116  2018-05-25 08:44:14+05:30  Cprogrammer
- * removed extra white spaces
- *
- * Revision 1.115  2018-05-25 08:41:09+05:30  Cprogrammer
- * renamed do_dns_query() to do_tlsa_query()
- *
- * Revision 1.114  2018-05-25 08:34:01+05:30  Cprogrammer
- * removed getdns
- *
- * Revision 1.113  2018-05-23 20:15:52+05:30  Cprogrammer
- * added dane verification code
- *
- * Revision 1.112  2018-05-01 01:42:57+05:30  Cprogrammer
- * indented code
- *
- * Revision 1.111  2017-08-26 11:07:08+05:30  Cprogrammer
- * fixed readling of tlsclientmethod control file
- *
- * Revision 1.110  2017-08-24 13:20:24+05:30  Cprogrammer
- * improved logging of TLS method errors
- *
- * Revision 1.109  2017-08-23 13:13:07+05:30  Cprogrammer
- * replaced SSLv23_client_method() with TLS_client_method()
- *
- * Revision 1.108  2017-08-08 23:56:27+05:30  Cprogrammer
- * openssl 1.1.0 port
- *
- * Revision 1.107  2017-05-15 23:21:07+05:30  Cprogrammer
- * fix for SMTPROUTE of the form domain:x.x.x.x::penalty:max_tolerance username password
- *
- * Revision 1.106  2017-05-15 19:18:53+05:30  Cprogrammer
- * use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
- *
- * Revision 1.105  2017-05-15 15:33:50+05:30  Cprogrammer
- * use X-SMTPROUTES env variable for setting artificial smtp routes. SMTPROUTES takes precendence over X-SMTPROUTES
- * bugfix - set port to 25 if relayhost is of the form :relayhost:
- *
- * Revision 1.104  2017-05-08 13:20:21+05:30  Cprogrammer
- * check for tlsv1_1_client_method() and tlsv1_2_client_method()
- *
- * Revision 1.103  2017-05-02 16:39:39+05:30  Cprogrammer
- * added SSL_CTX_free()
- *
- * Revision 1.102  2017-05-02 10:21:48+05:30  Cprogrammer
- * fixed location of tlsclientmethod control file
- *
- * Revision 1.101  2017-04-10 20:44:39+05:30  Cprogrammer
- * use SMTPS if SMTPS environment variable is set
- * added documentation and better variable name for type
- *
- * Revision 1.100  2017-04-06 15:58:00+05:30  Cprogrammer
- * new tls_quit() function to avoid mixed usage of tls_quit(), quit() functions
- *
- * Revision 1.99  2017-03-31 15:27:37+05:30  Cprogrammer
- * smtptext "Sorry I couldn't find any host named" was getting overwritten
- *
- * Revision 1.98  2017-03-31 10:22:46+05:30  Cprogrammer
- * added SMTPSTATUS env variable for success
- *
- * Revision 1.97  2017-03-24 15:34:35+05:30  Cprogrammer
- * fixes for onsuccess, onfailure scripts
- *
- * Revision 1.96  2017-03-21 15:39:33+05:30  Cprogrammer
- * use CERTDIR to override tls/ssl certificates
- *
- * Revision 1.95  2017-03-10 17:58:59+05:30  Cprogrammer
- * added back SSLv23 method
- *
- * Revision 1.94  2017-03-10 11:29:37+05:30  Cprogrammer
- * made TLS client method configurable using control file tlsclientmethod
- *
- * Revision 1.93  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.92  2015-08-24 19:08:34+05:30  Cprogrammer
- * replaced ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
- *
- * Revision 1.91  2014-12-18 11:18:41+05:30  Cprogrammer
- * added helohostbyip
- *
- * Revision 1.90  2014-04-03 21:35:39+05:30  Cprogrammer
- * added ability to disable specific AUTH methods - PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA256
- * CRAM-RIPEMD, DIGEST-MD5
- * use secure authentication methods if SECURE_AUTH env variable is defined
- *
- * Revision 1.89  2014-03-18 14:39:33+05:30  Cprogrammer
- * set environment variable OUTGOINGIP
- *
- * Revision 1.88  2013-09-06 13:53:23+05:30  Cprogrammer
- * set SMTPHOST env variable for ONSUCCESS, ONFAILURE scripts
- * try next mx on helo temp failure
- *
- * Revision 1.87  2013-08-27 08:09:12+05:30  Cprogrammer
- * set SMTPTEXT for local failures
- *
- * Revision 1.86  2013-08-22 11:10:14+05:30  Cprogrammer
- * set env variable SMTPSTATUS as 'D' or 'Z' indicating permanent or temporary failure
- *
- * Revision 1.85  2013-08-21 18:59:06+05:30  Cprogrammer
- * fixed setting of SMTPTEXT env variable for success and failures
- * bypass tls if clientcert.pem is missing
- *
- * Revision 1.84  2012-12-17 15:34:37+05:30  Cprogrammer
- * fix for smtptext during TLS negotiation
- *
- * Revision 1.83  2012-11-25 07:57:25+05:30  Cprogrammer
- * set smtptext for qmtp
- *
- * Revision 1.82  2012-11-24 11:06:04+05:30  Cprogrammer
- * fixed typo (SMTPCODE instead of SMTPTEXT)
- *
- * Revision 1.81  2012-11-24 07:50:45+05:30  Cprogrammer
- * set [S|Q]MTPTEXT and [S|Q]MTPCODE for transient errors
- * unset ONSUCCESS_REMOTE, ONFAILURE_REMOTE, ONTRANSIENT_REMOTE selectively
- * fix SIGSEGV setting SMTPTEXT environment variable
- *
- * Revision 1.80  2012-10-09 18:09:45+05:30  Cprogrammer
- * added DISABLE_CNAME_LOOKUP to bypass dns cname resolution
- *
- * Revision 1.79  2011-12-10 15:24:00+05:30  Cprogrammer
- * added hmac_sha256() function
- *
- * Revision 1.78  2011-12-08 20:32:06+05:30  Cprogrammer
- * fixed compilation error
- *
- * Revision 1.77  2011-12-08 14:48:00+05:30  Cprogrammer
- * added version info for all sub sources
- *
- * Revision 1.76  2011-12-05 15:10:56+05:30  Cprogrammer
- * added version information
- *
- * Revision 1.75  2011-10-29 20:42:53+05:30  Cprogrammer
- * added CRAM-RIPEMD, CRAM-SHA1, DIGEST-MD5 auth methods
- *
- * Revision 1.74  2011-07-08 13:52:25+05:30  Cprogrammer
- * ipv6, ipv4 code organized
- *
- * Revision 1.73  2011-07-03 16:56:26+05:30  Cprogrammer
- * use control_readrandom() to pick up a random line from control file
- *
- * Revision 1.72  2011-01-08 16:30:05+05:30  Cprogrammer
- * use OUTGOINGIP env variable to set local interface address
- *
- * Revision 1.71  2011-01-06 22:40:06+05:30  Cprogrammer
- * added environment variable OUTIP to select OUTGOINGIP
- * added check for correct number of command line arguments
- *
- * Revision 1.70  2010-08-05 20:56:37+05:30  Cprogrammer
- * added cram-md5 authentication
- *
- * Revision 1.69  2010-07-26 19:26:23+05:30  Cprogrammer
- * added default case in switch statement in run_script function()
- *
- * Revision 1.68  2010-07-25 19:48:21+05:30  Cprogrammer
- * replaced success(), failure() script with a single run_script()
- *
- * Revision 1.67  2010-07-24 20:15:31+05:30  Cprogrammer
- * define ERRTEXT env variable for ONSUCCESS_REMOTE, ONFAILURE_REMOTE scripts
- *
- * Revision 1.66  2010-07-24 17:37:52+05:30  Cprogrammer
- * fixed SMTPCODE, SMTPTEXT not getting set for failures
- * fixed logic for quit() function
- * execute failure() script only for permanent failures
- *
- * Revision 1.65  2010-07-20 20:11:12+05:30  Cprogrammer
- * execute program/script on failure if ONFAILURE_REMOTE is defined
- * set SMTPTEXT, SMTPCODE environment variables if success() or failure() function
- * is executed
- *
- * Revision 1.64  2010-07-17 16:21:32+05:30  Cprogrammer
- * use qmail-remote as argv0 when executing ONSUCCESS_REMOTE program
- *
- * Revision 1.63  2010-07-16 15:41:02+05:30  Cprogrammer
- * execute script on successful delivery
- *
- * Revision 1.62  2010-07-08 21:53:42+05:30  Cprogrammer
- * domainbindings based on envelope sender address
- *
- * Revision 1.61  2010-06-27 08:43:43+05:30  Cprogrammer
- * display bind ip (outgoing ip) in error messages for failed connections
- *
- * Revision 1.60  2010-06-24 08:54:30+05:30  Cprogrammer
- * made outgoingip control file name configureable
- *
- * Revision 1.59  2010-05-29 20:54:41+05:30  Cprogrammer
- * environment variable QMTPROUTE, SMTPROUTE takes precedence over control files
- *
- * Revision 1.58  2010-05-29 17:27:27+05:30  Cprogrammer
- * added fallback to SMTP as per MXPS
- *
- * Revision 1.57  2010-05-28 14:25:00+05:30  Cprogrammer
- * indicate protocol in the accepted message
- *
- * Revision 1.56  2010-04-30 13:17:44+05:30  Cprogrammer
- * fixed domainbindings for ipv4 addresses
- *
- * Revision 1.55  2010-04-24 20:13:17+05:30  Cprogrammer
- * ability to use either QMTP or SMTP for clustered domains
- *
- * Revision 1.54  2010-03-25 10:16:24+05:30  Cprogrammer
- * added QMTP support
- *
- * Revision 1.53  2010-02-01 10:11:30+05:30  Cprogrammer
- * fix for xtext function
- *
- * Revision 1.52  2009-12-17 09:15:55+05:30  Cprogrammer
- * log real envelope recipients of messages after host name canonicalization
- * patch by James Raftery
- * log from and recipient on success and failure
- *
- * Revision 1.51  2009-12-05 20:16:03+05:30  Cprogrammer
- * ansic conversion
- *
- * Revision 1.50  2009-11-12 19:29:33+05:30  Cprogrammer
- * record the helo name if rejected (Stupid MS Exchange rejects helo domain)
- *
- * Revision 1.49  2009-09-16 15:45:56+05:30  Cprogrammer
- * do not try next MX for permanent errors
- *
- * Revision 1.48  2009-09-02 11:30:58+05:30  Cprogrammer
- * added Bounce Address Tag Validation - BATV
- *
- * Revision 1.47  2009-08-13 19:09:09+05:30  Cprogrammer
- * code beautified
- *
- * Revision 1.46  2009-05-07 08:47:52+05:30  Cprogrammer
- * made DOMAINBINDINGS file configurable
- *
- * Revision 1.45  2009-05-06 22:56:26+05:30  Cprogrammer
- * use per recipient domain outgoingip
- *
- * Revision 1.44  2009-04-16 11:01:58+05:30  Cprogrammer
- * made min_penalty, max_tolerance configurable through env variables
- *
- * Revision 1.43  2008-09-30 08:42:33+05:30  Cprogrammer
- * have domainbindings take precedence over outgoingips
- *
- * Revision 1.42  2008-09-16 08:25:40+05:30  Cprogrammer
- * fixed case sensitivity
- *
- * Revision 1.41  2008-07-15 20:04:05+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.40  2008-06-01 15:38:32+05:30  Cprogrammer
- * Frederik Vermeulen <qmail-tls akrul inoa.net> 20070408 TLS patch
- *
- * Revision 1.39  2008-02-05 15:32:13+05:30  Cprogrammer
- * added domainbinding functionality
- *
- * Revision 1.38  2007-12-20 13:55:58+05:30  Cprogrammer
- * initialized variable i = 0
- *
- * Revision 1.37  2006-02-17 16:14:53+05:30  Cprogrammer
- * print the host for which SMTP connecton failed
- *
- * Revision 1.36  2005-12-29 14:02:30+05:30  Cprogrammer
- * made min_penalty, max_tolerance configurable.
- * initialized fdmoreroutes to -1
- *
- * Revision 1.35  2005-06-17 21:49:50+05:30  Cprogrammer
- * ipv6 support
- * replaced struct ip_address and struct ip6_address with shorter typedefs
- *
- * Revision 1.34  2005-06-11 21:46:52+05:30  Cprogrammer
- * changes for ipv6
- *
- * Revision 1.33  2005-04-05 20:06:34+05:30  Cprogrammer
- * use Authenticated SMTP only if AUTH_SMTP is defined
- *
- * Revision 1.32  2005-04-03 14:29:59+05:30  Cprogrammer
- * added authenticated SMTP methods
- *
- * Revision 1.31  2005-02-14 23:06:00+05:30  Cprogrammer
- * added moresmtproutes
- *
- * Revision 1.30  2004-11-03 23:42:11+05:30  Cprogrammer
- * BUG - memory error erroneously skipped
- *
- * Revision 1.29  2004-10-22 20:29:30+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.28  2004-10-22 15:37:55+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.27  2004-10-11 13:58:50+05:30  Cprogrammer
- * prevent inclusion of alloc.h with prototypes
- *
- * Revision 1.26  2004-07-30 18:05:19+05:30  Cprogrammer
- * TLS code overhaul - Fredrik Vermeulen 20040419
- *
- * Revision 1.25  2004-07-17 21:21:26+05:30  Cprogrammer
- * added qqeh code
- * added RCS log
- *
- * Revision 1.24  2004-03-17 12:16:40+05:30  Cprogrammer
- * *** empty log message ***
- *
- * Revision 1.23  2003-12-05 14:46:51+05:30  Cprogrammer
- * comment for arguments corrected
- *
- * Revision 1.22  2003-11-25 20:46:01+05:30  Cprogrammer
- * do not compare with mapsmtproutes if smtproutes is absent
- *
- * Revision 1.21  2003-10-23 01:25:33+05:30  Cprogrammer
- * replaced strcmp with str_diffn
- * fixed compilation warnings
- *
- * Revision 1.20  2003-10-13 10:03:59+05:30  Cprogrammer
- * try ESMTP SIZE extention of remote smtp supports it
- *
- * Revision 1.19  2003-10-01 19:05:39+05:30  Cprogrammer
- * changed return type to int
- *
- * Revision 1.18  2003-09-29 16:48:38+05:30  Cprogrammer
- * corrected clobbering of smtptext by smtpcode() when STARTTLS was done
- *
- * Revision 1.17  2003-08-02 16:15:54+05:30  Cprogrammer
- * use ehlo protocol when using authenticated SMTP
- *
- * Revision 1.16  2003-07-20 17:13:24+05:30  Cprogrammer
- * TLS patch
- *
- * Revision 1.15  2003-07-07 00:05:47+05:30  Cprogrammer
- * option to ship mails through AUTH SMTP
- *
- * Revision 1.14  2002-12-16 20:23:25+05:30  Cprogrammer
- * added display of port in connection errors
- *
- * Revision 1.13  2002-09-14 20:50:01+05:30  Cprogrammer
- * corrected display of ip addresses in temp_noconn()
- *
- * Revision 1.12  2002-09-11 15:41:02+05:30  Cprogrammer
- * changed error messages to display the host
- *
- * Revision 1.11  2002-09-11 11:48:13+05:30  Cprogrammer
- * try next MX if connection to smtp port dies before remote end replies with a greeting
- *
- * Revision 1.10  2002-09-10 20:05:22+05:30  Cprogrammer
- * try next MX also for permanent errors (rfc 2821)
- *
- * Revision 1.9  2002-09-08 23:47:12+05:30  Cprogrammer
- * RFC 2821 support - Retry next MX on transient errors
- *
- * Revision 1.8  2002-09-07 20:35:41+05:30  Cprogrammer
- * removed unecessary stralloc_ready()
- *
- * Revision 1.7  2002-08-16 19:49:57+05:30  Cprogrammer
- * added printing of correct control directory in perm_ambigmx()
- *
- * Revision 1.6  2002-08-16 19:31:53+05:30  Cprogrammer
- * added printing of the correct control directory
- *
- * Revision 1.5  2002-08-15 19:22:44+05:30  Cprogrammer
- * change for configurable control dir
- *
- * Revision 1.4  2002-08-14 15:00:10+05:30  Cprogrammer
- * RFC 2821 compliance
- *
- * Revision 1.3  2002-03-19 20:45:04+05:30  Cprogrammer
- * included env.h to supress compiler warnings
- *
- * Revision 1.2  2002-03-13 11:29:09+05:30  Cprogrammer
- * code indentation
- * removed mysql code
- * added code to get variables from environment variable SMTPROUTE
- *
- * Revision 1.1  2001-12-23 00:55:49+05:30  Cprogrammer
- * Initial revision
- *
+/*-
+ * RCS log at bottom
+ * $Id: qmail-remote.c,v 1.119 2018-05-27 17:49:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -780,6 +406,17 @@ temp_oserr()
 }
 
 void
+temp_write()
+{
+	out("ZUnable to write message. (#4.3.0)\n");
+	if (!stralloc_copys(&smtptext, "Unable to write message. (#4.3.0)"))
+		temp_nomem();
+	if (setsmtptext(0, protocol_t))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
+}
+
+void
 temp_read()
 {
 	out("ZUnable to read message. (#4.3.0)\n");
@@ -806,6 +443,17 @@ temp_dns()
 {
 	out("ZSorry, I couldn't find any host by that name. (#4.1.2)\n");
 	if (!stralloc_copys(&smtptext, "Sorry, I couldn't find any host by that name. (#4.1.2)"))
+		temp_nomem();
+	if (setsmtptext(0, protocol_t))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
+}
+
+void
+temp_dns_rr()
+{
+	out("ZSorry, I couldn't find TLSA RR for this host. (#4.1.2)\n");
+	if (!stralloc_copys(&smtptext, "Sorry, I couldn't find any TLSA RR for this host. (#4.1.2)"))
 		temp_nomem();
 	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
@@ -1197,16 +845,16 @@ ehlo()
 	if (protocol_t == 'q')		/*- QMTP */
 		return 0;
 	if (substdio_puts(&smtpto, "EHLO ") == -1)
-		strerr_die2sys(111, FATAL, "write: ");
+		temp_write();
 	else
 	if (substdio_put(&smtpto, helohost.s, helohost.len) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
+		temp_write();
 	else
 	if (substdio_puts(&smtpto, "\r\n") == -1)
-		strerr_die2sys(111, FATAL, "write: ");
+		temp_write();
 	else
 	if (substdio_flush(&smtpto) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
+		temp_write();
 	if ((code = smtpcode()) != 250)
 		return code;
 	s = smtptext.s;
@@ -1829,35 +1477,32 @@ tlsa_error(char *str)
 
 stralloc        temphost = { 0 };
 stralloc        sa = { 0 };
-void
+
+int
 get_tlsa_rr(char *mxhost, int port)
 {
 	char            strnum[FMT_ULONG];
 	int             r;
 
 	if (temphost.len && !str_diffn(temphost.s, mxhost, temphost.len))
-		return;
+		return (DNS_MEM);
+	else
 	if (!stralloc_copys(&temphost, mxhost) || !stralloc_0(&temphost))
-		temp_nomem();
+		return (DNS_MEM);
+	else
 	if (!stralloc_copyb(&sa, "_", 1))
-		temp_nomem();
+		return (DNS_MEM);
+	else
 	if (!stralloc_catb(&sa, strnum, fmt_uint(strnum, port)))
-		temp_nomem();
+		return (DNS_MEM);
+	else
 	if (!stralloc_catb(&sa, "._tcp.", 6))
-		temp_nomem();
+		return (DNS_MEM);
+	else
 	if (!stralloc_cats(&sa, mxhost))
-		temp_nomem();
-	r = dns_tlsarr(&ta, &sa);
-	switch (r)
-	{
-	case DNS_HARD:
-		perm_dns();
-	case DNS_SOFT:
-		temp_dns();
-	case DNS_MEM:
-		temp_nomem();
-	}
-	return;
+		return (DNS_MEM);
+	else
+	return ((r = dns_tlsarr(&ta, &sa)));
 }
 
 /*-
@@ -2762,57 +2407,53 @@ smtp()
  	 * to reject the EHLO and make us fallback to HELO
  	 */
 #ifdef HASTLSA
-	if (do_tlsa) {
-		if (ta.len) { /*- do DANE validation */
-			match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
-			if (!tls_init(0, &needtlsauth, &servercert)) /*- tls is needed for DANE */
-				quit("ZConnected to ", " but unable to intiate TLS for DANE", 530, -1);
-			for (j = 0, usage = -1; j < ta.len; ++j) {
-				rp = &(ta.rr[j]);
-				if (!rp->mtype || rp->mtype == 2)
-					match0Or512 = 1;
-				for (i = hexstring.len = 0; i < rp->data_len; i++) {
-					fmt_hexbyte(hex, (rp->data + i)[0]);
-					if (!stralloc_catb(&hexstring, hex, 2))
-						temp_nomem();
-				}
-				if (!stralloc_0(&hexstring))
+	if (do_tlsa && ta.len) {
+		match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
+		if (!tls_init(0, &needtlsauth, &servercert)) /*- tls is needed for DANE */
+			quit("ZConnected to ", " but unable to intiate TLS for DANE", 530, -1);
+		for (j = 0, usage = -1; j < ta.len; ++j) {
+			rp = &(ta.rr[j]);
+			if (!rp->mtype || rp->mtype == 2)
+				match0Or512 = 1;
+			for (i = hexstring.len = 0; i < rp->data_len; i++) {
+				fmt_hexbyte(hex, (rp->data + i)[0]);
+				if (!stralloc_catb(&hexstring, hex, 2))
 					temp_nomem();
-				if (!(tlsa_status = tlsa_vrfy_records(hexstring.s, rp->usage, rp->selector, rp->mtype, &err_str))) {
-					switch(rp->mtype)
-					{
-					case 0:
-						authfullMatch = 1;
-						break;
-					case 1:
-						authsha256 = 1;
-						break;
-					case 2:
-						authsha512 = 1;
-						break;
-					}
-				}
-				if (!rp->usage || rp->usage == 2)
-					usage = 2;
-				if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
+			}
+			if (!stralloc_0(&hexstring))
+				temp_nomem();
+			if (!(tlsa_status = tlsa_vrfy_records(hexstring.s, rp->usage, rp->selector, rp->mtype, &err_str))) {
+				switch(rp->mtype)
+				{
+				case 0:
+					authfullMatch = 1;
 					break;
-			} /*- for (j = 0, usage = -1; j < ta.len; ++j) */
-			/*-
-			 * client SHOULD accept a server public key that
-			 * matches either the "3 1 0" record or the "3 1 2" record, but it
-			 * SHOULD NOT accept keys that match only the weaker "3 1 1" record.
-			 * 9.  Digest Algorithm Agility
-			 * https://tools.ietf.org/html/rfc7671
-			 */
-			if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512))) {
-				if (needtlsauth && (!usage || usage == 2))
-					do_pkix(servercert);
-				code = ehlo();
-			} else /*- dane validation failed */
-				quit("DConnected to ", " but recpient failed DANE validation", 534, 1);
-		}  else
-		if (tls_init(1, 0, 0))
+				case 1:
+					authsha256 = 1;
+					break;
+				case 2:
+					authsha512 = 1;
+					break;
+				}
+			}
+			if (!rp->usage || rp->usage == 2)
+				usage = 2;
+			if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
+				break;
+		} /*- for (j = 0, usage = -1; j < ta.len; ++j) */
+		/*-
+		 * client SHOULD accept a server public key that
+		 * matches either the "3 1 0" record or the "3 1 2" record, but it
+		 * SHOULD NOT accept keys that match only the weaker "3 1 1" record.
+		 * 9.  Digest Algorithm Agility
+		 * https://tools.ietf.org/html/rfc7671
+		 */
+		if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512))) {
+			if (needtlsauth && (!usage || usage == 2))
+				do_pkix(servercert);
 			code = ehlo();
+		} else /*- dane validation failed */
+			quit("DConnected to ", " but recpient failed DANE validation", 534, 1);
 	} else /*- no tlsa rr records */
 	if (tls_init(1, 0, 0))
 		code = ehlo();
@@ -3539,8 +3180,18 @@ main(int argc, char **argv)
 			x[j++] = ',';
 			x[j] = 0;
 #ifdef HASTLSA
-			if (!relayhost && (do_tlsa = env_get("DANE_VERIFICATION")))
-				get_tlsa_rr(ip.ix[i].fqdn, port); /*- get_tlsa_rr() function will exit on error */
+			if (!relayhost && (do_tlsa = env_get("DANE_VERIFICATION"))) {
+				switch (get_tlsa_rr(ip.ix[i].fqdn, port))
+				{
+				case DNS_HARD:
+					do_tlsa = (char *) 0;
+					break;
+				case DNS_SOFT:
+					temp_dns_rr();
+				case DNS_MEM:
+					temp_nomem();
+				}
+			}
 #endif
 			for (;;) {
 				if (!timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconnect)) {
@@ -3601,8 +3252,390 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.118 2018-05-27 11:18:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.119 2018-05-27 17:49:02+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
 }
+
+/*
+ * $Log: qmail-remote.c,v $
+ * Revision 1.119  2018-05-27 17:49:02+05:30  Cprogrammer
+ * refactored code for TLSA
+ *
+ * Revision 1.118  2018-05-27 11:18:20+05:30  Cprogrammer
+ * check substdio_put() for error
+ *
+ * Revision 1.117  2018-05-26 15:59:35+05:30  Cprogrammer
+ * replaced getdns lib with inbuilt dns_tlsarr() function in dns.c
+ *
+ * Revision 1.116  2018-05-25 08:44:14+05:30  Cprogrammer
+ * removed extra white spaces
+ *
+ * Revision 1.115  2018-05-25 08:41:09+05:30  Cprogrammer
+ * renamed do_dns_query() to do_tlsa_query()
+ *
+ * Revision 1.114  2018-05-25 08:34:01+05:30  Cprogrammer
+ * removed getdns
+ *
+ * Revision 1.113  2018-05-23 20:15:52+05:30  Cprogrammer
+ * added dane verification code
+ *
+ * Revision 1.112  2018-05-01 01:42:57+05:30  Cprogrammer
+ * indented code
+ *
+ * Revision 1.111  2017-08-26 11:07:08+05:30  Cprogrammer
+ * fixed readling of tlsclientmethod control file
+ *
+ * Revision 1.110  2017-08-24 13:20:24+05:30  Cprogrammer
+ * improved logging of TLS method errors
+ *
+ * Revision 1.109  2017-08-23 13:13:07+05:30  Cprogrammer
+ * replaced SSLv23_client_method() with TLS_client_method()
+ *
+ * Revision 1.108  2017-08-08 23:56:27+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
+ * Revision 1.107  2017-05-15 23:21:07+05:30  Cprogrammer
+ * fix for SMTPROUTE of the form domain:x.x.x.x::penalty:max_tolerance username password
+ *
+ * Revision 1.106  2017-05-15 19:18:53+05:30  Cprogrammer
+ * use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
+ *
+ * Revision 1.105  2017-05-15 15:33:50+05:30  Cprogrammer
+ * use X-SMTPROUTES env variable for setting artificial smtp routes. SMTPROUTES takes precendence over X-SMTPROUTES
+ * bugfix - set port to 25 if relayhost is of the form :relayhost:
+ *
+ * Revision 1.104  2017-05-08 13:20:21+05:30  Cprogrammer
+ * check for tlsv1_1_client_method() and tlsv1_2_client_method()
+ *
+ * Revision 1.103  2017-05-02 16:39:39+05:30  Cprogrammer
+ * added SSL_CTX_free()
+ *
+ * Revision 1.102  2017-05-02 10:21:48+05:30  Cprogrammer
+ * fixed location of tlsclientmethod control file
+ *
+ * Revision 1.101  2017-04-10 20:44:39+05:30  Cprogrammer
+ * use SMTPS if SMTPS environment variable is set
+ * added documentation and better variable name for type
+ *
+ * Revision 1.100  2017-04-06 15:58:00+05:30  Cprogrammer
+ * new tls_quit() function to avoid mixed usage of tls_quit(), quit() functions
+ *
+ * Revision 1.99  2017-03-31 15:27:37+05:30  Cprogrammer
+ * smtptext "Sorry I couldn't find any host named" was getting overwritten
+ *
+ * Revision 1.98  2017-03-31 10:22:46+05:30  Cprogrammer
+ * added SMTPSTATUS env variable for success
+ *
+ * Revision 1.97  2017-03-24 15:34:35+05:30  Cprogrammer
+ * fixes for onsuccess, onfailure scripts
+ *
+ * Revision 1.96  2017-03-21 15:39:33+05:30  Cprogrammer
+ * use CERTDIR to override tls/ssl certificates
+ *
+ * Revision 1.95  2017-03-10 17:58:59+05:30  Cprogrammer
+ * added back SSLv23 method
+ *
+ * Revision 1.94  2017-03-10 11:29:37+05:30  Cprogrammer
+ * made TLS client method configurable using control file tlsclientmethod
+ *
+ * Revision 1.93  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.92  2015-08-24 19:08:34+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
+ *
+ * Revision 1.91  2014-12-18 11:18:41+05:30  Cprogrammer
+ * added helohostbyip
+ *
+ * Revision 1.90  2014-04-03 21:35:39+05:30  Cprogrammer
+ * added ability to disable specific AUTH methods - PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA256
+ * CRAM-RIPEMD, DIGEST-MD5
+ * use secure authentication methods if SECURE_AUTH env variable is defined
+ *
+ * Revision 1.89  2014-03-18 14:39:33+05:30  Cprogrammer
+ * set environment variable OUTGOINGIP
+ *
+ * Revision 1.88  2013-09-06 13:53:23+05:30  Cprogrammer
+ * set SMTPHOST env variable for ONSUCCESS, ONFAILURE scripts
+ * try next mx on helo temp failure
+ *
+ * Revision 1.87  2013-08-27 08:09:12+05:30  Cprogrammer
+ * set SMTPTEXT for local failures
+ *
+ * Revision 1.86  2013-08-22 11:10:14+05:30  Cprogrammer
+ * set env variable SMTPSTATUS as 'D' or 'Z' indicating permanent or temporary failure
+ *
+ * Revision 1.85  2013-08-21 18:59:06+05:30  Cprogrammer
+ * fixed setting of SMTPTEXT env variable for success and failures
+ * bypass tls if clientcert.pem is missing
+ *
+ * Revision 1.84  2012-12-17 15:34:37+05:30  Cprogrammer
+ * fix for smtptext during TLS negotiation
+ *
+ * Revision 1.83  2012-11-25 07:57:25+05:30  Cprogrammer
+ * set smtptext for qmtp
+ *
+ * Revision 1.82  2012-11-24 11:06:04+05:30  Cprogrammer
+ * fixed typo (SMTPCODE instead of SMTPTEXT)
+ *
+ * Revision 1.81  2012-11-24 07:50:45+05:30  Cprogrammer
+ * set [S|Q]MTPTEXT and [S|Q]MTPCODE for transient errors
+ * unset ONSUCCESS_REMOTE, ONFAILURE_REMOTE, ONTRANSIENT_REMOTE selectively
+ * fix SIGSEGV setting SMTPTEXT environment variable
+ *
+ * Revision 1.80  2012-10-09 18:09:45+05:30  Cprogrammer
+ * added DISABLE_CNAME_LOOKUP to bypass dns cname resolution
+ *
+ * Revision 1.79  2011-12-10 15:24:00+05:30  Cprogrammer
+ * added hmac_sha256() function
+ *
+ * Revision 1.78  2011-12-08 20:32:06+05:30  Cprogrammer
+ * fixed compilation error
+ *
+ * Revision 1.77  2011-12-08 14:48:00+05:30  Cprogrammer
+ * added version info for all sub sources
+ *
+ * Revision 1.76  2011-12-05 15:10:56+05:30  Cprogrammer
+ * added version information
+ *
+ * Revision 1.75  2011-10-29 20:42:53+05:30  Cprogrammer
+ * added CRAM-RIPEMD, CRAM-SHA1, DIGEST-MD5 auth methods
+ *
+ * Revision 1.74  2011-07-08 13:52:25+05:30  Cprogrammer
+ * ipv6, ipv4 code organized
+ *
+ * Revision 1.73  2011-07-03 16:56:26+05:30  Cprogrammer
+ * use control_readrandom() to pick up a random line from control file
+ *
+ * Revision 1.72  2011-01-08 16:30:05+05:30  Cprogrammer
+ * use OUTGOINGIP env variable to set local interface address
+ *
+ * Revision 1.71  2011-01-06 22:40:06+05:30  Cprogrammer
+ * added environment variable OUTIP to select OUTGOINGIP
+ * added check for correct number of command line arguments
+ *
+ * Revision 1.70  2010-08-05 20:56:37+05:30  Cprogrammer
+ * added cram-md5 authentication
+ *
+ * Revision 1.69  2010-07-26 19:26:23+05:30  Cprogrammer
+ * added default case in switch statement in run_script function()
+ *
+ * Revision 1.68  2010-07-25 19:48:21+05:30  Cprogrammer
+ * replaced success(), failure() script with a single run_script()
+ *
+ * Revision 1.67  2010-07-24 20:15:31+05:30  Cprogrammer
+ * define ERRTEXT env variable for ONSUCCESS_REMOTE, ONFAILURE_REMOTE scripts
+ *
+ * Revision 1.66  2010-07-24 17:37:52+05:30  Cprogrammer
+ * fixed SMTPCODE, SMTPTEXT not getting set for failures
+ * fixed logic for quit() function
+ * execute failure() script only for permanent failures
+ *
+ * Revision 1.65  2010-07-20 20:11:12+05:30  Cprogrammer
+ * execute program/script on failure if ONFAILURE_REMOTE is defined
+ * set SMTPTEXT, SMTPCODE environment variables if success() or failure() function
+ * is executed
+ *
+ * Revision 1.64  2010-07-17 16:21:32+05:30  Cprogrammer
+ * use qmail-remote as argv0 when executing ONSUCCESS_REMOTE program
+ *
+ * Revision 1.63  2010-07-16 15:41:02+05:30  Cprogrammer
+ * execute script on successful delivery
+ *
+ * Revision 1.62  2010-07-08 21:53:42+05:30  Cprogrammer
+ * domainbindings based on envelope sender address
+ *
+ * Revision 1.61  2010-06-27 08:43:43+05:30  Cprogrammer
+ * display bind ip (outgoing ip) in error messages for failed connections
+ *
+ * Revision 1.60  2010-06-24 08:54:30+05:30  Cprogrammer
+ * made outgoingip control file name configureable
+ *
+ * Revision 1.59  2010-05-29 20:54:41+05:30  Cprogrammer
+ * environment variable QMTPROUTE, SMTPROUTE takes precedence over control files
+ *
+ * Revision 1.58  2010-05-29 17:27:27+05:30  Cprogrammer
+ * added fallback to SMTP as per MXPS
+ *
+ * Revision 1.57  2010-05-28 14:25:00+05:30  Cprogrammer
+ * indicate protocol in the accepted message
+ *
+ * Revision 1.56  2010-04-30 13:17:44+05:30  Cprogrammer
+ * fixed domainbindings for ipv4 addresses
+ *
+ * Revision 1.55  2010-04-24 20:13:17+05:30  Cprogrammer
+ * ability to use either QMTP or SMTP for clustered domains
+ *
+ * Revision 1.54  2010-03-25 10:16:24+05:30  Cprogrammer
+ * added QMTP support
+ *
+ * Revision 1.53  2010-02-01 10:11:30+05:30  Cprogrammer
+ * fix for xtext function
+ *
+ * Revision 1.52  2009-12-17 09:15:55+05:30  Cprogrammer
+ * log real envelope recipients of messages after host name canonicalization
+ * patch by James Raftery
+ * log from and recipient on success and failure
+ *
+ * Revision 1.51  2009-12-05 20:16:03+05:30  Cprogrammer
+ * ansic conversion
+ *
+ * Revision 1.50  2009-11-12 19:29:33+05:30  Cprogrammer
+ * record the helo name if rejected (Stupid MS Exchange rejects helo domain)
+ *
+ * Revision 1.49  2009-09-16 15:45:56+05:30  Cprogrammer
+ * do not try next MX for permanent errors
+ *
+ * Revision 1.48  2009-09-02 11:30:58+05:30  Cprogrammer
+ * added Bounce Address Tag Validation - BATV
+ *
+ * Revision 1.47  2009-08-13 19:09:09+05:30  Cprogrammer
+ * code beautified
+ *
+ * Revision 1.46  2009-05-07 08:47:52+05:30  Cprogrammer
+ * made DOMAINBINDINGS file configurable
+ *
+ * Revision 1.45  2009-05-06 22:56:26+05:30  Cprogrammer
+ * use per recipient domain outgoingip
+ *
+ * Revision 1.44  2009-04-16 11:01:58+05:30  Cprogrammer
+ * made min_penalty, max_tolerance configurable through env variables
+ *
+ * Revision 1.43  2008-09-30 08:42:33+05:30  Cprogrammer
+ * have domainbindings take precedence over outgoingips
+ *
+ * Revision 1.42  2008-09-16 08:25:40+05:30  Cprogrammer
+ * fixed case sensitivity
+ *
+ * Revision 1.41  2008-07-15 20:04:05+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.40  2008-06-01 15:38:32+05:30  Cprogrammer
+ * Frederik Vermeulen <qmail-tls akrul inoa.net> 20070408 TLS patch
+ *
+ * Revision 1.39  2008-02-05 15:32:13+05:30  Cprogrammer
+ * added domainbinding functionality
+ *
+ * Revision 1.38  2007-12-20 13:55:58+05:30  Cprogrammer
+ * initialized variable i = 0
+ *
+ * Revision 1.37  2006-02-17 16:14:53+05:30  Cprogrammer
+ * print the host for which SMTP connecton failed
+ *
+ * Revision 1.36  2005-12-29 14:02:30+05:30  Cprogrammer
+ * made min_penalty, max_tolerance configurable.
+ * initialized fdmoreroutes to -1
+ *
+ * Revision 1.35  2005-06-17 21:49:50+05:30  Cprogrammer
+ * ipv6 support
+ * replaced struct ip_address and struct ip6_address with shorter typedefs
+ *
+ * Revision 1.34  2005-06-11 21:46:52+05:30  Cprogrammer
+ * changes for ipv6
+ *
+ * Revision 1.33  2005-04-05 20:06:34+05:30  Cprogrammer
+ * use Authenticated SMTP only if AUTH_SMTP is defined
+ *
+ * Revision 1.32  2005-04-03 14:29:59+05:30  Cprogrammer
+ * added authenticated SMTP methods
+ *
+ * Revision 1.31  2005-02-14 23:06:00+05:30  Cprogrammer
+ * added moresmtproutes
+ *
+ * Revision 1.30  2004-11-03 23:42:11+05:30  Cprogrammer
+ * BUG - memory error erroneously skipped
+ *
+ * Revision 1.29  2004-10-22 20:29:30+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.28  2004-10-22 15:37:55+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.27  2004-10-11 13:58:50+05:30  Cprogrammer
+ * prevent inclusion of alloc.h with prototypes
+ *
+ * Revision 1.26  2004-07-30 18:05:19+05:30  Cprogrammer
+ * TLS code overhaul - Fredrik Vermeulen 20040419
+ *
+ * Revision 1.25  2004-07-17 21:21:26+05:30  Cprogrammer
+ * added qqeh code
+ * added RCS log
+ *
+ * Revision 1.24  2004-03-17 12:16:40+05:30  Cprogrammer
+ * *** empty log message ***
+ *
+ * Revision 1.23  2003-12-05 14:46:51+05:30  Cprogrammer
+ * comment for arguments corrected
+ *
+ * Revision 1.22  2003-11-25 20:46:01+05:30  Cprogrammer
+ * do not compare with mapsmtproutes if smtproutes is absent
+ *
+ * Revision 1.21  2003-10-23 01:25:33+05:30  Cprogrammer
+ * replaced strcmp with str_diffn
+ * fixed compilation warnings
+ *
+ * Revision 1.20  2003-10-13 10:03:59+05:30  Cprogrammer
+ * try ESMTP SIZE extention of remote smtp supports it
+ *
+ * Revision 1.19  2003-10-01 19:05:39+05:30  Cprogrammer
+ * changed return type to int
+ *
+ * Revision 1.18  2003-09-29 16:48:38+05:30  Cprogrammer
+ * corrected clobbering of smtptext by smtpcode() when STARTTLS was done
+ *
+ * Revision 1.17  2003-08-02 16:15:54+05:30  Cprogrammer
+ * use ehlo protocol when using authenticated SMTP
+ *
+ * Revision 1.16  2003-07-20 17:13:24+05:30  Cprogrammer
+ * TLS patch
+ *
+ * Revision 1.15  2003-07-07 00:05:47+05:30  Cprogrammer
+ * option to ship mails through AUTH SMTP
+ *
+ * Revision 1.14  2002-12-16 20:23:25+05:30  Cprogrammer
+ * added display of port in connection errors
+ *
+ * Revision 1.13  2002-09-14 20:50:01+05:30  Cprogrammer
+ * corrected display of ip addresses in temp_noconn()
+ *
+ * Revision 1.12  2002-09-11 15:41:02+05:30  Cprogrammer
+ * changed error messages to display the host
+ *
+ * Revision 1.11  2002-09-11 11:48:13+05:30  Cprogrammer
+ * try next MX if connection to smtp port dies before remote end replies with a greeting
+ *
+ * Revision 1.10  2002-09-10 20:05:22+05:30  Cprogrammer
+ * try next MX also for permanent errors (rfc 2821)
+ *
+ * Revision 1.9  2002-09-08 23:47:12+05:30  Cprogrammer
+ * RFC 2821 support - Retry next MX on transient errors
+ *
+ * Revision 1.8  2002-09-07 20:35:41+05:30  Cprogrammer
+ * removed unecessary stralloc_ready()
+ *
+ * Revision 1.7  2002-08-16 19:49:57+05:30  Cprogrammer
+ * added printing of correct control directory in perm_ambigmx()
+ *
+ * Revision 1.6  2002-08-16 19:31:53+05:30  Cprogrammer
+ * added printing of the correct control directory
+ *
+ * Revision 1.5  2002-08-15 19:22:44+05:30  Cprogrammer
+ * change for configurable control dir
+ *
+ * Revision 1.4  2002-08-14 15:00:10+05:30  Cprogrammer
+ * RFC 2821 compliance
+ *
+ * Revision 1.3  2002-03-19 20:45:04+05:30  Cprogrammer
+ * included env.h to supress compiler warnings
+ *
+ * Revision 1.2  2002-03-13 11:29:09+05:30  Cprogrammer
+ * code indentation
+ * removed mysql code
+ * added code to get variables from environment variable SMTPROUTE
+ *
+ * Revision 1.1  2001-12-23 00:55:49+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
