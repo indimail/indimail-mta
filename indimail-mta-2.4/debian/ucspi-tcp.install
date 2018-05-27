@@ -10,7 +10,7 @@ usr/bin/http@ /usr/bin
 usr/bin/tcpcat /usr/bin
 usr/bin/mconnect /usr/bin
 usr/bin/mconnect-io /usr/bin
-usr/bin/daneq /usr/bin
+usr/bin/qdane /usr/bin
 usr/sbin/udplogger /usr/sbin
 usr/bin/rblsmtpd /usr/bin
 usr/sbin/greydaemon /usr/sbin
@@ -28,7 +28,7 @@ usr/share/man/man1/http@.1.gz /usr/share/man/man1
 usr/share/man/man1/tcpcat.1.gz /usr/share/man/man1
 usr/share/man/man1/mconnect.1.gz /usr/share/man/man1
 usr/share/man/man1/rblsmtpd.1.gz /usr/share/man/man1
-usr/share/man/man1/daneq.1.gz /usr/share/man/man1
+usr/share/man/man1/qdane.1.gz /usr/share/man/man1
 usr/share/man/man8/greydaemon.8.gz /usr/share/man/man8
 usr/share/man/man8/qmail-greyd.8.gz /usr/share/man/man8
 usr/share/man/man8/qmail-daned.8.gz /usr/share/man/man8

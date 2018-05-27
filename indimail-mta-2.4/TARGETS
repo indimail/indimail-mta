@@ -1108,8 +1108,8 @@ qmail-daned.o
 qmail-daned
 tlsacheck.o
 daneprog
-daneq
-daneq.o
+qdane
+qdane.o
 hastlsa.h
 tlsa.lib
 trytlsa.o

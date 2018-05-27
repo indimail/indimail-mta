@@ -145,7 +145,7 @@
 %attr(0755,root,qmail) @prefix@/bin/tai2tai64n
 %attr(0755,root,qmail) @prefix@/bin/tai64n2tai
 %attr(0755,root,qmail) @prefix@/bin/udpclient
-%attr(0755,root,qmail) @prefix@/bin/daneq
+%attr(0755,root,qmail) @prefix@/bin/qdane
 #
 # sbin
 #
@@ -484,7 +484,7 @@
 %attr(0644,root,root) @mandir@/cat8/run-cleanq.0.gz
 %attr(0644,root,root) @mandir@/cat8/spawn-filter.0.gz
 %attr(0644,root,root) @mandir@/cat8/splogger.0.gz
-%attr(0644,root,root) @mandir@/man1/daneq.1.gz
+%attr(0644,root,root) @mandir@/man1/qdane.1.gz
 %attr(0644,root,root) @mandir@/man1/822addr.1.gz
 %attr(0644,root,root) @mandir@/man1/822body.1.gz
 %attr(0644,root,root) @mandir@/man1/822bodyfilter.1.gz
