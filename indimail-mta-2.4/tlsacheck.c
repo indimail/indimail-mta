@@ -1,5 +1,8 @@
 /*
  * $Log: tlsacheck.c,v $
+ * Revision 1.2  2018-05-27 17:47:05+05:30  Cprogrammer
+ * added option for qmail-remote to query/update records
+ *
  * Revision 1.1  2018-04-26 01:30:59+05:30  Cprogrammer
  * Initial revision
  *
@@ -169,14 +172,16 @@ connect_udp(ip, port, errfn)
 stralloc        chkpacket = {0};
 stralloc        ipbuf = {0};
 
-int 
-tlsacheck(daneip, domain, timeoutfn, errfn)
+int
+tlsacheck(daneip, domain, qOru, rbuf, timeoutfn, errfn)
 	char           *daneip, *domain;
+	int             qOru;
+	char            rbuf[];
 	void            (*timeoutfn) (), (*errfn) (); /*- errfn must _exit */
 {
 	int             r, len = 0, timeout = DANETIMEOUT;
 	char           *ptr;
-	char            strnum[FMT_ULONG], z[IPFMT], rbuf[2];
+	char            strnum[FMT_ULONG], z[IPFMT];
 	unsigned long   port;
 	union v46addr   ip;
 	static int      sockfd = -1;
@@ -215,7 +220,23 @@ tlsacheck(daneip, domain, timeoutfn, errfn)
 	}
 	if ((ptr = env_get("DANETIMEOUT")))
 		scan_int(ptr, &timeout);
-	if (!stralloc_copyb(&chkpacket, "D", 1))
+	switch (qOru)
+	{
+		case 1:
+			ptr = "q";
+			break;
+		case 2:
+			ptr = "S";
+			break;
+		case 3:
+			ptr = "F";
+			break;
+		case 0:
+		default:
+			ptr = "D";
+			break;
+	}
+	if (!stralloc_copyb(&chkpacket, ptr, 1))
 		return (-2); /*- ENOMEM */
 	else
 	if (!stralloc_cats(&chkpacket, domain))
@@ -224,18 +245,25 @@ tlsacheck(daneip, domain, timeoutfn, errfn)
 	if (!stralloc_0(&chkpacket))
 		return (-2);
 	else
-	if ((r = query_skt(sockfd, ipbuf.s, &chkpacket, rbuf, sizeof rbuf, timeout, timeoutfn, errfn)) == -1)
+	if ((r = query_skt(sockfd, ipbuf.s, &chkpacket, rbuf, 2, timeout, timeoutfn, errfn)) == -1)
 		return -1;	/*- Permit connection (soft fail) - probably timeout */
-	else
-	if (rbuf[0] == 0)
-		return (0);
-	return (1);
+	else {
+		if (rbuf[0] == 0) { /* failure */
+			if (*ptr == 'S' || *ptr == 'F')
+				return (2);
+			return (0);
+		} else { /*- success */
+			if (*ptr == 'S' || *ptr == 'F')
+				return (3);
+			return (1);
+		}
+	}
 }
 
 void
 getversion_tlsacheck_c()
 {
-	static char    *x = "$Id: tlsacheck.c,v 1.1 2018-04-26 01:30:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tlsacheck.c,v 1.2 2018-05-27 17:47:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
