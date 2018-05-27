@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.7  2018-05-27 12:32:40+05:30  Cprogrammer
+ * refactored code. Organized error messages and error codes in child
+ *
  * Revision 1.6  2018-05-26 16:00:30+05:30  Cprogrammer
  * replaced getdns lib with inbuilt dns_tlsarr() function in dns.c
  *
@@ -163,6 +166,16 @@ die(int e)
 	}
 	_exit (e);
 }
+
+void
+die_nomem_child()
+{
+	substdio_flush(subfdout);
+	substdio_puts(subfderr, FATAL);
+	substdio_puts(subfderr, "out of memory\n");
+	substdio_flush(subfderr);
+	die (2);
+}
 #else
 #define die(e) _exit((e))
 #endif
@@ -194,8 +207,10 @@ logerr(char *str)
 {
 	if (!str || !*str)
 		return;
-	if (substdio_puts(subfderr, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
+	if (substdio_puts(subfderr, str) == -1) {
+		strerr_warn2(FATAL, "write: ", &strerr_sys);
+		die(111);
+	}
 	return;
 }
 
@@ -204,10 +219,10 @@ logerrf(char *str)
 {
 	if (!str || !*str)
 		return;
-	if (substdio_puts(subfderr, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	if (substdio_flush(subfderr) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
+	if (substdio_puts(subfderr, str) == -1 || substdio_flush(subfderr) == -1) {
+		strerr_warn2(FATAL, "write: ", &strerr_sys);
+		die(111);
+	}
 }
 
 int             whitelistok = 0;
@@ -918,26 +933,27 @@ outhost()
 	}
 	if (!stralloc_copyb(&rhost, x, len))
 		die_nomem();
-	if (substdio_put(subfdout, x, len) == -1)
-		die (0);
 	if (!stralloc_0(&rhost))
 		die_nomem();
+	if (substdio_put(subfderr, x, len) == -1) {
+		strerr_warn2(FATAL, "write: ", &strerr_sys);
+		die(111);
+	}
 }
 
 void
 dropped()
 {
-	out("Connected to ");
+	logerr("Connected to ");
 	outhost();
-	out(" but connection died");
+	logerr(" but connection died");
 #ifdef TLS
 	if (ssl_err_str) {
-		out(": ");
-		out((char *) ssl_err_str);
+		logerr(": ");
+		logerr((char *) ssl_err_str);
 	}
 #endif
-	out("\n");
-	flush();
+	logerrf("\n");
 	die (111);
 }
 
@@ -989,28 +1005,25 @@ substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtp
 void
 perm_dns()
 {
-	out("Sorry, I couldn't find any host named ");
-	out(partner_fqdn);
-	out("\n");
-	flush();
-	die (111);
+	logerr("Sorry, I couldn't find any host named ");
+	logerr(partner_fqdn);
+	logerrf("\n");
+	die (5);
 }
 
 void
 temp_dns()
 {
-	out("no host by that name ");
-	out(partner_fqdn);
-	out("\n");
-	flush();
-	die (111);
+	logerr("no host by that name ");
+	logerr(partner_fqdn);
+	logerrf("\n");
+	die (6);
 }
 
 void
 temp_oserr()
 {
-	out("System resources temporarily unavailable\n");
-	flush();
+	logerrf("System resources temporarily unavailable\n");
 	die (111);
 }
 
@@ -1154,10 +1167,17 @@ ehlo()
 	if (ehlokw.len > maxehlokwlen)
 		maxehlokwlen = ehlokw.len;
 	ehlokw.len = 0;
-	substdio_puts(&smtpto, "EHLO ");
-	substdio_put(&smtpto, helohost.s, helohost.len);
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_puts(&smtpto, "EHLO ") == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	else
+	if (substdio_put(&smtpto, helohost.s, helohost.len) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	else
+	if (substdio_puts(&smtpto, "\r\n") == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	else
+	if (substdio_flush(&smtpto) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
 	if ((code = smtpcode()) != 250)
 		return code;
 	s = smtptext.s;
@@ -1216,8 +1236,10 @@ outsmtptext()
 			if (!smtptext.s[i])
 				smtptext.s[i] = '?';
 		}
-		if (substdio_put(subfdout, smtptext.s, smtptext.len) == -1)
-			die (0);
+		if (substdio_put(subfderr, smtptext.s, smtptext.len) == -1) {
+			strerr_warn2(FATAL, "write: ", &strerr_sys);
+			die (111);
+		}
 		smtptext.len = 0;
 	}
 }
@@ -1235,12 +1257,12 @@ quit(char *prepend, char *append, int code, int e)
 {
 	substdio_putsflush(&smtpto, "QUIT\r\n");
 	/*- waiting for remote side is just too ridiculous */
-	out(prepend);
+	logerr(prepend);
 	outhost();
-	out(append);
-	out(".\n");
+	logerr(append);
+	logerr(".\n");
 	outsmtptext();
-	flush();
+	substdio_flush(subfderr);
 	die (e);
 }
 
@@ -1282,36 +1304,35 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 	if ((state & SSL_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
 		substdio_putsflush(&smtpto, "QUIT\r\n");
 #endif
-	out(ssl ? "; connected to " : "; connecting to ");
+	logerr(ssl ? "; connected to " : "; connecting to ");
 	outhost();
-	out("\n");
+	logerrf("\n");
 	if (env_get("DEBUG") && ssl) {
 		X509           *peercert;
 
-		out("STARTTLS proto=");
-		out((char *) SSL_get_version(ssl));
-		out("; cipher=");
-		out((char *) SSL_get_cipher(ssl));
+		logerr("STARTTLS proto=");
+		logerr((char *) SSL_get_version(ssl));
+		logerr("; cipher=");
+		logerr((char *) SSL_get_cipher(ssl));
 
 		/*- we want certificate details */
 		if ((peercert = SSL_get_peer_certificate(ssl))) {
 			char           *str;
 
 			str = X509_NAME_oneline(X509_get_subject_name(peercert), NULL, 0);
-			out("; subject=");
-			out(str);
+			logerr("; subject=");
+			logerr(str);
 			OPENSSL_free(str);
 
 			str = X509_NAME_oneline(X509_get_issuer_name(peercert), NULL, 0);
-			out("; issuer=");
-			out(str);
+			logerr("; issuer=");
+			logerr(str);
 			OPENSSL_free(str);
 
 			X509_free(peercert);
 		}
-		out(";\n");
+		logerrf(";\n");
 	}
-	flush();
 	die (111);
 }
 
@@ -1751,7 +1772,6 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	char            buffer[512], hex[2];
 	unsigned char   md_value[EVP_MAX_MD_SIZE];
 	unsigned char  *ptr;
-	char           *cp;
 	int             i, len;
 	unsigned int    md_len;
 
@@ -1895,8 +1915,7 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 			if (!stralloc_catb(&hexstring, hex, 2))
 				die_nomem();
 		}
-		cp = hexstring.s;
-		if (!str_diffn(certDataField, (char *) cp, hexstring.len))
+		if (!str_diffn(certDataField, hexstring.s, hexstring.len))
 			return (0);
 		return (1);
 	}
@@ -1931,8 +1950,7 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 #else
 		EVP_MD_CTX_cleanup(mdctx);
 #endif
-		cp = hexstring.s;
-		if (!str_diffn(certDataField, (char *) cp, hexstring.len))
+		if (!str_diffn(certDataField, hexstring.s, hexstring.len))
 			return (0);
 		return (1);
 	}
@@ -1943,7 +1961,7 @@ int
 do_work(char *host, int port)
 {
 	static ipalloc  ip = { 0 };
-    char           *cp, *err_str = 0, *servercert = 0;
+    char           *err_str = 0, *servercert = 0;
 	char            strnum[FMT_ULONG], hex[2];
 	int             i, j, tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage;
@@ -1951,12 +1969,13 @@ do_work(char *host, int port)
     tlsarr         *rp;
 
 	if (!stralloc_copys(&sa, host))
-		die_nomem();
+		die_nomem_child();
 	partner_fqdn = host;
+	/*- get the ip of the MX host */
 	switch (dns_ip(&ip, &sa))
 	{
 	case DNS_MEM:
-		die_nomem();
+		die_nomem_child();
 	case DNS_SOFT:
 		temp_dns();
 	case DNS_HARD:
@@ -1967,9 +1986,33 @@ do_work(char *host, int port)
 	}
 	get_tlsa_rr(host, 1, port);
 	if (!ta.len) {
-		out("dane_query_tlsa: No DANE data were found\n");
-		flush();
+		logerrf("dane_query_tlsa: No DANE data were found\n");
 		_exit (0);
+	}
+	/*- print TLSA records */
+	for (j = 0, usage = -1; j < ta.len; ++j) {
+		rp = &(ta.rr[j]);
+		out("TLSA[");
+		strnum[fmt_ulong(strnum, (unsigned long) j)] = 0;
+		out(strnum);
+		out("]:");
+		out(rp->host);
+		out(" IN TLSA ( ");
+		strnum[fmt_ulong(strnum, (unsigned long) rp->usage)] = 0;
+		out(strnum);
+		out(" ");
+		strnum[fmt_ulong(strnum, (unsigned long) rp->selector)] = 0;
+		out(strnum);
+		out(" ");
+		strnum[fmt_ulong(strnum, (unsigned long) rp->mtype)] = 0;
+		out(strnum);
+		out(" ");
+		for (i = hexstring.len = 0; i < rp->data_len; i++) {
+			fmt_hexbyte(hex, (rp->data + i)[0]);
+			substdio_put(subfdout, hex, 2);
+		}
+		out(" )\n");
+		flush();
 	}
 #ifdef IPV6
 	for (i = 0; i < 16; i++)
@@ -2008,13 +2051,11 @@ do_work(char *host, int port)
 		code = ehlo();
 	match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
 	if (!tls_init(0, &needtlsauth, &servercert)) {/*- tls is needed for DANE */
-		out("Connected to ");
+		logerr("Connected to ");
 		outhost();
-		out(" but unable to intiate TLS for DANE\n");
-		flush();
+		logerrf(" but unable to intiate TLS for DANE\n");
 		die (111);
 	}
-   	/*- for (i = 1, usage = -1, rp = tlsa_rdata_list; rp; rp = rp->next, i++) { -*/
 	for (j = 0, usage = -1; j < ta.len; ++j) {
 		rp = &(ta.rr[j]);
 		if (!rp->mtype || rp->mtype == 2)
@@ -2022,31 +2063,11 @@ do_work(char *host, int port)
 		for (i = hexstring.len = 0; i < rp->data_len; i++) {
 			fmt_hexbyte(hex, (rp->data + i)[0]);
 			if (!stralloc_catb(&hexstring, hex, 2))
-				die_nomem();
+				die_nomem_child();
 		}
 		if (!stralloc_0(&hexstring))
-			die_nomem();
-		cp = hexstring.s;
-		out("TLSA[");
-		strnum[fmt_ulong(strnum, (unsigned long) i)] = 0;
-		out(strnum);
-		out("]:");
-		out(rp->host);
-		out(" IN TLSA ");
-		out("( ");
-		strnum[fmt_ulong(strnum, (unsigned long) rp->usage)] = 0;
-		out(strnum);
-		out(" ");
-		strnum[fmt_ulong(strnum, (unsigned long) rp->selector)] = 0;
-		out(strnum);
-		out(" ");
-		strnum[fmt_ulong(strnum, (unsigned long) rp->mtype)] = 0;
-		out(strnum);
-		out(" ");
-		out(cp);
-		out(" )\n");
-		flush();
-		if (!(tlsa_status = tlsa_vrfy_records(cp, rp->usage, rp->selector, rp->mtype, &err_str))) {
+			die_nomem_child();
+		if (!(tlsa_status = tlsa_vrfy_records(hexstring.s, rp->usage, rp->selector, rp->mtype, &err_str))) {
 			switch(rp->mtype)
 			{
 			case 0:
@@ -2060,12 +2081,12 @@ do_work(char *host, int port)
 				break;
 			}
 		}
-       	free(cp);
 		if (!rp->usage || rp->usage == 2)
 			usage = 2;
 		if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
 			break;
-   } /*- for (i = 1, usage == -1, rp = tlsa_rdata_list; rp != NULL; rp = rp->next) */
+   } /*- for (j = 0, usage = -1; j < ta.len; ++j) */
+
 	/*-
 	 * client SHOULD accept a server public key that
 	 * matches either the "3 1 0" record or the "3 1 2" record, but it
@@ -2121,9 +2142,16 @@ get_dane_records(char *host)
 		if (!match && !line.len)
 			break;
 		line.len--; /*- remove newline */
+		if (verbose == 2) {
+			if (substdio_put(subfdout, line.s, line.len) == -1)
+				strerr_die2sys(111, FATAL, "write: ");
+			if (substdio_put(subfdout, "\n", 1) == -1)
+				strerr_die2sys(111, FATAL, "write: ");
+		}
 		if (!str_diffn(line.s, "TLSA[", 5)) {
 			for (len = 0, ptr = line.s + 5; *ptr; len++, ptr++) {
 				if (*ptr == ':') {
+					/*- record1\0record2\0...recordn\0 */
 					if (!stralloc_catb(&save, ptr + 1, line.len - (len + 6)))
 						die_nomem();
 					if (!stralloc_0(&save))
@@ -2131,14 +2159,13 @@ get_dane_records(char *host)
 					break;
 				}
 			}
-			continue;
 		} else
-		if (str_diffn(line.s, "dane_query_tlsa: No DANE data were found", 40))
-			continue;
-		if (!stralloc_cat(&save, &line))
-			die_nomem();
-		if (!stralloc_0(&save))
-			die_nomem();
+		if (!str_diffn(line.s, "dane_query_tlsa: No DANE data were found", 40)) {
+			if (!stralloc_cat(&save, &line))
+				die_nomem();
+			if (!stralloc_0(&save)) /*- serves as record field seperator */
+				die_nomem();
+		}
 	}
 	close(pipefd[0]);
 	if (substdio_flush(subfdout) == -1)
@@ -2159,17 +2186,37 @@ get_dane_records(char *host)
 	case 1:
 		return (RECORD_NOVRFY);
 	case 2:
-		logerrf("child: out of memory\n");
+		if (verbose == 2)
+			logerrf("child out of memory\n");
 		break;
 	case 3:
-		logerrf("child: unable to dup pipefd\n");
+		if (verbose == 2)
+			logerrf("child unable to dup pipefd\n");
 		break;
 	case 4:
-		logerrf("child: exec failed\n");
+		if (verbose == 2)
+			logerrf("child exec failed\n");
+		break;
+	case 5: /*- perm dns - NO TLSA RR Records */
+		if (!stralloc_copyb(&save, "_25._tcp.", 9))
+			die_nomem();
+		if (!stralloc_cats(&save, host))
+			die_nomem();
+		if (!stralloc_catb(&save, ": No TLSA RR", 12))
+			die_nomem();
+		if (!stralloc_0(&save))
+			die_nomem();
+		return (RECORD_OK);
+	case 6:
+		break;
+	case 100: /*- child returning 100 means domain doesn't exist */
 		break;
 	default:
 		strnum[fmt_ulong(strnum, (unsigned long) dane_exitcode)] = 0;
-		strerr_warn4(WARN, "error with child: exit code [", strnum, "]", &strerr_sys);
+		logerr(WARN);
+		logerr(": error with child: exit code [");
+		logerr(strnum);
+		logerrf("]\n");
 		break;
 	}
 	return (RECORD_FAIL);
@@ -2296,9 +2343,9 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	case RECORD_NEW:  /*- \1\0 */
 		*org_state = dane_state;
 		dane_state = get_dane_records(domain);
-		if (!save.len) {
+		if (!save.len)
 			dane_state = RECORD_OK;
-		} else
+		else
 		if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40))
 			dane_state = RECORD_OK;
 		if (!add_record(domain, dane_state, dnrecord)) {
@@ -2307,6 +2354,7 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 			n = -2;
 		} else {
 			ptr = *dnrecord;
+			/*- record1\0record2\0...recordn\0\0 */
 			if (save.len) {
 				if (!(ptr->data = (char *) realloc(ptr->data, save.len + 1)))
 					die_nomem();
@@ -2320,11 +2368,23 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 			rbuf[1] = dane_state;
 		}
 		break;
+	case RECORD_WHITE: /*- \1\1 */
+	case RECORD_OK:    /*- \1\2 */
+		*org_state = dane_state;
+		resp = rbuf;
+		rbuf[0] = 1;
+		rbuf[1] = dane_state;
+		break;
 	case RECORD_FAIL: /*- \1\4 */
-	case RECORD_OLD:
+	case RECORD_OLD:  /*- \1\5 */
 		*org_state = dane_state;
 		ptr = *dnrecord;
-		ptr->status = get_dane_records(domain);
+		dane_state = ptr->status = get_dane_records(domain);
+		if (!save.len)
+			dane_state = RECORD_OK;
+		else
+		if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40))
+			dane_state = RECORD_OK;
 		if (save.len) {
 			if (!(ptr->data = (char *) realloc(ptr->data, save.len + 1)))
 				die_nomem();
@@ -2337,13 +2397,6 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	case RECORD_NOVRFY: /*- \0\3 */
 		*org_state = dane_state;
 		rbuf[0] = 0;
-		rbuf[1] = dane_state;
-		break;
-	case RECORD_WHITE: /*- \1\1 */
-	case RECORD_OK:    /*- \1\2 */
-		*org_state = dane_state;
-		resp = rbuf;
-		rbuf[0] = 1;
 		rbuf[1] = dane_state;
 		break;
 	default:
@@ -2701,7 +2754,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.6 2018-05-26 16:00:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.7 2018-05-27 12:32:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
