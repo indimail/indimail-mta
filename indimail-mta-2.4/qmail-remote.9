@@ -70,6 +70,24 @@ like filtering, delivey rate control, running custom scripts, etc.
 Note that \fBqmail-remote\fR does not take options and does not follow the \fBgetopt\fR
 standard.
 
+.SH DANE VERIFICATION
+
+\fBqmail-remote\fR supports DANE verfication, described in RFC-7671. if the environment
+variable \fBDANE_VERIFICATION\fR is set without '@' sign, then \fBqmail-remote\fR
+will use it's own internal dane verification function.
+
+.EX
+   DANE_VERIFICATION=""
+.EE
+
+If this variable is set as host@port, then qmail-remote will use the tlsacheck(3) function
+and attempt to verify DANE status by connecting to \fBqmail-daned\fR(8) - qmail DANE verification daemon
+
+.EX
+   DANE_VERIFICATION="127.0.0.1@1998"
+.EE
+DANE verification can be restricted on per host basis by having the \fItlsadomains\fR control file.
+
 .SH TRANSPARENCY
 End-of-file in SMTP is encoded as dot CR LF.
 A dot at the beginning of a line is encoded as dot dot.
@@ -662,6 +680,15 @@ is the fully-qualified domain name of the server).
 takes precedence over this file however).
 The default location of @controldir@ can be overriden by environment variable CERTDIR
 
+.TP 5
+.I tlsadomains
+file having the list of MX hosts for which TLSA records needs
+to be verified. If this control file is present, TLSA
+verification will be skipped for all domains not in this file. If a file
+with the name \fItlsadomains\fR.\fIcdb\fR exists, \fBqmail-remote\fR will use
+\fBcdb(3)\fR lookup in addition to the normal in-memory search in a table
+of tlsa verification enforced domains.
+
 .SH "SEE ALSO"
 addresses(5),
 envelopes(5),
@@ -672,5 +699,7 @@ spawn-filter(8),
 qmail-rspawn(8),
 qmail-smtpd(8),
 qmail-qmtpd(8),
+qmail-daned(8),
+tlsacheck(3),
 qmail-tcpok(8),
 qmail-tcpto(8)
