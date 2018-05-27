@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.245  2018-05-27 11:17:34+05:30  mbhangui
+ * fixed dnstlsarr path
+ *
  * Revision 1.244  2018-05-26 15:46:13+05:30  Cprogrammer
  * added dnstlsarr program
  *
@@ -998,7 +1001,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "dnstxt", auto_uido, auto_gidq, moder_x);
 #endif
 #ifdef HASTLSA
-	c(auto_qmail_home, "sbin", "dnstlsarr", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "dnstlsarr", auto_uido, auto_gidq, moder_x);
 #endif
 	c(auto_libexec_dir, auto_libexec_base, "leapsecs", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "yearcal", auto_uido, auto_gidq, moder_x);
@@ -1603,7 +1606,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.244 2018-05-26 15:46:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.245 2018-05-27 11:17:34+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
