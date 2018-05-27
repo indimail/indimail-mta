@@ -1,5 +1,8 @@
 /*
  * $Log: tlsacheck.h,v $
+ * Revision 1.4  2018-05-27 22:12:47+05:30  Cprogrammer
+ * added defintions for qmail-daned modes
+ *
  * Revision 1.3  2018-05-27 17:47:27+05:30  Cprogrammer
  * added option for qmail-remote to query/update records
  *
@@ -24,6 +27,11 @@
 #define RECORD_NOVRFY   3
 #define RECORD_FAIL     4
 #define RECORD_OLD      5
+
+#define DEFAULT_MODE    0
+#define QUERY_MODE      1
+#define UPDATE_SUCCESS  2
+#define UPDATE_FAILURE  3
 
 int             tlsacheck(char *, char *, int, char [], void (*)(), void (*)());
 
