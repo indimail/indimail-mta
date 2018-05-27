@@ -91,7 +91,7 @@ print_status(char status)
 }
 
 char           *usage =
-				"usage: daneq [qsf] -d domain ipaddr\n"
+				"usage: daneq [qsf] -d mxhost ipaddr\n"
 				"        -q (query mode  - DANE VERIFICATION)\n"
 				"        -S (update mode - success)\n"
 				"        -F (update mode - failure)";
