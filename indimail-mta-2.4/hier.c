@@ -16,7 +16,7 @@
  * renamed qmail-dane to qmail-daned
  *
  * Revision 1.241  2018-04-26 11:39:02+05:30  Cprogrammer
- * added daneq, daneq man page, tlsacheck(), greylist(), qmail-dane man pages
+ * added qdane, qdane man page, tlsacheck(), greylist(), qmail-dane man pages
  *
  * Revision 1.240  2018-04-25 21:44:27+05:30  Cprogrammer
  * added qmail-dane, daneprog
@@ -897,7 +897,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qbase64", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "swaks", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "daneq", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qdane", auto_uido, auto_gidq, moder_x);
 
 	c(auto_libexec_dir, auto_libexec_base, "qpq", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qail", auto_uido, auto_gidq, moder_x);
@@ -1202,7 +1202,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "doc", "PIC.relaybad", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "PIC.relaygood", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "PIC.rem2local", auto_uido, auto_gidq, 0444);
-	c(mandir,          "man/man1", "daneq.1", uidr, gidr, moder_f);
+	c(mandir,          "man/man1", "qdane.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "cidr.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qmail-cat.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "predate.1", uidr, gidr, moder_f);

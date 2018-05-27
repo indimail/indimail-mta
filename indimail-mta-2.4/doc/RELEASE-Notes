@@ -16,7 +16,7 @@ o svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup
   utility for mysql-community-server
 o BUG - str_cpyb.c - fixed extra bytes getting copied
 o Fixed Bug with VIRTUAL_PKG_LIB env variable
-o qmail-daned(8), daneq(1), tlsacheck(3) - DANE implementation for
+o qmail-daned(8), qdane(1), tlsacheck(3) - DANE implementation for
   indimail-mta
 o qmail-multi - fixed qscanq path to sbin
 o fixed do_scan() for badattachment check
@@ -33,7 +33,7 @@ o qmail-remote.c - added tlsadomains control file check
 o qmail-daned.c - removed DANE verification via external DANEPROG script
 o qmail-daned.c - use dns_tlsarr() function.
 o tlsacheck.c - modified for qmail-remote query/update
-o daneq.c - modified for qmail-remote query/update
+o qdane.c - modified for qmail-remote query/update
 
 indimail-mta has RPM / DEB / yum / apt repository for most of the
 Linux Distros at
