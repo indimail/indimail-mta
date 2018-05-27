@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.118  2018-05-27 11:18:20+05:30  Cprogrammer
+ * check substdio_put() for error
+ *
  * Revision 1.117  2018-05-26 15:59:35+05:30  Cprogrammer
  * replaced getdns lib with inbuilt dns_tlsarr() function in dns.c
  *
@@ -1193,10 +1196,17 @@ ehlo()
 	ehlokw.len = 0;
 	if (protocol_t == 'q')		/*- QMTP */
 		return 0;
-	substdio_puts(&smtpto, "EHLO ");
-	substdio_put(&smtpto, helohost.s, helohost.len);
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_puts(&smtpto, "EHLO ") == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	else
+	if (substdio_put(&smtpto, helohost.s, helohost.len) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	else
+	if (substdio_puts(&smtpto, "\r\n") == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	else
+	if (substdio_flush(&smtpto) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
 	if ((code = smtpcode()) != 250)
 		return code;
 	s = smtptext.s;
@@ -2716,7 +2726,7 @@ smtp()
 	int             flagbother;
 	int             i, j, use_size = 0, is_esmtp = 1;
 #ifdef HASTLSA
-	char           *cp, *err_str = 0, *servercert = 0;
+	char           *err_str = 0, *servercert = 0;
 	int             tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage;
 	char            hex[2];
@@ -2768,8 +2778,7 @@ smtp()
 				}
 				if (!stralloc_0(&hexstring))
 					temp_nomem();
-				cp = hexstring.s;
-				if (!(tlsa_status = tlsa_vrfy_records(cp, rp->usage, rp->selector, rp->mtype, &err_str))) {
+				if (!(tlsa_status = tlsa_vrfy_records(hexstring.s, rp->usage, rp->selector, rp->mtype, &err_str))) {
 					switch(rp->mtype)
 					{
 					case 0:
@@ -2783,7 +2792,6 @@ smtp()
 						break;
 					}
 				}
-				free(cp);
 				if (!rp->usage || rp->usage == 2)
 					usage = 2;
 				if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
@@ -3593,7 +3601,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.117 2018-05-26 15:59:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.118 2018-05-27 11:18:20+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
