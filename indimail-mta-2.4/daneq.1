@@ -3,6 +3,7 @@
 daneq \- Query qmail-dane - TLSA verification daemon
 .SH SYNOPSIS
 .B daneq
+[-qSF]
 -\fBd\fR
 .I mxhost
 .I host
@@ -19,12 +20,32 @@ variable.
 .PP
 
 .TP
-.B -d \fIdomain
-domain to be queried for TLSA records
+.B -d \fImxhost
+mxhost to be queried for DANE verification
+
+.TP
+.B -q
+Query mode in which qmail-daned will just return back if a record exists for host \fImxhost\fR.
+This mode is used by qmail-remote(8). In this mode, qmail-daned(8) will not carry out any dns
+lookups or carry out any TLS transactions. The inbuilt cache of qmail-daned(8) will not be updated.
+
+.TP
+.B -S
+Update mode in which qmail-daned will update DANE verification as success for host \fImxhost\fR.
+This mode is used by qmail-remote(8). In this mode, qmail-daned(8) will not carry out any dns
+lookups or carry out any TLS transactions.
+
+.TP
+.B -F
+Update mode in which qmail-daned will update DANE verification as failure for host \fImxhost\fR.
+This mode is used by qmail-remote(8). In this mode, qmail-daned(8) will not carry out any dns
+lookups or carry out any TLS transactions.
 
 .SH RETURN VALUE
   0 for success
   1 for failure in TLSA verification
+  2 for record update success
+  3 for record update failure
  -1 for system error
  -2 for memory allocation error
 
