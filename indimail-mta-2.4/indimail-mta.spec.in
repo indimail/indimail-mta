@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.164 2018-05-27 14:11:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.165 2018-05-28 00:47:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -39,11 +39,7 @@
 %global nolibsrs2          0
 %global noclamav           1
 %global nodksignatures     0
-%if %build_on_obs == 1
-%global notlsarr           1
-%else
 %global notlsarr           0
-%endif
 
 %global _verbose           0
 %global qcount             5
@@ -503,6 +499,11 @@ do
     else
       %{__make} DESTDIR=%{buildroot}
       %{__make} DESTDIR=%{buildroot} install-strip
+    fi
+    if [ " $i" = " %{name}-%{version}" ] ; then
+      if [ ! -s hastlsa.h ] ; then
+        notlsarr=1
+      fi
     fi
     cd ..
   fi
