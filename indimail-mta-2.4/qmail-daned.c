@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.9  2018-05-27 17:46:06+05:30  Cprogrammer
+ * added option for qmail-remote to query/update records
+ *
  * Revision 1.8  2018-05-27 14:06:14+05:30  Cprogrammer
  * removed DANEPROG execution method
  *
@@ -89,12 +92,6 @@
 #define FATAL "qmail-daned: fatal: "
 #define WARN  "qmail-daned: warning: "
 
-#define RECORD_NEW    0
-#define RECORD_WHITE  1
-#define RECORD_OK     2
-#define RECORD_NOVRFY 3
-#define RECORD_FAIL   4
-#define RECORD_OLD    5
 #define BLOCK_SIZE 32768
 
 union sockunion
@@ -123,9 +120,7 @@ int             hash_size, h_allocated = 0;
 int             verbose = 0;
 unsigned long   timeout;
 char           *whitefn = 0, *tlsadomainsfn = 0;
-char           *daneprog;
 stralloc        context_file = { 0 };
-stralloc        daneprogargs = { 0 };
 stralloc        line = { 0 };
 stralloc        save = { 0 };
 stralloc        sa = { 0 };
@@ -2156,9 +2151,7 @@ get_dane_records(char *host)
 		die (111);
 	}
 	if (wait_crashed(wstat)) {
-		logerr("program ");
-		logerr(daneprog);
-		logerrf(" crashed\n");
+		logerrf("child crashed\n");
 		die (111);
 	}
 	switch (dane_exitcode = wait_exitcode(wstat))
@@ -2217,7 +2210,7 @@ get_dane_records(char *host)
  */
 int
 send_response(int s, union sockunion *from, int fromlen, char *domain,
-	int fr_int, struct danerec **dnrecord, int *record_added, int *org_state)
+	int fr_int, struct danerec **dnrecord, int *record_added, int *org_state, int qmr)
 {
 	char           *resp;
 	struct danerec *ptr;
@@ -2236,12 +2229,30 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	{
 	case RECORD_NEW:  /*- \1\0 */
 		*org_state = dane_state;
-		dane_state = get_dane_records(domain);
-		if (!save.len)
-			dane_state = RECORD_OK;
-		else
-		if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40))
-			dane_state = RECORD_OK;
+		if (qmr == 'q') {
+			resp = rbuf;
+			rbuf[0] = 0;
+			rbuf[1] = RECORD_NEW;
+			break; /*- don't add the record & don't do dns, tls transaction */
+		} else
+		if (qmr == 'S') {
+			resp = rbuf;
+			rbuf[0] = 1;
+			rbuf[1] = dane_state = RECORD_OK;
+		} else
+		if (qmr == 'F') {
+			resp = rbuf;
+			rbuf[0] = 1;
+			rbuf[1] = dane_state = RECORD_NOVRFY;
+		} 
+		if (qmr == 'D') {
+			dane_state = get_dane_records(domain);
+			if (!save.len)
+				dane_state = RECORD_OK;
+			else
+			if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40))
+				dane_state = RECORD_OK;
+		}
 		if (!add_record(domain, dane_state, dnrecord)) {
 			logerrf("unable to add record\n");
 			resp = "\0\1";
@@ -2258,7 +2269,10 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 			}
 			*record_added = 1;
 			resp = rbuf;
-			rbuf[0] = (dane_state == RECORD_OK ? 1 : 0);
+			if (qmr == 'S' || qmr == 'F')
+				rbuf[0] = 1;
+			else
+				rbuf[0] = (dane_state == RECORD_OK ? 1 : 0);
 			rbuf[1] = dane_state;
 		}
 		break;
@@ -2266,32 +2280,85 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	case RECORD_OK:    /*- \1\2 */
 		*org_state = dane_state;
 		resp = rbuf;
-		rbuf[0] = 1;
-		rbuf[1] = dane_state;
+		if (qmr == 'q') {
+			resp = rbuf;
+			rbuf[0] = 1;
+			rbuf[1] = dane_state;
+			break; /*- don't add the record & don't do dns, tls transaction */
+		} else
+		if (qmr == 'S') {
+			ptr = *dnrecord;
+			rbuf[0] = 1;
+			rbuf[1] = dane_state = ptr->status = RECORD_OK;
+		} else
+		if (qmr == 'F') {
+			ptr = *dnrecord;
+			rbuf[0] = 1;
+			rbuf[1] = dane_state = ptr->status = RECORD_NOVRFY;
+		} else {
+			rbuf[0] = 1;
+			rbuf[1] = dane_state;
+		}
 		break;
 	case RECORD_FAIL: /*- \1\4 */
 	case RECORD_OLD:  /*- \1\5 */
 		*org_state = dane_state;
 		ptr = *dnrecord;
-		dane_state = ptr->status = get_dane_records(domain);
-		if (!save.len)
-			dane_state = RECORD_OK;
-		else
-		if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40))
-			dane_state = RECORD_OK;
-		if (save.len) {
-			if (!(ptr->data = (char *) realloc(ptr->data, save.len + 1)))
-				die_nomem();
-			byte_copy(ptr->data, save.len, save.s);
-			ptr->data[save.len] = 0;
+		resp = rbuf;
+		if (qmr == 'q') {
+			resp = rbuf;
+			rbuf[0] = 1;
+			rbuf[1] = dane_state;
+			break; /*- don't add the record & don't do dns, tls transaction */
+		} else
+		if (qmr == 'S') {
+			rbuf[0] = 1;
+			rbuf[1] = dane_state = ptr->status = RECORD_OK;
+		} else
+		if (qmr == 'F') {
+			rbuf[0] = 1;
+			rbuf[1] = dane_state = ptr->status = RECORD_NOVRFY;
+		} else
+		if (qmr == 'D') {
+			dane_state = ptr->status = get_dane_records(domain);
+			if (!save.len)
+				dane_state = RECORD_OK;
+			else
+			if (!str_diffn(save.s, "dane_query_tlsa: No DANE data were found", 40))
+				dane_state = RECORD_OK;
+			if (save.len) {
+				if (!(ptr->data = (char *) realloc(ptr->data, save.len + 1)))
+					die_nomem();
+				byte_copy(ptr->data, save.len, save.s);
+				ptr->data[save.len] = 0;
+				ptr->datalen = save.len;
+			}
 		}
 		rbuf[0] = (dane_state == RECORD_OK ? 1 : 0);
 		rbuf[1] = dane_state;
 		break;
 	case RECORD_NOVRFY: /*- \0\3 */
 		*org_state = dane_state;
-		rbuf[0] = 0;
-		rbuf[1] = dane_state;
+		resp = rbuf;
+		if (qmr == 'q') {
+			resp = rbuf;
+			rbuf[0] = 1;
+			rbuf[1] = dane_state;
+			break; /*- don't add the record & don't do dns, tls transaction */
+		} else
+		if (qmr == 'S') {
+			ptr = *dnrecord;
+			rbuf[0] = 1;
+			rbuf[1] = dane_state = ptr->status = RECORD_OK;
+		} else
+		if (qmr == 'F') {
+			ptr = *dnrecord;
+			rbuf[0] = 1;
+			rbuf[1] = dane_state = ptr->status = RECORD_NOVRFY;
+		} else {
+			rbuf[0] = 0;
+			rbuf[1] = dane_state;
+		}
 		break;
 	default:
 		*org_state = dane_state;
@@ -2322,7 +2389,7 @@ int
 main(int argc, char **argv)
 {
 	int             s = -1, buf_len, rdata_len, n, port, opt, len,
-					fromlen, rec_added, o_s;
+					fromlen, rec_added, o_s, qmr;
 	union sockunion sin, from;
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 	struct addrinfo hints, *res, *res0;
@@ -2572,13 +2639,20 @@ main(int argc, char **argv)
 		domain = 0;
 		switch (rdata[0])
 		{
-		case 'D':
-			if (verbose)
-				out(" [");
+		case 'q': /*- qmail-remote record exist check */
+		case 'S': /*- qmail-remote record update success */
+		case 'F': /*- qmail-remote record update failure */
+		case 'D': /*- tlsacheck() function */
+			qmr = rdata[0];
+			if (verbose) {
+				out(" rdata[");
+				if (substdio_put(subfdout, rdata, 1) == -1)
+					strerr_die2sys(111, FATAL, "write: ");
+				out("] domain[");
+			}
 			domain = rdata + 1;
 			len = str_len(domain);
 			if (verbose) {
-				out("Domain: ");
 				out(domain);
 				out("] bufsiz=");
 				strnum[fmt_ulong(strnum, (unsigned long) n)] = 0;
@@ -2588,7 +2662,7 @@ main(int argc, char **argv)
 				logerrf("qmail-daned: null domain\n");
 				continue;
 			}
-			n = send_response(s, &from, fromlen, domain, free_interval, &dnrec, &rec_added, &o_s);
+			n = send_response(s, &from, fromlen, domain, free_interval, &dnrec, &rec_added, &o_s, qmr);
 			if (n == -2)
 				logerrf("qmail-daned: copy failed\n");
 			else
@@ -2616,7 +2690,8 @@ main(int argc, char **argv)
 						if (!*ptr)
 							out("\n");
 						else
-							substdio_put(subfdout, ptr, 1);
+						if (substdio_put(subfdout, ptr, 1) == -1)
+							strerr_die2sys(111, FATAL, "write: ");
 					}
 				}
 			} else {
@@ -2651,7 +2726,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.8 2018-05-27 14:06:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.9 2018-05-27 17:46:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
