@@ -8,11 +8,10 @@ int  \fBtlsacheck\fP(\fIchar\fR *\fIip\fR, \fIchar\fR *\fIdomain\fR, \fichar\fR 
 
 .SH DESCRIPTION
 \fBtlsacheck\fR connects to \fBqmail-daned\fR(8) - TLSA verification daemon
-to query, on the IP address \fIip\fR, to query TLSA records for domain
+on the IP address \fIip\fR port 1998, to query TLSA records for mx host
 \fIdomain\fR. It uses UDP to send the domain name and expects a two byte
 response in \fIrbuf\fR. Clients like \fBqmail-remote\fR(8) can use this function to
-enforce DANE protocol. The default port to which \fItlsacheck\fR()
-connects is 1998. IP address can also be of the form \fIip\fR@\fIport\fR,
+delegate DANE verification. IP address can also be of the form \fIip\fR@\fIport\fR,
 to specify an alternate port.
 
 You can use the command line program \fBdaneq\fR(1) to test

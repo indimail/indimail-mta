@@ -33,8 +33,8 @@ qmail-daned \- TLSA Record Checker for \fBIndiMail\fR
 .I ipaddr contextFile
 
 .SH DESCRIPTION
-\fBqmail-daned\fR is a daemon to check DNS resource records for the
-DANE protocol. ”DANE” defines the protocol for storing TLS certificates
+\fBqmail-daned\fR is a qmail daemon for DANE protocol validation.
+”DANE” defines the protocol for storing TLS certificates
 in the DNS for a variety of applications using them. DNS-based
 Authentication of Named Entities (DANE) is a great feature that uses the
 advantages of a DNSSEC signed zone in order to tell the client which TLS
@@ -72,9 +72,10 @@ to be verified, can be maintained in a control file, specified by the
 \fB-T\fR \fIfilename\fR option. If this control file is present, TLSA
 verification will be skipped for all domains not in this file. If a file
 with the name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-daned\fR will use
-\fBcdb(3)\fR lookup in addition to the normal in-memory search in a table
+\fBcdb(3)\fR lookup, in addition to the normal in-memory search, in a table
 of tlsa verification enforced domains. \fBqmail-daned\fR re-reads this list
-of domains on receipt of signal \fISIGHUP\fR.
+of domains on receipt of signal \fISIGHUP\fR. This control file is also
+used by \fBqmail-remote(8)\fR
 
 A whitelist of domains not subject to tlsa checking can be specified to
 \fBqmail-daned\fR by the \fB-w\fR \fIfilename\fR option. If a file with the
@@ -126,11 +127,23 @@ Alternate port to listen instead of the default 1998
 Queries to
 \fBqmail-daned\fR are UDP packets containing the domain name(as a string) preceded by
 .BR D ,
-with the record terminated by a ASCII 0 character.
+with the record terminated by an ASCII 0 character.
 
 .EX
  Ddomain\\0
 .EE
+
+qmail-remote(8) can delegate DANE validation to qmail-daned(8) if the DANE_VERIFICATION is set
+to host@port, where host@port represents the IP and port on which qmail-daned(8) is listening.
+qmail-remote(8) has the domain name (as a string) in UDP packets preceded by
+.BR q ,
+.BR S or
+.BR F ,
+with the record terminated by an ASCII 0 character. In this mode, qmail-daned(8) does not do the actual
+DANE verification but simply updates its own in memory database with the result from qmail-remote.
+The character q is for verifying the existence of TLSA RR. The character S, F is for updating the DANE
+validation as success or failure respectively. Once the record is updated, qmail-remote just gets the
+DANE validation from qmail-daned cache, thus saving many DNS lookups.
 
 .SH "SEE ALSO"
 qmail-remote(8), daneq(1), tlsacheck(3), hcreate(3), hsearch(3), hdestroy(3), recvfrom(2).
