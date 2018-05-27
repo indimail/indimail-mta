@@ -1,5 +1,8 @@
 /*
  * $Log: daneq.c,v $
+ * Revision 1.3  2018-05-27 22:15:49+05:30  mbhangui
+ * *** empty log message ***
+ *
  * Revision 1.2  2018-05-27 17:47:16+05:30  Cprogrammer
  * added option for qmail-remote to query/update records
  *
@@ -14,6 +17,12 @@
 
 #define FATAL "daneq: fatal: "
 #define WARN  "daneq: warning: "
+
+#ifdef LIBC_HAS_IP6
+int             noipv6 = 0;
+#else
+int             noipv6 = 1;
+#endif
 
 void
 out(char *str)
@@ -83,28 +92,28 @@ print_status(char status)
 
 char           *usage =
 				"usage: daneq [qsf] -d domain ipaddr\n"
-				"        -q (query mode for record check)\n"
-				"        -S (update mode success)\n"
-				"        -F (update mode failure)";
+				"        -q (query mode  - DANE VERIFICATION)\n"
+				"        -S (update mode - success)\n"
+				"        -F (update mode - failure)";
 
 int
 main(int argc, char **argv)
 {
 	char           *domain = 0;
-	int             opt, query_or_update = 0;
+	int             opt, query_or_update = DEFAULT_MODE;
 	char            rbuf[2];
 
 	while ((opt = getopt(argc, argv, "qSFd:")) != opteof) {
 		switch (opt)
 		{
 		case 'q':
-			query_or_update = 1;
+			query_or_update = QUERY_MODE;
 			break;
 		case 'S':
-			query_or_update = 2;
+			query_or_update = UPDATE_SUCCESS;
 			break;
 		case 'F':
-			query_or_update = 3;
+			query_or_update = UPDATE_FAILURE;
 			break;
 		case 'd':
 			domain = optarg;
@@ -156,7 +165,7 @@ main(int argc, char **argv)
 void
 getversion_daneq_c()
 {
-	static char    *x = "$Id: daneq.c,v 1.2 2018-05-27 17:47:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: daneq.c,v 1.3 2018-05-27 22:15:49+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
