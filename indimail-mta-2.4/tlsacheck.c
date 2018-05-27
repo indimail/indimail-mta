@@ -1,5 +1,8 @@
 /*
  * $Log: tlsacheck.c,v $
+ * Revision 1.3  2018-05-27 22:14:32+05:30  mbhangui
+ * added defintions for qmail-daned modes
+ *
  * Revision 1.2  2018-05-27 17:47:05+05:30  Cprogrammer
  * added option for qmail-remote to query/update records
  *
@@ -31,11 +34,6 @@
 typedef struct sockaddr_in  sockaddr_in;
 #ifdef IPV6
 typedef struct sockaddr_in6 sockaddr_in6;
-#endif
-#ifdef LIBC_HAS_IP6
-int             noipv6 = 0;
-#else
-int             noipv6 = 1;
 #endif
 
 /*
@@ -222,16 +220,16 @@ tlsacheck(daneip, domain, qOru, rbuf, timeoutfn, errfn)
 		scan_int(ptr, &timeout);
 	switch (qOru)
 	{
-		case 1:
+		case QUERY_MODE:
 			ptr = "q";
 			break;
-		case 2:
+		case UPDATE_SUCCESS:
 			ptr = "S";
 			break;
-		case 3:
+		case UPDATE_FAILURE:
 			ptr = "F";
 			break;
-		case 0:
+		case DEFAULT_MODE:
 		default:
 			ptr = "D";
 			break;
@@ -263,7 +261,7 @@ tlsacheck(daneip, domain, qOru, rbuf, timeoutfn, errfn)
 void
 getversion_tlsacheck_c()
 {
-	static char    *x = "$Id: tlsacheck.c,v 1.2 2018-05-27 17:47:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tlsacheck.c,v 1.3 2018-05-27 22:14:32+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
