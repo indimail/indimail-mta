@@ -152,10 +152,6 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
-	if [ ! -f $(DESTDIR)$(prefix)/sbin/qmail-daned ] ; then  \
-		grep -v qmail-daned debian/ucspi-tcp.install > debian/ucspi-tcp.install.$$; \
-		mv debian/ucspi-tcp.install.$$ debian/ucspi-tcp.install; \
-	fi
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mta
 	dh_install --sourcedir=$(DESTDIR) -pdaemontools
 	dh_install --sourcedir=$(DESTDIR) -pucspi-tcp
