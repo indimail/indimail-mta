@@ -19,7 +19,9 @@ the command \fBsvctool --config=add-boot\fR.
 \fBsvctool\fR requires root privilege to run.
 
 .EX
-Known values for \fIoptions\fR are:
+Usage: svctool [OPTION]
+
+Known values for OPTION are:
 
 --smtp=Port --qbase=queue_path --qcount=N --qstart=I
   --servicedir=service_path
@@ -66,7 +68,7 @@ Known values for \fIoptions\fR are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for /var/indimail/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
@@ -77,8 +79,8 @@ Known values for \fIoptions\fR are:
   Port           - Bind on this port for SMTP
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
-                   @qmaildir@ appropriate links will be created in
-                   @qmaildir@
+                   /var/indimail appropriate links will be created in
+                   /var/indimail
   cntrl_path     - Path where Qmail control files are stored
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   chkrecipient   - Perform a User Status query before accepting mails
@@ -172,7 +174,7 @@ Known values for \fIoptions\fR are:
 
  Installs a new queue without a SMTP listener
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for /var/indimail/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   D              - Max deliveries allowed per day for a user
@@ -181,8 +183,8 @@ Known values for \fIoptions\fR are:
   no-multi       - Do not set QMAILQUEUE to qmail-multi
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
-                   @qmaildir@ appropriate links will be created in
-                   @qmaildir@
+                   /var/indimail appropriate links will be created in
+                   /var/indimail
   cntrl_path     - Path where Qmail control files are stored
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   qregex         - Use regular expressions for matching entries in
@@ -235,10 +237,10 @@ Known values for \fIoptions\fR are:
  Installs a new queue with a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
   queue_path     - Path where the queues are installed. If this is different from
-                   @qmaildir@ appropriate links will be created in
-                   @qmaildir@
+                   /var/indimail appropriate links will be created in
+                   /var/indimail
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for /var/indimail/queue/queue1)
   cntrl_path     - Path where Qmail control files are stored
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
@@ -272,7 +274,7 @@ Known values for \fIoptions\fR are:
 
 --greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
   --context-file=f --save_interval=s --whitelist=w --hash-size=s
-  --localip=a --use-greydaemon
+  --localip=a --use-greydaemon --servicedir=service_path
 
   Installs a new Greylist Daemon
   a              - IP Address to listen
@@ -289,7 +291,7 @@ Known values for \fIoptions\fR are:
   use-greydaemon - Use John Levine's greydaemon
 
 --tlsa=port --timeout-days=t --context-file=f --save_interval=s --whitelist=w
-  --hash-size=s --localip=a
+  --hash-size=s --localip=a --servicedir=service_path
 
   Installs a new qmail-daned TLSA verification Daemon
   a              - IP Address to listen
@@ -321,15 +323,15 @@ Known values for \fIoptions\fR are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for /var/indimail/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
   Port           - Bind on this port for QMTP
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
-                   @qmaildir@ appropriate links will be created in
-                   @qmaildir@
+                   /var/indimail appropriate links will be created in
+                   /var/indimail
   cntrl_path     - Path where Qmail control files are stored
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
@@ -365,15 +367,15 @@ Known values for \fIoptions\fR are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for /var/indimail/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
   Port           - Bind on this port for QMTP
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
-                   @qmaildir@ appropriate links will be created in
-                   @qmaildir@
+                   /var/indimail appropriate links will be created in
+                   /var/indimail
   cntrl_path     - Path where Qmail control files are stored
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
@@ -410,7 +412,7 @@ Known values for \fIoptions\fR are:
   proxy          - Install as a proxy and connect to actual imap on destport
   legacyserver   - To be set if destination IMAP server is not Indimail's IMAP server
   fifo_path      - Install fifo specified by this path
-                   (e.g. @qmaildir@/inquery/infifo)
+                   (e.g. /var/indimail/inquery/infifo)
   postmaster     - name of the user who will be the contact for Certificates.
   common_name    - Common Name (CN) for server
   query-cache    - Enable caching of queries
@@ -471,26 +473,26 @@ Known values for \fIoptions\fR are:
 
   Disable supervise scripts for service
   service_name   - name of service with full path
-                   e.g. (@servicedir@/qmail-smtpd.25)
+                   e.g. (/service/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
+                   "/service/qmail-smtpd.25 /service/qmail-imapd.143"
 
 --ensvc=service_name
 
   Enable supervise scripts for service
   service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (/service/.qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   "/service/.qmail-smtpd.25 /service/.qmail-imapd.143"
 
 --refreshsvc=service_name
   [--run-file-only]
 
   Enable supervise scripts for service
   service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (/service/.qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   "/service/.qmail-smtpd.25 /service/.qmail-imapd.143"
   run-file-only  - Recreate run files but not variables
   NOTE: if the file .norefreshsvc is present in the variable or the config
   directory, refresh is skipped
@@ -519,7 +521,7 @@ Known values for \fIoptions\fR are:
 
   Installs a new Fifo Server
   fifo_path      - Install fifo specified by this path
-                   (e.g. @qmaildir@/inquery/infifo)
+                   (e.g. /var/indimail/inquery/infifo)
   N              - No of parallel inlookup threads to spawn
   A              - Max days for which a user has been active
   service_path   - Path where supervise scripts will be installed
@@ -579,7 +581,7 @@ Known values for \fIoptions\fR are:
   mysqlPrefix    - Installation Prefix for mysql
   databasedir    - Directory containing the Database and Logs
   mysqlsocket    - Unix Domain Socket for connecting to mysql
-  config         - MySQL Configuration file (e.g. @sysconfdir@/indimail.cnf)
+  config         - MySQL Configuration file (e.g. /etc/indimail/indimail.cnf)
   service_path   - Path where supervise scripts will be installed
   default-domain - default domain name for which this host will handle mails
 
@@ -598,10 +600,10 @@ Known values for \fIoptions\fR are:
 
   Install Fetchmail Server
   queue_path     - Path where the queues are installed. If this is different from
-                   @qmaildir@ appropriate links will be created in
-                   @qmaildir@
+                   /var/indimail appropriate links will be created in
+                   /var/indimail
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for /var/indimail/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that Fetchmail can allocate
@@ -636,6 +638,7 @@ Known values for \fIoptions\fR are:
   sysconfdir   - Path for config files (clamd.conf, freshclam.conf)
 
 --poppass=Port --localip=a --setpassword=cmd --maxdaemons=m --maxperip=i
+  --servicedir=service_path
   [--memory=b]
   [--certfile=certificate --ssl]
   Port           - TCP/IP port on which to bind
@@ -647,6 +650,7 @@ Known values for \fIoptions\fR are:
   cmd            - Path of a setpassword compatible program
   certficate     - Path to openssl certificate
   ssl            - Use SSL encrypted communication
+  service_path - Path where supervise scripts will be installed
 
   Installs a new IndiMail poppassd Server
 
@@ -667,8 +671,7 @@ Known values for \fIoptions\fR are:
   service_path - Path where supervise scripts will be installed
   n            - Scan interval for mrtg command
 
---config=mysql|sqlssl|mysqldb|qmail|users|rmusers|clamd|foxhole ..
-    .. |bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
+--config=mysql|sqlssl|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
   [--postmaster=user[@domain]]
   [--common_name=CN]
   [--default-domain=domain]
@@ -680,7 +683,7 @@ Known values for \fIoptions\fR are:
   [--stdout]
   [--wipe]
 
-  mysql          - Create @sysconfdir@/indimail.cnf
+  mysql          - Create /etc/indimail/indimail.cnf
   mysqldb        - Create an initidalized MySQL db for IndiMail
   sqlssl         - Create SSL/TLS Certs for MariaDB
   qmail          - Create default qmail control files
@@ -717,7 +720,7 @@ Known values for \fIoptions\fR are:
   service_path  - Path where supervise scripts have been installed
   queue_path    - Path where the queues are installed.
   N             - No of Queues
-  I             - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
+  I             - Numeral Prefix of first queue (i.e 1 for /var/indimail/queue/queue1)
   skip-sendmail - Skip Checking sendmail paths in /usr/sbin and /usr/lib
 
 --inittab --servicedir=service_path
@@ -736,7 +739,7 @@ Known values for \fIoptions\fR are:
   backupdir    - Directory to dump backup
 
 --repair-tables
-  Repair MySQL tables in @qmaildir@/mysqldb/data
+  Repair MySQL tables in /var/indimail/mysqldb/data
 
 --report=all| zddist| zdeferrals| zfailures| zoverall| zrecipients| zrhosts|
   zrxdelay| zsenders| zsendmail| zsuccesses| zsuids | zsmtp | zspam
@@ -748,7 +751,7 @@ Known values for \fIoptions\fR are:
   attach     - zip and send the report as an attachment
 
 --check-certs
-  Check IndiMail Certificates in @sysconfdir@/certs
+  Check IndiMail Certificates in /etc/indimail/certs
 
 --help
 
