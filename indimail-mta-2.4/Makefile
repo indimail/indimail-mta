@@ -1112,12 +1112,12 @@ compile hfield.c hfield.h
 
 hier.o: \
 compile hier.c auto_qmail.h auto_split.h auto_uids.h fmt.h fifo.h \
-qmail-todo.h tcpto.h ip.h ipalloc.h hassrs.h hastlsa.h \
-conf-domainkeys conf-srs conf-spf conf-ip conf-dkim conf-batv \
-auto_shared.h auto_control.h auto_assign.h auto_sysconfdir.h \
-stralloc.h strerr.h auto_prefix.h conf-plugin conf-dlopen conf-tlsa
+qmail-todo.h tcpto.h hassrs.h conf-domainkeys conf-srs \
+conf-spf conf-dkim conf-batv auto_shared.h auto_control.h \
+auto_assign.h auto_sysconfdir.h stralloc.h strerr.h \
+auto_prefix.h conf-plugin conf-dlopen
 	./compile \
-	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim \
+	`grep -h -v "^#" conf-tls conf-spf conf-domainkeys conf-dkim \
 	conf-batv conf-plugin conf-dlopen` hier.c
 
 home: \
