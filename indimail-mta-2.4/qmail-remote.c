@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.122 2018-05-28 17:22:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.123 2018-05-28 21:44:22+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -1540,7 +1540,12 @@ stralloc        certData = { 0 };
 int
 tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, char **err_str )
 {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX     *mdctx;
+#else
+	EVP_MD_CTX     *mdctx;
+	EVP_MD_CTX      _mdctx;
+#endif
 	const EVP_MD   *md = 0;
 	BIO            *membio = 0;
 	EVP_PKEY       *pkey = 0;
@@ -1702,8 +1707,12 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	if ((match_type == 2 || match_type == 1) && selector == 1) {
 		unsigned char  *tmpbuf = (unsigned char *) 0;
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		if (!(mdctx = EVP_MD_CTX_new()))
 			temp_nomem();
+#else
+		mdctx = &_mdctx;
+#endif
 		if (!(pkey = X509_get_pubkey(xs)))
 			tls_quit("ZTLS Unable to get public key", 0, 0, 0, 0);
 		if (!EVP_DigestInit_ex(mdctx, md, NULL))
@@ -3429,7 +3438,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.122 2018-05-28 17:22:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.123 2018-05-28 21:44:22+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3437,6 +3446,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.123  2018-05-28 21:44:22+05:30  Cprogrammer
+ * fixed code for openssl version < 0x10100000L
+ *
  * Revision 1.122  2018-05-28 17:22:16+05:30  Cprogrammer
  * fixed compiler warning with unused variable when HASTLSA is not defined
  *
