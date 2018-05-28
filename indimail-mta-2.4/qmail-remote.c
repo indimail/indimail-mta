@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.121 2018-05-27 23:38:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.122 2018-05-28 17:22:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -2411,11 +2411,11 @@ smtp()
 {
 	unsigned long   code;
 	int             flagbother;
-	int             i, j, use_size = 0, is_esmtp = 1;
+	int             i, use_size = 0, is_esmtp = 1;
 #ifdef HASTLSA
 	char           *err_str = 0, *servercert = 0;
 	int             tlsa_status, authfullMatch, authsha256, authsha512,
-					match0Or512, needtlsauth, usage;
+					match0Or512, needtlsauth, usage, j;
 	char            hex[2], rbuf[2];
 	tlsarr         *rp;
 #endif
@@ -3429,7 +3429,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.121 2018-05-27 23:38:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.122 2018-05-28 17:22:16+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3437,6 +3437,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.122  2018-05-28 17:22:16+05:30  Cprogrammer
+ * fixed compiler warning with unused variable when HASTLSA is not defined
+ *
  * Revision 1.121  2018-05-27 23:38:52+05:30  Cprogrammer
  * added tlsadomains control file to restrict DANE verification to hosts in tlsadomains control file
  *
