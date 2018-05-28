@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.5  2018-05-28 19:56:56+05:30  Cprogrammer
+ * exit with 111 for wrong usage
+ *
  * Revision 1.4  2018-05-26 19:17:35+05:30  Cprogrammer
  * fixed program name in usage
  *
@@ -40,7 +43,7 @@ usage()
 {
 	substdio_puts(subfderr,      "usage: dnstlsarr [-p port] host\n");
 	substdio_putsflush(subfderr, "         -p port  port to connect to\n");
-	_exit (100);
+	_exit (111);
 }
 
 int
@@ -107,7 +110,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.4 2018-05-26 19:17:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.5 2018-05-28 19:56:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
