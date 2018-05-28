@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.247  2018-05-28 19:55:51+05:30  Cprogrammer
+ * install qmail-daned, dnstlsarr regardless of HASTLSA
+ *
  * Revision 1.246  2018-05-27 14:12:03+05:30  Cprogrammer
  * removed daneprog script
  *
@@ -622,7 +625,6 @@
 #include "fifo.h"
 #include "tcpto.h"
 #include "hassrs.h"
-#include "hastlsa.h"
 
 void            d(char *, char *, int, int, int);
 void            h(char *, int, int, int);
@@ -978,9 +980,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_qmail_home, "sbin", "readproctitle", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "qmail-greyd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "greydaemon", auto_uido, auto_gidq, moder_x);
-#ifdef HASTLSA
 	c(auto_qmail_home, "sbin", "qmail-daned", auto_uido, auto_gidq, moder_x);
-#endif
 	c(auto_qmail_home, "sbin", "surblfilter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "surblqueue", auto_uido, auto_gidq, moder_x);
 #ifdef EXTERNAL_TODO
@@ -1003,9 +1003,7 @@ hier(inst_dir, fatal, dev_package)
 #ifdef USE_SPF
 	c(auto_libexec_dir, auto_libexec_base, "dnstxt", auto_uido, auto_gidq, moder_x);
 #endif
-#ifdef HASTLSA
 	c(auto_libexec_dir, auto_libexec_base, "dnstlsarr", auto_uido, auto_gidq, moder_x);
-#endif
 	c(auto_libexec_dir, auto_libexec_base, "leapsecs", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "yearcal", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "nowutc", auto_uido, auto_gidq, moder_x);
@@ -1534,9 +1532,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/cat8", "qmail-smtpd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-greyd.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-greyd.0", uidr, gidr, moder_f);
-#ifdef HASTLSA
 	c(mandir,          "man/man8", "qmail-daned.8", uidr, gidr, moder_f);
-#endif
 	c(mandir,          "man/man8", "greydaemon.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "greydaemon.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-poppass.8", uidr, gidr, moder_f);
@@ -1608,7 +1604,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.246 2018-05-27 14:12:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.247 2018-05-28 19:55:51+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
