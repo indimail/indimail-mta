@@ -2483,19 +2483,17 @@ auto_control.o error_str.o socket_ip4loopback.o socket_v6loopback.o socket_v6any
 md5c.o hmac_md5.o hmac_sha1.o hmac_sha256.o hmac_sha512.o hmac_ripemd.o sha1.o ripemd.o \
 tlsarralloc.o digest_md5.o ndelay.a case.a sig.a open.a lock.a seek.a getln.a stralloc.a \
 alloc.a socket_v4mappedprefix.o scan_xlong.o socket_tcp.o socket_tcp6.o wait_pid.o \
-fn_handler.o query_skt.o \
-tlsacheck.o substdio.a str.a fs.a cdb.a auto_qmail.o envread.o error.a dns.lib socket.lib \
-tls.lib 
+fn_handler.o query_skt.o tlsacheck.o substdio.a str.a fs.a cdb.a auto_qmail.o envread.o \
+error.a dns.lib socket.lib tls.lib 
 	./load qmail-remote control.o constmap.o timeoutread.o base64sub.o tlsacheck.o \
 	auto_control.o timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.o scan_xlong.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o ipalloc.o env.o \
 	error_str.o socket_v4mappedprefix.o strsalloc.o ipme.o quote.o wait_pid.o \
 	md5c.o hmac_md5.o hmac_sha1.o hmac_ripemd.o sha1.o ripemd.o digest_md5.o \
-	fn_handler.o query_skt.o \
-	tlsarralloc.o variables.o socket_tcp.o socket_tcp6.o ndelay.a case.a sig.a open.a \
-	hmac_sha256.o hmac_sha512.o lock.a seek.a getln.a stralloc.a alloc.a substdio.a \
-	str.a fs.a cdb.a auto_qmail.o envread.o error.a `cat dns.lib socket.lib \
-	tls.lib`
+	fn_handler.o query_skt.o tlsarralloc.o variables.o socket_tcp.o socket_tcp6.o \
+	ndelay.a case.a sig.a open.a hmac_sha256.o hmac_sha512.o lock.a seek.a \
+	getln.a stralloc.a alloc.a substdio.a str.a fs.a cdb.a auto_qmail.o \
+	envread.o error.a `cat dns.lib socket.lib tls.lib`
 
 qmail-remote.0: \
 qmail-remote.8
@@ -5717,8 +5715,8 @@ tls.h ssl_timeoutio.h gen_alloc.h gen_allocdefs.h constmap.h \
 env.h control.h strerr.h uint32.h sig.h getln.h fmt.h \
 wait.h str.h byte.h scan.h variables.h open.h error.h \
 cdb.h sgetopt.h auto_qmail.h auto_control.h tlsacheck.h \
-haveip6.h dns.h ip.h ipalloc.h now.h conf-ip conf-tls conf-tlsa
-	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls conf-tlsa` \
+haveip6.h dns.h ip.h ipalloc.h now.h conf-ip conf-tls
+	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls` \
 	qmail-daned.c
 
 tlsacheck.o: \
