@@ -15,7 +15,7 @@
 extern int      smtps;
 extern SSL     *ssl;
 
-void            ssl_free(SSL * myssl);
+void            ssl_free(SSL *myssl);
 void            ssl_exit(int status);
 #define _exit ssl_exit
 
