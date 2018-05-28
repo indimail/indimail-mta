@@ -9,6 +9,7 @@
 #include "iopause.h"
 #include "printpacket.h"
 #include "parsetype.h"
+#include "exit.h"
 #include "dns.h"
 
 #define FATAL "dnsqr: fatal: "
