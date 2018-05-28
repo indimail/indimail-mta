@@ -353,18 +353,16 @@ ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65536 --save-interval=5 --whitelist=greylist.white
+    --hash-size=65535 --save-interval=5 --whitelist=greylist.white
 
-if [ ${notlsarr} -eq 0] ; then
-	${prefix}/sbin/qmail-daned > /dev/null 2>&1
-	if [ $? -ne 100 ] ; then
-		# qmail-daned tlsa daemon
-		${prefix}/sbin/svctool --tlsa=1998 --servicedir=$servicedir \
-    		--timeout-days=30 --context-file=tlsa.context \
-    		--hash-size=65536 --save-interval=5 --whitelist=tlsa.white
-	else
-		echo "Not enabling qmail-daned service" 1>&2
-	fi
+if [ ${notlsarr} -eq 0 ] ; then
+  # qmail-daned tlsa daemon
+  ${prefix}/sbin/qmail-daned > /dev/null 2>&1 || \
+  (test $? -ne 100 && ${prefix}/sbin/svctool \
+    --tlsa=1998 --servicedir=%{servicedir} \
+    --timeout-days=30 --context-file=tlsa.context \
+    --hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) || \
+    echo "Not enabling qmail-daned service" 1>&2
 fi
 
 # qmail-qmtpd service

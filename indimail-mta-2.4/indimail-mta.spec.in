@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.166 2018-05-28 19:56:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.167 2018-05-28 22:20:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2000,17 +2000,15 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65536 --save-interval=5 --whitelist=greylist.white
+    --hash-size=65535 --save-interval=5 --whitelist=greylist.white
 if [ %{notlsarr} -eq 0 ] ; then
-  %{_prefix}/sbin/qmail-daned > /dev/null 2>&1
-  if [ $? -ne 111 ] ; then
-    # qmail-daned tlsa daemon
-    %{_prefix}/sbin/svctool --tlsa=1998 --servicedir=%{servicedir} \
-        --timeout-days=30 --context-file=tlsa.context \
-        --hash-size=65536 --save-interval=5 --whitelist=tlsa.white
-  else
-    echo "Not enabling qmail-daned service" 1>&1
-  fi
+  # qmail-daned tlsa daemon
+  %{_prefix}/sbin/qmail-daned > /dev/null 2>&1 || \
+  (test $? -ne 100 && %{_prefix}/sbin/svctool \
+    --tlsa=1998 --servicedir=%{servicedir} \
+    --timeout-days=30 --context-file=tlsa.context \
+    --hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) || \
+    echo "Not enabling qmail-daned service" 1>&2
 fi
 # qmail-qmtpd service
 %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
