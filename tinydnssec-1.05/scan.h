@@ -1,4 +1,5 @@
 #ifndef SCAN_H
+#include "uint32.h"
 #define SCAN_H
 
 extern unsigned int scan_uint(const char *,unsigned int *);
@@ -8,6 +9,7 @@ extern unsigned int scan_ushort(const char *,unsigned short *);
 extern unsigned int scan_xshort(const char *,unsigned short *);
 extern unsigned int scan_nbbshort(const char *,unsigned int,unsigned int,unsigned int,unsigned short *);
 extern unsigned int scan_ulong(const char *,unsigned long *);
+extern unsigned int scan_u32(const char *,uint32 *);
 extern unsigned int scan_xlong(const char *,unsigned long *);
 extern unsigned int scan_nbblong(const char *,unsigned int,unsigned int,unsigned int,unsigned long *);
 
