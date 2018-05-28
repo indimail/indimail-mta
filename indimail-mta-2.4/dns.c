@@ -1,5 +1,8 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.33  2018-05-28 17:24:20+05:30  Cprogrammer
+ * define T_TLSA for older systems where nameser.h doesn'thave T_TLSA defined
+ *
  * Revision 1.32  2018-05-26 12:41:25+05:30  Cprogrammer
  * fixed memory leak dns_mxip()
  * added functions for getting TLSA RR.
@@ -1152,6 +1155,9 @@ findtlsa(wanttype)
 	responsepos += rrdlen;
 	return 0;
 }
+#ifndef T_TLSA
+#define T_TLSA 52
+#endif
 
 static int
 dns_tlsarrplus(ta, sa)
@@ -1205,7 +1211,7 @@ dns_tlsarr(ta, sa)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.32 2018-05-26 12:41:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.33 2018-05-28 17:24:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
