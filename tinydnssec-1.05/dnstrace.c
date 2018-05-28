@@ -57,7 +57,7 @@ int resolve(char *q,char qtype[2],char ip[16])
   byte_zero(servers,256);
   byte_copy(servers,16,ip);
 
-  if (dns_transmit_start(&tx,servers,0,q,qtype,"\0\0\0\0") == -1) return -1;
+  if (dns_transmit_start(&tx,servers,0,q,qtype,V6any) == -1) return -1;
 
   for (;;) {
     taia_now(&stamp);
