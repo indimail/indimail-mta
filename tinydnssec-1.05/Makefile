@@ -141,13 +141,13 @@ case_diffb.o case_diffs.o case_lowerb.o fmt_ulong.o ip4_fmt.o \
 ip4_scan.o scan_ulong.o str_chr.o str_diff.o str_len.o str_rchr.o \
 str_start.o uint16_pack.o uint16_unpack.o uint32_pack.o \
 uint32_unpack.o ip6_fmt.o ip6_scan.o fmt_xlong.o \
-scan_xlong.o
+scan_xlong.o scan_u32.o
 	./makelib byte.a byte_chr.o byte_copy.o byte_cr.o \
 	byte_diff.o byte_zero.o case_diffb.o case_diffs.o \
 	case_lowerb.o fmt_ulong.o ip4_fmt.o ip4_scan.o scan_ulong.o \
 	str_chr.o str_diff.o str_len.o str_rchr.o str_start.o \
 	uint16_pack.o uint16_unpack.o uint32_pack.o uint32_unpack.o \
-	ip6_fmt.o ip6_scan.o fmt_xlong.o scan_xlong.o
+	ip6_fmt.o ip6_scan.o fmt_xlong.o scan_xlong.o scan_u32.o
 
 byte_chr.o: \
 compile byte_chr.c byte.h
@@ -909,6 +909,10 @@ warn-auto.sh rts.sh conf-home
 scan_ulong.o: \
 compile scan_ulong.c scan.h
 	./compile scan_ulong.c
+
+scan_u32.o: \
+compile scan_u32.c scan.h uint32.h
+	./compile scan_u32.c
 
 scan_xlong.o: \
 compile scan_xlong.c scan.h
