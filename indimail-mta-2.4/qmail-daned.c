@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.11  2018-05-28 19:57:21+05:30  Cprogrammer
+ * exit with 111 for wrong usage
+ *
  * Revision 1.10  2018-05-28 01:16:18+05:30  Cprogrammer
  * removed redundant setting of smtptext
  *
@@ -51,6 +54,10 @@
 #define _ALLOC_
 #include "alloc.h"
 #undef _ALLOC_
+#include <openssl/x509v3.h>
+#include <openssl/x509.h>
+#include <openssl/err.h>
+#include <sys/stat.h>
 #include "stralloc.h"
 #include "tlsarralloc.h"
 #include "case.h"
@@ -62,10 +69,6 @@
 #include "ssl_timeoutio.h"
 #include "gen_alloc.h"
 #include "gen_allocdefs.h"
-#include <openssl/x509v3.h>
-#include <openssl/x509.h>
-#include <openssl/err.h>
-#include <sys/stat.h>
 #include "constmap.h"
 #include "env.h"
 #include "control.h"
@@ -1679,7 +1682,12 @@ stralloc        certData = { 0 };
 int
 tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, char **err_str )
 {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX     *mdctx;
+#else
+	EVP_MD_CTX     *mdctx;
+	EVP_MD_CTX      _mdctx;
+#endif
 	const EVP_MD   *md = 0;
 	BIO            *membio = 0;
 	EVP_PKEY       *pkey = 0;
@@ -1832,8 +1840,12 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	/*- SHA512/SHA256 fingerprint of subjectPublicKeyInfo */
 	if ((match_type == 2 || match_type == 1) && selector == 1) {
 		unsigned char  *tmpbuf = (unsigned char *) 0;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		if (!(mdctx = EVP_MD_CTX_new()))
 			die_nomem();
+#else
+		mdctx = &_mdctx;
+#endif
 		if (!(pkey = X509_get_pubkey(xs)))
 			tls_quit("TLS Unable to get public key", 0, 0, 0, 0);
 		if (!EVP_DigestInit_ex(mdctx, md, NULL))
@@ -2387,14 +2399,14 @@ main(int argc, char **argv)
 			a_port = optarg;
 			break;
 		default:
-			strerr_die1x(100, pusage);
+			strerr_die1x(111, pusage);
 			break;
 		}
 	} /*- while ((opt = getopt(argc, argv, "dw:s:t:g:m:")) != opteof) */
 	if (hash_size <= 0 || save_interval <= 0 || free_interval <= 0)
-		strerr_die1x(100, pusage);
+		strerr_die1x(111, pusage);
 	if (optind + 2 != argc)
-		strerr_die1x(100, pusage);
+		strerr_die1x(111, pusage);
 	ipaddr = argv[optind++];
 	if (*ipaddr == '*')
 #ifdef IPV6
@@ -2663,7 +2675,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.10 2018-05-28 01:16:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.11 2018-05-28 19:57:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
