@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.12  2018-05-28 21:45:54+05:30  Cprogrammer
+ * fix for strange error thrown by stdio.h included by openssl
+ *
  * Revision 1.11  2018-05-28 19:57:21+05:30  Cprogrammer
  * exit with 111 for wrong usage
  *
@@ -49,15 +52,15 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <search.h>
+#include <openssl/x509v3.h>
+#include <openssl/x509.h>
+#include <openssl/err.h>
+#include <sys/stat.h>
 #define __USE_GNU
 #include <netdb.h>
 #define _ALLOC_
 #include "alloc.h"
 #undef _ALLOC_
-#include <openssl/x509v3.h>
-#include <openssl/x509.h>
-#include <openssl/err.h>
-#include <sys/stat.h>
 #include "stralloc.h"
 #include "tlsarralloc.h"
 #include "case.h"
@@ -2675,7 +2678,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.11 2018-05-28 19:57:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.12 2018-05-28 21:45:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
