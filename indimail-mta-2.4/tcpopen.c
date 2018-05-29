@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.4  2018-05-29 21:47:11+05:30  Cprogrammer
+ * removed call to gethostbyname() in ipv6 code
+ *
  * Revision 1.3  2018-01-09 12:37:04+05:30  Cprogrammer
  * removed header hasindimail.h
  *
@@ -16,13 +19,13 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <string.h>
 #include <errno.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <ctype.h>
+#include "haveip6.h"
 #include "fmt.h"
 #include "byte.h"
 #include "subfd.h"
@@ -58,8 +61,7 @@ Dirname(char *path)
 	if (!path || !*path)
 		return ((char *) 0);
 	byte_copy(tmpbuf, MAX_BUFF, path);
-	if ((ptr = strrchr(tmpbuf, '/')) != (char *) 0)
-	{
+	if ((ptr = strrchr(tmpbuf, '/')) != (char *) 0) {
 		if (ptr == tmpbuf)
 			return ("/");
 		*ptr = 0;
@@ -75,12 +77,9 @@ setsockbuf(fd, option, size)
 	int             len, retrycount;
 
 	len = size;
-	for (retrycount = 0; retrycount < MAXNOBUFRETRY; retrycount++)
-	{
-		if (setsockopt(fd, SOL_SOCKET, option, (void *) &len, sizeof(int)) == -1)
-		{
-			if (errno == ENOBUFS)
-			{
+	for (retrycount = 0; retrycount < MAXNOBUFRETRY; retrycount++) {
+		if (setsockopt(fd, SOL_SOCKET, option, (void *) &len, sizeof(int)) == -1) {
+			if (errno == ENOBUFS) {
 				usleep(1000);
 				continue;
 			}
@@ -110,16 +109,16 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	int             resvport, fd = -1, optval, retval;
 	char           *ptr, *hostptr;
 	struct servent *sp;
-#ifdef IPV6
-	struct addrinfo hints, *res, *res0;
+#if defined(LIBC_HAS_IP6) && defined(IPV6)
+	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
 	char            serv[FMT_ULONG];
 #else
+	struct hostent *hp;
 #ifdef HAVE_IN_ADDR_T
 	in_addr_t       inaddr;
 #else
 	unsigned long   inaddr;
 #endif
-	struct hostent *hp;
 	struct sockaddr_in tcp_srv_addr;/*- server's Internet socket address */
 #endif
 	struct sockaddr_un unixaddr;	/*- server's local unix socket address */
@@ -127,8 +126,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	char           *dir;
 	char            localhost[MAXHOSTNAMELEN];
 
-	if (host && *host && ((strchr(host, '/') || ((dir = Dirname(host)) && !access(dir, F_OK)))))
-	{
+	if (host && *host && ((strchr(host, '/') || ((dir = Dirname(host)) && !access(dir, F_OK))))) {
 		if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
         	return -1;
     	unixaddr.sun_family = AF_UNIX;
@@ -149,31 +147,25 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 		hostptr = "localhost";
 	else
 		hostptr = host;
-	if ((ptr = (char *) getenv("SLEEPTIME")) != (char *) 0)
-	{
+	if ((ptr = (char *) getenv("SLEEPTIME")) != (char *) 0) {
 		if (isnum(ptr))
 			sleeptime = atoi(ptr);
-		else
-		{
+		else {
 			errno = EINVAL;
 			return (-1);
 		}
 	}
-#ifdef IPV6
-	bzero(&hints, sizeof(struct addrinfo));
+#if defined(LIBC_HAS_IP6) && defined(IPV6)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-	if (service != (char *) NULL)
-	{
+	if (service != (char *) NULL) {
 		if (port > 0)
 			serv[fmt_ulong(serv, htons(port))] = 0;
-		else
-		{
+		else {
 			if (isnum(service))
 				byte_copy(serv, FMT_ULONG, service);
 			else {
-				if ((sp = getservbyname(service, "tcp")) == NULL)
-				{
+				if ((sp = getservbyname(service, "tcp")) == NULL) {
 					errno = EINVAL;
 					return (-1);
 				}
@@ -181,66 +173,37 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 			}
 		}
 	} else
-	if (port <= 0)
-	{
+	if (port <= 0) {
 		errno = EINVAL;
 		return (-1);
 	} else
 		serv[fmt_ulong(serv, htons(port))] = 0;
 	if ((retval = getaddrinfo(hostptr, serv, &hints, &res0)))
-	{
-		if (substdio_flush(subfdout) == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_puts(subfderr, "getaddrinfo: ") == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_puts(subfderr, hostptr) == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_puts(subfderr, ": ") == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_puts(subfderr, (char *) gai_strerror(retval)) == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_put(subfderr, "\n", 1) == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_flush(subfderr) == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		return (-1);
-	}
-	for (fd = -1, res = res0; res && fd == -1; res = res->ai_next)
-	{
-		for (;;)
-		{
-			if (port >= 0)
-			{
+		strerr_die7x(111, "tcpopen", "getadrinfo: ", hostptr, ": ", serv, ":", (char *) gai_strerror(retval));
+	for (fd = -1, res = res0; res && fd == -1; res = res->ai_next) {
+		for (;;) {
+			if (port >= 0) {
 				if ((fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1)
 					break; /*- Try the next address record in the list. */
-			}
-#ifndef WindowsNT
-			else /*- if (port < 0) */
-			{
+			} else { /*- if (port < 0) */
 				resvport = IPPORT_RESERVED - 1;
-				if ((fd = rresvport_af(&resvport, res->ai_family)) < 0) /*- RFC 2292 */
-				{
+				if ((fd = rresvport_af(&resvport, res->ai_family)) < 0) /*- RFC 2292 */ {
 					freeaddrinfo(res0);
 					return (-1);
 				}
 			}
-#endif /*- #ifndef WindowsNT */
-			for (errno = 0;;)
-			{
+			for (errno = 0;;) {
 				if ((retval = connect(fd, res->ai_addr, res->ai_addrlen)) != -1)
 					break;
-				else
-				{
+				else {
 #ifdef ERESTART
 					if (errno == EINTR || errno == ERESTART)
 #else
 					if (errno == EINTR)
 #endif
 						continue;
-					if (errno == ECONNREFUSED)
-					{
-						if (sleeptime <= MAXSLEEP)
-						{
+					if (errno == ECONNREFUSED) {
+						if (sleeptime <= MAXSLEEP) {
 							if (sleeptime)
 								(void) sleep(sleeptime);
 							else
@@ -249,8 +212,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 							(void) close(fd);
 							errno = ECONNREFUSED;
 							break;
-						} else
-						{
+						} else {
 							(void) close(fd);
 							errno = ECONNREFUSED;
 							freeaddrinfo(res0);
@@ -267,27 +229,26 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	 		if (!retval || errno != ECONNREFUSED)
 	 			break;
 		} /*- for (;;) */
+	 	if (!retval || errno != ECONNREFUSED)
+	 		break;
 		/*- try the next address record in list */
 	} /*- for (res = res0; res && fd == -1; res = res->ai_next) */
 	freeaddrinfo(res0);
-#else
+#else /*- #if defined(LIBC_HAS_IP6) && defined(IPV6) */
 	/*
 	 * Initialize the server's Internet address structure. We'll store
 	 * the actual 4-byte Internet address and the 2-byte port # below.
 	 */
-	(void) memset((char *) &tcp_srv_addr, 0, sizeof(tcp_srv_addr));
+	byte_zero((char *) &tcp_srv_addr, sizeof(tcp_srv_addr));
 	tcp_srv_addr.sin_family = AF_INET;
-	if (service != (char *) NULL)
-	{
+	if (service != (char *) NULL) {
 		if (port > 0)
 			tcp_srv_addr.sin_port = htons(port);	/*- caller's value */
-		else
-		{
+		else {
 			if (isnum(service))
 				tcp_srv_addr.sin_port = htons(atoi(service));
 			else {
-				if ((sp = getservbyname(service, "tcp")) == NULL)
-				{
+				if ((sp = getservbyname(service, "tcp")) == NULL) {
 					errno = EINVAL;
 					return (-1);
 				} 
@@ -295,8 +256,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 			}
 		}
 	} else
-	if (port <= 0)
-	{
+	if (port <= 0) {
 		errno = EINVAL;
 		return (-1);
 	} else
@@ -305,69 +265,44 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	 * First try to convert the hostname as the dotted decimal number.
 	 * Only if that fails, call gethostbyname.
 	 */
-	if ((inaddr = inet_addr(hostptr)) != INADDR_NONE)
-	{			/*- It's a dotted decimal */
+	if ((inaddr = inet_addr(hostptr)) != INADDR_NONE) /*- It's a dotted decimal */
 		(void) byte_copy((char *) &tcp_srv_addr.sin_addr, sizeof(inaddr), (char *) &inaddr);
-	} else
+	else
 	if ((hp = gethostbyname(hostptr)) == NULL)
-	{
-		if (substdio_flush(subfdout) == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_puts(subfderr, "gethostbyname: ") == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_puts(subfderr, hostptr) == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_puts(subfderr, ": No such host\n") == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		if (substdio_flush(subfderr) == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
-		errno = EINVAL;
-		return (-1);
-	} else
+		strerr_die5x(111, "tcpopen", "gethostbyname: ", hostptr, ": ", (char *) hstrerror(h_errno));
+	else
 		(void) byte_copy((char *) &tcp_srv_addr.sin_addr, hp->h_length, hp->h_addr);
-	for (;;)
-	{
-		if (port >= 0)
-		{
+	for (;;) {
+		if (port >= 0) {
 			if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 				return (-1);
-		}
-#ifndef WindowsNT
-		else /*- if (port < 0) */
-		{
+		} else { /*- if (port < 0) */
 			resvport = IPPORT_RESERVED - 1;
 			if ((fd = rresvport(&resvport)) < 0)
 				return (-1);
 		}
-#endif /*- #ifndef WindowsNT */
 #if !defined(linux) && !defined(CYGWIN) && !defined(WindowsNT)
-		if (!strcmp(hostptr, "localhost"))
-		{
+		if (!strcmp(hostptr, "localhost")) {
 			optval = 1;
-			if (setsockopt(fd, SOL_SOCKET, SO_USELOOPBACK, (char *) &optval, sizeof(optval)) == -1)
-			{
+			if (setsockopt(fd, SOL_SOCKET, SO_USELOOPBACK, (char *) &optval, sizeof(optval)) == -1) {
 				(void) close(fd);
 				return (-1);
 			}
 		}
 #endif
 		/*- Connect to the server. */
-		for (errno = 0;;)
-		{
+		for (errno = 0;;) {
 			if ((retval = connect(fd, (struct sockaddr *) &tcp_srv_addr, sizeof(tcp_srv_addr))) != -1)
 				break;
-			else
-			{
+			else {
 #ifdef ERESTART
 				if (errno == EINTR || errno == ERESTART)
 #else
 				if (errno == EINTR)
 #endif
 					continue;
-				if (errno == ECONNREFUSED)
-				{
-					if (sleeptime <= MAXSLEEP)
-					{
+				if (errno == ECONNREFUSED) {
+					if (sleeptime <= MAXSLEEP) {
 						if (sleeptime)
 							(void) sleep(sleeptime);
 						else
@@ -376,8 +311,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 						(void) close(fd);
 						errno = ECONNREFUSED;
 						break;
-					} else
-					{
+					} else {
 						(void) close(fd);
 						errno = ECONNREFUSED;
 						return (-1);
@@ -392,21 +326,18 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	 	if (!retval)
 	 		break;
 	} /*- for (;;) */
-#endif /*- #ifdef IPV6 */
+#endif /*- #if defined(LIBC_HAS_IP6) && defined(IPV6) */
 	linger.l_onoff = 1;
 	linger.l_linger = 1;
-	if (setsockopt(fd, SOL_SOCKET, SO_LINGER, (char *) &linger, sizeof(linger)) == -1)
-	{
+	if (setsockopt(fd, SOL_SOCKET, SO_LINGER, (char *) &linger, sizeof(linger)) == -1) {
 		(void) close(fd);
 		return (-1);
 	} else
-	if (setsockbuf(fd, SO_SNDBUF, SOCKBUF) == -1)
-	{
+	if (setsockbuf(fd, SO_SNDBUF, SOCKBUF) == -1) {
 		(void) close(fd);
 		return (-1);
 	} else
-	if (setsockbuf(fd, SO_RCVBUF, SOCKBUF) == -1)
-	{
+	if (setsockbuf(fd, SO_RCVBUF, SOCKBUF) == -1) {
 		(void) close(fd);
 		return (-1);
 	}
@@ -416,6 +347,6 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.3 2018-01-09 12:37:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.4 2018-05-29 21:47:11+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
