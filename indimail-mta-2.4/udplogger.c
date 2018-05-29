@@ -1,5 +1,8 @@
 /*
  * $Log: udplogger.c,v $
+ * Revision 1.3  2018-05-29 22:12:09+05:30  Cprogrammer
+ * removed call to gethostbyname() in ipv6 code
+ *
  * Revision 1.2  2016-04-15 15:42:09+05:30  Cprogrammer
  * ipv6 version
  *
@@ -166,10 +169,11 @@ main(int argc, char **argv)
 	char            rdata[MAXLOGDATASIZE];
 #endif
 	union sockunion sin, from;
-#if defined(LIBC_HAS_IP6) && defined(IPV6)
-	struct addrinfo hints, *res, *res0;
-#endif
+#if defined(LIBC_HAS_IP6)
+	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
+#else
 	struct hostent *hp;
+#endif
 #ifdef HAVE_IN_ADDR_T
 	in_addr_t       inaddr;
 #else
@@ -199,12 +203,10 @@ main(int argc, char **argv)
 		strerr_die1x(100, usage);
 	ipaddr = argv[optind++];
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
-	bzero(&hints, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = AI_PASSIVE;
-	if ((opt = getaddrinfo(ipaddr, serv, &hints, &res0)))
-	{
+	if ((opt = getaddrinfo(ipaddr, serv, &hints, &res0))) {
 		if (opt == EAI_ADDRFAMILY || (opt == EAI_SYSTEM && errno == EAFNOSUPPORT))
 			noipv6 = 1;
 		else
@@ -250,17 +252,36 @@ main(int argc, char **argv)
 		}
 		port = atoi(serv);
 		sin.sa4.sin_port = htons(port);
+#if defined(LIBC_HAS_IP6)
+		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE) {
+			byte_copy((char *) &sin.sa4.sin_addr, 4, (char *) &inaddr);
+			if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
+				strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", serv, ": ");
+		} else {
+			hints.ai_family = AF_INET;
+			hints.ai_socktype = SOCK_DGRAM;
+			if ((opt = getaddrinfo(ipaddr, serv, &hints, &res0))) {
+				freeaddrinfo(res0);
+				errno = EINVAL;
+				strerr_die7x(111, FATAL, "getadrinfo: ", ipaddr, ": ", serv, ":", (char *) gai_strerror(opt));
+			} 
+			for (res = res0; res; res = res->ai_next) {
+				if (bind(s, res->ai_addr, res->ai_addrlen) == 0)
+					break;
+			}
+			freeaddrinfo(res0);
+		}
+#else
 		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE)
 			byte_copy((char *) &sin.sa4.sin_addr, 4, (char *) &inaddr);
 		else {
-			if (!(hp = gethostbyname(ipaddr))) {
-				errno = EINVAL;
-				strerr_die4sys(111, FATAL, "gethostbyname: ", ipaddr, ": ");
-			} else
-				byte_copy((char *) &sin.sa4.sin_addr, hp->h_length, hp->h_addr);
+			if (!(hp = gethostbyname(ipaddr)))
+				strerr_die5x(111, FATAL, "gethostbyname: ", ipaddr, ": ", (char *) hstrerror(h_errno));
+			byte_copy((char *) &sin.sa4.sin_addr, hp->h_length, hp->h_addr);
 		}
 		if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
 			strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", serv, ": ");
+#endif
 	} 
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGHUP, sighup);
@@ -363,7 +384,7 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	static char    *x = "$Id: udplogger.c,v 1.2 2016-04-15 15:42:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: udplogger.c,v 1.3 2018-05-29 22:12:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
