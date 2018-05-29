@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.13  2018-05-29 22:10:55+05:30  Cprogrammer
+ * removed call to gethostbyname() in ipv6 code
+ *
  * Revision 1.12  2018-05-28 21:45:54+05:30  Cprogrammer
  * fix for strange error thrown by stdio.h included by openssl
  *
@@ -64,6 +67,7 @@
 #include "stralloc.h"
 #include "tlsarralloc.h"
 #include "case.h"
+#include "haveip6.h"
 #include "socket.h"
 #include "timeoutconn.h"
 #include "timeoutread.h"
@@ -2340,19 +2344,20 @@ char           *pusage =
 int
 main(int argc, char **argv)
 {
-	int             s = -1, buf_len, rdata_len, n, port, opt, len,
+	int             s = -1, n, port, opt, len,
 					fromlen, rec_added, o_s, qmr;
 	union sockunion sin, from;
-#if defined(LIBC_HAS_IP6) && defined(IPV6)
-	struct addrinfo hints, *res, *res0;
-#endif
+#if defined(LIBC_HAS_IP6)
+	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
+#else
 	struct hostent *hp;
+#endif
 	struct danerec *dnrec;
 	unsigned long   save_interval, free_interval;
 	char           *ptr, *ipaddr = 0, *domain, *a_port = "1998";
 #ifdef DYNAMIC_BUF
 	char           *rdata = 0, *buf = 0;
-	int             bufsize = MAXDANEDATASIZE;
+	int             bufsize = MAXDANEDATASIZE, buf_len, rdata_len;
 #else
 	char            rdata[MAXDANEDATASIZE];
 #endif
@@ -2441,7 +2446,6 @@ main(int argc, char **argv)
 		die_nomem();
 	load_context();
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
-	byte_zero((char *) &hints, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = AI_PASSIVE;
@@ -2490,24 +2494,47 @@ main(int argc, char **argv)
 			s = 0;
 		}
 		port = atoi(a_port);
-		sin.sa4.sin_port = htons(port);
-		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE)
+#if defined(LIBC_HAS_IP6)
+		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE) {
+			sin.sa4.sin_port = htons(port);
 			byte_copy((char *) &sin.sa4.sin_addr, 4, (char *) &inaddr);
-		else {
-			if (!(hp = gethostbyname(ipaddr))) {
+			if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
+				strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", a_port, ": ");
+		} else {
+			hints.ai_family = AF_INET;
+			hints.ai_socktype = SOCK_DGRAM;
+			if ((len = getaddrinfo(ipaddr, a_port, &hints, &res0))) {
+				freeaddrinfo(res0);
 				errno = EINVAL;
-				strerr_die4sys(111, FATAL, "gethostbyname: ", ipaddr, ": ");
-			} else
-				byte_copy((char *) &sin.sa4.sin_addr, hp->h_length, hp->h_addr);
+				strerr_die7x(111, FATAL, "getadrinfo: ", ipaddr, ": ", a_port, ":", (char *) gai_strerror(len));
+			}
+			for (res = res0; res; res = res->ai_next) {
+				if (bind(s, res->ai_addr, res->ai_addrlen) == 0)
+					break;
+			}
+			freeaddrinfo(res0);
+		}
+#else
+		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE) {
+			sin.sa4.sin_port = htons(port);
+			byte_copy((char *) &sin.sa4.sin_addr, 4, (char *) &inaddr);
+		} else {
+			if (!(hp = gethostbyname(ipaddr)))
+				strerr_die5x(111, FATAL, "gethostbyname: ", ipaddr, ": ", (char *) hstrerror(h_errno));
+			byte_copy((char *) &sin.sa4.sin_addr, hp->h_length, hp->h_addr);
 		}
 		if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
 			strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", a_port, ": ");
+#endif
 	} 
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGUSR1, sigusr1);
 	sig_catch(SIGUSR2, sigusr2);
 	ready();
-	for (buf_len = 0, rdata_len = 0;;) {
+#ifdef DYNAMIC_BUF
+	buf_len = rdata_len = 0;
+#endif
+	for (;;) {
 		char            save = 0;
 		int             ret;
 
@@ -2678,7 +2705,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.12 2018-05-28 21:45:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.13 2018-05-29 22:10:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
