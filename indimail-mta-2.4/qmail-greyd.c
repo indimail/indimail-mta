@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.27  2018-05-29 22:11:07+05:30  Cprogrammer
+ * removed call to gethostbyname() in ipv6 code
+ *
  * Revision 1.26  2018-04-26 00:31:09+05:30  Cprogrammer
  * fixed verbosity of log messages
  *
@@ -119,6 +122,7 @@
 #include "variables.h"
 #endif
 #include "greylist.h"
+#include "haveip6.h"
 #include "socket.h"
 #include <search.h>
 
@@ -1158,10 +1162,11 @@ main(int argc, char **argv)
 {
 	int             s = -1, buf_len, rdata_len, n, port, opt, fromlen, rcptlen, len, state, rec_added;
 	union sockunion sin, from;
-#if defined(LIBC_HAS_IP6) && defined(IPV6)
-	struct addrinfo hints, *res, *res0;
-#endif
+#if defined(LIBC_HAS_IP6)
+	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
+#else
 	struct hostent *hp;
+#endif
 	struct greylst *grey;
 	unsigned long   resend_window, min_resend, save_interval, free_interval;
 	char           *ptr, *ipaddr = 0, *client_ip = 0, *rpath = 0, *rcpt_head = 0, *a_port = "1999";
@@ -1262,7 +1267,6 @@ main(int argc, char **argv)
 		die_nomem();
 	load_context();
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
-	byte_zero((char *) &hints, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = AI_PASSIVE;
@@ -1311,18 +1315,38 @@ main(int argc, char **argv)
 			s = 0;
 		}
 		port = atoi(a_port);
-		sin.sa4.sin_port = htons(port);
-		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE)
+#if defined(LIBC_HAS_IP6)
+		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE) {
+			sin.sa4.sin_port = htons(port);
 			byte_copy((char *) &sin.sa4.sin_addr, 4, (char *) &inaddr);
-		else {
-			if (!(hp = gethostbyname(ipaddr))) {
+			if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
+				strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", a_port, ": ");
+		} else {
+			hints.ai_family = AF_INET;
+			hints.ai_socktype = SOCK_DGRAM;
+			if ((len = getaddrinfo(ipaddr, a_port, &hints, &res0))) {
+				freeaddrinfo(res0);
 				errno = EINVAL;
-				strerr_die4sys(111, FATAL, "gethostbyname: ", ipaddr, ": ");
-			} else
-				byte_copy((char *) &sin.sa4.sin_addr, hp->h_length, hp->h_addr);
+				strerr_die7x(111, FATAL, "getadrinfo: ", ipaddr, ": ", a_port, ":", (char *) gai_strerror(len));
+			}
+			for (res = res0; res; res = res->ai_next) {
+				if (bind(s, res->ai_addr, res->ai_addrlen) == 0)
+					break;
+			}
+			freeaddrinfo(res0);
+		}
+#else
+		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE) {
+			sin.sa4.sin_port = htons(port);
+			byte_copy((char *) &sin.sa4.sin_addr, 4, (char *) &inaddr);
+		} else {
+			if (!(hp = gethostbyname(ipaddr)))
+				strerr_die5x(111, FATAL, "gethostbyname: ", ipaddr, ": ", (char *) hstrerror(h_errno));
+			byte_copy((char *) &sin.sa4.sin_addr, hp->h_length, hp->h_addr);
 		}
 		if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
 			strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", a_port, ": ");
+#endif
 	} 
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGUSR1, sigusr1);
@@ -1526,7 +1550,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.26 2018-04-26 00:31:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.27 2018-05-29 22:11:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
