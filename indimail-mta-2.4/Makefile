@@ -1842,8 +1842,8 @@ matchregex.o control.h qregex.h error.h
 
 tablematch.o: \
 compile tablematch.c tablematch.h env.h stralloc.h str.h \
-control.h
-	./compile tablematch.c
+control.h haveip6.h conf-ip
+	./compile `grep -h -v "^#" conf-ip` tablematch.c
 
 bodycheck.o: \
 compile bodycheck.c bodycheck.h stralloc.h str.h substdio.h alloc.h
@@ -6010,11 +6010,13 @@ timeoutread.o scan_ulong.o strerr.a substdio.a str.a error.a
 	timeoutread.o scan_ulong.o strerr.a substdio.a str.a error.a
 
 udpopen.o: \
-compile udpopen.c subfd.h udpopen.h strerr.h fmt.h byte.h
-	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` udpopen.c
+compile udpopen.c subfd.h udpopen.h strerr.h fmt.h byte.h haveip6.h \
+conf-ip
+	./compile `grep -h -v "^#" conf-ip` udpopen.c
 
 tcpopen.o: \
-compile tcpopen.c subfd.h tcpopen.h strerr.h fmt.h byte.h strerr.h
+compile tcpopen.c subfd.h tcpopen.h strerr.h fmt.h byte.h strerr.h \
+haveip6.h conf-ip
 	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` tcpopen.c
 
 udpclient.o: \
