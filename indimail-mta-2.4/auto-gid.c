@@ -1,5 +1,8 @@
 /*
  * $Log: auto-gid.c,v $
+ * Revision 1.7  2018-05-29 09:36:03+05:30  Cprogrammer
+ * use effective gid when group or default group "mail" does not exist
+ *
  * Revision 1.6  2009-02-10 09:28:55+05:30  Cprogrammer
  * allow auto-gid to run as non-root
  *
@@ -46,10 +49,11 @@ main(argc, argv)
 	value = argv[2];
 	if (!value)
 		_exit(100);
-	if (!(gr = getgrnam(value)))
-		gr = getgrnam("mail");
-	if (!gr)
-	{
+	if (!(gr = getgrnam(value))) {
+		if (!(gr = getgrgid(getegid())))
+			gr = getgrnam("mail");
+	}
+	if (!gr) {
 		substdio_puts(subfderr, "fatal: unable to find group ");
 		substdio_puts(subfderr, value);
 		substdio_puts(subfderr, "\n");
