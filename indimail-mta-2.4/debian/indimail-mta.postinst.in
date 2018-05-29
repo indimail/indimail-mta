@@ -170,9 +170,12 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
   svc_list=""
   for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
-    qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000
+    qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
+	qscanq udplogger.3000
   do
-    svc_list="$svc_list ${servicedir}/$i"
+    if [ -d ${servicedir}/$i ] ; then
+      svc_list="$svc_list ${servicedir}/$i"
+    fi
   done
   svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
