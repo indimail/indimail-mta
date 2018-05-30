@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.15  2018-05-30 20:13:21+05:30  Cprogrammer
+ * moved timeoutssl variable from starttls.c to qmail-daned.c
+ *
  * Revision 1.14  2018-05-30 12:12:45+05:30  Cprogrammer
  * moved tls functions to starttls.c
  *
@@ -112,10 +115,11 @@ int             dane_count, hcount;
 int             hash_size, h_allocated = 0;
 int             verbose = 0;
 unsigned long   timeout;
+int             timeoutconnect = 60;
+int             timeoutssl;
 char           *whitefn = 0, *tlsadomainsfn = 0;
 stralloc        context_file = { 0 };
 struct substdio ssin;
-int             timeoutconnect = 60;
 stralloc        line = { 0 };
 
 extern char   **MakeArgs(char *);
@@ -129,7 +133,6 @@ struct constmap maptlsadomains;
 stralloc        helohost = { 0 };
 
 extern stralloc save;
-extern int      timeoutssl;
 
 void            out(char *);
 void            die_control(char *);
@@ -1350,7 +1353,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.14 2018-05-30 12:12:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.15 2018-05-30 20:13:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
