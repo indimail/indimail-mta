@@ -10,7 +10,7 @@ qdane \- qmail DANE/TLSA RR verification daemon
 
 .SH DESCRIPTION
 \fBqdane\fR(1) sends qmail-daned(8) UDP protocol packets, to \fIhost\fR
-on port 1998, for DANE verification, for mx host \fIdomain\fR.
+on port 1998, for DANE verification, for mx host \fImxhost\fR.
 \fIhost\fR can be of the form \fIhost\fR@\fIport\fR, to specify an
 alternate port. The default timeout for response from \fBqmail-daned\fR
 is 10 seconds, but can be changed by setting the DANETIMEOUT environment
@@ -54,4 +54,5 @@ lookups or carry out any TLS transactions.
 .SH "SEE ALSO"
 qmail-daned(8),
 tlsacheck(3),
+dnstlsarr(1),
 qmail-remote(8)
