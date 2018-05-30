@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.248  2018-05-30 20:12:35+05:30  Cprogrammer
+ * added man page for dnstlsarr
+ *
  * Revision 1.247  2018-05-28 19:55:51+05:30  Cprogrammer
  * install qmail-daned, dnstlsarr regardless of HASTLSA
  *
@@ -1201,6 +1204,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "doc", "PIC.relaygood", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "PIC.rem2local", auto_uido, auto_gidq, 0444);
 	c(mandir,          "man/man1", "qdane.1", uidr, gidr, moder_f);
+	c(mandir,          "man/man1", "dnstlsarr.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "cidr.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qmail-cat.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "predate.1", uidr, gidr, moder_f);
@@ -1604,7 +1608,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.247 2018-05-28 19:55:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.248 2018-05-30 20:12:35+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
