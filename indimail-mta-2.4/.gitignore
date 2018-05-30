@@ -577,3 +577,5 @@ hastlsa.h
 *.dsc
 dnstlsarr
 dnstlsarr.o
+qmail-daned.8
+starttls.o
