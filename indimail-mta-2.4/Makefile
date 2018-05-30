@@ -766,8 +766,8 @@ stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib socket.lib tls.lib
 dnstlsarr.o: \
 compile dnstlsarr.c substdio.h subfd.h stralloc.h fmt.h \
 dns.h dnsdoe.h tlsarralloc.h sgetopt.h exit.h tls.h \
-control.h conf-tlsa
-	./compile `grep -h -v "^#" conf-tlsa` dnstlsarr.c
+now.h control.h conf-tlsa conf-tls conf-ip
+	./compile `grep -h -v "^#" conf-tlsa conf-ip conf-tls` dnstlsarr.c
 
 dot-qmail.0: \
 dot-qmail.5
@@ -3297,11 +3297,11 @@ trylsock.c compile load
 	rm -f trylsock.o trylsock
 
 tls.lib: \
-tryltls.c compile conf-tls load tls.o ssl_timeoutio.o
-	( ( ./compile `grep -v "^#" conf-tls` tryltls.c && \
-	./load tryltls -lssl -lcrypto ) >/dev/null 2>&1 \
+trytls.c compile conf-tls load tls.o ssl_timeoutio.o
+	( ( ./compile `grep -v "^#" conf-tls` trytls.c && \
+	./load trytls -lssl -lcrypto ) >/dev/null 2>&1 \
 	&& echo tls.o ssl_timeoutio.o -lssl -lcrypto || exit 0 ) > tls.lib
-	rm -f tryltls.o tryltls
+	rm -f trytls.o trytls
 
 tls.o: \
 compile tls.c error.h conf-tls
@@ -3673,7 +3673,7 @@ compile wildmat.c
 	./compile wildmat.c
 
 variables.o: \
-compile variables.c variables.h
+compile variables.c variables.h haveip6.h conf-ip
 	./compile variables.c
 
 etrn.o: \
@@ -5740,7 +5740,7 @@ starttls.o: compile starttls.c conf-tls hastlsa.h conf-ip \
 alloc.h stralloc.h getln.h wait.h socket.h substdio.h \
 subfd.h tls.h strerr.h exit.h ip.h env.h case.h str.h \
 fmt.h now.h dns.h control.h variables.h tlsacheck.h \
-ipalloc.h tlsarralloc.h auto_control.h
+ipalloc.h tlsarralloc.h auto_control.h haveip6.h
 	./compile `grep -h -v "^#" conf-ip conf-tls` starttls.c
 
 tlsacheck.o: \
