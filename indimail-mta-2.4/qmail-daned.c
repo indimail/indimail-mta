@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.16  2018-05-31 02:23:10+05:30  Cprogrammer
+ * removed NETQMAIL code
+ *
  * Revision 1.15  2018-05-30 20:13:21+05:30  Cprogrammer
  * moved timeoutssl variable from starttls.c to qmail-daned.c
  *
@@ -147,19 +150,7 @@ tlsadomains_init(char *arg)
 {
 	if (verbose > 2)
 		out("initializing tlsadomains\n");
-#ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
-	static stralloc controlfile = {0};
-
-	if (!stralloc_copys(&controlfile, "control/"))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, arg))
-		die_nomem();
-	if (!stralloc_0(&controlfile))
-		die_nomem();
-	if ((tlsadomainsok = control_readfile(&tlsadomains, controlfile.s, 0)) == -1)
-#else /*- look for control files in $CONTROLDIR/control */
 	if ((tlsadomainsok = control_readfile(&tlsadomains, arg, 0)) == -1)
-#endif
 		die_control(arg);
 	if (tlsadomainsok && !constmap_init(&maptlsadomains, tlsadomains.s, tlsadomains.len, 0))
 		die_nomem();
@@ -173,20 +164,8 @@ whitelist_init(char *arg)
 {
 	if (verbose > 2)
 		out("initializing whitelist\n");
-#ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
-	static stralloc controlfile = {0};
-
-	if (!stralloc_copys(&controlfile, "control/"))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, arg))
-		die_nomem();
-	if (!stralloc_0(&controlfile))
-		die_nomem();
-	if ((whitelistok = control_readfile(&whitelist, controlfile.s, 0)) == -1)
-#else /*- look for control files in $CONTROLDIR/control */
 	if ((whitelistok = control_readfile(&whitelist, arg, 0)) == -1)
 		die_control(arg);
-#endif
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
 	if (verbose > 2)
@@ -1353,7 +1332,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.15 2018-05-30 20:13:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.16 2018-05-31 02:23:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
