@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.123 2018-05-28 21:44:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.124 2018-05-30 19:17:47+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -2486,7 +2486,8 @@ smtp()
 					authsha512 = 1;
 					break;
 				}
-			}
+			} else
+				break; /*- validation failed */
 			if (!rp->usage || rp->usage == 2)
 				usage = 2;
 			if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
@@ -2500,13 +2501,13 @@ smtp()
 		 * https://tools.ietf.org/html/rfc7671
 		 */
 		if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512))) {
-			(void) tlsacheck(do_tlsa, partner_fqdn, 2, rbuf, timeoutfn, err_tmpfail);
+			(void) tlsacheck(do_tlsa, partner_fqdn, UPDATE_SUCCESS, rbuf, timeoutfn, err_tmpfail);
 			if (needtlsauth && (!usage || usage == 2))
 				do_pkix(servercert);
 			code = ehlo();
 		} else { /*- dane validation failed */
 			if (use_daned)
-				(void) tlsacheck(do_tlsa, partner_fqdn, 3, rbuf, timeoutfn, err_tmpfail);
+				(void) tlsacheck(do_tlsa, partner_fqdn, UPDATE_FAILURE, rbuf, timeoutfn, err_tmpfail);
 			quit("DConnected to ", " but recpient failed DANE validation", 534, 1);
 		}
 	} else /*- no tlsa rr records */
@@ -3337,7 +3338,7 @@ main(int argc, char **argv)
 							break;
 					if (*x == '@') {
 						/*- connect to qmail-daned */
-						e = tlsacheck(do_tlsa, ip.ix[i].fqdn, 1, rbuf, timeoutfn, err_tmpfail);
+						e = tlsacheck(do_tlsa, ip.ix[i].fqdn, QUERY_MODE, rbuf, timeoutfn, err_tmpfail);
 						if (e && rbuf[1] == RECORD_OK)
 							do_tlsa = (char *) 0;
 						else
@@ -3438,7 +3439,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.123 2018-05-28 21:44:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.124 2018-05-30 19:17:47+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3446,6 +3447,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.124  2018-05-30 19:17:47+05:30  Cprogrammer
+ * use constants from tlsacheck.h
+ *
  * Revision 1.123  2018-05-28 21:44:22+05:30  Cprogrammer
  * fixed code for openssl version < 0x10100000L
  *
