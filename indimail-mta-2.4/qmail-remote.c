@@ -27,7 +27,7 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #else
-#warning "tlsa code not compiled"
+#warning "not compiled with -DHASTLSA"
 #endif /*- #ifdef HASTLSA */
 #include "dns.h"
 #define _ALLOC_
