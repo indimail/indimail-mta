@@ -852,7 +852,7 @@ exit.h env.h prot.h open.h wait.h stralloc.h gen_alloc.h \
 alloc.h buffer.h error.h strerr.h sgetopt.h subgetopt.h pathexec.h \
 socket.h uint32.h ndelay.h tcpremoteinfo.h stralloc.h rules.h \
 stralloc.h sig.h dns.h stralloc.h iopause.h taia.h tai.h uint64.h \
-ip6.h conf-tls conf-ip haveip6.h conf-mysqlrules \
+haveip6.h ip6.h conf-tls conf-ip haveip6.h conf-mysqlrules \
 conf-dlopen hasmysql.h mysql_config
 	./compile $(SSLINCS) $(mysql_inc) \
 	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen` \
