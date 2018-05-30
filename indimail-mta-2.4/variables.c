@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 1.5  2018-05-30 23:26:40+05:30  Cprogrammer
+ * moved noipv6 variable to variables.c
+ *
  * Revision 1.4  2017-03-21 15:40:38+05:30  Cprogrammer
  * added certdir variable
  *
@@ -14,10 +17,17 @@ char           *queuedir;
 char           *controldir;
 char           *certdir;
 
+#include "haveip6.h"
+#ifdef LIBC_HAS_IP6
+int             noipv6 = 0;
+#else
+int             noipv6 = 1;
+#endif
+
 void
 getversion_variables_c()
 {
-	static char    *x = "$Id: variables.c,v 1.4 2017-03-21 15:40:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: variables.c,v 1.5 2018-05-30 23:26:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
