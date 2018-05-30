@@ -742,18 +742,31 @@ str.h scan.h dns.h dnsdoe.h ip.h exit.h fmt.h
 
 dnstlsarr: \
 load dnstlsarr.o dns.o dnsdoe.o ip.o tlsarralloc.o ip.o  ipalloc.o\
-scan_xlong.o fmt_hexbytes.o subgetopt.o sgetopt.o \
+scan_xlong.o fmt_hexbytes.o subgetopt.o sgetopt.o starttls.o \
 strsalloc.o socket_v4mappedprefix.o socket_v6any.o \
-stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib socket.lib
+strerr_sys.o strerr_die.o timeoutread.o timeoutwrite.o \
+auto_control.o now.o getln.o open_read.o wait_pid.o \
+envread.o case_diffb.o variables.o control.o case_diffs.o \
+socket_tcp.o socket_tcp6.o timeoutconn.o constmap.o \
+getln2.o byte_zero.o ndelay.o ndelay_off.o byte_chr.o \
+socket_v6loopback.o socket_ip4loopback.o \
+stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib socket.lib tls.lib
 	./load dnstlsarr dns.o dnsdoe.o tlsarralloc.o ip.o ipalloc.o \
-	scan_xlong.o fmt_hexbytes.o subgetopt.o sgetopt.o \
+	scan_xlong.o fmt_hexbytes.o subgetopt.o sgetopt.o starttls.o \
 	strsalloc.o socket_v4mappedprefix.o socket_v6any.o \
+	strerr_sys.o strerr_die.o timeoutread.o timeoutwrite.o \
 	stralloc.a alloc.a substdio.a error.a str.a fs.a \
-	`cat dns.lib` `cat socket.lib`
+	auto_control.o now.o getln.o open_read.o wait_pid.o \
+	socket_tcp.o socket_tcp6.o timeoutconn.o constmap.o \
+	getln2.o byte_zero.o ndelay.o ndelay_off.o byte_chr.o \
+	socket_v6loopback.o socket_ip4loopback.o \
+	envread.o case_diffb.o variables.o control.o case_diffs.o \
+	`cat dns.lib` `cat socket.lib tls.lib`
 
 dnstlsarr.o: \
 compile dnstlsarr.c substdio.h subfd.h stralloc.h fmt.h \
-dns.h dnsdoe.h tlsarralloc.h sgetopt.h exit.h conf-tlsa
+dns.h dnsdoe.h tlsarralloc.h sgetopt.h exit.h tls.h \
+control.h conf-tlsa
 	./compile `grep -h -v "^#" conf-tlsa` dnstlsarr.c
 
 dot-qmail.0: \
@@ -1601,7 +1614,7 @@ qmail-rm.0 maildirdeliver.0 822header.0 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
 matchup.0 mlmatchup.0 columnt.0 xqp.0 xsender.0 xrecipient.0 \
 serialcmd.0 maildircmd.0 rewind.0 logselect.8 \
 maildirserial.0 serialsmtp.0 serialqmtp.0 maildirsmtp.0 \
-maildirqmtp.0 qmail-qfilter.0 queue-fix.0 \
+maildirqmtp.0 qmail-qfilter.0 queue-fix.0 qmail-daned.8 \
 caldate.0 caldate_mjd.0 caltime.0 caltime_tai.0 \
 config.0 leapsecs.0 mess822_date.0 tai.0 tai_now.0 tai_pack.0 \
 iftocc.0 ofmipd.0 ofmipname.0 822field.0 new-inject.0 rewriting.0 \
@@ -5712,7 +5725,7 @@ compile qmail-daned.c stralloc.h control.h constmap.h \
 uint32.h variables.h error.h cdb.h strerr.h open.h \
 str.h fmt.h tlsacheck.h getln.h scan.h byte.h sig.h \
 sgetopt.h env.h haveip6.h ip.h auto_qmail.h auto_control.h \
-conf-ip conf-tls
+hastlsa.h conf-ip conf-tls
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls` \
 	qmail-daned.c
 

@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.6  2018-05-30 20:10:54+05:30  Cprogrammer
+ * added options to do complete DANE verification
+ *
  * Revision 1.5  2018-05-28 19:56:56+05:30  Cprogrammer
  * exit with 111 for wrong usage
  *
@@ -26,23 +29,33 @@
 #include "dnsdoe.h"
 #include "tlsarralloc.h"
 #include "sgetopt.h"
+#include "tls.h"
+#include "control.h"
 
 char            temp[FMT_ULONG];
-stralloc        sa = { 0 };
-tlsarralloc     ta = { 0 };
+int             timeoutssl = 300;
+int             timeoutconnect = 60;
+int             verbose;
+stralloc        helohost = { 0 };
+
+extern stralloc sa;
+extern tlsarralloc ta;
+
+void            die_nomem();
+void            out(char *);
+void            flush();
+void            die_control(char *);
+int             do_dane_validation(char *, int);
 
 void
-die_nomem()
+pusage()
 {
-	substdio_putsflush(subfderr, "out of memory\n");
-	_exit(111);
-}
-
-void
-usage()
-{
-	substdio_puts(subfderr,      "usage: dnstlsarr [-p port] host\n");
-	substdio_putsflush(subfderr, "         -p port  port to connect to\n");
+	substdio_puts(subfderr,      "usage: dnstlsarr [-p port] [-c timeoutc] [-t timeoutr] [host\n");
+	substdio_putsflush(subfderr, "         -p port  - port to connect to\n");
+	substdio_putsflush(subfderr, "         -c timoutc - Timeout for connection to remote\n");
+	substdio_putsflush(subfderr, "         -t timoutr - Timeout for data from remote\n");
+	substdio_putsflush(subfderr, "         -v level - verbosity level for STARTTLS\n");
+	substdio_putsflush(subfderr, "         -s Initiate STARTTLS to initiate DANE verification\n");
 	_exit (111);
 }
 
@@ -51,22 +64,34 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             opt, j, i;
+	int             opt, j, i, verify = 0;
 	char           *port = "25", *host = (char *) 0;
 	char            hex[2];
 
-	while ((opt = getopt(argc,argv,"p:")) != opteof) {
+	while ((opt = getopt(argc,argv,"sv:p:c:t:")) != opteof) {
     	switch(opt)
 		{
 		case 'p':
 			port = optarg;
+			break;
+		case 's':
+			verify = 1;
+			break;
+		case 'c': /*- timeoutconnect */
+			scan_int(optarg, &timeoutconnect);
+			break;
+		case 't': /*- timeoutconnect */
+			scan_int(optarg, &timeoutssl);
+			break;
+		case 'v':
+			verbose = *optarg - '0';
 			break;
 		}
 	}
 	if (optind < argc)
 		host = argv[optind++];
 	else
-		usage();
+		pusage();
 	if (!stralloc_copyb(&sa, "_", 1))
 		die_nomem();
 	if (!stralloc_cats(&sa, port))
@@ -75,6 +100,14 @@ main(argc, argv)
 		die_nomem();
 	if (!stralloc_cats(&sa, host))
 		die_nomem();
+	if (verify) { /*- DANE Verification */
+		if (control_init() == -1)
+			die_control("me");
+		if (control_rldef(&helohost, "helohost", 1, (char *) 0) != 1)
+			die_control("helohost");
+		return (do_dane_validation(host, 25));
+	}
+	/*- DANE TLSA RR display mode */
 	dns_init(0);
 	dnsdoe(dns_tlsarr(&ta, &sa));
 	for (j = 0; j < ta.len; ++j) {
@@ -110,7 +143,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.5 2018-05-28 19:56:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.6 2018-05-30 20:10:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
