@@ -1,5 +1,8 @@
 /*
  * $Log: whois.c,v $
+ * Revision 1.3  2018-05-30 12:10:23+05:30  Cprogrammer
+ * fixed newline getting appended to whois server variable
+ *
  * Revision 1.2  2015-08-20 18:49:34+05:30  Cprogrammer
  * modified str_whois function
  *
@@ -14,7 +17,6 @@
  * 
  * @author Silver Moon ( m00n.silv3r@gmail.com )
  */
-
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -91,11 +93,11 @@ main(int argc, char **argv)
 			verbose = 1;
 			break;
 		default:
-			strerr_die2x(100, FATAL, "usage: whois [-v] domain");
+			strerr_die2x(111, FATAL, "usage: whois [-v] domain");
 		}
 	}
 	if (optind + 1 != argc)
-		strerr_die2x(100, FATAL, "usage: whois [-v] domain");
+		strerr_die2x(111, FATAL, "usage: whois [-v] domain");
 	arg = argv[optind++];
 	return (get_whois_data(arg));
 }
@@ -108,9 +110,10 @@ str_whois(char *resp, int resp_len)
 	char		*pch, *wch;
 	int          len;
 
+	whois_server.len = 0;
 	if ((pch = strstr(resp, "whois."))) {
-		for (len = 0, wch = pch; *wch; len++, wch++) {
-			if (*wch == '\n') {
+		for (len = 0, wch = pch; len < resp_len; len++, wch++) {
+			if (*wch == '\n' || *wch == '\r') {
 				if (!stralloc_copyb(&whois_server, pch, len))
 					die_nomem();
 				if (!stralloc_0(&whois_server))
@@ -183,9 +186,7 @@ get_whois_data(char *domain)
 	/* Again search for a whois server in this response. :) */
 	wch = str_whois(response_2.s, response_2.len);
 
-	/*
-	 * If a registrar whois server is found then query it
-	 */
+	/*- If a registrar whois server is found then query it */
 	if (wch) {
 		/*
 		 * Now we have the registrar whois server , this has the
@@ -205,9 +206,7 @@ get_whois_data(char *domain)
 		out(response_1.s);
 		out("\n");
 	} else {
-		/*
-		 * otherwise echo the output from the previous whois result
-		 */
+		/*- otherwise echo the output from the previous whois result */
 		out(response_2.s);
 		out("\n");
 	}
@@ -223,14 +222,14 @@ stralloc        message = {0};
 int
 whois_query(char *server, char *query, stralloc *response)
 {
-	char            ip[32], buffer[1500];
+	char            buffer[1500];
 	int	            sock, read_size;
 
 	if ((sock = tcpopen(server, "nicname", 0)) == -1)
 		strerr_die4sys(111, FATAL, "tcpopen: ", server, ": ");
 	if (verbose) {
 		logerr("querying ");
-		logerr(ip);
+		logerr(server);
 		logerr(" for ");
 		logerr(query);
 		logerrf("\n");
@@ -256,7 +255,7 @@ whois_query(char *server, char *query, stralloc *response)
 void
 getversion_whois_c()
 {
-	static char    *x = "$Id: whois.c,v 1.2 2015-08-20 18:49:34+05:30 Cprogrammer Stab $";
+	static char    *x = "$Id: whois.c,v 1.3 2018-05-30 12:10:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
