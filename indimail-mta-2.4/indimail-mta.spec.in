@@ -1824,7 +1824,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
     qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
-	qmail-daned.1998
+    qmail-daned.1998
   do
     if [ -d %{servicedir}/$i ] ; then
       svc_list="$svc_list %{servicedir}/$i"
