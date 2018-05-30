@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.3  2018-05-31 02:21:50+05:30  Cprogrammer
+ * print status of DANE Validation on stdout
+ *
  * Revision 1.2  2018-05-30 20:11:23+05:30  Cprogrammer
  * using hexstring variable inside tlsa_vrfy_records() clobbered certDataField
  *
@@ -786,7 +789,7 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	char            buffer[512], hex[2];
 	unsigned char   md_value[EVP_MAX_MD_SIZE];
 	unsigned char  *ptr;
-	int             i, len;
+	int             i, len, e;
 	unsigned int    md_len;
 
 	if (!ssl)
@@ -877,19 +880,15 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 			die_nomem();
 		certData.len--;
 		BIO_free_all(membio);
-		if (!str_diffn(certData.s, certDataField, certData.len)) {
-			if (verbose) {
-				out("matched full certificate\n");
-				out(certDataField);
-				out("\n");
-				flush();
-			} 
-			return (0);
-		} else {
-			if (verbose)
-				logerrf("full certicate match failed\n");
-			return (1);
+		e = str_diffn(certData.s, certDataField, certData.len);
+		if (verbose) {
+			out(e == 0 ? "matched " : "failed  ");
+			out("full certificate\n");
+			out(certDataField);
+			out("\n");
+			flush();
 		}
+		return (e);
 	}
 	if (match_type == 0 && selector == 1) { /*- match full subjectPublicKeyInfo data */
 		if (!(membio = BIO_new(BIO_s_mem()))) {
@@ -919,19 +918,15 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 			die_nomem();
 		certData.len--;
 		BIO_free_all(membio);
-		if (!str_diffn(certData.s, certDataField, certData.len)) {
-			if (verbose) {
-				out("matched full subjectPublickKeyInfo data\n");
-				out(certDataField);
-				out("\n");
-				flush();
-			}
-			return (0);
-		} else {
-			if (verbose)
-				logerrf("full subjectPublickKeyInfo match failed\n");
-			return (1);
+		e = str_diffn(certData.s, certDataField, certData.len);
+		if (verbose) {
+			out(e == 0 ? "matched " : "failed  ");
+			out("full subjectPublickKeyInfo data\n");
+			out(certDataField);
+			out("\n");
+			flush();
 		}
+		return (e);
 	}
 	/*- SHA512/SHA256 fingerprint of full certificate */
 	if ((match_type == 2 || match_type == 1) && selector == 0) {
@@ -942,22 +937,15 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 			if (!stralloc_catb(&hextmp, hex, 2))
 				die_nomem();
 		}
-		if (!str_diffn(certDataField, hextmp.s, hextmp.len)) {
-			if (verbose) {
-				out("matched ");
-				out(match_type == 1 ? "sha256" : "sha512");
-				out(" fingerprint [");
-				out(certDataField);
-				out("] of full certificate\n");
-			}
-			return (0);
-		} else {
-			if (verbose) {
-				logerr(match_type == 1 ? "sha256 " : "sha512 ");
-				logerrf("fingerprint match failed\n");
-			}
-			return (1);
+		e = str_diffn(certDataField, hextmp.s, hextmp.len);
+		if (verbose) {
+			out(e == 0 ? "matched " : "failed  ");
+			out(match_type == 1 ? "sha256" : "sha512");
+			out(" fingerprint [");
+			out(certDataField);
+			out("] of full certificate\n");
 		}
+		return (e);
 	}
 	/*- SHA512/SHA256 fingerprint of subjectPublicKeyInfo */
 	if ((match_type == 2 || match_type == 1) && selector == 1) {
@@ -994,20 +982,15 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 #else
 		EVP_MD_CTX_cleanup(mdctx);
 #endif
-		if (!str_diffn(certDataField, hextmp.s, hextmp.len)) {
-			if (verbose) {
-				out("matched ");
-				out(match_type == 1 ? "sha256" : "sha512");
-				out(" fingerprint [");
-				out(certDataField);
-				out("] of subjectPublicKeyInfo\n");
-			}
-			return (0);
-		} else {
-			logerr(match_type == 1 ? "sha256" : "sha512");
-			logerrf(" fingerprint of subjectPublicKeyInfo failed\n");
-			return (1);
+		e = str_diffn(certDataField, hextmp.s, hextmp.len);
+		if (verbose) {
+			out(e == 0 ? "matched " : "failed  ");
+			out(match_type == 1 ? "sha256" : "sha512");
+			out(" fingerprint [");
+			out(certDataField);
+			out("] of subjectPublicKeyInfo\n");
 		}
+		return (e);
 	}
 	return (1);
 }
@@ -1232,7 +1215,7 @@ do_dane_validation(char *host, int port)
 	/*- print TLSA records */
 	for (j = 0, usage = -1; j < ta.len; ++j) {
 		rp = &(ta.rr[j]);
-		out("TLSA[");
+		out("TLSARR[");
 		strnum[fmt_ulong(strnum, (unsigned long) j)] = 0;
 		out(strnum);
 		out("]:");
@@ -1296,6 +1279,8 @@ do_dane_validation(char *host, int port)
 		logerrf(" but unable to intiate TLS for DANE\n");
 		die (111);
 	}
+	if (verbose)
+		flush();
 	for (j = 0, usage = -1; j < ta.len; ++j) {
 		rp = &(ta.rr[j]);
 		if (!rp->mtype || rp->mtype == 2)
@@ -1345,19 +1330,16 @@ do_dane_validation(char *host, int port)
 		substdio_flush(subfderr);
 		die (1);
 	}
-#if 1
 	substdio_putsflush(&smtpto, "QUIT\r\n");
 	if (verbose == 2)
 		substdio_putsflush(subfdout, "Client: QUIT\n");
 	get((char *) &ch);
 	while (ch != '\n')
 		get((char *) &ch);
+	close(smtpfd); /*- close the SMTP connection */
 	if (verbose == 2)
 		flush();
 	die (0);
-#else
-	_exit(0);
-#endif
 	/*- not reached */
 	return (0);
 }
@@ -1492,7 +1474,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.2 2018-05-30 20:11:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.3 2018-05-31 02:21:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
