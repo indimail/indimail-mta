@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.8  2018-05-31 02:20:55+05:30  Cprogrammer
+ * added option to query mx records before fetching TLSA Resource Records
+ *
  * Revision 1.7  2018-05-30 20:17:38+05:30  Cprogrammer
  * added prototype for scan_int()
  *
@@ -25,7 +28,10 @@
 #include "substdio.h"
 #include "subfd.h"
 #include "exit.h"
-#ifdef HASTLSA
+#if defined(HASTLSA) && defined(TLS)
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
 #include "stralloc.h"
 #include "fmt.h"
 #include "dns.h"
@@ -35,15 +41,18 @@
 #include "tls.h"
 #include "control.h"
 #include "scan.h"
+#include "now.h"
 
-char            temp[FMT_ULONG];
+char            temp[IPFMT + FMT_ULONG];
 int             timeoutssl = 300;
 int             timeoutconnect = 60;
 int             verbose;
 stralloc        helohost = { 0 };
+stralloc        sahost = { 0 };
 
 extern stralloc sa;
 extern tlsarralloc ta;
+extern ipalloc  ia;
 
 void            die_nomem();
 void            out(char *);
@@ -68,15 +77,19 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             opt, j, i, verify = 0;
+	int             opt, k, j, i, query_mx = 0, verify = 0;
 	char           *port = "25", *host = (char *) 0;
 	char            hex[2];
+	unsigned long   r;
 
-	while ((opt = getopt(argc,argv,"sv:p:c:t:")) != opteof) {
+	while ((opt = getopt(argc,argv,"msv:p:c:t:")) != opteof) {
     	switch(opt)
 		{
 		case 'p':
 			port = optarg;
+			break;
+		case 'm':
+			query_mx = 1;
 			break;
 		case 's':
 			verify = 1;
@@ -96,49 +109,129 @@ main(argc, argv)
 		host = argv[optind++];
 	else
 		pusage();
-	if (!stralloc_copyb(&sa, "_", 1))
-		die_nomem();
-	if (!stralloc_cats(&sa, port))
-		die_nomem();
-	if (!stralloc_catb(&sa, "._tcp.", 6))
-		die_nomem();
-	if (!stralloc_cats(&sa, host))
-		die_nomem();
 	if (verify) { /*- DANE Verification */
 		if (control_init() == -1)
 			die_control("me");
 		if (control_rldef(&helohost, "helohost", 1, (char *) 0) != 1)
 			die_control("helohost");
-		return (do_dane_validation(host, 25));
+		if (query_mx) {
+			if (!stralloc_copys(&sahost, host)) {
+				substdio_putsflush(subfderr, "out of memory\n");
+				_exit(111);
+			}
+			dns_init(0);
+			r = now() + getpid();
+			dnsdoe(dns_mxip(&ia, &sahost, r));
+			for (j = 0; j < ia.len; ++j) {
+				out("checking ");
+				out(ia.ix[j].fqdn);
+				out("\n");
+				flush();
+				if (!(i = do_dane_validation(ia.ix[j].fqdn, 25)))
+					return (i);
+			}
+			return (1);
+		} else {
+			out("checking ");
+			out(host);
+			out("\n");
+			flush();
+			return (do_dane_validation(host, 25));
+		}
 	}
 	/*- DANE TLSA RR display mode */
 	dns_init(0);
-	dnsdoe(dns_tlsarr(&ta, &sa));
-	for (j = 0; j < ta.len; ++j) {
-		substdio_put(subfdout, ta.rr[j].host, ta.rr[j].hostlen);
-		substdio_put(subfdout, " ttl=", 5);
-		substdio_put(subfdout, temp, fmt_ulong(temp, ta.rr[j].ttl));
-		substdio_put(subfdout, " ", 1);
-		substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ta.rr[j].usage));
-		substdio_put(subfdout, " ", 1);
-		substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ta.rr[j].selector));
-		substdio_put(subfdout, " ", 1);
-		substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ta.rr[j].mtype));
-		substdio_put(subfdout, " ", 1);
-		for (i = 0; i < ta.rr[j].data_len; i++) {
-			fmt_hexbyte(hex, (ta.rr[j].data + i)[0]);
-			substdio_put(subfdout, hex, 2);
+	if (query_mx) {
+		if (!stralloc_copys(&sahost, host)) {
+			substdio_putsflush(subfderr, "out of memory\n");
+			_exit(111);
 		}
-		substdio_putsflush(subfdout, "\n");
+		r = now() + getpid();
+		dnsdoe(dns_mxip(&ia, &sahost, r));
+		for (k = 0; k < ia.len; ++k) {
+			if (!stralloc_copyb(&sa, "_", 1))
+				die_nomem();
+			if (!stralloc_cats(&sa, port))
+				die_nomem();
+			if (!stralloc_catb(&sa, "._tcp.", 6))
+				die_nomem();
+			if (!stralloc_cats(&sa, ia.ix[k].fqdn))
+				die_nomem();
+			out("MX ");
+			out(ia.ix[k].fqdn);
+			switch(ia.ix[k].af)
+			{
+			case AF_INET:
+				out(" IPv4 ");
+				substdio_put(subfdout, temp, ip4_fmt(temp, &ia.ix[k].addr.ip));
+			break;
+#ifdef IPV6
+			case AF_INET6:
+				out(" IPv6 ");
+				substdio_put(subfdout, temp, ip6_fmt(temp, &ia.ix[k].addr.ip6));
+			break;
+#endif
+			default:
+				substdio_puts(subfdout, "Unknown address family = ");
+				substdio_put(subfdout, temp, fmt_ulong(temp, ia.ix[k].af));
+			}
+			substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ia.ix[k].pref));
+			out("\n");
+			dnsdoe(dns_tlsarr(&ta, &sa));
+			for (j = 0; j < ta.len; ++j) {
+				substdio_put(subfdout, ta.rr[j].host, ta.rr[j].hostlen);
+				substdio_put(subfdout, " ttl=", 5);
+				substdio_put(subfdout, temp, fmt_ulong(temp, ta.rr[j].ttl));
+				substdio_put(subfdout, " ", 1);
+				substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ta.rr[j].usage));
+				substdio_put(subfdout, " ", 1);
+				substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ta.rr[j].selector));
+				substdio_put(subfdout, " ", 1);
+				substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ta.rr[j].mtype));
+				substdio_put(subfdout, " ", 1);
+				for (i = 0; i < ta.rr[j].data_len; i++) {
+					fmt_hexbyte(hex, (ta.rr[j].data + i)[0]);
+					substdio_put(subfdout, hex, 2);
+				}
+				substdio_putsflush(subfdout, "\n");
+			}
+		}
+	} else {
+		if (!stralloc_copyb(&sa, "_", 1))
+			die_nomem();
+		if (!stralloc_cats(&sa, port))
+			die_nomem();
+		if (!stralloc_catb(&sa, "._tcp.", 6))
+			die_nomem();
+		if (!stralloc_cats(&sa, host))
+			die_nomem();
+		dnsdoe(dns_tlsarr(&ta, &sa));
+		for (j = 0; j < ta.len; ++j) {
+			substdio_put(subfdout, ta.rr[j].host, ta.rr[j].hostlen);
+			substdio_put(subfdout, " ttl=", 5);
+			substdio_put(subfdout, temp, fmt_ulong(temp, ta.rr[j].ttl));
+			substdio_put(subfdout, " ", 1);
+			substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ta.rr[j].usage));
+			substdio_put(subfdout, " ", 1);
+			substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ta.rr[j].selector));
+			substdio_put(subfdout, " ", 1);
+			substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ta.rr[j].mtype));
+			substdio_put(subfdout, " ", 1);
+			for (i = 0; i < ta.rr[j].data_len; i++) {
+				fmt_hexbyte(hex, (ta.rr[j].data + i)[0]);
+				substdio_put(subfdout, hex, 2);
+			}
+			substdio_putsflush(subfdout, "\n");
+		}
 	}
 	_exit(0);
 }
 #else
-#warning "not compiled with -DHASTLSA"
+#warning "not compiled with -DHASTLSA -DTLS"
 int
 main()
 {
-	substdio_puts(subfderr, "not compiled with -DHASTLSA. Check conf-tlsa\n");
+	substdio_puts(subfderr, "not compiled with -DHASTLSA & -DTLS. Check conf-tlsa, conf-tls\n");
 	substdio_flush(subfderr);
 	_exit (100);
 }
@@ -147,7 +240,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.7 2018-05-30 20:17:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.8 2018-05-31 02:20:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
