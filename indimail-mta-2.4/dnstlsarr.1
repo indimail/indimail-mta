@@ -1,0 +1,83 @@
+.TH dnstlsarr 1
+.SH NAME
+DANE/TLSA RR Tester
+.SH SYNOPSIS
+.B dnstlsarr
+[-s]
+[-\fBv\fR level]
+.I mxhost
+
+.SH DESCRIPTION
+dnstlsarr fetches and display the TLSA RR records for \fImxhost\fR. With the -s option, it can
+perform a DANE verification and display the result.
+
+.SH OPTIONS
+.PP
+
+.TP 3
+.B -v \fIlevel
+.EX
+0 - Normal
+1 - Display DANE Verification Result
+2 - Everything including SMTP conversation
+.EE
+
+.SH EXAMPLE USAGE
+.EX
+Example 1
+$ dnstlsarr postino.cesnet.cz
+dnstlsarr postino.cesnet.cz
+terenasslca3ta.cesnet.cz ttl=2163 2 0 1 be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25
+terenasslca3ta.cesnet.cz ttl=2163 2 0 1 beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8
+
+Example 2
+$ dnstlsarr -v 2 -s mail.ietf.org
+TLSA[0]:_25._tcp.mail.ietf.org IN TLSA ( 3 1 1 0c72ac70b745ac19998811b131d662c9ac69dbdbe7cb23e5b514b56664c5d3d6 )
+220 ietfa.amsl.com ESMTP
+Client: EHLO argos
+250-ietfa.amsl.com
+250-PIPELINING
+250-SIZE 67108864
+250-ETRN
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250-AUTH=PLAIN LOGIN
+250-ENHANCEDSTATUSCODES
+250 8BITMIME
+Client: STARTTLS
+220 2.0.0 Ready to start TLS
+matched sha256fingerprint [0c72ac70b745ac19998811b131d662c9ac69dbdbe7cb23e5b514b56664c5d3d6Z] of subjectPublicKeyInfo
+Client: QUIT
+221 2.0.0 Bye
+
+Example 3
+$ dnstlsarr -v 2 -s postino.cesnet.cz
+TLSA[0]:terenasslca3ta.cesnet.cz IN TLSA ( 2 0 1 be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25 )
+TLSA[1]:terenasslca3ta.cesnet.cz IN TLSA ( 2 0 1 beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8 )
+220 postino.cesnet.cz ESMTP
+Client: EHLO argos
+250-postino.cesnet.cz
+250-PIPELINING
+250-SIZE 41943040
+250-VRFY
+250-ETRN
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-8BITMIME
+250 DSN
+Client: STARTTLS
+220 2.0.0 Ready to start TLS
+matched sha256fingerprint [beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8Z] of full certificate
+Client: QUIT
+221 2.0.0 Bye
+.EE
+
+.SH RETURN VALUE
+  0 for success
+  1 for failure in getting TLSA Resource Records or DANE verification failure (-s option)
+
+.SH "SEE ALSO"
+qdane(8),
+qmail-daned(8),
+tlsacheck(3),
+qmail-remote(8)
