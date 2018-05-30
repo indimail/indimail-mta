@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.28  2018-05-30 23:26:12+05:30  Cprogrammer
+ * moved noipv6 variable to variables.c
+ *
  * Revision 1.27  2018-05-29 22:11:07+05:30  Cprogrammer
  * removed call to gethostbyname() in ipv6 code
  *
@@ -151,11 +154,6 @@ union sockunion
 #endif
 };
 
-#if defined(LIBC_HAS_IP6) && defined(IPV6)
-int             noipv6 = 0;
-#else
-int             noipv6 = 1;
-#endif
 int             verbose = 0;
 
 struct greylst
@@ -1550,7 +1548,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.27 2018-05-29 22:11:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.28 2018-05-30 23:26:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

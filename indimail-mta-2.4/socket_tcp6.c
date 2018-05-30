@@ -1,5 +1,8 @@
 /*
  * $Log: socket_tcp6.c,v $
+ * Revision 1.3  2018-05-30 23:26:21+05:30  Cprogrammer
+ * moved noipv6 variable to variables.c
+ *
  * Revision 1.2  2005-06-15 22:32:24+05:30  Cprogrammer
  * added rcs version
  *
@@ -21,11 +24,7 @@
 #include <unistd.h>
 #include "socket.h"
 
-#ifdef LIBC_HAS_IP6
-int             noipv6 = 0;
-#else
-int             noipv6 = 1;
-#endif
+extern int      noipv6;
 
 int
 socket_tcp6(void)
@@ -56,7 +55,7 @@ compat:
 void
 getversion_socket_tcp6_c()
 {
-	static char    *x = "$Id: socket_tcp6.c,v 1.2 2005-06-15 22:32:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: socket_tcp6.c,v 1.3 2018-05-30 23:26:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.13  2018-05-30 23:25:31+05:30  Cprogrammer
+ * moved noipv6 variable to variables.c
+ *
  * Revision 1.12  2018-04-25 22:48:02+05:30  Cprogrammer
  * fixed error message length
  *
@@ -61,11 +64,6 @@
 typedef struct sockaddr_in  sockaddr_in;
 #ifdef IPV6
 typedef struct sockaddr_in6 sockaddr_in6;
-#endif
-#ifdef LIBC_HAS_IP6
-int             noipv6 = 0;
-#else
-int             noipv6 = 1;
 #endif
 
 /*
@@ -283,7 +281,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.12 2018-04-25 22:48:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.13 2018-05-30 23:25:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
