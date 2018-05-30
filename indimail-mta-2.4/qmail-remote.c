@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.124 2018-05-30 19:17:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.125 2018-05-30 20:04:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -151,6 +151,7 @@ char           *do_tlsa = 0, *tlsadomainsfn = 0;
 int             use_daned = 0;
 tlsarralloc     ta = { 0 };
 stralloc        hexstring = { 0 };
+stralloc        hextmp = { 0 };
 stralloc        tlsadomains = { 0 };
 struct constmap maptlsadomains;
 #endif
@@ -1693,13 +1694,13 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	if ((match_type == 2 || match_type == 1) && selector == 0) {
 		if (!X509_digest(xs, md, md_value, &md_len))
 			tls_quit("ZTLS Unable to get peer cerficatte digest", 0, 0, 0, 0);
-		for (i = hexstring.len = 0; i < md_len; i++) {
+		for (i = hextmp.len = 0; i < md_len; i++) {
 			fmt_hexbyte(hex, (md_value + i)[0]);
-			if (!stralloc_catb(&hexstring, hex, 2))
+			if (!stralloc_catb(&hextmp, hex, 2))
 				temp_nomem();
 		}
-		cp = hexstring.s;
-		if (!str_diffn(certDataField, (char *) cp, hexstring.len))
+		cp = hextmp.s;
+		if (!str_diffn(certDataField, (char *) cp, hextmp.len))
 			return (0);
 		return (1);
 	}
@@ -1729,9 +1730,9 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 		OPENSSL_free(tmpbuf);
 		if (!EVP_DigestFinal_ex(mdctx, md_value, &md_len))
 			tls_quit("ZTLS Unable to compute EVP Digest", 0, 0, 0, 0);
-		for (i = hexstring.len = 0; i < md_len; i++) {
+		for (i = hextmp.len = 0; i < md_len; i++) {
 			fmt_hexbyte(hex, (md_value + i)[0]);
-			if (!stralloc_catb(&hexstring, hex, 2))
+			if (!stralloc_catb(&hextmp, hex, 2))
 				temp_nomem();
 		}
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -1739,8 +1740,8 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 #else
 		EVP_MD_CTX_cleanup(mdctx);
 #endif
-		cp = hexstring.s;
-		if (!str_diffn(certDataField, (char *) cp, hexstring.len))
+		cp = hextmp.s;
+		if (!str_diffn(certDataField, (char *) cp, hextmp.len))
 			return (0);
 		return (1);
 	}
@@ -2473,6 +2474,8 @@ smtp()
 			}
 			if (!stralloc_0(&hexstring))
 				temp_nomem();
+			if (!rp->usage || rp->usage == 2)
+				usage = 2;
 			if (!(tlsa_status = tlsa_vrfy_records(hexstring.s, rp->usage, rp->selector, rp->mtype, &err_str))) {
 				switch(rp->mtype)
 				{
@@ -2486,11 +2489,8 @@ smtp()
 					authsha512 = 1;
 					break;
 				}
-			} else
-				break; /*- validation failed */
-			if (!rp->usage || rp->usage == 2)
-				usage = 2;
-			if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
+			}
+			if (match0Or512)
 				break;
 		} /*- for (j = 0, usage = -1; j < ta.len; ++j) */
 		/*-
@@ -2500,7 +2500,7 @@ smtp()
 		 * 9.  Digest Algorithm Agility
 		 * https://tools.ietf.org/html/rfc7671
 		 */
-		if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512))) {
+		if ((!match0Or512 && authsha256) || match0Or512) {
 			(void) tlsacheck(do_tlsa, partner_fqdn, UPDATE_SUCCESS, rbuf, timeoutfn, err_tmpfail);
 			if (needtlsauth && (!usage || usage == 2))
 				do_pkix(servercert);
@@ -3439,7 +3439,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.124 2018-05-30 19:17:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.125 2018-05-30 20:04:10+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3447,6 +3447,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.125  2018-05-30 20:04:10+05:30  Cprogrammer
+ * using hexstring variable inside tlsa_vrfy_records() clobbered certDataField
+ *
  * Revision 1.124  2018-05-30 19:17:47+05:30  Cprogrammer
  * use constants from tlsacheck.h
  *
