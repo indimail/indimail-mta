@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.7  2018-05-30 20:17:38+05:30  Cprogrammer
+ * added prototype for scan_int()
+ *
  * Revision 1.6  2018-05-30 20:10:54+05:30  Cprogrammer
  * added options to do complete DANE verification
  *
@@ -31,6 +34,7 @@
 #include "sgetopt.h"
 #include "tls.h"
 #include "control.h"
+#include "scan.h"
 
 char            temp[FMT_ULONG];
 int             timeoutssl = 300;
@@ -143,7 +147,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.6 2018-05-30 20:10:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.7 2018-05-30 20:17:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
