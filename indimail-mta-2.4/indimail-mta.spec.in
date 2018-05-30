@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.168 2018-05-29 22:39:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.169 2018-05-30 20:14:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -935,6 +935,7 @@ done
 %else
 %attr(0644,root,root)                   %{mandir}/man1/udpclient.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/qdane.1.gz
+%attr(0644,root,root)                   %{mandir}/man1/dnstlsarr.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/qmail-qfilter.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/drate.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/replier-config.1.gz
