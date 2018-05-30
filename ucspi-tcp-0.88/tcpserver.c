@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.57  2018-05-30 12:32:32+05:30  Cprogrammer
+ * flagssl should not be used when TLS is not defined
+ *
  * Revision 1.56  2018-05-30 12:30:33+05:30  Cprogrammer
  * replaced gethostbyname() with getaddrinfo()
  *
@@ -190,7 +193,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.56 2018-05-30 12:30:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.57 2018-05-30 12:32:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1518,10 +1521,10 @@ main(int argc, char **argv, char **envp)
 		case 'l':
 			localhost = optarg;
 			break;
+#ifdef TLS
 		case 's':
 			flagssl = 1;
 			break;
-#ifdef TLS
 		case 'n':
 			flagssl = 1;
 			if (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile))
