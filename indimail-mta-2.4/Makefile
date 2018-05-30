@@ -5689,7 +5689,7 @@ timeoutwrite.o case_diffs.o str_start.o socket_tcp.o \
 socket_tcp6.o ndelay.o ndelay_off.o timeoutconn.o \
 tlsarralloc.o socket_ip4loopback.o socket_v6loopback.o \
 fmt_uint.o MakeArgs.o wait_pid.o substdio.a stralloc.a \
-dns.lib tls.lib
+dns.lib tls.lib starttls.o
 	./load qmail-daned sgetopt.o subgetopt.o auto_control.o \
 	error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
 	str_len.o str_cpy.o str_chr.o str_diff.o str_diffn.o \
@@ -5704,20 +5704,31 @@ dns.lib tls.lib
 	timeoutwrite.o case_diffs.o str_start.o socket_tcp.o \
 	socket_tcp6.o ndelay.o ndelay_off.o timeoutconn.o \
 	fmt_uint.o socket_ip4loopback.o socket_v6loopback.o \
-	MakeArgs.o wait_pid.o substdio.a stralloc.a \
+	starttls.o MakeArgs.o wait_pid.o substdio.a stralloc.a \
 	`cat dns.lib tls.lib` -lm
 
 qmail-daned.o: \
-compile qmail-daned.c hastlsa.h subfd.h exit.h \
-alloc.h stralloc.h tlsarralloc.h \
-case.h socket.h timeoutconn.h timeoutread.h timeoutwrite.h \
-tls.h ssl_timeoutio.h gen_alloc.h gen_allocdefs.h constmap.h \
-env.h control.h strerr.h uint32.h sig.h getln.h fmt.h \
-wait.h str.h byte.h scan.h variables.h open.h error.h \
-cdb.h sgetopt.h auto_qmail.h auto_control.h tlsacheck.h \
-haveip6.h dns.h ip.h ipalloc.h now.h conf-ip conf-tls
+compile qmail-daned.c stralloc.h control.h constmap.h \
+uint32.h variables.h error.h cdb.h strerr.h open.h \
+str.h fmt.h tlsacheck.h getln.h scan.h byte.h sig.h \
+sgetopt.h env.h haveip6.h ip.h auto_qmail.h auto_control.h \
+conf-ip conf-tls
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls` \
 	qmail-daned.c
+
+qmail-daned.8: \
+qmail-daned.9 conf-qmail conf-sysconfdir
+	cat qmail-daned.9 \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> qmail-daned.8
+
+starttls.o: compile starttls.c conf-tls hastlsa.h conf-ip \
+alloc.h stralloc.h getln.h wait.h socket.h substdio.h \
+subfd.h tls.h strerr.h exit.h ip.h env.h case.h str.h \
+fmt.h now.h dns.h control.h variables.h tlsacheck.h \
+ipalloc.h tlsarralloc.h auto_control.h
+	./compile `grep -h -v "^#" conf-ip conf-tls` starttls.c
 
 tlsacheck.o: \
 compile tlsacheck.c haveip6.h stralloc.h ip.h fmt.h byte.h \
