@@ -1,11 +1,15 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.2  2018-05-30 20:11:23+05:30  Cprogrammer
+ * using hexstring variable inside tlsa_vrfy_records() clobbered certDataField
+ *
  * Revision 1.1  2018-05-30 11:54:47+05:30  Cprogrammer
  * Initial revision
  *
  */
-#include "haveip6.h"
 #include "hastlsa.h"
+#if defined(HASTLSA) && defined(TLS)
+#include "haveip6.h"
 #include <unistd.h>
 #include <openssl/x509v3.h>
 #include <openssl/x509.h>
@@ -65,6 +69,7 @@ stralloc        smtptext = { 0 };
 saa             ehlokw = { 0 };	/*- list of EHLO keywords and parameters */
 int             maxehlokwlen = 0;
 stralloc        hexstring = { 0 };
+stralloc        hextmp = { 0 };
 stralloc        sa = { 0 };
 ipalloc         ia = { 0 };
 tlsarralloc     ta = { 0 };
@@ -74,9 +79,27 @@ union v46addr   outip;
 stralloc        sauninit = { 0 };
 
 extern int      verbose;
-int             timeoutssl = 1200;
 extern int      timeoutconnect;
+extern int      timeoutssl;
 extern stralloc helohost;
+
+void
+out(char *str)
+{
+	if (!str || !*str)
+		return;
+	if (substdio_puts(subfdout, str) == -1)
+		strerr_die1sys(111, "write: ");
+	return;
+}
+
+void
+flush()
+{
+	if (substdio_flush(subfdout) == -1)
+		strerr_die1sys(111, "fatal: write: ");
+	return;
+}
 
 void
 die(int e)
@@ -223,24 +246,6 @@ char            smtpfrombuf[128];
 substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
 
 void
-out(char *str)
-{
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfdout, str) == -1)
-		strerr_die1sys(111, "write: ");
-	return;
-}
-
-void
-flush()
-{
-	if (substdio_flush(subfdout) == -1)
-		strerr_die1sys(111, "fatal: write: ");
-	return;
-}
-
-void
 outsmtptext()
 {
 	int             i;
@@ -271,6 +276,8 @@ void
 quit(char *prepend, char *append, int e)
 {
 	substdio_putsflush(&smtpto, "QUIT\r\n");
+	if (verbose == 2)
+		substdio_putsflush(subfdout, "Client: QUIT\n");
 	/*- waiting for remote side is just too ridiculous */
 	logerr(prepend);
 	outhost();
@@ -312,17 +319,23 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 	 */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	state = ssl ? SSL_get_state(ssl) : SSL_ST_BEFORE;
-	if ((state & TLS_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
+	if ((state & TLS_ST_OK) || (!smtps && (state & SSL_ST_BEFORE))) {
 		substdio_putsflush(&smtpto, "QUIT\r\n");
+		if (verbose == 2)
+			substdio_putsflush(subfdout, "Client: QUIT\n");
+	}
 #else
 	state = ssl ? ssl->state : SSL_ST_BEFORE;
-	if ((state & SSL_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
+	if ((state & SSL_ST_OK) || (!smtps && (state & SSL_ST_BEFORE))) {
 		substdio_putsflush(&smtpto, "QUIT\r\n");
+		if (verbose == 2)
+			substdio_putsflush(subfdout, "Client: QUIT\n");
+	}
 #endif
 	logerr(ssl ? "; connected to " : "; connecting to ");
 	outhost();
 	logerrf("\n");
-	if (env_get("DEBUG") && ssl) {
+	if (verbose == 2 && ssl) {
 		X509           *peercert;
 
 		logerr("STARTTLS proto=");
@@ -355,6 +368,8 @@ void
 get(char *ch)
 {
 	substdio_get(&smtpfrom, ch, 1);
+	if (verbose == 2)
+		substdio_put(subfdout, ch, 1);
 	if (*ch != '\r') {
 		if (smtptext.len < HUGESMTPTEXT) {
 			if (!stralloc_append(&smtptext, ch))
@@ -684,8 +699,11 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	} else
 		SSL_CTX_free(ctx);
 
-	if (!smtps)
+	if (!smtps) {
 		substdio_putsflush(&smtpto, "STARTTLS\r\n");
+		if (verbose == 2)
+			substdio_putsflush(subfdout, "Client: STARTTLS\n");
+	}
 
 	/*- while the server is preparing a response, do something else */
 	if (!ciphers) {
@@ -859,9 +877,19 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 			die_nomem();
 		certData.len--;
 		BIO_free_all(membio);
-		if (!str_diffn(certData.s, certDataField, certData.len))
+		if (!str_diffn(certData.s, certDataField, certData.len)) {
+			if (verbose) {
+				out("matched full certificate\n");
+				out(certDataField);
+				out("\n");
+				flush();
+			} 
 			return (0);
-		return (1);
+		} else {
+			if (verbose)
+				logerrf("full certicate match failed\n");
+			return (1);
+		}
 	}
 	if (match_type == 0 && selector == 1) { /*- match full subjectPublicKeyInfo data */
 		if (!(membio = BIO_new(BIO_s_mem()))) {
@@ -891,22 +919,45 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 			die_nomem();
 		certData.len--;
 		BIO_free_all(membio);
-		if (!str_diffn(certData.s, certDataField, certData.len))
+		if (!str_diffn(certData.s, certDataField, certData.len)) {
+			if (verbose) {
+				out("matched full subjectPublickKeyInfo data\n");
+				out(certDataField);
+				out("\n");
+				flush();
+			}
 			return (0);
-		return (1);
+		} else {
+			if (verbose)
+				logerrf("full subjectPublickKeyInfo match failed\n");
+			return (1);
+		}
 	}
 	/*- SHA512/SHA256 fingerprint of full certificate */
 	if ((match_type == 2 || match_type == 1) && selector == 0) {
 		if (!X509_digest(xs, md, md_value, &md_len))
 			tls_quit("TLS Unable to get peer cerficatte digest", 0, 0, 0, 0);
-		for (i = hexstring.len = 0; i < md_len; i++) {
+		for (i = hextmp.len = 0; i < md_len; i++) {
 			fmt_hexbyte(hex, (md_value + i)[0]);
-			if (!stralloc_catb(&hexstring, hex, 2))
+			if (!stralloc_catb(&hextmp, hex, 2))
 				die_nomem();
 		}
-		if (!str_diffn(certDataField, hexstring.s, hexstring.len))
+		if (!str_diffn(certDataField, hextmp.s, hextmp.len)) {
+			if (verbose) {
+				out("matched ");
+				out(match_type == 1 ? "sha256" : "sha512");
+				out(" fingerprint [");
+				out(certDataField);
+				out("] of full certificate\n");
+			}
 			return (0);
-		return (1);
+		} else {
+			if (verbose) {
+				logerr(match_type == 1 ? "sha256 " : "sha512 ");
+				logerrf("fingerprint match failed\n");
+			}
+			return (1);
+		}
 	}
 	/*- SHA512/SHA256 fingerprint of subjectPublicKeyInfo */
 	if ((match_type == 2 || match_type == 1) && selector == 1) {
@@ -933,9 +984,9 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 		OPENSSL_free(tmpbuf);
 		if (!EVP_DigestFinal_ex(mdctx, md_value, &md_len))
 			tls_quit("TLS Unable to compute EVP Digest", 0, 0, 0, 0);
-		for (i = hexstring.len = 0; i < md_len; i++) {
+		for (i = hextmp.len = 0; i < md_len; i++) {
 			fmt_hexbyte(hex, (md_value + i)[0]);
-			if (!stralloc_catb(&hexstring, hex, 2))
+			if (!stralloc_catb(&hextmp, hex, 2))
 				die_nomem();
 		}
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -943,9 +994,20 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 #else
 		EVP_MD_CTX_cleanup(mdctx);
 #endif
-		if (!str_diffn(certDataField, hexstring.s, hexstring.len))
+		if (!str_diffn(certDataField, hextmp.s, hextmp.len)) {
+			if (verbose) {
+				out("matched ");
+				out(match_type == 1 ? "sha256" : "sha512");
+				out(" fingerprint [");
+				out(certDataField);
+				out("] of subjectPublicKeyInfo\n");
+			}
 			return (0);
-		return (1);
+		} else {
+			logerr(match_type == 1 ? "sha256" : "sha512");
+			logerrf(" fingerprint of subjectPublicKeyInfo failed\n");
+			return (1);
+		}
 	}
 	return (1);
 }
@@ -1082,6 +1144,11 @@ ehlo()
 	else
 	if (substdio_flush(&smtpto) == -1)
 		strerr_die1sys(111, "fatal: write: ");
+	if (verbose == 2) {
+		out("Client: EHLO ");
+		substdio_put(subfdout, helohost.s, helohost.len);
+		substdio_putsflush(subfdout, "\n");
+	}
 	if ((code = smtpcode()) != 250)
 		return code;
 	s = smtptext.s;
@@ -1130,7 +1197,7 @@ ehlo()
 }
 
 int
-connect_smtp(char *host, int port)
+do_dane_validation(char *host, int port)
 {
 	static ipalloc  ip = { 0 };
     char           *err_str = 0, *servercert = 0;
@@ -1138,6 +1205,7 @@ connect_smtp(char *host, int port)
 	int             i, j, tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage;
 	unsigned long   code;
+	unsigned char   ch;
     tlsarr         *rp;
 
 	if (!stralloc_copys(&sa, host))
@@ -1209,6 +1277,8 @@ connect_smtp(char *host, int port)
 		break;
 	}
 	code = smtpcode();
+	if (verbose)
+		flush();
 	if (code >= 500 && code < 600)
 		quit("Connected to ", " but greeting failed", code);
 	else
@@ -1237,6 +1307,8 @@ connect_smtp(char *host, int port)
 		}
 		if (!stralloc_0(&hexstring))
 			die_nomem_child();
+		if (!rp->usage || rp->usage == 2)
+			usage = 2;
 		if (!(tlsa_status = tlsa_vrfy_records(hexstring.s, rp->usage, rp->selector, rp->mtype, &err_str))) {
 			switch(rp->mtype)
 			{
@@ -1251,10 +1323,6 @@ connect_smtp(char *host, int port)
 				break;
 			}
 		}
-		if (!rp->usage || rp->usage == 2)
-			usage = 2;
-		if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512)))
-			break;
    } /*- for (j = 0, usage = -1; j < ta.len; ++j) */
 
 	/*-
@@ -1264,19 +1332,32 @@ connect_smtp(char *host, int port)
 	 * 9.  Digest Algorithm Agility
 	 * https://tools.ietf.org/html/rfc7671
 	 */
-	if ((!match0Or512 && authsha256) || (match0Or512 && (authfullMatch || authsha512))) {
+	if ((!match0Or512 && authsha256) || match0Or512) {
 		if (needtlsauth && usage == 2)
 			do_pkix(servercert);
-		code = ehlo();
 	} else { /*- dane validation failed */
 		substdio_putsflush(&smtpto, "QUIT\r\n");
+		if (verbose == 2)
+			substdio_putsflush(subfdout, "Client: QUIT\n");
 		logerr("Connected to ");
 		outhost();
 		logerr(" but recipient failed DANE validation.\n");
 		substdio_flush(subfderr);
 		die (1);
 	}
-	_exit (0);
+#if 1
+	substdio_putsflush(&smtpto, "QUIT\r\n");
+	if (verbose == 2)
+		substdio_putsflush(subfdout, "Client: QUIT\n");
+	get((char *) &ch);
+	while (ch != '\n')
+		get((char *) &ch);
+	if (verbose == 2)
+		flush();
+	die (0);
+#else
+	_exit(0);
+#endif
 	/*- not reached */
 	return (0);
 }
@@ -1312,7 +1393,7 @@ get_dane_records(char *host)
 			die (3);
 		if (pipefd[1] != 1 && pipefd[1] != 2)
 			close(pipefd[1]);
-		connect_smtp(host, 25);
+		do_dane_validation(host, 25);
 		die (4);
 	default:
 		close(pipefd[1]);
@@ -1403,4 +1484,15 @@ get_dane_records(char *host)
 		break;
 	}
 	return (RECORD_FAIL);
+}
+#else
+#warning "TLSA, TLS code not compiled"
+#endif /*- #if defined(HASTLSA) && defined(TLS) */
+
+void
+getversion_starttls_c()
+{
+	static char    *x = "$Id: starttls.c,v 1.2 2018-05-30 20:11:23+05:30 Cprogrammer Exp mbhangui $";
+
+	x++;
 }
