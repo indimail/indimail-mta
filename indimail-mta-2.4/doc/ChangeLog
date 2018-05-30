@@ -1,4 +1,4 @@
-* Sun May 27 2018 23:40:08 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
+* Tue May 29 2018 22:53:25 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 31/01/2018
 31/01/2018
 1.  svctool - added option to refresh services
@@ -58,6 +58,10 @@ Release 2.4 Start 31/01/2018
 35. qmail-daned.c - use dns_tlsarr() function.
 36. tlsacheck.c - modified for qmail-remote query/update
 37. qdane.c - modified for qmail-remote query/update
+29/05/2018
+38. postinstall - create DANE verification service only if TLSA code is compiled
+39. removed calls to gethostbyname - tcpopen.c, udpopen.c, qmail-daned.c, qmail-greyd.c, udplogger.c, tablematch.c
+40. added qmail-daned service to refresh list
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017

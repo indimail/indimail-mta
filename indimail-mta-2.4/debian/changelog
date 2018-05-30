@@ -1,4 +1,4 @@
-indimail-mta (2.4-7) unstable; urgency=low
+indimail-mta (2.4-8) unstable; urgency=low
 
   * svctool - added option to refresh services
   * moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
@@ -36,5 +36,8 @@ indimail-mta (2.4-7) unstable; urgency=low
   * qmail-daned.c - use dns_tlsarr() function.
   * tlsacheck.c - modified for qmail-remote query/update
   * qdane.c - modified for qmail-remote query/update
+  * postinstall - create DANE verification service only if TLSA code is compiled
+  * removed calls to gethostbyname - tcpopen.c, udpopen.c, qmail-daned.c, qmail-greyd.c, udplogger.c, tablematch.c
+  * added qmail-daned service to refresh list
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sun, 27 May 2018 23:40:08 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 29 May 2018 22:53:25 +0530

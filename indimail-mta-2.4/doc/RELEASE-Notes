@@ -34,6 +34,9 @@ o qmail-daned.c - removed DANE verification via external DANEPROG script
 o qmail-daned.c - use dns_tlsarr() function.
 o tlsacheck.c - modified for qmail-remote query/update
 o qdane.c - modified for qmail-remote query/update
+o postinstall - create DANE verification service only if TLSA code is compiled
+o removed calls to gethostbyname - tcpopen.c, udpopen.c, qmail-daned.c, qmail-greyd.c, udplogger.c, tablematch.c
+o added qmail-daned service to refresh list
 
 indimail-mta has RPM / DEB / yum / apt repository for most of the
 Linux Distros at
