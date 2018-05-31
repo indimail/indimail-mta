@@ -1,29 +1,58 @@
-DATE: Sun May 27 23:40:08 IST 2018
+DATE: Thu May 31 17:38:03 IST 2018
 
 Announcing Release 2.5 of indimail-mta
 
 Following are the main features of this release
 
-o svctool option to refresh services. This ensures lates variables
-  get created
-o moved multiple system binaries to sbin
-o svctool - use SHA-512 encryption for indisrvr admin password
-o svctool - moved enabling/disabling of services to separate functions
-  --enable-service, --disable-service
-o svctool - added --ssl, --require-secure-transport command line option
-  for mysqld
-o svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup
-  utility for mysql-community-server
-o BUG - str_cpyb.c - fixed extra bytes getting copied
-o Fixed Bug with VIRTUAL_PKG_LIB env variable
-o qmail-daned(8), qdane(1), tlsacheck(3) - DANE implementation for
-  indimail-mta
-o qmail-multi - fixed qscanq path to sbin
+o DANE validation added to qmail-remote
+o new dns_tlsarr() function in dns.c
+o dnstlsarr utility to fetch TLSA Resource Records and perform DANE validations
+
+indimail-mta has RPM / DEB / yum / apt repository for most of the
+Linux Distros at
+
+http://download.opensuse.org/repositories/home:/indimail/
+
+Install Instructions
+https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail-mta
+
+Currently, the list of supported distributions for indimail-mta is
+
+    * SUSE
+          o openSUSE_Leap_15
+          o openSUSE_Leap_42.3
+          o openSUSE_Leap_42.2
+          o openSUSE 13.2
+          o SUSE Linux Enterprise 12
+          o SUSE Linux Enterprise 15
+
+    * Red Hat
+          o Fedora 28
+          o Fedora 27
+          o Red Hat Enterprise Linux 7
+          o Red Hat Enterprise Linux 6
+          o CentOS 7
+          o CentOS 6
+
+    * Debian
+          o Debian 9.0
+          o Debian 8.0
+          o Ubuntu 18.04
+          o Ubuntu 17.04
+          o Ubuntu 16.10
+          o Ubuntu 16.04
+          o Ubuntu 14.04
+          o Ubuntu 12.04
+ChangeLog
+=========
+o qmail-multi.c - fixed qscanq path to sbin
 o fixed do_scan() for badattachment check
 o qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
-o added foxhole_all.cdb for banned extensions in clamav
-o BUG - do_scan.c - break out of loop if file extension matches a line in badext
+o remove hardcoded servicedir in spec file
 o dnsmxip - print host along with ip
+o added foxhole_all.cdb for banned extensions in clamav
+o svctool option --config=foxhole for creating foxhole_all.cdb
+o BUG - do_scan.c - break out of loop if file extension matches a line in badext
 o qmail-remote, qmail-daned - added dane verification code using getdns
 o substdo.c - added subsdio_discard() function to discard unflushed data
 o dns.c - added dns_tlsarr() function to query TLSA records
@@ -37,39 +66,4 @@ o qdane.c - modified for qmail-remote query/update
 o postinstall - create DANE verification service only if TLSA code is compiled
 o removed calls to gethostbyname - tcpopen.c, udpopen.c, qmail-daned.c, qmail-greyd.c, udplogger.c, tablematch.c
 o added qmail-daned service to refresh list
-
-indimail-mta has RPM / DEB / yum / apt repository for most of the
-Linux Distros at
-
-http://download.opensuse.org/repositories/home:/indimail/
-
-Install Instructions
-https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail-mta
-
-Currently, the list of supported distributions for indimail-mta is
-
-    * SUSE
-          o openSUSE_Leap_42.3
-          o openSUSE_Leap_42.2
-          o openSUSE 13.2
-          o openSUSE 13.1
-          o SUSE Linux Enterprise 12 SP2
-          o SUSE Linux Enterprise 12 SP1
-          o SUSE Linux Enterprise 12
-
-    * Red Hat
-          o Fedora 27
-          o Fedora 26
-          o Red Hat Enterprise Linux 7
-          o Red Hat Enterprise Linux 6
-          o CentOS 7
-          o CentOS 6
-
-    * Debian
-          o Debian 8.0
-          o Debian 7.0
-          o Ubuntu 17.04
-          o Ubuntu 16.10
-          o Ubuntu 16.04
-          o Ubuntu 14.04
-          o Ubuntu 12.04
+o dnstlsarr program - cmd line DANE validation tool

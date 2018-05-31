@@ -1,24 +1,5 @@
-indimail-mta (2.4-8) unstable; urgency=low
+indimail-mta (2.5-0) unstable; urgency=low
 
-  * svctool - added option to refresh services
-  * moved cdbget, cdbgetm,cdbmake, qmail-getpw, qmail-local, qmail-newmrh to sbin
-  * moved system binaries to sbin
-  * added permissions files for openSUSE
-  * svctool - use SHA-512 encryption for indisrvr admin password
-  * svctool - moved enabling/disabling of services to separate functions --enable-service, --disable-service
-  * create ld.so cache only when libdir is not /usr/lib or /usr/lib64
-  * svctool - added --ssl, --require-secure-transport command line option for mysqld
-  * svctool - create env variable VIRTUAL_PKG_LIB with libindimail.so to provide indimail functionality
-  * BUG - indimail_stub.c:  fixed spurious chown() in r_mkdir()
-  * svctool - fix creation of env variable VIRTUAL_PKG_LIB
-  * svctool - create SSL/TLS config for MariaDB like mysql_ssl_rsa_setup utility for mysql-community-server
-  * svctool - autofix QHPSI during clamd service creation for smtpd, qmqpd, qmtpd
-  * svctool - skip service refresh if .norefreshsvc file is present in variables directory
-  * svctool - added --config=sqlssl for creating SSL/TLS config for mariadb
-  * str_cpyb.c - fixed extra bytes getting copied
-  * qmail-daned - DANE implementation for IndiMail/indimail-mta
-  * qdane - Tool to query qmail-daned for TLSA RRs
-  * tlsacheck() function to send queries to qmail-dane.
   * qmail-multi.c - fixed qscanq path to sbin
   * fixed do_scan() for badattachment check
   * qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
@@ -29,6 +10,7 @@ indimail-mta (2.4-8) unstable; urgency=low
   * BUG - do_scan.c - break out of loop if file extension matches a line in badext
   * qmail-remote, qmail-daned - added dane verification code using getdns
   * substdo.c - added subsdio_discard() function to discard unflushed data
+  * dns.c - added dns_tlsarr() function to query TLSA records
   * qmail-remote.c - added inbuilt DANE verification function using dns_tlsarr() function
   * qmail-remote.c - added DANE verification function via qmail-daned
   * qmail-remote.c - added tlsadomains control file check
@@ -39,5 +21,6 @@ indimail-mta (2.4-8) unstable; urgency=low
   * postinstall - create DANE verification service only if TLSA code is compiled
   * removed calls to gethostbyname - tcpopen.c, udpopen.c, qmail-daned.c, qmail-greyd.c, udplogger.c, tablematch.c
   * added qmail-daned service to refresh list
+  * dnstlsarr program - cmd line DANE validation tool
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 29 May 2018 22:53:25 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 31 May 2018 17:25:37 +0530
