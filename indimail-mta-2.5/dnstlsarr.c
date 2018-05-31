@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.10  2018-05-31 19:40:46+05:30  Cprogrammer
+ * fixed compiler 'not reached' warning
+ *
  * Revision 1.9  2018-05-31 14:41:33+05:30  Cprogrammer
  * included hastlsa.h
  *
@@ -229,6 +232,8 @@ main(argc, argv)
 		}
 	}
 	_exit(0);
+	/*- Not reached */
+	return (0);
 }
 #else
 #warning "not compiled with -DHASTLSA -DTLS"
@@ -244,7 +249,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.9 2018-05-31 14:41:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.10 2018-05-31 19:40:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
