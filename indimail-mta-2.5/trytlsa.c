@@ -1,10 +1,12 @@
 #include "stralloc.h"
 #include "tlsarralloc.h"
-#include <arpa/nameser.h>
+#include "dns.h"
 int main()
 {
-#if defined(HASTLSA) && defined T_TLSA
-	dns_tlsarr();
+#ifdef HASTLSA
+tlsarralloc ta;
+ipalloc  ia;
+	dns_tlsarr(&ta, &ia);
 #else
 	:
 #endif
