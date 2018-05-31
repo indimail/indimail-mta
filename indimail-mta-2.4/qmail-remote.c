@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.125 2018-05-30 20:04:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.126 2018-05-31 17:13:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -1097,7 +1097,7 @@ do_pkix(char *servercert)
 {
 	X509           *peercert;
 	STACK_OF(GENERAL_NAME) *gens;
-	int             r, i;
+	int             r, i = 0;
 	char           *t;
 
 	/*- PKIX */
@@ -1623,12 +1623,14 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	 */
 	i = (usage == 2 ? sk_X509_num(sk) - 1 : 0);
 	xs = sk_X509_value(sk, i);
-	/*-
-	 * DANE Validation
-	 * case 1 - match full certificate data
-	 * case 2 - match full subjectPublicKeyInfo data
-	 * case 3 - match  SHA512/SHA256 fingerprint of full certificate
-	 * case 4 - match  SHA512/SHA256 fingerprint of subjectPublicKeyInfo
+	/*- 
+	 * DANE Validation 
+	 * server cert - X = 2
+	 * anchor cert - X = 3
+	 * case 1 - match full certificate data -                            - X 0 0
+	 * case 2 - match full subjectPublicKeyInfo data                     - X 1 0
+	 * case 3 - match  SHA512/SHA256 fingerprint of full certificate     - X 0 1, X 0 2
+	 * case 4 - match  SHA512/SHA256 fingerprint of subjectPublicKeyInfo - X 1 1, X 1 2
 	 */
 	if (match_type == 0 && selector == 0) { /*- match full certificate data */
 		if (!(membio = BIO_new(BIO_s_mem()))) {
@@ -3439,7 +3441,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.125 2018-05-30 20:04:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.126 2018-05-31 17:13:28+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3447,6 +3449,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.126  2018-05-31 17:13:28+05:30  Cprogrammer
+ * fixed potential use of uninitialized variable in do_pkix()
+ *
  * Revision 1.125  2018-05-30 20:04:10+05:30  Cprogrammer
  * using hexstring variable inside tlsa_vrfy_records() clobbered certDataField
  *

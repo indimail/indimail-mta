@@ -1,5 +1,9 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.4  2018-05-31 17:12:18+05:30  Cprogrammer
+ * fixed potential use of uninitialized variable in do_pkix()
+ * changed DANE validation messages
+ *
  * Revision 1.3  2018-05-31 02:21:50+05:30  Cprogrammer
  * print status of DANE Validation on stdout
  *
@@ -438,7 +442,7 @@ do_pkix(char *servercert)
 {
 	X509           *peercert;
 	STACK_OF(GENERAL_NAME) *gens;
-	int             r, i;
+	int             r, i = 0;
 	char           *t;
 
 	/*- PKIX */
@@ -851,10 +855,10 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 	xs = sk_X509_value(sk, i);
 	/*- 
 	 * DANE Validation 
-	 * case 1 - match full certificate data
-	 * case 2 - match full subjectPublicKeyInfo data
-	 * case 3 - match  SHA512/SHA256 fingerprint of full certificate
-	 * case 4 - match  SHA512/SHA256 fingerprint of subjectPublicKeyInfo
+	 * case 1 - match full certificate data -                            - X 0 0
+	 * case 2 - match full subjectPublicKeyInfo data                     - X 1 0
+	 * case 3 - match  SHA512/SHA256 fingerprint of full certificate     - X 0 1, X 0 2
+	 * case 4 - match  SHA512/SHA256 fingerprint of subjectPublicKeyInfo - X 1 1, X 1 2
 	 */
 	if (match_type == 0 && selector == 0) { /*- match full certificate data */
 		if (!(membio = BIO_new(BIO_s_mem()))) {
@@ -883,7 +887,7 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 		e = str_diffn(certData.s, certDataField, certData.len);
 		if (verbose) {
 			out(e == 0 ? "matched " : "failed  ");
-			out("full certificate\n");
+			out(usage == 2 ? "full anchorCert\n" : "full serverCert\n");
 			out(certDataField);
 			out("\n");
 			flush();
@@ -921,7 +925,7 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 		e = str_diffn(certData.s, certDataField, certData.len);
 		if (verbose) {
 			out(e == 0 ? "matched " : "failed  ");
-			out("full subjectPublickKeyInfo data\n");
+			out(usage == 2 ? "SubjectPublicKeyInfo anchorCert\n" : "SubjectPublicKeyInfo serverCert\n");
 			out(certDataField);
 			out("\n");
 			flush();
@@ -943,7 +947,7 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 			out(match_type == 1 ? "sha256" : "sha512");
 			out(" fingerprint [");
 			out(certDataField);
-			out("] of full certificate\n");
+			out(usage == 2 ? "] full anchorCert\n" : "] full serverCert\n");
 		}
 		return (e);
 	}
@@ -988,7 +992,7 @@ tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, 
 			out(match_type == 1 ? "sha256" : "sha512");
 			out(" fingerprint [");
 			out(certDataField);
-			out("] of subjectPublicKeyInfo\n");
+			out(usage == 2 ? "] SubjectPublicKeyInfo anchorCert\n" : "] SubjectPublicKeyInfo serverCert\n");
 		}
 		return (e);
 	}
@@ -1474,7 +1478,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.3 2018-05-31 02:21:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.4 2018-05-31 17:12:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
