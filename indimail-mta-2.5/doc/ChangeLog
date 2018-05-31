@@ -1,4 +1,39 @@
-* Tue May 29 2018 22:53:25 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
+* Thu May 31 2018 17:29:20 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+Release 2.5 Start 05/05/2018
+05/05/2018
+1.  qmail-multi.c - fixed qscanq path to sbin
+11/05/2018
+2.  fixed do_scan() for badattachment check
+13/05/2018
+3.  qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
+4.  dnsmxip - print host along with ip
+15/05/2018
+5.  remove hardcoded servicedir in spec file
+18/05/2018
+6.  added foxhole_all.cdb for banned extensions in clamav
+7.  svctool option --config=foxhole for creating foxhole_all.cdb
+8.  BUG - do_scan.c - break out of loop if file extension matches a line in badext
+23/05/2018
+9.  qmail-remote, qmail-daned - added dane verification code using getdns
+24/05/2018
+10. substdo.c - added subsdio_discard() function to discard unflushed data
+27/05/2018
+11. dns.c - added dns_tlsarr() function to query TLSA records
+12. qmail-remote.c - added inbuilt DANE verification function using
+    dns_tlsarr() function
+13. qmail-remote.c - added DANE verification function via qmail-daned
+14. qmail-remote.c - added tlsadomains control file check
+15. qmail-daned.c - removed DANE verification via external DANEPROG script
+16. qmail-daned.c - use dns_tlsarr() function.
+17. tlsacheck.c - modified for qmail-remote query/update
+18. qdane.c - modified for qmail-remote query/update
+29/05/2018
+19. postinstall - create DANE verification service only if TLSA code is compiled
+20. removed calls to gethostbyname - tcpopen.c, udpopen.c, qmail-daned.c, qmail-greyd.c, udplogger.c, tablematch.c
+21. added qmail-daned service to refresh list
+22. dnstlsarr program - cmd line DANE validation tool
+
+* Thu Apr 26 2018 14:40:06 +0530 mbhangui@gmail.com 2.4-1.1%{?dist}
 Release 2.4 Start 31/01/2018
 31/01/2018
 1.  svctool - added option to refresh services
@@ -31,37 +66,6 @@ Release 2.4 Start 31/01/2018
 17. qmail-daned - DANE implementation for IndiMail/indimail-mta
 18. qdane - Tool to query qmail-daned for TLSA RRs
 19. tlsacheck() function to send queries to qmail-dane.
-05/05/2018
-20. qmail-multi.c - fixed qscanq path to sbin
-11/05/2018
-21. fixed do_scan() for badattachment check
-13/05/2018
-22. qmail-remote.c, smtpd.c disable SSLv2, SSLv3 to fix POODLE vulnerability
-23. dnsmxip - print host along with ip
-15/05/2018
-24. remove hardcoded servicedir in spec file
-18/05/2018
-25. added foxhole_all.cdb for banned extensions in clamav
-26. svctool option --config=foxhole for creating foxhole_all.cdb
-27. BUG - do_scan.c - break out of loop if file extension matches a line in badext
-23/05/2018
-28. qmail-remote, qmail-daned - added dane verification code using getdns
-24/05/2018
-29. substdo.c - added subsdio_discard() function to discard unflushed data
-27/05/2018
-30. dns.c - added dns_tlsarr() function to query TLSA records
-31. qmail-remote.c - added inbuilt DANE verification function using
-    dns_tlsarr() function
-32. qmail-remote.c - added DANE verification function via qmail-daned
-33. qmail-remote.c - added tlsadomains control file check
-34. qmail-daned.c - removed DANE verification via external DANEPROG script
-35. qmail-daned.c - use dns_tlsarr() function.
-36. tlsacheck.c - modified for qmail-remote query/update
-37. qdane.c - modified for qmail-remote query/update
-29/05/2018
-38. postinstall - create DANE verification service only if TLSA code is compiled
-39. removed calls to gethostbyname - tcpopen.c, udpopen.c, qmail-daned.c, qmail-greyd.c, udplogger.c, tablematch.c
-40. added qmail-daned service to refresh list
 
 * Sat Jan 27 2018 12:22:15 +0530 mbhangui@gmail.com 2.3-1.1%{?dist}
 Release 2.3 Start 25/12/2017
