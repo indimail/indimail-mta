@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.9  2018-05-31 14:41:33+05:30  Cprogrammer
+ * included hastlsa.h
+ *
  * Revision 1.8  2018-05-31 02:20:55+05:30  Cprogrammer
  * added option to query mx records before fetching TLSA Resource Records
  *
@@ -28,6 +31,7 @@
 #include "substdio.h"
 #include "subfd.h"
 #include "exit.h"
+#include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -240,7 +244,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.8 2018-05-31 02:20:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.9 2018-05-31 14:41:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
