@@ -1,5 +1,9 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.34  2018-06-01 22:51:10+05:30  Cprogrammer
+ * define dns_ptrplus() proto only if USE_SPF is defined
+ * set ix.fqdn when quering mx records
+ *
  * Revision 1.33  2018-05-28 17:24:20+05:30  Cprogrammer
  * define T_TLSA for older systems where nameser.h doesn'thave T_TLSA defined
  *
@@ -188,7 +192,9 @@ static int      (*lookup) () = res_query;
 #ifdef IPV6
 static int      iaafmt6(char *, ip6_addr *, char *);
 #endif
+#ifdef USE_SPF
 static int      dns_ptrplus(strsalloc *, ip_addr *);
+#endif
 #ifdef HASTLSA
 static tlsarr   tlsaRR;
 ns_rr           rr;
@@ -932,6 +938,9 @@ dns_mxip(ia, sa, random)
 		return DNS_MEM;
 	if (!stralloc_0(&glue))
 		return DNS_MEM;
+#ifdef TLS
+	ix.fqdn = glue.s;
+#endif
 	if (glue.s[0]) {
 		ix.af = AF_INET;
 		ix.pref = 0;
@@ -1211,7 +1220,7 @@ dns_tlsarr(ta, sa)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.33 2018-05-28 17:24:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.34 2018-06-01 22:51:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
