@@ -64,7 +64,7 @@
 
 Summary: A Flexible SMTP server
 Name: indimail-mta
-Version: 2.5
+Version: 2.6
 %if %fedorareview == 0
 Provides: daemontools = %{version}, ucspi-tcp = %{version}
 %endif
