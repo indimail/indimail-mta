@@ -1,5 +1,8 @@
 /*
  * $Log: udpclient.c,v $
+ * Revision 1.5  2018-06-01 15:17:29+05:30  Cprogrammer
+ * use strerr_die2sys to display error message
+ *
  * Revision 1.4  2016-04-18 16:44:33+05:30  Cprogrammer
  * added option to read from socket
  *
@@ -41,9 +44,7 @@ out(char *str)
 int
 main(int argc, char **argv)
 {
-	int             sfd, opt;
-	int             timeout = 5;
-	int             maxresponsesize = -1;
+	int             sfd, opt, timeout = 5, maxresponsesize = -1;
 	char            buf[1024];
 	char           *host = 0, *port = 0;
 
@@ -70,19 +71,7 @@ main(int argc, char **argv)
 		strerr_die1x(100, usage);
 
 	if ((sfd = udpopen(host, port)) == -1)
-	{
-		if (substdio_puts(subfderr, FATAL) == -1)
-			strerr_die2sys(111, FATAL, "write: ");
-		if (substdio_puts(subfderr, "udpopen: ") == -1)
-			strerr_die2sys(111, FATAL, "write: ");
-		if (substdio_puts(subfderr, strerror(errno)) == -1)
-			strerr_die2sys(111, FATAL, "write: ");
-		if (substdio_put(subfderr, "\n", 1) == -1)
-			strerr_die2sys(111, "udpopen", "write: ");
-		if (substdio_flush(subfderr) == -1)
-			strerr_die2sys(111, FATAL, "write: ");
-		_exit(1);
-	}
+		strerr_die2sys(111, FATAL, "udpopen: ");
 	if (dup2(sfd, 1) == -1)
 		strerr_die2sys(111, FATAL, "dup2: ");
 	if (optind == argc) {
@@ -120,7 +109,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	static char    *x = "$Id: udpclient.c,v 1.4 2016-04-18 16:44:33+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: udpclient.c,v 1.5 2018-06-01 15:17:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
