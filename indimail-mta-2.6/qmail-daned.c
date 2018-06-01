@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.17  2018-06-01 14:49:22+05:30  Cprogrammer
+ * added 'E' option to send back TLSA RR data
+ *
  * Revision 1.16  2018-05-31 02:23:10+05:30  Cprogrammer
  * removed NETQMAIL code
  *
@@ -794,7 +797,7 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	int fr_int, struct danerec **dnrecord, int *record_added, int *org_state, int qmr)
 {
 	char           *resp;
-	struct danerec *ptr;
+	struct danerec *ptr = 0;
 	char            dane_state, rbuf[2];
 	int             i, n = 0;
 
@@ -826,7 +829,7 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 			rbuf[0] = 1;
 			rbuf[1] = dane_state = RECORD_NOVRFY;
 		} 
-		if (qmr == 'D') {
+		if (qmr == 'D' || qmr == 'E') {
 			dane_state = get_dane_records(domain);
 			if (!save.len)
 				dane_state = RECORD_OK;
@@ -900,7 +903,7 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 			rbuf[0] = 1;
 			rbuf[1] = dane_state = ptr->status = RECORD_NOVRFY;
 		} else
-		if (qmr == 'D') {
+		if (qmr == 'D' || qmr == 'E') {
 			dane_state = ptr->status = get_dane_records(domain);
 			if (!save.len)
 				dane_state = RECORD_OK;
@@ -947,13 +950,22 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 		n = -3;
 		break;
 	}
-	if (!n)
-		return (sendto(s, resp, 2, 0, (struct sockaddr *) from, fromlen));
-	else {
+	if (!n) {
+		if ((i = sendto(s, resp, 2, 0, (struct sockaddr *) from, fromlen)) == -1)
+			return (i);
+		if (qmr == 'E') { /*- send back tlsarr data */
+			ptr = *dnrecord;
+			if (ptr)
+				return (sendto(s, ptr->data, (size_t) ptr->datalen, 0, (struct sockaddr *) from, fromlen));
+		}
+	}
+	else { /*- if failed to add record to hash list */
 		if ((i = sendto(s, resp, 2, 0, (struct sockaddr *) from, fromlen)) == -1)
 			return (i);
 		return (n);
 	}
+	/*- Not Reached */
+	return (0);
 }
 
 char           *pusage =
@@ -1245,6 +1257,7 @@ main(int argc, char **argv)
 		domain = 0;
 		switch (rdata[0])
 		{
+		case 'E': /*- same as 'D' but send back TLSA RR data */
 		case 'q': /*- qmail-remote record exist check */
 		case 'S': /*- qmail-remote record update success */
 		case 'F': /*- qmail-remote record update failure */
@@ -1332,7 +1345,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.16 2018-05-31 02:23:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.17 2018-06-01 14:49:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
