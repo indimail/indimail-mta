@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.12  2018-06-01 22:52:11+05:30  Cprogrammer
+ * exit on incorrect usage
+ *
  * Revision 1.11  2018-06-01 16:29:52+05:30  Cprogrammer
  * added verbose messages to indicate the type of dns query
  *
@@ -113,6 +116,8 @@ main(argc, argv)
 		case 'v':
 			verbose = *optarg - '0';
 			break;
+		default:
+			pusage();
 		}
 	}
 	if (optind < argc)
@@ -138,7 +143,7 @@ main(argc, argv)
 			}
 			dnsdoe(dns_mxip(&ia, &sahost, r));
 			for (j = 0; j < ia.len; ++j) {
-				out("checking MX host");
+				out("checking MX host ");
 				out(ia.ix[j].fqdn);
 				out("\n");
 				flush();
@@ -273,7 +278,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.11 2018-06-01 16:29:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.12 2018-06-01 22:52:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
