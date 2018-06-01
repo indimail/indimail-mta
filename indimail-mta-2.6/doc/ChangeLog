@@ -1,4 +1,9 @@
 * Fri Jun 01 2018 09:38:11 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
+Release 2.6 Start 01/06/2018
+01/06/2018
+1.  qmail-daned.c - added 'E' option to send back TLSA RR data
+2.  udpclient.c - use strerr_die2sys to display error message
+3.  dnstlsarr.c - added verbose messages to indicate the type of dns query
 
 * Thu May 31 2018 17:29:20 +0530 mbhangui@gmail.com 2.5-1.1%{?dist}
 Release 2.5 Start 05/05/2018
