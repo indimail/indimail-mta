@@ -54,7 +54,7 @@ indimail-mta.install: indimail-mta.install.in Makefile
 clean:
 	/bin/rm -f rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
-	indimail-mini.postinst *.dsc \
+	indimail-mini.postinst *.dsc changelog \
 	indimail-mta.install indimail-mta.postinst obs_deb_prep debian.tar.gz dummy.tar.gz
 
 noinst_SCRIPTS = indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
