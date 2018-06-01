@@ -1,5 +1,7 @@
 indimail-mta (@version@-@release@) unstable; urgency=low
 
-  * 
+  * qmail-daned.c - added 'E' option to send back TLSA RR data
+  * udpclient.c - use strerr_die2sys to display error message
+  * dnstlsarr.c - added verbose messages to indicate the type of dns query
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 01 Jun 2018 09:38:11 +0530
