@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.5  2018-06-01 22:53:36+05:30  Cprogrammer
+ * display correct host in perm_dns()
+ *
  * Revision 1.4  2018-05-31 17:12:18+05:30  Cprogrammer
  * fixed potential use of uninitialized variable in do_pkix()
  * changed DANE validation messages
@@ -1018,10 +1021,10 @@ timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port, int timeout
 }
 
 void
-perm_dns()
+perm_dns(char *str)
 {
 	logerr("Sorry, I couldn't find any host named ");
-	logerr(partner_fqdn);
+	logerr(str ? str : partner_fqdn);
 	logerrf("\n");
 	die (5);
 }
@@ -1065,7 +1068,9 @@ get_tlsa_rr(char *domain, int mxhost, int port)
 		switch (r)
 		{
 		case DNS_HARD:
-			perm_dns();
+			if (!stralloc_0(&sa))
+				die_nomem();
+			perm_dns(sa.s);
 		case DNS_SOFT:
 			temp_dns();
 		case DNS_MEM:
@@ -1078,7 +1083,7 @@ get_tlsa_rr(char *domain, int mxhost, int port)
 		switch (r)
 		{
 		case DNS_HARD:
-			perm_dns();
+			perm_dns(0);
 		case DNS_SOFT:
 			temp_dns();
 		case DNS_MEM:
@@ -1099,7 +1104,9 @@ get_tlsa_rr(char *domain, int mxhost, int port)
 			switch (r)
 			{
 			case DNS_HARD:
-				perm_dns();
+				if (!stralloc_0(&sa))
+					die_nomem();
+				perm_dns(sa.s);
 			case DNS_SOFT:
 				temp_dns();
 			case DNS_MEM:
@@ -1206,7 +1213,7 @@ do_dane_validation(char *host, int port)
 	case DNS_SOFT:
 		temp_dns();
 	case DNS_HARD:
-		perm_dns();
+		perm_dns(0);
 	case 1:
 		if (ip.len <= 0)
 			temp_dns();
@@ -1478,7 +1485,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.4 2018-05-31 17:12:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.5 2018-06-01 22:53:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
