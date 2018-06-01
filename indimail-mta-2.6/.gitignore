@@ -7,10 +7,11 @@ debian/indimail-mini.postinst
 debian/indimail-mini.postrm
 debian/indimail-mini.preinst
 debian/indimail-mini.prerm
+debian/perm_list.q
+debian/changelog
 auto_libexec.o
 qmail-srs.5
 indimail-mta.fc
-debian/perm_list.q
 perm_list.q
 conf-prefix
 conf-shared

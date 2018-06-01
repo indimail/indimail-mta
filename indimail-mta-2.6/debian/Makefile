@@ -7,13 +7,13 @@ servicedir=/service
 mandir=$(prefix)/share/man
 libexecdir=$(prefix)/libexec/indimail
 shareddir=$(prefix)/share/indimail
-release=$(shell head -1 changelog |awk '{print $$2}'|cut -d'-' -f2|cut -c-1)
 logdir=/var/log/svc
 
 libdkim_version=1.5
 libsrs2_version=1.0.18
-#version=$(shell grep Version: ../indimail-mta.spec.in|cut -d: -f2 | cut -c2-)
-version=2.5
+version=$(shell grep Version: ../indimail-mta.spec.in|cut -d: -f2 | cut -c2-)
+#release=$(shell head -1 changelog |awk '{print $$2}'|cut -d'-' -f2|cut -c-1)
+release=0
 all: rules indimail-mta.prerm indimail-mta.preinst \
 indimail-mta.postrm indimail-mta.postinst \
 indimail-mini.prerm indimail-mini.preinst \
@@ -75,11 +75,13 @@ obs_deb_prep: obs_deb_prep.in Makefile
 	$(edit) $@.in > $@
 rules: rules.in Makefile
 	$(edit) $@.in > $@
-indimail-mta.dsc: indimail-mta.dsc.in Makefile changelog
+changelog: changelog.in Makefile ../indimail-mta.spec.in
 	$(edit) $@.in > $@
-indimail-mta-Debian_9.0.dsc: indimail-mta-Debian_9.0.dsc.in Makefile changelog
+indimail-mta.dsc: indimail-mta.dsc.in Makefile ../indimail-mta.spec.in
 	$(edit) $@.in > $@
-indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile changelog
+indimail-mta-Debian_9.0.dsc: indimail-mta-Debian_9.0.dsc.in Makefile ../indimail-mta.spec.in
+	$(edit) $@.in > $@
+indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile ../indimail-mta.spec.in
 	$(edit) $@.in > $@
 indimail-mta.postrm: indimail-mta.postrm.in Makefile
 	$(edit) $@.in > $@
