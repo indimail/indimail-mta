@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.11  2018-06-01 16:29:52+05:30  Cprogrammer
+ * added verbose messages to indicate the type of dns query
+ *
  * Revision 1.10  2018-05-31 19:40:46+05:30  Cprogrammer
  * fixed compiler 'not reached' warning
  *
@@ -128,9 +131,14 @@ main(argc, argv)
 			}
 			dns_init(0);
 			r = now() + getpid();
+			if (verbose) {
+				out("MX query for ");
+				out(host);
+				out("\n");
+			}
 			dnsdoe(dns_mxip(&ia, &sahost, r));
 			for (j = 0; j < ia.len; ++j) {
-				out("checking ");
+				out("checking MX host");
 				out(ia.ix[j].fqdn);
 				out("\n");
 				flush();
@@ -154,6 +162,11 @@ main(argc, argv)
 			_exit(111);
 		}
 		r = now() + getpid();
+		if (verbose) {
+			out("MX query for ");
+			out(host);
+			out("\n");
+		}
 		dnsdoe(dns_mxip(&ia, &sahost, r));
 		for (k = 0; k < ia.len; ++k) {
 			if (!stralloc_copyb(&sa, "_", 1))
@@ -184,6 +197,11 @@ main(argc, argv)
 			}
 			substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ia.ix[k].pref));
 			out("\n");
+			if (verbose) {
+				out("TLSA RR query for ");
+				substdio_put(subfdout, sa.s, sa.len);
+				out("\n");
+			}
 			dnsdoe(dns_tlsarr(&ta, &sa));
 			for (j = 0; j < ta.len; ++j) {
 				substdio_put(subfdout, ta.rr[j].host, ta.rr[j].hostlen);
@@ -212,6 +230,11 @@ main(argc, argv)
 			die_nomem();
 		if (!stralloc_cats(&sa, host))
 			die_nomem();
+		if (verbose) {
+			out("TLSA RR query for ");
+			substdio_put(subfdout, sa.s, sa.len);
+			out("\n");
+		}
 		dnsdoe(dns_tlsarr(&ta, &sa));
 		for (j = 0; j < ta.len; ++j) {
 			substdio_put(subfdout, ta.rr[j].host, ta.rr[j].hostlen);
@@ -231,6 +254,7 @@ main(argc, argv)
 			substdio_putsflush(subfdout, "\n");
 		}
 	}
+	flush();
 	_exit(0);
 	/*- Not reached */
 	return (0);
@@ -249,7 +273,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.10 2018-05-31 19:40:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.11 2018-06-01 16:29:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
