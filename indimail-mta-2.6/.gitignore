@@ -580,3 +580,6 @@ dnstlsarr
 dnstlsarr.o
 qmail-daned.8
 starttls.o
+doc/ChangeLog
+doc/RELEASE-Notes
+debian/changelog.in
