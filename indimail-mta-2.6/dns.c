@@ -1,5 +1,8 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.35  2018-06-02 09:58:37+05:30  Cprogrammer
+ * fqdn of ip_mx struct was pointing to a location that could be overwritten
+ *
  * Revision 1.34  2018-06-01 22:51:10+05:30  Cprogrammer
  * define dns_ptrplus() proto only if USE_SPF is defined
  * set ix.fqdn when quering mx records
@@ -835,7 +838,9 @@ dns_ipplus(ia, sa, pref)
 					continue;
 #endif
 #ifdef TLS
-				ix.fqdn = glue.s;
+				if (!(ix.fqdn = (char *) alloc(sizeof(char) * glue.len)))
+					return DNS_MEM;
+				byte_copy(ix.fqdn, glue.len, glue.s);
 #endif
 				if (!ipalloc_append(ia, &ix)) {
 					err6 = DNS_MEM;
@@ -872,7 +877,9 @@ dns_ipplus(ia, sa, pref)
 					continue;
 #endif
 #ifdef TLS
-				ix.fqdn = glue.s;
+				if (!(ix.fqdn = (char *) alloc(sizeof(char) * glue.len)))
+					return DNS_MEM;
+				byte_copy(ix.fqdn, glue.len, glue.s);
 #endif
 				if (!ipalloc_append(ia, &ix)) {
 					err4 = DNS_MEM;
@@ -938,13 +945,15 @@ dns_mxip(ia, sa, random)
 		return DNS_MEM;
 	if (!stralloc_0(&glue))
 		return DNS_MEM;
-#ifdef TLS
-	ix.fqdn = glue.s;
-#endif
 	if (glue.s[0]) {
 		ix.af = AF_INET;
 		ix.pref = 0;
 		if (!glue.s[ip4_scan(glue.s, &ix.addr.ip)] || !glue.s[ip4_scanbracket(glue.s, &ix.addr.ip)]) {
+#ifdef TLS
+			if (!(ix.fqdn = (char *) alloc(sizeof(char) * glue.len)))
+				return DNS_MEM;
+			byte_copy(ix.fqdn, glue.len, glue.s);
+#endif
 			if (!ipalloc_append(ia, &ix))
 				return DNS_MEM;
 			return 0;
@@ -1220,7 +1229,7 @@ dns_tlsarr(ta, sa)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.34 2018-06-01 22:51:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.35 2018-06-02 09:58:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
