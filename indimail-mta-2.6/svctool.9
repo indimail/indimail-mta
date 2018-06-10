@@ -497,6 +497,15 @@ Known values for OPTION are:
   NOTE: if the file .norefreshsvc is present in the variable or the config
   directory, refresh is skipped
 
+--norefreshsvc="0|1 service_name"
+  [--run-file-only]
+
+  Disable/Enable auto refresh of supervise scripts for service
+  0              - Disable autorefresh (delete .norefreshsvc in variables directory)
+  1              - Enable  autorefresh (create .norefreshsvc in variables directory)
+  service_name   - name of service with full path
+                   e.g. (@servicedir@/.qmail-smtpd.25)
+
 --enable-service name1 name2 ..
 
   Add a service to be started at system boot. The unit file for the service should exist
