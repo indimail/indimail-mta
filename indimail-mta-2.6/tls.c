@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.7  2018-06-11 23:28:54+05:30  Cprogrammer
+ * removed ssl_free()
+ *
  * Revision 1.6  2017-05-02 16:40:18+05:30  Cprogrammer
  * avoid potential SIGSEGV
  *
@@ -30,17 +33,14 @@ int             smtps = 0;
 SSL            *ssl = NULL;
 
 void
-ssl_free(SSL *myssl)
-{
-	SSL_shutdown(myssl);
-	SSL_free(myssl);
-}
-
-void
 ssl_exit(int status)
 {
-	if (ssl)
-		ssl_free(ssl);
+	if (ssl) {
+		while (SSL_shutdown(ssl) == 0)
+			usleep(100);
+		SSL_free(ssl);
+		ssl = 0;
+	}
 	_exit(status);
 }
 
@@ -81,7 +81,7 @@ ssl_strerror()
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 1.6 2017-05-02 16:40:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tls.c,v 1.7 2018-06-11 23:28:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
