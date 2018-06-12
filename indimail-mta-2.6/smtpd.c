@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.209 $";
+char           *revision = "$Revision: 1.210 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5670,7 +5670,10 @@ tls_init()
 	if (ssl_timeoutaccept(timeout, ssl_rfd, ssl_wfd, myssl) <= 0) {
 		/*- neither cleartext nor any other response here is part of a standard */
 		const char     *err = ssl_error_str();
-		ssl_free(myssl);
+		while (SSL_shutdown(myssl) == 0)
+			usleep(100);
+		SSL_free(myssl);
+		myssl = 0;
 		tls_out("connection failed", err);
 		die_read();
 	}
@@ -6013,6 +6016,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.210  2018-06-11 23:29:28+05:30  Cprogrammer
+ * replaced ssl_free() with SSL_shutdown(), SSL_free()
+ *
  * Revision 1.209  2018-05-25 08:44:38+05:30  Cprogrammer
  * added whitespace for readability
  *
@@ -6078,7 +6084,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.209 2018-05-25 08:44:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.210 2018-06-11 23:29:28+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
