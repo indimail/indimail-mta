@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.171 2018-06-02 00:24:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.172 2018-06-12 07:59:26+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -353,6 +353,22 @@ do
     echo "No Source Archive for $i"
   exit 1
   fi
+%if %build_on_obs == 1
+  if [ -d $i ] ; then
+    #
+    # Apply indimail-mta Patch
+    #
+    if [ " $i" = " %{name}-%{version}" ] ; then
+      if [ -f ../SOURCES/%{name}-%{version}.patch ] ; then
+        patch -p0 < ../SOURCES/%{name}-%{version}.patch
+        continue
+      elif [ -f ../SOURCES/%{name}-%{version}.patch.gz ] ; then
+        gunzip -c ../SOURCES/%{name}-%{version}.patch.gz | patch -p0
+        continue
+      fi
+    fi
+  fi
+%endif
 )
 done
 
