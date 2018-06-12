@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.462 2018-06-12 08:00:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.463 2018-06-12 22:02:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -432,12 +432,13 @@ fi
 %configure --prefix=%{_prefix} --sysconfdir=%{sysconfdir} \
   --mandir=%{_prefix}/share/man --datarootdir=%{_prefix}/share/indimail \
   --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} --enable-domaindir=%{domaindir} \
-  --enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
+  --enable-mysqlprefix=%{mysqlPrefix} \
   --libexecdir=%{libexecdir} --mandir=%{mandir} --enable-qmaildir=%{indimaildir} \
   --enable-shareddir=%{shareddir} --datarootdir=%{shareddir} \
   --enable-modbase=%{_prefix}/lib/indimail \
   --enable-basepath=@basepath@ --enable-logdir=%{logdir} \
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp.smtp \
+  --enable-cookiedir=%{_prefix}/share/indimail/fortunes \
   --enable-moduledir=%pam_module_dir `%{__cat} config/indimail.opts`
 
 #### nssd ######################
