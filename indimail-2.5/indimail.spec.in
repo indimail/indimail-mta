@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.461 2018-05-22 11:04:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.462 2018-06-12 08:00:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -374,8 +374,8 @@ do
     echo "No Source Archive for $i"
     exit 1
   fi
-  if [ -d $i ] ; then
 %if %build_on_obs == 1
+  if [ -d $i ] ; then
     #
     # Apply IndiMail Patch
     #
@@ -388,21 +388,8 @@ do
         continue
       fi
     fi
-    #
-    # Apply patch picked up from indimail.sourceforge.net
-    # rather than from indimail-x/patches subdir
-    #
-    if [ " $i" = " courier-imap-%{courier_version}" ] ; then
-      continue
-    fi
-%endif
-    if [ -f %{name}-%{version}/patches/$i.patch ] ; then
-      # Copy for the SRPM
-      %{__cp} %{name}-%{version}/patches/$i.patch ../SOURCES
-    elif [ -f %{name}-%{version}/patches/$i.patch.gz ] ; then
-      %{__cp} %{name}-%{version}/patches/$i.patch.gz ../SOURCES
-    fi
   fi
+%endif
   )
 done
 
