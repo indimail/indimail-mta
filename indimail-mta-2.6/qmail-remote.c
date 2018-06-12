@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.126 2018-05-31 17:13:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.127 2018-06-12 07:15:43+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -307,6 +307,7 @@ zerodie(char *s1, int succ)
 		while (SSL_shutdown(ssl) == 0)
 			usleep(100);
 		SSL_free(ssl);
+		ssl = 0;
 	}
 	zero();
 	substdio_flush(subfdoutsmall);
@@ -3441,7 +3442,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.126 2018-05-31 17:13:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.127 2018-06-12 07:15:43+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3449,6 +3450,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.127  2018-06-12 07:15:43+05:30  Cprogrammer
+ * initialize ssl to null after SSL_free()
+ *
  * Revision 1.126  2018-05-31 17:13:28+05:30  Cprogrammer
  * fixed potential use of uninitialized variable in do_pkix()
  *
