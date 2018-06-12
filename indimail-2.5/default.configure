@@ -2,26 +2,45 @@
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
 autoreconf -fiv
 fi
+if [ -d /lib64/security ] ; then
+	pam_module_dir=/lib64/security
+elif [ -d /lib/security ] ;then
+	pam_module_dir=/lib/security
+else
+	echo "could not find pam module directory" 1>&2
+	exit 1
+fi
+if [ -d /usr/lib64 ] ; then
+	libdir=/usr/lib64
+elif [ -d /usr/lib ] ;then
+	libdir=/usr/lib
+else
+	echo "could not find libdir " 1>&2
+	exit 1
+fi
 prefix=/usr
+sysconfdir=/etc/indimail
 ./configure \
   --prefix=$prefix \
-  --datarootdir=/usr/share/indimail \
-  --mandir=/usr/share/man \
+  --datarootdir=$prefix/share/indimail \
+  --mandir=$prefix/share/man \
   --enable-qmaildir=/var/indimail \
   --enable-servicedir=/service \
   --enable-modbase=$prefix/lib/indimail \
-  --libexecdir=/usr/libexec/indimail \
-  --enable-controldir=/etc/indimail/control \
-  --enable-assigndir=/etc/indimail/users \
-  --enable-shareddir=/usr/share/indimail \
+  --libdir=$libdir \
+  --libexecdir=$prefix/libexec/indimail \
+  --enable-shareddir=$prefix/share/indimail \
   --enable-domaindir=/var/indimail \
-  --sysconfdir=/etc/indimail \
-  --with-pkgconfigdir=/usr/lib64/pkgconfig \
-  --enable-mysqlprefix=/usr \
+  --sysconfdir=$sysconfdir \
+  --enable-controldir=$sysconfdir/control \
+  --enable-assigndir=$sysconfdir/users \
+  --enable-tcpserver-file=$sysconfdir/tcp.smtp \
+  --with-pkgconfigdir=$prefix/lib64/pkgconfig \
+  --enable-mysqlprefix=$prefix \
   --enable-logdir=/var/log/svc \
   --enable-basepath=/home/mail \
-  --enable-tcprules-prog=/usr/bin/tcprules \
-  --enable-tcpserver-file=/etc/indimail/tcp.smtp \
+  --enable-tcprules-prog=$prefix/bin/tcprules \
   --enable-default-domain=`uname -n` \
-  --enable-cookiedir=/usr/share/indimail/fortunes \
+  --enable-cookiedir=$prefix/share/indimail/fortunes \
+  --enable-moduledir=$pam_module_dir \
   `cat config/indimail.opts`
