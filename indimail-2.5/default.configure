@@ -23,4 +23,5 @@ prefix=/usr
   --enable-tcprules-prog=/usr/bin/tcprules \
   --enable-tcpserver-file=/etc/indimail/tcp.smtp \
   --enable-default-domain=`uname -n` \
+  --enable-cookiedir=/usr/share/indimail/fortunes \
   `cat config/indimail.opts`
