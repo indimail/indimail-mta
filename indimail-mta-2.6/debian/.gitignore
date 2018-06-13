@@ -8,3 +8,4 @@ README
 rules
 indimail-mta.cron.d
 obs_deb_prep
+conf-release
