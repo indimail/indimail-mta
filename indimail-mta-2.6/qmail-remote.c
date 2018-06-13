@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.127 2018-06-12 07:15:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.128 2018-06-13 08:52:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -1196,7 +1196,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	int             code, i = 0, _needtlsauth = 0;
 	static char     ssl_initialized;
 	const char     *ciphers = 0;
-	char           *t, *servercert = 0;
+	char           *t, *servercert = 0, *certfile;
 	static SSL     *myssl;
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	stralloc        ssl_option = { 0 };
@@ -1253,7 +1253,10 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		certdir = auto_control;
 	if (!stralloc_copys(&clientcert, certdir))
 		temp_nomem();
-	if (!stralloc_catb(&clientcert, "/clientcert.pem", 15))
+	if (!stralloc_append(&clientcert, "/"))
+		temp_nomem();
+	certfile = ((certfile = env_get("CLIENTCERT")) ? certfile : "clientcert.pem");
+	if (!stralloc_cats(&clientcert, certfile))
 		temp_nomem();
 	if (!stralloc_0(&clientcert))
 		temp_nomem();
@@ -3442,7 +3445,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.127 2018-06-12 07:15:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.128 2018-06-13 08:52:25+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3450,6 +3453,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.128  2018-06-13 08:52:25+05:30  Cprogrammer
+ * made client cert configurable via env variable CLIENTCERT
+ *
  * Revision 1.127  2018-06-12 07:15:43+05:30  Cprogrammer
  * initialize ssl to null after SSL_free()
  *
