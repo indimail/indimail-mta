@@ -13,7 +13,7 @@ libdkim_version=1.5
 libsrs2_version=1.0.18
 version=$(shell grep Version: ../indimail-mta.spec.in|cut -d: -f2 | cut -c2-)
 #release=$(shell head -1 changelog |awk '{print $$2}'|cut -d'-' -f2|cut -c-1)
-release=0
+release=2
 all: rules indimail-mta.prerm indimail-mta.preinst \
 indimail-mta.postrm indimail-mta.postinst \
 indimail-mini.prerm indimail-mini.preinst \
