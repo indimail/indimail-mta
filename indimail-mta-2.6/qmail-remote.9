@@ -645,7 +645,8 @@ and the server. The supported protocols are SSLv3, TLSv1, TLSv1.1 and TLSv1.2.
 SSL certificate that is used to authenticate with the remote server
 during a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR
 will not negotiate TLS.
-The default location of @controldir@ can be overriden by environment variable CERTDIR
+The default location of @controldir@ can be overriden by environment variable CERTDIR. \fIclientcert.pem\fR
+can be overriden by environment variable \fBCLIENTCERT\fR.
 
 .TP 5
 .I tlshosts/<FQDN>.pem
