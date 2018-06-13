@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.210 $";
+char           *revision = "$Revision: 1.211 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2836,23 +2836,11 @@ smtp_ehlo(char *arg)
 void
 smtp_rset(char *arg)
 {
-	seenmail = 0;
 	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
 		return;
 	}
-	if (!stralloc_copys(&rcptto, ""))
-		die_nomem();
-	if (!stralloc_copys(&mailfrom, ""))
-		die_nomem();
-	if (!stralloc_copys(&addr, ""))
-		die_nomem();
-	if (!stralloc_0(&rcptto))
-		die_nomem();
-	if (!stralloc_0(&mailfrom))
-		die_nomem();
-	if (!stralloc_0(&addr))
-		die_nomem();
+	seenmail = rcptto.len = mailfrom.len = addr.len = 0;
 	out("250 flushed\r\n");
 }
 
@@ -6016,6 +6004,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.211  2018-06-13 08:55:27+05:30  Cprogrammer
+ * refactored smtp_rset()
+ *
  * Revision 1.210  2018-06-11 23:29:28+05:30  Cprogrammer
  * replaced ssl_free() with SSL_shutdown(), SSL_free()
  *
@@ -6084,7 +6075,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.210 2018-06-11 23:29:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.211 2018-06-13 08:55:27+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
