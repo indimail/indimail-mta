@@ -15,7 +15,7 @@ mysql_prefix=@mysql_prefix@
 mysql_incdir=@mysql_incdir@
 mysql_libdir=@mysql_libdir@
 defaultdomain=@defaultdomain@
-release := $(shell head -1 changelog.in | awk '{print $$2}' | cut -d'-' -f2 | cut -c-1)
+release := $(shell head -1 conf-release 2>/dev/null|| echo 1)
 version=@version@
 prefix=@prefix@
 #
@@ -95,6 +95,7 @@ edit = sed \
 	-e 's,@mysql_libdir\@,$(mysql_libdir),g' \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
 	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
@@ -144,18 +145,16 @@ indimail.cron.d: indimail.cron.d.in
 obs_deb_prep: obs_deb_prep.in Makefile
 	$(edit) $@.in > $@;
 
-changelog: changelog.in Makefile
+changelog: changelog.in Makefile conf-release
+	$(edit) $@.in > $@;
+indimail.dsc: indimail.dsc.in Makefile conf-release
+	$(edit) $@.in > $@;
+indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile conf-release
+	$(edit) $@.in > $@;
+indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile conf-release
 	$(edit) $@.in > $@;
 
-indimail.dsc: indimail.dsc.in Makefile changelog.in
-	$(edit) $@.in > $@.tmp; \
-	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
-indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile changelog.in
-	$(edit) $@.in > $@.tmp; \
-	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
-indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile changelog.in
-	$(edit) $@.in > $@.tmp; \
-	sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+#sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@

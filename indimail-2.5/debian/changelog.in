@@ -1,4 +1,4 @@
-indimail (@version@-1) unstable; urgency=low
+indimail (@version@-@release@) unstable; urgency=low
 
   * corrected fortunes cookie directory
 
