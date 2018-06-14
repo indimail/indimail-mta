@@ -26,6 +26,7 @@ crypt
 dbinfo
 dbinfo.8
 */*.debhelper
+debian/conf-release
 debian/changelog
 debian/conffiles
 debian/debian.tar.gz
