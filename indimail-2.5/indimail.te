@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.28  2018-06-14 10:34:21+05:30  Cprogrammer
+# added rule for iwebadmin
+#
 # Revision 2.27  2018-04-26 23:27:48+05:30  Cprogrammer
 # fixed selinux rules
 #
@@ -82,7 +85,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.27 2018-04-26 23:27:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.28 2018-06-14 10:34:21+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -98,11 +101,13 @@ require {
 	type httpd_t;
 	type httpd_sys_script_t;
 	type mysqld_t;
+	type mysqld_port_t;
 	type nscd_t;
 	type pop_port_t;
 	type semanage_t;
 	type home_root_t;
 	type tmp_t;
+	type unlabeled_t;
 	type user_home_t;
 	type user_home_dir_t;
 	type user_tmp_t;
@@ -146,6 +151,8 @@ allow httpd_sys_script_t user_tmp_t:lnk_file read;
 allow httpd_sys_script_t var_t:dir { create read write remove_name add_name rmdir setattr };
 allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_trans write getattr rename unlink open lock };
 allow httpd_sys_script_t var_t:lnk_file read;
+allow httpd_sys_script_t mysqld_port_t:tcp_socket name_connect;
+allow httpd_sys_script_t unlabeled_t:dir search;
 
 #============= mysqld_t ==============
 allow mysqld_t usr_t:file { append create rename write unlink };
