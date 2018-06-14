@@ -1,5 +1,8 @@
 #
 # $Log: common.tcl.in,v $
+# Revision 2.24  2018-06-14 14:27:37+05:30  Cprogrammer
+# fixed paths for indimail/indimail-mta binaries
+#
 # Revision 2.23  2016-06-08 23:34:15+05:30  Cprogrammer
 # changed fetchmailrc path to /etc/indimail
 #

@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: litesrc.in,v $
+# Revision 2.11  2018-06-14 14:28:05+05:30  Cprogrammer
+# fixed logdir path
+#
 # Revision 2.10  2016-06-08 10:42:45+05:30  Cprogrammer
 # removed tk_library variable
 #
