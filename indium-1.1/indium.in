@@ -407,14 +407,7 @@ proc main {} {
 		.mbar1.misc.menu add command -label "Flash Interface"       -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" -underline 5
 		.mbar1.misc.menu add command -label "MySQL Client"         -command "mysql" -underline 6
 		.mbar1.misc.menu add command -label "Command Line"         -command "commandLine" -underline 1
-		if {[file exists @prefix@/bin/gq]} {
-		.mbar1.misc.menu add command -label "Ldap Client"          -command "catch {exec @prefix@/bin/gq &} result" -underline 1
-		}
-		.mbar1.misc.menu add command -label "IndiVersion"          -command "indiversion" -underline 4
 		.mbar1.misc.menu add command -label "Scheduler"            -command "xcron 1" -underline 0
-		if {[file exists /usr/sbin/neat]} {
-		.mbar1.misc.menu add command -label "Network Config"       -command "catch {exec /usr/sbin/neat &} result" -underline 0
-		}
 		if {[file exists @prefix@/bin/fetchmailconf]} {
 		.mbar1.misc.menu add command -label "Fetchmail Config"     -command "fetch_config" -underline 2
 		}
@@ -460,7 +453,7 @@ proc main {} {
 		.mbar1.help.menu add cascade -label "qmail system(8)"   -menu .mbar1.help.menu.qmail8 -underline 14
 		menu .mbar1.help.menu.qmail8 -tearoff 0
 		foreach line {adminclient chowkidar cleanq clearopensmtp dbinfo dk-filter dkim dknewkey \
-			dktest greydaemon hostcntrl hostsync indisrvr indiversion inlookup \
+			dktest greydaemon hostcntrl hostsync indisrvr inlookup \
 			inquerytest install_tables ipchange ldap-checkpwd logalert logmonitor logselect logsrv makeimapaccess \
 			mgmtpass mkdhparams nssd ofmipd ofmipname osh pam-checkpwd \
 			pam-multi postdel proxyimap proxypop3 qmail-cdb qmail-clean qmail-command qmail-daemon qmail-dk \
@@ -650,7 +643,9 @@ proc main {} {
 	menuStatus disabled
 	update
 	logBrowser 1
-	if {[file exist /var/log/indimail/deliver.25/current]} {
+	if {[file exist /var/log/svc/deliver.25/current]} {
+		set logfile "/var/log/svc/deliver.25/current"
+	} elseif {[file exist /var/log/indimail/deliver.25/current]} {
 		set logfile "/var/log/indimail/deliver.25/current"
 	} elseif {[file exist /var/log/qmail/deliver.25/current]} {
 		set logfile "/var/log/qmail/deliver.25/current"
@@ -1719,7 +1714,7 @@ proc ipmeprint {local} {
 	global localips
 
 	if {$local == 1} {
-		set cmd "| @prefix@/sbin/dnsfq $hostname"
+		set cmd "| @libexecdir@/dnsfq $hostname"
 		if {[catch {open $cmd r} f] } {
 			msg_dialog .d {dnsfq} $f @imagedir@/warning.gif 0 "OK"
 			return 1
@@ -1737,7 +1732,7 @@ proc ipmeprint {local} {
 	} else {
 		set localips {}
 	}
-	set cmd "| @prefix@/bin/ipmeprint"
+	set cmd "| @libexecdir@/ipmeprint"
 	if {[catch {open $cmd r} f] } {
 		msg_dialog .d {ipmeprint} $f @imagedir@/warning.gif 0 "OK"
 		return 1
@@ -3640,148 +3635,6 @@ proc run_addaliasdomain {olddomain aliasdomain} {
 	set new_domain ""
 }
 
-proc indiversion {} {
-	global BWidget_present prgtext sortorder
-	source @scriptdir@/global.tcl
-	variable versionfr
-
-	createWindow
-	set result ""
-	focus $w
-	if {$authenticated != 1} {
-		Login 1
-	}
-	set Description "Version Information"
-	wm title . $Description
-	.statusBar.lab configure -text $Description
-
-	if {$BWidget_present == 1} {
-		destroy $lwin
-		destroy $rwin
-		TitleFrame $w.fr -text $Description -side center -relief ridge -bd 2
-		pack $w.fr -side top -anchor w -fill both
-		set fr [$w.fr getframe]
-		set lwin [frame $fr.left  -relief flat  -bd 2]
-		set rwin [frame $fr.right -relief flat  -bd 2]
-		pack $lwin -side left -anchor nw -expand 0 -fill x -anchor nw -in $fr
-		pack $rwin -side left -anchor nw -expand 0 -fill x -anchor nw -in $fr -after $lwin
-		set dwin $fr.debug
-	} else {
-		$w configure -relief ridge -bd 2
-		pack $lwin $rwin -pady 40
-	}
-	set sortorder 1
-	text_create "Software Build Options" 1 40 25
-	## Frame 5 #######################################################################
-	set versionfr  $lwin.version
-	set butfr      $lwin.buttons
-	frame $versionfr -relief flat  -bd 0
-	frame $butfr     -relief flat  -bd 2
-	pack $versionfr $butfr -side top -fill none -anchor nw
-
-	scrollbar $versionfr.vsb -orient vertical   -trough black \
-		-command [list $versionfr.listbox yview]
-	scrollbar $versionfr.hsb -orient horizontal -trough black \
-		-command [list $versionfr.listbox xview]
-	mclistbox $versionfr.listbox \
-	    -bd 0 \
-		-font "Terminal" \
-	    -height 20 \
-	    -width 62 \
-	    -labelanchor w \
-	    -columnrelief flat \
-	    -columnborderwidth 2 \
-	    -labelborderwidth 2 \
-		-resizablecolumn 1 \
-	    -selectmode single \
-	    -selectcommand "listboxSelection" \
-	    -xscrollcommand [list $versionfr.hsb set] \
-	    -yscrollcommand [list $versionfr.vsb set]
-	bind $versionfr.listbox <<ListboxSelect>> {
-		focus $versionfr.listbox
-	}
-	bind $versionfr.listbox <ButtonPress-3> \
-	{ \
-		showContextMenu1 \
-	   	[::mclistbox::convert %W -W] \
-	   	[::mclistbox::convert %W -x %x] \
-	   	[::mclistbox::convert %W -y %y] \
-		%X %Y \
-	}
-	$versionfr.listbox column add code  -label "Code"  -width 25
-	$versionfr.listbox column add major -label "Major" -width 6
-	$versionfr.listbox column add minor -label "Minor" -width 6
-	$versionfr.listbox column add date  -label "Date"  -width 11
-	$versionfr.listbox column add time  -label "Time"  -width 15
-
-	$versionfr.listbox label bind code  <ButtonPress-1> "listboxsort %W code"
-	$versionfr.listbox label bind major <ButtonPress-1> "listboxsort %W major"
-	$versionfr.listbox label bind minor <ButtonPress-1> "listboxsort %W minor"
-	$versionfr.listbox label bind date  <ButtonPress-1> "listboxsort %W date"
-	$versionfr.listbox label bind time  <ButtonPress-1> "listboxsort %W time"
-
-	pack $versionfr.hsb     -side bottom -fill x
-	pack $versionfr.vsb     -side right  -fill y
-	pack $versionfr.listbox -side left -expand 1 -fill both
-
-	button $butfr.run  -text Submit -bg Orange \
-		-command {run_indiversion $versionfr.listbox} -bd 5 \
-		-highlightthickness 5 -highlightbackground black
-	button $butfr.quit -text Cancel -bg IndianRed \
-		-command "destroyWindows;return" -bd 5 \
-		-highlightthickness 5 -highlightbackground black
-	pack $butfr.run $butfr.quit -side left -expand 0 -anchor nw -fill none
-}
-
-proc run_indiversion {dbwin} {
-	global BWidget_present prgtext
-	source @scriptdir@/global.tcl
-
-	if {$BWidget_present == 1} {
-		set prgtext "Hmm... I am Busy"
-		progressDialog
-	}
-	set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"indiversion\" | grep -v indimail.h"
-	if {[catch {open $cmd r} f] } {
-		destroy .progress
-		msg_dialog .d "indiversion" $f @imagedir@/warning.gif 0 "OK"
-		return 1
-	}
-	set count 0
-	$dbwin delete 0 end
-	$dwin.log configure -state normal
-	while {[gets $f line] >= 0} {
-		incr count
-		set pc [expr $count * 100 / 362]
-		.statusBar.foo configure -text "$pc %"
-		set id      [lindex $line 0]
-		if {[string compare -length 4 $id "\$Id:"] == 0} {
-		set code    [lindex $line 1]
-		set version [lindex $line 2]
-		set major   [lindex [split $version .] 0]
-		set minor   [lindex [split $version .] 1]
-		set date    [lindex $line 3]
-		set time    [lindex $line 4]
-		$dbwin insert end [list $code $major $minor $date $time]
-		$dbwin yview scroll 1 units
-		}
-		if {[string length $line] > 0 && \
-			[string compare $line "Main Program Version List"] != 0 && \
-			[string compare -length 16 $line "IndiMail Version"] != 0} {
-			$dwin.log insert end "$line\n"
-			$dwin.log yview scroll 1 units
-		}
-	}
-	$dwin.log configure -state disabled
-	if {$BWidget_present == 1} {
-		destroy .progress
-	}
-	set returnstatus [catch {close $f} result]
-	if {$returnstatus != 0} {
-		msg_dialog .d "indiversion" $result @imagedir@/warning.gif 0 "OK"
-		return 1
-	}
-}
 
 proc vdeluser {} {
 	global BWidget_present prgtext inactiveFlag userList2
@@ -6487,21 +6340,21 @@ proc run_fstab {dbwin filesystem mdahost maxusers maxsize status server} {
 		} else {
 			set opt "-o 0"
 		}
-		set fstabcmd "@prefix@/bin/vfstab -i $opt -n $maxusers -q $maxsize -m $mdahost $filesystem"
+		set fstabcmd "@prefix@/sbin/vfstab -i $opt -n $maxusers -q $maxsize -m $mdahost $filesystem"
 	} elseif {[string compare $mode "mod"] == 0} {
 		if {$status == 1} {
 			set opt "-o 1"
 		} else {
 			set opt "-o 0"
 		}
-		set fstabcmd "@prefix@/bin/vfstab -u $opt -n $maxusers -q $maxsize -m $mdahost $filesystem"
+		set fstabcmd "@prefix@/sbin/vfstab -u $opt -n $maxusers -q $maxsize -m $mdahost $filesystem"
 	} else {
 		set msg "You are About to Delete filesystem $filesystem for $mdahost. Click OK to continue"
 		set action [msg_dialog .d {Confirm Deletion} $msg @imagedir@/warning.gif 0 "OK"]
 		if {$action != 1} {
 			return 1
 		}
-		set fstabcmd "@prefix@/bin/vfstab -d -m $mdahost $filesystem"
+		set fstabcmd "@prefix@/sbin/vfstab -d -m $mdahost $filesystem"
 	}
 	if {$server != ""} {
 		set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$fstabcmd\""
@@ -7971,7 +7824,7 @@ proc editcontrol {} {
 	} else {
 		set novice_mode 0
 	}
-	button $fr.3.1.b1 -text "Rebuild Assign" -command {exec @prefix@/bin/qmail-newu}
+	button $fr.3.1.b1 -text "Rebuild Assign" -command {exec @prefix@/sbin/qmail-newu}
 	balloonHelp $fr.3.1.b1 "Rebuild @sysconfdir@/users/cdb"
 	$fr.3.1.b1 configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBCRaJBxWJBxOHBRGBCxeLLTatCSKFCymJBQ6BAwmBNzu3AQCBAQOBCRSJKzWrGy+ZDy+NBxSHFSmTBxWHLTWtCyaHCSSFCx6PETKNBQ+FBwaHCRKJMTixLy6vExOTKyqrFxaXDQyNDw+PBQSFHx6fCwuLJyenDQ2NISChLSytJSSlFxeXAwODCQmJBweHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaBQIBQGBAMBALCcCksGA4IQkJBUDIDC6gVwGhshY5HlMn9DiCRL1MyYE8iiapaSKlALBdMRiPckDkdeXt9HgxkGhWDXB4fH4ZMGnxcICEiI45kQiQkDCUmJZskmUIiJyiPQgyoQwwpH35LqqgMKiEjq5obqh8rLCMtowAkLqovuH5BACH+aENyZWF0ZWQgYnkgQk1QVG9HSUYgUHJvIHZlcnNpb24gMi41DQqpIERldmVsQ29yIDE5OTcsMTk5OC4gQWxsIHJpZ2h0cyByZXNlcnZlZC4NCmh0dHA6Ly93d3cuZGV2ZWxjb3IuY29tADs="]
 	label $fr.3.1.l -text "Rebuild Assign CDB File" -anchor nw -justify left
@@ -7982,7 +7835,7 @@ proc editcontrol {} {
 	}
 	pack $fr.3.1.b1 $fr.3.1.b2 $fr.3.1.l -side left -anchor nw
 
-	button $fr.3.2.b1 -text "Rebuild Morercpthosts" -command {exec @prefix@/bin/qmail-newmrh}
+	button $fr.3.2.b1 -text "Rebuild Morercpthosts" -command {exec @prefix@/sbin/qmail-newmrh}
 	balloonHelp $fr.3.2.b1 "Rebuild @sysconfdir@/control/morercpthosts.cdb"
 	$fr.3.2.b1 configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBCRaJBxWJBxOHBRGBCxeLLTatCSKFCymJBQ6BAwmBNzu3AQCBAQOBCRSJKzWrGy+ZDy+NBxSHFSmTBxWHLTWtCyaHCSSFCx6PETKNBQ+FBwaHCRKJMTixLy6vExOTKyqrFxaXDQyNDw+PBQSFHx6fCwuLJyenDQ2NISChLSytJSSlFxeXAwODCQmJBweHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaBQIBQGBAMBALCcCksGA4IQkJBUDIDC6gVwGhshY5HlMn9DiCRL1MyYE8iiapaSKlALBdMRiPckDkdeXt9HgxkGhWDXB4fH4ZMGnxcICEiI45kQiQkDCUmJZskmUIiJyiPQgyoQwwpH35LqqgMKiEjq5obqh8rLCMtowAkLqovuH5BACH+aENyZWF0ZWQgYnkgQk1QVG9HSUYgUHJvIHZlcnNpb24gMi41DQqpIERldmVsQ29yIDE5OTcsMTk5OC4gQWxsIHJpZ2h0cyByZXNlcnZlZC4NCmh0dHA6Ly93d3cuZGV2ZWxjb3IuY29tADs="]
 	label $fr.3.2.l -text "Rebuild morercpthosts CDB File" -anchor nw -justify left
@@ -12512,7 +12365,6 @@ proc commandLine {} {
 		"mgmtpass" \
 		"printdir" \
 		"indisrvr" \
-		"indiversion" \
 		"spost" \
 		"updaterules" \
 		"vacation" \

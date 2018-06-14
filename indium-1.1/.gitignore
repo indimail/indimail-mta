@@ -1,5 +1,6 @@
 aclocal.m4
 common.tcl
+compile
 config.guess
 config.h
 config.h.in
@@ -12,6 +13,7 @@ debian/*.dsc
 debian/*.gz
 debian/postinst
 debian/postrm
+debian/README
 debian/rules
 fileman.tcl
 FMbrowse
@@ -25,6 +27,7 @@ kd
 libtool
 litesrc
 ltmain.sh
+m4
 Makefile
 Makefile.in
 missing
@@ -34,6 +37,3 @@ secpanel
 stamp-h1
 supernotepad
 tkdiff
-compile
-debian/README
-m4

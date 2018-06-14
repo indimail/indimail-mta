@@ -213,10 +213,10 @@ find ./BWidget-%{bwidget_version} -depth -print | cpio -pdmv %{buildroot}$TCL_PA
 
 # copy files here
 if [ -x /usr/bin/chrpath ] ; then
-#/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
+	#/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
 	/usr/bin/chrpath -d %{buildroot}%{libexecdir}/pwhelper
 fi
-%{__rm} -f %{buildroot}%{_libdir}/*.so
+# {__rm} -f %{buildroot}%{_libdir}/*.so
 
 %files
 %defattr(-, root, root,-)
@@ -463,10 +463,10 @@ fi
 %attr(444,root,indimail)                %{shareddir}/indium/scripts/ranges.tcl
 
 # Shared libraries (omit for architectures that don't support them)
-#%{_libdir}/libtai64.so
+%{_libdir}/libtai64.so
 %{_libdir}/libtai64-%{tai_version}.so.0
 %{_libdir}/libtai64-%{tai_version}.so.0.0.0
-#%{_libdir}/libfbsql.so
+%{_libdir}/libfbsql.so
 %{_libdir}/libfbsql-%{fbsql_version}.so.0
 %{_libdir}/libfbsql-%{fbsql_version}.so.0.0.0
 

@@ -1590,7 +1590,11 @@ proc default_config {} {
 		if {$result != ""} {
 			msg_dialog .d {default config} "$result" @imagedir@/warning.gif 0 "OK"
 		}
-		catch {file copy @sysconfdir@/cronlist $env(HOME)/.indimail/.cronlist} result
+		catch {file copy @sysconfdir@/cronlist.i $env(HOME)/.indimail/.cronlist.i} result
+		if {$result != ""} {
+			msg_dialog .d {default config} "$result" @imagedir@/warning.gif 0 "OK"
+		}
+		catch {file copy @sysconfdir@/cronlist.q $env(HOME)/.indimail/.cronlist.q} result
 		if {$result != ""} {
 			msg_dialog .d {default config} "$result" @imagedir@/warning.gif 0 "OK"
 		}
@@ -1789,8 +1793,8 @@ proc logBrowser {mode} {
 	set logmon  $b.ind
 	set larger  $b.font.larger
 	set smaller $b.font.smaller
-	if {[file exists "/var/log/indimail"]} {
-		set pwd "/var/log/indimail"
+	if {[file exists "/var/log/svc"]} {
+		set pwd "/var/log/svc"
 	} elseif {[file exists "/var/log/qmail"]} {
 		set pwd "/var/log/qmail"
 	} elseif {[file exists "/var/log"]} {
@@ -1836,7 +1840,7 @@ proc logBrowser {mode} {
 		close $f
 		set datalist [split $data "\n"]
 		for {set i 0} {$i < [llength $datalist]} {incr i} {
-			if {[string compare -length [string length "@prefix@/bin/multilog"] "@prefix@/bin/multilog" [lindex $datalist $i]] == 0} {
+			if {[string compare -length [string length "@prefix@/sbin/multilog"] "@prefix@/sbin/multilog" [lindex $datalist $i]] == 0} {
 				set  str "[lindex [lindex $datalist $i] 2]/current"
 				lappend logfile_list $str
 				if {[string first "imapd" $str] != -1} {
@@ -1906,63 +1910,44 @@ proc logBrowser {mode} {
 		if {[file exist @imagedir@/preferences.gif]} {
 			$b.menu.b1 config -image [image create photo -file @imagedir@/preferences.gif]
 		}
-		button $b.menu.b2 -text "IndiVersion" -command "indiversion"   -relief groove -bd 2 \
-			-highlightthickness 1 -highlightbackground black
-		if {[file exist @imagedir@/version.gif]} {
-			$b.menu.b2 config -image [image create photo -file @imagedir@/version.gif]
-		}
-		button $b.menu.b3 -text "Ldap Client" -command "catch {exec @prefix@/bin/gq &} result" -relief groove -bd 2 \
-			-highlightthickness 1 -highlightbackground black
-		if {[file exist @imagedir@/gq.gif]} {
-			$b.menu.b3 config -image [image create photo -file @imagedir@/gq.gif]
-		}
-		button $b.menu.b4 -text "Top" -command "catch {exec $configs(xterm) -e top &}" -relief groove -bd 2 \
+		button $b.menu.b2 -text "Top" -command "catch {exec $configs(xterm) -e top &}" -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/top.gif]} {
-			$b.menu.b4 config -image [image create photo -file @imagedir@/top.gif]
+			$b.menu.b2 config -image [image create photo -file @imagedir@/top.gif]
 		}
-		button $b.menu.b5 -text "Network Configuration" -command "network_config" -relief groove -bd 2 \
-			-highlightthickness 1 -highlightbackground black
-		if {[file exist @imagedir@/neat.gif]} {
-			$b.menu.b5 config -image [image create photo -file @imagedir@/neat.gif]
-		}
-		button $b.menu.b6 -text "FLASH Interface" -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" -relief groove -bd 2 \
+		button $b.menu.b3 -text "FLASH Interface" -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/flash.gif]} {
-			$b.menu.b6 config -image [image create photo -file @imagedir@/flash.gif]
+			$b.menu.b3 config -image [image create photo -file @imagedir@/flash.gif]
 		}
-		button $b.menu.b7 -text "Queue Statistics" -command "qmailAdv 1"   -relief groove -bd 2 \
+		button $b.menu.b4 -text "Queue Statistics" -command "qmailAdv 1"   -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/queuestatus.gif]} {
-			$b.menu.b7 config -image [image create photo -file @imagedir@/queuestatus.gif]
+			$b.menu.b4 config -image [image create photo -file @imagedir@/queuestatus.gif]
 		}
-		button $b.menu.b8 -text "Control Info" -command "showCtl 1"   -relief groove -bd 2 \
+		button $b.menu.b5 -text "Control Info" -command "showCtl 1"   -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/showctl.gif]} {
-			$b.menu.b8 config -image [image create photo -file @imagedir@/showctl.gif]
+			$b.menu.b5 config -image [image create photo -file @imagedir@/showctl.gif]
 		}
-		button $b.menu.b9 -text "Delete Old Users" -command "vdeloldusers"   -relief groove -bd 2 \
+		button $b.menu.b6 -text "Delete Old Users" -command "vdeloldusers"   -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/delolduser.gif]} {
-			$b.menu.b9 config -image [image create photo -file @imagedir@/delolduser.gif]
+			$b.menu.b6 config -image [image create photo -file @imagedir@/delolduser.gif]
 		}
-		button $b.menu.b10 -text "Scheduler" -command "xcron 1"   -relief groove -bd 2 \
+		button $b.menu.b7 -text "Scheduler" -command "xcron 1"   -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/cron.gif]} {
-			$b.menu.b10 config -image [image create photo -file @imagedir@/cron.gif]
+			$b.menu.b7 config -image [image create photo -file @imagedir@/cron.gif]
 		}
-		pack $b.menu.b1 $b.menu.b2 $b.menu.b3 $b.menu.b4 $b.menu.b5 $b.menu.b6 $b.menu.b7 $b.menu.b8 $b.menu.b9 \
-			$b.menu.b10 -side left
+		pack $b.menu.b1 $b.menu.b2 $b.menu.b3 $b.menu.b4 $b.menu.b5 $b.menu.b6 $b.menu.b7 -side left
 		balloonHelp $b.menu.b1  "Set Preferences"
-		balloonHelp $b.menu.b2  "Version Information"
-		balloonHelp $b.menu.b3  "Ldap Client"
-		balloonHelp $b.menu.b4  "Top System Processes"
-		balloonHelp $b.menu.b5  "Network Configuration"
-		balloonHelp $b.menu.b6  "Dumb Terminal Interface"
-		balloonHelp $b.menu.b7  "Queue Statistics"
-		balloonHelp $b.menu.b8  "Qmail Control File Information"
-		balloonHelp $b.menu.b9  "Delete Old Users"
-		balloonHelp $b.menu.b10 "Scheduler"
+		balloonHelp $b.menu.b2  "Top System Processes"
+		balloonHelp $b.menu.b3  "Dumb Terminal Interface"
+		balloonHelp $b.menu.b4  "Queue Statistics"
+		balloonHelp $b.menu.b5  "Qmail Control File Information"
+		balloonHelp $b.menu.b6  "Delete Old Users"
+		balloonHelp $b.menu.b7  "Scheduler"
 	} else {
 		frame $b.menu -relief flat -bd 0 -bg black
 		button $b.menu.b1 -text "Preferences" -command "preferences 2"   -relief groove -bd 2 \
@@ -1970,51 +1955,44 @@ proc logBrowser {mode} {
 		if {[file exist @imagedir@/preferences.gif]} {
 			$b.menu.b1 config -image [image create photo -file @imagedir@/preferences.gif]
 		}
-		button $b.menu.b2 -text "Ldap Client" -command "catch {exec @prefix@/bin/gq &} result" \
-			-relief groove -bd 2 \
-			-highlightthickness 1 -highlightbackground black
-		if {[file exist @imagedir@/gq.gif]} {
-			$b.menu.b2 config -image [image create photo -file @imagedir@/gq.gif]
-		}
-		button $b.menu.b3 -text "Top" -command "catch {exec $configs(xterm) -e top &}" \
+		button $b.menu.b2 -text "Top" -command "catch {exec $configs(xterm) -e top &}" \
 			-relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/top.gif]} {
-			$b.menu.b3 config -image [image create photo -file @imagedir@/top.gif]
+			$b.menu.b2 config -image [image create photo -file @imagedir@/top.gif]
 		}
-		button $b.menu.b4 -text "FLASH Interface" -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" \
+		button $b.menu.b3 -text "FLASH Interface" -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" \
 			-relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/flash.gif]} {
-			$b.menu.b4 config -image [image create photo -file @imagedir@/flash.gif]
+			$b.menu.b3 config -image [image create photo -file @imagedir@/flash.gif]
 		}
-		button $b.menu.b5 -text "Queue Statistics" -command "qmailAdv 2" \
+		button $b.menu.b4 -text "Queue Statistics" -command "qmailAdv 2" \
 			-relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/queuestatus.gif]} {
-			$b.menu.b5 config -image [image create photo -file @imagedir@/queuestatus.gif]
+			$b.menu.b4 config -image [image create photo -file @imagedir@/queuestatus.gif]
 		}
-		button $b.menu.b6 -text "Control Info" -command "showCtl 2" \
+		button $b.menu.b5 -text "Control Info" -command "showCtl 2" \
 			-relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/showctl.gif]} {
-			$b.menu.b6 config -image [image create photo -file @imagedir@/showctl.gif]
+			$b.menu.b5 config -image [image create photo -file @imagedir@/showctl.gif]
 		}
-		button $b.menu.b7 -text "Change User" -command "Login 2" \
+		button $b.menu.b6 -text "Change User" -command "Login 2" \
 			-relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/forum.gif]} {
-			$b.menu.b7 config -image [image create photo -file @imagedir@/forum.gif]
+			$b.menu.b6 config -image [image create photo -file @imagedir@/forum.gif]
 		}
 		pack $b.menu.b1 $b.menu.b2 $b.menu.b3 $b.menu.b4 $b.menu.b5 \
-		$b.menu.b6 $b.menu.b7 -side left
+		$b.menu.b6 -side left
 		balloonHelp $b.menu.b1 "Set Preferences"
-		balloonHelp $b.menu.b2 "Ldap Client"
-		balloonHelp $b.menu.b3 "Top"
-		balloonHelp $b.menu.b4 "Dumb Terminal Interface"
-		balloonHelp $b.menu.b5 "Queue Statistics"
-		balloonHelp $b.menu.b6 "Qmail Control File Information"
-		balloonHelp $b.menu.b7 "Change User"
+		balloonHelp $b.menu.b2 "Top"
+		balloonHelp $b.menu.b3 "Dumb Terminal Interface"
+		balloonHelp $b.menu.b4 "Queue Statistics"
+		balloonHelp $b.menu.b5 "Qmail Control File Information"
+		balloonHelp $b.menu.b6 "Change User"
 	}
 
 	pack $logmon   -side left -fill y -expand 0
@@ -2386,9 +2364,9 @@ proc xcron {mode} {
 	set program ""
 	set minute_val 0
 	set standard_list {}
-	if {[file exists $env(HOME)/.indimail/.cronlist]} {
-		if {[catch {open $env(HOME)/.indimail/.cronlist r} f] } {
-			msg_dialog .d {cronlist} "open: $f" @imagedir@/warning.gif 0 "OK"
+	if {[file exists $env(HOME)/.indimail/.cronlist.i]} {
+		if {[catch {open $env(HOME)/.indimail/.cronlist.i r} f] } {
+			msg_dialog .d {cronlist.i} "open: $f" @imagedir@/warning.gif 0 "OK"
 			return 1
 		}
 		while {[gets $f line] >= 0} {
@@ -2398,12 +2376,25 @@ proc xcron {mode} {
 		}
 		close $f
 	} else {
-	lappend standard_list "2,32 * * * * @prefix@/bin/hostsync"
-	lappend standard_list "5,35 * * * * @prefix@/bin/clearopensmtp"
-	lappend standard_list "5,35 * * * * @prefix@/bin/fetchmail.cron"
-	lappend standard_list "7 * * * * @prefix@/bin/vfstab -b"
-	lappend standard_list "24 0,4,8,12,16,20 * * * * @prefix@/bin/chowkidar -f /var/log/indimail/deliver.25/current -o $controldir/badmailfrom -n 300 -B > /dev/null 2>&1"
-	lappend standard_list "24 0,4,8,12,16,20 * * * * @prefix@/bin/chowkidar -f /var/log/indimail/deliver.25/current -o $controldir/badrcptto -n 300 -T > /dev/null 2>&1"
+	lappend standard_list "5,35 * * * * @prefix@/sbin/clearopensmtp"
+	lappend standard_list "10 0 * * * root /usr/sbin/svctool --backup=/home/mail/backup --mysqlPrefix=/usr --servicedir=/service"
+	}
+	if {[file exists $env(HOME)/.indimail/.cronlist.q]} {
+		if {[catch {open $env(HOME)/.indimail/.cronlist.q r} f] } {
+			msg_dialog .d {cronlist.q} "open: $f" @imagedir@/warning.gif 0 "OK"
+			return 1
+		}
+		while {[gets $f line] >= 0} {
+			if { [string index $line 0] != "#" } {
+				lappend standard_list $line
+			}
+		}
+		close $f
+	} else {
+	lappend standard_list "5    0 * * * root /usr/bin/svc -a /service/*/log > /dev/null 2>&1"
+	lappend standard_list "0    0 * * * root /usr/sbin/svctool --report=all --attach --postmaster=postmaster"
+	lappend standard_list "01 01 * * * root /usr/libexec/indimail/update_tmprsadh > /dev/null 2>&1"
+	lappend standard_list "12 * * * *	root /usr/sbin/run-cleanq"
 	}
 	createWindow
 	focus $w
@@ -3854,7 +3845,7 @@ proc qmailAdv {mode} {
 			set output_desc "Local IP Addresses"; \
 			$bwin1.2.run configure -text "Info"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/bin/ipmeprint"; \
+			set cmd "exec @libexecdir@/ipmeprint"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3865,7 +3856,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS cnames"; \
 			$bwin1.2.run configure -text "DNS cname"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/sbin/dnscname"; \
+			set cmd "exec @libexecdir@/dnscname"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3876,7 +3867,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS ptrs"; \
 			$bwin1.2.run configure -text "DNS ptr"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/sbin/dnsptr"; \
+			set cmd "exec @libexecdir@/dnsptr"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3887,7 +3878,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS Fully Qualified Name"; \
 			$bwin1.2.run configure -text "DNS fq"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/sbin/dnsfq"; \
+			set cmd "exec @libexecdir@/dnsfq"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3898,7 +3889,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS IP Addresses"; \
 			$bwin1.2.run configure -text "DNS ip"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/sbin/dnsip"; \
+			set cmd "exec @libexecdir@/dnsip"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3909,7 +3900,7 @@ proc qmailAdv {mode} {
 			set arguments ""; \
 			$bwin1.2.run configure -text "DNS mxip"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/sbin/dnsmxip"; \
+			set cmd "exec @libexecdir@/dnsmxip"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3950,7 +3941,7 @@ proc qmailAdv {mode} {
 			set output_desc "Queued Mail Headers"; \
 			$bwin1.2.run configure -text "Queue Print"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/bin/qpq"; \
+			set cmd "exec @libexecdir@/qpq"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -4012,7 +4003,7 @@ proc qmailAdv {mode} {
 	pack $opframe2.1 $opframe2.2 $opframe2.3 $opframe2.4 $opframe2.5 $opframe2.6 $opframe2.7 -side top -anchor w
 
 	set arguments ""
-	set cmd "exec @prefix@/bin/ipmeprint"		
+	set cmd "exec @libexecdir@/ipmeprint"		
 	set output_desc "Local IP Addresses"
 	set queuedirs [glob -nocomplain @indimaildir@/queue*]
 	frame $bwin1.1

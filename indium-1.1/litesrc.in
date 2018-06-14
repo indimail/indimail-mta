@@ -177,7 +177,9 @@ proc main {} {
 	pack .statusBar -side bottom -fill x -pady 2 -anchor s
 	update
 	logBrowser 2
-	if {[file exist /var/log/indimail/fetchmail/current]} {
+	if {[file exist /var/log/svc/fetchmail/current]} {
+		loadFile "/var/log/svc/fetchmail/current"
+	} elseif {[file exist /var/log/indimail/fetchmail/current]} {
 		loadFile "/var/log/indimail/fetchmail/current"
 	} elseif {[file exist /var/log/messages]} {
 		loadFile "/var/log/messages"
