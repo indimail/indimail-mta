@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.463 2018-06-12 22:02:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.464 2018-06-20 10:18:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1705,7 +1705,10 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
   for port in 25 465 587
   do
-    echo "/usr/lib*/libindimail.so.*.*.*" > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+    indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
+    if [ -n "$indlib" -a -f $indlib ] ; then
+      echo $indlib > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+    fi
   done
   ) >> /tmp/indimail-setup.log 2>&1
   exit 0
@@ -1752,9 +1755,8 @@ if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
 else
   default_domain=%{defaultDomain}
 fi
-echo "Creating default indimail configuraton"
-%{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
-  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
+echo "Creating default indimail tcp access control files"
+%{_prefix}/sbin/svctool --config=indimail
 
 # MySQL
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
@@ -1968,7 +1970,10 @@ done
 #update VIRTUAL_PKG_LIB for smtp service
 for port in 25 465 587
 do
-  echo "/usr/lib*/libindimail.so.*.*.*" > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+  indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
+  if [ -n "$indlib" -a -f $indlib ] ; then
+    echo $indlib > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+  fi
 done
 
 # selinux
@@ -2099,10 +2104,20 @@ if [ $argv1 -eq 1 ] ; then
 fi
 
 (
-%{__rm} -rf %{indimaildir}/domains/$default_domain
-for port in 465 25
+# remove all virtual domains
+for i in `ls %{indimaildir}/domains`
 do
-  if [ %nobogofilter -eq 0 ] ; then
+  grep -wv "^+$i-" %{sysconfdir}/users/assign > %{sysconfdir}/users/assign.tmp
+  %{__mv} %{sysconfdir}/users/assign.tmp %{sysconfdir}/users/assign
+done
+if [ -x %{_prefix}/sbin/qmail-newu ] ; then
+  %{_prefix}/sbin/qmail-newu
+fi
+%{__rm} -rf %{indimaildir}/domains/$default_domain
+for port in 465 25 587
+do
+  > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+  if [ %nobogofilter -eq 0 -a $port -ne 587 ] ; then
     > %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
     > %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
     > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
