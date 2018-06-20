@@ -47,11 +47,6 @@ DESTDIR=$(CURDIR)/debian/tmp
 define genControl
 $(shell if [ -d ../BUILD ] ; then ../BUILD/debian/gen_control; else debian/gen_control;fi)
 endef
-#bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
-#bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
-#libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
-#pkgconfigdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
-bits=32
 libdir=@prefix@/lib
 pkgconfigdir=@prefix@/lib/pkgconfig
 
@@ -63,13 +58,6 @@ build-stamp:
 	#
 	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
 	if [ -f ../BUILD/debian/gen_control ] ; then chmod +x ../BUILD/debian/gen_control; fi
-	if [ -f ../BUILD/debian/indimail-devel$(bits) ] ; then \
-		/bin/mv ../BUILD/debian/indimail-devel$(bits) \
-		../BUILD/debian/indimail-devel.install; \
-	fi
-	if [ -f ../BUILD/debian/libindimail$(bits) ] ; then \
-		/bin/mv ../BUILD/debian/libindimail$(bits) ../BUILD/debian/libindimail.install; \
-	fi
 	#
 	# run configure script
 	#
@@ -126,7 +114,7 @@ build-stamp:
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then   $(MAKE) -s -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	if [ -d nssd-$(nssd_version) ] ; then             $(MAKE) -s -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
-	${rm} -rf $(DESTDIR)/$(prefix)/$(libdir)/*.la
+	${rm} -rf $(DESTDIR)$(libdir)/*.la
 	touch build-stamp
 
 clean:
@@ -159,6 +147,7 @@ binary-indep: build install
 	dh_install --sourcedir=$(DESTDIR) -pindimail-devel
 	dh_install --sourcedir=$(DESTDIR) -plibindimail
 	dh_installchangelogs
+	dh_installcron
 	dh_installdocs
 	dh_link
 	dh_strip
