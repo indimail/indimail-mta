@@ -1,5 +1,7 @@
 indimail (@version@-@release@) unstable; urgency=low
 
   * corrected fortunes cookie directory
+  * fixed creation and removal of VIRTUAL_PKG_LIB env variable
+  * remove virtual domains on uninstall
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 12 Jun 2018 07:09:55 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 20 Jun 2018 10:20:56 +0530
