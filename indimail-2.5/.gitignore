@@ -1,4 +1,5 @@
 debian/README
+debian/changelog.in
 adminclient
 authgeneric
 authindi
@@ -221,4 +222,5 @@ doc/INSTALL.indimail
 doc/INSTALL-RPM
 doc/INSTALL-MYSQL
 doc/README-CLUSTER
+doc/ChangeLog.indimail
 debian/indimail.dsc
