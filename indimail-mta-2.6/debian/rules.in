@@ -157,6 +157,7 @@ binary-indep: build install
 	dh_install --sourcedir=$(DESTDIR) -pucspi-tcp
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mini
 	dh_installchangelogs
+	dh_installcron
 	dh_installdocs
 	dh_link
 	dh_strip
