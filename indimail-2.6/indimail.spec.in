@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.464 2018-06-20 10:18:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.465 2018-06-21 23:09:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -272,6 +272,7 @@ Requires: coreutils grep /bin/sh glibc openssl
 # rpm -qlp some-file.rpm
 Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
+Requires: binutils initscripts sed findutils pkgconfig
 
 %if 0%{?suse_version}
 Requires: mysql-community-server
@@ -1756,7 +1757,8 @@ else
   default_domain=%{defaultDomain}
 fi
 echo "Creating default indimail tcp access control files"
-%{_prefix}/sbin/svctool --config=indimail
+%{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
+  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
 
 # MySQL
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
