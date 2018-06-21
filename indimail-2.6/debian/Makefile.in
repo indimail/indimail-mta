@@ -117,13 +117,13 @@ rules: rules.in Makefile
 	$(edit) $@.in > $@; chmod +x $@;
 indimail.install: indimail.install.in
 	$(edit) $@.in > $@
-indimail.prerm: indimail.prerm.in
+indimail.prerm: indimail.prerm.in Makefile
 	$(edit) $@.in > $@;
-indimail.preinst: indimail.preinst.in
+indimail.preinst: indimail.preinst.in Makefile
 	$(edit) $@.in > $@;
-indimail.postrm: indimail.postrm.in
+indimail.postrm: indimail.postrm.in Makefile
 	$(edit) $@.in > $@;
-indimail.postinst: indimail.postinst.in
+indimail.postinst: indimail.postinst.in Makefile
 	$(edit) $@.in > $@;
 
 indimail-devel.postinst: indimail-devel.postinst.in
