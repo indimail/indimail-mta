@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.50  2018-06-22 14:29:28+05:30  Cprogrammer
+ * code indented
+ *
  * Revision 1.49  2018-05-05 18:23:23+05:30  Cprogrammer
  * fixed qscanq path
  *
@@ -182,7 +185,7 @@ extern char   **MakeArgs(char *);
 
 void
 sigalrm()
-{	
+{
 	/*- thou shalt not clean up here */
 	_exit(52);
 }
@@ -213,11 +216,9 @@ main(int argc, char **argv)
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);
 	alarm(DEATH);
-	if ((ptr = env_get("VIRUSCHECK")) && *ptr)
-	{
+	if ((ptr = env_get("VIRUSCHECK")) && *ptr) {
 		scan_int(ptr, &n);
-		if (1 < n && 8 > n)
-		{
+		if (1 < n && 8 > n) {
 			execv("sbin/qscanq", argv);
 			_exit(75);
 		}
@@ -254,8 +255,7 @@ main(int argc, char **argv)
 	default:
 		break;
 	}
-	if (pipe(recpfd) == -1)
-	{
+	if (pipe(recpfd) == -1) {
 		close(0);
 		close(1);
 		close(pipefd[0]);
@@ -296,15 +296,13 @@ main(int argc, char **argv)
 		close(recpfd[0]);
 		break;
 	}
-	if (wait_pid(&wstat, filt_pid) != filt_pid)
-	{
+	if (wait_pid(&wstat, filt_pid) != filt_pid) {
 		close(1);
 		close(recpfd[1]);
 		wait_pid(&wstat, queuepid);
 		_exit(122);
 	}
-	if (wait_crashed(wstat))
-	{
+	if (wait_crashed(wstat)) {
 		close(1);
 		close(recpfd[1]);
 		wait_pid(&wstat, queuepid);
@@ -319,23 +317,18 @@ main(int argc, char **argv)
 	case 0: /*- SPAM */
 	case 1: /*- HAM */
 	case 2: /*- Unsure */
-		if ((ptr = env_get("SPAMEXITCODE")))
-		{
+		if ((ptr = env_get("SPAMEXITCODE"))) {
 			scan_int(ptr, &n);
-			if (n == filt_exitcode) /*- Message is SPAM */
-			{
-				if ((n = rewrite_envelope(recpfd[1])) > 1) /*- Some error */
-				{
+			if (n == filt_exitcode) { /*- Message is SPAM */
+				if ((n = rewrite_envelope(recpfd[1])) > 1) { /*- Some error */
 					close(1);
 					close(recpfd[1]);
 					wait_pid(&wstat, queuepid);
 					_exit(n);
 				}
-				if (n == 1 || (ptr = env_get("REJECTSPAM"))) 
-				{
+				if (n == 1 || (ptr = env_get("REJECTSPAM"))) {
 					/*- REJECTSPAM takes precedence over spam notifications */
-					if (ptr && *ptr > '0')
-					{
+					if (ptr && *ptr > '0') {
 						(void) discard_envelope();
 						close(1);
 						close(recpfd[1]);
@@ -344,9 +337,7 @@ main(int argc, char **argv)
 							_exit(32); /*- bounce */
 						else
 							_exit(0); /*- blackhole */
-					} else /*- spam notification - envelope has been rewritten */
-					if (n == 1)
-					{
+					} else /*- spam notification - envelope has been rewritten */ if (n == 1) {
 						(void) discard_envelope();
 						goto finish;
 					}
@@ -361,9 +352,9 @@ main(int argc, char **argv)
 		_exit(76); /*- treat this as temp problem with spam filter */
 	}
 	/*- Write envelope to qmail-queue */
-	substdio_fdbuf(&ssout, write, recpfd[1], outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, write, recpfd[1], outbuf, sizeof (outbuf));
 	/*- Read envelope from qmail-smtpd */
-	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof (inbuf));
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2: /*- read error */
@@ -377,7 +368,7 @@ main(int argc, char **argv)
 	}
 	if (substdio_flush(&ssout) == -1)
 		_exit(53);
-finish:
+  finish:
 	close(1);
 	close(recpfd[1]);
 	if (wait_pid(&wstat, queuepid) != queuepid)
@@ -421,16 +412,14 @@ run_mailfilter(int argc, char **argv)
 		_exit(75);
 	default:
 		close(pipefd[1]);
-		if (dup2(pipefd[0], 0))
-		{
+		if (dup2(pipefd[0], 0)) {
 			close(pipefd[0]);
 			wait_pid(&wstat, filt_pid);
 			_exit(60);
 		}
 		if (pipefd[0] != 0)
 			close(pipefd[0]);
-		if (mkTempFile(0))
-		{
+		if (mkTempFile(0)) {
 			close(0);
 			wait_pid(&wstat, filt_pid);
 			_exit(68);
@@ -448,7 +437,7 @@ run_mailfilter(int argc, char **argv)
 		return (qmail_multi(argc, argv));
 	case 2:
 		return (0); /*- Blackhole */
-	case 88:
+	case 88: /*- exit with custom error code with error code string from stderr */
 		_exit(88);
 	case 100:
 		_exit(31);
@@ -468,10 +457,9 @@ qmail_multi(int argc, char **argv)
 	char           *qqargs[2] = { 0, 0 };
 	char           *ptr, *queue_count_ptr, *queue_start_ptr, *qbase;
 	int             qcount, qstart;
-	static stralloc Queuedir = {0}, QueueBase = {0};
+	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
 
-	if (!(ptr = env_get("QUEUEDIR")))
-	{
+	if (!(ptr = env_get("QUEUEDIR"))) {
 		if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
 			qcount = QUEUE_COUNT;
 		else
@@ -480,8 +468,7 @@ qmail_multi(int argc, char **argv)
 			qstart = 1;
 		else
 			scan_int(queue_start_ptr, &qstart);
-		if (!(qbase = env_get("QUEUE_BASE")))
-		{
+		if (!(qbase = env_get("QUEUE_BASE"))) {
 			switch (control_readfile(&QueueBase, "queue_base", 0))
 			{
 			case -1:
@@ -555,7 +542,7 @@ mkTempFile(int seekfd)
 {
 	char            inbuf[2048], outbuf[2048], strnum[FMT_ULONG];
 	char           *tmpdir;
-	static stralloc tmpFile = {0};
+	static stralloc tmpFile = { 0 };
 	struct substdio ssin;
 	struct substdio ssout;
 	int             fd;
@@ -577,8 +564,8 @@ mkTempFile(int seekfd)
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 		return (-1);
 	unlink(tmpFile.s);
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof (outbuf));
+	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof (inbuf));
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2: /*- read error */
@@ -588,22 +575,18 @@ mkTempFile(int seekfd)
 		close(fd);
 		_exit(53);
 	}
-	if (substdio_flush(&ssout) == -1)
-	{
+	if (substdio_flush(&ssout) == -1) {
 		close(fd);
 		_exit(68);
 	}
-	if (fd != seekfd)
-	{
-		if (dup2(fd, seekfd) == -1)
-		{
+	if (fd != seekfd) {
+		if (dup2(fd, seekfd) == -1) {
 			close(fd);
 			_exit(68);
 		}
 		close(fd);
 	}
-	if (lseek(seekfd, 0, SEEK_SET) != 0)
-	{
+	if (lseek(seekfd, 0, SEEK_SET) != 0) {
 		close(seekfd);
 		_exit(54);
 	}
@@ -625,18 +608,16 @@ rewrite_envelope(int outfd)
 	char            buffer[2048];
 	char           *ptr;
 
-	if (!(ptr = env_get("SPAMREDIRECT")))
-	{
+	if (!(ptr = env_get("SPAMREDIRECT"))) {
 		if (control_readline(&notifyaddress, "globalspamredirect") == -1)
 			return (55);
-	} else
-	if (!stralloc_copys(&notifyaddress, ptr))
+	} else if (!stralloc_copys(&notifyaddress, ptr))
 		_exit(51);
 	if (!notifyaddress.len)
 		return (0);
 	if ((n = discard_envelope()))
 		return (n);
-	substdio_fdbuf(&ssout, write, outfd, buffer, sizeof(buffer));
+	substdio_fdbuf(&ssout, write, outfd, buffer, sizeof (buffer));
 	if (substdio_bput(&ssout, "F", 1) == -1)
 		return (53);
 	if (substdio_bput(&ssout, "\0", 1) == -1)
@@ -660,18 +641,16 @@ discard_envelope()
 	char            buffer[2048];
 	int             n, total = 0;
 
-	/* discard envelope and empty smtp's pipe */
-	for (;;)
-	{
-		if (!(n = read(1, buffer, sizeof(buffer))))
+	/*- discard envelope and empty smtp's pipe */
+	for (;;) {
+		if (!(n = read(1, buffer, sizeof (buffer))))
 			break;
-		if (n == -1)
-		{
+		if (n == -1) {
 			if (errno == error_intr)
 				continue;
 			return (54);
 		}
-		total += sizeof(buffer);
+		total += sizeof (buffer);
 	}
 	if (!total)
 		return (54);
@@ -681,6 +660,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.49 2018-05-05 18:23:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.50 2018-06-22 14:29:28+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
