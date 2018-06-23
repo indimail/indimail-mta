@@ -1,4 +1,29 @@
 4.18.2
+2018-06-21  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* libs/tcpd/tlsclient.h: add username option, used in couriertls_start
+	to set the child process's uid and gid.
+
+	* imaplogin.c (starttls): Set username option for couriertls
+
+	* pop3login.c (starttls): Set username option for couriertls
+
+	* imapd-ssl.dist, pop3d-ssl.dist: Use separate imap and pop3 session
+	cache files. Startup script: remove/set ownership and permsission
+	on the imap and pop3 session cache files.
+
+2018-02-13  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* libs/tcpd/libcouriergnutls.c: Remove usage of deprecated OpenPGP
+	API. Tag the "Unexpected SSL connection shutdown" with the "DEBUG"
+	label just like the OpenSSL version does.
+
+	* libs/tcpd/starttls.c: If TCPREMOTEIP is set, prepend it to error
+	messages.
+
+2017-11-26  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Tweak RPM spec file.
 
 2017-09-27  Giovanni Bechis <giovanni@paclan.it>
 

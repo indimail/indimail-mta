@@ -1,5 +1,5 @@
 /*
-** Copyright 2007-2013 Double Precision, Inc.
+** Copyright 2007-2018 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 #include	"config.h"
@@ -13,7 +13,6 @@
 #include	<gnutls/extra.h>
 #endif
 #include	<gnutls/x509.h>
-#include	<gnutls/openpgp.h>
 #include	<stdio.h>
 #include	<string.h>
 #include	<stdlib.h>
@@ -146,9 +145,6 @@ struct ssl_handle_t {
 	gnutls_session_t session;
 
 	gnutls_x509_privkey_t x509_key;
-
-	gnutls_openpgp_crt_t pgp_crt;
-	gnutls_openpgp_privkey_t pgp_key;
 };
 
 static void nonsslerror(struct tls_info *info, const char *pfix)
@@ -475,16 +471,7 @@ static void tls_free_session_keys(ssl_handle ssl)
 	if (ssl->x509_key)
 		gnutls_x509_privkey_deinit(ssl->x509_key);
 
-	if (ssl->pgp_crt)
-		gnutls_openpgp_key_deinit(ssl->pgp_crt);
-
-	if (ssl->pgp_key)
-		gnutls_openpgp_privkey_deinit(ssl->pgp_key);
-
 	ssl->x509_key=NULL;
-	ssl->pgp_crt=NULL;
-	ssl->pgp_key=NULL;
-
 }
 
 static void tls_free_session(ssl_handle ssl)
@@ -537,7 +524,15 @@ static int chk_error(int rc, ssl_handle ssl, int fd, fd_set *r, fd_set *w,
 
 	if (result_rc)
 	{
-		(*ssl->info_cpy.tls_err_msg)(gnutls_strerror(rc),
+		const char *errmsg=gnutls_strerror(rc);
+
+#ifdef GNUTLS_E_PREMATURE_TERMINATION
+		if (rc == GNUTLS_E_PREMATURE_TERMINATION)
+		{
+			errmsg="DEBUG: Unexpected SSL connection shutdown.";
+		}
+#endif
+		(*ssl->info_cpy.tls_err_msg)(errmsg,
 					     ssl->info_cpy.app_data);
 		*result_rc= -1;
 	}
@@ -672,94 +667,6 @@ static int verify_client(ssl_handle ssl, int fd)
 
 		gnutls_x509_crt_deinit (cert);
 	}
-	else if (gnutls_certificate_type_get(ssl->session)==GNUTLS_CRT_OPENPGP)
-	{
-		gnutls_openpgp_crt_t cert;
-
-		if (gnutls_openpgp_key_init(&cert) < 0)
-		{
-			(*ssl->info_cpy.tls_err_msg)
-				("Error initializing certificate",
-				 ssl->info_cpy.app_data);
-			gnutls_openpgp_key_deinit(cert);
-			return GNUTLS_E_INSUFFICIENT_CREDENTIALS;
-		}
-
-		if (gnutls_openpgp_key_import(cert, &cert_list[0],
-					      GNUTLS_OPENPGP_FMT_RAW) < 0)
-		{
-			(*ssl->info_cpy.tls_err_msg)
-				("Error parsing certificate",
-				 ssl->info_cpy.app_data);
-			gnutls_openpgp_key_deinit (cert);
-			return GNUTLS_E_INSUFFICIENT_CREDENTIALS;
-		}
-
-		if (gnutls_openpgp_key_get_creation_time(cert) > time(NULL))
-		{
-			(*ssl->info_cpy.tls_err_msg)
-				("Certificate not activated",
-				 ssl->info_cpy.app_data);
-			gnutls_openpgp_key_deinit (cert);
-			return GNUTLS_E_INSUFFICIENT_CREDENTIALS;
-		}
-
-		if (gnutls_openpgp_key_get_expiration_time(cert) < time(NULL))
-		{
-			(*ssl->info_cpy.tls_err_msg)
-				("Expired certificate",
-				 ssl->info_cpy.app_data);
-			gnutls_openpgp_key_deinit (cert);
-			return GNUTLS_E_INSUFFICIENT_CREDENTIALS;
-		}
-
-		if (ssl->info_cpy.peer_verify_domain &&
-		    *ssl->info_cpy.peer_verify_domain &&
-		    !gnutls_openpgp_key_check_hostname(cert,
-						       ssl->info_cpy
-						       .peer_verify_domain))
-
-		{
-			char *hostname;
-			size_t hostnamesiz=0;
-			const char *errmsg_txt=
-				"Certificate owner mismatch: ";
-			char *errmsg_buf;
-
-			gnutls_openpgp_key_get_name(cert, 0, NULL,
-						    &hostnamesiz);
-
-			hostname=malloc(hostnamesiz);
-
-			if (hostname)
-			{
-				*hostname=0;
-				gnutls_openpgp_key_get_name(cert,
-							    0, hostname,
-							    &hostnamesiz);
-			}
-
-			errmsg_buf=malloc(strlen(errmsg_txt)+
-					  strlen(hostname ?
-						 hostname:"")+100);
-
-			if (errmsg_buf)
-				strcat(strcpy(errmsg_buf, errmsg_txt),
-					       hostname ?
-					       hostname:"(unknown)");
-
-			(*ssl->info_cpy.tls_err_msg)
-				(errmsg_buf ? errmsg_buf:strerror(errno),
-				 ssl->info_cpy.app_data);
-			if (errmsg_buf)
-				free(errmsg_buf);
-			if (hostname)
-				free(hostname);
-			gnutls_openpgp_key_deinit (cert);
-			return GNUTLS_E_INSUFFICIENT_CREDENTIALS;
-		}
-		gnutls_openpgp_key_deinit (cert);
-	}
 	else
 	{
 		(*ssl->info_cpy.tls_err_msg)
@@ -813,9 +720,6 @@ static char *check_cert(const char *filename,
 
 		strcat(strcat(strcpy(p, filename), "."), req_dn);
 
-		if (cert_type == GNUTLS_CRT_OPENPGP)
-			strcat(p, ".pgp");
-
 		if (access(p, R_OK) == 0)
 			return p;
 
@@ -836,9 +740,6 @@ static char *check_cert(const char *filename,
 			return NULL;
 
 		strcpy(p, filename);
-
-		if (cert_type == GNUTLS_CRT_OPENPGP)
-			strcat(p, ".pgp");
 
 		if (access(p, R_OK) == 0)
 			return p;
@@ -939,20 +840,6 @@ static int set_cert(ssl_handle ssl,
 		ssl->x509_key=0;
 		st->deinit_all=1;
 
-		break;
-	case GNUTLS_CRT_OPENPGP:
-		if ((rc=gnutls_openpgp_key_init(&ssl->pgp_crt)) < 0 ||
-		    (rc=gnutls_openpgp_privkey_init(&ssl->pgp_key)) < 0 ||
-		    (rc=gnutls_openpgp_key_import(ssl->pgp_crt, &filebuf,
-						  GNUTLS_OPENPGP_FMT_BASE64))
-		    < 0 ||
-		    (rc=gnutls_openpgp_privkey_import(ssl->pgp_key, &filebuf,
-						      GNUTLS_OPENPGP_FMT_BASE64,
-						      NULL, 0)) < 0)
-			break;
-		st->cert.pgp=ssl->pgp_crt;
-		st->ncerts=1;
-		st->key.pgp=ssl->pgp_key;
 		break;
 	default:
 		break;
@@ -1670,10 +1557,12 @@ int tls_connecting(ssl_handle ssl)
 }
 
 static const char *dump_dn(gnutls_x509_crt_t cert,
-			   int (*get_dn_func)(gnutls_x509_crt_t cert, int indx,
+			   int (*get_dn_func)(gnutls_x509_crt_t cert,
+					      unsigned indx,
 					      void *oid, size_t * sizeof_oid),
 			   int (*get_dnval_func)(gnutls_x509_crt_t cert,
-						 const char *oid, int indx,
+						 const char *oid,
+						 unsigned indx,
 						 unsigned int raw_flag,
 						 void *buf, size_t *sizeof_buf),
 			   void (*dump_func)(const char *, int cnt, void *),
@@ -1867,8 +1756,6 @@ static void dump_cipher_name(gnutls_session_t session,
 		(*dump_func)(cipher_name, -1, dump_arg);
 	else
 	{
-		gnutls_compression_method_t comp;
-
 		(*dump_func)(gnutls_kx_get_name(kx_algo), -1, dump_arg);
 
 		(*dump_func)("-", 1, dump_arg);
@@ -1878,14 +1765,6 @@ static void dump_cipher_name(gnutls_session_t session,
 		(*dump_func)("-", 1, dump_arg);
 		(*dump_func)(gnutls_cipher_get_name(cipher_algo), -1,
 			     dump_arg);
-
-		if ((comp=gnutls_compression_get(session))
-		    != GNUTLS_COMP_NULL)
-		{
-			(*dump_func)("/", 1, dump_arg);
-			(*dump_func)(gnutls_compression_get_name(comp),
-				     -1, dump_arg);
-		}
 
 		(*dump_func)("-", 1, dump_arg);
 		(*dump_func)(gnutls_mac_get_name(gnutls_mac_get(session)),

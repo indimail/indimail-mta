@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildirmake</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"/><link rel="home" href="#idm255213202976" title="maildirmake"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildirmake</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#idm140259863611568" title="maildirmake"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry"><a id="idm255213202976" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildirmake — create maildirs and maildir folders</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">maildirmake</code>  [options...] {<em class="replaceable"><code>maildir</code></em>}</p></div></div><div class="refsect1"><a id="idm255214899744" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+--></head><body><div class="refentry"><a id="idm140259863611568" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildirmake — create maildirs and maildir folders</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">maildirmake</code>  [options...] {<em class="replaceable"><code>maildir</code></em>}</p></div></div><div class="refsect1"><a id="idm140259865117216" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 The <span class="command"><strong>maildirmake</strong></span> command creates maildirs, and
 maildir folders.
 This documentation

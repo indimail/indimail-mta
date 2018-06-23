@@ -96,6 +96,7 @@ void usage()
 	fprintf(stderr, "    -r - rewrite message, filling in missing MIME headers.\n");
 	fprintf(stderr, "    -r7 - also convert 8bit/raw encoding to quoted-printable, if possible.\n");
 	fprintf(stderr, "    -r8 - also convert quoted-printable encoding to 8bit, if possible.\n");
+	fprintf(stderr, "    -rU - convert quoted-printable encoding to 8bit, unconditionally.\n");
 	fprintf(stderr, "    -c charset - default charset for rewriting, -o, and -O.\n");
 	fprintf(stderr, "    -m [file] [file]... - create a MIME message digest.\n");
 	fprintf(stderr, "    -h \"header\" - decode RFC 2047-encoded header.\n");
@@ -651,7 +652,7 @@ static void extract_section(struct rfc2045 *top_rfcp, const char *mimesection,
 	if (mimesection)
 	{
 		top_rfcp=rfc2045_find(top_rfcp, mimesection);
-		if (!mimesection)
+		if (!top_rfcp)
 			notfound(mimesection);
 		if (top_rfcp->firstpart)
 		{
@@ -1011,6 +1012,8 @@ int rc=0;
 				rwmode=RFC2045_RW_7BIT;
 			if (optarg && *optarg == '8')
 				rwmode=RFC2045_RW_8BIT;
+			if (optarg && *optarg == 'U')
+				rwmode=RFC2045_RW_8BIT_ALWAYS;
 			break;
 		case 'm':
 			domimedigest=1;

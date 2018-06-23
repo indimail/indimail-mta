@@ -111,6 +111,7 @@ docidr() {
 			    foreach ( Net::CIDR::cidr2octets(
 					Net::CIDR::range2cidr($net)))
 			    {
+				print ":" if $net =~ /:/;
 				print "$_\t$line\n";
 			    }
 			}

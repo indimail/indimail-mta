@@ -123,9 +123,11 @@ int	is8bitte;
 				rfc2045_enomem();
 			flag=1;
 		}
-		else if (rwmode == RFC2045_RW_8BIT &&
-			strcasecmp(te, "quoted-printable") == 0 &&
-			!p->haslongline)
+		else if (strcasecmp(te, "quoted-printable") == 0 &&
+			 ((rwmode == RFC2045_RW_8BIT &&
+			   !p->haslongline)
+			  ||
+			  (rwmode == RFC2045_RW_8BIT_ALWAYS)))
 		{
 			if (p->rw_transfer_encoding)
 				free(p->rw_transfer_encoding);

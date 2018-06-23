@@ -133,10 +133,12 @@ static void mksalutation_cb(const char *salutation_template,
 			(*callback_func)(CBSTR(sender_name));
 			break;
 		case 'd':
-			mksalutation_datefmt(fmt_start,
-					     fmt_end,
-					     date,
-					     callback_func, callback_arg);
+			if (date)
+				mksalutation_datefmt(fmt_start,
+						     fmt_end,
+						     date,
+						     callback_func,
+						     callback_arg);
 			break;
 		case 's':
 			(*callback_func)(CBSTR(subject));
@@ -1139,7 +1141,8 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 				      newsgroups ? newsgroups:"",
 
 				      sender_addr ? sender_addr:"(no address given)",
-				      sender_name ? sender_name:sender_addr,
+				      sender_name ? sender_name:
+				      sender_addr ? sender_addr:"@",
 				      date,
 				      subject,
 				      ri->charset);

@@ -265,6 +265,7 @@ libs/maildir/maildirsharedrc.h
 libs/maildir/quotawarnmsg.h
 libs/maildir/testmaildirfilter
 libs/maildir/testmaildirsearch
+libs/maildir/m4
 libs/makedat/.deps/
 libs/makedat/Makefile
 libs/makedat/autom4te.cache/
@@ -310,6 +311,7 @@ libs/rfc1035/config.status
 libs/rfc1035/libtool
 libs/rfc1035/testlookup
 libs/rfc1035/testspf
+libs/rfc2045/m4
 libs/rfc2045/.deps/
 libs/rfc2045/.libs/
 libs/rfc2045/Makefile

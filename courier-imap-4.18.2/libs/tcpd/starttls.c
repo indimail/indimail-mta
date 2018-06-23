@@ -81,7 +81,32 @@ const char *printx509=0;
 
 static void ssl_errmsg(const char *errmsg, void *dummy)
 {
-	fprintf(errfp, "%s\n", errmsg);
+	const char *loglevel_prefix="";
+	const char *tcpremoteip=getenv("TCPREMOTEIP");
+	const char *errmsgpfix="";
+	const char *errmsgsfix="";
+
+	if (strncmp(errmsg, "DEBUG: ", 7) == 0)
+	{
+		loglevel_prefix="DEBUG: ";
+		errmsg += 7;
+	}
+
+	if (tcpremoteip && *tcpremoteip)
+	{
+		errmsgpfix="ip=[";
+		errmsgsfix="], ";
+	}
+	else
+	{
+		tcpremoteip="";
+	}
+
+	fprintf(errfp, "%s%s%s%s%s\n",
+		loglevel_prefix,
+		errmsgpfix, tcpremoteip, errmsgsfix,
+		errmsg);
+	fflush(errfp);
 }
 
 static void nonsslerror(const char *pfix)
@@ -698,7 +723,7 @@ static void smtp_proto(int fd)
 	{
 		p=prb_getline(fd, &prb);
 		printf("%s\n", p);
-	} while ( ! ( isdigit((int)(unsigned char)p[0]) && 
+	} while ( ! ( isdigit((int)(unsigned char)p[0]) &&
 		      isdigit((int)(unsigned char)p[1]) &&
 		      isdigit((int)(unsigned char)p[2]) &&
 		      (p[3] == 0 || isspace((int)(unsigned char)p[3]))));
@@ -716,7 +741,7 @@ static void smtp_proto(int fd)
 	{
 		p=prb_getline(fd, &prb);
 		printf("%s\n", p);
-	} while ( ! ( isdigit((int)(unsigned char)p[0]) && 
+	} while ( ! ( isdigit((int)(unsigned char)p[0]) &&
 		      isdigit((int)(unsigned char)p[1]) &&
 		      isdigit((int)(unsigned char)p[2]) &&
 		      (p[3] == 0 || isspace((int)(unsigned char)p[3]))));
@@ -729,7 +754,7 @@ static void smtp_proto(int fd)
 	{
 		p=prb_getline(fd, &prb);
 		printf("%s\n", p);
-	} while ( ! ( isdigit((int)(unsigned char)p[0]) && 
+	} while ( ! ( isdigit((int)(unsigned char)p[0]) &&
 		      isdigit((int)(unsigned char)p[1]) &&
 		      isdigit((int)(unsigned char)p[2]) &&
 		      (p[3] == 0 || isspace((int)(unsigned char)p[3]))));

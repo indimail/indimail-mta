@@ -189,7 +189,14 @@ Like
 \fB\-r\fR
 but also convert
 quoted\-printable\-encoded MIME sections to
-8bit\&.
+8bit, except in some situations, see below\&.
+.RE
+.PP
+\-rU
+.RS 4
+Unconditionally convert
+quoted\-printable\-encoded MIME sections to
+8bit, even when the resulting message may not necessarily comply with Internet message formatting standards\&. See below for more information\&.
 .RE
 .PP
 \-s \fIsection\fR
@@ -359,7 +366,15 @@ encoding\&.
 \fB\-r8\fR
 does the same thing, but also converts
 quoted\-printable\-encoded content to
-8bit, except in some situations\&.
+8bit, except in some situations\&. The content remains
+quoted\-printable
+if converting it results in excessively long lines of text\&.
+.PP
+\fB\-rU\fR
+always converts
+quoted\-printable\-encoded content to
+8bit
+potentially resulting in excessively long lines of text\&. The resulting message should not be resubmitted for mail delivery, as a delivery failure may occur\&.
 .SS "Creating multipart/digest MIME digests"
 .PP
 The
@@ -477,20 +492,20 @@ RFC 1894
 .IP " 3." 4
 \fBreformail\fR(1)
 .RS 4
-\%[set $man.base.url.for.relative.links]/reformail.html
+\%http://www.courier-mta.org/maildrop/reformail.html
 .RE
 .IP " 4." 4
 \fBmailbot\fR(1)
 .RS 4
-\%[set $man.base.url.for.relative.links]/mailbot.html
+\%http://www.courier-mta.org/maildrop/mailbot.html
 .RE
 .IP " 5." 4
 \fBmaildrop\fR(1)
 .RS 4
-\%[set $man.base.url.for.relative.links]/maildrop.html
+\%http://www.courier-mta.org/maildrop/maildrop.html
 .RE
 .IP " 6." 4
 \fBmaildropfilter\fR(5)
 .RS 4
-\%[set $man.base.url.for.relative.links]/maildropfilter.html
+\%http://www.courier-mta.org/maildrop/maildropfilter.html
 .RE

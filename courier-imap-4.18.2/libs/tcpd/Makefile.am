@@ -31,7 +31,7 @@ couriertcpd_DEPENDENCIES= libspipe.la \
 	@dblibrary@ \
 	../liblock/liblock.la\
 	../numlib/libnumlib.la\
-	../waitlib/libwaitlib.a\
+	../waitlib/libwaitlib.la\
 	../soxwrap/libsoxwrap.a\
 	../md5/libmd5.la ../random128/librandom128.la
 
@@ -42,7 +42,7 @@ couriertcpd_LDADD= libspipe.la \
         @dblibrary@ \
 	../liblock/liblock.la\
         ../numlib/libnumlib.la\
-        ../waitlib/libwaitlib.a\
+        ../waitlib/libwaitlib.la\
 	../soxwrap/libsoxwrap.a\
 	../md5/libmd5.la ../random128/librandom128.la \
 	$(couriertcpd_t:%=-Wl,%)

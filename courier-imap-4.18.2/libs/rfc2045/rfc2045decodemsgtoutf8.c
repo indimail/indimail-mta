@@ -79,7 +79,7 @@ static int doconvtoutf8_rfc822hdr(const char *header,
 		doconvtoutf8_write(header, strlen(header), &info);
 		doconvtoutf8_write(": ", 2, &info);
 	}
-	rfc822_display_hdrvalue(header, value, "utf-8", 
+	rfc822_display_hdrvalue(header, value, "utf-8",
 				doconvtoutf8_write_noeol,
 				doconvtoutf8_error,
 				&info);
@@ -127,6 +127,11 @@ int rfc2045_decodemsgtoutf8(struct rfc2045src *src,
 					 RFC2045H_KEEPNL) == 0 && header)
 		{
 			if (callback->flags & RFC2045_DECODEMSG_NOHEADERS)
+				continue;
+
+			if ((callback->flags &
+			     RFC2045_DECODEMSG_NOATTACHHEADERS)
+			    && p->parent)
 				continue;
 
 			if (doconvtoutf8_rfc822hdr(header, value,

@@ -336,6 +336,18 @@ char	*tmp=0;
 
 	if (quota)
 	{
+		struct stat stat_buf;
+
+		if (stat(maildir, &stat_buf) < 0 && errno == ENOENT)
+		{
+			if (maildir_make(maildir, perm & ~0022,
+					 (perm & ~0022),
+					 0) < 0)
+			{
+				perror(maildir);
+				exit(1);
+			}
+		}
 		maildir_quota_set(maildir, quota);
 		exit(0);
 	}

@@ -69,8 +69,21 @@ struct rfc2045 {
 
 	char	*rw_transfer_encoding;	/* For rewriting */
 
+	/* Use quoted-printable for 8bit content */
 #define	RFC2045_RW_7BIT	1
+
+	/*
+	** Convert quoted-printable, if the resulting line length is not
+	** excessive.
+	*/
+
 #define	RFC2045_RW_8BIT	2
+
+	/*
+	** Convert quoted printable without checking for maximum resulting
+	** line length.
+	*/
+#define RFC2045_RW_8BIT_ALWAYS 3
 
 	/* Subsections */
 
@@ -544,6 +557,13 @@ struct rfc2045_decodemsgtoutf8_cb {
 #define RFC2045_DECODEMSG_NOHEADERNAME 0x04
 /*
 ** Do not prepend name: to converted header content.
+*/
+
+
+#define RFC2045_DECODEMSG_NOATTACHHEADERS 0x08
+/*
+** Do not decode MIME headers of attachments. Decode only the message's
+** main headers.
 */
 
 /*
