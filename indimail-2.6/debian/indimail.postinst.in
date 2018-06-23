@@ -234,9 +234,10 @@ fi
 ${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
 
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=`uname -n`
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 else
-  default_domain=@defaultdomain@
+  defaultDomain=@defaultdomain@
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain})
 fi
 echo "Creating default indimail tcp access control files"
 ${prefix}/sbin/svctool --config=indimail

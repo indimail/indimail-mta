@@ -78,7 +78,12 @@ case "$1" in
 	exit 0
     ;;
 esac
-default_domain=`uname -n`
+if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+else
+  defaultDomain=@defaultdomain@
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain})
+fi
 #
 # Debian silliness
 #

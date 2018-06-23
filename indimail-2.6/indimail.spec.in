@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.465 2018-06-21 23:09:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.466 2018-06-23 22:46:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -197,7 +197,9 @@ BuildRequires: xz
 BuildRequires: mysql-devel pam-devel
 
 %if %nocourierimap == 0
+BuildRequires: libgcrypt-devel gnutls-devel /usr/bin/certtool
 BuildRequires: gdbm-devel
+BuildRequires: perl
 %endif
 
 %if %{defined fedora_version}
@@ -1752,9 +1754,9 @@ fi
 %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir}
 
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=`uname -n`
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 else
-  default_domain=%{defaultDomain}
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
 fi
 echo "Creating default indimail tcp access control files"
 %{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
@@ -2018,7 +2020,9 @@ echo "   you can start sending emails. Look at %{logdir}/freshclam/current"
 
 if [ ! -f %{sysconfdir}/certs/servercert.pem ] ; then
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=`uname -n`
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+else
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
 fi
 count=`expr $count + 1`
 %if %nocourierimap == 0
@@ -2089,7 +2093,11 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-default_domain=`uname -n`
+if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+else
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
+fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (
