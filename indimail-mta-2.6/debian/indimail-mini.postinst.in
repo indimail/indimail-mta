@@ -104,6 +104,7 @@ else
 	done
 fi
 if [ ! -f ${qsysconfdir}/control/idhost ] ; then
-	uname -n > ${qsysconfdir}/control/idhost
+	default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+	echo $default_domain > ${qsysconfdir}/control/idhost
 fi
 exit 0

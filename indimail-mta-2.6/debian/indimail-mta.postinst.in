@@ -513,7 +513,7 @@ else
 	echo "2. Issue /sbin/init q to start services"
 	count=2
 fi
-default_domain=`uname -n`
+default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 echo "   You can also use the 'service' command to start indimail-mta"
 echo "   sudo service indimail start"
 count=`expr $count + 1`

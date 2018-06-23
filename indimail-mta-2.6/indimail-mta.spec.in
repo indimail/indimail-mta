@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.173 2018-06-21 23:08:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.174 2018-06-23 22:47:48+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2151,7 +2151,7 @@ else
   echo "2. Issue /sbin/init q to start services"
   count=2
 fi
-default_domain=`uname -n`
+default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 count=`expr $count + 1`
 echo "$count. Change your default domain in %{qsysconfdir}/control/defaultdomain"
 count=`expr $count + 1`
@@ -2708,7 +2708,8 @@ fi
 # this host's name in /var/indimail/control/idhost, so that qmail-inject
 # generates Message-ID without any risk of collision
 if [ ! -f %{qsysconfdir}/control/idhost ] ; then
-  uname -n > %{qsysconfdir}/control/idhost
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+  echo $default_domain > %{qsysconfdir}/control/idhost
 fi
 
 %postun -n indimail-mini
