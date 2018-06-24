@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop indimail
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.56 2017-12-27 20:13:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.57 2018-06-24 21:43:49+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -77,23 +77,6 @@ myfailure() {
 
 # Check that we're a privileged user
 [ `id -u` = 0 ] || exit 4
-if [ -x /bin/systemctl ] ; then
-	/bin/systemctl is-enabled svscan > /dev/null
-	if [ $? -ne 0 ] ; then
-		SYSTEMCTL_SKIP_REDIRECT=1
-		if [ -f /etc/rc.d/init.d/functions ] ; then
-			. /etc/rc.d/init.d/functions
-		elif [ -f /etc/init.d/functions ] ; then
-			. /etc/init.d/functions
-		elif [ -f /lib/lsb/init-functions ] ; then
-			. /lib/lsb/init-functions
-		fi
-		$ECHO -n $"indimail is disabled: "
-		$fail
-		$ECHO -ne "\n"
-		exit 1
-	fi
-fi
 # Source function library.
 if [ -f /etc/rc.d/init.d/functions ] ; then
 	. /etc/rc.d/init.d/functions
@@ -136,6 +119,31 @@ case "$SYSTEM" in
 	fail=myfailure
 	;;
 esac
+
+if [ -x /bin/systemctl ] ; then
+	/bin/systemctl is-enabled svscan > /dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		if [ -f PREFIX/sbin/initsvc ] ; then
+			PREFIX/sbin/initsvc -on > /dev/null && $succ || $fail
+			$ECHO -ne "\n"
+		fi
+		/bin/systemctl is-enabled svscan > /dev/null 2>&1
+	fi
+	if [ $? -ne 0 ] ; then
+		SYSTEMCTL_SKIP_REDIRECT=1
+		if [ -f /etc/rc.d/init.d/functions ] ; then
+			. /etc/rc.d/init.d/functions
+		elif [ -f /etc/init.d/functions ] ; then
+			. /etc/init.d/functions
+		elif [ -f /lib/lsb/init-functions ] ; then
+			. /lib/lsb/init-functions
+		fi
+		$ECHO -n $"indimail is disabled: "
+		$fail
+		$ECHO -ne "\n"
+		exit 1
+	fi
+fi
 
 PATH=$PATH:PREFIX/bin:PREFIX/sbin:/usr/local/bin:/usr/bin:/bin
 export PATH
