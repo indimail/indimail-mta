@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.11  2018-06-25 08:47:11+05:30  Cprogrammer
+# removed creation of getdns-root.key
+#
 # Revision 1.10  2018-06-21 23:10:37+05:30  Cprogrammer
 # check for /usr/sbin/unbound-anchor
 #
@@ -28,7 +31,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.10 2018-06-21 23:10:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.11 2018-06-25 08:47:11+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -53,7 +56,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.10 2018-06-21 23:10:37+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.11 2018-06-25 08:47:11+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -86,9 +89,6 @@ if [ ! -d /etc/indimail/certs ] ; then
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
-fi
-if [ ! -f /etc/indimail/certs/getdns-root.key -a -x /usr/sbin/unbound-anchor ] ; then
-	/usr/sbin/unbound-anchor -a /etc/indimail/certs/getdns-root.key
 fi
 # move existing certs in control directory to /etc/indimail/certs
 for i in servercert.pem clientcert.pem dh1024.pem dh512.pem \
