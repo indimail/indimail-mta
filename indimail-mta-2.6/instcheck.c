@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.27  2018-06-25 13:45:26+05:30  Cprogrammer
+ * ignore permission denied errors when running as non-root
+ *
  * Revision 1.26  2018-01-09 11:43:43+05:30  Cprogrammer
  * removed unused function ci()
  *
@@ -102,29 +105,29 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	int             should_exit;
 {
 	struct stat     st;
+	uid_t           myuid;
 	int             len, err = 0;
 	char           *tfile = 0, *slashd;
 
+	myuid = getuid();
 	slashd = (prefix1 && *prefix1) ? "/" : "";
 	if (stat(file, &st) != -1)
 		tfile = file;
-	else
-	{
-		if (errno != error_noent)
-		{
-			strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
-			return;
+	else {
+		if (errno != error_noent) {
+			if (errno == error_acces)
+				return;
+			strerr_die4sys(111, FATAL, "unable to stat ", file, ": ");
 		}
-		if (!str_diffn(prefix2, "man/", 4)) /*- check for .gz extension */
-		{
+		if (!str_diffn(prefix2, "man/", 4)) {
 			if (!(tfile = (char *) alloc((len = str_len(file)) + 4)))
 				strerr_die2sys(111, FATAL, "unable to allocate mem: ");
+			/*- check for .gz extension */
 			str_copy(tfile, file);
 			str_copy(tfile + len, ".gz");
-			if (stat(tfile, &st) == -1)
-			{
-				if (errno != error_noent)
-					strerr_warn4(WARNING, "unable to stat ", tfile, ": ", &strerr_sys);
+			if (stat(tfile, &st) == -1) {
+				if (myuid == 0 && errno != error_noent)
+					strerr_die4sys(111, FATAL, "unable to stat ", tfile, ": ");
 				else
 					strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 				if (tfile != file)
@@ -132,10 +135,8 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 				return;
 			}
 		} else
-		if (!str_diffn(file, "lib", 3))
-		{
-			if (stat("../lib64", &st) == -1)
-			{
+		if (!str_diffn(file, "lib", 3)) {
+			if (stat("../lib64", &st) == -1) {
 				strerr_warn4(WARNING, "unable to stat file", file, ": ", &strerr_sys);
 				return;
 			} else {
@@ -144,8 +145,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 					return;
 				}
 			}
-			if (stat(file, &st) == -1)
-			{
+			if (stat(file, &st) == -1) {
 				if (errno == error_noent)
 					strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 				else
@@ -154,10 +154,8 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			}
 			tfile = file;
 		} else
-		if (!str_diffn(file, "sbin", 4))
-		{
-			if (stat("../sbin", &st) == -1)
-			{
+		if (!str_diffn(file, "sbin", 4)) {
+			if (stat("../sbin", &st) == -1) {
 				strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
 				return;
 			} else {
@@ -166,8 +164,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 					return;
 				}
 			}
-			if (stat(file, &st) == -1)
-			{
+			if (stat(file, &st) == -1) {
 				if (errno == error_noent)
 					strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 				else
@@ -175,8 +172,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 				return;
 			}
 			tfile = file;
-		} else
-		{
+		} else {
 			if (!str_diffn(file, "man/", 4))
 				strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 			else
@@ -184,21 +180,18 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			return;
 		}
 	}
-	if ((uid != -1) && (st.st_uid != uid))
-	{
+	if ((uid != -1) && (st.st_uid != uid)) {
 		err = 1;
 		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong owner (will fix)", 0);
 	}
-	if ((gid != -1) && (st.st_gid != gid))
-	{
+	if ((gid != -1) && (st.st_gid != gid)) {
 		err = 1;
 		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong group (will fix)", 0);
 	}
 	if (err && chown(tfile, uid, gid) == -1)
 		strerr_die4sys(111, FATAL, "unable to chown ", tfile, ": ");
 	err = 0;
-	if ((st.st_mode & 07777) != mode)
-	{
+	if ((st.st_mode & 07777) != mode) {
 		err = 1;
 		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong permissions (will fix)", 0);
 	}
@@ -222,6 +215,7 @@ l(home, subdir, target, dummy)
 	if (chdir(subdir) == -1)
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
 }
+
 void
 h(home, uid, gid, mode)
 	char           *home;
@@ -232,19 +226,19 @@ h(home, uid, gid, mode)
 	perm("", "", "", home, S_IFDIR, uid, gid, mode, 1);
 }
 
-char    *
+char           *
 getdirname(char *dir, char **basedir)
 {
 	char           *ptr;
 	int             len;
 
-	for (ptr = dir, len = 0;*ptr; ptr++, len++);
+	for (ptr = dir, len = 0; *ptr; ptr++, len++);
 	ptr--;
-	for (;ptr != dir && *ptr != '/';ptr--, len--);
+	for (; ptr != dir && *ptr != '/'; ptr--, len--);
 	if (basedir)
 		*basedir = ptr;
 	while (len > 1 && *ptr == '/')
-		ptr--,len--;
+		ptr--, len--;
 	if (!stralloc_copyb(&dirbuf, dir, len))
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	if (!stralloc_0(&dirbuf))
@@ -276,8 +270,7 @@ c(home, subdir, file, uid, gid, mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	if (chdir(subdir) == -1)
-	{
+	if (chdir(subdir) == -1) {
 		if (errno == error_noent && !str_diffn(subdir, "man/", 4))
 			return;
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
@@ -311,8 +304,8 @@ main(int argc, char **argv)
 	if (argc == 1)
 		hier(0, FATAL, 0);
 	else
-	for (i = 1;i < argc;i++)
-		hier(argv[i], FATAL, 0);
+		for (i = 1; i < argc; i++)
+			hier(argv[i], FATAL, 0);
 #ifdef LOGDIR
 	h(LOGDIR, auto_uidl, auto_gidn, 0755);
 #endif
@@ -322,7 +315,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.26 2018-01-09 11:43:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.27 2018-06-25 13:45:26+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
