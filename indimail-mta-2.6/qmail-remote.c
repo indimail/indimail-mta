@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.128 2018-06-13 08:52:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.129 2018-06-27 18:11:39+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -122,6 +122,9 @@ int             my_argc;
 const char     *ssl_err_str = 0;
 stralloc        saciphers = { 0 }, tlsFilename = { 0 }, clientcert = { 0 };
 SSL_CTX        *ctx;
+int             notls = 0;
+stralloc        notlshosts = { 0 } ;
+struct constmap mapnotlshosts;
 #endif
 
 int             fdmoreroutes = -1;
@@ -1204,6 +1207,8 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 #endif
 	int             method_fail = 1;
 
+	if (notls) /*- if found in control/notlshosts control file */
+		return (0);
 	if (needtlsauth)
 		*needtlsauth = 0;
 	if (scert)
@@ -1284,7 +1289,17 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 				temp_nomem();
 			if (!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn) + 1))
 				temp_nomem();
-			if (!stralloc_0(&tlsFilename))
+			if (!stralloc_0(&tlsFilename)) /*- fqdn */
+				temp_nomem();
+			if (!stat(tlsFilename.s, &st))
+				return (0);
+			if (!stralloc_copys(&tlsFilename, certdir))
+				temp_nomem();
+			if (!stralloc_catb(&tlsFilename, "/notlshosts/", 12))
+				temp_nomem();
+			if (!stralloc_catb(&tlsFilename, host.s, host.len))
+				temp_nomem();
+			if (!stralloc_0(&tlsFilename)) /*- domain */
 				temp_nomem();
 			if (!stat(tlsFilename.s, &st))
 				return (0);
@@ -2522,10 +2537,10 @@ smtp()
 #else
 	if (tls_init(1, 0, 0))
 		code = ehlo();
-#endif
+#endif /*- #ifdef HASTLSA */
 #else
 	code = ehlo();
-#endif
+#endif /*- #ifdef TLS */
 	if (!use_auth_smtp) {
 		if (code >= 500) {
 			is_esmtp = 0;
@@ -2930,6 +2945,7 @@ getcontrols()
 			temp_nomem();
 		break;
 	}
+
 	senderdomain = 0;
 	if (sender.len) {
 		int             i;
@@ -2982,7 +2998,22 @@ getcontrols()
 	x = constmap(&maphelohosts, outgoingip.s, outgoingip.len);
 	if (x && *x && !stralloc_copys(&helohost, x))
 		temp_nomem();
-
+	switch (control_readfile(&notlshosts, (x = env_get("NOTLSHOSTS")) ? x : "notlshosts", 0))
+	{
+	case -1:
+		temp_control(x);
+	case 0:
+		if (!constmap_init(&mapnotlshosts, "", 0, 0))
+			temp_nomem();
+		break;
+	case 1:
+		if (!constmap_init(&mapnotlshosts, notlshosts.s, notlshosts.len, 0))
+			temp_nomem();
+		break;
+	}
+	x = constmap(&mapnotlshosts, host.s, host.len);
+	if (x && *x)
+		notls = 1;
 #ifdef HASTLSA
 	/*- tlsadomains */
 	switch (control_readfile(&tlsadomains, (x = env_get("TLSADOMAINS")) ? x : "tlsadomains", 0))
@@ -3318,7 +3349,7 @@ main(int argc, char **argv)
 		perm_ambigmx();
 	x = 0;
 #ifdef HASTLSA
-	if (!relayhost)
+	if (!relayhost && notls == 0)
 		do_tlsa = env_get("DANE_VERIFICATION");
 #endif
 	for (i = j = 0; i < ip.len; ++i) {
@@ -3445,7 +3476,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.128 2018-06-13 08:52:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.129 2018-06-27 18:11:39+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3453,6 +3484,10 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.129  2018-06-27 18:11:39+05:30  Cprogrammer
+ * added control file control/notlshosts
+ * added additonal check for notlshosts/host
+ *
  * Revision 1.128  2018-06-13 08:52:25+05:30  Cprogrammer
  * made client cert configurable via env variable CLIENTCERT
  *
