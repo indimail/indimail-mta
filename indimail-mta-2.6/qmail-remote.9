@@ -260,7 +260,7 @@ specific by using envrules. See \fBspawn-filter(8)\fR for more details.
 
 .SH "CONTROL FILES"
 .B qmail-remote
-by default looks at @controldir@ for all control files. This path can be changed by defining the
+by default looks at @sysconfdir@/control for all control files. This path can be changed by defining the
 CONTROLDIR environment variable.
 
 .TP 5
@@ -629,9 +629,21 @@ all in
 Exclusions of domains you host for Bounce Address Tag Validation (BATV).
 
 .TP 5
+.I notlhosts
+domains for which \fBqmail-remote\fR will not initiate TLS sesson. This file in @sysconfdir@/control or directory
+defined by the \fBCONTROLDIR\fR envirnoment variable, shouldn't be confused with \fInotlshosts\fR in
+the directory defined by the \fBCERTDIR\fR environment variable.
+
+.PP
+For TLS sessions, the default location of @sysconfdir@/control can be overriden by environment variable CERTDIR.
+This affects the location of below files/directories \fItlsclientciphers\fR, \fItlsclientmethod\fR,
+\fIclientcert.pem\fR, \fIservercert.pem\fR, \fItlshosts/<FQDN>.pem\fR, \fItlshosts/exhaustivelist\fR,
+\fInotlshosts/<FQDN>\fR, \fInotlshosts/host\fR.
+
+.TP 5
 .I tlsclientciphers
-A set of OpenSSL client cipher strings. Multiple ciphers
-contained in a string should be separated by a colon.
+A set of OpenSSL client cipher strings. Multiple ciphers contained in a string should be separated by a colon.
+The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
 
 .TP 5
 .I tlsclientmethod
@@ -639,13 +651,14 @@ The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_
 This control file is used for openssl version < 1.0.1. OpenSSL Version >= 1.0.1 uses TLS_client_method() where
 the actual protocol version used will be negotiated to the highest version mutually supported by the client
 and the server. The supported protocols are SSLv3, TLSv1, TLSv1.1 and TLSv1.2.
+The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
 
 .TP 5
 .I clientcert.pem
 SSL certificate that is used to authenticate with the remote server
 during a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR
 will not negotiate TLS.
-The default location of @controldir@ can be overriden by environment variable CERTDIR. \fIclientcert.pem\fR
+The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR. \fIclientcert.pem\fR
 can be overriden by environment variable \fBCLIENTCERT\fR.
 
 .TP 5
@@ -653,12 +666,12 @@ can be overriden by environment variable \fBCLIENTCERT\fR.
 .B qmail-remote
 requires TLS authentication from servers for which this file exists
 .RB ( <FQDN>
-is the fully-qualified domain name of the server). One of the
+is the fully-qualified domain name of the remote SMTP server). One of the
 .I dNSName
 or the
 .I CommonName
 attributes have to match. The file contains the trusted CA certificates.
-The default location of @controldir@ can be overriden by environment variable CERTDIR
+The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
 
 .TP 5
 .I tlshosts/exhaustivelist
@@ -666,7 +679,7 @@ if this file exists
 no TLS will be tried on hosts other than those for which a file
 .B tlshosts/<FQDN>.pem
 exists.
-The default location of @controldir@ can be overriden by environment variable CERTDIR
+The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
 
 .B WARNING:
 this option may cause mail to be delayed, bounced, doublebounced, or lost.
@@ -676,10 +689,20 @@ this option may cause mail to be delayed, bounced, doublebounced, or lost.
 .B qmail-remote
 will not try TLS on servers for which this file exists
 .RB ( <FQDN>
-is the fully-qualified domain name of the server). 
+is the fully-qualified domain name of the remote SMTP server). 
 .IR (tlshosts/<FQDN>.pem 
 takes precedence over this file however).
-The default location of @controldir@ can be overriden by environment variable CERTDIR
+The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
+
+.TP 5
+.I notlshosts/host
+.B qmail-remote
+will not try TLS on servers for which this file exists
+.RB ( host
+is the domain name of the recipient). 
+.IR (tlshosts/<FQDN>.pem 
+takes precedence over this file however).
+The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
 
 .TP 5
 .I tlsadomains
