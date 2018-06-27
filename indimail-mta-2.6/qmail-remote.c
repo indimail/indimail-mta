@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.129 2018-06-27 18:11:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.130 2018-06-27 19:54:17+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -20,7 +20,7 @@
 #include "auto_control.h"
 #include "control.h"
 #include "hastlsa.h"
-#ifdef HASTLSA
+#if defined(TLS) && defined(HASTLSA)
 #include "tlsarralloc.h"
 #include "fn_handler.h"
 #include <netdb.h>
@@ -28,7 +28,7 @@
 #include <openssl/err.h>
 #else
 #warning "not compiled with -DHASTLSA"
-#endif /*- #ifdef HASTLSA */
+#endif /*- #if defined(TLS) && defined(HASTLSA) */
 #include "dns.h"
 #define _ALLOC_
 #include "alloc.h"
@@ -63,10 +63,10 @@
 #include "auth_digest_md5.h"
 #include "hastlsv1_1_client.h"
 #include "hastlsv1_2_client.h"
-#endif /*- #ifdef TLS */
 #ifdef HASTLSA
 #include "tlsacheck.h"
 #endif
+#endif /*- #ifdef TLS */
 
 #define EHLO 1
 #define HUGESMTPTEXT  5000
@@ -149,7 +149,7 @@ struct constmap mapnosign;
 struct constmap mapnosigndoms;
 #endif
 
-#ifdef HASTLSA
+#if defined(TLS) && defined(HASTLSA)
 char           *do_tlsa = 0, *tlsadomainsfn = 0;
 int             use_daned = 0;
 tlsarralloc     ta = { 0 };
@@ -2407,7 +2407,7 @@ qmtp(stralloc *h, char *ip, int port)
 	}
 }
 
-#ifdef HASTLSA
+#if defined(TLS) && defined(HASTLSA)
 void
 timeoutfn()
 {
@@ -2443,7 +2443,7 @@ smtp()
 	unsigned long   code;
 	int             flagbother;
 	int             i, use_size = 0, is_esmtp = 1;
-#ifdef HASTLSA
+#if defined(TLS) && defined(HASTLSA)
 	char           *err_str = 0, *servercert = 0;
 	int             tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage, j;
@@ -2682,7 +2682,7 @@ addrmangle(stralloc *saout, char *s, int *flagalias, int flagcname)
 		temp_nomem();
 }
 
-#ifdef HASTLSA
+#if defined(TLS) && defined(HASTLSA)
 int
 cdb_match(char *fn, char *addr, int len)
 {
@@ -2998,6 +2998,7 @@ getcontrols()
 	x = constmap(&maphelohosts, outgoingip.s, outgoingip.len);
 	if (x && *x && !stralloc_copys(&helohost, x))
 		temp_nomem();
+#ifdef TLS
 	switch (control_readfile(&notlshosts, (x = env_get("NOTLSHOSTS")) ? x : "notlshosts", 0))
 	{
 	case -1:
@@ -3025,6 +3026,7 @@ getcontrols()
 			temp_nomem();
 		break;
 	}
+#endif
 #endif
 }
 
@@ -3158,7 +3160,7 @@ main(int argc, char **argv)
 	unsigned long   random, prefme;
 	char          **recips;
 	char           *relayhost, *x;
-#ifdef HASTLSA
+#if defined(TLS) && defined(HASTLSA)
 	int             e;
 	char            rbuf[2];
 #endif
@@ -3348,7 +3350,7 @@ main(int argc, char **argv)
 	if (i >= ip.len)
 		perm_ambigmx();
 	x = 0;
-#ifdef HASTLSA
+#if defined(TLS) && defined(HASTLSA)
 	if (!relayhost && notls == 0)
 		do_tlsa = env_get("DANE_VERIFICATION");
 #endif
@@ -3364,7 +3366,7 @@ main(int argc, char **argv)
 		{
 			if (flagtcpto && tcpto(&ip.ix[i], min_penalty))
 				continue;
-#ifdef HASTLSA
+#if defined(TLS) && defined(HASTLSA)
 			use_daned = 0;
 			if (do_tlsa) {
 				if (tlsadomains.len && !is_in_tlsadomains(ip.ix[i].fqdn))
@@ -3403,7 +3405,7 @@ main(int argc, char **argv)
 			j += ip4_fmt(x + j, &ip.ix[i].addr.ip);
 			x[j++] = ',';
 			x[j] = 0;
-#ifdef HASTLSA
+#if defined(TLS) && defined(HASTLSA)
 			if (!relayhost && do_tlsa) {
 				switch (get_tlsa_rr(ip.ix[i].fqdn, port))
 				{
@@ -3476,7 +3478,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.129 2018-06-27 18:11:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.130 2018-06-27 19:54:17+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3484,6 +3486,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.130  2018-06-27 19:54:17+05:30  Cprogrammer
+ * use TLSA only if TLS is defined
+ *
  * Revision 1.129  2018-06-27 18:11:39+05:30  Cprogrammer
  * added control file control/notlshosts
  * added additonal check for notlshosts/host
