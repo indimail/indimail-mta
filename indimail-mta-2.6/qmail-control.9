@@ -97,6 +97,9 @@ be in MySQL
 .IR goodrcptto ,
 .IR relaymailfrom ,
 .IR spamignore ,
+.IR greylist.white ,
+.IR tlsa.white ,
+.IR tlsadomains ,
 and
 .IR badip .
 
@@ -149,7 +152,7 @@ See the corresponding man pages for further details.
 
 .RS
 .nf
-.ta 5c 10c
+.ta 8c 12c
 control	default	used by
 
 .I accesslist	\fR(none)	\fRqmail-smtpd
@@ -237,21 +240,24 @@ control	default	used by
 .I timeoutsmtpd	\fR1200	\fRqmail-smtpd
 .I timeoutread	\fR4	\fRqmail-smtpd
 .I timeoutwrite	\fR4	\fRqmail-smtpd
-.I clientca.pem	\fR(none)	\fRqmail-smtpd
-.I clientcert.pem	\fR(none)	\fRqmail-remote
-.I dh1024.pem	\fR(none)	\fRqmail-smtpd
-.I dh512.pem	\fR(none)	\fRqmail-smtpd
-.I rsa512.pem	\fR(none)	\fRqmail-smtpd
-.I servercert.pem	\fR(none)	\fRqmail-smtpd
-.I tlsclients	\fR(none)	\fRqmail-smtpd
-.I tlsclientciphers	\fR(none)	\fRqmail-remote
-.I tlshosts/FQDN.pem	\fR(none)	\fRqmail-remote
-.I tlsserverciphers	\fR(none)	\fRqmail-smtpd
-.I tlsservermethod \fR(none) \fRqmail-smtpd
-.I tlsclientmethod \fR(none) \fRqmail-remote
+.I certs/clientca.pem	\fR(none)	\fRqmail-smtpd
+.I certs/clientcert.pem	\fR(none)	\fRqmail-remote
+.I certs/dh1024.pem	\fR(none)	\fRqmail-smtpd
+.I certs/dh512.pem	\fR(none)	\fRqmail-smtpd
+.I certs/rsa512.pem	\fR(none)	\fRqmail-smtpd
+.I certs/servercert.pem	\fR(none)	\fRqmail-smtpd
+.I certs/tlsclients	\fR(none)	\fRqmail-smtpd
+.I certs/tlsclientciphers	\fR(none)	\fRqmail-remote
+.I certs/tlshosts/FQDN.pem	\fR(none)	\fRqmail-remote
+.I certs/tlsserverciphers	\fR(none)	\fRqmail-smtpd
+.I certs/tlsservermethod	\fR(none)	\fRqmail-smtpd
+.I certs/tlsclientmethod	\fR(none)	\fRqmail-remote
+.I certs/notlshosts/	\fR(none)	\fRqmail-remote
+.I notlshosts\fR	(none)	\fRqmail-remote
+.I tlsadomains\fR	(none)	\fRqmail-remote, qmail-daned
 .I originipfield	\fR(none)	\fRqmail-queue
 .I filterargs	\fR(none)	\fRspawn-filter
-.I globalspamredirect	\FR(none)	\fRqmail-multi
+.I globalspamredirect	\fR(none)	\fRqmail-multi
 .I spamfilter	\fR(none)	\fRspawn-filter
 .I spamignore	\fR(none)	\fRqmail-smtpd, spawn-filter
 .I spamignorepatterns	\fR(none)	\fRqmail-smtpd, spawn-filter
@@ -264,9 +270,9 @@ control	default	used by
 .I earlytalkerdroptime	\fR(none)	\fRqmail-smtpd
 .I signaturedomains	\fR(none)	\fRqmail-dkim
 .I nosignaturedomains	\fR(none)	\fRqmail-dkim
-.I signkey	\fR(none)	\fRqmail-remote/qmail-smtpd
+.I signkey	\fR(none)	\fRqmail-remote, qmail-smtpd
 .I signkeystale	\fR7	\fRqmail-smtpd
-.I nosignhosts	\fR(none)	\fRqmail-remote/qmail-smtpd
+.I nosignhosts	\fR(none)	\fRqmail-remote, qmail-smtpd
 .I nosignmydoms	\fR(none)	\fRqmail-remote
 .fi
 
