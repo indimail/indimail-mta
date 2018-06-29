@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.26  2018-06-29 23:54:11+05:30  Cprogrammer
+ * fixed length of user variable
+ *
  * Revision 1.25  2018-01-31 12:06:54+05:30  Cprogrammer
  * moved qmail-getpw, qmail-local to sbin
  *
@@ -429,6 +432,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 			return (-1);
 		if (!stralloc_0(&user))
 			return (-1);
+		user.len--;
 		if ((pw = (struct passwd *) (*vauth_getpw)(user.len ? user.s : "postmaster", recip + at + 1))) {
 			if (copy_pwstruct(pw, recip, at))
 				return (-1);
@@ -551,7 +555,7 @@ noauthself:
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.25 2018-01-31 12:06:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.26 2018-06-29 23:54:11+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
