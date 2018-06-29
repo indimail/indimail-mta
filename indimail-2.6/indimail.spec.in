@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.467 2018-06-24 12:02:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.468 2018-06-30 00:09:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1709,13 +1709,14 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     svc_list="$svc_list %{servicedir}/$i"
   done
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
+  indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
   do
-    indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
     if [ -n "$indlib" -a -f $indlib ] ; then
       echo $indlib > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
     fi
   done
+  echo $indlib > %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
   ) >> /tmp/indimail-setup.log 2>&1
   exit 0
 fi
