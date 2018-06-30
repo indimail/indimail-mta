@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.12  2018-06-30 19:00:22+05:30  Cprogrammer
+# added check for apache group and clamd.conf
+#
 # Revision 1.11  2018-06-25 08:47:11+05:30  Cprogrammer
 # removed creation of getdns-root.key
 #
@@ -31,7 +34,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.11 2018-06-25 08:47:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.12 2018-06-30 19:00:22+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -56,7 +59,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.11 2018-06-25 08:47:11+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.12 2018-06-30 19:00:22+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -117,13 +120,16 @@ if [ -f /etc/indimail/certs/clientcert.pem ] ; then
 	$rm -f /etc/indimail/certs/clientcert.pem
 fi
 
-for i in servercert.pem dh2048.pem rsa2048.pem dh1024.pem rsa1024.pem dh512.pem rsa512.pem
-do
-	# roundcube (php) will require read access to certs
-	if [ -f /etc/indimail/certs/$i ] ; then
-		$chgrp apache /etc/indimail/certs/$i
-	fi
-done
+getent group apache > /dev/null
+if [ $? -ne 2 ] ; then
+	for i in servercert.pem dh2048.pem rsa2048.pem dh1024.pem rsa1024.pem dh512.pem rsa512.pem
+	do
+		# roundcube (php) will require read access to certs
+		if [ -f /etc/indimail/certs/$i ] ; then
+			$chgrp apache /etc/indimail/certs/$i
+		fi
+	done
+fi
 $ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/control/servercert.pem
 $ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/control/clientcert.pem
 $ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/certs/clientcert.pem
@@ -186,7 +192,9 @@ if [ -f /etc/indimail/cronlist.q -a -d /etc/cron.d ] ; then
 	fi
 fi
 # create foxhole_all.cdb in /var/indimail/clamd
-/usr/sbin/svctool --config=foxhole
+if [ -f /etc/indimail/clamd.conf -o -f /etc/indimail/clamd.conf.disabled ] ; then
+	/usr/sbin/svctool --config=foxhole
+fi
 }
 
 case $1 in
