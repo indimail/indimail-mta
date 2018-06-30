@@ -165,11 +165,13 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
   indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
   do
-	if [ -n "$indlib" -a -f $indlib ] ; then
+	if [ -n "$indlib" -a -f "$indlib" ] ; then
       echo $indlib > ${servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
 	fi
   done
-  echo $indlib > ${servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+  if [ -n "$indlib" -a -f "$indlib" ] ; then
+    echo $indlib > ${servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+  fi
   ) >> /tmp/indimail-setup.log
   ${rm} -f /tmp/indimail.upgrade
   exit 0
@@ -462,11 +464,13 @@ fi
 indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
 for port in 25 465 587
 do
-  if [ -n "$indlib" -a -f $indlib ] ; then
+  if [ -n "$indlib" -a -f "$indlib" ] ; then
     echo $indlib > ${servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
   fi
 done
-echo $indlib > ${servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+if [ -n "$indlib" -a -f "$indlib" ] ; then
+	echo $indlib > ${servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+fi
 
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
