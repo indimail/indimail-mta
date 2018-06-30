@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.17  2018-06-30 16:34:04+05:30  Cprogrammer
+ * replace environ with envp to pass full environment variable list in tcpserver to rbl()
+ *
  * Revision 1.16  2017-03-30 22:59:08+05:30  Cprogrammer
  * prefix rbl with ip6_scan(), dns_txt(), smtp_mail(), smtp_rcpt(), smtpcommands - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
  *
@@ -76,7 +79,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.16 2017-03-30 22:59:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.17 2018-06-30 16:34:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -109,8 +112,7 @@ rbl_out(int should_flush, char *arg)
 	buffer_puts(buffer_2, pid_str);
 	buffer_puts(buffer_2, " from ");
 	buffer_puts(buffer_2, ip_env);
-	if (arg && *arg)
-	{
+	if (arg && *arg) {
 		buffer_puts(buffer_2, ": ");
 		buffer_puts(buffer_2, arg);
 	}
@@ -216,15 +218,13 @@ rbl(char *base)
 	if (!stralloc_copy(&tmp, &ip_reverse))
 		nomem();
 	i = str_chr(base, ':');
-	if (base[i])
-	{
+	if (base[i]) {
 		base[i] = 0;
 		altreply = base + i + 1;
 	}
 	if (!stralloc_cats(&tmp, base))
 		nomem();
-	if (altreply)
-	{
+	if (altreply) {
 #ifdef IPV6
 		if (dns_ip6(&text, &tmp) == -1)
 #else
@@ -232,31 +232,26 @@ rbl(char *base)
 #endif
 		{
 			flagmustnotbounce = 1;
-			if (flagfailclosed)
-			{
+			if (flagfailclosed) {
 				if (!stralloc_copys(&text, "temporary RBL lookup error"))
 					nomem();
 				decision = 2;
 			}
 			return;
 		}
-		if (text.len)
-		{
+		if (text.len) {
 			if (!stralloc_copys(&text, ""))
 				nomem();
-			while (*altreply)
-			{
+			while (*altreply) {
 				i = str_chr(altreply, '%');
 				if (!stralloc_catb(&text, altreply, i))
 					nomem();
-				if (altreply[i] && altreply[i + 1] == 'I' && altreply[i + 2] == 'P' && altreply[i + 3] == '%')
-				{
+				if (altreply[i] && altreply[i + 1] == 'I' && altreply[i + 2] == 'P' && altreply[i + 3] == '%') {
 					if (!stralloc_catb(&text, ip_env, str_len(ip_env)))
 						nomem();
 					altreply += i + 4;
 				} else
-				if (altreply[i])
-				{
+				if (altreply[i]) {
 					if (!stralloc_cats(&text, "%"))
 						nomem();
 					altreply += i + 1;
@@ -264,13 +259,10 @@ rbl(char *base)
 					altreply += i;
 			}
 		}
-	} else
-	{
-		if (rbl_dns_txt(&text, &tmp) == -1)
-		{
+	} else {
+		if (rbl_dns_txt(&text, &tmp) == -1) {
 			flagmustnotbounce = 1;
-			if (flagfailclosed)
-			{
+			if (flagfailclosed) {
 				if (!stralloc_copys(&text, "temporary RBL lookup error"))
 					nomem();
 				decision = 2;
@@ -278,8 +270,7 @@ rbl(char *base)
 			return;
 		}
 	}
-	if (text.len)
-	{
+	if (text.len) {
 		if (flagrblbounce)
 			decision = 3;
 		else
@@ -326,8 +317,7 @@ delay(unsigned long delay)
 	char           *x;
 	static stralloc info;
 
-	if ((x = env_get("GREETDELAY")))
-	{
+	if ((x = env_get("GREETDELAY"))) {
 		scan_ulong(x, &u);
 		delay= u;
 	}
@@ -376,8 +366,8 @@ addrparse(char *arg)
 	i = str_chr(arg, '<');
 	if (arg[i])
 		arg += i + 1;
-	else
-	{	/*- partner should go read rfc 821 */
+	else {
+		/*- partner should go read rfc 821 */
 		terminator = ' ';
 		arg += str_chr(arg, ':');
 		if (*arg == ':')
@@ -388,10 +378,8 @@ addrparse(char *arg)
 			++arg;
 	}
 	/*- strip source route */
-	if (*arg == '@')
-	{
-		while (*arg)
-		{
+	if (*arg == '@') {
+		while (*arg) {
 			if (*arg++ == ':')
 				break;
 		}
@@ -400,15 +388,13 @@ addrparse(char *arg)
 		nomem();
 	flagesc = 0;
 	flagquoted = 0;
-	for (i = 0; (ch = arg[i]); ++i)
-	{	/*- copy arg to addr, stripping quotes */
-		if (flagesc)
-		{
+	for (i = 0; (ch = arg[i]); ++i) {
+		/*- copy arg to addr, stripping quotes */
+		if (flagesc) {
 			if (!stralloc_append(&addr, &ch))
 				nomem();
 			flagesc = 0;
-		} else
-		{
+		} else {
 			if (!flagquoted && ch == terminator)
 				break;
 			switch (ch)
@@ -444,8 +430,7 @@ rblsmtp_mail(char *arg)
 	rbl_out(1, 0);
 	if (!addrparse(arg))
 		buffer_puts(buffer_2, ": MAIL with too long address\n");
-	else
-	{
+	else {
 		buffer_puts(buffer_2, ": Sender <");
 		buffer_puts(buffer_2, addr.s);
 		buffer_puts(buffer_2, ">\n");
@@ -460,8 +445,7 @@ rblsmtp_rcpt(char *arg)
 	rbl_out(1, 0);
 	if (!addrparse(arg))
 		buffer_puts(buffer_2, ": RCPT with too long address\n");
-	else
-	{
+	else {
 		buffer_puts(buffer_2, ": Recipient <");
 		buffer_puts(buffer_2, addr.s);
 		buffer_puts(buffer_2, ">\n");
@@ -506,8 +490,7 @@ rblsmtpd_f(void)
 {
 	int             i;
 
-	if (flagmustnotbounce || (decision == 2))
-	{
+	if (flagmustnotbounce || (decision == 2)) {
 		if (!stralloc_copys(&message, "451 "))
 			nomem();
 	} else
@@ -529,8 +512,7 @@ rblsmtpd_f(void)
 		nomem();
 	if (!timeout)
 		reject();
-	else
-	{
+	else {
 		sig_catch(sig_alarm, drop);
 		alarm(timeout);
 		greet();
@@ -545,41 +527,38 @@ rblsmtpd(int argc, char **argv, char **envp)
 {
 	int             flagwantdefaultrbl = 1;
 	char           *x, *altreply = 0;
+	char          **e;
 	int             i, opt;
 	unsigned long   greetdelay = 0;
 
+	e = environ;
+	environ = envp;
 	ip_init();
-	if ((x = env_get("RBLSMTPD")))
-	{
+	if ((x = env_get("RBLSMTPD"))) {
 		if (!*x)
 			decision = 1;
 		else
-		if (*x == '-')
-		{
+		if (*x == '-') {
 			altreply = x + 1;
 			decision = 3;
 			if (!stralloc_copys(&text, ""))
 				nomem();
-		} else
-		{
+		} else {
 			altreply = x;
 			decision = 2;
 			if (!stralloc_copys(&text, ""))
 				nomem();
 		}
-		while (altreply && *altreply)
-		{
+		while (altreply && *altreply) {
 			i = str_chr(altreply, '%');
 			if (!stralloc_catb(&text, altreply, i))
 				nomem();
-			if (altreply[i] && altreply[i + 1] == 'I' && altreply[i + 2] == 'P' && altreply[i + 3] == '%')
-			{
+			if (altreply[i] && altreply[i + 1] == 'I' && altreply[i + 2] == 'P' && altreply[i + 3] == '%') {
 				if (!stralloc_catb(&text, ip_env, str_len(ip_env)))
 					nomem();
 				altreply += i + 4;
 			} else
-			if (altreply[i])
-			{
+			if (altreply[i]) {
 				if (!stralloc_cats(&text, "%"))
 					nomem();
 				altreply += i + 1;
@@ -593,10 +572,10 @@ rblsmtpd(int argc, char **argv, char **envp)
 		buffer_flush(buffer_2);
 #endif
 	}
+	environ = e;
 	/*- reset optind as it gets called in tcpserver and rblsmtpd.so might be loaded as shared object */
 	optind = 1;
-	while ((opt = getopt(argc, argv, "bBcCt:r:a:")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "bBcCt:r:a:")) != opteof) {
 		switch (opt)
 		{
 		case 'b':
@@ -642,14 +621,14 @@ rblsmtpd(int argc, char **argv, char **envp)
 	pathexec_run(*argv, argv, envp);
 	strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
 	/*- Not reached */
-	return(0);
+	return (0);
 }
 
 #ifdef MAIN
 int
 main(int argc, char **argv, char **envp)
 {
-	return(rblsmtpd(argc, argv, envp));
+	return (rblsmtpd(argc, argv, envp));
 }
 #endif
 
