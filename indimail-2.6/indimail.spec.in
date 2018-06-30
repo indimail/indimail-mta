@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.469 2018-06-30 00:31:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.470 2018-06-30 18:59:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1712,11 +1712,13 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
   do
-    if [ -n "$indlib" -a -f $indlib ] ; then
+    if [ -n "$indlib" -a -f "$indlib" ] ; then
       echo $indlib > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
     fi
   done
-  echo $indlib > %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+  if [ -n "$indlib" -a -f "$indlib" ] ; then
+    echo $indlib > %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+  fi
   ) >> /tmp/indimail-setup.log 2>&1
   exit 0
 fi
@@ -1979,11 +1981,13 @@ done
 indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
 for port in 25 465 587
 do
-  if [ -n "$indlib" -a -f $indlib ] ; then
+  if [ -n "$indlib" -a -f "$indlib" ] ; then
     echo $indlib > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
   fi
 done
-echo $indlib > %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+if [ -n "$indlib" -a -f "$indlib" ] ; then
+  echo $indlib > %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+fi
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
