@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.62  2018-07-01 11:49:55+05:30  Cprogrammer
+ * renamed getFunction() to getlibObject()
+ *
  * Revision 1.61  2018-01-09 11:53:53+05:30  Cprogrammer
  * use loadLibrary() to load indimail code
  *
@@ -402,16 +405,16 @@ main(int argc, char **argv)
 		_exit(111);
 	}
 	if (handle) {
-		if (!(get_local_ip = getFunction("get_local_ip", &errstr))) {
-			substdio_puts(subfderr, "getFunction: get_local_ip: ");
+		if (!(get_local_ip = getlibObject("get_local_ip", &errstr))) {
+			substdio_puts(subfderr, "getlibObject: get_local_ip: ");
 			substdio_puts(subfderr, errstr);
 			substdio_puts(subfderr, "\n");
 			substdio_flush(subfderr);
 			_exit(111);
 		} else
 			local_ip = (*get_local_ip) ();
-		if (!(get_local_hostid = getFunction("get_local_hostid", &errstr))) {
-			substdio_puts(subfderr, "getFunction: get_local_hostid: ");
+		if (!(get_local_hostid = getlibObject("get_local_hostid", &errstr))) {
+			substdio_puts(subfderr, "getlibObject: get_local_hostid: ");
 			substdio_puts(subfderr, errstr);
 			substdio_puts(subfderr, "\n");
 			substdio_flush(subfderr);
@@ -827,7 +830,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.61 2018-01-09 11:53:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.62 2018-07-01 11:49:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

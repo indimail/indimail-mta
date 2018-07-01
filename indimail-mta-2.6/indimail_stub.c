@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.5  2018-07-01 11:49:17+05:30  Cprogrammer
+ * renamed getFunction() to getlibObject()
+ *
  * Revision 1.4  2018-03-31 00:00:41+05:30  Cprogrammer
  * fixed spurious chown in r_mkdir()
  *
@@ -172,7 +175,7 @@ closeLibrary()
 }
 
 void *
-getFunction(char *plugin_symb, char **errstr)
+getlibObject(char *plugin_symb, char **errstr)
 {
 	if (!handle)
 		handle = loadLibrary(0, errstr);
@@ -751,7 +754,7 @@ inquery(char query_type, char *email, char *ip)
 void
 getversion_inquery_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.4 2018-03-31 00:00:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.5 2018-07-01 11:49:17+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

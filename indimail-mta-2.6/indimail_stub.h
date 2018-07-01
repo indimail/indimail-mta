@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.h,v $
+ * Revision 1.3  2018-07-01 11:49:21+05:30  Cprogrammer
+ * renamed getFunction() to getlibObject()
+ *
  * Revision 1.2  2018-03-24 23:34:45+05:30  Cprogrammer
  * removed hardcoded definition of VIRTUAL_PKG_LIB
  *
@@ -45,5 +48,5 @@ extern int      use_etrn;
 
 void           *inquery(char, char *, char *);
 void           *loadLibrary(int *, char **);
-void *          getFunction(char *, char **);
+void *          getlibObject(char *, char **);
 void            closeLibrary(void);

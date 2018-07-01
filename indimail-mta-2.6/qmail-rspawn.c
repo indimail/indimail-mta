@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.32  2018-07-01 11:51:31+05:30  Cprogrammer
+ * renamed getFunction() to getlibObject()
+ *
  * Revision 1.31  2018-01-31 12:07:59+05:30  Cprogrammer
  * moved qmail-remote to sbin
  *
@@ -271,11 +274,11 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 				return (-1);
 		}
 		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1) {
-			if (!(vget_real_domain = getFunction("vget_real_domain", 0)))
+			if (!(vget_real_domain = getlibObject("vget_real_domain", 0)))
 				return (-1);
-			if (!(is_distributed_domain = getFunction("is_distributed_domain", 0)))
+			if (!(is_distributed_domain = getlibObject("is_distributed_domain", 0)))
 				return (-1);
-			if (!(findhost = getFunction("findhost", 0)))
+			if (!(findhost = getlibObject("findhost", 0)))
 				return (-1);
 			if ((real_domain = (*vget_real_domain) (r + at + 1))
 				&& ((*is_distributed_domain) (real_domain) == 1)) {
@@ -318,7 +321,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.31 2018-01-31 12:07:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.32 2018-07-01 11:51:31+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
