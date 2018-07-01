@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.27  2018-07-01 11:51:01+05:30  Cprogrammer
+ * renamed getFunction() to getlibObject()
+ * get value of variables userNotFound, is_inactive using getlibObject()
+ *
  * Revision 1.26  2018-06-29 23:54:11+05:30  Cprogrammer
  * fixed length of user variable
  *
@@ -386,6 +390,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 	void            (*vclose) (void);
 	int             (*isvirtualdomain) (char *);
 	int             (*vauth_open) (char *);
+	int            *u_not_found, *i_inactive;
 	struct passwd*  (*vauth_getpw) (char *, char *);
 
 	if (!env_unset("QMAILREMOTE"))
@@ -396,25 +401,25 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 		_exit(-1);
 	if (!env_get("AUTHSELF") || !handle)
 		goto noauthself;
-	if (!(isvirtualdomain = getFunction("isvirtualdomain", 0)))
+	if (!(isvirtualdomain = getlibObject("isvirtualdomain", 0)))
 		_exit (1);
 	else
-	if (!(vauth_open = getFunction("vauth_open", 0)))
+	if (!(vauth_open = getlibObject("vauth_open", 0)))
 		_exit (1);
 	else
-	if (!(vauth_getpw = getFunction("vauth_getpw", 0)))
+	if (!(vauth_getpw = getlibObject("vauth_getpw", 0)))
 		_exit (1);
 	else
-	if (!(vclose = getFunction("vclose", 0)))
+	if (!(vclose = getlibObject("vclose", 0)))
 		_exit (1);
 	/*-
 	 * saldo-biuro.com.pl-david-goliath@saldo-biuro.com.pl
 	 */
 	if (env_get("QUERY_CACHE")) {
 		if ((*isvirtualdomain) (recip + at + 1)) {
-			f = str_len(recip + at + 1);
 			if (!env_unset("PWSTRUCT"))
 				return (-1);
+			f = str_len(recip + at + 1);
 			if ((pw = inquery(PWD_QUERY, recip + f + 1, 0))) {
 				if (copy_pwstruct(pw, recip, at))
 					return (-1);
@@ -424,22 +429,27 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 		}
 	} else
 	if ((*isvirtualdomain) (recip + at + 1) && !(*vauth_open) ((char *) 0)) {
-		f = str_len(recip + at + 1);
 		if (!env_unset("PWSTRUCT"))
 			return (-1);
-		for(len = 0, ptr = recip + f + 1;*ptr && *ptr != '@';ptr++, len++);
+		f = str_len(recip + at + 1);
+		for (len = 0, ptr = recip + f + 1;*ptr && *ptr != '@';ptr++, len++);
 		if (!stralloc_copyb(&user,recip + f + 1, len))
 			return (-1);
 		if (!stralloc_0(&user))
 			return (-1);
 		user.len--;
+		if (!(u_not_found = (int *) getlibObject("userNotFound", 0)))
+			_exit (1);
 		if ((pw = (struct passwd *) (*vauth_getpw)(user.len ? user.s : "postmaster", recip + at + 1))) {
+			if (!(i_inactive = (int *) getlibObject("is_inactive", 0)))
+				_exit (1);
+			is_inactive = *i_inactive;
 			if (copy_pwstruct(pw, recip, at))
 				return (-1);
 			if (!env_put(pwstruct.s))
 				return (-1);
 		}  else {
-			if (userNotFound) {
+			if (*u_not_found) {
 				if (!stralloc_copys(&pwstruct, "PWSTRUCT=No such user "))
 					return (-1);
 				else
@@ -555,7 +565,7 @@ noauthself:
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.26 2018-06-29 23:54:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.27 2018-07-01 11:51:01+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
