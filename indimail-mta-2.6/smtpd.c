@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.211 $";
+char           *revision = "$Revision: 1.212 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5075,19 +5075,19 @@ smtp_atrn(char *arg)
 		err_library("libindimail.so not loaded");
 		return;
 	}
-	if (!(parse_email = getFunction("parse_email", &errstr))) {
+	if (!(parse_email = getlibObject("parse_email", &errstr))) {
 		err_library(errstr);
 		return;
 	} else
-	if (!(vclose = getFunction("vclose", &errstr))) {
+	if (!(vclose = getlibObject("vclose", &errstr))) {
 		err_library(errstr);
 		return;
 	} else
-	if (!(vshow_atrn_map = getFunction("vshow_atrn_map", &errstr))) {
+	if (!(vshow_atrn_map = getlibObject("vshow_atrn_map", &errstr))) {
 		err_library(errstr);
 		return;
 	} else
-	if (!(atrn_access = getFunction("atrn_access", &errstr))) {
+	if (!(atrn_access = getlibObject("atrn_access", &errstr))) {
 		err_library(errstr);
 		return;
 	}
@@ -6004,6 +6004,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.212  2018-07-01 11:50:03+05:30  Cprogrammer
+ * renamed getFunction() to getlibObject()
+ *
  * Revision 1.211  2018-06-13 08:55:27+05:30  Cprogrammer
  * refactored smtp_rset()
  *
@@ -6075,7 +6078,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.211 2018-06-13 08:55:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.212 2018-07-01 11:50:03+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.11  2018-07-01 11:48:57+05:30  Cprogrammer
+ * renamed getFunction() to getlibObject()
+ *
  * Revision 1.10  2018-01-09 11:36:22+05:30  Cprogrammer
  * load count_dir() using loadLibrary()
  *
@@ -99,7 +102,7 @@ etrn_queue(char *arg, char *remoteip)
 	mailcount = 0;
 	if (!loadLibrary(0, &errstr))
 		return (err_library(errstr));
-	if (!(count_dir = getFunction("count_dir", &errstr)))
+	if (!(count_dir = getlibObject("count_dir", &errstr)))
 		return (err_library(errstr));
 	if (!access(maildir1, F_OK))
 		count_dir(maildir1, &mailcount);
@@ -181,7 +184,7 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.10 2018-01-09 11:36:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.11 2018-07-01 11:48:57+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
