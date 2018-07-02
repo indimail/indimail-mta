@@ -90,8 +90,9 @@ it will reread
 .IR locals ,
 .IR virtualdomains ,
 .IR holdlocal ,
+.IR holdremote ,
 and
-.IR holdremote .
+.IR envnoathost .
 
 During startup, \fBqmail-send\fR uses the environment variable \fBLOCK_LOGS\fR and locks the file
 CONTROLDIR/defaultdelivery before writing a line to the log file (or stdout). If multiple qmail-send
