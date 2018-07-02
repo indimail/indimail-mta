@@ -1,5 +1,8 @@
 /*
  * $Log: ipme.c,v $
+ * Revision 1.24  2018-07-03 02:02:11+05:30  Cprogrammer
+ * set allocated to zero for stralloc variable buf
+ *
  * Revision 1.23  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -135,13 +138,13 @@ int ipme_is6(ip)
 }
 #endif
 
-static stralloc buf = { 0 };
 
 #ifdef MOREIPME
+static stralloc buf = { 0 };
 #define ipme_init_retclean(ret) { \
   if (notipme.ix) alloc_free((char *) notipme.ix); \
   if (moreipme.ix) alloc_free((char *) moreipme.ix); \
-  if (buf.s) alloc_free(buf.s); \
+  if (buf.s) {alloc_free(buf.s);buf.len = buf.a = 0;} \
   return ret; }
 #endif
 
@@ -501,7 +504,7 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	static char    *x = "$Id: ipme.c,v 1.23 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ipme.c,v 1.24 2018-07-03 02:02:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
