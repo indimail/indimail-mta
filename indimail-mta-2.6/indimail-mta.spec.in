@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.174 2018-06-23 22:47:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.175 2018-07-03 02:03:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -385,7 +385,6 @@ echo "ID=%{name}"
 echo "HOME_URL="http://www.indimail.org""
 echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui manvendra@indimail.org\""
 ) > %{name}-release
-
 #### LIBDKIM ######################
 if [ -d libdkim-%{libdkim_version} ] ; then
   cd libdkim-%{libdkim_version}
@@ -455,30 +454,34 @@ if [ -d %{name}-%{version} ] ; then
   else
     %{__rm} -f /tmp/conf-users
   fi
-   # create conf-groups
-   (
-   echo "qmail"
-   echo "nofiles"
-   echo %groupname
-   echo "qscand"
-   echo
-   echo "These are the qmail groups. The second group should not have access to"
-   echo "any files, but it must be usable for processes; this requirement"
-   echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
-   ) > /tmp/conf-groups
-   diff /tmp/conf-groups %{name}-%{version}/conf-groups > /dev/null 2>&1
-   if [ $? -ne 0 ] ; then
-     %{__mv} /tmp/conf-groups %{name}-%{version}/conf-groups
-   else
-     %{__rm} -f /tmp/conf-groups
-   fi
-   %{__cp} %{name}-%{version}/doc/ChangeLog .
-   if [ -f %{name}-%{version}/qupgrade.sh ] ; then
-   %{__cp} %{name}-%{version}/qupgrade.sh .
-   fi
-   if [ -f %{name}-%{version}/qlocal_upgrade.sh ] ; then
-   %{__cp} %{name}-%{version}/qlocal_upgrade.sh .
-   fi
+  # create conf-groups
+  (
+  echo "qmail"
+  echo "nofiles"
+  echo %groupname
+  echo "qscand"
+  echo
+  echo "These are the qmail groups. The second group should not have access to"
+  echo "any files, but it must be usable for processes; this requirement"
+  echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
+  ) > /tmp/conf-groups
+  diff /tmp/conf-groups %{name}-%{version}/conf-groups > /dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+    %{__mv} /tmp/conf-groups %{name}-%{version}/conf-groups
+  else
+    %{__rm} -f /tmp/conf-groups
+  fi
+  %{__cp} %{name}-%{version}/doc/ChangeLog .
+  if [ -f %{name}-%{version}/qupgrade.sh ] ; then
+    %{__cp} %{name}-%{version}/qupgrade.sh .
+  fi
+  if [ -f %{name}-%{version}/qlocal_upgrade.sh ] ; then
+    %{__cp} %{name}-%{version}/qlocal_upgrade.sh .
+  fi
+  if [ -n "%{debug_package}" ] ; then
+    echo %{__cc} -DINET6 -fPIC %{optflags} > %{name}-%{version}/conf-cc
+    echo %{__cc} -rdynamic > %{name}-%{version}/conf-ld
+  fi
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
@@ -489,6 +492,10 @@ if [ -d ucspi-tcp-%{ucspi_version} ] ; then
   %else
     %{__rm} -f ucspi-tcp-%{ucspi_version}/conf-dlopen
   %endif
+  if [ -n "%{debug_package}" ] ; then
+    echo %{__cc} -fPIC %{optflags} > ucspi-tcp-%{ucspi_version}/conf-cc
+    echo %{__cc} -O2 > ucspi-tcp-%{ucspi_version}/conf-ld
+  fi
 fi
 
 %install
