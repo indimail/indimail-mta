@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.13  2018-07-03 11:01:27+05:30  Cprogrammer
+# update envnoathost, defaulthost, defaultdomain if hostname has changed
+#
 # Revision 1.12  2018-06-30 19:00:22+05:30  Cprogrammer
 # added check for apache group and clamd.conf
 #
@@ -34,7 +37,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.12 2018-06-30 19:00:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.13 2018-07-03 11:01:27+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -59,7 +62,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.12 2018-06-30 19:00:22+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.13 2018-07-03 11:01:27+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -176,10 +179,13 @@ if [ -s /etc/indimail/control/defaultqueue/LOGFILTER ] ; then
 	check_update_if_diff /etc/indimail/control/defaultqueue/LOGFILTER /tmp/logfifo
 fi
 
-host=`uname -n`
-check_update_if_diff /service/qmail-send.25/variables/DEFAULT_DOMAIN $host
-check_update_if_diff /etc/indimail/control/envnoathost $host
-check_update_if_diff /etc/indimail/control/defaulthost $host
+host=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+echo $host | grep "\." > /dev/null
+if [ $? -eq 0 ] ; then
+	check_update_if_diff /etc/indimail/control/envnoathost $host
+	check_update_if_diff /etc/indimail/control/defaultdomain $host
+	check_update_if_diff /etc/indimail/control/defaulthost $host
+fi
 
 # qmail-greyd, greydaemon path changed to /usr/sbin
 $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' /service/greylist.1999/run
