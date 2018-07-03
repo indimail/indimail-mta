@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.471 2018-07-03 11:42:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.472 2018-07-03 12:04:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -197,10 +197,7 @@ BuildRequires: xz
 BuildRequires: mysql-devel pam-devel
 
 %if %nocourierimap == 0
-BuildRequires: libgcrypt-devel gnutls-devel
-%if %{undefined suse_version} && %{undefined sles_version}
-BuildRequires: gnutls-utils
-%endif
+BuildRequires: libgcrypt-devel
 BuildRequires: gdbm-devel
 BuildRequires: perl
 %endif
