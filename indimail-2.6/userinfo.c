@@ -627,7 +627,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		if (delivery_time > 0)
 		{
 			printf("Delivery Time :                   %s", asctime(localtime(&delivery_time)));
-			printf("              : (%"PRIu64" Mails, %"PRIu64" Bytes [%"PRIu64" Kb])\n", delivery_count, delivery_size, delivery_size/1024);
+			printf("        Today : (%"PRIu64" Mails, %"PRIu64" Bytes [%"PRIu64" Kb])\n", delivery_count, delivery_size, delivery_size/1024);
 		} else
 			printf("Delivery Time : No Mails Delivered yet / Per Day Limit not configured\n");
 	}
