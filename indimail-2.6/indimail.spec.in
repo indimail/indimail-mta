@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.470 2018-06-30 18:59:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.471 2018-07-03 11:42:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1988,6 +1988,17 @@ done
 if [ -n "$indlib" -a -f "$indlib" ] ; then
   echo $indlib > %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
 fi
+
+# turn off automatic refresh for services during first time installation
+svc_list=""
+for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+  qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
+  proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
+  pwdlookup qmail-poppass.106 
+do
+  svc_list="$svc_list %{servicedir}/$i"
+done
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 $svc_list"
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux

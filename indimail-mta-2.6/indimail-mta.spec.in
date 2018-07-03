@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.175 2018-07-03 02:03:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.176 2018-07-03 11:42:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2119,6 +2119,20 @@ do
     fi
   done
 done
+
+# turn off automatic refresh for services during first time installation
+svc_list=""
+for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
+  qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
+  qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
+  qmail-daned.1998
+do
+  if [ -d %{servicedir}/$i ] ; then
+    svc_list="$svc_list %{servicedir}/$i"
+  fi
+done
+svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 $svc_list"
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux

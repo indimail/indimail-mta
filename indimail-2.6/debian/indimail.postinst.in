@@ -472,6 +472,17 @@ if [ -n "$indlib" -a -f "$indlib" ] ; then
 	echo $indlib > ${servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
 fi
 
+# turn off automatic refresh for services during first time installation
+svc_list=""
+for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+  qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
+  proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
+  pwdlookup qmail-poppass.106 
+do
+  svc_list="$svc_list ${servicedir}/$i"
+done
+${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
+
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
 #
