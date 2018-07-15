@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.28  2018-07-15 12:27:36+05:30  Cprogrammer
+ * env variable ROUTE_NULL_USER to redirect double bounces to a mailbox
+ * use -3 return for error loading libindimail
+ *
  * Revision 1.27  2018-07-01 11:51:01+05:30  Cprogrammer
  * renamed getFunction() to getlibObject()
  * get value of variables userNotFound, is_inactive using getlibObject()
@@ -130,8 +134,7 @@ report(ss, wstat, s, len)
 	int             len;
 {
 	int             i;
-	if (wait_crashed(wstat))
-	{
+	if (wait_crashed(wstat)) {
 		substdio_puts(ss, "Zqmail-local crashed.\n");
 		return;
 	}
@@ -181,8 +184,7 @@ report(ss, wstat, s, len)
 		substdio_put(ss, "D", 1);
 		break;
 	}
-	for (i = 0; i < len; ++i)
-	{
+	for (i = 0; i < len; ++i) {
 		if (!s[i])
 			break;
 	}
@@ -192,8 +194,9 @@ report(ss, wstat, s, len)
 stralloc        lower = { 0 };
 stralloc        nughde = { 0 };
 stralloc        wildchars = { 0 };
-char           *cdbdir;
 stralloc        cdbfile = { 0 };
+
+char           *cdbdir;
 
 void
 nughde_get(local)
@@ -207,8 +210,7 @@ nughde_get(local)
 	int             fd;
 	int             flagwild;
 
-	if (!cdbdir)
-	{
+	if (!cdbdir) {
 		if (!(cdbdir = env_get("ASSIGNDIR")))
 			cdbdir = auto_assign;
 	}
@@ -230,8 +232,7 @@ nughde_get(local)
 	if ((fd = open_read(cdbfile.s)) == -1)
 		if (errno != error_noent)
 			_exit(QLX_CDB);
-	if (fd != -1)
-	{
+	if (fd != -1) {
 		uint32          dlen;
 		unsigned int    i;
 
@@ -244,15 +245,12 @@ nughde_get(local)
 			_exit(QLX_CDB);
 		i = lower.len;
 		flagwild = 0;
-		do
-		{
+		do {
 			/*- i > 0 */
-			if (!flagwild || (i == 1) || (byte_chr(wildchars.s, wildchars.len, lower.s[i - 1]) < wildchars.len))
-			{
+			if (!flagwild || (i == 1) || (byte_chr(wildchars.s, wildchars.len, lower.s[i - 1]) < wildchars.len)) {
 				if ((r = cdb_seek(fd, lower.s, i, &dlen)) == -1)
 					_exit(QLX_CDB);
-				if (r == 1)
-				{
+				if (r == 1) {
 					if (!stralloc_ready(&nughde, (unsigned int) dlen))
 						_exit(QLX_NOMEM);
 					nughde.len = dlen;
@@ -296,8 +294,7 @@ nughde_get(local)
 	close(pi[1]);
 	if (slurpclose(pi[0], &nughde, 128) == -1)
 		_exit(QLX_SYS);
-	if (wait_pid(&gpwstat, gpwpid) != -1)
-	{
+	if (wait_pid(&gpwstat, gpwpid) != -1) {
 		if (wait_crashed(gpwstat))
 			_exit(QLX_SYS);
 		if (wait_exitcode(gpwstat) != 0)
@@ -306,6 +303,7 @@ nughde_get(local)
 }
 
 stralloc        pwstruct = { 0 };
+
 static char     strnum[FMT_ULONG];
 
 int
@@ -371,19 +369,20 @@ copy_pwstruct(struct passwd *pw, char *recip, int at)
 }
 
 stralloc        user = { 0 };
+stralloc        save = { 0 };
 
 int
-spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
+spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 	int             fdmess;
 	int             fdout;
 	unsigned long   msgsize;
 	char           *sender;
 	char           *qqeh;
-	char           *recip;
-	int             at;
+	char           *recip_t;
+	int             at_t;
 {
-	int             f, len;
-	char           *ptr;
+	int             f, len, at = at_t;
+	char           *ptr, *tptr, *recip = recip_t;
 	void           *handle;
 	/*- indimail */
 	struct passwd  *pw;
@@ -398,22 +397,23 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 	/*- indimail */
 	handle = loadLibrary(&f, 0);
 	if (f)
-		_exit(-1);
+		_exit(-3);
 	if (!env_get("AUTHSELF") || !handle)
 		goto noauthself;
 	if (!(isvirtualdomain = getlibObject("isvirtualdomain", 0)))
-		_exit (1);
+		_exit(-3);
 	else
 	if (!(vauth_open = getlibObject("vauth_open", 0)))
-		_exit (1);
+		_exit(-3);
 	else
 	if (!(vauth_getpw = getlibObject("vauth_getpw", 0)))
-		_exit (1);
+		_exit(-3);
 	else
 	if (!(vclose = getlibObject("vclose", 0)))
-		_exit (1);
+		_exit(-3);
 	/*-
-	 * saldo-biuro.com.pl-david-goliath@saldo-biuro.com.pl
+	 * recip = example1-example2.com-some_user@example1-example2.com
+	 * recip + at + 1 = example1-example2.com
 	 */
 	if (env_get("QUERY_CACHE")) {
 		if ((*isvirtualdomain) (recip + at + 1)) {
@@ -431,29 +431,73 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 	if ((*isvirtualdomain) (recip + at + 1) && !(*vauth_open) ((char *) 0)) {
 		if (!env_unset("PWSTRUCT"))
 			return (-1);
-		f = str_len(recip + at + 1);
-		for (len = 0, ptr = recip + f + 1;*ptr && *ptr != '@';ptr++, len++);
-		if (!stralloc_copyb(&user,recip + f + 1, len))
-			return (-1);
-		if (!stralloc_0(&user))
-			return (-1);
-		user.len--;
+		f = str_len(recip + at + 1); /*- domain length */
+		for (len = 0, ptr = recip + f + 1; *ptr && *ptr != '@'; ptr++, len++);
+		if (len) {
+			if (!stralloc_copyb(&user, recip + f + 1, len)) /*- copy user portion */
+				return (-1);
+			if (!stralloc_0(&user))
+				return (-1);
+		} else { /*- NULL user (double bounce) */
+			if (!(ptr = env_get("ROUTE_NULL_USER")))
+				goto noauthself;
+			else
+			if (!*ptr)
+				goto noauthself;
+			for (len = 0, tptr = ptr; *tptr && *tptr != '@'; tptr++, len++);
+			if (!((*isvirtualdomain) (tptr + 1))) { /*- local domain */
+				/*-
+				 * delivery to email to local domain
+				 * mailbox@domain
+				 */
+				if (!stralloc_copys(&user, ptr)) /*- copy mailbox@localdomain */
+					return (-1);
+				if (!stralloc_0(&user))
+					return (-1);
+				recip = user.s;
+				at = len;
+				goto noauthself;
+			}
+			/*-
+			 * delivery to email to virtual domain.
+			 * convert mailbox@domain
+			 *   to
+			 * virtual_domain-mailbox@virtual_domain
+			 */
+			f = str_len(tptr + 1); /*- domain length */
+			if (!stralloc_copyb(&save, tptr + 1, f)) /*- copy domain */
+				return (-1);
+			if (!stralloc_append(&save, "-"))
+				return (-1);
+			if (!stralloc_catb(&save, ptr, len)) /*- copy user portion */
+				return (-1);
+			if (!stralloc_catb(&save, tptr, f + 1)) /*- copy @domain */
+				return (-1);
+			if (!stralloc_0(&save))
+				return (-1);
+			if (!stralloc_copyb(&user, ptr, len)) /*- copy user portion */
+				return (-1);
+			if (!stralloc_0(&user))
+				return (-1);
+			recip = save.s;
+			at = f + 1 + len;
+		}
 		if (!(u_not_found = (int *) getlibObject("userNotFound", 0)))
-			_exit (1);
-		if ((pw = (struct passwd *) (*vauth_getpw)(user.len ? user.s : "postmaster", recip + at + 1))) {
+			_exit(-3);
+		if ((pw = (struct passwd *) (*vauth_getpw) (user.s, recip + at + 1))) {
 			if (!(i_inactive = (int *) getlibObject("is_inactive", 0)))
-				_exit (1);
+				_exit(-3);
 			is_inactive = *i_inactive;
 			if (copy_pwstruct(pw, recip, at))
 				return (-1);
 			if (!env_put(pwstruct.s))
 				return (-1);
-		}  else {
+		} else {
 			if (*u_not_found) {
 				if (!stralloc_copys(&pwstruct, "PWSTRUCT=No such user "))
 					return (-1);
 				else
-				if (!stralloc_cats(&pwstruct, user.len ? user.s : "postmaster"))
+				if (!stralloc_cats(&pwstruct, user.s))
 					return (-1);
 				else
 				if (!stralloc_append(&pwstruct, "@"))
@@ -472,11 +516,10 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 				return (-2);
 			}
 		}
-	}
-	/*- end indimail */
-noauthself:
-	if (!(f = fork()))
-	{
+	} /*- if ((*isvirtualdomain) (recip_t + at_t + 1) && !(*vauth_open) ((char *) 0)) */
+/*- end indimail */
+noauthself: /*- deliver to local user in control/locals */
+	if (!(f = fork())) {
 		char           *(args[12]);
 		unsigned long   u;
 		int             n;
@@ -565,7 +608,7 @@ noauthself:
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.27 2018-07-01 11:51:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.28 2018-07-15 12:27:36+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
