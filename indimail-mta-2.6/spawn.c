@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.21  2018-07-15 12:24:32+05:30  Cprogrammer
+ * added new error string for error related to loading libindimail
+ *
  * Revision 1.20  2018-01-09 12:35:11+05:30  Cprogrammer
  * use loadLibrary() to access indimail functions()
  *
@@ -334,6 +337,9 @@ docmd()
 		if (f == -2)
 			err("Zqmail-spawn temporary MySQL error. (#4.3.0)\n");
 		else
+		if (f == -3)
+			err("Zqmail-spawn error loading indimail library. (#4.3.0)\n");
+		else
 			err("Zqmail-spawn unable to fork or out of mem. (#4.3.0)\n");
 		return;
 	}
@@ -549,7 +555,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.20 2018-01-09 12:35:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.21 2018-07-15 12:24:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
