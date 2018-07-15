@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.14  2018-07-15 13:58:08+05:30  Cprogrammer
+# create env variable ROUTE_NULL_USER, LOCK_LOGS for qmail-send
+#
 # Revision 1.13  2018-07-03 11:01:27+05:30  Cprogrammer
 # update envnoathost, defaulthost, defaultdomain if hostname has changed
 #
@@ -37,7 +40,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.13 2018-07-03 11:01:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.14 2018-07-15 13:58:08+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -62,7 +65,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.13 2018-07-03 11:01:27+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.14 2018-07-15 13:58:08+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -145,6 +148,12 @@ do
 		check_update_if_diff /service/$i/variables/SOFT_MEM 536870912
 	fi
 	if [ "$i" = "qmail-send.25" ] ; then
+		if [ -f /etc/indimail/control/virtualdomains && ! -f /service/$i/variables/ROUTE_NULL_USER ] ; then
+			echo > /service/$i/variables/ROUTE_NULL_USER
+		fi
+		if [ ! -f /service/$i/variables/LOCK_LOGS ] ; then
+			echo > /service/$i/variables/LOCK_LOGS
+		fi
 		continue
 	fi
 	if [ ! -f /service/$i/variables/DISABLE_PLUGIN ] ; then
