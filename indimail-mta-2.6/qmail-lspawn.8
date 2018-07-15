@@ -39,14 +39,29 @@ mechanism; if the address is not listed there, it invokes
 then runs
 .B qmail-local
 under the user's uid and gid.
-It does not set up any supplementary groups. If the environment variable AUTHSELF is set,
+It does not set up any supplementary groups.
+
+If the environment variable \fBAUTHSELF\fR is set, \fBqmail-lspawn\fR connects to MySQL
+and fetches user records for virtual domains in \fIvirtualdomains\fR control file.
+If connecton to MySQL fails, \fBqmail-lspawn\fR exits with -2. For an empty
+mailbox name (e.g. double bounces to virtual domains), mails can be routed to
+user defined by \fBROUTE_NULL_USER\fR environment variable. If this variable
+is set but empty, \fBqmail-lspawn\fR will treat the empty mailbox name as a trash
+address. If the domain portion, belongs to a virtual domain on the host, the mail will
+be routed to the mailbox name at the virtual domain. If the domain portion, doesn't
+belong to a virtual domain set in IndiMail, the mail will be silently deliverd to local
+user, ignoring the domain name following the '@' sign.
+
+For all other cases not covered by setting \fbAUTHSELF\fR environment variable,
 .B qmail-lspawn
-treats an empty mailbox name as a trash address. If connecton to MySQL fails,
+treats an empty mailbox name as a trash address.
 
 .SH Virtual Package Functionality
 \fBqmail-lspawn\fR can load an external library to add functionality. The virtual package
 can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR. This is set to
-\fIlibindimail\fR.\fIso\fR by default.
+\fIlibindimail\fR.\fIso\fR by default. If there is any problem loading the library or
+loading symbols required for email delivery to IndiMail virtual domains, \fBqmail-lspawn\fR
+will exit with -3.
 
 Following functions should be provided by the shared library for adding features to
 qmail-lspawn - isvirtualdomain(), vauth_open(), vauth_getpw(), vclose(). If such a
