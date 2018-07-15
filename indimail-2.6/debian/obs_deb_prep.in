@@ -67,14 +67,6 @@ do
 	if [ " $i" = " courier-imap-"$courier_version"" ] ; then
 		continue
 	fi
-	# indimail patch
-	if [ " $i" = " indimail-"$version"" ] ; then
-		if [ -f ../SOURCES/$i.patch.gz ] ; then
-			echo "applying patch for $i"
-			gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
-			continue
-		fi
-	fi
 	# apply from the obs directory
 	if [ -f ../SOURCES/$i.patch.gz ] ; then
 		echo "applying patch for $i"
@@ -84,14 +76,6 @@ do
 		echo "applying patch for $i"
 		patch -p0 < ../SOURCES/$i.patch > /dev/null
 		continue
-	fi
-	# apply patch from indimail-x/patches subdir
-	if [ -f indimail-"$version"/patches/$i.patch.gz ] ; then
-		echo "applying patch for $i"
-		gunzip -c indimail-"$version"/patches/$i.patch.gz | patch -p0 > /dev/null
-	elif [ -f indimail-"$version"/patches/$i.patch ] ; then
-		echo "applying patch for $i"
-		patch -p0 < indimail-"$version"/patches/$i.patch > /dev/null
 	fi
 done
 # Local Stuff
