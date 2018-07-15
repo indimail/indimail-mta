@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.65  2018-07-09 16:16:10+05:30  Cprogrammer
+ * redirect mail to postmaster for null user (double bounces)
+ *
  * Revision 2.64  2017-03-13 14:12:43+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -276,7 +279,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.64 2017-03-13 14:12:43+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.65 2018-07-09 16:16:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -300,19 +303,19 @@ vdl_exit(int err)
 	vclose();
 	fflush(stdout);
 	if (getenv("DISCARD_BOUNCE") && err == 100)
-		_exit (0);
+		_exit(0);
 	_exit(err);
 }
 
-/* 
+/*
  * The email message comes in on file descriptor 0 - stanard in
  * The user to deliver the email to is in the EXT environment variable
  * The domain to deliver the email to is in the HOST environment variable
  *
  * Deliver Exit Codes
- *	exit(0)   - exit successfully and have qmail delete the email 
- *	exit(100) - Bounce Back the email
- *	exit(111) - email remains in the queue.
+ *  exit(0)   - exit successfully and have qmail delete the email 
+ *  exit(100) - Bounce Back the email
+ *  exit(111) - email remains in the queue.
  */
 
 int
@@ -328,7 +331,7 @@ main(int argc, char **argv)
 #ifdef CLUSTERED_SITE
 	int             ret;
 	char           *ip, remoteip[MAX_BUFF], *local_hostid, *remote_hostid;
-	char            Email[MAX_BUFF], route[256];
+	char            Email[MAX_BUFF + MAX_BUFF], route[256];
 #endif
 #ifdef MAKE_SEEKABLE
 	char           *str;
@@ -337,9 +340,7 @@ main(int argc, char **argv)
 	setbuf(stdout, 0);
 	if (GetIndiId(&indimailuid, &indimailgid))
 		_exit(111);
-	/*
-	 * get the arguments to the program and setup things 
-	 */
+	/*- get the arguments to the program and setup things */
 	*TheUser = *TheDomain = *Bounce = 0;
 #ifdef QMAIL_EXT
 	*TheUserExt = 0;
@@ -349,109 +350,92 @@ main(int argc, char **argv)
 #endif
 	signal(SIGPIPE, SIG_IGN);
 #ifdef MAKE_SEEKABLE
-	if ((str = getenv("MAKE_SEEKABLE")) && *str != '0' && makeseekable(stdin))
-	{
+	if ((str = getenv("MAKE_SEEKABLE")) && *str != '0' && makeseekable(stdin)) {
 		fprintf(stderr, "makeseekable: system error: %s\n", strerror(errno));
 		_exit(111);
 	}
 #endif
 	unsetenv("SPAMFILTER");
 	/*- if we don't know the message size then read it */
-	if (!(MsgSize = get_message_size()))
-	{
+	if (!(MsgSize = get_message_size())) {
 		fprintf(stderr, "Discarding 0 size message\n");
 		_exit(0);
 	}
-	if (!(addr = (char *) getenv("SENDER")))
-	{
+	if (!(addr = (char *) getenv("SENDER"))) {
 		fprintf(stderr, "No SENDER environment variable\n");
 		_exit(100);
 	}
-	if (bhfcheck(addr))
-	{
+	if (bhfcheck(addr)) {
 		fprintf(stderr, "Discarding BlackHoled Address %s\n", addr);
 		_exit(0);
 	}
-	/*
-	 * get the user from indimail database 
-	 */
-	if (!(pw = ((ptr = (char *) getenv("PWSTRUCT"))) ?  strToPw(ptr, slen(ptr) + 1) : vauth_getpw(TheUser, TheDomain)))
-	{
-		if (!userNotFound)
-		{
+	/*- get the user from indimail database */
+	if (!(pw = ((ptr = (char *) getenv("PWSTRUCT"))) ? strToPw(ptr, slen(ptr) + 1) : vauth_getpw(TheUser, TheDomain))) {
+		if (!userNotFound) {
 			fprintf(stderr, "Temporary Authentication error\n");
 			vdl_exit(111);
-		} 
+		}
 #ifdef CLUSTERED_SITE
 		/*- Set SMTPROUTE for qmail-remote */
-		if ((ret = is_distributed_domain(TheDomain)) == -1)
-		{
+		if ((ret = is_distributed_domain(TheDomain)) == -1) {
 			fprintf(stderr, "is_distributed_domain: Error\n");
 			vdl_exit(111);
 		} else
-		if (ret == 1)
-		{
-			snprintf(Email, sizeof(Email), "%s@%s", TheUser, TheDomain);
-			if ((ip = findhost(Email, 0)))
-			{
-				for (ptr = ip;*ptr && *ptr != ':';ptr++);
+		if (ret == 1) {
+			snprintf(Email, sizeof (Email), "%s@%s", TheUser, TheDomain);
+			if ((ip = findhost(Email, 0))) {
+				for (ptr = ip; *ptr && *ptr != ':'; ptr++);
 				scopy(remoteip, ptr + 1, MAX_BUFF);
 				if ((ptr = strchr(remoteip, ':')))
 					*ptr = 0;
-				else
-				{
+				else {
 					fprintf(stderr, "findhost: Invalid route %s\n", ip);
 					vdl_exit(111);
 				}
-				if (!(local_hostid = get_local_hostid()))
-				{
+				if (!(local_hostid = get_local_hostid())) {
 					fprintf(stderr, "Unable to get hostid\n");
 					vdl_exit(111);
 				}
-				if (!(remote_hostid = vauth_gethostid(remoteip)))
-				{
+				if (!(remote_hostid = vauth_gethostid(remoteip))) {
 					fprintf(stderr, "unable to get hostid for %s\n", remoteip);
 					vdl_exit(111);
-				} else /* avoid looping of mails */
-				if (strncmp(remote_hostid, local_hostid, MAX_BUFF))
-				{
+				} else /* avoid looping of mails */ if (strncmp(remote_hostid, local_hostid, MAX_BUFF)) {
 					if ((ptr = getenv("ROUTES")) && (*ptr && !memcmp(ptr, "smtp", 4)))
 						ptr = "SMTP";
 					else
 						ptr = "QMTP";
-					snprintf(route, sizeof(route), "%cMTPROUTE=%s", *ptr, ip);
+					snprintf(route, sizeof (route), "%cMTPROUTE=%s", *ptr, ip);
 					putenv(route);
 					switch (qmail_remote(TheUser, TheDomain))
 					{
-						case -1:
-							fprintf(stderr, "%s@%s has insufficient quota. indimail (#5.1.4)", TheUser, TheDomain);
-							vdl_exit(100);
-							break;
-						case -2:
-							fprintf(stderr, "system error: %s\n", strerror(errno));
-							vdl_exit(111);
-							break;
-						case 0:
-							vdl_exit(0);
-							break;
-						case 100:
-							vdl_exit(100);
-							break;
-						case 111:
-							vdl_exit(111);
-							break;
+					case -1:
+						fprintf(stderr, "%s@%s has insufficient quota. indimail (#5.1.4)", TheUser, TheDomain);
+						vdl_exit(100);
+						break;
+					case -2:
+						fprintf(stderr, "system error: %s\n", strerror(errno));
+						vdl_exit(111);
+						break;
+					case 0:
+						vdl_exit(0);
+						break;
+					case 100:
+						vdl_exit(100);
+						break;
+					case 111:
+						vdl_exit(111);
+						break;
 					} /*- switch() */
 				}
 			} else
-			if (!userNotFound)
-			{
+			if (!userNotFound) {
 				fprintf(stderr, "Temporary Authentication error\n");
 				vdl_exit(111);
 			}
-		} /*- if (is_distributed()) */
+		}	  /*- if (is_distributed()) */
 #endif
 #ifdef QMAIL_EXT
-		/*
+		/*-
 		 * try and find user that matches the QmailEXT address if no user found, 
 		 * and the QmailEXT address is different, meaning there was an extension 
 		 */
@@ -459,8 +443,7 @@ main(int argc, char **argv)
 			pw = vauth_getpw(TheUserExt, TheDomain);
 #endif
 	} /*- if (!(pw = vauth_getpw(TheUser, TheDomain))) */
-	if (pw)
-	{
+	if (pw) {
 		/*-
 		 * Mail delivery has happened successfully
 		 * Do not check the return status of 
@@ -469,19 +452,16 @@ main(int argc, char **argv)
 		 * of vset_lastauth() error
 		 */
 #ifdef ENABLE_AUTH_LOGGING
-		if (getenv("ALLOW_INACTIVE"))
-		{
+		if (getenv("ALLOW_INACTIVE")) {
 			processMail(pw, pw->pw_name, TheDomain, MsgSize);
-			if (!strncmp (pw->pw_gecos, "MailGroup ", 10)) /*- Prevent groups getting inactive */
+			if (!strncmp(pw->pw_gecos, "MailGroup ", 10))	   /*- Prevent groups getting inactive */
 				vset_lastauth(TheUser, TheDomain, "deli", "", pw->pw_gecos + 10, 0);
-		} else
-		{
+		} else {
 			if (is_inactive)
 				reject_mail(pw->pw_name, TheDomain, 0, MsgSize, Bounce);
-			else
-			{
+			else {
 				processMail(pw, pw->pw_name, TheDomain, MsgSize);
-				if (!strncmp (pw->pw_gecos, "MailGroup ", 10)) /*- Prevent groups getting inactive */
+				if (!strncmp(pw->pw_gecos, "MailGroup ", 10))	   /*- Prevent groups getting inactive */
 					vset_lastauth(TheUser, TheDomain, "deli", "", pw->pw_gecos + 10, 0);
 			}
 		}
@@ -491,8 +471,7 @@ main(int argc, char **argv)
 		else
 			processMail(pw, pw->pw_name, TheDomain, MsgSize);
 #endif
-	} else
-	{
+	} else {
 #ifdef VALIAS
 		/*- process valiases if configured */
 		if (!process_valias(TheUser, TheDomain, MsgSize))
@@ -505,7 +484,7 @@ main(int argc, char **argv)
 	exit(0);
 }
 
-/* 
+/*
  * Get the command line arguments and the environment variables.
  * Force addresses to be lower case and set the default domain
  */
@@ -513,77 +492,53 @@ static void
 get_arguments(int argc, char **argv, char *user, char *domain, char *user_ext, char *bounce)
 {
 	char           *tmpstr;
-	int             local;
 #ifdef QMAIL_EXT
 	int             i;
 #endif
 
-	local = 0;
-	if (argc == 3)
-	{
+	if (argc == 3) {
 		scopy(bounce, argv[2], MAX_BUFF);
 		/*- get the last parameter in the .qmail-default file */
-		if (!(tmpstr = getenv("EXT")))
-		{
+		if (!(tmpstr = getenv("EXT"))) {
 			fprintf(stderr, "No EXT environment variable\n");
 			vdl_exit(100);
-		} else
-		{
+		} else {
 			if (*tmpstr)
 				scopy(user, tmpstr, AUTH_SIZE);
 			else
-			if (!(tmpstr = getenv("LOCAL")))
-			{
-				fprintf(stderr, "No LOCAL environment variable\n");
-				vdl_exit(100);
-			} else
-			{
-				scopy(user, tmpstr, AUTH_SIZE);
-				local = 1;
-			}
+				scopy(user, "postmaster", AUTH_SIZE);
 		}
-		if (local)
+		if (!(tmpstr = getenv("HOST")))
 			scopy(domain, ((tmpstr = (char *) getenv("DEFAULT_DOMAIN")) ? tmpstr : DEFAULT_DOMAIN), AUTH_SIZE);
 		else
-		if (!(tmpstr = getenv("HOST")))
-		{
-			fprintf(stderr, "No HOST environment variable\n");
-			vdl_exit(100);
-		} else
 			scopy(domain, tmpstr, AUTH_SIZE);
-		if (remove_quotes(user))
-		{
+		if (remove_quotes(user)) {
 			fprintf(stderr, "Invalid user %s\n", user);
 			vdl_exit(100);
 		}
 	} else
-	if (argc == 11) /*- qmail-local */
-	{
+	if (argc == 11) { /*- qmail-local */
 		scopy(user, argv[6], AUTH_SIZE);
 		scopy(domain, argv[7], AUTH_SIZE);
 		snprintf(ReturnPathEnv, AUTH_SIZE, "RPLINE=Return-Path: <%s>\n", argv[8]);
-		if (putenv(ReturnPathEnv) == -1)
-		{
+		if (putenv(ReturnPathEnv) == -1) {
 			fprintf(stderr, "vdelivermail: putenv: %s\n", strerror(ENOMEM));
 			vdl_exit(111);
 		}
-	} else
-	{
+	} else {
 		fprintf(stderr, "vdelivermail: Invalid number of arguments\n");
 		vdl_exit(111);
 	}
 	lowerit(user);
 	lowerit(domain);
 #ifdef QMAIL_EXT
-	if (getenv("QMAIL_EXT"))
-	{
-		for (i = 0;user[i] && user[i] != '-';i++)
+	if (getenv("QMAIL_EXT")) {
+		for (i = 0; user[i] && user[i] != '-'; i++)
 			user_ext[i] = user[i];
 		user_ext[i] = 0;
 	}
 #endif
-	if (!(tmpstr = vget_real_domain(domain)))
-	{
+	if (!(tmpstr = vget_real_domain(domain))) {
 		fprintf(stderr, "%s: No such domain\n", domain);
 		if (userNotFound)
 			vdl_exit(100);
@@ -596,7 +551,7 @@ get_arguments(int argc, char **argv, char *user, char *domain, char *user_ext, c
 static int
 processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 {
-	char            TheDir[AUTH_SIZE], tmpbuf[AUTH_SIZE];
+	char            TheDir[AUTH_SIZE + 3], tmpbuf[AUTH_SIZE];
 	char           *ptr, *maildirfolder;
 	int             ret;
 	mdir_t          cur_size, mail_size_limit, cur_count = 0;
@@ -607,21 +562,18 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 	uid_t           uid;
 	gid_t           gid;
 
-	if (!vget_assign(domain, NULL, AUTH_SIZE, &uid, &gid))
-	{
+	if (!vget_assign(domain, NULL, AUTH_SIZE, &uid, &gid)) {
 		fprintf(stderr, "%s: domain does not exist\n", domain);
 		vdl_exit(111);
 	}
-	/*
+	/*-
 	 * check if the account is locked and their email
 	 * should be bounced back
 	 */
-	if (pw->pw_gid & BOUNCE_MAIL)
-	{
+	if (pw->pw_gid & BOUNCE_MAIL) {
 		snprintf(tmpbuf, AUTH_SIZE, "%s/Maildir", pw->pw_dir);
 #ifdef USE_MAILDIRQUOTA
-		if ((mail_size_limit = parse_quota(pw->pw_shell, &mail_count_limit)) == -1)
-		{
+		if ((mail_size_limit = parse_quota(pw->pw_shell, &mail_count_limit)) == -1) {
 			fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
 			return (-1);
 		}
@@ -630,37 +582,36 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 		mail_size_limit = atol(pw->pw_shell);
 		cur_size = recalc_quota(tmpbuf, 0);
 #endif
-		/* Remove bounce flag if a message size of 1024000 can be delivered to the user */
+		/*-
+		 * Remove bounce flag if a message size of 1024000 can be delivered to the user 
+		 */
 		if (strncmp(pw->pw_shell, "NOQUOTA", 7) && ((cur_size + 1024000) < mail_size_limit))
 			vset_lastdeliver(user, domain, 0);
-		else
-		{
-			getEnvConfigStr(&ptr, "OVERQUOTA_CMD", LIBEXECDIR"/overquota.sh");
-			if (!access(ptr, X_OK))
-			{
-				/*
-				 * Call overquota command with 5 arguments
-				 */
+		else {
+			getEnvConfigStr(&ptr, "OVERQUOTA_CMD", LIBEXECDIR "/overquota.sh");
+			if (!access(ptr, X_OK)) {
+				/*- Call overquota command with 5 arguments */
 				if ((maildirfolder = (char *) getenv("MAILDIRFOLDER")))
-					snprintf(TheDir, sizeof(TheDir), "%s %s/Maildir/%s %"PRIu64" %"PRIu64" %"PRIu64" %s",
+					snprintf(TheDir, sizeof (TheDir), "%s %s/Maildir/%s %" PRIu64 " %" PRIu64 " %" PRIu64 " %s",
 						ptr, pw->pw_dir, maildirfolder, MsgSize, cur_size, cur_count, pw->pw_shell);
 				else
-					snprintf(TheDir, sizeof(TheDir), "%s %s/Maildir %"PRIu64" %"PRIu64" %"PRIu64" %s",
+					snprintf(TheDir, sizeof (TheDir), "%s %s/Maildir %" PRIu64 " %" PRIu64 " %" PRIu64 " %s",
 						ptr, pw->pw_dir, MsgSize, cur_size, cur_count, pw->pw_shell);
 				runcmmd(TheDir, 0);
 			}
-			fprintf(stderr, "Account %s@%s locked/overquota %"PRIu64"/%"PRIu64". indimail (#5.1.1)", user, domain, cur_size, mail_size_limit);
+			fprintf(stderr, "Account %s@%s locked/overquota %" PRIu64 "/%" PRIu64 ". indimail (#5.1.1)", user, domain, cur_size,
+					mail_size_limit);
 			getEnvConfigStr(&ptr, "HOLDOVERQUOTA", "holdoverquota");
 			if (ptr && *ptr == '/')
-				scopy(TheDir, ptr, sizeof(TheDir));
+				scopy(TheDir, ptr, sizeof (TheDir));
 			else
-				snprintf(TheDir, sizeof(TheDir), "%s/%s", tmpbuf, ptr);
+				snprintf(TheDir, sizeof (TheDir) - 2, "%s/%s", tmpbuf, ptr);
 			if (!access(TheDir, F_OK))
 				vdl_exit(111);
 			vdl_exit(100);
 		}
 	}
-	/*
+	/*-
 	 * check for a .qmail file in Maildir or valias table
 	 * If either exists, then carry out delivery instructions
 	 * and skip Maildir delivery
@@ -668,40 +619,35 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 	ptr = (char *) getenv("EXT");
 	if (ptr && *ptr && doAlias(pw->pw_dir, user, domain, MsgSize) == 1)
 		vdl_exit(0);
-	if (!strncmp(pw->pw_gecos, "MailGroup ", 10))
-	{
+	if (!strncmp(pw->pw_gecos, "MailGroup ", 10)) {
 		fprintf(stderr, "Mail delivery to group is avoided");
-		return(0);
+		return (0);
 	}
 	snprintf(TheDir, AUTH_SIZE, "%s/Maildir/", pw->pw_dir);
 	ptr = process_dir(TheDir, uid, gid);
-	ret = deliver_mail(ptr, MsgSize, pw->pw_shell, uid, gid, domain,
-		&MailQuotaCount, &MailQuotaSize);
-	if (ret == -1 || ret == -4)
-	{
+	ret = deliver_mail(ptr, MsgSize, pw->pw_shell, uid, gid, domain, &MailQuotaCount, &MailQuotaSize);
+	if (ret == -1 || ret == -4) {
 		if (ret == -1)
-			fprintf(stderr, "%s@%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-				user, domain, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+			fprintf(stderr,
+					"%s@%s has insufficient quota. %" PRIu64 "/%" PRIu64 ":%" PRIu64 "/%" PRIu64 ":%" PRIu64 ". indimail (#5.1.4)",
+					user, domain, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 		vdl_exit(100);
 	} else
-	if (ret == -2)
-	{
+	if (ret == -2) {
 		fprintf(stderr, "temporary system error: %s\n", strerror(errno));
 		vdl_exit(111);
 	} else
-	if (ret == -3) /* mail is looping */
-	{
+	if (ret == -3) { /* mail is looping */
 		fprintf(stderr, "%s is looping\n", TheDir);
 		vdl_exit(100);
-	}
-	else
-	if (ret == -5) /*- Defer Overquota mails */
-	{
-		fprintf(stderr, "%s@%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-			user, domain, MsgSize, CurBytes, CurCount, MailQuotaSize, MailQuotaCount);
+	} else
+	if (ret == -5) { /*- Defer Overquota mails */
+		fprintf(stderr,
+				"%s@%s has insufficient quota. %" PRIu64 "/%" PRIu64 ":%" PRIu64 "/%" PRIu64 ":%" PRIu64 ". indimail (#5.1.4)",
+				user, domain, MsgSize, CurBytes, CurCount, MailQuotaSize, MailQuotaCount);
 		vdl_exit(111);
 	}
-	return(0);
+	return (0);
 }
 
 /*
@@ -723,25 +669,23 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 	char           *ptr;
 	int             ret = 0;
 
-	if ((ptr =getenv("NOALIAS")) && *ptr > '0')
+	if ((ptr = getenv("NOALIAS")) && *ptr > '0')
 		return (0);
 #ifdef VALIAS
 	/*- process valiases if configured */
 	if (process_valias(user, domain, MsgSize))
-		return(1);
+		return (1);
 #endif
 	/*- format the file name */
 	snprintf(tmpbuf, BUFF_SIZE, "%s/.qmail", dir);
-	if ((fs = fopen(tmpbuf, "r")) == NULL)
-		/*- no file, so just return */
+	if ((fs = fopen(tmpbuf, "r")) == NULL) /*- no file, so just return */
 		return (-1);
 	/*- format a simple loop checker name */
 	snprintf(tmpbuf, BUFF_SIZE, "%s@%s", user, domain);
-	while (fgets(qmail_line, BUFF_SIZE, fs) != NULL)
-	{
+	while (fgets(qmail_line, BUFF_SIZE, fs) != NULL) {
 		if ((ptr = strrchr(qmail_line, '\n')) != NULL)
 			*ptr = 0;
-		/*
+		/*-
 		 * simple loop check, if they are sending it to themselves
 		 * then skip this line
 		 */
@@ -752,37 +696,33 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 		else
 			ptr = qmail_line;
 		putenv("NOALIAS=2");
-		ret = deliver_mail(ptr, MsgSize, "AUTO", indimailgid, indimailgid, domain,
-			&MailQuotaSize, &MailQuotaCount);
+		ret = deliver_mail(ptr, MsgSize, "AUTO", indimailgid, indimailgid, domain, &MailQuotaSize, &MailQuotaCount);
 		unsetenv("NOALIAS");
 		if (ret == 99)
 			break;
-		if (ret == -1 || ret == -4)
-		{
+		if (ret == -1 || ret == -4) {
 			if (ret == -1)
-				fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-					qmail_line, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+				fprintf(stderr,
+						"%s has insufficient quota. %" PRIu64 "/%" PRIu64 ":%" PRIu64 "/%" PRIu64 ":%" PRIu64 ". indimail (#5.1.4)",
+						qmail_line, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 			vdl_exit(100);
 		} else
 		if (ret == -2)
 			vdl_exit(111);
 		else
-		if (ret == -3) /* mail is looping */
-		{
+		if (ret == -3) {	/* mail is looping */
 			fprintf(stderr, "%s is looping\n", qmail_line);
 			vdl_exit(100);
 		} else
-		if (ret == -5) /*- Defer Overquota mails */
-		{
-			fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-				qmail_line, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+		if (ret == -5) { /*- Defer Overquota mails */
+			fprintf(stderr,
+					"%s has insufficient quota. %" PRIu64 "/%" PRIu64 ":%" PRIu64 "/%" PRIu64 ":%" PRIu64 ". indimail (#5.1.4)",
+					qmail_line, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 			vdl_exit(111);
 		}
 	}
 	fclose(fs);
-	/*-
-	 * A Blank .qmail file will result in mails getting blackholed
-	 */
+	/*- A Blank .qmail file will result in mails getting blackholed */
 	return (1);
 }
 
@@ -794,7 +734,7 @@ reject_mail(char *user, char *domain, int status, mdir_t MsgSize, char *bounce)
 	char            route[256];
 	char           *ptr;
 
-	/*
+	/*-
 	 * the indimail user does not exist. Follow the rest of 
 	 * the directions in the .qmail-default file
 	 *
@@ -804,8 +744,7 @@ reject_mail(char *user, char *domain, int status, mdir_t MsgSize, char *bounce)
 	if (!strncmp(bounce, DELETE_ALL, AUTH_SIZE))
 		vdl_exit(0);
 	else
-	if (!strncmp(bounce, BOUNCE_ALL, AUTH_SIZE))
-	{
+	if (!strncmp(bounce, BOUNCE_ALL, AUTH_SIZE)) {
 		if (status == 0)
 			fprintf(stderr, "Account %s@%s is inactive. indimail(#5.1.3)", user, domain);
 		else
@@ -813,7 +752,7 @@ reject_mail(char *user, char *domain, int status, mdir_t MsgSize, char *bounce)
 			fprintf(stderr, "No Account %s@%s here by that name. indimail (#5.1.5)", user, domain);
 		vdl_exit(100);
 	}
-	/*
+	/*-
 	 * Last case: the last parameter is a Maildir, an email address, ipaddress or hostname
 	 */
 	if (status == 0)
@@ -821,71 +760,64 @@ reject_mail(char *user, char *domain, int status, mdir_t MsgSize, char *bounce)
 	else
 	if (status == 1)
 		fprintf(stderr, "No Account %s@%s - delivering to %s. indimail (#5.1.6) ", user, domain, bounce);
-	if (*bounce != '/' && !strchr(bounce, '@')) /*- IP Address */
-	{
+	if (*bounce != '/' && !strchr(bounce, '@')) { /*- IP Address */
 		if (status == 0)
 			vdl_exit(100);
-		for (i = 0, ptr = bounce;*ptr;ptr++)
-		{
+		for (i = 0, ptr = bounce; *ptr; ptr++) {
 			if (*ptr == ':')
 				i++;
 		}
-		if (i != 2)
-		{
+		if (i != 2) {
 			fprintf(stderr, "Invalid SMTPROUTE Specification [%s]. indimail (#5.1.8)", bounce);
 			vdl_exit(111);
 		}
-		snprintf(route, sizeof(route), "SMTPROUTE=%s", bounce);
+		snprintf(route, sizeof (route), "SMTPROUTE=%s", bounce);
 		putenv(route);
 		switch (qmail_remote(user, domain))
 		{
-			case -1:
-				fprintf(stderr, "%s@%s has insufficient quota. indimail (#5.1.4)", user, domain);
-				vdl_exit(100);
-				break;
-			case -2:
-				fprintf(stderr, "system error: %s\n", strerror(errno));
-				vdl_exit(111);
-				break;
-			case 0:
-				vdl_exit(0);
-				break;
-			case 100:
-				vdl_exit(100);
-				break;
-			case 111:
-				vdl_exit(111);
-				break;
+		case -1:
+			fprintf(stderr, "%s@%s has insufficient quota. indimail (#5.1.4)", user, domain);
+			vdl_exit(100);
+			break;
+		case -2:
+			fprintf(stderr, "system error: %s\n", strerror(errno));
+			vdl_exit(111);
+			break;
+		case 0:
+			vdl_exit(0);
+			break;
+		case 100:
+			vdl_exit(100);
+			break;
+		case 111:
+			vdl_exit(111);
+			break;
 		} /*- switch() */
-	} else /*- check if it is a path add the /Maildir/ for delivery */
-	if (*bounce == '/' && !strstr(bounce, "/Maildir/"))
+	} else /*- check if it is a path add the /Maildir/ for delivery */ if (*bounce == '/' && !strstr(bounce, "/Maildir/"))
 		scat(bounce, "/Maildir/", AUTH_SIZE);
 	/*- Send the email out, if we get a -1 then the user is over quota */
 	ret = deliver_mail(bounce, MsgSize, "AUTO", indimailuid, indimailgid, domain, &MailQuotaSize, &MailQuotaCount);
-	if (ret == -1 || ret == -4)
-	{
+	if (ret == -1 || ret == -4) {
 		if (ret == -1)
-			fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-				bounce, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+			fprintf(stderr,
+					"%s has insufficient quota. %" PRIu64 "/%" PRIu64 ":%" PRIu64 "/%" PRIu64 ":%" PRIu64 ". indimail (#5.1.4)",
+					bounce, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 		vdl_exit(100);
 	} else
-	if (ret == -2)
-	{
+	if (ret == -2) {
 		fprintf(stderr, "system error: %s\n", strerror(errno));
 		vdl_exit(111);
 	} else
-	if (ret == -3) /* mail is looping */
-	{
+	if (ret == -3) {		/* mail is looping */
 		fprintf(stderr, "%s is looping\n", bounce);
 		vdl_exit(100);
 	} else
-	if (ret == -5) /*- Defer Overquota mails */
-	{
-		fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-			bounce, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+	if (ret == -5) { /*- Defer Overquota mails */
+		fprintf(stderr, "%s has insufficient quota. %" PRIu64 "/%" PRIu64 ":%" PRIu64 "/%" PRIu64 ":%" PRIu64 ". indimail (#5.1.4)",
+				bounce, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 		vdl_exit(111);
 	}
-	return(0);
+	return (0);
 }
 
 static int
@@ -900,98 +832,79 @@ bhfcheck(char *addr)
 	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/')
-		snprintf(tmpbuf, sizeof(tmpbuf), "%s/blackholedsender", controldir);
+		snprintf(tmpbuf, sizeof (tmpbuf), "%s/blackholedsender", controldir);
 	else
-		snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedsender", sysconfdir, controldir);
-	if (!stat(tmpbuf, &statbuf))
-	{
-		if (!(mapbhf = (char *) malloc(statbuf.st_size)))
-		{
-			fprintf(stderr, "malloc: %"PRIu64": %s\n", (mdir_t) statbuf.st_size, strerror(errno));
+		snprintf(tmpbuf, sizeof (tmpbuf), "%s/%s/blackholedsender", sysconfdir, controldir);
+	if (!stat(tmpbuf, &statbuf)) {
+		if (!(mapbhf = (char *) malloc(statbuf.st_size))) {
+			fprintf(stderr, "malloc: %" PRIu64 ": %s\n", (mdir_t) statbuf.st_size, strerror(errno));
 			vdl_exit(111);
 		}
-		if ((fd = open(tmpbuf, O_RDONLY)) == -1)
-		{
+		if ((fd = open(tmpbuf, O_RDONLY)) == -1) {
 			fprintf(stderr, "open: %s: %s\n", tmpbuf, strerror(errno));
 			free(mapbhf);
 			vdl_exit(111);
 		}
-		if ((count = read(fd, mapbhf, statbuf.st_size)) != statbuf.st_size)
-		{
-			fprintf(stderr, "read: %"PRIu64": %s\n", (mdir_t) statbuf.st_size, strerror(errno));
+		if ((count = read(fd, mapbhf, statbuf.st_size)) != statbuf.st_size) {
+			fprintf(stderr, "read: %" PRIu64 ": %s\n", (mdir_t) statbuf.st_size, strerror(errno));
 			free(mapbhf);
 			close(fd);
 			vdl_exit(111);
 		}
 		close(fd);
-		for (ptr = mapbhf;ptr < mapbhf + statbuf.st_size;ptr++)
-		{
+		for (ptr = mapbhf; ptr < mapbhf + statbuf.st_size; ptr++) {
 			if (*ptr == '\n')
 				*ptr = 0;
 		}
 		i = 0;
-		for (j = 0; j < count; ++j)
-		{
-			if (!mapbhf[j])
-			{
-				if (mapbhf[i]) /*- Not a blank line */
-				{
-					if (mapbhf[i] == '@')
-					{
-						if (!(ptr = strchr(addr, '@')))
-						{
+		for (j = 0; j < count; ++j) {
+			if (!mapbhf[j]) {
+				if (mapbhf[i]) { /*- Not a blank line */
+					if (mapbhf[i] == '@') {
+						if (!(ptr = strchr(addr, '@'))) {
 							free(mapbhf);
-							return(0);
+							return (0);
 						}
 					} else
 						ptr = addr;
-					if (!strncmp(ptr, mapbhf + i, slen(mapbhf + i)))
-					{
+					if (!strncmp(ptr, mapbhf + i, slen(mapbhf + i))) {
 						free(mapbhf);
-						return(1);
+						return (1);
 					}
 				}
 				i = j + 1;
 			}
 		}
 		free(mapbhf);
-		return(0);
+		return (0);
 	}
 	if (*controldir == '/')
-		snprintf(tmpbuf, sizeof(tmpbuf), "%s/blackholedpatterns",  controldir);
+		snprintf(tmpbuf, sizeof (tmpbuf), "%s/blackholedpatterns", controldir);
 	else
-		snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedpatterns", sysconfdir, controldir);
-	if (!stat(tmpbuf, &statbuf))
-	{
-		if (!(mapbhf = (char *) malloc(statbuf.st_size)))
-		{
-			fprintf(stderr, "malloc: %"PRIu64": %s\n", (mdir_t) statbuf.st_size, strerror(errno));
+		snprintf(tmpbuf, sizeof (tmpbuf), "%s/%s/blackholedpatterns", sysconfdir, controldir);
+	if (!stat(tmpbuf, &statbuf)) {
+		if (!(mapbhf = (char *) malloc(statbuf.st_size))) {
+			fprintf(stderr, "malloc: %" PRIu64 ": %s\n", (mdir_t) statbuf.st_size, strerror(errno));
 			vdl_exit(111);
 		}
-		if ((fd = open(tmpbuf, O_RDONLY)) == -1)
-		{
+		if ((fd = open(tmpbuf, O_RDONLY)) == -1) {
 			fprintf(stderr, "open: %s: %s\n", tmpbuf, strerror(errno));
 			vdl_exit(111);
 		}
-		if ((count = read(fd, mapbhf, statbuf.st_size)) != statbuf.st_size)
-		{
-			fprintf(stderr, "read: %"PRIu64": %s\n", (mdir_t) statbuf.st_size, strerror(errno));
+		if ((count = read(fd, mapbhf, statbuf.st_size)) != statbuf.st_size) {
+			fprintf(stderr, "read: %" PRIu64 ": %s\n", (mdir_t) statbuf.st_size, strerror(errno));
 			close(fd);
 			vdl_exit(111);
 		}
 		close(fd);
-		for (ptr = mapbhf;ptr < mapbhf + statbuf.st_size;ptr++)
-		{
+		for (ptr = mapbhf; ptr < mapbhf + statbuf.st_size; ptr++) {
 			if (*ptr == '\n')
 				*ptr = 0;
 		}
 		i = 0;
-		for (j = 0; j < count; ++j)
-		{
-			if (!mapbhf[j]) /*- Not a blank line */
-			{
-				if (mapbhf[i])
-				{
+		for (j = 0; j < count; ++j) {
+			if (!mapbhf[j]) { /*- Not a blank line */
+				if (mapbhf[i]) {
 					subvalue = mapbhf[i] != '!';
 					if (!subvalue)
 						i++;
@@ -1007,7 +920,8 @@ bhfcheck(char *addr)
 	return (0);
 }
 
-static char *process_dir(char *dir, uid_t uid, gid_t gid)
+static char    *
+process_dir(char *dir, uid_t uid, gid_t gid)
 {
 	int             i;
 	char           *maildirfolder, TheDir[AUTH_SIZE];
@@ -1018,21 +932,18 @@ static char *process_dir(char *dir, uid_t uid, gid_t gid)
 		"tmp",
 	};
 	maildirfolder = (char *) getenv("MAILDIRFOLDER");
-	for (i = 0;i < 3;i++)
-	{
+	for (i = 0; i < 3; i++) {
 		if (maildirfolder)
 			snprintf(TheDir, AUTH_SIZE, "%s/%s/%s", dir, maildirfolder, MailDirNames[i]);
 		else
 			snprintf(TheDir, AUTH_SIZE, "%s/%s", dir, MailDirNames[i]);
-		if (access(TheDir, F_OK))
-		{
-			if (r_mkdir(TheDir, INDIMAIL_DIR_MODE, uid, gid))
-			{
+		if (access(TheDir, F_OK)) {
+			if (r_mkdir(TheDir, INDIMAIL_DIR_MODE, uid, gid)) {
 				fprintf(stderr, "access: %s: %s. indimail (#5.1.2)", TheDir, strerror(errno));
 				vdl_exit(111);
 			}
 			snprintf(TheDir, MAX_BUFF, "%s/%s/maildirfolder", dir, maildirfolder);
-			close(open(TheDir, O_CREAT | O_TRUNC , 0644));
+			close(open(TheDir, O_CREAT | O_TRUNC, 0644));
 		}
 	}
 	if (maildirfolder)
@@ -1043,7 +954,7 @@ static char *process_dir(char *dir, uid_t uid, gid_t gid)
 }
 
 #ifdef VALIAS
-/* 
+/*
  * Process any valiases for this user@domain
  * 
  * This will look up any valiases in indimail and
@@ -1060,8 +971,7 @@ process_valias(char *user, char *domain, mdir_t MsgSize)
 	char           *tmpstr;
 
 	/*- Get the aliases for this user@domain */
-	for (status = found = 0;;found++)
-	{
+	for (status = found = 0;; found++) {
 		if (!(tmpstr = valias_select(user, domain)))
 			break;
 		if (tmpstr[0] == '/')
@@ -1069,33 +979,31 @@ process_valias(char *user, char *domain, mdir_t MsgSize)
 		putenv("NOALIAS=1");
 		ret = deliver_mail(tmpstr, MsgSize, "AUTO", indimailuid, indimailgid, domain, &MailQuotaSize, &MailQuotaCount);
 		unsetenv("NOALIAS");
-		if (ret == -1 || ret == -4)
-		{
+		if (ret == -1 || ret == -4) {
 			if (status++)
 				printf("\n\n");
 			if (ret == -1)
-				fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-					tmpstr, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+				fprintf(stderr,
+						"%s has insufficient quota. %" PRIu64 "/%" PRIu64 ":%" PRIu64 "/%" PRIu64 ":%" PRIu64 ". indimail (#5.1.4)",
+						tmpstr, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 			continue;
 		} else
-		if (ret == -2)
-		{
+		if (ret == -2) {
 			fprintf(stderr, "temporary system error: %s\n", strerror(errno));
 			vdl_exit(111);
 		} else
-		if (ret == -3) /* mail is looping */
-		{
+		if (ret == -3) {	/* mail is looping */
 			if (status++)
 				printf("\n\n");
 			fprintf(stderr, "%s is looping\n", tmpstr);
 			continue;
 		} else
-		if (ret == -5) /*- Defer Overquota mails */
-		{
+		if (ret == -5) { /*- Defer Overquota mails */
 			if (status++)
 				printf("\n\n");
-			fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-				tmpstr, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+			fprintf(stderr,
+					"%s has insufficient quota. %" PRIu64 "/%" PRIu64 ":%" PRIu64 "/%" PRIu64 ":%" PRIu64 ". indimail (#5.1.4)",
+					tmpstr, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 			vdl_exit(111);
 		}
 	} /*- for (found = 0;;found++) */
