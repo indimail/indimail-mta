@@ -1,5 +1,8 @@
 /*
  * $Log: spfquery.c,v $
+ * Revision 1.5  2018-07-31 21:22:27+05:30  Cprogrammer
+ * removed redundant variable remoteip
+ *
  * Revision 1.4  2012-04-10 20:38:03+05:30  Cprogrammer
  * added remoteip argument (ipv4) to spfcheck()
  *
@@ -49,12 +52,11 @@ die_nomem()
 
 stralloc        addr = { 0 };
 stralloc        helohost = { 0 };
-char           *remoteip;
-char           *local;
-
 stralloc        spflocal = { 0 };
 stralloc        spfguess = { 0 };
 stralloc        spfexp = { 0 };
+
+char           *local = "localhost";
 
 int
 main(argc, argv)
@@ -66,9 +68,6 @@ main(argc, argv)
 
 	if (argc < 4)
 		die_usage();
-
-	remoteip = (char *) strdup(argv[1]);
-	local = "localhost";
 
 	if (!stralloc_copys(&helohost, argv[2]))
 		die_nomem();
@@ -107,7 +106,7 @@ main(argc, argv)
 		die_nomem();
 
 	dns_init(0);
-	if ((r = spfcheck(remoteip)) == SPF_NOMEM)
+	if ((r = spfcheck(argv[1])) == SPF_NOMEM)
 		die_nomem();
 	substdio_puts(subfdout, "result=");
 	switch (r)
@@ -167,7 +166,7 @@ main(argc, argv)
 void
 getversion_spfquery_c()
 {
-	static char    *x = "$Id: spfquery.c,v 1.4 2012-04-10 20:38:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spfquery.c,v 1.5 2018-07-31 21:22:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
