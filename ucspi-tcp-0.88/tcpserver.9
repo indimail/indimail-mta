@@ -300,7 +300,7 @@ instead of exec of the qmail-smtpd executable. This improves the perfomance of t
 rblsmtpd.so is loaded without executing any initialization function and without changing directory. On SIGHUP, tcpserver
 executes the function smtp_init(0). The variable PLUGINn_dir should be used if your function expects to be in a particular
 directory to function properly. PLUGIN1 causes tcpserver to preload rblsmtpd.so and if \fIprog\fR is
-HOME/LIB?indimail/plugins/rblsmtpd.so, it will simply execute the function \fIrblsmtpd\fR, from the shared library rblsmtpd.so
+HOME/lib/indimail/plugins/rblsmtpd.so, it will simply execute the function \fIrblsmtpd\fR, from the shared library rblsmtpd.so
 already preloaded in the memory.
 
 .SH ENVIRONMENT
