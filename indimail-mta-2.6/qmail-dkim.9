@@ -180,7 +180,7 @@ error codes (F,G,H,I,J,K,L,M,N,P,Q,R,S,T,U,V,W,X) for signature verification. In
 against SSP/ADSP only for DKIM_NO_SIGNATURE and DKIM_NO_VALID_SIGNATURE
 set the environment variable 
 .BR DKIMPRACTICE="ST" .
-If you want automatic behaviour, set DKIMADSPERROR to an empty string. In this case ADSP/SSP will be used when return code
+If you want automatic behaviour, set DKIMPRACTICE to an empty string. In this case ADSP/SSP will be used when return code
 matches "FGHIJKLMNPQRSTUVWX".
 .B qmail-dkim
 uses ADSP as the default signing practice. You can override this by setting the SIGN_PRACTICE to ssp, adsp, local (lowercase).
