@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.21  2018-08-08 23:57:02+05:30  Cprogrammer
+ * issue success if at lease one one good signature is found
+ *
  * Revision 1.20  2018-05-22 10:03:26+05:30  Cprogrammer
  * changed return type of writeHeader() to void
  *
@@ -808,25 +811,25 @@ main(int argc, char **argv)
 		}
 		if (!ret)
 		{
-			if ((ret = DKIMVerifyResults(&ctxt, &sCount, &sSize)) != DKIM_SUCCESS)
+			ret = DKIMVerifyResults(&ctxt, &sCount, &sSize);
+			if (ret != DKIM_SUCCESS && ret != DKIM_3PS_SIGNATURE && ret != DKIM_NEUTRAL)
 				dkim_error(ret);
 			if ((ret = DKIMVerifyGetDetails(&ctxt, &nSigCount, &pDetails, szPolicy)) != DKIM_SUCCESS)
 				dkim_error(ret);
-			else
-			{
-				for (ret = 0,i = 0; i < nSigCount; i++) {
+			else {
+				for (ret = DKIM_FAIL, i = 0; i < nSigCount; i++) {
 					if (verbose)
 						printf("Signature # %02d: ", i + 1);
-					if (pDetails[i].nResult >= 0)
-					{
+					if (pDetails[i].nResult >= 0) {
+						ret = 0;
 						if (verbose)
 							printf("Success\n");
 						continue;
-					} else
-					{
-						ret = pDetails[i].nResult;
+					} else {
+						if (ret == DKIM_FAIL)
+							ret = pDetails[i].nResult;
 						if (verbose)
-							printf("Failure %d\n", ret);
+							printf("Failure %d\n", pDetails[i].nResult);
 					}
 				}
 				if (!nSigCount)
@@ -896,7 +899,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.20 2018-05-22 10:03:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.21 2018-08-08 23:57:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
