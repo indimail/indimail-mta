@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.49  2018-08-08 23:58:01+05:30  Cprogrammer
+ * issue success if at lease one one good signature is found
+ *
  * Revision 1.48  2017-09-05 12:37:16+05:30  Cprogrammer
  * added missing DKIM_MFREE()
  *
@@ -1264,10 +1267,12 @@ main(int argc, char *argv[])
 				if ((ret = DKIMVerifyGetDetails(&ctxt, &nSigCount, &pDetails, szPolicy)) != DKIM_SUCCESS)
 					maybe_die_dkim(ret);
 				else
-				for (ret = DKIM_SUCCESS,i = 0; i < nSigCount; i++) {
-					if (pDetails[i].nResult < 0) {
-						ret = pDetails[i].nResult;
-						break; /*- don't know if it is right to break */
+				for (ret = DKIM_FAIL,i = 0; i < nSigCount; i++) {
+					if (pDetails[i].nResult >= 0) {
+						ret = 0;
+					} else {
+						if (ret == DKIM_FAIL)
+							ret = pDetails[i].nResult;
 					}
 				}
 				if (!nSigCount)
@@ -1412,7 +1417,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.48 2017-09-05 12:37:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.49 2018-08-08 23:58:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
