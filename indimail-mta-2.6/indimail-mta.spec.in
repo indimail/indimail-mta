@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.176 2018-07-03 11:42:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.177 2018-08-12 00:32:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1954,20 +1954,22 @@ if [ %{noclamav} -eq 0 ] ; then
   echo "Checking if clamav is installed"
   clamav_os=0
   clamdPrefix=%{_prefix}
-  qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
   mysysconfdir=%{qsysconfdir}
+  qhpsi="%{_prefix}/bin/clamdscan %s --config=%{mysysconfdir}/clamd.conf--fdpass --quiet --no-summary"
 else
   if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
     clamav_os=1
     clamdPrefix="/usr"
-    qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
     if [ -d %{_sysconfdir}/clamav ] ; then
       mysysconfdir=%{_sysconfdir}/clamav
+    elif [ -d %{_sysconfdir}/clamd.d ] ; then
+      mysysconfdir=%{_sysconfdir}/clamd.d
     elif [ -d %{qsysconfdir} ] ; then
       mysysconfdir=%{qsysconfdir}
     else
       mysysconfdir=%{_sysconfdir}
     fi
+    qhpsi="/usr/bin/clamdscan %s --config=%{mysysconfdir}/clamd.conf --fdpass --quiet --no-summary"
   else
     clamav_os=0
   fi
