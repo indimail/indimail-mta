@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.213 $";
+char           *revision = "$Revision: 1.214 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -359,6 +359,10 @@ struct authcmd {
 	{"digest-md5", auth_digest_md5},
 	{0, err_noauth}
 };
+
+/*- misc */
+static stralloc sa = { 0 };
+static stralloc domBuf = { 0 };
 
 int             smtp_port;
 
@@ -723,8 +727,9 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 {
 	char           *ptr;
 	int             idx;
-	stralloc        tmpLine = { 0 };
+	static stralloc tmpLine = { 0 };
 
+	tmpLine.len = 0;
 	for (ptr = arg3 + 1, idx = 0; idx < len; idx++) {
 		if (!arg3[idx]) {
 			/*- write data to spamlogger and get X-Bogosity line in tmpLine */
@@ -802,9 +807,10 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, in
 {
 	char           *ptr;
 	int             idx;
-	stralloc        tmpLine = { 0 };
 	char            size[FMT_ULONG];
+	static stralloc tmpLine = { 0 };
 
+	tmpLine.len = 0;
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
 	size[fmt_ulong(size, msg_size)] = 0;
 	for (ptr = arg3 + 1, idx = 0; idx < len; idx++) {
@@ -1855,7 +1861,6 @@ check_recipient_sql(char *rcpt, int len)
 int
 dnscheck(char *addr, int len, int paranoid)
 {
-	stralloc        sa = { 0 };
 	ipalloc         ia = { 0 };
 	unsigned int    random;
 	int             j;
@@ -2095,8 +2100,9 @@ int
 badhostcheck()
 {
 	int             i = 0, j = 0, x = 0, negate = 0;
-	stralloc        curregex = { 0 };
+	static stralloc curregex = { 0 };
 
+	curregex.len = 0;
 	while (j < brh.len) {
 		i = j;
 		while ((brh.s[i] != '\0') && (i < brh.len))
@@ -4177,15 +4183,13 @@ blast(int *hops)
 }
 
 #ifdef USE_SPF
+stralloc        rcvd_spf = { 0 };
 void
 spfreceived()
 {
-	stralloc        sa = { 0 };
-	stralloc        rcvd_spf = { 0 };
 
 	if (!spfbehavior || relayclient)
 		return;
-
 	if (!stralloc_copys(&rcvd_spf, "Received-SPF: "))
 		die_nomem();
 	if (!spfinfo(&sa))
@@ -4756,8 +4760,7 @@ auth_digest_md5()
 	unsigned char   digest[20], encrypted[41];
 	unsigned char  *s, *x = encrypted;
 	int             i, r, len = 0; /*- qop = 1; */
-	stralloc        tmp = { 0 }, nonce = {
-	0};
+	static stralloc tmp = { 0 }, nonce = {0};
 
 	s = unique;
 	s += (i = fmt_uint((char *) s, getpid()));
@@ -5118,7 +5121,6 @@ smtp_atrn(char *arg)
 	int             i, end_flag, status, Reject = 0, Accept = 0;
 	char            err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 	char            user[MAX_BUFF], domain[MAX_BUFF];
-	stralloc        domBuf = { 0 };
 	void            (*vclose) (void);
 	int             (*parse_email) (char *, char *, char *, int);
 	char           *(*vshow_atrn_map) (char **, char **);
@@ -5156,6 +5158,7 @@ smtp_atrn(char *arg)
 		err_library(errstr);
 		return;
 	}
+	domBuf.len = 0;
 	for (; *arg && !isalnum((int) *arg); arg++);
 	if (*arg)
 		domain_ptr = arg;
@@ -5427,8 +5430,7 @@ tls_err(const char *s)
 int
 tls_verify()
 {
-	stralloc        clients = { 0 }, filename = {
-	0};
+	stralloc        clients = { 0 }, filename = { 0 };
 	struct constmap mapclients;
 
 	if (!ssl || relayclient || ssl_verified)
@@ -5470,6 +5472,7 @@ tls_verify()
 			}
 			constmap_free(&mapclients);
 		}
+		alloc_free(clients.s);
 	case 0:
 		alloc_free(clients.s);
 		return 0;
@@ -5526,7 +5529,6 @@ tls_verify()
 		X509_free(peercert);
 	} while (0);
 	constmap_free(&mapclients);
-	alloc_free(clients.s);
 	/*- we are not going to need this anymore: free the memory */
 	SSL_set_client_CA_list(ssl, NULL);
 	SSL_set_verify(ssl, SSL_VERIFY_NONE, NULL);
@@ -5676,6 +5678,7 @@ tls_init()
 	myssl = SSL_new(ctx);
 	SSL_CTX_free(ctx);
 	if (!myssl) {
+		alloc_free(filename.s);
 		tls_err("unable to initialize ssl");
 		return;
 	}
@@ -5831,7 +5834,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 #ifdef SMTP_PLUGIN
 	int             i, j, len;
 	char           *start_plugin, *plugin_symb, *plugindir;
-	stralloc        plugin = { 0 };
+	static stralloc plugin = { 0 };
 #endif
 
 	if (argc > 2) {
@@ -6072,6 +6075,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.214  2018-08-12 00:28:37+05:30  Cprogrammer
+ * removed memory leaks due to auto stralloc variables
+ *
  * Revision 1.213  2018-07-02 00:34:15+05:30  Cprogrammer
  * checkrecipient support for domains in /etc/indimail/control/locals
  *
@@ -6149,7 +6155,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.213 2018-07-02 00:34:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.214 2018-08-12 00:28:37+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
