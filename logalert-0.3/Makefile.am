@@ -16,7 +16,7 @@ sbin_PROGRAMS=logsrv rpclog
 man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1 showbytes.1
 
 MOSTLYCLEANFILES=logalert.spec logalert-@VERSION@-rpmlintrc \
-				lex.c parser.h parser.c logalert_perm_list obs.mk
+				lex.c parser.h parser.c logalert_perm_list debian/Makefile
 
 noinst_SCRIPTS = logalert.spec logalert-@VERSION@-rpmlintrc
 
@@ -68,8 +68,8 @@ logsrv.8: logsrv.man
 	$(edit) logsrv.man > $@
 logclient.1: logclient.man
 	$(edit) logclient.man > $@
-obs.mk: debian/obs.mk.in
-	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
+debian/Makefile: debian/obs.mk.in
+	$(edit) debian/obs.mk.in > debian/Makefile
 logalert_perm_list: logalert_perm_list.in
 	$(edit) $@.in > $@
 install-data-hook:
