@@ -21,6 +21,7 @@ endif
 
 prefix=@prefix@
 version=@version@
+sysconfdir=/etc/indimail
 #
 DESTDIR=$(CURDIR)/debian/procmail
 
@@ -34,7 +35,7 @@ build-stamp:
 	# run configure script
 	#
 	./configure --prefix=${prefix} --mandir=${prefix} \
-		--sysconfdir=${prefix}/etc \
+		--sysconfdir=${sysconfdir} \
 		--enable-sendmail-prog=${prefix}/bin/sendmail
 	#
 	# run make
