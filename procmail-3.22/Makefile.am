@@ -15,6 +15,7 @@ MOSTLYCLEANFILES=man/*.1 man/*.5 man/man.sed.* man/man.sed procmail-@VERSION@-rp
 noinst_SCRIPTS = procmail.spec procmail-@VERSION@-rpmlintrc
 
 bin_PROGRAMS=procmail lockfile formail
+bin_SCRIPTS=mailstat
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = procmail_perm_list
