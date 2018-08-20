@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.12  2018-08-20 13:13:04+05:30  Cprogrammer
+ * added tirpc/rpc inclusion
+ *
  * Revision 1.11  2017-03-07 19:35:08+05:30  Cprogrammer
  * added CRYPTO_POLICY_NON_COMPLIANCE
  *
@@ -62,8 +65,19 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+/*- tirpc */
+#ifdef HAVE_TIRPC
+#include <tirpc/rpc/rpc.h>
+#include <tirpc/rpc/types.h>
+#else
+#ifdef HAVE_RPC_RPC_H
 #include <rpc/rpc.h>
+#endif
+#ifdef HAVE_RPC_TYPES_H
 #include <rpc/types.h>
+#endif
+#endif
+
 #include <signal.h>
 #include <errno.h>
 #ifdef HAVE_SSL
@@ -94,7 +108,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.11 2017-03-07 19:35:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.12 2018-08-20 13:13:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__

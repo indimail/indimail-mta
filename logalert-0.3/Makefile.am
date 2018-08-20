@@ -46,7 +46,9 @@ logclient_SOURCES=logclient.c common.c tls.c
 logclient_LDADD = @LIB_INDIMAIL@ @LIB_SSL@
 
 logsrv_SOURCES=logsrv.c common.c tls.c
-logsrv_LDADD = @LIB_INDIMAIL@ @LIB_SSL@
+logsrv_LDADD = @LIB_INDIMAIL@ @LIB_SSL@ @LIB_RPC@
+
+rpclog_LDADD=@LIB_RPC@
 
 incrmesg_SOURCES=incrmesg.c common.c
 incrmesg_LDADD = @LIB_INDIMAIL@

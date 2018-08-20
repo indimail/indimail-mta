@@ -1,5 +1,8 @@
 /*
  * $Log: rpclog.c,v $
+ * Revision 1.5  2018-08-20 13:13:28+05:30  Cprogrammer
+ * added tirpc/rpc inclusion
+ *
  * Revision 1.4  2014-04-17 11:29:15+05:30  Cprogrammer
  * added conditional inclusion of stdlib.h, string.h
  *
@@ -39,8 +42,13 @@
 #include <sys/types.h>
 #endif
 #include <sys/ioctl.h>
+#ifdef HAVE_TIRPC
+#include <tirpc/rpc/rpc.h>
+#include <tirpc/rpc/types.h>
+#else
 #ifdef HAVE_RPC_RPC_H
 #include <rpc/rpc.h>
+#endif
 #endif
 
 #ifdef DEBUG
@@ -54,7 +62,7 @@
 #define SEND_MESSAGE ((u_long)1)
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rpclog.c,v 1.4 2014-04-17 11:29:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rpclog.c,v 1.5 2018-08-20 13:13:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct CONSOLE_MSG

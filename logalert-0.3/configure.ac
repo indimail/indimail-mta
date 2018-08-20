@@ -32,8 +32,17 @@ AC_PROG_YACC
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h stdarg.h stdlib.h string.h sys/time.h unistd.h getopt.h \
-				  pwd.h grp.h inttypes.h limits.h sys/syslimits.h sys/param.h sys/wait.h rpc/rpc.h])
+				  pwd.h grp.h inttypes.h limits.h sys/syslimits.h sys/param.h \
+				  sys/wait.h rpc/rpc.h rpc/types.h])
 AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
+tirpc="yes"
+AC_CHECK_LIB(tirpc, clnt_create, [AC_SUBST([LIB_RPC], ["-ltirpc"]) AC_DEFINE([HAVE_TIRPC], [1],[tirpc Library])],tirpc=no,-ltirpc)
+
+if test " $tirpc" = " yes"
+then
+    CPPFLAGS="-I/usr/include/tirpc $CXXFLAGS"
+    CXXFLAGS="-I/usr/include/tirpc $CXXFLAGS"
+fi
 
 have_pcre=no
 LIBPCREDIR=libpcre
@@ -62,7 +71,6 @@ if test $have_pcre != yes ; then
 fi
 
 if test $have_pcre != yes ; then
-
 	echo "I could not find pcre library/headere, therefore I'm using"
 	echo "regex.h header. Note that pcre is necessary to some funcionalities"
 	echo "in logalert. See documentation for further details."
