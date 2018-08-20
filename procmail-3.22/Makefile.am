@@ -10,9 +10,9 @@ DIST_COMMON=ChangeLog COPYING AUTHORS
 #
 MOSTLYCLEANFILES=man/*.1 man/*.5 man/man.sed.* man/man.sed procmail-@VERSION@-rpmlintrc \
 				 procmail_perm_list formail.1 lockfile.1 procmail.1 \
-				 procmailex.5 procmailrc.5 procmailsc.5 procmail.spec
+				 procmailex.5 procmailrc.5 procmailsc.5 procmail.spec debian/Makefile
 
-noinst_SCRIPTS = procmail.spec procmail-@VERSION@-rpmlintrc
+noinst_SCRIPTS = procmail.spec procmail-@VERSION@-rpmlintrc debian/Makefile
 
 bin_PROGRAMS=procmail lockfile formail
 bin_SCRIPTS=mailstat
@@ -92,8 +92,8 @@ procmail-@VERSION@-rpmlintrc: procmail-rpmlintrc.in
 	$(edit) procmail-rpmlintrc.in > $@
 procmail.spec: procmail.spec.in
 	($(edit) $@.in;cat ChangeLog) > $@
-obs.mk: debian/obs.mk.in
-	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
+debian/Makefile: debian/obs.mk.in
+	$(edit) debian/obs.mk.in > debian/Makefile
 procmail_perm_list: procmail_perm_list.in
 	$(edit) $@.in > $@
 
