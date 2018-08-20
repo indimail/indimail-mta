@@ -3,10 +3,7 @@ version=@version@
 #
 
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
-	procmail-Debian_8.0.dsc \
-	procmail-Debian_7.0.dsc \
-	procmail-xUbuntu_16.10.dsc \
-	procmail-xUbuntu_16.04.dsc
+	procmail.dsc
 
 clean:
 	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service
@@ -15,23 +12,17 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-rules: rules.in obs.mk
+rules: rules.in Makefile
 	$(edit) $@.in > $@; chmod +x $@;
-postinst: postinst.in obs.mk
+postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
-postrm: postrm.in obs.mk
+postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
-procmail-Debian_8.0.dsc: procmail-Debian_8.0.dsc.in obs.mk
+procmail.dsc: procmail.dsc.in Makefile
 	$(edit) $@.in > $@
-procmail-Debian_7.0.dsc: procmail-Debian_7.0.dsc.in obs.mk
+_service: _service.in Makefile
 	$(edit) $@.in > $@
-procmail-xUbuntu_16.10.dsc: procmail-xUbuntu_16.10.dsc.in obs.mk
-	$(edit) $@.in > $@
-procmail-xUbuntu_16.04.dsc: procmail-xUbuntu_16.04.dsc.in obs.mk
-	$(edit) $@.in > $@
-_service: _service.in obs.mk
-	$(edit) $@.in > $@
-changelog: changelog.in obs.mk
+changelog: changelog.in Makefile
 	$(edit) $@.in > $@
 
 dummy.tar.gz: README
