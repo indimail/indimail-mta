@@ -81,6 +81,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(4511,root,root)              %{_prefix}/bin/procmail
 %attr(555,root,root)               %{_prefix}/bin/lockfile
 %attr(555,root,root)               %{_prefix}/bin/formail
+%attr(555,root,root)               %{_prefix}/bin/mailstat
 %attr(444,root,root)               %{sysconfdir}/procmail_perm_list
 %defattr(-,root,root)
 %attr(644,root,root)               %{mandir}/man[1,5]/*
