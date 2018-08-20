@@ -243,7 +243,8 @@ else
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain})
 fi
 echo "Creating default indimail tcp access control files"
-${prefix}/sbin/svctool --config=indimail
+${prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail \
+	--mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket}
 
 echo "Creating Database/Service for MySQL"
 # MySQL Config Creation
