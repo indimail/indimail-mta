@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.214 $";
+char           *revision = "$Revision: 1.215 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2321,31 +2321,31 @@ open_control_files()
 	 */
 	if (!(nodnscheck = env_get("NODNSCHECK")))
 		open_control_once(&nodnschecksok, 0, &nodnsFn, 0, 0, 0, "nodnscheck", 0, &nodnschecks, &mapnodnschecks, 0);
-/*
- * Enable badip if
- * BADIPCHECK is defined (default control file badip)
- * or
- * BADIP (control file defined by BADIP env variable)
- * is defined
- */
+	/*-
+	 * Enable badip if
+	 * BADIPCHECK is defined (default control file badip)
+	 * or
+	 * BADIP (control file defined by BADIP env variable)
+	 * is defined
+	 */
 	if ((dobadipcheck = (env_get("BADIPCHECK") ? "" : env_get("BADIP"))))
 		open_control_once(&briok, 0, &badipfn, 0, "BADIP", 0, "badip", 0, &bri, &mapbri, 0);
-/*
- * Enable badhost if
- * BADHOSTCHECK is defined (default control file badhost)
- * or
- * BADHOST (control file defined by BADHOST env variable)
- * is defined
- */
+	/*-
+	 * Enable badhost if
+	 * BADHOSTCHECK is defined (default control file badhost)
+	 * or
+	 * BADHOST (control file defined by BADHOST env variable)
+	 * is defined
+	 */
 	if ((dobadhostcheck = (env_get("BADHOSTCHECK") ? "" : env_get("BADHOST"))))
 		open_control_once(&brhok, 0, &badhostfn, 0, "BADHOST", 0, "badhost", 0, &brh, &mapbrh, 0);
-/*
- * Enable badhelo if
- * BADHELOCHECK is defined (default control file badhelo)
- * or
- * BADHELO (control file defined by BADHELO env variable)
- * is defined
- */
+	/*-
+	 * Enable badhelo if
+	 * BADHELOCHECK is defined (default control file badhelo)
+	 * or
+	 * BADHELO (control file defined by BADHELO env variable)
+	 * is defined
+	 */
 	if ((dohelocheck = (env_get("BADHELOCHECK") ? "" : env_get("BADHELO"))))
 		open_control_once(&badhelook, 0, &badhelofn, 0, "BADHELO", 0, "badhelo", 0, &badhelo, &maphelo, 0);
 #ifdef BATV
@@ -2378,9 +2378,7 @@ open_control_files()
 	open_control_once_int((int *) &spfbehavior, &spfbehaviorFn, "SPFBEHAVIOR", "spfbehavior", 0);
 	open_control_once_int((int *) &spfipv6, &spfipv6Fn, "SPFIPV6", "spfipv6", 0);
 #endif
-/*
- * TARPIT Patch - include Control Files 
- */
+	/*- TARPIT Patch - include Control Files */
 	open_control_once_int(&tarpitcount, &tarpitcountFn, "TARPITCOUNT", "tarpitcount", 0);
 	open_control_once_int(&tarpitdelay, &tarpitdelayFn, "TARPITDELAY", "tarpitdelay", 0);
 	/*- MAXRECPIENTS - include Control Files */
@@ -2397,10 +2395,6 @@ open_control_files()
 		case 3:	/*- Virus Scanner (Internal) + Bad Attachment Scan */
 		case 4:	/*- Virus Scanner (Internal + External) + Bad Attachment Scan */
 			open_control_once(&sigsok, 0, &sigsFn, 0, "SIGNATURES", 0, "signatures", 0, &sigs, 0, 0);
-		/*
-		 * if ((sigsok = control_readfile(&sigs, (x = env_get("SIGNATURES")) && *x ? x : "signatures", 0)) == -1)
-		 * die_control();
-		 */
 			sigsok_orig = sigsok;
 			break;
 		case 5:	/*- Virus Scanner (External) + Bad Attachment Scan*/
@@ -3883,13 +3877,6 @@ stralloc        content = { 0 };
 stralloc        boundary = { 0 };
 
 /*-
- * def put(ch):
- * line.append(ch)
- * if ch == '\n':
- * if linespastheader == 0:
- * if line.startswith('Content-Type:'):
- * content = 
- * 
  * put() puts characters into the queue.  We remember those characters
  * and form them into a line.  When we get a newline, we examine the
  * line.  If we're currently in a header (0 linespastheader), we look
@@ -6075,6 +6062,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.215  2018-08-21 20:37:56+05:30  Cprogrammer
+ * fixed comments and indentation
+ *
  * Revision 1.214  2018-08-12 00:28:37+05:30  Cprogrammer
  * removed memory leaks due to auto stralloc variables
  *
@@ -6155,7 +6145,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.214 2018-08-12 00:28:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.215 2018-08-21 20:37:56+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
