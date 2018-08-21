@@ -86,5 +86,9 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %defattr(-,root,root)
 %attr(644,root,root)               %{mandir}/man[1,5]/*
 %doc [A-Z]* examples
+%attr(644,root,root)               %{_prefix}/share/doc/procmail/AUTHORS
+%attr(644,root,root)               %{_prefix}/share/doc/procmail/COPYING
+%attr(644,root,root)               %{_prefix}/share/doc/procmail/INSTALL.procmail
+
 
 %changelog
