@@ -36,7 +36,7 @@ build-stamp:
 	# run configure script
 	#
 	./configure --prefix=${prefix} --mandir=${mandir} \
-		--sysconfdir=${sysconfdir}
+		--sysconfdir=${sysconfdir} LEXLIB=""
 	#
 	# run make
 	#
