@@ -1,5 +1,8 @@
 /*
  * $Log: rpclog.c,v $
+ * Revision 1.6  2018-08-21 19:39:23+05:30  Cprogrammer
+ * fix for rpc.h on openSUSE tumbleweed
+ *
  * Revision 1.5  2018-08-20 13:13:28+05:30  Cprogrammer
  * added tirpc/rpc inclusion
  *
@@ -42,12 +45,19 @@
 #include <sys/types.h>
 #endif
 #include <sys/ioctl.h>
-#ifdef HAVE_TIRPC
-#include <tirpc/rpc/rpc.h>
-#include <tirpc/rpc/types.h>
-#else
 #ifdef HAVE_RPC_RPC_H
 #include <rpc/rpc.h>
+#endif
+#ifdef HAVE_RPC_TYPES_H
+#include <rpc/types.h>
+#endif
+/*- tirpc */
+#ifdef HAVE_TIRPC
+#ifndef HAVE_RPC_RPC_H
+#include <tirpc/rpc/rpc.h>
+#endif
+#ifndef HAVE_RPC_TYPES_H
+#include <tirpc/rpc/types.h>
 #endif
 #endif
 
@@ -62,7 +72,7 @@
 #define SEND_MESSAGE ((u_long)1)
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rpclog.c,v 1.5 2018-08-20 13:13:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rpclog.c,v 1.6 2018-08-21 19:39:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct CONSOLE_MSG

@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.13  2018-08-21 19:38:58+05:30  Cprogrammer
+ * fix for rpc.h on openSUSE tumbleweed
+ *
  * Revision 1.12  2018-08-20 13:13:04+05:30  Cprogrammer
  * added tirpc/rpc inclusion
  *
@@ -65,16 +68,19 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-/*- tirpc */
-#ifdef HAVE_TIRPC
-#include <tirpc/rpc/rpc.h>
-#include <tirpc/rpc/types.h>
-#else
 #ifdef HAVE_RPC_RPC_H
 #include <rpc/rpc.h>
 #endif
 #ifdef HAVE_RPC_TYPES_H
 #include <rpc/types.h>
+#endif
+/*- tirpc */
+#ifdef HAVE_TIRPC
+#ifndef HAVE_RPC_RPC_H
+#include <tirpc/rpc/rpc.h>
+#endif
+#ifndef HAVE_RPC_TYPES_H
+#include <tirpc/rpc/types.h>
 #endif
 #endif
 
@@ -108,7 +114,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.12 2018-08-20 13:13:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.13 2018-08-21 19:38:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__
