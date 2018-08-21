@@ -596,9 +596,8 @@ present in
 The control file
 .I signatures
 is evaluated if the environment variable VIRUSCHECK
-is set but empty. All virus attempts will be logged. In the control file, additionally a
-description for the pattern can be set by appending the description just after the pattern.
-with a colon \fB:\fR as a separator. i.e.
+is set but empty. All matches will be logged. Additionally a description for the pattern can
+be set by appending it just after the pattern, with a colon \fB:\fR as a separator. i.e.
 
 TvqQAAMAA:An Executable from a Dirty OS
 
@@ -1697,7 +1696,11 @@ further logging detail.
 
 .SH "VIRUS SCANNING"
 The environment variable VIRUSCHECK can be set to one of the 7 values given below
-for scanning MS viruses which affect vulnerable Operating Systems.
+for scanning MS viruses which affect vulnerable Operating Systems. Virus scanning
+is not handled by \fBqmail-smtpd\fR(8). It is done by \fBqmail-multi\fR(8), which
+uses \fBqscanq\fR(8) to extract the attachments in a temporary work directory and
+run a suitable virus scanner like \fBclamdscan\fR(1). \fBqscanq\fR(8) also handles
+the check for prohibited filename extensions.
 
  1. Internal virus scanner (via signatures control file)
  2. Internal+External (qscanq) virus scanner
@@ -1709,6 +1712,7 @@ for scanning MS viruses which affect vulnerable Operating Systems.
     filename extensions
  6. External virus scanner (via qscanq)
  7. Check for prohibited filename extensions
+
 
 .SH Error Messages
 
@@ -1806,8 +1810,8 @@ See rfc-1893(5) for an explanation of the error codes in parentheses.
 .SH "SEE ALSO"
 mysqld(1), tcp-env(1), tcp-environ(5), tcpserver(1), tcprules(1), uacl(1),
 qmail-control(5), MCDFILE(5), qmail-inject(8), qmail-newmrh(8),
-qmail-queue(8), qmail-multi(8), qscanq(8), qmail-remote(8), qmail-send(8), qmail-cdb(8),
-recipient-cdb(8), pam-multi(8), pam-checkpwd(8), inlookup(8), vchkpass(8), systpass(8),
-plugin_init(3), dlopen(3), plugtest(1), bogofilter(1), greydaemon(8), qmail-greyd(8),
-rfc-2821(5), rfc-1893(5), rfc-1894(5), rfc-1985(5), rfc-2645(5), rfc-1321(5), rfc-822(5),
-rfc-2104(5), rfc-2476(5)
+qmail-queue(8), qmail-multi(8), qscanq(8), cleanq(8), qmail-remote(8), qmail-send(8),
+qmail-cdb(8), recipient-cdb(8), pam-multi(8), pam-checkpwd(8), inlookup(8),
+vchkpass(8), systpass(8), plugin_init(3), dlopen(3), plugtest(1), bogofilter(1),
+greydaemon(8), qmail-greyd(8), rfc-2821(5), rfc-1893(5), rfc-1894(5), rfc-1985(5),
+rfc-2645(5), rfc-1321(5), rfc-822(5), rfc-2104(5), rfc-2476(5)

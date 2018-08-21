@@ -17,11 +17,8 @@ environment variable. If \fBRELAYCLIENT\fR environment is set, \fBqmail-multi(8)
 skips spam filtering regardless of \fBSPAMFILTER\fR setting.
 
 .B qmail-multi
-also calls
-.B qscanq
-to perform virus scanning or bad attachment scan
-if the value of the VIRUSCHECK environment variable lies
-between 2 and 7.
+also calls \fBqscanq\fR(8) to perform virus scanning or bad attachment scan
+if the value of the VIRUSCHECK environment variable lies between 2 and 7.
 
 The deposition and balancing of mail across multiple queues is controlled by
 the following environment variables.
@@ -178,6 +175,7 @@ qmail-header(5),
 qmail-queue(8),
 qmail-qmqpc(8),
 qscanq(8),
+cleanq(8),
 bogofilter(1),
 queue-fix(8),
 spawn-filter(8)
