@@ -4,24 +4,15 @@ Announcing Release @version@ of IndiMail.
 
 Following are the main features of this release
 
-o added ability to use SSL/TLS encryption for MySQL connections. set
-  use_ssl paramter for MySQL connnections Table dbinfo needs additional
-  field with the following SQL stmt
-  'alter table dbinfo add column use_ssl int after port;'
-o RPM/DEB installation will now recreate services with the same options
-  given during first installation. This will ensure creation of new env
-  variables added in new releases
-o New script in svctool for MySQL db creation
-o svctool can use .mylogin.cnf created by mysql_config_editor, allowing
-  MySQL admin passwords to be stored externally
-o set_mysql_options.c - set MySQL options for SSL/TLS connections.
-o removed legacy MYSQL_ESCAPE
-o svctool - added --config=sqlssl to create MariaDB SSL/TLS config
-  (similar to MySQL's mysql_rsa_setup)
-o Fixed Bug with VIRTUAL_PKG_LIB env variable
-o removed logalert
-o run clearopensmtp as root in cron
-o remove hardcoded servicedir in spec file
+o corrected fortunes cookie directory
+o fixed creation and removal of VIRTUAL_PKG_LIB env variable
+o remove virtual domains on uninstall
+o Use $HOSTNAME env variable (apart from uname -n) to set control file that need hostname
+o create VIRTUAL_PKG_LIB env variable for qmail-send.25 (qmail-lspawn)
+o fix argument expected error in spec, postinst
+o postinstall - turn off automatic refresh for services during first time installation
+o vdelivermmail - redirect mail to postmaster for null user (double bounces)
+o logalert - modified for tirpc compilation
 
 This release includes the following files (Note: Files may be suffied with -@version@)
 
@@ -50,25 +41,29 @@ https://software.opensuse.org/download.html?project=home%3Aindimail&package=indi
 Currently, the list of supported distributions for IndiMail is
 
     * SUSE
+          o openSUSE_Leap_15.0
           o openSUSE_Leap_42.3
           o openSUSE_Leap_42.2
           o openSUSE 13.2
-          o openSUSE 13.1
+          o SUSE Linux Enterprise 15
+          o SUSE Linux Enterprise 12 SP3
           o SUSE Linux Enterprise 12 SP2
           o SUSE Linux Enterprise 12 SP1
           o SUSE Linux Enterprise 12
 
     * Red Hat
+          o Fedora 28
           o Fedora 27
-          o Fedora 26
           o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 6
           o CentOS 7
           o CentOS 6
 
     * Debian
+          o Debian 9.0
           o Debian 8.0
-          o Debian 7.0
+          o Ubuntu 18.04
+          o Ubuntu 17.10
           o Ubuntu 17.04
           o Ubuntu 16.10
           o Ubuntu 16.04
@@ -87,4 +82,12 @@ Install Instructions
 https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
 
 ChangeLog
-
+1.  corrected fortunes cookie directory
+2.  fixed creation and removal of VIRTUAL_PKG_LIB env variable
+3.  remove virtual domains on uninstall
+4.  Use $HOSTNAME env variable (apart from uname -n) to set control file that need hostname
+5.  create VIRTUAL_PKG_LIB env variable for qmail-send.25 (qmail-lspawn)
+6.  fix argument expected error in spec, postinst
+7.  postinstall - turn off automatic refresh for services during first time installation
+8.  vdelivermmail - redirect mail to postmaster for null user (double bounces)
+9.  logalert - modified for tirpc compilation
