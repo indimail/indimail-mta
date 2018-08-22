@@ -217,6 +217,7 @@ m4
 migrate1to2
 missing
 stamp-h1
+RELEASE-Notes.in
 doc/README
 doc/RELEASE-Notes
 doc/INSTALL.indimail
