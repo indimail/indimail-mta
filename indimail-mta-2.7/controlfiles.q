@@ -80,7 +80,6 @@ recipients
 rejectspam
 relayclients
 relaydomains
-relayhosts
 relaymailfrom
 signaturedomains
 signatures
