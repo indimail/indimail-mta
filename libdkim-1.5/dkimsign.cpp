@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.13  2018-08-25 18:01:59+05:30  Cprogrammer
+ * fixed dkim signing for From address containing company name
+ *
  * Revision 1.12  2018-05-23 13:07:58+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -270,24 +273,12 @@ ConvertHeaderToQuotedPrintable(const char *source, char *dest)
 void
 CDKIMSign::GetHeaderParams(const string & sHdr)
 {
-	string::size_type pos1, pos2;
-
 	if (_strnicmp(sHdr.c_str(), "X", 1) == 0)
 		return;
-	if (_strnicmp(sHdr.c_str(), "From:", 5) == 0) {
+	if (_strnicmp(sHdr.c_str(), "From:", 5) == 0)
 		sFrom.assign(sHdr.c_str() + 5);
-		pos1 = sFrom.find('(');
-		pos2 = sFrom.find(')');
-		if (pos1 != 0 && pos1 != string::npos && pos2 != 0 && pos2 != string::npos)
-			sFrom.erase(pos1, pos2);
-	}
-	if (_strnicmp(sHdr.c_str(), "Sender:", 7) == 0) {
+	if (_strnicmp(sHdr.c_str(), "Sender:", 7) == 0)
 		sSender.assign(sHdr.c_str() + 7);
-		pos1 = sSender.find('(');
-		pos2 = sSender.find(')');
-		if (pos1 != 0 && pos1 != string::npos && pos2 != 0 && pos2 != string::npos)
-			sSender.erase(pos1, pos2);
-	}
 	if (_strnicmp(sHdr.c_str(), "Return-Path:", 12) == 0)
 		sReturnPath.assign(sHdr.c_str() + 12);
 	if (m_nIncludeCopiedHeaders) {
@@ -1011,7 +1002,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.12 2018-05-23 13:07:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.13 2018-08-25 18:01:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
