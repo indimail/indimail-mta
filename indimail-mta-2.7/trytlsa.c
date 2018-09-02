@@ -5,8 +5,8 @@ int main()
 {
 #ifdef HASTLSA
 tlsarralloc ta;
-ipalloc  ia;
-	dns_tlsarr(&ta, &ia);
+stralloc  sa = {0};
+	dns_tlsarr(&ta, &sa);
 #else
 	:
 #endif
