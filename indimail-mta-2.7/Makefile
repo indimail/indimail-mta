@@ -645,7 +645,7 @@ socket.lib stralloc.a alloc.a error.a fs.a str.a
 dns.o: \
 compile dns.c ip.h ipalloc.h gen_alloc.h fmt.h alloc.h str.h \
 strsalloc.h stralloc.h gen_alloc.h dns.h case.h byte.h tlsarralloc.h \
-conf-tls conf-spf conf-domainkeys conf-ip conf-tlsa
+conf-tls conf-spf conf-domainkeys conf-ip
 	./compile `grep -h -v "^#" conf-tls conf-spf conf-domainkeys conf-ip conf-tlsa` dns.c
 
 dnscname: \
@@ -769,7 +769,7 @@ fs.a dns.lib socket.lib tls.lib
 dnstlsarr.o: \
 compile dnstlsarr.c substdio.h subfd.h stralloc.h fmt.h \
 dns.h dnsdoe.h tlsarralloc.h sgetopt.h exit.h tls.h \
-hastlsa.h now.h control.h conf-tlsa conf-tls conf-ip
+hastlsa.h now.h control.h conf-tls conf-ip
 	./compile `grep -h -v "^#" conf-ip conf-tls` dnstlsarr.c
 
 dot-qmail.0: \
@@ -1134,7 +1134,7 @@ auto_assign.h auto_sysconfdir.h stralloc.h strerr.h \
 auto_prefix.h conf-plugin conf-dlopen
 	./compile \
 	`grep -h -v "^#" conf-tls conf-spf conf-domainkeys conf-dkim \
-	conf-batv conf-plugin conf-dlopen` hier.c
+	conf-batv conf-plugin conf-dlopen conf-tlsa` hier.c
 
 home: \
 home.sh conf-prefix
@@ -1210,8 +1210,8 @@ gen_alloc.h conf-tls conf-ip
 
 tlsarralloc.o: \
 compile tlsarralloc.c alloc.h gen_allocdefs.h tlsarralloc.h \
-gen_alloc.h conf-tlsa
-	./compile `grep -h -v "^#" conf-tlsa` tlsarralloc.c
+gen_alloc.h
+	./compile tlsarralloc.c
 
 ipme.o: \
 compile ipme.c hassalen.h byte.h ip.h ipalloc.h gen_alloc.h \
@@ -2469,7 +2469,7 @@ dk-filter.8: dk-filter.9 conf-prefix conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dk-filter.8
 
-hastlsa.h: trytlsa.c compile load conf-tlsa dns.lib \
+hastlsa.h: trytlsa.c compile load dns.lib \
 dns.o stralloc_pend.o stralloc_eady.o alloc.o alloc_re.o \
 error.o tlsarralloc.o byte_copy.o stralloc_opys.o \
 stralloc_cats.o stralloc_copy.o stralloc_catb.o \
