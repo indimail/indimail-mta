@@ -31,7 +31,6 @@ Known values for OPTION are:
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--persistdb]
   [--dnscheck]
-  [--starttls]
   [--helofqdn --helocheck]
   [--fsync --syncdir]
   [--qregex]
@@ -53,7 +52,9 @@ Known values for OPTION are:
   [--paranoid --dmasquerade]
   [--remote-authsmtp=b]
   [--odmr]
+  [--starttls]
   [--ssl]
+  [--forcetls]
   [--shared-objects=0|1]
   [--use-dlmopen=0|1]
   [--dkverify=dk|dkim|both|none]
@@ -87,7 +88,6 @@ Known values for OPTION are:
                    (qmail-smtpd)
   cugmail        - Allow only local valid senders to use SMTP.
   antispoof      - Turn on antispoofing code
-  starttls       - Advertise STARTTLS capability
   authsmtp       - Enforce Authenticated SMTP before accepting MAIL FROM
   authall        - Accept mails to remote/local domains only after AUTH SMTP or
                    POP/IMAP before SMTP
@@ -139,6 +139,8 @@ Known values for OPTION are:
   mysqlpass      - Passwd for connecting to mysql
   odmr           - Setup SMTP for ODMR (On Demand Mail Relay)
   private_key    - Path to Private key created by dknewkey
+  starttls       - Advertise STARTTLS capability
+  forcetls       - Force client to issue STARTTLS
   ssl            - Use SSL encrypted communication
   persistdb      - Enables qmail-lspawn to have persistent MySQL connection and set
                    PWSTRUCT environment variable. This eliminates the need for
@@ -501,10 +503,10 @@ Known values for OPTION are:
 --norefreshsvc="0|1 service_name"
 
   Disable/Enable auto refresh of supervise scripts for service
-  0              - Disable autorefresh (delete .norefreshsvc in variables directory)
-  1              - Enable  autorefresh (create .norefreshsvc in variables directory)
+  0              - Disable autorefresh (create .norefreshsvc in variables directory)
+  1              - Enable  autorefresh (delete .norefreshsvc in variables directory)
   service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (/service/.qmail-smtpd.25)
 				   service_name can be "all" to act on all services
 
 --enable-service name1 name2 ..
