@@ -8341,7 +8341,7 @@ case $option in
 	else
 	echo "Creating SMTP Listener Port $smtp_port, Service $servicedir"
 	fi
-	create_smtp "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$chkrecipient" "$chkrelay" "$use_ssl" "$force_tls" "$infifo"
+	create_smtp "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$chkrecipient" "$chkrelay" "$use_ssl" "$forcetls" "$infifo"
 	;;
 
 	2) # IMAP Service
