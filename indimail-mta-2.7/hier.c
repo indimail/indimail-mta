@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.250  2018-09-02 13:51:52+05:30  Cprogrammer
+ * conditional compilation of qmail-daned, qdane, dnstlsarr
+ *
  * Revision 1.249  2018-06-25 13:43:23+05:30  Cprogrammer
  * changed group to root for binaries in bin, sbin
  *
@@ -912,7 +915,9 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "uacl", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "qbase64", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "swaks", auto_uido, 0, moder_x);
+#ifdef HASTLSA
 	c(auto_prefix, "bin", "qdane", auto_uido, 0, moder_x);
+#endif
 	c(auto_prefix, "bin", "qaes", auto_uido, 0, moder_x);
 #ifdef USE_SPF
 	c(auto_prefix, "bin", "spfquery", auto_uido, 0, moder_x);
@@ -973,7 +978,9 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "readproctitle", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-greyd", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "greydaemon", auto_uido, 0, moder_x);
+#ifdef HASTLSA
 	c(auto_prefix, "sbin", "qmail-daned", auto_uido, 0, moder_x);
+#endif
 	c(auto_prefix, "sbin", "surblfilter", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "surblqueue", auto_uido, 0, moder_x);
 #ifdef EXTERNAL_TODO
@@ -1111,7 +1118,9 @@ hier(inst_dir, fatal, dev_package)
 #ifdef USE_SPF
 	c(auto_libexec_dir, auto_libexec_base, "dnstxt", auto_uido, 0, moder_x);
 #endif
+#ifdef HASTLSA
 	c(auto_libexec_dir, auto_libexec_base, "dnstlsarr", auto_uido, 0, moder_x);
+#endif
 	c(auto_libexec_dir, auto_libexec_base, "leapsecs", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "yearcal", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "nowutc", auto_uido, 0, moder_x);
@@ -1214,8 +1223,10 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "doc", "PIC.relaygood", auto_uido, 0, 0444);
 	c(auto_shared,     "doc", "PIC.rem2local", auto_uido, 0, 0444);
 
+#ifdef HASTLSA
 	c(mandir,          "man/man1", "qdane.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "dnstlsarr.1", uidr, gidr, moder_f);
+#endif
 	c(mandir,          "man/man1", "cidr.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qmail-cat.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "predate.1", uidr, gidr, moder_f);
@@ -1547,7 +1558,9 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/cat8", "qmail-smtpd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-greyd.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-greyd.0", uidr, gidr, moder_f);
+#ifdef HASTLSA
 	c(mandir,          "man/man8", "qmail-daned.8", uidr, gidr, moder_f);
+#endif
 	c(mandir,          "man/man8", "greydaemon.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "greydaemon.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-poppass.8", uidr, gidr, moder_f);
@@ -1587,7 +1600,9 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/man3", "now.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "sgetopt.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "stralloc.3", uidr, gidr, moder_f);
+#ifdef HASTLSA
 	c(mandir,          "man/man3", "tlsacheck.3", uidr, gidr, moder_f);
+#endif
 	c(mandir,          "man/man3", "greylist.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "byte.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "substdio.3", uidr, gidr, moder_f);
@@ -1619,7 +1634,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.249 2018-06-25 13:43:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.250 2018-09-02 13:51:52+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
