@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.178 2018-09-02 09:45:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.179 2018-09-02 13:58:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -958,8 +958,10 @@ done
 %attr(0644,root,root)                   %{mandir}/cat[1,4,5,7,8]/*
 %else
 %attr(0644,root,root)                   %{mandir}/man1/udpclient.1.gz
+%if %notlsarr == 0
 %attr(0644,root,root)                   %{mandir}/man1/qdane.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/dnstlsarr.1.gz
+%endif
 %attr(0644,root,root)                   %{mandir}/man1/qmail-qfilter.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/drate.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/replier-config.1.gz
@@ -1308,13 +1310,13 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/mconnect
 %attr(755,root,root)                    %{_prefix}/bin/finger@
 %attr(755,root,root)                    %{_prefix}/bin/http@
-%attr(755,root,root)                    %{_prefix}/bin/qdane
 %attr(755,root,root)                    %{_prefix}/bin/tcprules
 %attr(755,root,root)                    %{_prefix}/bin/udpclient
 %attr(755,root,root)                    %{_prefix}/sbin/udplogger
 %attr(755,root,root)                    %{_prefix}/sbin/greydaemon
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-greyd
 %if %notlsarr == 0
+%attr(755,root,root)                    %{_prefix}/bin/qdane
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-daned
 %endif
 %endif
@@ -1525,12 +1527,12 @@ done
 %attr(555,root,root)                    %{_prefix}/bin/mconnect
 %attr(555,root,root)                    %{_prefix}/bin/mconnect-io
 %attr(555,root,root)                    %{_prefix}/bin/rblsmtpd
-%attr(755,root,root)                    %{_prefix}/bin/qdane
 %attr(555,root,root)                    %{_prefix}/bin/udpclient
 %attr(555,root,root)                    %{_prefix}/sbin/udplogger
 %attr(555,root,root)                    %{_prefix}/sbin/greydaemon
 %attr(555,root,root)                    %{_prefix}/sbin/qmail-greyd
 %if %notlsarr == 0
+%attr(755,root,root)                    %{_prefix}/bin/qdane
 %attr(555,root,root)                    %{_prefix}/sbin/qmail-daned
 %endif
 
@@ -1561,11 +1563,11 @@ done
 %attr(0644,root,root)                   %{mandir}/man1/mconnect-io.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/rblsmtpd.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/udpclient.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/qdane.1.gz
 %attr(0644,root,root)                   %{mandir}/man8/udplogger.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/greydaemon.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-greyd.8.gz
 %if %notlsarr == 0
+%attr(0644,root,root)                   %{mandir}/man1/qdane.1.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-daned.8.gz
 %endif
 %attr(0644,root,root)                   %{mandir}/cat8/greydaemon.0.gz
