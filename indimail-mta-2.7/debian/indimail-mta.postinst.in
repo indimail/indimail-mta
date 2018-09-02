@@ -314,7 +314,7 @@ do
 		# if you do, then you have a serious
 		# problem with your organization, not 
 		# with IndiMail
-		extra_opt="--skipsend --authsmtp --antispoof"
+		extra_opt="--skipsend --authsmtp --antispoof --forcetls"
 	else
 		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
