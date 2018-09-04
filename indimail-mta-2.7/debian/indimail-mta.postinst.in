@@ -249,8 +249,8 @@ ${prefix}/sbin/svctool --config=qmail --postmaster=${qmaildir}/alias/Maildir/
 
 if [ $nodksignature -eq 0 ] ; then
 	if [ -x ${prefix}/bin/dknewkey ] ; then
-		ver_opt="both"
-		sign_opt="both"
+		ver_opt="dkim"
+		sign_opt="dkim"
 		if [ " $key_bit" = " " ] ; then
 			key_bit=1024
 		fi
@@ -334,8 +334,8 @@ do
 		--chkrecipient --chkrelay --masquerade \
 		--min-free=52428800 --content-filter --virus-filter \
 		--dmasquerade --infifo=infifo \
-		--dkverify=both \
-		--dksign=both --private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
+		--dkverify=${ver_opt} \
+		--dksign=${sign_opt} --private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
 		$extra_opt
 done
 
