@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.179 2018-09-02 13:58:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.180 2018-09-04 07:58:08+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1908,8 +1908,8 @@ fi
 
 if [ %nodksignatures -eq 0 ] ; then
   if [ -x %{_prefix}/bin/dknewkey ] ; then
-    ver_opt="both"
-    sign_opt="both"
+    ver_opt="dkim"
+    sign_opt="dkim"
     key_bit=$KEYBIT # set KEYBIT in environment variable
     if [ " $key_bit" = " " ] ; then
       key_bit=1024
@@ -2003,8 +2003,8 @@ do
     --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
     --min-free=52428800 --content-filter --virus-filter \
     --dmasquerade --infifo=infifo \
-    --dkverify=both \
-    --dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+    --dkverify=${ver_opt} \
+    --dksign=${sign_opt} --private_key="%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn}" \
     $extra_opt
 done
 
