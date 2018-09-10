@@ -514,7 +514,7 @@ case $POPRELAY in
 	AC_DEFINE_UNQUOTED(TCPRULES_PROG,"$tcprules_prog",full path of tcprules program)
 
 	tcpserver_file=""
-	for f in "$sysconfdir/tcp/tcp.smtp $sysconfdir"/tcp.smtp /etc/tcp.smtp /etc/tcprules.d/qmail-smtpd
+	for f in "$sysconfdir"/tcp/tcp.smtp "$sysconfdir"/tcp.smtp /etc/tcp.smtp /etc/tcprules.d/qmail-smtpd
 	do
 	if test -f $f
 	then
