@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.181 2018-09-10 12:15:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.182 2018-09-10 12:50:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -603,12 +603,14 @@ else
 fi
 # Create these files so that %%ghost does not complain
 for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp \
-tcp.qmqp.cdb indimail-mta.pp indimail-mta.mod
+tcp.qmqp.cdb
 do
   if [ ! -f %{buildroot}%{qsysconfdir}/tcp/$i ] ; then
     $TOUCH %{buildroot}%{qsysconfdir}/tcp/$i
   fi
 done
+$TOUCH %{buildroot}%{qsysconfdir}/indimail-mta.pp
+$TOUCH %{buildroot}%{qsysconfdir}/indimail-mta.mod
 (
 for i in `cat %{name}-%{version}/controlfiles.q`
 do
