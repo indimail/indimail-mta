@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.180 2018-09-04 07:58:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.181 2018-09-10 12:15:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -605,8 +605,8 @@ fi
 for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp \
 tcp.qmqp.cdb indimail-mta.pp indimail-mta.mod
 do
-  if [ ! -f %{buildroot}%{qsysconfdir}/$i ] ; then
-    $TOUCH %{buildroot}%{qsysconfdir}/$i
+  if [ ! -f %{buildroot}%{qsysconfdir}/tcp/$i ] ; then
+    $TOUCH %{buildroot}%{qsysconfdir}/tcp/$i
   fi
 done
 (
@@ -669,6 +669,7 @@ done
 %dir %attr(2775,indimail,qmail)   %{qsysconfdir}/users
 %dir %attr(2775,indimail,qmail)   %{qsysconfdir}/certs
 %dir %attr(2775,indimail,qmail)   %{qsysconfdir}/control
+%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/tcp
 %dir %attr(2775,qmailr,qmail)     %{qsysconfdir}/control/ratelimit
 %dir %attr(2755,indimail,qmail)   %{qsysconfdir}/control/domainkeys
 %dir %attr(755,indimail,qmail)    %{qsysconfdir}/control/defaultqueue
@@ -697,15 +698,15 @@ done
 %attr(444,root,root) %config(noreplace)            %{qsysconfdir}/controlfiles.q
 %attr(444,root,root) %config(noreplace)            %{qsysconfdir}/perm_list.q
 
-%ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp.smtp
-%ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp.qmtp
-%ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp.qmqp
+%ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp/tcp.smtp
+%ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp/tcp.qmtp
+%ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp/tcp.qmqp
 #
 # These files will get removed during uninstallation
 #
-%ghost %attr(0644,indimail,indimail)               %{qsysconfdir}/tcp.smtp.cdb
-%ghost %attr(0644,indimail,indimail)               %{qsysconfdir}/tcp.qmtp.cdb
-%ghost %attr(0644,indimail,indimail)               %{qsysconfdir}/tcp.qmqp.cdb
+%ghost %attr(0644,indimail,indimail)               %{qsysconfdir}/tcp/tcp.smtp.cdb
+%ghost %attr(0644,indimail,indimail)               %{qsysconfdir}/tcp/tcp.qmtp.cdb
+%ghost %attr(0644,indimail,indimail)               %{qsysconfdir}/tcp/tcp.qmqp.cdb
 %ghost %attr(0644,root,root)                       %{qsysconfdir}/indimail-mta.pp
 %ghost %attr(0644,root,root)                       %{qsysconfdir}/indimail-mta.mod
 

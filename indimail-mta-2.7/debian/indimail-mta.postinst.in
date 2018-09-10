@@ -444,7 +444,7 @@ fi
 # rebuild cdb
 for i in smtp qmtp qmqp
 do
-	for j in `/bin/ls ${qsysconfdir}/tcp.$i 2>/dev/null`
+	for j in `/bin/ls ${qsysconfdir}/tcp/tcp.$i 2>/dev/null`
 	do
 		t1=`date +'%s' -r $j`
 		if [ -f $j.cdb ] ; then

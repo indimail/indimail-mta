@@ -123,7 +123,7 @@ if [ " $1" = " purge" ] ; then
 	${rm} -f ${qsysconfdir}/resolv.conf
 	for i in smtp qmtp qmqp
 	do
-		${rm} -f ${qsysconfdir}/tcp.$i.cdb ${qsysconfdir}/tcp.$i
+		${rm} -f ${qsysconfdir}/tcp/tcp.$i.cdb ${qsysconfdir}/tcp/tcp.$i
 	done
 	${rm} -f ${qsysocnfdir}/control/controlfiles.q
 	for i in chkrcptdomains defaulthost greylist.white me signatures tlsclientmethod \
