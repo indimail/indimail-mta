@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop indimail
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.57 2018-06-24 21:43:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.58 2018-09-10 12:24:19+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -430,7 +430,7 @@ case "$1" in
 				let ret+=$RETVAL
 			fi
 		done
-		for j in `/bin/ls SYSCONFDIR/tcp*.$i 2>/dev/null`
+		for j in `/bin/ls SYSCONFDIR/tcp/tcp*.$i 2>/dev/null`
 		do
 			t1=`date +'%s' -r $j`
 			if [ -f $j.cdb ] ; then
