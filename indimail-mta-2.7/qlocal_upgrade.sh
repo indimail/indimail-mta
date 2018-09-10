@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.16  2018-09-10 12:22:45+05:30  Cprogrammer
+# create directory /etc/indimail/tcp and move tcpserver access control files
+#
 # Revision 1.15  2018-09-02 14:25:02+05:30  Cprogrammer
 # fixed syntax error
 #
@@ -43,7 +46,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.15 2018-09-02 14:25:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.16 2018-09-10 12:22:45+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -68,7 +71,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.15 2018-09-02 14:25:02+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.16 2018-09-10 12:22:45+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -101,6 +104,22 @@ if [ ! -d /etc/indimail/certs ] ; then
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
+fi
+# move tcpserver access control to /etc/indimail/tcp
+if [ ! -d /etc/indimail/tcp ] ; then
+	$mkdir -p /etc/indimail/tcp
+	if [ $? -ne 0 ] ; then
+		exit 1
+	fi
+	$chown indimail:qmail /etc/indimail/tcp
+	if [ $? -ne 0 ] ; then
+		exit 1
+	fi
+	$chmod 2775 /etc/indimail/tcp
+	if [ $? -ne 0 ] ; then
+		exit 1
+	fi
+	$mv /etc/indimail/tcp.* /etc/indimail/tcp > /dev/null
 fi
 # move existing certs in control directory to /etc/indimail/certs
 for i in servercert.pem clientcert.pem dh1024.pem dh512.pem \
