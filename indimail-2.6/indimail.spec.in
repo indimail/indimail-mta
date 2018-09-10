@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.473 2018-09-10 12:38:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.474 2018-09-10 13:03:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -729,12 +729,18 @@ fi
 %{__mkdir_p} %{buildroot}%{sysconfdir}/users
 %{__mkdir_p} %{buildroot}%{sysconfdir}/control
 # Create these files so that %%ghost does not complain
-for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
-tcp.poppass tcp.poppass.cdb procmailrc indimail.pp indimail.mod \
-users/cdb users/assign
+for i in tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
+  tcp.poppass tcp.poppass.cdb
 do
   if [ ! -f %{buildroot}%{sysconfdir}/tcp/$i ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/tcp/$i
+  fi
+done
+for i in indimail.cnf procmailrc indimail.pp indimail.mod \
+  users/cdb users/assign
+do
+  if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
+    $TOUCH %{buildroot}%{sysconfdir}/$i
   fi
 done
 %if %nonssd == 0
