@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.474 2018-09-10 13:03:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.475 2018-09-10 13:27:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -184,7 +184,7 @@ AutoReqProv: No
 AutoReqProv: Yes
 %endif
 # few binaries were moved to sbin and indimail >= 2.5 depends on that
-Requires: indimail-mta > 2.3
+Requires: indimail-mta > 2.6
 Conflicts: %{name} < 2.0
 Obsoletes: %{name} < 2.0
 
@@ -728,6 +728,7 @@ fi
 %{__mkdir_p} %{buildroot}%{indimaildir}/inquery
 %{__mkdir_p} %{buildroot}%{sysconfdir}/users
 %{__mkdir_p} %{buildroot}%{sysconfdir}/control
+%{__mkdir_p} %{buildroot}%{sysconfdir}/tcp
 # Create these files so that %%ghost does not complain
 for i in tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
   tcp.poppass tcp.poppass.cdb
