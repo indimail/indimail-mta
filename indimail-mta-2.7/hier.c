@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.251  2018-09-10 12:14:28+05:30  Cprogrammer
+ * added tcp subdir for tcpserver access control files
+ *
  * Revision 1.250  2018-09-02 13:51:52+05:30  Cprogrammer
  * conditional compilation of qmail-daned, qdane, dnstlsarr
  *
@@ -825,6 +828,7 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_qmail_home, "queue", auto_uido, auto_gidq, 0755);
 
 	d(auto_sysconfdir, "certs", auto_uidv, auto_gidq, 02775);
+	d(auto_sysconfdir, "tcp", auto_uidv, auto_gidq, 02775);
 
 	d(auto_qmail_home, "qscanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root", auto_uidc, auto_gidc, 0750);
@@ -1634,7 +1638,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.250 2018-09-02 13:51:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.251 2018-09-10 12:14:28+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
