@@ -152,7 +152,7 @@ fi
 echo "removing configuration"
 for i in imap pop3 poppass
 do
-	${rm} -f ${sysconfdir}/tcp.$i.cdb ${sysconfdir}/tcp.$i
+	${rm} -f ${sysconfdir}/tcp/tcp.$i.cdb ${sysconfdir}/tcp/tcp.$i
 done
 ${rm} -f ${sysconfdir}/control/controlfiles
 for i in indimail.cnf stat.override backup.conf headerlist \

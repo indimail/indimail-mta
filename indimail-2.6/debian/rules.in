@@ -70,7 +70,7 @@ build-stamp:
 		--enable-modbase=$(prefix)/lib/indimail --mandir=$(mandir) --sysconfdir=$(sysconfdir) \
 		--enable-qmaildir=$(indimaildir) --enable-domaindir=$(domaindir) \
 		--enable-tcprules-prog=$(prefix)/bin/tcprules \
-		--enable-tcpserver-file=$(sysconfdir)/tcp.smtp \
+		--enable-tcpserver-file=$(sysconfdir)/tcp/tcp.smtp \
 		--enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`; \
 		cd ..; \
 		unset FAKED_MODE; \

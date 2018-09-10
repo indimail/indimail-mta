@@ -435,7 +435,7 @@ fi
 # rebuild cdb
 for i in imap pop3 poppass
 do
-	for j in `/bin/ls ${sysconfdir}/tcp.$i 2>/dev/null`
+	for j in `/bin/ls ${sysconfdir}/tcp/tcp.$i 2>/dev/null`
 	do
 		t1=`date +'%s' -r $j`
 		if [ -f $j.cdb ] ; then

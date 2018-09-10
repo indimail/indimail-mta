@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.472 2018-07-03 12:04:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.473 2018-09-10 12:38:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -440,7 +440,7 @@ fi
   --enable-shareddir=%{shareddir} --datarootdir=%{shareddir} \
   --enable-modbase=%{_prefix}/lib/indimail \
   --enable-basepath=@basepath@ --enable-logdir=%{logdir} \
-  --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp.smtp \
+  --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
   --enable-cookiedir=%{_prefix}/share/indimail/fortunes \
   --enable-moduledir=%pam_module_dir `%{__cat} config/indimail.opts`
 
@@ -733,8 +733,8 @@ for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
 tcp.poppass tcp.poppass.cdb procmailrc indimail.pp indimail.mod \
 users/cdb users/assign
 do
-  if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
-    $TOUCH %{buildroot}%{sysconfdir}/$i
+  if [ ! -f %{buildroot}%{sysconfdir}/tcp/$i ] ; then
+    $TOUCH %{buildroot}%{sysconfdir}/tcp/$i
   fi
 done
 %if %nonssd == 0
@@ -869,15 +869,15 @@ fi
 %if %nonssd == 0
 %ghost %config(noreplace,missingok)               %{sysconfdir}/nssd.conf
 %endif
-%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp.imap
-%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp.pop3
-%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp.poppass
+%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.imap
+%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.pop3
+%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.poppass
 #
 # These files will get removed during uninstallation
 #
-%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.imap.cdb
-%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.pop3.cdb
-%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.poppass.cdb
+%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp/tcp.imap.cdb
+%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp/tcp.pop3.cdb
+%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp/tcp.poppass.cdb
 #
 #
 %ghost %attr(0644,root,root)                      %{sysconfdir}/indimail.pp
