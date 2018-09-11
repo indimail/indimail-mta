@@ -42,14 +42,14 @@ pkgconfig_DATA = libindimail.pc
 
 man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl.8 hostsync.8 \
 	initsvc.1 indisrvr.8 inlookup.8 InLookup.8 inquerytest.8 ipchange.8 \
-	logmonitor.8 mgmtpass.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 resetquota.8 \
+	mgmtpass.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 resetquota.8 \
 	vacation.8 vaddaliasdomain.1 vadddomain.1 valias.1 vatrn.1 vbulletin.1 vcalias.8 \
 	vcaliasrev.8 vcfilter.1 vchkpass.8 vdeldomain.1 vdelivermail.8 vdeloldusers.8 \
 	vdeluser.1 vdominfo.1 vfilter.8 vfstab.8 vgroup.1 vhostid.8 vipmap.1 vmoddomain.1 \
 	vlimit.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 \
 	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.8 vuserinfo.1 indimail.7 IndiMail.7 \
 	updaterules.8 osh.8 systpass.8 vserverinfo.1 sslerator.1 iecho.1 \
-	ismaildup.1 login_tasks.3 vtable.1 install_tables.8 displaytop.8 hashtable.8 \
+	ismaildup.1 login_tasks.3 vtable.1 install_tables.8 \
 	crc.1 crcdiff.1 vsetpass.8 crypt.1 
 
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
@@ -151,8 +151,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar clearopensmtp \
 	vserverinfo vchkpass vsetpass vdelivermail vdeloldusers vfilter vfstab \
 	vmoddomain vreorg vtable resetquota
 
-indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 cindimail hashtable displaytop \
-						   updatefile
+indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 cindimail updatefile
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime \
 						  myslave bogofilter-qfe iupgrade.sh ilocal_upgrade.sh
 
@@ -160,7 +159,7 @@ indimailauthlib_PROGRAMS = authindi authpgsql
 
 indimailauthlib_SCRIPTS = authgeneric
 
-indimailbin_SCRIPTS = vcaliasrev logmonitor
+indimailbin_SCRIPTS = vcaliasrev
 
 noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
@@ -171,7 +170,7 @@ noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 				   vdeluser_handle vrenameuser_handle
 
-MOSTLYCLEANFILES=vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
+MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 cronlist.i crypt vdeluser_handle vrenameuser_handle \
 cscope.* *.dSYM socket.lib indimail-rpmlintrc mailzipper \
 perm_list.i dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
@@ -384,16 +383,9 @@ postdel_LDADD = @auth_libs@
 vserverinfo_SOURCES = vserverinfo.c
 vserverinfo_LDADD = @auth_libs@
 
-displaytop_SOURCES = displaytop.c
-displaytop_LDADD = @LIB_CURSES@ @LIB_TERMCAP@
-
 osh_SOURCES = osh.c
 osh_LDADD = @LIB_CURSES@ @LIB_TERMCAP@
 osh_DEPENDENCIES = exp.lo handlers.lo getEnvConfig.lo
-
-hashtable_SOURCES = hashtable.c
-hashtable_LDADD =
-hashtable_DEPENDENCIES = makeseekable.lo sockwrite.lo
 
 updatefile_SOURCES=updatefile.c
 updatefile_LDADD= @auth_libs@
@@ -778,8 +770,6 @@ vcaliasrev: vcaliasrev.in
 	$(edit) $@.in > $@
 myslave: myslave.in
 	$(edit) $@.in > $@
-logmonitor: logmonitor.in
-	$(edit) $@.in > $@
 indimail.mrtg.cfg: indimail.mrtg.cfg.in
 	$(edit) $@.in > $@
 overquota.sh: overquota.sh.in
@@ -894,19 +884,8 @@ iecho.$(OBJEXT): iecho.c
 iecho$(EXEEXT): $(iecho_DEPENDENCIES) $(iecho_OBJECTS)
 	$(LINK) $@.$(OBJEXT) $(iecho_LDADD)
 
-displaytop.$(OBJEXT): displaytop.c
-	$(COMPILE) $(DEFS) -DMAIN -c displaytop.c
-displaytop$(EXEEXT): $(displaytop_DEPENDENCIES) $(displaytop_OBJECTS)
-	$(LINK) $@.$(OBJEXT) $(displaytop_LDADD)
-
 osh$(EXEEXT): $(osh_DEPENDENCIES) $(osh_OBJECTS)
 	$(LINK) $@.$(OBJEXT) exp.$(OBJEXT) handlers.$(OBJEXT) getEnvConfig.$(OBJEXT) $(osh_LDADD)
-
-hashtable$(EXEEXT): $(hashtable_DEPENDENCIES) $(hashtable_OBJECTS)
-	$(LINK) $@.$(OBJEXT) makeseekable.$(OBJEXT) sockwrite.$(OBJEXT)
-
-hashtable.$(OBJEXT): hashtable.c
-	$(COMPILE) -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast $(DEFS) -DMAIN -c hashtable.c
 
 initsvc$(EXEEXT): $(initsvc_OBJECTS) $(initsvc_DEPENDENCIES)
 	$(LINK) $(initsvc_LDFLAGS) $(initsvc_OBJECTS) fappend.$(OBJEXT) getEnvConfig.$(OBJEXT) $(initsvc_LDADD)
