@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 2.47  2018-09-11 10:44:58+05:30  Cprogrammer
+ * fixed commpiler warnings
+ *
  * Revision 2.46  2017-03-13 14:06:35+05:30  Cprogrammer
  * replaced INDIMAILDIR with PREFIX
  *
@@ -159,7 +162,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 2.46 2017-03-13 14:06:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 2.47 2018-09-11 10:44:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -178,7 +181,7 @@ autoAddUser(char *email, char *pass, char *service)
 {
 	char           *admin_user, *admin_pass, *admin_host, *admin_port,
                    *hard_quota, *ptr, *cptr, *certfile;
-	char            cmdbuf[MAX_BUFF], encrypted[MAX_BUFF], tmpbuf[5];
+	char            cmdbuf[MAX_BUFF + MAX_BUFF + 1], encrypted[MAX_BUFF], tmpbuf[5];
 	int             len, sfd;
 
 	if (!getenv("AUTOADDUSERS"))
@@ -236,7 +239,7 @@ int
 proxylogin(char **argv, char *service, char *userid, char *plaintext, char *remoteip, char *imaptag, int skip_nl)
 {
 	char           *ptr, *cptr, *remote_port;
-	char            loginbuf[MAX_BUFF], TheUser[MAX_BUFF], TheDomain[MAX_BUFF], Email[MAX_BUFF];
+	char            loginbuf[MAX_BUFF + MAX_BUFF + 28], TheUser[MAX_BUFF], TheDomain[MAX_BUFF], Email[MAX_BUFF + MAX_BUFF + 1];
 	char           *mailstore;
 	int             retval;
 
@@ -264,7 +267,7 @@ proxylogin(char **argv, char *service, char *userid, char *plaintext, char *remo
 		fflush(stdout);
 		return(1);
 	}
-	snprintf(Email, MAX_BUFF, "%s@%s", TheUser, TheDomain);
+	snprintf(Email, sizeof(Email) - 1, "%s@%s", TheUser, TheDomain);
 	mailstore = (char *) 0;
 	if (!(mailstore = inquery(HOST_QUERY, Email, 0)))
 	{
@@ -328,19 +331,19 @@ proxylogin(char **argv, char *service, char *userid, char *plaintext, char *remo
 		if (!strncmp(service, "imap", 4))
 		{
 			if (!(ptr = getenv("LEGACY_SERVER")))
-				snprintf(loginbuf, MAX_BUFF, "%s LOGIN %s@%s:%s %s\r\n", 
+				snprintf(loginbuf, sizeof(loginbuf) - 1, "%s LOGIN %s@%s:%s %s\r\n", 
 					imaptag, TheUser, TheDomain, remoteip, plaintext);
 			else
-				snprintf(loginbuf, MAX_BUFF, "%s LOGIN %s@%s %s\r\n", 
+				snprintf(loginbuf, sizeof(loginbuf) - 1, "%s LOGIN %s@%s %s\r\n", 
 					imaptag, TheUser, TheDomain, plaintext);
 		} else
 		if (!strncmp(service, "pop3", 4))
 		{
 			if (!(ptr = getenv("LEGACY_SERVER")))
-				snprintf(loginbuf, MAX_BUFF, "USER %s@%s:%s\nPASS %s\n", 
+				snprintf(loginbuf, sizeof(loginbuf) - 1, "USER %s@%s:%s\nPASS %s\n", 
 					TheUser, TheDomain, remoteip, plaintext);
 			else
-				snprintf(loginbuf, MAX_BUFF, "USER %s@%s\nPASS %s\n", 
+				snprintf(loginbuf, sizeof(loginbuf) - 1, "USER %s@%s\nPASS %s\n", 
 					TheUser, TheDomain, plaintext);
 		}
 		fprintf(stderr, "INFO: LOGIN, user=%s@%s, ip=[%s], mailstore=[%s]\n", TheUser, TheDomain, remoteip, mailstore);
@@ -360,10 +363,10 @@ static int
 LocalLogin(char **argv, char *user, char *TheDomain, char *service, 
 	char *imaptag, char *plaintext)
 {
-	char            Email[MAX_BUFF];
+	char            Email[MAX_BUFF + MAX_BUFF + 1];
 	struct passwd  *pw;
 
-	snprintf(Email, MAX_BUFF, "%s@%s", user, TheDomain);
+	snprintf(Email, sizeof(Email) - 1, "%s@%s", user, TheDomain);
 	if (!(pw = inquery(PWD_QUERY, Email, 0)))
 	{
 		if (userNotFound)
@@ -437,9 +440,9 @@ LocalLogin(char **argv, char *user, char *TheDomain, char *service,
 static int
 ExecImapd(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *service, char *imaptag)
 {
-	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF],
+	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF + MAX_BUFF + 16], authenv2[MAX_BUFF + MAX_BUFF + 10],
 	                authenv3[MAX_BUFF], authenv4[MAX_BUFF], authenv5[MAX_BUFF],
-	                authenv6[MAX_BUFF], authenv7[MAX_BUFF], TheUser[MAX_BUFF],
+	                authenv6[MAX_BUFF], authenv7[MAX_BUFF + 18], TheUser[MAX_BUFF],
 	                TmpBuf[MAX_BUFF];
 	char           *ptr, *cptr;
 	int             status;
@@ -456,9 +459,9 @@ ExecImapd(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *s
 		fprintf(stderr, "Login not permitted for %s\n", TmpBuf);
 		return (1);
 	}
-	snprintf(authenv1, MAX_BUFF, "AUTHENTICATED=%s", userid);
-	snprintf(authenv2, MAX_BUFF, "AUTHADDR=%s@%s", TheUser, TheDomain);
-	snprintf(authenv3, MAX_BUFF, "AUTHFULLNAME=%s", pw->pw_gecos);
+	snprintf(authenv1, sizeof(authenv1) - 1, "AUTHENTICATED=%s", userid);
+	snprintf(authenv2, sizeof(authenv2) - 1, "AUTHADDR=%s@%s", TheUser, TheDomain);
+	snprintf(authenv3, sizeof(authenv3) - 1, "AUTHFULLNAME=%s", pw->pw_gecos);
 #ifdef USE_MAILDIRQUOTA	
 	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
 	{
@@ -524,7 +527,7 @@ ExecImapd(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *s
 		fprintf(stderr, "proxylogin: chdir: %s: %s\n", Maildir, strerror(errno));
 		return(1);
 	}
-	snprintf(authenv7, MAX_BUFF, "MAILDIR=%s/Maildir", Maildir);
+	snprintf(authenv7, sizeof(authenv7) - 1, "MAILDIR=%s/Maildir", Maildir);
 	putenv(authenv7);
 	execv(argv[1], argv + 1);
 	return(1);

@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg7.c,v $
+ * Revision 2.13  2018-09-11 10:45:15+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.12  2017-04-13 00:43:18+05:30  Cprogrammer
  * fixed format specifier for bytes
  *
@@ -72,13 +75,13 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.12 2017-04-13 00:43:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.13 2018-09-11 10:45:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAX_BUFF 1000
 int             BigTodo=1;
 int             ConfSplit=151;
-char            TmpBuf[MAX_BUFF];
+char            TmpBuf[MAX_BUFF + 28];
 int             cconcurrency;
 int             tconcurrency;
 int             tallow;
@@ -105,7 +108,7 @@ int             debug;
 unsigned long   get_tai(char *);
 void            get_options(int argc, char **argv);
 char            TheDir[MAX_BUFF];
-char            TheFile[MAX_BUFF];
+char            TheFile[2048];
 char            qbase[MAX_BUFF];
 void            process_file(char *file_name);
 void            usage();

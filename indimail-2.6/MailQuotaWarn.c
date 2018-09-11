@@ -1,5 +1,8 @@
 /*
  * $Log: MailQuotaWarn.c,v $
+ * Revision 2.18  2018-09-11 10:40:02+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.17  2016-05-25 09:02:35+05:30  Cprogrammer
  * use LIBEXECDIR for overquota.sh
  *
@@ -79,13 +82,13 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.17 2016-05-25 09:02:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.18 2018-09-11 10:40:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 MailQuotaWarn(char *username, char *domain, char *Maildir, char *QuotaAlloted)
 {
-	char            maildir[MAX_BUFF], quotawarn[16], quota_cmd[MAX_BUFF], tmpbuf[MAX_BUFF];
+	char            maildir[MAX_BUFF], quotawarn[16], quota_cmd[MAX_BUFF + 13], tmpbuf[MAX_BUFF];
 	char           *ptr;
 	int             i, percent_warn, percent_usage_disk, warn_usage, warn_mail;
 	struct stat     statbuf;

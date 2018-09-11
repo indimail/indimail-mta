@@ -1,5 +1,8 @@
 /*
  * $Log: user_over_quota.c,v $
+ * Revision 2.14  2018-09-11 14:12:25+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.13  2012-04-22 13:58:43+05:30  Cprogrammer
  * added case for specification of quota in gigabytes
  *
@@ -61,7 +64,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: user_over_quota.c,v 2.13 2012-04-22 13:58:43+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: user_over_quota.c,v 2.14 2018-09-11 14:12:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /* 
@@ -75,7 +78,7 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 {
 #ifdef USE_MAILDIRQUOTA
 	mdir_t          mail_count_limit, cur_mailbox_count;
-	char            tmpbuf[MAX_BUFF];
+	char            tmpbuf[MAX_BUFF + 13];
 	char           *tmpQuota;
 	FILE           *fp;
 #else
@@ -91,7 +94,7 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 #ifdef USE_MAILDIRQUOTA
 	if (!quota || !*quota)
 	{
-		snprintf(tmpbuf, MAX_BUFF, "%s/maildirsize", maildir);
+		snprintf(tmpbuf, sizeof(tmpbuf) - 1, "%s/maildirsize", maildir);
 		if (!(fp = fopen(tmpbuf, "r")))
 			return(0);
 		if (!fgets(tmpbuf, MAX_BUFF - 2, fp))

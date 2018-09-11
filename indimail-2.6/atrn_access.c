@@ -1,5 +1,8 @@
 /*
  * $Log: atrn_access.c,v $
+ * Revision 2.5  2018-09-11 10:18:04+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.4  2008-09-08 09:20:59+05:30  Cprogrammer
  * removed mysql_escape
  *
@@ -16,7 +19,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: atrn_access.c,v 2.4 2008-09-08 09:20:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: atrn_access.c,v 2.5 2018-09-11 10:18:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -52,7 +55,7 @@ atrn_access(char *email, char *domain)
 	}
 	if(!*Email)
 	{
-		strncpy(Email, email, MAX_BUFF);
+		strncpy(Email, email, MAX_BUFF - 1);
 		if (vauth_open((char *) 0))
 		{
 			*Email = 0;

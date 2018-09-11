@@ -1,5 +1,8 @@
 /*
  * $Log: rc.c,v $
+ * Revision 1.5  2018-09-10 22:17:49+05:30  Cprogrammer
+ * fixed possible truncation by sprintf
+ *
  * Revision 1.4  2011-07-29 09:24:18+05:30  Cprogrammer
  * fixed gcc warnings
  *
@@ -177,7 +180,7 @@ rc_block(int wordc, char **wordv, FILE * fp, int *line_no)
 			return;
 		}
 
-		sprintf(linep, "%-6d", linen);
+		snprintf(linep, 12, "%-6d", linen);
 		if (processthisblock)
 			processrccommandline(line, rctype, errorprefix);
 

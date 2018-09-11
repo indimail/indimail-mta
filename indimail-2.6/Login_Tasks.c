@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 2.31  2018-09-11 10:39:53+05:30  Cprogrammer
+ * fixed commpiler warnings
+ *
  * Revision 2.30  2013-02-21 22:39:14+05:30  Cprogrammer
  * fixed typo (postauth->migrateuser) in error message
  *
@@ -140,7 +143,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 2.30 2013-02-21 22:39:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 2.31 2018-09-11 10:39:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -150,8 +153,8 @@ Login_Tasks(pw, User, ServiceType)
 	char           *ServiceType;
 {
 	char           *domain, *ptr, *migrateflag, *migrateuser, *postauth;
-	char            fqemail[MAX_BUFF], Maildir[MAX_BUFF], tmpbuf[MAX_BUFF];
-	char            pwbuf[MAX_BUFF], last_pass_change[MAX_BUFF], user[MAX_BUFF];
+	char            fqemail[MAX_BUFF + 3], Maildir[MAX_BUFF], tmpbuf[MAX_BUFF + 28];
+	char            pwbuf[MAX_BUFF + 28], last_pass_change[MAX_BUFF], user[MAX_BUFF + 1];
 	struct stat     statbuf;
 	int             status, flag = 0;
 #ifdef ENABLE_AUTH_LOGGING
@@ -171,7 +174,7 @@ Login_Tasks(pw, User, ServiceType)
 	{
 		getEnvConfigStr(&domain, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 		lowerit(domain);
-		snprintf(fqemail, MAX_BUFF, "%s@%s", user, domain);
+		snprintf(fqemail, sizeof(fqemail), "%s@%s", user, domain);
 	} else
 	{
 		domain = ptr + 1;
@@ -253,7 +256,7 @@ Login_Tasks(pw, User, ServiceType)
 #endif /*- ENABLE_AUTH_LOGGING */
 	if ((postauth = (char *) getenv("POSTAUTH")) && !access(postauth, X_OK))
 	{
-		snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
+		snprintf(pwbuf, sizeof(pwbuf) - 1, "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
 			fqemail,
 			pw->pw_passwd,
 			pw->pw_uid,
@@ -262,7 +265,7 @@ Login_Tasks(pw, User, ServiceType)
 			pw->pw_dir,
 			pw->pw_shell, is_inactive);
 		putenv(pwbuf);
-		snprintf(tmpbuf, MAX_BUFF, "%s %s %s", postauth, fqemail, pw->pw_dir);
+		snprintf(tmpbuf, sizeof(tmpbuf) - 1, "%s %s %s", postauth, fqemail, pw->pw_dir);
 		if ((status = runcmmd(tmpbuf, 0)))
 		{
 			fprintf(stderr, "%s %s %s [status=%d]\n", postauth, fqemail, pw->pw_dir, status);
@@ -274,7 +277,7 @@ Login_Tasks(pw, User, ServiceType)
 	snprintf(tmpbuf, MAX_BUFF, "%s/%s", pw->pw_dir, migrateflag);
 	if (access(tmpbuf, F_OK) && !access(migrateuser, X_OK))
 	{
-		snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
+		snprintf(pwbuf, sizeof(pwbuf) - 1, "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
 			fqemail,
 			pw->pw_passwd,
 			pw->pw_uid,
@@ -283,7 +286,7 @@ Login_Tasks(pw, User, ServiceType)
 			pw->pw_dir,
 			pw->pw_shell, is_inactive);
 		putenv(pwbuf);
-		snprintf(tmpbuf, MAX_BUFF, "%s %s %s", migrateuser, fqemail, pw->pw_dir);
+		snprintf(tmpbuf, sizeof(tmpbuf) - 1, "%s %s %s", migrateuser, fqemail, pw->pw_dir);
 		if ((status = runcmmd(tmpbuf, 0)))
 		{
 			fprintf(stderr, "%s %s %s [status=%d]\n", migrateuser, fqemail, pw->pw_dir, status);

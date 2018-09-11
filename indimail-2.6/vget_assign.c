@@ -1,5 +1,8 @@
 /*
  * $Log: vget_assign.c,v $
+ * Revision 2.7  2018-09-11 15:08:35+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.6  2017-11-06 21:43:18+05:30  Cprogrammer
  * reset static variables when cache is disabled
  *
@@ -35,7 +38,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_assign.c,v 2.6 2017-11-06 21:43:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vget_assign.c,v 2.7 2018-09-11 15:08:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      cdb_seek(int, unsigned char *, unsigned int, int *);
@@ -115,7 +118,7 @@ vget_assign(char *domain, char *dir, int dir_len, uid_t *uid, gid_t *gid)
 	}
 	strcpy(tmpstr, "!");
 	strncat(tmpstr, domain, in_domain_size + 1);
-	strncat(tmpstr, "-", 1);
+	strcat(tmpstr, "-");
 	if ((i = cdb_seek(fs, (unsigned char *) tmpstr, in_domain_size + 2, &dlen)) == 1) {
 		if (!(tmpbuf1 = (char *) malloc(dlen + 1))) {
 			close(fs);

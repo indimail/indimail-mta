@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.24  2018-09-11 15:08:42+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.23  2016-01-28 15:06:07+05:30  Cprogrammer
  * maildirquota spec for quota
  *
@@ -75,7 +78,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.23 2016-01-28 15:06:07+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.24 2018-09-11 15:08:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -186,7 +189,7 @@ main(int argc, char **argv)
 			if (*member != '&' && *member != '/' && *member != '|')
 				snprintf(alias_line, sizeof(alias_line),  "&%s",  member);
 			else
-				strncpy(alias_line, member, sizeof(alias_line));
+				strncpy(alias_line, member, sizeof(alias_line) - 1);
 			ret = valias_insert(User, real_domain, alias_line, ignore);
 			break;
 		case DELETE_MEMBER:
@@ -199,7 +202,7 @@ main(int argc, char **argv)
 			if (*member != '&' && *member != '/' && *member != '|')
 				snprintf(alias_line, sizeof(alias_line),  "&%s",  member);
 			else
-				strncpy(alias_line, member, sizeof(alias_line));
+				strncpy(alias_line, member, sizeof(alias_line) - 1);
 			ret = valias_delete(User, real_domain, alias_line);
 			break;
 		case UPDATE_MEMBER:
@@ -218,11 +221,11 @@ main(int argc, char **argv)
 			if (*member != '&' && *member != '/' && *member != '|')
 				snprintf(alias_line, sizeof(alias_line),  "&%s",  member);
 			else
-				strncpy(alias_line, member, sizeof(alias_line));
+				strncpy(alias_line, member, sizeof(alias_line) - 1);
 			if (*old_member != '&' && *old_member != '/' && *old_member != '|')
 				snprintf(old_alias, sizeof(old_alias),  "&%s",  old_member);
 			else
-				strncpy(old_alias, old_member, sizeof(old_alias));
+				strncpy(old_alias, old_member, sizeof(old_alias) - 1);
 			ret = valias_update(User, real_domain, old_alias, alias_line);
 			break;
 	}

@@ -1,5 +1,8 @@
 /*
  * $Log: findmdahost.c,v $
+ * Revision 2.17  2018-09-11 10:33:36+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.16  2010-06-07 18:43:27+05:30  Cprogrammer
  * added addition argument to indicate connection to all MySQL database or just one
  * return number of dbinfo records in the additional argument
@@ -60,7 +63,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findmdahost.c,v 2.16 2010-06-07 18:43:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findmdahost.c,v 2.17 2018-09-11 10:33:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -73,7 +76,7 @@ findmdahost(char *email, int *total)
 {
 	int             is_dist, count, port, connect_all;
 	char            user[MAX_BUFF], domain[MAX_BUFF];
-	static char     mailhost[MAX_BUFF];
+	static char     mailhost[MAX_BUFF + 140];
 	char           *ptr, *cptr, *real_domain, *ip;
 	DBINFO        **rhostsptr;
 	MYSQL         **mysqlptr;
@@ -195,7 +198,7 @@ findmdahost(char *email, int *total)
 				port = GetSmtproute(real_domain);
 			if (port == -1)
 				return ((char *) 0);
-			snprintf(mailhost, MAX_BUFF, "%s:%s:%d", domain, (*rhostsptr)->mdahost, port);
+			snprintf(mailhost, sizeof(mailhost), "%s:%s:%d", domain, (*rhostsptr)->mdahost, port);
 			return (mailhost);
 		}
 	} else

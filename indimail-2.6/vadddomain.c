@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.40  2018-09-11 14:13:57+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.39  2017-03-13 14:11:19+05:30  Cprogrammer
  * replaced INDIMAILDIR with PREFIX
  *
@@ -183,12 +186,12 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.39 2017-03-13 14:11:19+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.40 2018-09-11 14:13:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
 char            Domain[MAX_BUFF], Passwd[MAX_BUFF], User[MAX_BUFF], Dir[MAX_BUFF], Quota[MAX_BUFF], BounceEmail[MAX_BUFF];
-char            TmpBuf[MAX_BUFF], ipaddr[16], a_dir[MAX_BUFF];
+char            TmpBuf[MAX_BUFF + 28], ipaddr[16], a_dir[MAX_BUFF];
 #ifdef CLUSTERED_SITE
 char            database[MAX_BUFF], sqlserver[MAX_BUFF], database[MAX_BUFF], dbuser[MAX_BUFF], dbpass[MAX_BUFF];
 int             dbport, distributed;
@@ -211,7 +214,7 @@ main(argc, argv)
 	extern int      create_flag;
 	char           *domaindir, *ptr, *base_argv0, *base_path;
 	FILE           *fs;
-	char            AliasLine[MAX_BUFF];
+	char            AliasLine[MAX_BUFF + 28];
 	char           *auto_ids[] = {
 		"abuse",
 		"mailer-daemon",
@@ -219,7 +222,7 @@ main(argc, argv)
 	};
 #ifdef CLUSTERED_SITE
 	char           *hostid, *localIP;
-	char            email[MAX_BUFF];
+	char            email[MAX_BUFF + 28];
 	int             is_dist, user_present, total;
 #endif
 
@@ -399,7 +402,7 @@ main(argc, argv)
 		if (strchr(BounceEmail, '@') != NULL || *BounceEmail == '/')
 		{
 			vget_assign(Domain, a_dir, MAX_BUFF, &a_uid, &a_gid);
-			snprintf(TmpBuf, MAX_BUFF, "%s/.qmail-default", a_dir);
+			snprintf(TmpBuf, sizeof(TmpBuf) - 1, "%s/.qmail-default", a_dir);
 			if ((fs = fopen(TmpBuf, "w+")) != NULL)
 			{
 				fprintf(fs, "| %s/sbin/vdelivermail '' %s\n", PREFIX, BounceEmail);
@@ -425,7 +428,7 @@ main(argc, argv)
 	 * Add the postmaster user
 	 */
 #ifdef CLUSTERED_SITE
-	snprintf(email, MAX_BUFF, "postmaster@%s", Domain);
+	snprintf(email, sizeof(email) - 1, "postmaster@%s", Domain);
 	if ((is_dist = is_distributed_domain(Domain)) == -1)
 	{
 		error_stack(stderr, "Unable to verify %s as a distributed domain\n", Domain);

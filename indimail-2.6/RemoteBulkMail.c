@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 2.15  2018-09-11 10:47:35+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.14  2018-03-31 20:29:29+05:30  Cprogrammer
  * display mysql_option() error index
  *
@@ -59,7 +62,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.14 2018-03-31 20:29:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.15 2018-09-11 10:47:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -73,7 +76,7 @@ int
 RemoteBulkMail(email, domain, homedir)
 	const char     *email, *domain, *homedir;
 {
-	char            SqlBuf[SQL_BUF_SIZE], bulkdir[MAX_BUFF], TmpBuf[MAX_BUFF];
+	char            SqlBuf[SQL_BUF_SIZE], bulkdir[MAX_BUFF], TmpBuf[MAX_BUFF + 2];
 	struct stat     statbuf;
 	MYSQL_ROW       row;
 	MYSQL_RES      *res;
@@ -109,7 +112,7 @@ RemoteBulkMail(email, domain, homedir)
 	snprintf(bulkdir, MAX_BUFF, "%s/%s/%s", CONTROLDIR, domain, ((ptr = getenv("BULK_MAILDIR"))) ? ptr : BULK_MAILDIR);
 	for (status = 0; (row = mysql_fetch_row(res));)
 	{
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s", bulkdir, row[0]);
+		snprintf(TmpBuf, sizeof(TmpBuf) - 1, "%s/%s", bulkdir, row[0]);
 		if (stat(TmpBuf, &statbuf))
 			continue;
 		if (CopyEmailFile(homedir, TmpBuf, email, 0, 0, 0, 0, 1, statbuf.st_size))

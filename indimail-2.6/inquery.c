@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 2.22  2018-09-11 10:34:57+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.21  2017-03-27 08:53:59+05:30  Cprogrammer
  * added FIFODIR variable for location of infifo
  *
@@ -75,7 +78,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 2.21 2017-03-27 08:53:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 2.22 2018-09-11 10:34:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -95,7 +98,7 @@ inquery(char query_type, char *email, char *ip)
 {
 	int             rfd, wfd, len1, len2, len3, bytes, idx, readTimeout, writeTimeout, pipe_size, tmperrno, relative;
 	static int      intBuf;
-	char            QueryBuf[MAX_BUFF + sizeof(int)], myFifo[MAX_BUFF], InFifo[MAX_BUFF], TmpBuf[MAX_BUFF];
+	char            QueryBuf[MAX_BUFF + sizeof(int)], myFifo[MAX_BUFF], InFifo[MAX_BUFF + 25], TmpBuf[MAX_BUFF + 12];
 	char           *sysconfdir, *controldir, *infifo_dir, *infifo;
 	static char    *pwbuf;
 	FILE           *fp;
@@ -163,7 +166,7 @@ inquery(char query_type, char *email, char *ip)
 			snprintf(TmpBuf, MAX_BUFF, "%s/%s", infifo_dir, infifo);
 		}
 		for (idx = 1;;idx++) {
-			snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, idx);
+			snprintf(InFifo, sizeof(InFifo) - 1, "%s.%d", TmpBuf, idx);
 			if(access(InFifo, F_OK))
 				break;
 		}
@@ -171,9 +174,9 @@ inquery(char query_type, char *email, char *ip)
 		srand(getpid() + time(0));
 #endif
 #ifdef RANDOM_BALANCING
-		snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, 1 + (int) ((float) (idx - 1) * rand()/(RAND_MAX + 1.0)));
+		snprintf(InFifo, sizeof(InFifo) - 1, "%s.%d", TmpBuf, 1 + (int) ((float) (idx - 1) * rand()/(RAND_MAX + 1.0)));
 #else
-		snprintf(InFifo, MAX_BUFF, "%s.%ld", TmpBuf, 1 + (time(0) % (idx - 1)));
+		snprintf(InFifo, sizeof(InFifo) - 1, "%s.%ld", TmpBuf, 1 + (time(0) % (idx - 1)));
 #endif
 	}
 	if(verbose)

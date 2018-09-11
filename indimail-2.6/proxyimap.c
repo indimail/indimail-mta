@@ -1,5 +1,8 @@
 /*
  * $Log: proxyimap.c,v $
+ * Revision 2.10  2018-09-11 10:41:52+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.9  2017-03-13 14:06:08+05:30  Cprogrammer
  * replaced INDIMAILDIR with PREFIX
  *
@@ -41,7 +44,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxyimap.c,v 2.9 2017-03-13 14:06:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxyimap.c,v 2.10 2018-09-11 10:41:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -132,7 +135,7 @@ main(int argc, char **argv)
 			} else
 			if (!strcmp(dummy2, "STARTTLS"))
 			{
-				static char     namebuf[56];
+				static char     namebuf[340];
 				char           *p;
 
 				putenv("AUTHARGC=0");

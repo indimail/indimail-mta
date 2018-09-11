@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfo.c,v $
+ * Revision 2.17  2018-09-11 10:24:55+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.16  2017-03-13 13:40:51+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -98,7 +101,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfo.c,v 2.16 2017-03-13 13:40:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbinfo.c,v 2.17 2018-09-11 10:24:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -170,7 +173,7 @@ main(int argc, char **argv)
 static int
 editdbinfo(char *filename)
 {
-	char            mcdFile[MAX_BUFF], TmpBuf[MAX_BUFF], envbuf[MAX_BUFF];
+	char            mcdFile[MAX_BUFF], TmpBuf[MAX_BUFF + 1], envbuf[MAX_BUFF + 9];
 	char           *ptr, *sysconfdir, *controldir, *mcdfile;
 	DBINFO        **rhostsptr, **tmpPtr;
 	uid_t           uid;
@@ -192,7 +195,7 @@ editdbinfo(char *filename)
 		else
 			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 	}
-	snprintf(envbuf, MAX_BUFF, "MCDFILE=%s", mcdFile);
+	snprintf(envbuf, sizeof(envbuf), "MCDFILE=%s", mcdFile);
 	rhostsptr = LoadDbInfo_TXT(&total);
 	for (count = 0,tmpPtr = rhostsptr;tmpPtr && *tmpPtr;tmpPtr++)
 	{
@@ -212,7 +215,7 @@ editdbinfo(char *filename)
 	}
 	getEnvConfigStr(&ptr, "EDITOR", "vi");
 	printf("Editor is %s\n", ptr);
-	snprintf(TmpBuf, MAX_BUFF, "%s %s", ptr, mcdFile);
+	snprintf(TmpBuf, sizeof(TmpBuf), "%s %s", ptr, mcdFile);
 	runcmmd(TmpBuf, 1);
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);

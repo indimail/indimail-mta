@@ -1,5 +1,8 @@
 /*
  * $Log: vuserinfo.c,v $
+ * Revision 2.9  2018-09-11 15:12:19+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.8  2018-02-17 13:37:49+05:30  Cprogrammer
  * userinfo privilege only for root or indimail users
  *
@@ -90,7 +93,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vuserinfo.c,v 2.8 2018-02-17 13:37:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vuserinfo.c,v 2.9 2018-09-11 15:12:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            usage();
@@ -117,10 +120,10 @@ main(argc, argv)
 	errflag = 0;
 	snprintf(opt_str, sizeof(opt_str), "anpugcdqm");
 #ifdef ENABLE_AUTH_LOGGING
-	strncat(opt_str, "l", 1);
+	strcat(opt_str, "l");
 #endif
 #ifdef VFILTER
-	strncat(opt_str, "f", 1);
+	strcat(opt_str, "f");
 #endif
 	while (!errflag && (c = getopt(argc, argv, opt_str)) != -1)
 	{

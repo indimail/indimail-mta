@@ -1,5 +1,8 @@
 /*
  * $Log: adduser.c,v $
+ * Revision 2.25  2018-09-11 10:17:55+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.24  2016-01-28 00:04:45+05:30  Cprogrammer
  * maildirquota specification for -q option to vadduser
  *
@@ -124,7 +127,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adduser.c,v 2.24 2016-01-28 00:04:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: adduser.c,v 2.25 2018-09-11 10:17:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -165,7 +168,7 @@ int
 vadduser(char *username, char *domain, char *mdahost, char *password,
 		 char *gecos, char *quota, int max_users_per_level, int apop, int actFlag)
 {
-	char            Dir[MAX_BUFF], Crypted[MAX_BUFF], tmpbuf[MAX_BUFF];
+	char            Dir[MAX_BUFF], Crypted[MAX_BUFF], tmpbuf[MAX_BUFF + 17];
 	char           *tmpstr, *dir, *ptr, *allow_chars;
 	uid_t           uid;
 	gid_t           gid;
@@ -282,7 +285,7 @@ vadduser(char *username, char *domain, char *mdahost, char *password,
 		}
 		GetIndiId(&uid, &gid);
 	}
-	snprintf(tmpbuf, MAX_BUFF, "%s/.users_per_level", Dir);
+	snprintf(tmpbuf, sizeof(tmpbuf), "%s/.users_per_level", Dir);
 	if (!(fp = fopen(tmpbuf, "r")))
 	{
 		if (errno != ENOENT)

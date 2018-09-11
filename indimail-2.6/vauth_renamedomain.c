@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_renamedomain.c,v $
+ * Revision 2.10  2018-09-11 14:16:32+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.9  2010-03-07 09:28:37+05:30  Cprogrammer
  * check return value of is_distributed_domain for error
  *
@@ -31,7 +34,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_renamedomain.c,v 2.9 2010-03-07 09:28:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_renamedomain.c,v 2.10 2018-09-11 14:16:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -41,7 +44,7 @@ static int rename_data(int, char *, char *, char *, char *);
 int
 vauth_renamedomain(char *OldDomain, char *NewDomain, char *domdir)
 {
-	char            SqlBuf[SQL_BUF_SIZE], tmpbuf[MAX_BUFF], buffer[MAX_BUFF];
+	char            SqlBuf[SQL_BUF_SIZE], tmpbuf[MAX_BUFF + 12], buffer[MAX_BUFF];
 	char           *ptr1, *ptr2;
 	FILE           *fp;
 	int             err = 0;
@@ -104,7 +107,7 @@ vauth_renamedomain(char *OldDomain, char *NewDomain, char *domdir)
 			}
 			if (feof(fp))
 				break;
-			snprintf(tmpbuf, MAX_BUFF, "dir_control%s", buffer);
+			snprintf(tmpbuf, sizeof(tmpbuf) - 1, "dir_control%s", buffer);
 			if (rename_data(ON_LOCAL, tmpbuf, "domain", NewDomain, OldDomain))
 				err = 1;
 		}

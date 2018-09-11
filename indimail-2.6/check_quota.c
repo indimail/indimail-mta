@@ -1,5 +1,8 @@
 /*
  * $Log: check_quota.c,v $
+ * Revision 2.12  2018-09-11 10:22:48+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.11  2009-06-03 09:28:20+05:30  Cprogrammer
  * use fcntl() interface for file locking
  *
@@ -63,7 +66,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: check_quota.c,v 2.11 2009-06-03 09:28:20+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: check_quota.c,v 2.12 2018-09-11 10:22:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -80,7 +83,7 @@ mdir_t check_quota(char *Maildir)
 #endif
 {
 	mdir_t          mail_size;
-	char            tmpbuf[MAX_BUFF], maildir[MAX_BUFF];
+	char            tmpbuf[MAX_BUFF + 15], maildir[MAX_BUFF];
 	char           *ptr;
 	int             Fd;
 	struct flock    fl;
@@ -98,9 +101,9 @@ mdir_t check_quota(char *Maildir)
 	fl.l_len    = 0;        /* length, 0 = to EOF           */
 	fl.l_pid    = getpid(); /* our PID                      */
 #ifdef USE_MAILDIRQUOTA
-	(void) snprintf(tmpbuf, MAX_BUFF, "%s/maildirsize", maildir);
+	(void) snprintf(tmpbuf, sizeof(tmpbuf), "%s/maildirsize", maildir);
 #else
-	(void) snprintf(tmpbuf, MAX_BUFF, "%s/.current_size", maildir);
+	(void) snprintf(tmpbuf, sizeof(tmpbuf), "%s/.current_size", maildir);
 #endif
 	if ((Fd = open(tmpbuf, O_RDONLY)) == -1)
 	{

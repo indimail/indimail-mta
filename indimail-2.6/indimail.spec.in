@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.475 2018-09-10 13:27:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.476 2018-09-11 10:33:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -943,7 +943,6 @@ fi
 
 # indimail binaries
 %attr(755,root,qmail)                   %{_prefix}/bin/vuserinfo
-%attr(755,root,qmail)                   %{_prefix}/bin/logmonitor
 %attr(755,root,qmail)                   %{_prefix}/bin/hostcntrl
 %attr(755,root,qmail)                   %{_prefix}/bin/vpasswd
 %attr(755,root,qmail)                   %{_prefix}/bin/vcalias
@@ -1015,8 +1014,6 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/controlsync
 %attr(755,root,qmail)                   %{libexecdir}/mailzipper
 %attr(755,root,qmail)                   %{libexecdir}/updatefile
-%attr(755,root,qmail)                   %{libexecdir}/displaytop
-%attr(755,root,qmail)                   %{libexecdir}/hashtable
 %attr(755,root,qmail)                   %{libexecdir}/cindimail
 %attr(755,root,qmail)                   %{libexecdir}/cputime
 %attr(755,root,qmail)                   %{libexecdir}/myslave

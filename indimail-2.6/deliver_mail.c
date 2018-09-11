@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.67  2018-09-11 10:30:34+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.66  2017-03-13 13:43:08+05:30  Cprogrammer
  * use PREFIX for binaries
  *
@@ -226,7 +229,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.66 2017-03-13 13:43:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.67 2018-09-11 10:30:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -359,7 +362,7 @@ char           *
 read_quota(char *Maildir)
 {
 	char            maildir[MAX_BUFF];
-	static char     tmpbuf[MAX_BUFF];
+	static char     tmpbuf[MAX_BUFF + 13];
 	char           *ptr;
 	int             count;
 	FILE           *fp;
@@ -367,7 +370,7 @@ read_quota(char *Maildir)
 	scopy(maildir, Maildir, MAX_BUFF);
 	if ((ptr = strstr(maildir, "/Maildir/")) && *(ptr + 9))
 		*(ptr + 9) = 0;
-	snprintf(tmpbuf, MAX_BUFF, "%s/maildirsize", maildir);
+	snprintf(tmpbuf, sizeof(tmpbuf), "%s/maildirsize", maildir);
 	for(count = 0;;count++)
 	{
 		if (!(fp = fopen(tmpbuf, "r")))
@@ -411,7 +414,7 @@ int
 recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *dailyMsgCount)
 {
 	FILE           *fp;
-	char            tmpbuf[MAX_BUFF], datebuf[20], tmpdate[MAX_BUFF], fileName[MAX_BUFF];
+	char            tmpbuf[MAX_BUFF], datebuf[80], tmpdate[MAX_BUFF], fileName[MAX_BUFF];
 	char           *ptr;
 	long            pos, savepos, count, size, mail_limit, size_limit;
 #ifdef FILE_LOCKING
@@ -540,10 +543,10 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	time_t          tm;
 	int             wait_status, write_fd, is_injected, is_file, sfd, code, ret;
 	off_t           file_count;
-	char            local_file[FILE_SIZE], local_file_new[FILE_SIZE], hostname[FILE_SIZE],
+	char            local_file[MAX_BUFF + 1], local_file_new[MAX_BUFF], hostname[FILE_SIZE],
 	                DeliveredTo[AUTH_SIZE], msgbuf[MSG_BUF_SIZE], user[AUTH_SIZE],
 	                homedir[MAX_BUFF], mailalert_host[MAX_BUFF], mailalert_port[MAX_BUFF],
-					date_dir[MAX_BUFF];
+					date_dir[MAX_BUFF], tmpbuf[50];
 	char           *maildirquota, *domain, *email, *rpline, *dtline, *xfilter, *ptr, *alert_host,
 	               *alert_port, *cmmd, *ptr1, *ptr2, *qqeh, *faddr;
 	char           *MailDirNames[] = {
@@ -800,7 +803,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		pid = getpid() + counter++;
 		umask(INDIMAIL_UMASK);
 		time(&tm);
-		snprintf(local_file, FILE_SIZE, "%sfolder.dateformat", address);
+		snprintf(local_file, sizeof(local_file), "%sfolder.dateformat", address);
 		if (!access(local_file, R_OK)) {
 			if (!(fp = fopen(local_file, "r"))) {
 				fprintf(stderr, "open: %s: %s. indimail (#5.1.2)", local_file, strerror(errno));
@@ -814,15 +817,15 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			fclose(fp);
 			if ((ptr = strrchr(date_dir, '\n')))
 				*ptr = 0;
-			if (!(ret = dateFolder(tm, msgbuf, sizeof(msgbuf) - 1, date_dir))) {
-				snprintf(local_file, FILE_SIZE, "%s%s", address, msgbuf);
+			if (!(ret = dateFolder(tm, tmpbuf, sizeof(tmpbuf) - 1, date_dir))) {
+				snprintf(local_file, sizeof(local_file), "%s%s", address, tmpbuf);
 				if (access(local_file, F_OK)) {
 					if (r_mkdir(local_file, INDIMAIL_DIR_MODE, uid, gid)) {
 						fprintf(stderr, "r_mkdir: %s: %s. indimail (#5.1.2)", local_file, strerror(errno));
 						return (-2);
 					} else {
 						for (code = 0;code < 3;code++) {
-							snprintf(local_file, sizeof(local_file), "%s%s/%s", address, msgbuf, MailDirNames[code]);
+							snprintf(local_file, sizeof(local_file), "%s%s/%s", address, tmpbuf, MailDirNames[code]);
 							if (r_mkdir(local_file, INDIMAIL_DIR_MODE, uid, gid)) {
 								fprintf(stderr, "r_mkdir: %s: %s. indimail (#5.1.2)", local_file, strerror(errno));
 								return (-2);
@@ -831,7 +834,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 					}
 				} else {
 					for (code = 0;code < 3;code++) {
-						snprintf(local_file, sizeof(local_file), "%s%s/%s", address, msgbuf, MailDirNames[code]);
+						snprintf(local_file, sizeof(local_file), "%s%s/%s", address, tmpbuf, MailDirNames[code]);
 						if (access(local_file, F_OK)) {
 							if (r_mkdir(local_file, INDIMAIL_DIR_MODE, uid, gid)) {
 								fprintf(stderr, "r_mkdir: %s: %s. indimail (#5.1.2)", local_file, strerror(errno));
@@ -844,14 +847,14 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				fprintf(stderr, "dateFolder: failed to get date format: %s. indimail (#5.1.2)", strerror(errno));
 				return (-2);
 			}
-			snprintf(local_file, FILE_SIZE, "%s%s/tmp/%ld.%ld.%s,S=%"PRIu64, address, msgbuf, tm, pid, hostname,
+			snprintf(local_file, sizeof(local_file), "%s%s/tmp/%ld.%ld.%s,S=%"PRIu64, address, tmpbuf, tm, pid, hostname,
 				MsgSize);
-			snprintf(local_file_new, FILE_SIZE, "%s%s/new/%ld.%ld.%s,S=%"PRIu64, address, msgbuf, tm, pid, hostname,
+			snprintf(local_file_new, sizeof(local_file_new), "%s%s/new/%ld.%ld.%s,S=%"PRIu64, address, tmpbuf, tm, pid, hostname,
 				MsgSize);
 		} else {
-			snprintf(local_file, FILE_SIZE, "%stmp/%ld.%ld.%s,S=%"PRIu64, address, tm, pid, hostname,
+			snprintf(local_file, sizeof(local_file), "%stmp/%ld.%ld.%s,S=%"PRIu64, address, tm, pid, hostname,
 				MsgSize);
-			snprintf(local_file_new, FILE_SIZE, "%snew/%ld.%ld.%s,S=%"PRIu64, address, tm, pid, hostname,
+			snprintf(local_file_new, sizeof(local_file_new), "%snew/%ld.%ld.%s,S=%"PRIu64, address, tm, pid, hostname,
 				MsgSize);
 		}
 		if ((write_fd = open(local_file, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)) == -1)

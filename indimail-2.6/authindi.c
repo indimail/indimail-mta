@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.28  2018-09-11 10:20:30+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.27  2017-03-13 13:35:50+05:30  Cprogrammer
  * replaced INDIMAILDIR with PREFIX
  *
@@ -95,7 +98,7 @@
 #include <stdint.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.27 2017-03-13 13:35:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.28 2018-09-11 10:20:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -193,7 +196,7 @@ main(int argc, char **argv)
 {
 	char           *buf, *tmpbuf, *login, *challenge, *response, *crypt_pass, *ptr,
 				   *real_domain, *prog_name, *service, *auth_type, *auth_data;
-	char            user[AUTH_SIZE], domain[AUTH_SIZE], Email[MAX_BUFF];
+	char            user[AUTH_SIZE], domain[AUTH_SIZE], Email[514];
 	int             count, offset, auth_method;
 	size_t          cram_md5_len, out_len;
 	uid_t           uid;
@@ -387,7 +390,7 @@ main(int argc, char **argv)
 	}
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
-	snprintf(Email, MAX_BUFF, "%s@%s", user, real_domain);
+	snprintf(Email, sizeof(Email), "%s@%s", user, real_domain);
 #ifdef CLUSTERED_SITE
 	if ((count = is_distributed_domain(real_domain)) == -1)
 	{
@@ -666,9 +669,9 @@ main(int argc, char **argv)
 static int
 exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *service)
 {
-	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF],
+	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF + 11],
 					authenv3[MAX_BUFF], authenv4[MAX_BUFF], authenv5[MAX_BUFF],
-					authenv6[MAX_BUFF], authenv7[MAX_BUFF], TheUser[MAX_BUFF],
+					authenv6[MAX_BUFF], authenv7[MAX_BUFF + 18], TheUser[MAX_BUFF],
 					TmpBuf[MAX_BUFF];
 	char           *ptr, *cptr;
 	int             status;
@@ -685,7 +688,7 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 		return (1);
 	}
 	snprintf(authenv1, MAX_BUFF, "AUTHENTICATED=%s", userid);
-	snprintf(authenv2, MAX_BUFF, "AUTHADDR=%s@%s", TheUser, TheDomain);
+	snprintf(authenv2, sizeof(authenv2), "AUTHADDR=%s@%s", TheUser, TheDomain);
 	snprintf(authenv3, MAX_BUFF, "AUTHFULLNAME=%s", pw->pw_gecos);
 #ifdef USE_MAILDIRQUOTA	
 	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
@@ -754,7 +757,7 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 		fprintf(stderr, "authindi: chdir: %s: %s\n", Maildir, strerror(errno));
 		return (1);
 	}
-	snprintf(authenv7, MAX_BUFF, "MAILDIR=%s/Maildir", Maildir);
+	snprintf(authenv7, sizeof(authenv7), "MAILDIR=%s/Maildir", Maildir);
 	putenv(authenv7);
 	execv(argv[0], argv);
 	return (1);

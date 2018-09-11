@@ -1,5 +1,8 @@
 /*
  * $Log: MakeArgs.c,v $
+ * Revision 2.6  2018-09-11 10:40:08+05:30  Cprogrammer
+ * fixe compiler warnings
+ *
  * Revision 2.5  2007-12-22 00:20:05+05:30  Cprogrammer
  * allow and expand environment variables in the argument
  *
@@ -29,7 +32,7 @@
 #include <ctype.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: MakeArgs.c,v 2.5 2007-12-22 00:20:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: MakeArgs.c,v 2.6 2018-09-11 10:40:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
@@ -53,7 +56,7 @@ MakeArgs(char *cmmd)
 	idx = strlen(ptr);
 	if (!(sptr = (char *) malloc((idx + 1) * sizeof(char))))
 		return((char **) 0);
-	strncpy(sptr, ptr, idx + 1);
+	strcpy(sptr, ptr);
 	/*-
 	 * Get the number of arguments by counting
 	 * white spaces. Allow escape via the double

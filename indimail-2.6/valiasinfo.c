@@ -1,5 +1,8 @@
 /*
  * $Log: valiasinfo.c,v $
+ * Revision 2.5  2018-09-11 14:14:44+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.4  2005-12-29 22:51:06+05:30  Cprogrammer
  * use getEnvConfigStr to set variables from environment variables
  *
@@ -29,14 +32,14 @@
 #include <pwd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valiasinfo.c,v 2.4 2005-12-29 22:51:06+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valiasinfo.c,v 2.5 2018-09-11 14:14:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 valiasinfo(char *user, char *domain)
 {
 	int             flag1;
-	char            tmpbuf[MAX_BUFF];
+	char            tmpbuf[MAX_BUFF + 9];
 	FILE           *fp;
 	char            Dir[MAX_BUFF];
 	struct passwd  *pw;
@@ -55,7 +58,7 @@ valiasinfo(char *user, char *domain)
 		*Dir = 0;
 	if (*Dir)
 	{
-		snprintf(tmpbuf, MAX_BUFF, "%s/.qmail-%s", Dir, user);
+		snprintf(tmpbuf, sizeof(tmpbuf) - 1, "%s/.qmail-%s", Dir, user);
 		/* replace all dots with ':' */
 		for (tmpalias = tmpbuf + slen(Dir) + 8;*tmpalias;tmpalias++)
 		{

@@ -1,5 +1,8 @@
 /*
  * $Log: bulk_mail.c,v $
+ * Revision 2.5  2018-09-11 10:22:08+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.4  2016-05-17 14:41:16+05:30  Cprogrammer
  * replace control directory with CONTROLDIR
  *
@@ -52,7 +55,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulk_mail.c,v 2.4 2016-05-17 14:41:16+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: bulk_mail.c,v 2.5 2018-09-11 10:22:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -62,7 +65,7 @@ bulk_mail(email, domain, homedir)
 	DIR            *Dir;
 	struct dirent  *Dirent;
 	struct stat     statbuf;
-	char            TmpBuf[MAX_BUFF], bulkdir[MAX_BUFF];
+	char            TmpBuf[MAX_BUFF + MAX_BUFF + 1], bulkdir[MAX_BUFF];
 	char           *ptr;
 	time_t          last_mtime;
 	int             status;
@@ -91,7 +94,7 @@ bulk_mail(email, domain, homedir)
 		else
 		if(!strstr(Dirent->d_name, ",all"))
 			continue;
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s", bulkdir, Dirent->d_name);
+		snprintf(TmpBuf, sizeof(TmpBuf), "%s/%s", bulkdir, Dirent->d_name);
 		if (stat(TmpBuf, &statbuf))
 		{
 			perror(TmpBuf);

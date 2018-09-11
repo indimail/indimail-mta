@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 2.15  2018-09-11 15:10:49+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.14  2014-04-17 11:43:09+05:30  Cprogrammer
  * set supplementary group ids for indimail
  *
@@ -96,7 +99,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 2.14 2014-04-17 11:43:09+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 2.15 2018-09-11 15:10:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             get_options(int argc, char **argv, char *, char *, int *, int *, int *);
@@ -176,15 +179,15 @@ main(int argc, char **argv)
 		tmpstr = next_big_dir(uid, gid, users_per_level);
 		close_big_dir(fname, Domain, uid, gid);
 		/*- get space for pw_dir */
-		if(!(pw->pw_dir = (char *) malloc(MAX_BUFF)))
+		if(!(pw->pw_dir = (char *) malloc(MAX_BUFF + 3)))
 		{
 			fprintf(stderr, "%s@%s: malloc: %s\n", User, Domain, strerror(errno));
 			continue;
 		}
 		if (*tmpstr)
-			snprintf(pw->pw_dir, MAX_BUFF, "%s/%s/%s", mplexdir, tmpstr, User);
+			snprintf(pw->pw_dir, MAX_BUFF + 2, "%s/%s/%s", mplexdir, tmpstr, User);
 		else
-			snprintf(pw->pw_dir, MAX_BUFF, "%s/%s", mplexdir, User);
+			snprintf(pw->pw_dir, MAX_BUFF + 2, "%s/%s", mplexdir, User);
 		if(mplexdir)
 			free(mplexdir);
 		if(!strncmp(OldDir, pw->pw_dir, MAX_BUFF))

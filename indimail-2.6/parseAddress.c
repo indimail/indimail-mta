@@ -1,5 +1,8 @@
 /*-
  * $Log: parseAddress.c,v $
+ * Revision 2.6  2018-09-11 10:41:45+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.5  2005-12-21 09:47:43+05:30  Cprogrammer
  * make gcc 4 happy
  *
@@ -20,7 +23,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parseAddress.c,v 2.5 2005-12-21 09:47:43+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: parseAddress.c,v 2.6 2018-09-11 10:41:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -68,11 +71,11 @@ parseAddress(struct header_t *h, char *addr_buf)
 				strncat(addr_buf, a->next->user, slen(a->next->user) + 1);
 			if(a->next->domain)
 			{
-				strncat(addr_buf, "@", 1);
+				strncat(addr_buf, "@", 2);
 				strncat(addr_buf, a->next->domain, slen(a->next->domain) + 1);
 			}
 			if(a->next->next)
-				strncat(addr_buf, ",", 1);
+				strncat(addr_buf, ",", 2);
 		}
 	}
 	address_kill(g);

@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 2.10  2018-09-11 15:11:12+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.9  2016-06-09 15:32:32+05:30  Cprogrammer
  * run if indimail gid is present in process supplementary groups
  *
@@ -89,7 +92,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 2.9 2016-06-09 15:32:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 2.10 2018-09-11 15:11:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -112,7 +115,7 @@ main(argc, argv)
 	char           *real_domain;
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
-	char            tmpbuf[MAX_BUFF], TheDir[MAX_BUFF];
+	char            tmpbuf[MAX_BUFF + 28], TheDir[MAX_BUFF];
 	int             domain_limits;
 	struct vlimits  limits;
 #endif
@@ -157,7 +160,7 @@ main(argc, argv)
 		error_stack(stderr, "%s: domain does not exist\n", real_domain);
 		return (1);
 	}
-	snprintf(tmpbuf, MAX_BUFF, "%s/.domain_limits", TheDir);
+	snprintf(tmpbuf, sizeof(tmpbuf) - 1, "%s/.domain_limits", TheDir);
 	domain_limits = ((access(tmpbuf, F_OK) && !getenv("DOMAIN_LIMITS")) ? 0 : 1);
 #endif
 #ifdef CLUSTERED_SITE

@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.45  2018-09-11 14:14:12+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.44  2016-06-09 15:32:32+05:30  Cprogrammer
  * run if indimail gid is present in process supplementary groups
  *
@@ -186,11 +189,11 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.44 2016-06-09 15:32:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.45 2018-09-11 14:14:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
-                Quota[QUOTA_BUFLEN], Gecos[MAX_BUFF], envbuf[MAX_BUFF];
+                Quota[QUOTA_BUFLEN], Gecos[MAX_BUFF], envbuf[MAX_BUFF + 28];
 #ifdef CLUSTERED_SITE
 char            mdahost[MAX_BUFF], hostid[MAX_BUFF];
 #endif

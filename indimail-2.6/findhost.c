@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.42  2018-09-11 10:33:07+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.41  2018-03-31 20:30:39+05:30  Cprogrammer
  * display mysql_option() error index
  *
@@ -216,7 +219,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.41 2018-03-31 20:30:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.42 2018-09-11 10:33:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -242,7 +245,7 @@ static char     _cacheSwitch = 1;
 char           *
 findhost(char *email, int connect_primarydb)
 {
-	static char     _mailhost[MAX_BUFF], mailhost[MAX_BUFF], prevEmail[MAX_BUFF];
+	static char     _mailhost[MAX_BUFF], mailhost[MAX_BUFF + 4], prevEmail[MAX_BUFF];
 	char            user[MAX_BUFF], domain[MAX_BUFF], SqlBuf[SQL_BUF_SIZE], hostid[MAX_BUFF];
 	char           *ptr, *real_domain, *ip_addr;
 	static int      mlen;
@@ -363,8 +366,8 @@ again:
 	} else
 	if (!port)
 		port = PORT_QMTP;
-	strncpy(prevEmail, email, len);
-	snprintf(mailhost, MAX_BUFF, "%s:%s:%d", domain, ip_addr, port);
+	strncpy(prevEmail, email, len + 1);
+	snprintf(mailhost, sizeof(mailhost), "%s:%s:%d", domain, ip_addr, port);
 	return (mailhost);
 }
 

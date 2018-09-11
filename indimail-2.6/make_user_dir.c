@@ -1,5 +1,8 @@
 /*
  * $Log: make_user_dir.c,v $
+ * Revision 2.11  2018-09-11 10:41:03+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.10  2016-05-18 11:46:15+05:30  Cprogrammer
  * use DOMAINDIR for users directories
  *
@@ -53,7 +56,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: make_user_dir.c,v 2.10 2016-05-18 11:46:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: make_user_dir.c,v 2.11 2018-09-11 10:41:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -64,7 +67,7 @@ char           *
 make_user_dir(char *username, char *domain, uid_t uid, gid_t gid, int users_per_level)
 {
 	char           *tmpstr, *tmpdir, *fname;
-	char            tmpbuf1[MAX_BUFF], tmpbuf2[MAX_BUFF];
+	char            tmpbuf1[MAX_BUFF], tmpbuf2[MAX_BUFF + 8];
 	FILE           *fp;
 
 	if (!*username)
@@ -102,7 +105,7 @@ make_user_dir(char *username, char *domain, uid_t uid, gid_t gid, int users_per_
 		}
 		if(!domain || !*domain)
 		{
-			snprintf(tmpbuf2, MAX_BUFF, "%s/.qmail", tmpbuf1);
+			snprintf(tmpbuf2, sizeof(tmpbuf2) - 1, "%s/.qmail", tmpbuf1);
 			if ((fp = fopen(tmpbuf2, "w")) != (FILE *) NULL)
 			{
 				fprintf(fp, "%s/Maildir/\n", tmpbuf1);

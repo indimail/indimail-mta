@@ -1,5 +1,8 @@
 /*
  * $Log: backfill.c,v $
+ * Revision 2.4  2018-09-11 10:21:35+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.3  2009-01-15 08:54:58+05:30  Cprogrammer
  * change for once_only flag in remove_line
  *
@@ -17,7 +20,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: backfill.c,v 2.3 2009-01-15 08:54:58+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: backfill.c,v 2.4 2018-09-11 10:21:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char *
@@ -78,7 +81,7 @@ backfill(char *username, char *domain, char *path, int operation)
 	} else
 	if (operation == 2) /*- add */
 	{
-		(void) strncpy(tmpbuf, path, MAX_BUFF);
+		(void) strncpy(tmpbuf, path, MAX_BUFF - 1);
 		if ((ptr = strstr(tmpbuf, username)))
 		{
 			if (ptr != tmpbuf)

@@ -1,5 +1,8 @@
 /*
  * $Log: recalc_quota.c,v $
+ * Revision 2.9  2018-09-11 10:45:58+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.8  2009-11-17 20:15:41+05:30  Cprogrammer
  * struct flock members have different order on Mac OS X
  *
@@ -57,7 +60,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: recalc_quota.c,v 2.8 2009-11-17 20:15:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: recalc_quota.c,v 2.9 2018-09-11 10:45:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef USE_MAILDIRQUOTA
@@ -77,7 +80,7 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 	FILE           *fp;
 #endif
 	static char     prevmaildir[MAX_BUFF];
-	char            tmpbuf[MAX_BUFF], maildir[MAX_BUFF];
+	char            tmpbuf[MAX_BUFF + 15], maildir[MAX_BUFF];
 	char           *ptr;
 	struct stat     statbuf;
 	time_t          tm;
@@ -91,9 +94,9 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 #ifdef USE_MAILDIRQUOTA
 	if (mailcount)
 		*mailcount = 0;
-	snprintf(tmpbuf, MAX_BUFF, "%s/maildirsize", maildir);
+	snprintf(tmpbuf, sizeof(tmpbuf) - 1, "%s/maildirsize", maildir);
 #else
-	snprintf(tmpbuf, MAX_BUFF, "%s/.current_size", maildir);
+	snprintf(tmpbuf, sizeof(tmpbuf) - 1, "%s/.current_size", maildir);
 #endif
 	if (!force_flag)
 	{

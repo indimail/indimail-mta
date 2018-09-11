@@ -2,6 +2,9 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
 # $Log: system.menu.in,v $
+# Revision 1.9  2018-09-10 22:18:28+05:30  Cprogrammer
+# fixes for new paths
+#
 # Revision 1.8  2017-03-08 13:51:21+05:30  Cprogrammer
 # fixed paths for FHS
 #
@@ -26,7 +29,7 @@
 #
 # Sample flash menu file definition
 #
-# $Id: system.menu.in,v 1.8 2017-03-08 13:51:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: system.menu.in,v 1.9 2018-09-10 22:18:28+05:30 Cprogrammer Exp mbhangui $
 #
 
 # Main menu

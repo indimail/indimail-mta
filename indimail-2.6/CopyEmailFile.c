@@ -1,5 +1,8 @@
 /*
  * $Log: CopyEmailFile.c,v $
+ * Revision 2.11  2018-09-11 10:23:59+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.10  2009-02-06 11:37:06+05:30  Cprogrammer
  * check return value of writes
  *
@@ -61,7 +64,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: CopyEmailFile.c,v 2.10 2009-02-06 11:37:06+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: CopyEmailFile.c,v 2.11 2018-09-11 10:23:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -82,7 +85,7 @@ CopyEmailFile(homedir, fname, email, To, From, Subject, setDate, copy_method, me
 	int             wfd, rfd, count, Fromlen, Tolen, Subjectlen, dlen, Datelen;
 	static int      counter;
 	pid_t           pid;
-	char            hostname[MAX_BUFF], TmpFile[MAX_BUFF], buffer[MAX_BUFF], MailFile[MAX_BUFF];
+	char            hostname[MAX_BUFF], TmpFile[MAX_BUFF + 50], buffer[MAX_BUFF], MailFile[MAX_BUFF + 50];
 	char            DeliveredTo[MAX_BUFF], Tolist[MAX_BUFF], Fromlist[MAX_BUFF], SubJect[MAX_BUFF], Date[MAX_BUFF];
 	char           *ptr, *cptr;
 	struct stat     statbuf;
@@ -106,7 +109,7 @@ CopyEmailFile(homedir, fname, email, To, From, Subject, setDate, copy_method, me
 			else
 				cptr = fname;
 			snprintf(TmpFile, MAX_BUFF, "%s/bulk_mail/%s", ptr, cptr);
-			snprintf(MailFile, MAX_BUFF, "%s/Maildir/new/%lu.%lu.%s,S=%lu", 
+			snprintf(MailFile, sizeof(MailFile), "%s/Maildir/new/%lu.%lu.%s,S=%lu", 
 				homedir, (long unsigned) tm, (long unsigned) pid, hostname, message_size);
 			if (stat(TmpFile, &statbuf))
 			{
@@ -159,9 +162,9 @@ CopyEmailFile(homedir, fname, email, To, From, Subject, setDate, copy_method, me
 		snprintf(SubJect, MAX_BUFF, "Subject: %s\n", Subject);
 		count += (Subjectlen = slen(SubJect));
 	}
-	snprintf(TmpFile, MAX_BUFF, "%s/Maildir/tmp/%lu.%lu.%s,S=%lu", homedir, (long unsigned) tm, (long unsigned) pid, hostname,
+	snprintf(TmpFile, sizeof(TmpFile), "%s/Maildir/tmp/%lu.%lu.%s,S=%lu", homedir, (long unsigned) tm, (long unsigned) pid, hostname,
 			 message_size + count);
-	snprintf(MailFile, MAX_BUFF, "%s/Maildir/new/%lu.%lu.%s,S=%lu", homedir, (long unsigned) tm, (long unsigned) pid, hostname,
+	snprintf(MailFile, sizeof(TmpFile), "%s/Maildir/new/%lu.%lu.%s,S=%lu", homedir, (long unsigned) tm, (long unsigned) pid, hostname,
 			 message_size + count);
 	if ((rfd = open(fname, O_RDONLY)) == -1)
 	{

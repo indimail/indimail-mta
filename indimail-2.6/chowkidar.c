@@ -1,5 +1,8 @@
 /*
  * $Log: chowkidar.c,v $
+ * Revision 2.14  2018-09-11 10:22:57+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.13  2017-03-13 13:37:08+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -52,7 +55,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: chowkidar.c,v 2.13 2017-03-13 13:37:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: chowkidar.c,v 2.14 2018-09-11 10:22:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            usage();
@@ -60,7 +63,7 @@ void            usage();
 int
 main(int argc, char **argv)
 {
-	char           *ptr, *revision = "$Revision: 2.13 $";
+	char           *ptr, *revision = "$Revision: 2.14 $";
 	int             spamNumber, spamFilter, c, silent, type, relative;
 	char            ignfile[SQL_BUF_SIZE], bad_from_rcpt_file[MAX_BUFF];
 	char           *filename = (char *) 0, *outfile = (char *) 0;
@@ -226,7 +229,7 @@ main(int argc, char **argv)
 		 * to have duplicate spammer addresses 
 		 */
 		if (strchr(outfile, '.') || strchr(outfile, '/'))
-			strncpy(bad_from_rcpt_file, outfile, MAX_BUFF);
+			strncpy(bad_from_rcpt_file, outfile, MAX_BUFF - 1);
 		else {
 			if (relative)
 				snprintf(bad_from_rcpt_file, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, outfile);

@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.51  2018-09-11 10:36:36+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.50  2018-03-30 09:35:29+05:30  Cprogrammer
  * set socket for local dbinfo structure
  *
@@ -164,7 +167,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.50 2018-03-30 09:35:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.51 2018-09-11 10:36:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -197,7 +200,7 @@ static int      delete_dbinfo_rows(char *);
 DBINFO **
 LoadDbInfo_TXT(int *total)
 {
-	char            SqlBuf[SQL_BUF_SIZE], mcdFile[MAX_BUFF], TmpBuf[MAX_BUFF];
+	char            SqlBuf[SQL_BUF_SIZE + 247], mcdFile[MAX_BUFF], TmpBuf[MAX_BUFF];
 	struct stat     statbuf;
 	int             num_rows, idx, err = 0, sync_file = 0, sync_mcd = 0, relative;
 	DBINFO        **ptr, **relayhosts;
@@ -316,7 +319,7 @@ LoadDbInfo_TXT(int *total)
 		for (err = 0, ptr = relayhosts;(*ptr);ptr++) {
 			if ((*ptr)->isLocal) /*- don't insert dbinfo obtained from localDbInfo() */
 				continue;
-			snprintf(SqlBuf, SQL_BUF_SIZE, "replace low_priority into dbinfo \
+			snprintf(SqlBuf, sizeof(SqlBuf) - 1, "replace low_priority into dbinfo \
 				(filename, domain, distributed, server, mdahost, port, use_ssl, dbname, user, passwd, timestamp) \
 				values (\"%s\", \"%s\", %d, \"%s\", \"%s\", %d, %d, \"%s\", \"%s\", \"%s\", FROM_UNIXTIME(%ld) + 0)", 
 				mcdFile, (*ptr)->domain, (*ptr)->distributed, (*ptr)->server, (*ptr)->mdahost, (*ptr)->port, 

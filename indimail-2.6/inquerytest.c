@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.27  2018-09-11 10:35:16+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.26  2017-03-27 08:54:04+05:30  Cprogrammer
  * added FIFODIR variable for location of infifo
  *
@@ -95,7 +98,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.26 2017-03-27 08:54:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.27 2018-09-11 10:35:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -123,7 +126,7 @@ main(int argc, char **argv)
 #endif
 	void           *dbptr;
 	char           *ptr, *infifo = 0, *infifo_dir, *controldir, *email = 0, *ipaddr = 0;
-	char            InFifo[MAX_BUFF], InFifoEnv[MAX_BUFF];
+	char            InFifo[MAX_BUFF], InFifoEnv[MAX_BUFF + 28];
 	int             c, query_type = -1, fd = -1, status;
 	pid_t           pid;
 
@@ -194,7 +197,7 @@ main(int argc, char **argv)
 				fprintf(stderr, "%s: FifoCreate: %s: %s\n", ptr, InFifo, strerror(errno));
 				return (1);
 			}
-			snprintf(InFifoEnv, MAX_BUFF, "INFIFO=%s", InFifo);
+			snprintf(InFifoEnv, sizeof(InFifoEnv), "INFIFO=%s", InFifo);
 			putenv(InFifoEnv);
 			switch (pid = fork())
 			{
@@ -209,7 +212,7 @@ main(int argc, char **argv)
 			}
 		} else /*- Fifo is present and open by inlookup */
 		{
-			snprintf(InFifoEnv, MAX_BUFF, "INFIFO=%s", InFifo);
+			snprintf(InFifoEnv, sizeof(InFifoEnv), "INFIFO=%s", InFifo);
 			putenv(InFifoEnv);
 			pid = -1;
 			close(fd);

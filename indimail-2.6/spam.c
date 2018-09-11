@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 2.21  2018-09-11 14:10:57+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.20  2018-01-31 11:58:10+05:30  Cprogrammer
  * moved qmail-cdb to sbin
  *
@@ -77,7 +80,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 2.20 2018-01-31 11:58:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 2.21 2018-09-11 14:10:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *parseLine1(char *);
@@ -120,7 +123,7 @@ parseLine1(char *str)
 		fprintf(stderr, "parseLine1: malloc: %s\n", strerror(errno));
 		return ((char *) 0);
 	}
-	strncpy(email, ptr, len);
+	strcpy(email, ptr);
 	lowerit(email);
 	return (email);
 }
@@ -145,7 +148,7 @@ parseLine2(char *str)
 		fprintf(stderr, "parseLine2: malloc: %s\n", strerror(errno));
 		return ((char *) 0);
 	}
-	strncpy(email, ptr, len);
+	strcpy(email, ptr);
 	lowerit(email);
 	return (email);
 }
@@ -192,7 +195,7 @@ parseLine3(char *str)
 		fprintf(stderr, "parseLine3: malloc: %s\n", strerror(errno));
 		return ((char *) 0);
 	}
-	strncpy(email, ptr, len);
+	strcpy(email, ptr);
 	lowerit(email);
 	return (email);
 }
@@ -233,7 +236,7 @@ loadIgnoreList(char *fn)
 			fclose(fp);
 			return(-1);
 		}
-		strncpy(cptr, ptr, len);
+		strcpy(cptr, ptr);
 		lowerit(cptr);
 		if(!insertAddr(IGNOREHASHTAB, cptr))
 			status = -1;

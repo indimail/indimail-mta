@@ -1,5 +1,8 @@
 /*
  * $Log: nc_module.c,v $
+ * Revision 1.5  2018-09-10 22:22:23+05:30  Cprogrammer
+ * fixed possible truncation
+ *
  * Revision 1.4  2009-06-04 10:46:47+05:30  Cprogrammer
  * added conditional inclusion of ncurses
  *
@@ -276,7 +279,7 @@ static void
 DisplayBarClock(void)
 {
 	struct tm      *tm;
-	char            at[20];
+	char            at[28];
 
 	tm = localtime(&TimeNow);
 
@@ -284,7 +287,7 @@ DisplayBarClock(void)
 	{
 		BarClock_l_min = tm->tm_min;
 
-		sprintf(at, "%3s %d/%d %d:%2.2d%2s", DOW[tm->tm_wday], tm->tm_mday, tm->tm_mon + 1, ((tm->tm_hour + 11) % 12) + 1,
+		snprintf(at, 27, "%3s %d/%d %d:%2.2d%2s", DOW[tm->tm_wday], tm->tm_mday, tm->tm_mon + 1, ((tm->tm_hour + 11) % 12) + 1,
 				tm->tm_min, tm->tm_hour > 11 ? "pm" : "am");
 
 		werase(BarClock_Win);

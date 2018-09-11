@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 2.29  2018-09-11 10:31:13+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.28  2016-05-18 12:43:34+05:30  Cprogrammer
  * added dir argument to del_user_assign()
  *
@@ -141,7 +144,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 2.28 2016-05-18 12:43:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 2.29 2018-09-11 10:31:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -154,7 +157,7 @@ int
 vdeluser(char *user, char *domain, int remove_db)
 {
 	struct passwd  *passent;
-	char            Dir[MAX_BUFF], TmpBuf[MAX_BUFF], SqlBuf[SQL_BUF_SIZE];
+	char            Dir[MAX_BUFF], TmpBuf[MAX_BUFF + 9], SqlBuf[SQL_BUF_SIZE];
 	char           *real_domain, *local_ip, *ptr;
 	char            ch;
 	mdir_t          quota;
@@ -410,7 +413,7 @@ vdeluser(char *user, char *domain, int remove_db)
 		error_stack(stderr, "Failed to remove Dir %s: %s\n", Dir, strerror(errno));
 		return (-1);
 	}
-	snprintf(TmpBuf, MAX_BUFF, "%s/.qmail-%s", Dir, user);
+	snprintf(TmpBuf, sizeof(TmpBuf), "%s/.qmail-%s", Dir, user);
 	/* replace all dots with ':' */
 	for(ptr = TmpBuf + slen(Dir) + 8;*ptr;ptr++)
 	{

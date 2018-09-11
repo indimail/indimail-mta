@@ -1,5 +1,8 @@
 /*
  * $Log: addaliasdomain.c,v $
+ * Revision 2.8  2018-09-11 10:17:12+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.7  2013-08-03 20:21:18+05:30  Cprogrammer
  * send sighup through post_handle
  *
@@ -46,13 +49,13 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: addaliasdomain.c,v 2.7 2013-08-03 20:21:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: addaliasdomain.c,v 2.8 2018-09-11 10:17:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 vaddaliasdomain(char *old_domain, char *new_domain)
 {
-	char            Dir[MAX_BUFF], TmpBuf1[MAX_BUFF], TmpBuf2[MAX_BUFF];
+	char            Dir[MAX_BUFF], TmpBuf1[MAX_BUFF], TmpBuf2[MAX_BUFF + 28];
 	char           *tmpstr;
 	int             i;
 	uid_t           uid;
@@ -95,7 +98,7 @@ vaddaliasdomain(char *old_domain, char *new_domain)
 	scopy(TmpBuf1, Dir, MAX_BUFF);
 	if ((tmpstr = strstr(Dir, "/domains")) != (char *) 0)
 		*tmpstr = 0;
-	snprintf(TmpBuf2, MAX_BUFF, "%s/domains/%s", Dir, new_domain);
+	snprintf(TmpBuf2, sizeof(TmpBuf2), "%s/domains/%s", Dir, new_domain);
 	if (symlink(TmpBuf1, TmpBuf2) != 0)
 	{
 		error_stack(stderr, "symlink:%s->%s: %s\n",

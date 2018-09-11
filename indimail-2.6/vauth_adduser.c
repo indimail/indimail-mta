@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_adduser.c,v $
+ * Revision 2.18  2018-09-11 14:15:37+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.17  2016-05-18 11:47:12+05:30  Cprogrammer
  * use DOMAINDIR for user home directories
  *
@@ -100,7 +103,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_adduser.c,v 2.17 2016-05-18 11:47:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_adduser.c,v 2.18 2018-09-11 14:15:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -108,7 +111,7 @@ static char     sccsid[] = "$Id: vauth_adduser.c,v 2.17 2016-05-18 11:47:12+05:3
 char           *
 vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *Quota, int apop, int actFlag)
 {
-	static char     dirbuf[MAX_BUFF];
+	static char     dirbuf[MAX_BUFF + 3];
 	char            quota[QUOTA_BUFLEN], dom_dir[MAX_BUFF];
 	char            SqlBuf[SQL_BUF_SIZE];
 	char           *domstr, *ptr;
@@ -149,9 +152,9 @@ vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char
 			free(ptr);
 	}
 	if (dir && *dir)
-		snprintf(dirbuf, MAX_BUFF, "%s/%s/%s", dom_dir, dir, user);
+		snprintf(dirbuf, sizeof(dirbuf) - 1, "%s/%s/%s", dom_dir, dir, user);
 	else
-		snprintf(dirbuf, MAX_BUFF, "%s/%s", dom_dir, user);
+		snprintf(dirbuf, sizeof(dirbuf) - 1, "%s/%s", dom_dir, user);
 	if (site_size == LARGE_SITE)
 	{
 		if(domain && *domain)

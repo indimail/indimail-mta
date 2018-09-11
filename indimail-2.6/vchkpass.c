@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.40  2018-09-11 14:19:17+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.39  2011-12-22 11:58:30+05:30  Cprogrammer
  * use domain from realm (fix for outlook)
  *
@@ -136,7 +139,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.39 2011-12-22 11:58:30+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.40 2018-09-11 14:19:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -149,7 +152,7 @@ int
 main(int argc, char **argv)
 {
 	char           *tmpbuf, *login, *ologin, *response, *challenge, *crypt_pass, *ptr, *cptr;
-	char            user[AUTH_SIZE], fquser[AUTH_SIZE], domain[AUTH_SIZE], buf[MAX_BUFF];
+	char            user[AUTH_SIZE], fquser[1025], domain[AUTH_SIZE], buf[MAX_BUFF];
 	int             count, offset, norelay = 0, status, auth_method;
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -254,7 +257,7 @@ main(int argc, char **argv)
 			for (cptr = domain;*ptr;*cptr++ = *ptr++);
 			*cptr = 0;
 		}
-		snprintf(fquser, AUTH_SIZE, "%s@%s", user, domain);
+		snprintf(fquser, sizeof(fquser) - 1, "%s@%s", user, domain);
 		login = fquser;
 	}
 #ifdef QUERY_CACHE

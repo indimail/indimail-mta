@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 2.24  2018-09-11 10:41:13+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.23  2017-03-09 23:34:15+05:30  Cprogrammer
  * changed location of pass.dict to /etc/indimail
  *
@@ -74,7 +77,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.23 2017-03-09 23:34:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.24 2018-09-11 10:41:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -409,7 +412,7 @@ setpassword(user)
 			perror("malloc");
 			continue;
 		}
-		(void) strncpy(newpass1, crypt_pass, plen + 1);
+		(void) strcpy(newpass1, crypt_pass);
 
 		passwd = (char *) getpass("Re-enter new password: ");
 		if (!(crypt_pass = (char *) in_crypt(passwd, salt)))
@@ -423,7 +426,7 @@ setpassword(user)
 			perror("malloc");
 			continue;
 		}
-		(void) strncpy(newpass2, crypt_pass, plen + 1);
+		(void) strcpy(newpass2, crypt_pass);
 		if (!strncmp(newpass1, newpass2, plen + 1))
 		{
 			if (newpass2)

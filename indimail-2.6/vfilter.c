@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 2.52  2018-09-11 15:08:18+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.51  2017-05-01 20:17:34+05:30  Cprogrammer
  * removed mailing list feature from vfilter
  *
@@ -166,7 +169,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 2.51 2017-05-01 20:17:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 2.52 2018-09-11 15:08:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -204,10 +207,10 @@ main(int argc, char **argv)
 	struct header_t *h = NULL;
 	int             ret = 0, fd = 0;
 	int             header_name, comparision, bounce_action, filter_no, MsgSize;
-	char            emailid[MAX_BUFF], Maildir[MAX_BUFF], filter_name[MAX_BUFF];
+	char            emailid[1025], Maildir[MAX_BUFF], filter_name[MAX_BUFF];
 	char            keyword[MAX_BUFF], folder[MAX_BUFF], filterid[MAX_BUFF];
 	char            bounce[AUTH_SIZE], forward[AUTH_SIZE], user[AUTH_SIZE];
-	char            tmpFlag[MAX_BUFF], domain[AUTH_SIZE];
+	char            tmpFlag[MAX_BUFF + 28], domain[AUTH_SIZE];
 
 	*emailid = *user = *domain = *Maildir = 0;
 	setbuf(stdout, 0);
@@ -286,13 +289,13 @@ main(int argc, char **argv)
 		snprintf(filterid, sizeof(filterid), "prefilt%s", str);
 	else
 		strncpy(filterid, "prefilt", sizeof(filterid));
-	snprintf(tmpFlag, MAX_BUFF, "%snoprefilt", Maildir);
+	snprintf(tmpFlag, sizeof(tmpFlag) - 1, "%snoprefilt", Maildir);
 	if (access(tmpFlag, F_OK))
 		process_filter(argc, argv, hptr, filterid, &filter_no, filter_name, &header_name,
 			&comparision, keyword, folder, &bounce_action, forward);
 
 	/*- Process User Filter */
-	snprintf(tmpFlag, MAX_BUFF, "%svfilter", Maildir);
+	snprintf(tmpFlag, sizeof(tmpFlag) - 1, "%svfilter", Maildir);
 	if (access(tmpFlag, F_OK))
 	{
 		if (interactive)
@@ -304,10 +307,10 @@ main(int argc, char **argv)
 
 	/*- Global postfilt ID Filter */
 	if ((str = strrchr(emailid, '@')))
-		snprintf(filterid, sizeof(filterid), "postfilt%s", str);
+		snprintf(filterid, sizeof(filterid) - 1, "postfilt%s", str);
 	else
-		strncpy(filterid, "postfilt", sizeof(filterid));
-	snprintf(tmpFlag, MAX_BUFF, "%snopostfilt", Maildir);
+		strncpy(filterid, "postfilt", sizeof(filterid) - 1);
+	snprintf(tmpFlag, sizeof(tmpFlag) - 1, "%snopostfilt", Maildir);
 	if (access(tmpFlag, F_OK))
 		process_filter(argc, argv, hptr, filterid, &filter_no, filter_name, &header_name,
 			&comparision, keyword, folder, &bounce_action, forward);
@@ -663,7 +666,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 {
 	int             c, local;
 	char           *tmpstr, *real_domain = 0;
-	char            pwstruct[MAX_BUFF];
+	char            pwstruct[MAX_BUFF + 28];
 	struct passwd  *pw;
 
 	local = 0;
@@ -712,7 +715,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 				myExit(argc, argv, 100, 1, 0, 0);
 			myExit(argc, argv, 111, 1, 0, 0);
 		}
-		snprintf(emailid, MAX_BUFF, "%s@%s", user, real_domain);
+		snprintf(emailid, 1024, "%s@%s", user, real_domain);
 	} else
 	if (argc == 11)	/*- qmail-local */
 	{
@@ -722,7 +725,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 		lowerit(domain);
 		if (!(real_domain = vget_real_domain(domain)))
 			real_domain = domain;
-		snprintf(emailid, MAX_BUFF, "%s@%s", user, real_domain);
+		snprintf(emailid, 1024, "%s@%s", user, real_domain);
 	} else
 	if (argc == 2 || (argc > 1 && (!strncmp(argv[1], "-v", 2) || !strncmp(argv[1], "-V", 2))))
 	{
@@ -820,7 +823,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 2.51 $";
+	char           *revision = "$Revision: 2.52 $";
 	char           *ptr, *mda;
 	char            MaildirFolder[MAX_BUFF], XFilter[MAX_BUFF];
 	pid_t           pid;
@@ -833,7 +836,7 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 	snprintf(XFilter, sizeof(XFilter) - 26, "XFILTER=X-Filter: xFilter/IndiMail Revision %s", revision + 11);
 	if ((ptr = strrchr(XFilter, '$')))
 		*ptr = 0;
-	strncat(XFilter, "(http://www.indimail.org)", 25);
+	strncat(XFilter, "(http://www.indimail.org)", 26);
 	if (putenv(XFilter) == -1)
 	{
 		fprintf(stderr, "vfilter: putenv: %s\n", strerror(ENOMEM));

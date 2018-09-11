@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 2.20  2018-09-11 14:18:34+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.19  2016-06-09 15:32:32+05:30  Cprogrammer
  * run if indimail gid is present in process supplementary groups
  *
@@ -83,7 +86,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 2.19 2016-06-09 15:32:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 2.20 2018-09-11 14:18:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define COPY_IT          0
@@ -276,7 +279,7 @@ int
 process_domain(EmailFile, ExcludeFile, domain)
 	char           *EmailFile, *ExcludeFile, *domain;
 {
-	char            filename[MAX_BUFF], hostname[MAX_BUFF], Dir[MAX_BUFF];
+	char            filename[MAX_BUFF + 28], hostname[MAX_BUFF], Dir[MAX_BUFF];
 	static FILE    *fsi, *fsx;
 	static struct passwd *pwent;
 	time_t          tm;
@@ -314,7 +317,7 @@ process_domain(EmailFile, ExcludeFile, domain)
 		error_stack(stderr, "setuser_privileges: (%d/%d): %s", uid, gid, strerror(errno));
 		return (1);
 	}
-	snprintf(filename, MAX_BUFF, "%lu.%d.%s", tm, pid, hostname);
+	snprintf(filename, sizeof(filename), "%lu.%d.%s", tm, pid, hostname);
 	first = 1;
 	while ((pwent = vauth_getall(domain, first, 0)) != NULL)
 	{
@@ -340,7 +343,7 @@ copy_email(EmailFile, fs_file, name, domain, pwent)
 	struct passwd  *pwent;
 {
 	static char     tmpbuf[MAX_BUFF];
-	static char     tmpbuf1[MAX_BUFF];
+	static char     tmpbuf1[MAX_BUFF + 2];
 	static char     MsgBuf[MSG_BUF_SIZE];
 	FILE           *fs;
 	int             count;
@@ -366,18 +369,18 @@ copy_email(EmailFile, fs_file, name, domain, pwent)
 	if (DeliveryMethod == HARD_LINK_IT)
 	{
 		if(*EmailFile == '/')
-			snprintf(tmpbuf1, MAX_BUFF, "%s", EmailFile);
+			snprintf(tmpbuf1, sizeof(tmpbuf1) - 1, "%s", EmailFile);
 		else
-			snprintf(tmpbuf1, MAX_BUFF, "%s/%s", CurDir, EmailFile);
+			snprintf(tmpbuf1, sizeof(tmpbuf1) - 1, "%s/%s", CurDir, EmailFile);
 		if (link(tmpbuf1, tmpbuf) < 0)
 			fprintf(stderr, "link: %s->%s: %s\n", tmpbuf1, tmpbuf, strerror(errno));
 	} else
 	if (DeliveryMethod == SYMBOLIC_LINK_IT)
 	{
 		if(*EmailFile == '/')
-			snprintf(tmpbuf1, MAX_BUFF, "%s", EmailFile);
+			snprintf(tmpbuf1, sizeof(tmpbuf1) - 1, "%s", EmailFile);
 		else
-			snprintf(tmpbuf1, MAX_BUFF, "%s/%s", CurDir, EmailFile);
+			snprintf(tmpbuf1, sizeof(tmpbuf1) - 1, "%s/%s", CurDir, EmailFile);
 		if (symlink(tmpbuf1, tmpbuf) < 0)
 			perror(tmpbuf);
 	} else
@@ -410,7 +413,7 @@ in_exclude_list(FILE * fsx, char *domain, char *user)
 static int
 spost(char *EmailOrDomain, char *Filename, int bulk)
 {
-	char            bulkdir[MAX_BUFF], TmpBuf[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF];
+	char            bulkdir[MAX_BUFF], TmpBuf[MAX_BUFF + 30], User[MAX_BUFF], Domain[MAX_BUFF];
 	char           *ptr1, *ptr2, *domain = 0;
 	int             copy_method;
 	uid_t           uid;
@@ -438,7 +441,7 @@ spost(char *EmailOrDomain, char *Filename, int bulk)
 		fprintf(stderr, "%s: No such domain\n", Domain);
 		return (1);
 	}
-	snprintf(bulkdir, MAX_BUFF, "%s/%s/%s", CONTROLDIR, domain, (ptr1 = getenv("BULK_MAILDIR")) ? ptr1 : BULK_MAILDIR);
+	snprintf(bulkdir, sizeof(bulkdir) - 1, "%s/%s/%s", CONTROLDIR, domain, (ptr1 = getenv("BULK_MAILDIR")) ? ptr1 : BULK_MAILDIR);
 	if (access(bulkdir, F_OK))
 	{
 		fprintf(stderr, "spost: access: %s: %s\n", bulkdir, strerror(errno));
@@ -449,9 +452,9 @@ spost(char *EmailOrDomain, char *Filename, int bulk)
 	else
 		ptr2 = Filename;
 	if(bulk)
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s,all", bulkdir, ptr2);
+		snprintf(TmpBuf, sizeof(TmpBuf) - 1, "%s/%s,all", bulkdir, ptr2);
 	else
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s", bulkdir, ptr2);
+		snprintf(TmpBuf, sizeof(TmpBuf) - 1, "%s/%s", bulkdir, ptr2);
 	if (access(Filename, F_OK))
 	{
 		fprintf(stderr, "spost: access: %s: %s\n", Filename, strerror(errno));

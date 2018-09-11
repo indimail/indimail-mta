@@ -1,5 +1,8 @@
 /*
  * $Log: osh.c,v $
+ * Revision 2.7  2018-09-11 10:41:35+05:30  Cprogrammer
+ * removed buggy code
+ *
  * Revision 2.6  2011-04-08 17:26:54+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -41,7 +44,7 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-static char    *rcsid = "@(#) $Id: osh.c,v 2.6 2011-04-08 17:26:54+05:30 Cprogrammer Stab mbhangui $";
+static char    *rcsid = "@(#) $Id: osh.c,v 2.7 2018-09-11 10:41:35+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -264,7 +267,7 @@ iopen(argc, argv)
 		{						
 			/*- It's a command, input is a string */
 			inputfp = (FILE *) 1;
-			strncpy(inputstring, argv[1], 1024);
+			strncpy(inputstring, argv[1], 1023);
 			for (i = 3; i <= argc; i++)
 			{
 				strncat(inputstring, " ", 1024 - strlen(inputstring));
@@ -472,7 +475,7 @@ redirect(srcfd, srcfile, dstfd, dstfile, append, bckgrnd)
 				}
 				if (!append)
 				{
-					char            buf[80], *cptr;
+					char            buf[81], *cptr;
 
 					strncpy(buf, dstfile, 80);
 					if ((cptr = (char *) strrchr(buf, '/')) != NULL)
@@ -913,12 +916,12 @@ get_table(name, group)
 	char           *who = (char *) malloc(16);	/*- Number of chars in the login name */
 	char            dummy[255];
 	int             i, x;
-	char           *prog = (char *) malloc(MAXPATHLEN);
-	char           *path = (char *) malloc(MAXPATHLEN);
+	char            prog[MAXPATHLEN + 1];
+	char            path[MAXPATHLEN];
 	int             bp;
 
 	getEnvConfigStr(&ptr, "TABLE_NAME", TABLE_NAME);
-	strncpy(work_table, ptr, sizeof(work_table));
+	strncpy(work_table, ptr, sizeof(work_table) - 1);
 	bp = strlen(work_table) - 2;
 	if (!strncmp("{}", work_table + bp, 2))
 	{
@@ -980,7 +983,7 @@ get_table(name, group)
 					/*
 					 * sscanf(dummy,"%s",prog); Get rid of the \n 
 					 */
-					strncpy(prog, dummy, strlen(dummy));
+					strncpy(prog, dummy, sizeof(prog) - 1);
 					prog[strlen(dummy) - 1] = '\0';
 					FileList[temp] = (char *) malloc(strlen(prog) + 1);
 					strcpy(FileList[temp], prog);
@@ -1037,9 +1040,11 @@ main(argc, argv)				/*- real shell */
 	time_t          timer;
 	struct tm      *dt;
 	char           *date_time;
+#if 0
 	char           *t;
 	char            buf[40];
 	int             i;
+#endif
 	char           *x, *ptr;
 #ifdef HAVE_SYS_UTSNAME
 	struct utsname  un;
@@ -1059,6 +1064,7 @@ main(argc, argv)				/*- real shell */
 #ifndef COMPILE_TABLE
 	FileList[0] = NULL;
 #endif
+#if 0
 	t = getenv("TERM");
 	if (!strcmp(t, "network") && argc == 1)
 	{
@@ -1068,6 +1074,7 @@ main(argc, argv)				/*- real shell */
 			perror("fgets");
 			return (1);
 		}
+		/*- this is buggy code. needs to be corrected */
 		for (i = 0; i < 100; i++)
 			if (!strncmp(environ[i], "TERM=", 5))
 			{
@@ -1076,6 +1083,7 @@ main(argc, argv)				/*- real shell */
 				break;
 			}
 	}
+#endif
 	pwdcopy(getpwuid(getuid()), &pwh);
 	pw = &pwh;
 	grpcopy(getgrgid(pw->pw_gid), &gph);

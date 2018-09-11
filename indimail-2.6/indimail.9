@@ -56,20 +56,46 @@ flash
 .PP
 Apart from providing ESMTP, IMAP, POP3 service, IndiMail provides Management of Virtual
 domains. IndiMail works on both 32 / 64 bit Unix platforms.
+
+IndiMail consists of two packages.
+
+The indimail-mta package which provides
+
+  o MTA, SMTP, QMQP, QMTP
+  o daemontools package
+  o ucspi-tcp package
+  o bogofilter spam filter
+  o fetchmail mail retrieval package
+
+The indimail-mta package can be installed and function without the indimail package. If it
+finds the libindimail shared library, indimail-mta works seamlessly with virtual domains
+configured locally or on multiple hosts.
+
+The indimail package which provides
+
+  o libindimail shared library
+  o courier-imap for IMAP/POP3
+  o checkpassword or PAM authentication modules for IMAP/POP3
+  o virtual domain management.
+  o vdelivermail local delivery agent.
+
+The indimail package requires indimail-mta package to be installed. In fact, if you install
+indimail package using apt-get, yum/dnf, indimail-mta package will be automatically installed.
+
 .PP
 IndiMail provides qmail-remote / qmail-local, proxyimap & proxypop3 which are user-location
 aware (on which server the user's mailbox lies). This gives IndiMail the ability to distribute
-the users across multiple hosts using standard non-proprietary protocols and RFCs. The other
-use of user-location aware property is to have a single domain consisting of a heterogeneous
-email server environment (with some users on MS Exchange and some on Lotus Notes some on
-IndiMail). To distribute mails for users across multiple hosts, IndiMail uses \fBqmail-remote(8)\fR.
-\fBqmail-remote(8)\fR gives the ability to distribute the mails using SMTP or QMTP. You can
-use the \fBROUTES\fR environment variable to "smtp" or "qmtp" to choose the protocol.
-You can have multiple hosts hosting a domain placed geographically anywhere and tied
-up by IndiMail. The architecture does not force a filesystem architecture like NFS to be used
-to distribute the users. In other words, \fBIndiMail\fR allows you to extend a domain across
+the users across multiple hosts using standard non-proprietary protocols detailed in standard
+RFCs. The other use of user-location aware property is to have a single domain consisting of
+a heterogeneous email server environment (with some users on MS Exchange and some on Lotus
+Notes some on IndiMail). To distribute mails for users across multiple hosts, IndiMail uses
+\fBqmail-remote(8)\fR. \fBqmail-remote(8)\fR gives the ability to distribute the mails using
+SMTP or QMTP. You can use the \fBROUTES\fR environment variable to "smtp" or "qmtp" to choose
+the protocol. You can have multiple hosts hosting a domain placed geographically anywhere and
+tied up by IndiMail. The architecture does not force a filesystem architecture like NFS to be
+used to distribute the users. In other words, \fBIndiMail\fR allows you to extend a domain across
 multiple servers and hence provide the ability to scale to any number of users. Such a domain
-which is extended across multiple servers is called a clustered domain. A clustered domain
+which is extended across multiple servers is called a distributed domain. A distributed domain
 consists of multiple mailstore and one or many MySQL servers. A mailstore is a host which has
 the user's mail storage in Maildir. The MySQL servers hold user information like path of the
 Maildir, user privileges, user aliases and forwardings, user's mailstore. The MySQL servers
@@ -85,27 +111,30 @@ The proxy analyzes the login sequence
 Extracts the user name of the user trying to login
 .sp -1
 .IP \[bu]
-Does a lookup query on the local server to find out which server the mailbox of the user
-attempting to login lives on This lookup service (named \fBinlookup(8)\fR) runs on mailbox
-servers and accepts requests on a well defined FIFO.
+Does a lookup query on the local server to find out the server having the mailbox of the user
+attempting the login. This lookup service (named \fBinlookup(8)\fR) runs on all mailbox
+servers and accepts requests through a well defined FIFO.
+
 .PP
 IndiMail uses a highly modified qmail and provides all features needed in a
 modern MTA. However, all features have been added by re-using the functions/libraries provide
 by stock qmail (stralloc, substdio, alloc, str, env, etc). Detailed feature list of IndiMail
 is provided on the website http://www.indimail.org
+
 .PP
-IndiMail has two databases
+IndiMail has two databases. For most purposes, IndiMail can function with just the local
+database. For a distributed environment, IndiMail requires two databases.
 
 .nr step 1 1
 .IP \n[step] 2
 local database - Contains all user information, attributes
 .sp -1
 .IP \n+[step]
-central database - Used only when configured as a clustered domain. This database is
+central database - Used only when configured as a distributed domain. This database is
 refered to as '\fBclusterinfo\fR'.
 
 .PP
-For a non-clustered architecture, you need a local MySQL database. To connect to this MySQL
+For a non-distributed architecture, you need a local MySQL database. To connect to this MySQL
 database, you need to have a control file \fBhost\.mysql\fR. This control file contains the
 IP address or hostname of the MySQL database corresponding to the \fBlocal database\fR. If
 the control file \fBhost\.mysql\fR is missing, programs will use \fIlocalhost\fR to connect
@@ -154,10 +183,10 @@ mailing_list
 bulkmail
 
 .PP
-A clustered domain in IndiMail is achieved by having a central MySQL database called
+A distributed domain in IndiMail is achieved by having a central MySQL database called
 \fIclusterinfo\fR. \fIclusterinfo\fR stores information about the user's storage server
 (mailstore) and each mailstore's individual local MySQL database's connection parameters
-(host, user, password, socket or port). This database is also referred to as the
+(host, user, password, socket or port, ssl/nossl). This database is also referred to as the
 \fBcentral database\fR. It consists of the following tables
 
 .nr step 1 1
@@ -213,7 +242,7 @@ in \fBhosts(5)\fR /etc/hosts. You can bypass \fBgethostid(3)\fR and \fBgetaddrif
 have your hostid in \fICONTROLDIR/hostid\fR and your IP address in
 \fBCONTROLDIR/localiphost\fR.
 .PP
-In a clustered setup, you can have multiple servers with each server having its own set of
+In a distributed setup, you can have multiple servers with each server having its own set of
 local users. The information for these users are stored in a MySQL database known as the
 \fBlocal database\fR. You can have multiple \fBlocal databases\fR with each database serving one
 email server. You can also club user information for multiple email servers in a single MySQL
@@ -362,7 +391,12 @@ poppass.106     | Log for poppassd protocol daemon
 mysql.3306      | Log for MySQL service
 qmail-logfifo   | Log for clients using fifologger
 svscan          | Log for svscan service
+qmail-daned     | service for getting TLSA records
 udplogger       | Log for udplogger service
+mrtg            | MRTG service
+.svscan         | svscan service and local /etc/resolv.conf namespace
+resolvconf      | Provide private local namespace for /etc/resolv.conf
+dnscache        | DNS cache service
 .TE
 
 .SH Virtual Domain Directory Structure Layout
@@ -1192,7 +1226,7 @@ MAILTMP            |maildir2mbox |used    |Temporary file that maildir2mbox can
                    |             |        |overwrite
 MCDFILE            |InLookup     |used    |Mail Control Definition file. Specifies
                    |dbinfo       |        |the list of all MySQL servers
-                   |vuserinfo    |        |participating in a clustered setup.
+                   |vuserinfo    |        |participating in a distributed setup.
                    |vserverinfo  |        |
 MAXADDR            |chowkidar    |used    |Number of addresses to load in chowkidar
 -------------------|-------------|--------|----------------------------------------
@@ -1562,10 +1596,10 @@ ismaildup(1)       - Discard duplicate mails during local delivery
 postdel(8)         - Deliver mails to Maildir if using postfix as MTA
 .sp -1
 .IP \n+[step]
-proxyimap(8)       - IMAP proxy to connect to a server in a cluster setup
+proxyimap(8)       - IMAP proxy to connect to a server in a distributed setup
 .sp -1
 .IP \n+[step]
-proxypop3(8)       - POP3 Proxy to connect to a server in a cluster setup
+proxypop3(8)       - POP3 Proxy to connect to a server in a distributed setup
 .sp -1
 .IP \n+[step]
 vproxy(8)          - Generic Proxy utility

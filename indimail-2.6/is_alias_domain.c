@@ -1,5 +1,8 @@
 /*
  * $Log: is_alias_domain.c,v $
+ * Revision 2.4  2018-09-11 10:36:01+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.3  2009-02-18 09:07:24+05:30  Cprogrammer
  * fixed fgets warning
  *
@@ -26,14 +29,14 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: is_alias_domain.c,v 2.3 2009-02-18 09:07:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: is_alias_domain.c,v 2.4 2018-09-11 10:36:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 is_alias_domain(char *domain)
 {
 	FILE           *fs;
-	char            dir[MAX_BUFF], tmpbuf1[MAX_BUFF], tmpbuf2[MAX_BUFF], buffer[MAX_BUFF];
+	char            dir[MAX_BUFF], tmpbuf1[MAX_BUFF + 15], tmpbuf2[MAX_BUFF], buffer[MAX_BUFF];
 	struct stat     statbuf;
 
 	if (vget_assign(domain, dir, MAX_BUFF, NULL, NULL) == 0)
@@ -45,8 +48,8 @@ is_alias_domain(char *domain)
 	}
 	if (S_ISLNK(statbuf.st_mode))
 		return(1);
-	snprintf(tmpbuf1, MAX_BUFF, "%s/.aliasdomains", dir);
-	snprintf(tmpbuf2, MAX_BUFF, "%s\n", domain);
+	snprintf(tmpbuf1, sizeof(tmpbuf1) - 1, "%s/.aliasdomains", dir);
+	snprintf(tmpbuf2, sizeof(tmpbuf2) - 1, "%s\n", domain);
 	if ((fs = fopen(tmpbuf1, "r")) != (FILE *)NULL)
 	{
 		for (;;)

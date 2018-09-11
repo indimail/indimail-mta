@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.31  2018-09-11 15:09:45+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.30  2017-03-31 00:42:40+05:30  Cprogrammer
  * added post handle script
  *
@@ -159,7 +162,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.30 2017-03-31 00:42:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.31 2018-09-11 15:09:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -193,7 +196,7 @@ main(argc, argv)
 	gid_t           gid;
 	struct passwd   PwTmp;
 	struct passwd  *pw;
-	char            tmpbuf[MAX_BUFF], tmpQuota[MAX_BUFF];
+	char            tmpbuf[MAX_BUFF + 28], tmpQuota[MAX_BUFF];
 	char           *real_domain, *ptr;
 	mdir_t          quota = 0;
 #ifdef USE_MAILDIRQUOTA
@@ -248,7 +251,7 @@ main(argc, argv)
 		error_stack(stderr, "%s: domain does not exist\n", real_domain);
 		return (1);
 	}
-	snprintf(tmpbuf, MAX_BUFF, "%s/.domain_limits", TheDir);
+	snprintf(tmpbuf, sizeof(tmpbuf) - 1, "%s/.domain_limits", TheDir);
 	domain_limits = ((access(tmpbuf, F_OK) && !getenv("DOMAIN_LIMITS")) ? 0 : 1);
 #endif
 #ifdef CLUSTERED_SITE
@@ -259,7 +262,7 @@ main(argc, argv)
 	} else
 	if (err == 1)
 	{
-		snprintf(tmpbuf, MAX_BUFF, "%s@%s", User, real_domain);
+		snprintf(tmpbuf, sizeof(tmpbuf) - 1, "%s@%s", User, real_domain);
 		if (!findhost(tmpbuf, 1))
 		{
 			error_stack(stderr, "no such user %s@%s\n", User, real_domain);
@@ -398,7 +401,7 @@ main(argc, argv)
 	vclose();
 	if (!err) {
 		for (i = 1, *tmpbuf = 0; i < argc; i++) {
-			strncat(tmpbuf, " ", MAX_BUFF);
+			strcat(tmpbuf, " ");
 			strncat(tmpbuf, argv[i], MAX_BUFF -1);
 		}
 		if (!(ptr = getenv("POST_HANDLE")))

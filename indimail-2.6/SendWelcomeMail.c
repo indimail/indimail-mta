@@ -1,5 +1,8 @@
 /*
  * $Log: SendWelcomeMail.c,v $
+ * Revision 2.7  2018-09-11 14:10:41+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.6  2016-05-17 14:56:55+05:30  Cprogrammer
  * use control directory defined by configure
  *
@@ -26,13 +29,13 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: SendWelcomeMail.c,v 2.6 2016-05-17 14:56:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: SendWelcomeMail.c,v 2.7 2018-09-11 14:10:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
 SendWelcomeMail(char *homedir, char *username, char *domain, int inactFlag, char *subject)
 {
-	char            email[MAX_BUFF], TmpBuf[MAX_BUFF], bulkdir[MAX_BUFF];
+	char            email[MAX_BUFF], TmpBuf[MAX_BUFF + 15], bulkdir[MAX_BUFF];
 	char           *ptr;
 	struct stat     statbuf;
 
@@ -40,11 +43,11 @@ SendWelcomeMail(char *homedir, char *username, char *domain, int inactFlag, char
 		CONTROLDIR, domain, (ptr = getenv("BULK_MAILDIR")) ? ptr : BULK_MAILDIR);
 	if (!access(bulkdir, F_OK))
 	{
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s", 
+		snprintf(TmpBuf, sizeof(TmpBuf) - 1, "%s/%s", 
 			bulkdir, inactFlag ? ((ptr = getenv("ACTIVATEMAIL")) ? ptr : ACTIVATEMAIL) : ((ptr = getenv("WELCOMEMAIL")) ? ptr : WELCOMEMAIL));
 		if (!stat(TmpBuf, &statbuf))
 		{
-			snprintf(email, MAX_BUFF, "%s@%s", username, domain);
+			snprintf(email, sizeof(email) - 1, "%s@%s", username, domain);
 			CopyEmailFile(homedir, TmpBuf, email, 0, 0, subject, 1, 0, statbuf.st_size);
 		}
 	}

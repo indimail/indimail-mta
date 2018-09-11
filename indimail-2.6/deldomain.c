@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 2.18  2018-09-11 10:25:27+05:30  Cprogrammer
+ * fixed commpiler warnings
+ *
  * Revision 2.17  2017-04-28 09:37:37+05:30  Cprogrammer
  * fixed incorrect handling of return status from del_control()
  *
@@ -87,13 +90,13 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 2.17 2017-04-28 09:37:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 2.18 2018-09-11 10:25:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 vdeldomain(char *domain)
 {
-	char            Dir[MAX_BUFF], TmpBuf[MAX_BUFF], BasePath[MAX_BUFF];
+	char            Dir[MAX_BUFF], TmpBuf[MAX_BUFF + 15], BasePath[MAX_BUFF];
 	char           *ptr, *tmpstr, *base_path;
 	int             is_alias, i;
 	FILE           *fp;
@@ -157,7 +160,7 @@ vdeldomain(char *domain)
 		error_stack(stderr, "Domain %s does not exist\n", domain);
 		return (-1);
 	}
-	snprintf(TmpBuf, MAX_BUFF, "%s/.base_path", Dir);
+	snprintf(TmpBuf, sizeof(TmpBuf), "%s/.base_path", Dir);
 	if ((fp = fopen(TmpBuf, "r")))
 	{
 		if (fscanf(fp, "%s", BasePath) != 1)
@@ -165,7 +168,7 @@ vdeldomain(char *domain)
 		fclose(fp);
 	} else
 		*BasePath = 0;
-	snprintf(TmpBuf, MAX_BUFF, "%s/.aliasdomains", Dir);
+	snprintf(TmpBuf, sizeof(TmpBuf), "%s/.aliasdomains", Dir);
 	if ((is_alias = is_alias_domain(domain)) == 1)
 	{
 		if (verbose)

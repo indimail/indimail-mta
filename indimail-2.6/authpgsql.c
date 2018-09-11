@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 2.3  2018-09-11 10:21:28+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.2  2014-01-30 13:59:55+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -19,7 +22,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 2.2 2014-01-30 13:59:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 2.3 2018-09-11 10:21:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL
@@ -94,7 +97,7 @@ int
 main(int argc, char **argv)
 {
 	char           *tmpbuf, *login, *ologin, *response, *challenge, *crypt_pass, *ptr, *cptr;
-	char            user[AUTH_SIZE], fquser[AUTH_SIZE], domain[AUTH_SIZE], buf[MAX_BUFF];
+	char            user[AUTH_SIZE], fquser[AUTH_SIZE + AUTH_SIZE + 1], domain[AUTH_SIZE], buf[MAX_BUFF];
 	int             count, offset, norelay = 0, status, auth_method;
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -194,7 +197,7 @@ main(int argc, char **argv)
 			for (cptr = domain; *ptr; *cptr++ = *ptr++);
 			*cptr = 0;
 		}
-		snprintf(fquser, AUTH_SIZE, "%s@%s", user, domain);
+		snprintf(fquser, sizeof(fquser), "%s@%s", user, domain);
 		login = fquser;
 	}
 	pgc = PQconnectdb("user=postgress,database=indimail");

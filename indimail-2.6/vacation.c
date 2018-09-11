@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 2.14  2018-09-11 14:13:10+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.13  2017-03-13 14:10:51+05:30  Cprogrammer
  * use PREFIX for bin prefix
  *
@@ -67,7 +70,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 2.13 2017-03-13 14:10:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 2.14 2018-09-11 14:13:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *getuserinfo(char *);
@@ -79,7 +82,7 @@ main(int argc, char **argv)
 {
 	FILE           *fp, *inject_fp;
 	char            buffer[MAX_BUFF + 2], VacationFname[MAXPATHLEN];
-	char            cmmd[MAX_BUFF], ToId[MAX_BUFF], FromId[MAX_BUFF], Subject[4096];
+	char            cmmd[1024], ToId[MAX_BUFF], FromId[MAX_BUFF], Subject[4096];
 	char           *ptr, *cptr, *HomeDir, *sender;
 
 	if(argc == 2 || argc == 3)
@@ -172,7 +175,7 @@ main(int argc, char **argv)
 		return (0);
 	if (*VacationFname)
 	{
-		snprintf(cmmd, MAX_BUFF, PREFIX"/bin/qmail-inject -f%s %s", FromId, ToId);
+		snprintf(cmmd, sizeof(cmmd) - 1, PREFIX"/bin/qmail-inject -f%s %s", FromId, ToId);
 		if (!(inject_fp = popen(cmmd, "w")))
 		{
 			perror(cmmd);

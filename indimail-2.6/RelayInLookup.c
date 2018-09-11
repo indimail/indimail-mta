@@ -1,5 +1,8 @@
 /*
  * $Log: RelayInLookup.c,v $
+ * Revision 2.7  2018-09-11 10:46:44+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 2.6  2010-05-01 14:13:51+05:30  Cprogrammer
  * added connect_all argument to vauthOpen_user
  *
@@ -25,7 +28,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RelayInLookup.c,v 2.6 2010-05-01 14:13:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: RelayInLookup.c,v 2.7 2018-09-11 10:46:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -37,7 +40,7 @@ static char     sccsid[] = "$Id: RelayInLookup.c,v 2.6 2010-05-01 14:13:51+05:30
 int
 RelayInLookup(char *mailfrom, char *remoteip)
 {
-	char            user[MAX_BUFF], domain[MAX_BUFF], email[MAX_BUFF];
+	char            user[MAX_BUFF], domain[MAX_BUFF], email[MAX_BUFF + 2];
 	char           *ptr, *cptr, *real_domain;
 	int             retval;
 
@@ -62,7 +65,7 @@ RelayInLookup(char *mailfrom, char *remoteip)
 	*cptr = 0;
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
-	snprintf(email, MAX_BUFF, "%s@%s", user, real_domain);
+	snprintf(email, sizeof(email) - 1, "%s@%s", user, real_domain);
 	retval = relay_select(email, remoteip);
 #ifdef CLUSTERED_SITE
 	is_open = 0;
