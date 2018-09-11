@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.7  2018-09-11 10:14:14+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.6  2010-05-05 20:13:23+05:30  Cprogrammer
  * added -i option to added service identifier
  *
@@ -45,7 +48,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.6 2010-05-05 20:13:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.7 2018-09-11 10:14:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -149,7 +152,7 @@ MakeArgs(char *cmmd)
 	idx = strlen(ptr);
 	if (!(sptr = (char *) malloc((idx + 1) * sizeof(char))))
 		return((char **) 0);
-	strncpy(sptr, ptr, idx + 1);
+	strcpy(sptr, ptr);
 	/*-
 	 * Get the number of arguments by counting
 	 * white spaces. Allow escape via the double
