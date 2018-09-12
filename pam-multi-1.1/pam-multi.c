@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.13  2018-09-12 12:55:04+05:30  Cprogrammer
+ * fixed SIGSEGV in _pam_log()
+ *
  * Revision 1.12  2010-05-05 20:13:41+05:30  Cprogrammer
  * use environment variable AUTHSERVICE for service identifier
  *
@@ -172,24 +175,25 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.12 2010-05-05 20:13:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.13 2018-09-12 12:55:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
  * logging function ripped from pam_listfile.c 
  */
 static void
-_pam_log(int err, const char *format, ...)
+_pam_log(int err, const char *fmt, ...)
 {
-	va_list         args;
+	va_list         ap;
 
-	va_start(args, format);
+	va_start(ap, fmt);
+	(void) vfprintf(stderr, fmt, ap);
+	(void) fprintf(stderr, "\n");
+	va_end(ap);
 	openlog(PAM_MODULE_NAME, LOG_PID, LOG_AUTHPRIV);
-	vsyslog(err, format, args);
-	fprintf(stderr, "%s: ", PAM_MODULE_NAME);
-	vfprintf(stderr, format, args);
-	fprintf(stderr, "\n");
-	va_end(args);
+	va_start(ap, fmt);
+	vsyslog(err, fmt, ap);
+	va_end(ap);
 	closelog();
 }
 
@@ -489,8 +493,11 @@ loadLIB(char *shared_lib, const char *user, const char *service, char **qresult,
 		_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
 		dlclose(handle);
 		return (PAM_BUF_ERR);
-	} else
+	} else {
+		if (debug)
+			_pam_log(LOG_INFO, "loadLIB nitems=%d, size=%d", nitems ? *nitems : 0, size);
 		memcpy(*qresult, ptr, size);
+	}
 	if (dlclose(handle)) {
 		_pam_log(LOG_ERR, "dlsym: %s", error);
 		return (PAM_SERVICE_ERR);
@@ -1059,9 +1066,6 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 	const char     *user;
 	int             pam_err;
 
-#ifdef DEBUG
-	_pam_log(LOG_INFO, "chauthtok %d.",__LINE__);
-#endif
 	if ((pam_err = pam_get_user(pamh, &user, NULL)) != PAM_SUCCESS)
 		return (pam_err);
 #ifndef DARWIN
@@ -1076,9 +1080,6 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 				is not in the selected database", user);
 		return PAM_USER_UNKNOWN;
 	}
-#ifdef DEBUG
-	_pam_log(LOG_INFO, "chauthtok %d.",__LINE__);
-#endif
 	/*
 	 * When looking through the LinuxPAM code, I came across this : 
 	 * 
@@ -1092,43 +1093,22 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 		_pam_log(LOG_WARNING, "Bad username [%s]", user);
 		return (PAM_USER_UNKNOWN);
 	}
-#ifdef DEBUG
-	_pam_log(LOG_INFO, "chauthtok %d.",__LINE__);
-#endif
 	if (flags & PAM_PRELIM_CHECK) {
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "Doing preliminary actions.");
-#endif
 		/*- root doesn't need old passwd */
 		if (!getuid())
 			return (pam_set_item(pamh, PAM_OLDAUTHTOK, ""));
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "chauthtok %d.",__LINE__);
-#endif
 		if ((pam_err = pam_get_item(pamh, PAM_OLDAUTHTOK, (const void **) &old_pass)) != PAM_SUCCESS) {
 			_pam_log(LOG_AUTHPRIV | LOG_ERR, PAM_MYSQL_LOG_PREFIX "PAM_OLDAUTHTOK-password (reason: %s)",
 				   pam_strerror(pamh, pam_err));
 			return (pam_err == PAM_PERM_DENIED ? PAM_AUTH_ERR : pam_err);
 		}
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "chauthtok %d.",__LINE__);
-#endif
 		if (!old_pass && (pam_err = converse(pamh, flags, PLEASE_ENTER_OLD_PASSWORD, &old_pass)) != PAM_SUCCESS)
 			return (pam_err == PAM_CONV_ERR ? pam_err : PAM_AUTH_ERR);
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "chauthtok [%s] [%s] %d.", old_pass, pwd->sp_pwdp, __LINE__);
-#endif
 		hashedpwd = crypt(old_pass, pwd->sp_pwdp);
 		if (strcmp(hashedpwd, old_pwd->pw_passwd))
 			return (PAM_PERM_DENIED);
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "Got old token for user [%s].", user);
-#endif
 	} else
 	if (flags & PAM_UPDATE_AUTHTOK) {
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "Doing actual update.");
-#endif
 		if ((pam_err = pam_get_item(pamh, PAM_OLDAUTHTOK, (const void **) &old_pass)) != PAM_SUCCESS) {
 			_pam_log(LOG_AUTHPRIV | LOG_ERR, PAM_MYSQL_LOG_PREFIX "PAM_OLDAUTHTOK-password (reason: %s)",
 				   pam_strerror(pamh, pam_err));
@@ -1136,9 +1116,6 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 		}
 		if (!old_pass && (pam_err = converse(pamh, flags, PLEASE_ENTER_OLD_PASSWORD, &old_pass)) != PAM_SUCCESS)
 			return (pam_err == PAM_CONV_ERR ? pam_err : PAM_AUTH_ERR);
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "Got old password");
-#endif
 		retries = 0;
 		pam_err = PAM_AUTHTOK_ERR;
 		while ((pam_err != PAM_SUCCESS) && (retries++ <= MAX_RETRIES)) {
@@ -1155,17 +1132,11 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 			_pam_log(LOG_ERR, "Unable to get new password!");
 			return (pam_err);
 		}
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "Got new password");
-#endif
 		/*
 		 * checking has to be done (?) for the new passwd to 
 		 * verify it's not weak. 
 		 */
 		makesalt(salt);
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "Generated salt [%s]\n", salt);
-#endif
 		/*- Update shadow/passwd entries for Linux */
 		if ((pam_err = update_shadow(pamh, user, (const char *) sha512_crypt(new_pass, salt))) != PAM_SUCCESS)
 		{
@@ -1174,17 +1145,11 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 #endif
 			pam_err = update_shadow(pamh, user, md5_crypt(new_pass, salt));
 		}
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "Generated password [%s]\n", sha512_crypt(new_pass, salt));
-#endif
 		if (pam_err != PAM_SUCCESS)
 			return (pam_err);
 #ifdef WHY_IS_THIS_NEEDED
 		if ((pam_err = update_passwd(pamh, user, "x")) != PAM_SUCCESS)
 			return (pam_err);
-#endif
-#ifdef DEBUG
-		_pam_log(LOG_INFO, "Password changed for user [%s]", user);
 #endif
 	} else {
 		pam_err = PAM_ABORT;
