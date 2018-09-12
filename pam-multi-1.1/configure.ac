@@ -224,10 +224,10 @@ AC_DEFINE_UNQUOTED(MYSQLBINDIR,"$mysqlbindir",full path to MySQL binaries)
 auth_inc="-I$mysql_incdir -I$mysql_incdir/mysql"
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L. -L$mysql_libdir -lmysqlclient $LIB_SSL"
+	auth_libs="-L. -L$mysql_libdir -lmysqlclient"
 	;;
 	*)
-	auth_libs="-L. -Xlinker -R -Xlinker $mysql_libdir -L$mysql_libdir -lmysqlclient $LIB_SSL"
+	auth_libs="-L. -Xlinker -R -Xlinker $mysql_libdir -L$mysql_libdir -lmysqlclient"
 	;;
 esac
 
@@ -256,10 +256,10 @@ echo "    default domain = $defaultdomain --enable-default-domain=$defaultdomain
 echo "MySQL bin directory= $mysqlbindir --enable-mysqlbindir=$mysqlbindir"
 echo "       include dir = $mysql_incdir --enable-mysqlincdir=$mysql_incdir"
 echo "     MySQL lib dir = $mysql_libdir --enable-mysqllibdir=$mysql_libdir"
-echo "         libraries = $libs"
+echo "         libraries = $libs $LIBS"
 echo "  module directory = $moduledir"
 echo "          auth inc = $auth_inc"
-echo "          auth lib = $auth_libs"
+echo "          auth lib = $auth_libs $LIB_PAM $LIB_CRYPT $LIB_DL"
 ) | tee pam-multi.settings
 AC_OUTPUT(Makefile)
 AC_OUTPUT([pam-multi.spec])
