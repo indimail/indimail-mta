@@ -56,13 +56,16 @@ This option is useful when you have automounted home directories, but mail is de
 central location.
 
 .PP
-Finally,
+If authentication fails,
 .B pam-checkpwd
-executes
+executes and passes input on file descriptor 3 to checkpassword compatabile program
 .I prog
 with
 .I args
 as its arguments.
+
+If the environment variable POSTAUTH is defined as set as a path to an executable/script, the program
+gets called with the authenticated username as the argument
 
 .PP
 \fB--\fR is used as usual to separate the \fBpam-checkpwd\fR own options from
@@ -72,15 +75,6 @@ as its arguments.
 \fBpam-checkpwd\fR logs authentication failures (or all actions, if
 --\fBdebug\fR option is used) to stderr.
 
-.SH "ENVIRONMENT VARIABLES"
-.TP
-.B PAM_SERVICE
-.B pam-checkpwd
-uses contents of
-.B PAM_SERVICE
-environment variable to specify the PAM service name.  This could be
-overriden by -\fBs\fR option, see above.
-
 .PP
 Before invoking \fIprog\fR, \fBpam-checkpwd\fR sets environment variables
 .BR USER ", " HOME ", and " SHELL
@@ -89,6 +83,22 @@ skipped and the variables are left alone. This is needed when you have
 virtual users which are not listed in your \fI/etc/passwd\fR,
 and you need to only do authentication. Setting up process
 environment is handled by some other application like \fBsetuidgid\fR.
+
+.SH "ENVIRONMENT VARIABLES"
+
+.TP
+.B PAM_SERVICE
+.B pam-checkpwd
+uses contents of
+.B PAM_SERVICE
+environment variable to specify the PAM service name.  This could be
+overriden by -\fBs\fR option, see above.
+
+.TP
+.B POSTAUTH
+If this is set to a path to an executable or script, \fBpam-checkpwd\fR will execute this program
+with the authenticated username as an argument exit with the return status of the program.
+
 
 .SH "DEBUGGING"
 .PP
@@ -106,6 +116,7 @@ and password with the following command-line
 .br
   | pam-checkpwd -s SERVICE -d -- /usr/bin/id 3<&0
 
+(here timestamp could be the output of date '+%s' command)
 .PP
 It will trace the PAM authentication process for the user
 \fIusername\fR with password \fIpassword\fR, and run the \fBid\fR
