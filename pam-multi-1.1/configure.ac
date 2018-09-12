@@ -98,6 +98,7 @@ fi
 
 AC_CHECK_LIB(dl, dlopen, [AC_SUBST([LIB_DL], ["-ldl"]) AC_DEFINE([HAVE_DL], [1],[Dynamic Link Library])],,-ldl)
 AC_CHECK_LIB(pam, pam_start, [AC_SUBST([LIB_PAM], ["-lpam"]) AC_DEFINE([HAVE_PAM], [1],[PAM Library])],,-lpam)
+AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
 
 defaultdomain=""
 AC_ARG_ENABLE(default-domain, [  --enable-default-domain=name  Default domain name, default is null.],
