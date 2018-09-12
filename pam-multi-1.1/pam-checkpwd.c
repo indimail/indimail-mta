@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.9  2018-09-12 21:14:32+05:30  Cprogrammer
+ * call initialize post successful auth
+ *
  * Revision 1.8  2018-09-12 18:50:30+05:30  Cprogrammer
  * coded indented
  *
@@ -51,7 +54,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.8 2018-09-12 18:50:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.9 2018-09-12 21:14:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -407,8 +410,6 @@ main(int argc, char **argv)
 	if (debug)
 		fprintf(stderr, "%s: login [%s] challenge [%s] response [%s]\n", 
 			argv[0], login, challenge, response);
-	if (!opt_dont_set_env)
-		initialize(login, opt_dont_chdir_home, debug);
 	/*- authenticate using PAM */
 	if ((status = auth_pam(service_name, login, challenge, debug))) {
 		pipe_exec(argv + s_optind, tmpbuf, offset);
@@ -416,6 +417,8 @@ main(int argc, char **argv)
 		fflush(stdout);
 		_exit (111);
 	}
+	if (!opt_dont_set_env)
+		initialize(login, opt_dont_chdir_home, debug);
 	if ((ptr = (char *) getenv("POSTAUTH")) && !access(ptr, X_OK)) {
 		snprintf(buf, MAX_BUFF, "%s %s", ptr, login);
 		status = runcmmd(buf, 1, debug);
