@@ -36,7 +36,7 @@ For the 'auth' method, \fBpam\-multi\fR supports any one of the three methods at
 that is needed is for you to configure the appropriate command which will return an encrypted
 password for the user. \fBpam-multi\fR will encrypt the plain text password given by the user
 and compare it with the result fetched by one of the three configured method. If the encrypted
-password matches, access will be granted. The comparision will utilize one of the four hashing
+password match, access will be granted. The comparision will utilize one of the four hashing
 schemes.
 .IP \( 2
 ??  .. DES
@@ -88,7 +88,12 @@ The function iauth() will be passed a \fIusername\fR and a token \fIservice\fR d
 the name of service. The service argument will be used only for identification purpose. It is
 expected for the function to return the data. The third argument is either 0 or 1 denoting authentication
 or account management respectively. \fIsize\fR denotes the size of the result returned. \fInitems\fR
-denotes the number of items that will be returned.
+denotes the number of items that will be returned. The function should return 0 for successful authentication.
+.RE
+
+.TP
+.I \fB\-i\fR \fIservice\fR Token identifier denotiing the name of service. The \fIservice\fR can also be
+set by setting the environment variable AUTHSERVICE
 .RE
 
 .TP
