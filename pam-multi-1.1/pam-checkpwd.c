@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.8  2018-09-12 18:50:30+05:30  Cprogrammer
+ * coded indented
+ *
  * Revision 1.7  2018-09-11 10:14:14+05:30  Cprogrammer
  * fixed compiler warning
  *
@@ -48,7 +51,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.7 2018-09-11 10:14:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.8 2018-09-12 18:50:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -158,17 +161,14 @@ MakeArgs(char *cmmd)
 	 * white spaces. Allow escape via the double
 	 * quotes character at the first word
 	 */
-	for (argc = 0, ptr = sptr;*ptr;)
-	{
+	for (argc = 0, ptr = sptr;*ptr;) {
 		for (;*ptr && isspace((int) *ptr);ptr++);
 		if (!*ptr)
 			break;
 		argc++;
 		marker = ptr;
-		for (;*ptr && !isspace((int) *ptr);ptr++)
-		{
-			if (ptr == marker && isEscape(*ptr))
-			{
+		for (;*ptr && !isspace((int) *ptr);ptr++) {
+			if (ptr == marker && isEscape(*ptr)) {
 				for (ptr++;*ptr && !isEscape(*ptr);ptr++);
 				if (!*ptr)
 					ptr = marker;
@@ -185,8 +185,7 @@ MakeArgs(char *cmmd)
 	 */
 	if (!(argv = (char **) malloc((argc + 1) * sizeof(char *))))
 		return ((char **) NULL);
-	for (idx = 0, ptr = sptr;*ptr;)
-	{
+	for (idx = 0, ptr = sptr;*ptr;) {
 		for (;*ptr && isspace((int) *ptr);ptr++)
 			*ptr = 0;
 		if (!*ptr)
@@ -196,15 +195,12 @@ MakeArgs(char *cmmd)
 		else
 			argv[idx++] = ptr;
 		marker = ptr;
-		for (;*ptr && !isspace((int) *ptr);ptr++)
-		{
-			if (ptr == marker && isEscape(*ptr))
-			{
+		for (;*ptr && !isspace((int) *ptr);ptr++) {
+			if (ptr == marker && isEscape(*ptr)) {
 				for (ptr++;*ptr && !isEscape(*ptr);ptr++);
 				if (!*ptr)
 					ptr = marker;
-				else /*- Remove the quotes */
-				{
+				else {/*- Remove the quotes */
 					argv[idx - 1] += 1;
 					*ptr = 0;
 				}
@@ -224,22 +220,19 @@ int pipe_exec(char **argv, char *tmpbuf, int len)
 {
 	int             pipe_fd[2];
 
-	if(pipe(pipe_fd) == -1)
-	{
+	if (pipe(pipe_fd) == -1) {
 		fprintf(stderr, "pipe_exec: pipe: %s\n", strerror(errno));
 		return(-1);
 	}
-	if(dup2(pipe_fd[0], 3) == -1 || dup2(pipe_fd[1], 4) == -1)
-	{
+	if (dup2(pipe_fd[0], 3) == -1 || dup2(pipe_fd[1], 4) == -1) {
 		fprintf(stderr, "pipe_exec: dup2: %s\n", strerror(errno));
 		return(-1);
 	}
-	if(pipe_fd[0] != 3 && pipe_fd[0] != 4)
+	if (pipe_fd[0] != 3 && pipe_fd[0] != 4)
 		close(pipe_fd[0]);
-	if(pipe_fd[1] != 3 && pipe_fd[1] != 4)
+	if (pipe_fd[1] != 3 && pipe_fd[1] != 4)
 		close(pipe_fd[1]);
-	if(write(4, tmpbuf, len) != len)
-	{
+	if (write(4, tmpbuf, len) != len) {
 		fprintf(stderr, "pipe_exec: %s: %s\n", argv[0], strerror(errno));
 		return(-1);
 	}
@@ -278,8 +271,7 @@ runcmmd(char *cmmd, int useP, int debug)
 	else
 	if ((pstat[1] = signal(SIGQUIT, SIG_IGN)) == SIG_ERR)
 		return (-1);
-	for (retval = -1;;)
-	{
+	for (retval = -1;;) {
 		i = wait(&status);
 #ifdef ERESTART
 		if (i == -1 && (errno == EINTR || errno == ERESTART))
@@ -292,16 +284,14 @@ runcmmd(char *cmmd, int useP, int debug)
 			break;
 		if (i != pid)
 			continue;
-		if (WIFSTOPPED(status) || WIFSIGNALED(status))
-		{
-			if(debug)
+		if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
+			if (debug)
 				fprintf(stderr, "%d: killed by signal %d\n", getpid(), WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
 			retval = -1;
 		} else
-		if (WIFEXITED(status))
-		{
+		if (WIFEXITED(status)) {
 			retval = WEXITSTATUS(status);
-			if(debug)
+			if (debug)
 				fprintf(stderr, "%d: normal exit return status %d\n", getpid(), retval);
 		}
 		break;
@@ -320,7 +310,7 @@ main(int argc, char **argv)
 					debug = 0, c, count, offset, status, option_index = 0, s_optind;
 	char           *service_name = 0;
 
-	if(argc < 2)
+	if (argc < 2)
 		_exit(2);
 	/*- process command line options */
 	s_optind = optind = opterr = 0;
@@ -359,8 +349,7 @@ main(int argc, char **argv)
 		}
 	}
 	s_optind = optind;
-	if (optind >= argc)
-	{
+	if (optind >= argc) {
 		fprintf(stderr, "Expected argument after options\n");
 		exit(2);
 	}
@@ -368,15 +357,13 @@ main(int argc, char **argv)
 		fprintf(stderr, "PAM service name not specified\n");
 		exit(2);
 	}
-	if(!(tmpbuf = calloc(1, (authlen + 1) * sizeof(char))))
-	{
+	if (!(tmpbuf = calloc(1, (authlen + 1) * sizeof(char)))) {
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));
 		fflush(stdout);
 		fprintf(stderr, "malloc-%d: %s\n", authlen + 1, strerror(errno));
 		_exit(111);
 	}
-	for (offset = 0;;)
-	{
+	for (offset = 0;;) {
 		do
 		{
 			count = read(3, tmpbuf + offset, authlen + 1 - offset);
@@ -385,18 +372,17 @@ main(int argc, char **argv)
 #else
 		} while(count == -1 && errno == EINTR);
 #endif
-		if (count == -1)
-		{
+		if (count == -1) {
 			printf("454-%s (#4.3.0)\r\n", strerror(errno));
 			fflush(stdout);
 			fprintf(stderr, "read: %s\n", strerror(errno));
 			_exit(111);
 		}
 		else
-		if(!count)
+		if (!count)
 			break;
 		offset += count;
-		if(offset >= (authlen + 1))
+		if (offset >= (authlen + 1))
 			_exit(2);
 	}
 	if (debug)
@@ -404,8 +390,7 @@ main(int argc, char **argv)
 	count = 0;
 	login = tmpbuf + count; /*- username */
 	for(;tmpbuf[count] && count < offset;count++);
-	if(count == offset || (count + 1) == offset)
-	{
+	if (count == offset || (count + 1) == offset) {
 		if (debug)
 			fprintf(stderr, "no username\n");
 		_exit(2);
@@ -413,8 +398,7 @@ main(int argc, char **argv)
 	count++;
 	challenge = tmpbuf + count; /*- challenge */
 	for(;tmpbuf[count] && count < offset;count++);
-	if(count == offset || (count + 1) == offset)
-	{
+	if (count == offset || (count + 1) == offset) {
 		if (debug)
 			fprintf(stderr, "no challenge\n");
 		_exit(2);
@@ -426,15 +410,13 @@ main(int argc, char **argv)
 	if (!opt_dont_set_env)
 		initialize(login, opt_dont_chdir_home, debug);
 	/*- authenticate using PAM */
-	if ((status = auth_pam(service_name, login, challenge, debug)))
-	{
+	if ((status = auth_pam(service_name, login, challenge, debug))) {
 		pipe_exec(argv + s_optind, tmpbuf, offset);
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));
 		fflush(stdout);
 		_exit (111);
 	}
-	if ((ptr = (char *) getenv("POSTAUTH")) && !access(ptr, X_OK))
-	{
+	if ((ptr = (char *) getenv("POSTAUTH")) && !access(ptr, X_OK)) {
 		snprintf(buf, MAX_BUFF, "%s %s", ptr, login);
 		status = runcmmd(buf, 1, debug);
 	}
