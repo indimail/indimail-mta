@@ -16,7 +16,7 @@ For \fIauth\fR or \fIaccount\fR methods only
 .SH DESCRIPTION
 \fBpam\-multi\fR
 is a system to handle the authentication tasks of applications (services) on the system which
-use PAM, against any proprietary databases.  The system provides a stable general interface,
+use PAM, against any proprietary databases. The system provides a stable general interface,
 that privilege granting programs (such as \fBlogin\fR(1) and \fBsu\fR(1)) can defer to, to
 perform standard authentication tasks. The primary goal of \fBpam\-multi\fR was to allow
 authentication of IMAP/POP3 servers like courier-imap, dovecot against \fBIndiMail(5)\fR's
@@ -28,7 +28,7 @@ database using any one of the three methods described below.
 \fBpam\-multi\fR supports four methods for password hashing schemes. crypt (DES), MD5, SHA256,
 SHA512.
 
-To use \fBpam\-multi\fR for your application (which currently uses PAM), you need to modify
+To use \fBpam\-multi\fR for any application (which currently uses PAM), you need to modify
 the PAM configuration file for that application.
 
 .SH OPTIONS
@@ -50,7 +50,7 @@ $5$ .. SHA256
 .sp -1
 $6$ .. SHA512
 
-The following methods are supported in configuration file in /etc/pam.d
+The following three methods are supported in configuration file in /etc/pam.d
 
 .TP
 \fB\-m\fR \fIsql_statement\fI
@@ -127,8 +127,9 @@ auth optional pam-multi.so args -m [select pw_passwd from indimail where pw_name
 auth optional pam-multi.so args -c [grep "^%u:" /etc/passwd | awk -F: '{print $2}']
 .sp -1
 .IP \n+[step]
-auth optional pam-multi.so args -s INDIMAIL/modules/iauth.so
+auth optional pam-multi.so args -s MODULEDIR/iauth.so
 
+.PP
 
 \fI/etc/pam\.d/imap\fR
 .IP \( 2
