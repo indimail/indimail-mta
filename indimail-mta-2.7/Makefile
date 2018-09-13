@@ -1101,8 +1101,6 @@ chkshsgr warn-shsgr tryshsgr.c compile load
 	hasshsgr.h
 	rm -f tryshsgr.o tryshsgr
 
-tai.h: uint64.h
-
 hastai.h: \
 trytai.c compile load
 	(( ./compile trytai.c && ./load trytai -ltai) >/dev/null \
@@ -1482,8 +1480,8 @@ make-load warn-auto.sh systype
 	chmod 755 load
 
 lock.a: \
-makelib lock_ex.o lock_exnb.o lock_sh.o lock_un.o
-	./makelib lock.a lock_ex.o lock_exnb.o lock_sh.o lock_un.o
+makelib lock_ex.o lock_exnb.o lock_un.o
+	./makelib lock.a lock_ex.o lock_exnb.o lock_un.o
 
 lock_ex.o: \
 compile lock_ex.c hasflock.h lock.h
@@ -1659,7 +1657,7 @@ date822fmt.h newfield.h stralloc.h
 	./compile newfield.c
 
 now.o: \
-compile now.c datetime.h now.h datetime.h
+compile now.c now.h datetime.h
 	./compile now.c
 
 open.a: \
@@ -2315,7 +2313,7 @@ qmail-queue.o: \
 compile qmail-queue.c sig.h exit.h open.h seek.h fmt.h tai.h matchregex.h \
 alloc.h substdio.h datetime.h now.h datetime.h triggerpull.h stralloc.h \
 control.h auto_qmail.h auto_uids.h date822fmt.h fmtqfn.h error.h env.h \
-mess822.h scan.h str.h variables.h wait.h getln.h \
+mess822.h scan.h str.h variables.h wait.h getln.h uint64.h \
 conf-sync conf-qhpsi conf-ip conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
 		qmail-queue.c
@@ -3792,7 +3790,7 @@ autoresponder.o: \
 compile autoresponder.c substdio.h subfd.h mess822.h date822fmt.h \
 getln.h stralloc.h env.h case.h auto_qmail.h str.h strerr.h control.h \
 constmap.h error.h alloc.h ip.h byte.h ipme.h fmt.h quote.h tai.h \
-qregex.h sgetopt.h conf-mime
+qregex.h sgetopt.h conf-mime uint64.h
 	./compile -DMAKE_SEEKABLE -DQUOTE `grep -h -v "^#" conf-mime` autoresponder.c
 
 autoresponder.0: \
@@ -4033,7 +4031,7 @@ alloc.o alloc_re.o libtai.a substdio.a
 
 leapsecs.o: \
 compile leapsecs.c substdio.h subfd.h getln.h strerr.h tai.h leapsecs.h \
-caldate.h auto_qmail.h
+caldate.h auto_qmail.h uint64.h
 	./compile leapsecs.c
 
 leapsecs.dat: leapsecs.txt leapsecs
@@ -5426,10 +5424,10 @@ tai_decode.o: compile tai_decode.c tai2.h bool.h
 tai_encode.o: compile tai_encode.c tai2.h bool.h
 	./compile tai_encode.c
 
-tai64n_decode.o: compile tai64n_decode.c tai.h bool.h
+tai64n_decode.o: compile tai64n_decode.c tai.h bool.h uint64.h
 	./compile tai64n_decode.c
 
-tai64n_encode.o: compile tai64n_encode.c tai.h bool.h
+tai64n_encode.o: compile tai64n_encode.c tai.h bool.h uint64.h
 	./compile tai64n_encode.c
 
 recordio.o: \
