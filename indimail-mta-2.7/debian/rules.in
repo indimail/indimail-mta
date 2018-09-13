@@ -81,7 +81,7 @@ build-stamp:
 	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d indimail-mta-$(version) ]                 ; then $(MAKE) -s -C indimail-mta-$(version) DESTDIR=$(DESTDIR); fi
-	${rm} -rf $(DESTDIR)$(prefix)/$(libdir)/*.la
+	${rm} -rf $(DESTDIR)$(libdir)/*.la
 	( \
 	echo NAME=indimail-mta; \
 	echo Description=\"IndiMail MTA\"; \
