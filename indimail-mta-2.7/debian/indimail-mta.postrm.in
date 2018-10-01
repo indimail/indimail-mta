@@ -23,6 +23,7 @@ prefix=@prefix@
 qmaildir=@qmaildir@
 qsysconfdir=@qsysconfdir@
 shareddir=@shareddir@
+libexecdir=@libexecdir@
 mandir=@mandir@
 servicedir=@servicedir@
 logdir=@logdir@
