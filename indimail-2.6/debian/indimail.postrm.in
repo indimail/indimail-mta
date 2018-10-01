@@ -23,6 +23,7 @@ prefix=@prefix@
 mandir=@mandir@
 indimaildir=@indimaildir@
 shareddir=@shareddir@
+libexecdir=@libexecdir@
 sysconfdir=@sysconfdir@
 servicedir=/service
 logdir=@logdir@

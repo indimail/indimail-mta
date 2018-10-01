@@ -21,6 +21,7 @@ prefix=@prefix@
 indimaildir=@indimaildir@
 mandir=@mandir@
 shareddir=@shareddir@
+libexecdir=@libexecdir@
 qcount=5
 qbase=${indimaildir}/queue
 mbase=@basepath@

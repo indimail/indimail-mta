@@ -6,6 +6,7 @@
 set -e
 prefix=@prefix@
 indimaildir=@indimaildir@
+libexecdir=@libexecdir@
 rm=/bin/rm
 
 # summary of how this script can be called:

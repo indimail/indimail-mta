@@ -20,6 +20,7 @@ prefix=@prefix@
 indimaildir=@indimaildir@
 sysconfdir=@sysconfdir@
 shareddir=@shareddir@
+libexecdir=@libexecdir@
 mandir=@mandir@
 rm=/bin/rm
 mv=/bin/mv
