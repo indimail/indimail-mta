@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.41  2018-10-01 16:55:39+05:30  Cprogrammer
+ * fixed code indentation
+ *
  * Revision 2.40  2018-09-11 14:13:57+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -186,7 +189,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.40 2018-09-11 14:13:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.41 2018-10-01 16:55:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -228,8 +231,7 @@ main(argc, argv)
 
 	if (get_options(argc, argv, &base_path, &chk_rcpt, &users_per_level))
 		return(1);
-	if (!isvalid_domain(Domain))
-	{
+	if (!isvalid_domain(Domain)) {
 		error_stack(stderr, "Invalid domain: %s\n", Domain);
 		return(1);
 	}
@@ -239,25 +241,20 @@ main(argc, argv)
 		GetIndiId(&indimailuid, &indimailgid);
 	uid = getuid();
 	gid = getgid();
-	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid) != 1)
-	{
+	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid) != 1) {
 		error_stack(stderr, "you must be root or indimail to run this program\n");
 		return(1);
 	}
-	if (uid & setuid(0))
-	{
+	if (uid & setuid(0)) {
 		error_stack(stderr, "setuid: %s\n", strerror(errno));
 		return(1);
 	}
-	if (!*Dir)
-	{
+	if (!*Dir) {
 		getEnvConfigStr(&domaindir, "DOMAINDIR", DOMAINDIR);
-		if (use_etrn)
-		{
+		if (use_etrn) {
 			if (!(ptr = vget_assign("autoturn", 0, 0, &uid, &gid)))
 				snprintf(Dir, MAX_BUFF, "%s/autoturn", domaindir);
-			else
-			{
+			else {
 				Uid = uid;
 				Gid = gid;
 				scopy(Dir, ptr, MAX_BUFF);
@@ -270,55 +267,42 @@ main(argc, argv)
 	 * add domain to users/assign, users/cdb
 	 * create .qmail-default file
 	 */
-	if (base_path && !use_etrn)
-	{
-		if (access(base_path, F_OK) && r_mkdir(base_path, INDIMAIL_DIR_MODE, Uid, Gid))
-		{
+	if (base_path && !use_etrn) {
+		if (access(base_path, F_OK) && r_mkdir(base_path, INDIMAIL_DIR_MODE, Uid, Gid)) {
 			error_stack(stderr, "%s: %s\n", base_path, strerror(errno));
-			vdeldomain(Domain);
-			vclose();
 			return(1);
 		}
-		if (setenv("BASE_PATH", base_path, 1))
-		{
+		if (setenv("BASE_PATH", base_path, 1)) {
 			error_stack(stderr, "setenv BASE_PATH=%s: %s\n", base_path, strerror(errno));
-			vdeldomain(Domain);
-			vclose();
 			return(1);
 		}
 	}
-	if ((err = vadddomain(Domain, ipaddr, Dir, Uid, Gid, chk_rcpt)) != VA_SUCCESS)
-	{
+	if ((err = vadddomain(Domain, ipaddr, Dir, Uid, Gid, chk_rcpt)) != VA_SUCCESS) {
 		error_stack(stderr, 0);
 		vclose();
 		return(err);
 	}
-	if (users_per_level)
-	{
-		if (!vget_assign(Domain, Dir, MAX_BUFF, &uid, &gid))
-		{
+	if (users_per_level) {
+		if (!vget_assign(Domain, Dir, MAX_BUFF, &uid, &gid)) {
 			error_stack(stderr, "Domain %s does not exist\n", Domain);
 			vdeldomain(Domain);
 			vclose();
 			return(1);
 		}
 		snprintf(TmpBuf, sizeof(TmpBuf), "%s/.users_per_level", Dir);
-		if ((fd = open(TmpBuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1)
-		{
+		if ((fd = open(TmpBuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1) {
 			error_stack(stderr, "open: %s: %s\n", TmpBuf, strerror(errno));
 			vdeldomain(Domain);
 			vclose();
 			return(1);
 		}
-		if (filewrt(fd, "%d", users_per_level) == -1)
-		{
+		if (filewrt(fd, "%d", users_per_level) == -1) {
 			error_stack(stderr, "write: %s\n", strerror(errno));
 			vdeldomain(Domain);
 			vclose();
 			return(1);
 		}
-		if (fchown(fd, uid, gid))
-		{
+		if (fchown(fd, uid, gid)) {
 			error_stack(stderr, "fchown: %s: (uid %d: gid %d): %s\n", TmpBuf, uid, gid, strerror(errno));
 			vdeldomain(Domain);
 			vclose();
@@ -326,32 +310,27 @@ main(argc, argv)
 		}
 		close(fd);
 	}
-	if (base_path && !use_etrn)
-	{
-		if (!vget_assign(Domain, Dir, MAX_BUFF, &uid, &gid))
-		{
+	if (base_path && !use_etrn) {
+		if (!vget_assign(Domain, Dir, MAX_BUFF, &uid, &gid)) {
 			error_stack(stderr, "Domain %s does not exist\n", Domain);
 			vdeldomain(Domain);
 			vclose();
 			return(1);
 		}
 		snprintf(TmpBuf, sizeof(TmpBuf), "%s/.base_path", Dir);
-		if ((fd = open(TmpBuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1)
-		{
+		if ((fd = open(TmpBuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1) {
 			error_stack(stderr, "open: %s: %s\n", TmpBuf, strerror(errno));
 			vdeldomain(Domain);
 			vclose();
 			return(1);
 		}
-		if (write(fd, base_path, strlen(base_path)) == -1)
-		{
+		if (write(fd, base_path, strlen(base_path)) == -1) {
 			error_stack(stderr, "write: %s\n", strerror(errno));
 			vdeldomain(Domain);
 			vclose();
 			return(1);
 		}
-		if (fchown(fd, uid, gid))
-		{
+		if (fchown(fd, uid, gid)) {
 			error_stack(stderr, "fchown: %s: (uid %d: gid %d): %s\n", TmpBuf, uid, gid, strerror(errno));
 			vdeldomain(Domain);
 			vclose();
@@ -363,31 +342,25 @@ main(argc, argv)
 	/*
 	 * add domain to dbinfo
 	 */
-	if (distributed >= 0)
-	{
-		if (!(localIP = get_local_ip(PF_INET)))
-		{
+	if (distributed >= 0) {
+		if (!(localIP = get_local_ip(PF_INET))) {
 			error_stack(stderr, "vadddomain: failed to get local ipaddr\n");
 			vclose();
 			return(1);
 		}
-		if (!(ptr = vhostid_select()))
-		{
-			if (!(hostid = get_local_hostid()))
-			{
+		if (!(ptr = vhostid_select())) {
+			if (!(hostid = get_local_hostid())) {
 				error_stack(stderr, "vadddomain: failed to get local hostid\n");
 				vclose();
 				return(1);
 			}
-			if (vhostid_insert(hostid, localIP))
-			{
+			if (vhostid_insert(hostid, localIP)) {
 				error_stack(stderr, "vadddomain: failed to get insert hostid\n");
 				vclose();
 				return(1);
 			}
 		}
-		if (dbinfoAdd(Domain, distributed, sqlserver, localIP, dbport, database, dbuser, dbpass))
-		{
+		if (dbinfoAdd(Domain, distributed, sqlserver, localIP, dbport, database, dbuser, dbpass)) {
 			error_stack(stderr, "Failed to add %s domain %s\n", distributed == 1 ? "Clustered" : "NonClustered", Domain);
 			vclose();
 			return(1);
@@ -397,28 +370,22 @@ main(argc, argv)
 #endif
 	if (use_etrn)
 		return(0);
-	if (*BounceEmail)
-	{
-		if (strchr(BounceEmail, '@') != NULL || *BounceEmail == '/')
-		{
+	if (*BounceEmail) {
+		if (strchr(BounceEmail, '@') != NULL || *BounceEmail == '/') {
 			vget_assign(Domain, a_dir, MAX_BUFF, &a_uid, &a_gid);
 			snprintf(TmpBuf, sizeof(TmpBuf) - 1, "%s/.qmail-default", a_dir);
-			if ((fs = fopen(TmpBuf, "w+")) != NULL)
-			{
+			if ((fs = fopen(TmpBuf, "w+")) != NULL) {
 				fprintf(fs, "| %s/sbin/vdelivermail '' %s\n", PREFIX, BounceEmail);
 				fclose(fs);
-				if (chown(TmpBuf, a_uid, a_gid) == -1)
-				{
+				if (chown(TmpBuf, a_uid, a_gid) == -1) {
 					error_stack(stderr, "chown: %s (%d:%d): %s\n", TmpBuf, a_uid, a_gid, strerror(errno));
 					return(1);
 				}
-			} else
-			{
+			} else {
 				printf("Error: could not open %s\n", TmpBuf);
 				return(1);
 			}
-		} else
-		{
+		} else {
 			printf("Invalid bounce email address %s\n", BounceEmail);
 			return(1);
 		}
@@ -429,32 +396,26 @@ main(argc, argv)
 	 */
 #ifdef CLUSTERED_SITE
 	snprintf(email, sizeof(email) - 1, "postmaster@%s", Domain);
-	if ((is_dist = is_distributed_domain(Domain)) == -1)
-	{
+	if ((is_dist = is_distributed_domain(Domain)) == -1) {
 		error_stack(stderr, "Unable to verify %s as a distributed domain\n", Domain);
 		vclose();
 		return(1);
 	} else
-	if (is_dist)
-	{
-		if ((user_present = is_user_present("postmaster", Domain)) == -1)
-		{
+	if (is_dist) {
+		if ((user_present = is_user_present("postmaster", Domain)) == -1) {
 			printf("Auth Db Error\n");
 			vclose();
 			return(1);
 		} else
-		if (user_present)
-		{
+		if (user_present) {
 			vclose();
 			return(0);
 		}
 	}
 #endif
 	if ((err = vadduser("postmaster", Domain, 0, Passwd, "Postmaster", 0, users_per_level,
-		Apop, 1)) != VA_SUCCESS)
-	{
-		if (errno != EEXIST)
-		{
+		Apop, 1)) != VA_SUCCESS) {
+		if (errno != EEXIST) {
 			error_stack(stderr, 0);
 			vdeldomain(Domain);
 			vclose();
@@ -464,15 +425,13 @@ main(argc, argv)
 	/* set quota for postmaster */
 	if (Quota[0] != 0)
 		vsetuserquota("postmaster", Domain, Quota);
-	for(i = 0;auto_ids[i];i++)
-	{
+	for(i = 0;auto_ids[i];i++) {
 		printf("Adding alias %s@%s --> postmaster@%s\n", auto_ids[i], Domain, Domain);
 		snprintf(AliasLine, sizeof(AliasLine), "&postmaster@%s", Domain);
 		valias_insert(auto_ids[i], Domain, AliasLine, 0);
 	}
 	vclose();
-	if (!(ptr = getenv("POST_HANDLE")))
-	{
+	if (!(ptr = getenv("POST_HANDLE"))) {
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
 		return(post_handle("%s/%s %s", LIBEXECDIR, base_argv0, Domain));
@@ -508,8 +467,7 @@ get_options(int argc, char **argv, char **base_path, int *chk_rcpt, int *users_p
 #ifdef VFILTER
 	scat(optbuf, "f", MAX_BUFF);
 #endif
-	while (!errflag && (c = getopt(argc, argv, optbuf)) != -1)
-	{
+	while (!errflag && (c = getopt(argc, argv, optbuf)) != -1) {
 		switch (c)
 		{
 		case 'B':
@@ -551,16 +509,13 @@ get_options(int argc, char **argv, char **base_path, int *chk_rcpt, int *users_p
 #endif
 		case 'u':
 			scopy(User, optarg, MAX_BUFF);
-			if (*User)
-			{
-				if ((mypw = getpwnam(User)) != NULL)
-				{
+			if (*User) {
+				if ((mypw = getpwnam(User)) != NULL) {
 					if (!*Dir)
 						scopy(Dir, mypw->pw_dir, MAX_BUFF);
 					Uid = mypw->pw_uid;
 					Gid = mypw->pw_gid;
-				} else
-				{
+				} else {
 					error_stack(stderr, "user %s not found in /etc/passwd\n", User);
 					return (1);
 				}
@@ -611,15 +566,13 @@ get_options(int argc, char **argv, char **base_path, int *chk_rcpt, int *users_p
 		scopy(Domain, argv[optind++], MAX_BUFF);
 	if (optind < argc)
 		scopy(Passwd, argv[optind++], MAX_BUFF);
-	if (!*Domain)
-	{
+	if (!*Domain) {
 		error_stack(stderr, "Domain not specified\n");
 		usage();
 		return(1);
 	}
 #ifdef CLUSTERED_SITE
-	if (distributed >=0 && (!*sqlserver || !*database || !*dbuser || !*dbpass || dbport == -1))
-	{
+	if (distributed >=0 && (!*sqlserver || !*database || !*dbuser || !*dbpass || dbport == -1)) {
 		error_stack(stderr, "specify sqlserver, database, dbuser, dbpass and dbport\n");
 		usage();
 		return(1);

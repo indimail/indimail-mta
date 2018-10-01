@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.41  2018-10-01 16:55:15+05:30  Cprogrammer
+ * fixed code indentation
+ *
  * Revision 2.40  2018-09-11 14:19:17+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -139,7 +142,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.40 2018-09-11 14:19:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.41 2018-10-01 16:55:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -162,25 +165,21 @@ main(int argc, char **argv)
 
 	if (argc < 2)
 		_exit(2);
-	if (!(tmpbuf = calloc(1, (authlen + 1) * sizeof(char))))
-	{
+	if (!(tmpbuf = calloc(1, (authlen + 1) * sizeof(char)))) {
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));
 		fflush(stdout);
 		fprintf(stderr, "malloc-%d: %s\n", authlen + 1, strerror(errno));
 		_exit(111);
 	}
-	for (offset = 0;;)
-	{
-		do
-		{
+	for (offset = 0;;) {
+		do {
 			count = read(3, tmpbuf + offset, authlen + 1 - offset);
 #ifdef ERESTART
 		} while (count == -1 && (errno == EINTR || errno == ERESTART));
 #else
 		} while (count == -1 && errno == EINTR);
 #endif
-		if (count == -1)
-		{
+		if (count == -1) {
 			printf("454-%s (#4.3.0)\r\n", strerror(errno));
 			fflush(stdout);
 			fprintf(stderr, "read: %s\n", strerror(errno));
@@ -215,13 +214,11 @@ main(int argc, char **argv)
 	for (cptr = user, ptr = login;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
 	ologin = login;
-	if (*ptr)
-	{
+	if (*ptr) { /*- domain */
 		ptr++;
 		for (cptr = domain;*ptr;*cptr++ = *ptr++);
 		*cptr = 0;
-	} else /*- no @ in the login */
-	{
+	} else { /*- no @ in the login */
 		if (auth_method == AUTH_DIGEST_MD5) { /*- for handling dumb programs like
 												outlook written by dumb programmers */
 			for (cptr = buf, ptr = response;*ptr;*cptr++ = *ptr++) {
@@ -261,8 +258,7 @@ main(int argc, char **argv)
 		login = fquser;
 	}
 #ifdef QUERY_CACHE
-	if (!getenv("QUERY_CACHE"))
-	{
+	if (!getenv("QUERY_CACHE")) {
 #ifdef CLUSTERED_SITE
 		if (vauthOpen_user(login, 0))
 #else
@@ -299,8 +295,7 @@ main(int argc, char **argv)
 	pw = vauth_getpw(user, domain);
 	vclose();
 #endif
-	if (!pw)
-	{
+	if (!pw) {
 		if (userNotFound)
 			pipe_exec(argv, tmpbuf, offset);
 		else
@@ -309,14 +304,12 @@ main(int argc, char **argv)
 		fflush(stdout);
 		_exit (111);
 	} else
-	if (pw->pw_gid & NO_SMTP)
-	{
+	if (pw->pw_gid & NO_SMTP) {
 		printf("553-Sorry, this account cannot use SMTP (#5.7.1)\r\n");
 		fflush(stdout);
 		_exit (1);
 	} else
-	if (is_inactive && !getenv("ALLOW_INACTIVE"))
-	{
+	if (is_inactive && !getenv("ALLOW_INACTIVE")) {
 		printf("553-Sorry, this account is inactive (#5.7.1)\r\n");
 		fflush(stdout);
 		_exit (1);
@@ -324,29 +317,24 @@ main(int argc, char **argv)
 	if (pw->pw_gid & NO_RELAY)
 		norelay = 1;
 	crypt_pass = pw->pw_passwd;
-	if (getenv("DEBUG"))
-	{
+	if (getenv("DEBUG")) {
 		fprintf(stderr, "%s: login [%s] challenge [%s] response [%s] pw_passwd [%s] method[%d]\n", 
 			argv[0], login, challenge, response, crypt_pass, auth_method);
 	}
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? challenge : 0),
-		(unsigned char *) (*response ? response : challenge), auth_method))
-	{
+		(unsigned char *) (*response ? response : challenge), auth_method)) {
 		pipe_exec(argv, tmpbuf, offset);
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));
 		fflush(stdout);
 		_exit (111);
 	}
 #ifdef ENABLE_DOMAIN_LIMITS
-	if (getenv("DOMAIN_LIMITS"))
-	{
+	if (getenv("DOMAIN_LIMITS")) {
 		struct vlimits *lmt;
 #ifdef QUERY_CACHE
-		if (!getenv("QUERY_CACHE"))
-		{
-			if (vget_limits(domain, &limits))
-			{
+		if (!getenv("QUERY_CACHE")) {
+			if (vget_limits(domain, &limits)) {
 				fprintf(stderr, "vchkpass: unable to get domain limits for for %s\n", domain);
 				printf("454-unable to get domain limits for %s\r\n", domain);
 				fflush(stdout);
@@ -356,8 +344,7 @@ main(int argc, char **argv)
 		} else
 			lmt = inquery(LIMIT_QUERY, login, 0);
 #else
-		if (vget_limits(domain, &limits))
-		{
+		if (vget_limits(domain, &limits)) {
 			fprintf(stderr, "vchkpass: unable to get domain limits for for %s\n", domain);
 			printf("454-unable to get domain limits for %s\r\n", domain);
 			fflush(stdout);
@@ -366,14 +353,12 @@ main(int argc, char **argv)
 		lmt = &limits;
 #endif
 		curtime = time(0);
-		if (lmt->domain_expiry > -1 && curtime > lmt->domain_expiry)
-		{
+		if (lmt->domain_expiry > -1 && curtime > lmt->domain_expiry) {
 			printf("553-Sorry, your domain has expired (#5.7.1)\r\n");
 			fflush(stdout);
 			_exit (1);
 		} else
-		if (lmt->passwd_expiry > -1 && curtime > lmt->passwd_expiry)
-		{
+		if (lmt->passwd_expiry > -1 && curtime > lmt->passwd_expiry) {
 			printf("553-Sorry, your password has expired (#5.7.1)\r\n");
 			fflush(stdout);
 			_exit (1);
@@ -381,8 +366,7 @@ main(int argc, char **argv)
 	}
 #endif
 	status = 0;
-	if ((ptr = (char *) getenv("POSTAUTH")) && !access(ptr, X_OK))
-	{
+	if ((ptr = (char *) getenv("POSTAUTH")) && !access(ptr, X_OK)) {
 		snprintf(buf, MAX_BUFF, "%s %s", ptr, login);
 		status = runcmmd(buf, 0);
 	}
