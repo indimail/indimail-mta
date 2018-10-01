@@ -19,6 +19,7 @@ set -e
 prefix=@prefix@
 qmaildir=@qmaildir@
 shareddir=@shareddir@
+libexecdir=@libexecdir@
 mandir=@mandir@
 qsysconfdir=@qsysconfdir@
 rm=/bin/rm

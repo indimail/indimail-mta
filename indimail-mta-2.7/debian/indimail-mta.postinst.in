@@ -21,6 +21,7 @@ prefix=@prefix@
 qmaildir=@qmaildir@
 mandir=@mandir@
 shareddir=@shareddir@
+libexecdir=@libexecdir@
 qcount=5
 qbase=${qmaildir}/queue
 mbase=@mbase@
@@ -242,7 +243,7 @@ fi
 ${prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=${servicedir}
 
 # Misc/Configuration
-${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir --scanint=60
+${prefix}/sbin/svctool --svscanlog --servicedir=${servicedir} --scanint=60
 
 echo "Creating default qmail configuraton and catch-all alias (${qmaildir}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${qmaildir}/alias/Maildir/
@@ -326,7 +327,7 @@ do
 	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
 	fi
-	eval ${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
+	eval ${prefix}/sbin/svctool --smtp=$port --servicedir=${servicedir} \
 		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 		--query-cache --dnscheck --password-cache \
 		--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
@@ -352,11 +353,11 @@ eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 	$extra_opt
 
 #odmr
-${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
+${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${servicedir} \
 	--infifo="" --query-cache --password-cache
 
 # Greylist daemon
-${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
+${prefix}/sbin/svctool --greylist=1999 --servicedir=${servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
     --hash-size=65535 --save-interval=5 --whitelist=greylist.white
 
@@ -371,17 +372,17 @@ if [ ${notlsarr} -eq 0 ] ; then
 fi
 
 # qmail-qmtpd service
-${prefix}/sbin/svctool --qmtp=209 --servicedir=$servicedir --qbase=${qbase} \
+${prefix}/sbin/svctool --qmtp=209 --servicedir=${servicedir} --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
 	--maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmtp_soft_mem --min-free=52428800
 
 # qmail-qmqpd service
-${prefix}/sbin/svctool --qmqp=628 --servicedir=$servicedir --qbase=${qbase} \
+${prefix}/sbin/svctool --qmqp=628 --servicedir=${servicedir} --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
 	--maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmqp_soft_mem --min-free=52428800
-/bin/touch $servicedir/qmail-qmqpd.628/down
+/bin/touch ${servicedir}/qmail-qmqpd.628/down
 
 # virus/spam filtering
 ${prefix}/sbin/svctool --qscanq --servicedir=${servicedir} --scanint=200

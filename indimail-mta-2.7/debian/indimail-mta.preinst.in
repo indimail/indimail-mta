@@ -6,6 +6,7 @@
 set -e
 prefix=@prefix@
 qmaildir=@qmaildir@
+libexecdir=@libexecdir@
 logdir=@logdir@
 rm=/bin/rm
 
