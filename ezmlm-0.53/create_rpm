@@ -1,0 +1,9 @@
+#!/bin/sh
+set -x
+make clean
+make distclean
+ver=0.53
+cd ..
+tar cf - ezmlm-$ver |gzip -c > /usr/local/src/indimail/rpmbuild/SOURCES/ezmlm-$ver.tar.gz
+cd ezmlm-$ver
+rpmbuild -bb --clean ezmlm.spec
