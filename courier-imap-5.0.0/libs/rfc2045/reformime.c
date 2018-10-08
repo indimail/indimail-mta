@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2011 Double Precision, Inc.  See COPYING for
+** Copyright 1998 - 2018 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
@@ -695,7 +695,8 @@ char *p, *q;
 	for (p=addr; *p && isspace((int)(unsigned char)*p); ++p)
 		;
 
-	if (strncasecmp(p, "rfc822;", 7))
+	if (strncasecmp(p, "rfc822;", 7) &&
+	    strncasecmp(p, "utf-8;", 6))
 	{
 		free(action);
 		free(addr);
@@ -703,7 +704,8 @@ char *p, *q;
 	}
 	for (q=action; *q && isspace((int)(unsigned char)*q); ++q)
 		;
-	p += 7;
+
+	p=strchr(p, ';')+1;
 	while (*p && isspace((int)(unsigned char)*p))
 		++p;
 	printf("%s %s\n", q, p);
@@ -738,7 +740,7 @@ char *orecip;
 	rfc2045_mimeinfo(p, &content_type_s, &content_transfer_encoding_s,
 		&charset_s);
 	rfc2045_mimepos(p, &start_pos, &end_pos, &start_body, &dummy, &dummy);
-	if (strcasecmp(content_type_s, "message/delivery-status") ||
+	if (!rfc2045_delivery_status_content_type(content_type_s) ||
 		fseek(stdin, start_body, SEEK_SET) == -1)
 		_exit(1);
 
@@ -856,17 +858,30 @@ char	**l;
 		l[pcnt++]=last->fn;
 
 	mimedigest1(pcnt, l);
+	free(l);
+	while(first)
+	{
+		last=first->next;
+		free(first->fn);
+		free(first);
+		first=last;
+	}
 }
 
 static void mimedigest1(int argc, char **argv)
 {
-time_t	t;
-char	boundarybuf[200];
-unsigned boundarycnt=0;
-int	i;
-FILE	*fp;
+	time_t	t;
+	char	boundarybuf[200];
+	unsigned boundarycnt=0;
+	int	i;
+	FILE	*fp;
+	int	*utf8;
+	if (argc == 0)
+		return;
 
 	time (&t);
+
+	utf8=malloc(sizeof(int)*argc);
 
 	/* Search for a suitable boundary */
 
@@ -874,15 +889,23 @@ FILE	*fp;
 	{
 	int	l;
 
-		sprintf(boundarybuf, "reformime_%lu_%u",
-			(unsigned long)t, ++boundarycnt);
+		sprintf(boundarybuf, "reformime_%lu_%lu_%u",
+			(unsigned long)t,
+			(unsigned long)getpid(),
+			++boundarycnt);
 
 		l=strlen(boundarybuf);
 
 		for (i=0; i<argc; i++)
 		{
-		int	err=0;
+			int	err=0;
+			struct rfc2045 *parser=rfc2045_alloc();
 
+			if (!parser)
+			{
+				perror(argv[i]);
+				exit(1);
+			}
 			if ((fp=fopen(argv[i], "r")) == 0)
 			{
 				perror(argv[i]);
@@ -891,6 +914,8 @@ FILE	*fp;
 
 			while (fgets(mimebuf, sizeof(mimebuf), fp))
 			{
+				rfc2045_parse(parser, mimebuf, strlen(mimebuf));
+
 				if (mimebuf[0] != '-' || mimebuf[1] != '-')
 					continue;
 
@@ -901,10 +926,13 @@ FILE	*fp;
 				}
 			}
 			fclose(fp);
+			utf8[i]=parser->rfcviolation & RFC2045_ERR8BITHEADER
+				? 1:0;
+			rfc2045_free(parser);
 			if (err)	break;
 		}
 	} while (i < argc);
-		
+
 	printf("Mime-Version:1.0\n"
 		"Content-Type: multipart/digest; boundary=\"%s\"\n\n%s",
 			boundarybuf, RFC2045MIMEMSG);
@@ -917,14 +945,16 @@ FILE	*fp;
 			exit(1);
 		}
 
-		printf("\n--%s\nContent-Type: message/rfc822\n\n",
-			boundarybuf);
+		printf("\n--%s\nContent-Type: %s\n\n",
+		       boundarybuf,
+		       utf8[i] ? RFC2045_MIME_MESSAGE_GLOBAL:
+		       RFC2045_MIME_MESSAGE_RFC822);
 
 		while (fgets(mimebuf, sizeof(mimebuf), fp))
 			printf("%s", mimebuf);
 		fclose(fp);
 	}
-
+	free(utf8);
 	printf("\n--%s--\n", boundarybuf);
 }
 
@@ -1167,10 +1197,11 @@ int rc=0;
 	}
 	else if (dodecode)
 	{
-		mimesection = strtok(section,",");
+		mimesection = section ? strtok(section,","):NULL;
 		do {
 			print_decode(p, mimesection);
-			mimesection = strtok(NULL,",");
+			if (mimesection)
+				mimesection = strtok(NULL,",");
 		} while (mimesection != NULL);
 	}
 	else if (dorewrite)
@@ -1179,11 +1210,12 @@ int rc=0;
 		dsn(p, dodsn == 2);
 	else if (do_extract)
 	{
-		mimesection = strtok(section,",");
+		mimesection = section ? strtok(section, ","):NULL;
 		do {
 			extract_section(p, mimesection, extract_filename,
 					argc-argn, argv+argn, do_extract);
-			mimesection = strtok(NULL,",");
+			if (mimesection)
+				mimesection = strtok(NULL,",");
 		} while (mimesection != NULL);
 	}
 	else if (dovalidate)

@@ -14,7 +14,7 @@
 #include	<ctype.h>
 #include	<stdlib.h>
 #include	<string.h>
-
+#include	"imapd.h"
 
 #define	MAX_HEADER_SIZE	8192
 
@@ -62,7 +62,8 @@ void msgappends(void (*writefunc)(const char *, size_t),
 	char *q=0;
 
 	for (i=0; i<l; i++)
-		if (s[i] & 0x80)	/* Illegal 8-bit header content */
+		if (!enabled_utf8 &&
+		    (s[i] & 0x80))	/* Illegal 8-bit header content */
 		{
 			char *p=malloc(l+1);
 

@@ -79,7 +79,7 @@ const char *charset=getenv("CHARSET");
 	}
 
 	unlink("maildirsize");
-	errcode=maildir_filter_saverules(&mf, "testrules2", ".", "Maildir", "nobody@example.com");
+	errcode=maildir_filter_saverules(&mf, "testrules2", "Maildir", "nobody@example.com");
 	if (errcode)
 	{
 		fprintf(stderr, "Error saving testrules2: %d\n", errcode);

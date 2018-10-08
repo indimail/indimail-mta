@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([courier-unicode], [2.0], [courier-users@lists.sourceforge.net])
+AC_INIT([courier-unicode], [2.1], [courier-users@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
@@ -116,4 +116,4 @@ CFLAGS="-I.. -I$srcdir/.. $CFLAGS"
 CXXFLAGS="-I.. -I$srcdir/.. $CXXFLAGS"
 
 AM_CONDITIONAL(HAVE_DOCS,[test -f $srcdir/docbook/icon.gif])
-AC_OUTPUT(Makefile courier-unicode.spec courier-unicode.h)
+AC_OUTPUT(Makefile packaging/freebsd10/Makefile courier-unicode.spec courier-unicode.h)

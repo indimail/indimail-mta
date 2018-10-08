@@ -23,6 +23,12 @@ AC_PROG_LIBTOOL
 
 dnl Checks for libraries.
 
+PKG_CHECK_MODULES(LIBIDN, libidn >= 0.0.0, [libidn=yes], [libidn=no])
+
+if test "$libidn" = "no"
+then
+	AC_MSG_ERROR(libidn not found)
+fi
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/types.h sys/time.h unistd.h arpa/inet.h netinet/in.h)
@@ -174,12 +180,12 @@ UINT16="$int16"
 
 AC_CACHE_CHECK([for socklen_t],
 	courier_cv_hassocklen_t,
- 
+
 AC_COMPILE_IFELSE([
 AC_LANG_SOURCE( [
 #include <sys/types.h>
 #include <sys/socket.h>
- 
+
 socklen_t sl_t;
 ],[
 	accept(0, 0, &sl_t);
@@ -187,9 +193,9 @@ socklen_t sl_t;
 	courier_cv_hassocklen_t=yes,
 	courier_cv_hassocklen_t=no)
 )
- 
+
 socklen_t="int"
- 
+
 if test $courier_cv_hassocklen_t = yes
 then
 	:

@@ -1,5 +1,5 @@
 /*
-** Copyright 2000-2008 Double Precision, Inc.
+** Copyright 2000-2018 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 #include	"config.h"
@@ -10,6 +10,8 @@
 #include	"tlscache.h"
 #include	"rfc1035/rfc1035.h"
 #include	"soxwrap/soxwrap.h"
+#include	"numlib/numlib.h"
+
 #ifdef  getc
 #undef  getc
 #endif
@@ -74,6 +76,7 @@ const char *statusfd=0;
 const char *tcpd=0;
 const char *peer_verify_domain=0;
 const char *fdprotocol=0;
+const char *username=0;
 static FILE *errfp;
 static FILE *statusfp;
 
@@ -536,6 +539,14 @@ static int dossl(int fd, int argn, int argc, char **argv)
 	info.connect_callback= &verify_connection;
 	info.app_data=NULL;
 
+	stdin_fd=0;
+	stdout_fd=1;
+
+	startclient(argn, argc, argv, fd, &stdin_fd, &stdout_fd);
+
+	if (username)
+		libmail_changeusername(username, 0);
+
 	ctx=tls_create(server ? 1:0, &info);
 	if (ctx == 0)	return (1);
 
@@ -554,11 +565,6 @@ static int dossl(int fd, int argn, int argc, char **argv)
 		tls_destroy(ctx);
 		return 1;
 	}
-
-	stdin_fd=0;
-	stdout_fd=1;
-
-	startclient(argn, argc, argv, fd, &stdin_fd, &stdout_fd);
 
 	docopy(ssl, fd, stdin_fd, stdout_fd);
 
@@ -778,6 +784,7 @@ static struct args arginfo[] = {
 	{ "verify", &peer_verify_domain},
 	{ "statusfd", &statusfd},
 	{ "protocol", &fdprotocol},
+	{ "user", &username},
 	{0}};
 void (*protocol_func)(int)=0;
 

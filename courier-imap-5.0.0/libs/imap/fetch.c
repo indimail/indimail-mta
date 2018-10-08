@@ -18,6 +18,7 @@
 #include	<sys/types.h>
 #include	<sys/stat.h>
 
+#include	"imapd.h"
 #include	"imaptoken.h"
 #include	"imapwrite.h"
 #include	"imapscanclient.h"
@@ -248,6 +249,7 @@ int do_fetch(unsigned long n, int byuid, void *p)
 	struct	rfc2045 *rfc2045p;
 	int	seen;
 	int	open_err;
+	const char *cannot_open_because="";
 
 	fp=NULL;
 	open_err=0;
@@ -275,16 +277,30 @@ int do_fetch(unsigned long n, int byuid, void *p)
 	rfc2045p=0;
 	while (fi)
 	{
-		if (fetchitem(&fp, &open_err, fi, &current_maildir_info, n-1,
-			&rfc2045p))	seen=1;
+		int rc=fetchitem(&fp, &open_err, fi, &current_maildir_info, n-1,
+				 &rfc2045p);
+
+		if (rc > 0)
+			seen=1;
+		if (rc < 0)
+		{
+			open_err=1;
+			cannot_open_because=
+				" because it is a Unicode message and your"
+				" E-mail reader did not enable Unicode support."
+				" Please use an E-mail reader that supports"
+				" IMAP with UTF-8 (see"
+				" https://tools.ietf.org/html/rfc6855.html)";
+		}
 		if ((fi=fi->next) != 0)	writes(" ");
 	}
 	writes(")\r\n");
 
 	if (open_err)
 	{
-		writes("* NO Cannot open message ");
+		writes("* NO [ALERT] Cannot open message ");
 		writen(n);
+		writes(cannot_open_because);
 		writes("\r\n");
 		return (0);
 	}
@@ -327,6 +343,7 @@ static int fetchitem(FILE **fp, int *open_err, struct fetchinfo *fi,
 	int	parsemime=0;
 	int	rc=0;
 	int	do_open=1;
+	int	mimecorrectness=0;
 
 	if (strcmp(fi->name, "ALL") == 0)
 	{
@@ -345,15 +362,20 @@ static int fetchitem(FILE **fp, int *open_err, struct fetchinfo *fi,
 		if (fi->bodysection)
 		{
 			fetchfunc= &fetchmsgbody;
+			mimecorrectness=1;
 			rc=1;
 		}
 	}
 	else if (strcmp(fi->name, "BODY.PEEK") == 0)
 	{
 		parsemime=1;
+		mimecorrectness=1;
 		fetchfunc= &body;
 		if (fi->bodysection)
+		{
 			fetchfunc= &fetchmsgbody;
+			mimecorrectness=1;
+		}
 	}
 	else if (strcmp(fi->name, "ENVELOPE") == 0)
 	{
@@ -382,11 +404,13 @@ static int fetchitem(FILE **fp, int *open_err, struct fetchinfo *fi,
 	else if (strcmp(fi->name, "RFC822") == 0)
 	{
 		fetchfunc= &rfc822;
+		mimecorrectness=1;
 		rc=1;
 	}
 	else if (strcmp(fi->name, "RFC822.HEADER") == 0)
 	{
 		fetchfunc= &rfc822header;
+		mimecorrectness=1;
 	}
 	else if (strcmp(fi->name, "RFC822.SIZE") == 0)
 	{
@@ -396,6 +420,7 @@ static int fetchitem(FILE **fp, int *open_err, struct fetchinfo *fi,
 	else if (strcmp(fi->name, "RFC822.TEXT") == 0)
 	{
 		parsemime=1;
+		mimecorrectness=1;
 		fetchfunc= &rfc822text;
 	}
 	else if (strcmp(fi->name, "UID") == 0)
@@ -415,10 +440,17 @@ static int fetchitem(FILE **fp, int *open_err, struct fetchinfo *fi,
 		}
 	}
 
+	if (mimecorrectness && !enabled_utf8)
+		parsemime=1;
+
 	if (parsemime && !*mimep)
 	{
 		*mimep=fetch_alloc_rfc2045(msgnum, *fp);
 	}
+
+	if (mimecorrectness && !enabled_utf8 &&
+	    ((*mimep)->rfcviolation & RFC2045_ERR8BITHEADER))
+		return -1;
 
 	(*fetchfunc)(*fp, fi, i, msgnum, *mimep);
 	return (rc);
@@ -704,7 +736,7 @@ off_t cache_virtual_chars;
 off_t cache_phys_chars;
 
 	headermimep=mimep;
- 
+
 	while (p && isdigit((int)(unsigned char)*p))
 	{
 	unsigned long n=0;

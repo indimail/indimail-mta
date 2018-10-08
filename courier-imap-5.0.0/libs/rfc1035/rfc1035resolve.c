@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2000 Double Precision, Inc.
+** Copyright 1998 - 2018 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -13,7 +13,7 @@
 #endif
 #include	<stdlib.h>
 #include	<string.h>
-
+#include	<idna.h>
 
 struct querybuf {
 	char qbuf[512];
@@ -30,25 +30,82 @@ struct querybuf *qp=(struct querybuf *)q;
 	qp->qbuflen += l;
 }
 
-struct rfc1035_reply *rfc1035_resolve_multiple(
-			struct rfc1035_res *res,
-			int opcode,
-			const struct rfc1035_query *queries,
-			unsigned nqueries)
+
+static struct rfc1035_reply
+*rfc1035_resolve_multiple_idna(struct rfc1035_res *res,
+			       int opcode,
+			       const struct rfc1035_query *queries,
+			       unsigned nqueries);
+
+struct rfc1035_reply
+*rfc1035_resolve_multiple(struct rfc1035_res *res,
+			  int opcode,
+			  const struct rfc1035_query *queries,
+			  unsigned nqueries)
 {
-struct	querybuf qbuf;
-int	udpfd;
-int	attempt;
-const RFC1035_ADDR *ns;
-unsigned nscount;
-unsigned current_timeout, timeout_backoff;
-unsigned nbackoff, backoff_num;
-int	af;
-static const char fakereply[]={0, 0, 0, RFC1035_RCODE_SERVFAIL,
-		0, 0,
-		0, 0,
-		0, 0,
-		0, 0};
+	struct rfc1035_query *idna_queries=
+		(struct rfc1035_query *)malloc(nqueries * sizeof(*queries));
+	struct rfc1035_reply *r;
+	unsigned n;
+	char **buffers;
+
+	/*
+	** Translate each label from UTF8 to IDNA.
+	*/
+
+	if (!idna_queries)
+		return NULL;
+	if ((buffers=(char **)malloc(nqueries * sizeof(char *))) == NULL)
+	{
+		free(idna_queries);
+		return NULL;
+	}
+	for (n=0; n<nqueries; ++n)
+	{
+		idna_queries[n]=queries[n];
+		if (idna_to_ascii_8z(idna_queries[n].name, &buffers[n], 0)
+		    != IDNA_SUCCESS)
+		{
+			errno=EINVAL;
+			while (n)
+			{
+				free(buffers[--n]);
+			}
+			free(idna_queries);
+			free(buffers[n]);
+			return NULL;
+		}
+
+		idna_queries[n].name=buffers[n];
+	}
+
+	r=rfc1035_resolve_multiple_idna(res, opcode, idna_queries, nqueries);
+	for (n=0; n<nqueries; ++n)
+		free(buffers[n]);
+	free(idna_queries);
+	free(buffers);
+	return r;
+}
+
+static struct rfc1035_reply
+*rfc1035_resolve_multiple_idna(struct rfc1035_res *res,
+			       int opcode,
+			       const struct rfc1035_query *queries,
+			       unsigned nqueries)
+{
+	struct	querybuf qbuf;
+	int	udpfd;
+	int	attempt;
+	const RFC1035_ADDR *ns;
+	unsigned nscount;
+	unsigned current_timeout, timeout_backoff;
+	unsigned nbackoff, backoff_num;
+	int	af;
+	static const char fakereply[]={0, 0, 0, RFC1035_RCODE_SERVFAIL,
+				       0, 0,
+				       0, 0,
+				       0, 0,
+				       0, 0};
 
 	nscount=res->rfc1035_nnameservers;
 	ns=res->nameservers;
@@ -184,7 +241,7 @@ static const char fakereply[]={0, 0, 0, RFC1035_RCODE_SERVFAIL,
 				if ((reply=rfc1035_recv_tcp(res,
 					tcpfd, &nbytes, current_timeout))==0)
 					break;
-				
+
 				rfcreply=rfc1035_replyparse(reply, nbytes);
 				if (!rfcreply)
 				{

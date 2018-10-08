@@ -179,6 +179,9 @@ std::string unicode::iconvert::convert(const std::u32string &uc,
 	size_t csize;
 	int err;
 
+	if (uc.empty())
+		return buf;
+
 	if (unicode_convert_fromu_tobuf(&uc[0], uc.size(),
 					  dstcharset.c_str(), &c, &csize,
 					  &err))

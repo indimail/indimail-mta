@@ -343,6 +343,9 @@ static int do_couriertls_start(char **args, struct couriertls_info *cinfo)
 		close(statuspipe_fd[0]);
 		close(x509_fd[0]);
 
+		if (cinfo->username)
+			libmail_changeusername(cinfo->username, 0);
+
 		fp=fdopen(statuspipe_fd[1], "w");
 
 		if (!fp)
@@ -387,6 +390,7 @@ static int do_couriertls_start(char **args, struct couriertls_info *cinfo)
 
 	close(statuspipe_fd[1]);
 	close(x509_fd[1]);
+	free(argvec);
 
 	while ((p2=wait(&waitstat)) != p)
 		if (p2 < 0 && errno == ECHILD)

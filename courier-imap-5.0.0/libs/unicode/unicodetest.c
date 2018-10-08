@@ -134,6 +134,34 @@ int main(int argc, char **argv)
 		++argn;
 	}
 
+	if (argn < argc && strcmp(argv[argn], "--smaputf8") == 0)
+	{
+		chset=unicode_x_smap_modutf8;
+		++argn;
+	}
+
+	if (argn < argc && strcmp(argv[argn], "--modutf7toutf8") == 0)
+	{
+		while (++argn < argc)
+		{
+			int error=0;
+			char *p=unicode_convert_tobuf(argv[argn],
+						      unicode_x_imap_modutf7,
+						      unicode_x_smap_modutf8,
+						      &error);
+
+			if (p)
+			{
+				printf("%s\n", p);
+				free(p);
+			}
+			else
+			{
+				printf("[error]\n");
+			}
+		}
+	}
+
 	if (argn < argc && strcmp(argv[argn], "--totitle") == 0)
 	{
 		++argn;

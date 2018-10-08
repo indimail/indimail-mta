@@ -7,6 +7,8 @@ Group: System Environment/Libraries
 URL: http://www.courier-mta.org/unicode/
 Source: http://download.sourceforge.net/courier/courier-unicode-@VERSION@.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildRequires: perl
+BuildRequires: gcc-c++
 
 %package devel
 Summary: Courier Unicode Library development files

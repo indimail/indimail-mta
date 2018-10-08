@@ -45,6 +45,7 @@ couriertcpd_LDADD= libspipe.la \
         ../waitlib/libwaitlib.la\
 	../soxwrap/libsoxwrap.a\
 	../md5/libmd5.la ../random128/librandom128.la \
+	@LIBIDN_LIBS@ \
 	$(couriertcpd_t:%=-Wl,%)
 couriertcpd_LDFLAGS=-static
 
@@ -67,6 +68,7 @@ couriertls_DEPENDENCIES=libcouriertls.la libspipe.la ../rfc1035/librfc1035.a \
 couriertls_LDADD=libcouriertls.la libspipe.la ../rfc1035/librfc1035.a \
 	../md5/libmd5.la ../random128/librandom128.la \
 	../numlib/libnumlib.la ../liblock/liblock.la \
+	@LIBIDN_LIBS@ \
 	../soxwrap/libsoxwrap.a $(couriertls_t:%=-Wl,%)
 couriertls_LDFLAGS=-static
 

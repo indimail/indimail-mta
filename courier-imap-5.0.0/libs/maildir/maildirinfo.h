@@ -20,6 +20,10 @@ struct maildir_info {
 	char *owner;
 };
 
+char *imap_foldername_to_filename(int utf8_format, const char *foldername);
+
+char *imap_filename_to_foldername(int utf8_format, const char *filename);
+
 void maildir_info_destroy(struct maildir_info *); /* Deallocate memory */
 
 int maildir_info_imap_find(struct maildir_info *info, const char *path,
@@ -60,7 +64,7 @@ extern int maildir_info_suppress(const char *maildir);
 int maildir_info_smap_find(struct maildir_info *info, char **folder,
 			   const char *myid);
 
-char **maildir_smapfn_fromutf7(const char *modutf7);
+char **maildir_smapfn_fromutf8(const char *modutf8);
 void maildir_smapfn_free(char **fn);
 
 /*

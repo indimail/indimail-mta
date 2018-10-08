@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2004 Double Precision, Inc.  See COPYING for
+** Copyright 1998 - 2018 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
@@ -621,7 +621,7 @@ int	bit8=0;
 		*/
 
 		if (p->content_type &&
-			strcmp(p->content_type, "message/rfc822") == 0)
+		    rfc2045_message_content_type(p->content_type))
 		{
 			newp=append_part_noinherit(p, p->startbody);
 			newp->workinheader=1;
@@ -735,6 +735,36 @@ char	*p;
 	}
 	p[l]=0;
 	return (p);
+}
+
+/*
+** Whether this MIME content type is a nested MIME message.
+*/
+
+int rfc2045_message_content_type(const char *content_type)
+{
+	return strcasecmp(content_type, RFC2045_MIME_MESSAGE_RFC822) == 0 ||
+		strcasecmp(content_type, RFC2045_MIME_MESSAGE_GLOBAL) == 0;
+}
+
+/*
+** Whether this MIME content type is a delivery status notification.
+*/
+
+int rfc2045_delivery_status_content_type(const char *content_type)
+{
+	return strcasecmp(content_type,
+		      RFC2045_MIME_MESSAGE_DELIVERY_STATUS) == 0 ||
+		strcasecmp(content_type,
+		       RFC2045_MIME_MESSAGE_GLOBAL_DELIVERY_STATUS) == 0;
+}
+
+int rfc2045_message_headers_content_type(const char *content_type)
+{
+	return strcasecmp(content_type,
+			  RFC2045_MIME_MESSAGE_HEADERS) == 0 ||
+		strcasecmp(content_type,
+			   RFC2045_MIME_MESSAGE_GLOBAL_HEADERS) == 0;
 }
 
 /* Various permutations of the above, including forcing the string to

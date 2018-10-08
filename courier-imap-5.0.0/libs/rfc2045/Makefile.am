@@ -1,11 +1,11 @@
 #
-# Copyright 1998 - 2014 Double Precision, Inc.  See COPYING for
+# Copyright 1998 - 2018 Double Precision, Inc.  See COPYING for
 # distribution information.
 
 noinst_LTLIBRARIES=librfc2045.la
-noinst_PROGRAMS=reformime makemime headercheck testrfc3676parser
+noinst_PROGRAMS=reformime makemime headercheck testrfc3676parser \
+	testrfc6533parser
 
-ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 AM_CXXFLAGS=@COURIER_UNICODE_CXXFLAGS@
 
 BUILT_SOURCES=reformime.html reformime.1 makemime.html makemime.1 \
@@ -30,6 +30,7 @@ librfc2045_la_SOURCES=rfc2045.c rfc2045.h rfc2045src.h \
 		     rfc2045decodemsgtoutf8.c \
 		     rfc2231.c rfc2231encode.c \
 		     rfc3676parser.h rfc3676parser.c rfc3676parsercpp.C \
+                     rfc6533.c \
 		     base64.c base64.h
 
 reformime_SOURCES=reformime.c
@@ -51,6 +52,10 @@ headercheck_LDFLAGS=-static
 testrfc3676parser_SOURCES=testrfc3676parser.c
 testrfc3676parser_DEPENDENCIES=librfc2045.la
 testrfc3676parser_LDADD=$(testrfc3676parser_DEPENDENCIES) ../unicode/libunicode.la
+
+testrfc6533parser_SOURCES=testrfc6533parser.c
+testrfc6533parser_DEPENDENCIES=librfc2045.la
+testrfc6533parser_LDADD=$(testrfc6533parser_DEPENDENCIES) ../unicode/libunicode.la
 
 if HAVE_SGML
 reformime.html: reformime.sgml ../docbook/sgml2html
@@ -82,3 +87,4 @@ check-am:
 	@SHELL@ $(srcdir)/testsuite | cmp -s - $(srcdir)/$(TESTSUITE)
 	@SHELL@ $(srcdir)/testsuitemm | cmp -s - $(srcdir)/testsuitemm.txt
 	@SHELL@ $(srcdir)/testrfc3676parsersuite | diff -U 3 $(srcdir)/testrfc3676parsersuite.txt -
+	./testrfc6533parser

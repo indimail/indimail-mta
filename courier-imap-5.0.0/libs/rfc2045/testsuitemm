@@ -55,3 +55,24 @@ rm -f confmdtest
 ./reformime -o 'дададададададададада foo bar дададададададададада'
 ./reformime -h '=?UTF-8?B?0LTQsNC00LDQtNCw0LTQsNC00LDQtNCw0LTQsNC00LDQtNCw0LTQsA==?= foo bar =?UTF-8?B?0LTQsNC00LDQtNCw0LTQsNC00LDQtNCw0LTQsNC00LDQtNCw0LTQsA==?='
 
+cat >testsuite.msg <<EOF
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary=xx
+
+--xx
+Content-Type: text/plain
+
+section 1
+
+--xx
+Content-Type text/plain
+
+section 2
+
+--xx--
+EOF
+echo ""
+./reformime -X -s1.1 `which cat` <testsuite.msg
+./reformime -X -s1.2 `which cat` <testsuite.msg
+./reformime -X `which cat` <testsuite.msg
+rm -f testsuite.msg

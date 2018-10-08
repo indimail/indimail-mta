@@ -354,7 +354,7 @@ static void list_callback(const char *f, void *vp)
 	struct list_callback_utf8 *utf8=(struct list_callback_utf8 *)vp;
 	maildir_aclt_list l;
 
-	char **fn=maildir_smapfn_fromutf7(f);
+	char **fn=maildir_smapfn_fromutf8(f);
 
 	if (!fn)
 	{
@@ -3215,6 +3215,7 @@ void smap()
 
 	char rights_buf[40];
 
+	enabled_utf8=1;
 	imapscan_init(&current_maildir_info);
 	memset(&add_flags, 0, sizeof(add_flags));
 

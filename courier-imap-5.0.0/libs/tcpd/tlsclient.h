@@ -2,7 +2,7 @@
 #define	tlsclient_h
 
 /*
-** Copyright 2000-2001 Double Precision, Inc.
+** Copyright 2000-2018 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -36,6 +36,7 @@ struct couriertls_info {
 
 	const char *cipher;
 	const char *version;
+	const char *username;
 	int bits;
 } ;
 

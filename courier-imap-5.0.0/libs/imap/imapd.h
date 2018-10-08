@@ -12,6 +12,7 @@
 
 #define	NEWMSG_FLAG	'*'	/* Prefixed to mimeinfo to indicate new msg */
 
+extern int enabled_utf8;
 
 #define	is_sharedsubdir(dir) \
 	(strncmp((dir), SHAREDSUBDIR "/", \

@@ -28,7 +28,7 @@ static void alarm_handler(int signum)
 	static const char msg[]=
 		"Timeout initializing the FAM library. Your FAM library is broken.\n";
 
-	write(2, msg, sizeof(msg)-1);
+	(void)write(2, msg, sizeof(msg)-1);
 	kill(getpid(), SIGKILL);
 }
 #endif

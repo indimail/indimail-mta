@@ -1,3 +1,16 @@
+2018-07-13  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* unicode.c: Fix error and validation of valid modified-utf7
+	encoding.
+
+2018-07-11  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* unicode.c: Implement unicode_x_smap_modutf8 pseudo-encoding.
+
+2018-04-27  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* gcc 8 update, fix assertions. libtool and toolchain updates.
+
 2.0
 
 2017-03-06  Sam Varshavchik  <mrsam@courier-mta.com>

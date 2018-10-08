@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 1999 Double Precision, Inc.
+** Copyright 1998 - 2018 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -7,7 +7,7 @@
 #include	<stdlib.h>
 #include	<string.h>
 #include	<errno.h>
-
+#include	<idna.h>
 
 void rfc1035_replyfree(struct rfc1035_reply *p)
 {
@@ -71,7 +71,23 @@ int	cnt=0;
 		*ptr += l;
 	}
 
-	if (namebuf)	namebuf[i]=0;
+	if (namebuf)
+	{
+		char *p;
+
+		namebuf[i]=0;
+
+		if (idna_to_unicode_8z8z(namebuf, &p, 0) != IDNA_SUCCESS)
+			return (0);
+
+		if (strlen(p) >= RFC1035_MAXNAMESIZE)
+		{
+			free(p);
+			return (0);
+		}
+		strcpy(namebuf, p);
+		free(p);
+	}
 	return (namebuf ? namebuf:"");
 }
 

@@ -1,5 +1,5 @@
 /*
-** Copyright 2000-2011 Double Precision, Inc.  See COPYING for
+** Copyright 2000-2018 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
@@ -775,7 +775,13 @@ static int mkforward(struct rfc2045_mkreplyinfo *ri)
 
 			writes(ri, "\n--");
 			writes(ri, boundary);
-			writes(ri, "\nContent-Type: message/rfc822\n");
+			writes(ri, "\nContent-Type: ");
+
+			writes(ri, first_attachment->rfcviolation &
+			       RFC2045_ERR8BITHEADER
+			       ? RFC2045_MIME_MESSAGE_GLOBAL
+			       : RFC2045_MIME_MESSAGE_RFC822);
+			writes(ri, "\n");
 
 			if (ri->forwarddescr)
 			{
@@ -929,7 +935,7 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 	off_t	start_pos, end_pos, start_body, dummy;
 	int errflag=0;
 	char	*boundary;
-	char	*dsn_report_type;
+	const char *dsn_report_type;
 	int	(*dsn_report_gen)(struct rfc2045_mkreplyinfo *);
 
 	struct rfc2045headerinfo *hi;
@@ -1460,11 +1466,7 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 
 		writes(ri, "\n--");
 		writes(ri, boundary);
-		writes(ri, "\nContent-Type: message/");
-
-		writes(ri, dsn_report_type);
-		writes(ri, "\n"
-		       "Content-Transfer-Encoding: 7bit\n\n");
+		writes(ri, "\n");
 
 		if (errflag == 0)
 			errflag=(*dsn_report_gen)(ri);
@@ -1477,7 +1479,14 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 			off_t cnt=end_pos - start_pos;
 			char buf[BUFSIZ];
 
-			writes(ri, "\nContent-Type: message/rfc822\n"
+			writes(ri, "\nContent-Type: ");
+
+			writes(ri, ri->rfc2045partp->rfcviolation &
+			       RFC2045_ERR8BITHEADER
+			       ? RFC2045_MIME_MESSAGE_GLOBAL
+			       : RFC2045_MIME_MESSAGE_RFC822);
+
+			writes(ri, "\n"
 			       "Content-Disposition: attachment\n\n");
 
 			if (errflag == 0)
@@ -1528,7 +1537,14 @@ static void copyheaders(struct rfc2045_mkreplyinfo *ri)
 	char	*header, *value;
 
 
-	writes(ri, "\nContent-Type: text/rfc822-headers; charset=\"utf-8\"\n"
+	writes(ri, "\nContent-Type: ");
+
+	if (ri->rfc2045partp->rfcviolation & RFC2045_ERR8BITHEADER)
+		writes(ri, RFC2045_MIME_MESSAGE_GLOBAL_HEADERS);
+	else
+		writes(ri, RFC2045_MIME_MESSAGE_HEADERS);
+
+	writes(ri, "; charset=\"utf-8\"\n"
 	       "Content-Disposition: attachment\n"
 	       "Content-Transfer-Encoding: 8bit\n\n"
 	       );
@@ -1580,6 +1596,31 @@ static int replydraft(struct rfc2045_mkreplyinfo *ri)
 
 static int replydsn(struct rfc2045_mkreplyinfo *ri)
 {
+	const char *p;
+	int is8bit=0;
+
+	for (p=ri->dsnfrom; *p; ++p)
+		if (*p & 0x80)
+		{
+			is8bit=1;
+			break;
+		}
+
+	if (is8bit)
+	{
+		writes(ri, "Content-Type: "
+		       RFC2045_MIME_MESSAGE_GLOBAL_DELIVERY_STATUS
+		       "; charset=\"utf-8\"\n");
+		writes(ri, "Content-Transfer-Encoding: 8bit\n\n");
+	}
+	else
+	{
+		writes(ri, "Content-Type: "
+		       RFC2045_MIME_MESSAGE_DELIVERY_STATUS
+		       "\n");
+		writes(ri, "Content-Transfer-Encoding: 7bit\n\n");
+	}
+
 	dsn_arrival_date(ri);
 
 	writes (ri, "\n"
@@ -1596,6 +1637,9 @@ static int replydsn(struct rfc2045_mkreplyinfo *ri)
 static int replyfeedback(struct rfc2045_mkreplyinfo *ri)
 {
 	size_t i;
+
+	writes(ri, "Content-Type: message/feedback-report; charset=\"utf-8\"\n");
+	writes(ri, "Content-Transfer-Encoding: 8bit\n\n");
 
 	dsn_arrival_date(ri);
 	writes(ri, "User-Agent: librfc2045 "

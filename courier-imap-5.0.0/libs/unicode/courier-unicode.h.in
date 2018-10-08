@@ -2,7 +2,7 @@
 #define	courier_unicode_h
 
 /*
-** Copyright 2000-2017 Double Precision, Inc.
+** Copyright 2000-2018 Double Precision, Inc.
 ** See COPYING for distribution information.
 **
 */
@@ -40,7 +40,7 @@ typedef uint32_t char32_t;
 #endif
 #endif
 
-#define COURIER_UNICODE_VERSION 200
+#define COURIER_UNICODE_VERSION 210
 
 /*
 ** The system default character set, from the locale.
@@ -986,6 +986,19 @@ extern const char unicode_u_ucs2_native[];
 */
 
 #define unicode_x_imap_modutf7 "x-imap-modutf7"
+
+/*
+** EAI-capable Courier-IMAP does not use modified-UTF7, and uses UTF-8.
+**
+** However, to support SMAP we will still need to encode/decode some
+** special characters.
+**
+** The characters U+0000-U+001F, and ./~:\
+**
+** They are encoded as a backslash followed by three octal digits.
+*/
+
+#define unicode_x_smap_modutf8 "x-smap-modutf8"
 
 #if 0
 {

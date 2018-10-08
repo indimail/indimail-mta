@@ -175,7 +175,7 @@ static int maildir_filter_ruleupdate_utf8(struct maildirfilter *r,
 
 	/* rule name: may not already exist */
 	*errcode=MF_ERR_EXISTS;
-	
+
 	for (pom=r->first; pom->next; pom=pom->next) {
 	    if (p!=pom && !strcmp(name, pom->rulename_utf8))
 		return (-1);
@@ -508,8 +508,7 @@ static void print_pattern(FILE *f, int flags, const char *v)
 }
 
 int maildir_filter_saverules(struct maildirfilter *r, const char *filename,
-		 const char *maildir,
-		 const char *maildirpath, const char *fromaddr)
+			     const char *maildirpath, const char *fromaddr)
 {
 FILE	*f=fopen(filename, "w");
 struct maildirfilterrule *p;

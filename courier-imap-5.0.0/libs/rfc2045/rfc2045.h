@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2011 Double Precision, Inc.  See COPYING for
+** Copyright 1998 - 2018 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
@@ -21,6 +21,20 @@ extern "C" {
 #if 0
 }
 #endif
+
+#define RFC2045_MIME_MESSAGE_RFC822 "message/rfc822"
+#define RFC2045_MIME_MESSAGE_GLOBAL "message/global"
+
+#define RFC2045_MIME_MESSAGE_DELIVERY_STATUS "message/delivery-status"
+#define RFC2045_MIME_MESSAGE_GLOBAL_DELIVERY_STATUS \
+	"message/global-delivery-status"
+
+#define RFC2045_MIME_MESSAGE_HEADERS "text/rfc822-headers"
+#define RFC2045_MIME_MESSAGE_GLOBAL_HEADERS "message/global-headers"
+
+int rfc2045_message_content_type(const char *);
+int rfc2045_delivery_status_content_type(const char *);
+int rfc2045_message_headers_content_type(const char *);
 
 #define	RFC2045_ISMIME1(p)	((p) && atoi(p) == 1)
 #define	RFC2045_ISMIME1DEF(p)	(!(p) || atoi(p) == 1)
@@ -60,6 +74,8 @@ struct rfc2045 {
 	unsigned rfcviolation;	/* Boo-boos */
 
 #define	RFC2045_ERR8BITHEADER	1	/* 8 bit characters in headers */
+	/* But this is now OK, in UTF8 mode */
+
 #define	RFC2045_ERR8BITCONTENT	2	/* 8 bit contents, but no 8bit
 					content-transfer-encoding */
 #define	RFC2045_ERR2COMPLEX	4	/* Too many nested contents */
@@ -666,6 +682,30 @@ void rfc2231_paramDecode(struct rfc2231param *paramList,
 			 int *charsetLen,
 			 int *langLen,
 			 int *textLen);
+
+/*
+** Encode an E-mail address as utf-8 address type specified in RFC 6533.
+** The e-mail address parameter must be encoded in UTF-8.
+**
+** The E-mail address is encoded as "rfc822" address type if it has only
+** ASCII characters, or if use_rfc822 is set to non0.
+**
+** A malloc-ed address gets returned.
+*/
+
+char *rfc6533_encode(const char *address, int use_rfc822);
+
+/*
+** Decode a utf-8 or an rfc-822 address type. Returns a malloc-ed buffer,
+** or NULL if the address cannot be decoded.
+**
+** Assumes valid UTF-8 coding, and does not verify it.
+**
+** Does verify, for both rfc-822 and utf-8 formats, that the returned address
+** does not contain control characters.
+*/
+
+char *rfc6533_decode(const char *address);
 
 #if 0
 {

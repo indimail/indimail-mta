@@ -1,9 +1,10 @@
 #
-# Copyright 1998 - 2011 Double Precision, Inc.  See COPYING for
+# Copyright 1998 - 2018 Double Precision, Inc.  See COPYING for
 # distribution information.
 
 
 noinst_LIBRARIES=librfc1035.a
+AM_CFLAGS=@LIBIDN_CFLAGS@
 
 librfc1035_a_SOURCES= \
 		rfc1035.c rfc1035.h rfc1035an.c \
@@ -16,7 +17,6 @@ librfc1035_a_SOURCES= \
 		rfc1035str.c rfc1035tcp.c rfc1035udp.c rfc1035bindsource.c \
 \
 		spf.c spf.h
-
 noinst_PROGRAMS=testlookup testspf
 
 testlookup_SOURCES=testlookup.c
@@ -24,7 +24,7 @@ testlookup_DEPENDENCIES=librfc1035.a ../rfc822/libencode.la ../md5/libmd5.la \
 	../random128/librandom128.la ../soxwrap/libsoxwrap.a \
 	../soxwrap/soxlibs.dep
 testlookup_LDADD=librfc1035.a ../rfc822/libencode.la ../soxwrap/libsoxwrap.a ../md5/libmd5.la \
-	../random128/librandom128.la `cat ../soxwrap/soxlibs.dep`
+	../random128/librandom128.la `cat ../soxwrap/soxlibs.dep` @LIBIDN_LIBS@
 testlookup_LDFLAGS=-static
 
 EXTRA_DIST=testsuite.txt
@@ -35,7 +35,7 @@ testspf_DEPENDENCIES=librfc1035.a ../rfc822/libencode.la ../md5/libmd5.la \
 	../soxwrap/soxlibs.dep
 testspf_LDADD=librfc1035.a ../rfc822/libencode.la ../md5/libmd5.la \
 	../random128/librandom128.la ../soxwrap/libsoxwrap.a \
-	`cat ../soxwrap/soxlibs.dep`
+	`cat ../soxwrap/soxlibs.dep` @LIBIDN_LIBS@
 testspf_LDFLAGS=-static
 
 mycheck:

@@ -113,7 +113,6 @@ int maildir_filter_ruleupdate(struct maildirfilter *, struct maildirfilterrule *
 
 int maildir_filter_saverules(struct maildirfilter *,
 		 const char *,		/* Filename */
-		 const char *,		/* Maildir */
 		 const char *,		/* Path to maildir from mailfilter */
 		 const char *);		/* The return address */
 

@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2000 Double Precision, Inc.
+** Copyright 1998 - 2018 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -12,7 +12,7 @@ static void print_hostname(FILE *f, const char *p)
 {
 	for ( ; *p; p++)
 	{
-		if (*p < ' ' || *p >= 127)
+		if ((unsigned char)*p < ' ')
 		{
 			fprintf(f, "\\%03o", (int)(unsigned char)*p);
 			continue;
@@ -48,10 +48,10 @@ struct	rfc1035_reply *qr;
 
 	fprintf(f, " (server %s)", ipbuf);
 
-	fprintf(f, ":\n;;  Bytes: %ld\n", 
+	fprintf(f, ":\n;;  Bytes: %ld\n",
 		(long)r->replylen);
 
-	fprintf(f, ";;  Opcode: %s\n", 
+	fprintf(f, ";;  Opcode: %s\n",
 		rfc1035_opcode_itostr(r->opcode));
 	fprintf(f, ";;  Flags:");
 	if (r->qr)

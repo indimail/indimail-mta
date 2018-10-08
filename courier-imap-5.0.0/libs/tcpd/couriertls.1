@@ -1,15 +1,15 @@
 '\" t
-.\"<!-- Copyright 2000-2009 Double Precision, Inc.  See COPYING for -->
+.\"<!-- Copyright 2000-2018 Double Precision, Inc.  See COPYING for -->
 .\"<!-- distribution information. -->
 .\"     Title: couriertls
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/27/2015
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 06/28/2018
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "COURIERTLS" "1" "06/27/2015" "Courier Mail Server" "Double Precision, Inc."
+.TH "COURIERTLS" "1" "06/28/2018" "Courier Mail Server" "Double Precision, Inc."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -106,6 +106,13 @@ means, basically, the same as
 closes file descriptor 1, and redirects file descriptor 1 to file descriptor 2\&.
 .RE
 .PP
+\-user=\fIusername\fR
+.RS 4
+Used when
+\fBcouriertls\fR
+needs to get started as root and fork off a root child process (see below), before dropping root and running as the specified user\&.
+.RE
+.PP
 \-verify=\fIdomain\fR
 .RS 4
 Verify that
@@ -129,7 +136,11 @@ is either "smtp" or "imap"\&. This is a debugging option that can be used to tro
 .PP
 If the
 \fB\-remotefd=\fR\fB\fIn\fR\fR
-option is not specified, the rest of the command line specifies the program to run \-\- and its arguments \-\- whose standard input and output is encrypted via SSL/TLS over the network connection\&. If the program is not specified, the standard input and output of
+option is not specified, the rest of the command line specifies the program to run \-\- and its arguments \-\- whose standard input and output is encrypted via SSL/TLS over the network connection\&. This is done before the
+\fB\-user\fR
+option drops root and
+\fBcouriertls\fR
+continues to run as the indicated user\&. If the program is not specified, the standard input and output of
 \fBcouriertls\fR
 itself is encrypted\&.
 .SH "ENVIRONMENT VARIABLES"
@@ -221,10 +232,10 @@ Author
 .IP " 1." 4
 \fBcouriertcpd\fR(1)
 .RS 4
-\%[set $man.base.url.for.relative.links]/couriertcpd.html
+\%http://www.courier-mta.org/couriertcpd.html
 .RE
 .IP " 2." 4
 \fBcourier\fR(8)
 .RS 4
-\%[set $man.base.url.for.relative.links]/courier.html
+\%http://www.courier-mta.org/courier.html
 .RE

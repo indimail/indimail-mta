@@ -418,12 +418,12 @@ int maildir_info_imap_find(struct maildir_info *info, const char *path,
 /***************************************************************************/
 
 /*
-** Maildir folders are named in IMAP-compatible modified-UTF7 encoding,
+** Maildir folders are named in IMAP-compatible modified-UTF8 encoding,
 ** with periods as hierarchy delimiters.  One exception: ".", "/", "~", and
-** ":" are also encoded using modified-UTF7, making folder names that contain
+** ":" are also encoded using modified-UTF8, making folder names that contain
 ** those characters incompatible with IMAP.
 **
-** smaptoUtf7 crates a modified-UTF7-encoded folder name from a vector
+** smap_to_utf8 crates a modified-UTF8-encoded folder name from a vector
 ** of UTF-8 words.
 **
 ** input:  "INBOX" "a" "b"
@@ -431,7 +431,7 @@ int maildir_info_imap_find(struct maildir_info *info, const char *path,
 **
 */
 
-static char *smaptoUtf7(char **ptr)
+static char *smap_to_utf8(char **ptr)
 {
 	char *f=NULL;
 	char *n;
@@ -439,8 +439,8 @@ static char *smaptoUtf7(char **ptr)
 	while ((n=*ptr++) != NULL && *n)
 	{
 		char *p=unicode_convert_tobuf(n, "utf-8",
-						unicode_x_imap_modutf7 " ./~:",
-						NULL);
+					      unicode_x_smap_modutf8,
+					      NULL);
 
 		if (!p)
 		{
@@ -471,15 +471,13 @@ static char *smaptoUtf7(char **ptr)
 }
 
 /*
-** Legacy IMAP creates maildir folders using modified-UTF7.
-**
-** Convert modified-UTF7 folder name into an array of UTF-8 words, that
+** Convert modified-UTF8 folder name into an array of UTF-8 words, that
 ** represent a folder name.
 */
 
-char **maildir_smapfn_fromutf7(const char *modutf7)
+char **maildir_smapfn_fromutf8(const char *modutf8)
 {
-	char *p=strdup(modutf7), *q;
+	char *p=strdup(modutf8), *q;
 	size_t n, i;
 	char **fn;
 
@@ -513,8 +511,8 @@ char **maildir_smapfn_fromutf7(const char *modutf7)
 			}
 
 		fn[n]=unicode_convert_tobuf(q,
-					      unicode_x_imap_modutf7 " ./~:",
-					      "utf-8", NULL);
+					    unicode_x_smap_modutf8,
+					    "utf-8", NULL);
 		q += i;
 
 		if (!fn[n])
@@ -558,7 +556,7 @@ static void get_existing_callback(const char *f, void *vp)
 	if (gefi->pathname)
 		return;
 
-	fn=maildir_smapfn_fromutf7(f);
+	fn=maildir_smapfn_fromutf8(f);
 	if (!fn)
 	{
 		perror(f);
@@ -601,7 +599,7 @@ static char *smap_path(const char *homedir,
 	char *n, *p;
 	struct stat stat_buf;
 
-	if ((n=smaptoUtf7(words)) == NULL)
+	if ((n=smap_to_utf8(words)) == NULL)
 		return NULL;
 
 	p=maildir_name2dir(homedir, n);
@@ -935,4 +933,3 @@ static size_t munge_complex(const char *orig, char *n)
 	if (n) *n=0;
 	return cnt+1;
 }
-

@@ -38,6 +38,7 @@ extern int have_starttls();
 extern int tlsrequired();
 extern int authenticate(const char *);
 unsigned long header_count=0, body_count=0;	/* Dummies */
+int enabled_utf8=0;
 
 extern unsigned long bytes_received_count; /* counter for received bytes (imaptoken.c) */
 extern unsigned long bytes_sent_count; /* counter for sent bytes (imapwrite.c) */

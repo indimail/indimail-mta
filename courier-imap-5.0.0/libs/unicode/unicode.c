@@ -1,5 +1,5 @@
 /*
-** Copyright 2000-2011 Double Precision, Inc.
+** Copyright 2000-2018 Double Precision, Inc.
 ** See COPYING for distribution information.
 **
 */
@@ -239,6 +239,42 @@ static int do_convert_toutf7(const char *text, size_t cnt, void *arg);
 static int convert_utf7_handler(void *ptr, const char *text, size_t cnt);
 
 /*
+** Conversion wrapper for converting to modified-utf8 SMAP encoding.
+**
+** This is done by converting to UTF-8, then stacking on a module that
+** takes that and converts UTF-8 to modified-UTF8.
+**
+** init_nottosmaputf8() returns an opaque stack for converting to modified
+** UTF-8.
+*/
+
+static unicode_convert_handle_t
+init_nottosmaputf8(const char *src_chset,
+		   const char *dst_chset,
+		   int (*output_func)(const char *, size_t, void *),
+		   void *convert_arg);
+
+/*
+** The to modified UTF8 module
+*/
+
+struct unicode_convert_tosmaputf8 {
+
+	struct unicode_convert_hdr hdr;
+
+	int errflag;
+
+	/* Remembered output function */
+
+	int (*output_func)(const char *, size_t, void *);
+
+	/* Remembered arg to the output function */
+	void *convert_arg;
+};
+
+
+
+/*
 ** Create a conversion module stack
 */
 
@@ -273,8 +309,8 @@ unicode_convert_init(const char *src_chset,
 
 	memset(toutf7, 0, sizeof(*toutf7));
 
-	h=init_nottoimaputf7(src_chset, unicode_u_ucs2_native,
-			     do_convert_toutf7, toutf7);
+	h=unicode_convert_init(src_chset, unicode_u_ucs2_native,
+			       do_convert_toutf7, toutf7);
 	if (!h)
 	{
 		free(toutf7);
@@ -417,6 +453,133 @@ static int deinit_toimaputf7(void *ptr, int *errptr)
 	return rc;
 }
 
+/*
+** Convert to unicode_x_smap_modutf8.
+*/
+
+static int deinit_tosmaputf8(void *ptr, int *errptr);
+static int do_convert_tosmaputf8(const char *text, size_t cnt, void *arg);
+static int convert_utf8_handler(void *ptr, const char *text, size_t cnt);
+
+static unicode_convert_handle_t
+init_nottoimaputf7(const char *src_chset,
+		   const char *dst_chset,
+		   int (*output_func)(const char *, size_t, void *),
+		   void *convert_arg)
+{
+	struct unicode_convert_tosmaputf8 *toutf8;
+	unicode_convert_handle_t h;
+
+	if (strcmp(dst_chset, unicode_x_smap_modutf8))
+		return init_nottosmaputf8(src_chset, dst_chset,
+					  output_func,
+					  convert_arg);
+
+	toutf8=malloc(sizeof(struct unicode_convert_tosmaputf8));
+
+	if (!toutf8)
+		return NULL;
+
+	memset(toutf8, 0, sizeof(*toutf8));
+
+	h=unicode_convert_init(src_chset, "utf-8",
+			       do_convert_tosmaputf8,
+			       toutf8);
+	if (!h)
+	{
+		free(toutf8);
+		return (NULL);
+	}
+
+	toutf8->output_func=output_func;
+	toutf8->convert_arg=convert_arg;
+
+	toutf8->hdr.convert_handler=convert_utf8_handler;
+	toutf8->hdr.deinit_handler=deinit_tosmaputf8;
+	toutf8->hdr.ptr=toutf8;
+	toutf8->hdr.next=h;
+	return &toutf8->hdr;
+}
+
+static int deinit_tosmaputf8(void *ptr, int *errptr)
+{
+	int rc;
+
+	struct unicode_convert_tosmaputf8 *toutf8=
+		(struct unicode_convert_tosmaputf8 *)ptr;
+
+	/* Flush out the downstream stack */
+	rc=(*toutf8->hdr.next->deinit_handler)(toutf8->hdr.next->ptr, errptr);
+
+	if (toutf8->errflag && rc == 0)
+		rc=toutf8->errflag;
+
+	free(toutf8);
+	return rc;
+}
+
+static int do_convert_tosmaputf8(const char *text, size_t cnt, void *arg)
+{
+	struct unicode_convert_tosmaputf8 *toutf8=
+		(struct unicode_convert_tosmaputf8 *)arg;
+	int rc;
+	size_t i;
+	char octal[4];
+
+	while (cnt)
+	{
+		if (toutf8->errflag)
+			return toutf8->errflag;
+
+		for (i=0; i<cnt; ++i)
+			if ((unsigned char)text[i] < ' ' ||
+			    strchr("./~:\\", text[i]))
+				break;
+		if (i)
+		{
+			rc= (*toutf8->output_func)(text, i,
+						   toutf8->convert_arg);
+
+			if (rc)
+			{
+				toutf8->errflag=rc;
+				return rc;
+			}
+			text += i;
+			cnt -= i;
+		}
+
+		if (cnt)
+		{
+			char c= *text;
+
+			octal[0]='\\';
+			octal[3]= (c & 7)+'0'; c /= 8;
+			octal[2]= (c & 7)+'0'; c /= 8;
+			octal[1]= (c & 7)+'0';
+			rc= (*toutf8->output_func)(octal, 4,
+						   toutf8->convert_arg);
+			if (rc)
+			{
+				toutf8->errflag=rc;
+				return rc;
+			}
+			++text;
+			--cnt;
+		}
+	}
+	return 0;
+}
+
+static int convert_utf8_handler(void *ptr, const char *text, size_t cnt)
+{
+	struct unicode_convert_tosmaputf8 *toutf8=
+		(struct unicode_convert_tosmaputf8 *)ptr;
+
+	return (*toutf8->hdr.next->convert_handler)(toutf8->hdr.next->ptr,
+						    text, cnt);
+}
+
 /************/
 
 /*
@@ -460,11 +623,15 @@ struct unicode_convert_fromimaputf7 {
 /* Flush the accumulated UCS-2 stream */
 
 #define convert_fromutf7_flush(p) do {					\
-		(p)->errflag=(*(p)->hdr.next->convert_handler)		\
+		int rc=(*(p)->hdr.next->convert_handler)		\
 			((p)->hdr.next->ptr,				\
 			 (const char *)(p)->convbuf,			\
 			 (p)->convbuf_cnt *				\
 			 sizeof((p)->convbuf[0]));			\
+									\
+		if (rc)							\
+			(p)->errflag=rc;				\
+									\
 		(p)->convbuf_cnt=0;					\
 	} while (0)
 
@@ -483,7 +650,7 @@ static int convert_fromutf7(void *ptr,
 static int deinit_fromutf7(void *ptr, int *errptr);
 
 static unicode_convert_handle_t
-init_nottoimaputf7(const char *src_chset,
+init_nottosmaputf8(const char *src_chset,
 		   const char *dst_chset,
 		   int (*output_func)(const char *, size_t, void *),
 		   void *convert_arg)
@@ -510,7 +677,7 @@ init_nottoimaputf7(const char *src_chset,
 
 	/* Create a stack for converting UCS-2 to the dest charset */
 
-	h=init_notfromimaputf7(unicode_u_ucs2_native, dst_chset,
+	h=unicode_convert_init(unicode_u_ucs2_native, dst_chset,
 			       output_func, convert_arg);
 
 	if (!h)
@@ -648,6 +815,162 @@ static int deinit_fromutf7(void *ptr, int *errptr)
 
 /************/
 
+/*
+** Convert from modified-utf8 SMAP encoding.
+**
+** This module converts it to UTF-8, then this is attached to a stack that
+** converts UTF-8 to the requested charset.
+*/
+
+static unicode_convert_handle_t
+init_notfromsmaputf8(const char *src_chset,
+		     const char *dst_chset,
+		     int (*output_func)(const char *, size_t, void *),
+		     void *convert_arg);
+
+struct unicode_convert_fromsmaputf8 {
+
+	struct unicode_convert_hdr hdr;
+
+	/* Convert a backslash escape */
+
+	int in_escape;
+
+	/* The escaped character */
+
+	unsigned char escape_char;
+
+	int errflag;
+	int converr;
+};
+
+static int convert_fromutf8(void *ptr,
+			    const char *text, size_t cnt);
+static int deinit_fromutf8(void *ptr, int *errptr);
+
+static unicode_convert_handle_t
+init_notfromimaputf7(const char *src_chset,
+		     const char *dst_chset,
+		     int (*output_func)(const char *, size_t, void *),
+		     void *convert_arg)
+{
+	struct unicode_convert_fromsmaputf8 *fromutf8;
+	unicode_convert_handle_t h;
+
+	if (strcmp(src_chset, unicode_x_smap_modutf8))
+		return init_notfromsmaputf8(src_chset, dst_chset,
+					    output_func, convert_arg);
+
+	fromutf8=(struct unicode_convert_fromsmaputf8 *)
+		malloc(sizeof(struct unicode_convert_fromsmaputf8));
+
+	if (!fromutf8)
+		return NULL;
+
+	memset(fromutf8, 0, sizeof(*fromutf8));
+
+	/* Create a stack for converting UTF-8 to the dest charset */
+
+	h=unicode_convert_init("utf-8", dst_chset,
+			       output_func, convert_arg);
+
+	if (!h)
+	{
+		free(fromutf8);
+		return (NULL);
+	}
+
+	fromutf8->hdr.next=h;
+	fromutf8->hdr.convert_handler=convert_fromutf8;
+	fromutf8->hdr.deinit_handler=deinit_fromutf8;
+	fromutf8->hdr.ptr=fromutf8;
+	return &fromutf8->hdr;
+}
+
+static int convert_fromutf8(void *ptr,
+			    const char *text, size_t cnt)
+{
+	struct unicode_convert_fromsmaputf8 *fromutf8=
+		(struct unicode_convert_fromsmaputf8 *)ptr;
+	size_t i;
+
+	while (cnt)
+	{
+		if (fromutf8->errflag)
+			return fromutf8->errflag;
+
+		if (fromutf8->in_escape)
+		{
+			if (*text < '0' || *text > '7')
+			{
+				errno=EILSEQ;
+				return fromutf8->errflag=-1;
+			}
+			fromutf8->escape_char <<= 3;
+			fromutf8->escape_char |= *text - '0';
+			if (--fromutf8->in_escape == 0)
+			{
+				fromutf8->errflag=(*fromutf8->hdr.next
+						   ->convert_handler)
+					(fromutf8->hdr.next->ptr,
+					 (const char *)&fromutf8->escape_char,
+					 1);
+			}
+			++text;
+			--cnt;
+			continue;
+		}
+
+		for (i=0; i<cnt; ++i)
+			if (text[i] == '\\')
+				break;
+
+		if (i)
+		{
+			fromutf8->errflag=(*fromutf8->hdr.next
+					   ->convert_handler)
+				(fromutf8->hdr.next->ptr, text, i);
+			text += i;
+			cnt -= i;
+		}
+
+		if (cnt)
+		{
+			fromutf8->escape_char=0;
+			fromutf8->in_escape=3;
+			++text;
+			--cnt;
+		}
+	}
+	return 0;
+}
+
+static int deinit_fromutf8(void *ptr, int *errptr)
+{
+	struct unicode_convert_fromsmaputf8 *fromutf8=
+		(struct unicode_convert_fromsmaputf8 *)ptr;
+	int rc;
+
+	if (fromutf8->in_escape)
+	{
+		fromutf8->errflag= -1;
+		errno=EILSEQ;
+	}
+
+	rc=fromutf8->hdr.next->deinit_handler(fromutf8->hdr.next->ptr, errptr);
+
+	if (fromutf8->errflag && rc == 0)
+		rc=fromutf8->errflag;
+
+	if (errptr && fromutf8->converr)
+		*errptr=1;
+
+	free(fromutf8);
+	return rc;
+}
+
+/************/
+
 /* A real conversion module, via iconv */
 
 struct unicode_convert_iconv {
@@ -674,7 +997,7 @@ static int init_iconv(struct unicode_convert_iconv *h,
 		      void *convert_arg);
 
 static unicode_convert_handle_t
-init_notfromimaputf7(const char *src_chset,
+init_notfromsmaputf8(const char *src_chset,
 		     const char *dst_chset,
 		     int (*output_func)(const char *, size_t, void *),
 		     void *convert_arg)

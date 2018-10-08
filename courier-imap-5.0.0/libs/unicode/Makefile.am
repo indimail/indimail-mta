@@ -83,7 +83,7 @@ libunicode_la_SOURCES=\
 			categoriestab.h \
 			unicode_categories.c
 
-libunicode_la_LDFLAGS=-version-info 4:0:0
+libunicode_la_LDFLAGS=-version-info 5:0:1
 
 EXTRA_DIST=$(noinst_SCRIPTS) $(man_MANS) $(PACKAGE).spec \
 	m4/courier-unicode.m4 \
@@ -167,6 +167,9 @@ check-am: unicodetest
 	test "`./unicodetest 'foobааааааr'`" = "foob&BDAEMAQwBDAEMAQw-r"
 	test "`./unicodetest 'foobаaаr'`" = "foob&BDA-a&BDA-r"
 	test "`./unicodetest 'foobааaааr'`" = "foob&BDAEMA-a&BDAEMA-r"
+	test "`./unicodetest --smaputf8 'hello world'`" = 'hello world'
+	test "`./unicodetest --smaputf8 'hello\\\\world'`" = 'hello\134\134world'
+	test "`./unicodetest --smaputf8 ':hello:world:'`" = '\072hello\072world\072'
 	n="aaaaaaaa"; n="$$n$$n$$n$$n"; n="$$n$$n$$n$$n"; n="$$n$$n$$n$$n"; n="$$n$$n"; n="`echo $$n | cut -c1-1023`"; test "`./unicodetest $$n`" = "$$n"
 	n="aaaaaaaa"; n="$$n$$n$$n$$n"; n="$$n$$n$$n$$n"; n="$$n$$n$$n$$n"; n="$$n$$n"; test "`./unicodetest $$n`" = "$$n"
 	n="aaaaaaaa"; n="$$n$$n$$n$$n"; n="$$n$$n$$n$$n"; n="$$n$$n$$n$$n"; n="$$n$$n"; test "`./unicodetest a$$n`" = "a$$n"
@@ -179,6 +182,9 @@ check-am: unicodetest
 	test "`./unicodetest --smap 'foo&bar'`" = 'foo&-bar'
 	test "`./unicodetest --smap 'foo.bar'`" = 'foo&AC4-bar'
 	test "`./unicodetest --totitle 'tÄst'`" = 'Täst'
+	test "`./unicodetest --modutf7toutf8 'foo&bar'`" = '[error]'
+	test "`./unicodetest --modutf7toutf8 'foo&-bar'`" = 'foo&bar'
+	test "`./unicodetest --modutf7toutf8 'foo:bar'`" = 'foo\072bar'
 	test "`./graphemetest 0x0d 0x0a`" = "0" # GB3
 	test "`./graphemetest 0x0d 0x41`" = "1" # GB4
 	test "`./graphemetest 0x41 0x0d`" = "1" # GB5

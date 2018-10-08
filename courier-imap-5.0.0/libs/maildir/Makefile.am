@@ -35,7 +35,7 @@ libmaildir_la_SOURCES=autoresponse.c autoresponse.h \
 	maildirfilter.h maildirfiltertypelist.h\
 	maildirflags.c maildirmkdir.c \
 	maildirgetquota.c maildirgetquota.h \
-	maildirinfo.c maildirinfo.h \
+	maildirinfo.c maildirinfo.h maildirinfo2.c \
 	maildirkeywords.c maildirkeywords2.c maildirkeywords3.c \
 	maildirkeywords4.cpp \
 	maildirkeywords.h maildirlist.c maildirlock.c \
@@ -65,7 +65,7 @@ maildirmake_DEPENDENCIES=libmaildir.la \
 			../rfc822/librfc822.la
 maildirmake_LDADD=libmaildir.la \
 			../numlib/libnumlib.la \
-			../rfc822/librfc822.la ../unicode/libunicode.la
+			../rfc822/librfc822.la ../unicode/libunicode.la @LIBPCRE@
 maildirmake_LDFLAGS=-static
 
 testmaildirfilter_SOURCES=maildirfiltertypelist.h testmaildirfilter.c

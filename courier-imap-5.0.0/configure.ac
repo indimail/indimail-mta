@@ -1,10 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl Copyright 1998 - 2016 Double Precision, Inc.  See COPYING for
+dnl Copyright 1998 - 2018 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
 AC_PREREQ(2.59)
-AC_INIT(courier-imap, 4.18.2, [courier-imap@lists.sourceforge.net])
+AC_INIT(courier-imap, 5.0.0, [courier-imap@lists.sourceforge.net])
 AC_CONFIG_SRCDIR(libs/imap/imapd.c)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
@@ -42,6 +42,12 @@ then
 	AC_MSG_WARN(=== you better read INSTALL again.)
 	AC_MSG_ERROR(aborted.)
 fi
+fi
+
+PKG_CHECK_MODULES(LIBIDN, libidn >= 0.0.0, [libidn=yes], [libidn=no])
+if test "$libidn" != "yes"
+then
+	AC_MSG_ERROR([libidn not found])
 fi
 
 AC_ARG_WITH(redhat, [], [ redhat=$withval ], [redhat=no])
@@ -107,6 +113,7 @@ if test x$exec_prefix = xNONE
 then
 	exec_prefix="$prefix"
 fi
+
 eval "datadir=$datadir"
 
 AC_ARG_WITH(certsdir, [ --with-certsdir Directory where certs are created ],
@@ -194,7 +201,10 @@ AC_SUBST(userdb)
 AC_ARG_WITH(makedatprog, [], ,
 	ac_configure_args="$ac_configure_args --with-makedatprog='${libexecdir}/makedatprog'")
 
-AC_ARG_WITH(mailuser, [], , ac_configure_args="$ac_configure_args --with-mailuser=root")
+AC_ARG_WITH(mailuser, [], , ac_configure_args="$ac_configure_args --with-mailuser=$authmailuser")
+AC_ARG_WITH(mailgroup, [], , ac_configure_args="$ac_configure_args --with-mailgroup=$authmailgroup")
+AC_SUBST(authmailuser)
+AC_SUBST(authmailgroup)
 
 AC_CONFIG_SUBDIRS(libs/numlib)
 AC_CONFIG_SUBDIRS(libs/unicode)

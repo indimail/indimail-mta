@@ -127,7 +127,6 @@ stamp-h1
 *.a
 *.o
 .libs/
-INSTALL.html
 Makefile
 autom4te.cache/
 config.h

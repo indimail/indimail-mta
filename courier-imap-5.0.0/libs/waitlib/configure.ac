@@ -17,8 +17,8 @@ dnl Checks for programs.
 AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_LN_S
-AC_PROG_LIBTOOL
 AC_PROG_CC
+AC_PROG_LIBTOOL
 
 dnl Checks for libraries.
 
@@ -61,7 +61,7 @@ wait3)
 	then
 		has_xsig=yes
 	fi
-	if test "$has_sighold" = "yes"
+	if test "$ac_cv_func_sighold" = "yes"
 	then
 		has_xsig=yes
 	fi
@@ -84,7 +84,7 @@ wait3)
 	else
 		use_wait3=no
 	fi
-	
+
 	if test "$waitlib_cv_SYS_WAITBROKEN$use_wait3" = "yesno"
 	then
 		AC_MSG_ERROR([I give up -- neither wait nor wait3 works properly])

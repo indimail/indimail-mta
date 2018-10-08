@@ -213,7 +213,7 @@ int maildir_filter_savemaildirfilter(struct maildirfilter *mf, const char *maild
 	strcat(strcpy(createInfo.newname, maildir), "/maildirfilter.tmp");
 
 	rc=maildir_filter_saverules(mf, createInfo.tmpname,
-				    maildir, maildirpath, from);
+				    maildirpath, from);
 	if (rc == 0 && rename(createInfo.tmpname, createInfo.newname))
 		rc= -1;
 	maildir_tmpcreate_free(&createInfo);

@@ -141,6 +141,7 @@ char *current_mailbox_acl;
 
 dev_t homedir_dev;
 ino_t homedir_ino;
+int enabled_utf8=0;
 
 void rfc2045_error(const char *p)
 {

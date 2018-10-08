@@ -36,9 +36,22 @@ Requirements
        implementation that provides real-time folder status updates to
        concurrent IMAP clients that have the same folder opened.
      * The Courier authentication library. Before installing Courier-IMAP,
-       download and install http://www.courier-mta.org/authlib/.
+       download and install https://www.courier-mta.org/authlib/.
+     * The GNU IDN) library is required.
+     * The Courier unicode library. Before installing Courier-IMAP, download
+       and install https://www.courier-mta.org/unicode/.
 
 UPGRADING
+
+  Upgrading from Courier-IMAP 4.18.2, and earlier
+
+   Courier-IMAP 5.0 added IMAP UTF8 support, and converted maildir folders'
+   names to Unicode. Updating an existing system to Courier-IMAP 5.0, and
+   later, requires a manual one-time conversion of all existing maildirs
+   using the maildirmake command. See the maildirmake(1) manual page for more
+   information.
+
+   NOTE: If Cone is installed, Cone also must be updated to 0.97, or later.
 
   Upgrading from Courier-IMAP 4.14, and earlier
 
@@ -107,7 +120,7 @@ UPGRADING
    library.
 
    You must download and install the Courier Authentication Library from
-   http://www.courier-mta.org/authlib/ before upgrading. Review the
+   https://www.courier-mta.org/authlib/ before upgrading. Review the
    documentation in the courier-authlib package for more information.
 
    After upgrading to 4.0, or later, to avoid future confusion the old copies

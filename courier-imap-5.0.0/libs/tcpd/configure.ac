@@ -61,6 +61,12 @@ saveLIBS="$LIBS"
 AC_CHECK_LIB(dl, dlopen, [ LIBDL="-ldl" ])
 LIBS="$saveLIBS"
 
+PKG_CHECK_MODULES(LIBIDN, libidn >= 0.0.0, [libidn=yes], [libidn=no])
+if test "$libidn" != "yes"
+then
+	AC_MSG_ERROR([libidn not found])
+fi
+
 dnl Determine whether transport libraries are created static or shared
 
 AC_SUBST(LIBDL)
@@ -459,8 +465,13 @@ then
 	CRYPTLIBS="$CRYPTLIBS -lgcrypt"
 ], [
 AC_MSG_RESULT(no)
+have_gcrypt="no"
 ])
 
+	if test "$have_gcrypt" = "no"
+	then
+		AC_MSG_ERROR(gcrypt header file is required for GNUTLS)
+	fi
 	AC_MSG_CHECKING([for libgpg-error])
 	LIBS="$LIBS -lgpg-error"
 	AC_TRY_LINK( [

@@ -912,7 +912,11 @@ static int get_server_cert(gnutls_session_t session,
 	}
 
 	if (!certfilename)
+	{
+		if (ssl->ctx->certfile)
+			nonsslerror(&ssl->info_cpy, ssl->ctx->certfile);
 		return 0;
+	}
 
 	rc=set_cert(ssl, session, st, certfilename);
 	free(certfilename);
