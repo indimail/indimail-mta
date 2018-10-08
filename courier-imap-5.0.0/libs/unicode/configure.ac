@@ -116,4 +116,4 @@ CFLAGS="-I.. -I$srcdir/.. $CFLAGS"
 CXXFLAGS="-I.. -I$srcdir/.. $CXXFLAGS"
 
 AM_CONDITIONAL(HAVE_DOCS,[test -f $srcdir/docbook/icon.gif])
-AC_OUTPUT(Makefile packaging/freebsd10/Makefile courier-unicode.spec courier-unicode.h)
+AC_OUTPUT(Makefile courier-unicode.spec courier-unicode.h)
