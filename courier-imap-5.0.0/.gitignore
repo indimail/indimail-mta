@@ -7,6 +7,7 @@ config.sub
 configure
 depcomp
 install-sh
+confdefs.h
 libs/authlib/Makefile.in
 libs/authlib/aclocal.m4
 libs/authlib/config.h.in
