@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.22  2018-10-08 11:53:27+05:30  Cprogrammer
+ * use ifdefs to define calls to mysql_options
+ *
  * Revision 2.21  2018-04-26 23:26:28+05:30  Cprogrammer
  * set MYSQL_OPT_SSL_ENFORCE & MYSQL_OPT_SSL_MODE if use_ssl is set
  *
@@ -68,7 +71,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.21 2018-04-26 23:26:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.22 2018-10-08 11:53:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -117,10 +120,24 @@ int
 set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 {
 	char           *default_file, *default_group, *c_timeout, 
-				   *r_timeout, *w_timeout, *init_cmd, *ptr,
-				   *set_client_ip, *opt_reconnect, *opt_protocol;
+				   *r_timeout, *w_timeout, *init_cmd,
+				   *opt_reconnect, *opt_protocol;
+#ifdef MYSQL_SET_CLIENT_IP
+	char           *set_client_ip;
+#endif
+#if defined(HAVE_MYSQL_OPT_SSL_CA) || defined(HAVE_MYSQL_OPT_SSL_CAPATH) \
+		|| defined(HAVE_MYSQL_OPT_SSL_CERT) || defined(HAVE_MYSQL_OPT_SSL_CIPHER) \
+		|| defined(HAVE_MYSQL_OPT_SSL_CRL) || defined(HAVE_MYSQL_OPT_SSL_CRLPATH) \
+		|| defined(HAVE_MYSQL_OPT_SSL_ENFORCE) || defined(HAVE_MYSQL_OPT_SSL_MODE) \
+		|| defined(HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT) || defined(HAVE_MYSQL_OPT_SSL_KEY) \
+		|| defined(HAVE_MYSQL_OPT_TLS_VERSION)
+	char           *ptr; 
+#endif
 	char            temp[4];
-	char            o_reconnect, tmpv_c, use_ssl = 0;
+	char            o_reconnect, use_ssl = 0;
+#ifdef HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT
+	char            tmpv_c;
+#endif
 	unsigned int    protocol, connect_timeout, read_timeout, write_timeout;
 #if defined(LIBMARIADB) || defined(MARIADB_BASE_VERSION)
 	char            fpath[MAX_BUFF];
@@ -138,7 +155,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if (getenv("CLIENT_INTERACTIVE"))
 		*flags += CLIENT_INTERACTIVE;
 	getEnvConfigStr(&init_cmd, "MYSQL_INIT_COMMAND", 0);
-#if defined(LIBMARIADB) || defined(MARIADB_BASE_VERSION)
+#if defined(LIBMARIADB) || defined(MARIADB_BASE_VERSION) /*- full path required in mariadb */
 	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	snprintf(fpath, sizeof(fpath) - 1, "%s/%s", sysconfdir, file);
 	getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", fpath);
@@ -149,7 +166,9 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	getEnvConfigStr(&c_timeout, "MYSQL_OPT_CONNECT_TIMEOUT", "120");
 	getEnvConfigStr(&r_timeout, "MYSQL_OPT_READ_TIMEOUT", "20");
 	getEnvConfigStr(&w_timeout, "MYSQL_OPT_WRITE_TIMEOUT", "20");
+#ifdef MYSQL_SET_CLIENT_IP
 	getEnvConfigStr(&set_client_ip, "MYSQL_SET_CLIENT_IP", 0);
+#endif
 	getEnvConfigStr(&opt_reconnect, "MYSQL_OPT_RECONNECT", "0");
 	snprintf(temp, sizeof(temp) - 1, "%d", MYSQL_PROTOCOL_DEFAULT);
 	getEnvConfigStr(&opt_protocol, "MYSQL_OPT_PROTOCOL", temp);
@@ -170,9 +189,11 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 		return (5);
 	if (int_mysql_options(mysql, MYSQL_OPT_WRITE_TIMEOUT, (char *) &write_timeout))
 		return (6);
+#ifdef MYSQL_SET_CLIENT_IP
 	if (getenv("MYSQL_SET_CLIENT_IP") && 
 			int_mysql_options(mysql, MYSQL_SET_CLIENT_IP, set_client_ip))
 		return (7);
+#endif
 	if (getenv("MYSQL_OPT_RECONNECT") &&
 			int_mysql_options(mysql, MYSQL_OPT_RECONNECT, (char *) &o_reconnect))
 		return (8);
