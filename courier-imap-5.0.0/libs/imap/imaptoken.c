@@ -19,6 +19,8 @@
 #if HAVE_STDLIB_H
 #include	<stdlib.h>
 #endif
+#include	"imapd.h"
+#include	"unicode/courier-unicode.h"
 #if	HAVE_UNISTD_H
 #include	<unistd.h>
 #endif
@@ -226,10 +228,61 @@ void smap_readline(char *buffer, size_t bufsize)
 
 #endif
 
+static int ignore_output_func(const char *ptr, size_t cnt, void *ignore)
+{
+	return 0;
+}
+
+static struct imaptoken *do_readtoken_nolog(int touc);
+
 static struct imaptoken *do_readtoken(int touc)
 {
+	struct imaptoken *tok=do_readtoken_nolog(touc);
+
+	if (debugfile)
+	{
+		char	*p=0;
+
+		fprintf(debugfile, "READ: ");
+		switch (tok->tokentype) {
+		case IT_ATOM:
+			p=curtoken.tokenbuf; fprintf(debugfile, "ATOM"); break;
+		case IT_NUMBER:
+			p=curtoken.tokenbuf; fprintf(debugfile, "NUMBER"); break;
+		case IT_QUOTED_STRING:
+			p=curtoken.tokenbuf; fprintf(debugfile, "QUOTED_STRING"); break;
+		case IT_LPAREN:
+			fprintf(debugfile, "LPAREN"); break;
+		case IT_RPAREN:
+			fprintf(debugfile, "RPAREN"); break;
+		case IT_NIL:
+			fprintf(debugfile, "NIL"); break;
+		case IT_ERROR:
+			fprintf(debugfile, "ERROR"); break;
+		case IT_EOL:
+			fprintf(debugfile, "EOL"); break;
+		case IT_LBRACKET:
+			fprintf(debugfile, "LBRACKET"); break;
+		case IT_RBRACKET:
+			fprintf(debugfile, "RBRACKET"); break;
+		case IT_LITERAL_STRING_START:
+			fprintf(debugfile, "{%lu}", tok->tokennum); break;
+		case IT_LITERAL8_STRING_START:
+			fprintf(debugfile, "~{%lu}", tok->tokennum); break;
+		}
+
+		if (p)
+			fprintf(debugfile, ": %s", p);
+		fprintf(debugfile, "\n");
+		fflush(debugfile);
+	}
+	return tok;
+}
+
+static struct imaptoken *do_readtoken_nolog(int touc)
+{
 int	c=0;
-unsigned l; 
+unsigned l;
 static unsigned long max_atom_size = 0;
 char *ptr;
 
@@ -275,6 +328,8 @@ char *ptr;
 
 	if (c == '"')
 	{
+		int bit8=0;
+
 		l=0;
 		while ((c=READ()) != '"')
 		{
@@ -286,14 +341,60 @@ char *ptr;
 				curtoken.tokentype=IT_ERROR;
 				return (&curtoken);
 			}
-			if (l < 8192)
+			if (l >= BUFSIZ)
 			{
-				appendch(c);
+				writes("* NO [ALERT] IMAP command too long.\r\n");
+				curtoken.tokentype=IT_ERROR;
 			}
+			if (c & 0x80)
+				bit8=1;
+			appendch(c);
 		}
 		appendch(0);
 		curtoken.tokentype=IT_QUOTED_STRING;
+
+		/*
+		 * Strings must be valid UTF-8. Shortcut check.
+		 */
+
+		if (bit8)
+		{
+			int errptr=0;
+
+			unicode_convert_handle_t h=
+				unicode_convert_init("utf-8",
+						     unicode_u_ucs4_native,
+						     ignore_output_func,
+						     (void *)0);
+
+			if (unicode_convert(h, curtoken.tokenbuf,
+					    strlen(curtoken.tokenbuf)))
+			{
+				curtoken.tokentype=IT_ERROR;
+			}
+
+			if (unicode_convert_deinit(h, &errptr) || errptr)
+			{
+				curtoken.tokentype=IT_ERROR;
+			}
+		}
 		return (&curtoken);
+	}
+
+	/*
+	 * Parse LITERAL or LITERAL8
+	 */
+	curtoken.tokentype=IT_LITERAL_STRING_START;
+
+	if (c == '~')
+	{
+		c=READ();
+		if (c != '{')
+		{
+			curtoken.tokentype=IT_ERROR;
+			return (&curtoken);
+		}
+		curtoken.tokentype=IT_LITERAL8_STRING_START;
 	}
 
 	if (c == '{')
@@ -319,7 +420,6 @@ char *ptr;
 			curtoken.tokentype=IT_ERROR;
 			return (&curtoken);
 		}
-		curtoken.tokentype=IT_LITERAL_STRING_START;
 		return (&curtoken);
 	}
 
@@ -345,9 +445,11 @@ char *ptr;
 	}
 
 	while (c != '\r' && c != '\n'
-		&& !isspace((int)(unsigned char)c)
-		&& c != '\\' && c != '"' && c != LPAREN_CHAR && c != RPAREN_CHAR
-		&& c != '{' && c != '}' && c != LBRACKET_CHAR && c != RBRACKET_CHAR)
+	       && !isspace((int)(unsigned char)c)
+	       && (((unsigned char)c) & 0x80) == 0
+	       && c != '\\' && c != '"' && c != LPAREN_CHAR && c != RPAREN_CHAR
+	       && c != '~'
+	       && c != '{' && c != '}' && c != LBRACKET_CHAR && c != RBRACKET_CHAR)
 	{
 		curtoken.tokentype=IT_ATOM;
 		max_atom_size = (ptr = getenv("MAX_ATOM_SIZE")) ? strtoull(ptr, 0, 0) : IT_MAX_ATOM_SIZE;
@@ -359,7 +461,7 @@ char *ptr;
 		}
 		else
 		{
-			write_error_exit("max atom size too small");  
+			write_error_exit("max atom size too small");
 		}
 		c=READ();
 	}
@@ -378,65 +480,50 @@ char *ptr;
 
 static struct imaptoken *readtoken(int touc)
 {
-struct imaptoken *tok=do_readtoken(touc);
+	struct imaptoken *tok=do_readtoken(touc);
 
-	if (tok->tokentype == IT_LITERAL_STRING_START)
+	convert_literal_tokens(tok);
+	return (tok);
+}
+
+/*
+ * If a token is a LITERAL, read it and replace it with a QUOTED_STRING.
+ */
+
+void convert_literal_tokens(struct imaptoken *tok)
+{
+	unsigned long nbytes;
+	if (tok->tokentype != IT_LITERAL_STRING_START &&
+	    tok->tokentype != IT_LITERAL8_STRING_START)
+		return;
+
+	nbytes=curtoken.tokennum;
+
+	if (nbytes > BUFSIZ)
 	{
-	unsigned long nbytes=curtoken.tokennum;
-
-		if (nbytes > 8192)
-		{
-			writes("* NO [ALERT] IMAP command too long.\r\n");
-			tok->tokentype=IT_ERROR;
-		}
-		else
-		{
+		writes("* NO [ALERT] IMAP command too long.\r\n");
+		tok->tokentype=IT_ERROR;
+	}
+	else
+	{
 		unsigned long i;
 
-			writes("+ OK\r\n");
-			writeflush();
-			alloc_tokenbuf(nbytes+1);
-			for (i=0; i<nbytes; i++)
-				tok->tokenbuf[i]= READ();
-			tok->tokenbuf[i]=0;
-			tok->tokentype=IT_QUOTED_STRING;
-		}
+		/*
+		  RFC4466: In addition, the non-terminal "literal8" defined
+		  in [BINARY] got extended to allow for non-synchronizing
+		  literals if both [BINARY] and [LITERAL+] extensions are
+		  supported by the server.
+
+		*/
+
+		writes("+ OK\r\n");
+		writeflush();
+		alloc_tokenbuf(nbytes+1);
+		for (i=0; i<nbytes; i++)
+			tok->tokenbuf[i]= READ();
+		tok->tokenbuf[i]=0;
+		tok->tokentype=IT_QUOTED_STRING;
 	}
-
-	if (debugfile)
-	{
-	char	*p=0;
-
-		fprintf(debugfile, "READ: ");
-		switch (tok->tokentype) {
-		case IT_ATOM:
-			p=curtoken.tokenbuf; fprintf(debugfile, "ATOM"); break;
-		case IT_NUMBER:
-			p=curtoken.tokenbuf; fprintf(debugfile, "NUMBER"); break;
-		case IT_QUOTED_STRING:
-			p=curtoken.tokenbuf; fprintf(debugfile, "QUOTED_STRING"); break;
-		case IT_LPAREN:
-			fprintf(debugfile, "LPAREN"); break;
-		case IT_RPAREN:
-			fprintf(debugfile, "RPAREN"); break;
-		case IT_NIL:
-			fprintf(debugfile, "NIL"); break;
-		case IT_ERROR:
-			fprintf(debugfile, "ERROR"); break;
-		case IT_EOL:
-			fprintf(debugfile, "EOL"); break;
-		case IT_LBRACKET:
-			fprintf(debugfile, "LBRACKET"); break;
-		case IT_RBRACKET:
-			fprintf(debugfile, "RBRACKET"); break;
-		}
-
-		if (p)
-			fprintf(debugfile, ": %s", p);
-		fprintf(debugfile, "\n");
-		fflush(debugfile);
-	}
-	return (tok);
 }
 
 struct imaptoken *nexttoken(void)

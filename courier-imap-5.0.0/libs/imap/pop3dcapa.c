@@ -82,6 +82,6 @@ void pop3dcapa()
 		printf("SASL LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256\r\n");
 	if (have_starttls())
 		printf("STLS\r\n");
-	printf("TOP\r\nUSER\r\nLOGIN-DELAY 10\r\nPIPELINING\r\nUIDL\r\n.\r\n");
+	printf("TOP\r\nUSER\r\nLOGIN-DELAY 10\r\nPIPELINING\r\nUIDL\r\nUTF8 USER\r\n.\r\n");
 	fflush(stdout);
 }

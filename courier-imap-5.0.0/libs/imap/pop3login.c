@@ -140,7 +140,7 @@ authresp(const char *s)
 int
 main(int argc, char **argv)
 {
-	int             c, disable_pass;
+	int             c, disable_pass, utf8_enabled=0;
 	char            buf[BUFSIZ], authservice[40];
 	char           *user = 0, *p, *ptr, *q;
 	const char     *ip = getenv("TCPREMOTEIP");
@@ -208,6 +208,13 @@ main(int argc, char **argv)
 						bytes_sent_count);
 				fflush(stderr);
 				break;
+			}
+			if (strcmp(p, "UTF8") == 0)
+			{
+				printf("+OK UTF8 enabled\r\n");
+				fflush(stdout);
+				utf8_enabled=1;
+				continue;
 			}
 			if (!disable_pass && strcmp(p, "USER") == 0)
 			{
@@ -281,6 +288,10 @@ main(int argc, char **argv)
 						q = getenv(authservice);
 						if (!q || !*q)
 							q = "pop3";
+						if (utf8_enabled)
+							putenv("UTF8=1");
+						else
+							putenv("UTF8=0");
 						authmod(argc - 1, argv + 1, q, authtype, authdata);
 					}
 					if (rc == AUTHSASL_ABORTED)

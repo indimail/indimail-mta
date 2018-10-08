@@ -93,14 +93,16 @@ pop3login_LDADD=../tcpd/libtlsclient.la libpop3d.la \
 	@NETLIBS@
 
 libpop3d_la_SOURCES=externalauth.c
-libpop3d_la_LIBADD=../maildir/libmaildir.la ../rfc822/librfc822.la \
+libpop3d_la_LIBADD=../maildir/libmaildir.la \
+	../rfc2045/librfc2045.la \
+	../rfc822/librfc822.la \
 	../numlib/libnumlib.la
 libpop3d_la_DEPENDENCIES=$(libpop3d_la_LIBADD)
 libpop3d_la_LDFLAGS=-static
 
 pop3d_SOURCES=pop3dserver.c pop3dcapa.c
 pop3d_DEPENDENCIES=libpop3d.la
-pop3d_LDADD=libpop3d.la ../authlib/libauthmod.la ../authlib/libauth.la
+pop3d_LDADD=libpop3d.la ../authlib/libauthmod.la ../authlib/libauth.la ../unicode/libunicode.la
 
 HTML2TXT=links -dump -no-numbering
 

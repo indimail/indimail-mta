@@ -57,11 +57,19 @@
 #include	"maildir/maildirgetquota.h"
 #include	"maildir/maildircreate.h"
 #include	"maildir/loginexec.h"
+#include	"rfc2045/rfc2045.h"
 
 #define POP3DLIST "courierpop3dsizelist"
+#define LISTVERSION 3
 
 extern void pop3dcapa();
 static void acctout(const char *disc);
+void rfc2045_error(const char *p)
+{
+	if (write(2, p, strlen(p)) < 0)
+		_exit(1);
+	_exit(0);
+}
 
 static const char *authaddr, *remoteip, *remoteport;
 
@@ -70,13 +78,14 @@ struct msglist {
 	char *filename;
 	int isdeleted;
 	int isnew;
+	int isutf8;
 	off_t size;
 
 	struct {
 		unsigned long uidv;
 		unsigned long n;
 	} uid;
-	} ;
+};
 
 static struct msglist *msglist_l;
 static struct msglist **msglist_a;
@@ -84,6 +93,7 @@ static unsigned msglist_cnt;
 
 static struct stat enomem_stat;
 static int enomem_1msg;
+int utf8_enabled;
 
 /*
 ** When a disk error occurs while saving an updated courierpop3dsizelist
@@ -111,7 +121,6 @@ static unsigned long bytes_sent_count=0;
 static unsigned long bytes_received_count=0;
 
 static unsigned long uidv=0;
-static int convert_v0=0;
 
 static time_t start_time;
 
@@ -122,29 +131,18 @@ static time_t start_time;
 
 static void calcsize(struct msglist *m)
 {
-FILE	*f=fopen(m->filename, "r");
-int	c, lastc;
+	FILE	*f=fopen(m->filename, "r");
+	struct rfc2045 *p=rfc2045_fromfp(f);
 
-	m->size=0;
-	if (f == 0)
-	{
-		perror("calcsize fopen");
-		return;
-	}
-	lastc='\n';
-	while ((c=getc(f)) >= 0)
-	{
-		if (c == '\n')	++m->size;
-		++m->size;
-		lastc=c;
-	}
-	if (lastc != '\n')	m->size += 2;
+	m->size=p->nlines + p->endpos;
 
-	if (ferror(f))
-	{
-		perror("calcsize ferror");
-		return;
-	}
+	clearerr(f);
+	if (m->size > 0 && fseek(f, -1, SEEK_SET) == 0 && getc(f) != '\n')
+		m->size+=2; /* We'll add an extra CRLF ourselves */
+
+	if (p->rfcviolation & RFC2045_ERR8BITHEADER)
+		m->isutf8=1;
+	rfc2045_free(p);
 	fclose(f);
 }
 
@@ -181,36 +179,22 @@ static struct msglist **readpop3dlist(unsigned long *uid)
 	struct msglist **a;
 	struct msglist *list=NULL;
 	size_t mcnt=0;
-
 	char linebuf[1024];
 	FILE *fp=openpop3dlist();
-
 	size_t i;
 	int vernum=0;
 
 	uidv=time(NULL);
 
-	convert_v0=0;
-
 	if (fp == NULL ||
 	    fgets(linebuf, sizeof(linebuf)-1, fp) == NULL ||
 	    linebuf[0] != '/' || sscanf(linebuf+1, "%d %lu %lu", &vernum,
 					uid, &uidv)
-	    < 2 || (vernum != 1 && vernum != 2))
+	    < 2 || vernum != LISTVERSION)
 	{
-		if (fp == NULL)
-			convert_v0=1;
-
-		if (vernum == 0 && fp && fseek(fp, 0L, SEEK_SET) >= 0)
-		{
-			/* Old version 0 format courierpop3dsizelist file */
-		}
-		else
-		{
-			if (fp)
-				fclose(fp);
-			fp=NULL;
-		}
+		if (fp)
+			fclose(fp);
+		fp=NULL;
 	}
 
 	if (fp)
@@ -224,8 +208,6 @@ static struct msglist **readpop3dlist(unsigned long *uid)
 
 		while ((ch=getc(fp)) != EOF)
 		{
-			unsigned long sz;
-
 			if (ch != '\n')
 			{
 				if (n < sizeof(linebuf)-3)
@@ -234,10 +216,6 @@ static struct msglist **readpop3dlist(unsigned long *uid)
 			}
 			linebuf[n]=0;
 			n=0;
-
-			if (vernum == 0)
-				strcat(linebuf, " 0");
-			/* Convert version 0 to version 1 format - PRESTO! */
 
 			if ((p=strrchr(linebuf, ' ')) == NULL)
 				continue;
@@ -264,18 +242,15 @@ static struct msglist **readpop3dlist(unsigned long *uid)
 				exit(1);
 			}
 
-			switch (sscanf(p, "%lu %lu:%lu", &sz,
-				       &m->uid.n, &m->uid.uidv)) {
-			case 2:
-				m->uid.uidv=0;
-				/* FALLTHROUGH */
-			case 3:
-				m->size=sz;
+			if (sscanf(p, "%lu %lu:%lu:%d", &m->size,
+				   &m->uid.n, &m->uid.uidv,
+				   &m->isutf8) == 4)
+			{
 				m->next=list;
 				list=m;
 				++mcnt;
-				break;
-			default:
+			} else
+			{
 				free(m->filename);
 				free(m);
 			}
@@ -317,7 +292,7 @@ static int savepop3dlist(struct msglist **a, size_t cnt,
 		return -1;
 	}
 
-	fprintf(fp, "/2 %lu %lu\n", uid, uidv);
+	fprintf(fp, "/%d %lu %lu\n", LISTVERSION, uid, uidv);
 
 	for (i=0; i<cnt; i++)
 	{
@@ -327,8 +302,8 @@ static int savepop3dlist(struct msglist **a, size_t cnt,
 		if ((q=strrchr(p, '/')) != NULL)
 			p=q+1;
 
-		fprintf(fp, "%s %lu %lu:%lu\n", p, (unsigned long)a[i]->size,
-			a[i]->uid.n, a[i]->uid.uidv);
+		fprintf(fp, "%s %lu %lu:%lu:%d\n", p, (unsigned long)a[i]->size,
+			a[i]->uid.n, a[i]->uid.uidv, a[i]->isutf8);
 	}
 
 	if (fflush(fp) || ferror(fp))
@@ -412,7 +387,7 @@ static int cmpmsgs(const void *a, const void *b)
 		++bp;
 	else
 		bp=bname;
- 
+
 	na=atol(ap);
 	nb=atol(bp);
 
@@ -481,6 +456,7 @@ static void sortmsgs()
 		{
 			msglist_a[i]->size=prev_list[n]->size;
 			msglist_a[i]->uid=prev_list[n]->uid;
+			msglist_a[i]->isutf8=prev_list[n]->isutf8;
 			n++;
 		}
 		else
@@ -488,12 +464,10 @@ static void sortmsgs()
 			msglist_a[i]->uid.n=nextuid++;
 			msglist_a[i]->uid.uidv=uidv;
 			msglist_a[i]->isnew=1;
-			if (convert_v0)
-				msglist_a[i]->uid.n=0;
 
 			calcsize(msglist_a[i]);
 			savesizes=1;
-		}      
+		}
 	}
 
 	if (prev_list[n])
@@ -663,12 +637,27 @@ char	buf[NUMBUFSIZE];
 
 static void do_retr(unsigned i, unsigned *lptr)
 {
-FILE	*f=fopen(msglist_a[i]->filename, "r");
-char	*p;
-int	c, lastc='\n';
-int	inheader=1;
-char	buf[NUMBUFSIZE];
-unsigned long *cntr;
+	FILE	*f;
+	char	*p;
+	int	c, lastc='\n';
+	int	inheader=1;
+	char	buf[NUMBUFSIZE];
+	unsigned long *cntr;
+
+	if (msglist_a[i]->isutf8 && !utf8_enabled)
+	{
+		printed(printf("-ERR Cannot open message %u because it is"
+			       " a Unicode message and your E-mail reader"
+			       " did not enable Unicode support. Please"
+			       " use an E-mail reader that supports POP3"
+			       " with UTF-8 (see"
+			       " https://tools.ietf.org/html/rfc6856.html)\r\n",
+			       i+1));
+		fflush(stdout);
+		return;
+	}
+
+	f=fopen(msglist_a[i]->filename, "r");
 
 	if (!f)
 	{
@@ -1033,6 +1022,7 @@ int main(int argc, char **argv)
 {
 char   *p, *protocol;
 uid_t  euid, uid;
+const char *utf8;
 
 #ifdef HAVE_SETVBUF_IOLBF
 	setvbuf(stderr, NULL, _IOLBF, BUFSIZ);
@@ -1063,6 +1053,10 @@ uid_t  euid, uid;
 		fflush(stderr);
 		exit(1);
 	}
+
+	utf8_enabled=1; /* Until proven otherwise */
+	if ((utf8=getenv("UTF8")))
+		utf8_enabled=atoi(utf8);
 
 	if ((remoteport=getenv("TCPREMOTEPORT")) == NULL)
 		remoteport="0";

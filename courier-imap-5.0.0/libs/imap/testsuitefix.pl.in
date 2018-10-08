@@ -17,5 +17,5 @@ while (<>)
     s/^\* ADD \"UID=.*/* ADD UID/;
     s/^\* COPY \d+ \"NEWUID=.*/* COPY NEWUID/;
     printf("%06d %s", $n, $_);
-    ++$n unless $_ =~ /^\* (LIST|LSUB)/;
+    ++$n unless $_ =~ /^\* (LIST|LSUB|ENABLED)/ || $_ =~ /Options enabled/;
 }

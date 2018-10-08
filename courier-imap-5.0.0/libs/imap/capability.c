@@ -122,7 +122,7 @@ void imapcapability()
 		if (imap_externalauth())
 			writes(" AUTH=EXTERNAL");
 	}
-			
+
 
 	p=getenv("OUTBOX");
 
@@ -134,4 +134,6 @@ void imapcapability()
 
 	if (magictrash())
 		writes(" XMAGICTRASH");
+
+	writes(" ENABLE UTF8=ACCEPT");
 }

@@ -366,7 +366,7 @@ IMAP_MOVE_EXPUNGE_TO_TRASH=0
 #
 # mkdir /etc/skel
 # chmod 700 /etc/skel
-# maildirmak /etc/skel/Maildir
+# maildirmake /etc/skel/Maildir
 #
 # This directory gets copied as is, preserving each file/subdirectory's
 # permissions, with only userid/groupid changed to match the account's.

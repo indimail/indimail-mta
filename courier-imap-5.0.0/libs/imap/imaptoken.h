@@ -29,6 +29,7 @@ struct imaptoken {
 #define	IT_EOL			8
 #define	IT_LBRACKET		9
 #define	IT_RBRACKET		10
+#define	IT_LITERAL8_STRING_START 11
 
 struct imaptoken *nexttoken(void);
 struct imaptoken *currenttoken(void);
@@ -36,6 +37,7 @@ struct imaptoken *nexttoken_nouc(void);
 struct imaptoken *nexttoken_noparseliteral(void);
 struct imaptoken *nexttoken_okbracket(void);
 struct imaptoken *nexttoken_nouc_okbracket(void);
+void convert_literal_tokens(struct imaptoken *tok);
 
 int ismsgset(struct imaptoken *);
 	/* See if this token is a syntactically valid message set */
