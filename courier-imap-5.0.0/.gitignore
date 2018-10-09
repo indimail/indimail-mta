@@ -8,6 +8,8 @@ configure
 depcomp
 install-sh
 confdefs.h
+INSTALL
+INSTALL.html
 libs/authlib/Makefile.in
 libs/authlib/aclocal.m4
 libs/authlib/config.h.in
@@ -56,6 +58,7 @@ libs/rfc1035/Makefile.in
 libs/rfc1035/aclocal.m4
 libs/rfc1035/config.h.in
 libs/rfc1035/configure
+libs/rfc2045/testrfc6533parser
 libs/rfc2045/Makefile.in
 libs/rfc2045/aclocal.m4
 libs/rfc2045/configure
