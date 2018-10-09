@@ -1,0 +1,79 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#export DH_VERBOSE = 1
+
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# see ENVIRONMENT in dpkg-buildflags(1)
+# package maintainers to append CFLAGS
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# package maintainers to append LDFLAGS
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+CFLAGS=-g
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
+else
+	CFLAGS += -O2 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
+endif
+
+rm=/bin/rm
+prefix=/usr
+mandir=${prefix}/share/man
+DESTDIR=$(CURDIR)/debian/ezmlm.tmp
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+	#
+	# Extract source archives
+	#
+	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
+	#
+	# run configure script
+	#
+	$(MAKE) -s DESTDIR=$(DESTDIR)
+	touch build-stamp
+
+clean:
+	${rm} -f build-stamp configure-stamp
+	${rm} -rf $(DESTDIR) .deps ezmlm
+	dh_testdir
+	dh_testroot
+	dh_clean
+	$(MAKE) clean || true;
+	${rm} -f build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep || dh_clean -k
+	dh_installdirs
+	$(MAKE) -s DESTDIR=$(DESTDIR) setup
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	dh_install --sourcedir=$(DESTDIR) -pezmlm
+	dh_installchangelogs
+	dh_installcron
+	dh_installdocs
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_makeshlibs -V
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+# Build architecture-dependent files here. 
+binary-arch: build install
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
