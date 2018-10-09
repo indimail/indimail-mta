@@ -24,6 +24,8 @@ AC_PATH_PROGS(SETENV, env)
 defaultprefix="/usr/lib/courier-imap"
 AC_SUBST(defaultprefix)
 
+CXXFLAGS="-std=c++0x $CXXFLAGS"
+
 AC_ARG_ENABLE(root-check, [  --disable-root-check    Allow build as root (make check will fail)],
 	rootcheck="$enableval",
 	rootcheck="yes")
