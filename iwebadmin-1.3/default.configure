@@ -4,7 +4,7 @@ autoreconf -fiv
 fi
 ./configure --prefix=/usr \
         --sysconfdir=/etc/indimail \
-        --enable-ezmlmdir=/var/indimail \
+        --enable-ezmlmdir=/usr/bin \
         --disable-ipauth --disable-trivial-password --enable-modify-quota \
         --enable-mysqlprefix=/usr \
         --enable-htmldir=/var/www/html \
