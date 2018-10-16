@@ -1,7 +1,0 @@
-VERSION
-systype
-direntry.h
-fork.h
-hasflock.h
-hassgact.h
-uint32.h

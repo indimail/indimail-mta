@@ -1,8 +1,0 @@
-Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: ezmlm
-Source: https://cr.yp.to/ezmlm.html
-License: GPL-2
-
-Files: *
-Copyright: 1997 DJ Bernstein
-License: GPL-2
