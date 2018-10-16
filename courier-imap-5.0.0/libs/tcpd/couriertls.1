@@ -182,6 +182,17 @@ is required for SSL/TLS servers, and is optional for SSL/TLS clients\&.
 must not be world\-readable\&.
 .RE
 .PP
+TLS_PRIVATE_KEYFILE=\fIfilename\fR
+.RS 4
+SSL/TLS private key for decrypting client data\&.
+\fBTLS_PRIVATE_KEY\fR
+is optional because
+<term>TLS_CERTFILE</term>
+is generated including cert and private key both\&.
+\fIfilename\fR
+must not be world\-readable, and must be accessible without a pass\-phrase, i\&.e\&. it must not be encrypted\&.
+.RE
+.PP
 TLS_TRUSTCERTS=\fIpathname\fR
 .RS 4
 Load trusted root certificates from

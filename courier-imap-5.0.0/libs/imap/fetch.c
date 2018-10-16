@@ -249,7 +249,7 @@ int do_fetch(unsigned long n, int byuid, void *p)
 	struct	rfc2045 *rfc2045p;
 	int	seen;
 	int	open_err;
-	const char *cannot_open_because="";
+	int unicode_err=0;
 
 	fp=NULL;
 	open_err=0;
@@ -284,13 +284,8 @@ int do_fetch(unsigned long n, int byuid, void *p)
 			seen=1;
 		if (rc < 0)
 		{
-			open_err=1;
-			cannot_open_because=
-				" because it is a Unicode message and your"
-				" E-mail reader did not enable Unicode support."
-				" Please use an E-mail reader that supports"
-				" IMAP with UTF-8 (see"
-				" https://tools.ietf.org/html/rfc6855.html)";
+			rc=0;
+			unicode_err=1;
 		}
 		if ((fi=fi->next) != 0)	writes(" ");
 	}
@@ -300,11 +295,20 @@ int do_fetch(unsigned long n, int byuid, void *p)
 	{
 		writes("* NO [ALERT] Cannot open message ");
 		writen(n);
-		writes(cannot_open_because);
 		writes("\r\n");
 		return (0);
 	}
 
+    if (unicode_err)
+    {
+        writes("* OK [ALERT] Cannot open message ");
+        writen(n);
+        writes(" because it is a Unicode message and your"
+               " E-mail reader did not enable Unicode support."
+               " Please use an E-mail reader that supports"
+               " IMAP with UTF-8 (see"
+               " https://tools.ietf.org/html/rfc6855.html)\r\n");
+    }
 
 #if SMAP
 	if (!smapflag)
@@ -450,7 +454,41 @@ static int fetchitem(FILE **fp, int *open_err, struct fetchinfo *fi,
 
 	if (mimecorrectness && !enabled_utf8 &&
 	    ((*mimep)->rfcviolation & RFC2045_ERR8BITHEADER))
-		return -1;
+	{
+#if HAVE_OPEN_MEMSTREAM
+        char *ptr;
+        size_t sizeloc;
+        FILE *memfp;
+ 
+        static const char canned_msg[]=
+            "From: Mail Delivery Subsystem <postmaster@localhost>\n"
+            "Subject: Message unavailable\n"
+            "\n"
+            "This is a Unicode message that cannot be correctly\n"
+            "opened by your E-mail program. Please upgrade to\n"
+            "an E-mail program that supports IMAP with UTF-8.\n";
+ 
+        if ((memfp=open_memstream(&ptr, &sizeloc)) != 0)
+        {
+            struct rfc2045 *rfcp;
+ 
+            fprintf(memfp, canned_msg);
+ 
+            if ((rfcp=rfc2045_alloc()) != NULL)
+            {
+                rfc2045_parse(rfcp, canned_msg,
+                          sizeof(canned_msg)-1);
+                (*fetchfunc)(memfp, fi, i, msgnum, rfcp);
+                rfc2045_free(rfcp);
+            }
+            fclose(memfp);
+            free(ptr);
+        }
+ 
+        /* Still return -1, in order to [ALERT] the client */
+#endif
+        return -1;
+	}
 
 	(*fetchfunc)(*fp, fi, i, msgnum, *mimep);
 	return (rc);

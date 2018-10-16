@@ -126,6 +126,7 @@ struct ssl_context_t {
 	const char *priority_list;
 
 	char *certfile;
+	char *keyfile;
 	char *dhfile;
 
 	char *trustcerts;
@@ -267,6 +268,17 @@ ssl_context tls_create(int isserver, const struct tls_info *info)
 			free(certfile);
 	}
 
+	if ((certfile=strdup(safe_getenv(p, "TLS_PRIVATE_KEYFILE", ""))) != NULL &&
+	    *certfile)
+	{
+		p->keyfile=certfile;
+	}
+	else
+	{
+		if (certfile)
+			free(certfile);
+	}
+
 	switch (*safe_getenv(p, "TLS_VERIFYPEER", "P")) {
 	case 'n':
 	case 'N':
@@ -320,6 +332,8 @@ void tls_destroy(ssl_context p)
 {
 	if (p->certfile)
 		free(p->certfile);
+	if (p->keyfile)
+		free(p->keyfile);
 	if (p->dhfile)
 		free(p->dhfile);
 	if (p->trustcerts)
@@ -749,6 +763,14 @@ static char *check_cert(const char *filename,
 	return NULL;
 }
 
+static char *check_key(const char *filename,
+			gnutls_certificate_type_t cert_type,
+			const char *req_dn,
+			int isvirtual)
+{
+	return check_cert(filename, cert_type, req_dn, isvirtual);
+}
+
 static int read_file(const char *file,
 		     gnutls_datum_t *filebuf)
 {
@@ -790,10 +812,12 @@ static void release_file(gnutls_datum_t *filebuf)
 static int set_cert(ssl_handle ssl,
 		    gnutls_session_t session,
 		    gnutls_retr2_st *st,
-		    const char *certfilename)
+		    const char *certfilename,
+		    const char *keyfilename)
 {
 	int rc;
 	gnutls_datum_t filebuf;
+	gnutls_datum_t keyfilebuf;
 	unsigned int cert_cnt;
 
 	st->ncerts=0;
@@ -803,15 +827,34 @@ static int set_cert(ssl_handle ssl,
 	if ((rc=read_file(certfilename, &filebuf)) < 0)
 		return rc;
 
+	if (keyfilename)
+	{
+		if ((rc=read_file(keyfilename, &keyfilebuf)) < 0)
+		{
+			release_file(&filebuf);
+			return rc;
+		}
+	}
+
 	switch (st->cert_type) {
 	case GNUTLS_CRT_X509:
 
 		cert_cnt=0;
 
-		if ((rc=gnutls_x509_privkey_init(&ssl->x509_key)) < 0 ||
-		    (rc=gnutls_x509_privkey_import(ssl->x509_key, &filebuf,
-						   GNUTLS_X509_FMT_PEM)) < 0)
-			break;
+		if (keyfilename)
+		{
+			if ((rc=gnutls_x509_privkey_init(&ssl->x509_key)) < 0 ||
+			    (rc=gnutls_x509_privkey_import(ssl->x509_key, &keyfilebuf,
+							   GNUTLS_X509_FMT_PEM)) < 0)
+				break;
+		}
+		else
+		{
+			if ((rc=gnutls_x509_privkey_init(&ssl->x509_key)) < 0 ||
+			    (rc=gnutls_x509_privkey_import(ssl->x509_key, &filebuf,
+							   GNUTLS_X509_FMT_PEM)) < 0)
+				break;
+		}
 
 		rc=gnutls_x509_crt_list_import(NULL, &cert_cnt,
 					       &filebuf,
@@ -846,6 +889,8 @@ static int set_cert(ssl_handle ssl,
 	}
 
 	release_file(&filebuf);
+	if (keyfilename)
+		release_file(&keyfilebuf);
 	return 0;
 }
 
@@ -862,6 +907,7 @@ static int get_server_cert(gnutls_session_t session,
 	size_t vhost_size;
 	unsigned int type=GNUTLS_NAME_DNS;
 	char *certfilename=NULL;
+	char *keyfilename=NULL;
 	int rc;
 
 	st->cert_type=gnutls_certificate_type_get(session);
@@ -897,6 +943,11 @@ static int get_server_cert(gnutls_session_t session,
 						st->cert_type,
 						vhost_buf, 1);
 
+		if (ssl->ctx->keyfile)
+			keyfilename=check_key(ssl->ctx->keyfile,
+						st->cert_type,
+						vhost_buf, 1);
+
 		if (certfilename)
 			break;
 	}
@@ -905,6 +956,12 @@ static int get_server_cert(gnutls_session_t session,
 	{
 		if (ssl->ctx->certfile)
 			certfilename=check_cert(ssl->ctx->certfile,
+						st->cert_type,
+						safe_getenv(ssl->ctx,
+							    "TCPLOCALIP", ""),
+						0);
+		if (ssl->ctx->keyfile)
+			keyfilename=check_key(ssl->ctx->keyfile,
 						st->cert_type,
 						safe_getenv(ssl->ctx,
 							    "TCPLOCALIP", ""),
@@ -918,7 +975,7 @@ static int get_server_cert(gnutls_session_t session,
 		return 0;
 	}
 
-	rc=set_cert(ssl, session, st, certfilename);
+	rc=set_cert(ssl, session, st, certfilename, keyfilename);
 	free(certfilename);
 	return rc;
 }
@@ -1072,6 +1129,7 @@ static int get_client_cert(gnutls_session_t session,
 	ssl_handle ssl=(ssl_handle)gnutls_session_get_ptr(session);
 	int rc;
 	char *certfilename=NULL;
+	char *keyfilename=NULL;
 
 	rc= 0;
 	st->cert_type=gnutls_certificate_type_get(session);
@@ -1080,12 +1138,16 @@ static int get_client_cert(gnutls_session_t session,
 		certfilename=check_cert(ssl->ctx->certfile,
 					st->cert_type, "", 0);
 
+	if (ssl->ctx->keyfile)
+		keyfilename=check_key(ssl->ctx->keyfile,
+					st->cert_type, "", 0);
+
 	st->ncerts=0;
 	st->deinit_all=0;
 
 	if (certfilename)
 	{
-		rc=set_cert(ssl, session, st, certfilename);
+		rc=set_cert(ssl, session, st, certfilename, keyfilename);
 		free(certfilename);
 	}
 	else
@@ -1095,6 +1157,10 @@ static int get_client_cert(gnutls_session_t session,
 		if (rc > 0)
 			rc=0;
 	}
+
+	if (keyfilename)
+		free(keyfilename);
+
 	return rc;
 }
 

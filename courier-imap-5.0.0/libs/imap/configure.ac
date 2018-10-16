@@ -139,7 +139,7 @@ fi
 
 dnl Checks for library functions.
 
-AC_CHECK_FUNCS(strerror utime utimes strcasecmp strncasecmp setlocale poll getaddrinfo)
+AC_CHECK_FUNCS(strerror utime utimes strcasecmp strncasecmp setlocale poll getaddrinfo open_memstream)
 
 AC_DEFINE_UNQUOTED(SOCKET_TIMEOUT,60,
 	[ Read/write timeout ])

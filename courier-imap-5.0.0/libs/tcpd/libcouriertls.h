@@ -325,6 +325,12 @@ TLS_CERTFILE is required for SSL/TLS servers, and is optional for SSL/TLS
 clients.  TLS_CERTFILE is usually treated as confidential, and must not be
 world-readable.
 
+TLS_PRIVATE_KEYFILE - SSL/TLS private key for decrypting peer data.
+By default, courier generates SSL/TLS certifice including private key
+and install it in TLS_CERTFILE path, so TLS_PRIVATE_KEYFILE is completely
+optional. If TLS_PRIVATE_KEYFILE is not set (default), TLS_CERTFILE is
+treated as certificate including private key file.
+
 TLS_TRUSTCERTS=pathname - load trusted root certificates from pathname.
 pathname can be a file or a directory. If a file, the file should
 contain a list of trusted certificates, in PEM format. If a
