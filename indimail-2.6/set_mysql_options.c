@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.23  2018-10-29 20:16:39+05:30  Cprogrammer
+ * use mysql_optionsv() for mariadb
+ *
  * Revision 2.22  2018-10-08 11:53:27+05:30  Cprogrammer
  * use ifdefs to define calls to mysql_options
  *
@@ -71,7 +74,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.22 2018-10-08 11:53:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.23 2018-10-29 20:16:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -104,7 +107,8 @@ int
 int_mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg)
 {
 #ifdef HAVE_MYSQL_OPTIONSV
-	return (mysql_options(mysql, option, arg)); /*- at the moment mysql_optionsv() does a core dump */
+	/*- mysql_optionsv() used to dump core dump earlier. */
+	return (mysql_optionsv(mysql, option, arg, 0));
 #else
 	return (mysql_options(mysql, option, arg));
 #endif
