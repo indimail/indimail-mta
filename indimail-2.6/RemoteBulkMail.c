@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 2.16  2018-10-29 20:15:30+05:30  Cprogrammer
+ * MariaDB bug fix for mysql_options(), mysql_real_connect() - MYSQL_READ_DEFAULT_FILE
+ *
  * Revision 2.15  2018-09-11 10:47:35+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -62,7 +65,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.15 2018-09-11 10:47:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.16 2018-10-29 20:15:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -187,6 +190,13 @@ bulk_host_connect()
 			return ((MYSQL *) 0);
 		}
 		bulk_port = atoi(port);
+		/*- 
+		 * mysql_options bug
+		 * if MYSQL_READ_DEFAULT_FILE is used
+		 * mysql_real_connect fails by connecting with a null unix domain socket
+		 */
+		if (bulk_port > 0 || bulk_socket)
+			*(bulkMySql.options.my_cnf_file) = 0;
 		if ((mysql_real_connect(&bulkMySql, bulk_host, bulk_user, bulk_passwd,
 				bulk_database, bulk_port, bulk_socket, flags)))
 			return (&bulkMySql);

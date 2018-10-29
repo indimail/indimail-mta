@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.32  2018-10-29 20:16:55+05:30  Cprogrammer
+ * MariaDB bug fix for mysql_options(), mysql_real_connect() - MYSQL_READ_DEFAULT_FILE
+ *
  * Revision 2.31  2018-03-31 20:30:20+05:30  Cprogrammer
  * display mysql_option() error index
  *
@@ -126,7 +129,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.31 2018-03-31 20:30:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.32 2018-10-29 20:16:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -240,6 +243,13 @@ vauth_open(char *dbhost)
 			return(-1);
 		}
 		server = (mysql_socket && islocalif(mysql_host) ? "localhost" : mysql_host);
+		/*- 
+		 * mysql_options bug
+		 * if MYSQL_READ_DEFAULT_FILE is used
+		 * mysql_real_connect fails by connecting with a null unix domain socket
+		 */
+		if (mysqlport > 0 || mysql_socket)
+			*(mysql[1].options.my_cnf_file) = 0;
 		if (!(mysql_real_connect(&mysql[1], server, mysql_user, mysql_passwd,
 			mysql_database, mysqlport, mysql_socket, flags))) {
 			flags = use_ssl;

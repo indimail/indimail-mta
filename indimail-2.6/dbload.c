@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.27  2018-10-29 20:16:26+05:30  Cprogrammer
+ * MariaDB bug fix for mysql_options(), mysql_real_connect() - MYSQL_READ_DEFAULT_FILE
+ *
  * Revision 2.26  2018-03-31 20:30:03+05:30  Cprogrammer
  * display mysql_option() error index
  *
@@ -92,7 +95,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.26 2018-03-31 20:30:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.27 2018-10-29 20:16:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -283,6 +286,13 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	}
 	server = ((*ptr)->socket && islocalif((*ptr)->server) ? "localhost" : (*ptr)->server);
 	(*ptr)->last_attempted = time(0);
+	/*- 
+	 * mysql_options bug
+	 * if MYSQL_READ_DEFAULT_FILE is used
+	 * mysql_real_connect fails by connecting with a null unix domain socket
+	 */
+	if ((*ptr)->port > 0 || (*ptr)->socket)
+		*((*mysqlptr)->options.my_cnf_file) = 0;
 	if (!mysql_real_connect(*mysqlptr, server, (*ptr)->user,
 			(*ptr)->password, (*ptr)->database, (*ptr)->port, (*ptr)->socket, flags))
 	{

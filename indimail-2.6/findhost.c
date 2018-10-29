@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.43  2018-10-29 20:16:30+05:30  Cprogrammer
+ * MariaDB bug fix for mysql_options(), mysql_real_connect() - MYSQL_READ_DEFAULT_FILE
+ *
  * Revision 2.42  2018-09-11 10:33:07+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -219,7 +222,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.42 2018-09-11 10:33:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.43 2018-10-29 20:16:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -487,6 +490,13 @@ open_central_db(char *dbhost)
 				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
 			return(-1);
 		}
+		/*- 
+		 * mysql_options bug
+		 * if MYSQL_READ_DEFAULT_FILE is used
+		 * mysql_real_connect fails by connecting with a null unix domain socket
+		 */
+		if (mysqlport > 0 || cntrl_socket)
+			*(mysql[0].options.my_cnf_file) = 0;
 		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, flags))) {
 			flags = use_ssl;
 			if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
