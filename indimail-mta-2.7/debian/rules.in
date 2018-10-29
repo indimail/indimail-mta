@@ -145,6 +145,10 @@ install: build
 		mkdir -p $(DESTDIR)$(libexecdir); \
 		install -m 0755 indimail-mta-$(version)/qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
 	fi
+	if [ -f indimail-mta-$(version)/perm_list.q ] ; then \
+		mkdir -p $(DESTDIR)$(qsysconfdir); \
+		install -m 0644 indimail-mta-$(version)/perm_list.q "$(DESTDIR)$(qsysconfdir)"/daemontools_perm_list; \
+	fi
 	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
 	/bin/rm -f indimail-mta-release
 
