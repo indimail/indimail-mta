@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.18  2018-10-29 21:48:56+05:30  Cprogrammer
+# fix for missing ln -r option in CentOS6
+#
 # Revision 1.17  2018-09-10 13:02:27+05:30  Cprogrammer
 # move tcpserver tcp access files to /etc/indimail/tcp
 #
@@ -49,7 +52,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.17 2018-09-10 13:02:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.18 2018-10-29 21:48:56+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -74,7 +77,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.17 2018-09-10 13:02:27+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.18 2018-10-29 21:48:56+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -137,12 +140,16 @@ do
 			exit 1
 		fi
 	fi
+	# move tlshosts, notlshosts directory to certs
 	if [ -d /etc/indimail/control/$i -a ! -L /etc/indimail/control/$i ] ; then
 		$mv /etc/indimail/control/$i /etc/indimail/certs/$i
 		if [ $? -ne 0 ] ; then
 			exit 1
 		fi
-		$ln -rsf /etc/indimail/certs/$i /etc/indimail/control/$i
+		cd /etc/indimail/control
+		if [ $? -eq 0 ] ; then
+			$ln ../certs/$i $i
+		fi
 	fi
 done
 # remove clientcert.pem link to servercert.pem in control directory
@@ -163,9 +170,12 @@ if [ $? -ne 2 ] ; then
 		fi
 	done
 fi
-$ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/control/servercert.pem
-$ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/control/clientcert.pem
-$ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/certs/clientcert.pem
+cd /etc/indimail/control
+if [ $? -eq 0 ] ; then
+	$ln -sf ../certs/servercert.pem servercert.pem
+	$ln -sf ../certs/servercert.pem clientcert.pem
+	$ln -sf ../certs/servercert.pem clientcert.pem
+fi
 # Certificate location changed from /etc/indimail/control to /etc/indimail/certs
 for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25
 do
