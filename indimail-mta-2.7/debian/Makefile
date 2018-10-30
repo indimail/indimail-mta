@@ -19,7 +19,8 @@ indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst \
 obs_deb_prep indimail-mta.install \
 indimail-mta.dsc indimail-mta-Debian_9.0.dsc \
-indimail-mta-xUbuntu_18.04.dsc debian.tar.gz dummy.tar.gz
+indimail-mta-xUbuntu_18.04.dsc indimail-mta-xUbuntu_18.10.dsc \
+debian.tar.gz dummy.tar.gz
 
 #bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
 bits=32
@@ -81,6 +82,8 @@ indimail-mta.dsc: indimail-mta.dsc.in Makefile ../indimail-mta.spec.in conf-rele
 indimail-mta-Debian_9.0.dsc: indimail-mta-Debian_9.0.dsc.in Makefile ../indimail-mta.spec.in conf-release
 	$(edit) $@.in > $@
 indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile ../indimail-mta.spec.in conf-release
+	$(edit) $@.in > $@
+indimail-mta-xUbuntu_18.10.dsc: indimail-mta-xUbuntu_18.10.dsc.in Makefile ../indimail-mta.spec.in conf-release
 	$(edit) $@.in > $@
 indimail-mta.postrm: indimail-mta.postrm.in Makefile
 	$(edit) $@.in > $@
