@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.19  2018-10-31 00:21:55+05:30  Cprogrammer
+# create scan.conf from clamd.conf
+#
 # Revision 1.18  2018-10-29 21:48:56+05:30  Cprogrammer
 # fix for missing ln -r option in CentOS6
 #
@@ -52,7 +55,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.18 2018-10-29 21:48:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.19 2018-10-31 00:21:55+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -77,7 +80,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.18 2018-10-29 21:48:56+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.19 2018-10-31 00:21:55+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -244,7 +247,10 @@ if [ -f /etc/indimail/cronlist.q -a -d /etc/cron.d ] ; then
 	fi
 fi
 # create foxhole_all.cdb in /var/indimail/clamd
-if [ -f /etc/indimail/clamd.conf -o -f /etc/indimail/clamd.conf.disabled ] ; then
+if [ -f /etc/indimail/clamd.conf -a ! -f /etc/indimail/scan.conf ] ; then
+	$mv /etc/indimail/clamd.conf /etc/indimail/scan.conf
+fi
+if [ -f /etc/indimail/scan.conf -o -f /etc/indimail/scan.conf.disabled ] ; then
 	/usr/sbin/svctool --config=foxhole
 fi
 }
