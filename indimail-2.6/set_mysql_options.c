@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.24  2018-10-30 18:55:34+05:30  Cprogrammer
+ * fix mysql_options() bug with MySQL and MariaDB when MYSQL_READ_DEFAULT_FILE along with port, unix_socket is provided to mysql_real_connect()
+ *
  * Revision 2.23  2018-10-29 20:16:39+05:30  Cprogrammer
  * use mysql_optionsv() for mariadb
  *
@@ -74,7 +77,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.23 2018-10-29 20:16:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.24 2018-10-30 18:55:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -159,14 +162,17 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if (getenv("CLIENT_INTERACTIVE"))
 		*flags += CLIENT_INTERACTIVE;
 	getEnvConfigStr(&init_cmd, "MYSQL_INIT_COMMAND", 0);
+	if (file) {
 #if defined(LIBMARIADB) || defined(MARIADB_BASE_VERSION) /*- full path required in mariadb */
-	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-	snprintf(fpath, sizeof(fpath) - 1, "%s/%s", sysconfdir, file);
-	getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", fpath);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(fpath, sizeof(fpath) - 1, "%s/%s", sysconfdir, file);
+		getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", fpath);
 #else
-	getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", file);
+		getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", file);
 #endif
-	getEnvConfigStr(&default_group, "MYSQL_READ_DEFAULT_GROUP", group);
+	}
+	if (file && group)
+		getEnvConfigStr(&default_group, "MYSQL_READ_DEFAULT_GROUP", group);
 	getEnvConfigStr(&c_timeout, "MYSQL_OPT_CONNECT_TIMEOUT", "120");
 	getEnvConfigStr(&r_timeout, "MYSQL_OPT_READ_TIMEOUT", "20");
 	getEnvConfigStr(&w_timeout, "MYSQL_OPT_WRITE_TIMEOUT", "20");
@@ -183,9 +189,9 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	write_timeout = atoi(w_timeout);
 	if (init_cmd && int_mysql_options(mysql, MYSQL_INIT_COMMAND, init_cmd))
 		return (1);
-	if (int_mysql_options(mysql, MYSQL_READ_DEFAULT_FILE, default_file))
+	if (file && int_mysql_options(mysql, MYSQL_READ_DEFAULT_FILE, default_file))
 		return (2);
-	if (int_mysql_options(mysql, MYSQL_READ_DEFAULT_GROUP, default_group))
+	if (file && group && int_mysql_options(mysql, MYSQL_READ_DEFAULT_GROUP, default_group))
 		return (3);
 	if (int_mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &connect_timeout))
 		return (4);
