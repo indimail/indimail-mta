@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -674,7 +674,7 @@ Known values for OPTION are:
 
   service_path - Path where supervise scripts will be installed
   clamdPrefix  - Installation Prefix for clamd
-  sysconfdir   - Path for config files (clamd.conf, freshclam.conf)
+  sysconfdir   - Path for config files (scan.conf, freshclam.conf)
 
 --poppass=Port --localip=a --setpassword=cmd --maxdaemons=m --maxperip=i
   --servicedir=service_path
@@ -1679,7 +1679,7 @@ echo  $fifo_path > $conf_dir/LOGFILTER
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-logfifo/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# $prog_args"
 echo ""
 echo "LOGFILTER=\`/bin/cat $SERVICEDIR/qmail-logfifo/variables/LOGFILTER\`"
@@ -1700,7 +1700,7 @@ fi
 #qmail-logfifo log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2063,7 +2063,7 @@ esac
 echo "$QmailBinPrefix/sbin/vchkpass $QmailBinPrefix/sbin/systpass" > $conf_dir/AUTHMODULES
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2126,7 +2126,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2419,7 +2419,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2460,7 +2460,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2534,7 +2534,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2552,7 +2552,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2625,7 +2625,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2643,7 +2643,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2724,7 +2724,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2747,7 +2747,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2858,7 +2858,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2914,7 +2914,7 @@ fi
 # qmail-[imapd|pop3d] log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3345,7 +3345,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3373,7 +3373,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3424,7 +3424,7 @@ $chown qscand "$DESTDIR"$SERVICEDIR/qscanq
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3444,7 +3444,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3492,22 +3492,24 @@ fi
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "exec 2>&1"
-echo "CLAMD_SOCK=\`grep -w ^LocalSocket $mysysconfdir/clamd.conf | awk '{print \$2}'\`"
+echo "CLAMD_SOCK=\`grep -w ^LocalSocket $mysysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$CLAMD_SOCK\" ] ; then"
-echo "	echo \"LocalSocket not defined in $mysysconfdir/clamd.conf\" 1>&2"
+echo "	echo \"LocalSocket not defined in $mysysconfdir/scan.conf\" 1>&2"
 echo "	sleep 10"
 echo "	exit 1"
 echo "fi"
 echo "SOCKET_DIR=\`dirname \$CLAMD_SOCK\`"
 echo "if [ ! -d \"\$SOCKET_DIR\" ] ; then"
 echo "	/bin/mkdir -p \"\$SOCKET_DIR\""
-echo "	$chown qscand:qmail \"\$SOCKET_DIR\""
-echo "	/bin/chmod 750 \"\$SOCKET_DIR\""
+echo "fi"
+echo "if [ ! \"\$SOCKET_DIR\" = \"/tmp\" -a ! \"\$SOCKET_DIR\" = \"/\" ] ; then"
+echo "  $chown qscand:qmail \"\$SOCKET_DIR\""
+echo "  /bin/chmod 750 \"\$SOCKET_DIR\""
 echo "fi"
 echo ""
 echo "# Check for a leftover socket."
@@ -3524,9 +3526,9 @@ echo "		/bin/rm -f \$CLAMD_SOCK"
 echo "	fi"
 echo "fi"
 echo ""
-echo "dbd=\`grep -w \"^DatabaseDirectory\" $mysysconfdir/clamd.conf | awk '{print \$2}'\`"
+echo "dbd=\`grep -w \"^DatabaseDirectory\" $mysysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$dbd\" ] ; then"
-echo "	echo \"DatabaseDirectory not defined in $mysysconfdir/clamd.conf\" 1>&2"
+echo "	echo \"DatabaseDirectory not defined in $mysysconfdir/scan.conf\" 1>&2"
 echo "	sleep 10"
 echo "	exit 1"
 echo "fi"
@@ -3535,21 +3537,21 @@ echo "	echo \"run: FATAL: no signatures found...\""
 echo "	sleep 300"
 echo "	exit 1"
 echo "fi"
-echo "fgd=\`grep -w \"^Foreground\" $mysysconfdir/clamd.conf | awk '{print \$2}'\`"
+echo "fgd=\`grep -w \"^Foreground\" $mysysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$fgd\" ] ; then"
-echo "	echo \"Foreground not defined in $mysysconfdir/clamd.conf\" 1>&2"
+echo "	echo \"Foreground not defined in $mysysconfdir/scan.conf\" 1>&2"
 echo "	sleep 10"
 echo "	exit 1"
 echo "fi"
 echo ""
 echo "# Run the scanner daemon."
-echo "ans=\`grep -w \"^AllowSupplementaryGroups\" $mysysconfdir/clamd.conf | awk '{print \$2}'\`"
+echo "ans=\`grep -w \"^AllowSupplementaryGroups\" $mysysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ \" \$ans\" = \" yes\" -o \" \$ans\" = \" Yes\" ] ; then"
 echo "	exec $clamdPrefix/sbin/clamd \\"
-echo "		--config-file=$mysysconfdir/clamd.conf 2>&1"
+echo "		--config-file=$mysysconfdir/scan.conf 2>&1"
 echo "else"
 echo "	exec $QmailBinPrefix/bin/setuidgid qscand $clamdPrefix/sbin/clamd \\"
-echo "		--config-file=$mysysconfdir/clamd.conf 2>&1"
+echo "		--config-file=$mysysconfdir/scan.conf 2>&1"
 echo "fi"
 ) > "$DESTDIR"$SERVICEDIR/clamd/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/clamd/run
@@ -3561,7 +3563,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3590,7 +3592,7 @@ fi
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3642,7 +3644,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3710,7 +3712,7 @@ fi
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3726,7 +3728,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3877,7 +3879,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3894,7 +3896,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4057,7 +4059,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 	fi
 	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "$prog_args"
@@ -4277,7 +4279,7 @@ fi
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4327,7 +4329,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4344,7 +4346,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4646,7 +4648,7 @@ echo "nameserver 127.0.0.1"
 # svscan run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4667,7 +4669,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4698,7 +4700,7 @@ echo "$prog_args" > $conf_dir/.options
 # resolvconf run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4743,7 +4745,7 @@ echo "wait"
 # resolvconf log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4893,7 +4895,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4915,7 +4917,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5007,7 +5009,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5048,7 +5050,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5283,7 +5285,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5300,7 +5302,7 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -6253,7 +6255,7 @@ echo "# Uncomment this option to enable logging."
 echo "# LogFile must be writable for the user running daemon."
 echo "# A full path is required."
 echo "# Default: disabled"
-echo "#LogFile /var/log/clamd.log"
+echo "#LogFile /var/log/clamd.scan"
 echo ""
 echo "# By default the log file is locked for writing - the lock protects against"
 echo "# running clamd multiple times (if want to run another clamd, please"
@@ -6290,10 +6292,6 @@ echo "# for facility names."
 echo "# Default: LOG_LOCAL6"
 echo "#LogFacility LOG_MAIL"
 echo ""
-echo "# Enable log rotation. Always enabled when LogFileMaxSize is enabled."
-echo "# Default: no"
-echo "#LogRotate yes"
-echo ""
 echo "# Enable verbose logging."
 echo "# Default: no"
 echo "#LogVerbose yes"
@@ -6302,9 +6300,16 @@ echo "# Enable log rotation. Always enabled when LogFileMaxSize is enabled."
 echo "# Default: no"
 echo "#LogRotate yes"
 echo ""
+echo "# Enable Prelude output."
+echo "# Default: no"
+echo "#PreludeEnable yes"
+echo "#"
+echo "# Set the name of the analyzer used by prelude-admin."
+echo "# Default: ClamAV"
+echo "#PreludeAnalyzerName ClamAV"
+echo ""
 echo "# Log additional information about the infected file, such as its"
 echo "# size and hash, together with the virus name."
-echo "#ExtendedDetectionInfo yes"
 echo "ExtendedDetectionInfo yes"
 echo ""
 echo "# This option allows you to save a process identifier of the listening"
@@ -6318,7 +6323,7 @@ echo "#TemporaryDirectory /var/tmp"
 echo ""
 echo "# Path to the database directory."
 echo "# Default: hardcoded (depends on installation options)"
-echo "DatabaseDirectory $indimaildir/clamd"
+echo "DatabaseDirectory /var/indimail/clamd"
 echo ""
 echo "# Only load the official signatures published by the ClamAV project."
 echo "# Default: no"
@@ -6333,12 +6338,10 @@ echo "LocalSocket /var/run/clamd.scan/clamd.sock"
 echo ""
 echo "# Sets the group ownership on the unix socket."
 echo "# Default: disabled (the primary group of the user running clamd)"
-echo "#LocalSocketGroup virusgroup"
-echo "LocalSocketGroup qmail"
+echo "#LocalSocketGroup qmail"
 echo ""
 echo "# Sets the permissions on the unix socket to the specified mode."
 echo "# Default: disabled (socket is world accessible)"
-echo "#LocalSocketMode 660"
 echo "LocalSocketMode 660"
 echo ""
 echo "# Remove stale socket after unclean shutdown."
@@ -6354,7 +6357,6 @@ echo "# By default we bind to INADDR_ANY, probably not wise."
 echo "# Enable the following to provide some degree of protection"
 echo "# from the outside world. This option can be specified multiple"
 echo "# times if you want to listen on multiple IPs. IPv6 is now supported."
-
 echo "# Default: no"
 echo "#TCPAddr 127.0.0.1"
 echo ""
@@ -6382,7 +6384,6 @@ echo "# Default: 10"
 echo "#MaxThreads 20"
 echo ""
 echo "# Waiting for data from a client socket will timeout after this time (seconds)."
-echo "# Value of 0 disables the timeout."
 echo "# Default: 120"
 echo "#ReadTimeout 300"
 echo ""
@@ -6391,17 +6392,21 @@ echo "# timeout if a client doesn't provide any initial command after connecting
 echo "# Default: 5"
 echo "#CommandReadTimeout 5"
 echo ""
-echo "# This option specifies how long to wait (in miliseconds) if the send buffer is full."
+echo "# This option specifies how long to wait (in milliseconds) if the send buffer"
+echo "# is full."
 echo "# Keep this value low to prevent clamd hanging"
 echo "#"
 echo "# Default: 500"
 echo "#SendBufTimeout 200"
 echo ""
-echo "# Maximum number of queued items (including those being processed by MaxThreads threads)"
+echo "# Maximum number of queued items (including those being processed by"
+echo "# MaxThreads threads)"
 echo "# It is recommended to have this value at least twice MaxThreads if possible."
-echo "# WARNING: you shouldn't increase this too much to avoid running out  of file descriptors,"
+echo "# WARNING: you shouldn't increase this too much to avoid running out  of file"
+echo "# descriptors,"
 echo "# the following condition should hold:"
-echo "# MaxThreads*MaxRecursion + (MaxQueue - MaxThreads) + 6< RLIMIT_NOFILE (usual max is 1024)"
+echo "# MaxThreads*MaxRecursion + (MaxQueue - MaxThreads) + 6< RLIMIT_NOFILE (usual"
+echo "# max is 1024)"
 echo "#"
 echo "# Default: 100"
 echo "#MaxQueue 200"
@@ -6445,12 +6450,7 @@ echo "# Run as another user (clamd must be started by root for this option to wo
 echo "# Default: don't drop privileges"
 echo "User qscand"
 echo ""
-echo "# Initialize supplementary group access (clamd must be started by root)."
-echo "# Default: no"
-echo "AllowSupplementaryGroups yes"
-echo ""
 echo "# Stop daemon when libclamav reports out of memory condition."
-echo "#ExitOnOOM yes"
 echo "ExitOnOOM yes"
 echo ""
 echo "# Don't fork into background."
@@ -6475,7 +6475,7 @@ echo "# Default: no"
 echo "#DetectPUA yes"
 echo ""
 echo "# Exclude a specific PUA category. This directive can be used multiple times."
-echo "# See https://github.com/vrtadmin/clamav-faq/blob/master/faq/faq-pua.md for"
+echo "# See https://github.com/vrtadmin/clamav-faq/blob/master/faq/faq-pua.md for "
 echo "# the complete list of PUA categories."
 echo "# Default: Load all categories (if DetectPUA is activated)"
 echo "#ExcludePUA NetTool"
@@ -6511,8 +6511,8 @@ echo "## Executable files"
 echo "##"
 echo ""
 echo "# PE stands for Portable Executable - it's an executable file format used"
-echo "# in all 32 and 64-bit versions of Windows operating systems. This option allows"
-echo "# ClamAV to perform a deeper analysis of executable files and it's also"
+echo "# in all 32 and 64-bit versions of Windows operating systems. This option"
+echo "# allows ClamAV to perform a deeper analysis of executable files and it's also"
 echo "# required for decompression of popular executable packers such as UPX, FSG,"
 echo "# and Petite. If you turn off this option, the original files will still be"
 echo "# scanned, but without additional processing."
@@ -6553,7 +6553,6 @@ echo "# without additional processing."
 echo "# Default: yes"
 echo "#ScanOLE2 yes"
 echo ""
-echo ""
 echo "# With this option enabled OLE2 files with VBA macros, which were not"
 echo "# detected by signatures will be marked as \"Heuristics.OLE2.ContainsMacros\"."
 echo "# Default: no"
@@ -6571,6 +6570,18 @@ echo "# without decoding and additional processing."
 echo "# Default: yes"
 echo "#ScanSWF yes"
 echo ""
+echo "# This option enables scanning xml-based document files supported by libclamav."
+echo "# If you turn off this option, the original files will still be scanned, but"
+echo "# without additional processing."
+echo "# Default: yes"
+echo "#ScanXMLDOCS yes"
+echo ""
+echo "# This option enables scanning of HWP3 files."
+echo "# If you turn off this option, the original files will still be scanned, but"
+echo "# without additional processing."
+echo "# Default: yes"
+echo "#ScanHWP3 yes"
+echo ""
 echo ""
 echo "##"
 echo "## Mail files"
@@ -6583,12 +6594,12 @@ echo "# Default: yes"
 echo "#ScanMail yes"
 echo ""
 echo "# Scan RFC1341 messages split over many emails."
-echo "# You will need to periodically clean up \$TemporaryDirectory/clamav-partial directory."
+echo "# You will need to periodically clean up \$TemporaryDirectory/clamav-partial"
+echo "# directory."
 echo "# WARNING: This option may open your system to a DoS attack."
-echo "#   Never use it on loaded servers."
+echo "#	   Never use it on loaded servers."
 echo "# Default: no"
 echo "#ScanPartialMessages yes"
-echo ""
 echo ""
 echo "# With this option enabled ClamAV will try to detect phishing attempts by using"
 echo "# signatures."
@@ -6619,9 +6630,9 @@ echo "# Allow heuristic match to take precedence."
 echo "# When enabled, if a heuristic scan (such as phishingScan) detects"
 echo "# a possible virus/phish it will stop scan immediately. Recommended, saves CPU"
 echo "# scan-time."
-echo "# When disabled, virus/phish detected by heuristic scans will be reported only at"
-echo "# the end of a scan. If an archive contains both a heuristically detected"
-echo "# virus/phish, and a real malware, the real malware will be reported"
+echo "# When disabled, virus/phish detected by heuristic scans will be reported"
+echo "# only at the end of a scan. If an archive contains both a heuristically"
+echo "# detected virus/phish, and a real malware, the real malware will be reported."
 echo "#"
 echo "# Keep this disabled if you intend to handle \"*.Heuristics.*\" viruses "
 echo "# differently from \"real\" malware."
@@ -6630,6 +6641,7 @@ echo "# the scan is interrupted immediately, regardless of this config option."
 echo "#"
 echo "# Default: no"
 echo "#HeuristicScanPrecedence yes"
+echo ""
 echo ""
 echo "##"
 echo "## Data Loss Prevention (DLP)"
@@ -6665,9 +6677,9 @@ echo "## HTML"
 echo "##"
 echo ""
 echo "# Perform HTML normalisation and decryption of MS Script Encoder code."
+echo "# Default: yes"
 echo "# If you turn off this option, the original files will still be scanned, but"
 echo "# without additional processing."
-echo "# Default: yes"
 echo "#ScanHTML yes"
 echo ""
 echo ""
@@ -6693,9 +6705,10 @@ echo ""
 echo "# The options below protect your system against Denial of Service attacks"
 echo "# using archive bombs."
 echo ""
-echo "# This option sets the maximum amount of data to be scanned for each input file."
-echo "# Archives and other containers are recursively extracted and scanned up to this"
-echo "# value."
+echo "# This option sets the maximum amount of data to be scanned for each input"
+echo "# file."
+echo "# Archives and other containers are recursively extracted and scanned up to"
+echo "# this value."
 echo "# Value of 0 disables the limit"
 echo "# Note: disabling this limit or setting it too high may result in severe damage"
 echo "# to the system."
@@ -6761,19 +6774,70 @@ echo "# to the system."
 echo "# Default: 1M"
 echo "#MaxZipTypeRcg 1M"
 echo ""
-echo "# This option sets the maximum number of partitions of a raw disk image to be scanned."
-echo "# Raw disk images with more partitions than this value will have up to the value number"
-echo "# partitions scanned. Negative values are not allowed."
-echo "# Note: setting this limit too high may result in severe damage or impact performance."
+echo "# This option sets the maximum number of partitions of a raw disk image to be"
+echo "# scanned."
+echo "# Raw disk images with more partitions than this value will have up to"
+echo "# the value number partitions scanned. Negative values are not allowed."
+echo "# Note: setting this limit too high may result in severe damage or impact"
+echo "# performance."
 echo "# Default: 50"
 echo "#MaxPartitions 128"
 echo ""
 echo "# This option sets the maximum number of icons within a PE to be scanned."
-echo "# PE files with more icons than this value will have up to the value number icons scanned."
+echo "# PE files with more icons than this value will have up to the value number"
+echo "# icons scanned."
 echo "# Negative values are not allowed."
-echo "# WARNING: setting this limit too high may result in severe damage or impact performance."
+echo "# WARNING: setting this limit too high may result in severe damage or impact"
+echo "# performance."
 echo "# Default: 100"
 echo "#MaxIconsPE 200"
+echo ""
+echo "# This option sets the maximum recursive calls for HWP3 parsing during"
+echo "# scanning. HWP3 files using more than this limit will be terminated and"
+echo "# alert the user."
+echo "# Scans will be unable to scan any HWP3 attachments if the recursive limit"
+echo "# is reached."
+echo "# Negative values are not allowed."
+echo "# WARNING: setting this limit too high may result in severe damage or impact"
+echo "# performance."
+echo "# Default: 16"
+echo "#MaxRecHWP3 16"
+echo ""
+echo "# This option sets the maximum calls to the PCRE match function during"
+echo "# an instance of regex matching."
+echo "# Instances using more than this limit will be terminated and alert the user"
+echo "# but the scan will continue."
+echo "# For more information on match_limit, see the PCRE documentation."
+echo "# Negative values are not allowed."
+echo "# WARNING: setting this limit too high may severely impact performance."
+echo "# Default: 100000"
+echo "#PCREMatchLimit 20000"
+echo ""
+echo "# This option sets the maximum recursive calls to the PCRE match function"
+echo "# during an instance of regex matching."
+echo "# Instances using more than this limit will be terminated and alert the user"
+echo "# but the scan will continue."
+echo "# For more information on match_limit_recursion, see the PCRE documentation."
+echo "# Negative values are not allowed and values > PCREMatchLimit are superfluous."
+echo "# WARNING: setting this limit too high may severely impact performance."
+echo "# Default: 5000"
+echo "#PCRERecMatchLimit 10000"
+echo ""
+echo "# This option sets the maximum filesize for which PCRE subsigs will be"
+echo "# executed. Files exceeding this limit will not have PCRE subsigs executed"
+echo "# unless a subsig is encompassed to a smaller buffer."
+echo "# Negative values are not allowed."
+echo "# Setting this value to zero disables the limit."
+echo "# WARNING: setting this limit too high or disabling it may severely impact"
+echo "# performance."
+echo "# Default: 25M"
+echo "#PCREMaxFileSize 100M"
+echo ""
+echo "# When BlockMax is set, files exceeding the MaxFileSize, MaxScanSize, or"
+echo "# MaxRecursion limit will be flagged with the virus"
+echo "# \"Heuristic.Limits.Exceeded\"."
+echo "# Default: no"
+echo "#BlockMax yes"
 echo ""
 echo "##"
 echo "## On-access Scan Settings"
@@ -6783,6 +6847,15 @@ echo "# Enable on-access scanning. Currently, this is supported via fanotify."
 echo "# Clamuko/Dazuko support has been deprecated."
 echo "# Default: no"
 echo "#ScanOnAccess yes"
+echo ""
+echo "# Set the  mount point to be scanned. The mount point specified, or the mount"
+echo "# point containing the specified directory will be watched. If any directories"
+echo "# are specified, this option will preempt the DDD system. This will notify"
+echo "# only. It can be used multiple times."
+echo "# (On-access scan only)"
+echo "# Default: disabled"
+echo "#OnAccessMountPath /"
+echo "#OnAccessMountPath /home/user"
 echo ""
 echo "# Don't scan files larger than OnAccessMaxFileSize"
 echo "# Value of 0 disables the limit."
@@ -6801,47 +6874,82 @@ echo "# (On-access scan only)"
 echo "# Default: disabled"
 echo "#OnAccessExcludePath /home/bofh"
 echo ""
-echo "# With this option you can whitelist specific UIDs. Processes with these UIDs"
-echo "# will be able to access all files."
-echo "# This option can be used multiple times (one per line)."
-echo "# Default: disabled"
-echo "#OnAccessExcludeUID 0"
+echo "# With this option you can whitelist the root UID (0). Processes run under"
+echo "# root with be able to access all files without triggering scans or"
+echo "# permission denied events."
+echo "# Note that if clamd cannot check the uid of the process that generated an"
+echo "# on-access scan event (e.g., because OnAccessPrevention was not enabled, and"
+echo "# the process already exited), clamd will perform a scan.  Thus, setting"
+echo "# OnAccessExcludeRootUID is not *guaranteed* to prevent every access by the"
+echo "# root user from triggering a scan (unless OnAccessPrevention is enabled)."
+echo "# Default: no"
+echo "#OnAccessExcludeRootUID no"
 echo ""
+echo "# With this option you can whitelist specific UIDs. Processes with these UIDs"
+echo "# will be able to access all files without triggering scans or permission"
+echo "# denied events."
+echo "# This option can be used multiple times (one per line)."
+echo "# Using a value of 0 on any line will disable this option entirely."
+echo "# To whitelist the root UID (0) please enable the OnAccessExcludeRootUID"
+echo "# option."
+echo "# Also note that if clamd cannot check the uid of the process that generated an"
+echo "# on-access scan event (e.g., because OnAccessPrevention was not enabled, and"
+echo "# the process already exited), clamd will perform a scan.  Thus, setting"
+echo "# OnAccessExcludeUID is not *guaranteed* to prevent every access by the"
+echo "# specified uid from triggering a scan (unless OnAccessPrevention is enabled)."
+echo "# Default: disabled"
+echo "#OnAccessExcludeUID -1"
+echo ""
+echo "# Toggles dynamic directory determination. Allows for recursively watching"
+echo "# include paths."
+echo "# (On-access scan only)"
+echo "# Default: no"
+echo "#OnAccessDisableDDD yes"
+echo ""
+echo "# Modifies fanotify blocking behaviour when handling permission events."
+echo "# If off, fanotify will only notify if the file scanned is a virus,"
+echo "# and not perform any blocking."
+echo "# (On-access scan only)"
+echo "# Default: no"
+echo "#OnAccessPrevention yes"
+echo ""
+echo "# Toggles extra scanning and notifications when a file or directory is"
+echo "# created or moved."
+echo "# Requires the  DDD system to kick-off extra scans."
+echo "# NOTE:  This feature is disabled until a thread resource leak bug"
+echo "#        in the OnAccessExtraScanning code can be resolved."
+echo "# (On-access scan only)"
+echo "# Default: no"
+echo "#OnAccessExtraScanning yes"
 echo ""
 echo "##"
 echo "## Bytecode"
 echo "##"
 echo ""
 echo "# With this option enabled ClamAV will load bytecode from the database. "
-echo "# It is highly recommended you keep this option on, otherwise you'll miss detections for many new viruses."
+echo "# It is highly recommended you keep this option on, otherwise you'll miss"
+echo "# detections for many new viruses."
 echo "# Default: yes"
 echo "#Bytecode yes"
 echo ""
-echo "# Bytecode mode"
-echo "#"
-echo "# This option has been set to 'ForceInterpreter' in Fedora due to"
-echo "# security concerns by default.  You might need to enable the"
-echo "# 'clamd_use_jit' SELinux boolean after setting this option to the"
-echo "# more efficient 'ForceJIT' value."
-echo "#"
-echo "# Default: ForceInterpreter"
-echo "#ByteCodeMode ForceInterpreter"
-echo ""
 echo "# Set bytecode security level."
 echo "# Possible values:"
-echo "#       None - no security at all, meant for debugging. DO NOT USE THIS ON PRODUCTION SYSTEMS"
-echo "#         This value is only available if clamav was built with --enable-debug!"
-echo "#       TrustSigned - trust bytecode loaded from signed .c[lv]d files,"
-echo "#                insert runtime safety checks for bytecode loaded from other sources"
-echo "#       Paranoid - don't trust any bytecode, insert runtime checks for all"
-echo "# Recommended: TrustSigned, because bytecode in .cvd files already has these checks"
+echo "#   None -      No security at all, meant for debugging."
+echo "#               DO NOT USE THIS ON PRODUCTION SYSTEMS."
+echo "#               This value is only available if clamav was built"
+echo "#               with --enable-debug!"
+echo "#   TrustSigned - Trust bytecode loaded from signed .c[lv]d files, insert"
+echo "#               runtime safety checks for bytecode loaded from other sources."
+echo "#   Paranoid -  Don't trust any bytecode, insert runtime checks for all."
+echo "# Recommended: TrustSigned, because bytecode in .cvd files already has these"
+echo "# checks."
 echo "# Note that by default only signed bytecode is loaded, currently you can only"
 echo "# load unsigned bytecode in --enable-debug mode."
 echo "#"
 echo "# Default: TrustSigned"
 echo "#BytecodeSecurity TrustSigned"
 echo ""
-echo "# Set bytecode timeout in miliseconds."
+echo "# Set bytecode timeout in milliseconds."
 echo "# "
 echo "# Default: 5000"
 echo "# BytecodeTimeout 1000"
@@ -6849,28 +6957,12 @@ echo ""
 echo "##"
 echo "## Statistics gathering and submitting"
 echo "##"
-echo ""
-echo "# Enable statistical reporting."
-echo "# Default: no"
-echo "#StatsEnabled yes"
-echo ""
-echo "# Disable submission of individual PE sections for files flagged as malware."
-echo "# Default: no"
-echo "#StatsPEDisabled yes"
-echo ""
-echo "# HostID in the form of an UUID to use when submitting statistical information."
-echo "# Default: auto"
-echo "#StatsHostID auto"
-echo ""
-echo "# Time in seconds to wait for the stats server to come back with a response"
-echo "# Default: 10"
-echo "#StatsTimeout 10"
 }
 
 create_freshclam_conf()
 {
 echo "# Path to the database directory."
-echo "# WARNING: It must match clamd.conf's directive!"
+echo "# WARNING: It must match scan.conf's directive!"
 echo "# Default: hardcoded (depends on installation options)"
 echo "DatabaseDirectory $indimaildir/clamd"
 echo ""
@@ -6998,7 +7090,7 @@ echo "#LocalIPAddress aaa.bbb.ccc.ddd"
 echo ""
 echo "# Send the RELOAD command to clamd."
 echo "# Default: no"
-echo "#NotifyClamd /path/to/clamd.conf"
+echo "#NotifyClamd /path/to/scan.conf"
 echo ""
 echo "# Run command after successful database update."
 echo "# Default: disabled"
@@ -7041,7 +7133,7 @@ echo "# will then use this data to determine what types of malware are the most"
 echo "# detected in the field and in what geographic area they are."
 echo "# Freshclam will connect to clamd in order to get recent statistics."
 echo "# Default: no"
-echo "#SubmitDetectionStats /path/to/clamd.conf"
+echo "#SubmitDetectionStats /path/to/scan.conf"
 echo ""
 echo "# Country of origin of malware/detection statistics (for statistical"
 echo "# purposes only). The statistics collector at ClamAV.net will look up"
@@ -7516,7 +7608,7 @@ sed "s{MRTGHOSTNAME{`hostname`{;  s{HTMLDIR{$htmldir\/{" \
 # mrtg run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7544,7 +7636,7 @@ fi
 # mrtg log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -8037,7 +8129,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.418 2018-10-29 20:19:23+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.419 2018-10-30 23:56:42+05:30 Cprogrammer Exp mbhangui $"
 	exit 0
 	;;
 
@@ -8710,9 +8802,9 @@ case $option in
 			/bin/mkdir -p "$DESTDIR"$sysconfdir
 		fi
 		if [ -f "$DESTDIR"$QmailBinPrefix/sbin/clamd ] ; then
-			conf_file="$DESTDIR"$sysconfdir/clamd.conf
+			conf_file="$DESTDIR"$sysconfdir/scan.conf
 		else
-			conf_file="$DESTDIR"$sysconfdir/clamd.conf.disabled
+			conf_file="$DESTDIR"$sysconfdir/scan.conf.disabled
 		fi
 		create_clamd_conf > /tmp/config.cnf.$$
 		if [ $? -eq 0 ] ; then
@@ -8734,11 +8826,11 @@ case $option in
 		else
 			exit 1
 		fi
-		if [ ! -f "$DESTDIR"/etc/clamd.conf ] ; then
-			/bin/ln -sr "$DESTDIR"$sysconfdir/clamd.conf "$DESTDIR"/etc/clamd.conf
+		if [ -d /etc/clamd.d -a ! -f "$DESTDIR"/etc/clamd.d/scan.conf ] ; then
+			/bin/ln -sr "$DESTDIR"$sysconfdir/scan.conf "$DESTDIR"/etc/clamd.d/scan.conf
 			if [ $? -ne 0 ] ; then
-				cd "$DESTDIR"/etc
-				/bin/ln -s "$DESTDIR"$sysconfdir/clamd.conf
+				cd "$DESTDIR"/etc/clamd.d
+				/bin/ln -s "$DESTDIR"$sysconfdir/scan.conf
 			fi
 		fi
 
@@ -8760,9 +8852,9 @@ case $option in
 			/bin/mkdir -p "$DESTDIR"$sysconfdir
 		fi
 		if [ -f "$DESTDIR"$QmailBinPrefix/sbin/clamd ] ; then
-			conf_file="$DESTDIR"$sysconfdir/clamd.conf
+			conf_file="$DESTDIR"$sysconfdir/scan.conf
 		else
-			conf_file="$DESTDIR"$sysconfdir/clamd.conf.disabled
+			conf_file="$DESTDIR"$sysconfdir/scan.conf.disabled
 		fi
 		dbd=`grep -w "^DatabaseDirectory" $conf_file | awk '{print $2}'`
 		if [ -z "$dbd" ] ; then
