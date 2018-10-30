@@ -47,7 +47,7 @@ pkgconfigdir=@prefix@/lib/pkgconfig
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep gen_control indimail.install indimail.dsc indimail-Debian_9.0.dsc \
 indimail-devel.install libindimail.install indimail-devel.postinst \
-indimail-devel.postrm indimail-xUbuntu_18.04.dsc \
+indimail-devel.postrm indimail-xUbuntu_18.04.dsc indimail-xUbuntu_18.10.dsc \
 debian.tar.gz dummy.tar.gz
 
 install: all
@@ -148,6 +148,8 @@ indimail.dsc: indimail.dsc.in Makefile conf-release
 indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile conf-release
 	$(edit) $@.in > $@;
 indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile conf-release
+	$(edit) $@.in > $@;
+indimail-xUbuntu_18.10.dsc: indimail-xUbuntu_18.10.dsc.in Makefile conf-release
 	$(edit) $@.in > $@;
 
 #sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
