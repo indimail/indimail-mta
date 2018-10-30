@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.229  2018-10-30 19:03:34+05:30  Cprogrammer
+ * added proto for int_mysql_options()
+ *
  * Revision 2.228  2018-03-30 09:31:40+05:30  Cprogrammer
  * added socket member to dbinfo structure
  *
@@ -1000,7 +1003,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.228 2018-03-30 09:31:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.229 2018-10-30 19:03:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1932,6 +1935,7 @@ int             vadd_atrn_map(char *, char *, char *);
 int             vdel_atrn_map(char *, char *, char *);
 int             vupd_atrn_map(char *, char *, char *, char *);
 int             set_mysql_options(MYSQL *, char *, char *, unsigned int *);
+int             int_mysql_options(MYSQL *, enum mysql_option, const void *);
 char           *error_mysql_options_str(unsigned int);
 int             vauth_renamedomain(char *, char *, char *);
 int             vset_lastdeliver(char *, char *, int);
