@@ -1,5 +1,9 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.44  2018-10-30 19:02:25+05:30  Cprogrammer
+ * skip MYSQL_READ_DEFAULT_FILE, MYSQL_READ_DEFAULT_GROUP if port or socket is provided
+ * use TCP if port is provided and unix_socket is not defined
+ *
  * Revision 2.43  2018-10-29 20:16:30+05:30  Cprogrammer
  * MariaDB bug fix for mysql_options(), mysql_real_connect() - MYSQL_READ_DEFAULT_FILE
  *
@@ -222,7 +226,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.43 2018-10-29 20:16:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.44 2018-10-30 19:02:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -381,7 +385,7 @@ open_central_db(char *dbhost)
 	char            SqlBuf[SQL_BUF_SIZE];
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
 				   *cntrl_socket = 0, *sysconfdir, *controldir;
-	int             mysqlport = -1, count;
+	int             mysqlport = -1, count, protocol;
 	unsigned int    flags, use_ssl = 0;
 	FILE           *fp;
 
@@ -485,18 +489,32 @@ open_central_db(char *dbhost)
 	 */
 	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF)) {
 		flags = use_ssl;
-		if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
-			fprintf(stderr, "open_central_db: mysql_options(%d): %s\n", count,
-				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
-			return(-1);
-		}
 		/*- 
 		 * mysql_options bug
 		 * if MYSQL_READ_DEFAULT_FILE is used
 		 * mysql_real_connect fails by connecting with a null unix domain socket
 		 */
-		if (mysqlport > 0 || cntrl_socket)
-			*(mysql[0].options.my_cnf_file) = 0;
+		if ((count = set_mysql_options(&mysql[0], 
+				mysqlport > 0 || cntrl_socket ? 0 : "indimail.cnf",
+				mysqlport > 0 || cntrl_socket ? 0 : "indimail",
+				&flags))) {
+			fprintf(stderr, "open_central_db: mysql_options(%d): %s\n", count,
+				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
+			return(-1);
+		}
+		/*
+		 * MySQL/MariaDB is very stubborn.
+		 * It uses Unix domain socket, even if port is set and the socket value is NULL
+		 * Force it to use TCP when port is provided and unix_socket is NULL
+		 */
+		if (mysqlport > 0 && !cntrl_socket) {
+			protocol = MYSQL_PROTOCOL_TCP;
+			if (int_mysql_options(&mysql[1], MYSQL_OPT_PROTOCOL, (char *) &protocol)) {
+				fprintf(stderr, "mysql_options(MYSQL_OPT_PROTOCOL): %s\n",
+					(ptr = error_mysql_options_str(count)) ? ptr : "unknown error");
+				return (-1);
+			}
+		}
 		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, flags))) {
 			flags = use_ssl;
 			if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {

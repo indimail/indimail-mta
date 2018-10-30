@@ -1,5 +1,9 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.28  2018-10-30 19:01:20+05:30  Cprogrammer
+ * skip MYSQL_READ_DEFAULT_FILE, MYSQL_READ_DEFAULT_GROUP if port or socket is provided
+ * use TCP if port is provided and unix_socket is not defined
+ *
  * Revision 2.27  2018-10-29 20:16:26+05:30  Cprogrammer
  * MariaDB bug fix for mysql_options(), mysql_real_connect() - MYSQL_READ_DEFAULT_FILE
  *
@@ -95,7 +99,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.27 2018-10-29 20:16:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.28 2018-10-30 19:01:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -105,6 +109,7 @@ static char     sccsid[] = "$Id: dbload.c,v 2.27 2018-10-29 20:16:26+05:30 Cprog
 #include <errno.h>
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
+int             int_mysql_options(MYSQL *, enum mysql_option, const void *);
 
 int
 OpenDatabases()
@@ -237,7 +242,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 {
 	char            mcdFile[MAX_BUFF];
 	char           *sysconfdir, *controldir, *mcdfile, *server, *str;
-	int             maxattempts, retry_interval, count;
+	int             maxattempts, retry_interval, count, protocol;
 #ifdef HAVE_MYSQL_OPT_SSL_ENFORCE
 	int             use_ssl = 0;
 #endif
@@ -278,21 +283,35 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		return (1);
 	}
 	flags = (*ptr)->use_ssl;
-	if ((count = set_mysql_options(*mysqlptr, "indimail.cnf", "indimail", &flags)))
+	/*- 
+	 * mysql_options bug
+	 * if MYSQL_READ_DEFAULT_FILE is used
+	 * mysql_real_connect fails by connecting with a null unix domain socket
+	 */
+	if ((count = set_mysql_options(*mysqlptr, 
+		(*ptr)->port > 0 || (*ptr)->socket ? 0 : "indimail.cnf",
+		(*ptr)->port > 0 || (*ptr)->socket ? 0 : "indimail",
+		&flags)))
 	{
 		fprintf(stderr, "mysql_options(%d): %s\n", count, 
 			(str = error_mysql_options_str(count)) ? str : "unknown error");
 		return(-1);
 	}
 	server = ((*ptr)->socket && islocalif((*ptr)->server) ? "localhost" : (*ptr)->server);
-	(*ptr)->last_attempted = time(0);
-	/*- 
-	 * mysql_options bug
-	 * if MYSQL_READ_DEFAULT_FILE is used
-	 * mysql_real_connect fails by connecting with a null unix domain socket
+	/*
+	 * MySQL/MariaDB is very stubborn.
+	 * It uses Unix domain socket, even if port is set and the socket value is NULL
+	 * Force it to use TCP when port is provided and unix_socket is NULL
 	 */
-	if ((*ptr)->port > 0 || (*ptr)->socket)
-		*((*mysqlptr)->options.my_cnf_file) = 0;
+	if ((*ptr)->port > 0 && !(*ptr)->socket) {
+		protocol = MYSQL_PROTOCOL_TCP;
+		if (int_mysql_options(*mysqlptr, MYSQL_OPT_PROTOCOL, (char *) &protocol)) {
+			fprintf(stderr, "mysql_options(MYSQL_OPT_PROTOCOL9): %s\n",
+				(str = error_mysql_options_str(count)) ? str : "unknown error");
+			return (-1);
+		}
+	}
+	(*ptr)->last_attempted = time(0);
 	if (!mysql_real_connect(*mysqlptr, server, (*ptr)->user,
 			(*ptr)->password, (*ptr)->database, (*ptr)->port, (*ptr)->socket, flags))
 	{
