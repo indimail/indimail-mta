@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.20  2018-10-31 07:42:34+05:30  Cprogrammer
+# migrate clamd.conf to scan.conf
+#
 # Revision 1.19  2018-10-31 00:21:55+05:30  Cprogrammer
 # create scan.conf from clamd.conf
 #
@@ -55,7 +58,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.19 2018-10-31 00:21:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.20 2018-10-31 07:42:34+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -80,7 +83,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.19 2018-10-31 00:21:55+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.20 2018-10-31 07:42:34+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -246,10 +249,18 @@ if [ -f /etc/indimail/cronlist.q -a -d /etc/cron.d ] ; then
 		$cp /etc/indimail/cronlist.q /etc/cron.d/cronlist.q
 	fi
 fi
-# create foxhole_all.cdb in /var/indimail/clamd
+# migrate clamd.conf to scan.conf
 if [ -f /etc/indimail/clamd.conf -a ! -f /etc/indimail/scan.conf ] ; then
 	$mv /etc/indimail/clamd.conf /etc/indimail/scan.conf
 fi
+if [ -d /etc/clamd.d -a -f /etc/indimail/scan.conf ] ; then
+	/bin/rm -f clamd.conf
+	if [ ! -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.d/scan.conf ] ; then
+		cd /etc/clamd.d
+		$ln -sf /etc/indimail/scan.conf
+	fi
+fi
+# create foxhole_all.cdb in /var/indimail/clamd
 if [ -f /etc/indimail/scan.conf -o -f /etc/indimail/scan.conf.disabled ] ; then
 	/usr/sbin/svctool --config=foxhole
 fi
