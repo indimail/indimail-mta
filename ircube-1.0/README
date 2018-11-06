@@ -25,7 +25,7 @@ Non SSL Version Install/Configuration (look below for SSL config)
       MySQL> QUIT;
    b) /usr/bin/mysql -u roundcube -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
 
-3) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube.inc.php
+3) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube/config.inc.php
    $ sudo cp /etc/roundcube/config.inc.php.sample /etc/roundcubemail/config.inc.php
    Edit the lines in /etc/roundcube/config.inc.php
 
@@ -188,11 +188,11 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ sudo chown root:apache /etc/roundcube/defaults.inc.php
    $ sudo chmod 640 /etc/roundcube/defaults.inc.php
 
-5) Change iwebadmin path in /usr/share/roundcubemail/iwebadmin/config.inc.php
+5) Change iwebadmin path in /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php
 
    $rcmail_config['iwebadmin_path'] = 'https://127.0.0.1/cgi-bin/iwebadmin';
 
-6) Change sauserprefs_db_dsnw in /usr/share/roundcubemail/sauserprefs/config.inc.php
+6) Change sauserprefs_db_dsnw in /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php
 
    $rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
 
@@ -337,3 +337,10 @@ Non SSL Version Install/Configuration (look below for SSL config)
 
 NOTE:
 Replace indimail.org with domain that you have configured
+
+1) Apache is running a threaded MPM, but your PHP Module is not compiled to be
+   threadsafe in Fedora
+   Replace
+     LoadModule mpm_event_module modules/mod_mpm_event.so
+   with
+     LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
