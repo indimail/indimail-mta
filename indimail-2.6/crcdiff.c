@@ -1,5 +1,8 @@
 /*
  * $Log: crcdiff.c,v $
+ * Revision 2.3  2018-11-06 22:04:34+05:30  Cprogrammer
+ * updated for 32 bit checksum CRC
+ *
  * Revision 2.2  2009-02-18 09:06:34+05:30  Cprogrammer
  * fixed fgets warning
  *
@@ -50,9 +53,7 @@
 #define CNULL 0
 #endif
 
-/*
- * max size of line 
- */
+/*- max size of line */
 
 #define BUF_SIZE 1124
 
@@ -67,7 +68,7 @@ char            old_line[BUF_SIZE];
 
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 2.2 2009-02-18 09:06:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 2.3 2018-11-06 22:04:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -80,8 +81,8 @@ main(argc, argv)
 	char           *old_ptr;
 	FILE           *newfp;
 	FILE           *oldfp;
-	int             match, count;
-	unsigned long   oldcrc, newcrc, diffcrc, modicount;
+	int             match;
+	unsigned long   oldcrc, newcrc, diffcrc, modicount, count;
 	char            tmpcrc[6];
 	/*-
        	If line =, read new line from each file
@@ -130,7 +131,7 @@ main(argc, argv)
 		}
 		strncpy(tmpcrc, old_line, 4);
 		tmpcrc[4] = CNULL;
-		sscanf(tmpcrc, "%x", &count);
+		sscanf(tmpcrc, "%lx", &count);
 		oldcrc += count;
 		for (count = match = 0;; count++)
 		{
@@ -171,11 +172,11 @@ main(argc, argv)
 				{
 					strncpy(tmpcrc, new_line, 4);
 					tmpcrc[4] = CNULL;
-					sscanf(tmpcrc, "%x", &count);
+					sscanf(tmpcrc, "%lx", &count);
 					diffcrc += count;
 					strncpy(tmpcrc, old_line, 4);
 					tmpcrc[4] = CNULL;
-					sscanf(tmpcrc, "%x", &count);
+					sscanf(tmpcrc, "%lx", &count);
 					diffcrc -= count;
 					if (!strcmp(new_ptr, old_ptr))
 						(void) printf("corrupt    %s", new_line + 5);
@@ -212,7 +213,7 @@ main(argc, argv)
 		{
 			strncpy(tmpcrc, old_line, 4);
 			tmpcrc[4] = CNULL;
-			sscanf(tmpcrc, "%x", &count);
+			sscanf(tmpcrc, "%lx", &count);
 			diffcrc -= count;
 			(void) printf("removed    %s", old_line + 5);
 			modicount++;
@@ -236,7 +237,7 @@ main(argc, argv)
 		}
 		strncpy(tmpcrc, new_line, 4);
 		tmpcrc[4] = CNULL;
-		sscanf(tmpcrc, "%x", &count);
+		sscanf(tmpcrc, "%lx", &count);
 		newcrc += count;
 		for (count = match = 0;; count++)
 		{
@@ -267,14 +268,12 @@ main(argc, argv)
 			} else
 			if (!count)
 				rewind(oldfp);
-		}						/*
-								 * end of for(match = 0;;) 
-								 */
+		} /*- end of for(match = 0;;) */
 		if (!match)
 		{
 			strncpy(tmpcrc, new_line, 4);
 			tmpcrc[4] = CNULL;
-			sscanf(tmpcrc, "%x", &count);
+			sscanf(tmpcrc, "%lx", &count);
 			diffcrc += count;
 			(void) printf("added      %s", new_line + 5);
 			modicount++;
