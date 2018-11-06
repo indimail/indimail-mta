@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.478 2018-10-09 12:30:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.479 2018-11-06 09:30:47+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -13,6 +13,9 @@
 %define _project           local
 %global build_on_obs       0
 %global reconfigure_mode   0
+%global reconf_fetchmail   1
+%global reconf_courierimap 1
+%global reconf_bogofilter  1
 %global _hardened_build    1
 %endif
 
@@ -33,7 +36,6 @@
 %global fetchmail_version  6.4.0
 %global tcpserver_plugin   1
 %global nosignatures       1
-%global clamav_version     0.98
 %global fortune_version    1.1
 %global nssd_version       1.1
 %global flash_version      0.9.4
@@ -47,7 +49,6 @@
 %endif
 %global see_base           For a description of IndiMail visit http://www.indimail.org
 %global nonssd             0
-%global noclamav           1
 %global noproxy            0
 %global nocourierimap      0
 %global nofetchmail        0
@@ -143,16 +144,13 @@ Source8: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_versio
 %if %nofetchmail == 0
 Source9: http://downloads.sourceforge.net/%{name}/fetchmail-%{fetchmail_version}.tar.xz
 %endif
-%if %noclamav == 0
-Source10: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
-%endif
-Source11: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
-Source12: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
+Source10: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
+Source11: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source13:%{name}-permissions.easy
-Source14:%{name}-permissions.secure
-Source15:%{name}-permissions.paranoid
+Source12:%{name}-permissions.easy
+Source13:%{name}-permissions.secure
+Source14:%{name}-permissions.paranoid
 %endif
 %endif
 
@@ -171,10 +169,6 @@ Patch8: http://downloads.sourceforge.net/%{name}/Patches-2.0/bogofilter-%{bogofi
 Patch9: http://downloads.sourceforge.net/%{name}/Patches-2.0/fetchmail-%{fetchmail_version}.patch.gz
 %endif
 
-%endif
-
-%if %noclamav == 0
-Patch10: http://downloads.sourceforge.net/%{name}/Patches-1.0/clamav-%{clamav_version}.patch.gz
 %endif
 
 URL: http://www.indimail.org
@@ -347,8 +341,7 @@ echo "------------------------------------------------------"
 for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.10 flash-0.9.4 \
 mpack-1.6 fortune-%{fortune_version} pam-multi-%{pam_multi_version} \
 nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
-fetchmail-%{fetchmail_version} courier-imap-%{courier_version} \
-clamav-%{clamav_version}
+fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
   (
   if [ -d $i ] ; then
@@ -361,9 +354,6 @@ do
     continue
   fi
   if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
     continue
   fi
   if [ -f ../SOURCES/$i.tar.bz2 ] ; then
@@ -415,10 +405,6 @@ done
 %endif
 %endif
 
-%if %noclamav == 0
-%patch10 -p0
-%endif
-
 %build
 ID=$(id -u)
 #### IndiMail ######################
@@ -465,7 +451,7 @@ fi
 %if %nocourierimap == 0
 if [ -d ../courier-imap-%{courier_version} ] ; then
   cd ../courier-imap-%{courier_version}
-  if [ %{reconfigure_mode} -eq 1 ] ; then
+  if [ %{reconf_courierimap} -eq 1 ] ; then
     echo "reconfiguring..."
     %{__mkdir_p} m4
     aclocal -I m4
@@ -484,7 +470,7 @@ fi
 %if %nobogofilter == 0
 if [ -d ../bogofilter-%{bogofilter_version} ] ; then
   cd ../bogofilter-%{bogofilter_version}
-  if [ %{reconfigure_mode} -eq 1 ] ; then
+  if [ %{reconf_bogofilter} -eq 1 ] ; then
     echo "reconfiguring..."
     %{__mkdir_p} m4
     aclocal -I m4
@@ -498,37 +484,11 @@ if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 fi
 %endif
 
-#### clamav ######################
-%if %noclamav == 0
-if [ -d ../clamav-%{clamav_version} ] ; then
-  cd ../clamav-%{clamav_version}
-  if [ %{reconfigure_mode} -eq 1 ] ; then
-    echo "reconfiguring..."
-    %{__mkdir_p} m4
-    aclocal -I m4
-    autoreconf -fiv
-  fi
-  if [ %{build_on_obs} -eq 0 ] ; then
-  %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-  --with-pkgconfigdir=%{_pkg_config_path} \
-  --with-dbdir=%{indimaildir}/clamd --mandir=%{mandir} \
-  --libdir=%{_libdir} \
-  `%{__cat} ../%{name}-%{version}/config/clamav.opts`
-  else
-  # change to ./configure for openSUSE buildservice
-  ./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-  --with-dbdir=%{indimaildir}/clamd --mandir=%{mandir} \
-  --libdir=%{_libdir} \
-  `%{__cat} ../%{name}-%{version}/config/clamav.opts`
-  fi
-fi
-%endif
-
 #### fetchmail ######################
 %if %nofetchmail == 0
 if [ -d ../fetchmail-%{fetchmail_version} ] ; then
   cd ../fetchmail-%{fetchmail_version}
-  if [ %{reconfigure_mode} -eq 1 ] ; then
+  if [ %{reconf_fetchmail} -eq 1 ] ; then
     echo "reconfiguring..."
     %{__mkdir_p} m4
     aclocal -I m4
@@ -554,8 +514,7 @@ fi
 ID=$(id -u)
 %{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
 for i in %{name}-%{version} nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
-fetchmail-%{fetchmail_version} courier-imap-%{courier_version} \
-clamav-%{clamav_version}
+fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
   if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
     continue
@@ -564,9 +523,6 @@ do
     continue
   fi
   if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
     continue
   fi
   if [ -d $i ] ; then
@@ -604,12 +560,6 @@ do
 done
 %{__rm} -f %{buildroot}%{moduledir}/iauth.la
 
-if [ %noclamav -eq 0 ] ; then
-  for i in clamav clamunrar clamunrar_iface
-  do
-    %{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
-  done
-fi
 if [ %nonssd -eq 0 ] ; then
   %{__rm} -f %{buildroot}%{_libdir}/libnss_nssd.la
 fi
@@ -633,18 +583,6 @@ fi
 %{__mkdir_p} %{buildroot}%{domaindir}/domains
 %{__mkdir_p} %{buildroot}%{_prefix}/include/indimail
 
-if [ %noclamav -eq 0 ] ; then
-  if [ -f %{buildroot}%{sysconfdir}/clamd.conf ] ; then
-    %{__rm} -f %{buildroot}%{sysconfdir}/clamd.conf
-  fi
-  if [ -f %{buildroot}%{sysconfdir}/freshclam ] ; then
-    %{__rm} -f %{buildroot}%{sysconfdir}/freshclam.conf
-  fi
-  if [ -d %{buildroot}%{_prefix}/var ] ; then
-    /bin/rmdir %{buildroot}%{_prefix}/var
-  fi
-fi
-
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
@@ -665,14 +603,6 @@ if [ -x /usr/bin/chrpath ] ; then
       /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
     fi
   done
-  if [ %noclamav -eq 0 ] ; then
-    for i in clambc clamconf clamscan freshclam
-    do
-      if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
-        /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
-      fi
-    done
-  fi
 
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/imapmodules/authindi
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/imapmodules/authpgsql
@@ -696,9 +626,6 @@ if [ -x /usr/bin/chrpath ] ; then
       /usr/bin/chrpath -d %{buildroot}%{libexecdir}/$i
     fi
   done
-  if [ %noclamav -eq 0 ] ; then
-    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/clamd
-  fi
 fi
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
@@ -755,42 +682,27 @@ done
 ) > config_files.list
 
 %if %{undefined suse_version} && %{undefined sles_version}
-%{__mkdir_p} %{buildroot}%{logdir}
-for i in imapd.143 imapd-ssl.993 indisrvr.4000 \
-  inlookup.infifo logfifo mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 \
-  proxyIMAP.4143 proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup
-do
-  %{__mkdir_p} %{buildroot}%{logdir}/$i
-  $TOUCH %{buildroot}%{logdir}/$i/current
-done
-if [ %nofetchmail -eq 0 ] ; then
-  %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
-  $TOUCH %{buildroot}%{logdir}/fetchmail/current
-fi
-if [ %noclamav -eq 0 ] ; then
-  for i in freshclam clamd
+  %{__mkdir_p} %{buildroot}%{logdir}
+  for i in imapd.143 imapd-ssl.993 indisrvr.4000 \
+    inlookup.infifo logfifo mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 \
+    proxyIMAP.4143 proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup
   do
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     $TOUCH %{buildroot}%{logdir}/$i/current
   done
-fi
-%endif
-
-if [ %nobogofilter -eq 0 ] ; then
-  $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
-fi
-if [ %nofetchmail -eq 0 ] ; then
-  $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
-  #%%find_lang fetchmail
-fi
-if [ %noclamav -eq 0 ] ; then # clamav >= 0.97.5, without clamav-db
-  if [ ! -d %{buildroot}%{indimaildir}/clamd ] ; then
-    %{__mkdir_p} %{buildroot}%{indimaildir}/clamd
-  else # with built-in clamav signatures
-    $TOUCH %{buildroot}%{indimaildir}/clamd/clamav
-    $TOUCH %{buildroot}%{indimaildir}/clamd/mirrors.dat
+  if [ %nofetchmail -eq 0 ] ; then
+    %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
+    $TOUCH %{buildroot}%{logdir}/fetchmail/current
   fi
-fi
+  
+  if [ %nobogofilter -eq 0 ] ; then
+    $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
+  fi
+  if [ %nofetchmail -eq 0 ] ; then
+    $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
+    #%%find_lang fetchmail
+  fi
+%endif
 
 %files -f config_files.list
 %defattr(-, root, root,-)
@@ -824,11 +736,6 @@ fi
 
 %if %nofetchmail == 0
 %dir %attr(755,root,root)         %{shareddir}/locale
-%endif
-
-%if %noclamav == 0
-%dir %attr(755,root,root)         %{_libdir}/pkgconfig
-%dir %attr(775,qscand,qscand)     %{_prefix}/share/clamd
 %endif
 
 %dir %attr(755,root,root)         %{shareddir}/fortunes
@@ -1062,19 +969,6 @@ fi
 %attr(755,root,root)                    %{_prefix}/sbin/bf_tar
 %endif
 
-# clamav
-%if %noclamav == 0
-%attr(755,root,root)                    %{_prefix}/bin/sigtool
-%attr(755,root,root)                    %{_prefix}/bin/clamav-config
-%attr(755,root,root)                    %{_prefix}/bin/clamscan
-%attr(755,root,root)                    %{_prefix}/bin/clamdscan
-%attr(755,root,root)                    %{_prefix}/bin/clambc
-%attr(755,root,root)                    %{_prefix}/bin/clamdtop
-%attr(755,root,root)                    %{_prefix}/bin/freshclam
-%attr(755,root,root)                    %{_prefix}/bin/clamconf
-%attr(755,root,root)                    %{_prefix}/sbin/clamd
-%endif
-
 # fetchmail
 %if %nofetchmail == 0
 %attr(755,root,root)                    %{_prefix}/bin/fetchmailconf
@@ -1211,15 +1105,6 @@ fi
 %attr(644,root,root)                    %{shareddir}/fortunes/vedas-1.dat
 %attr(644,root,root)                    %{shareddir}/fortunes/vedas-2
 %attr(644,root,root)                    %{shareddir}/fortunes/vedas-2.dat
-
-%if %noclamav == 0
-%if %nosignatures == 0
-%ghost                   %config(noreplace) %{shareddir}/clamd/clamav*
-%ghost                   %config(noreplace) %{shareddir}/clamd/mirrors.dat
-%attr(664,qscand,qscand) %config(noreplace) %{shareddir}/clamd/main.cvd
-%attr(664,qscand,qscand) %config(noreplace) %{shareddir}/clamd/daily.cvd
-%endif
-%endif
 
 %if %nofetchmail == 0
 #%%attr(644,root,root)                    %%{shareddir}/locale/*/LC_MESSAGES/*.mo
@@ -1424,10 +1309,6 @@ fi
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/cdbmake.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/uint32.h
 
-%if %noclamav == 0
-%attr(644,root,qmail)                   %{_prefix}/include/clamav.h
-%endif
-
 %if %nocourierimap == 0
 %attr(644,root,qmail)                   %{_prefix}/include/courier-unicode.h
 %attr(644,root,qmail)                   %{_prefix}/include/courier-unicode-categories-tab.h
@@ -1440,11 +1321,6 @@ fi
 %{_libdir}/libcdb.a
 %{_libdir}/libflash.a
 %{_libdir}/libindimail.a
-
-%if %noclamav == 0
-%{_libdir}/libclam*.so
-%attr(644,root,root)                        %{_pkg_config_path}/libclamav.pc
-%endif
 
 %if %nocourierimap == 0
 %{_libdir}/libunicode.so
@@ -1464,10 +1340,6 @@ fi
 %files -n libindimail
 %defattr(-, root, root, 0755)
 # Shared libraries (omit for architectures that don't support them)
-%if %noclamav == 0
-%{_libdir}/libclam*.so.*
-%endif
-
 %{_libdir}/libeps.so.1
 %{_libdir}/libeps.so.1.0.0
 %{_libdir}/libcdb.so.1
@@ -1834,26 +1706,6 @@ do
   fi
 done
 
-if [ %noclamav -eq 0 ] ; then
-  echo "Checking if clamav is installed"
-  clamav_os=0
-  clamdPrefix=%{_prefix}
-  qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
-  mysysconfdir=%{sysconfdir}
-else
-  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-    clamav_os=1
-    clamdPrefix="/usr"
-    qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-    if [ -d %{_sysconfdir}/clamav ] ; then
-      mysysconfdir=%{_sysconfdir}/clamav
-    else
-      mysysconfdir=%{_sysconfdir}
-    fi
-  else
-    clamav_os=0
-  fi
-fi
 
 # fetchmail
 if [ %nofetchmail -eq 0 ] ; then
@@ -1879,7 +1731,8 @@ if [ %nofetchmail -eq 0 ] ; then
     extra_opt="--spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\""
     extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
   fi
-  if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+    qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
     extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
   fi
   eval %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
@@ -2031,12 +1884,6 @@ echo "$count. Change your default domain in %{sysconfdir}/control/defaultdomain"
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo rpm -V indimail"
-
-%if %noclamav == 0
-count=`expr $count + 1`
-echo "$count. You need to ensure that clamav signatures download have completed so that"
-echo "   you can start sending emails. Look at %{logdir}/freshclam/current"
-%endif
 
 if [ ! -f %{sysconfdir}/certs/servercert.pem ] ; then
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
@@ -2251,10 +2098,6 @@ if [ $argv1 -eq 1 ] ; then
 fi
 # Shared libraries (omit for architectures that don't support them)
 echo "removing shared libraries"
-%if %noclamav == 0
-%{__rm} -f %{_libdir}/libclam*.so*
-%endif
-
 %{__rm} -f %{_libdir}/libeps.so
 %{__rm} -f %{_libdir}/libeps.so.1
 %{__rm} -f %{_libdir}/libeps.so.1.0.0
