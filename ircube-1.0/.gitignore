@@ -1,8 +1,10 @@
+configure
+Makefile.in
+INSTALL
 *.gz
 aclocal.m4
 ./configure
 Makefile
-Makefile.am
 missing
 depcomp
 m4

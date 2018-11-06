@@ -82,7 +82,7 @@ static const query_conf_t query_conf[] = {
 	[GETSPBYNAME] = {NUM_SP_ELEMENTS, conf.getspnam},
 	[GETSP] = {NUM_SP_ELEMENTS, conf.getspent},
 };
-
+typedef char my_bool;
 /*- Open up all MySQL connections */
 static int
 init_connection(int th_num)

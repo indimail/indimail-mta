@@ -1179,10 +1179,10 @@ if [ $indimail_installed -eq 1 ] ; then
     qmail-imapd.143 qmail-pop3d.110 qmail-imapd-ssl.993 qmail-pop3d-ssl.995 \
     proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110 \
     qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
-	qmail-logfifo udplogger.3000 mrtg"
+    qmail-daned.1998 qmail-logfifo udplogger.3000 mrtg"
 else
   LIST="qscanq greylist.1999 qmail-send.25 qmail-smtpd.25 qmail-smtpd.465 \
-   qmail-logfifo udplogger.3000 qmail-smtpd.587"
+    qmail-daned.1998 qmail-logfifo udplogger.3000 qmail-smtpd.587"
 fi
 for i in $LIST $M_SERVICE ; do
   echo $i
@@ -1537,13 +1537,6 @@ fi
 
 if [ " $wipe_option" = " 1" -o ! -f "$DESTDIR"/$sysconfdir/users/assign ] ; then
 	echo "assign"
-fi
-if [ " $wipe_option" = " 1" ] ; then
-	echo "." > "$DESTDIR"$sysconfdir/users/assign
-	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/qmail-newu ] ; then
-		"$DESTDIR"$QmailBinPrefix/sbin/qmail-newu "$DESTDIR"$sysconfdir/users
-	fi
-elif [ ! -f "$DESTDIR"$sysconfdir/users/assign ] ; then
 	echo "." > "$DESTDIR"$sysconfdir/users/assign
 	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/qmail-newu ] ; then
 		"$DESTDIR"$QmailBinPrefix/sbin/qmail-newu "$DESTDIR"$sysconfdir/users
@@ -8760,11 +8753,7 @@ case $option in
 		if [ ! -d "$DESTDIR"$sysconfdir ] ; then
 			/bin/mkdir -p "$DESTDIR"$sysconfdir
 		fi
-		if [ -f "$DESTDIR"$QmailBinPrefix/sbin/clamd ] ; then
-			conf_file="$DESTDIR"$sysconfdir/scan.conf
-		else
-			conf_file="$DESTDIR"$sysconfdir/scan.conf.disabled
-		fi
+		conf_file="$DESTDIR"$sysconfdir/scan.conf.disabled
 		create_clamd_conf > /tmp/config.cnf.$$
 		if [ $? -eq 0 ] ; then
 			change_config $conf_file /tmp/config.cnf.$$
