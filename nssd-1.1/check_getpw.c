@@ -1,5 +1,8 @@
 /*
  * $Log: check_getpw.c,v $
+ * Revision 1.2  2018-11-06 11:28:41+05:30  Cprogrammer
+ * fixed warning message
+ *
  * Revision 1.1  2010-05-23 14:13:29+05:30  Cprogrammer
  * Initial revision
  *
@@ -12,7 +15,7 @@
 #include <shadow.h>
 
 #ifndef	lint
-static char     rcsid[] = "$Id: check_getpw.c,v 1.1 2010-05-23 14:13:29+05:30 Cprogrammer Stab mbhangui $";
+static char     rcsid[] = "$Id: check_getpw.c,v 1.2 2018-11-06 11:28:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -24,7 +27,7 @@ main(int argc, char **argv)
 
 	if (!getuid())
 	{
-		fprintf(stderr, "you must be root!!\n");
+		fprintf(stderr, "you must not be root!!\n");
 		return (1);
 	}
 	for (i = 1;i < argc;i++)
