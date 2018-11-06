@@ -19,7 +19,7 @@
 /*- A SIGNIFICANT PORTION OF THIS CODE IS BASED ON GNU NSCD */
 
 /*
- * $Id: nssd.c,v 1.1 2011-06-18 11:38:37+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: nssd.c,v 1.2 2018-11-06 11:26:50+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <errno.h>
@@ -52,6 +52,7 @@ do {                                                                         \
 int             debug_level = 0;
 static int      sock;
 static const char *conffile = _PATH_NSVSD_CONF;
+typedef char my_bool;
 
 /*- Each thread gets their own MySQL connection and result set */
 typedef struct {
@@ -82,7 +83,7 @@ static const query_conf_t query_conf[] = {
 	[GETSPBYNAME] = {NUM_SP_ELEMENTS, conf.getspnam},
 	[GETSP] = {NUM_SP_ELEMENTS, conf.getspent},
 };
-typedef char my_bool;
+
 /*- Open up all MySQL connections */
 static int
 init_connection(int th_num)
@@ -148,7 +149,7 @@ run_query(int32_t type, char *key, int th_num)
 			snprintf(query, sizeof (query), query_conf[type].query, ekey, p);
 		}
 	} else /*- Otherwise just strncpy () */
-		strncpy(query, query_conf[type].query, sizeof (query));
+		strncpy(query, query_conf[type].query, sizeof (query) - 1);
 	nssd_log(LOG_DEBUG, "%s: query: %s", __FUNCTION__, query);
 	/*- Run the query */
 	if (mysql_query(&connections[th_num].mysql, query)) {
@@ -481,7 +482,7 @@ setup_socket(void)
 		exit(EXIT_FAILURE);
 	}
 	sock_addr.sun_family = AF_UNIX;
-	strncpy(sock_addr.sun_path, socket_file, sizeof(sock_addr.sun_path));
+	strncpy(sock_addr.sun_path, socket_file, sizeof(sock_addr.sun_path) - 1);
 	if (!access(socket_file, F_OK) && unlink(socket_file))
 	{
 		strerror_r(errno, buf, sizeof(buf));

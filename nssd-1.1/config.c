@@ -17,9 +17,11 @@
  */
 
 /*
- * $Id: config.c,v 1.1 2011-06-18 11:38:25+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: config.c,v 1.2 2018-11-06 11:26:36+05:30 Cprogrammer Exp mbhangui $ 
  */
-static const char rcsid[] = "$Id: config.c,v 1.1 2011-06-18 11:38:25+05:30 Cprogrammer Exp mbhangui $";
+#ifndef	lint
+static const char rcsid[] = "$Id: config.c,v 1.2 2018-11-06 11:26:36+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 #include "common.h"
 #include <string.h>
@@ -169,11 +171,11 @@ load_config(const char *file)
 	strncpy(conf.pidfile, DEFAULT_PIDFILE, sizeof (conf.pidfile));
 
 	/*- Read the config - step through all key/val pairs available */
-	while (_next_key(fh, key, sizeof (key), val, sizeof (val))) {
+	while (_next_key(fh, key, sizeof(key), val, sizeof(val))) {
 		for (c = config_fields; c->name; c++) {
 			if (!strcmp(key, c->name)) {
 				if (c->type == CV_STRING)
-					strncpy(c->ptr, val, sizeof (val));
+					strncpy(c->ptr, val, 1024);
 				else if (c->type == CV_INTEGER)
 					*((int *) c->ptr) = atoi(val);
 			}
@@ -194,3 +196,11 @@ load_config(const char *file)
 		conf.threads = MAX_THREADS;
 	return 1;
 }
+
+#ifndef lint
+void
+getversion_config_c()
+{
+	printf("%s\n", rcsid);
+}
+#endif

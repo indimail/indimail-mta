@@ -17,10 +17,10 @@
  */
 
 /*
- * $Id: nssd.h,v 1.1 2011-06-18 11:38:08+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: nssd.h,v 1.2 2018-11-06 11:26:56+05:30 Cprogrammer Exp mbhangui $ 
  */
 #define MAX_LINE_SIZE       1024	/* Max line length in config file */
-#define MAX_KEY_SIZE        128	/* Max length of a key in cfg file */
+#define MAX_KEY_SIZE        1024	/* Max length of a key in cfg file */
 #define MAX_VAL_SIZE        1024	/* Max length of a val in cfg file */
 #define MAX_QUERY_SIZE      2048	/* Max length of MySQL query */
 #define MAX_USERNAME_SIZE   128
