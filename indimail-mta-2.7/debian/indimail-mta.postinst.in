@@ -34,7 +34,6 @@ rm=/bin/rm
 mv=/bin/mv
 ####################################
 nodksignature=0
-noclamav=1
 notlsarr=0
 tcpserver_plugin=1
 dkimkeyfn=default
@@ -200,11 +199,6 @@ if [ ! "${prefix}" = "/usr" ] ; then
 	fi
 fi
 
-if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-	clamav_os=1
-else
-	clamav_os=0
-fi
 echo "Doing post installation activities for the following"
 echo ""
 echo " 1. Configure ${logdir} for multilog"
@@ -224,11 +218,6 @@ echo "14. Configure qscanq/clamd/freshclam service"
 echo "15. Configure ${qsysconfdir}/control/signatures"
 echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
 echo "17. Configure indimail-mta startup"
-if [ -x ${sysconfdir}/init.d/apparmor ] ; then
-if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-echo "18. Creating apparmor profile for clamav"
-fi
-fi
 echo ""
 
 echo "Post Installation..."
@@ -278,28 +267,21 @@ else
 fi
 
 echo "Checking if clamav is installed"
-if [ $noclamav -eq 0 ] ; then
-	clamav_os=0
-	clamdPrefix=${prefix}
-	mysysconfdir=${qsysconfdir}
-	qhpsi="${prefix}/bin/clamdscan %s --config=${mysysconfdir}/clamd.conf --fdpass --quiet --no-summary"
-else
-	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-		clamav_os=1
-		clamdPrefix="/usr"
-		if [ -d ${sysconfdir}/clamav ] ; then
-			mysysconfdir=${sysconfdir}/clamav
-		elif [ -d ${sysconfdir}/clamd.d ] ; then
-			mysysconfdir=${sysconfdir}/clamd.d
-		elif [ -d ${qsysconfdir}] ; then
-			mysysconfdir=${qsysconfdir}
-		else
-			mysysconfdir=${sysconfdir}
-		fi
-		qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/clamd.conf --fdpass --quiet --no-summary"
+if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+	have_clamav=1
+	clamdPrefix="/usr"
+	if [ -d ${sysconfdir}/clamav ] ; then
+		mysysconfdir=${sysconfdir}/clamav
+	elif [ -d ${sysconfdir}/clamd.d ] ; then
+		mysysconfdir=${sysconfdir}/clamd.d
+	elif [ -d ${qsysconfdir}] ; then
+		mysysconfdir=${qsysconfdir}
 	else
-		clamav_os=0
+		mysysconfdir=${sysconfdir}
 	fi
+	qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
+else
+	have_clamav=0
 fi
 
 # SMTP
@@ -324,7 +306,7 @@ do
 	if [ $tcpserver_plugin -eq 1 ] ; then
 		extra_opt="$extra_opt --shared-objects=1 --use-dlmopen=1"
 	fi
-	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	if [ $have_clamav -eq 1 ] ; then
 		extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
 	fi
 	eval ${prefix}/sbin/svctool --smtp=$port --servicedir=${servicedir} \
@@ -342,7 +324,7 @@ done
 
 # queue parameters in control/defaultqueue for qmail-inject, sendmail
 extra_opt=""
-if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+if [ $have_clamav -eq 1 ] ; then
 	extra_opt="--qhpsi=\"$qhpsi\""
 fi
 eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
@@ -386,12 +368,25 @@ ${prefix}/sbin/svctool --qmqp=628 --servicedir=${servicedir} --qbase=${qbase} \
 
 # virus/spam filtering
 ${prefix}/sbin/svctool --qscanq --servicedir=${servicedir} --scanint=200
-if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+if [ $have_clamav -eq 1 ] ; then
 	${prefix}/sbin/svctool --config=clamd
 	${prefix}/sbin/svctool --config=foxhole
 	# create clamd, freshclam service
 	${prefix}/sbin/svctool --clamd --servicedir=${servicedir} --clamdPrefix=$clamdPrefix \
 		--sysconfdir=$mysysconfdir
+  if [ $have_clamav -eq 1 ] ; then
+    echo "Checking if clamd/freshclam is running"
+    count=`ps -e|grep clamd|wc -l`
+    if [ $count -gt 0 ] ; then
+      echo "Disabling clamd service"
+      $TOUCH ${servicedir}/clamd/down
+    fi
+    count=`ps -e|grep freshclam|wc -l`
+    if [ $count -gt 0 ] ; then
+      echo "Disabling freshclam service"
+      $TOUCH ${servicedir}/freshclam/down
+    fi
+  fi
 fi
 
 # udplogger service
@@ -420,24 +415,33 @@ EOFUU
 /bin/chown qscand:qscand ${qsysconfdir}/control/signatures
 
 if [ -x ${sysconfdir}/init.d/apparmor ] ; then
-if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+if [ $have_clamav -eq 1 ] ; then
 	if [ -d ${sysconfdir}/apparmor.d/local ] ; then
+		reload=0
+		if [ ! -f ${sysconfdir}/apparmor.d/local/usr.sbin.clamd ] ; then
 		(
 		echo "# Site-specific additions and overrides for usr.sbin.clamd."
 		echo "# For more details, please see ${sysconfdir}/apparmor.d/local/README."
 		echo "capability setuid,"
 		echo "capability setgid,"
-  		echo "${shareddir}/clamd/ r,"
-  		echo "${shareddir}/clamd/** krw,"
+		echo "${shareddir}/clamd/ r,"
+		echo "${shareddir}/clamd/** krw,"
+		reload=1
 		) > ${sysconfdir}/apparmor.d/local/usr.sbin.clamd
+		fi
+		if [ ! -f ${sysconfdir}/apparmor.d/local/usr.sbin.freshclam ] ; then
 		(
 		echo "# Site-specific additions and overrides for usr.bin.freshclam."
 		echo "# For more details, please see ${sysconfdir}/apparmor.d/local/README."
-  		echo "${shareddir}/share/clamd/ r,"
-  		echo "${shareddir}/share/clamd/** krw,"
+		echo "${shareddir}/share/clamd/ r,"
+		echo "${shareddir}/share/clamd/** krw,"
+		reload=1
 		) > ${sysconfdir}/apparmor.d/local/usr.bin.freshclam
-		echo "Reloading apparmor profiles..."
-		/usr/sbin/service apparmor reload || true
+		fi
+		if [ $reload -ne 0 ] ; then
+			echo "Reloading apparmor profiles..."
+			/usr/sbin/service apparmor reload || true
+		fi
 	fi
 fi
 fi
