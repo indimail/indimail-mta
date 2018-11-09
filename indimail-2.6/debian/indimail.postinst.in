@@ -36,7 +36,6 @@ mv=/bin/mv
 noproxy=0
 nonssd=0
 nocourierimap=0
-noclamav=1
 nofetchmail=0
 nobogofilter=0
 nodksignature=0
@@ -193,11 +192,6 @@ fi
 /sbin/ldconfig
 fi
 
-if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-	clamav_os=1
-else
-	clamav_os=0
-fi
 echo "Doing post installation activities for the following"
 echo ""
 echo " 1. Configure ${logdir} for multilog"
@@ -213,11 +207,6 @@ echo "10. Configure inlookup service"
 echo "11. Configure SPAM filter configuration"
 echo "12. Configure tcprules database for IMAP, POP3, popass"
 echo "13. Configure default cron entries"
-if [ -x /etc/init.d/apparmor ] ; then
-if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-echo "14. Creating apparmor profile"
-fi
-fi
 echo ""
 
 if [ -x /bin/touch ] ; then
@@ -297,26 +286,6 @@ else
 	imapspop3_mem=52428800
 	poppass_mem=52428800
 fi
-echo "Checking if clamav is installed"
-if [ $noclamav -eq 0 ] ; then
-	clamav_os=0
-	clamdPrefix=${prefix}
-	qhpsi="${prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
-	mysysconfdir=${sysconfdir}
-else
-	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-		clamav_os=1
-		clamdPrefix="/usr"
-		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-		if [ -d /etc/clamav ] ; then
-			mysysconfdir=/etc/clamav
-		else
-			mysysconfdir=${sysconfdir}
-		fi
-	else
-		clamav_os=0
-	fi
-fi
 # SMTP
 for port in 465 25
 do
@@ -356,7 +325,8 @@ if [ $nofetchmail -eq 0 ] ; then
 		extra_opt="--spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\""
 		extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
 	fi
-	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
 		extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
 	fi
 	eval ${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
@@ -516,11 +486,6 @@ count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo ${prefix}/sbin/svctool --check-install --servicedir=${servicedir} \\"
 echo "       --qbase=${qbase} --qcount=${qcount} --qstart=1"
-if [ $noclamav -eq 0 ] ; then
-count=`expr $count + 1`
-echo "$count. You need to ensure that clamav signatures download have completed so that"
-echo "   you can start sending emails. Look at ${logdir}/freshclam/current"
-fi
 if [ ! -f ${sysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
 if [ ${nocourierimap} -eq 0 ] ; then
