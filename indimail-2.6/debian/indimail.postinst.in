@@ -244,7 +244,7 @@ if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
 		--databasedir=${indimaildir}/mysqldb
 	# MySQL Database Creation
 	${prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=${mysqlPrefix} \
-    	--databasedir=${indimaildir}/mysqldb --base_path=${mbase} --mysqlsocket="${mysqlSocket}".tmp
+		--databasedir=${indimaildir}/mysqldb --base_path=${mbase} --mysqlsocket="${mysqlSocket}".tmp
 	# MySQL Supervise creation
 	${prefix}/sbin/svctool --mysql=3306 --servicedir=${servicedir} --mysqlPrefix=${mysqlPrefix} \
 		--databasedir=${indimaildir}/mysqldb --config=${sysconfdir}/indimail.cnf --default-domain=${default_domain}
@@ -326,7 +326,7 @@ if [ $nofetchmail -eq 0 ] ; then
 		extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
 	fi
 	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
+		qhpsi="/usr/bin/clamdscan %s --config=%{sysconfdir}/scan.conf --fdpass --quiet --no-summary"
 		extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
 	fi
 	eval ${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \

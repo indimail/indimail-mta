@@ -33,7 +33,6 @@ mv=/bin/mv
 ####################################
 noproxy=0
 nocourierimap=0
-noclamav=1
 nofetchmail=0
 nobogofilter=0
 nonssd=0
@@ -169,11 +168,6 @@ if [ $nobogofilter -eq 0 ] ; then
 	${rm} -f ${sysconfdir}/bogofilter.cf ${sysconfdir}/bogofilter.cf.example
 fi
 
-if [ $noclamav -eq 0 ] ; then
-	${rm} -f ${sysconfdir}/clamd.conf ${sysconfdir}/freshclam.conf
-	${rm} -f ${sysconfdir}/clamd.conf.disabled ${sysconfdir}/freshclam.conf.disabled
-	${rm} -f ${sysconfdir}/clamd.conf.sample ${sysconfdir}/freshclam.conf.sample
-fi
 if [ $nonssd -eq 0 ] ; then
 	${rm} -f ${sysconfdir}/nssd.conf
 fi
