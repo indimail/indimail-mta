@@ -583,3 +583,4 @@ starttls.o
 doc/ChangeLog
 doc/RELEASE-Notes
 debian/changelog.in
+maildirsize

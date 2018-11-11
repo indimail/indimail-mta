@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.253  2018-11-11 17:35:10+05:30  Cprogrammer
+ * added maildirsize man page
+ *
  * Revision 1.252  2018-11-11 14:07:37+05:30  Cprogrammer
  * added maildirsize program
  *
@@ -1243,6 +1246,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/man1", "addcr.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "delcr.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "fixcrio.1", uidr, gidr, moder_f);
+	c(mandir,          "man/man1", "maildirsize.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "recordio.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "uacl.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qbase64.1", uidr, gidr, moder_f);
@@ -1642,7 +1646,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.252 2018-11-11 14:07:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.253 2018-11-11 17:35:10+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
