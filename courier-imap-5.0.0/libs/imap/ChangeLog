@@ -1,4 +1,26 @@
-4.18.2
+5.0.0
+
+2018-07-21  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* pop3dserver.c: update Courier-IMAP to support UTF8 POP3. Update
+	version of the courierpop3dsizelist cache file.
+
+2018-07-17  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* courier-imap, sqwebmail: update Courier-IMAP to support UTF8 IMAP.
+	Convert maildir folders to use UTF-8 for folder names. Add
+	--checkutf8 and --convutf8 options to maildirmake to convert
+	pre-UTF8 maildirs to UTF8 maildirs, a mandatory upgrade procedure.
+
+2018-07-08  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* waitlib/configure.ac: Fix typo.
+
+2018-06-28  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* libs/tcpd/starttls.c (main): Add -user option. Additional fixes
+	to startup script to have couriertls drop root privileges.
+
 2018-06-21  Sam Varshavchik  <mrsam@courier-mta.com>
 
 	* libs/tcpd/tlsclient.h: add username option, used in couriertls_start
@@ -24,6 +46,8 @@
 2017-11-26  Sam Varshavchik  <mrsam@courier-mta.com>
 
 	* Tweak RPM spec file.
+
+4.18.2
 
 2017-09-27  Giovanni Bechis <giovanni@paclan.it>
 
