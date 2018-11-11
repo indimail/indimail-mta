@@ -24,7 +24,7 @@ BUILT_SOURCES=maildirsharedrc.h maildirfilterconfig.h quotawarnmsg.h \
 endif
 
 noinst_DATA=deliverquota.html maildirmake.html maildiracl.html maildir.libdeps
-man_MANS=deliverquota.8 maildirmake.1 maildiracl.1 sharedindexinstall.1 sharedindexsplit.1 maildirkw.1
+man_MANS=deliverquota.8 maildirquota.7 maildirmake.1 maildiracl.1 sharedindexinstall.1 sharedindexsplit.1 maildirkw.1
 
 libmaildir_la_SOURCES=autoresponse.c autoresponse.h \
 	maildiraclt.c maildiraclt.h \
