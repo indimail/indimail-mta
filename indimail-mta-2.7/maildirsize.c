@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.2  2018-11-11 14:08:11+05:30  Cprogrammer
+ * print maildirsize on stdout
+ *
  * Revision 1.1  2018-11-11 13:52:20+05:30  Cprogrammer
  * Initial revision
  *
@@ -15,33 +18,6 @@
 #include "indimail_stub.h"
 
 #define FATAL "maildirsize: fatal: "
-
-void
-out(char *str)
-{
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfdout, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
-}
-
-void
-flush()
-{
-	if (substdio_flush(subfdout) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
-}
-
-void
-die_nomem()
-{
-	substdio_flush(subfdout);
-	substdio_puts(subfderr, "out of memory\n");
-	substdio_flush(subfderr);
-	_exit(111);
-}
 
 struct substdio ssout;
 char            outbuf[256];
@@ -78,21 +54,23 @@ main(int argc, char **argv)
 	if (statfs("./Maildir/", &statbuf))
 		strerr_die3sys(111, FATAL, "statfs: ", "./Maildir/: ");
 	strnum[len = fmt_ulong(strnum, statbuf.f_bavail * statbuf.f_bsize)] = 0;
-	if (substdio_put(&ssout, strnum, len))
+	if (substdio_put(&ssout, strnum, len) || substdio_put(subfdout, strnum, len))
 		strerr_die2sys(111, FATAL, "write: ");
-	if (substdio_put(&ssout, "S\n", 2))
+	if (substdio_put(&ssout, "S\n", 2) || substdio_put(subfdout, "S\n", 2))
 		strerr_die2sys(111, FATAL, "write: ");
 	strnum[len = fmt_ulong(strnum, mailsize)] = 0;
-	if (substdio_put(&ssout, strnum, len))
+	if (substdio_put(&ssout, strnum, len) || substdio_put(subfdout, strnum, len))
 		strerr_die2sys(111, FATAL, "write: ");
-	if (substdio_put(&ssout, " ", 1))
+	if (substdio_put(&ssout, " ", 1) || substdio_put(subfdout, " ", 1))
 		strerr_die2sys(111, FATAL, "write: ");
 	strnum[len = fmt_ulong(strnum, mailcount)] = 0;
-	if (substdio_put(&ssout, strnum, len))
+	if (substdio_put(&ssout, strnum, len) || substdio_put(subfdout, strnum, len))
 		strerr_die2sys(111, FATAL, "write: ");
-	if (substdio_put(&ssout, "\n", 1))
+	if (substdio_put(&ssout, "\n", 1) || substdio_put(subfdout, "\n", 1))
 		strerr_die2sys(111, FATAL, "write: ");
 	if (substdio_flush(&ssout))
+		strerr_die2sys(111, FATAL, "write: ");
+	if (substdio_flush(subfdout))
 		strerr_die2sys(111, FATAL, "write: ");
 	if (close(fd) == -1)
 		strerr_die2sys(111, FATAL, "close: ");
@@ -102,7 +80,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.1 2018-11-11 13:52:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.2 2018-11-11 14:08:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
