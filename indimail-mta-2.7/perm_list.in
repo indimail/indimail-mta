@@ -78,6 +78,7 @@
 %attr(0755,root,qmail) @prefix@/bin/maildir2mbox
 %attr(0755,root,qmail) @prefix@/bin/maildircmd
 %attr(0755,root,qmail) @prefix@/bin/maildirdeliver
+%attr(0755,root,qmail) @prefix@/bin/maildirsize
 %attr(0755,root,qmail) @prefix@/bin/maildirqmtp
 %attr(0755,root,qmail) @prefix@/bin/maildirserial
 %attr(0755,root,qmail) @prefix@/bin/maildirsmtp

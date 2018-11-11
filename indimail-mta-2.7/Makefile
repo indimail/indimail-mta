@@ -1442,7 +1442,7 @@ ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirq
 maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate inewaliases newinclude \
 new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest \
 predate preline printforward printmaillist proc proc+df qaes qail \
-qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl \
+qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl maildirsize \
 qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
 qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-pop3d qmail-popbull qmail-poppass \
 qmail-popup qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
@@ -6132,6 +6132,33 @@ inotify.o: \
 compile inotify.c subfd.h strerr.h env.h scan.h \
 sig.h sgetopt.h hasinotify.h
 	./compile inotify.c
+
+maildirsize: \
+load maildirsize.o subfdout.o strerr_die.o \
+strerr_sys.o substdo.o substdio.o subfderr.o byte_copy.o \
+stralloc_opys.o stralloc_catb.o stralloc_cats.o \
+stralloc_opyb.o stralloc_cat.o stralloc_pend.o \
+stralloc_eady.o stralloc_copy.o auto_uids.o \
+auto_control.o auto_qmail.o str_rchr.o open_trunc.o \
+str_chr.o str_diffn.o scan_uint.o fmt_ulong.o \
+scan_ulong.o envread.o variables.o auto_sysconfdir.o \
+timeoutread.o timeoutwrite.o alloc.o alloc_re.o \
+error_str.o error.o str_len.o indimail_stub.o
+	./load maildirsize subfdout.o strerr_die.o \
+	strerr_sys.o substdo.o substdio.o subfderr.o \
+	byte_copy.o stralloc_opys.o stralloc_catb.o \
+	stralloc_cats.o stralloc_opyb.o stralloc_cat.o \
+	stralloc_pend.o stralloc_eady.o stralloc_copy.o \
+	auto_uids.o auto_control.o auto_qmail.o \
+	str_rchr.o open_trunc.o str_chr.o str_diffn.o \
+	scan_uint.o fmt_ulong.o scan_ulong.o envread.o \
+	variables.o auto_sysconfdir.o timeoutread.o \
+	timeoutwrite.o alloc.o alloc_re.o error_str.o \
+	error.o str_len.o indimail_stub.o -ldl
+
+maildirsize.o: \
+compile maildirsize.c subfd.h strerr.h indimail_stub.h open.h
+	./compile maildirsize.c
 
 
 ################### PLUGINS ########################################

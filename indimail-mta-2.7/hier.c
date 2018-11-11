@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.252  2018-11-11 14:07:37+05:30  Cprogrammer
+ * added maildirsize program
+ *
  * Revision 1.251  2018-09-10 12:14:28+05:30  Cprogrammer
  * added tcp subdir for tcpserver access control files
  *
@@ -938,6 +941,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "addcr", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "delcr", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "fixcrio", auto_uido, 0, moder_x);
+	c(auto_prefix, "bin", "maildirsize", auto_uido, 0, moder_x);
 
 #ifdef DOMAIN_KEYS
 	c(auto_prefix, "sbin", "qmail-dk", auto_uido, 0, moder_x);
@@ -1638,7 +1642,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.251 2018-09-10 12:14:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.252 2018-11-11 14:07:37+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
