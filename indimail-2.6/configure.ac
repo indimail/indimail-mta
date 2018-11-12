@@ -25,7 +25,7 @@ AC_ISC_POSIX
 AC_HEADER_STDC
 AC_CHECK_HEADERS(crypt.h openssl/evp.h inttypes.h)
 AC_CHECK_HEADERS(unistd.h dirent.h fnmatch.h stdarg.h fcntl.h limits.h udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/wait.h)
-AC_EGREP_HEADER(in_addr_t, netinet/in.h, AC_DEFINE(HAVE_IN_ADDR_T, 1, "have in_addr_t data type"))
+AC_EGREP_HEADER(in_addr_t, netinet/in.h, AC_DEFINE(HAVE_IN_ADDR_T, 1, "have in_addr_t data type"),)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -956,18 +956,54 @@ else
 	fi
 	mysqlbindir=$mysql_prefix/bin
 fi
-AC_EGREP_HEADER(MYSQL_OPT_LOCAL_INFILE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_LOCAL_INFILE, 1, "local inflie support"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_VERIFY_SERVER_CERT, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT, 1, "verify server cert"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_KEY, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_KEY, 1, "ssl key"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_CERT, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CERT, 1, "ssl cert"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_CA, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CA, 1, "ssl ca"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_CAPATH, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CAPATH, 1, "ssl capath"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_CIPHER, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CIPHER, 1, "ssl cipher"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_CRL, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CRL, 1, "ssl cert revocation list"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_CRLPATH, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CRLPATH, 1, "ssl cert revocation list path"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_ENFORCE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_ENFORCE, 1, "enforce ssl/tls"))
-AC_EGREP_HEADER(MYSQL_OPT_TLS_VERSION, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_TLS_VERSION, 1, "tls version"))
-AC_EGREP_HEADER(MYSQL_OPT_SSL_MODE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_MODE, 1, "ssl mmode"))
+egrep MYSQL_OPT_LOCAL_INFILE $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_LOCAL_INFILE, 1, "local infile support")
+fi
+egrep MYSQL_OPT_SSL_VERIFY_SERVER_CERT $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT, 1, "verify server cert")
+fi
+egrep MYSQL_OPT_SSL_KEY $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_KEY, 1, "ssl key")
+fi
+egrep MYSQL_OPT_SSL_CERT $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_CERT, 1, "ssl cert")
+fi
+egrep MYSQL_OPT_SSL_CA $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_CA, 1, "ssl ca")
+fi
+egrep MYSQL_OPT_SSL_CAPATH $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_CAPATH, 1, "ssl capath")
+fi
+egrep MYSQL_OPT_SSL_CIPHER $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_CIPHER, 1, "ssl cipher")
+fi
+egrep MYSQL_OPT_SSL_CRL $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_CRL, 1, "ssl cert revocation list")
+fi
+egrep MYSQL_OPT_SSL_CRLPATH $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_CRLPATH, 1, "ssl cert revocation list path")
+fi
+egrep MYSQL_OPT_SSL_ENFORCE $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_ENFORCE, 1, "enforce ssl/tls")
+fi
+egrep MYSQL_OPT_TLS_VERSION $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_TLS_VERSION, 1, "tls version")
+fi
+egrep MYSQL_OPT_SSL_MODE $mysql_incdir/mysql.h > /dev/null 2>&1
+if test $? = 0 ; then
+	AC_DEFINE(HAVE_MYSQL_OPT_SSL_MODE, 1, "ssl mode")
+fi
 
 saveLIBS="$LIBS"
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
