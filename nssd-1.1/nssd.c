@@ -19,7 +19,7 @@
 /*- A SIGNIFICANT PORTION OF THIS CODE IS BASED ON GNU NSCD */
 
 /*
- * $Id: nssd.c,v 1.2 2018-11-06 11:26:50+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: nssd.c,v 1.3 2018-11-12 17:43:46+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <errno.h>
@@ -52,7 +52,7 @@ do {                                                                         \
 int             debug_level = 0;
 static int      sock;
 static const char *conffile = _PATH_NSVSD_CONF;
-typedef char my_bool;
+typedef char ns_bool;
 
 /*- Each thread gets their own MySQL connection and result set */
 typedef struct {
@@ -89,7 +89,7 @@ static int
 init_connection(int th_num)
 {
 	const unsigned int default_timeout = DEFAULT_TIMEOUT;
-	const my_bool   reconnect = 1;
+	const ns_bool   reconnect = 1;
 
 	if (connections[th_num].connected)
 		return 1;
@@ -112,7 +112,7 @@ init_connection(int th_num)
 		return 0;
 	}
 #else
-	connections[th_num].mysql.reconnect = (my_bool) 1;
+	connections[th_num].mysql.reconnect = (ns_bool) 1;
 #endif
 
 	if (!mysql_real_connect
