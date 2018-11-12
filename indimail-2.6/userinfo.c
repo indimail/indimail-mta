@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.46  2018-11-12 21:54:45+05:30  Cprogrammer
+ * use HAVE_MYSQL_OPT_SSL_MODE to determine if ssl mode is being used
+ *
  * Revision 2.45  2018-03-31 11:51:20+05:30  Cprogrammer
  * conditionally compile ssl code
  *
@@ -231,7 +234,7 @@
 #include <mysql.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.45 2018-03-31 11:51:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.46 2018-11-12 21:54:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -499,17 +502,19 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 			printf("Unix   Socket : %s\n", mptr->unix_socket);
 		else {
 			printf("TCP/IP Port   : %d\n", mptr->port);
-#ifdef HAVE_MYSQL_OPT_SSL_ENFORCE
-			if (mysql_get_option(mptr, MYSQL_OPT_SSL_ENFORCE, &use_ssl)) {
+#ifdef HAVE_MYSQL_OPT_SSL_MODE
+			if (mysql_get_option(mptr, MYSQL_OPT_SSL_MODE, &use_ssl)) {
 				mysql_perror("mysql_get_option: %s");
 				return (1);
 			}
+			if (use_ssl)
+				ptr = (char *) mysql_get_ssl_cipher(mptr);
 #else
-			use_ssl = 0;
+			use_ssl = ((ptr = (char *) mysql_get_ssl_cipher(mptr)) ? 1 : 0);
 #endif
 			printf("Use SSL       : %s\n", use_ssl ? "Yes" : "No");
 			if (use_ssl)
-   				printf("SSL Cipher    : %s\n", mysql_get_ssl_cipher(mptr));
+   				printf("SSL Cipher    : %s\n", ptr);
 		}
 	}
 #ifdef ENABLE_AUTH_LOGGING
