@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.215 $";
+char           *revision = "$Revision: 1.216 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5430,36 +5430,36 @@ tls_verify()
 	switch (control_readfile(&clients, "tlsclients", 0))
 	{
 	case 1:
-		if (constmap_init(&mapclients, clients.s, clients.len, 0)) {
-			/*-
-			 * if clientca.pem contains all the standard root certificates, a
-			 * 0.9.6b client might fail with SSL_R_EXCESSIVE_MESSAGE_SIZE;
-			 * it is probably due to 0.9.6b supporting only 8k key exchange
-			 * data while the 0.9.6c release increases that limit to 100k 
-			 */
-			if (!certdir) {
-				if (!(certdir = env_get("CERTDIR")))
-					certdir = auto_control;
-			}
-			if (!stralloc_copys(&filename, certdir))
-				die_nomem();
-			if (!stralloc_catb(&filename, "/", 1))
-				die_nomem();
-			clientca = ((clientca = env_get("CLIENTCA")) ? clientca : "clientca.pem");
-			if (!stralloc_cats(&filename, clientca))
-				die_nomem();
-			if (!stralloc_0(&filename))
-				die_nomem();
-			STACK_OF(X509_NAME) * sk = SSL_load_client_CA_file(filename.s);
-			alloc_free(filename.s);
-			if (sk) {
-				SSL_set_client_CA_list(ssl, sk);
-				SSL_set_verify(ssl, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, NULL);
-				break;
-			}
-			constmap_free(&mapclients);
+		if (!constmap_init(&mapclients, clients.s, clients.len, 0))
+			die_nomem();
+		/*-
+		 * if clientca.pem contains all the standard root certificates, a
+		 * 0.9.6b client might fail with SSL_R_EXCESSIVE_MESSAGE_SIZE;
+		 * it is probably due to 0.9.6b supporting only 8k key exchange
+		 * data while the 0.9.6c release increases that limit to 100k 
+		 */
+		if (!certdir) {
+			if (!(certdir = env_get("CERTDIR")))
+				certdir = auto_control;
 		}
+		if (!stralloc_copys(&filename, certdir))
+			die_nomem();
+		if (!stralloc_catb(&filename, "/", 1))
+			die_nomem();
+		clientca = ((clientca = env_get("CLIENTCA")) ? clientca : "clientca.pem");
+		if (!stralloc_cats(&filename, clientca))
+			die_nomem();
+		if (!stralloc_0(&filename))
+			die_nomem();
+		STACK_OF(X509_NAME) *sk = SSL_load_client_CA_file(filename.s);
+		alloc_free(filename.s);
+		constmap_free(&mapclients);
 		alloc_free(clients.s);
+		if (sk) {
+			SSL_set_client_CA_list(ssl, sk);
+			SSL_set_verify(ssl, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, NULL);
+			break;
+		}
 	case 0:
 		alloc_free(clients.s);
 		return 0;
@@ -5629,6 +5629,7 @@ tls_init()
 	if (!stralloc_0(&filename))
 		die_nomem();
 	if (!SSL_CTX_use_certificate_chain_file(ctx, filename.s)) {
+		alloc_free(filename.s);
 		SSL_CTX_free(ctx);
 		tls_err("missing certificate");
 		return;
@@ -6062,6 +6063,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.216  2018-11-12 08:28:27+05:30  Cprogrammer
+ * removed potential leaks
+ *
  * Revision 1.215  2018-08-21 20:37:56+05:30  Cprogrammer
  * fixed comments and indentation
  *
@@ -6145,7 +6149,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.215 2018-08-21 20:37:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.216 2018-11-12 08:28:27+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
