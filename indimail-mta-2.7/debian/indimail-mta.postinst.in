@@ -476,7 +476,7 @@ do
     svc_list="$svc_list ${servicedir}/$i"
   fi
 done
-svc_list="$svc_list ${sysconfdir}/control/defaultqueue"
+svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
 
 echo "compressing man pages"
