@@ -32,7 +32,7 @@ AC_ARG_WITH(certdb, [  --with-certdb=/pathname     Use external root certificate
 		esac
 ], [
 
-for f in /etc/ssl/certs /etc/ssl/cert.pem /etc/pki/tls/cert.pem
+for f in /etc/ssl/certs /etc/ssl/cert.pem /etc/pki/tls/cert.pem /etc/ssl/certs/ca-certificates.crt
 do
 	if test -f $f -o -d $f
 	then
