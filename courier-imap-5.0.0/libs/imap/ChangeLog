@@ -1,3 +1,27 @@
+5.0.2
+
+2018-10-27  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* configure.ac: Additional changes to how Unicode messages are
+	handled with non-Unicode clients: disclaim all warranties, still
+	report an error, but provide the raw message content, as is.
+
+5.0.1
+
+2018-09-26  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Provide an substitute message to IMAP clients that did not enable
+	UTF-8.
+
+2018-09-24  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* couriertls: additional fixes.
+
+2018-09-24  Yoshinari Takaoka <mumumu@mumumu.org>
+
+	* couriertls: option to use a separate file for the SSL certificate's
+	private key, as an alternative to the combined keyfile+certificate.
+
 5.0.0
 
 2018-07-21  Sam Varshavchik  <mrsam@courier-mta.com>
