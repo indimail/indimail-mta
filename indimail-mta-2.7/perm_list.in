@@ -27,6 +27,7 @@
 %dir %attr(0555,root,qmail)        @prefix@/lib/indimail/plugins
 %dir %attr(2755,root,qmail)        @qsysconfdir@
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/certs
+%dir %attr(2775,indimail,qmail)    @qsysconfdir@/tcp
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/users
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/control
 %dir %attr(2755,indimail,qmail)    @qsysconfdir@/control/domainkeys
