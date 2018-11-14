@@ -717,7 +717,7 @@ static int store_mailbox(const char *tag, const char *mailbox,
 	unsigned long nbytes=curtoken->tokennum;
 	char	*tmpname;
 	char	*newname;
-	char	*p;
+	char	*p, *q;
 	char    *e;
 	FILE	*fp;
 	unsigned long n;
@@ -791,7 +791,8 @@ static int store_mailbox(const char *tag, const char *mailbox,
 		errflag=1;
 	}
 
-	if ((rfc2045_parser->rfcviolation & RFC2045_ERR8BITHEADER) &&
+	q = getenv("ENABLE_UTF8_COMPLIANCE");
+	if ((q && *q) &&(rfc2045_parser->rfcviolation & RFC2045_ERR8BITHEADER) &&
 	    curtoken->tokentype != IT_LITERAL8_STRING_START)
 	{
 		errmsg=" NO [ALERT] Your IMAP client does not appear to "
@@ -841,7 +842,6 @@ static int store_mailbox(const char *tag, const char *mailbox,
 		{
 			unlink(tmpname);
 			free(tmpname);
-			free(p);
 			writes(tag);
 			writes(" NO [ALERT] You exceeded your mail quota.\r\n");
 			return (-1);
@@ -855,7 +855,6 @@ static int store_mailbox(const char *tag, const char *mailbox,
 		writes(tag);
 		writes(" NO [ALERT] Unable to send E-mail message.\r\n");
 		free(tmpname);
-		free(p);
 		return (-1);
 	}
 
@@ -886,7 +885,6 @@ static int store_mailbox(const char *tag, const char *mailbox,
 				writes(" NO [ALERT] ");
 				writes(strerror(errno));
 				free(tmpname);
-				free(p);
 				return (-1);
 			}
 		}
@@ -903,7 +901,6 @@ static int store_mailbox(const char *tag, const char *mailbox,
 		if (rc)
 		{
 			free(tmpname);
-			free(p);
 			writes(tag);
 			writes(nowrite);
 			return -1;
@@ -915,7 +912,6 @@ static int store_mailbox(const char *tag, const char *mailbox,
 	}
 
 	free(tmpname);
-	free(p);
 	return (0);
 }
 
