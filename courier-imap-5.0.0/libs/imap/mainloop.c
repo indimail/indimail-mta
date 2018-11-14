@@ -113,14 +113,8 @@ void mainloop(void)
 
 	if (!max_atom_size) {
 		max_atom_size = (ptr = getenv("MAX_ATOM_SIZE")) ? strtoull(ptr, 0, 0) : IT_MAX_ATOM_SIZE;
-#ifdef HAVE_INTTYPES_H
-		fprintf(stderr, "setting MAX ATOM SIZE to %"PRIu64"\n", max_atom_size);
-#else
-		fprintf(stderr, "setting MAX ATOM SIZE to %ld\n", max_atom_size);
-#endif
-		if (!(tag = (char *) malloc(max_atom_size + 1))) {
+		if (!(tag = (char *) malloc(max_atom_size + 1)))
 			write_error_exit("error allocating atom");
-		}
 	}
 	signal(SIGTERM, sigexit);
 	signal(SIGHUP, sigexit);
