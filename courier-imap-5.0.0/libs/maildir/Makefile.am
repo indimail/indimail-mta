@@ -2,7 +2,6 @@
 # Copyright 1998 - 2005 Double Precision, Inc.  See COPYING for
 # distribution information.
 
-ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 AM_CXXFLAGS=@COURIER_UNICODE_CXXFLAGS@
 
 noinst_LTLIBRARIES=libmaildir.la
