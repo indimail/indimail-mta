@@ -644,7 +644,8 @@ static void do_retr(unsigned i, unsigned *lptr)
 	char	buf[NUMBUFSIZE];
 	unsigned long *cntr;
 
-	if (msglist_a[i]->isutf8 && !utf8_enabled)
+	p = getenv("ENABLE_UTF8_COMPLIANCE");
+	if ((p && *p) && msglist_a[i]->isutf8 && !utf8_enabled)
 	{
 		printed(printf("-ERR Cannot open message %u because it is"
 			       " a Unicode message and your E-mail reader"

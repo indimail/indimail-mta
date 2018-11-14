@@ -135,5 +135,7 @@ void imapcapability()
 	if (magictrash())
 		writes(" XMAGICTRASH");
 
-	writes(" ENABLE UTF8=ACCEPT");
+	p = getenv("ENABLE_UTF8_COMPLIANCE");
+	if (p && *p)
+		writes(" ENABLE UTF8=ACCEPT");
 }
