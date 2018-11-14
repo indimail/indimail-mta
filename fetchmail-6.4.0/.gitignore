@@ -31,3 +31,6 @@ stamp-h1
 *.a
 autom4te.cache
 ChangeLog.fetchmail
+compile
+py-compile
+ylwrap
