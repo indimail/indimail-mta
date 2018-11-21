@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_active.c,v $
+ * Revision 2.11  2018-11-21 14:35:00+05:30  Cprogrammer
+ * change for fstabChangeCounter
+ *
  * Revision 2.10  2016-01-12 14:27:08+05:30  Cprogrammer
  * use AF_INET for get_local_ip()
  *
@@ -53,7 +56,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_active.c,v 2.10 2016-01-12 14:27:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_active.c,v 2.11 2018-11-21 14:35:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -62,12 +65,11 @@ static char     sccsid[] = "$Id: vauth_active.c,v 2.10 2016-01-12 14:27:08+05:30
 #include <string.h>
 #include <pwd.h>
 #include <errno.h>
-#include <sys/socket.h>
 
 int
 vauth_active(struct passwd *pw, char *domain, int type)
 {
-	char           *table1 = NULL, *table2 = NULL, *local_ip;
+	char           *table1 = NULL, *table2 = NULL;
 	int             row_count;
 	mdir_t          quota;
 	char            SqlBuf[SQL_BUF_SIZE], Dir[MAX_BUFF];
@@ -77,18 +79,15 @@ vauth_active(struct passwd *pw, char *domain, int type)
 		return(1);
 	if(type != FROM_INACTIVE_TO_ACTIVE && type != FROM_ACTIVE_TO_INACTIVE)
 		return(1);
-	if(type == FROM_INACTIVE_TO_ACTIVE)
-	{
+	if(type == FROM_INACTIVE_TO_ACTIVE) {
 		table1  = inactive_table;
 		table2 = default_table;
 	} else
-	if(type == FROM_ACTIVE_TO_INACTIVE)
-	{
+	if(type == FROM_ACTIVE_TO_INACTIVE) {
 		table2  = inactive_table;
 		table1 = default_table;
 		snprintf(SqlBuf, SQL_BUF_SIZE, "CREATE TABLE IF NOT EXISTS %s ( %s )", inactive_table, SMALL_TABLE_LAYOUT);
-		if (mysql_query(&mysql[1], SqlBuf))
-		{
+		if (mysql_query(&mysql[1], SqlBuf)) {
 			mysql_perror("vauth_active: %s", SqlBuf);
 			return (1);
 		}
@@ -96,8 +95,7 @@ vauth_active(struct passwd *pw, char *domain, int type)
 	snprintf(SqlBuf, SQL_BUF_SIZE,
 		"insert low_priority into %s select high_priority * from %s where pw_name=\"%s\" and pw_domain=\"%s\"",
 		table2, table1, pw->pw_name, domain);
-	if (mysql_query(&mysql[1], SqlBuf))
-	{
+	if (mysql_query(&mysql[1], SqlBuf)) {
 		mysql_perror("vauth_moverecord: %s", SqlBuf);
 		return (1);
 	}
@@ -106,21 +104,18 @@ vauth_active(struct passwd *pw, char *domain, int type)
 		return(1);
 	snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from %s where pw_name=\"%s\" and pw_domain=\"%s\"",
 			table1, pw->pw_name, domain);
-	if (mysql_query(&mysql[1], SqlBuf))
-	{
+	if (mysql_query(&mysql[1], SqlBuf)) {
 		mysql_perror("vauth_moverecord: %s", SqlBuf);
 		return (1);
 	}
 	row_count = mysql_affected_rows(&mysql[1]);
 #ifdef DELETE_AUTH_RECORD
-	if(type == FROM_ACTIVE_TO_INACTIVE)
-	{
+	if(type == FROM_ACTIVE_TO_INACTIVE) {
 		snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"delete low_priority from lastauth where user = \"%s\" and domain = \"%s\" \
 			and (service = \"pop3\" or service=\"imap\")", 
 			pw->pw_name, domain);
-		if (mysql_query(&mysql[1], SqlBuf))
-		{
+		if (mysql_query(&mysql[1], SqlBuf)) {
 			mysql_perror("vauth_active-lastauth: %s", SqlBuf);
 			return(1);
 		}
@@ -135,8 +130,7 @@ vauth_active(struct passwd *pw, char *domain, int type)
 		is_inactive = 0;
 	snprintf(Dir, MAX_BUFF, "%s/Maildir", pw->pw_dir);
 #ifdef USE_MAILDIRQUOTA
-	if ((quota = parse_quota(pw->pw_shell, 0)) == -1)
-	{
+	if ((quota = parse_quota(pw->pw_shell, 0)) == -1) {
 		fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
 		return (-1);
 	}
@@ -147,16 +141,11 @@ vauth_active(struct passwd *pw, char *domain, int type)
 	vset_lastauth(pw->pw_name, domain, ((type == FROM_ACTIVE_TO_INACTIVE) ? "INAC" : "ACTI"), GetIpaddr(), 
 			pw->pw_gecos, (type == FROM_ACTIVE_TO_INACTIVE) ? 0 : check_quota(Dir));
 #endif
-	if(!(local_ip = get_local_ip(PF_INET)))
-	{
-		fprintf(stderr, "vauth_active: get_local_ip: %s\n", strerror(errno));
-		return(-1);
-	}
 	if(type == FROM_ACTIVE_TO_INACTIVE)
-		fstabChangeCounter(pw->pw_dir, local_ip, -1, 0 - quota);
+		fstabChangeCounter(pw->pw_dir, 0, -1, 0 - quota);
 	else
 	if(type == FROM_INACTIVE_TO_ACTIVE)
-		fstabChangeCounter(pw->pw_dir, local_ip, 1, quota);
+		fstabChangeCounter(pw->pw_dir, 0, 1, quota);
 	return(0);
 }
 #endif

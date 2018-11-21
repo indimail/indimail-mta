@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 2.30  2018-11-21 14:36:00+05:30  Cprogrammer
+ * change for fstabChangeCounter
+ *
  * Revision 2.29  2018-09-11 10:31:13+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -137,14 +140,13 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
 #include <mysqld_error.h>
 #ifndef USE_MAILDIRQUOTA
 #include <stdlib.h>
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 2.29 2018-09-11 10:31:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 2.30 2018-11-21 14:36:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -158,7 +160,7 @@ vdeluser(char *user, char *domain, int remove_db)
 {
 	struct passwd  *passent;
 	char            Dir[MAX_BUFF], TmpBuf[MAX_BUFF + 9], SqlBuf[SQL_BUF_SIZE];
-	char           *real_domain, *local_ip, *ptr;
+	char           *real_domain, *ptr;
 	char            ch;
 	mdir_t          quota;
 #ifdef CLUSTERED_SITE
@@ -169,27 +171,20 @@ vdeluser(char *user, char *domain, int remove_db)
 	gid_t           gid;
 	int             i;
 
-	if (!user || !*user || !isalnum((int) *user))
-	{
+	if (!user || !*user || !isalnum((int) *user)) {
 		error_stack(stderr, "Illegal Username\n");
 		return (-1);
 	}
-	if (remove_db == 2)
-	{
-		for(i = 0;rfc_ids[i];i++)
-		{
-			if (!strncmp(user, rfc_ids[i], slen(rfc_ids[i]) + 1))
-			{
+	if (remove_db == 2) {
+		for(i = 0;rfc_ids[i];i++) {
+			if (!strncmp(user, rfc_ids[i], slen(rfc_ids[i]) + 1)) {
 				error_stack(stderr, "RFC Ids cannot be made inactive\n");
 				return (-1);
 			}
 		}
-	} else
-	{
-		for(i = 0;rfc_ids[i];i++)
-		{
-			if (!strncmp(user, rfc_ids[i], slen(rfc_ids[i]) + 1))
-			{
+	} else {
+		for(i = 0;rfc_ids[i];i++) {
+			if (!strncmp(user, rfc_ids[i], slen(rfc_ids[i]) + 1)) {
 				printf("Are You sure removing RFC Id %s (y/n) - ", user);
 				ch = getchar();
 				if (ch != 'y' && ch != 'Y')
@@ -202,56 +197,46 @@ vdeluser(char *user, char *domain, int remove_db)
 	lowerit(user);
 	if (domain && *domain)
 		lowerit(domain);
-	if (domain && *domain)
-	{
-		if (!(real_domain = vget_real_domain(domain)))
-		{
+	if (domain && *domain) {
+		if (!(real_domain = vget_real_domain(domain))) {
 			error_stack(stderr, "Domain %s does not exist\n", domain);
 			return (-1);
 		} else
-		if (!vget_assign(real_domain, Dir, MAX_BUFF, &uid, &gid))
-		{
+		if (!vget_assign(real_domain, Dir, MAX_BUFF, &uid, &gid)) {
 			error_stack(stderr, "Domain %s does not exist\n", real_domain);
 			return (-1);
 		}
 #ifdef CLUSTERED_SITE
-		if ((err = is_distributed_domain(real_domain)) == -1)
-		{
+		if ((err = is_distributed_domain(real_domain)) == -1) {
 			error_stack(stderr, "Unable to verify %s as a distributed domain\n", real_domain);
 			return (-1);
 		} else
-		if (err == 1)
-		{
-			if (open_master())
-			{
+		if (err == 1) {
+			if (open_master()) {
 				error_stack(stderr, "vdeluser: Failed to Open Master Db\n");
 				return (-1);
 			}
 			snprintf(TmpBuf, MAX_BUFF, "%s@%s", user, real_domain);
-			if ((mailstore = findhost(TmpBuf, 0)) != (char *) 0)
-			{
+			if ((mailstore = findhost(TmpBuf, 0)) != (char *) 0) {
 				if ((ptr = strrchr(mailstore, ':')) != (char *) 0)
 					*ptr = 0;
 				for(;*mailstore && *mailstore != ':';mailstore++);
 				mailstore++;
-			} else
-			{
+			} else {
 				if (userNotFound)
 					error_stack(stderr, "%s@%s: No such user\n", user, real_domain);
 				else
 					error_stack(stderr, "Error connecting to db\n");
 				return (-1);
 			}
-			if (!islocalif(mailstore))
-			{
+			if (!islocalif(mailstore)) {
 				error_stack(stderr, "%s@%s not local (mailstore %s)\n",
 					user, real_domain, mailstore);
 				return(-1);
 			}
 		}
 #endif
-		if (!(passent = vauth_getpw(user, real_domain)))
-		{
+		if (!(passent = vauth_getpw(user, real_domain))) {
 			if (userNotFound)
 				error_stack(stderr, "%s@%s: No such user\n", user, real_domain);
 			else
@@ -262,8 +247,7 @@ vdeluser(char *user, char *domain, int remove_db)
 		switch(remove_db)
 		{
 			case 1: /*- Delete User */
-				if (vauth_deluser(user, real_domain))
-				{
+				if (vauth_deluser(user, real_domain)) {
 					error_stack(stderr, "vdeluser: Failed to remove user %s@%s\n",
 						user, real_domain);
 					return (-1);
@@ -273,30 +257,21 @@ vdeluser(char *user, char *domain, int remove_db)
 #else
 				quota = atol(passent->pw_shell);
 #endif
-				if (quota == -1)
-				{
+				if (quota == -1) {
 					fprintf(stderr, "vdeluser: parse_quota: %s: %s\n", passent->pw_shell, strerror(errno));
 					return (-1);
 				}
-				if (!(local_ip = get_local_ip(PF_INET)))
-				{
-					fprintf(stderr, "vdeluser: get_local_ip: %s\n", strerror(errno));
-					return(-1);
-				}
 #ifdef ENABLE_AUTH_LOGGING
 				if (vget_lastauth(passent, real_domain, ACTIV_TIME, 0))
-					fstabChangeCounter(passent->pw_dir, local_ip, -1, 0 - quota);
+					fstabChangeCounter(passent->pw_dir, 0, -1, 0 - quota);
 				snprintf(SqlBuf, SQL_BUF_SIZE, 
 					"delete low_priority from lastauth where user=\"%s\" and domain=\"%s\"",
 					user, real_domain);
-				if (mysql_query(&mysql[1], SqlBuf))
-				{
-					if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
-					{
+				if (mysql_query(&mysql[1], SqlBuf)) {
+					if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
 						if (create_table(ON_LOCAL, "lastauth", LASTAUTH_TABLE_LAYOUT))
 							return(-1);
-					} else
-					{
+					} else {
 						fprintf(stderr, "vdeluser: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
 						return(-1);
 					}
@@ -305,8 +280,7 @@ vdeluser(char *user, char *domain, int remove_db)
 				break;
 			case 2: /*- Make user inactive */
 #ifdef ENABLE_AUTH_LOGGING
-				if (vauth_active(passent, real_domain, FROM_ACTIVE_TO_INACTIVE))
-				{
+				if (vauth_active(passent, real_domain, FROM_ACTIVE_TO_INACTIVE)) {
 					error_stack(stderr, "vdeluser: Failed to mark user %s@%s as inactive\n", 
 						user, real_domain);
 					return (-1);
@@ -319,33 +293,26 @@ vdeluser(char *user, char *domain, int remove_db)
 #endif
 				break;
 		}
-		if (remove_db)
-		{
+		if (remove_db) {
 #ifdef VFILTER
 			snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from vfilter where emailid=\"%s@%s\"",
 				user, real_domain);
-			if (mysql_query(&mysql[1], SqlBuf))
-			{
-				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
-				{
+			if (mysql_query(&mysql[1], SqlBuf)) {
+				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
 					if (create_table(ON_LOCAL, "vfilter", FILTER_TABLE_LAYOUT))
 						return(-1);
-				} else
-				{
+				} else {
 					fprintf(stderr, "vdeluser: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
 					return (-1);
 				}
 			}
 			snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from mailing_list where emailid=\"%s@%s\"",
 				user, real_domain);
-			if (mysql_query(&mysql[1], SqlBuf))
-			{
-				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
-				{
+			if (mysql_query(&mysql[1], SqlBuf)) {
+				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
 					if (create_table(ON_LOCAL, "mailing_list", MAILING_LIST_TABLE_LAYOUT))
 						return(-1);
-				} else
-				{
+				} else {
 					fprintf(stderr, "vdeluser: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
 					return (-1);
 				}
@@ -354,14 +321,11 @@ vdeluser(char *user, char *domain, int remove_db)
 #ifdef ENABLE_AUTH_LOGGING
 			snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from userquota where user=\"%s\" and domain=\"%s\"", 
 				user, real_domain);
-			if (mysql_query(&mysql[1], SqlBuf))
-			{
-				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
-				{
+			if (mysql_query(&mysql[1], SqlBuf)) {
+				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
 					if (create_table(ON_LOCAL, "userquota", USERQUOTA_TABLE_LAYOUT))
 						return(-1);
-				} else
-				{
+				} else {
 					fprintf(stderr, "vdeluser: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
 					return (-1);
 				}
@@ -371,30 +335,24 @@ vdeluser(char *user, char *domain, int remove_db)
 			/*- Remove forwardings to this email address */
 			snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from valias where valias_line=\"&%s@%s\"", 
 				user, real_domain);
-			if (mysql_query(&mysql[1], SqlBuf))
-			{
-				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
-				{
+			if (mysql_query(&mysql[1], SqlBuf)) {
+				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
 					if (create_table(ON_LOCAL, "valias", VALIAS_TABLE_LAYOUT))
 						return(-1);
-				} else
-				{
+				} else {
 					fprintf(stderr, "vdeluser: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
 					return (-1);
 				}
 			}
-			if (valias_delete(user, real_domain, (char *) 0))
-			{
+			if (valias_delete(user, real_domain, (char *) 0)) {
 				error_stack(stderr, "vdeluser: Failed to remove aliases for user %s@%s\n",
 					user, real_domain);
 				return (-1);
 			}
 #endif
 		}
-	} else
-	{
-		if (!vget_assign(user, Dir, MAX_BUFF, &uid, &gid))
-		{
+	} else {
+		if (!vget_assign(user, Dir, MAX_BUFF, &uid, &gid)) {
 			error_stack(stderr, "%s: No such user\n", user);
 			return (-1);
 		}
@@ -408,20 +366,17 @@ vdeluser(char *user, char *domain, int remove_db)
 	 * remove the users directory from the file system 
 	 * and check for error
 	 */
-	if (vdelfiles(Dir, user, real_domain))
-	{
+	if (vdelfiles(Dir, user, real_domain)) {
 		error_stack(stderr, "Failed to remove Dir %s: %s\n", Dir, strerror(errno));
 		return (-1);
 	}
 	snprintf(TmpBuf, sizeof(TmpBuf), "%s/.qmail-%s", Dir, user);
 	/* replace all dots with ':' */
-	for(ptr = TmpBuf + slen(Dir) + 8;*ptr;ptr++)
-	{
+	for(ptr = TmpBuf + slen(Dir) + 8;*ptr;ptr++) {
 		if (*ptr == '.')
 			*ptr = ':';
 	}
-	if (!access(TmpBuf, F_OK))
-	{
+	if (!access(TmpBuf, F_OK)) {
 		if (verbose)
 			printf("Removing file %s\n", TmpBuf);
 		unlink(TmpBuf);
