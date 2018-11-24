@@ -1,5 +1,8 @@
 /*
  * $Log: crc.c,v $
+ * Revision 2.8  2018-11-24 17:26:18+05:30  Cprogrammer
+ * display crc as a 8 digit hex number
+ *
  * Revision 2.7  2018-11-06 22:06:28+05:30  Cprogrammer
  * calculate 32-bit CRC
  *
@@ -35,7 +38,7 @@
 #include <grp.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crc.c,v 2.7 2018-11-06 22:06:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crc.c,v 2.8 2018-11-24 17:26:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAXBUF 4096
@@ -328,7 +331,7 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 		}
 		crc = ~crc & 0xFFFFFFFF;
 		if (statflag != -1) {
-			printf(displayhex ? "0x%4.4lx" : "%ld", crc);
+			printf(displayhex ? "0x%8.8lx" : "%ld", crc);
 			if (statflag)
 				stats(file, &statbuf);
 			else
@@ -368,7 +371,7 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 	crc = ~crc & 0xFFFFFFFF;
 	(void) close(fd);
 	if (statflag != -1) {
-		printf(displayhex ? "0x%4.4lx" : "%ld", crc);
+		printf(displayhex ? "0x%8.8lx" : "%ld", crc);
 		if (statflag)
 			stats(file, &statbuf);
 		else

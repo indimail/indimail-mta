@@ -1,5 +1,8 @@
 /*
  * $Log: crcdiff.c,v $
+ * Revision 2.4  2018-11-24 17:30:19+05:30  Cprogrammer
+ * modified for 8 digit crc
+ *
  * Revision 2.3  2018-11-06 22:04:34+05:30  Cprogrammer
  * updated for 32 bit checksum CRC
  *
@@ -68,7 +71,7 @@ char            old_line[BUF_SIZE];
 
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 2.3 2018-11-06 22:04:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 2.4 2018-11-24 17:30:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -83,7 +86,7 @@ main(argc, argv)
 	FILE           *oldfp;
 	int             match;
 	unsigned long   oldcrc, newcrc, diffcrc, modicount, count;
-	char            tmpcrc[6];
+	char            tmpcrc[11];
 	/*-
        	If line =, read new line from each file
        else
@@ -121,16 +124,14 @@ main(argc, argv)
 			perror("fgets");
 			return (1);
 		}
-		/*
-		 * Compare just the file names 
-		 */
+		/*- Compare just the file names */
 		if (!(old_ptr = strrchr(old_line, ' ')))
 		{
 			(void) printf("Error in input data\n");
 			exit(1);
 		}
-		strncpy(tmpcrc, old_line, 4);
-		tmpcrc[4] = CNULL;
+		strncpy(tmpcrc, old_line, 10);
+		tmpcrc[10] = CNULL;
 		sscanf(tmpcrc, "%lx", &count);
 		oldcrc += count;
 		for (count = match = 0;; count++)
@@ -165,42 +166,33 @@ main(argc, argv)
 					(void) printf("Error in input data\n");
 					return (1);
 				}
-				/*
-				 * check crc change 
-				 */
-				if (strncmp(new_line, old_line, 4))
-				{
-					strncpy(tmpcrc, new_line, 4);
-					tmpcrc[4] = CNULL;
+				/*- check crc change */
+				if (strncmp(new_line, old_line, 10)) {
+					strncpy(tmpcrc, new_line, 10);
+					tmpcrc[10] = CNULL;
 					sscanf(tmpcrc, "%lx", &count);
 					diffcrc += count;
-					strncpy(tmpcrc, old_line, 4);
-					tmpcrc[4] = CNULL;
+					strncpy(tmpcrc, old_line, 10);
+					tmpcrc[10] = CNULL;
 					sscanf(tmpcrc, "%lx", &count);
 					diffcrc -= count;
 					if (!strcmp(new_ptr, old_ptr))
-						(void) printf("corrupt    %s", new_line + 5);
+						(void) printf("corrupt    %s", new_line + 11);
 					else
-						(void) printf("replaced   %s", new_line + 5);
+						(void) printf("replaced   %s", new_line + 11);
 					modicount++;
 				}
-				/*
-				 * check permission chenage 
-				 */
-				if (strncmp(new_line + 5, old_line + 5, 11))
-				{
-					(void) printf("permiss <  %s", old_line + 5);
-					(void) printf("permiss >  %s", new_line + 5);
+				/*- check permission chenage */
+				if (strncmp(new_line + 11, old_line + 11, 10)) {
+					(void) printf("permiss <  %s", old_line + 11);
+					(void) printf("permiss >  %s", new_line + 11);
 					modicount++;
 					fflush(stdout);
 				}
-				/*
-				 * check  owner/group 
-				 */
-				if (strncmp(new_line + 16, old_line + 16, new_ptr - new_line - 15))
-				{
-					(void) printf("own/grp <  %s", old_line + 5);
-					(void) printf("own/grp >  %s", new_line + 5);
+				/*- check  owner/group */
+				if (strncmp(new_line + 22, old_line + 22, new_ptr - new_line - 15)) {
+					(void) printf("own/grp <  %s", old_line + 11);
+					(void) printf("own/grp >  %s", new_line + 11);
 					modicount++;
 					fflush(stdout);
 				}
@@ -209,73 +201,62 @@ main(argc, argv)
 			if (!count)
 				rewind(newfp);
 		}/*- end of for(match = 0;;) -*/
-		if (!match)
-		{
-			strncpy(tmpcrc, old_line, 4);
-			tmpcrc[4] = CNULL;
+		if (!match) {
+			strncpy(tmpcrc, old_line, 10);
+			tmpcrc[10] = CNULL;
 			sscanf(tmpcrc, "%lx", &count);
 			diffcrc -= count;
-			(void) printf("removed    %s", old_line + 5);
+			(void) printf("removed    %s", old_line + 11);
 			modicount++;
 		}
 	}
 	rewind(newfp);
 	rewind(oldfp);
-	for (newcrc = 0l;;)
-	{
-		if (!fgets(new_line, BUF_SIZE, newfp))
-		{
+	for (newcrc = 0l;;) {
+		if (!fgets(new_line, BUF_SIZE, newfp)) {
 			if (feof(newfp))
 				break;
 			perror("fgets");
 			exit (1);
 		}
-		if (!(new_ptr = strrchr(new_line, ' ')))
-		{
+		if (!(new_ptr = strrchr(new_line, ' '))) {
 			(void) printf("Error in input data\n");
 			exit(1);
 		}
-		strncpy(tmpcrc, new_line, 4);
-		tmpcrc[4] = CNULL;
+		strncpy(tmpcrc, new_line, 10);
+		tmpcrc[10] = CNULL;
 		sscanf(tmpcrc, "%lx", &count);
 		newcrc += count;
-		for (count = match = 0;; count++)
-		{
-			if (!fgets(old_line, BUF_SIZE, oldfp))
-			{
-				if (feof(oldfp))
-				{
+		for (count = match = 0;; count++) {
+			if (!fgets(old_line, BUF_SIZE, oldfp)) {
+				if (feof(oldfp)) {
 					rewind(oldfp);
 					break;
 				}
 				perror("fgets");
 				exit (1);
 			}
-			if (!strcmp(old_line, new_line))
-			{
+			if (!strcmp(old_line, new_line)) {
 				match = 1;
 				break;
 			}
-			if (!(old_ptr = strrchr(old_line, ' ')))
-			{
+			if (!(old_ptr = strrchr(old_line, ' '))) {
 				(void) printf("Error in input data\n");
 				exit(1);
 			}
-			if (!strcmp(old_ptr, new_ptr))
-			{
+			if (!strcmp(old_ptr, new_ptr)) {
 				match = 1;
 				break;
 			} else
 			if (!count)
 				rewind(oldfp);
 		} /*- end of for(match = 0;;) */
-		if (!match)
-		{
-			strncpy(tmpcrc, new_line, 4);
-			tmpcrc[4] = CNULL;
+		if (!match) {
+			strncpy(tmpcrc, new_line, 10);
+			tmpcrc[10] = CNULL;
 			sscanf(tmpcrc, "%lx", &count);
 			diffcrc += count;
-			(void) printf("added      %s", new_line + 5);
+			(void) printf("added      %s", new_line + 11);
 			modicount++;
 		}
 	}
