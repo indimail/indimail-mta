@@ -806,29 +806,25 @@ You can use regex patterns in \fIblackholedrcptpatterns\fR itself if \fBQREGEX\f
 .TP 5
 .I hostaccess
 provides domain, IP address pair access list control. You can control
-sender domains to orignate from certian IP addresses. The host access
-list can also be set in the environment variable 
-.B HOSTACCESS .
-When this is set, the control file 
-.I hostaccess
-is not used. If the environment variable PARANOID is set, then only
-domain-ip pairs listed in the control file will be granted access. If
-the variable DOMAIN_MASQUERADE is set then for IP addresses listed in
+sender domains to orignate from certian IP addresses. You can override
+\fIhostaccess\fR filename with the environment variable \fBHOSTACCESS\fR
+If the environment variable PARANOID is set, then only domain-ip pairs
+listed in the control file will be granted access. If the variable
+\fBDOMAIN_MASQUERADE\fR is set then for IP addresses listed in
 the control file, domains not matching the pair will still be allowed.
 
 .EX
  *:202.133.22.1
  yahoo.com:202.144.77.5
  abc.com:202.10-33.54.5
- rediff.com:202.144.55.3
- indi.com:*
+ indimail.org:*
 
  - All domains allowed from 202.133.22.1 (no domain restriction
    for 202.133.22.1)
  - yahoo.com allowed from 202.144.77.5
  - abc.com is allowed from a ip range 202.10.54.5 to 202.33.54.5
- - indi.com is allowed from any ip address (no IP restriction for
-   indi.com)
+ - indimail.org is allowed from any ip address (no IP restriction
+   for indimail.org)
  - any domain other than rediff.com will be rejected from
    202.144.55.3 (unless DOMAIN_MASQUERADE is set)
 .EE
