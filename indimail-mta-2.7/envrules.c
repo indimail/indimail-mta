@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.18  2018-11-29 15:21:26+05:30  Cprogrammer
+ * skip white spaces in envrules
+ *
  * Revision 1.17  2015-04-14 20:01:15+05:30  Cprogrammer
  * fixed matching of null address
  *
@@ -53,6 +56,7 @@
  * Initial revision
  *
  */
+#include <ctype.h>
 #include "qregex.h"
 #include "error.h"
 #include "matchregex.h"
@@ -76,8 +80,7 @@ do_match(int use_regex, char *text, char *regex, char **errStr)
 	if (use_regex)
 		return (matchregex(text, regex, errStr));
 	else
-	if (env_get("USE_FNMATCH"))
-	{
+	if (env_get("USE_FNMATCH")) {
 #ifdef FNM_CASEFOLD
 		i = FNM_PATHNAME|FNM_CASEFOLD;
 #else
@@ -107,8 +110,7 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 		*errStr = 0;
 	if (!(ptr = env_get(rulesfile)))
 		ptr = envrules_f;
-	if ((count = control_readfile(&rules, ptr, 0)) == -1)
-	{
+	if ((count = control_readfile(&rules, ptr, 0)) == -1) {
 		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_FILE_ERR);
@@ -117,8 +119,7 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 		return(0);
 	if (env_get("QREGEX"))
 		use_regex = 1;
-	for (count = len = 0, ptr = rules.s;len < rules.len;)
-	{
+	for (count = len = 0, ptr = rules.s;len < rules.len;) {
 		len += (str_len(ptr) + 1);
 		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
 		if (*cptr == ':')
@@ -129,8 +130,7 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 			nullflag = 1;
 		else
 			nullflag = 0;
-		if (nullflag || do_match(use_regex, email, ptr, errStr))
-		{
+		if (nullflag || do_match(use_regex, email, ptr, errStr)) {
 			if (parse_env(cptr + 1))
 				return(AM_MEMORY_ERR);
 			count++;
@@ -151,8 +151,7 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 		*errStr = 0;
 	if (!(ptr = env_get(domainqueue)))
 		ptr = domainqueue_f;
-	if ((count = control_readfile(&rules, ptr, 0)) == -1)
-	{
+	if ((count = control_readfile(&rules, ptr, 0)) == -1) {
 		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_FILE_ERR);
@@ -164,16 +163,14 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 		return (0);
 	else
 		domain++;
-	for (count = len = 0, ptr = rules.s;len < rules.len;)
-	{
+	for (count = len = 0, ptr = rules.s;len < rules.len;) {
 		len += (str_len(ptr) + 1);
 		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
 		else
 			continue;
-		if (do_match(0, domain, ptr, errStr))
-		{
+		if (do_match(0, domain, ptr, errStr)) {
 			if (parse_env(cptr + 1))
 				return(AM_MEMORY_ERR);
 			count++;
@@ -188,48 +185,49 @@ parse_env(char *envStrings)
 {
 	char           *ptr1, *ptr2, *ptr3, *ptr4;
 
-	for (ptr2 = ptr1 = envStrings;*ptr1;ptr1++)
-	{
-		if (*ptr1 == ',')
-		{
+	for (ptr2 = ptr1 = envStrings;*ptr1;ptr1++) {
+		if (*ptr1 == ',') {
 			/*
 			 * Allow ',' in environment variable if escaped
 			 * by '\' character
 			 */
-			if (ptr1 != envStrings && *(ptr1 - 1) == '\\')
-			{
+			if (ptr1 != envStrings && *(ptr1 - 1) == '\\') {
 				for (ptr3 = ptr1 - 1, ptr4 = ptr1; *ptr3; *ptr3++ = *ptr4++);
 				continue;
 			}
 			*ptr1 = 0;
 			/*- envar=, - Unset the environment variable */
-			if (ptr1 != envStrings && *(ptr1 - 1) == '=')
-			{
+			if (ptr1 != envStrings && *(ptr1 - 1) == '=') {
 				*(ptr1 - 1) = 0;
 				if (*ptr2 && !env_unset(ptr2))
 					return (1);
-			} else /*- envar=val, - Set the environment variable */
-			if (*ptr2 && !env_put(ptr2))
-				return (1);
+			} else { /*- envar=val, - Set the environment variable */
+				while (isspace(*ptr2))
+					ptr2++;
+				if (*ptr2 && !env_put(ptr2))
+					return (1);
+			}
 			ptr2 = ptr1 + 1;
 		}
 	}
 	/*- envar=, */
-	if (ptr1 != envStrings && *(ptr1 - 1) == '=')
-	{
+	if (ptr1 != envStrings && *(ptr1 - 1) == '=') {
 		*(ptr1 - 1) = 0;
 		if (*ptr2 && !env_unset(ptr2))
 			return (1);
-	} else /*- envar=val, */
-	if (*ptr2 && !env_put(ptr2))
-		return (1);
+	} else { /*- envar=val, */
+		while (isspace(*ptr2))
+			ptr2++;
+		if (*ptr2 && !env_put(ptr2))
+			return (1);
+	}
 	return(0);
 }
 
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.17 2015-04-14 20:01:15+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.18 2018-11-29 15:21:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
