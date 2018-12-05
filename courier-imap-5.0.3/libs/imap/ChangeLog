@@ -1,3 +1,10 @@
+5.0.4
+
+2018-11-28  Hideki SAKAMOTO <hsakamt@tsnr.com>
+
+	* pop3dserver.c: Deal with MS Outlook's broken implementation of
+	RFC 6856.
+
 5.0.3
 
 2018-11-17  Sam Varshavchik  <mrsam@courier-mta.com>
