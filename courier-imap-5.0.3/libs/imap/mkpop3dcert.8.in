@@ -37,17 +37,17 @@ mkpop3dcert \- create a test SSL certificate for POP3 over SSL
 .SH "DESCRIPTION"
 .PP
 POP3 over SSL requires a valid, signed, X\&.509 certificate\&. The default location for the certificate file is
-@datadir@/pop3d\&.pem\&.
+@certsdir@/pop3d\&.pem\&.
 \fBmkpop3dcert\fR
 generates a self\-signed X\&.509 certificate, mainly for testing\&. For production use the X\&.509 certificate must be signed by a recognized certificate authority, in order for mail clients to accept the certificate\&.
 .PP
-@datadir@/pop3d\&.pem
+@certsdir@/pop3d\&.pem
 must be owned by the @mailuser@ user and have no group or world permissions\&. The
 \fBmkpop3dcert\fR
 command will enforce this\&. To prevent an unfortunate accident,
 \fBmkpop3dcert\fR
 will not work if
-\fB@datadir@/pop3d\&.pem\fR
+\fB@certsdir@/pop3d\&.pem\fR
 already exists\&.
 .PP
 \fBmkpop3dcert\fR
@@ -56,7 +56,7 @@ OpenSSL
 to be installed\&.
 .SH "FILES"
 .PP
-@datadir@/pop3d\&.pem
+@certsdir@/pop3d\&.pem
 .RS 4
 X\&.509 certificate\&.
 .RE

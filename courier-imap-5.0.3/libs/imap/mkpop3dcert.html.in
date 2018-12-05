@@ -7,22 +7,22 @@ information.
 --></head><body><div class="refentry"><a id="idm255219725024" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>mkpop3dcert — create a test SSL certificate for POP3 over SSL</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">@sbindir@/mkpop3dcert</code> </p></div></div><div class="refsect1"><a id="idm255223883600" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 POP3 over SSL requires a valid, signed, X.509 certificate.  The default
 location for the certificate file is
-<code class="filename">@datadir@/pop3d.pem</code>.
+<code class="filename">@certsdir@/pop3d.pem</code>.
 <span class="command"><strong>mkpop3dcert</strong></span> generates a self-signed X.509 certificate,
 mainly for
 testing.
 For production use the X.509 certificate must be signed by a
 recognized certificate authority, in order for mail clients to accept the
 certificate.</p><p>
-<code class="filename">@datadir@/pop3d.pem</code> must be owned by the
+<code class="filename">@certsdir@/pop3d.pem</code> must be owned by the
 @mailuser@ user and
 have no group or world permissions.
 The <span class="command"><strong>mkpop3dcert</strong></span> command will
 enforce this.  To prevent an unfortunate accident,
 <span class="command"><strong>mkpop3dcert</strong></span>
-will not work if <span class="command"><strong>@datadir@/pop3d.pem</strong></span> already exists.</p><p>
+will not work if <span class="command"><strong>@certsdir@/pop3d.pem</strong></span> already exists.</p><p>
 <span class="command"><strong>mkpop3dcert</strong></span> requires
-<span class="application">OpenSSL</span> to be installed.</p></div><div class="refsect1"><a id="idm255218601984" shape="rect"> </a><h2>FILES</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">@datadir@/pop3d.pem</span></dt><dd>
+<span class="application">OpenSSL</span> to be installed.</p></div><div class="refsect1"><a id="idm255218601984" shape="rect"> </a><h2>FILES</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">@certsdir@/pop3d.pem</span></dt><dd>
 X.509 certificate.
 </dd><dt><span class="term">@sysconfdir@/pop3d.cnf</span></dt><dd>
 Parameters used by OpenSSL to
