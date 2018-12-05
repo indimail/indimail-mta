@@ -214,7 +214,6 @@ install-sh
 libtool
 ltmain.sh
 m4
-migrate1to2
 missing
 stamp-h1
 RELEASE-Notes.in
