@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.480 2018-11-20 22:08:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.481 2018-12-05 22:55:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -574,8 +574,8 @@ if [ %nobogofilter -eq 0 ] ; then
   if [ -x /usr/bin/chrpath ] ; then
     for i in bogofilter bogoutil bogotune
     do
-      chmod 755 %{buildroot}%{_prefix}/bin/$i
-         /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
+      /bin/chmod 755 %{buildroot}%{_prefix}/bin/$i
+      /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
     done
   fi
 fi
