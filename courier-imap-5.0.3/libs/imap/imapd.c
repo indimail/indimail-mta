@@ -712,7 +712,8 @@ static int store_mailbox(const char *tag, const char *mailbox,
 			 time_t	timestamp,
 			 struct imaptoken *curtoken,
 			 unsigned long *new_uidv,
-			 unsigned long *new_uid)
+			 unsigned long *new_uid,
+ 			 int *utf8_error)
 {
 	unsigned long nbytes=curtoken->tokennum;
 	char	*tmpname;
@@ -795,10 +796,8 @@ static int store_mailbox(const char *tag, const char *mailbox,
 	if ((q && *q) &&(rfc2045_parser->rfcviolation & RFC2045_ERR8BITHEADER) &&
 	    curtoken->tokentype != IT_LITERAL8_STRING_START)
 	{
-		errmsg=" NO [ALERT] Your IMAP client does not appear to "
-			"correctly implement Unicode messages, "
-			"see https://tools.ietf.org/html/rfc6855.html\r\n";
-		errflag=1;
+		/* in order to [ALERT] the client */
+		*utf8_error=1;
 	}
 
 	rfc2045_free(rfc2045_parser);
@@ -3903,6 +3902,7 @@ static int append(const char *tag, const char *mailbox, const char *path)
 	char access_rights[8];
 	struct imaptoken *curtoken;
 	int need_rparen;
+ 	int utf8_error=0;
 
 	if (access(path, 0))
 	{
@@ -4022,7 +4022,7 @@ static int append(const char *tag, const char *mailbox, const char *path)
 			  acl_flags_adjust(access_rights, &flags)
 			  ? NULL:keywords,
 			  timestamp,
-			  curtoken, &new_uidv, &new_uid))
+ 			  curtoken, &new_uidv, &new_uid, &utf8_error))
 	{
 		libmail_kwmDestroy(keywords);
 		unread('\n');
@@ -4049,7 +4049,13 @@ static int append(const char *tag, const char *mailbox, const char *path)
 	writen(new_uidv);
 	writes(" ");
 	writen(new_uid);
-	writes("] APPEND Ok.\r\n");
+ 	writes("] APPEND Ok.");
+ 	if (utf8_error) {
+ 		writes(" [ALERT] Your IMAP client does not appear to "
+ 				"correctly implement Unicode messages, "
+ 				"see https://tools.ietf.org/html/rfc6855.html");
+ 	}
+ 	writes("\r\n");
 	return (0);
 }
 
