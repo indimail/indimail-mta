@@ -1057,6 +1057,15 @@ int	c;
 			continue;
 		}
 
+		if (strcmp(p, "UTF8") == 0)
+		{
+			/* XXX workaround for MS Outlook */
+			utf8_enabled=1;
+			printed(printf("+OK UTF8 enabled\r\n"));
+			fflush(stdout);
+			continue;
+		}
+
 error:
 		printed(printf("-ERR Invalid command.\r\n"));
 		fflush(stdout);
