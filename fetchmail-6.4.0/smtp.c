@@ -143,7 +143,7 @@ SMTP_auth(int sock, char smtp_mode, char *username, char *password, char *buf)
 		digest[9], digest[10], digest[11], digest[12], digest[13],
 		digest[14], digest[15]);
 
-		to64frombits(b64buf, tmp, strlen(tmp));
+		to64frombits(b64buf, tmp, strlen(tmp), sizeof b64buf);
 		SockPrintf(sock, "%s\r\n", b64buf);
 #ifdef INDIMAIL
 		if (outlevel >= O_MONITOR)
@@ -173,7 +173,7 @@ SMTP_auth(int sock, char smtp_mode, char *username, char *password, char *buf)
 			if (tmp[c] == '^')
 				tmp[c] = '\0';
 		}
-		to64frombits(b64buf, tmp, len);
+		to64frombits(b64buf, tmp, len, sizeof b64buf);
 		SockPrintf(sock, "AUTH PLAIN %s\r\n", b64buf);
 #ifdef INDIMAIL
 		if (outlevel >= O_MONITOR)
@@ -234,7 +234,7 @@ SMTP_auth(int sock, char smtp_mode, char *username, char *password, char *buf)
 #endif
 		}
 		/*- Step 2 */
-		to64frombits(b64buf, username, strlen(username));
+		to64frombits(b64buf, username, strlen(username), sizeof b64buf);
 		SockPrintf(sock, "%s\r\n", b64buf); /*- username */
 #ifdef INDIMAIL
 		if (outlevel >= O_MONITOR)
@@ -270,7 +270,7 @@ SMTP_auth(int sock, char smtp_mode, char *username, char *password, char *buf)
 #endif
 		}
 		/*- Step 3 */
-		to64frombits(b64buf, password, strlen(password));
+		to64frombits(b64buf, password, strlen(password), sizeof b64buf);
 		SockPrintf(sock, "%s\r\n", b64buf); /*- password */
 #ifdef INDIMAIL
 		if (outlevel >= O_MONITOR)
@@ -341,7 +341,7 @@ int SMTP_ehlo(int sock, char smtp_mode, const char *host, char *name, char *pass
 	      *opt |= hp->value;
 	      if (strncmp(hp->name, "AUTH ", 5) == 0)
             strncpy(auth_response, smtp_response, sizeof(auth_response));
-          auth_response[sizeof(auth_response)-1] = '\0';
+	      auth_response[sizeof(auth_response)-1] = '\0';
 	  }
       if ((smtp_response[0] == '1' || smtp_response[0] == '2' || smtp_response[0] == '3') && smtp_response[3] == ' ') {
 	  if (*opt & ESMTP_AUTH)
