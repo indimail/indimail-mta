@@ -554,6 +554,7 @@ The opposite of \-\-sslcertck, this is a disouraged option. It permits
 fetchmail to continue connecting even if the server certificate failed
 the verification checks.  Should only be used together with
 \-\-sslfingerprint.
+.TP
 .B \-\-sslcertfile <file>
 (Keyword: sslcertfile, since v6.3.17)
 .br

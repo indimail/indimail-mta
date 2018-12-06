@@ -202,7 +202,7 @@ cancelfail:
 		return result;
 	    return PS_AUTHFAIL;
 	}
-	to64frombits(buf1, send_token.value, send_token.length);
+	to64frombits(buf1, send_token.value, send_token.length, sizeof buf1);
 	gss_release_buffer(&min_stat, &send_token);
 
 	suppress_tags = TRUE;
@@ -241,7 +241,7 @@ cancelfail:
 	decode_status("gss_unwrap", maj_stat, min_stat, stderr);
         report(stderr, GT_("Couldn't unwrap security level data\n"));
         gss_release_buffer(&min_stat, &send_token);
-        return PS_AUTHFAIL;
+	goto cancelfail;
     }
     if (outlevel >= O_DEBUG)
         report(stdout, GT_("Credential exchange complete\n"));
@@ -250,7 +250,7 @@ cancelfail:
     if ( !(((char *)send_token.value)[0] & GSSAUTH_P_NONE) ) {
         report(stderr, GT_("Server requires integrity and/or privacy\n"));
         gss_release_buffer(&min_stat, &send_token);
-        return PS_AUTHFAIL;
+	goto cancelfail;
     }
     ((char *)send_token.value)[0] = 0;
     buf_size = ntohl(*((long *)send_token.value));
@@ -268,16 +268,25 @@ cancelfail:
     buf_size = htonl(buf_size); /* do as they do... only matters if we do enc */
     memcpy(buf1, &buf_size, 4);
     buf1[0] = GSSAUTH_P_NONE;
-    strlcpy(buf1+4, username, sizeof(buf1) - 4); /* server decides if princ is user */
-    request_buf.length = 4 + strlen(username) + 1;
+    if (strlcpy(buf1 + 4, username, sizeof(buf1) - 4) >= sizeof(buf1) - 4)
+    {
+	   report(stderr, GT_("GSSAPI username too long for static buffer.\n"));
+	   goto cancelfail;
+    }
+    /* server decides if princ is user */
+    request_buf.length = 4 + strlen(username);
     request_buf.value = buf1;
     maj_stat = gss_wrap(&min_stat, context, 0, GSS_C_QOP_DEFAULT, &request_buf,
         &cflags, &send_token);
     if (maj_stat != GSS_S_COMPLETE) {
         report(stderr, GT_("Error creating security level request\n"));
-        return PS_AUTHFAIL;
+	goto cancelfail;
     }
-    to64frombits(buf1, send_token.value, send_token.length);
+    if ((send_token.length + 3) * 4/3 >= sizeof(buf1) - 1) {
+	    report(stderr, GT_("GSSAPI send_token too large (%lu) while sending username.\n"), (unsigned long)send_token.length);
+	    goto cancelfail;
+    }
+    to64frombits(buf1, send_token.value, send_token.length, sizeof buf1);
 
     suppress_tags = TRUE;
     result = gen_transact(sock, "%s", buf1);

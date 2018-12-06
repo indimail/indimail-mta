@@ -38,12 +38,12 @@ int do_otp(int sock, const char *command, struct query *ctl)
     if ((rval = gen_recv(sock, buffer, sizeof(buffer))))
 	return rval;
 
-	if (strncmp(buffer, "+", 1)) {
+    if (strncmp(buffer, "+", 1)) {
 	report(stderr, GT_("server recv fatal\n"));
 	return PS_AUTHFAIL;
-	}
+    }
 
-    to64frombits(buffer, ctl->remotename, strlen(ctl->remotename));
+    to64frombits(buffer, ctl->remotename, strlen(ctl->remotename), sizeof buffer);
 	suppress_tags = TRUE;
     gen_send(sock, "%s", buffer);
 	suppress_tags = FALSE;
@@ -51,7 +51,7 @@ int do_otp(int sock, const char *command, struct query *ctl)
     if ((rval = gen_recv(sock, buffer, sizeof(buffer))))
 	return rval;
 
-	memset(challenge, '\0', sizeof(challenge));
+    memset(challenge, '\0', sizeof(challenge));
     if ((i = from64tobits(challenge, buffer+2, sizeof(challenge))) < 0) {
 	report(stderr, GT_("Could not decode OTP challenge\n"));
 	return PS_AUTHFAIL;
@@ -70,7 +70,7 @@ int do_otp(int sock, const char *command, struct query *ctl)
     if (rval)
 	return(PS_AUTHFAIL);
 
-    to64frombits(buffer, response, strlen(response));
+    to64frombits(buffer, response, strlen(response), sizeof buffer);
     suppress_tags = TRUE;
     gen_send(sock, "%s", buffer);
     suppress_tags = FALSE;

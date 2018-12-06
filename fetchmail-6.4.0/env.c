@@ -169,7 +169,7 @@ char *host_fqdn(int required)
 	if (e) {
 	    /* exit with error message */
 	    fprintf(stderr,
-		    GT_("gethostbyname failed for %s\n"), tmpbuf);
+		    GT_("getaddrinfo failed for %s\n"), tmpbuf);
 	    fprintf(stderr, "%s", gai_strerror(e));
 	    fprintf(stderr, GT_("Cannot find my own host in hosts database to qualify it!\n"));
 	    if (required)
@@ -243,7 +243,7 @@ char *rfc822timestamp(void)
 #if defined(HAVE_SETLOCALE) && defined(ENABLE_NLS)
     setlocale (LC_TIME, "");
 #endif
-    strncpy(strstr(buf, "XXXXX"), tzoffset(&now), 5);
+    memcpy(strstr(buf, "XXXXX"), tzoffset(&now), 5);
 #else
     /*
      * This is really just a portability fallback, as the

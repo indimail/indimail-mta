@@ -111,7 +111,7 @@ static char *const *parse_plugin(const char *plugin, const char *host, const cha
 		return NULL;
 	}
 
-	while (plugin_copy_offset < plugin_copy_len)
+	while (plugin_offset < plugin_len && plugin_copy_offset < plugin_copy_len)
 	{	if ((plugin[plugin_offset] == '%') && (plugin[plugin_offset + 1] == 'h'))
 		{	strcpy(plugin_copy + plugin_copy_offset, host);
 			plugin_offset += 2;
@@ -130,6 +130,8 @@ static char *const *parse_plugin(const char *plugin, const char *host, const cha
 	}
 	plugin_copy[plugin_copy_len] = 0;
 
+	/* XXX FIXME - is this perhaps a bit too simplistic to chop down the argument strings without any respect to quoting?
+	 * better write a generic function that tracks arguments instead... */
 	argvec = (char **)malloc(s);
 	if (!argvec)
 	{
@@ -379,8 +381,7 @@ va_dcl {
 #include <openssl/x509v3.h>
 #include <openssl/rand.h>
 
-/*- #define fm_MIN_OPENSSL_VER 0x1000200fL -*/
-#define fm_MIN_OPENSSL_VER 0x00907000L
+#define fm_MIN_OPENSSL_VER 0x1000200fL
 
 #ifdef LIBRESSL_VERSION_NUMBER
 #pragma message "WARNING - LibreSSL is unsupported. Use at your own risk."
@@ -929,6 +930,17 @@ static int OSSL10X_proto_version_logic(int sock, const char **myproto, int *avoi
 		report(stderr, GT_("Your OpenSSL version does not support TLS v1.2.\n"));
 		return -1;
 #endif
+#if defined(TLS1_3_VERSION)
+	} else if (!strcasecmp("tls1.3", *myproto)) {
+		_ctx[sock] = SSL_CTX_new(TLSv1_3_client_method());
+	} else if (!strcasecmp("tls1.3+", *myproto)) {
+		*myproto = NULL;
+		*avoid_ssl_versions |= SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1 | SSL_OP_NO_TLSv1_2;
+#else
+	} else if(!strcasecmp("tls1.3",*myproto) || !strcasecmp("tls1.3+", *myproto)) {
+		report(stderr, GT_("Your OpenSSL version does not support TLS v1.3.\n"));
+		return -1;
+#endif
 	} else if (!strcasecmp("ssl23", *myproto)
 	        || 0 == strcasecmp("auto", *myproto))
 	{
@@ -942,11 +954,15 @@ static int OSSL10X_proto_version_logic(int sock, const char **myproto, int *avoi
 	return 0;
 }
 #define OSSL_proto_version_logic(a,b,c) OSSL10X_proto_version_logic((a),(b),(c))
+#undef OSSL110_API
 #else
 /* implementation for OpenSSL 1.1.0 */
+#define OSSL110_API 1
 static int OSSL110_proto_version_logic(int sock, const char **myproto,
         int *avoid_ssl_versions)
 {
+	/* NOTE - this code MUST NOT set myproto to NULL, else the
+	 * SSL_...set_..._proto_version() call becomes ineffective. */
 	_ctx[sock] = SSL_CTX_new(TLS_client_method());
 	SSL_CTX_set_min_proto_version(_ctx[sock], TLS1_VERSION);
 
@@ -987,10 +1003,20 @@ static int OSSL110_proto_version_logic(int sock, const char **myproto,
 		SSL_CTX_set_max_proto_version(_ctx[sock], TLS1_2_VERSION);
 	} else if (!strcasecmp("tls1.2+", *myproto)) {
 		SSL_CTX_set_min_proto_version(_ctx[sock], TLS1_2_VERSION);
-		*myproto = NULL;
 #else
 	} else if(!strcasecmp("tls1.2",*myproto) || !strcasecmp("tls1.2+", *myproto)) {
 		report(stderr, GT_("Your OpenSSL version does not support TLS v1.2.\n"));
+		return -1;
+#endif
+#if defined(TLS1_3_VERSION)
+	} else if (!strcasecmp("tls1.3", *myproto)) {
+		SSL_CTX_set_min_proto_version(_ctx[sock], TLS1_3_VERSION);
+		SSL_CTX_set_max_proto_version(_ctx[sock], TLS1_3_VERSION);
+	} else if (!strcasecmp("tls1.3+", *myproto)) {
+		SSL_CTX_set_min_proto_version(_ctx[sock], TLS1_3_VERSION);
+#else
+	} else if(!strcasecmp("tls1.3",*myproto) || !strcasecmp("tls1.3+", *myproto)) {
+		report(stderr, GT_("Your OpenSSL version does not support TLS v1.3.\n"));
 		return -1;
 #endif
 	} else if (!strcasecmp("ssl23", *myproto)
@@ -998,9 +1024,12 @@ static int OSSL110_proto_version_logic(int sock, const char **myproto,
 	{
 		/* do nothing */
 	} else {
+		/* This should not happen. */
 		report(stderr,
 		        GT_("Invalid SSL protocol '%s' specified, using default autoselect (auto).\n"),
 		        *myproto);
+		report(stderr, "fetchmail internal error in OSSL110_proto_version_logic\n");
+		abort();
 	}
 	return 0;
 }
@@ -1022,11 +1051,16 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 	int ssle_connect = 0;
 	long ver;
 
+#ifndef OSSL110_API
 	SSL_load_error_strings();
 	SSL_library_init();
 	OpenSSL_add_all_algorithms(); /* see Debian Bug#576430 and manpage */
+	ver = SSLeay();
+#else
+	ver = OpenSSL_version_num();
+#endif
 
-	if ((ver = SSLeay()) < OPENSSL_VERSION_NUMBER) {
+	if (ver < OPENSSL_VERSION_NUMBER) {
 	    report(stderr, GT_("Loaded OpenSSL library %#lx older than headers %#lx, refusing to work.\n"), (long)ver, (long)(OPENSSL_VERSION_NUMBER));
 	    return -1;
 	}
@@ -1131,6 +1165,20 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 	_verify_ok = 1;
 	_prev_err = -1;
 
+	/*
+	 * Support SNI, some servers (googlemail) appear to require it.
+	 */
+	{
+	    long r;
+	    r = SSL_set_tlsext_host_name(_ssl_context[sock], servercname);
+
+	    if (0 == r) {
+		/* handle error */
+		report(stderr, GT_("Warning: SSL_set_tlsext_host_name(%p, \"%s\") failed (code %#lx), trying to continue.\n"), (void *)_ssl_context[sock], servercname, r);
+		ERR_print_errors_fp(stderr);
+	    }
+	}
+
 	if( mycert || mykey ) {
 
 	/* Ok...  He has a certificate file defined, so lets declare it.  If
@@ -1148,8 +1196,8 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 			free(*remotename);
 			*remotename = xstrdup(buffer);
 		}
-        	SSL_use_certificate_file(_ssl_context[sock], mycert, SSL_FILETYPE_PEM);
-        	SSL_use_RSAPrivateKey_file(_ssl_context[sock], mykey, SSL_FILETYPE_PEM);
+		SSL_use_certificate_file(_ssl_context[sock], mycert, SSL_FILETYPE_PEM);
+		SSL_use_RSAPrivateKey_file(_ssl_context[sock], mykey, SSL_FILETYPE_PEM);
 	}
 
 	if (SSL_set_fd(_ssl_context[sock], sock) == 0 

@@ -44,7 +44,7 @@ int ntlm_helper(int sock, struct query *ctl, const char *proto)
 	dumpSmbNtlmAuthRequest(stdout, &request);
 
     memset(msgbuf,0,sizeof msgbuf);
-    to64frombits (msgbuf, &request, SmbLength(&request));
+    to64frombits (msgbuf, &request, SmbLength(&request), sizeof msgbuf);
 
     if (outlevel >= O_MONITOR)
 	report(stdout, "%s> %s\n", proto, msgbuf);
@@ -95,7 +95,7 @@ int ntlm_helper(int sock, struct query *ctl, const char *proto)
 	dumpSmbNtlmAuthResponse(stdout, &response);
 
     memset(msgbuf,0,sizeof msgbuf);
-    to64frombits (msgbuf, &response, SmbLength(&response));
+    to64frombits (msgbuf, &response, SmbLength(&response), sizeof msgbuf);
 
     if (outlevel >= O_MONITOR)
 	report(stdout, "%s> %s\n", proto, msgbuf);

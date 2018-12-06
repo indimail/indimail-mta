@@ -53,8 +53,6 @@ static int is_ip_alias(const char *name1,const char *name2)
 /*
  * Given two hostnames as arguments, returns TRUE if they
  * have at least one IP address in common.
- * No check is done on errors returned by gethostbyname,
- * the calling function does them.
  */
 {
     int rc = FALSE;
@@ -151,9 +149,6 @@ int is_host_alias(const char *name, struct query *ctl, struct addrinfo **res)
     return(FALSE);
 #else
     /*
-     * The only code that calls the BIND library is here and in the
-     * start-of-run probe with gethostbyname(3) under ETRN/Kerberos.
-     *
      * We know DNS service was up at the beginning of the run.
      * If it's down, our nameserver has crashed.  We don't want to try
      * delivering the current message or anything else from the
@@ -216,8 +211,6 @@ int is_host_alias(const char *name, struct query *ctl, struct addrinfo **res)
 	}
 
     /*
-     * We're only here if DNS was OK but the gethostbyname() failed
-     * with a HOST_NOT_FOUND or NO_ADDRESS error.
      * Search for a name match on MX records pointing to the server.
      */
     h_errno = 0;

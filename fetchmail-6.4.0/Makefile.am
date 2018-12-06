@@ -33,10 +33,10 @@ noinst_LIBRARIES=	libfm.a
 libfm_a_SOURCES=	xmalloc.c base64.c rfc822.c report.c rfc2047e.c \
 			servport.c ntlm.h smbbyteorder.h smbdes.h smbmd4.h \
 			smbencrypt.h smbdes.c smbencrypt.c smbmd4.c smbutil.c \
-			libesmtp/gethostbyname.h libesmtp/gethostbyname.c \
 			smbtypes.h fm_getaddrinfo.c starttls.c rfc822valid.c \
 			xmalloc.h sdump.h sdump.c x509_name_match.c \
 			fm_strl.h md5c.c
+
 if NTLM_ENABLE
 libfm_a_SOURCES += ntlmsubr.c
 endif

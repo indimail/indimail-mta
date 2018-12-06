@@ -582,7 +582,7 @@ sub outputLine
 	s,\\t,\t,g;
 
 	s,\\%,&nbsp;,g;
-	s,\\{,,g;
+	s,\\\{,,g;
 	s,\\},,g;
 	s,\\$,,g;
 
@@ -1953,9 +1953,9 @@ sub processTable
 				$rowref->[$troffCol] .= "$style2</TD>";
 				++$troffCol;
 			}
-			elsif ($col =~ m/T{/) #}
+			elsif ($col =~ m/T\{/) #}
 			{
-				$col =~ s/T{//; #}
+				$col =~ s/T\{//; #}
 				$rowref->[$troffCol] = "<TD$align>$style1$col";
 				$troffMultiline = 1;
 			}

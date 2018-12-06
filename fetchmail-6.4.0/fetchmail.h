@@ -643,8 +643,8 @@ int prc_parse_file(const char *, const flag);
 int prc_filecheck(const char *, const flag);
 
 /* base64.c */
-void to64frombits(char *, const void *, int);
-int from64tobits(void *, const char *, int maxlen);
+int to64frombits(char *, const void *, int inlen, size_t outlen);
+int from64tobits(void *, const char *, int mxoutlen);
 
 /* unmime.c */
 /* Bit-mask returned by MimeBodyType */

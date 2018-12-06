@@ -79,13 +79,18 @@ fetchmail-6.4.0 (not yet released):
   --sslproto auto, so that they can benefit from TLSv1.1 and TLSv1.2 where
   supported by the server.
 
-  The --sslproto option now understands the values auto, ssl3+, tls1+, tls1.1, 
-  tls1.1+, tls1.2, tls1.2+ (case insensitively), see CHANGES below for details.
+  The --sslproto option now understands the values auto, ssl3+, tls1+, tls1.1,
+  tls1.1+, tls1.2, tls1.2+, tls1.3, tls1.3+ (case insensitively), see CHANGES
+  below for details.
 
 * Fetchmail defaults to --sslcertck behaviour. A new option --nosslcertck to
   override this has been added, but may be removed in future fetchmail versions
   in favour of another configuration option that makes the insecurity in using
   this option clearer.
+
+## SECURITY FIXES
+* Fetchmail prevents buffer overruns in GSSAPI authentication with user names
+  beyond c. 6000 characters in length. Reported by Greg Hudson.
 
 ## CHANGES
 * fetchmail 6.3.X is unsupported.
@@ -123,6 +128,9 @@ fetchmail-6.4.0 (not yet released):
   or that #define OPENSSL_NO_SSL3 inside #include <openssl/ssl.h>
   Related to Debian Bug#775255. Fixes Debian Bug #804604.
 * Version report lists -SSLv3 on SSL-enabled no-ssl3 builds.
+* Fetchmail no longer adds a NUL byte to the username in GSSAPI authentication.
+  This was reported to break Kerberos-based authentication with Microsoft
+  Exchange 2013 by Greg Hudson.
 
 # KNOWN BUGS AND WORKAROUNDS
   (This section floats upwards through the NEWS file so it stays with the

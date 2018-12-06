@@ -27,23 +27,27 @@ static const char base64val[] = {
 };
 #define DECODE64(c)  (isascii((unsigned char)(c)) ? base64val[c] : BAD)
 
-void to64frombits(char *out, const void *in_, int inlen)
+int to64frombits(char *out, const void *in_, int inlen, size_t outlen)
 /* raw bytes in quasi-big-endian order to base 64 string (NUL-terminated) */
 {
+    int rc = 0;
     const unsigned char *in = (const unsigned char *)in_;
 
     for (; inlen >= 3; inlen -= 3)
     {
+	if (outlen < 5) { rc = -1; goto fail; } /* buffer too small */
 	*out++ = base64digits[in[0] >> 2];
 	*out++ = base64digits[((in[0] << 4) & 0x30) | (in[1] >> 4)];
 	*out++ = base64digits[((in[1] << 2) & 0x3c) | (in[2] >> 6)];
 	*out++ = base64digits[in[2] & 0x3f];
 	in += 3;
+	outlen -= 4;
     }
     if (inlen > 0)
     {
 	unsigned char fragment;
     
+	if (outlen < 5) { rc = -1; goto fail; } /* buffer too small */
 	*out++ = base64digits[in[0] >> 2];
 	fragment = (in[0] << 4) & 0x30;
 	if (inlen > 1)
@@ -52,7 +56,9 @@ void to64frombits(char *out, const void *in_, int inlen)
 	*out++ = (inlen < 2) ? '=' : base64digits[(in[1] << 2) & 0x3c];
 	*out++ = '=';
     }
+fail:
     *out = '\0';
+    return rc;
 }
 
 int from64tobits(void *out_, const char *in, int maxlen)
@@ -103,7 +109,7 @@ int from64tobits(void *out_, const char *in, int maxlen)
     } while 
 	(*in && *in != '\r' && digit4 != '=');
 
-    return (len);
+    return len;
 }
 
 /* base64.c ends here */

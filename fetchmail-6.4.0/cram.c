@@ -122,7 +122,7 @@ int do_cram_md5 (int sock, const char *command, struct query *ctl, const char *s
               response[8], response[9], response[10], response[11],
               response[12], response[13], response[14], response[15]);
 
-    to64frombits (buf1, reply, strlen(reply));
+    to64frombits (buf1, reply, strlen(reply), sizeof buf1);
 
     /* ship the authentication back, accept the server's responses */
     /* PMDF5.2 IMAP has a bug that requires this to be a single write */

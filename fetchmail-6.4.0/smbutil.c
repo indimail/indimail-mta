@@ -73,14 +73,14 @@ dumpRaw(fp,((unsigned char*)structPtr)+IVAL(&structPtr->header.offset,0),SVAL(&s
 
 
 static void dumpRaw(FILE *fp, unsigned char *buf, size_t len)
-  {
-  size_t i;
-  
-  for (i=0; i<len; ++i)
-    fprintf(fp,"%02x ",buf[i]);
-    
+{
+    size_t i;
+
+    for (i=0; i<len; ++i)
+	fprintf(fp,"%02x ",buf[i]);
+
     fprintf(fp,"\n");
-  }
+}
 
 /* helper macro to destructively resize buffers; assumes that bufsiz
  * is initialized to 0 if buf is unallocated! */

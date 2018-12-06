@@ -245,7 +245,8 @@ static void sanitize(char *s)
 char *rcpt_address(struct query *ctl, const char *id,
 			  int usesmtpname)
 {
-    static char addr[HOSTLEN+USERNAMELEN+1];
+    static char addr[HOSTLEN+USERNAMELEN+1000];
+
     if (strchr(id, '@'))
     {
 	snprintf(addr, sizeof (addr), "%s", id);
@@ -844,7 +845,7 @@ static int open_smtp_sink(struct query *ctl, struct msgblk *msg,
     const char	*ap;
     struct	idlist *idp;
     char		options[MSGBUFSIZE]; 
-    char		addr[HOSTLEN+USERNAMELEN+1];
+    char		addr[HOSTLEN+USERNAMELEN+1000];
 #ifdef EXPLICIT_BOUNCE_ON_BAD_ADDRESS
     char		**from_responses;
 #endif /* EXPLICIT_BOUNCE_ON_BAD_ADDRESS */
