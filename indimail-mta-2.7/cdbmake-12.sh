@@ -10,7 +10,7 @@
 # Initial revision
 #
 #
-awk '
+awk -c '
 	/^[^#]/ {
 		print "+" length($1) "," length($2) ":" $1 "->" $2
 	}
