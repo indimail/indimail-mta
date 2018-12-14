@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.20  2018-12-14 11:05:20+05:30  Cprogrammer
+ * fixed 'conversion from 'int' to 'char' inside { }” for cross compiling on arm
+ *
  * Revision 1.19  2018-08-08 23:56:27+05:30  Cprogrammer
  * changed comment style
  *
@@ -261,7 +264,7 @@ DecodeQuotedPrintable(char *ptr)
 unsigned
 DecodeBase64(char *ptr)
 {
-	static const char base64_table[256] =
+	static const signed char base64_table[256] =
 		{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1,
 		-1, -1,
@@ -1270,7 +1273,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.19 2018-08-08 23:56:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.20 2018-12-14 11:05:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
