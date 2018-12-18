@@ -56,17 +56,14 @@ case "$1" in
 	#
 	(
 	echo "Adding IndiMail users/groups"
-	/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
-	if [ $? = 4 ] ; then
-		/usr/sbin/groupadd indimail
-	fi
+	/usr/bin/getent group indimail  > /dev/null || \
+		/usr/sbin/groupadd -r -g 555 indimail || /usr/sbin/groupadd indimail || true
 	# add for roundcube/php to access certs
 	/usr/bin/getent group apache    > /dev/null && /usr/sbin/usermod -aG qmail apache || true
 	
-	/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d ${indimaildir} indimail || true
-	if [ $? = 4 ] ; then
-		/usr/sbin/useradd -r -g indimail -d ${indimaildir} indimail
-	fi
+	/usr/bin/getent passwd indimail > /dev/null || \
+		/usr/sbin/useradd -r -g indimail -u 555 -d ${indimaildir} indimail || \
+		/usr/sbin/useradd -r -g indimail -d ${indimaildir} indimail || true
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
