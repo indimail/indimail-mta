@@ -848,6 +848,7 @@ int	dowritecache=0;
 		scaninfo->msgs[i].filename=tempinfo_array[i]->filename;
 		scaninfo->msgs[i].keywordMsg=NULL;
 		scaninfo->msgs[i].copiedflag=0;
+		scaninfo->msgs[i].err8bitflag=0;
 
 #if SMAP
 		if (smapflag)
