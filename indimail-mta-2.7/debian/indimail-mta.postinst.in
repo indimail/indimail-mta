@@ -142,10 +142,8 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
     /bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
   fi
   if [ -f /etc/init.d/indimail ] ; then
-    cmp -s ${prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1 || true
-    if [ $? -ne 0 ] ; then
-      ${cp} ${prefix}/bin/qmailctl /etc/init.d/indimail
-    fi
+    cmp -s ${prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1 || \
+		${cp} ${prefix}/bin/qmailctl /etc/init.d/indimail || true
   fi
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
