@@ -49,10 +49,8 @@ case "$1" in
 	#
 	(
 	echo "Adding IndiMail users/groups"
-	/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
-	if [ $? = 4 ] ; then
-		/usr/sbin/groupadd indimail
-	fi
+	/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || \
+		/usr/sbin/groupadd indimail || true
 	/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 	/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
 	/usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
@@ -62,10 +60,9 @@ case "$1" in
 		${rm} -f /var/spool/mail/$i
 	done
 	
-	/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d ${qmaildir} indimail || true
-	if [ $? = 4 ] ; then
-		/usr/sbin/useradd -r -g indimail -d ${qmaildir} indimail
-	fi
+	/usr/bin/getent passwd indimail > /dev/null || \
+		/usr/sbin/useradd -r -g indimail -u 555 -d ${qmaildir} indimail || 
+		test $? = 4 && /usr/sbin/useradd -r -g indimail -d ${qmaildir} indimail || true
 	/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}/alias  -s /sbin/nologin  alias || true
 	/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}        -s /sbin/nologin qmaild || true
 	/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${logdir}          -s /sbin/nologin qmaill || true
