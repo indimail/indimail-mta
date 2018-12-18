@@ -299,8 +299,13 @@ int do_fetch(unsigned long n, int byuid, void *p)
 		return (0);
 	}
 
+	if (current_maildir_info.msgs[n-1].err8bitflag)
+		unicode_err=0;
+
 	if (unicode_err)
 	{
+		current_maildir_info.msgs[n-1].err8bitflag=1;
+
 		writes("* OK [ALERT] Message ");
 		writen(n);
 		writes(" appears to be a Unicode message and your"
