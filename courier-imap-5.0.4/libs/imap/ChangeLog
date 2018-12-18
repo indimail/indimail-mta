@@ -1,3 +1,10 @@
+5.0.5
+
+2018-12-09  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* fetch.c: Send an alert about a Unicode messages to a non-Unicode
+	client at most once per IMAP session.
+
 5.0.4
 
 2018-11-28  Hideki SAKAMOTO <hsakamt@tsnr.com>
