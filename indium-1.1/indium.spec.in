@@ -1,6 +1,6 @@
 #
 #
-# $Id: indium.spec.in,v 1.20 2018-06-14 14:28:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.21 2018-12-23 15:51:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -108,21 +108,21 @@ for i in %{name}-%{version}
 do
 (
 if [ -d $i ] ; then
-	/bin/rm -rf $i
+  /bin/rm -rf $i
 fi
 if [ -f ../SOURCES/$i.tar.gz ] ; then
-	gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+  gunzip -c ../SOURCES/$i.tar.gz |tar xf -
 elif [ -f ../SOURCES/$i.tar.bz2 ] ; then
-	bzip2 -d -c ../SOURCES/$i.tar.bz2 |tar xf -
+  bzip2 -d -c ../SOURCES/$i.tar.bz2 |tar xf -
 else
-	echo "No Source Archive for $i"
-	exit 1
+  echo "No Source Archive for $i"
+  exit 1
 fi
 if [ -d $i ] ; then
-	if [ -f %{name}-%{version}/patches/$i.patch ] ; then
-	    # Copy for the SRPM
-		/bin/cp %{name}-%{version}/patches/$i.patch ../SOURCES
-	fi
+  if [ -f %{name}-%{version}/patches/$i.patch ] ; then
+    # Copy for the SRPM
+    /bin/cp %{name}-%{version}/patches/$i.patch ../SOURCES
+  fi
 fi
 )
 done
@@ -130,20 +130,20 @@ done
 %build
 ID=$(id -u)
 if [ $ID -eq 0 ] ; then
-	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
-	if [ $nscd_up -ge 1 ] ; then
-		if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-			%{_sysconfdir}/init.d/nscd stop
-		fi
-	fi
-	/usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
-	if [ $? = 4 ] ; then
-		/usr/sbin/groupadd -r indimail
-	fi
-	/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
-	if [ $? = 4 ] ; then
-		/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
-	fi
+  nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+  if [ $nscd_up -ge 1 ] ; then
+    if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+      %{_sysconfdir}/init.d/nscd stop
+    fi
+  fi
+  /usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
+  if [ $? = 4 ] ; then
+    /usr/sbin/groupadd -r indimail
+  fi
+    /usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
+  if [ $? = 4 ] ; then
+    /usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+  fi
 fi
 
 #### Stupid Mandriva ######################
@@ -160,22 +160,22 @@ fi
 cd %{name}-%{version}
 if [ %{reconfigure_mode} -eq 0 ] ; then
 if [ %{build_on_obs} -eq 0 ] ; then
-	echo "reconfiguring..."
-	autoreconf -fi
+  echo "reconfiguring..."
+  autoreconf -fi
 else
 echo "reconfiguring..."
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 %if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-	autoreconf -fi
+  autoreconf -fi
 %endif
 %endif
 fi
 fi
 
 %configure --prefix=%{_prefix} --libdir=%{_libdir} \
-	--libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-	--enable-shareddir=%{shareddir} \
-	--mandir=%{mandir} --enable-mysqlprefix=/usr
+  --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+  --enable-shareddir=%{shareddir} \
+  --mandir=%{mandir} --enable-mysqlprefix=/usr
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
@@ -183,29 +183,29 @@ ID=$(id -u)
 for i in %{name}-%{version}
 do
 if [ -d $i ] ; then
-	cd $i
-	if [ %{_verbose} -eq 0 ] ; then
-		%{__make} -s DESTDIR=%{buildroot}
-		%{__make} -s DESTDIR=%{buildroot} install-strip
-	else
-		%{__make} DESTDIR=%{buildroot}
-		%{__make} DESTDIR=%{buildroot} install-strip
-	fi
-	cd ..
+  cd $i
+  if [ %{_verbose} -eq 0 ] ; then
+    %{__make} -s DESTDIR=%{buildroot}
+    %{__make} -s DESTDIR=%{buildroot} install-strip
+  else
+    %{__make} DESTDIR=%{buildroot}
+    %{__make} DESTDIR=%{buildroot} install-strip
+  fi
+  cd ..
 fi
 done
 for i in fbsql tai64
 do
-	/bin/rm -f %{buildroot}%{_libdir}/lib"$i".la
-	/bin/rm -f %{buildroot}%{_libdir}/lib"$i".a
+  /bin/rm -f %{buildroot}%{_libdir}/lib"$i".la
+  /bin/rm -f %{buildroot}%{_libdir}/lib"$i".a
 done
 
 %if %nobwidget == 0
 . /usr/lib/tclConfig.sh
 cd %{name}-%{version}
 if [ $TCL_VERSION -ne %{tcl_version} ] ; then
-	echo "tcl version mismatch $TCL_VERSION != %{tcl_version}"
-	exit 1
+  echo "tcl version mismatch $TCL_VERSION != %{tcl_version}"
+  exit 1
 fi
 TCL_PATH=`echo $TCL_PACKAGE_PATH|awk '{print $1}'`
 find ./BWidget-%{bwidget_version} -depth -print | cpio -pdmv %{buildroot}$TCL_PATH
@@ -213,8 +213,8 @@ find ./BWidget-%{bwidget_version} -depth -print | cpio -pdmv %{buildroot}$TCL_PA
 
 # copy files here
 if [ -x /usr/bin/chrpath ] ; then
-	#/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-	/usr/bin/chrpath -d %{buildroot}%{libexecdir}/pwhelper
+  #/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
+  /usr/bin/chrpath -d %{buildroot}%{libexecdir}/pwhelper
 fi
 # {__rm} -f %{buildroot}%{_libdir}/*.so
 
@@ -499,16 +499,16 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
-	exit 1
+  echo "You are not root"
+  exit 1
 fi
 
 %post
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
-	exit 1
+  echo "You are not root"
+  exit 1
 fi
 /sbin/ldconfig
 
@@ -516,8 +516,8 @@ fi
 #echo This is preun for %{version}-%{release} : arg=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
-	exit 1
+  echo "You are not root"
+  exit 1
 fi
 
 %postun
@@ -525,13 +525,13 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
-	exit 1
+  echo "You are not root"
+  exit 1
 fi
 if [ $argv1 -eq 1 ] ; then
-	echo "recreating ld.so cache"
-	/sbin/ldconfig
-	exit 0
+  echo "recreating ld.so cache"
+  /sbin/ldconfig
+  exit 0
 fi
 echo "recreating ld.so cache"
 /sbin/ldconfig
