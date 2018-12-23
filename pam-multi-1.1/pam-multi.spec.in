@@ -10,7 +10,7 @@
 %else
 %define build_on_obs       0
 %endif
-%define	_prefix      @indimaildir@
+%define _prefix      @indimaildir@
 %define security_dir @moduledir@
 
 Summary: A PAM-module for generic authentication
@@ -70,8 +70,8 @@ ID=$(id -u)
 /bin/rm -f "$RPM_BUILD_ROOT"%{security_dir}/*.la
 /bin/rm -f "$RPM_BUILD_ROOT"%{security_dir}/*a
 if [ -x /usr/bin/chrpath ] ; then
-	/usr/bin/chrpath -d %{buildroot}%{security_dir}/pam-multi.so
-	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
+  /usr/bin/chrpath -d %{buildroot}%{security_dir}/pam-multi.so
+  /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
 fi
 
 %clean
