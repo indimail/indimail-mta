@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.187 2018-11-11 17:37:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.188 2018-12-23 15:50:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1747,6 +1747,9 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
@@ -1806,6 +1809,9 @@ ID=$(id -u)
 if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
 # we are doing upgrade
@@ -2197,6 +2203,9 @@ if [ $ID -ne 0 ] ; then
   exit 1
 fi
 (
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
@@ -2276,6 +2285,9 @@ ID=$(id -u)
 if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
@@ -2457,6 +2469,9 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
   echo "doing post upgrade activities"
@@ -2504,6 +2519,9 @@ if [ $ID -ne 0 ] ; then
   exit 1
 fi
 (
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
@@ -2567,6 +2585,9 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
@@ -2606,6 +2627,9 @@ ID=$(id -u)
 if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
@@ -2728,6 +2752,9 @@ fi
 
 %postun -n indimail-mini
 argv1=$1
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   exit 0
