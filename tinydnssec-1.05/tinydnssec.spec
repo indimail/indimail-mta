@@ -267,6 +267,9 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
   exit 0
@@ -279,6 +282,9 @@ done
 
 %preun
 argv1=$1
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   exit 0
@@ -308,6 +314,9 @@ ID=$(id -u)
 if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   echo "doing post upgrade activities"
@@ -362,6 +371,9 @@ ID=$(id -u)
 if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
