@@ -69,7 +69,7 @@ incoming mail automatically.  SmartList also needs procmail to operate.
 
 %build
 %configure --prefix=%{_prefix} --enable-sendmail-prog=%{_prefix}/bin/sendmail \
-	--sysconfdir=/etc/indimail
+  --sysconfdir=/etc/indimail
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
