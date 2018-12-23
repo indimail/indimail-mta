@@ -1,5 +1,8 @@
 #
 # $Log: cdbmake-12.sh,v $
+# Revision 1.4  2018-12-23 15:49:48+05:30  Cprogrammer
+# run awk in compatibility mode. fixe for wide characters
+#
 # Revision 1.3  2018-01-31 12:02:29+05:30  Cprogrammer
 # moved cdbmake to sbin
 #
