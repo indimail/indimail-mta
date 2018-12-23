@@ -28,7 +28,7 @@
 %global mandir             @mandir@
 %global shareddir          @shareddir@
 %global defaultDomain      @defaultdomain@
-%global courier_version    5.0.4
+%global courier_version    5.0.5
 %global bogofilter_version 1.2.4
 %global pam_multi_version  1.1
 %global ucspi_version      0.88
@@ -1474,6 +1474,9 @@ if [ $ID -ne 0 ] ; then
 fi
 # initialize setup log file
 >> /tmp/indimail-setup.log
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
@@ -1557,6 +1560,9 @@ else
   TOUCH=/bin/touch
 fi
 
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 if [ $argv1 -eq 2 ] ; then # upgrade
 # we are doing upgrade
   (
@@ -1914,6 +1920,9 @@ if [ $ID -ne 0 ] ; then
 fi
 
 (
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
@@ -1964,6 +1973,9 @@ if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 else
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
@@ -2092,6 +2104,9 @@ fi
 ### SCRIPTLET ###############################################################################
 %postun -n libindimail
 argv1=$1
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   exit 0
@@ -2116,6 +2131,9 @@ fi
 
 %postun devel
 argv1=$1
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   exit 0
