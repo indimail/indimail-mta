@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.22  2019-01-13 10:10:27+05:30  Cprogrammer
+ * added missing usage string for allowing unsigned subject.
+ *
  * Revision 1.21  2018-08-08 23:57:02+05:30  Cprogrammer
  * issue success if at lease one one good signature is found
  *
@@ -135,6 +138,8 @@ usage()
 	fprintf(stderr, "q                    include query method tag\n");
 	fprintf(stderr, "t                    include a timestamp tag\n");
 	fprintf(stderr, "h                    include Copied Headers\n");
+	fprintf(stderr, "f                    allow Unsigned From (default is to reject if From field is not signed\n");
+	fprintf(stderr, "S                    allow Unsigned Subject (default is to reject if Subject field is not signed)\n");
 	fprintf(stderr, "v                    verify the message\n");
 	fprintf(stderr, "p <ssp|adsp>         0 - disable practice (default), 1- SSP, or 2 - ADSP verification\n");
 	fprintf(stderr, "b <standard>         1 - allman, 2 - ietf or 3 - both\n");
@@ -146,10 +151,9 @@ usage()
 #ifdef HAVE_EVP_SHA256
 	fprintf(stderr, "z <hash>             1 for sha1, 2 for sha256, 3 for both\n");
 #endif
-	fprintf(stderr, "f                    0 = From headers not included in the signature are not allowed\n");
-	fprintf(stderr, "                     1 = allowed\n");
 	fprintf(stderr, "y <selector>         the selector tag DEFAULT=private\n");
 	fprintf(stderr, "s <privkeyfile>      sign the message using the private key in privkeyfile\n");
+	fprintf(stderr, "V                    set verbose mode\n");
 	fprintf(stderr, "H                    this help\n");
 	exit(1);
 }
@@ -161,8 +165,7 @@ unsigned int str_chr(char *s, int c)
 
 	ch = c;
 	t = s;
-	for (;;)
-	{
+	for (;;) {
 		if (!*t)
 			break;
 		if (*t == ch)
@@ -312,8 +315,7 @@ void writeHeader(int ret, int resDKIMSSP, int resDKIMADSP, int useSSP, int useAD
 				break;
 		}
 	}
-	if (useADSP && resDKIMADSP != -1)
-	{
+	if (useADSP && resDKIMADSP != -1) {
 		switch(resDKIMADSP)
 		{
 			case DKIM_ADSP_ALL:
@@ -351,24 +353,18 @@ ParseTagValues(char *list, char *letters[], char *values[])
 	for (i = 0; letters[i]; i++)
 		values[i] = 0;
 	key = 0;
-	for(ptr = list;*ptr;)
-	{
+	for(ptr = list;*ptr;) {
 		if ((*ptr == ' ') || (*ptr == '\t') || (*ptr == '\r') || (*ptr == '\n')) /*- FWS */
 			*ptr++ = 0;
 		if (!key)
 			key = ptr;
-		if (*ptr == '=')
-		{
+		if (*ptr == '=') {
 			*ptr = 0;
-			for (i = 0;letters[i];i++)
-			{
-				if (!strcmp(letters[i], key))
-				{
+			for (i = 0;letters[i];i++) {
+				if (!strcmp(letters[i], key)) {
 					ptr++;
-					for (;*ptr;)
-					{
-						if ((*ptr == ' ') || (*ptr == '\t') || (*ptr == '\r') || (*ptr == '\n'))
-						{
+					for (;*ptr;) {
+						if ((*ptr == ' ') || (*ptr == '\t') || (*ptr == '\r') || (*ptr == '\n')) {
 							ptr++;
 							continue;
 						}
@@ -379,10 +375,8 @@ ParseTagValues(char *list, char *letters[], char *values[])
 					tmp = ptr;
 					if (*ptr)
 						*ptr++ = 0;
-					for(;tmp != values[i];tmp--) /*- RFC 4871 3.2 */
-					{
-						if ((*tmp == ' ') || (*tmp == '\t') || (*tmp == '\r') || (*tmp == '\n'))
-						{
+					for(;tmp != values[i];tmp--) /*- RFC 4871 3.2 */ {
+						if ((*tmp == ' ') || (*tmp == '\t') || (*tmp == '\r') || (*tmp == '\n')) {
 							*tmp = 0;
 							continue;
 						}
@@ -407,8 +401,7 @@ GetSSP(char *domain, int *bTesting)
 	int             bIsParentSSP = 0, iSSP = DKIM_SSP_UNKNOWN;
 
 	*bTesting = 0;
-	if (!(query = (char *) DKIM_MALLOC(strlen("_ssp._domainkey.") + strlen(domain) + 1)))
-	{
+	if (!(query = (char *) DKIM_MALLOC(strlen("_ssp._domainkey.") + strlen(domain) + 1))) {
 		fprintf(stderr, "malloc: %d: %s\n", strlen("_ssp._domainkey.") + strlen(domain) + 1,
 			strerror(errno));
 		exit(1);
@@ -416,29 +409,24 @@ GetSSP(char *domain, int *bTesting)
 	sprintf(query, "_ssp._domainkey.%s", domain);
 	results = dns_text(query);
 	DKIM_MFREE(query);
-	if (!strcmp(results, "e=temp;"))
-	{
+	if (!strcmp(results, "e=temp;")) {
 		DKIM_MFREE(results);
 		return DKIM_SSP_TEMPFAIL;
 	} else
-	if (!strcmp(results, "e=perm;"))
-	{
+	if (!strcmp(results, "e=perm;")) {
 		DKIM_MFREE(results);
 		results = dns_text(domain);
-		if (!strcmp(results, "e=temp;"))
-		{
+		if (!strcmp(results, "e=temp;")) {
 			DKIM_MFREE(results);
 			return DKIM_SSP_TEMPFAIL;
 		} else
-		if (!strcmp(results, "e=perm;"))
-		{
+		if (!strcmp(results, "e=perm;")) {
 			DKIM_MFREE(results);
 			return DKIM_SSP_SCOPE;
 		}
 		bIsParentSSP = 1;
 	}
-	if (!ParseTagValues(results, tags, values))
-	{
+	if (!ParseTagValues(results, tags, values)) {
 		DKIM_MFREE(results);
 		return DKIM_SSP_UNKNOWN;
 	}
@@ -453,8 +441,7 @@ GetSSP(char *domain, int *bTesting)
 	// flags
 	if (values[1] != NULL) {
 		char           *s, *p;
-		for (p = values[1], s = values[1]; *p; p++)
-		{
+		for (p = values[1], s = values[1]; *p; p++) {
 			if (*p == '|')
 				*p = 0;
 			else
@@ -486,18 +473,15 @@ GetADSP(char *domain)
 	char           *values[1];
 
 	results = dns_text(domain);
-	if (!strcmp(results, "e=perm;"))
-	{
+	if (!strcmp(results, "e=perm;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_SCOPE;
 	} else
-	if (!strcmp(results, "e=temp;"))
-	{
+	if (!strcmp(results, "e=temp;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_TEMPFAIL;
 	}
-	if (!(query = (char *) DKIM_MALLOC(strlen((char *) "_adsp._domainkey.") + strlen(domain) + 1)))
-	{
+	if (!(query = (char *) DKIM_MALLOC(strlen((char *) "_adsp._domainkey.") + strlen(domain) + 1))) {
 		fprintf(stderr, "malloc: %d: %s\n", strlen("_adsp._domainkey.") + strlen(domain) + 1,
 			strerror(errno));
 		exit(1);
@@ -505,18 +489,15 @@ GetADSP(char *domain)
 	sprintf(query, "_adsp._domainkey.%s", domain);
 	results = dns_text(query);
 	DKIM_MFREE(query);
-	if (!strcmp(results, "e=perm;"))
-	{
+	if (!strcmp(results, "e=perm;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_SCOPE;
 	} else
-	if (!strcmp(results, "e=temp;"))
-	{
+	if (!strcmp(results, "e=temp;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_TEMPFAIL;
 	}
-	if (!ParseTagValues(results, tags, values))
-	{
+	if (!ParseTagValues(results, tags, values)) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_UNKNOWN;
 	}
@@ -567,8 +548,7 @@ main(int argc, char **argv)
 	opts.nIncludeBodyHash = DKIM_BODYHASH_BOTH;
 	strcpy(opts.szRequiredHeaders, "NonExistent");
 	opts.pfnHeaderCallback = SignThisHeader;
-	while (1)
-	{
+	while (1) {
 		if ((ch = getopt(argc, argv, "lqtfhHSvVp:b:c:d:i:s:x:y:z:")) == -1)
 			break;
 		switch (ch)
@@ -710,8 +690,7 @@ main(int argc, char **argv)
 		} /*- switch (ch) */
 	}
 	if (bSign) { /*- sign */
-		if (!PrivKeyFile)
-		{
+		if (!PrivKeyFile) {
 			fprintf(stderr, "Private Key not provided\n");
 			usage();
 			return (1);
@@ -727,53 +706,44 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: %s\n", PrivKeyFile, strerror(errno));
 			return (1);
 		}
-		if (fstat(PrivKeyFD, &statbuf) == -1)
-		{
+		if (fstat(PrivKeyFD, &statbuf) == -1) {
 			fprintf(stderr, "fstat: %s: %s\n", PrivKeyFile, strerror(errno));
 			return (1);
 		}
-		if (!(PrivKey = (char *) DKIM_MALLOC(sizeof(char) * ((nPrivKeyLen = statbuf.st_size) + 1))))
-		{
+		if (!(PrivKey = (char *) DKIM_MALLOC(sizeof(char) * ((nPrivKeyLen = statbuf.st_size) + 1)))) {
 			fprintf(stderr, "malloc: %ld bytes: %s\n", statbuf.st_size + 1, strerror(errno));
 			return (1);
 		}
-		if (read(PrivKeyFD, PrivKey, nPrivKeyLen) != nPrivKeyLen)
-		{
+		if (read(PrivKeyFD, PrivKey, nPrivKeyLen) != nPrivKeyLen) {
 			fprintf(stderr, "%s: read: %s\n", strerror(errno), program);
 			return (1);
 		}
 		close(PrivKeyFD);
 		PrivKey[nPrivKeyLen] = '\0';
-		if (DKIMSignInit(&ctxt, &opts) != DKIM_SUCCESS)
-		{
+		if (DKIMSignInit(&ctxt, &opts) != DKIM_SUCCESS) {
 			fprintf(stderr, "DKIMSignInit: failed to initialize signature %s\n", PrivKeyFile);
 			return (1);
 		}
-		for (;;)
-		{
-			if ((ret = read(0, Buffer, sizeof(Buffer) - 1)) == -1)
-			{
+		for (;;) {
+			if ((ret = read(0, Buffer, sizeof(Buffer) - 1)) == -1) {
 				fprintf(stderr, "read: %s\n", strerror(errno));
 				DKIMSignFree(&ctxt);
 				return (1);
 			} else
 			if (!ret)
 				break;
-			if (DKIMSignProcess(&ctxt, Buffer, ret) == DKIM_INVALID_CONTEXT)
-			{
+			if (DKIMSignProcess(&ctxt, Buffer, ret) == DKIM_INVALID_CONTEXT) {
 				fprintf(stderr, "DKIMSignProcess: DKIMContext structure invalid for this operation\n");
 				DKIMSignFree(&ctxt);
 				return (1);
 			}
 		}
-		if (DKIMSignGetSig2(&ctxt, PrivKey, &pSig) == DKIM_INVALID_CONTEXT)
-		{
+		if (DKIMSignGetSig2(&ctxt, PrivKey, &pSig) == DKIM_INVALID_CONTEXT) {
 			fprintf(stderr, "DKIMSignProcess: DKIMContext structure invalid for this operation\n");
 			DKIMSignFree(&ctxt);
 			return (1);
 		}
-		if (pSig)
-		{
+		if (pSig) {
 			fwrite(pSig, 1, strlen(pSig), stdout);
 			fwrite("\n", 1, 1, stdout);
 		}
@@ -792,10 +762,8 @@ main(int argc, char **argv)
 		vopts.nAllowUnsignedFromHeaders = nAllowUnsignedFromHeaders;
 		vopts.nSubjectRequired = nAllowUnsignedSubject;
 		DKIMVerifyInit(&ctxt, &vopts);		/*- this is always successful */
-		for (;;)
-		{
-			if ((i = read(0, Buffer, sizeof(Buffer) - 1)) == -1)
-			{
+		for (;;) {
+			if ((i = read(0, Buffer, sizeof(Buffer) - 1)) == -1) {
 				fprintf(stderr, "read: %s\n", strerror(errno));
 				DKIMVerifyFree(&ctxt);
 				return (1);
@@ -809,8 +777,7 @@ main(int argc, char **argv)
 			if (ret)
 				break;
 		}
-		if (!ret)
-		{
+		if (!ret) {
 			ret = DKIMVerifyResults(&ctxt, &sCount, &sSize);
 			if (ret != DKIM_SUCCESS && ret != DKIM_3PS_SIGNATURE && ret != DKIM_NEUTRAL)
 				dkim_error(ret);
@@ -837,8 +804,7 @@ main(int argc, char **argv)
 			}
 		} 
 		if (ret < 0 || ret == DKIM_3PS_SIGNATURE) {
-			if (useADSP)
-			{
+			if (useADSP) {
 				char           *domain;
 	
 				if ((domain = DKIMVerifyGetDomain(&ctxt)))
@@ -852,8 +818,7 @@ main(int argc, char **argv)
 					ret = DKIM_FAIL;
 				ret = DKIM_NEUTRAL;
 			} else
-			if (useSSP)
-			{
+			if (useSSP) {
 				int             bTestingPractices = 0;
 				char           *domain;
 
@@ -874,16 +839,13 @@ main(int argc, char **argv)
 		}
 		DKIMVerifyFree(&ctxt);
 		writeHeader(ret, resDKIMSSP, resDKIMADSP, useSSP, useADSP);
-		if ((dkimverify = getenv("DKIMVERIFY")))
-		{
-			if (ret < 0)
-			{
+		if ((dkimverify = getenv("DKIMVERIFY"))) {
+			if (ret < 0) {
 				if (dkimverify[str_chr(dkimverify, 'F' - ret)])
 					ret = 14; /*- return permanent error */
 				if (dkimverify[str_chr(dkimverify, 'f' - ret)])
 					ret = 88; /*- return temporary error */
-			} else
-			{
+			} else {
 				if (dkimverify[str_chr(dkimverify, 'A' + ret)])
 					ret = 14; /*- return permanent error */
 				if (dkimverify[str_chr(dkimverify, 'a' + ret)])
@@ -899,7 +861,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.21 2018-08-08 23:57:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.22 2019-01-13 10:10:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
