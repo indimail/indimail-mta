@@ -138,7 +138,7 @@ usage()
 	fprintf(stderr, "q                    include query method tag\n");
 	fprintf(stderr, "t                    include a timestamp tag\n");
 	fprintf(stderr, "h                    include Copied Headers\n");
-	fprintf(stderr, "f                    allow Unsigned From (default is to reject if From field is not signed\n");
+	fprintf(stderr, "f                    allow Unsigned From (default is to reject if From field is not signed)\n");
 	fprintf(stderr, "S                    allow Unsigned Subject (default is to reject if Subject field is not signed)\n");
 	fprintf(stderr, "v                    verify the message\n");
 	fprintf(stderr, "p <ssp|adsp>         0 - disable practice (default), 1- SSP, or 2 - ADSP verification\n");
