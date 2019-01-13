@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.21  2019-01-14 00:10:00+05:30  Cprogrammer
+# added -S, -f option to verify signatures with unsigned subject, unsigned from
+#
 # Revision 1.20  2017-03-09 16:38:15+05:30  Cprogrammer
 # FHS changes
 #
@@ -63,7 +66,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.20 2017-03-09 16:38:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.21 2019-01-14 00:10:00+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -317,7 +320,14 @@ if [ $dkimverify -eq 1 ] ; then
 		practice=2
 	fi
 	exec 0</tmp/dk.$$
-	PREFIX/bin/dkim -p $practice -v
+	dkimvargs="-p $practice"
+	if [ -n "$UNSIGNED_SUBJECT" ] ; then
+		dkimvargs="$dkimvargs -S"
+	fi
+	if [ -n "$UNSIGNED_FROM" ] ; then
+		dkimvargs="$dkimvargs -f"
+	fi
+	PREFIX/bin/dkim $dkimvargs -v
 	ret=$?
 	case $ret in
 		14)
