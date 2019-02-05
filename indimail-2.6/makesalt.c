@@ -1,5 +1,8 @@
 /*
  * $Log: makesalt.c,v $
+ * Revision 2.3  2019-02-05 15:46:28+05:30  Cprogrammer
+ * fixed buffer overflow
+ *
  * Revision 2.2  2015-08-21 10:46:58+05:30  Cprogrammer
  * fix for 'stack smashing detected' when compiled with -fstack-protector
  *
@@ -15,7 +18,7 @@
 #include <sys/types.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: makesalt.c,v 2.2 2015-08-21 10:46:58+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: makesalt.c,v 2.3 2019-02-05 15:46:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int        Arc4random(int, int);
@@ -28,7 +31,7 @@ genpass(int len)
 	int             i, slen;
 	char           *pwtmp;
 
-	if (!(pwtmp = (char *) malloc(len)))
+	if (!(pwtmp = (char *) malloc(len + 1)))
 		return((char *) 0);
 	slen = strlen(itoa64) - 1;
 	for (i = 0; i < len; i++)
