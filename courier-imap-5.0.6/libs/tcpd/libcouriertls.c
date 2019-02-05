@@ -830,12 +830,10 @@ SSL_CTX *tls_create_int(int isserver, const struct tls_info *info,
 					      "/"), de->d_name);
 
 				fp=fopen(q, "r");
-				if (!fp)
-				{
-					nonsslerror(info, q);
-					exit(1);
-				}
 				free(q);
+
+				if (!fp)
+					continue;
 
 				while ((x=PEM_read_X509(fp, NULL, NULL, NULL)))
 				{

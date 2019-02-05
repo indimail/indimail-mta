@@ -377,7 +377,7 @@ static int read_cert_dir(const char *cert_dir,
 
 		strcat(strcat(strcpy(buf, cert_dir), "/"), de->d_name);
 
-		if (lstat(buf, &stat_buf) < 0 || !S_ISREG(stat_buf.st_mode))
+		if (stat(buf, &stat_buf) < 0 || !S_ISREG(stat_buf.st_mode))
 		{
 			free(buf);
 			continue;

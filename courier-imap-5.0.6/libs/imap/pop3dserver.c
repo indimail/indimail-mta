@@ -185,6 +185,7 @@ static struct msglist **readpop3dlist(unsigned long *uid)
 	FILE *fp=openpop3dlist();
 	size_t i;
 	int vernum=0;
+	unsigned long size;
 
 	uidv=time(NULL);
 
@@ -254,10 +255,11 @@ static struct msglist **readpop3dlist(unsigned long *uid)
 			// We have extra room at the end.
 			strcat(p, ":0");
 
-			if (sscanf(p, "%lu %lu:%lu:%d", &m->size,
+			if (sscanf(p, "%lu %lu:%lu:%d", &size,
 				   &m->uid.n, &m->uid.uidv,
 				   &m->isutf8) == 4)
 			{
+				m->size=size;
 				m->next=list;
 				list=m;
 				++mcnt;
@@ -427,7 +429,6 @@ static void sortmsgs()
 	size_t i, n;
 	struct msglist *m;
 	struct msglist **prev_list;
-	int savesizes=0;
 
 	unsigned long nextuid;
 
@@ -1107,7 +1108,6 @@ int main(int argc, char **argv)
 {
 char   *p, *protocol;
 uid_t  euid, uid;
-const char *utf8;
 
 #ifdef HAVE_SETVBUF_IOLBF
 	setvbuf(stderr, NULL, _IOLBF, BUFSIZ);
@@ -1140,8 +1140,13 @@ const char *utf8;
 	}
 
 	utf8_enabled=1; /* Until proven otherwise */
-	if ((utf8=getenv("UTF8")))
-		utf8_enabled=atoi(utf8);
+
+	{
+		const char *utf8=getenv("UTF8");
+
+		if (utf8)
+			utf8_enabled=atoi(utf8);
+	}
 
 	if ((remoteport=getenv("TCPREMOTEPORT")) == NULL)
 		remoteport="0";
