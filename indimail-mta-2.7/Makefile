@@ -48,6 +48,9 @@ svctool: svctool.in mysql_config
 svctool.8: svctool.9 conf-qmail conf-sysconfdir Makefile mysql_config
 	$(edit) svctool.9 > $@
 
+create_services: create_services.in
+	$(edit) $@.in > $@; chmod 755 $@
+
 addresses.0: \
 addresses.5
 	nroff -man addresses.5 > addresses.0
@@ -1432,7 +1435,7 @@ run-cleanq.9 conf-prefix
 it: \
 indimail-mta.fc perm_list.q 822date 822field 822header 822print 822received addcr addrlist \
 argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q indimail-mta.spec \
-binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm inotify \
+binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm inotify create_services \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
 datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip svctool \
 dnsmxip dnsptr dnstxt dot-forward drate elq envdir envuidgid qdane dnstlsarr \

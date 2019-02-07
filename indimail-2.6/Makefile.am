@@ -165,7 +165,7 @@ noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
 	README vadddomain_handle vadduser_handle vdeldomain_handle \
 	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle \
-	vdeluser_handle vrenameuser_handle create_services
+	vdeluser_handle vrenameuser_handle
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 				   vdeluser_handle vrenameuser_handle
@@ -891,8 +891,6 @@ vdeluser_handle: vdeluser_handle.in post_handle
 vrenameuser_handle: vrenameuser_handle.in post_handle
 	$(edit) $@.in > post_handle/vrenameuser; ln -sf post_handle/vrenameuser $@
 
-create_services: create_services.in
-	$(edit) $@.in > $@; chmod 755 $@
 indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog.indimail
 	($(edit) $@.in;./catChangeLog) | $(edit) > $@
 indimail-rpmlintrc: indimail-rpmlintrc.in
