@@ -1,5 +1,8 @@
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.6  2019-02-15 17:11:18+05:30  Cprogrammer
+# fixed checking of argument count
+#
 # Revision 1.5  2017-03-09 16:38:24+05:30  Cprogrammer
 # use full path of openssl
 #
@@ -16,7 +19,7 @@
 # Initial revision
 #
 #
-if [ $# -lt 1 ] ; then
+if [ $# -ne 2 ] ; then
 	echo "USAGE: dknewkey keyfile [bits]"
 	exit 1
 fi
