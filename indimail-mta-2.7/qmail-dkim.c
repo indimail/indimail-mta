@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.50  2019-02-15 21:25:04+05:30  Cprogrammer
+ * skip nosignaturedomains if domain is present in signaturedomains
+ *
  * Revision 1.49  2018-08-08 23:58:01+05:30  Cprogrammer
  * issue success if at lease one one good signature is found
  *
@@ -1281,6 +1284,7 @@ main(int argc, char *argv[])
 			/*- what to do if DKIM Verification fails */
 			if (checkPractice(ret)) {
 				char           *domain;
+				int             skip_nosignature_domain = 0;
 
 				origRet = ret;
 				if ((domain = DKIMVerifyGetDomain(&ctxt))) {
@@ -1294,27 +1298,31 @@ main(int argc, char *argv[])
 						len += ((token_len = str_len(p)) + 1); /*- next domain */
 						if (!case_diffb(p, token_len, domain)) {
 							ret = DKIM_FAIL;
+							skip_nosignature_domain = 1;
 							useADSP = 0;
 							useSSP = 0;
 							break;
 						}
 						p = sigdomains.s + len;
 					}
-					if (!(p = env_get("NOSIGNATUREDOMAINS"))) {
-						if (control_readfile(&nsigdomains, "nosignaturedomains", 0) == -1)
-							die(55, 2);
-					} else
-					if (!stralloc_copys(&nsigdomains, p))
-						die(51, 2);
-					for (len = 0, p = nsigdomains.s;len < nsigdomains.len;) {
-						len += ((token_len = str_len(p)) + 1); /*- next domain */
-						if (*p == '*' || !case_diffb(p, token_len, domain)) {
-							ret = DKIM_NEUTRAL;
-							useADSP = 0;
-							useSSP = 0;
-							break;
+					/* if not found in signaturedomains */
+					if (!skip_nosignature_domain) {
+						if (!(p = env_get("NOSIGNATUREDOMAINS"))) {
+							if (control_readfile(&nsigdomains, "nosignaturedomains", 0) == -1)
+								die(55, 2);
+						} else
+						if (!stralloc_copys(&nsigdomains, p))
+							die(51, 2);
+						for (len = 0, p = nsigdomains.s;len < nsigdomains.len;) {
+							len += ((token_len = str_len(p)) + 1); /*- next domain */
+							if (*p == '*' || !case_diffb(p, token_len, domain)) {
+								ret = DKIM_NEUTRAL;
+								useADSP = 0;
+								useSSP = 0;
+								break;
+							}
+							p = nsigdomains.s + len;
 						}
-						p = nsigdomains.s + len;
 					}
 				}
 				if (!domain || !*domain)
@@ -1417,7 +1425,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.49 2018-08-08 23:58:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.50 2019-02-15 21:25:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
