@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.51  2019-02-17 11:38:51+05:30  Cprogrammer
+ * set original DKIM error for SIGN_PRACTICE=local
+ *
  * Revision 1.50  2019-02-15 21:25:04+05:30  Cprogrammer
  * skip nosignaturedomains if domain is present in signaturedomains
  *
@@ -1184,8 +1187,7 @@ main(int argc, char *argv[])
 		if (!str_diffn("adsp", x, 4)) {
 			useADSP = 1;
 			accept3ps = 1;
-		}
-		else
+		} else
 		if (!str_diffn("ssp", x, 3)) {
 			useSSP = 1;
 			accept3ps = 1;
@@ -1297,7 +1299,7 @@ main(int argc, char *argv[])
 					for (len = 0, p = sigdomains.s;len < sigdomains.len;) {
 						len += ((token_len = str_len(p)) + 1); /*- next domain */
 						if (!case_diffb(p, token_len, domain)) {
-							ret = DKIM_FAIL;
+							ret = origRet;
 							skip_nosignature_domain = 1;
 							useADSP = 0;
 							useSSP = 0;
@@ -1343,7 +1345,7 @@ main(int argc, char *argv[])
 				if (useSSP) {
 					int             bTestingPractices = 0;
 					char           *domain;
-	
+
 					if ((domain = DKIMVerifyGetDomain(&ctxt)))
 						resDKIMSSP = checkSSP(domain, &bTestingPractices);
 					if (sCount > 0) {
@@ -1425,7 +1427,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.50 2019-02-15 21:25:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.51 2019-02-17 11:38:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
