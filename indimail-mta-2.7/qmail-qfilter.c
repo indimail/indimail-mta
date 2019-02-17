@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.11  2019-02-17 11:40:14+05:30  Cprogrammer
+ * fixed indentation
+ *
  * Revision 1.10  2016-06-03 09:58:12+05:30  Cprogrammer
  * moved qmail-multi to sbin
  *
@@ -106,8 +109,7 @@ custom_error(char *flag, char *status, char *code)
 		_exit(QQ_WRITE_ERROR);
 	if (substdio_puts(&sserr, status) == -1)
 		_exit(QQ_WRITE_ERROR);
-	if (code)
-	{
+	if (code) {
 		if (substdio_put(&sserr, " (#", 3) == -1)
 			_exit(QQ_WRITE_ERROR);
 		c = (*flag == 'Z') ? "4" : "5";
@@ -132,8 +134,7 @@ parse_sender(char *env)
 	int             at, len;
 
 	for (len = 0;*ptr != 'F' && len < env_len;len++,ptr++);
-	if (*ptr != 'F')
-	{
+	if (*ptr != 'F') {
 		custom_error("Z", "bad envelope. (#4.3.0)", 0);
 		_exit(88);
 	}
@@ -147,16 +148,14 @@ parse_sender(char *env)
 		return 2;
 	}
 	at = str_chr(ptr, '@');
-	if (ptr[at])
-	{
+	if (ptr[at]) {
 		if (!env_put2("QMAILHOST", ptr + at + 1))
 			_exit(QQ_OOM);
 		ptr[at] = 0;
 		if (!env_put2("QMAILUSER", ptr))
 			_exit(QQ_OOM);
 		ptr[at] = '@';
-	} else
-	{
+	} else {
 		if (!env_put2("QMAILUSER", ptr))
 			_exit(QQ_OOM);
 		if (!env_put("QMAILHOST="))
@@ -199,8 +198,7 @@ parse_envelope(void)
 	char           *env;
 	size_t          offset;
 
-	if ((env = mmap(0, env_len, PROT_READ|PROT_WRITE, MAP_PRIVATE, ENVIN, 0)) == MAP_FAILED)
-	{
+	if ((env = mmap(0, env_len, PROT_READ|PROT_WRITE, MAP_PRIVATE, ENVIN, 0)) == MAP_FAILED) {
 		custom_error("Z", "mmap failed. (#4.3.0)", 0);
 		_exit(88);
 	}
@@ -218,8 +216,7 @@ mktmpfile()
 	char            filename[sizeof (TMPDIR) + 19] = TMPDIR "/fixheaders.XXXXXX";
 	int             fd = mkstemp(filename);
 
-	if (fd == -1)
-	{
+	if (fd == -1) {
 		custom_error("Z", "unable to create temp file. (#4.3.0)", 0);
 		_exit(88);
 	}
@@ -227,8 +224,7 @@ mktmpfile()
 	 * The following makes the temporary file disappear immediately on
 	 * program exit. 
 	 */
-	if (unlink(filename) == -1)
-	{
+	if (unlink(filename) == -1) {
 		custom_error("Z", "unable to unlink temp file. (#4.3.0)", 0);
 		close(fd);
 		_exit(88);
@@ -244,13 +240,11 @@ move_fd(int currfd, int newfd)
 {
 	if (currfd == newfd)
 		return;
-	if (dup2(currfd, newfd) != newfd)
-	{
+	if (dup2(currfd, newfd) != newfd) {
 		custom_error("Z", "move_fd: dup2 failed. (#4.3.0)", 0);
 		_exit(88);
 	}
-	if (close(currfd) != 0)
-	{
+	if (close(currfd) != 0) {
 		custom_error("Z", "move_fd: close failed. (#4.3.0)", 0);
 		_exit(88);
 	}
@@ -281,8 +275,7 @@ copy_fd(int fdin, int fdout, size_t * var)
 		bytes += rd;
 	}
 	close(fdin);
-	if (lseek(tmp, 0, SEEK_SET) != 0)
-	{
+	if (lseek(tmp, 0, SEEK_SET) != 0) {
 		custom_error("Z", "unable to lseek. (#4.3.0)", 0);
 		_exit(88);
 	}
@@ -338,7 +331,7 @@ mktmpfd(int fd)
 }
 
 static void
-move_unless_empty(int src, int dst, const void *reopen, size_t * var)
+move_unless_empty(int src, int dst, const void *reopen, size_t *var)
 {
 	struct stat     st;
 
@@ -355,8 +348,7 @@ move_unless_empty(int src, int dst, const void *reopen, size_t * var)
 	} else
 	if (!reopen)
 		close(src);
-	if (lseek(dst, 0, SEEK_SET) != 0)
-	{
+	if (lseek(dst, 0, SEEK_SET) != 0) {
 		custom_error("Z", "unable to lseek. (#4.3.0)", 0);
 		_exit(88);
 	}
@@ -402,8 +394,7 @@ run_filters(const command * first)
 		strnum[fmt_ulong(strnum, msg_len)] = 0;
 		if (!env_put2("MSGSIZE", strnum))
 			_exit(QQ_OOM);
-		if (lseek(1, 0, SEEK_SET) != 0)
-		{
+		if (lseek(1, 0, SEEK_SET) != 0) {
 			custom_error("Z", "unable to lseek envelope. (#4.3.0)", 0);
 			_exit(88);
 		}
@@ -423,8 +414,7 @@ run_filters(const command * first)
 			exit((WEXITSTATUS(status) == QQ_DROP_MSG) ? 0 : WEXITSTATUS(status));
 		move_unless_empty(MSGOUT, MSGIN, c->next, &msg_len);
 		move_unless_empty(ENVOUT, ENVIN, c->next, &env_len);
-		if (lseek(QQFD, 0, SEEK_SET) != 0)
-		{
+		if (lseek(QQFD, 0, SEEK_SET) != 0) {
 			custom_error("Z", "unable to lseek qqfd. (#4.3.0)", 0);
 			_exit(88);
 		}
@@ -460,7 +450,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.10 2016-06-03 09:58:12+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.11 2019-02-17 11:40:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
