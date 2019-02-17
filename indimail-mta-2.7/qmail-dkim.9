@@ -235,7 +235,7 @@ You can have a control file
 .I nosignaturedomains
 containing a list of domains which you know are sure not to sign messages using DKIM.
 If a message comes from a domain listed in
-.IR signaturedomains ,
+.IR nosignaturedomains ,
 and does not have a DKIM-Signature header, 
 .B qmail-dkim
 will bypass ADSP/SSP checks and return DKIM_NEUTRAL. The wildcard entry '*' in this file, will
@@ -247,8 +247,8 @@ The name of this control file can be overriden by the environment variable
 
 Typically, you would sign messages generated on-host by setting
 .B DKIMSIGN
-in the environment before running an email program.  DKIMSIGN will be carried
-through qmail's sendmail emulation through 
+in the environment before running an \fBqmail-smtpd\fR(8) or \fBsendmail(1)\fR / \fBqmail-inject\fR(8).  DKIMSIGN will be carried
+through qmail-smtpd or through qmail's sendmail emulation through 
 .B qmail-inject
 to
 .BR qmail-dkim .
