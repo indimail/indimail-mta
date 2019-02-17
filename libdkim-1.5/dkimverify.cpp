@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.21  2019-02-17 11:32:05+05:30  Cprogrammer
+ * made scope of sFromDomain static
+ *
  * Revision 1.20  2018-12-14 11:05:20+05:30  Cprogrammer
  * fixed 'conversion from 'int' to 'char' inside { }” for cross compiling on arm
  *
@@ -1250,7 +1253,7 @@ CDKIMVerify::GetDetails(int *nSigCount, DKIMVerifyDetails ** pDetails)
 char           *DKIM_CALL
 CDKIMVerify::GetDomain(void)
 {
-	string          sFromDomain;
+	static string   sFromDomain;
 	for (list <string>::iterator i = HeaderList.begin(); i != HeaderList.end(); ++i) {
 		if (_strnicmp(i->c_str(), "From", 4) == 0) {
 			/*- skip over whitespace between the header name and : -*/
@@ -1273,7 +1276,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.20 2018-12-14 11:05:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.21 2019-02-17 11:32:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
