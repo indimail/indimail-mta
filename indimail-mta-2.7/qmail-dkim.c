@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.52  2019-02-18 22:18:12+05:30  Cprogrammer
+ * allow DKIMVERIFY env variable in place of DKIMPRACTICE when SIGN_PRACTICE="local"
+ *
  * Revision 1.51  2019-02-17 11:38:51+05:30  Cprogrammer
  * set original DKIM error for SIGN_PRACTICE=local
  *
@@ -952,15 +955,19 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 }
 
 int
-checkPractice(int dkimRet)
+checkPractice(int dkimRet, int useADSP, int useSSP)
 {
 	char           *ptr;
 
-	if (!(ptr = env_get("DKIMPRACTICE")))
-		return (0);
-	else
+	if (!(ptr = env_get("DKIMPRACTICE"))) {
+		/*- if SIGN_PRACTICE="local" then you can use DKIMVERIFY env variable too */
+		if (!useADSP && !useSSP) 
+			dkimpractice = dkimverify; /*- DKIMVERIFY env variable */
+		else
+			return (0);
+	} else
 		dkimpractice = ptr;
-	if (!*ptr) {
+	if (!*dkimpractice) {
 		if (dkimRet < 0 || dkimRet == DKIM_3PS_SIGNATURE)
 			return (1);
 		return (0);
@@ -1284,7 +1291,7 @@ main(int argc, char *argv[])
 					ret = DKIM_NO_SIGNATURES;
 			}
 			/*- what to do if DKIM Verification fails */
-			if (checkPractice(ret)) {
+			if (checkPractice(ret, useADSP, useSSP)) {
 				char           *domain;
 				int             skip_nosignature_domain = 0;
 
@@ -1427,7 +1434,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.51 2019-02-17 11:38:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.52 2019-02-18 22:18:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
