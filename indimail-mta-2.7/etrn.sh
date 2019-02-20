@@ -1,5 +1,8 @@
 #
 # $Log: etrn.sh,v $
+# Revision 1.11  2019-02-20 19:55:10+05:30  Cprogrammer
+# set pipefail to catch error if ipmeprint fails
+#
 # Revision 1.10  2016-06-17 17:20:30+05:30  Cprogrammer
 # FHS compliance
 #
@@ -31,7 +34,7 @@
 # 3 - No Pending message for node
 # 4 - Pending message for node
 #
-# $Id: etrn.sh,v 1.10 2016-06-17 17:20:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: etrn.sh,v 1.11 2019-02-20 19:55:10+05:30 Cprogrammer Exp mbhangui $
 #
 trap "" 1 2 3
 if [ $# -ne 2 ] ; then
@@ -65,6 +68,7 @@ fi
 if [ $count -eq 0 ] ; then
 	exit 3
 fi
+set -o pipefail
 if [ -d $1 ] ; then
 	ipme=`LIBEXEC/ipmeprint | awk '{print $3]'`
 	if [ $? -ne 0 ] ; then
