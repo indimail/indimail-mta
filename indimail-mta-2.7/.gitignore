@@ -585,3 +585,5 @@ doc/RELEASE-Notes
 debian/changelog.in
 maildirsize
 create_services
+qfrontend
+qf-smtp-ratelimit

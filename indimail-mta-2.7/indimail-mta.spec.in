@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.188 2018-12-23 15:50:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.189 2019-02-21 14:15:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -659,6 +659,7 @@ done
 %ghost                            %{logdir}/*/*
 %endif
 %dir %attr(555,root,root)         %{libexecdir}
+%dir %attr(555,root,root)         %{libexecdir}/qfilters
 %dir %attr(555,root,root)         %{shareddir}
 %dir %attr(555,root,root)         %{shareddir}/boot
 %dir %attr(555,root,root)         %{shareddir}/doc
@@ -955,6 +956,8 @@ done
 %attr(755,root,root)                    %{libexecdir}/pinq
 %attr(755,root,root)                    %{libexecdir}/qail
 %attr(755,root,root)                    %{libexecdir}/qpq
+%attr(755,root,root)                    %{libexecdir}/qfrontend
+%attr(755,root,root)                    %{libexecdir}/qfilters/qf-smtp-ratelimit
 
 %if %fedorareview == 0
 %docdir %{mandir}
