@@ -1121,3 +1121,5 @@ tlsarralloc.o
 maildirsize
 maildirsize.o
 create_services
+qfrontend
+qf-smtp-ratelimit

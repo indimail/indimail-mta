@@ -1,5 +1,10 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.254  2019-02-21 14:14:22+05:30  Cprogrammer
+ * added qfilters directory in /usr/libexec/indimail
+ * added qfrontend script for qmail-qfilter
+ * added smtp ratelimit qmail-qfilter script
+ *
  * Revision 1.253  2018-11-11 17:35:10+05:30  Cprogrammer
  * added maildirsize man page
  *
@@ -832,6 +837,7 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
 
 	d(auto_qmail_home, "queue", auto_uido, auto_gidq, 0755);
+	d(auto_libexec,    "qfilters", auto_uido, 0, 0755);
 
 	d(auto_sysconfdir, "certs", auto_uidv, auto_gidq, 02775);
 	d(auto_sysconfdir, "tcp", auto_uidv, auto_gidq, 02775);
@@ -1103,6 +1109,8 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "lib/indimail/plugins", "qmail_smtpd.so", auto_uido, 0, moder_s);
 #endif
 
+	c(auto_libexec, "qfilters", "qf-smtp-ratelimit", auto_uido, 0, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "qfrontend", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qpq", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qail", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "elq", auto_uido, 0, moder_x);
@@ -1646,7 +1654,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.253 2018-11-11 17:35:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.254 2019-02-21 14:14:22+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

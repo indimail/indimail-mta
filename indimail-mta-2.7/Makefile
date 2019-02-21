@@ -574,6 +574,21 @@ warn-auto.sh qmailconfig.sh conf-prefix conf-prefix conf-break conf-split conf-s
 	> qmailconfig
 	chmod 755 qmailconfig
 
+qfrontend: \
+warn-auto.sh qfrontend.sh conf-libexec
+	cat warn-auto.sh qfrontend.sh \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
+	> qfrontend
+	chmod 755 qfrontend
+
+qf-smtp-ratelimit: \
+warn-auto.sh qf-smtp-ratelimit.in conf-libexec
+	cat warn-auto.sh qf-smtp-ratelimit.in \
+	| sed s}HOME}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
+	> qf-smtp-ratelimit
+	chmod 755 qf-smtp-ratelimit
+
 config-fast: \
 warn-auto.sh config-fast.sh conf-prefix conf-break conf-split conf-sysconfdir
 	cat warn-auto.sh config-fast.sh \
@@ -1437,9 +1452,9 @@ indimail-mta.fc perm_list.q 822date 822field 822header 822print 822received addc
 argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q indimail-mta.spec \
 binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm inotify create_services \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
-datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip svctool \
+datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip svctool qfrontend \
 dnsmxip dnsptr dnstxt dot-forward drate elq envdir envuidgid qdane dnstlsarr \
-etrn except fastforward fghack fixcrio forward generic.so greydaemon \
+etrn except fastforward fghack fixcrio forward generic.so greydaemon qf-smtp-ratelimit \
 home home+df hostname idedit iftocc indimail.plist instcheck ipmeprint \
 ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
 maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate inewaliases newinclude \

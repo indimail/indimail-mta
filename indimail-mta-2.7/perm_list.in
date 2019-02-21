@@ -12,9 +12,11 @@
 %dir %attr(0755,root,qmail)        @qmaildir@/queue
 %dir %attr(0555,root,root)         @prefix@/sbin
 %dir %attr(0555,root,root)         @prefix@/bin
-%dir %attr(0555,root,qmail)        @shareddir@
-%dir %attr(0555,root,qmail)        @shareddir@/boot
-%dir %attr(0555,root,qmail)        @shareddir@/doc
+%dir %attr(0555,root,root)         @libexecdir@
+%dir %attr(0555,root,root)         @libexecdir@/qfilters
+%dir %attr(0555,root,root)         @shareddir@
+%dir %attr(0555,root,root)         @shareddir@/boot
+%dir %attr(0555,root,root)         @shareddir@/doc
 %dir %attr(0755,root,root)         @mandir@
 %dir %attr(0755,root,root)         @mandir@/cat1
 %dir %attr(0755,root,root)         @mandir@/cat5
@@ -236,6 +238,8 @@
 %attr(0755,root,qmail) @libexecdir@/pinq
 %attr(0755,root,qmail) @libexecdir@/qail
 %attr(0755,root,qmail) @libexecdir@/qpq
+%attr(0755,root,qmail) @libexecdir@/qfilters/qf-smtp-ratelimit
+%attr(0755,root,qmail) @libexecdir@/qfrontend
 %attr(0755,root,qmail) @libexecdir@/leapsecs
 %attr(0755,root,qmail) @libexecdir@/nowutc
 %attr(0755,root,qmail) @libexecdir@/yearcal
