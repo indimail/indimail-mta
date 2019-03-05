@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vdeldomain_handle.in,v $
+# Revision 2.4  2019-03-05 17:06:19+05:30  Cprogrammer
+# supress message when there is no entries to be removed from spamignore, nodnscheck
+#
 # Revision 2.3  2018-01-27 09:05:18+05:30  Cprogrammer
 # remove domain from spamigore, nodnscheck file on domain deletion
 #
@@ -12,7 +15,7 @@
 #
 #
 #
-# $Id: vdeldomain_handle.in,v 2.3 2018-01-27 09:05:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: vdeldomain_handle.in,v 2.4 2019-03-05 17:06:19+05:30 Cprogrammer Exp mbhangui $
 
 # get securely chown, chmod path
 PATH=/usr/bin:/bin
@@ -24,16 +27,20 @@ mv=$(which mv)
 # remove domain from spamignore nodnscheck
 for i in spamignore nodnscheck
 do
-	echo "removing $1 from $i control file"
 	if [ -f @controldir@/$i ] ; then
 		$grep -w @"$1" @controldir@/$i > /dev/null
 		if [ $? -eq 0 ] ; then
 			$grep -v -w  @"$1" @controldir@/$i > /tmp/$i.$$
-			$mv /tmp/$i.$$ @controldir@/$i
+			if [ -s /tmp/$i.$$ ] ; then
+				echo "removing $1 from $i control file"
+				$mv /tmp/$i.$$ @controldir@/$i
+				$chown indimail:indimail @controldir@/$i
+				$chmod 644 @controldir@/$i
+			else
+				/bin/rm -f /tmp/$i.$$
+			fi
 		fi
 	fi
-	$chown indimail:indimail @controldir@/$i
-	$chmod 644 @controldir@/$i
 done
 @prefix@/bin/svc -h /service/inlookup.* /service*/qmail-send.* 2>/dev/null
 exit 0
