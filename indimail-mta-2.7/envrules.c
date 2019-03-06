@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.19  2019-03-07 00:49:37+05:30  Cprogrammer
+ * do not treat regcomp error as matches
+ *
  * Revision 1.18  2018-11-29 15:21:26+05:30  Cprogrammer
  * skip white spaces in envrules
  *
@@ -102,7 +105,7 @@ do_match(int use_regex, char *text, char *regex, char **errStr)
 int
 envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 {
-	int             len, count, nullflag, use_regex = 0;
+	int             len, count, lcount, nullflag, use_regex = 0;
 	char           *ptr, *cptr;
 	static stralloc rules = { 0 };
 
@@ -116,10 +119,10 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 		return (AM_FILE_ERR);
 	}
 	if (!count)
-		return(0);
+		return (0);
 	if (env_get("QREGEX"))
 		use_regex = 1;
-	for (count = len = 0, ptr = rules.s;len < rules.len;) {
+	for (count = lcount = len = 0, ptr = rules.s; len < rules.len;) {
 		len += (str_len(ptr) + 1);
 		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
 		if (*cptr == ':')
@@ -130,20 +133,21 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 			nullflag = 1;
 		else
 			nullflag = 0;
-		if (nullflag || do_match(use_regex, email, ptr, errStr)) {
+		if (nullflag || do_match(use_regex, email, ptr, errStr) > 0) {
 			if (parse_env(cptr + 1))
-				return(AM_MEMORY_ERR);
-			count++;
+				return (AM_MEMORY_ERR);
+			count = lcount + 1; /*- set line no where match occured*/
 		}
 		ptr = rules.s + len;
+		lcount++;
 	}
-	return(count);
+	return (count);
 }
 
 int
 domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 {
-	int             len, count;
+	int             len, lcount, count;
 	char           *ptr, *cptr, *domain;
 	static stralloc rules = { 0 };
 
@@ -157,27 +161,28 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 		return (AM_FILE_ERR);
 	}
 	if (!count)
-		return(0);
+		return (0);
 	for (domain = email;*domain && *domain != '@';domain++);
 	if (!*domain)
 		return (0);
 	else
 		domain++;
-	for (count = len = 0, ptr = rules.s;len < rules.len;) {
+	for (count = lcount = len = 0, ptr = rules.s; len < rules.len;) {
 		len += (str_len(ptr) + 1);
 		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
 		else
 			continue;
-		if (do_match(0, domain, ptr, errStr)) {
+		if (do_match(0, domain, ptr, errStr) > 0) {
 			if (parse_env(cptr + 1))
-				return(AM_MEMORY_ERR);
-			count++;
+				return (AM_MEMORY_ERR);
+			count = lcount + 1; /*- set line no where match occured*/
 		}
 		ptr = rules.s + len;
+		lcount++;
 	}
-	return(count);
+	return (count);
 }
 
 static int
@@ -221,13 +226,13 @@ parse_env(char *envStrings)
 		if (*ptr2 && !env_put(ptr2))
 			return (1);
 	}
-	return(0);
+	return (0);
 }
 
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.18 2018-11-29 15:21:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.19 2019-03-07 00:49:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
