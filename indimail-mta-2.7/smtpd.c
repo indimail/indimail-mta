@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.216 $";
+char           *revision = "$Revision: 1.217 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -367,13 +367,6 @@ static stralloc domBuf = { 0 };
 int             smtp_port;
 
 extern char   **environ;
-
-/*- dummy function for mail_acl */
-void
-die_qregex(char *str)
-{
-	return;
-}
 
 void
 logerr(char *s)
@@ -3179,7 +3172,7 @@ smtp_mail(char *arg)
 	case AM_FILE_ERR:
 		die_control();
 	case AM_REGEX_ERR:
-		die_regex();
+		/*- flow through */
 	case 0:
 		break;
 	default:
@@ -3823,7 +3816,7 @@ smtp_rcpt(char *arg)
 	case AM_FILE_ERR:
 		die_control();
 	case AM_REGEX_ERR:
-		die_regex();
+		/*- flow through */
 	case 0:
 		break;
 	default:
@@ -4309,7 +4302,7 @@ smtp_data(char *arg)
 		case AM_FILE_ERR:
 			die_control();
 		case AM_REGEX_ERR:
-			die_regex();
+			/*- flow through */
 		case 0:
 			break;
 		default:
@@ -6063,6 +6056,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.217  2019-03-07 00:55:21+05:30  Cprogrammer
+ * do not treat regcomp error as matches
+ *
  * Revision 1.216  2018-11-12 08:28:27+05:30  Cprogrammer
  * removed potential leaks
  *
@@ -6149,7 +6145,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.216 2018-11-12 08:28:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.217 2019-03-07 00:55:21+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
