@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.189 2019-02-21 14:15:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.190 2019-03-08 11:57:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2418,7 +2418,7 @@ fi
 if [ -f %{_prefix}/bin/svok ] ; then
   %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
   if [ $? -eq 0 ] ; then
-    echo "Giving %{name} exactly 5 seconds to exit nicely"
+    echo "Giving svscan exactly 5 seconds to exit nicely"
     if test -f %{_sysconfdir}/init/svscan.conf
     then
       /sbin/initctl emit qmailstop > /dev/null 2>&1
@@ -2536,7 +2536,7 @@ fi
 if [ -f %{_prefix}/bin/svok ] ; then
   %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
   if [ $? -eq 0 ] ; then
-    echo "Giving %{name} exactly 5 seconds to exit nicely"
+    echo "Giving svscan exactly 5 seconds to exit nicely"
     if test -f %{_sysconfdir}/init/svscan.conf
     then
       /sbin/initctl emit qmailstop > /dev/null 2>&1
