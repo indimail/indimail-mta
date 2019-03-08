@@ -1,5 +1,8 @@
 /*
  * $Log: tablematch.c,v $
+ * Revision 1.9  2019-03-08 11:50:42+05:30  Cprogrammer
+ * improved code documentation
+ *
  * Revision 1.8  2018-11-29 15:23:28+05:30  Cprogrammer
  * use HOSTACCESS environment variable as alternate filename for hostaccess control file
  *
@@ -93,23 +96,16 @@ matchinet(char *ip, char *token, char flag)
 		*cptr = 0;
 		ptr1++;
 
-		/*
-		 * IP Address of client 
-		 */
+		/*- IP Address of client */
 		for (cptr = field2; *ptr2 && *ptr2 != '.'; *cptr++ = *ptr2++);
 		*cptr = 0;
 		ptr2++;
-		/*-
-		 * Network address wildcard match (i.e. "192.86.28.*")
-		 */
+		/*- Network address wildcard match (i.e. "192.86.28.*") */
 		if (!str_diff(field1, "*")) {
 			match++;
 			continue;
 		}
-		/*
-		 * Network address wildcard match (i.e.
-		 * "192.86.2?.12?")
-		 */
+		/*- Network address wildcard match (i.e.  * "192.86.2?.12?") */
 		for (; (ptr = my_strchr(field1, '?'));) {
 			lnum = ptr - field1;
 			*ptr = field2[lnum];
@@ -197,7 +193,7 @@ matchinet(char *ip, char *token, char flag)
 int
 tablematch(char *filename, char *ip, char *domain)
 {
-	int             len, count, nullflag, dmatch, imatch, domain_match, ip_match;
+	int             len, count, nullflag, dmatch, imatch, exact_domain_match, exact_ip_match;
 	char           *ptr, *cptr;
 	static stralloc hostacc = { 0 };
 
@@ -207,7 +203,7 @@ tablematch(char *filename, char *ip, char *domain)
 		return (-1);
 	if (!count) /*- allow access if control file is absent */
 		return (1);
-	for (domain_match = ip_match = len = 0, ptr = hostacc.s; len < hostacc.len;) {
+	for (exact_domain_match = exact_ip_match = len = 0, ptr = hostacc.s; len < hostacc.len;) {
 		len += (str_len(ptr) + 1);
 		for (cptr = ptr; *cptr && *cptr != ':'; cptr++);
 		if (*cptr == ':') /*- cptr + 1 is the IP address token */
@@ -226,11 +222,11 @@ tablematch(char *filename, char *ip, char *domain)
 		dmatch = imatch = 0;
 		if (nullflag || (*domain && (!str_diff("*", ptr) || !str_diff(domain + 1, ptr)))) {
 			dmatch = 1;
-			domain_match = str_diff(ptr, "*") ? 1 : 0; /* matched on domain & not on wildcard */
+			exact_domain_match = str_diff(ptr, "*") ? 1 : 0; /* exact domain match & not wildcard match */
 		}
 		if (!str_diff(cptr + 1, "*") || !str_diff(cptr + 1, "*.*.*.*") || matchinet(ip, cptr + 1, 0)) {
 			imatch = 1;
-			ip_match = (str_diff(cptr + 1, "*") && str_diff(cptr + 1, "*.*.*.*")) ? 1 : 0;
+			exact_ip_match = (str_diff(cptr + 1, "*") && str_diff(cptr + 1, "*.*.*.*")) ? 1 : 0;
 		}
 		if (imatch && dmatch)
 			return (1);
@@ -240,13 +236,13 @@ tablematch(char *filename, char *ip, char *domain)
 	 * Matched a domain without IP match - deny access
 	 * if PARANOID is set - deny access
 	 */
-	if (domain_match && env_get("PARANOID"))
+	if (exact_domain_match && env_get("PARANOID"))
 		return (0);
 	/*
 	 * IP matched but domain did not match - deny access unless
 	 * DOMAIN_MASQUERADE is set
 	 */
-	if (ip_match && !env_get("DOMAIN_MASQUERADE"))
+	if (exact_ip_match && !env_get("DOMAIN_MASQUERADE"))
 		return (0);
 	/*- Got no match - neither domain and neither IP */
 	return (1);
@@ -255,7 +251,7 @@ tablematch(char *filename, char *ip, char *domain)
 void
 getversion_tablematch_c()
 {
-	static char    *x = "$Id: tablematch.c,v 1.8 2018-11-29 15:23:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tablematch.c,v 1.9 2019-03-08 11:50:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
