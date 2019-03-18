@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.52  2019-03-18 18:20:58+05:30  Cprogrammer
+ * bug in getting total
+ *
  * Revision 2.51  2018-09-11 10:36:36+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -167,7 +170,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.51 2018-09-11 10:36:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.52 2019-03-18 18:20:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -317,7 +320,7 @@ LoadDbInfo_TXT(int *total)
 		if (delete_dbinfo_rows(mcdFile)) /*- delete from dbinfo records for mcdFile */
 			return (relayhosts);
 		for (err = 0, ptr = relayhosts;(*ptr);ptr++) {
-			if ((*ptr)->isLocal) /*- don't insert dbinfo obtained from localDbInfo() */
+			if ((*ptr)->isLocal) /*- don't insert dbinfo obtained from localDbinfo() */
 				continue;
 			snprintf(SqlBuf, sizeof(SqlBuf) - 1, "replace low_priority into dbinfo \
 				(filename, domain, distributed, server, mdahost, port, use_ssl, dbname, user, passwd, timestamp) \
@@ -717,7 +720,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 			if (found)
 				continue;
 		}
-		count++;
+		count++; /*- new domains - domains without entry in relayhosts */
 	}
 	*mysqlhost_buf = 0;
 	if ((mysqlhost = (char *) getenv("MYSQL_HOST")) != (char *) 0)
@@ -781,7 +784,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	if (!mysql_port && !(mysql_port = (char *) getenv("MYSQL_VPORT")))
 		mysql_port = "0";
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
-	if (!count) { /*- no domains found in assign file */
+	if (!count) { /*- no extra domains found in assign file */
 		fclose(fp);
 		if (total) {
 			/*- 
@@ -826,7 +829,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr) = (DBINFO *) 0;
 		return (relayhosts);
 	}
-	if (total) { /*- we found domains in the assign file */
+	if (*total) { /*- we found domains in the assign file */
 		relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + count + 1));
 		rhostsptr = relayhosts + *total;
 		for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + count + 1;tmpPtr++)
