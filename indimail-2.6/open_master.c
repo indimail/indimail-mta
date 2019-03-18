@@ -1,5 +1,8 @@
 /*
  * $Log: open_master.c,v $
+ * Revision 2.10  2019-03-18 18:21:12+05:30  Cprogrammer
+ * return 2 if hostcntrl not configured
+ *
  * Revision 2.9  2017-03-13 14:04:53+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -16,7 +19,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: open_master.c,v 2.9 2017-03-13 14:04:53+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: open_master.c,v 2.10 2019-03-18 18:21:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -45,6 +48,8 @@ open_master()
 	}
 	if (!(fp = fopen(host_path, "r")))
 	{
+		if (errno == 2)
+			return (2);
 		fprintf(stderr, "%s: %s\n", host_path, strerror(errno));
 		return (1);
 	} else
