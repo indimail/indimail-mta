@@ -8,7 +8,6 @@ comparision tinyint not null,
 keyword char(64) not null,
 destination char(156) not null,
 bounce_action char(64) not null,
-mailing_list tinyint not null,
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
 primary key(emailid, filter_no),
 unique index (emailid, header_name, comparision, keyword, destination))
