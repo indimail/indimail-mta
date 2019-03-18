@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 2.19  2019-03-18 18:20:07+05:30  Cprogrammer
+ * open_master now returns 2 if hostcntrl not present
+ *
  * Revision 2.18  2018-09-11 10:25:27+05:30  Cprogrammer
  * fixed commpiler warnings
  *
@@ -90,7 +93,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 2.18 2018-09-11 10:25:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 2.19 2019-03-18 18:20:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -174,20 +177,18 @@ vdeldomain(char *domain)
 		if (verbose)
 			printf("Removing alias domain %s\n", domain);
 #ifdef CLUSTERED_SITE
-		if (open_master())
-		{
+		i = open_master();
+		if (i && i != 2) {
 			error_stack(stderr, "vdeldomain: Failed to open Master Db\n");
 			return (-1);
 		}
-		if (vauth_get_realdomain(domain) && vauth_delaliasdomain(domain))
-		{
+		if (!i && vauth_get_realdomain(domain) && vauth_delaliasdomain(domain)) {
 			error_stack(stderr, "Failed to remove alias Domain %s from aliasdomain Table\n",
 				domain);
 			return (-1);
 		}
 #endif
-		if (remove_line(domain, TmpBuf, 0, 0600) == -1)
-		{
+		if (remove_line(domain, TmpBuf, 0, 0600) == -1) {
 			error_stack(stderr, "Failed to remove alias Domain %s from %s\n",
 				domain, TmpBuf);
 			return (-1);
