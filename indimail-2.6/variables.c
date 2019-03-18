@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.59  2019-03-16 19:27:21+05:30  Cprogrammer
+ * removed mailing list table
+ *
  * Revision 2.58  2017-11-09 10:15:15+05:30  Cprogrammer
  * fixed paths
  *
@@ -222,7 +225,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.58 2017-11-09 10:15:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.59 2019-03-16 19:27:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -421,7 +424,6 @@ IndiMAILTable IndiMailTable[] = {
 #endif
 #ifdef VFILTER
 	{ON_LOCAL, "vfilter",      FILTER_TABLE_LAYOUT},
-	{ON_LOCAL, "mailing_list", MAILING_LIST_TABLE_LAYOUT},
 #endif
 #ifdef ENABLE_DOMAIN_LIMITS
 	{ON_LOCAL, "vlimits",      LIMITS_TABLE_LAYOUT},

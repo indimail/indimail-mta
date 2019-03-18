@@ -1,5 +1,8 @@
 /*
  * $Log: layout.c,v $
+ * Revision 2.4  2019-03-16 19:27:04+05:30  Cprogrammer
+ * removed mailing list code
+ *
  * Revision 2.3  2008-06-13 09:29:38+05:30  Cprogrammer
  * conditional definitions of tables
  *
@@ -13,7 +16,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: layout.c,v 2.3 2008-06-13 09:29:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: layout.c,v 2.4 2019-03-16 19:27:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -62,7 +65,6 @@ layout(char *tablename)
 		{"fstab", FSTAB_TABLE_LAYOUT},
 #ifdef VFILTER
 		{"vfilter", FILTER_TABLE_LAYOUT},
-		{"mailing_list", MAILING_LIST_TABLE_LAYOUT},
 #endif
 #ifdef ENABLE_DOMAIN_LIMITS
 		{"vlimits", LIMITS_TABLE_LAYOUT},

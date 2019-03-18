@@ -58,7 +58,7 @@
  * Indicate blackholed mails
  *
  * Revision 2.33  2004-10-27 17:22:23+05:30  Cprogrammer
- * BUG - mailing_list variable was not initialized
+ * BUG - mailing list variable was not initialized
  *
  * Revision 2.32  2004-10-08 10:17:23+05:30  Cprogrammer
  * bounds check for headerlist

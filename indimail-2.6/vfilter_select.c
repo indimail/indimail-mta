@@ -26,7 +26,7 @@
  *
  * Revision 2.4  2002-10-14 21:04:52+05:30  Cprogrammer
  * sql statement changed to order by filter_no
- * added code for intelligent mailing_list
+ * added code for intelligent mailing list
  *
  * Revision 2.3  2002-10-09 23:25:55+05:30  Cprogrammer
  * fixed memory leak

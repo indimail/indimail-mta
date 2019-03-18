@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.230  2019-03-16 19:26:56+05:30  Cprogrammer
+ * removed mailing list code
+ *
  * Revision 2.229  2018-10-30 19:03:34+05:30  Cprogrammer
  * added proto for int_mysql_options()
  *
@@ -1003,7 +1006,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.229 2018-10-30 19:03:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.230 2019-03-16 19:26:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1448,7 +1451,6 @@ comparision tinyint not null, \
 keyword char(64) not null, \
 destination char(156) not null, \
 bounce_action char(64) not null, \
-mailing_list tinyint not null, \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key(emailid, filter_no), unique index (emailid, header_name, comparision, keyword, destination)"
 #endif

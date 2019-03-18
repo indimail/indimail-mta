@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 2.31  2019-03-16 19:26:43+05:30  Cprogrammer
+ * removed mailing_list code
+ *
  * Revision 2.30  2018-11-21 14:36:00+05:30  Cprogrammer
  * change for fstabChangeCounter
  *
@@ -146,7 +149,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 2.30 2018-11-21 14:36:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 2.31 2019-03-16 19:26:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -300,17 +303,6 @@ vdeluser(char *user, char *domain, int remove_db)
 			if (mysql_query(&mysql[1], SqlBuf)) {
 				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
 					if (create_table(ON_LOCAL, "vfilter", FILTER_TABLE_LAYOUT))
-						return(-1);
-				} else {
-					fprintf(stderr, "vdeluser: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
-					return (-1);
-				}
-			}
-			snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from mailing_list where emailid=\"%s@%s\"",
-				user, real_domain);
-			if (mysql_query(&mysql[1], SqlBuf)) {
-				if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
-					if (create_table(ON_LOCAL, "mailing_list", MAILING_LIST_TABLE_LAYOUT))
 						return(-1);
 				} else {
 					fprintf(stderr, "vdeluser: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));

@@ -32,7 +32,7 @@
  *
  * Revision 2.2  2002-10-14 21:02:57+05:30  Cprogrammer
  * added code to display forwarding address
- * code changes for mailing_list functionality
+ * code changes for mailing list functionality
  *
  * Revision 2.1  2002-10-12 10:29:14+05:30  Cprogrammer
  * function to display filters configured for a user

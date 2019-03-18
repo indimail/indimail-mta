@@ -13,7 +13,7 @@
  * added code to create filter table if mysql_query() returns ER_NO_SUCH_TABLE
  *
  * Revision 2.4  2002-10-11 20:04:57+05:30  Cprogrammer
- * removed code to delete mailing_list
+ * removed code to delete mailing list
  *
  * Revision 2.3  2002-10-10 01:16:06+05:30  Cprogrammer
  * added deletion of mailing list

@@ -78,12 +78,12 @@
  * return value of mlist_filterno() now correctly interpreted
  *
  * Revision 2.7  2002-10-15 11:42:54+05:30  Cprogrammer
- * allow changing of mailing_list option based on comparision rather than on filter_no
+ * allow changing of mailing list option based on comparision rather than on filter_no
  *
  * Revision 2.6  2002-10-14 20:59:51+05:30  Cprogrammer
  * extensive rewrite
  * added option to forward mails on filter match
- * added option MLIST_OPTION to alter match for mailing_lists
+ * added option MLIST_OPTION to alter match for mailing lists
  *
  * Revision 2.5  2002-10-13 16:36:26+05:30  Cprogrammer
  * added bounds checks on header_name and comparision values
