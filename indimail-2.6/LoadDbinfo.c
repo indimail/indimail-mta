@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.53  2019-03-18 23:13:50+05:30  Cprogrammer
+ * increment total when no domains found in mcdinfo
+ *
  * Revision 2.52  2019-03-18 18:20:58+05:30  Cprogrammer
  * bug in getting total
  *
@@ -170,7 +173,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.52 2019-03-18 18:20:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.53 2019-03-18 23:13:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -829,7 +832,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr) = (DBINFO *) 0;
 		return (relayhosts);
 	}
-	if (*total) { /*- we found domains in the assign file */
+	if (*total) { /*- we found domains in the mcdinfo file */
 		relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + count + 1));
 		rhostsptr = relayhosts + *total;
 		for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + count + 1;tmpPtr++)
@@ -878,6 +881,8 @@ localDbinfo(int *total, DBINFO ***rhosts)
 			return ((DBINFO **) 0);
 		}
 		/*- Should check virtual domains and smtproutes */
+		if (total)
+			(*total)++;
 		(*rhostsptr)->isLocal = 1; /*- indicate that we were created automatically */
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
