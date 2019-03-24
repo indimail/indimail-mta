@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.51  2019-03-24 20:56:21+05:30  Cprogrammer
+ * fixed typo
+ *
  * Revision 2.50  2018-03-25 13:56:18+05:30  Cprogrammer
  * fixed ambiguous select statement in join statement with timestamp column in indimail, lastuath table
  *
@@ -165,7 +168,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.50 2018-03-25 13:56:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.51 2019-03-24 20:56:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -918,7 +921,7 @@ ProcessInFifo(int instNum)
 				if (bytes > pipe_size)
 					bytes = -1;
 				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
-					fprintf(stderr, "InLookup: write-findmdahost: %s\n", strerror(errno));
+					fprintf(stderr, "InLookup: write-get_real_domain: %s\n", strerror(errno));
 				else
 				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, real_domain, bytes) == -1)
 					fprintf(stderr, "InLookup: write-get_real_domain: %s\n", strerror(errno));
@@ -1139,6 +1142,7 @@ sig_hand(sig, code, scp, addr)
 	{
 		case SIGUSR1:
 			printf("%d %s Dumping Stats\n", (int) getpid(), fifo_name);
+			/*- flow through */
 		case SIGTERM:
 			cur_time = time(0);
 #ifdef CLUSTERED_SITE
@@ -1170,7 +1174,7 @@ sig_hand(sig, code, scp, addr)
 		case SIGUSR2:
 			printf("%d %s Resetting DEBUG flag to %d\n", (int) getpid(), fifo_name, _debug ? 0 : 1);
 			_debug = (_debug ? 0 : 1);
-		break;
+			break;
 		case SIGHUP:
 			printf("%d %s Reconfiguring\n", (int) getpid(), fifo_name);
 			close_db();
@@ -1188,11 +1192,11 @@ sig_hand(sig, code, scp, addr)
 			tdestroy(in_root, in_free_func);
 			in_root = 0;
 			btree_count = 0;
-		break;
+			break;
 		case SIGINT:
 			printf("%d %s closing db\n", (int) getpid(), fifo_name);
 			close_db();
-		break;
+			break;
 	} /*- switch (sig) */
 	fflush(stdout);
 	signal(sig, (void(*)()) sig_hand);
