@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.484 2019-02-06 11:54:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.485 2019-04-02 10:59:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -9,6 +9,9 @@
 # define if building on openSUSE build service
 %global build_on_obs       1
 %global reconfigure_mode   0
+%global reconf_fetchmail   0
+%global reconf_courierimap 0
+%global reconf_bogofilter  0
 %else
 %define _project           local
 %global build_on_obs       0
@@ -19,7 +22,7 @@
 %global _hardened_build    1
 %endif
 
-%global pythondir %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
+%global pythondir %(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 %global _prefix            @prefix@
 %global indimaildir        @indimaildir@
 %global domaindir          @domaindir@
@@ -185,7 +188,7 @@ Obsoletes: %{name} < 2.0
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
-BuildRequires: python-devel flex findutils
+BuildRequires: python python-devel flex findutils
 BuildRequires: readline gzip autoconf automake libtool pkgconfig
 BuildRequires: xz
 BuildRequires: mysql-devel pam-devel
@@ -244,6 +247,7 @@ BuildRequires: db4-devel
 %endif
 %endif
 
+
 ################################# OBS ###############################
 %if %build_on_obs == 1
 %if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700
@@ -258,9 +262,6 @@ BuildRequires: -post-build-checks
 %endif
 ################################# OBS ###############################
 
-Requires: pam mrtg
-Requires: coreutils grep /bin/sh glibc openssl
-
 # rpm -qf /bin/ls
 # rpm -qp --queryformat %%{arch} some-file.rpm
 # rpm --showrc for all macros
@@ -268,6 +269,8 @@ Requires: coreutils grep /bin/sh glibc openssl
 Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: binutils initscripts sed findutils pkgconfig
+Requires: coreutils grep /bin/sh glibc openssl
+Requires: pam mrtg
 
 %if 0%{?suse_version}
 Requires: mysql-community-server
@@ -387,16 +390,11 @@ done
 
 # skip patch application on obs. Picked the patched source from indimail/obs subdir
 # autoreconf gives issues
+# Comment out below for openSUSE buildservice
 %if %build_on_obs == 0
 %if %nocourierimap == 0
 %patch1  -p0
 %endif
-%endif
-
-# skip patch application on obs. Picked the patched source from indimail/obs subdir
-# autoreconf gives issues
-# Comment out below for openSUSE buildservice
-%if %build_on_obs == 0
 %if %nobogofilter == 0
 %patch8 -p0
 %endif
