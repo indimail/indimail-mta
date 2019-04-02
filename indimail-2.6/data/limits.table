@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 vlimits
 (domain                   CHAR(67) NOT NULL,
 domain_expiry            INT(10) NOT NULL DEFAULT -1,

@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 host_table
 (host char(64) not null,
 ipaddr char(16) not null,

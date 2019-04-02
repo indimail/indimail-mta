@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 dbinfo
 (filename char(128) not null,
 domain   char(64) not null,

@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 vpriv
 (user        char(32) not null,
 program     char(64) not null,

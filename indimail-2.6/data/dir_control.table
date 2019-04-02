@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 dir_control
 (domain char(67) not null,
 cur_users int,

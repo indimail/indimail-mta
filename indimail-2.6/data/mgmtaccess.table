@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 mgmtaccess
 (user  char(32) not null,
 pass char(128) not null,

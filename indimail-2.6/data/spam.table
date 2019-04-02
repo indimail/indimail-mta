@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 spam
 (email char(64) not null,
 spam_count int not null,

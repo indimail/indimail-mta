@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 vfilter
 (emailid char(107) not null,
 filter_no smallint not null,

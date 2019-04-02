@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 fstab
 (filesystem char(64) not null,
 host char(64) not null,

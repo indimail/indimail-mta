@@ -1,4 +1,4 @@
-#!/var/indimail/sbin/vtable
+#!/usr/sbin/vtable
 atrn
 (pw_name char(40) not null,
 pw_domain char(67) not null,
