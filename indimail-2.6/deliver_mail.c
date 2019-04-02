@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.68  2019-04-02 10:59:00+05:30  Cprogrammer
+ * removed duplicate statement and fixed makeseekable
+ *
  * Revision 2.67  2018-09-11 10:30:34+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -229,7 +232,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.67 2018-09-11 10:30:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.68 2019-04-02 10:59:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -691,7 +694,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			maildirquota = quota;
 			scopy(homedir, address, MAX_BUFF);
 		}
-		if (strncmp(maildirquota, "NOQUOTA", 8) && strncmp(maildirquota, "NOQUOTA,", 8))
+		if (strncmp(maildirquota, "NOQUOTA,", 8))
 		{
 			/*
 			 * If the user has insufficient quota to accept
@@ -1236,7 +1239,7 @@ is_looping(char *address)
 		ptr = 0;
 	if (dtline && ptr && !strcmp(ptr, address))
 		return (1);
-	if (!(ptr = getenv("MAKE_SEEKABLE")) || *ptr != '0')
+	if (!(ptr = getenv("MAKE_SEEKABLE")) || *ptr == '0')
 		return (0);
 	if (lseek(0, 0L, SEEK_SET) < 0)
 	{
