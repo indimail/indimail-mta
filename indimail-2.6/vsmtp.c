@@ -1,5 +1,8 @@
 /*
  * $Log: vsmtp.c,v $
+ * Revision 2.8  2019-04-02 11:00:17+05:30  Cprogrammer
+ * removed unused variable tmpbuf
+ *
  * Revision 2.7  2018-09-11 15:12:03+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -44,7 +47,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsmtp.c,v 2.7 2018-09-11 15:12:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsmtp.c,v 2.8 2019-04-02 11:00:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -79,7 +82,7 @@ main(argc, argv)
 	char           *argv[];
 {
 	char           *tmpsmtp, *ptr, *cptr;
-	char            TmpBuf[MAX_BUFF + 2], srchost[MAX_BUFF], dsthost[MAX_BUFF];
+	char            srchost[MAX_BUFF], dsthost[MAX_BUFF];
 	int             OldPort, err;
 
 	if(get_options(argc, argv))
@@ -107,7 +110,6 @@ main(argc, argv)
 				continue;
 			if(!OldPort)
 				printf("Source Host          Destination Host -> Port\n");
-			snprintf(TmpBuf, sizeof(TmpBuf) - 1, "%s@%s", tmpsmtp, MdaHost);
 			printf("%-20s %-16s -> %d\n", srchost, dsthost, Port);
 			err = 0;
 		}
