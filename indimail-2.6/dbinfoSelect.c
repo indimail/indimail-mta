@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoSelect.c,v $
+ * Revision 2.10  2019-04-12 17:11:29+05:30  Cprogrammer
+ * fixed dbinfo method display (auto or DBINFO) for row format in dbinfoSelect()
+ *
  * Revision 2.9  2018-03-30 22:59:54+05:30  Cprogrammer
  * display SSL Cipher only when use_ssl is set
  *
@@ -31,7 +34,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.9 2018-03-30 22:59:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.10 2019-04-12 17:11:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -66,12 +69,12 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 			first_flag++;
 			if ((*mysqlptr)->unix_socket)
 			printf("%s %s %d %s %s %s 0 %s %s %s\n", 
-				filename ? filename : "auto", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
+				(*rhsotsptr)->isLocal ? "auto" : "DBINFO", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
 				(*rhostsptr)->server, (*rhostsptr)->mdahost, (*mysqlptr)->unix_socket, (*rhostsptr)->database,
 				(*rhostsptr)->user, (*rhostsptr)->password);
 			else
 			printf("%s %s %d %s %s %d %d %s %s %s\n", 
-				filename ? filename : "auto", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
+				(*rhsotsptr)->isLocal ? "auto" : "DBINFO", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
 				(*rhostsptr)->server, (*rhostsptr)->mdahost, (*rhostsptr)->port, (*rhostsptr)->use_ssl,
 				(*rhostsptr)->database, (*rhostsptr)->user, (*rhostsptr)->password);
 			continue;
