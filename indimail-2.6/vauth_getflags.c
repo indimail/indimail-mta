@@ -62,7 +62,7 @@ vauth_getflags(char *domain, int first)
 		}
 		if (!(res1 = mysql_store_result(&mysql[1])))
 		{
-			mysql_perror("vauth_getall: mysql_store_result");
+			mysql_perror("vauth_getflags: mysql_store_result");
 			return ((struct passwd *) 0);
 		}
 		snprintf(SqlBuf, SQL_BUF_SIZE, "select pw_name, pw_passwd, pw_uid from %s where pw_uid in (%d, %d) \
@@ -94,7 +94,7 @@ vauth_getflags(char *domain, int first)
 		{
 			mysql_free_result(res1);
 			res1 = (MYSQL_RES *) 0;
-			mysql_perror("vauth_getall: mysql_store_result");
+			mysql_perror("vauth_getflags: mysql_store_result");
 			return ((struct passwd *) 0);
 		}
 		if(!(num = (res2 ? (mysql_num_rows(res1) + mysql_num_rows(res2)) : mysql_num_rows(res1))))
