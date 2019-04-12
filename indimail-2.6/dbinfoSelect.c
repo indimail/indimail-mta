@@ -69,12 +69,12 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 			first_flag++;
 			if ((*mysqlptr)->unix_socket)
 			printf("%s %s %d %s %s %s 0 %s %s %s\n", 
-				(*rhsotsptr)->isLocal ? "auto" : "DBINFO", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
+				(*rhostsptr)->isLocal ? "auto" : "DBINFO", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
 				(*rhostsptr)->server, (*rhostsptr)->mdahost, (*mysqlptr)->unix_socket, (*rhostsptr)->database,
 				(*rhostsptr)->user, (*rhostsptr)->password);
 			else
 			printf("%s %s %d %s %s %d %d %s %s %s\n", 
-				(*rhsotsptr)->isLocal ? "auto" : "DBINFO", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
+				(*rhostsptr)->isLocal ? "auto" : "DBINFO", (*rhostsptr)->domain, is_distributed_domain((*rhostsptr)->domain), 
 				(*rhostsptr)->server, (*rhostsptr)->mdahost, (*rhostsptr)->port, (*rhostsptr)->use_ssl,
 				(*rhostsptr)->database, (*rhostsptr)->user, (*rhostsptr)->password);
 			continue;
