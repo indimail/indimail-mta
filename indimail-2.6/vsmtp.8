@@ -6,8 +6,6 @@ vsmtp \- Setup artificial routes for qmail-remote
 .B vsmtp
 [
 .I options
-]
-[
 .I hostid@domain_name
 \fB\-m\fR \fImta\fR
 |
@@ -17,7 +15,7 @@ vsmtp \- Setup artificial routes for qmail-remote
 .SH DESCRIPTION
 .PP
 \fBvsmtp\fR sets up artificial routes for \fBqmail-remote(8)\fR to be able to deliver mails to the
-mailstore on host \fIhost\fR and domain \fIdomain_name\fR. This route is used by \fBqmail-remote(8)\fR
+mailstore on host \fIhostid\fR and domain \fIdomain_name\fR. This route is used by \fBqmail-remote(8)\fR
 to send mails using SMTP or QMTP for clustered domains. For all other domains the control/smtproutes or
 control/qmtproutes is consulted. This routing information is stored in MySQL on a host which by nomenclature
 is called the \fBcontrol host\fR.
@@ -34,7 +32,7 @@ Sets Verbose option.
 .TP
 \fB\-s\fR
 Show smtp ports for a virtual domain or SMTP Route between a MTA host and a mailstore having
-the domain domain_name
+the domain \fIdomain_name\fR
 .TP
 \fB\-d\fR
 Delete SMTP Route between a MTA host and a mailstore.
