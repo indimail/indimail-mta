@@ -91,8 +91,8 @@ get_Mplexdir.c getpeer.c GetPrefix.c GetSmtproute.c get_smtp_service_port.c \
 hmac_sha256.c hostcntrl_select.c host_in_locals.c in_crypt.c inc_dir.c inc_dir_control.c \
 init_dir_control.c inquery.c is_alias_domain.c is_already_running.c ismaildup.c \
 is_distributed_domain.c islocalif.c isnum.c is_user_present.c \
-isvalid_domain.c isvirtualdomain.c layout.c limits.c loadbalance.c LoadBMF.c \
-LoadDbinfo.c lockfile.c lockTable.c Login_Tasks.c logmysql.c lowerit.c \
+isvalid_domain.c isvirtualdomain.c layout.c limits.c LoadBMF.c \
+LoadDbinfo.c lockfile.c Login_Tasks.c logmysql.c lowerit.c \
 maildir_to_domain.c maildir_to_email.c MailQuotaWarn.c MakeArgs.c makeseekable.c \
 make_user_dir.c makesalt.c md5c.c mdaMysqlConnect.c mgmtpassfuncs.c mkpasswd3.c \
 monkey.c MoveFile.c mysql_perror.c mysql_query.c next_big_dir.c no_of_days.c \
@@ -102,8 +102,8 @@ print_control.c purge_files.c pw_comp.c pwcomp.c \
 qmail_remote.c r_chown.c recalc_quota.c relay_select.c \
 RemoteBulkMail.c remove_line.c remove_quotes.c renameuser.c replacestr.c r_mkdir.c \
 runcmmd.c ScanDir.c scat.c scopy.c SendWelcomeMail.c set_mysql_options.c setsockbuf.c \
-setuserquota.c sha256_crypt.c sha512_crypt.c signal_process.c site_size.c \
-skip_relay.c skip_system_files.c slen.c hmac_sha1.c sha1.c hmac_ripemd.c ripemd.c \
+setuserquota.c sha256_crypt.c sha512_crypt.c \
+skip_relay.c skip_system_files.c slen.c hmac_sha1.c hmac_ripemd.c ripemd.c \
 md5_crypt.c hmac_md5.c sockread.c sockwrite.c spam.c SqlServer.c strToPw.c tcpbind.c \
 tcpopen.c timeoutio.c trashpurge.c udpopen.c unsetenv.c update_file.c update_newu.c \
 update_quota.c update_rules.c updusercntrl.c userinfo.c user_over_quota.c \
@@ -118,10 +118,10 @@ vclear_open_smtp.c vclose.c vcreate_dir_control.c vdel_atrn_map.c vdel_dir_contr
 vdelfiles.c vdel_ip_map.c vfilter_delete.c vfilter_display.c vfilter_filterNo.c \
 vfilter_header.c vfilter_insert.c vfilter_select.c vfilter_update.c \
 vfstab_delete.c vfstab_insert.c vfstabNew.c vfstab_select.c vfstab_status.c \
-vfstab_update.c vget_assign.c vgetent.c vget_ip_map.c vget_lastauth.c vgetpasswd.c \
+vfstab_update.c vget_assign.c vget_ip_map.c vget_lastauth.c vgetpasswd.c \
 vget_real_domain.c vhostid_delete.c vhostid_insert.c vhostid_select.c vhostid_update.c \
 vlog.c vmake_maildir.c vopen_smtp_relay.c vpriv_delete.c vpriv_insert.c \
-vpriv_select.c vpriv_update.c vquota_select.c vread_dir_control.c vset_default_domain.c \
+vpriv_select.c vpriv_update.c vread_dir_control.c vset_default_domain.c \
 vset_lastauth.c vset_lastdeliver.c vshow_atrn_map.c vshow_ip_map.c vsmtp_delete.c \
 vsmtp_delete_domain.c vsmtp_insert.c vsmtp_select.c vsmtp_update.c vupdate_rules.c \
 vupd_atrn_map.c vupd_ip_map.c vwrite_dir_control.c wildmat.c
@@ -528,9 +528,7 @@ isvalid_domain.lo: indimail.h config.h
 islocalif.lo: indimail.h config.h
 is_user_present.lo: indimail.h config.h
 isvirtualdomain.lo: indimail.h config.h
-loadbalance.lo: indimail.h config.h
 lockfile.lo: indimail.h config.h
-lockTable.lo: indimail.h config.h
 Login_Tasks.lo: indimail.h config.h
 logmysql.lo: indimail.h config.h
 MailQuotaWarn.lo: indimail.h config.h
@@ -572,7 +570,6 @@ hostsync.lo: indimail.h config.h
 signal_process.lo: indimail.h config.h
 sha256_crypt.c: config.h
 sha512_crypt.c: config.h
-site_size.lo: indimail.h config.h
 skip_relay.lo: indimail.h config.h
 sockread.lo: indimail.h config.h
 tcpbind.lo: indimail.h config.h
@@ -703,7 +700,6 @@ vfstab_select.lo: indimail.h config.h
 vfstab_status.lo: indimail.h config.h
 vfstab_update.lo: indimail.h config.h
 vget_assign.lo: indimail.h config.h
-vgetent.lo: indimail.h config.h
 vget_ip_map.lo: indimail.h config.h
 vget_lastauth.lo: indimail.h config.h
 vgetpasswd.lo: indimail.h config.h
@@ -721,7 +717,6 @@ vpriv_select.lo: indimail.h config.h
 vpriv_insert.lo: indimail.h config.h
 vpriv_delete.lo: indimail.h config.h
 vpriv_update.lo: indimail.h config.h
-vquota_select.lo: indimail.h config.h
 vread_dir_control.lo: indimail.h config.h
 vreorg.lo: indimail.h config.h
 vset_default_domain.lo: indimail.h config.h
