@@ -415,7 +415,7 @@ usage()
 	printf("                        (default is 1 day)\n");
 	printf("                        (-1 for not to delete trash)\n");
 	printf("         -m mailboxes   (List of mailboxes to be purged. Multiple -m can be given)\n");
-	printf("                        (default value .Trash)");
+	printf("                        (default value .Trash)\n");
 	printf("         -s gecos       (Skip entries having this gecos. Multiple -s can be given)\n");
 	printf("         -c Remove Mails only\n");
 	printf("         -p Purge entry from Database\n");
