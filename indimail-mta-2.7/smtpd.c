@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.217 $";
+char           *revision = "$Revision: 1.218 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5100,9 +5100,8 @@ smtp_atrn(char *arg)
 	char           *ptr, *cptr, *domain_ptr, *user_tmp, *domain_tmp, *errstr;
 	int             i, end_flag, status, Reject = 0, Accept = 0;
 	char            err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
-	char            user[MAX_BUFF], domain[MAX_BUFF];
+	static stralloc user = {0}, domain = {0};
 	void            (*vclose) (void);
-	int             (*parse_email) (char *, char *, char *, int);
 	char           *(*vshow_atrn_map) (char **, char **);
 	int             (*atrn_access) (char *, char *);
 
@@ -5122,10 +5121,6 @@ smtp_atrn(char *arg)
 		err_library("libindimail.so not loaded");
 		return;
 	}
-	if (!(parse_email = getlibObject("parse_email", &errstr))) {
-		err_library(errstr);
-		return;
-	} else
 	if (!(vclose = getlibObject("vclose", &errstr))) {
 		err_library(errstr);
 		return;
@@ -5143,8 +5138,8 @@ smtp_atrn(char *arg)
 	if (*arg)
 		domain_ptr = arg;
 	else {
-		parse_email(remoteinfo, user, domain, MAX_BUFF);
-		for (user_tmp = user, domain_tmp = domain, end_flag = 0;;) {
+		parse_email(remoteinfo, &user, &domain);
+		for (user_tmp = user.s, domain_tmp = domain.s, end_flag = 0;;) {
 			if (!(ptr = (*vshow_atrn_map) (&user_tmp, &domain_tmp)))
 				break;
 			if (end_flag) {
@@ -6056,6 +6051,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.218  2019-04-16 23:59:48+05:30  Cprogrammer
+ * changed parse_email() parameters
+ *
  * Revision 1.217  2019-03-07 00:55:21+05:30  Cprogrammer
  * do not treat regcomp error as matches
  *
@@ -6145,7 +6143,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.217 2019-03-07 00:55:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.218 2019-04-16 23:59:48+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
