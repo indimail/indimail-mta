@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.54  2019-04-16 23:03:33+05:30  Cprogrammer
+ * return local dbinfo in absence of mcdinfo file
+ *
  * Revision 2.53  2019-03-18 23:13:50+05:30  Cprogrammer
  * increment total when no domains found in mcdinfo
  *
@@ -173,7 +176,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.53 2019-03-18 23:13:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.54 2019-04-16 23:03:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -276,11 +279,8 @@ LoadDbInfo_TXT(int *total)
 				return (loadMCDInfo(total));
 		}
 		if (!(num_rows = mysql_num_rows(res))) { /*- dbinfo table is empty */
-			if (sync_file) { /*- in absense of mcdinfo, we can't proceed further */
-				mysql_free_result(res);
-				errno = ENOENT;
-				return ((DBINFO **) 0);
-			}
+			if (sync_file) /*- in absense of mcdinfo, we can't proceed further */
+				return (loadMCDInfo(total));
 			sync_mcd = 1;
 			row = mysql_fetch_row(res);
 			mysql_free_result(res);
