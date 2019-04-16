@@ -4,7 +4,7 @@
 # post handle script for vdeluser
 #
 #
-# $Id: vdeluser_handle.in,v 2.1 2017-12-03 16:21:51+05:30 Cprogrammer Exp $
+# $Id: vdeluser_handle.in,v 2.1 2017-12-03 16:21:51+05:30 Cprogrammer Exp mbhangui $
 #
 # send sighup to inlookup
 @prefix@/bin/svc -h /service/inlookup.*
