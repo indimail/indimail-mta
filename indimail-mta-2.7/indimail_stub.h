@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.h,v $
+ * Revision 1.4  2019-04-17 00:00:23+05:30  Cprogrammer
+ * added parse_email() function
+ *
  * Revision 1.3  2018-07-01 11:49:21+05:30  Cprogrammer
  * renamed getFunction() to getlibObject()
  *
@@ -12,6 +15,7 @@
  */
 /* gid flags */
 #include <pwd.h>
+#include "stralloc.h"
 #define NO_PASSWD_CHNG 0x01
 #define NO_POP         0x02
 #define NO_WEBMAIL     0x04
@@ -47,6 +51,7 @@ extern int      verbose;
 extern int      use_etrn;
 
 void           *inquery(char, char *, char *);
+int             parse_email(char *, stralloc *, stralloc *);
 void           *loadLibrary(int *, char **);
 void *          getlibObject(char *, char **);
 void            closeLibrary(void);

@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.6  2019-04-16 23:57:44+05:30  Cprogrammer
+ * added parse_email() function
+ *
  * Revision 1.5  2018-07-01 11:49:17+05:30  Cprogrammer
  * renamed getFunction() to getlibObject()
  *
@@ -14,6 +17,28 @@
  *
  * Revision 1.1  2018-01-09 10:41:16+05:30  Cprogrammer
  * Initial revision
+ *
+ */
+/*
+ * The following objects are needed to support indimail
+ * indimail 2.x                 indimail 3.x
+ * count_dir()
+ * parse_email()
+ * isvirtualdomain()
+ * vauth_open()             --> iopen()
+ * vauth_getpw()            --> sql_getpw()
+ * vget_real_domain()       --> get_real_domain
+ * is_distributed_domain()
+ * findhost()
+ * get_local_ip()
+ * get_local_hostid()
+ * vshow_atrn_map()         --> show_atrn_map()
+ * atrn_access()
+ * vclose()                 --> iclose()
+ *
+ * Following variables are required
+ * userNotFound
+ * is_inactive
  *
  */
 #include <stdlib.h>
@@ -184,7 +209,7 @@ getlibObject(char *plugin_symb, char **errstr)
 	return (dlsym(handle, plugin_symb));
 }
 
-int
+static int
 r_mkdir(dir, mode, uid, gid)
 	char           *dir;
 	mode_t          mode;
@@ -237,8 +262,7 @@ strToPw(char *pwbuf, int len)
 	}
 	if (__PWstruct.len && !str_diffn(__PWstruct.s, _pwstruct.s, pwstruct_len))
 		return((struct passwd *) &pwent);
-	if (!pwent.pw_name) /*- first time */
-	{
+	if (!pwent.pw_name) { /*- first time */
 		pwent.pw_name = IUser.s;
 		pwent.pw_passwd = IPass.s;
 		pwent.pw_gecos = IGecos.s;
@@ -529,28 +553,24 @@ inquery(char query_type, char *email, char *ip)
 	if ((wfd = open(InFifo.s, O_WRONLY | O_NDELAY, 0)) == -1)
 		return ((void *) 0);
 	else 
-	if (bytes > (pipe_size = fpathconf(wfd, _PC_PIPE_BUF)))
-	{
+	if (bytes > (pipe_size = fpathconf(wfd, _PC_PIPE_BUF))) {
 		errno = EMSGSIZE;
 		return ((void *) 0);
 	} else
-	if (FifoCreate(myfifo.s) == -1)
-	{
+	if (FifoCreate(myfifo.s) == -1) {
 		tmperrno = errno;
 		close(wfd);
 		errno = tmperrno;
 		return ((void *) 0);
 	} else
-	if ((rfd = open(myfifo.s, O_RDONLY | O_NDELAY, 0)) == -1)
-	{
+	if ((rfd = open(myfifo.s, O_RDONLY | O_NDELAY, 0)) == -1) {
 		tmperrno = errno;
 		close(wfd);
 		unlink(myfifo.s);
 		errno = tmperrno;
 		return ((void *) 0);
 	} else
-	if ((sig_pipe_save = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
-	{
+	if ((sig_pipe_save = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
 		tmperrno = errno;
 		close(rfd);
 		close(wfd);
@@ -641,23 +661,20 @@ inquery(char query_type, char *email, char *ip)
 				close(fd);
 				scan_ulong(strnum, (unsigned long *) &readTimeout);
 			}
-			if ((idx = timeoutread(readTimeout, rfd, (char *) &intBuf, sizeof(int))) == -1 || !idx)
-			{
+			if ((idx = timeoutread(readTimeout, rfd, (char *) &intBuf, sizeof(int))) == -1 || !idx) {
 				tmperrno = errno;
 				close(rfd);
 				unlink(myfifo.s);
 				errno = tmperrno;
 				return((void *) 0);
 			} else
-			if (intBuf == -1)
-			{
+			if (intBuf == -1) {
 				close(rfd);
 				unlink(myfifo.s);
 				errno = 0;
 				return((void *) 0);
 			} else
-			if (intBuf > pipe_size)
-			{
+			if (intBuf > pipe_size) {
 				close(rfd);
 				unlink(myfifo.s);
 				errno = EMSGSIZE;
@@ -674,23 +691,20 @@ inquery(char query_type, char *email, char *ip)
 #ifdef ENABLE_DOMAIN_LIMITS
 				case LIMIT_QUERY:
 #endif
-					if (!intBuf)
-					{
+					if (!intBuf) {
 						close(rfd);
 						unlink(myfifo.s);
 						errno = 0;
 						return((void *) 0);
 					} else
-					if (!(pwbuf = (char *) realloc(pwbuf, intBuf + 1)))
-					{
+					if (!(pwbuf = (char *) realloc(pwbuf, intBuf + 1))) {
 						tmperrno = errno;
 						close(rfd);
 						unlink(myfifo.s);
 						errno = tmperrno;
 						return((void *) 0);
 					} 
-					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx)
-					{
+					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx) {
 						tmperrno = errno;
 						close(rfd);
 						unlink(myfifo.s);
@@ -712,24 +726,21 @@ inquery(char query_type, char *email, char *ip)
 				case HOST_QUERY:
 #endif
 				case DOMAIN_QUERY:
-					if (!intBuf)
-					{
+					if (!intBuf) {
 						close(rfd);
 						unlink(myfifo.s);
 						userNotFound = 1;
 						errno = 0;
 						return((void *) 0);
 					} else
-					if (!(pwbuf = (char *) realloc(pwbuf, intBuf + 1)))
-					{
+					if (!(pwbuf = (char *) realloc(pwbuf, intBuf + 1))) {
 						tmperrno = errno;
 						close(rfd);
 						unlink(myfifo.s);
 						errno = tmperrno;
 						return((void *) 0);
 					} 
-					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx)
-					{
+					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx) {
 						tmperrno = errno;
 						close(rfd);
 						unlink(myfifo.s);
@@ -751,10 +762,49 @@ inquery(char query_type, char *email, char *ip)
 	return((void *) 0);
 }
 
-void
-getversion_inquery_c()
+/*
+ * parse out user and domain from an email address utility function
+ * 
+ * email  = input email address
+ * user   = parsed user
+ * domain = parsed domain
+ * return   0 success
+ *         -1 if either user or domain was truncated due to buff_size being reached
+ */
+int
+parse_email(char *email, stralloc *user, stralloc *domain)
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.5 2018-07-01 11:49:17+05:30 Cprogrammer Exp mbhangui $";
+	char           *ptr;
+	int             i, len;
+
+	for (len = 0, ptr = email; *ptr; ptr++, len++) {
+		i = str_chr(ATCHARS, *ptr);
+		if (ATCHARS[i])
+			break;
+	}
+	if (len) {
+		if (!stralloc_copyb(user, email, len) || !stralloc_0(user))
+			return (-1);
+		user->len--;
+	} else {
+		if (!stralloc_0(user))
+			return (-1);
+		user->len = 0;
+	}
+	if (*ptr)
+		ptr++;
+	else
+		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+	if (!stralloc_copys(domain, ptr) || !stralloc_0(domain))
+		return (-1);
+	domain->len--;
+	return (0);
+}
+
+void
+getversion_indimail_stub_c()
+{
+	static char    *x = "$Id: indimail_stub.c,v 1.6 2019-04-16 23:57:44+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
