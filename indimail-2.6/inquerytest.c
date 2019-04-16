@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.29  2019-04-16 23:04:07+05:30  Cprogrammer
+ * fixed spurious error message for user status query
+ *
  * Revision 2.28  2019-03-24 20:53:08+05:30  Cprogrammer
  * force ipaddr for relay query
  *
@@ -101,7 +104,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.28 2019-03-24 20:53:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.29 2019-04-16 23:04:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -165,7 +168,7 @@ main(int argc, char **argv)
 	{
 	case USER_QUERY:
 	case RELAY_QUERY:
-		if (!ipaddr) {
+		if (query_type == RELAY_QUERY && !ipaddr) {
 			fprintf(stderr, "%s: ipaddr must be specified for RELAY query\n", ptr);
 			usage(ptr);
 		}
