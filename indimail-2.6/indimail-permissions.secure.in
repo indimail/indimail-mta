@@ -57,3 +57,13 @@
 @libexecdir@/sq_vacation            root:qmail     4555
 @libexecdir@/imapmodules/authshadow     root:root      4555
 @prefix@/sbin/systpass              root:root      4555
+@prefix@/sbin/qmail-queue           qmailq:qmail   6511
+@prefix@/sbin/qscanq                qscand:qscand  4555
+@prefix@/sbin/run-cleanq            root:qscand    2511
+@prefix@/sbin/qhpsi                 root:qscand    2511
+
+#
+# Directories
+#
+@indimaildir@/alias                      alias:qmail    2775
+@indimaildir@/autoturn                   indimail:qmail 2775
