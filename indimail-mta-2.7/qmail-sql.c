@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.6  2019-04-20 19:52:22+05:30  Cprogrammer
+ * load MySQL shared library dynamically
+ *
  * Revision 1.5  2018-02-11 21:20:48+05:30  Cprogrammer
  * use USE_SQL to compile sql support
  *
@@ -38,6 +41,7 @@
 #include "stralloc.h"
 #include "strerr.h"
 #include "sqlmatch.h"
+#include "load_mysql.h"
 #include <mysql.h>
 #include <mysqld_error.h>
 
@@ -114,8 +118,7 @@ insert_db(MYSQL *conn, char *filename, char *table_name, int replace, char **err
 	int             num, m_error;
 	static stralloc sql = { 0 };
 
-	if (!conn)
-	{
+	if (!conn) {
 		if (errStr)
 			*errStr = "not connected to MySQL";
 		return (0);
@@ -133,18 +136,15 @@ insert_db(MYSQL *conn, char *filename, char *table_name, int replace, char **err
 again:
 	if (!stralloc_0(&sql))
 		die_nomem();
-	if (mysql_query(conn, sql.s))
-	{
-		if ((m_error = mysql_errno(conn)) == ER_NO_SUCH_TABLE)
-		{
+	if (in_mysql_query(conn, sql.s)) {
+		if ((m_error = in_mysql_errno(conn)) == ER_NO_SUCH_TABLE) {
 			if (create_sqltable(conn, table_name, errStr))
 				return (AM_MYSQL_ERR);
-			if (mysql_query(conn, sql.s))
-			{
+			if (in_mysql_query(conn, sql.s)) {
 				sql.len--;
 				if (!stralloc_cats(&sql, ": "))
 					die_nomem();
-				if (!stralloc_cats(&sql, (char *) mysql_error(conn)))
+				if (!stralloc_cats(&sql, (char *) in_mysql_error(conn)))
 					die_nomem();
 				if (!stralloc_0(&sql))
 					die_nomem();
@@ -153,8 +153,7 @@ again:
 				return (AM_MYSQL_ERR);
 			}
 		} else
-		if (m_error == ER_PARSE_ERROR)
-		{
+		if (m_error == ER_PARSE_ERROR) {
 			if (!stralloc_copys(&sql, "LOAD DATA LOW_PRIORITY LOCAL INFILE '"))
 				die_nomem();
 			if (!stralloc_cats(&sql, filename))
@@ -166,12 +165,11 @@ again:
 			if (!stralloc_catb(&sql, " (email)", 8))
 				die_nomem();
 			goto again;
-		} else
-		{
+		} else {
 			sql.len--;
 			if (!stralloc_cats(&sql, ": "))
 				die_nomem();
-			if (!stralloc_cats(&sql, (char *) mysql_error(conn)))
+			if (!stralloc_cats(&sql, (char *) in_mysql_error(conn)))
 				die_nomem();
 			if (!stralloc_0(&sql))
 				die_nomem();
@@ -180,12 +178,12 @@ again:
 			return (AM_MYSQL_ERR);
 		}
 	}
-	if ((num = mysql_affected_rows(conn)) == -1)
+	if ((num = in_mysql_affected_rows(conn)) == -1)
 	{
 		sql.len--;
 		if (!stralloc_cats(&sql, ": "))
 			die_nomem();
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn)))
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn)))
 			die_nomem();
 		if (!stralloc_0(&sql))
 			die_nomem();
@@ -304,15 +302,19 @@ main(int argc, char **argv)
 		out(filename.s);
 		out("\n");
 	}
-	if (!skip_load)
-	{
+	if (initMySQLlibrary(&errStr))
+		my_error("initMySQLlibrary: couldn't load MySQL shared library", errStr, 111);
+	else
+	if (!use_sql)
+		my_error("initMySQLlibrary: couldn't load MySQL shared library", errStr, 111);
+	if (!skip_load) {
 		if (connect_sqldb(filename.s, &conn, &tname, &errStr) < 0)
 			my_error("MySQL connect", errStr, 111);
 		filename.len -= 6;
 		if (!stralloc_0(&filename))
 			die_nomem();
 		opt = insert_db(conn, filename.s, tname, replace, &errStr);
-		mysql_close(conn);
+		in_mysql_close(conn);
 		strnum[fmt_ulong(strnum, opt)] = 0;
 		out(strnum);
 		out(" rows affected\n");
@@ -339,7 +341,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.5 2018-02-11 21:20:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.6 2019-04-20 19:52:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
