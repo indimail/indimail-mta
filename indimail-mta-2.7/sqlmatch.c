@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.11  2019-04-20 19:53:13+05:30  Cprogrammer
+ * load MySQL library dynamically
+ *
  * Revision 1.10  2018-02-11 21:21:16+05:30  Cprogrammer
  * use USE_SQL to compile sql support
  *
@@ -47,6 +50,8 @@
 #include "qregex.h"
 #include "sqlmatch.h"
 #include "auto_control.h"
+#include "indimail_stub.h"
+#include "load_mysql.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -63,7 +68,7 @@ stralloc        dbtable = { 0 };
 MYSQL          *db_mysql = (MYSQL *) 0;
 
 int
-connect_sqldb(char *fn, MYSQL ** conn, char **table_name, char **error)
+connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 {
 	char           *x, *m_timeout;
 	int             fd, i = 0;
@@ -224,24 +229,24 @@ connect_sqldb(char *fn, MYSQL ** conn, char **table_name, char **error)
 	}
 	close(fd);
 	munmap(x, st.st_size);
-	if (!(db_mysql = mysql_init(0))) {
+	if (!(db_mysql = in_mysql_init(0))) {
 		if (error)
 			*error = "mysql_init: no memory";
 		return (AM_MEMORY_ERR);
 	}
-	if (mysql_options(db_mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout)) {
+	if (in_mysql_options(db_mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout)) {
 		if (error)
 			*error = "unable to set MYSQL_OPT_CONNECT_TIMEOUT";
 		return (AM_CONFIG_ERR);
 	}
-	if (mysql_options(db_mysql, MYSQL_OPT_LOCAL_INFILE, 0)) {
+	if (in_mysql_options(db_mysql, MYSQL_OPT_LOCAL_INFILE, 0)) {
 		if (error)
 			*error = "unable to set MYSQL_OPT_LOCAL_INFILE";
 		return (AM_CONFIG_ERR);
 	}
-	if (!mysql_real_connect(db_mysql, dbserver.s, dbuser.s, dbpass.s, dbname.s, 0, NULL, 0)) {
+	if (!in_mysql_real_connect(db_mysql, dbserver.s, dbuser.s, dbpass.s, dbname.s, 0, NULL, 0)) {
 		if (error)
-			*error = (char *) mysql_error(db_mysql);
+			*error = (char *) in_mysql_error(db_mysql);
 		return (AM_MYSQL_ERR);
 	}
 	if (conn)
@@ -277,16 +282,16 @@ create_sqltable(MYSQL * conn, char *table_name, char **error)
 			*error = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (mysql_query(conn, sql.s)) {
+	if (in_mysql_query(conn, sql.s)) {
 		sql.len--;
 		if (!stralloc_cats(&sql, ": ")) {
 			if (error)
 				*error = error_str(errno);
 			return (AM_MEMORY_ERR);
 		}
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn))) {
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
 			if (error)
-				*error = (char *) mysql_error(conn);
+				*error = (char *) in_mysql_error(conn);
 			return (AM_MEMORY_ERR);
 		}
 		if (!stralloc_0(&sql)) {
@@ -342,8 +347,8 @@ check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmva
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (mysql_query(conn, sql.s)) {
-		if ((m_error = mysql_errno(conn)) == ER_NO_SUCH_TABLE) {
+	if (in_mysql_query(conn, sql.s)) {
+		if ((m_error = in_mysql_errno(conn)) == ER_NO_SUCH_TABLE) {
 			if (create_sqltable(conn, dbtable.s, errStr))
 				return (AM_MYSQL_ERR);
 			return (0);
@@ -381,9 +386,9 @@ check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmva
 				*errStr = error_str(errno);
 			return (AM_MEMORY_ERR);
 		}
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn))) {
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
 			if (errStr)
-				*errStr = (char *) mysql_error(conn);
+				*errStr = (char *) in_mysql_error(conn);
 			return (AM_MEMORY_ERR);
 		}
 		if (!stralloc_0(&sql)) {
@@ -395,16 +400,16 @@ check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmva
 			*errStr = sql.s;
 		return (AM_MYSQL_ERR);
 	}
-	if (!(res = mysql_store_result(conn))) {
+	if (!(res = in_mysql_store_result(conn))) {
 		sql.len--;
 		if (!stralloc_cats(&sql, "mysql_store_result: ")) {
 			if (errStr)
 				*errStr = error_str(errno);
 			return (AM_MEMORY_ERR);
 		}
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn))) {
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
 			if (errStr)
-				*errStr = (char *) mysql_error(conn);
+				*errStr = (char *) in_mysql_error(conn);
 			return (AM_MEMORY_ERR);
 		}
 		if (!stralloc_0(&sql)) {
@@ -414,22 +419,22 @@ check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmva
 		}
 		return (AM_MYSQL_ERR);
 	}
-	num = mysql_num_rows(res);
+	num = in_mysql_num_rows(res);
 	if (row_count)
 		*row_count = num;
-	for (; (row = mysql_fetch_row(res));) {
+	for (; (row = in_mysql_fetch_row(res));) {
 		if (tmval)
 			*tmval = scan_ulong(row[0], tmval);
 		if (envStr) {
 			if (!stralloc_copys(&envStore, row[1])) {
 				if (errStr)
 					*errStr = error_str(errno);
-				mysql_free_result(res);
+				in_mysql_free_result(res);
 				return (AM_MEMORY_ERR);
 			}
 		}
 	}
-	mysql_free_result(res);
+	in_mysql_free_result(res);
 	return (num);
 }
 
@@ -458,6 +463,11 @@ sqlmatch(char *fn, char *addr, int len, char **errStr)
 		return AM_MEMORY_ERR;
 	if (!stralloc_0(&controlfile))
 		return AM_MEMORY_ERR;
+	if ((cntrl_ok = initMySQLlibrary(errStr)))
+		return (0);
+	else
+	if (!use_sql)
+		return (0);
 	if ((cntrl_ok = connect_sqldb(controlfile.s, &conn, 0, errStr)) < 0)
 		return (cntrl_ok);
 	if ((cntrl_ok = check_db(conn, addr, 0, 0, 0, errStr)) < 0)
@@ -470,7 +480,7 @@ sqlmatch_close_db(void)
 {
 	if (!db_mysql)
 		return;
-	mysql_close(db_mysql);
+	in_mysql_close(db_mysql);
 	db_mysql = (MYSQL *) 0;
 }
 #else
@@ -494,7 +504,7 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.10 2018-02-11 21:21:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.11 2019-04-20 19:53:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
