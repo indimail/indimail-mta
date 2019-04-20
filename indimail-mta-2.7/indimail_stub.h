@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.h,v $
+ * Revision 1.5  2019-04-20 19:50:44+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
  * Revision 1.4  2019-04-17 00:00:23+05:30  Cprogrammer
  * added parse_email() function
  *
@@ -52,6 +55,6 @@ extern int      use_etrn;
 
 void           *inquery(char, char *, char *);
 int             parse_email(char *, stralloc *, stralloc *);
-void           *loadLibrary(int *, char **);
-void *          getlibObject(char *, char **);
-void            closeLibrary(void);
+void           *loadLibrary(void **, char *, int *, char **);
+void *          getlibObject(char *, void **, char *, char **);
+void            closeLibrary(void **);

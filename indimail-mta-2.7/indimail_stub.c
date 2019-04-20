@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.7  2019-04-20 19:49:34+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
  * Revision 1.6  2019-04-16 23:57:44+05:30  Cprogrammer
  * added parse_email() function
  *
@@ -113,13 +116,12 @@ int             is_overquota;
 int             verbose = 0;
 int             use_etrn;
 static char     strnum[FMT_ULONG];
-void           *handle;
+static stralloc errbuf = { 0 };
 
 void *
-loadLibrary(int *errflag, char **errstr)
+loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 {
 	char           *ptr;
-	static stralloc errbuf = { 0 };
 
 	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
 		if (errflag)
@@ -128,7 +130,7 @@ loadLibrary(int *errflag, char **errstr)
 			*errstr = (char *) 0;
 		return ((void *) 0);
 	} else
-	if (handle) {
+	if (handle && *handle) {
 		if (errflag)
 			*errflag = 0;
 		if (errstr)
@@ -140,12 +142,6 @@ loadLibrary(int *errflag, char **errstr)
 	if (errstr)
 		*errstr = (char *) 0;
 	if (access(ptr, R_OK)) {
-		if (errno == 2 && errflag) {
-			*errflag = 0;
-			if (errstr)
-				*errstr = (char *) 0;
-			return ((void *) 0);
-		}
 		if (errflag)
 			*errflag = errno;
 		if (!stralloc_copys(&errbuf, error_str(errno))) {
@@ -161,9 +157,9 @@ loadLibrary(int *errflag, char **errstr)
 		return ((void *) 0);
 	}
 #ifdef RTLD_DEEPBIND
-	if (!(handle = dlopen(ptr, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
+	if (!(*handle = dlopen(ptr, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
 #else
-	if (!(handle = dlopen(ptr, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
+	if (!(*handle = dlopen(ptr, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
 		if (errno == 2 && errflag) {
 			*errflag = 0;
@@ -186,27 +182,42 @@ loadLibrary(int *errflag, char **errstr)
 	dlerror();
 	if (errflag)
 		*errflag = 0;
-	return (handle);
+	return (*handle);
 }
 
 void
-closeLibrary()
+closeLibrary(void **handle)
 {
-	if (handle) {
-		dlclose(handle);
-		handle = (void *) 0;
+	if (*handle) {
+		dlclose(*handle);
+		*handle = (void *) 0;
 	}
 	return;
 }
 
 void *
-getlibObject(char *plugin_symb, char **errstr)
+getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 {
-	if (!handle)
-		handle = loadLibrary(0, errstr);
-	if (!handle)
+	void           *i;
+	char           *ptr;
+
+	if (!*handle)
+		*handle = loadLibrary(handle, libenv, 0, errstr);
+	if (!*handle)
 		return ((void *) 0);
-	return (dlsym(handle, plugin_symb));
+	i = dlsym(*handle, plugin_symb);
+	if (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
+			!stralloc_cats(&errbuf, plugin_symb) ||
+			!stralloc_catb(&errbuf, ": ", 2))
+	{
+		if (errstr)
+			*errstr = (char *) 0;
+	}
+	if ((ptr = dlerror()) && !stralloc_cats(&errbuf, ptr)) {
+		if (errstr)
+			*errstr = (char *) 0;
+	}
+	return (i);
 }
 
 static int
@@ -804,7 +815,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.6 2019-04-16 23:57:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.7 2019-04-20 19:49:34+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
