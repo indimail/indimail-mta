@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.22  2019-04-20 19:53:05+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
  * Revision 1.21  2018-07-15 12:24:32+05:30  Cprogrammer
  * added new error string for error related to loading libindimail
  *
@@ -82,6 +85,7 @@ struct delivery
 };
 
 struct delivery *d;
+void            *phandle;
 
 void
 sigchld()
@@ -479,7 +483,7 @@ main(argc, argv)
 		d[i].used = 0;
 		d[i].output.s = 0;
 	}
-	if (!loadLibrary(&i, 0) && i)
+	if(!(phandle = loadLibrary(&phandle, "VIRTUAL_PKG_LIB", &i, 0)) && i)
 		_exit(111);
 	for (;;)
 	{
@@ -555,7 +559,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.21 2018-07-15 12:24:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.22 2019-04-20 19:53:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

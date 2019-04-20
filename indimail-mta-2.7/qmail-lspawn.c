@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.29  2019-04-20 19:52:02+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
  * Revision 1.28  2018-07-15 12:27:36+05:30  Cprogrammer
  * env variable ROUTE_NULL_USER to redirect double bounces to a mailbox
  * use -3 return for error loading libindimail
@@ -383,9 +386,9 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 {
 	int             f, len, at = at_t;
 	char           *ptr, *tptr, *recip = recip_t;
-	void           *handle;
 	/*- indimail */
 	struct passwd  *pw;
+	extern void    *phandle;
 	void            (*vclose) (void);
 	int             (*isvirtualdomain) (char *);
 	int             (*vauth_open) (char *);
@@ -395,21 +398,21 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 	if (!env_unset("QMAILREMOTE"))
 		_exit(-1);
 	/*- indimail */
-	handle = loadLibrary(&f, 0);
+	loadLibrary(&phandle, "VIRTUAL_PKG_LIB", &f, 0);
 	if (f)
 		_exit(-3);
-	if (!env_get("AUTHSELF") || !handle)
+	if (!env_get("AUTHSELF") || !phandle)
 		goto noauthself;
-	if (!(isvirtualdomain = getlibObject("isvirtualdomain", 0)))
+	if (!(isvirtualdomain = getlibObject("VIRTUAL_PKG_LIB", &phandle, "isvirtualdomain", 0)))
 		_exit(-3);
 	else
-	if (!(vauth_open = getlibObject("vauth_open", 0)))
+	if (!(vauth_open = getlibObject("VIRTUAL_PKG_LIB", &phandle, "vauth_open", 0)))
 		_exit(-3);
 	else
-	if (!(vauth_getpw = getlibObject("vauth_getpw", 0)))
+	if (!(vauth_getpw = getlibObject("VIRTUAL_PKG_LIB", &phandle, "vauth_getpw", 0)))
 		_exit(-3);
 	else
-	if (!(vclose = getlibObject("vclose", 0)))
+	if (!(vclose = getlibObject("VIRTUAL_PKG_LIB", &phandle, "vclose", 0)))
 		_exit(-3);
 	/*-
 	 * recip = example1-example2.com-some_user@example1-example2.com
@@ -482,10 +485,10 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 			recip = save.s;
 			at = f + 1 + len;
 		}
-		if (!(u_not_found = (int *) getlibObject("userNotFound", 0)))
+		if (!(u_not_found = (int *) getlibObject("VIRTUAL_PKG_LIB", &phandle, "userNotFound", 0)))
 			_exit(-3);
 		if ((pw = (struct passwd *) (*vauth_getpw) (user.s, recip + at + 1))) {
-			if (!(i_inactive = (int *) getlibObject("is_inactive", 0)))
+			if (!(i_inactive = (int *) getlibObject("VIRTUAL_PKG_LIB", &phandle, "is_inactive", 0)))
 				_exit(-3);
 			is_inactive = *i_inactive;
 			if (copy_pwstruct(pw, recip, at))
@@ -528,6 +531,7 @@ noauthself: /*- deliver to local user in control/locals */
 		char           *x;
 		unsigned int    xlen;
 
+		closeLibrary(&phandle);
 		recip[at] = 0;
 		if (!recip[0])
 			_exit(0);/*- <> */
@@ -608,7 +612,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.28 2018-07-15 12:27:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.29 2019-04-20 19:52:02+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

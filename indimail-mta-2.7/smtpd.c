@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.218 $";
+char           *revision = "$Revision: 1.219 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -365,6 +365,7 @@ static stralloc sa = { 0 };
 static stralloc domBuf = { 0 };
 
 int             smtp_port;
+void           *phandle;
 
 extern char   **environ;
 
@@ -2049,7 +2050,8 @@ smtp_quit(char *arg)
 	smtp_greet("221 ");
 	out(" closing connection\r\n");
 	flush();
-	closeLibrary();
+	if (phandle)
+		closeLibrary(&phandle);
 #ifdef SMTP_PLUGIN
 	for (i = 0; plughandle && i < plugin_count; i++) {
 		if (plughandle[i])
@@ -5121,15 +5123,15 @@ smtp_atrn(char *arg)
 		err_library("libindimail.so not loaded");
 		return;
 	}
-	if (!(vclose = getlibObject("vclose", &errstr))) {
+	if (!(vclose = getlibObject("VIRTUAL_PKG_LIB", &phandle, "vclose", &errstr))) {
 		err_library(errstr);
 		return;
 	} else
-	if (!(vshow_atrn_map = getlibObject("vshow_atrn_map", &errstr))) {
+	if (!(vshow_atrn_map = getlibObject("VIRTUAL_PKG_LIB", &phandle, "vshow_atrn_map", &errstr))) {
 		err_library(errstr);
 		return;
 	} else
-	if (!(atrn_access = getlibObject("atrn_access", &errstr))) {
+	if (!(atrn_access = getlibObject("VIRTUAL_PKG_LIB", &phandle, "atrn_access", &errstr))) {
 		err_library(errstr);
 		return;
 	}
@@ -5806,7 +5808,6 @@ qmail_smtpd(int argc, char **argv, char **envp)
 {
 	char           *ptr, *errstr;
 	struct commands *cmdptr;
-	void           *phandle;
 #ifdef SMTP_PLUGIN
 	int             i, j, len;
 	char           *start_plugin, *plugin_symb, *plugindir;
@@ -5833,7 +5834,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	if (chdir(auto_qmail) == -1)
 		die_control();
 	/*- load virtual package library */
-	phandle = loadLibrary(&i, &errstr);
+	loadLibrary(&phandle, "VIRTUAL_PKG_LIB", &i, &errstr);
 	if (i) {
 		logerr("Error loading virtual package shared lib: ");
 		logerr(errstr);
@@ -6051,6 +6052,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.219  2019-04-20 19:52:52+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
  * Revision 1.218  2019-04-16 23:59:48+05:30  Cprogrammer
  * changed parse_email() parameters
  *
@@ -6143,7 +6147,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.218 2019-04-16 23:59:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.219 2019-04-20 19:52:52+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
