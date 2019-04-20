@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.3  2019-04-20 19:51:25+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
  * Revision 1.2  2018-11-11 14:08:11+05:30  Cprogrammer
  * print maildirsize on stdout
  *
@@ -33,6 +36,7 @@ main(int argc, char **argv)
 	char            strnum[FMT_ULONG];
 	struct statfs   statbuf;
 	struct passwd  *pw;
+	void           *phandle = (void *) 0;
 
 	if (argc != 2)
 		strerr_die1x(100, "usage: maildirsize user");
@@ -42,12 +46,13 @@ main(int argc, char **argv)
 		strerr_die3sys(111, FATAL, "chdir: ", pw->pw_dir);
 	if (access("./Maildir/", F_OK))
 		strerr_die4sys(111, FATAL, "chdir: ", pw->pw_dir, "/Maildir/");
-	if (!loadLibrary(0, &errstr))
+	if (!(phandle = loadLibrary(&phandle, "VIRTUAL_PKG_LIB", 0, &errstr)))
 		strerr_die1x(111, "problem with loading shared libs");
-	if (!(count_dir = getlibObject("count_dir", &errstr)))
+	if (!(count_dir = getlibObject("VIRTUAL_PKG_LIB", &phandle, "count_dir", &errstr)))
 		strerr_die1x(111, "problem with loading shared libs");
 	mailcount = 0;
 	mailsize = count_dir("./Maildir/", &mailcount);
+	closeLibrary(&phandle);
 	if ((fd = open_trunc("./Maildir/maildirsize")) == -1)
 		strerr_die2sys(111, FATAL, "./Maildir/maildirsize: ");
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
@@ -80,7 +85,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.2 2018-11-11 14:08:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.3 2019-04-20 19:51:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

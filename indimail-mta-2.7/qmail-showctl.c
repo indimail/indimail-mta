@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.64  2019-04-20 19:52:13+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
  * Revision 1.63  2018-08-26 03:46:06+05:30  Cprogrammer
  * better indentation
  *
@@ -292,7 +295,7 @@ main(int argc, char **argv)
 {
 	DIR            *dir;
 	direntry       *d;
-	void           *handle;
+	void           *handle = (void *) 0;
 	char           *ptr, *local_ip, *qbase, *local_id, *errstr;
 	int             i, verbose = 0;
 	struct stat     stmrh, stmrhcdb;
@@ -400,7 +403,7 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		_exit(111);
 	}
-	handle = loadLibrary(&i, &errstr);
+	loadLibrary(&handle, "VIRTUAL_PKG_LIB", &i, &errstr);
 	if (i) {
 		substdio_puts(subfderr, "error loading shared library: ");
 		substdio_puts(subfderr, errstr);
@@ -409,7 +412,7 @@ main(int argc, char **argv)
 		_exit(111);
 	}
 	if (handle) {
-		if (!(get_local_ip = getlibObject("get_local_ip", &errstr))) {
+		if (!(get_local_ip = getlibObject("VIRTUAL_PKG_LIB", &handle, "get_local_ip", &errstr))) {
 			substdio_puts(subfderr, "getlibObject: get_local_ip: ");
 			substdio_puts(subfderr, errstr);
 			substdio_puts(subfderr, "\n");
@@ -417,7 +420,7 @@ main(int argc, char **argv)
 			_exit(111);
 		} else
 			local_ip = (*get_local_ip) ();
-		if (!(get_local_hostid = getlibObject("get_local_hostid", &errstr))) {
+		if (!(get_local_hostid = getlibObject("VIRTUAL_PKG_LIB", &handle, "get_local_hostid", &errstr))) {
 			substdio_puts(subfderr, "getlibObject: get_local_hostid: ");
 			substdio_puts(subfderr, errstr);
 			substdio_puts(subfderr, "\n");
@@ -425,8 +428,11 @@ main(int argc, char **argv)
 			_exit(111);
 		} else
 			local_id = (*get_local_hostid) ();
-	} else
+		closeLibrary(&handle);
+	} else {
+		local_id = "0x00";
 		local_ip = "127.0.0.1";
+	}
 	do_str("me", 0, "undefined! Uh-oh", "My name is ");
 	if (do_lst
 		("rcpthosts", "SMTP clients may send messages to any recipient.", "SMTP clients may send messages to recipients at ", "."))
@@ -830,7 +836,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.63 2018-08-26 03:46:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.64 2019-04-20 19:52:13+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.12  2019-04-20 19:48:42+05:30  Cprogrammer
+ * change in loadLibrary() interface
+ *
  * Revision 1.11  2018-07-01 11:48:57+05:30  Cprogrammer
  * renamed getFunction() to getlibObject()
  *
@@ -68,6 +71,7 @@ etrn_queue(char *arg, char *remoteip)
 	struct constmap mapetrn;
 	static int      flagrcpt = 1;
 	size_t          (*count_dir) (char *, size_t *);
+	void           *phandle = (void *) 0;
 
 	if (flagrcpt)
 		flagrcpt = rcpthosts_init();
@@ -100,15 +104,17 @@ etrn_queue(char *arg, char *remoteip)
 	maildir2[r] = 0;
 
 	mailcount = 0;
-	if (!loadLibrary(0, &errstr))
+	loadLibrary(&phandle, "VIRTUAL_PKG_LIB", 0, &errstr);
+	if (!phandle)
 		return (err_library(errstr));
-	if (!(count_dir = getlibObject("count_dir", &errstr)))
+	if (!(count_dir = getlibObject("VIRTUAL_PKG_LIB", &phandle, "count_dir", &errstr)))
 		return (err_library(errstr));
 	if (!access(maildir1, F_OK))
 		count_dir(maildir1, &mailcount);
 	else
 	if (!access(maildir2, F_OK))
 		count_dir(maildir2, &mailcount);
+	closeLibrary(&phandle);
 	if (!mailcount)
 		return(-3);
 	switch (child = fork())
@@ -184,7 +190,7 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.11 2018-07-01 11:48:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.12 2019-04-20 19:48:42+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

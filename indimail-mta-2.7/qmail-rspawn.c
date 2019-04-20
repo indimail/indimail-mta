@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.33  2019-04-20 19:52:09+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
  * Revision 1.32  2018-07-01 11:51:31+05:30  Cprogrammer
  * renamed getFunction() to getlibObject()
  *
@@ -230,7 +233,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	char           *ip, *real_domain;
 	static char     smtproute[MAX_BUFF], CurDir[MAX_BUFF]; 
 	static int      rcptflag = 1;
-	void           *handle;
+	extern void    *phandle;
 	int             (*is_distributed_domain) (char *);
 	char *          (*vget_real_domain) (char *);
 	char *          (*findhost) (char *, int);
@@ -244,10 +247,10 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	args[5] = r;				/*- recipient */
 	args[6] = 0;
 
-	handle = loadLibrary(&i, 0);
+	loadLibrary(&phandle, "VIRTUAL_PKG_LIB", &i, 0);
 	if (i)
 		return (-1);
-	if (!handle)
+	if (!phandle)
 		goto noroutes;
 	*smtproute = 0;
 	if (!env_unset("SMTPROUTE"))
@@ -274,11 +277,11 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 				return (-1);
 		}
 		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1) {
-			if (!(vget_real_domain = getlibObject("vget_real_domain", 0)))
+			if (!(vget_real_domain = getlibObject("VIRTUAL_PKG_LIB", &phandle, "vget_real_domain", 0)))
 				return (-1);
-			if (!(is_distributed_domain = getlibObject("is_distributed_domain", 0)))
+			if (!(is_distributed_domain = getlibObject("VIRTUAL_PKG_LIB", &phandle, "is_distributed_domain", 0)))
 				return (-1);
-			if (!(findhost = getlibObject("findhost", 0)))
+			if (!(findhost = getlibObject("VIRTUAL_PKG_LIB", &phandle, "findhost", 0)))
 				return (-1);
 			if ((real_domain = (*vget_real_domain) (r + at + 1))
 				&& ((*is_distributed_domain) (real_domain) == 1)) {
@@ -299,8 +302,8 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 noroutes:
 	if (!env_unset("QMAILLOCAL"))
 		_exit(111);
-	if (!(f = vfork()))
-	{
+	if (!(f = vfork())) {
+		closeLibrary(&phandle);
 		if (fd_move(0, fdmess) == -1)
 			_exit(111);
 		if (fd_move(1, fdout) == -1)
@@ -321,7 +324,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.32 2018-07-01 11:51:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.33 2019-04-20 19:52:09+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
