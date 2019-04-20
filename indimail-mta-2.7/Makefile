@@ -14,7 +14,6 @@ libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
 version=$(shell grep Version: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
 release=$(shell grep Release: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
 DEFS := $(shell uname -s | tr "[:lower:]" "[:upper:]")
-mysql_libs = $(shell sh ./mysql_libs $(DEFS))
 mysql_inc  = $(shell ./mysql_config --include)
 HOST=$(shell echo "`uname -m`-pc-`uname -s`-`uname -o|cut -d/ -f1`"|tr "[:upper:]" "[:lower:]")
 servicedir=/service
@@ -2721,13 +2720,13 @@ wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
 base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o greylist.o \
-query_skt.o fn_handler.o \
+query_skt.o fn_handler.o load_mysql.o \
 auto_break.o auto_control.o auto_assign.o env.a stralloc.a alloc.a substdio.a \
 auto_prefix.o auto_sysconfdir.o error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so smtpd.o rcpthosts.o \
-	recipients.o commands.o timeoutread.o indimail_stub.o \
+	recipients.o commands.o timeoutread.o indimail_stub.o load_mysql.o \
 	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
@@ -2737,7 +2736,7 @@ socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	query_skt.o fn_handler.o tlsarralloc.o \
 	auto_prefix.o auto_sysconfdir.o hmac_sha1.o getln.a open.a sig.a \
 	wait.a datetime.a case.a env.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` $(mysql_libs) ; \
+	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` ; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so smtpd.o rcpthosts.o \
 	recipients.o commands.o timeoutread.o auto_control.o auto_assign.o \
@@ -2746,11 +2745,11 @@ socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
-	greylist.o auto_break.o indimail_stub.o \
+	greylist.o auto_break.o indimail_stub.o load_mysql.o \
 	query_skt.o fn_handler.o tlsarralloc.o \
 	auto_prefix.o auto_sysconfdir.o hmac_sha1.o getln.a open.a sig.a \
 	wait.a datetime.a case.a env.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` $(mysql_libs) ; \
+	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` ; \
 	fi
 
 qmail-smtpd: \
@@ -2761,7 +2760,7 @@ wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o indimai
 scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
 base64sub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o greylist.o auto_assign.o \
-query_skt.o fn_handler.o tlsarralloc.o \
+query_skt.o fn_handler.o tlsarralloc.o load_mysql.o \
 auto_sysconfdir.o auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 auto_prefix.o socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
@@ -2771,10 +2770,10 @@ auto_prefix.o socket.lib tai.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-s
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	base64sub.o indimail_stub.o qregex_sql.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
 	greylist.o auto_break.o auto_control.o auto_assign.o hmac_sha1.o \
-	query_skt.o fn_handler.o tlsarralloc.o \
+	query_skt.o fn_handler.o tlsarralloc.o load_mysql.o \
 	auto_sysconfdir.o auto_prefix.o getln.a open.a sig.a \
 	wait.a datetime.a case.a env.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` $(mysql_libs) -ldl
+	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib tls.lib` -ldl
 
 mail_acl.o: \
 compile mail_acl.c str.h matchregex.h fmt.h stralloc.h
@@ -2797,6 +2796,11 @@ qregex_sql.o: \
 compile qregex.c qregex.h sqlmatch.h case.h stralloc.h constmap.h matchregex.h byte.h env.h \
 str.h cdb.h uint32.h open.h error.h control.h variables.h hasmysql.h mysql_config conf-sql
 	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) qregex.c -o qregex_sql.o
+
+load_mysql.o: \
+compile load_mysql.c indimail_stub.h error.h stralloc.h strerr.h \
+env.h
+	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) load_mysql.c
 
 matchregex.o: \
 compile matchregex.c stralloc.h error.h qregex.h
@@ -2886,7 +2890,7 @@ auto_control.h dns.h conf-tls conf-spf conf-ip conf-plugin conf-batv mysql_confi
 
 sqlmatch.o: \
 compile sqlmatch.c stralloc.h byte.h error.h env.h open.h variables.h scan.h \
-sqlmatch.h qregex.h auto_control.h mysql_config conf-sql
+sqlmatch.h qregex.h auto_control.h load_mysql.h mysql_config conf-sql
 	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) sqlmatch.c
 
 greylist.o: \
@@ -5853,20 +5857,24 @@ env.h strerr.h fmt.h str.h matchregex.h scan.h control.h
 qmail-sql: \
 load qmail-sql.o sgetopt.o str_len.o stralloc.a error_str.o \
 error.o envread.o variables.o subgetopt.o str_diffn.o auto_control.o \
-byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o \
+byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o load_mysql.o \
 fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
-sqlmatch.o auto_uids.o auto_sysconfdir.o substdio.a tls.lib mysql_config conf-sql
-	./load qmail-sql sgetopt.o str_len.o error_str.o \
+scan_uint.o sqlmatch.o auto_uids.o auto_sysconfdir.o indimail_stub.o \
+timeoutread.o timeoutwrite.o str_chr.o str_rchr.o auto_qmail.o \
+substdio.a tls.lib mysql_config conf-sql
+	./load qmail-sql sgetopt.o str_len.o error_str.o indimail_stub.o \
 	error.o envread.o variables.o subgetopt.o str_diffn.o auto_control.o \
-	byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o \
+	byte_copy.o alloc_re.o alloc.o scan_uint.o strerr_die.o strerr_sys.o \
 	fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
-	sqlmatch.o auto_uids.o auto_sysconfdir.o \
-	stralloc.a substdio.a `cat tls.lib` $(mysql_libs)
+	timeoutread.o timeoutwrite.o sqlmatch.o auto_uids.o auto_sysconfdir.o \
+	auto_qmail.o load_mysql.o str_chr.o str_rchr.o stralloc.a substdio.a \
+	`cat tls.lib` -ldl
 
 qmail-sql.o: \
 compile qmail-sql.c sgetopt.h subfd.h stralloc.h str.h env.h \
 sqlmatch.h auto_qmail.h variables.h error.h strerr.h auto_uids.h \
-fmt.h substdio.h auto_control.h hasmysql.h mysql_config conf-sql
+fmt.h substdio.h auto_control.h hasmysql.h load_mysql.h \
+mysql_config conf-sql
 	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) qmail-sql.c
 
 qmail-sql.8: \
