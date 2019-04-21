@@ -56,5 +56,5 @@ extern int      use_etrn;
 void           *inquery(char, char *, char *);
 int             parse_email(char *, stralloc *, stralloc *);
 void           *loadLibrary(void **, char *, int *, char **);
-void *          getlibObject(char *, void **, char *, char **);
+void           *getlibObject(char *, void **, char *, char **);
 void            closeLibrary(void **);
