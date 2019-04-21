@@ -225,3 +225,4 @@ hasdlmopen.h
 auto_shared.c
 str_rchr.o
 tcdlmopen.o
+load_mysql.o
