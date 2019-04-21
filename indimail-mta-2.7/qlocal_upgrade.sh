@@ -273,7 +273,7 @@ mysqllib=`ls -d /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
 if [ -z "$mysqllib" ] ; then
 	mysqllib=`ls -d /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
 fi
-if [ -n "$mysqllib" -a -f $mysqllib ] ; the
+if [ -n "$mysqllib" -a -f $mysqllib ] ; then
 	for i in `grep -l "bin/tcpserver" /service/*/run`
 	do
 		sdir=`dirname $i`
