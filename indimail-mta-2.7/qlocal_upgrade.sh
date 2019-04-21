@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.21  2019-04-21 11:57:50+05:30  Cprogrammer
+# create MYSQL_LIB for dynamically loading MySQL shared libs
+#
 # Revision 1.20  2018-10-31 07:42:34+05:30  Cprogrammer
 # migrate clamd.conf to scan.conf
 #
@@ -58,7 +61,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.20 2018-10-31 07:42:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.21 2019-04-21 11:57:50+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -83,7 +86,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.20 2018-10-31 07:42:34+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.21 2019-04-21 11:57:50+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -264,6 +267,22 @@ fi
 if [ -f /etc/indimail/scan.conf -o -f /etc/indimail/scan.conf.disabled ] ; then
 	/usr/sbin/svctool --config=foxhole
 fi
+
+# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
+mysqllib=`ls -d /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
+if [ -z "$mysqllib" ] ; then
+	mysqllib=`ls -d /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
+fi
+if [ -n "$mysqllib" -a -f $mysqllib ] ; the
+	for i in `grep -l "bin/tcpserver" /service/*/run`
+	do
+		sdir=`dirname $i`
+		if [ ! -f $sdir/variables/MYSQL_LIB ] ; then
+			echo $mysqllib > $sdir/variables/MYSQL_LIB
+		fi
+	done
+fi
+
 }
 
 case $1 in
