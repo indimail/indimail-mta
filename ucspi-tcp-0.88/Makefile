@@ -5,7 +5,6 @@ SSLINCS=-I/usr/kerberos/include
 INDIDIR := $(shell head -1 conf-home 2>/dev/null || echo "/var/indimail")
 DEFS := $(shell uname -s | tr "[:lower:]" "[:upper:]")
 SYSTEM :=  $(shell uname -s)
-mysql_libs = $(shell sh ./mysql_libs $(DEFS))
 mysql_inc  = $(shell ./mysql_config --include)
 SSLLIBS := -lssl -lcrypto
 #SSLLIBS := `if test $(SYSTEM) = Darwin ; then echo "-lssl -lcrypto" ; else echo "-lssl" ; fi`
@@ -838,13 +837,13 @@ env.h pathexec.h
 tcpserver: \
 load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o pathexec_rundl.o \
 tcpserver_plugin.o load_shared.o control.o str_diffn.o auto_home.o \
-fmt_str.o fmt_uint.o scan_uint.o dlnamespace.o tcdlmopen.o \
+fmt_str.o fmt_uint.o scan_uint.o dlnamespace.o tcdlmopen.o load_mysql.o \
 cdb.a dns.a time.a unix.a byte.a socket.lib mysql_config
-	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o \
+	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o load_mysql.o \
 	control.o str_diffn.o auto_home.o tcpserver_plugin.o load_shared.o \
 	fmt_str.o fmt_uint.o scan_uint.o dlnamespace.o tcdlmopen.o \
 	pathexec_rundl.o cdb.a dns.a time.a unix.a byte.a `cat socket.lib` \
-	$(SSLLIBS) $(mysql_libs) -ldl
+	$(SSLLIBS) -ldl
 
 tcpserver.o: \
 compile tcpserver.c uint16.h str.h byte.h fmt.h scan.h ip4.h fd.h \
@@ -862,6 +861,9 @@ mysql_config.o: compile mysql_config.c conf-mysqlrules
 	./compile `grep -h -v "^#" conf-mysqlrules` mysql_config.c
 mysql_config: load mysql_config.o
 	./load mysql_config
+
+load_mysql.o: compile load_mysql.c error.h stralloc.h env.h
+	./compile $(mysql_inc) `grep -h -v "^#" conf-mysqlrules` load_mysql.c
 
 control.o: \
 compile control.c buffer.h stralloc.h scan.h error.h open.h getln.h env.h control.h
