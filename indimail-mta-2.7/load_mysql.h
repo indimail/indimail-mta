@@ -1,11 +1,15 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.2  2019-04-21 10:28:17+05:30  Cprogrammer
+ * include mysql.h for MYSQL definition
+ *
  * Revision 1.1  2019-04-20 19:48:09+05:30  Cprogrammer
  * Initial revision
  *
  */
 #ifndef LOAD_MYSQL_H
 #define LOAD_MYSQL_H
+#include <mysql.h>
 
 typedef struct MYSQL_RES res;
 typedef unsigned int i_uint;
@@ -23,9 +27,6 @@ extern my_ulonglong (*in_mysql_num_rows)(MYSQL_RES *);
 extern my_ulonglong (*in_mysql_affected_rows) (MYSQL *);
 extern void     (*in_mysql_free_result) (MYSQL_RES *);
 
-void           *loadMySQLlibrary(int *, char **);
-void           *getMySQLlibObject(char *, char **);
-void            closeMySQLlibrary();
 int             initMySQLlibrary(char **);
 
 #endif
