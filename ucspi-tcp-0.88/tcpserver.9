@@ -143,6 +143,15 @@ will connect to the
 server specified by parameters in db.conf file. The connect timeout can be controlled by the environment variable
 .BR MYSQL_TIMEOUT .
 
+To enable the -m option, you have to set MYSQL_LIB variable to point to the mysql shared library. e.g.
+
+.EE
+  MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
+.EX
+
+You can set MYSQL_LIB environment variable in /service/\fIname\fR/variables/MYSQL_LIB (here \fIname\fR refers
+to a service under \fIsupervise\fR(8))
+
 .TP
 .B \-B \fIbanner
 Write
@@ -329,6 +338,8 @@ tcpcat(1),
 mconnect(1),
 openssl(1),
 dlopen(3),
+supervise(8),
+svscan(8),
 tcp-environ(5)
 
 http://cr.yp.to/ucspi-tcp.html
