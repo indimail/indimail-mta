@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.58  2019-04-21 10:25:07+05:30  Cprogrammer
+ * load MySQL functions dynamically at run time
+ *
  * Revision 1.57  2018-05-30 12:32:32+05:30  Cprogrammer
  * flagssl should not be used when TLS is not defined
  *
@@ -190,10 +193,11 @@
 #include "dns.h"
 #include "hasmysql.h"
 #include "control.h"
+#include "load_mysql.h"
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.57 2018-05-30 12:32:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.58 2019-04-21 10:25:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -311,8 +315,7 @@ safecats(char *s)
 	char            ch;
 	int             i;
 
-	for (i = 0; i < 100; ++i)
-	{
+	for (i = 0; i < 100; ++i) {
 		if (!(ch = s[i]))
 			return;
 		if (ch < 33)
@@ -351,8 +354,7 @@ found(char *data, unsigned int datalen)
 	unsigned int    next0;
 	unsigned int    split;
 
-	while ((next0 = byte_chr(data, datalen, 0)) < datalen)
-	{
+	while ((next0 = byte_chr(data, datalen, 0)) < datalen) {
 		switch (data[0])
 		{
 		case 'D':
@@ -360,8 +362,7 @@ found(char *data, unsigned int datalen)
 			break;
 		case '+':
 			split = str_chr(data + 1, '=');
-			if (data[1 + split] == '=')
-			{
+			if (data[1 + split] == '=') {
 				data[1 + split] = 0;
 				env(data + 1, data + 1 + split + 1);
 			}
@@ -398,8 +399,7 @@ doit(int t)
 #else
 	remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
 #endif
-	if (verbosity >= 2)
-	{
+	if (verbosity >= 2) {
 		strnum[fmt_ulong(strnum, getpid())] = 0;
 		strerr_warn4("tcpserver: pid ", strnum, " from ", remoteipstr, 0);
 	}
@@ -409,8 +409,7 @@ doit(int t)
 	}
 	if (!flagdelay)
 		socket_tcpnodelay(t);
-	if (*banner)
-	{
+	if (*banner) {
 		buffer_init(&b, write, t, bspace, sizeof bspace);
 		if (buffer_putsflush(&b, banner) == -1)
 			strerr_die2sys(111, DROP, "unable to print banner: ");
@@ -439,8 +438,7 @@ doit(int t)
 	if (!localhost && !dns_name4(&localhostsa, localip))
 #endif
 	{
-		if (localhostsa.len)
-		{
+		if (localhostsa.len) {
 			if (!stralloc_0(&localhostsa))
 				drop_nomem();
 			localhost = localhostsa.s;
@@ -471,8 +469,7 @@ doit(int t)
 	if (flagremotehost && !dns_name4(&remotehostsa, remoteip))
 #endif
 	{
-		if (remotehostsa.len)
-		{
+		if (remotehostsa.len) {
 #ifdef IPV6
 			if (flagparanoid && !dns_ip6(&tmp, &remotehostsa))
 #else
@@ -496,8 +493,7 @@ doit(int t)
 					}
 				}
 			}
-			if (!flagparanoid)
-			{
+			if (!flagparanoid) {
 				if (!stralloc_0(&remotehostsa))
 					drop_nomem();
 				remotehost = remotehostsa.s;
@@ -516,8 +512,7 @@ doit(int t)
 		env("TCP6REMOTEHOST", remotehost);
 	}
 #endif
-	if (flagremoteinfo)
-	{
+	if (flagremoteinfo) {
 #ifdef IPV6
 		if (remoteinfo6(&tcpremoteinfo, remoteip, remoteport, localip, localport, timeout, netif) == -1)
 #else
@@ -531,18 +526,15 @@ doit(int t)
 #ifdef IPV6
 	env("TCP6REMOTEINFO", flagremoteinfo ? tcpremoteinfo.s : 0);
 #endif
-	if (fnrules)
-	{
+	if (fnrules) {
 		int             fdrules;
 
-		if ((fdrules = open_read(fnrules)) == -1)
-		{
+		if ((fdrules = open_read(fnrules)) == -1) {
 			if (errno != error_noent)
 				drop_rules();
 			if (!flagallownorules)
 				drop_rules();
-		} else
-		{
+		} else {
 			char           *temp;
 #ifdef IPV6
 			if (fakev4 || (noipv6 && !forcev6))
@@ -557,8 +549,7 @@ doit(int t)
 			close(fdrules);
 		}
 	}
-	if (verbosity >= 2)
-	{
+	if (verbosity >= 2) {
 		strnum[fmt_ulong(strnum, getpid())] = 0;
 		if (!stralloc_copys(&tmp, "tcpserver: "))
 			drop_nomem();
@@ -655,8 +646,7 @@ matchinet(char *ip, char *token)
 	if (inet_addr(token) != INADDR_NONE)
 		return (0);
 	else
-	for (match = idx1 = 0, ptr1 = token, ptr2 = ip; idx1 < 4 && match == idx1; idx1++)
-	{
+	for (match = idx1 = 0, ptr1 = token, ptr2 = ip; idx1 < 4 && match == idx1; idx1++) {
 		/*- IP Address in control file */
 		for (cptr = field1; *ptr1 && *ptr1 != '.'; *cptr++ = *ptr1++);
 		*cptr = 0;
@@ -671,8 +661,7 @@ matchinet(char *ip, char *token)
 		/*-
 		 * Network address wildcard match (i.e. "192.86.28.*")
 		 */
-		if (!str_diff(field1, "*"))
-		{
+		if (!str_diff(field1, "*")) {
 			match++;
 			continue;
 		}
@@ -680,21 +669,18 @@ matchinet(char *ip, char *token)
 		 * Network address wildcard match (i.e.
 		 * "192.86.2?.12?")
 		 */
-		for (; (ptr = my_strchr(field1, '?'));)
-		{
+		for (; (ptr = my_strchr(field1, '?'));) {
 			lnum = ptr - field1;
 			*ptr = field2[lnum];
 		}
-		if (!str_diff(field1, field2))
-		{
+		if (!str_diff(field1, field2)) {
 			match++;
 			continue;
 		}
 		/*
 		 * Range match (i.e. "190-193.86.22.11") 
 		 */
-		if ((ptr = my_strchr(field1, '-')))
-		{
+		if ((ptr = my_strchr(field1, '-'))) {
 			*ptr = 0;
 			ptr++;
 			scan_ulong(field1, &lnum);
@@ -703,10 +689,8 @@ matchinet(char *ip, char *token)
 			else
 				scan_ulong(ptr, &hnum);
 			scan_ulong(field2, &tmp);
-			for (idx2 = lnum; idx2 <= hnum; idx2++)
-			{
-				if (idx2 == tmp)
-				{
+			for (idx2 = lnum; idx2 <= hnum; idx2++) {
+				if (idx2 == tmp) {
 					match++;
 					break;
 				}
@@ -758,11 +742,7 @@ matchinet(char *ip, char *token)
 	return (0);
 }
 
-#ifdef IPV6
-#undef MYSQL_CONFIG
-#endif
-
-#if defined(MYSQL_CONFIG) && defined(HAS_MYSQL)
+#if defined(HAS_MYSQL)
 #include <mysql.h>
 #include <mysqld_error.h>
 
@@ -788,20 +768,17 @@ create_table(MYSQL *conn)
 		drop_nomem();
 	if (!stralloc_0(&sql))
 		drop_nomem();
-	if (mysql_query(conn, sql.s))
-	{
+	if (in_mysql_query(conn, sql.s)) {
 		sql.len--;
-		if (!stralloc_cats(&sql, ": "))
-		{
-			mysql_close(conn);
+		if (!stralloc_cats(&sql, ": ")) {
+			in_mysql_close(conn);
 			drop_nomem();
 		}
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn)))
-		{
-			mysql_close(conn);
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
+			in_mysql_close(conn);
 			drop_nomem();
 		}
-		mysql_close(conn);
+		in_mysql_close(conn);
 		if (!stralloc_0(&sql))
 			drop_nomem();
 		strerr_die2x(111, DROP, sql.s);
@@ -823,84 +800,71 @@ connect_db(char *dbfile)
 	scan_ulong(m_timeout, (unsigned long *) &mysql_timeout);
 	if ((fd = open_read(dbfile)) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", dbfile, ": ");
-	if (fstat(fd, &st) == -1)
-	{
+	if (fstat(fd, &st) == -1) {
 		close(fd);
 		strerr_die4sys(111, FATAL, "unable to fstat ", dbfile, ": ");
 	}
-	if (st.st_size <= 0xffffffff)
-	{
+	if (st.st_size <= 0xffffffff) {
 		x = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
 		xlen = st.st_size;
-		while ((next = byte_chr(x, xlen, ':')) < xlen)
-		{
+		while ((next = byte_chr(x, xlen, ':')) < xlen) {
 			switch (i)
 			{
 			case 0:
-				if (!stralloc_copyb(&dbserver, x, next))
-				{
+				if (!stralloc_copyb(&dbserver, x, next)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
 				}
-				if (!stralloc_0(&dbserver))
-				{
+				if (!stralloc_0(&dbserver)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
 				}
 				break;
 			case 1:
-				if (!stralloc_copyb(&dbuser, x, next))
-				{
+				if (!stralloc_copyb(&dbuser, x, next)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
 				}
-				if (!stralloc_0(&dbuser))
-				{
+				if (!stralloc_0(&dbuser)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
 				}
 				break;
 			case 2:
-				if (!stralloc_copyb(&dbpass, x, next))
-				{
+				if (!stralloc_copyb(&dbpass, x, next)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
 				}
-				if (!stralloc_0(&dbpass))
-				{
+				if (!stralloc_0(&dbpass)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
 				}
 				break;
 			case 3:
-				if (!stralloc_copyb(&dbname, x, next))
-				{
+				if (!stralloc_copyb(&dbname, x, next)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
 				}
-				if (!stralloc_0(&dbname))
-				{
+				if (!stralloc_0(&dbname)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
 				}
 				break;
 			case 4:
-				if (!stralloc_copyb(&dbtable, x, next))
-				{
+				if (!stralloc_copyb(&dbtable, x, next)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
 				}
-				if (!stralloc_0(&dbtable))
-				{
+				if (!stralloc_0(&dbtable)) {
 					munmap(x, st.st_size);
 					close(fd);
 					drop_nomem();
@@ -912,22 +876,18 @@ connect_db(char *dbfile)
 			x += next;
 			xlen -= next;
 		}
-		if (i < 4)
-		{
+		if (i < 4) {
 			munmap(x, st.st_size);
 			close(fd);
 			strerr_die2x(111, FATAL, "Invalid db.conf");
 		}
-		if (i == 4)
-		{
-			if (!*x || *x == '\n')
-			{
+		if (i == 4) {
+			if (!*x || *x == '\n') {
 				munmap(x, st.st_size);
 				close(fd);
 				strerr_die2x(111, FATAL, "Invalid db.conf");
 			}
-			if (!stralloc_copys(&dbtable, x))
-			{
+			if (!stralloc_copys(&dbtable, x)) {
 				munmap(x, st.st_size);
 				close(fd);
 				drop_nomem();
@@ -935,24 +895,23 @@ connect_db(char *dbfile)
 			if (*(dbtable.s + dbtable.len -1) == '\n')
 				*(dbtable.s + dbtable.len -1) = 0;
 			else
-			if (!stralloc_0(&dbtable))
-			{
+			if (!stralloc_0(&dbtable)) {
 				munmap(x, st.st_size);
 				close(fd);
 				drop_nomem();
 			}
 		}
-	} else
-	{
+	} else {
 		close(fd);
 		strerr_die2x(111, FATAL, "File too large");
 	}
 	munmap(x, st.st_size);
 	close(fd);
-	mysql_init(&mysql);
-	mysql_options(&mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout);
-	if (!mysql_real_connect(&mysql, dbserver.s, dbuser.s, dbpass.s, dbname.s, 0, NULL, 0))
-		strerr_die3x(111, FATAL, "Unable to connect to MySQL Server: ", (char *) mysql_error(&mysql));
+	if (!in_mysql_init(&mysql))
+		drop_nomem();
+	in_mysql_options(&mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout);
+	if (!in_mysql_real_connect(&mysql, dbserver.s, dbuser.s, dbpass.s, dbname.s, 0, NULL, 0))
+		strerr_die3x(111, FATAL, "Unable to connect to MySQL Server: ", (char *) in_mysql_error(&mysql));
 	conn = &mysql;
 	return;
 }
@@ -965,108 +924,88 @@ check_db(MYSQL *conn)
 	MYSQL_ROW       row;
 	static stralloc sql = { 0 };
 
-	if (!stralloc_copys(&sql, "select decision, iprule, env from "))
-	{
-		mysql_close(conn);
+	if (!stralloc_copys(&sql, "select decision, iprule, env from ")) {
+		in_mysql_close(conn);
 		drop_nomem();
 	}
-	if (!stralloc_cats(&sql, dbtable.s))
-	{
-		mysql_close(conn);
+	if (!stralloc_cats(&sql, dbtable.s)) {
+		in_mysql_close(conn);
 		drop_nomem();
 	}
-	if (!stralloc_cats(&sql, " where port = "))
-	{
-		mysql_close(conn);
+	if (!stralloc_cats(&sql, " where port = ")) {
+		in_mysql_close(conn);
 		drop_nomem();
 	}
-	if (!stralloc_cats(&sql, localportstr))
-	{
-		mysql_close(conn);
+	if (!stralloc_cats(&sql, localportstr)) {
+		in_mysql_close(conn);
 		drop_nomem();
 	}
-	if (!stralloc_0(&sql))
-	{
-		mysql_close(conn);
+	if (!stralloc_0(&sql)) {
+		in_mysql_close(conn);
 		drop_nomem();
 	}
-	if (mysql_query(conn, sql.s))
-	{
-		if (mysql_errno(conn) == ER_NO_SUCH_TABLE)
-		{
+	if (in_mysql_query(conn, sql.s)) {
+		if (in_mysql_errno(conn) == ER_NO_SUCH_TABLE) {
 			create_table(conn);
-			if (!mysql_query(conn, sql.s))
+			if (!in_mysql_query(conn, sql.s))
 				goto done;
 		}
 		sql.len--;
-		if (!stralloc_cats(&sql, ": "))
-		{
-			mysql_close(conn);
+		if (!stralloc_cats(&sql, ": ")) {
+			in_mysql_close(conn);
 			drop_nomem();
 		}
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn)))
-		{
-			mysql_close(conn);
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
+			in_mysql_close(conn);
 			drop_nomem();
 		}
-		mysql_close(conn);
+		in_mysql_close(conn);
 		if (!stralloc_0(&sql))
 			drop_nomem();
 		strerr_die2x(111, DROP, sql.s);
 	}
 done:
-	if (!(res = mysql_store_result(conn)))
-	{
+	if (!(res = in_mysql_store_result(conn))) {
 		sql.len--;
-		if (!stralloc_cats(&sql, "mysql_store_result: "))
-		{
-			mysql_close(conn);
+		if (!stralloc_cats(&sql, "mysql_store_result: ")) {
+			in_mysql_close(conn);
 			drop_nomem();
 		}
-		if (!stralloc_cats(&sql, (char *) mysql_error(conn)))
-		{
-			mysql_close(conn);
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
+			in_mysql_close(conn);
 			drop_nomem();
 		}
-		mysql_close(conn);
+		in_mysql_close(conn);
 		if (!stralloc_0(&sql))
 			drop_nomem();
 		strerr_die2x(111, DROP, sql.s);
 	}
-	for (;(row = mysql_fetch_row(res));)
-	{
-		if (!str_diff(row[1], "*") || matchinet(remoteipstr, row[1]))
-		{
-			if (*row[0] == 'D')
-			{
+	for (;(row = in_mysql_fetch_row(res));) {
+		if (!str_diff(row[1], "*") || matchinet(remoteipstr, row[1])) {
+			if (*row[0] == 'D') {
 				strerr_warn4("tcpserver: MySQL: Port ", localportstr, ": IPrule ", row[1], 0);
 				flagdeny = 1;
-				mysql_free_result(res);
+				in_mysql_free_result(res);
 				return;
 			}
-			if (row[2])
-			{
+			if (row[2]) {
 				char           *ptr1, *ptr2, *ptr3, *ptr4;
 				unsigned int    split;
 
-				for (ptr2 = ptr1 = row[2];*ptr1;ptr1++)
-				{
-					if (*ptr1 == ',')
-					{
+				for (ptr2 = ptr1 = row[2];*ptr1;ptr1++) {
+					if (*ptr1 == ',') {
 						/*
 			 			* Allow ',' in environment variable if escaped
 			 			* by '\' character
 			 			*/
-						if (ptr1 != row[2] && *(ptr1 - 1) == '\\')
-						{
+						if (ptr1 != row[2] && *(ptr1 - 1) == '\\') {
 							/*- for (ptr3 = ptr1 - 1; *ptr3; *ptr3++ = *(ptr3 + 1)); -*/
 							for (ptr3 = ptr1 - 1, ptr4 = ptr1; *ptr3; *ptr3++ = *ptr4++);
 							continue;
 						}
 						*ptr1 = 0;
 						split = str_chr(ptr2, '=');
-						if (ptr2[split] == '=')
-						{
+						if (ptr2[split] == '=') {
 							ptr2[split] = 0;
 							env(ptr2, ptr2 + split + 1);
 						}
@@ -1074,17 +1013,16 @@ done:
 					}
 				} /*- for */
 				split = str_chr(ptr2, '=');
-				if (ptr2[split] == '=')
-				{
+				if (ptr2[split] == '=') {
 					ptr2[split] = 0;
 					env(ptr2, ptr2 + split + 1);
 				}
 			} /*- if (row[2]) */
 		}
 	}
-	mysql_free_result(res);
+	in_mysql_free_result(res);
 }
-#endif /*- #ifdef MYSQL_CONFIG */
+#endif /*- #ifdef HAS_MYSQL */
 
 void
 usage(void)
@@ -1105,7 +1043,7 @@ usage(void)
 "[ -b backlog ]\n"
 "[ -l localname ]\n"
 "[ -t timeout ]\n"
-#if defined(MYSQL_CONFIG) && defined(HAS_MYSQL)
+#if defined(HAS_MYSQL)
 "[ -m db.conf ]\n"
 #endif
 #ifdef TLS
@@ -1135,15 +1073,12 @@ init_ip()
 	int             i;
 	IPTABLE       **iptable;
 
-	if (!IpTable)
-	{
+	if (!IpTable) {
 		if (!(IpTable = (IPTABLE **) alloc(limit * sizeof(IPTABLE *))))
 			drop_nomem();
 		alloc_count = limit;
-		for (i = 0, iptable = IpTable;i < limit;i++, iptable++)
-		{
-			if (!(*iptable = (IPTABLE *) alloc(sizeof(IPTABLE))))
-			{
+		for (i = 0, iptable = IpTable;i < limit;i++, iptable++) {
+			if (!(*iptable = (IPTABLE *) alloc(sizeof(IPTABLE)))) {
 				drop_nomem();
 				return;
 			}
@@ -1179,10 +1114,8 @@ add_ip(pid)
 #else
 	remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
 #endif
-	for (i = 0, iptable = IpTable; i < limit; iptable++, i++)
-	{
-		if ((*iptable)->pid == -1)
-		{
+	for (i = 0, iptable = IpTable; i < limit; iptable++, i++) {
+		if ((*iptable)->pid == -1) {
 			(*iptable)->pid = pid;
 #ifdef IPV6
 			byte_copy((*iptable)->ipaddr, 16, remoteip);
@@ -1210,8 +1143,7 @@ check_ip()
 #ifndef IPV6
 	remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
 #endif
-	for (count = i = 0, iptable = IpTable; i < limit; iptable++, i++)
-	{
+	for (count = i = 0, iptable = IpTable; i < limit; iptable++, i++) {
 		if ((*iptable)->pid == -1)
 			continue;
 #ifdef IPV6
@@ -1233,10 +1165,8 @@ remove_ip(pid)
 
 	if (!IpTable)
 		init_ip();
-	for (i = 0, iptable = IpTable; i < limit; iptable++, i++)
-	{
-		if ((*iptable)->pid == pid)
-		{
+	for (i = 0, iptable = IpTable; i < limit; iptable++, i++) {
+		if ((*iptable)->pid == pid) {
 			(*iptable)->pid = -1;
 			break;
 		}
@@ -1257,10 +1187,8 @@ print_ip()
 		return;
 	if (!IpTable)
 		init_ip();
-	for (i = 0, iptable = IpTable; i < limit; iptable++, i++)
-	{
-		if ((*iptable)->pid != -1)
-		{
+	for (i = 0, iptable = IpTable; i < limit; iptable++, i++) {
+		if ((*iptable)->pid != -1) {
 			slotstr[fmt_ulong(slotstr, i)] = 0;
 			pid_str[fmt_ulong(pid_str, (*iptable)->pid)] = 0;
 #ifdef IPV6
@@ -1307,19 +1235,15 @@ sighangup()
 	tmpLimit = limit;
 	if (control_readint(&tmpLimit, limitFile.s) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", limitFile.s, ": ");
-	if (tmpLimit > alloc_count)
-	{
+	if (tmpLimit > alloc_count) {
 		if (!(tmpTable = (IPTABLE **) alloc(tmpLimit * sizeof(IPTABLE *))))
 			drop_nomem();
-		for (i = 0, iptable1 = tmpTable, iptable2 = IpTable;i < tmpLimit;i++, iptable1++)
-		{
-			if (i < alloc_count)
-			{
+		for (i = 0, iptable1 = tmpTable, iptable2 = IpTable;i < tmpLimit;i++, iptable1++) {
+			if (i < alloc_count) {
 				*iptable1 = *iptable2++;
 				continue;
 			}
-			if (!(*iptable1 = (IPTABLE *) alloc(sizeof(IPTABLE))))
-			{
+			if (!(*iptable1 = (IPTABLE *) alloc(sizeof(IPTABLE)))) {
 				drop_nomem();
 				return;
 			}
@@ -1342,16 +1266,13 @@ sigchld()
 	int             wstat;
 	int             pid;
 
-	while ((pid = wait_nohang(&wstat)) > 0)
-	{
-		if (verbosity >= 2)
-		{
+	while ((pid = wait_nohang(&wstat)) > 0) {
+		if (verbosity >= 2) {
 			strnum[fmt_ulong(strnum, pid)] = 0;
 			strnum2[fmt_ulong(strnum2, wstat)] = 0;
 			strerr_warn4("tcpserver: end ", strnum, " status ", strnum2, 0);
 		}
-		if (numchildren)
-		{
+		if (numchildren) {
 			--numchildren;
 			remove_ip(pid);
 		}
@@ -1363,7 +1284,7 @@ int
 main(int argc, char **argv, char **envp)
 {
 	char           *x, *hostname;
-#if defined(MYSQL_CONFIG) && defined(HAS_MYSQL)
+#if defined(HAS_MYSQL)
 	char           *dbfile = 0;
 #endif
 	struct servent *se;
@@ -1381,8 +1302,7 @@ main(int argc, char **argv, char **envp)
 #endif
 	struct stralloc options = {0};
 
-	if ((x = env_get("MAXPERIP"))) /*- '-C' option overrides this */
-	{
+	if ((x = env_get("MAXPERIP"))) { /*- '-C' option overrides this */
 		scan_ulong(x, &PerHostLimit);
 		maxperip = PerHostLimit;
 	}
@@ -1421,13 +1341,11 @@ main(int argc, char **argv, char **envp)
 		switch (opt)
 		{
 		case 'c':
-			for (x = optarg;*x;x++)
-			{
+			for (x = optarg;*x;x++) {
 				if (*x == '/' || *x == '.' || *x < '0' || *x > '9')
 					break;
 			}
-			if (*x)
-			{
+			if (*x) {
 				if (!stralloc_copys(&limitFile, optarg))
 					strerr_die2x(111, FATAL, "out of memory");
 				if (!stralloc_0(&limitFile))
@@ -1451,7 +1369,7 @@ main(int argc, char **argv, char **envp)
 		case 'x':
 			fnrules = optarg;
 			break;
-#if defined(MYSQL_CONFIG) && defined(HAS_MYSQL)
+#if defined(HAS_MYSQL)
 		case 'm':
 			dbfile = optarg;
 #endif
@@ -1557,8 +1475,7 @@ main(int argc, char **argv, char **envp)
 		usage();
 	if (!x[scan_ulong(x, &port)])
 		localport = port;
-	else
-	{
+	else {
 		if (!(se = getservbyname(x, "tcp")))
 			strerr_die3x(111, FATAL, "unable to figure out port number for ", x);
 #ifdef IPV6
@@ -1569,7 +1486,12 @@ main(int argc, char **argv, char **envp)
 	}
 	if (!*argv)
 		usage();
-#if defined(MYSQL_CONFIG) && defined(HAS_MYSQL)
+#if defined(HAS_MYSQL)
+	if (initMySQLlibrary(&x))
+		strerr_die3x(111, FATAL, "couldn't load MySQL shared lib: ", x);
+	else
+	if (!use_sql)
+		strerr_die2x(111, FATAL, "MySQL shared lib not loaded");
 	if (dbfile)
 		connect_db(dbfile);
 #endif
@@ -1581,8 +1503,7 @@ main(int argc, char **argv, char **envp)
 	sig_ignore(sig_pipe);
 	if (str_equal(hostname, "0"))
 		byte_zero(localip, sizeof(localip));
-	else
-	{
+	else {
 		if (!stralloc_copys(&tmp, hostname))
 			strerr_die2x(111, FATAL, "out of memory");
 #ifdef IPV6
@@ -1606,8 +1527,7 @@ main(int argc, char **argv, char **envp)
 #endif
 	}
 #ifdef TLS
-	if (flagssl == 1)
-	{
+	if (flagssl == 1) {
     	/* setup SSL context (load key and cert into ctx) */
 		SSL_library_init();
 		if (!(ctx = SSL_CTX_new(SSLv23_server_method())))
@@ -1652,8 +1572,7 @@ main(int argc, char **argv, char **envp)
 	if (tcpserver_plugin(envp, 1))
 		_exit(111);
 	localportstr[fmt_ulong(localportstr, localport)] = 0;
-	if (flag1)
-	{
+	if (flag1) {
 		buffer_init(&b, write, 1, bspace, sizeof bspace);
 		buffer_puts(&b, localportstr);
 		buffer_puts(&b, "\n");
@@ -1662,8 +1581,7 @@ main(int argc, char **argv, char **envp)
 	close(0);
 	close(1);
 	printstatus();
-	for (;;)
-	{
+	for (;;) {
 		while (numchildren >= limit)
 			sig_pause();
 		sig_unblock(sig_child);
@@ -1690,8 +1608,7 @@ main(int argc, char **argv, char **envp)
 #else
 		remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
 #endif
-		if (PerHostLimit && (ipcount = check_ip()) >= PerHostLimit)
-		{
+		if (PerHostLimit && (ipcount = check_ip()) >= PerHostLimit) {
 			strnum2[fmt_ulong(strnum2, ipcount)] = 0;
 			strerr_warn4("tcpserver: end ", remoteipstr, " perIPlimit ", strnum2, 0);
 			--numchildren;
@@ -1703,7 +1620,7 @@ main(int argc, char **argv, char **envp)
 		{
 		case 0:
 			close(s);
-#if defined(MYSQL_CONFIG) && defined(HAS_MYSQL) && IPV6
+#if defined(HAS_MYSQL)
 			if (conn)
 				check_db(conn);
 #endif
@@ -1714,12 +1631,10 @@ main(int argc, char **argv, char **envp)
 			sig_unblock(sig_child);
 			sig_uncatch(sig_term);
 			sig_uncatch(sig_pipe);
-			if (maxperip)
-			{
+			if (maxperip) {
 				if (ipcount == -1)
 					ipcount = check_ip();
-				if (ipcount >= maxperip)
-				{
+				if (ipcount >= maxperip) {
 					strnum2[fmt_ulong(strnum2, ipcount)] = 0;
 					close(t);
 					errno = error_acces;
@@ -1727,8 +1642,7 @@ main(int argc, char **argv, char **envp)
 				}
 			}
 #ifdef TLS
-			if (flagssl == 1)
-			{
+			if (flagssl == 1) {
 				if (pipe(pi2c) != 0)
 					strerr_die2sys(111, DROP, "unable to create pipe: ");
 				if (pipe(pi4c) != 0)
@@ -1794,10 +1708,8 @@ allwrite(int fd, char *buf, int len)
 {
 	int             w;
 
-	while (len)
-	{
-		if ((w = write(fd, buf, len)) == -1)
-		{
+	while (len) {
+		if ((w = write(fd, buf, len)) == -1) {
 			if (errno == error_intr)
 				continue;
 			return -1;	/*- note that some data may have been written */
@@ -1814,10 +1726,8 @@ allwritessl(SSL * ssl, char *buf, int len)
 {
 	int             w;
 
-	while (len)
-	{
-		if ((w = SSL_write(ssl, buf, len)) == -1)
-		{
+	while (len) {
+		if ((w = SSL_write(ssl, buf, len)) == -1) {
 			if (errno == error_intr)
 				continue;
 			return -1;	/*- note that some data may have been written */
@@ -1846,8 +1756,7 @@ translate(SSL * ssl, int clearout, int clearin, unsigned int iotimeout)
 	flagexitasap = 0;
 	if (SSL_accept(ssl) <= 0)
 		strerr_die2x(111, DROP, "unable to accept SSL connection");
-	while (!flagexitasap)
-	{
+	while (!flagexitasap) {
 		taia_now(&now);
 		taia_uint(&deadline, iotimeout);
 		taia_add(&deadline, &now, &deadline);
@@ -1861,8 +1770,7 @@ translate(SSL * ssl, int clearout, int clearin, unsigned int iotimeout)
 
 		/*- do iopause read */
 		iopause(iop, iopl, &deadline, &now);
-		if (iop[0].revents)
-		{
+		if (iop[0].revents) {
 			/*- data on sslin */
 			n = SSL_read(ssl, tbuf, sizeof(tbuf));
 			if (n < 0)
@@ -1873,8 +1781,7 @@ translate(SSL * ssl, int clearout, int clearin, unsigned int iotimeout)
 			if (r < 0)
 				strerr_die2sys(111, DROP, "unable to write to client: ");
 		}
-		if (iop[1].revents)
-		{
+		if (iop[1].revents) {
 			/*- data on clearin */
 			n = read(clearin, tbuf, sizeof(tbuf));
 			if (n < 0)
