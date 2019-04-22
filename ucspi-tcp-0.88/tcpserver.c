@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.59  2019-04-22 21:57:59+05:30  Cprogrammer
+ * use mysql only if use_sql is non-zero
+ *
  * Revision 1.58  2019-04-21 10:25:07+05:30  Cprogrammer
  * load MySQL functions dynamically at run time
  *
@@ -197,7 +200,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.58 2019-04-21 10:25:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.59 2019-04-22 21:57:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1489,10 +1492,7 @@ main(int argc, char **argv, char **envp)
 #if defined(HAS_MYSQL)
 	if (initMySQLlibrary(&x))
 		strerr_die3x(111, FATAL, "couldn't load MySQL shared lib: ", x);
-	else
-	if (!use_sql)
-		strerr_die2x(111, FATAL, "MySQL shared lib not loaded");
-	if (dbfile)
+	if (use_sql && dbfile)
 		connect_db(dbfile);
 #endif
 	sig_block(sig_child);
@@ -1621,7 +1621,7 @@ main(int argc, char **argv, char **envp)
 		case 0:
 			close(s);
 #if defined(HAS_MYSQL)
-			if (conn)
+			if (use_sql && conn)
 				check_db(conn);
 #endif
 			doit(t); /*- MAXPERIP can only be checked after this */
