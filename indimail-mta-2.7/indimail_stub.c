@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.8  2019-04-22 21:50:10+05:30  Cprogrammer
+ * fixed errorneous hardcoding
+ *
  * Revision 1.7  2019-04-20 19:49:34+05:30  Cprogrammer
  * changed interface for loadLibrary(), closeLibrary() and getlibObject()
  *
@@ -123,7 +126,7 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 {
 	char           *ptr;
 
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+	if (!(ptr = env_get(libenv))) {
 		if (errflag)
 			*errflag = 0;
 		if (errstr)
@@ -815,7 +818,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.7 2019-04-20 19:49:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.8 2019-04-22 21:50:10+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
