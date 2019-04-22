@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.2  2019-04-22 21:51:00+05:30  Cprogrammer
+ * fixed erroneous hardcoding
+ *
  * Revision 1.1  2019-04-21 10:24:06+05:30  Cprogrammer
  * Initial revision
  *
@@ -35,7 +38,7 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 {
 	char           *ptr;
 
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+	if (!(ptr = env_get(libenv))) {
 		if (errflag)
 			*errflag = 0;
 		if (errstr)
@@ -179,7 +182,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.1 2019-04-21 10:24:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.2 2019-04-22 21:51:00+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
