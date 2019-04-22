@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 2.25  2019-04-22 07:40:05+05:30  Cprogrammer
+ * fixed comparision typo
+ *
  * Revision 2.24  2018-09-11 10:41:13+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -77,7 +80,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.24 2018-09-11 10:41:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.25 2019-04-22 07:40:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -265,7 +268,7 @@ isDisabled(user)
 	} else
 	if ((row = mysql_fetch_row(res)))
 	{
-		if ((tmptr->tm_mday = atoi(row[0])) && (atoi(row[1]) > DAILY_MAX_ATTEMPTS))
+		if ((tmptr->tm_mday == atoi(row[0])) && (atoi(row[1]) > DAILY_MAX_ATTEMPTS))
 			status = 1;
 		else
 			status = atoi(row[2]);
