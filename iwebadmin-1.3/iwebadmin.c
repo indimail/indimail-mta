@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.9 2017-04-03 17:40:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.10 2019-05-01 23:20:11+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -382,12 +382,11 @@ load_lang(char *lang)
 	}
 	fseek(lang_fs, 0, SEEK_END);
 	lang_size = ftell(lang_fs);
-	lang_entries = malloc(lang_size);
-
-	if (lang_entries == NULL)
+	if (!(lang_entries = malloc(lang_size + 1)))
 		return;
 	rewind(lang_fs);
 	fread(lang_entries, 1, lang_size, lang_fs);
+	lang_entries[lang_size] = 0;
 	/*
 	 * error handling for incomplete reads? 
 	 */
@@ -474,7 +473,7 @@ init_globals()
 	/* read in preferred languages */
 	langptr = getenv("HTTP_ACCEPT_LANGUAGE");
 	if (langptr != NULL) {
-		accept_lang = malloc(strlen(langptr));
+		accept_lang = malloc(strlen(langptr) + 1);
 		strcpy(accept_lang, langptr);
 		langptr = strtok(accept_lang, " ,\n");
 		while (langptr != NULL) {
