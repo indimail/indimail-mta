@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.9 2017-04-03 14:35:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.10 2019-05-01 23:25:07+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -85,7 +85,7 @@ show_autorespond_line(char *user, char *dom, time_t mytime, char *dir)
 	sort_init();
 	sprintf(TmpBuf, "%s/vacation", RealDir);
 	if ((mydir = opendir(TmpBuf)) == NULL) {
-		printf("<tr><td>%s %d</tr><td>", html_text[143], 1);
+		printf("<tr><td>%s %d</tr><td>", html_text[233], 1);
 		return;
 	}
 	while ((mydirent = readdir(mydir)) != NULL) {
@@ -361,7 +361,7 @@ count_autoresponders()
 #endif
 	sprintf(TmpBuf, "%s/vacation", RealDir);
 	if ((mydir = opendir(TmpBuf)) == NULL) {
-		printf("<tr><td>%s %d</tr><td>", html_text[143], 1);
+		printf("<tr><td>%s %d</tr><td>", html_text[233], 1);
 		return;
 	}
 	while ((mydirent = readdir(mydir)) != NULL) {
