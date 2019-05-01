@@ -1,5 +1,5 @@
 /*
- * $Id: alias.c,v 1.3 2011-11-17 22:09:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: alias.c,v 1.4 2019-05-01 23:21:06+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -513,7 +513,7 @@ int
 adddotqmail_shared(char *forwardname, char *dest, int create)
 {
 	if (strlen(forwardname) <= 0) {
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[163], forwardname);
+		snprinth(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[163]);
 		return (-1);
 	/*
 	 * make sure forwardname is valid 
