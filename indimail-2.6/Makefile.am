@@ -23,7 +23,6 @@ libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
 libindimail_la_DEPENDENCIES = $(top_builddir)/cdb-1.0/libcdb.la
 libindimail_la_LIBADD = $(top_builddir)/cdb-1.0/libcdb.la -L@mysql_libdir@ -lmysqlclient @LIB_CRYPT@ @LIB_SSL@ -lm
-
 libindimail_la_LDFLAGS = -version-info @LIBVER@:0:0
 libindimaildir=@libdir@
 
