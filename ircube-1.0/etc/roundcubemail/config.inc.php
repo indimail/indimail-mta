@@ -39,6 +39,14 @@ $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
 // For example %n = mail.domain.tld, %t = domain.tld
 $config['default_host'] = 'ssl://indimail.org';
 
+// TCP port used for IMAP connections
+$config['default_port'] = 993;
+
+// IMAP authentication method (DIGEST-MD5, CRAM-MD5, LOGIN, PLAIN or null).
+// Use 'IMAP' to authenticate with IMAP LOGIN command.
+// By default the most secure method (from supported) will be selected.
+$config['imap_auth_type'] = 'LOGIN';
+
 // SMTP server host (for sending mails).
 // Enter hostname with prefix tls:// to use STARTTLS, or use
 // prefix ssl:// to use the deprecated SSL over SMTP (aka SMTPS)
@@ -63,12 +71,25 @@ $config['smtp_user'] = '%u';
 // will use the current user's password for login
 $config['smtp_pass'] = '%p';
 
+// SMTP AUTH type (DIGEST-MD5, CRAM-MD5, LOGIN, PLAIN or empty to use
+// best server supported one)
+$config['smtp_auth_type'] = 'PLAIN';
+
+// Enforce connections over https
+// With this option enabled, all non-secure connections will be redirected.
+// It can be also a port number, hostname or hostname:port if they are
+// different than default HTTP_HOST:443
+$config['force_https'] = true;
+
 // provide an URL where a user can get support for this Roundcube installation
 // PLEASE DO NOT LINK TO THE ROUNDCUBE.NET WEBSITE HERE!
 $config['support_url'] = 'https://sourceforge.net/p/indimail/support-requests';
 
 // Name your service. This is displayed on the login screen and in the window title
 $config['product_name'] = 'IndiMail Webmail';
+
+// Add this user-agent to message headers when sending
+$config['useragent'] = 'IndiMail Webmail/'.RCUBE_VERSION;
 
 // this key is used to encrypt the users imap password which is stored
 // in the session record (and the client cookie if remember password is enabled).
