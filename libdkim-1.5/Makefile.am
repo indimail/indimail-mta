@@ -2,6 +2,7 @@
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
+DEFS=@DEFS@ -g
 
 include_HEADERS = dkim.h macros.h
 COMMONSOURCES= dkimfuncs.cpp dns.cpp dkimbase.cpp dkimsign.cpp dkimverify.cpp
