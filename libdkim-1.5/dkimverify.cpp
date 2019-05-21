@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.22  2019-05-21 22:27:17+05:30  Cprogrammer
+ * increased buffer size
+ *
  * Revision 1.21  2019-02-17 11:32:05+05:30  Cprogrammer
  * made scope of sFromDomain static
  *
@@ -1207,7 +1210,7 @@ SelectorInfo &CDKIMVerify::GetSelector(const string &sSelector, const string &sD
 	string sFQDN = sSelector;
 	sFQDN += "._domainkey.";
 	sFQDN += sDomain;
-	char            Buffer[1024];
+	char            Buffer[4096];
 	int             DNSResult;
 
 	if (m_pfnSelectorCallback)
@@ -1276,7 +1279,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.21 2019-02-17 11:32:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.22 2019-05-21 22:27:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
