@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.11  2019-05-21 22:37:42+05:30  Cprogrammer
+ * fixed pointers after realloc
+ *
  * Revision 1.10  2017-09-05 11:01:06+05:30  Cprogrammer
  * removed unused variables
  *
@@ -132,8 +135,8 @@ byte_copy(register char *to, register unsigned int n, register char *from)
 	}
 }
 
-static char     *txt;
-static int      txtlen;
+static char     *txt, *dnresult;
+static int      txtlen, dnresultlen;
 
 static int
 findtxt(int wanttype, int *txt_strlen)
@@ -175,8 +178,16 @@ findtxt(int wanttype, int *txt_strlen)
 			if (n > rrdlen - txtpos)
 				n = rrdlen - txtpos;
 			if ((*txt_strlen + n + 1) > txtlen) {
-				if (!(ptr = (char *) realloc(txt, (*txt_strlen + n) * 2)))
+				if (!(ptr = (char *) realloc(txt, (*txt_strlen + n) * 2))) {
+					free(txt);
+					txtlen = 0;
+					if (dnresultlen) {
+						free(dnresult);
+						dnresultlen = 0;
+					}
 					return DNS_MEM;
+				}
+				txt = ptr;
 				txtlen = (*txt_strlen + n) * 2;
 			}
 			byte_copy(txt + *txt_strlen, n, (char *) &responsepos[txtpos]);
@@ -189,9 +200,6 @@ findtxt(int wanttype, int *txt_strlen)
 	responsepos += rrdlen;
 	return 0;
 }
-
-static char    *dnresult;
-static int      dnresultlen;
 
 static int
 dns_txtplus(char *domain)
@@ -217,21 +225,23 @@ dns_txtplus(char *domain)
 	while ((r = findtxt(T_TXT, &len)) != 2) {
 		if (r == DNS_SOFT) {
 			if (txtlen) {
-				txtlen = 0;
 				free(txt);
+				txtlen = 0;
 			}
 			return DNS_SOFT;
 		}
 		if (r == 1) {
 			if ((total + len + 1) >= dnresultlen) {
 				if (!(ptr = (char *) realloc(dnresult, (total + len) * 2))) {
+					free(dnresult);
 					dnresultlen = 0;
 					if (txtlen) {
-						txtlen = 0;
 						free(txt);
+						txtlen = 0;
 					}
 					return DNS_MEM;
 				}
+				dnresult = ptr;
 				dnresultlen = (total + len) * 2;
 			}
 			byte_copy(dnresult + total, len, txt);
@@ -239,8 +249,8 @@ dns_txtplus(char *domain)
 		}
 	}
 	if (txtlen) {
-		txtlen = 0;
 		free(txt);
+		txtlen = 0;
 	}
 	if (total) {
 		dnresult[total] = 0;
@@ -316,7 +326,7 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.10 2017-09-05 11:01:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.11 2019-05-21 22:37:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
