@@ -77,6 +77,8 @@ case "$host" in
 	;;
 esac
 
+AC_CHECK_SIZEOF(time_t)
+
 # Checks for libraries.
 AC_CHECK_LIB([crypto],[EVP_sha256],[AC_SUBST([LIB_CRYPTO],["-lcrypto"]) AC_DEFINE([HAVE_EVP_SHA256],[1],[HAVE_EVP_SHA256])],,-lcrypto)
 if test " $LIB_CRYPTO" = " "

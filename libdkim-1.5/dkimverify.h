@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.8  2019-05-22 11:30:06+05:30  Cprogrammer
+ * fix for 32 bit systems where time_t is 4 bytes & encounters year 2038 issue
+ *
  * Revision 1.7  2017-08-31 17:07:45+05:30  Cprogrammer
  * fixed g++ compiler warning
  *
@@ -43,7 +46,9 @@
 
 #ifndef DKIMVERIFY_H
 #define DKIMVERIFY_H
-
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "dkimbase.h"
 #include <vector>
 
@@ -86,7 +91,11 @@ public:
 	int             BodyLength;
 	unsigned        HeaderCanonicalization;
 	unsigned        BodyCanonicalization;
+#if SIZEOF_TIME_T  == 8
 	time_t          ExpireTime;
+#else
+	long long       ExpireTime;
+#endif
 	int             VerifiedBodyCount;
 	unsigned        UnverifiedBodyCount;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
