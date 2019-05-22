@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.23  2019-05-22 11:29:09+05:30  Cprogrammer
+ * fix for 32 bit systems where time_t is 4 bytes & encounters year 2038 issue
+ *
  * Revision 1.22  2019-05-21 22:27:17+05:30  Cprogrammer
  * increased buffer size
  *
@@ -954,8 +957,12 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 		if (!HasDNS)
 			return DKIM_BAD_SYNTAX;	// todo: maybe create a new error code for unknown query method
 	}
+#if SIZEOF_TIME_T  == 8
 	/*- signature time -*/
 	time_t          SignedTime = -1;
+#else
+	long long       SignedTime = -1;
+#endif
 	if (values[10] != NULL) {
 		if (!ParseUnsigned(values[10], (unsigned long *) &SignedTime))
 			return DKIM_BAD_SYNTAX;
@@ -968,12 +975,22 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 			return DKIM_BAD_SYNTAX;
 		if (sig.ExpireTime != -1) {
 			/*- the value of x= MUST be greater than the value of t= if both are present -*/
+#if SIZEOF_TIME_T  == 8
 			if (SignedTime != -1 && sig.ExpireTime <= SignedTime)
 				return DKIM_BAD_SYNTAX;
+#else
+			if (SignedTime != -1 && (long long) sig.ExpireTime <= SignedTime)
+				return DKIM_BAD_SYNTAX;
+#endif
 			/*- todo: if possible, use the received date/time instead of the current time -*/
 			time_t curtime = time(NULL);
+#if SIZEOF_TIME_T  == 8
 			if (curtime > sig.ExpireTime)
 				return DKIM_SIGNATURE_EXPIRED;
+#else /*- handle year 2038 the best we can, beyond which one has to upgrade to a 64 bit os */
+			if (curtime < 2147483648 && curtime > sig.ExpireTime)
+				return DKIM_SIGNATURE_EXPIRED;
+#endif
 		}
 	}
 	/*- parse the signed headers list -*/
@@ -1279,7 +1296,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.22 2019-05-21 22:27:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.23 2019-05-22 11:29:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
