@@ -35,6 +35,7 @@ PREFIX/sbin/surblqueue. You can define \fBSURBLQUEUE\fR environment variable to 
 whitelist recipients by having the email addresses in \fIsurblrcpt\fR control file. You can
 change the name of this control file by setting \fBSURBLRCPT\fR environment variable.
 \fBQMAILRCPTS\fR environment variable is set by the \fBqmail-qfilter(1)\fR program.
+
 .PP
 \fBsurblfilter\fR uses the control file \fIsurbldomainwhite\fR to whitelist a domain. You can
 change the name of this control file by setting the \fBSURBLDOMAINWHITE\fR environment variable.
@@ -44,10 +45,11 @@ The default SURBL list that is used is \fBmulti.surbl.org\fR. You can use a diff
 by setting the \fIsurbldomain\fR control file.
 
 .PP
-\fBsurblfilter\fR caches results in @controldir@/cache. The filename represents the domain.
-If a file as permission 0600, it means that the domain was blacklisted. The entries are
-cached for a default of 300 seconds. You can change this by setting \fBCACHELIFETIME\fR
-environment variable.
+\fBsurblfilter\fR caches results in @controldir@/cache directory. The filename of files in this
+directory represents the domain. If a file has permission 0600, it means that the domain was
+blacklisted. The entries are cached for a default of 300 seconds. You can change this by
+setting \fBCACHELIFETIME\fR environment variable or setting this value in \fBcacheliftime\fR
+control file. The cache directory should be owned by the uid of the running qmail-smtpd(8).
 
 \fBsurblfilter\fR removes all leading host names, subdomains, www., randomized subdomains, etc. In
 order to determine the level of domain check, it uses the control files \fBlevel3-tlds\fR and
