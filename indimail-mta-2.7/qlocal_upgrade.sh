@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.22  2019-05-24 14:13:58+05:30  Cprogrammer
+# create /etc/indimail/control/cache directory
+#
 # Revision 1.21  2019-04-21 11:57:50+05:30  Cprogrammer
 # create MYSQL_LIB for dynamically loading MySQL shared libs
 #
@@ -61,7 +64,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.21 2019-04-21 11:57:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.22 2019-05-24 14:13:58+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -86,7 +89,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.21 2019-04-21 11:57:50+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.22 2019-05-24 14:13:58+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -181,9 +184,12 @@ if [ $? -ne 2 ] ; then
 fi
 cd /etc/indimail/control
 if [ $? -eq 0 ] ; then
+	if [ ! -f servercert.pem ] ; then
 	$ln -sf ../certs/servercert.pem servercert.pem
+	fi
+	if [ ! -f clientcert.pem ] ; then
 	$ln -sf ../certs/servercert.pem clientcert.pem
-	$ln -sf ../certs/servercert.pem clientcert.pem
+	fi
 fi
 # Certificate location changed from /etc/indimail/control to /etc/indimail/certs
 for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25
@@ -283,6 +289,12 @@ if [ -n "$mysqllib" -a -f $mysqllib ] ; then
 	done
 fi
 
+# for surbl
+if [ ! -d /etc/indimail/control/cache ] ; then
+	$mkdir /etc/indimail/control/cache
+	$chown indimail:qmail /etc/indimail/control/cache
+	$chmod 2775 /etc/indimail/control/cache
+fi
 }
 
 case $1 in
