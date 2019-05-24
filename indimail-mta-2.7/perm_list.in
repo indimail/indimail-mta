@@ -32,6 +32,7 @@
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/tcp
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/users
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/control
+%dir %attr(2775,indimail,qmail)    @qsysconfdir@/control/cache
 %dir %attr(2755,indimail,qmail)    @qsysconfdir@/control/domainkeys
 %dir %attr(2775,qmailr,qmail)      @qsysconfdir@/control/ratelimit
 %dir %attr(0755,indimail,qmail)    @qsysconfdir@/control/defaultqueue
@@ -337,10 +338,12 @@
 %attr(0444,root,root)  @qsysconfdir@/cronlist.q
 %attr(0444,root,root)  @qsysconfdir@/controlfiles.q
 %attr(0444,root,root)  @qsysconfdir@/qmailprog.list
-%attr(0644,root,root)  @qsysconfdir@/etc/leapsecs.txt
-%attr(0644,root,root)  @qsysconfdir@/etc/leapsecs.dat
-%attr(0644,root,root)  @qsysconfdir@/procmailrc
+%attr(0644,root,qmail) @qsysconfdir@/leapsecs.txt
+%attr(0644,root,qmail) @qsysconfdir@/leapsecs.dat
+%attr(0644,root,qmail) @qsysconfdir@/procmailrc
 %attr(0644,root,root)  @qsysconfdir@/indimail-mta-release
+%attr(0644,root,qmail) @qsysconfdir@/control/level2-tlds
+%attr(0644,root,qmail) @qsysconfdir@/control/level3-tlds
 #
 # docs
 #
