@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.12  2019-05-24 14:14:14+05:30  Cprogrammer
+ * removed requirement of env variable SURBL for surblfilter to work
+ *
  * Revision 1.11  2017-05-16 12:35:22+05:30  Cprogrammer
  * refactored dns_test() function
  *
@@ -892,8 +895,6 @@ main(int argc, char **argv)
 	substdio_fdbuf(&sserr, write, errfd, sserrbuf, sizeof(sserrbuf));
 	substdio_fdbuf(&ssout, write, 1, ssoutbuf, sizeof(ssoutbuf));
 	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
-	if (!(x = env_get("SURBL")))
-		do_surbl = 0;
 	while ((opt = getopt(argc, argv, "vtc")) != opteof) {
 		switch (opt) {
 		case 'c':
@@ -909,8 +910,7 @@ main(int argc, char **argv)
 	}
 	if (chdir(auto_qmail) == -1)
 		die_control();
-	if (do_surbl)
-		setup();
+	setup();
 	for (html_plain_text = base64_decode = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("getln: ", 0, 1);
@@ -1006,7 +1006,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.11 2017-05-16 12:35:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.12 2019-05-24 14:14:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
