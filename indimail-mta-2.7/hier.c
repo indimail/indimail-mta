@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.255  2019-05-24 14:12:12+05:30  Cprogrammer
+ * added control/cache directory and level2-tlds, level3-tlds files for surbl filter
+ *
  * Revision 1.254  2019-02-21 14:14:22+05:30  Cprogrammer
  * added qfilters directory in /usr/libexec/indimail
  * added qfrontend script for qmail-qfilter
@@ -848,6 +851,7 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_qmail_home, "alias", auto_uida, auto_gidq, 02775);
 	d(auto_qmail_home, "autoturn", auto_uidv, auto_gidq, 02775);
 
+	d(auto_cntrl_dir,  "control/cache", auto_uidv, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 02755);
 	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/defaultqueue", auto_uidv, auto_gidq, 0755);
@@ -885,6 +889,8 @@ hier(inst_dir, fatal, dev_package)
 #endif
 
 	c(auto_sysconfdir, "control", "nodnscheck", auto_uidv, auto_gidv, 0644);
+	c(auto_sysconfdir, "control", "level2-tlds", auto_uidv, auto_gidq, 0644);
+	c(auto_sysconfdir, "control", "level3-tlds", auto_uidv, auto_gidq, 0644);
 	c(auto_sysconfdir, ".", "leapsecs.dat", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, ".", "leapsecs.txt", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, ".", "cronlist.q", auto_uido, 0, 0444);
@@ -1654,7 +1660,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.254 2019-02-21 14:14:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.255 2019-05-24 14:12:12+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
