@@ -911,6 +911,7 @@ cronlist.q:cronlist.in conf-prefix conf-libexec
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
 	cat cronlist.in \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	) > cronlist.q
 
