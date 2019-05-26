@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.13  2019-05-26 12:27:30+05:30  Cprogrammer
+ * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
+ *
  * Revision 1.12  2019-04-20 19:48:42+05:30  Cprogrammer
  * change in loadLibrary() interface
  *
@@ -47,6 +50,7 @@
 #include "str.h"
 #include "fmt.h"
 #include "auto_qmail.h"
+#include "env.h"
 #include "wait.h"
 #include "indimail_stub.h"
 #include <ctype.h>
@@ -67,7 +71,7 @@ etrn_queue(char *arg, char *remoteip)
 	size_t          mailcount;
 	stralloc        etrn = { 0 };
 	char            maildir1[1024], maildir2[1024];
-	char           *errstr;
+	char           *errstr, *ptr;
 	struct constmap mapetrn;
 	static int      flagrcpt = 1;
 	size_t          (*count_dir) (char *, size_t *);
@@ -104,10 +108,12 @@ etrn_queue(char *arg, char *remoteip)
 	maildir2[r] = 0;
 
 	mailcount = 0;
-	loadLibrary(&phandle, "VIRTUAL_PKG_LIB", 0, &errstr);
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
+		ptr = "libindimail";
+	loadLibrary(&phandle, ptr, 0, &errstr);
 	if (!phandle)
 		return (err_library(errstr));
-	if (!(count_dir = getlibObject("VIRTUAL_PKG_LIB", &phandle, "count_dir", &errstr)))
+	if (!(count_dir = getlibObject(ptr, &phandle, "count_dir", &errstr)))
 		return (err_library(errstr));
 	if (!access(maildir1, F_OK))
 		count_dir(maildir1, &mailcount);
@@ -190,7 +196,7 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.12 2019-04-20 19:48:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.13 2019-05-26 12:27:30+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

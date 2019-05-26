@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.4  2019-05-26 12:31:13+05:30  Cprogrammer
+ * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
+ *
  * Revision 1.3  2019-04-20 19:51:25+05:30  Cprogrammer
  * changed interface for loadLibrary(), closeLibrary() and getlibObject()
  *
@@ -18,6 +21,7 @@
 #include "strerr.h"
 #include "fmt.h"
 #include "open.h"
+#include "env.h"
 #include "indimail_stub.h"
 
 #define FATAL "maildirsize: fatal: "
@@ -30,7 +34,7 @@ main(int argc, char **argv)
 {
 	size_t          (*count_dir) (char *, size_t *);
 	int             fd, len;
-	char           *errstr;
+	char           *errstr, *ptr;
 	size_t          mailcount;
 	int64_t         mailsize;
 	char            strnum[FMT_ULONG];
@@ -46,9 +50,11 @@ main(int argc, char **argv)
 		strerr_die3sys(111, FATAL, "chdir: ", pw->pw_dir);
 	if (access("./Maildir/", F_OK))
 		strerr_die4sys(111, FATAL, "chdir: ", pw->pw_dir, "/Maildir/");
-	if (!(phandle = loadLibrary(&phandle, "VIRTUAL_PKG_LIB", 0, &errstr)))
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
+		ptr = "libindimail";
+	if (!(phandle = loadLibrary(&phandle, ptr, 0, &errstr)))
 		strerr_die1x(111, "problem with loading shared libs");
-	if (!(count_dir = getlibObject("VIRTUAL_PKG_LIB", &phandle, "count_dir", &errstr)))
+	if (!(count_dir = getlibObject(ptr, &phandle, "count_dir", &errstr)))
 		strerr_die1x(111, "problem with loading shared libs");
 	mailcount = 0;
 	mailsize = count_dir("./Maildir/", &mailcount);
@@ -85,7 +91,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.3 2019-04-20 19:51:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.4 2019-05-26 12:31:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
