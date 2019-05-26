@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.9  2019-05-26 11:39:31+05:30  Cprogrammer
+ * use control file mysql_lib to dlopen libmysqlclient
+ *
  * Revision 1.8  2019-04-22 21:50:10+05:30  Cprogrammer
  * fixed errorneous hardcoding
  *
@@ -55,7 +58,6 @@
 #include <dlfcn.h>
 #include <signal.h>
 #include <errno.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "auto_qmail.h"
@@ -65,6 +67,7 @@
 #include "timeoutread.h"
 #include "timeoutwrite.h"
 #include "stralloc.h"
+#include "control.h"
 #include "env.h"
 #include "fmt.h"
 #include "scan.h"
@@ -112,6 +115,7 @@ stralloc        tmp = { 0 };
 stralloc        dirbuf = { 0 };
 stralloc        _pwstruct = { 0 };
 stralloc        __PWstruct = { 0 };
+static stralloc mysql_libfn = { 0 };
 
 int             userNotFound = 0;
 int             is_inactive;
@@ -119,13 +123,39 @@ int             is_overquota;
 int             verbose = 0;
 int             use_etrn;
 static char     strnum[FMT_ULONG];
+static char     memerr[] = "out of memory";
+static char     ctlerr[] = "unable to read controls";
 static stralloc errbuf = { 0 };
 
 void *
 loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 {
 	char           *ptr;
+	int             i;
 
+	if (*libenv == '/') { /*- filename */
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if ((i = control_readfile(&mysql_libfn, libenv, 0)) == -1 || !i) {
+			if (errflag)
+				*errflag = errno;
+			if (errstr)
+				*errstr = (char *) 0;
+			if (!stralloc_copys(&errbuf, ctlerr) ||
+					!stralloc_catb(&errbuf, ": ", 2) ||
+					!stralloc_copys(&errbuf, error_str(errno)) ||
+					!stralloc_0(&errbuf)) {
+				if (errstr)
+					*errstr = memerr;
+			} else
+			if (errstr)
+				*errstr = errbuf.s;
+			return ((void *) 0);
+		} 
+		ptr = mysql_libfn.s;
+	} else
 	if (!(ptr = env_get(libenv))) {
 		if (errflag)
 			*errflag = 0;
@@ -149,11 +179,11 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 			*errflag = errno;
 		if (!stralloc_copys(&errbuf, error_str(errno))) {
 			if (errstr)
-				*errstr = (char *) 0;
+				*errstr = memerr;
 		} else
 		if (!stralloc_0(&errbuf)) {
 			if (errstr)
-				*errstr = (char *) 0;
+				*errstr = memerr;
 		} else
 		if (errstr)
 			*errstr = errbuf.s;
@@ -172,11 +202,11 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 		}
 		if (!stralloc_copys(&errbuf, dlerror())) {
 			if (errstr)
-				*errstr = (char *) 0;
+				*errstr = memerr;
 		} else
 		if (!stralloc_0(&errbuf)) {
 			if (errstr)
-				*errstr = (char *) 0;
+				*errstr = memerr;
 		} else
 		if (errstr)
 			*errstr = errbuf.s;
@@ -492,7 +522,6 @@ inquery(char query_type, char *email, char *ip)
 	*((int *) ptr) = querybuf.len - sizeof(int);
 	bytes = querybuf.len;
 
-	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", auto_sysconfdir);
 	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
@@ -592,6 +621,7 @@ inquery(char query_type, char *email, char *ip)
 		errno = tmperrno;
 		return ((void *) 0);
 	} 
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", auto_sysconfdir);
 	if (relative) {
 		if (!stralloc_copys(&tmp, sysconfdir))
 			return ((void *) 0);
@@ -818,7 +848,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.8 2019-04-22 21:50:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.9 2019-05-26 11:39:31+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
