@@ -4,11 +4,12 @@ qmail-sql \- prepare data in MySQL for
 .BR qmail-smtpd(8) .
 
 .SH SYNOPSIS
-.B qmail-sql [-Sr] [-s \fIdbserver\fR -u \fIuser\fR -p \fIpass\fR -d \fIdbname\fR -t \fItable_name\fR] \fIfilename\fR
+.B qmail-sql
+[-Sr] [-s \fIdbserver\fR -u \fIuser\fR -p \fIpass\fR -d \fIdbname\fR -t \fItable_name\fR] \fIfilename\fR
 
 .SH DESCRIPTION
 \fBqmail-sql\fR does a chdir to @controldir@ and prepares filename.sql control file to enable
-\fBqmail-smtpd\fR to access data in certain control files to be in MySQL. \fBqmail-sql\fR also
+\fBqmail-smtpd\fR to access data from MySQL instead of control files. \fBqmail-sql\fR also
 prepares data in \fIfilename\fR to be inserted into \fItable_name\fR in MySQL.
 
 The below command will create a file \fIbadmailfrom.sql\fR in @controldir@ and table \fIbmf\fR
