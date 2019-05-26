@@ -1942,15 +1942,21 @@ fmt.h
 	./compile qmail-lspawn.c
 
 qmail-lspawn: \
-load qmail-lspawn.o spawn.o prot.o slurpclose.o coe.o get_uid.o sig.a wait.a \
-auto_sysconfdir.o auto_control.o timeoutread.o timeoutwrite.o \
-strerr.a case.a cdb.a fd.a open.a stralloc.a alloc.a substdio.a error.a str.a \
-fs.a auto_qmail.o auto_uids.o auto_spawn.o auto_assign.o env.o str_diffn.o str_cpy.o \
+load qmail-lspawn.o spawn.o prot.o slurpclose.o coe.o \
+get_uid.o sig.a wait.a auto_sysconfdir.o \
+auto_control.o timeoutread.o timeoutwrite.o \
+strerr.a case.a cdb.a fd.a open.a stralloc.a \
+alloc.a substdio.a error.a str.a fs.a \
+auto_qmail.o auto_uids.o auto_spawn.o \
+auto_assign.o env.o str_diffn.o str_cpy.o \
+control.o getln.o getln2.o now.o stralloc_catb.o \
 indimail_stub.o envread.o variables.o dns.lib
-	./load qmail-lspawn spawn.o prot.o slurpclose.o coe.o auto_uids.o get_uid.o \
-	auto_sysconfdir.o auto_control.o timeoutread.o timeoutwrite.o \
-	auto_qmail.o auto_spawn.o env.o str_diffn.o str_cpy.o \
-	indimail_stub.o envread.o variables.o auto_assign.o \
+	./load qmail-lspawn spawn.o prot.o slurpclose.o coe.o \
+	auto_uids.o get_uid.o auto_sysconfdir.o auto_control.o \
+	timeoutread.o timeoutwrite.o auto_qmail.o auto_spawn.o \
+	env.o str_diffn.o str_cpy.o indimail_stub.o envread.o \
+	control.o getln.o getln2.o now.o stralloc_catb.o \
+	variables.o auto_assign.o byte_chr.o substdi.o byte_cr.o \
 	sig.a wait.a case.a cdb.a fd.a open.a stralloc.a alloc.a \
 	strerr.a substdio.a error.a str.a fs.a \
 	`cat dns.lib` -ldl
@@ -5861,12 +5867,14 @@ error.o envread.o variables.o subgetopt.o str_diffn.o auto_control.o \
 byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o load_mysql.o \
 fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
 scan_uint.o sqlmatch.o auto_uids.o auto_sysconfdir.o indimail_stub.o \
+control.o getln.o getln2.o now.o byte_cr.o \
 timeoutread.o timeoutwrite.o str_chr.o str_rchr.o auto_qmail.o \
 substdio.a tls.lib mysql_config conf-sql
 	./load qmail-sql sgetopt.o str_len.o error_str.o indimail_stub.o \
 	error.o envread.o variables.o subgetopt.o str_diffn.o auto_control.o \
 	byte_copy.o alloc_re.o alloc.o scan_uint.o strerr_die.o strerr_sys.o \
 	fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
+	control.o getln.o getln2.o now.o byte_cr.o \
 	timeoutread.o timeoutwrite.o sqlmatch.o auto_uids.o auto_sysconfdir.o \
 	auto_qmail.o load_mysql.o str_chr.o str_rchr.o stralloc.a substdio.a \
 	`cat tls.lib` -ldl
@@ -6170,7 +6178,9 @@ auto_control.o auto_qmail.o str_rchr.o open_trunc.o \
 str_chr.o str_diffn.o scan_uint.o fmt_ulong.o \
 scan_ulong.o envread.o variables.o auto_sysconfdir.o \
 timeoutread.o timeoutwrite.o alloc.o alloc_re.o \
-error_str.o error.o str_len.o indimail_stub.o
+error_str.o error.o str_len.o indimail_stub.o \
+control.o getln.o getln2.o open_read.o now.o \
+byte_chr.o substdi.o byte_cr.o
 	./load maildirsize subfdout.o strerr_die.o \
 	strerr_sys.o substdo.o substdio.o subfderr.o \
 	byte_copy.o stralloc_opys.o stralloc_catb.o \
@@ -6181,6 +6191,8 @@ error_str.o error.o str_len.o indimail_stub.o
 	scan_uint.o fmt_ulong.o scan_ulong.o envread.o \
 	variables.o auto_sysconfdir.o timeoutread.o \
 	timeoutwrite.o alloc.o alloc_re.o error_str.o \
+	control.o getln.o getln2.o open_read.o now.o \
+	byte_chr.o substdi.o byte_cr.o \
 	error.o str_len.o indimail_stub.o -ldl
 
 maildirsize.o: \
