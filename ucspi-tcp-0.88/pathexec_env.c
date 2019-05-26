@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_env.c,v $
+ * Revision 1.5  2019-05-26 12:04:26+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.4  2017-12-17 19:08:19+05:30  Cprogrammer
  * added documentation.
  *
@@ -91,7 +94,7 @@ pathexec_dl(int argc, char **argv, char **envp, int (*func) (int, char **, char 
 	}
 	e[elen] = (char *) 0;
 	(*func) (argc, argv, e); /*- execute the function */
-	alloc_free(e);
+	alloc_free((char *) e);
 }
 #endif
 
@@ -144,5 +147,5 @@ pathexec(char **argv)
 	}
 	e[elen] = 0;
 	pathexec_run(*argv, argv, e);
-	alloc_free(e);
+	alloc_free((char *) e);
 }
