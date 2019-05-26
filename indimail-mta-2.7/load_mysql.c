@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.3  2019-05-26 12:30:13+05:30  Cprogrammer
+ * use mysql_lib control file to dlopen libmysqlclient if MYSQL_LIB env variable not defined
+ *
  * Revision 1.2  2019-05-26 11:37:26+05:30  Cprogrammer
  * set use_sql after all getlibObject()
  *
@@ -34,39 +37,42 @@ int
 initMySQLlibrary(char **errstr)
 {
 	void           *phandle = (void *) 0;
+	char           *ptr;
 	int             i;
 
-	if (!(phandle = loadLibrary(&phandle, "MYSQL_LIB", &i, errstr))) {
+	if (!(ptr = env_get("MYSQL_LIB")))
+		ptr = "mysql_lib";
+	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {
 		use_sql = 0;
 		if (!i)
 			return (0);
 		return (1);
 	}
-	if (!(in_mysql_init = getlibObject("MYSQL_LIB", &phandle, "mysql_init", errstr)))
+	if (!(in_mysql_init = getlibObject(ptr, &phandle, "mysql_init", errstr)))
 		return (1);
 	else
-	if (!(in_mysql_real_connect = getlibObject("MYSQL_LIB", &phandle, "mysql_real_connect", errstr)))
+	if (!(in_mysql_real_connect = getlibObject(ptr, &phandle, "mysql_real_connect", errstr)))
 		return (1);
 	else
-	if (!(in_mysql_error = getlibObject("MYSQL_LIB", &phandle, "mysql_error", errstr)))
+	if (!(in_mysql_error = getlibObject(ptr, &phandle, "mysql_error", errstr)))
 		return (1);
 	else
-	if (!(in_mysql_close = getlibObject("MYSQL_LIB", &phandle, "mysql_close", errstr)))
+	if (!(in_mysql_close = getlibObject(ptr, &phandle, "mysql_close", errstr)))
 		return (1);
 	else
-	if (!(in_mysql_options = getlibObject("MYSQL_LIB", &phandle, "mysql_options", errstr)))
+	if (!(in_mysql_options = getlibObject(ptr, &phandle, "mysql_options", errstr)))
 		return (1);
 	else
-	if (!(in_mysql_query = getlibObject("MYSQL_LIB", &phandle, "mysql_query", errstr)))
+	if (!(in_mysql_query = getlibObject(ptr, &phandle, "mysql_query", errstr)))
 		return (1);
 	else
-	if (!(in_mysql_store_result = getlibObject("MYSQL_LIB", &phandle, "mysql_store_result", errstr)))
+	if (!(in_mysql_store_result = getlibObject(ptr, &phandle, "mysql_store_result", errstr)))
 		return (1);
 	else
-	if (!(in_mysql_free_result = getlibObject("MYSQL_LIB", &phandle, "mysql_free_result", errstr)))
+	if (!(in_mysql_free_result = getlibObject(ptr, &phandle, "mysql_free_result", errstr)))
 		return (1);
 	else
-	if (!(in_mysql_fetch_row = getlibObject("MYSQL_LIB", &phandle, "mysql_fetch_row", errstr)))
+	if (!(in_mysql_fetch_row = getlibObject(ptr, &phandle, "mysql_fetch_row", errstr)))
 		return (1);
 	else
 		use_sql = 1;
@@ -76,7 +82,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.2 2019-05-26 11:37:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.3 2019-05-26 12:30:13+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
