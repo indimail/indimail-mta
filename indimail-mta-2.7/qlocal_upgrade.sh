@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.23  2019-05-26 11:00:27+05:30  Cprogrammer
+# create /etc/indimail/control/mysql_lib control file
+#
 # Revision 1.22  2019-05-24 14:13:58+05:30  Cprogrammer
 # create /etc/indimail/control/cache directory
 #
@@ -64,7 +67,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.22 2019-05-24 14:13:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.23 2019-05-26 11:00:27+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -89,7 +92,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.22 2019-05-24 14:13:58+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.23 2019-05-26 11:00:27+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -280,13 +283,9 @@ if [ -z "$mysqllib" ] ; then
 	mysqllib=`ls -d /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
 fi
 if [ -n "$mysqllib" -a -f $mysqllib ] ; then
-	for i in `grep -l "bin/tcpserver" /service/*/run`
-	do
-		sdir=`dirname $i`
-		if [ ! -f $sdir/variables/MYSQL_LIB ] ; then
-			echo $mysqllib > $sdir/variables/MYSQL_LIB
-		fi
-	done
+	check_update_if_diff /etc/indimail/control/mysql_lib $mysqllib
+else
+	/bin/rm -f /etc/indimail/control/mysql_lib
 fi
 
 # for surbl
