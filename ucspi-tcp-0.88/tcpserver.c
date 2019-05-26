@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.60  2019-05-26 12:04:50+05:30  Cprogrammer
+ * use /etc/indimail/control as controldir
+ *
  * Revision 1.59  2019-04-22 21:57:59+05:30  Cprogrammer
  * use mysql only if use_sql is non-zero
  *
@@ -200,7 +203,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.59 2019-04-22 21:57:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.60 2019-05-26 12:04:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1253,7 +1256,7 @@ sighangup()
 			(*iptable1)->ipaddr[0] = 0;
 			(*iptable1)->pid = -1;
 		}
-		alloc_free(IpTable);
+		alloc_free((char *) IpTable);
 		IpTable = tmpTable;
 		alloc_count = tmpLimit;
 	}
@@ -1324,14 +1327,8 @@ main(int argc, char **argv, char **envp)
 #ifdef TLS
 	ctx = NULL;
 	if (!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
-	if (!stralloc_copys(&certfile, auto_home))
-		strerr_die2x(111, FATAL, "out of memory");
-	else
-	if (!stralloc_cats(&certfile, "/"))
-		strerr_die2x(111, FATAL, "out of memory");
-	else
-	if (!stralloc_cats(&certfile, controldir))
+		controldir = "/etc/indimail/control";
+	if (!stralloc_copys(&certfile, controldir))
 		strerr_die2x(111, FATAL, "out of memory");
 	else
 	if (!stralloc_cats(&certfile, "/servercert.pem"))
