@@ -172,7 +172,7 @@ initMySQLlibrary(char **errstr)
 	char           *ptr;
 	int             i;
 
-	if (!(ptr = env_get("MYSQL_LIB"))
+	if (!(ptr = env_get("MYSQL_LIB")))
 		ptr = "mysql_lib";
 	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {
 		use_sql = 0;
