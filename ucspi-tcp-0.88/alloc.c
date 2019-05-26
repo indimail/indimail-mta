@@ -1,5 +1,8 @@
 /*
  * $Log: alloc.c,v $
+ * Revision 1.3  2019-05-26 12:03:12+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.2  2010-03-18 15:06:37+05:30  Cprogrammer
  * add unsigned integer overflow check to alloc.c
  * Matthew Dempsky - http://marc.info/?l=qmail&m=125213850310173&w=2
@@ -10,8 +13,7 @@
  */
 #include "alloc.h"
 #include "error.h"
-extern void    *malloc();
-extern void     free();
+#include <stdlib.h>
 
 #define ALIGNMENT 16			/*- XXX: assuming that this alignment is enough */
 #define SPACE 2048				/*- must be multiple of ALIGNMENT */

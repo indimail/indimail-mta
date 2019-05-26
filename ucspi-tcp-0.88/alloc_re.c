@@ -1,10 +1,15 @@
 /*
  * $Log: alloc_re.c,v $
+ * Revision 1.2  2019-05-26 12:03:28+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
  * Initial revision
  *
  */
+#define _ALLOC_
 #include "alloc.h"
+#undef _ALLOC_
 #include "byte.h"
 
 int
