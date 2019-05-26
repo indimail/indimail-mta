@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.10  2019-05-26 12:00:13+05:30  Cprogrammer
+ * replaced control_readfile with control_readline
+ *
  * Revision 1.9  2019-05-26 11:39:31+05:30  Cprogrammer
  * use control file mysql_lib to dlopen libmysqlclient
  *
@@ -138,7 +141,7 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
-		if ((i = control_readfile(&mysql_libfn, libenv, 0)) == -1 || !i) {
+		if ((i = control_readline(&mysql_libfn, libenv)) == -1 || !i) {
 			if (errflag)
 				*errflag = errno;
 			if (errstr)
@@ -177,11 +180,8 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 	if (access(ptr, R_OK)) {
 		if (errflag)
 			*errflag = errno;
-		if (!stralloc_copys(&errbuf, error_str(errno))) {
-			if (errstr)
-				*errstr = memerr;
-		} else
-		if (!stralloc_0(&errbuf)) {
+		if (!stralloc_copys(&errbuf, error_str(errno)) ||
+				!stralloc_0(&errbuf)) {
 			if (errstr)
 				*errstr = memerr;
 		} else
@@ -200,11 +200,8 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 				*errstr = (char *) 0;
 			return ((void *) 0);
 		}
-		if (!stralloc_copys(&errbuf, dlerror())) {
-			if (errstr)
-				*errstr = memerr;
-		} else
-		if (!stralloc_0(&errbuf)) {
+		if (!stralloc_copys(&errbuf, dlerror()) ||
+				!stralloc_0(&errbuf)) {
 			if (errstr)
 				*errstr = memerr;
 		} else
@@ -244,11 +241,11 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 			!stralloc_catb(&errbuf, ": ", 2))
 	{
 		if (errstr)
-			*errstr = (char *) 0;
+			*errstr = memerr;
 	}
 	if ((ptr = dlerror()) && !stralloc_cats(&errbuf, ptr)) {
 		if (errstr)
-			*errstr = (char *) 0;
+			*errstr = memerr;
 	}
 	return (i);
 }
@@ -848,7 +845,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.9 2019-05-26 11:39:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.10 2019-05-26 12:00:13+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
