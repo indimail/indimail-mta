@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.65  2019-05-26 12:32:25+05:30  Cprogrammer
+ * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
+ *
  * Revision 1.64  2019-04-20 19:52:13+05:30  Cprogrammer
  * changed interface for loadLibrary(), closeLibrary() and getlibObject()
  *
@@ -403,7 +406,9 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		_exit(111);
 	}
-	loadLibrary(&handle, "VIRTUAL_PKG_LIB", &i, &errstr);
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
+		ptr = "libindimail";
+	loadLibrary(&handle, ptr, &i, &errstr);
 	if (i) {
 		substdio_puts(subfderr, "error loading shared library: ");
 		substdio_puts(subfderr, errstr);
@@ -412,7 +417,7 @@ main(int argc, char **argv)
 		_exit(111);
 	}
 	if (handle) {
-		if (!(get_local_ip = getlibObject("VIRTUAL_PKG_LIB", &handle, "get_local_ip", &errstr))) {
+		if (!(get_local_ip = getlibObject(ptr, &handle, "get_local_ip", &errstr))) {
 			substdio_puts(subfderr, "getlibObject: get_local_ip: ");
 			substdio_puts(subfderr, errstr);
 			substdio_puts(subfderr, "\n");
@@ -420,7 +425,7 @@ main(int argc, char **argv)
 			_exit(111);
 		} else
 			local_ip = (*get_local_ip) ();
-		if (!(get_local_hostid = getlibObject("VIRTUAL_PKG_LIB", &handle, "get_local_hostid", &errstr))) {
+		if (!(get_local_hostid = getlibObject(ptr, &handle, "get_local_hostid", &errstr))) {
 			substdio_puts(subfderr, "getlibObject: get_local_hostid: ");
 			substdio_puts(subfderr, errstr);
 			substdio_puts(subfderr, "\n");
@@ -836,7 +841,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.64 2019-04-20 19:52:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.65 2019-05-26 12:32:25+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

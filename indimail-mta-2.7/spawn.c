@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.23  2019-05-26 12:32:58+05:30  Cprogrammer
+ * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
+ *
  * Revision 1.22  2019-04-20 19:53:05+05:30  Cprogrammer
  * changed interface for loadLibrary(), closeLibrary() and getlibObject()
  *
@@ -443,10 +446,9 @@ main(argc, argv)
 	char          **argv;
 {
 	char            ch;
-	int             i;
-	int             r;
+	char           *ptr;
+	int             i, r, nfds;
 	fd_set          rfds;
-	int             nfds;
 
 	if (uidinit(1) == -1)
 		_exit(111);
@@ -483,7 +485,9 @@ main(argc, argv)
 		d[i].used = 0;
 		d[i].output.s = 0;
 	}
-	if(!(phandle = loadLibrary(&phandle, "VIRTUAL_PKG_LIB", &i, 0)) && i)
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
+		ptr = "libindimail";
+	if(!(phandle = loadLibrary(&phandle, ptr, &i, 0)) && i)
 		_exit(111);
 	for (;;)
 	{
@@ -559,7 +563,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.22 2019-04-20 19:53:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.23 2019-05-26 12:32:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

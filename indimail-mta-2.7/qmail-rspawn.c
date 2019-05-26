@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.34  2019-05-26 12:32:20+05:30  Cprogrammer
+ * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
+ *
  * Revision 1.33  2019-04-20 19:52:09+05:30  Cprogrammer
  * changed interface for loadLibrary(), closeLibrary() and getlibObject()
  *
@@ -230,7 +233,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	char            size_buf[FMT_ULONG];
 	/*- indimail */
 	int             i;
-	char           *ip, *real_domain;
+	char           *ip, *real_domain, *libptr;
 	static char     smtproute[MAX_BUFF], CurDir[MAX_BUFF]; 
 	static int      rcptflag = 1;
 	extern void    *phandle;
@@ -247,7 +250,9 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	args[5] = r;				/*- recipient */
 	args[6] = 0;
 
-	loadLibrary(&phandle, "VIRTUAL_PKG_LIB", &i, 0);
+	if (!(libptr = env_get("VIRTUAL_PKG_LIB")))
+		libptr = "libindimail";
+	loadLibrary(&phandle, libptr, &i, 0);
 	if (i)
 		return (-1);
 	if (!phandle)
@@ -277,11 +282,11 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 				return (-1);
 		}
 		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1) {
-			if (!(vget_real_domain = getlibObject("VIRTUAL_PKG_LIB", &phandle, "vget_real_domain", 0)))
+			if (!(vget_real_domain = getlibObject(libptr, &phandle, "vget_real_domain", 0)))
 				return (-1);
-			if (!(is_distributed_domain = getlibObject("VIRTUAL_PKG_LIB", &phandle, "is_distributed_domain", 0)))
+			if (!(is_distributed_domain = getlibObject(libptr, &phandle, "is_distributed_domain", 0)))
 				return (-1);
-			if (!(findhost = getlibObject("VIRTUAL_PKG_LIB", &phandle, "findhost", 0)))
+			if (!(findhost = getlibObject(libptr, &phandle, "findhost", 0)))
 				return (-1);
 			if ((real_domain = (*vget_real_domain) (r + at + 1))
 				&& ((*is_distributed_domain) (real_domain) == 1)) {
@@ -324,7 +329,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.33 2019-04-20 19:52:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.34 2019-05-26 12:32:20+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
