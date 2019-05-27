@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.35  2019-05-27 12:38:49+05:30  Cprogrammer
+ * set libfn with full path of libindimail control file
+ *
  * Revision 1.34  2019-05-26 12:32:20+05:30  Cprogrammer
  * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
  *
@@ -108,6 +111,9 @@
 #include "env.h"
 #include "rcpthosts.h"
 #include "fmt.h"
+#include "stralloc.h"
+#include "auto_control.h"
+#include "variables.h"
 #include "auto_qmail.h"
 #include "indimail_stub.h"
 
@@ -232,6 +238,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	char           *ptr, *(args[7]);
 	char            size_buf[FMT_ULONG];
 	/*- indimail */
+	static stralloc libfn = { 0 };
 	int             i;
 	char           *ip, *real_domain, *libptr;
 	static char     smtproute[MAX_BUFF], CurDir[MAX_BUFF]; 
@@ -250,8 +257,22 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	args[5] = r;				/*- recipient */
 	args[6] = 0;
 
-	if (!(libptr = env_get("VIRTUAL_PKG_LIB")))
-		libptr = "libindimail";
+	if (!(libptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!libfn.len) {
+			if (!stralloc_copys(&libfn, controldir))
+				return(-1);
+			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+				return(-1);
+			if (!stralloc_catb(&libfn, "libindimail", 11) ||
+					!stralloc_0(&libfn))
+				return(-1);
+			}
+		libptr = libfn.s;
+	}
 	loadLibrary(&phandle, libptr, &i, 0);
 	if (i)
 		return (-1);
@@ -329,7 +350,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.34 2019-05-26 12:32:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.35 2019-05-27 12:38:49+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
