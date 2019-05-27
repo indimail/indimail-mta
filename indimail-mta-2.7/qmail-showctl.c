@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.67  2019-05-27 20:31:30+05:30  Cprogrammer
+ * use VIRTUAL_PKG_LIB env variable if defined
+ *
  * Revision 1.66  2019-05-27 12:39:52+05:30  Cprogrammer
  * set libfn with full path of libindimail control file
  *
@@ -426,7 +429,8 @@ main(int argc, char **argv)
 			_exit(111);
 		}
 		ptr = libfn.s;
-	}
+	} else
+		ptr = "VIRTUAL_PKG_LIB";
 	loadLibrary(&handle, ptr, &i, &errstr);
 	if (i) {
 		substdio_puts(subfderr, "error loading shared library: ");
@@ -860,7 +864,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.66 2019-05-27 12:39:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.67 2019-05-27 20:31:30+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
