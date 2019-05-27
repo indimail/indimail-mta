@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.25  2019-05-27 20:29:48+05:30  Cprogrammer
+ * use VIRTUAL_PKG_LIB env variable if defined
+ *
  * Revision 1.24  2019-05-27 12:39:35+05:30  Cprogrammer
  * set libfn with full path of libindimail control file
  *
@@ -506,7 +509,8 @@ main(argc, argv)
 				_exit(111);
 		}
 		ptr = libfn.s;
-	}
+	} else
+		ptr = "VIRTUAL_PKG_LIB";
 	if(!(phandle = loadLibrary(&phandle, ptr, &i, 0)) && i)
 		_exit(111);
 	for (;;)
@@ -583,7 +587,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.24 2019-05-27 12:39:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.25 2019-05-27 20:29:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
