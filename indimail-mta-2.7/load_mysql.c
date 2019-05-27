@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.4  2019-05-27 12:34:49+05:30  Cprogrammer
+ * set libfn with full path of mysql_lib control file
+ *
  * Revision 1.3  2019-05-26 12:30:13+05:30  Cprogrammer
  * use mysql_lib control file to dlopen libmysqlclient if MYSQL_LIB env variable not defined
  *
@@ -17,8 +20,9 @@
 #include "error.h"
 #include "stralloc.h"
 #include "env.h"
+#include "auto_control.h"
+#include "variables.h"
 
-void           *mysql_handle;
 MYSQL          *(*in_mysql_init) (MYSQL *);
 MYSQL          *(*in_mysql_real_connect) (MYSQL *, const char *, const char *, const char *, const char *, unsigned int, const char *, unsigned long);
 const char     *(*in_mysql_error) (MYSQL *);
@@ -33,15 +37,33 @@ my_ulonglong    (*in_mysql_affected_rows) (MYSQL *);
 void            (*in_mysql_free_result) (MYSQL_RES *);
 int             use_sql = 0;
 
+static stralloc libfn = { 0 };
+
 int
 initMySQLlibrary(char **errstr)
 {
-	void           *phandle = (void *) 0;
+	static void    *phandle = (void *) 0;
 	char           *ptr;
 	int             i;
 
-	if (!(ptr = env_get("MYSQL_LIB")))
-		ptr = "mysql_lib";
+	if (phandle)
+		return (0);
+	if (!(ptr = env_get("MYSQL_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!libfn.len) {
+			if (!stralloc_copys(&libfn, controldir))
+				return(-1);
+			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+				return(-1);
+			if (!stralloc_catb(&libfn, "mysql_lib", 9) ||
+					!stralloc_0(&libfn))
+				return(-1);
+		}
+		ptr = libfn.s;
+	}
 	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {
 		use_sql = 0;
 		if (!i)
@@ -82,7 +104,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.3 2019-05-26 12:30:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.4 2019-05-27 12:34:49+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
