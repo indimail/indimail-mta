@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.6  2019-05-27 20:29:13+05:30  Cprogrammer
+ * use VIRTUAL_PKG_LIB env variable if defined
+ *
  * Revision 1.5  2019-05-27 12:35:45+05:30  Cprogrammer
  * set libfn with full path of libindimail control file
  *
@@ -71,7 +74,8 @@ main(int argc, char **argv)
 				!stralloc_0(&libfn))
 			strerr_die2x(111, FATAL, "out of memory");
 		ptr = libfn.s;
-	}
+	} else
+		ptr = "VIRTUAL_PKG_LIB";
 	if (!(phandle = loadLibrary(&phandle, ptr, 0, &errstr)))
 		strerr_die1x(111, "problem with loading shared libs");
 	if (!(count_dir = getlibObject(ptr, &phandle, "count_dir", &errstr)))
@@ -111,7 +115,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.5 2019-05-27 12:35:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.6 2019-05-27 20:29:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
