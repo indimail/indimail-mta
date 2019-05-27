@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.11  2019-05-27 12:33:57+05:30  Cprogrammer
+ * null terminate mysql_libfn
+ *
  * Revision 1.10  2019-05-26 12:00:13+05:30  Cprogrammer
  * replaced control_readfile with control_readline
  *
@@ -156,7 +159,12 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 			if (errstr)
 				*errstr = errbuf.s;
 			return ((void *) 0);
-		} 
+		}
+		if (!stralloc_0(&mysql_libfn)) {
+			if (errstr)
+				*errstr = memerr;
+			return ((void *) 0);
+		}
 		ptr = mysql_libfn.s;
 	} else
 	if (!(ptr = env_get(libenv))) {
@@ -845,7 +853,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.10 2019-05-26 12:00:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.11 2019-05-27 12:33:57+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
