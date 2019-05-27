@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.66  2019-05-27 12:39:52+05:30  Cprogrammer
+ * set libfn with full path of libindimail control file
+ *
  * Revision 1.65  2019-05-26 12:32:25+05:30  Cprogrammer
  * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
  *
@@ -148,11 +151,9 @@
 int             uidinit(int);
 
 stralloc        me = { 0 };
-
 int             meok;
-
 stralloc        line = { 0 };
-
+stralloc        libfn = { 0 };
 char            num[FMT_ULONG];
 
 void
@@ -406,8 +407,26 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		_exit(111);
 	}
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
-		ptr = "libindimail";
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&libfn, controldir)) {
+			substdio_puts(subfdout, "Oops! Out of memory.\n");
+			_exit(111);
+		}
+		if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/")) {
+			substdio_puts(subfdout, "Oops! Out of memory.\n");
+			_exit(111);
+		}
+		if (!stralloc_catb(&libfn, "libindimail", 11) ||
+				!stralloc_0(&libfn)) {
+			substdio_puts(subfdout, "Oops! Out of memory.\n");
+			_exit(111);
+		}
+		ptr = libfn.s;
+	}
 	loadLibrary(&handle, ptr, &i, &errstr);
 	if (i) {
 		substdio_puts(subfderr, "error loading shared library: ");
@@ -841,7 +860,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.65 2019-05-26 12:32:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.66 2019-05-27 12:39:52+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
