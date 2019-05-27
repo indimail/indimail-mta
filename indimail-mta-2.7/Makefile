@@ -1938,7 +1938,7 @@ qmail-lspawn.o: \
 compile qmail-lspawn.c fd.h wait.h prot.h substdio.h stralloc.h \
 gen_alloc.h scan.h exit.h error.h cdb.h uint32.h case.h open.h byte.h str.h \
 slurpclose.h auto_qmail.h auto_uids.h qlx.h env.h auto_assign.h indimail_stub.h \
-fmt.h
+fmt.h auto_control.h variables.h
 	./compile qmail-lspawn.c
 
 qmail-lspawn: \
@@ -2597,7 +2597,7 @@ qmail-rspawn.8
 qmail-rspawn.o: \
 compile qmail-rspawn.c fd.h wait.h substdio.h exit.h error.h str.h \
 tcpto.h env.h rcpthosts.h fmt.h auto_qmail.h indimail_stub.h \
-ipalloc.h conf-tls conf-ip
+ipalloc.h conf-tls conf-ip stralloc.h auto_control.h variables.h
 	./compile `grep -h -v "^#" conf-tls conf-ip` qmail-rspawn.c
 
 qmail-send: \
@@ -2806,7 +2806,7 @@ str.h cdb.h uint32.h open.h error.h control.h variables.h hasmysql.h mysql_confi
 
 load_mysql.o: \
 compile load_mysql.c indimail_stub.h error.h stralloc.h strerr.h \
-env.h
+env.h auto_control.h variables.h
 	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) load_mysql.c
 
 matchregex.o: \
@@ -3362,7 +3362,8 @@ compile ssl_timeoutio.c ssl_timeoutio.h select.h error.h ndelay.h conf-tls
 spawn.o: \
 compile chkspawn spawn.c sig.h wait.h substdio.h byte.h str.h \
 stralloc.h gen_alloc.h select.h exit.h coe.h open.h error.h alloc.h \
-auto_qmail.h auto_uids.h auto_spawn.h env.h variables.h indimail_stub.h
+auto_qmail.h auto_uids.h auto_spawn.h env.h variables.h indimail_stub.h \
+auto_control.h variables.h
 	./chkspawn
 	./compile spawn.c
 
@@ -3725,7 +3726,8 @@ compile variables.c variables.h haveip6.h conf-ip
 
 etrn.o: \
 compile etrn.c etrn.h rcpthosts.h case.h sig.h stralloc.h constmap.h wait.h \
-auto_qmail.h control.h fmt.h str.h indimail_stub.h
+auto_qmail.h control.h fmt.h str.h indimail_stub.h auto_control.h \
+variables.h
 	./compile etrn.c
 
 atrn.o: \
@@ -6196,7 +6198,8 @@ byte_chr.o substdi.o byte_cr.o
 	error.o str_len.o indimail_stub.o -ldl
 
 maildirsize.o: \
-compile maildirsize.c subfd.h strerr.h indimail_stub.h open.h
+compile maildirsize.c subfd.h strerr.h indimail_stub.h open.h \
+auto_control.h stralloc.h variables.h
 	./compile maildirsize.c
 
 
