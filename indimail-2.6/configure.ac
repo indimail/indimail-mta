@@ -1008,7 +1008,6 @@ fi
 saveLIBS="$LIBS"
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
-LIBS="$LIBS -lmysqlclient"
 AC_CHECK_FUNC(mysql_optionsv, have_mysqloptionsv=1)
 LIBS=$saveLIBS
 
