@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.24  2019-05-27 12:39:35+05:30  Cprogrammer
+ * set libfn with full path of libindimail control file
+ *
  * Revision 1.23  2019-05-26 12:32:58+05:30  Cprogrammer
  * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
  *
@@ -71,6 +74,8 @@
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "auto_spawn.h"
+#include "auto_control.h"
+#include "variables.h"
 
 extern int      truncreport;
 int             spawn(int, int, unsigned long, char *, char *, char *, int);
@@ -148,6 +153,7 @@ stralloc        sender = { 0 };
 stralloc        qqeh = { 0 };
 stralloc        envh = { 0 };
 stralloc        recip = { 0 };
+stralloc        libfn = { 0 };
 
 void
 err(s)
@@ -485,8 +491,22 @@ main(argc, argv)
 		d[i].used = 0;
 		d[i].output.s = 0;
 	}
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
-		ptr = "libindimail";
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!libfn.len) {
+			if (!stralloc_copys(&libfn, controldir))
+				_exit(111);
+			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+				_exit(111);
+			if (!stralloc_catb(&libfn, "libindimail", 11) ||
+					!stralloc_0(&libfn))
+				_exit(111);
+		}
+		ptr = libfn.s;
+	}
 	if(!(phandle = loadLibrary(&phandle, ptr, &i, 0)) && i)
 		_exit(111);
 	for (;;)
@@ -563,7 +583,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.23 2019-05-26 12:32:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.24 2019-05-27 12:39:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
