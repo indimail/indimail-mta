@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.55  2019-05-27 20:34:01+05:30  Cprogrammer
+ * initialize socket & port after allocating dbinfo structure
+ *
  * Revision 2.54  2019-04-16 23:03:33+05:30  Cprogrammer
  * return local dbinfo in absence of mcdinfo file
  *
@@ -176,7 +179,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.54 2019-04-16 23:03:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.55 2019-05-27 20:34:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -610,6 +613,8 @@ loadMCDInfo(int *total)
 				return ((DBINFO **) 0);
 			}
 			items++;
+			(*rhostsptr)->socket = (char *) 0;
+			(*rhostsptr)->port = -1;
 			(*rhostsptr)->isLocal = 0;
 			(*rhostsptr)->fd = -1;
 			(*rhostsptr)->last_error = 0;
