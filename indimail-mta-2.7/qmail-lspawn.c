@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.31  2019-05-27 12:38:14+05:30  Cprogrammer
+ * set libfn with full path of libindimail control file
+ *
  * Revision 1.30  2019-05-26 12:32:02+05:30  Cprogrammer
  * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
  *
@@ -109,6 +112,8 @@
 #include "slurpclose.h"
 #include "auto_qmail.h"
 #include "auto_assign.h"
+#include "auto_control.h"
+#include "variables.h"
 #include "indimail_stub.h"
 #include "auto_uids.h"
 #include "qlx.h"
@@ -201,6 +206,7 @@ stralloc        lower = { 0 };
 stralloc        nughde = { 0 };
 stralloc        wildchars = { 0 };
 stralloc        cdbfile = { 0 };
+static stralloc libfn = { 0 };
 
 char           *cdbdir;
 
@@ -401,8 +407,22 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 	if (!env_unset("QMAILREMOTE"))
 		_exit(-1);
 	/*- indimail */
-	if (!(libptr = env_get("VIRTUAL_PKG_LIB")))
-		libptr = "libindimail";
+	if (!(libptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!libfn.len) {
+			if (!stralloc_copys(&libfn, controldir))
+				return(-1);
+			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+				return(-1);
+			if (!stralloc_catb(&libfn, "libindimail", 11) ||
+					!stralloc_0(&libfn))
+				return(-1);
+		}
+		libptr = libfn.s;
+	}
 	loadLibrary(&phandle, libptr, &f, 0);
 	if (f)
 		_exit(-3);
@@ -617,7 +637,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.30 2019-05-26 12:32:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.31 2019-05-27 12:38:14+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
