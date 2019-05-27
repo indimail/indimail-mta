@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.14  2019-05-27 12:24:33+05:30  Cprogrammer
+ * set full path to libindimail control file
+ *
  * Revision 1.13  2019-05-26 12:27:30+05:30  Cprogrammer
  * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
  *
@@ -47,6 +50,8 @@
 #include "stralloc.h"
 #include "constmap.h"
 #include "control.h"
+#include "auto_control.h"
+#include "variables.h"
 #include "str.h"
 #include "fmt.h"
 #include "auto_qmail.h"
@@ -69,7 +74,7 @@ etrn_queue(char *arg, char *remoteip)
 {
 	int             child, r, flagetrn, len, exitcode, wstat;
 	size_t          mailcount;
-	stralloc        etrn = { 0 };
+	static stralloc etrn = { 0 }, libfn = { 0 };
 	char            maildir1[1024], maildir2[1024];
 	char           *errstr, *ptr;
 	struct constmap mapetrn;
@@ -108,8 +113,20 @@ etrn_queue(char *arg, char *remoteip)
 	maildir2[r] = 0;
 
 	mailcount = 0;
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
-		ptr = "libindimail";
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&libfn, controldir))
+			die_nomem();
+		if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+			die_nomem();
+		if (!stralloc_catb(&libfn, "libindimail", 11) ||
+				!stralloc_0(&libfn))
+			die_nomem();
+		ptr = libfn.s;
+	}
 	loadLibrary(&phandle, ptr, 0, &errstr);
 	if (!phandle)
 		return (err_library(errstr));
@@ -196,7 +213,7 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.13 2019-05-26 12:27:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.14 2019-05-27 12:24:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
