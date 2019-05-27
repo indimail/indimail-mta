@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.15  2019-05-27 20:26:33+05:30  Cprogrammer
+ * use VIRTUAL_PKG_LIB env variable if defined
+ *
  * Revision 1.14  2019-05-27 12:24:33+05:30  Cprogrammer
  * set full path to libindimail control file
  *
@@ -126,7 +129,8 @@ etrn_queue(char *arg, char *remoteip)
 				!stralloc_0(&libfn))
 			die_nomem();
 		ptr = libfn.s;
-	}
+	} else
+		ptr = "VIRTUAL_PKG_LIB";
 	loadLibrary(&phandle, ptr, 0, &errstr);
 	if (!phandle)
 		return (err_library(errstr));
@@ -213,7 +217,7 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.14 2019-05-27 12:24:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.15 2019-05-27 20:26:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
