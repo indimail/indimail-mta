@@ -1,7 +1,7 @@
 /*
  * $Log: indimail_stub.c,v $
  * Revision 1.11  2019-05-27 12:33:57+05:30  Cprogrammer
- * null terminate mysql_libfn
+ * null terminate libfn
  *
  * Revision 1.10  2019-05-26 12:00:13+05:30  Cprogrammer
  * replaced control_readfile with control_readline
@@ -121,7 +121,7 @@ stralloc        tmp = { 0 };
 stralloc        dirbuf = { 0 };
 stralloc        _pwstruct = { 0 };
 stralloc        __PWstruct = { 0 };
-static stralloc mysql_libfn = { 0 };
+static stralloc libfn = { 0 };
 
 int             userNotFound = 0;
 int             is_inactive;
@@ -144,7 +144,7 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
-		if ((i = control_readline(&mysql_libfn, libenv)) == -1 || !i) {
+		if ((i = control_readline(&libfn, libenv)) == -1 || !i) {
 			if (errflag)
 				*errflag = errno;
 			if (errstr)
@@ -160,12 +160,12 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 				*errstr = errbuf.s;
 			return ((void *) 0);
 		}
-		if (!stralloc_0(&mysql_libfn)) {
+		if (!stralloc_0(&libfn)) {
 			if (errstr)
 				*errstr = memerr;
 			return ((void *) 0);
 		}
-		ptr = mysql_libfn.s;
+		ptr = libfn.s;
 	} else
 	if (!(ptr = env_get(libenv))) {
 		if (errflag)
