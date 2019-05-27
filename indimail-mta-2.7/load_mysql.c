@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.5  2019-05-27 20:28:32+05:30  Cprogrammer
+ * use MYSQL_LIB env variable if defined
+ *
  * Revision 1.4  2019-05-27 12:34:49+05:30  Cprogrammer
  * set libfn with full path of mysql_lib control file
  *
@@ -63,7 +66,8 @@ initMySQLlibrary(char **errstr)
 				return(-1);
 		}
 		ptr = libfn.s;
-	}
+	} else
+		ptr = "MYSQL_LIB";
 	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {
 		use_sql = 0;
 		if (!i)
@@ -104,7 +108,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.4 2019-05-27 12:34:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.5 2019-05-27 20:28:32+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
