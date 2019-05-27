@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.6  2019-05-27 20:31:52+05:30  Cprogrammer
+ * use MYSQL_LIB env variable if defined
+ *
  * Revision 1.5  2019-05-27 12:41:51+05:30  Cprogrammer
  * set full path of mysql_lib control file
  *
@@ -68,6 +71,11 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 				*errstr = errbuf.s;
 			return ((void *) 0);
 		} 
+		if (!stralloc_0(&mysql_libfn)) {
+			if (errstr)
+				*errstr = memerr;
+			return ((void *) 0);
+		}
 		ptr = mysql_libfn.s;
 	} else
 	if (!(ptr = env_get(libenv))) {
@@ -178,6 +186,8 @@ initMySQLlibrary(char **errstr)
 		return (0);
 	if (!(ptr = env_get("MYSQL_LIB")))
 		ptr = "/etc/indimail/control/mysql_lib";
+	else
+		ptr = "MYSQL_LIB";
 	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {
 		use_sql = 0;
 		if (!i)
@@ -219,7 +229,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.5 2019-05-27 12:41:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.6 2019-05-27 20:31:52+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
