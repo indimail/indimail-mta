@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.220 $";
+char           *revision = "$Revision: 1.221 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -144,6 +144,7 @@ stralloc        signkey = { 0 };
 
 char           *batvfn = 0;
 stralloc        nosign = { 0 };
+static stralloc libfn = { 0 };
 
 int             batvok;
 int             signkeystale = 7; /*- accept signkey for a week */
@@ -5123,8 +5124,22 @@ smtp_atrn(char *arg)
 		err_library("libindimail.so not loaded");
 		return;
 	}
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
-		ptr = "libindimail";
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!libfn.len) {
+			if (!stralloc_copys(&libfn, controldir))
+				die_nomem();
+			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+				die_nomem();
+			if (!stralloc_catb(&libfn, "libindimail", 11) ||
+					!stralloc_0(&libfn))
+				die_nomem();
+		}
+		ptr = libfn.s;
+	}
 	if (!(vclose = getlibObject(ptr, &phandle, "vclose", &errstr))) {
 		err_library(errstr);
 		return;
@@ -5836,8 +5851,22 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	if (chdir(auto_qmail) == -1)
 		die_control();
 	/*- load virtual package library */
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
-		ptr = "libindimail";
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!libfn.len) {
+			if (!stralloc_copys(&libfn, controldir))
+				die_nomem();
+			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+				die_nomem();
+			if (!stralloc_catb(&libfn, "libindimail", 11) ||
+					!stralloc_0(&libfn))
+				die_nomem();
+		}
+		ptr = libfn.s;
+	}
 	loadLibrary(&phandle, ptr, &i, &errstr);
 	if (i) {
 		logerr("Error loading virtual package shared lib: ");
@@ -6056,6 +6085,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.221  2019-05-27 12:39:17+05:30  Cprogrammer
+ * set libfn with full path of libindimail control file
+ *
  * Revision 1.220  2019-05-26 12:32:40+05:30  Cprogrammer
  * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
  *
@@ -6154,7 +6186,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.220 2019-05-26 12:32:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.221 2019-05-27 12:39:17+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
