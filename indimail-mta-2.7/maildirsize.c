@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.5  2019-05-27 12:35:45+05:30  Cprogrammer
+ * set libfn with full path of libindimail control file
+ *
  * Revision 1.4  2019-05-26 12:31:13+05:30  Cprogrammer
  * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
  *
@@ -22,12 +25,17 @@
 #include "fmt.h"
 #include "open.h"
 #include "env.h"
+#include "stralloc.h"
+#include "control.h"
+#include "variables.h"
+#include "auto_control.h"
 #include "indimail_stub.h"
 
 #define FATAL "maildirsize: fatal: "
 
 struct substdio ssout;
 char            outbuf[256];
+static stralloc libfn = { 0 };
 
 int
 main(int argc, char **argv)
@@ -50,8 +58,20 @@ main(int argc, char **argv)
 		strerr_die3sys(111, FATAL, "chdir: ", pw->pw_dir);
 	if (access("./Maildir/", F_OK))
 		strerr_die4sys(111, FATAL, "chdir: ", pw->pw_dir, "/Maildir/");
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB")))
-		ptr = "libindimail";
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&libfn, controldir))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (!stralloc_catb(&libfn, "libindimail", 11) ||
+				!stralloc_0(&libfn))
+			strerr_die2x(111, FATAL, "out of memory");
+		ptr = libfn.s;
+	}
 	if (!(phandle = loadLibrary(&phandle, ptr, 0, &errstr)))
 		strerr_die1x(111, "problem with loading shared libs");
 	if (!(count_dir = getlibObject(ptr, &phandle, "count_dir", &errstr)))
@@ -91,7 +111,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.4 2019-05-26 12:31:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.5 2019-05-27 12:35:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
