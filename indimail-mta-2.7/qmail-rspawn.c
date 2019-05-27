@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.36  2019-05-27 20:29:39+05:30  Cprogrammer
+ * use VIRTUAL_PKG_LIB env variable if defined
+ *
  * Revision 1.35  2019-05-27 12:38:49+05:30  Cprogrammer
  * set libfn with full path of libindimail control file
  *
@@ -272,7 +275,8 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 				return(-1);
 			}
 		libptr = libfn.s;
-	}
+	} else
+		libptr = "VIRTUAL_PKG_LIB";
 	loadLibrary(&phandle, libptr, &i, 0);
 	if (i)
 		return (-1);
@@ -350,7 +354,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.35 2019-05-27 12:38:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.36 2019-05-27 20:29:39+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
