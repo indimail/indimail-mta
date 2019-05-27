@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.5  2019-05-27 12:41:51+05:30  Cprogrammer
+ * set full path of mysql_lib control file
+ *
  * Revision 1.4  2019-05-26 12:24:04+05:30  Cprogrammer
  * load mysql_lib control file if MYSQL_LIB env is not defined
  *
@@ -38,7 +41,6 @@ void            (*in_mysql_free_result) (MYSQL_RES *);
 
 static char     memerr[] = "out of memory";
 static char     ctlerr[] = "unable to read controls";
-void           *mysql_handle;
 int             use_sql = 0;
 static stralloc errbuf = { 0 };
 static stralloc mysql_libfn = { 0 };
@@ -168,12 +170,14 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 int
 initMySQLlibrary(char **errstr)
 {
-	void           *phandle = (void *) 0;
+	static void    *phandle = (void *) 0;
 	char           *ptr;
 	int             i;
 
+	if (phandle)
+		return (0);
 	if (!(ptr = env_get("MYSQL_LIB")))
-		ptr = "mysql_lib";
+		ptr = "/etc/indimail/control/mysql_lib";
 	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {
 		use_sql = 0;
 		if (!i)
@@ -215,7 +219,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.4 2019-05-26 12:24:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.5 2019-05-27 12:41:51+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
