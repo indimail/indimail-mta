@@ -165,6 +165,13 @@ fi
 
 dnl Checks for library functions.
 
+PKG_CHECK_MODULES(LIBIDN, libidn >= 0.0.0, [libidn=yes], [libidn=no])
+
+if test "$libidn" != "yes"
+then
+	AC_MSG_ERROR([libidn not found])
+fi
+
 AC_CHECK_FUNCS(setpgrp setpgid)
 AC_CHECK_FUNC(setpgrp,
 	[

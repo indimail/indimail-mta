@@ -32,6 +32,8 @@ struct couriertls_info {
 	size_t x509info_len;
 	size_t x509info_size;
 
+	char **override_vars;
+
 	struct tls_subject *first_subject;
 
 	const char *cipher;

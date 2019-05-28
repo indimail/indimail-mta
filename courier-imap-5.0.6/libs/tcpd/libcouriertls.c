@@ -9,6 +9,7 @@
 #include	"libcouriertls.h"
 #include	<openssl/rand.h>
 #include	<openssl/x509.h>
+#include	<openssl/x509v3.h>
 #include	"tlscache.h"
 #include	"rfc1035/rfc1035.h"
 #include	"soxwrap/soxwrap.h"
@@ -21,6 +22,7 @@
 #include	<stdlib.h>
 #include	<ctype.h>
 #include	<netdb.h>
+#include	<idna.h>
 #if HAVE_DIRENT_H
 #include <dirent.h>
 #define NAMLEN(dirent) strlen((dirent)->d_name)
@@ -140,38 +142,141 @@ static int ssl_verify_callback(int goodcert, X509_STORE_CTX *x509)
 	return (1);
 }
 
+static int hostmatch_utf8(const char *a, const char *b)
+{
+	while (*a || *b)
+	{
+		char ca=*a;
+		char cb=*b;
+
+		if (ca >= 'A' && ca <= 'Z')
+			ca += 'a'-'A';
+		if (cb >= 'A' && cb <= 'Z')
+			cb += 'a'-'A';
+		if (ca != cb)
+			return 0;
+
+		++a;
+		++b;
+	}
+	return 1;
+}
+
+static int hostmatch(const struct tls_info *info, const char *domain)
+{
+	const char *p=domain;
+	const char *verify_domain=info->peer_verify_domain;
+	char *idn_domain1;
+	char *idn_domain2;
+	int rc;
+
+	if (*p == '*')
+	{
+		++p;
+
+		if (*p != '.')
+			return 0;
+
+		while (*verify_domain)
+		{
+			if (*verify_domain++ == '.')
+				break;
+		}
+	}
+
+	if (idna_to_unicode_8z8z(info->peer_verify_domain, &idn_domain1, 0)
+	    != IDNA_SUCCESS)
+		idn_domain1=0;
+
+	if (idna_to_unicode_8z8z(p, &idn_domain2, 0)
+	    != IDNA_SUCCESS)
+		idn_domain2=0;
+
+	rc=hostmatch_utf8(idn_domain1 ? idn_domain1:info->peer_verify_domain,
+			  idn_domain2 ? idn_domain2:p);
+
+	if (idn_domain1)
+		free(idn_domain1);
+	if (idn_domain2)
+		free(idn_domain2);
+	return rc;
+}
+
+static int verifypeer1(const struct tls_info *info, X509 *x,
+		       STACK_OF(GENERAL_NAME) *subject_alt_names);
+
 static int verifypeer(const struct tls_info *info, SSL *ssl)
 {
 	X509 *x=NULL;
-	X509_NAME *subj=NULL;
-	int nentries, j;
-	char domain[256];
-	char *p;
-	char errmsg[1000];
+	int rc;
+	STACK_OF(GENERAL_NAME) *subject_alt_names;
 
 	if (!info->peer_verify_domain)
 		return (1);
 
-	if (info->isserver)
-	{
-		x=SSL_get_peer_certificate(ssl);
+	if (SSL_get_verify_result(ssl) != X509_V_OK)
+		return (1);
 
-		if (x)
-			subj=X509_get_subject_name(x);
-	}
-	else
-	{
-		STACK_OF(X509) *peer_cert_chain=SSL_get_peer_cert_chain(ssl);
+	x=SSL_get_peer_certificate(ssl);
 
-		if (peer_cert_chain && sk_X509_num(peer_cert_chain) > 0)
+	if (!x)
+		return (0);
+
+	subject_alt_names=
+		X509_get_ext_d2i(x, NID_subject_alt_name, NULL, NULL);
+
+	rc=verifypeer1(info, x, subject_alt_names);
+
+	if (subject_alt_names)
+		GENERAL_NAMES_free(subject_alt_names);
+
+	X509_free(x);
+
+	return rc;
+}
+
+static int verifypeer1(const struct tls_info *info, X509 *x,
+		       STACK_OF(GENERAL_NAME) *subject_alt_names)
+{
+	X509_NAME *subj=NULL;
+	int nentries, j;
+	char domain[256];
+	char errmsg[1000];
+
+	if(subject_alt_names)
+	{
+		int n=sk_GENERAL_NAME_num(subject_alt_names);
+		int i;
+
+		for (i=0; i<n; i++)
 		{
-			X509 *xx=sk_X509_value(peer_cert_chain, 0);
+			const GENERAL_NAME *gn=
+				sk_GENERAL_NAME_value(subject_alt_names, i);
+			const char *str;
+			int l;
 
-			if (xx)
-				subj=X509_get_subject_name(xx);
+			if (gn->type != GEN_DNS)
+				continue;
+
+#ifdef HAVE_OPENSSL110
+			str = (const char *)ASN1_STRING_get0_data(gn->d.ia5);
+#else
+			str = (const char *)ASN1_STRING_data(gn->d.ia5);
+#endif
+			l=ASN1_STRING_length(gn->d.ia5);
+
+			if (l >= sizeof(domain)-1)
+				l=sizeof(domain)-1;
+
+			memcpy(domain, str, l);
+			domain[l]=0;
+
+			if (hostmatch(info, domain))
+				return 1;
 		}
 	}
 
+	subj=X509_get_subject_name(x);
 
 	nentries=0;
 	if (subj)
@@ -216,23 +321,8 @@ static int verifypeer(const struct tls_info *info, SSL *ssl)
 		}
 	}
 
-	if (x)
-		X509_free(x);
-	p=domain;
-
-	if (*p == '*')
-	{
-		int	pl, l;
-
-		pl=strlen(++p);
-		l=strlen(info->peer_verify_domain);
-
-		if (*p == '.' && pl <= l &&
-		    strcasecmp(info->peer_verify_domain+l-pl, p) == 0)
-			return (1);
-	}
-	else if (strcasecmp(info->peer_verify_domain, p) == 0)
-		return (1);
+	if (domain[0] && hostmatch(info, domain))
+		return 1;
 
 	strcpy(errmsg, "couriertls: Mismatched SSL certificate: CN=");
 	strcat(errmsg, domain);
@@ -1474,6 +1564,8 @@ static void dump_x509(X509 *x509,
 	X509_NAME *subj=X509_get_subject_name(x509);
 	int nentries, j;
 	time_t timestamp;
+	STACK_OF(GENERAL_NAME) *subject_alt_names;
+
 	static const char gcc_shutup[]="%Y-%m-%d %H:%M:%S";
 
 	if (!subj)
@@ -1519,6 +1611,39 @@ static void dump_x509(X509 *x509,
 
 	}
 	(*dump_func)("\n", 1, dump_arg);
+
+	subject_alt_names=
+		X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL);
+
+	if (subject_alt_names)
+	{
+		int n=sk_GENERAL_NAME_num(subject_alt_names);
+		int i;
+
+		for (i=0; i<n; i++)
+		{
+			const GENERAL_NAME *gn=
+				sk_GENERAL_NAME_value(subject_alt_names, i);
+			const char *domain;
+			int l;
+
+			if (gn->type != GEN_DNS)
+				continue;
+
+#ifdef HAVE_OPENSSL110
+			domain = (const char *)ASN1_STRING_get0_data(gn->d.ia5);
+#else
+			domain = (const char *)ASN1_STRING_data(gn->d.ia5);
+#endif
+			l=ASN1_STRING_length(gn->d.ia5);
+
+			(*dump_func)("Subject-Alt-Name-DNS: ", -1, dump_arg);
+			(*dump_func)(domain, l, dump_arg);
+			(*dump_func)("\n", -1, dump_arg);
+		}
+
+		GENERAL_NAMES_free(subject_alt_names);
+	}
 
 	timestamp=asn1toTime(X509_get_notBefore(x509));
 

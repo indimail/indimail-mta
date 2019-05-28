@@ -1,3 +1,10 @@
+5.0.7
+
+2019-02-24  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* pop3dserver.c (do_retr): Use the new MIME_UNICODE_MESSAGE_TYPE
+	setting to set the type of the wrapped MIME attachment.
+
 5.0.6
 
 2019-01-30  Sam Varshavchik  <mrsam@courier-mta.com>

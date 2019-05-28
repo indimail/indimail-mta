@@ -1,4 +1,4 @@
-##VERSION: $Id: 106596a150c4585c41d65f60a17e173402125332-20150610064018$
+##VERSION: $Id: 0877c2dea580caaeb10e5394cb859fd6ce6e1b5b-20190327193501$
 #
 # pop3d created from pop3d.dist by sysconftool
 #
@@ -181,3 +181,12 @@ POP3DSTART=NO
 # MAILDIRPATH - directory name of the maildir directory.
 #
 MAILDIRPATH=Maildir
+
+##NAME: MIME_UNICODE_MESSAGE_TYPE:0
+#
+# MIME type that wraps Unicode messages for downloading by non-Unicode
+# POP3 clients.
+#
+# This can be changed to "message/rfc822" to accomodate older mail clients.
+
+MIME_UNICODE_MESSAGE_TYPE="message/global"

@@ -1872,6 +1872,8 @@ static void tls_dump_connection_info_x509(ssl_handle ssl,
 		{
 			time_t notbefore;
 			time_t notafter;
+			char buffer[256];
+			unsigned j;
 
 			(*dump_func)("Subject:\n", -1, dump_arg);
 
@@ -1881,6 +1883,29 @@ static void tls_dump_connection_info_x509(ssl_handle ssl,
 				dump_func, dump_arg);
 			(*dump_func)("\n", 1, dump_arg);
 
+			for (j=0; ; ++j)
+			{
+				size_t s=sizeof(buffer);
+				enum gnutls_x509_subject_alt_name_t t;
+
+				t=gnutls_x509_crt_get_subject_alt_name
+					(cert[i], j, buffer, &s, 0);
+
+				if (t == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE)
+					break;
+
+				if (t != GNUTLS_SAN_DNSNAME)
+					continue;
+
+				if (s == sizeof(buffer))
+					--s; /* The API is not clear */
+
+				buffer[s]=0;
+				(*dump_func)("Subject-Alt-Name-DNS: ", -1,
+					     dump_arg);
+				(*dump_func)(buffer, -1, dump_arg);
+				(*dump_func)("\n", -1, dump_arg);
+			}
 
 #if 0
 			(*dump_func)("Issuer:\n", -1, dump_arg);

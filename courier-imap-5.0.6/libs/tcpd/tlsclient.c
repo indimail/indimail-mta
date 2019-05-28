@@ -379,6 +379,14 @@ static int do_couriertls_start(char **args, struct couriertls_info *cinfo)
 		if (!s || !*s)
 			s="couriertls";
 
+		if (cinfo->override_vars)
+		{
+			size_t i;
+
+			for (i=0; cinfo->override_vars[i]; ++i)
+				putenv(cinfo->override_vars[i]);
+		}
+
 		execv(s, argvec);
 		fprintf(fp, "500 Unable to start couriertls: %s\n",
 			strerror(errno));
