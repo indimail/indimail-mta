@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.7  2019-05-28 10:22:23+05:30  Cprogrammer
+ * BUG - return value of insert_db wasn't checked
+ *
  * Revision 1.6  2019-04-20 19:52:22+05:30  Cprogrammer
  * load MySQL shared library dynamically
  *
@@ -115,7 +118,7 @@ int
 insert_db(MYSQL *conn, char *filename, char *table_name, int replace, char **errStr)
 {
 
-	int             num, m_error;
+	int             num = 0, m_error;
 	static stralloc sql = { 0 };
 
 	if (!conn) {
@@ -127,7 +130,7 @@ insert_db(MYSQL *conn, char *filename, char *table_name, int replace, char **err
 		die_nomem();
 	if (!stralloc_cats(&sql, filename))
 		die_nomem();
-	if (!stralloc_cats(&sql, replace ? "\"REPLACE INTO TABLE " : "\"IGNORE INTO TABLE "))
+	if (!stralloc_cats(&sql, replace ? "\"REPLACE INTO TABLE " : "\" IGNORE INTO TABLE "))
 		die_nomem();
 	if (!stralloc_cats(&sql, table_name))
 		die_nomem();
@@ -158,7 +161,7 @@ again:
 				die_nomem();
 			if (!stralloc_cats(&sql, filename))
 				die_nomem();
-			if (!stralloc_cats(&sql, "'IGNORE INTO TABLE "))
+			if (!stralloc_cats(&sql, "' IGNORE INTO TABLE "))
 				die_nomem();
 			if (!stralloc_cats(&sql, table_name))
 				die_nomem();
@@ -178,8 +181,7 @@ again:
 			return (AM_MYSQL_ERR);
 		}
 	}
-	if ((num = in_mysql_affected_rows(conn)) == -1)
-	{
+	if ((num = in_mysql_affected_rows(conn)) == -1) {
 		sql.len--;
 		if (!stralloc_cats(&sql, ": "))
 			die_nomem();
@@ -311,9 +313,14 @@ main(int argc, char **argv)
 		if (connect_sqldb(filename.s, &conn, &tname, &errStr) < 0)
 			my_error("MySQL connect", errStr, 111);
 		filename.len -= 6;
-		if (!stralloc_0(&filename))
+		if (!stralloc_0(&filename)) {
+			in_mysql_close(conn);
 			die_nomem();
-		opt = insert_db(conn, filename.s, tname, replace, &errStr);
+		}
+		if ((opt = insert_db(conn, filename.s, tname, replace, &errStr)) < 0) {
+			in_mysql_close(conn);
+			my_error("insert_db", errStr, 111);
+		}
 		in_mysql_close(conn);
 		strnum[fmt_ulong(strnum, opt)] = 0;
 		out(strnum);
@@ -341,7 +348,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.6 2019-04-20 19:52:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.7 2019-05-28 10:22:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
