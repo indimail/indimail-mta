@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.12  2019-05-28 10:24:03+05:30  Cprogrammer
+ * assign error to error buffer in getlibObject()
+ *
  * Revision 1.11  2019-05-27 12:33:57+05:30  Cprogrammer
  * null terminate libfn
  *
@@ -244,17 +247,20 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 	if (!*handle)
 		return ((void *) 0);
 	i = dlsym(*handle, plugin_symb);
-	if (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
+	if (!i && (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
 			!stralloc_cats(&errbuf, plugin_symb) ||
-			!stralloc_catb(&errbuf, ": ", 2))
+			!stralloc_catb(&errbuf, ": ", 2)))
 	{
 		if (errstr)
 			*errstr = memerr;
 	}
-	if ((ptr = dlerror()) && !stralloc_cats(&errbuf, ptr)) {
+	ptr = dlerror();
+	if (!i && !stralloc_cats(&errbuf, ptr)) {
 		if (errstr)
 			*errstr = memerr;
 	}
+	if (!i && errstr)
+		*errstr = errbuf.s;
 	return (i);
 }
 
@@ -853,7 +859,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.11 2019-05-27 12:33:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.12 2019-05-28 10:24:03+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
