@@ -58,13 +58,13 @@ treats an empty mailbox name as a trash address.
 
 .SH Virtual Package Functionality
 \fBqmail-lspawn\fR can load an external library to add functionality. The virtual package
-can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR. This is set to
+can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR or by using the
+control file \fIlibindimail\fR. The value in \fIlibindimail\fR is set to
 \fIlibindimail\fR.\fIso\fR by default. If there is any problem loading the library or
-loading symbols required for email delivery to IndiMail virtual domains, \fBqmail-lspawn\fR
-will exit with -3.
+loading symbols required, \fBqmail-lspawn\fR will exit with -3.
 
 Following functions should be provided by the shared library for adding features to
-qmail-lspawn - isvirtualdomain(), vauth_open(), vauth_getpw(), vclose(). If such a
+qmail-lspawn - isvirtualdomain(), iopen(), sql_getpw(), iclose(). If such a
 library is opened \fBqmail-lspawn\fR connects to MySQL(1) and sets the environment variable
 \fBPWSTRUCT\fR having the passwd structure for the user. The environment variable is set to
 "No such user" in case the user is not found in the local MySQL database. This

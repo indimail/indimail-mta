@@ -123,6 +123,13 @@ specifies that entries for  badmailfrom should  be  checked in the MySQL table
 is \fIindimail\fR and \fIssh-1.5-\fR and the database name to use is \fIqmail\fR.
 .EE
 
+For database connection to MySQL, one can define \fBMYSQL_LIB\fR environment variable
+or have the control file \fImysql_lib\fR
+.EE
+  MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
+.EX
+Environment variable takes precedence over the control file.
+
 The following control files can have regular expressions for match if QREGEX environment
 variable is defined
 

@@ -23,12 +23,14 @@ so the results may not be in the same order as the commands.
 
 .SH Virtual Package Functionality
 \fBqmail-rspawn\fR can load an external library to add functionality. The virtual package
-can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR. This is set to
-\fIlibindimail\fR.\fIso\fR by default.
+can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR or by using the
+control file \fIlibindimail\fR. The value in \fIlibindimail\fR is set to
+\fIlibindimail\fR.\fIso\fR by default. If there is any problem loading the library or
+loading symbols required, \fBqmail-lspawn\fR will exit with -3.
 
 Following functions should be provided by the shared library for adding features to
-qmail-lspawn - vget_real_domain(), is_distributed_domain(), findhost() If such a
-library is opened \fBqmail-rspawn\fR connects to MySQL(1) and for a clustered domain, it queries
+qmail-lspawn - get_real_domain(), is_distributed_domain(), findhost(). If such a
+library is opened \fBqmail-rspawn\fR connects to MySQL(1). For a clustered domain, it queries
 .B hostcntrl
 in
 .B MySQL(1)
