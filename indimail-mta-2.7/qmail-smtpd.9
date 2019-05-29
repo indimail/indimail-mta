@@ -157,47 +157,41 @@ to be denied, if the client does not provide the STARTTLS command.
 
 \fBqmail-smtpd\fR prevents unauthorized relaying and also reject mails addressed to invalid
 mailboxes. To do this, \fBqmail-smtpd\fR employs the following additional checks -
+
 .nr step 1 1
 .IP \n[step] 2
 .B Check Relay Status
-by looking up in \fBMySQL\fR, email addresses logged in the relay table within past 30 Minutes,
-corresponding to the remote ip address of the client. This effectively prevents the user to
-give any "Mail from:" sender address other than the authenticated username and hence serves as
-a very powerful spam prevention mechanism. This option is turned on by defining the environment
-variable \fBCHECKRELAY\fR. Addresses are logged into the relay table when the user does a
-IMAP or POP3 access. This mechanism 'pop before smtp' allows \fBqmail-smtpd\fR to relay out
-mails if the user does a IMAP/POP3 access before sending out mails.
+by looking up in \fBMySQL\fR, email addresses logged in the relay table within
+past 30 Minutes, corresponding to the remote ip address of the client. This
+effectively prevents the user to give any "RCPT TO:" recipient address other
+than those belonging to local domains in \fIrcpthosts\fi, \fIlocals\fR control
+files.  This option is turned on by defining the environment variable
+\fBCHECKRELAY\fR.  Email address and IP address is logged into the relay table
+when the user does a IMAP or POP3 access. This mechanism 'pop before smtp'
+allows \fBqmail-smtpd\fR to relay out mails after a successful IMAP/POP3
+authentication.
 
-NOTE: Only domains not listed in rcpthosts are checked. Domains in rcpthosts
-are relayed by default. This feature can be turned off by having the domain listed in
-the control file \fIauthdomains\fR.  In such a case mails for local domains will be relayed
-only if the sender has authenticated using SMTP AUTH, IMAP or POP3. If the environment variable
-.B AUTH_ALL
-is set, even local domains (listed in rcpthosts) will require senders to authenticate using
-SMTP AUTH, IMAP or POP3.
-If the environment variable 
-.B REQUIREAUTH
-is set, qmail-smtpd will not accept any 
-.B MAIL FROM
-commands until and unless the client has authenticated via
-the 
-.B AUTH
-command. If the environment variable
-.B ANTISPOOFING
-set set, qmail-smtpd will force local users to authenticate (using AUTH, IMAP or POP3) before
+NOTE: Only domains not listed in \fIrcpthosts\fR are checked. Users can send emails
+domains in \fIrcpthosts\fR without authentication. Authentication can be forced
+for everyone by having the \fBAUTH_ALL\fR environment variable. If you desire
+forced authentication for certain domains, you can do it so by having the domain
+listed in the control file \fIauthdomains\fR.  In such cases of enforced
+authentication, an email transaction will succeed only if the sender has
+authenticated using SMTP AUTH, IMAP or POP3.  If the environment variable
+\fBREQUIREAUTH\fR is set, qmail-smtpd will not accept any \fBMAIL FROM\fR
+commands until and unless the client has authenticated using the \fBAUTH\fR
+command. If the environment variable \fBANTISPOOFING\fR set set, qmail-smtpd
+will force local users to authenticate (using AUTH, IMAP or POP3) before
 accepting mails.
 
 .IP \n+[step]
-.B Check User Status
+.B Check Recipient Status
 by looking up in \fBMySQL\fR, status of recipients is determined before accepting the mails.
 This option is turned on by defining the environment variable \fBCHECKRECIPIENT\fR to one of
 the following values
- 1. Reject if User not in MySQL
- 2. Reject if User not in both MySQL and recipients.cdb (See below)
- 3. Reject if User not in recipients.cdb (See below)
-
-Additionally for local senders, mail is accepted only if the recipient
-is an active user and does not have the NO_SMTP flag set for the user.
+ 1. Reject if recipient not in MySQL
+ 2. Reject if recipient not in both MySQL and recipients.cdb (See below)
+ 3. Reject if recipient not in recipients.cdb (See below)
 
 .IP \[bu] 2
 .I Inactive Recipients
@@ -211,31 +205,46 @@ Recipients who do not have any accounts on the mailing system
 Recipients who have exhausted their current mailbox quota.
 (works only if CHECKRECIPIENT is set to 1)
 
-If the status of the recipient fall into any of the above category, the mail is rejected with a permanent error.
-.LP
-NOTE: To turn on User Status Check for selected domains, include the domains
+If the status of the recipient fall into any of the above category, the mail is
+rejected with a permanent error.
+
+NOTE: To turn on recipient status check for selected domains, include the domains
 in the control file
 .IR chkrcptdomains .
-Check the \fBCONTROL FILES\fR section below for the syntax for \fIchkrcptdomains\fR control file.
-If the control file 
-.I chkrcptdomains
-is absent, the  User Status Check is turned on for all domains.  If the environment variable
-.B MAX_RCPT_ERRCOUNT
-is set, 
-.B qmail-smtpd
-will reject mails if number of errors while doing User Status Check equals/exceeds the value defined by
-.BR MAX_RCPT_ERRCOUNT .
+Check the \fBCONTROL FILES\fR section below for the syntax for
+\fIchkrcptdomains\fR control file.
+
+If the control file \fIchkrcptdomains\fR is absent, the  recipient status
+check is turned on for all domains. If the environment variable
+\fBMAX_RCPT_ERRCOUNT\fR is set, \fBqmail-smtpd\fR will reject mails if number
+of errors while doing recipient status Check equals/exceeds the value defined
+by \fBBR MAX_RCPT_ERRCOUNT\fR.
+
+.IP \n+[step]
+.B Check Sender Status
+by looking up in the \fBMySQL\fR, status of the sender is determined before accepting the mails.
+For local senders, mail is accepted only if the recipient is an active user and does not have the
+NO_SMTP flag set for the user. If the CUGMAIL environment variable is defined, mails will be
+accepted only from local domains (defined in rcpthosts).
 
 .SH Database Connections
-If the environment variable \fBQUERY_CACHE\fR is defined, \fBqmail-smtpd\fR can use
-\fBinlookup(8)\fR, instead of directly connecting to MySQL, for all MySQL queries. This allows
-very a high queries per seconds to be achieved by avoiding frequent tearing down of TCP/IP
-connections. If \fBQUERY_CACHE\fR is not defined, \fBqmail-smtpd\fR will directly connect to
-MySQL and close the connection when the SMTP session ends.
+\fBqmail-smtpd\fR uses \fBinlookup(8)\fR, instead of directly connecting to
+MySQL. This allows very a high queries per seconds to be achieved by avoiding
+frequent tearing down of TCP/IP connections.
+
+For a non-distributed architecture, you need a local MySQL database. To connect to a MySQL
+database, you need to have a control file \fBhost\.mysql\fR. This control file contains the
+IP address/hostname of the MySQL database corresponding to the \fBlocal database\fR. If
+the control file \fBhost\.mysql\fR is missing, programs will use \fIlocalhost\fR to connect
+to MySQL. One can also use \fIhost:user:password:socket/port[:ssl]\fR format for \fBhost.mysql\fR.
+
+\fBinlookup\fR can be used to serve queries for multiple databases (as in a distributed architecture).
+The information of all databases that \fBinlookup\fR needs to connect to can maintained in the
+file \fBmcdinfo\R. Without this file, \fBinlookup\fR will use the \fIhost.mysql\R control file.
 
 The information of all the databases that
 .B qmail-smtpd
-needs to connect to is maintained in the file
+can connect to connect to can be maintained in the file
 .BR mcdinfo .
 You can use
 .B dbinfo(1)
@@ -1630,12 +1639,13 @@ the plugins using the \fBplugtest(1)\fR command.
 
 .SH Virtual Package Functionality
 \fBqmail-smtpd\fR can load an external library to add functionality. The virtual package
-can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR. This is set to
+can be loaded by setting the environment variable \fBVIRTUAL_PKG_LIB\fR or by using the
+control file \fIlibindimail\fR. The value in \fIlibindimail\fR is set to
 \fIlibindimail\fR.\fIso\fR by default.
 
 Following functions should be provided by the shared library
 parse_function(), vshow_atrn_map(), atrn_access(),
-vauth_open(), vclose(), vauth_getpw(), vget_real_domain()
+iopen(), iclose(), sql_getpw(), get_real_domain()
 
 .SH GREYLISTING
 .B qmail-smtpd
