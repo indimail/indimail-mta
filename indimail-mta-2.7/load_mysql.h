@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.3  2019-06-07 20:02:39+05:30  Cprogrammer
+ * fixed compilation warning for MYSQL_RES with mariadb
+ *
  * Revision 1.2  2019-04-21 10:28:17+05:30  Cprogrammer
  * include mysql.h for MYSQL definition
  *
@@ -11,8 +14,13 @@
 #define LOAD_MYSQL_H
 #include <mysql.h>
 
-typedef struct MYSQL_RES res;
 typedef unsigned int i_uint;
+#ifdef LIBMARIADB
+typedef struct st_mysql_res res;
+#else
+typedef struct MYSQL_RES res;
+#endif
+
 extern int      use_sql;
 extern MYSQL   *(*in_mysql_init) (MYSQL *);
 extern MYSQL   *(*in_mysql_real_connect) (MYSQL *, const char *, const char *, const char *, const char *, unsigned int, const char *, unsigned long);
