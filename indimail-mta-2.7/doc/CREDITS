@@ -13,11 +13,15 @@ was being done for my own personal use, over the years, I may have missed mentio
 has been written by others. In case you know that I have missed out giving credit to anyone for any of the code
 or idea, let me know and I will be glad to add it here.
 
-qmail, serialmail, qmailanalog, dotforward, fastforward, mess822, daemontools, ucspi-tcp,
-Indimail - Management of Virtual domains, Courier IMAP/POP3, Bogofilter - A Bayesian Spam Filter,
+ACKNOWLEDGEMENTS
+================
+I acknowledge all the following people, urls, packages, code mentioned below
+
+qmail, serialmail, qmailanalog, dotforward, fastforward, mess822, daemontools,
+ucspi-tcp, Courier IMAP/POP3, Bogofilter - A Bayesian Spam Filter,
 Fetchmail, other useful utilities
 
-Dr. Daniel Bernstein for the following original packages which are there at http://cr.yp.to
+I thank Dr. Daniel Bernstein for the following original packages at http://cr.yp.to
 
 1. qmail-1.03
 2. dotforward
@@ -49,7 +53,7 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 11. Andreas Aardal Hanssen - ext-todo and big-todo
 12. Bruce Guenter - QMAILQUEUE, qmail-qstat, Bigtodo Patch
 13. Bruce Guenter - rate limiting autoresponder based on Eric Huss's design
-14. Bruce Guenter  syncdir
+14. Bruce Guenter - syncdir
 15. Bruce Guenter - qmail-qfilter, QUEUE_EXTRA patch
 16. Dave Sill - Life with qmail, inst_check script
 17. Erwin Hoffman - QHPSI, Authenticated SMTP, RFC1870 SMTP SIZE, SPAMCONTROL, RECIPIENTS
@@ -158,3 +162,4 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 103.Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredto
 104.Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd),
     control/tlsservermethod (qmail-remote)
+105.Bruce Guenter - qmail-remote patch to reduce cpu
