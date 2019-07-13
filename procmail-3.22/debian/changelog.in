@@ -1,5 +1,0 @@
-procmail (@version@-1) stable; urgency=low
-
-  * debian subdir for debian builds
-
- -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 06 May 2011 08:19:03 +0530

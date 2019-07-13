@@ -1,6 +1,0 @@
-#!/usr/sbin/vtable
-spam
-(email char(64) not null,
-spam_count int not null,
-timestamp TIMESTAMP not null,
-index email (email), index spam_count (spam_count), index timestamp (timestamp))

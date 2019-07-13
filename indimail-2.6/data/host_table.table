@@ -1,5 +1,0 @@
-#!/usr/sbin/vtable
-host_table
-(host char(64) not null,
-ipaddr char(16) not null,
-primary key (host), index ipaddr (ipaddr))

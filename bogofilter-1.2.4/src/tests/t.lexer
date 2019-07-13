@@ -1,8 +1,0 @@
-#! /bin/sh
-
-. ${srcdir:=.}/t.frame
-
-cat "$srcdir/inputs/lexer.inp" | $BOGOLEXER -p -C \
-| tee "$TMPDIR"/lexer.tmp | sort | uniq > "$TMPDIR/lexer.out"
-
-cmp "$OUTPUTS/lexer.out" "$TMPDIR/lexer.out"

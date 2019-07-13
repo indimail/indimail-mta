@@ -1,3 +1,0 @@
-usr/include @prefix@
-usr/share/man/man3 @prefix@/share/man
-usr/lib/*.so @prefix@/lib

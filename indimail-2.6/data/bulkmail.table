@@ -1,6 +1,0 @@
-#!/usr/sbin/vtable
-bulkmail
-(emailid char(107) not null,
-filename char(64) not null,
-zztimestamp TIMESTAMP not null,
-primary key(emailid, filename))

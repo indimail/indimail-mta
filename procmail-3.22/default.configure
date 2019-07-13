@@ -1,7 +1,0 @@
-#!/bin/sh
-if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-autoreconf -fiv
-fi
-./configure --prefix=/usr --enable-sendmail-prog=/usr/bin/sendmail \
-	--sysconfdir=/etc/indimail
-

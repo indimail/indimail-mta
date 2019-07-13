@@ -1,6 +1,0 @@
-#!/usr/sbin/vtable
-smtp_table
-(host char(64) not null,
-src_host char(64) not null,
-domain char(64) not null, port int,
-primary key (domain, host, src_host))

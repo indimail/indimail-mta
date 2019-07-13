@@ -1,8 +1,0 @@
-etc/indimail/default.config /etc/indimail
-etc/indimail/default.profile /etc/indimail
-etc/indimail/filemanrc /etc/indimail
-etc/indimail/termdefs.txt /etc/indimail
-usr/bin /usr
-usr/lib /usr
-usr/libexec/indimail /usr/libexec
-usr/share/indimail /usr/share

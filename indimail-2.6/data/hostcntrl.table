@@ -1,8 +1,0 @@
-#!/usr/sbin/vtable
-hostcntrl
-(pw_name char(40) not null,
-pw_domain char(67) not null,
-pw_passwd char(128) not null,
-host char(64) not null,
-timestamp datetime DEFAULT "0000-00-00 00:00:00" NOT NULL,
-primary key (pw_name, pw_domain))

@@ -1,7 +1,0 @@
-#!/usr/sbin/vtable
-vpriv
-(user        char(32) not null,
-program     char(64) not null,
-cmdswitches char(128),
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
-primary key(user, program))

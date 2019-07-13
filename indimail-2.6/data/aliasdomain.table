@@ -1,5 +1,0 @@
-#!/usr/sbin/vtable
-aliasdomain
-(alias char(64) not null,
-domain char(67),
-primary key(alias))

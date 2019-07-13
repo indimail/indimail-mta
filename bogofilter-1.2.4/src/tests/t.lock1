@@ -1,6 +1,0 @@
-#! /bin/sh
-
-. ${srcdir:=.}/t.frame
-
-# this test checks that bogofilter -u works
-$VAL $BOGOFILTER -u -p -e -d "$TMPDIR" -C < /dev/null > /dev/null

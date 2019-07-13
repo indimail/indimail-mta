@@ -1,6 +1,0 @@
-#!/usr/sbin/vtable
-ip_alias_map
-(ipaddr char(18) not null,
-domain char(67),
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
-primary key(ipaddr))

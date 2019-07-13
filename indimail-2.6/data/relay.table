@@ -1,6 +1,0 @@
-#!/usr/sbin/vtable
-relay
-(email char(96) not null,
-ipaddr char(18) not null,
-timestamp int,
-unique index (email, ipaddr), index(ipaddr), index(timestamp))

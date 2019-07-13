@@ -1,7 +1,0 @@
-#!/usr/sbin/vtable
-userquota
-(user char(40) not null,
-domain char(67) not null,
-quota bigint unsigned not null,
-timestamp datetime DEFAULT "0000-00-00 00:00:00" NOT NULL,
-primary key(user, domain), index quota (quota))

@@ -1,7 +1,0 @@
-#!/usr/sbin/vtable
-atrn
-(pw_name char(40) not null,
-pw_domain char(67) not null,
-domain_list char(67),
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
-unique index atrnmap (pw_name, pw_domain, domain_list))

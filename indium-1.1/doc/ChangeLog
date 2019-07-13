@@ -1,8 +1,0 @@
-* Mon Jun 06 2016 mbhangui@gmail.com @release@
-Version 1.0 Release 1.0-1.3 Start 21/02/2009
-21/02/2009
-1.  Created configure, Makefile.am
-2.  Create spam, nonspam, register-spam, register-nonspam ids by default
-06/06/2016
-3.  FHS version
-4.  upgraded to secpanel 0.6.0

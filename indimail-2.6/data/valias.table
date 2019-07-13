@@ -1,7 +1,0 @@
-#!/usr/sbin/vtable
-valias
-(alias  char(40) not null,
-domain char(67) not null,
-valias_line char(254) not null,
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
-unique index(alias, domain, valias_line), index (alias, domain))
