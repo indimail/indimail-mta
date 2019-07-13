@@ -1,5 +1,11 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.15  2019-06-26 19:08:18+05:30  Cprogrammer
+ * added sBouncedAddr variable for X-Bounced-Address header added by qmail-send for bounces
+ *
+ * Revision 1.14  2019-06-24 22:22:15+05:30  Cprogrammer
+ * use DKIMDOMAIN only if Return-Path, From, Sender header are empty
+ *
  * Revision 1.13  2018-08-25 18:01:59+05:30  Cprogrammer
  * fixed dkim signing for From address containing company name
  *
@@ -273,6 +279,9 @@ ConvertHeaderToQuotedPrintable(const char *source, char *dest)
 void
 CDKIMSign::GetHeaderParams(const string & sHdr)
 {
+	if (_strnicmp(sHdr.c_str(), "X-Bounced-Address:", 18) == 0)
+		sBouncedAddr.assign(sHdr.c_str() + 21);
+	else
 	if (_strnicmp(sHdr.c_str(), "X", 1) == 0)
 		return;
 	if (_strnicmp(sHdr.c_str(), "From:", 5) == 0)
@@ -326,7 +335,7 @@ CDKIMSign::ProcessHeaders(void)
 				bFromHeaderFound = true;
 				nSignThisTag = 1;
 				IsRequiredHeader(sTag);	// remove from required header list
-			} 
+			}
 			// is this in the list of headers that must be signed?
 			else
 			if (IsRequiredHeader(sTag))
@@ -473,6 +482,9 @@ bool CDKIMSign::ParseFromAddress(void)
 	else
 	if (!sFrom.empty())
 		sAddress.assign(sFrom);
+	else /* use indimail's X-Bounced-Address header to find the domain that injected the bounce */
+	if (!sBouncedAddr.empty())
+		sAddress.assign(sBouncedAddr);
 	else
 		return false;
 	// simple for now, beef it up later
@@ -489,17 +501,18 @@ bool CDKIMSign::ParseFromAddress(void)
 	if (pos == string::npos)
 		return false;
 	if (sDomain.empty()) {
-		p = getenv("DKIMDOMAIN");
-		if (p && *p)
-		{
-			if (!(at = strchr(p, '@')))
-				at = p;
-			else
-				at++;
-			sDomain.assign(at);
-		} else
-			sDomain.assign(sAddress.c_str() + pos + 1);
+		sDomain.assign(sAddress.c_str() + pos + 1);
 		RemoveSWSP(sDomain);
+		if (sDomain.empty()) {
+			p = getenv("DKIMDOMAIN");
+			if (p && *p) {
+				if (!(at = strchr(p, '@')))
+					at = p;
+				else
+					at++;
+				sDomain.assign(at);
+			}
+		}
 	}
 	return true;
 }
@@ -1002,7 +1015,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.13 2018-08-25 18:01:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.15 2019-06-26 19:08:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
