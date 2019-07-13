@@ -1,5 +1,11 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.23  2019-06-26 18:39:43+05:30  Cprogrammer
+# use DEFAULT_DKIM_KEY env variable for default signing key
+#
+# Revision 1.22  2019-06-24 23:19:57+05:30  Cprogrammer
+# added code for -d option in DKIMSIGNOPTIONS
+#
 # Revision 1.21  2019-01-14 00:10:00+05:30  Cprogrammer
 # added -S, -f option to verify signatures with unsigned subject, unsigned from
 #
@@ -66,7 +72,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.21 2019-01-14 00:10:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.23 2019-06-26 18:39:43+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -76,6 +82,11 @@ dksign=0
 dkimsign=0
 dkverify=0
 dkimverify=0
+if [ -z "$DEFAULT_DKIM_KEY" ] ; then
+	default_key=$CONTROLDIR/domainkeys/default
+else
+	default_key=$DEFAULT_DKIM_KEY
+fi
 if [ " $CONTROLDIR" = " " ] ; then
 	CONTROLDIR=@controldir@
 fi
@@ -117,7 +128,7 @@ if [ ! -z "$DKSIGN" ] ; then
 		dkkeyfn=$DKSIGN
 	fi
 	if [ $dksign -eq 2 -a ! -f $dkkeyfn ] ; then
-		dkkeyfn=$CONTROLDIR/domainkeys/default
+		dkkeyfn=$default_key
 	fi
 	if [ -f $dkkeyfn ] ; then
 		dksign=1
@@ -147,7 +158,7 @@ if [ ! -z "$DKIMSIGN" ] ; then
 		dkimkeyfn=$DKIMSIGN
 	fi
 	if [ $dkimsign -eq 2 -a ! -f $dkimkeyfn ] ; then
-		dkimkeyfn=$CONTROLDIR/domainkeys/default
+		dkimkeyfn=$default_key
 	fi
 	if [ -f $dkimkeyfn ] ; then
 		dkimsign=1
@@ -207,6 +218,11 @@ if [ $dkimsign -eq 1 ] ; then
 
 		-c)
 		dkimopts="$dkimopts -c $2"
+		shift
+		;;
+
+		-d)
+		dkimopts="$dkimopts -d $2"
 		shift
 		;;
 
@@ -275,6 +291,7 @@ if [ $dksign -eq 1 ] ; then
 		-h)
 		dkopts="$dkopts -h"
 		;;
+
 		-r)
 		dkopts="$dkopts -r"
 		;;
