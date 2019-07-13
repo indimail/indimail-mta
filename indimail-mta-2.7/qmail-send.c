@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.65  2019-06-26 18:45:51+05:30  Cprogrammer
+ * insert X-Bounced-Address header for bounces
+ *
  * Revision 1.64  2018-07-03 01:59:03+05:30  Cprogrammer
  * fixed indentation
  *
@@ -1017,6 +1020,7 @@ job_close(j)
 
 /*- this file is too long ------------------------------------------- BOUNCES */
 
+/*- strip the virtual domain which is prepended to addresses e.g. xxx.com-user01@xxx.com */
 char           *
 stripvdomprepend(recip)
 	char           *recip;
@@ -1049,7 +1053,12 @@ stripvdomprepend(recip)
 }
 
 stralloc        bouncetext = { 0 };
+stralloc        orig_recip = { 0 };
 
+/*
+ * prepare bounce txt with the following format
+ * user@domain:\nbounce_report
+ */
 void
 addbounce(id, recip, report)
 	unsigned long   id;
@@ -1060,7 +1069,7 @@ addbounce(id, recip, report)
 	int             pos;
 	int             w;
 
-	while (!stralloc_copys(&bouncetext, "<"))
+	while (!stralloc_copyb(&bouncetext, "<", 1))
 		nomem();
 	while (!stralloc_cats(&bouncetext, stripvdomprepend(recip)))
 		nomem();
@@ -1068,19 +1077,23 @@ addbounce(id, recip, report)
 		if (bouncetext.s[pos] == '\n')
 			bouncetext.s[pos] = '_';
 	}
-	while (!stralloc_cats(&bouncetext, ">:\n"))
+	while (!stralloc_copy(&orig_recip, &bouncetext))
+		nomem();
+	while (!stralloc_catb(&orig_recip, ">\n", 2))
+		nomem();
+	while (!stralloc_catb(&bouncetext, ">:\n", 3))
 		nomem();
 	while (!stralloc_cats(&bouncetext, report))
 		nomem();
 	if (report[0] && report[str_len(report) - 1] != '\n') {
-		while (!stralloc_cats(&bouncetext, "\n"))
+		while (!stralloc_append(&bouncetext, "\n"))
 			nomem();
 	}
 	for (pos = bouncetext.len - 2; pos > 0; --pos) {
 		if (bouncetext.s[pos] == '\n' && bouncetext.s[pos - 1] == '\n')
 			bouncetext.s[pos] = '/';
 	}
-	while (!stralloc_cats(&bouncetext, "\n"))
+	while (!stralloc_append(&bouncetext, "\n"))
 		nomem();
 	fnmake2_bounce(id);
 	for (;;) {
@@ -1151,13 +1164,11 @@ injectbounce(id)
 	static stralloc qqeh = { 0 };
 	static stralloc envh = { 0 };
 	static stralloc quoted = { 0 };
-	static stralloc orig_recip = { 0 };
 	datetime_sec    birth;
 	substdio        ssread;
 	char            buf[128], inbuf[128];
 	char           *bouncesender, *bouncerecip = "", *brep = "?", *p;
-	int             r = -1;
-	int             fd, ret;
+	int             r = -1, fd, ret;
 	unsigned long   qp;
 #ifdef MIME
 	stralloc        boundary = { 0 };
@@ -1314,7 +1325,11 @@ injectbounce(id)
 		while (!newfield_datemake(now()))
 			nomem();
 		qmail_put(&qqt, newfield_date.s, newfield_date.len);
-		qmail_puts(&qqt, "From: ");
+		if (orig_recip.len) {
+			qmail_put(&qqt, "X-Bounced-Address: ", 19);
+			qmail_put(&qqt, orig_recip.s, orig_recip.len);
+		}
+		qmail_put(&qqt, "From: ", 6);
 		while (!quote(&quoted, &bouncefrom))
 			nomem();
 		qmail_put(&qqt, quoted.s, quoted.len);
@@ -1379,6 +1394,11 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			}
 			while (!stralloc_0(&orig_recip))
 				nomem();
+			/*- 
+			 * orig_recip is of the form orig_recipient:\nbounce_recipient
+			 * remove :\nbounce_report from orig_recip to get the original
+			 * recipient
+			 */
 			for (brep = orig_recip.s; *brep != ':' && brep < orig_recip.s + orig_recip.len; brep++);
 			if (*brep == ':') {
 				*brep++ = 0;
@@ -1392,16 +1412,16 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		qmail_puts(&qqt,
 			*sender.s ? "--- Enclosed is a copy of the message.\n\n--" : "--- Enclosed is the original bounce.\n\n--");
 		qmail_put(&qqt, boundary.s, boundary.len);	/*- enclosure boundary */
-		qmail_puts(&qqt, "\nContent-Type: message/rfc822\n\n");
+		qmail_put(&qqt, "\nContent-Type: message/rfc822\n\n", 31);
 #else
 		qmail_puts(&qqt, 
 			*sender.s ? "--- Below this line is a copy of the message.\n\n" : "--- Below this line is the original bounce.\n\n");
 #endif
-		qmail_puts(&qqt, "Return-Path: <");
+		qmail_put(&qqt, "Return-Path: <", 14);
 		while (!quote2(&quoted, sender.s))
 			nomem();
 		qmail_put(&qqt, quoted.s, quoted.len);
-		qmail_puts(&qqt, ">\n");
+		qmail_put(&qqt, ">\n", 2);
 		if ((fd = open_read(fn.s)) == -1)
 			qmail_fail(&qqt);
 		else {
@@ -2906,7 +2926,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.64 2018-07-03 01:59:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.65 2019-06-26 18:45:51+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
