@@ -1,5 +1,8 @@
 /*
  * $Log: inotify.c,v $
+ * Revision 1.6  2019-06-24 23:29:35+05:30  Cprogrammer
+ * added notifications for open and delete
+ *
  * Revision 1.5  2017-05-12 19:01:46+05:30  Cprogrammer
  * use compile time inotify(7) api
  *
@@ -96,7 +99,7 @@ main(int argc, char **argv)
 		if (access(argv[optind], F_OK))
 			strerr_die2sys(111, FATAL, argv[optind]);
 		/*- adding a directory into watch list.  */
-		if ((wd[optind - _soptind] = inotify_add_watch(ifd, argv[optind], IN_CREATE | IN_CLOSE_WRITE| IN_DELETE)) == -1)
+		if ((wd[optind - _soptind] = inotify_add_watch(ifd, argv[optind], IN_CREATE | IN_OPEN| IN_CLOSE_WRITE| IN_DELETE)) == -1)
 			strerr_die4sys(111, FATAL, "inotify_add_watch: ", argv[optind], ": ");
 	}
 	if (substdio_flush(subfdout) == -1)
@@ -207,6 +210,36 @@ main(int argc, char **argv)
 							strerr_die2sys(111, FATAL, "write: ");
 					}
 				} else
+				if (event->mask & IN_OPEN) {
+					if (event->mask & IN_ISDIR) {
+						out("dir  ");
+						out(event->name);
+						out(" opened\n");
+						if (substdio_flush(subfdout) == -1)
+							strerr_die2sys(111, FATAL, "write: ");
+					} else {
+						out("file ");
+						out(event->name);
+						out(" opened\n");
+						if (substdio_flush(subfdout) == -1)
+							strerr_die2sys(111, FATAL, "write: ");
+					}
+				} else
+				if (event->mask & IN_DELETE) {
+					if (event->mask & IN_ISDIR) {
+						out("dir  ");
+						out(event->name);
+						out(" deleted\n");
+						if (substdio_flush(subfdout) == -1)
+							strerr_die2sys(111, FATAL, "write: ");
+					} else {
+						out("file ");
+						out(event->name);
+						out(" deleted\n");
+						if (substdio_flush(subfdout) == -1)
+							strerr_die2sys(111, FATAL, "write: ");
+					}
+				} else
 				if (event->mask & IN_CLOSE_WRITE) {
 					if (event->mask & IN_ISDIR) {
 						out("dir  ");
@@ -262,7 +295,7 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	static char    *x = "$Id: inotify.c,v 1.5 2017-05-12 19:01:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inotify.c,v 1.6 2019-06-24 23:29:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
