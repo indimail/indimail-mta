@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.13  2019-06-07 19:17:47+05:30  Cprogrammer
+ * return error if shared lib is missing
+ *
  * Revision 1.12  2019-05-28 10:24:03+05:30  Cprogrammer
  * assign error to error buffer in getlibObject()
  *
@@ -188,7 +191,7 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 		*errflag = -1;
 	if (errstr)
 		*errstr = (char *) 0;
-	if (access(ptr, R_OK)) {
+	if (*libenv != '/' && access(ptr, R_OK)) {
 		if (errflag)
 			*errflag = errno;
 		if (!stralloc_copys(&errbuf, error_str(errno)) ||
@@ -205,12 +208,6 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 #else
 	if (!(*handle = dlopen(ptr, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
-		if (errno == 2 && errflag) {
-			*errflag = 0;
-			if (errstr)
-				*errstr = (char *) 0;
-			return ((void *) 0);
-		}
 		if (!stralloc_copys(&errbuf, dlerror()) ||
 				!stralloc_0(&errbuf)) {
 			if (errstr)
@@ -255,7 +252,13 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 			*errstr = memerr;
 	}
 	ptr = dlerror();
-	if (!i && !stralloc_cats(&errbuf, ptr)) {
+	if (!i && ptr && !stralloc_cats(&errbuf, ptr)) {
+		if (errstr)
+			*errstr = memerr;
+	} else
+	if (!i)
+		errbuf.len--;
+	if (!i && !stralloc_0(&errbuf)) {
 		if (errstr)
 			*errstr = memerr;
 	}
@@ -859,7 +862,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.12 2019-05-28 10:24:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.13 2019-06-07 19:17:47+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
