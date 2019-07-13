@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.30  2019-07-08 16:09:39+05:30  Cprogrammer
+ * to not parse mail header in qmail-inject if -a is given
+ *
  * Revision 1.29  2018-05-01 01:42:41+05:30  Cprogrammer
  * indented code
  *
@@ -703,16 +706,19 @@ doheaderfield(h)
 	{
 	case H_TO:
 	case H_CC:
-		rw = rwtocc;
+		if (flagrh)
+			rw = rwtocc;
 		break;
 	case H_BCC:
 	case H_APPARENTLYTO:
-		rw = rwhr;
+		if (flagrh)
+			rw = rwhr;
 		break;
 	case H_R_TO:
 	case H_R_CC:
 	case H_R_BCC:
-		rw = rwhrr;
+		if (flagrh)
+			rw = rwhrr;
 		break;
 	case H_RETURNPATH:
 		rw = rwreturn;
@@ -1272,7 +1278,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.29 2018-05-01 01:42:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.30 2019-07-08 16:09:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
