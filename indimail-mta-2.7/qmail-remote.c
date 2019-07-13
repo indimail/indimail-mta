@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.130 2018-06-27 19:54:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.131 2019-07-09 10:24:29+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -964,31 +964,40 @@ quit(char *prepend, char *append, int code, int die)
 void
 blast()
 {
-	int             r;
-	char            ch;
+	int             r, i, j, sol;
+	char            in[4096], out[4096 * 2 + 1];
 
 	for (r = 0; r < qqeh.len; r++) {
 		if (qqeh.s[r] == '\n')
 			substdio_put(&smtpto, "\r", 1);
 		substdio_put(&smtpto, qqeh.s + r, 1);
 	}
-	for (;;) {
-		if (!(r = substdio_get(&ssin, &ch, 1)))
+	for (sol = 1;;) {
+		if (!(r = substdio_get(&ssin, in, sizeof(in))))
 			break;
 		if (r == -1)
 			temp_read();
-		if (ch == '.')
-			substdio_put(&smtpto, ".", 1);
-		while (ch != '\n') {
-			substdio_put(&smtpto, &ch, 1);
-			r = substdio_get(&ssin, &ch, 1);
-			if (r == 0)
-				perm_partialline();
-			if (r == -1)
-				temp_read();
-		}
-		substdio_put(&smtpto, "\r\n", 2);
+		for (i = j = 0; i < r; ) {
+			if (sol && in[i] == '.') {
+				out[j++] = '.';
+				out[j++] = in[i++];
+			}
+			sol = 0;
+			while (i < r) {
+				if (in[i] == '\n') {
+					i++;
+					sol = 1;
+					out[j++] = '\r';
+					out[j++] = '\n';
+					break;
+				}
+				out[j++] = in[i++];
+			} /*- while (i < r) */
+		} /*- for (i = o = 0; i < r; ) */
+		substdio_put(&smtpto, out, j);
 	}
+	if (!sol)
+		perm_partialline();
 	flagcritical = 1;
 	substdio_put(&smtpto, ".\r\n", 3);
 	substdio_flush(&smtpto);
@@ -3478,7 +3487,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.130 2018-06-27 19:54:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.131 2019-07-09 10:24:29+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3486,6 +3495,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.131  2019-07-09 10:24:29+05:30  Cprogrammer
+ * speed up blast() function by reading in chunks of 4096 bytes
+ *
  * Revision 1.130  2018-06-27 19:54:17+05:30  Cprogrammer
  * use TLSA only if TLS is defined
  *
