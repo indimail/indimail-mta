@@ -1,5 +1,11 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.62  2019-07-10 13:42:39+05:30  Cprogrammer
+ * fixed wrong child exit status in logs
+ *
+ * Revision 1.61  2019-06-07 19:20:54+05:30  Cprogrammer
+ * print MySQL load status
+ *
  * Revision 1.60  2019-05-26 12:04:50+05:30  Cprogrammer
  * use /etc/indimail/control as controldir
  *
@@ -203,7 +209,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.60 2019-05-26 12:04:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.62 2019-07-10 13:42:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1070,7 +1076,7 @@ printstatus(void)
 		return;
 	strnum[fmt_ulong(strnum, numchildren)] = 0;
 	strnum2[fmt_ulong(strnum2, limit)] = 0;
-	strerr_warn4("tcpserver: status: ", strnum, "/", strnum2, 0);
+	strerr_warn5("tcpserver: status: ", strnum, "/", strnum2, use_sql ? " sql: 1" : " sql: 0", 0);
 }
 
 void
@@ -1269,14 +1275,18 @@ sighangup()
 void
 sigchld()
 {
-	int             wstat;
-	int             pid;
+	int             i, wstat, pid;
 
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		if (verbosity >= 2) {
 			strnum[fmt_ulong(strnum, pid)] = 0;
-			strnum2[fmt_ulong(strnum2, wstat)] = 0;
-			strerr_warn4("tcpserver: end ", strnum, " status ", strnum2, 0);
+			if (wait_crashed(wstat))
+				strerr_warn3("tcpserver: end ", strnum, " status crashed", 0);
+			else
+			if ((i = wait_exitcode(wstat))) {
+				strnum2[fmt_ulong(strnum2, i)] = 0;
+				strerr_warn4("tcpserver: end ", strnum, " status ", strnum2, 0);
+			}
 		}
 		if (numchildren) {
 			--numchildren;
