@@ -74,11 +74,8 @@ Similarly,
 takes precedence over -x option specifed in
 .BR DKIMSIGNOPTIONS.
 .B qmail-dkim
-uses the domain found in the Sender: header to set the domain tag. If not it uses the
-From: header. You can override this by setting 
-.B DKIMDOMAIN
-environment variable.
-.B DKIMDOMAIN
+uses the domain found in the Return-Path, Sender, From headers to set the domain tag.
+If not it uses the \fBDKIMDOMAIN\fR environment variable. \fBDKIMDOMAIN\fR
 can be set to an email address or a domain (without the at sign).
 
 To verify a message, set the
@@ -160,7 +157,8 @@ rejected later at delivery time, or in the mail reader. In that case you may set
 .B DKIMVERIFY
 to an empty string. If you want to check all message's From header in signature set the
 \fBUNSIGNED_FROM\fR environment variable to an empty string. If you want to check messages
-without signed subject header, set \fBUNSIGNED_SUBJECT\fR environment variable.
+without signed subject header, set \fBUNSIGNED_SUBJECT\fR environment variable. If you want
+to honor body lengh tag (l=), set \fBHONOR_BODYLENGTHTAG\fR environment variable.
 
 qmail-dkim supports signing practice which can be additonall checked when a signature
 verifcation fails -
