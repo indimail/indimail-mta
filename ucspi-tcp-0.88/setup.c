@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.8  2019-07-13 10:19:55+05:30  Cprogrammer
+ * removed dummy bsd style install output
+ *
  * Revision 1.7  2017-05-02 11:26:07+05:30  Cprogrammer
  * fix for destdir
  *
@@ -25,6 +28,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
 #include "buffer.h"
 #include "fmt.h"
 #include "stralloc.h"
@@ -37,7 +42,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-void            dd(char *, int, int, int, char *, char *);
+void            dd(int, int, int, char *, char *);
 void            df(int, int, int, char *, char *, char *, int);
 extern void     hier(char *, char *);
 
@@ -51,10 +56,12 @@ stralloc        dird = { 0 };
 
 int             fdsourcedir = -1;
 uid_t           my_uid;
+gid_t           my_gid;
+char           *mailuser;
+char           *mailgroup;
 
 void
-dd(cmd, uid, gid, mode, home, subdir)
-	char           *cmd;
+dd(uid, gid, mode, home, subdir)
 	int             uid;
 	int             gid;
 	int             mode;
@@ -65,60 +72,46 @@ dd(cmd, uid, gid, mode, home, subdir)
 	int             d, i, count;
 	static char     strnum[FMT_ULONG];
 
-	buffer_puts(buffer_2, cmd);
-	buffer_puts(buffer_2, " -m ");
+	buffer_puts(buffer_1, "makedir -mode ");
 	d = mode;
-	for(count = i = 0;d != 0 && i < 3;++i)
-	{
+	for(count = i = 0;d != 0 && i < 3;++i) {
 		a[i] = d % 8;
 		d /= 8;
 		count += 1;
 	}
-	buffer_puts(buffer_2, "0");
-	for(i = count - 1;i >= 0;--i)
-	{
+	buffer_puts(buffer_1, "0");
+	for(i = count - 1;i >= 0;--i) {
 		strnum[fmt_ulong(strnum, a[i])] = 0;
-		buffer_puts(buffer_2, strnum);
+		buffer_puts(buffer_1, strnum);
 	}
-	buffer_puts(buffer_2, " ");
-	buffer_puts(buffer_2, home);
-	if (subdir)
-	{
-		buffer_puts(buffer_2, "/");
-		buffer_puts(buffer_2, subdir);
+	buffer_puts(buffer_1, " -user ");
+	buffer_puts(buffer_1, mailuser);
+	buffer_puts(buffer_1, " -group ");
+	buffer_puts(buffer_1, mailgroup);
+	buffer_puts(buffer_1, " ");
+	buffer_puts(buffer_1, home);
+	if (subdir) {
+		buffer_puts(buffer_1, "/");
+		buffer_puts(buffer_1, subdir);
 	}
-	buffer_puts(buffer_2, "\n");
-	if (uid != -1 && gid != -1)
-	{
-		buffer_puts(buffer_2, "/usr/bin/chown ");
-		buffer_puts(buffer_2, "-1:-1 ");
-		buffer_puts(buffer_2, home);
-		if (subdir)
-		{
-			buffer_puts(buffer_2, "/");
-			buffer_puts(buffer_2, subdir);
-		}
-		buffer_puts(buffer_2, "\n");
-	}
-	buffer_flush(buffer_2);
+	buffer_puts(buffer_1, "\n");
+	buffer_flush(buffer_1);
 }
 
 void
-dl(cmd, home, subdir, target)
-	char           *cmd;
+dl(home, subdir, target)
 	char           *home;
 	char           *subdir;
 	char           *target;
 {
-	buffer_puts(buffer_2, cmd);
-	buffer_puts(buffer_2, " ");
-	buffer_puts(buffer_2, target);
-	buffer_puts(buffer_2, " ");
-	buffer_puts(buffer_2, home);
-	buffer_puts(buffer_2, "/");
-	buffer_puts(buffer_2, subdir);
-	buffer_puts(buffer_2, "\n");
-	buffer_flush(buffer_2);
+	buffer_puts(buffer_1, "makesymlink -target ");
+	buffer_puts(buffer_1, target);
+	buffer_puts(buffer_1, " link ");
+	buffer_puts(buffer_1, home);
+	buffer_puts(buffer_1, "/");
+	buffer_puts(buffer_1, subdir);
+	buffer_puts(buffer_1, "\n");
+	buffer_flush(buffer_1);
 }
 
 void
@@ -135,35 +128,35 @@ df(uid, gid, mode, file, home, subdir, strip)
 	int             d, i, count;
 	static char     strnum[FMT_ULONG];
 
-	buffer_puts(buffer_2, "/usr/bin/install -c ");
-	if (uid != -1 && gid != -1)
-		buffer_puts(buffer_2, "-o -1 -g -1 ");
-	buffer_puts(buffer_2, "-m ");
+	buffer_puts(buffer_1, "install -user ");
+	buffer_puts(buffer_1, mailuser);
+	buffer_puts(buffer_1, " -group ");
+	buffer_puts(buffer_1, mailgroup);
+	buffer_puts(buffer_1, " -mode ");
 	d = mode;
-	for(count = i = 0;d != 0 && i < 3;++i)
-	{
+	for(count = i = 0;d != 0 && i < 3;++i) {
 		a[i] = d % 8;
 		d /= 8;
 		count += 1;
 	}
-	buffer_puts(buffer_2, "0");
+	buffer_puts(buffer_1, "0");
 	for(i = count - 1;i >= 0;--i)
 	{
 		strnum[fmt_ulong(strnum, a[i])] = 0;
-		buffer_puts(buffer_2, strnum);
+		buffer_puts(buffer_1, strnum);
 	}
-	buffer_puts(buffer_2, " ");
+	buffer_puts(buffer_1, " -source ");
+	buffer_puts(buffer_1, file);
 	if (strip)
-		buffer_puts(buffer_2, "-s ");
-	buffer_puts(buffer_2, file);
-	buffer_puts(buffer_2, " ");
-	buffer_puts(buffer_2, home);
-	buffer_puts(buffer_2, "/");
-	buffer_puts(buffer_2, subdir);
-	buffer_puts(buffer_2, "/");
-	buffer_puts(buffer_2, file);
-	buffer_puts(buffer_2, "\n");
-	buffer_flush(buffer_2);
+		buffer_puts(buffer_1, " -strip ");
+	buffer_puts(buffer_1, " -dest ");
+	buffer_puts(buffer_1, home);
+	buffer_puts(buffer_1, "/");
+	buffer_puts(buffer_1, subdir);
+	buffer_puts(buffer_1, "/");
+	buffer_puts(buffer_1, file);
+	buffer_puts(buffer_1, "\n");
+	buffer_flush(buffer_1);
 }
 
 int
@@ -232,7 +225,7 @@ h(home, uid, gid, mode)
 		strerr_die4sys(111, FATAL, "unable to chown ", tmpdir.s, ": ");
 	if (!my_uid && chmod(tmpdir.s, mode) == -1)
 		strerr_die4sys(111, FATAL, "unable to chmod ", tmpdir.s, ": ");
-	dd("/usr/bin/mkdir", uid, gid, mode, tmpdir.s, 0);
+	dd(uid, gid, mode, tmpdir.s, 0);
 }
 
 void
@@ -276,7 +269,7 @@ d(home, subdir, uid, gid, mode)
 		strerr_die6sys(111, FATAL, "unable to chown ", dird.s, "/", subdir, ": ");
 	if (!my_uid && chmod(subdir, mode) == -1)
 		strerr_die6sys(111, FATAL, "unable to chmod ", dird.s, "/", subdir, ": ");
-	dd("/usr/bin/mkdir", uid, gid, mode, dird.s, subdir);
+	dd(uid, gid, mode, dird.s, subdir);
 }
 
 char            inbuf[BUFFER_INSIZE];
@@ -297,13 +290,8 @@ c(home, subdir, file, uid, gid, mode)
 	char           *subd;
 	struct stat     st;
 
-	if (!str_diff(subdir, "bin"))
+	if (!str_diff(subdir, "bin") || !str_diff(subdir, "sbin"))
 		is_prog = 1;
-	/*- for generating qmailprog.list */
-	if (is_prog) {
-		buffer_puts(buffer_1, file);
-		buffer_put(buffer_1, "\n", 1);
-	}
 	if (fchdir(fdsourcedir) == -1)
 		strerr_die2sys(111, FATAL, "unable to switch back to source directory: ");
 	if((fdin = open_read(file)) == -1)
@@ -380,8 +368,6 @@ c(home, subdir, file, uid, gid, mode)
 		strerr_die8sys(111, FATAL, "unable to chown ", tmpdir.s, "/", subd, "/", file, ": ");
 	if (!my_uid && chmod(file, mode) == -1)
 		strerr_die8sys(111, FATAL, "unable to chmod ", tmpdir.s, "/", subd, "/", file, ": ");
-	if (is_prog)
-		buffer_flush(buffer_1);
 	df(uid, gid, mode, file, tmpdir.s, subd, is_prog ? 1 : 0);
 }
 
@@ -389,6 +375,8 @@ int
 main(int argc, char **argv)
 {
 	int             opt;
+	struct passwd  *pw;
+	struct group   *gr;
 
 	while ((opt = getopt(argc, argv, "ld:s:")) != opteof) {
 		switch (opt) {
@@ -405,6 +393,13 @@ main(int argc, char **argv)
 	if (destdir && !*destdir)
 		destdir = 0;
 	my_uid = getuid();
+	my_gid = getgid();
+	if (!(pw = getpwuid(my_uid))) /*- we expect this user to be present on all linux distros */
+		strerr_die2sys(111, FATAL, "unable to get uids: ");
+	if (!(gr = getgrgid(my_gid)))
+		strerr_die2sys(111, FATAL, "unable to get gids: ");
+	mailgroup = gr->gr_name;
+	mailuser = pw->pw_name;
 	if ((fdsourcedir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	umask(077);
