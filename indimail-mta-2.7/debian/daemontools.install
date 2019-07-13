@@ -22,7 +22,6 @@ usr/bin/spipe /usr/bin
 usr/bin/qfilelog /usr/bin
 usr/bin/multipipe /usr/bin
 usr/bin/teepipe /usr/bin
-usr/bin/multitail /usr/bin
 usr/bin/logselect /usr/bin
 usr/bin/qlogselect /usr/bin
 usr/sbin/multilog /usr/sbin
@@ -38,7 +37,6 @@ usr/share/man/man1/spipe.1.gz /usr/share/man/man1
 usr/share/man/man1/qfilelog.1.gz /usr/share/man/man1
 usr/share/man/man1/multipipe.1.gz /usr/share/man/man1
 usr/share/man/man1/teepipe.1.gz /usr/share/man/man1
-usr/share/man/man1/multitail.1.gz /usr/share/man/man1
 usr/share/man/man1/qlogselect.1.gz /usr/share/man/man1
 usr/share/man/man1/tai2tai64n.1.gz /usr/share/man/man1
 usr/share/man/man1/tai64n2tai.1.gz /usr/share/man/man1
