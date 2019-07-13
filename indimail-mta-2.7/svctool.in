@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.442 2019-07-07 10:20:33+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,6 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
+RCSID="# \$Id: svctool.in,v 2.442 2019-07-07 10:20:33+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -710,9 +711,11 @@ Known values for OPTION are:
   service_path - Path where supervise scripts will be installed
   n            - Scan interval for mrtg command
 
---config=mysql|sqlssl|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
+--config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
   [--postmaster=user[@domain]]
   [--common_name=CN]
+  [--capath=ca_path_dir]
+  [--certdir=certdir]
   [--default-domain=domain]
   [--mysqlPrefix=mysqlPrefix]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
@@ -724,7 +727,7 @@ Known values for OPTION are:
 
   mysql          - Create @sysconfdir@/indimail.cnf
   mysqldb        - Create an initidalized MySQL db for IndiMail
-  sqlssl         - Create SSL/TLS Certs for MariaDB
+  ssl_rsa        - Create SSL/TLS Certs for MariaDB
   qmail          - Create default qmail control files
   users          - Create Internal System Users used by IndiMail
   rmusers        - Remove Internal System Users used by IndiMail
@@ -740,6 +743,8 @@ Known values for OPTION are:
   postmaster     - name of the user who will recieve bounces on the local host.
                    This can also be a remote user i.e. &postmaster@indi.com
   common_name    - Common Name (CN) for server
+  ca_path_dir    - Directory having CA certificate
+  certdir        - Directory in which new certificates will be placed
   default-domain - default domain name for which this host will handle mails
   mysqlPrefix    - Installation Prefix for mysql
   mysqlhost      - MySQL Host having authentication tables
@@ -792,8 +797,9 @@ Known values for OPTION are:
   postmaster - name of the user who will recieve the report.
   attach     - zip and send the report as an attachment
 
---check-certs
-  Check IndiMail Certificates in @sysconfdir@/certs
+--check-certs=[full path of certificatte]
+  Check certificate given as argument or
+  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
 
 --help
 
@@ -1579,8 +1585,8 @@ LIST="tcp.smtp tcp.qmtp tcp.qmqp"
 if [ -f "$DESTDIR"$QmailBinPrefix/bin/tcprules ] ; then
 	for i in $LIST
 	do
-		if [ -f "$DESTDIR"$sysconfdir/$i ] ; then
-    		t1=`date +'%s' -r "$DESTDIR"$sysconfdir/$i`
+		if [ -f "$DESTDIR"$sysconfdir/tcp/$i ] ; then
+    		t1=`date +'%s' -r "$DESTDIR"$sysconfdir/tcp/$i`
 		else
 			continue
 		fi
@@ -1590,8 +1596,8 @@ if [ -f "$DESTDIR"$QmailBinPrefix/bin/tcprules ] ; then
 			t2=0
 		fi
     	if [ $t1 -gt $t2 ] ; then
-		"$DESTDIR"$QmailBinPrefix/bin/tcprules "$DESTDIR"$sysconfdir/tcp/"$i".cdb \
-			"$DESTDIR"$sysconfdir/tcp/"$i".tmp < "$DESTDIR"$sysconfdir/tcp/$i
+			"$DESTDIR"$QmailBinPrefix/bin/tcprules "$DESTDIR"$sysconfdir/tcp/"$i".cdb \
+				"$DESTDIR"$sysconfdir/tcp/"$i".tmp < "$DESTDIR"$sysconfdir/tcp/$i
 		fi
 	done
 else
@@ -1689,7 +1695,7 @@ echo  $fifo_path > $conf_dir/LOGFILTER
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-logfifo/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "# $RCSID"
 echo "# $prog_args"
 echo ""
 echo "LOGFILTER=\`/bin/cat $SERVICEDIR/qmail-logfifo/variables/LOGFILTER\`"
@@ -1710,7 +1716,7 @@ fi
 #qmail-logfifo log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2077,7 +2083,7 @@ esac
 echo "$QmailBinPrefix/sbin/vchkpass $QmailBinPrefix/sbin/systpass" > $conf_dir/AUTHMODULES
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2140,7 +2146,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2453,7 +2459,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2494,7 +2500,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2568,7 +2574,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2586,7 +2592,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2659,7 +2665,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2677,7 +2683,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2758,7 +2764,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2781,7 +2787,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2899,7 +2905,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2955,7 +2961,7 @@ fi
 # qmail-[imapd|pop3d] log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3386,7 +3392,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3414,7 +3420,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3465,7 +3471,7 @@ $chown qscand "$DESTDIR"$SERVICEDIR/qscanq
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3485,7 +3491,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3533,7 +3539,7 @@ fi
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3598,7 +3604,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3628,7 +3634,7 @@ qsysconfdir=/etc # weird tha clamd and freshclam do not share the same dir for c
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3680,7 +3686,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3748,7 +3754,7 @@ fi
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3764,7 +3770,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3915,7 +3921,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3932,7 +3938,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3950,101 +3956,147 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 }
 
-create_mariadb_ssl_cnf()
-{
-if [ $# -ne 2 ] ; then
-	echo "USAGE: create_mariadb_ssl_cnf CN randfilename" 1>&2
-	return 1
-fi
-cn=$1
-randfile=$2
-echo
-echo "RANDFILE = $randfile"
-echo 
-echo "[ req ]"
-echo "default_bits = 4096"
-echo "encrypt_key = yes"
-echo "distinguished_name = req_dn"
-echo "prompt = no"
-echo "default_md = sha256"
-echo
-echo "[v3_req]"
-echo "subjectAltName = DNS:$cn"
-echo 
-echo "[ req_dn ]"
-echo "CN=$cn"
-echo 
-}
-
 mariadb_ssl_rsa_setup()
 {
-if [ $# -ne 1 ] ; then
-	echo "USAGE: mariadb_ssl_rsa_setup databasedir" 1>&2
+if [ $# -ne 2 ] ; then
+	echo "USAGE: mariadb_ssl_rsa_setup capath certdir" 1>&2
 	return 1
 fi
-if [ ! -d "$DESTDIR"$databasedir/ssl ] ; then
-	/bin/mkdir -p "$DESTDIR"$databasedir/ssl
+ca_path=$1
+certdir=$2
+if [ -z "$ca_path" ] ; then
+	ca_path="."
+fi
+if [ ! -d "$DESTDIR"$certdir ] ; then
+	/bin/mkdir -p "$DESTDIR"$certdir
 	if [ $? -ne 0 ] ; then
 		return 1
 	fi
+else
+	if [ -f "$DESTDIR"$certdir/client-cert.pem -o -f "$DESTDIR"$certdir/server-cert.pem ] ; then
+		if [ $force -ne 1 ] ; then
+			echo "SSL Certs exists. Remove client, server certs in "$DESTDIR"$certdir to proceed" 1>&2
+			return 1
+		fi
+	fi
 fi
-cd "$DESTDIR"$databasedir/ssl
-echo "Creating MariaDB SSL/TLS Certificates"
-echo pass@@xxx > passinput
-/usr/bin/openssl genrsa 2048 > ca-key.pem
-if [ $? -ne 0 ] ; then
-	echo "failed to create ca-key.pem" 1>&2
-	return 1
-fi
-create_mariadb_ssl_cnf "MariaDB admin" test1.rand > ssl.cnf
-/usr/bin/openssl req -new -x509 -nodes -days 365000 -key ca-key.pem -out ca.pem -passin file:./passinput -config ssl.cnf
-if [ $? -ne 0 ] ; then
-	/bin/rm -f test1.rand ssl.cnf
-	echo "failed to create ca.pem" 1>&2
-	return 1
-fi
-/bin/rm -f test1.rand ssl.cnf
 
-create_mariadb_ssl_cnf "MariaDB server" test2.rand > ssl.cnf
-/usr/bin/openssl req -newkey rsa:2048 -days 365000 -nodes -keyout server-key.pem -out server-req.pem -passin file:./passinput -config ssl.cnf
+if [ ! -f $ca_path/ca.pem -o ! -f $ca_path/ca-key.pem ] ; then
+	# create CA certificate with x509 v3 extension
+	if [ ! -d $ca_path ] ; then
+		mkdir -p $ca_path
+		if [ $? -ne 0 ] ; then
+			echo "Failed to create $ca_path" 1>&2
+			return 1
+		fi
+	fi
+	cd $ca_path
+	if [ $? -ne 0 ] ; then
+		echo "unable to cd to $ca_path" 1>&2
+		return 1
+	fi
+	echo "basicConstraints=CA:TRUE"  > cav3.ext
+	# Create CA
+	/usr/bin/openssl req -newkey rsa:2048 -days 3650 -nodes -keyout $ca_path/ca-key.pem \
+		-subj /CN=MariaDB_Auto_Generated_CA_Certificate -out $ca_path/ca-req.pem
+	if [ $? -ne 0 ] ; then
+		echo "failed to create ca-req.pem" 1>&2
+		/bin/rm -f $ca_path/cav3.ext
+		return 1
+	fi
+	/usr/bin/openssl rsa -in $ca_path/ca-key.pem -out $ca_path/ca-key.pem 
+	if [ $? -ne 0 ] ; then
+		echo "failed to create ca-key.pem" 1>&2
+		/bin/rm -f $ca_path/cav3.ext
+		return 1
+	fi
+	/usr/bin/openssl x509 -sha256 -days 3650 -extfile $ca_path/cav3.ext -set_serial 1 \
+		-req -in $ca_path/ca-req.pem -signkey $ca_path/ca-key.pem -out $ca_path/ca.pem
+	if [ $? -ne 0 ] ; then
+		echo "failed to create ca.pem" 1>&2
+		/bin/rm -f $ca_path/cav3.ext
+		return 1
+	fi
+	/bin/rm -f $ca_path/cav3.ext
+fi
+
+cd "$DESTDIR"$certdir
 if [ $? -ne 0 ] ; then
-	/bin/rm -f test2.rand ssl.cnf
-	echo "failed to create server-req.pem" 1>&2
+	echo "unable to cd to "$DESTDIR"$certdir" 1>&2
 	return 1
 fi
-/bin/rm -f test2.rand ssl.cnf
+
+# create certificats with x509 v3 extension
+echo "basicConstraints=CA:FALSE" > certv3.ext
+# Create Server Cert
+/usr/bin/openssl req -newkey rsa:2048 -days 3650 -nodes -keyout server-key.pem \
+	-subj /CN=MariaDB_Auto_Generated_Server_Certificate -out server-req.pem
+if [ $? -ne 0 ] ; then
+	echo "failed to create server-req.pem" 1>&2
+	/bin/rm -f certv3.ext
+	return 1
+fi
 /usr/bin/openssl rsa -in server-key.pem -out server-key.pem
 if [ $? -ne 0 ] ; then
 	echo "failed to create server-key.pem" 1>&2
+	/bin/rm -f certv3.ext
 	return 1
 fi
-/usr/bin/openssl x509 -req -in server-req.pem -days 365000 -CA ca.pem -CAkey ca-key.pem -set_serial 01 -out server-cert.pem
+/usr/bin/openssl x509 -sha256 -days 3650 -extfile certv3.ext -set_serial 2 -req \
+	-in server-req.pem -CA $ca_path/ca.pem -CAkey $ca_path/ca-key.pem -out server-cert.pem
 if [ $? -ne 0 ] ; then
 	echo "failed to create server-cert.pem" 1>&2
+	/bin/rm -f certv3.ext
 	return 1
 fi
 
-create_mariadb_ssl_cnf "MariaDB user" test3.rand > ssl.cnf
-/usr/bin/openssl req -newkey rsa:2048 -days 365000 -nodes -keyout client-key.pem -out client-req.pem -passin file:./passinput -config ssl.cnf
+# Create Client Cert
+/usr/bin/openssl req -newkey rsa:2048 -days 3650 -nodes -keyout client-key.pem \
+	-subj /CN=MariaDB_Auto_Generated_Client_Certificate -out client-req.pem
 if [ $? -ne 0 ] ; then
-	/bin/rm -f test3.rand ssl.cnf
 	echo "failed to create client-req.pem" 1>&2
+	/bin/rm -f certv3.ext
 	return 1
 fi
-/bin/rm -f test3.rand ssl.cnf passinput
 /usr/bin/openssl rsa -in client-key.pem -out client-key.pem
 if [ $? -ne 0 ] ; then
 	echo "failed to create client-key.pem" 1>&2
+	/bin/rm -f certv3.ext
 	return 1
 fi
-$chown indimail:qmail client-key.pem
-/bin/chmod 640 client-key.pem
-/usr/bin/openssl x509 -req -in client-req.pem -days 365000 -CA ca.pem -CAkey ca-key.pem -set_serial 01 -out client-cert.pem
+/usr/bin/openssl x509 -sha256 -days 3650 -extfile certv3.ext -set_serial 3 -req \
+	-in client-req.pem -CA $ca_path/ca.pem -CAkey $ca_path/ca-key.pem -out client-cert.pem
 if [ $? -ne 0 ] ; then
 	echo "failed to create client-cert.pem" 1>&2
+	/bin/rm -f certv3.ext
 	return 1
 fi
-/usr/bin/openssl verify -CAfile ca.pem server-cert.pem client-cert.pem
+/bin/rm -f certv3.ext
+
+# Verifiy the certificates
+/usr/bin/openssl verify -CAfile $ca_path/ca.pem server-cert.pem client-cert.pem
+
+# Generate public & private key
+/usr/bin/openssl genrsa  -out private_key.pem 2048
+/usr/bin/openssl rsa -in private_key.pem -pubout -out public_key.pem
+$chown mysql:mysql $ca_path/ca-key.pem $ca_path/ca.pem server-key.pem server-cert.pem \
+	client-key.pem client-cert.pem private_key.pem public_key.pem
+/bin/chmod 600 $ca_path/ca-key.pem server-key.pem client-key.pem private_key.pem
+/bin/chmod 644 $ca_path/ca.pem server-cert.pem client-cert.pem public_key.pem
+/bin/rm -f ca-req.pem server-req.pem client-req.pem
+echo ""
+echo "Verifying server and client certs with ca.pem"
+/usr/bin/openssl verify -CAfile $ca_path/ca.pem server-cert.pem client-cert.pem
+echo ""
+echo "ca.pem purpose"
+/usr/bin/openssl x509 -in $ca_path/ca.pem -noout -purpose
+echo ""
+echo "client-cert.pem purpose"
+/usr/bin/openssl x509 -in client-cert.pem -noout -purpose
+echo ""
+echo "server-cert.pem purpose"
+/usr/bin/openssl x509 -in server-cert.pem -noout -purpose
+return 0
 }
 
 mecho()
@@ -4137,7 +4189,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 	fi
 	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+		echo "$RCSID"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "$prog_args"
@@ -4168,6 +4220,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 				--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
 				--datadir="$DESTDIR"$databasedir/data --socket=$mysql_socket
 			if [ $? -ne 0 ] ; then
+				/bin/rm -f "$DESTDIR"$databasedir/mysql.init
 				if [ -z $install_db ] ; then
 					echo "couldn't locate db installation program" 1>&2
 					return 1
@@ -4179,11 +4232,14 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 			fi
 		fi
 		if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
-			echo "Creating MySQL SSL Certs"
-			echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data"
-			$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
+			if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
+				echo "Creating MySQL SSL Certs"
+				echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data"
+				$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
+			fi
 		elif [ $mariadb -eq 1 ] ; then
-			mariadb_ssl_rsa_setup "$DESTDIR"$databasedir
+			echo "Creating MariaDB SSL/TLS Certificates" 1>&2
+			mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl
 		fi
 		$chown -R mysql:mysql "$DESTDIR"$databasedir
 		#
@@ -4269,6 +4325,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 				echo "Creating GRANTS" 1>&2
 				(
 				mecho "GRANT ALL on *.* to mysql;"
+				mecho "GRANT USAGE ON *.* TO mysql WITH GRANT OPTION;"
 				mecho "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;"
 				mecho "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
 				mecho "GRANT REPLICATION SLAVE on *.* to repl;"
@@ -4291,7 +4348,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 		create_mysql_rootuser $mysql_version $mariadb $pass_str $auth_str $plugin_str \
 			| eval "$mysqlPrefix/$mysqld $opt_str"
 		#
-		# Start MySql daemon
+		# Start MySQL daemon
 		#
 		echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data"
 		echo -n "$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid"
@@ -4389,11 +4446,20 @@ else
 	if [ $? -ne 0 ] ; then
 		return 1
 	fi
+	# we found underscore in the variable name
+	# mysqld variables have hyphen '-' to its equivalent ini variable.
+	# replace '_' with '-' and perform check
+	# replace underscores only in the variable name and not in the
+	# variable value
+	orig=`echo $name` # remove trailing space in $name, if present
 	name=`echo $name|sed s{_{-{g`
 	$mysqlPrefix/$mysqld --no-defaults --verbose --help 2>/dev/null |grep -w "^$name" > /dev/null 2>&1
 	if [ $? -eq 0 ] ; then
-		if [ $should_print -ne 0 ] ; then
-			echo "$1" | sed s{_{-{g
+		if [ $should_print -eq 1 ] ; then
+			echo "$1" | sed s{"$orig"{"$name"{g
+		elif [ $should_print -eq 2 ] ; then
+			echo -n "# "
+			echo "$1" | sed s{"$orig"{"$name"{g
 		fi
 		return 0
 	fi
@@ -4421,16 +4487,16 @@ create_mysql_rootuser()
 	fi
 	echo "use mysql;"
 	# Create mysql user by replacing auto created user root
-	mecho "delete from user where user='';"
-	mecho "drop database if exists test;"
-	mecho "delete from db where db like 'test%';"
+	mecho "DELETE from user where user='';"
+	mecho "DROP database if exists test;"
+	mecho "DELETE from db where db like 'test%';"
 	#
 	# there is a race at oracle between the monkeys there to introduce
 	# incompatibilities from one version to another. You will not
 	# be surprised to see columns dissapear from system tables.
 	# 
 	c_d=""
-	c_d="$c_d update user set host='%', "
+	c_d="$c_d UPDATE user set host='%', "
 	if [ $pass_str -eq 1 ] ; then
 		c_d="$c_d Password=Password('$PRIV_PASS'), "
 	fi
@@ -4445,8 +4511,13 @@ create_mysql_rootuser()
 	c_d="$c_d user='mysql' where host='localhost' and user='root';"
 	mecho $c_d
 	c_d=""
-	c_d="$c_d delete from user where host != '%' and user != 'mysql.sys';"
+	c_d="$c_d DELETE from user where host != '%' and user != 'mysql.sys';"
 	mecho $c_d
+	if [ $mysql_version_8 -eq 1 ] ; then
+		c_d=""
+		c_d="$c_d UPDATE global_grants set user='mysql' where user='root';"
+		mecho $c_d
+	fi
 }
 
 create_mysql_user()
@@ -4462,7 +4533,7 @@ create_mysql_user()
 	esac
 	mecho "use mysql;"
 	if [ $mariadb -eq 1 ] ; then
-		mecho "create database indimail;"
+		mecho "CREATE database indimail;"
 	fi
 	mecho "CREATE USER 'indimail'@'%' identified by '$MYSQL_PASS';"
 	mecho "CREATE USER 'admin'@'%'    identified by '$ADMIN_PASS';"
@@ -4602,7 +4673,7 @@ fi
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4628,12 +4699,8 @@ check_mysqld_variable --require-secure-transport 1
 # skip external locking is not shown in the list of variables
 echo "--skip-external-locking \\"
 check_mysqld_variable --delay-key-write=all 1
-if [ $mysql_version_8 -ne 1 ] ; then
-	echo "--sql-mode=\"NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,STRICT_TRANS_TABLES\" \\"
-else
-	check_mysqld_variable --skip-name-resolve 1
-	echo "--sql-mode=\"NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,STRICT_ALL_TABLES\" \\"
-fi
+check_mysqld_variable --skip-name-resolve 1
+echo "--sql-mode=\"NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,STRICT_TRANS_TABLES\" \\"
 check_mysqld_variable --explicit-defaults-for-timestamp=TRUE 1
 if [ $? -ne 0 ] ; then
 	check_mysqld_variable --explicit-defaults-for-timestamp 1
@@ -4656,7 +4723,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4673,7 +4740,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4703,6 +4770,7 @@ else
 	echo "mysqld: No such File or directory" 1>&2
 	return 1
 fi
+
 mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
 echo $mysql_version |grep MariaDB > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
@@ -4717,6 +4785,17 @@ if [ $? -eq 0 ] ; then
 else
 	mariadb_client=0
 fi
+
+if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
+	echo "Creating MySQL SSL Certs" 1>&2
+	echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
+	$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data 1>&2
+elif [ $mariadb -eq 1 ] ; then
+	echo "Creating MariaDB SSL/TLS Certificates" 1>&2
+	mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl 1>&2
+fi
+$chown -R mysql:mysql "$DESTDIR"$databasedir
+
 echo "[client]"
 echo "port      = $mysql_port"
 echo "socket    = $mysql_socket"
@@ -4724,7 +4803,7 @@ check_mysqld_ini_variable "default_character_set=utf8mb4" 1
 if [ $mariadb_client -eq 1 -a -d "$DESTDIR"$databasedir/ssl ] ; then
 	echo ""
 	echo "# MySQL Client SSL configuration"
-	echo "ssl-ca=$databasedir/ssl/ca-cert.pem"
+	echo "ssl-ca=$databasedir/ssl/ca.pem"
 	echo "ssl-cert=$databasedir/ssl/client-cert.pem"
 	echo "ssl-key=$databasedir/ssl/client-key.pem"
 	echo "# This option is disabled by default"
@@ -4754,7 +4833,7 @@ if [ $mariadb -eq 1 -a -d "$DESTDIR"$databasedir/ssl ] ; then
 		echo "# There is no control over the protocol level used."
 		echo "# mariadb will use TLSv1.0 or better."
 		echo "ssl"
-		echo "ssl-ca=$databasedir/ssl/ca-cert.pem"
+		echo "ssl-ca=$databasedir/ssl/ca.pem"
 		echo "ssl-cert=$databasedir/ssl/server-cert.pem"
 		echo "ssl-key=$databasedir/ssl/server-key.pem"
 		echo ""
@@ -4772,6 +4851,11 @@ echo "datadir  = $databasedir/data"
 check_mysqld_ini_variable "character_set_client_handshake = FALSE" 1
 check_mysqld_ini_variable "character_set_server = utf8mb4" 1
 check_mysqld_ini_variable "collation_server = utf8mb4_unicode_ci" 1
+echo
+echo "#Description: If set to 1, LOCAL is supported for LOAD DATA INFILE statements."
+echo "#If set to 0 (default), usually for security reasons, attempts to perform a"
+echo "#LOAD DATA LOCAL will fail with an error message."
+check_mysqld_ini_variable "local_infile = 1" 2
 echo
 echo "[inlookup]"
 echo "#The number of seconds the server waits for activity on an"
@@ -4856,7 +4940,7 @@ echo "nameserver 127.0.0.1"
 # svscan run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4877,7 +4961,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4908,7 +4992,7 @@ echo "$prog_args" > $conf_dir/.options
 # resolvconf run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4953,7 +5037,7 @@ echo "wait"
 # resolvconf log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5111,7 +5195,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5133,7 +5217,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5232,7 +5316,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5273,7 +5357,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5508,7 +5592,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5525,7 +5609,7 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7797,7 +7881,7 @@ sed "s{MRTGHOSTNAME{`hostname`{;  s{HTMLDIR{$htmldir\/{" \
 # mrtg run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7825,7 +7909,7 @@ fi
 # mrtg log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7839,55 +7923,69 @@ echo "$prog_args" > $conf_dir/.options
 tls_cert_check()
 {
 error=0
-for cert in servercert.pem clientcert.pem
+if [ $# -eq 1 ] ; then
+	files=$1
+else
+	files="@sysconfdir@/certs/servercert.pem @sysconfdir@/certs/clientcert.pem"
+fi
+for cert in $files
 do
-	if [ -f "@sysconfdir@/certs/$cert" ]; then
+	if [ -f $cert ]; then
+		echo "Checking $cert"
 		#First, check that it's a valid cert for the task
-		TEMP_PURPOSE=`/usr/bin/openssl x509 -in @sysconfdir@/certs/$cert -noout -purpose 2>/dev/null`
+		TEMP_PURPOSE=`/usr/bin/openssl x509 -in $cert -noout -purpose 2>/dev/null`
 		if [ "$?" != "0" ]; then
 			error=1
-			$mv -f @sysconfdir@/certs/$cert @sysconfdir@/certs/BROKEN-${cert}
+			dir=`dirname $cert`
+			fil=`basename $cert`
+			$mv -f $cert $dir/BROKEN-${fil}
 			if [ $? -eq 0 ] ; then
 				echo $TEMP_PURPOSE 1>&2
-				echo "@sysconfdir@/certs/$cert is a broken cert. Disabled" 1>&2
+				echo "$cert is a broken cert. Disabled" 1>&2
 			fi
 		fi
 
 		#Now check it hasn't expired
-		TEMP_DATE=`/usr/bin/openssl x509 -in @sysconfdir@/certs/$cert -noout -dates 2>/dev/null|grep -i after|cut -d= -f2`
+		TEMP_DATE=`/usr/bin/openssl x509 -in $cert -noout -dates 2>/dev/null|grep -i after|cut -d= -f2`
 		EXPIRE_IN_SECS=`date +%s --date $TEMP_DATE 2>/dev/null`
 		if [ "`echo $EXPIRE_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
 			NOW_IN_SECS=`date +%s 2>/dev/null`
 			if [ "`echo $NOW_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
 				if [ $NOW_IN_SECS -gt $EXPIRE_IN_SECS ]; then
-				 error=1
-				 echo expiry $TEMP_DATE 1>&2
-				 $mv -f @sysconfdir@/certs/$cert @sysconfdir@/certs/EXPIRED-${cert}
-				 if [ $? -eq 0 ] ; then
-				  echo "@sysconfdir@/certs/$cert has EXPIRED. Disabling" 1>&2
-				 fi
+					error=1
+					echo expiry $TEMP_DATE 1>&2
+					dir=`dirname $cert`
+					fil=`basename $cert`
+					$mv -f $cert $dir/EXPIRED-${fil}
+					if [ $? -eq 0 ] ; then
+						echo "$cert has EXPIRED. Disabling" 1>&2
+					fi
 				fi
 			fi
 		fi
 
 		if [ "`echo $cert|grep server`" != "" ];then
 			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|server).* yes'`" = "" ]; then
-			 error=1
-			 echo "Purpose $TEMP_PURPOSE" 1>&2
-			 $mv -f @sysconfdir@/certs/$cert @sysconfdir@/certs/NOT-A-SERVER-CERT-${cert}
-			 if [ $? -eq 0 ] ; then
-			  echo "@sysconfdir@/certs/$cert is NOT a server cert. Disabled" 1>&2
-			 fi
+				error=1
+				echo "Purpose $TEMP_PURPOSE" 1>&2
+				dir=`dirname $cert`
+				fil=`basename $cert`
+				$mv -f $cert $dir/NOT-A-SERVER-CERT-${fil}
+				if [ $? -eq 0 ] ; then
+					echo "$cert is NOT a server cert. Disabled" 1>&2
+				fi
 			fi
 		fi
 		if [ "`echo $cert|grep client`" != "" ];then
 			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|client).* yes'`" = "" ]; then
-			 error=1
-			 echo "Purpose $TEMP_PURPOSE" 1>&2
-			 $mv -f @sysconfdir@/certs/$cert @sysconfdir@/certs/NOT-A-CLIENT-CERT-${cert}
-			 if [ $? -eq 0 ] ; then
-			  echo "@sysconfdir@/certs/$cert is NOT a client cert. Disabled" 1>&2
-			 fi
+				error=1
+				echo "Purpose $TEMP_PURPOSE" 1>&2
+				dir=`dirname $cert`
+				fil=`basename $cert`
+				$mv -f $cert $dir/NOT-A-CLIENT-CERT-${fil}
+				if [ $? -eq 0 ] ; then
+					echo "$cert is NOT a client cert. Disabled" 1>&2
+				fi
 			fi		
 		fi
 	fi
@@ -8227,6 +8325,12 @@ while test $# -gt 0; do
 	--databasedir=*)
 	databasedir=$optarg
 	;;
+	--capath=*)
+	ca_path=$optarg
+	;;
+	--certdir=*)
+	certdir=$optarg
+	;;
 	--mysqlPrefix=*)
 	mysqlPrefix=$optarg
 	;;
@@ -8319,7 +8423,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.432 2019-05-29 09:26:04+05:30 Cprogrammer Exp mbhangui $"
+	echo "$RCSID"
 	exit 0
 	;;
 
@@ -8496,6 +8600,12 @@ while test $# -gt 0; do
 	;;
 
 	--check-certs)
+	cert_file=""
+	option=30
+	;;
+
+	--check-certs=*)
+	cert_file=$optarg
 	option=30
 	;;
 	--skip-sendmail)
@@ -8957,13 +9067,14 @@ case $option in
 		create_mysql_db "$databasedir" "$mysql_socket"
 		;;
 
-		sqlssl)
-		if [ " $databasedir" = " " ] ; then
-			echo "Database directory not specified" 1>&2
+		ssl_rsa)
+		if [ " $certdir" = " " ] ; then
+			echo "Certificate directory not specified" 1>&2
 			usage 1
 			exit 1
 		fi
-		mariadb_ssl_rsa_setup "$DESTDIR"$databasedir
+		echo "Creating MariaDB SSL/TLS Certificates"
+		mariadb_ssl_rsa_setup "$ca_path" "$DESTDIR"$certdir
 		;;
 
 		indimail)
@@ -9626,7 +9737,11 @@ case $option in
 
 	30)
 	[ `id -u` = 0 ] || exit 4
-	tls_cert_check
+	if [ -z "$cert_file" ] ; then
+		tls_cert_check
+	else
+		tls_cert_check $cert_file
+	fi
 	;;
 
 	31)
