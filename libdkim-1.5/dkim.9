@@ -46,7 +46,7 @@ ADU9NbAcpDh+E2YQwzCX
 
 .TP
 -l
-include body length tag
+include body length tag when signing. Honor body length tag when verifying
 .TP
 -q
 include query method tag
@@ -71,8 +71,10 @@ include Copied Headers
 .TP
 -c \fIcanonicalization\fR
 r for relaxed [DEFAULT], s - simple, t relaxed/simple, u - simple/relaxed
+
+.TP
 -d \fIdomain\fR
-the domain tag, if not provided, determined from the sender/from header
+the domain tag, if not provided, determined from the return-path/sender/from header
 .TP
 -i \fIidentity\fR
 the identity, if not provided it will not be included
@@ -91,6 +93,80 @@ sign the message using the private key in privkeyfile
 .TP
 -H
 this help
+
+.SH Return Value
+When signing, \fBdkim\fR returns 0 on success and non-zero on any failure.
+
+When verifying, you can set the environment variable \fBDKIMVERIFY\fR to
+set the exit code corresponding to the DKIM verifcation status by setting
+\fBDKIMVERIFY\fR environment variable to a desired set of letters. Precisely,
+if you want a dkim return status to generate an error, include that
+letter, where A is the first return status (DKIM_SUCCESS), B is the
+second (DKIM_FINISHED_BODY), etc.  The letter should be uppercase if you
+want a permanent error (exit code 14) to be returned, and lowercase if you want a temporary
+error to be returned (exit code 88). If you omit the letter, \fBdkim\fR will
+not issue any error inspite of DKIM verification failure. It will return
+success.
+
+The complete set of letters with the corresponding return status is given below
+
+ A - DKIM_SUCCESS                        - Function executed successfully
+ B - DKIM_FINISHED_BODY                  - process result: no more message
+                                           body is needed
+ C - DKIM_PARTIAL_SUCCESS                - verify result: at least one
+                                           but not all signatures verified
+ D - DKIM_NEUTRAL                        - verify result: no signatures
+                                           verified but message is
+                                           not suspicious
+ E - DKIM_SUCCESS_BUT_EXTRA              - signature result: signature
+                                           verified but it did not
+                                           include all of the body
+ F - DKIM_3PS_SIGNATURE                  - 3rd-party signature
+ G - DKIM_FAIL                           - Function failed to execute
+ H - DKIM_BAD_SYNTAX                     - signature error: DKIM-Signature
+                                           could not parse or has bad
+                                           tags/values
+ I - DKIM_SIGNATURE_BAD                  - signature error: RSA verify
+                                           failed
+ J - DKIM_SIGNATURE_BAD_BUT_TESTING      - signature error: RSA verify
+                                           failed but testing
+ K - DKIM_SIGNATURE_EXPIRED              - signature error: x= is old
+ L - DKIM_SELECTOR_INVALID               - signature error: selector doesn't
+                                           parse or contains invalid values
+ M - DKIM_SELECTOR_GRANULARITY_MISMATCH  - signature error: selector
+                                           g= doesn't match i=
+ N - DKIM_SELECTOR_KEY_REVOKED           - signature error: selector
+                                           p= empty
+ O - DKIM_SELECTOR_DOMAIN_NAME_TOO_LONG  - signature error: selector domain
+                                           name too long to request
+ P - DKIM_SELECTOR_DNS_TEMP_FAILURE      - signature error: temporary dns
+                                           failure requesting selector
+ Q - DKIM_SELECTOR_DNS_PERM_FAILURE      - signature error: permanent dns
+                                           failure requesting selector
+ R - DKIM_SELECTOR_PUBLIC_KEY_INVALID    - signature error: selector
+                                           p= value invalid or wrong format
+ S - DKIM_NO_SIGNATURES                  - no signatures
+ T - DKIM_NO_VALID_SIGNATURES            - no valid signatures
+ U - DKIM_BODY_HASH_MISMATCH             - sigature verify error: message
+                                           body does not hash to bh value
+ V - DKIM_SELECTOR_ALGORITHM_MISMATCH    - signature error: selector
+                                           h= doesn't match signature a=
+ W - DKIM_STAT_INCOMPAT                  - signature error: incompatible v=
+ X - DKIM_UNSIGNED_FROM                  - signature error: not all message's
+                                           From headers in signature
+
+For example, if you want to permanently reject messages that have a
+signature that is expired, include the letter 'K' in the
+.B DKIMVERIFY
+environment variable.  A conservative set of letters is
+.BR FGHIKLMNOQRTUVWjp .
+Reject permanently 3PS, FAILURE, SYNTAX, SIGNATURE_BAD, SIGNATURE_EXPIRED, SELECTOR_INVALID,
+GRANULARITY_MISMATCH, SELECTOR_KEY_REVOKED, DOMAIN_NAME_TOO_LONG, SELECTOR_PUBLIC_KEY_INVALID,
+NO_VALID_SIGNATURES and BODY_HASH_MISMATCH errors, and temporarily SIGNATURE_BAD_BUT_TESTING and DNS_TEMP_FAILURE .
+Add in \fBS\fR if you want to reject messages that do not have a DKIM signature.
+Note that \fBdkim\fR always inserts the \fBDKIM-Status\fR header, so that messages can be
+rejected later at delivery time, or in the mail reader. In that case you need not set
+\fBDKIMVERIFY\fR. 
 
 .SH "SEE ALSO"
 dktest(8),
