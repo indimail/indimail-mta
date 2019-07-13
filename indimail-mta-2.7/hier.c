@@ -1,5 +1,11 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.257  2019-07-13 10:36:12+05:30  Cprogrammer
+ * matched permissions of qfilters, level2-tlds, level3-tlds with spec file
+ *
+ * Revision 1.256  2019-06-07 11:42:02+05:30  Cprogrammer
+ * removed multitail program
+ *
  * Revision 1.255  2019-05-24 14:12:12+05:30  Cprogrammer
  * added control/cache directory and level2-tlds, level3-tlds files for surbl filter
  *
@@ -840,7 +846,7 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
 
 	d(auto_qmail_home, "queue", auto_uido, auto_gidq, 0755);
-	d(auto_libexec,    "qfilters", auto_uido, 0, 0755);
+	d(auto_libexec,    "qfilters", auto_uido, 0, 0555);
 
 	d(auto_sysconfdir, "certs", auto_uidv, auto_gidq, 02775);
 	d(auto_sysconfdir, "tcp", auto_uidv, auto_gidq, 02775);
@@ -889,8 +895,8 @@ hier(inst_dir, fatal, dev_package)
 #endif
 
 	c(auto_sysconfdir, "control", "nodnscheck", auto_uidv, auto_gidv, 0644);
-	c(auto_sysconfdir, "control", "level2-tlds", auto_uidv, auto_gidq, 0644);
-	c(auto_sysconfdir, "control", "level3-tlds", auto_uidv, auto_gidq, 0644);
+	c(auto_sysconfdir, "control", "level2-tlds", auto_uido, auto_gidq, 0644);
+	c(auto_sysconfdir, "control", "level3-tlds", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, ".", "leapsecs.dat", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, ".", "leapsecs.txt", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, ".", "cronlist.q", auto_uido, 0, 0444);
@@ -1075,7 +1081,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "qfilelog", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "multipipe", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "teepipe", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "multitail", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "logselect", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "qlogselect", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "udpclient", auto_uido, 0, moder_x);
@@ -1486,7 +1491,6 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/man1", "qfilelog.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "multipipe.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "teepipe.1", uidr, gidr, moder_f);
-	c(mandir,          "man/man1", "multitail.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "logselect.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qlogselect.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "tai2tai64n.1", uidr, gidr, moder_f);
@@ -1660,7 +1664,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.255 2019-05-24 14:12:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.257 2019-07-13 10:36:12+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
