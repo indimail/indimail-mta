@@ -1,5 +1,11 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.15  2019-07-13 11:05:18+05:30  Cprogrammer
+ * fixed indentation style
+ *
+ * Revision 1.14  2019-07-13 10:21:18+05:30  Cprogrammer
+ * return actual user/group from passwd/group file
+ *
  * Revision 1.13  2009-12-09 23:56:24+05:30  Cprogrammer
  * close passwd, group database if passed additional flag - closeflag
  *
@@ -47,9 +53,12 @@
 #include "auto_uids.h"
 #include "strerr.h"
 #include "str.h"
+#include "fmt.h"
 
 static int      get_uid(char *);
 static int      get_gid(char *);
+
+static char     strnum[FMT_ULONG];
 
 /*-
  * When you add an uid, increase length of uid_array[]
@@ -89,28 +98,23 @@ get_uid(char *user)
 	static int      first;
 	static uid_t    uid_array[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
-	if (!first)
-	{
-		for (;;)
-		{
+	if (!first) {
+		for (;;) {
 			if (!(pw = getpwent()))
 				break;
-			for (i = 0; *user_uid_list[i]; i++)
-			{
+			for (i = 0; *user_uid_list[i]; i++) {
 				len = str_len(user_uid_list[i]);
 				if (!str_diffn(user_uid_list[i], pw->pw_name, len))
 					uid_array[i] = pw->pw_uid;
 			}
 		}
-		for (i = 0; *user_uid_list[i]; i++)
-		{
+		for (i = 0; *user_uid_list[i]; i++) {
 			if (uid_array[i] == -1)
 				strerr_die(111, "getpwent: ", user_uid_list[i], ": No such user", 0, 0, 0, 0, 0, (struct strerr *) 0);
 		}
 		first++;
 	}
-	for (i = 0; *user_uid_list[i]; i++)
-	{
+	for (i = 0; *user_uid_list[i]; i++) {
 		len1 = str_len(user_uid_list[i]);
 		len2 = str_len(user);
 		len = len2 > len1 ? len2 : len1;
@@ -128,28 +132,23 @@ get_gid(char *group)
 	static int      first;
 	static uid_t    gid_array[5] = {-1, -1, -1, -1, -1};
 
-	if (!first)
-	{
-		for (;;)
-		{
+	if (!first) {
+		for (;;) {
 			if (!(gr = getgrent()))
 				break;
-			for (i = 0; *user_gid_list[i]; i++)
-			{
+			for (i = 0; *user_gid_list[i]; i++) {
 				len = str_len(user_gid_list[i]);
 				if (!str_diffn(user_gid_list[i], gr->gr_name, len))
 					gid_array[i] = gr->gr_gid;
 			}
 		}
-		for (i = 0; *user_gid_list[i]; i++)
-		{
+		for (i = 0; *user_gid_list[i]; i++) {
 			if (gid_array[i] == -1)
 				strerr_die(111, "getgrent: ", user_gid_list[i], ": No such group", 0, 0, 0, 0, 0, (struct strerr *) 0);
 		}
 		first++;
 	}
-	for (i = 0; *user_gid_list[i]; i++)
-	{
+	for (i = 0; *user_gid_list[i]; i++) {
 		len1 = str_len(user_gid_list[i]);
 		len2 = str_len(group);
 		len = len2 > len1 ? len2 : len1;
@@ -164,7 +163,7 @@ uidinit(int closeflag)
 {
 	static int      first;
 
-	if(first)
+	if (first)
 		return(0);
 	if ((auto_uida = get_uid(ALIASU)) == -1)
 		return (-1);
@@ -207,11 +206,9 @@ uidinit(int closeflag)
 	else
 	if ((auto_gidc = get_gid(QSCANDG)) == -1)
 		return (-1);
-	else
-	{
+	else {
 		first++;
-		if (closeflag)
-		{
+		if (closeflag) {
 			endpwent();
 			endgrent();
 		}
@@ -222,6 +219,8 @@ uidinit(int closeflag)
 char *
 get_user(uid_t uid)
 {
+	struct passwd  *pw;
+
 	if (uidinit(0) == -1)
 		return ((char *) 0);
 	else
@@ -254,13 +253,20 @@ get_user(uid_t uid)
 	else
 	if (uid == auto_uidc)
 		return("qscand");
-	else
-		return("nobody");
+	else {
+		if (!(pw = getpwuid(uid))) {
+			strnum[fmt_ulong(strnum, uid)] = 0;
+			strerr_die3sys(111, "get_user: unable to get uid for uid ", strnum, ": ");
+		}
+		return(pw->pw_name);
+	}
 }
 
 char *
 get_group(gid_t gid)
 {
+	struct group   *gr;
+
 	if (uidinit(0) == -1)
 		return ((char *) 0);
 	if (gid == auto_gidq)
@@ -275,13 +281,21 @@ get_group(gid_t gid)
 	if (gid == auto_gidc)
 		return("qscand");
 	else
+	if (gid == 0)
+		return("root");
+	else {
+		if (!(gr = getgrgid(gid))) {
+			strnum[fmt_ulong(strnum, gid)] = 0;
+			strerr_die3sys(111, "get_user: unable to get gid for gid ", strnum, ": ");
+		}
 		return("nobody");
+	}
 }
 
 void
 getversion_get_uid_c()
 {
-	static char    *x = "$Id: get_uid.c,v 1.13 2009-12-09 23:56:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: get_uid.c,v 1.15 2019-07-13 11:05:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
