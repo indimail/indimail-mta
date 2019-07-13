@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.8  2019-06-07 19:20:10+05:30  Cprogrammer
+ * return success and set use_sql=0 if libmysqlclient is missing
+ *
  * Revision 1.7  2019-05-28 10:28:01+05:30  Cprogrammer
  * assign symbols mysql_errno, mysql_num_rows, mysql_affected_rows
  * assign error string to error buffer in getlibObject()
@@ -100,7 +103,7 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 		*errflag = -1;
 	if (errstr)
 		*errstr = (char *) 0;
-	if (access(ptr, R_OK)) {
+	if (*libenv != '/' && access(ptr, R_OK)) {
 		if (errflag)
 			*errflag = errno;
 		if (!stralloc_copys(&errbuf, error_str(errno))) {
@@ -120,12 +123,6 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 #else
 	if (!(*handle = dlopen(ptr, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
-		if (errno == 2 && errflag) {
-			*errflag = 0;
-			if (errstr)
-				*errstr = (char *) 0;
-			return ((void *) 0);
-		}
 		if (!stralloc_copys(&errbuf, dlerror())) {
 			if (errstr)
 				*errstr = memerr;
@@ -173,7 +170,13 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 			*errstr = memerr;
 	}
 	ptr = dlerror();
-	if (!i && !stralloc_cats(&errbuf, ptr)) {
+	if (!i && ptr && !stralloc_cats(&errbuf, ptr)) {
+		if (errstr)
+			*errstr = memerr;
+	} else
+	if (!i)
+		errbuf.len--;
+	if (!i && !stralloc_0(&errbuf)) {
 		if (errstr)
 			*errstr = memerr;
 	}
@@ -191,10 +194,15 @@ initMySQLlibrary(char **errstr)
 
 	if (phandle)
 		return (0);
-	if (!(ptr = env_get("MYSQL_LIB")))
+	if (!(ptr = env_get("MYSQL_LIB"))) {
 		ptr = "/etc/indimail/control/mysql_lib";
-	else
+		if (access(ptr, R_OK))
+			return (0);
+	} else {
+		if (access(ptr, R_OK))
+			return (0);
 		ptr = "MYSQL_LIB";
+	}
 	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {
 		use_sql = 0;
 		if (!i)
@@ -245,7 +253,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.7 2019-05-28 10:28:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.8 2019-06-07 19:20:10+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
