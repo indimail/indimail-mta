@@ -1,5 +1,8 @@
 /*
  * $Log: subgetopt.h,v $
+ * Revision 1.4  2019-06-07 10:03:23+05:30  Cprogrammer
+ * BUG Fix. Declare variables as extern to prevent wrong assignment
+ *
  * Revision 1.3  2004-10-11 15:04:55+05:30  Cprogrammer
  * added function prototypes
  *
@@ -22,12 +25,12 @@
 
 #define SUBGETOPTDONE -1
 
-char           *subgetoptarg;
-int             subgetoptind;
-int             subgetoptpos;
-int             subgetoptproblem;
-int             subgetoptdone;
-char           *subgetoptprogname;
+extern char    *subgetoptarg;
+extern int      subgetoptind;
+extern int      subgetoptpos;
+extern int      subgetoptproblem;
+extern int      subgetoptdone;
+extern char    *subgetoptprogname;
 int             subgetopt(int, char **, char *);
 
 #endif
