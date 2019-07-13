@@ -19,9 +19,9 @@ or
 .B Author Domain Signing Practice.
 It uses the libdkim and OpenSSL libraries.  To sign a message, set the
 .B DKIMSIGN
-or
+environment variable (for DKIM signing) or
 .B DKSIGIN
-environment variables to the pathname of the private key that will be
+environment variable (for DK signing) to the pathname of the private key that will be
 used to sign the message. If there is a % character in the environment
 variable, it is removed and replaced by the domain name in the From: header.
 If, after substituting the %, that file does not exist, @controldir@/domainkeys/%/default
@@ -29,6 +29,9 @@ will be used as the key. If again, after substituting the % sign, the file does 
 @controldir@/domainkeys/default will be used as the key.
 After all substitutions, if the key file does not exist, the message will not be signed.
 If there is no % and the file does not exist, the message will be rejected with error 35.
+The default private key @controldir@/domainkeys/default can be overriden by the
+\fBDKIM_DEFAULT_KEY\fR environment variable.
+
 The selector (s=) will be taken from the basename of the file.
 The private key should be created by 
 .BR dknewkey(8) .
@@ -66,31 +69,22 @@ You can set various DKIM options in getopt style, by setting the environment var
  sets allman standard, with relaxed canonicalization and include query method tag
 .EE
 
-.B dk-filter
-uses the domain found in the Sender: header to set the domain tag. If not it uses the From: header. You can override this by
-setting 
-.B DKIMDOMAIN
-environment variable.
-.B DKIMDOMAIN
-can be set to an email address or a domain (without the at sign).
-To verify a message, set the
-.B DKIMVERIFY
-or
-.B DKVERIFY
-environment variables
-.B dk-filter
-always inserts the 
-.B DKIM-Status
-or
-.B DomainKey-Status
-header, so that messages can be
-rejected later at delivery time, or in the mail reader. In that case you may set
-.B DKIMVERIFY
-or
-.B DKVERIFY
-to an empty string.
-.B dk-filter
-does not use any signing practice byd default. You can override this by setting the SIGN_PRACTICE to ssp or adsp (lowercase).
+when signing \fBdk-filter\fR uses the domain found in the Return-Path, Sender, From headers to set
+the domain tag. If not it uses the value of \fBDKIMDOMAIN\fR environment
+variable. \fBDKIMDOMAIN\fR can be set to an email address or a domain (without the at sign).
+
+To verify a message, set the \fBDKIMVERIFY\fR or \fBDKVERIFY\fR environment variables.
+\fBdk-filter\fR always inserts the \fBDKIM-Status\fR or \fBDomainKey-Status\fR header, so
+that messages can be rejected later at delivery time, or in the mail reader. In that case
+you may set \fBDKIMVERIFY\fR or \fBDKVERIFY\fR to an empty string. The exit code of \fBdk-filter\fR
+can be fine tuned by setting \fBDKIMVERIFY\fR environment variable. See \fBdkim(8)\fR for a detailed
+description on setting the \fBDKIMVERIFY\fR environment variable.
+
+\fBdk-filter\fR does not use any signing practice by default. You can override this by setting
+the SIGN_PRACTICE to ssp or adsp (lowercase).
+
+If neither of these environment variables (DKIMSIGN, DKSIGN, DKIMVERIFY, DKVERIFY) are defined, dk-filter
+will do signing by default.
 
 .SH "EXIT CODES"
 0 for success, non-zero failure
