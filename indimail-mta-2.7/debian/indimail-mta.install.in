@@ -5,6 +5,7 @@ var/indimail/qscanq    /var/indimail
 var/indimail/bin       /var/indimail
 var/indimail/sbin      /var/indimail
 var/indimail/control   /var/indimail
+var/indimail/libexec   /var/indimail
 var/indimail/users     /var/indimail
 usr/bin                /usr
 usr/sbin               /usr
