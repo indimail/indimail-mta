@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.9  2019-06-14 21:25:11+05:30  Cprogrammer
+ * BUG - honor body length tag in verification. Changed data type for BodyLength
+ *
  * Revision 1.8  2019-05-22 11:30:06+05:30  Cprogrammer
  * fix for 32 bit systems where time_t is 4 bytes & encounters year 2038 issue
  *
@@ -88,7 +91,7 @@ public:
 	string          IdentityDomain;
 	string          CanonicalizedData;
 	vector <string> SignedHeaders;
-	int             BodyLength;
+	long            BodyLength;
 	unsigned        HeaderCanonicalization;
 	unsigned        BodyCanonicalization;
 #if SIZEOF_TIME_T  == 8
@@ -96,8 +99,8 @@ public:
 #else
 	long long       ExpireTime;
 #endif
-	int             VerifiedBodyCount;
-	unsigned        UnverifiedBodyCount;
+	long            VerifiedBodyCount;
+	long            UnverifiedBodyCount;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX     *m_Hdr_ctx = NULL;
 	EVP_MD_CTX     *m_Bdy_ctx = NULL;
