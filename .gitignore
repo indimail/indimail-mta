@@ -1,14 +1,3 @@
-netqmail-addons
-osc
-packages
-private
-rpmbuild
-ilmgrd-1.0
-icampaign-1.0
-dist
-COMMIT_ID
-VERSION
-MTA_VERSION
 patches
 cscope.*
-.gitignore
+RCS
