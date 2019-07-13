@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.28  2019-06-07 11:26:32+05:30  Cprogrammer
+ * replaced getopt() with subgetopt()
+ *
  * Revision 1.27  2016-06-13 17:49:11+05:30  Cprogrammer
  * removed ifdef indimail
  *
@@ -66,6 +69,7 @@
 #include "fmt.h"
 #include "str.h"
 #include "getln.h"
+#include "sgetopt.h"
 #include "fmtqfn.h"
 #include "readsubdir.h"
 #include "auto_qmail.h"
@@ -304,7 +308,7 @@ get_arguments(int argc, char **argv)
 	errflag = 0;
 	doTodo = 0;
 	doCount = 0;
-	while (!errflag && (c = getopt(argc, argv, "calrt")) != -1) {
+	while (!errflag && (c = getopt(argc, argv, "calrt")) != opteof) {
 		switch (c)
 		{
 		case 'c':
@@ -653,7 +657,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.27 2016-06-13 17:49:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.28 2019-06-07 11:26:32+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

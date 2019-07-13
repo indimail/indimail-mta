@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.9  2019-06-07 11:25:48+05:30  Cprogrammer
+ * replaced getopt() with subgetopt()
+ *
  * Revision 1.8  2017-05-04 20:19:42+05:30  Cprogrammer
  * make cleanq run continuously
  *
@@ -30,6 +33,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "substdio.h"
+#include "sgetopt.h"
 #include "error.h"
 #include "strerr.h"
 #include "direntry.h"
@@ -193,7 +197,7 @@ main(int argc, char **argv)
 
 	if (uidinit(1) == -1)
 		_exit(67);
-	while ((opt = getopt(argc, argv, "ls:")) != -1) {
+	while ((opt = getopt(argc, argv, "ls:")) != opteof) {
 		switch (opt)
 		{
 		case 'l':
@@ -252,7 +256,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.8 2017-05-04 20:19:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.9 2019-06-07 11:25:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

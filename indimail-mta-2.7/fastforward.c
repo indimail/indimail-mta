@@ -1,5 +1,8 @@
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.7  2019-06-07 11:26:18+05:30  Cprogrammer
+ * replaced getopt() with subgetopt()
+ *
  * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -46,6 +49,7 @@
 #include "coe.h"
 #include "seek.h"
 #include "wait.h"
+#include "sgetopt.h"
 #include "variables.h"
 
 #define FATAL "fastforward: fatal: "
@@ -386,7 +390,7 @@ main(argc, argv)
 		nomem();
 	if (!strset_init(&done))
 		nomem();
-	while ((opt = getopt(argc, argv, "nNpPdD")) != -1)
+	while ((opt = getopt(argc, argv, "nNpPdD")) != opteof)
 	{
 		switch (opt)
 		{
@@ -411,7 +415,7 @@ main(argc, argv)
 		default:
 			usage();
 		}
-	} /*- while ((opt = getopt(argc, argv, "nNpPdD")) != -1) */
+	} /*- while ((opt = getopt(argc, argv, "nNpPdD")) != opteof) */
 	argv += optind;
 	if (!(fncdb = *argv))
 		usage();
@@ -539,7 +543,7 @@ main(argc, argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.6 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.7 2019-06-07 11:26:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

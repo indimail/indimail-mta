@@ -1,5 +1,8 @@
 /*
  * $Log: dktest.c,v $
+ * Revision 1.17  2019-06-07 11:25:58+05:30  Cprogrammer
+ * replaced getopt() with subgetopt()
+ *
  * Revision 1.16  2013-08-17 16:01:08+05:30  Cprogrammer
  * added case for duplicate DomainKey-Signature header
  *
@@ -57,6 +60,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "domainkeys.h"
+#include "sgetopt.h"
 
 #ifdef DOMAIN_KEYS
 int             optf = 0;
@@ -101,8 +105,7 @@ main(int argc, char *argv[])
 
 	for (dkdomain = (char *) 0;;)
 	{
-		ch = getopt(argc, argv, "s:vt:fb:c:hrTd:D:");
-		if (ch == -1)
+		if ((ch = getopt(argc, argv, "s:vt:fb:c:hrTd:D:")) == opteof)
 			break;
 		switch (ch)
 		{
@@ -428,7 +431,7 @@ main(int argc, char *argv[])
 void
 getversion_dktest_c()
 {
-	static char    *x = "$Id: dktest.c,v 1.16 2013-08-17 16:01:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dktest.c,v 1.17 2019-06-07 11:25:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
