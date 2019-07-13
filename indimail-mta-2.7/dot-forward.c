@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.7  2019-06-07 11:26:04+05:30  Cprogrammer
+ * replaced getopt() with subgetopt()
+ *
  * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -41,6 +44,7 @@
 #include "token822.h"
 #include "control.h"
 #include "qmail.h"
+#include "sgetopt.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
 
@@ -486,7 +490,7 @@ main(argc, argv)
 	int             opt;
 
 	sig_pipeignore();
-	while ((opt = getopt(argc, argv, "nN")) != -1)
+	while ((opt = getopt(argc, argv, "nN")) != opteof)
 	{
 		switch (opt)
 		{
@@ -528,7 +532,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.6 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.7 2019-06-07 11:26:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
