@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.32  2019-07-13 10:19:34+05:30  Cprogrammer
+ * removed dummy bsd style install output
+ *
  * Revision 1.31  2018-01-09 12:33:33+05:30  Cprogrammer
  * removed unused ci() function
  *
@@ -104,7 +107,7 @@ void            hier(char *, char *, int);
 int             uidinit(int);
 char           *get_user(uid_t);
 char           *get_group(gid_t);
-void            dd(char *, int, int, int, char *, char *);
+void            dd(int, int, int, char *, char *);
 void            df(int, int, int, char *, char *, char *, int);
 
 #define FATAL "install: fatal: "
@@ -112,8 +115,8 @@ void            df(int, int, int, char *, char *, char *, int);
 int             fdsourcedir = -1;
 uid_t           my_uid;
 gid_t           my_gid;
-char           *mailuser = "mail";
-char           *mailgroup = "mail";
+char           *mailuser;
+char           *mailgroup;
 char           *destdir = 0, *sharedir = 0;
 int             lsb = 0;
 stralloc        tmpdir = { 0 };
@@ -122,8 +125,7 @@ stralloc        dird = { 0 };
 
 /*- gnu install style display */
 void
-dd(cmd, uid, gid, mode, home, subdir)
-	char           *cmd;
+dd(uid, gid, mode, home, subdir)
 	int             uid;
 	int             gid;
 	int             mode;
@@ -132,69 +134,62 @@ dd(cmd, uid, gid, mode, home, subdir)
 {
 	int             a[4];
 	int             d, i, count;
+	char           *ptr;
 	char            octal[5];
 
-	substdio_puts(subfderr, cmd);
-	substdio_puts(subfderr, " -m ");
+	substdio_puts(subfdout, "makedir -mode ");
 	d = mode;
-	for (count = i = 0;d != 0 && i < 4;++i)
-	{
+	for (count = i = 0;d != 0 && i < 4;++i) {
 		a[i] = (d % 8) + '0';
 		d /= 8;
 		count++;
 	}
-	substdio_puts(subfderr, "0");
+	substdio_puts(subfdout, "0");
 	d = 0;
 	for (i = count - 1;i >= 0;--i)
 		octal[d++] = a[i];
 	octal[d] = 0;
-	substdio_puts(subfderr, octal);
-	substdio_puts(subfderr, " ");
-	substdio_puts(subfderr, home);
-	if (subdir)
-	{
-		substdio_puts(subfderr, "/");
-		substdio_puts(subfderr, subdir);
+	substdio_puts(subfdout, octal);
+	substdio_puts(subfdout, " -user ");
+	if (my_uid) /*- for fakeroot environment */
+		substdio_puts(subfdout, mailuser);
+	else {
+		if (!(ptr = get_user(uid)))
+			ptr = mailuser;
+		substdio_puts(subfdout, ptr);
 	}
-	substdio_puts(subfderr, "\n");
-
-	substdio_puts(subfderr, "/usr/bin/chown ");
+	substdio_puts(subfdout, " -group ");
 	if (my_uid)
-		substdio_puts(subfderr, mailuser);
-	else
-		substdio_puts(subfderr, get_user(uid));
-	substdio_puts(subfderr, ":");
-	if (my_uid)
-		substdio_puts(subfderr, mailgroup);
-	else
-		substdio_puts(subfderr, get_group(gid));
-	substdio_puts(subfderr, " ");
-	substdio_puts(subfderr, home);
-	if (subdir)
-	{
-		substdio_puts(subfderr, "/");
-		substdio_puts(subfderr, subdir);
+		substdio_puts(subfdout, mailgroup);
+	else {
+		if (!(ptr = get_group(gid)))
+			ptr = mailgroup;
+		substdio_puts(subfdout, ptr);
 	}
-	substdio_puts(subfderr, "\n");
-	substdio_flush(subfderr);
+	substdio_puts(subfdout, " ");
+	substdio_puts(subfdout, home);
+	if (subdir) {
+		substdio_puts(subfdout, "/");
+		substdio_puts(subfdout, subdir);
+	}
+	substdio_puts(subfdout, "\n");
+	substdio_flush(subfdout);
 }
 
 void
-dl(cmd, home, subdir, target)
-	char           *cmd;
+dl(home, subdir, target)
 	char           *home;
 	char           *subdir;
 	char           *target;
 {
-	substdio_puts(subfderr, cmd);
-	substdio_puts(subfderr, " ");
-	substdio_puts(subfderr, target);
-	substdio_puts(subfderr, " ");
-	substdio_puts(subfderr, home);
-	substdio_puts(subfderr, "/");
-	substdio_puts(subfderr, subdir);
-	substdio_puts(subfderr, "\n");
-	substdio_flush(subfderr);
+	substdio_puts(subfdout, "makesymlink -target ");
+	substdio_puts(subfdout, target);
+	substdio_puts(subfdout, " link ");
+	substdio_puts(subfdout, home);
+	substdio_puts(subfdout, "/");
+	substdio_puts(subfdout, subdir);
+	substdio_puts(subfdout, "\n");
+	substdio_flush(subfdout);
 }
 
 void
@@ -209,44 +204,50 @@ df(uid, gid, mode, file, home, subdir, strip)
 {
 	int             a[4];
 	int             d, i, count;
+	char           *ptr;
 	char            octal[5];
 
-	substdio_puts(subfderr, "/usr/bin/install -c -o ");
+	substdio_puts(subfdout, "install -user ");
+	if (my_uid) /*- for fakeroot environment */
+		substdio_puts(subfdout, mailuser);
+	else {
+		if (!(ptr = get_user(uid)))
+			ptr = mailuser;
+		substdio_puts(subfdout, ptr);
+	}
+	substdio_puts(subfdout, " -group ");
 	if (my_uid)
-		substdio_puts(subfderr, mailuser);
-	else
-		substdio_puts(subfderr, get_user(uid));
-	substdio_puts(subfderr, " -g ");
-	if (my_uid)
-		substdio_puts(subfderr, mailgroup);
-	else
-		substdio_puts(subfderr, get_group(gid));
-	substdio_puts(subfderr, " -m ");
+		substdio_puts(subfdout, mailgroup);
+	else {
+		if (!(ptr = get_group(gid)))
+			ptr = mailgroup;
+		substdio_puts(subfdout, ptr);
+	}
+	substdio_puts(subfdout, " -mode ");
 	d = mode;
-	for (count = i = 0;d != 0 && i < 4;++i)
-	{
+	for (count = i = 0;d != 0 && i < 4;++i) {
 		a[i] = (d % 8) + '0';
 		d /= 8;
 		count++;
 	}
-	substdio_puts(subfderr, "0");
+	substdio_puts(subfdout, "0");
 	d = 0;
 	for (i = count - 1;i >= 0;--i)
 		octal[d++] = a[i];
 	octal[d] = 0;
-	substdio_puts(subfderr, octal);
-	substdio_puts(subfderr, " ");
+	substdio_puts(subfdout, octal);
+	substdio_puts(subfdout, " -source ");
+	substdio_puts(subfdout, file);
 	if (strip)
-		substdio_puts(subfderr, "-s ");
-	substdio_puts(subfderr, file);
-	substdio_puts(subfderr, " ");
-	substdio_puts(subfderr, home);
-	substdio_puts(subfderr, "/");
-	substdio_puts(subfderr, subdir);
-	substdio_puts(subfderr, "/");
-	substdio_puts(subfderr, file);
-	substdio_puts(subfderr, "\n");
-	substdio_flush(subfderr);
+		substdio_puts(subfdout, " -strip ");
+	substdio_puts(subfdout, " -dest ");
+	substdio_puts(subfdout, home);
+	substdio_puts(subfdout, "/");
+	substdio_puts(subfdout, subdir);
+	substdio_puts(subfdout, "/");
+	substdio_puts(subfdout, file);
+	substdio_puts(subfdout, "\n");
+	substdio_flush(subfdout);
 }
 
 int
@@ -324,7 +325,7 @@ l(home, subdir, target, relative)
 	if (symlink(dird.s, subdir) == -1 && errno != error_exist)
 		strerr_die6sys(111, FATAL, "unable to symlink ", subdir, " to ", dird.s, ": ");
 	/*- dl(cmd, home, subdir, target) -*/
-	dl("/usr/bin/ln -s", tmpdir.s, subdir, dird.s);
+	dl(tmpdir.s, subdir, dird.s);
 }
 
 void
@@ -350,7 +351,7 @@ h(home, uid, gid, mode)
 		strerr_die4sys(111, FATAL, "unable to chown ", tmpdir.s, ": ");
 	if (!my_uid && chmod(tmpdir.s, mode) == -1)
 		strerr_die4sys(111, FATAL, "unable to chmod ", tmpdir.s, ": ");
-	dd("/usr/bin/mkdir", uid, gid, mode, tmpdir.s, 0);
+	dd(uid, gid, mode, tmpdir.s, 0);
 }
 
 void
@@ -394,7 +395,7 @@ d(home, subdir, uid, gid, mode)
 		strerr_die6sys(111, FATAL, "unable to chown ", dird.s, "/", subdir, ": ");
 	if (!my_uid && chmod(subdir, mode) == -1)
 		strerr_die6sys(111, FATAL, "unable to chmod ", dird.s, "/", subdir, ": ");
-	dd("/usr/bin/mkdir", uid, gid, mode, dird.s, subdir);
+	dd(uid, gid, mode, dird.s, subdir);
 }
 
 char            inbuf[SUBSTDIO_INSIZE];
@@ -420,11 +421,6 @@ c(home, subdir, file, uid, gid, mode)
 
 	if (!str_diff(subdir, "bin") || !str_diff(subdir, "sbin"))
 		is_prog = 1;
-	/*- for generating qmailprog.list */
-	if (is_prog) {
-		substdio_puts(subfdout, file);
-		substdio_put(subfdout, "\n", 1);
-	}
 	if (fchdir(fdsourcedir) == -1)
 		strerr_die2sys(111, FATAL, "unable to switch back to source directory: ");
 	if (!str_diff(subdir, "doc") && chdir("doc") == -1)
@@ -453,8 +449,7 @@ c(home, subdir, file, uid, gid, mode)
 		if (destdir) {
 			if (!stralloc_copys(&tmpdir, destdir))
 				strerr_die2sys(111, FATAL, "out of memory: ");
-			for (i = 28;;)
-			{
+			for (i = 28;;) {
 				if (!stralloc_ready(&dird, i + 1))
 					strerr_die2sys(111, FATAL, "out of memory: ");
 				if ((j = readlink(subdir, dird.s, i)) == i) {
@@ -504,8 +499,6 @@ c(home, subdir, file, uid, gid, mode)
 		strerr_die8sys(111, FATAL, "unable to chown ", tmpdir.s, "/", subd, "/", file, ": ");
 	if (!my_uid && chmod(file, mode) == -1)
 		strerr_die8sys(111, FATAL, "unable to chmod ", tmpdir.s, "/", subd, "/", file, ": ");
-	if (is_prog)
-		substdio_flush(subfdout);
 	df(uid, gid, mode, file, tmpdir.s, subd, is_prog ? 1 : 0);
 }
 
@@ -519,10 +512,6 @@ main(int argc, char **argv)
 	struct group   *gr;
 	char           *logdir = 0;
 
-#ifdef DARWIN
-	mailuser = "daemon";
-	mailgroup = "daemon";
-#endif
 	while ((opt = getopt(argc, argv, "ld:s:L:")) != opteof) {
 		switch (opt) {
 		case 'd':
@@ -543,7 +532,13 @@ main(int argc, char **argv)
 	}
 	if (destdir && !*destdir)
 		destdir = 0;
-	if (env_get("FAKED_MODE")) { /*-fix for debian generation */
+		/*-
+		 * debian does something real stupid
+		 * when generating builds. It runs the
+		 * build with fakeroot. This screws up
+		 * the uid returned by getuid()
+		 */ 
+	if (env_get("FAKED_MODE")) {
 		my_uid = 1;
 		my_gid = 1;
 	} else {
@@ -553,15 +548,16 @@ main(int argc, char **argv)
 	if ((fdsourcedir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	if (my_uid) {
-		if (!(pw = getpwuid(my_uid)) && !(pw = getpwnam(mailuser))) /*- we expect this user to be present on all linux distros */
+		if (!(pw = getpwuid(my_uid)))
 			strerr_die2sys(111, FATAL, "unable to get uids: ");
-		if ((gr = getgrgid(my_gid)))
-			mailgroup = gr->gr_name;
+		if (!(gr = getgrgid(my_gid)))
+			strerr_die2sys(111, FATAL, "unable to get gids: ");
+		mailgroup = gr->gr_name;
 		mailuser = pw->pw_name;
 		auto_uida = pw->pw_uid;
 		auto_gidn = pw->pw_gid;
 		umask(022);
-	} else {
+	} else { /*- when run as root */
 		if (uidinit(1) == -1)
 			strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 		umask(077);
@@ -578,7 +574,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.31 2018-01-09 12:33:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.32 2019-07-13 10:19:34+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
