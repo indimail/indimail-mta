@@ -1186,11 +1186,11 @@ seek.h wait.h
 setup: \
 load setup.o hier.o auto_qmail.o auto_uids.o get_uid.o auto_prefix.o \
 auto_control.o auto_assign.o auto_sysconfdir.o subgetopt.o sgetopt.o \
-str_cpy.o strerr.a substdio.a open.a error.a str.a fs.a env.a \
+fmt_ulong.o str_cpy.o strerr.a substdio.a open.a error.a str.a fs.a env.a \
 auto_libexec.o auto_shared.o stralloc.a alloc.a stralloc.a
 	./load setup hier.o auto_qmail.o auto_uids.o get_uid.o auto_prefix.o \
 	auto_control.o auto_assign.o auto_sysconfdir.o subgetopt.o sgetopt.o \
-	str_cpy.o strerr.a substdio.a open.a error.a str.a env.a \
+	fmt_ulong.o str_cpy.o strerr.a substdio.a open.a error.a str.a env.a \
 	auto_libexec.o auto_shared.o stralloc.a alloc.a stralloc.a
 
 setup.o: \
@@ -1201,11 +1201,13 @@ sgetopt.h
 
 instcheck: \
 load instcheck.o hier.o auto_qmail.o get_uid.o auto_uids.o \
-auto_sysconfdir.o auto_shared.o auto_control.o auto_assign.o alloc.a \
-auto_prefix.o auto_libexec.o strerr.a substdio.a error.a str.a alloc.a stralloc.a
+auto_sysconfdir.o auto_shared.o auto_control.o fmt_ulong.o \
+auto_assign.o alloc.a auto_prefix.o auto_libexec.o strerr.a \
+substdio.a error.a str.a alloc.a stralloc.a
 	./load instcheck hier.o auto_qmail.o get_uid.o auto_sysconfdir.o \
-	auto_prefix.o auto_shared.o auto_control.o auto_assign.o auto_uids.o \
-	auto_libexec.o strerr.a substdio.a error.a str.a alloc.a stralloc.a alloc.a
+	auto_prefix.o auto_shared.o auto_control.o fmt_ulong.o \
+	auto_assign.o auto_uids.o auto_libexec.o strerr.a \
+	substdio.a error.a str.a alloc.a stralloc.a alloc.a
 
 instcheck.o: \
 compile instcheck.c strerr.h error.h exit.h
@@ -1254,21 +1256,25 @@ viruscanner: \
 qscanq cleanq run-cleanq qscanq-stdin qhpsi
 
 qhpsi: \
-load qhpsi.o byte_copy.o error.o error_str.o auto_qmail.o get_uid.o auto_uids.o \
+load qhpsi.o byte_copy.o error.o error_str.o auto_qmail.o \
+fmt_ulong.o get_uid.o auto_uids.o \
 env.a str.a stralloc.a alloc.a strerr.a substdio.a
-	./load qhpsi byte_copy.o error.o error_str.o auto_qmail.o get_uid.o auto_uids.o \
+	./load qhpsi byte_copy.o error.o error_str.o auto_qmail.o \
+	fmt_ulong.o get_uid.o auto_uids.o \
 	env.a str.a stralloc.a alloc.a strerr.a substdio.a -ldl
 
 qhpsi.o: compile qhpsi.c strerr.h env.h str.h auto_qmail.h \
 stralloc.h auto_uids.h
 	./compile qhpsi.c
 
-qscanq: load qscanq.o auto_uids.o get_uid.o substdio.a strerr.a env.a str.a wait.a error.a \
-timestamp.o libtaia.a fd.a auto_spool.o mkfn.o fmt_xpid.o do_cleanq.o \
-auto_cleaner.o auto_qstdin.o sig.a alloc.a
+qscanq: load qscanq.o auto_uids.o get_uid.o \
+fmt_ulong.o timestamp.o auto_spool.o mkfn.o \
+fmt_xpid.o do_cleanq.o auto_cleaner.o libtaia.a \
+fd.a substdio.a strerr.a env.a str.a wait.a error.a \
+auto_qstdin.o sig.a alloc.a
 	./load qscanq auto_uids.o get_uid.o timestamp.o \
 	auto_spool.o mkfn.o fmt_xpid.o do_cleanq.o auto_cleaner.o \
-	auto_qstdin.o byte_copy.o \
+	auto_qstdin.o byte_copy.o fmt_ulong.o \
 	strerr.a env.a str.a wait.a error.a libtaia.a fd.a \
 	sig.a substdio.a alloc.a
 
@@ -1354,10 +1360,12 @@ auto-strarr: load auto-strarr.o substdio.a error.a str.a
 auto-strarr.o: compile auto-strarr.c substdio.h exit.h
 	./compile auto-strarr.c
 
-cleanq: load cleanq.o get_uid.o auto_uids.o scan_uint.o scan_ulong.o \
-strerr.a error.a substdio.a str.a wait.a getopt.a
-	./load cleanq get_uid.o auto_uids.o scan_uint.o scan_ulong.o \
-	strerr.a error.a substdio.a str.a wait.a getopt.a
+cleanq: load cleanq.o get_uid.o auto_uids.o scan_uint.o \
+fmt_ulong.o scan_ulong.o strerr.a error.a substdio.a \
+str.a wait.a getopt.a
+	./load cleanq get_uid.o auto_uids.o scan_uint.o \
+	fmt_ulong.o scan_ulong.o strerr.a error.a \
+	substdio.a str.a wait.a getopt.a
 
 cleanq.o: compile cleanq.c substdio.h error.h strerr.h direntry.h \
 auto_ageout.h wait.h sgetopt.h str.h subgetopt.h auto_uids.h
@@ -1490,7 +1498,7 @@ qtools: \
 822fields checkaddr checkdomain filterto \
 condtomaildir iftoccfrom ifaddr replier replier-config
 
-qlog: spipe qfilelog multipipe teepipe multitail qlogselect
+qlog: spipe qfilelog multipipe teepipe qlogselect
 
 load: \
 make-load warn-auto.sh systype
@@ -2216,11 +2224,13 @@ load qmail-qread.o fmtqfn.o readsubdir.o date822fmt.o datetime.a \
 open.a getln.a stralloc.a alloc.a substdio.a error.a str.a fs.a \
 auto_qmail.o auto_split.o envread.o str_diffn.o variables.o control.o \
 stralloc_copy.o stralloc_cat.o now.o envdir_set.o pathexec_env.o \
+sgetopt.o subgetopt.o substdo.o subfderr.o \
 auto_control.o pathexec_run.o openreadclose.o strerr_die.o strerr_sys.o
 	./load qmail-qread fmtqfn.o readsubdir.o date822fmt.o \
 	control.o stralloc_copy.o stralloc_cat.o str_diffn.o \
 	auto_qmail.o auto_split.o envread.o variables.o now.o \
 	envdir_set.o pathexec_env.o pathexec_run.o \
+	sgetopt.o subgetopt.o substdo.o subfderr.o \
 	auto_control.o openreadclose.o strerr_die.o strerr_sys.o \
 	datetime.a open.a getln.a stralloc.a alloc.a substdio.a \
 	error.a str.a fs.a
@@ -2234,7 +2244,7 @@ compile qmail-qread.c stralloc.h gen_alloc.h substdio.h subfd.h \
 fmt.h str.h getln.h fmtqfn.h readsubdir.h direntry.h \
 control.h auto_qmail.h open.h datetime.h date822fmt.h error.h \
 scan.h exit.h env.h envdir.h pathexec.h variables.h \
-conf-queue auto_control.h
+sgetopt.h conf-queue auto_control.h
 	if test -f conf-queue ; then \
 	./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
 	else \
@@ -2349,16 +2359,18 @@ dktrace.o: compile dktrace.c dktrace.h str.h case.h conf-domainkeys
 
 dktest: load dktest.o scan_ulong.o domainkeys.o dktrace.o \
 dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o fmt_xlong.o \
+sgetopt.o subgetopt.o subfderr.o substdo.o \
 scan_xlong.o socket_v4mappedprefix.o socket_v6any.o fmt_hexbytes.o \
 tlsarralloc.o dns_text.o case_diffs.o case_diffb.o fmt_str.o \
 stralloc.a alloc.a str.a dns.lib
 	./load dktest scan_ulong.o domainkeys.o dktrace.o \
 	dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o fmt_xlong.o \
+	sgetopt.o subgetopt.o subfderr.o substdo.o \
 	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o fmt_hexbytes.o \
 	tlsarralloc.o dns_text.o case_diffs.o case_diffb.o fmt_str.o \
 	stralloc.a alloc.a str.a -lcrypto `cat dns.lib`
 
-dktest.o: compile dktest.c domainkeys.h conf-domainkeys
+dktest.o: compile dktest.c domainkeys.h sgetopt.h conf-domainkeys
 	./compile `grep -h -v "^#" conf-domainkeys` dktest.c
 
 testtrace: load testtrace.o dns.o case_diffs.o case_diffb.o domainkeys.o dktrace.o \
@@ -2670,7 +2682,7 @@ control.h wait.h auto_qmail.h scan.h stralloc.h str.h conf-queue
 	fi;
 
 get_uid.o: \
-compile get_uid.c auto_uids.h strerr.h str.h
+compile get_uid.c auto_uids.h strerr.h str.h fmt.h
 	./compile get_uid.c
 
 qmail-showctl: \
@@ -2916,9 +2928,8 @@ compile fn_handler.c
 
 qmail-start: \
 load qmail-start.o prot.o fd.a auto_uids.o get_uid.o \
-strerr_die.o strerr_sys.o substdio.a str.a error.a
-
-	./load qmail-start prot.o auto_uids.o get_uid.o \
+fmt_ulong.o strerr_die.o strerr_sys.o substdio.a str.a error.a
+	./load qmail-start prot.o auto_uids.o get_uid.o fmt_ulong.o \
 	strerr_die.o strerr_sys.o fd.a substdio.a str.a error.a
 
 qmail-start.0: \
@@ -3194,7 +3205,7 @@ it man leapsecs.dat conf-sysconfdir perm_list.q conf-logdir
 		mkdir -p $(DESTDIR)"`head -1 conf-logdir`" ; \
 	fi ;
 	./setup -d "$(DESTDIR)" -L $(DESTDIR)"`head -1 conf-logdir`" \
-		$(QMAILDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list && \
+		$(QMAILDIR) && \
 		cp perm_list.q $(DESTDIR)"`head -1 conf-sysconfdir`"
 
 sgetopt.o: \
@@ -3776,11 +3787,13 @@ sig.h str.h strerr.h substdio.h env.h
 	./compile maildirdeliver.c
 
 qmail-rm: load qmail-rm.o auto_split.o auto_qmail.o error_str.o \
-	error.o fmt_str.o control.o envread.o scan_ulong.o now.o \
-	auto_control.o open_read.o getln.o getln2.o variables.o open_write.o \
-	lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
+error.o fmt_str.o control.o envread.o scan_ulong.o now.o \
+auto_control.o open_read.o getln.o getln2.o variables.o open_write.o \
+sgetopt.o subgetopt.o substdo.o subfderr.o \
+lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
 	./load qmail-rm auto_split.o auto_qmail.o error_str.o \
 	error.o fmt_str.o control.o envread.o scan_ulong.o now.o \
+	sgetopt.o subgetopt.o substdo.o subfderr.o \
 	auto_control.o open_read.o getln.o getln2.o variables.o open_write.o \
 	lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
 
@@ -4992,12 +5005,6 @@ multipipe: load multipipe.o svcfns.o
 
 multipipe.o: compile multipipe.c select.h direntry.h bool.h svcfns.h
 	./compile multipipe.c
-
-multitail: load multitail.o
-	./load multitail
-
-multitail.o: compile multitail.c systime.h bool.h
-	./compile multitail.c
 
 teepipe: load teepipe.o
 	./load teepipe
