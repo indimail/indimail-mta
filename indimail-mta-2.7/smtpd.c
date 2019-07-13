@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.222 $";
+char           *revision = "$Revision: 1.223 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -4438,15 +4438,16 @@ authgetl(void)
 #define AUTH_CRAM_RIPEMD 7
 #define AUTH_DIGEST_MD5  8
 
-int             po[2] = { -1, -1 };
 stralloc        authmethod = { 0 };
 
 int
 authenticate(int method)
 {
 	int             child, wstat, i, n = 0;
-	int             pi[2];
+	int             pi[2], po[2] = { -1, -1}, pe[2];
 	char            respbuf[1024];
+	char            pwd_in_buf[1024];
+	struct substdio pwd_in;
 
 	if (!stralloc_0(&user))
 		die_nomem();
@@ -4454,9 +4455,11 @@ authenticate(int method)
 		die_nomem();
 	if (!stralloc_0(&resp))
 		die_nomem();
-	if (pipe(pi) == -1)
+	if (pipe(pi) == -1) /*- password input data */
 		return err_pipe();
-	if (pipe(po) == -1)
+	if (pipe(po) == -1) /*- digest md5 */
+		return err_pipe();
+	if (ssl && pipe(pe) == -1) /*- smtp message pipe */
 		return err_pipe();
 	switch (child = fork())
 	{
@@ -4465,6 +4468,7 @@ authenticate(int method)
 	case 0:
 		close(pi[1]);
 		close(po[0]);
+		close(pe[0]);
 		if (pi[0] != 3) {
 			if (dup2(pi[0], 3) == -1)
 				return err_write();
@@ -4475,12 +4479,19 @@ authenticate(int method)
 				return err_write();
 			close(po[1]);
 		}
+		if (ssl && pe[1] != 1) {
+			if (dup2(pe[1], 1) == -1)
+				return err_write();
+			close(pe[1]);
+		}
 		sig_pipedefault();
 		execvp(*childargs, childargs);
 		_exit(1);
 	}
 	close(pi[0]);
 	close(po[1]);
+	if (ssl)
+		close(pe[1]);
 	substdio_fdbuf(&ssup, safewrite, pi[1], upbuf, sizeof upbuf);
 	if (substdio_put(&ssup, user.s, user.len) == -1)
 		return err_write();
@@ -4509,8 +4520,14 @@ authenticate(int method)
 		return err_child();
 	if (wait_crashed(wstat))
 		return err_child();
-	if ((i = wait_exitcode(wstat)))
-		return (i);
+	if ((i = wait_exitcode(wstat))) {
+		if (ssl) { /*- don't let plain text from exec'd programs to interfere with ssl */
+			substdio_fdbuf(&pwd_in, saferead, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
+			if (substdio_copy(&ssout, &pwd_in) == -2)
+				die_read();
+		}
+		return (i == 111 ? -1 : i);
+	}
 	if (method == AUTH_DIGEST_MD5) {
 		if (!n)
 			return (1);
@@ -4985,11 +5002,12 @@ smtp_auth(char *arg)
 		err_authfailure(remoteip, user.s, j);
 		out("454 temporary authentication failure (#4.3.0)\r\n");
 		break;
-	case -2:
+	case -2: /*- returned by err_noauthallowed() when SECURE_AUTH is set and TLS isn't used */
 		err_authinsecure(remoteip, j);
 		break;
 	default:
 		err_child();
+		break;
 	}
 	return;
 }
@@ -6087,6 +6105,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.223  2019-07-10 13:39:26+05:30  Cprogrammer
+ * fixed ssl getting terminated by output on fd 1 after exec
+ *
  * Revision 1.222  2019-05-27 20:30:50+05:30  Cprogrammer
  * use VIRTUAL_PKG_LIB env variable if defined
  *
@@ -6191,7 +6212,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.222 2019-05-27 20:30:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.223 2019-07-10 13:39:26+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
