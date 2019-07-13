@@ -459,8 +459,6 @@ multilog.o
 multipipe
 multipipe.o
 multirotate
-multitail
-multitail.o
 myctime.o
 ndelay.a
 ndelay.o
