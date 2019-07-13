@@ -137,7 +137,7 @@ if [ " $1" = " purge" ] ; then
 	for i in indimail.cnf stat.override backup.conf cronlist.q headerlist \
 		inc_deps indimail.mrtg.cfg \
 		procmailrc indimail.settings lib_deps osh.table perm_list.q \
-		qmailprog.list quotawarnmsg.example services.log
+		quotawarnmsg.example services.log
 	do
 		${rm} -f ${qsysconfdir}/$i
 	done
