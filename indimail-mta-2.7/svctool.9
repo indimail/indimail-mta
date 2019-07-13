@@ -683,9 +683,10 @@ Known values for OPTION are:
   service_path - Path where supervise scripts will be installed
   n            - Scan interval for mrtg command
 
---config=mysql|sqlssl|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
+--config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
   [--postmaster=user[@domain]]
   [--common_name=CN]
+  [--ca_path_dir=certdir]
   [--default-domain=domain]
   [--mysqlPrefix=mysqlPrefix]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
@@ -697,7 +698,7 @@ Known values for OPTION are:
 
   mysql          - Create /etc/indimail/indimail.cnf
   mysqldb        - Create an initidalized MySQL db for IndiMail
-  sqlssl         - Create SSL/TLS Certs for MariaDB
+  ssl_rsa        - Create SSL/TLS Certs for MariaDB
   qmail          - Create default qmail control files
   users          - Create Internal System Users used by IndiMail
   rmusers        - Remove Internal System Users used by IndiMail
@@ -713,6 +714,8 @@ Known values for OPTION are:
   postmaster     - name of the user who will recieve bounces on the local host.
                    This can also be a remote user i.e. &postmaster@indi.com
   common_name    - Common Name (CN) for server
+  ca_path_dir    - Directory having CA certificate
+  certdir        - Directory in which new certificates will be placed
   default-domain - default domain name for which this host will handle mails
   mysqlPrefix    - Installation Prefix for mysql
   mysqlhost      - MySQL Host having authentication tables
