@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.33  2019-07-14 01:13:29+05:30  Cprogrammer
+ * reverted to setting for fakeroot setup
+ *
  * Revision 1.32  2019-07-13 10:19:34+05:30  Cprogrammer
  * removed dummy bsd style install output
  *
@@ -574,7 +577,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.32 2019-07-13 10:19:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.33 2019-07-14 01:13:29+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
