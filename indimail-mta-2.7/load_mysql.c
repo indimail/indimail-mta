@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.7  2019-06-07 19:18:27+05:30  Cprogrammer
+ * do not treat missing libmysqlclient as error
+ *
  * Revision 1.6  2019-05-28 10:26:36+05:30  Cprogrammer
  * assign symbols mysql_errno, mysql_num_rows, mysql_affected_rows
  *
@@ -69,8 +72,13 @@ initMySQLlibrary(char **errstr)
 				return(-1);
 		}
 		ptr = libfn.s;
-	} else
+		if (access(ptr, R_OK))
+			return (0);
+	} else {
+		if (access(ptr, R_OK))
+			return (0);
 		ptr = "MYSQL_LIB";
+	}
 	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {
 		use_sql = 0;
 		if (!i)
@@ -120,7 +128,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.6 2019-05-28 10:26:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.7 2019-06-07 19:18:27+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
