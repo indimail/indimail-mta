@@ -1,7 +1,17 @@
-IndiMail provides multiple queues and eliminates the silly qmail syndrome.
+indimail-mta
+James Craig Burley claims copyright on the qmail-isoc patch. For
+more details, see COPYRIGHT.
+
+Apart from James' copyrights, no other copyright is claimed by the
+author of indimail-mta for changes from qmail 1.03 to indimail-mta.
+Daniel J. Bernstein has abandoned copyright for qmail 1.03.
+D. J. Bernstein did not participate in, nor has he been asked to
+approve of this distribution.
+
+indimail-mta provides multiple queues and eliminates the silly qmail syndrome.
 To provide multiple queues, you need to take care of starting multiple qmail-send
 (depending on number of queues that you want to setup). Any feature you need in qmail,
-will already be there in IndiMail.
+will already be there in indimail-mta.
 
 To put things very simple, you need to ensure that the below environment
 variables are set. The RPM/Deb installation ensures this.
@@ -44,7 +54,7 @@ directory.
 
 In case of any doubt, email "Manvendra Bhangui" <manvendra@indimail.org>
 
-Related packages (written by djb), included in IndiMail
+Related packages (written by djb), included in indimail-mta
 -------------------------------------------------------
 ucspi-tcp, which includes a high-speed inetd replacement for your SMTP
  server, and a generic tool to reject mail from RBL-listed sites;
