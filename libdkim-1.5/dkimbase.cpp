@@ -1,5 +1,8 @@
 /*
  * $Log: dkimbase.cpp,v $
+ * Revision 1.5  2019-06-14 21:24:03+05:30  Cprogrammer
+ * BUG - honor body length tag in verification
+ *
  * Revision 1.4  2017-09-05 10:58:26+05:30  Cprogrammer
  * removed compiler warnings
  *
@@ -162,7 +165,7 @@ int CDKIMBase::Process(char *szBuffer, int nBufLength, bool bEOF)
 			} else {
 				// process body line
 				int Result = ProcessBody(m_Line, m_LinePos, bEOF);
-				if (Result != DKIM_SUCCESS) {
+				if (Result != DKIM_SUCCESS && Result != DKIM_FINISHED_BODY) {
 					m_LinePos = 0;
 					return Result;
 				}
@@ -330,7 +333,7 @@ string CDKIMBase::RelaxHeader(const string &sHeader)
 void
 getversion_dkimbase_cpp()
 {
-	static char    *x = (char *) "$Id: dkimbase.cpp,v 1.4 2017-09-05 10:58:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimbase.cpp,v 1.5 2019-06-14 21:24:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
