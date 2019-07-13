@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.53  2019-06-14 21:26:37+05:30  Cprogrammer
+ * added env variable HONOR_BODYLENGTHTAG to honor body length tag during verification
+ *
  * Revision 1.52  2019-02-18 22:18:12+05:30  Cprogrammer
  * allow DKIMVERIFY env variable in place of DKIMPRACTICE when SIGN_PRACTICE="local"
  *
@@ -1216,6 +1219,7 @@ main(int argc, char *argv[])
 		if (env_get("UNSIGNED_FROM"))
 			vopts.nAllowUnsignedFromHeaders = 1;
 		vopts.nSubjectRequired = env_get("UNSIGNED_SUBJECT") ? 0 : 1;
+		vopts.nHonorBodyLengthTag = env_get("HONOR_BODYLENGTHTAG") ? 0 : 1;
 		DKIMVerifyInit(&ctxt, &vopts);		/*- this is always successful */
 	}
 	/*- Initialization */
@@ -1434,7 +1438,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.52 2019-02-18 22:18:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.53 2019-06-14 21:26:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
