@@ -90,7 +90,6 @@
 %attr(0755,root,qmail) @prefix@/bin/mailsubj
 %attr(0755,root,qmail) @prefix@/bin/mbox2maildir
 %attr(0755,root,qmail) @prefix@/bin/multipipe
-%attr(0755,root,qmail) @prefix@/bin/multitail
 %attr(0755,root,qmail) @prefix@/bin/inewaliases
 %attr(0755,root,qmail) @prefix@/bin/newinclude
 %attr(0755,root,qmail) @prefix@/bin/new-inject
@@ -337,7 +336,6 @@
 %attr(0444,root,root)  @qsysconfdir@/perm_list.q
 %attr(0444,root,root)  @qsysconfdir@/cronlist.q
 %attr(0444,root,root)  @qsysconfdir@/controlfiles.q
-%attr(0444,root,root)  @qsysconfdir@/qmailprog.list
 %attr(0644,root,qmail) @qsysconfdir@/leapsecs.txt
 %attr(0644,root,qmail) @qsysconfdir@/leapsecs.dat
 %attr(0644,root,qmail) @qsysconfdir@/procmailrc
@@ -548,7 +546,6 @@
 %attr(0644,root,root) @mandir@/man1/matchup.1.gz
 %attr(0644,root,root) @mandir@/man1/mconnect.1.gz
 %attr(0644,root,root) @mandir@/man1/multipipe.1.gz
-%attr(0644,root,root) @mandir@/man1/multitail.1.gz
 %attr(0644,root,root) @mandir@/man1/inewaliases.1.gz
 %attr(0644,root,root) @mandir@/man1/newinclude.1.gz
 %attr(0644,root,root) @mandir@/man1/new-inject.1.gz
