@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.5  2019-06-26 19:09:07+05:30  Cprogrammer
+ * added sBouncedAddr variable for X-Bounced-Address header added by qmail-send for bounces
+ *
  * Revision 1.4  2017-09-05 10:59:20+05:30  Cprogrammer
  * removed compiler warnings
  *
@@ -88,6 +91,7 @@ protected:
 	string          sSender;
 	string          sSelector;
 	string          sReturnPath;
+	string          sBouncedAddr; /*- used for bounces */
 	string          sDomain;
 	string          sIdentity;	// for i= tag, if empty tag will not be included in sig
 	string          sRequiredHeaders;
