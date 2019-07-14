@@ -1,5 +1,0 @@
-var/www/cgi-bin                       /var/www
-usr/share/man/man1/ezmlm-cgi.1.gz     /usr/share/man/man1
-usr/share/doc/ezmlm-idx/INSTALL.cgi   /usr/share/doc/ezmlm-idx
-usr/share/doc/ezmlm-idx/ezcgirc       /usr/share/doc/ezmlm-idx
-usr/share/doc/ezmlm-idx/ezcgi.css     /usr/share/doc/ezmlm-idx

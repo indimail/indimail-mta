@@ -1,8 +1,0 @@
-etc/indimail/ezmlm      /etc/indimail
-var/www/cgi-bin         /var/www/cgi-bin
-usr/bin                 /usr
-usr/sbin                /usr
-usr/lib/indimail/ezmlm  /usr/lib/indimail
-usr/share/doc/ezmlm-idx /usr/share/doc
-usr/share/man/man1      /usr/share/man
-usr/share/man/man5      /usr/share/man

@@ -1,7 +1,0 @@
-<services>
-  <service name="download_url">
-    <param name="host">downloads.sourceforge.net</param>
-    <param name="protocol">http</param>
-    <param name="path">/indimail/ezmlm-idx-@version@.tar.gz</param>
-  </service>
-</services>

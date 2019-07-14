@@ -1,4 +1,0 @@
--shared
-
-These flags will be added to the command line given in conf-ld when
-linking shared objects.

@@ -1,8 +1,0 @@
-#ifndef UINT64_H
-#define UINT64_H
-
-/* sysdep: -ulong64 */
-
-typedef unsigned long long uint64;
-
-#endif
