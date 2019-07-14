@@ -22,34 +22,34 @@ qmail-daemon \- turn on mail delivery
 .B qmail-start
 invokes
 .BR qmail-send ,
+.BR qmail-todo ,
 .BR qmail-lspawn ,
 .BR qmail-rspawn ,
 and
 .BR qmail-clean ,
 under the proper uids and gids for a single queue.
-These four daemons cooperate to deliver messages from the queue.
+These five daemons cooperate to deliver messages from the queue.
 
 .B qmail-daemon
 invokes
 .BR qmail-send ,
+.BR qmail-todo ,
 .BR qmail-lspawn ,
 .BR qmail-rspawn ,
 and
 .BR qmail-clean ,
 under the proper uids and gids for multiple queues. It starts multiple copies of
-\fBqmail-send\fR. The number of \fBqmail-send\fR instance it runs is defined by the environment
+\fBqmail-send\fR. The number of \fBqmail-todo\fR, \fBqmail-send\fR instance it runs is defined by the environment
 variable \fBQUEUE_COUNT\fR. For each instance of \fBqmail-send\fR,  the queue is defined by
 \fBqmail-daemon\fR by setting the environment variable \fBQUEUEDIR\fR. A queue is defined by
 the integers defined by environment variables \fBQUEUE_START\fR and \fBQUEUE_COUNT\fR.
 
 Setting QUEUE_COUNT=2, QUEUE_START=1 will make \fBqmail-daemon\fR run two instances of
-\fBqmail-send\fR. The first \fBqmail-send\fR instance will use the queue QMAIL/queue/queue1
-and the second instance will use QMAIL/queue/queue2
+\fBqmail-send\fR and \fBqmail-todo\fR. The first \fBqmail-send\fR, \fBqmail-todo\fR instance will use the
+queue QMAIL/queue/queue1 and the second instance will use QMAIL/queue/queue2
 
 .B qmail-daemon
-also monitors 
-.B qmail-send
-and restart it if it goes down.
+also monitors \fBqmail-send\fR and \fBqmail-todo\fR and restart them if they goes down.
 
 .B qmail-start
 should be used if you desire to run only one queue. For running multiple parallel queues run
@@ -162,6 +162,7 @@ qmail-clean(8),
 qmail-lspawn(8),
 qmail-rspawn(8),
 qmail-send(8),
+qmail-todo(8),
 qmail-multi(8),
 initsvc(1),
 svscan(8),
