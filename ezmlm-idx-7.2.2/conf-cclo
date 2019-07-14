@@ -1,4 +1,0 @@
--fPIC
-
-These flags will be added to the command line given in conf-cc when
-compiling library files.

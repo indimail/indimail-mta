@@ -1,3 +1,0 @@
-cc -s -rdynamic -L/usr/lib64/mysql
-
-This will be used to link .o files into an executable.
