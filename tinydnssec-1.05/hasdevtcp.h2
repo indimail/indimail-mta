@@ -1,2 +1,0 @@
-/* sysdep: +devtcp */
-#define HASDEVTCP 1

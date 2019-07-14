@@ -1,5 +1,0 @@
-#!/bin/sh
-
-USER="curvedns"
-
-exec setuidgid "$USER" multilog t n25 s1048576 ./main
