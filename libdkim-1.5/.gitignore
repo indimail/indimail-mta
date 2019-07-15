@@ -24,3 +24,4 @@ stamp-h1
 *.lo
 *.o
 autom4te.cache
+*.BAK
