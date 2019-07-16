@@ -374,7 +374,6 @@ ipme.o
 ipmeprint
 ipmeprint.o
 ip.o
-it
 junk
 leapsecs.0
 leapsecs_add.o
@@ -430,7 +429,6 @@ make-load
 make-makelib
 make-text
 make-text.o
-man
 match.o
 matchup
 matchup.0
