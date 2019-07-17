@@ -3,6 +3,11 @@ qmail fork with DKIM, SRS2 &amp; IndiMail virtual domains
 
 To install you need to do the following
 
+# Setup conf- files
+
+edit the files conf-qmail, conf-prefix, conf-sysconfdir, conf-shared, conf-libexec
+
+# Compiling/Linking
 
 cd libdkim-1.5
 
@@ -30,10 +35,12 @@ make
 
 sudo make install-strip
 
-You can configure indimail-mta using /usr/sbin/svctool
 
 # Setup & Configuration
-indimail-mta can be setup by create_service. create_services is a shell script which uses svctool -  a general purpose utility to configure indimail-mta services. create_services will also put a systemd unit file indimail.service in /lib/systemd/system
+You can configure indimail-mta using /usr/sbin/svctool. svctool is a general purpose utility to configure indimail-mta services.
+
+You can also run the script create_services which invokes svctool to setup few default services to start a full fledged messaging server create_services will also put a systemd unit file indimail.service in /lib/systemd/system
+
 
 $ cd /usr/local/src/indimail-mta-2.7
 
