@@ -1,5 +1,8 @@
 /*
  * $Log: ripemd.h,v $
+ * Revision 2.2  2019-07-18 10:54:03+05:30  Cprogrammer
+ * mode change - removed x bit
+ *
  * Revision 2.1  2011-10-27 14:31:03+05:30  Cprogrammer
  * header for ripemd.c
  *
@@ -11,7 +14,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsidripemdh[] = "$Id: ripemd.h,v 2.1 2011-10-27 14:31:03+05:30 Cprogrammer Stab $";
+static char     sccsidripemdh[] = "$Id: ripemd.h,v 2.2 2019-07-18 10:54:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 typedef struct {

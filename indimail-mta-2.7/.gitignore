@@ -589,3 +589,5 @@ qfrontend
 qf-smtp-ratelimit
 load_mysql.o
 Makefile-cert
+RELEASE-Notes
+RELEASE-Notes.in

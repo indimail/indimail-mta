@@ -1,5 +1,8 @@
 /*
  * $Log: mbox2maildir.c,v $
+ * Revision 1.4  2019-07-18 10:50:25+05:30  Cprogrammer
+ * removed unecessary header hasflock.h
+ *
  * Revision 1.3  2016-06-20 08:32:40+05:30  Cprogrammer
  * minor indentation change
  *
@@ -23,7 +26,6 @@
 #include <signal.h>
 #include "fmt.h"
 #include "lock.h"
-#include "hasflock.h"
 #include "substdio.h"
 
 char            host[68], filename[96], filenamen[96];
@@ -379,7 +381,7 @@ usage:
 void
 getversion_mbox2maildir_c()
 {
-	static char    *x = "$Id: mbox2maildir.c,v 1.3 2016-06-20 08:32:40+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: mbox2maildir.c,v 1.4 2019-07-18 10:50:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

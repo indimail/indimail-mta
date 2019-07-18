@@ -1,5 +1,8 @@
 /*
  * $Log: cdbget.c,v $
+ * Revision 1.3  2019-07-18 10:46:16+05:30  Cprogrammer
+ * use cdb_init() from libqmail
+ *
  * Revision 1.2  2013-09-04 12:51:01+05:30  Cprogrammer
  * fixed compilation warning
  *
@@ -57,7 +60,7 @@ main(int argc, char **argv)
 		scan_ulong(*argv, &u);
 	}
 
-	_cdb_init(&c, 0);
+	cdb_init(&c, 0);
 	cdb_findstart(&c);
 
 	for (;;) {
@@ -93,7 +96,7 @@ main(int argc, char **argv)
 void
 getversion_cdbget_c()
 {
-	static char    *x = "$Id: cdbget.c,v 1.2 2013-09-04 12:51:01+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: cdbget.c,v 1.3 2019-07-18 10:46:16+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
