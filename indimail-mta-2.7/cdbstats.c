@@ -1,5 +1,8 @@
 /*
  * $Log: cdbstats.c,v $
+ * Revision 1.2  2019-07-18 10:46:41+05:30  Cprogrammer
+ * use cdb_init() from libqmail
+ *
  * Revision 1.1  2008-09-16 08:14:28+05:30  Cprogrammer
  * Initial revision
  *
@@ -101,7 +104,7 @@ main()
 	uint32          dlen;
 	seek_pos        rest;
 
-	_cdb_init(&c, 0);
+	cdb_init(&c, 0);
 	getnum(&eod);
 	while (pos < 2048)
 		getnum(&dlen);
@@ -159,7 +162,7 @@ main()
 void
 getversion_cdbstats_c()
 {
-	static char    *x = "$Id: cdbstats.c,v 1.1 2008-09-16 08:14:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: cdbstats.c,v 1.2 2019-07-18 10:46:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
