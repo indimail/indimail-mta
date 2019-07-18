@@ -698,10 +698,6 @@ except.o: \
 compile except.c
 	./compile except.c
 
-fifo.o: \
-compile fifo.c hasmkffo.h fifo.h
-	./compile fifo.c
-
 find-systype: \
 find-systype.sh auto-ccld.sh
 	cat auto-ccld.sh find-systype.sh > find-systype
@@ -734,17 +730,10 @@ gfrom.o: \
 compile gfrom.c gfrom.h
 	./compile gfrom.c
 
-hasmkffo.h: \
-trymkffo.c compile load
-	( ( ./compile trymkffo.c && ./load trymkffo ) >/dev/null \
-	2>&1 \
-	&& echo \#define HASMKFIFO 1 || exit 0 ) > hasmkffo.h
-	rm -f trymkffo.o trymkffo
-
 hasnpbg1.h: \
-trynpbg1.c compile load fifo.h fifo.o
+trynpbg1.c compile load
 	( ( ./compile trynpbg1.c \
-	&& ./load trynpbg1 fifo.o -lqmail && ./trynpbg1 ) \
+	&& ./load trynpbg1 -lqmail && ./trynpbg1 ) \
 	>/dev/null 2>&1 \
 	&& echo \#define HASNAMEDPIPEBUG1 1 || exit 0 ) > \
 	hasnpbg1.h
@@ -788,7 +777,7 @@ compile hfield.c hfield.h
 	./compile hfield.c
 
 hier.o: \
-compile hier.c auto_qmail.h auto_split.h auto_uids.h fifo.h \
+compile hier.c auto_qmail.h auto_split.h auto_uids.h \
 qmail-todo.h tcpto.h hassrs.h conf-domainkeys conf-srs \
 conf-spf conf-dkim conf-batv auto_shared.h auto_control.h \
 auto_assign.h auto_sysconfdir.h auto_prefix.h conf-plugin conf-dlopen
@@ -1202,9 +1191,8 @@ matchup.0 mlmatchup.0 columnt.0 xqp.0 xsender.0 xrecipient.0 \
 serialcmd.0 maildircmd.0 rewind.0 logselect.8 \
 maildirserial.0 serialsmtp.0 serialqmtp.0 maildirsmtp.0 \
 maildirqmtp.0 qmail-qfilter.0 queue-fix.0 qmail-daned.8 \
-config.0 leapsecs.0 mess822_date.0 \
-iftocc.0 ofmipd.0 ofmipname.0 822field.0 new-inject.0 rewriting.0 \
-rewritehost.0 822date.0 822received.0 822print.0 \
+config.0 mess822_date.0 iftocc.0 ofmipd.0 ofmipname.0 822field.0 \
+new-inject.0 rewriting.0 rewritehost.0 822date.0 822received.0 822print.0 \
 822body.0 822headerok.0 822bodyfilter.0 822headerfilter.0 822addr.0 \
 822fields.0 checkaddr.0 checkdomain.0 filterto.0 \
 condtomaildir.0 iftoccfrom.0 ifaddr.0 replier.0 replier-config.0 qscanq.0 \
@@ -2539,11 +2527,11 @@ compile atrn.c etrn.h rcpthosts.h control.h
 ############### Begin queue-fix
 
 queue-fix: \
-load queue-fix.o fifo.o get_uid.o auto_split.o auto_uids.o
-	./load queue-fix fifo.o get_uid.o auto_split.o auto_uids.o -lqmail
+load queue-fix.o get_uid.o auto_split.o auto_uids.o
+	./load queue-fix get_uid.o auto_split.o auto_uids.o -lqmail
 
 queue-fix.o: \
-compile queue-fix.c direntry.h fifo.h auto_split.h auto_uids.h tcpto.h
+compile queue-fix.c direntry.h auto_split.h auto_uids.h tcpto.h
 	./compile queue-fix.c
 
 qbase64: \
@@ -2931,10 +2919,6 @@ leapsecs.o: compile leapsecs.c auto_qmail.h
 
 leapsecs.dat: leapsecs.txt leapsecs
 	./leapsecs < leapsecs.txt > leapsecs.dat
-
-leapsecs.0: \
-leapsecs.3
-	nroff -man leapsecs.3 > leapsecs.0
 
 mess822_date.0: \
 mess822_date.3
@@ -3688,8 +3672,8 @@ softlimit: load softlimit.o pathexec_run.o
 softlimit.o: compile pathexec.h softlimit.c
 	./compile softlimit.c
 
-supervise: deepsleep.o load supervise.o fifo.o iopause.o
-	./load supervise deepsleep.o fifo.o iopause.o -lqmail
+supervise: deepsleep.o load supervise.o iopause.o
+	./load supervise deepsleep.o iopause.o -lqmail
 
 supervise.o: compile supervise.c deepsleep.h iopause.h
 	./compile supervise.c
