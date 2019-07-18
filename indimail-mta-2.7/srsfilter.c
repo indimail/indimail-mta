@@ -1,5 +1,8 @@
 /*
  * $Log: srsfilter.c,v $
+ * Revision 1.2  2019-07-18 10:53:18+05:30  Cprogrammer
+ * replaced readwrite.h with unistd.h
+ *
  * Revision 1.1  2014-01-01 19:27:49+05:30  Cprogrammer
  * Initial revision
  *
@@ -202,7 +205,7 @@ main(argc, argv)
 void
 getversion_srsfilter_c()
 {
-	static char    *x = "$Id: srsfilter.c,v 1.1 2014-01-01 19:27:49+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: srsfilter.c,v 1.2 2019-07-18 10:53:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
