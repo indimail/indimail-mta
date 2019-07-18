@@ -1,5 +1,8 @@
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.7  2019-07-18 10:48:00+05:30  Cprogrammer
+ * use strerr_die?x macro instead of strerr_die() function
+ *
  * Revision 1.6  2017-05-04 20:20:22+05:30  Cprogrammer
  * close passwd, group database
  *
@@ -57,14 +60,12 @@ main(int argc, char **argv)
 	 * Set the real and effective user id to qscand to
 	 * prevent rogue programs from creating mischief
 	 */
-	if (setreuid(auto_uidc, auto_uidc))
-	{
+	if (setreuid(auto_uidc, auto_uidc)) {
 		if (flaglog)
 			strerr_die2sys(50, FATAL, "setreuid failed: ");
 		_exit(50);
 	}
-	if (!str_diffn(argv[0], "plugin:", 7))
-	{
+	if (!str_diffn(argv[0], "plugin:", 7)) {
 		if (!(plugindir = env_get("PLUGINDIR")))
 			plugindir = "plugins";
 		if (plugindir[i = str_chr(plugindir, '/')])
@@ -72,8 +73,7 @@ main(int argc, char **argv)
 		if (!(queue_plugin_symbol = env_get("QUEUE_PLUGIN_SYMB")))
 			queue_plugin_symbol = "virusscan";
 		messfn = argv[0] + 7;
-		for (u = 1; argv[u]; u++)
-		{
+		for (u = 1; argv[u]; u++) {
 			/* 
 			 * silently ignore plugins containing path
 			 */
@@ -95,33 +95,29 @@ main(int argc, char **argv)
 				nomem(flaglog);
 			if (!stralloc_0(&plugin))
 				nomem(flaglog);
-			if (!(handle = dlopen(plugin.s, RTLD_LAZY|RTLD_GLOBAL)))
-			{
+			if (!(handle = dlopen(plugin.s, RTLD_LAZY|RTLD_GLOBAL))) {
 				if (flaglog)
-					strerr_die(57, FATAL, "dlopen: ", plugin.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+					strerr_die5x(57, FATAL, "dlopen: ", plugin.s, ": ", dlerror());
 				_exit(57);
 			}
 			dlerror(); /*- man page told me to do this */
 			func = dlsym(handle, queue_plugin_symbol);
-			if ((error = dlerror()))
-			{
+			if ((error = dlerror())) {
 				if (flaglog)
-					strerr_die(58, FATAL, "dlsym: ", plugin.s, ": ", error, 0, 0, 0, (struct strerr *) 0);
+					strerr_die5x(58, FATAL, "dlsym: ", plugin.s, ": ", error);
 				_exit(58);
 			}
 			childrc = (*func) (messfn); /*- execute the function */
-			if (dlclose(handle))
-			{
+			if (dlclose(handle)) {
 				if (flaglog)
-					strerr_die(59, FATAL, "dlclose: ", plugin.s, ": ", error, 0, 0, 0, (struct strerr *) 0);
+					strerr_die5x(59, FATAL, "dlclose: ", plugin.s, ": ", error);
 				_exit(59);
 			}
 			if (childrc)
 				break;
 		}
 		_exit(childrc);
-	} else
-	{
+	} else {
 		if (*argv[0] != '/' && *argv[0] != '.')
 			execvp(*argv, argv);
 		else
@@ -136,6 +132,6 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.6 2017-05-04 20:20:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qhpsi.c,v 1.7 2019-07-18 10:48:00+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

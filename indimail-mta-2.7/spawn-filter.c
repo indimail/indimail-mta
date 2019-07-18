@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.67  2019-07-18 10:48:31+05:30  Cprogrammer
+ * use strerr_die?x macro instead of strerr_die() function
+ *
  * Revision 1.66  2018-01-31 12:08:27+05:30  Cprogrammer
  * moved qmail-local, qmail-remote to sbin
  *
@@ -276,7 +279,7 @@ static void
 report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 {
 	if (!remotE) /*- strerr_die does not return */
-		strerr_die(errCode, s1, s2, s3, s4, s5, s6, 0, 0, (struct strerr *) 0);
+		strerr_die6x(errCode, s1, s2, s3, s4, s5, s6);
 	if (!errCode)
 	{
 		if (substdio_put(subfdoutsmall, 
@@ -1158,7 +1161,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.66 2018-01-31 12:08:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.67 2019-07-18 10:48:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
