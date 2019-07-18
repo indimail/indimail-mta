@@ -1,0 +1,38 @@
+.TH tlsacheck 3
+.SH NAME
+tlsacheck \- query \fBqmail-daned\fR for TLSA domain verification
+.SH SYNTAX
+.B #include <tlsacheck.h>
+
+int  \fBtlsacheck\fP(\fIchar\fR *\fIip\fR, \fIchar\fR *\fIdomain\fR, \fichar\fR \fIrbuf[2]\fR, void (*\fItimeoutfn\fR)(), void (*\fIerrfn\fR)());
+
+.SH DESCRIPTION
+\fBtlsacheck\fR connects to \fBqmail-daned\fR(8) - TLSA verification daemon
+on the IP address \fIip\fR port 1998, to query TLSA records for mx host
+\fIdomain\fR. It uses UDP to send the domain name and expects a two byte
+response in \fIrbuf\fR. Clients like \fBqmail-remote\fR(8) can use this function to
+delegate DANE verification. IP address can also be of the form \fIip\fR@\fIport\fR,
+to specify an alternate port.
+
+You can use the command line program \fBqdane\fR(1) to test
+\fBqmail-daned\fR(8) protocol.
+
+The arguments \fItimeoutfn\fR should be a user defined function to handle
+timeouts. The default timeout is 10 seconds, but can be changed by setting
+the DANETIMEOUT environment variable.
+
+.SH "RETURN VALUE"
+\fBtlsacheck\fR returns 1 for success and 0 for failure. rbuf[1] can be one of the following
+
+.EX
+  RECORD_NEW      0
+  RECORD_WHITE    1
+  RECORD_OK       2
+  RECORD_NOVRFY   3
+  RECORD_FAIL     4
+  RECORD_OLD      5
+.EE
+
+.SH "SEE ALSO"
+
+qmail-remote(8), qdane(1), qmail-daned(8)
