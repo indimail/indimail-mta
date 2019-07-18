@@ -63,11 +63,11 @@
 
 Summary: A Flexible SMTP server
 Name: indimail-mta
-Version: 2.7
+Version: @version@
 %if %fedorareview == 0
 Provides: daemontools = %{version}, ucspi-tcp = %{version}
 %endif
-Release: 1.1%{?dist}
+Release: @release@%{?dist}
 
 ## user/group management
 # Note: it is not necessary to assign 555 for uid, gid. The package will use any id assigned to username, groupname

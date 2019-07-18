@@ -11,8 +11,8 @@ logdir=/var/log/svc
 
 libdkim_version=1.5
 libsrs2_version=1.0.18
-version=$(shell grep Version: ../indimail-mta.spec.in|cut -d: -f2 | cut -c2-)
-release := $(shell head -1 conf-release 2>/dev/null|| echo 1)
+version=$(shell cat ../conf-version)
+release := $(shell cat ../conf-release)
 all: rules indimail-mta.prerm indimail-mta.preinst \
 indimail-mta.postrm indimail-mta.postinst \
 indimail-mini.prerm indimail-mini.preinst \
