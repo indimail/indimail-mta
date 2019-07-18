@@ -9,7 +9,28 @@ edit the files conf-qmail, conf-prefix, conf-sysconfdir, conf-shared, conf-libex
 
 # Compiling/Linking
 
-cd libdkim-1.5
+# Download / clone libqmail
+
+ $ cd /usr/local/src
+ 
+ $ git clone https://github.com/mbhangui/libqmail
+ 
+ $ cd libqmail-0.1
+ 
+ $ ./default.configure
+ 
+ $ make
+ 
+ $ sudo make install-strip
+   
+# Download indimail-mta
+
+$ cd /usr/local/src
+ 
+$ git clone https://github.com/mbhangui/indimail-mta
+
+
+cd /usr/local/src/indimail-mta/libdkim-1.5
 
 ./default.configure
 
@@ -18,7 +39,7 @@ make
 sudo make install-strip
 
 
-cd libsrs2-1.0.18
+cd /usr/local/src/indimail-mta/libsrs2-1.0.18
 
 ./default.configure
 
@@ -27,7 +48,7 @@ make
 sudo make install-strip
 
 
-cd indimail-mta
+cd /usr/local/src/indimail-mta/indimail-mta-2.8 (replace 2.8 with the version number)
 
 edit conf-fiies (see the note on directory structure at the bottom)
 
