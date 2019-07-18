@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.259  2019-07-18 16:57:57+05:30  Cprogrammer
+ * moved fifo_make to libqmail
+ *
  * Revision 1.258  2019-07-18 16:34:38+05:30  Cprogrammer
  * moved man pages for common library functions to libqmail
  *
@@ -1616,7 +1619,6 @@ hier(inst_dir, fatal, dev_package)
 		return;
 	/*- library */
 	c(mandir,          "man/man3", "qerror.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "fifo_make.3", uidr, gidr, moder_f);
 #ifdef HASTLSA
 	c(mandir,          "man/man3", "tlsacheck.3", uidr, gidr, moder_f);
 #endif
@@ -1637,7 +1639,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.258 2019-07-18 16:34:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.259 2019-07-18 16:57:57+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
