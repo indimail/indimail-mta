@@ -15,7 +15,7 @@ edit the files conf-qmail, conf-prefix, conf-sysconfdir, conf-shared, conf-libex
  
  $ git clone https://github.com/mbhangui/libqmail
  
- $ cd libqmail-0.1
+ $ cd /usr/local/src/libqmail/libqmail-0.1
  
  $ ./default.configure
  
