@@ -1,5 +1,8 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.16  2019-07-18 10:49:03+05:30  Cprogrammer
+ * use strerr_die?x macro instead of strerr_die() function
+ *
  * Revision 1.15  2019-07-13 11:05:18+05:30  Cprogrammer
  * fixed indentation style
  *
@@ -110,7 +113,7 @@ get_uid(char *user)
 		}
 		for (i = 0; *user_uid_list[i]; i++) {
 			if (uid_array[i] == -1)
-				strerr_die(111, "getpwent: ", user_uid_list[i], ": No such user", 0, 0, 0, 0, 0, (struct strerr *) 0);
+				strerr_die3sys(111, "getpwent: ", user_uid_list[i], ": No such user: ");
 		}
 		first++;
 	}
@@ -144,7 +147,7 @@ get_gid(char *group)
 		}
 		for (i = 0; *user_gid_list[i]; i++) {
 			if (gid_array[i] == -1)
-				strerr_die(111, "getgrent: ", user_gid_list[i], ": No such group", 0, 0, 0, 0, 0, (struct strerr *) 0);
+				strerr_die3sys(111, "getgrent: ", user_gid_list[i], ": No such group: ");
 		}
 		first++;
 	}
@@ -295,7 +298,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	static char    *x = "$Id: get_uid.c,v 1.15 2019-07-13 11:05:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: get_uid.c,v 1.16 2019-07-18 10:49:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
