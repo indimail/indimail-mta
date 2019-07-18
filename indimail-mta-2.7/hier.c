@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.260  2019-07-18 17:00:24+05:30  Cprogrammer
+ * moved leapsecs.3 to libqmail
+ *
  * Revision 1.259  2019-07-18 16:57:57+05:30  Cprogrammer
  * moved fifo_make to libqmail
  *
@@ -1624,7 +1627,6 @@ hier(inst_dir, fatal, dev_package)
 #endif
 	c(mandir,          "man/man3", "greylist.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "config.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "leapsecs.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "rewritehost.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "mess822.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "mess822_addr.3", uidr, gidr, moder_f);
@@ -1639,7 +1641,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.259 2019-07-18 16:57:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.260 2019-07-18 17:00:24+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
