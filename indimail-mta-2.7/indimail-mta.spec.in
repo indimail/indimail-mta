@@ -154,7 +154,7 @@ BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils diffutils
 BuildRequires: readline gzip autoconf automake libtool pkgconfig
-BuildRequires: mysql-devel
+BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
 
 %if %build_on_obs == 1
 ##################################### OBS ####################################
