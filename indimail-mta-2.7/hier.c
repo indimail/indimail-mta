@@ -1,5 +1,14 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.260  2019-07-18 17:00:24+05:30  Cprogrammer
+ * moved leapsecs.3 to libqmail
+ *
+ * Revision 1.259  2019-07-18 16:57:57+05:30  Cprogrammer
+ * moved fifo_make to libqmail
+ *
+ * Revision 1.258  2019-07-18 16:34:38+05:30  Cprogrammer
+ * moved man pages for common library functions to libqmail
+ *
  * Revision 1.257  2019-07-13 10:36:12+05:30  Cprogrammer
  * matched permissions of qfilters, level2-tlds, level3-tlds with spec file
  *
@@ -1612,44 +1621,12 @@ hier(inst_dir, fatal, dev_package)
 	if (!dev_package)
 		return;
 	/*- library */
-	c(mandir,          "man/man3", "alloc.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "case.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "cdb.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "coe.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "datetime.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "direntry.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "env.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "qerror.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "error_str.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "error_temp.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "fd_copy.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "fd_move.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "fifo_make.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "getln.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "getln2.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "now.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "sgetopt.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "stralloc.3", uidr, gidr, moder_f);
 #ifdef HASTLSA
 	c(mandir,          "man/man3", "tlsacheck.3", uidr, gidr, moder_f);
 #endif
 	c(mandir,          "man/man3", "greylist.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "byte.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "substdio.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "substdio_in.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "substdio_out.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "substdio_copy.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "subgetopt.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "wait.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "caldate.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "caldate_mjd.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "caltime.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "caltime_tai.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "config.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "leapsecs.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "tai.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "tai_now.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "tai_pack.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "rewritehost.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "mess822.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "mess822_addr.3", uidr, gidr, moder_f);
@@ -1664,7 +1641,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.257 2019-07-13 10:36:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.260 2019-07-18 17:00:24+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
