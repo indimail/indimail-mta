@@ -11,8 +11,8 @@ mandir=$(shell echo `head -1 conf-prefix`/share/man 2>/dev/null)
 shareddir=$(shell head -1 conf-shared 2>/dev/null)
 qsysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
 libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
-version=$(shell grep Version: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
-release=$(shell grep Release: indimail-mta.spec.in | cut -d: -f2|cut -c2-)
+version=$(shell cat conf-version)
+release=$(shell cat conf-release)
 DATE=$(shell date)
 DEFS := $(shell uname -s | tr "[:lower:]" "[:upper:]")
 mysql_inc  = $(shell ./mysql_config --include)
@@ -4279,7 +4279,7 @@ svctool.8: svctool.9 conf-qmail conf-sysconfdir Makefile mysql_config
 create_services: create_services.in
 	$(edit) $@.in > $@; chmod 755 $@
 
-doc/RELEASE-Notes: doc/RELEASE-Notes.in
+doc/RELEASE-Notes: doc/RELEASE-Notes.in doc/ChangeLog
 	(cat doc/RELEASE-Notes.in;./catChangeLog) | $(edit) > $@
 
 #################################################################
