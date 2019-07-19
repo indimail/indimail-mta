@@ -1,5 +1,8 @@
 /*
  * $Log: ipalloc.c,v $
+ * Revision 1.7  2019-07-19 13:47:45+05:30  Cprogrammer
+ * 2nd argument of ipalloc_readyplus() should be unsigned int
+ *
  * Revision 1.6  2018-05-26 12:41:01+05:30  Cprogrammer
  * fixed typo with #undef
  *
@@ -21,9 +24,7 @@
 #undef _ALLOC_
 #include "gen_allocdefs.h"
 #include "ip.h"
-#define _IPALLOC_
 #include "ipalloc.h"
-#undef _IPALLOC_
 
 GEN_ALLOC_readyplus(ipalloc, struct ip_mx, ix, len, a, i, n, x, 10, ipalloc_readyplus)
 GEN_ALLOC_append(ipalloc, struct ip_mx, ix, len, a, i, n, x, 10, ipalloc_readyplus, ipalloc_append)
@@ -31,7 +32,7 @@ GEN_ALLOC_append(ipalloc, struct ip_mx, ix, len, a, i, n, x, 10, ipalloc_readypl
 void
 getversion_ipalloc_c()
 {
-	static char    *x = "$Id: ipalloc.c,v 1.6 2018-05-26 12:41:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipalloc.c,v 1.7 2019-07-19 13:47:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

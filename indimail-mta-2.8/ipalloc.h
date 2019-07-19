@@ -1,5 +1,8 @@
 /*
  * $Log: ipalloc.h,v $
+ * Revision 1.6  2019-07-19 13:48:18+05:30  Cprogrammer
+ * 2nd argument of ipalloc_readyplus() should be unsigned int
+ *
  * Revision 1.5  2005-06-11 21:30:03+05:30  Cprogrammer
  * added ipv6 support
  *
@@ -34,11 +37,6 @@ struct ip_mx
 #include "gen_alloc.h"
 
 GEN_ALLOC_typedef(ipalloc, struct ip_mx, ix, len, a)
-#ifndef _IPALLOC_
-int             ipalloc_readyplus(ipalloc *, int);
+int             ipalloc_readyplus(ipalloc *, unsigned int);
 int             ipalloc_append(ipalloc *, struct ip_mx *);
-#else
-int             ipalloc_readyplus();
-int             ipalloc_append();
-#endif
 #endif /*- #ifndef IPALLOC_H */
