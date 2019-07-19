@@ -6,6 +6,7 @@ To install you need to do the following
 # Setup conf- files
 
 edit the files conf-qmail, conf-prefix, conf-sysconfdir, conf-shared, conf-libexec
+(see the bottom of this page)
 
 # Compiling/Linking
 
@@ -13,9 +14,9 @@ edit the files conf-qmail, conf-prefix, conf-sysconfdir, conf-shared, conf-libex
 
  $ cd /usr/local/src
  
- $ git clone https://github.com/mbhangui/libqmail
+ $ git clone https://github.com/mbhangui/libqmail-0.1.git
  
- $ cd /usr/local/src/libqmail/libqmail-0.1
+ $ cd /usr/local/src/libqmail-0.1
  
  $ ./default.configure
  
@@ -27,7 +28,7 @@ edit the files conf-qmail, conf-prefix, conf-sysconfdir, conf-shared, conf-libex
 
 $ cd /usr/local/src
  
-$ git clone https://github.com/mbhangui/indimail-mta
+$ git clone https://github.com/mbhangui/indimail-mta.git
 
 
 cd /usr/local/src/indimail-mta/libdkim-1.5
