@@ -1,5 +1,8 @@
 /*
  * $Log: tlsarralloc.h,v $
+ * Revision 1.2  2019-07-19 13:49:46+05:30  Cprogrammer
+ * 2nd argument of tlsarralloc_readyplus() should be unsigned int
+ *
  * Revision 1.1  2018-05-26 12:38:36+05:30  Cprogrammer
  * Initial revision
  *
@@ -23,12 +26,7 @@ typedef struct tlsa_rdata {
 #include "gen_alloc.h"
 
 GEN_ALLOC_typedef(tlsarralloc,tlsarr,rr,len,a)
-#ifndef _TLSARRALLOC_
-int             tlsarralloc_readyplus(tlsarralloc *, int);
+int             tlsarralloc_readyplus(tlsarralloc *, unsigned int);
 int             tlsarralloc_append(tlsarralloc *, tlsarr *);
-#else
-int             tlsarralloc_readyplus();
-int             tlsarralloc_append();
-#endif
 
 #endif /*- TLSARRALLOC_H */
