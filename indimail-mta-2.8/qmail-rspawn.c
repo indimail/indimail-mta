@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.37  2019-07-22 22:01:49+05:30  Cprogrammer
+ * don't use dlopen (closeLibrary) in a vforked child
+ *
  * Revision 1.36  2019-05-27 20:29:39+05:30  Cprogrammer
  * use VIRTUAL_PKG_LIB env variable if defined
  *
@@ -333,7 +336,9 @@ noroutes:
 	if (!env_unset("QMAILLOCAL"))
 		_exit(111);
 	if (!(f = vfork())) {
+#if 0
 		closeLibrary(&phandle);
+#endif
 		if (fd_move(0, fdmess) == -1)
 			_exit(111);
 		if (fd_move(1, fdout) == -1)
@@ -354,7 +359,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.36 2019-05-27 20:29:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.37 2019-07-22 22:01:49+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
