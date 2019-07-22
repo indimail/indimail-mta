@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.261  2019-07-22 21:58:00+05:30  Cprogrammer
+ * removed qmail-pop3d, qmail-popup
+ *
  * Revision 1.260  2019-07-18 17:00:24+05:30  Cprogrammer
  * moved leapsecs.3 to libqmail
  *
@@ -980,9 +983,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-dkim", auto_uido, 0, moder_x);
 #endif
 	c(auto_prefix, "sbin", "qmail-popbull", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "qmail-popup", auto_uido, 0, moder_u);
 	c(auto_prefix, "sbin", "qmail-poppass", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "qmail-pop3d", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-qmqpd", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-qmtpd", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-smtpd", auto_uido, 0, moder_x);
@@ -1583,10 +1584,6 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/cat8", "qmail-tcpok.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-tcpto.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-tcpto.0", uidr, gidr, moder_f);
-	c(mandir,          "man/man8", "qmail-pop3d.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-pop3d.0", uidr, gidr, moder_f);
-	c(mandir,          "man/man8", "qmail-popup.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-popup.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-qmqpc.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-qmqpc.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-qmqpd.8", uidr, gidr, moder_f);
@@ -1641,7 +1638,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.260 2019-07-18 17:00:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.261 2019-07-22 21:58:00+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

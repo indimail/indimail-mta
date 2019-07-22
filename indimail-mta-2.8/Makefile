@@ -1050,8 +1050,8 @@ new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest \
 predate preline printforward printmaillist proc proc+df qaes qail \
 qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl maildirsize \
 qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
-qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-pop3d qmail-popbull qmail-poppass \
-qmail-popup qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
+qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-popbull qmail-poppass \
+qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
 qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-daned \
 qmail-smtpd qmail_smtpd.so qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmail-upq \
 qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
@@ -1176,7 +1176,7 @@ qmail-rspawn.0 qmail-clean.0 qmail-send.0 qmail-todo.0 qmail-start.0 splogger.0 
 qmail-queue.0 qmail-dk.0 qmail-dkim.8 dk-filter.8 qmail-inject.0 mailsubj.0 \
 qmail-showctl.0 qmail-newu.0 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 qmail-pw2u.0 qmail-qread.0 qmail-tcpto.0 qmail-tcpok.0 svscan.8 \
-qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
+qmail-popbull.0 qmail-qmqpc.0 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
 dktest.8 svscanboot.0 plugtest.1 surblfilter.8 svctool.8 \
 qmail-multi.0 spawn-filter.0 tcp-env.0 qmail-greyd.0 \
@@ -1499,19 +1499,6 @@ qmail-newu.o: \
 compile qmail-newu.c cdbmss.h auto_assign.h
 	./compile qmail-newu.c
 
-qmail-pop3d: load qmail-pop3d.o commands.o maildir.o prioq.o \
-socket.lib
-	./load qmail-pop3d commands.o maildir.o prioq.o \
-	`cat socket.lib` -lqmail
-
-qmail-pop3d.0: \
-qmail-pop3d.8
-	nroff -man qmail-pop3d.8 > qmail-pop3d.0
-
-qmail-pop3d.o: \
-compile qmail-pop3d.c commands.h prioq.h maildir.h
-	./compile qmail-pop3d.c
-
 qmail-popbull: \
 load qmail-popbull.o
 	./load qmail-popbull -lqmail
@@ -1523,16 +1510,6 @@ qmail-popbull.8
 qmail-popbull.o: \
 compile qmail-popbull.c direntry.h
 	./compile qmail-popbull.c
-
-qmail-popup: load qmail-popup.o commands.o socket.lib
-	./load qmail-popup commands.o `cat socket.lib` -lqmail
-
-qmail-popup.o: compile qmail-popup.c commands.h
-	./compile qmail-popup.c
-
-qmail-popup.0: \
-qmail-popup.8
-	nroff -man qmail-popup.8 > qmail-popup.0
 
 qmail-pw2u: load qmail-pw2u.o control.o auto_usera.o auto_control.o \
 auto_break.o auto_assign.o variables.o

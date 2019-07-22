@@ -312,15 +312,11 @@ qmail-newu
 qmail-newu.0
 qmail-newu.8
 qmail-nullqueue
-qmail-pop3d
-qmail-pop3d.0
 qmail-popbull
 qmail-popbull.0
 qmail-poppass
 qmail-poppass.0
 qmail-poppass.8
-qmail-popup
-qmail-popup.0
 qmail-pw2u
 qmail-pw2u.0
 qmail-pw2u.8

@@ -573,15 +573,9 @@ qmail-newu.o
 qmail-nullqueue
 qmail-nullqueue.o
 qmail.o
-qmail-pop3d
-qmail-pop3d.0
-qmail-pop3d.o
 qmail-popbull
 qmail-popbull.0
 qmail-popbull.o
-qmail-popup
-qmail-popup.0
-qmail-popup.o
 qmail-pw2u
 qmail-pw2u.0
 qmail-pw2u.8

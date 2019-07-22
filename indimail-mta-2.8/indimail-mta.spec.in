@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.196 2019-07-18 17:05:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.197 2019-07-22 21:59:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -828,8 +828,6 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/inotify
 
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-popbull
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-popup
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-pop3d
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-poppass
 %attr(755,root,root)                    %{_prefix}/sbin/ofmipd
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-smtpd
@@ -1113,8 +1111,6 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/qmail-qmtpd.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-qmqpd.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-qmqpc.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-popup.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-pop3d.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-tcpto.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-tcpok.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/queue-fix.0.gz
@@ -1250,8 +1246,6 @@ done
 %attr(0644,root,root)                   %{mandir}/cat8/qmail-qmtpd.0.gz
 %attr(0644,root,root)                   %{mandir}/cat8/qmail-qmqpd.0.gz
 %attr(0644,root,root)                   %{mandir}/cat8/qmail-qmqpc.0.gz
-%attr(0644,root,root)                   %{mandir}/cat8/qmail-popup.0.gz
-%attr(0644,root,root)                   %{mandir}/cat8/qmail-pop3d.0.gz
 %attr(0644,root,root)                   %{mandir}/cat8/qmail-tcpto.0.gz
 %attr(0644,root,root)                   %{mandir}/cat8/qmail-tcpok.0.gz
 %attr(0644,root,root)                   %{mandir}/cat8/qmail-qread.0.gz
