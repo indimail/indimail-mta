@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.442 2019-07-07 10:20:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.443 2019-07-27 11:24:21+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.442 2019-07-07 10:20:33+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.443 2019-07-27 11:24:21+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5501,6 +5501,9 @@ if [ ! " $domainlimits" = " " ] ; then
 else
 	> $conf_dir/DOMAIN_LIMITS
 fi
+> $conf_dir/FAST_QUOTA
+echo "8192"  > $conf_dir/MAILDIRSIZE_MAX_SIZE
+echo "43200" > $conf_dir/MAILDIRSIZE_MAX_AGE
 if [ ! " $overquota_mailsize" = " " ] ; then
 	echo $overquota_mailsize > $conf_dir/OVERQUOTA_MAILSIZE
 else
