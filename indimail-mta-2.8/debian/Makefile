@@ -78,17 +78,17 @@ obs_deb_prep: obs_deb_prep.in Makefile
 	$(edit) $@.in > $@
 rules: rules.in Makefile
 	$(edit) $@.in > $@
-changelog: changelog.in Makefile ../indimail-mta.spec.in conf-release
+changelog: changelog.in Makefile ../indimail-mta.spec.in ../conf-release
 	$(edit) $@.in > $@
-indimail-mta.dsc: indimail-mta.dsc.in Makefile ../indimail-mta.spec.in conf-release
+indimail-mta.dsc: indimail-mta.dsc.in Makefile ../indimail-mta.spec.in ../conf-release
 	$(edit) $@.in > $@
-indimail-mta-Debian_8.0.dsc: indimail-mta-Debian_8.0.dsc.in Makefile ../indimail-mta.spec.in conf-release
+indimail-mta-Debian_8.0.dsc: indimail-mta-Debian_8.0.dsc.in Makefile ../indimail-mta.spec.in ../conf-release
 	$(edit) $@.in > $@
-indimail-mta-xUbuntu_14.04.dsc: indimail-mta-xUbuntu_14.04.dsc.in Makefile ../indimail-mta.spec.in conf-release
+indimail-mta-xUbuntu_14.04.dsc: indimail-mta-xUbuntu_14.04.dsc.in Makefile ../indimail-mta.spec.in ../conf-release
 	$(edit) $@.in > $@
-indimail-mta-xUbuntu_16.04.dsc: indimail-mta-xUbuntu_16.04.dsc.in Makefile ../indimail-mta.spec.in conf-release
+indimail-mta-xUbuntu_16.04.dsc: indimail-mta-xUbuntu_16.04.dsc.in Makefile ../indimail-mta.spec.in ../conf-release
 	$(edit) $@.in > $@
-indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile ../indimail-mta.spec.in conf-release
+indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile ../indimail-mta.spec.in ../conf-release
 	$(edit) $@.in > $@
 indimail-mta.postrm: indimail-mta.postrm.in Makefile
 	$(edit) $@.in > $@
