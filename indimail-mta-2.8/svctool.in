@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.443 2019-07-27 11:24:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.444 2019-07-28 23:43:36+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.443 2019-07-27 11:24:21+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.444 2019-07-28 23:43:36+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1362,6 +1362,12 @@ if [ ! -d "$DESTDIR"$CONTROLDIR ] ; then
 		return 1
 	fi
 fi
+if [ ! -d "$DESTDIR"$sysconfdir/tcp ] ; then
+	/bin/mkdir -p "$DESTDIR"$sysconfdir/tcp
+	if [ $? -ne 0 ] ; then
+		return 1
+	fi
+fi
 echo "Creating Default IndiMail Control Files"
 if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.imap ] ; then
 	(
@@ -1458,6 +1464,12 @@ default_qmail_control()
 {
 if [ ! -d "$DESTDIR"$CONTROLDIR ] ; then
 	/bin/mkdir -p "$DESTDIR"$CONTROLDIR
+	if [ $? -ne 0 ] ; then
+		return 1
+	fi
+fi
+if [ ! -d "$DESTDIR"$sysconfdir/tcp ] ; then
+	/bin/mkdir -p "$DESTDIR"$sysconfdir/tcp
 	if [ $? -ne 0 ] ; then
 		return 1
 	fi
@@ -4619,6 +4631,16 @@ create_mysql_user()
 
 create_mysql_service()
 {
+if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+	mysqld=libexec/mysqld
+elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
+	mysqld=sbin/mysqld
+elif [ -x $mysqlPrefix/bin/mysqld ] ; then
+	mysqld=bin/mysqld
+else
+	echo "mysqld: No such File or directory" 1>&2
+	return 1
+fi
 if [ $# -ne 5 ] ; then
 	echo "USAGE: create_mysql_service port mysqlPrefix databasedir config_file servicedir" 1>&2
 	return 1
@@ -4786,15 +4808,16 @@ else
 	mariadb_client=0
 fi
 
-if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
-	echo "Creating MySQL SSL Certs" 1>&2
-	echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
-	$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data 1>&2
-elif [ $mariadb -eq 1 ] ; then
-	echo "Creating MariaDB SSL/TLS Certificates" 1>&2
-	mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl 1>&2
+if [ -d "$DESTDIR"$databasedir ] ; then
+	if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
+		echo "Creating MySQL SSL Certs" 1>&2
+		echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
+		$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data 1>&2
+	elif [ $mariadb -eq 1 ] ; then
+		echo "Creating MariaDB SSL/TLS Certificates" 1>&2
+		mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl 1>&2
+	fi
 fi
-$chown -R mysql:mysql "$DESTDIR"$databasedir
 
 echo "[client]"
 echo "port      = $mysql_port"
@@ -8982,6 +9005,16 @@ case $option in
 				mysql_socket=$mysqlSocket
 			fi
 		fi
+		if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+			mysqld=libexec/mysqld
+		elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
+			mysqld=sbin/mysqld
+		elif [ -x $mysqlPrefix/bin/mysqld ] ; then
+			mysqld=bin/mysqld
+		else
+			echo "mysqld: No such File or directory" 1>&2
+			return 1
+		fi
 		conf_file="$DESTDIR"$sysconfdir/indimail.cnf
 		mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
 		echo "creating mysql config MySQL version $mysql_version"
@@ -9141,10 +9174,18 @@ case $option in
 			exit 1
 		fi
 		if [ -d /etc/clamd.d -a ! -f "$DESTDIR"/etc/clamd.d/scan.conf ] ; then
+			if [ ! -d "$DESTDIR"/etc/clamd.d ] ; then
+				mkdir -p "$DESTDIR"/etc/clamd.d
+			fi
 			/bin/ln -sr "$DESTDIR"$sysconfdir/scan.conf "$DESTDIR"/etc/clamd.d/scan.conf
 			if [ $? -ne 0 ] ; then
-				cd "$DESTDIR"/etc/clamd.d
-				/bin/ln -s "$DESTDIR"$sysconfdir/scan.conf
+				if [ -d "$DESTDIR"/etc/clamd.d ] ; then
+					cd "$DESTDIR"/etc/clamd.d
+					/bin/ln -s "$DESTDIR"$sysconfdir/scan.conf
+				else
+					echo "Unable to create "$DESTDIR"$sysconfdir/scan.conf" 1>&2
+					exit 1
+				fi
 			fi
 		fi
 
@@ -9160,6 +9201,9 @@ case $option in
 			/bin/rm -f /tmp/config.cnf.$$
 		fi
 		if [ ! -f "$DESTDIR"/etc/freshclam.conf ] ; then
+			if [ ! -d "$DESTDIR"/etc ] ; then
+				mkdir -p "$DESTDIR"/etc
+			fi
 			/bin/ln -sr "$DESTDIR"$sysconfdir/freshclam.conf "$DESTDIR"/etc/freshclam.conf
 			if [ $? -ne 0 ] ; then
 				cd "$DESTDIR"/etc/
