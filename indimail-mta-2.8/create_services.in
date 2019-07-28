@@ -11,7 +11,7 @@ servicedir=@servicedir@
 indimaildir=@indimaildir@
 prefix=@prefix@
 sysconfdir=@sysconfdir@
-controldir=@controldir@
+controldir=@sysconfdir@/control
 libexecdir=@libexecdir@
 mysql_base=@mysql_prefix@
 default_domain=`uname -n`
@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.77 2019-02-07 14:01:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.78 2019-07-28 23:46:00+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -54,7 +54,6 @@ nocourierimap=0
 nofetchmail=0
 nobogofilter=0
 noindimail=0
-noclamav=1
 nonssd=0
 nomysql=0
 nodksignatures=0
@@ -110,10 +109,6 @@ while test $# -gt 0; do
 
     --no-fetchmail)
     nofetchmail=1
-    ;;
-
-    --no-clamav)
-    noclamav=1
     ;;
 
     --chk-install)
@@ -182,6 +177,9 @@ fi
 if [ ! -x $dir_prefix$libexecdir/ipmeprint -a -x $libexecdir/ipmeprint ] ; then
   $cp $libexecdir/ipmeprint $dir_prefix$libexecdir
 fi
+if [ ! -x $dir_prefix$libexecdir/update_tmprsadh -a -x $libexecdir/update_tmprsadh ] ; then
+  $cp $libexecdir/update_tmprsadh $dir_prefix$libexecdir
+fi
 if [ ! -x $dir_prefix$libexecdir/envmigrate -a -x $libexecdir/envmigrate ] ; then
   $cp $libexecdir/envmigrate $dir_prefix$libexecdir
 fi
@@ -240,7 +238,8 @@ $svctool --config=users $extra_opt
 # MySQL
 #
 if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
-  $svctool --config=mysql   --mysqlPrefix=$mysql_base $extra_opt
+  $svctool --config=mysql   --mysqlPrefix=$mysql_base \
+      --databasedir=$indimaildir/mysqldb $extra_opt
   $svctool --config=mysqldb --mysqlPrefix=$mysql_base \
     --databasedir=$indimaildir/mysqldb --base_path=$mail_path \
     --default-domain=$default_domain $extra_opt
@@ -289,21 +288,21 @@ else
 fi
 orig_bogofilter=$nobogofilter
 
-if [ $noclamav -eq 0 ] ; then
-  echo "Checking if clamav is installed"
-  clamav_os=0
-  clamdPrefix=$dir_prefix
-  qhpsi="\"$dir_prefix/bin/clamdscan %s --fdpass --quiet --no-summary\""
-  mysysconfdir=$dir_prefix/etc
-else
-  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-    clamav_os=1
-    clamdPrefix="/usr"
-    qhpsi="\"/usr/bin/clamdscan %s --fdpass --quiet --no-summary\""
-    mysysconfdir=/etc
+if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+  clamav_os=1
+  clamdPrefix="/usr"
+  if [ -d /etc/clamav ] ; then
+    mysysconfdir=/etc/clamav
+  elif [ -d /etc/clamd.d ] ; then
+    mysysconfdir=/etc/clamd.d
+  elif [ -d $sysconfdir ] ; then
+    mysysconfdir=$sysconfdir
   else
-    clamav_os=0
+    mysysconfdir=/etc
   fi
+  qhpsi="/usr/bin/clamdscan %s --config=$mysysconfdir/scan.conf --fdpass --quiet --no-summary"
+else
+  clamav_os=0
 fi
 for port in 465 25 587
 do
@@ -326,7 +325,7 @@ do
     append_opt="--spamfilter=\"$prefix/bin/bogofilter -p -d $sysconfdir\"" 
     append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
   fi
-  if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+  if [ $clamav_os -eq 1 ] ; then
     append_opt="$append_opt --qhpsi=\"$qhpsi\""
   fi
   eval $svctool --smtp=$port --servicedir=$servicedir \
@@ -343,7 +342,7 @@ do
 done
 
 append_opt=""
-if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+if [ $clamav_os -eq 1 ] ; then
   append_opt="--qhpsi=\"$qhpsi\""
 fi
 eval $svctool --queueParam=defaultqueue \
@@ -390,7 +389,7 @@ if [ $nofetchmail -eq 0 ] ; then
     append_opt="--spamfilter=\"$prefix/bin/bogofilter -p -d $sysconfdir\"" 
     append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
   fi
-  if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+  if [ $clamav_os -eq 1 ] ; then
     append_opt="$append_opt --qhpsi=\"$qhpsi\""
   fi
   eval $svctool --fetchmail --servicedir=$servicedir \
@@ -463,7 +462,7 @@ fi
 #
 # virus clamav/spam filter
 #
-if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+if [ $clamav_os -eq 1 ] ; then
   $svctool --qscanq --servicedir=$servicedir --clamdPrefix=$prefix \
     --scanint=200 $extra_opt
   $svctool --config=clamd $extra_opt
