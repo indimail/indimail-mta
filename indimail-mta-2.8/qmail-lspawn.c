@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.33  2019-07-29 21:16:59+05:30  Cprogrammer
+ * use setup_qlargs() to setup arguments once and cache the args
+ *
  * Revision 1.32  2019-05-27 20:29:31+05:30  Cprogrammer
  * use VIRTUAL_PKG_LIB env variable if defined
  *
@@ -127,6 +130,17 @@
 #include "fmt.h"
 
 char           *aliasempty;
+
+static char *setup_qlargs()
+{
+	static char    *qlargs;
+
+	if (!qlargs)
+		qlargs= env_get("QMAILLOCAL");
+	if (!qlargs)
+		qlargs = "sbin/qmail-local";
+	return qlargs;
+}
 
 void
 initialize(argc, argv)
@@ -569,7 +583,7 @@ noauthself: /*- deliver to local user in control/locals */
 		nughde_get(recip);
 		x = nughde.s;
 		xlen = nughde.len;
-		args[0] = "sbin/qmail-local";
+		args[0] = setup_qlargs();
 		args[1] = "--";
 		args[2] = x; /*- user */
 		n = byte_chr(x, xlen, 0);
@@ -627,10 +641,7 @@ noauthself: /*- deliver to local user in control/locals */
 			_exit(QLX_USAGE);
 		if (!getuid())
 			_exit(QLX_ROOT);
-		if (!(ptr = env_get("QMAILLOCAL")))
-			execv(*args, args);
-		else
-			execv(ptr, args);
+		execv(*args, args);
 		if (error_temp(errno))
 			_exit(QLX_EXECSOFT);
 		_exit(QLX_EXECHARD);
@@ -641,7 +652,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.32 2019-05-27 20:29:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.33 2019-07-29 21:16:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
