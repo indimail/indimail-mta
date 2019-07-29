@@ -6,14 +6,13 @@ qcount=5
 qbase=@indimaildir@/queue
 tcpserver_plugin=0
 add_boot=0
-check_install=9
+check_install=0
 servicedir=@servicedir@
 indimaildir=@indimaildir@
 prefix=@prefix@
 sysconfdir=@sysconfdir@
 controldir=@sysconfdir@/control
 libexecdir=@libexecdir@
-mysql_base=@mysql_prefix@
 default_domain=`uname -n`
 chown=$(which chown)
 mkdir=$(which mkdir)
@@ -23,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.78 2019-07-28 23:46:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.79 2019-07-29 16:30:22+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -58,6 +57,9 @@ nonssd=0
 nomysql=0
 nodksignatures=0
 dkimkeyfn=default
+if [ -x /usr/bin/mysql ] ; then
+  mysql_base=/usr
+fi
 ID=`id -u`
 while test $# -gt 0; do
     case "$1" in
@@ -500,7 +502,9 @@ if [ $add_boot -eq 1 ] ; then
   $svctool --config=add-boot $extra_opt
 fi
 $svctool --servicedir=$servicedir --config=qselinux
-$svctool --servicedir=$servicedir --config=iselinux
+if [ $noindimail -eq 0 ] ; then
+  $svctool --servicedir=$servicedir --config=iselinux
+fi
 if [ $check_install -eq 1 ] ; then
   $svctool --check-install --servicedir=$servicedir \
     --qbase=$qbase --qcount=$qcount --qstart=1 $extra_opt
