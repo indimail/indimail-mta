@@ -1832,21 +1832,31 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   fi
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s %{shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/systemd /lib/systemd/system/svscan.service
-    /bin/systemctl daemon-reload
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/systemd /lib/systemd/system/svscan.service
+      /bin/systemctl daemon-reload
+    fi
   elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
     cmp -s %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
-    /bin/systemctl daemon-reload
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+      /bin/systemctl daemon-reload
+    fi
   elif [ -f /sbin/initctl -a -d %{_sysconfdir}/init ] ; then
     cmp -s %{shareddir}/boot/upstart %{_sysconfdir}/init/svscan.conf >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/init/svscan.conf
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/init/svscan.conf
+    fi
   elif [ -d %{_sysconfdir}/event.d ] ; then
     cmp -s %{shareddir}/boot/upstart %{_sysconfdir}/event.d/upstart >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/event.d
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/event.d
+    fi
   elif [ -d /System/Library/LaunchDaemons ] ; then
     cmp -s %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+    fi
   fi
   # selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux
@@ -2477,19 +2487,31 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   echo "doing post upgrade activities"
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s %{shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/systemd /lib/systemd/system/svscan.service
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/systemd /lib/systemd/system/svscan.service
+      /bin/systemctl daemon-reload
+    fi
   elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
     cmp -s %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+      /bin/systemctl daemon-reload
+    fi
   elif [ -f /sbin/initctl -a -d %{_sysconfdir}/init ] ; then
     cmp -s %{shareddir}/boot/upstart %{_sysconfdir}/init/svscan.conf >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/init/svscan.conf
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/init/svscan.conf
+    fi
   elif [ -d %{_sysconfdir}/event.d ] ; then
     cmp -s %{shareddir}/boot/upstart %{_sysconfdir}/event.d/upstart >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/event.d
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/event.d
+    fi
   elif [ -d /System/Library/LaunchDaemons ] ; then
     cmp -s %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
-    %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+    fi
   fi
   if [ -f %{_sysconfdir}/inittab ] ; then # one of these days, this will disappear
     /bin/grep "^#SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
