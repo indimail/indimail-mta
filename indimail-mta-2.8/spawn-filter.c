@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.68  2019-09-30 22:59:06+05:30  Cprogrammer
+ * use sh as argv0 instead of IndiMailfilter
+ *
  * Revision 1.67  2019-07-18 10:48:31+05:30  Cprogrammer
  * use strerr_die?x macro instead of strerr_die() function
  *
@@ -280,14 +283,12 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 {
 	if (!remotE) /*- strerr_die does not return */
 		strerr_die6x(errCode, s1, s2, s3, s4, s5, s6);
-	if (!errCode)
-	{
+	if (!errCode) {
 		if (substdio_put(subfdoutsmall, 
 			"r\0Kfilter accepted message.\n"
 			"filter said: 250 ok notification queued\n\0", 82) == -1)
 			_exit(111);
-	} else
-	{
+	} else {
 		/*- h - hard, s - soft */
 		if (substdio_put(subfdoutsmall, errCode == 111 ? "s" : "h", 1) == -1)
 			_exit(111);
@@ -332,8 +333,7 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 		return;
 	if (*fifo_name != '/')
 		return;
-	if ((logfifo = open(fifo_name, O_NDELAY|O_WRONLY)) == -1)
-	{
+	if ((logfifo = open(fifo_name, O_NDELAY|O_WRONLY)) == -1) {
 		if (errno == ENXIO)
 			return;
 		report(111, "spawn-filter: open: ", fifo_name, ": ", error_str(errno), ". (#4.3.0)", 0);
@@ -363,8 +363,7 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 	 * on fd 255. Write it to LOGFILTER
 	 * fifo for qmail-cat spamlogger
 	 */
-	if (!fstat(255, &statbuf) && statbuf.st_size > 0 && !lseek(255, 0, SEEK_SET))
-	{
+	if (!fstat(255, &statbuf) && statbuf.st_size > 0 && !lseek(255, 0, SEEK_SET)) {
 		if (substdio_puts(&spamout, " ") == -1)
 			report(111, "spawn-filter: write: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		substdio_fdbuf(&spamin, read, 255, inbuf, sizeof(inbuf));
@@ -373,8 +372,7 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 		close(255);
 		if (!stralloc_0(line))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (line->len)
-		{
+		if (line->len) {
 			if (substdio_puts(&spamout, line->s) == -1)
 				report(111, "spawn-filter: write: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		}
@@ -417,14 +415,12 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 	char            ch;
 	static substdio errbuf;
 
-	if (!(filterargs = env_get("FILTERARGS")))
-	{
+	if (!(filterargs = env_get("FILTERARGS"))) {
 		if (control_readfile(&filterdefs, "filterargs", 0) == -1)
 			report(111, "spawn-filter: Unable to read filterargs: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		filterargs = getDomainToken(domain, &filterdefs);
 	}
-	if (!filterargs)
-	{
+	if (!filterargs) {
 		execv(mailprog, argv); /*- do the delivery (qmail-local/qmail-remote) */
 		report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 		_exit(111); /*- To make compiler happy */
@@ -455,13 +451,12 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 		/*- Avoid loop if program(s) defined by FILTERARGS call qmail-inject, etc */
 		if (!env_unset("FILTERARGS") || !env_unset("SPAMFILTER"))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		execl("/bin/sh", "IndiMailfilter", "-c", filterargs, (char *) 0);
+		execl("/bin/sh", "sh", "-c", filterargs, (char *) 0);
 		report(111, "spawn-filter: could not exec /bin/sh: ",  filterargs, ": ", error_str(errno), ". (#4.3.0)", 0);
 	default:
 		close(pipefe[1]);
 		close(pipefd[1]);
-		if (dup2(pipefd[0], 0))
-		{
+		if (dup2(pipefd[0], 0)) {
 			close(pipefd[0]);
 			close(pipefe[0]);
 			wait_pid(&wstat, filt_pid);
@@ -469,8 +464,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 		}
 		if (pipefd[0] != 0)
 			close(pipefd[0]);
-		if (mkTempFile(0))
-		{
+		if (mkTempFile(0)) {
 			close(0);
 			close(pipefe[0]);
 			wait_pid(&wstat, filt_pid);
@@ -479,14 +473,12 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 		break;
 	}
 	/*- Process message if exit code is 0, bounce if 100 */
-	if (wait_pid(&wstat, filt_pid) != filt_pid)
-	{
+	if (wait_pid(&wstat, filt_pid) != filt_pid) {
 		close(0);
 		close(pipefe[0]);
 		report(111, "spawn-filter: waitpid surprise: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	}
-	if (wait_crashed(wstat))
-	{
+	if (wait_crashed(wstat)) {
 		close(0);
 		close(pipefe[0]);
 		report(111, "spawn-filter: filter crashed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
@@ -519,18 +511,14 @@ getDomainToken(char *domain, stralloc *sa)
 	int             len, n, retval;
 	char           *ptr, *p;
 
-	for (len = 0, ptr = sa->s;len < sa->len;)
-	{
+	for (len = 0, ptr = sa->s;len < sa->len;) {
 		len += ((n = str_len(ptr)) + 1);
 		for (p = ptr;*p && *p != ':';p++);
-		if (*p == ':')
-		{
+		if (*p == ':') {
 			*p = 0;
 			/*- build the regex */
-			if ((retval = str_diff(ptr, domain)))
-			{
-				if (env_get("QREGEX"))
-				{
+			if ((retval = str_diff(ptr, domain))) {
+				if (env_get("QREGEX")) {
 					if ((retval = REGCOMP(qreg, ptr)) == 0)
 						retval = (REGEXEC(qreg, domain) == REG_NOMATCH ? 1 : REG_NOERROR);
 					regfree(&qreg);
@@ -538,26 +526,21 @@ getDomainToken(char *domain, stralloc *sa)
 					retval = !wildmat_internal(domain, ptr);
 			}
 			*p = ':';
-			if (!retval) /*- match occurred for domain or wildcard */
-			{
+			if (!retval) { /*- match occurred for domain or wildcard */
 				/* check for local/remote directives */
-				if (remotE)
-				{
+				if (remotE) { /*- remote delivery */
 					if (!str_diffn(p + 1, "remote:", 7))
 						return (p + 8);
-					if (!str_diffn(p + 1, "local:", 6))
-					{
+					if (!str_diffn(p + 1, "local:", 6)) {
 						ptr = sa->s + len;
 						continue; /*- skip local directives for remote mails */
 					}
-				} else
-				{
+				} else { /*- local delivery */
 					if (!str_diffn(p + 1, "local:", 6))
 						return (p + 7);
-					if (!str_diffn(p + 1, "remote:", 7))
-					{
+					if (!str_diffn(p + 1, "remote:", 7)) {
 						ptr = sa->s + len;
-						continue; /*- skip remote directives for remote mails */
+						continue; /*- skip remote directives for local mails */
 					}
 				}
 				return (p + 1);
@@ -580,8 +563,7 @@ mkTempFile(int seekfd)
 
 	if (lseek(seekfd, 0, SEEK_SET) == 0)
 		return (0);
-	if (errno == EBADF)
-	{
+	if (errno == EBADF) {
 		strnum[fmt_ulong(strnum, seekfd)] = 0;
 		report(111, "spawn-filter: fd ", strnum, ": ", error_str(errno), ". (#4.3.0)", 0);
 	}
@@ -624,8 +606,7 @@ create_logfilter()
 	char            strnum[FMT_ULONG];
 	static stralloc tmpFile = { 0 };
 
-	if (env_get("LOGFILTER"))
-	{
+	if (env_get("LOGFILTER")) {
 		if (!(tmpdir = env_get("TMPDIR")))
 			tmpdir = "/tmp";
 		if (!stralloc_copys(&tmpFile, tmpdir))
@@ -677,8 +658,7 @@ redirect_mail(char *notifyaddress, char *domain, char *ext, char *qqeh)
 		 * caught by spamfilter :)
 		 * unset SPAMFILTER
 		 */
-		if (!(qbase = env_get("QUEUE_BASE")))
-		{
+		if (!(qbase = env_get("QUEUE_BASE"))) {
 			switch (control_readfile(&QueueBase, "queue_base", 0))
 			{
 			case -1:
@@ -722,8 +702,7 @@ check_size(char *size)
 	char           *x;
 	unsigned long   databytes = -1, msgsize;
 
-	if (!(x = env_get("DATABYTES")))
-	{
+	if (!(x = env_get("DATABYTES"))) {
 		if (control_readulong(&databytes, "databytes") == -1)
 			report(111, "spawn-filter: Unable to read databytes: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	} else
@@ -819,8 +798,7 @@ is_rate_ok(char *rate_dir, char *file, char *rate_exp)
 		if (lock_ex(wfd) == -1)
 			report(111, "spawn-filter: unable to lock: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
 	}
-	if (!access_flag) /*- only if rate definition exists */
-	{
+	if (!access_flag) { /*- only if rate definition exists */
 		if ((rfd = open_read(file)) == -1)
 			report(111, "spawn-filter: unable to read: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
 		substdio_fdbuf(&ssin, read, rfd, inbuf, sizeof(inbuf));
@@ -917,8 +895,7 @@ main(int argc, char **argv)
 	if (*ptr && *ptr == '/')
 		ptr++;
 	ptr += 6;
-	if (*ptr == 'l') /*- qmail-local Filter */
-	{
+	if (*ptr == 'l') { /*- qmail-local Filter */
 		mailprog = "sbin/qmail-local";
 		domain = argv[7];
 		ext = argv[6];
@@ -926,8 +903,7 @@ main(int argc, char **argv)
 		remotE = 0;
 		if (!env_unset("QMAILREMOTE"))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (!fstat(0, &statbuf)) 
-		{
+		if (!fstat(0, &statbuf)) {
 			sizebuf[fmt_ulong(sizebuf, statbuf.st_size)] = 0;
 			size = sizebuf;
 		} else
@@ -938,8 +914,7 @@ main(int argc, char **argv)
 		if (!stralloc_0(&sender))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		/*- recipient */
-		if (*ext) /*- EXT */
-		{
+		if (*ext) { /*- EXT */
 			if (!stralloc_copys(&recipient, ext))
 				report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		} else /*- user */
@@ -952,8 +927,7 @@ main(int argc, char **argv)
 		if (!stralloc_0(&recipient))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	} else
-	if (*ptr == 'r') /*- qmail-remote Filter */
-	{
+	if (*ptr == 'r') { /*- qmail-remote Filter */
 		mailprog = "sbin/qmail-remote";
 		domain = argv[1];
 		ext = argv[5];
@@ -972,8 +946,7 @@ main(int argc, char **argv)
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!stralloc_0(&recipient))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-	} else
-	{
+	} else {
 		report(111, "spawn-filter: Incorrect usage. ", argv[0], " (#4.3.0)", 0, 0, 0);
 		_exit(111);
 	}
@@ -1002,8 +975,7 @@ main(int argc, char **argv)
 			if (!is_rate_ok(rate_dir, domain, 0))
 				report(111, "spawn-filter: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
 		} else
-		if (!access("ratecontrol", R_OK))
-		{
+		if (!access("ratecontrol", R_OK)) {
 			if (control_readfile(&ratedefs, "./ratecontrol", 0) == -1)
 				report(111, "spawn-filter: Unable to read ratecontrol: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 			rate_exp = getDomainToken(domain, &ratedefs);
@@ -1018,12 +990,10 @@ main(int argc, char **argv)
 	/*- DATABYTES Check */
 	if (check_size(size))
 		report(100, "sorry, that message size exceeds my databytes limit (#5.3.4)", 0, 0, 0, 0, 0);
-	if (!(spamfilterprog = env_get("SPAMFILTER")))
-	{
+	if (!(spamfilterprog = env_get("SPAMFILTER"))) {
 		if (control_readfile(&spamfilterdefs, "spamfilter", 0) == -1)
 			report(111, "spawn-filter: Unable to read spamfilter: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (!(spamfilterprog = getDomainToken(domain, &spamfilterdefs)))
-		{
+		if (!(spamfilterprog = getDomainToken(domain, &spamfilterdefs))) {
 			run_mailfilter(domain, ext, qqeh, mailprog, argv);
 			report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 		}
@@ -1089,16 +1059,14 @@ main(int argc, char **argv)
 		report(111, "spawn-filter: could not exec ", *Argv, ": ", error_str(errno), ". (#4.3.0)", 0);
 	default:
 		close(pipefd[1]);
-		if (dup2(pipefd[0], 0))
-		{
+		if (dup2(pipefd[0], 0)) {
 			close(pipefd[0]);
 			wait_pid(&wstat, filt_pid);
 			report(111, "spawn-filter: dup2 error: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		}
 		if (pipefd[0] != 0)
 			close(pipefd[0]);
-		if (mkTempFile(0))
-		{
+		if (mkTempFile(0)) {
 			close(0);
 			wait_pid(&wstat, filt_pid);
 			report(111, "spawn-filter: lseek error: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
@@ -1121,26 +1089,21 @@ main(int argc, char **argv)
 	if ((ptr = env_get("UNSUREEXITCODE")))
 		scan_int(ptr, &unsurecode);
 	filt_exitcode = wait_exitcode(wstat);
-	if (filt_exitcode == spamcode || (filt_exitcode == hamcode) || (filt_exitcode == unsurecode))
-	{
-		if (spamcode == filt_exitcode) /*- Message is SPAM */
-		{
-			if (!(rejectspam = env_get("REJECTSPAM")))
-			{
+	if (filt_exitcode == spamcode || (filt_exitcode == hamcode) || (filt_exitcode == unsurecode)) {
+		if (spamcode == filt_exitcode) { /*- Message is SPAM */
+			if (!(rejectspam = env_get("REJECTSPAM"))) {
 				if (control_readfile(&rejectspamlist, "rejectspam", 0) == -1)
 					report(111, "spawn-filter: Unable to read ", ptr, ": ", error_str(errno), ". (#4.3.0)", 0);
 				rejectspam = getDomainToken(domain, &rejectspamlist);
 			}
-			if (!(notifyaddress = env_get("SPAMREDIRECT")))
-			{
+			if (!(notifyaddress = env_get("SPAMREDIRECT"))) {
 				if (control_readfile(&addresslist, "spamredirect", 0) == -1)
 					report(111, "spawn-filter: Unable to read ", ptr, ": ", error_str(errno), ". (#4.3.0)", 0);
 				notifyaddress = getDomainToken(domain, &addresslist);
 			}
 			if (notifyaddress && *notifyaddress && redirect_mail(notifyaddress, domain, ext, qqeh))
 				report(111, "spawn-filter: unable to send spam notification. (#4.3.0)", 0, 0, 0, 0, 0);
-			if (rejectspam && *rejectspam > '0')
-			{
+			if (rejectspam && *rejectspam > '0') {
 				if (*rejectspam == '1')
 					report(100, "SPAM or junk mail threshold exceeded (#5.7.1)", 0, 0, 0, 0, 0);
 				else /*- BLACKHOLE sender */
@@ -1161,7 +1124,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.67 2019-07-18 10:48:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.68 2019-09-30 22:59:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
