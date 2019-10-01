@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.28  2019-10-01 14:06:53+05:30  Cprogrammer
+# use svctool to update libindimail, mysql_lib control files
+#
 # Revision 1.27  2019-06-17 18:17:15+05:30  Cprogrammer
 # update with mysql_lib control file with either libmsyqlclient or libmariadbclient
 #
@@ -79,7 +82,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.27 2019-06-17 18:17:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.28 2019-10-01 14:06:53+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -101,75 +104,10 @@ check_update_if_diff()
 	fi
 }
 
-check_libmysqlclient_lib()
-{
-	if [ -f /etc/indimail/control/mysql_lib ] ; then
-		mysqllib=`cat /etc/indimail/control/mysql_lib 2>/dev/null`
-		if [ -f $mysqllib ] ; then
-			return 0
-		fi
-	fi
-	# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
-	prev_num=0
-	for i in `ls -t /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
-	do
-		file=`basename $i`
-		num=`echo $file | cut -d. -f3`
-		if [ $num -gt $prev_num ] ; then
-			prev_num=$num
-			mysqllib=$i
-		fi
-	done
-	if [ -z "$mysqllib" -a -f /etc/debian_version ] ; then
-	# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
-	prev_num=0
-	for i in `ls -t /usr/lib/*-linux-gnu/libmariadbclient.so.*.*.* 2>/dev/null`
-	do
-		file=`basename $i`
-		num=`echo $file | cut -d. -f3`
-		if [ $num -gt $prev_num ] ; then
-			prev_num=$num
-			mysqllib=$i
-		fi
-	done
-	fi
-	#
-	# this is crazy. Both mariadb and oracle are breaking things
-	# around
-	# MariaDB-shared, mariadb-connector-c
-	# MariaDB-Compat
-	# mysql-community-libs
-	#
-	if [ -z "$mysqllib" ] ; then
-		if [ -d /etc/debian_version ] ; then
-			dir="/usr/lib/*-linux-gnu/libmysqlclient.so.*.*.* \
-				/usr/lib/*-linux-gnu/libmariadbclient.so.*.*.* \
-				/usr/lib*/mysql/libmariadbclient.so.*.*.*"
-		else
-			dir="/usr/lib*/libmariadb.so.* \
-				/usr/lib*/libmysqlclient.so.*.*.* \
-				/usr/lib*/mysql/libmysqlclient.so.*.*.*"
-		fi
-		for i in `ls -t $dir 2>/dev/null`
-		do
-			file=`basename $i`
-			num=`echo $file | cut -d. -f3`
-			if [ $num -gt $prev_num ] ; then
-				prev_num=$num
-				mysqllib=$i
-			fi
-		done
-	fi
-	if [ -n "$mysqllib" -a -f $mysqllib ] ; then
-		check_update_if_diff /etc/indimail/control/mysql_lib $mysqllib
-	fi
-	return 0
-}
-
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.27 2019-06-17 18:17:15+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.28 2019-10-01 14:06:53+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -355,14 +293,8 @@ if [ -f /etc/indimail/scan.conf -o -f /etc/indimail/scan.conf.disabled ] ; then
 fi
 
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
-indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
-if [ -n "$indlib" -a -f "$indlib" ] ; then
-	check_update_if_diff /etc/indimail/control/libindimail $indlib
-else
-	/bin/rm -f /etc/indimail/control/libindimail
-fi
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
-check_libmysqlclient_lib
+/usr/sbin/svctool --fixmysql_libs
 
 # for surbl
 if [ ! -d /etc/indimail/control/cache ] ; then
