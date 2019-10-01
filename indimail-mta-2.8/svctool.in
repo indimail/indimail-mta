@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.444 2019-07-28 23:43:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.445 2019-10-01 14:05:26+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.444 2019-07-28 23:43:36+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.445 2019-10-01 14:05:26+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -801,6 +801,10 @@ Known values for OPTION are:
   Check certificate given as argument or
   Check IndiMail Certificates in @sysconfdir@/certs without any arguments
 
+--fixsharedlibs
+
+  fix mysql shared library in $sysconfdir/control/mysql_lib
+
 --help
 
   display this help and exit
@@ -1460,6 +1464,87 @@ if [ ! -d "$DESTDIR"$QmailHOME/domains/$default_domain ] ; then
 fi
 }
 
+check_update_if_diff()
+{
+	val=`cat $1 2>/dev/null`
+	if [ ! " $val" = " $2" ] ; then
+		echo $2 > $1
+	fi
+}
+
+check_libmysqlclient_lib()
+{
+	if [ -z "$CONTROLDIR" ] ; then
+		CONTROLDIR=$sysconfdir/control
+	fi
+	if [ -f "$DESTDIR"$CONTROLDIR/mysql_lib ] ; then
+		mysqllib=`cat "$DESTDIR"$CONTROLDIR/mysql_lib 2>/dev/null`
+		if [ -f $mysqllib ] ; then
+			echo "$mysqllib exists: No Change"
+			return 0
+		fi
+	fi
+	# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
+	prev_num=0
+	for i in `ls -t /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
+	do
+		file=`basename $i`
+		num=`echo $file | cut -d. -f3`
+		if [ $num -gt $prev_num ] ; then
+			prev_num=$num
+			mysqllib=$i
+		fi
+	done
+	if [ -z "$mysqllib" -a -f /etc/debian_version ] ; then
+		# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
+		prev_num=0
+		for i in `ls -t /usr/lib/*-linux-gnu/libmariadbclient.so.*.*.* 2>/dev/null`
+		do
+			file=`basename $i`
+			num=`echo $file | cut -d. -f3`
+			if [ $num -gt $prev_num ] ; then
+				prev_num=$num
+				mysqllib=$i
+			fi
+		done
+	fi
+	#
+	# this is crazy. Both mariadb and oracle are breaking things
+	# around
+	# MariaDB-shared, mariadb-connector-c
+	# MariaDB-Compat
+	# mysql-community-libs
+	#
+	if [ -z "$mysqllib" ] ; then
+		if [ -d /etc/debian_version ] ; then
+			dir="/usr/lib/*-linux-gnu/libmysqlclient.so.*.*.* \
+				/usr/lib/*-linux-gnu/libmariadbclient.so.*.*.* \
+				/usr/lib*/mysql/libmariadbclient.so.*.*.*"
+		else
+			dir="/usr/lib*/libmariadb.so.* \
+				/usr/lib*/libmysqlclient.so.*.*.* \
+				/usr/lib*/mysql/libmysqlclient.so.*.*.*"
+		fi
+		for i in `ls -t $dir 2>/dev/null`
+		do
+			file=`basename $i`
+			num=`echo $file | cut -d. -f3`
+			if [ $num -gt $prev_num ] ; then
+				prev_num=$num
+				mysqllib=$i
+			fi
+		done
+	fi
+	if [ -n "$mysqllib" -a -f $mysqllib ] ; then
+		echo "updating "$DESTDIR"$CONTROLDIR/mysql_lib with $mysqllib"
+		check_update_if_diff "$DESTDIR"$CONTROLDIR/mysql_lib $mysqllib
+	else
+		/bin/rm -f "$DESTDIR"$CONTROLDIR/mysql_lib
+		return 1
+	fi
+	return 0
+}
+
 default_qmail_control()
 {
 if [ ! -d "$DESTDIR"$CONTROLDIR ] ; then
@@ -1670,16 +1755,10 @@ fi
 indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
 if [ -n "$indlib" -a -f "$indlib" ] ; then
 	echo libindimail
-	echo $indlib > "$DESTDIR"$CONTROLDIR/libindimail
+	check_update_if_diff "$DESTDIR"$CONTROLDIR/libindimail $indlib
 fi
-mysqllib=`ls -d /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
-if [ -z "$mysqllib" ] ; then
-	mysqllib=`ls -d /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
-fi
-if [ -n "$mysqllib" -a -f "$mysqllib" ] ; then
-	echo mysql_lib
-	echo $mysqllib > "$DESTDIR"$CONTROLDIR/mysql_lib
-fi
+echo "libmysqlclient/libmariadbclient"
+check_libmysqlclient_lib
 }
 
 create_fifologger()
@@ -8403,6 +8482,19 @@ while test $# -gt 0; do
 		fi
 	fi
 	exit 1
+	;;
+
+	--fixsharedlibs)
+	indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
+	if [ -n "$indlib" -a -f "$indlib" ] ; then
+		echo libindimail
+		check_update_if_diff "$DESTDIR"$CONTROLDIR/libindimail $indlib
+	else
+		/bin/rm -f "$DESTDIR"$CONTROLDIR/libindimail
+	fi
+	check_libmysqlclient_lib
+	nolog=1
+	exit $?
 	;;
 	--queuefix=*)
 	"$DESTDIR"$QmailBinPrefix/bin/queue-fix $optarg
