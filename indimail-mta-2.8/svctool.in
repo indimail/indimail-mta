@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.445 2019-10-01 14:05:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.446 2019-10-26 10:20:00+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.445 2019-10-01 14:05:26+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.446 2019-10-26 10:20:00+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1495,6 +1495,18 @@ check_libmysqlclient_lib()
 			mysqllib=$i
 		fi
 	done
+	if [ -z "$mysqllib" -a -d /usr/lib64/mysql ] ; then
+		prev_num=0
+		for i in `ls -t /usr/lib64/libmysqlclient.so.*.*.* 2>/dev/null`
+		do
+			file=`basename $i`
+			num=`echo $file | cut -d. -f3`
+			if [ $num -gt $prev_num ] ; then
+				prev_num=$num
+				mysqllib=$i
+			fi
+		done
+	fi
 	if [ -z "$mysqllib" -a -f /etc/debian_version ] ; then
 		# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
 		prev_num=0
