@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.446 2019-10-26 10:20:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.447 2019-10-26 20:10:05+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.446 2019-10-26 10:20:00+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.447 2019-10-26 20:10:05+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1468,7 +1468,11 @@ check_update_if_diff()
 {
 	val=`cat $1 2>/dev/null`
 	if [ ! " $val" = " $2" ] ; then
+		echo "updating $1 with $2"
 		echo $2 > $1
+		return 1
+	else
+		return 0
 	fi
 }
 
@@ -1480,7 +1484,7 @@ check_libmysqlclient_lib()
 	if [ -f "$DESTDIR"$CONTROLDIR/mysql_lib ] ; then
 		mysqllib=`cat "$DESTDIR"$CONTROLDIR/mysql_lib 2>/dev/null`
 		if [ -f $mysqllib ] ; then
-			echo "$mysqllib exists: No Change"
+			echo ""$DESTDIR"$CONTROLDIR/mysql_lib exists: No Change" 1>&2
 			return 0
 		fi
 	fi
@@ -1547,12 +1551,14 @@ check_libmysqlclient_lib()
 			fi
 		done
 	fi
-	if [ -n "$mysqllib" -a -f $mysqllib ] ; then
-		echo "updating "$DESTDIR"$CONTROLDIR/mysql_lib with $mysqllib"
+	if [ -n "$mysqllib" -a -f "$mysqllib" ] ; then
 		check_update_if_diff "$DESTDIR"$CONTROLDIR/mysql_lib $mysqllib
-	else
+		if [ $? -eq 0 ] ; then
+			echo ""$DESTDIR"$CONTROLDIR/mysql_lib exists: No Change" 1>&2
+		fi
+	elif [ -f "$DESTDIR"$CONTROLDIR/mysql_lib ] ; then
+		echo "removing "$DESTDIR"$CONTROLDIR/mysql_lib"
 		/bin/rm -f "$DESTDIR"$CONTROLDIR/mysql_lib
-		return 1
 	fi
 	return 0
 }
@@ -1766,10 +1772,14 @@ fi
 
 indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
 if [ -n "$indlib" -a -f "$indlib" ] ; then
-	echo libindimail
 	check_update_if_diff "$DESTDIR"$CONTROLDIR/libindimail $indlib
+	if [ $? -eq 0 ] ; then
+		echo ""$DESTDIR"$CONTROLDIR/libindimail exists: No Change" 1>&2
+	fi
+elif [ -f "$DESTDIR"$CONTROLDIR/libindimail ] ; then
+	echo "removing "$DESTDIR"$CONTROLDIR/libindimail"
+	/bin/rm -f "$DESTDIR"$CONTROLDIR/libindimail
 fi
-echo "libmysqlclient/libmariadbclient"
 check_libmysqlclient_lib
 }
 
@@ -8497,11 +8507,17 @@ while test $# -gt 0; do
 	;;
 
 	--fixsharedlibs)
+	if [ -z "$CONTROLDIR" ] ; then
+		CONTROLDIR=$sysconfdir/control
+	fi
 	indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
 	if [ -n "$indlib" -a -f "$indlib" ] ; then
-		echo libindimail
 		check_update_if_diff "$DESTDIR"$CONTROLDIR/libindimail $indlib
-	else
+		if [ $? -eq 0 ] ; then
+			echo ""$DESTDIR"$CONTROLDIR/libindimail exists: No Change" 1>&2
+		fi
+	elif [ -f "$DESTDIR"$CONTROLDIR/libindimail ] ; then
+		echo "removing "$DESTDIR"$CONTROLDIR/libindimail"
 		/bin/rm -f "$DESTDIR"$CONTROLDIR/libindimail
 	fi
 	check_libmysqlclient_lib
