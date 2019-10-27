@@ -16,10 +16,10 @@ When a directory is monitored, inotify will return events for the directory
 itself, and for files inside the directory. inotify(1) uses select(2) on file
 descriptor returned by inotify_init(2).
 
-inotify(1) can be used under tcpserver(1), to provide file system events, to interested remote clients,
-under tcpserver. When used under tcpserver, inotify should be be used with the -\fIn\fR, option. If the
-socket connection breaks or of the client terminates, inotify will terminate automatically. The \-\fIn\fR
-option should be used in standone scripts or when not run under tcpserver.
+inotify(1) can be used under tcpserver(1), to provide file system events, to
+interested remote clients. When used under tcpserver, inotify can be used without
+the -\fIn\fR, option. If the socket connection breaks or if the remote client
+terminates, inotify will terminate.
 
 inotify(1) uses inotify_init(2), inotify_add_watch(2) system calls.
 
