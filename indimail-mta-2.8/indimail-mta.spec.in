@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.199 2019-10-27 19:42:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.200 2019-10-27 19:48:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1869,7 +1869,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
 
   # refresh indimail-mta services
   svc_list=""
-  for i in clamd freshclam greylist.1999 qmail-logfifo qmail-qmqpd.628 \
+  for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
     qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
     qmail-daned.1998 libwatch

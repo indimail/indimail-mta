@@ -166,7 +166,7 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
   (
   # refresh indimail-mta services
   svc_list=""
-  for i in clamd freshclam greylist.1999 qmail-logfifo qmail-qmqpd.628 \
+  for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
     qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
     qscanq udplogger.3000 libwatch
