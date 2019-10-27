@@ -60,7 +60,7 @@ Sanesecurity.Foxhole.Rar_wsc:CL_TYPE_RAR:*:\.[Ww][Ss][Cc]$:*:*:*:*:*:*
 Sanesecurity.Foxhole.Rar_wsf:CL_TYPE_RAR:*:\.[Ww][Ss][Ff]$:*:*:*:*:*:*
 Sanesecurity.Foxhole.Rar_wsh:CL_TYPE_RAR:*:\.[Ww][Ss][Hh]$:*:*:*:*:*:*
 Sanesecurity.Foxhole.Rar_lnk:CL_TYPE_RAR:*:\.[Ll][Nn][Kk]$:*:*:*:*:*:*
-Sanesecurity.Foxhole.Rar_url:CL_TYPE_RAR:*:\.[Uu][Rr][Ll]$:*:*:*:2:*:*
+Sanesecurity.Foxhole.Rar_url:CL_TYPE_RAR:*:\.[Uu][Rr][Ll]$:*:*:*:1:*:*
 Sanesecurity.Foxhole.Rar_jnlp:CL_TYPE_RAR:*:\.[Jj][Nn][Ll][Pp]$:*:*:*:*:*:*
 Sanesecurity.Foxhole.Rar_ps1:CL_TYPE_RAR:*:\.[Pp][Ss]1$:*:*:*:*:*:*
 Sanesecurity.Foxhole.Zip_ade:CL_TYPE_ZIP:*:\.[Aa][Dd][Ee]$:*:*:*:*:*:*
@@ -134,3 +134,12 @@ Sanesecurity.Foxhole.Cab_ps1:CL_TYPE_MSCAB:*:\*[Pp][Ss]1$:*:*:*:*:*:*
 Sanesecurity.Foxhole.Mail_ps1:CL_TYPE_MAIL:*:\*[Pp][Ss]1$:*:*:*:*:*:*
 Sanesecurity.Foxhole.Iso_exe:CL_TYPE_ISO9660:*:\.[Ee][Xx][Ee]$:*:*:0:0:0:*
 Sanesecurity.Foxhole.Tar_exe:CL_TYPE_POSIX_TAR:*:\.[Ee][Xx][Ee]$:*:*:*:*:*:*
+Sanesecurity.Foxhole.Zip_iqy:CL_TYPE_ZIP:*:\.[Ii][Qq][Yy]$:*:*:*:1:*:*
+Sanesecurity.Foxhole.Rar_iqy:CL_TYPE_RAR:*:\.[Ii][Qq][Yy]$:*:*:*:1:*:*
+Sanesecurity.Foxhole.Zip_slk:CL_TYPE_ZIP:*:\.[Ss][Ll][Kk]$:*:*:*:1:*:*
+Sanesecurity.Foxhole.Rar_slk:CL_TYPE_RAR:*:\.[Ss][Ll][Kk]$:*:*:*:1:*:*
+Sanesecurity.Foxhole.Zip_setting:CL_TYPE_ZIP:*:(?i)\.settingcontent-ms$:*:*:*:1:*:*
+Sanesecurity.Foxhole.7z_setting:CL_TYPE_7Z:*:(?i)\.settingcontent-ms$:*:*:*:*:*:*
+Sanesecurity.Foxhole.Rar_setting:CL_TYPE_RAR:*:(?i)\.settingcontent-ms$:*:*:*:1:*:*
+Sanesecurity.Foxhole.Iso_com:CL_TYPE_ISO9660:*:\.[Cc][Oo][Mm]$:*:*:0:0:0:*
+Sanesecurity.Foxhole.Iso_scr:CL_TYPE_ISO9660:*:\.[Ss][Cc][Rr]$:*:*:0:0:0:*
