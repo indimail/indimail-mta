@@ -4146,7 +4146,7 @@ echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/libwatach"
+echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/libwatch"
 ) > "$DESTDIR"$SERVICEDIR/libwatch/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/libwatch/log/run
 echo "$prog_args" > $conf_dir/.options
