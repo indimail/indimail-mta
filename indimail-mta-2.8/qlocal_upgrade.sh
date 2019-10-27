@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.29  2019-10-27 19:22:59+05:30  Cprogrammer
+# removed svctool --config=foxhole since freshclam now updates foxhole on startup
+#
 # Revision 1.28  2019-10-01 14:06:53+05:30  Cprogrammer
 # use svctool to update libindimail, mysql_lib control files
 #
@@ -82,7 +85,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.28 2019-10-01 14:06:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.29 2019-10-27 19:22:59+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -107,7 +110,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.28 2019-10-01 14:06:53+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.29 2019-10-27 19:22:59+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -286,10 +289,6 @@ if [ -d /etc/clamd.d -a -f /etc/indimail/scan.conf ] ; then
 		cd /etc/clamd.d
 		$ln -sf /etc/indimail/scan.conf
 	fi
-fi
-# create foxhole_all.cdb in /var/indimail/clamd
-if [ -f /etc/indimail/scan.conf -o -f /etc/indimail/scan.conf.disabled ] ; then
-	/usr/sbin/svctool --config=foxhole
 fi
 
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
