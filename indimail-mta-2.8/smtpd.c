@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.223 $";
+char           *revision = "$Revision: 1.224 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -551,28 +551,14 @@ die_logfilter()
 }
 
 void
-die_addressmatch(char *errstr)
+err_addressmatch(char *errstr, char *fn)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(remoteip);
 	logerr(" address_match: ");
-	logerr(errstr);
-	logerrf("\n");
-	out("451 Requested action aborted: ");
-	out(errstr);
-	out(" (#4.3.0)\r\n");
-	flush();
-	_exit(1);
-}
-
-void
-err_addressmatch(char *errstr)
-{
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" address_match: ");
+	logerr(fn);
+	logerr(": ");
 	logerr(errstr);
 	logerrf("\n");
 	out("451 Requested action aborted: local system failure (#4.3.0)\r\n");
@@ -2079,7 +2065,7 @@ badipcheck(char *arg)
 	case -1:
 		die_nomem();
 	default:
-		die_addressmatch(errStr);
+		err_addressmatch(errStr, "badip");
 		return (-1);
 	}
 	return (0);
@@ -2156,7 +2142,7 @@ dohelo(char *arg)
 		case -1:
 			die_nomem();
 		default:
-			err_addressmatch(errStr);
+			err_addressmatch(errStr, "badhelo");
 			return;
 		}
 	}
@@ -3217,7 +3203,7 @@ smtp_mail(char *arg)
 	case -1:
 		die_nomem();
 	default:
-		err_addressmatch(errStr);
+		err_addressmatch(errStr, bhsndFn);
 		return;
 	}
 	/*- badmailfrom, badmailpatterns */
@@ -3231,7 +3217,7 @@ smtp_mail(char *arg)
 	case -1:
 		die_nomem();
 	default:
-		err_addressmatch(errStr);
+		err_addressmatch(errStr, bmfFn);
 		return;
 	}
 
@@ -3264,7 +3250,7 @@ smtp_mail(char *arg)
 		case -1:
 			die_nomem();
 		default:
-			err_addressmatch(errStr);
+			err_addressmatch(errStr, spfFn);
 			return;
 		}
 	}
@@ -3290,7 +3276,7 @@ smtp_mail(char *arg)
 		case -1:
 			die_nomem();
 		default:
-			err_addressmatch(errStr);
+			err_addressmatch(errStr, "relaymailfrom");
 			return;
 		}
 	}
@@ -3517,7 +3503,7 @@ nohasvirtual:
 		case -1:
 			die_nomem();
 		default:
-			err_addressmatch(errStr);
+			err_addressmatch(errStr, "authdomains");
 			return;
 		}
 	}
@@ -3618,7 +3604,7 @@ smtp_rcpt(char *arg)
 	case -1:
 		die_nomem();
 	default:
-		err_addressmatch(errStr);
+		err_addressmatch(errStr, grcptFn);
 		return;
 	}
 	/*- RECIPIENT BAD check */
@@ -3634,7 +3620,7 @@ smtp_rcpt(char *arg)
 		case -1:
 			die_nomem();
 		default:
-			err_addressmatch(errStr);
+			err_addressmatch(errStr, rcpFn);
 			return;
 		}
 	}
@@ -3696,7 +3682,7 @@ smtp_rcpt(char *arg)
 		case -1:
 			die_nomem();
 		default:
-			err_addressmatch(errStr);
+			err_addressmatch(errStr, "chkrcptdomains");
 			return;
 		}
 		if (!chkrcptok) {
@@ -3764,7 +3750,7 @@ smtp_rcpt(char *arg)
 		case -1:
 			die_nomem();
 		default:
-			err_addressmatch(errStr);
+			err_addressmatch(errStr, "bhrcpFn");
 			return;
 		}
 	}
@@ -6105,6 +6091,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.224  2019-10-27 10:43:04+05:30  Cprogrammer
+ * display table/file name in error logs
+ *
  * Revision 1.223  2019-07-10 13:39:26+05:30  Cprogrammer
  * fixed ssl getting terminated by output on fd 1 after exec
  *
@@ -6212,7 +6201,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.223 2019-07-10 13:39:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.224 2019-10-27 10:43:04+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
