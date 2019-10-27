@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.447 2019-10-26 20:10:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.448 2019-10-27 18:32:43+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.447 2019-10-26 20:10:05+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.448 2019-10-27 18:32:43+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -710,6 +710,9 @@ Known values for OPTION are:
   htmldir      - Path in /var/www/html directory
   service_path - Path where supervise scripts will be installed
   n            - Scan interval for mrtg command
+
+--libwatch --servicedir=service_path
+  service_path - Path where supervise scripts will be installed
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
   [--postmaster=user[@domain]]
@@ -4059,6 +4062,93 @@ echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/inlookup.$base_fifo_name"
 ) > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
+echo "$prog_args" > $conf_dir/.options
+
+if [ $run_file_only -eq 1 ] ; then
+	if [ -d "$conf_dir".bak ] ; then
+		/bin/rm -rf $conf_dir
+		/bin/mv "$conf_dir".bak $conf_dir
+	fi
+fi
+}
+
+create_libwatch()
+{
+if [ $# -ne 1 ] ; then
+	echo "USAGE: create_libwatch supervise_dir" 1>&2
+	return 1
+fi
+SERVICEDIR=$1
+conf_dir="$DESTDIR"$SERVICEDIR/libwatch/variables
+if [ $run_file_only -eq 1 ] ; then
+	if [ -d $conf_dir ] ; then
+		/bin/mv $conf_dir "$conf_dir".bak
+	fi
+fi
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/libwatch/log
+/bin/mkdir -p $conf_dir
+/bin/chmod 500 $conf_dir
+if [ ! " $CONTROLDIR" = " " ] ; then
+	echo $CONTROLDIR > $conf_dir/CONTROLDIR
+else
+	> $conf_dir/CONTROLDIR
+fi
+(
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
+if [ -d /usr/lib64 ] ; then
+	echo "libdir=/usr/lib64"
+else
+	echo "libdir=/usr/lib"
+fi
+echo "if [ -z \"\$CONTROLDIR\" ] ; then"
+echo "	CONTROLDIR=/etc/indimail/control"
+echo "fi"
+echo "file1=\`cat \$CONTROLDIR/libindimail\`"
+echo "file2=\`cat \$CONTROLDIR/mysql_lib\`"
+echo "file1=\`basename \$file1\`"
+echo "file2=\`basename \$file2\`"
+
+echo "/usr/bin/inotify -n \$libdir | while read line"
+echo "do"
+echo "	set \$line"
+echo "	# skip when file is not libindimail or libmysqlclient/libmariadb"
+echo "	if [ \" \$1\" != \" file\" ] ; then"
+echo "		continue"
+echo "	fi"
+echo "	file=\$2"
+echo "	event=\$3"
+echo "	# look for close events"
+echo "	if [ \" \$event\" != \" closed\" ] ; then"
+echo "		continue"
+echo "	fi"
+echo "	if [ \" \$file\" = \" \$file1\" -o \" \$file\" = \" \$file2\" ] ; then"
+echo "		/usr/sbin/svctool --fixsharedlibs"
+echo "	fi"
+echo "done"
+echo "sleep 5"
+) > "$DESTDIR"$SERVICEDIR/libwatch/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/libwatch/run
+
+if [ ! -d $LOGDIR ] ; then
+	/bin/mkdir -p $LOGDIR
+	$chown qmaill:nofiles $LOGDIR
+fi
+
+# libwatch log script
+(
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/libwatach"
+) > "$DESTDIR"$SERVICEDIR/libwatch/log/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/libwatch/log/run
 echo "$prog_args" > $conf_dir/.options
 
 if [ $run_file_only -eq 1 ] ; then
@@ -8789,6 +8879,10 @@ while test $# -gt 0; do
 	service=$optarg
 	;;
 
+	--libwatch)
+	option=36
+	;;
+
 	--mysqlupgrade)
 	if [ " $mysqlPrefix" = " " ] ; then
 		echo "MySQL Installation Prefix directory not specified" 1>&2
@@ -9947,6 +10041,15 @@ case $option in
 		usage 1
 	fi
 	norefreshsvc $service
+	;;
+
+	36)
+	[ `id -u` = 0 ] || exit 4
+	if [ " $servicedir" = " " ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	create_libwatch "$servicedir"
 	;;
 
 	*)
