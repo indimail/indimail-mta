@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.448 2019-10-27 18:32:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.449 2019-10-27 19:23:45+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.448 2019-10-27 18:32:43+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.449 2019-10-27 19:23:45+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3773,6 +3773,13 @@ echo "	echo \"Foreground not defined in $qsysconfdir/freshclam.conf\" 1>&2"
 echo "	sleep 10"
 echo "	exit 1"
 echo "fi"
+echo ""
+echo "cmp $sysconfdir/foxhole_all.cdb \$dbd/foxhole_all.cdb >/dev/null 2>&1"
+echo "if [ \$? -ne 0 ] ; then"
+echo "	/bin/cp $sysconfdir/foxhole_all.cdb \$dbd"
+echo "	$chown qscand:qmail \$dbd/foxhole_all.cdb"
+echo "fi"
+echo ""
 echo "if [ \" \$ans\" = \" yes\" -o \" \$ans\" = \" Yes\" ] ; then"
 echo "  if [ \" \$fgd\" = \" yes\" -o \" \$fgd\" = \" Yes\" ] ; then"
 echo "    exec $clamdPrefix/bin/freshclam -v --stdout --datadir=\$dbd -d -c 2 \\"
