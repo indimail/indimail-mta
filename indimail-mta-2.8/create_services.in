@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.79 2019-07-29 16:30:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.80 2019-11-01 10:10:08+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -490,6 +490,9 @@ $svctool --fifologger=/tmp/logfifo --servicedir=$servicedir
 
 # mrtg service
 $svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir
+
+# libindimail/mysql_lib control file updater
+$svctool --libwatch --servicedir=$servicedir
 
 # create svscan logging in indimail log directory
 $svctool --svscanlog --servicedir=$servicedir $extra_opt

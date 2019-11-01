@@ -481,6 +481,9 @@ done
 svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
 
+# libindimail/mysql_lib control file updater
+${prefix}/sbin/svctool --libwatch --servicedir=${servicedir}
+
 echo "compressing man pages"
 find ${mandir} -type f -exec gzip -q {} \;
 if [ -f ${mandir}/man7/authlib.7.gz ] ; then

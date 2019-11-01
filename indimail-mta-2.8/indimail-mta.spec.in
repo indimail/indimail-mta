@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.200 2019-10-27 19:48:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.201 2019-11-01 10:10:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2154,6 +2154,9 @@ do
 done
 svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 $svc_list"
+
+# libindimail/mysql_lib control file updater
+%{_prefix}/sbin/svctool --libwatch --servicedir=%{servicedir}
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux
