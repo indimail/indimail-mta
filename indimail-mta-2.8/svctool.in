@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.450 2019-10-27 20:02:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.451 2019-11-01 10:11:20+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.450 2019-10-27 20:02:42+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.451 2019-11-01 10:11:20+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5200,7 +5200,7 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 
-# resolveonf script using inotify
+# resolvconf script using inotify
 if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run -a -x "$DESTDIR"$QmailBinPrefix/bin/inotify ] ; then
 conf_dir="$DESTDIR"$SERVICEDIR/resolvconf/variables
 if [ $run_file_only -eq 1 ] ; then
@@ -5239,17 +5239,25 @@ echo "/bin/cat /etc/resolv.conf"
 echo "("
 echo "/usr/bin/inotify -n \$dir | while read line"
 echo "do"
-echo "	echo \$line | grep resolv.conf |grep closed > /dev/null 2>&1"
+echo "	set \$line"
+echo "	if [ \" \$1\" != \" file\" ] ; then"
+echo "		continue"
+echo "	fi"
+echo "	file=\$2"
+echo "	event=\$3"
+echo "	if [ \" \$file\" != \" resolv.conf\" ] ; then"
+echo "		continue"
+echo "	fi"
+echo "	if [ \" \$event\" != \" closed\" ] ; then"
+echo "		continue"
+echo "	fi"
+echo "	list=\`grep nameserver /etc/resolv.conf\` > /dev/null"
 echo "	if [ \$? -eq 0 ] ; then"
-echo "		echo \"Got event \$line\""
-echo "		list=\`grep nameserver /etc/resolv.conf\` > /dev/null"
-echo "		if [ \$? -eq 0 ] ; then"
-echo "			echo \$list"
-echo "			echo \"/usr/bin/umount /etc/resolv.conf\""
-echo "			/usr/bin/umount /etc/resolv.conf"
-echo "			echo \"/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf\""
-echo "			/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
-echo "		fi"
+echo "		echo \$list"
+echo "		echo \"/usr/bin/umount /etc/resolv.conf\""
+echo "		/usr/bin/umount /etc/resolv.conf"
+echo "		echo \"/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf\""
+echo "		/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf"
 echo "	fi"
 echo "done"
 echo ") &"
