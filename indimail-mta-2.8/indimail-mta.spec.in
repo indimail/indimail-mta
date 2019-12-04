@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.202 2019-12-04 21:57:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.203 2019-12-04 22:02:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -212,7 +212,12 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
-Requires: binutils sed findutils pkgconfig initscripts
+Requires: binutils sed findutils pkgconfig
+%if 0%{?suse_version}
+Requires: insserv-compat
+%else
+Requires: initscripts
+%endif
 #
 # IndiMail is choosy and runs on reliable OS only
 #
