@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.262  2019-12-08 18:23:27+05:30  Cprogrammer
+ * added docker entrypoint script for indimail
+ *
  * Revision 1.261  2019-07-22 21:58:00+05:30  Cprogrammer
  * removed qmail-pop3d, qmail-popup
  *
@@ -1117,6 +1120,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-nullqueue", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "sys-checkpwd", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "ldap-checkpwd", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "docker-entrypoint", auto_uido, 0, moder_x);
 
 #if defined(SMTP_PLUGIN) || defined(LOAD_SHARED_OBJECTS)
 	d(auto_prefix, "lib/indimail/plugins", auto_uido, 0, 0555);
@@ -1638,7 +1642,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.261 2019-07-22 21:58:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.262 2019-12-08 18:23:27+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -28,6 +28,7 @@ usr/sbin/multilog /usr/sbin
 usr/sbin/readproctitle /usr/sbin
 usr/sbin/svscan /usr/sbin
 usr/sbin/svctool /usr/sbin
+usr/sbin/docker-entrypoint /usr/sbin
 usr/share/indimail/boot/upstart /usr/share/indimail/boot
 usr/share/indimail/boot/systemd /usr/share/indimail/boot
 

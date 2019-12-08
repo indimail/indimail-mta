@@ -587,3 +587,4 @@ load_mysql.o
 Makefile-cert
 RELEASE-Notes
 RELEASE-Notes.in
+docker-entrypoint

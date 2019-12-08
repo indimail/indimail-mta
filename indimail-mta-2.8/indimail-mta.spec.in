@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.203 2019-12-04 22:02:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.204 2019-12-08 18:23:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1309,6 +1309,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/svscan
 %attr(755,root,root)                    %{_prefix}/sbin/readproctitle
 %attr(755,root,root)                    %{_prefix}/sbin/multilog
+%attr(755,root,root)                    %{_prefix}/sbin/docker-entrypoint
 
 # ucspi-tcp
 %attr(755,root,root)                    %{_prefix}/bin/mconnect-io

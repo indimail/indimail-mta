@@ -1062,7 +1062,7 @@ srsfilter supervise surblfilter surblqueue svc svok svscan svscanboot \
 svstat swaks sys-checkpwd systemd tai2tai64n tai64n tai64n2tai tai64nlocal \
 tai64nunix tcp-env testzero tokenize uacl udpclient udplogger update_tmprsadh \
 upstart viruscanner whois yearcal \
-analyzer qtools qlog \
+analyzer qtools qlog docker-entrypoint \
 indimail-mta-permissions.easy indimail-mta-permissions.paranoid indimail-mta-permissions.secure
 
 analyzer: \
@@ -4255,6 +4255,13 @@ svctool.8: svctool.9 conf-qmail conf-sysconfdir Makefile mysql_config
 
 create_services: create_services.in
 	$(edit) $@.in > $@; chmod 755 $@
+
+docker-entrypoint: \
+warn-auto.sh docker-entrypoint.sh conf-prefix
+	cat warn-auto.sh docker-entrypoint.sh \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	> docker-entrypoint
+	chmod 755 docker-entrypoint
 
 doc/RELEASE-Notes: doc/RELEASE-Notes.in doc/ChangeLog
 	(cat doc/RELEASE-Notes.in;./catChangeLog) | $(edit) > $@
