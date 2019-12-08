@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.10  2019-12-08 18:21:29+05:30  Cprogrammer
+ * fixed svscan lock failure when run as pid 1 in docker container
+ *
  * Revision 1.9  2017-05-11 14:24:27+05:30  Cprogrammer
  * run .svscan/shutdown on SIGTERM
  *
@@ -346,16 +349,22 @@ get_lock(char *sdir)
 	if (read(fd, (char *) &pid, sizeof(pid)) == -1)
 		strerr_die2sys(111, FATAL, "unable to get pid from lock: ");
 	close(fd);
+	if (pid == getpid()) { /*- we again got the same pid / we are running under a docker container as init */
+		if (unlink(SVLOCK) == -1)
+			strerr_die2sys(111, FATAL, "unable to delete lock: ");
+		return (1);
+	}
 	errno = 0;
 	if (pid == -1 || (kill(pid, 0) == -1 && errno == error_srch)) { /*- process does not exist */
 		if (unlink(SVLOCK) == -1)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 		return (1);
 	}
-	/*- let us find out if the process is svscan */
-	strnum[fmt_ulong(strnum, pid)] = 0;
 	if (errno)
 		strerr_die4sys(111, FATAL, "unable to get status of pid ", strnum, ": ");
+
+	/*- let us find out if the process is svscan */
+	strnum[fmt_ulong(strnum, pid)] = 0;
 
 	/*- save the current dir */
 	if ((fdsourcedir = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
@@ -363,7 +372,7 @@ get_lock(char *sdir)
 
 	/*- use the /proc filesystem to figure out command name */
 	if (chdir("/proc") == -1) { /*- on systems without /proc filesystem, give up */
-		strerr_warn4(FATAL, sdir, " running with pid ", strnum, 0);
+		strerr_warn5(FATAL, "chdir: ", sdir, ": running with pid ", strnum, 0);
 		_exit (111);
 	}
 	if (chdir(strnum) == -1) { /*- process is now dead */
@@ -395,7 +404,8 @@ get_lock(char *sdir)
 	close(fd);
 	if (buf[0] == 's' && buf[1] == 'v' && buf[2] == 's' && 
 		buf[3] == 'c' && buf[4] == 'a' && buf[5] == 'n' && buf[6] == '\n') { /*- indeed pid is svscan process */
-		strerr_warn4(FATAL, sdir, " running with pid ", strnum, 0);
+		buf[7] = 0;
+		strerr_warn5(FATAL, "[", buf, "] ", "not running as svscan", 0);
 		_exit (111);
 	}
 	/*- some non-svscan process is running with pid */
@@ -448,7 +458,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.9 2017-05-11 14:24:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svscan.c,v 1.10 2019-12-08 18:21:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
