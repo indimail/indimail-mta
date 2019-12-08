@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.452 2019-12-04 15:00:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.453 2019-12-08 18:24:33+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.452 2019-12-04 15:00:54+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.453 2019-12-08 18:24:33+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4370,16 +4370,6 @@ else
 	return 1
 fi
 mysql_version=`$mysqlPrefix/$mysqld --version |awk '{print $3}' 2>&1`
-case "$mysql_version" in
-	8.*)
-	# the monkeys at Oracle have again succeeded in introducing incompatibility with previous
-	# database initialization methods
-	mysql_version_8=1
-	;;
-	*)
-	mysql_version_8=0
-	;;
-esac
 echo $mysql_version |grep MariaDB > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
 	mysql_version=`echo $mysql_version|cut -d- -f1`
@@ -4387,6 +4377,25 @@ if [ $? -eq 0 ] ; then
 else
 	mariadb=0
 fi
+mysql_version_8=0
+mariadb_version_10=0
+case "$mysql_version" in
+	8.*)
+	# the monkeys at Oracle have again succeeded in introducing incompatibility with previous
+	# database initialization methods
+	mysql_version_8=1
+	;;
+
+	10.*)
+	if [ $mariadb -eq 1 ] ; then
+		mariadb_version_10=1
+	fi
+	;;
+
+	*)
+	mysql_version_8=0
+	;;
+esac
 if [ -x $mysqlPrefix/bin/mysql_install_db ] ; then
 	install_db=$mysqlPrefix/bin/mysql_install_db
 elif [ -x $mysqlPrefix/scripts/mysql_install_db ] ; then
@@ -4406,15 +4415,12 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 		echo ""
 		echo "$prog_args"
 		) > "$DESTDIR"$databasedir/README
-		(
-		echo "use mysql;"
-		echo "create database indimail;"
-		) > "$DESTDIR"$databasedir/mysql.init 
 		$chown -R mysql:mysql "$DESTDIR"$databasedir
-		echo "Creating MySQL Database in "$DESTDIR"$databasedir/data"
+		echo "Creating MySQL Database in "$DESTDIR"$databasedir/data" 1>&2
 		if [ $mariadb -eq 1 ] ; then
 			/bin/mkdir -p /var/run/mysqld
 			$chown mysql:mysql /var/run/mysqld
+			echo "$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data" 1>&2
 			$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data
 		else
 			if [ $mysql_version_8 -eq 1 ] ; then
@@ -4422,31 +4428,29 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 			else
 				opt_str="--user=mysql"
 			fi
-			echo -n "$mysqlPrefix/$mysqld --initialize-insecure $opt_str"
-			echo -n " --init-file="$DESTDIR"$databasedir/mysql.init --skip-networking"
-			echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log" 
-			echo    " --datadir="$DESTDIR"$databasedir/data --socket=$mysql_socket"
+			echo -n "$mysqlPrefix/$mysqld --initialize-insecure $opt_str" 1>&2
+			echo -n " --skip-networking" 1>&2
+			echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log"  1>&2
+			echo    " --datadir="$DESTDIR"$databasedir/data --socket=$mysql_socket" 1>&2
 			$mysqlPrefix/$mysqld --initialize-insecure $opt_str \
-				--init-file="$DESTDIR"$databasedir/mysql.init \
 				--skip-networking \
 				--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
 				--datadir="$DESTDIR"$databasedir/data --socket=$mysql_socket
 			if [ $? -ne 0 ] ; then
-				/bin/rm -f "$DESTDIR"$databasedir/mysql.init
 				if [ -z $install_db ] ; then
 					echo "couldn't locate db installation program" 1>&2
 					return 1
 				else
-					echo "WARNING!!! mysqld --initialize-insecure failed. Running $install_db"
-					echo "$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data"
-					$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data
+					echo "WARNING!!! mysqld --initialize-insecure failed. Running $install_db" 1>&2
+					echo "$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data" 1>&2
+					$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data
 				fi
 			fi
 		fi
 		if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
 			if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
-				echo "Creating MySQL SSL Certs"
-				echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data"
+				echo "Creating MySQL SSL Certs" 1>&2
+				echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
 				$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
 			fi
 		elif [ $mariadb -eq 1 ] ; then
@@ -4493,98 +4497,30 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 			return 1
 		fi
 		if [ $mysql_version_8 -eq 1 ] ; then
-			echo -n "$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid"
-			echo -n " --datadir="$DESTDIR"$databasedir/data"
-			echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log"
-			echo    " --user=root --socket=$mysql_socket"
-			$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid --datadir="$DESTDIR"$databasedir/data \
-				--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
-				--user=root --socket=$mysql_socket &
-			wait_for_mysqld
-			if [ -s "$DESTDIR"$databasedir/mysqld.pid ] ; then
-				pid=`/bin/cat "$DESTDIR"$databasedir/mysqld.pid`
-				(
-				# Create user mysql with all privileges
-				echo "Creating MySQL admin User for Database in "$DESTDIR"$databasedir/data" 1>&2
-				create_mysql_rootuser $mysql_version $mariadb $pass_str $auth_str $plugin_str
-				echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data" 1>&2
-				create_mysql_user $mysql_version
-				mecho "FLUSH PRIVILEGES;"
-				) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysql_socket
-				kill $pid
-				wait_for_mysqld 1
-				$chown -R mysql:mysql "$DESTDIR"$databasedir
-			else
-				echo "did not find running mysqld: "$DESTDIR"$databasedir/mysqld.pid not found" 1>&2
-				return 1
-			fi
-			echo -n "$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid --datadir="$DESTDIR"$databasedir/data"
-			echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log"
-			echo    " --user=mysql --socket=$mysql_socket"
-			$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid --datadir="$DESTDIR"$databasedir/data \
-				--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
-				--user=mysql --socket=$mysql_socket &
-			wait_for_mysqld
-			if [ -s "$DESTDIR"$databasedir/mysqld.pid ] ; then
-				pid=`/bin/cat "$DESTDIR"$databasedir/mysqld.pid`
-				> $HOME/.svctool.cnf
-				chmod 600 $HOME/.svctool.cnf
-				(
-				echo "[mysql]"
-				echo "user=mysql"
-				echo "password=$PRIV_PASS"
-				) > $HOME/.svctool.cnf
-				echo "Creating GRANTS" 1>&2
-				(
-				mecho "GRANT ALL on *.* to mysql;"
-				mecho "GRANT USAGE ON *.* TO mysql WITH GRANT OPTION;"
-				mecho "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;"
-				mecho "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
-				mecho "GRANT REPLICATION SLAVE on *.* to repl;"
-				) | eval $mysqlPrefix/bin/mysql --defaults-file=$HOME/.svctool.cnf -sN -S $mysql_socket
-				/bin/rm -f $HOME/.svctool.cnf
-				kill $pid
-				wait_for_mysqld 1
-				$chown -R mysql:mysql "$DESTDIR"$databasedir
-			else
-				echo "did not find running mysqld: "$DESTDIR"$databasedir/mysqld.pid not found" 1>&2
-				return 1
-			fi
-			return 0
+			opt_str="--user=root"
+		else
+			opt_str="--user=mysql"
 		fi
-		# MySQL version < 8
-		echo "Creating MySQL admin User for Database in "$DESTDIR"$databasedir/data"
-		opt_str="--bootstrap --user=mysql"
-		opt_str="$opt_str""--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
-			--datadir="$DESTDIR"$databasedir/data --skip-grant-tables"
-		create_mysql_rootuser $mysql_version $mariadb $pass_str $auth_str $plugin_str \
-			| eval "$mysqlPrefix/$mysqld $opt_str"
 		#
 		# Start MySQL daemon
 		#
-		echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data"
-		echo -n "$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid"
-		echo -n " --datadir="$DESTDIR"$databasedir/data"
-		echo -n " --skip-networking --log-error="$DESTDIR"$databasedir/logs/mysqld.log"
-		echo    " --user=mysql --socket=$mysql_socket"
+		echo -n "$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid" 1>&2
+		echo -n " --datadir="$DESTDIR"$databasedir/data" 1>&2
+		echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log" 1>&2
+		echo    " $opt_str --socket=$mysql_socket" 1>&2
 		$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid --datadir="$DESTDIR"$databasedir/data \
-			--skip-networking --log-error="$DESTDIR"$databasedir/logs/mysqld.log \
-			--user=mysql --socket=$mysql_socket &
+			--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
+			$opt_str --socket=$mysql_socket &
 		wait_for_mysqld
 		if [ -s "$DESTDIR"$databasedir/mysqld.pid ] ; then
 			pid=`/bin/cat "$DESTDIR"$databasedir/mysqld.pid`
-			# create user indimail, admin, repl
-			> $HOME/.svctool.cnf
-			chmod 600 $HOME/.svctool.cnf
 			(
-			echo "[mysql]"
-			echo "user=mysql"
-			echo "password=$PRIV_PASS"
-			) > $HOME/.svctool.cnf
-			create_mysql_user $mysql_version | $mysqlPrefix/bin/mysql \
-				--defaults-file=$HOME/.svctool.cnf -sN -S $mysql_socket
-			/bin/rm -f $HOME/.svctool.cnf
-			# Shutdown MySQLD
+			# Create user mysql with all privileges
+			echo "Creating MySQL admin User for Database in "$DESTDIR"$databasedir/data" 1>&2
+			create_mysql_rootuser $mysql_version $mariadb $pass_str $auth_str $plugin_str
+			echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data" 1>&2
+			create_mysql_user $mysql_version
+			) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysql_socket
 			kill $pid
 			wait_for_mysqld 1
 			$chown -R mysql:mysql "$DESTDIR"$databasedir
@@ -4694,42 +4630,11 @@ create_mysql_rootuser()
 		mysql_version_8=0
 		;;
 	esac
-	if [ $mysql_version_8 -eq 1 ] ; then
-		mecho "ALTER USER 'root'@'localhost' identified by '$PRIV_PASS';"
-	fi
-	echo "use mysql;"
-	# Create mysql user by replacing auto created user root
+	mecho "ALTER USER 'root'@'localhost' identified by '$PRIV_PASS';"
+	mecho "use mysql;"
 	mecho "DELETE from user where user='';"
 	mecho "DROP database if exists test;"
 	mecho "DELETE from db where db like 'test%';"
-	#
-	# there is a race at oracle between the monkeys there to introduce
-	# incompatibilities from one version to another. You will not
-	# be surprised to see columns dissapear from system tables.
-	# 
-	c_d=""
-	c_d="$c_d UPDATE user set host='%', "
-	if [ $pass_str -eq 1 ] ; then
-		c_d="$c_d Password=Password('$PRIV_PASS'), "
-	fi
-	if [ $auth_str -eq 1 ] ; then
-		c_d="$c_d authentication_string=Password('$PRIV_PASS'), "
-	fi
-	if [ $plugin_str -eq 1 ] ; then
-		c_d="$c_d plugin='', "
-	elif [ $plugin_str -eq 2 ] ; then
-		c_d="$c_d plugin='mysql_native_password', "
-	fi
-	c_d="$c_d user='mysql' where host='localhost' and user='root';"
-	mecho $c_d
-	c_d=""
-	c_d="$c_d DELETE from user where host != '%' and user != 'mysql.sys';"
-	mecho $c_d
-	if [ $mysql_version_8 -eq 1 ] ; then
-		c_d=""
-		c_d="$c_d UPDATE global_grants set user='mysql' where user='root';"
-		mecho $c_d
-	fi
 }
 
 create_mysql_user()
@@ -4743,21 +4648,9 @@ create_mysql_user()
 			mysql_version_8=0
 			;;
 	esac
-	mecho "use mysql;"
-	if [ $mariadb -eq 1 ] ; then
-		mecho "CREATE database indimail;"
-	fi
-	mecho "CREATE USER 'indimail'@'%' identified by '$MYSQL_PASS';"
-	mecho "CREATE USER 'admin'@'%'    identified by '$ADMIN_PASS';"
-	mecho "CREATE USER 'repl'@'%'     identified by 'slaveserver';"
-	if [ $mysql_version_8 -ne 1 ] ; then
-		mecho "GRANT ALL on *.* to mysql;"
-		mecho "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;"
-		mecho "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
-		mecho "GRANT REPLICATION SLAVE on *.* to repl;"
-	fi
 
 	# Bootstrap Indimail tables
+	mecho "CREATE database indimail;"
 	mecho "use indimail;"
 	c_d=""
 	c_d="$c_d CREATE TABLE mgmtaccess ("
@@ -4827,6 +4720,28 @@ create_mysql_user()
 	c_d="$c_d mailing_list tinyint not null,"
 	c_d="$c_d primary key(emailid, filter_no), unique index (emailid, header_name, comparision, keyword, destination));"
 	mecho $c_d
+
+	mecho "use mysql;"
+	mecho "CREATE USER 'indimail'@'%' identified by '$MYSQL_PASS';"
+	mecho "CREATE USER 'admin'@'%'    identified by '$ADMIN_PASS';"
+	mecho "CREATE USER 'repl'@'%'     identified by 'slaveserver';"
+	if [ $mariadb -eq 1 -a $mariadb_version_10 -eq 1 ] ; then
+		mecho "DROP user mysql@localhost;"
+	fi
+	mecho "CREATE USER 'mysql'@'%' identified by '$PRIV_PASS';"
+	mecho "GRANT ALL on *.* to mysql;"
+	if [ $mysql_version_8 -eq 1 -o $mariadb_version_10 -eq 1 ] ; then
+		mecho "GRANT USAGE ON *.* TO mysql WITH GRANT OPTION;"
+	fi
+	mecho "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;"
+	mecho "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
+	mecho "GRANT REPLICATION SLAVE on *.* to repl;"
+	if [ $mysql_version_8 -eq 1 ] ; then
+		c_d=""
+		c_d="$c_d UPDATE global_grants set user='mysql' where user='root';"
+		mecho $c_d
+	fi
+	mecho "FLUSH PRIVILEGES;"
 }
 
 create_mysql_service()
