@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.7  2019-12-21 00:53:51+05:30  Cprogrammer
+ * fixed multiple bugs
+ *
  * Revision 1.6  2014-01-29 14:00:56+05:30  Cprogrammer
  * BUG - removed extra semicolon
  *
@@ -68,9 +71,9 @@
 #define LDAP_BASE         "ou=mail,o=enterprise"
 #define LDAP_SCOPE        LDAP_SCOPE_SUBTREE
 #define LDAP_FILTER       "(&(uid=%u)(dc=%h))"
-#define LDAP_HOME_FIELD   "mailMessageStore"
-#define LDAP_UID_FIELD    "uid"
-#define LDAP_GID_FIELD    "gid"
+#define LDAP_HOME_FIELD   "homeDirectory"
+#define LDAP_UID_FIELD    "uidNumber"
+#define LDAP_GID_FIELD    "gidNumber"
 #define LDAP_BIND_DN      "uid=auth,ou=mail,o=enterprise"
 #define LDAP_BIND_PASSWD  "password"
 
@@ -116,18 +119,17 @@ static int      debug;
 void
 my_error(char *s1, char *s2, int exit_val)
 {
-	if (!debug)
-		_exit(exit_val);
 	logerr(s1);
-	logerr(": ");
 	if (s2) {
-		logerr(s2);
 		logerr(": ");
+		logerr(s2);
 	}
-	if (exit_val > 0)
+	if (exit_val < 0) {
+		logerr(": ");
 		logerr(error_str(errno));
+	}
 	logerrf("\n");
-	_exit(exit_val > 0 ? exit_val : -exit_val);
+	_exit(exit_val > 0 ? exit_val : 111);
 }
 
 static char     up[513];
@@ -156,29 +158,29 @@ main(int argc, char *argv[])
 			r = read(3, up + uplen, sizeof (up) - uplen);
 		while ((r == -1) && (errno == error_intr));
 		if (r == -1)
-			my_error("read", 0, 111);
+			my_error("read", 0, -1);
 		if (r == 0)
 			break;
 		uplen += r;
 		if (uplen >= sizeof (up))
-			my_error("read", "data too big", -1);
+			my_error("read", "data too big", 100);
 	}
 	close(3);
 	i = 0;
 	if (i >= uplen)
-		my_error("invalid data", 0, -2);
+		my_error("invalid data", 0, 2);
 	login = up + i;
 	while (up[i++])
 		if (i >= uplen)
-			my_error("invalid data", 0, -2);
+			my_error("invalid data", 0, 2);
 	password = up + i;
 	if (i >= uplen)
-		my_error("invalid data", 0, -2);
+		my_error("invalid data", 0, 2);
 	while (up[i++])
 		if (i >= uplen)
-			my_error("invalid data", 0, -2);
+			my_error("invalid data", 0, 2);
 	if (!*login || !*password)
-		my_error("invalid data", 0, -2);
+		my_error("invalid data", 0, 2);
 	if (debug) {
 		out("login [");
 		out(login);
@@ -191,18 +193,18 @@ main(int argc, char *argv[])
 	if (debug)
 		flush();
 	if (i == -1)
-		my_error("ldap error", error, 111);
-	else
+		my_error("ldap lookup error", error, 111);
 	if (!i)
-		_exit(0);
+		_exit (0);
+	/*- authenticaion did not succeed */
 #ifdef EXTENDED_ATTRIBUTES
 	if (homedir.len && chdir(homedir.s) != 0)
-		my_error("chdir", homedir.s, 111);
+		my_error("chdir", homedir.s, -1);
 #endif
 	execvp(argv[1], argv + 1);
-	my_error("execvp", argv[1], 111);
+	my_error("execvp", argv[1], -1);
 	/*- Not reached */
-	_exit(111);
+	_exit (111);
 }
 
 int
@@ -216,7 +218,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 	char           *ldap_home_field, *ldap_uid_field, *ldap_gid_field;
 	char          **values;
 #endif
-	static stralloc filter = {0};
+	static stralloc filter = {0}, errbuf = {0};
 	LDAP           *ld;
 	LDAPMessage    *res, *res0;
 	int             ret, ldap_port, scope, at;
@@ -230,7 +232,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 	if (!(ld = (LDAP *) ldap_init(ldap_host, ldap_port))) {
 		if (error)
 			*error = error_str(errno);
-		return(-1);
+		return (-1);
 	}
 	if (login[at = str_chr(login, '@')] == 0)
 		host = "";
@@ -256,18 +258,40 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 		ldap_bind_passwd = "";
 	} else
 		ldap_bind_passwd = env_get("LDAP_BIND_PASSWD");
+	ret = 3;
+	if (ldap_set_option(ld, LDAP_OPT_PROTOCOL_VERSION, &ret) != LDAP_OPT_SUCCESS) {
+		if (!stralloc_copyb(&errbuf, "ldap_set_option: LDAP_OPT_PROTOCOL_VERSION=3", 44) ||
+				!stralloc_0(&errbuf)) {
+			if (error)
+				*error = "out of memory";
+			return (-1);
+		}
+		if (error)
+			*error = errbuf.s;
+		return (-1);
+	}
 	switch ((ret = ldap_simple_bind_s(ld, ldap_bind_dn, ldap_bind_passwd)))
 	{
 	case LDAP_SUCCESS:
 		break;
 	case LDAP_INVALID_CREDENTIALS:
-		ldap_unbind_s(ld);
-		return(1);
-	default:
 		if (error)
-			*error = ldap_err2string(ret);
+			*error = "invalid credentials for bind DN";
 		ldap_unbind_s(ld);
-		return -1;
+		return (-1);
+	default:
+		if (!stralloc_copyb(&errbuf, "ldap_simple_bind_s: ", 20) ||
+				!stralloc_cats(&errbuf, ldap_err2string(ret)) ||
+				!stralloc_0(&errbuf)) {
+			ldap_unbind_s(ld);
+			if (error)
+				*error = "out of memory";
+			return (-1);
+		}
+		ldap_unbind_s(ld);
+		if (error)
+			*error = errbuf.s;
+		return (-1);
 	}
 	if (!(ldap_filter = env_get("LDAP_FILTER")))
 		ldap_filter = LDAP_FILTER;
@@ -279,7 +303,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 				if (!stralloc_catb(&filter, "%", 1)) {
 					if (error)
 						*error = "out of memory";
-					return(-1);
+					return (-1);
 				}
 				ptr++;
 				break;
@@ -287,7 +311,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 				if (!stralloc_cats(&filter, login)) {
 					if (error)
 						*error = "out of memory";
-					return(-1);
+					return (-1);
 				}
 				ptr++;
 				break;
@@ -295,7 +319,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 				if (!stralloc_catb(&filter, login, at)) {
 					if (error)
 						*error = "out of memory";
-					return(-1);
+					return (-1);
 				}
 				ptr++;
 				break;
@@ -303,7 +327,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 				if (!stralloc_cats(&filter, host)) {
 					if (error)
 						*error = "out of memory";
-					return(-1);
+					return (-1);
 				}
 				ptr++;
 				break;
@@ -314,7 +338,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 	if (!stralloc_0(&filter)) {
 		if (error)
 			*error = "out of memory";
-		return(-1);
+		return (-1);
 	}
 	if (!(ldap_base = env_get("LDAP_BASE")))
 		ldap_base = LDAP_BASE;
@@ -336,44 +360,70 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 			if (error)
 				*error = "invalid scope";
 			errno = EINVAL;
-			return(-1);
+			return (-1);
 		}
 	}
 	if (debug)
 	{
-		out("ldap_search: base[");
+		out("ldap_search: base=[");
 		out(ldap_base);
-		out("] filter [");
+		out("] filter=[");
 		out(filter.s);
 		out("]\n");
 		flush();
 	}
 	if ((ret = ldap_search_s(ld, ldap_base, scope, filter.s, attrs, 0, &res))) {
-		if (error)
-			*error = ldap_err2string(ret);
+		if (!stralloc_copyb(&errbuf, "ldap_search_s: ", 15) ||
+				!stralloc_cats(&errbuf, ldap_err2string(ret)) ||
+				!stralloc_0(&errbuf)) {
+			ldap_msgfree(res);
+			ldap_unbind_s(ld);
+			if (error)
+				*error = "out of memory";
+			return (-1);
+		}
+		ldap_msgfree(res);
 		ldap_unbind_s(ld);
-		return(-1);
+		if (error)
+			*error = errbuf.s;
+		return (-1);
 	}
 	if (!(res0 = ldap_first_entry(ld, res))) {
-		if (error) {
-			ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
-			*error = ldap_err2string(ret);
+		ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
+		if (!stralloc_copyb(&errbuf, "ldap_first_entry: ", 18) ||
+				!stralloc_cats(&errbuf, ldap_err2string(ret)) ||
+				!stralloc_0(&errbuf)) {
+			ldap_msgfree(res);
+			ldap_unbind_s(ld);
+			if (error)
+				*error = "out of memory";
+			return (-1);
 		}
 		ldap_msgfree(res);
 		ldap_unbind_s(ld);
-		return(1);
+		if (error)
+			*error = errbuf.s;
+		return (-1);
 	}
 	if (!(dn = ldap_get_dn(ld, res))) {
-		if (error) {
-			ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
-			*error = ldap_err2string(ret);
+		ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
+		if (!stralloc_copyb(&errbuf, "ldap_get_dn: ", 13) ||
+				!stralloc_cats(&errbuf, ldap_err2string(ret)) ||
+				!stralloc_0(&errbuf)) {
+			ldap_msgfree(res);
+			ldap_unbind_s(ld);
+			if (error)
+				*error = "out of memory";
+			return (-1);
 		}
 		ldap_msgfree(res);
 		ldap_unbind_s(ld);
-		return(-1);
+		if (error)
+			*error = errbuf.s;
+		return (-1);
 	}
 	if (debug) {
-		out("dn=[");
+		out("ldap_get_dn: dn=[");
 		out(dn);
 		out("]\n");
 		flush();
@@ -384,6 +434,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 		out("]\n");
 		flush();
 	}
+#if 0
 	switch ((ret = ldap_simple_bind_s(ld, dn, password)))
 	{
 	case LDAP_SUCCESS:
@@ -391,18 +442,26 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 	case LDAP_INVALID_CREDENTIALS:
 		ldap_msgfree(res);
 		ldap_unbind_s(ld);
-		return(1);
+		return (1);
 	default:
-		if (error)
-			*error = ldap_err2string(ret);
 		ldap_msgfree(res);
+		if (!stralloc_copyb(&errbuf, "ldap_simple_bind_s: ", 20) ||
+				!stralloc_cats(&errbuf, ldap_err2string(ret)) ||
+				!stralloc_0(&errbuf)) {
+			ldap_unbind_s(ld);
+			if (error)
+				*error = "out of memory";
+			return (-1);
+		}
 		ldap_unbind_s(ld);
+		if (error)
+			*error = errbuf.s;
 		return -1;
 	}
 	ldap_memfree(dn);
+#endif
 #ifdef EXTENDED_ATTRIBUTES
-	if ((ldap_home_field = env_get("LDAP_HOME_FIELD")))
-	{
+	if ((ldap_home_field = env_get("LDAP_HOME_FIELD"))) {
 		if (!(values = (char **) ldap_get_values(ld, res0, ldap_home_field))) {
 			if (error) {
 				ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
@@ -410,26 +469,31 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 			}
 			ldap_msgfree(res);
 			ldap_unbind_s(ld);
-			return(-1);
+			return (-1);
 		}
 		if (values && values[0]) {
 			if (!stralloc_copys(&homedir, values[0])) {
 				ldap_value_free(values);
 				ldap_msgfree(res);
 				ldap_unbind_s(ld);
-				return(-1);
+				return (-1);
 			}
 			if (!stralloc_0(&homedir)) {
 				ldap_value_free(values);
 				ldap_msgfree(res);
 				ldap_unbind_s(ld);
-				return(-1);
+				return (-1);
 			}
+		}
+		if (debug && values && values[0]) {
+			out("homedir=[");
+			out(homedir.s);
+			out("]\n");
+			flush();
 		}
 		ldap_value_free(values);
 	}
-	if ((ldap_uid_field = env_get("LDAP_UID_FIELD")))
-	{
+	if ((ldap_uid_field = env_get("LDAP_UID_FIELD"))) {
 		if (!(values = ldap_get_values(ld, res0, ldap_uid_field))) {
 			if (error) {
 				ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
@@ -437,14 +501,19 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 			}
 			ldap_msgfree(res);
 			ldap_unbind_s(ld);
-			return(-1);
+			return (-1);
 		}
 		if (values && values[0])
 			scan_ulong(values[0], (unsigned long *) userId);
+		if (debug && values && values[0]) {
+			out("uid=[");
+			out(values[0]);
+			out("]\n");
+			flush();
+		}
 		ldap_value_free(values);
 	}
-	if ((ldap_gid_field = env_get("LDAP_GID_FIELD")))
-	{
+	if ((ldap_gid_field = env_get("LDAP_GID_FIELD"))) {
 		if (!(values = ldap_get_values(ld, res0, ldap_gid_field))) {
 			if (error) {
 				ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
@@ -452,16 +521,22 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 			}
 			ldap_msgfree(res);
 			ldap_unbind_s(ld);
-			return(-1);
+			return (-1);
 		}
 		if (values && values[0])
 			scan_ulong(values[0], (unsigned long *) groupId);
+		if (debug && values && values[0]) {
+			out("gid=[");
+			out(values[0]);
+			out("]\n");
+			flush();
+		}
 		ldap_value_free(values);
 	}
 #endif
 	ldap_msgfree(res);
 	ldap_unbind(ld);
-	return(0);
+	return (0);
 }
 #else
 #warning "not compiled with -DHASLDAP or ldap libraries absent"
@@ -486,7 +561,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.6 2014-01-29 14:00:56+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.7 2019-12-21 00:53:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
