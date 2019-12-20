@@ -4066,7 +4066,7 @@ load ldap-checkpwd.o ldap.lib
 
 ldap-checkpwd.o: \
 compile ldap-checkpwd.c pathexec.h hasldap.h
-	./compile -DLDAP_DEPRECATED ldap-checkpwd.c
+	./compile -DEXTENDED_ATTRIBUTES -DLDAP_DEPRECATED ldap-checkpwd.c
 
 surblfilter.8: surblfilter.9 conf-qmail conf-sysconfdir
 	cat surblfilter.9 \
