@@ -47,6 +47,13 @@ You can specify '%' followed by the following letters to have specific substitio
  %e - This gets substituted by the fully qualified email address
  %u - This gets substituted by the user
       (component before the '@' portion of an email address)
+.TP
+.B LDAP_FIELD_XXX
+You can tell \fBldap-checkpwd\fR to fetch the value of any ldap field. e.g. setting the environment variable
+ LDAP_FIELD_UID=uidNumber       - fetches user's uid
+ LDAP_FIELD_GID=gidNumber       - fetches user's gid
+ LDAP_FIELD_HOME=homeDirectory  - fetches home directory
+ LDAP_FIELD_PASS=userPassword   - fetches user password
 
 .TP
 .B LDAP_BASE

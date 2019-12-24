@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.8  2019-12-24 07:19:24+05:30  Cprogrammer
+ * use LDAP_FIELD_xxx environment variables to get value of any ldap field
+ *
  * Revision 1.7  2019-12-21 00:53:51+05:30  Cprogrammer
  * fixed multiple bugs
  *
@@ -52,9 +55,7 @@
  * LDAP_BIND_DN dn of the account who has the good permissions to request search
  * LDAP_BIND_PASSWD password of the account who has the good permissions to request search
  * LDAP_FILTER filter to use, %u gets replaced by login & %h gets replaced by domain
- * LDAP_UID_FIELD name of the field containing the system uid
- * LDAP_GID_FIELD name of the field containing the system gid
- * LDAP_HOME_FIELD name of field containing the directory of the mailbox
+ * LDAP_FIELD_xxx where xxx is name of a LDAP field like uid, gid, home, user password
  *
  * #define LDAP_SCOPE_BASE			((ber_int_t) 0x0000)
  * #define LDAP_SCOPE_ONELEVEL		((ber_int_t) 0x0001)
@@ -190,8 +191,6 @@ main(int argc, char *argv[])
 		flush();
 	}
 	i = ldap_lookup(login, password, &error, &uid, &gid);
-	if (debug)
-		flush();
 	if (i == -1)
 		my_error("ldap lookup error", error, 111);
 	if (!i)
@@ -215,13 +214,13 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 	char           *ldap_host, *ldap_bind_dn, *ldap_bind_passwd = 0, *ldap_filter,
 				   *ldap_base, *ldap_scope;
 #ifdef EXTENDED_ATTRIBUTES
-	char           *ldap_home_field, *ldap_uid_field, *ldap_gid_field;
+	char           *ldap_field;
 	char          **values;
 #endif
 	static stralloc filter = {0}, errbuf = {0};
 	LDAP           *ld;
 	LDAPMessage    *res, *res0;
-	int             ret, ldap_port, scope, at;
+	int             i, ret, ldap_port, scope, at;
 
 	if (!(ldap_host = env_get("LDAP_HOST")))
 		ldap_host = LDAP_HOST;
@@ -434,7 +433,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 		out("]\n");
 		flush();
 	}
-#if 0
+	/*- bind with the user dn to test the password */
 	switch ((ret = ldap_simple_bind_s(ld, dn, password)))
 	{
 	case LDAP_SUCCESS:
@@ -459,10 +458,13 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 		return -1;
 	}
 	ldap_memfree(dn);
-#endif
 #ifdef EXTENDED_ATTRIBUTES
-	if ((ldap_home_field = env_get("LDAP_HOME_FIELD"))) {
-		if (!(values = (char **) ldap_get_values(ld, res0, ldap_home_field))) {
+	for (i = 0; environ[i]; ++i) {
+		if (str_diffn(environ[i], "LDAP_FIELD_", 11))
+			continue;
+		for (ldap_field = environ[i] + 11;*ldap_field && *ldap_field != '=';ldap_field++);
+		ldap_field++;
+		if (!(values = (char **) ldap_get_values(ld, res0, ldap_field))) {
 			if (error) {
 				ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
 				*error = ldap_err2string(ret);
@@ -471,68 +473,39 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 			ldap_unbind_s(ld);
 			return (-1);
 		}
-		if (values && values[0]) {
-			if (!stralloc_copys(&homedir, values[0])) {
-				ldap_value_free(values);
-				ldap_msgfree(res);
-				ldap_unbind_s(ld);
-				return (-1);
+		if (!str_diffn(environ[i] + 11, "HOME", 4)) {
+			if (values && values[0]) {
+				if (!stralloc_copys(&homedir, values[0])) {
+					ldap_value_free(values);
+					ldap_msgfree(res);
+					ldap_unbind_s(ld);
+					return (-1);
+				}
+				if (!stralloc_0(&homedir)) {
+					ldap_value_free(values);
+					ldap_msgfree(res);
+					ldap_unbind_s(ld);
+					return (-1);
+				}
 			}
-			if (!stralloc_0(&homedir)) {
-				ldap_value_free(values);
-				ldap_msgfree(res);
-				ldap_unbind_s(ld);
-				return (-1);
-			}
+		} else
+		if (!str_diffn(environ[i] + 11, "UID", 3)) {
+			if (values && values[0])
+				scan_ulong(values[0], (unsigned long *) userId);
+		}
+		if (!str_diffn(environ[i] + 11, "GID", 3)) {
+			if (values && values[0])
+				scan_ulong(values[0], (unsigned long *) groupId);
 		}
 		if (debug && values && values[0]) {
-			out("homedir=[");
-			out(homedir.s);
-			out("]\n");
-			flush();
-		}
-		ldap_value_free(values);
-	}
-	if ((ldap_uid_field = env_get("LDAP_UID_FIELD"))) {
-		if (!(values = ldap_get_values(ld, res0, ldap_uid_field))) {
-			if (error) {
-				ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
-				*error = ldap_err2string(ret);
-			}
-			ldap_msgfree(res);
-			ldap_unbind_s(ld);
-			return (-1);
-		}
-		if (values && values[0])
-			scan_ulong(values[0], (unsigned long *) userId);
-		if (debug && values && values[0]) {
-			out("uid=[");
+			out(environ[i]);
+			out("=[");
 			out(values[0]);
 			out("]\n");
 			flush();
 		}
 		ldap_value_free(values);
-	}
-	if ((ldap_gid_field = env_get("LDAP_GID_FIELD"))) {
-		if (!(values = ldap_get_values(ld, res0, ldap_gid_field))) {
-			if (error) {
-				ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
-				*error = ldap_err2string(ret);
-			}
-			ldap_msgfree(res);
-			ldap_unbind_s(ld);
-			return (-1);
-		}
-		if (values && values[0])
-			scan_ulong(values[0], (unsigned long *) groupId);
-		if (debug && values && values[0]) {
-			out("gid=[");
-			out(values[0]);
-			out("]\n");
-			flush();
-		}
-		ldap_value_free(values);
-	}
+	} /*- for (i = 0; environ[i]; ++i) */
 #endif
 	ldap_msgfree(res);
 	ldap_unbind(ld);
@@ -561,7 +534,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.7 2019-12-21 00:53:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.8 2019-12-24 07:19:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
