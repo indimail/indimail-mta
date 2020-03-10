@@ -1,5 +1,9 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.5  2020-03-10 20:07:28+05:30  Cprogrammer
+ * replaced atoi() with scan_uint()
+ * incorrect usage of htons()
+ *
  * Revision 1.4  2018-05-29 21:47:11+05:30  Cprogrammer
  * removed call to gethostbyname() in ipv6 code
  *
@@ -27,6 +31,7 @@
 #include <ctype.h>
 #include "haveip6.h"
 #include "fmt.h"
+#include "scan.h"
 #include "byte.h"
 #include "subfd.h"
 #include "strerr.h"
@@ -113,6 +118,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
 	char            serv[FMT_ULONG];
 #else
+	int             i;
 	struct hostent *hp;
 #ifdef HAVE_IN_ADDR_T
 	in_addr_t       inaddr;
@@ -149,7 +155,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 		hostptr = host;
 	if ((ptr = (char *) getenv("SLEEPTIME")) != (char *) 0) {
 		if (isnum(ptr))
-			sleeptime = atoi(ptr);
+			scan_uint(ptr, &sleeptime);
 		else {
 			errno = EINVAL;
 			return (-1);
@@ -160,7 +166,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	hints.ai_socktype = SOCK_STREAM;
 	if (service != (char *) NULL) {
 		if (port > 0)
-			serv[fmt_ulong(serv, htons(port))] = 0;
+			serv[fmt_ulong(serv, port)] = 0;
 		else {
 			if (isnum(service))
 				byte_copy(serv, FMT_ULONG, service);
@@ -177,7 +183,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 		errno = EINVAL;
 		return (-1);
 	} else
-		serv[fmt_ulong(serv, htons(port))] = 0;
+		serv[fmt_ulong(serv, port)] = 0;
 	if ((retval = getaddrinfo(hostptr, serv, &hints, &res0)))
 		strerr_die7x(111, "tcpopen", "getadrinfo: ", hostptr, ": ", serv, ":", (char *) gai_strerror(retval));
 	for (fd = -1, res = res0; res && fd == -1; res = res->ai_next) {
@@ -245,9 +251,10 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 		if (port > 0)
 			tcp_srv_addr.sin_port = htons(port);	/*- caller's value */
 		else {
-			if (isnum(service))
-				tcp_srv_addr.sin_port = htons(atoi(service));
-			else {
+			if (isnum(service)) {
+				scan_int(service, &i);
+				tcp_srv_addr.sin_port = htons(i);
+			} else {
 				if ((sp = getservbyname(service, "tcp")) == NULL) {
 					errno = EINVAL;
 					return (-1);
@@ -347,6 +354,6 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.4 2018-05-29 21:47:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.5 2020-03-10 20:07:28+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
