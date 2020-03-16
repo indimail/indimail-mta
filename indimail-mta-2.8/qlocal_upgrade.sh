@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.30  2020-03-16 22:39:12+05:30  Cprogrammer
+# disable freshclam svscan service if systemd freshclam is enabled
+#
 # Revision 1.29  2019-10-27 19:22:59+05:30  Cprogrammer
 # removed svctool --config=foxhole since freshclam now updates foxhole on startup
 #
@@ -85,7 +88,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.29 2019-10-27 19:22:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.30 2020-03-16 22:39:12+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -110,13 +113,13 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.29 2019-10-27 19:22:59+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.30 2020-03-16 22:39:12+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
-  systemctl is-enabled svscan >/dev/null 2>&1
-  if [ $? -ne 0 ] ; then
-	  systemctl disable indimail > /dev/null 2>&1
-	  systemctl enable svscan > /dev/null 2>&1
-  fi
+	systemctl is-enabled svscan >/dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		systemctl disable indimail > /dev/null 2>&1
+		systemctl enable svscan > /dev/null 2>&1
+	fi
 fi
 /bin/rm -f /lib/systemd/system/indimail.service
 /bin/rm -f /usr/lib/systemd/system/indimail.service
@@ -288,6 +291,14 @@ if [ -d /etc/clamd.d -a -f /etc/indimail/scan.conf ] ; then
 	if [ ! -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.d/scan.conf ] ; then
 		cd /etc/clamd.d
 		$ln -sf /etc/indimail/scan.conf
+	fi
+fi
+if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
+	systemctl is-enabled clamav-freshclam >/dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		touch /service/freshclam/down
+	else
+		/bin/rm -f /service/freshclam/down
 	fi
 fi
 
