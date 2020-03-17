@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.454 2020-02-18 22:59:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.455 2020-03-17 21:31:10+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.454 2020-02-18 22:59:56+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.455 2020-03-17 21:31:10+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -799,6 +799,12 @@ Known values for OPTION are:
 
   postmaster - name of the user who will recieve the report.
   attach     - zip and send the report as an attachment
+
+--unshare
+  Use unshare to mount private /etc/resolv.conf for using local dns
+
+--down
+  Create any of the above supervisor services in down state
 
 --check-certs=[full path of certificatte]
   Check certificate given as argument or
@@ -1809,6 +1815,9 @@ echo  $fifo_path > $conf_dir/LOGFILTER
 
 # qmail-logfifo logger
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-logfifo/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-logfifo/down
+fi
 (
 echo "#!/bin/sh"
 echo "# $RCSID"
@@ -1883,6 +1892,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/down
+fi
 /bin/mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
@@ -2609,6 +2621,9 @@ echo "$QmailBinPrefix/sbin/qmail-$type 2>&1\""
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/run
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/down
+fi
 # qmail-qm[t|q]pd log script
 if [ ! -d $LOGDIR ] ; then
 	/bin/mkdir -p $LOGDIR
@@ -2664,6 +2679,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/udplogger.$tag/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/udplogger.$tag/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 if [ " $ipaddress" = " " ] ; then
@@ -2757,6 +2775,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-daned.$tag/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-daned.$tag/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 if [ " $ipaddress" = " " ] ; then
@@ -2852,6 +2873,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/greylist.$tag/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/greylist.$tag/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 if [ " $ipaddress" = " " ] ; then
@@ -2972,6 +2996,9 @@ else
 	fi
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/log
 	conf_dir="$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/variables
+fi
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/down
 fi
 if [ $run_file_only -eq 1 ] ; then
 	if [ -d $conf_dir ] ; then
@@ -3455,6 +3482,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/indisrvr.$tag/down
+fi
 /bin/mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
@@ -3580,6 +3610,9 @@ fi
 $chown qscand:root "$DESTDIR"$SERVICEDIR/qscanq/supervise/control
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qscanq/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/qscanq/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 $chown qscand "$DESTDIR"$SERVICEDIR/qscanq
@@ -3650,6 +3683,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/clamd/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/clamd/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 # clamd script
@@ -3744,6 +3780,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/freshclam/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/freshclam/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 qsysconfdir=/etc # weird tha clamd and freshclam do not share the same dir for config files
@@ -3874,6 +3913,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/pwdlookup/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/pwdlookup/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 (
@@ -3988,6 +4030,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 #
@@ -4094,6 +4139,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/libwatch/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/libwatch/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 if [ ! " $CONTROLDIR" = " " ] ; then
@@ -4806,6 +4854,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/$mysql.$port/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 (
@@ -5062,7 +5113,7 @@ echo "/var/lock/subsys/svscan" > $conf_dir/STATUSFILE
 else
 echo "/tmp/svscan"             > $conf_dir/STATUSFILE
 fi
-if [ -x /usr/bin/unshare ] ; then
+if [ -x /usr/bin/unshare -a $use_unshare -eq 1 ] ; then
 echo > $conf_dir/UNSHARE
 else
      > $conf_dir/UNSHARE
@@ -5124,6 +5175,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/resolvconf/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/resolvconf/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 echo "$prog_args" > $conf_dir/.options
@@ -5222,6 +5276,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/fetchmail/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/fetchmail/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 echo $QUEUE_BASE > $conf_dir/QUEUE_BASE
@@ -5418,6 +5475,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/down
+fi
 /bin/mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
@@ -5592,6 +5652,9 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send.$tag/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-send.$tag/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 if [ $no_multi -eq 1 ] ; then
@@ -5756,6 +5819,9 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # qmail-send log script
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-send.$tag/down
+fi
 (
 echo "#!/bin/sh"
 echo "$RCSID"
@@ -8031,6 +8097,9 @@ $chown root:root $htmldir
 /bin/chmod 755 $htmldir
 # mrtg - script
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/mrtg/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/mrtg/down
+fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 $chown root:root $conf_dir
@@ -8171,6 +8240,8 @@ prog_args="$QmailBinPrefix/sbin/svctool"
 force=0
 no_multi=0
 silent=0
+down_state=0
+use_unshare=0
 use_ssl=0
 use_starttls=0
 forcetls=0
@@ -8605,6 +8676,12 @@ while test $# -gt 0; do
 	;;
 	--private_key=*)
 	private_key=$optarg
+	;;
+	--down)
+	down_state=1
+	;;
+	--unshare)
+	use_unshare=1
 	;;
 
 	--version)
