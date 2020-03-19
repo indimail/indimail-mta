@@ -32,7 +32,7 @@ cd /usr/local/src/indimail-mta/libsrs2-1.0.18
 ./default.configure
 make
 sudo make install-strip
-cd /usr/local/src/indimail-mta/indimail-mta-2.8 (replace 2.8 with the version number)
+cd /usr/local/src/indimail-mta/indimail-mta-2.9 (replace 2.9 with the version number)
 ```
 
 edit conf-files (see the note on directory structure at the bottom)
@@ -48,7 +48,7 @@ You can configure indimail-mta using /usr/sbin/svctool. svctool is a general pur
 You can also run the script create_services which invokes svctool to setup few default services to start a full fledged messaging server create_services will also put a systemd unit file indimail.service in /lib/systemd/system
 
 ```
-$ cd /usr/local/src/indimail-mta-2.7
+$ cd /usr/local/src/indimail-mta-2.9
 $ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
 $ sudo service indimail start
 ```
