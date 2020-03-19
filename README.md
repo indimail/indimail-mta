@@ -89,7 +89,7 @@ Stable Releases       - http://download.opensuse.org/repositories/home:/indimail
 
 Experimental Releases - http://download.opensuse.org/repositories/home:/mbhangui/
 
-The corresponding install instructions for the two repositories are
+If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories are at
 
 https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail-mta
 
