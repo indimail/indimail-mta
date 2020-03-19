@@ -129,10 +129,18 @@ Currently, the list of supported distributions for IndiMail is
 
 # Docker / Podman Repository
 The docker repository for indimail-mta is at
+
 https://hub.docker.com/r/cprogrammer/indimail-mta
 
+for Docker
 ```
 indimail-mta - docker pull cprogrammer/indimail-mta:tag
+```
+or
+
+for Podman
+```
+indimail-mta - podman pull cprogrammer/indimail-mta:tag
 ```
 
 where tag is one of
