@@ -86,11 +86,15 @@ conf-qmail        - /var/indimail
 You can get binary RPM / Debian packages at
 
 Stable Releases       - http://download.opensuse.org/repositories/home:/indimail/
+
 Experimental Releases - http://download.opensuse.org/repositories/home:/mbhangui/
 
 The corresponding install instructions for the two repositories are
+
 https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail-mta
+
 &
+
 https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail-mta
 
 ```
@@ -132,12 +136,21 @@ indimail-mta - docker pull cprogrammer/indimail-mta:tag
 ```
 
 where tag is one of
+
 xenial   for ubuntu 16.04
+
 bionic   for ubuntu 18.04
+
 disco    for ubuntu 19.04
+
 centos7  for centos7
+
 debian8  for debian8
+
 debian9  for debian9
+
 debian10 for debian10
+
 fc31     for fc31
+
 fc30     for fc30
