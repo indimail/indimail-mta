@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.455 2020-03-17 21:31:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.456 2020-03-19 20:41:31+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.455 2020-03-17 21:31:10+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.456 2020-03-19 20:41:31+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4774,7 +4774,7 @@ create_mysql_user()
 	mecho "CREATE USER 'admin'@'%'    identified by '$ADMIN_PASS';"
 	mecho "CREATE USER 'repl'@'%'     identified by 'slaveserver';"
 	if [ $mariadb -eq 1 -a $mariadb_version_10 -eq 1 ] ; then
-		mecho "DROP user mysql@localhost;"
+		mecho "DROP user if exists mysql@localhost;"
 	fi
 	mecho "CREATE USER 'mysql'@'%' identified by '$PRIV_PASS';"
 	mecho "GRANT ALL on *.* to mysql;"
