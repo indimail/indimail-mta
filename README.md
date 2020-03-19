@@ -134,13 +134,13 @@ https://hub.docker.com/r/cprogrammer/indimail-mta
 
 for Docker
 ```
-indimail-mta - docker pull cprogrammer/indimail-mta:tag
+docker pull cprogrammer/indimail-mta:tag
 ```
 or
 
 for Podman
 ```
-indimail-mta - podman pull cprogrammer/indimail-mta:tag
+podman pull cprogrammer/indimail-mta:tag
 ```
 
 where tag is one of
