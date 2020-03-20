@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.457 2020-03-20 10:29:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.458 2020-03-20 11:26:20+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.457 2020-03-20 10:29:31+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.458 2020-03-20 11:26:20+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9326,9 +9326,6 @@ case $option in
 			else
 				/bin/ln -sf $sysconfdir/indimail.cnf /etc/indimail.cnf
 			fi
-		fi
-		if [ -d /etc/sysctl.d -a ! -f /etc/sysctl.d/50-mysql.conf ] ; then
-			echo "fs.file-max=16384" > /etc/sysctl.d/50-mysql.conf
 		fi
 		if [ -d /etc/security/limits.d -a ! -f /etc/security/limits.d/51-mysql.conf ] ; then
 			echo "mysql hard nproc unlimited" > /etc/security/limits.d/51-mysql.conf
