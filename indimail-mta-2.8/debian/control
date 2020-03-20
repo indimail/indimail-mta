@@ -7,7 +7,7 @@ Homepage: http://indimail.sourceforge.net
 
 Package: indimail-mta
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils
+Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, procps
 Provides: indimail-mini, daemontools, ucspi-tcp
 Conflicts: indimail-mini, daemontools, ucspi-tcp
 Replaces: indimail-mini, daemontools, ucspi-tcp
