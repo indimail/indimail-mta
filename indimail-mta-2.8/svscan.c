@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.11  2020-03-21 23:54:02+05:30  Cprogrammer
+ * improved code for get_lock()
+ *
  * Revision 1.10  2019-12-08 18:21:29+05:30  Cprogrammer
  * fixed svscan lock failure when run as pid 1 in docker container
  *
@@ -333,6 +336,10 @@ get_lock(char *sdir)
 	char            strnum[FMT_ULONG], buf[8];
 	int             fdsourcedir = -1;
 
+	if (1 == getpid()) { /*- we are running under a docker container as init */
+		if (unlink(SVLOCK) == -1)
+			strerr_die2sys(111, FATAL, "unable to delete lock: ");
+	}
 	pid = -1;
 	if ((fd = open(SVLOCK, O_CREAT|O_WRONLY|O_EXCL, 0644)) >= 0) {
 		pid = getpid();
@@ -349,11 +356,8 @@ get_lock(char *sdir)
 	if (read(fd, (char *) &pid, sizeof(pid)) == -1)
 		strerr_die2sys(111, FATAL, "unable to get pid from lock: ");
 	close(fd);
-	if (pid == getpid()) { /*- we again got the same pid / we are running under a docker container as init */
-		if (unlink(SVLOCK) == -1)
-			strerr_die2sys(111, FATAL, "unable to delete lock: ");
-		return (1);
-	}
+	if (pid == getpid()) /*- we again got the same pid */
+		return (0);
 	errno = 0;
 	if (pid == -1 || (kill(pid, 0) == -1 && errno == error_srch)) { /*- process does not exist */
 		if (unlink(SVLOCK) == -1)
@@ -404,8 +408,8 @@ get_lock(char *sdir)
 	close(fd);
 	if (buf[0] == 's' && buf[1] == 'v' && buf[2] == 's' && 
 		buf[3] == 'c' && buf[4] == 'a' && buf[5] == 'n' && buf[6] == '\n') { /*- indeed pid is svscan process */
-		buf[7] = 0;
-		strerr_warn5(FATAL, "[", buf, "] ", "not running as svscan", 0);
+		buf[6] = 0;
+		strerr_warn5(FATAL, "[", buf, "] ", "already running", 0);
 		_exit (111);
 	}
 	/*- some non-svscan process is running with pid */
@@ -458,7 +462,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.10 2019-12-08 18:21:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svscan.c,v 1.11 2020-03-21 23:54:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
