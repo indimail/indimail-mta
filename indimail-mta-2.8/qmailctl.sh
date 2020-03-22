@@ -1,16 +1,16 @@
 # chkconfig: 345 14 91
-# description: Starts indimail system and associated services
+# description: Starts svscan system and associated services
 ### BEGIN INIT INFO
-# Provides:          indimail
+# Provides:          svscan
 # Required-Start:    $network
 # Required-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Description:       Starts indimail system and associated services
-# Short-Description: Start/Stop indimail
+# Description:       Starts svscan system and associated services
+# Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.58 2018-09-10 12:24:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.59 2020-03-22 16:38:47+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -138,7 +138,7 @@ if [ -x /bin/systemctl ] ; then
 		elif [ -f /lib/lsb/init-functions ] ; then
 			. /lib/lsb/init-functions
 		fi
-		$ECHO -n $"indimail is disabled: "
+		$ECHO -n $"svscan is disabled: "
 		$fail
 		$ECHO -ne "\n"
 		exit 1
@@ -154,7 +154,7 @@ myhelp()
    stop -- stops mail service (smtp connections refused, nothing goes out)
 restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
    kill -- Send kill signal to tcpserver, supvervise, qmail-send processes.
-   shut -- Shutdown entire indimail service.
+   shut -- Shutdown entire svscan service.
   flush -- Schedules queued messages for immediate delivery
  reload -- sends qmail-send HUP, rereading locals and virtualdomains
  status -- status of svscan process & IndiMail services

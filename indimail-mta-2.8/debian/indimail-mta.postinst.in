@@ -141,9 +141,9 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
   fi
-  if [ -f /etc/init.d/indimail ] ; then
-    cmp -s ${prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1 || \
-		${cp} ${prefix}/bin/qmailctl /etc/init.d/indimail || true
+  if [ -f /etc/init.d/svscan ] ; then
+    cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
+		${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
   fi
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
@@ -534,7 +534,7 @@ else
 	if [ -x ${prefix}/sbin/initsvc ] ; then
 	echo "1. Issue ${prefix}/sbin/initsvc -on"
 	else
-	echo "1. Issue ${sysconfdir}/init.d/indimail start"
+	echo "1. Issue ${sysconfdir}/init.d/svscan start"
 	fi
 	echo "2. Issue /sbin/init q to start services"
 	count=2

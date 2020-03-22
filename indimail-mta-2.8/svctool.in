@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.458 2020-03-20 11:26:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.459 2020-03-22 16:39:13+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.458 2020-03-20 11:26:20+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.459 2020-03-22 16:39:13+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1141,22 +1141,22 @@ else
     fi
     PS="ps -ef"
   else
-    if [ -x /sbin/chkconfig -a -f /etc/init.d/indimail ] ; then
-      /sbin/chkconfig --list indimail|grep on > /dev/null
+    if [ -x /sbin/chkconfig -a -f /etc/init.d/svscan ] ; then
+      /sbin/chkconfig --list svscan|grep on > /dev/null
       if [ $? -ne 0 ] ; then
       echo "! Couldn't find indimail referenced in any runlevel" 1>&2
         OK=0
       elif [ "$VERB" = y ]; then
-        /sbin/chkconfig --list indimail|grep on
+        /sbin/chkconfig --list svscan|grep on
         echo "indimail service is configured to run through rc scripts"
       fi
-    elif [ -f /etc/init.d/indimail ] ; then
-      /bin/ls -l /etc/rc?.d/*/indimail > /dev/null 2>&1
+    elif [ -f /etc/init.d/svscan ] ; then
+      /bin/ls -l /etc/rc?.d/*/svscan > /dev/null 2>&1
       if [ $? -ne 0 ] ; then
         echo "! Couldn't find indimail referenced in any runlevel" 1>&2
         OK=0
       elif [ "$VERB" = y ]; then
-        /sbin/chkconfig --list indimail|grep on
+        /sbin/chkconfig --list svscan|grep on
         echo "indimail service is configured to run through rc scripts"
       fi
     fi
@@ -6533,17 +6533,17 @@ create_startup()
 		fi
 	fi
 	if [ -d /etc/init.d ] ; then
-		cmp -s "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1
+		cmp -s "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1
 		if [ $? -ne 0 ] ; then
-			/bin/cp "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/indimail
+			/bin/cp "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/svscan
 		fi
 	fi
-	if [ -f /etc/init.d/indimail ] ; then
+	if [ -f /etc/init.d/svscan ] ; then
 		if [ -f /sbin/chkconfig ] ; then
 			if [ -f /etc/debian_version ] ; then
-				/sbin/chkconfig --add indimail 2>/dev/null
+				/sbin/chkconfig --add svscan 2>/dev/null
 			else
-				/sbin/chkconfig --add indimail
+				/sbin/chkconfig --add svscan
 			fi
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d indimail start 14 2 3 4 5 . stop 91 0 1 6 .
@@ -6636,17 +6636,17 @@ remove_startup()
 		echo "Running Custom Un-Installation Script for preun" 1>&2
 		/bin/sh ${shareddir}/boot/rpm.init preun
 	fi
-	if [ -f /etc/init.d/indimail ] ; then
+	if [ -f /etc/init.d/svscan ] ; then
 		if [ -f /sbin/chkconfig ] ; then
 			if [ -f /etc/debian_version ] ; then
-				/sbin/chkconfig --del indimail 2>/dev/null
+				/sbin/chkconfig --del svscan 2>/dev/null
 			else
-				/sbin/chkconfig --del indimail
+				/sbin/chkconfig --del svscan
 			fi
 		elif [ -f /usr/sbin/update-rc.d ] ; then
-			/usr/sbin/update-rc.d -f indimail remove
+			/usr/sbin/update-rc.d -f svscan remove
 		fi
-		/bin/rm -f /etc/init.d/indimail
+		/bin/rm -f /etc/init.d/svscan
 	fi
 	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools. This should be called before removing package
 		return 0
@@ -8081,7 +8081,7 @@ servicedir=$1
 for i in $servicedir $CONTROLDIR \
 	$sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
 	$QmailHOME/alias/.qmail-* \
-	/etc/inittab /etc/init.d/indimail \
+	/etc/inittab /etc/init.d/svscan \
 	$file /etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
 	/etc/resolv.conf \
 	$QmailHOME/.bashrc $QmailHOME/.bash_profile \

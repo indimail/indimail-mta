@@ -57,9 +57,9 @@ case "$1" in
 				/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
 			elif test -x ${prefix}/sbin/initsvc
 			then
-				${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
+				${prefix}/sbin/initsvc -status || /etc/init.d/svscan stop || true
 			else
-				/etc/init.d/indimail stop || true
+				/etc/init.d/svscan stop || true
 			fi
 			sleep 5
 		fi

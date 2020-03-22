@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.204 2019-12-08 18:23:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.205 2020-03-22 16:38:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1717,15 +1717,15 @@ if [ -f %{_prefix}/bin/svok ] ; then
       /bin/systemctl stop svscan > /dev/null 2>&1
     elif test -x %{_prefix}/sbin/initsvc
     then
-      if [ -x %{_sysconfdir}/init.d/indimail ] ; then
-        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/indimail stop || true
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
       else
         %{_prefix}/sbin/initsvc -status || true
       fi
       %{_prefix}/sbin/initsvc -off || true
     else
-      if [ -x %{_sysconfdir}/init.d/indimail ] ; then
-        %{_sysconfdir}/init.d/indimail stop
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_sysconfdir}/init.d/svscan stop
       fi
       /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
       if [ $? -eq 0 ] ; then
@@ -1830,10 +1830,10 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/qupgrade.sh post upgrade %{version} $*
   fi
-  if [ -f %{_sysconfdir}/init.d/indimail ] ; then
-    cmp -s %{_prefix}/bin/qmailctl %{_sysconfdir}/init.d/indimail >/dev/null 2>&1
+  if [ -f %{_sysconfdir}/init.d/svscan ] ; then
+    cmp -s %{_prefix}/bin/qmailctl %{_sysconfdir}/init.d/svscan >/dev/null 2>&1
     if [ $? -ne 0 ] ; then
-      %{__cp} %{_prefix}/bin/qmailctl %{_sysconfdir}/init.d/indimail
+      %{__cp} %{_prefix}/bin/qmailctl %{_sysconfdir}/init.d/svscan
     fi
   fi
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
@@ -2197,7 +2197,7 @@ else
   if [ -f %{_prefix}/sbin/initsvc ] ; then
   echo "1. Issue %{_prefix}/sbin/initsvc -on"
   else
-  echo "1. Issue %{_sysconfdir}/init.d/indimail start"
+  echo "1. Issue %{_sysconfdir}/init.d/svscan start"
   fi
   echo "2. Issue /sbin/init q to start services"
   count=2
@@ -2252,15 +2252,15 @@ if [ -f %{_prefix}/bin/svok ] ; then
       /bin/systemctl stop svscan > /dev/null 2>&1
     elif test -x %{_prefix}/sbin/initsvc
     then
-      if [ -x %{_sysconfdir}/init.d/indimail ] ; then
-        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/indimail stop || true
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
       else
         %{_prefix}/sbin/initsvc -status || true
       fi
       %{_prefix}/sbin/initsvc -off || true
     else
-      if [ -x %{_sysconfdir}/init.d/indimail ] ; then
-        %{_sysconfdir}/init.d/indimail stop
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_sysconfdir}/init.d/svscan stop
       fi
       /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
       if [ $? -eq 0 ] ; then
@@ -2279,7 +2279,7 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
   /bin/sh %{libexecdir}/qupgrade.sh preun uninstall %{version} "$argv1"
 fi
 
-if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
+if [ -f %{_sysconfdir}/init.d/svscan ] ; then
   if [ -f /sbin/chkconfig ] ; then
     /sbin/chkconfig --add sendmail
   fi
@@ -2450,15 +2450,15 @@ if [ -f %{_prefix}/bin/svok ] ; then
       /bin/systemctl stop svscan > /dev/null 2>&1
     elif test -x %{_prefix}/sbin/initsvc
     then
-      if [ -x %{_sysconfdir}/init.d/indimail ] ; then
-        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/indimail stop || true
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
       else
         %{_prefix}/sbin/initsvc -status || true
       fi
       %{_prefix}/sbin/initsvc -off || true
     else
-      if [ -x %{_sysconfdir}/init.d/indimail ] ; then
-        %{_sysconfdir}/init.d/indimail stop
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_sysconfdir}/init.d/svscan stop
       fi
       /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
       if [ $? -eq 0 ] ; then
@@ -2580,15 +2580,15 @@ if [ -f %{_prefix}/bin/svok ] ; then
       /bin/systemctl stop svscan > /dev/null 2>&1
     elif test -x %{_prefix}/sbin/initsvc
     then
-      if [ -x %{_sysconfdir}/init.d/indimail ] ; then
-        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/indimail stop || true
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
       else
         %{_prefix}/sbin/initsvc -status || true
       fi
       %{_prefix}/sbin/initsvc -off || true
     else
-      if [ -x %{_sysconfdir}/init.d/indimail ] ; then
-        %{_sysconfdir}/init.d/indimail stop
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_sysconfdir}/init.d/svscan stop
       fi
       /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
       if [ $? -eq 0 ] ; then
