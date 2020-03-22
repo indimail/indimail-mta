@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.12  2020-03-22 08:03:58+05:30  Cprogrammer
+ * return error on deletion of .svlock only when file exists
+ *
  * Revision 1.11  2020-03-21 23:54:02+05:30  Cprogrammer
  * improved code for get_lock()
  *
@@ -337,7 +340,7 @@ get_lock(char *sdir)
 	int             fdsourcedir = -1;
 
 	if (1 == getpid()) { /*- we are running under a docker container as init */
-		if (unlink(SVLOCK) == -1)
+		if (unlink(SVLOCK) == -1 && errno != error_noent)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 	}
 	pid = -1;
@@ -462,7 +465,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.11 2020-03-21 23:54:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svscan.c,v 1.12 2020-03-22 08:03:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
