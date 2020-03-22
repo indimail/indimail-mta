@@ -1,6 +1,0 @@
-3600
-
-The first line of this file gives the time in seconds before qscanq
-decides to quit without further action. Default is 1 hour. cleanq
-will wait three times this period before deleting folders with their
-sticky bits set.

@@ -1,9 +1,0 @@
-indimail-mta for Debian
--------------------
-
-This package has been built using openSUSE build service. It has been a painful
-experience to get a debian package built. Using RPM to build a binary package is
-a far better and an elegant way. Hope that one day the debian developers see some
-sense and make dpkg and tools to be flexible like the RPM.
-
- -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 25 Apr 2011 12:25:19 +0530
