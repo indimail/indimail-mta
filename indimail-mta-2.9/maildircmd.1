@@ -1,0 +1,33 @@
+.TH maildirsmtp 1
+.SH NAME
+maildircmd \- pipe a maildir through a command
+.SH SYNOPSIS
+.B maildircmd
+.I dir
+.I prefix
+.I command
+
+.SH DESCRIPTION
+.B maildircmd
+scans a maildir,
+.IR dir ,
+and pipes each message through
+.IR command .
+It ignores any message whose recipient address does not begin with
+.IR prefix .
+
+.B maildircmd
+removes messages successfully handled by
+.IR command ,
+based on the exit status of
+.IR command .
+It bounces messages permanently rejected by
+.I command
+back to the envelope sender,
+and then removes them.
+It treats temporary rejection as permanent rejection
+for messages more than two weeks old.
+
+.SH "SEE ALSO"
+maildirserial(1),
+serialcmd(1)

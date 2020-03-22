@@ -1,0 +1,70 @@
+.TH svscanboot 8
+.SH NAME
+\fBsvscanboot\fR \- starts
+.BR svscan (8)
+in the service directories, with output and error messages logged through
+.BR multilog (8).
+
+\fBsvscanboot\fR is available in \fBindimail(7)\fR and \fBindimail-mta\fR package.
+
+.SH SYNOPSIS
+\fBsvscanboot\fR [ \fIservicedir\fR ]
+
+.SH DESCRIPTION
+
+\fBsvscanboot\fR (without any command-line arguments) runs \fBsvscan\fR command
+
+svscan /service 2>&1 
+
+If \fBsvscanboot\fR is given a command-line argument, it startups up svscan for the directory
+\fIservicedir\fR given on the command line (instead of just svscan /service).
+
+\fBsvscanboot\fR uses envdir(8) on \fIservicedir\fR/.svscan/variables to set environment variables
+and clear all other environment variables.
+
+You can use the following variables
+
+.EX
+ PATH
+ SCANINTERVAL  - If set, svscan(8) uses this to look for new services every SCANINTERVAL seconds.
+ STATUSFILE    - Used by svscan(8)
+ INITCMD       - If set, svscan(8) runs this command using /bin/sh, before running supervise(8).
+ WAIT_INITCMD  - If set, svscan(8) waits for this INIT_CMD to finish before starting supervise(8)
+ SCANLOG       - If set, svscan(8) logs all messages and errors using multilog with instructions
+                 in \fIservicedir\fR/.svscan/log/run. If not set, svscanboot(8) pipes stdout, stderr
+	             of svscan(8) to readproctitle(8)
+ UNSHARE       - If set, svscanboot(8) uses unshare --mount command to run svscan(8)
+.EE
+
+The recommended old way was to put the following entry in /etc/inittab to invoke svscanboot.
+
+SV:345:respawn:LIBEXEC/svscanboot <>/dev/console 2<>/dev/console
+
+The current operating systems use systemd(1) replacement for init(1). \fBsvcanboot(8)\fR should be
+invoked by your boot scripts (systemd(1), upstart(1), init(1) or boot rc scripts.
+
+.SH SEE ALSO
+init(1),
+supervise(8),
+svc(8),
+svok(8),
+svstat(8),
+svscan(8),
+svctool(8),
+envdir(8),
+readproctitle(8),
+fghack(8),  
+pgrphack(8),
+multilog(8),
+tai64n(8),
+tai64nlocal(8),
+setuidgid(8),
+envuidgid(8),
+envdir(8),
+softlimit(8),
+setlock(8),
+unshare(1),
+unshare(2),
+ps(1)
+
+ http://cr.yp.to/daemontools.html

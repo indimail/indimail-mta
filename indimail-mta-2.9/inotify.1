@@ -1,0 +1,53 @@
+.TH inotify 1
+.SH NAME
+inotify - monitor file system events
+
+.SH SYNOPSIS
+.B inotify
+.B [\-n]
+.B \-d \fItimeout
+[dir1] [dir2] [...]
+
+.SH DESCRIPTION
+.PP
+\fBinotify(1)\fR provides a mechanism for monitoring file system events.
+Inotify can be used to monitor individual files, or to monitor directories.
+When a directory is monitored, inotify will return events for the directory
+itself, and for files inside the directory. inotify(1) uses select(2) on file
+descriptor returned by inotify_init(2).
+
+inotify(1) can be used under tcpserver(1), to provide file system events, to
+interested remote clients. When used under tcpserver, inotify can be used without
+the -\fIn\fR, option. If the socket connection breaks or if the remote client
+terminates, inotify will terminate.
+
+inotify(1) uses inotify_init(2), inotify_add_watch(2) system calls.
+
+.SH OPTIONS
+.PP
+
+.TP
+\fB\-n\fR
+Do not read stdin for data
+
+.TP
+\fB\-d\fR \fItimeout\fR
+With this option, \fBinotify\fR will \fItimeout\fR seconds for select(2)
+
+.TP
+\fIdir1\fR \fIdir2\fR
+Paths to be monitored for filesystem events
+
+.SH RETURN VALUE
+0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic
+message is printed.
+
+.SH AUTHORS
+\fBinotify(1)\fR has been written by Manvendra Bhangui for \fBTagrem Technologies Pvt. Ltd.\fR. - https://www.tagrem.com
+
+.SH "SEE ALSO"
+inotify(7),
+inotify_init(2),
+inotify_add_watch(2),
+tcpserver(1),
+select(2)

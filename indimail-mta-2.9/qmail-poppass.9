@@ -1,0 +1,138 @@
+.TH qmail-poppass 8 "03 Aug 2009" IndiMail "Authentication"
+.SH "NAME"
+qmail-poppass \- change passwords from across the network using
+the
+.B setpassword
+interface
+.SH SYNOPSIS
+.B qmail-poppass
+[
+.I hostname
+.I checkprogram
+.I subprogram
+.I subprogram
+]
+
+.SH "DESCRIPTION"
+.B qmail-poppass
+provides the
+.B poppassd
+protocol to allow users to change their passwords from remote locations.
+
+.PP
+.B qmail-poppass
+uses the
+.B checkpassword
+interface for authencation and uses the
+.B setpassword
+interface for setting the password.
+.B checkpassword
+interface provides a simple, uniform password-checking interface to all root
+applications. It is suitable for use by applications such as login, ftpd, and pop3d.
+.B setpassword
+interface provides a simple, uniform password-setting interface to all root applications. It is suitable for use by
+applications such as pop3d, imapd.
+
+.PP
+.IR checkprogram ,
+.I subprogram
+should be
+.B checkpassword
+compatible programs.
+.B qmail-poppass
+invokes
+.IR checkprogram ,
+which reads on file descriptor 3 the username, a 0 byte, the password,
+another 0 byte, and a final two 0 bytes.
+.I checkprogram
+invokes
+.I subprogram
+upon unsuccessful authentication, passing the same data (read earlier on descriptor 3) on a pipe with file descriptor 4
+as the write end and file descriptor 3 as the read end.
+.I subprogram
+should read file descriptor 3 and should in turn return 0 to
+.BR qmail-poppass
+on successful authentication.
+.B qmail-poppass
+will reject the authentication attempt if it receives a nonzero return
+value from
+.I checkprogram
+or
+.IR subprogram .
+There can be multiple
+.I subprograms
+for a particular type of authentication. The last
+.I subprogram
+should typically be /bin/false or /usr/bin/false depending on your Operating System.
+
+.PP
+.B qmail-poppass
+sleeps 5 seconds after an unsuccessful password
+change attempt. This feature is designed to make brute force attacks
+against passwords harder to perform.
+
+.PP
+To be able to change passwords,
+.B qmail-poppass
+needs a
+.B setpassword
+compatible program. This can be specified by setting the
+.B PASSWORD_COMMAND
+environment variable.
+
+.EX
+PASSWORD_COMMAND="PREFIX/sbin/vsetpass /bin/false"
+.EE
+
+.SH "LOGGING"
+Logging is done to descriptor 2.
+.B qmail-poppass
+logs all password change attempts whether they are successful or not.
+
+.SH "EXAMPLE CLIENT-SERVER CONVERSATION"
+All messages passed between server and client are text based allowing
+a client session to be easily mimicked with telnet. Using telnet, 
+changing a user's password would look like this:
+
+	Connected to localhost.localdomain (127.0.0.1).
+.br
+	Escape character is '^]'.
+.br
+	200 indimail.org hello, who are you?\\r\\n
+.br
+	user <username>\\r\\n
+.br
+	200 Your password please.\\r\\n
+.br
+	pass <current password>
+.br
+	200 Your new password please.\\r\\n
+.br
+	newpass <new password>\\r\\n
+.br
+	200 Password changed, thank-you.\\r\\n
+.br
+	quit\\r\\n
+.br
+	200 Bye.\\r\\n
+.br
+	Connection closed by foreign host.
+
+.SH "BUGS"
+.PP
+If you've found a bug in
+.BR qmail-poppass ,
+please report it to
+mbhangui@gmail\&.com
+
+.SH "SEE ALSO"
+qmail-smtpd(8), vsetpass(8)
+
+.SH "AUTHOR"
+.PP
+.B qmail-poppass
+was written by Manvendra Bhangui <mbhangui@gmail\&.com>
+.PP
+.B poppassd
+was written by Pawel Krawczyk based on an ealier
+version written by John Norstad, Roy Smith and Daniel L. Leavitt

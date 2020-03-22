@@ -1,0 +1,58 @@
+.TH qdane 1
+.SH NAME
+qdane \- qmail DANE/TLSA RR verification daemon
+.SH SYNOPSIS
+.B qdane
+[-qSF]
+-\fBd\fR
+.I mxhost
+.I host
+
+.SH DESCRIPTION
+\fBqdane\fR(1) sends qmail-daned(8) UDP protocol packets, to \fIhost\fR
+on port 1998, for DANE verification, for mx host \fImxhost\fR.
+\fIhost\fR can be of the form \fIhost\fR@\fIport\fR, to specify an
+alternate port. The default timeout for response from \fBqmail-daned\fR
+is 10 seconds, but can be changed by setting the DANETIMEOUT environment
+variable.
+
+.SH OPTIONS
+.PP
+
+.TP 3
+.B -d \fImxhost
+mxhost to be queried for DANE verification
+
+.TP 3
+.B -q
+Query mode in which qmail-daned will just return back if a record exists for host \fImxhost\fR.
+This mode is used by qmail-remote(8). In this mode, qmail-daned(8) will not carry out any dns
+lookups or carry out any TLS transactions. The inbuilt cache of qmail-daned(8) will not be updated.
+
+.TP 3
+.B -S
+Update mode in which qmail-daned will update DANE verification as success for host \fImxhost\fR.
+This mode is used by qmail-remote(8). In this mode, qmail-daned(8) will not carry out any dns
+lookups or carry out any TLS transactions.
+
+.TP 3
+.B -F
+Update mode in which qmail-daned will update DANE verification as failure for host \fImxhost\fR.
+This mode is used by qmail-remote(8). In this mode, qmail-daned(8) will not carry out any dns
+lookups or carry out any TLS transactions.
+
+.SH RETURN VALUE
+  0 for success
+  0 for record exists in q mode
+  1 for failure in TLSA verification
+  1 for record does not exist in q mode
+  2 for record update success in S or F mode
+  3 for record update failure in S or F mode
+ -1 for system error
+ -2 for memory allocation error
+
+.SH "SEE ALSO"
+qmail-daned(8),
+tlsacheck(3),
+dnstlsarr(1),
+qmail-remote(8)

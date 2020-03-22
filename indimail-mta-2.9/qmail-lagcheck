@@ -1,0 +1,138 @@
+#!/usr/bin/perl
+#
+# qmail-lagcheck - notify users if their messages are stuck in
+#                  the queue for too long.
+#
+# Matt Ranney (mjr@ranney.com)
+#
+
+# Version 0.8
+
+$QMAIL_HOME='/var/qmail';
+$FIRST_NOTICE=4;   # time in hours
+$REGULAR_NOTICE=24;# also time in hours
+#$ADMIN_CC="manvendra_bhangui\@indicorp.com";
+
+open(ME, "$QMAIL_HOME/control/me") || die "Couldn't open $QMAIL_HOME/control/me for read: $!\n";
+chop($me = <ME>);
+close(ME);
+
+if (-f "$QMAIL_HOME/control/queuelifetime") {
+    open(QLIFE, "$QMAIL_HOME/control/queuelifetime") || die "Couldn't open $QMAIL_HOME/control/queuelifetime for read: $!\n";
+    chop($qlife = <QLIFE>);
+    close(QLIFE);
+}
+$qlife = 604800 unless $qlife;
+$qlife = sprintf "%d", ($qlife / 60 / 60);
+$QUEUEDIR="$QMAIL_HOME/queue" unless $QUEUEDIR;
+
+chdir($QUEUEDIR) || die "Couldn't chdir $QUEUEDIR: $!\n";
+
+opendir(DIR, "info") || die "Couldn't opendir info: $!\n";
+
+@subdirs = grep (/^\d+$/, readdir(DIR));
+
+foreach $dir (@subdirs) {
+    undef @messages;
+    opendir(SUBDIR, "info/$dir") || die "Couldn't opendir info/$dir: $!\n";
+    @messages = grep(/^\d+$/, readdir(SUBDIR));
+    closedir(SUBDIR);
+    foreach $message (@messages) {
+	undef $to, $from;
+	open(FROM, "info/$dir/$message") || die "Couldn't open info/$dir/$message for read: $!\n";
+	chomp($from = <FROM>);
+	close(FROM);
+	if (-f "local/$dir/$message") {
+	    open(TO, "local/$dir/$message") || die "Couldn't open local/$dir/$message for read: $!\n";
+	    chomp($to = <TO>);
+	    $to =~ s/\0/,/g;
+	    close(TO);
+	}
+	if (-f "remote/$dir/$message") {
+	    open(TO, "remote/$dir/$message") || die "Couldn't open remote/$dir/$message for read: $!\n";
+	    if ($to) {
+		$to .= ',';
+	    }
+	    chomp($to .= <TO>);
+	    $to =~ s/\0/,/g;
+	    close(TO);
+	}
+	$from =~ s/^[A-Z]//;
+	$from =~ s/\0//g;
+	print "Here's a message: info/$dir/$message from $from, to $to\n";
+	($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,
+	 $ctime,$blksize,$blocks) = stat("info/$dir/$message");
+	$notify = 0;
+	$delay = sprintf "%d", ((time - $ctime) / 60 / 60); # get $delay in hours
+	print "  delay is: $delay.\n";
+	if ( ($delay >= $FIRST_NOTICE) && ($delay < ($FIRST_NOTICE * 2)) ) {
+	    $notify = 1;
+	    print "  First notice.\n"
+	}
+	elsif ($delay > $REGULAR_NOTICE) {
+	    $regs = sprintf "%d", ($delay / $REGULAR_NOTICE);
+	    if ($delay <= (($REGULAR_NOTICE * $regs) + $FIRST_NOTICE) ) {
+		$notify = 1;
+		print "  Regular notice.\n"
+	    }
+	    else {
+		print "  Not due for Regular notice.\n";
+	    }
+	    
+	}
+	if ($notify) {
+	    print "message needs notification\n";
+	    open(MESS, "mess/$dir/$message") || die "Couldn't open mess/$dir/$message for read: $!\n";
+	    while(<MESS>) {
+		if (/^Subject: (.*)$/) {
+		    chomp($subject = $1);
+		}
+	    }
+	    close(MESS);
+	    open(INJ, "| $QMAIL_HOME/bin/qmail-inject -f MAILER-DAEMON\@$me")
+		|| die "Coudln't run $QMAIL_HOME/bin/qmail-inject " .
+		    "-f MAILER-DAEMON $from: $!\n";
+	    print INJ "To: $from\n";
+	    if ($ADMIN_CC) {
+		print INJ "Cc: $ADMIN_CC\n";
+	    }
+	    print INJ "From: qmail queue notification <MAILER-DAEMON\@$me>\n";
+	    print INJ "Subject: mail slowness\n";
+	    print INJ "\n";
+	    print INJ "Hi.  This is the qmail-lagcheck program on $me.\n\n";
+	    print INJ "The message you sent around $delay hours ago with ";
+	    print INJ "a subject of:\n";
+	    if ($subject) {
+		print INJ "    $subject\n";
+	    }
+	    else {
+		print INJ "    Ummmm.  Aparently there was no subject.\n";
+	    }
+	    print INJ "\nAnd destined for:\n";
+	    foreach $t (split(',', $to)) {
+		$status = substr($t, 0, 1);
+		$reallyto = substr($t, 1); 
+		print INJ "    $reallyto (";
+		if ($status eq "T") {
+		    print INJ "not done)\n";
+		}
+		elsif ($status eq "D") {
+		    print INJ "done)\n";
+		}
+		else {
+		    print INJ "unknown status)\n";
+		}
+	    }
+	    print INJ "\nis not yet fully delivered.\n\n";
+	    print INJ "I will keep trying to deliver this message for ";
+	    print INJ ($qlife - $delay) . " more hours, and I will\n";
+	    print INJ "keep you somewhat regularly apprised of the ";
+	    print INJ "situation as long as it is\nin the queue.\n\n";
+	    close (INJ);
+	}
+	else {
+	    print "don't notify yet.\n";
+	}
+    }
+}
+closedir(DIR);

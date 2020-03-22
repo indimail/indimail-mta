@@ -1,0 +1,43 @@
+.TH dknewkey 8
+.SH NAME
+dknewkey \- create a new domain key
+.SH SYNOPSIS
+.B dknewkey
+.I keyfile
+[
+.I bits
+]
+.SH DESCRIPTION
+.B dknewkey
+creates a new key, and prints the associated DNS record (public key) on stdout.
+.I keyfile
+is the pathname to a file which will hold the private key. Additionally \fIkeyfile.pub\fR
+containing the public key will be created.
+.I bits
+is the number of bits in the key. If not specified, defaults to 384.
+To implement domainkeys you can use
+.B envrules
+in
+.B qmail-smtpd
+or
+.B spawn-filter
+to set the DKSIGN variable to the path of the signature file holding
+the private key.
+
+.B dknewkey
+uses the following
+.B openssl
+command to generate the private/public keys
+.IP \[bu] 2
+openssl -genrsa -out \fIkeyfile\fR \fIbits\fR
+.IP \[bu]
+openssl rsa -in \fIkeyfile\fR -out \fIkeyfile.pub\fR -pubout -outform PEM
+
+.SH "SEE ALSO"
+qmail-dk(8),
+qmail-smtpd(8),
+qmail-queue(8),
+spawn-filter(8),
+dktest(8),
+domain-keys(5),
+openssl(1)

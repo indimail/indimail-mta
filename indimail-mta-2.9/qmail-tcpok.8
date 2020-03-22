@@ -1,0 +1,27 @@
+.TH qmail-tcpok 8
+.SH NAME
+qmail-tcpok \- clear TCP timeout table
+.SH SYNOPSIS
+.B qmail-tcpok
+.SH DESCRIPTION
+.B qmail-tcpok
+erases
+.BR qmail-remote 's
+current list of timeouts,
+so that
+.B qmail-remote
+does not make any assumptions about failing addresses. 
+
+.B qmail-tcpok
+must be run either as 
+.B root
+or with user id
+.B qmailr
+and group id
+.BR qmail .
+\fBqmail-tcpok\fR uses the environment variable QUEUE_BASE or the conrol file \fBqbase\fR if
+present to use the queue base. If the environment variables QUEUE_START and QUEUE_COUNT are set,
+\fBqmail-tcpok\fR will process multiple queues present in the queue base.
+.SH "SEE ALSO"
+qmail-remote(8),
+qmail-tcpto(8)

@@ -1,0 +1,16 @@
+Hi!  This is the email replier at $Lhelp@$H.  When I
+receive a message sent to one of the addresses listed below, I process
+the message and reply with the results.
+
+--- Replier Addresses
+
+   <$Lhelp@$H>:
+    Fetch a copy of this message.
+
+I send each response to the envelope sender.  If I'm unable to take
+the requested action, I'll bounce the message and state the reason for
+doing so.  I reject warning and bounce messages from MTAs, messages
+from mailing lists, or messages that I have already processed.
+
+--- Below this line is a copy of the message I received.
+

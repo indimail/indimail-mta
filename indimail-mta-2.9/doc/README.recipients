@@ -1,0 +1,213 @@
+README - qmail-smtpd RECIPIENTS extension
+=========================================
+
+1. Scope:
+
+qmail-smtpd accepts messages if the SMTP domain part of 
+recipient address ("RCPT to: <recip@domain>") matches an 
+entry in control/rcpthosts or control/morercpthosts.cdb.
+
+The existence of a mailbox/maildir for the corresponding
+SMTP recipient is checked later in the delivery chain.
+
+In case Mailbox/Maildir doesn't exist, the message is bounced
+back to the SMTP sender ("MAIL From: <send@example.com>").
+
+For normal SMTP mail traffic thats fine as long as the rate 
+of undeliverable messages dont exceed 10% and the sender is
+'legitmate'; ie. exists.
+
+Todays situation is different: Spam and Virus attacks with
+forged/faked sender addresses to a bunch of random
+recipient addresses yield a undeliverable rate up to 90%.
+
+Worse, the generated bounces will never reach the sender and
+a double-bounce is eventually send to the postmaster.
+
+
+2. qmail-smtpd RECIPIENTS:
+
+The RECIPIENTS extension makes qmail-smtpd aware of acceptable
+recipients, which are fetched from an external source. 
+Which source to query depends on the domain-part of the 
+recipient address.
+
+- The recipients are kept either in 'fastforward' compatible 
+  cdbs for quick lookup during the SMTP session, or
+- are available by means of a 'checkpassword' compatible
+  Plugable Authentication Module (PAM).
+
+The RECIPIENTS mechanism supports natively Qmail's address 
+extensions (VERP).  If a recipient address like 'foo@mydomain.com' 
+defined, all VERP addresses like 'foo-bar@mydomain.com' are
+accepted for SMTP reception.
+
+The RECIPIENTS lookup is triggered by the recipient domain, thus 
+is domain-specific. The domain-part of the envelope address
+is evaluated in lower case. You can specify which lookup is performed
+per domain within control/recipients. Consider the following:
+
+a) An entry 'example.com' is used to match 'example.com' and
+   in addition all subdomain addresses '*.example.com'; 
+   depending in addition on 'control/rcpthosts'. 
+b) An entry '@example.com' serves as exact match for the
+   domain address.
+c) The entry '*' will match all domains for the respective lookup. 
+d) Reversely, domains flagged as '!domain.com' are not queried 
+   and all recipients for this domain are accepted.
+e) A 'fail-open' behaviour can be achieved adding '!*' as last 
+   statement in control/recipients. Thus, emails for domains not 
+   listed in control/recipients will finally be accepted.
+
+Thus, the RECIPIENTS extension can be used in a 'fail-closed' or 
+'fail-open' mode for the domains included in control/recipients. 
+Without including '!*' on the last line, the recipient check is done 
+'fail-closed', thus if all queries are negative, the incoming email 
+with this recipient address will be rejected.  
+
+The RECIPIENTS check is done only in a none-RELAYCLIENT case
+and after control/rcpthosts, control/morercpthosts.cdb has been
+successfully consulted.
+
+NOTE: The new wilddomain mechanism superseeds the old cdb-only
+      wilddomain syntax (which is not working anymore).
+      The PAM should be in your $PATH or referenced with full path.
+
+
+3. Setting up the recipients control file:
+
+Release 0.5+ the RECIPIENTS extension provides a flexible
+new syntax to interprete control/recipients on a domain
+base, as part of the RCPT TO: envelope address.
+
+a) Read 'man qmail-smtpd' and 'man recipient-cdb.'
+
+b) Legacy:
+   Put 'recipients.cdb' into control/recipients.
+   This is a backward compatible mode.
+
+c) Per Domain cdbs:
+   Put 'example.com:example.cdb' in
+   control/recipients and you advise the
+   RECIPIENTS extension to do a per-domain lookup.
+
+d) Global cdbs:
+   Use '*:users/recipients.cdb' in
+   control/recipients.
+   This is equivalent to (1.).
+
+e) Per Domain PAM:
+   Put 'example.com|checkpassword true'
+   into control/recipients and the RECIPIENT
+   extension will use the program defined
+   after the "|" to check the existence of
+   the provided RCPT TO.
+
+f) Global PAM:
+   Put '*|ldapam myldapserver' into
+   control/recipients and you delegate the entire 
+   verification of the RCPT TO to the program in charge.
+
+g) Wildcarded domain:
+   Prepend the domain name with a '!' and
+   emails for this domain will be entirely accepted:
+   '!localhost'.
+
+h) Pass-Thru for unlisted domains:
+   Use '!*' as last statement in control/recipients.
+
+Lines in control/recipients starting with a '#'
+are not evaluated, thus are treated as comment lines.
+
+
+4. Generating a cdb with recipient addresses:
+
+a) Build a list of recipients (with full qualified address).
+   The recipient file should be in /etc/indimail/users
+
+b) Run recipient-cdb to transform that list into a cdb:
+   users/recipients.cdb
+
+c) After the successful generation of the recipients.cdb
+   you can rename it to your taste.
+
+d) Edit control/recipients and
+   include users/recipients.cdb therein.
+
+e) If you have 'fastforward' cdbs (those which are generated
+   by 'setforward') you have to place the output somewhere
+   in a subdirectory under Qmail's home directory and
+   include those into control/recipients.
+   
+   At that time, your control/recipients file may look like:
+
+   mydomain.com:control/mydomain.cdb
+   users/recipients.cdb
+   etc/fastforward.cdb
+
+f) You can add an arbitary number of cdbs to control/recipients.
+   Any change regarding control/recipients and/or the content
+   of the cdbs is effective on the fly.
+
+
+5. VERP support
+
+The RECIPIENTS extension allows now per default VERP support.
+The local part of the recipient addresses is truncted AFTER 
+the character defined as AUTO_BREAK and only the first part 
+of the address (plus domain) is used for the evaluation.
+
+a) If you run EZMLM, you have to set up a list of recipient
+   addresses for all your mailing lists.
+
+b) Simply put the full qualified list name apppended with the VERP 
+   charcater into the recipients database (or into the LDAP dir).
+
+c) Sample: If your list is called:
+   
+   mylist@example.com 
+
+   define 
+
+   mylist-@example.com
+
+   This makes VERP addresses distinguishable from normal addresses.
+
+d) In order to support generic and VERP addresses, you have to 
+   add both address schemes into the recipient database:
+  
+   me@example.com
+   me-@example.com
+ 
+
+6. Using a checkpassword compatible PAM:
+
+The checkpassword API is defined in:
+
+  http://cr.yp.to/checkpwd/interface.html
+
+and typically consists of the string: 
+
+  username\0password\0timestamp\0otherdata\0
+
+written to file descriptor 3 (FD 3) to be read by the 
+checkpassword compatible PAM.
+
+For email address (recipient) verification, we replace
+username\0
+with
+email-address\0
+ie.
+recipient@domain.tld\0 
+
+The PAM fetches this information and checks for it's
+existance in any external resource, for example a LDAP 
+directory or a SQL database.
+
+The PAM returns a '0' in case of successful verification,
+otherwise a '1'; and perhaps a '111' in case of problems.
+
+RECIPIENT's checkpassword API allows to enter up to five
+additional arguments; which are specific to the PAM. 
+
+Erwin Hoffmann (www.fehcom.de) - Cologne 2010-12-16

@@ -1,0 +1,46 @@
+.TH sys-checkpwd 8
+.SH NAME
+sys-checkpwd \- Checkpassword Interface for system users
+.SH SYNOPSIS
+\fBsys-checkpwd\fR \fIprog\fR
+
+.SH DESCRIPTION
+\fBsys-checkpwd\fR reads descriptor 3 through end of file and then closes descriptor 3. There
+must be at most 512 bytes of data before end of file.
+
+The information supplied on descriptor 3 is a login name terminated by \\0, a password
+terminated by \\0, a timestamp terminated by \\0, and possibly more data. There are no other
+restrictions on the form of the login name, password, and timestamp.
+
+If the password is acceptable, sys-checkpwd exits 0. If sys-checkpwd is misused, it may
+instead exit 2. If there is a temporary problem checking the password, sys-checkpwd exits 111.
+
+If the password is unacceptable, ldap-checkpwd runs \fIprog\fR. \fIprog\fR consists of one or more
+arguments.
+
+.SH Passwd Database
+\fBsys-checkpwd\fR checks the login name and password against /etc/passwd, using the
+operating system's \fBgetpwnam(3)\fR and \fBcrypt(3)\fR functions, supplemented by \fBgetuserpw(3)\fR
+and \fBgetspnam(3)\fR if necessary. It rejects accounts with empty passwords. It ignores the
+timestamp.
+
+Other checkpassword-compatible tools have different interpretations of login names, passwords,
+and timestamps. Both the login name and the password should be treated as secrets by the
+application calling \fBsys-checkpwd\fR; the only distinction is for administrative convenience.
+The timestamp should include any other information that the password is based on; for example,
+the challenge in a challenge-response system such as APOP.
+
+WARNING: \fBgetpwnam(3)\fR is inherently unreliable. It fails to distinguish between temporary
+errors and nonexistent users. Future versions of getpwnam should return ETXTBSY to indicate
+temporary errors and ESRCH to indicate nonexistent users.
+
+Other checkpassword-compatible tools may make different changes to the process state. It is
+crucial for these effects to be documented; different applications have different requirements.
+
+.SH SEE ALSO
+qmail-smtpd(8),
+vchkpass(8),
+systpass(8),
+pam-checkpwd(8),
+ldap-checkpwd(8),
+pam-multi(8)

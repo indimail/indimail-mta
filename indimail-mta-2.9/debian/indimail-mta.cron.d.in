@@ -1,0 +1,17 @@
+#
+# Regular cron jobs for the indimail-mta package
+#
+# Rotate the logs at midnight
+5    0 * * * root @prefix@/bin/svc -a /service*/*/log > /dev/null 2>&1
+# Generate reports
+0    0 * * * root @prefix@/sbin/svctool --report=all --attach --postmaster=postmaster
+#
+# qmail-smtpd TLS
+#
+01 01 * * * root @libexecdir@/update_tmprsadh > /dev/null 2>&1
+#
+# Clean Temp directories created by qscanq
+#
+12 * * * *	root @prefix@/sbin/run-cleanq
+# Backup indimail
+10 0 * * * root @prefix@/sbin/svctool --backup=/home/mail/backup --servicedir=/service --mysqlPrefix=/usr

@@ -1,0 +1,7 @@
+# Site-specific additions and overrides for usr.sbin.clamd.
+# For more details, please see /etc/apparmor.d/local/README.
+
+  capability setuid,
+  capability setgid,
+  /var/indimail/clamd/ r,
+  /var/indimail/clamd/** krw,

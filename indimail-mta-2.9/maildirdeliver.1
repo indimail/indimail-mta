@@ -1,0 +1,62 @@
+.TH MAILDIRDELIVER 1
+.SH NAME
+maildirdeliver \- deliver a mail message to a maildir
+.SH SYNOPSIS
+.B maildirdeliver
+.I dir
+.SH DESCRIPTION
+.B maildirdeliver
+reads a mail message from the standard input,
+and stores it in a maildir,
+.IR dir .
+
+If
+.B maildirdeliver
+sees an initial
+.B From_
+line in the incoming message,
+it silently discards that line.
+
+.B maildirdeliver
+exits 0 on a successful delivery.
+On a temporary failure,
+it exits 111.
+On a permanent failure,
+it exits 100.
+
+Unlike a maildir line in
+.B .qmail
+files,
+.B maildirdeliver
+does
+.I not
+prepend a
+.B Return-Path
+line nor a
+.B Delivered-To
+line to the incoming message. \fBmaildirdeliver\fR will use \fBRPLINE\fR if set, to prepend a
+\fBReturn-Path\fR line to the incoming message. \fBmaildirdeliver\fR will use \fBDTLINE\fR if
+set, to prepend a \fBDelivered-To\fR line to the incoming message.
+if \fBRPLINE\fR or \fBDTLINE\fR are not defined and if you use
+.B maildirdeliver
+in a program line in a
+.B .qmail
+file,
+you may want to invoke it under
+.BR preline .
+For example:
+
+.EX
+     |preline -f maildirdeliver Maildir
+.EE
+
+.B maildirdeliver
+is heavily based on
+.B qmail-local.c
+in D. J. Bernstein's
+.B qmail
+package.
+.SH "SEE ALSO"
+dot-qmail(5),
+maildir(5),
+preline(1)

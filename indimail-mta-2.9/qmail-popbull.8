@@ -1,0 +1,60 @@
+.TH qmail-popbull 8
+.SH NAME
+qmail-popbull \- insert bulletins
+.SH SYNOPSIS
+.B qmail-popbull
+.I bulletin-directory
+.I pop3d-program
+.I Maildir
+.SH DESCRIPTION
+.B qmail-popbull
+examines a directory of bulletins whenever a user checks their pop3 mail.
+When a new bulletin is seen, it inserts the bulletin into the user's
+.I Maildir.
+
+It compares the time on a .timestamp file in the
+.I Maildir
+directory and compares it to the time on the bulletin.  If the bulletin
+is newer,
+.B qmail-popbull
+inserts a symlink to the bulletin into the user's Maildir/new directory.
+The bulletin should be an ordinary email message.  One reasonable use
+of
+.B qmail-popbull
+is to point it to the
+.B new
+directory of a special user's Maildir.  When you send that user mail,
+it becomes a bulletin.
+
+.B Caution!
+The files in the bulletin directory must be readable by anyone, so
+you'll probably have to store the mail in the user's maildir using:
+.EX
+  ./Maildir/
+.br
+  |chmod ugo+r Maildir/new/*
+.EE
+
+When
+.B qmail-popbull
+is finished, it execs the
+.I pop3d-program
+with the remainder of its arguments as arguments to
+.I pop3d-program.
+
+.I pop3d-program
+can be any program, but that program's first argument must be the user's
+.I Maildir.
+
+Suggested invocation:
+.EX
+   qmail-popup YOURHOST /bin/checkpassword /usr/sbin/qmail-popbull
+.br
+   /var/spool/bulletins /usr/sbin/qmail-pop3d Maildir
+.br
+   (all on one line)
+.EE
+
+.SH "SEE ALSO"
+qmail-popup(8),
+qmail-pop3d(8)

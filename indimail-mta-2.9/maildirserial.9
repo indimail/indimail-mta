@@ -1,0 +1,80 @@
+.TH maildirserial 1
+.SH NAME
+maildirserial \- send a maildir through a client
+.SH SYNOPSIS
+.B maildirserial
+[
+.B \-b
+] [
+.B \-t\fIlifetime
+]
+.I dir
+.I prefix
+.I client
+[
+.I arg ...
+]
+.SH DESCRIPTION
+.B maildirserial
+scans a maildir,
+.IR dir ,
+for messages whose envelope recipient addresses begin with
+.IR prefix .
+It then invokes
+.I client
+(in the
+.I dir
+directory)
+and feeds
+.I client
+a list of 0-terminated filenames.
+
+.I client
+prints a series of results.
+Each result is a 0-terminated filename,
+a status byte, and an LF-terminated human-readable status message.
+The status byte is K if
+.I client
+has accepted the message,
+Z if
+.I client
+has temporarily rejected the message,
+or D if
+.I client
+has permanently rejected the message.
+
+.B maildirserial
+will remove messages accepted by
+.IR client .
+
+.B maildirserial
+may run
+.I client
+repeatedly if
+.I client
+exits without handling all the files.
+.B maildirserial
+will give up if it is not making any progress.
+
+\fBmaildirserial\fR uses environment modified according to files in 
+@controldir@/defaultqueue directory.
+
+.SH OPTIONS
+.TP 5
+.B \-b
+Bounce permanently rejected messages
+back to the envelope sender,
+and then remove them.
+.TP
+.B \-t\fIlifetime
+Treat temporary rejection as permanent rejection
+for messages more than
+.I lifetime
+seconds old.
+
+.SH "SEE ALSO"
+serialqmtp(1),
+serialsmtp(1),
+tcpclient(1),
+maildir(5),
+qmail-queue(8)

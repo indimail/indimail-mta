@@ -1,0 +1,85 @@
+README - QHPSI together with Clam AV
+====================================
+
+You can use QHPSI either with Clam AV's 
+
+- clamscan 
+
+or with the preferred
+
+- clamd/clamdscan
+
+combination.
+
+
+1. clamd run script:
+
+It is useful to put clamd under supervise control.
+The following run script can be used:
+
+#!/bin/sh
+exec softlimit -m 200000000 \
+       /usr/sbin/clamd -c /etc/clamd.conf 2>&1
+
+Note: 
+
+a) After invokation, clamd runs typically as user 'qscand'.
+
+b) The softlimit setting depends on your system.
+
+c) The location of clamd's customization file may be different.
+
+
+
+2. clamav.conf
+
+The clamav.conf file has to be customized.
+
+Necessary steps:
+----------------
+
+a) Comment the 'Example' --> '#Example'
+
+b) To be used with supervise, it is absolutely necessary to run
+   clamd in the foreground:
+   '#Foreground yes' --> 'Foreground yes'
+
+c) Raw emails have to be scanned:
+   '#ScanMail' --> '#ScanMail yes'
+
+Optional steps:
+---------------
+
+d) Set the location of the temporay directory (staging area);
+   default: '#TemporaryDirectory /var/tmp'
+   has to be world-writeable and large enough.
+
+e) It is adviceable to remove stale sockets in case of unclean shutdown:
+   '#FixStaleSocket' --> 'FixStaleSocket'
+
+Performance relevant steps:
+---------------------------
+
+f) # Maximal number of a threads running at the same time.
+   # Default is 5, and it should be sufficient for a typical workstation.
+   # You may need to increase threads number for a server machine.
+   #MaxThreads 10
+
+   Set this to the number of maximum incoming connections.
+
+g) # Maximum length the queue of pending connections may grow to.
+   # Default is 15.
+   #MaxConnectionQueueLength 30
+
+
+3. clamdscan
+
+Customization:
+--------------
+
+set environment variable QHPSI for qmail-queue to use QHPSI.
+You should set QHPSI on your incoming SMTP port and at points
+where users inject email into your system.
+.e.g. in  /service/qmail-smtpd.25/variables/QHPSI,
+/etc/indimail/control/defaultqueue/QHPSI
+  /usr/bin/clamdscan %s --fdpass --quiet --no-summary

@@ -1,0 +1,75 @@
+.TH ldap-checkpwd 8
+.SH NAME
+ldap-checkpwd \- LDAP checkpassword Interface
+.SH SYNOPSIS
+\fBldap-checkpwd\fR \fIprog\fR
+
+.SH DESCRIPTION
+\fBldap-checkpwd\fR reads descriptor 3 through end of file and then closes descriptor 3. There
+must be at most 512 bytes of data before end of file.
+
+The information supplied on descriptor 3 is a login name terminated by \\0, a password
+terminated by \\0, a timestamp terminated by \\0, and possibly more data. There are no other
+restrictions on the form of the login name, password, and timestamp.
+
+If the password is acceptable, ldap-checkpwd exits 0. If ldap-checkpwd is misused, it may
+instead exit 2. If there is a temporary problem checking the password, ldap-checkpwd exits 111.
+
+If the password is unacceptable, ldap-checkpwd runs \fIprog\fR. \fIprog\fR consists of one or more
+arguments.
+
+\fBldap-checkpwd\fR requires series of environment variables to run;
+
+.SH Environment Variables
+.TP
+.B DEBUG
+Causes debug statements to be printed on file descriptor 1 and error messages on file descriptor 2.
+.TP
+.B LDAP_HOST
+Specify an alternate host on which ldap servier is running.
+.TP
+.B LDAP_PORT
+Specifiy an alternate TCP port where the ldap server is listening.
+.TP
+.B LDAP_BIND_DN
+Use a Distinguished Name to bind to the LDAP directory
+.TP
+.B LDAP_BIND_PASSWD
+Use a password to bind to the LDAP directory
+.TP
+.B LDAP_FILTER
+Specify a filter to user in search. Default is (&(uid=%u)(dc=%h))
+
+You can specify '%' followed by the following letters to have specific substitions
+
+ %h - This gets substituted by the host component
+      (component after the '@' portion of an email address)
+ %e - This gets substituted by the fully qualified email address
+ %u - This gets substituted by the user
+      (component before the '@' portion of an email address)
+.TP
+.B LDAP_FIELD_XXX
+You can tell \fBldap-checkpwd\fR to fetch the value of any ldap field. e.g. setting the environment variable
+ LDAP_FIELD_UID=uidNumber       - fetches user's uid
+ LDAP_FIELD_GID=gidNumber       - fetches user's gid
+ LDAP_FIELD_HOME=homeDirectory  - fetches home directory
+ LDAP_FIELD_PASS=userPassword   - fetches user password
+
+.TP
+.B LDAP_BASE
+Specify a search base as the starting point
+.TP
+.B LDAP_SCOPE
+Specify the scope of the search to be one of \fIbase\fR, \fIone\fR, \fIsub\fR
+or \fIchildren\fR to specify a base object, one level, subtree, or children search.
+The default is \fIsub\fR.
+
+NOTE: \fIchildren\fR scope requiers LDAPv3 subordinate feature extension.
+
+.SH SEE ALSO
+qmail-smtpd(8),
+vchkpass(8),
+systpass(8),
+pam-checkpwd(8),
+sys-checkpwd(8),
+pam-multi(8)

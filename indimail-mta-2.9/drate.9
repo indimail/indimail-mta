@@ -1,0 +1,79 @@
+.TH drate 1
+.SH NAME
+drate \- indimail domain rate control
+
+.SH SYNOPSIS
+.B drate
+.B \-d \fIdomain
+.B \-D \fIratelimit_dir
+.B \-r \fIrate_expression
+[
+.B \-c
+.B \-R
+]
+
+or
+
+.B drate
+.B \-d \fIdomain
+.B \-D \fIratelimit_dir
+[
+.B \-s
+]
+
+.SH DESCRIPTION
+\fBdrate\fR(1) displays or sets delivery rate for \fBqmail-remote\fR(8). The actual rate
+limiting happens in \fBspawn-filter\fR(8). Hence, QMAILREMOTE should be set to
+PREFIX/sbin/spawn-filter. You must also set the environment variable \fBRATELIMIT_DIR\fR
+to the full path of the directory where you will keep the rate definition files created by
+\fBdrate\fR(1). \fBdrate\fR(1) locks the file \fIdomain\fR in \fIratelimit_dir\fR before
+writing the following four lines.
+
+.EX
+ line 1 - Rate Expression
+ line 2 - Delivery Count since sampling started
+ line 3 - Start Time since the sampling started
+ line 4 - End   Time of the last sample
+.EE
+
+By default, \fBspawn-filter\fR(8) resets statistics one day after the first sample. You can
+change the default by setting \fBRATELIMIT_INTERVAL\fR environment variable to the desired
+number of seconds. You can manually reset the interval using \fB-R\fR option of
+\fBdrate\fR(1).
+
+.SH OPTIONS
+.PP
+
+.TP
+\fB-s\fR
+Display statistics for deliveries to \fIdomain\fR.
+
+.TP
+\fB-d\fR
+Use this argument to set the domain name. \fIdomain\fR can be the special word .\fIglobal\fR in case
+rate limiting has been applied for all domains that does not have a rate definition. See \fBspawn-filter\fR(8)
+
+.TP
+\fB-r\fR
+Use this argument to set the rate expression in terms of deliveries/sec. To set a delivery
+rate of 500 emails / hr, you can use 500/3600 for the rate expression. You can also give
+the prefix '+' or '-' to increase or decrease the existing rate
+
+.TP
+\fB-D\fR
+The directory to store or retrieve delivery rate parameters and statistics. 
+
+.TP
+\fB-c\fR
+Consolidate all rate expressions. When you give the '+' or '-' prefix in the
+\fIrate_expression\fR, the expressions are simply appended without any mathematical
+computation. It is valid to have an expression 1790/3600+10/3600. This option will
+collapse the expression to 0.5
+
+.TP
+\fB-R\fR
+Reset all statistics in \fIratelimit_dir/domain\fR. This will cause \fBqmail-remote\fR(8) to start
+counting from start.
+
+.SH "SEE ALSO"
+spawn-filter(8), qmail-remote(8)

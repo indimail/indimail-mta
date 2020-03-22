@@ -1,0 +1,399 @@
+Writing Filters for IndiMail
+============================
+
+IndiMail provides multiple methods by which you can intercept an email in transit and modify
+the email headers or the email body. A filter is a simple program that expects the raw email
+on standard input and outputs back text on standard output. The program /bin/cat can be used
+as a filter which simply copes the standard input to standard output without modifying anything.
+Some methods can be used before the mail gets queued and some methods can be used before the
+execution of local / remote delivery. Let us say that we have written a script
+/usr/local/bin/myfilter. The myfilter program expects the raw email on stdin and outputs the
+email back (maybe modiying it) on stdout.
+
+1.1 Filtering during SMTP (before mail gets queued)
+===================================================
+
+1.1.1 Using FILTERARGS environment variable
+===========================================
+
+The below configuration causes all inbound SMTP email to be fed through the filter
+/usr/local/bin/myfilter. You can use the programs 822header(1), 822body(1) inside myfilter to
+get and manipulate the headers and body (See 1.5.1).
+
+NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2,
+      the message will be discarded (blackholed).
+
+% su root
+# echo /usr/local/bin/myfilter > /service/qmail-smtpd.25/variables/FILTERARGS
+# svc -d /service/qmail-smtpd.25
+# svc -u /service/qmail-smtpd.25
+
+1.1.2 Using QMAILQUEUE with qmail-qfilter
+=========================================
+
+You can use qmail-qfilter(1)
+
+% su root
+# echo /var/indimail/bin/qmail-qfilter /usr/local/bin/myfilter > \
+   /usr/local/bin/qfilter
+# chmod +x /usr/local/bin/qfilter
+# echo /usr/local/bin/qfilter > /service/qmail-smtpd.25/variables/QMAILQUEUE
+# echo /var/indimail/bin/qmail-dk > /service/qmail-smtpd.25/variabels/QQF_QMAILQUEUE
+# svc -d /service/qmail-smtpd.25
+# svc -u /service/qmail-smtpd.25
+
+NOTE: you can define QQF_MAILQUEUE to /var/indimail/bin/qmail-nullqueue to discard
+      the mail (blackhole).
+
+1.1.3 Using QMAILQUEUE with your own program
+============================================
+
+When you want to use your own program as QMAILQUEUE, then your program is responsible for
+queuing the email. It is trivial to queue the email by calling qmail-multi(8). You script can
+read the stdin for the raw message (headers + body) and pipe the output (maybe after
+modifications) to qmail-multi(8). If you are doing DK/DKIM signing, you can execute
+qmail-dk(8) instead of qmail-multi(8). You can have qmail-dk(8) call qmail-dkim(8) and
+qmail-dkim(8) calls qmail-multi(8). Assuming you want to do DK/DKIM signing, and myfilter calls
+qmail-dk(8), you can do the following
+
+% su root
+# echo /usr/local/bin/myfilter > /service/qmail-smtpd.25/variables/QMAILQUEUE
+# echo /var/indimail/bin/qmail-dkim > /service/qmail-smtpd.25/variables/DKQUEUE
+# echo /var/indimail/bin/qmail-multi > /service/qmail-smtpd.25/variables/DKIMQUEUE
+# svc -d /service/qmail-smtpd.25
+# svc -u /service/qmail-smtpd.25
+
+NOTE: You can set the environment variable NULLQUEUE before calling qmail-multi
+      to discard the mail completely (blackhole).
+
+1.2 Filtering during local / remote delivery
+============================================
+
+1.2.1 Using FILTERARGS environment variable
+===========================================
+
+The below configuration causes all local / remote deliveries to be fed through the filter
+/usr/local/bin/myfilter. You can use the programs 822header(1), 822body(1) inside myfilter to
+get and manipulate the headers and body.
+
+% su root
+# echo /usr/local/bin/myfilter > /service/qmail-send.25/variables/FILTERARGS
+# svc -d /service/qmail-send.25
+# svc -u /service/qmail-send.25
+
+If you want to filter only for local delivery or only for remote delivery, you can use the
+environment variable QMAILLOCAL or QMAILREMOTE. QMAILLOCAL is defined only for local deliveries
+while QMAILREMOTE is defined only for remote deliveries.
+
+NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2,
+      the message will be discarded (blackholed).
+
+e.g. the below script skips filtering for remote deliveries
+
+#!/bin/sh
+if [ -n "$QMAILREMOTE" ] ; then
+    exec /bin/cat
+fi
+# rest of the script
+...
+...
+exit 0
+
+1.2.2 Using control file filterargs
+===================================
+
+The control file filterargs gives you control to run filters individually for local or remote
+deliveries. It also allows you to run your filter for both local and remote deliveries. See
+spawn-filter(8) for full description on this control file
+
+e.g. The following entry in /var/indimail/control/filterargs causes all mails to yahoo.com be
+fed through the filter dk-filter(8) for DK/DKIM signing.
+
+yahoo.com:remote:/var/indimail/bin/dk-filter
+
+NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2,
+      the message will be discarded (blackholed).
+
+1.2.3 Using QMAILLOCAL or QMAILREMOTE environment variables
+===========================================================
+
+If you define QMAILLOCAL, indimail will execute the program/script defined by the QMAILLOCAL
+variable for all local deliveries. The arguments passed to this program/script will be the same
+as that for qmail-local(8).
+
+Similarly, if you define QMAILREMOTE, indimail will execute the program/script defined by the
+QMAILREMOTE variable for all remote deliveries. The argument passed to this program/script are
+the same as that for qmail-remote(8). 
+
+The raw email (header + body) is available on stdin. You can use 822header(8), 822body(8) for
+getting the headers and body. After your program is through with filtering, the output should
+be piped to qmail-local(8) for local deliveries and qmail-remote(8) for remote deliveries. You
+need to also call qmail-local / qmail-remote with the same arguments. i.e
+
+exec qmail-local  "$@"     #(for local deliveries)
+exec qmail-remote "$@"     #(for remote deliveries)
+
+NOTE: You can exit with value 0 instead of calling qmail-local / qmail-remote to discard
+      the mail completely (blackhole)
+
+1.3 Using dot-qmail(5) or valias(1)
+===================================
+
+Both .qmail files and valias mechanism allows you to execute your own programs for local
+deliveries. See the man pages for dot-qmail(5) and valias(1) for more details. After
+manipulating the original raw email on stdin, you can pipe the out to the program
+maildirdeliver(1) for the final delivery.
+
+Assuming you write the program myfilter to call maildirdeliver program, you can use
+the valias command to add the following alias
+
+% valias -i "|/usr/local/bin/myfilter" testuser01@example.com
+
+Now any mail sent to testuser01@example.com will be given to the program
+/usr/local/bin/myfilter as standard input.
+
+NOTE: you can exit with value 0 instead of calling the maildirdeliver program to
+      discard the mail completely (blackhole).
+
+1.4 Using IndiMail rule based filter - vfilter
+==============================================
+IndiMail's vfilter(8) mechanism allows you to create rule based filter based on any keyword in the
+message headers or message body. You can create a vfilter by calling the vcfilter(1) program.
+
+% vcfilter -i -t myfilter -h 2 -c 0 -k "failure notice" -f /NoDeliver \
+    -b "2|/usr/local/bin/myfilter" testuser01@example.com
+
+NOTE: you can exit with value 0 instead of putting anything on standard output
+      to discard the mail completely (blackhole).
+
+1.5 Examples Filters
+====================
+e.g. the below filter looks for emails having "failure notice" in the subject line and
+inserts the line "sorry about that" in the first line of the message body and puts the
+line "sent by IndiMail Messaging platform" at the bottom of the message body.
+
+1.5.1 FILTERARGS script
+=======================
+
+A FILTERARGS script can be used during SMTP before the mail gets queued and also after the
+mail gets picked up from the queue but just before local / remote delivery
+
+#/bin/sh
+# create a temporary file
+tmp_file=`mktemp -p /var/tmp -t myfilter.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file
+    exit 111
+fi
+# Copy the stdin
+/bin/cat > $tmp_file
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file
+    exit 111
+fi
+subject=`/var/indimail/bin/822header -I Subject < $tmp_file`
+echo $subject | grep "failure notice" > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+    (
+    /var/indimail/bin/822header < $tmp_file
+    echo
+    echo "sorry about that"
+    /var/indimail/bin/822body < $tmp_file
+    echo "sent by IndiMail Messaging platform"
+    )
+else
+    /bin/cat $tmp_file
+fi
+/bin/rm -f $tmp_file
+exit 0
+
+1.5.2 QMAILQUEUE script
+=======================
+
+#!/bin/sh
+# create a temporary file
+inp_file=`mktemp -p /var/tmp -t myfilteri.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file
+    exit 111
+fi
+out_file=`mktemp -p /var/tmp -t myfiltero.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file $out_file
+    exit 111
+fi
+/bin/cat > $inp_file
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file $out_file
+    exit 111
+fi
+subject=`/var/indimail/bin/822header -I Subject < $inp_file`
+echo $subject | grep "failure notice" > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+    (
+    /var/indimail/bin/822header < $inp_file
+    echo
+    echo "sorry about that"
+    /var/indimail/bin/822body < $inp_file
+    echo "sent by IndiMail Messaging platform"
+    ) > $out_file
+    if [ $? -ne 0 ] ; then
+       /bin/rm -f $inp_file $out_file
+       exit 111
+    fi
+    exec 0<$out_file
+else
+    exec 0<$inp_file
+fi
+/bin/rm -f $inp_file $out_file
+# queue the message
+exec /var/indimail/bin/qmail-multi
+exit 111
+
+
+1.5.3 QMAILREMOTE script
+========================
+
+#!/bin/sh
+if [ -z "$QMAILREMOTE" ] ; then # execute qmail-local
+    # call spawn-filter so that features like FILTERARGS, SPAMFILTER are not lost
+    exec -a qmail-local /var/indimail/bin/spawn-filter "$@"
+fi
+# create a temporary file
+inp_file=`mktemp -p /var/tmp -t myfilteri.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file
+    exit 111
+fi
+out_file=`mktemp -p /var/tmp -t myfiltero.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file $out_file
+    exit 111
+fi
+/bin/cat > $inp_file
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file $out_file
+    exit 111
+fi
+subject=`/var/indimail/bin/822header -I Subject < $inp_file`
+echo $subject | grep "failure notice" > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+    (
+    /var/indimail/bin/822header < $inp_file
+    echo
+    echo "sorry about that"
+    /var/indimail/bin/822body < $inp_file
+    echo "sent by IndiMail Messaging platform"
+    ) > $out_file
+    if [ $? -ne 0 ] ; then
+       /bin/rm -f $inp_file $out_file
+       exit 111
+    fi
+    exec 0<$out_file
+else
+    exec 0<$inp_file
+fi
+/bin/rm -f $inp_file $out_file
+# call spawn-filter so that features like FILTERARGS, SPAMFILTER are not lost
+exec -a qmail-remote /var/indimail/bin/spawn-filter "$@"
+exit 111
+
+1.5.4 QMAILLOCAL script
+=======================
+
+#!/bin/sh
+if [ -z "$QMAILLOCAL" ] ; then
+    # call spawn-filter so that features like FILTERARGS, SPAMFILTER are not lost
+    exec -a qmail-remote /var/indimail/bin/spawn-filter "$@"
+fi
+# create a temporary file
+inp_file=`mktemp -p /var/tmp -t myfilteri.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file
+    exit 111
+fi
+out_file=`mktemp -p /var/tmp -t myfiltero.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file $out_file
+    exit 111
+fi
+/bin/cat > $inp_file
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file $out_file
+    exit 111
+fi
+subject=`/var/indimail/bin/822header -I Subject < $inp_file`
+echo $subject | grep "failure notice" > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+    (
+    /var/indimail/bin/822header < $inp_file
+    echo
+    echo "sorry about that"
+    /var/indimail/bin/822body < $inp_file
+    echo "sent by IndiMail Messaging platform"
+    ) > $out_file
+    if [ $? -ne 0 ] ; then
+       /bin/rm -f $inp_file $out_file
+       exit 111
+    fi
+    exec 0<$out_file
+else
+    exec 0<$inp_file
+fi
+/bin/rm -f $inp_file $out_file
+# call spawn-filter so that features like FILTERARGS, SPAMFILTER are not lost
+exec -a qmail-local /var/indimail/bin/spawn-filter "$@"
+exit 111
+
+1.5.5 valias/vcfilter script
+============================
+
+#!/bin/sh
+# create a temporary file
+inp_file=`mktemp -p /var/tmp -t myfilteri.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file
+    exit 111
+fi
+out_file=`mktemp -p /var/tmp -t myfiltero.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file $out_file
+    exit 111
+fi
+/bin/cat > $inp_file
+if [ $? -ne 0 ] ; then
+    /bin/rm -f $inp_file $out_file
+    exit 111
+fi
+subject=`/var/indimail/bin/822header -I Subject < $inp_file`
+echo $subject | grep "failure notice" > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+    (
+    /var/indimail/bin/822header < $inp_file
+    echo
+    echo "sorry about that"
+    /var/indimail/bin/822body < $inp_file
+    echo "sent by IndiMail Messaging platform"
+    ) > $out_file
+    if [ $? -ne 0 ] ; then
+       /bin/rm -f $inp_file $out_file
+       exit 111
+    fi
+    exec 0<$out_file
+else
+    exec 0<$inp_file
+fi
+/bin/rm -f $inp_file $out_file
+#
+# unset RPLINE so that maildirdeliver does not add a duplicate Return-Path line
+# unset PWSTRUCT so that password structure cached is removed for vuserinfo to
+# work correctly
+#
+unset RPLINE PWSTRUCT
+dir=`/var/indimail/bin/vuserinfo -d testuser01@example.com | cut -d: -f2 |cut -c2-`
+if [ $? -ne 0 -o " $dir" = " " ] ; then
+    echo "unable to get user's homedir" 1>&1
+    exit 111
+fi
+exec /var/indimail/bin/maildirdeliver "$dir"/Maildir
+exit 111

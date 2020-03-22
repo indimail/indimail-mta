@@ -1,0 +1,12 @@
+{
+  Description     = "IndiMail email server";
+  Provides        = ("qmailctl");
+  Requires        = ("Resolver", "NetWork");
+  Uses            = ("Network")
+  OrderPreference = "None";
+  Messages =
+  {
+    start = "Starting IndiMail server";
+    stop  = "Stopping IndiMail server";
+  };
+}

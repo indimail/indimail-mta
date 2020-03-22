@@ -1,0 +1,301 @@
+.TH qmail-control 5
+.SH "NAME"
+qmail-control \- qmail configuration files
+.SH "INTRODUCTION"
+You can change the behavior of the
+.B qmail
+system by modifying
+.BR qmail 's
+.I control files
+in
+.BR @controldir@ .
+
+.B qmail
+can survive with just one control file,
+.IR me ,
+containing the
+fully-qualified name of the current host.
+This file is used as the default for
+other hostname-related control files.
+
+If control files are required apart from what is present in @controldir@, you can
+set the environment variable CONTROLDIR. This forces qmail system to look at path
+defined by CONTROLDIR for all control files.
+
+Comments are allowed
+in
+.IR accesslist ,
+.IR authdomains ,
+.IR badext ,
+.IR badextpatterns ,
+.IR badhelo ,
+.IR badmailfrom ,
+.IR badmailpatterns ,
+.IR bindroutes ,
+.IR blackholedrcpt ,
+.IR blackholedrcptpatterns ,
+.IR blackholedsender ,
+.IR blackholedpatterns ,
+.IR badrcptto ,
+.IR badrcptpatterns ,
+.IR bodycheck ,
+.IR chkrcptdomains ,
+.IR domainbindings,
+.IR earlytalkerdroptime ,
+.IR etrnhosts ,
+.IR filterargs ,
+.IR goodrcptto ,
+.IR goodrcptpatterns ,
+.IR hostaccess ,
+.IR locals ,
+.IR localdomains ,
+.IR nodnscheck ,
+.IR percenthack ,
+.IR qmqpservers ,
+.IR relaymailfrom ,
+.IR relayclients ,
+.IR relaydomains ,
+.IR removeheaders ,
+.IR recipients ,
+.IR rejectspam ,
+.IR rcpthosts ,
+.IR signatures ,
+.IR smtproutes ,
+.IR qmtproutes ,
+.IR spamfilter ,
+.IR spamredirect ,
+.IR spamignore ,
+.IR spamignorepatterns ,
+.IR from.envrules ,
+.IR fromd.envrules ,
+.IR rcpt.envrules ,
+.IR auth.envrules ,
+.IR domainqueue ,
+.IR signaturedomains ,
+.IR nosignaturedomains ,
+.IR badhost ,
+.IR badip ,
+.IR mailarchive ,
+.IR removeheaders ,
+.IR envheaders ,
+.IR logheaders ,
+and
+.IR virtualdomains .
+Trailing spaces and tabs are allowed in any control file.
+
+The following control files can also be specified in cdb format or
+be in MySQL
+
+.IR authdomains ,
+.IR badhelo ,
+.IR badext ,
+.IR badmailfrom ,
+.IR badrcptto ,
+.IR blackholedsender ,
+.IR blackholedrcpt ,
+.IR chkrcptdomains ,
+.IR goodrcptto ,
+.IR relaymailfrom ,
+.IR spamignore ,
+.IR greylist.white ,
+.IR tlsa.white ,
+.IR tlsadomains ,
+and
+.IR badip .
+
+To use the cdb format, the control files should be converted to cdb using
+.BR qmail-cdb
+and have a .cdb extension. To have the control files in MySQL, you should have the control file
+with a .sql extension and a colon separated list of paramaters for connecting to MySQL
+specified in the file. If the files are present in all the 3 formats, cdb file will be used.
+
+The parameters are as given below.
+
+.BR db_server_ip:db_user:db_password:db_name:table_name .
+
+.EX
+Having the following entry in \fIbadmailfrom\fR.\fIsql\fR
+
+localhost:indimail:ssh-1.5-:qmail:my_badmailfrom
+
+specifies that entries for  badmailfrom should  be  checked in the MySQL table
+\fImy_badmailfrom\fR on localhost. The username and password for connecting to MySQL
+is \fIindimail\fR and \fIssh-1.5-\fR and the database name to use is \fIqmail\fR.
+.EE
+
+For database connection to MySQL, one can define \fBMYSQL_LIB\fR environment variable
+or have the control file \fImysql_lib\fR
+.EE
+  MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
+.EX
+Environment variable takes precedence over the control file.
+
+The following control files can have regular expressions for match if QREGEX environment
+variable is defined
+
+.IR badhelo ,
+.IR badhost ,
+.IR badip ,
+.IR blackholedsender ,
+.IR blackholedrcpt ,
+.IR badmailfrom ,
+.IR spamignore ,
+.IR relaymailfrom ,
+.IR authdomains ,
+.IR badrcptto ,
+.IR chkrcptdomains ,
+.IR badext ,
+.IR goodrcptto ,
+and
+.IR accesslist .
+
+Once you define QREGEX, the corresponding pattern file gets disabled
+(e.g. badhelopatterns, badhostpatterns, badmailfrompatterns, etc).
+
+The following table lists all control files
+other than
+.IR me .
+See the corresponding man pages for further details.
+
+.RS
+.nf
+.ta 8c 12c
+control	default	used by
+
+.I accesslist	\fR(none)	\fRqmail-smtpd
+.I authdomains	\fR(none)	\fRqmail-smtpd
+.I badhelo	\fR(none)	\fRqmail-smtpd
+.I badhost	\fR(none)	\fRqmail-smtpd
+.I badmailfrom	\fR(none)	\fRqmail-smtpd
+.I badmailpatterns	\fR(none)	\fRqmail-smtpd
+.I goodrcptto	\fR(none)	\fRqmail-smtpd
+.I goodrcpttpatterns	\fR(none)	\fRqmail-smtpd
+.I domainqueue	\fR(none)	\fRqmail-smtpd
+.I auth.envrules	\fR(none)	\fRqmail-smtpd
+.I from.envrules	\fR(none)	\fRqmail-smptd
+.I fromd.envrules	\fR(none)	\fRspawn-filter
+.I rcpt.envrules	\fR(none)	\fRspawn-fliter
+.I badext	\fR(none)	\fRqscanq-stdin
+.I badextpatterns	\fR(none)	\fRqscanq-stdin
+.I badrcptto	\fR(none)	\fRqmail-smtpd
+.I badrcptpatterns	\fR(none)	\fRqmail-smtpd
+.I blackholedsender	\fR(none)	\fRqmail-smtpd
+.I blackholedpatterns	\fR(none)	\fRqmail-smtpd
+.I blackholedrcpt	\fR(none)	\fRqmail-smtpd
+.I blackholedrcptpatterns	\fR(none)	\fRqmail-smtpd
+.I blackholedsender	\fR(none)	\fRqmail-smtpd
+.I bouncefrom	\fRMAILER-DAEMON	\fRqmail-send
+.I bouncehost	\fIme	\fRqmail-send
+.I bouncemessage	\fRQSBMF	\fRqmail-send
+.I bouncesubject	\fRfailure notice	\fRqmail-send
+.I bouncemaxbytes	\fR50000	\fRqmail-send
+.I doublebounceto	\fRpostmaster	\fRqmail-send
+.I doublebouncehost	\fIme	\fRqmail-send
+.I doublebouncemessage	\fRQSBMF	\fRqmail-send
+.I doublebouncesubject	\fRfailure notice	\fRqmail-send
+.I concurrencylocal	\fR10	\fRqmail-send
+.I concurrencyremote	\fR20	\fRqmail-send
+.I defaultdomain	\fIme	\fRqmail-inject
+.I defaultdelivery	\fR(none)	\fRqmail-daemon
+.I defaulthost	\fIme	\fRqmail-inject
+.I dnsbllist	\fR(none)	\fRqmail-smtpd
+.I databytes	\fR$DATABYTES	\fRqmail-smtpd
+.I envnoathost	\fIme	\fRqmail-send
+.I extraqueue	\fR(none)	\fRqmail-queue
+.I quarantine	\fR(none)	\fRqmail-queue
+.I helohost	\fIme	\fRqmail-remote
+.I holdlocal	\fI0	\fRqmail-send
+.I holdremote	\fI0	\fRqmail-send
+.I todointerval	\fR(none)	\fRqmail-todo
+.I idhost	\fIme	\fRqmail-inject
+.I localiphost	\fIme	\fRqmail-smtpd
+.I outgoingip	\fIme	\fRqmail-remote
+.I bindroutes	\fR(none)	\fRqmail-remote
+.I domainbindings	\fIme	\fRqmail-remote
+.I rcpthosts	\fR(none)	\fRqmail-smtpd
+.I morercpthosts	\fR(none)	\fRqmail-smtpd
+.I locals	\fIme	\fRqmail-send, qmail-smtpd
+.I maxdeliveredto	\fI0	\fRqmail-local
+.I localdomains	\fR(none)	\fRqmail-local
+.I virtualdomains	\fR(none)	\fRqmail-send
+.I etrnhosts	\fR(none)	\fRqmail-smtpd
+.I nodnscheck	\fR$NODNSCHECK	\fRqmail-smtpd
+.I percenthack	\fR(none)	\fRqmail-send
+.I plusdomain	\fIme	\fRqmail-inject
+.I qmqpservers	\fR(none)	\fRqmail-qmqpc
+.I chkrcptdomains	\fR(none)	\fRqmail-smtpd
+.I queuelifetime	\fR604800	\fRqmail-send
+.I relayclients	\fR$RELAYCLIENT	\fRqmail-smtpd
+.I relaydomains	\fR$RELAYCLIENT	\fRqmail-smtpd
+.I relaymailfrom	\fR(none)	\fRqmail-smtpd
+.I recipients	\fR(none)	\fRqmail-smtpd
+.I smtpgreeting	\fIme	\fRqmail-smtpd
+.I smtproutes	\fR(none)	\fRqmail-remote
+.I qmtproutes	\fR(none)	\fRqmail-remote
+.I spfbehavior	\fR0	\fRqmail-smtpd
+.I spfexp	\fR(default)	\fRqmail-smtpd
+.I spfguess	\fR(none)	\fRqmail-smtpd
+.I spfrules	\fR(none)	\fRqmail-smtpd
+.I moreipme	\fR(none)	\fRqmail-smtpd
+.I notipme	\fR(none)	\fRqmail-smtpd
+.I maxrecipients	\fR$MAXRECIPIENTS	\fRqmail-smtpd
+.I maxhops	\fR(none)	\fRqmail-smtpd
+.I tarpitcount	\fR$TARPITCOUNT=0	\fRqmail-smtpd
+.I tarpitdelay	\fR$TARPITDELAY=5	\fRqmail-smtpd
+.I timeoutconnect	\fR60	\fRqmail-remote
+.I timeoutremote	\fR1200	\fRqmail-remote
+.I timeoutsmtpd	\fR1200	\fRqmail-smtpd
+.I timeoutread	\fR4	\fRqmail-smtpd
+.I timeoutwrite	\fR4	\fRqmail-smtpd
+.I certs/clientca.pem	\fR(none)	\fRqmail-smtpd
+.I certs/clientcert.pem	\fR(none)	\fRqmail-remote
+.I certs/dh1024.pem	\fR(none)	\fRqmail-smtpd
+.I certs/dh512.pem	\fR(none)	\fRqmail-smtpd
+.I certs/rsa512.pem	\fR(none)	\fRqmail-smtpd
+.I certs/servercert.pem	\fR(none)	\fRqmail-smtpd
+.I certs/tlsclients	\fR(none)	\fRqmail-smtpd
+.I certs/tlsclientciphers	\fR(none)	\fRqmail-remote
+.I certs/tlshosts/FQDN.pem	\fR(none)	\fRqmail-remote
+.I certs/tlsserverciphers	\fR(none)	\fRqmail-smtpd
+.I certs/tlsservermethod	\fR(none)	\fRqmail-smtpd
+.I certs/tlsclientmethod	\fR(none)	\fRqmail-remote
+.I certs/notlshosts/	\fR(none)	\fRqmail-remote
+.I notlshosts\fR	(none)	\fRqmail-remote
+.I tlsadomains\fR	(none)	\fRqmail-remote, qmail-daned
+.I originipfield	\fR(none)	\fRqmail-queue
+.I filterargs	\fR(none)	\fRspawn-filter
+.I globalspamredirect	\fR(none)	\fRqmail-multi
+.I spamfilter	\fR(none)	\fRspawn-filter
+.I spamignore	\fR(none)	\fRqmail-smtpd, spawn-filter
+.I spamignorepatterns	\fR(none)	\fRqmail-smtpd, spawn-filter
+.I spamredirect	\fR(none)	\fRspawn-filter
+.I rejectspam	\fR(none)	\fRspawn-filter
+.I hostaccess	\fR(none)	\fRqmail-smtpd
+.I signatures	\fR(none)	\fRqmail-smtpd
+.I bodycheck	\fR(none)	\fRqmail-smtpd
+.I qregex	\fR(none)	\fRqmail-smtpd
+.I earlytalkerdroptime	\fR(none)	\fRqmail-smtpd
+.I signaturedomains	\fR(none)	\fRqmail-dkim
+.I nosignaturedomains	\fR(none)	\fRqmail-dkim
+.I signkey	\fR(none)	\fRqmail-remote, qmail-smtpd
+.I signkeystale	\fR7	\fRqmail-smtpd
+.I nosignhosts	\fR(none)	\fRqmail-remote, qmail-smtpd
+.I nosignmydoms	\fR(none)	\fRqmail-remote
+.fi
+
+.RE
+.IR Defaultvalues
+following a $ sign (ie. $RELAYCLIENT) depend on the
+corresponding environment variable.
+    
+.SH "SEE ALSO"
+qmail-inject(8),
+spawn-filter(8),
+qmail-qmqpc(8),
+qmail-queue(8),
+qmail-remote(8),
+qmail-send(8),
+qmail-showctl(8),
+qmail-smtpd(8),
+qmail-remote(8),
+qscanq-stdin(8)

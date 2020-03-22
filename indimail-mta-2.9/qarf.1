@@ -1,0 +1,111 @@
+.TH qarf 1
+.SH NAME
+qarf \- qmail/IndiMail Abuse Report Format Generator
+.SH SYNOPSIS
+.B qarf
+[
+.B \-i
+]
+.B \-t \fIrecipient
+.B \-f \fIsender
+.B \-s \fIsubject
+[
+.B \-m \fIfilename
+]
+.SH DESCRIPTION
+\fBqarf\fR reads an rfc822 email on stdin and generates a report in ARF format as specified
+at
+
+http://www.mipassoc.org/arf/specs/draft-shafranovich-feedback-report-05.txt
+
+.SH OPTIONS
+.PP
+
+.TP
+\fB-t\fR
+Use argument as " RCPT TO " address. If this is not specified, the domain is automatically
+picked up from the "Return-Path:" field in the headers of the original mail. The recipient
+is modifed as abuse@domain.
+
+.TP
+\fB-f\fR
+Use this argument as "From:" address.
+
+.TP
+\fB-s\fR
+Argument to -s must be the "Subject:" field for the feedback report. If this is not specified,
+the Subject field is automatically picked up from the original email with "FW:" prefixed.
+
+.TP
+\fB-m\fR
+Argument to -m should be a file containing text for the Abuse Report. This will compose
+the first MIME part of the message. This file should contains a human readable
+description of the report. If this is not specified, a default text as given below is
+inserted
+
+.EX
+This is an email abuse report for an email received from IP
+x.x.x.x on on Sat, 12 Feb 2011 12:02:27 +0530.
+For more information about this format please see http://www.mipassoc.org/arf/.
+.EE
+
+.TP
+\fB-i\fR
+Use this argument to have "inline" disposition of the original mail attached with the abuse
+report as opposed to the default "attachment" disposition.
+
+.SH Fields
+
+\fBqarf\fR adds the following headers in the feedback-report
+
+.TP 5
+.I Feedback-Type:
+contains the type of feedback report (as defined in the corresponding IANA registry).
+This is intended to let report generators distinguish among different types of reports.
+
+.TP 5
+.I User-Agent:
+indicates the name and version of the software program that generated the report.
+This field is for documentation only; report receivers SHOULD NOT expect user agent names
+to belong to a known set.
+
+.TP 5
+.I Version:
+indicates the version of specification that the report generator is using to generate the
+report. The version number in this specification is set to "0.1".
+
+.TP 5
+.I Original-Envelope-Id:
+envelope ID string used in the original SMTP transaction. This is picked up from the
+\fIMessage-ID\fR field in the header of original email.
+
+.TP 5
+.I Original-Mail-From:
+copy of the email address used in the MAIL FROM portion of the original SMTP transaction.
+This is picked up from the \fIReturn-Path:\fR field in header of the original email.
+
+.TP 5
+.I Arrival-Date:
+indicates the date the original message was received by recipient system's MTA. This is picked
+up from the first \fIDate:\fR field in the header of original email.
+
+.TP 5
+.I Source-IP:
+contains an IPv4 or IPv6 address of the MTA from which the original message was received.
+
+.TP 5
+.I Original-Rcpt-To:
+copy of the email address used in the RCPT TO portion of the original SMTP transaction. This
+is picked up from the \fIDelivered-To\fR field in the header of the original email.
+
+.PP
+The following header field will appear once in a DKIM failure report:
+
+.TP 5
+.I DKIM-Failure:
+the type of DKIM verification failure that occurred; MUST be included for "dkim" failure
+reports and MUST NOT be included otherwise. This is set by checking the \fIDKIM-Status\fR
+field in the headers of the original email.
+
+.SH "SEE ALSO"
+qmail-send(8), bogofilter(1)

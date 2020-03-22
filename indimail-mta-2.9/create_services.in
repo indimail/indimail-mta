@@ -1,0 +1,514 @@
+#!/bin/sh
+#
+#
+mail_path=/home/mail
+qcount=5
+qbase=@indimaildir@/queue
+tcpserver_plugin=0
+add_boot=0
+check_install=0
+servicedir=@servicedir@
+indimaildir=@indimaildir@
+prefix=@prefix@
+sysconfdir=@sysconfdir@
+controldir=@sysconfdir@/control
+libexecdir=@libexecdir@
+default_domain=`uname -n`
+chown=$(which chown)
+mkdir=$(which mkdir)
+cp=$(which cp)
+
+#
+# End USER Configuration OPTIONS
+#
+
+# $Id: create_services.in,v 2.80 2019-11-01 10:10:08+05:30 Cprogrammer Exp mbhangui $
+
+usage()
+{
+  echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path \\
+  destdir=path] [--shared-objects] [--add-boot] [--chk-install] --nomysql
+
+  servicedir     - path of Supervise service directory
+  qbase          - path for createing IndiMail's queue collection
+  mbase          - path where user's home maildir will be created
+  mysqlPrefix    - Prefix for MySQL installation
+  destdir        - Staging directory for creating service
+  shared-objects - Enable loading of shared objects in tcpserver for SMTP
+  add-boot       - Enable indimail/indimail-mta in system startup
+  chk-install    - Check indimail/indimail-mta installation
+  nomysql        - Do not configure MySQL service
+"
+  echo "Press ENTER or Cntrl C to quit"
+  read key
+  exit 1
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+noproxy=0
+nocourierimap=0
+nofetchmail=0
+nobogofilter=0
+noindimail=0
+nonssd=0
+nomysql=0
+nodksignatures=0
+dkimkeyfn=default
+if [ -x /usr/bin/mysql ] ; then
+  mysql_base=/usr
+fi
+ID=`id -u`
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    --servicedir=*)
+    servicedir=$optarg
+    ;;
+
+    --qcount=*)
+    qcount=$optarg
+    ;;
+
+    --qbase=*)
+    qbase=$optarg
+    ;;
+
+    --mbase=*)
+    mail_path=$optarg
+    ;;
+
+    --mysqlPrefix=*)
+    mysql_base=$optarg
+    ;;
+
+    --no-courier-imap)
+    nocourierimap=1
+    ;;
+
+    --no-proxy)
+    noproxy=1
+    ;;
+
+    --no-bogofilter)
+    nobogofilter=1
+    ;;
+
+    --nomysql)
+    nomysql=1
+    nonssd=1
+    ;;
+
+    --no-nssd)
+    nonssd=1
+    ;;
+
+    --no-fetchmail)
+    nofetchmail=1
+    ;;
+
+    --chk-install)
+    check_install=1
+    ;;
+
+    --shared-objects)
+    tcpserver_plugin=1
+    ;;
+
+    --add-boot)
+    add_boot=1
+    ;;
+
+    --destdir=*)
+    extra_opt="--destdir=$optarg"
+    dir_prefix=$optarg
+    ;;
+
+    *)
+    echo "invalid option [$1]"
+    read key
+    usage 1
+    ;;
+    esac
+
+    shift
+done
+
+if [ ! -x $dir_prefix$prefix/bin/vadddomain -a ! -x $prefix/bin/vadddomain ] ; then
+  noindimail=1
+fi
+if [ $noindimail -eq 0 ] ; then
+  if [ $nomysql -eq 1 ] ; then
+    if [ " $qbase" = " " -o " $mail_path" = " " ] ; then
+      usage 1
+    fi
+  else
+    if [ " $qbase" = " " -o " $mail_path" = " " -o " $mysql_base" = " " ] ; then
+      usage 1
+    fi
+  fi
+else
+  if [ " $qbase" = " " ] ; then
+    usage 1
+  fi
+fi
+
+if [ -x $dir_prefix$prefix/sbin/svctool ] ; then
+  svctool=$dir_prefix$prefix/sbin/svctool
+else
+  svctool=/usr/sbin/svctool
+fi
+# some setup
+$mkdir -p $dir_prefix$prefix/bin
+$mkdir -p $dir_prefix$prefix/sbin
+$mkdir -p $dir_prefix$indimaildir
+$mkdir -p $dir_prefix$controldir
+$mkdir -p $dir_prefix$sysconfdir/users
+$mkdir -p $dir_prefix$sysconfdir/control
+$mkdir -p $dir_prefix$libexecdir
+$mkdir -p $dir_prefix$servicedir
+if [ ! -x $dir_prefix$libexecdir/config-fast -a -x $libexecdir/config-fast ] ; then
+  $cp $libexecdir/config-fast $dir_prefix$libexecdir
+fi
+if [ ! -x $dir_prefix$libexecdir/ipmeprint -a -x $libexecdir/ipmeprint ] ; then
+  $cp $libexecdir/ipmeprint $dir_prefix$libexecdir
+fi
+if [ ! -x $dir_prefix$libexecdir/update_tmprsadh -a -x $libexecdir/update_tmprsadh ] ; then
+  $cp $libexecdir/update_tmprsadh $dir_prefix$libexecdir
+fi
+if [ ! -x $dir_prefix$libexecdir/envmigrate -a -x $libexecdir/envmigrate ] ; then
+  $cp $libexecdir/envmigrate $dir_prefix$libexecdir
+fi
+if [ ! -x $dir_prefix$prefix/bin/queue-fix -a -x $prefix/bin/queue-fix ] ; then
+  $cp $prefix/bin/queue-fix $dir_prefix$prefix/bin/queue-fix
+fi
+if [ ! -x $dir_prefix$prefix/bin/tcprules -a -x $prefix/bin/tcprules ] ; then
+  $cp $prefix/bin/tcprules $dir_prefix$prefix/bin/tcprules
+fi
+if [ ! -x $dir_prefix$prefix/bin/svc -a -x $prefix/bin/svc ] ; then
+  $cp $prefix/bin/svc $dir_prefix$prefix/bin/svc
+fi
+if [ ! -x $dir_prefix$prefix/bin/bogoutil -a -x $prefix/bin/bogoutil ] ; then
+  $cp $prefix/bin/bogoutil $dir_prefix$prefix/bin/bogoutil
+fi
+if [ ! -f $dir_prefix$sysconfdir/bogofilter.cf.example ] ; then
+  $cp $sysconfdir/bogofilter.cf.example $dir_prefix$sysconfdir/bogofilter.cf.example
+fi
+if [ ! -f $dir_prefix$sysconfdir/users/assign ] ; then
+  echo "." > $dir_prefix$sysconfdir/users/assign
+fi
+######################
+
+if [ ! -x $dir_prefix$prefix/bin/fetchmail -a ! -x $prefix/bin/fetchmail ] ; then
+  nofetchmail=1
+fi
+if [ ! -x $dir_prefix$prefix/bin/bogofilter -a ! -x $prefix/bin/bogofilter ] ; then
+  nobogofilter=1
+fi
+if [ $nomysql -eq 0 ] ; then
+  if [ ! -x $dir_prefix$prefix/sbin/nssd -a ! -x $prefix/sbin/nssd ] ; then
+    nonssd=1
+  fi
+fi
+if [ ! -x $dir_prefix$prefix/bin/imapd -a ! -x $prefix/bin/imapd ] ; then
+  nocourierimap=1
+fi
+if [ ! -x $dir_prefix$libexecdir/imapmodules/authindi -a ! -x $libexecdir/imapmodues/authindi ] ; then
+  noproxy=1
+fi
+echo "Creating @logdir@"
+if [ ! -d $dir_prefix"@logdir@" ] ; then
+  $mkdir -p $dir_prefix"@logdir@"
+fi
+[ $ID -eq 0 ] && $chown -R qmaill:nofiles @logdir@
+#
+# create users
+#
+if [ $noindimail -eq 0 ] ; then
+  echo "Creating indimail Users"
+else
+  echo "Creating indimail-mta Users"
+fi
+$svctool --config=users $extra_opt
+#
+# MySQL
+#
+if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
+  $svctool --config=mysql   --mysqlPrefix=$mysql_base \
+      --databasedir=$indimaildir/mysqldb $extra_opt
+  $svctool --config=mysqldb --mysqlPrefix=$mysql_base \
+    --databasedir=$indimaildir/mysqldb --base_path=$mail_path \
+    --default-domain=$default_domain $extra_opt
+  $svctool --mysql=3306 --servicedir=$servicedir \
+    --mysqlPrefix=$mysql_base --databasedir=$prefix/mysqldb \
+    --config=$sysconfdir/indimail.cnf --default-domain=$default_domain $extra_opt
+fi
+#
+# create qmail config
+$svctool --config=qmail --postmaster=postmaster@$default_domain \
+  --default-domain=$default_domain $extra_opt
+
+a_arch=`arch`
+if [ " $$a_arch" = " x86_64" ] ; then
+  fetchmail_mem=144857600
+  smtp_soft_mem=104857600
+  qmtp_soft_mem=104857600
+  qmqp_soft_mem=104857600
+  imap_pop3_mem=524288000
+  imapspop3_mem=524288000
+  poppass_mem=104857600
+else
+  fetchmail_mem=72428800
+  smtp_soft_mem=52428800
+  qmtp_soft_mem=52428800
+  qmqp_soft_mem=52428800
+  imap_pop3_mem=52428800
+  imapspop3_mem=52428800
+  poppass_mem=52428800
+fi
+#
+# SMTP
+#
+if [ $nodksignatures -eq 0 ] ; then
+  if [ -x $dir_prefix$prefix/bin/dknewkey ] ; then
+    ver_opt="both"
+    sign_opt="both"
+    $dir_prefix$prefix/bin/dknewkey $dir_prefix"$controldir"/domainkeys/$dkimkeyfn 1024
+  else
+    ver_opt="none"
+    sign_opt="none"
+  fi
+else
+  ver_opt="none"
+  sign_opt="none"
+fi
+orig_bogofilter=$nobogofilter
+
+if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+  clamav_os=1
+  clamdPrefix="/usr"
+  if [ -d /etc/clamav ] ; then
+    mysysconfdir=/etc/clamav
+  elif [ -d /etc/clamd.d ] ; then
+    mysysconfdir=/etc/clamd.d
+  elif [ -d $sysconfdir ] ; then
+    mysysconfdir=$sysconfdir
+  else
+    mysysconfdir=/etc
+  fi
+  qhpsi="/usr/bin/clamdscan %s --config=$mysysconfdir/scan.conf --fdpass --quiet --no-summary"
+else
+  clamav_os=0
+fi
+for port in 465 25 587
+do
+  if [ $port -eq 465 ] ; then
+    e_opt="--skipsend --ssl"
+    e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+  elif [ $port -eq 587 ] ; then
+    nobogofilter=1
+    e_opt="--skipsend --authsmtp --antispoof"
+  else
+    e_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+    e_opt="$e_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
+    e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+  fi
+  if [ $tcpserver_plugin -eq 1 ] ; then
+    e_opt="$e_opt --shared-objects=1 --use-dlmopen=1"
+  fi
+  append_opt=""
+  if [ $nobogofilter -eq 0 ] ; then
+    append_opt="--spamfilter=\"$prefix/bin/bogofilter -p -d $sysconfdir\"" 
+    append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
+  fi
+  if [ $clamav_os -eq 1 ] ; then
+    append_opt="$append_opt --qhpsi=\"$qhpsi\""
+  fi
+  eval $svctool --smtp=$port --servicedir=$servicedir \
+    --qbase=$qbase --qcount=$qcount --qstart=1 \
+    --query-cache --dnscheck --password-cache \
+    --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+    --starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
+    --min-free=52428800 --content-filter --virus-filter \
+    --dmasquerade --infifo=infifo \
+    --dkverify=$ver_opt \
+    --dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
+    $append_opt $e_opt $extra_opt
+  nobogofilter=$orig_bogofilter
+done
+
+append_opt=""
+if [ $clamav_os -eq 1 ] ; then
+  append_opt="--qhpsi=\"$qhpsi\""
+fi
+eval $svctool --queueParam=defaultqueue \
+  --qbase=$qbase --qcount=$qcount --qstart=1 \
+  --min-free=52428800 --fsync --syncdir --virus-filter \
+  --dkverify="none" --dksign=$sign_opt \
+  --private_key=$controldir/domainkeys/%/$dkimkeyfn \
+  $append_opt $extra_opt
+
+$svctool --smtp=366 --odmr --servicedir=$servicedir \
+  --infifo="" --query-cache --password-cache --memory=$smtp_soft_mem $extra_opt
+#
+# Greylist
+#
+$svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
+  --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
+  --hash-size=65536 --save-interval=5 --whitelist=greylist.white $extra_opt
+
+# qmail-dane tlsa daemon
+$svctool --tlsa=1998 --servicedir=$servicedir --timeout-days=30 \
+  --context-file=tlsa.context --hash-size=65536 --save-interval=5 \
+  --whitelist=tlsa.white $extra_opt
+#
+# qmtpd service
+#
+$svctool --qmtp=209 --servicedir=$servicedir \
+  --qbase=$qbase --qcount=$qcount --qstart=1 \
+  --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+  --fsync --syncdir --memory=$qmtp_soft_mem --min-free=52428800 $extra_opt
+#
+# qmqpd service
+#
+$svctool --qmqp=628 --servicedir=$servicedir \
+  --qbase=$qbase --qcount=$qcount --qstart=1 \
+  --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+  --fsync --syncdir --memory=$qmqp_soft_mem --min-free=52428800 $extra_opt
+
+#
+# fetchmail
+#
+if [ $nofetchmail -eq 0 ] ; then
+  append_opt=""
+  if [ $nobogofilter -eq 0 ] ; then
+    append_opt="--spamfilter=\"$prefix/bin/bogofilter -p -d $sysconfdir\"" 
+    append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
+  fi
+  if [ $clamav_os -eq 1 ] ; then
+    append_opt="$append_opt --qhpsi=\"$qhpsi\""
+  fi
+  eval $svctool --fetchmail --servicedir=$servicedir \
+    --qbase=$qbase --qcount=$qcount --qstart=1 \
+    --cntrldir=control --default-domain=$default_domain \
+    --memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt \
+    $append_opt $extra_opt
+  touch $dir_prefix$servicedir/fetchmail/down
+fi
+
+#
+# IMAP/POP3
+#
+if [ $nocourierimap -eq 0 ] ; then
+  $svctool --imap=143 --servicedir=$servicedir \
+    --starttls --localip=0 --maxdaemons=40 --maxperip=25 --infifo=infifo \
+    --query-cache --default-domain=$default_domain --memory=$imap_pop3_mem $extra_opt
+  $svctool --imap=993 --servicedir=$servicedir --localip=0 \
+    --maxdaemons=40 --maxperip=25 --infifo=infifo \
+    --query-cache --default-domain=$default_domain --memory=$imapspop3_mem --ssl $extra_opt
+  $svctool --pop3=110 --servicedir=$servicedir --localip=0 \
+    --starttls --maxdaemons=40 --maxperip=25 --infifo=infifo \
+    --query-cache --default-domain=$default_domain --memory=$imap_pop3_mem $extra_opt
+  $svctool --pop3=995 --servicedir=$servicedir --localip=0 \
+    --maxdaemons=40 --maxperip=25 --infifo=infifo \
+    --query-cache --default-domain=$default_domain --memory=$imapspop3_mem --ssl $extra_opt
+fi
+if [ $noproxy -eq 0 ] ; then
+  $svctool --imap=4143 --servicedir=$servicedir --localip=0 --infifo=infifo \
+    --maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
+    --memory=$imap_pop3_mem --proxy=143 --starttls --tlsprog=$prefix/bin/sslerator \
+    $extra_opt
+  $svctool --imap=9143 --servicedir=$servicedir --localip=0 --infifo=infifo \
+    --maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
+    --memory=$imapspop3_mem --proxy=143 --ssl $extra_opt
+  $svctool --pop3=4110 --servicedir=$servicedir --localip=0 --infifo=infifo \
+    --maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
+    --memory=$imap_pop3_mem --proxy=110 --starttls --tlsprog=$prefix/bin/sslerator \
+    $extra_opt
+  $svctool --pop3=9110 --servicedir=$servicedir --localip=0 --infifo=infifo \
+    --maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
+    --memory=$imapspop3_mem --proxy=110 --ssl $extra_opt
+fi
+
+#
+# IndiMail Daemons
+#
+if [ $noindimail -eq 0 ] ; then
+  $svctool --indisrvr=4000 --servicedir=$servicedir \
+    --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
+    --certfile=$controldir/servercert.pem --ssl \
+    --hardquota=52428800 --base_path=$mail_path $extra_opt
+  $svctool --inlookup=infifo --servicedir=$servicedir --cntrldir=control --threads=5 \
+    --activeDays=60 --query-cache --password-cache --use-btree \
+    --max-btree-count=10000 $extra_opt
+  
+  if [ $nonssd -eq 0 -a $nomysql -eq 0 ] ; then
+  $svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
+    --mysqlhost=localhost --mysqluser=indimail \
+    --mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=$servicedir $extra_opt
+  fi
+    #
+    # poppassd protocol
+    #
+  $svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
+    --memory=$poppass_mem \
+    --certfile=$controldir/servercert.pem --ssl \
+    --setpassword=$prefix/sbin/vsetpass --servicedir=$servicedir $extra_opt
+fi
+#
+# virus clamav/spam filter
+#
+if [ $clamav_os -eq 1 ] ; then
+  $svctool --qscanq --servicedir=$servicedir --clamdPrefix=$prefix \
+    --scanint=200 $extra_opt
+  $svctool --config=clamd $extra_opt
+  $svctool --clamd --servicedir=$servicedir --clamdPrefix=$prefix \
+    --sysconfdir=$sysconfdir
+  if [ $clamav_os -eq 1 ] ; then
+    touch $dir_prefix$servicedir/clamd/down
+    touch $dir_prefix$servicedir/freshclam/down
+  fi
+fi
+if [ $nobogofilter -eq 0 ] ; then
+  $svctool --config=bogofilter $extra_opt
+fi
+#
+# Misc/Configuration
+#
+
+# create certs
+$svctool --postmaster=postmaster@$default_domain --config=cert --common_name=$default_domain $extra_opt
+
+# fifolog service
+$svctool --fifologger=/tmp/logfifo --servicedir=$servicedir
+
+# mrtg service
+$svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir
+
+# libindimail/mysql_lib control file updater
+$svctool --libwatch --servicedir=$servicedir
+
+# create svscan logging in indimail log directory
+$svctool --svscanlog --servicedir=$servicedir $extra_opt
+if [ $add_boot -eq 1 ] ; then
+  if [ $noindimail -eq 0 ] ; then
+    $dir_prefix$prefix/sbin/initsvc -status
+  fi
+  # Install IndiMail to be started on system boot
+  echo "adding indimail startup"
+  $svctool --config=add-boot $extra_opt
+fi
+$svctool --servicedir=$servicedir --config=qselinux
+if [ $noindimail -eq 0 ] ; then
+  $svctool --servicedir=$servicedir --config=iselinux
+fi
+if [ $check_install -eq 1 ] ; then
+  $svctool --check-install --servicedir=$servicedir \
+    --qbase=$qbase --qcount=$qcount --qstart=1 $extra_opt
+fi

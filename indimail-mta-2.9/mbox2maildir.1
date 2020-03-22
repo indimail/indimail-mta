@@ -1,0 +1,41 @@
+.TH mbox2maildir 1
+.SH NAME
+maildir2mbox \- move mail from a mbox to a maildir
+.SH SYNOPSIS
+.B maildir2mbox
+[
+-ks 
+]
+.I mbox maildir
+
+.SH DESCRIPTION
+.B mbox2maldir
+moves mail from a
+.IR mbox -format
+file to an
+.IR maildir -format
+directory.
+
+.B maildir2mbox
+locks
+.B mbox
+to protect against simultaneous access by a mail reader.
+This locking system does not protect against simultaneous access
+by another
+.BR mbox2maildir ;
+you should run only one
+.B mbox2maildir
+at a time.
+
+.SH OPTIONS
+
+.TP
+.B \-k
+Keep the mbox after conversion. Without this option, the \fImbox\fR file is deleted
+
+.TP
+.B \-s
+Do not sleep after a successful conversion. Without this option, mbox2maildir will sleep for a second before exit
+
+.SH "SEE ALSO"
+maildir(5), maildir2mbox(1)

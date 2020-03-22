@@ -1,0 +1,33 @@
+.TH 822date 1
+.SH NAME
+822date \- print the date in a mail message
+.SH SYNOPSIS
+.B 822date
+[
+.I name
+]
+.SH DESCRIPTION
+.B 822date
+reads an 822-format mail message from its standard input,
+and prints the 822-format date shown in the last header field named
+.IR name ,
+or
+.B Date
+if
+.I name
+is not supplied.
+
+.B 822date
+prints the date in three forms:
+first, ISO format, using the time zone shown in the field;
+second, ISO format, using UTC;
+third,
+.B ctime
+format, using the local time zone.
+Beware that most
+.B ctime
+libraries do not correctly handle leap seconds or years past 2037.
+.SH "SEE ALSO"
+822field(1),
+822received(1),
+ctime(3)

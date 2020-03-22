@@ -1,0 +1,14 @@
+#
+# $Log: indimail-mta.fc.in,v $
+# Revision 1.1  2016-06-06 17:03:22+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: indimail-mta.fc.in,v 1.1 2016-06-06 17:03:22+05:30 Cprogrammer Exp mbhangui $
+#
+@servicedir@[[:digit:]]?(/.*)?         -d     system_u:object_r:svc_svc_t:s0
+@servicedir@(/.*)?/.*/run              --     system_u:object_r:svc_run_exec_t:s0
+@servicedir@/.*/run                    --     system_u:object_r:svc_run_exec_t:s0
+@servicedir@/.*/variables(/.*)?        --     system_u:object_r:svc_conf_t:s0
+@qmaildir@/clamd                --     system_u:object_r:antivirus_db_t:s0
+@sysconfdir@(/.*)?                --     system_u:object_r:etc_t:s0

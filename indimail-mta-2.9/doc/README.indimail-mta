@@ -1,0 +1,66 @@
+indimail-mta
+James Craig Burley claims copyright on the qmail-isoc patch. For
+more details, see COPYRIGHT.
+
+Apart from James' copyrights, no other copyright is claimed by the
+author of indimail-mta for changes from qmail 1.03 to indimail-mta.
+Daniel J. Bernstein has abandoned copyright for qmail 1.03.
+D. J. Bernstein did not participate in, nor has he been asked to
+approve of this distribution.
+
+indimail-mta provides multiple queues and eliminates the silly qmail syndrome.
+To provide multiple queues, you need to take care of starting multiple qmail-send
+(depending on number of queues that you want to setup). Any feature you need in qmail,
+will already be there in indimail-mta.
+
+To put things very simple, you need to ensure that the below environment
+variables are set. The RPM/Deb installation ensures this.
+
+QUEUE_BASE  - This should point to a directory which has multiple queues.
+QUEUE_COUNT - This should indicate the number of queues that qmail should use
+QUEUE_START - This indicates the first qeueue that should be used. 
+QMAILQUEUE  - This should be /usr/bin/qmail-multi
+
+e.g. If you want qmail to use 3 queues
+
+QUEUE_BASE=/var/indimail/queue
+QUEUE_COUNT=7
+QUEUE_START=1
+QMAILQUEUE=/usr/sbin/qmail-multi
+
+for i in 1 2 3
+do
+	/usr/bin/queue-fix /var/indimail/queue/queue"$i" > /dev/null
+done
+
+If you do the above, then qmail will use queue1, queue2, queue3 in the directory
+/var/indimail/queue
+
+NOTES
+-----
+
+To start qmail-send on the multiple queues, you need to use qmail-daemon instead of
+qmail-start. qmail-daemon starts a qmail-send process for each queue you configure.
+
+env - QUEUE_COUNT=3 QUEUE_BASE=/var/indimail/queue QUEUE_START=1 \
+	qmail-daemon "`cat /etc/indimail/control/defaultdelivery`" 2>&1
+
+
+You also need to set the above 3 environment variables in the SMTP run script.
+Even if you need to inject mails, you need to set these environment variables.
+
+qmail-inject uses environment variables stored in /etc/indimail/control/defaultqueue
+directory.
+
+In case of any doubt, email "Manvendra Bhangui" <manvendra@indimail.org>
+
+Related packages (written by djb), included in indimail-mta
+-------------------------------------------------------
+ucspi-tcp, which includes a high-speed inetd replacement for your SMTP
+ server, and a generic tool to reject mail from RBL-listed sites;
+serialmail, a collection of tools for passing mail across serial links, including AutoTURN support;
+qmailanalog, a collection of tools to help you analyze qmail's activity record;
+dot-forward, a .forward clone for qmail;
+fastforward, a table-based forwarding utility for qmail, including an /etc/aliases clone;
+mess822, which includes centralized From rewriting for SMTP clients;
+the checkpassword program.

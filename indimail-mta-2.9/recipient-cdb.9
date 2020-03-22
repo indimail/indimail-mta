@@ -1,0 +1,49 @@
+.TH recipient-cdb 8
+.SH NAME
+recipient-cdb \- prepare recipients for qmail-smtpd
+.SH SYNOPSIS
+.B recipient-cdb
+.SH DESCRIPTION
+.B recipient-cdb
+does a chdir to ASSIGN and
+reads the addresses provided in
+.IR recipients ,
+converts them into lowercase, and writes them into
+.I recipients.cdb
+in a binary format suited
+for quick access by
+.BR qmail-smtpd .
+Each line in \fIrecipients\fR should be a local email address.
+
+If there is a problem with
+.IR recipients ,
+.B recipient-cdb
+complains and leaves
+.I recipients.cdb
+alone.
+
+.B recipient-cdb
+ensures that
+.I recipients.cdb
+is updated atomically,
+so
+.B qmail-smtpd
+never has to wait for
+.B recipient-cdb
+to finish.
+However,
+.B recipient-cdb
+makes no attempt to protect against two simultaneous updates of
+.IR recipients.cdb .
+
+The binary
+.I recipients.cdb
+is compatible with 
+.B setforward
+generated \'fastforward\' cdbs and it's
+format is portable across machines.
+
+.SH "SEE ALSO"
+qmail-smtpd(8),
+setforward(1),
+fastforward(1)

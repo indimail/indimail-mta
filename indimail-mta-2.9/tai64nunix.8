@@ -1,0 +1,52 @@
+.TH tai64nunix 8
+.SH NAME
+tai64nunix \- Convert external TAI64N timestamps to fractional seconds since epoch.
+.SH SYNOPSIS
+.B tai64nunix
+.SH DESCRIPTION
+.B tai64nunix
+reads lines from stdin. Expects the input stream to be a sequence of lines beginning with @, a
+timestamp in external TAI64N format, and a space.  Replaces the @ and the
+timestamp with fractional seconds since epoch (1970-01-01 00:00:00 UTC).
+The input time format is the format written by 
+.B
+tai64n
+and 
+.B
+multilog.
+The output time format is expected by qmailanalog.
+
+.EX
+
+% echo @400000003d6387281f8fa4ac delivery 4: success: did_1+0+0/ | tai64nunix
+
+1029932830.529507500 delivery 4: success: did_1+0+0/
+
+%
+.EE
+
+.SH EXIT CODES
+.B tai64nunix
+exits 0 when it sees end of input. It exits 111 without an error message if it
+has trouble reading stdin or writing stdout. 
+.SH SEE ALSO
+supervise(8),
+svc(8),
+svok(8),
+svstat(8),
+svscanboot(8),
+svscan(8),
+readproctitle(8),
+fghack(8),  
+pgrphack(8),
+multilog(8),
+tai64n(8),
+tai64nlocal(8),
+setuidgid(8),
+envuidgid(8),
+envdir(8),
+softlimit(8),
+setlock(8),
+matchup(1)
+
+http://cr.yp.to/daemontools.html

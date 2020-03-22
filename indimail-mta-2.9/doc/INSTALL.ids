@@ -1,0 +1,93 @@
+Here's how to set up the indimail groups and the indimail users.
+
+On some systems there are commands that make this easy. Solaris and
+Linux:
+
+   # groupadd nofiles
+   # useradd -g nofiles -d /var/indimail/alias alias
+   # useradd -g nofiles -d /var/indimail qmaild
+   # useradd -g nofiles -d /var/indimail qmaill
+   # useradd -g nofiles -d /var/indimail qmailp
+   # groupadd qmail
+   # useradd -g qmail -d /var/indimail qmailq
+   # useradd -g qmail -d /var/indimail qmailr
+   # useradd -g qmail -d /var/indimail qmails
+   # groupadd indimail
+   # useradd -g indimail -d /var/indimail indimail
+   # groupadd qscand
+   # useradd -g qscand -d /var/indimail/qscanq qscand -G qmail
+
+FreeBSD 2.2:
+
+   # pw groupadd nofiles
+   # pw useradd alias -g nofiles -d /var/indimail/alias -s /nonexistent
+   # pw useradd qmaild -g nofiles -d /var/indimail -s /nonexistent
+   # pw useradd qmaill -g nofiles -d /var/indimail -s /nonexistent
+   # pw useradd qmailp -g nofiles -d /var/indimail -s /nonexistent
+   # pw groupadd qmail
+   # pw useradd qmailq -g qmail -d /var/indimail -s /nonexistent
+   # pw useradd qmailr -g qmail -d /var/indimail -s /nonexistent
+   # pw useradd qmails -g qmail -d /var/indimail -s /nonexistent
+   # pw groupadd indimail
+   # pw useradd indimail -g indimail -d /var/indimail -s /nonexistent
+   # pw groupadd qscand
+   # pw useradd qscand -g qscand -d /var/indimail/qscanq -G qmail -s /nonexistent
+
+BSDI 2.0:
+
+   # addgroup nofiles
+   # adduser -g nofiles -H/var/indimail/alias -G,,, -s/dev/null -P'*' alias
+   # adduser -g nofiles -H/var/indimail -G,,, -s/dev/null -P'*' qmaild
+   # adduser -g nofiles -H/var/indimail -G,,, -s/dev/null -P'*' qmaill
+   # adduser -g nofiles -H/var/indimail -G,,, -s/dev/null -P'*' qmailp
+   # addgroup qmail
+   # adduser -g qmail -H/var/indimail -G,,, -s/dev/null -P'*' qmailq
+   # adduser -g qmail -H/var/indimail -G,,, -s/dev/null -P'*' qmailr
+   # adduser -g qmail -H/var/indimail -G,,, -s/dev/null -P'*' qmails
+   # addgroup indimail
+   # adduser -g indimail -H/var/indimail -G,,, -s/dev/null -P'*' indimail
+   # addgroup qscand
+   # adduser -g qscand -H/var/indimail/qscanq -Gqmail,,, -s/dev/null -P'*' qscand
+
+AIX:
+
+   # mkgroup -A nofiles
+   # mkuser pgrp=nofiles home=/var/indimail/alias shell=/bin/true alias
+   # mkuser pgrp=nofiles home=/var/indimail shell=/bin/true qmaild
+   # mkuser pgrp=nofiles home=/var/indimail shell=/bin/true qmaill
+   # mkuser pgrp=nofiles home=/var/indimail shell=/bin/true qmailp
+   # mkgroup -A qmail
+   # mkuser pgrp=qmail home=/var/indimail shell=/bin/true qmailq
+   # mkuser pgrp=qmail home=/var/indimail shell=/bin/true qmailr
+   # mkuser pgrp=qmail home=/var/indimail shell=/bin/true qmails
+   # mkgroup -A indimail
+   # mkuser pgrp=indimail home=/var/indimail shell=/bin/true indimail
+   # mkgroup -A qscand
+   # mkuser pgrp=qscand home=/var/indimail/qscanq shell=/bin/true qscand
+
+On other systems, you will have to edit /etc/group and /etc/passwd
+manually. First add two new lines to /etc/group, something like
+
+        qmail:*:2107:qscand
+        nofiles:*:2108:
+        indimail:*:2109:
+        qscand:*:2110:
+
+where 2107, 2108, 2109 and 2110 are different from the other gids in /etc/group.
+Next (using vipw) add six new lines to /etc/passwd, something like
+
+        alias:*:7790:2108::/var/indimail/alias:/bin/true
+        qmaild:*:7791:2108::/var/indimail:/bin/true
+        qmaill:*:7792:2108::/var/indimail:/bin/true
+        qmailp:*:7793:2108::/var/indimail:/bin/true
+        qmailq:*:7794:2107::/var/indimail:/bin/true
+        qmailr:*:7795:2107::/var/indimail:/bin/true
+        qmails:*:7796:2107::/var/indimail:/bin/true
+        indimail:*:7797:2109::/var/indimail:/bin/true
+        qscand:*:7798:2110::/var/indimail/qscanq:/bin/true
+
+where 7790 through 7798 are _new_ uids, 2107 is the qmail gid, 2108
+is the nofiles gid, 2109 is the indimail gid and 2110 is the qscand gid.
+Make sure you use the nofiles gid for qmaild, qmaill, qmailp, and alias,
+the qmail gid for qmailq, qmailr, and qmails, indimail gid for indimail
+and qscand gid for qscand.

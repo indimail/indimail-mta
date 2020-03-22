@@ -1,0 +1,205 @@
+.TH matchup 1
+.SH NAME
+matchup \- collect information on messages and deliveries
+.SH SYNTAX
+.B matchup
+.SH DESCRIPTION
+.B matchup
+reads a series of lines from
+.BR qmail-send ,
+with a numeric timestamp (microsecond or tai64n) in front of each line allowing either
+splogger(8) or multilog(8) to produce the logfiles.
+.B matchup
+matches the end of each delivery attempt with the start of the delivery attempt
+and with the relevant message information;
+it replaces
+.BR qmail-send 's
+message reports and delivery reports
+with message lines and delivery lines in the format described below.
+
+qmail log will contains
+microsecond timestamps: e.g.,
+
+   901967408.113926 new msg 19287
+   901967408.116537 info msg 19287: bytes ...
+
+or tai64n timestamps: e.g.,
+
+   @40000000477f63f537146144 new msg 9101014
+   @40000000477f63f5371474cc info msg 9101014: bytes ...
+
+
+Several programs can generate these timestamps: splogger, accustamp,
+logger2, etc. The default qmail installation sends logs through splogger
+and then through syslogd:
+
+   Aug  1 05:30:08 host qmail: 901967408.113926 new msg 19287
+   Aug  1 05:30:08 host qmail: 901967408.116537 info msg 19287: bytes ...
+
+To remove the "Aug 1 05:30:08 host qmail:" added by syslogd, feed your
+logs through
+
+   awk '{$1="";$2="";$3="";$4="";$5="";print}'
+
+Note that the syslog mechanism is inherently unreliable: it does not
+guarantee that all messages will be logged. For reliable logs, try the
+logging utilities in the daemontools package.
+
+If you are using daemontools package to log qmail's deliveries, use
+.B matchup
+as a processor in
+.BR multilog .
+
+.SH Feeding the log through matchup
+
+The 
+.B matchup
+program monitors qmail's delivery attempts.
+It prints various information in a form suitable for further analysis.
+
+If you have saved the complete qmail log, you can simply run
+.B matchup
+with the log as input, and use the matchup output as described below.
+
+Running
+.B matchup
+again and again on a growing log is unnecessarily slow.
+You can save time by breaking the log into a series of chunks and
+running
+.B matchup
+just once on each chunk. (You can also save space by
+discarding a chunk once matchup is done with it.) Note that
+.B matchup
+keeps track of messages and delivery attempts across chunks.
+
+You could pipe qmail's log directly through
+.B matchup
+before it is logged,
+Beware, however, that
+.B matchup
+will quit if it runs out of memory.
+
+
+.SH Using the matchup results
+
+You can feed the
+.B matchup
+output through any of the
+.I z*
+scripts. Each script explains its output. Use
+.I zoverall
+for basic
+statistics,
+.I zsendmail
+for a sendmail-flavored log.
+
+The
+.I x*
+scripts extract information about particular
+messages, senders, or recipients. You can feed the
+.I x*
+output through the
+.I z*
+scripts.
+
+To see who is generating outgoing mail you can use 
+.IR zsuids ,
+which
+provides one line of statistics for each uid. Incoming mail is shown
+under the qmaild uid.
+
+.B matchup
+exits after it sees end of file.
+It prints pending messages and deliveries on descriptor 5,
+in a format suitable for input to a future invocation of
+.BR matchup :
+
+.EX
+   <log.1 matchup >out.1 5>pending.2
+.br
+   cat pending.2 log.2 | matchup >out.2 5>pending.3
+.br
+   cat pending.3 log.3 | matchup >out.3 5>pending.4
+.EE
+
+Note that the 5> notation does not work with csh.
+.SH "MESSAGE LINES"
+A message line summarizes the delivery results for a message
+that has left the queue:
+
+.EX
+   m \fIbirth\fR \fIdone\fR \fIbytes\fR \fInk\fR \fInz\fR \fInd\fR <\fIsender\fR> \fIqp\fR \fIuid\fR
+.EE
+
+Here
+.I birth
+and
+.I done
+are timestamps,
+.I bytes
+is the number of bytes in the message,
+.I nk
+is the number of successful deliveries,
+.I nz
+is the number of deferred delivery attempts,
+.I nd
+is the number of failed delivery attempts,
+.I sender
+is the message's return path,
+.I qp
+is the message's long-term queue identifier,
+and
+.I uid
+is the userid of the user that queued the message.
+
+Note that
+.B matchup
+converts
+.I sender
+to lowercase.
+This can lose information,
+since a few hosts pay attention to the case in the box part of an address.
+.SH "DELIVERY LINES"
+A delivery line shows the result of a single delivery attempt:
+
+.EX
+   d \fIresult\fR \fIbirth\fR \fIdstart\fR \fIddone\fR \fIbytes\fR
+.br
+   <\fIsender\fR> \fIchan\fR.\fIrecip\fR \fIqp\fR \fIuid\fR \fIreason\fR
+.EE
+
+Here
+.IR birth ,
+.IR bytes ,
+.IR sender ,
+.IR qp ,
+and
+.I uid
+are message information as above;
+.I chan
+is the channel for this delivery;
+.I recip
+is the recipient address for this delivery;
+.I dstart
+and
+.I ddone
+are timestamps;
+.I result
+is the letter k for success, z for deferral, d for failure;
+and
+.I reason
+is a more detailed explanation of the delivery result.
+
+.B matchup
+converts
+.I recip
+to lowercase.
+.SH "SEE ALSO"
+xqp(1),
+xrecipient(1),
+xsender(1),
+accustamp(1),
+qmail-log(5),
+splogger(8),
+tai64n(8),
+tai64nunix(8), multilog(8)

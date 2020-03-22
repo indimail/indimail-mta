@@ -1,0 +1,18 @@
+.TH tai64n2tai 1
+.SH NAME
+tai64n2tai \- convert TAI64N timestamps to TAI
+.SH SYNOPSIS
+.B tai64n2tai
+.SH DESCRIPTION
+.B tai64n2tai
+reads lines from standard input.
+If a line does not begin with a TAI64N label,
+.B tai64n2tai
+writes it out without change.
+Otherwise,
+.B tai64n2tai
+converts the timestamp to TAI format, and writes out the
+converted timestamp followed by the rest of the original line.
+The older TAI format is used by some older programs such as qmail-analog.
+.SH SEE ALSO
+multilog, tai64n, tai64nunix, tai64nlocal, tai2tai64n

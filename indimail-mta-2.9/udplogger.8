@@ -1,0 +1,39 @@
+.TH udplogger 8
+.SH NAME
+udplogger \- Receive log message from UDP clients and print on stdout
+
+.SH SYNOPSIS
+.B udplogger
+.B \-t \fItimeout
+.B \-p \fIport
+ipadd[:port]
+
+.SH DESCRIPTION
+.PP
+\fBudplogger\fR binds on datagram socket port 3000 and receives messages to be printed on stdout. udplogger(8) is
+typically configured under supervise(8) with use of multilog(8) to log the messages on disk.
+
+.SH OPTIONS
+.PP
+.TP
+\fB\-t\fR \fItimeout\fR
+Timeout out read after \fItimeout\fR seconds
+
+.TP
+\fB\-p\fR \fIport\fR
+Connect to port \fIport\fR
+
+.TP
+\fIipaddr\fR[:\fIport\fR]
+Connect to host \fIhost\fR on port \fIport\fR. If port is omitted, it binds on port 3000. This overrides the value
+specified by -p option.
+
+.SH RETURN VALUE
+0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic
+message is printed.
+
+.SH AUTHORS
+\fBudplogger(8)\fR has been written by Manvendra Bhangui for \fBTagrem Technologies Pvt. Ltd.\fR. - https://www.tagrem.com
+
+.SH "SEE ALSO"
+udpclient(1), supervise(8), multilog(8)

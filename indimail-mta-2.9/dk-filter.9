@@ -1,0 +1,96 @@
+.TH dk-filter 8
+.SH NAME
+dk-filter \- sign/verify using DK/DKIM (SSP/ADSP optionally) and deliver a mail message for delivery
+.SH SYNOPSIS
+.B FILTERARGS=PREFIX/bin/dk-filter
+.SH DESCRIPTION
+.B dk-filter
+is a qfilter which can be set as a filter for
+.BR spawn-filter(8) .
+The filter can be set either as
+.B FILTERARGS
+or in the control file
+.BR filterargs .
+
+.B dk-filter
+supports DK/DKIM signing and verification and can optionally use
+.B Sender Signing Practice (SSP)
+or
+.B Author Domain Signing Practice.
+It uses the libdkim and OpenSSL libraries.  To sign a message, set the
+.B DKIMSIGN
+environment variable (for DKIM signing) or
+.B DKSIGIN
+environment variable (for DK signing) to the pathname of the private key that will be
+used to sign the message. If there is a % character in the environment
+variable, it is removed and replaced by the domain name in the From: header.
+If, after substituting the %, that file does not exist, @controldir@/domainkeys/%/default
+will be used as the key. If again, after substituting the % sign, the file does not exist,
+@controldir@/domainkeys/default will be used as the key.
+After all substitutions, if the key file does not exist, the message will not be signed.
+If there is no % and the file does not exist, the message will be rejected with error 35.
+The default private key @controldir@/domainkeys/default can be overriden by the
+\fBDKIM_DEFAULT_KEY\fR environment variable.
+
+The selector (s=) will be taken from the basename of the file.
+The private key should be created by 
+.BR dknewkey(8) .
+
+You can set various DK options in getopt style, by setting the environment variable DKSIGNOPTIONS
+ b <advice_length>    Length of Advice
+ c <canonicalization> simple, nofws
+ s <privkeyfile>
+ h                    show headers included
+ r                    Skip Duplicate Headers
+.EX
+ DKSIGNOPTIONS="-h -r -c nofws"
+ sets the h= tag, skips duplicate headers and sets nofws canonicalization
+.EE
+
+You can set various DKIM options in getopt style, by setting the environment variable DKIMSIGNOPTIONS
+
+ b <standard>         1 - allman, 2 - ietf or 3 - both
+ c <canonicalization> r for relaxed [DEFAULT], s - simple,
+                      t relaxed/simple, u - simple/relaxed
+ l                    include body length tag
+ q                    include query method tag;
+ t                    include a timestamp tag
+ h
+ i <identity>         the identity, if not provided it will not be included
+ x <expire_time>      the expire time in seconds since epoch
+                      ( DEFAULT = current time + 604800)
+                      if set to - then it will not be included
+ z <hash>             1 for sha1, 2 for sha256, 3 for both
+ s <privkeyfile>
+ y <selector>
+
+.EX
+ DKIMSIGNOPTIONS="-b 1 -c r -q"
+ sets allman standard, with relaxed canonicalization and include query method tag
+.EE
+
+when signing \fBdk-filter\fR uses the domain found in the Return-Path, Sender, From headers to set
+the domain tag. If not it uses the value of \fBDKIMDOMAIN\fR environment
+variable. \fBDKIMDOMAIN\fR can be set to an email address or a domain (without the at sign).
+
+To verify a message, set the \fBDKIMVERIFY\fR or \fBDKVERIFY\fR environment variables.
+\fBdk-filter\fR always inserts the \fBDKIM-Status\fR or \fBDomainKey-Status\fR header, so
+that messages can be rejected later at delivery time, or in the mail reader. In that case
+you may set \fBDKIMVERIFY\fR or \fBDKVERIFY\fR to an empty string. The exit code of \fBdk-filter\fR
+can be fine tuned by setting \fBDKIMVERIFY\fR environment variable. See \fBdkim(8)\fR for a detailed
+description on setting the \fBDKIMVERIFY\fR environment variable.
+
+\fBdk-filter\fR does not use any signing practice by default. You can override this by setting
+the SIGN_PRACTICE to ssp or adsp (lowercase).
+
+If neither of these environment variables (DKIMSIGN, DKSIGN, DKIMVERIFY, DKVERIFY) are defined, dk-filter
+will do signing by default.
+
+.SH "EXIT CODES"
+0 for success, non-zero failure
+
+.SH "SEE ALSO"
+dknewkey(8),
+dktest(8),
+dkim(8),
+spawn-filter(8)

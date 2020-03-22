@@ -1,0 +1,65 @@
+.TH plugtest 1
+.SH NAME
+plugtest \- test qmail-smtpd plugins
+.SH SYNOPSIS
+.B plugtest
+.B \-MRD
+[
+.B \-l
+.I localip
+.B \-r
+.I remoteip
+.B \-R
+.I remotehost
+.B \-m
+.I mailfrom 
+]
+\fIrecip\fR ...
+
+.SH DESCRIPTION
+\fBplugtest(1)\fR tests SMTP plugins for \fBqmail-smtpd(8)\fR. By default \fBplugtest(1)\fR
+looks for plugins in PREFIX/lib/indimail/plugins directory. You can change this by defining
+\fBPLUGINDIR\fR environment variable. You can also load multiple plugins by creating
+smtpd-plugin0.so, smtpd-plugin1.so, and so on. plugtest(1) uses \fBdlopen(3)\fR to open
+the plugins and execute the MAIL, RCPT & DATA plugins defined in the shared library
+representing a plugin.
+After loading the plugin, the function \fIplugin_init()\fR is executed. The function to
+be executed can be changed by setting environment variable \fBSMTP_PLUGIN_SYM\fR. The
+function \fIplugin_init()\fR should return a PLUGIN structure (see plugin_init(3) for details).
+The PLUGIN structure returns pointer to three functions to be executed in the MAIL FROM,
+RCPT and DATA phase of SMTP.
+
+.SH OPTIONS
+.TP
+-M
+Test plugin for MAIL session
+.TP
+-R
+Test plugin for RCPT session
+.TP
+-D
+Test plugin for DATA session
+.TP
+-i
+Set authenticated flag
+.TP
+-I
+Set RELAYCLIENT flag
+.TP
+-r \fIremoteip\fR
+Pass \fIremoteip\fR as the remote IP address
+.TP
+-R \fIremotehost\fR
+Pass \fIremotehost\fR as the remote IP address
+.TP
+-l \fIlocalip\fR
+Pass \fIlocalip\fR as the local IP address
+.TP
+-m \fImailfrom\fR
+Pass \fImailfrom\fR as the return path
+.TP
+\fIrecip\fR
+Pass \fIrecip\fR and following arguments as recipients
+
+.SH SEE ALSO
+qmail-smtpd(8), dlopen(3), plugin_init(3), gcc(1)

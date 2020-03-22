@@ -1,0 +1,51 @@
+.TH maildirqmtp 1
+.SH NAME
+maildirqmtp \- send a maildir through QMTP
+.SH SYNOPSIS
+.B maildirqmtp
+.I dir
+.I prefix
+.I host
+.SH DESCRIPTION
+.B maildirqmtp
+scans a maildir,
+.IR dir ,
+and sends each message to
+.I host
+through QMTP.
+It removes
+.I prefix
+from the beginning of each envelope recipient address.
+It ignores any message whose recipient address does not begin with
+.IR prefix .
+
+.B maildirqmtp
+removes messages accepted by
+.IR host .
+It bounces messages permanently rejected by
+.I host
+back to the envelope sender,
+and then removes them.
+It treats temporary rejection as permanent rejection
+for messages more than two weeks old.
+
+Note that failure to connect to
+.I host
+is not temporary rejection.
+If
+.I host
+is never reachable,
+.B maildirqmtp
+will never remove messages.
+
+.B maildirqmtp
+needs
+.B tcpclient
+in
+.BR $PATH .
+.SH "SEE ALSO"
+qmtp(5),
+qmail-remote(5),
+maildirserial(1),
+serialqmtp(1),
+tcpclient(1)

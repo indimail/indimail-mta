@@ -1,0 +1,13 @@
+/*
+ * $Log: select.h1,v $
+ * Revision 1.1  2004-10-22 14:59:46+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
+#ifndef SELECT_H
+#define SELECT_H
+
+#include <sys/types.h>
+#include <sys/time.h>
+
+#endif
