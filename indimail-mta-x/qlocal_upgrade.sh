@@ -307,7 +307,7 @@ fi
 
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
-/usr/sbin/svctool ----fixsharedlibs
+/usr/sbin/svctool --fixsharedlibs
 
 # for surbl
 if [ ! -d /etc/indimail/control/cache ] ; then
