@@ -8,7 +8,11 @@ libsrs2_version=@libsrs2_version@
 version=@version@
 for i in indimail-mta-"$version" ucspi-tcp-0.88 libdkim-"$libdkim_version" libsrs2-"$libsrs2_version"
 do
-	/bin/rm -rf $i
+	if [ -d $i ] ; then
+		/bin/rm -rf $i
+	elif [ -d indimail-mta-x ] ; then
+		/bin/rm -rf indimail-mta-x
+	fi
 	if [ -f ../SOURCES/$i.tar.gz ] ; then
 		echo "extracting $i.tar.gz"
 		gunzip -c ../SOURCES/$i.tar.gz |tar xf -
@@ -21,6 +25,9 @@ do
 	else
 		echo "no source archive for $i"
 		exit 1
+	fi
+	if [ -d indimail-mta-x ] ; then
+		/bin/mv indimail-mta-x indimail-mta-"$version"
 	fi
 	if [ -f ../SOURCES/$i.patch.gz ] ; then
 		echo "applying patch for $i"
