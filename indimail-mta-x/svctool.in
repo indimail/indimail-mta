@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.459 2020-03-22 16:39:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.460 2020-03-23 16:21:40+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.459 2020-03-22 16:39:13+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.460 2020-03-23 16:21:40+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3122,7 +3122,6 @@ if [ " $proxy_port" = " " ] ;then
 		echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/$stype.$tag"
 	fi
 else
-	#echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/proxy${cdb_f^^}.$tag"
 	echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/proxy"`echo $cdb_f|tr '[:lower:]' '[:upper:]'`".$tag"
 fi
 ) > /tmp/courierlog-run.$$
@@ -9557,7 +9556,7 @@ case $option in
 					fi
 				done
 				echo "Updating certfile as $sysconfdir/certs/servercert.pem"
-				for i in `echo /service/*/variables/*CERTFILE`
+				for i in `ls /service/*/variables/*CERTFILE 2>/dev/null`
 				do
 					j=`/bin/cat $i`
 					if [ ! " $j" = " $sysconfdir/certs/servercert.pem" ] ; then
@@ -9566,7 +9565,7 @@ case $option in
 					fi
 				done
 				echo "Updating tls cachefile as $sysconfdir/certs/couriersslcache"
-				for i in `echo /service/*/variables/TLS_CACHEFILE`
+				for i in `ls /service/*/variables/TLS_CACHEFILE 2>/dev/null`
 				do
 					j=`/bin/cat $i`
 					if [ ! " $j" = " $sysconfdir/certs/couriersslcache" ] ; then
@@ -9575,7 +9574,7 @@ case $option in
 					fi
 				done
 				# restart services
-				for i in `echo /service/*-ssl.* /service/indisrvr.* /service/qmail-poppass.*`
+				for i in `ls /service/*-ssl.* /service/indisrvr.* /service/qmail-poppass.*`
 				do
 					if [ -d $i ] ; then
 						echo $QmailBinPrefix/bin/svc -d $i
