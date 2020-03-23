@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.31  2020-03-23 16:18:28+05:30  Cprogrammer
+# changed --fixmysql_libs to --fixsharedlibs
+#
 # Revision 1.30  2020-03-16 22:39:12+05:30  Cprogrammer
 # disable freshclam svscan service if systemd freshclam is enabled
 #
@@ -88,7 +91,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.30 2020-03-16 22:39:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.31 2020-03-23 16:18:28+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -113,7 +116,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.30 2020-03-16 22:39:12+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.31 2020-03-23 16:18:28+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -304,7 +307,7 @@ fi
 
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
-/usr/sbin/svctool --fixmysql_libs
+/usr/sbin/svctool ----fixsharedlibs
 
 # for surbl
 if [ ! -d /etc/indimail/control/cache ] ; then
