@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.14  2020-03-24 13:00:43+05:30  Cprogrammer
+ * BUG Fix. Absence of control file shouldn't be treated as an error
+ *
  * Revision 1.13  2019-06-07 19:17:47+05:30  Cprogrammer
  * return error if shared lib is missing
  *
@@ -43,7 +46,6 @@
 /*
  * The following objects are needed to support indimail
  * indimail 2.x                 indimail 3.x
- * count_dir()
  * parse_email()
  * isvirtualdomain()
  * vauth_open()             --> iopen()
@@ -146,15 +148,15 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 	int             i;
 
 	if (*libenv == '/') { /*- filename */
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
 		if ((i = control_readline(&libfn, libenv)) == -1 || !i) {
-			if (errflag)
-				*errflag = errno;
 			if (errstr)
 				*errstr = (char *) 0;
+			if (!i) {
+				*errflag = 0;
+				return ((void *) 0);
+			}
+			if (errflag)
+				*errflag = errno;
 			if (!stralloc_copys(&errbuf, ctlerr) ||
 					!stralloc_catb(&errbuf, ": ", 2) ||
 					!stralloc_copys(&errbuf, error_str(errno)) ||
@@ -536,10 +538,6 @@ inquery(char query_type, char *email, char *ip)
 	*((int *) ptr) = querybuf.len - sizeof(int);
 	bytes = querybuf.len;
 
-	if (!controldir) {
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = auto_control;
-	}
 	getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
 	relative = *infifo_dir == '/' ? 0 : 1;
 	if (!(infifo = env_get("INFIFO")))
@@ -636,6 +634,10 @@ inquery(char query_type, char *email, char *ip)
 		return ((void *) 0);
 	} 
 	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", auto_sysconfdir);
+	if (!controldir) {
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = auto_control;
+	}
 	if (relative) {
 		if (!stralloc_copys(&tmp, sysconfdir))
 			return ((void *) 0);
@@ -862,7 +864,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.13 2019-06-07 19:17:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.14 2020-03-24 13:00:43+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

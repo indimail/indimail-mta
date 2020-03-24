@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.16  2020-03-24 12:58:57+05:30  Cprogrammer
+ * use qcount_dir() function to get mail counts
+ *
  * Revision 1.15  2019-05-27 20:26:33+05:30  Cprogrammer
  * use VIRTUAL_PKG_LIB env variable if defined
  *
@@ -60,7 +63,7 @@
 #include "auto_qmail.h"
 #include "env.h"
 #include "wait.h"
-#include "indimail_stub.h"
+#include "qcount_dir.h"
 #include <ctype.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -77,13 +80,10 @@ etrn_queue(char *arg, char *remoteip)
 {
 	int             child, r, flagetrn, len, exitcode, wstat;
 	size_t          mailcount;
-	static stralloc etrn = { 0 }, libfn = { 0 };
+	static stralloc etrn = { 0 };
 	char            maildir1[1024], maildir2[1024];
-	char           *errstr, *ptr;
 	struct constmap mapetrn;
 	static int      flagrcpt = 1;
-	size_t          (*count_dir) (char *, size_t *);
-	void           *phandle = (void *) 0;
 
 	if (flagrcpt)
 		flagrcpt = rcpthosts_init();
@@ -116,32 +116,11 @@ etrn_queue(char *arg, char *remoteip)
 	maildir2[r] = 0;
 
 	mailcount = 0;
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&libfn, controldir))
-			die_nomem();
-		if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
-			die_nomem();
-		if (!stralloc_catb(&libfn, "libindimail", 11) ||
-				!stralloc_0(&libfn))
-			die_nomem();
-		ptr = libfn.s;
-	} else
-		ptr = "VIRTUAL_PKG_LIB";
-	loadLibrary(&phandle, ptr, 0, &errstr);
-	if (!phandle)
-		return (err_library(errstr));
-	if (!(count_dir = getlibObject(ptr, &phandle, "count_dir", &errstr)))
-		return (err_library(errstr));
 	if (!access(maildir1, F_OK))
-		count_dir(maildir1, &mailcount);
+		qcount_dir(maildir1, &mailcount);
 	else
 	if (!access(maildir2, F_OK))
-		count_dir(maildir2, &mailcount);
-	closeLibrary(&phandle);
+		qcount_dir(maildir2, &mailcount);
 	if (!mailcount)
 		return(-3);
 	switch (child = fork())
@@ -217,7 +196,7 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.15 2019-05-27 20:26:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.16 2020-03-24 12:58:57+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

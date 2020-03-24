@@ -1952,7 +1952,7 @@ qmail_smtpd.so: \
 smtpd.o rcpthosts.o recipients.o commands.o indimail_stub.o \
 ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 received.o date822fmt.o wildmat.o qmail.o variables.o \
-envrules.o bodycheck.o sqlmatch.o matchregex.o \
+envrules.o bodycheck.o sqlmatch.o matchregex.o qcount_dir.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o spf.o dns.o auto_qmail.o auto_uids.o \
 qregex_sql.o tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
@@ -1960,7 +1960,7 @@ auto_break.o auto_control.o auto_assign.o auto_prefix.o auto_sysconfdir.o \
 socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so smtpd.o rcpthosts.o \
-	recipients.o commands.o indimail_stub.o load_mysql.o \
+	recipients.o commands.o indimail_stub.o load_mysql.o qcount_dir.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o socket_v4mappedprefix.o \
@@ -1970,7 +1970,7 @@ socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	hmac_sha1.o `cat socket.lib dns.lib tls.lib` -lqmail ; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so smtpd.o rcpthosts.o \
-	recipients.o commands.o auto_control.o auto_assign.o \
+	recipients.o commands.o auto_control.o auto_assign.o qcount_dir.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o socket_v4mappedprefix.o \
@@ -1987,12 +1987,12 @@ received.o date822fmt.o wildmat.o qmail.o variables.o auto_control.o \
 envrules.o bodycheck.o sqlmatch.o matchregex.o indimail_stub.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o spf.o dns.o auto_qmail.o auto_uids.o \
-qregex_sql.o tablematch.o greylist.o auto_assign.o \
+qregex_sql.o tablematch.o greylist.o auto_assign.o qcount_dir.o \
 query_skt.o fn_handler.o tlsarralloc.o load_mysql.o \
 auto_sysconfdir.o auto_break.o auto_prefix.o socket.lib dns.lib tls.lib \
 hmac_sha1.o mysql_config conf-sql
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o commands.o \
-	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
+	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o qcount_dir.o \
 	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
@@ -4197,13 +4197,18 @@ inotify.o: compile inotify.c hasinotify.h
 maildirsize: \
 load maildirsize.o auto_uids.o auto_control.o auto_qmail.o \
 variables.o auto_sysconfdir.o indimail_stub.o \
-control.o
+control.o qcount_dir.o
 	./load maildirsize auto_uids.o auto_control.o auto_qmail.o \
-	variables.o auto_sysconfdir.o control.o indimail_stub.o -ldl -lqmail
+	variables.o auto_sysconfdir.o control.o indimail_stub.o qcount_dir.o \
+	-ldl -lqmail
 
 maildirsize.o: \
 compile maildirsize.c indimail_stub.h auto_control.h variables.h
 	./compile maildirsize.c
+
+qcount_dir.o: \
+compile qcount_dir.c
+	./compile qcount_dir.c
 
 
 ################### PLUGINS ########################################

@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.7  2020-03-24 13:02:14+05:30  Cprogrammer
+ * use qcount_dir() instead of loadLibrary() to load count_dir() function from libindimail
+ *
  * Revision 1.6  2019-05-27 20:29:13+05:30  Cprogrammer
  * use VIRTUAL_PKG_LIB env variable if defined
  *
@@ -32,26 +35,22 @@
 #include "control.h"
 #include "variables.h"
 #include "auto_control.h"
-#include "indimail_stub.h"
+#include "qcount_dir.h"
 
 #define FATAL "maildirsize: fatal: "
 
 struct substdio ssout;
 char            outbuf[256];
-static stralloc libfn = { 0 };
 
 int
 main(int argc, char **argv)
 {
-	size_t          (*count_dir) (char *, size_t *);
 	int             fd, len;
-	char           *errstr, *ptr;
 	size_t          mailcount;
 	int64_t         mailsize;
 	char            strnum[FMT_ULONG];
 	struct statfs   statbuf;
 	struct passwd  *pw;
-	void           *phandle = (void *) 0;
 
 	if (argc != 2)
 		strerr_die1x(100, "usage: maildirsize user");
@@ -61,28 +60,8 @@ main(int argc, char **argv)
 		strerr_die3sys(111, FATAL, "chdir: ", pw->pw_dir);
 	if (access("./Maildir/", F_OK))
 		strerr_die4sys(111, FATAL, "chdir: ", pw->pw_dir, "/Maildir/");
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&libfn, controldir))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_catb(&libfn, "libindimail", 11) ||
-				!stralloc_0(&libfn))
-			strerr_die2x(111, FATAL, "out of memory");
-		ptr = libfn.s;
-	} else
-		ptr = "VIRTUAL_PKG_LIB";
-	if (!(phandle = loadLibrary(&phandle, ptr, 0, &errstr)))
-		strerr_die1x(111, "problem with loading shared libs");
-	if (!(count_dir = getlibObject(ptr, &phandle, "count_dir", &errstr)))
-		strerr_die1x(111, "problem with loading shared libs");
 	mailcount = 0;
-	mailsize = count_dir("./Maildir/", &mailcount);
-	closeLibrary(&phandle);
+	mailsize = qcount_dir("./Maildir/", &mailcount);
 	if ((fd = open_trunc("./Maildir/maildirsize")) == -1)
 		strerr_die2sys(111, FATAL, "./Maildir/maildirsize: ");
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
@@ -115,7 +94,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.6 2019-05-27 20:29:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.7 2020-03-24 13:02:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
