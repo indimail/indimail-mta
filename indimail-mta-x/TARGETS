@@ -1115,3 +1115,4 @@ qfrontend
 qf-smtp-ratelimit
 load_mysql.o
 docker-entrypoint
+qcount_dir.o
