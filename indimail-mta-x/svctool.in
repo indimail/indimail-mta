@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.462 2020-03-24 13:11:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.463 2020-03-27 19:20:15+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.462 2020-03-24 13:11:01+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.463 2020-03-27 19:20:15+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9424,7 +9424,28 @@ case $option in
 		else
 			conf_file="$DESTDIR"$sysconfdir/scan.conf.disabled
 		fi
-		create_clamd_conf > /tmp/config.cnf.$$
+		if [ -d /etc/clamd.d ] ; then
+			if [ -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.d/scan.conf ] ; then
+				cat /etc/clamd.d/scan.conf | sed \
+					-e 's,#LogClean,LogClean,g' \
+					-e 's,#LocalSocket,LocalSocket,g' \
+					-e 's,LogSyslog,#LogSyslog,g' \
+					-e 's,#DatabaseDirectory.*,DatabaseDirectory /var/indimail/clamd,g' \
+					-e 's,LocalSocketGroup.*,LocalSocketGroup qmail,g'  \
+					-e 's,#LocalSocketMode,LocalSocketMode,g' \
+					-e 's,#FixStaleSocket,FixStaleSocket,g' \
+					-e 's,User.*,User qscand,g'  \
+					-e 's,#Foreground,Foreground,g' \
+					-e '0,/^#Example$/d' > /tmp/config.cnf.$$
+				if [ ! -s /tmp/config.cnf.$$ ] ; then
+					create_clamd_conf > /tmp/config.cnf.$$
+				fi
+			elif [ ! -f /etc/clamd.d/scan.conf ] ; then
+				create_clamd_conf > /tmp/config.cnf.$$
+			fi
+		else
+			create_clamd_conf > /tmp/config.cnf.$$
+		fi
 		if [ $? -eq 0 ] ; then
 			change_config $conf_file /tmp/config.cnf.$$
 		else
@@ -9443,6 +9464,9 @@ case $option in
 			fi
 		else
 			exit 1
+		fi
+		if [ -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.conf ] ; then
+			mv /etc/clamd.d/scan.conf /etc/clamd.d/scan.conf.BAK
 		fi
 		if [ -d /etc/clamd.d -a ! -f "$DESTDIR"/etc/clamd.d/scan.conf ] ; then
 			if [ ! -d "$DESTDIR"/etc/clamd.d ] ; then
@@ -9465,11 +9489,27 @@ case $option in
 		else
 			conf_file="$DESTDIR"$sysconfdir/freshclam.conf.disabled
 		fi
-		create_freshclam_conf > /tmp/config.cnf.$$
+		if [ -f /etc/freshclam.conf -a ! -L /etc/freshclam.conf ] ; then
+			cat /etc/freshclam.conf | sed \
+				-e 's,#LogClean,LogClean,g' \
+				-e 's,LogSyslog,#LogSyslog,g' \
+				-e 's,#DatabaseDirectory.*,DatabaseDirectory /var/indimail/clamd,g' \
+				-e 's,#DatabaseOwner.*,DatabaseOwner qscand,g'  \
+				-e 's,#Foreground,Foreground,g' \
+				-e '0,/^#Example$/d' > /tmp/config.cnf.$$
+			if [ ! -s /tmp/config.cnf.$$ ] ; then
+				create_freshclam_conf > /tmp/config.cnf.$$
+			fi
+		elif [ ! -f /etc/freshclam.conf ] ; then
+			create_freshclam_conf > /tmp/config.cnf.$$
+		fi
 		if [ $? -eq 0 ] ; then
 			change_config $conf_file /tmp/config.cnf.$$
 		else
 			/bin/rm -f /tmp/config.cnf.$$
+		fi
+		if [ -f /etc/freshclam.conf -a ! -L /etc/freshclam.conf ] ; then
+			mv /etc/freshclam.conf /etc/freshclam.conf.BAK
 		fi
 		if [ ! -f "$DESTDIR"/etc/freshclam.conf ] ; then
 			if [ ! -d "$DESTDIR"/etc ] ; then
