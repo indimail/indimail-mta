@@ -7,7 +7,7 @@ Homepage: http://indimail.sourceforge.net
 
 Package: indimail-mta
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, procps
+Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, diffutils, procps
 Provides: indimail-mini, daemontools, ucspi-tcp
 Conflicts: indimail-mini, daemontools, ucspi-tcp
 Replaces: indimail-mini, daemontools, ucspi-tcp
@@ -27,7 +27,7 @@ Description: indimail-mta provides a standalone SMTP server that is part of the 
 
 Package: daemontools
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils
 Description: daemontools is a collection of tools for managing UNIX services. 
  .
  supervise monitors a service. It starts the service and restarts the
@@ -42,7 +42,7 @@ Description: daemontools is a collection of tools for managing UNIX services.
 
 Package: ucspi-tcp
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils
 Description: tcpserver and tcpclient are easy-to-use command-line tools for building
  TCP client-server applications.
  .
@@ -73,7 +73,7 @@ Description: tcpserver and tcpclient are easy-to-use command-line tools for buil
  different networks.
 
 Package: indimail-mini
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils
 Section: misc
 Architecture: any
 Breaks: indimail-mta
