@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.39  2020-03-31 13:18:04+05:30  Cprogrammer
+ * fixed bug with setup_qrargs()
+ *
  * Revision 1.38  2019-07-29 21:15:31+05:30  Cprogrammer
  * use setup_qrargs() to setup arguments once and cache the args
  *
@@ -269,7 +272,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	char *          (*findhost) (char *, int);
 
 	size_buf[fmt_ulong(size_buf, msgsize)] = 0;
-	args[0] = setup_qrargs();
+	args[0] = "sbin/qmail-remote";
 	args[1] = r + at + 1;		/*- domain */
 	args[2] = s;				/*- sender */
 	args[3] = qqeh;				/*- qqeh */
@@ -359,7 +362,8 @@ noroutes:
 			_exit(111);
 		if (fd_copy(2, 1) == -1)
 			_exit(111);
-		execvp(*args, args);
+		ptr = setup_qrargs();
+		execvp(ptr, args);
 		if (error_temp(errno))
 			_exit(111);
 		_exit(100);
@@ -370,7 +374,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.38 2019-07-29 21:15:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.39 2020-03-31 13:18:04+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
