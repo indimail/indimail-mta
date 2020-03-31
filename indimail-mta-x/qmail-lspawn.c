@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.34  2020-03-31 13:17:52+05:30  Cprogrammer
+ * fixed bug with setup_qlargs()
+ *
  * Revision 1.33  2019-07-29 21:16:59+05:30  Cprogrammer
  * use setup_qlargs() to setup arguments once and cache the args
  *
@@ -583,7 +586,7 @@ noauthself: /*- deliver to local user in control/locals */
 		nughde_get(recip);
 		x = nughde.s;
 		xlen = nughde.len;
-		args[0] = setup_qlargs();
+		args[0] = "sbin/qmail-local";
 		args[1] = "--";
 		args[2] = x; /*- user */
 		n = byte_chr(x, xlen, 0);
@@ -641,7 +644,8 @@ noauthself: /*- deliver to local user in control/locals */
 			_exit(QLX_USAGE);
 		if (!getuid())
 			_exit(QLX_ROOT);
-		execv(*args, args);
+		ptr = setup_qlargs();
+		execv(ptr, args);
 		if (error_temp(errno))
 			_exit(QLX_EXECSOFT);
 		_exit(QLX_EXECHARD);
@@ -652,7 +656,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.33 2019-07-29 21:16:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.34 2020-03-31 13:17:52+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
