@@ -1,46 +1,93 @@
 .TH sys-checkpwd 8
 .SH NAME
-sys-checkpwd \- Checkpassword Interface for system users
-.SH SYNOPSIS
-\fBsys-checkpwd\fR \fIprog\fR
+sys-checkpwd \- indimail-mta checkpassword program for authentication
+
+.SH SYNOPSYS
+\fBsys-checkpwd\fR \fBalternate_checkpassword_program(s)\fR \fB/bin/false\fR
 
 .SH DESCRIPTION
-\fBsys-checkpwd\fR reads descriptor 3 through end of file and then closes descriptor 3. There
-must be at most 512 bytes of data before end of file.
+\fBsys-checkpwd\fR supports authentication for ESMTP AUTH option in \fBqmail-smtpd(8)\fR,
+allowing the LOGIN, PLAIN, and CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 AUTH types.
+\fBsystpass\fR looks up userids in the systems authentication database (/etc/passwd or /etc/shadow).
+.PP
+As reflected in the \fBqmail-smtpd(8)\fR man page, \fBqmail-smtpd(8)\fR must be invoked with
+three arguments: hostname, path of the systpass program, and subprogram. If these
+arguments are missing, \fBqmail-smtpd(8)\fR will not advertise availability of AUTH.
+.PP
+\fBsystpass\fR reads descriptor 3 through end of file and then closes
+descriptor 3. There must be at most 512 bytes of data before end of file. If it invokes an
+\fBalternate_checkpassword_program\fR, it opens a pipe duping the read descriptor as 3 for
+the \fBalternate_checkpassword_program\fR. The write end of the pipe is duped to descriptor 4
+and the data which was earlier read on descriptor 3 is written back on descriptor 4.
+The alternate program is invoked when sys-checkpwd doesn't support authentication for the
+supplied login name.
+.PP
+For LOGIN, PLAIN AUTH types, the information supplied on descriptor 3 is a login name
+terminated by \\0 and password terminated by \\0. \fBsys-checkpwd\fR encrypts the password using
+cyrpt(3) routine and compares it against the value present in the passwd database. The encrypted
+password can be in DES, MD5, SHA-256 or SHA-512 hash.
+.PP
+For CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 AUTH type, the information supplied on
+descriptor 3 is a login name terminated by \\0, a cram-md5 challenge terminated by \\0, and
+a cram-md5 response terminated by \\0.  \fBsystpass\fR encrypts the
+challenge with keyed MD5 using passwords from passwd database. It's compared with
+response (3rd parameter) and if they are the same then systpass uses execvp to
+run subprogram with the given arguments. If they differ then it returns -1.
+.PP
+If challenge and response differ, \fBsystpass\fR exits 1. If \fBsystpass\fR
+is misused, it may instead exit 2. If there is a temporary problem checking the password,
+\fBsystpass\fR exits 111.
+.PP
+hostname is simply used to form the CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 challenge.
+\fBqmail-smtpd\fR invokes \fBsys-checkpwd\fR, feeding it the username and password, in the case
+of LOGIN or PLAIN, or the username, challenge, and response, in the case of CRAM-MD5,
+CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5.  If the user checks out, \fBsystpass\fR
+exits with a status of 0 for the user to be authenticated. Otherwise, subprogram should
+exit with a non-zero status, or call an alternate checkpassword program. The last
+subprogram can usually be /usr/bin/false (or /bin/false, depending on your flavor of OS).
 
-The information supplied on descriptor 3 is a login name terminated by \\0, a password
-terminated by \\0, a timestamp terminated by \\0, and possibly more data. There are no other
-restrictions on the form of the login name, password, and timestamp.
+.PP
+\fBsys-checkwd\fR does not authenticate if user is inactive. A user is active if one logs in using
+IMAP or POP3 protocol. If \fBALLOW_INACTIVE\fR is defined, \fBsys-checkwd\fR will proceed regardless
+of the user's active or inactive status.
 
-If the password is acceptable, sys-checkpwd exits 0. If sys-checkpwd is misused, it may
-instead exit 2. If there is a temporary problem checking the password, sys-checkpwd exits 111.
+If the environment variable \fBDOMAIN_LIMITS\fR is defined, \fBsys-checkwd\fR validates domain
+expiry and password expiry set by \fBvmoduser(1)\fR program.
 
-If the password is unacceptable, ldap-checkpwd runs \fIprog\fR. \fIprog\fR consists of one or more
-arguments.
+\fBsys-checkwd\fR can execute a script defined by environment variable \fBPOSTAUTH\fR
+.PP
+MUAs and AUTH types tested with this software are:
 
-.SH Passwd Database
-\fBsys-checkpwd\fR checks the login name and password against /etc/passwd, using the
-operating system's \fBgetpwnam(3)\fR and \fBcrypt(3)\fR functions, supplemented by \fBgetuserpw(3)\fR
-and \fBgetspnam(3)\fR if necessary. It rejects accounts with empty passwords. It ignores the
-timestamp.
+.IP \[bu] 2
+Netscape Communicator 4.76 - LOGIN & PLAIN
+.IP \[bu]
+Microsoft Outlook 2000 - LOGIN
+.IP \[bu]
+Microsoft Outlook Express 5 - LOGIN
+.IP \[bu]
+Eudora 5.0.2 – CRAM-MD5
+.IP \[bu]
+sylpheed 0.8.2 – LOGIN, PLAIN and CRAM-MD5
+.IP \[bu]
+evolution - LOGIN, PLAIN
+.IP \[bu]
+Thunderbird - LOGIN, PLAIN
+.IP \[bu]
+RoundCube Mail - LOGIN, PLAIN
 
-Other checkpassword-compatible tools have different interpretations of login names, passwords,
-and timestamps. Both the login name and the password should be treated as secrets by the
-application calling \fBsys-checkpwd\fR; the only distinction is for administrative convenience.
-The timestamp should include any other information that the password is based on; for example,
-the challenge in a challenge-response system such as APOP.
+.SH OPTIONS
+\fBalternate_checkpassword_program\fR
+Path to an alternate checkpassword utility which supports additional authentication
+advertised by qmail-smtpd.
 
-WARNING: \fBgetpwnam(3)\fR is inherently unreliable. It fails to distinguish between temporary
-errors and nonexistent users. Future versions of getpwnam should return ETXTBSY to indicate
-temporary errors and ESRCH to indicate nonexistent users.
+.SH RETURN VALUE
+0 if authenticated, 1 on authentication failure or system problems.
 
-Other checkpassword-compatible tools may make different changes to the process state. It is
-crucial for these effects to be documented; different applications have different requirements.
-
-.SH SEE ALSO
+.SH "SEE ALSO"
 qmail-smtpd(8),
+qmail-poppass(8),
 vchkpass(8),
-systpass(8),
-pam-checkpwd(8),
 ldap-checkpwd(8),
+pam-checkpwd(8),
+nssd(8),
 pam-multi(8)

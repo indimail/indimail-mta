@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.4  2020-04-01 16:15:33+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.3  2010-06-08 22:00:54+05:30  Cprogrammer
  * pathexec() now returns allocated environment variable which should be freed
  *
@@ -11,29 +14,28 @@
  *
  */
 #include <unistd.h>
-#include "alloc.h"
-#include "error.h"
-#include "str.h"
-#include "pathexec.h"
-/*----*/
-#include "subfd.h"
-#include "substdio.h"
-#include "env.h"
-#include "strerr.h"
-
-extern char    *crypt();
 #include <pwd.h>
-static struct passwd *pw;
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "hasspnam.h"
 #ifdef HASGETSPNAM
 #include <shadow.h>
-static struct spwd *spw;
 #endif
 #include "hasuserpw.h"
 #ifdef HASUSERPW
 #include <userpw.h>
-static struct userpw *upw;
 #endif
+#include "alloc.h"
+#include "stralloc.h"
+#include "strerr.h"
+#include "str.h"
+#include "fmt.h"
+#include "error.h"
+#include "env.h"
+#include "subfd.h"
+#include "in_crypt.h"
+#include "pw_comp.h"
+#include "MakeArgs.h"
 
 #define FATAL "sys-checkpwd: fatal: "
 
@@ -56,143 +58,224 @@ flush()
 }
 
 void
-logerr(char *s)
+print_error(char *str)
 {
-	if (substdio_puts(subfderr, s) == -1)
-		_exit(111);
+	out("454-");
+	out(str);
+	out(": ");
+	out(error_str(errno));
+	out(" (#4.3.0)\r\n");
+	flush();
 }
 
-void
-logerrf(char *s)
+static int
+runcmmd(char *cmmd)
 {
-	if (substdio_puts(subfderr, s) == -1)
-		_exit(111);
-	if (substdio_flush(subfderr) == -1)
-		_exit(111);
-}
+	char          **argv;
+	int             status, i, retval, debug;
+	pid_t           pid;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
-static int      debug;
-
-void
-my_error(char *s1, char *s2, int exit_val)
-{
-	if (!debug)
-		_exit(exit_val);
-	logerr(s1);
-	logerr(": ");
-	if (s2) {
-		logerr(s2);
-		logerr(": ");
+	debug = env_get("DEBUG") ? 1 : 0;
+	switch ((pid = fork()))
+	{
+	case -1:
+		_exit(111);
+	case 0:
+		if (!(argv = MakeArgs(cmmd)))
+			_exit(111);
+		execv(*argv, argv);
+		strerr_die2sys(111, *argv, ": ");
+	default:
+		break;
 	}
-	if (exit_val > 0)
-		logerr(error_str(errno));
-	logerrf("\n");
-	_exit(exit_val > 0 ? exit_val : -exit_val);
+	for (retval = -1;;) {
+		i = wait(&status);
+#ifdef ERESTART
+		if (i == -1 && (errno == EINTR || errno == ERESTART))
+#else
+		if (i == -1 && errno == EINTR)
+#endif
+			continue;
+		else
+		if (i == -1)
+			break;
+		if (i != pid)
+			continue;
+		if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
+			if (debug) {
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strnum2[fmt_uint(strnum2, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status))] = 0;
+				strerr_warn3(strnum1, ": killed by signal ", strnum2, 0);
+			}
+			retval = -1;
+		} else
+		if (WIFEXITED(status)) {
+			retval = WEXITSTATUS(status);
+			if (debug) {
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strnum2[fmt_uint(strnum2, retval < 0 ? 0 - retval : retval)] = 0;
+				strerr_warn4(strnum1, ": normal exit return status", retval < 0 ? " -" : " ", strnum2, 0);
+			}
+		}
+		break;
+	}
+	return (retval);
 }
 
-static char     up[513];
-static int      uplen;
+static void
+pipe_exec(char **argv, char *tmpbuf, int len)
+{
+	int             pipe_fd[2];
+
+	if (pipe(pipe_fd) == -1)
+		strerr_die2sys(111, FATAL, "pipe: ");
+	if (dup2(pipe_fd[0], 3) == -1 || dup2(pipe_fd[1], 4) == -1)
+		strerr_die2sys(111, FATAL, "dup: ");
+	if (pipe_fd[0] != 3 && pipe_fd[0] != 4)
+		close(pipe_fd[0]);
+	if (pipe_fd[1] != 3 && pipe_fd[1] != 4)
+		close(pipe_fd[1]);
+	if (write(4, tmpbuf, len) != len)
+		strerr_die2sys(111, FATAL, "write: ");
+	close(4);
+	execvp(argv[1], argv + 1);
+	strerr_die3sys(111, FATAL, "exec: ", argv[1]);
+}
+
+int             authlen = 512;
 
 int
 main(int argc, char **argv)
 {
-	char           *login, *password, *encrypted, *stored = 0;
-	char          **e;
-	int             r, i, tmperrno;
+	char           *ptr, *tmpbuf, *login, *response, *challenge, *stored;
+	char            strnum[FMT_ULONG];
+	static stralloc buf = {0};
+	int             i, count, offset, status;
+	struct passwd  *pw;
+#ifdef HASUSERPW
+	struct userpw  *upw;
+#endif
+#ifdef HASGETSPNAM
+	struct spwd    *spw;
+#endif
 
 	if (argc < 2)
 		_exit(2);
-	if (env_get("DEBUG"))
-		debug = 1;
-	uplen = 0;
-	for (;;) {
-		do
-			r = read(3, up + uplen, sizeof (up) - uplen);
-		while ((r == -1) && (errno == error_intr));
-		if (r == -1)
-			my_error("read", 0, 111);
-		if (r == 0)
-			break;
-		uplen += r;
-		if (uplen >= sizeof (up))
-			my_error("read", "data too big", -1);
+	if (!(tmpbuf = alloc((authlen + 1) * sizeof(char)))) {
+		print_error("out of memory");
+		strnum[fmt_uint(strnum, (unsigned int) authlen + 1)] = 0;
+		strerr_warn3("alloc-", strnum, ": ", &strerr_sys);
+		_exit(111);
 	}
-	close(3);
-	i = 0;
-	if (i >= uplen)
+	for (offset = 0;;) {
+		do
+		{
+			count = read(3, tmpbuf + offset, authlen + 1 - offset);
+#ifdef ERESTART
+		} while(count == -1 && (errno == EINTR || errno == ERESTART));
+#else
+		} while(count == -1 && errno == EINTR);
+#endif
+		if (count == -1) {
+			print_error("read error");
+			strerr_warn1("syspass: read: ", &strerr_sys);
+			_exit(111);
+		}
+		else
+		if (!count)
+			break;
+		offset += count;
+		if (offset >= (authlen + 1))
+			_exit(2);
+	}
+	count = 0;
+	login = tmpbuf + count; /*- username */
+	for (;tmpbuf[count] && count < offset;count++);
+	if (count == offset || (count + 1) == offset)
 		_exit(2);
-	login = up + i;
-	while (up[i++])
-		if (i >= uplen)
-			my_error("invalid data", 0, -2);
-	password = up + i;
-	if (i >= uplen)
-		my_error("invalid data", 0, -2);
-	while (up[i++])
-		if (i >= uplen)
-			my_error("invalid data", 0, -2);
+	count++;
+	challenge = tmpbuf + count; /*- challenge */
+	for (;tmpbuf[count] && count < offset;count++);
+	if (count == offset || (count + 1) == offset)
+		_exit(2);
+	response = tmpbuf + count + 1; /*- response */
+	i = str_chr(login, '@');
+	if (login[i])
+		login[i] = 0;
 	if (!(pw = getpwnam(login))) {
-		if (errno == error_txtbsy)
-			my_error("getpwnam", 0, 111);
-		my_error("getpwnam", 0, 1);
-	} else
-		stored = pw->pw_passwd;
+		if (errno != ETXTBSY)
+			pipe_exec(argv, tmpbuf, offset);
+		else
+			strerr_warn1("syspass: getpwnam: ", &strerr_sys);
+		print_error("getpwnam");
+		_exit (111);
+	}
+	stored = pw->pw_passwd;
 #ifdef HASUSERPW
 	if (!(upw = getuserpw(login))) {
-		if (errno == error_txtbsy)
-			my_error("getuserpw", 0, 111);
-	} else
-		stored = upw->upw_passwd;
+		if (errno != ETXTBSY)
+			pipe_exec(argv, tmpbuf, offset);
+		else
+			strerr_warn1("syspass: getuserpw: ", &strerr_sys);
+		print_error("getuserpw");
+		_exit (111);
+	}
+	stored = upw->upw_passwd;
 #endif
 #ifdef HASGETSPNAM
 	if (!(spw = getspnam(login))) {
-		if (errno == error_txtbsy)
-			my_error("getspnam", 0, 111);
-	} else
-		stored = spw->sp_pwdp;
+		if (errno != ETXTBSY)
+			pipe_exec(argv, tmpbuf, offset);
+		else
+			strerr_warn1("syspass: getspnam: ", &strerr_sys);
+		print_error("getspnam");
+		_exit (111);
+	}
+	stored = spw->sp_pwdp;
 #endif
-	if (!stored || !*stored)
-		my_error("getuserpw/getspnam", 0, 1);
-	encrypted = crypt(password, stored);
-#if 0
-	if (debug) {
-		out("comparing ");
-		out(password);
-		out(" stored [");
+	if (env_get("DEBUG_LOGIN")) {
+		out(argv[0]);
+		out(": ");
+		out("login [");
+		out(login);
+		out("] challenge [");
+		out(challenge);
+		out("] response [");
+		out(response);
+		out("] pw_passwd [");
 		out(stored);
-		out("] encrypted [");
-		out(encrypted);
 		out("]\n");
 		flush();
 	}
-#endif
-	if (str_diff(encrypted, stored)) { /*- try next module */
-		if (debug) {
-			out("authentication failure\n");
-			flush();
-		}
-		if ((e = pathexec(argv + 1)))
-		{
-			tmperrno = errno;
-			alloc_free((char *) e);
-			errno = tmperrno;
-		}
-		my_error("exec", 0, 111);
+	if (pw_comp((unsigned char *) login, (unsigned char *) stored,
+		(unsigned char *) (*response ? challenge : 0),
+		(unsigned char *) (*response ? response : challenge), 0))
+	{
+		pipe_exec(argv, tmpbuf, offset);
+		print_error("exec");
+		_exit (111);
 	}
-	if (debug) {
-		out("authentication success\n");
-		flush();
+	status = 0;
+	if ((ptr = (char *) env_get("POSTAUTH")) && !access(ptr, X_OK)) {
+		if (stralloc_copys(&buf, ptr) ||
+				!stralloc_append(&buf, " ") ||
+				!stralloc_cats(&buf, login) ||
+				!stralloc_0(&buf)) {
+			strerr_warn1("syspass: out of memory: ", &strerr_sys);
+			_exit (111);
+		}
+		status = runcmmd(buf.s);
 	}
-	/*- passwords matched */
-	for (i = 0; i < sizeof (up); ++i)
-		up[i] = 0;
-	_exit(0);
+	_exit(status);
+	/*- Not reached */
+	return (0);
 }
 
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.3 2010-06-08 22:00:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.4 2020-04-01 16:15:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
