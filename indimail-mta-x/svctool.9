@@ -37,7 +37,8 @@ Known values for OPTION are:
   [--memory=b]
   [--overquota_mailsize=o]
   [--domainlimits]
-  [--chkrecipient --cugmail --authsmtp --authall --chkrelay]
+  [--authsmtp --forceauthsmtp --authall]
+  [--chkrecipient --chkrelay --cugmail]
   [--masquerade] [--antispoof]
   [--routes=smtp|qmtp|static]
   [--cname-lookup]
@@ -88,7 +89,8 @@ Known values for OPTION are:
                    (qmail-smtpd)
   cugmail        - Allow only local valid senders to use SMTP.
   antispoof      - Turn on antispoofing code
-  authsmtp       - Enforce Authenticated SMTP before accepting MAIL FROM
+  authsmtp       - Enable Authenticated SMTP 
+  force authsmtp - Enforce Authenticated SMTP before accepting MAIL FROM
   authall        - Accept mails to remote/local domains only after AUTH SMTP or
                    POP/IMAP before SMTP
   chkrelay       - Accept mails to remote domains only after AUTH SMTP or
