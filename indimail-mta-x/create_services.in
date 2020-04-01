@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.80 2019-11-01 10:10:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.81 2020-04-01 19:04:11+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -309,13 +309,17 @@ fi
 for port in 465 25 587
 do
   if [ $port -eq 465 ] ; then
-    e_opt="--skipsend --ssl"
+    e_opt="--skipsend --authsmtp --ssl"
     e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   elif [ $port -eq 587 ] ; then
     nobogofilter=1
-    e_opt="--skipsend --authsmtp --antispoof"
+    e_opt="--skipsend --forceauthsmtp --antispoof"
   else
+    if [ $port -eq 25 ] ; then
     e_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+    else
+    e_opt="--authsmtp"
+    fi
     e_opt="$e_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
     e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   fi
