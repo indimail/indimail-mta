@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.8  2020-04-01 16:16:17+05:30  Cprogrammer
+ * fixed typo in error message
+ *
  * Revision 1.7  2020-03-24 13:02:14+05:30  Cprogrammer
  * use qcount_dir() instead of loadLibrary() to load count_dir() function from libindimail
  *
@@ -30,17 +33,12 @@
 #include "strerr.h"
 #include "fmt.h"
 #include "open.h"
-#include "env.h"
-#include "stralloc.h"
-#include "control.h"
-#include "variables.h"
-#include "auto_control.h"
 #include "qcount_dir.h"
 
 #define FATAL "maildirsize: fatal: "
 
 struct substdio ssout;
-char            outbuf[256];
+char            ssoutbuf[256];
 
 int
 main(int argc, char **argv)
@@ -59,12 +57,12 @@ main(int argc, char **argv)
 	if (chdir(pw->pw_dir))
 		strerr_die3sys(111, FATAL, "chdir: ", pw->pw_dir);
 	if (access("./Maildir/", F_OK))
-		strerr_die4sys(111, FATAL, "chdir: ", pw->pw_dir, "/Maildir/");
+		strerr_die4sys(111, FATAL, "stat: ", pw->pw_dir, "/Maildir/");
 	mailcount = 0;
 	mailsize = qcount_dir("./Maildir/", &mailcount);
 	if ((fd = open_trunc("./Maildir/maildirsize")) == -1)
 		strerr_die2sys(111, FATAL, "./Maildir/maildirsize: ");
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, write, fd, ssoutbuf, sizeof(ssoutbuf));
 	if (statfs("./Maildir/", &statbuf))
 		strerr_die3sys(111, FATAL, "statfs: ", "./Maildir/: ");
 	strnum[len = fmt_ulong(strnum, statbuf.f_bavail * statbuf.f_bsize)] = 0;
@@ -94,7 +92,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.7 2020-03-24 13:02:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.8 2020-04-01 16:16:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
