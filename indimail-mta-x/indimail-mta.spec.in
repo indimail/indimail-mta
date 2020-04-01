@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.208 2020-03-27 19:21:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.209 2020-04-01 19:01:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -866,7 +866,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/qscanq-stdin
 
 %attr(755,root,root)                    %{_prefix}/sbin/plugtest
-%attr(755,root,root)                    %{_prefix}/sbin/sys-checkpwd
+%attr(4551,root,root)                   %{_prefix}/sbin/sys-checkpwd
 %attr(755,root,root)                    %{_prefix}/sbin/ldap-checkpwd
 %attr(755,root,root)                    %{_prefix}/sbin/svctool
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-nullqueue
@@ -1429,6 +1429,7 @@ done
 %verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
 %verify (not user group mode) %attr(2555, alias, qmail)    %{qmaildir}/alias
 %verify (not user group mode) %attr(2755, indimail, qmail) %{qmaildir}/autoturn
+%verify (not user group mode) %attr(4551, root, root)      %{_prefix}/sbin/sys-checkpwd
 %endif
 %endif
 
@@ -2010,12 +2011,16 @@ for port in 465 25 587
 do
   extra_opt=""
   if [ $port -eq 465 ] ; then
-    extra_opt="--skipsend --ssl"
+    extra_opt="--skipsend --authsmtp --ssl"
     extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   elif [ $port -eq 587 ] ; then
-    extra_opt="--skipsend --authsmtp --antispoof --forcetls"
+    extra_opt="--skipsend --forceauthsmtp --antispoof --forcetls"
   else
-    extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+    if [ $port -eq 25 ] ; then
+      extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+    else
+      extra_opt="--authsmtp"
+    fi
     extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
     extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   fi
