@@ -1,5 +1,8 @@
 /*
  * $Log: qcount_dir.c,v $
+ * Revision 1.2  2020-04-01 16:16:50+05:30  Cprogrammer
+ * fixed alloc() core dump
+ *
  * Revision 1.1  2020-03-24 12:57:30+05:30  Cprogrammer
  * Initial revision
  *
@@ -15,6 +18,7 @@
 #include "str.h"
 #include "alloc.h"
 #include "strerr.h"
+#include "substdio.h"
 
 static int
 skip_system_files(char *filename)
@@ -86,19 +90,21 @@ ssize_t qcount_dir(char *dir_name, size_t *mailcount)
 			continue;
 		filename_len = str_len(dp->d_name);
 		newlen = sizeof(char) * (filename_len + dirname_len + 2);
-		if (!alloc_re((char *) &tmpstr, oldlen, newlen)) {
-			strnum[i = fmt_uint(strnum, newlen)] = 0;
-			strerr_warn3("qcount_dir: alloc_re: ", strnum, " bytes: ", &strerr_sys);
-			closedir(entry);
-			return (-1);
+		if (!oldlen || newlen > oldlen) {
+			if (!alloc_re((char *) &tmpstr, oldlen, newlen)) {
+				strnum[i = fmt_uint(strnum, newlen)] = 0;
+				strerr_warn3("qcount_dir: alloc_re: ", strnum, " bytes: ", &strerr_sys);
+				closedir(entry);
+				return (-1);
+			}
 		}
 		oldlen = newlen;
 		ptr = tmpstr;
 		ptr += fmt_strn(ptr, dir_name, dirname_len);
 		ptr += fmt_strn(ptr, "/", 1);
 		ptr += fmt_strn(ptr, dp->d_name, filename_len);
-		*ptr++ = 0;
-		if ((ptr = str_str(tmpstr, ",S=")) != NULL) {
+		*ptr = 0;
+		if ((ptr = str_str(dp->d_name, ",S=")) != NULL) {
 			ptr += 3;
 			scan_ulong(ptr, (unsigned long *) &tmp);
 			file_size += tmp;
@@ -118,16 +124,17 @@ ssize_t qcount_dir(char *dir_name, size_t *mailcount)
 				file_size += statbuf.st_size;
 			}
 		}
-	}
+	} /*- for (tmpstr = 0, file_size = oldlen = newlen = 0;;) */
 	closedir(entry);
-	alloc_free(tmpstr);
+	if (tmpstr)
+		alloc_free(tmpstr);
 	return (file_size);
 }
 
 void
 getversion_qcount_dir_c()
 {
-	static char    *x = "$Id: qcount_dir.c,v 1.1 2020-03-24 12:57:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qcount_dir.c,v 1.2 2020-04-01 16:16:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
