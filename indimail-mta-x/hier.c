@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.263  2020-04-01 17:47:40+05:30  Cprogrammer
+ * sys-checkpwd should be setuid for checking password in /etc/shadow
+ *
  * Revision 1.262  2019-12-08 18:23:27+05:30  Cprogrammer
  * added docker entrypoint script for indimail
  *
@@ -1114,11 +1117,11 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qhpsi", auto_uidc, auto_gidq, 06551);
 	c(auto_prefix, "sbin", "qscanq", auto_uidc, auto_gidc, 04551);
 	c(auto_prefix, "sbin", "run-cleanq", auto_uido, auto_gidc, 02551);
+	c(auto_prefix, "sbin", "sys-checkpwd", auto_uido, 0, 04551);
 
 	/*- misc */
 	c(auto_prefix, "sbin", "qmail-multi", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-nullqueue", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "sys-checkpwd", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "ldap-checkpwd", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "docker-entrypoint", auto_uido, 0, moder_x);
 
@@ -1642,7 +1645,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.262 2019-12-08 18:23:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.263 2020-04-01 17:47:40+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
