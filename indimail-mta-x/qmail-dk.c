@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.49  2020-04-01 16:14:34+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.48  2016-06-13 14:14:27+05:30  Cprogrammer
  * BUG - removed extra semicolon after if () statement
  *
@@ -879,7 +882,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.48 2016-06-13 14:14:27+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.49 2020-04-01 16:14:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: control.c,v $
+ * Revision 1.21  2020-04-01 16:13:09+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.20  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -521,7 +524,7 @@ control_readcmd(stralloc *sa, char *fn)
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.20 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: control.c,v 1.21 2020-04-01 16:13:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

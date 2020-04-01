@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.63  2020-04-01 16:14:45+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.62  2018-01-09 11:49:26+05:30  Cprogrammer
  * use indimail-mta identifier in Received: headers
  *
@@ -1222,7 +1225,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.62 2018-01-09 11:49:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.63 2020-04-01 16:14:45+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

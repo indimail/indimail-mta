@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.69  2020-04-01 16:14:54+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.68  2019-09-30 22:59:06+05:30  Cprogrammer
  * use sh as argv0 instead of IndiMailfilter
  *
@@ -1124,7 +1127,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.68 2019-09-30 22:59:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.69 2020-04-01 16:14:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)

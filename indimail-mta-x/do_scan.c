@@ -1,5 +1,8 @@
 /*
  * $Log: do_scan.c,v $
+ * Revision 1.16  2020-04-01 16:13:35+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.15  2018-05-18 17:39:05+05:30  Cprogrammer
  * BUG - break out of loop if file extension matches a line in badext
  *
@@ -245,7 +248,7 @@ do_scan()
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.15 2018-05-18 17:39:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_scan.c,v 1.16 2020-04-01 16:13:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

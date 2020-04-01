@@ -1,5 +1,8 @@
 /*
  * $Log: generic.c,v $
+ * Revision 1.4  2020-04-01 16:13:40+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.3  2009-04-30 16:14:55+05:30  Cprogrammer
  * removed hasindimail.h
  *
@@ -65,7 +68,7 @@ virusscan(char *messfn)
 void
 getversion_generic_c()
 {
-	static char    *x = "$Id: generic.c,v 1.3 2009-04-30 16:14:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: generic.c,v 1.4 2020-04-01 16:13:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

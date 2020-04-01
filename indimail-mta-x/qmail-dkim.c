@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.54  2020-04-01 16:14:36+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.53  2019-06-14 21:26:37+05:30  Cprogrammer
  * added env variable HONOR_BODYLENGTHTAG to honor body length tag during verification
  *
@@ -1435,7 +1438,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.53 2019-06-14 21:26:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.54 2020-04-01 16:14:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

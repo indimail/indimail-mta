@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.51  2020-04-01 16:14:39+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.50  2018-06-22 14:29:28+05:30  Cprogrammer
  * code indented
  *
@@ -659,6 +662,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.50 2018-06-22 14:29:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.51 2020-04-01 16:14:39+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

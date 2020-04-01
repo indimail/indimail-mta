@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.18  2020-04-01 16:14:30+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.17  2018-06-01 14:49:22+05:30  Cprogrammer
  * added 'E' option to send back TLSA RR data
  *
@@ -1344,7 +1347,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.17 2018-06-01 14:49:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.18 2020-04-01 16:14:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

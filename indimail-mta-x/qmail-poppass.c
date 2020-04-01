@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-poppass.c,v $
+ * Revision 1.4  2020-04-01 16:14:42+05:30  Cprogrammer
+ * added header for MakeArgs() function
+ *
  * Revision 1.3  2009-08-06 22:53:21+05:30  Cprogrammer
  * remove '\r' from input stream
  *
@@ -351,7 +354,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	static char    *x = "$Id: qmail-poppass.c,v 1.3 2009-08-06 22:53:21+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-poppass.c,v 1.4 2020-04-01 16:14:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
