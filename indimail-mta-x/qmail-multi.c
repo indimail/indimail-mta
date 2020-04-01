@@ -155,6 +155,7 @@
 #include "wait.h"
 #include "sig.h"
 #include "auto_qmail.h"
+#include "MakeArgs.h"
 #include "variables.h"
 #ifdef sun
 #include <sys/types.h>
@@ -180,8 +181,6 @@ int             discard_envelope();
 #define QUEUE_COUNT 10
 #endif
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
-
-extern char   **MakeArgs(char *);
 
 void
 sigalrm()

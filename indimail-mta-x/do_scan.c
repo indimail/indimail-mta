@@ -63,12 +63,12 @@
 #include "qregex.h"
 #include "control.h"
 #include "str.h"
+#include "MakeArgs.h"
 
 extern int      flaglog;
 extern pid_t    pid;
 extern int      alarm_flag;
 extern char    *auto_scancmd[];
-char          **MakeArgs(char *);
 
 int             extok = 0;
 static stralloc ext = { 0 };

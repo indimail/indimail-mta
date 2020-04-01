@@ -248,6 +248,7 @@
 #include "evaluate.h"
 #include "now.h"
 #include "scan.h"
+#include "MakeArgs.h"
 
 #define REGCOMP(X,Y)    regcomp(&X, Y, REG_EXTENDED|REG_ICASE)
 #define REGEXEC(X,Y)    regexec(&X, Y, (size_t) 0, (regmatch_t *) 0, (int) 0)
@@ -265,7 +266,6 @@ static int      redirect_mail(char *, char *, char *, char *);
 static void     create_logfilter();
 static int      check_size(char *);
 void            set_environ(char *, char *, char *, char *, char *);
-extern char   **MakeArgs(char *);
 
 static int      spfok = 0;
 static stralloc spf = { 0 };

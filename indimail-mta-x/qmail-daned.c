@@ -88,6 +88,7 @@
 #include "env.h"
 #include "haveip6.h"
 #include "ip.h"
+#include "MakeArgs.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
 
@@ -127,8 +128,6 @@ char           *whitefn = 0, *tlsadomainsfn = 0;
 stralloc        context_file = { 0 };
 struct substdio ssin;
 stralloc        line = { 0 };
-
-extern char   **MakeArgs(char *);
 
 int             whitelistok = 0;
 stralloc        whitelist = { 0 };

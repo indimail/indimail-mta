@@ -174,6 +174,7 @@
 #include "control.h"
 #include "variables.h"
 #include "domainkeys.h"
+#include "MakeArgs.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
@@ -195,9 +196,6 @@ int             messfd;
 int             readfd;
 char           *dksign = 0;
 char           *dkverify = 0;
-
-char          **MakeArgs(char *);
-void            FreeMakeArgs(char **);
 
 void
 die(e)

@@ -435,7 +435,7 @@ error:
 
 #ifdef CONTROL_CMD
 #include "wait.h"
-char          **MakeArgs(char *);
+#include "MakeArgs.h"
 
 int
 control_readcmd(stralloc *sa, char *fn)

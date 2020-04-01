@@ -43,6 +43,7 @@
 #include "getln.h"
 #include "error.h"
 #include "auto_uids.h"
+#include "MakeArgs.h"
 
 static char     ssinbuf[1024];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
@@ -56,8 +57,6 @@ stralloc        new_pass = { 0 };
 char          **authargs, **passargs;
 static char     upbuf[128];
 static substdio ssup;
-
-char          **MakeArgs(char *);
 
 void
 errlog(s)

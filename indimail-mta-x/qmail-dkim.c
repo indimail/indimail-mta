@@ -189,6 +189,7 @@
 #include "env.h"
 #include "control.h"
 #include "dkim.h"
+#include "MakeArgs.h"
 #include "variables.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
@@ -212,10 +213,6 @@ char           *pidfn;
 int             messfd;
 int             readfd;
 DKIMContext     ctxt;
-
-char          **MakeArgs(char *);
-void            FreeMakeArgs(char **);
-
 
 void
 die(int e, int what)

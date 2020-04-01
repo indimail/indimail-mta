@@ -197,12 +197,12 @@
 #include "scan.h"
 #include "mess822.h"
 #include "wait.h"
+#include "MakeArgs.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR  1003
 
 int             uidinit(int);
-char          **MakeArgs(char *);
 
 char            inbuf[2048], outbuf[256], logbuf[2048];
 char           *pidfn, *messfn, *todofn, *intdfn;

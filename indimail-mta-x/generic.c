@@ -14,8 +14,7 @@
 #include "str.h"
 #include "env.h"
 #include "wait.h"
-
-char          **MakeArgs(char *);
+#include "MakeArgs.h"
 
 extern char    *auto_scancmd[];
 
