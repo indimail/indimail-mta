@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.5  2020-04-01 19:00:49+05:30  Cprogrammer
+ * display uid in debug login mode
+ *
  * Revision 1.4  2020-04-01 16:15:33+05:30  Cprogrammer
  * refactored code
  *
@@ -234,10 +237,15 @@ main(int argc, char **argv)
 	}
 	stored = spw->sp_pwdp;
 #endif
+	strnum[fmt_ulong(strnum, getuid())] = 0;
+	if (setuid(getuid()))
+		strerr_die4sys(111, FATAL, "sys-checkpwd: setuid: uid(", strnum, "):");
 	if (env_get("DEBUG_LOGIN")) {
 		out(argv[0]);
 		out(": ");
-		out("login [");
+		out("uid (");
+		out(strnum);
+		out(") login [");
 		out(login);
 		out("] challenge [");
 		out(challenge);
@@ -275,7 +283,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.4 2020-04-01 16:15:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.5 2020-04-01 19:00:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
