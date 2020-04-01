@@ -4008,8 +4008,7 @@ shadow.lib crypt.lib
 
 sys-checkpwd.o: \
 compile sys-checkpwd.c pathexec.h hasspnam.h \
-hasuserpw.h alloc.h stralloc.h strerr.h str.h \
-fmt.h error.h env.h subfd.h MakeArgs.h
+hasuserpw.h MakeArgs.h
 	./compile sys-checkpwd.c
 
 hasifaddr.h: \
