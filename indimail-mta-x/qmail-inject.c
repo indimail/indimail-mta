@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.31  2020-04-03 22:09:46+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.30  2019-07-08 16:09:39+05:30  Cprogrammer
  * to not parse mail header in qmail-inject if -a is given
  *
@@ -259,18 +262,11 @@ die_qqt()
 }
 
 void
-die_chdir()
+die_chdir(char *dir)
 {
-	substdio_putsflush(subfderr, "qmail-inject: fatal: unable to chdir to home\n");
-	temp();
-}
-
-void
-die_controldir(char *x)
-{
-	substdio_puts(subfderr, "qmail-inject: fatal: unable to chdir to ");
-	substdio_puts(subfderr, x);
-	substdio_puts(subfderr, "\n");
+	substdio_puts(subfderr, "qmail-inject: fatal: unable to chdir to [");
+	substdio_puts(subfderr, dir);
+	substdio_puts(subfderr, "]\n");
 	substdio_flush(subfderr);
 	temp();
 }
@@ -1052,12 +1048,22 @@ getcontrols()
 {
 	struct stat     statbuf;
 	static stralloc sa = { 0 };
-	char           *x, *qbase;
+	char           *x, *qbase, *home;
 	char          **e;
 
 	mft_init();
+	if ((home = env_get("HOME"))) {
+		if (chdir(home) == -1)
+			die_chdir(home);
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		} else
+			home = (char *) 0;
+	}
 	if (chdir(auto_qmail) == -1)
-		die_chdir();
+		die_chdir(auto_qmail);
 	if (control_init() == -1)
 		die_read();
 	if (!(qbase = env_get("QUEUE_BASE"))) {
@@ -1066,14 +1072,14 @@ getcontrols()
 				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
-			die_controldir(controldir);
+			die_chdir(controldir);
 		if (!access("defaultqueue", X_OK)) {
 			envdir_set("defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
 		}
 		if (chdir(auto_qmail) == -1)
-			die_chdir();
+			die_chdir(auto_qmail);
 	}
 	if (!(x = env_get("QMAILDEFAULTDOMAIN"))) {
 		if (control_rldef(&control_defaultdomain, "defaultdomain", 1, "defaultdomain") != 1)
@@ -1278,7 +1284,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.30 2019-07-08 16:09:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.31 2020-04-03 22:09:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
