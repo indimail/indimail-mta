@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.10  2020-04-04 11:30:55+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.9  2016-05-21 14:48:09+05:30  Cprogrammer
  * use auto_sysconfdir for leapsecs_init()
  *
@@ -117,10 +120,8 @@ recipient_addlist(list)
 	int             i;
 	int             j;
 
-	for (j = i = 0; j < list->len; ++j)
-	{
-		if (!list->s[j])
-		{
+	for (j = i = 0; j < list->len; ++j) {
+		if (!list->s[j]) {
 			if (list->s[i] == '+' && !stralloc_catb(&recipients, list->s + i + 1, j - i))
 				nomem();
 			i = j + 1;
@@ -135,10 +136,8 @@ sender_get(list)
 	int             i;
 	int             j;
 
-	for (j = i = 0; j < list->len; ++j)
-	{
-		if (!list->s[j])
-		{
+	for (j = i = 0; j < list->len; ++j) {
+		if (!list->s[j]) {
 			if (list->s[i] == '+' && !stralloc_copyb(&sender, list->s + i + 1, j - i))
 				nomem();
 			i = j + 1;
@@ -236,12 +235,10 @@ mess822_action  a[] = {
 void
 envelope_make()
 {
-	if (recipstrategy != 'a')
-	{
+	if (recipstrategy != 'a') {
 		if (flagenveloperecipients)
 			recipient_addlist(&enveloperecipients);
-		else
-		{
+		else {
 			recipient_addlist(&to);
 			recipient_addlist(&cc);
 			recipient_addlist(&bcc);
@@ -251,8 +248,7 @@ envelope_make()
 		sender_get(&envelopesender);
 	if (!sender.len)
 		sender_get(&returnpath);
-	if (!sender.len)
-	{
+	if (!sender.len) {
 		if (!rewritehost_addr(&sender, config_data(&suser)->s, config_data(&suser)->len, config_data(&rewrite)))
 			nomem();
 		if (flagverprecip && !stralloc_cats(&sender, "-@[]"))
@@ -274,10 +270,8 @@ envelope_print()
 	myput(tmp.s, tmp.len);
 	myputs("\n");
 	myputs("Envelope-Recipients:\n");
-	for (j = i = 0; j < recipients.len; ++j)
-	{
-		if (!recipients.s[j])
-		{
+	for (j = i = 0; j < recipients.len; ++j) {
+		if (!recipients.s[j]) {
 			if (!mess822_quote(&tmp, recipients.s + i, (char *) 0))
 				nomem();
 			myputs("  ");
@@ -291,8 +285,7 @@ envelope_print()
 void
 datemsgid_print()
 {
-	if (!date.known)
-	{
+	if (!date.known) {
 		caltime_utc(&date.ct, &start, (int *) 0, (int *) 0);
 		date.known = 1;
 	}
@@ -301,8 +294,7 @@ datemsgid_print()
 	myputs("Date: ");
 	myput(tmp.s, tmp.len);
 	myputs("\n");
-	if (!msgid.len)
-	{
+	if (!msgid.len) {
 		if (!stralloc_copys(&msgid, "Message-ID: <"))
 			nomem();
 		if (!stralloc_catlong(&msgid, date.ct.date.year))
@@ -329,8 +321,7 @@ void
 from_print()
 {
 	putlist("From: ", &from);
-	if (!from.len)
-	{
+	if (!from.len) {
 		if (!rewritehost_addr(&tmp2, config_data(&user)->s, config_data(&user)->len, config_data(&rewrite)))
 			nomem();
 		if (!stralloc_0(&tmp2))
@@ -351,10 +342,8 @@ inmft(list)
 	int             i;
 	int             j;
 
-	for (j = i = 0; j < list->len; ++j)
-	{
-		if (!list->s[j])
-		{
+	for (j = i = 0; j < list->len; ++j) {
+		if (!list->s[j]) {
 			if (list->s[i] == '+' && constmap(&mapmft, list->s + i + 1, j - i - 1))
 				return 1;
 			i = j + 1;
@@ -369,8 +358,7 @@ response_print()
 	putlist("Reply-To: ", &replyto);
 	putlist("Mail-Reply-To: ", &mailreplyto);
 
-	if (!followupto.len && config(&mft) && (inmft(&to) || inmft(&cc)))
-	{
+	if (!followupto.len && config(&mft) && (inmft(&to) || inmft(&cc))) {
 		if (!stralloc_cat(&followupto, &to))
 			nomem();
 		if (!stralloc_cat(&followupto, &cc))
@@ -434,13 +422,10 @@ finishmessage()
 
 	if (!flagqueue)
 		substdio_flush(subfdoutsmall);
-	else
-	{
+	else {
 		qmail_from(&qq, sender.s);
-		for (j = i = 0; j < recipients.len; ++j)
-		{
-			if (!recipients.s[j])
-			{
+		for (j = i = 0; j < recipients.len; ++j) {
+			if (!recipients.s[j]) {
 				qmail_to(&qq, recipients.s + i);
 				i = j + 1;
 			}
@@ -462,17 +447,15 @@ main(argc, argv)
 	char          **argv;
 {
 	int             i, opt, flagheader = 1;
-	char           *qbase;
+	char           *qbase, *home;
 	char          **e;
 
 	sig_pipeignore();
 	tai_now(&start);
 	if (config_env(&qmailinject, "QMAILINJECT") == -1)
 		nomem();
-	if (config(&qmailinject))
-	{
-		for (i = 0; i < config_data(&qmailinject)->len; ++i)
-		{
+	if (config(&qmailinject)) {
+		for (i = 0; i < config_data(&qmailinject)->len; ++i) {
 			switch (config_data(&qmailinject)->s[i])
 			{
 			case 'F':
@@ -498,8 +481,7 @@ main(argc, argv)
 			}
 		}
 	}
-	while ((opt = getopt(argc, argv, "nNaAhHFIMRSf:")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "nNaAhHFIMRSf:")) != opteof) {
 		switch (opt)
 		{
 		case 'n':
@@ -543,8 +525,7 @@ main(argc, argv)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (config_env(&fnmft, "QMAILMFTFILE") == -1)
 		nomem();
-	if (config(&fnmft))
-	{
+	if (config(&fnmft)) {
 		if (!stralloc_0(config_data(&fnmft)))
 			nomem();
 		if (config_readfile(&mft, config_data(&fnmft)->s) == -1)
@@ -555,28 +536,38 @@ main(argc, argv)
 	}
 	if (config_env(&fnrewrite, "QMAILREWRITEFILE") == -1)
 		nomem();
-	if (config(&fnrewrite))
-	{
+	if (config(&fnrewrite)) {
 		if (!stralloc_0(config_data(&fnrewrite)))
 			nomem();
 		if (config_readfile(&rewrite, config_data(&fnrewrite)->s) == -1)
 			strerr_die2sys(111, FATAL, "unable to read $QMAILREWRITEFILE: ");
 	}
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
-		if (!controldir)
-		{
+	if ((home = env_get("HOME"))) {
+		if (chdir(home) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		} else
+			home = (char *) 0;
+	}
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK))
-		{
+		if (!access("defaultqueue", X_OK)) {
 			envdir_set("defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
 		}
+		if (chdir(auto_sysconfdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	}
 	if (config_env(&name, "QMAILNAME") == -1)
 		nomem();
@@ -614,8 +605,7 @@ main(argc, argv)
 		nomem();
 	if (!stralloc_copys(&sender, ""))
 		nomem();
-	if (argsender)
-	{
+	if (argsender) {
 		if (!rewritehost_addr(&sender, argsender, str_len(argsender), config_data(&rewrite)))
 			nomem();
 		if (!stralloc_0(&sender))
@@ -625,13 +615,11 @@ main(argc, argv)
 		recipstrategy = (*argv ? 'a' : 'h');
 	if (!stralloc_copys(&recipients, ""))
 		nomem();
-	if (recipstrategy != 'h')
-	{
+	if (recipstrategy != 'h') {
 		while (*argv)
 			recipient_add(*argv++);
 	}
-	if (flagverpmess)
-	{
+	if (flagverpmess) {
 		unsigned char   nowpack[TAI_PACK];
 		unsigned long   u;
 
@@ -665,16 +653,14 @@ main(argc, argv)
 		nomem();
 	if (!mess822_begin(&h, a))
 		nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		if (!match && !line.len)
 			break;
 		if (!match && !stralloc_append(&line, "\n"))
 			nomem();
-		if (flagheader && !mess822_ok(&line))
-		{
+		if (flagheader && !mess822_ok(&line)) {
 			finishheader();
 			flagheader = 0;
 			if (line.len != 1)
@@ -697,7 +683,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.9 2016-05-21 14:48:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.10 2020-04-04 11:30:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
