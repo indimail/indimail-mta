@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.32  2020-04-04 11:53:24+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
  * Revision 1.31  2020-04-03 22:09:46+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -116,7 +119,7 @@
 #include "exit.h"
 #include "quote.h"
 #include "headerbody.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "newfield.h"
 #include "constmap.h"
@@ -1062,8 +1065,8 @@ getcontrols()
 		} else
 			home = (char *) 0;
 	}
-	if (chdir(auto_qmail) == -1)
-		die_chdir(auto_qmail);
+	if (chdir(auto_sysconfdir) == -1)
+		die_chdir(auto_sysconfdir);
 	if (control_init() == -1)
 		die_read();
 	if (!(qbase = env_get("QUEUE_BASE"))) {
@@ -1078,8 +1081,8 @@ getcontrols()
 			if ((e = pathexec(0)))
 				environ = e;
 		}
-		if (chdir(auto_qmail) == -1)
-			die_chdir(auto_qmail);
+		if (chdir(auto_sysconfdir) == -1)
+			die_chdir(auto_sysconfdir);
 	}
 	if (!(x = env_get("QMAILDEFAULTDOMAIN"))) {
 		if (control_rldef(&control_defaultdomain, "defaultdomain", 1, "defaultdomain") != 1)
@@ -1284,7 +1287,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.31 2020-04-03 22:09:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.32 2020-04-04 11:53:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
