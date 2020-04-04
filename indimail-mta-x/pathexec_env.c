@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_env.c,v $
+ * Revision 1.5  2020-04-04 09:46:18+05:30  Cprogrammer
+ * added code documentation
+ *
  * Revision 1.4  2011-05-07 15:58:21+05:30  Cprogrammer
  * removed unused variable
  *
@@ -30,8 +33,7 @@ pathexec_env(char *s, char *t)
 		return 1;
 	if (!stralloc_copys(&tmp, s))
 		return 0;
-	if (t)
-	{
+	if (t) {
 		if (!stralloc_cats(&tmp, "="))
 			return 0;
 		if (!stralloc_cats(&tmp, t))
@@ -39,9 +41,11 @@ pathexec_env(char *s, char *t)
 	}
 	if (!stralloc_0(&tmp))
 		return 0;
+	/*- append value to plus with null as separator */
 	return stralloc_cat(&plus, &tmp);
 }
 
+/*- execute command with a new environ */
 char **
 pathexec(char **argv)
 {
@@ -55,31 +59,33 @@ pathexec(char **argv)
 	if (!stralloc_cats(&plus, ""))
 		return ((char **) 0);
 	elen = 0;
-	for (i = 0; environ[i]; ++i)
+	for (i = 0; environ[i]; ++i) /*- existing environ size */
 		++elen;
-	for (i = 0; i < plus.len; ++i)
+	for (i = 0; i < plus.len; ++i) /*- additional environment variables to be added */
 		if (!plus.s[i])
 			++elen;
 	if (!(e = (char **) alloc((elen + 1) * sizeof(char *))))
 		return ((char **) 0);
 	elen = 0;
+	/*- copy all existing environment variables */
 	for (i = 0; environ[i]; ++i)
 		e[elen++] = environ[i];
 	j = 0;
-	for (i = 0; i < plus.len; ++i)
-	{
-		if (!plus.s[i])
-		{
+	for (i = 0; i < plus.len; ++i) {
+		if (!plus.s[i]) {
 			split = str_chr(plus.s + j, '=');
-			for (t = 0; t < elen; ++t)
-			{
-				if (byte_equal(plus.s + j, split, e[t]) && e[t][split] == '=')
-				{
+			for (t = 0; t < elen; ++t) {
+				/*- compare if an env variable in plus matches env variable in
+				 * environment & move the last element to current position
+				 * and decrease environment list size by 1
+				 */
+				if (byte_equal(plus.s + j, split, e[t]) && e[t][split] == '=') {
 					--elen;
 					e[t] = e[elen];
 					break;
 				}
 			}
+			/*- if env variable has a value, append the env variable in plus */
 			if (plus.s[j + split])
 				e[elen++] = plus.s + j;
 			j = i + 1;
@@ -94,7 +100,7 @@ pathexec(char **argv)
 void
 getversion_pathexec_env_c()
 {
-	static char    *x = "$Id: pathexec_env.c,v 1.4 2011-05-07 15:58:21+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: pathexec_env.c,v 1.5 2020-04-04 09:46:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
