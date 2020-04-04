@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.8  2020-04-04 11:14:45+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.7  2019-06-07 11:26:04+05:30  Cprogrammer
  * replaced getopt() with subgetopt()
  *
@@ -197,28 +200,37 @@ void
 readcontrols()
 {
 	int             r, fddir;
-	char           *qbase;
+	char           *qbase, *home;
 	char          **e;
 
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+	if ((home = env_get("HOME"))) {
+		if (chdir(home) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		} else
+			home = (char *) 0;
+	}
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
-		if (!controldir)
-		{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK))
-		{
+		if (!access("defaultqueue", X_OK)) {
 			envdir_set("defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
 		}
+		if (chdir(auto_qmail) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 	}
 	if ((r = control_readline(&me, "me")) == -1)
 		die_control();
@@ -251,55 +263,46 @@ gotaddr()
 	if (token822_unquote(&address, &tokaddr) != 1)
 		die_nomem();
 	flaghasat = 0;
-	for (i = 0; i < tokaddr.len; ++i)
-	{
+	for (i = 0; i < tokaddr.len; ++i) {
 		if (tokaddr.t[i].type == TOKEN822_AT)
 			flaghasat = 1;
 	}
 	tokaddr.len = 0;
 	if (!address.len)
 		return;
-	if (!flaghasat && address.len == userlen && !case_diffb(address.s, address.len, user))
-	{
+	if (!flaghasat && address.len == userlen && !case_diffb(address.s, address.len, user)) {
 		flagacted = 1;
 		flagdirect = 1;
 		return;
 	}
-	if (flaghasat && address.len == userlen + 1 + hostlen)
-	{
-		if (!case_diffb(address.s, userlen, user) && address.s[userlen] == '@')
-		{
-			if (!case_diffb(address.s + userlen + 1, hostlen, host))
-			{
+	if (flaghasat && address.len == userlen + 1 + hostlen) {
+		if (!case_diffb(address.s, userlen, user) && address.s[userlen] == '@') {
+			if (!case_diffb(address.s + userlen + 1, hostlen, host)) {
 				flagacted = 1;
 				flagdirect = 1;
 				return;
 			}
 		}
 	}
-	if (!flaghasat && address.s[0] == '/')
-	{
+	if (!flaghasat && address.s[0] == '/') {
 		if (!stralloc_0(&address))
 			die_nomem();
 		strerr_die4x(111, FATAL, "file delivery ", address.s, " not supported");
 	}
-	if (!flaghasat && address.s[0] == '|')
-	{
+	if (!flaghasat && address.s[0] == '|') {
 		if (!stralloc_0(&address))
 			die_nomem();
 		flagacted = 1;
 		run(address.s + 1);
 		return;
 	}
-	if (!flaghasat)
-	{
+	if (!flaghasat) {
 		if (!stralloc_cats(&address, "@"))
 			die_nomem();
 		if (!stralloc_cat(&address, &defaulthost))
 			die_nomem();
 	}
-	if (address.s[address.len - 1] == '+')
-	{
+	if (address.s[address.len - 1] == '+') {
 		address.s[address.len - 1] = '.';
 		if (!stralloc_cat(&address, &plusdomain))
 			die_nomem();
@@ -311,8 +314,7 @@ gotaddr()
 	for (i = j; i < address.len; ++i)
 		if (address.s[i] == '.')
 			break;
-	if (i == address.len)
-	{
+	if (i == address.len) {
 		if (!stralloc_cats(&address, "."))
 			die_nomem();
 		if (!stralloc_cat(&address, &defaultdomain))
@@ -348,8 +350,7 @@ parseline()
 	if (!token822_readyplus(&tokaddr, 1))
 		die_nomem();
 	tokaddr.len = 0;
-	while (t > beginning)
-	{
+	while (t > beginning) {
 		switch ((--t)->type)
 		{
 		case TOKEN822_SEMI:
@@ -359,8 +360,7 @@ parseline()
 		case TOKEN822_RIGHT:
 			if (tokaddr.len)
 				gotaddr();
-			while ((t > beginning) && (t[-1].type != TOKEN822_LEFT))
-			{
+			while ((t > beginning) && (t[-1].type != TOKEN822_LEFT)) {
 				if (!token822_append(&tokaddr, --t))
 					die_nomem();
 			}
@@ -420,8 +420,7 @@ try(fn)
 	int             match;
 	substdio        ss;
 
-	if ((fd = open_read(fn)) == -1)
-	{
+	if ((fd = open_read(fn)) == -1) {
 		if (errno == error_noent)
 			return;
 		strerr_die4sys(111, FATAL, "unable to open ", fn, ": ");
@@ -431,8 +430,7 @@ try(fn)
 	flagacted = 0;
 	flagdirect = 0;
 	substdio_fdbuf(&ss, read, fd, inbuf, sizeof inbuf);
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ss, &line, &match, '\n') == -1)
 			strerr_die4sys(111, FATAL, "unable to read ", fn, ": ");
 		if (!line.len)
@@ -443,11 +441,9 @@ try(fn)
 			break;
 	}
 	close(fd);
-	if (targets.len)
-	{
+	if (targets.len) {
 		flagacted = 1;
-		if (flagdoit)
-		{
+		if (flagdoit) {
 			if (qmail_open(&qq) == -1)
 				strerr_die2sys(111, FATAL, "unable to run qmail-queue: ");
 			qp = qmail_qp(&qq);
@@ -467,14 +463,12 @@ try(fn)
 			strerr_warn3(INFO, "qp ", strnum, 0);
 		}
 	}
-	if (flagdirect)
-	{
+	if (flagdirect) {
 		if (!flagdoit)
 			strerr_warn1("direct delivery", 0);
 		_exit(0);
 	}
-	if (!flagacted)
-	{
+	if (!flagacted) {
 		if (!flagdoit)
 			strerr_warn2("skipping empty file ", fn, 0);
 		return;
@@ -490,8 +484,7 @@ main(argc, argv)
 	int             opt;
 
 	sig_pipeignore();
-	while ((opt = getopt(argc, argv, "nN")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "nN")) != opteof) {
 		switch (opt)
 		{
 		case 'n':
@@ -532,7 +525,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.7 2019-06-07 11:26:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.8 2020-04-04 11:14:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
