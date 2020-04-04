@@ -1,5 +1,8 @@
 /*
  * $Log: forward.c,v $
+ * Revision 1.10  2020-04-04 11:21:35+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.9  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -72,7 +75,7 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	char           *sender, *dtline, *qqeh, *qqx, *qbase;
+	char           *sender, *dtline, *qqeh, *qqx, *qbase, *home;
 	char         **e;
 
 	sig_pipeignore();
@@ -80,23 +83,32 @@ main(argc, argv)
 		strerr_die2x(100, FATAL, "NEWSENDER not set");
 	if (!(dtline = env_get("DTLINE")))
 		strerr_die2x(100, FATAL, "DTLINE not set");
+	if ((home = env_get("HOME"))) {
+		if (chdir(home) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		} else
+			home = (char *) 0;
+	}
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
-		if (!controldir)
-		{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK))
-		{
+		if (!access("defaultqueue", X_OK)) {
 			envdir_set("defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
 		}
+		if (chdir(auto_qmail) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 	}
 #ifdef HAVESRS
 	if (*sender) {
@@ -142,7 +154,7 @@ main(argc, argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.9 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: forward.c,v 1.10 2020-04-04 11:21:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
