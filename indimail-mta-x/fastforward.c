@@ -1,5 +1,8 @@
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.8  2020-04-04 11:17:10+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.7  2019-06-07 11:26:18+05:30  Cprogrammer
  * replaced getopt() with subgetopt()
  *
@@ -72,8 +75,7 @@ print(s)
 {
 	char            ch;
 
-	while ((ch = *s++))
-	{
+	while ((ch = *s++)) {
 		substdio_put(subfderr, &ch, 1);
 	}
 }
@@ -84,8 +86,7 @@ printsafe(s)
 {
 	char            ch;
 
-	while ((ch = *s++))
-	{
+	while ((ch = *s++)) {
 		if (ch < 32)
 			ch = '_';
 		substdio_put(subfderr, &ch, 1);
@@ -139,19 +140,15 @@ dofile(fn)
 	if (slurpclose(fd, &mailinglist, 1024) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", fn, ": ");
 	i = 0;
-	for (j = 0; j < mailinglist.len; ++j)
-	{
-		if (!mailinglist.s[j])
-		{
-			if ((mailinglist.s[i] == '.') || (mailinglist.s[i] == '/'))
-			{
+	for (j = 0; j < mailinglist.len; ++j) {
+		if (!mailinglist.s[j]) {
+			if ((mailinglist.s[i] == '.') || (mailinglist.s[i] == '/')) {
 				if (!stralloc_cats(&todo, mailinglist.s + i))
 					nomem();
 				if (!stralloc_0(&todo))
 					nomem();
 			} else
-			if ((mailinglist.s[i] == '&') && (j - i < 900))
-			{
+			if ((mailinglist.s[i] == '&') && (j - i < 900)) {
 				if (!stralloc_cats(&todo, mailinglist.s + i))
 					nomem();
 				if (!stralloc_0(&todo))
@@ -242,23 +239,20 @@ doprogram(arg)
 	int             child;
 	int             wstat;
 
-	if (!flagdeliver)
-	{
+	if (!flagdeliver) {
 		print("run ");
 		printsafe(arg);
 		print("\n");
 		substdio_flush(subfderr);
 		return;
 	}
-	if (*arg == '!')
-	{
+	if (*arg == '!') {
 		args[0] = "preline";
 		args[1] = "sh";
 		args[2] = "-c";
 		args[3] = arg + 1;
 		args[4] = 0;
-	} else
-	{
+	} else {
 		args[0] = "sh";
 		args[1] = "-c";
 		args[2] = arg + 1;
@@ -303,22 +297,18 @@ dodata()
 	int             j;
 
 	i = 0;
-	for (j = 0; j < data.len; ++j)
-	{
-		if (!data.s[j])
-		{
+	for (j = 0; j < data.len; ++j) {
+		if (!data.s[j]) {
 			if ((data.s[i] == '|') || (data.s[i] == '!'))
 				doprogram(data.s + i);
 			else
-			if ((data.s[i] == '.') || (data.s[i] == '/'))
-			{
+			if ((data.s[i] == '.') || (data.s[i] == '/')) {
 				if (!stralloc_cats(&todo, data.s + i))
 					nomem();
 				if (!stralloc_0(&todo))
 					nomem();
 			} else
-			if ((data.s[i] == '&') && (j - i < 900))
-			{
+			if ((data.s[i] == '&') && (j - i < 900)) {
 				if (!stralloc_cats(&todo, data.s + i))
 					nomem();
 				if (!stralloc_0(&todo))
@@ -334,8 +324,7 @@ dorecip(addr)
 	char           *addr;
 {
 
-	if (!findtarget(0, "?", addr) && gettarget(0, ":", addr))
-	{
+	if (!findtarget(0, "?", addr) && gettarget(0, ":", addr)) {
 		dodata();
 		return;
 	}
@@ -349,16 +338,13 @@ void
 doorigrecip(addr)
 	char           *addr;
 {
-	if (sender.len)
-	{
-		if ((sender.len != 4) || byte_diff(sender.s, 4, "#@[]"))
-		{
+	if (sender.len) {
+		if ((sender.len != 4) || byte_diff(sender.s, 4, "#@[]")) {
 			if (gettarget(1, "?", addr) && !stralloc_copy(&sender, &data))
 				nomem();
 		}
 	}
-	if (!gettarget(1, ":", addr))
-	{
+	if (!gettarget(1, ":", addr)) {
 		if (flagpassthrough)
 			_exit(0);
 		else
@@ -376,7 +362,7 @@ main(argc, argv)
 	char          **argv;
 {
 	int             opt, i;
-	char           *x, *qbase;
+	char           *x, *qbase, *home;
 	char          **e;
 
 	sig_pipeignore();
@@ -390,8 +376,7 @@ main(argc, argv)
 		nomem();
 	if (!strset_init(&done))
 		nomem();
-	while ((opt = getopt(argc, argv, "nNpPdD")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "nNpPdD")) != opteof) {
 		switch (opt)
 		{
 		case 'n':
@@ -422,8 +407,7 @@ main(argc, argv)
 	if ((fdcdb = open_read(fncdb)) == -1)
 		cdbreaderror();
 	coe(fdcdb);
-	if (flagdefault)
-	{
+	if (flagdefault) {
 		if (!(x = env_get("DEFAULT")))
 			x = env_get("EXT");
 		if (!x)
@@ -439,16 +423,14 @@ main(argc, argv)
 		if (!stralloc_0(&recipient))
 			nomem();
 		x = recipient.s;
-	} else
-	{
+	} else {
 		if (!(x = env_get("RECIPIENT")))
 			strerr_die2x(100, FATAL, "$RECIPIENT must be set");
 	}
 	if (!strset_add(&done, x))
 		nomem();
 	doorigrecip(x);
-	while (todo.len)
-	{
+	while (todo.len) {
 		i = todo.len - 1;
 		while ((i > 0) && todo.s[i - 1])
 			--i;
@@ -469,10 +451,8 @@ main(argc, argv)
 		else
 			dorecip(x + 1);
 	}
-	if (!forward.len)
-	{
-		if (!flagdeliver)
-		{
+	if (!forward.len) {
+		if (!flagdeliver) {
 			print("no forwarding\n");
 			substdio_flush(subfderr);
 		}
@@ -480,13 +460,11 @@ main(argc, argv)
 	}
 	if (!stralloc_0(&sender))
 		nomem();
-	if (!flagdeliver)
-	{
+	if (!flagdeliver) {
 		print("from <");
 		printsafe(sender.s);
 		print(">\n");
-		while (forward.len)
-		{
+		while (forward.len) {
 			i = forward.len - 1;
 			while ((i > 0) && forward.s[i - 1])
 				--i;
@@ -498,23 +476,32 @@ main(argc, argv)
 		substdio_flush(subfderr);
 		_exit(flagpassthrough ? 99 : 0);
 	}
+	if ((home = env_get("HOME"))) {
+		if (chdir(home) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		} else
+			home = (char *) 0;
+	}
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
-		if (!controldir)
-		{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK))
-		{
+		if (!access("defaultqueue", X_OK)) {
 			envdir_set("defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
 		}
+		if (chdir(auto_qmail) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 	}
 	if (qmail_open(&qq) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
@@ -524,8 +511,7 @@ main(argc, argv)
 	substdio_flush(&ssqq);
 	qp[fmt_ulong(qp, qmail_qp(&qq))] = 0;
 	qmail_from(&qq, sender.s);
-	while (forward.len)
-	{
+	while (forward.len) {
 		i = forward.len - 1;
 		while ((i > 0) && forward.s[i - 1])
 			--i;
@@ -543,7 +529,7 @@ main(argc, argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.7 2019-06-07 11:26:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.8 2020-04-04 11:17:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
