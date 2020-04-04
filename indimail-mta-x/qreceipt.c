@@ -1,5 +1,8 @@
 /*
  * $Log: qreceipt.c,v $
+ * Revision 1.10  2020-04-04 12:43:35+05:30  Cprogrammer
+ * removed redundant code
+ *
  * Revision 1.9  2020-04-04 12:31:48+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -23,7 +26,6 @@
 #include "sig.h"
 #include "scan.h"
 #include "auto_sysconfdir.h"
-#include "auto_qmail.h"
 #include "auto_control.h"
 #include "envdir.h"
 #include "pathexec.h"
@@ -42,7 +44,6 @@
 #include "gen_allocdefs.h"
 #include "headerbody.h"
 #include "exit.h"
-#include "control.h"
 #include "open.h"
 #include "quote.h"
 #include "qmail.h"
@@ -232,8 +233,7 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	char           *qbase, *queue_count_ptr, *queue_start_ptr, *home;
-	int             qcount, qstart;
+	char           *qbase, *home;
 	char          **e;
 
 	sig_pipeignore();
@@ -268,28 +268,6 @@ main(argc, argv)
 		if (chdir(auto_sysconfdir) == -1)
 			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	}
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		switch (control_readfile(&QueueBase, "queue_base", 0))
-		{
-		case -1:
-			die_control();
-			break;
-		case 0:
-			qbase = auto_qmail;
-			break;
-		case 1:
-			qbase = QueueBase.s;
-			break;
-		}
-	}
-	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
-		qcount = QUEUE_COUNT;
-	else
-		scan_int(queue_count_ptr, &qcount);
-	if (!(queue_start_ptr = env_get("QUEUE_START")))
-		qstart = 1;
-	else
-		scan_int(queue_start_ptr, &qstart);
 	if (headerbody(subfdin, doheaderfield, finishheader, dobody) == -1)
 		die_read();
 	die_noreceipt();
@@ -300,7 +278,7 @@ main(argc, argv)
 void
 getversion_qreceipt_c()
 {
-	static char    *x = "$Id: qreceipt.c,v 1.9 2020-04-04 12:31:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qreceipt.c,v 1.10 2020-04-04 12:43:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
