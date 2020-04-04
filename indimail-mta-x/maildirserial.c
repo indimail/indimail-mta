@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.12  2020-04-04 11:48:46+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
  * Revision 1.11  2020-04-04 11:23:28+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -64,7 +67,6 @@
 #include "qmail.h"
 #include "quote.h"
 #include "byte.h"
-#include "auto_qmail.h"
 #include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "variables.h"
@@ -162,8 +164,8 @@ readcontrols()
 		} else
 			home = (char *) 0;
 	}
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -180,8 +182,8 @@ readcontrols()
 			if ((e = pathexec(0)))
 				environ = e;
 		}
-		if (chdir(auto_qmail) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+		if (chdir(auto_sysconfdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	}
 	my_config_readline(&me, "me");
 	if (config_default(&me, "me") == -1)
@@ -673,7 +675,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.11 2020-04-04 11:23:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.12 2020-04-04 11:48:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
