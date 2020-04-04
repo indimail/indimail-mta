@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.7  2020-04-04 13:01:03+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.6  2017-04-10 20:42:36+05:30  Cprogrammer
  * renamed ONTRANSIENT_ERROR to ONTEMPORARY_ERROR
  *
@@ -22,7 +25,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include "sgetopt.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "control.h"
 #include "qmail.h"
@@ -272,7 +275,7 @@ main(int argc, char **argv)
 	static char     ssinbuf[1024];
 	char            buf[DATE822FMT];
 	char           *rpline, *recipient, *qqx, *qbase, *ptr,
-				   *smtptext = 0, *qmtptext = 0;
+				   *smtptext = 0, *qmtptext = 0, *home;
 	char          **e;
 
 	while ((ch = getopt(argc, argv, "nb")) != opteof) {
@@ -309,8 +312,8 @@ main(int argc, char **argv)
 	if (!stralloc_0(&email_rr))
 		my_error("out of memory", 0, MEM_ERR);
 	email_rr.len--;
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	if (control_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to read init controls: ");
 	if (control_rldef(&bouncefrom, "bouncefrom", 0, "MAILER-DAEMON") != 1)
@@ -334,6 +337,18 @@ main(int argc, char **argv)
 			return (0);
 	}
 	if (flagqueue) {
+		if ((home = env_get("HOME"))) {
+			if (chdir(home) == -1)
+				strerr_die4sys(111, FATAL, "unable to chdir to ", home, ": ");
+			if (!access(".defaultqueue", X_OK)) {
+				envdir_set(".defaultqueue");
+				if ((e = pathexec(0)))
+					environ = e;
+			} else
+				home = (char *) 0;
+			if (chdir(auto_sysconfdir) == -1)
+				strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
+		}
 		if (!(qbase = env_get("QUEUE_BASE"))) {
 			if (!controldir) {
 				if (!(controldir = env_get("CONTROLDIR")))
@@ -346,6 +361,8 @@ main(int argc, char **argv)
 				if ((e = pathexec(0)))
 					environ = e;
 			}
+			if (chdir(auto_sysconfdir) == -1)
+				strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 		}
 		if (qmail_open(&qqt) == -1)
 			die_fork();
@@ -491,7 +508,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.6 2017-04-10 20:42:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.7 2020-04-04 13:01:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
