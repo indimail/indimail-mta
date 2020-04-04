@@ -1,5 +1,8 @@
 /*
  * $Log: filterto.c,v $
+ * Revision 1.9  2020-04-04 11:45:05+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
  * Revision 1.8  2020-04-04 11:19:55+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -27,7 +30,7 @@
  */
 #include <unistd.h>
 #include <signal.h>
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "envdir.h"
 #include "sig.h"
@@ -109,13 +112,13 @@ main(int argc, char **argv, char **envp)
 		} else
 			home = (char *) 0;
 	}
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
+		if (chdir(auto_sysconfdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
 		if (!access("defaultqueue", X_OK)) {
@@ -123,6 +126,8 @@ main(int argc, char **argv, char **envp)
 			if ((e = pathexec(0)))
 				environ = e;
 		}
+		if (chdir(auto_sysconfdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	}
 	if (qmail_open(&qqt) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
@@ -160,7 +165,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.8 2020-04-04 11:19:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: filterto.c,v 1.9 2020-04-04 11:45:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
