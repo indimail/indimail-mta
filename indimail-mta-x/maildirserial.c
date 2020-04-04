@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.11  2020-04-04 11:23:28+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.10  2016-05-21 14:48:06+05:30  Cprogrammer
  * use auto_sysconfdir for leapsecs_init()
  *
@@ -124,8 +127,7 @@ stralloc        boundary = { 0 };
 static void
 my_config_readline(config_str *c, char *fname)
 {
-	if (!controldir)
-	{
+	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
@@ -145,17 +147,25 @@ void
 readcontrols()
 {
 	int             fddir;
-	char           *qbase;
+	char           *qbase, *home;
 	char          **e;
 
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+	if ((home = env_get("HOME"))) {
+		if (chdir(home) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		} else
+			home = (char *) 0;
+	}
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
-		if (!controldir)
-		{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
@@ -165,12 +175,13 @@ readcontrols()
 			die_nomem();
 		if (!stralloc_0(&fn))
 			die_nomem();
-		if (!access(fn.s, X_OK))
-		{
+		if (!access(fn.s, X_OK)) {
 			envdir_set("defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
 		}
+		if (chdir(auto_qmail) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 	}
 	my_config_readline(&me, "me");
 	if (config_default(&me, "me") == -1)
@@ -268,12 +279,10 @@ bounce(fd, why, flagtimeout)
 		die_qq();
 	qp = qmail_qp(&qq);
 
-	if (*sender.s)
-	{
+	if (*sender.s) {
 		bouncesender = "";
 		bouncerecip = sender.s;
-	} else
-	{
+	} else {
 		bouncesender = "#@[]";
 		bouncerecip = config_data(&doublebounceto)->s;
 	}
@@ -355,8 +364,7 @@ bounce(fd, why, flagtimeout)
 		die_nomem();
 	put(quoted.s, quoted.len);
 	my_puts(">\n");
-	for (;;)
-	{
+	for (;;) {
 		n = substdio_feed(&ssmess);
 		if (n < 0)
 			strerr_die2sys(111, FATAL, "unable to read message: ");
@@ -416,8 +424,7 @@ usable(fn)
 	int             fd;
 
 	i = 0;
-	while (i < deadfiles.len)
-	{
+	while (i < deadfiles.len) {
 		if (str_equal(fn, deadfiles.s + i))
 			return 0;
 		i += str_len(deadfiles.s + i);
@@ -426,8 +433,7 @@ usable(fn)
 
 	if (!*prefix)
 		return 1;	/*- optimization */
-	if ((fd = open_read(fn)) == -1)
-	{
+	if ((fd = open_read(fn)) == -1) {
 		strerr_warn4(WARNING, "unable to open ", fn, ": ", &strerr_sys);
 		return 0;
 	}
@@ -454,19 +460,15 @@ scanner()
 	maildir_clean(&filenames);
 	if (maildir_scan(&pq, &filenames, 1, 1) == -1)
 		strerr_die1(111, FATAL, &maildir_scan_err);
-	while (prioq_min(&pq, &pe))
-	{
+	while (prioq_min(&pq, &pe)) {
 		prioq_delmin(&pq);
 		fn = filenames.s + pe.id;
-		if (usable(fn))
-		{
-			if (!pid)
-			{
+		if (usable(fn)) {
+			if (!pid) {
 				pid = fork();
 				if (pid == -1)
 					strerr_die2sys(111, FATAL, "unable to fork: ");
-				if (pid == 0)
-				{
+				if (pid == 0) {
 					close(pis2c[1]);
 					fd_move(0, pis2c[0]);
 					sig_pipedefault();
@@ -531,8 +533,7 @@ main(argc, argv)
 
 	sig_pipeignore();
 
-	while ((opt = getopt(argc, argv, "bt:")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "bt:")) != opteof) {
 		switch (opt)
 		{
 		case 'b':
@@ -560,14 +561,12 @@ main(argc, argv)
 	if (!stralloc_copys(&deadfiles, ""))
 		die_nomem();
 	progress = 3;
-	for (;;)
-	{
+	for (;;) {
 		if (pipe(pic2p) == -1)
 			strerr_die2sys(111, FATAL, "unable to create pipe: ");
 		if ((pid = fork()) == -1)
 			strerr_die2sys(111, FATAL, "unable to fork: ");
-		if (!pid)
-		{
+		if (!pid) {
 			close(pic2p[0]);
 			fd_move(1, pic2p[1]);
 			scanner();
@@ -575,8 +574,7 @@ main(argc, argv)
 		close(pic2p[1]);
 		substdio_fdbuf(&ss, read, pic2p[0], buf, sizeof buf);
 		--progress;
-		for (;;)
-		{
+		for (;;) {
 			if (getln(&ss, &fn, &match, '\0') == -1)
 				die_readclient();
 			if (!match)
@@ -590,11 +588,9 @@ main(argc, argv)
 			if (!match)
 				break;
 			progress = 3;
-			if (status == 'K')
-			{
+			if (status == 'K') {
 				info(" succeeded: ");
-				if (unlink(fn.s) == -1)
-				{
+				if (unlink(fn.s) == -1) {
 					strerr_warn4(WARNING, "message will be delivered twice! unable to unlink ", fn.s, ": ", &strerr_sys);
 					if (!stralloc_cat(&deadfiles, &fn))
 						die_nomem();
@@ -602,25 +598,21 @@ main(argc, argv)
 				continue;
 			}
 			flagtimeout = 0;
-			if (flaglifetime && (status != 'D'))
-			{
+			if (flaglifetime && (status != 'D')) {
 				if (stat(fn.s, &st) == -1)
 					strerr_warn4(WARNING, "assuming message is still alive; unable to stat ", fn.s, ": ", &strerr_sys);
 				else
-				if (now() > st.st_mtime + lifetime)
-				{
+				if (now() > st.st_mtime + lifetime) {
 					status = 'D';
 					flagtimeout = 1;
 				}
 			}
-			if (flagbounce && status == 'D')
-			{
+			if (flagbounce && status == 'D') {
 				int             fd;
 				int             r;
 
 				info(" bounced: ");
-				if ((fd = open_read(fn.s)) == -1)
-				{
+				if ((fd = open_read(fn.s)) == -1) {
 					strerr_warn4(WARNING, "unable to read ", fn.s, ": ", &strerr_sys);
 					if (!stralloc_cat(&deadfiles, &fn))
 						die_nomem();
@@ -634,8 +626,7 @@ main(argc, argv)
 					strerr_warn4(WARNING, "unable to bounce ", fn.s, ": bad file format", 0);
 				if (r == 2)
 					strerr_warn4(INFO, "discarding ", fn.s, ": triple bounce", 0);
-				if (r == 1)
-				{
+				if (r == 1) {
 					substdio_puts(subfderr, INFO);
 					substdio_puts(subfderr, "returned ");
 					substdio_puts(subfderr, fn.s);
@@ -645,8 +636,7 @@ main(argc, argv)
 					substdio_flush(subfderr);
 				}
 				close(fd);
-				if (r > 0)
-				{
+				if (r > 0) {
 					if (unlink(fn.s) == 0)
 						continue;
 					strerr_warn4(WARNING, "message has been bounced but not removed! unable to unlink ", fn.s, ": ",
@@ -683,7 +673,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.10 2016-05-21 14:48:06+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.11 2020-04-04 11:23:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
