@@ -60,8 +60,9 @@ file to enable
 .BR filterto ,
 make sure to also add a line specifying delivery to your normal mailbox.
 
-\fBfilterto\fR uses environment modified according to files in 
-@controldir@/defaultqueue directory.
+\fBfilterto\fR uses environment modified according to files in
+$HOME/defaultqueue directory if present, else it uses environment modified
+according to files in @controldir@/defaultqueue directory.
 
 .SH "SEE ALSO"
 bouncesaying(1),

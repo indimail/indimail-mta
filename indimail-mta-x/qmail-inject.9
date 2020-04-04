@@ -427,9 +427,11 @@ and
 .IR NOSIGNATUREDOMAINS
 
 \fBqmail-inject\fR uses environment modified according to files in
-@controldir@/defaultqueue directory.
+$HOME/defaultqueue directory if present, else it uses environment modified
+according to files in @controldir@/defaultqueue directory.
 
 .SH "SEE ALSO"
+envdir(8),
 sendmail(1),
 qmail-srs(5),
 addresses(5),

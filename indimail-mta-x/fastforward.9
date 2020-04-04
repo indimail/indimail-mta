@@ -39,8 +39,9 @@ user.
 See
 .BR qmail-getpw (8).
 
-\fBfastforward\fR uses environment modified according to files in 
-@controldir@/defaultqueue directory.
+\fBfastforward\fR uses environment modified according to files in
+$HOME/defaultqueue directory if present, else it uses environment modified
+according to files in @controldir@/defaultqueue directory.
 
 .B SECURITY WARNING:
 If

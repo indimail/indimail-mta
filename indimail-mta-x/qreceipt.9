@@ -29,8 +29,9 @@ For example:
      |qreceipt joe@nowhere.mil
 .EE
 
-\fBqreceipt\fR uses environment modified according to files in 
-@controldir@/defaultqueue directory.
+\fBqreceipt\fR uses environment modified according to files in
+$HOME/defaultqueue directory if present, else it uses environment modified
+according to files in @controldir@/defaultqueue directory.
 
 .SH "SEE ALSO"
 dot-qmail(5),

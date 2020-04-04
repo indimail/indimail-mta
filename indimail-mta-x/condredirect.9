@@ -49,8 +49,9 @@ it is not safe for
 to fork a child that
 reads the message in the background.
 
-\fBcondredirect\fR uses environment modified according to files in 
-@controldir@/defaultqueue directory.
+\fBcondredirect\fR uses environment modified according to files in
+$HOME/defaultqueue directory if present, else it uses environment modified
+according to files in @controldir@/defaultqueue directory.
 
 .B WARNING:
 If you create a

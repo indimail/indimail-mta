@@ -19,8 +19,9 @@ variable \fBRECIPIENT\fR to generate the MDN. \fBqnotify\fR(1) silently exits wi
 status in case it does not get the required information from the environment variables or
 the headers in the email.
 
-\fBqnotify\fR(1) uses \fBqmail-queue\fR(8) to queue the Return Receipt and uses environment
-variables according to files in @controldir@/defaultqueue directory.
+\fBqnotify\fR uses environment modified according to files in
+$HOME/defaultqueue directory if present, else it uses environment modified
+according to files in @controldir@/defaultqueue directory.
 
 .SH OPTIONS
 .PP

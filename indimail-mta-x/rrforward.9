@@ -30,8 +30,9 @@ is read from
 .I .qmailrr
 file.
 
-\fBrrforward\fR uses environment modified according to files in 
-@controldir@/defaultqueue directory.
+\fBrrforward\fR uses environment modified according to files in
+$HOME/defaultqueue directory if present, else it uses environment modified
+according to files in @controldir@/defaultqueue directory.
 
 .SH "EXIT CODES"
 0 if local address part does not match
