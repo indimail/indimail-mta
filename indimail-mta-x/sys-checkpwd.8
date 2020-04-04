@@ -10,6 +10,8 @@ sys-checkpwd \- indimail-mta checkpassword program for authentication
 allowing the LOGIN, PLAIN, and CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 AUTH types.
 \fBsys-checkpwd\fR looks up userids in the systems authentication database (/etc/passwd
 or /etc/shadow). \fBsys-checkpwd\fR needs to be setuid root to function.
+\fBsys-checkpwd\fR drops all root privileges after reading the shadow(5)
+file, switches to the real uid of the invoking process.
 .PP
 As reflected in the \fBqmail-smtpd(8)\fR man page, \fBqmail-smtpd(8)\fR must be invoked with
 three arguments: hostname, path of the sys-checkpwd program, and subprogram. If these
@@ -85,6 +87,8 @@ advertised by qmail-smtpd.
 0 if authenticated, 1 on authentication failure or system problems.
 
 .SH "SEE ALSO"
+shadow(3),
+shadow(5),
 qmail-smtpd(8),
 qmail-poppass(8),
 vchkpass(8),
