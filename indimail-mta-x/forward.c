@@ -1,5 +1,8 @@
 /*
  * $Log: forward.c,v $
+ * Revision 1.11  2020-04-04 11:46:26+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
  * Revision 1.10  2020-04-04 11:21:35+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -26,7 +29,7 @@
  *
  */
 #include <unistd.h>
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "envdir.h"
 #include "pathexec.h"
@@ -93,8 +96,8 @@ main(argc, argv)
 		} else
 			home = (char *) 0;
 	}
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -107,8 +110,8 @@ main(argc, argv)
 			if ((e = pathexec(0)))
 				environ = e;
 		}
-		if (chdir(auto_qmail) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+		if (chdir(auto_sysconfdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	}
 #ifdef HAVESRS
 	if (*sender) {
@@ -154,7 +157,7 @@ main(argc, argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.10 2020-04-04 11:21:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: forward.c,v 1.11 2020-04-04 11:46:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
