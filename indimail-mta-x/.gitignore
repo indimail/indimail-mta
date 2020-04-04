@@ -588,3 +588,6 @@ Makefile-cert
 RELEASE-Notes
 RELEASE-Notes.in
 docker-entrypoint
+forward.1
+new-inject.1
+qmail-qread.8

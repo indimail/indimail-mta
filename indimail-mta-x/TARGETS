@@ -1116,3 +1116,7 @@ qf-smtp-ratelimit
 load_mysql.o
 docker-entrypoint
 qcount_dir.o
+forward.1
+new-inject.1
+qmail-qread.8
+
