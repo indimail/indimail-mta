@@ -1,5 +1,8 @@
 /*
  * $Log: filterto.c,v $
+ * Revision 1.8  2020-04-04 11:19:55+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -69,7 +72,7 @@ char            num[FMT_ULONG];
 int
 main(int argc, char **argv, char **envp)
 {
-	char           *sender, *dtline, *qbase;
+	char           *sender, *dtline, *qbase, *home;
 	char          **e;
 	int             pid, wstat;
 	char           *qqx;
@@ -82,8 +85,7 @@ main(int argc, char **argv, char **envp)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
 	if ((pid = fork()) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
-	if (pid == 0)
-	{
+	if (pid == 0) {
 		close(pf[0]);
 		if (fd_move(1, pf[1]) == -1)
 			_exit(111);
@@ -97,19 +99,26 @@ main(int argc, char **argv, char **envp)
 		strerr_die2x(100, FATAL, "SENDER not set");
 	if (!(dtline = env_get("DTLINE")))
 		strerr_die2x(100, FATAL, "DTLINE not set");
+	if ((home = env_get("HOME"))) {
+		if (chdir(home) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		} else
+			home = (char *) 0;
+	}
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
-		if (!controldir)
-		{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK))
-		{
+		if (!access("defaultqueue", X_OK)) {
 			envdir_set("defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
@@ -151,7 +160,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: filterto.c,v 1.8 2020-04-04 11:19:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
