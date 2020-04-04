@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.8  2020-04-04 12:43:17+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -25,8 +28,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include "auto_qmail.h"
 #include "auto_control.h"
+#include "auto_sysconfdir.h"
 #include "stralloc.h"
 #include "qmail.h"
 #include "case.h"
@@ -410,7 +413,7 @@ main(int argc, char **argv)
 	struct substdio ssin;
 	static char     ssinbuf[1024];
 	char            buf[DATE822FMT];
-	char           *rpline, *qqx, *recipient, *host, *qbase;
+	char           *rpline, *qqx, *recipient, *host, *qbase, *home;
 	char          **e;
 
 	while ((ch = getopt(argc, argv, "nh")) != sgoptdone) {
@@ -461,14 +464,24 @@ main(int argc, char **argv)
 	 */
 	if (!compare_local(email_disp.s, email_disp.len, rpath.s, rpath.len))
 		_exit (0);
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 	if (flagqueue) {
+		if ((home = env_get("HOME"))) {
+			if (chdir(home) == -1)
+				strerr_die4sys(111, FATAL, "unable to chdir to ", home, ": ");
+			if (!access(".defaultqueue", X_OK)) {
+				envdir_set(".defaultqueue");
+				if ((e = pathexec(0)))
+					environ = e;
+			} else
+				home = (char *) 0;
+		}
 		if (!(qbase = env_get("QUEUE_BASE"))) {
 			if (!controldir) {
 				if (!(controldir = env_get("CONTROLDIR")))
 					controldir = auto_control;
 			}
+			if (chdir(auto_sysconfdir) == -1)
+				strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 			if (chdir(controldir) == -1)
 				strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
 			if (!access("defaultqueue", X_OK)) {
@@ -476,6 +489,8 @@ main(int argc, char **argv)
 				if ((e = pathexec(0)))
 					environ = e;
 			}
+			if (chdir(auto_sysconfdir) == -1)
+				strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 		}
 		if (qmail_open(&qqt) == -1)
 			die_fork();
@@ -580,7 +595,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.8 2020-04-04 12:43:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
