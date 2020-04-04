@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.9  2020-04-04 11:37:41+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
  * Revision 1.8  2020-04-04 11:14:45+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -48,7 +51,7 @@
 #include "control.h"
 #include "qmail.h"
 #include "sgetopt.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 
 #define FATAL "dot-forward: fatal: "
@@ -215,8 +218,8 @@ readcontrols()
 		} else
 			home = (char *) 0;
 	}
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -229,8 +232,8 @@ readcontrols()
 			if ((e = pathexec(0)))
 				environ = e;
 		}
-		if (chdir(auto_qmail) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+		if (chdir(auto_sysconfdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	}
 	if ((r = control_readline(&me, "me")) == -1)
 		die_control();
@@ -525,7 +528,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.8 2020-04-04 11:14:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.9 2020-04-04 11:37:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
