@@ -1,5 +1,8 @@
 /*
  * $Log: condredirect.c,v $
+ * Revision 1.14  2020-04-04 11:36:55+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
  * Revision 1.13  2020-04-04 11:10:14+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -29,7 +32,7 @@
 #include "sig.h"
 #include "envdir.h"
 #include "pathexec.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "exit.h"
 #include "env.h"
@@ -121,8 +124,8 @@ main(argc, argv)
 		} else
 			home = (char *) 0;
 	}
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -135,8 +138,8 @@ main(argc, argv)
 			if ((e = pathexec(0)))
 				environ = e;
 		}
-		if (chdir(auto_qmail) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
+		if (chdir(auto_sysconfdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
 	}
 #ifdef HAVESRS
 	if (*sender) {
@@ -181,7 +184,7 @@ main(argc, argv)
 void
 getversion_condredirect_c()
 {
-	static char    *x = "$Id: condredirect.c,v 1.13 2020-04-04 11:10:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: condredirect.c,v 1.14 2020-04-04 11:36:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
