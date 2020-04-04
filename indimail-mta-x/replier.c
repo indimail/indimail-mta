@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.8  2020-04-04 12:48:43+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -28,7 +31,7 @@
 #include <sys/stat.h>
 #include "alloc.h"
 #include "envdir.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "stralloc.h"
 #include "byte.h"
@@ -132,7 +135,7 @@ stralloc        mydtline = { 0 };
 int
 main(int argc, char **argv)
 {
-	char           *dir, *addr, *sender, *local, *action, *qqx, *qbase;
+	char           *dir, *addr, *sender, *local, *action, *qqx, *qbase, *home;
 	char          **e;
 	int             flagmlwasthere, match, i, flaginheader, flagbadfield, pid, wstat,
 					tmperrno;
@@ -146,12 +149,20 @@ main(int argc, char **argv)
 	sig_ignore(SIGPIPE);
 	sig_catch(SIGALRM, sigalrm);
 	alarm(86400);
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
-		if (!controldir)
-		{
+	if ((home = env_get("HOME"))) {
+		if (chdir(home) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", home, ": ");
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		} else
+			home = (char *) 0;
+	}
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
@@ -162,8 +173,7 @@ main(int argc, char **argv)
 	}
 	if (chdir(dir) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", dir, ": ");
-	if ((sender = env_get("SENDER")))
-	{
+	if ((sender = env_get("SENDER"))) {
 		if (!*sender)
 			strerr_die2x(100, FATAL, "I don't reply to bounce messages (#5.7.2)");
 		if (str_equal(sender, "#@[]"))
@@ -184,8 +194,7 @@ main(int argc, char **argv)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
 	if ((pid = fork()) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
-	if (pid == 0)
-	{
+	if (pid == 0) {
 		close(pf[0]);
 		if (fd_move(1, pf[1]) == -1)
 			_exit(111);
@@ -206,8 +215,7 @@ main(int argc, char **argv)
 			++action;
 		if (!pathexec_env("REQUEST4", action))
 			_exit(111);
-		if ((e = pathexec(argv + 3)))
-		{
+		if ((e = pathexec(argv + 3))) {
 			tmperrno = errno;
 			alloc_free((char *) e);
 			errno = tmperrno;
@@ -249,16 +257,13 @@ main(int argc, char **argv)
 	flaginheader = 1;
 	flagbadfield = 0;
 	substdio_fdbuf(&ssin, read, pf[0], inbuf, sizeof(inbuf));
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
-		if (flaginheader && match)
-		{
+		if (flaginheader && match) {
 			if (line.len == 1)
 				flaginheader = 0;
-			if ((line.s[0] != ' ') && (line.s[0] != '\t'))
-			{
+			if ((line.s[0] != ' ') && (line.s[0] != '\t')) {
 				flagbadfield = 0;
 				if (constmap(&headerremovemap, line.s, byte_chr(line.s, line.len, ':')))
 					flagbadfield = 1;
@@ -316,7 +321,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: replier.c,v 1.8 2020-04-04 12:48:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
