@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.29  2020-04-04 12:13:55+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
  * Revision 1.28  2019-06-07 11:26:32+05:30  Cprogrammer
  * replaced getopt() with subgetopt()
  *
@@ -73,8 +76,10 @@
 #include "fmtqfn.h"
 #include "readsubdir.h"
 #include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "open.h"
+#include "strerr.h"
 #include "datetime.h"
 #include "date822fmt.h"
 #include "env.h"
@@ -84,6 +89,8 @@
 #include "exit.h"
 #include "envdir.h"
 #include "pathexec.h"
+
+#define FATAL "qmail-qread: fatal: "
 
 #ifndef QUEUE_COUNT
 #define QUEUE_COUNT 10
@@ -136,25 +143,9 @@ die_opendir(fn)
 }
 
 void
-die_home()
-{
-	substdio_puts(subfderr, "Unable to switch to home directory.\n");
-	die(111);
-}
-
-void
 die_control()
 {
 	substdio_puts(subfderr, "fatal: unable to read controls\n");
-	die(111);
-}
-
-void
-die_controldir(char *x)
-{
-	substdio_puts(subfderr, "qmail-inject: fatal: unable to chdir to ");
-	substdio_puts(subfderr, x);
-	substdio_puts(subfderr, "\n");
 	die(111);
 }
 
@@ -396,8 +387,8 @@ main(int argc, char **argv)
 	substdio        ss;
 
 #ifndef MULTI_QUEUE
-	if (chdir(auto_qmail))
-		die_home();
+	if (chdir(auto_sysconfdir))
+		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
@@ -569,7 +560,7 @@ main(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
-	char           *queue_count_ptr, *queue_start_ptr;
+	char           *queue_count_ptr, *queue_start_ptr, *home;
 	char            strnum[FMT_ULONG];
 	char          **e;
 	int             idx, count, qcount, qstart, lcount, rcount, bcount, tcount;
@@ -579,18 +570,32 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		return(1);
 	}
-	if (chdir(auto_qmail))
-		die_home();
-	if (!controldir) {
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = auto_control;
+	if ((home = env_get("HOME"))) {
+		if (chdir(home) == -1)
+			die_chdir(home);
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		} else
+			home = (char *) 0;
 	}
-	if (chdir(controldir) == -1)
-		die_controldir(controldir);
-	if (!access("defaultqueue", X_OK)) {
-		envdir_set("defaultqueue");
-		if ((e = pathexec(0)))
-			environ = e;
+	if (chdir(auto_sysconfdir))
+		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+		if (!access("defaultqueue", X_OK)) {
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+		if (chdir(auto_sysconfdir))
+			strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
 	}
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
@@ -657,7 +662,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.28 2019-06-07 11:26:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.29 2020-04-04 12:13:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
