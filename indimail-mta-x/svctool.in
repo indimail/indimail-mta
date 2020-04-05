@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.464 2020-04-01 19:09:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.465 2020-04-05 09:28:35+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.464 2020-04-01 19:09:16+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.465 2020-04-05 09:28:35+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3003,13 +3003,6 @@ if [ " $proxy_port" = " " ] ;then
 else
 	proxy_type="proxy"
 fi
-mysqllib=`ls -d /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
-if [ -z "$mysqllib" ] ; then
-	mysqllib=`ls -d /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
-fi
-if [ -n "$mysqllib" -a -f "$mysqllib" ] ; then
-	echo $mysqllib > $conf_dir/MYSQL_LIB
-fi
 if [ " $imap_ssl" = " 1" ] ; then
 	if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype-ssl.$tag/variables ] ; then
 		return 0
@@ -3057,6 +3050,13 @@ fi
 # create $conf_dir directory
 # create $conf_dir variables for supervise
 "$DESTDIR"$libexecdir/envmigrate $conf_dir root indimail 550
+mysqllib=`ls -d /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
+if [ -z "$mysqllib" ] ; then
+	mysqllib=`ls -d /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
+fi
+if [ -n "$mysqllib" -a -f "$mysqllib" ] ; then
+	echo $mysqllib > $conf_dir/MYSQL_LIB
+fi
 if [ ! " $memory" = " " ] ; then
 	echo $memory > $conf_dir/SOFT_MEM
 else
@@ -8926,10 +8926,6 @@ while test $# -gt 0; do
 	skip_sendmail_check=1
 	;;
 
-	--run-file-only)
-	run_file_only=1
-	;;
-
 	--enable-service)
 	option=31
 	service=$optarg
@@ -8950,6 +8946,12 @@ while test $# -gt 0; do
 	--refreshsvc=*)
 	option=34
 	service=$optarg
+	;;
+
+	--run-file-only)
+	if [ $option -eq 34 ] ; then
+		run_file_only=1
+	fi
 	;;
 
 	--norefreshsvc=*)
