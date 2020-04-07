@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.9  2020-04-07 10:05:48+05:30  Cprogrammer
+ * added getopt to allow command line argument for user and optional directory
+ *
  * Revision 1.8  2020-04-01 16:16:17+05:30  Cprogrammer
  * fixed typo in error message
  *
@@ -29,6 +32,8 @@
 #include <unistd.h>
 #include <inttypes.h>
 #include <sys/vfs.h>
+#include <sys/stat.h>
+#include "sgetopt.h"
 #include "subfd.h"
 #include "strerr.h"
 #include "fmt.h"
@@ -43,25 +48,44 @@ char            ssoutbuf[256];
 int
 main(int argc, char **argv)
 {
-	int             fd, len;
+	int             fd, len, opt;
 	size_t          mailcount;
 	int64_t         mailsize;
 	char            strnum[FMT_ULONG];
+	char           *user = (char *) 0, *dir = (char *) 0;
 	struct statfs   statbuf;
 	struct passwd  *pw;
 
-	if (argc != 2)
-		strerr_die1x(100, "usage: maildirsize user");
-	if (!(pw = getpwnam(argv[1])))
-		strerr_die3x(111, FATAL, "unknown account ", argv[1]);
-	if (chdir(pw->pw_dir))
-		strerr_die3sys(111, FATAL, "chdir: ", pw->pw_dir);
+	while ((opt = getopt(argc, argv, "u:d:")) != opteof) {
+		switch (opt) {
+		case 'u':
+			user = optarg;
+			break;
+		default:
+			strerr_die1x(100, "usage: maildirsize -u user [dir]");
+		}
+	}
+	if (!user)
+		strerr_die1x(100, "usage: maildirsize -u user [dir]");
+	if (optind + 1 == argc)
+		dir = argv[optind++];
+	if (!(pw = getpwnam(user)))
+		strerr_die3x(111, FATAL, "unknown account ", user);
+	if (!dir)
+		dir = pw->pw_dir;
+	if (chdir(dir))
+		strerr_die4sys(111, FATAL, "chdir: ", dir, ": ");
 	if (access("./Maildir/", F_OK))
-		strerr_die4sys(111, FATAL, "stat: ", pw->pw_dir, "/Maildir/");
+		strerr_die4sys(111, FATAL, ": ", dir, "/Maildir/: ");
 	mailcount = 0;
 	mailsize = qcount_dir("./Maildir/", &mailcount);
 	if ((fd = open_trunc("./Maildir/maildirsize")) == -1)
 		strerr_die2sys(111, FATAL, "./Maildir/maildirsize: ");
+	if (fchown(fd, pw->pw_uid, pw->pw_gid))
+		strerr_die4sys(111, FATAL, "chown: ", dir, "/Maildir/maildirsize: ");
+	else
+	if (fchmod(fd, 0644))
+		strerr_die4sys(111, FATAL, "chmod: ", dir, "/Maildir/maildirsize: ");
 	substdio_fdbuf(&ssout, write, fd, ssoutbuf, sizeof(ssoutbuf));
 	if (statfs("./Maildir/", &statbuf))
 		strerr_die3sys(111, FATAL, "statfs: ", "./Maildir/: ");
@@ -92,7 +116,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.8 2020-04-01 16:16:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.9 2020-04-07 10:05:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
