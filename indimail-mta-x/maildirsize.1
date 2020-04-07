@@ -1,12 +1,15 @@
 .TH maildirsize 1
 .SH NAME
-maildirsize \- print quota of a Maildir
+maildirsize \- print Maildir++ quota usage of a Maildir
 
 .SH SYNOPSIS
-\fBmaildirsize\fR \fIaccount\fR
+\fBmaildirsize\fR -u \fIaccount\fR [\fIdir\fR]
 
 .SH DESCRIPTION
 \fBmaildirsize\fR scans a Maildir for all emails and calculates the total storage
-consumed by the emails. It then prints the quota in Maildir++ specification.
+consumed by the emails. It then prints the quota in Maildir++
+specification. If \fIdir\fR is omitted, the directory ./Maildir in the home
+directory of the user \fIuser\fR is used.
+
 .SH "SEE ALSO"
-maildirquota(1), maildirmake(1), deliverquota(8)
+maildir(5), maildirquota(1), maildirmake(1), deliverquota(8), passwd(5)
