@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.10  2020-04-07 11:45:07+05:30  Cprogrammer
+ * omit ./Maildir when directory is specfied on command line
+ *
  * Revision 1.9  2020-04-07 10:05:48+05:30  Cprogrammer
  * added getopt to allow command line argument for user and optional directory
  *
@@ -36,6 +39,7 @@
 #include "sgetopt.h"
 #include "subfd.h"
 #include "strerr.h"
+#include "stralloc.h"
 #include "fmt.h"
 #include "open.h"
 #include "qcount_dir.h"
@@ -44,52 +48,23 @@
 
 struct substdio ssout;
 char            ssoutbuf[256];
+stralloc        maildirsizefn = {0};
 
-int
-main(int argc, char **argv)
+void
+update_maildirsize(char *maildirsizefn, ssize_t avail, ssize_t mailsize, size_t mailcount, uid_t uid, gid_t gid)
 {
-	int             fd, len, opt;
-	size_t          mailcount;
-	int64_t         mailsize;
+	int             fd, len;
 	char            strnum[FMT_ULONG];
-	char           *user = (char *) 0, *dir = (char *) 0;
-	struct statfs   statbuf;
-	struct passwd  *pw;
 
-	while ((opt = getopt(argc, argv, "u:d:")) != opteof) {
-		switch (opt) {
-		case 'u':
-			user = optarg;
-			break;
-		default:
-			strerr_die1x(100, "usage: maildirsize -u user [dir]");
-		}
-	}
-	if (!user)
-		strerr_die1x(100, "usage: maildirsize -u user [dir]");
-	if (optind + 1 == argc)
-		dir = argv[optind++];
-	if (!(pw = getpwnam(user)))
-		strerr_die3x(111, FATAL, "unknown account ", user);
-	if (!dir)
-		dir = pw->pw_dir;
-	if (chdir(dir))
-		strerr_die4sys(111, FATAL, "chdir: ", dir, ": ");
-	if (access("./Maildir/", F_OK))
-		strerr_die4sys(111, FATAL, ": ", dir, "/Maildir/: ");
-	mailcount = 0;
-	mailsize = qcount_dir("./Maildir/", &mailcount);
-	if ((fd = open_trunc("./Maildir/maildirsize")) == -1)
-		strerr_die2sys(111, FATAL, "./Maildir/maildirsize: ");
-	if (fchown(fd, pw->pw_uid, pw->pw_gid))
-		strerr_die4sys(111, FATAL, "chown: ", dir, "/Maildir/maildirsize: ");
+	if ((fd = open_trunc(maildirsizefn)) == -1)
+		strerr_die3sys(111, FATAL, maildirsizefn, ": ");
+	if (fchown(fd, uid, gid))
+		strerr_die4sys(111, FATAL, "chown: ", maildirsizefn, ": ");
 	else
 	if (fchmod(fd, 0644))
-		strerr_die4sys(111, FATAL, "chmod: ", dir, "/Maildir/maildirsize: ");
+		strerr_die4sys(111, FATAL, "chmod: ", maildirsizefn, ": ");
 	substdio_fdbuf(&ssout, write, fd, ssoutbuf, sizeof(ssoutbuf));
-	if (statfs("./Maildir/", &statbuf))
-		strerr_die3sys(111, FATAL, "statfs: ", "./Maildir/: ");
-	strnum[len = fmt_ulong(strnum, statbuf.f_bavail * statbuf.f_bsize)] = 0;
+	strnum[len = fmt_ulong(strnum, avail)] = 0;
 	if (substdio_put(&ssout, strnum, len) || substdio_put(subfdout, strnum, len))
 		strerr_die2sys(111, FATAL, "write: ");
 	if (substdio_put(&ssout, "S\n", 2) || substdio_put(subfdout, "S\n", 2))
@@ -110,13 +85,67 @@ main(int argc, char **argv)
 		strerr_die2sys(111, FATAL, "write: ");
 	if (close(fd) == -1)
 		strerr_die2sys(111, FATAL, "close: ");
+	return;
+}
+
+int
+main(int argc, char **argv)
+{
+	int             opt;
+	size_t          mailcount;
+	int64_t         mailsize;
+	char           *user = (char *) 0;
+	struct statfs   statbuf;
+	struct passwd  *pw;
+
+	while ((opt = getopt(argc, argv, "u:d:")) != opteof) {
+		switch (opt) {
+		case 'u':
+			user = optarg;
+			break;
+		default:
+			strerr_die1x(100, "usage: maildirsize -u user [dir]");
+		}
+	}
+	if (!user)
+		strerr_die1x(100, "usage: maildirsize -u user [dir]");
+	if (optind + 1 == argc) {
+		if (chdir(argv[optind]))
+			strerr_die4sys(111, FATAL, "chdir: ", argv[optind], ": ");
+		if (!stralloc_copys(&maildirsizefn, argv[optind]) ||
+				!stralloc_catb(&maildirsizefn, "/maildirsize", 12) ||
+				!stralloc_0(&maildirsizefn))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!(pw = getpwnam(user)))
+			strerr_die3x(111, FATAL, "unknown account ", user);
+		mailcount = 0;
+		mailsize = qcount_dir(argv[optind], &mailcount);
+		if (statfs(argv[optind], &statbuf))
+			strerr_die4sys(111, FATAL, "statfs: ", argv[optind], ": ");
+	} else {
+		if (!(pw = getpwnam(user)))
+			strerr_die3x(111, FATAL, "unknown account ", user);
+		if (chdir(pw->pw_dir))
+			strerr_die4sys(111, FATAL, "chdir: ", pw->pw_dir, ": ");
+		if (access("./Maildir/", F_OK))
+			strerr_die4sys(111, FATAL, ": ", pw->pw_dir, "/Maildir/: ");
+		if (!stralloc_copys(&maildirsizefn, pw->pw_dir) ||
+				!stralloc_catb(&maildirsizefn, "/Maildir/maildirsize", 20) ||
+				!stralloc_0(&maildirsizefn))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		mailcount = 0;
+		mailsize = qcount_dir("./Maildir/", &mailcount);
+		if (statfs("./Maildir/", &statbuf))
+			strerr_die3sys(111, FATAL, "statfs: ", "./Maildir/: ");
+	}
+	update_maildirsize(maildirsizefn.s, statbuf.f_bavail * statbuf.f_bsize, mailsize, mailcount, pw->pw_uid, pw->pw_gid);
 	return (0);
 }
 
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.9 2020-04-07 10:05:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.10 2020-04-07 11:45:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
