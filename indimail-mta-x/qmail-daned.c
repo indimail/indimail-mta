@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.19  2020-04-08 16:00:24+05:30  Cprogrammer
+ * set controldir variable in cdb_match() function
+ *
  * Revision 1.18  2020-04-01 16:14:30+05:30  Cprogrammer
  * added header for MakeArgs() function
  *
@@ -188,6 +191,8 @@ cdb_match(char *fn, char *addr, int len)
 
 	if (!len || !*addr || !fn)
 		return (0);
+	if(!(controldir = env_get("CONTROLDIR")))
+		controldir = auto_control;
 	if (!stralloc_copys(&controlfile, controldir))
 		die_nomem();
 	if (!stralloc_cats(&controlfile, "/"))
@@ -1347,7 +1352,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.18 2020-04-01 16:14:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.19 2020-04-08 16:00:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
