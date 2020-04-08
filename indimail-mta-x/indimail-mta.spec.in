@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.209 2020-04-01 19:01:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.210 2020-04-08 18:18:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -876,6 +876,8 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-tcpto
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-qmqpc
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-newu
+%attr(751,root,root)                    %{_prefix}/sbin/cdb-database
+%attr(751,root,root)                    %{_prefix}/sbin/ctrlenv
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-cdb
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-sql
 
@@ -1130,6 +1132,8 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/qmail-qread.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-pw2u.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-newu.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/cdb-database.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/ctrlenv.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-cdb.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-sql.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/recipient-cdb.8.gz
