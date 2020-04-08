@@ -25,6 +25,9 @@ if \fIenv\fR does not exists, \fBctrlenv\fR adds an environment variable named
 If no matched lines are found, \fBctrlenv\fR runs \fIchild\fR without
 modifying any environment variable
 
+if \fIfilename\fR has a \fB.cdb\fR extension, \fBctrlenv\fR will use
+cdb(3) to do a match.
+
 .SH EXIT CODES
 .B ctrlenv
 exits 111 if it has trouble reading \fIfilename\fR,
@@ -48,6 +51,7 @@ tai64nlocal(8),
 setuidgid(8),
 envuidgid(8),
 softlimit(8),
-setlock(8)
+setlock(8),
+cdb(3)
 
 http://cr.yp.to/daemontools.html
