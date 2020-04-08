@@ -1051,7 +1051,7 @@ home home+df hostname idedit iftocc indimail.plist instcheck ipmeprint \
 ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
 maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate inewaliases newinclude \
 new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest \
-predate preline printforward printmaillist proc proc+df qaes qail \
+predate preline printforward printmaillist proc proc+df qaes qail ctrlenv \
 qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl maildirsize \
 qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
 qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-popbull qmail-poppass \
@@ -1065,7 +1065,7 @@ setup smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest spawn-filter spfquer
 srsfilter supervise surblfilter surblqueue svc svok svscan svscanboot \
 svstat swaks sys-checkpwd systemd tai2tai64n tai64n tai64n2tai tai64nlocal \
 tai64nunix tcp-env testzero tokenize uacl udpclient udplogger update_tmprsadh \
-upstart viruscanner whois yearcal \
+upstart viruscanner whois yearcal cdb-database \
 analyzer qtools qlog docker-entrypoint \
 indimail-mta-permissions.easy indimail-mta-permissions.paranoid indimail-mta-permissions.secure
 
@@ -1180,7 +1180,7 @@ qmail-rspawn.0 qmail-clean.0 qmail-send.0 qmail-todo.0 qmail-start.0 splogger.0 
 qmail-queue.0 qmail-dk.0 qmail-dkim.8 dk-filter.8 qmail-inject.0 mailsubj.0 \
 qmail-showctl.0 qmail-newu.0 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 qmail-pw2u.0 qmail-qread.0 qmail-tcpto.0 qmail-tcpok.0 svscan.8 \
-qmail-popbull.0 qmail-qmqpc.0 \
+qmail-popbull.0 qmail-qmqpc.0 cdb-database.8 ctrlenv.8 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
 dktest.8 svscanboot.0 plugtest.1 surblfilter.8 svctool.8 \
 qmail-multi.0 spawn-filter.0 tcp-env.0 qmail-greyd.0 \
@@ -1502,6 +1502,21 @@ qmail-newu.9 conf-sysconfdir
 qmail-newu.o: \
 compile qmail-newu.c cdbmss.h auto_assign.h
 	./compile qmail-newu.c
+
+cdb-database: \
+load cdb-database.o cdbmss.o auto_control.o variables.o
+	./load cdb-database cdbmss.o auto_control.o variables.o -lqmail
+
+cdb-database.o: \
+compile cdb-database.c cdbmss.h auto_control.h
+	./compile cdb-database.c
+
+cdb-database.8: \
+cdb-database.9 conf-prefix conf-sysconfdir
+	cat cdb-database.9 \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}CONTROL}"`head -1 conf-sysconfdir`"}g \
+	> cdb-database.8
 
 qmail-popbull: \
 load qmail-popbull.o
@@ -4002,7 +4017,7 @@ matchregex.h control.h
 qmail-sql: \
 load qmail-sql.o variables.o auto_control.o \
 load_mysql.o sqlmatch.o auto_uids.o auto_sysconfdir.o indimail_stub.o \
-control.o auto_qmail.o tls.lib mysql_config conf-sql
+control.o auto_qmail.o tls.lib
 	./load qmail-sql indimail_stub.o \
 	variables.o auto_control.o \
 	control.o sqlmatch.o auto_uids.o auto_sysconfdir.o \
@@ -4214,12 +4229,8 @@ inotify.o: compile inotify.c hasinotify.h
 	./compile inotify.c
 
 maildirsize: \
-load maildirsize.o auto_uids.o auto_control.o auto_qmail.o \
-variables.o auto_sysconfdir.o indimail_stub.o \
-control.o qcount_dir.o
-	./load maildirsize auto_uids.o auto_control.o auto_qmail.o \
-	variables.o auto_sysconfdir.o control.o indimail_stub.o qcount_dir.o \
-	-ldl -lqmail
+load maildirsize.o qcount_dir.o
+	./load maildirsize qcount_dir.o -lqmail
 
 maildirsize.o: \
 compile maildirsize.c indimail_stub.h auto_control.h variables.h
@@ -4229,6 +4240,22 @@ qcount_dir.o: \
 compile qcount_dir.c
 	./compile qcount_dir.c
 
+ctrlenv: \
+load ctrlenv.o control.o auto_control.o \
+pathexec_env.o pathexec_run.o variables.o
+	./load ctrlenv auto_control.o control.o \
+	pathexec_env.o pathexec_run.o variables.o -lqmail
+
+ctrlenv.o: \
+compile ctrlenv.c variables.h auto_control.h
+	./compile ctrlenv.c
+
+ctrlenv.8: \
+ctrlenv.9 conf-prefix conf-sysconfdir
+	cat ctrlenv.9 \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}CONTROL}"`head -1 conf-sysconfdir`"}g \
+	> ctrlenv.8
 
 ################### PLUGINS ########################################
 # dnsblcheck plugin
