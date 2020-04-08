@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.264  2020-04-08 16:05:57+05:30  Cprogrammer
+ * added cdb-database, ctrlenv
+ *
  * Revision 1.263  2020-04-01 17:47:40+05:30  Cprogrammer
  * sys-checkpwd should be setuid for checking password in /etc/shadow
  *
@@ -1037,8 +1040,10 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "svctool", auto_uido, 0, moder_x);
 
 	c(auto_prefix, "sbin", "qmail-newu", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "cdb-database", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-cdb", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-sql", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "ctrlenv", auto_uido, 0, moder_t);
 
 	/* mess822 */
 	c(auto_prefix, "bin", "ofmipname", auto_uido, 0, moder_x);
@@ -1581,6 +1586,8 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/cat8", "qmail-cdb.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-newu.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-newu.0", uidr, gidr, moder_f);
+	c(mandir,          "man/man8", "cdb-database.8", uidr, gidr, moder_f);
+	c(mandir,          "man/man8", "ctrlenv.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-pw2u.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-pw2u.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-qread.8", uidr, gidr, moder_f);
@@ -1645,7 +1652,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.263 2020-04-01 17:47:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.264 2020-04-08 16:05:57+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
