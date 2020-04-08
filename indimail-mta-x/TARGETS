@@ -1119,4 +1119,9 @@ qcount_dir.o
 forward.1
 new-inject.1
 qmail-qread.8
-
+ctrlenv
+ctrlenv.o
+ctrlenv.8
+cdb-database
+cdb-database.8
+cdb-database.o
