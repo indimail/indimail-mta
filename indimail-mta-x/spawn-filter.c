@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.70  2020-04-08 15:59:13+05:30  Cprogrammer
+ * fixed spamignore control file not being read
+ *
  * Revision 1.69  2020-04-01 16:14:54+05:30  Cprogrammer
  * added header for MakeArgs() function
  *
@@ -275,7 +278,6 @@ static stralloc spf = { 0 };
 static int      sppok = 0;
 static stralloc spp = { 0 };
 struct constmap mapspf;
-struct constmap mapspp;
 static int      remotE;
 stralloc        sender = { 0 };
 stralloc        recipient = { 0 };
@@ -1003,16 +1005,14 @@ main(int argc, char **argv)
 	}
 	if (!(spf_fn = env_get("SPAMIGNORE")))
 		spf_fn = "spamignore";
-	if ((spfok = control_readfile(&spf, ptr, 0)) == -1)
-		report(111, "spawn-filter: Unable to read ", ptr, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if ((spfok = control_readfile(&spf, spf_fn, 0)) == -1)
+		report(111, "spawn-filter: Unable to read ", spf_fn, ": ", error_str(errno), ". (#4.3.0)", 0);
 	if (spfok && !constmap_init(&mapspf, spf.s, spf.len, 0))
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if (!(ptr = env_get("SPAMIGNOREPATTERNS")))
 		ptr = "spamignorepatterns";
 	if ((sppok = control_readfile(&spp, ptr, 0)) == -1)
 		report(111, "spawn-filter: Unable to read ", ptr, ": ", error_str(errno), ". (#4.3.0)", 0);
-	if (sppok && !constmap_init(&mapspp, spp.s, spp.len, 0))
-		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	/*
 	 * Check if addr is in spamignore or spamignorepatterns
 	 */
@@ -1127,7 +1127,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.69 2020-04-01 16:14:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.70 2020-04-08 15:59:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
