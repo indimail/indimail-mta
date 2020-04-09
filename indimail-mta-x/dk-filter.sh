@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.24  2020-04-09 21:42:09+05:30  Cprogrammer
+# added variables NODK, NODKIM to disable domainkeys, dkim
+#
 # Revision 1.23  2019-06-26 18:39:43+05:30  Cprogrammer
 # use DEFAULT_DKIM_KEY env variable for default signing key
 #
@@ -72,7 +75,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.23 2019-06-26 18:39:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.24 2020-04-09 21:42:09+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -94,7 +97,7 @@ slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
 	cd SYSCONFDIR
 fi
-if [ -x PREFIX/bin/dktest -a -z "$DKVERIFY" ] ; then
+if [ -z "$NODK" -a -x PREFIX/bin/dktest -a -z "$DKVERIFY" ] ; then
 	if [ -z "$DKSIGN" ] ; then
 		DKSIGN=$CONTROLDIR/domainkeys/%/default
 		dksign=2
@@ -102,7 +105,7 @@ if [ -x PREFIX/bin/dktest -a -z "$DKVERIFY" ] ; then
 		dksign=2
 	fi
 fi
-if [ -x PREFIX/bin/dkim -a -z "$DKIMVERIFY" ] ; then
+if [ -z "$NODKIM" -a -x PREFIX/bin/dkim -a -z "$DKIMVERIFY" ] ; then
 	if [ -z "$DKIMSIGN" ] ; then
 		DKIMSIGN=$CONTROLDIR/domainkeys/%/default
 		dkimsign=2
@@ -110,7 +113,7 @@ if [ -x PREFIX/bin/dkim -a -z "$DKIMVERIFY" ] ; then
 		dkimsign=2
 	fi
 fi
-if [ ! -z "$DKSIGN" ] ; then
+if [ -z "$NODK" -a -n "$DKSIGN" ] ; then
 	if [ ! -f PREFIX/bin/dktest ] ; then
 		echo "PREFIX/bin/dktest: No such file or directory" 1>&2
 		exit 1
@@ -120,7 +123,9 @@ if [ ! -z "$DKSIGN" ] ; then
 	if [ $? -eq 0 ] ; then
 		percent_found=1
 	fi
-	if [ ! " $_SENDER" = " " ] ; then
+	if [ -n "$DKIMDOMAIN" ] ; then
+		dkkeyfn=`echo $DKSIGN | sed s{%{$DKIMDOMAIN{g`
+	elif [ ! " $_SENDER" = " " ] ; then
 		# replace '%' in filename with domain
 		domain=`echo $_SENDER | cut -d@ -f2`
 		dkkeyfn=`echo $DKSIGN | sed s{%{$domain{g`
@@ -140,7 +145,7 @@ if [ ! -z "$DKSIGN" ] ; then
 	fi
 	dkselector=`basename $dkkeyfn`
 fi
-if [ ! -z "$DKIMSIGN" ] ; then
+if [ -z "$NODKIM" -a -n "$DKIMSIGN" ] ; then
 	if [ ! -f PREFIX/bin/dkim ] ; then
 		echo "PREFIX/bin/dkim: No such file or directory" 1>&2
 		exit 1
@@ -150,7 +155,9 @@ if [ ! -z "$DKIMSIGN" ] ; then
 	if [ $? -eq 0 ] ; then
 		percent_found=1
 	fi
-	if [ ! " $_SENDER" = " " ] ; then
+	if [ -n "$DKIMDOMAIN" ] ; then
+		dkimkeyfn=`echo $DKIMSIGN | sed s{%{$DKIMDOMAIN{g`
+	elif [ ! " $_SENDER" = " " ] ; then
 		# replace '%' in filename with domain
 		domain=`echo $_SENDER | cut -d@ -f2`
 		dkimkeyfn=`echo $DKIMSIGN | sed s{%{$domain{g`
@@ -170,14 +177,14 @@ if [ ! -z "$DKIMSIGN" ] ; then
 	fi
 	dkimselector=`basename $dkimkeyfn`
 fi
-if [ ! -z "$DKVERIFY" ] ; then
+if [ -z "$NODK" -a -n "$DKVERIFY" ] ; then
 	if [ ! -f PREFIX/bin/dktest ] ; then
 		echo "PREFIX/bin/dktest: No such file or directory" 1>&2
 		exit 1
 	fi
 	dkverify=1
 fi
-if [ ! -z "$DKIMVERIFY" ] ; then
+if [ -z "$NODKIM" -a -n "$DKIMVERIFY" ] ; then
 	if [ ! -f PREFIX/bin/dkim ] ; then
 		echo "PREFIX/bin/dkim: No such file or directory" 1>&2
 		exit 1
