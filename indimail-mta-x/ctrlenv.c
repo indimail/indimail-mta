@@ -1,5 +1,8 @@
 /*
  * $Log: ctrlenv.c,v $
+ * Revision 1.2  2020-04-09 16:33:30+05:30  Cprogrammer
+ * added search in MySQL db
+ *
  * Revision 1.1  2020-04-08 16:02:19+05:30  Cprogrammer
  * Initial revision
  *
@@ -13,7 +16,6 @@
 #include "stralloc.h"
 #include "alloc.h"
 #include "pathexec.h"
-
 #include "uint32.h"
 #include "alloc.h"
 #include "cdb.h"
@@ -23,7 +25,127 @@
 #include "variables.h"
 #include "auto_control.h"
 
+#ifdef USE_SQL
+#include "hasmysql.h"
+#include "scan.h"
+#ifdef HAS_MYSQL
+#include <mysql.h>
+#include <mysqld_error.h>
+#include "indimail_stub.h"
+#include "load_mysql.h"
+#include "sqlmatch.h"
+#endif
+#endif
+
 #define FATAL "ctrlenv: fatal: "
+
+#ifdef HAS_MYSQL
+int
+match_in_db(MYSQL *conn, char *table_name, char *addr, char **envStr, char **errStr)
+{
+
+	MYSQL_RES      *res;
+	MYSQL_ROW       row;
+	int             num, m_error;
+	static stralloc envStore = { 0 };
+	static stralloc sql = { 0 };
+
+	if (!conn)
+		return (0);
+	if (!stralloc_copys(&sql, "select value from ") ||
+			!stralloc_cats(&sql, table_name) || !stralloc_cats(&sql, " where addr=\"") ||
+			!stralloc_cats(&sql, addr) || !stralloc_cats(&sql, "\"")) {
+		if (errStr)
+			*errStr = error_str(errno);
+		return (AM_MEMORY_ERR);
+	}
+again:
+	if (!stralloc_0(&sql)) {
+		if (errStr)
+			*errStr = error_str(errno);
+		return (AM_MEMORY_ERR);
+	}
+	if (in_mysql_query(conn, sql.s)) {
+		if ((m_error = in_mysql_errno(conn)) == ER_NO_SUCH_TABLE)
+			return (0);
+		else
+		if (m_error == ER_PARSE_ERROR) {
+			if (!stralloc_copys(&sql, "select value from ") ||
+					!stralloc_cats(&sql, table_name) || !stralloc_cats(&sql, " where addr='") ||
+					!stralloc_cats(&sql, addr) || !stralloc_cats(&sql, "'")) {
+				if (errStr)
+					*errStr = error_str(errno);
+				return (AM_MEMORY_ERR);
+			}
+			goto again;
+		}
+		sql.len--;
+		if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) ||
+				!stralloc_0(&sql)) {
+			if (errStr)
+				*errStr = error_str(errno);
+			return (AM_MEMORY_ERR);
+		}
+		if (errStr)
+			*errStr = sql.s;
+		return (AM_MYSQL_ERR);
+	}
+	if (!(res = in_mysql_store_result(conn))) {
+		sql.len--;
+		if (!stralloc_cats(&sql, "mysql_store_result: ") ||
+				!stralloc_cats(&sql, (char *) in_mysql_error(conn)) || !stralloc_0(&sql)) {
+			if (errStr)
+				*errStr = error_str(errno);
+			return (AM_MEMORY_ERR);
+		}
+		return (AM_MYSQL_ERR);
+	}
+	num = in_mysql_num_rows(res);
+	for (; (row = in_mysql_fetch_row(res));) {
+		if (envStr) {
+			if (!stralloc_copys(&envStore, row[0]) || !stralloc_0(&envStore)) {
+				if (errStr)
+					*errStr = error_str(errno);
+				in_mysql_free_result(res);
+				return (AM_MEMORY_ERR);
+			}
+			*envStr = envStore.s;
+		}
+	}
+	in_mysql_free_result(res);
+	return (num);
+}
+
+int
+sql_match(char *fn, char *addr, int len, char **result)
+{
+	static stralloc controlfile = { 0 };
+	int             cntrl_ok;
+	MYSQL          *conn;
+	char           *errStr = (char *) 0, *table_name = (char *) 0;
+
+	if (!len || !*addr || !fn)
+		return (0);
+	if (!controldir) {
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = auto_control;
+	}
+	if (!stralloc_copys(&controlfile, controldir) || !stralloc_cats(&controlfile, "/") ||
+			!stralloc_cats(&controlfile, fn) ||
+			!stralloc_0(&controlfile))
+		strerr_die2sys(111, FATAL, "out of memory");
+	if ((cntrl_ok = initMySQLlibrary(&errStr)))
+		return (0);
+	else
+	if (!use_sql)
+		return (0);
+	if ((cntrl_ok = connect_sqldb(controlfile.s, &conn, &table_name, &errStr)) < 0)
+		return (cntrl_ok);
+	if ((cntrl_ok = match_in_db(conn, table_name, addr, result, &errStr)) < 0)
+		return (cntrl_ok);
+	return (cntrl_ok ? 1 : 0);
+}
+#endif
 
 stralloc        ctrl = {0};
 
@@ -102,9 +224,10 @@ main(int argc, char **argv)
 		strerr_die1x(100, "usage: cntrlenv -f filename -e env -a address child");
 	if (!fn || !env_name || !addr)
 		strerr_die1x(100, "usage: cntrlenv -f filename -e env -a address child");
+	j = str_len(addr);
 	i = str_end(fn, ".cdb");
 	if (fn[i]) {
-		if (cdb_match(fn, addr, str_len(addr), &result)) {
+		if (cdb_match(fn, addr, j, &result)) {
 			if (!pathexec_env(env_name, result))
 				strerr_die2sys(111, FATAL, "out of memory");
 			pathexec(argv + optind);
@@ -112,6 +235,18 @@ main(int argc, char **argv)
 			pathexec(argv + optind);
 		strerr_die4sys(111, FATAL, "unable to run ", argv[optind], ": ");
 	}
+#ifdef HAS_MYSQL
+	i = str_end(fn, ".sql");
+	if (fn[i]) {
+		if (sql_match(fn, addr, j, &result)) {
+			if (!pathexec_env(env_name, result))
+				strerr_die2sys(111, FATAL, "out of memory");
+			pathexec(argv + optind);
+		} else
+			pathexec(argv + optind);
+		strerr_die4sys(111, FATAL, "unable to run ", argv[optind], ": ");
+	}
+#endif
 	if ((opt = control_readfile(&ctrl, fn, 0)) == -1)
 		strerr_die3sys(111, FATAL, fn, ": ");
 	for (len = 0, ptr = ctrl.s; len < ctrl.len; ) {
@@ -135,7 +270,7 @@ main(int argc, char **argv)
 void
 getversion_ctrlenv_c()
 {
-	static char    *x = "$Id: ctrlenv.c,v 1.1 2020-04-08 16:02:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ctrlenv.c,v 1.2 2020-04-09 16:33:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
