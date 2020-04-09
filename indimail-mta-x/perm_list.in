@@ -205,6 +205,9 @@
 %attr(0751,root,qmail) @prefix@/sbin/splogger
 %attr(0751,root,qmail) @prefix@/sbin/qmail-cdb
 %attr(0751,root,qmail) @prefix@/sbin/qmail-sql
+%attr(0751,root,qmail) @prefix@/sbin/cdb-database
+%attr(0751,root,qmail) @prefix@/sbin/sql-database
+%attr(0751,root,qmail) @prefix@/sbin/ctrlenv
 %attr(0751,root,qmail) @prefix@/sbin/qmail-newu
 %attr(0751,root,qmail) @prefix@/sbin/recipient-cdb
 

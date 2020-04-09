@@ -877,6 +877,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-qmqpc
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-newu
 %attr(751,root,root)                    %{_prefix}/sbin/cdb-database
+%attr(751,root,root)                    %{_prefix}/sbin/sql-database
 %attr(751,root,root)                    %{_prefix}/sbin/ctrlenv
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-cdb
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-sql
@@ -1133,6 +1134,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/qmail-pw2u.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-newu.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/cdb-database.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/sql-database.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/ctrlenv.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-cdb.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-sql.8.gz
