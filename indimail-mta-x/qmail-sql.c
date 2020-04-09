@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.8  2020-04-09 16:00:18+05:30  Cprogrammer
+ * collapsed stralloc calls
+ *
  * Revision 1.7  2019-05-28 10:22:23+05:30  Cprogrammer
  * BUG - return value of insert_db wasn't checked
  *
@@ -89,8 +92,7 @@ my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
 	logerr(": ");
-	if (s2)
-	{
+	if (s2) {
 		logerr(s2);
 		logerr(": ");
 	}
@@ -98,20 +100,6 @@ my_error(char *s1, char *s2, int exit_val)
 		logerr(error_str(errno));
 	logerrf("\n");
 	_exit(exit_val > 0 ? exit_val : -exit_val);
-}
-
-void
-die_nomem()
-{
-	substdio_putsflush(subfderr, "qmail-sql: fatal: out of memory\n");
-	_exit(111);
-}
-
-void
-die_control()
-{
-	substdio_putsflush(subfderr, "unable to read controls\n");
-	_exit(111);
 }
 
 int
@@ -126,56 +114,39 @@ insert_db(MYSQL *conn, char *filename, char *table_name, int replace, char **err
 			*errStr = "not connected to MySQL";
 		return (0);
 	}
-	if (!stralloc_copys(&sql, "LOAD DATA LOW_PRIORITY LOCAL INFILE \""))
-		die_nomem();
-	if (!stralloc_cats(&sql, filename))
-		die_nomem();
-	if (!stralloc_cats(&sql, replace ? "\"REPLACE INTO TABLE " : "\" IGNORE INTO TABLE "))
-		die_nomem();
-	if (!stralloc_cats(&sql, table_name))
-		die_nomem();
-	if (!stralloc_catb(&sql, " (email)", 8))
-		die_nomem();
+	if (!stralloc_copys(&sql, "LOAD DATA LOW_PRIORITY LOCAL INFILE \"") ||
+			!stralloc_cats(&sql, filename) ||
+			!stralloc_cats(&sql, replace ? "\" REPLACE INTO TABLE " : "\" IGNORE INTO TABLE ") ||
+			!stralloc_cats(&sql, table_name) || !stralloc_catb(&sql, " (email)", 8))
+		strerr_die2sys(111, FATAL, "out of memory");
 again:
 	if (!stralloc_0(&sql))
-		die_nomem();
+		strerr_die2sys(111, FATAL, "out of memory");
 	if (in_mysql_query(conn, sql.s)) {
 		if ((m_error = in_mysql_errno(conn)) == ER_NO_SUCH_TABLE) {
 			if (create_sqltable(conn, table_name, errStr))
 				return (AM_MYSQL_ERR);
 			if (in_mysql_query(conn, sql.s)) {
 				sql.len--;
-				if (!stralloc_cats(&sql, ": "))
-					die_nomem();
-				if (!stralloc_cats(&sql, (char *) in_mysql_error(conn)))
-					die_nomem();
-				if (!stralloc_0(&sql))
-					die_nomem();
+				if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) || !stralloc_0(&sql))
+					strerr_die2sys(111, FATAL, "out of memory");
 				if (errStr)
 					*errStr = sql.s;
 				return (AM_MYSQL_ERR);
 			}
 		} else
 		if (m_error == ER_PARSE_ERROR) {
-			if (!stralloc_copys(&sql, "LOAD DATA LOW_PRIORITY LOCAL INFILE '"))
-				die_nomem();
-			if (!stralloc_cats(&sql, filename))
-				die_nomem();
-			if (!stralloc_cats(&sql, "' IGNORE INTO TABLE "))
-				die_nomem();
-			if (!stralloc_cats(&sql, table_name))
-				die_nomem();
-			if (!stralloc_catb(&sql, " (email)", 8))
-				die_nomem();
+			if (!stralloc_copys(&sql, "LOAD DATA LOW_PRIORITY LOCAL INFILE '") ||
+					!stralloc_cats(&sql, filename) ||
+					!stralloc_cats(&sql, replace ? "' REPLACE INTO TABLE " : "' IGNORE INTO TABLE ") ||
+					!stralloc_cats(&sql, table_name) || !stralloc_catb(&sql, " (email)", 8))
+				strerr_die2sys(111, FATAL, "out of memory");
 			goto again;
 		} else {
 			sql.len--;
-			if (!stralloc_cats(&sql, ": "))
-				die_nomem();
-			if (!stralloc_cats(&sql, (char *) in_mysql_error(conn)))
-				die_nomem();
-			if (!stralloc_0(&sql))
-				die_nomem();
+			if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) ||
+					!stralloc_0(&sql))
+				strerr_die2sys(111, FATAL, "out of memory");
 			if (errStr)
 				*errStr = sql.s;
 			return (AM_MYSQL_ERR);
@@ -183,12 +154,9 @@ again:
 	}
 	if ((num = in_mysql_affected_rows(conn)) == -1) {
 		sql.len--;
-		if (!stralloc_cats(&sql, ": "))
-			die_nomem();
-		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn)))
-			die_nomem();
-		if (!stralloc_0(&sql))
-			die_nomem();
+		if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) ||
+				!stralloc_0(&sql))
+			strerr_die2sys(111, FATAL, "out of memory");
 		if (errStr)
 			*errStr = sql.s;
 		return (AM_MYSQL_ERR);
@@ -250,54 +218,30 @@ main(int argc, char **argv)
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
-	if (!stralloc_copys(&filename, controldir))
-		die_nomem();
-	if (!stralloc_catb(&filename, "/", 1))
-		die_nomem();
-	if (!stralloc_cats(&filename, *argv++))
-		die_nomem();
-	if (!stralloc_0(&filename))
-		die_nomem();
+	if (!stralloc_copys(&filename, controldir) || !stralloc_catb(&filename, "/", 1) ||
+			!stralloc_cats(&filename, *argv++) || !stralloc_0(&filename))
+		strerr_die2sys(111, FATAL, "out of memory");
 	if (chdir(auto_sysconfdir) == -1)
-		strerr_die3sys(111, FATAL, "chdir: ", auto_sysconfdir);
+		strerr_die4sys(111, FATAL, "chdir: ", auto_sysconfdir, ": ");
 	if (stat(filename.s, &statbuf))
 		my_error("stat", filename.s, 111);
 	--filename.len;
-	if (!stralloc_cats(&filename, ".sql"))
-		die_nomem();
-	if (!stralloc_0(&filename))
-		die_nomem();
+	if (!stralloc_cats(&filename, ".sql") || !stralloc_0(&filename))
+		strerr_die2sys(111, FATAL, "out of memory");
 	if (stat(filename.s, &statbuf) && (!dbserver || !user || !pass || !dbname || !table_name))
 		strerr_die1x(100, usage);
-	if (!stralloc_0(&filename))
-		die_nomem();
 	if (dbserver && user && pass && dbname && table_name) {
 		if ((fd = open(filename.s, O_CREAT|O_TRUNC|O_WRONLY, 0644)) == -1)
 			my_error("open", filename.s, 111);
-		if (fchown(fd, auto_uidv, auto_gidv))
-			my_error("chown", filename.s, 111);
-		if (!stralloc_copys(&str, dbserver))
-			die_nomem();
-		if (!stralloc_catb(&str, ":", 1))
-			die_nomem();
-		if (!stralloc_cats(&str, user))
-			die_nomem();
-		if (!stralloc_catb(&str, ":", 1))
-			die_nomem();
-		if (!stralloc_cats(&str, pass))
-			die_nomem();
-		if (!stralloc_catb(&str, ":", 1))
-			die_nomem();
-		if (!stralloc_cats(&str, dbname))
-			die_nomem();
-		if (!stralloc_catb(&str, ":", 1))
-			die_nomem();
-		if (!stralloc_cats(&str, table_name))
-			die_nomem();
-		if (!stralloc_catb(&str, "\n", 1))
-			die_nomem();
+		if (!stralloc_copys(&str, dbserver) || !stralloc_catb(&str, ":", 1) ||
+				!stralloc_cats(&str, user) || !stralloc_catb(&str, ":", 1) ||
+				!stralloc_cats(&str, pass) || !stralloc_catb(&str, ":", 1) ||
+				!stralloc_cats(&str, dbname) || !stralloc_catb(&str, ":", 1) ||
+				!stralloc_cats(&str, table_name) || !stralloc_catb(&str, "\n", 1))
 		if (write(fd, str.s, str.len) == -1)
 			my_error("write", filename.s, 111);
+		if (fchown(fd, auto_uidv, auto_gidv))
+			my_error("chown", filename.s, 111);
 		if (close(fd))
 			my_error("close", filename.s, 111);
 		out("created file ");
@@ -312,10 +256,10 @@ main(int argc, char **argv)
 	if (!skip_load) {
 		if (connect_sqldb(filename.s, &conn, &tname, &errStr) < 0)
 			my_error("MySQL connect", errStr, 111);
-		filename.len -= 6;
+		filename.len -= 5;
 		if (!stralloc_0(&filename)) {
 			in_mysql_close(conn);
-			die_nomem();
+			strerr_die2sys(111, FATAL, "out of memory");
 		}
 		if ((opt = insert_db(conn, filename.s, tname, replace, &errStr)) < 0) {
 			in_mysql_close(conn);
@@ -348,7 +292,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.7 2019-05-28 10:22:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.8 2020-04-09 16:00:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

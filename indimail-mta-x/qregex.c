@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.c,v $
+ * Revision 1.29  2020-04-09 16:01:17+05:30  Cprogrammer
+ * collapsed multiple stralloc statements
+ *
  * Revision 1.28  2018-07-02 00:31:24+05:30  Cprogrammer
  * use addr->len - 1 instead of str_len(addr->s)
  *
@@ -88,12 +91,12 @@
  * Initial revision
  *
  * qregex (v2)
- * $Id: qregex.c,v 1.28 2018-07-02 00:31:24+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.29 2020-04-09 16:01:17+05:30 Cprogrammer Exp mbhangui $
  *
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2018-07-02 00:31:24+05:30 $
- * Revision: $Revision: 1.28 $
+ * Modified: $Date: 2020-04-09 16:01:17+05:30 $
+ * Revision: $Revision: 1.29 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -172,27 +175,9 @@ cdbmatch(char *fn, char *addr, int len, struct constmap *maprh, char **errStr)
 	}
 	if (errStr)
 		*errStr = 0;
-	if (!stralloc_copys(&controlfile, controldir)) {
-		if (errStr) 
-			*errStr = error_str(errno);
-		return AM_MEMORY_ERR;
-	}
-	if (!stralloc_cats(&controlfile, "/")) {
-		if (errStr) 
-			*errStr = error_str(errno);
-		return AM_MEMORY_ERR;
-	}
-	if (!stralloc_cats(&controlfile, fn)) {
-		if (errStr) 
-			*errStr = error_str(errno);
-		return AM_MEMORY_ERR;
-	}
-	if (!stralloc_cats(&controlfile, ".cdb")) {
-		if (errStr) 
-			*errStr = error_str(errno);
-		return AM_MEMORY_ERR;
-	}
-	if (!stralloc_0(&controlfile)) {
+	if (!stralloc_copys(&controlfile, controldir) || !stralloc_cats(&controlfile, "/")
+			|| !stralloc_cats(&controlfile, fn) || !stralloc_cats(&controlfile, ".cdb")
+			|| !stralloc_0(&controlfile)) {
 		if (errStr) 
 			*errStr = error_str(errno);
 		return AM_MEMORY_ERR;
@@ -205,9 +190,7 @@ cdbmatch(char *fn, char *addr, int len, struct constmap *maprh, char **errStr)
 		}
 		if (!maprh)
 			return (0);
-		/*
-		 * cdb missing or entry missing
-		 */
+		/*- cdb missing or entry missing */
 		if ((cntrl_ok = control_readfile(&temp, fn, 0)) == -1) {
 			if (errStr) 
 				*errStr = error_str(errno);
@@ -329,9 +312,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 				j++;
 			}
 			if (*(map->s + j) == dotChar) {
-				if (!stralloc_copys(&curregex, ".*"))
-					return (AM_MEMORY_ERR);
-				if (!stralloc_catb(&curregex, map->s + j, (i - j)))
+				if (!stralloc_copys(&curregex, ".*") || !stralloc_catb(&curregex, map->s + j, (i - j)))
 					return (AM_MEMORY_ERR);
 			} else
 			if (!stralloc_copyb(&curregex, map->s + j, (i - j)))
@@ -353,7 +334,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.28 2018-07-02 00:31:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.29 2020-04-09 16:01:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
