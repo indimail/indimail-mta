@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.25  2020-04-09 22:25:01+05:30  Cprogrammer
+# exec cat if both NODDK and NODKIM are defined
+#
 # Revision 1.24  2020-04-09 21:42:09+05:30  Cprogrammer
 # added variables NODK, NODKIM to disable domainkeys, dkim
 #
@@ -75,7 +78,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.24 2020-04-09 21:42:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.25 2020-04-09 22:25:01+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -85,6 +88,9 @@ dksign=0
 dkimsign=0
 dkverify=0
 dkimverify=0
+if [ -n "$NODK" -a -n "$NODKIM" ] ; then
+	exec /bin/cat
+fi
 if [ -z "$DEFAULT_DKIM_KEY" ] ; then
 	default_key=$CONTROLDIR/domainkeys/default
 else
@@ -191,7 +197,7 @@ if [ -z "$NODKIM" -a -n "$DKIMVERIFY" ] ; then
 	fi
 	dkimverify=1
 fi
-cat > /tmp/dk.$$
+/bin/cat > /tmp/dk.$$
 if [ $dkimsign -eq 1 ] ; then
 	# DKIMSIGNOPTIONS="-z 1 -b 2 -x - -y $dkimselector -s $dkimkeyfn"
 	set -- `getopt lqthb:c:d:i:x:z:y:s: $DKIMSIGNOPTIONS`
@@ -325,7 +331,6 @@ if [ $dksign -eq 1 ] ; then
 		dkopts="$dkopts -s $dkkeyfn"
 	fi
 	exec 0</tmp/dk.$$
-	#PREFIX/bin/dktest -h -s $dkkeyfn
 	eval $dkopts
 	exit_val=$?
 	# allow error due to duplicate DomainKey-Header
@@ -378,5 +383,5 @@ if [ $dkverify -eq 1 ] ; then
 fi
 exec 0</tmp/dk.$$
 /bin/rm -f /tmp/dk.$$
-cat
+/bin/cat
 exit $?
