@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.12  2020-04-09 16:03:16+05:30  Cprogrammer
+ * removed not needed arguments to check_db()
+ *
  * Revision 1.11  2019-04-20 19:53:13+05:30  Cprogrammer
  * load MySQL library dynamically
  *
@@ -234,6 +237,16 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 			*error = "mysql_init: no memory";
 		return (AM_MEMORY_ERR);
 	}
+	if (in_mysql_options(db_mysql, MYSQL_READ_DEFAULT_FILE, "indimail.cnf")) {
+		if (error)
+			*error = "unable to set MYSQL_READ_DEFAULT_FILE";
+		return (AM_CONFIG_ERR);
+	}
+	if (in_mysql_options(db_mysql, MYSQL_READ_DEFAULT_GROUP, "indimail")) {
+		if (error)
+			*error = "unable to set MYSQL_READ_DEFAULT_GROUP";
+		return (AM_CONFIG_ERR);
+	}
 	if (in_mysql_options(db_mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout)) {
 		if (error)
 			*error = "unable to set MYSQL_OPT_CONNECT_TIMEOUT";
@@ -257,44 +270,21 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 }
 
 int
-create_sqltable(MYSQL * conn, char *table_name, char **error)
+create_sqltable(MYSQL *conn, char *table_name, char **error)
 {
 	static stralloc sql = { 0 };
 
-	if (!stralloc_copys(&sql, "create table ")) {
-		if (error)
-			*error = error_str(errno);
-		return (AM_MEMORY_ERR);
-	}
-	if (!stralloc_cats(&sql, table_name)) {
-		if (error)
-			*error = error_str(errno);
-		return (AM_MEMORY_ERR);
-	}
-	if (!stralloc_cats(&sql, " (email char(64) NOT NULL, timestamp timestamp NOT NULL, \
-		primary key (email), index timestamp (timestamp))")) {
-		if (error)
-			*error = error_str(errno);
-		return (AM_MEMORY_ERR);
-	}
-	if (!stralloc_0(&sql)) {
+	if (!stralloc_copys(&sql, "CREATE TABLE ") || !stralloc_cats(&sql, table_name) ||
+			!stralloc_cats(&sql, " (email char(64) NOT NULL, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, PRIMARY KEY (email), INDEX timestamp (timestamp))") ||
+			!stralloc_0(&sql)) {
 		if (error)
 			*error = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
 	if (in_mysql_query(conn, sql.s)) {
 		sql.len--;
-		if (!stralloc_cats(&sql, ": ")) {
-			if (error)
-				*error = error_str(errno);
-			return (AM_MEMORY_ERR);
-		}
-		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
-			if (error)
-				*error = (char *) in_mysql_error(conn);
-			return (AM_MEMORY_ERR);
-		}
-		if (!stralloc_0(&sql)) {
+		if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) ||
+				!stralloc_0(&sql)) {
 			if (error)
 				*error = error_str(errno);
 			return (AM_MEMORY_ERR);
@@ -305,43 +295,24 @@ create_sqltable(MYSQL * conn, char *table_name, char **error)
 }
 
 int
-check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmval, char *envStr, char **errStr)
+check_db(MYSQL *conn, char *addr, unsigned long *row_count, unsigned long *tmval, char **errStr)
 {
 
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 	int             num, m_error;
-	static stralloc envStore = { 0 };
 	static stralloc sql = { 0 };
 
 	if (!conn)
 		return (0);
-	if (!stralloc_copys(&sql, "select UNIX_TIMESTAMP(timestamp) from ")) {
+	if (!stralloc_copys(&sql, "select UNIX_TIMESTAMP(timestamp) from ") ||
+			!stralloc_cats(&sql, dbtable.s) || !stralloc_cats(&sql, " where email=\"") ||
+			!stralloc_cats(&sql, addr) || !stralloc_cats(&sql, "\"")) {
 		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_cats(&sql, dbtable.s)) {
-		if (errStr)
-			*errStr = error_str(errno);
-		return (AM_MEMORY_ERR);
-	}
-	if (!stralloc_cats(&sql, " where email=\"")) {
-		if (errStr)
-			*errStr = error_str(errno);
-		return (AM_MEMORY_ERR);
-	}
-	if (!stralloc_cats(&sql, addr)) {
-		if (errStr)
-			*errStr = error_str(errno);
-		return (AM_MEMORY_ERR);
-	}
-	if (!stralloc_cats(&sql, "\"")) {
-		if (errStr)
-			*errStr = error_str(errno);
-		return (AM_MEMORY_ERR);
-	}
-  again:
+again:
 	if (!stralloc_0(&sql)) {
 		if (errStr)
 			*errStr = error_str(errno);
@@ -352,28 +323,11 @@ check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmva
 			if (create_sqltable(conn, dbtable.s, errStr))
 				return (AM_MYSQL_ERR);
 			return (0);
-		} else if (m_error == ER_PARSE_ERROR) {
-			if (!stralloc_copys(&sql, "select UNIX_TIMESTAMP(timestamp) from ")) {
-				if (errStr)
-					*errStr = error_str(errno);
-				return (AM_MEMORY_ERR);
-			}
-			if (!stralloc_cats(&sql, dbtable.s)) {
-				if (errStr)
-					*errStr = error_str(errno);
-				return (AM_MEMORY_ERR);
-			}
-			if (!stralloc_cats(&sql, " where email='")) {
-				if (errStr)
-					*errStr = error_str(errno);
-				return (AM_MEMORY_ERR);
-			}
-			if (!stralloc_cats(&sql, addr)) {
-				if (errStr)
-					*errStr = error_str(errno);
-				return (AM_MEMORY_ERR);
-			}
-			if (!stralloc_cats(&sql, "'")) {
+		} else
+		if (m_error == ER_PARSE_ERROR) {
+			if (!stralloc_copys(&sql, "select UNIX_TIMESTAMP(timestamp) from ") ||
+					!stralloc_cats(&sql, dbtable.s) || !stralloc_cats(&sql, " where email='") ||
+					!stralloc_cats(&sql, addr) || !stralloc_cats(&sql, "'")) {
 				if (errStr)
 					*errStr = error_str(errno);
 				return (AM_MEMORY_ERR);
@@ -381,17 +335,8 @@ check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmva
 			goto again;
 		}
 		sql.len--;
-		if (!stralloc_cats(&sql, ": ")) {
-			if (errStr)
-				*errStr = error_str(errno);
-			return (AM_MEMORY_ERR);
-		}
-		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
-			if (errStr)
-				*errStr = (char *) in_mysql_error(conn);
-			return (AM_MEMORY_ERR);
-		}
-		if (!stralloc_0(&sql)) {
+		if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) ||
+				!stralloc_0(&sql)) {
 			if (errStr)
 				*errStr = error_str(errno);
 			return (AM_MEMORY_ERR);
@@ -402,17 +347,8 @@ check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmva
 	}
 	if (!(res = in_mysql_store_result(conn))) {
 		sql.len--;
-		if (!stralloc_cats(&sql, "mysql_store_result: ")) {
-			if (errStr)
-				*errStr = error_str(errno);
-			return (AM_MEMORY_ERR);
-		}
-		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
-			if (errStr)
-				*errStr = (char *) in_mysql_error(conn);
-			return (AM_MEMORY_ERR);
-		}
-		if (!stralloc_0(&sql)) {
+		if (!stralloc_cats(&sql, "mysql_store_result: ") ||
+				!stralloc_cats(&sql, (char *) in_mysql_error(conn)) || !stralloc_0(&sql)) {
 			if (errStr)
 				*errStr = error_str(errno);
 			return (AM_MEMORY_ERR);
@@ -425,14 +361,6 @@ check_db(MYSQL * conn, char *addr, unsigned long *row_count, unsigned long *tmva
 	for (; (row = in_mysql_fetch_row(res));) {
 		if (tmval)
 			*tmval = scan_ulong(row[0], tmval);
-		if (envStr) {
-			if (!stralloc_copys(&envStore, row[1])) {
-				if (errStr)
-					*errStr = error_str(errno);
-				in_mysql_free_result(res);
-				return (AM_MEMORY_ERR);
-			}
-		}
 	}
 	in_mysql_free_result(res);
 	return (num);
@@ -453,15 +381,9 @@ sqlmatch(char *fn, char *addr, int len, char **errStr)
 	}
 	if (errStr)
 		*errStr = 0;
-	if (!stralloc_copys(&controlfile, controldir))
-		return AM_MEMORY_ERR;
-	if (!stralloc_cats(&controlfile, "/"))
-		return AM_MEMORY_ERR;
-	if (!stralloc_cats(&controlfile, fn))
-		return AM_MEMORY_ERR;
-	if (!stralloc_cats(&controlfile, ".sql"))
-		return AM_MEMORY_ERR;
-	if (!stralloc_0(&controlfile))
+	if (!stralloc_copys(&controlfile, controldir) || !stralloc_cats(&controlfile, "/") ||
+			!stralloc_cats(&controlfile, fn) || !stralloc_cats(&controlfile, ".sql") ||
+			!stralloc_0(&controlfile))
 		return AM_MEMORY_ERR;
 	if ((cntrl_ok = initMySQLlibrary(errStr)))
 		return (0);
@@ -470,7 +392,7 @@ sqlmatch(char *fn, char *addr, int len, char **errStr)
 		return (0);
 	if ((cntrl_ok = connect_sqldb(controlfile.s, &conn, 0, errStr)) < 0)
 		return (cntrl_ok);
-	if ((cntrl_ok = check_db(conn, addr, 0, 0, 0, errStr)) < 0)
+	if ((cntrl_ok = check_db(conn, addr, 0, 0, errStr)) < 0)
 		return (cntrl_ok);
 	return (cntrl_ok ? 1 : 0);
 }
@@ -504,7 +426,7 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.11 2019-04-20 19:53:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.12 2020-04-09 16:03:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
