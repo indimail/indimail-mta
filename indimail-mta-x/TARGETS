@@ -1125,3 +1125,6 @@ ctrlenv.8
 cdb-database
 cdb-database.8
 cdb-database.o
+sql-database
+sql-database.o
+sql-database.8

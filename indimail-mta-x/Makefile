@@ -1057,8 +1057,8 @@ qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inje
 qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-popbull qmail-poppass \
 qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
 qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-daned \
-qmail-smtpd qmail_smtpd.so qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmail-upq \
-qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
+qmail-smtpd qmail_smtpd.so qmail-sql sql-database qmail-start qmail-tcpok qmail-tcpto \
+qmail-todo qmail-upq qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
 recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
 sendmail serialcmd serialqmtp serialsmtp setforward setlock setmaillist setuidgid \
 setup smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest spawn-filter spfquery splogger \
@@ -1184,9 +1184,9 @@ qmail-popbull.0 qmail-qmqpc.0 cdb-database.8 ctrlenv.8 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
 dktest.8 svscanboot.0 plugtest.1 surblfilter.8 svctool.8 \
 qmail-multi.0 spawn-filter.0 tcp-env.0 qmail-greyd.0 \
-qmail-newmrh.0 recipient-cdb.0 qmail-cdb.0 qmail-sql.8 qreceipt.0 forward.0 \
-rrforward.0 preline.0 condredirect.0 bouncesaying.0 except.0 \
-maildir2mbox.0 maildirwatch.0 qmail.0 qmail-limits.0 qmail-log.0 \
+qmail-newmrh.0 recipient-cdb.0 qmail-cdb.0 qmail-sql.8 sql-database.8 \
+qreceipt.0 forward.0 rrforward.0 preline.0 condredirect.0 bouncesaying.0 \
+except.0 maildir2mbox.0 maildirwatch.0 qmail.0 qmail-limits.0 qmail-log.0 \
 qmail-control.0 qmail-header.0 qmail-users.0 dot-qmail.0 \
 qmail-command.0 tcp-environ.0 maildir.0 mbox.0 addresses.0 \
 envelopes.0 forgeries.0 autoresponder.0 predate.1 datemail.1 mlmatchup.8 \
@@ -2045,8 +2045,8 @@ control.h variables.h hasmysql.h mysql_config conf-sql
 	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) \
 	qregex.c -o qregex_sql.o
 
-load_mysql.o: \
-compile load_mysql.c indimail_stub.h auto_control.h variables.h
+load_mysql.o: compile load_mysql.c indimail_stub.h \
+mysql_config conf-sql auto_control.h variables.h
 	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) load_mysql.c
 
 matchregex.o: \
@@ -4034,6 +4034,27 @@ qmail-sql.9 conf-sysconfdir
 	cat qmail-sql.9 \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-sql.8
+
+sql-database: \
+load sql-database.o variables.o auto_control.o \
+load_mysql.o sqlmatch.o auto_uids.o auto_sysconfdir.o indimail_stub.o \
+control.o auto_qmail.o tls.lib
+	./load sql-database indimail_stub.o \
+	variables.o auto_control.o \
+	control.o sqlmatch.o auto_uids.o auto_sysconfdir.o \
+	auto_qmail.o load_mysql.o `cat tls.lib` -ldl -lqmail
+
+sql-database.o: \
+compile sql-database.c sqlmatch.h auto_qmail.h variables.h \
+auto_uids.h auto_control.h hasmysql.h load_mysql.h \
+mysql_config conf-sql
+	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) sql-database.c
+
+sql-database.8: \
+sql-database.9 conf-sysconfdir
+	cat sql-database.9 \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> sql-database.8
 	
 sys-checkpwd: load sys-checkpwd.o MakeArgs.o \
 shadow.lib crypt.lib
@@ -4242,13 +4263,19 @@ compile qcount_dir.c
 
 ctrlenv: \
 load ctrlenv.o control.o auto_control.o \
-pathexec_env.o pathexec_run.o variables.o
+pathexec_env.o pathexec_run.o variables.o \
+load_mysql.o indimail_stub.o sqlmatch.o \
+auto_qmail.o auto_uids.o auto_sysconfdir.o
 	./load ctrlenv auto_control.o control.o \
-	pathexec_env.o pathexec_run.o variables.o -lqmail
+	pathexec_env.o pathexec_run.o variables.o \
+	load_mysql.o indimail_stub.o sqlmatch.o \
+	auto_qmail.o auto_uids.o auto_sysconfdir.o \
+	-lqmail -ldl
 
-ctrlenv.o: \
-compile ctrlenv.c variables.h auto_control.h
-	./compile ctrlenv.c
+ctrlenv.o: compile ctrlenv.c variables.h \
+hasmysql.h load_mysql.h indimail_stub.h \
+auto_control.h sqlmatch.h mysql_config conf-sql
+	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) ctrlenv.c
 
 ctrlenv.8: \
 ctrlenv.9 conf-prefix conf-sysconfdir

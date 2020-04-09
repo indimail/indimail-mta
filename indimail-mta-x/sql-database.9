@@ -1,0 +1,51 @@
+.TH cdb-database 8
+.SH NAME
+cdb-database \- prepare data in MySQL for
+.BR ctrlenv(8) .
+
+.SH SYNOPSIS
+.B cdb-database
+[-Sr] [-s \fIdbserver\fR -u \fIuser\fR -p \fIpass\fR -d \fIdbname\fR -t \fItable_name\fR] \fIfilename\fR
+
+.SH DESCRIPTION
+\fBcdb-database\fR does a chdir to @controldir@ and prepares filename.sql control file to enable
+\fBctrlenv\fR to access data from MySQL instead of control files / cdb files.
+\fBcdb-database\fR also prepares data in \fIfilename\fR to be inserted into \fItable_name\fR in MySQL.
+
+The below command will create a file \fIdkimtable.sql\fR in @controldir@ and table \fIdkimtable\fR
+in MySQL
+.EX
+ cdb-database -s localhost -u indimail -p ssh-1.5- -d indimail -t dkimtable dkimtable
+.EE
+
+The below command will replace contents of file dkimtable in @controldir@ into the the table
+\fIdkimtable\fR in MySQL.
+.EX
+ cdb-database -r dkimtable
+.EE
+
+.SH OPTIONS
+.TP
+.B -S
+Skip creating MySQL table and subsequent inserting of data into MySQL
+.TP
+.B -r
+Replace the content of data in MySQL with the content in \fIfilename\fR
+.TP
+.B -u \fIuser\fR
+MySQL username. A user which has privilege to create, insert, delete in MySQL database \fIdbname\fR.
+.TP
+.B -p \fIpass\fR
+Password for MySQL user \fIusername\fR
+.TP
+.B -d \fRdbname\fR
+Database name in MySQL
+.TP
+.B -t \fRtable_name\fR
+Table in MySQL in which data from plain-text control file will be inserted
+
+.SH SEE ALSO
+ctrlenv(8),
+cdb-database(8),
+qmail-cdb(8),
+qmail-control(5)
