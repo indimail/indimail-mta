@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.16  2020-04-09 21:21:04+05:30  Cprogrammer
+ * check for null domain after DKIMDOMAIN replacement
+ *
  * Revision 1.15  2019-06-26 19:08:18+05:30  Cprogrammer
  * added sBouncedAddr variable for X-Bounced-Address header added by qmail-send for bounces
  *
@@ -496,10 +499,6 @@ bool CDKIMSign::ParseFromAddress(void)
 	pos = sAddress.find('>');
 	if (pos != string::npos)
 		sAddress.erase(pos, string::npos);
-	// look for '@' symbol
-	pos = sAddress.find('@');
-	if (pos == string::npos)
-		return false;
 	if (sDomain.empty()) {
 		sDomain.assign(sAddress.c_str() + pos + 1);
 		RemoveSWSP(sDomain);
@@ -514,6 +513,10 @@ bool CDKIMSign::ParseFromAddress(void)
 			}
 		}
 	}
+	// look for '@' symbol
+	pos = sAddress.find('@');
+	if (pos == string::npos)
+		return false;
 	return true;
 }
 
@@ -1015,7 +1018,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.15 2019-06-26 19:08:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.16 2020-04-09 21:21:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
