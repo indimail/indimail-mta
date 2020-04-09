@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.h,v $
+ * Revision 1.4  2020-04-09 16:00:51+05:30  Cprogrammer
+ * added proto for check_db()
+ *
  * Revision 1.3  2018-01-09 12:36:42+05:30  Cprogrammer
  * removed #ifdef INDIMAIL
  *
@@ -34,6 +37,7 @@
 
 int             create_sqltable(MYSQL *, char *, char **);
 int             connect_sqldb(char *, MYSQL **, char **, char **);
+int             check_db(MYSQL *, char *, unsigned long *, unsigned long *, char **);
 #endif
 int             sqlmatch(char *, char *, int, char **);
 void            sqlmatch_close_db(void);
