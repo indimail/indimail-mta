@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.17  2020-04-10 21:36:20+05:30  Cprogrammer
+ * fixed BUG with domain assignment
+ *
  * Revision 1.16  2020-04-09 21:21:04+05:30  Cprogrammer
  * check for null domain after DKIMDOMAIN replacement
  *
@@ -490,18 +493,23 @@ bool CDKIMSign::ParseFromAddress(void)
 		sAddress.assign(sBouncedAddr);
 	else
 		return false;
-	// simple for now, beef it up later
-	// remove '<' and anything before it
+	/*-
+	 * simple for now, beef it up later
+	 * remove '<' and anything before it
+	 */
 	pos = sAddress.find('<');
 	if (pos != string::npos)
-		sAddress.erase(0, pos);
-	// remove '>' and anything after it
+		sAddress.erase(0, pos + 1);
+
+	/* remove '>' and anything after it */
 	pos = sAddress.find('>');
 	if (pos != string::npos)
 		sAddress.erase(pos, string::npos);
+	/* look for '@' symbol */
 	if (sDomain.empty()) {
-		sDomain.assign(sAddress.c_str() + pos + 1);
-		RemoveSWSP(sDomain);
+		pos = sAddress.find('@');
+		if (pos != string::npos)
+			sDomain.assign(sAddress.c_str() + pos + 1);
 		if (sDomain.empty()) {
 			p = getenv("DKIMDOMAIN");
 			if (p && *p) {
@@ -513,10 +521,7 @@ bool CDKIMSign::ParseFromAddress(void)
 			}
 		}
 	}
-	// look for '@' symbol
-	pos = sAddress.find('@');
-	if (pos == string::npos)
-		return false;
+	RemoveSWSP(sDomain);
 	return true;
 }
 
@@ -1018,7 +1023,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.16 2020-04-09 21:21:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.17 2020-04-10 21:36:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
