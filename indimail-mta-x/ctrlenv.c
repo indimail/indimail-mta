@@ -1,5 +1,8 @@
 /*
  * $Log: ctrlenv.c,v $
+ * Revision 1.3  2020-04-10 18:28:52+05:30  Cprogrammer
+ * added feature to add multiple env variables
+ *
  * Revision 1.2  2020-04-09 16:33:30+05:30  Cprogrammer
  * added search in MySQL db
  *
@@ -8,6 +11,7 @@
  *
  */
 #include <unistd.h>
+#include <ctype.h>
 #include "sgetopt.h"
 #include "control.h"
 #include "strerr.h"
@@ -38,6 +42,50 @@
 #endif
 
 #define FATAL "ctrlenv: fatal: "
+
+static int
+parse_env(char *envStrings)
+{
+	char           *ptr1, *ptr2, *ptr3, *ptr4;
+
+	for (ptr2 = ptr1 = envStrings;*ptr1;ptr1++) {
+		if (*ptr1 == ',') {
+			/*
+			 * Allow ',' in environment variable if escaped
+			 * by '\' character
+			 */
+			if (ptr1 != envStrings && *(ptr1 - 1) == '\\') {
+				for (ptr3 = ptr1 - 1, ptr4 = ptr1; *ptr3; *ptr3++ = *ptr4++);
+				continue;
+			}
+			*ptr1 = 0;
+			/*- envar=, - Unset the environment variable */
+			if (ptr1 != envStrings && *(ptr1 - 1) == '=') {
+				*(ptr1 - 1) = 0;
+				if (*ptr2 && !env_unset(ptr2))
+					return (1);
+			} else { /*- envar=val, - Set the environment variable */
+				while (isspace(*ptr2))
+					ptr2++;
+				if (*ptr2 && !env_put(ptr2))
+					return (1);
+			}
+			ptr2 = ptr1 + 1;
+		}
+	}
+	/*- envar=, */
+	if (ptr1 != envStrings && *(ptr1 - 1) == '=') {
+		*(ptr1 - 1) = 0;
+		if (*ptr2 && !env_unset(ptr2))
+			return (1);
+	} else { /*- envar=val, */
+		while (isspace(*ptr2))
+			ptr2++;
+		if (*ptr2 && !env_put(ptr2))
+			return (1);
+	}
+	return (0);
+}
 
 #ifdef HAS_MYSQL
 int
@@ -221,14 +269,18 @@ main(int argc, char **argv)
 		}
 	}
 	if (optind == argc)
-		strerr_die1x(100, "usage: cntrlenv -f filename -e env -a address child");
-	if (!fn || !env_name || !addr)
-		strerr_die1x(100, "usage: cntrlenv -f filename -e env -a address child");
+		strerr_die1x(100, "usage: cntrlenv -f filename [-e env] -a address child");
+	if (!fn || !addr)
+		strerr_die1x(100, "usage: cntrlenv -f filename [-e env] -a address child");
 	j = str_len(addr);
 	i = str_end(fn, ".cdb");
 	if (fn[i]) {
 		if (cdb_match(fn, addr, j, &result)) {
-			if (!pathexec_env(env_name, result))
+			if (env_name) {
+				if (!pathexec_env(env_name, result))
+					strerr_die2sys(111, FATAL, "out of memory");
+			} else
+			if (parse_env(result))
 				strerr_die2sys(111, FATAL, "out of memory");
 			pathexec(argv + optind);
 		} else
@@ -239,7 +291,11 @@ main(int argc, char **argv)
 	i = str_end(fn, ".sql");
 	if (fn[i]) {
 		if (sql_match(fn, addr, j, &result)) {
-			if (!pathexec_env(env_name, result))
+			if (env_name) {
+				if (!pathexec_env(env_name, result))
+					strerr_die2sys(111, FATAL, "out of memory");
+			} else
+			if (parse_env(result))
 				strerr_die2sys(111, FATAL, "out of memory");
 			pathexec(argv + optind);
 		} else
@@ -255,7 +311,11 @@ main(int argc, char **argv)
 			if (!case_diffb(addr, i - 1, ptr + 1)) {
 				j = str_chr(ptr + i + 1, ':');
 				ptr[i + 1 + j] = 0;
-				if (!pathexec_env(env_name, ptr + i + 1))
+				if (env_name) {
+					if (!pathexec_env(env_name, ptr + i + 1))
+						strerr_die2sys(111, FATAL, "out of memory");
+				} else
+				if (parse_env(ptr + i + 1))
 					strerr_die2sys(111, FATAL, "out of memory");
 				pathexec(argv + optind);
 				strerr_die4sys(111, FATAL, "unable to run ", argv[optind], ": ");
@@ -270,7 +330,7 @@ main(int argc, char **argv)
 void
 getversion_ctrlenv_c()
 {
-	static char    *x = "$Id: ctrlenv.c,v 1.2 2020-04-09 16:33:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ctrlenv.c,v 1.3 2020-04-10 18:28:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
