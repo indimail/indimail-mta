@@ -59,6 +59,11 @@ rewrites the recipient to the original sender using Sender Rewriting Scheme, if 
 .B qmail-srs(5)
 for information on how to do this
 
+\fBqmail-send\fR adds the \fBX-Bounced-Address\fR header when creating a
+bounce. It assigns the address that caused the bounce to this header. This
+is useful for programs that generate DKIM signature to use the domain in
+the \fBX-Bounced-Address\fR for the d= DKIM-Signature tag.
+
 If
 .B qmail-send
 receives a TERM signal,
@@ -604,4 +609,6 @@ qmail-daemon(8),
 qmail-todo(8),
 qmail-clean(8),
 qmail-lspawn(8),
+qmail-dkim(8),
+dk-filter(8),
 qmail-rspawn(8)
