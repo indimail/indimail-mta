@@ -1,5 +1,8 @@
-#!/bin/sh
+#!/usr/bin/sh
 # $Log: qupgrade.sh,v $
+# Revision 1.8  2020-04-11 08:38:30+05:30  Cprogrammer
+# use /usr/bin/sh to suppress rpmlint errors
+#
 # Revision 1.7  2018-03-13 14:13:52+05:30  Cprogrammer
 # fixed syntax error
 #
@@ -28,7 +31,7 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: qupgrade.sh,v 1.7 2018-03-13 14:13:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: qupgrade.sh,v 1.8 2020-04-11 08:38:30+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
