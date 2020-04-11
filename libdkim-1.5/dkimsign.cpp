@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.18  2020-04-11 08:37:12+05:30  Cprogrammer
+ * renamed DKKIMDOMAIN to BOUNCEDOMAIN
+ *
  * Revision 1.17  2020-04-10 21:36:20+05:30  Cprogrammer
  * fixed BUG with domain assignment
  *
@@ -511,14 +514,15 @@ bool CDKIMSign::ParseFromAddress(void)
 		if (pos != string::npos)
 			sDomain.assign(sAddress.c_str() + pos + 1);
 		if (sDomain.empty()) {
-			p = getenv("DKIMDOMAIN");
+			p = getenv("BOUNCEDOMAIN");
 			if (p && *p) {
 				if (!(at = strchr(p, '@')))
 					at = p;
 				else
 					at++;
 				sDomain.assign(at);
-			}
+			} else
+				return false;
 		}
 	}
 	RemoveSWSP(sDomain);
@@ -1023,7 +1027,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.17 2020-04-10 21:36:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.18 2020-04-11 08:37:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
