@@ -70,8 +70,8 @@ You can set various DKIM options in getopt style, by setting the environment var
 .EE
 
 when signing \fBdk-filter\fR uses the domain found in the Return-Path, Sender, From headers to set
-the domain tag. If not it uses the value of \fBDKIMDOMAIN\fR environment
-variable. \fBDKIMDOMAIN\fR can be set to an email address or a domain (without the at sign).
+the domain tag. If not it uses the value of \fBBOUNCEDOMAIN\fR environment
+variable. \fBBOUNCEDOMAIN\fR can be set to an email address or a domain (without the at sign).
 
 To verify a message, set the \fBDKIMVERIFY\fR or \fBDKVERIFY\fR environment variables.
 \fBdk-filter\fR always inserts the \fBDKIM-Status\fR or \fBDomainKey-Status\fR header, so
