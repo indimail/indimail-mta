@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.211 2020-04-10 18:29:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.212 2020-04-13 23:00:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -317,6 +317,8 @@ Summary: IndiMail - Mini Client Installation
 Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
 Conflicts: indimail-mini < 2.0
+Requires: coreutils /bin/sh glibc openssl libqmail
+Requires: binutils 
 
 %description -n indimail-mini
 This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
@@ -1628,6 +1630,11 @@ done
 %attr(755,root,root)              %{_prefix}/bin/maildirwatch
 %attr(755,root,root)              %{_prefix}/sbin/qmail-qmqpc
 #
+%if %nolibsrs2 == 0
+%{_libdir}/libsrs2.so.1
+%{_libdir}/libsrs2.so.1.0.0
+%endif
+#
 %attr(444,root,root)              %{mandir}/man1/forward.1.gz
 %attr(444,root,root)              %{mandir}/man1/predate.1.gz
 %attr(444,root,root)              %{mandir}/man1/datemail.1.gz
@@ -1641,6 +1648,10 @@ done
 %attr(444,root,root)              %{mandir}/cat1/maildir2mbox.0.gz
 %attr(444,root,root)              %{mandir}/cat1/maildirwatch.0.gz
 #
+%if %nolibsrs2 == 0
+%attr(0644,root,root)             %{mandir}/man5/qmail-srs.5.gz
+%endif
+#
 %attr(444,root,root)              %{mandir}/man8/qmail-showctl.8.gz
 %attr(444,root,root)              %{mandir}/man8/qmail-inject.8.gz
 %attr(444,root,root)              %{mandir}/man8/isendmail.8.gz
@@ -1650,6 +1661,12 @@ done
 %attr(444,root,root)              %{mandir}/cat8/qmail-qmqpc.0.gz
 
 %attr(444,root,root)              %{shareddir}/doc/INSTALL-MINI
+%attr(444,root,root)              %{shareddir}/doc/AUTHORS.libsrs2
+%if %build_on_obs == 0
+%license %attr(444,root,root)     %{shareddir}/doc/LICENSE.GPL-2.libsrs2
+%else
+%attr(444,root,root)              %{shareddir}/doc/LICENSE.GPL-2.libsrs2
+%endif
 
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
 # and /var/qmail/control/plusdomain from your central server, so that
