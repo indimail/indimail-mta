@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.212 2020-04-13 23:00:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.213 2020-04-14 12:24:29+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1620,6 +1620,7 @@ done
 #
 %attr(755,root,root)              %{_prefix}/bin/sendmail
 %attr(755,root,root)              %{_prefix}/bin/qmail-inject
+%attr(755,root,root)              %{_prefix}/bin/irmail
 %attr(755,root,root)              %{_prefix}/bin/forward
 %attr(755,root,root)              %{_prefix}/bin/predate
 %attr(755,root,root)              %{_prefix}/bin/datemail
@@ -1659,6 +1660,7 @@ done
 %attr(444,root,root)              %{mandir}/cat8/qmail-showctl.0.gz
 %attr(444,root,root)              %{mandir}/cat8/qmail-inject.0.gz
 %attr(444,root,root)              %{mandir}/cat8/qmail-qmqpc.0.gz
+%attr(0644,root,root)             %{mandir}/man8/irmail.8.gz
 
 %attr(444,root,root)              %{shareddir}/doc/INSTALL-MINI
 %attr(444,root,root)              %{shareddir}/doc/AUTHORS.libsrs2
