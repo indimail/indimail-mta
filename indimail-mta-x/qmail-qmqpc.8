@@ -25,6 +25,9 @@ are specified on the command line,
 .B qmail-qmqpc
 will ignore the control files and instead use the QMQP servers specified on the
 command line.
+
+The default QMQP port 628 used by \fBqmail-qmqpc\fR can be overriden by
+setting PORT_QMQP environment variable.
  
 .SH "CONTROL FILES"
 .TP 5
@@ -50,7 +53,7 @@ The kernel normally imposes a 75-second upper limit.
 .I timeoutremote
 Number of seconds
 .B qmail-qmqpc
-will wait for each response from the remote QMQP server.
+will wait for each response (read or write) from the remote QMQP server.
 Default: 60.
 
 .TP 5
