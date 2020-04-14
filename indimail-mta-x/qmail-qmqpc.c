@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.19  2020-04-14 12:31:37+05:30  Cprogrammer
+ * fixed controlfile name for timeoutremote
+ *
  * Revision 1.18  2017-03-23 20:06:57+05:30  Cprogrammer
  * added option to specifiy qmqpservers on command line
  *
@@ -136,7 +139,7 @@ die_format()
 }
 
 int             lasterror = 55;
-int             timeout = 60;
+int             timeoutremote = 60;
 int             timeoutconnect = 10;
 int             qmqpfd;
 
@@ -147,7 +150,7 @@ saferead(fd, buf, len)
 	int             len;
 {
 	int             r;
-	r = timeoutread(timeout, qmqpfd, buf, len);
+	r = timeoutread(timeoutremote, qmqpfd, buf, len);
 	if (r <= 0)
 		die_conn();
 	return r;
@@ -160,7 +163,7 @@ safewrite(fd, buf, len)
 	int             len;
 {
 	int             r;
-	r = timeoutwrite(timeout, qmqpfd, buf, len);
+	r = timeoutwrite(timeoutremote, qmqpfd, buf, len);
 	if (r <= 0)
 		die_conn();
 	return r;
@@ -312,7 +315,7 @@ main(int argc, char **argv)
 		die_control();
 	if (argc == 1 && control_readfile(&servers, "qmqpservers", 0) != 1)
 		die_control();
-	if (control_readint(&timeout, "timeout") == -1)
+	if (control_readint(&timeoutremote, "timeoutremote") == -1)
 		die_control();
 	if (control_readint(&timeoutconnect, "timeoutconnect") == -1)
 		die_control();
@@ -408,7 +411,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.18 2017-03-23 20:06:57+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.19 2020-04-14 12:31:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
