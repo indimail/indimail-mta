@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.59 2020-03-22 16:38:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.60 2020-04-15 14:01:05+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -22,7 +22,20 @@ if [ -f /etc/lsb-release -o -f /etc/debian_version ] ; then
 elif [ -f /etc/SuSE-release ] ; then
 	SYSTEM=SuSE
 else
-	SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+	if [ -f /etc/os-release ] ; then
+		NAME=`grep -w NAME /etc/os-release | cut -d= -f2 | sed -e 's{"{{g'`
+		case "$NAME" in
+			"openSUSE Tumbleweed")
+			SYSTEM=SuSE
+			;;
+			*)
+			echo name=$NAME
+			SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+			;;
+		esac
+	else
+		SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+	fi
 fi
 if [ -x PREFIX/bin/iecho ] ; then
 	ECHO=PREFIX/bin/iecho
@@ -120,14 +133,14 @@ case "$SYSTEM" in
 	;;
 esac
 
-if [ -x /bin/systemctl ] ; then
-	/bin/systemctl is-enabled svscan > /dev/null 2>&1
+if [ -x /usr/bin/systemctl ] ; then
+	/usr/bin/systemctl is-enabled svscan > /dev/null 2>&1
 	if [ $? -ne 0 ] ; then
 		if [ -f PREFIX/sbin/initsvc ] ; then
 			PREFIX/sbin/initsvc -on > /dev/null && $succ || $fail
 			$ECHO -ne "\n"
 		fi
-		/bin/systemctl is-enabled svscan > /dev/null 2>&1
+		/usr/bin/systemctl is-enabled svscan > /dev/null 2>&1
 	fi
 	if [ $? -ne 0 ] ; then
 		SYSTEMCTL_SKIP_REDIRECT=1
@@ -180,14 +193,14 @@ stop()
 		echo
 		let ret+=$RETVAL
 	done
-	if [ ! -f /bin/systemctl ] ; then
+	if [ ! -f /usr/bin/systemctl ] ; then
 		$ECHO -n $"Stopping svscan: "
 		if [ -f PREFIX/sbin/initsvc ] ; then
 			PREFIX/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /sbin/initctl ] ; then
 			/sbin/initctl stop svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		else
-  			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+  			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
 				/usr/bin/killall -e -w svscan && $succ || $fail
 			else
@@ -226,9 +239,9 @@ start()
 			else
 				device=/dev/null
 			fi
-  			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+  			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
-				/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
+				/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$ 2>&1
 				if [ " $SYSTEM" = " Debian" ] ; then
 					echo "SV:2345:respawn:PREFIX/sbin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
 				else
