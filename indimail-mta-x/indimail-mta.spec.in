@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.213 2020-04-14 12:24:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.214 2020-04-22 19:01:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -156,22 +156,22 @@ BuildRequires: flex findutils diffutils
 BuildRequires: readline gzip autoconf automake libtool pkgconfig
 BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
 
-%if %build_on_obs == 1
-##################################### OBS ####################################
-%if 0%{?rhel_version} == 700
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 BuildRequires: groff-base
 %else
+%if 0%{?fedora_version}
 BuildRequires: groff
 %endif
+%endif
 
+##################################### OBS ####################################
+%if %build_on_obs == 1
 %if 0%{?suse_version}
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
 %endif
-##############################################################################
-%else
-BuildRequires: groff
 %endif
+##############################################################################
 
 %if 0%{?suse_version}
 BuildRequires: openldap2-devel
@@ -179,7 +179,7 @@ BuildRequires: openldap2-devel
 BuildRequires: openldap-devel
 %endif
 
-%if %{undefined centos_version} && %{undefined rhel_version}
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined centos_ver}
 BuildRequires: chrpath
 %endif
 %if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
@@ -195,7 +195,7 @@ PreReq: permissions
 %if 0%{?suse_version}
 BuildRequires: db-devel
 %else
-%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600
+%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 7
 BuildRequires: libdb-devel
 %else
 BuildRequires: db4-devel
@@ -213,6 +213,15 @@ Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/group
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl libqmail
 Requires: binutils diffutils sed findutils pkgconfig
+
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
+Requires: policycoreutils
+%else
+%if %{defined centos_version} || %{defined rhel_version}
+Requires: policycoreutils-python
+%endif
+%endif
+
 %if 0%{?suse_version}
 Requires: insserv-compat
 %else
