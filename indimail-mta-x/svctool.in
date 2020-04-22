@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.465 2020-04-05 09:28:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.466 2020-04-22 11:10:56+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.465 2020-04-05 09:28:35+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.466 2020-04-22 11:10:56+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6538,31 +6538,31 @@ create_startup()
 		if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "indimail startup enabled in systemd /lib/systemd/system/svscan.service"
+				echo "svscan startup enabled in systemd /lib/systemd/system/svscan.service"
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service
 			fi
 		elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "indimail startup enabled in systemd /usr/lib/systemd/system/svscan.service"
+				echo "svscan startup enabled in systemd /usr/lib/systemd/system/svscan.service"
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service
 			fi
 		elif [ -f /sbin/initctl -a -d /etc/init ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "indimail startup enabled in upstart /etc/init/svscan.conf"
+				echo "svscan startup enabled in upstart /etc/init/svscan.conf"
 				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf
 			fi
 		elif [ -d /etc/event.d ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/event.d/upstart >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "indimail startup enabled in upstart /etc/event.d/upstart"
+				echo "svscan startup enabled in upstart /etc/event.d/upstart"
 				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/event.d
 			fi
 		elif [ -d /System/Library/LaunchDaemons ] ; then
 			cmp -s "$DESTDIR"$shareddir/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
 			if [ $? -ne 0 ] ; then
-				echo "indimail startup enabled in upstart /System/Library/LaunchDaemons/indimail.plist"
+				echo "svscan startup enabled in upstart /System/Library/LaunchDaemons/indimail.plist"
 				/bin/cp "$DESTDIR"$shareddir/boot/indimail.plist /System/Library/LaunchDaemons
 			fi
 		fi
@@ -6581,7 +6581,7 @@ create_startup()
 				/sbin/chkconfig --add svscan
 			fi
 		elif [ -f /usr/sbin/update-rc.d ] ; then
-			/usr/sbin/update-rc.d indimail start 14 2 3 4 5 . stop 91 0 1 6 .
+			/usr/sbin/update-rc.d svscan start 14 2 3 4 5 . stop 91 0 1 6 .
 		fi
 	fi
 	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools
@@ -6604,7 +6604,7 @@ create_startup()
 			alternatives_cmd=/usr/sbin/update-alternatives
 		fi
 		if [ ! -f /etc/SuSE-release -a ! -f /etc/debian_version ] ; then
-			init_script="--initscript indimail"
+			init_script="--initscript svscan"
 		else
 			init_script=""
 		fi
