@@ -18,10 +18,6 @@
 %dir %attr(0555,root,root)         @shareddir@/boot
 %dir %attr(0555,root,root)         @shareddir@/doc
 %dir %attr(0755,root,root)         @mandir@
-%dir %attr(0755,root,root)         @mandir@/cat1
-%dir %attr(0755,root,root)         @mandir@/cat5
-%dir %attr(0755,root,root)         @mandir@/cat7
-%dir %attr(0755,root,root)         @mandir@/cat8
 %dir %attr(0755,root,root)         @mandir@/man1
 %dir %attr(0755,root,root)         @mandir@/man5
 %dir %attr(0755,root,root)         @mandir@/man7
@@ -382,115 +378,6 @@
 #
 # Man pages
 # 
-%attr(0644,root,root) @mandir@/cat1/822addr.0.gz
-%attr(0644,root,root) @mandir@/cat1/822body.0.gz
-%attr(0644,root,root) @mandir@/cat1/822bodyfilter.0.gz
-%attr(0644,root,root) @mandir@/cat1/822date.0.gz
-%attr(0644,root,root) @mandir@/cat1/822field.0.gz
-%attr(0644,root,root) @mandir@/cat1/822fields.0.gz
-%attr(0644,root,root) @mandir@/cat1/822header.0.gz
-%attr(0644,root,root) @mandir@/cat1/822headerfilter.0.gz
-%attr(0644,root,root) @mandir@/cat1/822headerok.0.gz
-%attr(0644,root,root) @mandir@/cat1/822print.0.gz
-%attr(0644,root,root) @mandir@/cat1/822received.0.gz
-%attr(0644,root,root) @mandir@/cat1/autoresponder.0.gz
-%attr(0644,root,root) @mandir@/cat1/bouncesaying.0.gz
-%attr(0644,root,root) @mandir@/cat1/checkaddr.0.gz
-%attr(0644,root,root) @mandir@/cat1/checkdomain.0.gz
-%attr(0644,root,root) @mandir@/cat1/columnt.0.gz
-%attr(0644,root,root) @mandir@/cat1/condredirect.0.gz
-%attr(0644,root,root) @mandir@/cat1/condtomaildir.0.gz
-%attr(0644,root,root) @mandir@/cat1/dot-forward.0.gz
-%attr(0644,root,root) @mandir@/cat1/except.0.gz
-%attr(0644,root,root) @mandir@/cat1/fastforward.0.gz
-%attr(0644,root,root) @mandir@/cat1/filterto.0.gz
-%attr(0644,root,root) @mandir@/cat1/forward.0.gz
-%attr(0644,root,root) @mandir@/cat1/ifaddr.0.gz
-%attr(0644,root,root) @mandir@/cat1/iftocc.0.gz
-%attr(0644,root,root) @mandir@/cat1/iftoccfrom.0.gz
-%attr(0644,root,root) @mandir@/cat1/maildir2mbox.0.gz
-%attr(0644,root,root) @mandir@/cat1/maildircmd.0.gz
-%attr(0644,root,root) @mandir@/cat1/maildirdeliver.0.gz
-%attr(0644,root,root) @mandir@/cat1/maildirqmtp.0.gz
-%attr(0644,root,root) @mandir@/cat1/maildirserial.0.gz
-%attr(0644,root,root) @mandir@/cat1/maildirsmtp.0.gz
-%attr(0644,root,root) @mandir@/cat1/maildirwatch.0.gz
-%attr(0644,root,root) @mandir@/cat1/mailsubj.0.gz
-%attr(0644,root,root) @mandir@/cat1/matchup.0.gz
-%attr(0644,root,root) @mandir@/cat1/newaliases.0.gz
-%attr(0644,root,root) @mandir@/cat1/newinclude.0.gz
-%attr(0644,root,root) @mandir@/cat1/new-inject.0.gz
-%attr(0644,root,root) @mandir@/cat1/preline.0.gz
-%attr(0644,root,root) @mandir@/cat1/printforward.0.gz
-%attr(0644,root,root) @mandir@/cat1/printmaillist.0.gz
-%attr(0644,root,root) @mandir@/cat1/qmaildirmake.0.gz
-%attr(0644,root,root) @mandir@/cat1/qmail-qfilter.0.gz
-%attr(0644,root,root) @mandir@/cat1/qmail-rm.0.gz
-%attr(0644,root,root) @mandir@/cat1/qreceipt.0.gz
-%attr(0644,root,root) @mandir@/cat1/replier.0.gz
-%attr(0644,root,root) @mandir@/cat1/replier-config.0.gz
-%attr(0644,root,root) @mandir@/cat1/rrforward.0.gz
-%attr(0644,root,root) @mandir@/cat1/serialqmtp.0.gz
-%attr(0644,root,root) @mandir@/cat1/serialsmtp.0.gz
-%attr(0644,root,root) @mandir@/cat1/setforward.0.gz
-%attr(0644,root,root) @mandir@/cat1/setmaillist.0.gz
-%attr(0644,root,root) @mandir@/cat1/tcp-env.0.gz
-%attr(0644,root,root) @mandir@/cat1/xqp.0.gz
-%attr(0644,root,root) @mandir@/cat1/xrecipient.0.gz
-%attr(0644,root,root) @mandir@/cat1/xsender.0.gz
-%attr(0644,root,root) @mandir@/cat5/addresses.0.gz
-%attr(0644,root,root) @mandir@/cat5/dot-qmail.0.gz
-%attr(0644,root,root) @mandir@/cat5/envelopes.0.gz
-%attr(0644,root,root) @mandir@/cat5/maildir.0.gz
-%attr(0644,root,root) @mandir@/cat5/mbox.0.gz
-%attr(0644,root,root) @mandir@/cat5/qmail-control.0.gz
-%attr(0644,root,root) @mandir@/cat5/qmail-header.0.gz
-%attr(0644,root,root) @mandir@/cat5/qmail-log.0.gz
-%attr(0644,root,root) @mandir@/cat5/qmail-users.0.gz
-%attr(0644,root,root) @mandir@/cat5/rewriting.0.gz
-%attr(0644,root,root) @mandir@/cat5/tcp-environ.0.gz
-%attr(0644,root,root) @mandir@/cat7/forgeries.0.gz
-%attr(0644,root,root) @mandir@/cat7/qmail.0.gz
-%attr(0644,root,root) @mandir@/cat7/qmail-limits.0.gz
-%attr(0644,root,root) @mandir@/cat8/cleanq.0.gz
-%attr(0644,root,root) @mandir@/cat8/greydaemon.0.gz
-%attr(0644,root,root) @mandir@/cat8/mlmatchup.0.gz
-%attr(0644,root,root) @mandir@/cat8/ofmipd.0.gz
-%attr(0644,root,root) @mandir@/cat8/ofmipname.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-cdb.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-clean.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-command.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-dk.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-getpw.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-greyd.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-inject.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-local.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-lspawn.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-multi.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-newmrh.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-newu.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-poppass.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-pw2u.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-qmqpc.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-qmqpd.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-qmtpd.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-qread.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-queue.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-remote.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-rspawn.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-send.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-showctl.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-smtpd.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-start.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-tcpok.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-tcpto.0.gz
-%attr(0644,root,root) @mandir@/cat8/qmail-todo.0.gz
-%attr(0644,root,root) @mandir@/cat8/qscanq.0.gz
-%attr(0644,root,root) @mandir@/cat8/qscanq-stdin.0.gz
-%attr(0644,root,root) @mandir@/cat8/recipient-cdb.0.gz
-%attr(0644,root,root) @mandir@/cat8/run-cleanq.0.gz
-%attr(0644,root,root) @mandir@/cat8/spawn-filter.0.gz
-%attr(0644,root,root) @mandir@/cat8/splogger.0.gz
 %attr(0644,root,root) @mandir@/man1/qdane.1.gz
 %attr(0644,root,root) @mandir@/man1/822addr.1.gz
 %attr(0644,root,root) @mandir@/man1/822body.1.gz

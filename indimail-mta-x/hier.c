@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.266  2020-04-23 13:56:51+05:30  Cprogrammer
+ * removed catted man pages
+ *
  * Revision 1.265  2020-04-09 16:37:02+05:30  Cprogrammer
  * added sql-database program
  *
@@ -890,10 +893,6 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_shared,     "doc", auto_uido, 0, 0555);
 
 	d(mandir,          "man", uidr, gidr, moder_d);
-	d(mandir,          "man/cat1", uidr, gidr, moder_d);
-	d(mandir,          "man/cat5", uidr, gidr, moder_d);
-	d(mandir,          "man/cat7", uidr, gidr, moder_d);
-	d(mandir,          "man/cat8", uidr, gidr, moder_d);
 	d(mandir,          "man/man1", uidr, gidr, moder_d);
 	d(mandir,          "man/man3", uidr, gidr, moder_d);
 	d(mandir,          "man/man5", uidr, gidr, moder_d);
@@ -1297,41 +1296,24 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/man1", "qbase64.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "swaks.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man7", "forgeries.7", uidr, gidr, moder_f);
-	c(mandir,          "man/cat7", "forgeries.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man7", "qmail-limits.7", uidr, gidr, moder_f);
-	c(mandir,          "man/cat7", "qmail-limits.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man7", "qmail.7", uidr, gidr, moder_f);
-	c(mandir,          "man/cat7", "qmail.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "forward.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "forward.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "rrforward.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "rrforward.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "condredirect.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "condredirect.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "bouncesaying.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "bouncesaying.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "except.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "except.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qmaildirmake.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "qmaildirmake.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "maildir2mbox.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "maildir2mbox.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "mbox2maildir.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "maildirwatch.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "maildirwatch.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "mailsubj.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "mailsubj.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qreceipt.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "qreceipt.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "preline.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "preline.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "tcp-env.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "tcp-env.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "relaytest.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "maildirdeliver.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "maildirdeliver.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "autoresponder.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "autoresponder.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qnotify.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "rrt.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qarf.1", uidr, gidr, moder_f);
@@ -1345,33 +1327,20 @@ hier(inst_dir, fatal, dev_package)
 
 	/* serialmail */
 	c(mandir,          "man/man1", "serialcmd.1", uidr, gidr, moder_f);
-	c(mandir,          "man/man1", "serialcmd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "serialqmtp.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "serialqmtp.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "serialsmtp.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "serialsmtp.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "maildircmd.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "maildircmd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "maildirqmtp.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "maildirqmtp.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "maildirsmtp.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "maildirsmtp.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "maildirserial.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "maildirserial.0", uidr, gidr, moder_f);
 
 	/*- report programs */
 	c(mandir,          "man/man1", "matchup.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "matchup.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "mlmatchup.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "mlmatchup.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "xqp.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "xqp.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "xsender.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "xsender.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "xrecipient.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "xrecipient.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "columnt.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "columnt.0", uidr, gidr, moder_f);
 
 	c(mandir,          "man/man1", "cdbget.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "cdbgetm.1", uidr, gidr, moder_f);
@@ -1382,31 +1351,19 @@ hier(inst_dir, fatal, dev_package)
 
 	c(mandir,          "man/man1", "qaes.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qmail-rm.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "qmail-rm.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "plugtest.1", uidr, gidr, moder_f);
 
 	c(mandir,          "man/man5", "addresses.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "addresses.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "envelopes.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "envelopes.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "maildir.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "maildir.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "mbox.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "mbox.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "dot-qmail.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "dot-qmail.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "qmail-control.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "qmail-control.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "qmail-header.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "qmail-header.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "qmail-log.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "qmail-log.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "qmail-users.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "qmail-users.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "tcp-environ.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "tcp-environ.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "rewriting.5", uidr, gidr, moder_f);
-	c(mandir,          "man/cat5", "rewriting.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "qmtp.5", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "rfc-822.5", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "rfc-1845.5", uidr, gidr, moder_f);
@@ -1431,68 +1388,37 @@ hier(inst_dir, fatal, dev_package)
 
 	/*- fastforward */
 	c(mandir,          "man/man1", "dot-forward.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "dot-forward.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "fastforward.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "fastforward.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "printforward.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "printforward.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "setforward.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "setforward.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "inewaliases.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "newaliases.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "printmaillist.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "printmaillist.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "setmaillist.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "setmaillist.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "newinclude.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "newinclude.0", uidr, gidr, moder_f);
 
 	/*- mess822 */
 	c(mandir,          "man/man8", "ofmipd.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "ofmipd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "ofmipname.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "ofmipname.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "iftocc.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "iftocc.0", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "iftoccfrom.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "iftoccfrom.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "ifaddr.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "ifaddr.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "new-inject.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "new-inject.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822field.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822field.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822header.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822header.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822date.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822date.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822received.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822received.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822print.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822print.0", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822body.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822body.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822headerok.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822headerok.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822bodyfilter.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822bodyfilter.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822headerfilter.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822headerfilter.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822addr.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822addr.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "822fields.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "822fields.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "checkaddr.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "checkaddr.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "checkdomain.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "checkdomain.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "filterto.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "filterto.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "condtomaildir.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "condtomaildir.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "replier.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "replier.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "replier-config.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "replier-config.1", uidr, gidr, moder_f);
 
 	/*- daemontools */
@@ -1528,31 +1454,20 @@ hier(inst_dir, fatal, dev_package)
 	/*- qmail */
 	c(mandir,          "man/man8", "qmailctl.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-local.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-local.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-lspawn.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-lspawn.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-getpw.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-getpw.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-remote.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-remote.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-rspawn.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-rspawn.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-clean.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-clean.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-send.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-send.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-todo.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-todo.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-daemon.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-start.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-start.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "splogger.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "splogger.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-internals.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-queue.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qhpsi.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "surblqueue.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-queue.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-nullqueue.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-popbull.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "svctool.8", uidr, gidr, moder_f);
@@ -1563,76 +1478,49 @@ hier(inst_dir, fatal, dev_package)
 #endif
 #ifdef DOMAIN_KEYS
 	c(mandir,          "man/man8", "qmail-dk.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-dk.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "dknewkey.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "dktest.8", uidr, gidr, moder_f);
 #endif
 	c(mandir,          "man/man8", "qmail-multi.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-multi.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "drate.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qmail-qfilter.1", uidr, gidr, moder_f);
-	c(mandir,          "man/cat1", "qmail-qfilter.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "surblfilter.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "spawn-filter.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "spawn-filter.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-inject.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-inject.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "isendmail.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "irmail.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-showctl.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-showctl.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-newmrh.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-newmrh.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "recipient-cdb.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "recipient-cdb.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-sql.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-cdb.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-cdb.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-newu.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-newu.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "cdb-database.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "sql-database.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "ctrlenv.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-pw2u.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-pw2u.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-qread.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-qread.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "queue-fix.8", uidr, gidr, moder_f);
-	c(mandir,          "man/man8", "queue-fix.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-tcpok.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-tcpok.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-tcpto.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-tcpto.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-qmqpc.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-qmqpc.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-qmqpd.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-qmqpd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-qmtpd.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-qmtpd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-smtpd.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-smtpd.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-greyd.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-greyd.0", uidr, gidr, moder_f);
 #ifdef HASTLSA
 	c(mandir,          "man/man8", "qmail-daned.8", uidr, gidr, moder_f);
 #endif
 	c(mandir,          "man/man8", "greydaemon.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "greydaemon.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-poppass.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-poppass.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-command.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qmail-command.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "sys-checkpwd.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "ldap-checkpwd.8", uidr, gidr, moder_f);
 
 	c(mandir,          "man/man8", "qscanq.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qscanq.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qscanq-stdin.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "qscanq-stdin.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "cleanq.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "cleanq.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "run-cleanq.8", uidr, gidr, moder_f);
-	c(mandir,          "man/cat8", "run-cleanq.0", uidr, gidr, moder_f);
 
 	if (!dev_package)
 		return;
@@ -1657,7 +1545,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.265 2020-04-09 16:37:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.266 2020-04-23 13:56:51+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
