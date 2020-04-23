@@ -1,9 +1,7 @@
 etc/indimail/control /etc/indimail
 usr/share/man /usr/share
 usr/share/man/man1 /usr/share/man
-usr/share/man/cat1 /usr/share/man
 usr/share/man/man8 /usr/share/man
-usr/share/man/cat8 /usr/share/man
 usr/bin/sendmail /usr/bin
 usr/bin/qmail-inject /usr/bin
 usr/bin/irmail /usr/bin
@@ -32,14 +30,6 @@ usr/share/man/man8/qmail-inject.8.gz /usr/share/man/man8
 usr/share/man/man8/isendmail.8.gz /usr/share/man/man8
 usr/share/man/man8/isendmail.8.gz /usr/share/man/man8
 usr/share/man/man8/qmail-qmqpc.8.gz /usr/share/man/man8
-usr/share/man/cat1/forward.0.gz /usr/share/man/cat1
-usr/share/man/cat1/mailsubj.0.gz /usr/share/man/cat1
-usr/share/man/cat1/qmaildirmake.0.gz /usr/share/man/cat1
-usr/share/man/cat1/maildir2mbox.0.gz /usr/share/man/cat1
-usr/share/man/cat1/maildirwatch.0.gz /usr/share/man/cat1
-usr/share/man/cat8/qmail-showctl.0.gz /usr/share/man/cat8
-usr/share/man/cat8/qmail-inject.0.gz /usr/share/man/cat8
-usr/share/man/cat8/qmail-qmqpc.0.gz /usr/share/man/cat8
 usr/lib/libsrs2.so.1 /usr/lib
 usr/lib/libsrs2.so.1.0.0 /usr/lib
 
