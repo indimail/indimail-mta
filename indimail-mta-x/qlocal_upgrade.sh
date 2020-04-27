@@ -1,5 +1,8 @@
 #!/usr/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.33  2020-04-27 22:11:27+05:30  Cprogrammer
+# added install routine
+#
 # Revision 1.32  2020-04-11 08:38:02+05:30  Cprogrammer
 # use /usr/bin/sh to suppress rpmlint errors
 #
@@ -94,7 +97,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.32 2020-04-11 08:38:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.33 2020-04-27 22:11:27+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -116,10 +119,19 @@ check_update_if_diff()
 	fi
 }
 
+do_install()
+{
+date
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.33 2020-04-27 22:11:27+05:30 Cprogrammer Exp mbhangui $"
+# upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
+# upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
+/usr/sbin/svctool --fixsharedlibs
+}
+
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.32 2020-04-11 08:38:02+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.33 2020-04-27 22:11:27+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -323,5 +335,8 @@ fi
 case $1 in
 	post|posttrans)
 	do_post_upgrade $1
+	;;
+	install)
+	do_install $1
 	;;
 esac

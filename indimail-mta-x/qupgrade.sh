@@ -1,5 +1,8 @@
 #!/usr/bin/sh
 # $Log: qupgrade.sh,v $
+# Revision 1.9  2020-04-27 22:10:27+05:30  Cprogrammer
+# added install routine
+#
 # Revision 1.8  2020-04-11 08:38:30+05:30  Cprogrammer
 # use /usr/bin/sh to suppress rpmlint errors
 #
@@ -31,16 +34,13 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: qupgrade.sh,v 1.8 2020-04-11 08:38:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: qupgrade.sh,v 1.9 2020-04-27 22:10:27+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
 	if [ -f /usr/libexec/indimail/qlocal_upgrade.sh ] ; then
 		echo "Running upgrade script for $1"
 		sh /usr/libexec/indimail/qlocal_upgrade.sh $1
-		#if [ $? -eq 0 ] ; then
-		#	/bin/rm -f /usr/libexec/indimail/qlocal_upgrade.sh
-		#fi
 	fi
 }
 
@@ -80,6 +80,7 @@ do_post()
 	case $1 in
 		install)
 		echo do_post install
+		do_upgrade install
 		;;
 		upgrade)
 		echo do_post upgrade
