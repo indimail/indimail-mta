@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.470 2020-04-28 09:11:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.471 2020-04-28 21:11:21+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.470 2020-04-28 09:11:16+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.471 2020-04-28 21:11:21+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4502,6 +4502,12 @@ if [ $? -eq 0 ] ; then
 	mysql_version=`echo $mysql_version|cut -d- -f1`
 	mariadb=1
 else
+	$mysqlPrefix/$mysqld --version | grep "MySQL Community Server" > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		mysql_community_server=1
+	else
+		mysql_community_server=0
+	fi
 	mariadb=0
 fi
 mysql_version_8=0
@@ -4644,7 +4650,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 			(
 			# Create user mysql with all privileges
 			echo "Creating MySQL admin User for Database in "$DESTDIR"$databasedir/data" 1>&2
-			create_mysql_rootuser $mysql_version $mariadb $pass_str $auth_str $plugin_str
+			create_mysql_rootuser $mysql_version $mariadb $mysql_community_server $pass_str $auth_str $plugin_str
 			echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data" 1>&2
 			create_mysql_user $mysql_version
 			) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysql_socket
@@ -4746,9 +4752,10 @@ create_mysql_rootuser()
 {
 	mysql_version=$1
 	mariadb=$2
-	pass_str=$3
-	auth_str=$4
-	plugin_str=$5
+	mysql_community_server=$3
+	pass_str=$4
+	auth_str=$5
+	plugin_str=$6
 	mysql_version_8=0
 	mariadb_version_10=0
 	case "$mysql_version" in
@@ -4776,7 +4783,11 @@ create_mysql_rootuser()
 		fi
 	fi
 	mecho "use mysql;"
-	mecho "DELETE from user where user='' or password='';"
+	if [ $mysql_community_server -eq 1 ] ; then
+		mecho "DELETE from user where user='';"
+	else
+		mecho "DELETE from user where user='' or password='';"
+	fi
 	mecho "DROP database if exists test;"
 	mecho "DELETE from db where db like 'test%';"
 }
