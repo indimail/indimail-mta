@@ -145,9 +145,9 @@ server specified by parameters in db.conf file. The connect timeout can be contr
 
 To enable the -m option, you have to set MYSQL_LIB variable to point to the mysql shared library. e.g.
 
-.EE
-  MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
 .EX
+  MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
+.EE
 
 You can set MYSQL_LIB environment variable in /service/\fIname\fR/variables/MYSQL_LIB (here \fIname\fR refers
 to a service under \fIsupervise\fR(8)). You can also set the value in the control file \fImysql_lib\fR.
