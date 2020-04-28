@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.468 2020-04-27 22:12:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.470 2020-04-28 09:11:16+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.468 2020-04-27 22:12:18+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.470 2020-04-28 09:11:16+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1510,6 +1510,17 @@ check_libmysqlclient_lib()
 			mysqllib=$i
 		fi
 	done
+	if [ -z "$mysqllib" ] ; then
+		for i in `ls -t /usr/lib*/libmariadb.so.* 2>/dev/null`
+		do
+			file=`basename $i`
+			num=`echo $file | cut -d. -f3`
+			if [ $num -gt $prev_num ] ; then
+				prev_num=$num
+				mysqllib=$i
+			fi
+		done
+	fi
 	if [ -z "$mysqllib" -a -d /usr/lib64/mysql ] ; then
 		prev_num=0
 		for i in `ls -t /usr/lib64/libmysqlclient.so.*.*.* 2>/dev/null`
@@ -1521,6 +1532,18 @@ check_libmysqlclient_lib()
 				mysqllib=$i
 			fi
 		done
+		if [ -z "$mysqllib" ] ; then
+			prev_num=0
+			for i in `ls -t /usr/lib64/libmariadb.so.* 2>/dev/null`
+			do
+				file=`basename $i`
+				num=`echo $file | cut -d. -f3`
+				if [ $num -gt $prev_num ] ; then
+					prev_num=$num
+					mysqllib=$i
+				fi
+			done
+		fi
 	fi
 	if [ -z "$mysqllib" -a -f /etc/debian_version ] ; then
 		# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
@@ -1534,6 +1557,18 @@ check_libmysqlclient_lib()
 				mysqllib=$i
 			fi
 		done
+		if [ -z "$mysqllib" ] ; then
+			prev_num=0
+			for i in `ls -t /usr/lib/*-linux-gnu/libmariadb.so.* 2>/dev/null`
+			do
+				file=`basename $i`
+				num=`echo $file | cut -d. -f3`
+				if [ $num -gt $prev_num ] ; then
+					prev_num=$num
+					mysqllib=$i
+				fi
+			done
+		fi
 	fi
 	#
 	# this is crazy. Both mariadb and oracle are breaking things
@@ -4714,17 +4749,34 @@ create_mysql_rootuser()
 	pass_str=$3
 	auth_str=$4
 	plugin_str=$5
+	mysql_version_8=0
+	mariadb_version_10=0
 	case "$mysql_version" in
 		8.*)
 		mysql_version_8=1
 		;;
-		*)
-		mysql_version_8=0
+		10.*)
+		if [ $mariadb -eq 1 ] ; then
+			mariadb_version_10=1
+		fi
 		;;
 	esac
-	mecho "ALTER USER 'root'@'localhost' identified by '$PRIV_PASS';"
+	if [ $mariadb -eq 1 ] ; then
+		ver2=`echo $mysql_version | cut -d. -f2`
+		if [ -n $ver2 -a $ver2 -ge 2 ] ; then
+			mecho "ALTER USER 'root'@'localhost' identified by '$PRIV_PASS';"
+		else
+			mecho "set PASSWORD for 'root'@'localhost' = PASSWORD('$PRIV_PASS');"
+		fi
+	else
+		if [ $mysql_version_8 -eq 1 ] ; then
+			mecho "ALTER USER 'root'@'localhost' identified by '$PRIV_PASS';"
+		else
+			mecho "set PASSWORD for 'root'@'localhost' = PASSWORD('$PRIV_PASS');"
+		fi
+	fi
 	mecho "use mysql;"
-	mecho "DELETE from user where user='';"
+	mecho "DELETE from user where user='' or password='';"
 	mecho "DROP database if exists test;"
 	mecho "DELETE from db where db like 'test%';"
 }
