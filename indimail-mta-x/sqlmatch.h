@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.h,v $
+ * Revision 1.5  2020-04-30 18:04:44+05:30  Cprogrammer
+ * define function prototypes as extern
+ *
  * Revision 1.4  2020-04-09 16:00:51+05:30  Cprogrammer
  * added proto for check_db()
  *
@@ -35,10 +38,10 @@
 #ifndef AM_MYSQL_ERR
 #define  AM_MYSQL_ERR  -6
 
-int             create_sqltable(MYSQL *, char *, char **);
-int             connect_sqldb(char *, MYSQL **, char **, char **);
-int             check_db(MYSQL *, char *, unsigned long *, unsigned long *, char **);
+extern int      create_sqltable(MYSQL *, char *, char **);
+extern int      connect_sqldb(char *, MYSQL **, char **, char **);
+extern int      check_db(MYSQL *, char *, unsigned long *, unsigned long *, char **);
 #endif
-int             sqlmatch(char *, char *, int, char **);
-void            sqlmatch_close_db(void);
+extern int      sqlmatch(char *, char *, int, char **);
+extern void     sqlmatch_close_db(void);
 #endif
