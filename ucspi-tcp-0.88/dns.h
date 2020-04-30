@@ -1,5 +1,8 @@
 /*
  * $Log: dns.h,v $
+ * Revision 1.8  2020-04-30 22:04:56+05:30  Cprogrammer
+ * define dns_resolve_tx as extern in dns_resolve.c
+ *
  * Revision 1.7  2020-04-30 17:59:29+05:30  Cprogrammer
  * define function prototypes as extern
  *
@@ -70,6 +73,8 @@ struct dns_transmit
 #endif
 	char            qtype[2];
 };
+
+extern struct dns_transmit dns_resolve_tx;
 
 extern void     dns_random_init(char *);
 extern unsigned int dns_random(unsigned int);
