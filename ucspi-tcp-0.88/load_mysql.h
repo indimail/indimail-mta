@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.3  2020-04-30 18:01:14+05:30  Cprogrammer
+ * define function prototypes as extern
+ *
  * Revision 1.2  2019-06-07 20:03:24+05:30  Cprogrammer
  * fixed compilation warning for MYSQL_RES with mariadb
  *
@@ -21,7 +24,7 @@ typedef struct MYSQL_RES res;
 extern int      use_sql;
 extern MYSQL   *(*in_mysql_init) (MYSQL *);
 extern MYSQL   *(*in_mysql_real_connect) (MYSQL *, const char *, const char *, const char *, const char *, unsigned int, const char *, unsigned long);
-const char     *(*in_mysql_error) (MYSQL *);
+extern const char *(*in_mysql_error) (MYSQL *);
 extern i_uint   (*in_mysql_errno) (MYSQL *mysql);
 extern void     (*in_mysql_close) (MYSQL *);
 extern int      (*in_mysql_options) (MYSQL *, enum mysql_option, const void *);
@@ -32,9 +35,9 @@ extern my_ulonglong (*in_mysql_num_rows)(MYSQL_RES *);
 extern my_ulonglong (*in_mysql_affected_rows) (MYSQL *);
 extern void     (*in_mysql_free_result) (MYSQL_RES *);
 
-void           *loadLibrary(void **, char *, int *, char **);
-void           *getlibObject(char *, void **, char *, char **);
-void            closeLibrary(void **);
-int             initMySQLlibrary(char **);
+extern void    *loadLibrary(void **, char *, int *, char **);
+extern void    *getlibObject(char *, void **, char *, char **);
+extern void     closeLibrary(void **);
+extern int      initMySQLlibrary(char **);
 
 #endif
