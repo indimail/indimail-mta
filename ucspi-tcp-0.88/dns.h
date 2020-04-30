@@ -1,5 +1,8 @@
 /*
  * $Log: dns.h,v $
+ * Revision 1.7  2020-04-30 17:59:29+05:30  Cprogrammer
+ * define function prototypes as extern
+ *
  * Revision 1.6  2017-03-30 22:43:48+05:30  Cprogrammer
  * renamed dns_txt() to rbl_dns_txt() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
  *
@@ -67,49 +70,48 @@ struct dns_transmit
 #endif
 	char            qtype[2];
 };
-struct dns_transmit dns_resolve_tx;
 
-void            dns_random_init(char *);
-unsigned int    dns_random(unsigned int);
-void            dns_sortip(char *, unsigned int);
-void            dns_domain_free(char **);
-int             dns_domain_copy(char **, char *);
-unsigned int    dns_domain_length(char *);
-int             dns_domain_equal(char *, char *);
-int             dns_domain_suffix(char *, char *);
-int             dns_domain_fromdot(char **, char *, unsigned int);
-int             dns_domain_todot_cat(stralloc *, char *);
-unsigned int    dns_packet_copy(char *, unsigned int, unsigned int, char *, unsigned int);
-unsigned int    dns_packet_getname(char *, unsigned int, unsigned int, char **);
-unsigned int    dns_packet_skipname(char *, unsigned int, unsigned int);
-int             dns_transmit_start(struct dns_transmit *, char *, int, char *, char *, unsigned char *);
-void            dns_transmit_free(struct dns_transmit *);
-void            dns_transmit_io(struct dns_transmit *, iopause_fd *, struct taia *);
-int             dns_transmit_get(struct dns_transmit *, iopause_fd *, struct taia *);
-int             dns_resolvconfip(char *);
-int             dns_resolve(char *, char *);
-int             dns_ip4_packet(stralloc *, char *, unsigned int);
-int             dns_ip4(stralloc *, stralloc *);
-int             dns_name_packet(stralloc *, char *, unsigned int);
-void            dns_name4_domain(char *, char *);
-int             dns_name4(stralloc *, char *);
-int             dns_txt_packet(stralloc *, char *, unsigned int);
-int             rbl_dns_txt(stralloc *, stralloc *);
-int             dns_mx_packet(stralloc *, char *, unsigned int);
-int             dns_mx(stralloc *, stralloc *);
-int             dns_resolvconfrewrite(stralloc *);
-int             dns_ip4_qualify_rules(stralloc *, stralloc *, stralloc *, stralloc *);
-int             dns_ip4_qualify(stralloc *, stralloc *, stralloc *);
-int             dns_packet_nameequal(char *, unsigned int, unsigned int, char *, unsigned int, unsigned int);
+extern void     dns_random_init(char *);
+extern unsigned int dns_random(unsigned int);
+extern void     dns_sortip(char *, unsigned int);
+extern void     dns_domain_free(char **);
+extern int      dns_domain_copy(char **, char *);
+extern unsigned int dns_domain_length(char *);
+extern int      dns_domain_equal(char *, char *);
+extern int      dns_domain_suffix(char *, char *);
+extern int      dns_domain_fromdot(char **, char *, unsigned int);
+extern int      dns_domain_todot_cat(stralloc *, char *);
+extern unsigned int dns_packet_copy(char *, unsigned int, unsigned int, char *, unsigned int);
+extern unsigned int dns_packet_getname(char *, unsigned int, unsigned int, char **);
+extern unsigned int dns_packet_skipname(char *, unsigned int, unsigned int);
+extern int      dns_transmit_start(struct dns_transmit *, char *, int, char *, char *, unsigned char *);
+extern void     dns_transmit_free(struct dns_transmit *);
+extern void     dns_transmit_io(struct dns_transmit *, iopause_fd *, struct taia *);
+extern int      dns_transmit_get(struct dns_transmit *, iopause_fd *, struct taia *);
+extern int      dns_resolvconfip(char *);
+extern int      dns_resolve(char *, char *);
+extern int      dns_ip4_packet(stralloc *, char *, unsigned int);
+extern int      dns_ip4(stralloc *, stralloc *);
+extern int      dns_name_packet(stralloc *, char *, unsigned int);
+extern void     dns_name4_domain(char *, char *);
+extern int      dns_name4(stralloc *, char *);
+extern int      dns_txt_packet(stralloc *, char *, unsigned int);
+extern int      rbl_dns_txt(stralloc *, stralloc *);
+extern int      dns_mx_packet(stralloc *, char *, unsigned int);
+extern int      dns_mx(stralloc *, stralloc *);
+extern int      dns_resolvconfrewrite(stralloc *);
+extern int      dns_ip4_qualify_rules(stralloc *, stralloc *, stralloc *, stralloc *);
+extern int      dns_ip4_qualify(stralloc *, stralloc *, stralloc *);
+extern int      dns_packet_nameequal(char *, unsigned int, unsigned int, char *, unsigned int, unsigned int);
 
 #ifdef LIBC_HAS_IP6
-int             dns_name6(stralloc *, char *);
-int             dns_name6_domain(char *, char *);
-void            dns_sortip6(char *, unsigned int);
-unsigned int    dns_domain_suffixpos(char *, char *);
-int             dns_ip6_packet(stralloc *, char *, unsigned int);
-int             dns_ip6(stralloc *, stralloc *);
-int             dns_ip6_qualify_rules(stralloc *, stralloc *, stralloc *, stralloc *);
-int             dns_ip6_qualify(stralloc *, stralloc *, stralloc *);
+extern int      dns_name6(stralloc *, char *);
+extern int      dns_name6_domain(char *, char *);
+extern void     dns_sortip6(char *, unsigned int);
+extern unsigned int dns_domain_suffixpos(char *, char *);
+extern int      dns_ip6_packet(stralloc *, char *, unsigned int);
+extern int      dns_ip6(stralloc *, stralloc *);
+extern int      dns_ip6_qualify_rules(stralloc *, stralloc *, stralloc *, stralloc *);
+extern int      dns_ip6_qualify(stralloc *, stralloc *, stralloc *);
 #endif
 #endif

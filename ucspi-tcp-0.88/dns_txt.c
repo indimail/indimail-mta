@@ -1,5 +1,8 @@
 /*
  * $Log: dns_txt.c,v $
+ * Revision 1.3  2020-04-30 18:00:45+05:30  Cprogrammer
+ * change scope of variable dns_resolve_tx to local
+ *
  * Revision 1.2  2017-03-30 22:48:35+05:30  Cprogrammer
  * prefix rbl with dns_txt() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
  *
@@ -35,8 +38,7 @@ dns_txt_packet(stralloc * out, char *buf, unsigned int len)
 		return -1;
 	pos += 4;
 
-	while (numanswers--)
-	{
+	while (numanswers--) {
 		pos = dns_packet_skipname(buf, len, pos);
 		if (!pos)
 			return -1;
@@ -44,20 +46,16 @@ dns_txt_packet(stralloc * out, char *buf, unsigned int len)
 		if (!pos)
 			return -1;
 		uint16_unpack_big(header + 8, &datalen);
-		if (byte_equal(header, 2, DNS_T_TXT))
-		{
-			if (byte_equal(header + 2, 2, DNS_C_IN))
-			{
+		if (byte_equal(header, 2, DNS_T_TXT)) {
+			if (byte_equal(header + 2, 2, DNS_C_IN)) {
 				if (pos + datalen > len)
 					return -1;
 				txtlen = 0;
-				for (i = 0; i < datalen; ++i)
-				{
+				for (i = 0; i < datalen; ++i) {
 					ch = buf[pos + i];
 					if (!txtlen)
 						txtlen = (unsigned char) ch;
-					else
-					{
+					else {
 						--txtlen;
 						if (ch < 32)
 							ch = '?';
@@ -80,6 +78,8 @@ static char    *q = 0;
 int
 rbl_dns_txt(stralloc * out, stralloc * fqdn)
 {
+	struct dns_transmit dns_resolve_tx;
+
 	if (!dns_domain_fromdot(&q, fqdn->s, fqdn->len))
 		return -1;
 	if (dns_resolve(q, DNS_T_TXT) == -1)
