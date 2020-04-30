@@ -1,5 +1,8 @@
 /*
  * $Log: rwhconfig.c,v $
+ * Revision 1.5  2020-04-30 18:10:08+05:30  Cprogrammer
+ * define rwhconfig_err variable locally
+ *
  * Revision 1.4  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -24,8 +27,7 @@
 #include "env.h"
 #include <unistd.h>
 
-struct strerr   rwhconfig_err;
-
+static struct strerr rwhconfig_err;
 static stralloc tmp = { 0 }, fn = {0};
 static config_str me = CONFIG_STR;
 static config_str defaultdomain = CONFIG_STR;
@@ -150,7 +152,7 @@ nomem:
 void
 getversion_rwhconfig_c()
 {
-	static char    *x = "$Id: rwhconfig.c,v 1.4 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rwhconfig.c,v 1.5 2020-04-30 18:10:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.11  2020-04-30 18:09:45+05:30  Cprogrammer
+ * define rwhconfig_err variable locally
+ *
  * Revision 1.10  2020-04-04 11:30:55+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -449,6 +452,7 @@ main(argc, argv)
 	int             i, opt, flagheader = 1;
 	char           *qbase, *home;
 	char          **e;
+	struct strerr   rwhconfig_err;
 
 	sig_pipeignore();
 	tai_now(&start);
@@ -683,7 +687,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.10 2020-04-04 11:30:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.11 2020-04-30 18:09:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
