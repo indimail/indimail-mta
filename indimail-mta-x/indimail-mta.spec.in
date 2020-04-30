@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.216 2020-04-25 08:29:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.217 2020-04-30 22:09:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1900,6 +1900,8 @@ if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
     mysysconfdir=%{_sysconfdir}
   fi
   qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
+  # let qscand get qmail group for socket permission
+  /usr/sbin/usermod -aG qmail qscand || true
 else
   have_clamav=0
 fi

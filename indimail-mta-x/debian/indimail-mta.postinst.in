@@ -281,6 +281,8 @@ if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 		mysysconfdir=${sysconfdir}
 	fi
 	qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
+	# let qscand get qmail group for socket permission
+	/usr/sbin/usermod -aG qmail qscand || true
 else
 	have_clamav=0
 fi
