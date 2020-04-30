@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.20  2020-04-30 18:05:15+05:30  Cprogrammer
+ * removed unused variable ssin
+ *
  * Revision 1.19  2020-04-08 16:00:24+05:30  Cprogrammer
  * set controldir variable in cdb_match() function
  *
@@ -132,7 +135,6 @@ int             timeoutconnect = 60;
 int             timeoutssl;
 char           *whitefn = 0, *tlsadomainsfn = 0;
 stralloc        context_file = { 0 };
-struct substdio ssin;
 stralloc        line = { 0 };
 
 int             whitelistok = 0;
@@ -1352,7 +1354,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.19 2020-04-08 16:00:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.20 2020-04-30 18:05:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
