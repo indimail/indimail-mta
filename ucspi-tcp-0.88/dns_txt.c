@@ -1,5 +1,8 @@
 /*
  * $Log: dns_txt.c,v $
+ * Revision 1.4  2020-04-30 22:06:11+05:30  Cprogrammer
+ * use dns_resolve_tx from dns_resolve.c
+ *
  * Revision 1.3  2020-04-30 18:00:45+05:30  Cprogrammer
  * change scope of variable dns_resolve_tx to local
  *
@@ -78,8 +81,6 @@ static char    *q = 0;
 int
 rbl_dns_txt(stralloc * out, stralloc * fqdn)
 {
-	struct dns_transmit dns_resolve_tx;
-
 	if (!dns_domain_fromdot(&q, fqdn->s, fqdn->len))
 		return -1;
 	if (dns_resolve(q, DNS_T_TXT) == -1)

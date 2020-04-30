@@ -1,5 +1,8 @@
 /*
  * $Log: dns_name.c,v $
+ * Revision 1.4  2020-04-30 22:05:56+05:30  Cprogrammer
+ * use dns_resolve_tx from dns_resolve.c
+ *
  * Revision 1.3  2020-04-30 18:00:40+05:30  Cprogrammer
  * change scope of variable dns_resolve_tx to local
  *
@@ -64,7 +67,6 @@ int
 dns_name4(stralloc *out, char ip[4])
 {
 	char            name[DNS_NAME4_DOMAIN];
-	struct dns_transmit dns_resolve_tx;
 
 	dns_name4_domain(name, ip);
 	if (dns_resolve(name, DNS_T_PTR) == -1)
@@ -81,7 +83,6 @@ int
 dns_name6(stralloc *out, char ip[16])
 {
 	char            name[DNS_NAME6_DOMAIN];
-	struct dns_transmit dns_resolve_tx;
 
 	if (ip6_isv4mapped(ip))
 		return dns_name4(out, ip + 12);

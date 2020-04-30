@@ -1,5 +1,8 @@
 /*
  * $Log: dns_ip.c,v $
+ * Revision 1.6  2020-04-30 22:05:30+05:30  Cprogrammer
+ * use dns_resolve_tx in dns_resolve.c
+ *
  * Revision 1.5  2020-04-30 18:00:15+05:30  Cprogrammer
  * change scope of variable dns_resolve_tx to local
  *
@@ -82,7 +85,6 @@ dns_ip6(stralloc *out, stralloc *fqdn)
 	char            code;
 	char            ch;
 	char            ip[16];
-	struct dns_transmit dns_resolve_tx;
 
 	if (!stralloc_copys(out, ""))
 		return -1;
@@ -180,7 +182,6 @@ dns_ip4(stralloc *out, stralloc *fqdn)
 	unsigned int    i;
 	char            code;
 	char            ch;
-	struct dns_transmit dns_resolve_tx;
 
 	if (!stralloc_copys(out, ""))
 		return -1;
