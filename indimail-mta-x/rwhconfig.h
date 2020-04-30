@@ -1,5 +1,8 @@
 /*
  * $Log: rwhconfig.h,v $
+ * Revision 1.3  2020-04-30 18:08:52+05:30  Cprogrammer
+ * removed rwhconfig_err variable.
+ *
  * Revision 1.2  2004-10-11 14:01:35+05:30  Cprogrammer
  * added function prototypes
  *
@@ -12,8 +15,6 @@
 
 #include "strerr.h"
 #include "sconfig.h"
-
-struct strerr   rwhconfig_err;
 
 int             rwhconfig(config_str *, stralloc *);
 
