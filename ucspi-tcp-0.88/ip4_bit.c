@@ -1,5 +1,8 @@
 /*
  * $Log: ip4_bit.c,v $
+ * Revision 1.3  2020-04-30 18:00:50+05:30  Cprogrammer
+ * changed scope of variable strnum to local
+ *
  * Revision 1.2  2016-05-05 01:20:20+05:30  Cprogrammer
  * fix stack smashing - num defined as int instead of unsigned long
  *
@@ -16,8 +19,6 @@
 #include "byte.h"
 
 #define BITSUBSTITUTION
-
-char            strnum[FMT_ULONG];
 
 int
 getaddressasbit(char *ip, int prefix, stralloc *ip4string)
@@ -71,6 +72,7 @@ getaddressasbit(char *ip, int prefix, stralloc *ip4string)
 	return 0;
 }
 
+static char     strnum[FMT_ULONG];
 int
 getbitasaddress(stralloc *ip4string)
 {

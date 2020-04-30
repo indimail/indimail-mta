@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_bit.c,v $
+ * Revision 1.3  2020-04-30 18:01:01+05:30  Cprogrammer
+ * changed scope of variable strnum to local
+ *
  * Revision 1.2  2017-03-30 22:52:17+05:30  Cprogrammer
  * prefix rbl with ip6_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so"
  *
@@ -16,7 +19,7 @@
 
 #define BITSUBSTITUTION
 
-char            strnum[FMT_ULONG];
+static char     strnum[FMT_ULONG];
 
 /**
  * This function converts a IPv6 address into its binary representation.
