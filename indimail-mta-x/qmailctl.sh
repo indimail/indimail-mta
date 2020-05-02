@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.60 2020-04-15 14:01:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.61 2020-05-02 18:11:19+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -29,7 +29,6 @@ else
 			SYSTEM=SuSE
 			;;
 			*)
-			echo name=$NAME
 			SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
 			;;
 		esac
