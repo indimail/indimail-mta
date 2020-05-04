@@ -1,7 +1,11 @@
 #
-# $Id: docker-entrypoint.sh,v 1.4 2020-04-29 11:31:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.5 2020-05-04 11:11:01+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.5  2020-05-04 11:11:01+05:30  Cprogrammer
+# create /etc/mtab as link to /proc/self/mounts / /proc/mounts if missing
+# start apache if argument to podman/docker entrypoint is webmail
+#
 # Revision 1.4  2020-04-29 11:31:56+05:30  Cprogrammer
 # removed deletion of mysql.3306/down
 #
@@ -17,7 +21,23 @@
 set -e
 
 case "$1" in
-indimail|indimail-mta|svscan)
+indimail|indimail-mta|svscan|webmail)
+	if [ ! -f /etc/mtab ] ; then
+		if [ -f /proc/self/mounts ] ; then
+			echo "Warning  linking /etc/mtab to /proc/self/mounts" 1>&2
+			ln -s /proc/self/mounts /etc/mtab
+		elif [ -f /proc/mounts ] ; then
+			echo "Warning  linking /etc/mtab to /proc/mounts" 1>&2
+			ln -s /proc/mounts /etc/mtab
+		else
+			echo "Warning /etc/mtab: No such file or directory" 1>&2
+		fi
+	fi
+	case "$1" in
+	webmail)
+		/usr/sbin/apachectl start
+	;;
+	esac
 	if [ -d /service/.svscan/variables ] ; then
    		echo "docker-entrypoint: [$1] PREFIX/bin/envdir /service/.svscan/variables PREFIX/sbin/svscan /service"
    		exec PREFIX/bin/envdir /service/.svscan/variables PREFIX/sbin/svscan /service
