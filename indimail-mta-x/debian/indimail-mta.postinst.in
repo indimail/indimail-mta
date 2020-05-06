@@ -509,7 +509,7 @@ if [ /usr/lib/sm.bin/sendmail ] ; then
 	/usr/bin/update-alternatives --remove-all sendmail-msp || true
 	fi
 fi
-${prefix}/sbin/svctool --disable-service sendmail exim4
+${prefix}/sbin/svctool --disable-service sendmail exim4 postfix
 ${prefix}/sbin/svctool --config=add-boot
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
