@@ -1,7 +1,10 @@
 #
-# $Id: docker-entrypoint.sh,v 1.6 2020-05-06 11:09:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.7 2020-05-06 15:30:52+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.7  2020-05-06 15:30:52+05:30  Cprogrammer
+# remove down file to start services
+#
 # Revision 1.6  2020-05-06 11:09:11+05:30  Cprogrammer
 # start httpd, php-fpm for webmail entrypoint
 #
@@ -39,13 +42,14 @@ indimail|indimail-mta|svscan|webmail)
 	case "$1" in
 	webmail)
 		if [ -f /service/php-fpm/down ] ; then
-			echo "/usr/bin/svc -u /service/php-fpm"
-			svc -u /service/php-fpm
+			echo "enabling /service/php-fpm"
+			/bin/rm -f /service/php-fpm/down
 		fi
 		if [ -f /service/httpd/down ] ; then
-			echo "/usr/bin/svc -u /service/httpd"
-			svc -u /service/httpd
+			echo "enabling /service/httpd"
+			/bin/rm -f /service/httpd/down
 		else
+			echo "/usr/sbin/apachectl start"
 			/usr/sbin/apachectl start
 		fi
 	;;
