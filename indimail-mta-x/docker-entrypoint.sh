@@ -1,7 +1,10 @@
 #
-# $Id: docker-entrypoint.sh,v 1.5 2020-05-04 11:11:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.6 2020-05-06 11:09:11+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.6  2020-05-06 11:09:11+05:30  Cprogrammer
+# start httpd, php-fpm for webmail entrypoint
+#
 # Revision 1.5  2020-05-04 11:11:01+05:30  Cprogrammer
 # create /etc/mtab as link to /proc/self/mounts / /proc/mounts if missing
 # start apache if argument to podman/docker entrypoint is webmail
@@ -35,7 +38,16 @@ indimail|indimail-mta|svscan|webmail)
 	fi
 	case "$1" in
 	webmail)
-		/usr/sbin/apachectl start
+		if [ -f /service/php-fpm/down ] ; then
+			echo "/usr/bin/svc -u /service/php-fpm"
+			svc -u /service/php-fpm
+		fi
+		if [ -f /service/httpd/down ] ; then
+			echo "/usr/bin/svc -u /service/httpd"
+			svc -u /service/httpd
+		else
+			/usr/sbin/apachectl start
+		fi
 	;;
 	esac
 	if [ -d /service/.svscan/variables ] ; then
