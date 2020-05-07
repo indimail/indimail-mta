@@ -526,18 +526,18 @@ fi
 ) >> /tmp/indimail-mta-setup.log 2>&1
 
 if [ -f ${sysconfdir}/init/svscan.conf -o -f ${sysconfdir}/event.d/svscan ] ; then
-	echo "1. Issue /sbin/initctl emit qmailstart to start services"
+	echo "1. Execute /sbin/initctl emit qmailstart to start services"
 	count=1
 elif [ -f ${sysconfdir}/systemd/system/multi-user.target.wants/svscan.service ] ; then
-	echo "1. Issue /bin/systemctl start svscan to start services"
+	echo "1. Execute /bin/systemctl start svscan to start services"
 	count=1
 else
 	if [ -x ${prefix}/sbin/initsvc ] ; then
-	echo "1. Issue ${prefix}/sbin/initsvc -on"
+	echo "1. Execute ${prefix}/sbin/initsvc -on"
 	else
-	echo "1. Issue ${sysconfdir}/init.d/svscan start"
+	echo "1. Execute ${sysconfdir}/init.d/svscan start"
 	fi
-	echo "2. Issue /sbin/init q to start services"
+	echo "2. Execute /sbin/init q to start services"
 	count=2
 fi
 default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
@@ -551,11 +551,11 @@ echo "   sudo ${prefix}/sbin/svctool --check-install --servicedir=${servicedir} 
 echo "       --qbase=${qbase} --qcount=${qcount} --qstart=1"
 if [ ! -f ${qsysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
-echo "$count. You also need to create CERTS for SSL/TLS. run the following"
-echo "   command to create cert"
+echo "$count. You need to create CERTS for SSL/TLS/STARTTLS"
+echo "   Execute the following command to create the certificate"
 echo "   ${prefix}/sbin/svctool --config=cert --postmaster=postmaster@${default_domain} --common_name=${default_domain}"
 fi
 echo
-echo "Check /tmp/indimail-mta-setup.log for the detailed installation log!!!"
+echo "Look at /tmp/indimail-mta-setup.log for the installation log"
 
 exit 0

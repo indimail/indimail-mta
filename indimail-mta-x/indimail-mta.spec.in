@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.217 2020-04-30 22:09:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.218 2020-05-08 00:24:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1680,7 +1680,7 @@ if [ $nscd_up -ge 1 ] ; then
     %{_sysconfdir}/init.d/nscd stop
   fi
 fi
-echo "Adding IndiMail users/groups"
+echo "Adding indimail-mta users/groups"
 /usr/bin/getent group %groupname  > /dev/null || /usr/sbin/groupadd -r -g %gid %groupname || true
 if [ $? = 4 ] ; then
   /usr/sbin/groupadd %groupname
@@ -2098,18 +2098,18 @@ if [ -x /bin/systemctl ] ; then
 fi
 ) >> /tmp/%{name}-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
-  echo "1. Issue /sbin/initctl emit qmailstart to start services"
+  echo "1. Execute /sbin/initctl emit qmailstart to start services"
   count=1
 elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service ] ; then
-  echo "1. Issue /bin/systemctl start svscan to start services"
+  echo "1. Execute /bin/systemctl start svscan to start services"
   count=1
 else
   if [ -f %{_prefix}/sbin/initsvc ] ; then
-  echo "1. Issue %{_prefix}/sbin/initsvc -on"
+  echo "1. Execute %{_prefix}/sbin/initsvc -on"
   else
-  echo "1. Issue %{_sysconfdir}/init.d/svscan start"
+  echo "1. Execute %{_sysconfdir}/init.d/svscan start"
   fi
-  echo "2. Issue /sbin/init q to start services"
+  echo "2. Execute /sbin/init q to start services"
   count=2
 fi
 default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
@@ -2120,8 +2120,8 @@ echo "$count. You can optionally run the following command to verify installatio
 echo "   sudo rpm -V indimail"
 if [ ! -f %{qsysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
-echo "$count. You need to create CERTS for STARTTLS."
-echo "   Run the following command to create Certificate for TLS/SSL"
+echo "$count. You need to create CERTS for SSL/TLS/STARTTLS"
+echo "   Execute the following command to create the certificate"
 echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
 fi
 echo
