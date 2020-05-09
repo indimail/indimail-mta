@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.475 2020-05-09 18:10:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.476 2020-05-10 04:33:57+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -18,7 +18,7 @@ LOGDIR=@logdir@
 #indimaildir=`awk -F: '{print $6}' /etc/passwd|grep indimail|head -1`
 CONCURRENCYINCOMING=150
 min_free=52428800
-DATABYTES=10000000
+DATABYTES=20971520
 MASTER_HOST=localhost
 MYSQL_HOST=localhost
 MYSQL_USER=indimail
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.475 2020-05-09 18:10:30+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.476 2020-05-10 04:33:57+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -63,6 +63,7 @@ Known values for OPTION are:
   [--fsync --syncdir]
   [--qregex]
   [--memory=b]
+  [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
   [--authsmtp --forceauthsmtp --authall]
@@ -102,6 +103,8 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
+  d              - Max size of email that can be submitted to SMTP or
+                   injected locally
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
@@ -342,6 +345,7 @@ Known values for OPTION are:
   --localip=a --maxdaemons=m --maxperip=i
   [--fsync --syncdir]
   [--memory=b --min-free=M]
+  [--databytes=d]
   [--qhpsi=q]
   [--spamfilter=spamfilter_args]
   [--logfilter=logfifo]
@@ -359,6 +363,8 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
+  d              - Max size of email that can be submitted to SMTP or
+                   injected locally
   Port           - Bind on this port for QMTP
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
@@ -1700,7 +1706,7 @@ fi
 
 if [ ! -f "$DESTDIR"$CONTROLDIR/databytes ] ; then
 	echo "databytes"
-	echo "$DATABYTES"           > "$DESTDIR"$CONTROLDIR/databytes
+	echo "$databytes"           > "$DESTDIR"$CONTROLDIR/databytes
 fi
 
 if [ ! -f "$DESTDIR"$CONTROLDIR/timeoutsmtpd ] ; then
@@ -8383,6 +8389,7 @@ use_starttls=0
 forcetls=0
 nooverwrite=0
 run_file_only=0
+databytes=$DATABYTES
 mysqlPrefix=/usr
 if [ -x /bin/chown ] ; then
 	chown=/bin/chown
@@ -8447,6 +8454,9 @@ while test $# -gt 0; do
 	;;
 	--skipsend)
 	skipsend=1
+	;;
+	--databytes=*)
+	databytes=$optarg
 	;;
 	--scanint=*)
 	scan_interval=$optarg
