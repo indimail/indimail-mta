@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.218 2020-05-08 00:24:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.219 2020-05-09 10:38:08+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1877,13 +1877,13 @@ fi
 
 # SMTP
 %ifarch x86_64
-%global smtp_soft_mem 536870912
-%global qmtp_soft_mem 104857600
-%global qmqp_soft_mem 104857600
-%else
 %global smtp_soft_mem 52428800
 %global qmtp_soft_mem 52428800
 %global qmqp_soft_mem 52428800
+%else
+%global smtp_soft_mem 26214400
+%global qmtp_soft_mem 26214400
+%global qmqp_soft_mem 26214400
 %endif
 
 # Define QHPSI for inline virus scanning by qmail-queue
