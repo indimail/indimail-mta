@@ -35,6 +35,7 @@ Known values for OPTION are:
   [--fsync --syncdir]
   [--qregex]
   [--memory=b]
+  [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
   [--authsmtp --forceauthsmtp --authall]
@@ -74,6 +75,8 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
+  d              - Max size of email that can be submitted to SMTP or
+                   injected locally
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
@@ -314,6 +317,7 @@ Known values for OPTION are:
   --localip=a --maxdaemons=m --maxperip=i
   [--fsync --syncdir]
   [--memory=b --min-free=M]
+  [--databytes=d]
   [--qhpsi=q]
   [--spamfilter=spamfilter_args]
   [--logfilter=logfifo]
@@ -331,6 +335,8 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
+  d              - Max size of email that can be submitted to SMTP or
+                   injected locally
   Port           - Bind on this port for QMTP
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
