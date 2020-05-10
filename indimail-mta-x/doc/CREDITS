@@ -163,3 +163,4 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 104.Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd),
     control/tlsservermethod (qmail-remote)
 105.Bruce Guenter - qmail-remote patch to reduce cpu
+106.Rolf Eike Beer for gen_allocdefs.h, GEN_ALLOC refactoring changes to fix memory overflow
