@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.17  2020-05-11 11:18:47+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.16  2018-08-12 00:30:27+05:30  Cprogrammer
  * removed stdio.h
  *
@@ -224,7 +227,7 @@ hdr_addr_family()
 
 #ifdef IPV6
 static int
-matchip6(ip6_addr *net, int mask, ip6_addr *ip6)
+matchip6(ip6_addr *net, int mask, ip6_addr *i6)
 {
 	int             j;
 	int             bytemask;
@@ -235,7 +238,7 @@ matchip6(ip6_addr *net, int mask, ip6_addr *ip6)
 		else
 			bytemask = mask;
 		mask -= bytemask;
-		if ((net->d[j] ^ ip6->d[j]) & (0x100 - (1 << (8 - bytemask))))
+		if ((net->d[j] ^ i6->d[j]) & (0x100 - (1 << (8 - bytemask))))
 			return 0;
 	}
 	return 1;
@@ -321,7 +324,7 @@ getipmask(char *mask, int ipv6)
 #endif
 
 static int
-matchip(ip_addr *net, int mask, ip_addr *ip)
+matchip(ip_addr *net, int mask, ip_addr *ipaddr)
 {
 	int             j;
 	int             bytemask;
@@ -332,14 +335,14 @@ matchip(ip_addr *net, int mask, ip_addr *ip)
 		else
 			bytemask = mask;
 		mask -= bytemask;
-		if ((net->d[j] ^ ip->d[j]) & (0x100 - (1 << (8 - bytemask))))
+		if ((net->d[j] ^ ipaddr->d[j]) & (0x100 - (1 << (8 - bytemask))))
 			return 0;
 	}
 	return 1;
 }
 
 int
-spfget(stralloc *spf, stralloc *domain)
+spfget(stralloc *spf, stralloc *domain_v)
 {
 	int             j;
 	int             begin, pos, i;
@@ -347,7 +350,7 @@ spfget(stralloc *spf, stralloc *domain)
 
 	spf->len = 0;
 	ssa.len = 0;
-	switch (dns_txt(&ssa, domain))
+	switch (dns_txt(&ssa, domain_v))
 	{
 	case DNS_MEM:
 		return SPF_NOMEM;
@@ -392,7 +395,7 @@ spfget(stralloc *spf, stralloc *domain)
 }
 
 int
-spfsubst(stralloc *expand, char *spec, char *domain)
+spfsubst(stralloc *expand, char *spec, char *domain_p)
 {
 	static char     hexdigits[] = "0123456789abcdef";
 	char            ch;
@@ -459,7 +462,7 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 			return 0;
 		break;
 	case 'd':
-		if (!stralloc_copys(&sa, domain))
+		if (!stralloc_copys(&sa, domain_p))
 			return 0;
 		break;
 	case 'i':
@@ -481,7 +484,7 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 		break;
 	case 'p':
 		if (!sender_fqdn.len)
-			spf_ptr(domain, 0);
+			spf_ptr(domain_p, 0);
 		if (sender_fqdn.len) {
 			if (!stralloc_copy(&sa, &sender_fqdn))
 				return 0;
@@ -575,15 +578,15 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 }
 
 int
-spfexpand(stralloc *sa, char *spec, char *domain)
+spfexpand(stralloc *sa_p, char *spec, char *domain_p)
 {
 	char           *p;
 	char            append;
 	int             pos;
 
-	if (!stralloc_readyplus(sa, 0))
+	if (!stralloc_readyplus(sa_p, 0))
 		return 0;
-	sa->len = 0;
+	sa_p->len = 0;
 
 	for (p = spec; *p; p++) {
 		append = *p;
@@ -597,7 +600,7 @@ spfexpand(stralloc *sa, char *spec, char *domain)
 				append = ' ';
 				break;
 			case '-':
-				if (!stralloc_cats(sa, "%20"))
+				if (!stralloc_cats(sa_p, "%20"))
 					return 0;
 				continue;
 			case '{':
@@ -607,7 +610,7 @@ spfexpand(stralloc *sa, char *spec, char *domain)
 					break;
 				}
 				p[pos] = 0;
-				if (!spfsubst(sa, p + 1, domain))
+				if (!spfsubst(sa_p, p + 1, domain_p))
 					return 0;
 				p += pos;
 				continue;
@@ -615,10 +618,9 @@ spfexpand(stralloc *sa, char *spec, char *domain)
 				p--;
 			}
 		}
-		if (!stralloc_append(sa, &append))
+		if (!stralloc_append(sa_p, &append))
 			return 0;
 	}
-
 	return 1;
 }
 
@@ -992,7 +994,7 @@ static struct mechanisms
 };
 
 static int
-spfmech(char *mechanism, char *spec, char *mask, char *domain)
+spfmech(char *mechanism, char *spec, char *mask, char *domain_p)
 {
 	struct mechanisms *mech;
 	int             r;
@@ -1003,7 +1005,7 @@ spfmech(char *mechanism, char *spec, char *mask, char *domain)
 			break;
 	}
 	if (mech->takes_spec && !spec && mech->filldomain)
-		spec = domain;
+		spec = domain_p;
 	if (!mech->takes_spec != !spec)
 		return SPF_SYNTAX;
 	if (!mech->takes_mask && mask)
@@ -1012,8 +1014,8 @@ spfmech(char *mechanism, char *spec, char *mask, char *domain)
 		return mech->defresult;
 	if (!stralloc_readyplus(&sa, 0))
 		return SPF_NOMEM;
-	if (mech->expands && spec != domain) {
-		if (!spfexpand(&sa, spec, domain))
+	if (mech->expands && spec != domain_p) {
+		if (!spfexpand(&sa, spec, domain_p))
 			return SPF_NOMEM;
 		for (pos = 0; (sa.len - pos) > 255;) {
 			pos += byte_chr(sa.s + pos, sa.len - pos, '.');
@@ -1047,7 +1049,7 @@ static struct default_aliases
 };
 
 static int
-spflookup(stralloc *domain)
+spflookup(stralloc *domain_s)
 {
 	stralloc        spf_v = { 0 };
 	struct default_aliases *da;
@@ -1071,11 +1073,11 @@ redirect:
 		hdr_unknown_msg("Maximum nesting level exceeded, possible loop");
 		return SPF_SYNTAX;
 	}
-	if (!stralloc_0(domain))
+	if (!stralloc_0(domain_s))
 		return SPF_NOMEM;
-	if (!stralloc_copy(&expdomain, domain))
+	if (!stralloc_copy(&expdomain, domain_s))
 		return SPF_NOMEM;
-	if ((r = spfget(&spf_v, domain)) == SPF_NONE) {
+	if ((r = spfget(&spf_v, domain_s)) == SPF_NONE) {
 		if (!Main) {
 			alloc_free(spf_v.s);
 			return r;
@@ -1161,7 +1163,7 @@ redirect:
 			if (begin < (local_pos + spflocal.len))
 				expdomain.len = 0;
 			else
-			if (!stralloc_copy(&expdomain, domain)) {
+			if (!stralloc_copy(&expdomain, domain_s)) {
 				alloc_free(spf_v.s);
 				return SPF_NOMEM;
 			}
@@ -1175,11 +1177,11 @@ redirect:
 			if (str_equal(spf_v.s + begin, "redirect")) {
 				if (done)
 					continue;
-				if (!spfexpand(&sa, p, domain->s)) {
+				if (!spfexpand(&sa, p, domain_s->s)) {
 					alloc_free(spf_v.s);
 					return SPF_NOMEM;
 				}
-				stralloc_copy(domain, &sa);
+				stralloc_copy(domain_s, &sa);
 				hdr_unknown();
 				r = SPF_UNKNOWN;
 				goto redirect;
@@ -1259,19 +1261,19 @@ redirect:
 			}
 			if (*p == '/') {
 				*p++ = 0;
-				q = spfmech(spf_v.s + begin, 0, p, domain->s);
+				q = spfmech(spf_v.s + begin, 0, p, domain_s->s);
 			} else {
 				if (*p)
 					*p++ = 0;
 				i = str_chr(p, '/');
 				if (p[i] == '/') {
 					p[i++] = 0;
-					q = spfmech(spf_v.s + begin, p, p + i, domain->s);
+					q = spfmech(spf_v.s + begin, p, p + i, domain_s->s);
 				} else
 				if (i > 0)
-					q = spfmech(spf_v.s + begin, p, 0, domain->s);
+					q = spfmech(spf_v.s + begin, p, 0, domain_s->s);
 				else
-					q = spfmech(spf_v.s + begin, 0, 0, domain->s);
+					q = spfmech(spf_v.s + begin, 0, 0, domain_s->s);
 			}
 			if (q == SPF_OK)
 				q = prefix;
@@ -1311,7 +1313,7 @@ redirect:
 		}
 	}
 	/*- we fell through, no local rule applied */
-	if (!done && !stralloc_copy(&expdomain, domain)) {
+	if (!done && !stralloc_copy(&expdomain, domain_s)) {
 		alloc_free(spf_v.s);
 		return SPF_NOMEM;
 	}
@@ -1397,22 +1399,20 @@ spfcheck(char *remoteip)
 }
 
 int
-spfexplanation(sa)
-	stralloc       *sa;
+spfexplanation(stralloc *sa_p)
 {
-	return spfexpand(sa, explanation.s, expdomain.s);
+	return spfexpand(sa_p, explanation.s, expdomain.s);
 }
 
 int
-spfinfo(sa)
-	stralloc       *sa;
+spfinfo(stralloc *sa_p)
 {
 	stralloc        tmp = { 0 };
 	if (!stralloc_copys(&tmp, received))
 		return 0;
 	if (!stralloc_0(&tmp))
 		return 0;
-	if (!spfexpand(sa, tmp.s, expdomain.s))
+	if (!spfexpand(sa_p, tmp.s, expdomain.s))
 		return 0;
 	alloc_free(tmp.s);
 	return 1;
@@ -1422,7 +1422,7 @@ spfinfo(sa)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.16 2018-08-12 00:30:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.17 2020-05-11 11:18:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
