@@ -1,5 +1,8 @@
 /*
  * $Log: sorted.c,v $
+ * Revision 1.2  2020-05-10 17:47:09+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.1  2008-06-03 23:21:57+05:30  Cprogrammer
  * Initial revision
  *
@@ -12,7 +15,7 @@
 #include "sorted.h"
 #include "byte.h"
 
-GEN_ALLOC_readyplus(sorted,stralloc,p,len,a,i,n,x,100,sorted_readyplus)
+GEN_ALLOC_readyplus(sorted,stralloc,p,len,a,100,sorted_readyplus)
 
 int
 sorted_insert(sl, sa)
@@ -52,7 +55,7 @@ sorted_insert(sl, sa)
 void
 getversion_sorted_c()
 {
-	static char    *x = "$Id: sorted.c,v 1.1 2008-06-03 23:21:57+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: sorted.c,v 1.2 2020-05-10 17:47:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

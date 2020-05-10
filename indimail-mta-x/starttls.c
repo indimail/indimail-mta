@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.6  2020-05-10 17:47:13+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.5  2018-06-01 22:53:36+05:30  Cprogrammer
  * display correct host in perm_dns()
  *
@@ -66,7 +69,7 @@
 
 #define HUGESMTPTEXT  5000
 GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
-GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, i, n, x, 10, saa_readyplus)
+GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
 
 int             smtpfd;
 const char     *ssl_err_str = 0;
@@ -1485,7 +1488,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.5 2018-06-01 22:53:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.6 2020-05-10 17:47:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

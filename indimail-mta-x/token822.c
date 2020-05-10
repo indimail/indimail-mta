@@ -1,5 +1,8 @@
 /*
  * $Log: token822.c,v $
+ * Revision 1.5  2020-05-10 17:47:25+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.4  2004-10-22 20:31:48+05:30  Cprogrammer
  * added RCS id
  *
@@ -37,9 +40,9 @@ token822_reverse(ta)
 	}
 }
 
-GEN_ALLOC_ready(token822_alloc, struct token822, t, len, a, i, n, x, 30, token822_ready)
-GEN_ALLOC_readyplus(token822_alloc, struct token822, t, len, a, i, n, x, 30, token822_readyplus)
-GEN_ALLOC_append(token822_alloc, struct token822, t, len, a, i, n, x, 30, token822_readyplus, token822_append)
+GEN_ALLOC_readyplus(token822_alloc, struct token822, t, len, a, 30, token822_readyplus)
+GEN_ALLOC_ready(token822_alloc, struct token822, t, len, a, 30, token822_ready)
+GEN_ALLOC_append(token822_alloc, struct token822, t, len, a, 30, token822_readyplus, token822_append)
 
 static int
 needspace(t1, t2)
@@ -719,7 +722,7 @@ if (!token822_append(taout,&comma)) return -1; }
 void
 getversion_token822_c()
 {
-	static char    *x = "$Id: token822.c,v 1.4 2004-10-22 20:31:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: token822.c,v 1.5 2020-05-10 17:47:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

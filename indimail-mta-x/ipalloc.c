@@ -1,5 +1,8 @@
 /*
  * $Log: ipalloc.c,v $
+ * Revision 1.8  2020-05-10 17:46:42+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.7  2019-07-19 13:47:45+05:30  Cprogrammer
  * 2nd argument of ipalloc_readyplus() should be unsigned int
  *
@@ -26,13 +29,13 @@
 #include "ip.h"
 #include "ipalloc.h"
 
-GEN_ALLOC_readyplus(ipalloc, struct ip_mx, ix, len, a, i, n, x, 10, ipalloc_readyplus)
-GEN_ALLOC_append(ipalloc, struct ip_mx, ix, len, a, i, n, x, 10, ipalloc_readyplus, ipalloc_append)
+GEN_ALLOC_readyplus(ipalloc, struct ip_mx, ix, len, a, 10, ipalloc_readyplus)
+GEN_ALLOC_append(ipalloc, struct ip_mx, ix, len, a, 10, ipalloc_readyplus, ipalloc_append)
 
 void
 getversion_ipalloc_c()
 {
-	static char    *x = "$Id: ipalloc.c,v 1.7 2019-07-19 13:47:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipalloc.c,v 1.8 2020-05-10 17:46:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

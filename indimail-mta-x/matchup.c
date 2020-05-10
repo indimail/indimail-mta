@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.8  2020-05-10 17:46:47+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.7  2017-01-04 12:56:35+05:30  Cprogrammer
  * ignore qmail-daemon and local/remote debug lines
  *
@@ -103,8 +106,8 @@ outs5(buf)
 }
 
 GEN_ALLOC_typedef(ulongalloc, unsigned long, u, len, a)
-GEN_ALLOC_ready(ulongalloc, unsigned long, u, len, a, i, n, x, 30, ulongalloc_ready)
-GEN_ALLOC_readyplus(ulongalloc, unsigned long, u, len, a, i, n, x, 30, ulongalloc_readyplus)
+GEN_ALLOC_readyplus(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_readyplus)
+GEN_ALLOC_ready(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_ready)
 char            strnum[FMT_ULONG];
 stralloc        pool = { 0 };
 unsigned int    poolbytes = 0;
@@ -753,7 +756,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.7 2017-01-04 12:56:35+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.8 2020-05-10 17:46:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

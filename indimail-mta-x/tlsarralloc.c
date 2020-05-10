@@ -1,5 +1,8 @@
 /*
  * $Log: tlsarralloc.c,v $
+ * Revision 1.3  2020-05-10 17:47:21+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.2  2019-07-19 13:49:15+05:30  Cprogrammer
  * 2nd argument of tlsarralloc_readyplus() should be unsigned int
  *
@@ -13,13 +16,13 @@
 #include "gen_allocdefs.h"
 #include "tlsarralloc.h"
 
-GEN_ALLOC_readyplus(tlsarralloc,struct tlsa_rdata,rr,len,a,i,n,x,10,tlsarralloc_readyplus)
-GEN_ALLOC_append(tlsarralloc,struct tlsa_rdata,rr,len,a,i,n,x,10,tlsarralloc_readyplus,tlsarralloc_append)
+GEN_ALLOC_readyplus(tlsarralloc,struct tlsa_rdata,rr,len,a,10,tlsarralloc_readyplus)
+GEN_ALLOC_append(tlsarralloc,struct tlsa_rdata,rr,len,a,10,tlsarralloc_readyplus,tlsarralloc_append)
 
 void
 getversion_tlsarralloc_c()
 {
-	static char    *x = "$Id: tlsarralloc.c,v 1.2 2019-07-19 13:49:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tlsarralloc.c,v 1.3 2020-05-10 17:47:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: mlmatchup.c,v $
+ * Revision 1.2  2020-05-10 17:46:51+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.1  2008-01-31 15:44:15+05:30  Cprogrammer
  * Initial revision
  *
@@ -85,8 +88,8 @@ outs5(buf)
 }
 
 GEN_ALLOC_typedef(ulongalloc, unsigned long, u, len, a)
-GEN_ALLOC_ready(ulongalloc, unsigned long, u, len, a, i, n, x, 30, ulongalloc_ready)
-GEN_ALLOC_readyplus(ulongalloc, unsigned long, u, len, a, i, n, x, 30, ulongalloc_readyplus)
+GEN_ALLOC_readyplus(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_readyplus)
+GEN_ALLOC_ready(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_ready)
 char            strnum[FMT_ULONG];
 
 stralloc        pool = { 0 };
@@ -722,7 +725,7 @@ main()
 void
 getversion_mlmatchup_c()
 {
-	static char    *x = "$Id: mlmatchup.c,v 1.1 2008-01-31 15:44:15+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: mlmatchup.c,v 1.2 2020-05-10 17:46:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.33  2020-05-10 17:46:59+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.32  2020-04-04 11:53:24+05:30  Cprogrammer
  * use auto_sysconfdir instead of auto_qmail
  *
@@ -319,7 +322,7 @@ doordie(sa, r)
 }
 
 GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
-GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, i, n, x, 10, saa_readyplus)
+GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
 
 stralloc        sauninit = { 0 };
 saa             savedh = { 0 };
@@ -1287,7 +1290,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.32 2020-04-04 11:53:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.33 2020-05-10 17:46:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

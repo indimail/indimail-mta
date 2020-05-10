@@ -1,5 +1,8 @@
 /*
  * $Log: prioq.c,v $
+ * Revision 1.5  2020-05-10 17:46:56+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.4  2004-10-22 20:28:02+05:30  Cprogrammer
  * added RCS id
  *
@@ -16,7 +19,7 @@
 #include "gen_allocdefs.h"
 #include "prioq.h"
 
-GEN_ALLOC_readyplus(prioq, struct prioq_elt, p, len, a, i, n, x, 100, prioq_readyplus)
+GEN_ALLOC_readyplus(prioq, struct prioq_elt, p, len, a, 100, prioq_readyplus)
 
 int
 prioq_insert(pq, pe)
@@ -86,7 +89,7 @@ prioq_delmin(pq)
 void
 getversion_prioq_c()
 {
-	static char    *x = "$Id: prioq.c,v 1.4 2004-10-22 20:28:02+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: prioq.c,v 1.5 2020-05-10 17:46:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

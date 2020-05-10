@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.131 2019-07-09 10:24:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.132 2020-05-10 17:47:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -79,7 +79,7 @@
 unsigned long   port = PORT_SMTP;
 
 GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
-GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, i, n, x, 10, saa_readyplus)
+GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
 
 stralloc        sauninit = { 0 };
 stralloc        helohost = { 0 };
@@ -3487,7 +3487,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.131 2019-07-09 10:24:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.132 2020-05-10 17:47:03+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3495,6 +3495,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.132  2020-05-10 17:47:03+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
  * Revision 1.131  2019-07-09 10:24:29+05:30  Cprogrammer
  * speed up blast() function by reading in chunks of 4096 bytes
  *
