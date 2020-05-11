@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.33  2020-05-11 08:08:33+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.32  2017-03-09 14:35:38+05:30  Cprogrammer
  * ignore responses to senders listed in badrcptto
  *
@@ -128,7 +131,6 @@ time_t          when, opt_timelimit = 86400 * 7; /*- RFC 3834 */
 char           *opt_subject_prefix = "Autoreply: Re: ";
 char           *argv0, *dtline, *recipient, *from_addr = 0;
 char            ssinbuf[512], ssoutbuf[512];
-char            dbuf[DATE822FMT];
 substdio        ssin, ssout;
 pid_t           inject_pid;
 stralloc        liphost = { 0 }, content_type = { 0 };
@@ -202,8 +204,7 @@ ignore(char *msg)
 {
 	if (opt_quiet)
 		_exit(0);
-	if (msg)
-	{
+	if (msg) {
 		substdio_puts(subfderr, argv0);
 		substdio_puts(subfderr, ": Ignoring message, ");
 		substdio_puts(subfderr, msg);
@@ -219,10 +220,8 @@ store_addr(stralloc *addrlist, char *line)
 	char           *start, *ptr;
 
 	for(start = line;*start && isspace((int) *start);start++);
-	for (ptr = start;*ptr;ptr++)
-	{
-		if (*ptr == ',' || *ptr == ';')
-		{
+	for (ptr = start;*ptr;ptr++) {
+		if (*ptr == ',' || *ptr == ';') {
 			*ptr = 0;
 			if (!stralloc_cats(addrlist, start))
 				strerr_die2sys(111, FATAL, "out of memory: ");
@@ -256,8 +255,7 @@ addrparse(arg)
 	i = str_chr(arg, '<');
 	if (arg[i])
 		arg += i + 1;
-	else
-	{	/*- partner should go read rfc 821 */
+	else {	/*- partner should go read rfc 821 */
 		terminator = ' ';
 		arg += str_chr(arg, ':');
 		if (*arg == ':')
@@ -268,10 +266,8 @@ addrparse(arg)
 			++arg;
 	}
 	/*- strip source route */
-	if (*arg == '@')
-	{
-		while (*arg)
-		{
+	if (*arg == '@') {
+		while (*arg) {
 			if (*arg++ == ':')
 				break;
 		}
@@ -280,15 +276,12 @@ addrparse(arg)
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	flagesc = 0;
 	flagquoted = 0;
-	for (i = 0; (ch = arg[i]); ++i)
-	{	/*- copy arg to addr, stripping quotes */
-		if (flagesc)
-		{
+	for (i = 0; (ch = arg[i]); ++i) {	/*- copy arg to addr, stripping quotes */
+		if (flagesc) {
 			if (!stralloc_append(&addr, &ch))
 				strerr_die2sys(111, FATAL, "out of memory: ");
 			flagesc = 0;
-		} else
-		{
+		} else {
 			if (!flagquoted && ch == terminator)
 				break;
 			switch (ch)
@@ -312,17 +305,12 @@ addrparse(arg)
 	}
 	if (!stralloc_append(&addr, ""))
 		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (liphostok)
-	{
-		if ((i = byte_rchr(addr.s, addr.len, '@')) < addr.len)
-		{
+	if (liphostok) {
+		if ((i = byte_rchr(addr.s, addr.len, '@')) < addr.len) {
 			/*- if not, partner should go read rfc 821 */
-			if (addr.s[i + 1] == '[')
-			{
-				if (!addr.s[i + 1 + ip4_scanbracket(addr.s + i + 1, &ip)])
-				{
-					if (ipme_is(&ip))
-					{
+			if (addr.s[i + 1] == '[') {
+				if (!addr.s[i + 1 + ip4_scanbracket(addr.s + i + 1, &ip)]) {
+					if (ipme_is(&ip)) {
 						addr.len = i + 1;
 						if (!stralloc_cat(&addr, &liphost))
 							strerr_die2sys(111, FATAL, "out of memory: ");
@@ -351,8 +339,7 @@ match_addr(stralloc *addrlist, char *email_addr)
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	if (!stralloc_0(&quoted))
 		strerr_die2sys(111, FATAL, "out of memory: ");
-	for (len = 0, ptr = addrlist->s;len < addrlist->len;)
-	{
+	for (len = 0, ptr = addrlist->s;len < addrlist->len;) {
 		if (!strcasecmp(ptr, email_addr))
 			return(1);
 		len += (str_len(ptr) + 1);
@@ -370,8 +357,7 @@ match_addr(stralloc *addrlist, char *email_addr)
 void
 usage(char *msg)
 {
-	if (msg)
-	{
+	if (msg) {
 		substdio_puts(subfderr, argv0);
 		substdio_puts(subfderr, ": ");
 		substdio_puts(subfderr, msg);
@@ -414,15 +400,13 @@ get_arguments(int argc, char *argv[])
 	else
 		argv0 = argv[0];
 	when = now();
-	while ((ch = getopt(argc, argv, "cn:s:S:t:T:f:b:e:qlLN")) != opteof)
-	{
+	while ((ch = getopt(argc, argv, "cn:s:S:t:T:f:b:e:qlLN")) != opteof) {
 		switch (ch)
 		{
 		case 'b':
 			/*- YYYY-mm-dd HH:MM:SS */
 			ptr = strptime(optarg, "%Y-%m-%d %H:%M:%S", &tm);
-			if (!ptr || (ptr && *ptr))
-			{
+			if (!ptr || (ptr && *ptr)) {
 				substdio_puts(subfderr, "Invalid date ");
 				substdio_puts(subfderr, "[");
 				substdio_puts(subfderr, optarg);
@@ -436,8 +420,7 @@ get_arguments(int argc, char *argv[])
 		case 'e':
 			/*- YYYY-mm-dd HH:MM:SS */
 			ptr = strptime(optarg, "%Y-%m-%d %H:%M:%S", &tm);
-			if (!ptr || (ptr && *ptr))
-			{
+			if (!ptr || (ptr && *ptr)) {
 				substdio_puts(subfderr, "Invalid date ");
 				substdio_puts(subfderr, "[");
 				substdio_puts(subfderr, optarg);
@@ -457,11 +440,9 @@ get_arguments(int argc, char *argv[])
 		case 'n':
 			opt_maxmsgs = strtoul(optarg, &ptr, 10);
 			if ((opt_maxmsgs == ULONG_MAX && errno == ERANGE) 
-				|| (!opt_maxmsgs && ptr == optarg) || *ptr)
-			{
+				|| (!opt_maxmsgs && ptr == optarg) || *ptr) {
 				substdio_puts(subfderr, "Invalid number ");
-				if (*ptr)
-				{
+				if (*ptr) {
 					substdio_puts(subfderr, "[");
 					substdio_puts(subfderr, ptr);
 					substdio_puts(subfderr, "] ");
@@ -498,11 +479,9 @@ get_arguments(int argc, char *argv[])
 		case 't':
 			opt_timelimit = strtoul(optarg, &ptr, 10);
 			if ((opt_timelimit == ULONG_MAX && errno == ERANGE) 
-				|| (!opt_timelimit && ptr == optarg) || *ptr)
-			{
+				|| (!opt_timelimit && ptr == optarg) || *ptr) {
 				substdio_puts(subfderr, "Invalid number ");
-				if (*ptr)
-				{
+				if (*ptr) {
 					substdio_puts(subfderr, "[");
 					substdio_puts(subfderr, ptr);
 					substdio_puts(subfderr, "] ");
@@ -621,8 +600,7 @@ parse_header(char *str, unsigned length)
 	if (!strncasecmp(str, dtline, dtline_len))
 		ignore("Message already has my Delivered-To line");
 	else
-	if (!strncasecmp(str, "Auto-Submitted:", 15)) /*- RFC 3834 */
-	{
+	if (!strncasecmp(str, "Auto-Submitted:", 15)) /*- RFC 3834 */ {
 		char           *start = str + 15;
 		char           *end;
 
@@ -637,8 +615,7 @@ parse_header(char *str, unsigned length)
 		if (strncasecmp(start, "no", 2))
 			ignore("Message does not haveAuto-Submitted header as \"no\"");
 	} else
-	if (!strncasecmp(str, "Precedence:", 11))
-	{
+	if (!strncasecmp(str, "Precedence:", 11)) {
 		char           *start = str + 11;
 		char           *end;
 
@@ -651,11 +628,9 @@ parse_header(char *str, unsigned length)
 			!strncasecmp(start, "list", end - start))
 			ignore("Message has a junk, bulk, or list precedence header");
 	} else 
-	for(pos = 0, ptr = headertab;*ptr;ptr++,pos++)
-	{
+	for(pos = 0, ptr = headertab;*ptr;ptr++,pos++) {
 		len = str_len(*ptr);
-		if (!strncasecmp(str, *ptr, len))
-		{
+		if (!strncasecmp(str, *ptr, len)) {
 			char           *start = str + len;
 			char           *end = str + length - 1;
 			char           *cptr1, *cptr2;
@@ -663,8 +638,7 @@ parse_header(char *str, unsigned length)
 
 			while (start < str + length && isspace((int) *start))
 				++start;
-			while (end > start && isspace((int) *end))
-			{
+			while (end > start && isspace((int) *end)) {
 				--end;
 				i++;
 			}
@@ -783,7 +757,7 @@ pclose_inject(int fdout)
 }
 
 void
-parseMessage_file(stralloc *line, struct datetime *dt, char *dbuf)
+parseMessage_file(stralloc *line, struct datetime *dt, char *ldbuf)
 {
 	static int      saw_percent = 0;
 	ssize_t         todo, incr;
@@ -792,10 +766,8 @@ parseMessage_file(stralloc *line, struct datetime *dt, char *dbuf)
 
 	buf = line->s;
 	len = line->len;
-	while (len > 0)
-	{
-		if (!(next = str_chrn(buf, '%', len)))
-		{
+	while (len > 0) {
+		if (!(next = str_chrn(buf, '%', len))) {
 			if (substdio_put(&ssout, buf, len))
 				strerr_die2sys(111, FATAL, "unable to write: ");
 			return;
@@ -809,8 +781,7 @@ parseMessage_file(stralloc *line, struct datetime *dt, char *dbuf)
 		if (!len)
 			return;
 		buf += incr;
-		if (saw_percent)
-		{
+		if (saw_percent) {
 			saw_percent = 0;
 			switch (*buf)
 			{
@@ -855,14 +826,13 @@ parseMessage_file(stralloc *line, struct datetime *dt, char *dbuf)
 					strerr_die2sys(111, FATAL, "unable to write: ");
 				if (substdio_put(&ssout, ", ", 2))
 					strerr_die2sys(111, FATAL, "unable to write: ");
-				if (substdio_puts(&ssout, dbuf))
+				if (substdio_puts(&ssout, ldbuf))
 					strerr_die2sys(111, FATAL, "unable to write: ");
 				++buf;
 				--len;
 				continue;
 			case 'D': /*- Date: */
-				if (header.date)
-				{
+				if (header.date) {
 					if (substdio_puts(&ssout, header.date))
 						strerr_die2sys(111, FATAL, "unable to write: ");
 				}
@@ -870,8 +840,7 @@ parseMessage_file(stralloc *line, struct datetime *dt, char *dbuf)
 				--len;
 				continue;
 			case 'r': /*- X-Bogosity: */
-				if (header.bogosity)
-				{
+				if (header.bogosity) {
 					if (substdio_puts(&ssout, header.bogosity))
 						strerr_die2sys(111, FATAL, "unable to write: ");
 				}
@@ -879,8 +848,7 @@ parseMessage_file(stralloc *line, struct datetime *dt, char *dbuf)
 				--len;
 				continue;
 			case 'M': /*- X-Mailer: */
-				if (header.mailer)
-				{
+				if (header.mailer) {
 					if (substdio_puts(&ssout, header.mailer))
 						strerr_die2sys(111, FATAL, "unable to write: ");
 				}
@@ -889,8 +857,7 @@ parseMessage_file(stralloc *line, struct datetime *dt, char *dbuf)
 				continue;
 				break;
 			case 'S': /*- Subject */
-				if (header.subject)
-				{
+				if (header.subject) {
 					if (substdio_puts(&ssout, header.subject))
 						strerr_die2sys(111, FATAL, "unable to write: ");
 				}
@@ -898,8 +865,7 @@ parseMessage_file(stralloc *line, struct datetime *dt, char *dbuf)
 				--len;
 				continue;
 			case 'm': /*- MessageID: */
-				if (header.messageid)
-				{
+				if (header.messageid) {
 					if (substdio_puts(&ssout, header.messageid))
 						strerr_die2sys(111, FATAL, "unable to write: ");
 				}
@@ -963,8 +929,7 @@ count_history(char *sender, unsigned max)
 	/*
 	 * check if there are too many responses in the logs 
 	 */
-	while ((entry = readdir(dir)) != NULL)
-	{
+	while ((entry = readdir(dir)) != NULL) {
 		if (entry->d_name[0] == '.')
 			continue;
 		message_pid = strtoul(entry->d_name, &ptr, 10);
@@ -975,8 +940,7 @@ count_history(char *sender, unsigned max)
 			continue;
 		if (when - message_time > opt_timelimit) /*- too old..ignore errors on unlink */
 			unlink(entry->d_name);
-		else
-		{
+		else {
 			/*
 			 * If the user's count is already over the max,
 			 * don't record any more. 
@@ -992,10 +956,8 @@ count_history(char *sender, unsigned max)
 	if (last_filename && !opt_nolinks && !link(last_filename, filename))
 		*filename = 0;
 	/*- Otherwise, create a new 0-byte file now */
-	if (*filename)
-	{
-		if ((fd = open(filename, O_WRONLY | O_CREAT | O_EXCL, 0444)) == -1)
-		{
+	if (*filename) {
+		if ((fd = open(filename, O_WRONLY | O_CREAT | O_EXCL, 0444)) == -1) {
 			alloc_free(filename);
 			strerr_die4sys(111, FATAL, "unable to create file ", filename, ": ");
 		}
@@ -1011,8 +973,8 @@ mkTempFile(int seekfd)
 	char            inbuf[2048], outbuf[2048], strnum[FMT_ULONG];
 	char           *tmpdir;
 	static stralloc tmpFile = {0};
-	struct substdio ssin;
-	struct substdio ssout;
+	struct substdio ssin_t;
+	struct substdio ssout_t;
 	int             fd;
 
 	if (lseek(seekfd, 0, SEEK_SET) == 0)
@@ -1032,9 +994,9 @@ mkTempFile(int seekfd)
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 		strerr_die3sys(111, FATAL, "unable to open: ", tmpFile.s);
 	unlink(tmpFile.s);
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof(inbuf));
-	switch (substdio_copy(&ssout, &ssin))
+	substdio_fdbuf(&ssout_t, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin_t, read, seekfd, inbuf, sizeof(inbuf));
+	switch (substdio_copy(&ssout_t, &ssin_t))
 	{
 	case -2: /*- read error */
 		close(fd);
@@ -1043,22 +1005,18 @@ mkTempFile(int seekfd)
 		close(fd);
 		strerr_die2sys(111, FATAL, "unable to write output: ");
 	}
-	if (substdio_flush(&ssout) == -1)
-	{
+	if (substdio_flush(&ssout_t) == -1) {
 		close(fd);
 		strerr_die2sys(111, FATAL, "unable to write: ");
 	}
-	if(fd != seekfd)
-	{
-		if (dup2(fd, seekfd) == -1)
-		{
+	if(fd != seekfd) {
+		if (dup2(fd, seekfd) == -1) {
 			close(fd);
 			strerr_die2sys(111, FATAL, "unable to dup: ");
 		}
 		close(fd);
 	}
-	if (lseek(seekfd, 0, SEEK_SET) != 0)
-	{
+	if (lseek(seekfd, 0, SEEK_SET) != 0) {
 		close(seekfd);
 		strerr_die2sys(111, FATAL, "unable to lseek: ");
 	}
@@ -1073,6 +1031,7 @@ main(int argc, char *argv[])
 {
 	int             fdout, match;
 	char           *sender, *dtrecip, *host, *ptr;
+	char            dbuf[DATE822FMT];
 #ifdef MIME
 	char            num[FMT_ULONG];
 	struct tai      datetai;
@@ -1125,8 +1084,7 @@ main(int argc, char *argv[])
 	/*- Read and parse header */
 	if (lseek(0, 0, SEEK_SET) == -1)
 		strerr_die2sys(111, FATAL, "unable to lseek: ");
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read headers: ");
 		if (!mess822_ok(&line))
@@ -1143,8 +1101,7 @@ main(int argc, char *argv[])
 		ignore("Message is spam"); /*- RFC 3834 */
 	if (opt_nosend)
 		fdout = 1;
-	else
-	{
+	else {
 		/*- Check rate that SENDER has sent */
 		if (count_history(mailfrom.s, opt_maxmsgs))
 			ignore("SENDER has sent too many messages");
@@ -1165,8 +1122,7 @@ main(int argc, char *argv[])
 		strerr_die2sys(111, FATAL, "unable to write: ");
 
 	/* The From: Address */
-	if ((ptr = env_get("SERVICE_RESPONDER")))
-	{
+	if ((ptr = env_get("SERVICE_RESPONDER"))) {
 		if (substdio_puts(&ssout, "From: ") == -1)
 			strerr_die2sys(111, FATAL, "unable to write: ");
 		if (substdio_puts(&ssout, *ptr ? ptr : "AutoResponse") == -1)
@@ -1181,8 +1137,7 @@ main(int argc, char *argv[])
 			strerr_die2sys(111, FATAL, "unable to write: ");
 		if (substdio_puts(&ssout, ">\n"))
 			strerr_die2sys(111, FATAL, "unable to write: ");
-	} else
-	{
+	} else {
 		if (substdio_puts(&ssout, "From: ") == -1)
 			strerr_die2sys(111, FATAL, "unable to write: ");
 		if (!from_addr)
@@ -1215,8 +1170,7 @@ main(int argc, char *argv[])
 	if (substdio_put(&ssout, "\n", 1))
 		strerr_die2sys(111, FATAL, "unable to write: ");
 
-	if (header.messageid) /*- RFC 3834 */
-	{
+	if (header.messageid) /*- RFC 3834 */ {
 		/*- In-Reply-To Field */
 		if (substdio_put(&ssout, "In-Reply-To: ", 13))
 			strerr_die2sys(111, FATAL, "unable to write: ");
@@ -1235,8 +1189,7 @@ main(int argc, char *argv[])
 	}
 
 #ifdef MIME
-	if (opt_copyinput)
-	{
+	if (opt_copyinput) {
 		tai_now(&datetai);
 		if (substdio_puts(&ssout, "Mime-Version: 1.0\n"
 			"Content-Type: multipart/mixed;\n"
@@ -1273,8 +1226,7 @@ main(int argc, char *argv[])
 		strerr_die2sys(111, FATAL, "unable to write: ");
 	if (substdio_puts(&ssout, "\n\n"))
 		strerr_die2sys(111, FATAL, "unable to write: ");
-	if (opt_copyinput)
-	{
+	if (opt_copyinput) {
 		if (substdio_puts(&ssout, "This is a multi-part message in MIME format.\n\n--"))
 			strerr_die2sys(111, FATAL, "unable to write: ");
 		if (substdio_put(&ssout, boundary.s, boundary.len))	/* def type is text/plain */
@@ -1294,8 +1246,7 @@ main(int argc, char *argv[])
 #endif
 	/*- Copy the autoresponse text */
 	substdio_fdbuf(&ssin, read, msgfilefd, ssinbuf, sizeof(ssinbuf));
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read autoresponse text: ");
 		if (!match && line.len == 0)
@@ -1303,8 +1254,7 @@ main(int argc, char *argv[])
 		parseMessage_file(&line, &dt, dbuf);
 	}
 	close(msgfilefd);
-	if (opt_copyinput)
-	{
+	if (opt_copyinput) {
 #ifdef MIME
 		if (substdio_puts(&ssout, "\n--- Enclosed below is a copy of the message.\n\n--"))
 			strerr_die2sys(111, FATAL, "unable to write: ");
@@ -1346,7 +1296,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.32 2017-03-09 14:35:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.33 2020-05-11 08:08:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
