@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.13  2020-05-11 10:58:12+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.12  2020-03-22 08:03:58+05:30  Cprogrammer
  * return error on deletion of .svlock only when file exists
  *
@@ -465,7 +468,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.12 2020-03-22 08:03:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.13 2020-05-11 10:58:12+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	y++;
 }

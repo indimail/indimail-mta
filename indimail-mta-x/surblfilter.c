@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.13  2020-05-11 10:58:19+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.12  2019-05-24 14:14:14+05:30  Cprogrammer
  * removed requirement of env variable SURBL for surblfilter to work
  *
@@ -368,7 +371,7 @@ dns_txtplus(domain)
 }
 
 static char *
-strdup(const char *str)
+my_strdup(const char *str)
 {
 	size_t siz;
 	char *copy;
@@ -395,11 +398,11 @@ dns_text(char *dn)
 	{
 	case DNS_MEM:
 	case DNS_SOFT:
-		return strdup("e=temp;");
+		return my_strdup("e=temp;");
 	case DNS_HARD:
-		return strdup("e=perm;");
+		return my_strdup("e=perm;");
 	}
-	return strdup(result.s);
+	return my_strdup(result.s);
 }
 
 static char    *
@@ -653,7 +656,7 @@ getreason(int code, char **text)
 }
 
 static int
-checksurbl(char *uri, int urilen, char *surbldomain, char **text)
+checksurbl(char *uri, int urilen, char *surb_domain, char **text)
 {
 	static stralloc ip = { 0 };
 	static stralloc host = { 0 };
@@ -668,7 +671,7 @@ checksurbl(char *uri, int urilen, char *surbldomain, char **text)
 		die_nomem();
 	if (stralloc_append(&host, ".") == 0)
 		die_nomem();
-	if (stralloc_cats(&host, surbldomain) == 0)
+	if (stralloc_cats(&host, surb_domain) == 0)
 		die_nomem();
 	if (!stralloc_0(&host))
 		die_nomem();
@@ -1006,7 +1009,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.12 2019-05-24 14:14:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.13 2020-05-11 10:58:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

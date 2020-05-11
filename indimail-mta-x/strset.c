@@ -1,5 +1,8 @@
 /*
  * $Log: strset.c,v $
+ * Revision 1.3  2020-05-11 10:58:31+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.2  2004-10-22 20:31:02+05:30  Cprogrammer
  * added RCS id
  *
@@ -20,8 +23,7 @@ strset_hash(s)
 	uint32          h;
 
 	h = 5381;
-	while ((ch = *s))
-	{
+	while ((ch = *s)) {
 		h = ((h << 5) + h) ^ ch;
 		++s;
 	}
@@ -41,14 +43,12 @@ strset_init(set)
 	if (!set->first)
 		return 0;
 	set->p = (strset_list *) alloc(sizeof(strset_list) * set->a);
-	if (!set->p)
-	{
+	if (!set->p) {
 		alloc_free((char *) set->first);
 		return 0;
 	}
 	set->x = (char **) alloc(sizeof(char *) * set->a);
-	if (!set->x)
-	{
+	if (!set->x) {
 		alloc_free((char *) set->p);
 		alloc_free((char *) set->first);
 		return 0;
@@ -72,11 +72,9 @@ strset_in(set, s)
 
 	h = strset_hash(s);
 	i = set->first[h & set->mask];
-	while (i >= 0)
-	{
+	while (i >= 0) {
 		sl = set->p + i;
-		if (sl->h == h)
-		{
+		if (sl->h == h) {
 			xi = set->x[i];
 			if (!str_diff(xi, s))
 				return xi;
@@ -97,8 +95,7 @@ strset_add(set, s)
 
 	n = set->n;
 
-	if (n == set->a)
-	{
+	if (n == set->a) {
 		int             newa;
 		strset_list    *newp;
 		char          **newx;
@@ -108,8 +105,7 @@ strset_add(set, s)
 		if (!newp)
 			return 0;
 		newx = (char **) alloc(sizeof(char *) * newa);
-		if (!newx)
-		{
+		if (!newx) {
 			alloc_free((char *) newp);
 			return 0;
 		}
@@ -122,27 +118,25 @@ strset_add(set, s)
 		set->x = newx;
 		set->a = newa;
 
-		if (n + n + n > set->mask)
-		{
+		if (n + n + n > set->mask) {
 			int             newmask;
 			int            *newfirst;
 			int             i;
-			uint32          h;
+			uint32          t;
 
 			newmask = set->mask + set->mask + 1;
 			newfirst = (int *) alloc(sizeof(int) * (newmask + 1));
 			if (!newfirst)
 				return 0;
 
-			for (h = 0; h <= newmask; ++h)
-				newfirst[h] = -1;
+			for (t = 0; t <= newmask; ++t)
+				newfirst[t] = -1;
 
-			for (i = 0; i < n; ++i)
-			{
+			for (i = 0; i < n; ++i) {
 				sl = set->p + i;
-				h = sl->h & newmask;
-				sl->next = newfirst[h];
-				newfirst[h] = i;
+				t = sl->h & newmask;
+				sl->next = newfirst[t];
+				newfirst[t] = i;
 			}
 
 			alloc_free((char *) set->first);
@@ -166,7 +160,7 @@ strset_add(set, s)
 void
 getversion_strset_c()
 {
-	static char    *x = "$Id: strset.c,v 1.2 2004-10-22 20:31:02+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: strset.c,v 1.3 2020-05-11 10:58:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

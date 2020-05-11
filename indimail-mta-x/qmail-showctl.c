@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.68  2020-05-11 10:59:57+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.67  2019-05-27 20:31:30+05:30  Cprogrammer
  * use VIRTUAL_PKG_LIB env variable if defined
  *
@@ -304,13 +307,15 @@ main(int argc, char **argv)
 	direntry       *d;
 	void           *handle = (void *) 0;
 	char           *ptr, *local_ip, *qbase, *local_id, *errstr;
-	int             i, verbose = 0;
+	int             i;
 	struct stat     stmrh, stmrhcdb;
 	char           *(*get_local_ip) (void);
 	char           *(*get_local_hostid) (void);
 
 	if (argc == 2 && str_equal(argv[1], "-v"))
 		verbose = 1;
+	else
+		verbose = 0;
 	substdio_puts(subfdout, "qmail home directory: ");
 	substdio_puts(subfdout, auto_qmail);
 	substdio_puts(subfdout, ".\n");
@@ -864,7 +869,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.67 2019-05-27 20:31:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.68 2020-05-11 10:59:57+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

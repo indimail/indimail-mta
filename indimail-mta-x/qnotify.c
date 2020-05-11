@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.9  2020-05-11 11:00:10+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.8  2020-04-04 12:43:17+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -177,11 +180,11 @@ my_putb(char *s, int len)
 static int
 mkTempFile(int seekfd)
 {
-	char            inbuf[2048], outbuf[2048], strnum[FMT_ULONG];
+	char            inbuf[2048], outbuf[2048];
 	char           *tmpdir;
 	static stralloc tmpFile = {0};
 	struct substdio ssin;
-	struct substdio ssout;
+	struct substdio sstmp;
 	int             fd;
 
 	if (lseek(seekfd, 0, SEEK_SET) == 0)
@@ -201,9 +204,9 @@ mkTempFile(int seekfd)
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 		my_error("open error", tmpFile.s, OPEN_ERR);
 	unlink(tmpFile.s);
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&sstmp, write, fd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof(inbuf));
-	switch (substdio_copy(&ssout, &ssin))
+	switch (substdio_copy(&sstmp, &ssin))
 	{
 	case -2: /*- read error */
 		close(fd);
@@ -212,7 +215,7 @@ mkTempFile(int seekfd)
 		close(fd);
 		my_error("write error", 0, WRITE_ERR);
 	}
-	if (substdio_flush(&ssout) == -1) {
+	if (substdio_flush(&sstmp) == -1) {
 		close(fd);
 		my_error("write error", 0, WRITE_ERR);
 	}
@@ -595,7 +598,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.8 2020-04-04 12:43:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.9 2020-05-11 11:00:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

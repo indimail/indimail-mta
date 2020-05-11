@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.17  2020-05-11 11:00:29+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.16  2019-06-07 11:26:36+05:30  Cprogrammer
  * replaced getopt() with subgetopt()
  *
@@ -197,7 +200,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.16 2019-06-07 11:26:36+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.17 2020-05-11 11:00:29+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -282,23 +285,19 @@ check_send(char *queuedir)
 	static stralloc lockfile = { 0 };
 	int             fd;
 
-	if (!stralloc_copys(&lockfile, queuedir))
-	{
+	if (!stralloc_copys(&lockfile, queuedir)) {
 		logerrf("alert: out of memory\n");
 		_exit(111);
 	}
-	if (!stralloc_cats(&lockfile, "/lock/sendmutex"))
-	{
+	if (!stralloc_cats(&lockfile, "/lock/sendmutex")) {
 		logerrf("alert: out of memory\n");
 		_exit(111);
 	}
-	if (!stralloc_0(&lockfile))
-	{
+	if (!stralloc_0(&lockfile)) {
 		logerrf("alert: out of memory\n");
 		_exit(111);
 	}
-	if ((fd = open_write(lockfile.s)) == -1)
-	{
+	if ((fd = open_write(lockfile.s)) == -1) {
 		logerr("alert: cannot start: unable to open ");
 		logerr(lockfile.s);
 		logerr(": ");
@@ -306,16 +305,14 @@ check_send(char *queuedir)
 		logerrf("\n");
 		_exit(111);
 	} else
-	if (lock_exnb(fd) == -1)
-	{
+	if (lock_exnb(fd) == -1) {
 		close(fd); /*- send already running */
 		logerr("alert: cannot start: qmail-send with queue ");
 		logerr(queuedir);
 		logerrf(" is already running\n");
 		_exit(111);
 	}
-	if (access(yank_dir, F_OK) && mkdir(yank_dir, 0700))
-	{
+	if (access(yank_dir, F_OK) && mkdir(yank_dir, 0700)) {
 		logerr("mkdir: ");
 		logerr(yank_dir);
 		logerr(": ");
@@ -336,14 +333,12 @@ main(int argc, char **argv)
 	int             idx, count, qcount, qstart;
 	char           *ptr, *pattern = NULL, *qbase = 0, *queuedir = 0;
 	char           *queue_count_ptr, *queue_start_ptr;
-	char            strnum[FMT_ULONG];
 	struct tm       stime;
 
 	if (argc < 2)
 		usage();
 	conf_split = auto_split;
-	while ((ch = getopt(argc, argv, "deirvh?n:p:q:s:y:X:x:")) != opteof)
-	{
+	while ((ch = getopt(argc, argv, "deirvh?n:p:q:s:y:X:x:")) != opteof) {
 		switch (ch)
 		{
 		case 'e':
@@ -362,16 +357,14 @@ main(int argc, char **argv)
 			break;
 		case 'n':
 			read_bytes = strtoul(optarg, &ptr, 10);
-			if ((read_bytes == ULONG_MAX && errno == ERANGE) || (!read_bytes && ptr == optarg))
-			{
+			if ((read_bytes == ULONG_MAX && errno == ERANGE) || (!read_bytes && ptr == optarg)) {
 				logerr(optarg);
 				logerr(": ");
 				logerr(error_str(errno));
 				logerrf("\n");
 				_exit(111);
 			}
-			if (*ptr)
-			{
+			if (*ptr) {
 				logerr("invalid char [");
 				logerr(ptr);
 				logerr("] in ");
@@ -388,16 +381,14 @@ main(int argc, char **argv)
 			break;
 		case 's':
 			tmp = strtoul(optarg, &ptr, 10);
-			if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == optarg))
-			{
+			if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == optarg)) {
 				logerr(optarg);
 				logerr(": ");
 				logerr(error_str(errno));
 				logerrf("\n");
 				_exit(111);
 			}
-			if (*ptr)
-			{
+			if (*ptr) {
 				logerr("invalid char [");
 				logerr(ptr);
 				logerr("] in ");
@@ -412,16 +403,14 @@ main(int argc, char **argv)
 			expire_date = -1;	/*- make sure we only use the offset */
 			/*- lets see if they specified a parameter for seconds */
 			tmp = strtoul(optarg, &ptr, 10);
-			if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == optarg))
-			{
+			if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == optarg)) {
 				logerr(optarg);
 				logerr(": ");
 				logerr(error_str(errno));
 				logerrf("\n");
 				_exit(111);
 			}
-			if (*ptr)
-			{
+			if (*ptr) {
 				logerr("invalid char [");
 				logerr(ptr);
 				logerr("] in ");
@@ -442,8 +431,7 @@ main(int argc, char **argv)
 			/*- lets test our parsing function to see what it can do */
 			ptr = strptime(optarg, "%+", &stime);
 			expire_date = mktime(&stime);
-			if (expire_date >= 0)
-			{
+			if (expire_date >= 0) {
 				out("time in seconds: ");
 				strnum[fmt_ulong(strnum, expire_date)] = 0;
 				out(strnum);
@@ -451,8 +439,7 @@ main(int argc, char **argv)
 				out(optarg);
 				out("]\n");
 				flush();
-			} else
-			{
+			} else {
 				out("Error parsing the date specified at: [");
 				out(ptr);
 				out("] col ");
@@ -478,8 +465,7 @@ main(int argc, char **argv)
 	}
 	if (chdir(auto_qmail))
 		die_chdir(auto_qmail);
-	if (!qbase && !(qbase = env_get("QUEUE_BASE")))
-	{
+	if (!qbase && !(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
 		case -1:
@@ -494,8 +480,7 @@ main(int argc, char **argv)
 			break;
 		}
 	}
-	if (access(qbase, F_OK))
-	{
+	if (access(qbase, F_OK)) {
 		logerr(qbase);
 		logerr(": ");
 		logerr(error_str(errno));
@@ -510,8 +495,7 @@ main(int argc, char **argv)
 		qstart = 1;
 	else
 		scan_int(queue_start_ptr, &qstart);
-	for (idx = qstart, count=1; count <= qcount; count++, idx++)
-	{
+	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
 		if (!stralloc_copys(&Queuedir, qbase))
 			die_nomem();
 		if (!stralloc_cats(&Queuedir, "/queue"))
@@ -532,8 +516,7 @@ main(int argc, char **argv)
 		if (chdir(queuedir))
 			die_chdir(queuedir);
 		matches = find_files(queuedir, (char **) queues, (pattern ? pattern : default_pattern));
-		if (matches >= 0)
-		{
+		if (matches >= 0) {
 			strnum[fmt_ulong(strnum, matches)] = 0;
 			out(strnum);
 			out(" file(s) match\n");
@@ -591,8 +574,7 @@ read_file(const char *filename)
 
 	if (filename == NULL)
 		return NULL;
-	if ((fd = open(filename, (O_RDONLY | O_NOFOLLOW), 0)) == -1)
-	{
+	if ((fd = open(filename, (O_RDONLY | O_NOFOLLOW), 0)) == -1) {
 		logerr("open: ");
 		logerr((char *) filename);
 		logerr(": ");
@@ -600,8 +582,7 @@ read_file(const char *filename)
 		logerrf("\n");
 		return NULL;
 	}
-	if (fstat(fd, &fd_stat))
-	{
+	if (fstat(fd, &fd_stat)) {
 		logerr("fstat: ");
 		logerr((char *) filename);
 		logerr(": ");
@@ -611,8 +592,7 @@ read_file(const char *filename)
 		return NULL;
 	} 
 	bytes = fd_stat.st_size;
-	if (!(buff = malloc(bytes + 1)))
-	{
+	if (!(buff = malloc(bytes + 1))) {
 		logerr("malloc: ");
 		logerr(error_str(errno));
 		logerrf("\n");
@@ -620,8 +600,7 @@ read_file(const char *filename)
 		return NULL;
 	}
 	buff[bytes] = '\0';
-	if (read(fd, buff, bytes) != bytes)
-	{
+	if (read(fd, buff, bytes) != bytes) {
 		free(buff);
 		close(fd);
 		logerr((char *) __progname);
@@ -643,15 +622,12 @@ search_file(const char *filename, const char *pattern)
 		return (-1);
 	if (filename == NULL)
 		return (-1);
-	if ((file_inards = read_file(filename)))
-	{
+	if ((file_inards = read_file(filename))) {
 		err_code = regcomp(&match_me, pattern, regex_flags | REG_NOSUB);
-		if (err_code == 0)
-		{
+		if (err_code == 0) {
 			if (regexec(&match_me, file_inards, 0, NULL, 0) == 0)
 				match = 1;
-		} else
-		{
+		} else {
 			/*- regex error */
 			regerror(err_code, &match_me, err_string, 128);
 			logerr("regcomp(): ");
@@ -677,16 +653,14 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 
 	argv[0] = dir_list[0];
 	argv[1] = NULL;
-	if ((fts = fts_open((char **) argv, FTS_PHYSICAL, NULL)) == NULL)
-	{
+	if ((fts = fts_open((char **) argv, FTS_PHYSICAL, NULL)) == NULL) {
 		logerr("fts_open: ");
 		logerr(error_str(errno));
 		logerrf("\n");
 		return -1;
 	}
 	errno = 0;
-	while ((ftsp = fts_read(fts)) != NULL)
-	{
+	while ((ftsp = fts_read(fts)) != NULL) {
 		switch (ftsp->fts_info)
 		{
 		case FTS_F:
@@ -694,8 +668,7 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 			out("/");
 			out(ftsp->fts_path);
 			out(": ");
-			if (search_file(ftsp->fts_accpath, pattern) == 0)
-			{
+			if (search_file(ftsp->fts_accpath, pattern) == 0) {
 				out("yes\n");
 				flush();
 				i++;
@@ -704,8 +677,7 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 					if (chdir(queuedir))
 						die_chdir(queuedir);
 					remove_file(ftsp->fts_name);
-					if (fchdir(tmp_fd) != 0)
-					{
+					if (fchdir(tmp_fd) != 0) {
 						logerr("fchdir: ");
 						logerr(error_str(errno));
 						logerrf("\n");
@@ -774,8 +746,7 @@ remove_file(const char *filename)
 	char           *ptr, *my_name, *old_name = NULL, *new_name = NULL;
 	struct stat     statinfo;
 
-	if (filename == NULL)
-	{
+	if (filename == NULL) {
 		logerrf("remove_file: no filename\n");
 		return -1;
 	}
@@ -784,14 +755,12 @@ remove_file(const char *filename)
 	else
 		my_name++;
 	inode_num = strtoul(my_name, &ptr, 10);
-	if ((inode_num == ULONG_MAX && errno == ERANGE) || (inode_num == 0 && ptr == my_name))
-	{
+	if ((inode_num == ULONG_MAX && errno == ERANGE) || (inode_num == 0 && ptr == my_name)) {
 		logerr(my_name);
 		logerrf(" doesn't look like an inode number\n");
 		return -1;
 	}
-	if (*ptr)
-	{
+	if (*ptr) {
 		logerr("Invalid char [");
 		logerr(ptr);
 		logerr("] in filename ");
@@ -799,17 +768,14 @@ remove_file(const char *filename)
 		logerrf("\n");
 		return -1;
 	}
-	for (i = 0; (queues[i] != NULL); i++)
-	{
+	for (i = 0; (queues[i] != NULL); i++) {
 		if (!(new_name = mk_newpath((char *) queues[i], inode_num)))
 			return -1;
-		if (!(old_name = mk_hashpath((char *) queues[i], inode_num)))
-		{
+		if (!(old_name = mk_hashpath((char *) queues[i], inode_num))) {
 			free(new_name);
 			return -1;
 		}
-		if (!rename(old_name, new_name))
-		{
+		if (!rename(old_name, new_name)) {
 			/*- succeeded */
 			out("moved ");
 			out(old_name);
@@ -818,14 +784,10 @@ remove_file(const char *filename)
 			out("\n");
 			flush();
 			count++;
-		} else
-		{
-			if (errno == ENOENT)
-			{
-				if (old_name)
-				{
-					if (verbosity >= 2)
-					{
+		} else {
+			if (errno == ENOENT) {
+				if (old_name) {
+					if (verbosity >= 2) {
 						logerr("remove_file: ");
 						logerr(old_name);
 						logerr(": ");
@@ -835,15 +797,12 @@ remove_file(const char *filename)
 					free(old_name);
 					old_name = NULL;
 				}
-				if (!(old_name = mk_nohashpath((char *) queues[i], inode_num)))
-				{
+				if (!(old_name = mk_nohashpath((char *) queues[i], inode_num))) {
 					free(new_name);
 					return -1;
 				}
-				if (stat(old_name, &statinfo) == -1)
-				{
-					if (verbosity >= 2)
-					{
+				if (stat(old_name, &statinfo) == -1) {
+					if (verbosity >= 2) {
 						logerr("remove_file: stat: ");
 						logerr(old_name);
 						logerr(": ");
@@ -852,18 +811,15 @@ remove_file(const char *filename)
 					}
 					continue;
 				}
-				if (!S_ISREG(statinfo.st_mode))
-				{
-					if (verbosity >= 2)
-					{
+				if (!S_ISREG(statinfo.st_mode)) {
+					if (verbosity >= 2) {
 						logerr("remove_file: ");
 						logerr(old_name);
 						logerrf(": not a file\n");
 					}
 					continue;
 				}
-				if (!rename(old_name, new_name))
-				{
+				if (!rename(old_name, new_name)) {
 					/*- succeeded */
 					out("moved ");
 					out(old_name);
@@ -874,8 +830,7 @@ remove_file(const char *filename)
 					flush();
 					count++;
 				} else
-				if (errno != ENOENT)
-				{
+				if (errno != ENOENT) {
 					logerr("rename: ");
 					logerr(old_name);
 					logerr("->");
@@ -883,8 +838,7 @@ remove_file(const char *filename)
 					logerr(error_str(errno));
 					logerrf("\n");
 				}
-			} else /*- failed but exists */
-			{
+			} else { /*- failed but exists */
 				logerr("rename: ");
 				logerr(old_name);
 				logerr("->");
@@ -923,8 +877,7 @@ expire_file(const char *filename)
 	struct stat     statinfo;
 	struct utimbuf  ut;
 
-	if (filename == NULL)
-	{
+	if (filename == NULL) {
 		logerrf("expire_file: no filename\n");
 		return -1;
 	}
@@ -934,14 +887,12 @@ expire_file(const char *filename)
 		my_name++;
 	/*- make sure the INODE NUMBER is really an INODE */
 	inode_num = strtoul(my_name, &ptr, 10);
-	if ((inode_num == ULONG_MAX && errno == ERANGE) || (inode_num == 0 && ptr == my_name))
-	{
+	if ((inode_num == ULONG_MAX && errno == ERANGE) || (inode_num == 0 && ptr == my_name)) {
 		logerr(my_name);
 		logerrf(" doesn't look like an inode number\n");
 		return -1;
 	}
-	if (*ptr)
-	{
+	if (*ptr) {
 		logerr("Invalid char [");
 		logerr(ptr);
 		logerr("] in filename ");
@@ -957,13 +908,10 @@ expire_file(const char *filename)
 	else /*- otherwise use the relative date offset form */
 	if (!stat(old_name, &statinfo))
 		ut.actime = ut.modtime = statinfo.st_mtime - expire_offset;
-	else
-	{
+	else {
 		/*- do some error detection */
-		if (errno == ENOENT && old_name)
-		{
-			if (verbosity >= 2)
-			{
+		if (errno == ENOENT && old_name) {
+			if (verbosity >= 2) {
 				logerr("expire_file: ");
 				logerr(old_name);
 				logerr(": ");
@@ -976,19 +924,15 @@ expire_file(const char *filename)
 		}
 	}
 	/*- now, update the time stamp */
-	if (utime(old_name, &ut) == 0)
-	{
+	if (utime(old_name, &ut) == 0) {
 		logerr("Set timestamp on ");
 		logerr(old_name);
 		logerrf("\n");
 		count++;
 	} else
-	if (errno == ENOENT)
-	{
-		if (old_name)
-		{
-			if (verbosity >= 2)
-			{
+	if (errno == ENOENT) {
+		if (old_name) {
+			if (verbosity >= 2) {
 				logerr("expire_file: ");
 				logerr(old_name);
 				logerr(": ");
@@ -1017,15 +961,13 @@ mk_nohashpath(char *queue, int inode_name)
 	len += digits(inode_name);
 	len += 4;
 	old_name = malloc(len);
-	if (old_name)
-	{
+	if (old_name) {
 		len = fmt_str(old_name, queue);
 		len += fmt_str(old_name + len, "/");
 		len += fmt_ulong(old_name + len, inode_name);
 		old_name[len] = 0;
 		return(old_name);
-	} else
-	{
+	} else {
 		logerr("mk_nohashpath: malloc: ");
 		logerr(error_str(errno));
 		logerrf("\n");
@@ -1047,8 +989,7 @@ mk_hashpath(char *queue, int inode_name)
 	len += digits(inode_name);
 	len += 4;
 	old_name = malloc(len);
-	if (old_name)
-	{
+	if (old_name) {
 		len = fmt_str(old_name, queue);
 		len += fmt_str(old_name + len, "/");
 		len += fmt_ulong(old_name + len, hash_num);
@@ -1056,8 +997,7 @@ mk_hashpath(char *queue, int inode_name)
 		len += fmt_ulong(old_name + len, inode_name);
 		old_name[len] = 0;
 		return old_name;
-	} else
-	{
+	} else {
 		logerr("mk_hashpath: malloc: ");
 		logerr(error_str(errno));
 		logerrf("\n");
@@ -1071,8 +1011,7 @@ mk_newpath(char *queue, int inode_name)
 	int             len = 0;
 	char           *new_name = NULL;
 
-	if ((queue == NULL) || (inode_name <= 0))
-	{
+	if ((queue == NULL) || (inode_name <= 0)) {
 		logerrf("mk_newpath: invalid queue\n");
 		return NULL;
 	}
@@ -1081,8 +1020,7 @@ mk_newpath(char *queue, int inode_name)
 	len += digits(inode_name);
 	len += 4;
 	new_name = malloc(len);
-	if (new_name)
-	{
+	if (new_name) {
 		len = fmt_str(new_name, yank_dir);
 		len += fmt_str(new_name + len, "/");
 		len += fmt_ulong(new_name + len, inode_name);
@@ -1090,8 +1028,7 @@ mk_newpath(char *queue, int inode_name)
 		len += fmt_str(new_name + len, queue);
 		new_name[len] = 0;
 		return new_name;
-	} else
-	{
+	} else {
 		logerr("mk_newpath: malloc: ");
 		logerr(error_str(errno));
 		logerrf("\n");
@@ -1215,8 +1152,8 @@ unsigned long
 digits(unsigned long num)
 {
 	unsigned long   i = 0;
-	while (num >= 10)
-	{
+
+	while (num >= 10) {
 		num /= 10;
 		i++;
 	}
@@ -1227,7 +1164,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.16 2019-06-07 11:26:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.17 2020-05-11 11:00:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

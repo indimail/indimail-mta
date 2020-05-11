@@ -1,5 +1,8 @@
 /*
  * $Log: mbox2maildir.c,v $
+ * Revision 1.5  2020-05-11 11:00:57+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.4  2019-07-18 10:50:25+05:30  Cprogrammer
  * removed unecessary header hasflock.h
  *
@@ -34,7 +37,7 @@ char            buf_f_space[8192];	/*- buffer for disk writing */
 int             flagsleep = 0, state = 1, tmpfd = -1, seenat = 0;
 substdio        buf_1, buf_f;
 
-int             gettmpfd(char *, char *, char *);
+int             gettmpfd(char *, char *);
 
 void
 w2f()
@@ -107,7 +110,7 @@ safe_write(int fd, char *s, int len)
 void
 safe_open()
 {
-	tmpfd = gettmpfd(filename, filenamen, host);
+	tmpfd = gettmpfd(filename, filenamen);
 	if (tmpfd < 0)
 	{
 		w2nl("unable to open tmpfd");
@@ -234,28 +237,25 @@ normalize(struct timeval *now)
 }
 
 int
-gettmpfd(char *filename, char *filenamen, char *host)
+gettmpfd(char *fn, char *fnn)
 {
 	char           *p;
 	int             fd;
 	struct timeval  now;
 
 	gettimeofday(&now, 0);
-	for (;;)
-	{
-		p = filename + 4;
+	for (;;) {
+		p = fn + 4;
 		p += fmt_ulong(p, now.tv_sec);
 		*p++ = '.';
 		p += fmt_ulong0(p, now.tv_usec, 6);
 		*p = '\0';
-		if (host[0])
-		{
+		if (host[0]) {
 			*p++ = '.';
 			strcpy(p, host);
 		}
-
-		strcpy(filenamen + 4, filename + 4);
-		fd = open(filename, O_WRONLY | O_CREAT | O_EXCL, 0600);
+		strcpy(fnn + 4, fn + 4);
+		fd = open(fn, O_WRONLY | O_CREAT | O_EXCL, 0600);
 		if (fd >= 0 || errno != EEXIST)
 			break;
 		now.tv_usec += 1;
@@ -381,7 +381,7 @@ usage:
 void
 getversion_mbox2maildir_c()
 {
-	static char    *x = "$Id: mbox2maildir.c,v 1.4 2019-07-18 10:50:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mbox2maildir.c,v 1.5 2020-05-11 11:00:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

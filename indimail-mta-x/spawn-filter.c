@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.71  2020-05-11 10:59:51+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.70  2020-04-08 15:59:13+05:30  Cprogrammer
  * fixed spamignore control file not being read
  *
@@ -391,7 +394,7 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 }
 
 void
-set_environ(char *host, char *ext, char *qqeh, char *sender, char *recipient)
+set_environ(char *host, char *ext, char *qqeh, char *sender_p, char *recipient_p)
 {
 	if (!env_put2("DOMAIN", host)) 
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
@@ -399,9 +402,9 @@ set_environ(char *host, char *ext, char *qqeh, char *sender, char *recipient)
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if (!env_put2("_QQEH", qqeh))
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-	if (!env_put2("_SENDER", sender))
+	if (!env_put2("_SENDER", sender_p))
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-	if (!env_put2("_RECIPIENT", recipient))
+	if (!env_put2("_RECIPIENT", recipient_p))
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	return;
 }
@@ -1127,7 +1130,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.70 2020-04-08 15:59:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.71 2020-05-11 10:59:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)

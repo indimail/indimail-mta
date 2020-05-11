@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.7  2020-05-11 10:59:44+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.6  2020-05-10 17:47:13+05:30  Cprogrammer
  * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
  *
@@ -302,7 +305,7 @@ quit(char *prepend, char *append, int e)
 }
 
 void
-tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
+tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *peer_sa)
 {
 	char            ch;
 	int             i, state;
@@ -314,9 +317,9 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *sa)
 		logerr((char *) s3);
 	if (s4)
 		logerr((char *) s4);
-	if (sa && sa->len) {
-		for (i = 0; i < sa->len; ++i) {
-			ch = sa->s[i];
+	if (peer_sa && peer_sa->len) {
+		for (i = 0; i < peer_sa->len; ++i) {
+			ch = peer_sa->s[i];
 			if (ch < 33)
 				ch = '?';
 			if (ch > 126)
@@ -424,7 +427,7 @@ smtpcode()
  * don't want to fail handshake if certificate can't be verified
  */
 int
-verify_cb(int preverify_ok, X509_STORE_CTX *ctx)
+verify_cb(int preverify_ok, X509_STORE_CTX *ctx_dummy)
 {
 	return 1;
 }
@@ -449,12 +452,12 @@ do_pkix(char *servercert)
 	X509           *peercert;
 	STACK_OF(GENERAL_NAME) *gens;
 	int             r, i = 0;
-	char           *t;
+	char           *tmp;
 
 	/*- PKIX */
 	if ((r = SSL_get_verify_result(ssl)) != X509_V_OK) {
-		t = (char *) X509_verify_cert_error_string(r);
-		tls_quit("TLS unable to verify server with ", servercert, ": ", t, 0);
+		tmp = (char *) X509_verify_cert_error_string(r);
+		tls_quit("TLS unable to verify server with ", servercert, ": ", tmp, 0);
 	}
 	if (!(peercert = SSL_get_peer_certificate(ssl)))
 		tls_quit("TLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
@@ -619,11 +622,11 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	}
 
 	if (!smtps) {
-		stralloc       *sa = ehlokw.sa;
+		stralloc       *sa_t = ehlokw.sa;
 		unsigned int    len = ehlokw.len;
 
 		/*- look for STARTTLS among EHLO keywords */
-		for (; len && case_diffs(sa->s, "STARTTLS"); ++sa, --len);
+		for (; len && case_diffs(sa_t->s, "STARTTLS"); ++sa_t, --len);
 		if (!len) {
 			if (!_needtlsauth)
 				return (0);
@@ -1123,7 +1126,7 @@ get_tlsa_rr(char *domain, int mxhost, int port)
 unsigned long
 ehlo()
 {
-	stralloc       *sa;
+	stralloc       *sa_ptr;
 	char           *s, *e, *p;
 	unsigned long   code;
 
@@ -1156,17 +1159,17 @@ ehlo()
 
 		if (!saa_readyplus(&ehlokw, 1))
 			die_nomem();
-		sa = ehlokw.sa + ehlokw.len++;
+		sa_ptr = ehlokw.sa + ehlokw.len++;
 		if (ehlokw.len > maxehlokwlen)
-			*sa = sauninit;
+			*sa_ptr = sauninit;
 		else
-			sa->len = 0;
+			sa_ptr->len = 0;
 
 		/*- smtptext is known to end in a '\n' */
 		for (p = (s += 4);; ++p) {
 			if (*p == '\n' || *p == ' ' || *p == '\t') {
 				if (!wasspace)
-					if (!stralloc_catb(sa, s, p - s) || !stralloc_0(sa))
+					if (!stralloc_catb(sa_ptr, s, p - s) || !stralloc_0(sa_ptr))
 						die_nomem();
 				if (*p == '\n')
 					break;
@@ -1183,7 +1186,7 @@ ehlo()
 		 * keyword should consist of alpha-num and '-'
 		 * broken AUTH might use '=' instead of space
 		 */
-		for (p = sa->s; *p; ++p) {
+		for (p = sa_ptr->s; *p; ++p) {
 			if (*p == '=') {
 				*p = 0;
 				break;
@@ -1368,7 +1371,6 @@ get_dane_records(char *host)
 	char           *ptr;
 	int             dane_pid, wstat, dane_exitcode, match, len;
 	int             pipefd[2];
-	char            inbuf[2048];
 
 	if (pipe(pipefd) == -1) {
 		strerr_warn1("fatal: unable to create pipe: ", &strerr_sys);
@@ -1488,7 +1490,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.6 2020-05-10 17:47:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.7 2020-05-11 10:59:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
