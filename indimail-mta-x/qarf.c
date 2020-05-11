@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.11  2020-05-11 11:03:42+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.10  2016-01-02 17:45:20+05:30  Cprogrammer
  * reformatted error strings
  *
@@ -109,11 +112,11 @@ my_putb(char *s, int len)
 static int
 mkTempFile(int seekfd)
 {
-	char            inbuf[2048], outbuf[2048], strnum[FMT_ULONG];
+	char            inbuf[2048], outbuf[2048];
 	char           *tmpdir;
 	static stralloc tmpFile = {0};
 	struct substdio ssin;
-	struct substdio ssout;
+	struct substdio sstmp;
 	int             fd;
 
 	if (lseek(seekfd, 0, SEEK_SET) == 0)
@@ -133,9 +136,9 @@ mkTempFile(int seekfd)
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 		my_error("qarf: open", tmpFile.s, OPEN_ERR);
 	unlink(tmpFile.s);
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&sstmp, write, fd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof(inbuf));
-	switch (substdio_copy(&ssout, &ssin))
+	switch (substdio_copy(&sstmp, &ssin))
 	{
 	case -2: /*- read error */
 		close(fd);
@@ -144,7 +147,7 @@ mkTempFile(int seekfd)
 		close(fd);
 		my_error("qarf: write", 0, WRITE_ERR);
 	}
-	if (substdio_flush(&ssout) == -1) {
+	if (substdio_flush(&sstmp) == -1) {
 		close(fd);
 		my_error("qarf: write", 0, WRITE_ERR);
 	}
@@ -406,7 +409,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.10 $\n");
+			"X-Mailer: qarf $Revision: 1.11 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -450,7 +453,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.10 2016-01-02 17:45:20+05:30 Cprogrammer Stab mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.11 2020-05-11 11:03:42+05:30 Cprogrammer Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -510,7 +513,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.10 2016-01-02 17:45:20+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.11 2020-05-11 11:03:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

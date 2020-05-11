@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.11  2020-05-11 11:03:06+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.10  2020-04-07 11:45:07+05:30  Cprogrammer
  * omit ./Maildir when directory is specfied on command line
  *
@@ -51,18 +54,18 @@ char            ssoutbuf[256];
 stralloc        maildirsizefn = {0};
 
 void
-update_maildirsize(char *maildirsizefn, ssize_t avail, ssize_t mailsize, size_t mailcount, uid_t uid, gid_t gid)
+update_maildirsize(char *maildirsize_fn, ssize_t avail, ssize_t mailsize, size_t mailcount, uid_t uid, gid_t gid)
 {
 	int             fd, len;
 	char            strnum[FMT_ULONG];
 
-	if ((fd = open_trunc(maildirsizefn)) == -1)
-		strerr_die3sys(111, FATAL, maildirsizefn, ": ");
+	if ((fd = open_trunc(maildirsize_fn)) == -1)
+		strerr_die3sys(111, FATAL, maildirsize_fn, ": ");
 	if (fchown(fd, uid, gid))
-		strerr_die4sys(111, FATAL, "chown: ", maildirsizefn, ": ");
+		strerr_die4sys(111, FATAL, "chown: ", maildirsize_fn, ": ");
 	else
 	if (fchmod(fd, 0644))
-		strerr_die4sys(111, FATAL, "chmod: ", maildirsizefn, ": ");
+		strerr_die4sys(111, FATAL, "chmod: ", maildirsize_fn, ": ");
 	substdio_fdbuf(&ssout, write, fd, ssoutbuf, sizeof(ssoutbuf));
 	strnum[len = fmt_ulong(strnum, avail)] = 0;
 	if (substdio_put(&ssout, strnum, len) || substdio_put(subfdout, strnum, len))
@@ -145,7 +148,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.10 2020-04-07 11:45:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.11 2020-05-11 11:03:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

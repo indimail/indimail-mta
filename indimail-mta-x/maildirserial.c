@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.13  2020-05-11 11:02:50+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.12  2020-04-04 11:48:46+05:30  Cprogrammer
  * use auto_sysconfdir instead of auto_qmail
  *
@@ -213,18 +216,15 @@ readcontrols()
 struct qmail    qq;
 
 void
-put(buf, len)
-	char           *buf;
-	int             len;
+put(char *buffer, int len)
 {
-	qmail_put(&qq, buf, len);
+	qmail_put(&qq, buffer, len);
 }
 
 void
-my_puts(buf)
-	char           *buf;
+my_puts(char *buffer)
 {
-	qmail_puts(&qq, buf);
+	qmail_puts(&qq, buffer);
 }
 
 char           *qqx;
@@ -419,15 +419,14 @@ hasprefix(fd)
 }
 
 int
-usable(fn)
-	char           *fn;
+usable(char *filename)
 {
 	int             i;
 	int             fd;
 
 	i = 0;
 	while (i < deadfiles.len) {
-		if (str_equal(fn, deadfiles.s + i))
+		if (str_equal(filename, deadfiles.s + i))
 			return 0;
 		i += str_len(deadfiles.s + i);
 		++i;
@@ -435,12 +434,12 @@ usable(fn)
 
 	if (!*prefix)
 		return 1;	/*- optimization */
-	if ((fd = open_read(fn)) == -1) {
-		strerr_warn4(WARNING, "unable to open ", fn, ": ", &strerr_sys);
+	if ((fd = open_read(filename)) == -1) {
+		strerr_warn4(WARNING, "unable to open ", filename, ": ", &strerr_sys);
 		return 0;
 	}
 	if ((i = hasprefix(fd)) == -1)
-		strerr_warn4(WARNING, "unable to read ", fn, ": ", &strerr_sys);
+		strerr_warn4(WARNING, "unable to read ", filename, ": ", &strerr_sys);
 	close(fd);
 	return i == 1;
 }
@@ -454,7 +453,7 @@ void
 scanner()
 {
 	struct prioq_elt pe;
-	char           *fn;
+	char           *filename;
 
 	if (pipe(pis2c) == -1)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
@@ -464,8 +463,8 @@ scanner()
 		strerr_die1(111, FATAL, &maildir_scan_err);
 	while (prioq_min(&pq, &pe)) {
 		prioq_delmin(&pq);
-		fn = filenames.s + pe.id;
-		if (usable(fn)) {
+		filename = filenames.s + pe.id;
+		if (usable(filename)) {
 			if (!pid) {
 				pid = fork();
 				if (pid == -1)
@@ -479,7 +478,7 @@ scanner()
 				}
 				close(pis2c[0]);
 			}
-			substdio_put(&ss, fn, str_len(fn) + 1);	/*- ignore errors */
+			substdio_put(&ss, filename, str_len(filename) + 1);	/*- ignore errors */
 		}
 	}
 	if (!pid)
@@ -526,12 +525,10 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             opt;
+	int             opt, r, progress;
 	char           *dir;
-	int             r;
 	char            status;
 	struct stat     st;
-	int             progress;
 
 	sig_pipeignore();
 
@@ -610,8 +607,7 @@ main(argc, argv)
 				}
 			}
 			if (flagbounce && status == 'D') {
-				int             fd;
-				int             r;
+				int             fd, t;
 
 				info(" bounced: ");
 				if ((fd = open_read(fn.s)) == -1) {
@@ -620,15 +616,15 @@ main(argc, argv)
 						die_nomem();
 					continue;
 				}
-				if ((r = bounce(fd, &err, flagtimeout)) == -1)
+				if ((t = bounce(fd, &err, flagtimeout)) == -1)
 					strerr_warn4(WARNING, "unable to bounce ", fn.s, ": ", &strerr_sys);
-				if (r == -2)
+				if (t == -2)
 					strerr_warn5(WARNING, "unable to bounce ", fn.s, ": qq failed: ", qqx + 1, 0);
-				if (r == -3)
+				if (t == -3)
 					strerr_warn4(WARNING, "unable to bounce ", fn.s, ": bad file format", 0);
-				if (r == 2)
+				if (t == 2)
 					strerr_warn4(INFO, "discarding ", fn.s, ": triple bounce", 0);
-				if (r == 1) {
+				if (t == 1) {
 					substdio_puts(subfderr, INFO);
 					substdio_puts(subfderr, "returned ");
 					substdio_puts(subfderr, fn.s);
@@ -638,7 +634,7 @@ main(argc, argv)
 					substdio_flush(subfderr);
 				}
 				close(fd);
-				if (r > 0) {
+				if (t > 0) {
 					if (unlink(fn.s) == 0)
 						continue;
 					strerr_warn4(WARNING, "message has been bounced but not removed! unable to unlink ", fn.s, ": ",
@@ -675,7 +671,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.12 2020-04-04 11:48:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.13 2020-05-11 11:02:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

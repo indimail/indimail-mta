@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.50  2020-05-11 11:04:23+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.49  2020-04-01 16:14:34+05:30  Cprogrammer
  * added header for MakeArgs() function
  *
@@ -369,15 +372,15 @@ char           *dkqueue = 0;
 char           *dkexcludeheaders;
 
 static void
-write_signature(DK *dk, char *dk_selector, char *keyfn,
+write_signature(DK *dka, char *dk_selector, char *keyfn,
 	int advicelen, int opth, char *canon)
 {
 	unsigned char   advice[ADVICE_BUF];
-	char           *selector, *from, *tmp;
+	char           *selector, *from, *ptr;
 	static stralloc keyfnfrom = { 0 };
 	int             i;
 
-	from = dk_from(dk);
+	from = dk_from(dka);
 	if (keyfn[0] != '/') {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -451,7 +454,7 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 	}
 	if (!stralloc_0(&dksignature))
 		die(51);
-	st = dk_getsig(dk, dksignature.s, advice, advicelen);
+	st = dk_getsig(dka, dksignature.s, advice, advicelen);
 	maybe_die_dk(st);
 	if (!dk_selector) {
 		selector = keyfn;
@@ -478,9 +481,9 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		die(51);
 	if (!stralloc_cats(&dkoutput, "; d="))
 		die(51);
-	tmp = env_get("DKDOMAIN");
-	if (from || tmp) {
-		if (!stralloc_cats(&dkoutput, tmp ? tmp : from))
+	ptr = env_get("DKDOMAIN");
+	if (from || ptr) {
+		if (!stralloc_cats(&dkoutput, ptr ? ptr : from))
 			die(51);
 	} else
 	if (!stralloc_cats(&dkoutput, "unknown"))
@@ -492,16 +495,16 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 	if (!stralloc_cats(&dkoutput, (char *) advice))
 		die(51);
 	if (dkexcludeheaders || opth) {
-		if ((i = dk_headers(dk, NULL)) > 0) {
-			if (!(tmp = alloc(i)))
+		if ((i = dk_headers(dka, NULL)) > 0) {
+			if (!(ptr = alloc(i)))
 				die(51);
-			if (!dk_headers(dk, tmp))
+			if (!dk_headers(dka, ptr))
 				die(51);
 			if (!stralloc_cats(&dkoutput, ";\n    h="))
 				die(51);
-			if (!stralloc_cats(&dkoutput, tmp))
+			if (!stralloc_cats(&dkoutput, ptr))
 				die(51);
-			alloc_free(tmp);
+			alloc_free(ptr);
 		}
 	}
 	if (!stralloc_cats(&dkoutput, ";\n"))
@@ -721,24 +724,24 @@ main(int argc, char *argv[])
 	} else
 	for (;;) {
 		register int    n;
-		register char  *x;
+		register char  *t;
 		int             i;
 
 		if ((n = substdio_feed(&ssin)) < 0)
 			die_read();
 		if (!n)
 			break;
-		x = substdio_PEEK(&ssin);
+		t = substdio_PEEK(&ssin);
 		if (dksign || dkverify) {
 			for (i = 0; i < n; i++) {
-				if (x[i] == '\n')
+				if (t[i] == '\n')
 					st = dk_message(dk, (unsigned char *) "\r\n", 2);
 				else
-					st = dk_message(dk, (unsigned char *) x + i, 1);
+					st = dk_message(dk, (unsigned char *) t + i, 1);
 				maybe_die_dk(st);
 			}
 		}
-		if (substdio_put(&ssout, x, n) == -1)
+		if (substdio_put(&ssout, t, n) == -1)
 			die_write();
 		substdio_SEEK(&ssin, n);
 	}
@@ -882,7 +885,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.49 2020-04-01 16:14:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.50 2020-05-11 11:04:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

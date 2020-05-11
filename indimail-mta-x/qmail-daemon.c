@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.20  2020-05-11 11:04:08+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.19  2016-06-03 13:34:48+05:30  Cprogrammer
  * moved qmail-start to sbin
  *
@@ -109,8 +112,7 @@ sigterm()
 		qcount = QUEUE_COUNT;
 	else
 		scan_int(queue_count_ptr, &qcount);
-	for (i = 0;i <= qcount;i++)
-	{
+	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
 		kill(pid_table[i].pid, SIGTERM);
@@ -128,8 +130,7 @@ sigalrm()
 		qcount = QUEUE_COUNT;
 	else
 		scan_int(queue_count_ptr, &qcount);
-	for (i = 0;i <= qcount;i++)
-	{
+	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
 		kill(pid_table[i].pid, SIGALRM);
@@ -146,8 +147,7 @@ sighup()
 		qcount = QUEUE_COUNT;
 	else
 		scan_int(queue_count_ptr, &qcount);
-	for (i = 0;i <= qcount;i++)
-	{
+	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
 		kill(pid_table[i].pid, SIGHUP);
@@ -164,8 +164,7 @@ sigint()
 		qcount = QUEUE_COUNT;
 	else
 		scan_int(queue_count_ptr, &qcount);
-	for (i = 0;i <= qcount;i++)
-	{
+	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
 		kill(pid_table[i].pid, SIGINT);
@@ -234,23 +233,19 @@ check_send(char *queuedir)
 	static stralloc lockfile = { 0 };
 	int             fd;
 
-	if (!stralloc_copys(&lockfile, queuedir))
-	{
+	if (!stralloc_copys(&lockfile, queuedir)) {
 		logerrf("alert: out of memory\n");
 		return(1);
 	}
-	if (!stralloc_cats(&lockfile, "/lock/sendmutex"))
-	{
+	if (!stralloc_cats(&lockfile, "/lock/sendmutex")) {
 		logerrf("alert: out of memory\n");
 		return(1);
 	}
-	if (!stralloc_0(&lockfile))
-	{
+	if (!stralloc_0(&lockfile)) {
 		logerrf("alert: out of memory\n");
 		return(1);
 	}
-	if ((fd = open_write(lockfile.s)) == -1)
-	{
+	if ((fd = open_write(lockfile.s)) == -1) {
 		logerr("alert: cannot start: unable to open ");
 		logerr(lockfile.s);
 		logerr(": ");
@@ -258,8 +253,7 @@ check_send(char *queuedir)
 		logerrf("\n");
 		return(1);
 	} else
-	if (lock_exnb(fd) == -1)
-	{
+	if (lock_exnb(fd) == -1) {
 		close(fd); /*- send already running */
 		logerr("alert: cannot start: qmail-send with queue ");
 		logerr(queuedir);
@@ -274,24 +268,20 @@ void
 start_send(char **argv, int qstart, int qcount)
 {
 	char           *qbase;
-	char            strnum[FMT_ULONG];
 	int             i, j, child, nqueue;
 	static stralloc queuedir = {0}, QueueBase = {0};
 
 	if (argv[1])
 		qlargs[1] = argv[1];
-	if (!pid_table)
-	{
-		if (!(pid_table = (struct pidtab *) alloc(sizeof(struct pidtab) * (qcount + 1))))
-		{
+	if (!pid_table) {
+		if (!(pid_table = (struct pidtab *) alloc(sizeof(struct pidtab) * (qcount + 1)))) {
 			logerrf("alert: out of memory\n");
 			_exit(111);
 		}
 		for (i = 0;i <= qcount;i++)
 			pid_table[i].pid = -1;
 	}
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
 		case -1:
@@ -312,20 +302,16 @@ start_send(char **argv, int qstart, int qcount)
 	my_log("/");
 	strnum[fmt_ulong(strnum, qcount)] = 0;
 	my_log(strnum);
-	if (env_get("SPAMFILTER"))
-	{
-		if (!stralloc_copys(&queuedir, qbase))
-		{
+	if (env_get("SPAMFILTER")) {
+		if (!stralloc_copys(&queuedir, qbase)) {
 			logerrf("alert: out of memory\n");
 			die();
 		}
-		if (!stralloc_cats(&queuedir, "/nqueue"))
-		{
+		if (!stralloc_cats(&queuedir, "/nqueue")) {
 			logerrf("alert: out of memory\n");
 			die();
 		}
-		if (!stralloc_0(&queuedir))
-		{
+		if (!stralloc_0(&queuedir)) {
 			logerrf("alert: out of memory\n");
 			die();
 		}
@@ -335,42 +321,33 @@ start_send(char **argv, int qstart, int qcount)
 	} else
 		nqueue = 0;
 	my_logf("\n");
-	for (i = qstart;i <= qstart + qcount;i++)
-	{
-		if (!stralloc_copys(&queuedir, "QUEUEDIR="))
-		{
+	for (i = qstart;i <= qstart + qcount;i++) {
+		if (!stralloc_copys(&queuedir, "QUEUEDIR=")) {
 			logerrf("alert: out of memory\n");
 			die();
 		}
-		if (!stralloc_cats(&queuedir, qbase))
-		{
+		if (!stralloc_cats(&queuedir, qbase)) {
 			logerrf("alert: out of memory\n");
 			die();
 		}
-		if (i == qstart + qcount)
-		{
+		if (i == qstart + qcount) {
 			if (!nqueue)
 				break;
-			if (!stralloc_cats(&queuedir, "/nqueue"))
-			{
+			if (!stralloc_cats(&queuedir, "/nqueue")) {
 				logerrf("alert: out of memory\n");
 				die();
 			}
-		} else
-		{
-			if (!stralloc_cats(&queuedir, "/queue"))
-			{
+		} else {
+			if (!stralloc_cats(&queuedir, "/queue")) {
 				logerrf("alert: out of memory\n");
 				die();
 			}
-			if (!stralloc_catb(&queuedir, strnum, fmt_ulong(strnum, (unsigned long) i)))
-			{
+			if (!stralloc_catb(&queuedir, strnum, fmt_ulong(strnum, (unsigned long) i))) {
 				logerrf("alert: out of memory\n");
 				die();
 			}
 		}
-		if (!stralloc_0(&queuedir))
-		{
+		if (!stralloc_0(&queuedir)) {
 			logerrf("alert: out of memory\n");
 			die();
 		}
@@ -385,16 +362,13 @@ start_send(char **argv, int qstart, int qcount)
 				sig_catch(SIGTERM, SIG_DFL);
 				sig_catch(SIGALRM, SIG_DFL);
 				sig_catch(SIGHUP, SIG_DFL);
-				if (i == qstart + qcount) /*- don't set this for nqueue */
-				{
-					if (!env_unset("QMAILLOCAL") || !env_unset("QMAILREMOTE"))
-					{
+				if (i == qstart + qcount) /*- don't set this for nqueue */ {
+					if (!env_unset("QMAILLOCAL") || !env_unset("QMAILREMOTE")) {
 						logerrf("alert: out of memory\n");
 						die();
 					}
 				}
-				if (!env_put(queuedir.s))
-				{
+				if (!env_put(queuedir.s)) {
 					logerrf("alert: out of memory\n");
 					die();
 				}
@@ -406,8 +380,7 @@ start_send(char **argv, int qstart, int qcount)
 				_exit(111);
 			default:
 				pid_table[i - qstart].pid = child;
-				if (!(pid_table[i - qstart].queuedir = (char *) alloc(str_len(queuedir.s) + 1)))
-				{
+				if (!(pid_table[i - qstart].queuedir = (char *) alloc(str_len(queuedir.s) + 1))) {
 					logerrf("alert: out of memory\n");
 					die();
 				}
@@ -424,13 +397,11 @@ restart(char **argv, int pid, int qcount)
 {
 	int             i, child;
 
-	for (i = 0;i <= qcount;i++)
-	{
+	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == pid)
 			break;
 	}
-	if (pid_table[i].pid != pid)
-	{
+	if (pid_table[i].pid != pid) {
 		logerr("qmail-daemon: could not locate pid "); 
 		strnum[fmt_ulong(strnum, pid)] = 0;
 		logerr(strnum);
@@ -454,8 +425,7 @@ restart(char **argv, int pid, int qcount)
 			sig_catch(SIGTERM, SIG_DFL);
 			sig_catch(SIGALRM, SIG_DFL);
 			sig_catch(SIGHUP, SIG_DFL);
-			if (!env_put(pid_table[i].queuedir))
-			{
+			if (!env_put(pid_table[i].queuedir)) {
 				logerrf("alert: out of memory\n");
 				die();
 			}
@@ -493,21 +463,18 @@ main(int argc, char **argv)
 	sig_catch(SIGINT, sigint);
 	sig_catch(SIGCHLD, SIG_DFL);
 
-	if (chdir(auto_qmail) == -1)
-	{
+	if (chdir(auto_qmail) == -1) {
 		logerr("alert: qmail-daemon: unable to switch to qmail directory: ");
 		logerr(error_str(errno));
 		logerrf("\n");
 		die();
 	}
-	if (flagexitasap)
-	{
+	if (flagexitasap) {
 		logerrf("qmail-daemon: exiting\n");
 		return(0);
 	}
 	start_send(argv, qstart, qcount);
-	for (;!flagexitasap;)
-	{
+	for (;!flagexitasap;) {
 		if ((child = wait_pid(&wstat, -1)) == -1)
 			break;
 		if (flagexitasap)
@@ -515,8 +482,7 @@ main(int argc, char **argv)
 		restart(argv, child, qcount);
 		sleep(1);
 	} /*- for (child = 0;;) */
-	for (;flagexitasap;)
-	{
+	for (;flagexitasap;) {
 		if ((child = wait_pid(&wstat, -1)) == -1)
 			break;
 	}
@@ -529,7 +495,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.19 2016-06-03 13:34:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.20 2020-05-11 11:04:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

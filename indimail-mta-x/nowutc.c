@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.4  2020-05-11 11:03:11+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.3  2016-05-21 14:48:14+05:30  Cprogrammer
  * use auto_sysconfdir for leapsecs_init()
  *
@@ -52,7 +55,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	static char    *x = "$Id: nowutc.c,v 1.3 2016-05-21 14:48:14+05:30 Cprogrammer Stab mbhangui $";
+	static char    *z = "$Id: nowutc.c,v 1.4 2020-05-11 11:03:11+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	z++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.14  2020-05-11 11:03:26+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.13  2016-05-21 14:48:20+05:30  Cprogrammer
  * use auto_sysconfdir for leapsecs_init()
  *
@@ -651,15 +654,13 @@ rewritelist(list)
 }
 
 void
-putlist(name, list)
-	char           *name;
-	stralloc       *list;
+putlist(char *name_t, stralloc *list)
 {
 	if (!list->len)
 		return;
 	if (!mess822_quotelist(&tmp, list))
 		nomem();
-	if (!mess822_fold(&tmp2, &tmp, name, 78))
+	if (!mess822_fold(&tmp2, &tmp, name_t, 78))
 		nomem();
 	put(tmp2.s, tmp2.len);
 }
@@ -1292,7 +1293,7 @@ main(argc, argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.13 2016-05-21 14:48:20+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.14 2020-05-11 11:03:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
