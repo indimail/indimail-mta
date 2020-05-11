@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-pw2u.c,v $
+ * Revision 1.9  2020-05-11 11:09:34+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.8  2016-05-18 15:31:28+05:30  Cprogrammer
  * use auto_assign dir for files include, exclude, mailnames, subusers, append
  *
@@ -329,7 +332,7 @@ dosubuser()
 	int             i;
 	char           *x;
 	unsigned int    xlen;
-	char           *uugh;
+	char           *u;
 
 	x = line.s;
 	xlen = line.len;
@@ -344,8 +347,8 @@ dosubuser()
 	i = byte_chr(x, xlen, ':');
 	if (i == xlen)
 		return;
-	uugh = constmap(&mapuser, x, i);
-	if (!uugh)
+	u = constmap(&mapuser, x, i);
+	if (!u)
 		die_user(x, i);
 	++i;
 	x += i;
@@ -358,7 +361,7 @@ dosubuser()
 		die_write();
 	if (substdio_put(subfdout, sub.s, sub.len) == -1)
 		die_write();
-	if (substdio_puts(subfdout, uugh) == -1)
+	if (substdio_puts(subfdout, u) == -1)
 		die_write();
 	if (substdio_puts(subfdout, dashcolon) == -1)
 		die_write();
@@ -375,7 +378,7 @@ dosubuser()
 			die_write();
 		if (substdio_put(subfdout, auto_break, 1) == -1)
 			die_write();
-		if (substdio_puts(subfdout, uugh) == -1)
+		if (substdio_puts(subfdout, u) == -1)
 			die_write();
 		if (substdio_puts(subfdout, dashcolon) == -1)
 			die_write();
@@ -511,7 +514,7 @@ main(argc, argv)
 void
 getversion_qmail_pw2u_c()
 {
-	static char    *x = "$Id: qmail-pw2u.c,v 1.8 2016-05-18 15:31:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-pw2u.c,v 1.9 2020-05-11 11:09:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

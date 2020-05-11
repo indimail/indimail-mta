@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.224 $";
+char           *revision = "$Revision: 1.225 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -921,7 +921,7 @@ err_smf()
 }
 
 void
-err_size(char *rip, char *mailfrom, char *rcpt, int len)
+err_size(char *rip, char *mfrom, char *rcpt, int len)
 {
 	int             idx;
 	char           *ptr;
@@ -935,7 +935,7 @@ err_size(char *rip, char *mailfrom, char *rcpt, int len)
 			logerrpid();
 			logerr(rip);
 			logerr(" data size exceeded: MAIL from <");
-			logerr(mailfrom);
+			logerr(mfrom);
 			logerr("> RCPT <");
 			logerr(ptr);
 			logerr("> Size: ");
@@ -1840,32 +1840,32 @@ check_recipient_sql(char *rcpt, int len)
 }
 
 int
-dnscheck(char *addr, int len, int paranoid)
+dnscheck(char *address, int len, int paranoid)
 {
 	ipalloc         ia = { 0 };
 	unsigned int    random;
 	int             j;
 
-	if (str_equal(addr, "#@[]") || !len)
+	if (str_equal(address, "#@[]") || !len)
 		return (0);
 	if (nodnschecksok) {
-		if (constmap(&mapnodnschecks, addr, len))
+		if (constmap(&mapnodnschecks, address, len))
 			return 0;
-		if ((j = byte_rchr(addr, len, '@')) < (len - 1)) {
-			if (constmap(&mapnodnschecks, addr + j, len - j))
+		if ((j = byte_rchr(address, len, '@')) < (len - 1)) {
+			if (constmap(&mapnodnschecks, address + j, len - j))
 				return 0;
 		}
 	}
 	random = now() + (getpid() << 16);
-	if ((j = byte_rchr(addr, len, '@')) < (len - 1)) {
-		if (!stralloc_copys(&sa, addr + j + 1))
+	if ((j = byte_rchr(address, len, '@')) < (len - 1)) {
+		if (!stralloc_copys(&sa, address + j + 1))
 			die_nomem();
 		dns_init(0);
 		if ((j = dns_mxip(&ia, &sa, random)) < 0)
 			return j;
 	} else
 	if (paranoid) {
-		if (!stralloc_copys(&sa, addr))
+		if (!stralloc_copys(&sa, address))
 			die_nomem();
 		dns_init(0);
 		if ((j = dns_mxip(&ia, &sa, random)) < 0)
@@ -2928,11 +2928,11 @@ check_batv_sig()
 #endif /*- #ifdef BATV */
 
 int
-pop_bef_smtp(char *mailfrom)
+pop_bef_smtp(char *mfrom)
 {
 	char           *ptr;
 
-	if ((ptr = inquery(RELAY_QUERY, mailfrom, remoteip))) {
+	if ((ptr = inquery(RELAY_QUERY, mfrom, remoteip))) {
 		if ((authenticated = *ptr)) /*- also set authenticated variable */
 			relayclient = "";
 		env_put2("AUTHENTICATED", authenticated == 1 ? "1" : "0");
@@ -5107,7 +5107,7 @@ smtp_atrn(char *arg)
 	char           *ptr, *cptr, *domain_ptr, *user_tmp, *domain_tmp, *errstr;
 	int             i, end_flag, status, Reject = 0, Accept = 0;
 	char            err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
-	static stralloc user = {0}, domain = {0};
+	static stralloc a_user = {0}, domain = {0};
 	void            (*vclose) (void);
 	char           *(*vshow_atrn_map) (char **, char **);
 	int             (*atrn_access) (char *, char *);
@@ -5162,8 +5162,8 @@ smtp_atrn(char *arg)
 	if (*arg)
 		domain_ptr = arg;
 	else {
-		parse_email(remoteinfo, &user, &domain);
-		for (user_tmp = user.s, domain_tmp = domain.s, end_flag = 0;;) {
+		parse_email(remoteinfo, &a_user, &domain);
+		for (user_tmp = a_user.s, domain_tmp = domain.s, end_flag = 0;;) {
 			if (!(ptr = (*vshow_atrn_map) (&user_tmp, &domain_tmp)))
 				break;
 			if (end_flag) {
@@ -5279,7 +5279,7 @@ smtp_tls(char *arg)
 }
 
 RSA            *
-tmp_rsa_cb(SSL * ssl, int export, int keylen)
+tmp_rsa_cb(SSL *ssl_p, int export, int keylen)
 {
 	stralloc        filename = { 0 };
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -5325,7 +5325,7 @@ tmp_rsa_cb(SSL * ssl, int export, int keylen)
 }
 
 DH             *
-tmp_dh_cb(SSL * ssl, int export, int keylen)
+tmp_dh_cb(SSL *ssl_p, int export, int keylen)
 {
 	stralloc        filename = { 0 };
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -6091,6 +6091,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.225  2020-05-11 11:12:08+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.224  2019-10-27 10:43:04+05:30  Cprogrammer
  * display table/file name in error logs
  *
@@ -6201,7 +6204,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.224 2019-10-27 10:43:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.225 2020-05-11 11:12:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.12  2020-05-11 11:07:43+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.11  2020-04-30 18:09:45+05:30  Cprogrammer
  * define rwhconfig_err variable locally
  *
@@ -170,15 +173,13 @@ myputs(buf)
 }
 
 void
-putlist(name, list)
-	char           *name;
-	stralloc       *list;
+putlist(char *name_t, stralloc *list)
 {
 	if (!list->len)
 		return;
 	if (!mess822_quotelist(&tmp, list))
 		nomem();
-	if (!mess822_fold(&tmp2, &tmp, name, 78))
+	if (!mess822_fold(&tmp2, &tmp, name_t, 78))
 		nomem();
 	myput(tmp2.s, tmp2.len);
 }
@@ -687,7 +688,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.11 2020-04-30 18:09:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.12 2020-05-11 11:07:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

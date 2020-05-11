@@ -1,5 +1,8 @@
 /*
  * $Log: recipients.c,v $
+ * Revision 1.9  2020-05-11 11:11:36+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.8  2017-10-05 08:51:20+05:30  Cprogrammer
  * use /etc/indimail/users/recipients instead of /etc/indimail/control/recipients
  *
@@ -201,15 +204,7 @@ recipients_init()
 }
 
 int
-recipients_parse(rhost, rlen, addr, rkey, klen, vaddr, vkey, vlen)
-	char           *rhost;
-	int             rlen;
-	char           *addr;
-	char           *rkey;
-	int             klen;
-	char           *vaddr;
-	char           *vkey;
-	int             vlen;
+recipients_parse(char *rhost, int rlen, char *addr, char *rkey, int klen, char *vaddr, char *v_key, int vlen)
 {
 	int             i;
 	int             r;
@@ -273,7 +268,7 @@ recipients_parse(rhost, rlen, addr, rkey, klen, vaddr, vkey, vlen)
 					if (fdrcps != -1) {
 						r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
 						if (vlen > 0 && r == 0)
-							r = cdb_seek(fdrcps, vkey, vlen - 2, &dlen);
+							r = cdb_seek(fdrcps, v_key, vlen - 2, &dlen);
 						close(fdrcps);
 						if (r)
 							return 1;
@@ -285,7 +280,7 @@ recipients_parse(rhost, rlen, addr, rkey, klen, vaddr, vkey, vlen)
 				if (fdrcps != -1) {
 					r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
 					if (vlen > 0 && r == 0)
-						r = cdb_seek(fdrcps, vkey, vlen - 2, &dlen);
+						r = cdb_seek(fdrcps, v_key, vlen - 2, &dlen);
 					close(fdrcps);
 					if (r)
 						return 1;
@@ -370,7 +365,7 @@ recipients(buf, len)
 void
 getversion_recipients_c()
 {
-	static char    *x = "$Id: recipients.c,v 1.8 2017-10-05 08:51:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: recipients.c,v 1.9 2020-05-11 11:11:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

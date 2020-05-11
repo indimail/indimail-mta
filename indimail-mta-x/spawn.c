@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.26  2020-05-11 11:12:35+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.25  2019-05-27 20:29:48+05:30  Cprogrammer
  * use VIRTUAL_PKG_LIB env variable if defined
  *
@@ -105,14 +108,10 @@ sigchld()
 	int             pid;
 	int             i;
 
-	while ((pid = wait_nohang(&wstat)) > 0)
-	{
-		for (i = 0; i < auto_spawn; ++i)
-		{
-			if (d[i].used)
-			{
-				if (d[i].pid == pid)
-				{
+	while ((pid = wait_nohang(&wstat)) > 0) {
+		for (i = 0; i < auto_spawn; ++i) {
+			if (d[i].used) {
+				if (d[i].pid == pid) {
 					close(d[i].fdout);
 					d[i].fdout = -1;
 					d[i].wstat = wstat;
@@ -177,20 +176,15 @@ variables_set()
 {
 	char           *x, *y, *z, *c, *n;
 
-	for (y = z = envh.s;envh.len && *z;z++)
-	{
-		if (*z == '\n')
-		{
+	for (y = z = envh.s;envh.len && *z;z++) {
+		if (*z == '\n') {
 			*(n = z) = 0;
-			for (x = y;*x;x++)
-			{
-				if (*x == ':')
-				{
+			for (x = y;*x;x++) {
+				if (*x == ':') {
 					c = x;
 					*x++ = 0;
 					for (;*x && *x == ' ';x++);
-					if (!env_put2(y, x))
-					{
+					if (!env_put2(y, x)) {
 						*n = '\n';
 						*c = ':';
 						return (1);
@@ -213,15 +207,11 @@ variables_unset()
 {
 	char           *x, *y, *z;
 
-	for (y = z = envh.s;envh.len && *z;z++)
-	{
-		if (*z == '\n')
-		{
+	for (y = z = envh.s;envh.len && *z;z++) {
+		if (*z == '\n') {
 			*z = 0;
-			for (x = y;*x;x++)
-			{
-				if (*x == ':')
-				{
+			for (x = y;*x;x++) {
+				if (*x == ':') {
 					*x = 0;
 					if (!env_unset(y))
 						return (1);
@@ -241,79 +231,63 @@ docmd()
 	int             pi[2];
 	struct stat     st;
 
-	if (flagabort)
-	{
+	if (flagabort) {
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
 		return;
 	}
-	if (delnum < 0)
-	{
+	if (delnum < 0) {
 		err("ZInternal error: delnum negative. (#4.3.5)\n");
 		return;
 	}
-	if (delnum >= auto_spawn)
-	{
+	if (delnum >= auto_spawn) {
 		err("ZInternal error: delnum too big. (#4.3.5)\n");
 		return;
 	}
-	if (d[delnum].used)
-	{
+	if (d[delnum].used) {
 		err("ZInternal error: delnum in use. (#4.3.5)\n");
 		return;
 	}
-	for (i = 0; i < messid.len; ++i)
-	{
-		if (messid.s[i])
-		{
-			if (!i || (messid.s[i] != '/'))
-			{
-				if ((unsigned char) (messid.s[i] - '0') > 9)
-				{
+	for (i = 0; i < messid.len; ++i) {
+		if (messid.s[i]) {
+			if (!i || (messid.s[i] != '/')) {
+				if ((unsigned char) (messid.s[i] - '0') > 9) {
 					err("DInternal error: messid has nonnumerics. (#5.3.5)\n");
 					return;
 				}
 			}
 		}
 	}
-	if (messid.len > 100)
-	{
+	if (messid.len > 100) {
 		err("DInternal error: messid too long. (#5.3.5)\n");
 		return;
 	}
-	if (!messid.s[0])
-	{
+	if (!messid.s[0]) {
 		err("DInternal error: messid too short. (#5.3.5)\n");
 		return;
 	}
-	if (!stralloc_copys(&d[delnum].output, ""))
-	{
+	if (!stralloc_copys(&d[delnum].output, "")) {
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
 		return;
 	}
-	if ((j = byte_rchr(recip.s, recip.len, '@')) >= recip.len)
-	{
+	if ((j = byte_rchr(recip.s, recip.len, '@')) >= recip.len) {
 		err("DSorry, address must include host name. (#5.1.3)\n");
 		return;
 	}
-	if ((fdmess = open_read(messid.s)) == -1)
-	{
+	if ((fdmess = open_read(messid.s)) == -1) {
 		err("Zqmail-spawn unable to open message. (#4.3.0)\n");
 		return;
 	}
-	if (fstat(fdmess, &st) == -1)
-	{
+	if (fstat(fdmess, &st) == -1) {
 		close(fdmess);
 		err("Zqmail-spawn unable to fstat message. (#4.3.0)\n");
 		return;
 	}
-	if ((st.st_mode & S_IFMT) != S_IFREG)
-	{
+	if ((st.st_mode & S_IFMT) != S_IFREG) {
 		close(fdmess);
 		err("ZSorry, message has wrong type. (#4.3.5)\n");
 		return;
 	}
-	if (st.st_uid != auto_uidq)	/*- aaack! qmailq has to be trusted!  */
-	{
+	if (st.st_uid != auto_uidq) { /*- aaack! qmailq has to be trusted!  */
 		/*
 		 * your security is already toast at this point. damage control... 
 		 */
@@ -321,33 +295,28 @@ docmd()
 		err("ZSorry, message has wrong owner. (#4.3.5)\n");
 		return;
 	}
-	if (pipe(pi) == -1)
-	{
+	if (pipe(pi) == -1) {
 		close(fdmess);
 		err("Zqmail-spawn unable to create pipe. (#4.3.0)\n");
 		return;
 	}
 	coe(pi[0]);
-	if (envh.len && !stralloc_0(&envh))
-	{
+	if (envh.len && !stralloc_0(&envh)) {
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
 		return;
 	}
-	if (variables_set())
-	{
+	if (variables_set()) {
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
 		variables_unset();
 		return;
 	}
 	f = spawn(fdmess, pi[1], st.st_size, sender.s, qqeh.s, recip.s, j);
-	if (variables_unset())
-	{
+	if (variables_unset()) {
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
 		return;
 	}
 	close(fdmess);
-	if (f < 0)
-	{
+	if (f < 0) {
 		close(pi[0]);
 		close(pi[1]);
 		if (f == -2)
@@ -375,19 +344,16 @@ getcmd()
 	int             r;
 	char            ch;
 
-	if (!(r = read(0, cmdbuf, sizeof(cmdbuf))))
-	{
+	if (!(r = read(0, cmdbuf, sizeof(cmdbuf)))) {
 		flagreading = 0;
 		return;
 	}
-	if (r == -1)
-	{
+	if (r == -1) {
 		if (errno != error_intr)
 			flagreading = 0;
 		return;
 	}
-	for (i = 0; i < r; ++i)
-	{
+	for (i = 0; i < r; ++i) {
 		ch = cmdbuf[i];
 		switch (stage)
 		{
@@ -489,8 +455,7 @@ main(argc, argv)
 	substdio_put(&ssout, &ch, 1);
 	ch = auto_spawn >> 8;
 	substdio_putflush(&ssout, &ch, 1);
-	for (i = 0; i < auto_spawn; ++i)
-	{
+	for (i = 0; i < auto_spawn; ++i) {
 		d[i].used = 0;
 		d[i].output.s = 0;
 	}
@@ -513,10 +478,8 @@ main(argc, argv)
 		ptr = "VIRTUAL_PKG_LIB";
 	if(!(phandle = loadLibrary(&phandle, ptr, &i, 0)) && i)
 		_exit(111);
-	for (;;)
-	{
-		if (!flagreading)
-		{
+	for (;;) {
+		if (!flagreading) {
 			for (i = 0; i < auto_spawn; ++i)
 				if (d[i].used)
 					break;
@@ -528,10 +491,8 @@ main(argc, argv)
 		if (flagreading)
 			FD_SET(0, &rfds);
 		nfds = 1;
-		for (i = 0; i < auto_spawn; ++i)
-		{
-			if (d[i].used)
-			{
+		for (i = 0; i < auto_spawn; ++i) {
+			if (d[i].used) {
 				FD_SET(d[i].fdin, &rfds);
 				if (d[i].fdin >= nfds)
 					nfds = d[i].fdin + 1;
@@ -539,21 +500,15 @@ main(argc, argv)
 		}
 		r = select(nfds, &rfds, (fd_set *) 0, (fd_set *) 0, (struct timeval *) 0);
 		sig_childblock();
-		if (r != -1)
-		{
+		if (r != -1) {
 			if (flagreading && FD_ISSET(0, &rfds))
 				getcmd();
-			for (i = 0; i < auto_spawn; ++i)
-			{
-				if (d[i].used)
-				{
-					if (FD_ISSET(d[i].fdin, &rfds))
-					{
+			for (i = 0; i < auto_spawn; ++i) {
+				if (d[i].used) {
+					if (FD_ISSET(d[i].fdin, &rfds)) {
 						if ((r = read(d[i].fdin, inbuf, 128)) == -1)
 							continue;	/*- read error on a readable pipe? be serious */
-						if (r == 0)
-						{
-							char            ch;
+						if (r == 0) {
 							ch = i;
 							substdio_put(&ssout, &ch, 1);
 							ch = i >> 8;
@@ -569,8 +524,7 @@ main(argc, argv)
 							sleep(10);
 						/*XXX*/ byte_copy(d[i].output.s + d[i].output.len, r, inbuf);
 						d[i].output.len += r;
-						if (truncreport > 100 && d[i].output.len > truncreport)
-						{
+						if (truncreport > 100 && d[i].output.len > truncreport) {
 							char           *truncmess = "\nError report too long, sorry.\n";
 							d[i].output.len = truncreport - str_len(truncmess) - 3;
 							stralloc_cats(&d[i].output, truncmess);
@@ -587,7 +541,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.25 2019-05-27 20:29:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.26 2020-05-11 11:12:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

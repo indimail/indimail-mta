@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.132 2020-05-10 17:47:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.133 2020-05-11 11:11:24+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -681,7 +681,7 @@ temp_noconn_out(char *s)
 }
 
 void
-temp_noconn(stralloc *h, char *ip, int port)
+temp_noconn(stralloc *h, char *ip, int port_num)
 {
 	char            strnum[FMT_ULONG];
 
@@ -697,7 +697,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 		temp_noconn_out(" to ");
 		temp_noconn_out(ip);
 		temp_noconn_out(" port ");
-		strnum[fmt_ulong(strnum, port)] = 0;
+		strnum[fmt_ulong(strnum, port_num)] = 0;
 		temp_noconn_out(strnum);
 		temp_noconn_out(" bind IP [");
 		substdio_put(subfdoutsmall, outgoingip.s, outgoingip.len);
@@ -720,7 +720,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 }
 
 void
-temp_qmtp_noconn(stralloc *h, char *ip, int port)
+temp_qmtp_noconn(stralloc *h, char *ip, int port_num)
 {
 	char            strnum[FMT_ULONG];
 
@@ -731,7 +731,7 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 		temp_noconn_out(" to ");
 		temp_noconn_out(ip);
 		temp_noconn_out(" port ");
-		strnum[fmt_ulong(strnum, port)] = 0;
+		strnum[fmt_ulong(strnum, port_num)] = 0;
 		temp_noconn_out(strnum);
 		if (!stralloc_copys(&rhost, ip))
 			temp_nomem();
@@ -1100,7 +1100,7 @@ match_partner(char *s, int len)
  * don't want to fail handshake if certificate can't be verified
  */
 int
-verify_cb(int preverify_ok, X509_STORE_CTX *ctx)
+verify_cb(int preverify_ok, X509_STORE_CTX *ctx_t)
 {
 	return 1;
 }
@@ -1156,9 +1156,9 @@ do_pkix(char *servercert)
 		X509_NAME      *subj = X509_get_subject_name(peercert);
 		if ((i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1)) >= 0) {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-			X509_NAME_ENTRY *t;
-			t = X509_NAME_get_entry(subj, i);
-			ASN1_STRING    *s = X509_NAME_ENTRY_get_data(t);
+			X509_NAME_ENTRY *xnet;
+			xnet = X509_NAME_get_entry(subj, i);
+			ASN1_STRING    *s = X509_NAME_ENTRY_get_data(xnet);
 #else
 			const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
 #endif
@@ -1520,7 +1520,7 @@ stralloc        temphost = { 0 };
 stralloc        sa = { 0 };
 
 int
-get_tlsa_rr(char *mxhost, int port)
+get_tlsa_rr(char *mxhost, int port_num)
 {
 	char            strnum[FMT_ULONG];
 	int             r;
@@ -1534,7 +1534,7 @@ get_tlsa_rr(char *mxhost, int port)
 	if (!stralloc_copyb(&sa, "_", 1))
 		return (DNS_MEM);
 	else
-	if (!stralloc_catb(&sa, strnum, fmt_uint(strnum, port)))
+	if (!stralloc_catb(&sa, strnum, fmt_uint(strnum, port_num)))
 		return (DNS_MEM);
 	else
 	if (!stralloc_catb(&sa, "._tcp.", 6))
@@ -2309,7 +2309,7 @@ qmtp_priority(int pref)
 #endif
 
 void
-qmtp(stralloc *h, char *ip, int port)
+qmtp(stralloc *h, char *ip, int port_num)
 {
 	struct stat     st;
 	unsigned long   len;
@@ -2400,7 +2400,7 @@ qmtp(stralloc *h, char *ip, int port)
 			flagallok = -1;
 		}
 		if (substdio_put(subfdoutsmall, smtptext.s + 1, smtptext.len - 1) == -1)
-			temp_qmtp_noconn(h, ip, port);
+			temp_qmtp_noconn(h, ip, port_num);
 		zero();
 	} /*- for (i = 0; i < reciplist.len; ++i) */
 	if (flagallok == 1) {
@@ -3098,13 +3098,13 @@ sign_batv()
  * http://www.apecity.com/qmail/moresmtproutes.txt
  */
 char           *
-lookup_host(char *host, int len)
+lookup_host(char *hst, int len)
 {
 	static stralloc morerelayhost = { 0 };
 	static stralloc h = { 0 };
 	uint32          dlen;
 
-	if (!stralloc_copyb(&h, host, len))
+	if (!stralloc_copyb(&h, hst, len))
 		temp_nomem();
 	case_lowerb(h.s, h.len);
 	if (fdmoreroutes != -1 && cdb_seek(fdmoreroutes, h.s, h.len, &dlen) == 1) {
@@ -3136,20 +3136,20 @@ ipme_is46(struct ip_mx *mxip)
 }
 
 int
-timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port, int timeout)
+timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port_num, int tmout)
 {
 	switch (ix->af)
 	{
 #ifdef IPV6
 	case AF_INET6:
-		return timeoutconn6(fd, &ix->addr.ip6, ip, port, timeout);
+		return timeoutconn6(fd, &ix->addr.ip6, ip, port_num, tmout);
 		break;
 #endif
 	case AF_INET:
-		return timeoutconn4(fd, &ix->addr.ip, ip, port, timeout);
+		return timeoutconn4(fd, &ix->addr.ip, ip, port_num, tmout);
 		break;
 	default:
-		return timeoutconn4(fd, &ix->addr.ip, ip, port, timeout);
+		return timeoutconn4(fd, &ix->addr.ip, ip, port_num, tmout);
 	}
 }
 
@@ -3298,8 +3298,6 @@ main(int argc, char **argv)
 		use_auth_smtp = 0;
 #if BATV
 	if (batvok && sender.len && signkey.len) {
-		int             j;
-
 		if (!stralloc_0(&sender))
 			temp_nomem();		/*- null terminate */
 		sender.len--;
@@ -3487,7 +3485,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.132 2020-05-10 17:47:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.133 2020-05-11 11:11:24+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidauthdigestmd5h;
 	x++;
@@ -3495,6 +3493,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.133  2020-05-11 11:11:24+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.132  2020-05-10 17:47:03+05:30  Cprogrammer
  * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
  *

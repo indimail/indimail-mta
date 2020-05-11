@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.29  2020-05-11 11:09:17+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.28  2017-03-10 11:26:36+05:30  Cprogrammer
  * no of duplicate Delivered-To configurable in maxdeliveredto control file
  *
@@ -234,7 +237,7 @@ sigalrm()
 void
 maildir_child(char *dir)
 {
-	char            strnum[FMT_ULONG], host[64];
+	char            strnum[FMT_ULONG], host_a[64];
 	char           *s;
 	struct timeval  tmval;
 	struct stat     st;
@@ -243,26 +246,22 @@ maildir_child(char *dir)
 	substdio        ss, ssout;
 
 	sig_alarmcatch(sigalrm);
-	if (chdir(dir) == -1)
-	{
+	if (chdir(dir) == -1) {
 		if (error_temp(errno))
 			_exit(1);
 		_exit(2);
 	}
 	pid = getpid();
-	host[0] = 0;
-	gethostname(host, sizeof(host));
-	s = host;
-	for (loop = 0; loop < str_len(host); ++loop)
-	{
-		if (host[loop] == '/')
-		{
+	host_a[0] = 0;
+	gethostname(host_a, sizeof(host_a));
+	s = host_a;
+	for (loop = 0; loop < str_len(host_a); ++loop) {
+		if (host_a[loop] == '/') {
 			if (!stralloc_cats(&hostname, "057"))
 				temp_nomem();
 			continue;
 		}
-		if (host[loop] == ':')
-		{
+		if (host_a[loop] == ':') {
 			if (!stralloc_cats(&hostname, "072"))
 				temp_nomem();
 			continue;
@@ -270,8 +269,7 @@ maildir_child(char *dir)
 		if (!stralloc_append(&hostname, s + loop))
 			temp_nomem();
 	}
-	for (loop = 0;; ++loop)
-	{
+	for (loop = 0;; ++loop) {
 		gettimeofday(&tmval, 0);
 		if (!stralloc_copys(&fntmptph, "tmp/"))
 			temp_nomem();
@@ -306,8 +304,7 @@ maildir_child(char *dir)
 		sleep(2);
 	}
 	alarm(86400);
-	if ((fd = open_excl(fntmptph.s)) == -1)
-	{
+	if ((fd = open_excl(fntmptph.s)) == -1) {
 		if (errno == error_dquot)
 			_exit(5);
 		else
@@ -379,10 +376,8 @@ maildir_child(char *dir)
 	if (link(fntmptph.s, fnnewtph.s) == -1)
 		goto fail;
 #ifdef USE_FSYNC
-	if (!env_get("USE_SYNCDIR"))
-	{
-		if (use_fsync)
-		{
+	if (!env_get("USE_SYNCDIR")) {
+		if (use_fsync) {
 			if ((fd = open(fnnewtph.s, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0)
 				goto fail;
 		}
@@ -394,12 +389,10 @@ maildir_child(char *dir)
 	tryunlinktmp();
 	_exit(0);
 fail:
-	if (errno == error_dquot)
-	{
+	if (errno == error_dquot) {
 		tryunlinktmp();
 		_exit(5);
-	} else
-	{
+	} else {
 		tryunlinktmp();
 		_exit(1);
 	}
@@ -476,10 +469,8 @@ mailfile(char *fn)
 		goto writeerrs;
 	if (substdio_puts(&ssout, qqeh) == -1)
 		goto writeerrs;
-	for (;;)
-	{
-		if (getln(&ss, &messline, &match, '\n') != 0)
-		{
+	for (;;) {
+		if (getln(&ss, &messline, &match, '\n') != 0) {
 			strerr_warn3("Unable to read message: ", error_str(errno), ". (#4.3.0)", 0);
 			if (flaglocked)
 				seek_trunc(fd, pos);
@@ -493,8 +484,7 @@ mailfile(char *fn)
 				goto writeerrs;
 		if (substdio_bput(&ssout, messline.s, messline.len))
 			goto writeerrs;
-		if (!match)
-		{
+		if (!match) {
 			if (substdio_bputs(&ssout, "\n"))
 				goto writeerrs;
 			break;
@@ -512,8 +502,7 @@ mailfile(char *fn)
 	return;
 
 writeerrs:
-	if (errno == error_dquot)
-	{
+	if (errno == error_dquot) {
 		if (flaglocked)
 			seek_trunc(fd, pos);
 		close(fd);
@@ -596,10 +585,8 @@ mailforward(char **recips)
 	mailforward_qp = qmail_qp(&qqt);
 	qmail_put(&qqt, dtline.s, dtline.len);
 	qmail_puts(&qqt, qqeh);
-	do
-	{
-		if (getln(&ss, &messline, &match, '\n') != 0)
-		{
+	do {
+		if (getln(&ss, &messline, &match, '\n') != 0) {
 			qmail_fail(&qqt);
 			break;
 		}
@@ -646,8 +633,7 @@ bouncexf()
 	if (control_readint(&maxdeliveredto, "maxdeliveredto") == -1)
 		strerr_die1x(111, "Unable to read control file maxdeliveredto. (#4.3.0)");
 	substdio_fdbuf(&ss, read, 0, buf, sizeof(buf));
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ss, &messline, &match, '\n') != 0)
 			temp_read();
 		if (!match)
@@ -662,21 +648,20 @@ bouncexf()
 }
 
 void
-checkhome(char *homedir)
+checkhome(char *home_dir)
 {
 	struct stat     st;
 	int             ldmok;
 	stralloc        ldm = { 0 };
 	struct constmap mapldm;
 
-	if (chdir(homedir) == -1)
-		strerr_die5x(111, "Unable to switch to ", homedir, ": ", error_str(errno), ". (#4.3.0)");
+	if (chdir(home_dir) == -1)
+		strerr_die5x(111, "Unable to switch to ", home_dir, ": ", error_str(errno), ". (#4.3.0)");
 	if (stat(".", &st) == -1)
 		strerr_die3x(111, "Unable to stat home directory: ", error_str(errno), ". (#4.3.0)");
 	if (st.st_mode & auto_patrn)
 		strerr_die1x(111, "Uh-oh: home directory is writable. (#4.7.0)");
-	if (st.st_mode & S_ISVTX)
-	{
+	if (st.st_mode & S_ISVTX) {
 		if (flagdoit)
 			strerr_die1x(111, "Home directory is sticky: user is editing his .qmail file. (#4.2.1)");
 		else
@@ -684,25 +669,22 @@ checkhome(char *homedir)
 	}
 	if (!env_get("LOCALDOMAINS") && stat(".localdomains", &st))
 		ldmok = 0;
-	else
-	{
+	else {
 		if (chdir(auto_qmail) == -1)
 			strerr_die5x(111, "Unable to switch to ", auto_qmail, ": ", error_str(errno), ". (#4.3.0)");
 		if ((ldmok = control_readfile(&ldm, "localdomains", 0)) == -1)
 			strerr_die1x(111, "Unable to read control file [localdomains]. (#4.3.0)");
-		if (chdir(homedir) == -1)
-			strerr_die5x(111, "Unable to switch to ", homedir, ": ", error_str(errno), ". (#4.3.0)");
+		if (chdir(home_dir) == -1)
+			strerr_die5x(111, "Unable to switch to ", home_dir, ": ", error_str(errno), ". (#4.3.0)");
 	}
-	if (ldmok)
-	{
+	if (ldmok) {
 		stralloc        sas = {0};
 		int             j, len;
 
 		if (!constmap_init(&mapldm, ldm.s, ldm.len, 0))
 			temp_nomem();
 		len = str_len(sender);
-		if ((j = byte_rchr(sender, len, '@')) < len - 1)
-		{
+		if ((j = byte_rchr(sender, len, '@')) < len - 1) {
 			if (!stralloc_copys(&sas, sender + j + 1))
 				temp_nomem();
 			if (!constmap(&mapldm, sas.s, sas.len))
@@ -726,8 +708,7 @@ qmeox(char *dashowner)
 		temp_nomem();
 	if (!stralloc_0(&qme))
 		temp_nomem();
-	if (stat(qme.s, &st) == -1)
-	{
+	if (stat(qme.s, &st) == -1) {
 		if (error_temp(errno))
 			temp_qmail(qme.s);
 		return -1;
@@ -744,8 +725,7 @@ qmeexists(int *fd, int *cutable)
 		temp_nomem();
 
 	*fd = open_read(qme.s);
-	if (*fd == -1)
-	{
+	if (*fd == -1) {
 		if (error_temp(errno))
 			temp_qmail(qme.s);
 		if (errno == error_perm)
@@ -757,8 +737,7 @@ qmeexists(int *fd, int *cutable)
 
 	if (fstat(*fd, &st) == -1)
 		temp_qmail(qme.s);
-	if ((st.st_mode & S_IFMT) == S_IFREG)
-	{
+	if ((st.st_mode & S_IFMT) == S_IFREG) {
 		if (st.st_mode & auto_patrn)
 			strerr_die1x(111, "Uh-oh: .qmail file is writable. (#4.7.0)");
 		*cutable = !!(st.st_mode & 0100);
@@ -788,15 +767,11 @@ qmesearch(int *fd, int *cutable)
 		temp_nomem();
 	if (!stralloc_cat(&qme, &safeext))
 		temp_nomem();
-	if (qmeexists(fd, cutable))
-	{
-		if (safeext.len >= 7)
-		{
+	if (qmeexists(fd, cutable)) {
+		if (safeext.len >= 7) {
 			i = safeext.len - 7;
-			if (!byte_diff("default", 7, safeext.s + i))
-			{
-				if (i <= str_len(ext))	/*- paranoia */
-				{
+			if (!byte_diff("default", 7, safeext.s + i)) {
+				if (i <= str_len(ext)) { /*- paranoia */
 					if (!env_put2("DEFAULT", ext + i))
 						temp_nomem();
 				}
@@ -804,10 +779,8 @@ qmesearch(int *fd, int *cutable)
 		}
 		return;
 	}
-	for (i = safeext.len; i >= 0; --i)
-	{
-		if (!i || (safeext.s[i - 1] == '-'))
-		{
+	for (i = safeext.len; i >= 0; --i) {
+		if (!i || (safeext.s[i - 1] == '-')) {
 			if (!stralloc_copys(&qme, ".qmail"))
 				temp_nomem();
 			if (!stralloc_cats(&qme, dash))
@@ -816,8 +789,7 @@ qmesearch(int *fd, int *cutable)
 				temp_nomem();
 			if (!stralloc_cats(&qme, "default"))
 				temp_nomem();
-			if (qmeexists(fd, cutable))
-			{
+			if (qmeexists(fd, cutable)) {
 				if (i <= str_len(ext))	/*- paranoia */
 					if (!env_put2("DEFAULT", ext + i))
 						temp_nomem();
@@ -843,8 +815,7 @@ count_print()
 	substdio_puts(subfdoutsmall, "+");
 	substdio_put(subfdoutsmall, count_buf, fmt_ulong(count_buf, count_program));
 	substdio_puts(subfdoutsmall, "\n");
-	if (mailforward_qp)
-	{
+	if (mailforward_qp) {
 		substdio_puts(subfdoutsmall, "qp ");
 		substdio_put(subfdoutsmall, count_buf, fmt_ulong(count_buf, mailforward_qp));
 		substdio_puts(subfdoutsmall, "\n");
@@ -873,8 +844,7 @@ main(int argc, char **argv)
 	if (!env_init())
 		temp_nomem();
 	flagdoit = 1;
-	while ((opt = getopt(argc, argv, "nN")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "nN")) != opteof) {
 		switch (opt)
 		{
 		case 'n':
@@ -976,16 +946,14 @@ main(int argc, char **argv)
 		temp_nomem();
 	if (!stralloc_copys(&ufline, "From "))
 		temp_nomem();
-	if (*sender)
-	{
-		int             len, i;
+	if (*sender) {
+		int             len;
 		char            ch;
 
 		len = str_len(sender);
 		if (!stralloc_readyplus(&ufline, len))
 			temp_nomem();
-		for (i = 0; i < len; ++i)
-		{
+		for (i = 0; i < len; ++i) {
 			ch = sender[i];
 			if ((ch == ' ') || (ch == '\t') || (ch == '\n'))
 				ch = '-';
@@ -1028,8 +996,7 @@ main(int argc, char **argv)
 	if (!stralloc_copys(&safeext, ext))
 		temp_nomem();
 	case_lowerb(safeext.s, safeext.len);
-	for (i = 0; i < safeext.len; ++i)
-	{
+	for (i = 0; i < safeext.len; ++i) {
 		if (safeext.s[i] == '.')
 			safeext.s[i] = ':';
 	}
@@ -1061,14 +1028,10 @@ main(int argc, char **argv)
 		strerr_die1x(100, "Sorry, no mailbox here by that name. (#5.1.1)");
 	if (!stralloc_copys(&ueo, sender))
 		temp_nomem();
-	if (str_diff(sender, ""))
-	{
-		if (str_diff(sender, "#@[]"))
-		{
-			if (qmeox("-owner") == 0)
-			{
-				if (qmeox("-owner-default") == 0)
-				{
+	if (str_diff(sender, "")) {
+		if (str_diff(sender, "#@[]")) {
+			if (qmeox("-owner") == 0) {
+				if (qmeox("-owner-default") == 0) {
 					if (!stralloc_copys(&ueo, local))
 						temp_nomem();
 					if (!stralloc_cats(&ueo, "-owner-@"))
@@ -1077,8 +1040,7 @@ main(int argc, char **argv)
 						temp_nomem();
 					if (!stralloc_cats(&ueo, "-@[]"))
 						temp_nomem();
-				} else
-				{
+				} else {
 					if (!stralloc_copys(&ueo, local))
 						temp_nomem();
 					if (!stralloc_cats(&ueo, "-owner@"))
@@ -1099,23 +1061,19 @@ main(int argc, char **argv)
 	if (fd != -1)
 		if (slurpclose(fd, &cmds, 256) == -1)
 			temp_nomem();
-	if (!cmds.len)
-	{
+	if (!cmds.len) {
 		if (!stralloc_copys(&cmds, aliasempty))
 			temp_nomem();
 		flagforwardonly = 0;
 	}
-	if (!cmds.len || (cmds.s[cmds.len - 1] != '\n'))
-	{
+	if (!cmds.len || (cmds.s[cmds.len - 1] != '\n')) {
 		if (!stralloc_cats(&cmds, "\n"))
 			temp_nomem();
 	}
 	numforward = 0;
 	i = 0;
-	for (j = 0; j < cmds.len; ++j)
-	{
-		if (cmds.s[j] == '\n')
-		{
+	for (j = 0; j < cmds.len; ++j) {
+		if (cmds.s[j] == '\n') {
 			switch (cmds.s[i])
 			{
 			case '#':
@@ -1139,10 +1097,8 @@ main(int argc, char **argv)
 	if (env_get("USE_FSYNC"))
 		use_fsync = 1;
 #endif
-	for (j = 0; j < cmds.len; ++j)
-	{
-		if (cmds.s[j] == '\n')
-		{
+	for (j = 0; j < cmds.len; ++j) {
+		if (cmds.s[j] == '\n') {
 			cmds.s[j] = 0;
 			k = j;
 			while ((k > i) && ((cmds.s[k - 1] == ' ') || (cmds.s[k - 1] == '\t')))
@@ -1161,8 +1117,7 @@ main(int argc, char **argv)
 				++count_file;
 				if (flagforwardonly)
 					strerr_die1x(111, "Uh-oh: .qmail has file delivery but has x bit set. (#4.7.0)");
-				if (cmds.s[k - 1] == '/')
-				{
+				if (cmds.s[k - 1] == '/') {
 					if (flagdoit)
 						maildir(cmds.s + i);
 					else
@@ -1249,10 +1204,8 @@ main(int argc, char **argv)
 				break;
 		}
 	}
-	if (numforward)
-	{
-		if (flagdoit)
-		{
+	if (numforward) {
+		if (flagdoit) {
 			recips[numforward] = 0;
 			mailforward(recips);
 		}
@@ -1266,7 +1219,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.28 2017-03-10 11:26:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.29 2020-05-11 11:09:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

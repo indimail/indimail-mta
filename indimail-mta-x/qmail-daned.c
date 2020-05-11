@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.21  2020-05-11 11:07:52+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.20  2020-04-30 18:05:15+05:30  Cprogrammer
  * removed unused variable ssin
  *
@@ -1183,7 +1186,7 @@ main(int argc, char **argv)
 	buf_len = rdata_len = 0;
 #endif
 	for (;;) {
-		char            save = 0;
+		char            save_f = 0;
 		int             ret;
 
 		FD_ZERO(&rfds);
@@ -1201,9 +1204,9 @@ main(int argc, char **argv)
 		} else
 		if (!ret) {
 			/*- timeout occurred */
-			if (save) {
+			if (save_f) {
 				save_context();
-				save = 0;
+				save_f = 0;
 			}
 			continue;
 		}
@@ -1234,7 +1237,7 @@ main(int argc, char **argv)
 				continue;
 			strerr_die2sys(111, FATAL, "recvfrom: ");
 		}
-		save = 1;
+		save_f = 1;
 		if (verbose) {
 			out("qmail-daned IP: ");
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
@@ -1354,7 +1357,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.20 2020-04-30 18:05:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.21 2020-05-11 11:07:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

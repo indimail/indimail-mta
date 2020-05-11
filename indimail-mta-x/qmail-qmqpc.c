@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.20  2020-05-11 11:10:41+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.19  2020-04-14 12:31:37+05:30  Cprogrammer
  * fixed controlfile name for timeoutremote
  *
@@ -215,8 +218,7 @@ getmess()
 		nomem();
 	if (!stralloc_cats(&aftermessage, ","))
 		nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&envelope, &line, &match, '\0') == -1)
 			die_read();
 		if (!match)
@@ -265,11 +267,10 @@ doit(char *server, union v46addr *outip)
 	else
 		port_qmqp = PORT_QMQP;
 #ifdef IPV6
-	if (timeoutconn6(qmqpfd, &ip, outip, port_qmqp, timeoutconnect) != 0)
+	if (timeoutconn6(qmqpfd, &ip, outip, port_qmqp, timeoutconnect) != 0) {
 #else
-	if (timeoutconn4(qmqpfd, &ip, outip, port_qmqp, timeoutconnect) != 0)
+	if (timeoutconn4(qmqpfd, &ip, outip, port_qmqp, timeoutconnect) != 0) {
 #endif
-	{
 		lasterror = 73;
 		if (errno == error_timeout)
 			lasterror = 72;
@@ -284,8 +285,7 @@ doit(char *server, union v46addr *outip)
 	substdio_put(&to, aftermessage.s, aftermessage.len);
 	substdio_puts(&to, ",");
 	substdio_flush(&to);
-	for (;;)
-	{
+	for (;;) {
 		substdio_get(&from, &ch, 1);
 		if (ch == 'K')
 			die_success();
@@ -320,14 +320,12 @@ main(int argc, char **argv)
 	if (control_readint(&timeoutconnect, "timeoutconnect") == -1)
 		die_control();
 	getmess();
-	if ((x = env_get("OUTGOINGIP")) && *x)
-	{
+	if ((x = env_get("OUTGOINGIP")) && *x) {
 		if (!stralloc_copys(&outgoingip, x))
 			nomem();
 		r = 1;
 	} else
-	if (-1 == (r = control_readrandom(&outgoingip, "outgoingip")))
-	{
+	if (-1 == (r = control_readrandom(&outgoingip, "outgoingip"))) {
 		if (errno == error_nomem)
 			nomem();
 		die_control();
@@ -335,9 +333,7 @@ main(int argc, char **argv)
 #ifdef IPV6
 	if (0 == r && !stralloc_copys(&outgoingip, "::"))
 		nomem();
-	if (0 == str_diffn(outgoingip.s, "::", 2))
-	{
-		int             i;
+	if (0 == str_diffn(outgoingip.s, "::", 2)) {
 		for (i = 0;i < 16;i++)
 			outip.ip6.d[i] = 0;
 	} else
@@ -346,17 +342,14 @@ main(int argc, char **argv)
 #else
 	if (0 == r && !stralloc_copys(&outgoingip, "0.0.0.0"))
 		nomem();
-	if (0 == str_diffn(outgoingip.s, "0.0.0.0", 7))
-	{
-		int             i;
+	if (0 == str_diffn(outgoingip.s, "0.0.0.0", 7)) {
 		for (i = 0;i < 4;i++)
 			outip.ip.d[i] = 0;
 	} else
 	if (!ip4_scan(outgoingip.s, &outip.ip))
 		die_format();
 #endif
-	if (!controldir)
-	{
+	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
@@ -411,7 +404,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.19 2020-04-14 12:31:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.20 2020-05-11 11:10:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
