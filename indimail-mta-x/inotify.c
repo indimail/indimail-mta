@@ -1,5 +1,8 @@
 /*
  * $Log: inotify.c,v $
+ * Revision 1.7  2020-05-11 08:11:47+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.6  2019-06-24 23:29:35+05:30  Cprogrammer
  * added notifications for open and delete
  *
@@ -39,6 +42,7 @@
 #define SELECTTIMEOUT     5
 
 char           *usage = "usage: inotify [-n] path1..path2";
+int             ifd, _soptind, _sargc, *wd;
 
 void
 out(char *str)
@@ -49,8 +53,6 @@ out(char *str)
 		strerr_die2sys(111, FATAL, "write: ");
 	return;
 }
-
-int             ifd, _soptind, _sargc, *wd;
 
 void
 sigterm()
@@ -66,7 +68,7 @@ sigterm()
 int
 main(int argc, char **argv)
 {
-	int             opt, length, i = 0, dataTimeout = -1, retval, read_stdin = 1, _soptind;
+	int             opt, length, i = 0, dataTimeout = -1, retval, read_stdin = 1;
 	struct timeval  timeout;
 	struct timeval *tptr;
 	time_t          last_timeout;
@@ -295,7 +297,7 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	static char    *x = "$Id: inotify.c,v 1.6 2019-06-24 23:29:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inotify.c,v 1.7 2020-05-11 08:11:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
