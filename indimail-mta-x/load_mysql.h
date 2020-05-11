@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.5  2020-05-11 10:55:57+05:30  Cprogrammer
+ * use uppercasse for typedefs
+ *
  * Revision 1.4  2020-04-30 18:04:06+05:30  Cprogrammer
  * define function prototypes as extern
  *
@@ -19,9 +22,9 @@
 
 typedef unsigned int i_uint;
 #ifdef LIBMARIADB
-typedef struct st_mysql_res res;
+typedef struct st_mysql_res MYSQL_RES;
 #else
-typedef struct MYSQL_RES res;
+typedef struct MYSQL_RES MYSQL_RES;
 #endif
 
 extern int      use_sql;
@@ -32,7 +35,7 @@ extern i_uint   (*in_mysql_errno) (MYSQL *mysql);
 extern void     (*in_mysql_close) (MYSQL *);
 extern int      (*in_mysql_options) (MYSQL *, enum mysql_option, const void *);
 extern int      (*in_mysql_query) (MYSQL *, const char *);
-extern res     *(*in_mysql_store_result) (MYSQL *);
+extern MYSQL_RES *(*in_mysql_store_result) (MYSQL *);
 extern char   **(*in_mysql_fetch_row) (MYSQL_RES *);
 extern my_ulonglong (*in_mysql_num_rows)(MYSQL_RES *);
 extern my_ulonglong (*in_mysql_affected_rows) (MYSQL *);
