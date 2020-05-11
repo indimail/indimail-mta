@@ -1,5 +1,8 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.36  2020-05-11 11:15:49+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.35  2018-06-02 09:58:37+05:30  Cprogrammer
  * fqdn of ip_mx struct was pointing to a location that could be overwritten
  *
@@ -162,8 +165,7 @@ static stralloc tld = {0};
 #endif
 
 static unsigned short
-getshort(c)
-	unsigned char  *c;
+getshort(unsigned char *c)
 {
 	unsigned short  u;
 	u = c[0];
@@ -205,9 +207,7 @@ ns_msg          msg;
 #endif
 
 static int
-resolve(domain, type)
-	stralloc       *domain;
-	int             type;
+resolve(stralloc *domain, int type)
 {
 	int             n;
 	int             i;
@@ -263,8 +263,7 @@ resolve(domain, type)
 }
 
 static int
-findname(wanttype)
-	int             wanttype;
+findname(int wanttype)
 {
 	unsigned short  rrtype;
 	unsigned short  rrdlen;
@@ -296,8 +295,7 @@ findname(wanttype)
 }
 
 static int
-findip(wanttype)
-	int             wanttype;
+findip(int wanttype)
 {
 	unsigned short  rrtype;
 	unsigned short  rrdlen;
@@ -333,8 +331,7 @@ findip(wanttype)
 
 #ifdef IPV6
 static int
-findip6(wanttype)
-	int             wanttype;
+findip6(int wanttype)
 {
 	unsigned short  rrtype;
 	unsigned short  rrdlen;
@@ -367,8 +364,7 @@ findip6(wanttype)
 #endif
 
 static int
-findmx(wanttype)
-	int             wanttype;
+findmx(int wanttype)
 {
 	unsigned short  rrtype;
 	unsigned short  rrdlen;
@@ -401,8 +397,7 @@ findmx(wanttype)
 }
 
 void
-dns_init(flagsearch)
-	int             flagsearch;
+dns_init(int flagsearch)
 {
 	res_init();
 	if (flagsearch)
@@ -410,8 +405,7 @@ dns_init(flagsearch)
 }
 
 int
-dns_cname(sa)
-	stralloc       *sa;
+dns_cname(stralloc *sa)
 {
 	int             r;
 	int             loop;
@@ -453,16 +447,13 @@ dns_cname(sa)
 #define FMT_IAA 40
 
 static int
-iaafmt(s, ip, dom)
-	char           *s;
-	ip_addr        *ip;
-	const char     *dom;
+iaafmt(char *s, ip_addr *ip4, const char *dom)
 {
 	unsigned int    i;
 	unsigned int    len;
 
 	len = 0;
-	i = fmt_ulong(s, (unsigned long) ip->d[3]);
+	i = fmt_ulong(s, (unsigned long) ip4->d[3]);
 	len += i;
 	if (s)
 		s += i;
@@ -470,7 +461,7 @@ iaafmt(s, ip, dom)
 	len += i;
 	if (s)
 		s += i;
-	i = fmt_ulong(s, (unsigned long) ip->d[2]);
+	i = fmt_ulong(s, (unsigned long) ip4->d[2]);
 	len += i;
 	if (s)
 		s += i;
@@ -478,7 +469,7 @@ iaafmt(s, ip, dom)
 	len += i;
 	if (s)
 		s += i;
-	i = fmt_ulong(s, (unsigned long) ip->d[1]);
+	i = fmt_ulong(s, (unsigned long) ip4->d[1]);
 	len += i;
 	if (s)
 		s += i;
@@ -486,7 +477,7 @@ iaafmt(s, ip, dom)
 	len += i;
 	if (s)
 		s += i;
-	i = fmt_ulong(s, (unsigned long) ip->d[0]);
+	i = fmt_ulong(s, (unsigned long) ip4->d[0]);
 	len += i;
 	if (s)
 		s += i;
@@ -502,8 +493,7 @@ iaafmt(s, ip, dom)
 static stralloc txt = { 0 };
 
 static int
-findtxt(wanttype)
-	int             wanttype;
+findtxt(int wanttype)
 {
 	unsigned short  rrtype;
 	unsigned short  rrdlen;
@@ -543,13 +533,11 @@ findtxt(wanttype)
 }
 
 static int
-dns_txtplus(ssa, sa)
-	strsalloc      *ssa;
-	stralloc       *sa;
+dns_txtplus(strsalloc *ssa, stralloc *domain)
 {
 	int             r;
 
-	switch (resolve(sa, T_TXT))
+	switch (resolve(domain, T_TXT))
 	{
 	case DNS_MEM:
 		return DNS_MEM;
@@ -562,10 +550,9 @@ dns_txtplus(ssa, sa)
 		if (r == DNS_SOFT)
 			return DNS_SOFT;
 		if (r == 1) {
-			stralloc        sa = { 0 };
-			if (!stralloc_copy(&sa, &txt))
+			if (!stralloc_copy(&tmpsa, &txt))
 				return DNS_MEM;
-			if (!strsalloc_append(ssa, &sa))
+			if (!strsalloc_append(ssa, &tmpsa))
 				return DNS_MEM;
 		}
 	}
@@ -575,17 +562,14 @@ dns_txtplus(ssa, sa)
 }
 
 int
-dns_txt(ssa, sa)
-	strsalloc      *ssa;
-	stralloc       *sa;
+dns_txt(strsalloc *ssa, stralloc *domain)
 {
-	int             r;
-	int             j;
+	int             r, j;
 
 	if (!strsalloc_readyplus(ssa, 0))
 		return DNS_MEM;
 	ssa->len = 0;
-	if ((r = dns_txtplus(ssa, sa)) < 0) {
+	if ((r = dns_txtplus(ssa, domain)) < 0) {
 		for (j = 0; j < ssa->len; ++j)
 			alloc_free(ssa->sa[j].s);
 		ssa->len = 0;
@@ -594,28 +578,24 @@ dns_txt(ssa, sa)
 }
 
 int
-dns_ptr(ssa, ip)
-	strsalloc      *ssa;
-	ip_addr        *ip;
+dns_ptr(strsalloc *ssa, ip_addr *ip4)
 {
 	int             r;
 
 	ssa->len = 0;
-	if ((r = dns_ptrplus(ssa, ip)) < 0)
+	if ((r = dns_ptrplus(ssa, ip4)) < 0)
 		ssa->len = 0;
 	return r;
 }
 
 static int
-dns_ptrplus(ssa, ip)
-	strsalloc      *ssa;
-	ip_addr        *ip;
+dns_ptrplus(strsalloc *ssa, ip_addr *ip4)
 {
 	int             r;
 
-	if (!stralloc_ready(&tmpsa, iaafmt((char *) 0, ip, ".in-addr.arpa.")))
+	if (!stralloc_ready(&tmpsa, iaafmt((char *) 0, ip4, ".in-addr.arpa.")))
 		return DNS_MEM;
-	tmpsa.len = iaafmt(tmpsa.s, ip, ".in-addr.arpa.");
+	tmpsa.len = iaafmt(tmpsa.s, ip4, ".in-addr.arpa.");
 	switch ((r = resolve(&tmpsa, T_PTR)))
 	{
 	case DNS_MEM:
@@ -641,15 +621,13 @@ dns_ptrplus(ssa, ip)
 }
 #else
 int
-dns_ptr(sa, ip)
-	stralloc       *sa;
-	ip_addr        *ip;
+dns_ptr(stralloc *sa, ip_addr *ip4)
 {
 	int             r;
 
-	if (!stralloc_ready(sa, iaafmt((char *) 0, ip, ".in-addr.arpa.")))
+	if (!stralloc_ready(sa, iaafmt((char *) 0, ip4, ".in-addr.arpa.")))
 		return DNS_MEM;
-	sa->len = iaafmt(sa->s, ip, ".in-addr.arpa.");
+	sa->len = iaafmt(sa->s, ip4, ".in-addr.arpa.");
 	switch (resolve(sa, T_PTR))
 	{
 	case DNS_MEM:
@@ -674,19 +652,16 @@ dns_ptr(sa, ip)
 
 #ifdef IPV6
 static int
-iaafmt6(s, ip, dom)
-	char           *s;
-	ip6_addr       *ip;
-	char           *dom;
+iaafmt6(char *s, ip6_addr *i6, char *dom)
 {
 	int             j;
 	static char     data[] = "0123456789abcdef";
 
 	if (s) {
 		for (j = 15; j >= 0; j--) {
-			*s++ = data[ip->d[j] & 0x0f];
+			*s++ = data[i6->d[j] & 0x0f];
 			*s++ = '.';
-			*s++ = data[(ip->d[j] >> 4) & 0x0f];
+			*s++ = data[(i6->d[j] >> 4) & 0x0f];
 			*s++ = '.';
 		}
 		str_copy(s, dom);
@@ -698,19 +673,17 @@ iaafmt6(s, ip, dom)
 }
 
 int
-dns_ptr6(ssa, ip)
 #ifdef USE_SPF
-	strsalloc      *ssa;
+dns_ptr6(strsalloc *ssa, ip6_addr *i6)
 #else
-	stralloc       *ssa;
+dns_ptr6(stralloc *ssa, ip6_addr *i6)
 #endif
-	ip6_addr       *ip;
 {
 	int             r;
 
-	if (!stralloc_ready(&tmpsa, iaafmt6((char *) 0, ip, "ip6.int")))
+	if (!stralloc_ready(&tmpsa, iaafmt6((char *) 0, i6, "ip6.int")))
 		return DNS_MEM;
-	tmpsa.len = iaafmt6(tmpsa.s, ip, "ip6.int");
+	tmpsa.len = iaafmt6(tmpsa.s, i6, "ip6.int");
 	switch (resolve(&tmpsa, T_PTR))
 	{
 	case DNS_MEM:
@@ -745,10 +718,7 @@ dns_ptr6(ssa, ip)
 #endif
 
 static int
-dns_ipplus(ia, sa, pref)
-	ipalloc        *ia;
-	stralloc       *sa;
-	int             pref;
+dns_ipplus(ipalloc *ia, stralloc *sa, int prefv)
 {
 	int             r, err4 = 0;
 #ifdef IPV6
@@ -827,7 +797,7 @@ dns_ipplus(ia, sa, pref)
 		while ((r = findip6(T_AAAA)) != 2) {
 			ix.af = AF_INET6;
 			ix.addr.ip6 = ip6;
-			ix.pref = pref;
+			ix.pref = prefv;
 			if (r == DNS_SOFT) {
 				err6 = DNS_SOFT;
 				break;
@@ -866,7 +836,7 @@ dns_ipplus(ia, sa, pref)
 		while ((r = findip(T_A)) != 2) {
 			ix.af = AF_INET;
 			ix.addr.ip = ip;
-			ix.pref = pref;
+			ix.pref = prefv;
 			if (r == DNS_SOFT) {
 				err4 = DNS_SOFT;
 				break;
@@ -905,9 +875,7 @@ dns_ipplus(ia, sa, pref)
 }
 
 int
-dns_ip(ia, sa)
-	ipalloc        *ia;
-	stralloc       *sa;
+dns_ip(ipalloc *ia, stralloc *sa)
 {
 	if (!ipalloc_readyplus(ia, 0))
 		return DNS_MEM;
@@ -916,10 +884,7 @@ dns_ip(ia, sa)
 }
 
 int
-dns_mxip(ia, sa, random)
-	ipalloc        *ia;
-	stralloc       *sa;
-	unsigned long   random;
+dns_mxip(ipalloc *ia, stralloc *sa, unsigned long random)
 {
 	int             r;
 	struct mx
@@ -1025,8 +990,7 @@ dns_mxip(ia, sa, random)
 }
 
 static int
-findstring(wanttype)
-	int             wanttype;
+findstring(int wanttype)
 {
 	unsigned short  rrtype;
 	unsigned short  rrdlen;
@@ -1060,31 +1024,28 @@ findstring(wanttype)
 }
 
 int
-dns_maps(sa, ip, suffix)
-	stralloc       *sa;
 #ifdef IPV6
-	ip6_addr       *ip;
+dns_maps(stralloc *sa, ip6_addr *i6, char *suffix)
 #else
-	ip_addr        *ip;
+dns_maps(stralloc *sa, ip_addr *i4, char *suffix)
 #endif
-	char           *suffix;
 {
 	int             r;
 
-	/*
+	/*-
 	 * First, look for a TXT type.  If it is found, we will skip looking
 	 * for an A record.
 	 */
 #ifdef IPV6
-	if (!stralloc_ready(sa, iaafmt6(NULL, ip, suffix)))
+	if (!stralloc_ready(sa, iaafmt6(NULL, i6, suffix)))
 #else
-	if (!stralloc_ready(sa, iaafmt(NULL, ip, suffix)))
+	if (!stralloc_ready(sa, iaafmt(NULL, i4, suffix)))
 #endif
 		return DNS_MEM;
 #ifdef IPV6
-	sa->len = iaafmt6(sa->s, ip, suffix);
+	sa->len = iaafmt6(sa->s, i6, suffix);
 #else
-	sa->len = iaafmt(sa->s, ip, suffix);
+	sa->len = iaafmt(sa->s, i4, suffix);
 #endif
 	switch (resolve(sa, T_TXT))
 	{
@@ -1137,8 +1098,7 @@ dns_maps(sa, ip, suffix)
 
 #ifdef HASTLSA
 static int
-findtlsa(wanttype)
-	int             wanttype;
+findtlsa(int wanttype)
 {
 	unsigned short  rrtype;
 	unsigned short  rrdlen;
@@ -1178,9 +1138,7 @@ findtlsa(wanttype)
 #endif
 
 static int
-dns_tlsarrplus(ta, sa)
-	tlsarralloc    *ta;
-	stralloc       *sa;
+dns_tlsarrplus(tlsarralloc *ta, stralloc *sa)
 {
 	int             r, i = 0;
 	uint32_t        ttl;
@@ -1215,9 +1173,7 @@ dns_tlsarrplus(ta, sa)
 }
 
 int
-dns_tlsarr(ta, sa)
-	tlsarralloc    *ta;
-	stralloc       *sa;
+dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 {
 	if (!tlsarralloc_readyplus(ta, 0))
 		return DNS_MEM;
@@ -1229,7 +1185,7 @@ dns_tlsarr(ta, sa)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.35 2018-06-02 09:58:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.36 2020-05-11 11:15:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
