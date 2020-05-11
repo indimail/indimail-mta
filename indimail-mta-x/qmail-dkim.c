@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.55  2020-05-11 11:06:35+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
  * Revision 1.54  2020-04-01 16:14:36+05:30  Cprogrammer
  * added header for MakeArgs() function
  *
@@ -381,7 +384,6 @@ pidopen()
 	die(63, 0);
 }
 
-char            tmp[FMT_ULONG];
 char           *dkimsign = 0;
 char           *dkimverify = 0;
 char           *dkimadspverify = 0, *dkimpractice =  "FGHIJKLMNPQRSTUVWX";
@@ -493,7 +495,7 @@ char           *dns_text(char *);
 int
 ParseTagValues(char *list, char *letters[], char *values[])
 {
-	char           *tmp, *ptr, *key;
+	char           *t, *ptr, *key;
 	int             i;
 
 	/*- start with all args unset */
@@ -519,12 +521,12 @@ ParseTagValues(char *list, char *letters[], char *values[])
 					}
 					values[i] = ptr;
 					for(;*ptr && *ptr != ';';ptr++);
-					tmp = ptr;
+					t = ptr;
 					if (*ptr)
 						*ptr++ = 0;
-					for(;tmp != values[i];tmp--) { /*- RFC 4871 3.2 */
-						if ((*tmp == ' ') || (*tmp == '\t') || (*tmp == '\r') || (*tmp == '\n')) {
-							*tmp = 0;
+					for(;t != values[i];t--) { /*- RFC 4871 3.2 */
+						if ((*t == ' ') || (*t == '\t') || (*t == '\r') || (*t == '\n')) {
+							*t = 0;
 							continue;
 						}
 						break;
@@ -1123,7 +1125,7 @@ main(int argc, char *argv[])
 	int             sCount = 0, sSize = 0;
 	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0, len, token_len;
 	unsigned long   pid;
-	char           *selector, *p;
+	char           *selector, *ptr;
 	stralloc        dkimfn = {0};
 	DKIMSignOptions opts = { 0 };
 	DKIMVerifyDetails *pDetails;
@@ -1132,10 +1134,10 @@ main(int argc, char *argv[])
 	starttime = now();
 	sig_blocknone();
 	umask(033);
-	if (!(p = env_get("ERROR_FD")))
+	if (!(ptr = env_get("ERROR_FD")))
 		errfd = CUSTOM_ERR_FD;
 	else
-		scan_int(p, &errfd);
+		scan_int(ptr, &errfd);
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61, 0);
@@ -1144,12 +1146,12 @@ main(int argc, char *argv[])
 		binqqargs[0] = dkimqueue;
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
-	p = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
-	if (dkimverify && p && env_get("RELAYCLIENT_NODKIMVERIFY")) {
+	ptr = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
+	if (dkimverify && ptr && env_get("RELAYCLIENT_NODKIMVERIFY")) {
 		execv(*binqqargs, binqqargs);
 		die(120, 0);
 	}
-	if (!dkimsign && !dkimverify && p) {
+	if (!dkimsign && !dkimverify && ptr) {
 		if (!(dkimsign = env_get("DKIMKEY"))) {
 			if (!stralloc_copys(&dkimfn, "domainkeys/%/default"))
 				die(51, 0);
@@ -1160,12 +1162,12 @@ main(int argc, char *argv[])
 	}
 	if (dkimsign) {
 		/* selector */
-		p = dkimsign;
-		selector = p;
-		while (*p) {
-			if (*p == '/' && *(p + 1))
-				selector = p + 1;
-			p++;
+		ptr = dkimsign;
+		selector = ptr;
+		while (*ptr) {
+			if (*ptr == '/' && *(ptr + 1))
+				selector = ptr + 1;
+			ptr++;
 		}
 		str_copyb(opts.szSelector, selector, sizeof(opts.szSelector) - 1);
 
@@ -1173,14 +1175,14 @@ main(int argc, char *argv[])
 			custom_error("Z", "Invalid DKIMSIGNOPTIONS (#4.3.0)", 0);
 			_exit(88);
 		}
-		p = env_get("DKIMIDENTITY");
-		if (p && *p)
-			str_copyb(opts.szIdentity, p, sizeof(opts.szIdentity) - 1);
-		p = env_get("DKIMEXPIRE");
-		if (p && *p)
-			opts.expireTime = starttime + atol(p);
+		ptr = env_get("DKIMIDENTITY");
+		if (ptr && *ptr)
+			str_copyb(opts.szIdentity, ptr, sizeof(opts.szIdentity) - 1);
+		ptr = env_get("DKIMEXPIRE");
+		if (ptr && *ptr)
+			opts.expireTime = starttime + atol(ptr);
 		else
-		if (p)
+		if (ptr)
 			opts.expireTime = 0;
 		opts.pfnHeaderCallback = SignThisHeader;
 		if (DKIMSignInit(&ctxt, &opts) != DKIM_SUCCESS) { /*- failed to initialize signature */
@@ -1266,13 +1268,13 @@ main(int argc, char *argv[])
 	}
 	if (dkimsign || dkimverify) {
 		if (dkimsign) {
-			char           *p;
+			char           *t;
 
-			if (!(p = DKIMSignGetDomain(&ctxt))) {
+			if (!(t = DKIMSignGetDomain(&ctxt))) {
 				DKIMSignFree(&ctxt);
 				maybe_die_dkim(DKIM_INVALID_CONTEXT);
 			}
-			write_signature(p, dkimsign); /*- calls DKIMSignFree(&ctxt) */
+			write_signature(t, dkimsign); /*- calls DKIMSignFree(&ctxt) */
 		} else
 		if (dkimverify) {
 			char            szPolicy[512];
@@ -1301,40 +1303,40 @@ main(int argc, char *argv[])
 
 				origRet = ret;
 				if ((domain = DKIMVerifyGetDomain(&ctxt))) {
-					if (!(p = env_get("SIGNATUREDOMAINS"))) {
+					if (!(ptr = env_get("SIGNATUREDOMAINS"))) {
 						if (control_readfile(&sigdomains, "signaturedomains", 0) == -1)
 							die(55, 2);
 					} else
-					if (!stralloc_copys(&sigdomains, p))
+					if (!stralloc_copys(&sigdomains, ptr))
 						die(51, 2);
-					for (len = 0, p = sigdomains.s;len < sigdomains.len;) {
-						len += ((token_len = str_len(p)) + 1); /*- next domain */
-						if (!case_diffb(p, token_len, domain)) {
+					for (len = 0, ptr = sigdomains.s;len < sigdomains.len;) {
+						len += ((token_len = str_len(ptr)) + 1); /*- next domain */
+						if (!case_diffb(ptr, token_len, domain)) {
 							ret = origRet;
 							skip_nosignature_domain = 1;
 							useADSP = 0;
 							useSSP = 0;
 							break;
 						}
-						p = sigdomains.s + len;
+						ptr = sigdomains.s + len;
 					}
 					/* if not found in signaturedomains */
 					if (!skip_nosignature_domain) {
-						if (!(p = env_get("NOSIGNATUREDOMAINS"))) {
+						if (!(ptr = env_get("NOSIGNATUREDOMAINS"))) {
 							if (control_readfile(&nsigdomains, "nosignaturedomains", 0) == -1)
 								die(55, 2);
 						} else
-						if (!stralloc_copys(&nsigdomains, p))
+						if (!stralloc_copys(&nsigdomains, ptr))
 							die(51, 2);
-						for (len = 0, p = nsigdomains.s;len < nsigdomains.len;) {
-							len += ((token_len = str_len(p)) + 1); /*- next domain */
-							if (*p == '*' || !case_diffb(p, token_len, domain)) {
+						for (len = 0, ptr = nsigdomains.s;len < nsigdomains.len;) {
+							len += ((token_len = str_len(ptr)) + 1); /*- next domain */
+							if (*ptr == '*' || !case_diffb(ptr, token_len, domain)) {
 								ret = DKIM_NEUTRAL;
 								useADSP = 0;
 								useSSP = 0;
 								break;
 							}
-							p = nsigdomains.s + len;
+							ptr = nsigdomains.s + len;
 						}
 					}
 				}
@@ -1355,10 +1357,10 @@ main(int argc, char *argv[])
 				} else
 				if (useSSP) {
 					int             bTestingPractices = 0;
-					char           *domain;
+					char           *domain_t;
 
-					if ((domain = DKIMVerifyGetDomain(&ctxt)))
-						resDKIMSSP = checkSSP(domain, &bTestingPractices);
+					if ((domain_t = DKIMVerifyGetDomain(&ctxt)))
+						resDKIMSSP = checkSSP(domain_t, &bTestingPractices);
 					if (sCount > 0) {
 						if ((resDKIMSSP == DKIM_SSP_UNKNOWN || resDKIMSSP == DKIM_SSP_ALL))
 							ret = (sCount == sSize ? DKIM_SUCCESS : DKIM_PARTIAL_SUCCESS);
@@ -1438,7 +1440,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.54 2020-04-01 16:14:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.55 2020-05-11 11:06:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
