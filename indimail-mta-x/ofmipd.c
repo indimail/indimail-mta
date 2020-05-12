@@ -1,5 +1,10 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.15  2020-05-12 12:38:19+05:30  Cprogrammer
+ * fixed signedness error (CVE-2005-1515)
+ * c89 function prototypes
+ * added maxcmdlen control file to limit command length
+ *
  * Revision 1.14  2020-05-11 11:03:26+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -72,6 +77,7 @@
 #include "tai.h"
 #include "caltime.h"
 #include "cdb.h"
+#include "control.h"
 
 int             auth_login(char *);
 int             auth_plain(char *);
@@ -91,8 +97,7 @@ struct authcmd
 {
 	char           *text;
 	int             (*fun) ();
-} authcmds[] =
-{
+} authcmds[] = {
 	{"login", auth_login},
 	{"plain", auth_plain},
 	{"cram-md5", auth_cram},
@@ -117,8 +122,7 @@ safewrite(fd, buf, len)
 {
 	int             r;
 
-	if ((r = timeoutwrite(timeout, fd, buf, len)) <= 0)
-	{
+	if ((r = timeoutwrite(timeout, fd, buf, len)) <= 0) {
 		logerr_start();
 		logerrf("write error (disconnect?): quitting\n");
 		_exit(1);
@@ -137,15 +141,13 @@ flush()
 }
 
 void
-out(s)
-	char           *s;
+out(char *s)
 {
 	substdio_puts(&ssout, s);
 }
 
 void
-logerr(s)
-	char           *s;
+logerr(char *s)
 {
 	if (substdio_puts(&sserr, s))
 		_exit (1);
@@ -179,18 +181,15 @@ log_trans(char *arg1, char *arg2, int rcptlen, char *arg3)
 	char           *ptr;
 	int             idx;
 
-	for (ptr = arg2 + 1, idx = 0; idx < rcptlen; idx++)
-	{
-		if (!arg2[idx])
-		{
+	for (ptr = arg2 + 1, idx = 0; idx < rcptlen; idx++) {
+		if (!arg2[idx]) {
 			logerr_start();
 			logerr("MAIL from <");
 			logerr(arg1);
 			logerr("> RCPT <");
 			logerr(ptr);
 			logerr("> AUTH <");
-			if (arg3 && *arg3)
-			{
+			if (arg3 && *arg3) {
 				logerr(arg3);
 				switch (authd)
 				{
@@ -230,10 +229,8 @@ err_queue(char *arg1, char *arg2, int len, char *arg3, char *qqx,
 
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
 	strnum[fmt_ulong(strnum, databytes)] = 0;
-	for (ptr = arg2 + 1, idx = 0; idx < len; idx++)
-	{
-		if (!arg2[idx])
-		{
+	for (ptr = arg2 + 1, idx = 0; idx < len; idx++) {
+		if (!arg2[idx]) {
 			logerr_start();
 			logerr(qqx);
 			if (permanent)
@@ -245,8 +242,7 @@ err_queue(char *arg1, char *arg2, int len, char *arg3, char *qqx,
 			logerr("> RCPT <");
 			logerr(ptr);
 			logerr("> AUTH <");
-			if (arg3 && *arg3)
-			{
+			if (arg3 && *arg3) {
 				logerr(arg3);
 				switch (authd)
 				{
@@ -276,6 +272,16 @@ err_queue(char *arg1, char *arg2, int len, char *arg3, char *qqx,
 	}
 	if (substdio_flush(&sserr) == -1)
 		_exit(1);
+}
+
+void
+die_control(char *arg)
+{
+	logerr_start();
+	logerr("451 unable to read control file ");
+	logerr(arg);
+	logerrf(" (#4.3.0)\n");
+	_exit(1);
 }
 
 void
@@ -440,8 +446,7 @@ stralloc        addr = { 0 };	/*- will be 0-terminated, if addrparse returns 1 *
 stralloc        rwaddr = { 0 };
 
 int
-addrparse(arg)
-	char           *arg;
+addrparse(char *arg)
 {
 	int             i, flagesc, flagquoted;
 	char            ch, terminator;
@@ -507,21 +512,18 @@ stralloc        mailfrom = { 0 };
 stralloc        rcptto = { 0 };
 
 void
-smtp_helo(arg)
-	char           *arg;
+smtp_helo(char *arg)
 {
 	seenmail = 0;
 	out("250 ofmipd.local\r\n");
 }
 
 void
-smtp_ehlo(arg)
-	char           *arg;
+smtp_ehlo(char *arg)
 {
 	seenmail = 0;
 	out("250-ofmipd.local\r\n");
-	if (auth_smtp)
-	{
+	if (auth_smtp) {
 		out("250-AUTH LOGIN CRAM-MD5 PLAIN\r\n");
 		out("250-AUTH=LOGIN CRAM-MD5 PLAIN\r\n");
 	}
@@ -536,44 +538,35 @@ smtp_rset()
 }
 
 void
-smtp_mail(arg)
-	char           *arg;
+smtp_mail(char *arg)
 {
-	if (env_get("REQUIREAUTH") && !authd)
-	{
+	if (env_get("REQUIREAUTH") && !authd) {
 		err_authrequired();
 		return;
 	}
-	if (!addrparse(arg))
-	{
+	if (!addrparse(arg)) {
 		err_syntax();
 		return;
 	}
 	name = 0;
-	if (fncdb)
-	{
+	if (fncdb) {
 		uint32          dlen;
 		int             r;
 
-		if ((r = cdb_seek(fdcdb, rwaddr.s, rwaddr.len, &dlen)) == -1)
-		{
+		if ((r = cdb_seek(fdcdb, rwaddr.s, rwaddr.len, &dlen)) == -1) {
 			err_cdb();
 			return;
 		}
-		if (r)
-		{
+		if (r) {
 			if (!stralloc_ready(&cdbresult, (unsigned int) dlen))
 				nomem();
 			cdbresult.len = dlen;
 			name = cdbresult.s;
-			if (cdb_bread(fdcdb, name, cdbresult.len) == -1)
-			{
+			if (cdb_bread(fdcdb, name, cdbresult.len) == -1) {
 				err_cdb();
 				return;
 			}
-			r = byte_chr(name, cdbresult.len, '\0');
-			if (r == cdbresult.len)
-			{
+			if ((r = byte_chr(name, cdbresult.len, '\0')) == cdbresult.len) {
 				err_cdb();
 				return;
 			}
@@ -581,11 +574,8 @@ smtp_mail(arg)
 				nomem();
 		}
 	}
-	if (!stralloc_copy(&mailfrom, &rwaddr))
-		nomem();
-	if (!stralloc_0(&mailfrom))
-		nomem();
-	if (!stralloc_copys(&rcptto, ""))
+	if (!stralloc_copy(&mailfrom, &rwaddr) || 
+			!stralloc_0(&mailfrom) || !stralloc_copys(&rcptto, ""))
 		nomem();
 	seenmail = 1;
 	rcptcount = 0;
@@ -593,26 +583,18 @@ smtp_mail(arg)
 }
 
 void
-smtp_rcpt(arg)
-	char           *arg;
+smtp_rcpt(char *arg)
 {
-	if (!seenmail)
-	{
+	if (!seenmail) {
 		err_wantmail();
 		return;
 	}
-	if (!addrparse(arg))
-	{
+	if (!addrparse(arg)) {
 		err_syntax();
 		return;
 	}
-	if (!stralloc_0(&rwaddr))
-		nomem();
-	if (!stralloc_cats(&rcptto, "T"))
-		nomem();
-	if (!stralloc_cats(&rcptto, rwaddr.s))
-		nomem();
-	if (!stralloc_0(&rcptto))
+	if (!stralloc_0(&rwaddr) || !stralloc_cats(&rcptto, "T") ||
+			!stralloc_cats(&rcptto, rwaddr.s) || !stralloc_0(&rcptto))
 		nomem();
 	++rcptcount;
 	out("250 ok\r\n");
@@ -621,22 +603,18 @@ smtp_rcpt(arg)
 struct qmail    qqt;
 
 void
-put(buf, len)
-	char           *buf;
-	int             len;
+put(char *buf, unsigned int len)
 {
 	qmail_put(&qqt, buf, len);
 	databytes += len;
 }
 
 void
-myputs(buf)
-	char           *buf;
+myputs(char *buf)
 {
-	int             len;
+	unsigned int    len;
 
-	len = str_len(buf);
-	qmail_put(&qqt, buf, len);
+	qmail_put(&qqt, buf, (len = str_len(buf)));
 	databytes += len;
 }
 
@@ -644,12 +622,10 @@ stralloc        tmp = { 0 };
 stralloc        tmp2 = { 0 };
 
 void
-rewritelist(list)
-	stralloc       *list;
+rewritelist(stralloc *list)
 {
-	if (!rewritehost_list(&tmp, list->s, list->len, config_data(&rewrite)))
-		nomem();
-	if (!stralloc_copy(list, &tmp))
+	if (!rewritehost_list(&tmp, list->s, list->len, config_data(&rewrite)) ||
+			!stralloc_copy(list, &tmp))
 		nomem();
 }
 
@@ -658,9 +634,8 @@ putlist(char *name_t, stralloc *list)
 {
 	if (!list->len)
 		return;
-	if (!mess822_quotelist(&tmp, list))
-		nomem();
-	if (!mess822_fold(&tmp2, &tmp, name_t, 78))
+	if (!mess822_quotelist(&tmp, list) ||
+			!mess822_fold(&tmp2, &tmp, name_t, 78))
 		nomem();
 	put(tmp2.s, tmp2.len);
 }
@@ -741,38 +716,24 @@ finishheader()
 	put(tmp.s, tmp.len);
 	myputs("\n");
 
-	if (!msgid.len)
-	{
+	if (!msgid.len) {
 		static int      idcounter = 0;
 
-		if (!stralloc_copys(&msgid, "Message-ID: <"))
-			nomem();
-		if (!stralloc_catlong(&msgid, date.ct.date.year))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.date.month, 2))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.date.day, 2))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.hour, 2))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.minute, 2))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.second, 2))
-			nomem();
-		if (!stralloc_cats(&msgid, "."))
-			nomem();
-		if (!stralloc_catint(&msgid, ++idcounter))
-			nomem();
-		if (!stralloc_cat(&msgid, &idappend))
-			nomem();
-		if (!stralloc_cats(&msgid, ">\n"))
+		if (!stralloc_copys(&msgid, "Message-ID: <") ||
+				!stralloc_catlong(&msgid, date.ct.date.year) ||
+				!stralloc_catint0(&msgid, date.ct.date.month, 2) ||
+				!stralloc_catint0(&msgid, date.ct.date.day, 2) ||
+				!stralloc_catint0(&msgid, date.ct.hour, 2) ||
+				!stralloc_catint0(&msgid, date.ct.minute, 2) ||
+				!stralloc_catint0(&msgid, date.ct.second, 2) ||
+				!stralloc_cats(&msgid, ".") || !stralloc_catint(&msgid, ++idcounter) ||
+				!stralloc_cat(&msgid, &idappend) || !stralloc_cats(&msgid, ">\n"))
 			nomem();
 	}
 	put(msgid.s, msgid.len);
 
 	putlist("From: ", &from);
-	if (!from.len)
-	{
+	if (!from.len) {
 		myputs("From: ");
 		if (!mess822_quote(&tmp, mailfrom.s, name))
 			nomem();
@@ -794,15 +755,12 @@ finishheader()
 }
 
 ssize_t
-saferead(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
+
 	flush();
-	r = timeoutread(timeout, fd, buf, len);
-	if (r <= 0)
+	if ((r = timeoutread(timeout, fd, buf, len)) <= 0)
 		die_read();
 	return r;
 }
@@ -822,8 +780,7 @@ blast()
 	if (!mess822_begin(&h, a))
 		nomem();
 
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			die_read();
 		if (!match)
@@ -832,8 +789,7 @@ blast()
 		--line.len;
 		if (line.len && (line.s[line.len - 1] == '\r'))
 			--line.len;
-		if (line.len && (line.s[0] == '.'))
-		{
+		if (line.len && (line.s[0] == '.')) {
 			--line.len;
 			if (!line.len)
 				break;
@@ -842,14 +798,12 @@ blast()
 		}
 		line.s[line.len++] = '\n';
 
-		if (flagheader)
-			if (!mess822_ok(&line))
-			{
-				finishheader();
-				flagheader = 0;
-				if (line.len > 1)
-					put("\n", 1);
-			}
+		if (flagheader && !mess822_ok(&line)) {
+			finishheader();
+			flagheader = 0;
+			if (line.len > 1)
+				put("\n", 1);
+		}
 		if (!flagheader)
 			put(line.s, line.len);
 		else
@@ -875,20 +829,17 @@ smtp_data()
 	datastart.known = 1;
 	if (!mess822_date(&datastamp, &datastart))
 		nomem();
-	if (!seenmail)
-	{
+	if (!seenmail) {
 		err_wantmail();
 		return;
 	}
-	if (!rcptto.len)
-	{
+	if (!rcptto.len) {
 		err_wantrcpt();
 		return;
 	}
 	seenmail = 0;
 	databytes = 0;
-	if (qmail_open(&qqt) == -1)
-	{
+	if (qmail_open(&qqt) == -1) {
 		err_qqt();
 		return;
 	}
@@ -902,8 +853,7 @@ smtp_data()
 	qmail_from(&qqt, mailfrom.s);
 	qmail_put(&qqt, rcptto.s, rcptto.len);
 	qqx = qmail_close(&qqt);
-	if (!*qqx)
-	{
+	if (!*qqx) {
 		out("250 ok\r\n");
 		log_trans(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0);
 		return;
@@ -919,13 +869,10 @@ smtp_data()
 }
 
 void
-safecats(out, in)
-	stralloc       *out;
-	char           *in;
+safecats(stralloc *out, char *in)
 {
 	char            ch;
-	while ((ch = *in++))
-	{
+	while ((ch = *in++)) {
 		if (ch < 33)
 			ch = '?';
 		if (ch > 126)
@@ -950,8 +897,7 @@ received_init()
 
 	if (!stralloc_copys(&received, "Received: (ofmipd "))
 		nomem();
-	if (remoteinfo)
-	{
+	if (remoteinfo) {
 		safecats(&received, remoteinfo);
 		if (!stralloc_append(&received, "@"))
 			nomem();
@@ -970,12 +916,10 @@ authgetl(void)
 
 	if (!stralloc_copys(&authin, ""))
 		nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (!stralloc_readyplus(&authin, 1))
 			nomem(); /*- XXX */
-		i = substdio_get(&ssin, authin.s + authin.len, 1);
-		if (i != 1)
+		if ((i = substdio_get(&ssin, authin.s + authin.len, 1)) != 1)
 			die_read();
 		if (authin.s[authin.len] == '\n')
 			break;
@@ -1001,11 +945,7 @@ authenticate(void)
 	int             wstat;
 	int             pi[2];
 
-	if (!stralloc_0(&user))
-		nomem();
-	if (!stralloc_0(&pass))
-		nomem();
-	if (!stralloc_0(&resp))
+	if (!stralloc_0(&user) || !stralloc_0(&pass) || !stralloc_0(&resp))
 		nomem();
 	if (pipe(pi) == -1)
 		return err_pipe();
@@ -1015,8 +955,7 @@ authenticate(void)
 		return err_fork();
 	case 0:
 		close(pi[1]);
-		if (pi[0] != 3)
-		{
+		if (pi[0] != 3) {
 			dup2(pi[0], 3);
 			close(pi[0]);
 		}
@@ -1026,11 +965,9 @@ authenticate(void)
 	}
 	close(pi[0]);
 	substdio_fdbuf(&ssup, write, pi[1], upbuf, sizeof upbuf);
-	if (substdio_put(&ssup, user.s, user.len) == -1)
-		return err_write();
-	if (substdio_put(&ssup, pass.s, pass.len) == -1)
-		return err_write();
-	if (substdio_put(&ssup, resp.s, resp.len) == -1)
+	if (substdio_put(&ssup, user.s, user.len) == -1 ||
+			substdio_put(&ssup, pass.s, pass.len) == -1 ||
+			substdio_put(&ssup, resp.s, resp.len) == -1)
 		return err_write();
 	if (substdio_flush(&ssup) == -1)
 		return err_write();
@@ -1045,17 +982,14 @@ authenticate(void)
 }
 
 int
-auth_login(arg)
-	char           *arg;
+auth_login(char *arg)
 {
 	int             r;
 
-	if (*arg)
-	{
+	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &user)) == 1)
 			return err_input();
-	} else
-	{
+	} else {
 		out("334 VXNlcm5hbWU6\r\n");
 		flush(); /*- Username: */
 		if (authgetl() < 0)
@@ -1082,17 +1016,14 @@ auth_login(arg)
 }
 
 int
-auth_plain(arg)
-	char           *arg;
+auth_plain(char *arg)
 {
 	int             r, id = 0;
 
-	if (*arg)
-	{
+	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
 			return err_input();
-	} else
-	{
+	} else {
 		out("334 \r\n");
 		flush();
 		if (authgetl() < 0)
@@ -1171,45 +1102,35 @@ auth_cram()
 }
 
 void
-smtp_auth(arg)
-	char           *arg;
+smtp_auth(char *arg)
 {
 	int             i;
 	char           *cmd = arg;
 
-	if (env_get("SHUTDOWN"))
-	{
+	if (env_get("SHUTDOWN")) {
 		out("503 bad sequence of commands (#5.3.2)\r\n");
 		return;
 	}
-	if (!hostname || !*hostname || !childargs || !*childargs)
-	{
+	if (!hostname || !*hostname || !childargs || !*childargs) {
 		out("503 auth not available (#5.3.3)\r\n");
 		return;
 	}
-	if (authd)
-	{
+	if (authd) {
 		err_authd();
 		return;
 	}
-	if (seenmail)
-	{
+	if (seenmail) {
 		out("503 no auth during mail transaction (#5.5.0)\r\n");
 		return;
 	}
-	if (!stralloc_copys(&user, ""))
-		nomem();
-	if (!stralloc_copys(&pass, ""))
-		nomem();
-	if (!stralloc_copys(&resp, ""))
+	if (!stralloc_copys(&user, "") || !stralloc_copys(&pass, "") || !stralloc_copys(&resp, ""))
 		nomem();
 	i = str_chr(cmd, ' ');
 	arg = cmd + i;
 	while (*arg == ' ')
 		++arg;
 	cmd[i] = 0;
-	for (i = 0; authcmds[i].text; ++i)
-	{
+	for (i = 0; authcmds[i].text; ++i) {
 		if (case_equals(authcmds[i].text, cmd))
 			break;
 	}
@@ -1253,23 +1174,19 @@ struct commands smtpcommands[] = {
 };
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	sig_pipeignore();
 
 	if (!(remoteip = env_get("TCPREMOTEIP")))
 		remoteip = "unknown";
 	fncdb = argv[1];
-	if (fncdb && *fncdb)
-	{
+	if (fncdb && *fncdb) {
 		if ((fdcdb = open_read(fncdb)) == -1)
 			die_config();
 	} else
 		fncdb = 0;
-	if (argc > 3)
-	{
+	if (argc > 3) {
 		hostname = argv[2];
 		childargs = argv + 3;
 		auth_smtp = 1;
@@ -1283,6 +1200,10 @@ main(argc, argv)
 		die_config();
 	if (rwhconfig(&rewrite, &idappend) == -1)
 		die_config();
+	if (control_readint(&ctl_maxcmdlen, "maxcmdlen") == -1)
+		die_control("maxcmdlen");
+	if (ctl_maxcmdlen < 0)
+		ctl_maxcmdlen = 0;
 	out("220 ofmipd.local ESMTP\r\n");
 	commands(&ssin, smtpcommands);
 	nomem();
@@ -1293,7 +1214,7 @@ main(argc, argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.14 2020-05-11 11:03:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.15 2020-05-12 12:38:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
