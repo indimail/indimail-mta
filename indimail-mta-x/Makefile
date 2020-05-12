@@ -2898,11 +2898,11 @@ iftocc.o: compile iftocc.c mess822.h
 	./compile iftocc.c
 
 ofmipd: load ofmipd.o rewritehost.o rwhconfig.o sconfig.o \
-qmail.o auto_sysconfdir.o auto_control.o variables.o \
+qmail.o auto_sysconfdir.o control.o auto_control.o variables.o \
 auto_qmail.o commands.o mess822.a
 	./load ofmipd rewritehost.o rwhconfig.o sconfig.o qmail.o \
-	auto_sysconfdir.o variables.o auto_qmail.o auto_control.o \
-	commands.o mess822.a -lqmail
+	auto_sysconfdir.o variables.o auto_qmail.o control.o \
+	auto_control.o commands.o mess822.a -lqmail
 
 ofmipd.o: compile ofmipd.c commands.h qmail.h \
 sconfig.h mess822.h auto_sysconfdir.h variables.h \
