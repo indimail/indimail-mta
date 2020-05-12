@@ -1,5 +1,9 @@
 /*
  * $Log: qmail.c,v $
+ * Revision 1.26  2020-05-12 12:11:46+05:30  Cprogrammer
+ * c89 prototypes
+ * fix integer signedness error in qmail_put() (CVE-2005-1515)
+ *
  * Revision 1.25  2016-06-03 09:57:41+05:30  Cprogrammer
  * moved qmail-mullqueue, qmail-queue to sbin
  *
@@ -65,8 +69,7 @@
 
 /*- open the queue */
 int
-qmail_open(qq)
-	struct qmail   *qq;
+qmail_open(struct qmail *qq)
 {
 	int             pim[2];
 	int             pie[2];
@@ -75,14 +78,12 @@ qmail_open(qq)
 
 	if (pipe(pim) == -1)
 		return -1;
-	if (pipe(pie) == -1)
-	{
+	if (pipe(pie) == -1) {
 		close(pim[0]);
 		close(pim[1]);
 		return -1;
 	}
-	if (pipe(pic) == -1)
-	{
+	if (pipe(pic) == -1) {
 		close(pim[0]);
 		close(pim[1]);
 		close(pie[0]);
@@ -136,48 +137,37 @@ qmail_open(qq)
 }
 
 unsigned long
-qmail_qp(qq)
-	struct qmail   *qq;
+qmail_qp(struct qmail *qq)
 {
 	return qq->pid;
 }
 
 void
-qmail_fail(qq)
-	struct qmail   *qq;
+qmail_fail(struct qmail *qq)
 {
 	qq->flagerr = 1;
 }
 
 void
-qmail_put(qq, s, len)
-	struct qmail   *qq;
-	char           *s;
-	int             len;
+qmail_put(struct qmail *qq, char *s, unsigned int len)
 {
-	if (!qq->flagerr)
-	{
+	if (!qq->flagerr) {
 		if (substdio_put(&qq->ss, s, len) == -1)
 			qq->flagerr = 1;
 	}
 }
 
 void
-qmail_puts(qq, s)
-	struct qmail   *qq;
-	char           *s;
+qmail_puts(struct qmail *qq, char *s)
 {
-	if (!qq->flagerr)
-	{
+	if (!qq->flagerr) {
 		if (substdio_puts(&qq->ss, s) == -1)
 			qq->flagerr = 1;
 	}
 }
 
 void
-qmail_from(qq, s)
-	struct qmail   *qq;
-	char           *s;
+qmail_from(struct qmail *qq, char *s)
 {
 	if (substdio_flush(&qq->ss) == -1)
 		qq->flagerr = 1;
@@ -189,9 +179,7 @@ qmail_from(qq, s)
 }
 
 void
-qmail_to(qq, s)
-	struct qmail   *qq;
-	char           *s;
+qmail_to(struct qmail *qq, char * s)
 {
 	qmail_put(qq, "T", 1);
 	qmail_puts(qq, s);
@@ -199,8 +187,7 @@ qmail_to(qq, s)
 }
 
 char           *
-qmail_close(qq)
-	struct qmail   *qq;
+qmail_close(struct qmail *qq)
 {
 	int             wstat, exitcode, len = 0;
 	char            ch;
@@ -319,7 +306,7 @@ qmail_close(qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.25 2016-06-03 09:57:41+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.26 2020-05-12 12:11:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
