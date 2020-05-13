@@ -1,5 +1,8 @@
 /*
  * $Log: quote.c,v $
+ * Revision 1.4  2020-05-13 20:12:48+05:30  Cprogrammer
+ * fix integer signedness error for quote()
+ *
  * Revision 1.3  2004-10-22 20:29:51+05:30  Cprogrammer
  * added RCS id
  *
@@ -10,6 +13,8 @@
 #include "stralloc.h"
 #include "str.h"
 #include "quote.h"
+#include "builtinoflmacros.h"
+#include "error.h"
 
 /*
  * quote() encodes a box as per rfc 821 and rfc 822,
@@ -35,15 +40,19 @@ doit(saout, sain)
 	stralloc       *sain;
 {
 	char            ch;
-	int             i;
-	int             j;
+	int             i, j;
+	unsigned int    nlen;
 
-	if (!stralloc_ready(saout, sain->len * 2 + 2))
+	/* make sure the size calculation below does not overflow */
+	if (__builtin_mul_overflow(sain->len, 2, &nlen) || __builtin_add_overflow(nlen, 2, &nlen)) {
+		errno = error_nomem;
+		return 0;
+	}
+	if (!stralloc_ready(saout, nlen))
 		return 0;
 	j = 0;
 	saout->s[j++] = '"';
-	for (i = 0; i < sain->len; ++i)
-	{
+	for (i = 0; i < sain->len; ++i) {
 		ch = sain->s[i];
 		if ((ch == '\r') || (ch == '\n') || (ch == '"') || (ch == '\\'))
 			saout->s[j++] = '\\';
@@ -63,8 +72,7 @@ quote_need(s, n)
 	int             i;
 	if (!n)
 		return 1;
-	for (i = 0; i < n; ++i)
-	{
+	for (i = 0; i < n; ++i) {
 		uch = s[i];
 		if (uch >= 128)
 			return 1;
@@ -116,7 +124,7 @@ quote2(sa, s)
 void
 getversion_quote_c()
 {
-	static char    *x = "$Id: quote.c,v 1.3 2004-10-22 20:29:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: quote.c,v 1.4 2020-05-13 20:12:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
