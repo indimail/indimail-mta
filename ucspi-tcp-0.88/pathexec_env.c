@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_env.c,v $
+ * Revision 1.6  2020-05-14 12:47:37+05:30  Cprogrammer
+ * added comments on how environ variables are re-adjusted
+ *
  * Revision 1.5  2019-05-26 12:04:26+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -81,6 +84,12 @@ pathexec_dl(int argc, char **argv, char **envp, int (*func) (int, char **, char 
 				 */
 				if (byte_equal(plus.s + j, split, e[t])) {
 					if (e[t][split] == '=') {
+						/*- the last member gets assigned to e[t] because
+						 * existing e[t] is old and has a new definition
+						 * in plus.s + j
+						 * elen is decremented so that the 2nd last member
+						 * becomes the last member
+						 */
 						--elen;
 						e[t] = e[elen];
 						break;
@@ -134,6 +143,12 @@ pathexec(char **argv)
 				 */
 				if (byte_equal(plus.s + j, split, e[t])) {
 					if (e[t][split] == '=') {
+						/*- the last member gets assigned to e[t] because
+						 * existing e[t] is old and has a new definition
+						 * in plus.s + j
+						 * elen is decremented so that the 2nd last member
+						 * becomes the last member
+						 */
 						--elen;
 						e[t] = e[elen];
 						break;
