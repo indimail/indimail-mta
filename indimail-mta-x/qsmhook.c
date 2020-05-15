@@ -1,5 +1,8 @@
 /*
  * $Log: qsmhook.c,v $
+ * Revision 1.8  2020-05-15 10:58:21+05:30  Cprogrammer
+ * use unsigned int to store return value of str_len
+ *
  * Revision 1.7  2004-10-22 20:29:48+05:30  Cprogrammer
  * added RCS id
  *
@@ -27,9 +30,7 @@
 #include "sig.h"
 
 void
-die(e, s)
-	int             e;
-	char           *s;
+die(int e, char *s)
 {
 	substdio_putsflush(subfderr, s);
 	_exit(e);
@@ -59,36 +60,23 @@ die_badcmd()
 	die(100, "qsmhook: fatal: command not found\n");
 }
 
-int             flagrpline = 0;
-char           *rpline;
-int             flagufline = 1;
-char           *ufline;
-int             flagdtline = 0;
-char           *dtline;
-char           *host;
-char           *sender;
-char           *recip;
-
+int             flagrpline = 0, flagufline = 1, flagdtline = 0;
+char           *rpline, *ufline, *dtline;
+char           *host, *sender, *recip;
 stralloc        newarg = { 0 };
-
-substdio        ssout;
-char            outbuf[SUBSTDIO_OUTSIZE];
-substdio        ssin;
-char            inbuf[SUBSTDIO_INSIZE];
+substdio        ssin, ssout;
+char            inbuf[SUBSTDIO_INSIZE], outbuf[SUBSTDIO_OUTSIZE];
 
 int
 main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             pid;
-	int             wstat;
+	unsigned int    i;
+	int             pid, wstat, opt, flagesc;
 	int             pi[2];
-	int             opt;
 	char          **arg;
 	char           *x;
-	int             i;
-	int             flagesc;
 
 	sig_pipeignore();
 
@@ -104,8 +92,7 @@ main(argc, argv)
 		die_usage();
 	if (!(sender = env_get("SENDER")))
 		die_usage();
-	while ((opt = getopt(argc, argv, "DFlMmnPsx:")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "DFlMmnPsx:")) != opteof) {
 		switch (opt)
 		{
 		case 'D':
@@ -137,15 +124,12 @@ main(argc, argv)
 	argv += optind;
 	if (!*argv)
 		die_usage();
-	for (arg = argv; (x = *arg); ++arg)
-	{
+	for (arg = argv; (x = *arg); ++arg) {
 		if (!stralloc_copys(&newarg, ""))
 			die_temp();
 		flagesc = 0;
-		for (i = 0; x[i]; ++i)
-		{
-			if (flagesc)
-			{
+		for (i = 0; x[i]; ++i) {
+			if (flagesc) {
 				switch (x[i])
 				{
 				case '%':
@@ -222,7 +206,7 @@ main(argc, argv)
 void
 getversion_qsmhook_c()
 {
-	static char    *x = "$Id: qsmhook.c,v 1.7 2004-10-22 20:29:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qsmhook.c,v 1.8 2020-05-15 10:58:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
