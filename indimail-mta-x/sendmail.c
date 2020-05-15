@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.11  2020-05-15 11:00:31+05:30  Cprogrammer
+ * use unsigned int to store return value of str_len
+ *
  * Revision 1.10  2018-01-31 14:25:07+05:30  Cprogrammer
  * moved qmail-smtpd to sbin
  *
@@ -47,8 +50,7 @@ char           *smtpdarg[] = { "sbin/qmail-smtpd", 0 };
 void
 smtpd()
 {
-	if (!env_get("PROTO"))
-	{
+	if (!env_get("PROTO")) {
 		if (!env_put("RELAYCLIENT="))
 			nomem();
 		if (!env_put("DATABYTES=0"))
@@ -82,13 +84,10 @@ mailq()
 }
 
 void
-do_sender(s)
-	const char     *s;
+do_sender(const char *s)
 {
 	char           *x;
-	int             n;
-	int             a;
-	int             i;
+	unsigned int    n, a, i;
 
 	env_unset("QMAILNAME");
 	env_unset("MAILNAME");
@@ -97,8 +96,7 @@ do_sender(s)
 	env_unset("MAILHOST");
 	n = str_len((char *) s);
 	a = str_rchr((char *) s, '@');
-	if (a == n)
-	{
+	if (a == n) {
 		env_put2("QMAILUSER", (char *) s);
 		return;
 	}
@@ -121,21 +119,18 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             opt;
+	int             opt, i;
 	char          **qiargv;
 	char          **arg;
-	int             i;
 
-	if (chdir(auto_qmail) == -1)
-	{
+	if (chdir(auto_qmail) == -1) {
 		substdio_putsflush(subfderr, "sendmail: fatal: unable to switch to qmail home directory\n");
 		_exit(111);
 	}
 
 	flagh = 0;
 	sender = 0;
-	while ((opt = getopt(argc, argv, "ULhnIAvimte:f:p:o:B:F:EJxb:")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "ULhnIAvimte:f:p:o:B:F:EJxb:")) != opteof) {
 		switch (opt)
 		{
 		case 'B': /*- ignored */
@@ -232,8 +227,7 @@ main(argc, argv)
 
 	if (str_equal(optprogname, "mailq"))
 		mailq();
-	if (str_equal(optprogname, "newaliases"))
-	{
+	if (str_equal(optprogname, "newaliases")) {
 		substdio_putsflush(subfderr, "sendmail: fatal: please use fastforward/newaliases instead\n");
 		_exit(100);
 	}
@@ -243,8 +237,7 @@ main(argc, argv)
 	arg = qiargv;
 	*arg++ = "bin/qmail-inject";
 	*arg++ = (flagh ? "-H" : "-a");
-	if (sender)
-	{
+	if (sender) {
 		*arg++ = "-f";
 		*arg++ = sender;
     	do_sender(sender);
@@ -263,7 +256,7 @@ main(argc, argv)
 void
 getversion_sendmail_c()
 {
-	static char    *x = "$Id: sendmail.c,v 1.10 2018-01-31 14:25:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sendmail.c,v 1.11 2020-05-15 11:00:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
