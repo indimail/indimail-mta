@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.30  2020-05-15 10:42:52+05:30  Cprogrammer
+ * use unsigned variables for array offsets of cmds variable
+ *
  * Revision 1.29  2020-05-11 11:09:17+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -154,10 +157,8 @@ temp_qmail(fn)
 
 char           *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
 char           *user, *homedir, *local, *dash, *ext, *host, *sender, *aliasempty, *qqeh;
-char            buf[1024];
-char            outbuf[1024];
-int             flagdoit;
-int             flag99;
+char            buf[1024], outbuf[1024];
+int             flagdoit, flag99;
 stralloc        safeext = { 0 };
 stralloc        ufline = { 0 };
 stralloc        rpline = { 0 };
@@ -182,11 +183,9 @@ void die_control()
 
 void die_srs()
 {
-	if (!stralloc_copys(&foo, srs_error.s))
-		temp_nomem();
-	if (!stralloc_cats(&foo, " (#4.3.0)"))
-		temp_nomem();
-	if (!stralloc_0(&foo))
+	if (!stralloc_copys(&foo, srs_error.s)
+			|| !stralloc_cats(&foo, " (#4.3.0)")
+			|| !stralloc_0(&foo))
 		temp_nomem();
 	strerr_die1x(111,foo.s);
 }
@@ -274,31 +273,23 @@ maildir_child(char *dir)
 		if (!stralloc_copys(&fntmptph, "tmp/"))
 			temp_nomem();
 		strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0;
-		if (!stralloc_cats(&fntmptph, strnum))
-			temp_nomem();
-		if (!stralloc_append(&fntmptph, "."))
-			temp_nomem();
-		if (!stralloc_append(&fntmptph, "M"))
+		if (!stralloc_cats(&fntmptph, strnum)
+				|| !stralloc_append(&fntmptph, ".")
+				|| !stralloc_append(&fntmptph, "M"))
 			temp_nomem();
 		strnum[fmt_ulong(strnum, tmval.tv_usec)] = 0;
-		if (!stralloc_cats(&fntmptph, strnum))
-			temp_nomem();
-		if (!stralloc_append(&fntmptph, "P"))
+		if (!stralloc_cats(&fntmptph, strnum)
+				|| !stralloc_append(&fntmptph, "P"))
 			temp_nomem();
 		strnum[fmt_ulong(strnum, pid)] = 0;
-		if (!stralloc_cats(&fntmptph, strnum))
-			temp_nomem();
-		if (!stralloc_append(&fntmptph, "."))
-			temp_nomem();
-		if (!stralloc_cat(&fntmptph, &hostname))
-			temp_nomem();
-		if (!stralloc_0(&fntmptph))
+		if (!stralloc_cats(&fntmptph, strnum)
+				|| !stralloc_append(&fntmptph, ".")
+				|| !stralloc_cat(&fntmptph, &hostname)
+				|| !stralloc_0(&fntmptph))
 			temp_nomem();
 		if (stat(fntmptph.s, &st) == -1 && errno == error_noent)
 			break;
-		/*
-		 * really should never get to this point 
-		 */
+		/*- really should never get to this point */
 		if (loop == 2)
 			_exit(1);
 		sleep(2);
@@ -339,18 +330,16 @@ maildir_child(char *dir)
 	if (!stralloc_copys(&fnnewtph, "new/"))
 		temp_nomem();
 	strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0;
-	if (!stralloc_cats(&fnnewtph, strnum))
-		temp_nomem();
-	if (!stralloc_append(&fnnewtph, "."))
+	if (!stralloc_cats(&fnnewtph, strnum)
+			|| !stralloc_append(&fnnewtph, "."))
 		temp_nomem();
 	/*- in hexadecimal */
 	if (!stralloc_append(&fnnewtph, "I"))
 		temp_nomem();
 	s = alloc(fmt_xlong(0, st.st_ino) + fmt_xlong(0, st.st_dev));
 	i = fmt_xlong(s, st.st_ino);
-	if (!stralloc_catb(&fnnewtph, s, i))
-		temp_nomem();
-	if (!stralloc_append(&fnnewtph, "V"))
+	if (!stralloc_catb(&fnnewtph, s, i)
+			|| !stralloc_append(&fnnewtph, "V"))
 		temp_nomem();
 	i = fmt_xlong(s, st.st_dev);
 	if (!stralloc_catb(&fnnewtph, s, i))
@@ -360,27 +349,21 @@ maildir_child(char *dir)
 	if (!stralloc_append(&fnnewtph, "M"))
 		temp_nomem();
 	strnum[fmt_ulong(strnum, tmval.tv_usec)] = 0;
-	if (!stralloc_cats(&fnnewtph, strnum))
-		temp_nomem();
-	if (!stralloc_append(&fnnewtph, "P"))
+	if (!stralloc_cats(&fnnewtph, strnum)
+			|| !stralloc_append(&fnnewtph, "P"))
 		temp_nomem();
 	strnum[fmt_ulong(strnum, pid)] = 0;
-	if (!stralloc_cats(&fnnewtph, strnum))
-		temp_nomem();
-	if (!stralloc_append(&fnnewtph, "."))
-		temp_nomem();
-	if (!stralloc_cat(&fnnewtph, &hostname))
-		temp_nomem();
-	if (!stralloc_0(&fnnewtph))
+	if (!stralloc_cats(&fnnewtph, strnum)
+			|| !stralloc_append(&fnnewtph, ".")
+			|| !stralloc_cat(&fnnewtph, &hostname)
+			|| !stralloc_0(&fnnewtph))
 		temp_nomem();
 	if (link(fntmptph.s, fnnewtph.s) == -1)
 		goto fail;
 #ifdef USE_FSYNC
-	if (!env_get("USE_SYNCDIR")) {
-		if (use_fsync) {
-			if ((fd = open(fnnewtph.s, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0)
-				goto fail;
-		}
+	if (!env_get("USE_SYNCDIR") && use_fsync) {
+		if ((fd = open(fnnewtph.s, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0)
+			goto fail;
 	}
 #endif
 	/*
@@ -461,13 +444,10 @@ mailfile(char *fn)
 	pos = seek_cur(fd);
 	substdio_fdbuf(&ss, read, 0, buf, sizeof(buf));
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	if (substdio_put(&ssout, ufline.s, ufline.len))
-		goto writeerrs;
-	if (substdio_put(&ssout, rpline.s, rpline.len))
-		goto writeerrs;
-	if (substdio_put(&ssout, dtline.s, dtline.len))
-		goto writeerrs;
-	if (substdio_puts(&ssout, qqeh) == -1)
+	if (substdio_put(&ssout, ufline.s, ufline.len)
+			|| substdio_put(&ssout, rpline.s, rpline.len)
+			|| substdio_put(&ssout, dtline.s, dtline.len)
+			|| substdio_puts(&ssout, qqeh) == -1)
 		goto writeerrs;
 	for (;;) {
 		if (getln(&ss, &messline, &match, '\n') != 0) {
@@ -490,9 +470,7 @@ mailfile(char *fn)
 			break;
 		}
 	}
-	if (substdio_bputs(&ssout, "\n"))
-		goto writeerrs;
-	if (substdio_flush(&ssout))
+	if (substdio_bputs(&ssout, "\n") || substdio_flush(&ssout))
 		goto writeerrs;
 #ifdef USE_FSYNC
 	if (use_fsync && fsync(fd) == -1)
@@ -698,15 +676,11 @@ qmeox(char *dashowner)
 {
 	struct stat     st;
 
-	if (!stralloc_copys(&qme, ".qmail"))
-		temp_nomem();
-	if (!stralloc_cats(&qme, dash))
-		temp_nomem();
-	if (!stralloc_cat(&qme, &safeext))
-		temp_nomem();
-	if (!stralloc_cats(&qme, dashowner))
-		temp_nomem();
-	if (!stralloc_0(&qme))
+	if (!stralloc_copys(&qme, ".qmail")
+			|| !stralloc_cats(&qme, dash)
+			|| !stralloc_cat(&qme, &safeext)
+			|| !stralloc_cats(&qme, dashowner)
+			|| !stralloc_0(&qme))
 		temp_nomem();
 	if (stat(qme.s, &st) == -1) {
 		if (error_temp(errno))
@@ -724,13 +698,9 @@ qmeexists(int *fd, int *cutable)
 	if (!stralloc_0(&qme))
 		temp_nomem();
 
-	*fd = open_read(qme.s);
-	if (*fd == -1) {
-		if (error_temp(errno))
-			temp_qmail(qme.s);
-		if (errno == error_perm)
-			temp_qmail(qme.s);
-		if (errno == error_acces)
+	if ((*fd = open_read(qme.s)) == -1) {
+		if (error_temp(errno) || errno == error_perm
+				|| errno == error_acces)
 			temp_qmail(qme.s);
 		return 0;
 	}
@@ -761,11 +731,9 @@ qmesearch(int *fd, int *cutable)
 {
 	int             i;
 
-	if (!stralloc_copys(&qme, ".qmail"))
-		temp_nomem();
-	if (!stralloc_cats(&qme, dash))
-		temp_nomem();
-	if (!stralloc_cat(&qme, &safeext))
+	if (!stralloc_copys(&qme, ".qmail")
+			|| !stralloc_cats(&qme, dash)
+			|| !stralloc_cat(&qme, &safeext))
 		temp_nomem();
 	if (qmeexists(fd, cutable)) {
 		if (safeext.len >= 7) {
@@ -781,13 +749,10 @@ qmesearch(int *fd, int *cutable)
 	}
 	for (i = safeext.len; i >= 0; --i) {
 		if (!i || (safeext.s[i - 1] == '-')) {
-			if (!stralloc_copys(&qme, ".qmail"))
-				temp_nomem();
-			if (!stralloc_cats(&qme, dash))
-				temp_nomem();
-			if (!stralloc_catb(&qme, safeext.s, i))
-				temp_nomem();
-			if (!stralloc_cats(&qme, "default"))
+			if (!stralloc_copys(&qme, ".qmail")
+					|| !stralloc_cats(&qme, dash)
+					|| !stralloc_catb(&qme, safeext.s, i)
+					|| !stralloc_cats(&qme, "default"))
 				temp_nomem();
 			if (qmeexists(fd, cutable)) {
 				if (i <= str_len(ext))	/*- paranoia */
@@ -824,7 +789,7 @@ count_print()
 }
 
 void
-sayit(char *type, char *cmd, int len)
+sayit(char *type, char *cmd, unsigned int len)
 {
 	substdio_puts(subfdoutsmall, type);
 	substdio_put(subfdoutsmall, cmd, len);
@@ -836,7 +801,8 @@ main(int argc, char **argv)
 {
 	char           *x;
 	char          **recips;
-	int             opt, i, j, k, fd, numforward, flagforwardonly;
+	int             opt, fd, flagforwardonly;
+	unsigned int    i, j, numforward;
 	datetime_sec    starttime;
 
 	umask(077);
@@ -859,95 +825,62 @@ main(int argc, char **argv)
 	} /*- while ((opt = getopt(argc, argv, "nN")) != opteof) */
 	argc -= optind;
 	argv += optind;
-	if (!(user = *argv++))
+	if (!(user = *argv++) || !(homedir = *argv++)
+			|| !(local = *argv++) || !(dash = *argv++)
+			|| !(ext = *argv++) || !(host = *argv++)
+			|| !(sender = *argv++)
+			|| !(aliasempty = *argv++)
+			|| !(qqeh = *argv++))
 		usage();
-	if (!(homedir = *argv++))
-		usage();
-	if (!(local = *argv++))
-		usage();
-	if (!(dash = *argv++))
-		usage();
-	if (!(ext = *argv++))
-		usage();
-	if (!(host = *argv++))
-		usage();
-	if (!(sender = *argv++))
-		usage();
-	if (!(aliasempty = *argv++))
-		usage();
-	if (!(qqeh = *argv++))
-		usage();
-	if (*argv)
-		usage();
-	if (homedir[0] != '/')
+	if (*argv || homedir[0] != '/')
 		usage();
 	checkhome(homedir);
-	if (!env_put2("HOST", host))
-		temp_nomem();
-	if (!env_put2("HOME", homedir))
-		temp_nomem();
-	if (!env_put2("USER", user))
-		temp_nomem();
-	if (!env_put2("LOCAL", local))
-		temp_nomem();
-	if (!env_unset("SPAMFILTER"))
+	if (!env_put2("HOST", host) || !env_put2("HOME", homedir)
+			|| !env_put2("USER", user)
+			|| !env_put2("LOCAL", local)
+			|| !env_unset("SPAMFILTER"))
 		temp_nomem();
 #if defined(MAILARCHIVE)
 	if (!env_put2("MAILARCHIVE", "forward.arch"))
 		temp_nomem();
 #endif
-	if (!stralloc_copys(&envrecip, local))
+	if (!stralloc_copys(&envrecip, local)
+			|| !stralloc_cats(&envrecip, "@")
+			|| !stralloc_cats(&envrecip, host)
+			|| !stralloc_copy(&foo, &envrecip)
+			|| !stralloc_0(&foo))
 		temp_nomem();
-	if (!stralloc_cats(&envrecip, "@"))
-		temp_nomem();
-	if (!stralloc_cats(&envrecip, host))
-		temp_nomem();
-	if (!stralloc_copy(&foo, &envrecip))
-		temp_nomem();
-	if (!stralloc_0(&foo))
-		temp_nomem();
-	if (!env_put2("RECIPIENT", foo.s))
-		temp_nomem();
-	if (!stralloc_copys(&dtline, "Delivered-To: "))
-		temp_nomem();
-	if (!stralloc_cat(&dtline, &envrecip))
+	if (!env_put2("RECIPIENT", foo.s)
+			|| !stralloc_copys(&dtline, "Delivered-To: ")
+			|| !stralloc_cat(&dtline, &envrecip))
 		temp_nomem();
 	for (i = 0; i < dtline.len; ++i)
 		if (dtline.s[i] == '\n')
 			dtline.s[i] = '_';
-	if (!stralloc_cats(&dtline, "\n"))
-		temp_nomem();
-	if (!stralloc_copy(&foo, &dtline))
-		temp_nomem();
-	if (!stralloc_0(&foo))
+	if (!stralloc_cats(&dtline, "\n")
+			|| !stralloc_copy(&foo, &dtline)
+			|| !stralloc_0(&foo))
 		temp_nomem();
 	if (!env_put2("DTLINE", foo.s))
 		temp_nomem();
 	if (flagdoit)
 		bouncexf();
-	if (!env_put2("SENDER", sender))
-		temp_nomem();
-	if (!quote2(&foo, sender))
-		temp_nomem();
-	if (!stralloc_copys(&rpline, "Return-Path: <"))
-		temp_nomem();
-	if (!stralloc_cat(&rpline, &foo))
+	if (!env_put2("SENDER", sender) || !quote2(&foo, sender)
+			|| !stralloc_copys(&rpline, "Return-Path: <")
+			|| !stralloc_cat(&rpline, &foo))
 		temp_nomem();
 	for (i = 0; i < rpline.len; ++i)
 		if (rpline.s[i] == '\n')
 			rpline.s[i] = '_';
-	if (!stralloc_cats(&rpline, ">\n"))
+	if (!stralloc_cats(&rpline, ">\n")
+			|| !stralloc_copy(&foo, &rpline)
+			|| !stralloc_0(&foo))
 		temp_nomem();
-	if (!stralloc_copy(&foo, &rpline))
-		temp_nomem();
-	if (!stralloc_0(&foo))
-		temp_nomem();
-	if (!env_put2("RPLINE", foo.s))
-		temp_nomem();
-	if (!stralloc_copys(&ufline, "From "))
+	if (!env_put2("RPLINE", foo.s)
+			|| !stralloc_copys(&ufline, "From "))
 		temp_nomem();
 	if (*sender) {
-		int             len;
+		unsigned int    len;
 		char            ch;
 
 		len = str_len(sender);
@@ -961,17 +894,14 @@ main(int argc, char **argv)
 		}
 		ufline.len += len;
 	} else
-	if (!stralloc_cats(&ufline, "MAILER-DAEMON"))
-		temp_nomem();
-	if (!stralloc_cats(&ufline, " "))
+	if (!stralloc_cats(&ufline, "MAILER-DAEMON")
+			|| !stralloc_cats(&ufline, " "))
 		temp_nomem();
 	starttime = now();
 	if (!stralloc_cats(&ufline, myctime(starttime)))
 		temp_nomem();
 
-	if (!stralloc_copy(&foo, &ufline))
-		temp_nomem();
-	if (!stralloc_0(&foo))
+	if (!stralloc_copy(&foo, &ufline) || !stralloc_0(&foo))
 		temp_nomem();
 	if (!env_put2("UFLINE", foo.s))
 		temp_nomem();
@@ -1002,23 +932,17 @@ main(int argc, char **argv)
 	}
 	i = str_len(host);
 	i = byte_rchr(host, i, '.');
-	if (!stralloc_copyb(&foo, host, i))
-		temp_nomem();
-	if (!stralloc_0(&foo))
+	if (!stralloc_copyb(&foo, host, i) || !stralloc_0(&foo))
 		temp_nomem();
 	if (!env_put2("HOST2", foo.s))
 		temp_nomem();
 	i = byte_rchr(host, i, '.');
-	if (!stralloc_copyb(&foo, host, i))
-		temp_nomem();
-	if (!stralloc_0(&foo))
+	if (!stralloc_copyb(&foo, host, i) || !stralloc_0(&foo))
 		temp_nomem();
 	if (!env_put2("HOST3", foo.s))
 		temp_nomem();
 	i = byte_rchr(host, i, '.');
-	if (!stralloc_copyb(&foo, host, i))
-		temp_nomem();
-	if (!stralloc_0(&foo))
+	if (!stralloc_copyb(&foo, host, i) || !stralloc_0(&foo))
 		temp_nomem();
 	if (!env_put2("HOST4", foo.s))
 		temp_nomem();
@@ -1032,20 +956,15 @@ main(int argc, char **argv)
 		if (str_diff(sender, "#@[]")) {
 			if (qmeox("-owner") == 0) {
 				if (qmeox("-owner-default") == 0) {
-					if (!stralloc_copys(&ueo, local))
-						temp_nomem();
-					if (!stralloc_cats(&ueo, "-owner-@"))
-						temp_nomem();
-					if (!stralloc_cats(&ueo, host))
-						temp_nomem();
-					if (!stralloc_cats(&ueo, "-@[]"))
+					if (!stralloc_copys(&ueo, local)
+							|| !stralloc_cats(&ueo, "-owner-@")
+							|| !stralloc_cats(&ueo, host)
+							|| !stralloc_cats(&ueo, "-@[]"))
 						temp_nomem();
 				} else {
-					if (!stralloc_copys(&ueo, local))
-						temp_nomem();
-					if (!stralloc_cats(&ueo, "-owner@"))
-						temp_nomem();
-					if (!stralloc_cats(&ueo, host))
+					if (!stralloc_copys(&ueo, local)
+							|| !stralloc_cats(&ueo, "-owner@")
+							|| !stralloc_cats(&ueo, host))
 						temp_nomem();
 				}
 			}
@@ -1053,9 +972,7 @@ main(int argc, char **argv)
 	}
 	if (!stralloc_0(&ueo))
 		temp_nomem();
-	if (!env_put2("NEWSENDER", ueo.s))
-		temp_nomem();
-	if (!stralloc_ready(&cmds, 0))
+	if (!env_put2("NEWSENDER", ueo.s) || !stralloc_ready(&cmds, 0))
 		temp_nomem();
 	cmds.len = 0;
 	if (fd != -1)
@@ -1070,8 +987,7 @@ main(int argc, char **argv)
 		if (!stralloc_cats(&cmds, "\n"))
 			temp_nomem();
 	}
-	numforward = 0;
-	i = 0;
+	i = numforward = 0;
 	for (j = 0; j < cmds.len; ++j) {
 		if (cmds.s[j] == '\n') {
 			switch (cmds.s[i])
@@ -1082,13 +998,12 @@ main(int argc, char **argv)
 			case '|':
 				break;
 			default:
-				++numforward;
+				numforward++;
 			}
 			i = j + 1;
 		}
 	}
-	recips = (char **) alloc((numforward + 1) * sizeof(char *));
-	if (!recips)
+	if (!(recips = (char **) alloc((numforward + 1) * sizeof(char *))))
 		temp_nomem();
 	numforward = 0;
 	flag99 = 0;
@@ -1100,7 +1015,7 @@ main(int argc, char **argv)
 	for (j = 0; j < cmds.len; ++j) {
 		if (cmds.s[j] == '\n') {
 			cmds.s[j] = 0;
-			k = j;
+			unsigned int    k = j;
 			while ((k > i) && ((cmds.s[k - 1] == ' ') || (cmds.s[k - 1] == '\t')))
 				cmds.s[--k] = 0;
 			switch (cmds.s[i])
@@ -1165,13 +1080,8 @@ main(int argc, char **argv)
 								j += 2;
 								l = j;
 								for (; j < cmds.len; ++j) {
-									if (cmds.s[j] == 0)
-										break;
-									if (cmds.s[j] == '\t')
-										break;
-									if (cmds.s[j] == '\n')
-										break;
-									if (cmds.s[j] == ' ')
+									if (cmds.s[j] == 0 || cmds.s[j] == '\t'
+											|| cmds.s[j] == '\n' || cmds.s[j] == ' ')
 										break;
 								}
 								if (!str_diffn(cmds.s + i, cmds.s + l, j - l)) {
@@ -1219,7 +1129,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.29 2020-05-11 11:09:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.30 2020-05-15 10:42:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
