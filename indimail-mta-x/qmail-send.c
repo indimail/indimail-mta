@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.67  2020-05-16 09:57:09+05:30  Cprogrammer
+ * avoid possible integer overflow in rewrite()
+ *
  * Revision 1.66  2020-05-15 10:49:07+05:30  Cprogrammer
  * converted function prototypes to c89 standard
  * use unsigned int to store return value of str_len
@@ -452,7 +455,7 @@ stralloc        rwline = { 0 };
 int
 rewrite(char *recip)
 {
-	int             i, j, at;
+	unsigned int    i, j, at;
 	char           *x;
 	static stralloc addr = { 0 };
 
@@ -1219,7 +1222,7 @@ injectbounce(unsigned long id)
 #ifdef HAVESRS
 		if (*sender.s) {
 			if (srs_domain.len) {
-				int             j = 0;
+				unsigned int    j = 0;
 
 				j = byte_rchr(sender.s, sender.len, '@');
 				if (j < sender.len) {
@@ -1472,8 +1475,8 @@ del_status()
 void
 del_init()
 {
-	int             c;
-	int             i;
+	int             c, i;
+
 	for (c = 0; c < CHANNELS; ++c) {
 		flagspawnalive[c] = 1;
 		while (!(d[c] = (struct del *) alloc(concurrency[c] * sizeof (struct del))))
@@ -1493,6 +1496,7 @@ int
 del_canexit()
 {
 	int             c;
+
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagspawnalive[c] && !holdjobs[c]) { /* if dead or held /NJL/, nothing we can do about its jobs */
 			if (concurrencyused[c])
@@ -1503,8 +1507,7 @@ del_canexit()
 }
 
 int
-del_avail(c)
-	int             c;
+del_avail(int c)
 {
 	return flagspawnalive[c] && comm_canwrite(c) && !holdjobs[c] && (concurrencyused[c] < concurrency[c]);	/* NJL 1998/07/24 */
 }
@@ -1512,8 +1515,7 @@ del_avail(c)
 void
 del_start(int j, seek_pos mpos, char *recip)
 {
-	int             i;
-	int             c;
+	int             i, c;
 
 	c = jo[j].channel;
 	if (!flagspawnalive[c])
@@ -2837,7 +2839,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.66 2020-05-15 10:49:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.67 2020-05-16 09:57:09+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
