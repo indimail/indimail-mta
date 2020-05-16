@@ -126,7 +126,7 @@ will deliver the mail only if it comes from any of the domain listed in
 This restricts users to receive local mails only.
 
 .SH "EXIT CODES"
-0 if the delivery is completely successful;
+0 if the delivery is completely successful, 5 if out of disk quota;
 nonzero if any delivery instruction failed.
 Exit code 111
 indicates temporary failure.
