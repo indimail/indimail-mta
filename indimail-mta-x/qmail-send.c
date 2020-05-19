@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.68  2020-05-19 10:33:59+05:30  Cprogrammer
+ * define use_fsync for non-external qmail-todo
+ *
  * Revision 1.67  2020-05-16 09:57:09+05:30  Cprogrammer
  * avoid possible integer overflow in rewrite()
  *
@@ -2730,7 +2733,7 @@ main()
 		log5("alert: cannot start: unable to switch to queue directory: ", queuedesc, ":", error_str(errno), "\n");
 		_exit(111);
 	}
-#ifdef USE_FSYNC
+#if !defined(EXTERNAL_TOTO) && defined(USE_FSYNC)
 	if (env_get("USE_FSYNC"))
 		use_fsync = 1;
 #endif
@@ -2839,7 +2842,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.67 2020-05-16 09:57:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.68 2020-05-19 10:33:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
