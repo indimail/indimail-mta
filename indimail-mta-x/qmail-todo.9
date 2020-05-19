@@ -74,6 +74,18 @@ it will reread
 and
 .IR envnoathost .
 
+If the environment variable USE_SYNC is set, then\fBqmail-todo\fR writes
+all data to disk ("flushes") all modified in-core data of (i.e., modified
+buffer cache pages for) the new message to the disk device (or other
+permanent storage device) so that all  changed  information can  be
+retrieved even if the system crashes or is rebooted. This includes
+writing through or flushing a disk cache if present. The call blocks
+until the device reports that the transfer has completed. This is done
+for the info and mess files.
+
+If the environment variable USE_SYNCDIR is enabled, \fBqmail-todo\fR
+forces BSD style directory syncing.
+
 .SH INTERNALS
 Communication between qmail-send and qmail-todo
 

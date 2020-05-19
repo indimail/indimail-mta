@@ -25,11 +25,11 @@ to the envelope in \fIqueue/todo\fR to \fIqueue/intd\fR, qmail-queue syncs the d
 using the following two methods.
 .IP \[bu] 2
 .I BSD Style Synchronous Directory
-This gets enabled if \fBUSE_SYNCDIR\fR environment variable is defined
+This gets enabled if \fBUSE_SYNCDIR\fR environment variable is defined. This forces directory syncing.
 .IP \[bu]
 .I Using FSYNC
-\fBqmail-queue\fR opens the file in \fBqueue/todo\fR and uses the fsync(2) call. This
-hack forces directory syncing.
+\fBqmail-queue\fR opens the file in \fBqueue/todo\fR and uses the fsync(2)
+call to flush data buffers to the disk
 
 .SH CONTROL FILES
 \fBqmail-queue\fR use many control files to provide various features.
