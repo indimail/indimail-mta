@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.16  2020-05-19 21:21:55+05:30  Cprogrammer
+ * fixed shadowing of now by a global declaration
+ *
  * Revision 1.15  2020-05-12 12:38:19+05:30  Cprogrammer
  * fixed signedness error (CVE-2005-1515)
  * c89 function prototypes
@@ -820,12 +823,12 @@ stralloc        received = { 0 };
 void
 smtp_data()
 {
-	struct tai      now;
+	struct tai      n;
 	char           *qqx;
 	unsigned long   qp;
 
-	tai_now(&now);
-	caltime_utc(&datastart.ct, &now, (int *) 0, (int *) 0);
+	tai_now(&n);
+	caltime_utc(&datastart.ct, &n, (int *) 0, (int *) 0);
 	datastart.known = 1;
 	if (!mess822_date(&datastamp, &datastart))
 		nomem();
@@ -1214,7 +1217,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.15 2020-05-12 12:38:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.16 2020-05-19 21:21:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
