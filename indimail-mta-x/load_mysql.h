@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.6  2020-05-19 21:27:16+05:30  Cprogrammer
+ * fixed typedef for MYSQL_RES
+ *
  * Revision 1.5  2020-05-11 10:55:57+05:30  Cprogrammer
  * use uppercasse for typedefs
  *
@@ -22,9 +25,9 @@
 
 typedef unsigned int i_uint;
 #ifdef LIBMARIADB
-typedef struct st_mysql_res MYSQL_RES;
+typedef struct st_mysql_res MYRES;
 #else
-typedef struct MYSQL_RES MYSQL_RES;
+typedef struct MYSQL_RES MYRES;
 #endif
 
 extern int      use_sql;
@@ -35,7 +38,7 @@ extern i_uint   (*in_mysql_errno) (MYSQL *mysql);
 extern void     (*in_mysql_close) (MYSQL *);
 extern int      (*in_mysql_options) (MYSQL *, enum mysql_option, const void *);
 extern int      (*in_mysql_query) (MYSQL *, const char *);
-extern MYSQL_RES *(*in_mysql_store_result) (MYSQL *);
+extern MYRES   *(*in_mysql_store_result) (MYSQL *);
 extern char   **(*in_mysql_fetch_row) (MYSQL_RES *);
 extern my_ulonglong (*in_mysql_num_rows)(MYSQL_RES *);
 extern my_ulonglong (*in_mysql_affected_rows) (MYSQL *);
