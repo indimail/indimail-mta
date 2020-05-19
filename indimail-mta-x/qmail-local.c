@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.31  2020-05-19 10:34:49+05:30  Cprogrammer
+ * avoid race creating file in Maildir/tmp
+ *
  * Revision 1.30  2020-05-15 10:42:52+05:30  Cprogrammer
  * use unsigned variables for array offsets of cmds variable
  *
@@ -201,7 +204,7 @@ void
 sigalrm()
 {
 	tryunlinktmp();
-	_exit(3);
+	_exit (3);
 }
 
 /*
@@ -247,8 +250,8 @@ maildir_child(char *dir)
 	sig_alarmcatch(sigalrm);
 	if (chdir(dir) == -1) {
 		if (error_temp(errno))
-			_exit(1);
-		_exit(2);
+			_exit (1);
+		_exit (2);
 	}
 	pid = getpid();
 	host_a[0] = 0;
@@ -268,11 +271,12 @@ maildir_child(char *dir)
 		if (!stralloc_append(&hostname, s + loop))
 			temp_nomem();
 	}
+	if (!stralloc_copyb(&fntmptph, "tmp/", 4))
+		temp_nomem();
 	for (loop = 0;; ++loop) {
 		gettimeofday(&tmval, 0);
-		if (!stralloc_copys(&fntmptph, "tmp/"))
-			temp_nomem();
 		strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0;
+		fntmptph.len = 4;
 		if (!stralloc_cats(&fntmptph, strnum)
 				|| !stralloc_append(&fntmptph, ".")
 				|| !stralloc_append(&fntmptph, "M"))
@@ -287,20 +291,20 @@ maildir_child(char *dir)
 				|| !stralloc_cat(&fntmptph, &hostname)
 				|| !stralloc_0(&fntmptph))
 			temp_nomem();
-		if (stat(fntmptph.s, &st) == -1 && errno == error_noent)
+		if ((fd = open_excl(fntmptph.s)) >= 0)
 			break;
-		/*- really should never get to this point */
-		if (loop == 2)
-			_exit(1);
-		sleep(2);
+		if (errno == error_exist) {
+			/*- really should never get to this point */
+			if (loop == 2)
+				_exit (1);
+			usleep(100);
+		} else {
+			if (errno == error_dquot)
+				_exit (5);
+			_exit (1);
+		}
 	}
 	alarm(86400);
-	if ((fd = open_excl(fntmptph.s)) == -1) {
-		if (errno == error_dquot)
-			_exit(5);
-		else
-			_exit(1);
-	}
 	substdio_fdbuf(&ss, read, 0, buf, sizeof(buf));
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 	if (substdio_put(&ssout, rpline.s, rpline.len) == -1)
@@ -313,7 +317,7 @@ maildir_child(char *dir)
 	{
 	case -2:
 		tryunlinktmp();
-		_exit(4);
+		_exit (4);
 	case -3:
 		goto fail;
 	}
@@ -327,7 +331,7 @@ maildir_child(char *dir)
 #endif
 	if (close(fd) == -1)
 		goto fail;	/*- NFS dorks */
-	if (!stralloc_copys(&fnnewtph, "new/"))
+	if (!stralloc_copyb(&fnnewtph, "new/", 4))
 		temp_nomem();
 	strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0;
 	if (!stralloc_cats(&fnnewtph, strnum)
@@ -370,14 +374,14 @@ maildir_child(char *dir)
 	 * if it was error_exist, almost certainly successful; i hate NFS 
 	 */
 	tryunlinktmp();
-	_exit(0);
+	_exit (0);
 fail:
 	if (errno == error_dquot) {
 		tryunlinktmp();
-		_exit(5);
+		_exit (5);
 	} else {
 		tryunlinktmp();
-		_exit(1);
+		_exit (1);
 	}
 }
 
@@ -398,7 +402,7 @@ maildir(char *fn)
 		temp_fork();
 	case 0:
 		maildir_child(fn);
-		_exit(111);
+		_exit (111);
 	}
 	wait_pid(&wstat, child);
 	if (wait_crashed(wstat))
@@ -455,7 +459,7 @@ mailfile(char *fn)
 			if (flaglocked)
 				seek_trunc(fd, pos);
 			close(fd);
-			_exit(111);
+			_exit (111);
 		}
 		if (!match && !messline.len)
 			break;
@@ -490,7 +494,7 @@ writeerrs:
 	if (flaglocked)
 		seek_trunc(fd, pos);
 	close(fd);
-	_exit(111);
+	_exit (111);
 }
 
 void
@@ -532,14 +536,14 @@ mailprogram(char *prog)
 	case 77:
 	case 78:
 	case 112:
-		_exit(100);
+		_exit (100);
 	case 0:
 		break;
 	case 99:
 		flag99 = 1;
 		break;
 	default:
-		_exit(111);
+		_exit (111);
 	}
 }
 
@@ -1121,7 +1125,7 @@ main(int argc, char **argv)
 		}
 	}
 	count_print();
-	_exit(0);
+	_exit (0);
 	/*- Not reached */
 	return(0);
 }
@@ -1129,7 +1133,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.30 2020-05-15 10:42:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.31 2020-05-19 10:34:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
