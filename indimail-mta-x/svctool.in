@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.476 2020-05-10 04:33:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.477 2020-05-20 13:33:03+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.476 2020-05-10 04:33:57+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.477 2020-05-20 13:33:03+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5862,6 +5862,11 @@ if [ " $usesyncdir" = " " ] ; then
 else
 	echo > $conf_dir/USE_SYNCDIR
 fi
+if [ ! " $memory" = " " ] ; then
+	echo $memory > $conf_dir/SOFT_MEM
+else
+	echo 52428800 > $conf_dir/SOFT_MEM
+fi
 if [ " $persistdb" = " 1" ] ; then
 	echo postmaster > $conf_dir/ROUTE_NULL_USER
 	echo > $conf_dir/AUTHSELF
@@ -5943,8 +5948,19 @@ echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "exec 2>&1"
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-send.$tag/variables \\"
-echo "qmail-daemon \"\`/bin/cat $CONTROLDIR/defaultdelivery\`\""
+echo "if [ -s /service/qmail-send.25/variables/CONTROLDIR ] ; then"
+echo "  cntrl_dir=\`/bin/cat /service/qmail-send.25/variables/CONTROLDIR\`"
+echo "else"
+echo "  cntrl_dir=/etc/indimail/control"
+echo "fi"
+echo "if [ -f \$cntrl_dir/defaultdelivery ] ; then"
+echo "  defaultdelivery=\`/bin/cat \$cntrl_dir/defaultdelivery\`"
+echo "else"
+echo "  defaultdelivery=\"./Maildir/\""
+echo "fi"
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-send.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "$QmailBinPrefix/sbin/qmail-daemon \$defaultdelivery\""
 ) > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
 
