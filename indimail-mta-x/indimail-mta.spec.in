@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.219 2020-05-09 10:38:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.220 2020-05-21 12:08:41+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1494,9 +1494,11 @@ done
                                   %{qmaildir}/users
                                   %{qmaildir}/control
 %dir %attr(755,indimail,indimail) %{qsysconfdir}/control
+%if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)         %{mandir}
 %dir %attr(755,root,root)         %{mandir}/man1
 %dir %attr(755,root,root)         %{mandir}/man8
+%endif
 #
 %attr(755,root,root)              %{_prefix}/bin/sendmail
 %attr(755,root,root)              %{_prefix}/bin/qmail-inject
