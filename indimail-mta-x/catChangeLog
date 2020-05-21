@@ -29,7 +29,7 @@ do
 		continue
 	fi
 	if [ $flag -eq 0 ] ; then # first line
-		echo "* `date +"%a %b %d %Y %H:%S:%M %z"` mbhangui@gmail.com" @version@-@release@
+		echo "* `date +"%a %b %d %Y %H:%M:%S %z"` indimail-mta@indimail.org" @version@-@release@
 		flag=1
 		continue
 	elif [ $flag -eq 1 ] ; then
