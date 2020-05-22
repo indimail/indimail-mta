@@ -1,0 +1,154 @@
+#!/bin/sh
+version=$(head -1 conf-version)
+libdkim_version=$(grep libdkim_version indimail-mta.spec.in | head -1| awk '{print $3}')
+libsrs2_version=$(grep libsrs2_version indimail-mta.spec.in | head -1| awk '{print $3}')
+ucspi_version=$(grep ucspi_version indimail-mta.spec.in | head -1| awk '{print $3}')
+
+get_tar_files()
+{
+(
+for i in `grep "^Source" indimail-mta-x/indimail-mta.spec.in | awk '{print $2}' | grep "\.tar"`
+do
+	i=`basename $i`
+	echo $i
+done
+) | sort -u | sed \
+	-e 's/%{name}/indimail-mta/g' \
+	-e "s/%{version}/$version/g" \
+	-e "s/%{libdkim_version}/$libdkim_version/g" \
+	-e "s/%{libsrs2_version}/$libsrs2_version/g" \
+	-e "s/%{ucspi_version}/$ucspi_version/g" 
+}
+
+get_non_tar_files()
+{
+(
+for i in `grep "^Source" $1 | grep -v "\.tar" | awk '{print $2}'`
+do
+	i=`basename $i`
+	echo $i
+done
+) | sort -u | sed \
+	-e 's/%{name}/indimail-mta/g' \
+	-e "s/%{version}/$version/g" \
+	-e "s/%{libdkim_version}/$libdkim_version/g" \
+	-e "s/%{libsrs2_version}/$libsrs2_version/g" \
+	-e "s/%{ucspi_version}/$ucspi_version/g" 
+}
+
+get_dirname()
+{
+	echo $1 | sed \
+		-e 's}.tar.gz}}g' \
+		-e 's}.tar.bz2}}g' \
+		-e 's}.tar.xz}}g'
+}
+
+if test -f $HOME/.rpmmacros
+then
+	topdir=`grep ^%_topdir $HOME/.rpmmacros | awk '{print $2}'`
+	if test -n "$topdir"
+	then
+		rpmbuild=$topdir
+	else
+		rpmbuild=$HOME/rpmbuild
+	fi
+else
+	rpmbuild=$HOME/rpmbuild
+fi
+if [ -d ../stage ] ; then
+	/bin/rm -rf ../stage
+fi
+mkdir ../stage
+cd ..
+list=`get_tar_files`
+for i in $list
+do
+	echo $i | grep indimail-mta > /dev/null
+	if [ $? -eq 0 ] ; then
+		if [ ! -d indimail-mta-x ] ; then
+			echo "$i: No such file or directory" 1>&2
+			exit 1
+		fi
+		echo "Preparing indimail-mta-"$version""
+		/bin/cp -rp indimail-mta-x stage/indimail-mta-"$version"
+		cd stage/indimail-mta-"$version"
+		echo "Cleaning indimail-mta"
+		make -s clean > /dev/null
+		make -s distclean > /dev/null
+		/bin/rm -rf autom4te.cache .deps
+		cd ..
+		tar \
+			--exclude="indimail-mta-$version/.git" \
+			--exclude="indimail-mta-$version/debian" \
+			--exclude="indimail-mta-$version/RCS" \
+			-cf - indimail-mta-"$version" \
+			| gzip -c > $rpmbuild/SOURCES/indimail-mta-"$version".tar.gz
+		SRC="$rpmbuild/SOURCES/indimail-mta-"$version".tar.gz $SRC"
+		cd ..
+		continue
+	fi
+	dir=`get_dirname $i`
+	if [ ! -d $dir ] ; then
+		echo "$dir: No such file or directory" 1>&2
+		exit 1
+	fi
+	echo "Preparing $dir"
+	/bin/cp -rp $dir stage
+	cd stage/$dir
+	echo "Cleaning $dir"
+	make -s clean > /dev/null
+	make -s distclean > /dev/null
+	/bin/rm -rf autom4te.cache .deps
+	cd ..
+	tar \
+		--exclude="$dir/.git" \
+		--exclude="$dir/debian" \
+		--exclude="$dir/RCS" \
+		-cf - $dir \
+		| gzip -c > $rpmbuild/SOURCES/$dir.tar.gz
+	SRC="$rpmbuild/SOURCES/$dir.tar.gz $SRC"
+	cd ..
+done
+echo "Copying permissions files and rpmlintrc"
+for i in `get_non_tar_files indimail-mta-x/indimail-mta.spec.in`
+do
+	/bin/cp -p stage/indimail-mta-"$version"/$i $rpmbuild/SOURCES
+	SRC="$rpmbuild/SOURCES/$i $SRC"
+done
+if [ -f /usr/sbin/qmail-smtpd ] ; then
+	iversion=$(rpm -qf /usr/sbin/qmail-smtpd|cut -d- -f3)
+	if [ "$iversion" = "$version" ] ; then
+		release=$(rpm -qf /usr/sbin/qmail-smtpd | cut -d- -f4 | cut -d. -f2)
+		release=$(expr $release + 1)
+	else
+		release=1
+	fi
+else
+	release=1
+fi
+echo "Clearing stage directory"
+/bin/rm -rf stage
+echo -n "Build RPM for indimail-mta-"$version"-1."$release" (Y/N) - "
+read key
+if [ " $key" = " Y" -o " $key" = " y" ] ; then
+	cp indimail-mta-x/indimail-mta.spec /tmp
+	sed -i -e "s|^Release: .*|Release: 1.$release%{?dist}|g" /tmp/indimail-mta.spec
+	echo 1.$release > indimail-mta-x/conf-release
+	cd indimail-mta-x/debian
+	make
+	rpmbuild -ba --clean /tmp/indimail-mta.spec
+	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
+	dist=`uname -r |cut -d . -f4`
+	rpm --addsign $rpmbuild/RPMS/$build_arch/indimail-mta-"$version"-"1.$release".$dist.$build_arch.rpm
+	/bin/rm -f /tmp/indimail-mta.spec
+fi
+echo -n "Remove Source (Y/N) - "
+read key
+if [ " $key" = " Y" -o " $key" = " y" ] ; then
+	for i in $SRC
+	do
+		echo "/bin/rm -f $i"
+		/bin/rm -f $i
+	done
+fi
