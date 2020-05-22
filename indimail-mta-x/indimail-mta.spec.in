@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.220 2020-05-21 12:08:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.221 2020-05-22 18:30:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -9,11 +9,13 @@
 # define if building on openSUSE build service
 %global build_on_obs       1
 %global reconfigure_mode   0
+%global patch_applied      0
 %else
 %define _project           local
 %global build_on_obs       0
 %global reconfigure_mode   0
 %global _hardened_build    1
+%global patch_applied      1
 %endif
 
 %global qmaildir           @qmaildir@
@@ -118,13 +120,15 @@ Source5: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source6:%{name}-permissions.easy
-Source7:%{name}-permissions.secure
-Source8:%{name}-permissions.paranoid
+Source6: %{name}-permissions.easy
+Source7: %{name}-permissions.secure
+Source8: %{name}-permissions.paranoid
 %endif
 %endif
 
-Patch2: http://downloads.sourceforge.net/indimail/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
+%if %patch_applied == 0
+Patch1: http://downloads.sourceforge.net/indimail/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
+%endif
 
 %if 0 != 0
 NoSource: 1
@@ -385,7 +389,9 @@ do
 )
 done
 
-%patch2  -p0
+%if %patch_applied == 0
+%patch1  -p0
+%endif
 
 %build
 ID=$(id -u)
