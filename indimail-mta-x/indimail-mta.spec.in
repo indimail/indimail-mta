@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.221 2020-05-22 18:30:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.222 2020-05-24 11:46:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -159,14 +159,6 @@ BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: flex findutils diffutils
 BuildRequires: readline gzip autoconf automake libtool pkgconfig
 BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
-
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
-BuildRequires: groff-base
-%else
-%if 0%{?fedora_version} || 0%{?suse_version} || 0%{?sles_version}
-BuildRequires: groff
-%endif
-%endif
 
 ##################################### OBS ####################################
 %if %build_on_obs == 1
