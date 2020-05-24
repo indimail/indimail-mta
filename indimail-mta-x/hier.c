@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.267  2020-05-24 23:54:39+05:30  Cprogrammer
+ * set readable permissions for non-critical files/directories
+ *
  * Revision 1.266  2020-04-23 13:56:51+05:30  Cprogrammer
  * removed catted man pages
  *
@@ -910,14 +913,14 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "boot", "binm2+df", auto_uido, 0, 0755);
 	c(auto_shared,     "boot", "binm3", auto_uido, 0, 0755);
 	c(auto_shared,     "boot", "binm3+df", auto_uido, 0, 0755);
-	c(auto_shared,     "boot", "upstart", auto_uido, 0, 0444);
-	c(auto_shared,     "boot", "systemd", auto_uido, 0, 0444);
+	c(auto_shared,     "boot", "upstart", auto_uido, 0, 0644);
+	c(auto_shared,     "boot", "systemd", auto_uido, 0, 0644);
 #ifdef DARWIN
 	c(auto_shared,     "boot", "StartupParameters.plist", auto_uido, 0, 0444);
 	c(auto_shared,     "boot", "indimail.plist", auto_uido, 0, 0444);
 #endif
 
-	c(auto_sysconfdir, "control", "nodnscheck", auto_uidv, auto_gidv, 0644);
+	c(auto_sysconfdir, "control", "nodnscheck", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, "control", "level2-tlds", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, "control", "level3-tlds", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, ".", "leapsecs.dat", auto_uido, auto_gidq, 0644);
@@ -1001,7 +1004,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "spawn-filter", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-local", auto_uido, 0, moder_u);
 	c(auto_prefix, "sbin", "qmail-remote", auto_uido, 0, moder_u);
-	c(auto_prefix, "sbin", "recipient-cdb", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "recipient-cdb", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-getpw", auto_uido, 0, moder_u);
 	c(auto_prefix, "sbin", "qmail-pw2u", auto_uido, 0, moder_u);
 	c(auto_prefix, "sbin", "cdbdump", auto_uido, 0, moder_x);
@@ -1010,7 +1013,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "cdbget", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "cdbgetm", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "cdbmake", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "qmail-newmrh", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "qmail-newmrh", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "relaytest", auto_uido, 0, moder_u);
 	c(auto_prefix, "sbin", "splogger", auto_uido, 0, moder_u);
 	c(auto_prefix, "sbin", "qmail-tcpto", auto_uido, 0, moder_x);
@@ -1042,11 +1045,11 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "svctool", auto_uido, 0, moder_x);
 
 	c(auto_prefix, "sbin", "qmail-newu", auto_uido, 0, moder_t);
-	c(auto_prefix, "sbin", "cdb-database", auto_uido, 0, moder_t);
-	c(auto_prefix, "sbin", "sql-database", auto_uido, 0, moder_t);
-	c(auto_prefix, "sbin", "qmail-cdb", auto_uido, 0, moder_t);
-	c(auto_prefix, "sbin", "qmail-sql", auto_uido, 0, moder_t);
-	c(auto_prefix, "sbin", "ctrlenv", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "cdb-database", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "sql-database", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "qmail-cdb", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "qmail-sql", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "ctrlenv", auto_uido, 0, moder_x);
 
 	/* mess822 */
 	c(auto_prefix, "bin", "ofmipname", auto_uido, 0, moder_x);
@@ -1235,48 +1238,48 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "whois", auto_uido, 0, moder_x);
 
 	/* GPLv3 License, Man Pages, Documents */
-	c(auto_shared,     "doc", "COPYING", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "LICENSE.libdkim", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "LICENSE.qhpsi", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "LICENSE.GPL-2.libsrs2", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "softwarelicense1-1.html", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "CREDITS", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "INSTALL-MINI", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "INSTALL.alias", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "INSTALL.control", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "INSTALL.maildir", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "INSTALL.mbox", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "INSTALL.vsm", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.licenses", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.clamav", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.greylist", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.logselect", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.srs", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.surbl", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.filters", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.recipients", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.indimail-mta", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.qhpsi", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.qregex", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.queue-fix", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.status", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.libdkim", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "README.EXTTODO", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "AUTHORS.libdkim", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "AUTHORS.libsrs2", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "FROMISP", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "TOISP", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "AUTOTURN", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "INTERNALS", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "PIC.local2alias", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "PIC.local2ext", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "PIC.local2local", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "PIC.local2rem", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "PIC.local2virt", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "PIC.nullclient", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "PIC.relaybad", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "PIC.relaygood", auto_uido, 0, 0444);
-	c(auto_shared,     "doc", "PIC.rem2local", auto_uido, 0, 0444);
+	c(auto_shared,     "doc", "COPYING", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "LICENSE.libdkim", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "LICENSE.qhpsi", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "LICENSE.GPL-2.libsrs2", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "softwarelicense1-1.html", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "CREDITS", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "INSTALL-MINI", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "INSTALL.alias", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "INSTALL.control", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "INSTALL.maildir", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "INSTALL.mbox", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "INSTALL.vsm", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.licenses", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.clamav", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.greylist", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.logselect", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.srs", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.surbl", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.filters", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.recipients", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.indimail-mta", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.qhpsi", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.qregex", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.queue-fix", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.status", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.libdkim", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "README.EXTTODO", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "AUTHORS.libdkim", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "AUTHORS.libsrs2", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "FROMISP", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "TOISP", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "AUTOTURN", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "INTERNALS", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "PIC.local2alias", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "PIC.local2ext", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "PIC.local2local", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "PIC.local2rem", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "PIC.local2virt", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "PIC.nullclient", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "PIC.relaybad", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "PIC.relaygood", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "PIC.rem2local", auto_uido, 0, 0644);
 
 #ifdef HASTLSA
 	c(mandir,          "man/man1", "qdane.1", uidr, gidr, moder_f);
@@ -1545,7 +1548,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.266 2020-04-23 13:56:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.267 2020-05-24 23:54:39+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
