@@ -1,5 +1,8 @@
 #!/usr/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.34  2020-05-24 23:55:25+05:30  Cprogrammer
+# fix permission for certs
+#
 # Revision 1.33  2020-04-27 22:11:27+05:30  Cprogrammer
 # added install routine
 #
@@ -97,7 +100,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.33 2020-04-27 22:11:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.34 2020-05-24 23:55:25+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -122,7 +125,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.sh,v 1.33 2020-04-27 22:11:27+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.34 2020-05-24 23:55:25+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -131,7 +134,7 @@ echo "Running $1 $Id: qlocal_upgrade.sh,v 1.33 2020-04-27 22:11:27+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.sh,v 1.33 2020-04-27 22:11:27+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.34 2020-05-24 23:55:25+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -207,11 +210,12 @@ do
 	fi
 done
 # remove clientcert.pem link to servercert.pem in control directory
-if [ -f /etc/indimail/control/clientcert.pem ] ; then
+if [ -L /etc/indimail/control/clientcert.pem ] ; then
 	$rm -f /etc/indimail/control/clientcert.pem
 fi
-if [ -f /etc/indimail/certs/clientcert.pem ] ; then
-	$rm -f /etc/indimail/certs/clientcert.pem
+if [ ! -f /etc/indimail/certs/clientcert.pem -a ! -L /etc/indimail/certs/clientcert.pem ] ; then
+	cd /etc/indimail/certs
+	$ln -s servercert.pem clientcert.pem
 fi
 
 getent group apache > /dev/null
@@ -220,7 +224,7 @@ if [ $? -ne 2 ] ; then
 	do
 		# roundcube (php) will require read access to certs
 		if [ -f /etc/indimail/certs/$i ] ; then
-			$chgrp apache /etc/indimail/certs/$i
+			$chgrp qmail /etc/indimail/certs/$i
 		fi
 	done
 fi
