@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.222 2020-05-24 11:46:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.223 2020-05-24 23:55:11+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -47,8 +47,6 @@
 %global qbase              %{qmaildir}/queue
 %global dkimkeyfn          default
 
-%global fedorareview       0
-
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <manvendra@indimail.org>
 %endif
@@ -66,9 +64,7 @@
 Summary: A Flexible SMTP server
 Name: indimail-mta
 Version: @version@
-%if %fedorareview == 0
 Provides: daemontools = %{version}, ucspi-tcp = %{version}
-%endif
 Release: @release@%{?dist}
 
 ## user/group management
@@ -636,7 +632,17 @@ $TOUCH %{buildroot}%{qsysconfdir}/indimail-mta.mod
 (
 for i in `cat %{name}-%{version}/controlfiles.q`
 do
-  echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/control/$i"
+  case "$i" in
+  signatures)
+  echo "%ghost %attr(0644,qscand,qscand) %config(noreplace,missingok) %{qsysconfdir}/control/$i"
+  ;;
+  spamignore)
+  echo "%ghost %attr(0644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/$i"
+  ;;
+  *)
+  echo "%ghost %config(noreplace,missingok) %{qsysconfdir}/control/$i"
+  ;;
+  esac
   echo $i 1>&3
   $TOUCH %{buildroot}%{qsysconfdir}/control/$i
 done
@@ -644,11 +650,11 @@ done
 for i in rsa2048.pem rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
 dh2048.pem dh512.pem rsa512.pem servercert.rand
 do
-  echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/certs/$i"
+  echo "%ghost %attr(0640,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/certs/$i"
   echo ../certs/$i 1>&3
   $TOUCH %{buildroot}%{qsysconfdir}/certs/$i
 done
-echo "%ghost %attr(0644,root,root)                      %{qsysconfdir}/resolv.conf"
+echo "%ghost %attr(0644,root,root) %{qsysconfdir}/resolv.conf"
 echo ../resolv.conf 1>&3
 ) > config_files.list 3>%{buildroot}%{qsysconfdir}/controlfiles.q
 
@@ -669,49 +675,49 @@ done
 #
 # Directories
 #
-%dir %attr(555,root,qmail)        %{qmaildir}
-                                  %{qmaildir}/bin
-                                  %{qmaildir}/sbin
-                                  %{qmaildir}/users
-                                  %{qmaildir}/control
-                                  %{qmaildir}/libexec
+%dir %attr(555,root,qmail)                         %{qmaildir}
+                                                   %{qmaildir}/bin
+                                                   %{qmaildir}/sbin
+                                                   %{qmaildir}/users
+                                                   %{qmaildir}/control
+                                                   %{qmaildir}/libexec
 # opensuse requres ghost files to be present
 %if %{undefined suse_version} && %{undefined sles_version}
-%ghost %dir                       %{logdir}
-%ghost %dir                       %{logdir}/*
-%ghost                            %{logdir}/*/*
+%ghost %dir %attr(0755,qmaill,nofiles)             %{logdir}
+%ghost %dir %attr(0755,qmaill,nofiles)             %{logdir}/*
+%ghost      %attr(-,qmaill,nofiles)                %{logdir}/*/*
 %endif
-%dir %attr(555,root,root)         %{libexecdir}
-%dir %attr(555,root,root)         %{libexecdir}/qfilters
-%dir %attr(555,root,root)         %{shareddir}
-%dir %attr(555,root,root)         %{shareddir}/boot
-%dir %attr(555,root,root)         %{shareddir}/doc
-%dir %attr(755,root,qmail)        %{qmaildir}/queue
-%dir %attr(2775,alias,qmail)      %{qmaildir}/alias
-%dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq
-%dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root
-%dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root/scanq
-%dir %attr(2755,root,qmail)       %{qsysconfdir}
-%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/users
-%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/certs
-%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/control
-%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/tcp
-%dir %attr(2775,indimail,qmail)   %{qsysconfdir}/control/cache
-%dir %attr(2775,qmailr,qmail)     %{qsysconfdir}/control/ratelimit
-%dir %attr(2755,indimail,qmail)   %{qsysconfdir}/control/domainkeys
-%dir %attr(755,indimail,qmail)    %{qsysconfdir}/control/defaultqueue
-%dir %attr(2775,indimail,qmail)   %{qmaildir}/autoturn
+%dir %attr(555,root,root)                          %{libexecdir}
+%dir %attr(555,root,root)                          %{libexecdir}/qfilters
+%dir %attr(555,root,root)                          %{shareddir}
+%dir %attr(555,root,root)                          %{shareddir}/boot
+%dir %attr(555,root,root)                          %{shareddir}/doc
+%dir %attr(755,root,qmail)                         %{qmaildir}/queue
+%dir %attr(2775,alias,qmail)                       %{qmaildir}/alias
+%dir %attr(750,qscand,qscand)                      %{qmaildir}/qscanq
+%dir %attr(750,qscand,qscand)                      %{qmaildir}/qscanq/root
+%dir %attr(750,qscand,qscand)                      %{qmaildir}/qscanq/root/scanq
+%dir %attr(2755,root,qmail)                        %{qsysconfdir}
+%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/users
+%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/certs
+%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/control
+%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/tcp
+%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/control/cache
+%dir %attr(2775,qmailr,qmail)                      %{qsysconfdir}/control/ratelimit
+%dir %attr(2755,indimail,qmail)                    %{qsysconfdir}/control/domainkeys
+%dir %attr(755,indimail,qmail)                     %{qsysconfdir}/control/defaultqueue
+%dir %attr(2775,indimail,qmail)                    %{qmaildir}/autoturn
 %if "%{mandir}" != "/usr/share/man"
-%dir %attr(755,root,root)         %{mandir}
-%dir %attr(755,root,root)         %{mandir}/man1
-%dir %attr(755,root,root)         %{mandir}/man5
-%dir %attr(755,root,root)         %{mandir}/man7
-%dir %attr(755,root,root)         %{mandir}/man8
+%dir %attr(755,root,root)                          %{mandir}
+%dir %attr(755,root,root)                          %{mandir}/man1
+%dir %attr(755,root,root)                          %{mandir}/man5
+%dir %attr(755,root,root)                          %{mandir}/man7
+%dir %attr(755,root,root)                          %{mandir}/man8
 %endif
 %if "%{_prefix}" != "/usr"
-%dir %attr(555,root,root)         %{_libdir}
+%dir %attr(555,root,root)                          %{_libdir}
 %endif
-%dir %attr(555,root,root)             %{plugindir}
+%dir %attr(555,root,root)                          %{plugindir}
 
 %attr(444,root,root) %config(noreplace)            %{qsysconfdir}/controlfiles.q
 %attr(444,root,root) %config(noreplace)            %{qsysconfdir}/perm_list.q
@@ -851,14 +857,14 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-local
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-remote
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-pw2u
-%attr(751,root,root)                    %{_prefix}/sbin/recipient-cdb
+%attr(755,root,root)                    %{_prefix}/sbin/recipient-cdb
 %attr(755,root,root)                    %{_prefix}/sbin/cdbtest
 %attr(755,root,root)                    %{_prefix}/sbin/cdbstats
 %attr(755,root,root)                    %{_prefix}/sbin/cdbdump
 %attr(755,root,root)                    %{_prefix}/sbin/cdbget
 %attr(755,root,root)                    %{_prefix}/sbin/cdbgetm
 %attr(755,root,root)                    %{_prefix}/sbin/cdbmake
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-newmrh
+%attr(755,root,root)                    %{_prefix}/sbin/qmail-newmrh
 %attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
 %attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
 %attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
@@ -876,11 +882,11 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-tcpto
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-qmqpc
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-newu
-%attr(751,root,root)                    %{_prefix}/sbin/cdb-database
-%attr(751,root,root)                    %{_prefix}/sbin/sql-database
-%attr(751,root,root)                    %{_prefix}/sbin/ctrlenv
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-cdb
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-sql
+%attr(755,root,root)                    %{_prefix}/sbin/cdb-database
+%attr(755,root,root)                    %{_prefix}/sbin/sql-database
+%attr(755,root,root)                    %{_prefix}/sbin/ctrlenv
+%attr(755,root,root)                    %{_prefix}/sbin/qmail-cdb
+%attr(755,root,root)                    %{_prefix}/sbin/qmail-sql
 
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-daemon
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-start
@@ -977,344 +983,139 @@ done
 %attr(755,root,root)                    %{libexecdir}/qfrontend
 %attr(755,root,root)                    %{libexecdir}/qfilters/qf-smtp-ratelimit
 
-%if %fedorareview == 0
 %docdir %{mandir}
 %attr(0644,root,root)                   %{mandir}/man[1,4,5,7,8]/*
-%else
-%attr(0644,root,root)                   %{mandir}/man1/udpclient.1.gz
-%if %notlsarr == 0
-%attr(0644,root,root)                   %{mandir}/man1/qdane.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/dnstlsarr.1.gz
-%endif
-%attr(0644,root,root)                   %{mandir}/man1/qmail-qfilter.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/drate.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/replier-config.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/replier.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/condtomaildir.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/filterto.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/checkdomain.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/checkaddr.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822fields.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822addr.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822headerfilter.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822bodyfilter.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822headerok.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822body.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822print.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822received.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822date.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822header.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/822field.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/new-inject.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/ifaddr.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/iftoccfrom.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/iftocc.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/newinclude.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/setmaillist.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/printmaillist.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/inewaliases.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/setforward.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/printforward.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/fastforward.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/dot-forward.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/plugtest.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/qmail-rm.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/qaes.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/cdbdump.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/cdbmake.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/cdbstats.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/cdbtest.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/cdbgetm.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/cdbget.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/columnt.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/xrecipient.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/xsender.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/xqp.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/matchup.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/maildirserial.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/maildirsmtp.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/maildirqmtp.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/maildircmd.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/serialsmtp.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/serialqmtp.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/serialcmd.0.gz
-%attr(0644,root,root)                   %{mandir}/man1/serialcmd.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/qarf.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/rrt.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/qnotify.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/autoresponder.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/maildirdeliver.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/relaytest.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/tcp-env.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/preline.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/qreceipt.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/mailsubj.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/maildirwatch.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/maildir2mbox.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/mbox2maildir.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/qmaildirmake.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/except.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/bouncesaying.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/condredirect.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/rrforward.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/forward.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/swaks.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/qbase64.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/uacl.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/recordio.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/fixcrio.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/maildirsize.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/delcr.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/addcr.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/argv0.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/datemail.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/predate.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/qmail-cat.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/cidr.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/spfquery.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/inotify.1.gz
-%if %nolibsrs2 == 0
-%attr(0644,root,root)                   %{mandir}/man1/srs.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/srsfilter.1.gz
-%endif
-%attr(0644,root,root)                   %{mandir}/man5/rfc-4870.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-4871.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-3798.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-3834.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-2476.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-2635.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-2505.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-2554.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-2645.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-2104.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-1321.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-1985.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-1894.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-1893.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-2821.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-1845.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rfc-822.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/qmtp.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/rewriting.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/tcp-environ.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/qmail-users.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/qmail-log.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/qmail-header.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/qmail-control.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/dot-qmail.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/mbox.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/maildir.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/envelopes.5.gz
-%attr(0644,root,root)                   %{mandir}/man5/addresses.5.gz
-%if %nolibsrs2 == 0
-%attr(0644,root,root)                   %{mandir}/man5/qmail-srs.5.gz
-%endif
-%attr(0644,root,root)                   %{mandir}/man7/forgeries.7.gz
-%attr(0644,root,root)                   %{mandir}/man7/qmail.7.gz
-%attr(0644,root,root)                   %{mandir}/man7/qmail-limits.7.gz
-%attr(0644,root,root)                   %{mandir}/man8/run-cleanq.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/cleanq.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qscanq-stdin.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qscanq.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/ldap-checkpwd.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/sys-checkpwd.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-command.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-poppass.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-smtpd.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-qmtpd.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-qmqpd.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-qmqpc.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-tcpto.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-tcpok.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/queue-fix.0.gz
-%attr(0644,root,root)                   %{mandir}/man8/queue-fix.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-popbull.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-qread.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-pw2u.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-newu.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/cdb-database.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/sql-database.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/ctrlenv.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-cdb.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-sql.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/recipient-cdb.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-newmrh.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-showctl.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/irmail.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/isendmail.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-inject.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/spawn-filter.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/surblfilter.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-multi.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/dktest.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/dknewkey.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-dk.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/dk-filter.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-dkim.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-nullqueue.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-queue.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qhpsi.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/surblqueue.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-internals.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/splogger.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-start.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-daemon.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-todo.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-send.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-clean.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-rspawn.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-remote.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-getpw.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-lspawn.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-local.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmailctl.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/ofmipname.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/ofmipd.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/mlmatchup.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/svctool.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/udplogger.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/greydaemon.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/qmail-greyd.8.gz
-%if %notlsarr == 0
-%attr(0644,root,root)                   %{mandir}/man8/qmail-daned.8.gz
-%endif
-%if %nolibdkim == 0
-%attr(0644,root,root)                   %{mandir}/man8/dkim.8.gz
-%endif
-%endif
 
 # daemontools
-%if %fedorareview == 0
-%attr(755,root,root)                    %{_prefix}/bin/envdir
-%attr(755,root,root)                    %{_prefix}/bin/envuidgid
-%attr(755,root,root)                    %{_prefix}/bin/fghack
-%attr(755,root,root)                    %{_prefix}/bin/pgrphack
-%attr(755,root,root)                    %{_prefix}/bin/setlock
-%attr(755,root,root)                    %{_prefix}/bin/setuidgid
-%attr(755,root,root)                    %{_prefix}/bin/softlimit
-%attr(755,root,root)                    %{_prefix}/bin/supervise
-%attr(755,root,root)                    %{_prefix}/bin/svc
-%attr(755,root,root)                    %{_prefix}/bin/svok
-%attr(755,root,root)                    %{_prefix}/bin/svstat
-%attr(755,root,root)                    %{_prefix}/bin/tai64n
-%attr(755,root,root)                    %{_prefix}/bin/tai64nlocal
-%attr(755,root,root)                    %{_prefix}/bin/tai64nunix
-%attr(755,root,root)                    %{_prefix}/bin/tai2tai64n
-%attr(755,root,root)                    %{_prefix}/bin/tai64n2tai
-%attr(755,root,root)                    %{_prefix}/bin/spipe
-%attr(755,root,root)                    %{_prefix}/bin/qfilelog
-%attr(755,root,root)                    %{_prefix}/bin/multipipe
-%attr(755,root,root)                    %{_prefix}/bin/teepipe
-%attr(755,root,root)                    %{_prefix}/bin/logselect
-%attr(755,root,root)                    %{_prefix}/bin/qlogselect
-%attr(755,root,root)                    %{_prefix}/sbin/svscan
-%attr(755,root,root)                    %{_prefix}/sbin/readproctitle
-%attr(755,root,root)                    %{_prefix}/sbin/multilog
-%attr(755,root,root)                    %{_prefix}/sbin/docker-entrypoint
+%attr(0755,root,root)                   %{_prefix}/bin/envdir
+%attr(0755,root,root)                   %{_prefix}/bin/envuidgid
+%attr(0755,root,root)                   %{_prefix}/bin/fghack
+%attr(0755,root,root)                   %{_prefix}/bin/pgrphack
+%attr(0755,root,root)                   %{_prefix}/bin/setlock
+%attr(0755,root,root)                   %{_prefix}/bin/setuidgid
+%attr(0755,root,root)                   %{_prefix}/bin/softlimit
+%attr(0755,root,root)                   %{_prefix}/bin/supervise
+%attr(0755,root,root)                   %{_prefix}/bin/svc
+%attr(0755,root,root)                   %{_prefix}/bin/svok
+%attr(0755,root,root)                   %{_prefix}/bin/svstat
+%attr(0755,root,root)                   %{_prefix}/bin/tai64n
+%attr(0755,root,root)                   %{_prefix}/bin/tai64nlocal
+%attr(0755,root,root)                   %{_prefix}/bin/tai64nunix
+%attr(0755,root,root)                   %{_prefix}/bin/tai2tai64n
+%attr(0755,root,root)                   %{_prefix}/bin/tai64n2tai
+%attr(0755,root,root)                   %{_prefix}/bin/spipe
+%attr(0755,root,root)                   %{_prefix}/bin/qfilelog
+%attr(0755,root,root)                   %{_prefix}/bin/multipipe
+%attr(0755,root,root)                   %{_prefix}/bin/teepipe
+%attr(0755,root,root)                   %{_prefix}/bin/logselect
+%attr(0755,root,root)                   %{_prefix}/bin/qlogselect
+%attr(0755,root,root)                   %{_prefix}/sbin/svscan
+%attr(0755,root,root)                   %{_prefix}/sbin/readproctitle
+%attr(0755,root,root)                   %{_prefix}/sbin/multilog
+%attr(0755,root,root)                   %{_prefix}/sbin/docker-entrypoint
 
 # ucspi-tcp
-%attr(755,root,root)                    %{_prefix}/bin/mconnect-io
-%attr(755,root,root)                    %{_prefix}/bin/rblsmtpd
-%attr(755,root,root)                    %{_prefix}/bin/tcprulescheck
-%attr(755,root,root)                    %{_prefix}/bin/tcpcat
-%attr(755,root,root)                    %{_prefix}/bin/date@
-%attr(755,root,root)                    %{_prefix}/bin/who@
-%attr(755,root,root)                    %{_prefix}/bin/tcpclient
-%attr(755,root,root)                    %{_prefix}/bin/tcpserver
-%attr(755,root,root)                    %{_prefix}/bin/mconnect
-%attr(755,root,root)                    %{_prefix}/bin/finger@
-%attr(755,root,root)                    %{_prefix}/bin/http@
-%attr(755,root,root)                    %{_prefix}/bin/tcprules
-%attr(755,root,root)                    %{_prefix}/bin/udpclient
-%attr(755,root,root)                    %{_prefix}/sbin/udplogger
-%attr(755,root,root)                    %{_prefix}/sbin/greydaemon
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-greyd
+%attr(0755,root,root)                   %{_prefix}/bin/mconnect-io
+%attr(0755,root,root)                   %{_prefix}/bin/rblsmtpd
+%attr(0755,root,root)                   %{_prefix}/bin/tcprulescheck
+%attr(0755,root,root)                   %{_prefix}/bin/tcpcat
+%attr(0755,root,root)                   %{_prefix}/bin/date@
+%attr(0755,root,root)                   %{_prefix}/bin/who@
+%attr(0755,root,root)                   %{_prefix}/bin/tcpclient
+%attr(0755,root,root)                   %{_prefix}/bin/tcpserver
+%attr(0755,root,root)                   %{_prefix}/bin/mconnect
+%attr(0755,root,root)                   %{_prefix}/bin/finger@
+%attr(0755,root,root)                   %{_prefix}/bin/http@
+%attr(0755,root,root)                   %{_prefix}/bin/tcprules
+%attr(0755,root,root)                   %{_prefix}/bin/udpclient
+%attr(0755,root,root)                   %{_prefix}/sbin/udplogger
+%attr(0755,root,root)                   %{_prefix}/sbin/greydaemon
+%attr(0755,root,root)                   %{_prefix}/sbin/qmail-greyd
 %if %notlsarr == 0
-%attr(755,root,root)                    %{_prefix}/bin/qdane
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-daned
-%endif
+%attr(0755,root,root)                   %{_prefix}/bin/qdane
+%attr(0755,root,root)                   %{_prefix}/sbin/qmail-daned
 %endif
 
 %if %nolibdkim == 0
-%attr(555,root,root)                    %{_prefix}/bin/dkim
+%attr(0755,root,root)                   %{_prefix}/bin/dkim
 %endif
 
 %if %nolibsrs2 == 0
-%attr(555,root,root)                    %{_prefix}/bin/srs
+%attr(0755,root,root)                   %{_prefix}/bin/srs
 %endif
-%attr(755,root,root)                    %{shareddir}/boot/binm2
-%attr(755,root,root)                    %{shareddir}/boot/proc+df
-%attr(755,root,root)                    %{shareddir}/boot/binm1+df
-%attr(755,root,root)                    %{shareddir}/boot/binm3+df
-%attr(755,root,root)                    %{shareddir}/boot/home+df
-%attr(755,root,root)                    %{shareddir}/boot/binm3
-%attr(755,root,root)                    %{shareddir}/boot/binm1
-%attr(755,root,root)                    %{shareddir}/boot/proc
-%attr(755,root,root)                    %{shareddir}/boot/home
-%attr(755,root,root)                    %{shareddir}/boot/binm2+df
-%attr(444,root,root)                    %{shareddir}/boot/upstart
-%attr(444,root,root)                    %{shareddir}/boot/systemd
+%attr(0755,root,root)                   %{shareddir}/boot/binm2
+%attr(0755,root,root)                   %{shareddir}/boot/proc+df
+%attr(0755,root,root)                   %{shareddir}/boot/binm1+df
+%attr(0755,root,root)                   %{shareddir}/boot/binm3+df
+%attr(0755,root,root)                   %{shareddir}/boot/home+df
+%attr(0755,root,root)                   %{shareddir}/boot/binm3
+%attr(0755,root,root)                   %{shareddir}/boot/binm1
+%attr(0755,root,root)                   %{shareddir}/boot/proc
+%attr(0755,root,root)                   %{shareddir}/boot/home
+%attr(0755,root,root)                   %{shareddir}/boot/binm2+df
+%attr(0644,root,root)                   %{shareddir}/boot/upstart
+%attr(0644,root,root)                   %{shareddir}/boot/systemd
 
-%attr(755,root,root)                    %{plugindir}/generic.so
-%attr(755,root,root)                    %{plugindir}/smtpd-plugin.so
-%attr(755,root,root)                    %{plugindir}/smtpd-plugin0.so
+%attr(0755,root,root)                   %{plugindir}/generic.so
+%attr(0755,root,root)                   %{plugindir}/smtpd-plugin.so
+%attr(0755,root,root)                   %{plugindir}/smtpd-plugin0.so
 %if %tcpserver_plugin != 0
-%attr(755,root,root)                    %{plugindir}/qmail_smtpd.so
-%attr(755,root,root)                    %{plugindir}/rblsmtpd.so
+%attr(0755,root,root)                   %{plugindir}/qmail_smtpd.so
+%attr(0755,root,root)                   %{plugindir}/rblsmtpd.so
 %endif
 
 %if %build_on_obs == 0
-%license %attr(444,root,root)           %{shareddir}/doc/COPYING
-%license %attr(444,root,root)           %{shareddir}/doc/README.licenses
-%license %attr(444,root,root)           %{shareddir}/doc/LICENSE.libdkim
-%license %attr(444,root,root)           %{shareddir}/doc/LICENSE.qhpsi
-%license %attr(444,root,root)           %{shareddir}/doc/LICENSE.GPL-2.libsrs2
+%license %attr(0644,root,root)          %{shareddir}/doc/COPYING
+%license %attr(0644,root,root)          %{shareddir}/doc/README.licenses
+%license %attr(0644,root,root)          %{shareddir}/doc/LICENSE.libdkim
+%license %attr(0644,root,root)          %{shareddir}/doc/LICENSE.qhpsi
+%license %attr(0644,root,root)          %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %else
-%attr(444,root,root)                    %{shareddir}/doc/COPYING
-%attr(444,root,root)                    %{shareddir}/doc/README.licenses
-%attr(444,root,root)                    %{shareddir}/doc/LICENSE.libdkim
-%attr(444,root,root)                    %{shareddir}/doc/LICENSE.qhpsi
-%attr(444,root,root)                    %{shareddir}/doc/LICENSE.GPL-2.libsrs2
+%attr(0644,root,root)                   %{shareddir}/doc/COPYING
+%attr(0644,root,root)                   %{shareddir}/doc/README.licenses
+%attr(0644,root,root)                   %{shareddir}/doc/LICENSE.libdkim
+%attr(0644,root,root)                   %{shareddir}/doc/LICENSE.qhpsi
+%attr(0644,root,root)                   %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %endif
-%attr(444,root,root)                    %{shareddir}/doc/softwarelicense1-1.html
-%attr(444,root,root)                    %{shareddir}/doc/INSTALL.alias
-%attr(444,root,root)                    %{shareddir}/doc/INSTALL.control
-%attr(444,root,root)                    %{shareddir}/doc/INSTALL.maildir
-%attr(444,root,root)                    %{shareddir}/doc/INSTALL.mbox
-%attr(444,root,root)                    %{shareddir}/doc/INSTALL-MINI
-%attr(444,root,root)                    %{shareddir}/doc/INSTALL.vsm
-%attr(444,root,root)                    %{shareddir}/doc/README.clamav
-%attr(444,root,root)                    %{shareddir}/doc/README.EXTTODO
-%attr(444,root,root)                    %{shareddir}/doc/README.filters
-%attr(444,root,root)                    %{shareddir}/doc/README.greylist
-%attr(444,root,root)                    %{shareddir}/doc/README.indimail-mta
-%attr(444,root,root)                    %{shareddir}/doc/README.qhpsi
-%attr(444,root,root)                    %{shareddir}/doc/README.qregex
-%attr(444,root,root)                    %{shareddir}/doc/README.queue-fix
-%attr(444,root,root)                    %{shareddir}/doc/README.status
-%attr(444,root,root)                    %{shareddir}/doc/README.recipients
-%attr(444,root,root)                    %{shareddir}/doc/README.libdkim
-%attr(444,root,root)                    %{shareddir}/doc/README.logselect
-%attr(444,root,root)                    %{shareddir}/doc/README.srs
-%attr(444,root,root)                    %{shareddir}/doc/README.surbl
-%attr(444,root,root)                    %{shareddir}/doc/README.ucspi-tcp
-%attr(444,root,root)                    %{shareddir}/doc/AUTHORS.libdkim
-%attr(444,root,root)                    %{shareddir}/doc/AUTHORS.libsrs2
-%attr(444,root,root)                    %{shareddir}/doc/CREDITS
-%attr(444,root,root)                    %{shareddir}/doc/ChangeLog
-%attr(444,root,root)                    %{shareddir}/doc/INTERNALS
-%attr(444,root,root)                    %{shareddir}/doc/FROMISP
-%attr(444,root,root)                    %{shareddir}/doc/TOISP
-%attr(444,root,root)                    %{shareddir}/doc/AUTOTURN
-%attr(444,root,root)                    %{shareddir}/doc/PIC.local2alias
-%attr(444,root,root)                    %{shareddir}/doc/PIC.local2local
-%attr(444,root,root)                    %{shareddir}/doc/PIC.nullclient
-%attr(444,root,root)                    %{shareddir}/doc/PIC.rem2local
-%attr(444,root,root)                    %{shareddir}/doc/PIC.relaybad
-%attr(444,root,root)                    %{shareddir}/doc/PIC.local2ext
-%attr(444,root,root)                    %{shareddir}/doc/PIC.local2virt
-%attr(444,root,root)                    %{shareddir}/doc/PIC.relaygood
-%attr(444,root,root)                    %{shareddir}/doc/PIC.local2rem
+%attr(0644,root,root)                   %{shareddir}/doc/softwarelicense1-1.html
+%attr(0644,root,root)                   %{shareddir}/doc/INSTALL.alias
+%attr(0644,root,root)                   %{shareddir}/doc/INSTALL.control
+%attr(0644,root,root)                   %{shareddir}/doc/INSTALL.maildir
+%attr(0644,root,root)                   %{shareddir}/doc/INSTALL.mbox
+%attr(0644,root,root)                   %{shareddir}/doc/INSTALL-MINI
+%attr(0644,root,root)                   %{shareddir}/doc/INSTALL.vsm
+%attr(0644,root,root)                   %{shareddir}/doc/README.clamav
+%attr(0644,root,root)                   %{shareddir}/doc/README.EXTTODO
+%attr(0644,root,root)                   %{shareddir}/doc/README.filters
+%attr(0644,root,root)                   %{shareddir}/doc/README.greylist
+%attr(0644,root,root)                   %{shareddir}/doc/README.indimail-mta
+%attr(0644,root,root)                   %{shareddir}/doc/README.qhpsi
+%attr(0644,root,root)                   %{shareddir}/doc/README.qregex
+%attr(0644,root,root)                   %{shareddir}/doc/README.queue-fix
+%attr(0644,root,root)                   %{shareddir}/doc/README.status
+%attr(0644,root,root)                   %{shareddir}/doc/README.recipients
+%attr(0644,root,root)                   %{shareddir}/doc/README.libdkim
+%attr(0644,root,root)                   %{shareddir}/doc/README.logselect
+%attr(0644,root,root)                   %{shareddir}/doc/README.srs
+%attr(0644,root,root)                   %{shareddir}/doc/README.surbl
+%attr(0644,root,root)                   %{shareddir}/doc/README.ucspi-tcp
+%attr(0644,root,root)                   %{shareddir}/doc/AUTHORS.libdkim
+%attr(0644,root,root)                   %{shareddir}/doc/AUTHORS.libsrs2
+%attr(0644,root,root)                   %{shareddir}/doc/CREDITS
+%attr(0644,root,root)                   %{shareddir}/doc/ChangeLog
+%attr(0644,root,root)                   %{shareddir}/doc/INTERNALS
+%attr(0644,root,root)                   %{shareddir}/doc/FROMISP
+%attr(0644,root,root)                   %{shareddir}/doc/TOISP
+%attr(0644,root,root)                   %{shareddir}/doc/AUTOTURN
+%attr(0644,root,root)                   %{shareddir}/doc/PIC.local2alias
+%attr(0644,root,root)                   %{shareddir}/doc/PIC.local2local
+%attr(0644,root,root)                   %{shareddir}/doc/PIC.nullclient
+%attr(0644,root,root)                   %{shareddir}/doc/PIC.rem2local
+%attr(0644,root,root)                   %{shareddir}/doc/PIC.relaybad
+%attr(0644,root,root)                   %{shareddir}/doc/PIC.local2ext
+%attr(0644,root,root)                   %{shareddir}/doc/PIC.local2virt
+%attr(0644,root,root)                   %{shareddir}/doc/PIC.relaygood
+%attr(0644,root,root)                   %{shareddir}/doc/PIC.local2rem
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -1345,57 +1146,55 @@ done
 # Directories
 #
 %if %{undefined suse_version} && %{undefined sles_version}
-%ghost %dir                             %{logdir}
-%ghost %dir                             %{logdir}/*
-%ghost                                  %{logdir}/*/*
+%ghost %dir %attr(0755,qmaill,nofiles)  %{logdir}
+%ghost %dir %attr(0755,qmaill,nofiles)  %{logdir}/*
+%ghost      %attr(-,qmaill,nofiles)     %{logdir}/*/*
 %endif
 
-%dir %attr(555,root,root)               %{libexecdir}
-%dir %attr(555,root,root)               %{shareddir}
-%dir %attr(555,root,root)               %{shareddir}/boot
-%dir %attr(555,root,root)               %{shareddir}/doc
+%dir %attr(0555,root,root)              %{libexecdir}
+%dir %attr(0555,root,root)              %{shareddir}
+%dir %attr(0555,root,root)              %{shareddir}/boot
+%dir %attr(0555,root,root)              %{shareddir}/doc
 %if "%{mandir}" != "/usr/share/man"
-%dir %attr(755,root,root)               %{mandir}
-%dir %attr(755,root,root)               %{mandir}/man1
-%dir %attr(755,root,root)               %{mandir}/man8
+%dir %attr(0755,root,root)              %{mandir}
+%dir %attr(0755,root,root)              %{mandir}/man1
+%dir %attr(0755,root,root)              %{mandir}/man8
 %endif
 
-%attr(555,root,root)                    %{_prefix}/bin/envdir
-%attr(555,root,root)                    %{_prefix}/bin/envuidgid
-%attr(555,root,root)                    %{_prefix}/bin/fghack
-%attr(555,root,root)                    %{_prefix}/bin/pgrphack
-%attr(555,root,root)                    %{_prefix}/bin/setlock
-%attr(555,root,root)                    %{_prefix}/bin/setuidgid
-%attr(555,root,root)                    %{_prefix}/bin/softlimit
-%attr(555,root,root)                    %{_prefix}/bin/supervise
-%attr(555,root,root)                    %{_prefix}/bin/svc
-%attr(555,root,root)                    %{_prefix}/bin/svok
-%attr(555,root,root)                    %{_prefix}/bin/svstat
-%attr(555,root,root)                    %{_prefix}/bin/tai64n
-%attr(555,root,root)                    %{_prefix}/bin/tai64nlocal
-%attr(555,root,root)                    %{_prefix}/bin/tai64nunix
-%attr(555,root,root)                    %{_prefix}/bin/tai2tai64n
-%attr(555,root,root)                    %{_prefix}/bin/tai64n2tai
-%attr(555,root,root)                    %{_prefix}/bin/spipe
-%attr(555,root,root)                    %{_prefix}/bin/qfilelog
-%attr(555,root,root)                    %{_prefix}/bin/multipipe
-%attr(555,root,root)                    %{_prefix}/bin/teepipe
-%attr(555,root,root)                    %{_prefix}/bin/logselect
-%attr(555,root,root)                    %{_prefix}/bin/qlogselect
-%attr(755,root,root)                    %{_prefix}/bin/qmailctl
-%attr(555,root,root)                    %{_prefix}/sbin/svscan
-%attr(555,root,root)                    %{_prefix}/sbin/readproctitle
-%attr(555,root,root)                    %{_prefix}/sbin/multilog
-%attr(755,root,root)                    %{_prefix}/sbin/svctool
+%attr(0755,root,root)                   %{_prefix}/bin/envdir
+%attr(0755,root,root)                   %{_prefix}/bin/envuidgid
+%attr(0755,root,root)                   %{_prefix}/bin/fghack
+%attr(0755,root,root)                   %{_prefix}/bin/pgrphack
+%attr(0755,root,root)                   %{_prefix}/bin/setlock
+%attr(0755,root,root)                   %{_prefix}/bin/setuidgid
+%attr(0755,root,root)                   %{_prefix}/bin/softlimit
+%attr(0755,root,root)                   %{_prefix}/bin/supervise
+%attr(0755,root,root)                   %{_prefix}/bin/svc
+%attr(0755,root,root)                   %{_prefix}/bin/svok
+%attr(0755,root,root)                   %{_prefix}/bin/svstat
+%attr(0755,root,root)                   %{_prefix}/bin/tai64n
+%attr(0755,root,root)                   %{_prefix}/bin/tai64nlocal
+%attr(0755,root,root)                   %{_prefix}/bin/tai64nunix
+%attr(0755,root,root)                   %{_prefix}/bin/tai2tai64n
+%attr(0755,root,root)                   %{_prefix}/bin/tai64n2tai
+%attr(0755,root,root)                   %{_prefix}/bin/spipe
+%attr(0755,root,root)                   %{_prefix}/bin/qfilelog
+%attr(0755,root,root)                   %{_prefix}/bin/multipipe
+%attr(0755,root,root)                   %{_prefix}/bin/teepipe
+%attr(0755,root,root)                   %{_prefix}/bin/logselect
+%attr(0755,root,root)                   %{_prefix}/bin/qlogselect
+%attr(0755,root,root)                   %{_prefix}/bin/qmailctl
+%attr(0755,root,root)                   %{_prefix}/sbin/svscan
+%attr(0755,root,root)                   %{_prefix}/sbin/readproctitle
+%attr(0755,root,root)                   %{_prefix}/sbin/multilog
+%attr(0755,root,root)                   %{_prefix}/sbin/svctool
 
-%attr(555,root,root)                    %{libexecdir}/svscanboot
+%attr(0755,root,root)                   %{libexecdir}/svscanboot
 
-%attr(444,root,root)                    %{shareddir}/boot/upstart
-%attr(444,root,root)                    %{shareddir}/boot/systemd
+%attr(0644,root,root)                   %{shareddir}/boot/upstart
+%attr(0644,root,root)                   %{shareddir}/boot/systemd
 
-%if %fedorareview == 0
 %docdir %{mandir}
-%endif
 %docdir %{shareddir}/doc
 %attr(0644,root,root)                   %{shareddir}/doc/README.logselect
 %attr(0644,root,root)                   %{mandir}/man1/spipe.1.gz
@@ -1428,36 +1227,34 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/qmailctl.8.gz
 
 %files -n ucspi-tcp
-%attr(555,root,root)                    %{_prefix}/bin/tcpserver
-%attr(555,root,root)                    %{_prefix}/bin/tcprules
-%attr(555,root,root)                    %{_prefix}/bin/tcprulescheck
-%attr(555,root,root)                    %{_prefix}/bin/tcpclient
-%attr(555,root,root)                    %{_prefix}/bin/who@
-%attr(555,root,root)                    %{_prefix}/bin/date@
-%attr(555,root,root)                    %{_prefix}/bin/finger@
-%attr(555,root,root)                    %{_prefix}/bin/http@
-%attr(555,root,root)                    %{_prefix}/bin/tcpcat
-%attr(555,root,root)                    %{_prefix}/bin/mconnect
-%attr(555,root,root)                    %{_prefix}/bin/mconnect-io
-%attr(555,root,root)                    %{_prefix}/bin/rblsmtpd
-%attr(555,root,root)                    %{_prefix}/bin/udpclient
-%attr(555,root,root)                    %{_prefix}/sbin/udplogger
-%attr(555,root,root)                    %{_prefix}/sbin/greydaemon
-%attr(555,root,root)                    %{_prefix}/sbin/qmail-greyd
+%attr(0755,root,root)                   %{_prefix}/bin/tcpserver
+%attr(0755,root,root)                   %{_prefix}/bin/tcprules
+%attr(0755,root,root)                   %{_prefix}/bin/tcprulescheck
+%attr(0755,root,root)                   %{_prefix}/bin/tcpclient
+%attr(0755,root,root)                   %{_prefix}/bin/who@
+%attr(0755,root,root)                   %{_prefix}/bin/date@
+%attr(0755,root,root)                   %{_prefix}/bin/finger@
+%attr(0755,root,root)                   %{_prefix}/bin/http@
+%attr(0755,root,root)                   %{_prefix}/bin/tcpcat
+%attr(0755,root,root)                   %{_prefix}/bin/mconnect
+%attr(0755,root,root)                   %{_prefix}/bin/mconnect-io
+%attr(0755,root,root)                   %{_prefix}/bin/rblsmtpd
+%attr(0755,root,root)                   %{_prefix}/bin/udpclient
+%attr(0755,root,root)                   %{_prefix}/sbin/udplogger
+%attr(0755,root,root)                   %{_prefix}/sbin/greydaemon
+%attr(0755,root,root)                   %{_prefix}/sbin/qmail-greyd
 %if %notlsarr == 0
-%attr(755,root,root)                    %{_prefix}/bin/qdane
-%attr(555,root,root)                    %{_prefix}/sbin/qmail-daned
+%attr(0755,root,root)                   %{_prefix}/bin/qdane
+%attr(0755,root,root)                   %{_prefix}/sbin/qmail-daned
 %endif
 
 %if "%{mandir}" != "/usr/share/man"
-%dir %attr(755,root,root)         %{mandir}
-%dir %attr(755,root,root)         %{mandir}/man1
-%dir %attr(755,root,root)         %{mandir}/man8
+%dir %attr(0755,root,root)              %{mandir}
+%dir %attr(0755,root,root)              %{mandir}/man1
+%dir %attr(0755,root,root)              %{mandir}/man8
 %endif
 
-%if %fedorareview == 0
 %docdir %{mandir}
-%endif
 %attr(0644,root,root)                   %{mandir}/man1/tcpserver.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/tcprules.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/tcprulescheck.1.gz
@@ -1479,67 +1276,67 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/qmail-daned.8.gz
 %endif
 
-%attr(444,root,root)                    %{shareddir}/doc/README.ucspi-tcp
+%attr(644,root,root)                    %{shareddir}/doc/README.ucspi-tcp
 
 %files -n indimail-mini
-%defattr(-, root, root, 0555)
+%defattr(-, root, root, 0755)
 #
 # Directories
 #
-%dir %attr(555,root,qmail)        %{qmaildir}
-                                  %{qmaildir}/bin
-                                  %{qmaildir}/sbin
-                                  %{qmaildir}/users
-                                  %{qmaildir}/control
-%dir %attr(755,indimail,indimail) %{qsysconfdir}/control
+%dir %attr(0555,root,qmail)        %{qmaildir}
+                                   %{qmaildir}/bin
+                                   %{qmaildir}/sbin
+                                   %{qmaildir}/users
+                                   %{qmaildir}/control
+%dir %attr(0755,indimail,indimail) %{qsysconfdir}/control
 %if "%{mandir}" != "/usr/share/man"
-%dir %attr(755,root,root)         %{mandir}
-%dir %attr(755,root,root)         %{mandir}/man1
-%dir %attr(755,root,root)         %{mandir}/man8
+%dir %attr(0755,root,root)         %{mandir}
+%dir %attr(0755,root,root)         %{mandir}/man1
+%dir %attr(0755,root,root)         %{mandir}/man8
 %endif
 #
-%attr(755,root,root)              %{_prefix}/bin/sendmail
-%attr(755,root,root)              %{_prefix}/bin/qmail-inject
-%attr(755,root,root)              %{_prefix}/bin/irmail
-%attr(755,root,root)              %{_prefix}/bin/forward
-%attr(755,root,root)              %{_prefix}/bin/predate
-%attr(755,root,root)              %{_prefix}/bin/datemail
-%attr(755,root,root)              %{_prefix}/bin/mailsubj
-%attr(755,root,root)              %{_prefix}/bin/qmail-showctl
-%attr(755,root,root)              %{_prefix}/bin/qmaildirmake
-%attr(755,root,root)              %{_prefix}/bin/maildir2mbox
-%attr(755,root,root)              %{_prefix}/bin/maildirwatch
-%attr(755,root,root)              %{_prefix}/sbin/qmail-qmqpc
+%attr(0755,root,root)              %{_prefix}/bin/sendmail
+%attr(0755,root,root)              %{_prefix}/bin/qmail-inject
+%attr(0755,root,root)              %{_prefix}/bin/irmail
+%attr(0755,root,root)              %{_prefix}/bin/forward
+%attr(0755,root,root)              %{_prefix}/bin/predate
+%attr(0755,root,root)              %{_prefix}/bin/datemail
+%attr(0755,root,root)              %{_prefix}/bin/mailsubj
+%attr(0755,root,root)              %{_prefix}/bin/qmail-showctl
+%attr(0755,root,root)              %{_prefix}/bin/qmaildirmake
+%attr(0755,root,root)              %{_prefix}/bin/maildir2mbox
+%attr(0755,root,root)              %{_prefix}/bin/maildirwatch
+%attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
 #
 %if %nolibsrs2 == 0
 %{_libdir}/libsrs2.so.1
 %{_libdir}/libsrs2.so.1.0.0
 %endif
 #
-%attr(444,root,root)              %{mandir}/man1/forward.1.gz
-%attr(444,root,root)              %{mandir}/man1/predate.1.gz
-%attr(444,root,root)              %{mandir}/man1/datemail.1.gz
-%attr(444,root,root)              %{mandir}/man1/mailsubj.1.gz
-%attr(444,root,root)              %{mandir}/man1/qmaildirmake.1.gz
-%attr(444,root,root)              %{mandir}/man1/maildir2mbox.1.gz
-%attr(444,root,root)              %{mandir}/man1/maildirwatch.1.gz
+%attr(0644,root,root)              %{mandir}/man1/forward.1.gz
+%attr(0644,root,root)              %{mandir}/man1/predate.1.gz
+%attr(0644,root,root)              %{mandir}/man1/datemail.1.gz
+%attr(0644,root,root)              %{mandir}/man1/mailsubj.1.gz
+%attr(0644,root,root)              %{mandir}/man1/qmaildirmake.1.gz
+%attr(0644,root,root)              %{mandir}/man1/maildir2mbox.1.gz
+%attr(0644,root,root)              %{mandir}/man1/maildirwatch.1.gz
 #
 %if %nolibsrs2 == 0
-%attr(0644,root,root)             %{mandir}/man5/qmail-srs.5.gz
+%attr(0644,root,root)              %{mandir}/man5/qmail-srs.5.gz
 %endif
 #
-%attr(444,root,root)              %{mandir}/man8/qmail-showctl.8.gz
-%attr(444,root,root)              %{mandir}/man8/qmail-inject.8.gz
-%attr(444,root,root)              %{mandir}/man8/isendmail.8.gz
-%attr(444,root,root)              %{mandir}/man8/qmail-qmqpc.8.gz
-%attr(0644,root,root)             %{mandir}/man8/irmail.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qmail-showctl.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qmail-inject.8.gz
+%attr(0644,root,root)              %{mandir}/man8/isendmail.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qmail-qmqpc.8.gz
+%attr(0644,root,root)              %{mandir}/man8/irmail.8.gz
 
-%attr(444,root,root)              %{shareddir}/doc/INSTALL-MINI
-%attr(444,root,root)              %{shareddir}/doc/AUTHORS.libsrs2
+%attr(0644,root,root)              %{shareddir}/doc/INSTALL-MINI
+%attr(0644,root,root)              %{shareddir}/doc/AUTHORS.libsrs2
 %if %build_on_obs == 0
-%license %attr(444,root,root)     %{shareddir}/doc/LICENSE.GPL-2.libsrs2
+%license %attr(0644,root,root)     %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %else
-%attr(444,root,root)              %{shareddir}/doc/LICENSE.GPL-2.libsrs2
+%attr(0644,root,root)              %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %endif
 
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
@@ -2578,6 +2375,9 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
+    if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+      /sbin/ldconfig
+    fi
   exit 0
 fi
 #
@@ -2702,6 +2502,16 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
+  (
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for postun upgrade"
+    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
+  fi
+  ) >> /tmp/%{name}-setup.log
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    echo "recreating ld.so cache"
+    /sbin/ldconfig
+  fi
   exit 0
 fi
 if [ -x /usr/sbin/alternatives ] ; then
@@ -2743,6 +2553,10 @@ for i in mailq newaliases; do
     %{__mv} /usr/share/man/man1/$i.old.1.gz /usr/share/man/man1/$i.1.gz
   fi
 done
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  echo "recreating ld.so cache"
+  /sbin/ldconfig
+fi
 
 # fix changelog for openSUSE buildservice
 %changelog
