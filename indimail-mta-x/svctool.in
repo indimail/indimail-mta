@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.477 2020-05-20 13:33:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.478 2020-05-24 23:55:49+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.477 2020-05-20 13:33:03+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.478 2020-05-24 23:55:49+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1233,7 +1233,7 @@ for i in $SVCDIRS; do
   if [ ! -f $servicedir/$i/run ]; then
     echo "! $servicedir/$i/run file is missing" 1>&2
     OK=0
-  elif [ ! " $interp" = " #!/bin/sh$" ]; then
+  elif [ " $interp" != " #!/bin/sh$" -a " $interp" != " #!/bin/bash$" -a " $interp" != " #!/usr/bin/sh$" -a " $interp" != " #!/usr/bin/bash$" ] ; then
     echo "! $servicedir/$i/run has bad magic cookie [$interp]" 1>&2
     echo "...try: dos2unix $servicedir/$i/run" 1>&2
     OK=0
@@ -1250,7 +1250,7 @@ for i in $SVCDIRS; do
   if [ ! -f $servicedir/$i/log/run ]; then
     echo "! $servicedir/$i/log/run file is missing" 1>&2
     OK=0
-  elif [ ! " $interp" = " #!/bin/sh$" ]; then
+  elif [ " $interp" != " #!/bin/sh$" -a " $interp" != " #!/bin/bash$" -a " $interp" != " #!/usr/bin/sh$" -a " $interp" != " #!/usr/bin/bash$" ] ; then
     echo "! $servicedir/$i/log/run has bad magic cookie [$interp]" 1>&2
     echo "...try: dos2unix $servicedir/$i/log/run" 1>&2
     OK=0
@@ -1274,6 +1274,7 @@ for i in $LOGDIRS; do
     continue
   fi
   echo $i
+  perm="`ls -ld $i|awk '{print $1}'|cut -d. -f1`"
   if [ ! -d $i ]; then
     echo "! $i looks strange" 1>&2
     echo "...try: rm -f $i" 1>&2
@@ -1282,7 +1283,7 @@ for i in $LOGDIRS; do
     echo "! $i has wrong owner, should be qmaill" 1>&2
     echo "...try: chown qmaill $i" 1>&2
     OK=0
-  elif [ "`ls -ld $i|awk '{print $1}'|cut -d. -f1`" != "drwxr-xr-x" ]; then
+  elif [ "$perm" != "drwxr-xr-x" -a "$perm" != "drwxr-sr-x" ]; then
     echo "! $i has wrong mode, should be 755" 1>&2
     echo "...try: chmod 755 $i" 1>&2
     OK=0
@@ -9724,7 +9725,8 @@ case $option in
 		conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
 		/bin/rm -f $conf_file
 		change_config $conf_file /tmp/config.cnf.$$
-		/bin/chmod 400 $conf_file
+		/bin/chmod 640 $conf_file
+		$chown indimail:qmail $conf_file
 		if [ ! -f "$DESTDIR"$sysconfdir/certs/servercert.pem ] ; then
 			/usr/bin/openssl req -new -x509 -nodes -days 366 -out "$DESTDIR"$sysconfdir/certs/servercert.pem \
 				-keyout "$DESTDIR"$sysconfdir/certs/servercert.pem -config $conf_file
