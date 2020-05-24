@@ -17,8 +17,6 @@ bouncemaxbytes
 bouncemessage
 bouncesubject
 chkrcptdomains
-clientca.pem
-clientcert.pem
 concurrencyincoming
 concurrencylocal
 concurrencyremote
