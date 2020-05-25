@@ -166,7 +166,7 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
   (
   # refresh indimail-mta services
   svc_list=""
-  for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
+  for i in clamd greylist.1999 qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
     qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
     qscanq udplogger.3000 libwatch
@@ -181,7 +181,7 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
   done
   svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
-  ) >> /tmp/indimail-mta-setup.log
+  ) >> /var/log/indimail-mta-setup.log
   ${rm} -f /tmp/indimail-mta.upgrade
   exit 0
 fi
@@ -199,6 +199,8 @@ if [ ! "${prefix}" = "/usr" ] ; then
 	) > ${sysconfdir}/ld.so.conf.d/indimail-mta-`uname -m`.conf
 	/sbin/ldconfig
 	fi
+else
+	/sbin/ldconfig
 fi
 
 echo "Doing Post Install"
@@ -228,9 +230,6 @@ if [ ! -d ${logdir} ] ; then
 	/bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
-
-# fifolog service
-${prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=${servicedir}
 
 # Misc/Configuration
 ${prefix}/sbin/svctool --svscanlog --servicedir=${servicedir} --scanint=60
@@ -298,7 +297,7 @@ do
 		# local authenticated users
 		# why bother with spamfilter
 		# if you do, then you have a serious
-		# problem with your organization, not 
+		# problem with your organization, not
 		# with IndiMail
 		extra_opt="--skipsend --authsmtp --antispoof --forcetls"
 	else
@@ -470,7 +469,7 @@ done
 
 # turn off automatic refresh for services during first time installation
 svc_list=""
-for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
+for i in clamd greylist.1999 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
   qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
   qmail-daned.1998
@@ -523,7 +522,7 @@ fi
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
 #
-) >> /tmp/indimail-mta-setup.log 2>&1
+) >> /var/log/indimail-mta-setup.log 2>&1
 
 if [ -f ${sysconfdir}/init/svscan.conf -o -f ${sysconfdir}/event.d/svscan ] ; then
 	echo "1. Execute /sbin/initctl emit qmailstart to start services"
@@ -556,6 +555,6 @@ echo "   Execute the following command to create the certificate"
 echo "   ${prefix}/sbin/svctool --config=cert --postmaster=postmaster@${default_domain} --common_name=${default_domain}"
 fi
 echo
-echo "Look at /tmp/indimail-mta-setup.log for the installation log"
+echo "Look at /var/log/indimail-mta-setup.log for the installation log"
 
 exit 0
