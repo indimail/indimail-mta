@@ -1,5 +1,11 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.269  2020-05-25 18:32:10+05:30  Cprogrammer
+ * fixed permissions of /usr/lib/indimail/plugins directory
+ *
+ * Revision 1.268  2020-05-25 18:27:38+05:30  Cprogrammer
+ * fixed permission of qmail-newu
+ *
  * Revision 1.267  2020-05-24 23:54:39+05:30  Cprogrammer
  * set readable permissions for non-critical files/directories
  *
@@ -1044,7 +1050,7 @@ hier(inst_dir, fatal, dev_package)
 #endif
 	c(auto_prefix, "sbin", "svctool", auto_uido, 0, moder_x);
 
-	c(auto_prefix, "sbin", "qmail-newu", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "qmail-newu", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "cdb-database", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "sql-database", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-cdb", auto_uido, 0, moder_x);
@@ -1137,7 +1143,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "docker-entrypoint", auto_uido, 0, moder_x);
 
 #if defined(SMTP_PLUGIN) || defined(LOAD_SHARED_OBJECTS)
-	d(auto_prefix, "lib/indimail/plugins", auto_uido, 0, 0555);
+	d(auto_prefix, "lib/indimail/plugins", auto_uido, 0, 0755);
 #endif
 #ifdef SMTP_PLUGIN
 	c(auto_prefix, "lib/indimail/plugins", "smtpd-plugin.so", auto_uido, 0, moder_s);
@@ -1548,7 +1554,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.267 2020-05-24 23:54:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.269 2020-05-25 18:32:10+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
