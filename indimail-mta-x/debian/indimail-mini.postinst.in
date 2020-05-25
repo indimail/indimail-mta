@@ -107,4 +107,20 @@ if [ ! -f ${qsysconfdir}/control/idhost ] ; then
 	default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 	echo $default_domain > ${qsysconfdir}/control/idhost
 fi
+if [ ! "${prefix}" = "/usr" ] ; then
+	# Recreate ld.so links and cache
+	echo "recreating ld.so cache"
+	if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
+	(
+		if [ -d /usr/lib64 ] ; then
+			echo /usr/lib64
+		else
+			echo /usr/lib
+		fi
+	) > ${sysconfdir}/ld.so.conf.d/indimail-mta-`uname -m`.conf
+	/sbin/ldconfig
+	fi
+else
+	/sbin/ldconfig
+fi
 exit 0
