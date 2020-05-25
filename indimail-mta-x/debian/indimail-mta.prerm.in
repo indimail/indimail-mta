@@ -38,7 +38,7 @@ case "$1" in
 	(
 		echo "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/qupgrade.sh prerm $1 @version@ $* || true
-	) >> /tmp/indimail-mta-setup.log 2>&1
+	) >> /var/log/indimail-mta-setup.log 2>&1
 	fi
 	(
 	if [ -f ${prefix}/bin/svok ] ; then
@@ -64,7 +64,7 @@ case "$1" in
 			sleep 5
 		fi
 	fi
-	) > /tmp/indimail-mta-setup.log 2>&1
+	) > /var/log/indimail-mta-setup.log 2>&1
     ;;
 
     failed-upgrade)
@@ -116,4 +116,4 @@ do
 	fi
 done
 exit 0
-) >> /tmp/indimail-mta-setup.log 2>&1
+) >> /var/log/indimail-mta-setup.log 2>&1
