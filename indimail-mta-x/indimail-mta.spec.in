@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.224 2020-05-25 10:24:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.225 2020-05-25 18:33:27+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -717,7 +717,8 @@ done
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,root)                          %{_libdir}
 %endif
-%dir %attr(555,root,root)                          %{plugindir}
+%dir %attr(755,root,root)                          %{_prefix}/lib/indimail
+%dir %attr(755,root,root)                          %{plugindir}
 
 %attr(444,root,root) %config(noreplace)            %{qsysconfdir}/controlfiles.q
 %attr(444,root,root) %config(noreplace)            %{qsysconfdir}/perm_list.q
@@ -881,7 +882,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-tcpok
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-tcpto
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-qmqpc
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-newu
+%attr(755,root,root)                    %{_prefix}/sbin/qmail-newu
 %attr(755,root,root)                    %{_prefix}/sbin/cdb-database
 %attr(755,root,root)                    %{_prefix}/sbin/sql-database
 %attr(755,root,root)                    %{_prefix}/sbin/ctrlenv
@@ -971,7 +972,7 @@ done
 %attr(755,root,root)                    %{libexecdir}/envmigrate
 %attr(755,root,root)                    %{libexecdir}/qsmhook
 %attr(755,root,root)                    %{libexecdir}/update_tmprsadh
-%attr(751,root,root)                    %{libexecdir}/instcheck
+%attr(755,root,root)                    %{libexecdir}/instcheck
 %attr(755,root,root)                    %{libexecdir}/whois
 %attr(755,root,root)                    %{libexecdir}/testzero
 %attr(755,root,root)                    %{libexecdir}/qmail-lint
@@ -1123,8 +1124,8 @@ done
 %verify (not user group mode) %attr(2551, root, qscand)    %{_prefix}/sbin/run-cleanq
 %verify (not user group mode) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
 %verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
-%verify (not user group mode) %attr(2555, alias, qmail)    %{qmaildir}/alias
-%verify (not user group mode) %attr(2755, indimail, qmail) %{qmaildir}/autoturn
+%verify (not user group mode) %attr(2775, alias, qmail)    %{qmaildir}/alias
+%verify (not user group mode) %attr(2775, indimail, qmail) %{qmaildir}/autoturn
 %verify (not user group mode) %attr(4551, root, root)      %{_prefix}/sbin/sys-checkpwd
 %endif
 %endif
