@@ -29,6 +29,10 @@ esac
 
 # we are doing upgrade or removal
 if [ " $1" = " upgrade" ] ; then
+	if [ ! "${prefix}" = "/usr" ] ; then
+		echo "recreating ld.so cache"
+		/sbin/ldconfig
+	fi
 	exit 0
 fi
 
@@ -76,5 +80,9 @@ if [ " $1" = " purge" ] ; then
 	fi
 	${rmdir} --ignore-fail-on-non-empty ${qsysconfdir} 2>/dev/null || true
 	${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
+fi
+if [ ! "${prefix}" = "/usr" ] ; then
+	echo "recreating ld.so cache"
+	/sbin/ldconfig
 fi
 exit 0
