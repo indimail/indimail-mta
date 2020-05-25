@@ -61,7 +61,7 @@ case "$1" in
 	done
 	
 	/usr/bin/getent passwd indimail > /dev/null || \
-		/usr/sbin/useradd -r -g indimail -u 555 -d ${qmaildir} indimail || 
+		/usr/sbin/useradd -r -g indimail -u 555 -d ${qmaildir} indimail || \
 		test $? = 4 && /usr/sbin/useradd -r -g indimail -d ${qmaildir} indimail || true
 	/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}/alias  -s /sbin/nologin  alias || true
 	/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}        -s /sbin/nologin qmaild || true
