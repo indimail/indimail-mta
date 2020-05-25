@@ -10,8 +10,6 @@
 %dir %attr(0750,qscand,qscand)     @qmaildir@/qscanq/root
 %dir %attr(0750,qscand,qscand)     @qmaildir@/qscanq/root/scanq
 %dir %attr(0755,root,qmail)        @qmaildir@/queue
-%dir %attr(0555,root,root)         @prefix@/sbin
-%dir %attr(0555,root,root)         @prefix@/bin
 %dir %attr(0555,root,root)         @libexecdir@
 %dir %attr(0555,root,root)         @libexecdir@/qfilters
 %dir %attr(0555,root,root)         @shareddir@
@@ -22,7 +20,7 @@
 %dir %attr(0755,root,root)         @mandir@/man5
 %dir %attr(0755,root,root)         @mandir@/man7
 %dir %attr(0755,root,root)         @mandir@/man8
-%dir %attr(0555,root,qmail)        @prefix@/lib/indimail/plugins
+%dir %attr(0755,root,qmail)        @prefix@/lib/indimail/plugins
 %dir %attr(2755,root,qmail)        @qsysconfdir@
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/certs
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/tcp
@@ -165,7 +163,7 @@
 %attr(0755,root,qmail) @prefix@/sbin/cdbget
 %attr(0755,root,qmail) @prefix@/sbin/cdbgetm
 %attr(0755,root,qmail) @prefix@/sbin/cdbmake
-%attr(0751,root,qmail) @prefix@/sbin/qmail-newmrh
+%attr(0755,root,qmail) @prefix@/sbin/qmail-newmrh
 %attr(0755,root,qmail) @prefix@/sbin/qmail-tcpok
 %attr(0755,root,qmail) @prefix@/sbin/qmail-tcpto
 %attr(0755,root,qmail) @prefix@/sbin/qmail-multi
@@ -193,19 +191,19 @@
 %attr(0755,root,qmail) @prefix@/sbin/qmail-daned
 %attr(0755,root,qmail) @prefix@/sbin/surblfilter
 %attr(0755,root,qmail) @prefix@/sbin/surblqueue
-%attr(0751,root,qmail) @prefix@/sbin/qmail-getpw
-%attr(0751,root,qmail) @prefix@/sbin/qmail-local
-%attr(0751,root,qmail) @prefix@/sbin/qmail-remote
-%attr(0751,root,qmail) @prefix@/sbin/qmail-pw2u
-%attr(0751,root,qmail) @prefix@/sbin/relaytest
-%attr(0751,root,qmail) @prefix@/sbin/splogger
-%attr(0751,root,qmail) @prefix@/sbin/qmail-cdb
-%attr(0751,root,qmail) @prefix@/sbin/qmail-sql
-%attr(0751,root,qmail) @prefix@/sbin/cdb-database
-%attr(0751,root,qmail) @prefix@/sbin/sql-database
-%attr(0751,root,qmail) @prefix@/sbin/ctrlenv
+%attr(0755,root,qmail) @prefix@/sbin/qmail-getpw
+%attr(0755,root,qmail) @prefix@/sbin/qmail-local
+%attr(0755,root,qmail) @prefix@/sbin/qmail-remote
+%attr(0755,root,qmail) @prefix@/sbin/qmail-pw2u
+%attr(0755,root,qmail) @prefix@/sbin/relaytest
+%attr(0755,root,qmail) @prefix@/sbin/splogger
+%attr(0755,root,qmail) @prefix@/sbin/qmail-cdb
+%attr(0755,root,qmail) @prefix@/sbin/qmail-sql
+%attr(0755,root,qmail) @prefix@/sbin/cdb-database
+%attr(0755,root,qmail) @prefix@/sbin/sql-database
+%attr(0755,root,qmail) @prefix@/sbin/ctrlenv
 %attr(0751,root,qmail) @prefix@/sbin/qmail-newu
-%attr(0751,root,qmail) @prefix@/sbin/recipient-cdb
+%attr(0755,root,qmail) @prefix@/sbin/recipient-cdb
 
 %attr(0755,root,qmail) @libexecdir@/svscanboot
 %attr(0755,root,qmail) @libexecdir@/cdbmake-12
@@ -226,7 +224,7 @@
 %attr(0755,root,qmail) @libexecdir@/envmigrate
 %attr(0755,root,qmail) @libexecdir@/qsmhook
 %attr(0755,root,qmail) @libexecdir@/update_tmprsadh
-%attr(0751,root,qmail) @libexecdir@/instcheck
+%attr(0755,root,qmail) @libexecdir@/instcheck
 %attr(0755,root,qmail) @libexecdir@/testzero
 %attr(0755,root,qmail) @libexecdir@/qmail-lint
 %attr(0755,root,qmail) @libexecdir@/ipmeprint
@@ -293,6 +291,7 @@
 %attr(4551,qscand,qscand) @prefix@/sbin/qscanq
 %attr(6551,qmailq,qmail) @prefix@/sbin/qmail-queue
 %attr(6551,qscand,qmail) @prefix@/sbin/qhpsi
+%attr(4551,root,root)    @prefix@/sbin/sys-checkpwd
 #
 # ucspi-tcp
 #
