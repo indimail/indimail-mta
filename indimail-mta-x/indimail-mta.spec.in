@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.223 2020-05-24 23:55:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.224 2020-05-25 10:24:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -159,8 +159,8 @@ BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
 ##################################### OBS ####################################
 %if %build_on_obs == 1
 %if 0%{?suse_version}
-BuildRequires: -post-build-checks  
-#!BuildIgnore: post-build-checks  
+BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
 %endif
 %endif
 ##############################################################################
@@ -222,7 +222,7 @@ Requires: initscripts
 #
 # IndiMail is choosy and runs on reliable OS only
 #
-Excludeos: windows 
+Excludeos: windows
 
 %description
 indimail-mta provides a standalone mta server that is part of the IndiMail
@@ -258,7 +258,7 @@ Group: System/Base
 %endif
 
 %description -n daemontools
-daemontools is a collection of tools for managing UNIX services. 
+daemontools is a collection of tools for managing UNIX services.
 
 supervise monitors a service. It starts the service and restarts the
 service if it dies. Setting up a new service is easy: all supervise
@@ -319,7 +319,7 @@ Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
 Conflicts: indimail-mini < 2.0
 Requires: coreutils /bin/sh glibc openssl
-Requires: binutils 
+Requires: binutils
 
 %description -n indimail-mini
 This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
@@ -456,7 +456,7 @@ if [ -d %{name}-%{version} ] ; then
   echo "qmails"
   echo %username
   echo "qscand"
-  echo 
+  echo
   echo "The qmail system is heavily partitioned for security; it does almost"
   echo "nothing as root."
   echo
@@ -660,7 +660,7 @@ echo ../resolv.conf 1>&3
 
 %if %{undefined suse_version} && %{undefined sles_version}
 %{__mkdir_p} %{buildroot}%{logdir}
-for i in deliver.25 greylist.1999 logfifo \
+for i in deliver.25 greylist.1999 \
   qmqpd.628 qmtpd.209 qscanq smtpd.25 resolvconf \
   smtpd.366 smtpd.465 smtpd.587 qmail-daned.1998 \
   svscan udplogger.3000
@@ -1368,7 +1368,7 @@ done
 #   5. preun of old package
 #   6. (removal of old package)
 #   7. postun of old package
-#   8. posttrans of new package 
+#   8. posttrans of new package
 
 ### SCRIPTLET ###############################################################################
 %verifyscript
@@ -1443,11 +1443,11 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Upgrade Script for pretrans"
   /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs %{version} $*
-) > /tmp/%{name}-setup.log 2>&1
+) > /var/log/%{name}-setup.log 2>&1
 fi
 
 ### SCRIPTLET ###############################################################################
-%pre 
+%pre
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
@@ -1463,7 +1463,7 @@ if [ $argv1 -eq 2 ] ; then
   (
     echo "Running Custom Upgrade Script for pre upgrade"
     /bin/sh %{libexecdir}/qupgrade.sh pre upgrade %{version} $*
-  ) >> /tmp/%{name}-setup.log 2>&1
+  ) >> /var/log/%{name}-setup.log 2>&1
   fi
   exit 0
 fi
@@ -1471,6 +1471,7 @@ fi
 # Create a users and groups. Do not report any problems if they already
 # exists.
 #
+(
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
@@ -1508,6 +1509,7 @@ if [ $nscd_up -ge 1 ] ; then
     %{_sysconfdir}/init.d/nscd start
   fi
 fi
+) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %post
@@ -1576,7 +1578,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
 
   # refresh indimail-mta services
   svc_list=""
-  for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
+  for i in clamd greylist.1999 qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
     qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
     qmail-daned.1998 libwatch
@@ -1591,7 +1593,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   done
   svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
-  ) >> /tmp/%{name}-setup.log 2>&1
+  ) >> /var/log//%{name}-setup.log 2>&1
   exit 0
 fi
 if [ -x /bin/touch ] ; then
@@ -1623,16 +1625,13 @@ echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
 echo "17. Configure %{name} startup"
 echo ""
 
-(
-echo "Creating %{logdir}"
 if [ ! -d %{logdir} ] ; then
+  echo "Creating %{logdir}"
   %{__mkdir_p} %{logdir}
 fi
 %{__chown} -R qmaill:nofiles %{logdir}
 
-# fifolog service
-%{_prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=%{servicedir}
-
+(
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir} --scanint=60
 
@@ -1856,7 +1855,7 @@ done
 
 # turn off automatic refresh for services during first time installation
 svc_list=""
-for i in clamd greylist.1999 qmail-logfifo qmail-qmqpd.628 \
+for i in clamd greylist.1999 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
   qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
   qmail-daned.1998
@@ -1893,7 +1892,7 @@ fi
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan
 fi
-) >> /tmp/%{name}-setup.log 2>&1
+) >> /var/log/%{name}-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
   echo "1. Execute /sbin/initctl emit qmailstart to start services"
   count=1
@@ -1922,7 +1921,7 @@ echo "   Execute the following command to create the certificate"
 echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
 fi
 echo
-echo "Look at /tmp/%{name}-setup.log for the installation log"
+echo "Look at /var/log/%{name}-setup.log for the installation log"
 
 ### SCRIPTLET ###############################################################################
 %preun
@@ -1938,10 +1937,12 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
+  (
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
     /bin/sh %{libexecdir}/qupgrade.sh preun upgrade %{version} "$argv1"
   fi
+  ) >> /var/log/%{name}-setup.log 2>&1
   exit 0
 fi
 if [ -f %{_prefix}/bin/svok ] ; then
@@ -1991,22 +1992,10 @@ if [ -f %{_sysconfdir}/init.d/svscan ] ; then
     /sbin/chkconfig --add sendmail
   fi
 fi
-if [ -x /usr/sbin/alternatives ] ; then
-  /usr/sbin/alternatives --remove mta %{_prefix}/bin/sendmail
-  /usr/sbin/alternatives --auto mta
-else
-  for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-    if [ -f $i.old -o -L $i.old ]; then
-      echo "restoring sendmail"
-      %{__rm} -f $i
-      %{__mv} $i.old $i
-    fi
-  done
-fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot
-) >> /tmp/%{name}-setup.log 2>&1
+) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -2021,12 +2010,12 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-  (
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
+    (
     echo "Running Custom Un-Installation Script for postun upgrade"
     /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
+    ) >> /var/log/%{name}-setup.log
   fi
-  ) >> /tmp/%{name}-setup.log
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
     echo "recreating ld.so cache"
     /sbin/ldconfig
@@ -2073,7 +2062,7 @@ if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
   done
 fi
 for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
-  qmail-logfifo qscanq qmail-smtpd.465 qmail-smtpd.587 \
+  qscanq qmail-smtpd.465 qmail-smtpd.587 \
   qmail-qmtpd.209 qmail-qmqpd.628 greylist.1999 \
   qmail-daned.1998 resolvconf udplogger.3000 .svscan
 do
@@ -2113,7 +2102,7 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
   /bin/sh %{libexecdir}/qupgrade.sh postun uninstall %{version} $*
 fi
-) >> /tmp/%{name}-setup.log 2>&1
+) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %posttrans
@@ -2127,7 +2116,7 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for posttrans"
   /bin/sh %{libexecdir}/qupgrade.sh posttrans noargs %{version} $*
-) >> /tmp/%{name}-setup.log 2>&1
+) >> /var/log/%{name}-setup.log 2>&1
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -2182,7 +2171,7 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Upgrade Script for pretrans"
   /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs %{version} $*
-) > /tmp/daemontools-setup.log 2>&1
+) > /var/log/%{name}-setup.log 2>&1
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -2201,6 +2190,10 @@ if [ $ID -ne 0 ] ; then
 fi
 if [ -z "$argv1" ] ; then
   argv1=0
+fi
+if [ ! -d %{logdir} ] ; then
+  echo "Creating %{logdir}"
+  %{__mkdir_p} %{logdir}
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
@@ -2239,14 +2232,9 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       %{__sed} -i 's{^#SV:{SV:{' %{_sysconfdir}/inittab
     fi
   fi
-  ) >> /tmp/%{name}-setup.log 2>&1
+  ) >> /var/log/%{name}-setup.log 2>&1
   exit 0
 fi
-echo "Creating %{logdir}"
-if [ ! -d %{logdir} ] ; then
-  %{__mkdir_p} %{logdir}
-fi
-%{__chown} -R qmaill:nofiles %{logdir}
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 # svscanlog service
@@ -2266,10 +2254,12 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
+  (
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
     /bin/sh %{libexecdir}/qupgrade.sh preun upgrade %{version} "$argv1"
   fi
+  ) >> /var/log/daemontools-setup.log 2>&1
   exit 0
 fi
 if [ -f %{_prefix}/bin/svok ] ; then
@@ -2317,7 +2307,7 @@ fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot
-) >> /tmp/daemontools-setup.log 2>&1
+) >> /var/log/daemontools-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun -n daemontools
@@ -2332,16 +2322,15 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
+  (
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
     /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
   fi
-  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-    echo "recreating ld.so cache"
-    /sbin/ldconfig
-  fi
+  ) >> /var/log/daemontools-setup.log
   exit 0
 fi
+(
 # remove users / groups
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
@@ -2362,6 +2351,14 @@ if [ $nscd_up -ge 1 ] ; then
     %{_sysconfdir}/init.d/nscd start
   fi
 fi
+echo "removing logs"
+if [ -h %{logdir} ] ; then
+  log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
+else
+  log_dir=%{logdir}
+fi
+[ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
+) >> /var/log/%{name}-setup.log
 
 %post -n indimail-mini
 argv1=$1
@@ -2375,11 +2372,13 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
-    if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-      /sbin/ldconfig
-    fi
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    echo "recreating ld.so cache"
+    /sbin/ldconfig
+  fi
   exit 0
 fi
+(
 #
 # Create user/groups indimail. Do not report any problems if it already
 # exists.
@@ -2415,7 +2414,7 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 
 if [ -f %{_prefix}/sbin/qmail-qmqpc ] ; then
-  %{__rm} -f %{_prefix}/sbin/qmail-queue
+  %{__mv} %{_prefix}/sbin/qmail-queue %{_prefix}/sbin/qmail-queue.orig
 fi
 cd %{_prefix}/sbin
 /bin/ln -sf qmail-qmqpc qmail-queue
@@ -2494,6 +2493,11 @@ if [ ! -f %{qsysconfdir}/control/idhost ] ; then
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
   echo $default_domain > %{qsysconfdir}/control/idhost
 fi
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  echo "recreating ld.so cache"
+  /sbin/ldconfig
+fi
+) >> /var/log/%{name}-setup.log
 
 %postun -n indimail-mini
 argv1=$1
@@ -2507,13 +2511,14 @@ if [ $argv1 -eq 1 ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
     /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
   fi
-  ) >> /tmp/%{name}-setup.log
+  ) >> /var/log/%{name}-setup.log
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
     echo "recreating ld.so cache"
     /sbin/ldconfig
   fi
   exit 0
 fi
+(
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -2527,7 +2532,6 @@ if [ -n $alternatives_cmd ] ; then
   for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
     if [ -f $i.old -o -L $i.old ]; then
       echo "restoring $i"
-      %{__rm} -f $i
       %{__mv} $i.old $i
     fi
   done
@@ -2543,7 +2547,6 @@ fi
 for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
   if [ -f $i.old -o -L $i.old ]; then
     echo "restoring $i"
-    %{__rm} -f $i
     %{__mv} $i.old $i
   fi
 done
@@ -2557,6 +2560,7 @@ if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   echo "recreating ld.so cache"
   /sbin/ldconfig
 fi
+) >> /var/log/%{name}-setup.log
 
 # fix changelog for openSUSE buildservice
 %changelog
