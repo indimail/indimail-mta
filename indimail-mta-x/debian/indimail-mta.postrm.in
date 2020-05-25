@@ -44,7 +44,7 @@ case "$1" in
 	(
 		echo "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/qupgrade.sh postrm $1 @version@ $* || true
-	) >> /tmp/indimail-mta-setup.log 2>&1
+	) >> /var/log/indimail-mta-setup.log 2>&1
 	fi
     ;;
 
@@ -235,7 +235,7 @@ if [ " $1" = " purge" ] ; then
 		log_dir=${logdir}
 	fi
 	[ "$log_dir" != "/" ] && ${rm} -fr $log_dir
-	) >> /tmp/indimail-mta-setup.log 2>&1
+	) >> /var/log/indimail-mta-setup.log 2>&1
 fi
 if [ ! "${prefix}" = "/usr" ] ; then
 	echo "recreating ld.so cache"
