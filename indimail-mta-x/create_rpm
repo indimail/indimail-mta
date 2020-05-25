@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.3  2020-05-25 23:12:35+05:30  Cprogrammer
+# fixed release number in changelog
+#
 # Revision 1.2  2020-05-24 23:52:46+05:30  Cprogrammer
 # reset release to 1.1 on OS distribution change
 #
@@ -7,7 +10,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.2 2020-05-24 23:52:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.3 2020-05-25 23:12:35+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 libdkim_version=$(grep libdkim_version indimail-mta.spec.in | head -1| awk '{print $3}')
@@ -148,13 +151,17 @@ echo "Clearing stage directory"
 echo -n "Build RPM for indimail-mta-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
-	cp indimail-mta-x/indimail-mta.spec /tmp
-	sed -i -e "s|^Release: .*|Release: 1.$release%{?dist}|g" /tmp/indimail-mta.spec
 	tmprel=`cat indimail-mta-x/conf-release 2>/dev/null`
 	if [ ! " $tmprel" = " 1.$release" ] ; then
 		echo 1.$release > indimail-mta-x/conf-release
-		cd indimail-mta-x/debian
+		cd indimail-mta-x
+		make indimail-mta.spec
+		cp indimail-mta.spec /tmp
+		cd debian
 		make
+		cd ../..
+	else
+		cp indimail-mta-x/indimail-mta.spec /tmp
 	fi
 	rpmbuild -ba --clean /tmp/indimail-mta.spec
 	/bin/rm -f /tmp/indimail-mta.spec
