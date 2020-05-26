@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.227 2020-05-26 09:32:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.228 2020-05-26 11:23:41+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -638,7 +638,7 @@ do
   echo "%ghost %attr(0644,qscand,qscand) %config(noreplace,missingok) %{qsysconfdir}/control/$i"
   ;;
   spamignore)
-  echo "%ghost %attr(0644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/$i"
+  echo "%ghost %attr(0664,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/$i"
   ;;
   *)
   echo "%ghost %config(noreplace,missingok) %{qsysconfdir}/control/$i"
