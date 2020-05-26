@@ -691,14 +691,15 @@
 #include "qmail-todo.h"
 #include "fmt.h"
 #include "fifo.h"
+#include "str.h"
 #include "tcpto.h"
 #include "hassrs.h"
 
-void            d(char *, char *, int, int, int);
-void            h(char *, int, int, int);
-void            l(char *, char *, char *, int);
-void            c(char *, char *, char *, int, int, int);
-char           *getdirname(char *, char **);
+extern void     d(char *, char *, int, int, int);
+extern void     h(char *, int, int, int);
+extern void     l(char *, char *, char *, int);
+extern void     c(char *, char *, char *, int, int, int);
+extern char    *getdirname(char *, char **);
 
 stralloc        a1 = { 0 };
 stralloc        a2 = { 0 };
@@ -708,47 +709,6 @@ stralloc        a5 = { 0 };
 char            buf[100 + FMT_ULONG];
 extern int      lsb;
 
-static int
-str_diff(s, t)
-	register char  *s;
-	register char  *t;
-{
-	register char   x;
-
-	for (;;)
-	{
-		x = *s;
-		if (x != *t)
-			break;
-		if (!x)
-			break;
-		++s;
-		++t;
-		x = *s;
-		if (x != *t)
-			break;
-		if (!x)
-			break;
-		++s;
-		++t;
-		x = *s;
-		if (x != *t)
-			break;
-		if (!x)
-			break;
-		++s;
-		++t;
-		x = *s;
-		if (x != *t)
-			break;
-		if (!x)
-			break;
-		++s;
-		++t;
-	}
-	return ((int) (unsigned int) (unsigned char) x) - ((int) (unsigned int) (unsigned char) *t);
-}
-
 void
 hier(inst_dir, fatal, dev_package)
 	char           *inst_dir, *fatal;
@@ -757,7 +717,7 @@ hier(inst_dir, fatal, dev_package)
 	char           *auto_cntrl_base, *auto_cntrl_dir, *auto_assgn_base, *auto_assgn_dir;
 	char           *auto_libexec_base, *auto_libexec_dir, *auto_qmail_home = auto_qmail;
 	char           *mandir;
-	mode_t          moder_d, moder_f, moder_x, moder_s, moder_t, moder_u;
+	mode_t          moder_d, moder_f, moder_x, moder_s, moder_t;
 	uid_t           uidr;
 	gid_t           gidr;
 
@@ -858,12 +818,11 @@ hier(inst_dir, fatal, dev_package)
 	if (str_diff(auto_qmail, auto_prefix)) {
 		uidr = 0;
 		gidr = 0;
-		moder_d = 0755;
-		moder_f = 0644;
-		moder_x = 0755;
-		moder_s = 0755;
-		moder_t = 0751;
-		moder_u = 0755;
+		moder_d = 0755; /*- directories */
+		moder_f = 0644; /*- files */
+		moder_x = 0755; /*- executables */
+		moder_t = 0751; /*- daemons */
+		moder_s = 0755; /*- shared objects */
 		if (access(auto_prefix, F_OK))
 			h(auto_prefix, uidr, gidr, 0755);
 		l(auto_qmail_home, "bin", auto_prefix, 1);
@@ -874,9 +833,8 @@ hier(inst_dir, fatal, dev_package)
 		moder_d = 0555;
 		moder_f = 0444;
 		moder_x = 0555;
-		moder_s = 0555;
 		moder_t = 0550;
-		moder_u = 0551;
+		moder_s = 0555;
 	}
 	d(auto_prefix,     "bin", uidr, gidr, 0555);
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
@@ -1004,15 +962,12 @@ hier(inst_dir, fatal, dev_package)
 #endif
 	c(auto_prefix, "sbin", "qmail-popbull", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-poppass", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "qmail-qmqpd", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "qmail-qmtpd", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "qmail-smtpd", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "spawn-filter", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "qmail-local", auto_uido, 0, moder_u);
-	c(auto_prefix, "sbin", "qmail-remote", auto_uido, 0, moder_u);
+	c(auto_prefix, "sbin", "qmail-local", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "qmail-remote", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "recipient-cdb", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "qmail-getpw", auto_uido, 0, moder_u);
-	c(auto_prefix, "sbin", "qmail-pw2u", auto_uido, 0, moder_u);
+	c(auto_prefix, "sbin", "qmail-getpw", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "qmail-pw2u", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "cdbdump", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "cdbstats", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "cdbtest", auto_uido, 0, moder_x);
@@ -1020,8 +975,8 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "cdbgetm", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "cdbmake", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-newmrh", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "relaytest", auto_uido, 0, moder_u);
-	c(auto_prefix, "sbin", "splogger", auto_uido, 0, moder_u);
+	c(auto_prefix, "sbin", "relaytest", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "splogger", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-tcpto", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-tcpok", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "cleanq", auto_uido, 0, moder_x);
@@ -1033,18 +988,19 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-rspawn", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-clean", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-send", auto_uido, 0, moder_t);
-	c(auto_prefix, "sbin", "svscan", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "readproctitle", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "qmail-greyd", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "greydaemon", auto_uido, 0, moder_x);
-#ifdef HASTLSA
-	c(auto_prefix, "sbin", "qmail-daned", auto_uido, 0, moder_x);
-#endif
-	c(auto_prefix, "sbin", "surblfilter", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "surblqueue", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "qmail-qmqpd", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "qmail-qmtpd", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "qmail-smtpd", auto_uido, 0, moder_t);
 #ifdef EXTERNAL_TODO
 	c(auto_prefix, "sbin", "qmail-todo", auto_uido,0,moder_t);
 #endif
+	c(auto_prefix, "sbin", "qmail-greyd", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "greydaemon", auto_uido, 0, moder_t);
+#ifdef HASTLSA
+	c(auto_prefix, "sbin", "qmail-daned", auto_uido, 0, moder_t);
+#endif
+	c(auto_prefix, "sbin", "surblfilter", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "surblqueue", auto_uido, 0, moder_x);
 #ifdef SMTP_PLUGIN
 	c(auto_prefix, "sbin", "plugtest", auto_uido, 0, moder_x);
 #endif
@@ -1081,7 +1037,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "replier", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "replier-config", auto_uido, 0, moder_x);
 
-	c(auto_prefix, "sbin", "ofmipd", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "ofmipd", auto_uido, 0, moder_t);
 
 	/* fastforward */
 	c(auto_prefix, "bin", "dot-forward", auto_uido, 0, moder_x);
@@ -1117,6 +1073,8 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "logselect", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "qlogselect", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "udpclient", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "svscan", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "readproctitle", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "udplogger", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "multilog", auto_uido, 0, moder_x);
 
@@ -1190,7 +1148,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "nowutc", auto_uido, 0, moder_x);
 
 	/* Report Programs */
-	c(auto_libexec_dir, auto_libexec_base, "svscanboot", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "columnt", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "zoverall", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "zsendmail", auto_uido, 0, moder_x);
@@ -1235,12 +1192,14 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "batv", auto_uido, 0, moder_x);
 #endif
 
+	/*- daemontools */
+	c(auto_libexec_dir, auto_libexec_base, "svscanboot", auto_uido, 0, moder_x);
 	/*- misc */
 	c(auto_libexec_dir, auto_libexec_base, "envmigrate", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "hostname", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qmailconfig", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "config-fast", auto_uido, 0, moder_x);
-	c(auto_libexec_dir, auto_libexec_base, "instcheck", auto_uido, 0, moder_t);
+	c(auto_libexec_dir, auto_libexec_base, "instcheck", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "whois", auto_uido, 0, moder_x);
 
 	/* GPLv3 License, Man Pages, Documents */
