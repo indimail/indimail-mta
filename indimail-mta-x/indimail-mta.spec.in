@@ -848,10 +848,7 @@ done
 
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-popbull
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-poppass
-%attr(755,root,root)                    %{_prefix}/sbin/ofmipd
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-smtpd
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-qmqpd
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-qmtpd
+%attr(751,root,root)                    %{_prefix}/sbin/ofmipd
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-dkim
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-dk
 %attr(755,root,root)                    %{_prefix}/sbin/spawn-filter
@@ -890,6 +887,9 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-cdb
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-sql
 
+%attr(751,root,root)                    %{_prefix}/sbin/qmail-smtpd
+%attr(751,root,root)                    %{_prefix}/sbin/qmail-qmqpd
+%attr(751,root,root)                    %{_prefix}/sbin/qmail-qmtpd
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-daemon
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-start
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-lspawn
@@ -1011,7 +1011,7 @@ done
 %attr(0755,root,root)                   %{_prefix}/bin/teepipe
 %attr(0755,root,root)                   %{_prefix}/bin/logselect
 %attr(0755,root,root)                   %{_prefix}/bin/qlogselect
-%attr(0755,root,root)                   %{_prefix}/sbin/svscan
+%attr(0751,root,root)                   %{_prefix}/sbin/svscan
 %attr(0755,root,root)                   %{_prefix}/sbin/readproctitle
 %attr(0755,root,root)                   %{_prefix}/sbin/multilog
 %attr(0755,root,root)                   %{_prefix}/sbin/docker-entrypoint
@@ -1031,11 +1031,11 @@ done
 %attr(0755,root,root)                   %{_prefix}/bin/tcprules
 %attr(0755,root,root)                   %{_prefix}/bin/udpclient
 %attr(0755,root,root)                   %{_prefix}/sbin/udplogger
-%attr(0755,root,root)                   %{_prefix}/sbin/greydaemon
-%attr(0755,root,root)                   %{_prefix}/sbin/qmail-greyd
+%attr(0751,root,root)                   %{_prefix}/sbin/greydaemon
+%attr(0751,root,root)                   %{_prefix}/sbin/qmail-greyd
 %if %notlsarr == 0
 %attr(0755,root,root)                   %{_prefix}/bin/qdane
-%attr(0755,root,root)                   %{_prefix}/sbin/qmail-daned
+%attr(0751,root,root)                   %{_prefix}/sbin/qmail-daned
 %endif
 
 %if %nolibdkim == 0
@@ -1186,7 +1186,7 @@ done
 %attr(0755,root,root)                   %{_prefix}/bin/logselect
 %attr(0755,root,root)                   %{_prefix}/bin/qlogselect
 %attr(0755,root,root)                   %{_prefix}/bin/qmailctl
-%attr(0755,root,root)                   %{_prefix}/sbin/svscan
+%attr(0751,root,root)                   %{_prefix}/sbin/svscan
 %attr(0755,root,root)                   %{_prefix}/sbin/readproctitle
 %attr(0755,root,root)                   %{_prefix}/sbin/multilog
 %attr(0755,root,root)                   %{_prefix}/sbin/svctool
@@ -1243,11 +1243,11 @@ done
 %attr(0755,root,root)                   %{_prefix}/bin/rblsmtpd
 %attr(0755,root,root)                   %{_prefix}/bin/udpclient
 %attr(0755,root,root)                   %{_prefix}/sbin/udplogger
-%attr(0755,root,root)                   %{_prefix}/sbin/greydaemon
-%attr(0755,root,root)                   %{_prefix}/sbin/qmail-greyd
+%attr(0751,root,root)                   %{_prefix}/sbin/greydaemon
+%attr(0751,root,root)                   %{_prefix}/sbin/qmail-greyd
 %if %notlsarr == 0
 %attr(0755,root,root)                   %{_prefix}/bin/qdane
-%attr(0755,root,root)                   %{_prefix}/sbin/qmail-daned
+%attr(0751,root,root)                   %{_prefix}/sbin/qmail-daned
 %endif
 
 %if "%{mandir}" != "/usr/share/man"
