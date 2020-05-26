@@ -130,21 +130,25 @@ do
 	SRC="$rpmbuild/SOURCES/$i $SRC"
 done
 dist=`uname -r |cut -d . -f4`
-if [ -f /usr/sbin/qmail-smtpd ] ; then
-	idist=$(rpm -qf /usr/sbin/qmail-smtpd|cut -d- -f4|cut -d. -f3)
-	if [ " $dist" = " $idist" ] ; then
-		iversion=$(rpm -qf /usr/sbin/qmail-smtpd|cut -d- -f3)
-		if [ "$iversion" = "$version" ] ; then
-			release=$(rpm -qf /usr/sbin/qmail-smtpd | cut -d- -f4 | cut -d. -f2)
-			release=$(expr $release + 1)
+if [ $# -gt 0 ] ; then
+	release=$1
+else
+	if [ -f /usr/sbin/qmail-smtpd ] ; then
+		idist=$(rpm -qf /usr/sbin/qmail-smtpd|cut -d- -f4|cut -d. -f3)
+		if [ " $dist" = " $idist" ] ; then
+			iversion=$(rpm -qf /usr/sbin/qmail-smtpd|cut -d- -f3)
+			if [ "$iversion" = "$version" ] ; then
+				release=$(rpm -qf /usr/sbin/qmail-smtpd | cut -d- -f4 | cut -d. -f2)
+				release=$(expr $release + 1)
+			else
+				release=1
+			fi
 		else
 			release=1
 		fi
 	else
 		release=1
 	fi
-else
-	release=1
 fi
 echo "Clearing stage directory"
 /bin/rm -rf stage
