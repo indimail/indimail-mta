@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.270  2020-05-26 09:32:42+05:30  Cprogrammer
+ * resynced permissions with spec file
+ *
  * Revision 1.269  2020-05-25 18:32:10+05:30  Cprogrammer
  * fixed permissions of /usr/lib/indimail/plugins directory
  *
@@ -1513,7 +1516,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.269 2020-05-25 18:32:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.270 2020-05-26 09:32:42+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
