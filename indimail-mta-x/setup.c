@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.34  2020-05-26 09:33:15+05:30  Cprogrammer
+ * use environment variable DESTDIR if destdir not specified on command line
+ *
  * Revision 1.33  2019-07-14 01:13:29+05:30  Cprogrammer
  * reverted to setting for fakeroot setup
  *
@@ -533,6 +536,8 @@ main(int argc, char **argv)
 			strerr_die1x(100, usage);
 		}
 	}
+	if (!destdir)
+		destdir = env_get("DESTDIR");
 	if (destdir && !*destdir)
 		destdir = 0;
 		/*-
@@ -577,7 +582,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.33 2019-07-14 01:13:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.34 2020-05-26 09:33:15+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
