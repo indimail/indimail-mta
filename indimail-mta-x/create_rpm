@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.5  2020-05-27 12:39:18+05:30  Cprogrammer
+# build spec file before rpm build
+#
 # Revision 1.4  2020-05-26 09:38:40+05:30  Cprogrammer
 # added option to specify release number on command line
 #
@@ -13,12 +16,11 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.4 2020-05-26 09:38:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.5 2020-05-27 12:39:18+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 libdkim_version=$(grep libdkim_version indimail-mta.spec.in | head -1| awk '{print $3}')
 libsrs2_version=$(grep libsrs2_version indimail-mta.spec.in | head -1| awk '{print $3}')
-ucspi_version=$(grep ucspi_version indimail-mta.spec.in | head -1| awk '{print $3}')
 
 get_tar_files()
 {
@@ -32,8 +34,7 @@ done
 	-e 's/%{name}/indimail-mta/g' \
 	-e "s/%{version}/$version/g" \
 	-e "s/%{libdkim_version}/$libdkim_version/g" \
-	-e "s/%{libsrs2_version}/$libsrs2_version/g" \
-	-e "s/%{ucspi_version}/$ucspi_version/g" 
+	-e "s/%{libsrs2_version}/$libsrs2_version/g"
 }
 
 get_non_tar_files()
@@ -48,8 +49,7 @@ done
 	-e 's/%{name}/indimail-mta/g' \
 	-e "s/%{version}/$version/g" \
 	-e "s/%{libdkim_version}/$libdkim_version/g" \
-	-e "s/%{libsrs2_version}/$libsrs2_version/g" \
-	-e "s/%{ucspi_version}/$ucspi_version/g" 
+	-e "s/%{libsrs2_version}/$libsrs2_version/g"
 }
 
 get_dirname()
@@ -71,6 +71,11 @@ then
 	fi
 else
 	rpmbuild=$HOME/rpmbuild
+fi
+make -s indimail-mta.spec
+if [ $? -ne 0 ] ; then
+	echo "make failed" 1>&2
+	exit 1
 fi
 if [ -d ../stage ] ; then
 	/bin/rm -rf ../stage
