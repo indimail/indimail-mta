@@ -6,7 +6,7 @@ Binary: indimail-mta
 Architecture: any
 Version: @version@-@release@
 Maintainer: Manvendra Bhangui <indimail-mta@indimail.org>
-Homepage: http://indimail.sourceforge.net
+Homepage: https://github.com/mbhangui/indimail-mta
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: dummy.tar.gz
 Standards-Version: 3.9.1

@@ -74,11 +74,11 @@ MOSTLYCLEANFILES= indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-obs_deb_prep: obs_deb_prep.in Makefile
+obs_deb_prep: obs_deb_prep.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-rules: rules.in Makefile
+rules: rules.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-changelog: changelog.in ../conf-release ../conf-version
+changelog: changelog.in ../conf-version ../conf-release
 	(cat $@.in; echo ""; \
 	echo " -- Manvendra Bhangui <indimail-mta@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
 	| $(edit) > $@
@@ -92,23 +92,23 @@ indimail-mta-xUbuntu_16.04.dsc: indimail-mta-xUbuntu_16.04.dsc.in Makefile ../co
 	$(edit) $@.in > $@
 indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-indimail-mta.postrm: indimail-mta.postrm.in Makefile
+indimail-mta.postrm: indimail-mta.postrm.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-indimail-mta.prerm: indimail-mta.prerm.in Makefile
+indimail-mta.prerm: indimail-mta.prerm.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-indimail-mta.postinst: indimail-mta.postinst.in Makefile
+indimail-mta.postinst: indimail-mta.postinst.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-indimail-mta.preinst: indimail-mta.preinst.in Makefile
+indimail-mta.preinst: indimail-mta.preinst.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-indimail-mini.prerm: indimail-mini.prerm.in
+indimail-mini.prerm: indimail-mini.prerm.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-mini.preinst: indimail-mini.preinst.in
+indimail-mini.preinst: indimail-mini.preinst.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-mini.postrm: indimail-mini.postrm.in
+indimail-mini.postrm: indimail-mini.postrm.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-mini.postinst: indimail-mini.postinst.in
+indimail-mini.postinst: indimail-mini.postinst.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-mta.cron.d: indimail-mta.cron.d.in
+indimail-mta.cron.d: indimail-mta.cron.d.in Makefile
 	$(edit) $@.in > $@
 
 debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
