@@ -87,8 +87,8 @@ build-stamp:
 	echo Description=\"IndiMail MTA\"; \
 	echo MTA_version=$(version); \
 	echo ID=indimail-mta; \
-	echo HOME_URL="http://www.indimail.org"; \
-	echo PACKAGE_BUGREPORT=\"Manvendra Bhangui manvendra@indimail.org\"; \
+	echo HOME_URL="https://github.com/mbhangui/indimail-mta"; \
+	echo PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-mta@indimail.org\"; \
 	) > indimail-mta-release
 	touch build-stamp
 

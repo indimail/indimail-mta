@@ -1,9 +1,9 @@
 Source: indimail-mta
 Section: mail
 Priority: extra
-Maintainer: Manvendra Bhangui <manvendra@indimail.org>
+Maintainer: Manvendra Bhangui <indimail-mta@indimail.org>
 Standards-Version: 3.9.1
-Homepage: http://indimail.sourceforge.net
+Homepage: https://github.com/mbhangui/indimail-mta
 
 Package: indimail-mta
 Architecture: any
