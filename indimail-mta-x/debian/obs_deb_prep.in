@@ -6,7 +6,7 @@ set -e
 libdkim_version=@libdkim_version@
 libsrs2_version=@libsrs2_version@
 version=@version@
-for i in indimail-mta-"$version" ucspi-tcp-0.88 libdkim-"$libdkim_version" libsrs2-"$libsrs2_version"
+for i in indimail-mta-"$version" ucspi-tcp libdkim-"$libdkim_version" libsrs2-"$libsrs2_version"
 do
 	if [ -d $i ] ; then
 		/bin/rm -rf $i
