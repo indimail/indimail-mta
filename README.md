@@ -13,8 +13,8 @@ edit the files conf-qmail, conf-prefix, conf-sysconfdir, conf-shared, conf-libex
 # Download / clone libqmail
 ```
 $ cd /usr/local/src
-$ git clone https://github.com/mbhangui/libqmail-0.1.git
-$ cd /usr/local/src/libqmail-0.1
+$ git clone https://github.com/mbhangui/libqmail.git
+$ cd /usr/local/src/libqmail
 $ ./default.configure
 $ make
 $ sudo make install-strip
@@ -32,7 +32,7 @@ cd /usr/local/src/indimail-mta/libsrs2-1.0.18
 ./default.configure
 make
 sudo make install-strip
-cd /usr/local/src/indimail-mta/indimail-mta-2.x
+cd /usr/local/src/indimail-mta/indimail-mta-x
 ```
 
 edit conf-files (see the note on directory structure at the bottom)
@@ -124,7 +124,7 @@ Currently, the list of supported distributions for IndiMail is
           o Ubuntu 17.04
           o Ubuntu 18.04
           o Ubuntu 19.04
-          o Ubuntu 19.10
+          o Ubuntu 20.04
 ```
 
 # Docker / Podman Repository
@@ -152,6 +152,8 @@ bionic   for ubuntu 18.04
 
 disco    for ubuntu 19.04
 
+focal    for ubuntu 20.04
+
 centos7  for centos7
 
 debian8  for debian8
@@ -160,6 +162,6 @@ debian9  for debian9
 
 debian10 for debian10
 
-fc31     for fc31
+fc32     for fc32
 
-fc30     for fc30
+fc31     for fc31
