@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.228 2020-05-26 11:23:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.229 2020-05-27 12:41:03+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -101,37 +101,22 @@ Group: System Environment/Base
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-Source1: %{name}-%{version}.tar.gz
-Source2: ucspi-tcp.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source2: http://downloads.sourceforge.net/indimail/ucspi-tcp.tar.gz
 %if %nolibdkim == 0
-Source3: libdkim-%{libdkim_version}.tar.gz
+Source3: http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}.tar.gz
 %endif
 %if %nolibsrs2 == 0
-Source4: libsrs2-%{libsrs2_version}.tar.gz
+Source4: http://downloads.sourceforge.net/indimail/libsrs2-%{libsrs2_version}.tar.gz
 %endif
-Source5: %{name}-rpmlintrc
+Source5: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source6: %{name}-permissions.easy
-Source7: %{name}-permissions.secure
-Source8: %{name}-permissions.paranoid
+Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
+Source7: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
+Source8: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
-%endif
-
-%if 0 != 0
-NoSource: 1
-NoSource: 2
-%if %nolibdkim == 0
-NoSource: 3
-%endif
-%if %nolibsrs2 == 0
-NoSource: 4
-%endif
-NoSource: 5
-NoSource: 6
-NoSource: 7
-NoSource: 8
 %endif
 
 URL: https://github.com/mbhangui/indimail-mta
