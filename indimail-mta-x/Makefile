@@ -3760,7 +3760,7 @@ whois.o:\
 compile whois.c tcpopen.h
 	./compile `grep -h -v "^#" conf-ip` whois.c
 
-indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config
+indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config conf-release conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
 
 hastlsv1_1_server.h: \
