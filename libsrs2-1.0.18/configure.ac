@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([libsrs2], [1.0.18], [Manvendra Bhangui manvendra@indimail.org], libsrs2)
+AC_INIT([libsrs2],1.0.18, [Manvendra Bhangui manvendra@indimail.org], libsrs2)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_HEADERS([config.h])
