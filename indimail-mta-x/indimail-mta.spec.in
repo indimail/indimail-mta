@@ -314,9 +314,6 @@ for i in %{name}-%{version} ucspi-tcp-%{ucspitcp_version} \
 libdkim-%{libdkim_version} libsrs2-%{libsrs2_version}
 do
 (
-  if [ -d indimail-mta-x ] ; then
-    %{__rm} -rf indimail-mta-x
-  fi
   if [ -d $i ] ; then
     %{__rm} -rf $i
   fi
@@ -333,9 +330,6 @@ do
   else
     echo "No Source Archive for $i"
     exit 1
-  fi
-  if [ -d indimail-mta-x ] ; then
-    %{__mv} indimail-mta-x indimail-mta-%{version}
   fi
 %if %build_on_obs == 1
   if [ -d $i ] ; then
@@ -493,6 +487,20 @@ fi
 %install
 ID=$(id -u)
 %{__mkdir_p} %{buildroot}%{_prefix}
+# This is needed for to figure out versions e.g.
+# the following 3 lines in indimail-mta/Makefile
+# libdkim_version=$(shell cat ../libdkim-x/conf-version)
+# libsrs2_version=$(shell cat ../libsrs2-x/conf-version)
+# ucspitcp_version=$(shell cat ../ucspi-tcp-x/conf-version)
+if [ -d libdkim-%{libdkim_version} ] ; then
+  ln -s libdkim-%{libdkim_version} libdkim-x
+fi
+if [ -d libsrs2-%{libsrs2_version} ] ; then
+  ln -s libsrs2-%{libsrs2_version} libsrs2-x
+fi
+if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
+  ln -s ucspi-tcp-%{ucspitcp_version} ucspi-tcp-x
+fi
 for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} \
 %{name}-%{version} ucspi-tcp-%{ucspitcp_version}
 do
@@ -512,15 +520,18 @@ do
       %{__make} DESTDIR=%{buildroot} install-strip
     fi
     cd ..
+  else
+    echo "$i: No such file or directory" 1>&2
+    exit 1
   fi
 done
 
-#copy files not copied by setup
-install -m 0644 %{name}-release %{buildroot}%{qsysconfdir}/%{name}-release
-install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 %{__mkdir_p} %{buildroot}%{libexecdir}
 %{__mkdir_p} %{buildroot}%{qsysconfdir}
+#copy files not copied by setup
+install -m 0644 %{name}-release  %{buildroot}%{qsysconfdir}/%{name}-release
+install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 install -m 0644 ChangeLog %{buildroot}%{shareddir}/doc/ChangeLog
 if [ -f qupgrade.sh ] ; then
 install -m 0755 qupgrade.sh %{buildroot}%{libexecdir}/qupgrade.sh
