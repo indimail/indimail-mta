@@ -13,8 +13,9 @@ qsysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
 libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
 version=$(shell cat conf-version)
 release := $(shell cat conf-release 2>/dev/null||echo "1.1")
-libdkim_version=$(shell cat ../libdkim-1.5/conf-version)
-libsrs2_version=$(shell cat ../libsrs2-1.0.18/conf-version)
+libdkim_version=$(shell cat ../libdkim-x/conf-version)
+libsrs2_version=$(shell cat ../libsrs2-x/conf-version)
+ucspitcp_version=$(shell cat ../ucspi-tcp-x/conf-version)
 DATE=$(shell date)
 DEFS=$(shell uname -s | tr "[:lower:]" "[:upper:]")
 mysql_inc=$(shell ./mysql_config --include)
@@ -38,6 +39,7 @@ edit = sed \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@libdkim_version\@,$(libdkim_version),g' \
 	-e 's,@libsrs2_version\@,$(libsrs2_version),g' \
+	-e 's,@ucspitcp_version\@,$(ucspitcp_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
 default: it man leapsecs.dat
@@ -1589,21 +1591,25 @@ dktest.8: dktest.9 conf-sysconfdir
 
 dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
-	( ( ./compile -I../libdkim-$(DKIM_VERSION) \
+	( ( ./compile -I../libdkim-$(DKIM_VERSION) -I../libdkim-x \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o dns_text.o \
-	-L../libdkim-$(DKIM_VERSION)/.libs \
-	-L../libdkim-$(DKIM_VERSION) \
+	-L../libdkim-$(DKIM_VERSION)/.libs -L../libdkim-x/.libs \
+	-L../libdkim-$(DKIM_VERSION) -L../libdkim-x \
 	`cat dns.lib` -ldkim -lcrypto -lqmail ) >/dev/null 2>&1 \
-	&& echo "-L../libdkim-$(DKIM_VERSION)/.libs -L../libdkim-$(DKIM_VERSION) -ldkim" || exit 0 ) > dkim.lib
+	&& echo "-L../libdkim-$(DKIM_VERSION)/.libs \
+	-L../libdkim-$(DKIM_VERSION) -L../libdkim-x/.libs -L../libdkim-x -ldkim" \
+	|| exit 0 ) > dkim.lib
 	rm -f trydkim.o trydkim
 
 hasdkim.h: dns_text.o \
 trydkim.c compile load dns.lib dkim.lib conf-indi
-	( ( ./compile -I../libdkim-$(DKIM_VERSION) `grep -h -v "^#" conf-dkim` trydkim.c && \
+	( ( ./compile -I../libdkim-$(DKIM_VERSION) -I../libdkim-x \
+		`grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o dns_text.o \
-	-L../libdkim-$(DKIM_VERSION)/.libs \
-	-L../libdkim-$(DKIM_VERSION) `cat dkim.lib dns.lib` -lcrypto -lqmail ) >/dev/null 2>&1 \
+	-L../libdkim-$(DKIM_VERSION)/.libs -L../libdkim-x/.libs \
+	-L../libdkim-$(DKIM_VERSION) -L../libdkim-x/ \
+	`cat dkim.lib dns.lib` -lcrypto -lqmail ) >/dev/null 2>&1 \
 	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h
 	rm -f trydkim.o trydkim
 
@@ -1623,7 +1629,7 @@ dns.lib dkim.lib
 qmail-dkim.o: \
 compile qmail-dkim.c qmail.h auto_qmail.h control.h domainkeys.h \
 hasdkim.h variables.h auto_control.h MakeArgs.h
-	./compile -I../libdkim-$(DKIM_VERSION) qmail-dkim.c
+	./compile -I../libdkim-$(DKIM_VERSION) -I../libdkim-x qmail-dkim.c
 
 qmail-dkim.8: qmail-dkim.9 conf-sysconfdir
 	cat qmail-dkim.9 \
@@ -2169,26 +2175,27 @@ compile splogger.c
 	./compile splogger.c
 
 srs.lib: trysrs.c compile load conf-srs dns.lib
-	( ( ./compile -I../libsrs2-$(SRS_VERSION)/libsrs2 \
-		`grep -h -v "^#" conf-srs` trysrs.c && \
+	((./compile -I../libsrs2-$(SRS_VERSION)/libsrs2 \
+	-I../libsrs2-x/libsrs2 `grep -h -v "^#" conf-srs` trysrs.c && \
 	./load trysrs -L../libsrs2-$(SRS_VERSION)/libsrs2/.libs \
-	-L../libsrs2-$(SRS_VERSION)/libsrs2 \
-	-lsrs2 ) >/dev/null 2>&1 \
-	&& echo "-L../libsrs2-$(SRS_VERSION)/libsrs2/.libs -L../libsrs2-$(SRS_VERSION)/libsrs2 \
-		-lsrs2" || exit 0 ) > srs.lib
+	-L../libsrs2-x/libsrs2/.libs -L../libsrs2-$(SRS_VERSION)/libsrs2 \
+	-L../libsrs2-x/libsrs2 -lsrs2 ) >/dev/null 2>&1 \
+	&& echo "-L../libsrs2-$(SRS_VERSION)/libsrs2/.libs \
+	-L../libsrs2-x/libsrs2/.libs -L../libsrs2-$(SRS_VERSION)/libsrs2 \
+	-L../libsrs2-x/libsrs2 -lsrs2" || exit 0 ) > srs.lib
 	rm -f trysrs.o trysrs
 
 hassrs.h:  trysrs.c compile load srs.lib conf-indi
-	( ( ./compile -I../libsrs2-$(SRS_VERSION)/libsrs2 \
-		`grep -h -v "^#" conf-srs` trysrs.c && \
-	./load trysrs -L../libsrs2-$(SRS_VERSION)/libsrs2/.libs \
-	-L../libsrs2-$(SRS_VERSION)/libsrs2 `cat srs.lib`) >/dev/null 2>&1 \
+	((./compile -I../libsrs2-$(SRS_VERSION)/libsrs2 \
+	-I../libsrs2-x/libsrs2 `grep -h -v "^#" conf-srs` \
+	trysrs.c && ./load trysrs -L../libsrs2-$(SRS_VERSION)/libsrs2/.libs \
+	-L../libsrs2-x/libsrs2/.libs -L../libsrs2-$(SRS_VERSION)/libsrs2 \
+	-L../libsrs2-x/libsrs2 `cat srs.lib`) >/dev/null 2>&1 \
 	&& (echo \#define HAVESRS 1) || exit 0 ) > hassrs.h
 	rm -f trysrs.o trysrs
 
 srs.o: compile srs.c hassrs.h srs.h auto_qmail.h control.h rcpthosts.h
-	./compile -I../libsrs2-$(SRS_VERSION)/libsrs2 srs.c
-
+	./compile -I../libsrs2-$(SRS_VERSION)/libsrs2 -I../libsrs2-x/libsrs2 srs.c
 
 srsfilter: \
 load srsfilter.o srs.o qmail.o control.o rcpthosts.o \
@@ -3764,9 +3771,14 @@ whois.o:\
 compile whois.c tcpopen.h
 	./compile `grep -h -v "^#" conf-ip` whois.c
 
-indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config conf-release conf-version
+indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config \
+conf-release conf-version ../libdkim-x/conf-version \
+../libsrs2-x/conf-version ../ucspi-tcp-x/conf-version Makefile
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
-debian/Makefile: debian/Makefile.in
+
+debian/Makefile: debian/Makefile.in conf-release conf-version \
+../libdkim-x/conf-version ../libsrs2-x/conf-version \
+../ucspi-tcp-x/conf-version Makefile
 	$(edit) $@.in > $@
 
 hastlsv1_1_server.h: \

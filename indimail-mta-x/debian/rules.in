@@ -29,12 +29,12 @@ libexecdir=$(prefix)/libexec/indimail
 
 libdkim_version=@libdkim_version@
 libsrs2_version=@libsrs2_version@
+ucspitcp_version=@ucspitcp_version@
 version=@version@
 
 tcpserver_plugin=1
 notlsarr=0
-bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
-libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
+libdir=@libdir@
 cp=/bin/cp
 rm=/bin/rm
 
@@ -52,10 +52,10 @@ build-stamp:
 	#
 	if [ $(tcpserver_plugin) -eq 1 ] ; then \
 		echo "-DLOAD_SHARED_OBJECTS" > indimail-mta-$(version)/conf-dlopen; \
-		echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp/conf-dlopen; \
+		echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-$(ucspitcp_version)/conf-dlopen; \
 	else \
 		/bin/rm -f indimail-mta-$(version)/conf-dlopen; \
-		/bin/rm -f ucspi-tcp/conf-dlopen; \
+		/bin/rm -f ucspi-tcp-$(ucspitcp_version)/conf-dlopen; \
 	fi
 	if [ $(notlsarr) -eq 0 ] ; then \
 		echo "-DHASTLSA" > indimail-mta-$(version)/conf-tlsa; \
@@ -74,13 +74,13 @@ build-stamp:
 	#
 	# run make
 	#
-	if [ -d ucspi-tcp ]                  ; then echo $(prefix)      > ucspi-tcp/conf-home; fi
-	if [ -d indimail-mta-$(version) ]    ; then echo $(qmaildir)    > indimail-mta-$(version)/conf-qmail; fi
-	if [ -d indimail-mta-$(version) ]    ; then echo $(qsysconfdir) > indimail-mta-$(version)/conf-sysconfdir; fi
-	if [ -d ucspi-tcp ]                  ; then $(MAKE) -s -C ucspi-tcp DESTDIR=$(DESTDIR); fi
-	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
-	if [ -d indimail-mta-$(version) ]    ; then $(MAKE) -s -C indimail-mta-$(version) DESTDIR=$(DESTDIR); fi
+	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then echo $(prefix)      > ucspi-tcp-$(ucspitcp_version)/conf-home; fi
+	if [ -d indimail-mta-$(version) ]       ; then echo $(qmaildir)    > indimail-mta-$(version)/conf-qmail; fi
+	if [ -d indimail-mta-$(version) ]       ; then echo $(qsysconfdir) > indimail-mta-$(version)/conf-sysconfdir; fi
+	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) -s -C ucspi-tcp-$(ucspitcp_version) DESTDIR=$(DESTDIR); fi
+	if [ -d libdkim-$(libdkim_version) ]    ; then $(MAKE) -s -C libdkim-$(libdkim_version)    DESTDIR=$(DESTDIR); fi
+	if [ -d libsrs2-$(libsrs2_version) ]    ; then $(MAKE) -s -C libsrs2-$(libsrs2_version)    DESTDIR=$(DESTDIR); fi
+	if [ -d indimail-mta-$(version) ]       ; then $(MAKE) -s -C indimail-mta-$(version)       DESTDIR=$(DESTDIR); fi
 	${rm} -rf $(DESTDIR)$(libdir)/*.la
 	( \
 	echo NAME=indimail-mta; \
@@ -95,12 +95,12 @@ build-stamp:
 clean:
 	rm -f build-stamp configure-stamp
 	${rm} -rf $(DESTDIR)
-	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) clean||true; fi
-	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) distclean||true; fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) clean||true; fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) distclean||true; fi
-	if [ -d ucspi-tcp ]                  ; then $(MAKE) -s -C ucspi-tcp clean||true; fi
-	if [ -d indimail-mta-$(version) ]    ; then \
+	if [ -d libdkim-$(libdkim_version) ]    ; then $(MAKE) -s -C libdkim-$(libdkim_version) clean||true; fi
+	if [ -d libdkim-$(libdkim_version) ]    ; then $(MAKE) -s -C libdkim-$(libdkim_version) distclean||true; fi
+	if [ -d libsrs2-$(libsrs2_version) ]    ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) clean||true; fi
+	if [ -d libsrs2-$(libsrs2_version) ]    ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) distclean||true; fi
+	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) -s -C ucspi-tcp-$(ucspitcp_version) clean||true; fi
+	if [ -d indimail-mta-$(version) ]       ; then \
 		FAKED_MODE=1;export FAKED_MODE; \
 		$(MAKE) -s -C indimail-mta-$(version) clean||true; \
 		unset FAKED_MODE; \
@@ -114,10 +114,10 @@ install: build
 	dh_testroot
 	dh_prep || dh_clean -k
 	dh_installdirs
-	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s install -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s install -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
-	if [ -d ucspi-tcp ]                  ; then       $(MAKE) -s install -C ucspi-tcp DESTDIR=$(DESTDIR); fi
-	if [ -d indimail-mta-$(version) ]    ; then       $(MAKE) -s install -C indimail-mta-$(version) DESTDIR=$(DESTDIR); fi
+	if [ -d libdkim-$(libdkim_version) ]    ; then $(MAKE) -s install -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
+	if [ -d libsrs2-$(libsrs2_version) ]    ; then $(MAKE) -s install -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) -s install -C ucspi-tcp-$(ucspitcp_version) DESTDIR=$(DESTDIR); fi
+	if [ -d indimail-mta-$(version) ]       ; then $(MAKE) -s install -C indimail-mta-$(version) DESTDIR=$(DESTDIR); fi
 	${rm} -rf $(DESTDIR)$(mandir)/man3
 	${rm} -rf $(DESTDIR)$(prefix)/include
 	${rm} -rf $(DESTDIR)$(prefix)/queue

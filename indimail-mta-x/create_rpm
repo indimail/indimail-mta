@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.6  2020-05-31 10:54:53+05:30  Cprogrammer
+# removed version numbers from directory names of libdkim, libsrs2, ucspi-tcp
+#
 # Revision 1.5  2020-05-27 12:39:18+05:30  Cprogrammer
 # build spec file before rpm build
 #
@@ -16,11 +19,12 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.5 2020-05-27 12:39:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.6 2020-05-31 10:54:53+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
-libdkim_version=$(grep libdkim_version indimail-mta.spec.in | head -1| awk '{print $3}')
-libsrs2_version=$(grep libsrs2_version indimail-mta.spec.in | head -1| awk '{print $3}')
+libdkim_version=$(cat ../libdkim-x/conf-version)
+libsrs2_version=$(cat ../libsrs2-x/conf-version)
+ucspitcp_version=$(cat ../ucspi-tcp-x/conf-version)
 
 get_tar_files()
 {
@@ -30,11 +34,12 @@ do
 	i=`basename $i`
 	echo $i
 done
-) | sort -u | sed \
+) | uniq | sed \
 	-e 's/%{name}/indimail-mta/g' \
 	-e "s/%{version}/$version/g" \
 	-e "s/%{libdkim_version}/$libdkim_version/g" \
-	-e "s/%{libsrs2_version}/$libsrs2_version/g"
+	-e "s/%{libsrs2_version}/$libsrs2_version/g" \
+	-e "s/%{ucspitcp_version}/$ucspitcp_version/g"
 }
 
 get_non_tar_files()
@@ -49,7 +54,8 @@ done
 	-e 's/%{name}/indimail-mta/g' \
 	-e "s/%{version}/$version/g" \
 	-e "s/%{libdkim_version}/$libdkim_version/g" \
-	-e "s/%{libsrs2_version}/$libsrs2_version/g"
+	-e "s/%{libsrs2_version}/$libsrs2_version/g" \
+	-e "s/%{ucspitcp_version}/$ucspitcp_version/g"
 }
 
 get_dirname()
@@ -85,8 +91,9 @@ cd ..
 list=`get_tar_files`
 for i in $list
 do
-	echo $i | grep indimail-mta > /dev/null
-	if [ $? -eq 0 ] ; then
+	dir=`get_dirname $i`
+	case "$dir" in
+		indimail-mta-$version)
 		if [ ! -d indimail-mta-x ] ; then
 			echo "$i: No such file or directory" 1>&2
 			exit 1
@@ -108,28 +115,75 @@ do
 		SRC="$rpmbuild/SOURCES/indimail-mta-"$version".tar.gz $SRC"
 		cd ..
 		continue
-	fi
-	dir=`get_dirname $i`
-	if [ ! -d $dir ] ; then
-		echo "$dir: No such file or directory" 1>&2
-		exit 1
-	fi
-	echo "Preparing $dir"
-	/bin/cp -rp $dir stage
-	cd stage/$dir
-	echo "Cleaning $dir"
-	make -s clean > /dev/null
-	make -s distclean > /dev/null
-	/bin/rm -rf autom4te.cache .deps
-	cd ..
-	tar \
-		--exclude="$dir/.git" \
-		--exclude="$dir/debian" \
-		--exclude="$dir/RCS" \
-		-cf - $dir \
-		| gzip -c > $rpmbuild/SOURCES/$dir.tar.gz
-	SRC="$rpmbuild/SOURCES/$dir.tar.gz $SRC"
-	cd ..
+		;;
+		libdkim-$libdkim_version)
+		if [ ! -d libdkim-x ] ; then
+			echo "$i: No such file or directory" 1>&2
+			exit 1
+		fi
+		echo "Preparing libdkim-"$libdkim_version""
+		/bin/cp -rp libdkim-x stage/libdkim-"$libdkim_version"
+		cd stage/libdkim-"$libdkim_version"
+		echo "Cleaning libdkim-$libdkim_version"
+		make -s clean > /dev/null
+		make -s distclean > /dev/null
+		/bin/rm -rf autom4te.cache .deps
+		cd ..
+		tar \
+			--exclude="libdkim-$libdkim_version/.git" \
+			--exclude="libdkim-$libdkim_version/debian" \
+			--exclude="libdkim-$libdkim_version/RCS" \
+			-cf - libdkim-"$libdkim_version" \
+			| gzip -c > $rpmbuild/SOURCES/libdkim-"$libdkim_version".tar.gz
+		SRC="$rpmbuild/SOURCES/libdkim-"$libdkim_version".tar.gz $SRC"
+		cd ..
+		continue
+		;;
+		libsrs2-$libsrs2_version)
+		if [ ! -d libsrs2-x ] ; then
+			echo "$i: No such file or directory" 1>&2
+			exit 1
+		fi
+		echo "Preparing libsrs2-"$libsrs2_version""
+		/bin/cp -rp libsrs2-x stage/libsrs2-"$libsrs2_version"
+		cd stage/libsrs2-"$libsrs2_version"
+		echo "Cleaning libsrs2-$libsrs2_version"
+		make -s clean > /dev/null
+		make -s distclean > /dev/null
+		/bin/rm -rf autom4te.cache .deps
+		cd ..
+		tar \
+			--exclude="libsrs2-$libsrs2_version/.git" \
+			--exclude="libsrs2-$libsrs2_version/debian" \
+			--exclude="libsrs2-$libsrs2_version/RCS" \
+			-cf - libsrs2-"$libsrs2_version" \
+			| gzip -c > $rpmbuild/SOURCES/libsrs2-"$libsrs2_version".tar.gz
+		SRC="$rpmbuild/SOURCES/libsrs2-"$libsrs2_version".tar.gz $SRC"
+		cd ..
+		continue
+		;;
+		ucspi-tcp-$ucspitcp_version)
+		if [ ! -d ucspi-tcp-x ] ; then
+			echo "$i: No such file or directory" 1>&2
+			exit 1
+		fi
+		echo "Preparing ucpsi-tcp-$ucspitcp_version"
+		/bin/cp -rp ucspi-tcp-x stage/ucspi-tcp-"$ucspitcp_version"
+		cd stage/ucspi-tcp-"$ucspitcp_version"
+		echo "Cleaning ucspi-tcp-$ucspitcp_version"
+		make -s clean > /dev/null
+		cd ..
+		tar \
+			--exclude="ucspi-tcp-$ucspitcp_version/.git" \
+			--exclude="ucspi-tcp-$ucspitcp_version/debian" \
+			--exclude="ucspi-tcp-$ucspitcp_version/RCS" \
+			-cf - ucspi-tcp-"$ucspitcp_version" \
+			| gzip -c > $rpmbuild/SOURCES/ucspi-tcp-"$ucspitcp_version".tar.gz
+		SRC="$rpmbuild/SOURCES/ucspi-tcp-$ucspitcp_version.tar.gz $SRC"
+		cd ..
+		continue
+		;;
+	esac
 done
 echo "Copying permissions files and rpmlintrc"
 for i in `get_non_tar_files indimail-mta-x/indimail-mta.spec.in`

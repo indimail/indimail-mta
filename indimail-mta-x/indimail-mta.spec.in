@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.229 2020-05-27 12:41:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.230 2020-05-31 10:55:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -27,6 +27,7 @@
 %global plugindir          %{_prefix}/lib/indimail/plugins
 %global libdkim_version    1.5
 %global libsrs2_version    1.0.18
+%global ucspitcp_version   1.0
 %global tcpserver_plugin   1
 %if 0%{?suse_version}
 %global noperms            1
@@ -102,7 +103,7 @@ Group: System Environment/Base
 Group: Productivity/Networking/Email/Servers
 %endif
 Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
-Source2: http://downloads.sourceforge.net/indimail/ucspi-tcp.tar.gz
+Source2: http://downloads.sourceforge.net/indimail/ucspi-tcp-%{ucspitcp_version}.tar.gz
 %if %nolibdkim == 0
 Source3: http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}.tar.gz
 %endif
@@ -309,7 +310,7 @@ new message to a central server using QMQP.
 %{see_base}
 
 %prep
-for i in %{name}-%{version} ucspi-tcp \
+for i in %{name}-%{version} ucspi-tcp-%{ucspitcp_version} \
 libdkim-%{libdkim_version} libsrs2-%{libsrs2_version}
 do
 (
@@ -475,17 +476,17 @@ if [ -d %{name}-%{version} ] ; then
   fi
 fi
 #### ucspi-tcp ######################
-if [ -d ucspi-tcp ] ; then
-  %{__sed} 's{HOME{%{_prefix}{' ucspi-tcp/conf-home.in > ucspi-tcp/conf-home
-  %{__sed} 's{SHAREDDIR{%{shareddir}{' ucspi-tcp/conf-shared.in > ucspi-tcp/conf-shared
+if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
+  %{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspitcp_version}/conf-home.in > ucspi-tcp-%{ucspitcp_version}/conf-home
+  %{__sed} 's{SHAREDDIR{%{shareddir}{' ucspi-tcp-%{ucspitcp_version}/conf-shared.in > ucspi-tcp-%{ucspitcp_version}/conf-shared
   %if %{tcpserver_plugin} == 1
-    echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp/conf-dlopen
+    echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-%{ucspitcp_version}/conf-dlopen
   %else
-    %{__rm} -f ucspi-tcp/conf-dlopen
+    %{__rm} -f ucspi-tcp-%{ucspitcp_version}/conf-dlopen
   %endif
   if [ -n "%{debug_package}" ] ; then
-    echo %{__cc} -fPIC %{optflags} > ucspi-tcp/conf-cc
-    echo %{__cc} -O2 > ucspi-tcp/conf-ld
+    echo %{__cc} -fPIC %{optflags} > ucspi-tcp-%{ucspitcp_version}/conf-cc
+    echo %{__cc} -O2 > ucspi-tcp-%{ucspitcp_version}/conf-ld
   fi
 fi
 
@@ -493,7 +494,7 @@ fi
 ID=$(id -u)
 %{__mkdir_p} %{buildroot}%{_prefix}
 for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} \
-%{name}-%{version} ucspi-tcp
+%{name}-%{version} ucspi-tcp-%{ucspitcp_version}
 do
   if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
     continue
