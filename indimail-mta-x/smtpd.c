@@ -6204,7 +6204,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.225 2020-05-11 11:12:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.225 2020-05-11 11:12:08+05:30 Cprogrammer Stab mbhangui $";
 
 	if (x)
 		x++;

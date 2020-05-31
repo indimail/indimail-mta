@@ -1,18 +1,18 @@
-prefix=/usr
-qmaildir=/var/indimail
+prefix=@prefix@
+qmaildir=@qmaildir@
 sysconfdir=/etc
-qsysconfdir=/etc/indimail
+qsysconfdir=@qsysconfdir@
 mbase=/home/mail
-servicedir=/service
-mandir=$(prefix)/share/man
-libexecdir=$(prefix)/libexec/indimail
-shareddir=$(prefix)/share/indimail
-logdir=/var/log/svc
+servicedir=@servicedir@
+mandir=@mandir@
+libexecdir=@libexecdir@
+shareddir=@shareddir@
+logdir=@logdir@
+libdkim_version=@libdkim_version@
+libsrs2_version=@libsrs2_version@
+version=@version@
+release=@release@
 
-libdkim_version=1.5
-libsrs2_version=1.0.18
-version=$(shell cat ../conf-version)
-release := $(shell cat ../conf-release)
 all: rules indimail-mta.prerm indimail-mta.preinst \
 indimail-mta.postrm indimail-mta.postinst \
 indimail-mini.prerm indimail-mini.preinst \
@@ -25,11 +25,6 @@ indimail-mta-xUbuntu_16.04.dsc \
 indimail-mta-xUbuntu_18.04.dsc \
 debian.tar.gz dummy.tar.gz
 
-#bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
-bits=32
-libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
-acl_libdirstem=$(shell if [ $(bits) -eq 64 ] ; then echo lib64; else echo lib;fi)
-
 edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
@@ -41,7 +36,6 @@ edit = sed \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
-	-e 's,@acl_libdirstem\@,$(acl_libdirstem),g' \
 	-e 's,@libdkim_version\@,$(libdkim_version),g' \
 	-e 's,@libsrs2_version\@,$(libsrs2_version),g' \
 	-e 's,@release\@,$(release),g' \
@@ -50,9 +44,6 @@ edit = sed \
 install: all
 install-strip: install
 distclean: clean
-
-indimail-mta.install: indimail-mta.install.in Makefile
-	$(edit) $@.in > $@
 
 clean:
 	/bin/rm -f rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
@@ -82,6 +73,8 @@ changelog: changelog.in ../conf-version ../conf-release
 	(cat $@.in; echo ""; \
 	echo " -- Manvendra Bhangui <indimail-mta@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
 	| $(edit) > $@
+indimail-mta.install: indimail-mta.install.in Makefile
+	$(edit) $@.in > $@
 indimail-mta.dsc: indimail-mta.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 indimail-mta-Debian_8.0.dsc: indimail-mta-Debian_8.0.dsc.in Makefile ../conf-version ../conf-release
