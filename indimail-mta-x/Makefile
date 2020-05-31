@@ -13,6 +13,8 @@ qsysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
 libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
 version=$(shell cat conf-version)
 release := $(shell cat conf-release 2>/dev/null||echo "1.1")
+libdkim_version=$(shell cat ../libdkim-1.5/conf-version)
+libsrs2_version=$(shell cat ../libsrs2-1.0.18/conf-version)
 DATE=$(shell date)
 DEFS=$(shell uname -s | tr "[:lower:]" "[:upper:]")
 mysql_inc=$(shell ./mysql_config --include)
@@ -34,11 +36,13 @@ edit = sed \
 	-e 's,@prefix\@,$(prefix),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@libdkim_version\@,$(libdkim_version),g' \
+	-e 's,@libsrs2_version\@,$(libsrs2_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
 default: it man leapsecs.dat
 
-all: it man leapsecs.dat doc/RELEASE-Notes
+all: it man leapsecs.dat doc/RELEASE-Notes debian/Makefile
 
 libsyncdir.a: makelib syncdir.o
 	./makelib libsyncdir.a syncdir.o
@@ -3762,6 +3766,8 @@ compile whois.c tcpopen.h
 
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config conf-release conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
+debian/Makefile: debian/Makefile.in
+	$(edit) $@.in > $@
 
 hastlsv1_1_server.h: \
 trytlsv1_1_server.c compile load
