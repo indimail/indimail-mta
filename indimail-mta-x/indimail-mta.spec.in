@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.230 2020-05-31 10:55:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.231 2020-06-03 20:24:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -46,7 +46,7 @@
 %global dkimkeyfn          default
 
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <manvendra@indimail.org>
+%global packager Manvendra Bhangui <indimail-mta@indimail.org>
 %endif
 
 %if 0%{?suse_version}
