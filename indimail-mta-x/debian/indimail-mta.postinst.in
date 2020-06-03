@@ -131,7 +131,7 @@ do
 	fi
 	fixperms $line
 done
-) > ${qsysconfdir}/stat.override
+) > ${qsysconfdir}/indimail-mta-stat.override
 fi
 
 # indimail-mta.upgrade/indimail-mta.install are created
