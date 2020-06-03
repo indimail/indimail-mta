@@ -87,9 +87,9 @@ if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 fi
 
 (
-if [ -s ${qsysconfdir}/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
+if [ -s ${qsysconfdir}/indimail-mta-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 	echo "reverting permissions"
-	/bin/cat ${qsysconfdir}/stat.override | while read line
+	/bin/cat ${qsysconfdir}/indimail-mta-stat.override | while read line
 	do
 		if [ -f $line ] ; then
 			echo "reverting permission for $line"

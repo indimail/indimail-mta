@@ -78,7 +78,7 @@ if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 	exit 0
 fi
 
-if [ -s ${qsysconfdir}/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
+if [ -s ${qsysconfdir}/daemontools-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 	echo "reverting permissions"
 	/bin/cat ${qsysconfdir}/stat.override | while read line
 	do
