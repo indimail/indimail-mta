@@ -121,10 +121,10 @@ esac
 #
 # We need to do this for debian. SIGH!!
 #
-if [ -f ${qsysconfdir}/perm_list.q ] ; then
+if [ -f ${qsysconfdir}/perm_list.mta ] ; then
 	echo "Fixing Permissions (debian stupidity)"
 (
-/bin/grep -v "^#" ${qsysconfdir}/perm_list.q | while read line
+/bin/grep -v "^#" ${qsysconfdir}/perm_list.mta | while read line
 do
 	if [ " $line" = " " ] ; then
 		continue
