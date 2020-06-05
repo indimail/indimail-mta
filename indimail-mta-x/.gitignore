@@ -7,12 +7,11 @@ debian/indimail-mini.postinst
 debian/indimail-mini.postrm
 debian/indimail-mini.preinst
 debian/indimail-mini.prerm
-debian/perm_list.q
 debian/changelog
 auto_libexec.o
 qmail-srs.5
 indimail-mta.fc
-perm_list.q
+perm_list.mta
 conf-prefix
 conf-shared
 conf-sysconfdir
@@ -554,8 +553,6 @@ mysql_config
 mysql_config.o
 indimail_stub.o
 cronlist.q
-debian/perm_list.q
-perm_list.q
 svctool
 svctool.8
 indimail-mta-permissions.easy
