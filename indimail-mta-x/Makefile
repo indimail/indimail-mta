@@ -995,7 +995,7 @@ run-cleanq.9 conf-prefix
 	> run-cleanq.8
 
 it: \
-indimail-mta.fc perm_list.q 822date 822field 822header 822print 822received addcr addrlist \
+indimail-mta.fc perm_list.mta 822date 822field 822header 822print 822received addcr addrlist \
 argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q indimail-mta.spec \
 binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm inotify create_services \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
@@ -2105,7 +2105,7 @@ install-strip: install
 distclean: clean
 
 install: \
-it man leapsecs.dat conf-sysconfdir perm_list.q conf-logdir
+it man leapsecs.dat conf-sysconfdir perm_list.mta conf-logdir
 	if test ! -d $(DESTDIR)"`head -1 conf-sysconfdir`" ; then \
 		mkdir -p $(DESTDIR)"`head -1 conf-sysconfdir`" ; \
 	fi ;
@@ -2114,7 +2114,7 @@ it man leapsecs.dat conf-sysconfdir perm_list.q conf-logdir
 	fi ;
 	./setup -d "$(DESTDIR)" -L $(DESTDIR)"`head -1 conf-logdir`" \
 		$(QMAILDIR) && \
-		cp perm_list.q $(DESTDIR)"`head -1 conf-sysconfdir`"
+		cp perm_list.mta $(DESTDIR)"`head -1 conf-sysconfdir`"
 
 slurpclose.o: compile slurpclose.c slurpclose.h
 	./compile slurpclose.c
@@ -3895,7 +3895,7 @@ generic.so: generic.o auto_scancmd.o MakeArgs.o
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o generic.so generic.o \
 	auto_scancmd.o MakeArgs.o -lqmail; fi
 
-perm_list.q: perm_list.in mysql_config
+perm_list.mta: perm_list.in mysql_config
 	$(edit) perm_list.in > $@
 
 svctool: svctool.in mysql_config
