@@ -24,11 +24,11 @@ $ sudo make install-strip
 ```
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/indimail-mta.git
-cd /usr/local/src/indimail-mta/libdkim-1.5
+cd /usr/local/src/indimail-mta/libdkim-x
 ./default.configure
 make
 sudo make install-strip
-cd /usr/local/src/indimail-mta/libsrs2-1.0.18
+cd /usr/local/src/indimail-mta/libsrs2-x
 ./default.configure
 make
 sudo make install-strip
@@ -96,6 +96,13 @@ https://software.opensuse.org/download.html?project=home%3Aindimail&package=indi
 &
 
 https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail-mta
+
+NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to install the additional software
+
+1. indimail-auth (nssd - providing name service switch and pam-multi to provide multiple pam auth methods)
+2. indimail-utils (Multiple utility that can work with indimail-mta - altermime, ripmime, mpack, fortune and flash - customizable menu based admin interface)
+3. indimail-spamfilter - SPAM filter capabillity using bogofilter - https://bogofilter.sourceforge.io
+4. indimail-saccess - IMAP/POP3 & fetchmail for mail retreival
 
 ```
 Currently, the list of supported distributions for IndiMail is
