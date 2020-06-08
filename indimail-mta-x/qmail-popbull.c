@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-popbull.c,v $
+ * Revision 1.8  2020-06-08 22:51:47+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.7  2004-10-22 20:28:37+05:30  Cprogrammer
  * added RCS id
  *
@@ -171,7 +174,7 @@ main(argc, argv)
 		if (st.st_mtime > ts_date)
 		{
 			fnmake_maildir();
-			symlink(fn.s, fntmptph);
+			if (symlink(fn.s, fntmptph) == -1) ;
 		}
 	}
 	closedir(bulldir);
@@ -192,7 +195,7 @@ main(argc, argv)
 void
 getversion_qmail_popbull_c()
 {
-	static char    *x = "$Id: qmail-popbull.c,v 1.7 2004-10-22 20:28:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-popbull.c,v 1.8 2020-06-08 22:51:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

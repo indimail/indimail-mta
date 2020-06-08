@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.10  2020-06-08 22:51:15+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.9  2020-04-04 11:37:41+05:30  Cprogrammer
  * use auto_sysconfdir instead of auto_qmail
  *
@@ -130,7 +133,7 @@ blindwrite(fd, buf, len)
 	char           *buf;
 	int             len;
 {
-	write(fd, buf, len);
+	if (write(fd, buf, len) == -1) ;
 	return len;
 }
 
@@ -528,7 +531,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.9 2020-04-04 11:37:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.10 2020-06-08 22:51:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

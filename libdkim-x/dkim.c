@@ -408,7 +408,7 @@ GetSSP(char *domain, int *bTesting)
 
 	*bTesting = 0;
 	if (!(query = (char *) DKIM_MALLOC(strlen("_ssp._domainkey.") + strlen(domain) + 1))) {
-		fprintf(stderr, "malloc: %d: %s\n", strlen("_ssp._domainkey.") + strlen(domain) + 1,
+		fprintf(stderr, "malloc: %ld: %s\n", strlen("_ssp._domainkey.") + strlen(domain) + 1,
 			strerror(errno));
 		exit(1);
 	}
@@ -488,7 +488,7 @@ GetADSP(char *domain)
 		return DKIM_ADSP_TEMPFAIL;
 	}
 	if (!(query = (char *) DKIM_MALLOC(strlen((char *) "_adsp._domainkey.") + strlen(domain) + 1))) {
-		fprintf(stderr, "malloc: %d: %s\n", strlen("_adsp._domainkey.") + strlen(domain) + 1,
+		fprintf(stderr, "malloc: %ld: %s\n", strlen("_adsp._domainkey.") + strlen(domain) + 1,
 			strerror(errno));
 		exit(1);
 	}

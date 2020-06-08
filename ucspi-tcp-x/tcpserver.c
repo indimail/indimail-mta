@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.63  2020-06-08 22:48:45+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.62  2019-07-10 13:42:39+05:30  Cprogrammer
  * fixed wrong child exit status in logs
  *
@@ -209,7 +212,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.62 2019-07-10 13:42:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.63 2020-06-08 22:48:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1808,5 +1811,5 @@ translate(SSL * ssl, int clearout, int clearin, unsigned int iotimeout)
 void
 getversion_tcpserver_c()
 {
-	write(1, sccsid, 0);
+	if (write(1, sccsid, 0) == -1) ;
 }

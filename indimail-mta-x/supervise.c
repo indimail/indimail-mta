@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.6  2020-06-08 22:52:16+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.5  2008-06-07 13:53:31+05:30  Cprogrammer
  * added signals SIGQUIT, SIGUSR2
  *
@@ -103,7 +106,7 @@ announce(void)
 void
 trigger(void)
 {
-	write(selfpipe[1], "", 1);
+	if (write(selfpipe[1], "", 1) == -1) ;
 }
 
 char           *run[2] = { "./run", 0 };
@@ -349,7 +352,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.5 2008-06-07 13:53:31+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.6 2020-06-08 22:52:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

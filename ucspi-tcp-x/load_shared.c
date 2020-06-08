@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.13  2020-06-08 22:48:20+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.12  2017-12-25 15:21:10+05:30  Cprogrammer
  * ability to chose at runtime dlopen(), dlmopen()
  *
@@ -59,7 +62,7 @@
 #define FATAL "tcpserver: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_shared.c,v 1.12 2017-12-25 15:21:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_shared.c,v 1.13 2020-06-08 22:48:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HASDLMOPEN
@@ -176,5 +179,5 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	write(1, sccsid, 0);
+	if (write(1, sccsid, 0) == -1) ;
 }

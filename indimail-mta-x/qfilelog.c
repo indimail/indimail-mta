@@ -1,5 +1,8 @@
 /*
  * $Log: qfilelog.c,v $
+ * Revision 1.3  2020-06-08 22:51:43+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.2  2004-10-22 20:28:04+05:30  Cprogrammer
  * added RCS id
  *
@@ -19,7 +22,7 @@
 void
 errmsg(const char *m)
 {
-	write(2, m, strlen(m));
+	if (write(2, m, strlen(m)) == -1) ;
 }
 
 void
@@ -161,7 +164,7 @@ main(int argc, char *argv[])
 void
 getversion_qfilelog_c()
 {
-	static char    *x = "$Id: qfilelog.c,v 1.2 2004-10-22 20:28:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qfilelog.c,v 1.3 2020-06-08 22:51:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

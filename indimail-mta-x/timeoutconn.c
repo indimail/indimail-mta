@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.15  2020-06-08 22:52:23+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.14  2016-04-15 15:43:35+05:30  Cprogrammer
  * added comments of #ifdef statements
  *
@@ -332,7 +335,7 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 		dummy = sizeof(sa);
 		if (getpeername(s, (struct sockaddr *) &sa, (socklen_t *) &dummy) == -1)
 		{
-			read(s, &ch, 1);
+			if (read(s, &ch, 1) == -1) ;
 			return -1;
 		}
 		ndelay_off(s);
@@ -397,7 +400,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 		dummy = sizeof(sin);
 		if (getpeername(s, (struct sockaddr *) &sin, (socklen_t *) &dummy) == -1)
 		{
-			read(s, &ch, 1);
+			if (read(s, &ch, 1) == -1) ;
 			return -1;
 		}
 		ndelay_off(s);
@@ -410,7 +413,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 void
 getversion_timeoutconn_c()
 {
-	static char    *x = "$Id: timeoutconn.c,v 1.14 2016-04-15 15:43:35+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: timeoutconn.c,v 1.15 2020-06-08 22:52:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

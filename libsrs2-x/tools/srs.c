@@ -254,8 +254,8 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 						}
 						fprintf(stderr, "Forward %s, %s -> %s\n",
 										address, alias, buf);
-						write(fd, buf, strlen(buf));
-						write(fd, "\n", 1);
+						if (write(fd, buf, strlen(buf)) == -1) ;
+						if (write(fd, "\n", 1) == -1) ;
 						FINISH(fd);
 						continue;
 					}
@@ -273,8 +273,8 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 						}
 						fprintf(stderr, "Reverse %s -> %s\n",
 										address, buf);
-						write(fd, buf, strlen(buf));
-						write(fd, "\n", 1);
+						if (write(fd, buf, strlen(buf)) == -1) ;
+						if (write(fd, "\n", 1) == -1) ;
 						FINISH(fd);
 						continue;
 					}

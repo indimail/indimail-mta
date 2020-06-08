@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.18  2020-06-08 22:48:38+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.17  2018-06-30 16:34:04+05:30  Cprogrammer
  * replace environ with envp to pass full environment variable list in tcpserver to rbl()
  *
@@ -79,7 +82,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.17 2018-06-30 16:34:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.18 2020-06-08 22:48:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -635,5 +638,5 @@ main(int argc, char **argv, char **envp)
 void
 getversion_rblsmtpd_c()
 {
-	write(1, sccsid, 0);
+	if (write(1, sccsid, 0) == -1) ;
 }
