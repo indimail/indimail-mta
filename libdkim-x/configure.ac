@@ -2,12 +2,12 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
-AC_INIT([libdkim],1.5, [Manvendra Bhangui manvendra@indimail.org], libdkim)
+AC_INIT([libdkim],1.5, [Manvendra Bhangui indimail-mta@indimail.org], libdkim)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_SRCDIR([dkimverify.h])
 AC_CONFIG_HEADERS([config.h])
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
+AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-mta@indimail.org")
 AC_CANONICAL_HOST
 LT_INIT
 AM_INIT_AUTOMAKE
