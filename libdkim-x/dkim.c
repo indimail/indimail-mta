@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.25  2020-06-08 23:16:27+05:30  Cprogrammer
+ * quench compiler warnings
+ *
  * Revision 1.24  2019-06-24 23:14:33+05:30  Cprogrammer
  * fixed return value interpretation of DKIMVERIFY
  *
@@ -874,7 +877,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.24 2019-06-24 23:14:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.25 2020-06-08 23:16:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
