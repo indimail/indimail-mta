@@ -34,6 +34,9 @@ version=@version@
 
 tcpserver_plugin=1
 notlsarr=0
+arch=$(shell uname -m)
+# check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
+libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)
 libdir=@libdir@
 cp=/bin/cp
 rm=/bin/rm
@@ -64,12 +67,23 @@ build-stamp:
 	fi
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then \
+		ln -s libdkim-$(libdkim_version) libdkim-x; \
+	fi
+	if [ -d libsrs2-$(libsrs2_version) ] ; then \
+		ln -s libsrs2-$(libsrs2_version) libsrs2-x; \
+	fi
+	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then \
+		ln -s ucspi-tcp-$(ucspitcp_version) ucspi-tcp-x; \
+	fi
+	if [ -d libdkim-$(libdkim_version) ] ; then \
 		cd libdkim-$(libdkim_version) ; \
-		./configure --prefix=$(prefix) --mandir=$(mandir) ; \
+		./configure --prefix=$(prefix) --libdir=$(prefix)/$(libd) \
+			--mandir=$(mandir) ; \
 	fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then \
 		cd libsrs2-$(libsrs2_version) ; \
-		./configure --prefix=$(prefix) --mandir=$(mandir) ; \
+		./configure --prefix=$(prefix) --libdir=$(prefix)/$(libd) \
+			--mandir=$(mandir) ; \
 	fi
 	#
 	# run make
@@ -81,7 +95,7 @@ build-stamp:
 	if [ -d libdkim-$(libdkim_version) ]    ; then $(MAKE) -s -C libdkim-$(libdkim_version)    DESTDIR=$(DESTDIR); fi
 	if [ -d libsrs2-$(libsrs2_version) ]    ; then $(MAKE) -s -C libsrs2-$(libsrs2_version)    DESTDIR=$(DESTDIR); fi
 	if [ -d indimail-mta-$(version) ]       ; then $(MAKE) -s -C indimail-mta-$(version)       DESTDIR=$(DESTDIR); fi
-	${rm} -rf $(DESTDIR)$(libdir)/*.la
+	${rm} -f $(DESTDIR)$(prefix)/$(libd)/*.la
 	( \
 	echo NAME=indimail-mta; \
 	echo Description=\"IndiMail MTA\"; \
@@ -117,15 +131,17 @@ install: build
 	if [ -d libdkim-$(libdkim_version) ]    ; then $(MAKE) -s install -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
 	if [ -d libsrs2-$(libsrs2_version) ]    ; then $(MAKE) -s install -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) -s install -C ucspi-tcp-$(ucspitcp_version) DESTDIR=$(DESTDIR); fi
-	if [ -d indimail-mta-$(version) ]       ; then $(MAKE) -s install -C indimail-mta-$(version) DESTDIR=$(DESTDIR); fi
+	if [ -d indimail-mta-$(version) ]       ; then \
+		FAKED_MODE=1;export FAKED_MODE; \
+		$(MAKE) -s install -C indimail-mta-$(version) DESTDIR=$(DESTDIR); \
+		unset FAKED_MODE; \
+	fi
 	${rm} -rf $(DESTDIR)$(mandir)/man3
 	${rm} -rf $(DESTDIR)$(prefix)/include
 	${rm} -rf $(DESTDIR)$(prefix)/queue
-	${rm} -f  $(DESTDIR)$(prefix)/lib/libdkim.a
-	${rm} -f  $(DESTDIR)$(prefix)/lib64/libdkim.a
-	${rm} -f  $(DESTDIR)$(prefix)/lib/libsrs2.a
-	${rm} -f  $(DESTDIR)$(prefix)/lib64/libsrs2.a
-	${rm} -f  $(DESTDIR)$(prefix)/lib/*.la
+	${rm} -f  $(DESTDIR)$(prefix)/$(libd)/libdkim.a
+	${rm} -f  $(DESTDIR)$(prefix)/$(libd)/libsrs2.a
+	${rm} -f  $(DESTDIR)$(prefix)/$(libd)/*.la
 	if [ ! -d $(DESTDIR)$(sysconfdir)/apparmor.d/local ] ; then \
 		mkdir -p $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
@@ -149,17 +165,19 @@ install: build
 		mkdir -p $(DESTDIR)$(libexecdir); \
 		install -m 0755 indimail-mta-$(version)/qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
 	fi
-	if [ -f indimail-mta-$(version)/perm_list.q ] ; then \
+	if [ -f indimail-mta-$(version)/perm_list.mta ] ; then \
 		mkdir -p $(DESTDIR)$(qsysconfdir); \
-		install -m 0644 indimail-mta-$(version)/perm_list.q "$(DESTDIR)$(qsysconfdir)"/daemontools_perm_list; \
+		install -m 0644 indimail-mta-$(version)/perm_list.mta "$(DESTDIR)$(qsysconfdir)"/daemontools_perm_list; \
 	fi
 	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
-	/bin/rm -f indimail-mta-release
+	/bin/rm -f indimail-mta-release indimail-mta-x libdkim-x libsrs2-x ucspi-tcp-x
 
 binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-mta.install
+	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-mini.install
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mta
 	dh_install --sourcedir=$(DESTDIR) -pdaemontools
 	dh_install --sourcedir=$(DESTDIR) -pucspi-tcp
