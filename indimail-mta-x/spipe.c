@@ -1,5 +1,8 @@
 /*
  * $Log: spipe.c,v $
+ * Revision 1.3  2020-06-08 22:52:12+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.2  2004-10-22 20:30:42+05:30  Cprogrammer
  * added RCS id
  *
@@ -130,7 +133,7 @@ start_parts()
 void
 handle_intr(int sig)
 {
-	write(selfpipe[1], "", 1);
+	if (write(selfpipe[1], "", 1) == -1) ;
 }
 
 void
@@ -140,7 +143,7 @@ mainloop()
 	signal(SIGINT, handle_intr);
 	signal(SIGQUIT, handle_intr);
 	signal(SIGTERM, handle_intr);
-	read(selfpipe[0], buf, 1);
+	if (read(selfpipe[0], buf, 1) == -1) ;
 	stop_parts();
 	exit(0);
 }
@@ -157,7 +160,7 @@ main(int argc, char **argv)
 void
 getversion_spipe_c()
 {
-	static char    *x = "$Id: spipe.c,v 1.2 2004-10-22 20:30:42+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spipe.c,v 1.3 2020-06-08 22:52:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

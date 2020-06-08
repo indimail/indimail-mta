@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.7  2020-06-08 22:51:53+05:30  Cprogrammer
+ * handle chdir error
+ *
  * Revision 1.6  2017-05-04 20:20:40+05:30  Cprogrammer
  * close passwd, group database
  *
@@ -64,8 +67,12 @@ reset_sticky()
 
 	if (!(ptr = env_get("SCANDIR")))
 		ptr = (char *) auto_spool;
-	chdir(ptr);
-	chmod(fn, 0700);
+	if (chdir(ptr) == -1) {
+		if (flaglog)
+			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", (char *) ptr, ": ");
+		_exit(QQ_XTEMP);	/*- temporary refusal to handle messages */
+	}
+	if (chmod(fn, 0700) == -1) ;
 }
 
 void
@@ -187,7 +194,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.6 2017-05-04 20:20:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq.c,v 1.7 2020-06-08 22:51:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

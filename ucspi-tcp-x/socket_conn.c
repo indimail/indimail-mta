@@ -1,5 +1,8 @@
 /*
  * $Log: socket_conn.c,v $
+ * Revision 1.6  2020-06-08 22:48:42+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.5  2008-07-25 16:50:04+05:30  Cprogrammer
  * fix for darwin
  *
@@ -49,7 +52,7 @@ socket_connected(int s)
 	dummy = sizeof sa;
 	if (getpeername(s, (struct sockaddr *) &sa, &dummy) == -1)
 	{
-		read(s, &ch, 1);		/*- sets errno */
+		if (read(s, &ch, 1) == -1) ; /*- sets errno */
 		return 0;
 	}
 	return 1;

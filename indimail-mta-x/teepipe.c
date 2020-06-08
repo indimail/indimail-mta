@@ -1,5 +1,8 @@
 /*
  * $Log: teepipe.c,v $
+ * Revision 1.3  2020-06-08 22:52:20+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.2  2004-10-22 20:31:43+05:30  Cprogrammer
  * added RCS id
  *
@@ -34,19 +37,15 @@
 void
 err(const char *msg)
 {
-	write(2, "teepipe: Error: ", 16);
-	write(2, msg, strlen(msg));
-	write(2, "\n", 1);
+	if (write(2, "teepipe: Error: ", 16) == -1 || write(2, msg, strlen(msg)) == -1 || write(2, "\n", 1) == -1) ;
 	exit(1);
 }
 
 void
 err2(const char *msg1, const char *msg2)
 {
-	write(2, "teepipe: Error: ", 16);
-	write(2, msg1, strlen(msg1));
-	write(2, msg2, strlen(msg2));
-	write(2, "\n", 1);
+	if (write(2, "teepipe: Error: ", 16) == -1 || write(2, msg1, strlen(msg1)) == -1 ||
+		write(2, msg2, strlen(msg2)) == -1 || write(2, "\n", 1) == -1) ;
 	exit(1);
 }
 
@@ -108,7 +107,7 @@ main(int argc, char **argv)
 void
 getversion_teepipe_c()
 {
-	static char    *x = "$Id: teepipe.c,v 1.2 2004-10-22 20:31:43+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: teepipe.c,v 1.3 2020-06-08 22:52:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

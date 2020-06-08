@@ -1,5 +1,8 @@
 /*
  * $Log: fghack.c,v $
+ * Revision 1.4  2020-06-08 22:51:19+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.3  2004-10-22 20:25:04+05:30  Cprogrammer
  * added RCS id
  *
@@ -41,7 +44,7 @@ main(int argc, char **argv, char **envp)
 	case 0:
 		close(pi[0]);
 		for (i = 0; i < 30; ++i)
-			dup(pi[1]);
+			if (dup(pi[1]) == -1) ;
 		pathexec_run(argv[1], argv + 1, envp);
 		strerr_die4sys(111, FATAL, "unable to run ", argv[1], ": ");
 	}
@@ -68,7 +71,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fghack_c()
 {
-	static char    *x = "$Id: fghack.c,v 1.3 2004-10-22 20:25:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: fghack.c,v 1.4 2020-06-08 22:51:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

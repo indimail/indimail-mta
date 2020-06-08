@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.11  2020-06-08 22:48:48+05:30  Cprogrammer
+ *  quench compiler warning
+ *
  *  Revision 1.10  2017-12-25 15:21:45+05:30  Cprogrammer
  *  ability to chose at runtime dlopen(), dlmopen()
  *
@@ -33,7 +36,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.10 2017-12-25 15:21:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.11 2020-06-08 22:48:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -191,5 +194,5 @@ tcpserver_plugin(char **envp)
 void
 getversion_tcpserver_plugin_c()
 {
-	write(1, sccsid, 0);
+	if (write(1, sccsid, 0) == -1) ;
 }
