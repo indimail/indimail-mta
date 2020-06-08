@@ -35,3 +35,4 @@ tools/Makefile.in
 *.lo
 autom4te.cache
 mkinstalldirs
+configure.lineno
