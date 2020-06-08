@@ -1,0 +1,44 @@
+#!/bin/sh
+if [ ! -f /etc/debian_version ] ; then
+	echo "Not a debian or ubuntu distribution" 1>&2
+	exit 1
+fi
+version=$(cat conf-version)
+release=$(cat conf-release)
+libdkim_version=$(cat ../libdkim-x/conf-version)
+libsrs2_version=$(cat ../libsrs2-x/conf-version)
+ucspi_tcp_version=$(cat ../ucspi-tcp-x/conf-version)
+make -s debian/Makefile
+make -s -C debian
+echo "Cleaning Stage"
+/bin/rm -rf           $HOME/stage/indimail-mta-$version
+/bin/rm -rf           $HOME/stage/libdkim-$libdkim_version
+/bin/rm -rf           $HOME/stage/libsrs2-$libsrs2_version
+/bin/rm -rf           $HOME/stage/ucspi-tcp-$ucspi_tcp_version
+mkdir -p              $HOME/stage/indimail-mta-$version
+echo "Copying Stage"
+cp -rp .              $HOME/stage/indimail-mta-$version
+cp -rp ../libdkim-x   $HOME/stage/libdkim-$libdkim_version
+cp -rp ../libsrs2-x   $HOME/stage/libsrs2-$libsrs2_version
+cp -rp ../ucspi-tcp-x $HOME/stage/ucspi-tcp-$ucspi_tcp_version
+cp -rp ./debian       $HOME/stage
+cd                    $HOME/stage
+echo "Building Stage"
+dpkg-buildpackage -tc -b
+for i in daemontools_$version-1.1_amd64.deb \
+	indimail-mini-dbgsym_$version-1.1_amd64.ddeb \
+	indimail-mini_$version-1.1_amd64.deb \
+	indimail-mta-dbgsym_$version-1.1_amd64.ddeb \
+	indimail-mta_$version-1.1_amd64.buildinfo \
+	indimail-mta_$version-1.1_amd64.changes \
+	indimail-mta_$version-1.1_amd64.deb \
+	ucspi-tcp_$version-1.1_amd64.deb
+do
+	mv $HOME/$i $HOME/stage
+done
+/bin/rm -rf           $HOME/stage/indimail-mta-$version
+/bin/rm -rf           $HOME/stage/libdkim-$libdkim_version
+/bin/rm -rf           $HOME/stage/libsrs2-$libsrs2_version
+/bin/rm -rf           $HOME/stage/ucspi-tcp-$ucspi_tcp_version
+/bin/rm -rf           $HOME/stage/debian
+ls -lt $HOME/stage
