@@ -1,5 +1,22 @@
 #!/bin/sh
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-autoreconf -fiv
+	autoreconf -fiv
 fi
-./configure --prefix=/usr --mandir=/usr/share/man 
+arch=$(uname -m)
+if [ -f /etc/debian_version ] ; then
+	if [ -d /usr/lib/$arch-linux-gnu ] ; then
+		libdir=/usr/lib/$arch-linux-gnu
+	else
+		libdir=/usr/lib
+	fi
+else
+	if [ -d /usr/lib64 ] ; then
+		libdir=/usr/lib64
+	elif [ -d /usr/lib ] ;then
+		libdir=/usr/lib
+	else
+		echo "could not find libdir " 1>&2
+		exit 1
+	fi
+fi
+./configure --prefix=/usr --libdir=$libdir --mandir=/usr/share/man 
