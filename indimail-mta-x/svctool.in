@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.481 2020-06-10 14:25:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.482 2020-06-10 17:38:09+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.481 2020-06-10 14:25:16+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.482 2020-06-10 17:38:09+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2274,11 +2274,19 @@ case "$dkverify_option" in
 	;;
 esac
 AUTHM=""
-if [ -f $QmailBinPrefix/sbin/vchkpass ] ; then
-	AUTHM="$QmailBinPrefix/sbin/vchkpass $AUTHM"
+if [ -f $QmailBinPrefix/sbin/sys-checkpwd ] ; then
+	if [ -n "$AUTHM" ] ; then
+		AUTHM="$AUTHM $QmailBinPrefix/sbin/sys-checkpwd"
+	else
+		AUTHM="$QmailBinPrefix/sbin/sys-checkpwd"
+	fi
 fi
-if [ -f $QmailBinPrefix/sbin/sys-chekcpwd ] ; then
-	AUTHM="$QmailBinPrefix/sbin/sys-checkpwd $AUTHM"
+if [ -f $QmailBinPrefix/sbin/vchkpass ] ; then
+	if [ -n "$AUTHM" ] ; then
+		AUTHM="$AUTHM $QmailBinPrefix/sbin/vchkpass"
+	else
+		AUTHM="$QmailBinPrefix/sbin/vchkpass"
+	fi
 fi
 if [ -n "$authsmtp" -o "$forceauthsmtp" ] ; then
 echo "$AUTHM" > $conf_dir/AUTHMODULES
