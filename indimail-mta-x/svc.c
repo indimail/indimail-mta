@@ -1,5 +1,8 @@
 /*
  * $Log: svc.c,v $
+ * Revision 1.5  2020-06-10 17:37:42+05:30  Cprogrammer
+ * new option restart (stop and restart) a service
+ *
  * Revision 1.4  2008-06-07 19:11:45+05:30  Cprogrammer
  * added sigquit, sigusr1, sigusr2 signals
  *
@@ -42,14 +45,13 @@ main(int argc, char **argv)
 	char           *dir;
 
 	sig_ignore(sig_pipe);
-	while ((opt = getopt(argc, argv, "udopchUaitkxq12")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "udropchUaitkxq12")) != opteof) {
 		if (opt == '?')
 			strerr_die1x(100,
-				 "svc options: u up, d down, o once, x exit, p pause, c continue, h hup, a alarm, i interrupt, t term, k kill, q quit, U | 1 SIGUSR1, 2 SIGUSR2");
+				 "svc options: u up, d down, r restart, o once, x exit, p pause, c continue h hup\n"
+				 "             a alarm, i interrupt, t term, k kill, q quit, U | 1 SIGUSR1, 2 SIGUSR2");
 		else
-		if (datalen < sizeof data)
-		{
+		if (datalen < sizeof data) {
 			if (byte_chr(data, datalen, opt) == datalen)
 				data[datalen++] = opt;
 		}
@@ -59,23 +61,17 @@ main(int argc, char **argv)
 	if (fdorigdir == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	exit_stat = 0;
-	while ((dir = *argv++))
-	{
+	while ((dir = *argv++)) {
 		if (chdir(dir) == -1)
 			strerr_warn4(WARNING, "unable to chdir to ", dir, ": ", &strerr_sys);
-		else
-		{
-			if((fd = open_write("supervise/control")) == -1)
-			{
-				if (errno == error_nodevice)
-				{
+		else {
+			if((fd = open_write("supervise/control")) == -1) {
+				if (errno == error_nodevice) {
 					strerr_warn4(WARNING, "unable to control ", dir, ": supervise not running", 0);
 					exit_stat = 2;
-				}
-				else
+				} else
 					strerr_warn4(WARNING, "unable to control ", dir, ": ", &strerr_sys);
-			} else
-			{
+			} else {
 				ndelay_off(fd);
 				substdio_fdbuf(&b, write, fd, bspace, sizeof bspace);
 				if (substdio_putflush(&b, data, datalen) == -1)
@@ -92,7 +88,7 @@ main(int argc, char **argv)
 void
 getversion_svc_c()
 {
-	static char    *x = "$Id: svc.c,v 1.4 2008-06-07 19:11:45+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: svc.c,v 1.5 2020-06-10 17:37:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
