@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.480 2020-05-26 11:02:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.481 2020-06-10 14:25:16+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.480 2020-05-26 11:02:29+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.481 2020-06-10 14:25:16+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -122,8 +122,8 @@ Known values for OPTION are:
   antispoof      - Turn on antispoofing code
   authsmtp       - Enable Authenticated SMTP 
   forceauthsmtp  - Enforce Authenticated SMTP before accepting MAIL FROM
-  authall        - Accept mails to remote/local domains only after AUTH SMTP or
-                   POP/IMAP before SMTP
+  authall        - Accept mails to both remote & local domains only after
+                   AUTH SMTP or POP/IMAP before SMTP
   chkrelay       - Accept mails to remote domains only after AUTH SMTP or
                    POP/IMAP before SMTP (closed relay)
   qregex         - Use regular expressions for matching entries in
@@ -2280,7 +2280,7 @@ fi
 if [ -f $QmailBinPrefix/sbin/sys-chekcpwd ] ; then
 	AUTHM="$QmailBinPrefix/sbin/sys-checkpwd $AUTHM"
 fi
-if [ ! " $authsmtp" = " " ] ; then
+if [ -n "$authsmtp" -o "$forceauthsmtp" ] ; then
 echo "$AUTHM" > $conf_dir/AUTHMODULES
 else
 > $conf_dir/AUTHMODULES
@@ -2337,13 +2337,13 @@ echo "-x $sysconfdir/tcp/tcp.smtp.cdb \\"
 echo "-c $SERVICEDIR/qmail-smtpd.$tag/variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
 echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
 if [ $shared_objects -eq 1 -a -f "$DESTDIR"@prefix@/lib/indimail/plugins/qmail_smtpd.so ] ; then
-	if [ ! " $authsmtp" = " " ] ; then
+	if [ -n "$authsmtp" -o -n "$forceauthsmtp" ] ; then
 		echo "@prefix@/lib/indimail/plugins/qmail_smtpd.so \$HOSTNAME \\\$AUTHMODULES /bin/false\""
 	else
 		echo "@prefix@/lib/indimail/plugins/qmail_smtpd.so\""
 	fi
 else
-	if [ ! " $authsmtp" = " " ] ; then
+	if [ -n "$authsmtp" -o -n "$forceauthsmtp" ] ; then
 		echo "$QmailBinPrefix/sbin/qmail-smtpd \$HOSTNAME \\\$AUTHMODULES /bin/false\""
 	else
 		echo "$QmailBinPrefix/sbin/qmail-smtpd\""
