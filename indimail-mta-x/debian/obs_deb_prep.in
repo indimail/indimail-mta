@@ -5,8 +5,9 @@ set -e
 #
 libdkim_version=@libdkim_version@
 libsrs2_version=@libsrs2_version@
+ucspitcp_version=@ucspitcp_version@
 version=@version@
-for i in indimail-mta-"$version" ucspi-tcp libdkim-"$libdkim_version" libsrs2-"$libsrs2_version"
+for i in indimail-mta-"$version" ucspi-tcp-"$ucspitcp_version" libdkim-"$libdkim_version" libsrs2-"$libsrs2_version"
 do
 	if [ -d $i ] ; then
 		/bin/rm -rf $i
@@ -26,13 +27,19 @@ do
 		echo "no source archive for $i"
 		exit 1
 	fi
-	if [ -d indimail-mta-x ] ; then
-		/bin/mv indimail-mta-x indimail-mta-"$version"
-	fi
 	if [ -f ../SOURCES/$i.patch.gz ] ; then
 		echo "applying patch for $i"
 		gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
 		continue
 	fi
 done
+if [ -d libdkim-${libdkim_version} ] ; then
+	ln -s libdkim-${libdkim_version} libdkim-x
+fi
+if [ -d libsrs2-${libsrs2_version} ] ; then
+	ln -s libsrs2-${libsrs2_version} libsrs2-x
+fi
+if [ -d ucspi-tcp-${ucspitcp_version} ] ; then
+	ln -s ucspi-tcp-${ucspitcp_version} ucspi-tcp-x
+fi
 exit 0
