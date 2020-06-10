@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.231 2020-06-03 20:24:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.232 2020-06-10 17:37:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -708,7 +708,7 @@ done
 %dir %attr(755,root,root)                          %{plugindir}
 
 %attr(444,root,root) %config(noreplace)            %{qsysconfdir}/controlfiles.q
-%attr(444,root,root) %config(noreplace)            %{qsysconfdir}/perm_list.q
+%attr(444,root,root) %config(noreplace)            %{qsysconfdir}/perm_list.mta
 
 %ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp/tcp.smtp
 %ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp/tcp.qmtp
