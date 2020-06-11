@@ -78,6 +78,7 @@ $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ ./create_rpm    # for RPM
 or
 $ ./create_debian # for deb
+```
 
 # Setup & Configuration
 
