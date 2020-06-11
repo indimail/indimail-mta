@@ -99,7 +99,7 @@ If you use source installation method, you need to setup various configuration a
 You can also run the script create_services which invokes svctool to setup few default services to start a full fledged messaging server create_services will also put a systemd unit file indimail.service in /lib/systemd/system
 
 ```
-$ cd /usr/local/src/indimail-mta-2.x
+$ cd /usr/local/src/indimail-mta-x
 $ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
 $ sudo service indimail start
 ```
