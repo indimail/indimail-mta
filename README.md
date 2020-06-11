@@ -49,7 +49,7 @@ make
 sudo make install-strip
 ```
 
-# Binary Packages build
+# Binary Packages Build
 
 If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines.
 The steps for doing this are
@@ -80,9 +80,21 @@ or
 $ ./create_debian # for deb
 ```
 
+## Install Packages
+
+Installing and configuration is much simplied when you use the Binary Packages Build. The pre, post instlation scripts do all the hard work for you.
+
+** For RPM based distributions **
+
+`sudo rpm -ivh rpm_file`
+
+** For Debian based distributions **
+
+`sudo dpkg -i debian_file`
+
 # Setup & Configuration
 
-You can configure indimail-mta using /usr/sbin/svctool. svctool is a general purpose utility to configure indimail-mta services.
+If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool. svctool is a general purpose utility to configure indimail-mta services.
 
 You can also run the script create_services which invokes svctool to setup few default services to start a full fledged messaging server create_services will also put a systemd unit file indimail.service in /lib/systemd/system
 
