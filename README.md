@@ -125,7 +125,7 @@ conf-libexec      - /usr/libexec/indimail
 conf-qmail        - /var/indimail
 ```
 
-# Binary Builds
+# Binary Builds on openSUSE Build Service
 
 You can get binary RPM / Debian packages at
 
