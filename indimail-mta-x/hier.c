@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.271  2020-06-14 17:52:32+05:30  Cprogrammer
+ * renamed COPYING to COPYING-indimail-mta
+ *
  * Revision 1.270  2020-05-26 09:32:42+05:30  Cprogrammer
  * resynced permissions with spec file
  *
@@ -1206,7 +1209,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "whois", auto_uido, 0, moder_x);
 
 	/* GPLv3 License, Man Pages, Documents */
-	c(auto_shared,     "doc", "COPYING", auto_uido, 0, 0644);
+	c(auto_shared,     "doc", "COPYING-indimail-mta", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "LICENSE.libdkim", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "LICENSE.qhpsi", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "LICENSE.GPL-2.libsrs2", auto_uido, 0, 0644);
@@ -1516,7 +1519,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.270 2020-05-26 09:32:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.271 2020-06-14 17:52:32+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
