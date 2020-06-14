@@ -694,7 +694,8 @@ Known values for OPTION are:
 --libwatch --servicedir=service_path
   service_path - Path where supervise scripts will be installed
 
---config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
+--config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
+--config=add-alt|remove-alt|qselinux|iselinux
   [--postmaster=user[@domain]]
   [--common_name=CN]
   [--capath=ca_path_dir]
@@ -718,9 +719,9 @@ Known values for OPTION are:
   bogofilter     - Create bogofilter.cf configuration file
   cert           - Generate SSL Certificate
   add-boot       - Add startup scripts for IndiMail to get started during boot
-                   Also install indiamil as default MTA
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
-                   Also remove indimail as the default MTA
+  add-alt        - Install indiamil as default MTA
+  remove-alt     - Remove indimail as the default MTA
   iselinux       - Enable selinux module for indimail
   qselinux       - Enable selinux module for indimail-mta
   postmaster     - name of the user who will recieve bounces on the local host.

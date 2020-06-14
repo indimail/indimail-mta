@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.482 2020-06-10 17:38:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.483 2020-06-15 00:30:59+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.482 2020-06-10 17:38:09+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.483 2020-06-15 00:30:59+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -722,7 +722,8 @@ Known values for OPTION are:
 --libwatch --servicedir=service_path
   service_path - Path where supervise scripts will be installed
 
---config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot|qselinux|iselinux
+--config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
+--config=add-alt|remove-alt|qselinux|iselinux
   [--postmaster=user[@domain]]
   [--common_name=CN]
   [--capath=ca_path_dir]
@@ -746,9 +747,9 @@ Known values for OPTION are:
   bogofilter     - Create bogofilter.cf configuration file
   cert           - Generate SSL Certificate
   add-boot       - Add startup scripts for IndiMail to get started during boot
-                   Also install indiamil as default MTA
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
-                   Also remove indimail as the default MTA
+  add-alt        - Install indiamil as default MTA
+  remove-alt     - Remove indimail as the default MTA
   iselinux       - Enable selinux module for indimail
   qselinux       - Enable selinux module for indimail-mta
   postmaster     - name of the user who will recieve bounces on the local host.
@@ -6722,70 +6723,6 @@ create_startup()
 	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools
 		return 0
 	fi
-	if [ -x /usr/sbin/alternatives -o -x /usr/sbin/update-alternatives -o -x /usr/bin/update-alternatives ] ; then
-		for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-			if [ -f $i -a ! -L $i ]; then
-				echo "! $i is a file, should be a link" 1>&2
-				/bin/mv $i $i.old
-			fi
-		done
-		if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
-			echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
-			/bin/mv /etc/pam.d/smtp /etc/pam.d/smtp.old
-		fi
-		if [ -x /usr/sbin/alternatives ] ; then
-			alternatives_cmd=/usr/sbin/alternatives
-		elif [ -x /usr/sbin/update-alternatives ] ; then
-			alternatives_cmd=/usr/sbin/update-alternatives
-		else
-			alternatives_cmd=/usr/bin/update-alternatives
-		fi
-		if [ -f /etc/os-release ] ; then
-			openSUSE=$(grep openSUSE /etc/os-release 2>/dev/null)
-		else
-			openSUSE=""
-		fi
-		if [ -z "$openSUSE" -a ! -f /etc/SuSE-release -a ! -f /etc/debian_version ] ; then
-			init_script="--initscript svscan"
-		else
-			init_script=""
-		fi
-		$alternatives_cmd --install \
-			/usr/sbin/sendmail mta $QmailBinPrefix/bin/sendmail 120 \
-			--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
-				$mandir/man8/isendmail.8.gz \
-			--slave /usr/bin/mailq mta-mailq $QmailBinPrefix/bin/qmail-qread \
-			--slave /usr/share/man/man1/mailq.1.gz mta-mailqman \
-				$mandir/man8/qmail-qread.8.gz \
-			--slave /usr/bin/rmail mta-rmail $QmailBinPrefix/bin/irmail \
-			--slave /usr/share/man/man8/rmail.8.gz mta-rmailman $mandir/man8/irmail.8.gz \
-			--slave /usr/bin/newaliases mta-newaliases \
-				$QmailBinPrefix/bin/inewaliases \
-			--slave /usr/share/man/man1/newaliases.1.gz mta-newaliasesman \
-				$mandir/man1/inewaliases.1.gz \
-			--slave /usr/lib/sendmail mta-sendmail \
-				$QmailBinPrefix/bin/sendmail \
-			--slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi $init_script
-	else
-		for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-			if [ -f $i -a ! -L $i ]; then
-				echo "! $i is a file, should be a link. Fixing..."
-				/bin/mv $i $i.old
-				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
-			elif [ -L $i ];then
-				/bin/mv $i $i.old
-				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
-			elif [ ! -f $i ];then
-				echo "! $i is missing. Fixing..."
-				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
-			fi
-		done
-		if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
-			echo "! /etc/pam.d/smtp is a file, should be a link. Fixing..."
-			/bin/mv /etc/pam.d/smtp /etc/pam.d/smtp.old
-			/bin/ln -s /etc/pam.d/pam.multi /etc/pam.d/smtp
-		fi
-	fi
 }
 
 remove_startup()
@@ -6828,14 +6765,94 @@ remove_startup()
 	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools. This should be called before removing package
 		return 0
 	fi
+}
+
+add_alternatives()
+{
+	if [ -x /usr/sbin/alternatives -o -x /usr/sbin/update-alternatives -o -x /usr/bin/update-alternatives ] ; then
+		for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+			if [ -f $i -a ! -L $i ]; then
+				echo "! $i is a file, should be a link" 1>&2
+				/bin/mv $i $i.old
+			fi
+		done
+		if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
+			echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
+			/bin/mv /etc/pam.d/smtp /etc/pam.d/smtp.old
+		fi
+		if [ -x /usr/sbin/alternatives ] ; then
+			alternatives_cmd=/usr/sbin/alternatives
+		elif [ -x /usr/sbin/update-alternatives ] ; then
+			alternatives_cmd=/usr/sbin/update-alternatives
+		else
+			alternatives_cmd=/usr/bin/update-alternatives
+		fi
+		if [ -f /etc/os-release ] ; then
+			openSUSE=$(grep openSUSE /etc/os-release 2>/dev/null)
+		else
+			openSUSE=""
+		fi
+		if [ -z "$openSUSE" -a ! -f /etc/SuSE-release -a ! -f /etc/debian_version ] ; then
+			init_script="--initscript svscan"
+		else
+			init_script=""
+		fi
+		cmd="$alternatives_cmd"
+		cmd="$cmd --install /usr/sbin/sendmail  mta            $QmailBinPrefix/bin/sendmail 120"
+		cmd="$cmd --slave   /usr/bin/mailq      mta-mailq      $QmailBinPrefix/bin/qmail-qread"
+		cmd="$cmd --slave   /usr/bin/rmail      mta-rmail      $QmailBinPrefix/bin/irmail"
+		cmd="$cmd --slave   /usr/bin/newaliases mta-newaliases $QmailBinPrefix/bin/inewaliases"
+		cmd="$cmd --slave   /usr/lib/sendmail   mta-sendmail   $QmailBinPrefix/bin/sendmail"
+		if [ -f $mandir/man1/inewaliases.1.gz ] ; then
+			cmd="$cmd --slave $mandir/man1/newaliases.1.gz mta-newaliasesman $mandir/man1/inewaliases.1.gz"
+		fi
+		if [ -f $mandir/man8/qmail-qread.8.gz ] ; then
+			cmd="$cmd --slave $mandir/man1/mailq.1.gz mta-mailqman $mandir/man8/qmail-qread.8.gz"
+		fi
+		if [ -f $mandir/man8/isendmail.8.gz ] ; then
+			cmd="$cmd --slave $mandir/man8/sendmail.8.gz mta-sendmailman $mandir/man8/isendmail.8.gz"
+		fi
+		if [ -f $mandir/man8/irmail.8.gz ] ; then
+			cmd="$cmd --slave $mandir/man8/rmail.8.gz mta-rmailman $mandir/man8/irmail.8.gz"
+		fi
+		if [ -f /etc/pam.d/pam-multi ] ; then
+			cmd="$cmd --slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi"
+		fi
+		if [ -n "$init_script" ] ; then
+			cmd="$cmd $init_script"
+		fi
+		eval $cmd
+	else
+		for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+			if [ -f $i -a ! -L $i ]; then
+				echo "! $i is a file, should be a link. Fixing..."
+				/bin/mv $i $i.old
+				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
+			elif [ -L $i ];then
+				/bin/mv $i $i.old
+				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
+			elif [ ! -f $i ];then
+				echo "! $i is missing. Fixing..."
+				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
+			fi
+		done
+		if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
+			echo "! /etc/pam.d/smtp is a file, should be a link. Fixing..."
+			/bin/mv /etc/pam.d/smtp /etc/pam.d/smtp.old
+			/bin/ln -s /etc/pam.d/pam.multi /etc/pam.d/smtp
+		fi
+	fi
+}
+
+remove_alternatives()
+{
 	if [ -x /usr/sbin/alternatives ] ; then
-		echo "/usr/sbin/alternatives --remove mta $QmailBinPrefix/bin/sendmail"
 		/usr/sbin/alternatives --remove mta $QmailBinPrefix/bin/sendmail
-		echo "/usr/sbin/alternatives --auto mta"
 		/usr/sbin/alternatives --auto mta
 	elif [ -x /usr/sbin/update-alternatives ] ; then
 		/usr/sbin/update-alternatives --remove mta $QmailBinPrefix/bin/sendmail
 		/usr/sbin/update-alternatives --auto mta
+	else
 		for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
 			if [ -f $i.old -o -L $i.old ]; then
 				echo "restoring $i"
@@ -6844,13 +6861,6 @@ remove_startup()
 			fi
 		done
 	fi
-	for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
-		if [ -f $i.old -o -L $i.old ]; then
-			echo "restoring $i"
-			/bin/rm -f $i
-			/bin/mv $i.old $i
-		fi
-	done
 }
 
 selinux_module()
@@ -9832,6 +9842,13 @@ case $option in
 
 		rm-boot)
 		remove_startup
+		;;
+
+		add-alt)
+		add_alternatives
+		;;
+		remove-alt)
+		remove_alternatives
 		;;
 
 		iselinux)
