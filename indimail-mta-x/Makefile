@@ -3771,6 +3771,11 @@ whois.o:\
 compile whois.c tcpopen.h
 	./compile `grep -h -v "^#" conf-ip` whois.c
 
+conf-release:
+	if test ! -f conf-release ; then \
+		echo "1.1" > conf-release; \
+	fi ;
+
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config \
 conf-release conf-version ../libdkim-x/conf-version \
 ../libsrs2-x/conf-version ../ucspi-tcp-x/conf-version Makefile
