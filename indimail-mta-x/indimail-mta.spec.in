@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.232 2020-06-10 17:37:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.233 2020-06-14 17:54:15+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -457,7 +457,7 @@ if [ -d %{name}-%{version} ] ; then
   else
     %{__rm} -f /tmp/conf-groups
   fi
-  %{__cp} %{name}-%{version}/doc/ChangeLog .
+  %{name}-%{version}/catChangeLog %{name}-%{version}/doc/ChangeLog > ChangeLog-indimail-mta
   if [ -f %{name}-%{version}/qupgrade.sh ] ; then
     %{__cp} %{name}-%{version}/qupgrade.sh .
   fi
@@ -532,7 +532,7 @@ done
 #copy files not copied by setup
 install -m 0644 %{name}-release  %{buildroot}%{qsysconfdir}/%{name}-release
 install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
-install -m 0644 ChangeLog %{buildroot}%{shareddir}/doc/ChangeLog
+install -m 0644 ChangeLog-indimail-mta %{buildroot}%{shareddir}/doc/ChangeLog-indimail-mta
 if [ -f qupgrade.sh ] ; then
 install -m 0755 qupgrade.sh %{buildroot}%{libexecdir}/qupgrade.sh
 fi
@@ -1053,13 +1053,13 @@ done
 %endif
 
 %if %build_on_obs == 0
-%license %attr(0644,root,root)          %{shareddir}/doc/COPYING
+%license %attr(0644,root,root)          %{shareddir}/doc/COPYING-indimail-mta
 %license %attr(0644,root,root)          %{shareddir}/doc/README.licenses
 %license %attr(0644,root,root)          %{shareddir}/doc/LICENSE.libdkim
 %license %attr(0644,root,root)          %{shareddir}/doc/LICENSE.qhpsi
 %license %attr(0644,root,root)          %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %else
-%attr(0644,root,root)                   %{shareddir}/doc/COPYING
+%attr(0644,root,root)                   %{shareddir}/doc/COPYING-indimail-mta
 %attr(0644,root,root)                   %{shareddir}/doc/README.licenses
 %attr(0644,root,root)                   %{shareddir}/doc/LICENSE.libdkim
 %attr(0644,root,root)                   %{shareddir}/doc/LICENSE.qhpsi
@@ -1090,7 +1090,7 @@ done
 %attr(0644,root,root)                   %{shareddir}/doc/AUTHORS.libdkim
 %attr(0644,root,root)                   %{shareddir}/doc/AUTHORS.libsrs2
 %attr(0644,root,root)                   %{shareddir}/doc/CREDITS
-%attr(0644,root,root)                   %{shareddir}/doc/ChangeLog
+%attr(0644,root,root)                   %{shareddir}/doc/ChangeLog-indimail-mta
 %attr(0644,root,root)                   %{shareddir}/doc/INTERNALS
 %attr(0644,root,root)                   %{shareddir}/doc/FROMISP
 %attr(0644,root,root)                   %{shareddir}/doc/TOISP
