@@ -100,6 +100,7 @@ fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 $prefix/sbin/svctool --config=rm-boot
+$prefix/sbin/svctool --config=remove-alt
 
 if [ $nocourierimap -eq 0 ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7

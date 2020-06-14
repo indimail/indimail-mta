@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.233 2020-06-14 17:54:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.234 2020-06-15 00:32:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1867,6 +1867,7 @@ svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
 #
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
+%{_prefix}/sbin/svctool --config=add-alt
 
 if [ -f %{qsysconfdir}/cronlist.q -a -d %{_sysconfdir}/cron.d ] ; then
   echo "adding cron entries"
@@ -1983,6 +1984,7 @@ fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot
+%{_prefix}/sbin/svctool --config=remove-alt
 ) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################

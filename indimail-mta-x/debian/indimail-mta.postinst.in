@@ -510,6 +510,7 @@ if [ /usr/lib/sm.bin/sendmail ] ; then
 fi
 ${prefix}/sbin/svctool --disable-service sendmail exim4 postfix
 ${prefix}/sbin/svctool --config=add-boot
+${prefix}/sbin/svctool --config=add-alt
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
 fi
