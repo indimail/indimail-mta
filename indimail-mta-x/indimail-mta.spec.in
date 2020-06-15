@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.234 2020-06-15 00:32:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.235 2020-06-15 10:09:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1511,7 +1511,6 @@ if [ -z "$argv1" ] ; then
   argv1=0
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
-# we are doing upgrade
   (
   echo "doing post upgrade activities"
   if [ -f %{libexecdir}/qupgrade.sh ] ; then
@@ -2048,6 +2047,8 @@ if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
   do
     if [ -d %{servicedir}/$i ] ; then
       %{__rm} -rf %{servicedir}/$i || true
+    elif [ -L %{servicedir}/$i ] ; then
+      %{__rm} -rf %{servicedir}/$i || true
     fi
   done
 fi
@@ -2058,8 +2059,11 @@ for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
 do
   if [ -d %{servicedir}/$i ] ; then
     %{__rm} -rf %{servicedir}/$i || true
+  elif [ -L %{servicedir}/$i ] ; then
+    %{__rm} -rf %{servicedir}/$i || true
   fi
 done
+
 count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
 if [ $count -eq 0 ] ; then # ignore disabled services
   %{__rm} -rf %{servicedir} || true
@@ -2077,10 +2081,13 @@ else
   log_dir=%{logdir}
 fi
 [ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
+
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   echo "recreating ld.so cache"
   /sbin/ldconfig
 fi
+
+#selinux
 if [ -x /usr/sbin/selinuxenabled ] ; then
   /usr/sbin/selinuxenabled
   if [ $? -eq 0 -a -x /usr/sbin/semodule ] ; then
@@ -2088,6 +2095,7 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
     /usr/sbin/semodule -r indimail-mta
   fi
 fi
+
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
   /bin/sh %{libexecdir}/qupgrade.sh postun uninstall %{version} $*
