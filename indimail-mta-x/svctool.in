@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.484 2020-06-15 15:33:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.485 2020-06-15 19:49:32+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.484 2020-06-15 15:33:53+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.485 2020-06-15 19:49:32+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3116,10 +3116,6 @@ if [ " $imap_ssl" = " 1" ] ; then
 else
 	# /service/[qmail|proxy]-[pop3d|imapd].nnn/variables
 	create_"$cdb_f"_config $COURIER_PORT $infifo > $conf_dir
-	if [ -f "$conf_dir"-ssl ] ; then
-		echo "moving $conf_dir-ssl to $conf_dir-ssl.`date +'%d%m%y-%H%M%S'`"
-		/bin/mv "$conf_dir"-ssl "$conf_dir"-ssl.`date +'%d%m%y-%H%M%S'`
-	fi
 	# /service/[qmail|proxy]-[pop3d|imapd].nnn/variables-ssl
 	create_"$cdb_f"_config_ssl > "$conf_dir"-ssl
 fi
@@ -3127,7 +3123,16 @@ fi
 # delete $conf_dir file
 # create $conf_dir directory
 # create $conf_dir variables for supervise
-"$DESTDIR"$libexecdir/envmigrate $conf_dir root indimail 550
+if [ -x "$DESTDIR"$libexecdir/envmigrate ] ; then
+	"$DESTDIR"$libexecdir/envmigrate $conf_dir root indimail 550
+else
+	echo "Unable to execute envmigrate" 1>&2
+	return 1
+fi
+if [ ! -d $conf_dir ] ; then
+	echo "$conf_dir: No such file or directory" 1>&2
+	return 1
+fi
 mysqllib=`ls -d /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
 if [ -z "$mysqllib" ] ; then
 	mysqllib=`ls -d /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
