@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.483 2020-06-15 00:30:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.484 2020-06-15 15:33:53+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.483 2020-06-15 00:30:59+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.484 2020-06-15 15:33:53+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -63,6 +63,7 @@ Known values for OPTION are:
   [--fsync --syncdir]
   [--qregex]
   [--memory=b]
+  [--dmemory=c]
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
@@ -103,6 +104,7 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
+  c              - Max Memory that qmail-daemon can allocate
   d              - Max size of email that can be submitted to SMTP or
                    injected locally
   D              - Max deliveries allowed per day for a user
@@ -193,7 +195,7 @@ Known values for OPTION are:
   [--persistdb]
   [--fsync --syncdir]
   [--qregex]
-  [--memory=b]
+  [--dmemory=c]
   [--overquota_mailsize=o]
   [--domainlimits]
   [--routes=smtp|qmtp|static]
@@ -212,6 +214,7 @@ Known values for OPTION are:
   I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
+  c              - Max Memory that qmail-daemon can allocate
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
@@ -5896,10 +5899,10 @@ if [ " $usesyncdir" = " " ] ; then
 else
 	echo > $conf_dir/USE_SYNCDIR
 fi
-if [ ! " $memory" = " " ] ; then
-	echo $memory > $conf_dir/SOFT_MEM
+if [ ! " $dmemory" = " " ] ; then
+	echo $dmemory > $conf_dir/SOFT_MEM
 else
-	echo 52428800 > $conf_dir/SOFT_MEM
+	echo 83886080 > $conf_dir/SOFT_MEM
 fi
 if [ " $persistdb" = " 1" ] ; then
 	echo postmaster > $conf_dir/ROUTE_NULL_USER
@@ -8526,6 +8529,9 @@ while test $# -gt 0; do
 	;;
 	--memory=*)
 	memory=$optarg
+	;;
+	--dmemory=*)
+	dmemory=$optarg
 	;;
 	--password-cache)
 	password_cache=1
