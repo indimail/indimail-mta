@@ -35,6 +35,7 @@ Known values for OPTION are:
   [--fsync --syncdir]
   [--qregex]
   [--memory=b]
+  [--dmemory=c]
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
@@ -75,6 +76,7 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
+  c              - Max Memory that qmail-daemon can allocate
   d              - Max size of email that can be submitted to SMTP or
                    injected locally
   D              - Max deliveries allowed per day for a user
@@ -93,7 +95,7 @@ Known values for OPTION are:
   cugmail        - Allow only local valid senders to use SMTP.
   antispoof      - Turn on antispoofing code
   authsmtp       - Enable Authenticated SMTP 
-  force authsmtp - Enforce Authenticated SMTP before accepting MAIL FROM
+  forceauthsmtp  - Enforce Authenticated SMTP before accepting MAIL FROM
   authall        - Accept mails to both remote & local domains only after
                    AUTH SMTP or POP/IMAP before SMTP
   chkrelay       - Accept mails to remote domains only after AUTH SMTP or
@@ -165,7 +167,7 @@ Known values for OPTION are:
   [--persistdb]
   [--fsync --syncdir]
   [--qregex]
-  [--memory=b]
+  [--memory=c]
   [--overquota_mailsize=o]
   [--domainlimits]
   [--routes=smtp|qmtp|static]
@@ -184,6 +186,7 @@ Known values for OPTION are:
   I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
+  c              - Max Memory that qmail-daemon can allocate
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
@@ -787,7 +790,7 @@ Known values for OPTION are:
 --down
   Create any of the above supervisor services in down state
 
---check-certs=[full path of certificatte]
+--check-certs=[full path of certificate]
   Check certificate given as argument or
   Check IndiMail Certificates in @sysconfdir@/certs without any arguments
 
