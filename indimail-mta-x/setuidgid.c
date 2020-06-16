@@ -1,5 +1,8 @@
 /*
  * $Log: setuidgid.c,v $
+ * Revision 1.4  2020-06-16 23:57:33+05:30  Cprogrammer
+ * added option -s to set supplementary groups
+ *
  * Revision 1.3  2020-06-16 22:36:48+05:30  Cprogrammer
  * set supplementary group ids
  *
@@ -10,41 +13,58 @@
  * Initial revision
  *
  */
+#include <stdio.h>
 #include <sys/types.h>
 #include <pwd.h>
 #include <grp.h>
 #include <setuserid.h>
 #include <strerr.h>
+#include <sgetopt.h>
 #include "prot.h"
 #include "pathexec.h"
 
 #define FATAL "setuidgid: fatal: "
+char           *usage = "usage: setuidgid [-s] account child";
 
-char           *account;
 struct passwd  *pw;
 
 int
 main(int argc, char **argv, char **envp)
 {
 	gid_t          *gidset;
-	int             ngroups;
+	char           *account;
+	char          **child;
+	int             ngroups = 0, opt;
 
-	account = *++argv;
-	if (!account || !*++argv)
-		strerr_die1x(100, "setuidgid: usage: setuidgid account child");
+	while ((opt = getopt(argc, argv, "s")) != opteof) {
+		switch (opt)
+		{
+		case 's':
+			ngroups = 1;
+			break;
+		default:
+			strerr_die1x(100, usage);
+		}
+	}
+	if (argc < optind + 2)
+		strerr_die1x(100, usage);
+	account = argv[optind++];
+	child = argv + optind++;
 	if (!(pw = getpwnam(account)))
 		strerr_die3x(111, FATAL, "unknown account ", account);
 	if (prot_gid(pw->pw_gid) == -1)
 		strerr_die2sys(111, FATAL, "unable to setgid: ");
-	if (!(gidset = grpscan(account, &ngroups)))
-		strerr_die2sys(111, FATAL, "unable to do groupscan: ");
-	if (setgroups(ngroups, gidset))
-		strerr_die2sys(111, FATAL, "unable to setgroups: ");
+	if (ngroups) {
+		if (!(gidset = grpscan(account, &ngroups)))
+			strerr_die2sys(111, FATAL, "unable to do groupscan: ");
+		if (setgroups(ngroups, gidset))
+			strerr_die2sys(111, FATAL, "unable to setgroups: ");
+	}
 	if (prot_uid(pw->pw_uid) == -1)
 		strerr_die2sys(111, FATAL, "unable to setuid: ");
 
-	pathexec_run(*argv, argv, envp);
-	strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
+	pathexec_run(*child, child, envp);
+	strerr_die4sys(111, FATAL, "unable to run ", *child, ": ");
 	/*- Not reached */
 	return(1);
 }
@@ -52,7 +72,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_setuidgid_c()
 {
-	static char    *x = "$Id: setuidgid.c,v 1.3 2020-06-16 22:36:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setuidgid.c,v 1.4 2020-06-16 23:57:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
