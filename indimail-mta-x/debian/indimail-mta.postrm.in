@@ -217,10 +217,16 @@ if [ " $1" = " purge" ] ; then
 	qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
 	greylist.1999 udplogger.3000 .svscan resolvconf dnscache
 	do
-		if [ -d ${servicedir}/$i ] ; then
+		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
+			touch ${servicedir}/$i/down
+			svc -dx ${servicedir}/$i || true
+		fi
+		if [ -d ${servicedir}/$i/log -o -L ${servicedir}/$i/log ] ; then
+			touch ${servicedir}/$i/log/down
+			svc -dx ${servicedir}/$i/log || true
+		fi
+		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 			${rm} -rf ${servicedir}/$i >/dev/null 2>&1 || true
-		elif [ -f ${servicedir}/$i ] ; then
-			${rm} -f ${servicedir}/$i >/dev/null 2>&1 || true
 		fi
 	done
 
