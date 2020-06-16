@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.17  2020-06-16 21:47:30+05:30  Cprogrammer
+ * set supplementary group ids if USE_SETGROUPS env variable is set
+ *
  * Revision 1.16  2009-12-09 23:57:36+05:30  Cprogrammer
  * additional closeflag argument to uidinit()
  *
@@ -31,12 +34,17 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <str.h>
 #include "fd.h"
+#include "env.h"
+#include "alloc.h"
 #include "prot.h"
 #include "exit.h"
 #include "qmail-todo.h"
 #include "auto_uids.h"
-#include <fcntl.h>
+#include "setuserid.h"
 
 char           *(qsargs[]) = { "qmail-send", 0};
 char           *(qcargs[]) = { "qmail-clean", 0};
@@ -50,6 +58,38 @@ void
 die()
 {
 	_exit(111);
+}
+
+/*
+ * return 0 if userlist (USE_SETGROUPS env vairable is not set
+ * return 1 if userlist is set and == 1
+ * else userlist is a list of users seperated by colon ':'
+ *   return 1 if user is present in the list
+ *   return 0 if user is not present in the list
+ */
+int
+check_user(char *userlist, char *user)
+{
+	char           *ptr1, *ptr2;
+
+	if (!userlist)
+		return 0;
+	if (userlist && *userlist == '1')
+		return 1;
+	for (ptr1 = ptr2 = userlist; *ptr1; ptr1++) {
+		if (*ptr1 == ':') {
+			*ptr1 = 0;
+			if (!str_diff(user, ptr2)) {
+				*ptr1 = ':';
+				return 1;
+			}
+			*ptr1 = ':';
+			ptr2 = ptr1 + 1;
+		}
+	}
+	if (!str_diff(user, ptr2))
+		return 1;
+	return 0;
 }
 
 int             pi0[2];
@@ -116,12 +156,17 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
+	char           *set_supplementary_groups;
+	gid_t          *gidset;
+	int             ngroups;
+
+	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
 		die();
 	if (uidinit(1) == -1)
 		die();
 	umask(077);
-	if (prot_gid(auto_gidq) == -1)
+	if (prot_gid(auto_gidq) == -1) /*- qmail unix group */
 		die();
 	if (fd_copy(2, 0) == -1)
 		die();
@@ -139,29 +184,36 @@ main(argc, argv)
 	if (fd_copy(8,0) == -1)
 		die();
 #endif
-	if (argv[1])
-	{
+	if (argv[1]) {
 		qlargs[1] = argv[1];
 		++argv;
 	}
-	if (argv[1])
-	{
+	if (argv[1]) {
 		if (pipe(pi0) == -1)
 			die();
 		switch (fork())
 		{
 		case -1:
 			die();
-		case 0:
-			if (prot_gid(auto_gidn) == -1)
+		case 0: /* execute logger */
+			if (check_user(set_supplementary_groups, "qmaill")) {
+				if (!(gidset = grpscan("qmaill", &ngroups)))
+					die();
+				gidset[0] = auto_gidq;
+				gidset[ngroups] = auto_gidn;
+				if (setgroups(ngroups + 1, gidset))
+					die();
+				alloc_free((char *) gidset);
+			} else
+			if (prot_gid(auto_gidn) == -1) /*- nofiles unix group */
 				die();
-			if (prot_uid(auto_uidl) == -1)
+			if (prot_uid(auto_uidl) == -1) /*- qmaill unix user */
 				die();
 			close(pi0[1]);
 			if (fd_move(0, pi0[0]) == -1)
 				die();
 			close23456();
-			execvp(argv[1], argv + 1);
+			execvp(argv[1], argv + 1); /*- splogger, etc */
 			die();
 		}
 		close(pi0[0]);
@@ -201,7 +253,7 @@ main(argc, argv)
 			die();
 		close23456();
 		closepipes();
-		execvp(*qlargs, qlargs);
+		execvp(*qlargs, qlargs); /*- qmail-lspawn */
 		die();
 	}
 	switch (fork())
@@ -209,7 +261,15 @@ main(argc, argv)
 	case -1:
 		die();
 	case 0:
-		if (prot_uid(auto_uidr) == -1)
+		if (check_user(set_supplementary_groups, "qmailr")) {
+			if (!(gidset = grpscan("qmailr", &ngroups)))
+				die();
+			gidset[0] = auto_gidq;
+			if (setgroups(ngroups, gidset))
+				die();
+			alloc_free((char *) gidset);
+		}
+		if (prot_uid(auto_uidr) == -1) /*- qmailr unix user */
 			die();
 		if (fd_copy(0, pi3[0]) == -1)
 			die();
@@ -217,7 +277,7 @@ main(argc, argv)
 			die();
 		close23456();
 		closepipes();
-		execvp(*qrargs, qrargs);
+		execvp(*qrargs, qrargs); /*- qmail-rspawn */
 		die();
 	}
 	switch (fork())
@@ -225,7 +285,15 @@ main(argc, argv)
 	case -1:
 		die();
 	case 0:
-		if (prot_uid(auto_uidq) == -1)
+		if (check_user(set_supplementary_groups, "qmailq")) {
+			if (!(gidset = grpscan("qmailq", &ngroups)))
+				die();
+			gidset[0] = auto_gidq;
+			if (setgroups(ngroups, gidset))
+				die();
+			alloc_free((char *) gidset);
+		}
+		if (prot_uid(auto_uidq) == -1) /*- qmailq unix user */
 			die();
 		if (fd_copy(0, pi5[0]) == -1)
 			die();
@@ -233,38 +301,65 @@ main(argc, argv)
 			die();
 		close23456();
 		closepipes();
-		execvp(*qcargs, qcargs);
+		execvp(*qcargs, qcargs); /*- qmail-clean */
 		die();
 	}
 #ifdef EXTERNAL_TODO
-  switch (fork()) {
-    case -1: die();
-    case 0:
-      if (prot_uid(auto_uids) == -1) die();
-      if (fd_copy(0,pi7[0]) == -1) die();
-      if (fd_copy(1,pi8[1]) == -1) die();
-      close23456();
-      if (fd_copy(2,pi9[1]) == -1) die();
-      if (fd_copy(3,pi10[0]) == -1) die();
-      closepipes();
-      execvp(*qtargs,qtargs);
-      die();
-  }
+	switch (fork())
+	{
+	case -1:
+		die();
+	case 0:
+		if (prot_uid(auto_uids) == -1)
+			die();
+		if (fd_copy(0,pi7[0]) == -1)
+			die();
+		if (fd_copy(1,pi8[1]) == -1)
+			die();
+		close23456();
+		if (fd_copy(2,pi9[1]) == -1)
+			die();
+		if (fd_copy(3,pi10[0]) == -1)
+			die();
+		closepipes();
+		execvp(*qtargs,qtargs); /*- qmail-todo */
+		die();
+	}
 
-  switch (fork()) {
-    case -1: die();
-    case 0:
-      if (prot_uid(auto_uidq) == -1) die();
-      if (fd_copy(0,pi9[0]) == -1) die();
-      if (fd_copy(1,pi10[1]) == -1) die();
-      close23456();
-      closepipes();
-      execvp(*qcargs,qcargs);
-      die();
-  }
+	switch (fork())
+	{
+	case -1:
+		die();
+	case 0:
+		if (check_user(set_supplementary_groups, "qmailq")) {
+			if (!(gidset = grpscan("qmailq", &ngroups)))
+				die();
+			gidset[0] = auto_gidq;
+			if (setgroups(ngroups, gidset))
+				die();
+			alloc_free((char *) gidset);
+		}
+		if (prot_uid(auto_uidq) == -1)
+			die();
+		if (fd_copy(0,pi9[0]) == -1)
+			die();
+		if (fd_copy(1,pi10[1]) == -1)
+			die();
+		close23456();
+		closepipes();
+		execvp(*qcargs,qcargs); /*- qmail-clean */
+		die();
+	}
 #endif
- 
-	if (prot_uid(auto_uids) == -1)
+	if (check_user(set_supplementary_groups, "qmails")) {
+		if (!(gidset = grpscan("qmails", &ngroups)))
+			die();
+		gidset[0] = auto_gidq;
+		if (setgroups(ngroups, gidset))
+			die();
+		alloc_free((char *) gidset);
+	}
+	if (prot_uid(auto_uids) == -1) /*- qmails unix user */
 		die();
 	if (fd_copy(0, 1) == -1)
 		die();
@@ -287,7 +382,7 @@ main(argc, argv)
 		die();
 #endif
 	closepipes();
-	execvp(*qsargs, qsargs);
+	execvp(*qsargs, qsargs); /*- qmail-send */
 	die();
 	/*- Not reached */
 	return(0);
@@ -296,7 +391,7 @@ main(argc, argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.16 2009-12-09 23:57:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.17 2020-06-16 21:47:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
