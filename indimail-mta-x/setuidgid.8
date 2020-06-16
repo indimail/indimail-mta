@@ -3,22 +3,33 @@
 setuidgid \- runs another program under a specified account's uid and gid.
 .SH SYNOPSIS
 .B setuidgid
+[
+.B \-s
+]
 .I account
 .I child
+
 .SH DESCRIPTION
 .I account
 is a single argument.
 .I child
 consists of one or more arguments. 
 
+.TP
+\fB-s\fR
+Set supplementary group ids
+
+.PP
 .B setuidgid
 sets its uid and gid to
 .IR account 's
-uid and gid, adding all supplementary groups. It then runs
+uid and gid, removing all supplementary groups. It then runs
 .IR child .
+If \-s option is specified, \fBsetuidgid\fR adds all supplementary groups for \fIaccount\fR in group(5).
 
 .B setuidgid
 cannot be run by anyone other than root.
+
 .SH EXIT CODES
 .B setuidgid
 exits 111 if it cannot find a UNIX account named
@@ -27,6 +38,7 @@ if it cannot setgid, if it cannot setgroups, if it cannot setuid, or if it canno
 .IR child .
 Otherwise its exit code is the same as that of
 .IR child .
+
 .SH SEE ALSO
 supervise(8),
 svc(8),
@@ -40,6 +52,7 @@ pgrphack(8),
 multilog(8),
 tai64n(8),
 tai64nlocal(8),
+group(5),
 envuidgid(8),
 envdir(8),
 softlimit(8),
