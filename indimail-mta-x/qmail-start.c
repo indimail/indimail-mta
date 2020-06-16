@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.18  2020-06-16 22:33:09+05:30  Cprogrammer
+ * use prot_gid() to lose existing qmail group privileges (qmailr)
+ *
  * Revision 1.17  2020-06-16 21:47:30+05:30  Cprogrammer
  * set supplementary group ids if USE_SETGROUPS env variable is set
  *
@@ -201,6 +204,8 @@ main(argc, argv)
 					die();
 				gidset[0] = auto_gidq;
 				gidset[ngroups] = auto_gidn;
+				if (prot_gid(auto_gidn) == -1) /*- nofiles unix group */
+					die();
 				if (setgroups(ngroups + 1, gidset))
 					die();
 				alloc_free((char *) gidset);
@@ -391,7 +396,7 @@ main(argc, argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.17 2020-06-16 21:47:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.18 2020-06-16 22:33:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
