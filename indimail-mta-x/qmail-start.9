@@ -31,7 +31,7 @@ under the proper uids and gids for a single queue.
 These five daemons cooperate to deliver messages from the queue.
 
 .B qmail-daemon
-invokes
+invokes multiple invocations of \fBqmail-start\fR to invoke
 .BR qmail-send ,
 .BR qmail-todo ,
 .BR qmail-lspawn ,
@@ -152,6 +152,13 @@ you can run
 or
 .B qmail-daemon
 with a low priority.
+
+.SH Supplementary Groups
+If you set the environment variable \fBUSE_SETGROUPS\fR, \fBqmail-start\fR can set
+supplementary groups (if defined in /etc/groups) for qmail-send (for qmails user),
+qmail-rspawn (for qmailr user), qmail-clean (qmailq user) and any logger specified on
+command line (qmaill user). See groups(5) to learn how to set supplementary groups.
+
 .SH "SEE ALSO"
 logger(1),
 splogger(1),
@@ -167,4 +174,5 @@ qmail-multi(8),
 initsvc(1),
 svscan(8),
 supervise(8),
+groups(5),
 IndiMail(7)
