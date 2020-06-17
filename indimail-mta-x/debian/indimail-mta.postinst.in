@@ -257,10 +257,10 @@ else
 fi
 a_arch=`uname -m`
 if [ " $a_arch" = " x86_64" ] ; then
-	smtp_soft_mem=52428800
-	qmtp_soft_mem=52428800
-	qmqp_soft_mem=52428800
-	send_soft_mem=83886080
+	smtp_soft_mem=104857600
+	qmtp_soft_mem=104857600
+	qmqp_soft_mem=104857600
+	send_soft_mem=104857600
 else
 	smtp_soft_mem=26214400
 	qmtp_soft_mem=26214400
