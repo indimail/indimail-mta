@@ -1,5 +1,8 @@
 /*
  * $Log: auto-str.c,v $
+ * Revision 1.7  2020-06-17 16:58:35+05:30  Cprogrammer
+ * make output readable
+ *
  * Revision 1.6  2004-10-22 15:34:20+05:30  Cprogrammer
  * replaced readwrite.h with unistd.h
  *
@@ -7,12 +10,28 @@
  * added RCS log
  *
  */
+#include <ctype.h>
 #include <unistd.h>
 #include "substdio.h"
 #include "exit.h"
 
 char            buf1[256];
 substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
+
+/* 
+ * check if a given character can be printed unquoted in a C string
+ * does not accept digits as they may be hardly visible between octal
+ * encoded chars
+ */
+static int
+is_legible(unsigned char ch)
+{
+    if (isascii(ch))
+        return 1;
+    if (ch == '/' || ch == '_' || ch == '-' || ch == '.')
+        return 1;
+    return 0;
+}
 
 void
 my_puts(s)
@@ -32,27 +51,29 @@ main(argc, argv)
 	unsigned char   ch;
 	char            octal[4];
 
-	name = argv[1];
-	if (!name)
+	if (!(name = argv[1]))
 		_exit(100);
-	value = argv[2];
-	if (!value)
+	if (!(value = argv[2]))
 		_exit(100);
 	my_puts("char ");
 	my_puts(name);
-	my_puts("[] = \"\\\n");
-	while ((ch = *value++))
-	{
-		my_puts("\\");
-		octal[3] = 0;
-		octal[2] = '0' + (ch & 7);
-		ch >>= 3;
-		octal[1] = '0' + (ch & 7);
-		ch >>= 3;
-		octal[0] = '0' + (ch & 7);
-		my_puts(octal);
+	my_puts("[] = \"");
+	while ((ch = *value++)) {
+        if (is_legible(ch)) {
+            if (substdio_put(&ss1, (char *) &ch, 1) == -1)
+                _exit(111);
+        } else {
+			my_puts("\\");
+			octal[3] = 0;
+			octal[2] = '0' + (ch & 7);
+			ch >>= 3;
+			octal[1] = '0' + (ch & 7);
+			ch >>= 3;
+			octal[0] = '0' + (ch & 7);
+			my_puts(octal);
+		}
 	}
-	my_puts("\\\n\";\n");
+	my_puts("\";\n");
 	if (substdio_flush(&ss1) == -1)
 		_exit(111);
 	_exit(0);
