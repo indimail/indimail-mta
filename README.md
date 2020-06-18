@@ -1,8 +1,7 @@
 # indimail-mta
 
-qmail fork with [DKIM](https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x), [SRS2](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) &amp; [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).  indimail-mta additionally includes forks of the following packages
+[qmail](http://cr.yp.to/qmail.html "qmail") fork with [DKIM](https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x), [SRS2](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) &amp; [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).  indimail-mta additionally includes forks of the following packages
 
-* [qmail](http://cr.yp.to/qmail.html "qmail")
 * [ucspi-tcp](https://cr.yp.to/ucspi-tcp.html "ucspi-tcp")
 * [serialmail](https://cr.yp.to/serialmail.html "serialmail")
 * [qmailanalog](http://cr.yp.to/qmailanalog.html "qmailanalog")
