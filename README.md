@@ -67,8 +67,10 @@ sudo make install-strip
 
 # Binary Packages Build
 
-If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines.
-The steps for doing this are
+If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command.
+You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter '# Binary Builds on openSUSE Build Service`.
+
+The steps for doing a binary build are
 
 ## Clone git repository
 
@@ -110,7 +112,7 @@ Installing and configuration is much simplied when you use the Binary Packages B
 
 # Setup & Configuration
 
-If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool.  svctool is a general purpose utility to configure indimail-mta services.
+You are here because you decide to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool.  svctool is a general purpose utility to configure indimail-mta services.
 
 You can also run the script create_services which invokes svctool to setup few default services to start a full fledged messaging server create_services will also put a systemd unit file indimail.service in /lib/systemd/system
 
