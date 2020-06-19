@@ -65,6 +65,18 @@ make
 sudo make install-strip
 ```
 
+# Setup & Configuration
+
+You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool. svctool is a general purpose utility to configure indimail-mta services.
+
+You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd unit file `svscan.service` in `/lib/systemd/system`.
+
+```
+$ cd /usr/local/src/indimail-mta-x
+$ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
+$ sudo service indimail start
+```
+
 # Binary Packages Build
 
 If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command.
@@ -100,7 +112,7 @@ $ ./create_debian # for deb
 
 ## Install Packages
 
-Installing and configuration is much simplied when you use the Binary Packages Build. The pre, post instlation scripts do all the hard work for you.
+Installing and configuration is much simplied when you use the Binary Packages Build. The pre, post instlation scripts do all the hard work for you. For each of the packages built above you can follow the steps below, depending on your linux distribution. The location of the RPM file will be ~/rpmbuild/RPMS/x86_64 for rpm based distributions and ~/stage for debian/ubuntu distributions.
 
 ** For RPM based distributions **
 
@@ -109,18 +121,6 @@ Installing and configuration is much simplied when you use the Binary Packages B
 ** For Debian based distributions **
 
 `sudo dpkg -i debian_file`
-
-# Setup & Configuration
-
-You are here because you decide to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool.  svctool is a general purpose utility to configure indimail-mta services.
-
-You can also run the script create_services which invokes svctool to setup few default services to start a full fledged messaging server create_services will also put a systemd unit file indimail.service in /lib/systemd/system
-
-```
-$ cd /usr/local/src/indimail-mta-x
-$ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
-$ sudo service indimail start
-```
 
 ## Some Notes on directory structure
 
@@ -171,7 +171,7 @@ Currently, the list of supported distributions for IndiMail is
           o openSUSE_Leap_15.0
           o openSUSE_Leap_15.1
           o openSUSE_Leap_15.2
-		  o openSUSE_Tumbleweed
+          o openSUSE_Tumbleweed
           o SUSE Linux Enterprise 12
           o SUSE Linux Enterprise 12 SP1
           o SUSE Linux Enterprise 12 SP2
