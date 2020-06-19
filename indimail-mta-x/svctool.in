@@ -9761,7 +9761,7 @@ case $option in
 			/bin/rm -f /tmp/config.cnf.$$
 		fi
 		if [ ! -f "$DESTDIR"$sysconfdir/wordlist.db ] ; then
-		# create empty wordlist.db
+			# create empty wordlist.db
 			"$DESTDIR"$QmailBinPrefix/bin/bogoutil -l "$DESTDIR"$sysconfdir/wordlist.db < /dev/null
 			$chown indimail:indimail "$DESTDIR"$sysconfdir/wordlist.db
 		fi
