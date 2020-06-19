@@ -30,7 +30,7 @@ Doing a source build requires you to have all the development packages installed
 db-devel, libdb-devel, db4-devel on different systems, just to get Berkeley db installed. There is an easy way out to find out what your distribution needs.
 
 * For RPM based distribtions, locate your .spec file (e.g. indimail-mta.spec in indimail-mta/indimail-mta-x directory, libqmail/libqmail.spec). Open the RPM spec file and look for `BuildRequires`. This will tell you what you require for your distribution. If there is a specific version of development package required, you will find `%if %else` statements. Use dnf / yum / zypper to install your development package.
-* For debian based distribution, locate your debian subdirectory (e.g. indimail-mta/indimail-mta-x/debian, libqmail/debian). In this directory you will find files with `.dsc` extension. Look at the line having `Build-Depends`. Use `apt-get install package` to install the package. If your debian distribution has few libraries different than the default, you will find a `.dsc` filename with a name corresponding to your distribution. (e.g. indimail-mta-x-Debain_10.dsc)
+* For debian based distribution, locate your debian subdirectory (e.g. indimail-mta/indimail-mtaa-x/debian, libqmail/debian). In this directory you will find files with `.dsc` extension. Look at the line having `Build-Depends`. Use `apt-get install package` to install the package. If your debian distribution has few libraries different than the default, you will find a `.dsc` filename with a name corresponding to your distribution. (e.g. indimail-mta-Debain_10.dsc)
 
 ## Download / clone libqmail
 
@@ -266,7 +266,7 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 1. [indimail-access](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-access) - IMAP/POP3 & fetchmail for mail retreival
 2. [indimail-auth](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-auth) (nssd - providing Name Service Switch and pam-multi providing multiple PAM modules for flexible, configurable authentication methods)
 3. [indimail-spamfilter](https://github.com/mbhangui/indimail-virtualdomains/tree/master/bogofilter-x) - SPAM filter capabillity using bogofilter - https://bogofilter.sourceforge.io
-4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail-mta - altermime, ripmime, mpack, fortune and flash - customizable menu based admin interface)
+4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail/indimail-mta - altermime, ripmime, mpack, fortune and flash - customizable menu based admin interface)
 
 ```
 Currently, the list of supported distributions for IndiMail is
@@ -315,7 +315,7 @@ For latest details refer to [README](https://github.com/mbhangui/docker/blob/mas
 # SUPPORT INFORMATION #
 
 ## IRC
-IndiMail has an IRC channel ##indimail and ##indimail-mta
+IndiMail has an IRC channel ##indimail and ##indimail
 
 ## Mailing list
 
