@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "/usr"                  > conf-prefix
+echo "/var/indimail"         > conf-qmail
+echo "/etc/indimail"         > conf-sysconfdir
+echo "/usr/share/indimail"   > conf-shared
+echo "/usr/libexec/indimail" > conf-libexec

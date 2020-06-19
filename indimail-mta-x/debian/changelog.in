@@ -1,0 +1,19 @@
+indimail-mta (@version@-@release@) unstable; urgency=low
+
+  * added create_rpm script
+  * Permission cleanup - Removed restrictive permissions from hier.c, indimail-mta.spec
+  * moved qmail-logfifo to indimail package
+  * create install/uninstall logs to /var/log
+  * moved logfifo, nssd.sock, nssd.pid to /run or /var/run
+  * debian packaging - renamed perm_list.q to perm_list.mta
+  * svctool: fixed setting of Authentited SMTP for port 587 in run file
+  * svctool: fixed setting of sys-checkpwd in AUTHMODULES variable
+  * svc, supervise - new option restart (stop and restart) a service
+  * svctool - separated setting alternatives from add-boot, rm-boot. new functions add_alternatives, remove_alternatives.
+  * postinst, prerm	: separated setting alternatives from add-boot, rm-boot.  new functions add_alternatives, remove_alternatives.
+  * svctool - new option --dmemory to set specific softmemory limit for qmail-daemon/qmail-send
+  * svctool, envmigrate - added error checks calling envmigrate
+  * qmail-start.c - set supplementary group ids if USE_SETGROUPS env variable is set
+  * qmail-start.c - use prot_gid() to lose existing qmail group privileges (qmailr)
+  * setuidgid.c - set supplementary group ids
+  * setuidgid.c - use -s option set supplementary group ids

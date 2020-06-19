@@ -44,7 +44,7 @@ edit = sed \
 
 default: it man leapsecs.dat
 
-all: it man leapsecs.dat doc/RELEASE-Notes debian/Makefile
+all: it man leapsecs.dat debian/Makefile
 
 libsyncdir.a: makelib syncdir.o
 	./makelib libsyncdir.a syncdir.o
@@ -3918,9 +3918,6 @@ warn-auto.sh docker-entrypoint.sh conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> docker-entrypoint
 	chmod 755 docker-entrypoint
-
-doc/RELEASE-Notes: doc/RELEASE-Notes.in doc/ChangeLog
-	(cat doc/RELEASE-Notes.in;./catChangeLog) | $(edit) > $@
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in

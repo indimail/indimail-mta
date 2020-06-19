@@ -47,11 +47,20 @@ make
 sudo make install-strip
 ```
 
-edit the files conf-qmail, conf-prefix, conf-sysconfdir, conf-shared, conf-libexec in /usr/local/src/indimail-mta/indimail-mta-x directory.
-(see the note on directory structure at the bottom)
+To configure indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared and conf-libexec. Defaults are given in the table below. You can also use the script default.configure to set the below values.
+
+config file|value
+-----------|------
+conf-prefix|/usr
+conf-qmail|/var/indimail
+conf-sysconfdir|/etc/indimail
+conf-shared|/usr/share/indimail
+conf-libexec|/usr/libexec/indimail
+
 
 ```
 cd /usr/local/src/indimail-mta/indimail-mta-x
+./default-configure
 make
 sudo make install-strip
 ```
@@ -101,7 +110,7 @@ Installing and configuration is much simplied when you use the Binary Packages B
 
 # Setup & Configuration
 
-If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool. svctool is a general purpose utility to configure indimail-mta services.
+If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool.  svctool is a general purpose utility to configure indimail-mta services.
 
 You can also run the script create_services which invokes svctool to setup few default services to start a full fledged messaging server create_services will also put a systemd unit file indimail.service in /lib/systemd/system
 
@@ -132,16 +141,6 @@ directory /usr/lib/indimail in build scripts
 
 ```
 /usr/lib/indimail - plugins, modules (architecture-dependent files)
-```
-
-# Some settings
-
-```
-conf-shared       - /usr/share/indimail
-conf-prefix       - /usr
-conf-sysconfdir   - /etc/indimail
-conf-libexec      - /usr/libexec/indimail
-conf-qmail        - /var/indimail
 ```
 
 # Binary Builds on openSUSE Build Service
