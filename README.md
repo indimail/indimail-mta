@@ -19,7 +19,7 @@ To install you need to do the following
 
 # Source Compiling/Linking
 
-The steps below give instructions on building from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [CREATE-Packages.md](CREATE-Packages.md)
+The steps below give instructions on building from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [CREATE-Packages.md](https://github.com/mbhangui/indimail-mta/blob/master/.github/CREATE-Packages.md)
 
 You can also use docker / podman images to deploy indimail-mta. Look at the chapter `# Docker / Podman Repository` below on how to do that. The big advantage of using a docker / podman image is you can change your configuration with the `docker commit ..` or `podman commit` to save your entire build and deploy the exact configuration on multiple hosts.
 
