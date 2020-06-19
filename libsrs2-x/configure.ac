@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([libsrs2],1.0.18, [Manvendra Bhangui indimail-mta@indimail.org], libsrs2)
+AC_INIT([libsrs2],m4_normalize(m4_include([conf-version])), [Manvendra Bhangui indimail-mta@indimail.org], libsrs2)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_HEADERS([config.h])
@@ -12,6 +12,7 @@ AC_MINIX
 
 dnl Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
