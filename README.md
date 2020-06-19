@@ -19,7 +19,7 @@ To install you need to do the following
 
 # Source Compiling/Linking
 
-The steps below give instructions on building from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [CREATE-Packages.md](https://github.com/mbhangui/indimail-mta/blob/master/.github/CREATE-Packages.md)
+The steps below give instructions on building from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [Binary Packages](.github/CREATE-Packages.md)
 
 You can also use docker / podman images to deploy indimail-mta. Look at the chapter `# Docker / Podman Repository` below on how to do that. The big advantage of using a docker / podman image is you can change your configuration with the `docker commit ..` or `podman commit` to save your entire build and deploy the exact configuration on multiple hosts.
 
@@ -48,14 +48,44 @@ $ sudo make install-strip
 ```
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/indimail-mta.git
-cd /usr/local/src/indimail-mta/libdkim-x
-./default.configure
-make
-sudo make install-strip
-cd /usr/local/src/indimail-mta/libsrs2-x
-./default.configure
-make
-sudo make install-strip
+```
+
+## Compile libdkim-x (with dynamic libaries)
+
+(check version in indimail-mta/libdkim-x/conf-version)
+```
+$ cd /usr/local/src/indimail-mta/libdkim-x
+$ ./default.configure
+$ make
+$ sudo make -s install-strip
+```
+
+## Compile libsrs2-x (with dynamic libaries)
+
+(check version in indimail-mta/libsrs2-x/conf-version)
+```
+$ cd /usr/local/src/indimail-mta/libsrs2-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
+```
+
+## Build ucspi-tcp 
+
+(check version in indimail-mta/ucspi-tcp-x/conf-version)
+```
+$ cd /usr/local/src/indimail-mta/ucspi-tcp-x
+$ make
+$ sudo make install-strip
+```
+
+## Build indimail-mta
+
+```
+$ cd /usr/local/src
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 To configure indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared and conf-libexec. Defaults are given in the table below. You can also use the script default.configure to set the below values.
@@ -70,10 +100,10 @@ conf-libexec|/usr/libexec/indimail
 
 
 ```
-cd /usr/local/src/indimail-mta/indimail-mta-x
-./default-configure
-make
-sudo make install-strip
+$ cd /usr/local/src/indimail-mta/indimail-mta-x
+$ ./default-configure
+$ make
+$ sudo make install-strip
 ```
 
 ## Download optional components
@@ -89,9 +119,9 @@ Optional component. Required only if you require a Name Service Switch to authen
 
 ```
 cd /usr/local/src/indimail-virtualdomans/nssd-x
-./default.configure
-make
-sudo make install-strip
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 ### Build pam-multi
@@ -99,10 +129,10 @@ sudo make install-strip
 Optional. Required only if you require PAM authentication for authenticated SMTP or extra PAM other than /etc/shadow authentication for IMAP / POP3
 
 ```
-cd /usr/local/src/indimail-virtualdomans/pam-multi-x
-./default.configure
-make
-sudo make install-strip
+$ cd /usr/local/src/indimail-virtualdomans/pam-multi-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 ### Build courier-imap
@@ -110,10 +140,10 @@ sudo make install-strip
 Optional. Required only if you want IMAP, POP3 to retrieve your mails
 
 ```
-cd /usr/local/src/indimail-virtualdomans/courier-imap-x
-./default.configure
-make
-sudo make install-strip
+$ cd /usr/local/src/indimail-virtualdomans/courier-imap-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 ### Build fetchmail
@@ -121,10 +151,10 @@ sudo make install-strip
 Optional. Required only if you want fetchmail to retrieve your mails
 
 ```
-cd /usr/local/src/indimail-virtualdomans/fetchmail-x
-./default.configure
-make
-sudo make install-strip
+$ cd /usr/local/src/indimail-virtualdomans/fetchmail-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 ### Build altermime
@@ -132,10 +162,10 @@ sudo make install-strip
 Optional. Required only if you want altermime to add content to your emails before delivery. e.g. adding disclaimers
 
 ```
-cd /usr/local/src/indimail-virtualdomans/altermime-x
-./default.configure
-make
-sudo make install-strip
+$ cd /usr/local/src/indimail-virtualdomans/altermime-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 ### Build ripmime
@@ -143,10 +173,10 @@ sudo make install-strip
 Optional. Required only if you want extract attachments from your emails
 
 ```
-cd /usr/local/src/indimail-virtualdomans/ripmime-x
-./default.configure
-make
-sudo make install-strip
+$ cd /usr/local/src/indimail-virtualdomans/ripmime-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 ### Build mpack
@@ -154,10 +184,10 @@ sudo make install-strip
 Optional. Required only if you want to pack a zip file and attach it to your email.
 
 ```
-cd /usr/local/src/indimail-virtualdomans/mpack-x
-./default.configure
-make
-sudo make install-strip
+$ cd /usr/local/src/indimail-virtualdomans/mpack-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 ### Build flash
@@ -165,10 +195,10 @@ sudo make install-strip
 Optional. Required only if you want a configurable ncurses based menu system to configure a system for administering emails using a dumb terminal
 
 ```
-cd /usr/local/src/indimail-virtualdomans/flash-x
-./default.configure
-make
-sudo make install-strip
+$ cd /usr/local/src/indimail-virtualdomans/flash-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 ### Build fortune
@@ -176,10 +206,10 @@ sudo make install-strip
 Optional. Required only if you want fortune cookies to be sent out in your outgoing emails.
 
 ```
-cd /usr/local/src/indimail-virtualdomans/fortune-x
-./default.configure
-make
-sudo make install-strip
+$ cd /usr/local/src/indimail-virtualdomans/fortune-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
 # Setup & Configuration
@@ -196,93 +226,8 @@ $ sudo service indimail start
 
 # Binary Packages Build
 
-If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command.
+If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md)
 You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter '# Binary Builds on openSUSE Build Service`.
-
-The steps for doing a binary build are
-
-## Clone git repository
-
-```
-$ cd /usr/local/src
-$ git clone https://github.com/mbhangui/libqmail.git
-$ git clone https://github.com/mbhangui/indimail-mta.git
-$ git clone https://github.com/mbhangui/indimail-virtualdomains.git
-```
-
-## Build libqmail, libqmail-dev package
-
-```
-$ cd /usr/local/src/libqmail
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-mta package
-
-```
-$ cd /usr/local/src/indimail-mta/indimail-mta-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-auth package
-
-Optional. Required only if you want extra authentication methods using NSS or PAM.
-
-```
-$ cd /usr/local/src/indimail-virtualdomains/indimail-auth
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-access package
-
-Optional. You require this if you want IMAP/POP3 or fetchmail to retrieve your mails
-
-```
-$ cd /usr/local/src/indimail-virtualdomains/indimail-access
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-utils package
-
-Optional. Required only if you want utilities like altermime, ripmime, flash menu, mpack and fortune
-
-```
-$ cd /usr/local/src/indimail-virtualdomains/indimail-utils
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-spamfilter package
-
-Optional. Required only if you want to use bogofilter to filter SPAM mails
-
-```
-$ cd /usr/local/src/indimail-virtualdomains/bogofilter-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Install Packages
-
-Installing and configuration is much simplied when you use the Binary Packages Build. The pre, post instlation scripts do all the hard work for you. For each of the packages built above you can follow the steps below, depending on your linux distribution. The location of the RPM file will be ~/rpmbuild/RPMS/x86_64 for rpm based distributions and ~/stage for debian/ubuntu distributions.
-
-** For RPM based distributions **
-
-`sudo rpm -ivh rpm_file`
-
-** For Debian based distributions **
-
-`sudo dpkg -i debian_file`
 
 ## Some Notes on directory structure
 
