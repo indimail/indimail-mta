@@ -20,7 +20,7 @@ $ ./create_debian # for deb
 
 ## Build indimail-auth package
 
-Optional. Required only if you want extra authentication methods using NSS or PAM.
+Optional component. Required only if you require a Name Service Switch & extra PAM modules for authentication
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-auth
