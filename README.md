@@ -224,6 +224,8 @@ $ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
 $ sudo service indimail start
 ```
 
+NOTE: I myself use RPMs for deploying indimail-mta on my own services and do not use `create_services`. It is possible that it may not include few steps added recently in the pre/post install scripts written for the RPM/Debian builds.
+
 # Binary Packages Build
 
 If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md)
