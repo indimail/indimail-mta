@@ -13,6 +13,7 @@ prefix=@prefix@
 sysconfdir=@sysconfdir@
 controldir=@sysconfdir@/control
 libexecdir=@libexecdir@
+mysql_socket=/var/run/mysqld/mysqld.sock
 default_domain=`uname -n`
 chown=$(which chown)
 mkdir=$(which mkdir)
@@ -22,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.81 2020-04-01 19:04:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.82 2020-06-22 21:41:47+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -260,6 +261,7 @@ if [ " $$a_arch" = " x86_64" ] ; then
   smtp_soft_mem=104857600
   qmtp_soft_mem=104857600
   qmqp_soft_mem=104857600
+  send_soft_mem=104857600
   imap_pop3_mem=524288000
   imapspop3_mem=524288000
   poppass_mem=104857600
@@ -268,9 +270,19 @@ else
   smtp_soft_mem=52428800
   qmtp_soft_mem=52428800
   qmqp_soft_mem=52428800
+  send_soft_mem=52428800
   imap_pop3_mem=52428800
   imapspop3_mem=52428800
   poppass_mem=52428800
+fi
+if [ -d /run ] ; then
+  logfifo="/run/indimail/logfifo"
+  mkdir -p /run/indimail
+elif [ -d /var/run ] ; then
+  logfifo="/var/run/indimail/logfifo"
+  mkdir -p /var/run/indimail
+else
+  logfifo="/tmp/logfifo"
 fi
 #
 # SMTP
@@ -313,10 +325,11 @@ do
     e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   elif [ $port -eq 587 ] ; then
     nobogofilter=1
-    e_opt="--skipsend --forceauthsmtp --antispoof"
+    e_opt="--skipsend --forceauthsmtp --antispoof --forcetls"
   else
     if [ $port -eq 25 ] ; then
     e_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+    e_opt="--dmemory=$send_soft_mem"
     else
     e_opt="--authsmtp"
     fi
@@ -329,7 +342,7 @@ do
   append_opt=""
   if [ $nobogofilter -eq 0 ] ; then
     append_opt="--spamfilter=\"$prefix/bin/bogofilter -p -d $sysconfdir\"" 
-    append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
+    append_opt="$append_opt --logfilter=$logfifo --rejectspam=0 --spamexitcode=0"
   fi
   if [ $clamav_os -eq 1 ] ; then
     append_opt="$append_opt --qhpsi=\"$qhpsi\""
@@ -393,7 +406,7 @@ if [ $nofetchmail -eq 0 ] ; then
   append_opt=""
   if [ $nobogofilter -eq 0 ] ; then
     append_opt="--spamfilter=\"$prefix/bin/bogofilter -p -d $sysconfdir\"" 
-    append_opt="$append_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
+    append_opt="$append_opt --logfilter=$logfifo --rejectspam=0 --spamexitcode=0"
   fi
   if [ $clamav_os -eq 1 ] ; then
     append_opt="$append_opt --qhpsi=\"$qhpsi\""
@@ -453,13 +466,23 @@ if [ $noindimail -eq 0 ] ; then
     --max-btree-count=10000 $extra_opt
   
   if [ $nonssd -eq 0 -a $nomysql -eq 0 ] ; then
-  $svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
-    --mysqlhost=localhost --mysqluser=indimail \
-    --mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=$servicedir $extra_opt
+    if [ -d /run ] ; then
+      nssd_sock=/run/indimail/nssd.sock
+      mkdir -p /run/indimail
+    elif [ -d /var/run ] ; then
+      nssd_sock=/var/run/indimail/nssd.sock
+      mkdir -p /var/run/indimail
+    else
+      nssd_sock=/tmp/nssd.sock
+    fi
+    $svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
+      --mysqlhost=localhost --mysqluser=indimail \
+      --mysqlpass=ssh-1.5- --mysqlsocket=$mysql_socket \
+      --servicedir=$servicedir $extra_opt
   fi
-    #
-    # poppassd protocol
-    #
+  #
+  # poppassd protocol
+  #
   $svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
     --memory=$poppass_mem \
     --certfile=$controldir/servercert.pem --ssl \
@@ -490,7 +513,7 @@ fi
 $svctool --postmaster=postmaster@$default_domain --config=cert --common_name=$default_domain $extra_opt
 
 # fifolog service
-$svctool --fifologger=/tmp/logfifo --servicedir=$servicedir
+$svctool --fifologger=$logfifo --servicedir=$servicedir
 
 # mrtg service
 $svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir
@@ -507,12 +530,37 @@ if [ $add_boot -eq 1 ] ; then
   # Install IndiMail to be started on system boot
   echo "adding indimail startup"
   $svctool --config=add-boot $extra_opt
+  $svctool --config=add-alt
 fi
+
+# turn off automatic refresh for services during first time installation
+svc_list=""
+for i in clamd greylist.1999 qmail-qmqpd.628 \
+  qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
+  qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
+  qmail-daned.1998
+do
+  if [ -d $servicedir/$i ] ; then
+    svc_list="$svc_list $servicedir/$i"
+  fi
+done
+svc_list="$svc_list $sysconfdir/control/defaultqueue"
+$svctool --servicedir=$servicedir --norefreshsvc="0 $svc_list"
+
 $svctool --servicedir=$servicedir --config=qselinux
 if [ $noindimail -eq 0 ] ; then
   $svctool --servicedir=$servicedir --config=iselinux
+fi
+if [ -f $sysconfdir/cronlist.q -a -d /etc/cron.d ] ; then
+  echo "adding indimali-mta cron entries"
+  $cp $sysconfdir/cronlist.q /etc/cron.d
+fi
+if [ -f $sysconfdir/cronlist.i -a -d /etc/cron.d ] ; then
+  echo "adding indimali cron entries"
+  $cp $sysconfdir/cronlist.i /etc/cron.d
 fi
 if [ $check_install -eq 1 ] ; then
   $svctool --check-install --servicedir=$servicedir \
     --qbase=$qbase --qcount=$qcount --qstart=1 $extra_opt
 fi
+$svctool --fixsharedlibs
