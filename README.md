@@ -224,7 +224,7 @@ $ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
 $ sudo service indimail start
 ```
 
-NOTE: I myself use RPMs for deploying indimail-mta on my own services and do not use `create_services`. It is possible that it may not include few steps added recently in the pre/post install scripts written for the RPM/Debian builds.
+NOTE: I myself use RPMs for deploying indimail-mta on my own servers and do not use `create_services`. It is possible that it may not include few steps added recently in the pre/post install scripts written for the RPM/Debian builds.
 
 # Binary Packages Build
 
