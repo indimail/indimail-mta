@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.485 2020-06-15 19:49:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.486 2020-06-22 21:50:08+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.485 2020-06-15 19:49:32+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.486 2020-06-22 21:50:08+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4700,10 +4700,11 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 		# Start MySQL daemon
 		#
 		echo -n "$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid" 1>&2
-		echo -n " --datadir="$DESTDIR"$databasedir/data" 1>&2
+		echo -n " --skip-networking --datadir="$DESTDIR"$databasedir/data" 1>&2
 		echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log" 1>&2
 		echo    " $opt_str --socket=$mysql_socket" 1>&2
-		$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid --datadir="$DESTDIR"$databasedir/data \
+		$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid \
+			--skip-networking --datadir="$DESTDIR"$databasedir/data \
 			--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
 			$opt_str --socket=$mysql_socket &
 		wait_for_mysqld
