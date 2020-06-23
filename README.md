@@ -13,13 +13,13 @@
 indimail-mta is the default MTA installed when you install [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).
 Refer to this [README](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for a detailed understanding of Indimail Virtual Domains and indimail-mta.
 
-This document contains installation instructions for install indimail-mta from source as well as building binary packages from the source.
+This document contains instructions for building indimail-mta from source.
 
 To install you need to do the following
 
 # Source Compiling/Linking
 
-The steps below give instructions on building from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [Binary Packages](.github/CREATE-Packages.md)
+The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Binary Packages](.github/CREATE-Packages.md)
 
 You can also use docker / podman images to deploy indimail-mta. Look at the chapter `# Docker / Podman Repository` below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
@@ -70,7 +70,7 @@ $ make
 $ sudo make install-strip
 ```
 
-## Build ucspi-tcp 
+## Build ucspi-tcp
 
 (check version in indimail-mta/ucspi-tcp-x/conf-version)
 ```
@@ -101,7 +101,7 @@ conf-libexec|/usr/libexec/indimail
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
-$ ./default-configure
+$ ./default.configure
 $ make
 $ sudo make install-strip
 ```
@@ -118,7 +118,7 @@ $ git clone https://github.com/mbhangui/indimail-virtualdomains.git
 Optional component. Required only if you require a Name Service Switch to authenticate from a MySQL db (e.g. for authenticated SMTP)
 
 ```
-cd /usr/local/src/indimail-virtualdomans/nssd-x
+$ cd /usr/local/src/indimail-virtualdomans/nssd-x
 $ ./default.configure
 $ make
 $ sudo make install-strip
@@ -221,10 +221,20 @@ You can also run the script `create_services` which invokes svctool to setup few
 ```
 $ cd /usr/local/src/indimail-mta-x
 $ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
-$ sudo service indimail start
 ```
-
 NOTE: I myself use RPMs for deploying indimail-mta on my own servers and do not use `create_services`. It is possible that it may not include few steps added recently in the pre/post install scripts written for the RPM/Debian builds.
+
+## Start Services
+
+```
+$ sudo systemctl start svscan
+or
+$ sudo service svscan start
+or
+$ /etc/init.d/svscan start
+or
+$ /usr/bin/qmailctl start
+```
 
 # Binary Packages Build
 
@@ -268,7 +278,7 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 1. [indimail-access](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-access) - IMAP/POP3 & fetchmail for mail retreival
 2. [indimail-auth](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-auth) (nssd - providing Name Service Switch and pam-multi providing multiple PAM modules for flexible, configurable authentication methods)
 3. [indimail-spamfilter](https://github.com/mbhangui/indimail-virtualdomains/tree/master/bogofilter-x) - SPAM filter capabillity using bogofilter - https://bogofilter.sourceforge.io
-4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail/indimail-mta - altermime, ripmime, mpack, fortune and flash - customizable menu based admin interface)
+4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail/indimail-mta - [altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_(Unix)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x) - customizable menu based admin interface)
 
 ```
 Currently, the list of supported distributions for IndiMail is
