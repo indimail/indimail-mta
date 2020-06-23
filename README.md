@@ -23,7 +23,7 @@ The steps below give instructions to build from source. If you need to deploy in
 
 You can also use docker / podman images to deploy indimail-mta. Look at the [chapter](#Docker-/-Podman-Repository) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
-Doing a source build can be daunting for many. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the [Binary Builds on OBS](# Binary Builds on openSUSE Build Service) towards the end of this document.
+Doing a source build can be daunting for many. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document.
 
 Doing a source build requires you to have all the development packages installed. Linux distributions are known to be crazy. You will have different package names for different distirbutions. e.g.
 
