@@ -78,6 +78,15 @@ then
 else
 	rpmbuild=$HOME/rpmbuild
 fi
+
+copy_src=0
+echo -n "Copy Source Files - "
+read key
+if [ " $key" = " y" -o " $key" = " Y" ] ; then
+	copy_src=1
+fi
+
+if [ $copy_src -eq 1 ] ; then
 make -s indimail-mta.spec
 if [ $? -ne 0 ] ; then
 	echo "make failed" 1>&2
@@ -191,6 +200,11 @@ do
 	/bin/cp -p stage/indimail-mta-"$version"/$i $rpmbuild/SOURCES
 	SRC="$rpmbuild/SOURCES/$i $SRC"
 done
+echo "Clearing stage directory"
+/bin/rm -rf stage
+else
+	cd ..
+fi
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1
@@ -212,8 +226,6 @@ else
 		release=1
 	fi
 fi
-echo "Clearing stage directory"
-/bin/rm -rf stage
 echo -n "Build RPM for indimail-mta-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
@@ -253,12 +265,14 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		) 2>&1 | less
 	fi
 fi
-echo -n "Remove Source (Y/N) - "
-read key
-if [ " $key" = " Y" -o " $key" = " y" ] ; then
-	for i in $SRC
-	do
-		echo "/bin/rm -f $i"
-		/bin/rm -f $i
-	done
+if [ $copy_src -eq 1 ] ; then
+	echo -n "Remove Source (Y/N) - "
+	read key
+	if [ " $key" = " Y" -o " $key" = " y" ] ; then
+		for i in $SRC
+		do
+			echo "/bin/rm -f $i"
+			/bin/rm -f $i
+		done
+	fi
 fi

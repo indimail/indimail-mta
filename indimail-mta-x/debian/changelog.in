@@ -19,3 +19,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * setuidgid.c - use -s option set supplementary group ids
   * use AC_PROG_CC_C99 in configure.ac
   * use m4_normalize(m4_include([conf-version])) in AC_INIT
+  * create_services - updated script
