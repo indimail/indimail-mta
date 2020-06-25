@@ -324,10 +324,12 @@ for indimail.
 
 For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md)
 
-# SUPPORT INFORMATION #
+# SUPPORT INFORMATION
 
-## IRC
-IndiMail has an IRC channel ##indimail and ##indimail
+## IRC / Matrix
+
+* Join me https://matrix.to/#/#indimail:matrix.org
+* IndiMail has an IRC channel #indimail-mta
 
 ## Mailing list
 
