@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.225 $";
+char           *revision = "$Revision: 1.226 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2935,11 +2935,13 @@ pop_bef_smtp(char *mfrom)
 	if ((ptr = inquery(RELAY_QUERY, mfrom, remoteip))) {
 		if ((authenticated = *ptr)) /*- also set authenticated variable */
 			relayclient = "";
-		env_put2("AUTHENTICATED", authenticated == 1 ? "1" : "0");
+		if (!env_put2("AUTHENTICATED", authenticated == 1 ? "1" : "0"))
+			die_nomem();
 	} else {
 		if (userNotFound) {
 			authenticated = -1;
-			env_put2("AUTHENTICATED", "0");
+			if (!env_put2("AUTHENTICATED", "0"))
+				die_nomem();
 		} else {
 			out("451 Requested action aborted: database error (#4.3.2)\r\n");
 			logerr("qmail-smtpd: ");
@@ -5522,7 +5524,8 @@ tls_verify()
 				|| !stralloc_cats(&proto, ")"))
 				die_nomem();
 			authenticated = 1;
-			env_put2("AUTHENTICATED", "1");
+			if (!env_put2("AUTHENTICATED", "1"))
+				die_nomem();
 			relayclient = "";
 		}
 		X509_free(peercert);
@@ -6091,6 +6094,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.226  2020-07-01 21:35:28+05:30  Cprogrammer
+ * added missing error check for "out of mem"
+ *
  * Revision 1.225  2020-05-11 11:12:08+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -6204,7 +6210,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.225 2020-05-11 11:12:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.226 2020-07-01 21:35:28+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
