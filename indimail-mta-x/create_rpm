@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.7  2020-07-01 21:35:03+05:30  Cprogrammer
+# added option to skip copying source files
+#
 # Revision 1.6  2020-05-31 10:54:53+05:30  Cprogrammer
 # removed version numbers from directory names of libdkim, libsrs2, ucspi-tcp
 #
@@ -19,7 +22,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.6 2020-05-31 10:54:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.7 2020-07-01 21:35:03+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 libdkim_version=$(cat ../libdkim-x/conf-version)
