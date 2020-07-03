@@ -1,8 +1,7 @@
 /*
  * $Log: tcpopen.c,v $
- * Revision 1.5  2020-03-10 20:07:28+05:30  Cprogrammer
- * replaced atoi() with scan_uint()
- * incorrect usage of htons()
+ * Revision 1.6  2020-07-03 22:21:10+05:30  Cprogrammer
+ * fixed SIGSEGV if a readonly string was used for host
  *
  * Revision 1.4  2018-05-29 21:47:11+05:30  Cprogrammer
  * removed call to gethostbyname() in ipv6 code
@@ -18,7 +17,6 @@
  *
  *
  */
-#include <stdlib.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -31,7 +29,9 @@
 #include <ctype.h>
 #include "haveip6.h"
 #include "fmt.h"
+#include "env.h"
 #include "scan.h"
+#include "str.h"
 #include "byte.h"
 #include "subfd.h"
 #include "strerr.h"
@@ -43,6 +43,7 @@
 #define MAX_BUFF                300
 #define SOCKBUF                 32768 /*- Buffer size used in Monkey service -*/
 #define MAXNOBUFRETRY           60 /*- Defines maximum number of ENOBUF retries -*/
+
 static unsigned sleeptime = MAXSLEEP + 1; /*- 0 for infinite connect */
 
 static int
@@ -55,24 +56,6 @@ isnum(str)
 		if (!isdigit((int) *ptr))
 			return (0);
 	return (1);
-}
-
-static char    *
-Dirname(char *path)
-{
-	static char     tmpbuf[MAX_BUFF];
-	char           *ptr;
-
-	if (!path || !*path)
-		return ((char *) 0);
-	byte_copy(tmpbuf, MAX_BUFF, path);
-	if ((ptr = strrchr(tmpbuf, '/')) != (char *) 0) {
-		if (ptr == tmpbuf)
-			return ("/");
-		*ptr = 0;
-		return (tmpbuf);
-	} 
-	return ((char *) 0);
 }
 
 static int
@@ -106,19 +89,19 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
  *           other system / Pathname for a unix domain socket
  * service - Name of the service being requested.
  *           Can be NULL, if port > 0.
+ *           it could be a service in /etc/services if port < 0
  * port    - if == 0, nothin special, use port# of the service.
  *           if < 0, use a reserved port
  *           if > 0, it is the port# of server (host-byte-order)
  */
 {
-	int             resvport, fd = -1, optval, retval;
+	int             resvport, fd = -1, optval, retval, i;
 	char           *ptr, *hostptr;
 	struct servent *sp;
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
 	char            serv[FMT_ULONG];
 #else
-	int             i;
 	struct hostent *hp;
 #ifdef HAVE_IN_ADDR_T
 	in_addr_t       inaddr;
@@ -129,14 +112,14 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 #endif
 	struct sockaddr_un unixaddr;	/*- server's local unix socket address */
 	struct linger   linger;
-	char           *dir;
 	char            localhost[MAXHOSTNAMELEN];
 
-	if (host && *host && ((strchr(host, '/') || ((dir = Dirname(host)) && !access(dir, F_OK))))) {
+	i = str_chr(host, '/');
+	if (host && *host && host[i] && !access(host, F_OK)) {
 		if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
         	return -1;
     	unixaddr.sun_family = AF_UNIX;
-    	byte_copy(unixaddr.sun_path, sizeof(unixaddr.sun_path), host);
+    	str_copyb(unixaddr.sun_path, host, sizeof(unixaddr.sun_path));
     	if (connect(fd, (struct sockaddr *) &unixaddr, sizeof(struct sockaddr_un)) == -1) {
 			close (fd);
         	return -1;
@@ -149,11 +132,11 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	if (gethostname(localhost, MAXHOSTNAMELEN))
 #endif
 		return (-1);
-	if (!strcmp(host, localhost) || !strcmp(host, "localhost"))
+	if (!str_diff(host, localhost) || !str_diffn(host, "localhost", 10))
 		hostptr = "localhost";
 	else
 		hostptr = host;
-	if ((ptr = (char *) getenv("SLEEPTIME")) != (char *) 0) {
+	if ((ptr = (char *) env_get("SLEEPTIME")) != (char *) 0) {
 		if (isnum(ptr))
 			scan_uint(ptr, &sleeptime);
 		else {
@@ -169,7 +152,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 			serv[fmt_ulong(serv, port)] = 0;
 		else {
 			if (isnum(service))
-				byte_copy(serv, FMT_ULONG, service);
+				str_copyb(serv, service, FMT_ULONG);
 			else {
 				if ((sp = getservbyname(service, "tcp")) == NULL) {
 					errno = EINVAL;
@@ -289,7 +272,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				return (-1);
 		}
 #if !defined(linux) && !defined(CYGWIN) && !defined(WindowsNT)
-		if (!strcmp(hostptr, "localhost")) {
+		if (!str_diffn(hostptr, "localhost", 10)) {
 			optval = 1;
 			if (setsockopt(fd, SOL_SOCKET, SO_USELOOPBACK, (char *) &optval, sizeof(optval)) == -1) {
 				(void) close(fd);
@@ -354,6 +337,6 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.5 2020-03-10 20:07:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.6 2020-07-03 22:21:10+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
