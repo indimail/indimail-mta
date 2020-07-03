@@ -20,3 +20,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * use AC_PROG_CC_C99 in configure.ac
   * use m4_normalize(m4_include([conf-version])) in AC_INIT
   * create_services - updated script
+  * tcpopen.c: fixed SIGSEGV if a readonly string was used for host

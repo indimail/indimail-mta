@@ -36,3 +36,5 @@ Release 2.11 Start 21/05/2020
 20. create_services - updated script
 - 23/06/2020
 21. updated create_rpm script
+- 03/07/2020
+22. tcpopen.c: fixed SIGSEGV if a readonly string was used for host
