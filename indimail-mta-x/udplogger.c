@@ -1,5 +1,8 @@
 /*
  * $Log: udplogger.c,v $
+ * Revision 1.4  2020-07-04 21:43:46+05:30  Cprogrammer
+ * removed usage of INET6 define
+ *
  * Revision 1.3  2018-05-29 22:12:09+05:30  Cprogrammer
  * removed call to gethostbyname() in ipv6 code
  *
@@ -36,7 +39,7 @@ union sockunion
 {
 	struct sockaddr     sa;
 	struct sockaddr_in  sa4;
-#ifdef INET6
+#ifdef IPV6
 	struct sockaddr_in6 sa6;
 #endif
 };
@@ -384,7 +387,7 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	static char    *x = "$Id: udplogger.c,v 1.3 2018-05-29 22:12:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udplogger.c,v 1.4 2020-07-04 21:43:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

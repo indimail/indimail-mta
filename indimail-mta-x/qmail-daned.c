@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.22  2020-07-04 21:43:12+05:30  Cprogrammer
+ * removed usage of INET6 define
+ *
  * Revision 1.21  2020-05-11 11:07:52+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -113,7 +116,7 @@ union sockunion
 {
 	struct sockaddr     sa;
 	struct sockaddr_in  sa4;
-#ifdef INET6
+#ifdef IPV6
 	struct sockaddr_in6 sa6;
 #endif
 };
@@ -1357,7 +1360,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.21 2020-05-11 11:07:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.22 2020-07-04 21:43:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

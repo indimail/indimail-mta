@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.29  2020-07-04 21:43:34+05:30  Cprogrammer
+ * removed usage of INET6 define
+ *
  * Revision 1.28  2018-05-30 23:26:12+05:30  Cprogrammer
  * moved noipv6 variable to variables.c
  *
@@ -149,7 +152,7 @@ union sockunion
 {
 	struct sockaddr     sa;
 	struct sockaddr_in  sa4;
-#ifdef INET6
+#ifdef IPV6
 	struct sockaddr_in6 sa6;
 #endif
 };
@@ -1548,7 +1551,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.28 2018-05-30 23:26:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.29 2020-07-04 21:43:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
