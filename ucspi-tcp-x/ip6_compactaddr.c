@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_compactaddr.c,v $
+ * Revision 1.2  2020-07-04 22:01:45+05:30  Cprogrammer
+ * fixed global variable V4mappedprefix shadowed by local variable
+ *
  * Revision 1.1  2013-08-06 07:55:38+05:30  Cprogrammer
  * Initial revision
  *
@@ -22,7 +25,6 @@ unsigned int
 ip6_compactaddr(char *s, char ip[16])
 {
 	unsigned long   len, temp, k, pos0 = 0, len0 = 0, pos1 = 0, compr = 0;
-	const unsigned char V4mappedprefix[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
 
 	for (k = 0; k < 16; k += 2) {
 		if (ip[k] == 0 && ip[k + 1] == 0) {
