@@ -513,10 +513,10 @@ do
   if [ -d $i ] ; then
     cd $i
     if [ %{_verbose} -eq 0 ] ; then
-      %{__make} -s DESTDIR=%{buildroot}
+      %{__make} -s %{?_smp_mflags}
       %{__make} -s DESTDIR=%{buildroot} install-strip
     else
-      %{__make} DESTDIR=%{buildroot}
+      %{__make} %{?_smp_mflags}
       %{__make} DESTDIR=%{buildroot} install-strip
     fi
     cd ..
