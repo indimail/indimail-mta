@@ -42,7 +42,9 @@ Release 2.11 Start 21/05/2020
 23. svscan: write pid as a string on the second line of .svlock
 24. added -Wshadow to ucspi-tcp/conf-cc to warn global variables shadowed by
     local variables
-24. ip6_compactaddr.c, tcpserver.c - fixes for global variables shadowed by
+25. ip6_compactaddr.c, tcpserver.c - fixes for global variables shadowed by
     local variables
 26. make-compile - use CC, CFLAGS definition instead of hardcoded command in
     conf-cc
+27. qmail-rm.c, qmail-send.c: replaced utime() with utimes()
+

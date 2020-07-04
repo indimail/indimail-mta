@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.18  2020-07-04 22:26:25+05:30  Cprogrammer
+ * removed utime() with utimes()
+ *
  * Revision 1.17  2020-05-11 11:00:29+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -155,6 +158,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <regex.h>
@@ -163,7 +167,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <fts.h>
-#include <utime.h>
+/*- #include <utime.h> -*/
 #include "stralloc.h"
 #include "substdio.h"
 #include "lock.h"
@@ -200,7 +204,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.17 2020-05-11 11:00:29+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.18 2020-07-04 22:26:25+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -875,7 +879,7 @@ expire_file(const char *filename)
 	unsigned long   inode_num;
 	char           *ptr, *my_name, *old_name;
 	struct stat     statinfo;
-	struct utimbuf  ut;
+	struct timeval  ut[2] = {0};
 
 	if (filename == NULL) {
 		logerrf("expire_file: no filename\n");
@@ -903,11 +907,14 @@ expire_file(const char *filename)
 	/*- generate the relative path to the specified file */
 	if (!(old_name = mk_hashpath("info", inode_num)))
 		return -1;
-	if (expire_date > 0L) /*- use the date specified if it was passed */
-		ut.actime = ut.modtime = expire_date;
-	else /*- otherwise use the relative date offset form */
-	if (!stat(old_name, &statinfo))
-		ut.actime = ut.modtime = statinfo.st_mtime - expire_offset;
+	if (expire_date > 0L) { /*- use the date specified if it was passed */
+		ut[0].tv_sec = expire_date;
+		ut[1].tv_sec = expire_date;
+	} else /*- otherwise use the relative date offset form */
+	if (!stat(old_name, &statinfo)) {
+		ut[0].tv_sec = statinfo.st_mtime - expire_offset;
+		ut[1].tv_sec = statinfo.st_ctime - expire_offset;
+	}
 	else {
 		/*- do some error detection */
 		if (errno == ENOENT && old_name) {
@@ -924,7 +931,7 @@ expire_file(const char *filename)
 		}
 	}
 	/*- now, update the time stamp */
-	if (utime(old_name, &ut) == 0) {
+	if (utimes(old_name, ut) == 0) {
 		logerr("Set timestamp on ");
 		logerr(old_name);
 		logerrf("\n");
@@ -1164,7 +1171,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.17 2020-05-11 11:00:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.18 2020-07-04 22:26:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

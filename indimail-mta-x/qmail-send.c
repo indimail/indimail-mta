@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.69  2020-07-04 22:23:52+05:30  Cprogrammer
+ * replaced utime() with utimes()
+ *
  * Revision 1.68  2020-05-19 10:33:59+05:30  Cprogrammer
  * define use_fsync for non-external qmail-todo
  *
@@ -170,7 +173,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <utime.h>
+#include <sys/time.h>
 #include <dlfcn.h>
 #include <sys/stat.h>
 #include "sig.h"
@@ -846,7 +849,7 @@ pqfinish()
 {
 	int             c;
 	struct prioq_elt pe;
-	struct utimbuf  ut;
+	struct timeval   ut[2] = {0};
 	/*- XXX: more portable than utimbuf, but still worrisome */
 	/*- time_t          ut[2]; -*/
 
@@ -855,8 +858,8 @@ pqfinish()
 			prioq_delmin(&pqchan[c]);
 			fnmake_chanaddr(pe.id, c);
 			/*- ut[0] = ut[1] = pe.dt; -*/
-			ut.actime = ut.modtime = pe.dt;
-			if (utime(fn.s, (struct utimbuf *) &ut) == -1)
+			ut[0].tv_sec = ut[1].tv_sec = pe.dt;
+			if (utimes(fn.s, ut) == -1)
 				log5("warning: ", queuedesc, "unable to utime ", fn.s, "; message will be retried too soon\n");
 		}
 	}
@@ -2842,7 +2845,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.68 2020-05-19 10:33:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.69 2020-07-04 22:23:52+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

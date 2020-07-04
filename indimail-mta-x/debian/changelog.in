@@ -25,3 +25,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * added -Wshadow to ucspi-tcp/conf-cc to warn global variables shadowed by local variables
   * ip6_compactaddr.c, tcpserver.c - fixes for global variables shadowed by local variables
   * make-compile - use CC, CFLAGS definition instead of hardcoded command in conf-cc
+  * qmail-rm.c, qmail-send.c: replaced utime() with utimes()
