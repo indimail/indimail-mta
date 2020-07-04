@@ -168,12 +168,14 @@ compile commands.c buffer.h stralloc.h gen_alloc.h str.h case.h \
 commands.h
 	./compile commands.c
 
-compile: \
-warn-auto.sh conf-cc
-	( cat warn-auto.sh; \
-	echo exec "`head -1 conf-cc`" -D$(DEFS) '-c $${1+"$$@"}' \
-	) > compile
+compile: warn-auto.sh conf-cc make-compile
+	./make-compile > compile
 	chmod 755 compile
+
+make-compile: \
+make-compile.sh
+	cp make-compile.sh make-compile
+	chmod 755 make-compile
 
 date@: \
 warn-auto.sh date@.sh conf-home

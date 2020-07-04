@@ -451,7 +451,7 @@ socket.lib
 	( ( ./compile tryrsolv.c && ./load tryrsolv dns.o \
 	socket_v6any.o socket_v4mappedprefix.o \
 	tlsarralloc.o ipalloc.o ip.o strsalloc.o \
-	-lresolv `cat socket.lib` -lqmail ) 2>/dev/null \
+	-lresolv `cat socket.lib` -lqmail ) >/dev/null 2>&1 \
 	&& echo -lresolv || exit 0 ) > dns.lib
 	rm -f tryrsolv.o tryrsolv
 
