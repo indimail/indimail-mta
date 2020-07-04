@@ -47,4 +47,5 @@ Release 2.11 Start 21/05/2020
 26. make-compile - use CC, CFLAGS definition instead of hardcoded command in
     conf-cc
 27. qmail-rm.c, qmail-send.c: replaced utime() with utimes()
-
+28. indimail-mta, ucspi-tcp Makefile: Fixed Makefile for parallel builds
+29. indimail-mta.spec: use smp_mflags macro for parallel builds
