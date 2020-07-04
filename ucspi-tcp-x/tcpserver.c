@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.64  2020-07-04 22:03:00+05:30  Cprogrammer
+ * fixed global variables overshadowd by local variables
+ *
  * Revision 1.63  2020-06-08 22:48:45+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -212,7 +215,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.63 2020-06-08 22:48:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.64 2020-07-04 22:03:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -638,11 +641,11 @@ matchinet(char *ip, char *token)
 {
 	char            field1[8];
 	char            field2[8];
-	unsigned long   lnum, hnum, tmp;
+	unsigned long   lnum, hnum, t;
 	int             idx1, idx2, match;
 	char           *ptr, *ptr1, *ptr2, *cptr;
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
-	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
+	struct addrinfo hints = {0}, *addr_res = 0, *addr_res0 = 0;
 	struct sockaddr     sa;
 	struct sockaddr_in *in4 = (struct sockaddr_in *) &sa;
 	struct sockaddr_in6 *in6 = (struct sockaddr_in6 *) &sa;
@@ -703,14 +706,14 @@ matchinet(char *ip, char *token)
 				hnum = 256;
 			else
 				scan_ulong(ptr, &hnum);
-			scan_ulong(field2, &tmp);
+			scan_ulong(field2, &t);
 			for (idx2 = lnum; idx2 <= hnum; idx2++) {
-				if (idx2 == tmp) {
+				if (idx2 == t) {
 					match++;
 					break;
 				}
 			}
-			if (idx2 <= hnum && idx2 == tmp)
+			if (idx2 <= hnum && idx2 == t)
 				continue;
 		}
 	} /*- for (match = idx1 = 0, ptr1 = token, ptr2 = ip; idx1 < 4 && match == idx1; idx1++) */
@@ -729,10 +732,10 @@ matchinet(char *ip, char *token)
 		hints.ai_canonname = 0;
 		hints.ai_addr = 0;
 		hints.ai_next = 0;
-		if (getaddrinfo(token, 0, &hints, &res0))
+		if (getaddrinfo(token, 0, &hints, &addr_res0))
 			return (-1);
-		for (res = res0; res; res = res->ai_next) {
-			byte_copy((char *) &sa, res->ai_addrlen, (char *) res->ai_addr);
+		for (addr_res = addr_res0; addr_res; addr_res = addr_res->ai_next) {
+			byte_copy((char *) &sa, addr_res->ai_addrlen, (char *) addr_res->ai_addr);
 			if (sa.sa_family == AF_INET) {
 				in4 = (struct sockaddr_in *) &sa;
 				if (!inet_ntop(AF_INET, (void *) &in4->sin_addr, addrBuf, INET_ADDRSTRLEN))
@@ -747,7 +750,7 @@ matchinet(char *ip, char *token)
 			if (!str_diff(ip, addrBuf))
 				return (1);
 		}
-		freeaddrinfo(res0);
+		freeaddrinfo(addr_res0);
 #else
 	if (!(hp = gethostbyname(token)))
 		return (0);
@@ -769,7 +772,7 @@ struct stralloc dbtable = {0};
 MYSQL          *conn = (MYSQL *) 0;
 
 void
-create_table(MYSQL *conn)
+create_table(MYSQL *mysql)
 {
 	static stralloc sql = { 0 };
 
@@ -783,17 +786,17 @@ create_table(MYSQL *conn)
 		drop_nomem();
 	if (!stralloc_0(&sql))
 		drop_nomem();
-	if (in_mysql_query(conn, sql.s)) {
+	if (in_mysql_query(mysql, sql.s)) {
 		sql.len--;
 		if (!stralloc_cats(&sql, ": ")) {
-			in_mysql_close(conn);
+			in_mysql_close(mysql);
 			drop_nomem();
 		}
-		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
-			in_mysql_close(conn);
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(mysql))) {
+			in_mysql_close(mysql);
 			drop_nomem();
 		}
-		in_mysql_close(conn);
+		in_mysql_close(mysql);
 		if (!stralloc_0(&sql))
 			drop_nomem();
 		strerr_die2x(111, DROP, sql.s);
@@ -932,75 +935,75 @@ connect_db(char *dbfile)
 }
 
 void
-check_db(MYSQL *conn)
+check_db(MYSQL *mysql)
 {
 
-	MYSQL_RES      *res;
+	MYSQL_RES      *myres;
 	MYSQL_ROW       row;
 	static stralloc sql = { 0 };
 
 	if (!stralloc_copys(&sql, "select decision, iprule, env from ")) {
-		in_mysql_close(conn);
+		in_mysql_close(mysql);
 		drop_nomem();
 	}
 	if (!stralloc_cats(&sql, dbtable.s)) {
-		in_mysql_close(conn);
+		in_mysql_close(mysql);
 		drop_nomem();
 	}
 	if (!stralloc_cats(&sql, " where port = ")) {
-		in_mysql_close(conn);
+		in_mysql_close(mysql);
 		drop_nomem();
 	}
 	if (!stralloc_cats(&sql, localportstr)) {
-		in_mysql_close(conn);
+		in_mysql_close(mysql);
 		drop_nomem();
 	}
 	if (!stralloc_0(&sql)) {
-		in_mysql_close(conn);
+		in_mysql_close(mysql);
 		drop_nomem();
 	}
-	if (in_mysql_query(conn, sql.s)) {
-		if (in_mysql_errno(conn) == ER_NO_SUCH_TABLE) {
-			create_table(conn);
-			if (!in_mysql_query(conn, sql.s))
+	if (in_mysql_query(mysql, sql.s)) {
+		if (in_mysql_errno(mysql) == ER_NO_SUCH_TABLE) {
+			create_table(mysql);
+			if (!in_mysql_query(mysql, sql.s))
 				goto done;
 		}
 		sql.len--;
 		if (!stralloc_cats(&sql, ": ")) {
-			in_mysql_close(conn);
+			in_mysql_close(mysql);
 			drop_nomem();
 		}
-		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
-			in_mysql_close(conn);
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(mysql))) {
+			in_mysql_close(mysql);
 			drop_nomem();
 		}
-		in_mysql_close(conn);
+		in_mysql_close(mysql);
 		if (!stralloc_0(&sql))
 			drop_nomem();
 		strerr_die2x(111, DROP, sql.s);
 	}
 done:
-	if (!(res = in_mysql_store_result(conn))) {
+	if (!(myres = in_mysql_store_result(mysql))) {
 		sql.len--;
 		if (!stralloc_cats(&sql, "mysql_store_result: ")) {
-			in_mysql_close(conn);
+			in_mysql_close(mysql);
 			drop_nomem();
 		}
-		if (!stralloc_cats(&sql, (char *) in_mysql_error(conn))) {
-			in_mysql_close(conn);
+		if (!stralloc_cats(&sql, (char *) in_mysql_error(mysql))) {
+			in_mysql_close(mysql);
 			drop_nomem();
 		}
-		in_mysql_close(conn);
+		in_mysql_close(mysql);
 		if (!stralloc_0(&sql))
 			drop_nomem();
 		strerr_die2x(111, DROP, sql.s);
 	}
-	for (;(row = in_mysql_fetch_row(res));) {
+	for (;(row = in_mysql_fetch_row(myres));) {
 		if (!str_diff(row[1], "*") || matchinet(remoteipstr, row[1])) {
 			if (*row[0] == 'D') {
 				strerr_warn4("tcpserver: MySQL: Port ", localportstr, ": IPrule ", row[1], 0);
 				flagdeny = 1;
-				in_mysql_free_result(res);
+				in_mysql_free_result(myres);
 				return;
 			}
 			if (row[2]) {
@@ -1035,7 +1038,7 @@ done:
 			} /*- if (row[2]) */
 		}
 	}
-	in_mysql_free_result(res);
+	in_mysql_free_result(myres);
 }
 #endif /*- #ifdef HAS_MYSQL */
 
