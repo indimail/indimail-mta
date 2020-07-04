@@ -1,5 +1,8 @@
 /*
  * $Log: ip.c,v $
+ * Revision 1.11  2020-07-04 16:51:06+05:30  Cprogrammer
+ * removed extra inclusion of fmt.h
+ *
  * Revision 1.10  2016-04-10 13:27:49+05:30  Cprogrammer
  * fixed mapped ipv4 address in ip6_scan()
  *
@@ -28,7 +31,6 @@
  * added RCS log
  *
  */
-#include "fmt.h"
 #include "scan.h"
 #include "ip.h"
 #include "byte.h"
@@ -362,7 +364,7 @@ ip6_scanbracket(s, ip6)
 void
 getversion_ip_c()
 {
-	static char    *x = "$Id: ip.c,v 1.10 2016-04-10 13:27:49+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ip.c,v 1.11 2020-07-04 16:51:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
