@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.14  2020-07-04 16:35:45+05:30  Cprogrammer
+ * write pid as a string on the second line of .svlock
+ *
  * Revision 1.13  2020-05-11 10:58:12+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -349,7 +352,10 @@ get_lock(char *sdir)
 	pid = -1;
 	if ((fd = open(SVLOCK, O_CREAT|O_WRONLY|O_EXCL, 0644)) >= 0) {
 		pid = getpid();
-		if (write(fd, (char *) &pid, sizeof(pid_t)) == -1)
+		strnum[n = fmt_ulong(strnum, pid)] = 0;
+		if (write(fd, (char *) &pid, sizeof(pid_t)) == -1 || 
+				write(fd, "\n", 1) == -1 || write(fd, strnum, n) == -1 ||
+				write(fd, "\n", 1) == -1)
 			strerr_die2sys(111, FATAL, "unable to write pid to lock file: ");
 		close(fd);
 		return (0);
@@ -468,7 +474,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.13 2020-05-11 10:58:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.14 2020-07-04 16:35:45+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
