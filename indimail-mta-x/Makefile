@@ -525,7 +525,7 @@ dnsptr.o: \
 compile dnsptr.c strsalloc.h dns.h dnsdoe.h ip.h conf-spf
 	./compile `grep -h -v "^#" conf-spf` dnsptr.c
 
-dnstxt: load dnstxt.o dns_text.o
+dnstxt: load dnstxt.o dns_text.o dns.lib socket.lib
 	./load dnstxt dns_text.o `cat dns.lib socket.lib` \
 		-lcrypto -lqmail
 
@@ -1770,7 +1770,7 @@ get_uid.o auto_control.o auto_sysconfdir.o
 qmail-showctl.o: compile qmail-showctl.c control.h direntry.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
 auto_split.h spf.h variables.h auto_control.h indimail_stub.h \
-conf-srs conf-spf conf-batv
+hassrs.h conf-srs conf-spf conf-batv
 	./compile `grep -h -v "^#" conf-spf conf-batv` \
 	qmail-showctl.c
 
@@ -2205,7 +2205,7 @@ auto_control.o variables.o auto_qmail.o srs.lib
 	`cat srs.lib` -lqmail
 
 srsfilter.o: \
-compile srsfilter.c qmail.h srs.h
+compile srsfilter.c qmail.h srs.h hassrs.h
 	./compile srsfilter.c
 
 strsalloc.o: \
@@ -3733,7 +3733,7 @@ cidr: load cidr.o
 cidr.o: compile cidr.c
 	./compile cidr.c
 
-nowutc: load nowutc.o auto_qmail.o
+nowutc: load nowutc.o auto_qmail.o auto_sysconfdir.o
 	./load nowutc auto_sysconfdir.o -lqmail
 
 nowutc.o: compile nowutc.c auto_sysconfdir.h

@@ -854,7 +854,7 @@ alloc.h buffer.h error.h strerr.h sgetopt.h subgetopt.h pathexec.h \
 socket.h uint32.h ndelay.h tcpremoteinfo.h stralloc.h rules.h \
 stralloc.h sig.h dns.h stralloc.h iopause.h taia.h tai.h uint64.h \
 haveip6.h ip6.h conf-tls conf-ip haveip6.h conf-mysqlrules \
-conf-dlopen hasmysql.h mysql_config
+conf-dlopen hasmysql.h
 	./compile $(SSLINCS) $(mysql_inc) \
 	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen` \
 	tcpserver.c
@@ -864,7 +864,7 @@ mysql_config.o: compile mysql_config.c conf-mysqlrules
 mysql_config: load mysql_config.o
 	./load mysql_config
 
-load_mysql.o: compile load_mysql.c error.h stralloc.h env.h
+load_mysql.o: compile load_mysql.c error.h stralloc.h env.h hasmysql.h
 	./compile $(mysql_inc) `grep -h -v "^#" conf-mysqlrules` load_mysql.c
 
 control.o: \
