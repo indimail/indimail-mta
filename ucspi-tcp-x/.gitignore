@@ -41,3 +41,4 @@ tcpserver_plugin.o
 *.o
 *.a
 *.lib
+make-compile
