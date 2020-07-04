@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.8  2020-07-04 23:57:51+05:30  Cprogrammer
+# do silent rpm builds
+#
 # Revision 1.7  2020-07-01 21:35:03+05:30  Cprogrammer
 # added option to skip copying source files
 #
@@ -22,7 +25,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.7 2020-07-01 21:35:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.8 2020-07-04 23:57:51+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 libdkim_version=$(cat ../libdkim-x/conf-version)
@@ -244,7 +247,8 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	else
 		cp indimail-mta-x/indimail-mta.spec /tmp
 	fi
-	rpmbuild -ba --clean /tmp/indimail-mta.spec
+	echo "rpmbuild -ba --clean --quiet /tmp/indimail-mta.spec"
+	rpmbuild -ba --clean --quiet /tmp/indimail-mta.spec
 	/bin/rm -f /tmp/indimail-mta.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	for i in indimail-mta indimail-mini daemontools ucspi-tcp
