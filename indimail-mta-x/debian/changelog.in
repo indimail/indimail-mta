@@ -21,3 +21,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * use m4_normalize(m4_include([conf-version])) in AC_INIT
   * create_services - updated script
   * tcpopen.c: fixed SIGSEGV if a readonly string was used for host
+  * svscan: write pid as a string on the second line of .svlock
