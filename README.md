@@ -32,6 +32,37 @@ db-devel, libdb-devel, db4-devel on different systems, just to get Berkeley db i
 * For RPM based distribtions, locate your .spec file (e.g. indimail-mta.spec in indimail-mta/indimail-mta-x directory, libqmail/libqmail.spec). Open the RPM spec file and look for `BuildRequires`. This will tell you what you require for your distribution. If there is a specific version of development package required, you will find `%if %else` statements. Use dnf / yum / zypper to install your development package.
 * For debian based distribution, locate your debian subdirectory (e.g. indimail-mta/indimail-mtaa-x/debian, libqmail/debian). In this directory you will find files with `.dsc` extension. Look at the line having `Build-Depends`. Use `apt-get install package` to install the package. If your debian distribution has few libraries different than the default, you will find a `.dsc` filename with a name corresponding to your distribution. (e.g. indimail-mta-Debain_10.dsc)
 
+**Note**
+
+This is a rough list of packages required. If you want the exact packages, look BuildRequires in the spec file or Build-Depends in the debian/control or debian/\*.dsc files
+
+**RPM Based Distributions**
+Install the following packages using dnf/yum
+
+```
+Universal
+gcc gcc-c++ make autoconf automaake libtool pkgconfig
+sed findutils diffutils gzip binutils coreutils grep
+glibc glibc-devel procps openssl openssl-devel mysql-devel
+libqmail-devel libqmail
+
+opensuse - openldap2-devel instead of openldap-devel
+```
+
+**Debian Based Distributions**
+Install the following packages using apt
+
+```
+Universal
+cdbs, debhelper, gcc, g++, automake, autoconf, libtool libqmail-dev, libqmail,
+libldap2-dev, libssl-dev, mime-support, m4, gawk, openssl, procps, sed,
+findutils, diffutils, readline, gzip, binutils, coreutils, grep
+
+Debian 9, Debian 10 - default-libmysqlclient-dev
+Remaining - libmysqlclient-dev,
+Ubuntu 16.04 - libcom-err2, libmysqlclient-dev
+```
+
 ## Download / clone libqmail
 
 ```
