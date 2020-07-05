@@ -49,3 +49,7 @@ Release 2.11 Start 21/05/2020
 27. qmail-rm.c, qmail-send.c: replaced utime() with utimes()
 28. indimail-mta, ucspi-tcp Makefile: Fixed Makefile for parallel builds
 29. indimail-mta.spec: use smp_mflags macro for parallel builds
+05/07/2020
+30. indimail-mta.spec: use CC="%{__cc}" CFLAGS="%{build_cflags}"
+    LDFLAGS="%{build_ldflags}" macros to set compiler flags
+31. debian/rules: use dkpg buildflags to set compiler flags

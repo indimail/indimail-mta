@@ -28,3 +28,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * qmail-rm.c, qmail-send.c: replaced utime() with utimes()
   * indimail-mta, ucspi-tcp Makefile: Fixed Makefile for parallel builds
   * indimail-mta.spec: use smp_mflags macro for parallel builds
+  * indimail-mta.spec: use CC="%{__cc}" CFLAGS="%{build_cflags}" LDFLAGS="%{build_ldflags}" macros to set compiler flags
+  * debian/rules: use dkpg buildflags to set compiler flags
