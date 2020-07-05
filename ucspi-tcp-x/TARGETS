@@ -227,3 +227,5 @@ str_rchr.o
 tcdlmopen.o
 load_mysql.o
 make-compile
+make-load
+auto-ccld.sh

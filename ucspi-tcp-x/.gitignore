@@ -42,3 +42,5 @@ tcpserver_plugin.o
 *.a
 *.lib
 make-compile
+make-load
+auto-ccld.sh

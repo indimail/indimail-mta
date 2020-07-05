@@ -174,8 +174,21 @@ compile: warn-auto.sh conf-cc make-compile
 
 make-compile: \
 make-compile.sh
-	cp make-compile.sh make-compile
+	(cat warn-auto.sh make-compile.sh) > make-compile
 	chmod 755 make-compile
+
+make-load: \
+make-load.sh auto-ccld.sh
+	cat auto-ccld.sh make-load.sh > make-load
+	chmod 755 make-load
+
+auto-ccld.sh: conf-cc conf-ld warn-auto.sh
+	(cat warn-auto.sh; echo CC=\'`head -1 conf-cc`\'; \
+	if test $(SYSTEM) = Darwin ; then \
+		echo LD=\'`head -1 conf-ld | sed s{-s{{`\'; \
+	else \
+		echo LD=\'`head -1 conf-ld`\'; \
+	fi) > auto-ccld.sh
 
 date@: \
 warn-auto.sh date@.sh conf-home
@@ -394,16 +407,8 @@ compile ip4_scan.c scan.h ip4.h
 it: \
 prog setup instcheck tcpserver.1 shared
 
-load: warn-auto.sh conf-ld
-	( cat warn-auto.sh; \
-	echo 'main="$$1"; shift'; \
-	if test $(SYSTEM) = Darwin ; then \
-		echo exec "`head -1 conf-ld | sed s{-s{{`" \
-		'-o "$$main" "$$main".o $${1+"$$@"}'; \
-	else \
-		echo exec "`head -1 conf-ld`" \
-		'-o "$$main" "$$main".o $${1+"$$@"}'; \
-	fi) > load
+load: warn-auto.sh conf-ld systype make-load
+	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
 	chmod 755 load
 
 makelib: \
