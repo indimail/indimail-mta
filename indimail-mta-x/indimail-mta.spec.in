@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.242 2020-07-05 09:24:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.243 2020-07-05 14:14:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -452,7 +452,7 @@ if [ -d %{name}-%{version} ] ; then
     %{__cp} %{name}-%{version}/qlocal_upgrade.sh .
   fi
   if [ -n "%{debug_package}" ] ; then
-    echo %{__cc} -DINET6 -fPIC %{optflags} > %{name}-%{version}/conf-cc
+    echo %{__cc} -g -Wall -Wshadow -O2 -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > %{name}-%{version}/conf-cc
     echo %{__cc} -rdynamic > %{name}-%{version}/conf-ld
   fi
 fi
@@ -466,7 +466,7 @@ if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
     %{__rm} -f ucspi-tcp-%{ucspitcp_version}/conf-dlopen
   %endif
   if [ -n "%{debug_package}" ] ; then
-    echo %{__cc} -fPIC %{optflags} > ucspi-tcp-%{ucspitcp_version}/conf-cc
+    echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > ucspi-tcp-%{ucspitcp_version}/conf-cc
     echo %{__cc} -O2 > ucspi-tcp-%{ucspitcp_version}/conf-ld
   fi
 fi
@@ -488,6 +488,12 @@ fi
 if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
   ln -s ucspi-tcp-%{ucspitcp_version} ucspi-tcp-x
 fi
+if [ %{_verbose} -eq 0 ] ; then
+	silent_opt="-s"
+else
+	silent_opt=""
+fi
+
 for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} \
 %{name}-%{version} ucspi-tcp-%{ucspitcp_version}
 do
@@ -499,12 +505,12 @@ do
   fi
   if [ -d $i ] ; then
     cd $i
-    if [ %{_verbose} -eq 0 ] ; then
-      %{__make} -s %{?_smp_mflags}
-      %{__make} -s DESTDIR=%{buildroot} install-strip
+    if [ " $i" = " %{name}-%{version}" -o " $i" = " ucspi-tcp-%{ucspitcp_version}" ] ; then
+      %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="%{build_cflags}" LDFLAGS="%{build_ldflags}"
+      %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="%{build_cflags}" LDFLAGS="%{build_ldflags}" DESTDIR=%{buildroot} install-strip
     else
-      %{__make} %{?_smp_mflags}
-      %{__make} DESTDIR=%{buildroot} install-strip
+      %{__make} "$silent_opt" %{?_smp_mflags}
+      %{__make} "$silent_opt" %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
     fi
     cd ..
   else
