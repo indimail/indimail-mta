@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.241 2020-07-05 09:19:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.242 2020-07-05 09:24:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -129,7 +129,7 @@ Conflicts: indimail-mta < 2.0
 Conflicts: indimail < 2.5
 Obsoletes: indimail-mta < 2.0
 BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
-BuildRequires: sed findutils diffutils gzip binutils coreutils grep
+BuildRequires: sed findutils diffutils gzip coreutils grep
 BuildRequires: glibc glibc-devel
 BuildRequires: openssl openssl-devel mysql-devel libqmail-devel libqmail
 
@@ -286,7 +286,6 @@ Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
 Conflicts: indimail-mini < 2.0
 Requires: coreutils /bin/sh glibc openssl
-Requires: binutils
 
 %description -n indimail-mini
 This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
