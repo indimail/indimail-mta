@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.4  2020-07-05 10:58:04+05:30  Cprogrammer
+ * removed unused variable
+ *
  * Revision 1.3  2004-10-22 20:29:36+05:30  Cprogrammer
  * added RCS id
  *
@@ -12,8 +15,6 @@ void qmail_smtpd(int, char **, char **);
 int
 main(int argc, char **argv)
 {
-	int i;
-
 	qmail_smtpd(argc, argv, 0);
 	return(0);
 }
@@ -21,7 +22,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.3 2004-10-22 20:29:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.4 2020-07-05 10:58:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
