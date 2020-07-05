@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.240 2020-07-04 21:42:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.241 2020-07-05 09:19:27+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -128,12 +128,10 @@ Conflicts: ucspi-tcp
 Conflicts: indimail-mta < 2.0
 Conflicts: indimail < 2.5
 Obsoletes: indimail-mta < 2.0
-BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
-BuildRequires: glibc glibc-devel openssl procps readline-devel
-BuildRequires: sed ncurses-devel gettext-devel
-BuildRequires: flex findutils diffutils
-BuildRequires: readline gzip autoconf automake libtool pkgconfig
-BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
+BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
+BuildRequires: sed findutils diffutils gzip binutils coreutils grep
+BuildRequires: glibc glibc-devel
+BuildRequires: openssl openssl-devel mysql-devel libqmail-devel libqmail
 
 ##################################### OBS ####################################
 %if %build_on_obs == 1
@@ -163,16 +161,6 @@ PreReq: permissions
 %endif
 %endif
 
-%if 0%{?suse_version}
-BuildRequires: db-devel
-%else
-%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 7
-BuildRequires: libdb-devel
-%else
-BuildRequires: db4-devel
-%endif
-%endif
-
 # rpm -qf /bin/ls
 # rpm -qp --queryformat '%' {arch}\n some-file.rpm
 # rpm --showrc for all macros
@@ -183,7 +171,7 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl libqmail
-Requires: binutils diffutils sed findutils pkgconfig
+Requires: diffutils sed findutils pkgconfig
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 Requires: policycoreutils
