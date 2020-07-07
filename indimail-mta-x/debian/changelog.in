@@ -30,3 +30,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * indimail-mta.spec: use smp_mflags macro for parallel builds
   * indimail-mta.spec: use CC="%{__cc}" CFLAGS="%{build_cflags}" LDFLAGS="%{build_ldflags}" macros to set compiler flags
   * debian/rules: use dkpg buildflags to set compiler flags
+  * svctool: fixed typo with FIFODIR
+  * added CFLAGS="-O2 -Wall -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail"

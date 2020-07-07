@@ -4,7 +4,7 @@ Release 2.11 Start 21/05/2020
 01. added create_rpm script
 - 25/05/2020
 02. Permission cleanup - Removed restrictive permissions from hier.c,
-	indimail-mta.spec
+    indimail-mta.spec
 03. moved qmail-logfifo to indimail package
 04. create install/uninstall logs to /var/log
 05. moved logfifo, nssd.sock, nssd.pid to /run or /var/run
@@ -53,3 +53,8 @@ Release 2.11 Start 21/05/2020
 30. indimail-mta.spec: use CC="%{__cc}" CFLAGS="%{build_cflags}"
     LDFLAGS="%{build_ldflags}" macros to set compiler flags
 31. debian/rules: use dkpg buildflags to set compiler flags
+07/07/2020
+32. svctool: fixed typo with FIFODIR
+33. added CFLAGS=-O2 -Wall -Wimplicit -fPIC -fno-strict-aliasing -Wunused
+    -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align
+    -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail
