@@ -6188,7 +6188,7 @@ addrrelay()
  * openssl 1.1.0 port
  *
  * Revision 1.196  2017-05-15 19:21:50+05:30  Cprogrammer
- * fixed spurious error "no valid cert for gateway
+ * fixed spurious error "no valid cert for gateway"
  *
  * Revision 1.195  2017-05-08 13:52:14+05:30  Cprogrammer
  * check for tlsv1_1_server_method() and tlsv1_2_server_method()
