@@ -1,5 +1,8 @@
 /*
  * $Log: received.c,v $
+ * Revision 1.6  2020-07-08 09:15:22+05:30  Cprogrammer
+ * added square brackets in the list of safe characters
+ *
  * Revision 1.5  2004-10-22 20:29:55+05:30  Cprogrammer
  * added RCS id
  *
@@ -21,23 +24,9 @@ static int
 issafe(ch)
 	char            ch;
 {
-	if (ch == '.')
-		return 1;
-	if (ch == '@')
-		return 1;
-	if (ch == '%')
-		return 1;
-	if (ch == '+')
-		return 1;
-	if (ch == '/')
-		return 1;
-	if (ch == '=')
-		return 1;
-	if (ch == ':')
-		return 1;
-	if (ch == '-')
-		return 1;
-	if (ch == '_')
+	if (ch == '.' || ch == '@' || ch == '%' || ch == '+'
+			|| ch == '/' || ch == '=' || ch == ':' || ch == '-'
+			|| ch == '_' || ch == '[' || ch == ']' || ch == ' ')
 		return 1;
 	if ((ch >= 'a') && (ch <= 'z'))
 		return 1;
@@ -108,7 +97,7 @@ received(qqt, protocol, local, remoteip, remotehost, remoteinfo, helo)
 void
 getversion_received_c()
 {
-	static char    *x = "$Id: received.c,v 1.5 2004-10-22 20:29:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: received.c,v 1.6 2020-07-08 09:15:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

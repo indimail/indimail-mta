@@ -32,3 +32,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * debian/rules: use dkpg buildflags to set compiler flags
   * svctool: fixed typo with FIFODIR
   * added CFLAGS="-O2 -Wall -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail"
+  * received.c: added square brackets in the list of safe characters (taken from notqmail)
