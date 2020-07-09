@@ -168,7 +168,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	} else
 		serv[fmt_ulong(serv, port)] = 0;
 	if ((retval = getaddrinfo(hostptr, serv, &hints, &res0)))
-		strerr_die7x(111, "tcpopen", "getadrinfo: ", hostptr, ": ", serv, ":", (char *) gai_strerror(retval));
+		strerr_die7x(111, "tcpopen: ", "getaddrinfo: ", hostptr, ": ", serv, ":", (char *) gai_strerror(retval));
 	for (fd = -1, res = res0; res && fd == -1; res = res->ai_next) {
 		for (;;) {
 			if (port >= 0) {
