@@ -61,3 +61,5 @@ Release 2.11 Start 21/05/2020
 08/07/2020
 34. received.c: added square brackets in the list of safe characters
     (taken from notqmail)
+08/07/2020
+35. tcpopen.c: fixed typo on error message
