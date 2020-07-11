@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.15  2020-07-11 22:08:52+05:30  Cprogrammer
+ * removed STATUSFILE code
+ *
  * Revision 1.14  2020-07-04 16:35:45+05:30  Cprogrammer
  * write pid as a string on the second line of .svlock
  *
@@ -300,10 +303,6 @@ sighup(int i)
 static void
 sigterm(int i)
 {
-	char           *s;
-
-	if ((s = env_get("STATUSFILE")))
-		unlink(s);
 	unlink(SVLOCK);
 	signal(SIGTERM, SIG_IGN);
 	strerr_warn2(INFO, "Stopping svscan", 0);
@@ -437,7 +436,6 @@ int
 main(int argc, char **argv)
 {
 	unsigned long   wait;
-	int             fd;
 	char           *s;
 
 	if (argv[0] && argv[1]) {
@@ -454,11 +452,6 @@ main(int argc, char **argv)
 		wait = 5;
 	if (env_get("SCANLOG"))
 		open_svscan_log();
-	if ((s = env_get("STATUSFILE"))) {
-		if ((fd = open(s, O_CREAT, 0644)) == -1)
-			strerr_die4sys(111, FATAL, "unable to open ", s, ": ");
-		close(fd);
-	}
 	if ((s = env_get("INITCMD")))
 		init_cmd(s, env_get("WAIT_INITCMD") ? 1 : 0, 0);
 	for (;;) {
@@ -474,7 +467,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.14 2020-07-04 16:35:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.15 2020-07-11 22:08:52+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }

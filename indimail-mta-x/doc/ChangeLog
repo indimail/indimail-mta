@@ -50,8 +50,8 @@ Release 2.11 Start 21/05/2020
 28. indimail-mta, ucspi-tcp Makefile: Fixed Makefile for parallel builds
 29. indimail-mta.spec: use smp_mflags macro for parallel builds
 05/07/2020
-30. indimail-mta.spec: use CC="%{__cc}" CFLAGS="%{build_cflags}"
-    LDFLAGS="%{build_ldflags}" macros to set compiler flags
+30. indimail-mta.spec: use CC="%{__cc}" CFLAGS="%%{build_cflags}"
+    LDFLAGS="%%{build_ldflags}" macros to set compiler flags
 31. debian/rules: use dkpg buildflags to set compiler flags
 07/07/2020
 32. svctool: fixed typo with FIFODIR
@@ -61,5 +61,6 @@ Release 2.11 Start 21/05/2020
 08/07/2020
 34. received.c: added square brackets in the list of safe characters
     (taken from notqmail)
-08/07/2020
 35. tcpopen.c: fixed typo on error message
+11/07/2020
+35. Removed svscan STATUSFILE

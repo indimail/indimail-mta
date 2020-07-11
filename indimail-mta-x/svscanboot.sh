@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.19  2020-07-11 22:08:41+05:30  Cprogrammer
+# removed svscan STATUSFILE
+#
 # Revision 1.18  2017-09-01 14:24:20+05:30  Cprogrammer
 # skip envdir if .svscan/variables directory is missing
 #
@@ -6,7 +9,7 @@
 # removed RCS log.
 #
 #
-# $Id: svscanboot.sh,v 1.18 2017-09-01 14:24:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.19 2020-07-11 22:08:41+05:30 Cprogrammer Exp mbhangui $
 
 PATH=PREFIX/bin:/bin:/usr/local/bin:PREFIX/sbin:/sbin
 
@@ -92,12 +95,5 @@ else
 			fi
 		fi
 	done
-	if [ -d /var/lock/subsys ] ; then
-		STATUSFILE=/var/lock/subsys/svscan
-		touch $STATUSFILE
-	fi
 	wait
-	if [ -d /var/lock/subsys ] ; then
-		/bin/rm -f $STATUSFILE
-	fi
 fi
