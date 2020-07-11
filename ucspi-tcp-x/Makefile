@@ -208,7 +208,7 @@ dns_resolve.o dns_sortip.o dns_transmit.o dns_txt.o
 
 dns_dfd.o: \
 compile dns_dfd.c error.h alloc.h byte.h dns.h stralloc.h gen_alloc.h \
-iopause.h taia.h tai.h uint64.h taia.h
+iopause.h taia.h tai.h uint64.h
 	./compile dns_dfd.c
 
 dns_domain.o: \
@@ -218,17 +218,17 @@ gen_alloc.h iopause.h taia.h tai.h uint64.h haveip6.h
 
 dns_dtda.o: \
 compile dns_dtda.c stralloc.h gen_alloc.h dns.h stralloc.h iopause.h \
-taia.h tai.h uint64.h taia.h
+taia.h tai.h uint64.h
 	./compile dns_dtda.c
 
 dns_ip.o: \
 compile dns_ip.c stralloc.h gen_alloc.h uint16.h byte.h dns.h \
-stralloc.h iopause.h taia.h tai.h uint64.h taia.h conf-ip
+stralloc.h iopause.h taia.h tai.h uint64.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_ip.c
 
 dns_ipq.o: \
 compile dns_ipq.c stralloc.h gen_alloc.h case.h byte.h str.h dns.h \
-stralloc.h iopause.h taia.h tai.h uint64.h taia.h conf-ip
+stralloc.h iopause.h taia.h tai.h uint64.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_ipq.c
 
 dns_name.o: \
@@ -238,17 +238,17 @@ stralloc.h iopause.h taia.h tai.h uint64.h ip6.h haveip6.h conf-ip
 
 dns_nd.o: \
 compile dns_nd.c byte.h fmt.h dns.h stralloc.h gen_alloc.h iopause.h \
-taia.h tai.h uint64.h taia.h conf-ip
+taia.h tai.h uint64.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_nd.c
 
 dns_packet.o: \
 compile dns_packet.c error.h dns.h stralloc.h gen_alloc.h iopause.h \
-taia.h tai.h uint64.h taia.h
+taia.h tai.h uint64.h
 	./compile dns_packet.c
 
 dns_random.o: \
 compile dns_random.c dns.h stralloc.h gen_alloc.h iopause.h taia.h \
-tai.h uint64.h taia.h taia.h uint32.h
+tai.h uint64.h uint32.h
 	./compile dns_random.c
 
 dns_rcip.o: \
@@ -259,7 +259,7 @@ gen_alloc.h byte.h ip4.h ip6.h env.h dns.h iopause.h haveip6.h conf-ip
 dns_rcrw.o: \
 compile dns_rcrw.c taia.h tai.h env.h byte.h str.h \
 openreadclose.h stralloc.h gen_alloc.h dns.h stralloc.h iopause.h \
-haveip6.h
+haveip6.h uint64.h
 	./compile dns_rcrw.c
 
 dns_resolve.o: \
@@ -269,18 +269,18 @@ dns.h stralloc.h gen_alloc.h iopause.h ip6.h haveip6.h conf-ip
 
 dns_sortip.o: \
 compile dns_sortip.c byte.h dns.h stralloc.h gen_alloc.h iopause.h \
-taia.h tai.h uint64.h taia.h conf-ip
+taia.h tai.h uint64.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_sortip.c
 
 dns_transmit.o: \
 compile dns_transmit.c socket.h alloc.h error.h byte.h \
 uint16.h dns.h stralloc.h gen_alloc.h iopause.h taia.h \
-tai.h uint32.h uint64.h taia.h conf-ip haveip6.h
+tai.h uint32.h uint64.h conf-ip haveip6.h
 	./compile `grep -h -v "^#" conf-ip` dns_transmit.c
 
 dns_txt.o: \
 compile dns_txt.c stralloc.h gen_alloc.h uint16.h byte.h dns.h \
-stralloc.h iopause.h taia.h tai.h uint64.h taia.h
+stralloc.h iopause.h taia.h tai.h uint64.h
 	./compile dns_txt.c
 
 env.o: \
@@ -323,7 +323,7 @@ fmt_ulong.o: \
 compile fmt_ulong.c fmt.h
 	./compile fmt_ulong.c
 
-socket.h: haveip6.h
+socket.h: haveip6.h uint32.h
 
 getln.o: \
 compile getln.c byte.h getln.h buffer.h stralloc.h gen_alloc.h
@@ -389,7 +389,7 @@ choose compile trypoll.c iopause.h1 iopause.h2
 	./choose clr trypoll iopause.h1 iopause.h2 > iopause.h
 
 iopause.o: \
-compile iopause.c taia.h tai.h uint64.h select.h iopause.h taia.h
+compile iopause.c taia.h tai.h uint64.h select.h iopause.h
 	./compile iopause.c
 
 ip4_bit.o: \
@@ -525,14 +525,14 @@ rblsmtpd.o: \
 compile rblsmtpd.c byte.h str.h scan.h fmt.h env.h exit.h sig.h \
 buffer.h sgetopt.h subgetopt.h strerr.h stralloc.h \
 gen_alloc.h commands.h pathexec.h dns.h stralloc.h iopause.h taia.h \
-ip6.h tai.h uint64.h taia.h fd.h conf-ip
+ip6.h tai.h uint64.h fd.h conf-ip
 	./compile -DMAIN `grep -h -v "^#" conf-ip` rblsmtpd.c
 
 rbl.o: \
 compile rblsmtpd.c byte.h str.h scan.h fmt.h env.h exit.h sig.h \
 buffer.h sgetopt.h subgetopt.h strerr.h stralloc.h \
 gen_alloc.h commands.h pathexec.h dns.h stralloc.h iopause.h taia.h \
-ip6.h tai.h uint64.h taia.h fd.h conf-ip
+ip6.h tai.h uint64.h fd.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` rblsmtpd.c -o rbl.o
 
 readclose.o: \
@@ -793,7 +793,7 @@ compile tcpclient.c sig.h exit.h sgetopt.h subgetopt.h uint16.h fmt.h \
 scan.h str.h ip4.h uint16.h socket.h uint16.h fd.h stralloc.h \
 gen_alloc.h buffer.h error.h strerr.h pathexec.h timeoutconn.h \
 uint16.h tcpremoteinfo.h stralloc.h uint16.h dns.h stralloc.h iopause.h \
-taia.h tai.h uint64.h ip6.h byte.h taia.h conf-ip
+taia.h tai.h uint64.h ip6.h byte.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` tcpclient.c; \
 
 tcprules: \
