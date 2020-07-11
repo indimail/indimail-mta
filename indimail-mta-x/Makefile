@@ -3661,7 +3661,7 @@ trycrypt.c compile load
 	rm -f trycrypt.o trycrypt
 
 ldap.lib: \
-tryldap.c compile load
+tryldap.c compile load hasldap.h
 	( ( ./compile tryldap.c && \
 	./load tryldap -lldap ) >/dev/null 2>&1 \
 	&& echo -lldap || exit 0 ) > ldap.lib
@@ -3774,7 +3774,7 @@ compile whois.c tcpopen.h
 conf-release:
 	if test ! -f conf-release ; then \
 		echo "1.1" > conf-release; \
-	fi ;
+	fi
 
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config \
 conf-release conf-version ../libdkim-x/conf-version \

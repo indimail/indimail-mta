@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.244 2020-07-11 22:07:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.245 2020-07-12 00:36:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -506,8 +506,17 @@ do
   if [ -d $i ] ; then
     cd $i
     if [ " $i" = " %{name}-%{version}" -o " $i" = " ucspi-tcp-%{ucspitcp_version}" ] ; then
-      %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="%{build_cflags}" LDFLAGS="%{build_ldflags}"
-      %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="%{build_cflags}" LDFLAGS="%{build_ldflags}" DESTDIR=%{buildroot} install-strip
+#%{?set_build_flags}
+      %if %{?build_cflags:1}%{!?build_cflags:0}
+        CFLAGS="%{build_cflags}"
+      %else
+        CFLAGS="%{optflags}"
+      %endif
+      %if %{?build_ldflags:1}%{!?build_ldflags:0}
+        LDFLAGS="%{build_ldflags}"
+      %endif
+      %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+      %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install-strip
     else
       %{__make} "$silent_opt" %{?_smp_mflags}
       %{__make} "$silent_opt" %{?_smp_mflags} DESTDIR=%{buildroot} install-strip

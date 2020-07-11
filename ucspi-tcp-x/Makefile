@@ -794,7 +794,7 @@ scan.h str.h ip4.h uint16.h socket.h uint16.h fd.h stralloc.h \
 gen_alloc.h buffer.h error.h strerr.h pathexec.h timeoutconn.h \
 uint16.h tcpremoteinfo.h stralloc.h uint16.h dns.h stralloc.h iopause.h \
 taia.h tai.h uint64.h ip6.h byte.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` tcpclient.c; \
+	./compile `grep -h -v "^#" conf-ip` tcpclient.c
 
 tcprules: \
 load tcprules.o cdb.a unix.a byte.a
