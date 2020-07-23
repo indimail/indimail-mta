@@ -1,4 +1,7 @@
 #!/bin/sh
+if [ ! -f conf-release ] ; then
+	echo 1.1 > conf-release
+fi
 echo "/usr"                  > conf-prefix
 echo "/var/indimail"         > conf-qmail
 echo "/etc/indimail"         > conf-sysconfdir
