@@ -1,5 +1,8 @@
 /*
  * $Log: tcprules.c,v $
+ * Revision 1.6  2020-08-03 17:28:09+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.5  2009-11-12 15:04:58+05:30  Cprogrammer
  * fixed tcprules going into endless loop with lines not having allow and deny
  *

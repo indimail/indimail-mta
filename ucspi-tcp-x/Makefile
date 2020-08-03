@@ -314,15 +314,15 @@ compile prot.c hasshsgr.h prot.h
 
 rblsmtpd.so: \
 load rbl.o commands.o pathexec_rundl.o load_shared.o \
-dlnamespace.o dns.a socket.lib
+dlnamespace.o dns.a unix.a socket.lib
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
 	rbl.o commands.o pathexec_rundl.o load_shared.o \
-	tcdlmopen.o dlnamespace.o dns.a `cat socket.lib` -lqmail; \
+	tcdlmopen.o dlnamespace.o dns.a unix.a `cat socket.lib` -lqmail; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o rblsmtpd.so \
 	rbl.o commands.o pathexec_rundl.o load_shared.o \
-	dlnamespace.o tcdlmopen.o dns.a `cat socket.lib` -lqmail -ldl; \
+	dlnamespace.o tcdlmopen.o dns.a unix.a `cat socket.lib` -lqmail -ldl; \
 	fi
 
 rblsmtpd: \

@@ -1,5 +1,8 @@
 /*
  * $Log: env.c,v $
+ * Revision 1.2  2020-08-03 17:23:37+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.1  2003-10-21 11:21:08+05:30  Cprogrammer
  * Initial revision
  *

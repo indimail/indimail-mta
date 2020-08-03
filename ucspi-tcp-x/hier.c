@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.12  2020-08-03 17:23:42+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.11  2017-04-13 00:40:49+05:30  Cprogrammer
  * added README.ucspi-tcp
  *

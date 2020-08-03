@@ -1,5 +1,8 @@
 /*
  * $Log: dns_nd.c,v $
+ * Revision 1.3  2020-08-03 17:22:48+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.2  2005-06-10 12:09:56+05:30  Cprogrammer
  * added ipv6 support
  *

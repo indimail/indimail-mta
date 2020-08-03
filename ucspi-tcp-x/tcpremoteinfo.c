@@ -1,5 +1,8 @@
 /*
  * $Log: tcpremoteinfo.c,v $
+ * Revision 1.4  2020-08-03 17:27:53+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.3  2008-07-25 16:50:15+05:30  Cprogrammer
  * fix for darwin
  *

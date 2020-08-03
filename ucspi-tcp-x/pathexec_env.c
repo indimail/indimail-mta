@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_env.c,v $
+ * Revision 1.7  2020-08-03 17:25:21+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.6  2020-05-14 12:47:37+05:30  Cprogrammer
  * added comments on how environ variables are re-adjusted
  *

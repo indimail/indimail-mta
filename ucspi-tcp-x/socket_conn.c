@@ -1,5 +1,8 @@
 /*
  * $Log: socket_conn.c,v $
+ * Revision 1.7  2020-08-03 17:26:27+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.6  2020-06-08 22:48:42+05:30  Cprogrammer
  * quench compiler warning
  *

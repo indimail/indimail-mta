@@ -1,5 +1,8 @@
 /*
  * $Log: chkshsgr.c,v $
+ * Revision 1.3  2020-08-03 17:28:41+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.2  2007-06-10 10:12:16+05:30  Cprogrammer
  * datatype changed to gid_t
  *

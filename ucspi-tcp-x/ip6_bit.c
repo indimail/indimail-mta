@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_bit.c,v $
+ * Revision 1.4  2020-08-03 17:24:14+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.3  2020-04-30 18:01:01+05:30  Cprogrammer
  * changed scope of variable strnum to local
  *

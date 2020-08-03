@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.5  2020-08-03 17:23:52+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.4  2016-05-27 20:46:20+05:30  Cprogrammer
  * FHS compliant instcheck
  *

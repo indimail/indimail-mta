@@ -1,5 +1,8 @@
 /*
  * $Log: socket_bind.c,v $
+ * Revision 1.3  2020-08-03 17:26:17+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.2  2005-06-10 12:16:58+05:30  Cprogrammer
  * removed unneeded header files
  *

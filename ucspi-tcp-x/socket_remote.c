@@ -1,5 +1,8 @@
 /*
  * $Log: socket_remote.c,v $
+ * Revision 1.3  2020-08-03 17:26:57+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.2  2005-06-10 12:18:25+05:30  Cprogrammer
  * added ipv6 support
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.8  2020-08-03 17:21:41+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.7  2017-12-25 15:20:38+05:30  Cprogrammer
  * added rcsid
  *
@@ -34,7 +37,7 @@
 #include "pathexec.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dlnamespace.c,v 1.7 2017-12-25 15:20:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dlnamespace.c,v 1.8 2020-08-03 17:21:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc namespace = {0};

@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.19  2020-08-03 17:25:31+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.18  2020-06-08 22:48:38+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -81,7 +84,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.18 2020-06-08 22:48:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.19 2020-08-03 17:25:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void

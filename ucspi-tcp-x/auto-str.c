@@ -1,5 +1,8 @@
 /*
  * $Log: auto-str.c,v $
+ * Revision 1.4  2020-08-03 17:20:27+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.7  2020-06-17 16:58:35+05:30  Cprogrammer
  * make output readable
  *

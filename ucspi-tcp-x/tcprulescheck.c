@@ -1,5 +1,8 @@
 /*
  * $Log: tcprulescheck.c,v $
+ * Revision 1.4  2020-08-03 17:27:59+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.3  2009-05-29 15:02:57+05:30  Cprogrammer
  * unset env variables
  *

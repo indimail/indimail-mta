@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.10  2020-08-03 17:27:39+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.9  2017-03-30 23:00:07+05:30  Cprogrammer
  * prefix rbl with ip6_scan(), ip4_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
  *

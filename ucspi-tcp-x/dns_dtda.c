@@ -1,5 +1,8 @@
 /*
  * $Log: dns_dtda.c,v $
+ * Revision 1.2  2020-08-03 17:28:50+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
  * Initial revision
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: control.c,v $
+ * Revision 1.3  2020-08-03 17:21:35+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.2  2017-03-30 22:42:20+05:30  Cprogrammer
  * made control_readline() exactly duplicate of qmail-1.03 control_readline()
  *

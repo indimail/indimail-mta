@@ -1,5 +1,8 @@
 /*
  * $Log: tcdlmopen.c,v $
+ * Revision 1.2  2020-08-03 17:27:31+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.1  2017-12-25 15:19:19+05:30  Cprogrammer
  * Initial revision
  *
@@ -17,7 +20,7 @@
 #include <env.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcdlmopen.c,v 1.1 2017-12-25 15:19:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcdlmopen.c,v 1.2 2020-08-03 17:27:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HASDLMOPEN

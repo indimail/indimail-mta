@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_run.c,v $
+ * Revision 1.5  2020-08-03 17:25:25+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.4  2017-12-17 19:11:37+05:30  Cprogrammer
  * added documentation
  *

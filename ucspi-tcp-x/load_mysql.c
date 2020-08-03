@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.9  2020-08-03 17:24:48+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.8  2019-06-07 19:20:10+05:30  Cprogrammer
  * return success and set use_sql=0 if libmysqlclient is missing
  *
@@ -252,7 +255,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.8 2019-06-07 19:20:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.9 2020-08-03 17:24:48+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

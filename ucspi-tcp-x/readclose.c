@@ -1,5 +1,8 @@
 /*
  * $Log: readclose.c,v $
+ * Revision 1.3  2020-08-03 17:25:37+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.2  2008-07-17 23:04:08+05:30  Cprogrammer
  * removed readwrite.h
  *

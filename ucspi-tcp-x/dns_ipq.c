@@ -1,12 +1,15 @@
 /*
  * $Log: dns_ipq.c,v $
+ * Revision 1.3  2020-08-03 17:29:40+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.2  2005-06-10 12:09:01+05:30  Cprogrammer
  * added ipv6 support
  *
  * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
  * Initial revision
  *
-	 */
+ */
 #include <stralloc.h>
 #include <case.h>
 #include <byte.h>
@@ -34,8 +37,7 @@ doit(stralloc * work, char *rule)
 		return 1;
 	if (case_diffb(rule, colon, work->s + prefixlen))
 		return 1;
-	if (ch == '?')
-	{
+	if (ch == '?') {
 		if (byte_chr(work->s, prefixlen, '.') < prefixlen)
 			return 1;
 		if (byte_chr(work->s, prefixlen, ':') < prefixlen)
@@ -66,10 +68,8 @@ dns_ip4_qualify_rules(stralloc * out, stralloc * fqdn, stralloc * in, stralloc *
 
 	if (!stralloc_copy(fqdn, in))
 		return -1;
-	for (j = i = 0; j < rules->len; ++j)
-	{
-		if (!rules->s[j])
-		{
+	for (j = i = 0; j < rules->len; ++j) {
+		if (!rules->s[j]) {
 			if (!doit(fqdn, rules->s + i))
 				return -1;
 			i = j + 1;
@@ -84,8 +84,7 @@ dns_ip4_qualify_rules(stralloc * out, stralloc * fqdn, stralloc * in, stralloc *
 		return dns_ip4(out, fqdn);
 #endif
 	i = plus + 1;
-	for (;;)
-	{
+	for (;;) {
 		j = byte_chr(fqdn->s + i, fqdnlen - i, '+');
 		byte_copy(fqdn->s + plus, j, fqdn->s + i);
 		fqdn->len = plus + j;

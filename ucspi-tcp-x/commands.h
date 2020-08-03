@@ -1,5 +1,8 @@
 /*
  * $Log: commands.h,v $
+ * Revision 1.3  2020-08-03 17:21:15+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.2  2005-05-13 23:44:28+05:30  Cprogrammer
  * code indentation
  *

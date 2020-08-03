@@ -1,5 +1,8 @@
 /*
  * $Log: socket_send6.c,v $
+ * Revision 1.3  2020-08-03 17:27:03+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.2  2005-06-10 12:18:47+05:30  Cprogrammer
  * conditional ipv6 compilation
  *

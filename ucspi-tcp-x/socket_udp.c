@@ -1,5 +1,8 @@
 /*
  * $Log: socket_udp.c,v $
+ * Revision 1.3  2020-08-03 17:27:22+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.2  2005-06-10 12:19:17+05:30  Cprogrammer
  * added ipv6 support
  *

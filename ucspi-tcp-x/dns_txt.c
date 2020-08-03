@@ -1,5 +1,8 @@
 /*
  * $Log: dns_txt.c,v $
+ * Revision 1.5  2020-08-03 17:23:31+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.4  2020-04-30 22:06:11+05:30  Cprogrammer
  * use dns_resolve_tx from dns_resolve.c
  *

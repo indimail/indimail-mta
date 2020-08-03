@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_fmt.c,v $
+ * Revision 1.4  2020-08-03 17:24:33+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.3  2015-08-27 00:21:29+05:30  Cprogrammer
  * fixed ip6_fmt() function.
  *

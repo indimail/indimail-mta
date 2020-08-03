@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_scan.c,v $
+ * Revision 1.5  2020-08-03 17:24:44+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.4  2017-03-30 22:56:58+05:30  Cprogrammer
  * prefix rbl with ip6_scan(), ip4_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
  *

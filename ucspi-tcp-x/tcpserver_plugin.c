@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.12  2020-08-03 17:28:21+05:30  Cprogrammer
+ *  use qmail library
+ *
  *  Revision 1.11  2020-06-08 22:48:48+05:30  Cprogrammer
  *  quench compiler warning
  *
@@ -36,7 +39,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.11 2020-06-08 22:48:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.12 2020-08-03 17:28:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "

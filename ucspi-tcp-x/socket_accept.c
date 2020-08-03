@@ -1,5 +1,8 @@
 /*
  * $Log: socket_accept.c,v $
+ * Revision 1.4  2020-08-03 17:26:04+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.3  2008-07-25 16:49:38+05:30  Cprogrammer
  * remove compilation warning
  *
@@ -36,7 +39,7 @@ socket_accept4(int s, char ip[4], uint16 * port)
 void
 getversion_socket_accept4_c()
 {
-	static char    *x = "$Id: socket_accept.c,v 1.3 2008-07-25 16:49:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: socket_accept.c,v 1.4 2020-08-03 17:26:04+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 	return;
 }

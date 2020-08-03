@@ -1,5 +1,8 @@
 /*
  * $Log: socket_recv6.c,v $
+ * Revision 1.4  2020-08-03 17:26:52+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.3  2010-04-06 08:59:54+05:30  Cprogrammer
  * minor change
  *

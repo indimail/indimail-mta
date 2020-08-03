@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_compactaddr.c,v $
+ * Revision 1.3  2020-08-03 17:24:22+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.2  2020-07-04 22:01:45+05:30  Cprogrammer
  * fixed global variable V4mappedprefix shadowed by local variable
  *

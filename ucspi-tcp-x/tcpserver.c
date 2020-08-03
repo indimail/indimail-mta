@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.65  2020-08-03 17:28:15+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.64  2020-07-04 22:03:00+05:30  Cprogrammer
  * fixed global variables overshadowd by local variables
  *
@@ -215,7 +218,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.64 2020-07-04 22:03:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.65 2020-08-03 17:28:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6

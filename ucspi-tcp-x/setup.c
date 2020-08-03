@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.9  2020-08-03 17:25:55+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.8  2019-07-13 10:19:55+05:30  Cprogrammer
  * removed dummy bsd style install output
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: dns_transmit.c,v $
+ * Revision 1.5  2020-08-03 17:23:27+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.4  2008-07-17 23:03:10+05:30  Cprogrammer
  * use unistd.h instead of readwrite.h
  *

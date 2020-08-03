@@ -1,5 +1,8 @@
 /*
  * $Log: rules.c,v $
+ * Revision 1.6  2020-08-03 17:25:50+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.5  2016-01-08 17:57:16+05:30  Cprogrammer
  * fix bug with tcprules when compact ipv6 notation was given in tcp.smtp
  *

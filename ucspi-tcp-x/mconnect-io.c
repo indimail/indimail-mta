@@ -1,5 +1,8 @@
 /*
  * $Log: mconnect-io.c,v $
+ * Revision 1.5  2020-08-03 17:25:11+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
  * Revision 1.4  2008-07-25 16:49:26+05:30  Cprogrammer
  * fix for darwin
  *

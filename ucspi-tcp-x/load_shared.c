@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.14  2020-08-03 17:24:54+05:30  Cprogrammer
+ * use qmail library
+ *
  * Revision 1.13  2020-06-08 22:48:20+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -62,7 +65,7 @@
 #define FATAL "tcpserver: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_shared.c,v 1.13 2020-06-08 22:48:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_shared.c,v 1.14 2020-08-03 17:24:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HASDLMOPEN
