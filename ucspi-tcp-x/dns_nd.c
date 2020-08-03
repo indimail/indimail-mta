@@ -7,8 +7,8 @@
  * Initial revision
  *
  */
-#include "byte.h"
-#include "fmt.h"
+#include <byte.h>
+#include <fmt.h>
 #include "dns.h"
 #ifdef IPV6
 /*
@@ -17,12 +17,6 @@
  * * ->
  * *   b.a.9.8.7.6.5.0.4.0.0.0.3.0.0.0.2.0.0.0.1.0.0.0.0.0.0.0.1.2.3.4.IP6.INT.
  */
-
-static inline char
-tohex(char c)
-{
-	return c >= 10 ? c - 10 + 'a' : c + '0';
-}
 
 int
 dns_name6_domain(char name[DNS_NAME6_DOMAIN], char ip[16])

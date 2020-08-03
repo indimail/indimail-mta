@@ -17,6 +17,6 @@ struct commands
 	void            (*flush) (void);
 };
 
-int             commands(buffer *, struct commands *);
+int             commands(substdio *, struct commands *);
 
 #endif

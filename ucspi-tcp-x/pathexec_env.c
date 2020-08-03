@@ -19,11 +19,11 @@
  * Initial revision
  *
  */
-#include "stralloc.h"
-#include "alloc.h"
-#include "str.h"
-#include "byte.h"
-#include "env.h"
+#include <stralloc.h>
+#include <alloc.h>
+#include <str.h>
+#include <byte.h>
+#include <env.h>
 #include "pathexec.h"
 
 static stralloc plus;

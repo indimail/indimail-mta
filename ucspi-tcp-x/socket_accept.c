@@ -15,7 +15,7 @@
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "byte.h"
+#include <byte.h>
 #include "socket.h"
 
 int

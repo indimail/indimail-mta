@@ -14,7 +14,7 @@
 #ifdef HASDLMOPEN
 #include "dlnamespace.h"
 #endif
-#include "env.h"
+#include <env.h>
 
 #ifndef	lint
 static char     sccsid[] = "$Id: tcdlmopen.c,v 1.1 2017-12-25 15:19:19+05:30 Cprogrammer Exp mbhangui $";

@@ -4,6 +4,8 @@
  * Initial revision
  *
  */
+#include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 
 void
@@ -12,6 +14,7 @@ nope()
 	exit(1);
 }
 
+int
 main()
 {
 	unsigned long   x[4];
@@ -32,10 +35,8 @@ main()
 		return 0;
 	asm volatile    (".byte 15;.byte 162":"=a" (y[0]), "=b"(y[1]), "=c"(y[2]), "=d"(y[3]):"0"(1));
 
-	for (i = 1; i < 4; ++i)
-	{
-		for (j = 0; j < 4; ++j)
-		{
+	for (i = 1; i < 4; ++i) {
+		for (j = 0; j < 4; ++j) {
 			c = x[i] >> (8 * j);
 			if (c < 32)
 				c = 32;

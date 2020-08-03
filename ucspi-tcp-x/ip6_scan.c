@@ -14,7 +14,7 @@
  *
  */
 #ifdef IPV6
-#include "scan.h"
+#include <scan.h>
 #include "ip4.h"
 #include "ip6.h"
 
@@ -37,8 +37,7 @@ rblip6_scan(char *s, char ip[16])
 	int             prefixlen = 0;
 	int             suffixlen = 0;
 
-	if ((i = rblip4_scan((char *) s, ip + 12)))
-	{
+	if ((i = rblip4_scan((char *) s, ip + 12))) {
 		unsigned char *c = V4mappedprefix;
 		if (byte_equal((char *) ip + 12, 4, (char *) V6any))
 			c = V6any;
@@ -48,10 +47,8 @@ rblip6_scan(char *s, char ip[16])
 	}
 	for (i = 0; i < 16; i++)
 		ip[i] = 0;
-	for (;;)
-	{
-		if (*s == ':')
-		{
+	for (;;) {
+		if (*s == ':') {
 			len++;
 			if (s[1] == ':') {	/*- Found "::", skip to part 2 */
 				s += 2;
@@ -76,10 +73,8 @@ rblip6_scan(char *s, char ip[16])
 			return len;
 	}
 	/*- part 2, after "::" */
-	for (;;)
-	{
-		if (*s == ':')
-		{
+	for (;;) {
+		if (*s == ':') {
 			if (suffixlen == 0)
 				break;
 			s++;
@@ -87,16 +82,13 @@ rblip6_scan(char *s, char ip[16])
 		} else
 		if (suffixlen != 0)
 			break;
-		if (!(i = scan_xlong((char *) s, &u)))
-		{
+		if (!(i = scan_xlong((char *) s, &u))) {
 			len--;
 			break;
 		}
-		if (suffixlen + prefixlen <= 12 && s[i] == '.')
-		{
+		if (suffixlen + prefixlen <= 12 && s[i] == '.') {
 			int             j = rblip4_scan((char *) s, suffix + suffixlen);
-			if (j)
-			{
+			if (j) {
 				suffixlen += 4;
 				len += j;
 				break;

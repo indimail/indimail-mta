@@ -7,7 +7,6 @@
  * Initial revision
  *
  */
-#include "exit.h"
 #include <sys/types.h>
 #include <unistd.h>
 #include <grp.h>

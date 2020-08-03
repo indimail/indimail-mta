@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
-#include "uint32.h"
+#include <uint32.h>
 #include "socket.h"
 
 static char     ifname[IFNAMSIZ];

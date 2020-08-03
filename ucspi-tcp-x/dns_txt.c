@@ -13,9 +13,9 @@
  * Initial revision
  *
  */
-#include "stralloc.h"
-#include "uint16.h"
-#include "byte.h"
+#include <stralloc.h>
+#include <uint16.h>
+#include <byte.h>
 #include "dns.h"
 
 int

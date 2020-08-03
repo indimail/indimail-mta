@@ -10,47 +10,47 @@
  * Initial revision
  *
  */
-#include "byte.h"
-#include "buffer.h"
-#include "strerr.h"
-#include "env.h"
-#include "rules.h"
-#include "open.h"
+#include <byte.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <env.h>
+#include <open.h>
 #include <unistd.h>
+#include "rules.h"
 
 void
 found(char *data, unsigned int datalen)
 {
 	unsigned int    next0;
 
-	buffer_puts(buffer_1, "rule ");
-	buffer_put(buffer_1, rules_name.s, rules_name.len);
-	buffer_puts(buffer_1, ":\n");
-	while ((next0 = byte_chr(data, datalen, 0)) < datalen)
-	{
+	substdio_puts(subfdout, "rule ");
+	substdio_put(subfdout, rules_name.s, rules_name.len);
+	substdio_puts(subfdout, ":\n");
+	while ((next0 = byte_chr(data, datalen, 0)) < datalen) {
 		switch (data[0])
 		{
 		case 'D':
-			buffer_puts(buffer_1, "deny connection\n");
-			buffer_flush(buffer_1);
+			substdio_puts(subfdout, "deny connection\n");
+			substdio_flush(subfdout);
 			_exit(0);
 		case '+':
-			buffer_puts(buffer_1, "set environment variable ");
-			buffer_puts(buffer_1, data + 1);
-			buffer_puts(buffer_1, "\n");
+			substdio_puts(subfdout, "set environment variable ");
+			substdio_puts(subfdout, data + 1);
+			substdio_puts(subfdout, "\n");
 			break;
 		case '-':
-			buffer_puts(buffer_1, "unset environment variable ");
-			buffer_puts(buffer_1, data + 1);
-			buffer_puts(buffer_1, "\n");
+			substdio_puts(subfdout, "unset environment variable ");
+			substdio_puts(subfdout, data + 1);
+			substdio_puts(subfdout, "\n");
 			break;
 		}
 		++next0;
 		data += next0;
 		datalen -= next0;
 	}
-	buffer_puts(buffer_1, "allow connection\n");
-	buffer_flush(buffer_1);
+	substdio_puts(subfdout, "allow connection\n");
+	substdio_flush(subfdout);
 	_exit(0);
 }
 
@@ -77,6 +77,6 @@ main(int argc, char **argv)
 	if ((fd == -1) || (rules(found, fd, ip, host, info) == -1))
 		strerr_die3sys(111, "tcprulescheck: fatal: unable to read ", fnrules, ": ");
 
-	buffer_putsflush(buffer_1, "default:\nallow connection\n");
+	substdio_putsflush(subfdout, "default:\nallow connection\n");
 	_exit(0);
 }

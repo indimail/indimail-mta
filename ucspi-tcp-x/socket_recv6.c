@@ -15,7 +15,7 @@
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "byte.h"
+#include <byte.h>
 #include "socket.h"
 #include "ip6.h"
 
@@ -32,14 +32,13 @@ socket_recv6(int s, char *buf, unsigned int len, char ip[16], uint16 *port, uint
 	unsigned int    dummy = sizeof sa;
 	int             r;
 
-	byte_zero(&sa, dummy);
+	byte_zero((char *) &sa, dummy);
 	if (-1 == (r = recvfrom(s, buf, len, 0, (struct sockaddr *) &sa, &dummy)))
 		return -1;
 #ifdef LIBC_HAS_IP6
-	if (noipv6)
-	{
+	if (noipv6) {
 		struct sockaddr_in *sa4 = (struct sockaddr_in *) &sa;
-		byte_copy(ip, 12, V4mappedprefix);
+		byte_copy(ip, 12, (char *) V4mappedprefix);
 		byte_copy(ip + 12, 4, (char *) &sa4->sin_addr);
 		uint16_unpack_big((char *) &sa4->sin_port, port);
 		return r;

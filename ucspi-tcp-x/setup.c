@@ -30,15 +30,15 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
-#include "buffer.h"
-#include "fmt.h"
-#include "stralloc.h"
-#include "str.h"
-#include "strerr.h"
-#include "error.h"
-#include "open.h"
-#include "exit.h"
-#include "sgetopt.h"
+#include <substdio.h>
+#include <subfd.h>
+#include <fmt.h>
+#include <stralloc.h>
+#include <str.h>
+#include <strerr.h>
+#include <error.h>
+#include <open.h>
+#include <sgetopt.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -72,30 +72,30 @@ dd(uid, gid, mode, home, subdir)
 	int             d, i, count;
 	static char     strnum[FMT_ULONG];
 
-	buffer_puts(buffer_1, "makedir -mode ");
+	substdio_puts(subfdout, "makedir -mode ");
 	d = mode;
 	for(count = i = 0;d != 0 && i < 3;++i) {
 		a[i] = d % 8;
 		d /= 8;
 		count += 1;
 	}
-	buffer_puts(buffer_1, "0");
+	substdio_puts(subfdout, "0");
 	for(i = count - 1;i >= 0;--i) {
 		strnum[fmt_ulong(strnum, a[i])] = 0;
-		buffer_puts(buffer_1, strnum);
+		substdio_puts(subfdout, strnum);
 	}
-	buffer_puts(buffer_1, " -user ");
-	buffer_puts(buffer_1, mailuser);
-	buffer_puts(buffer_1, " -group ");
-	buffer_puts(buffer_1, mailgroup);
-	buffer_puts(buffer_1, " ");
-	buffer_puts(buffer_1, home);
+	substdio_puts(subfdout, " -user ");
+	substdio_puts(subfdout, mailuser);
+	substdio_puts(subfdout, " -group ");
+	substdio_puts(subfdout, mailgroup);
+	substdio_puts(subfdout, " ");
+	substdio_puts(subfdout, home);
 	if (subdir) {
-		buffer_puts(buffer_1, "/");
-		buffer_puts(buffer_1, subdir);
+		substdio_puts(subfdout, "/");
+		substdio_puts(subfdout, subdir);
 	}
-	buffer_puts(buffer_1, "\n");
-	buffer_flush(buffer_1);
+	substdio_puts(subfdout, "\n");
+	substdio_flush(subfdout);
 }
 
 void
@@ -104,14 +104,14 @@ dl(home, subdir, target)
 	char           *subdir;
 	char           *target;
 {
-	buffer_puts(buffer_1, "makesymlink -target ");
-	buffer_puts(buffer_1, target);
-	buffer_puts(buffer_1, " link ");
-	buffer_puts(buffer_1, home);
-	buffer_puts(buffer_1, "/");
-	buffer_puts(buffer_1, subdir);
-	buffer_puts(buffer_1, "\n");
-	buffer_flush(buffer_1);
+	substdio_puts(subfdout, "makesymlink -target ");
+	substdio_puts(subfdout, target);
+	substdio_puts(subfdout, " link ");
+	substdio_puts(subfdout, home);
+	substdio_puts(subfdout, "/");
+	substdio_puts(subfdout, subdir);
+	substdio_puts(subfdout, "\n");
+	substdio_flush(subfdout);
 }
 
 void
@@ -128,35 +128,34 @@ df(uid, gid, mode, file, home, subdir, strip)
 	int             d, i, count;
 	static char     strnum[FMT_ULONG];
 
-	buffer_puts(buffer_1, "install -user ");
-	buffer_puts(buffer_1, mailuser);
-	buffer_puts(buffer_1, " -group ");
-	buffer_puts(buffer_1, mailgroup);
-	buffer_puts(buffer_1, " -mode ");
+	substdio_puts(subfdout, "install -user ");
+	substdio_puts(subfdout, mailuser);
+	substdio_puts(subfdout, " -group ");
+	substdio_puts(subfdout, mailgroup);
+	substdio_puts(subfdout, " -mode ");
 	d = mode;
 	for(count = i = 0;d != 0 && i < 3;++i) {
 		a[i] = d % 8;
 		d /= 8;
 		count += 1;
 	}
-	buffer_puts(buffer_1, "0");
-	for(i = count - 1;i >= 0;--i)
-	{
+	substdio_puts(subfdout, "0");
+	for(i = count - 1;i >= 0;--i) {
 		strnum[fmt_ulong(strnum, a[i])] = 0;
-		buffer_puts(buffer_1, strnum);
+		substdio_puts(subfdout, strnum);
 	}
-	buffer_puts(buffer_1, " -source ");
-	buffer_puts(buffer_1, file);
+	substdio_puts(subfdout, " -source ");
+	substdio_puts(subfdout, file);
 	if (strip)
-		buffer_puts(buffer_1, " -strip ");
-	buffer_puts(buffer_1, " -dest ");
-	buffer_puts(buffer_1, home);
-	buffer_puts(buffer_1, "/");
-	buffer_puts(buffer_1, subdir);
-	buffer_puts(buffer_1, "/");
-	buffer_puts(buffer_1, file);
-	buffer_puts(buffer_1, "\n");
-	buffer_flush(buffer_1);
+		substdio_puts(subfdout, " -strip ");
+	substdio_puts(subfdout, " -dest ");
+	substdio_puts(subfdout, home);
+	substdio_puts(subfdout, "/");
+	substdio_puts(subfdout, subdir);
+	substdio_puts(subfdout, "/");
+	substdio_puts(subfdout, file);
+	substdio_puts(subfdout, "\n");
+	substdio_flush(subfdout);
 }
 
 int
@@ -272,10 +271,10 @@ d(home, subdir, uid, gid, mode)
 	dd(uid, gid, mode, dird.s, subdir);
 }
 
-char            inbuf[BUFFER_INSIZE];
-char            outbuf[BUFFER_OUTSIZE];
-buffer          ssin;
-buffer          ssout;
+char            inbuf[SUBSTDIO_INSIZE];
+char            outbuf[SUBSTDIO_OUTSIZE];
+substdio        ssin;
+substdio        ssout;
 
 void
 c(home, subdir, file, uid, gid, mode)
@@ -296,7 +295,7 @@ c(home, subdir, file, uid, gid, mode)
 		strerr_die2sys(111, FATAL, "unable to switch back to source directory: ");
 	if((fdin = open_read(file)) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", file, ": ");
-	buffer_init(&ssin, read, fdin, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ssin, read, fdin, inbuf, sizeof inbuf);
 
 	if (destdir) {
 		if (!stralloc_copys(&tmpdir, destdir))
@@ -317,8 +316,7 @@ c(home, subdir, file, uid, gid, mode)
 		if (destdir) {
 			if (!stralloc_copys(&tmpdir, destdir))
 				strerr_die2sys(111, FATAL, "out of memory: ");
-			for (i = 28;;)
-			{
+			for (i = 28;;) {
 				if (!stralloc_ready(&dird, i + 1))
 					strerr_die2sys(111, FATAL, "out of memory: ");
 				if ((j = readlink(subdir, dird.s, i)) == i) {
@@ -349,8 +347,8 @@ c(home, subdir, file, uid, gid, mode)
 		strerr_die6sys(111, FATAL, "unable to switch to ", tmpdir.s, "/", subdir, ": ");
 	if((fdout = open_trunc(file)) == -1)
 		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");
-	buffer_init(&ssout, write, fdout, outbuf, sizeof outbuf);
-	switch (buffer_copy(&ssout, &ssin))
+	substdio_fdbuf(&ssout, write, fdout, outbuf, sizeof outbuf);
+	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2:
 		strerr_die4sys(111, FATAL, "unable to read ", file, ": ");
@@ -358,7 +356,7 @@ c(home, subdir, file, uid, gid, mode)
 		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");
 	}
 	close(fdin);
-	if (buffer_flush(&ssout) == -1)
+	if (substdio_flush(&ssout) == -1)
 		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");
 	if (fsync(fdout) == -1)
 		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");

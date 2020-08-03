@@ -56,27 +56,26 @@
  *
  */
 #include <unistd.h>
-#include "byte.h"
-#include "str.h"
-#include "scan.h"
-#include "fmt.h"
-#include "env.h"
-#include "exit.h"
-#include "sig.h"
-#include "buffer.h"
+#include <byte.h>
+#include <str.h>
+#include <scan.h>
+#include <fmt.h>
+#include <env.h>
+#include <sig.h>
+#include <substdio.h>
+#include <subfd.h>
 #ifdef DARWIN
 #define opteof -1
 #else
-#include "sgetopt.h"
+#include <sgetopt.h>
 #endif
-#include "strerr.h"
-#include "stralloc.h"
+#include <strerr.h>
+#include <stralloc.h>
 #include "commands.h"
 #include "pathexec.h"
 #include "dns.h"
 #ifdef IPV6
 #include "ip6.h"
-#include "hexconversion.h"
 #endif
 
 #define FATAL "rblsmtpd: fatal: "
@@ -108,19 +107,19 @@ static stralloc ip_reverse;
 void
 rbl_out(int should_flush, char *arg)
 {
-	buffer_puts(buffer_2, "rblsmtpd: ");
-	buffer_puts(buffer_2, " pid ");
+	substdio_puts(subfderr, "rblsmtpd: ");
+	substdio_puts(subfderr, " pid ");
 	if (*pid_str == '?')
 		pid_str[fmt_ulong(pid_str, getpid())] = 0;
-	buffer_puts(buffer_2, pid_str);
-	buffer_puts(buffer_2, " from ");
-	buffer_puts(buffer_2, ip_env);
+	substdio_puts(subfderr, pid_str);
+	substdio_puts(subfderr, " from ");
+	substdio_puts(subfderr, ip_env);
 	if (arg && *arg) {
-		buffer_puts(buffer_2, ": ");
-		buffer_puts(buffer_2, arg);
+		substdio_puts(subfderr, ": ");
+		substdio_puts(subfderr, arg);
 	}
 	if (should_flush)
-		buffer_flush(buffer_2);
+		substdio_flush(subfderr);
 }
 
 #ifdef IPV6
@@ -148,7 +147,7 @@ ip_init(void)
 		nomem();
 #ifdef IPV6
 	if (str_diff(tcp_proto, "TCP6") == 0) {
-		if (byte_equal(ip_env, 7, V4MAPPREFIX))
+		if (byte_equal(ip_env, 7, (char *) V4MAPPREFIX))
 			ip_env = ip_env + 7;
 		else
 			flagip6 = 1;
@@ -309,9 +308,9 @@ char            strnum[FMT_ULONG];
 static stralloc message;
 
 char            inspace[64];
-buffer          in = BUFFER_INIT(read, 0, inspace, sizeof inspace);
+substdio        in = SUBSTDIO_FDBUF(read, 0, inspace, sizeof inspace);
 char            outspace[1];
-buffer          out = BUFFER_INIT(write, 1, outspace, sizeof outspace);
+substdio        out = SUBSTDIO_FDBUF(write, 1, outspace, sizeof outspace);
 
 void
 delay(unsigned long delay)
@@ -327,11 +326,11 @@ delay(unsigned long delay)
 	if (!stralloc_copys(&info, "greetdelay: "))
 		nomem();
 	rbl_out(0, 0);
-	buffer_puts(buffer_2, ": ");
-	buffer_put(buffer_2, info.s, info.len);
-	buffer_put(buffer_2, strnum, fmt_ulong(strnum,delay));
-	buffer_puts(buffer_2, "\n");
-	buffer_flush(buffer_2);
+	substdio_puts(subfderr, ": ");
+	substdio_put(subfderr, info.s, info.len);
+	substdio_put(subfderr, strnum, fmt_ulong(strnum,delay));
+	substdio_puts(subfderr, "\n");
+	substdio_flush(subfderr);
 	if (!stralloc_cats(&info, "\r\n"))
 		nomem();
 	if (delay)
@@ -341,19 +340,19 @@ delay(unsigned long delay)
 void
 reject()
 {
-	buffer_putflush(&out, message.s, message.len);
+	substdio_putflush(&out, message.s, message.len);
 }
 
 void
 accept()
 {
-	buffer_putsflush(&out, "250 rblsmtpd.indimail\r\n");
+	substdio_putsflush(&out, "250 rblsmtpd.indimail\r\n");
 }
 
 void
 verify()
 {
-	buffer_putsflush(&out, "252 rblsmtpd.indimail\r\n");
+	substdio_putsflush(&out, "252 rblsmtpd.indimail\r\n");
 }
 
 static int
@@ -432,13 +431,13 @@ rblsmtp_mail(char *arg)
 {
 	rbl_out(1, 0);
 	if (!addrparse(arg))
-		buffer_puts(buffer_2, ": MAIL with too long address\n");
+		substdio_puts(subfderr, ": MAIL with too long address\n");
 	else {
-		buffer_puts(buffer_2, ": Sender <");
-		buffer_puts(buffer_2, addr.s);
-		buffer_puts(buffer_2, ">\n");
+		substdio_puts(subfderr, ": Sender <");
+		substdio_puts(subfderr, addr.s);
+		substdio_puts(subfderr, ">\n");
 	}
-	buffer_flush(buffer_2);
+	substdio_flush(subfderr);
 	accept();
 }
 
@@ -447,26 +446,26 @@ rblsmtp_rcpt(char *arg)
 {
 	rbl_out(1, 0);
 	if (!addrparse(arg))
-		buffer_puts(buffer_2, ": RCPT with too long address\n");
+		substdio_puts(subfderr, ": RCPT with too long address\n");
 	else {
-		buffer_puts(buffer_2, ": Recipient <");
-		buffer_puts(buffer_2, addr.s);
-		buffer_puts(buffer_2, ">\n");
+		substdio_puts(subfderr, ": Recipient <");
+		substdio_puts(subfderr, addr.s);
+		substdio_puts(subfderr, ">\n");
 	}
-	buffer_flush(buffer_2);
+	substdio_flush(subfderr);
 	reject();
 }
 
 void
 greet()
 {
-	buffer_putsflush(&out, "220 rblsmtpd.indimail\r\n");
+	substdio_putsflush(&out, "220 rblsmtpd.indimail\r\n");
 }
 
 void
 quit()
 {
-	buffer_putsflush(&out, "221 rblsmtpd.indimail\r\n");
+	substdio_putsflush(&out, "221 rblsmtpd.indimail\r\n");
 	_exit(0);
 }
 
@@ -507,10 +506,10 @@ rblsmtpd_f(void)
 		if ((message.s[i] < 32) || (message.s[i] > 126))
 			message.s[i] = '?';
 	rbl_out(0, 0);
-	buffer_puts(buffer_2, ": ");
-	buffer_put(buffer_2, message.s, message.len);
-	buffer_puts(buffer_2, "\n");
-	buffer_flush(buffer_2);
+	substdio_puts(subfderr, ": ");
+	substdio_put(subfderr, message.s, message.len);
+	substdio_puts(subfderr, "\n");
+	substdio_flush(subfderr);
 	if (!stralloc_cats(&message, "\r\n"))
 		nomem();
 	if (!timeout)
@@ -569,10 +568,10 @@ rblsmtpd(int argc, char **argv, char **envp)
 				altreply += i;
 		}
 #if 0
-		buffer_puts(buffer_2, "RBLSMTPD=");
-		buffer_put(buffer_2, text.s, text.len);
-		buffer_puts(buffer_2, "\n");
-		buffer_flush(buffer_2);
+		substdio_puts(subfderr, "RBLSMTPD=");
+		substdio_put(subfderr, text.s, text.len);
+		substdio_puts(subfderr, "\n");
+		substdio_flush(subfderr);
 #endif
 	}
 	environ = e;

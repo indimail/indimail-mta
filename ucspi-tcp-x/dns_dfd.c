@@ -4,9 +4,9 @@
  * Initial revision
  *
  */
-#include "error.h"
-#include "alloc.h"
-#include "byte.h"
+#include <error.h>
+#include <alloc.h>
+#include <byte.h>
 #include "dns.h"
 
 int
@@ -21,16 +21,13 @@ dns_domain_fromdot(char **out, char *buf, unsigned int n)
 
 	errno = error_proto;
 
-	for (;;)
-	{
+	for (;;) {
 		if (!n)
 			break;
 		ch = *buf++;
 		--n;
-		if (ch == '.')
-		{
-			if (labellen)
-			{
+		if (ch == '.') {
+			if (labellen) {
 				if (namelen + labellen + 1 > sizeof name)
 					return 0;
 				name[namelen++] = labellen;
@@ -40,23 +37,19 @@ dns_domain_fromdot(char **out, char *buf, unsigned int n)
 			}
 			continue;
 		}
-		if (ch == '\\')
-		{
+		if (ch == '\\') {
 			if (!n)
 				break;
 			ch = *buf++;
 			--n;
-			if ((ch >= '0') && (ch <= '7'))
-			{
+			if ((ch >= '0') && (ch <= '7')) {
 				ch -= '0';
-				if (n && (*buf >= '0') && (*buf <= '7'))
-				{
+				if (n && (*buf >= '0') && (*buf <= '7')) {
 					ch <<= 3;
 					ch += *buf - '0';
 					++buf;
 					--n;
-					if (n && (*buf >= '0') && (*buf <= '7'))
-					{
+					if (n && (*buf >= '0') && (*buf <= '7')) {
 						ch <<= 3;
 						ch += *buf - '0';
 						++buf;
@@ -70,8 +63,7 @@ dns_domain_fromdot(char **out, char *buf, unsigned int n)
 		label[labellen++] = ch;
 	}
 
-	if (labellen)
-	{
+	if (labellen) {
 		if (namelen + labellen + 1 > sizeof name)
 			return 0;
 		name[namelen++] = labellen;

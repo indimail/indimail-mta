@@ -10,12 +10,11 @@
  * Initial revision
  *
  */
+#include <byte.h>
+#include <str.h>
+#include <fmt.h>
+#include <stralloc.h>
 #include "ip6.h"
-#include "byte.h"
-#include "str.h"
-#include "fmt.h"
-#include "hexconversion.h"
-#include "stralloc.h"
 
 #define BITSUBSTITUTION
 

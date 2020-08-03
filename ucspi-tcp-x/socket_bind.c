@@ -9,7 +9,7 @@
  */
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "byte.h"
+#include <byte.h>
 #include "socket.h"
 
 int
@@ -17,7 +17,7 @@ socket_bind4(int s, char ip[4], uint16 port)
 {
 	struct sockaddr_in sa;
 
-	byte_zero(&sa, sizeof sa);
+	byte_zero((char *) &sa, sizeof sa);
 	sa.sin_family = AF_INET;
 	uint16_pack_big((char *) &sa.sin_port, port);
 	byte_copy((char *) &sa.sin_addr, 4, ip);
@@ -36,8 +36,7 @@ socket_bind4_reuse(int s, char ip[4], uint16 port)
 void
 socket_tryreservein(int s, int size)
 {
-	while (size >= 1024)
-	{
+	while (size >= 1024) {
 		if (setsockopt(s, SOL_SOCKET, SO_RCVBUF, &size, sizeof size) == 0)
 			return;
 		size -= (size >> 5);

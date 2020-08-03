@@ -10,13 +10,13 @@
  * Initial revision
  *
  */
-#include "str.h"
-#include "fmt.h"
-#include "stralloc.h"
-#include "scan.h"
+#include <str.h>
+#include <fmt.h>
+#include <stralloc.h>
+#include <scan.h>
+#include <byte.h>
 #include "ip4_bit.h"
 #include "ip4.h"
-#include "byte.h"
 
 #define BITSUBSTITUTION
 

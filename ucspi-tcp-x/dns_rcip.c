@@ -10,15 +10,15 @@
  * Initial revision
  *
  */
-#include "taia.h"
-#include "openreadclose.h"
-#include "byte.h"
+#include <taia.h>
+#include <byte.h>
+#include <env.h>
 #include "ip4.h"
 #ifdef IPV6
 #include "ip6.h"
 #endif
-#include "env.h"
 #include "dns.h"
+#include "openreadclose.h"
 
 static stralloc data = { 0 };
 

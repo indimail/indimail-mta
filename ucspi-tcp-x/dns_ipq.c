@@ -6,11 +6,11 @@
  * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
  * Initial revision
  *
- */
-#include "stralloc.h"
-#include "case.h"
-#include "byte.h"
-#include "str.h"
+	 */
+#include <stralloc.h>
+#include <case.h>
+#include <byte.h>
+#include <str.h>
 #include "dns.h"
 
 static int

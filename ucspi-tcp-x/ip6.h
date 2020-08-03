@@ -19,8 +19,8 @@
 #ifndef IP6_H
 #define IP6_H
 
-#include "byte.h"
-#include "stralloc.h"
+#include <byte.h>
+#include <stralloc.h>
 
 unsigned int    rblip6_scan(char *, char *);
 unsigned int    ip6_fmt(char *, char *);
@@ -43,7 +43,7 @@ extern unsigned char V4mappedprefix[12]; /*- ={0,0,0,0,0,0,0,0,0,0,0xff,0xff}; *
 extern unsigned char V6loopback[16]; /*- ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}; */
 extern unsigned char V6any[16];	/*- ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; */
 
-#define ip6_isv4mapped(ip) (byte_equal(ip,12,V4mappedprefix))
+#define ip6_isv4mapped(ip) (byte_equal(ip, 12, (char *) V4mappedprefix))
 
 #define V4MAPPREFIX "::ffff:"
 

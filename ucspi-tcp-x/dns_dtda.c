@@ -4,7 +4,7 @@
  * Initial revision
  *
  */
-#include "stralloc.h"
+#include <stralloc.h>
 #include "dns.h"
 
 int
@@ -18,20 +18,16 @@ dns_domain_todot_cat(stralloc * out, char *d)
 	if (!*d)
 		return stralloc_append(out, ".");
 
-	for (;;)
-	{
+	for (;;) {
 		ch = *d++;
-		while (ch--)
-		{
+		while (ch--) {
 			ch2 = *d++;
 			if ((ch2 >= 'A') && (ch2 <= 'Z'))
 				ch2 += 32;
-			if (((ch2 >= 'a') && (ch2 <= 'z')) || ((ch2 >= '0') && (ch2 <= '9')) || (ch2 == '-') || (ch2 == '_'))
-			{
+			if (((ch2 >= 'a') && (ch2 <= 'z')) || ((ch2 >= '0') && (ch2 <= '9')) || (ch2 == '-') || (ch2 == '_')) {
 				if (!stralloc_append(out, &ch2))
 					return 0;
-			} else
-			{
+			} else {
 				ch3 = ch2;
 				buf[3] = '0' + (ch3 & 7);
 				ch3 >>= 3;

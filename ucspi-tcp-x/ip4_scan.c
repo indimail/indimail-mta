@@ -7,7 +7,7 @@
  * Initial revision
  *
  */
-#include "scan.h"
+#include <scan.h>
 #include "ip4.h"
 
 unsigned int

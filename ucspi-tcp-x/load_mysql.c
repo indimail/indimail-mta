@@ -31,9 +31,9 @@
 #include <dlfcn.h>
 #include <mysql.h>
 #include <mysqld_error.h>
-#include "error.h"
-#include "stralloc.h"
-#include "env.h"
+#include <error.h>
+#include <stralloc.h>
+#include <env.h>
 #include "control.h"
 
 MYSQL          *(*in_mysql_init) (MYSQL *);
@@ -164,8 +164,7 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 	i = dlsym(*handle, plugin_symb);
 	if (!i && (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
 			!stralloc_cats(&errbuf, plugin_symb) ||
-			!stralloc_catb(&errbuf, ": ", 2)))
-	{
+			!stralloc_catb(&errbuf, ": ", 2))) {
 		if (errstr)
 			*errstr = memerr;
 	}

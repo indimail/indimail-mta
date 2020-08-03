@@ -7,9 +7,9 @@
  * Initial revision
  *
  */
-#include "iopause.h"
-#include "taia.h"
-#include "byte.h"
+#include <iopause.h>
+#include <taia.h>
+#include <byte.h>
 #ifdef IPV6
 #include "ip6.h"
 #endif
@@ -38,8 +38,7 @@ dns_resolve(char *q, char qtype[2])
 	if (dns_transmit_start(&dns_resolve_tx, servers, 1, q, qtype, (unsigned char *) "\0\0\0\0") == -1)
 #endif
 		return -1;
-	for (;;)
-	{
+	for (;;) {
 		taia_now(&stamp);
 		taia_uint(&deadline, 120);
 		taia_add(&deadline, &deadline, &stamp);

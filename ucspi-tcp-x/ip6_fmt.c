@@ -11,11 +11,10 @@
  *
  */
 #ifdef IPV6
-#include "fmt.h"
-#include "byte.h"
+#include <fmt.h>
+#include <byte.h>
 #include "ip4.h"
 #include "ip6.h"
-#include "hexconversion.h"
 
 unsigned int
 ip6_fmt(char *s, char ip[16])

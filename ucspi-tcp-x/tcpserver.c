@@ -174,40 +174,40 @@
 #ifdef TLS
 #include <openssl/ssl.h>
 #endif
-#include "str.h"
-#include "byte.h"
-#include "fmt.h"
-#include "scan.h"
-#include "uint16.h"
+#include <str.h>
+#include <byte.h>
+#include <fmt.h>
+#include <scan.h>
+#include <uint16.h>
 #include "haveip6.h"
 #include "ip4.h"
 #ifdef IPV6
 #include "ip6.h"
-#include "uint32.h"
+#include <uint32.h>
 #endif
-#include "fd.h"
-#include "exit.h"
-#include "env.h"
+#include <fd.h>
+#include <env.h>
 #include "prot.h"
-#include "open.h"
-#include "wait.h"
-#include "stralloc.h"
-#include "alloc.h"
-#include "buffer.h"
-#include "error.h"
-#include "strerr.h"
+#include <open.h>
+#include <wait.h>
+#include <stralloc.h>
+#include <alloc.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <error.h>
+#include <strerr.h>
 #include <getopt.h>
 #ifdef DARWIN
 #define opteof -1
 #else
-#include "sgetopt.h"
+#include <sgetopt.h>
 #endif
 #include "pathexec.h"
 #include "socket.h"
-#include "ndelay.h"
+#include <ndelay.h>
 #include "tcpremoteinfo.h"
 #include "rules.h"
-#include "sig.h"
+#include <sig.h>
 #include "dns.h"
 #include "hasmysql.h"
 #include "control.h"
@@ -272,7 +272,7 @@ static stralloc addresses;
 
 int             flag1 = 0;
 char            bspace[16];
-buffer          b;
+substdio        b;
 static stralloc limitFile;
 
 uid_t           uid = 0;
@@ -428,8 +428,8 @@ doit(int t)
 	if (!flagdelay)
 		socket_tcpnodelay(t);
 	if (*banner) {
-		buffer_init(&b, write, t, bspace, sizeof bspace);
-		if (buffer_putsflush(&b, banner) == -1)
+		substdio_fdbuf(&b, write, t, bspace, sizeof bspace);
+		if (substdio_puts(&b, banner) == -1)
 			strerr_die2sys(111, DROP, "unable to print banner: ");
 	}
 #ifdef IPV6
@@ -604,7 +604,7 @@ doit(int t)
 		strnum[fmt_ulong(strnum, maxperip)] = 0;
 		safecats(strnum);
 		cats("\n");
-		buffer_putflush(buffer_2, tmp.s, tmp.len);
+		substdio_putflush(subfderr, tmp.s, tmp.len);
 	}
 	if (flagdeny)
 		_exit(100);
@@ -1482,7 +1482,7 @@ main(int argc, char **argv, char **envp)
 	argc -= optind;
 	argv += optind;
 	if (!verbosity)
-		buffer_2->fd = -1;
+		subfderr->fd = -1;
 	if (!(hostname = *argv++))
 		usage();
 	if (str_equal(hostname, ""))
@@ -1586,10 +1586,10 @@ main(int argc, char **argv, char **envp)
 		_exit(111);
 	localportstr[fmt_ulong(localportstr, localport)] = 0;
 	if (flag1) {
-		buffer_init(&b, write, 1, bspace, sizeof bspace);
-		buffer_puts(&b, localportstr);
-		buffer_puts(&b, "\n");
-		buffer_flush(&b);
+		substdio_fdbuf(&b, write, 1, bspace, sizeof bspace);
+		substdio_puts(&b, localportstr);
+		substdio_puts(&b, "\n");
+		substdio_flush(&b);
 	}
 	close(0);
 	close(1);

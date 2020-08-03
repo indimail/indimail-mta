@@ -12,11 +12,11 @@
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "byte.h"
+#include <byte.h>
+#include <error.h>
 #include "socket.h"
 #include "ip4.h"
 #include "ip6.h"
-#include "error.h"
 
 extern int          noipv6;
 
@@ -29,13 +29,12 @@ socket_send6(int s, char *buf, unsigned int len, char ip[16], uint16 port, uint3
 	struct sockaddr_in sa;
 #endif
 
-	byte_zero(&sa, sizeof sa);
+	byte_zero((char *) &sa, sizeof sa);
 #ifdef LIBC_HAS_IP6
-	if (noipv6)
-	{
+	if (noipv6) {
 		if (ip6_isv4mapped(ip))
 			return socket_send4(s, buf, len, ip + 12, port);
-		if (byte_equal(ip, 16, V6loopback))
+		if (byte_equal(ip, 16, (char *) V6loopback))
 			return socket_send4(s, buf, len, ip4loopback, port);
 		errno = error_proto;
 		return -1;
@@ -47,7 +46,7 @@ socket_send6(int s, char *buf, unsigned int len, char ip[16], uint16 port, uint3
 #else
 		if (ip6_isv4mapped(ip))
 			return socket_send4(s, buf, len, ip + 12, port);
-		if (byte_equal(ip, 16, V6loopback))
+		if (byte_equal(ip, 16, (char *) V6loopback))
 			return socket_send4(s, buf, len, ip4loopback, port);
 		errno = error_proto;
 		return -1;

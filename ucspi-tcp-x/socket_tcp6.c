@@ -17,7 +17,7 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <unistd.h>
-#include "ndelay.h"
+#include <ndelay.h>
 #include "socket.h"
 
 #ifdef LIBC_HAS_IP6
@@ -34,10 +34,8 @@ socket_tcp6(void)
 
 	if (noipv6)
 		goto compat;
-	if ((s = socket(PF_INET6, SOCK_STREAM, 0)) == -1)
-	{
-		if (errno == EINVAL || errno == EAFNOSUPPORT)
-		{
+	if ((s = socket(PF_INET6, SOCK_STREAM, 0)) == -1) {
+		if (errno == EINVAL || errno == EAFNOSUPPORT) {
 compat:
 			s = socket(AF_INET, SOCK_STREAM, 0);
 			noipv6 = 1;
@@ -46,8 +44,7 @@ compat:
 		} else
 			return -1;
 	}
-	if (ndelay_on(s) == -1)
-	{
+	if (ndelay_on(s) == -1) {
 		close(s);
 		return -1;
 	}

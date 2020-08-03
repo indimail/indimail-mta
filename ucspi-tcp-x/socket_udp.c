@@ -28,10 +28,8 @@ socket_udp6(void)
 
 	if (noipv6)
 		goto compat;
-	if ((s = socket(PF_INET6, SOCK_DGRAM, 0)) == -1)
-	{
-		if (errno == EINVAL || errno == EAFNOSUPPORT)
-		{
+	if ((s = socket(PF_INET6, SOCK_DGRAM, 0)) == -1) {
+		if (errno == EINVAL || errno == EAFNOSUPPORT) {
 compat:
 			s = socket(AF_INET, SOCK_DGRAM, 0);
 			noipv6 = 1;
@@ -57,8 +55,7 @@ socket_udp(void)
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s == -1)
 		return -1;
-	if (ndelay_on(s) == -1)
-	{
+	if (ndelay_on(s) == -1) {
 		close(s);
 		return -1;
 	}

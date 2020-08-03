@@ -13,24 +13,24 @@
  * Initial revision
  *
  */
-#include "sig.h"
-#include "wait.h"
-#include "buffer.h"
-#include "strerr.h"
-#include "exit.h"
+#include <sig.h>
+#include <wait.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <strerr.h>
 #include <unistd.h>
 #include <signal.h>
 
 char            outbuf[512];
-buffer          bout;
+substdio        bout;
 
 char            inbuf[512];
-buffer          bin;
+substdio        bin;
 
 ssize_t
 myread(int fd, char *buf, int len)
 {
-	buffer_flush(&bout);
+	substdio_flush(&bout);
 	return read(fd, buf, len);
 }
 
@@ -47,25 +47,23 @@ main()
 	if (pid == -1)
 		strerr_die2sys(111, "mconnect-io: fatal: ", "unable to fork: ");
 
-	if (!pid)
-	{
-		buffer_init(&bin, myread, 0, inbuf, sizeof inbuf);
-		buffer_init(&bout, write, 7, outbuf, sizeof outbuf);
+	if (!pid) {
+		substdio_fdbuf(&bin, myread, 0, inbuf, sizeof inbuf);
+		substdio_fdbuf(&bout, write, 7, outbuf, sizeof outbuf);
 
-		while (buffer_get(&bin, &ch, 1) == 1)
-		{
+		while (substdio_get(&bin, &ch, 1) == 1) {
 			if (ch == '\n')
-				buffer_put(&bout, "\r", 1);
-			buffer_put(&bout, &ch, 1);
+				substdio_put(&bout, "\r", 1);
+			substdio_put(&bout, &ch, 1);
 		}
 		_exit(0);
 	}
 
-	buffer_init(&bin, myread, 6, inbuf, sizeof inbuf);
-	buffer_init(&bout, write, 1, outbuf, sizeof outbuf);
+	substdio_fdbuf(&bin, myread, 6, inbuf, sizeof inbuf);
+	substdio_fdbuf(&bout, write, 1, outbuf, sizeof outbuf);
 
-	while (buffer_get(&bin, &ch, 1) == 1)
-		buffer_put(&bout, &ch, 1);
+	while (substdio_get(&bin, &ch, 1) == 1)
+		substdio_put(&bout, &ch, 1);
 
 	kill(pid, sig_term);
 	wait_pid(&wstat, pid);

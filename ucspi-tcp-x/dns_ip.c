@@ -19,9 +19,9 @@
  * Initial revision
  *
  */
-#include "stralloc.h"
-#include "uint16.h"
-#include "byte.h"
+#include <stralloc.h>
+#include <uint16.h>
+#include <byte.h>
 #include "dns.h"
 #ifdef IPV6
 #include "ip4.h"
@@ -56,7 +56,7 @@ dns_ip6_packet_add(stralloc *out, char *buf, unsigned int len)
 			}
 		} else
 		if (byte_equal(header, 2, DNS_T_A) && byte_equal(header + 2, 2, DNS_C_IN) && datalen == 4) {
-			byte_copy(header, 12, V4mappedprefix);
+			byte_copy(header, 12, (char *) V4mappedprefix);
 			if (!dns_packet_copy(buf, len, pos, header + 12, 4))
 				return -1;
 			if (!stralloc_catb(out, header, 16))

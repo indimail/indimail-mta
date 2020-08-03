@@ -4,8 +4,8 @@
  * Initial revision
  *
  */
-#include "str.h"
-#include "env.h"
+#include <str.h>
+#include <env.h>
 
 extern /*- @null@ */
 char       *
@@ -17,8 +17,7 @@ env_get(char *s)
 	if (!s)
 		return 0;
 	len = str_len(s);
-	for (i = 0; environ[i]; ++i)
-	{
+	for (i = 0; environ[i]; ++i) {
 		if (str_start(environ[i], s) && (environ[i][len] == '='))
 			return environ[i] + len + 1;
 	}

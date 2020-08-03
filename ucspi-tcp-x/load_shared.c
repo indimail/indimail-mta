@@ -49,10 +49,10 @@
 #ifdef HASDLMOPEN
 #include "dlnamespace.h"
 #endif
-#include "strerr.h"
-#include "str.h"
-#include "fmt.h"
-#include "env.h"
+#include <strerr.h>
+#include <str.h>
+#include <fmt.h>
+#include <env.h>
 #include "pathexec.h"
 #include <link.h>
 #ifndef HASDLMOPEN
@@ -89,23 +89,23 @@ load_shared(char *file, char **argv, char **envp)
 		use_dlmopen = env_get("USE_DLMOPEN") ? 1 : 0;
 		/*- get lmid */
 		if (use_dlmopen && (i = dlnamespace(file, envp, (unsigned long *) &lmid)) < 0)
-			strerr_die(111, FATAL, "dlnamespace: ", file, ": ", 0, 0, 0, 0, (struct strerr *) 0);
+			strerr_die4x(111, FATAL, "dlnamespace: ", file, ": unable to store namespace");
 		if (!i) { /*- No existing entry for lmid (loaded libs) found */
 #ifdef RTLD_DEEPBIND
 			if (!(handle = tcdlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
 #else
 			if (!(handle = tcdlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
-				strerr_die(111, FATAL, "tcdlmopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die5x(111, FATAL, "tcdlmopen: ", file, ": ", dlerror());
 				return;
 			}
 			if (use_dlmopen) {
 				loadedNew = 1; /*- indicator for newly loaded shared lib */
 				if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
-					strerr_die(111, FATAL, "dlinfo: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+					strerr_die5x(111, FATAL, "dlinfo: ", file, ": ", dlerror());
 				/*- store the new lmid */
 				if (dlnamespace(file, 0, (unsigned long *) &lmid) < 0)
-					strerr_die(111, FATAL, "dlnamespace: ", file, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
+					strerr_die4x(111, FATAL, "dlnamespace: ", file, ": unable to store namespace");
 			}
 		} else /*- loaded earlier so use RTLD_NOLOAD */
 		if (!(handle = tcdlmopen(lmid, file, RTLD_NOW|RTLD_NOLOAD))) { /*- load it again (may have been dlclosed */
@@ -114,16 +114,16 @@ load_shared(char *file, char **argv, char **envp)
 #else
 			if (!(handle = tcdlmopen(LM_ID_NEWLM, file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
-				strerr_die(111, FATAL, "tcdlmopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die5x(111, FATAL, "tcdlmopen: ", file, ": ", dlerror());
 				return;
 			}
 			if (use_dlmopen) {
 				loadedNew = 1; /*- indicator for newly loaded shared lib */
 				if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
-					strerr_die(111, FATAL, "dlinfo: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+					strerr_die5x(111, FATAL, "dlinfo: ", file, ": ", dlerror());
 				/*- store the new lmid */
 				if (dlnamespace(file, 0, (unsigned long *) &lmid) < 0)
-					strerr_die(111, FATAL, "dlnamespace: ", file, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
+					strerr_die4x(111, FATAL, "dlnamespace: ", file, ": unable to store namespace");
 			}
 		} else
 			loadedNew = 0;
@@ -134,7 +134,7 @@ load_shared(char *file, char **argv, char **envp)
 #else
 			if (!(handle = dlopen(file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
-				strerr_die(111, FATAL, "dlopen: ", file, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die5x(111, FATAL, "dlopen: ", file, ": ", dlerror());
 				return;
 			}
 		}
@@ -155,14 +155,14 @@ load_shared(char *file, char **argv, char **envp)
 #endif
 		func = dlsym(handle, fptr);
 		if ((error = dlerror()))
-			strerr_die(111, FATAL, "dlsym: ", fptr, ": ", error, 0, 0, 0, (struct strerr *) 0);
+			strerr_die5x(111, FATAL, "dlsym: ", fptr, ": ", error);
 		if (split)
 			file[split + 1] = '.';
 		for (argc = 0,ptr = argv; *ptr; ptr++)
 			argc++;
 		pathexec_dl(argc, argv, envp, func);
 		if (dlclose(handle)) /*- this will not unload the object due to RTLD_NODELETE */
-			strerr_die(111, FATAL, "dlclose: ", fptr, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+			strerr_die5x(111, FATAL, "dlclose: ", fptr, ": ", dlerror());
 		_exit(0);
 	} else
 		execve(file, argv, envp);

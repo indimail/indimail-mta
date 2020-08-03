@@ -7,11 +7,10 @@
  * Initial revision
  *
  */
-#include "fmt.h"
-#include "byte.h"
+#include <fmt.h>
+#include <byte.h>
 #include "ip4.h"
 #include "ip6.h"
-#include "hexconversion.h"
 
 /**
  * This function convert a IPv6 address as 16 bytes char array into a compactificated string.
@@ -47,7 +46,7 @@ last:
 		}
 	}
 	for (len = 0, k = 0; k < 16; k += 2) {
-		if (k == 12 && (byte_equal(ip, 12, V4mappedprefix))) {
+		if (k == 12 && (byte_equal(ip, 12, (char *) V4mappedprefix))) {
 			len += ip4_fmt(s, ip + 12);
 			break;
 		}

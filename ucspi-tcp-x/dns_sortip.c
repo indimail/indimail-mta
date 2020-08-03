@@ -7,7 +7,7 @@
  * Initial revision
  *
  */
-#include "byte.h"
+#include <byte.h>
 #include "dns.h"
 #ifdef IPV6
 
@@ -23,8 +23,7 @@ dns_sortip6(char *s, unsigned int n)
 	char            tmp[16];
 
 	n >>= 4;
-	while (n > 1)
-	{
+	while (n > 1) {
 		i = dns_random(n);
 		--n;
 		byte_copy(tmp, 16, s + (i << 4));
@@ -44,8 +43,7 @@ dns_sortip(char *s, unsigned int n)
 	char            tmp[4];
 
 	n >>= 2;
-	while (n > 1)
-	{
+	while (n > 1) {
 		i = dns_random(n);
 		--n;
 		byte_copy(tmp, 4, s + (i << 2));

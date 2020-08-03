@@ -13,12 +13,12 @@
  * Initial revision
  *
  */
-#include "error.h"
-#include "stralloc.h"
-#include "str.h"
-#include "env.h"
-#include "pathexec.h"
+#include <error.h>
+#include <stralloc.h>
+#include <str.h>
+#include <env.h>
 #include <unistd.h>
+#include "pathexec.h"
 
 static stralloc tmp;
 

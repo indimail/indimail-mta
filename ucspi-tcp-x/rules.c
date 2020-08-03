@@ -17,13 +17,13 @@
  * Initial revision
  *
  */
-#include "alloc.h"
-#include "stralloc.h"
-#include "open.h"
-#include "cdb.h"
+#include <alloc.h>
+#include <stralloc.h>
+#include <open.h>
+#include <cdb.h>
+#include <str.h>
+#include <byte.h>
 #include "rules.h"
-#include "str.h"
-#include "byte.h"
 #include "ip4_bit.h"
 #include "ip6.h"
 
@@ -49,8 +49,7 @@ dorule(void     (*callback) (char *, unsigned int))
 	datalen = cdb_datalen(&c);
 	if (!(data = alloc(datalen)))
 		return -1;
-	if (cdb_read(&c, data, datalen, cdb_datapos(&c)) == -1)
-	{
+	if (cdb_read(&c, data, datalen, cdb_datapos(&c)) == -1) {
 		alloc_free(data);
 		return -1;
 	}
@@ -163,10 +162,8 @@ doit(void       (*callback) (char *, unsigned int), char *ip, char *host, char *
 #else
 	if (!stralloc_copys(&rules_name, ip))
 		return -1;
-	while (rules_name.len > 0)
-	{
-		if (ip[rules_name.len - 1] == '.')
-		{
+	while (rules_name.len > 0) {
+		if (ip[rules_name.len - 1] == '.') {
 			if ((r = dorule(callback)))
 				return r;
 		}

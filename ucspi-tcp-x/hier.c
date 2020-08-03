@@ -34,11 +34,12 @@
  * Initial revision
  *
  */
+#include <str.h>
+#include <strerr.h>
+#include <stralloc.h>
 #include "auto_home.h"
 #include "auto_shared.h"
-#include "str.h"
-#include "strerr.h"
-#include "stralloc.h"
+
 stralloc        a = { 0 };
 
 void            h(char *, int, int, int);

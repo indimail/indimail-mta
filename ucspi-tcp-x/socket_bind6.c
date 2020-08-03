@@ -9,7 +9,7 @@
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "byte.h"
+#include <byte.h>
 #include "socket.h"
 #include "ip6.h"
 #include "error.h"
@@ -22,18 +22,16 @@ socket_bind6(int s, char ip[16], uint16 port, uint32 scope_id)
 #ifdef LIBC_HAS_IP6
 	struct sockaddr_in6 sa;
 
-	if (noipv6)
-	{
+	if (noipv6) {
 		int             i;
-		for (i = 0; i < 16; i++)
-		{
+		for (i = 0; i < 16; i++) {
 			if (ip[i] != 0)
 				break;
 		}
 		if (i == 16 || ip6_isv4mapped(ip))
 			return socket_bind4(s, ip + 12, port);
 	}
-	byte_zero(&sa, sizeof sa);
+	byte_zero((char *) &sa, sizeof sa);
 	sa.sin6_family = AF_INET6;
 	uint16_pack_big((char *) &sa.sin6_port, port);
 	/*
@@ -44,8 +42,7 @@ socket_bind6(int s, char ip[16], uint16 port, uint32 scope_id)
 	return bind(s, (struct sockaddr *) &sa, sizeof sa);
 #else
 	int             i;
-	for (i = 0; i < 16; i++)
-	{
+	for (i = 0; i < 16; i++) {
 		if (ip[i] != 0)
 			break;
 	}

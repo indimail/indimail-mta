@@ -10,10 +10,10 @@
  * Initial revision
  *
  */
-#include "byte.h"
-#include "stralloc.h"
-#include "str.h"
-#include "hexconversion.h"
+#include <byte.h>
+#include <stralloc.h>
+#include <str.h>
+#include "fmt.h"
 #include "ip6.h"
 
 /**
@@ -29,7 +29,7 @@ ip6_expandaddr(char *src, stralloc *destination)
 {
 	stralloc        addresstemp = { 0 };
 	char            ip6[16] = { 0 };
-	char            hexvalue[3] = { 0, 0, 0 };
+	char            hexval[3];
 	int             i;
 
 
@@ -42,8 +42,8 @@ ip6_expandaddr(char *src, stralloc *destination)
 	if (!stralloc_copys(destination, ""))
 		return -1;
 	for (i = 0; i < 16; i++) {
-		bytetohex((unsigned char) ip6[i], hexvalue);
-		if (!stralloc_catb(destination, hexvalue, 2))
+		hexval[fmt_hexbyte(hexval, ip6[i])] = 0;
+		if (!stralloc_catb(destination, hexval, 2))
 			return -1;
 		if (!((i + 1) % 2) && (i + 1) < 16 && !stralloc_cats(destination, ":"))
 			return -1; /*- Append ':' after every two bytes. */

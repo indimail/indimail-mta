@@ -26,11 +26,11 @@
 #include "hasdlmopen.h"
 #include <errno.h>
 #ifdef HASDLMOPEN
-#include "str.h"
-#include "fmt.h"
-#include "stralloc.h"
-#include "scan.h"
-#include "env.h"
+#include <str.h>
+#include <fmt.h>
+#include <stralloc.h>
+#include <scan.h>
+#include <env.h>
 #include "pathexec.h"
 
 #ifndef	lint

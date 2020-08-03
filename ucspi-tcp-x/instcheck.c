@@ -16,12 +16,11 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "strerr.h"
-#include "stralloc.h"
-#include "error.h"
-#include "exit.h"
-#include "str.h"
-#include "alloc.h"
+#include <strerr.h>
+#include <stralloc.h>
+#include <error.h>
+#include <str.h>
+#include <alloc.h>
 
 char           *sharedir = 0;
 stralloc        dirbuf = { 0 };
@@ -49,21 +48,17 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 
 	if (stat(file, &st) != -1)
 		tfile = file;
-	else
-	{
-		if (errno != error_noent)
-		{
+	else {
+		if (errno != error_noent) {
 			strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
 			return;
 		}
-		if (!str_diffn(prefix2, "man/", 4)) /*- check for .gz extension */
-		{
+		if (!str_diffn(prefix2, "man/", 4)) { /*- check for .gz extension */
 			if (!(tfile = (char *) alloc((len = str_len(file)) + 4)))
 				strerr_die2sys(111, FATAL, "unable to allocate mem: ");
 			str_copy(tfile, file);
 			str_copy(tfile + len, ".gz");
-			if (stat(tfile, &st) == -1)
-			{
+			if (stat(tfile, &st) == -1) {
 				if (errno != error_noent)
 					strerr_warn4(WARNING, "unable to stat ", tfile, ": ", &strerr_sys);
 				else
@@ -76,10 +71,8 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 				return;
 			}
 		} else
-		if (!str_diffn(file, "lib", 3))
-		{
-			if (stat("../lib64", &st) == -1)
-			{
+		if (!str_diffn(file, "lib", 3)) {
+			if (stat("../lib64", &st) == -1) {
 				strerr_warn4(WARNING, "unable to stat file", file, ": ", &strerr_sys);
 				return;
 			} else {
@@ -88,8 +81,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 					return;
 				}
 			}
-			if (stat(file, &st) == -1)
-			{
+			if (stat(file, &st) == -1) {
 				if (errno == error_noent)
 					strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
 				else
@@ -98,10 +90,8 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			}
 			tfile = file;
 		} else
-		if (!str_diffn(file, "sbin", 4))
-		{
-			if (stat("../sbin", &st) == -1)
-			{
+		if (!str_diffn(file, "sbin", 4)) {
+			if (stat("../sbin", &st) == -1) {
 				strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
 				return;
 			} else {
@@ -110,8 +100,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 					return;
 				}
 			}
-			if (stat(file, &st) == -1)
-			{
+			if (stat(file, &st) == -1) {
 				if (errno == error_noent)
 					strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
 				else
@@ -119,8 +108,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 				return;
 			}
 			tfile = file;
-		} else
-		{
+		} else {
 			if (!str_diffn(file, "man/", 4))
 				strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
 			else
@@ -128,21 +116,18 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			return;
 		}
 	}
-	if ((uid != -1) && (st.st_uid != uid))
-	{
+	if ((uid != -1) && (st.st_uid != uid)) {
 		err = 1;
 		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong owner (will fix)", 0);
 	}
-	if ((gid != -1) && (st.st_gid != gid))
-	{
+	if ((gid != -1) && (st.st_gid != gid)) {
 		err = 1;
 		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong group (will fix)", 0);
 	}
 	if (err && chown(tfile, uid, gid) == -1)
 		strerr_die4sys(111, FATAL, "unable to chown ", tfile, ": ");
 	err = 0;
-	if ((st.st_mode & 07777) != mode)
-	{
+	if ((st.st_mode & 07777) != mode) {
 		err = 1;
 		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong permissions (will fix)", 0);
 	}

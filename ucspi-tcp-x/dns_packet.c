@@ -7,7 +7,7 @@
  * DNS should have used LZ77 instead of its own sophomoric compression algorithm.
  */
 
-#include "error.h"
+#include <error.h>
 #include "dns.h"
 
 unsigned int

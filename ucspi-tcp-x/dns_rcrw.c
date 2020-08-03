@@ -7,13 +7,13 @@
  * Initial revision
  *
  */
-#include "taia.h"
-#include "env.h"
-#include "byte.h"
-#include "str.h"
+#include <taia.h>
+#include <env.h>
+#include <byte.h>
+#include <str.h>
+#include <unistd.h>
 #include "openreadclose.h"
 #include "dns.h"
-#include <unistd.h>
 
 static stralloc data = { 0 };
 
@@ -32,19 +32,15 @@ init(stralloc * rules)
 		x = "/etc/dnsrewrite";
 	if ((i = openreadclose(x, &data, 64)) == -1)
 		return -1;
-	if (i)
-	{
+	if (i) {
 		if (!stralloc_append(&data, "\n"))
 			return -1;
 		i = 0;
-		for (j = 0; j < data.len; ++j)
-		{
-			if (data.s[j] == '\n')
-			{
+		for (j = 0; j < data.len; ++j) {
+			if (data.s[j] == '\n') {
 				if (!stralloc_catb(rules, data.s + i, j - i))
 					return -1;
-				while (rules->len)
-				{
+				while (rules->len) {
 					if (rules->s[rules->len - 1] != ' ' && rules->s[rules->len - 1] != '\t' && rules->s[rules->len - 1] != '\r')
 						break;
 					--rules->len;
@@ -56,8 +52,7 @@ init(stralloc * rules)
 		}
 		return 0;
 	}
-	if ((x = env_get("LOCALDOMAIN")))
-	{
+	if ((x = env_get("LOCALDOMAIN"))) {
 		if (!stralloc_copys(&data, x))
 			return -1;
 		if (!stralloc_append(&data, " "))
@@ -65,10 +60,8 @@ init(stralloc * rules)
 		if (!stralloc_copys(rules, "?:"))
 			return -1;
 		i = 0;
-		for (j = 0; j < data.len; ++j)
-		{
-			if (data.s[j] == ' ')
-			{
+		for (j = 0; j < data.len; ++j) {
+			if (data.s[j] == ' ') {
 				if (!stralloc_cats(rules, "+."))
 					return -1;
 				if (!stralloc_catb(rules, data.s + i, j - i))
@@ -86,27 +79,21 @@ init(stralloc * rules)
 	}
 	if ((i = openreadclose("/etc/resolv.conf", &data, 64)) == -1)
 		return -1;
-	if (i)
-	{
+	if (i) {
 		if (!stralloc_append(&data, "\n"))
 			return -1;
 		i = 0;
-		for (j = 0; j < data.len; ++j)
-		{
-			if (data.s[j] == '\n')
-			{
+		for (j = 0; j < data.len; ++j) {
+			if (data.s[j] == '\n') {
 				if (byte_equal("search ", 7, data.s + i) || byte_equal("search\t", 7, data.s + i) ||
-					byte_equal("domain ", 7, data.s + i) || byte_equal("domain\t", 7, data.s + i))
-				{
+					byte_equal("domain ", 7, data.s + i) || byte_equal("domain\t", 7, data.s + i)) {
 					if (!stralloc_copys(rules, "?:"))
 						return -1;
 					i += 7;
-					while (i < j)
-					{
+					while (i < j) {
 						k = byte_chr(data.s + i, j - i, ' ');
 						k = byte_chr(data.s + i, k, '\t');
-						if (!k)
-						{
+						if (!k) {
 							++i;
 							continue;
 						}
@@ -133,8 +120,7 @@ init(stralloc * rules)
 		return -1;
 	host[(sizeof host) - 1] = 0;
 	i = str_chr(host, '.');
-	if (host[i])
-	{
+	if (host[i]) {
 		if (!stralloc_copys(rules, "?:"))
 			return -1;
 		if (!stralloc_cats(rules, host + i))
@@ -164,8 +150,7 @@ dns_resolvconfrewrite(stralloc * out)
 		ok = 0;
 	if (!uses)
 		ok = 0;
-	if (!ok)
-	{
+	if (!ok) {
 		if (init(&rules) == -1)
 			return -1;
 		taia_uint(&deadline, 600);

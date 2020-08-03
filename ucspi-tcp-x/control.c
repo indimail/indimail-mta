@@ -7,15 +7,15 @@
  * Initial revision
  *
  */
-#include "buffer.h"
-#include "stralloc.h"
-#include "scan.h"
-#include "error.h"
-#include "open.h"
-#include "getln.h"
-#include "env.h"
-#include "control.h"
+#include <substdio.h>
+#include <stralloc.h>
+#include <scan.h>
+#include <error.h>
+#include <open.h>
+#include <getln.h>
+#include <env.h>
 #include <unistd.h>
+#include "control.h"
 
 static char     inbuf[64];
 static stralloc line = { 0 };
@@ -47,15 +47,13 @@ control_readline(sa, fn)
 	stralloc       *sa;
 	char           *fn;
 {
-	buffer          ss;
+	substdio        ss;
 	int             fd, match;
 	static char    *controldir;
 	static stralloc controlfile = {0};
 
-	if (*fn != '/' && *fn != '.')
-	{
-		if (!controldir)
-		{
+	if (*fn != '/' && *fn != '.') {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = "/etc/indimail/control";
 		}
@@ -70,15 +68,13 @@ control_readline(sa, fn)
 		return(-1);
 	if (!stralloc_0(&controlfile))
 		return(-1);
-	if((fd = open_read(controlfile.s)) == -1)
-	{
+	if((fd = open_read(controlfile.s)) == -1) {
 		if (errno == error_noent)
 			return 0;
 		return -1;
 	}
-	buffer_init(&ss, read, fd, inbuf, sizeof inbuf);
-	if (getln(&ss, sa, &match, '\n') == -1)
-	{
+	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	if (getln(&ss, sa, &match, '\n') == -1) {
 		close(fd);
 		return -1;
 	}
@@ -91,8 +87,7 @@ void
 striptrailingwhitespace(sa)
 	stralloc       *sa;
 {
-	while (sa->len > 0)
-	{
+	while (sa->len > 0) {
 		switch (sa->s[sa->len - 1])
 		{
 		case '\n':

@@ -51,11 +51,11 @@ static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.11 2020-06-08 22:48:48+0
 #ifdef HASDLMOPEN
 #include "dlnamespace.h"
 #endif
-#include "strerr.h"
-#include "str.h"
-#include "env.h"
-#include "scan.h"
-#include "fmt.h"
+#include <strerr.h>
+#include <str.h>
+#include <env.h>
+#include <scan.h>
+#include <fmt.h>
 #include <link.h>
 #ifndef HASDLMOPEN
 #include <dlfcn.h>
@@ -106,15 +106,15 @@ tcpserver_plugin(char **envp, int reload_flag)
 #else
 			if (!(handle = tcdlmopen(LM_ID_NEWLM, shared_objfn.s, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
-				strerr_die(111, FATAL, "tcdlmopen: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die5x(111, FATAL, "tcdlmopen: ", shared_objfn.s, ": ", dlerror());
 				return (1);
 			} else
 			if (use_dlmopen) {
 				if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
-					strerr_die(111, FATAL, "dlinfo: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+					strerr_die5x(111, FATAL, "dlinfo: ", shared_objfn.s, ": ", dlerror());
 				/*- store the new lmid */
 				if (dlnamespace(shared_objfn.s, 0, (unsigned long *) &lmid) < 0)
-					strerr_die(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to store namespace", 0, 0, 0, 0, (struct strerr *) 0);
+					strerr_die4x(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to store namespace");
 				/*- display the new lmid in tcpserver log */
 				strnum[fmt_ulong(strnum, lmid)] = 0;
 				i = str_rchr(shared_objfn.s, '.');
@@ -130,13 +130,13 @@ tcpserver_plugin(char **envp, int reload_flag)
 			lmid = 0;
 			if (use_dlmopen) {
 				if ((i = dlnamespace(shared_objfn.s, 0, (unsigned long *) &lmid)) < 0)
-					strerr_die(111, FATAL, "dlnamespace: ", shared_objfn.s, ": ", 0, 0, 0, 0, (struct strerr *) 0);
+					strerr_die4x(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to store namespace");
 				else
 				if (!i)
-					strerr_die(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to get namespace", 0, 0, 0, 0, (struct strerr *) 0);
+					strerr_die4x(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to get namespace");
 			}
 			if (!(handle = tcdlmopen(lmid, shared_objfn.s, RTLD_NOW|RTLD_NOLOAD))) {
-				strerr_die(111, FATAL, "tcdlmopen: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die5x(111, FATAL, "tcdlmopen: ", shared_objfn.s, ": ", dlerror());
 				return (1);
 			}
 		}
@@ -147,12 +147,12 @@ tcpserver_plugin(char **envp, int reload_flag)
 #else
 			if (!(handle = dlopen(shared_objfn.s, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
 #endif
-				strerr_die(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die5x(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror());
 				return (1);
 			}
 		} else {
 			if (!(handle = dlopen(shared_objfn.s, RTLD_NOW|RTLD_NOLOAD))) {
-				strerr_die(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die5x(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror());
 				return (1);
 			}
 		}
@@ -164,7 +164,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 		s += (i = fmt_str((char *) s, "_dir"));
 		*s++ = 0;
 		if ((s = env_get(env_str)) && chdir(s))
-			strerr_die(111, FATAL, "chdir: ", s, ": ", 0, 0, 0, 0, (struct strerr *) 0);
+			strerr_die4sys(111, FATAL, "chdir: ", s, ": ");
 
 		/*- execute function defined by PLUGIN<num>_init */
 		s = env_str;
@@ -176,7 +176,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 		if ((func_name = env_get(env_str))) {
 			func = dlsym(handle, func_name);
 			if ((error = dlerror()))
-				strerr_die(111, FATAL, "dlsym: ", func_name, ": ", error, 0, 0, 0, (struct strerr *) 0);
+				strerr_die5x(111, FATAL, "dlsym: ", func_name, ": ", error);
 			(*func) (!reload_flag); /*- execute the function */
 		}
 	} /*- for (ptr1 = envp; *ptr1; ptr1++) { */

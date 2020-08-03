@@ -14,7 +14,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include "ndelay.h"
+#include <ndelay.h>
 
 int
 socket_tcp(void)
@@ -24,8 +24,7 @@ socket_tcp(void)
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	if (s == -1)
 		return -1;
-	if (ndelay_on(s) == -1)
-	{
+	if (ndelay_on(s) == -1) {
 		close(s);
 		return -1;
 	}

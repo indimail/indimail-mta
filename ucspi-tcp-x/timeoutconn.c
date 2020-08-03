@@ -7,10 +7,10 @@
  * Initial revision
  *
  */
-#include "ndelay.h"
+#include <ndelay.h>
+#include <iopause.h>
+#include <error.h>
 #include "socket.h"
-#include "iopause.h"
-#include "error.h"
 #include "timeoutconn.h"
 
 int
@@ -37,14 +37,12 @@ timeoutconn(int s, char ip[4], uint16 port, unsigned int timeout)
 		taia_now(&now);
 		taia_uint(&deadline, timeout);
 		taia_add(&deadline, &now, &deadline);
-		for (;;)
-		{
+		for (;;) {
 			taia_now(&now);
 			iopause(&x, 1, &deadline, &now);
 			if (x.revents)
 				break;
-			if (taia_less(&deadline, &now))
-			{
+			if (taia_less(&deadline, &now)) {
 				errno = error_timeout;	/*- note that connect attempt is continuing */
 				return -1;
 			}

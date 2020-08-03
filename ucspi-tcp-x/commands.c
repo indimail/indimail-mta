@@ -4,30 +4,27 @@
  * Initial revision
  *
  */
-#include "buffer.h"
-#include "stralloc.h"
-#include "str.h"
-#include "case.h"
+#include <substdio.h>
+#include <stralloc.h>
+#include <str.h>
+#include <case.h>
 #include "commands.h"
 
 static stralloc cmd = { 0 };
 
 int
-commands(buffer *ss, struct commands *c)
+commands(substdio *ss, struct commands *c)
 {
 	int             i;
 	char           *arg;
 	char            ch;
 
-	for (;;)
-	{
+	for (;;) {
 		if (!stralloc_copys(&cmd, ""))
 			return -1;
 
-		for (;;)
-		{
-			i = buffer_get(ss, &ch, 1);
-			if (i != 1)
+		for (;;) {
+			if ((i = substdio_get(ss, &ch, 1)) != 1)
 				return i;
 			if (ch == '\n')
 				break;

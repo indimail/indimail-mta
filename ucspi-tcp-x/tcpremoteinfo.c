@@ -11,11 +11,11 @@
  *
  */
 #include <unistd.h>
-#include "fmt.h"
-#include "buffer.h"
+#include <fmt.h>
+#include <substdio.h>
+#include <error.h>
+#include <iopause.h>
 #include "socket.h"
-#include "error.h"
-#include "iopause.h"
 #include "timeoutconn.h"
 #include "tcpremoteinfo.h"
 
@@ -29,14 +29,12 @@ mywrite(int fd, char *buf, int len)
 
 	x.fd = fd;
 	x.events = IOPAUSE_WRITE;
-	for (;;)
-	{
+	for (;;) {
 		taia_now(&now);
 		iopause(&x, 1, &deadline, &now);
 		if (x.revents)
 			break;
-		if (taia_less(&deadline, &now))
-		{
+		if (taia_less(&deadline, &now)) {
 			errno = error_timeout;
 			return -1;
 		}
@@ -51,14 +49,12 @@ myread(int fd, char *buf, int len)
 
 	x.fd = fd;
 	x.events = IOPAUSE_READ;
-	for (;;)
-	{
+	for (;;) {
 		taia_now(&now);
 		iopause(&x, 1, &deadline, &now);
 		if (x.revents)
 			break;
-		if (taia_less(&deadline, &now))
-		{
+		if (taia_less(&deadline, &now)) {
 			errno = error_timeout;
 			return -1;
 		}
@@ -76,7 +72,7 @@ doit(stralloc *out, int s, char ipremote[4], uint16 portremote, char iplocal[4],
 	uint16 portlocal, unsigned int timeout)
 #endif
 {
-	buffer          b;
+	substdio        b;
 	char            bspace[128];
 	char            strnum[FMT_ULONG];
 	int             numcolons;
@@ -94,29 +90,26 @@ doit(stralloc *out, int s, char ipremote[4], uint16 portremote, char iplocal[4],
 	if (timeoutconn(s, ipremote, 113, timeout) == -1)
 #endif
 		return -1;
-	buffer_init(&b, mywrite, s, bspace, sizeof bspace);
-	buffer_put(&b, strnum, fmt_ulong(strnum, portremote));
-	buffer_put(&b, " , ", 3);
-	buffer_put(&b, strnum, fmt_ulong(strnum, portlocal));
-	buffer_put(&b, "\r\n", 2);
-	if (buffer_flush(&b) == -1)
+	substdio_fdbuf(&b, mywrite, s, bspace, sizeof bspace);
+	substdio_put(&b, strnum, fmt_ulong(strnum, portremote));
+	substdio_put(&b, " , ", 3);
+	substdio_put(&b, strnum, fmt_ulong(strnum, portlocal));
+	substdio_put(&b, "\r\n", 2);
+	if (substdio_flush(&b) == -1)
 		return -1;
-	buffer_init(&b, myread, s, bspace, sizeof bspace);
+	substdio_fdbuf(&b, myread, s, bspace, sizeof bspace);
 	numcolons = 0;
-	for (;;)
-	{
-		if (buffer_get(&b, &ch, 1) != 1)
+	for (;;) {
+		if (substdio_get(&b, &ch, 1) != 1)
 			return -1;
 		if ((ch == ' ') || (ch == '\t') || (ch == '\r'))
 			continue;
 		if (ch == '\n')
 			return 0;
-		if (numcolons < 3)
-		{
+		if (numcolons < 3) {
 			if (ch == ':')
 				++numcolons;
-		} else
-		{
+		} else {
 			if (!stralloc_append(out, &ch))
 				return -1;
 			if (out->len > 256)

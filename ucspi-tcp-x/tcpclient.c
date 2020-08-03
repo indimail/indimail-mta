@@ -31,29 +31,29 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <netdb.h>
-#include "sig.h"
-#include "exit.h"
+#include <sig.h>
 #include <getopt.h>
 #ifdef DARWIN
 #define opteof -1
 #else
-#include "sgetopt.h"
+#include <sgetopt.h>
 #endif
-#include "uint16.h"
-#include "fmt.h"
-#include "scan.h"
-#include "str.h"
+#include <uint16.h>
+#include <fmt.h>
+#include <scan.h>
+#include <str.h>
 #include "ip4.h"
 #ifdef IPV6
 #include "ip6.h"
 #endif
-#include "uint16.h"
+#include <uint16.h>
 #include "socket.h"
-#include "fd.h"
-#include "stralloc.h"
-#include "buffer.h"
-#include "error.h"
-#include "strerr.h"
+#include <fd.h>
+#include <stralloc.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <error.h>
+#include <strerr.h>
 #include "pathexec.h"
 #include "timeoutconn.h"
 #include "tcpremoteinfo.h"
@@ -206,7 +206,7 @@ main(int argc, char **argv)
 	}
 	argv += optind;
 	if (!verbosity)
-		buffer_2->fd = -1;
+		subfderr->fd = -1;
 	if (!(hostname = *argv))
 		usage();
 	if (!hostname[0] || str_equal(hostname,"0"))
@@ -219,8 +219,7 @@ main(int argc, char **argv)
 		usage();
 	if (!x[scan_ulong(x, &u)])
 		portremote = u;
-	else
-	{
+	else {
 		struct servent *se;
 
 		if (!(se = getservbyname(x, "tcp")))
@@ -249,8 +248,7 @@ main(int argc, char **argv)
 		ctimeout[0] += ctimeout[1];
 		ctimeout[1] = 0;
 	}
-	for (cloop = 0; cloop < 2; ++cloop)
-	{
+	for (cloop = 0; cloop < 2; ++cloop) {
 		if (!stralloc_copys(&moreaddresses, ""))
 			nomem();
 #ifdef IPV6
@@ -278,16 +276,14 @@ main(int argc, char **argv)
 #endif
 				goto CONNECTED;
 			close(s);
-			if (!cloop && ctimeout[1] && (errno == error_timeout))
-			{
+			if (!cloop && ctimeout[1] && (errno == error_timeout)) {
 #ifdef IPV6
 				if (!stralloc_catb(&moreaddresses, addresses.s + j, 16))
 #else
 				if (!stralloc_catb(&moreaddresses, addresses.s + j, 4))
 #endif
 					nomem();
-			} else
-			{
+			} else {
 				strnum[fmt_ulong(strnum, portremote)] = 0;
 #ifdef IPV6
 				if (ip6_isv4mapped(addresses.s + j))
@@ -317,7 +313,7 @@ CONNECTED:
 #endif
 		strerr_die2sys(111, FATAL, "unable to get local address: ");
 #ifdef IPV6
-	if (!forcev6 && (ip6_isv4mapped(iplocal) || byte_equal(iplocal, 16, V6any)))
+	if (!forcev6 && (ip6_isv4mapped(iplocal) || byte_equal(iplocal, 16, (char *) V6any)))
 		fakev4 = 1;
 	if (!pathexec_env("PROTO", fakev4 ? "TCP" : "TCP6"))
 		nomem();

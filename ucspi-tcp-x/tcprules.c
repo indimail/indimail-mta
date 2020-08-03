@@ -16,16 +16,16 @@
  * Initial revision
  *
  */
-#include "strerr.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "buffer.h"
-#include "exit.h"
-#include "fmt.h"
-#include "byte.h"
-#include "cdb_make.h"
-#include "open.h"
-#include "scan.h"
+#include <strerr.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <fmt.h>
+#include <byte.h>
+#include <cdb_make.h>
+#include <open.h>
+#include <scan.h>
 #include <unistd.h>
 
 #define FATAL "tcprules: fatal: "
@@ -92,13 +92,9 @@ doaddressdata(void)
 	unsigned long   bot;
 	unsigned long   top;
 
-	if (byte_chr(address.s, address.len, '=') == address.len)
-	{
-		if (byte_chr(address.s, address.len, '@') == address.len)
-		{
-			i = byte_chr(address.s, address.len, '-');
-			if (i < address.len)
-			{
+	if (byte_chr(address.s, address.len, '=') == address.len) {
+		if (byte_chr(address.s, address.len, '@') == address.len) {
+			if ((i = byte_chr(address.s, address.len, '-')) < address.len) {
 				left = byte_rchr(address.s, i, '.');
 				if (left == i)
 					left = 0;
@@ -110,8 +106,7 @@ doaddressdata(void)
 				getnum(address.s + i, right - i, &top);
 				if (top > 255)
 					top = 255;
-				while (bot <= top)
-				{
+				while (bot <= top) {
 					if (!stralloc_copyb(&key, address.s, left))
 						nomem();
 					if (!stralloc_catb(&key, strnum, fmt_ulong(strnum, bot)))
@@ -145,9 +140,8 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to create ", fntemp, ": ");
 	if (cdb_make_start(&c, fd) == -1)
 		die_write();
-	while (match)
-	{
-		if (getln(buffer_0, &line, &match, '\n') == -1)
+	while (match) {
+		if (getln(subfdin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		x = line.s;
 		len = line.len;
@@ -157,8 +151,7 @@ main(int argc, char **argv)
 			continue;
 		if (x[0] == '\n')
 			continue;
-		while (len)
-		{
+		while (len) {
 			ch = x[len - 1];
 			if (ch != '\n' && ch != ' ' && ch != '\t')
 				break;
@@ -166,8 +159,7 @@ main(int argc, char **argv)
 		}
 		line.len = len;			/*- for die_bad() */
 #ifdef IPV6
-		for (colon = 0;;)
-		{
+		for (colon = 0;;) {
 			int             tmp;
 
 			tmp = byte_chr(x + colon, len - colon, ':');
@@ -191,21 +183,18 @@ main(int argc, char **argv)
 			nomem();
 		x += colon + 1;
 		len -= colon + 1;
-		if ((len >= 4) && byte_equal(x, 4, "deny"))
-		{
+		if ((len >= 4) && byte_equal(x, 4, "deny")) {
 			if (!stralloc_catb(&data, "D", 2))
 				nomem();
 			x += 4;
 			len -= 4;
 		} else
-		if ((len >= 5) && byte_equal(x, 5, "allow"))
-		{
+		if ((len >= 5) && byte_equal(x, 5, "allow")) {
 			x += 5;
 			len -= 5;
 		} else
 			die_bad();
-		while (len)
-		{
+		while (len) {
 			switch (*x)
 			{
 			case ',':

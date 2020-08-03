@@ -7,10 +7,10 @@
  * Initial revision
  *
  */
-#include "error.h"
-#include "alloc.h"
-#include "case.h"
-#include "byte.h"
+#include <error.h>
+#include <alloc.h>
+#include <case.h>
+#include <byte.h>
 #include "dns.h"
 
 unsigned int
