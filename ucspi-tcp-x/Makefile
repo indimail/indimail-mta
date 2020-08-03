@@ -117,11 +117,11 @@ compile dns_dtda.c
 	./compile dns_dtda.c
 
 dns_ip.o: \
-compile dns_ip.c dns.h conf-ip
+compile dns_ip.c dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_ip.c
 
 dns_ipq.o: \
-compile dns_ipq.c dns.h conf-ip
+compile dns_ipq.c dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_ipq.c
 
 dns_name.o: \
@@ -129,15 +129,15 @@ compile dns_name.c ip6.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_name.c
 
 dns_nd.o: \
-compile dns_nd.c dns.h conf-ip
+compile dns_nd.c dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_nd.c
 
 dns_packet.o: \
-compile dns_packet.c dns.h
+compile dns_packet.c dns.h haveip6.h
 	./compile dns_packet.c
 
 dns_random.o: \
-compile dns_random.c dns.h
+compile dns_random.c dns.h haveip6.h
 	./compile dns_random.c
 
 dns_rcip.o: \
@@ -154,15 +154,15 @@ compile dns_resolve.c dns.h ip6.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_resolve.c
 
 dns_sortip.o: \
-compile dns_sortip.c dns.h conf-ip
+compile dns_sortip.c dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_sortip.c
 
 dns_transmit.o: \
-compile dns_transmit.c socket.h dns.h conf-ip haveip6.h
+compile dns_transmit.c socket.h dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_transmit.c
 
 dns_txt.o: \
-compile dns_txt.c dns.h
+compile dns_txt.c dns.h haveip6.h
 	./compile dns_txt.c
 
 finger@: \
@@ -173,14 +173,12 @@ warn-auto.sh finger@.sh conf-home
 	chmod 755 finger@
 
 fixcrio: \
-load fixcrio.o unix.a
+load fixcrio.o
 	./load fixcrio -lqmail
 
 fixcrio.o: \
 compile fixcrio.c pathexec.h
 	./compile fixcrio.c
-
-socket.h: haveip6.h
 
 hasmysql.h: \
 choose compile load mysql_config.c hasmysql.h1 hasmysql.h2 mysql_config
@@ -334,12 +332,12 @@ dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
 
 rblsmtpd.o: \
 compile rblsmtpd.c commands.h pathexec.h dns.h \
-ip6.h conf-ip
+haveip6.h ip6.h conf-ip
 	./compile -DMAIN `grep -h -v "^#" conf-ip` rblsmtpd.c
 
 rbl.o: \
 compile rblsmtpd.c commands.h pathexec.h dns.h \
-ip6.h conf-ip
+haveip6.h ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` rblsmtpd.c -o rbl.o
 
 readclose.o: \
@@ -376,35 +374,35 @@ trylsock.c compile load
 	rm -f trylsock.o trylsock
 
 socket_accept.o: \
-compile socket_accept.c socket.h conf-ip
+compile socket_accept.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` socket_accept.c
 
 socket_bind.o: \
-compile socket_bind.c socket.h conf-ip
+compile socket_bind.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` socket_bind.c
 
 socket_conn.o: \
-compile socket_conn.c socket.h conf-ip
+compile socket_conn.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` socket_conn.c
 
 socket_delay.o: \
-compile socket_delay.c socket.h
+compile socket_delay.c socket.h haveip6.h
 	./compile socket_delay.c
 
 socket_listen.o: \
-compile socket_listen.c socket.h
+compile socket_listen.c socket.h haveip6.h
 	./compile socket_listen.c
 
 socket_local.o: \
-compile socket_local.c socket.h conf-ip
+compile socket_local.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` socket_local.c
 
 socket_opts.o: \
-compile socket_opts.c socket.h
+compile socket_opts.c socket.h haveip6.h
 	./compile socket_opts.c
 
 socket_opts6.o: \
-compile socket_opts6.c socket.h
+compile socket_opts6.c socket.h haveip6.h
 	./compile socket_opts6.c
 
 socket_remote.o: \
@@ -412,11 +410,11 @@ compile socket_remote.c socket.h ip6.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` socket_remote.c
 
 socket_tcp.o: \
-compile socket_tcp.c socket.h conf-ip
+compile socket_tcp.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` socket_tcp.c
 
 socket_udp.o: \
-compile socket_udp.c socket.h conf-ip
+compile socket_udp.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` socket_udp.c
 
 systype: find-systype.sh conf-cc conf-ld trycpp.c x86cpuid.c
@@ -444,7 +442,8 @@ pathexec_run.o dns.a unix.a socket.lib
 
 tcpclient.o: \
 compile tcpclient.c ip4.h socket.h pathexec.h \
-timeoutconn.h tcpremoteinfo.h dns.h ip6.h conf-ip
+timeoutconn.h tcpremoteinfo.h dns.h haveip6.h \
+ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` tcpclient.c
 
 tcprules: \
@@ -517,7 +516,7 @@ compile control.c control.h
 	./compile control.c
 
 timeoutconn.o: \
-compile timeoutconn.c socket.h timeoutconn.h conf-ip
+compile timeoutconn.c socket.h haveip6.h timeoutconn.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` timeoutconn.c
 
 unix.a: \
