@@ -45,7 +45,7 @@ case "$1" in
 		set +e
 		${prefix}/bin/svok /service/.svscan/log 2>/dev/null
 		if [ $? -eq 0 ] ; then
-			echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
+			echo "Giving indimail-mta exactly 5 seconds to exit nicely" 1>&2
 			if test -f /lib/systemd/system/svscan.service && test -x /bin/systemctl
 			then
 				/bin/systemctl stop svscan > /dev/null 2>&1 || true
@@ -97,8 +97,8 @@ if [ -s ${qsysconfdir}/indimail-mta-stat.override -a -f /usr/sbin/dpkg-statoverr
 		fi
 	done
 fi
-# Remove IndiMail being started on system boot
-echo "removing indimail startup"
+# Remove indimail-mta being started on system boot
+echo "removing indimail-mta startup"
 $prefix/sbin/svctool --config=rm-boot
 $prefix/sbin/svctool --config=remove-alt
 
