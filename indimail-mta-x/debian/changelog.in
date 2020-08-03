@@ -35,3 +35,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * received.c: added square brackets in the list of safe characters (taken from notqmail)
   * tcpopen.c: fixed typo on error message
   * Removed svscan STATUSFILE
+  * dk-filter.sh: Turn of BOUNCEDOMAIN feature for non-bounce mails
+  * qupgrade.sh, qlocal_upgrade.sh: Reverted interpreter back to #!/bin/sh

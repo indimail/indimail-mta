@@ -64,3 +64,6 @@ Release 2.11 Start 21/05/2020
 35. tcpopen.c: fixed typo on error message
 11/07/2020
 35. Removed svscan STATUSFILE
+30/07/2020
+36. dk-filter.sh: Turn of BOUNCEDOMAIN feature for non-bounce mails
+37. qupgrade.sh, qlocal_upgrade.sh: Reverted interpreter back to #!/bin/sh
