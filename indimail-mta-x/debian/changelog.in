@@ -37,3 +37,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * Removed svscan STATUSFILE
   * dk-filter.sh: Turn of BOUNCEDOMAIN feature for non-bounce mails
   * qupgrade.sh, qlocal_upgrade.sh: Reverted interpreter back to #!/bin/sh
+  * ucspi-tcp: remove duplication of functions an use libqmail
+  * ucspi-tcp: replace buffer library with substdio

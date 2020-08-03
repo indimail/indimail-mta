@@ -67,3 +67,5 @@ Release 2.11 Start 21/05/2020
 30/07/2020
 36. dk-filter.sh: Turn of BOUNCEDOMAIN feature for non-bounce mails
 37. qupgrade.sh, qlocal_upgrade.sh: Reverted interpreter back to #!/bin/sh
+38. ucspi-tcp: remove duplication of functions an use libqmail
+39. ucspi-tcp: replace buffer library with substdio
