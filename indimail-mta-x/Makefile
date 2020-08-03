@@ -2237,7 +2237,7 @@ tlsarralloc.o dns.lib socket.lib
 
 tcp-env.o: \
 compile tcp-env.c strsalloc.h ip.h dns.h remoteinfo.h \
-conf-spf conf-ip
+socket.h haveip6.h conf-spf conf-ip
 	./compile `grep -h -v "^#" conf-spf conf-ip` tcp-env.c
 
 tcpto.o: \

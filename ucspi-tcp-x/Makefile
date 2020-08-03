@@ -105,15 +105,15 @@ dns_resolve.o dns_sortip.o dns_transmit.o dns_txt.o
 	dns_transmit.o dns_txt.o
 
 dns_dfd.o: \
-compile dns_dfd.c
+compile dns_dfd.c dns.h haveip6.h
 	./compile dns_dfd.c
 
 dns_domain.o: \
-compile dns_domain.c haveip6.h
+compile dns_domain.c dns.h haveip6.h
 	./compile dns_domain.c
 
 dns_dtda.o: \
-compile dns_dtda.c
+compile dns_dtda.c dns.h haveip6.h
 	./compile dns_dtda.c
 
 dns_ip.o: \
@@ -125,7 +125,7 @@ compile dns_ipq.c dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_ipq.c
 
 dns_name.o: \
-compile dns_name.c ip6.h haveip6.h conf-ip
+compile dns_name.c ip6.h dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_name.c
 
 dns_nd.o: \
