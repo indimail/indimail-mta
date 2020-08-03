@@ -1,5 +1,8 @@
-#!/usr/bin/sh
+#!/bin/sh
 # $Log: qupgrade.sh,v $
+# Revision 1.10  2020-07-30 11:30:07+05:30  Cprogrammer
+# reverted interpreter back to /bin/sh
+#
 # Revision 1.9  2020-04-27 22:10:27+05:30  Cprogrammer
 # added install routine
 #
@@ -34,7 +37,7 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: qupgrade.sh,v 1.9 2020-04-27 22:10:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: qupgrade.sh,v 1.10 2020-07-30 11:30:07+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
