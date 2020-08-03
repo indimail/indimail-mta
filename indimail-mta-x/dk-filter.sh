@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.27  2020-07-30 11:29:04+05:30  Cprogrammer
+# Use BOUNCEDOMAINS only for bounces
+#
 # Revision 1.26  2020-04-11 08:41:50+05:30  Cprogrammer
 # renamed DKIMDOMAIN to BOUNCEDOMAIN
 #
@@ -81,7 +84,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.26 2020-04-11 08:41:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.27 2020-07-30 11:29:04+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -132,7 +135,7 @@ if [ -z "$NODK" -a -n "$DKSIGN" ] ; then
 	if [ $? -eq 0 ] ; then
 		percent_found=1
 	fi
-	if [ -n "$BOUNCEDOMAIN" ] ; then
+	if [ -n "$BOUNCEDOMAIN" ] && [ -z "$_SENDER" ] ; then
 		dkkeyfn=`echo $DKSIGN | sed s{%{$BOUNCEDOMAIN{g`
 	elif [ ! " $_SENDER" = " " ] ; then
 		# replace '%' in filename with domain
@@ -164,7 +167,7 @@ if [ -z "$NODKIM" -a -n "$DKIMSIGN" ] ; then
 	if [ $? -eq 0 ] ; then
 		percent_found=1
 	fi
-	if [ -n "$BOUNCEDOMAIN" ] ; then
+	if [ -n "$BOUNCEDOMAIN" ] && [ -z "$_SENDER" ] ; then
 		dkimkeyfn=`echo $DKIMSIGN | sed s{%{$BOUNCEDOMAIN{g`
 	elif [ ! " $_SENDER" = " " ] ; then
 		# replace '%' in filename with domain
