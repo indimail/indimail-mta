@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.246 2020-07-23 11:15:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.247 2020-08-03 17:30:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -170,8 +170,9 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 %endif
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
-Requires: coreutils grep /bin/sh glibc openssl libqmail
+Requires: coreutils grep /bin/sh glibc openssl
 Requires: diffutils sed findutils pkgconfig
+Requires: libqmail > 0.2
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 Requires: policycoreutils
@@ -241,6 +242,7 @@ Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
 %package -n ucspi-tcp
 Conflicts: indimail-mta
+Requires: libqmail > 0.2
 Summary: A collection of tools for building TCP client-server applications
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Base
