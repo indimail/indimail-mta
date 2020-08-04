@@ -2,6 +2,9 @@
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
 	autoreconf -fiv
 fi
+if [ ! -f conf-release ] ; then
+	echo 1.1 > conf-release
+fi
 arch=$(uname -m)
 if [ -f /etc/debian_version ] ; then
 	if [ -d /usr/lib/$arch-linux-gnu ] ; then

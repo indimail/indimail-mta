@@ -1,0 +1,163 @@
+#!/bin/sh
+# $Log: $
+#
+# $Id: $
+#
+curdir=`pwd`
+version=$(cat conf-version)
+
+if [ -f /etc/debian_version ] ; then
+	echo "you can't do rpmbuild on an insane system" 1>&2
+	exit 1
+fi
+
+verbose=0
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+	;;
+    *) optarg=
+	;;
+    esac
+
+    case "$1" in
+    --verbose)
+	verbose=1
+    ;;
+    *)
+    echo "invalid option [$1]"
+    read key
+    usage 1
+    ;;
+    esac
+
+    shift
+done
+
+if test -f $HOME/.rpmmacros
+then
+	topdir=`grep ^%_topdir $HOME/.rpmmacros | awk '{print $2}'`
+	if test -n "$topdir"
+	then
+		rpmbuild=$topdir
+	else
+		rpmbuild=$HOME/rpmbuild
+	fi
+else
+	rpmbuild=$HOME/rpmbuild
+fi
+copy_src=0
+echo -n "Copy Source Files - "
+read key
+if [ " $key" = " y" -o " $key" = " Y" ] ; then
+	copy_src=1
+fi
+
+make -s libdkim.spec
+if [ $? -ne 0 ] ; then
+	echo "make failed" 1>&2
+	exit 1
+fi
+
+if [ -d ../stage ] ; then
+	/bin/rm -rf ../stage
+fi
+mkdir ../stage
+if [ $copy_src -eq 1 ] ; then
+cd ..
+/bin/rm -rf stage/libdkim-"$version"
+cp -rp libdkim-x stage/libdkim-"$version"
+cd stage/libdkim-"$version"
+make -s clean
+make -s distclean
+
+/bin/rm -rf autom4te.cache .deps
+cd ..
+echo "Archiving libdkim-"$version".tar.gz in `pwd`"
+tar \
+	--exclude="libdkim-$version/.git" \
+	--exclude="libdkim-$version/debian"  \
+	--exclude="libdkim-$version/RCS" \
+	-cf - libdkim-"$version" \
+	| gzip -c > $rpmbuild/SOURCES/libdkim-"$version".tar.gz
+dist=`uname -r |cut -d . -f4`
+if [ $# -gt 0 ] ; then
+	release=$1
+else
+	if [ -d /usr/include/dkim ] ; then
+		qdist=$(rpm -qf /usr/include/dkim|cut -d- -f4|cut -d. -f3)
+		if [ " $dist" = " $qdist" ] ; then
+			qversion=$(rpm -qf /usr/include/dkim|cut -d- -f3)
+			if [ "$qversion" = "$version" ] ; then
+				release=$(rpm -qf /usr/include/dkim | cut -d- -f4 | cut -d. -f2)
+				release=$(expr $release + 1)
+			else
+				release=1
+			fi
+		else
+			release=1
+		fi
+	else
+		release=1
+	fi
+fi
+cd ..
+/bin/cp -p stage/libdkim-"$version"/libdkim-rpmlintrc $rpmbuild/SOURCES
+else
+	cd ..
+fi
+echo -n "Build RPM for libdkim-"$version"-1."$release" (Y/N) - "
+read key
+if [ " $key" = " Y" -o " $key" = " y" ] ; then
+	cp stage/libdkim-"$version"/libdkim.spec /tmp
+	sed -i -e "s|^Release: .*|Release: 1.$release%{?dist}|g" /tmp/libdkim.spec
+	/bin/rm -rf /tmp/libdkim-"$version"
+	cd $curdir
+	if [ $? -eq 0 ] ; then
+		tmprel=`cat conf-release 2>/dev/null`
+		if [ ! " $tmprel" = " 1.$release" ] ; then
+			echo 1.$release > conf-release
+			make -s libdkim.spec
+			cp libdkim.spec /tmp
+			cd debian
+			make -s
+			cd ..
+		fi
+	fi
+	if [ $verbose -eq 0 ] ; then
+		echo "rpmbuild -ba --clean --quiet /tmp/libdkim.spec"
+		rpmbuild -ba --clean --quiet /tmp/libdkim.spec
+	else
+		echo "rpmbuild -ba --clean /tmp/libdkim.spec"
+		rpmbuild -ba --clean /tmp/libdkim.spec
+	fi
+	if [ $? -eq 0 ] ; then
+		/bin/rm /tmp/libdkim.spec
+		build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
+		rpm --addsign $rpmbuild/RPMS/$build_arch/libdkim-"$version"-"1.$release".$dist.$build_arch.rpm
+		echo -n "RPM lint for libdkim-"$version"-1."$release" (Y/N) - "
+		read key
+		if [ " $key" = " Y" -o " $key" = " y" ] ; then
+			(
+			echo libdkim
+			rpmlint $rpmbuild/RPMS/$build_arch/libdkim-"$version"-"1.$release".$dist.$build_arch.rpm
+			echo ------------------------
+			echo libdkim-devel
+			rpmlint $rpmbuild/RPMS/$build_arch/libdkim-devel-"$version"-"1.$release".$dist.$build_arch.rpm
+			echo ------------------------
+			echo libdkim-"$version"-"1.$release".$dist.src.rpm
+			rpmlint $rpmbuild/SRPMS/libdkim-"$version"-"1.$release".$dist.src.rpm
+			echo ------------------------
+			) 2>&1 | less
+		fi
+	else
+		/bin/rm /tmp/libdkim.spec
+	fi
+else
+	/bin/rm -rf /tmp/libdkim-"$version"
+fi
+echo -n "Remove Source (Y/N) - "
+read key
+if [ " $key" = " Y" -o " $key" = " y" ] ; then
+	/bin/rm -f $rpmbuild/SOURCES/libdkim-"$version".tar.gz $rpmbuild/SOURCES/libdkim-rpmlintrc
+fi

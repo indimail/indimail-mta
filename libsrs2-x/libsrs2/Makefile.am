@@ -5,12 +5,12 @@ ACLOCAL_AMFLAGS=-I m4
 
 include_HEADERS = srs2.h
 noinst_HEADERS = win32.h
-includedir=@prefix@/include/indimail
+includedir=@prefix@/include/srs2
 
 lib_LTLIBRARIES = libsrs2.la
 libsrs2_la_SOURCES = srs2.c sha1.c
-libsrs2_la_LDFLAGS = -version-info @LIBVER@
-libsrs2_la_CFLAGS = -fPIC
+libsrs2_la_LDFLAGS = -version-info @LIBVER@ -pie
+libsrs2_la_CFLAGS = -fPIC -fPIE
 
 srs2.$(OBJEXT): srs2.h win32.h
 
@@ -20,4 +20,4 @@ libtool: $(LIBTOOL_DEPS)
 
 install-data-local:
 	$(mkinstalldirs)  $(DESTDIR)@libdir@
-	$(mkinstalldirs)  $(DESTDIR)@prefix@/include/indimail
+	$(mkinstalldirs)  $(DESTDIR)@prefix@/include/srs2

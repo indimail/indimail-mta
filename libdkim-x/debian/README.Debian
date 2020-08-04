@@ -1,0 +1,15 @@
+Yahoo! Inc. claims patent rights concerning DomainKeys and
+DKIM. Details of the claim can be found at
+<https://datatracker.ietf.org/public/ipr_detail_show.cgi?&ipr_id=693>.
+Their licensing statement from that page reads as follows, as of
+2007-02-30:
+
+"Yahoo! licenses its Necessary Patent Claims contained in the patent(s) and
+patent application(s) disclosed above under either of two separate license
+agreements, one of which is the DomainKeys Patent License Agreement (v1.2), and
+the other is the GNU General Public License v2.0 (and no other version)."
+
+It is believed that this will cause normal users no legal problems, but the 
+packager can't guarantee anything.
+
+For more information about DKIM, see http://mipassoc.org/dkim/

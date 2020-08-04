@@ -1,0 +1,3 @@
+addFilter("W: shlib-policy-name-error .*")
+addFilter("W: shlib-policy-nonversioned-dir .*")
+setBadness('shlib-policy-name-error', 0)

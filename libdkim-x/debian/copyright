@@ -1,0 +1,23 @@
+Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
+Name: libdkim
+Maintainer: Manvendra Bhangui <libdkim@indimail.org>
+Source: https://github.com/mbhangui/indimail-mta
+
+Upstream Author: Alt-N Technologies, http://www.altn.com
+
+Copyright © 2005-2008 Alt-N Technologies, Ltd.
+
+License:
+
+   Licensed under the Apache License, Version 2.0 (the "License"); you
+   may not use this [package] except in compliance with the License.
+
+   This code incorporates intellectual property owned by Yahoo! and
+   licensed pursuant to the Yahoo! DomainKeys Patent License
+   Agreement.
+
+On Debian systems, the full text of the Apache 2.0 license can be
+found in /usr/share/common-licenses/Apache-2.0
+
+The Yahoo! DomainKeys Patent License can be found in the file
+yahoo-patent-license-1.2.txt.gz.

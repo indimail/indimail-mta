@@ -1,14 +1,16 @@
 Source: libsrs2
+Section: libs
 Priority: optional
-Maintainer: Shevek <srs@anarres.org>
-Build-Depends: debhelper (>> 3.0.0), autoconf (>= 2.53-2 ), gcc, perl, perl-modules, file, fileutils
-Standards-Version: 3.5.2
+Maintainer: Manvendra Bhangui <libsrs2@indimail.org>
+Standards-Version: 3.9.5
+Build-Depends: debhelper (>= 9), pkg-config, autoconf (>= 2.53-2 ), gcc, perl, perl-modules, file
+Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x
 
-Package: libsrs2-dev
-Section: devel
+Package: libsrs2
+Section: libs
 Architecture: any
-Depends: libsrs2 (= ${Source-Version})
-Description: Development tools for the libsrs2
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: SRS email address rewriting engine
  libsrs2 is the next generation SRS library. SPF verifies that the
  Sender address of a mail matches (according to some policy) the
  client IP address which submits the mail. When a mail is forwarded,
@@ -16,11 +18,11 @@ Description: Development tools for the libsrs2
  Sender Rewriting Scheme, or SRS, provides a standard for this
  rewriting which is not vulnerable to attacks by spammers.
 
-Package: libsrs2
-Section: libs
+Package: libsrs2-dev
+Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}
-Description: SRS email address rewriting engine
+Depends: libsrs2 (= ${binary:Version}), ${misc:Depends}
+Description: Development tools for the libsrs2
  libsrs2 is the next generation SRS library. SPF verifies that the
  Sender address of a mail matches (according to some policy) the
  client IP address which submits the mail. When a mail is forwarded,

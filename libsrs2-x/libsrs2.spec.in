@@ -1,0 +1,165 @@
+#
+#
+# $Id: indimail-mta.spec.in,v 1.247 2020-08-03 17:30:46+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%global _unpackaged_files_terminate_build 1
+%global debug_package %{nil}
+
+%if %{defined _project}
+# define if building on openSUSE build service
+%global build_on_obs       1
+%global reconfigure_mode   0
+%else
+%define _project           local
+%global build_on_obs       0
+%global reconfigure_mode   0
+%global _hardened_build    1
+%endif
+
+%global _prefix            /usr
+%global mandir             /usr/share/man
+%global _pkg_config_path   /usr/%{_lib}/pkgconfig
+
+%global _verbose           0
+
+%if %build_on_obs == 1
+%global packager Manvendra Bhangui <libsrs2@indimail.org>
+%endif
+
+%if 0%{?suse_version}
+%global dist suse
+%global disttag suse
+%endif
+
+%if 0%{?fedora_version}
+%global dist %{?dist}
+%global disttag fedora
+%endif
+
+Summary: A Flexible SMTP server
+Name: libsrs2
+Version: @version@
+Release: @release@%{?dist}
+
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Libraries
+%else
+Group: System/Libraries
+%endif
+Source0: http://downloads.sourceforge.net/indimail/libsrs2-%{version}.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/libsrs2-rpmlintrc
+
+URL: https://github.com/mbhangui/indimail-mta
+#AutoReqProv: No
+BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
+BuildRequires: findutils diffutils gzip coreutils
+BuildRequires: glibc glibc-devel
+
+##################################### OBS ####################################
+%if %build_on_obs == 1
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
+%endif
+%endif
+##############################################################################
+
+%if %build_on_obs == 1
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+%endif
+Requires: coreutils glibc findutils pkgconfig
+
+
+%description
+libsrs2 is the next generation SRS library. SPF verifies that the Sender
+address of a mail matches (according to some policy) the client IP address
+which submits the mail. When a mail is forwarded, the sender address must
+be rewritten to comply with SPF policy. The Sender Rewriting Scheme, or
+SRS, provides a standard for this rewriting which is not vulnerable to
+attacks by spammers.
+
+%package -n libsrs2-devel
+Summary: Development header files and libraries for libsrs2
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Libraries
+%else
+Group: Development/Tools/Other
+%endif
+Requires: libsrs2 = %{version}
+
+%description -n libsrs2-devel
+This package contains the development header files and libraries
+necessary to applications that incorporates sender rewriting scheme, a part
+of the SPF/SRS protocol pair.
+
+%prep
+%setup -q
+
+%build
+%configure --prefix=%{_prefix} --mandir=%{mandir}
+
+%install
+%if 0%{?build_cflags:1}
+  CFLAGS="%{build_cflags}"
+%else
+  CFLAGS="%{optflags}"
+%endif
+%if 0%{?build_ldflags:1}
+  LDFLAGS="%{build_ldflags} -pie"
+%endif
+%if %{undefined centos_version} && %{undefined rhel_version}
+  CFLAGS="$CFLAGS -ffat-lto-objects"
+%else
+%if %{defined centos_version} && 0%{?centos_version} > 700
+  CFLAGS="$CFLAGS -ffat-lto-objects"
+%endif
+%if %{defined rhel_version} && 0%{?rhel_version} > 700
+  CFLAGS="$CFLAGS -ffat-lto-objects"
+%endif
+%endif
+%{__make} -s %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+%{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
+%{__rm} -f %{buildroot}%{_libdir}/libsrs2.la
+
+%files
+%defattr(-, root, root,-)
+%{_libdir}/libsrs2.so.1
+%{_libdir}/libsrs2.so.1.0.0
+%doc AUTHORS ChangeLog COPYING LICENSE.BSD LICENSE.GPL-2
+%doc %attr(644,root,root)               %{mandir}/man1/srs.1.gz
+
+%attr(755,root,root)                    %{_prefix}/bin/srs
+
+%files devel
+%dir %attr(755,root,root)               %{_prefix}/include/srs2
+%attr(644,root,root)                    %{_prefix}/include/srs2/srs2.h
+%{_libdir}/libsrs2.so
+%{_libdir}/libsrs2.a
+%{_pkg_config_path}/libsrs2.pc
+
+%clean
+[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+
+%post
+argv1=$1
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+if [ "$argv1" -eq 2 ] ; then # upgrade
+  # we are doing upgrade
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    /sbin/ldconfig
+  fi
+fi
+
+%postun
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  /sbin/ldconfig
+fi
+
+%changelog

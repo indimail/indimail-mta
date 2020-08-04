@@ -1,0 +1,12 @@
+Format: 3.0 (quilt)
+Source: libsrs2
+Binary: libsrs2, libsrs2-dev
+Architecture: any
+Version: @version@-@release@
+Maintainer: Manvendra Bhangui <libsrs2@indimail.org>
+Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x
+Debtransform-Release: 1
+Debtransform-Files-Tar: debian.tar.gz
+Debtransform-Tar: libsrs2-@version@.tar.gz
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, autoconf, m4, gawk, pkg-config

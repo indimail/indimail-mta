@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.9  2020-08-04 22:27:54+05:30  Cprogrammer
+ * removed compiler warning
+ *
  * Revision 1.8  2020-08-03 17:21:41+05:30  Cprogrammer
  * use qmail library
  *
@@ -34,10 +37,11 @@
 #include <stralloc.h>
 #include <scan.h>
 #include <env.h>
+#include <unistd.h>
 #include "pathexec.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dlnamespace.c,v 1.8 2020-08-03 17:21:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dlnamespace.c,v 1.9 2020-08-04 22:27:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc namespace = {0};
@@ -156,9 +160,8 @@ dlnamespace(char *fn, unsigned long *id)
 #endif /*- ifdef HASDLMOPEN */
 #endif /*- ifdef LOAD_SHARED_OBJECTS */
 
-extern void write(int, char *, int);
 void
 getversion_dlnamespace_c()
 {
-	write(1, sccsid, 0);
+	if (write(1, sccsid, 0) == -1) ;
 }

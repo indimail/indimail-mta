@@ -23,9 +23,11 @@ AC_PROG_INSTALL
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_MAKE_SET
 AM_PROG_CC_C_O
+PKG_PROG_PKG_CONFIG
+PKG_INSTALLDIR
 
 defaultprefix="/var/indimail"
-LIBVER=0:0:0
+LIBVER=1:0:0
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(defaultprefix)
 AC_SUBST(LIBVER)
@@ -42,7 +44,7 @@ case "$host" in
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	CXXFLAGS="$CXXFLAGS -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
 	STRIP_OPT=-s
 	;;
 *-*-solaris*)
@@ -50,7 +52,7 @@ case "$host" in
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	CXXFLAGS="$CXXFLAGS -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
 	STRIP_OPT=-s
 	;;
 *-*-linux*)
@@ -66,14 +68,14 @@ case "$host" in
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
 	CFLAGS="$CFLAGS -O4 -Wall -pie"
-	CXXFLAGS="$CXXFLAGS -DDARWIN -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -DDARWIN -O4 -Wall -fPIC"
 	STRIP_OPT=-S
 	;;
 *)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	CXXFLAGS="$CXXFLAGS -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
 	STRIP_OPT=-s
 	;;
 esac
@@ -105,5 +107,6 @@ AC_C_INLINE
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strchr strerror strncasecmp])
 
+AC_CONFIG_FILES([libdkim.pc:libdkim.pc.in],[], [])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

@@ -30,6 +30,4 @@ usr/share/man/man8/qmail-inject.8.gz /usr/share/man/man8
 usr/share/man/man8/isendmail.8.gz /usr/share/man/man8
 usr/share/man/man8/isendmail.8.gz /usr/share/man/man8
 usr/share/man/man8/qmail-qmqpc.8.gz /usr/share/man/man8
-usr/@libd@/libsrs2.so.1     /usr/@libd@
-usr/@libd@/libsrs2.so.1.0.0 /usr/@libd@
 

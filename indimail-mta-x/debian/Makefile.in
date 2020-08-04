@@ -8,8 +8,6 @@ mandir=@mandir@
 libexecdir=@libexecdir@
 shareddir=@shareddir@
 logdir=@logdir@
-libdkim_version=@libdkim_version@
-libsrs2_version=@libsrs2_version@
 ucspitcp_version=@ucspitcp_version@
 libdir=/usr/lib
 version=@version@
@@ -36,8 +34,6 @@ edit = sed \
 	-e 's,@libdir\@,$(libdir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
-	-e 's,@libdkim_version\@,$(libdkim_version),g' \
-	-e 's,@libsrs2_version\@,$(libsrs2_version),g' \
 	-e 's,@ucspitcp_version\@,$(ucspitcp_version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@prefix\@,$(prefix),g'

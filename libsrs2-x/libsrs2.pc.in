@@ -1,0 +1,9 @@
+prefix=@prefix@
+exec_prefix=@prefix@
+libdir=@libdir@
+includedir=@prefix@/include
+
+Name: @PACKAGE@
+Description: @PACKAGE_NAME@ - Development header files and libraries for libsrs2
+Version: @VERSION@
+Cflags: @CFLAGS@ 

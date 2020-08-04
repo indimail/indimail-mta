@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.272  2020-08-04 22:13:13+05:30  Cprogrammer
+ * libsrs2, libdkim made as independent packages and moved out of indimail-mta
+ *
  * Revision 1.271  2020-06-14 17:52:32+05:30  Cprogrammer
  * renamed COPYING to COPYING-indimail-mta
  *
@@ -1210,9 +1213,7 @@ hier(inst_dir, fatal, dev_package)
 
 	/* GPLv3 License, Man Pages, Documents */
 	c(auto_shared,     "doc", "COPYING-indimail-mta", auto_uido, 0, 0644);
-	c(auto_shared,     "doc", "LICENSE.libdkim", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "LICENSE.qhpsi", auto_uido, 0, 0644);
-	c(auto_shared,     "doc", "LICENSE.GPL-2.libsrs2", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "softwarelicense1-1.html", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "CREDITS", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "INSTALL-MINI", auto_uido, 0, 0644);
@@ -1234,10 +1235,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "doc", "README.qregex", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "README.queue-fix", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "README.status", auto_uido, 0, 0644);
-	c(auto_shared,     "doc", "README.libdkim", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "README.EXTTODO", auto_uido, 0, 0644);
-	c(auto_shared,     "doc", "AUTHORS.libdkim", auto_uido, 0, 0644);
-	c(auto_shared,     "doc", "AUTHORS.libsrs2", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "FROMISP", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "TOISP", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "AUTOTURN", auto_uido, 0, 0644);
@@ -1519,7 +1517,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.271 2020-06-14 17:52:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.272 2020-08-04 22:13:13+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

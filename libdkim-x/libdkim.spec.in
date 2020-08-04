@@ -1,0 +1,182 @@
+#
+#
+# $Id: indimail-mta.spec.in,v 1.247 2020-08-03 17:30:46+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%global _unpackaged_files_terminate_build 1
+%global debug_package %{nil}
+
+%if %{defined _project}
+# define if building on openSUSE build service
+%global build_on_obs       1
+%global reconfigure_mode   0
+%else
+%define _project           local
+%global build_on_obs       0
+%global reconfigure_mode   0
+%global _hardened_build    1
+%endif
+
+%global _prefix            /usr
+%global mandir             /usr/share/man
+%global docdir             /usr/share/doc/libdkim
+%global _pkg_config_path   /usr/%{_lib}/pkgconfig
+
+%global _verbose           0
+
+%if %build_on_obs == 1
+%global packager Manvendra Bhangui <libdkim@indimail.org>
+%endif
+
+%if 0%{?suse_version}
+%global dist suse
+%global disttag suse
+%endif
+
+%if 0%{?fedora_version}
+%global dist %{?dist}
+%global disttag fedora
+%endif
+
+Summary: A Flexible SMTP server
+Name: libdkim
+Version: @version@
+Release: @release@%{?dist}
+
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Libraries
+%else
+Group: System/Libraries
+%endif
+Source0: http://downloads.sourceforge.net/indimail/libdkim-%{version}.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/libdkim-rpmlintrc
+
+URL: https://github.com/mbhangui/indimail-mta
+#AutoReqProv: No
+BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
+BuildRequires: findutils diffutils gzip coreutils
+BuildRequires: glibc glibc-devel
+BuildRequires: openssl-devel
+
+##################################### OBS ####################################
+%if %build_on_obs == 1
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
+%endif
+%endif
+##############################################################################
+
+%if %build_on_obs == 1
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+%endif
+Requires: coreutils glibc openssl findutils pkgconfig
+
+%description
+DomainKeys Identified Mail (DKIM) defines a domain-level authentication
+framework for email using public-key cryptography and key server technology
+to permit verification of the source and contents of messages by either
+Mail Transport Agents (MTAs) or Mail User Agents (MUAs).
+
+libdkim is a library, developed by Alt-N Technologies, that allows
+incorporating DKIM into an existing MTA or other application. It provides
+full support for signing, verifying, and SSP. See the changelogs for
+information on compliance with specifications.
+
+This package contains the development files needed to compile and link
+programs with libdkim.
+
+%package devel
+Summary: Development header files and static library for libdkim
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Libraries
+%else
+Group: Development/Tools/Other
+%endif
+Requires: libdkim = %{version}
+
+%description devel
+This package contains the development header files and libraries
+necessary to applications that incorporates DKIM signing, DKIM verification
+or both.
+
+%prep
+%setup -q -n libdkim-%{version}
+
+%build
+%configure --prefix=%{_prefix} --mandir=%{mandir}
+
+%install
+%if 0%{?build_cflags:1}
+  CFLAGS="%{build_cflags}"
+%else
+  CFLAGS="%{optflags}"
+%endif
+%if 0%{?build_cxxflags:1}
+  CXXFLAGS="%{build_cxxflags}"
+%else
+  CXXFLAGS="%{optflags}"
+%endif
+%if 0%{?build_ldflags:1}
+  LDFLAGS="%{build_ldflags} -pie"
+%endif
+%if %{undefined centos_version} && %{undefined rhel_version}
+  CFLAGS="$CFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder -ffat-lto-objects"
+  CXXFLAGS="$CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder -ffat-lto-objects"
+%else
+%if %{defined centos_version} && 0%{?centos_version} > 700
+  CFLAGS="$CFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder -ffat-lto-objects"
+  CXXFLAGS="$CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder -ffat-lto-objects"
+%endif
+%if %{defined rhel_version} && 0%{?rhel_version} > 700
+  CFLAGS="$CFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder -ffat-lto-objects"
+  CXXFLAGS="$CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder -ffat-lto-objects"
+%endif
+%endif
+%{__make} -s %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS"
+%{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
+%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
+
+%files
+%defattr(-, root, root,-)
+%{_libdir}/libdkim.so.1
+%{_libdir}/libdkim.so.1.0.0
+%doc AUTHORS COPYING README ChangeLog yahoo-patent-license-1.2.txt
+%doc %attr(644,root,root)               %{mandir}/man8/dkim.8.gz
+
+%attr(755,root,root)                    %{_prefix}/bin/dkim
+
+%files devel
+%dir %attr(755,root,root)               %{_prefix}/include/dkim
+
+%attr(644,root,root)                    %{_prefix}/include/dkim/dkim.h
+%attr(644,root,root)                    %{_prefix}/include/dkim/macros.h
+%{_libdir}/libdkim.so
+%{_libdir}/libdkim.a
+%{_pkg_config_path}/libdkim.pc
+
+%clean
+[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+
+%post
+argv1=$1
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+if [ "$argv1" -eq 2 ] ; then # upgrade
+  # we are doing upgrade
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    /sbin/ldconfig
+  fi
+fi
+
+%postun
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  /sbin/ldconfig
+fi
+
+%changelog

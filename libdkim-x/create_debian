@@ -1,0 +1,18 @@
+#!/bin/sh
+if [ ! -f /etc/debian_version ] ; then
+	echo "Not a debian or ubuntu distribution" 1>&2
+	exit 1
+fi
+make -s -C debian
+libdkim_version=$(cat conf-version)
+echo "Cleaning Stage"
+/bin/rm -rf $HOME/stage/libdkim
+echo "Copying Stage"
+mkdir -p    $HOME/stage/libdkim-$libdkim_version
+cp -rp .    $HOME/stage/libdkim-$libdkim_version
+cd          $HOME/stage/libdkim-$libdkim_version
+dpkg-buildpackage -tc -b
+if [ $? -eq 0 ] ; then
+	/bin/rm -rf $HOME/stage/libdkim-$libdkim_version
+	ls -lt $HOME/stage
+fi

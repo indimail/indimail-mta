@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([libsrs2],m4_normalize(m4_include([conf-version])), [Manvendra Bhangui indimail-mta@indimail.org], libsrs2)
+AC_INIT([libsrs2],m4_normalize(m4_include([conf-version])), [Manvendra Bhangui libsrs2@indimail.org], libsrs2)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_HEADERS([config.h])
@@ -13,6 +13,8 @@ AC_MINIX
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CC_C99
+PKG_PROG_PKG_CONFIG
+PKG_INSTALLDIR
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
@@ -38,21 +40,7 @@ AC_CHECK_HEADERS(strings.h time.h sys/time.h sys/types.h unistd.h)
 AC_CHECK_HEADERS(errno.h sys/select.h sys/socket.h stdarg.h getopt.h)
 AC_CHECK_HEADERS(alloca.h)
 
-dnl AC_CHECK_HEADER(openssl/ssl.h, , [
-dnl 	echo "OpenSSL is required to build this library."
-dnl 	exit 1;
-dnl ])
-
-dnl Checks for libraries.
-dnl Replace `main' with a function in -lcrypto:
-dnl AC_CHECK_LIB(crypto, EVP_sha1, , [
-dnl 	echo "OpenSSL is required to build this library."
-dnl 	exit 1;
-dnl ])
-
-AC_CHECK_LIB(nsl, inet_pton)
 AC_CHECK_LIB(socket, socket)
-AC_CHECK_LIB(resolv, gethostbyname)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -72,4 +60,5 @@ LIBVER=1:0:0
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(LIBVER)
 AC_SUBST(VERSION)
+AC_CONFIG_FILES([libsrs2.pc:libsrs2.pc.in],[], [])
 AC_OUTPUT(libsrs2/Makefile tools/Makefile Makefile)

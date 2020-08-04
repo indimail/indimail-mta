@@ -5,8 +5,6 @@ if [ ! -f /etc/debian_version ] ; then
 fi
 version=$(cat conf-version)
 release=$(cat conf-release)
-libdkim_version=$(cat ../libdkim-x/conf-version)
-libsrs2_version=$(cat ../libsrs2-x/conf-version)
 ucspi_tcp_version=$(cat ../ucspi-tcp-x/conf-version)
 make -s debian/Makefile
 make -s -C debian
@@ -15,8 +13,6 @@ echo "Cleaning Stage"
 mkdir -p              $HOME/stage/indimail-mta
 echo "Copying Stage"
 cp -rp .              $HOME/stage/indimail-mta/indimail-mta-$version
-cp -rp ../libdkim-x   $HOME/stage/indimail-mta/libdkim-$libdkim_version
-cp -rp ../libsrs2-x   $HOME/stage/indimail-mta/libsrs2-$libsrs2_version
 cp -rp ../ucspi-tcp-x $HOME/stage/indimail-mta/ucspi-tcp-$ucspi_tcp_version
 cp -rp ./debian       $HOME/stage/indimail-mta
 cd                    $HOME/stage/indimail-mta

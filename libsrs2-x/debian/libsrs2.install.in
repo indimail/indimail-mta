@@ -1,0 +1,4 @@
+usr/lib/pkgconfig/libsrs2.pc /usr/lib/pkgconfig
+usr/@libd@/*.so.* /usr/@libd@
+usr/bin/srs /usr/bin
+usr/share/man/man1 /usr/share/man

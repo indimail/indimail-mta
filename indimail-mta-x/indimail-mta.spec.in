@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.247 2020-08-03 17:30:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.248 2020-08-04 22:13:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -25,8 +25,6 @@
 %global logdir             @logdir@
 %global servicedir         @servicedir@
 %global plugindir          %{_prefix}/lib/indimail/plugins
-%global libdkim_version    1.5
-%global libsrs2_version    1.0.18
 %global ucspitcp_version   1.0
 %global tcpserver_plugin   1
 %if 0%{?suse_version}
@@ -35,8 +33,6 @@
 %global noperms            0
 %endif
 %global see_base           For a description of IndiMail visit https://github.com/mbhangui/indimail-mta
-%global nolibdkim          0
-%global nolibsrs2          0
 %global nodksignatures     0
 %global notlsarr           0
 
@@ -104,19 +100,13 @@ Group: Productivity/Networking/Email/Servers
 %endif
 Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source2: http://downloads.sourceforge.net/indimail/ucspi-tcp-%{ucspitcp_version}.tar.gz
-%if %nolibdkim == 0
-Source3: http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}.tar.gz
-%endif
-%if %nolibsrs2 == 0
-Source4: http://downloads.sourceforge.net/indimail/libsrs2-%{libsrs2_version}.tar.gz
-%endif
-Source5: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
+Source3: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
-Source7: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
-Source8: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
+Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
+Source5: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
+Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
 %endif
 
@@ -131,7 +121,8 @@ Obsoletes: indimail-mta < 2.0
 BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
 BuildRequires: sed findutils diffutils gzip coreutils grep
 BuildRequires: glibc glibc-devel
-BuildRequires: openssl openssl-devel mysql-devel libqmail-devel libqmail
+BuildRequires: openssl openssl-devel mysql-devel
+BuildRequires: libqmail-devel libdkim-devel libsrs2-devel
 
 ##################################### OBS ####################################
 %if %build_on_obs == 1
@@ -205,9 +196,8 @@ mess822,
 daemontools,
 ucspi-tcp,
 
-The package combines qmail with other packages like libdkim, libsrs2
-
-qmail, daemontools, ucspi-tcp, serialmail, qmailanalog, fastforward, mess822
+The package combines qmail with other packages qmail, daemontools,
+ucspi-tcp, serialmail, qmailanalog, fastforward, mess822
 
 Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
@@ -299,18 +289,11 @@ new message to a central server using QMQP.
 %{see_base}
 
 %prep
-for i in %{name}-%{version} ucspi-tcp-%{ucspitcp_version} \
-libdkim-%{libdkim_version} libsrs2-%{libsrs2_version}
+for i in %{name}-%{version} ucspi-tcp-%{ucspitcp_version}
 do
 (
   if [ -d $i ] ; then
     %{__rm} -rf $i
-  fi
-  if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
-    continue
   fi
   if [ -f ../SOURCES/$i.tar.bz2 ] ; then
     %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 |tar xf -
@@ -360,31 +343,6 @@ echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
 echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-mta@indimail.org\""
 ) > %{name}-release
-#### LIBDKIM ######################
-if [ -d libdkim-%{libdkim_version} ] ; then
-  cd libdkim-%{libdkim_version}
-  if [ %{reconfigure_mode} -eq 1 ] ; then
-    echo "reconfiguring..."
-    %{__mkdir_p} m4
-    aclocal -I m4
-    autoreconf -fiv
-  fi
-  %configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
-  cd ..
-fi
-
-#### LIBSRS2 ######################
-if [ -d libsrs2-%{libsrs2_version} ] ; then
-  cd libsrs2-%{libsrs2_version}
-  if [ %{reconfigure_mode} -eq 1 ] ; then
-    echo "reconfiguring..."
-    %{__mkdir_p} m4
-    aclocal -I m4
-    autoreconf -fiv
-  fi
-  %configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
-  cd ..
-fi
 
 #### qmail ######################
 if [ -d %{name}-%{version} ] ; then
@@ -478,15 +436,7 @@ ID=$(id -u)
 %{__mkdir_p} %{buildroot}%{_prefix}
 # This is needed for to figure out versions e.g.
 # the following 3 lines in indimail-mta/Makefile
-# libdkim_version=$(shell cat ../libdkim-x/conf-version)
-# libsrs2_version=$(shell cat ../libsrs2-x/conf-version)
 # ucspitcp_version=$(shell cat ../ucspi-tcp-x/conf-version)
-if [ -d libdkim-%{libdkim_version} ] ; then
-  ln -s libdkim-%{libdkim_version} libdkim-x
-fi
-if [ -d libsrs2-%{libsrs2_version} ] ; then
-  ln -s libsrs2-%{libsrs2_version} libsrs2-x
-fi
 if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
   ln -s ucspi-tcp-%{ucspitcp_version} ucspi-tcp-x
 fi
@@ -496,15 +446,8 @@ else
   silent_opt=""
 fi
 
-for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} \
-%{name}-%{version} ucspi-tcp-%{ucspitcp_version}
+for i in %{name}-%{version} ucspi-tcp-%{ucspitcp_version}
 do
-  if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
-    continue
-  fi
   if [ -d $i ] ; then
     cd $i
     if [ " $i" = " %{name}-%{version}" -o " $i" = " ucspi-tcp-%{ucspitcp_version}" ] ; then
@@ -551,25 +494,15 @@ install -m 0644 %{name}-%{version}/indimail-mta.te %{buildroot}%{qsysconfdir}/in
 fi
 /bin/rm -f ChangeLog qlocal_upgrade.sh qupgrade.sh %{name}-release %{name}-rpm.info
 
-if [ %nolibdkim -eq 0 ] ; then
-  %{__rm} -f %{buildroot}%{_libdir}/libdkim.la
-  if [ -x /usr/bin/chrpath ] ; then
-    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/dkim
-  fi
-fi
-if [ %nolibsrs2 -eq 0 ] ; then
-  %{__rm} -f %{buildroot}%{_libdir}/libsrs2.la
-  if [ -x /usr/bin/chrpath ] ; then
-    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srsfilter
-    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srs
-  fi
+if [ -x /usr/bin/chrpath ] ; then
+  /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srsfilter
 fi
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
-install -m 644 %{S:6} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
-install -m 644 %{S:7} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+install -m 644 %{S:4} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 %endif
 
@@ -584,21 +517,6 @@ fi
 # remove devel files as we are not building a devel package
 %{__rm} -rf %{buildroot}%{mandir}/man3
 %{__rm} -rf %{buildroot}%{_prefix}/include
-
-if [ %nolibdkim -eq 0 ] ; then
-if [ -x /usr/bin/chrpath ] ; then
-  /usr/bin/chrpath -d %{buildroot}%{_libdir}/libdkim*.so
-fi
-%{__rm} -f  %{buildroot}%{_libdir}/libdkim.a
-%{__rm} -f  %{buildroot}%{_libdir}/libdkim.so
-fi
-if [ %nolibsrs2 -eq 0 ] ; then
-if [ -x /usr/bin/chrpath ] ; then
-  /usr/bin/chrpath -d %{buildroot}%{_libdir}/libsrs2*.so
-fi
-%{__rm} -f  %{buildroot}%{_libdir}/libsrs2.a
-%{__rm} -f  %{buildroot}%{_libdir}/libsrs2.so
-fi
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
@@ -831,9 +749,7 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/822received
 %attr(755,root,root)                    %{_prefix}/bin/qmail-qfilter
 %attr(755,root,root)                    %{_prefix}/bin/spfquery
-%if %nolibsrs2 == 0
 %attr(755,root,root)                    %{_prefix}/bin/srsfilter
-%endif
 %attr(755,root,root)                    %{_prefix}/bin/inotify
 
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-popbull
@@ -1028,13 +944,6 @@ done
 %attr(0751,root,root)                   %{_prefix}/sbin/qmail-daned
 %endif
 
-%if %nolibdkim == 0
-%attr(0755,root,root)                   %{_prefix}/bin/dkim
-%endif
-
-%if %nolibsrs2 == 0
-%attr(0755,root,root)                   %{_prefix}/bin/srs
-%endif
 %attr(0755,root,root)                   %{shareddir}/boot/binm2
 %attr(0755,root,root)                   %{shareddir}/boot/proc+df
 %attr(0755,root,root)                   %{shareddir}/boot/binm1+df
@@ -1059,15 +968,11 @@ done
 %if %build_on_obs == 0
 %license %attr(0644,root,root)          %{shareddir}/doc/COPYING-indimail-mta
 %license %attr(0644,root,root)          %{shareddir}/doc/README.licenses
-%license %attr(0644,root,root)          %{shareddir}/doc/LICENSE.libdkim
 %license %attr(0644,root,root)          %{shareddir}/doc/LICENSE.qhpsi
-%license %attr(0644,root,root)          %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %else
 %attr(0644,root,root)                   %{shareddir}/doc/COPYING-indimail-mta
 %attr(0644,root,root)                   %{shareddir}/doc/README.licenses
-%attr(0644,root,root)                   %{shareddir}/doc/LICENSE.libdkim
 %attr(0644,root,root)                   %{shareddir}/doc/LICENSE.qhpsi
-%attr(0644,root,root)                   %{shareddir}/doc/LICENSE.GPL-2.libsrs2
 %endif
 %attr(0644,root,root)                   %{shareddir}/doc/softwarelicense1-1.html
 %attr(0644,root,root)                   %{shareddir}/doc/INSTALL.alias
@@ -1086,13 +991,10 @@ done
 %attr(0644,root,root)                   %{shareddir}/doc/README.queue-fix
 %attr(0644,root,root)                   %{shareddir}/doc/README.status
 %attr(0644,root,root)                   %{shareddir}/doc/README.recipients
-%attr(0644,root,root)                   %{shareddir}/doc/README.libdkim
 %attr(0644,root,root)                   %{shareddir}/doc/README.logselect
 %attr(0644,root,root)                   %{shareddir}/doc/README.srs
 %attr(0644,root,root)                   %{shareddir}/doc/README.surbl
 %attr(0644,root,root)                   %{shareddir}/doc/README.ucspi-tcp
-%attr(0644,root,root)                   %{shareddir}/doc/AUTHORS.libdkim
-%attr(0644,root,root)                   %{shareddir}/doc/AUTHORS.libsrs2
 %attr(0644,root,root)                   %{shareddir}/doc/CREDITS
 %attr(0644,root,root)                   %{shareddir}/doc/ChangeLog-indimail-mta
 %attr(0644,root,root)                   %{shareddir}/doc/INTERNALS
@@ -1119,17 +1021,6 @@ done
 %verify (not user group mode) %attr(2775, indimail, qmail) %{qmaildir}/autoturn
 %verify (not user group mode) %attr(4551, root, root)      %{_prefix}/sbin/sys-checkpwd
 %endif
-%endif
-
-# Shared libraries (omit for architectures that don't support them)
-%if %nolibdkim == 0
-%{_libdir}/libdkim-%{libdkim_version}.so.0
-%{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
-%endif
-
-%if %nolibsrs2 == 0
-%{_libdir}/libsrs2.so.1
-%{_libdir}/libsrs2.so.1.0.0
 %endif
 
 %files -n daemontools
@@ -1300,11 +1191,6 @@ done
 %attr(0755,root,root)              %{_prefix}/bin/maildirwatch
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
 #
-%if %nolibsrs2 == 0
-%{_libdir}/libsrs2.so.1
-%{_libdir}/libsrs2.so.1.0.0
-%endif
-#
 %attr(0644,root,root)              %{mandir}/man1/forward.1.gz
 %attr(0644,root,root)              %{mandir}/man1/predate.1.gz
 %attr(0644,root,root)              %{mandir}/man1/datemail.1.gz
@@ -1313,9 +1199,7 @@ done
 %attr(0644,root,root)              %{mandir}/man1/maildir2mbox.1.gz
 %attr(0644,root,root)              %{mandir}/man1/maildirwatch.1.gz
 #
-%if %nolibsrs2 == 0
 %attr(0644,root,root)              %{mandir}/man5/qmail-srs.5.gz
-%endif
 #
 %attr(0644,root,root)              %{mandir}/man8/qmail-showctl.8.gz
 %attr(0644,root,root)              %{mandir}/man8/qmail-inject.8.gz
@@ -1324,12 +1208,6 @@ done
 %attr(0644,root,root)              %{mandir}/man8/irmail.8.gz
 
 %attr(0644,root,root)              %{shareddir}/doc/INSTALL-MINI
-%attr(0644,root,root)              %{shareddir}/doc/AUTHORS.libsrs2
-%if %build_on_obs == 0
-%license %attr(0644,root,root)     %{shareddir}/doc/LICENSE.GPL-2.libsrs2
-%else
-%attr(0644,root,root)              %{shareddir}/doc/LICENSE.GPL-2.libsrs2
-%endif
 
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
 # and /var/qmail/control/plusdomain from your central server, so that

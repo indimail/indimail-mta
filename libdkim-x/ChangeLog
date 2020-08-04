@@ -8,10 +8,8 @@ By making, using, selling, offering for sale, importing, and/or sublicensing
 Implementations as permitted, you agree to the terms and conditions of the 
 Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.
 
-----------------------
-1.5
-----------------------
-Changes for IndiMail
+* ChangeLog
+Release 1.5 Start 19/03/2009
 19/03/2009
 1.  Added libdkim-1.0 - DKIM signing/verification library by ALT-N
     technologies. New program dkim for testing dkim signatures
@@ -55,9 +53,18 @@ Changes for IndiMail
 14/06/2019
 27. libdkim - dkim.c, dkimverify.h, dkimbase.cpp, dkimverify.cpp - BUG
     verfication was not honoring body length tag
+24/06/2019
+28. use DKIMDOMAIN only if Return-Path, From, Sender header are empty
 26/06/2019
-28. dkimsign.cpp - use X-Bounced-Address domain for DKIM signing for bounces
+29. dkimsign.cpp - use X-Bounced-Address domain for DKIM signing for bounces
+09/04/2020
+30. check for null domain after DKIMDOMAIN replacement
+10/04/2020
+31. fixed BUG with domain assignment
+11/04/2020
+32. renamed DKKIMDOMAIN to BOUNCEDOMAIN
 
+*
 ----------------------
 1.0.21 
 ----------------------

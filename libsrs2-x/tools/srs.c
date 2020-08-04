@@ -59,19 +59,19 @@
 
 #ifdef HAVE_GETOPT_LONG
 static const struct option	longopts[] = {
-		{ "daemon",			no_argument,		NULL, 'd', },
-		{ "nofork",			no_argument,		NULL, 'x', },
-		{ "socket",			required_argument,	NULL, 's', },
-		{ "separator",		required_argument,	NULL, 'e', },
-		{ "address",		required_argument,	NULL, 'a', },
-		{ "alwaysrewrite",	no_argument,		NULL, 'r', },
-		{ "secret",			required_argument,	NULL, 'k', },
-		{ "secretfile",		required_argument,	NULL, 'f', },
-		{ "forward",		no_argument,		NULL, 'o', },
-		{ "reverse",		no_argument,		NULL, 'v', },
-		{ "alias",			required_argument,	NULL, 'i', },
-		{ "hashlength",		required_argument,	NULL, 'l', },
-		{ "help",			no_argument,		NULL, 'h', },
+		{ "daemon",        no_argument,       NULL, 'd', },
+		{ "nofork",        no_argument,       NULL, 'x', },
+		{ "socket",        required_argument, NULL, 's', },
+		{ "separator",     required_argument, NULL, 'e', },
+		{ "address",       required_argument, NULL, 'a', },
+		{ "alwaysrewrite", no_argument,       NULL, 'r', },
+		{ "secret",        required_argument, NULL, 'k', },
+		{ "secretfile",    required_argument, NULL, 'f', },
+		{ "forward",       no_argument,       NULL, 'o', },
+		{ "reverse",       no_argument,       NULL, 'v', },
+		{ "alias",         required_argument, NULL, 'i', },
+		{ "hashlength",    required_argument, NULL, 'l', },
+		{ "help",          no_argument,       NULL, 'h', },
 		{ 0, 0, 0, 0 },
 	};
 	int		 idx;
@@ -101,8 +101,8 @@ static void
 usage(char *name)
 {
 	fprintf(stderr, "Sender Rewriting Scheme - "
-					"command/daemon interface - "
-				"http://www.libsrs2.org/\n");
+			"command/daemon interface - "
+			"http://www.libsrs2.org/\n");
 	fprintf(stderr, "Usage: %s [options] <address> [...]\n", name);
 	DOC_OPT('e', "separator", "<sep>",
 			"Set the initial SRS separator.", 18, 9);

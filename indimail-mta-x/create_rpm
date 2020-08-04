@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.11  2020-08-04 22:13:07+05:30  Cprogrammer
+# libsrs2, libdkim made as independent packages and moved out of indimail-mta
+#
 # Revision 1.10  2020-07-11 22:07:21+05:30  Cprogrammer
 # fixed return status of rpmbuild getting clobbered
 #
@@ -31,11 +34,9 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.10 2020-07-11 22:07:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.11 2020-08-04 22:13:07+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
-libdkim_version=$(cat ../libdkim-x/conf-version)
-libsrs2_version=$(cat ../libsrs2-x/conf-version)
 ucspitcp_version=$(cat ../ucspi-tcp-x/conf-version)
 
 get_tar_files()
@@ -49,8 +50,6 @@ done
 ) | uniq | sed \
 	-e 's/%{name}/indimail-mta/g' \
 	-e "s/%{version}/$version/g" \
-	-e "s/%{libdkim_version}/$libdkim_version/g" \
-	-e "s/%{libsrs2_version}/$libsrs2_version/g" \
 	-e "s/%{ucspitcp_version}/$ucspitcp_version/g"
 }
 
@@ -65,8 +64,6 @@ done
 ) | sort -u | sed \
 	-e 's/%{name}/indimail-mta/g' \
 	-e "s/%{version}/$version/g" \
-	-e "s/%{libdkim_version}/$libdkim_version/g" \
-	-e "s/%{libsrs2_version}/$libsrs2_version/g" \
 	-e "s/%{ucspitcp_version}/$ucspitcp_version/g"
 }
 
@@ -162,52 +159,6 @@ do
 			-cf - indimail-mta-"$version" \
 			| gzip -c > $rpmbuild/SOURCES/indimail-mta-"$version".tar.gz
 		SRC="$rpmbuild/SOURCES/indimail-mta-"$version".tar.gz $SRC"
-		cd ..
-		continue
-		;;
-		libdkim-$libdkim_version)
-		if [ ! -d libdkim-x ] ; then
-			echo "$i: No such file or directory" 1>&2
-			exit 1
-		fi
-		echo "Preparing libdkim-"$libdkim_version""
-		/bin/cp -rp libdkim-x stage/libdkim-"$libdkim_version"
-		cd stage/libdkim-"$libdkim_version"
-		echo "Cleaning libdkim-$libdkim_version"
-		make -s clean > /dev/null
-		make -s distclean > /dev/null
-		/bin/rm -rf autom4te.cache .deps
-		cd ..
-		tar \
-			--exclude="libdkim-$libdkim_version/.git" \
-			--exclude="libdkim-$libdkim_version/debian" \
-			--exclude="libdkim-$libdkim_version/RCS" \
-			-cf - libdkim-"$libdkim_version" \
-			| gzip -c > $rpmbuild/SOURCES/libdkim-"$libdkim_version".tar.gz
-		SRC="$rpmbuild/SOURCES/libdkim-"$libdkim_version".tar.gz $SRC"
-		cd ..
-		continue
-		;;
-		libsrs2-$libsrs2_version)
-		if [ ! -d libsrs2-x ] ; then
-			echo "$i: No such file or directory" 1>&2
-			exit 1
-		fi
-		echo "Preparing libsrs2-"$libsrs2_version""
-		/bin/cp -rp libsrs2-x stage/libsrs2-"$libsrs2_version"
-		cd stage/libsrs2-"$libsrs2_version"
-		echo "Cleaning libsrs2-$libsrs2_version"
-		make -s clean > /dev/null
-		make -s distclean > /dev/null
-		/bin/rm -rf autom4te.cache .deps
-		cd ..
-		tar \
-			--exclude="libsrs2-$libsrs2_version/.git" \
-			--exclude="libsrs2-$libsrs2_version/debian" \
-			--exclude="libsrs2-$libsrs2_version/RCS" \
-			-cf - libsrs2-"$libsrs2_version" \
-			| gzip -c > $rpmbuild/SOURCES/libsrs2-"$libsrs2_version".tar.gz
-		SRC="$rpmbuild/SOURCES/libsrs2-"$libsrs2_version".tar.gz $SRC"
 		cd ..
 		continue
 		;;

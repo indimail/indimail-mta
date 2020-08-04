@@ -1,0 +1,3 @@
+usr/include/srs2 /usr/include
+usr/@libd@/libsrs2.a /usr/@libd@
+usr/@libd@/*.so       /usr/@libd@
