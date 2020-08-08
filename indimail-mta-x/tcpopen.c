@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.7  2020-08-08 10:54:03+05:30  Cprogrammer
+ * added missing return on connect() failure
+ *
  * Revision 1.6  2020-07-03 22:21:10+05:30  Cprogrammer
  * fixed SIGSEGV if a readonly string was used for host
  *
@@ -182,7 +185,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				}
 			}
 			for (errno = 0;;) {
-				if ((retval = connect(fd, res->ai_addr, res->ai_addrlen)) != -1)
+				if (!(retval = connect(fd, res->ai_addr, res->ai_addrlen)))
 					break;
 				else {
 #ifdef ERESTART
@@ -193,18 +196,18 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 						continue;
 					if (errno == ECONNREFUSED) {
 						if (sleeptime <= MAXSLEEP) {
+							(void) close(fd);
 							if (sleeptime)
 								(void) sleep(sleeptime);
 							else
 								(void) sleep(5);
 							sleeptime += sleeptime;
-							(void) close(fd);
 							errno = ECONNREFUSED;
 							break;
 						} else {
 							(void) close(fd);
-							errno = ECONNREFUSED;
 							freeaddrinfo(res0);
+							errno = ECONNREFUSED;
 							return (-1);
 						}
 					}	/*- if (errno == ECONNREFUSED) */
@@ -282,7 +285,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 #endif
 		/*- Connect to the server. */
 		for (errno = 0;;) {
-			if ((retval = connect(fd, (struct sockaddr *) &tcp_srv_addr, sizeof(tcp_srv_addr))) != -1)
+			if (!(retval = connect(fd, (struct sockaddr *) &tcp_srv_addr, sizeof(tcp_srv_addr))))
 				break;
 			else {
 #ifdef ERESTART
@@ -317,6 +320,8 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	 		break;
 	} /*- for (;;) */
 #endif /*- #if defined(LIBC_HAS_IP6) && defined(IPV6) */
+	if (!fd)
+		return (-1);
 	linger.l_onoff = 1;
 	linger.l_linger = 1;
 	if (setsockopt(fd, SOL_SOCKET, SO_LINGER, (char *) &linger, sizeof(linger)) == -1) {
@@ -337,6 +342,6 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.6 2020-07-03 22:21:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.7 2020-08-08 10:54:03+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
