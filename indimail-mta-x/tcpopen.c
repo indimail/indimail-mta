@@ -320,7 +320,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	 		break;
 	} /*- for (;;) */
 #endif /*- #if defined(LIBC_HAS_IP6) && defined(IPV6) */
-	if (!fd)
+	if (fd == -1)
 		return (-1);
 	linger.l_onoff = 1;
 	linger.l_linger = 1;
