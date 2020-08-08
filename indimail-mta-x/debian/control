@@ -30,6 +30,9 @@ Package: daemontools
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils
 Description: daemontools is a collection of tools for managing UNIX services. 
+ svscan scans a directory and starts a supervise process for each
+ subdirectory of the scanned directory. It restarts the supervise process if
+ it dies.
  .
  supervise monitors a service. It starts the service and restarts the
  service if it dies. Setting up a new service is easy: all supervise
