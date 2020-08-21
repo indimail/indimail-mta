@@ -362,7 +362,7 @@ the following conents
 
 ```
 $ sudo /bin/bash
-# cat > /etc/apt/preferences.d/preferences with <<EOF
+# cat > /etc/apt/preferences.d/preferences <<EOF
 Package: *
 Pin: origin download.opensuse.org
 Pin-Priority: 1001
