@@ -1,5 +1,8 @@
 /*
  * $Log: syncdir.c,v $
+ * Revision 1.7  2020-08-21 22:35:07+05:30  Cprogrammer
+ * syncdir.c: fix for missing SYS_open, SYS_link, SYS_unlink, SYS_rename (use SYS_openat, SYS_linkat, SYS_renameat syscalls)
+ *
  * Revision 1.6  2008-07-25 16:52:25+05:30  Cprogrammer
  * port for darwin
  *
@@ -53,11 +56,27 @@
 #include <unistd.h>
 #include "env.h"
 
+#if defined(SYS_openat) && defined(AT_FDCWD)
+#define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_openat, AT_FDCWD, FILE, FLAG, MODE)
+#else
 #define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_open, FILE, FLAG, MODE)
+#endif
 #define SYS_CLOSE(FD) syscall(SYS_close, FD)
+#if defined(SYS_linkat) && defined(AT_FDCWD)
+#define SYS_LINK(OLD,NEW) syscall(SYS_linkat, AT_FDCWD, OLD, NEW)
+#else
 #define SYS_LINK(OLD,NEW) syscall(SYS_link, OLD, NEW)
+#endif
+#if defined(SYS_unlinkat) && defined(AT_FDCWD)
+#define SYS_UNLINK(PATH) syscall(SYS_unlinkat, AT_FDCWD, PATH)
+#else
 #define SYS_UNLINK(PATH) syscall(SYS_unlink, PATH)
+#endif
+#if defined(SYS_renameat) && defined(AT_FDCWD)
+#define SYS_RENAME(OLD,NEW) syscall(SYS_renameat, AT_FDCWD, OLD, NEW)
+#else
 #define SYS_RENAME(OLD,NEW) syscall(SYS_rename, OLD, NEW)
+#endif
 #define SYS_FSYNC(FD) syscall(SYS_fsync, FD)
 
 int             use_fsync = 0;
@@ -170,7 +189,7 @@ int             use_fsync = 0;
 void
 getversion_syncdir_c()
 {
-	static char    *x = "$Id: syncdir.c,v 1.6 2008-07-25 16:52:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: syncdir.c,v 1.7 2020-08-21 22:35:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
