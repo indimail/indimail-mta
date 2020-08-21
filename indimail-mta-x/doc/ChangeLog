@@ -69,3 +69,6 @@ Release 2.11 Start 21/05/2020
 37. qupgrade.sh, qlocal_upgrade.sh: Reverted interpreter back to #!/bin/sh
 38. ucspi-tcp: remove duplication of functions an use libqmail
 39. ucspi-tcp: replace buffer library with substdio
+21/08/2020
+40. syncdir.c: fix for missing SYS_open, SYS_link, SYS_unlink, SYS_rename (use
+    SYS_openat, SYS_linkat, SYS_renameat syscalls)
