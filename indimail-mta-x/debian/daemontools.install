@@ -31,7 +31,6 @@ usr/sbin/svctool /usr/sbin
 usr/sbin/docker-entrypoint /usr/sbin
 usr/share/indimail/boot/upstart /usr/share/indimail/boot
 usr/share/indimail/boot/systemd /usr/share/indimail/boot
-
 usr/libexec/indimail/svscanboot /usr/libexec/indimail
 etc/indimail/daemontools_perm_list /etc/indimail
 usr/share/man/man1/spipe.1.gz /usr/share/man/man1
