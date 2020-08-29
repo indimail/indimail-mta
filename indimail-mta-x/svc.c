@@ -1,5 +1,8 @@
 /*
  * $Log: svc.c,v $
+ * Revision 1.6  2020-08-29 08:41:22+05:30  Cprogrammer
+ * new option 'G' to send signal to entire process group
+ *
  * Revision 1.5  2020-06-10 17:37:42+05:30  Cprogrammer
  * new option restart (stop and restart) a service
  *
@@ -45,11 +48,12 @@ main(int argc, char **argv)
 	char           *dir;
 
 	sig_ignore(sig_pipe);
-	while ((opt = getopt(argc, argv, "udropchUaitkxq12")) != opteof) {
+	while ((opt = getopt(argc, argv, "udropchUaitkxq12G")) != opteof) {
 		if (opt == '?')
 			strerr_die1x(100,
 				 "svc options: u up, d down, r restart, o once, x exit, p pause, c continue h hup\n"
-				 "             a alarm, i interrupt, t term, k kill, q quit, U | 1 SIGUSR1, 2 SIGUSR2");
+				 "             a alarm, i interrupt, t term, k kill, q quit, U|1 SIGUSR1, 2 SIGUSR2\n"
+				 "             G process group");
 		else
 		if (datalen < sizeof data) {
 			if (byte_chr(data, datalen, opt) == datalen)
@@ -88,7 +92,7 @@ main(int argc, char **argv)
 void
 getversion_svc_c()
 {
-	static char    *x = "$Id: svc.c,v 1.5 2020-06-10 17:37:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svc.c,v 1.6 2020-08-29 08:41:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

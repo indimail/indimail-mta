@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.8  2020-08-29 08:38:51+05:30  Cprogrammer
+ * new option 'G' to send signal to entire process group
+ *
  * Revision 1.7  2020-06-10 17:37:21+05:30  Cprogrammer
  * new option 'r' to restart (stop & start) a service
  *
@@ -166,7 +169,7 @@ doit(void)
 	iopause_fd      x[2];
 	struct taia     deadline;
 	struct taia     stamp;
-	int             wstat, r, t;
+	int             wstat, r, t, g = 0;
 	char            ch, c = 0;
 
 	announce();
@@ -208,15 +211,18 @@ doit(void)
 		if (read(fdcontrol, &ch, 1) == 1) {
 			switch (ch)
 			{
+			case 'G':
+				g = 1;
+				break;
 			case 'r':
 				flagwant = 1;
 				flagwantup = 1;
 				if (pid) {
 					if (!access(*shutdown, F_OK))
 						trystop(); /*- run the shutdown command */
-					kill(pid, SIGTERM);
-					kill(pid, SIGCONT);
-					flagpaused = 0;
+					kill(g ? 0 - pid : pid, SIGTERM);
+					kill(g ? 0 - pid : pid, SIGCONT);
+					g = flagpaused = 0;
 				}
 				t = pid;
 				while (c < 10) {
@@ -237,9 +243,9 @@ doit(void)
 				if (pid) {
 					if (!access(*shutdown, F_OK))
 						trystop(); /*- run the shutdown command */
-					kill(pid, SIGTERM);
-					kill(pid, SIGCONT);
-					flagpaused = 0;
+					kill(g ? 0 - pid : pid, SIGTERM);
+					kill(g ? 0 - pid : pid, SIGCONT);
+					g = flagpaused = 0;
 				}
 				announce();
 				break;
@@ -257,57 +263,77 @@ doit(void)
 					trystart();
 				break;
 			case 'a':
-				if (pid)
-					kill(pid, SIGALRM);
+				if (pid) {
+					kill(g ? 0 - pid : pid, SIGALRM);
+					g = 0;
+				}
 				break;
 			case 'h':
-				if (pid)
-					kill(pid, SIGHUP);
+				if (pid) {
+					kill(g ? 0 - pid : pid, SIGHUP);
+					g = 0;
+				}
 				break;
 			case 'k':
-				if (pid)
-					kill(pid, SIGKILL);
+				if (pid) {
+					kill(g ? 0 - pid : pid, SIGKILL);
+					g = 0;
+				}
 				break;
 			case 't':
-				if (pid)
-					kill(pid, SIGTERM);
+				if (pid) {
+					kill(g ? 0 - pid : pid, SIGTERM);
+					g = 0;
+				}
 				break;
 			case 'i':
-				if (pid)
-					kill(pid, SIGINT);
+				if (pid) {
+					kill(g ? 0 - pid : pid, SIGINT);
+					g = 0;
+				}
 				break;
 			case 'q':
-				if (pid)
-					kill(pid,SIGQUIT);
+				if (pid) {
+					kill(g ? 0 - pid : pid,SIGQUIT);
+					g = 0;
+				}
 				break;
 			case 'U':
 			case '1':
-				if (pid)
-					kill(pid,SIGUSR1);
+				if (pid) {
+					kill(g ? 0 - pid : pid,SIGUSR1);
+					g = 0;
+				}
 				break;
 			case '2':
-				if (pid)
-					kill(pid,SIGUSR2);
+				if (pid) {
+					kill(g ? 0 - pid : pid,SIGUSR2);
+					g = 0;
+				}
 				break;
 			case 'p':
 				flagpaused = 1;
 				announce();
-				if (pid)
-					kill(pid, SIGSTOP);
+				if (pid) {
+					kill(g ? 0 - pid : pid, SIGSTOP);
+					g = 0;
+				}
 				break;
 			case 'c':
 				flagpaused = 0;
 				announce();
-				if (pid)
-					kill(pid, SIGCONT);
+				if (pid) {
+					kill(g ? 0 - pid : pid, SIGCONT);
+					g = 0;
+				}
 				break;
 			case 'x':
 				flagexit = 1;
 				announce();
 				break;
-			}
-		}
-	}
+			} /*- switch (ch) */
+		} /*- if (read(fdcontrol, &ch, 1) == 1) */
+	} /* for (;;) */
 }
 
 int
@@ -362,7 +388,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.7 2020-06-10 17:37:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.8 2020-08-29 08:38:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
