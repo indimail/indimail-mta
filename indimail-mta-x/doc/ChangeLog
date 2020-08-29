@@ -72,3 +72,5 @@ Release 2.11 Start 21/05/2020
 21/08/2020
 40. syncdir.c: fix for missing SYS_open, SYS_link, SYS_unlink, SYS_rename (use
     SYS_openat, SYS_linkat, SYS_renameat syscalls)
+29/08/2020
+41. svc, supervise: new option 'G' to send signal to entire process group
