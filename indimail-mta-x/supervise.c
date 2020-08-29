@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.9  2020-08-29 11:50:27+05:30  Cprogrammer
+ * send signal to process id after sending signal to process group id
+ *
  * Revision 1.8  2020-08-29 08:38:51+05:30  Cprogrammer
  * new option 'G' to send signal to entire process group
  *
@@ -222,6 +225,10 @@ doit(void)
 						trystop(); /*- run the shutdown command */
 					kill(g ? 0 - pid : pid, SIGTERM);
 					kill(g ? 0 - pid : pid, SIGCONT);
+					if (g) {
+						kill(pid, SIGTERM);
+						kill(pid, SIGCONT);
+					}
 					g = flagpaused = 0;
 				}
 				t = pid;
@@ -245,6 +252,10 @@ doit(void)
 						trystop(); /*- run the shutdown command */
 					kill(g ? 0 - pid : pid, SIGTERM);
 					kill(g ? 0 - pid : pid, SIGCONT);
+					if (g) {
+						kill(pid, SIGTERM);
+						kill(pid, SIGCONT);
+					}
 					g = flagpaused = 0;
 				}
 				announce();
@@ -265,36 +276,48 @@ doit(void)
 			case 'a':
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGALRM);
+					if (g)
+						kill(pid, SIGALRM);
 					g = 0;
 				}
 				break;
 			case 'h':
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGHUP);
+					if (g)
+						kill(pid, SIGHUP);
 					g = 0;
 				}
 				break;
 			case 'k':
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGKILL);
+					if (g)
+						kill(pid, SIGKILL);
 					g = 0;
 				}
 				break;
 			case 't':
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGTERM);
+					if (g)
+						kill(pid, SIGTERM);
 					g = 0;
 				}
 				break;
 			case 'i':
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGINT);
+					if (g)
+						kill(pid, SIGINT);
 					g = 0;
 				}
 				break;
 			case 'q':
 				if (pid) {
 					kill(g ? 0 - pid : pid,SIGQUIT);
+					if (g)
+						kill(pid,SIGQUIT);
 					g = 0;
 				}
 				break;
@@ -302,12 +325,16 @@ doit(void)
 			case '1':
 				if (pid) {
 					kill(g ? 0 - pid : pid,SIGUSR1);
+					if (g)
+						kill(pid,SIGUSR1);
 					g = 0;
 				}
 				break;
 			case '2':
 				if (pid) {
 					kill(g ? 0 - pid : pid,SIGUSR2);
+					if (g)
+						kill(pid,SIGUSR2);
 					g = 0;
 				}
 				break;
@@ -316,6 +343,8 @@ doit(void)
 				announce();
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGSTOP);
+					if (g)
+						kill(pid, SIGSTOP);
 					g = 0;
 				}
 				break;
@@ -324,6 +353,8 @@ doit(void)
 				announce();
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGCONT);
+					if (g)
+						kill(pid, SIGCONT);
 					g = 0;
 				}
 				break;
@@ -388,7 +419,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.8 2020-08-29 08:38:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.9 2020-08-29 11:50:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
