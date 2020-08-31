@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.273  2020-08-31 09:05:53+05:30  Cprogrammer
+ * moved fghack, pgrphack, supervise to sbin
+ *
  * Revision 1.272  2020-08-04 22:13:13+05:30  Cprogrammer
  * libsrs2, libdkim made as independent packages and moved out of indimail-mta
  *
@@ -1061,12 +1064,9 @@ hier(inst_dir, fatal, dev_package)
 	/* daemontools */
 	c(auto_prefix, "bin", "envdir", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "envuidgid", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "fghack", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "pgrphack", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "setlock", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "setuidgid", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "softlimit", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "supervise", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "svc", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "svok", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "svstat", auto_uido, 0, moder_x);
@@ -1083,9 +1083,12 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "qlogselect", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "udpclient", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "svscan", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "supervise", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "readproctitle", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "udplogger", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "multilog", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "fghack", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "pgrphack", auto_uido, 0, moder_x);
 
 	/* serialmail */
 	c(auto_prefix, "bin", "serialcmd", auto_uido, 0, moder_x);
@@ -1517,7 +1520,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.272 2020-08-04 22:13:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.273 2020-08-31 09:05:53+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.249 2020-08-08 10:53:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.250 2020-08-31 09:06:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -454,22 +454,17 @@ for i in %{name}-%{version} ucspi-tcp-%{ucspitcp_version}
 do
   if [ -d $i ] ; then
     cd $i
-    if [ " $i" = " %{name}-%{version}" -o " $i" = " ucspi-tcp-%{ucspitcp_version}" ] ; then
-      # rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
-      %if 0%{?build_cflags:1}
-        CFLAGS="%{build_cflags}"
-      %else
-        CFLAGS="%{optflags}"
-      %endif
-      %if 0%{?build_ldflags:1}
-        LDFLAGS="%{build_ldflags} $LDFLAGS"
-      %endif
-      %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
-      %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install-strip
-    else
-      %{__make} "$silent_opt" %{?_smp_mflags}
-      %{__make} "$silent_opt" %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
-    fi
+    # rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
+    %if 0%{?build_cflags:1}
+      CFLAGS="%{build_cflags}"
+    %else
+      CFLAGS="%{optflags}"
+    %endif
+    %if 0%{?build_ldflags:1}
+      LDFLAGS="%{build_ldflags} $LDFLAGS"
+    %endif
+    %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+    %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install-strip
     cd ..
   else
     echo "$i: No such file or directory" 1>&2
@@ -901,12 +896,9 @@ done
 # daemontools
 %attr(0755,root,root)                   %{_prefix}/bin/envdir
 %attr(0755,root,root)                   %{_prefix}/bin/envuidgid
-%attr(0755,root,root)                   %{_prefix}/bin/fghack
-%attr(0755,root,root)                   %{_prefix}/bin/pgrphack
 %attr(0755,root,root)                   %{_prefix}/bin/setlock
 %attr(0755,root,root)                   %{_prefix}/bin/setuidgid
 %attr(0755,root,root)                   %{_prefix}/bin/softlimit
-%attr(0755,root,root)                   %{_prefix}/bin/supervise
 %attr(0755,root,root)                   %{_prefix}/bin/svc
 %attr(0755,root,root)                   %{_prefix}/bin/svok
 %attr(0755,root,root)                   %{_prefix}/bin/svstat
@@ -922,9 +914,12 @@ done
 %attr(0755,root,root)                   %{_prefix}/bin/logselect
 %attr(0755,root,root)                   %{_prefix}/bin/qlogselect
 %attr(0751,root,root)                   %{_prefix}/sbin/svscan
+%attr(0755,root,root)                   %{_prefix}/sbin/supervise
 %attr(0755,root,root)                   %{_prefix}/sbin/readproctitle
 %attr(0755,root,root)                   %{_prefix}/sbin/multilog
 %attr(0755,root,root)                   %{_prefix}/sbin/docker-entrypoint
+%attr(0755,root,root)                   %{_prefix}/sbin/fghack
+%attr(0755,root,root)                   %{_prefix}/sbin/pgrphack
 
 # ucspi-tcp
 %attr(0755,root,root)                   %{_prefix}/bin/mconnect-io
@@ -1050,12 +1045,9 @@ done
 
 %attr(0755,root,root)                   %{_prefix}/bin/envdir
 %attr(0755,root,root)                   %{_prefix}/bin/envuidgid
-%attr(0755,root,root)                   %{_prefix}/bin/fghack
-%attr(0755,root,root)                   %{_prefix}/bin/pgrphack
 %attr(0755,root,root)                   %{_prefix}/bin/setlock
 %attr(0755,root,root)                   %{_prefix}/bin/setuidgid
 %attr(0755,root,root)                   %{_prefix}/bin/softlimit
-%attr(0755,root,root)                   %{_prefix}/bin/supervise
 %attr(0755,root,root)                   %{_prefix}/bin/svc
 %attr(0755,root,root)                   %{_prefix}/bin/svok
 %attr(0755,root,root)                   %{_prefix}/bin/svstat
@@ -1072,9 +1064,12 @@ done
 %attr(0755,root,root)                   %{_prefix}/bin/qlogselect
 %attr(0755,root,root)                   %{_prefix}/bin/qmailctl
 %attr(0751,root,root)                   %{_prefix}/sbin/svscan
+%attr(0755,root,root)                   %{_prefix}/sbin/supervise
 %attr(0755,root,root)                   %{_prefix}/sbin/readproctitle
 %attr(0755,root,root)                   %{_prefix}/sbin/multilog
 %attr(0755,root,root)                   %{_prefix}/sbin/svctool
+%attr(0755,root,root)                   %{_prefix}/sbin/fghack
+%attr(0755,root,root)                   %{_prefix}/sbin/pgrphack
 
 %attr(0755,root,root)                   %{libexecdir}/svscanboot
 
