@@ -1,11 +1,8 @@
 usr/bin/envdir /usr/bin
 usr/bin/envuidgid /usr/bin
-usr/bin/fghack /usr/bin
-usr/bin/pgrphack /usr/bin
 usr/bin/setlock /usr/bin
 usr/bin/setuidgid /usr/bin
 usr/bin/softlimit /usr/bin
-usr/bin/supervise /usr/bin
 usr/bin/svc /usr/bin
 usr/bin/svok /usr/bin
 usr/bin/svstat /usr/bin
@@ -28,6 +25,9 @@ usr/sbin/multilog /usr/sbin
 usr/sbin/readproctitle /usr/sbin
 usr/sbin/svscan /usr/sbin
 usr/sbin/svctool /usr/sbin
+usr/sbin/supervise /usr/bin
+usr/sbin/fghack /usr/bin
+usr/sbin/pgrphack /usr/bin
 usr/sbin/docker-entrypoint /usr/sbin
 usr/share/indimail/boot/upstart /usr/share/indimail/boot
 usr/share/indimail/boot/systemd /usr/share/indimail/boot
