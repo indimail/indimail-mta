@@ -41,3 +41,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * ucspi-tcp: replace buffer library with substdio
   * syncdir.c: fix for missing SYS_open, SYS_link, SYS_unlink, SYS_rename (use SYS_openat, SYS_linkat, SYS_renameat syscalls)
   * svc, supervise: new option 'G' to send signal to entire process group
+  * moved fghack, pgrphack, supervise to sbin

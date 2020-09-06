@@ -74,3 +74,5 @@ Release 2.11 Start 21/05/2020
     SYS_openat, SYS_linkat, SYS_renameat syscalls)
 29/08/2020
 41. svc, supervise: new option 'G' to send signal to entire process group
+31/08/2020
+42. moved fghack, pgrphack, supervise to sbin
