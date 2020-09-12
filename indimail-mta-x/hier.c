@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.274  2020-09-13 01:22:55+05:30  Cprogrammer
+ * fixed bin, sbin permissions
+ *
  * Revision 1.273  2020-08-31 09:05:53+05:30  Cprogrammer
  * moved fghack, pgrphack, supervise to sbin
  *
@@ -848,8 +851,8 @@ hier(inst_dir, fatal, dev_package)
 		moder_t = 0550;
 		moder_s = 0555;
 	}
-	d(auto_prefix,     "bin", uidr, gidr, 0555);
-	d(auto_prefix,     "sbin", uidr, gidr, 0555);
+	d(auto_prefix,     "bin", uidr, gidr, 0755);
+	d(auto_prefix,     "sbin", uidr, gidr, 0755);
 
 	d(auto_qmail_home, "queue", auto_uido, auto_gidq, 0755);
 	d(auto_libexec,    "qfilters", auto_uido, 0, 0555);
@@ -1520,7 +1523,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.273 2020-08-31 09:05:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.274 2020-09-13 01:22:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
