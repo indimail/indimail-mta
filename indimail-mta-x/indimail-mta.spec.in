@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.250 2020-08-31 09:06:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.251 2020-09-13 01:23:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -8,11 +8,9 @@
 %if %{defined _project}
 # define if building on openSUSE build service
 %global build_on_obs       1
-%global reconfigure_mode   0
 %else
 %define _project           local
 %global build_on_obs       0
-%global reconfigure_mode   0
 %global _hardened_build    1
 %endif
 
@@ -111,7 +109,7 @@ Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
 
 URL: https://github.com/mbhangui/indimail-mta
-#AutoReqProv: No
+AutoReq: Yes
 Conflicts: indimail-mini
 Conflicts: daemontools
 Conflicts: ucspi-tcp
@@ -152,18 +150,10 @@ PreReq: permissions
 %endif
 %endif
 
-# rpm -qf /bin/ls
-# rpm -qp --queryformat '%' {arch}\n some-file.rpm
-# rpm --showrc for all macros
-# rpm -qlp some-file.rpm
-%if %build_on_obs == 1
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
-%endif
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: diffutils sed findutils pkgconfig
-Requires: libqmail > 0.2
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 Requires: policycoreutils
@@ -177,6 +167,10 @@ Requires: policycoreutils-python
 Requires: insserv-compat
 %else
 Requires: initscripts
+%endif
+#
+%if %build_on_obs == 1
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 %endif
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -415,10 +409,8 @@ if [ -d %{name}-%{version} ] ; then
   if [ -f %{name}-%{version}/qlocal_upgrade.sh ] ; then
     %{__cp} %{name}-%{version}/qlocal_upgrade.sh .
   fi
-  if [ -n "%{debug_package}" ] ; then
-    echo %{__cc} -g -Wall -Wshadow -O2 -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > %{name}-%{version}/conf-cc
-    echo %{__cc} -rdynamic > %{name}-%{version}/conf-ld
-  fi
+  echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail > %{name}-%{version}/conf-cc
+  echo %{__cc} -rdynamic > %{name}-%{version}/conf-ld
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
@@ -429,10 +421,8 @@ if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
   %else
     %{__rm} -f ucspi-tcp-%{ucspitcp_version}/conf-dlopen
   %endif
-  if [ -n "%{debug_package}" ] ; then
-    echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > ucspi-tcp-%{ucspitcp_version}/conf-cc
-    echo %{__cc} -O2 > ucspi-tcp-%{ucspitcp_version}/conf-ld
-  fi
+  echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > ucspi-tcp-%{ucspitcp_version}/conf-cc
+  echo %{__cc} -O2 > ucspi-tcp-%{ucspitcp_version}/conf-ld
 fi
 
 %install
@@ -464,7 +454,7 @@ do
       LDFLAGS="%{build_ldflags} $LDFLAGS"
     %endif
     %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
-    %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install-strip
+    %{__make} "$silent_opt" %{?_smp_mflags} DESTDIR=%{buildroot} install
     cd ..
   else
     echo "$i: No such file or directory" 1>&2
