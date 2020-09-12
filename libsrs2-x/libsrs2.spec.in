@@ -55,7 +55,6 @@ Source0: http://downloads.sourceforge.net/indimail/libsrs2-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/libsrs2-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-mta
-#AutoReqProv: No
 BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
 BuildRequires: findutils diffutils gzip coreutils
 BuildRequires: glibc glibc-devel
@@ -68,6 +67,9 @@ BuildRequires: -post-build-checks
 %endif
 %endif
 ##############################################################################
+AutoReqProv: Yes
+Provides: srs2-libs = %{version}
+Provides: srs2-libs%{?_isa} = %{version}
 
 %if %build_on_obs == 1
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
