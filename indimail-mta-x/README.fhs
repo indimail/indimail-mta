@@ -14,8 +14,8 @@ to the above, indimail uses the hardcoded directory /usr/lib/indimail in build s
 Some settings
 =============
 
-conf-shared       - /usr/share/indimail
 conf-prefix       - /usr
+conf-shared       - /usr/share/indimail
 conf-sysconfdir   - /etc/indimail
 conf-libexec      - /usr/libexec/indimail
 conf-qmail        - /var/indimail
