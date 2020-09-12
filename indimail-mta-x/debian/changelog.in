@@ -1,44 +1,5 @@
 indimail-mta (@version@-@release@) unstable; urgency=low
 
-  * added create_rpm script
-  * Permission cleanup - Removed restrictive permissions from hier.c, indimail-mta.spec
-  * moved qmail-logfifo to indimail package
-  * create install/uninstall logs to /var/log
-  * moved logfifo, nssd.sock, nssd.pid to /run or /var/run
-  * debian packaging - renamed perm_list.q to perm_list.mta
-  * svctool: fixed setting of Authentited SMTP for port 587 in run file
-  * svctool: fixed setting of sys-checkpwd in AUTHMODULES variable
-  * svc, supervise - new option restart (stop and restart) a service
-  * svctool - separated setting alternatives from add-boot, rm-boot. new functions add_alternatives, remove_alternatives.
-  * postinst, prerm	: separated setting alternatives from add-boot, rm-boot.  new functions add_alternatives, remove_alternatives.
-  * svctool - new option --dmemory to set specific softmemory limit for qmail-daemon/qmail-send
-  * svctool, envmigrate - added error checks calling envmigrate
-  * qmail-start.c - set supplementary group ids if USE_SETGROUPS env variable is set
-  * qmail-start.c - use prot_gid() to lose existing qmail group privileges (qmailr)
-  * setuidgid.c - set supplementary group ids
-  * setuidgid.c - use -s option set supplementary group ids
-  * use AC_PROG_CC_C99 in configure.ac
-  * use m4_normalize(m4_include([conf-version])) in AC_INIT
-  * create_services - updated script
-  * tcpopen.c: fixed SIGSEGV if a readonly string was used for host
-  * svscan: write pid as a string on the second line of .svlock
-  * added -Wshadow to ucspi-tcp/conf-cc to warn global variables shadowed by local variables
-  * ip6_compactaddr.c, tcpserver.c - fixes for global variables shadowed by local variables
-  * make-compile - use CC, CFLAGS definition instead of hardcoded command in conf-cc
-  * qmail-rm.c, qmail-send.c: replaced utime() with utimes()
-  * indimail-mta, ucspi-tcp Makefile: Fixed Makefile for parallel builds
-  * indimail-mta.spec: use smp_mflags macro for parallel builds
-  * indimail-mta.spec: use CC="%{__cc}" CFLAGS="%{build_cflags}" LDFLAGS="%{build_ldflags}" macros to set compiler flags
-  * debian/rules: use dkpg buildflags to set compiler flags
-  * svctool: fixed typo with FIFODIR
-  * added CFLAGS="-O2 -Wall -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail"
-  * received.c: added square brackets in the list of safe characters (taken from notqmail)
-  * tcpopen.c: fixed typo on error message
-  * Removed svscan STATUSFILE
-  * dk-filter.sh: Turn of BOUNCEDOMAIN feature for non-bounce mails
-  * qupgrade.sh, qlocal_upgrade.sh: Reverted interpreter back to #!/bin/sh
-  * ucspi-tcp: remove duplication of functions an use libqmail
-  * ucspi-tcp: replace buffer library with substdio
-  * syncdir.c: fix for missing SYS_open, SYS_link, SYS_unlink, SYS_rename (use SYS_openat, SYS_linkat, SYS_renameat syscalls)
-  * svc, supervise: new option 'G' to send signal to entire process group
-  * moved fghack, pgrphack, supervise to sbin
+  * hier.c: use 0755 for bin and sbin
+  * replaced setup with installer which uses text files for installation
+  * indimail-mta.spec: fixed AutoReq
