@@ -1,5 +1,8 @@
 /*
  * $Log: auto-uid.c,v $
+ * Revision 1.9  2020-09-13 01:21:46+05:30  Cprogrammer
+ * removed scan.h as dependency
+ *
  * Revision 1.8  2010-05-16 16:11:44+05:30  Cprogrammer
  * added rcs id
  *
@@ -22,7 +25,6 @@
 #include "subfd.h"
 #include "substdio.h"
 #include "exit.h"
-#include "scan.h"
 #include "fmt.h"
 
 char            buf1[256];
@@ -83,6 +85,6 @@ main(argc, argv)
 void
 getversion_auto_uid_c()
 {
-	static char    *x = "$Id: auto-uid.c,v 1.8 2010-05-16 16:11:44+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: auto-uid.c,v 1.9 2020-09-13 01:21:46+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
