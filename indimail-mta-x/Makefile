@@ -781,18 +781,6 @@ idedit.o: \
 compile idedit.c
 	./compile idedit.c
 
-setup: \
-load setup.o hier.o auto_qmail.o auto_uids.o get_uid.o \
-auto_prefix.o auto_control.o auto_assign.o \
-auto_sysconfdir.o auto_libexec.o auto_shared.o
-	./load setup hier.o auto_qmail.o auto_uids.o get_uid.o auto_prefix.o \
-	auto_control.o auto_assign.o auto_sysconfdir.o \
-	auto_libexec.o auto_shared.o -lqmail
-
-setup.o: \
-compile setup.c auto_uids.h
-	./compile setup.c
-
 instcheck: \
 load instcheck.o hier.o auto_qmail.o get_uid.o auto_uids.o \
 auto_sysconfdir.o auto_shared.o auto_control.o \
@@ -1001,7 +989,7 @@ etrn except fastforward fghack fixcrio forward generic.so greydaemon qf-smtp-rat
 home home+df hostname idedit iftocc indimail.plist instcheck ipmeprint \
 ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
 maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate inewaliases newinclude \
-new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest \
+new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest installer \
 predate preline printforward printmaillist proc proc+df qaes qail ctrlenv \
 qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl maildirsize \
 qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
@@ -1012,7 +1000,7 @@ qmail-smtpd qmail_smtpd.so qmail-sql sql-database qmail-start qmail-tcpok qmail-
 qmail-todo qmail-upq qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
 recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
 sendmail serialcmd serialqmtp serialsmtp setforward setlock setmaillist setuidgid \
-setup smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest spawn-filter spfquery splogger \
+smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest spawn-filter spfquery splogger \
 srsfilter supervise surblfilter surblqueue svc svok svscan svscanboot \
 svstat swaks sys-checkpwd systemd tai2tai64n tai64n tai64n2tai tai64nlocal \
 tai64nunix tcp-env testzero tokenize uacl udpclient udplogger update_tmprsadh \
@@ -2094,17 +2082,24 @@ install-strip: install
 
 distclean: clean
 
+installer: \
+load installer.o
+	./load installer -lqmail
+
+installer.o: \
+compile installer.c
+	./compile installer.c
+
 install: \
-it man leapsecs.dat conf-sysconfdir perm_list.mta conf-logdir
-	if test ! -d $(DESTDIR)"`head -1 conf-sysconfdir`" ; then \
-		mkdir -p $(DESTDIR)"`head -1 conf-sysconfdir`" ; \
-	fi ;
-	if test ! -d $(DESTDIR)"`head -1 conf-logdir`" ; then \
-		mkdir -p $(DESTDIR)"`head -1 conf-logdir`" ; \
-	fi ;
-	./setup -d "$(DESTDIR)" -L $(DESTDIR)"`head -1 conf-logdir`" \
-		$(QMAILDIR) && \
-		cp perm_list.mta $(DESTDIR)"`head -1 conf-sysconfdir`"
+it man leapsecs.dat conf-sysconfdir perm_list.mta conf-logdir installer
+	./installer $(DESTDIR) < DIRS
+	./installer $(DESTDIR)"`head -1 conf-prefix`"              < BIN
+	./installer $(DESTDIR)"`head -1 conf-prefix`"              < SBIN
+	./installer $(DESTDIR)"`head -1 conf-shared`"              < SHARED
+	./installer $(DESTDIR)"`head -1 conf-sysconfdir`"          < ETC
+	./installer $(DESTDIR)"`head -1 conf-prefix`/lib/indimail" < PLUGINS
+	./installer $(DESTDIR)"`head -1 conf-libexec`"             < LIBEXEC
+	./installer $(DESTDIR)"`head -1 conf-prefix`/share/man"    < MAN
 
 slurpclose.o: compile slurpclose.c slurpclose.h
 	./compile slurpclose.c
