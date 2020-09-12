@@ -409,8 +409,10 @@ if [ -d %{name}-%{version} ] ; then
   if [ -f %{name}-%{version}/qlocal_upgrade.sh ] ; then
     %{__cp} %{name}-%{version}/qlocal_upgrade.sh .
   fi
-  echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail > %{name}-%{version}/conf-cc
-  echo %{__cc} -rdynamic > %{name}-%{version}/conf-ld
+  if [ -n "%{debug_package}" ] ; then
+    echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail > %{name}-%{version}/conf-cc
+    echo %{__cc} -rdynamic > %{name}-%{version}/conf-ld
+  fi
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
@@ -421,8 +423,10 @@ if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
   %else
     %{__rm} -f ucspi-tcp-%{ucspitcp_version}/conf-dlopen
   %endif
-  echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > ucspi-tcp-%{ucspitcp_version}/conf-cc
-  echo %{__cc} -O2 > ucspi-tcp-%{ucspitcp_version}/conf-ld
+  if [ -n "%{debug_package}" ] ; then
+    echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > ucspi-tcp-%{ucspitcp_version}/conf-cc
+    echo %{__cc} -O2 > ucspi-tcp-%{ucspitcp_version}/conf-ld
+  fi
 fi
 
 %install
