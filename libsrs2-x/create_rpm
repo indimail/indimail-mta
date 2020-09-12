@@ -24,6 +24,9 @@ while test $# -gt 0; do
     --verbose)
 	verbose=1
     ;;
+    --release=*)
+	release=$optarg
+    ;;
     *)
     echo "invalid option [$1]"
     read key
@@ -81,9 +84,7 @@ tar \
 	-cf - libsrs2-"$version" \
 	| gzip -c > $rpmbuild/SOURCES/libsrs2-"$version".tar.gz
 dist=`uname -r |cut -d . -f4`
-if [ $# -gt 0 ] ; then
-	release=$1
-else
+if [ -z "$release" ] ; then
 	if [ -d /usr/include/srs2 ] ; then
 		qdist=$(rpm -qf /usr/include/srs2|cut -d- -f4|cut -d. -f3)
 		if [ " $dist" = " $qdist" ] ; then
