@@ -70,6 +70,9 @@ BuildRequires: -post-build-checks
 %endif
 %endif
 ##############################################################################
+AutoReqProv: Yes
+Provides: dkim-libs = %{version}
+Provides: dkim-libs%{?_isa} = %{version}
 
 %if %build_on_obs == 1
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
