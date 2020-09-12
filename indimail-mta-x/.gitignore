@@ -426,7 +426,6 @@ setlock
 setmaillist
 setmaillist.0
 setuidgid
-setup
 smtp-matchup
 softlimit
 sortedtest
@@ -597,3 +596,4 @@ sql-database.o
 sql-database.8
 conf-release
 debian/Makefile
+installer

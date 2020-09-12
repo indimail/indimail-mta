@@ -750,8 +750,6 @@ setmaillist.0
 setmaillist.o
 setuidgid
 setuidgid.o
-setup
-setup.o
 sgetopt.0
 sgetopt.o
 sig.a
@@ -1125,3 +1123,5 @@ cdb-database.o
 sql-database
 sql-database.o
 sql-database.8
+installer
+installer.o
