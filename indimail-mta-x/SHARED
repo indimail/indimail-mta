@@ -1,6 +1,6 @@
-d:::0755:::
-d:::0755:/boot::
-d:::0755:/doc::
+d:::0555:::
+d:::0555:/boot::
+d:::0555:/doc::
 c:::0755:/boot/:home:home
 c:::0755:/boot/:home+df:home+df
 c:::0755:/boot/:proc:proc

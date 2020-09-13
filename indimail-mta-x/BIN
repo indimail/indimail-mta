@@ -1,5 +1,5 @@
 d:::0755:::
-d:::0755:/bin::
+d:::0555:/bin::
 c:::0755:/bin/:qmail-inject:qmail-inject
 c:::0755:/bin/:qmail-showctl:qmail-showctl
 c:::0755:/bin/:qmail-qread:qmail-qread

@@ -1,4 +1,4 @@
-d:::0755:::
+d:::0555:::
 c:::0755:/qfilters/:qf-smtp-ratelimit:qf-smtp-ratelimit
 c:::0755:/:qfrontend:qfrontend
 c:::0755:/:qpq:qpq

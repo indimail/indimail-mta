@@ -1,5 +1,5 @@
 d:::0755:::
-d:::0755:/sbin::
+d:::0555:/sbin::
 c:::0755:/sbin/:qmail-dk:qmail-dk
 c:::0755:/sbin/:qmail-dkim:qmail-dkim
 c:::0755:/sbin/:qmail-popbull:qmail-popbull
