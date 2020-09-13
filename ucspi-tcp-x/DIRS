@@ -2,6 +2,7 @@ d:::0755:::
 d::::/var::
 d::::/var/indimail::
 d::::/var/indimail/bin::
+d::::/usr::
 d::::/usr/share::
 d::::/usr/share/indimail::
 d::::/usr/share/indimail/doc::
