@@ -2092,7 +2092,7 @@ compile installer.c
 
 install: \
 it man leapsecs.dat conf-sysconfdir perm_list.mta conf-logdir installer
-	./installer $(DESTDIR) < DIRS
+	./installer $(DESTDIR)                                     < DIRS
 	./installer $(DESTDIR)"`head -1 conf-prefix`"              < BIN
 	./installer $(DESTDIR)"`head -1 conf-prefix`"              < SBIN
 	./installer $(DESTDIR)"`head -1 conf-shared`"              < SHARED
