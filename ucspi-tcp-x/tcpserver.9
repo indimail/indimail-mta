@@ -297,20 +297,20 @@ tcpserver can load shared objects by specifying a shared object on the command l
 for qmail-smtpd and rblmstpd by specifying the following environment variables
 
 .EX
-PLUGIN0=HOME/lib/indimail/plugins/qmail_smtpd.so
+PLUGIN0=PREFIX/lib/indimail/plugins/qmail_smtpd.so
 PLUGIN0_dir=/var/indimail
 PLUGIN0_init=smtp_init
-PLUGIN1=HOME/lib/indimail/plugins/rblsmtpd.so
+PLUGIN1=PREFIX/lib/indimail/plugins/rblsmtpd.so
 .EE
 
 The above causes tcpserver to load qmail_smtpd.so and execute the smtp_init(1) function, after changing directory to /var/indimail,
-in the parent. smtp_init() loads all qmail-smtpd control files. Additionally, if HOME/lib/indimail/plugins/qmail_smtpd.so
-is specfied in the command line argument, instead of HOME/bin/qmail-smtpd, tcpserver will execute the fuction qmail_smtpd()
+in the parent. smtp_init() loads all qmail-smtpd control files. Additionally, if PREFIX/lib/indimail/plugins/qmail_smtpd.so
+is specfied in the command line argument, instead of PREFIX/bin/qmail-smtpd, tcpserver will execute the fuction qmail_smtpd()
 instead of exec of the qmail-smtpd executable. This improves the perfomance of the smtp service. In the above example,
 rblsmtpd.so is loaded without executing any initialization function and without changing directory. On SIGHUP, tcpserver
 executes the function smtp_init(0). The variable PLUGINn_dir should be used if your function expects to be in a particular
 directory to function properly. PLUGIN1 causes tcpserver to preload rblsmtpd.so and if \fIprog\fR is
-HOME/lib/indimail/plugins/rblsmtpd.so, it will simply execute the function \fIrblsmtpd\fR, from the shared library rblsmtpd.so
+PREFIX/lib/indimail/plugins/rblsmtpd.so, it will simply execute the function \fIrblsmtpd\fR, from the shared library rblsmtpd.so
 already preloaded in the memory.
 
 .SH ENVIRONMENT
@@ -321,7 +321,7 @@ Specifies the ciphers that should be used in SSL/TLS mode. See
 for more information.
 .TP
 .B CONTROLDIR
-Sub-directory relative to HOME, having servercert.pem. Default is HOME/control.
+Sub-directory relative to SYSCONFDIR, having servercert.pem. Default is SYSCONFDIR/control.
 
 .SH SEE ALSO
 tcprules(1),
