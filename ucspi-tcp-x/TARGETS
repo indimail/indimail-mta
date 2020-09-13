@@ -71,17 +71,14 @@ commands.o
 rblsmtpd
 rts
 prog
-setup.o
 hier.o
 auto-str.o
 auto-str
 auto_home.c
 auto_home.o
-setup
 instcheck.o
 instcheck
 it
-setup
 check
 control.o
 socket_accept6.o
@@ -133,3 +130,5 @@ load_mysql.o
 make-compile
 make-load
 auto-ccld.sh
+installer
+installer.o

@@ -1,0 +1,12 @@
+d:::0755:::
+d::::/var::
+d::::/var/indimail::
+d::::/var/indimail/bin::
+d::::/usr/share::
+d::::/usr/share/indimail::
+d::::/usr/share/indimail/doc::
+d::::/usr/share/man::
+d::::/usr/share/man/man1::
+d::::/usr/lib::
+d::::/usr/lib/indimail::
+d::::/usr/lib/indimail/plugins::

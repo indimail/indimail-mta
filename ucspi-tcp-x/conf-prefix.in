@@ -1,4 +1,4 @@
-HOME
+PREFIX
 
 This is the ucspi-tcp home directory. Programs will be installed in
 .../bin.

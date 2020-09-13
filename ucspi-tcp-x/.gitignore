@@ -25,7 +25,6 @@ mysql_config
 rblsmtpd
 rts
 select.h
-setup
 systype
 tcpcat
 tcpclient
@@ -44,3 +43,5 @@ tcpserver_plugin.o
 make-compile
 make-load
 auto-ccld.sh
+installer
+installer.o

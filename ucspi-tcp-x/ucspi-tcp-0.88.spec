@@ -5,8 +5,12 @@ Name: ucspi-tcp
 Version: 0.88
 Release: 1
 URL: http://mail.indi.com
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
 Source0: %{name}-%{version}.tar.gz
-Copyright: Artistic License
 Group: System Applications
 #Buildrequires: indimail
 BuildRoot: %{_tmppath}/%{name}-root

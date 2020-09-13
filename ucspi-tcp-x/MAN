@@ -1,0 +1,14 @@
+d:::0755:::
+d:::0755:/man1::
+c:::0644:/man1/:tcpserver.1:tcpserver.1
+c:::0644:/man1/:tcprules.1:tcprules.1
+c:::0644:/man1/:tcprulescheck.1:tcprulescheck.1
+c:::0644:/man1/:tcpclient.1:tcpclient.1
+c:::0644:/man1/:who@.1:who@.1
+c:::0644:/man1/:date@.1:date@.1
+c:::0644:/man1/:finger@.1:finger@.1
+c:::0644:/man1/:http@.1:http@.1
+c:::0644:/man1/:tcpcat.1:tcpcat.1
+c:::0644:/man1/:mconnect.1:mconnect.1
+c:::0644:/man1/:mconnect-io.1:mconnect-io.1
+c:::0644:/man1/:rblsmtpd.1:rblsmtpd.1
