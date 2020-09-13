@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.2  2020-09-13 17:33:04+05:30  Cprogrammer
+ * sync permissions with indimail-mta.spec file
+ *
  * Revision 1.1  2020-09-13 01:24:56+05:30  Cprogrammer
  * Initial revision
  *
@@ -18,16 +21,15 @@
 #include <strerr.h>
 #include <byte.h>
 #include <scan.h>
+#include <fmt.h>
 
 stralloc        target = { 0 };
-char           *mailuser;
-char           *mailgroup;
-char           *to;
+char           *user, *group, *to;
 const char      FATAL[] = "installer: fatal: ";
-char            inbuf[SUBSTDIO_INSIZE];
-char            outbuf[SUBSTDIO_OUTSIZE];
-substdio        ssin;
-substdio        ssout;
+static char     strnum[FMT_ULONG];
+char            inbuf[SUBSTDIO_INSIZE], outbuf[SUBSTDIO_OUTSIZE];
+substdio        ssin, ssout;
+uid_t           my_uid;
 
 void
 nomem()
@@ -41,27 +43,49 @@ print_info(char *str, char *source, char *dest, mode_t mode, uid_t uid, gid_t gi
 	int             i, d, count;
 	int             a[4];
 	char            octal[5];
+	struct passwd  *pw;
+	struct group   *gr;
 
 	substdio_puts(subfdout, str);
 	substdio_puts(subfdout, " ");
 	substdio_puts(subfdout, dest);
-	substdio_puts(subfdout, " -user ");
-	substdio_puts(subfdout, mailuser);
-	substdio_puts(subfdout, " -group ");
-	substdio_puts(subfdout, mailgroup);
-	substdio_puts(subfdout, " -mode ");
-	d = mode == -1 ? 0 : mode;
-	for (count = i = 0;d != 0 && i < 4;++i) {
-		a[i] = (d % 8) + '0';
-		d /= 8;
-		count++;
+	if (gid != -1) {
+		if (!(gr = getgrgid(gid))) {
+			strnum[fmt_ulong(strnum, gid)] = 0;
+			strerr_die4sys(111, FATAL, "unable to get gid entry for ", strnum, ": ");
+		}
+		group = gr->gr_name;
 	}
-	substdio_puts(subfdout, "0");
-	d = 0;
-	for (i = count - 1;i >= 0;--i)
-		octal[d++] = a[i];
-	octal[d] = 0;
-	substdio_puts(subfdout, octal);
+	if (uid != -1) {
+		if (!(pw = getpwuid(uid))) {
+			strnum[fmt_ulong(strnum, uid)] = 0;
+			strerr_die4sys(111, FATAL, "unable to get uid entry for ", strnum, ": ");
+		}
+		user = pw->pw_name;
+	}
+	if (uid != -1) {
+		substdio_puts(subfdout, " -user ");
+		substdio_puts(subfdout, user);
+	}
+	if (gid != -1) {
+		substdio_puts(subfdout, " -group ");
+		substdio_puts(subfdout, group);
+	}
+	if (mode != -1) {
+		substdio_puts(subfdout, " -mode ");
+		d = mode == -1 ? 0 : mode;
+		for (count = i = 0;d != 0 && i < 4;++i) {
+			a[i] = (d % 8) + '0';
+			d /= 8;
+			count++;
+		}
+		substdio_puts(subfdout, "0");
+		d = 0;
+		for (i = count - 1;i >= 0;--i)
+			octal[d++] = a[i];
+		octal[d] = 0;
+		substdio_puts(subfdout, octal);
+	}
 	if (source) {
 		substdio_puts(subfdout, " -source ");
 		substdio_puts(subfdout, source);
@@ -74,14 +98,15 @@ void
 doit(stralloc *line)
 {
 	char           *x;
-	unsigned int    xlen, i;
 	char           *type, *uidstr, *gidstr, *modestr, *mid, *name;
+	int             fdin, fdout, opt;
+	unsigned long   m;
+	unsigned int    xlen, i;
+	uid_t           uid;
+	gid_t           gid;
+	mode_t          mode;
 	struct passwd  *pw;
 	struct group   *gr;
-	uid_t           my_uid;
-	gid_t           my_gid;
-	unsigned long   uid, gid, mode;
-	int             fdin, fdout, opt;
 
 	x = line->s;
 	xlen = line->len;
@@ -152,21 +177,25 @@ doit(stralloc *line)
 	if (xlen > 0)
 		name = x;
 
-	uid = gid = mode = -1;
-	if (*uidstr)
-		scan_ulong(uidstr, &uid);
-	if (*gidstr)
-		scan_ulong(gidstr, &gid);
-	if (*modestr)
-		scan_8long(modestr, &mode);
-	my_gid = getgid();
-	if (!(gr = getgrgid(my_gid)))
-		strerr_die2sys(111, FATAL, "unable to get gids: ");
-	mailgroup = gr->gr_name;
-	my_uid = getuid();
-	if (!(pw = getpwuid(my_uid)))
-		strerr_die2sys(111, FATAL, "unable to get uids: ");
-	mailuser = pw->pw_name;
+	if (*uidstr) {
+		if (!(pw = getpwnam(uidstr)))
+			scan_uint(uidstr, &uid);
+		else
+			uid = pw->pw_uid;
+	} else
+		uid = -1;
+	if (*gidstr) {
+		if (!(gr = getgrnam(gidstr)))
+			scan_uint(gidstr, &gid);
+		else
+			gid = gr->gr_gid;
+	} else
+		gid = -1;
+	if (*modestr) {
+		scan_8long(modestr, &m);
+		mode = (mode_t) m;
+	} else
+		mode = -1;
 	switch (*type)
 	{
 	case 'l':
@@ -175,10 +204,14 @@ doit(stralloc *line)
 		break;
 	case 'd':
 		print_info("makedir", 0, target.s, (mode_t) mode, (uid_t) uid, (gid_t) gid);
-		if (mkdir(target.s, mode == -1 ? 0700 : mode) == -1 && errno != error_exist)
+		if (my_uid)
+			mode = 0755;
+		if (mkdir(target.s, mode == -1 ? 0755 : mode) == -1 && errno != error_exist)
 			strerr_die4sys(111, FATAL, "unable to mkdir ", target.s, ": ");
 		if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
 			strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
+		if (mode != -1 && !my_uid && chmod(target.s, (mode_t) mode) == -1)
+			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		break;
 
 	case 'c':
@@ -209,7 +242,7 @@ doit(stralloc *line)
 		if (fsync(fdout) == -1)
 			strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
 		close(fdout);
-		if (mode != -1 && chmod(target.s, (mode_t) mode) == -1)
+		if (mode != -1 && !my_uid && chmod(target.s, (mode_t) mode) == -1)
 			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
 			strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
@@ -232,8 +265,6 @@ main(argc, argv)
 {
 	int             match;
 
-	umask(077);
-
 	if (argc == 1)
 		to = (char *) 0;
 	else
@@ -241,6 +272,8 @@ main(argc, argv)
 		to = argv[1];
 	else
 		strerr_die2x(100, FATAL, "usage: installer [install_dir]");
+	if ((my_uid = getuid()))
+		umask(077);
 	for (;;) {
 		if (getln(&in, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input");
@@ -250,13 +283,12 @@ main(argc, argv)
 		if (!match)
 			_exit(0);
 	}
-	(void) argc;
 }
 
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.1 2020-09-13 01:24:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: installer.c,v 1.2 2020-09-13 17:33:04+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

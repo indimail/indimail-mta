@@ -1,3 +1,3 @@
-d:::0755:::
-d:::0755:/doc::
-c:::0644:/doc/:README.ucspi-tcp:README.ucspi-tcp
+d::::::
+d::::/doc::
+c:::0444:/doc/:README.ucspi-tcp:README.ucspi-tcp

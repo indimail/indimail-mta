@@ -1,5 +1,5 @@
-d:::0755:::
-d:::0755:/bin::
+d::::::
+d::::/bin::
 c:::0755:/bin/:tcpserver:tcpserver
 c:::0755:/bin/:tcprules:tcprules
 c:::0755:/bin/:tcprulescheck:tcprulescheck
