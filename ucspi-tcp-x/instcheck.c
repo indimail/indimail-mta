@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.6  2020-09-13 17:33:18+05:30  Cprogrammer
+ * skip chmod of mode is -1
+ *
  * Revision 1.5  2020-08-03 17:23:52+05:30  Cprogrammer
  * use qmail library
  *
@@ -130,7 +133,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	if (err && chown(tfile, uid, gid) == -1)
 		strerr_die4sys(111, FATAL, "unable to chown ", tfile, ": ");
 	err = 0;
-	if ((st.st_mode & 07777) != mode) {
+	if (mode != -1 && (st.st_mode & 07777) != mode) {
 		err = 1;
 		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong permissions (will fix)", 0);
 	}
