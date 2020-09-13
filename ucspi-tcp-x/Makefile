@@ -2,7 +2,6 @@
 SHELL=/bin/sh
 OPENSSLBIN=openssl
 SSLINCS=-I/usr/kerberos/include
-INDIDIR := $(shell head -1 conf-home 2>/dev/null || echo "/var/indimail")
 DEFS := $(shell uname -s | tr "[:lower:]" "[:upper:]")
 SYSTEM :=  $(shell uname -s)
 mysql_inc  = $(shell ./mysql_config --include)
@@ -19,8 +18,8 @@ compile auto-str.c
 	./compile auto-str.c
 
 auto_home.c: \
-auto-str conf-home
-	./auto-str auto_home `head -1 conf-home` > auto_home.c
+auto-str conf-prefix
+	./auto-str auto_home `head -1 conf-prefix` > auto_home.c
 
 auto_home.o: \
 compile auto_home.c
@@ -51,15 +50,16 @@ compile sig.c
 	./compile sig.c
 
 choose: \
-warn-auto.sh choose.sh conf-home
+warn-auto.sh choose.sh conf-prefix
 	cat warn-auto.sh choose.sh \
-	| sed s}HOME}"`head -1 conf-home`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> choose
 	chmod 755 choose
 
 tcpserver.1: tcpserver.9
 	cat tcpserver.9 \
-	| sed s}HOME}"`head -1 conf-home`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> tcpserver.1
 
 commands.o: \
@@ -89,9 +89,9 @@ auto-ccld.sh: conf-cc conf-ld warn-auto.sh
 	fi) > auto-ccld.sh
 
 date@: \
-warn-auto.sh date@.sh conf-home
+warn-auto.sh date@.sh conf-prefix
 	cat warn-auto.sh date@.sh \
-	| sed s}HOME}"`head -1 conf-home`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> date@
 	chmod 755 date@
 
@@ -166,9 +166,9 @@ compile dns_txt.c dns.h haveip6.h
 	./compile dns_txt.c
 
 finger@: \
-warn-auto.sh finger@.sh conf-home
+warn-auto.sh finger@.sh conf-prefix
 	cat warn-auto.sh finger@.sh \
-	| sed s}HOME}"`head -1 conf-home`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> finger@
 	chmod 755 finger@
 
@@ -207,19 +207,11 @@ compile hier.c auto_home.h auto_shared.h conf-dlopen
 	./compile `grep -h -v "^#" conf-dlopen` hier.c
 
 http@: \
-warn-auto.sh http@.sh conf-home
+warn-auto.sh http@.sh conf-prefix
 	cat warn-auto.sh http@.sh \
-	| sed s}HOME}"`head -1 conf-home`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> http@
 	chmod 755 http@
-
-setup: \
-load setup.o hier.o auto_home.o auto_shared.o
-	./load setup hier.o auto_home.o auto_shared.o -lqmail
-
-setup.o: \
-compile setup.c
-	./compile setup.c
 
 instcheck: \
 load instcheck.o hier.o auto_home.o auto_shared.o
@@ -242,7 +234,7 @@ compile ip4_scan.c ip4.h
 	./compile ip4_scan.c
 
 it: \
-prog setup instcheck tcpserver.1 shared
+prog instcheck tcpserver.1 shared installer
 
 load: warn-auto.sh conf-ld systype make-load
 	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
@@ -268,9 +260,9 @@ warn-auto.sh systype
 	chmod 755 makelib
 
 mconnect: \
-warn-auto.sh mconnect.sh conf-home
+warn-auto.sh mconnect.sh conf-prefix
 	cat warn-auto.sh mconnect.sh \
-	| sed s}HOME}"`head -1 conf-home`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> mconnect
 	chmod 755 mconnect
 
@@ -350,9 +342,9 @@ tcpremoteinfo.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` tcpremoteinfo.c
 
 rts: \
-warn-auto.sh rts.sh conf-home
+warn-auto.sh rts.sh conf-prefix
 	cat warn-auto.sh rts.sh \
-	| sed s}HOME}"`head -1 conf-home`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> rts
 	chmod 755 rts
 
@@ -363,8 +355,20 @@ compile rules.c rules.h ip4_bit.h ip6.h conf-ip
 install-strip: install
 distclean: clean
 
-install: it setup
-	./setup -d "$(DESTDIR)" -s "`head -1 conf-shared`" $(INDIDIR)
+installer: \
+load installer.o
+	./load installer -lqmail
+
+installer.o: \
+compile installer.c
+	./compile installer.c
+
+install: it installer
+	./installer $(DESTDIR)                                     < DIRS
+	./installer $(DESTDIR)"`head -1 conf-prefix`"              < BIN
+	./installer $(DESTDIR)"`head -1 conf-shared`"              < SHARED
+	./installer $(DESTDIR)"`head -1 conf-prefix`/lib/indimail" < PLUGINS
+	./installer $(DESTDIR)"`head -1 conf-prefix`/share/man"    < MAN
 
 socket.lib: \
 trylsock.c compile load
@@ -428,9 +432,9 @@ systype: find-systype.sh conf-cc conf-ld trycpp.c x86cpuid.c
 	) | sh > systype
 
 tcpcat: \
-warn-auto.sh tcpcat.sh conf-home
+warn-auto.sh tcpcat.sh conf-prefix
 	cat warn-auto.sh tcpcat.sh \
-	| sed s}HOME}"`head -1 conf-home`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> tcpcat
 	chmod 755 tcpcat
 
@@ -619,9 +623,9 @@ compile socket_v6loopback.c conf-ip
 	./compile `grep -h -v "^#" conf-ip` socket_v6loopback.c
 
 who@: \
-warn-auto.sh who@.sh conf-home
+warn-auto.sh who@.sh conf-prefix
 	cat warn-auto.sh who@.sh \
-	| sed s}HOME}"`head -1 conf-home`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> who@
 	chmod 755 who@
 
