@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.252 2020-09-13 01:48:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.253 2020-09-13 09:39:08+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -416,8 +416,9 @@ if [ -d %{name}-%{version} ] ; then
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
-  %{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspitcp_version}/conf-home.in > ucspi-tcp-%{ucspitcp_version}/conf-home
+  %{__sed} 's{PREFIX{%{_prefix}{' ucspi-tcp-%{ucspitcp_version}/conf-prefix.in > ucspi-tcp-%{ucspitcp_version}/conf-prefix
   %{__sed} 's{SHAREDDIR{%{shareddir}{' ucspi-tcp-%{ucspitcp_version}/conf-shared.in > ucspi-tcp-%{ucspitcp_version}/conf-shared
+  %{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' ucspi-tcp-%{ucspitcp_version}/conf-sysconfdir.in > ucspi-tcp-%{ucspitcp_version}/conf-sysconfdir
   %if %{tcpserver_plugin} == 1
     echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-%{ucspitcp_version}/conf-dlopen
   %else
