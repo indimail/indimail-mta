@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.13  2020-09-13 17:32:28+05:30  Cprogrammer
+ * leave permissions of directories alone as they are owned by indimail-mta
+ *
  * Revision 1.12  2020-08-03 17:23:42+05:30  Cprogrammer
  * use qmail library
  *
@@ -59,19 +62,12 @@ hier(inst_dir, fatal)
 	char           *fatal;
 {
 	char           *mandir;
-	int             moder_d1, moder_d2;
 
 	if (inst_dir && *inst_dir)
 		auto_ucspi_home = inst_dir;
 
 	if (!sharedir)
 		sharedir = auto_shared;
-	if (!str_diff(auto_ucspi_home, "/var/indimail") || !str_diff(auto_ucspi_home, "/var/qmail")) {
-		moder_d1 = moder_d2 = 0555;
-	} else {
-		moder_d1 = 0755;
-		moder_d2 = 0555;
-	}
 	/*- shared directory for boot, doc, man */
 	if (str_diff(auto_home, auto_shared)) {
 		mandir = getdirname(auto_shared, 0);
@@ -80,27 +76,27 @@ hier(inst_dir, fatal)
 		if (!stralloc_0(&a))
 			strerr_die2sys(111, fatal, "out of memory: ");
 		mandir = a.s;
-		h(auto_shared, 0, 0, 0755);
+		h(auto_shared, -1, -1, -1);
 	} else
 		mandir = auto_ucspi_home;
 
-	h(auto_ucspi_home, -1, -1, moder_d1);
-	d(auto_ucspi_home, "bin", -1, -1, moder_d2);
-	d(auto_shared,     "doc", -1, -1, moder_d1);
-	d(mandir,          "man", -1, -1, moder_d1);
-	d(mandir,          "man/man1", -1, -1, moder_d1);
-	c(auto_ucspi_home, "bin",      "tcpserver", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "tcprules", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "tcprulescheck", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "tcpclient", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "who@", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "date@", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "finger@", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "http@", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "tcpcat", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "mconnect", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "mconnect-io", -1, -1, 0555);
-	c(auto_ucspi_home, "bin",      "rblsmtpd", -1, -1, 0555);
+	h(auto_ucspi_home, -1, -1, -1);
+	d(auto_ucspi_home, "bin", -1, -1, -1);
+	d(auto_shared,     "doc", -1, -1, -1);
+	d(mandir,          "man", -1, -1, -1);
+	d(mandir,          "man/man1", -1, -1, -1);
+	c(auto_ucspi_home, "bin",      "tcpserver", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "tcprules", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "tcprulescheck", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "tcpclient", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "who@", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "date@", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "finger@", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "http@", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "tcpcat", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "mconnect", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "mconnect-io", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "rblsmtpd", -1, -1, 0755);
 	c(mandir,          "man/man1", "tcpserver.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "tcprules.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "tcprulescheck.1", -1, -1, 0644);
@@ -115,7 +111,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man1", "rblsmtpd.1", -1, -1, 0644);
 	c(auto_shared,     "doc",      "README.ucspi-tcp", -1, -1, 0444);
 #ifdef LOAD_SHARED_OBJECTS
-	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, 0555);
-	c(auto_ucspi_home, "lib/indimail/plugins", "rblsmtpd.so", -1, -1, 0555);
+	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, -1);
+	c(auto_ucspi_home, "lib/indimail/plugins", "rblsmtpd.so", -1, -1, 0755);
 #endif
 }
