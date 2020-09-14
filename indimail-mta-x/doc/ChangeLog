@@ -12,3 +12,5 @@ Release 2.12 Start 21/05/2020
 08. hier.c: leave owner, group, permissions alone as they are owned by
     indimail-mta package
 09. installer.c: sync permissions with indimail-mta.spec file
+- 14/09/2020
+10. fixed linkat(), unlinkat(), renameat() calls
