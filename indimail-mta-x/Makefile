@@ -1901,7 +1901,7 @@ auto_control.h dns.h conf-tls conf-spf conf-ip conf-plugin conf-batv mysql_confi
 	conf-ip conf-batv conf-plugin` smtpd.c
 
 sqlmatch.o: compile sqlmatch.c variables.h sqlmatch.h qregex.h auto_control.h \
-load_mysql.h mysql_config conf-sql
+load_mysql.h mysql_config conf-sql hasmysql.h
 	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) sqlmatch.c
 
 greylist.o: \
