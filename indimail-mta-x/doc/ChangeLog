@@ -14,3 +14,14 @@ Release 2.12 Start 21/05/2020
 09. installer.c: sync permissions with indimail-mta.spec file
 - 14/09/2020
 10. fixed linkat(), unlinkat(), renameat() calls
+- 15/09/2020
+11. leapsecs.txt: added date 2016-12-31
+12. moved to libqmail:  mess822.h, mess822_addr.c, mess822_date.c,
+    mess822_fold.c, mess822_line.c, mess822_ok.c, mess822_quote.c,
+    mess822_token.c, mess822_when.c, mess822.3 mess822_addr.3,
+    mess822_date.3, mess822_fold.3, mess822_quote.3, mess822_token.3,
+    mess822_when.3
+13. moved to libqmail: commands.c, commands.h, rewritehost.c, rewritehost.h,
+    rewritehost.3
+14. smtpd.c, ofmpid.c: variable ctl_maxcmdlen moved to libqmail
+15. moved to libqmail: sconfig.c, sconfig.h
