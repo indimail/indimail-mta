@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.226 $";
+char           *revision = "$Revision: 1.227 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -180,7 +180,6 @@ unsigned long   BytesToOverflow = 0;
 int             hasvirtual = 0;
 int             liphostok = 0;
 int             maxhops = MAXHOPS;
-int             ctl_maxcmdlen;	  /*- max length a smtp command may have */
 int             timeout = 1200;
 int             authd = 0;
 int             seenhelo = 0;
@@ -6094,6 +6093,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.227  2020-09-15 09:40:00+05:30  Cprogrammer
+ * ctl_maxcmdlen moved to libqmail
+ *
  * Revision 1.226  2020-07-01 21:35:28+05:30  Cprogrammer
  * added missing error check for "out of mem"
  *
@@ -6210,7 +6212,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.226 2020-07-01 21:35:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.227 2020-09-15 09:40:00+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

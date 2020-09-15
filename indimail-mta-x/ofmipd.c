@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.17  2020-09-15 09:40:18+05:30  Cprogrammer
+ * ctl_maxcmdlen moved to libqmail
+ *
  * Revision 1.16  2020-05-19 21:21:55+05:30  Cprogrammer
  * fixed shadowing of now by a global declaration
  *
@@ -88,7 +91,6 @@ int             auth_cram();
 int             err_noauth();
 
 int             timeout = 1200, auth_smtp = 0;
-int             ctl_maxcmdlen=0;    /*- max length a smtp command may have */
 int             authd = 0;
 int             rcptcount = 0;
 unsigned int    databytes = 0;
@@ -1217,7 +1219,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.16 2020-05-19 21:21:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.17 2020-09-15 09:40:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
