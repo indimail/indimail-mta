@@ -165,3 +165,4 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 105.Bruce Guenter - qmail-remote patch to reduce cpu
 106.Rolf Eike Beer <eike@sf-mail.de> gen_allocdefs.h, GEN_ALLOC refactoring
     changes to fix memory overflow
+107.Fefe - felix-libowfat@fefe.de for functions taken from libowfat
