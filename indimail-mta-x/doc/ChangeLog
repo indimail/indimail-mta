@@ -25,3 +25,9 @@ Release 2.12 Start 21/05/2020
     rewritehost.3
 14. smtpd.c, ofmpid.c: variable ctl_maxcmdlen moved to libqmail
 15. moved to libqmail: sconfig.c, sconfig.h
+16. qmail-send.c, qmail-todo.c: use control files conf-fsync, conf-syncdir
+    to turn on fsync, bsd style syncdir semantics
+17. qmail-send.c, qmail-todo.c: set / unset USE_FSYNC, USE_SYNCDIR env
+    variables
+18. qmail-queue.c, qmail-local.c: changed default value of use_fsync,
+    use_syncdir to -1
