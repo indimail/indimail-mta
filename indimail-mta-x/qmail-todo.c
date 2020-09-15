@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.39  2020-09-15 21:43:40+05:30  Cprogrammer
+ * unset USE_SYNCDIR, USE_FSYNC only when use_syncdir, use_fsync is zero
+ *
  * Revision 1.38  2020-09-15 21:10:08+05:30  Cprogrammer
  * use control files conf-fsync, conf-syncdir to turn on fsync, bsd style syncdir semantics
  * set / unset USE_FSYNC, USE_SYNCDIR env variables
@@ -943,14 +946,16 @@ getcontrols(void)
 	if (use_syncdir > 0) {
 		if (!env_put2("USE_SYNCDIR", "1"))
 			return 0;
-	} else {
+	} else
+	if (!use_syncdir) {
 		if (!env_unset("USE_SYNCDIR"))
 			return 0;
 	}
 	if (use_fsync > 0) {
 		if (!env_put2("USE_FSYNC", "1"))
 			return 0;
-	} else {
+	} else
+	if (!use_fsync) {
 		if (!env_unset("USE_FSYNC"))
 			return 0;
 	}
@@ -996,14 +1001,16 @@ regetcontrols(void)
 	if (use_syncdir > 0) {
 		while (!env_put2("USE_SYNCDIR", "1"))
 			nomem();
-	} else {
+	} else
+	if (!use_syncdir) {
 		while (!env_unset("USE_SYNCDIR"))
 			nomem();
 	}
 	if (use_fsync > 0) {
 		while (!env_put2("USE_FSYNC", "1"))
 			nomem();
-	} else {
+	} else
+	if (!use_fsync) {
 		while (!env_unset("USE_FSYNC"))
 			nomem();
 	}
@@ -1151,7 +1158,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.38 2020-09-15 21:10:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.39 2020-09-15 21:43:40+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

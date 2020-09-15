@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.71  2020-09-15 21:45:16+05:30  Cprogrammer
+ * unset USE_SYNCDIR, USE_FSYNC only when use_syncdir, use_fsync is zero
+ *
  * Revision 1.70  2020-09-15 21:09:07+05:30  Cprogrammer
  * use control files conf-fsync, conf-syncdir to turn on fsync, bsd style syncdir semantics
  * set / unset USE_FSYNC, USE_SYNCDIR env variables
@@ -2460,14 +2463,16 @@ getcontrols()
 	if (use_syncdir > 0) {
 		if (!env_put2("USE_SYNCDIR", "1"))
 			return 0;
-	} else {
+	} else
+	if (!use_syncdir) {
 		if (!env_unset("USE_SYNCDIR"))
 			return 0;
 	}
 	if (use_fsync > 0) {
 		if (!env_put2("USE_FSYNC", "1"))
 			return 0;
-	} else {
+	} else
+	if (!use_fsync) {
 		if (!env_unset("USE_FSYNC"))
 			return 0;
 	}
@@ -2606,14 +2611,16 @@ regetcontrols()
 	if (use_syncdir > 0) {
 		while (!env_put2("USE_SYNCDIR", "1"))
 			nomem();
-	} else {
+	} else
+	if (!use_syncdir) {
 		while (!env_unset("USE_SYNCDIR"))
 			nomem();
 	}
 	if (use_fsync > 0) {
 		while (!env_put2("USE_FSYNC", "1"))
 			nomem();
-	} else {
+	} else
+	if (!use_fsync) {
 		while (!env_unset("USE_FSYNC"))
 			nomem();
 	}
@@ -2784,10 +2791,6 @@ main()
 		log5("alert: cannot start: unable to switch to queue directory: ", queuedesc, ":", error_str(errno), "\n");
 		_exit(111);
 	}
-#if !defined(EXTERNAL_TOTO) && defined(USE_FSYNC)
-	if (env_get("USE_FSYNC"))
-		use_fsync = 1;
-#endif
 	sig_pipeignore();
 	sig_termcatch(sigterm);
 	sig_alarmcatch(sigalrm);
@@ -2805,6 +2808,10 @@ main()
 		log3("alert: ", queuedesc, ": cannot start: qmail-send is already running\n");
 		_exit(111);
 	}
+#ifdef USE_FSYNC
+	if (env_get("USE_FSYNC"))
+		use_fsync = 1;
+#endif
 	numjobs = 0;
 	for (c = 0; c < CHANNELS; ++c) {
 		char            ch1, ch2;
@@ -2893,7 +2900,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.70 2020-09-15 21:09:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.71 2020-09-15 21:45:16+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
