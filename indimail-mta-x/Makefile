@@ -331,9 +331,6 @@ chkspawn.o: compile chkspawn.c auto_spawn.h
 clean: TARGETS
 	rm -f `cat TARGETS`
 
-commands.o: compile commands.c commands.h
-	./compile commands.c
-
 compile: make-compile warn-auto.sh systype
 	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
 	compile
@@ -1496,10 +1493,10 @@ drate.9 conf-prefix
 qmail-queue: \
 load qmail-queue.o triggerpull.o fmtqfn.o date822fmt.o get_uid.o MakeArgs.o \
 auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
-control.o auto_control.o mess822_ok.o strsalloc.o socket.lib libsyncdir.a
+control.o auto_control.o strsalloc.o socket.lib libsyncdir.a
 	./load qmail-queue triggerpull.o fmtqfn.o date822fmt.o get_uid.o MakeArgs.o \
 	auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
-	control.o auto_control.o mess822_ok.o strsalloc.o \
+	control.o auto_control.o strsalloc.o \
 	`cat socket.lib` -L. -lsyncdir -lqmail
 
 qmail-queue.8: \
@@ -1512,7 +1509,7 @@ qmail-queue.9 conf-qmail conf-prefix
 qmail-queue.o: \
 compile qmail-queue.c matchregex.h triggerpull.h MakeArgs.h \
 control.h auto_qmail.h auto_uids.h date822fmt.h fmtqfn.h \
-mess822.h variables.h conf-sync conf-qhpsi conf-ip conf-mailarch
+variables.h conf-sync conf-qhpsi conf-ip conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
 	qmail-queue.c -lqmail
 
@@ -1551,9 +1548,9 @@ qmail-dk: \
 load qmail-dk.o triggerpull.o fmtqfn.o date822fmt.o \
 tlsarralloc.o auto_control.o auto_qmail.o auto_split.o variables.o \
 dns.o strsalloc.o ip.o ipalloc.o MakeArgs.o socket_v4mappedprefix.o \
-socket_v6any.o mess822_ok.o domainkeys.o dktrace.o control.o dns_text.o dns.lib
+socket_v6any.o domainkeys.o dktrace.o control.o dns_text.o dns.lib
 	./load qmail-dk triggerpull.o fmtqfn.o auto_control.o auto_qmail.o \
-	auto_split.o variables.o mess822_ok.o socket_v4mappedprefix.o \
+	auto_split.o variables.o socket_v4mappedprefix.o \
 	socket_v6any.o tlsarralloc.o dns.o strsalloc.o ip.o ipalloc.o \
 	domainkeys.o dktrace.o control.o dns_text.o MakeArgs.o \
 	`cat dns.lib` -lcrypto -lqmail
@@ -1762,7 +1759,7 @@ compile plugtest.c auto_qmail.h auto_prefix.h smtp_plugin.h
 	./compile plugtest.c
 
 qmail_smtpd.so: \
-smtpd.o rcpthosts.o recipients.o commands.o indimail_stub.o \
+smtpd.o rcpthosts.o recipients.o indimail_stub.o \
 ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 received.o date822fmt.o wildmat.o qmail.o variables.o \
 envrules.o bodycheck.o sqlmatch.o matchregex.o qcount_dir.o \
@@ -1773,7 +1770,7 @@ auto_break.o auto_control.o auto_assign.o auto_prefix.o auto_sysconfdir.o \
 socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so smtpd.o rcpthosts.o \
-	recipients.o commands.o indimail_stub.o load_mysql.o qcount_dir.o \
+	recipients.o indimail_stub.o load_mysql.o qcount_dir.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o socket_v4mappedprefix.o \
@@ -1783,7 +1780,7 @@ socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	hmac_sha1.o `cat socket.lib dns.lib tls.lib` -lqmail ; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so smtpd.o rcpthosts.o \
-	recipients.o commands.o auto_control.o auto_assign.o qcount_dir.o \
+	recipients.o auto_control.o auto_assign.o qcount_dir.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o socket_v4mappedprefix.o \
@@ -1794,7 +1791,7 @@ socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	fi
 
 qmail-smtpd: \
-load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o \
+load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o \
 ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 received.o date822fmt.o wildmat.o qmail.o variables.o auto_control.o \
 envrules.o bodycheck.o sqlmatch.o matchregex.o indimail_stub.o \
@@ -1804,7 +1801,7 @@ qregex_sql.o tablematch.o greylist.o auto_assign.o qcount_dir.o \
 query_skt.o fn_handler.o tlsarralloc.o load_mysql.o \
 auto_sysconfdir.o auto_break.o auto_prefix.o socket.lib dns.lib tls.lib \
 hmac_sha1.o mysql_config conf-sql
-	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o commands.o \
+	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o qcount_dir.o \
 	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o socket_v4mappedprefix.o \
@@ -1893,7 +1890,7 @@ qmail-multi.9 conf-prefix conf-qmail
 smtpd.o: \
 compile smtpd.c tls.h ssl_timeoutio.h auto_qmail.h control.h received.h \
 ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
-matchregex.o variables.h rcpthosts.h commands.h etrn.h date822fmt.h \
+matchregex.o variables.h rcpthosts.h etrn.h date822fmt.h \
 envrules.h tablematch.h matchregex.h qregex.h sqlmatch.h smtp_plugin.h \
 auto_prefix.h hastlsv1_1_server.h hastlsv1_2_server.h hasmysql.h indimail_stub.h \
 auto_control.h dns.h conf-tls conf-spf conf-ip conf-plugin conf-batv mysql_config
@@ -2304,95 +2301,94 @@ autoresponder: load autoresponder.o auto_qmail.o \
 variables.o control.o quote.o auto_control.o \
 ip.o ipme.o ipalloc.o socket_v4mappedprefix.o socket_v6any.o \
 date822fmt.o qregex.o matchregex.o wildmat.o \
-myctime.o mess822.a
+myctime.o
 	./load autoresponder auto_control.o auto_qmail.o \
 	variables.o control.o quote.o myctime.o \
 	date822fmt.o ip.o ipme.o ipalloc.o \
 	socket_v4mappedprefix.o socket_v6any.o qregex.o \
-	matchregex.o wildmat.o mess822.a -lqmail
+	matchregex.o wildmat.o -lqmail
 
 autoresponder.o: \
-compile autoresponder.c mess822.h date822fmt.h \
+compile autoresponder.c date822fmt.h \
 auto_qmail.h control.h ip.h ipme.h quote.h \
 qregex.h conf-mime 
 	./compile -DMAKE_SEEKABLE -DQUOTE `grep -h -v "^#" conf-mime` autoresponder.c
 
 822field: \
-load 822field.o mess822.a
-	./load 822field mess822.a -lqmail
+load 822field.o
+	./load 822field -lqmail
 
 822field.o: \
-compile 822field.c mess822.h
+compile 822field.c
 	./compile 822field.c
 
 822header: \
-load 822header.o mess822_ok.o mess822.a
-	./load 822header mess822_ok.o -lqmail
+load 822header.o
+	./load 822header -lqmail
 
 822header.o: \
-compile 822header.c mess822.h
+compile 822header.c
 	./compile 822header.c
 
 # qtools
-822body: load 822body.o mess822.a
-	./load 822body mess822.a -lqmail
+822body: load 822body.o
+	./load 822body -lqmail
 
-822body.o: compile 822body.c mess822.h
+822body.o: compile 822body.c
 	./compile 822body.c
 
-822headerok: load 822headerok.o mess822.a
-	./load 822headerok mess822.a -lqmail
+822headerok: load 822headerok.o
+	./load 822headerok -lqmail
 
-822headerok.o: compile 822headerok.c mess822.h
+822headerok.o: compile 822headerok.c
 	./compile 822headerok.c
 
-822bodyfilter: load 822bodyfilter.o pathexec_run.o \
-mess822.a
-	./load 822bodyfilter pathexec_run.o  mess822.a -lqmail
+822bodyfilter: load 822bodyfilter.o pathexec_run.o
+	./load 822bodyfilter pathexec_run.o -lqmail
 
-822bodyfilter.o: compile 822bodyfilter.c mess822.h pathexec.h
+822bodyfilter.o: compile 822bodyfilter.c pathexec.h
 	./compile 822bodyfilter.c
 
-822headerfilter: load 822headerfilter.o pathexec_run.o mess822.a
-	./load 822headerfilter pathexec_run.o mess822.a -lqmail
+822headerfilter: load 822headerfilter.o pathexec_run.o
+	./load 822headerfilter pathexec_run.o -lqmail
 
-822headerfilter.o: compile 822headerfilter.c mess822.h pathexec.h
+822headerfilter.o: compile 822headerfilter.c pathexec.h
 	./compile 822headerfilter.c
 
-822addr: load 822addr.o mess822.a
-	./load 822addr mess822.a -lqmail
+822addr: load 822addr.o
+	./load 822addr -lqmail
 
-822addr.o: compile 822addr.c mess822.h
+822addr.o: compile 822addr.c
 	./compile 822addr.c
 
-822fields: load 822fields.o  mess822.a
-	./load 822fields mess822.a -lqmail
+822fields: load 822fields.o
+	./load 822fields -lqmail
 
-822fields.o: compile 822fields.c mess822.h
+822fields.o: compile 822fields.c
 	./compile 822fields.c
 
-checkaddr: load checkaddr.o mess822.a
-	./load checkaddr mess822.a -lqmail
+checkaddr: load checkaddr.o
+	./load checkaddr -lqmail
 
-checkaddr.o: compile checkaddr.c mess822.h
+checkaddr.o: compile checkaddr.c
 	./compile checkaddr.c
 
-checkdomain: load checkdomain.o mess822.a
-	./load checkdomain mess822.a -lqmail
+checkdomain: load checkdomain.o
+	./load checkdomain -lqmail
 
-checkdomain.o: compile checkdomain.c mess822.h
+checkdomain.o: compile checkdomain.c
 	./compile checkdomain.c
 
 filterto.o: compile filterto.c variables.h auto_control.h \
-qmail.h mess822.h pathexec.h envdir.h auto_sysconfdir.h
+qmail.h pathexec.h envdir.h auto_sysconfdir.h
 	./compile filterto.c
 
 filterto: load filterto.o auto_qmail.o qmail.o \
 openreadclose.o envdir_set.o pathexec_env.o variables.o \
-auto_sysconfdir.o auto_control.o mess822.a
+auto_sysconfdir.o auto_control.o
 	./load filterto auto_qmail.o qmail.o variables.o \
 	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_sysconfdir.o auto_control.o mess822.a -lqmail
+	auto_sysconfdir.o auto_control.o -lqmail
 
 filterto.1: filterto.9 conf-sysconfdir
 	cat filterto.9 \
@@ -2405,16 +2401,16 @@ condtomaildir: load condtomaildir.o pathexec_run.o
 condtomaildir.o: compile condtomaildir.c pathexec.h
 	./compile condtomaildir.c
 
-iftoccfrom: load iftoccfrom.o mess822.a
-	./load iftoccfrom mess822.a -lqmail
+iftoccfrom: load iftoccfrom.o
+	./load iftoccfrom -lqmail
 
-iftoccfrom.o: compile iftoccfrom.c mess822.h
+iftoccfrom.o: compile iftoccfrom.c
 	./compile iftoccfrom.c
 
-ifaddr: load ifaddr.o mess822.a
-	./load ifaddr mess822.a -lqmail
+ifaddr: load ifaddr.o
+	./load ifaddr -lqmail
 
-ifaddr.o: compile ifaddr.c mess822.h
+ifaddr.o: compile ifaddr.c
 	./compile ifaddr.c
 
 replier: load replier.o qmail.o variables.o pathexec_env.o \
@@ -2441,38 +2437,6 @@ replier-config.o: compile replier-config.c \
 auto_ezmlm.h auto_qmail.h help.t
 	./compile replier-config.c
 
-mess822_when.o: compile mess822_when.c mess822.h
-	./compile mess822_when.c
-
-mess822_line.o: compile mess822_line.c mess822.h
-	./compile mess822_line.c
-
-mess822_date.o: compile mess822_date.c
-	./compile mess822_date.c
-
-mess822_fold.o: compile mess822_fold.c
-	./compile mess822_fold.c
-
-mess822_quote.o: compile mess822_quote.c
-	./compile mess822_quote.c
-
-mess822_token.o: compile mess822_token.c
-	./compile mess822_token.c
-	
-mess822_addr.o: compile mess822_addr.c
-	./compile mess822_addr.c
-
-mess822_ok.o: compile mess822_ok.c
-	./compile mess822_ok.c
-
-mess822.a: \
-makelib mess822_date.o mess822_quote.o mess822_fold.o mess822_token.o \
-mess822_addr.o mess822_when.o mess822_line.o mess822_ok.o
-	./makelib mess822.a mess822_date.o mess822_quote.o \
-	mess822_fold.o mess822_token.o mess822_addr.o \
-	mess822_when.o mess822_line.o mess822_ok.o
-
-
 ############### serialsmtp ###################################
 
 serialsmtp: \
@@ -2486,11 +2450,11 @@ compile serialsmtp.c quote.h conf-ip
 maildirserial: \
 load maildirserial.o auto_qmail.o qmail.o maildir.o sconfig.o quote.o \
 openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o variables.o \
-auto_sysconfdir.o auto_control.o prioq.o mess822.a 
+auto_sysconfdir.o auto_control.o prioq.o
 	./load maildirserial auto_qmail.o qmail.o maildir.o variables.o \
 	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_control.o auto_sysconfdir.o sconfig.o quote.o prioq.o \
-	mess822.a -lqmail
+	-lqmail
 
 maildirserial.1: maildirserial.9 conf-sysconfdir
 	cat maildirserial.9 \
@@ -2498,7 +2462,7 @@ maildirserial.1: maildirserial.9 conf-sysconfdir
 	> maildirserial.1
 
 maildirserial.o: \
-compile maildirserial.c prioq.h mess822.h sconfig.h \
+compile maildirserial.c prioq.h sconfig.h \
 variables.h qmail.h auto_sysconfdir.h auto_control.h \
 auto_sysconfdir.h conf-mime
 	./compile `grep -h -v "^#" conf-mime` maildirserial.c
@@ -2815,40 +2779,40 @@ qaes.o: compile qaes.c
 	./compile qaes.c
 
 qarf: \
-load  qarf.o date822fmt.o mess822_ok.o
-	./load qarf date822fmt.o mess822_ok.o -lqmail
+load  qarf.o date822fmt.o
+	./load qarf date822fmt.o -lqmail
 
-qarf.o: compile qarf.c date822fmt.h mess822.h
+qarf.o: compile qarf.c date822fmt.h
 	./compile qarf.c
 
 qnotify: \
 load  qnotify.o date822fmt.o qmail.o auto_qmail.o \
 pathexec_env.o pathexec_run.o envdir_set.o variables.o \
-openreadclose.o mess822_ok.o auto_sysconfdir.o \
+openreadclose.o auto_sysconfdir.o \
 auto_control.o
-	./load qnotify date822fmt.o mess822_ok.o qmail.o \
+	./load qnotify date822fmt.o qmail.o \
 	auto_qmail.o pathexec_env.o pathexec_run.o envdir_set.o \
 	variables.o openreadclose.o auto_sysconfdir.o \
 	auto_control.o -lqmail
 
 qnotify.o: \
 compile qnotify.c date822fmt.h qmail.h variables.h \
-envdir.h pathexec.h auto_sysconfdir.h mess822.h \
+envdir.h pathexec.h auto_sysconfdir.h \
 auto_control.h
 	./compile qnotify.c
 
 rrt.o: \
 compile rrt.c auto_sysconfdir.h control.h qmail.h \
-mess822.h date822fmt.h variables.h envdir.h \
+date822fmt.h variables.h envdir.h \
 pathexec.h auto_control.h
 	./compile rrt.c
 
 rrt: \
 load rrt.o auto_qmail.o qmail.o control.o variables.o \
-mess822_ok.o auto_control.o envdir_set.o pathexec_env.o \
+auto_control.o envdir_set.o pathexec_env.o \
 auto_sysconfdir.o pathexec_run.o openreadclose.o  date822fmt.o
 	./load rrt auto_qmail.o qmail.o control.o variables.o \
-	mess822_ok.o envdir_set.o pathexec_env.o pathexec_run.o \
+	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o auto_control.o openreadclose.o \
 	date822fmt.o -lqmail
 
@@ -2880,28 +2844,25 @@ warn-auto.sh rspamhist.sh
 	cat warn-auto.sh rspamhist.sh \
 	> rspamhist
 
-iftocc: load iftocc.o mess822.a
-	./load iftocc mess822.a -lqmail
+iftocc: load iftocc.o
+	./load iftocc -lqmail
 
-iftocc.o: compile iftocc.c mess822.h
+iftocc.o: compile iftocc.c
 	./compile iftocc.c
 
-ofmipd: load ofmipd.o rewritehost.o rwhconfig.o sconfig.o \
+ofmipd: load ofmipd.o rwhconfig.o sconfig.o \
 qmail.o auto_sysconfdir.o control.o auto_control.o variables.o \
-auto_qmail.o commands.o mess822.a
-	./load ofmipd rewritehost.o rwhconfig.o sconfig.o qmail.o \
+auto_qmail.o
+	./load ofmipd rwhconfig.o sconfig.o qmail.o \
 	auto_sysconfdir.o variables.o auto_qmail.o control.o \
-	auto_control.o commands.o mess822.a -lqmail
+	auto_control.o -lqmail
 
-ofmipd.o: compile ofmipd.c commands.h qmail.h \
-sconfig.h mess822.h auto_sysconfdir.h variables.h \
-rewritehost.h rwhconfig.h
+ofmipd.o: compile ofmipd.c qmail.h \
+sconfig.h auto_sysconfdir.h variables.h \
+rwhconfig.h
 	./compile ofmipd.c
 
-rewritehost.o: compile rewritehost.c rewritehost.h
-	./compile rewritehost.c
-
-rwhconfig.o: compile rwhconfig.c rewritehost.h sconfig.h \
+rwhconfig.o: compile rwhconfig.c sconfig.h \
 rwhconfig.h auto_qmail.h variables.h auto_control.h
 	./compile rwhconfig.c
 
@@ -2913,12 +2874,12 @@ compile ofmipname.c cdbmss.h
 	./compile ofmipname.c
 
 new-inject: \
-load new-inject.o qmail.o auto_sysconfdir.o rewritehost.o rwhconfig.o \
+load new-inject.o qmail.o auto_sysconfdir.o rwhconfig.o \
 envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o variables.o \
-auto_qmail.o auto_control.o sconfig.o mess822.a
-	./load new-inject qmail.o auto_sysconfdir.o rewritehost.o variables.o \
+auto_qmail.o auto_control.o sconfig.o
+	./load new-inject qmail.o auto_sysconfdir.o variables.o \
 	auto_qmail.o envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
-	auto_control.o rwhconfig.o sconfig.o mess822.a -lqmail
+	auto_control.o rwhconfig.o sconfig.o -lqmail
 
 new-inject.1: new-inject.9 conf-sysconfdir
 	cat new-inject.9 \
@@ -2926,53 +2887,52 @@ new-inject.1: new-inject.9 conf-sysconfdir
 	> new-inject.1
 
 new-inject.o: \
-compile new-inject.c mess822.h variables.h \
-sconfig.h auto_sysconfdir.h qmail.h rewritehost.h \
+compile new-inject.c variables.h \
+sconfig.h auto_sysconfdir.h qmail.h \
 rwhconfig.h envdir.h pathexec.h auto_control.h
 	./compile new-inject.c
 
-822date: load 822date.o mess822.a auto_sysconfdir.o
-	./load 822date auto_sysconfdir.o mess822.a -lqmail
+822date: load 822date.o auto_sysconfdir.o
+	./load 822date auto_sysconfdir.o -lqmail
 
 822date.o: compile 822date.c auto_sysconfdir.h
 	./compile 822date.c
 
-822received: load 822received.o auto_sysconfdir.o \
-mess822.a
-	./load 822received auto_sysconfdir.o mess822.a -lqmail
+822received: load 822received.o auto_sysconfdir.o
+	./load 822received auto_sysconfdir.o -lqmail
 
 822received.o: compile 822received.c \
-mess822.h auto_sysconfdir.h
+auto_sysconfdir.h
 	./compile 822received.c
 
-822print: load 822print.o auto_sysconfdir.o mess822.a
-	./load 822print auto_sysconfdir.o mess822.a -lqmail
+822print: load 822print.o auto_sysconfdir.o
+	./load 822print auto_sysconfdir.o -lqmail
 
-822print.o: compile 822print.c mess822.h auto_sysconfdir.h
+822print.o: compile 822print.c auto_sysconfdir.h
 	./compile 822print.c
 
-parsedate: load parsedate.o auto_sysconfdir.o mess822.a
-	./load parsedate auto_sysconfdir.o mess822.a -lqmail
+parsedate: load parsedate.o auto_sysconfdir.o
+	./load parsedate auto_sysconfdir.o -lqmail
 
-parsedate.o: compile parsedate.c mess822.h auto_sysconfdir.h
+parsedate.o: compile parsedate.c auto_sysconfdir.h
 	./compile parsedate.c
 
-tokenize: load tokenize.o mess822.a 
-	./load tokenize mess822.a -lqmail
+tokenize: load tokenize.o
+	./load tokenize -lqmail
 
-tokenize.o: compile tokenize.c mess822.h
+tokenize.o: compile tokenize.c
 	./compile tokenize.c
 
-addrlist: load addrlist.o mess822.a
-	./load addrlist mess822.a -lqmail
+addrlist: load addrlist.o
+	./load addrlist -lqmail
 
-addrlist.o: compile addrlist.c mess822.h
+addrlist.o: compile addrlist.c
 	./compile addrlist.c
 
-qquote: load qquote.o mess822.a
-	./load qquote mess822.a -lqmail
+qquote: load qquote.o
+	./load qquote -lqmail
 
-qquote.o: compile qquote.c mess822.h
+qquote.o: compile qquote.c
 	./compile qquote.c
 
 pathexec_run.o: compile pathexec_run.c pathexec.h
@@ -3676,16 +3636,16 @@ surblfilter.8: surblfilter.9 conf-qmail conf-sysconfdir
 surblfilter: \
 load surblfilter.o control.o tlsarralloc.o \
 auto_control.o variables.o auto_qmail.o \
-strsalloc.o mess822_ok.o ip.o dns.o ipalloc.o \
+strsalloc.o ip.o dns.o ipalloc.o \
 socket_v6any.o socket_v4mappedprefix.o 
 	./load surblfilter auto_control.o control.o variables.o \
-	auto_qmail.o tlsarralloc.o strsalloc.o mess822_ok.o \
+	auto_qmail.o tlsarralloc.o strsalloc.o \
 	ip.o dns.o ipalloc.o socket_v6any.o socket_v4mappedprefix.o \
 	-lresolv -lqmail
 
 surblfilter.o: \
 compile surblfilter.c auto_qmail.h control.h dns.h ip.h \
-ipalloc.h mess822.h variables.h qmail.h auto_control.h
+ipalloc.h variables.h qmail.h auto_control.h
 	./compile surblfilter.c
 
 surblqueue: \

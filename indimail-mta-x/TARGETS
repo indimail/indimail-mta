@@ -436,16 +436,6 @@ matchup.o
 mbox.0
 mbox2maildir
 mbox2maildir.o
-mess822.a
-mess822_addr.o
-mess822_date.0
-mess822_date.o
-mess822_fold.o
-mess822_line.o
-mess822_ok.o
-mess822_quote.o
-mess822_token.o
-mess822_when.o
 mkfn.o
 mlmatchup
 mlmatchup.0
