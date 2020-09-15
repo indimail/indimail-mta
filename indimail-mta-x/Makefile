@@ -2448,12 +2448,12 @@ compile serialsmtp.c quote.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` serialsmtp.c
 
 maildirserial: \
-load maildirserial.o auto_qmail.o qmail.o maildir.o sconfig.o quote.o \
+load maildirserial.o auto_qmail.o qmail.o maildir.o quote.o \
 openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o variables.o \
 auto_sysconfdir.o auto_control.o prioq.o
 	./load maildirserial auto_qmail.o qmail.o maildir.o variables.o \
 	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_control.o auto_sysconfdir.o sconfig.o quote.o prioq.o \
+	auto_control.o auto_sysconfdir.o quote.o prioq.o \
 	-lqmail
 
 maildirserial.1: maildirserial.9 conf-sysconfdir
@@ -2462,7 +2462,7 @@ maildirserial.1: maildirserial.9 conf-sysconfdir
 	> maildirserial.1
 
 maildirserial.o: \
-compile maildirserial.c prioq.h sconfig.h \
+compile maildirserial.c prioq.h \
 variables.h qmail.h auto_sysconfdir.h auto_control.h \
 auto_sysconfdir.h conf-mime
 	./compile `grep -h -v "^#" conf-mime` maildirserial.c
@@ -2511,10 +2511,6 @@ warn-auto.sh maildirqmtp.sh conf-prefix
 	cat warn-auto.sh maildirqmtp.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> maildirqmtp
-
-sconfig.o: \
-compile sconfig.c sconfig.h
-	./compile sconfig.c
 
 leapsecs: load leapsecs.o
 	./load leapsecs -lqmail
@@ -2850,19 +2846,19 @@ iftocc: load iftocc.o
 iftocc.o: compile iftocc.c
 	./compile iftocc.c
 
-ofmipd: load ofmipd.o rwhconfig.o sconfig.o \
+ofmipd: load ofmipd.o rwhconfig.o \
 qmail.o auto_sysconfdir.o control.o auto_control.o variables.o \
 auto_qmail.o
-	./load ofmipd rwhconfig.o sconfig.o qmail.o \
+	./load ofmipd rwhconfig.o qmail.o \
 	auto_sysconfdir.o variables.o auto_qmail.o control.o \
 	auto_control.o -lqmail
 
 ofmipd.o: compile ofmipd.c qmail.h \
-sconfig.h auto_sysconfdir.h variables.h \
+auto_sysconfdir.h variables.h \
 rwhconfig.h
 	./compile ofmipd.c
 
-rwhconfig.o: compile rwhconfig.c sconfig.h \
+rwhconfig.o: compile rwhconfig.c \
 rwhconfig.h auto_qmail.h variables.h auto_control.h
 	./compile rwhconfig.c
 
@@ -2876,10 +2872,10 @@ compile ofmipname.c cdbmss.h
 new-inject: \
 load new-inject.o qmail.o auto_sysconfdir.o rwhconfig.o \
 envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o variables.o \
-auto_qmail.o auto_control.o sconfig.o
+auto_qmail.o auto_control.o
 	./load new-inject qmail.o auto_sysconfdir.o variables.o \
 	auto_qmail.o envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
-	auto_control.o rwhconfig.o sconfig.o -lqmail
+	auto_control.o rwhconfig.o -lqmail
 
 new-inject.1: new-inject.9 conf-sysconfdir
 	cat new-inject.9 \
@@ -2888,7 +2884,7 @@ new-inject.1: new-inject.9 conf-sysconfdir
 
 new-inject.o: \
 compile new-inject.c variables.h \
-sconfig.h auto_sysconfdir.h qmail.h \
+auto_sysconfdir.h qmail.h \
 rwhconfig.h envdir.h pathexec.h auto_control.h
 	./compile new-inject.c
 
