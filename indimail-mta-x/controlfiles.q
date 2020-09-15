@@ -105,3 +105,5 @@ tlsserverciphers
 tlsservermethod
 todointerval
 virtualdomains
+conf-fsync
+conf-syncdir
