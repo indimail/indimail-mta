@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.32  2020-09-15 21:08:02+05:30  Cprogrammer
+ * changed default value of use_fsync to -1
+ *
  * Revision 1.31  2020-05-19 10:34:49+05:30  Cprogrammer
  * avoid race creating file in Maildir/tmp
  *
@@ -326,7 +329,7 @@ maildir_child(char *dir)
 	if (fstat(fd, &st) == -1)
 		goto fail;
 #ifdef USE_FSYNC
-	if (use_fsync && fsync(fd) == -1)
+	if (use_fsync > 0 && fsync(fd) == -1)
 		goto fail;
 #endif
 	if (close(fd) == -1)
@@ -365,7 +368,7 @@ maildir_child(char *dir)
 	if (link(fntmptph.s, fnnewtph.s) == -1)
 		goto fail;
 #ifdef USE_FSYNC
-	if (!env_get("USE_SYNCDIR") && use_fsync) {
+	if (!env_get("USE_SYNCDIR") && use_fsync > 0) {
 		if ((fd = open(fnnewtph.s, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0)
 			goto fail;
 	}
@@ -477,7 +480,7 @@ mailfile(char *fn)
 	if (substdio_bputs(&ssout, "\n") || substdio_flush(&ssout))
 		goto writeerrs;
 #ifdef USE_FSYNC
-	if (use_fsync && fsync(fd) == -1)
+	if (use_fsync > 0 && fsync(fd) == -1)
 		goto writeerrs;
 #endif
 	close(fd);
@@ -1133,7 +1136,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.31 2020-05-19 10:34:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.32 2020-09-15 21:08:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

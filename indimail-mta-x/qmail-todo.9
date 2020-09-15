@@ -71,20 +71,31 @@ it will reread
 .IR locals ,
 .IR todointerval ,
 .IR virtualdomains ,
+.IR envnoathost ,
+.IR conf-syncdir ,
 and
-.IR envnoathost .
+.IR conf-fsync .
 
-If the environment variable USE_SYNC is set, then\fBqmail-todo\fR writes
+If the environment variable USE_FSYNC is set, then\fBqmail-todo\fR writes
 all data to disk ("flushes") all modified in-core data of (i.e., modified
 buffer cache pages for) the new message to the disk device (or other
 permanent storage device) so that all  changed  information can  be
 retrieved even if the system crashes or is rebooted. This includes
 writing through or flushing a disk cache if present. The call blocks
 until the device reports that the transfer has completed. This is done
-for the info and mess files.
+for the info and mess files. This can also be set by using \fIconf-fsync\fR
+control file.
 
-If the environment variable USE_SYNCDIR is enabled, \fBqmail-todo\fR
-forces BSD style directory syncing.
+If the environment variable USE_SYNCDIR is enabled, \fBqmail-send\fR
+forces BSD style directory syncing. This can also be set by using
+\fIconf-syncdir\fR control file.
+
+The control files conf-syncdir, conf-fsync take precedence over
+the environment variable counterparts. If the control conf-fsync,
+conf-syncdir are present, \fBqmail-send\fR will additionally set
+or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
+is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is
+used for doing this.
 
 .SH INTERNALS
 Communication between qmail-send and qmail-todo
@@ -110,4 +121,5 @@ qmail-start(8),
 qmail-daemon(8),
 qmail-send(8),
 qmail-lspawn(8),
-qmail-rspawn(8)
+qmail-rspawn(8),
+fsync(2)

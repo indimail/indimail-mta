@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.64  2020-09-15 21:11:08+05:30  Cprogrammer
+ * changed default value of use_fsync as -1
+ *
  * Revision 1.63  2020-04-01 16:14:45+05:30  Cprogrammer
  * added header for MakeArgs() function
  *
@@ -125,7 +128,7 @@
  * added Qmail High Performance Scanner Interface
  *
  * Revision 1.24  2004-09-21 23:46:46+05:30  Cprogrammer
- * change exit code to "qq unable to read configuration (#4.3.0)
+ * change exit code to "qq unable to read configuration (#4.3.0)"
  *
  * Revision 1.23  2004-08-28 01:04:23+05:30  Cprogrammer
  * reformatted part of code
@@ -1197,7 +1200,7 @@ main()
 	if (substdio_flush(&ssout) == -1)
 		die_write();
 #ifdef USE_FSYNC
-	if (use_fsync) {
+	if (use_fsync > 0) {
 		if (fsync(messfd) == -1)
 			die_write();
 		if (fsync(intdfd) == -1)
@@ -1209,7 +1212,7 @@ main()
 		die(66);
 	}
 #ifdef USE_FSYNC
-	if (!env_get("USE_SYNCDIR") && use_fsync) {
+	if (!env_get("USE_SYNCDIR") && use_fsync > 0) {
 		if ((fd = open(todofn, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0) {
 			cleanup();
 			die(66);
@@ -1225,7 +1228,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.63 2020-04-01 16:14:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.64 2020-09-15 21:11:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

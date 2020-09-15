@@ -76,6 +76,27 @@ If
 receives an ALRM signal,
 it will reschedule every message in the queue for immediate delivery.
 
+If the environment variable USE_FSYNC is set, then\fBqmail-send\fR writes
+all data to disk ("flushes") all modified in-core data of (i.e., modified
+buffer cache pages for) the new message to the disk device (or other
+permanent storage device) so that all changed information can be
+retrieved even if the system crashes or is rebooted. This includes
+writing through or flushing a disk cache if present. The call blocks
+until the device reports that the transfer has completed. This is done
+for the info and mess files. This can also be set by using \fIconf-fsync\fR
+control file.
+
+If the environment variable USE_SYNCDIR is enabled, \fBqmail-send\fR
+forces BSD style directory syncing. This can also be set by using
+\fIconf-syncdir\fR control file.
+
+The control files conf-syncdir, conf-fsync take precedence over
+the environment variable counterparts. If the control conf-fsync,
+conf-syncdir are present, \fBqmail-send\fR will additionally set
+or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
+is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is
+used for doing this.
+
 .SH "CONTROL FILES"
 .B WARNING:
 .B qmail-send
@@ -96,8 +117,10 @@ it will reread
 .IR virtualdomains ,
 .IR holdlocal ,
 .IR holdremote ,
+.IR envnoathost ,
+.IR conf-syncdir ,
 and
-.IR envnoathost .
+.IR conf-fsync .
 
 During startup, \fBqmail-send\fR uses the environment variable \fBLOCK_LOGS\fR and locks the file
 CONTROLDIR/defaultdelivery before writing a line to the log file (or stdout). If multiple qmail-send
@@ -237,6 +260,7 @@ If
 sees an envelope recipient address without an @ sign,
 it appends
 .B @\fIenvnoathost\fR.
+
 .TP 5
 .I locals
 List of domain names that the current host
@@ -254,6 +278,7 @@ is considered local if
 .I domain
 is listed in
 .IR locals .
+
 .TP 5
 .I percenthack
 List of domain names where the percent hack is applied.
@@ -273,6 +298,7 @@ handles
 .I percenthack
 before
 .IR locals .
+
 .TP 5
 .I queuelifetime
 Number of seconds
@@ -283,6 +309,7 @@ After this time expires,
 will try the message once more,
 but it will treat any temporary delivery failures as
 permanent failures.
+
 .TP 5
 .I bouncelifetime
 Number of seconds
@@ -293,6 +320,7 @@ After this time expires,
 will try the message once more,
 but it will treat any temporary delivery failures as
 permanent failures.
+
 .TP 5
 .I bounce.envrules
 Specific environment variables can be set for bounce recipients. The format of this file is of the form
@@ -374,6 +402,7 @@ if a domain is listed in
 .IR locals ,
 .I virtualdomains
 does not apply.
+
 .TP 5
 .I holdlocal
 A boolean parameter indicating whether mail for local
@@ -382,6 +411,7 @@ delivery as normal; any other value causes local mail to
 be held.
 Default:
 .IR zero
+
 .TP 5
 .I holdremote
 A boolean parameter indicating whether mail for remote
@@ -392,6 +422,15 @@ dial-up environment when the remote delivery path may not
 always be available, as an alternative to the use of serialmail.
 Default:
 .IR zero
+
+.TP 5
+.I conf-fsync
+A boolean parameter to turn on fsync of file descriptors
+when writing to a file during delivery
+
+.TP 5
+.I conf-syncdir
+A boolean parameter to turn on BSD style sync semantics for flushing directories.
 
 .SH "External BOUNCE Processor"
 .B qmail-send
@@ -611,4 +650,5 @@ qmail-clean(8),
 qmail-lspawn(8),
 qmail-dkim(8),
 dk-filter(8),
-qmail-rspawn(8)
+qmail-rspawn(8),
+fsync(2)

@@ -1,5 +1,8 @@
 /*
  * $Log: variables.h,v $
+ * Revision 1.6  2020-09-15 21:10:46+05:30  Cprogrammer
+ * added use_syncdir variable
+ *
  * Revision 1.5  2018-05-30 23:26:52+05:30  Cprogrammer
  * moved noipv6 variable to variables.c
  *
@@ -16,7 +19,7 @@
 extern char    *queuedir;
 extern char    *controldir;
 extern char    *certdir;
-extern int      use_fsync;
+extern int      use_fsync, use_syncdir;
 extern int      noipv6;
 
 #endif

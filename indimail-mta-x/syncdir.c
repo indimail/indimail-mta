@@ -1,5 +1,8 @@
 /*
  * $Log: syncdir.c,v $
+ * Revision 1.9  2020-09-15 21:08:40+05:30  Cprogrammer
+ * set default value of use_fsync, use_sycdir as -1
+ *
  * Revision 1.8  2020-09-14 21:41:28+05:30  Cprogrammer
  * fixed linkat(), unlinkat(), renameat() calls
  *
@@ -45,8 +48,10 @@
  * You can reach me at bruce.guenter@qcc.sk.ca
  */
 
-#ifdef linux
+
 #ifdef USE_FSYNC
+int             use_fsync = -1, use_syncdir = -1;
+#ifdef linux
 #include <sys/types.h>
 #include <sys/stat.h>
 #define open XXX_open
@@ -81,9 +86,6 @@
 #define SYS_RENAME(OLD,NEW) syscall(SYS_rename,OLD,NEW)
 #endif
 #define SYS_FSYNC(FD) syscall(SYS_fsync, FD)
-
-int             use_fsync = 0;
-static int      use_syncdir;
 
 static int
 fdirsync(const char *filename, unsigned length)
@@ -136,17 +138,15 @@ int
 open(const char *file, int oflag, mode_t mode)
 {
 	int             fd = SYS_OPEN(file, oflag, mode);
-	if (!use_syncdir && !(use_syncdir = (env_get("USE_SYNCDIR") ? 1 : 0)))
+	if (use_syncdir == -1)
+		use_syncdir = (env_get("USE_SYNCDIR") ? 1 : 0);
+	if (use_syncdir == -1 || !use_syncdir)
 		return (fd);
 	if (fd == -1)
 		return fd;
-	if (oflag & O_CREAT)
-	{
-		if (fdirsyncfn(file) == -1)
-		{
-			SYS_CLOSE(fd);
-			return -1;
-		}
+	if (oflag & O_CREAT && fdirsyncfn(file) == -1) {
+		SYS_CLOSE(fd);
+		return -1;
 	}
 	return fd;
 }
@@ -156,8 +156,10 @@ link(const char *oldpath, const char *newpath)
 {
 	if (SYS_LINK(oldpath, newpath) == -1)
 		return -1;
-	if (!use_syncdir && !(use_syncdir = (env_get("USE_SYNCDIR") ? 1 : 0)))
-		return(0);
+	if (use_syncdir == -1)
+		use_syncdir = (env_get("USE_SYNCDIR") ? 1 : 0);
+	if (use_syncdir == -1 || !use_syncdir)
+		return (0);
 	return fdirsyncfn(newpath);
 }
 
@@ -166,9 +168,11 @@ unlink(const char *path)
 {
 	if (SYS_UNLINK(path) == -1)
 		return -1;
-	if (!use_syncdir && !(use_syncdir = (env_get("USE_SYNCDIR") ? 1 : 0)))
-		return(0);
-	return(fdirsyncfn(path));
+	if (use_syncdir == -1)
+		use_syncdir = (env_get("USE_SYNCDIR") ? 1 : 0);
+	if (use_syncdir == -1 || !use_syncdir)
+		return (0);
+	return (fdirsyncfn(path));
 }
 
 int
@@ -176,23 +180,21 @@ rename(const char *oldpath, const char *newpath)
 {
 	if (SYS_RENAME(oldpath, newpath) == -1)
 		return -1;
-	if (!use_syncdir && !(use_syncdir = (env_get("USE_SYNCDIR") ? 1 : 0)))
-		return(0);
+	if (use_syncdir == -1)
+		use_syncdir = (env_get("USE_SYNCDIR") ? 1 : 0);
+	if (use_syncdir == -1 || !use_syncdir)
+		return (0);
 	if (fdirsyncfn(newpath) == -1)
 		return -1;
-	return(fdirsyncfn(oldpath));
+	return (fdirsyncfn(oldpath));
 }
-#endif
-#else
-#ifdef USE_FSYNC
-int             use_fsync = 0;
-#endif
 #endif /*- #ifdef linux */
+#endif /*- #ifdef USE_FSYNC */
 
 void
 getversion_syncdir_c()
 {
-	static char    *x = "$Id: syncdir.c,v 1.8 2020-09-14 21:41:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: syncdir.c,v 1.9 2020-09-15 21:08:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

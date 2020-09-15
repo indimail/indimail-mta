@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.38  2020-09-15 21:10:08+05:30  Cprogrammer
+ * use control files conf-fsync, conf-syncdir to turn on fsync, bsd style syncdir semantics
+ * set / unset USE_FSYNC, USE_SYNCDIR env variables
+ *
  * Revision 1.37  2018-07-03 01:59:20+05:30  Cprogrammer
  * reread envnoathost on HUP
  *
@@ -931,6 +935,26 @@ getcontrols(void)
 	}
 	if (control_readint(&todo_interval, "todointerval") == -1)
 		return 0;
+#ifdef USE_FSYNC
+	if (control_readint(&use_syncdir, "conf-syncdir") == -1)
+		return 0;
+	if (control_readint(&use_fsync, "conf-fsync") == -1)
+		return 0;
+	if (use_syncdir > 0) {
+		if (!env_put2("USE_SYNCDIR", "1"))
+			return 0;
+	} else {
+		if (!env_unset("USE_SYNCDIR"))
+			return 0;
+	}
+	if (use_fsync > 0) {
+		if (!env_put2("USE_FSYNC", "1"))
+			return 0;
+	} else {
+		if (!env_unset("USE_FSYNC"))
+			return 0;
+	}
+#endif
 	return 1;
 }
 
@@ -960,6 +984,30 @@ regetcontrols(void)
 		log5("alert: ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/envnoathost\n");
 		return;
 	}
+#ifdef USE_FSYNC
+	if (control_readint(&use_syncdir, "conf-syncdir") == -1) {
+		log5("alert: ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/conf-syncdir\n");
+		return;
+	}
+	if (control_readint(&use_fsync, "conf-fsync") == -1) {
+		log5("alert: ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/conf-fsync\n");
+		return;
+	}
+	if (use_syncdir > 0) {
+		while (!env_put2("USE_SYNCDIR", "1"))
+			nomem();
+	} else {
+		while (!env_unset("USE_SYNCDIR"))
+			nomem();
+	}
+	if (use_fsync > 0) {
+		while (!env_put2("USE_FSYNC", "1"))
+			nomem();
+	} else {
+		while (!env_unset("USE_FSYNC"))
+			nomem();
+	}
+#endif
 	constmap_free(&maplocals);
 	constmap_free(&mapvdoms);
 	while (!stralloc_copy(&locals, &newlocals))
@@ -1016,7 +1064,7 @@ main()
 		_exit(111);
 	}
 	if (!getcontrols()) {
-		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to read controls\n");
+		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to read controls or out of memory\n");
 		_exit(111);
 	}
 	if (chdir(queuedir) == -1) {
@@ -1103,7 +1151,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.37 2018-07-03 01:59:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.38 2020-09-15 21:10:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

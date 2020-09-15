@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.70  2020-09-15 21:09:07+05:30  Cprogrammer
+ * use control files conf-fsync, conf-syncdir to turn on fsync, bsd style syncdir semantics
+ * set / unset USE_FSYNC, USE_SYNCDIR env variables
+ *
  * Revision 1.69  2020-07-04 22:23:52+05:30  Cprogrammer
  * replaced utime() with utimes()
  *
@@ -2180,7 +2184,7 @@ todo_do(fd_set *rfds)
 		}
 	}
 #ifdef USE_FSYNC
-	if (use_fsync && fsync(fdinfo) == -1) {
+	if (use_fsync > 0 && fsync(fdinfo) == -1) {
 		log5("warning: ", queuedesc, ": trouble fsyncing ", fn.s, "\n");
 		goto fail;
 	}
@@ -2190,7 +2194,7 @@ todo_do(fd_set *rfds)
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
-			if (use_fsync && fsync(fdchan[c]) == -1) {
+			if (use_fsync > 0 && fsync(fdchan[c]) == -1) {
 				log5("warning: ", queuedesc, ": trouble fsyncing ", fn.s, "\n");
 				goto fail;
 			}
@@ -2448,6 +2452,26 @@ getcontrols()
 		return 0; /*NJL*/
 	if (control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1)
 		return 0;
+#ifdef USE_FSYNC
+	if (control_readint(&use_syncdir, "conf-syncdir") == -1)
+		return 0;
+	if (control_readint(&use_fsync, "conf-fsync") == -1)
+		return 0;
+	if (use_syncdir > 0) {
+		if (!env_put2("USE_SYNCDIR", "1"))
+			return 0;
+	} else {
+		if (!env_unset("USE_SYNCDIR"))
+			return 0;
+	}
+	if (use_fsync > 0) {
+		if (!env_put2("USE_FSYNC", "1"))
+			return 0;
+	} else {
+		if (!env_unset("USE_FSYNC"))
+			return 0;
+	}
+#endif
 	if (control_rldef(&bouncefrom, "bouncefrom", 0, "MAILER-DAEMON") != 1)
 		return 0;
 	if (control_rldef(&bouncehost, "bouncehost", 1, "bouncehost") != 1)
@@ -2570,6 +2594,30 @@ regetcontrols()
 		log5("alert: ", queuedesc, ": unable to reread ", controldir, "/envnoathost\n");
 		return;
 	}
+#ifdef USE_FSYNC
+	if (control_readint(&use_syncdir, "conf-syncdir") == -1) {
+		log5("alert: ", queuedesc, ": unable to reread ", controldir, "/conf-syncdir\n");
+		return;
+	}
+	if (control_readint(&use_fsync, "conf-fsync") == -1) {
+		log5("alert: ", queuedesc, ": unable to reread ", controldir, "/conf-fsync\n");
+		return;
+	}
+	if (use_syncdir > 0) {
+		while (!env_put2("USE_SYNCDIR", "1"))
+			nomem();
+	} else {
+		while (!env_unset("USE_SYNCDIR"))
+			nomem();
+	}
+	if (use_fsync > 0) {
+		while (!env_put2("USE_FSYNC", "1"))
+			nomem();
+	} else {
+		while (!env_unset("USE_FSYNC"))
+			nomem();
+	}
+#endif
 	for (c = 0; c < CHANNELS; c++) {
 		if (holdjobs[c] != newholdjobs[c]) {
 			holdjobs[c] = newholdjobs[c];
@@ -2845,7 +2893,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.69 2020-07-04 22:23:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.70 2020-09-15 21:09:07+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
