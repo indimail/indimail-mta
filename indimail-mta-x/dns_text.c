@@ -1,5 +1,8 @@
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.10  2020-09-16 18:58:02+05:30  Cprogrammer
+ * fix for FreeBSD
+ *
  * Revision 1.9  2017-05-16 12:34:12+05:30  Cprogrammer
  * refactored dns_text() function
  *
@@ -30,6 +33,8 @@
  */
 #include <netdb.h>
 #include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/nameser.h>
 #include <resolv.h>
 #include "str.h"
 #include "dns.h"
@@ -229,7 +234,7 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	static char    *x = "$Id: dns_text.c,v 1.9 2017-05-16 12:34:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns_text.c,v 1.10 2020-09-16 18:58:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
