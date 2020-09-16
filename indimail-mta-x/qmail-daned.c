@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.23  2020-09-16 19:03:44+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.22  2020-07-04 21:43:12+05:30  Cprogrammer
  * removed usage of INET6 define
  *
@@ -1103,6 +1106,9 @@ main(int argc, char **argv)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = AI_PASSIVE;
+#ifndef EAI_ADDRFAMILY
+#define EAI_ADDRFAMILY EAI_FAMILY
+#endif
 	if ((len = getaddrinfo(ipaddr, a_port, &hints, &res0))) {
 		if (len == EAI_ADDRFAMILY || (len == EAI_SYSTEM && errno == EAFNOSUPPORT))
 			noipv6 = 1;
@@ -1360,7 +1366,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.22 2020-07-04 21:43:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.23 2020-09-16 19:03:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

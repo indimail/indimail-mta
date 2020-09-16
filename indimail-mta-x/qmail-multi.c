@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.52  2020-09-16 19:04:52+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.51  2020-04-01 16:14:39+05:30  Cprogrammer
  * added header for MakeArgs() function
  *
@@ -163,7 +166,7 @@
 #ifdef sun
 #include <sys/types.h>
 #include <sys/statvfs.h>
-#elif defined(DARWIN)
+#elif defined(DARWIN) || defined(FREEBSD)
 #include <sys/param.h>
 #include <sys/mount.h>
 #elif defined(linux)
@@ -662,6 +665,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.51 2020-04-01 16:14:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.52 2020-09-16 19:04:52+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

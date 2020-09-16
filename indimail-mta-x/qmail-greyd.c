@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.30  2020-09-16 19:04:22+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.29  2020-07-04 21:43:34+05:30  Cprogrammer
  * removed usage of INET6 define
  *
@@ -96,8 +99,8 @@
 #include <signal.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #define __USE_GNU
@@ -1271,6 +1274,9 @@ main(int argc, char **argv)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = AI_PASSIVE;
+#ifndef EAI_ADDRFAMILY
+#define EAI_ADDRFAMILY EAI_FAMILY
+#endif
 	if ((len = getaddrinfo(ipaddr, a_port, &hints, &res0))) {
 		if (len == EAI_ADDRFAMILY || (len == EAI_SYSTEM && errno == EAFNOSUPPORT))
 			noipv6 = 1;
@@ -1551,7 +1557,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.29 2020-07-04 21:43:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.30 2020-09-16 19:04:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
