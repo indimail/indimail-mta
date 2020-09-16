@@ -1115,3 +1115,4 @@ sql-database.o
 sql-database.8
 installer
 installer.o
+mysql_inc

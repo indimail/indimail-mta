@@ -596,3 +596,4 @@ sql-database.8
 conf-release
 debian/Makefile
 installer
+mysql_inc
