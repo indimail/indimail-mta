@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.10  2020-09-16 20:47:52+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.9  2020-08-04 22:27:54+05:30  Cprogrammer
  * removed compiler warning
  *
@@ -39,10 +42,6 @@
 #include <env.h>
 #include <unistd.h>
 #include "pathexec.h"
-
-#ifndef	lint
-static char     sccsid[] = "$Id: dlnamespace.c,v 1.9 2020-08-04 22:27:54+05:30 Cprogrammer Exp mbhangui $";
-#endif
 
 static stralloc namespace = {0};
 
@@ -163,5 +162,7 @@ dlnamespace(char *fn, unsigned long *id)
 void
 getversion_dlnamespace_c()
 {
-	if (write(1, sccsid, 0) == -1) ;
+	static char    *x = "$Id: dlnamespace.c,v 1.10 2020-09-16 20:47:52+05:30 Cprogrammer Exp mbhangui $";
+	if (x)
+		x++;
 }

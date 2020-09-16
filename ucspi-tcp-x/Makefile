@@ -1,13 +1,52 @@
 # Don't edit Makefile! Use conf-* for configuration.
+COFLAGS=-z+05:30
 SHELL=/bin/sh
 OPENSSLBIN=openssl
-SSLINCS=-I/usr/kerberos/include
-DEFS := $(shell uname -s | tr "[:lower:]" "[:upper:]")
-SYSTEM :=  $(shell uname -s)
-mysql_inc  = $(shell ./mysql_config --include)
+SSLINCS  =-I/usr/kerberos/include
+DEFS    != uname -s | tr "[:lower:]" "[:upper:]"
+SYSTEM  != uname -s
 SSLLIBS := -lssl -lcrypto
 
 default: it
+
+compile: make-compile warn-auto.sh systype
+	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
+	compile
+	chmod 755 compile
+
+make-compile: \
+make-compile.sh auto-ccld.sh
+	cat auto-ccld.sh make-compile.sh > make-compile
+	chmod 755 make-compile
+
+make-load: \
+make-load.sh auto-ccld.sh
+	cat auto-ccld.sh make-load.sh > make-load
+	chmod 755 make-load
+
+make-makelib: \
+make-makelib.sh auto-ccld.sh
+	cat auto-ccld.sh make-makelib.sh > make-makelib
+	chmod 755 make-makelib
+
+makelib: \
+make-makelib warn-auto.sh systype
+	( cat warn-auto.sh; ./make-makelib "`cat systype`" ) > \
+	makelib
+	chmod 755 makelib
+
+auto-ccld.sh: conf-cc conf-ld warn-auto.sh
+	(cat warn-auto.sh; echo CC=\'`head -1 conf-cc`\'; \
+	if test $(SYSTEM) = Darwin ; then \
+		echo LD=\'`head -1 conf-ld | sed s{-s{{`\'; \
+	else \
+		echo LD=\'`head -1 conf-ld`\'; \
+	fi) > auto-ccld.sh
+
+find-systype: \
+find-systype.sh auto-ccld.sh
+	cat auto-ccld.sh find-systype.sh > find-systype
+	chmod 755 find-systype
 
 auto-str: \
 load auto-str.o
@@ -65,28 +104,6 @@ tcpserver.1: tcpserver.9
 commands.o: \
 compile commands.c commands.h
 	./compile commands.c
-
-compile: warn-auto.sh conf-cc make-compile
-	./make-compile > compile
-	chmod 755 compile
-
-make-compile: \
-make-compile.sh
-	(cat warn-auto.sh make-compile.sh) > make-compile
-	chmod 755 make-compile
-
-make-load: \
-make-load.sh auto-ccld.sh
-	cat auto-ccld.sh make-load.sh > make-load
-	chmod 755 make-load
-
-auto-ccld.sh: conf-cc conf-ld warn-auto.sh
-	(cat warn-auto.sh; echo CC=\'`head -1 conf-cc`\'; \
-	if test $(SYSTEM) = Darwin ; then \
-		echo LD=\'`head -1 conf-ld | sed s{-s{{`\'; \
-	else \
-		echo LD=\'`head -1 conf-ld`\'; \
-	fi) > auto-ccld.sh
 
 date@: \
 warn-auto.sh date@.sh conf-prefix
@@ -239,25 +256,6 @@ prog instcheck tcpserver.1 shared installer
 load: warn-auto.sh conf-ld systype make-load
 	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
 	chmod 755 load
-
-makelib: \
-warn-auto.sh systype
-	( cat warn-auto.sh; \
-	echo 'main="$$1"; shift'; \
-	echo 'rm -f "$$main"'; \
-	echo 'ar cr "$$main" $${1+"$$@"}'; \
-	case "`cat systype`" in \
-	sunos-5.*) ;; \
-	unix_sv*) ;; \
-	irix64-*) ;; \
-	irix-*) ;; \
-	dgux-*) ;; \
-	hp-ux-*) ;; \
-	sco*) ;; \
-	*) echo 'ranlib "$$main"' ;; \
-	esac \
-	) > makelib
-	chmod 755 makelib
 
 mconnect: \
 warn-auto.sh mconnect.sh conf-prefix
@@ -498,13 +496,16 @@ tcdlmopen.o load_mysql.o dns.a unix.a socket.lib mysql_config
 	dlnamespace.o tcdlmopen.o pathexec_rundl.o dns.a unix.a \
 	`cat socket.lib` $(SSLLIBS) -lqmail -ldl
 
+mysql_inc: mysql_config
+	./mysql_config --include > mysql_inc || true
+
 tcpserver.o: \
 compile tcpserver.c ip4.h prot.h pathexec.h \
 socket.h tcpremoteinfo.h rules.h dns.h haveip6.h ip6.h \
 conf-tls conf-ip haveip6.h conf-mysqlrules conf-dlopen \
-hasmysql.h
-	./compile $(SSLINCS) $(mysql_inc) \
-	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen` \
+hasmysql.h mysql_inc
+	./compile $(SSLINCS) \
+	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen mysql_inc` \
 	tcpserver.c
 
 mysql_config.o: compile mysql_config.c conf-mysqlrules
@@ -512,8 +513,8 @@ mysql_config.o: compile mysql_config.c conf-mysqlrules
 mysql_config: load mysql_config.o
 	./load mysql_config
 
-load_mysql.o: compile load_mysql.c hasmysql.h
-	./compile $(mysql_inc) `grep -h -v "^#" conf-mysqlrules` load_mysql.c
+load_mysql.o: compile load_mysql.c hasmysql.h mysql_inc
+	./compile `grep -h -v "^#" conf-mysqlrules mysql_inc` load_mysql.c
 
 control.o: \
 compile control.c control.h

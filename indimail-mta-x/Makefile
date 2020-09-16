@@ -37,11 +37,15 @@ default: it man leapsecs.dat
 
 all: it man leapsecs.dat debian/Makefile
 
-libsyncdir.a: makelib syncdir.o
-	./makelib libsyncdir.a syncdir.o
+compile: make-compile warn-auto.sh systype
+	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
+	compile
+	chmod 755 compile
 
-syncdir.o: compile syncdir.c conf-sync
-	./compile `grep -h -v "^#" conf-sync` syncdir.c
+make-compile: \
+make-compile.sh auto-ccld.sh
+	cat auto-ccld.sh make-compile.sh > make-compile
+	chmod 755 make-compile
 
 auto-ccld.sh: conf-cc conf-ld warn-auto.sh
 	(cat warn-auto.sh; echo CC=\'`head -1 conf-cc`\'; \
@@ -50,6 +54,28 @@ auto-ccld.sh: conf-cc conf-ld warn-auto.sh
 	else \
 		echo LD=\'`head -1 conf-ld`\'; \
 	fi) > auto-ccld.sh
+
+make-load: \
+make-load.sh auto-ccld.sh
+	cat auto-ccld.sh make-load.sh > make-load
+	chmod 755 make-load
+
+make-makelib: \
+make-makelib.sh auto-ccld.sh
+	cat auto-ccld.sh make-makelib.sh > make-makelib
+	chmod 755 make-makelib
+
+makelib: \
+make-makelib warn-auto.sh systype
+	( cat warn-auto.sh; ./make-makelib "`cat systype`" ) > \
+	makelib
+	chmod 755 makelib
+
+libsyncdir.a: makelib syncdir.o
+	./makelib libsyncdir.a syncdir.o
+
+syncdir.o: compile syncdir.c conf-sync
+	./compile `grep -h -v "^#" conf-sync` syncdir.c
 
 auto-gid: load auto-gid.o
 	./load auto-gid -lqmail
@@ -325,11 +351,6 @@ chkspawn.o: compile chkspawn.c auto_spawn.h
 
 clean: TARGETS
 	rm -f `cat TARGETS`
-
-compile: make-compile warn-auto.sh systype
-	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
-	compile
-	chmod 755 compile
 
 choose: choose.sh warn-auto.sh
 	rm -f choose
@@ -1063,27 +1084,6 @@ warn-auto.sh mailsubj.sh conf-prefix conf-break conf-split
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> mailsubj
-
-make-compile: \
-make-compile.sh auto-ccld.sh
-	cat auto-ccld.sh make-compile.sh > make-compile
-	chmod 755 make-compile
-
-make-load: \
-make-load.sh auto-ccld.sh
-	cat auto-ccld.sh make-load.sh > make-load
-	chmod 755 make-load
-
-make-makelib: \
-make-makelib.sh auto-ccld.sh
-	cat auto-ccld.sh make-makelib.sh > make-makelib
-	chmod 755 make-makelib
-
-makelib: \
-make-makelib warn-auto.sh systype
-	( cat warn-auto.sh; ./make-makelib "`cat systype`" ) > \
-	makelib
-	chmod 755 makelib
 
 man: \
 drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \

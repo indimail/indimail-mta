@@ -1,5 +1,8 @@
 /*
  * $Log: tcprules.c,v $
+ * Revision 1.7  2020-09-16 20:50:26+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.6  2020-08-03 17:28:09+05:30  Cprogrammer
  * replaced buffer with substdio
  *
@@ -42,7 +45,7 @@ stralloc        data = { 0 };
 stralloc        key = { 0 };
 struct cdb_make c;
 
-#if defined(linux) || defined(DARWIN)
+#if defined(linux) || defined(DARWIN) || defined(FREEBSD)
 extern int      rename(const char *, const char *);
 #endif
 

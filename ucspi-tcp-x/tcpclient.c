@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.11  2020-09-16 20:50:19+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.10  2020-08-03 17:27:39+05:30  Cprogrammer
  * replaced buffer with substdio
  *
@@ -45,6 +48,7 @@
 #include <fmt.h>
 #include <scan.h>
 #include <str.h>
+#include <arpa/inet.h>
 #include "ip4.h"
 #ifdef IPV6
 #include "ip6.h"

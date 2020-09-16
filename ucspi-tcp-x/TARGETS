@@ -132,3 +132,5 @@ make-load
 auto-ccld.sh
 installer
 installer.o
+mysql_inc
+make-makelib

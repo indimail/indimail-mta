@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.15  2020-09-16 20:49:20+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.14  2020-08-03 17:24:54+05:30  Cprogrammer
  * use qmail library
  *
@@ -63,10 +66,6 @@
 #endif
 
 #define FATAL "tcpserver: fatal: "
-
-#ifndef	lint
-static char     sccsid[] = "$Id: load_shared.c,v 1.14 2020-08-03 17:24:54+05:30 Cprogrammer Exp mbhangui $";
-#endif
 
 #ifdef HASDLMOPEN
 extern void    *tcdlmopen(Lmid_t, char *, int);
@@ -182,5 +181,7 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	if (write(1, sccsid, 0) == -1) ;
+	static char    *x = "$Id: load_shared.c,v 1.15 2020-09-16 20:49:20+05:30 Cprogrammer Exp mbhangui $";
+	if (x)
+		x++;
 }

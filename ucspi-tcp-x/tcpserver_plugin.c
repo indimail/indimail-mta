@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.13  2020-09-16 20:50:37+05:30  Cprogrammer
+ *  fixed compiler warnings
+ *
  *  Revision 1.12  2020-08-03 17:28:21+05:30  Cprogrammer
  *  use qmail library
  *
@@ -39,7 +42,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.12 2020-08-03 17:28:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.13 2020-09-16 20:50:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -197,5 +200,6 @@ tcpserver_plugin(char **envp)
 void
 getversion_tcpserver_plugin_c()
 {
-	if (write(1, sccsid, 0) == -1) ;
+	if (write(1, sccsid, 0) == -1)
+		;
 }

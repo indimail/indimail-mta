@@ -172,7 +172,7 @@ h(home, uid, gid, mode)
 	int             gid;
 	int             mode;
 {
-	perm("", "", "", home, S_IFDIR, uid, gid, mode);
+	perm("", "", "", home, S_IFDIR, uid, gid, mode, 1);
 }
 
 void
@@ -185,7 +185,7 @@ d(home, subdir, uid, gid, mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode);
+	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode, 1);
 }
 
 void
@@ -198,7 +198,7 @@ p(home, fifo, uid, gid, mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", fifo, S_IFIFO, uid, gid, mode);
+	perm("", home, "/", fifo, S_IFIFO, uid, gid, mode, 1);
 }
 
 void
@@ -214,7 +214,7 @@ c(home, subdir, file, uid, gid, mode)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
 	if (chdir(subdir) == -1)
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
-	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode);
+	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 1);
 }
 
 int

@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.66  2020-09-16 20:50:32+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.65  2020-08-03 17:28:15+05:30  Cprogrammer
  * replaced buffer with substdio
  *
@@ -218,7 +221,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.65 2020-08-03 17:28:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.66 2020-09-16 20:50:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1730,7 +1733,8 @@ allwrite(int fd, char *buf, int len)
 				continue;
 			return -1;	/*- note that some data may have been written */
 		}
-		if (w == 0);	/*- luser's fault */
+		if (w == 0)
+			;	/*- luser's fault */
 		buf += w;
 		len -= w;
 	}
@@ -1748,7 +1752,8 @@ allwritessl(SSL * ssl, char *buf, int len)
 				continue;
 			return -1;	/*- note that some data may have been written */
 		}
-		if (w == 0);	/*- luser's fault */
+		if (w == 0)
+			;	/*- luser's fault */
 		buf += w;
 		len -= w;
 	}
@@ -1817,5 +1822,6 @@ translate(SSL * ssl, int clearout, int clearin, unsigned int iotimeout)
 void
 getversion_tcpserver_c()
 {
-	if (write(1, sccsid, 0) == -1) ;
+	if (write(1, sccsid, 0) == -1)
+		;
 }

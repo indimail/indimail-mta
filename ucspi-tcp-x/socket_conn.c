@@ -1,5 +1,8 @@
 /*
  * $Log: socket_conn.c,v $
+ * Revision 1.8  2020-09-16 20:50:03+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.7  2020-08-03 17:26:27+05:30  Cprogrammer
  * use qmail library
  *
@@ -45,7 +48,7 @@ int
 socket_connected(int s)
 {
 	struct sockaddr_in sa;
-#if defined(__socklen_t_defined) || defined(_SOCKLEN_T)
+#if defined(__socklen_t_defined) || defined(_SOCKLEN_T) || defined(_SOCKLEN_T_DECLARED)
 	socklen_t       dummy;
 #else
 	int             dummy;
@@ -54,7 +57,8 @@ socket_connected(int s)
 
 	dummy = sizeof sa;
 	if (getpeername(s, (struct sockaddr *) &sa, &dummy) == -1) {
-		if (read(s, &ch, 1) == -1) ; /*- sets errno */
+		if (read(s, &ch, 1) == -1)
+			; /*- sets errno */
 		return 0;
 	}
 	return 1;

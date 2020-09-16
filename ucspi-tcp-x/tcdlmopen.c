@@ -1,5 +1,8 @@
 /*
  * $Log: tcdlmopen.c,v $
+ * Revision 1.3  2020-09-16 20:50:12+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.2  2020-08-03 17:27:31+05:30  Cprogrammer
  * use qmail library
  *
@@ -19,10 +22,6 @@
 #endif
 #include <env.h>
 
-#ifndef	lint
-static char     sccsid[] = "$Id: tcdlmopen.c,v 1.2 2020-08-03 17:27:31+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 #ifdef HASDLMOPEN
 void           *
 tcdlmopen(Lmid_t lmid, const char *filename, int flags)
@@ -31,7 +30,7 @@ tcdlmopen(Lmid_t lmid, const char *filename, int flags)
 }
 #else
 void           *
-tcdlmopen(void lmid, const char *filename, int flags)
+tcdlmopen(int lmid, const char *filename, int flags)
 {
 	return (dlopen(filename, flags));
 }
@@ -43,5 +42,7 @@ extern void write(int, char *, int);
 void
 getversion_tcdlmopen_c()
 {
-	(void) write(1, sccsid, 0);
+	static char    *x = "$Id: tcdlmopen.c,v 1.3 2020-09-16 20:50:12+05:30 Cprogrammer Exp mbhangui $";
+	if (x)
+		x++;
 }

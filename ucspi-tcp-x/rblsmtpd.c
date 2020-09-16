@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.20  2020-09-16 20:49:57+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.19  2020-08-03 17:25:31+05:30  Cprogrammer
  * replaced buffer with substdio
  *
@@ -84,7 +87,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.19 2020-08-03 17:25:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.20 2020-09-16 20:49:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -640,5 +643,6 @@ main(int argc, char **argv, char **envp)
 void
 getversion_rblsmtpd_c()
 {
-	if (write(1, sccsid, 0) == -1) ;
+	if (write(1, sccsid, 0) == -1)
+		;
 }
