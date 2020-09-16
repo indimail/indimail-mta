@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.3  2020-09-16 18:59:40+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.2  2020-09-13 17:33:04+05:30  Cprogrammer
  * sync permissions with indimail-mta.spec file
  *
@@ -38,7 +41,7 @@ nomem()
 }
 
 void
-print_info(char *str, char *source, char *dest, mode_t mode, uid_t uid, gid_t gid)
+print_info(char *str, char *source, char *dest, int mode, int uid, int gid)
 {
 	int             i, d, count;
 	int             a[4];
@@ -102,9 +105,7 @@ doit(stralloc *line)
 	int             fdin, fdout, opt;
 	unsigned long   m;
 	unsigned int    xlen, i;
-	uid_t           uid;
-	gid_t           gid;
-	mode_t          mode;
+	int             uid, gid, mode;
 	struct passwd  *pw;
 	struct group   *gr;
 
@@ -179,21 +180,21 @@ doit(stralloc *line)
 
 	if (*uidstr) {
 		if (!(pw = getpwnam(uidstr)))
-			scan_uint(uidstr, &uid);
+			scan_uint(uidstr, (unsigned int *) &uid);
 		else
 			uid = pw->pw_uid;
 	} else
 		uid = -1;
 	if (*gidstr) {
 		if (!(gr = getgrnam(gidstr)))
-			scan_uint(gidstr, &gid);
+			scan_uint(gidstr, (unsigned int *) &gid);
 		else
 			gid = gr->gr_gid;
 	} else
 		gid = -1;
 	if (*modestr) {
 		scan_8long(modestr, &m);
-		mode = (mode_t) m;
+		mode = (int) m;
 	} else
 		mode = -1;
 	switch (*type)
@@ -203,7 +204,7 @@ doit(stralloc *line)
 			strerr_die6sys(111, FATAL, "unable to symlink ", name, " to ", target.s, ": ");
 		break;
 	case 'd':
-		print_info("makedir", 0, target.s, (mode_t) mode, (uid_t) uid, (gid_t) gid);
+		print_info("makedir", 0, target.s, mode, uid, gid);
 		if (my_uid)
 			mode = 0755;
 		if (mkdir(target.s, mode == -1 ? 0755 : mode) == -1 && errno != error_exist)
@@ -215,7 +216,7 @@ doit(stralloc *line)
 		break;
 
 	case 'c':
-		print_info("install file", name, target.s, (mode_t) mode, (uid_t) uid, (gid_t) gid);
+		print_info("install file", name, target.s, mode, uid, gid);
 		if ((fdin = open_read(name)) == -1) {
 			if (opt)
 				return;
@@ -288,7 +289,7 @@ main(argc, argv)
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.2 2020-09-13 17:33:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: installer.c,v 1.3 2020-09-16 18:59:40+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
