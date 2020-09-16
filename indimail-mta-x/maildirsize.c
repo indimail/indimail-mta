@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.12  2020-09-16 19:00:57+05:30  Cprogrammer
+ * freeBSD fix
+ *
  * Revision 1.11  2020-05-11 11:03:06+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -37,7 +40,15 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <inttypes.h>
+#ifdef sun
+#include <sys/types.h>
+#include <sys/statvfs.h>
+#elif defined(DARWIN) || defined(FREEBSD)
+#include <sys/param.h>
+#include <sys/mount.h>
+#elif defined(linux)
 #include <sys/vfs.h>
+#endif
 #include <sys/stat.h>
 #include "sgetopt.h"
 #include "subfd.h"
@@ -148,7 +159,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.11 2020-05-11 11:03:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirsize.c,v 1.12 2020-09-16 19:00:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
