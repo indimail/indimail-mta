@@ -1,5 +1,8 @@
 /*
  * $Log: fghack.c,v $
+ * Revision 1.5  2020-09-16 18:59:01+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.4  2020-06-08 22:51:19+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -43,16 +46,17 @@ main(int argc, char **argv, char **envp)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	case 0:
 		close(pi[0]);
-		for (i = 0; i < 30; ++i)
-			if (dup(pi[1]) == -1) ;
+		for (i = 0; i < 30; ++i) {
+			if (dup(pi[1]) == -1)
+				;
+		}
 		pathexec_run(argv[1], argv + 1, envp);
 		strerr_die4sys(111, FATAL, "unable to run ", argv[1], ": ");
 	}
 
 	close(pi[1]);
 
-	for (;;)
-	{
+	for (;;) {
 		i = read(pi[0], &ch, 1);
 		if ((i == -1) && (errno == error_intr))
 			continue;
@@ -71,7 +75,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fghack_c()
 {
-	static char    *x = "$Id: fghack.c,v 1.4 2020-06-08 22:51:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fghack.c,v 1.5 2020-09-16 18:59:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

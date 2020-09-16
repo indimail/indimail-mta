@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.11  2020-09-16 18:58:48+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.10  2020-06-08 22:51:15+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -133,7 +136,8 @@ blindwrite(fd, buf, len)
 	char           *buf;
 	int             len;
 {
-	if (write(fd, buf, len) == -1) ;
+	if (write(fd, buf, len) == -1)
+		;
 	return len;
 }
 
@@ -531,7 +535,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.10 2020-06-08 22:51:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.11 2020-09-16 18:58:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
