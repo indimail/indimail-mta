@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.8  2020-09-16 19:00:08+05:30  Cprogrammer
+ * conditional compilation when mysql development package is present
+ *
  * Revision 1.7  2019-06-07 19:18:27+05:30  Cprogrammer
  * do not treat missing libmysqlclient as error
  *
@@ -22,6 +25,9 @@
  * Initial revision
  *
  */
+#ifdef USE_SQL
+#include "hasmysql.h"
+#ifdef HAS_MYSQL
 #include <unistd.h>
 #include <mysql.h>
 #include <mysqld_error.h>
@@ -124,11 +130,13 @@ initMySQLlibrary(char **errstr)
 		use_sql = 1;
 	return (0);
 }
+#endif /*- HAVE_MYSQL */
+#endif /*- USE_SQL */
 
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.7 2019-06-07 19:18:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.8 2020-09-16 19:00:08+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
