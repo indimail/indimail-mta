@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.c,v $
+ * Revision 1.30  2020-09-16 19:06:06+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.29  2020-04-09 16:01:17+05:30  Cprogrammer
  * collapsed multiple stralloc statements
  *
@@ -91,12 +94,12 @@
  * Initial revision
  *
  * qregex (v2)
- * $Id: qregex.c,v 1.29 2020-04-09 16:01:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.30 2020-09-16 19:06:06+05:30 Cprogrammer Exp mbhangui $
  *
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2020-04-09 16:01:17+05:30 $
- * Revision: $Revision: 1.29 $
+ * Modified: $Date: 2020-09-16 19:06:06+05:30 $
+ * Revision: $Revision: 1.30 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -225,8 +228,7 @@ cdbmatch(char *fn, char *addr, int len, struct constmap *maprh, char **errStr)
 }
 
 void
-setdotChar(c)
-	char            c;
+setdotChar(char c)
 {
 	dotChar = c;
 	return;
@@ -334,7 +336,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.29 2020-04-09 16:01:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.30 2020-09-16 19:06:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
