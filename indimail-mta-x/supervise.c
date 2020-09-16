@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.10  2020-09-16 19:07:40+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
  * Revision 1.9  2020-08-29 11:50:27+05:30  Cprogrammer
  * send signal to process id after sending signal to process group id
  *
@@ -112,7 +115,8 @@ announce(void)
 void
 trigger(void)
 {
-	if (write(selfpipe[1], "", 1) == -1) ;
+	if (write(selfpipe[1], "", 1) == -1)
+		;
 }
 
 char           *run[2] =      { "./run", 0 };
@@ -419,7 +423,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.9 2020-08-29 11:50:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.10 2020-09-16 19:07:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

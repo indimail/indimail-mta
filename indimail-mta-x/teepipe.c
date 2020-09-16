@@ -1,5 +1,8 @@
 /*
  * $Log: teepipe.c,v $
+ * Revision 1.4  2020-09-16 19:08:05+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
  * Revision 1.3  2020-06-08 22:52:20+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -37,15 +40,21 @@
 void
 err(const char *msg)
 {
-	if (write(2, "teepipe: Error: ", 16) == -1 || write(2, msg, strlen(msg)) == -1 || write(2, "\n", 1) == -1) ;
+	if (write(2, "teepipe: Error: ", 16) == -1 
+		|| write(2, msg, strlen(msg)) == -1 
+		|| write(2, "\n", 1) == -1)
+		;
 	exit(1);
 }
 
 void
 err2(const char *msg1, const char *msg2)
 {
-	if (write(2, "teepipe: Error: ", 16) == -1 || write(2, msg1, strlen(msg1)) == -1 ||
-		write(2, msg2, strlen(msg2)) == -1 || write(2, "\n", 1) == -1) ;
+	if (write(2, "teepipe: Error: ", 16) == -1
+		|| write(2, msg1, strlen(msg1)) == -1
+		|| write(2, msg2, strlen(msg2)) == -1
+		|| write(2, "\n", 1) == -1)
+		;
 	exit(1);
 }
 
@@ -54,8 +63,7 @@ err2(const char *msg1, const char *msg2)
 void
 main_loop(int fd)
 {
-	for (;;)
-	{
+	for (;;) {
 		char            buf[BUFSIZE];
 		ssize_t         rd = read(0, buf, BUFSIZE);
 		if (rd == 0 || rd == -1)
@@ -107,7 +115,7 @@ main(int argc, char **argv)
 void
 getversion_teepipe_c()
 {
-	static char    *x = "$Id: teepipe.c,v 1.3 2020-06-08 22:52:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: teepipe.c,v 1.4 2020-09-16 19:08:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

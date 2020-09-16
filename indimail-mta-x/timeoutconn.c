@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.16  2020-09-16 19:08:17+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
  * Revision 1.15  2020-06-08 22:52:23+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -86,10 +89,8 @@ socket_bind4(int s, char *bound, ip_addr *ipr)
 	ipstr = ipstring + 1;
 	iplen = ip4_fmt(ipstr, ipr);	/*- Well, Dan seems to trust its output!  */
 	/*- check d.d.d.d, d.d.d., d.d., d., none */
-	if (!(bindroute = constmap(&bindroutes, ipstr, iplen)))
-	{
-		while (iplen--)	/*- no worries - the lost char must be 0-9 */
-		{
+	if (!(bindroute = constmap(&bindroutes, ipstr, iplen))) {
+		while (iplen--) {	/*- no worries - the lost char must be 0-9 */
 			if (ipstring[iplen] == '.' && (bindroute = constmap(&bindroutes, ipstr, iplen)))
 				break;
 		}
@@ -136,10 +137,8 @@ socket_bind6(int s, char *bound, ip6_addr *ipr)
 	ipstr = ipstring + 1;
 	iplen = ip6_fmt(ipstr, ipr);
 	/*- check d.d.d.d, d.d.d., d.d., d., none */
-	if (!(bindroute = constmap(&bindroutes, ipstr, iplen)))
-	{
-		while (iplen--)	/*- no worries - the lost char must be 0-9 */
-		{
+	if (!(bindroute = constmap(&bindroutes, ipstr, iplen))) {
+		while (iplen--) {	/*- no worries - the lost char must be 0-9 */
 			if (ipstring[iplen] == '.' && (bindroute = constmap(&bindroutes, ipstr, iplen)))
 				break;
 		}
@@ -148,19 +147,16 @@ socket_bind6(int s, char *bound, ip6_addr *ipr)
 		return 0;	/*- no bind required */
 	if (!ip6_scan(bindroute, &iplocal))
 		return -4;	/*- wasn't an ip returned */
-	if (noipv6)
-	{
+	if (noipv6) {
 		int             i;
 
-		for (i = 0; i < 16; i++)
-		{
+		for (i = 0; i < 16; i++) {
 			if (iplocal.d[i] != 0)
 				break;
 		}
 		if (i == 16 || ip6_isv4mapped(iplocal.d))
 			return socket_bind4(s, bound, (ip_addr *) (iplocal.d + 12));
-		else
-		{
+		else {
 			errno = error_proto;
 			return (-1);
 		}
@@ -175,8 +171,7 @@ socket_bind6(int s, char *bound, ip6_addr *ipr)
 #else
 	int             i;
 
-	for (i = 0; i < 16; i++)
-	{
+	for (i = 0; i < 16; i++) {
 		if (iplocal.d[i] != 0)
 			break;
 	}
@@ -218,46 +213,37 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 	/*
 	 * use outgoing ipaddr only if bind_socket did not bind on a local IP 
 	 */
-	if (!bound)
-	{
+	if (!bound) {
 		byte_zero((char *) &sa, sizeof(sa));
 #ifdef LIBC_HAS_IP6
-		if (noipv6)
-		{
-			for (i = 0; i < 16; i++)
-			{
+		if (noipv6) {
+			for (i = 0; i < 16; i++) {
 				if (ipl->ip6.d[i] != 0)
 					break;
 			}
-			if (i == 16 || ip6_isv4mapped(ipl->ip6.d))
-			{
+			if (i == 16 || ip6_isv4mapped(ipl->ip6.d)) {
 				sin4 = (sockaddr_in *) &sa;
 				sin4->sin_family = AF_INET;
 				byte_copy((char *) &sin4->sin_addr, 4, (char *) &ipl->ip6 + 12);
-			} else
-			{
+			} else {
 				errno = error_proto;
 				return -1;
 			}
-		} else
-		{
+		} else {
 			sin6 = &sa;
 			sin6->sin6_family = AF_INET6;
 			byte_copy((char *) &sin6->sin6_addr, 16, (char *) &ipl->ip6);
 		}
 #else
-		for (i = 0; i < 16; i++)
-		{
+		for (i = 0; i < 16; i++) {
 			if (ipl->ip.d[i] != 0)
 				break;
 		}
-		if (i == 16 || ip6_isv4mapped(ipl->ip.d))
-		{
+		if (i == 16 || ip6_isv4mapped(ipl->ip.d)) {
 			sin4 = (sockaddr_in *) &sa;
 			sin4->sin_family = AF_INET;
 			byte_copy((char *) &sin4->sin_addr, 4, (char *) &ipl->ip6 + 12);
-		} else
-		{
+		} else {
 			errno = error_proto;
 			return -1;
 		}
@@ -267,57 +253,48 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 	}
 #if LIBC_HAS_IP6
 	byte_zero((char *) &sa, sizeof(sa));
-	if (noipv6)
-	{
-		if (ip6_isv4mapped(ipr->d))
-		{
+	if (noipv6) {
+		if (ip6_isv4mapped(ipr->d)) {
 			sin4 = (sockaddr_in *) &sa;
 			sin4->sin_family = AF_INET;
 			sin4->sin_port = htons(port);
 			byte_copy((char *) &sin4->sin_addr, 4, (char *) &ipr->d + 12);
 		} else
-		if (byte_equal((char *) ipr->d, 16, (char *) V6loopback))
-		{
+		if (byte_equal((char *) ipr->d, 16, (char *) V6loopback)) {
 			sin4 = (sockaddr_in *) &sa;
 			sin4->sin_family = AF_INET;
 			sin4->sin_port = htons(port);
 			byte_copy((char *) &sin4->sin_addr, 4, ip4loopback);
-		} else
-		{
+		} else {
 			errno = error_proto;
 			return -1;
 		}
-	} else
-	{
+	} else {
 		sin6 = (sockaddr_in6 *) &sa;
 		sin6->sin6_family = AF_INET6;
 		sin6->sin6_port = htons(port);
 		byte_copy((char *) &sin6->sin6_addr, 16, (char *) ipr);
 	}
 #else
-	if (ip6_isv4mapped(ipr->d))
-	{
+	if (ip6_isv4mapped(ipr->d)) {
 		sin4 = (sockaddr_in *) &sa;
 		sin4->sin_family = AF_INET;
 		sin4->sin_port = htons(port);
 		byte_copy((char *) &sin4->sin_addr, 4, (char *) &ipr->d + 12);
 	} else
-	if (byte_equal(ipr->d, 16, (char *) V6loopback))
-	{
+	if (byte_equal(ipr->d, 16, (char *) V6loopback)) {
 		sin4 = (sockaddr_in *) &sa;
 		sin4->sin_family = AF_INET;
 		sin4->sin_port = htons(port);
 		byte_copy((char *) &sin4->sin_addr, 4, ip4loopback);
-	} else
-	{
+	} else {
 		errno = error_proto;
 		return -1;
 	}
 #endif
 	if (ndelay_on(s) == -1)
 		return -1;
-	if (connect(s, (struct sockaddr *) &sa, sizeof(sa)) == 0)
-	{
+	if (connect(s, (struct sockaddr *) &sa, sizeof(sa)) == 0) {
 		ndelay_off(s);
 		return 0;
 	}
@@ -329,13 +306,12 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 	tv.tv_usec = 0;
 	if (select(s + 1, (fd_set *) 0, &wfds, (fd_set *) 0, &tv) == -1)
 		return -1;
-	if (FD_ISSET(s, &wfds))
-	{
+	if (FD_ISSET(s, &wfds)) {
 		int             dummy;
 		dummy = sizeof(sa);
-		if (getpeername(s, (struct sockaddr *) &sa, (socklen_t *) &dummy) == -1)
-		{
-			if (read(s, &ch, 1) == -1) ;
+		if (getpeername(s, (struct sockaddr *) &sa, (socklen_t *) &dummy) == -1) {
+			if (read(s, &ch, 1) == -1)
+				;
 			return -1;
 		}
 		ndelay_off(s);
@@ -367,8 +343,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 	/*
 	 * use outgoing ipaddr only if bind_socket did not bind on a local IP 
 	 */
-	if (!bound)
-	{
+	if (!bound) {
 		byte_zero((char *) &sin, sizeof(sin));
 		sin.sin_family = AF_INET;
 		byte_copy((char *) &sin.sin_addr.s_addr, 4, (char *) &ipl->ip);
@@ -381,8 +356,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 	sin.sin_port = htons(port);
 	if (ndelay_on(s) == -1)
 		return -1;
-	if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) == 0)
-	{
+	if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) == 0) {
 		ndelay_off(s);
 		return 0;
 	}
@@ -394,13 +368,12 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 	tv.tv_usec = 0;
 	if (select(s + 1, (fd_set *) 0, &wfds, (fd_set *) 0, &tv) == -1)
 		return -1;
-	if (FD_ISSET(s, &wfds))
-	{
+	if (FD_ISSET(s, &wfds)) {
 		int             dummy;
 		dummy = sizeof(sin);
-		if (getpeername(s, (struct sockaddr *) &sin, (socklen_t *) &dummy) == -1)
-		{
-			if (read(s, &ch, 1) == -1) ;
+		if (getpeername(s, (struct sockaddr *) &sin, (socklen_t *) &dummy) == -1) {
+			if (read(s, &ch, 1) == -1)
+				;
 			return -1;
 		}
 		ndelay_off(s);
@@ -413,7 +386,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 void
 getversion_timeoutconn_c()
 {
-	static char    *x = "$Id: timeoutconn.c,v 1.15 2020-06-08 22:52:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: timeoutconn.c,v 1.16 2020-09-16 19:08:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

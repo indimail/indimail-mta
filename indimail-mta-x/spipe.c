@@ -1,5 +1,8 @@
 /*
  * $Log: spipe.c,v $
+ * Revision 1.4  2020-09-16 19:07:34+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
  * Revision 1.3  2020-06-08 22:52:12+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -104,14 +107,11 @@ start_parts()
 	int             fdout = FD_STDOUT;
 	int             fdout_next = -1;
 	unsigned        i;
-	for (i = part_count; i > 0; i--)
-	{
+	for (i = part_count; i > 0; i--) {
 		int             fdin = FD_STDIN;
-		if (i > 1)
-		{
+		if (i > 1) {
 			int             p[2];
-			if (pipe(p))
-			{
+			if (pipe(p)) {
 				die("Could not create pipe");
 				stop_parts();
 				exit(1);
@@ -119,8 +119,7 @@ start_parts()
 			fdin = p[0];
 			fdout_next = p[1];
 		}
-		if (!start_supervise(part_names[i - 1], fdin, fdout))
-		{
+		if (!start_supervise(part_names[i - 1], fdin, fdout)) {
 			stop_parts();
 			exit(1);
 		}
@@ -133,7 +132,8 @@ start_parts()
 void
 handle_intr(int sig)
 {
-	if (write(selfpipe[1], "", 1) == -1) ;
+	if (write(selfpipe[1], "", 1) == -1)
+		;
 }
 
 void
@@ -143,7 +143,8 @@ mainloop()
 	signal(SIGINT, handle_intr);
 	signal(SIGQUIT, handle_intr);
 	signal(SIGTERM, handle_intr);
-	if (read(selfpipe[0], buf, 1) == -1) ;
+	if (read(selfpipe[0], buf, 1) == -1)
+		;
 	stop_parts();
 	exit(0);
 }
@@ -160,7 +161,7 @@ main(int argc, char **argv)
 void
 getversion_spipe_c()
 {
-	static char    *x = "$Id: spipe.c,v 1.3 2020-06-08 22:52:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spipe.c,v 1.4 2020-09-16 19:07:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
