@@ -1,5 +1,8 @@
 /*
  * $Log: qfilelog.c,v $
+ * Revision 1.4  2020-09-16 19:03:09+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
  * Revision 1.3  2020-06-08 22:51:43+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -22,7 +25,8 @@
 void
 errmsg(const char *m)
 {
-	if (write(2, m, strlen(m)) == -1) ;
+	if (write(2, m, strlen(m)) == -1)
+		;
 }
 
 void
@@ -71,11 +75,9 @@ do_write(ssize_t rd)
 {
 	ssize_t         offset = 0;
 	ssize_t         wr;
-	while (offset < rd)
-	{
+	while (offset < rd) {
 		wr = write(fd, buf + offset, rd - offset);
-		if (wr == -1)
-		{
+		if (wr == -1) {
 			warn_sys("Can't write, pausing");
 			PAUSE;
 		} else
@@ -86,15 +88,12 @@ do_write(ssize_t rd)
 void
 do_close(void)
 {
-	if (fd >= 0)
-	{
-		while (fsync(fd) == -1)
-		{
+	if (fd >= 0) {
+		while (fsync(fd) == -1) {
 			warn_sys("Error syncing the file, pausing");
 			PAUSE;
 		}
-		while (close(fd) == -1)
-		{
+		while (close(fd) == -1) {
 			warn_sys("Error closing the file, pausing");
 			PAUSE;
 		}
@@ -104,11 +103,9 @@ do_close(void)
 void
 do_open(void)
 {
-	do
-	{
+	do {
 		fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0666);
-		if (fd == -1)
-		{
+		if (fd == -1) {
 			warn_sys("Error opening the output file, pausing");
 			PAUSE;
 		}
@@ -120,8 +117,7 @@ void
 loop(void)
 {
 	ssize_t         rd;
-	for (;;)
-	{
+	for (;;) {
 		rd = do_read();
 		if (rd)
 			do_write(rd);
@@ -146,8 +142,7 @@ catch_int(int flag)
 int
 main(int argc, char *argv[])
 {
-	if (argc < 2)
-	{
+	if (argc < 2) {
 		fatal("usage: filelog filename\n");
 		return 1;
 	}
@@ -164,7 +159,7 @@ main(int argc, char *argv[])
 void
 getversion_qfilelog_c()
 {
-	static char    *x = "$Id: qfilelog.c,v 1.3 2020-06-08 22:51:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qfilelog.c,v 1.4 2020-09-16 19:03:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
