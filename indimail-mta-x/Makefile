@@ -1,25 +1,20 @@
 # Don't edit Makefile! Use conf-* for configuration.
 COFLAGS=-z+05:30
-DKIM_VERSION=1.5
-SRS_VERSION=1.0.18
-QMAILDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
-SYSTEM=$(shell uname -s)
 SHELL=/bin/sh
-prefix=$(shell head -1 conf-prefix 2>/dev/null)
-qmaildir=$(shell head -1 conf-qmail 2>/dev/null)
-mandir=$(shell echo `head -1 conf-prefix`/share/man 2>/dev/null)
-shareddir=$(shell head -1 conf-shared 2>/dev/null)
-qsysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
-libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
-version=$(shell cat conf-version)
-release := $(shell cat conf-release 2>/dev/null||echo "1.1")
-ucspitcp_version=$(shell cat ../ucspi-tcp-x/conf-version)
-DATE=$(shell date)
-DEFS=$(shell uname -s | tr "[:lower:]" "[:upper:]")
-mysql_inc=$(shell ./mysql_config --include)
-HOST=$(shell echo "`uname -m`-pc-`uname -s`-`uname -o|cut -d/ -f1`"|tr "[:upper:]" "[:lower:]")
 servicedir=/service
-logdir=$(shell cat conf-logdir)
+SYSTEM           != uname -s
+prefix           != head -1 conf-prefix 2>/dev/null
+qmaildir         != head -1 conf-qmail 2>/dev/null
+mandir           != echo "`head -1 conf-prefix`/share/man" 2>/dev/null
+shareddir        != head -1 conf-shared 2>/dev/null
+qsysconfdir      != head -1 conf-sysconfdir 2>/dev/null
+libexecdir       != head -1 conf-libexec 2>/dev/null
+version          != cat conf-version
+release          != cat conf-release 2>/dev/null ||echo "1.1"
+ucspitcp_version != cat ../ucspi-tcp-x/conf-version
+DATE             != date
+HOST             != echo "`uname -m`-pc-`uname -s`-`uname -o|cut -d/ -f1`"|tr "[:upper:]" "[:lower:]"
+logdir           != cat conf-logdir
 
 edit = sed \
 	-e 's,@indimaildir\@,$(qmaildir),g' \
@@ -1511,7 +1506,7 @@ compile qmail-queue.c matchregex.h triggerpull.h MakeArgs.h \
 control.h auto_qmail.h auto_uids.h date822fmt.h fmtqfn.h \
 variables.h conf-sync conf-qhpsi conf-ip conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
-	qmail-queue.c -lqmail
+	qmail-queue.c
 
 domainkeys.o: compile domainkeys.c conf-domainkeys
 	./compile `grep -h -v "^#" conf-domainkeys` domainkeys.c
@@ -1591,15 +1586,9 @@ trydkim.c compile load dns.lib dkim.lib conf-indi
 qmail-dkim: qmail-dkim.o date822fmt.o auto_control.o \
 auto_qmail.o variables.o control.o MakeArgs.o dns_text.o \
 dns.lib dkim.lib
-	if test $(SYSTEM) = Darwin ; then \
-	g++ -s -o qmail-dkim qmail-dkim.o  date822fmt.o auto_control.o \
-	auto_qmail.o variables.o control.o MakeArgs.o dns_text.o \
-	`cat dns.lib dkim.lib` -lcrypto -lqmail ; \
-	else \
 	g++ -s -o qmail-dkim qmail-dkim.o date822fmt.o auto_control.o \
 	auto_qmail.o variables.o control.o MakeArgs.o \
-	dns_text.o `cat dns.lib dkim.lib` -lcrypto -lqmail ; \
-	fi
+	dns_text.o `cat dns.lib dkim.lib` -lcrypto -lqmail
 
 qmail-dkim.o: \
 compile qmail-dkim.c qmail.h auto_qmail.h control.h domainkeys.h \
@@ -1824,16 +1813,21 @@ compile qregex.c qregex.h matchregex.h \
 control.h variables.h auto_control.h
 	./compile qregex.c
 
+mysql_inc: mysql_config
+	./mysql_config --include > mysql_inc || true
+
 # qregex.c compiled with sqlmatch()
 qregex_sql.o: \
 compile qregex.c qregex.h sqlmatch.h matchregex.h \
-control.h variables.h hasmysql.h mysql_config conf-sql
-	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) \
+control.h variables.h hasmysql.h mysql_config \
+mysql_inc conf-sql
+	./compile `grep -h -v "^#" conf-sql mysql_inc` \
 	qregex.c -o qregex_sql.o
 
 load_mysql.o: compile load_mysql.c indimail_stub.h \
-mysql_config conf-sql auto_control.h variables.h
-	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) load_mysql.c
+mysql_config conf-sql auto_control.h variables.h \
+hasmysql.h mysql_inc
+	./compile `grep -h -v "^#" conf-sql mysql_inc` load_mysql.c
 
 matchregex.o: \
 compile matchregex.c qregex.h
@@ -1891,15 +1885,18 @@ smtpd.o: \
 compile smtpd.c tls.h ssl_timeoutio.h auto_qmail.h control.h received.h \
 ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
 matchregex.o variables.h rcpthosts.h etrn.h date822fmt.h \
-envrules.h tablematch.h matchregex.h qregex.h sqlmatch.h smtp_plugin.h \
-auto_prefix.h hastlsv1_1_server.h hastlsv1_2_server.h hasmysql.h indimail_stub.h \
-auto_control.h dns.h conf-tls conf-spf conf-ip conf-plugin conf-batv mysql_config
-	./compile $(mysql_inc) `grep -h -v "^#" conf-tls conf-spf \
-	conf-ip conf-batv conf-plugin` smtpd.c
+envrules.h tablematch.h matchregex.h qregex.h sqlmatch.h \
+smtp_plugin.h auto_prefix.h hastlsv1_1_server.h \
+hastlsv1_2_server.h hasmysql.h indimail_stub.h \
+auto_control.h dns.h conf-tls conf-spf conf-ip \
+conf-plugin conf-batv mysql_config mysql_inc
+	./compile `grep -h -v "^#" conf-tls conf-spf \
+	conf-ip conf-batv conf-plugin mysql_inc` smtpd.c
 
-sqlmatch.o: compile sqlmatch.c variables.h sqlmatch.h qregex.h auto_control.h \
-load_mysql.h mysql_config conf-sql hasmysql.h
-	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) sqlmatch.c
+sqlmatch.o: compile sqlmatch.c variables.h sqlmatch.h \
+qregex.h auto_control.h load_mysql.h mysql_config \
+conf-sql hasmysql.h mysql_inc
+	./compile `grep -h -v "^#" conf-sql mysql_inc` sqlmatch.c
 
 greylist.o: \
 compile greylist.c ip.h greylist.h query_skt.h fn_handler.h haveip6.h conf-ip
@@ -3526,8 +3523,8 @@ control.o auto_qmail.o tls.lib
 qmail-sql.o: \
 compile qmail-sql.c sqlmatch.h auto_qmail.h variables.h \
 auto_uids.h auto_control.h hasmysql.h load_mysql.h \
-mysql_config conf-sql
-	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) qmail-sql.c
+mysql_config conf-sql mysql_inc
+	./compile `grep -h -v "^#" conf-sql mysql_inc` qmail-sql.c
 
 qmail-sql.8: \
 qmail-sql.9 conf-sysconfdir
@@ -3547,8 +3544,8 @@ control.o auto_qmail.o tls.lib
 sql-database.o: \
 compile sql-database.c sqlmatch.h auto_qmail.h variables.h \
 auto_uids.h auto_control.h hasmysql.h load_mysql.h \
-mysql_config conf-sql
-	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) sql-database.c
+mysql_config conf-sql mysql_inc
+	./compile `grep -h -v "^#" conf-sql mysql_inc` sql-database.c
 
 sql-database.8: \
 sql-database.9 conf-sysconfdir
@@ -3596,17 +3593,29 @@ trycrypt.c compile load
 
 ldap.lib: \
 tryldap.c compile load hasldap.h
+	if test $(SYSTEM) = FreeBSD ; then \
+	( ( ./compile -I/usr/local/include tryldap.c && \
+	./load tryldap -L/usr/local/lib -lldap ) >/dev/null 2>&1 \
+	&& echo -L/usr/local/lib -lldap || exit 0 ) > ldap.lib; \
+	rm -f tryldap.o tryldap; \
+	else \
 	( ( ./compile tryldap.c && \
 	./load tryldap -lldap ) >/dev/null 2>&1 \
-	&& echo -lldap || exit 0 ) > ldap.lib
-	rm -f tryldap.o tryldap
+	&& echo -lldap || exit 0 ) > ldap.lib; \
+	rm -f tryldap.o tryldap; fi
 
 hasldap.h: \
 tryldap.c compile load
+	if test $(SYSTEM) = FreeBSD ; then \
+	( ( ./compile -I/usr/local/include tryldap.c && \
+	./load tryldap -L/usr/local/lib -lldap ) >/dev/null 2>&1 \
+	&& echo \#define HASLDAP 1 || exit 0 ) > hasldap.h; \
+	rm -f tryldap.o tryldap; \
+	else \
 	( ( ./compile tryldap.c && \
 	./load tryldap -lldap ) >/dev/null 2>&1 \
-	&& echo \#define HASLDAP 1 || exit 0 ) > hasldap.h
-	rm -f tryldap.o tryldap
+	&& echo \#define HASLDAP 1 || exit 0 ) > hasldap.h; \
+	rm -f tryldap.o tryldap; fi
 
 shadow.lib: \
 tryshadow.c compile load
@@ -3633,11 +3642,12 @@ surblfilter: \
 load surblfilter.o control.o tlsarralloc.o \
 auto_control.o variables.o auto_qmail.o \
 strsalloc.o ip.o dns.o ipalloc.o \
-socket_v6any.o socket_v4mappedprefix.o 
+socket_v6any.o socket_v4mappedprefix.o \
+dns.lib
 	./load surblfilter auto_control.o control.o variables.o \
 	auto_qmail.o tlsarralloc.o strsalloc.o \
 	ip.o dns.o ipalloc.o socket_v6any.o socket_v4mappedprefix.o \
-	-lresolv -lqmail
+	`cat dns.lib` -lqmail
 
 surblfilter.o: \
 compile surblfilter.c auto_qmail.h control.h dns.h ip.h \
@@ -3784,8 +3794,9 @@ auto_qmail.o auto_uids.o auto_sysconfdir.o
 
 ctrlenv.o: compile ctrlenv.c variables.h \
 hasmysql.h load_mysql.h indimail_stub.h \
-auto_control.h sqlmatch.h mysql_config conf-sql
-	./compile `grep -h -v "^#" conf-sql` $(mysql_inc) ctrlenv.c
+auto_control.h sqlmatch.h mysql_config \
+mysql_inc conf-sql
+	./compile `grep -h -v "^#" conf-sql mysql_inc` ctrlenv.c
 
 ctrlenv.8: \
 ctrlenv.9 conf-prefix conf-sysconfdir
@@ -3798,16 +3809,22 @@ ctrlenv.9 conf-prefix conf-sysconfdir
 # dnsblcheck plugin
 smtpd-plugin0.so: dnsbl.o control.o auto_control.o variables.o \
 socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
-dns.o
+strsalloc.o tlsarralloc.o dns.o dns.lib
 	if test $(SYSTEM) = Darwin ; then \
-	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin0.so dnsbl.o \
-	control.o auto_control.o variables.o \
+	$(LD) -bundle -undefined dynamic_lookup \
+	-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
 	socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
-	dns.o -lresolv -lqmail; \
+	strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -lqmail; \
+	elif test $(SYSTEM) = FreeBSD ; then \
+	$(LD) -shared -o smtpd-plugin0.so dnsbl.o control.o \
+	auto_control.o variables.o socket_v6any.o \
+	socket_v4mappedprefix.o ip.o ipalloc.o \
+	strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -L/usr/lib -lqmail; \
 	else \
-	$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin0.so dnsbl.o \
-	variables.o socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
-	dns.o -lresolv -lqmail; \
+	$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
+	-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
+	socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
+	strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -lqmail; \
 	fi
 
 dnsbl.o: compile dnsbl.c smtp_plugin.h dns.h control.h
@@ -3817,9 +3834,11 @@ smtpd-plugin.so:smtp_plugin.o
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
 	smtp_plugin.o; \
+	elif test $(SYSTEM) = FreeBSD ; then \
+	$(LD) -shared -o smtpd-plugin.so smtp_plugin.o; \
 	else \
-	$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin.so \
-	smtp_plugin.o; fi
+	$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
+	-o smtpd-plugin.so smtp_plugin.o; fi
 
 smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
 	./compile smtp_plugin.c

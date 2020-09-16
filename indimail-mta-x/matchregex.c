@@ -1,5 +1,8 @@
 /*
  * $Log: matchregex.c,v $
+ * Revision 1.4  2020-09-16 19:02:25+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.3  2019-03-07 00:52:18+05:30  Cprogrammer
  * added regcomp error cases for documentation
  *
@@ -54,11 +57,15 @@ matchregex(char *text, char *regex, char **errStr)
 			case REG_EBRACK:
 			case REG_ECOLLATE:
 			case REG_ECTYPE:
+#ifdef REG_EEND
 			case REG_EEND:
+#endif
 			case REG_EESCAPE:
 			case REG_EPAREN:
 			case REG_ERANGE:
+#ifdef REG_ESIZE
 			case REG_ESIZE:
+#endif
 			case REG_ESPACE:
 			case REG_ESUBREG:
 			default:
@@ -75,7 +82,7 @@ matchregex(char *text, char *regex, char **errStr)
 void
 getversion_matchregex_c()
 {
-	static char    *x = "$Id: matchregex.c,v 1.3 2019-03-07 00:52:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchregex.c,v 1.4 2020-09-16 19:02:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

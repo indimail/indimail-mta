@@ -1,5 +1,8 @@
 /*
  * $Log: mysql_config.c,v $
+ * Revision 1.6  2020-09-16 19:02:34+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.5  2016-05-15 22:40:33+05:30  Cprogrammer
  * use execvp() to locate mysql_config
  *
@@ -19,6 +22,7 @@ int
 main(int argc, char **argv)
 {
 	execv("/usr/bin/mysql_config", argv);
+	execv("/usr/local/bin/mysql_config", argv);
 	execv("/usr/local/mysql/bin/mysql_config", argv);
 	execvp("mysql_config", argv);
 	return (1);
