@@ -1,5 +1,8 @@
 /*
  * $Log: setuidgid.c,v $
+ * Revision 1.5  2020-09-16 19:06:56+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.4  2020-06-16 23:57:33+05:30  Cprogrammer
  * added option -s to set supplementary groups
  *
@@ -15,6 +18,10 @@
  */
 #include <stdio.h>
 #include <sys/types.h>
+#include <unistd.h>
+#ifdef FREEBSD
+#include <sys/param.h>
+#endif
 #include <pwd.h>
 #include <grp.h>
 #include <setuserid.h>
@@ -72,7 +79,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_setuidgid_c()
 {
-	static char    *x = "$Id: setuidgid.c,v 1.4 2020-06-16 23:57:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setuidgid.c,v 1.5 2020-09-16 19:06:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.18  2020-09-16 19:07:04+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.17  2020-05-11 11:18:47+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -56,6 +59,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 #include "stralloc.h"
 #include "strsalloc.h"
 #include "alloc.h"
@@ -1422,7 +1426,7 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.17 2020-05-11 11:18:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.18 2020-09-16 19:07:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
