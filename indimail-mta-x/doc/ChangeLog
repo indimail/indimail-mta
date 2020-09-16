@@ -31,3 +31,4 @@ Release 2.12 Start 21/05/2020
     variables
 18. qmail-queue.c, qmail-local.c: changed default value of use_fsync,
     use_syncdir to -1
+19. indimail-mta, ucspi-tcp: fixes for FreeBSD
