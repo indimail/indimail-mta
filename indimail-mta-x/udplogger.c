@@ -1,5 +1,8 @@
 /*
  * $Log: udplogger.c,v $
+ * Revision 1.5  2020-09-16 19:09:07+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.4  2020-07-04 21:43:46+05:30  Cprogrammer
  * removed usage of INET6 define
  *
@@ -209,6 +212,9 @@ main(int argc, char **argv)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = AI_PASSIVE;
+#ifndef EAI_ADDRFAMILY
+#define EAI_ADDRFAMILY EAI_FAMILY
+#endif
 	if ((opt = getaddrinfo(ipaddr, serv, &hints, &res0))) {
 		if (opt == EAI_ADDRFAMILY || (opt == EAI_SYSTEM && errno == EAFNOSUPPORT))
 			noipv6 = 1;
@@ -387,7 +393,7 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	static char    *x = "$Id: udplogger.c,v 1.4 2020-07-04 21:43:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udplogger.c,v 1.5 2020-09-16 19:09:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
