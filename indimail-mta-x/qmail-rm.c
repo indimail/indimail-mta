@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.19  2020-09-16 19:05:27+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
  * Revision 1.18  2020-07-04 22:26:25+05:30  Cprogrammer
  * removed utime() with utimes()
  *
@@ -204,7 +207,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.18 2020-07-04 22:26:25+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.19 2020-09-16 19:05:27+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -879,7 +882,7 @@ expire_file(const char *filename)
 	unsigned long   inode_num;
 	char           *ptr, *my_name, *old_name;
 	struct stat     statinfo;
-	struct timeval  ut[2] = {0};
+	struct timeval  ut[2] = { {0} };
 
 	if (filename == NULL) {
 		logerrf("expire_file: no filename\n");
@@ -1171,7 +1174,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.18 2020-07-04 22:26:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.19 2020-09-16 19:05:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

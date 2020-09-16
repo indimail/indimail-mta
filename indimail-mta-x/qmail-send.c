@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.72  2020-09-16 19:05:34+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
  * Revision 1.71  2020-09-15 21:45:16+05:30  Cprogrammer
  * unset USE_SYNCDIR, USE_FSYNC only when use_syncdir, use_fsync is zero
  *
@@ -856,7 +859,7 @@ pqfinish()
 {
 	int             c;
 	struct prioq_elt pe;
-	struct timeval   ut[2] = {0};
+	struct timeval   ut[2] = {{0}};
 	/*- XXX: more portable than utimbuf, but still worrisome */
 	/*- time_t          ut[2]; -*/
 
@@ -2900,7 +2903,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.71 2020-09-15 21:45:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.72 2020-09-16 19:05:34+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
