@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-popbull.c,v $
+ * Revision 1.9  2020-09-16 19:05:06+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
  * Revision 1.8  2020-06-08 22:51:47+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -94,8 +97,7 @@ fnmake_maildir()
 	pid = getpid();
 	host[0] = 0;
 	gethostname(host, sizeof(host));
-	for (loop = 0;; ++loop)
-	{
+	for (loop = 0;; ++loop) {
 		time = now();
 		s = fntmptph;
 		s += fmt_str(s, "new/");
@@ -153,8 +155,7 @@ main(argc, argv)
 	bulldir = opendir(bulldirname);
 	if (!bulldir)
 		die_nobulldir();
-	while ((d = readdir(bulldir)))
-	{
+	while ((d = readdir(bulldir))) {
 		if (str_equal(d->d_name, "."))
 			continue;
 		if (str_equal(d->d_name, ".."))
@@ -171,10 +172,10 @@ main(argc, argv)
 			die();
 		if ((st.st_mode & 0222) == 0)
 			continue;
-		if (st.st_mtime > ts_date)
-		{
+		if (st.st_mtime > ts_date) {
 			fnmake_maildir();
-			if (symlink(fn.s, fntmptph) == -1) ;
+			if (symlink(fn.s, fntmptph) == -1)
+				;
 		}
 	}
 	closedir(bulldir);
@@ -195,7 +196,7 @@ main(argc, argv)
 void
 getversion_qmail_popbull_c()
 {
-	static char    *x = "$Id: qmail-popbull.c,v 1.8 2020-06-08 22:51:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-popbull.c,v 1.9 2020-09-16 19:05:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
