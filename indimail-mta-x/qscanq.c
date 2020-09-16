@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.8  2020-09-16 19:06:34+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
  * Revision 1.7  2020-06-08 22:51:53+05:30  Cprogrammer
  * handle chdir error
  *
@@ -72,7 +75,8 @@ reset_sticky()
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", (char *) ptr, ": ");
 		_exit(QQ_XTEMP);	/*- temporary refusal to handle messages */
 	}
-	if (chmod(fn, 0700) == -1) ;
+	if (chmod(fn, 0700) == -1)
+		;
 }
 
 void
@@ -98,8 +102,7 @@ main(int argc, char *argv[])
 	umask(0);
 
 	uid = getuid();
-	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc))
-	{
+	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc)) {
 		if (flaglog)
 			strerr_die2sys(111, FATAL, "setreuid failed: ");
 		_exit(111);
@@ -107,30 +110,26 @@ main(int argc, char *argv[])
 	if (!(ptr = env_get("SCANDIR")))
 		ptr = (char *) auto_spool;
 	/*- [ cwd := spool folder ] */
-	if (chdir(ptr) < 0)
-	{
+	if (chdir(ptr) < 0) {
 		if (flaglog)
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", (char *) auto_spool, ": ");
 		_exit(QQ_XTEMP);	/*- temporary refusal to handle messages */
 	}
 
 	/*- [fn := name timestamp.ppid.n of existing directory w/sticky bit set ] */
-	do
-	{
+	do {
 		mkfn(fn, c++);
 		if (!mkdir(fn, 0700) && !chmod(fn, 01700))
 			break;
 		sleep(1);
 	} while (c < MAX_RETRIES);
-	if (c == MAX_RETRIES)
-	{
+	if (c == MAX_RETRIES) {
 		if (flaglog)
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to mkdir ", fn, ": ");
 		_exit(QQ_XTEMP);
 	}
 	/*- [ cwd := fn ] */
-	if (chdir(fn) < 0)
-	{
+	if (chdir(fn) < 0) {
 		if (flaglog)
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", fn, ": ");
 		rmdir(fn);				/*- if rmdir fails, bummer.  */
@@ -138,15 +137,13 @@ main(int argc, char *argv[])
 		_exit(QQ_XTEMP);
 	}
 	/*- [ cwd := fn/work */
-	if (mkdir("work", 0777) == -1)
-	{
+	if (mkdir("work", 0777) == -1) {
 		if (flaglog)
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to mkdir ", fn, "/work: ");
 		reset_sticky();
 		_exit(QQ_XTEMP);
 	}
-	if (chdir("work") == -1)
-	{
+	if (chdir("work") == -1) {
 		if (flaglog)
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", fn, "/work: ");
 		rmdir("work");
@@ -161,8 +158,7 @@ main(int argc, char *argv[])
 	case -1:
 		return 0;
 	case 0: /*- Run with indimail uid */
-		if (setreuid(getuid(), getuid()))
-		{
+		if (setreuid(getuid(), getuid())) {
 			if (flaglog)
 				strerr_die2sys(QQ_XTEMP, FATAL, "setreuid failed: ");
 			_exit(QQ_XTEMP);
@@ -174,16 +170,14 @@ main(int argc, char *argv[])
 		_exit(QQ_XTEMP); /*- hopefully never reached */ ;
 	}
 	/*- Catch the exit status */
-	if (wait_pid(&qstat, pid) == -1)
-	{
+	if (wait_pid(&qstat, pid) == -1) {
 		if (flaglog)
 			strerr_die2sys(QQ_XTEMP, FATAL, "waidpid failed: ");
 		real_cleanup();
 		_exit(QQ_XTEMP);
 	}
 	real_cleanup();
-	if (wait_crashed(qstat))
-	{
+	if (wait_crashed(qstat)) {
 		if (flaglog)
 			err("qscanq-stdin crashed.\n");
 		_exit(QQ_XTEMP);
@@ -194,7 +188,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.7 2020-06-08 22:51:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq.c,v 1.8 2020-09-16 19:06:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
