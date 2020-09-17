@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.10  2020-09-17 11:16:08+05:30  Cprogrammer
+# FreeBSD fixes
+#
 # Revision 1.9  2018-04-01 15:15:10+05:30  Cprogrammer
 # fixed wrong return value
 #
@@ -34,21 +37,10 @@
 #
 
 umask 0077 || exit 0
-if [ -x /bin/chown ] ; then
-	chown=/bin/chown
-else
-	chown=/usr/bin/chown
-fi
-if [ -x /bin/chmod ] ; then
-	chmod=/bin/chmod
-else
-	chmod=/usr/bin/chmod
-fi
-if [ -x /bin/ln ] ; then
-	ln=/bin/ln
-else
-	ln=/usr/bin/ln
-fi
+chown=$(which chown)
+chmod=$(which chmod)
+ln=$(which ln)
+mv=$(which mv)
 
 export PATH="$PATH:/usr/local/bin/ssl:/usr/sbin"
 while test $# -gt 0; do
@@ -83,17 +75,18 @@ do
 	/usr/bin/openssl genrsa -out $CERTDIR/rsa"$i".new $i &&
 	$chmod 600 $CERTDIR/rsa"$i".new &&
 	$chown indimail:qmail $CERTDIR/rsa"$i".new &&
-	mv -f $CERTDIR/rsa"$i".new $CERTDIR/rsa"$i".pem
+	$mv -f $CERTDIR/rsa"$i".new $CERTDIR/rsa"$i".pem
 	echo rsa"$i".pem
 
 	/usr/bin/openssl dhparam -2 -out $CERTDIR/dh"$i".new $i &&
 	$chmod 600 $CERTDIR/dh"$i".new &&
 	$chown indimail:qmail $CERTDIR/dh"$i".new &&
-	mv -f $CERTDIR/dh"$i".new $CERTDIR/dh"$i".pem
+	$mv -f $CERTDIR/dh"$i".new $CERTDIR/dh"$i".pem
 	echo dh"$i".pem
 done
 if [ ! -f $CERTDIR/dhparams.pem ] ; then
-	$ln -sr $CERTDIR/dh2048.pem $CERTDIR/dhparams.pem > /dev/null 2>&1
+	echo $ln -sr $CERTDIR/dh2048.pem $CERTDIR/dhparams.pem
+	$ln -sr $CERTDIR/dh2048.pem $CERTDIR/dhparams.pem 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd $CERTDIR
 		$ln -s dh2048.pem dhparams.pem

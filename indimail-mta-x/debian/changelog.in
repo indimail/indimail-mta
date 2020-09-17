@@ -19,3 +19,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * qmail-send.c, qmail-todo.c: set / unset USE_FSYNC, USE_SYNCDIR env variables
   * qmail-queue.c, qmail-local.c: changed default value of use_fsync, use_syncdir to -1
   * indimail-mta, ucspi-tcp: fixes for FreeBSD
+  * svctool, create_services, update_tmprsadh, config-fast: fixes for FreeBSD

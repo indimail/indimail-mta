@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.82 2020-06-22 21:41:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.83 2020-09-17 11:16:29+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -199,7 +199,9 @@ if [ ! -x $dir_prefix$prefix/bin/bogoutil -a -x $prefix/bin/bogoutil ] ; then
   $cp $prefix/bin/bogoutil $dir_prefix$prefix/bin/bogoutil
 fi
 if [ ! -f $dir_prefix$sysconfdir/bogofilter.cf.example ] ; then
-  $cp $sysconfdir/bogofilter.cf.example $dir_prefix$sysconfdir/bogofilter.cf.example
+  if [ -f $sysconfdir/bogofilter.cf.example ] ; then
+    $cp $sysconfdir/bogofilter.cf.example $dir_prefix$sysconfdir/bogofilter.cf.example
+  fi
 fi
 if [ ! -f $dir_prefix$sysconfdir/users/assign ] ; then
   echo "." > $dir_prefix$sysconfdir/users/assign
@@ -227,7 +229,6 @@ echo "Creating @logdir@"
 if [ ! -d $dir_prefix"@logdir@" ] ; then
   $mkdir -p $dir_prefix"@logdir@"
 fi
-[ $ID -eq 0 ] && $chown -R qmaill:nofiles @logdir@
 #
 # create users
 #
@@ -237,6 +238,7 @@ else
   echo "Creating indimail-mta Users"
 fi
 $svctool --config=users $extra_opt
+[ $ID -eq 0 ] && $chown -R qmaill:nofiles @logdir@
 #
 # MySQL
 #
@@ -255,8 +257,8 @@ fi
 $svctool --config=qmail --postmaster=postmaster@$default_domain \
   --default-domain=$default_domain $extra_opt
 
-a_arch=`arch`
-if [ " $$a_arch" = " x86_64" ] ; then
+a_arch=`uname -m`
+if [ " $a_arch" = " x86_64" -o " $a_arch" = " amd64" ] ; then
   fetchmail_mem=144857600
   smtp_soft_mem=104857600
   qmtp_soft_mem=104857600
@@ -291,6 +293,7 @@ if [ $nodksignatures -eq 0 ] ; then
   if [ -x $dir_prefix$prefix/bin/dknewkey ] ; then
     ver_opt="both"
     sign_opt="both"
+	mkdir -p "$dir_prefix"$controldir/domainkeys
     $dir_prefix$prefix/bin/dknewkey $dir_prefix"$controldir"/domainkeys/$dkimkeyfn 1024
   else
     ver_opt="none"
@@ -513,13 +516,16 @@ fi
 $svctool --postmaster=postmaster@$default_domain --config=cert --common_name=$default_domain $extra_opt
 
 # fifolog service
-$svctool --fifologger=$logfifo --servicedir=$servicedir
+$svctool --fifologger=$logfifo --servicedir=$servicedir $extra_opt
 
 # mrtg service
-$svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir
+if [ -f $dir_prefix$sysconfdir/indimail.mrtg.cfg ] ; then
+  cp $dir_prefix$sysconfdir/indimail.mrtg.cfg
+  $svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir $extra_opt
+fi
 
 # libindimail/mysql_lib control file updater
-$svctool --libwatch --servicedir=$servicedir
+$svctool --libwatch --servicedir=$servicedir $extra_opt
 
 # create svscan logging in indimail log directory
 $svctool --svscanlog --servicedir=$servicedir $extra_opt
@@ -540,27 +546,32 @@ for i in clamd greylist.1999 qmail-qmqpd.628 \
   qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
   qmail-daned.1998
 do
-  if [ -d $servicedir/$i ] ; then
+  if [ -d "$dir_prefix"$servicedir/$i ] ; then
     svc_list="$svc_list $servicedir/$i"
   fi
 done
-svc_list="$svc_list $sysconfdir/control/defaultqueue"
-$svctool --servicedir=$servicedir --norefreshsvc="0 $svc_list"
+if [ -d "$dir_prefix"$sysconfdir/control/defaultqueue ] ; then
+  svc_list="$svc_list $sysconfdir/control/defaultqueue"
+fi
+if [ -n "$svc_list" ] ; then
+  echo "Setting nofreshsvc options"
+  $svctool --servicedir=$servicedir --norefreshsvc="0 $svc_list" $extra_opt
+fi
 
-$svctool --servicedir=$servicedir --config=qselinux
+$svctool --servicedir=$servicedir --config=qselinux $extra_opt
 if [ $noindimail -eq 0 ] ; then
-  $svctool --servicedir=$servicedir --config=iselinux
+  $svctool --servicedir=$servicedir --config=iselinux $extra_opt
 fi
-if [ -f $sysconfdir/cronlist.q -a -d /etc/cron.d ] ; then
+if [ -f "$dir_prefix"$sysconfdir/cronlist.q -a -d /etc/cron.d ] ; then
   echo "adding indimali-mta cron entries"
-  $cp $sysconfdir/cronlist.q /etc/cron.d
+  $cp "$dir_prefix"$sysconfdir/cronlist.q /etc/cron.d
 fi
-if [ -f $sysconfdir/cronlist.i -a -d /etc/cron.d ] ; then
+if [ -f "$dir_prefix"$sysconfdir/cronlist.i -a -d /etc/cron.d ] ; then
   echo "adding indimali cron entries"
-  $cp $sysconfdir/cronlist.i /etc/cron.d
+  $cp "$dir_prefix"$sysconfdir/cronlist.i /etc/cron.d
 fi
 if [ $check_install -eq 1 ] ; then
   $svctool --check-install --servicedir=$servicedir \
     --qbase=$qbase --qcount=$qcount --qstart=1 $extra_opt
 fi
-$svctool --fixsharedlibs
+$svctool --fixsharedlibs $extra_opt

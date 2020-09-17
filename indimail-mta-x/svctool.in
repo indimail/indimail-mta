@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.488 2020-07-11 22:08:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.489 2020-09-17 11:15:48+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.488 2020-07-11 22:08:23+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.489 2020-09-17 11:15:48+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1443,20 +1443,23 @@ LIST="tcp.imap tcp.pop3 tcp.poppass"
 if [ -f "$DESTDIR"$QmailBinPrefix/bin/tcprules ] ; then
 	for i in $LIST
 	do
+		t1=1
 		if [ -f "$DESTDIR"$sysconfdir/tcp/$i ] ; then
-			t1=`date +'%s' -r "$DESTDIR"$sysconfdir/tcp/$i`
+			t1=`date -r "$DESTDIR"$sysconfdir/tcp/$i +'%s'`
 		else
 			continue
 		fi
 		if [ -f "$DESTDIR"$sysconfdir/tcp/$i.cdb ] ; then
-			t2=`date +'%s' -r "$DESTDIR"$sysconfdir/tcp/$i.cdb`
+			t2=`date -r "$DESTDIR"$sysconfdir/tcp/$i.cdb +'%s'`
 		else
 			t2=0
 		fi
-if [ $t1 -gt $t2 ] ; then
-		echo "Creating CDB "$DESTDIR"$sysconfdir/tcp/$i.cdb"
-		"$DESTDIR"$QmailBinPrefix/bin/tcprules "$DESTDIR"$sysconfdir/tcp/"$i".cdb \
-			"$DESTDIR"$sysconfdir/tcp/"$i".tmp < "$DESTDIR"$sysconfdir/tcp/$i
+		if [ $t1 -gt $t2 ] ; then
+			echo "Creating CDB "$DESTDIR"$sysconfdir/tcp/$i.cdb"
+			"$DESTDIR"$QmailBinPrefix/bin/tcprules \
+			"$DESTDIR"$sysconfdir/tcp/"$i".cdb \
+			"$DESTDIR"$sysconfdir/tcp/"$i".tmp \
+				< "$DESTDIR"$sysconfdir/tcp/$i
 		fi
 	done
 else
@@ -1697,7 +1700,8 @@ else
 fi
 if [ ! -f "$DESTDIR"$CONTROLDIR/hostip ] ; then
 	echo "hostip"
-	/bin/ln -sr "$DESTDIR"$CONTROLDIR/localiphost "$DESTDIR"$CONTROLDIR/hostip
+	/bin/ln -sr "$DESTDIR"$CONTROLDIR/localiphost \
+		"$DESTDIR"$CONTROLDIR/hostip 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd "$DESTDIR"$CONTROLDIR
 		/bin/ln -s localiphost hostip
@@ -1772,19 +1776,22 @@ LIST="tcp.smtp tcp.qmtp tcp.qmqp"
 if [ -f "$DESTDIR"$QmailBinPrefix/bin/tcprules ] ; then
 	for i in $LIST
 	do
+		t1=0
 		if [ -f "$DESTDIR"$sysconfdir/tcp/$i ] ; then
-    		t1=`date +'%s' -r "$DESTDIR"$sysconfdir/tcp/$i`
+    		t1=`date -r "$DESTDIR"$sysconfdir/tcp/$i +'%s'`
 		else
 			continue
 		fi
 		if [ -f "$DESTDIR"$sysconfdir/tcp/$i.cdb ] ; then
-    		t2=`date +'%s' -r "$DESTDIR"$sysconfdir/tcp/$i.cdb`
+    		t2=`date -r "$DESTDIR"$sysconfdir/tcp/$i.cdb +'%s'`
 		else
 			t2=0
 		fi
     	if [ $t1 -gt $t2 ] ; then
-			"$DESTDIR"$QmailBinPrefix/bin/tcprules "$DESTDIR"$sysconfdir/tcp/"$i".cdb \
-				"$DESTDIR"$sysconfdir/tcp/"$i".tmp < "$DESTDIR"$sysconfdir/tcp/$i
+			"$DESTDIR"$QmailBinPrefix/bin/tcprules \
+			"$DESTDIR"$sysconfdir/tcp/"$i".cdb \
+			"$DESTDIR"$sysconfdir/tcp/"$i".tmp \
+				< "$DESTDIR"$sysconfdir/tcp/$i
 		fi
 	done
 else
@@ -4885,18 +4892,9 @@ create_mysql_user()
 	c_d="$c_d unique index(user));"
 	mecho $c_d
 	TMP=$(head -c 8192 /dev/urandom | env LC_TYPE=C tr -dc 'a-zA-Z0-9./' | head -c 16)
-	if [ -x "$DESTDIR"$QmailBinPrefix/bin/crypt ] ; then
-		crypt="$DESTDIR"$QmailBinPrefix/bin/crypt
-	elif [ -x $QmailBinPrefix/bin/crypt ] ; then
-		crypt=/usr/bin/crypt
-	elif [ -x ./crypt ] ; then
-		crypt=./crypt
-	else
-		echo "crypt not found" 1>&2
-		return 1
-	fi
-	SALT="\$6\$$TMP\$"
-	CRYPT_PASS=`$crypt $ADMIN_PASS $SALT | sed s{\"{{g`
+	#SALT="\$6\$$TMP\$"
+	SALT="$TMP"
+	CRYPT_PASS=$(openssl passwd -6 -salt $SALT $ADMIN_PASS)
 	TMVAL=`date +'%s'`
 	DAY=`date +'%d'`
 	TIMESTAMP=`date +'%F %R:%S'`
@@ -6108,7 +6106,7 @@ if [ $# -lt 1 ] ; then
 	return 1
 fi
 if [ " $1" = " all" ] ; then
-	for j in `/bin/ls $servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
+	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
 	do
 		# remove last 19 char to get the directory+service_name
 		i=`echo $j|sed 's/.\{19\}$//'`
@@ -6124,34 +6122,34 @@ if [ " $1" = " all" ] ; then
 			sh $i/variables/.options
 		fi
 	done
-	if [ -f $sysconfdir/control/defaultqueue/.norefreshsvc ] ; then
+	if [ -f "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc ] ; then
 		echo "Skip Refreshing config defaultqueue"
 	else
-		echo "Refreshing config defaultqueue command `/bin/cat $sysconfdir/control/defaultqueue/.options`"
-		sh $sysconfdir/control/defaultqueue/.options
+		echo "Refreshing config defaultqueue command `/bin/cat "$DESTDIR"$sysconfdir/control/defaultqueue/.options`"
+		sh "$DESTDIR"$sysconfdir/control/defaultqueue/.options
 	fi
 else
 	for i in $*
 	do
-		if [ ! -d $i ] ; then
+		if [ ! -d "$DESTDIR"$i ] ; then
 			echo "$i: No such file or directory" 1>&2
 			continue
 		fi
 		svcname=`basename $i`
-		if [ ! -s $i/variables/.options -a ! -s $i/.options ] ; then
+		if [ ! -s "$DESTDIR"$i/variables/.options -a ! -s "$DESTDIR"$i/.options ] ; then
 			echo "$i/variables/.options or $i/.options missing" 1>&2
 			continue
 		fi
-		if [ -f $i/variables/.norefreshsvc -o -f $i/.norefreshsvc ] ; then
+		if [ -f "$DESTDIR"$i/variables/.norefreshsvc -o -f "$DESTDIR"$i/.norefreshsvc ] ; then
 			echo "Skip Refreshing service/config $svcname"
 			continue
 		fi
-		if [ -f $i/variables/.options ] ; then
-			echo "Refreshing service $svcname command `/bin/cat $i/variables/.options`"
-			sh $i/variables/.options
-		elif [ -f $i/.options ] ; then
-			echo "Refreshing config $svcname command `/bin/cat $i/.options`"
-			sh $i/.options
+		if [ -f "$DESTDIR"$i/variables/.options ] ; then
+			echo "Refreshing service $svcname command `/bin/cat "$DESTDIR"$i/variables/.options`"
+			sh "$DESTDIR"$i/variables/.options
+		elif [ -f "$DESTDIR"$i/.options ] ; then
+			echo "Refreshing config $svcname command `/bin/cat "$DESTDIR"$i/.options`"
+			sh "$DESTDIR"$i/.options
 		fi
 	done
 fi
@@ -6166,7 +6164,7 @@ fi
 svc_opt=$1
 shift
 if [ " $1" = " all" ] ; then
-	for j in `/bin/ls $servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
+	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
 	do
 		# remove last 19 char to get the directory+service_name
 		i=`echo $j|sed 's/.\{19\}$//'`
@@ -6184,33 +6182,33 @@ if [ " $1" = " all" ] ; then
 	done
 	if [ $svc_opt -eq 1 ] ; then
 		echo "Enabling  auto refresh for $sysconfdir/control/defaultqueue"
-		/bin/rm -f $sysconfdir/control/defaultqueue/.norefreshsvc
+		/bin/rm -f "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc
 	else
 		echo "Disabling auto refresh for $sysconfdir/control/defaultqueue"
-		touch $sysconfdir/control/defaultqueue/.norefreshsvc
+		touch "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc
 	fi
 else
 	for i in $*
 	do
-		if [ ! -d $i ] ; then
+		if [ ! -d "$DESTDIR"$i ] ; then
 			echo "$i: No such file or directory" 1>&2
 			continue
 		fi
-		if [ ! -s $i/variables/.options -a ! -s $i/.options ] ; then
+		if [ ! -s "$DESTDIR"$i/variables/.options -a ! -s "$DESTDIR"$i/.options ] ; then
 			echo "$i/variables/.options or $i/.options missing" 1>&2
 			continue
 		fi
 		if [ $svc_opt -eq 1 ] ; then
 			if [ -d $i/variables ] ; then
-				/bin/rm -f $i/variables/.norefreshsvc
+				/bin/rm -f "$DESTDIR"$i/variables/.norefreshsvc
 			else
-				/bin/rm -f $i/.norefreshsvc
+				/bin/rm -f "$DESTDIR"$i/.norefreshsvc
 			fi
 		else
-			if [ -d $i/variables ] ; then
-				touch $i/variables/.norefreshsvc
+			if [ -d "$DESTDIR"$i/variables ] ; then
+				touch "$DESTDIR"$i/variables/.norefreshsvc
 			else
-				touch $i/.norefreshsvc
+				touch "$DESTDIR"$i/.norefreshsvc
 			fi
 		fi
 	done
@@ -6396,15 +6394,28 @@ macOSuseradd()
 create_users()
 {
 	if [ -f /etc/debian_version ] ; then
-		eopt=""
+		opt1=""
 	else
-		eopt="-M"
+		opt1="-M"
 	fi
 	if [ -f /sbin/nologin ] ; then
 		safe_shell=/sbin/nologin
 	else
 		safe_shell=/bin/false
 	fi
+	case "$host" in
+		*-*-freebsd*)
+		pw=/usr/sbin/pw
+		opt1="-m"
+		opt2="-n"
+		opt3="-h -"
+		;;
+		*)
+		pw=""
+		opt2=""
+		opt3=""
+		;;
+	esac
 	(
 	case "$host" in
 		*-*-darwin*)
@@ -6423,12 +6434,20 @@ create_users()
   		grep "^mysql:" /etc/group >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating group mysql"
-			groupadd mysql
+			echo $pw groupadd $opt2 mysql
+			$pw groupadd $opt2 mysql
+			if [ $? -ne 0 ] ; then
+				exit 1
+			fi
 		fi
   		grep "^mysql:" /etc/passwd >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating user mysql"
-			useradd $eopt -g mysql -d /var/lib/mysql -s $safe_shell mysql
+			echo $pw useradd $opt1 -g mysql -d /var/lib/mysql -s $safe_shell $opt2 mysql
+			$pw useradd $opt1 -g mysql -d /var/lib/mysql -s $safe_shell $opt2 mysql
+			if [ $? -ne 0 ] ; then
+				exit 1
+			fi
 		fi
 		;;
 	esac
@@ -6459,17 +6478,37 @@ create_users()
 		grep "^indimail:" /etc/group >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating group indimail"
-			groupadd -g $groupid indimail
+			echo $pw groupadd -g $groupid $opt2 indimail
+			$pw groupadd -g $groupid $opt2 indimail
+			if [ $? -ne 0 ] ; then
+				exit 1
+			fi
 		fi
   		grep "^indimail:" /etc/passwd >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating user indimail"
 			SALT=`date +'%s'`
-			CRYPT_PASS=`"$DESTDIR"$QmailBinPrefix/bin/crypt $PRIV_PASS $SALT | cut -c 2-14`
+			CRYPT_PASS=$(openssl passwd -6 -salt $SALT $ADMIN_PASS)
 			if [ -f /bin/bash ] ; then
-				useradd $eopt -g indimail -d $QmailHOME -s /bin/bash -p $CRYPT_PASS indimail
+				echo $pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/bash $opt2 indimail
+				if [ -n "$opt3" ] ; then
+					echo "$ADMIN_PASS" | $pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/bash $opt2 indimail -h 0
+				else
+					$pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/bash $opt2 indimail
+				fi
+				if [ $? -ne 0 ] ; then
+					exit 1
+				fi
 			else
-				useradd $eopt -g indimail -d $QmailHOME -s /bin/sh -p $CRYPT_PASS indimail
+				echo $pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/sh $opt2 indimail
+				if [ -n "$opt3" ] ; then
+					echo "$ADMIN_PASS" | $pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/sh $opt2 indimail -h 0
+				else
+					$pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/sh $opt2 indimail
+				fi
+				if [ $? -ne 0 ] ; then
+					exit 1
+				fi
 			fi
 		fi
 		;;
@@ -6489,7 +6528,11 @@ create_users()
 		grep "^$i:" /etc/group >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating group $i"
-			groupadd $i
+			echo $pw groupadd $opt2 $i
+			$pw groupadd $opt2 $i
+			if [ $? -ne 0 ] ; then
+				exit 1
+			fi
 		fi
 		;;
 		esac
@@ -6507,7 +6550,11 @@ create_users()
   		grep "^alias:" /etc/passwd >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating user alias"
-			useradd $eopt -g nofiles -d $QmailHOME/alias -s $safe_shell alias
+			echo $pw useradd $opt1 -g nofiles -d $QmailHOME/alias -s $safe_shell $opt2 alias
+			$pw useradd $opt1 -g nofiles -d $QmailHOME/alias -s $safe_shell $opt2 alias
+			if [ $? -ne 0 ] ; then
+				exit 1
+			fi
 		fi
 		;;
 	esac
@@ -6524,7 +6571,11 @@ create_users()
   		grep "^qmaill" /etc/passwd >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating user qmaill"
-			useradd $eopt -g nofiles -d $LOGDIR -s $safe_shell qmaill
+			echo $pw useradd $opt1 -g nofiles -d $LOGDIR -s $safe_shell $opt2 qmaill
+			$pw useradd $opt1 -g nofiles -d $LOGDIR -s $safe_shell $opt2 qmaill
+			if [ $? -ne 0 ] ; then
+				exit 1
+			fi
 		fi
 		;;
 	esac
@@ -6542,7 +6593,11 @@ create_users()
   			grep "^$i:" /etc/passwd >/dev/null
 			if [ $? -ne 0 ]; then
 				echo "creating user $i"
-				useradd $eopt -g nofiles -d $QmailHOME -s $safe_shell $i
+				echo $pw useradd $opt1 -g nofiles -d $QmailHOME -s $safe_shell $opt2 $i
+				$pw useradd $opt1 -g nofiles -d $QmailHOME -s $safe_shell $opt2 $i
+				if [ $? -ne 0 ] ; then
+					exit 1
+				fi
 			fi
 			;;
 		esac
@@ -6561,7 +6616,11 @@ create_users()
   			grep "^$i:" /etc/passwd >/dev/null
 			if [ $? -ne 0 ]; then
 				echo "creating user $i"
-				useradd $eopt -g qmail -d $QmailHOME -s $safe_shell $i
+				echo $pw useradd $opt1 -g qmail -d $QmailHOME -s $safe_shell $opt2 $i
+				$pw useradd $opt1 -g qmail -d $QmailHOME -s $safe_shell $opt2 $i
+				if [ $? -ne 0 ] ; then
+					exit 1
+				fi
 			fi
 			;;
 		esac
@@ -6579,7 +6638,11 @@ create_users()
   		grep "^qscand" /etc/passwd >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating user qscand"
-			useradd $eopt -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell qscand
+			echo $pw useradd $opt1 -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell $opt2 qscand $opt3
+			$pw useradd $opt1 -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell $opt2 qscand $opt3
+			if [ $? -ne 0 ] ; then
+				exit 1
+			fi
 		fi
 		;;
 	esac
@@ -6603,6 +6666,14 @@ create_users()
 
 delUsers()
 {
+	case "$host" in
+		*-*-freebsd*)
+		pw=/usr/sbin/pw
+		;;
+		*)
+		pw=""
+		;;
+	esac
 	(
 	case "$host" in
 		*-*-darwin*)
@@ -6616,6 +6687,14 @@ delUsers()
 		done
 		;;
 		*)
+		for i in indimail qmail nofiles qscand; do
+			echo "deleting group $i"
+			$pw groupdel $i
+		done
+		for i in indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand; do
+			echo "deleting user $i"
+			$pw userdel $i
+		done
 		;;
 	esac
 	) 2>/tmp/svctool.user.$$
@@ -8321,7 +8400,8 @@ sed "s{MRTGHOSTNAME{`hostname`{;  s{HTMLDIR{$htmldir\/{" \
 #
 # Create index.html in htmldir
 #
-/usr/bin/indexmaker --title="IndiMail Statistics" --section=title \
+indexmaker=$(which indexmaker)
+$indexmaker --title="IndiMail Statistics" --section=title \
 	--output=$htmldir/index.html  $conf_dir/../etc/indimail.mrtg.cfg
 # mrtg run script
 (
@@ -9665,7 +9745,8 @@ case $option in
 			if [ ! -d "$DESTDIR"/etc/clamd.d ] ; then
 				mkdir -p "$DESTDIR"/etc/clamd.d
 			fi
-			/bin/ln -sr "$DESTDIR"$sysconfdir/scan.conf "$DESTDIR"/etc/clamd.d/scan.conf
+			/bin/ln -sr "$DESTDIR"$sysconfdir/scan.conf \
+				"$DESTDIR"/etc/clamd.d/scan.conf 2>/dev/null
 			if [ $? -ne 0 ] ; then
 				if [ -d "$DESTDIR"/etc/clamd.d ] ; then
 					cd "$DESTDIR"/etc/clamd.d
@@ -9708,7 +9789,8 @@ case $option in
 			if [ ! -d "$DESTDIR"/etc ] ; then
 				mkdir -p "$DESTDIR"/etc
 			fi
-			/bin/ln -sr "$DESTDIR"$sysconfdir/freshclam.conf "$DESTDIR"/etc/freshclam.conf
+			/bin/ln -sr "$DESTDIR"$sysconfdir/freshclam.conf \
+				"$DESTDIR"/etc/freshclam.conf 2>/dev/null
 			if [ $? -ne 0 ] ; then
 				cd "$DESTDIR"/etc/
 				/bin/ln -s "$DESTDIR"$sysconfdir/freshclam.conf
@@ -9788,7 +9870,8 @@ case $option in
 				echo "Creating Private Key, Certificate"
 				/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
 				$chown indimail:qmail "$DESTDIR"$sysconfdir/certs/servercert.pem
-				/bin/ln -sr "$DESTDIR"$sysconfdir/certs/servercert.pem "$DESTDIR"$sysconfdir/certs/clientcert.pem
+				/bin/ln -sr "$DESTDIR"$sysconfdir/certs/servercert.pem \
+					"$DESTDIR"$sysconfdir/certs/clientcert.pem 2>/dev/null
 				if [ $? -ne 0 ] ; then
 					cd "$DESTDIR"$sysconfdir/certs
 					/bin/ln -s servercert.pem clientcert.pem

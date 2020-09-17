@@ -74,6 +74,8 @@ $ make
 $ sudo make install-strip
 ```
 
+NOTE: for FreeBSD, install automake, autoconf, libtool, pkgconf using pkg
+
 ## Download indimail-mta
 
 ```
