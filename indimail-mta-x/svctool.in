@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.490 2020-09-19 17:26:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.491 2020-09-19 23:05:55+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.490 2020-09-19 17:26:54+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.491 2020-09-19 23:05:55+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6244,6 +6244,8 @@ enable_service()
 			/bin/rm -f /etc/init/$i.override
 		elif [ -f /etc/event.d/$i.override ] ; then
 			/bin/rm -f /etc/event.d/$i.override
+		elif [ -f $QmailBinPrefix/etc/rc.d/svscan ] ; then
+			service svscan enable
 		fi
 		#
 		# traditional sys v
@@ -6284,6 +6286,8 @@ disable_service()
 		elif [ -d /etc/event.d ] ; then
 			/sbin/initctl stop $i
 			echo "manual" > /etc/event.d/$i.override
+		elif [ -f $QmailBinPrefix/etc/rc.d/svscan ] ; then
+			service svscan disable
 		else
 			/usr/sbin/service $i stop
 		fi
@@ -6792,6 +6796,14 @@ create_startup()
 				echo "svscan startup enabled in upstart /etc/event.d/upstart"
 				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/event.d
 			fi
+		elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
+			cmp -s "$DESTDIR"$shareddir/boot/svscan $QmailBinPrefix/etc/rc.d/svscan >/dev/null 2>&1
+			if [ $? -ne 0 ] ; then
+				echo "svscan startup enabled in rc $QmailBinPrefix/etc/rc.d/svscan"
+				/bin/cp "$DESTDIR"$shareddir/boot/svscan $QmailBinPrefix/etc/rc.d/svscan
+				/bin/chmod 755 $QmailBinPrefix/etc/rc.d/svscan
+				service svscan enable
+			fi
 		elif [ -d /System/Library/LaunchDaemons ] ; then
 			cmp -s "$DESTDIR"$shareddir/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
 			if [ $? -ne 0 ] ; then
@@ -6842,6 +6854,10 @@ remove_startup()
 	elif [ -f /etc/event.d/svscan ] ; then
 		/sbin/initctl emit qmailstop > /dev/null
 		/bin/rm -f /etc/event.d/svscan
+	elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
+		service svscan stop
+		service svscan disable
+		/bin/rm -f $QmailBinPrefix/etc/rc.d/svscan
 	fi
 	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for preun" 1>&2
@@ -6919,6 +6935,20 @@ add_alternatives()
 			cmd="$cmd $init_script"
 		fi
 		eval $cmd
+	elif [ -f /usr/sbin/mailwrapper ] ; then
+		if [ ! -f /etc/mail/mailer.conf.indimail-mta ] ; then
+			/bin/mv /etc/mail/mailer.conf /etc/mail/mailer.conf.indimail-mta
+		fi
+		(
+		echo "#"
+		echo "# Execute the "real" sendmail program, named /usr/local/bin/sendmail"
+		echo "#"
+		echo "sendmail   $QmailBinPrefix/bin/sendmail"
+		echo "mailq      $QmailBinPrefix/bin/qmail-qread"
+		echo "newaliases $QmailBinPrefix/bin/inewaliases"
+		echo "hoststat   $QmailBinPrefix/sbin/qmail-tcpto"
+		echo "purgestat  $QmailBinPrefix/sbin/qmail-tcpok"
+		) > /etc/mail/mailer.conf
 	else
 		for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 			if [ -f $i -a ! -L $i ]; then
@@ -6949,6 +6979,12 @@ remove_alternatives()
 	elif [ -x /usr/sbin/update-alternatives ] ; then
 		/usr/sbin/update-alternatives --remove mta $QmailBinPrefix/bin/sendmail
 		/usr/sbin/update-alternatives --auto mta
+	elif [ -x /usr/sbin/mailwrapper ] ; then
+		if [  -f /etc/mail/mailer.conf.indimail-mta ] ; then
+			/bin/mv /etc/mail/mailer.conf.indimail-mta /etc/mail/mailer.conf
+		else
+			echo "unable to restore original mailer.conf" 1>&2
+		fi
 	else
 		for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
 			if [ -f $i.old -o -L $i.old ]; then
