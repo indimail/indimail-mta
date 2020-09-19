@@ -17,7 +17,7 @@ skips subdirectory names starting with dots.
 .BR supervise (8)
 must be in
 .BR svscan 's
-path.
+path. svscan calls \fBsetsid(2)\fR if the environment variable \fBSETSID\fR is set.
 
 .B svscan
 optionally starts a pair of
