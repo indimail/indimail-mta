@@ -134,3 +134,4 @@ installer
 installer.o
 mysql_inc
 make-makelib
+DIRS

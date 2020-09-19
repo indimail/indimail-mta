@@ -597,3 +597,9 @@ conf-release
 debian/Makefile
 installer
 mysql_inc
+BIN
+SBIN
+DIRS
+SHARED
+svscan_rc
+datemail.1

@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.61 2020-05-02 18:11:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.62 2020-09-19 17:24:59+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -29,11 +29,11 @@ else
 			SYSTEM=SuSE
 			;;
 			*)
-			SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+			SYSTEM=`uname -s`
 			;;
 		esac
 	else
-		SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+		SYSTEM=`uname -s`
 	fi
 fi
 if [ -x PREFIX/bin/iecho ] ; then
@@ -42,7 +42,7 @@ else
 	ECHO=echo
 fi
 case "$SYSTEM" in
-	DARWIN*|Debian|SuSE)
+	Darwin*|Debian|SuSE|FreeBSD)
 		RES_COL=60
 		MOVE_TO_COL="$ECHO -en \\033[${RES_COL}G"
 		SETCOLOR_SUCCESS="$ECHO -en \\033[1;32m"
@@ -98,7 +98,7 @@ elif [ -f /lib/lsb/init-functions ] ; then
 	. /lib/lsb/init-functions
 fi
 case "$SYSTEM" in
-	DARWIN*)
+	Darwin*)
 	. /etc/rc.common
 	CheckForNetwork
 	if [ "${NETWORKUP}" != "-YES-" ]
@@ -157,7 +157,7 @@ if [ -x /usr/bin/systemctl ] ; then
 	fi
 fi
 
-PATH=$PATH:PREFIX/bin:PREFIX/sbin:/usr/local/bin:/usr/bin:/bin
+PATH=$PATH:PREFIX/bin:PREFIX/sbin:/usr/bin:/bin
 export PATH
 myhelp()
 {
@@ -180,10 +180,30 @@ HELP
 
 stop()
 {
-	local ret=0
 	if [ -d /var/lock/subsys -a ! -f /var/lock/subsys/svscan ] ; then
 		exit 0
 	fi
+	local ret=0
+	case "$SYSTEM" in
+		FreeBSD)
+		$ECHO -n $"Stopping svscan: "
+		if [ -d /run ] ; then
+			sv_pid=/run/svscan.pid
+			daemon_pid=/run/sv_daemon.pid
+		elif [ -d /var/run ] ; then
+			sv_pid=/var/run/svscan.pid
+			daemon_pid=/var/run/sv_daemon.pid
+		else
+			sv_pid=/tmp/svscan.pid
+			daemon_pid=/tmp/sv_daemon.pid
+		fi
+		if [ ! -f $sv_pid -a ! -f $daemon_pid ] ; then
+			$succ
+			echo
+			return $ret
+		fi
+		;;
+	esac
 	for i in `echo $SERVICE/*`
 	do
 		$ECHO -n $"Stopping $i: "
@@ -198,13 +218,26 @@ stop()
 			PREFIX/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /sbin/initctl ] ; then
 			/sbin/initctl stop svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
-		else
-  			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
+		elif [ -f /usr/sbin/daemon ] ; then
+			if [ -f /var/run/sv_daemon.pid ] ; then
+				kill `cat /var/run/sv_daemon.pid` && $succ || $fail
+			fi
+		elif [ -f /etc/inittab ] ; then
+  			grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
-				/usr/bin/killall -e -w svscan && $succ || $fail
+				case "$SYSTEM" in
+					FreeBSD)
+					/usr/bin/killall -c svscan && $succ || $fail
+					;;
+					*)
+					/usr/bin/killall -e -w svscan && $succ || $fail
+					;;
+				esac
 			else
 				RETVAL=0
 			fi
+		else
+			/usr/bin/killall svscan && $succ || $fail
 		fi
 		RETVAL=$?
 		echo
@@ -232,15 +265,28 @@ start()
 			PREFIX/sbin/initsvc -on > /dev/null 2>/tmp/sv.err && $succ || $fail
 		elif [ -f /sbin/initctl ] ; then
 			/sbin/initctl start svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
+		elif [ -f /usr/sbin/daemon ] ; then
+			if [ -d /run ] ; then
+				sv_pid=/run/svscan.pid
+				daemon_pid=/run/sv_daemon.pid
+			elif [ -d /var/run ] ; then
+				sv_pid=/var/run/svscan.pid
+				daemon_pid=/var/run/sv_daemon.pid
+			else
+				sv_pid=/tmp/svscan.pid
+				daemon_pid=/tmp/sv_daemon.pid
+			fi
+			/usr/sbin/daemon -cS -p $sv_pid -P $daemon_pid -R 5 \
+				-t "$SYSTEM"_svscan LIBEXEC/svscanboot && $succ || $fail
 		else
 			if [ -w /dev/console ] ; then
 				device=/dev/console
 			else
 				device=/dev/null
 			fi
-  			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
+  			grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
-				/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$ 2>&1
+				grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$ 2>&1
 				if [ " $SYSTEM" = " Debian" ] ; then
 					echo "SV:2345:respawn:PREFIX/sbin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
 				else
@@ -340,7 +386,7 @@ case "$1" in
 	;;
   kill)
 	$ECHO -n $"killing tcpserver,supervise,qmail-send: "
-	kill `ps -ef|/bin/egrep "tcpserver|supervise|qmail-send" | /bin/grep -v grep | awk '{print $2}'` && $succ || $fail
+	kill `ps -ef| egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $2}'` && $succ || $fail
 	ret=$?
 	echo
 	[ $ret -eq 0 ] && exit 0 || exit 1
@@ -379,7 +425,7 @@ case "$1" in
 	if [ -x /sbin/initctl ] ; then
 		/sbin/initctl status svscan
 	else
-		ps -ef|/bin/grep svscanboot|/bin/grep -v grep
+		ps -ef| grep svscanboot| grep -v grep
 	fi
 	RETVAL=$?
 	PREFIX/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log

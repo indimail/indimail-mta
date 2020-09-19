@@ -11,8 +11,6 @@ c:::0755:/boot/:binm2:binm2
 c:::0755:/boot/:binm2+df:binm2+df
 c:::0755:/boot/:binm3:binm3
 c:::0755:/boot/:binm3+df:binm3+df
-c:::0644:/boot/:upstart:upstart
-c:::0644:/boot/:systemd:systemd
 c:::0644:/doc/:COPYING-indimail-mta:doc/COPYING-indimail-mta
 c:::0644:/doc/:LICENSE.qhpsi:doc/LICENSE.qhpsi
 c:::0644:/doc/:softwarelicense1-1.html:doc/softwarelicense1-1.html

@@ -1,0 +1,7 @@
+d::::::
+d::::@shareddir@::
+d::::@shareddir@/doc::
+d::::@mandir@::
+d::::@mandir@/man1::
+d::::@prefix@/lib/indimail::
+d::::@prefix@/lib/indimail/plugins::

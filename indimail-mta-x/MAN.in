@@ -45,7 +45,6 @@ c:::0644:/man1/:ifaddr.1:ifaddr.1
 c:::0644:/man1/:iftocc.1:iftocc.1
 c:::0644:/man1/:iftoccfrom.1:iftoccfrom.1
 c:::0644:/man1/:inewaliases.1:inewaliases.1
-c:::0644:/man1/:inotify.1:inotify.1
 c:::0644:/man1/:maildir2mbox.1:maildir2mbox.1
 c:::0644:/man1/:maildircmd.1:maildircmd.1
 c:::0644:/man1/:maildirdeliver.1:maildirdeliver.1
@@ -188,7 +187,6 @@ c:::0644:/man8/:qmail-rspawn.8:qmail-rspawn.8
 c:::0644:/man8/:qmail-send.8:qmail-send.8
 c:::0644:/man8/:qmail-showctl.8:qmail-showctl.8
 c:::0644:/man8/:qmail-smtpd.8:qmail-smtpd.8
-c:::0644:/man8/:qmail-sql.8:qmail-sql.8
 c:::0644:/man8/:qmail-start.8:qmail-start.8
 c:::0644:/man8/:qmail-tcpok.8:qmail-tcpok.8
 c:::0644:/man8/:qmail-tcpto.8:qmail-tcpto.8
@@ -204,7 +202,6 @@ c:::0644:/man8/:setuidgid.8:setuidgid.8
 c:::0644:/man8/:softlimit.8:softlimit.8
 c:::0644:/man8/:spawn-filter.8:spawn-filter.8
 c:::0644:/man8/:splogger.8:splogger.8
-c:::0644:/man8/:sql-database.8:sql-database.8
 c:::0644:/man8/:supervise.8:supervise.8
 c:::0644:/man8/:surblfilter.8:surblfilter.8
 c:::0644:/man8/:surblqueue.8:surblqueue.8

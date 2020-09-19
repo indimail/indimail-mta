@@ -30,7 +30,6 @@ c:::0755:/bin/:autoresponder:autoresponder
 c:::0755:/bin/:qnotify:qnotify
 c:::0755:/bin/:rrt:rrt
 c:::0755:/bin/:qarf:qarf
-c:::0755:/bin/:inotify:inotify
 c:::0755:/bin/:dk-filter:dk-filter
 c:::0755:/bin/:queue-fix:queue-fix
 c:::0755:/bin/:qmailctl:qmailctl

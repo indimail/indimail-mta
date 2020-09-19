@@ -35,3 +35,8 @@ Release 2.12 Start 21/05/2020
 19. indimail-mta, ucspi-tcp: fixes for FreeBSD
 - 17/09/2020
 20. svctool, create_services, update_tmprsadh, config-fast: fixes for FreeBSD
+- 19/09/2020
+21. exploit svscan as session leader. Terminate all children using svc -G
+22. svcscan_rc: rc startup script for FreeBSD
+23. portable Makefile for Linux, FreeBSD, OSX
+24. qmailctl: use daemon to start svscan in supervised mode

@@ -1,0 +1,5 @@
+it += svscan_rc
+
+.ifdef ($(USE_SQL),1)
+	it += qmail-sql sql-database
+.endif

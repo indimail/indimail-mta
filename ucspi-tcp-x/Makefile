@@ -2,14 +2,22 @@
 COFLAGS=-z+05:30
 SHELL=/bin/sh
 OPENSSLBIN=openssl
-SSLINCS  =-I/usr/kerberos/include
-DEFS    != uname -s | tr "[:lower:]" "[:upper:]"
-SYSTEM  != uname -s
+SSLINCS=-I/usr/kerberos/include
 SSLLIBS := -lssl -lcrypto
+prefix    != head -1 conf-prefix 2>/dev/null
+mandir    != [ -d $(prefix)/man ] && echo $(prefix)/man || echo $(prefix)/share/man
+shareddir != head -1 conf-shared 2>/dev/null
+DEFS      != uname -s | tr "[:lower:]" "[:upper:]"
+SYSTEM    != uname -s | tr "[:lower:]" "[:upper:]"
+edit = sed \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
+	-e 's,@prefix\@,$(prefix),g' \
+	-e 's,@DATE\@,$(DATE),g'
 
 default: it
 
-compile: make-compile warn-auto.sh systype
+compile: make-compile warn-auto.sh systype conf-cc-$(SYSTEM)
 	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
 	compile
 	chmod 755 compile
@@ -37,7 +45,7 @@ make-makelib warn-auto.sh systype
 
 auto-ccld.sh: conf-cc conf-ld warn-auto.sh
 	(cat warn-auto.sh; echo CC=\'`head -1 conf-cc`\'; \
-	if test $(SYSTEM) = Darwin ; then \
+	if test $(SYSTEM) = DARWIN ; then \
 		echo LD=\'`head -1 conf-ld | sed s{-s{{`\'; \
 	else \
 		echo LD=\'`head -1 conf-ld`\'; \
@@ -303,7 +311,7 @@ compile prot.c hasshsgr.h prot.h
 rblsmtpd.so: \
 load rbl.o commands.o pathexec_rundl.o load_shared.o \
 dlnamespace.o dns.a unix.a socket.lib
-	if test $(SYSTEM) = Darwin ; then \
+	if test $(SYSTEM) = DARWIN ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
 	rbl.o commands.o pathexec_rundl.o load_shared.o \
 	tcdlmopen.o dlnamespace.o dns.a unix.a `cat socket.lib` -lqmail; \
@@ -361,12 +369,19 @@ installer.o: \
 compile installer.c
 	./compile installer.c
 
-install: it installer
-	./installer $(DESTDIR)                                     < DIRS
-	./installer $(DESTDIR)"`head -1 conf-prefix`"              < BIN
-	./installer $(DESTDIR)"`head -1 conf-shared`"              < SHARED
-	./installer $(DESTDIR)"`head -1 conf-prefix`/lib/indimail" < PLUGINS
-	./installer $(DESTDIR)"`head -1 conf-prefix`/share/man"    < MAN
+DIRS: DIRS.in
+	$(edit) $@.in > $@
+
+install: it installer DIRS
+	mkdir -p $(DESTDIR)$(prefix)
+	mkdir -p $(DESTDIR)$(prefix)/lib
+	mkdir -p $(DESTDIR)$(shareddir)
+	mkdir -p $(DESTDIR)$(mandir)
+	./installer $(DESTDIR)                         < DIRS
+	./installer $(DESTDIR)$(prefix)                < BIN
+	./installer $(DESTDIR)$(shareddir)             < SHARED
+	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
+	./installer $(DESTDIR)$(mandir)                < MAN
 
 socket.lib: \
 trylsock.c compile load
@@ -422,7 +437,7 @@ compile socket_udp.c socket.h haveip6.h conf-ip
 systype: find-systype.sh conf-cc conf-ld trycpp.c x86cpuid.c
 	( cat warn-auto.sh; \
 	echo CC=\'`head -1 conf-cc`\'; \
-	if test $(SYSTEM) = Darwin ; then \
+	if test $(SYSTEM) = DARWIN ; then \
 		echo LD=\'`head -1 conf-ld | sed s{-s{{`\'; \
 	else \
 		echo LD=\'`head -1 conf-ld`\'; fi ; \

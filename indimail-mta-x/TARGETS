@@ -220,6 +220,7 @@ cscope.out
 cscope.po.out
 date822fmt.o
 datemail
+datemail.1
 datetime.a
 datetime.o
 datetime_un.o
@@ -1116,3 +1117,8 @@ sql-database.8
 installer
 installer.o
 mysql_inc
+DIRS
+BIN
+SBIN
+SHARED
+svscan_rc

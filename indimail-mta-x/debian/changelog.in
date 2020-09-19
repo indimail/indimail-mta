@@ -20,3 +20,7 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * qmail-queue.c, qmail-local.c: changed default value of use_fsync, use_syncdir to -1
   * indimail-mta, ucspi-tcp: fixes for FreeBSD
   * svctool, create_services, update_tmprsadh, config-fast: fixes for FreeBSD
+  * exploit svscan as session leader. Terminate all children using svc -G
+  * svcscan_rc: rc startup script for FreeBSD
+  * portable Makefile for Linux, FreeBSD, OSX
+  * qmailctl: use daemon to start svscan in supervised mode

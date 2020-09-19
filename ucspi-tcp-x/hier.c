@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.14  2020-09-19 17:35:03+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.13  2020-09-13 17:32:28+05:30  Cprogrammer
  * leave permissions of directories alone as they are owned by indimail-mta
  *
@@ -41,6 +44,7 @@
  *
  */
 #include <str.h>
+#include <unistd.h>
 #include <strerr.h>
 #include <stralloc.h>
 #include "auto_home.h"
@@ -61,7 +65,7 @@ hier(inst_dir, fatal)
 	char           *inst_dir;
 	char           *fatal;
 {
-	char           *mandir;
+	char           *mandir_base;
 
 	if (inst_dir && *inst_dir)
 		auto_ucspi_home = inst_dir;
@@ -70,21 +74,32 @@ hier(inst_dir, fatal)
 		sharedir = auto_shared;
 	/*- shared directory for boot, doc, man */
 	if (str_diff(auto_home, auto_shared)) {
-		mandir = getdirname(auto_shared, 0);
-		if (!stralloc_copys(&a, mandir))
+		mandir_base = auto_ucspi_home; /* /usr/local */
+		if (!stralloc_copys(&a, auto_ucspi_home))
+			strerr_die2sys(111, fatal, "out of memory: ");
+		if (!stralloc_catb(&a, "/man", 4))
 			strerr_die2sys(111, fatal, "out of memory: ");
 		if (!stralloc_0(&a))
 			strerr_die2sys(111, fatal, "out of memory: ");
-		mandir = a.s;
+		if (!access(a.s, F_OK))
+			mandir_base = auto_ucspi_home; /* /usr/local/man, /usr/man */
+		else {
+			mandir_base = getdirname(auto_shared, 0);
+			if (!stralloc_copys(&a, mandir_base))
+				strerr_die2sys(111, fatal, "out of memory: ");
+			if (!stralloc_0(&a))
+				strerr_die2sys(111, fatal, "out of memory: ");
+			mandir_base = a.s; /* /usr/share */
+		}
 		h(auto_shared, -1, -1, -1);
 	} else
-		mandir = auto_ucspi_home;
+		mandir_base = auto_ucspi_home;
 
 	h(auto_ucspi_home, -1, -1, -1);
 	d(auto_ucspi_home, "bin", -1, -1, -1);
 	d(auto_shared,     "doc", -1, -1, -1);
-	d(mandir,          "man", -1, -1, -1);
-	d(mandir,          "man/man1", -1, -1, -1);
+	d(mandir_base,     "man", -1, -1, -1);
+	d(mandir_base,     "man/man1", -1, -1, -1);
 	c(auto_ucspi_home, "bin",      "tcpserver", -1, -1, 0755);
 	c(auto_ucspi_home, "bin",      "tcprules", -1, -1, 0755);
 	c(auto_ucspi_home, "bin",      "tcprulescheck", -1, -1, 0755);
@@ -97,18 +112,18 @@ hier(inst_dir, fatal)
 	c(auto_ucspi_home, "bin",      "mconnect", -1, -1, 0755);
 	c(auto_ucspi_home, "bin",      "mconnect-io", -1, -1, 0755);
 	c(auto_ucspi_home, "bin",      "rblsmtpd", -1, -1, 0755);
-	c(mandir,          "man/man1", "tcpserver.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "tcprules.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "tcprulescheck.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "tcpclient.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "who@.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "date@.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "finger@.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "http@.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "tcpcat.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "mconnect.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "mconnect-io.1", -1, -1, 0644);
-	c(mandir,          "man/man1", "rblsmtpd.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "tcpserver.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "tcprules.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "tcprulescheck.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "tcpclient.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "who@.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "date@.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "finger@.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "http@.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "tcpcat.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "mconnect.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "mconnect-io.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "rblsmtpd.1", -1, -1, 0644);
 	c(auto_shared,     "doc",      "README.ucspi-tcp", -1, -1, 0444);
 #ifdef LOAD_SHARED_OBJECTS
 	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, -1);

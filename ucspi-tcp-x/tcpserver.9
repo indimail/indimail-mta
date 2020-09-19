@@ -25,8 +25,9 @@ waits for connections from TCP clients. For each connection, it runs
 .IR prog ,
 with descriptor 0 reading from the network and descriptor 1 writing to the
 network. It also sets up several environment variables.
-if \fIprog.so\fR is specified, it is expected that prog.so points to a shared object, which gets loaded using dlopen(3) call.
-Specifying a shared object can significantly improve performance by loading the object only once.
+if \fIprog.so\fR is specified, it is expected that prog.so points to a shared
+object, which gets loaded using dlopen(3) call. Specifying a shared object can
+significantly improve performance by loading the object only once.
 
 The server's address is given by
 .I host
@@ -41,6 +42,14 @@ may be 0, allowing connections to any local IP address; or a dotted-decimal IP
 address, allowing connections only to that address; or a host name, allowing
 connections to the first IP address for that host. Host names are fed through
 qualification using dns_ip4_qualify (dns_ip6_qualify for ipv6).
+
+By default, FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The
+default behavior intentionally violates RFC2553 for security reasons.
+Run two instances of \fBtcpserver\fR if you want to accept both IPv4 and
+IPv6 traffic. IPv4 traffic may be routed with certain per-socket/per-node
+configuration, however, it is not recommended to do so. Consult ip6(4) for
+details. Linux, however allows connections to any local IPv4 or IPv6
+addresses.
 
 \fBtcpserver\fR dumps on standard error, list of active connections, when it
 receives SIGUSR1. \fBtcpserver\fR exits when it receives SIGTERM.
@@ -125,7 +134,8 @@ does not exist.
 .B \-m \fIdb.conf
 Follow rules specified in the MySQL table tcprules. This table has 4 columns. The column
 .I iprules
-contains an IP address which can include wildcards. eg. 202.144.*.?, 202.144.10-20.1, etc. The column
+contains an IP address which can include wildcards. eg. 202.144.*.?,
+202.144.10-20.1, etc. The column
 .I decision
 can have the value
 .I 'D'
@@ -140,18 +150,21 @@ with this option,
 .I tcpserver
 will connect to the
 .B MySQL(1)
-server specified by parameters in db.conf file. The connect timeout can be controlled by the environment variable
+server specified by parameters in db.conf file. The connect timeout can be
+controlled by the environment variable
 .BR MYSQL_TIMEOUT .
 
-To enable the -m option, you have to set MYSQL_LIB variable to point to the mysql shared library. e.g.
+To enable the -m option, you have to set MYSQL_LIB variable to point to the
+mysql shared library. e.g.
 
 .EX
   MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
 .EE
 
-You can set MYSQL_LIB environment variable in /service/\fIname\fR/variables/MYSQL_LIB (here \fIname\fR refers
-to a service under \fIsupervise\fR(8)). You can also set the value in the control file \fImysql_lib\fR.
-Environment variable takes precedence over the control file.
+You can set MYSQL_LIB environment variable in
+/service/\fIname\fR/variables/MYSQL_LIB (here \fIname\fR refers to a service
+under \fIsupervise\fR(8)). You can also set the value in the control file
+\fImysql_lib\fR. Environment variable takes precedence over the control file.
 
 .TP
 .B \-B \fIbanner
@@ -279,8 +292,8 @@ Instead of the default servercert.pem certificate use the specified
 .IR certfile .
 
 .SH IPv4-mapped IPv6 addresses
-Setting up tcpserver with simultaneous bindings to IPv4 and IPv6 addresses, the Unix
-kernel employs the mapping
+Setting up tcpserver with simultaneous bindings to IPv4 and IPv6 addresses,
+the Unix kernel employs the mapping
 
 .EX
 ::ffff:a.b.c.d
@@ -288,13 +301,15 @@ for the IPv4 address
 a.b.c.d
 .EE
 
-Setting up tcpserver in IPv4 mode only -4 or in compatibility mode, IPv4 addresses are
-considered in their native format without the IPv6 prefix. Thus, usual IPv4 addresses
-can be entered in rules.cdb even in common IPv4/IPv6 bindings.
+Setting up tcpserver in IPv4 mode (-4) only or in compatibility mode, IPv4
+addresses are considered in their native format without the IPv6 prefix.
+Thus, usual IPv4 addresses can be entered in rules.cdb even in common
+IPv4/IPv6 bindings.
 
 .SH Loading Shared Objects
-tcpserver can load shared objects by specifying a shared object on the command line. A special case can be setup
-for qmail-smtpd and rblmstpd by specifying the following environment variables
+tcpserver can load shared objects by specifying a shared object on the
+command line. A special case can be setup for qmail-smtpd and rblmstpd
+by specifying the following environment variables
 
 .EX
 PLUGIN0=PREFIX/lib/indimail/plugins/qmail_smtpd.so
@@ -303,15 +318,20 @@ PLUGIN0_init=smtp_init
 PLUGIN1=PREFIX/lib/indimail/plugins/rblsmtpd.so
 .EE
 
-The above causes tcpserver to load qmail_smtpd.so and execute the smtp_init(1) function, after changing directory to /var/indimail,
-in the parent. smtp_init() loads all qmail-smtpd control files. Additionally, if PREFIX/lib/indimail/plugins/qmail_smtpd.so
-is specfied in the command line argument, instead of PREFIX/bin/qmail-smtpd, tcpserver will execute the fuction qmail_smtpd()
-instead of exec of the qmail-smtpd executable. This improves the perfomance of the smtp service. In the above example,
-rblsmtpd.so is loaded without executing any initialization function and without changing directory. On SIGHUP, tcpserver
-executes the function smtp_init(0). The variable PLUGINn_dir should be used if your function expects to be in a particular
-directory to function properly. PLUGIN1 causes tcpserver to preload rblsmtpd.so and if \fIprog\fR is
-PREFIX/lib/indimail/plugins/rblsmtpd.so, it will simply execute the function \fIrblsmtpd\fR, from the shared library rblsmtpd.so
-already preloaded in the memory.
+The above causes tcpserver to load qmail_smtpd.so and execute the smtp_init(1)
+function, after changing directory to /var/indimail, in the parent. smtp_init()
+loads all qmail-smtpd control files. Additionally, if
+PREFIX/lib/indimail/plugins/qmail_smtpd.so is specfied in the command line
+argument, instead of PREFIX/bin/qmail-smtpd, tcpserver will execute the
+fuction qmail_smtpd() instead of exec of the qmail-smtpd executable. This
+improves the perfomance of the smtp service. In the above example, rblsmtpd.so
+is loaded without executing any initialization function and without changing
+directory. On SIGHUP, tcpserver executes the function smtp_init(0). The
+variable PLUGINn_dir should be used if your function expects to be in a
+particular directory to function properly. PLUGIN1 causes tcpserver to preload
+rblsmtpd.so and if \fIprog\fR is PREFIX/lib/indimail/plugins/rblsmtpd.so, it
+will simply execute the function \fIrblsmtpd\fR, from the shared library
+rblsmtpd.so already preloaded in the memory.
 
 .SH ENVIRONMENT
 .TP
@@ -321,7 +341,8 @@ Specifies the ciphers that should be used in SSL/TLS mode. See
 for more information.
 .TP
 .B CONTROLDIR
-Sub-directory relative to SYSCONFDIR, having servercert.pem. Default is SYSCONFDIR/control.
+Sub-directory relative to SYSCONFDIR, having servercert.pem.
+Default is SYSCONFDIR/control.
 
 .SH SEE ALSO
 tcprules(1),
