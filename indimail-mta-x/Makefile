@@ -2,10 +2,10 @@
 COFLAGS=-z+05:30
 SHELL=/bin/sh
 servicedir=/service
-SYSTEM           != uname -s
+SYSTEM           != uname -s | tr "[:lower:]" "[:upper:]"
 prefix           != head -1 conf-prefix 2>/dev/null
 qmaildir         != head -1 conf-qmail 2>/dev/null
-mandir           != echo "`head -1 conf-prefix`/share/man" 2>/dev/null
+mandir           != [ -d "`head -1 conf-prefix`"/man ] && echo "`head -1 conf-prefix`/man" || echo "`head -1 conf-prefix`/share/man"
 shareddir        != head -1 conf-shared 2>/dev/null
 qsysconfdir      != head -1 conf-sysconfdir 2>/dev/null
 libexecdir       != head -1 conf-libexec 2>/dev/null
@@ -15,6 +15,8 @@ ucspitcp_version != cat ../ucspi-tcp-x/conf-version
 DATE             != date
 HOST             != echo "`uname -m`-pc-`uname -s`-`uname -o|cut -d/ -f1`"|tr "[:upper:]" "[:lower:]"
 logdir           != cat conf-logdir
+USE_SQL          != [ -n "`head -1 conf-sql`" ] && echo "1" || echo ""
+bash             != [ -f /usr/local/bin/bash ] && echo "/usr/local/bin/bash" || echo "/bin/bash"
 
 edit = sed \
 	-e 's,@indimaildir\@,$(qmaildir),g' \
@@ -33,11 +35,60 @@ edit = sed \
 	-e 's,@ucspitcp_version\@,$(ucspitcp_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-default: it man leapsecs.dat
+it = perm_list.mta 822date 822field 822header 822print 822received addcr \
+	addrlist argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q \
+	binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm qnotify \
+	create_services cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr \
+	condredirect config-fast datemail delcr dk-filter dknewkey dktest dnscname \
+	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate elq \
+	envdir envuidgid qdane dnstlsarr etrn except fastforward fghack fixcrio \
+	forward generic.so greydaemon qf-smtp-ratelimit home home+df hostname \
+	idedit iftocc indimail.plist instcheck ipmeprint ldap-checkpwd leapsecs \
+	logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
+	maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate \
+	inewaliases newinclude new-inject nowutc ofmipd ofmipname parsedate \
+	pgrphack pinq plugtest installer predate preline printforward \
+	printmaillist proc proc+df qaes qail ctrlenv qarf qmail-cat qmail-cdb \
+	qmail-clean qmailconfig qmailctl maildirsize qmail-daemon qmaildirmake \
+	qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
+	qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue \
+	qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter qmail-qmqpc \
+	qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue qmail-remote qmail-rm \
+	qmail-rspawn qmail-send qmail-showctl qmail-daned \
+	qmail-smtpd qmail_smtpd.so qmail-start qmail-tcpok qmail-tcpto \
+	qmail-todo qmail-upq qpq qquote qreceipt qsmhook queue-fix readproctitle \
+	recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
+	sendmail serialcmd serialqmtp serialsmtp setforward setlock setmaillist \
+	setuidgid smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest \
+	spawn-filter spfquery splogger srsfilter supervise surblfilter surblqueue \
+	svc svok svscan svscanboot svstat swaks sys-checkpwd systemd tai2tai64n \
+	tai64n tai64n2tai tai64nlocal tai64nunix tcp-env testzero tokenize uacl \
+	udpclient udplogger update_tmprsadh upstart viruscanner whois yearcal \
+	cdb-database analyzer qtools qlog leapsecs.dat
 
-all: it man leapsecs.dat debian/Makefile
+man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
+	svscan.8 cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
+	svctool.8 predate.1 datemail.1 \
+	mlmatchup.8 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
+	logselect.8 qmail-daned.8 qmail-srs.5 qmail-limits.7 \
+	forward.1 condredirect.1 qmail-control.5 rrforward.1 \
+	qreceipt.1 maildirserial.1 qmail-rm.1 dot-qmail.5 \
+	qmail-users.5 dot-forward.1 fastforward.1 new-inject.1 \
+	filterto.1 replier.1 svscanboot.8 qmail-local.8 \
+	qmail-getpw.8 qmail-remote.8 qmail-send.8 qmail-todo.8 \
+	qmail-start.8 qmail-queue.8 qmail-dkim.8 dk-filter.8 \
+	qmail-dk.8 dktest.8 qmail-multi.8 spawn-filter.8 \
+	qmail-inject.8 qmail-newmrh.8 recipient-cdb.8 qmail-cdb.8 \
+	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
+	qmail-poppass.8 qscanq.8 run-cleanq.8
 
-compile: make-compile warn-auto.sh systype
+include Makefile.$(SYSTEM)
+
+default: $(it) $(man)
+
+all: $(it) $(man)
+
+compile: make-compile warn-auto.sh systype conf-cc conf-cc-$(SYSTEM)
 	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
 	compile
 	chmod 755 compile
@@ -49,7 +100,7 @@ make-compile.sh auto-ccld.sh
 
 auto-ccld.sh: conf-cc conf-ld warn-auto.sh
 	(cat warn-auto.sh; echo CC=\'`head -1 conf-cc`\'; \
-	if test $(SYSTEM) = Darwin ; then \
+	if test $(SYSTEM) = DARWIN ; then \
 		echo LD=\'`head -1 conf-ld | sed s{-s{{`\'; \
 	else \
 		echo LD=\'`head -1 conf-ld`\'; \
@@ -385,7 +436,8 @@ condredirect.1: condredirect.9 conf-qmail conf-sysconfdir
 	> condredirect.1
 
 qmailconfig: \
-warn-auto.sh qmailconfig.sh conf-prefix conf-prefix conf-break conf-split conf-sysconfdir conf-libexec
+warn-auto.sh qmailconfig.sh conf-prefix conf-prefix conf-break \
+conf-split conf-sysconfdir conf-libexec
 	cat warn-auto.sh qmailconfig.sh \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
@@ -412,7 +464,8 @@ warn-auto.sh qf-smtp-ratelimit.in conf-libexec
 	chmod 755 qf-smtp-ratelimit
 
 config-fast: \
-warn-auto.sh config-fast.sh conf-prefix conf-break conf-split conf-sysconfdir
+warn-auto.sh config-fast.sh conf-prefix conf-break \
+conf-split conf-sysconfdir
 	cat warn-auto.sh config-fast.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
@@ -609,10 +662,12 @@ warn-auto.sh qpq.sh conf-qmail conf-prefix
 
 qmailctl: \
 warn-auto.sh qmailctl.sh conf-prefix conf-sysconfdir
-	(head -1 warn-auto.sh | sed  s}sh}bash};cat qmailctl.sh) \
+	(head -1 warn-auto.sh | sed  s}/bin/sh}$(bash)};cat qmailctl.sh) \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> qmailctl
+	chmod +x $@
 
 indimail.plist: indimail.plist.in conf-libexec
 	cat indimail.plist.in | sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
@@ -991,36 +1046,6 @@ run-cleanq.9 conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> run-cleanq.8
 
-it: \
-indimail-mta.fc perm_list.mta 822date 822field 822header 822print 822received addcr addrlist \
-argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q indimail-mta.spec \
-binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm inotify create_services \
-cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
-datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip svctool qfrontend \
-dnsmxip dnsptr dnstxt dot-forward drate elq envdir envuidgid qdane dnstlsarr \
-etrn except fastforward fghack fixcrio forward generic.so greydaemon qf-smtp-ratelimit \
-home home+df hostname idedit iftocc indimail.plist instcheck ipmeprint \
-ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
-maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate inewaliases newinclude \
-new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest installer \
-predate preline printforward printmaillist proc proc+df qaes qail ctrlenv \
-qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl maildirsize \
-qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
-qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-popbull qmail-poppass \
-qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
-qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-daned \
-qmail-smtpd qmail_smtpd.so qmail-sql sql-database qmail-start qmail-tcpok qmail-tcpto \
-qmail-todo qmail-upq qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
-recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
-sendmail serialcmd serialqmtp serialsmtp setforward setlock setmaillist setuidgid \
-smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest spawn-filter spfquery splogger \
-srsfilter supervise surblfilter surblqueue svc svok svscan svscanboot \
-svstat swaks sys-checkpwd systemd tai2tai64n tai64n tai64n2tai tai64nlocal \
-tai64nunix tcp-env testzero tokenize uacl udpclient udplogger update_tmprsadh \
-upstart viruscanner whois yearcal cdb-database \
-analyzer qtools qlog docker-entrypoint \
-indimail-mta-permissions.easy indimail-mta-permissions.paranoid indimail-mta-permissions.secure
-
 analyzer: \
 mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
 deferrals failures successes rhosts recipients rxdelay senders suids \
@@ -1084,23 +1109,6 @@ warn-auto.sh mailsubj.sh conf-prefix conf-break conf-split
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> mailsubj
-
-man: \
-drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
-svscan.8 cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
-svctool.8 qmail-sql.8 sql-database.8 predate.1 datemail.1 \
-mlmatchup.8 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
-logselect.8 qmail-daned.8 qmail-srs.5 qmail-limits.7 \
-forward.1 condredirect.1 qmail-control.5 rrforward.1 \
-qreceipt.1 maildirserial.1 qmail-rm.1 dot-qmail.5 \
-qmail-users.5 dot-forward.1 fastforward.1 new-inject.1 \
-filterto.1 replier.1 svscanboot.8 qmail-local.8 \
-qmail-getpw.8 qmail-remote.8 qmail-send.8 qmail-todo.8 \
-qmail-start.8 qmail-queue.8 qmail-dkim.8 dk-filter.8 \
-qmail-dk.8 dktest.8 qmail-multi.8 spawn-filter.8 \
-qmail-inject.8 qmail-newmrh.8 recipient-cdb.8 qmail-cdb.8 \
-qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
-qmail-poppass.8 qscanq.8 run-cleanq.8
 
 doc/INSTALL-MINI: doc/INSTALL-MINI.in
 	$(edit) $@.in > $@
@@ -1757,25 +1765,28 @@ socket_v6any.o mail_acl.o spf.o dns.o auto_qmail.o auto_uids.o \
 qregex_sql.o tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
 auto_break.o auto_control.o auto_assign.o auto_prefix.o auto_sysconfdir.o \
 socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
-	if test $(SYSTEM) = Darwin ; then \
-	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so smtpd.o rcpthosts.o \
-	recipients.o indimail_stub.o load_mysql.o qcount_dir.o \
-	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
-	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o bodycheck.o \
-	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o socket_v4mappedprefix.o \
-	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
-	qregex_sql.o tablematch.o greylist.o auto_break.o auto_control.o auto_assign.o \
-	query_skt.o fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
+	if test $(SYSTEM) = DARWIN ; then \
+	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so \
+	smtpd.o rcpthosts.o recipients.o indimail_stub.o load_mysql.o \
+	qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o \
+	etrn.o atrn.o received.o date822fmt.o wildmat.o qmail.o \
+	variables.o envrules.o bodycheck.o spf.o dns.o auto_qmail.o \
+	sqlmatch.o matchregex.o socket_v4mappedprefix.o \
+	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
+	mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
+	auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
+	tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
 	hmac_sha1.o `cat socket.lib dns.lib tls.lib` -lqmail ; \
 	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so smtpd.o rcpthosts.o \
-	recipients.o auto_control.o auto_assign.o qcount_dir.o \
-	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
-	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o bodycheck.o \
-	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o socket_v4mappedprefix.o \
-	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
-	qregex_sql.o tablematch.o greylist.o auto_break.o indimail_stub.o load_mysql.o \
-	query_skt.o fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o hmac_sha1.o \
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
+	smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
+	qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
+	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o \
+	bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o \
+	socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
+	socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
+	greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
+	fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o hmac_sha1.o \
 	`cat socket.lib dns.lib tls.lib` -lqmail; \
 	fi
 
@@ -1791,21 +1802,22 @@ query_skt.o fn_handler.o tlsarralloc.o load_mysql.o \
 auto_sysconfdir.o auto_break.o auto_prefix.o socket.lib dns.lib tls.lib \
 hmac_sha1.o mysql_config conf-sql
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o \
-	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o qcount_dir.o \
-	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o bodycheck.o \
-	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o socket_v4mappedprefix.o \
-	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
-	indimail_stub.o qregex_sql.o tablematch.o greylist.o auto_break.o auto_control.o \
-	auto_assign.o hmac_sha1.o query_skt.o fn_handler.o tlsarralloc.o load_mysql.o \
-	auto_sysconfdir.o auto_prefix.o `cat socket.lib dns.lib tls.lib` -ldl \
-	-lqmail
+	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
+	qcount_dir.o received.o date822fmt.o wildmat.o qmail.o variables.o \
+	envrules.o bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o \
+	matchregex.o socket_v4mappedprefix.o socket_ip4loopback.o \
+	socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
+	indimail_stub.o qregex_sql.o tablematch.o greylist.o auto_break.o \
+	auto_control.o auto_assign.o hmac_sha1.o query_skt.o fn_handler.o \
+	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
+	`cat socket.lib dns.lib tls.lib` -ldl -lqmail
 
 mail_acl.o: compile mail_acl.c matchregex.h
 	./compile mail_acl.c
 
 indimail_stub.o: \
-compile indimail_stub.c auto_qmail.h auto_sysconfdir.h auto_uids.h auto_control.h \
-variables.h
+compile indimail_stub.c auto_qmail.h auto_sysconfdir.h auto_uids.h \
+auto_control.h variables.h
 	./compile indimail_stub.c
 
 qregex.o: \
@@ -2084,16 +2096,48 @@ installer.o: \
 compile installer.c
 	./compile installer.c
 
+DIRS: DIRS.in
+	$(edit) $@.in > $@
+
+BIN: BIN.in
+	([ -f BIN.$(SYSTEM) ] && \
+	cat BIN.in BIN.$(SYSTEM) || cat BIN.in) > BIN
+
+SBIN: SBIN.in SBIN.sql
+	([ -f SBIN.$(SYSTEM) ] && \
+	cat SBIN.in SBIN.$(SYSTEM) || cat SBIN.in; \
+	[ -n "$(USE_SQL)" ] && cat SBIN.sql) > SBIN
+
+SHARED: SHARED.in
+	([ -f SHARED.$(SYSTEM) ] && \
+	cat SHARED.in SHARED.$(SYSTEM) || cat SHARED.in) > SHARED
+
+MAN: MAN.in MAN.sql
+	([ -f MAN.$(SYSTEM) ] && \
+	cat MAN.in MAN.$(SYSTEM) || cat MAN.in; \
+	[ -n "$(USE_SQL)" ] && cat MAN.sql) > MAN
+
+
 install: \
-it man leapsecs.dat conf-sysconfdir perm_list.mta conf-logdir installer
-	./installer $(DESTDIR)                                     < DIRS
-	./installer $(DESTDIR)"`head -1 conf-prefix`"              < BIN
-	./installer $(DESTDIR)"`head -1 conf-prefix`"              < SBIN
-	./installer $(DESTDIR)"`head -1 conf-shared`"              < SHARED
-	./installer $(DESTDIR)"`head -1 conf-sysconfdir`"          < ETC
-	./installer $(DESTDIR)"`head -1 conf-prefix`/lib/indimail" < PLUGINS
-	./installer $(DESTDIR)"`head -1 conf-libexec`"             < LIBEXEC
-	./installer $(DESTDIR)"`head -1 conf-prefix`/share/man"    < MAN
+$(it) $(man) conf-qmail conf-prefix conf-libexec \
+conf-shared conf-sysconfdir conf-logdir perm_list.mta \
+installer DIRS BIN SBIN SHARED MAN
+	mkdir -p $(DESTDIR)$(prefix)
+	mkdir -p $(DESTDIR)$(prefix)/lib
+	mkdir -p $(DESTDIR)$(qmaildir)
+	mkdir -p $(DESTDIR)$(shareddir)
+	mkdir -p $(DESTDIR)$(qsysconfdir)
+	mkdir -p $(DESTDIR)$(libexecdir)
+	mkdir -p $(DESTDIR)$(mandir)
+	mkdir -p $(DESTDIR)$(logdir)
+	./installer $(DESTDIR)                         < DIRS
+	./installer $(DESTDIR)$(prefix)                < BIN
+	./installer $(DESTDIR)$(prefix)                < SBIN
+	./installer $(DESTDIR)$(shareddir)             < SHARED
+	./installer $(DESTDIR)$(qsysconfdir)           < ETC
+	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
+	./installer $(DESTDIR)$(libexecdir)            < LIBEXEC
+	./installer $(DESTDIR)$(mandir)                < MAN
 
 slurpclose.o: compile slurpclose.c slurpclose.h
 	./compile slurpclose.c
@@ -2868,11 +2912,11 @@ compile ofmipname.c cdbmss.h
 
 new-inject: \
 load new-inject.o qmail.o auto_sysconfdir.o rwhconfig.o \
-envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o variables.o \
-auto_qmail.o auto_control.o
+envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
+variables.o auto_qmail.o auto_control.o
 	./load new-inject qmail.o auto_sysconfdir.o variables.o \
-	auto_qmail.o envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
-	auto_control.o rwhconfig.o -lqmail
+	auto_qmail.o envdir_set.o pathexec_env.o pathexec_run.o \
+	openreadclose.o auto_control.o rwhconfig.o -lqmail
 
 new-inject.1: new-inject.9 conf-sysconfdir
 	cat new-inject.9 \
@@ -3115,8 +3159,10 @@ compile newinclude.c token822.h control.h \
 auto_qmail.h variables.h
 	./compile newinclude.c
 
-envdir: load envdir.o envdir_set.o openreadclose.o pathexec_env.o pathexec_run.o
-	./load envdir envdir_set.o openreadclose.o pathexec_env.o pathexec_run.o -lqmail
+envdir: load envdir.o envdir_set.o openreadclose.o pathexec_env.o \
+pathexec_run.o
+	./load envdir envdir_set.o openreadclose.o pathexec_env.o \
+	pathexec_run.o -lqmail
 
 envdir.o: compile envdir.c pathexec.h envdir.h
 	./compile envdir.c
@@ -3565,63 +3611,51 @@ hasuserpw.h MakeArgs.h
 
 hasifaddr.h: \
 tryifaddr.c compile load
-	( ( ./compile tryifaddr.c && ./load tryifaddr ) >/dev/null \
-	2>&1 \
+	((./compile tryifaddr.c \
+	&& ./load tryifaddr) >/dev/null 2>&1 \
 	&& echo \#define HASIFADDR 1 || exit 0 ) > hasifaddr.h
 	rm -f tryifaddr.o tryifaddr
 
 hasspnam.h: \
 tryspnam.c compile load
-	( ( ./compile tryspnam.c && ./load tryspnam ) >/dev/null \
-	2>&1 \
+	((./compile tryspnam.c \
+	&& ./load tryspnam) >/dev/null 2>&1 \
 	&& echo \#define HASGETSPNAM 1 || exit 0 ) > hasspnam.h
 	rm -f tryspnam.o tryspnam
 
 hasuserpw.h: \
 tryuserpw.c compile load
-	( ( ./compile tryuserpw.c \
-	  && ./load tryuserpw ) >/dev/null 2>&1 \
+	((./compile tryuserpw.c \
+	  && ./load tryuserpw) >/dev/null 2>&1 \
 	&& echo \#define HASGETUSERPW 1 || exit 0 ) > hasuserpw.h
 	rm -f tryuserpw.o tryuserpw
 
 crypt.lib: \
 trycrypt.c compile load
-	( ( ./compile trycrypt.c && \
-	./load trycrypt -lcrypt ) >/dev/null 2>&1 \
-	&& echo -lcrypt || exit 0 ) > crypt.lib
+	((./compile trycrypt.c && \
+	./load trycrypt -lcrypt) >/dev/null 2>&1 \
+	&& echo -lcrypt || exit 0) > crypt.lib
 	rm -f trycrypt.o trycrypt
 
 ldap.lib: \
 tryldap.c compile load hasldap.h
-	if test $(SYSTEM) = FreeBSD ; then \
-	( ( ./compile -I/usr/local/include tryldap.c && \
-	./load tryldap -L/usr/local/lib -lldap ) >/dev/null 2>&1 \
-	&& echo -L/usr/local/lib -lldap || exit 0 ) > ldap.lib; \
-	rm -f tryldap.o tryldap; \
-	else \
-	( ( ./compile tryldap.c && \
+	((./compile tryldap.c && \
 	./load tryldap -lldap ) >/dev/null 2>&1 \
-	&& echo -lldap || exit 0 ) > ldap.lib; \
-	rm -f tryldap.o tryldap; fi
+	&& echo -lldap || exit 0) > ldap.lib
+	rm -f tryldap.o tryldap
 
 hasldap.h: \
 tryldap.c compile load
-	if test $(SYSTEM) = FreeBSD ; then \
-	( ( ./compile -I/usr/local/include tryldap.c && \
-	./load tryldap -L/usr/local/lib -lldap ) >/dev/null 2>&1 \
-	&& echo \#define HASLDAP 1 || exit 0 ) > hasldap.h; \
-	rm -f tryldap.o tryldap; \
-	else \
-	( ( ./compile tryldap.c && \
-	./load tryldap -lldap ) >/dev/null 2>&1 \
-	&& echo \#define HASLDAP 1 || exit 0 ) > hasldap.h; \
-	rm -f tryldap.o tryldap; fi
+	((./compile tryldap.c && \
+	./load tryldap -lldap) >/dev/null 2>&1 \
+	&& echo "#define HASLDAP 1" || exit 0) > hasldap.h
+	rm -f tryldap.o tryldap
 
 shadow.lib: \
 tryshadow.c compile load
-	( ( ./compile tryshadow.c && \
-	./load tryshadow -lshadow ) >/dev/null 2>&1 \
-	&& echo -lshadow || exit 0 ) > shadow.lib
+	((./compile tryshadow.c && \
+	./load tryshadow -lshadow) >/dev/null 2>&1 \
+	&& echo -lshadow || exit 0) > shadow.lib
 	rm -f tryshadow.o tryshadow
 
 ldap-checkpwd: \
@@ -3721,38 +3755,38 @@ conf-release:
 	fi
 
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config \
-conf-release conf-version ../ucspi-tcp-x/conf-version Makefile
+conf-release conf-version ../ucspi-tcp-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
 
 debian/Makefile: debian/Makefile.in conf-release conf-version \
-../ucspi-tcp-x/conf-version Makefile
+../ucspi-tcp-x/conf-version
 	$(edit) $@.in > $@
 
 hastlsv1_1_server.h: \
 trytlsv1_1_server.c compile load
-	(( ./compile trytlsv1_1_server.c && ./load trytlsv1_1_server -lssl -lcrypto) >/dev/null \
-	2>&1 \
+	((./compile trytlsv1_1_server.c && ./load trytlsv1_1_server \
+	-lssl -lcrypto) >/dev/null 2>&1 \
 	&& echo \#define TLSV1_1_SERVER_METHOD 1 || exit 0 ) > hastlsv1_1_server.h
 	rm -f trytlsv1_1_server.o trytlsv1_1_server
 
 hastlsv1_2_server.h: \
 trytlsv1_2_server.c compile load
-	(( ./compile trytlsv1_2_server.c && ./load trytlsv1_2_server -lssl -lcrypto) >/dev/null \
-	2>&1 \
+	((./compile trytlsv1_2_server.c && ./load trytlsv1_2_server \
+	-lssl -lcrypto) >/dev/null 2>&1 \
 	&& echo \#define TLSV1_2_SERVER_METHOD 1 || exit 0 ) > hastlsv1_2_server.h
 	rm -f trytlsv1_2_server.o trytlsv1_2_server
 
 hastlsv1_1_client.h: \
 trytlsv1_1_client.c compile load
-	(( ./compile trytlsv1_1_client.c && ./load trytlsv1_1_client -lssl -lcrypto) >/dev/null \
-	2>&1 \
+	(( ./compile trytlsv1_1_client.c && ./load trytlsv1_1_client \
+	-lssl -lcrypto) >/dev/null 2>&1 \
 	&& echo \#define TLSV1_1_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_1_client.h
 	rm -f trytlsv1_1_client.o trytlsv1_1_client
 
 hastlsv1_2_client.h: \
 trytlsv1_2_client.c compile load
-	(( ./compile trytlsv1_2_client.c && ./load trytlsv1_2_client -lssl -lcrypto) >/dev/null \
-	2>&1 \
+	(( ./compile trytlsv1_2_client.c && ./load trytlsv1_2_client \
+	-lssl -lcrypto) >/dev/null 2>&1 \
 	&& echo \#define TLSV1_2_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_2_client.h
 	rm -f trytlsv1_2_client.o trytlsv1_2_client
 
@@ -3810,12 +3844,12 @@ ctrlenv.9 conf-prefix conf-sysconfdir
 smtpd-plugin0.so: dnsbl.o control.o auto_control.o variables.o \
 socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
 strsalloc.o tlsarralloc.o dns.o dns.lib
-	if test $(SYSTEM) = Darwin ; then \
+	if test $(SYSTEM) = DARWIN ; then \
 	$(LD) -bundle -undefined dynamic_lookup \
 	-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
 	socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
 	strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -lqmail; \
-	elif test $(SYSTEM) = FreeBSD ; then \
+	elif test $(SYSTEM) = FREEBSD ; then \
 	$(LD) -shared -o smtpd-plugin0.so dnsbl.o control.o \
 	auto_control.o variables.o socket_v6any.o \
 	socket_v4mappedprefix.o ip.o ipalloc.o \
@@ -3831,10 +3865,10 @@ dnsbl.o: compile dnsbl.c smtp_plugin.h dns.h control.h
 	./compile dnsbl.c
 
 smtpd-plugin.so:smtp_plugin.o
-	if test $(SYSTEM) = Darwin ; then \
+	if test $(SYSTEM) = DARWIN ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
 	smtp_plugin.o; \
-	elif test $(SYSTEM) = FreeBSD ; then \
+	elif test $(SYSTEM) = FREEBSD ; then \
 	$(LD) -shared -o smtpd-plugin.so smtp_plugin.o; \
 	else \
 	$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
@@ -3844,24 +3878,26 @@ smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
 	./compile smtp_plugin.c
 
 generic.so: generic.o auto_scancmd.o MakeArgs.o
-	if test $(SYSTEM) = Darwin ; then \
+	if test $(SYSTEM) = DARWIN ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o generic.so generic.o \
 	auto_scancmd.o MakeArgs.o -lqmail; \
 	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o generic.so generic.o \
-	auto_scancmd.o MakeArgs.o -lqmail; fi
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o \
+	generic.so generic.o auto_scancmd.o MakeArgs.o -lqmail; fi
 
 perm_list.mta: perm_list.in mysql_config
 	$(edit) perm_list.in > $@
 
 svctool: svctool.in mysql_config
 	$(edit) $@.in > $@
+	chmod +x $@
 
-svctool.8: svctool.9 conf-qmail conf-sysconfdir Makefile mysql_config
+svctool.8: svctool.9 conf-qmail conf-sysconfdir mysql_config
 	$(edit) svctool.9 > $@
 
 create_services: create_services.in
 	$(edit) $@.in > $@; chmod 755 $@
+	chmod +x $@
 
 docker-entrypoint: \
 warn-auto.sh docker-entrypoint.sh conf-prefix
@@ -3869,6 +3905,10 @@ warn-auto.sh docker-entrypoint.sh conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> docker-entrypoint
 	chmod 755 docker-entrypoint
+
+svscan_rc: \
+warn-auto.sh conf-prefix svscan_rc.in
+	(cat warn-auto.sh; $(edit) $@.in) > $@
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in
