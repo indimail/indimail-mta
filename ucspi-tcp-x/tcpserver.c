@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.67  2020-09-19 17:35:36+05:30  Cprogrammer
+ * treat IPV6 :: same as 0
+ *
  * Revision 1.66  2020-09-16 20:50:32+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -221,7 +224,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.66 2020-09-16 20:50:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.67 2020-09-19 17:35:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1520,7 +1523,7 @@ main(int argc, char **argv, char **envp)
 	sig_catch(sig_hangup, sighangup);
 	sig_catch(sig_usr1, siguser1);
 	sig_ignore(sig_pipe);
-	if (str_equal(hostname, "0"))
+	if (str_equal(hostname, "0") || str_equal(hostname, "::"))
 		byte_zero(localip, sizeof(localip));
 	else {
 		if (!stralloc_copys(&tmp, hostname))
