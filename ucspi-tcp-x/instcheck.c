@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.7  2020-09-19 17:38:56+05:30  Cprogrammer
+ * removed unused argument to perm()
+ *
  * Revision 1.6  2020-09-13 17:33:18+05:30  Cprogrammer
  * skip chmod of mode is -1
  *
@@ -37,16 +40,7 @@ extern void     hier(char *, char *);
 #define WARNING "instcheck: warning: "
 
 void
-perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
-	char           *prefix1;
-	char           *prefix2;
-	char           *prefix3;
-	char           *file;
-	int             type;
-	int             uid;
-	int             gid;
-	int             mode;
-	int             should_exit;
+perm(char *prefix1, char *prefix2, char *prefix3, char *file, int type, int uid, int gid, int mode)
 {
 	struct stat     st;
 	int             len, err = 0;
@@ -172,7 +166,7 @@ h(home, uid, gid, mode)
 	int             gid;
 	int             mode;
 {
-	perm("", "", "", home, S_IFDIR, uid, gid, mode, 1);
+	perm("", "", "", home, S_IFDIR, uid, gid, mode);
 }
 
 void
@@ -185,7 +179,7 @@ d(home, subdir, uid, gid, mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode, 1);
+	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode);
 }
 
 void
@@ -198,7 +192,7 @@ p(home, fifo, uid, gid, mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", fifo, S_IFIFO, uid, gid, mode, 1);
+	perm("", home, "/", fifo, S_IFIFO, uid, gid, mode);
 }
 
 void
@@ -214,7 +208,7 @@ c(home, subdir, file, uid, gid, mode)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
 	if (chdir(subdir) == -1)
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
-	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 1);
+	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode);
 }
 
 int
