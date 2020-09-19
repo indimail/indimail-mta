@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.16  2020-09-19 17:25:19+05:30  Cprogrammer
+ * become session leader
+ *
  * Revision 1.15  2020-07-11 22:08:52+05:30  Cprogrammer
  * removed STATUSFILE code
  *
@@ -444,6 +447,8 @@ main(int argc, char **argv)
 		while (get_lock(argv[1])) ;
 	} else
 		while (get_lock(".")) ;
+	if (setsid() == -1)
+		strerr_die2sys(111, FATAL, "unable to become session leader: ");
 	signal(SIGHUP, sighup);
 	signal(SIGTERM, sigterm);
 	if((s = env_get("SCANINTERVAL")))
@@ -467,7 +472,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.15 2020-07-11 22:08:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.16 2020-09-19 17:25:19+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
