@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.62 2020-09-19 17:24:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.63 2020-09-20 11:35:31+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -276,7 +276,7 @@ start()
 				sv_pid=/tmp/svscan.pid
 				daemon_pid=/tmp/sv_daemon.pid
 			fi
-			/usr/sbin/daemon -cS -p $sv_pid -P $daemon_pid -R 5 \
+			env SETSID=1 /usr/sbin/daemon -cS -p $sv_pid -P $daemon_pid -R 5 \
 				-t "$SYSTEM"_svscan LIBEXEC/svscanboot && $succ || $fail
 		else
 			if [ -w /dev/console ] ; then
