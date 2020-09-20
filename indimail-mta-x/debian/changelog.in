@@ -24,3 +24,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svcscan_rc: rc startup script for FreeBSD
   * portable Makefile for Linux, FreeBSD, OSX
   * qmailctl: use daemon to start svscan in supervised mode
+  * tcpserver.c: open ipv4, ipv6 sockets on FreeBSD and use select before accept()

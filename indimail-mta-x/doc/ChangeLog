@@ -40,3 +40,5 @@ Release 2.12 Start 21/05/2020
 22. svcscan_rc: rc startup script for FreeBSD
 23. portable Makefile for Linux, FreeBSD, OSX
 24. qmailctl: use daemon to start svscan in supervised mode
+- 20/09/2020
+25. tcpserver.c: open ipv4, ipv6 sockets on FreeBSD and use select before accept()
