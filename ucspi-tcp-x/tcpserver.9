@@ -43,13 +43,15 @@ address, allowing connections only to that address; or a host name, allowing
 connections to the first IP address for that host. Host names are fed through
 qualification using dns_ip4_qualify (dns_ip6_qualify for ipv6).
 
+\fBtcpserver(1)\fR works differently on Linux and FreeBSD.
 By default, FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The
 default behavior intentionally violates RFC2553 for security reasons.
-Run two instances of \fBtcpserver\fR if you want to accept both IPv4 and
-IPv6 traffic. IPv4 traffic may be routed with certain per-socket/per-node
-configuration, however, it is not recommended to do so. Consult ip6(4) for
-details. Linux, however allows connections to any local IPv4 or IPv6
-addresses.
+IPv4 traffic may be routed with certain per-socket/per-node configuration,
+however, it is not recommended to do so. Consult ip6(4) for details. Linux,
+however allows connections to any local IPv4 or IPv6 addresses. To overcome
+this limitation, tcpserver creates two sockets, and binds both IPv4 and IPv6
+addresses. It then uses select(2) to carry out operation to accept a
+connection from the right socket.
 
 \fBtcpserver\fR dumps on standard error, list of active connections, when it
 receives SIGUSR1. \fBtcpserver\fR exits when it receives SIGTERM.
@@ -362,6 +364,9 @@ openssl(1),
 dlopen(3),
 supervise(8),
 svscan(8),
-tcp-environ(5)
+tcp-environ(5),
+socket(2),
+select(2),
+accept(2)
 
 http://cr.yp.to/ucspi-tcp.html

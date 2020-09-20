@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.68  2020-09-20 10:55:06+05:30  Cprogrammer
+ * open ipv4 and ipv6 sockets on FreeBSD
+ *
  * Revision 1.67  2020-09-19 17:35:36+05:30  Cprogrammer
  * treat IPV6 :: same as 0
  *
@@ -194,6 +197,9 @@
 #include "ip6.h"
 #include <uint32.h>
 #endif
+#if defined(IPV6) && defined(FREEBSD)
+#include <sys/select.h>
+#endif
 #include <fd.h>
 #include <env.h>
 #include "prot.h"
@@ -224,7 +230,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.67 2020-09-19 17:35:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.68 2020-09-20 10:55:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1323,6 +1329,10 @@ main(int argc, char **argv, char **envp)
 	int             s, t, pid, opt, tmpLimit;
 #ifdef IPV6
 	int             fakev4 = 0;
+#ifdef FREEBSD
+	int              s4, s6, r;
+	fd_set           rfds;
+#endif
 #endif
 #ifdef TLS
 	BIO            *sbio;
@@ -1445,11 +1455,9 @@ main(int argc, char **argv, char **envp)
 			scan_ulong(optarg, &timeout);
 			break;
 		case 'U':
-			x = env_get("UID");
-			if (x)
+			if ((x = env_get("UID")))
 				scan_uint(x, &uid);
-			x = env_get("GID");
-			if (x)
+			if ((x = env_get("GID")))
 				scan_uint(x, &gid);
 			break;
 		case 'u':
@@ -1567,26 +1575,69 @@ main(int argc, char **argv, char **envp)
 	}
 #endif
 #ifdef IPV6
+#ifdef FREEBSD
+	if ((s6 = socket_tcp6()) == -1)
+#else
 	if ((s = socket_tcp6()) == -1)
+#endif
 #else
 	if ((s = socket_tcp()) == -1)
 #endif
 		strerr_die2sys(111, FATAL, "unable to create socket: ");
 #ifdef IPV6
+#ifdef FREEBSD
+	if (socket_bind6_reuse(s6, localip, localport, netif) == -1)
+#else
 	if (socket_bind6_reuse(s, localip, localport, netif) == -1)
+#endif
 #else
 	if (socket_bind4_reuse(s, localip, localport) == -1)
 #endif
 		strerr_die2sys(111, FATAL, "unable to bind: ");
 #ifdef IPV6
+#ifdef FREEBSD
+	if (socket_local6(s6, localip, &localport, &netif) == -1)
+#else
 	if (socket_local6(s, localip, &localport, &netif) == -1)
+#endif
 #else
 	if (socket_local4(s, localip, &localport) == -1)
 #endif
 		strerr_die2sys(111, FATAL, "unable to get local address: ");
+#if defined(IPV6) && defined(FREEBSD)
+	if (socket_listen(s6, backlog) == -1)
+#else
 	if (socket_listen(s, backlog) == -1)
+#endif
 		strerr_die2sys(111, FATAL, "unable to listen: ");
+#if defined(IPV6) && defined(FREEBSD)
+	ndelay_off(s6);
+#else
 	ndelay_off(s);
+#endif
+#if defined(IPV6) && defined(FREEBSD)
+	/*
+	 * By default, FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The
+	 * default behavior intentionally violates RFC2553 for security reasons.
+	 * Listen to two sockets if you want to accept both IPv4 and IPv6 traffic.
+	 * IPv4 traffic may be routed with certain per-socket/per-node configura-
+	 * tion, however, it is not recommended to do so. Consult ip6(4) for
+	 * details.
+	 */
+	if (!noipv6) {
+		noipv6 = 1;
+		if ((s4 = socket_tcp6()) == -1)
+			strerr_die2sys(111, FATAL, "unable to create socket: ");
+		if (socket_bind6_reuse(s4, localip, localport, netif) == -1)
+			strerr_die2sys(111, FATAL, "unable to bind: ");
+		if (socket_local6(s4, localip, &localport, &netif) == -1)
+			strerr_die2sys(111, FATAL, "unable to get local address: ");
+		if (socket_listen(s4, backlog) == -1)
+			strerr_die2sys(111, FATAL, "unable to listen: ");
+		ndelay_off(s4);
+		noipv6 = 0;
+	}
+#endif /*- #if defined(IPV6) && defined(FREEBSD) */
 	if (gid && prot_gid(gid) == -1)
 		strerr_die2sys(111, FATAL, "unable to set gid: ");
 	if (uid && prot_uid(uid) == -1)
@@ -1607,6 +1658,27 @@ main(int argc, char **argv, char **envp)
 		while (numchildren >= limit)
 			sig_pause();
 		sig_unblock(sig_child);
+#if defined(IPV6) && defined(FREEBSD)
+		while (1) {
+			FD_ZERO(&rfds);
+			FD_SET(s6, &rfds);
+			FD_SET(s4, &rfds);
+			if ((r = select(s4 + 1, &rfds, 0, 0, 0)) == -1) {
+				if (errno == error_intr)
+					continue;
+				else
+					strerr_die2sys(111, FATAL, "select: ");
+			}
+			if (r) {
+				if (FD_ISSET(s6, &rfds))
+					s = s6;
+				else
+				if (FD_ISSET(s4, &rfds))
+					s = s4;
+				break;
+			}
+		}
+#endif
 #ifdef IPV6
 		t = socket_accept6(s, remoteip, &remoteport, &netif);
 #else
