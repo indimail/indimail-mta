@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.491 2020-09-19 23:05:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.492 2020-09-21 21:33:39+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.491 2020-09-19 23:05:55+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.492 2020-09-21 21:33:39+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1100,7 +1100,7 @@ if [ -f /etc/init/svscan.conf -a -f /sbin/initctl ] ; then
   else
     echo "svscan service is configured to run via upstart"
   fi
-  PS="ps -ef"
+  PS="ps -ax"
 elif [ -d /etc/event.d -a -f /sbin/initctl ] ; then
   /sbin/initctl list svscan
   if [ $? -ne 0 ]; then
@@ -1109,7 +1109,7 @@ elif [ -d /etc/event.d -a -f /sbin/initctl ] ; then
   else
     echo "svscan service is configured to run via upstart"
   fi
-  PS="ps -ef"
+  PS="ps -ax"
 elif [ -f /lib/systemd/system/svscan.service -a -f /bin/systemctl ] ; then
   /bin/systemctl is-enabled svscan > /dev/null
   if [ $? -ne 0 ] ; then
@@ -1134,7 +1134,7 @@ elif [ -d /System/Library/LaunchDaemons ] ; then
   else
     echo "svscan service is configured to run via launchd" 1>&2
   fi
-  PS="ps -ef"
+  PS="ps -ax"
 else
   echo "Checking /etc/inittab"
   if [ -f /etc/inittab ]; then
@@ -1151,7 +1151,7 @@ else
         echo "svscan is configured to run via /etc/inittab"
       fi
     fi
-    PS="ps -ef"
+    PS="ps -ax"
   else
     if [ -x /sbin/chkconfig -a -f /etc/init.d/svscan ] ; then
       /sbin/chkconfig --list svscan|grep on > /dev/null
@@ -4097,18 +4097,31 @@ mysql_user=$2
 mysql_pass=$3
 mysql_port=$4
 mysql_socket=$5
-echo "getpwnam    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \\"
-echo "            FROM indimail \\"
-echo "            WHERE pw_name='%1\$s' and pw_domain='%2\$s' \\"
-echo "            LIMIT 1"
-echo "getspnam    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \\"
-echo "            FROM indimail \\"
-echo "            WHERE pw_name='%1\$s'and pw_domain='%2\$s' \\"
-echo "            LIMIT 1"
-echo "getpwent    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \\"
-echo "            FROM indimail LIMIT 100"
-echo "getspent    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \\"
-echo "            FROM indimail"
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	Linux)
+	echo "getpwnam    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \\"
+	echo "            FROM indimail \\"
+	echo "            WHERE pw_name='%1\$s' and pw_domain='%2\$s' \\"
+	echo "            LIMIT 1"
+	echo "getspnam    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \\"
+	echo "            FROM indimail \\"
+	echo "            WHERE pw_name='%1\$s'and pw_domain='%2\$s' \\"
+	echo "            LIMIT 1"
+	echo "getpwent    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \\"
+	echo "            FROM indimail LIMIT 100"
+	echo "getspent    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \\"
+	echo "            FROM indimail"
+	;;
+	FreeBSD)
+	echo "getpwnam    SELECT pw_name,pw_passwd,555,555,0,'',pw_gecos,pw_dir,pw_shell,0 \\"
+	echo "            FROM indimail \\"
+	echo "            WHERE pw_name='%1\$s' and pw_domain='%2\$s' \\"
+	echo "            LIMIT 1"
+	echo "getpwent    SELECT pw_name,pw_passwd,555,555,0,'',pw_gecos,pw_dir,pw_shell,0 \\"
+	echo "            FROM indimail"
+	;;
+esac
 echo ""
 echo "host        $mysql_host"
 echo "database    indimail"
@@ -4575,7 +4588,7 @@ if [ $? -eq 0 ] ; then
 	mysql_version=`echo $mysql_version|cut -d- -f1`
 	mariadb=1
 else
-	$mysqlPrefix/$mysqld --version | grep "MySQL Community Server" > /dev/null 2>&1
+	$mysqlPrefix/$mysqld --version | egrep "MySQL Community Server|FreeBSD" > /dev/null 2>&1
 	if [ $? -eq 0 ] ; then
 		mysql_community_server=1
 	else
@@ -4634,11 +4647,11 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 			else
 				opt_str="--user=mysql"
 			fi
-			echo -n "$mysqlPrefix/$mysqld --initialize-insecure $opt_str" 1>&2
+			echo -n "$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str" 1>&2
 			echo -n " --skip-networking" 1>&2
 			echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log"  1>&2
 			echo    " --datadir="$DESTDIR"$databasedir/data --socket=$mysql_socket" 1>&2
-			$mysqlPrefix/$mysqld --initialize-insecure $opt_str \
+			$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str \
 				--skip-networking \
 				--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
 				--datadir="$DESTDIR"$databasedir/data --socket=$mysql_socket
@@ -4710,11 +4723,11 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 		#
 		# Start MySQL daemon
 		#
-		echo -n "$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid" 1>&2
+		echo -n "$mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid" 1>&2
 		echo -n " --skip-networking --datadir="$DESTDIR"$databasedir/data" 1>&2
 		echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log" 1>&2
 		echo    " $opt_str --socket=$mysql_socket" 1>&2
-		$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid \
+		$mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid \
 			--skip-networking --datadir="$DESTDIR"$databasedir/data \
 			--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
 			$opt_str --socket=$mysql_socket &
@@ -9720,7 +9733,7 @@ case $option in
 		;;
 
 		users)
-		nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+		nscd_up=`ps -ax |grep nscd |grep -v grep|wc -l`
 		if [ $nscd_up -ge 1 ] ; then
 			if [ -x /etc/init.d/nscd ] ; then
 				/etc/init.d/nscd stop

@@ -23,12 +23,12 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.83 2020-09-17 11:16:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.84 2020-09-21 21:34:00+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
-  echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path \\
-  destdir=path] [--shared-objects] [--add-boot] [--chk-install] --nomysql
+  echo "create_service [--servicedir=path] [--qbase=path] [--mbase=path] --mysqlPrefix=path \\
+  destdir=path] [--shared-objects] [--add-boot] [--chk-install] [--nomysql]
 
   servicedir     - path of Supervise service directory
   qbase          - path for createing IndiMail's queue collection
@@ -45,10 +45,6 @@ usage()
   exit 1
 }
 
-if test $# -eq 0; then
-    usage 1
-fi
-
 noproxy=0
 nocourierimap=0
 nofetchmail=0
@@ -58,8 +54,10 @@ nonssd=0
 nomysql=0
 nodksignatures=0
 dkimkeyfn=default
-if [ -x /usr/bin/mysql ] ; then
+if [ -x /usr/sbin/mysqld ] ; then # Linux
   mysql_base=/usr
+elif [ -x /usr/local/libexec/mysqld ] ; then # FreeBSD
+  mysql_base=/usr/local
 fi
 ID=`id -u`
 while test $# -gt 0; do
@@ -162,8 +160,13 @@ fi
 
 if [ -x $dir_prefix$prefix/sbin/svctool ] ; then
   svctool=$dir_prefix$prefix/sbin/svctool
-else
+elif [ -x /usr/sbin/svctool ] ; then
   svctool=/usr/sbin/svctool
+elif [ -x /usr/local/sbin/svctool ] ; then
+  svctool=/usr/local/sbin/svctool
+else
+  echo "Unable to locate svctool" 1>&2
+  exit 1
 fi
 # some setup
 $mkdir -p $dir_prefix$prefix/bin
