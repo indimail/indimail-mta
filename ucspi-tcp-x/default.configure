@@ -6,16 +6,12 @@ SYSTEM=$(uname -s)
 case "$SYSTEM" in
 	Linux)
 	echo "/usr"                        > conf-prefix
-	echo "/var/indimail"               > conf-qmail
 	echo "/etc/indimail"               > conf-sysconfdir
 	echo "/usr/share/indimail"         > conf-shared
-	echo "/usr/libexec/indimail"       > conf-libexec
 	;;
 	FreeBSD)
 	echo "/usr/local"                  > conf-prefix
-	echo "/var/indimail"               > conf-qmail
 	echo "/usr/local/etc/indimail"     > conf-sysconfdir
 	echo "/usr/local/share/indimail"   > conf-shared
-	echo "/usr/local/libexec/indimail" > conf-libexec
 	;;
 esac
