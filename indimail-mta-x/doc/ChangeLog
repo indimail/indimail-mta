@@ -45,3 +45,5 @@ Release 2.12 Start 21/05/2020
 26. cronlist.q: skip run-cleanq if qscanq service is not installed
 - 22/09/2020
 27. create_service: fixed certificate path for poppass, indisrvr service
+28. use conf-cc-SYSTEM, conf-ld-SYSTEM for system specific CFLAGS, LDFLAGS
+29. qmailctl: removed use of initsvc for start/stop
