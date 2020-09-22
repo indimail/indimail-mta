@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.84 2020-09-21 21:34:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.85 2020-09-22 08:51:00+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -252,7 +252,7 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
     --databasedir=$indimaildir/mysqldb --base_path=$mail_path \
     --default-domain=$default_domain $extra_opt
   $svctool --mysql=3306 --servicedir=$servicedir \
-    --mysqlPrefix=$mysql_base --databasedir=$prefix/mysqldb \
+    --mysqlPrefix=$mysql_base --databasedir=$indimaildir/mysqldb \
     --config=$sysconfdir/indimail.cnf --default-domain=$default_domain $extra_opt
 fi
 #
@@ -296,7 +296,7 @@ if [ $nodksignatures -eq 0 ] ; then
   if [ -x $dir_prefix$prefix/bin/dknewkey ] ; then
     ver_opt="both"
     sign_opt="both"
-	mkdir -p "$dir_prefix"$controldir/domainkeys
+    mkdir -p "$dir_prefix"$controldir/domainkeys
     $dir_prefix$prefix/bin/dknewkey $dir_prefix"$controldir"/domainkeys/$dkimkeyfn 1024
   else
     ver_opt="none"
@@ -465,7 +465,7 @@ fi
 if [ $noindimail -eq 0 ] ; then
   $svctool --indisrvr=4000 --servicedir=$servicedir \
     --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
-    --certfile=$controldir/servercert.pem --ssl \
+    --certfile=$sysconfdir/certs/servercert.pem --ssl \
     --hardquota=52428800 --base_path=$mail_path $extra_opt
   $svctool --inlookup=infifo --servicedir=$servicedir --cntrldir=control --threads=5 \
     --activeDays=60 --query-cache --password-cache --use-btree \
@@ -491,7 +491,7 @@ if [ $noindimail -eq 0 ] ; then
   #
   $svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
     --memory=$poppass_mem \
-    --certfile=$controldir/servercert.pem --ssl \
+    --certfile=$sysconfdir/certs/servercert.pem --ssl \
     --setpassword=$prefix/sbin/vsetpass --servicedir=$servicedir $extra_opt
 fi
 #
@@ -522,8 +522,10 @@ $svctool --postmaster=postmaster@$default_domain --config=cert --common_name=$de
 $svctool --fifologger=$logfifo --servicedir=$servicedir $extra_opt
 
 # mrtg service
-if [ -f $dir_prefix$sysconfdir/indimail.mrtg.cfg ] ; then
-  cp $dir_prefix$sysconfdir/indimail.mrtg.cfg
+if [ ! -f "$dir_prefix"$sysconfdir/indimail.mrtg.cfg ] ; then
+  if [ -f $sysconfdir/indimail.mrtg.cfg ] ; then
+    cp $sysconfdir/indimail.mrtg.cfg "$dir_prefix"$sysconfdir/indimail.mrtg.cfg
+  fi
   $svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir $extra_opt
 fi
 
