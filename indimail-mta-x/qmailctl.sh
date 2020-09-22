@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.63 2020-09-20 11:35:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.64 2020-09-22 20:57:07+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=/service
@@ -214,9 +214,7 @@ stop()
 	done
 	if [ ! -f /usr/bin/systemctl ] ; then
 		$ECHO -n $"Stopping svscan: "
-		if [ -f PREFIX/sbin/initsvc ] ; then
-			PREFIX/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
-		elif [ -f /sbin/initctl ] ; then
+		if [ -f /sbin/initctl ] ; then
 			/sbin/initctl stop svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /usr/sbin/daemon ] ; then
 			if [ -f /var/run/sv_daemon.pid ] ; then
@@ -261,9 +259,7 @@ start()
 	PREFIX/bin/svstat $SERVICE/.svscan/log > /dev/null
 	if [ $? -ne 0 ] ; then
 		$ECHO -n $"Starting svscan: "
-		if [ -f PREFIX/sbin/initsvc ] ; then
-			PREFIX/sbin/initsvc -on > /dev/null 2>/tmp/sv.err && $succ || $fail
-		elif [ -f /sbin/initctl ] ; then
+		if [ -f /sbin/initctl ] ; then
 			/sbin/initctl start svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /usr/sbin/daemon ] ; then
 			if [ -d /run ] ; then
@@ -373,9 +369,7 @@ case "$1" in
 	;;
   shut)
 	$ECHO -n $"shutdown svscan: "
-	if [ -f PREFIX/sbin/initsvc ] ; then
-		PREFIX/sbin/initsvc -off > /dev/null && $succ || $fail
-	elif [ -f /sbin/initctl ] ; then
+	if [ -f /sbin/initctl ] ; then
 		/sbin/initctl stop svscan >/dev/null && $succ || $fail
 	else
 		/usr/bin/killall -e -w svscan && $succ || $fail
