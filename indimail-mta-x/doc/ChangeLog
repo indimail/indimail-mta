@@ -42,3 +42,6 @@ Release 2.12 Start 21/05/2020
 24. qmailctl: use daemon to start svscan in supervised mode
 - 20/09/2020
 25. tcpserver.c: open ipv4, ipv6 sockets on FreeBSD and use select before accept()
+26. cronlist.q: skip run-cleanq if qscanq service is not installed
+- 22/09/2020
+27. create_service: fixed certificate path for poppass, indisrvr service

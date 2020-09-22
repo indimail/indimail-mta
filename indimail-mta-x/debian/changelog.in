@@ -25,3 +25,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * portable Makefile for Linux, FreeBSD, OSX
   * qmailctl: use daemon to start svscan in supervised mode
   * tcpserver.c: open ipv4, ipv6 sockets on FreeBSD and use select before accept()
+  * cronlist.q: skip run-cleanq if qscanq service is not installed
+  * create_service: fixed certificate path for poppass, indisrvr service
