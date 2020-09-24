@@ -1,5 +1,5 @@
 DEFS=`uname -s | tr "[:lower:]" "[:upper:]"`
-extra=$(cat conf-ld-$DEFS)
+extra=$(cat conf-ld-$DEFS 2>/dev/null)
 echo 'main="$1"; shift'
 set $LD
 ld_args=$1
