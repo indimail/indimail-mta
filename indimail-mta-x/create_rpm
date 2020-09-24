@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.13  2020-09-24 16:11:42+05:30  Cprogrammer
+# Makefile split into three Makefiles (variables, main, system specific)
+#
 # Revision 1.12  2020-09-13 01:33:07+05:30  Cprogrammer
 # added --release option to specify release on command line
 #
@@ -37,7 +40,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.12 2020-09-13 01:33:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.13 2020-09-24 16:11:42+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 ucspitcp_version=$(cat ../ucspi-tcp-x/conf-version)
@@ -129,8 +132,9 @@ if [ " $key" = " y" -o " $key" = " Y" ] ; then
 	copy_src=1
 fi
 
+SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
 if [ $copy_src -eq 1 ] ; then
-make -s indimail-mta.spec
+make SYSTEM=$SYSTEM -s indimail-mta.spec
 if [ $? -ne 0 ] ; then
 	echo "make failed" 1>&2
 	exit 1
@@ -154,8 +158,8 @@ do
 		/bin/cp -rp indimail-mta-x stage/indimail-mta-"$version"
 		cd stage/indimail-mta-"$version"
 		echo "Cleaning indimail-mta"
-		make -s clean > /dev/null
-		make -s distclean > /dev/null
+		make SYSTEM=$SYSTEM -s clean > /dev/null
+		make SYSTEM=$SYSTEM -s distclean > /dev/null
 		/bin/rm -rf autom4te.cache .deps
 		cd ..
 		tar \
@@ -177,7 +181,7 @@ do
 		/bin/cp -rp ucspi-tcp-x stage/ucspi-tcp-"$ucspitcp_version"
 		cd stage/ucspi-tcp-"$ucspitcp_version"
 		echo "Cleaning ucspi-tcp-$ucspitcp_version"
-		make -s clean > /dev/null
+		make SYSTEM=$SYSTEM -s clean > /dev/null
 		cd ..
 		tar \
 			--exclude="ucspi-tcp-$ucspitcp_version/.git" \
@@ -228,7 +232,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	if [ ! " $tmprel" = " 1.$release" ] ; then
 		echo 1.$release > indimail-mta-x/conf-release
 		cd indimail-mta-x
-		make indimail-mta.spec
+		make SYSTEM=$SYSTEM indimail-mta.spec
 		cp indimail-mta.spec /tmp
 		cd debian
 		make

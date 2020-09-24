@@ -63,8 +63,8 @@ build-stamp:
 	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then echo $(prefix)      > ucspi-tcp-$(ucspitcp_version)/conf-home; fi
 	if [ -d indimail-mta-$(version) ]       ; then echo $(qmaildir)    > indimail-mta-$(version)/conf-qmail; fi
 	if [ -d indimail-mta-$(version) ]       ; then echo $(qsysconfdir) > indimail-mta-$(version)/conf-sysconfdir; fi
-	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) -s -C ucspi-tcp-$(ucspitcp_version) DESTDIR=$(DESTDIR); fi
-	if [ -d indimail-mta-$(version) ]       ; then $(MAKE) -s -C indimail-mta-$(version)       DESTDIR=$(DESTDIR); fi
+	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) SYSTEM=LINUX -s -C ucspi-tcp-$(ucspitcp_version) DESTDIR=$(DESTDIR); fi
+	if [ -d indimail-mta-$(version) ]       ; then $(MAKE) SYSTEM=LINUX -s -C indimail-mta-$(version)       DESTDIR=$(DESTDIR); fi
 	${rm} -f $(DESTDIR)$(prefix)/$(libd)/*.la
 	( \
 	echo NAME=indimail-mta; \
@@ -79,10 +79,10 @@ build-stamp:
 clean:
 	rm -f build-stamp configure-stamp
 	${rm} -rf $(DESTDIR)
-	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) -s -C ucspi-tcp-$(ucspitcp_version) clean||true; fi
+	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) SYSTEM=LINUX -s -C ucspi-tcp-$(ucspitcp_version) clean||true; fi
 	if [ -d indimail-mta-$(version) ]       ; then \
 		FAKED_MODE=1;export FAKED_MODE; \
-		$(MAKE) -s -C indimail-mta-$(version) clean||true; \
+		$(MAKE) SYSTEM=LINUX -s -C indimail-mta-$(version) clean||true; \
 		unset FAKED_MODE; \
 	fi
 	dh_testdir
@@ -94,10 +94,10 @@ install: build
 	dh_testroot
 	dh_prep || dh_clean -k
 	dh_installdirs
-	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) -s install -C ucspi-tcp-$(ucspitcp_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) SYSTEM=LINUX -s install -C ucspi-tcp-$(ucspitcp_version) DESTDIR=$(DESTDIR); fi
 	if [ -d indimail-mta-$(version) ]       ; then \
 		FAKED_MODE=1;export FAKED_MODE; \
-		$(MAKE) -s install -C indimail-mta-$(version) DESTDIR=$(DESTDIR); \
+		$(MAKE) SYSTEM=LINUX -s install -C indimail-mta-$(version) DESTDIR=$(DESTDIR); \
 		unset FAKED_MODE; \
 	fi
 	${rm} -rf $(DESTDIR)$(mandir)/man3

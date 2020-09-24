@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.253 2020-09-13 09:39:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.254 2020-09-24 16:12:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -458,8 +458,8 @@ do
     %if 0%{?build_ldflags:1}
       LDFLAGS="%{build_ldflags} $LDFLAGS"
     %endif
-    %{__make} "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
-    %{__make} "$silent_opt" %{?_smp_mflags} DESTDIR=%{buildroot} install
+    %{__make} SYSTEM=LINUX "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+    %{__make} SYSTEM=LINUX "$silent_opt" %{?_smp_mflags} DESTDIR=%{buildroot} install
     cd ..
   else
     echo "$i: No such file or directory" 1>&2

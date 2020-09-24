@@ -600,6 +600,7 @@ mysql_inc
 BIN
 SBIN
 DIRS
+MAN
 SHARED
 svscan_rc
 datemail.1

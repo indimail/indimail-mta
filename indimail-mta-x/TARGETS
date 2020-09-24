@@ -1119,6 +1119,7 @@ installer.o
 mysql_inc
 DIRS
 BIN
+MAN
 SBIN
 SHARED
 svscan_rc

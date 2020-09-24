@@ -2,13 +2,9 @@
 COFLAGS=-z+05:30
 SHELL=/bin/sh
 OPENSSLBIN=openssl
-SSLINCS=-I/usr/kerberos/include
+SSLINCS := -I/usr/kerberos/include
 SSLLIBS := -lssl -lcrypto
-prefix    != head -1 conf-prefix 2>/dev/null
-mandir    != [ -d $(prefix)/man ] && echo $(prefix)/man || echo $(prefix)/share/man
-shareddir != head -1 conf-shared 2>/dev/null
-DEFS      != uname -s | tr "[:lower:]" "[:upper:]"
-SYSTEM    != uname -s | tr "[:lower:]" "[:upper:]"
+include Makevars.$(SYSTEM)
 edit = sed \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
@@ -310,7 +306,7 @@ compile prot.c hasshsgr.h prot.h
 
 rblsmtpd.so: \
 load rbl.o commands.o pathexec_rundl.o load_shared.o \
-dlnamespace.o dns.a unix.a socket.lib
+dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
 	if test $(SYSTEM) = DARWIN ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
 	rbl.o commands.o pathexec_rundl.o load_shared.o \
