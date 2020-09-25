@@ -31,3 +31,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * qmailctl: removed use of initsvc for start/stop
   * Makefile - indimail-mta, ucspi-tcp: split into variables, main Makefile and system specific Makefile. New script qmake to do the build
   * syncdir.c: FreeBSD port (use sys/syscall.h)
+  * svctool: use --defaults-file=indimail.cnf for shutdown script to avoid issues on FreeBSD
