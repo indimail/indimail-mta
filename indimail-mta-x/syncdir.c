@@ -1,5 +1,8 @@
 /*
  * $Log: syncdir.c,v $
+ * Revision 1.10  2020-09-25 11:15:53+05:30  Cprogrammer
+ * FreeBSD port
+ *
  * Revision 1.9  2020-09-15 21:08:40+05:30  Cprogrammer
  * set default value of use_fsync, use_sycdir as -1
  *
@@ -51,7 +54,6 @@
 
 #ifdef USE_FSYNC
 int             use_fsync = -1, use_syncdir = -1;
-#ifdef linux
 #include <sys/types.h>
 #include <sys/stat.h>
 #define open XXX_open
@@ -59,7 +61,13 @@ int             use_fsync = -1, use_syncdir = -1;
 #undef open
 #include <unistd.h>
 #include <string.h>
+#if defined(linux)
 #include <syscall.h>
+#elif defined(__FreeBSD__)
+#include <sys/syscall.h>
+#else
+#error "syscall.h presence unknown"
+#endif
 #include <errno.h>
 #include <unistd.h>
 #include "env.h"
@@ -138,6 +146,7 @@ int
 open(const char *file, int oflag, mode_t mode)
 {
 	int             fd = SYS_OPEN(file, oflag, mode);
+
 	if (use_syncdir == -1)
 		use_syncdir = (env_get("USE_SYNCDIR") ? 1 : 0);
 	if (use_syncdir == -1 || !use_syncdir)
@@ -188,13 +197,12 @@ rename(const char *oldpath, const char *newpath)
 		return -1;
 	return (fdirsyncfn(oldpath));
 }
-#endif /*- #ifdef linux */
 #endif /*- #ifdef USE_FSYNC */
 
 void
 getversion_syncdir_c()
 {
-	static char    *x = "$Id: syncdir.c,v 1.9 2020-09-15 21:08:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: syncdir.c,v 1.10 2020-09-25 11:15:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
