@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.85 2020-09-22 08:51:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.86 2020-09-25 20:55:57+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -43,6 +43,42 @@ usage()
   echo "Press ENTER or Cntrl C to quit"
   read key
   exit 1
+}
+
+create_ssl_cnf()
+{
+if [ $# -ne 3 ] ; then
+  echo "USAGE: create_ssl_cnf dir postmaster IMAP|POP3" 1>&2
+  return 1
+fi
+dir=$1
+postmaster=$2
+cn=$3
+echo
+echo "RANDFILE = "$dir"$sysconfdir/certs/servercert.rand"
+echo 
+echo "[ req ]"
+echo "default_bits = 4096"
+echo "encrypt_key = yes"
+echo "distinguished_name = req_dn"
+echo "x509_extensions = cert_type"
+echo "prompt = no"
+echo "default_md = sha256"
+echo
+echo "[v3_req]"
+echo "subjectAltName = DNS:$cn"
+echo 
+echo "[ req_dn ]"
+echo "C=IN"
+echo "ST=GOA"
+echo "L=Porvorim"
+echo "O=IndiMail Server"
+echo "OU=Automatically-generated SSL key"
+echo "CN=$cn"
+echo "emailAddress=$postmaster"
+echo 
+echo "[ cert_type ]"
+echo "nsCertType = server"
 }
 
 noproxy=0
@@ -259,6 +295,11 @@ fi
 # create qmail config
 $svctool --config=qmail --postmaster=postmaster@$default_domain \
   --default-domain=$default_domain $extra_opt
+if [ $noindimail -eq 0 ] ; then
+  $svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
+    --mysqlpass=ssh-1.5- --mysqlsocket=$mysql_socket \
+    --default-domain=$default_domain $extra_opt
+fi
 
 a_arch=`uname -m`
 if [ " $a_arch" = " x86_64" -o " $a_arch" = " amd64" ] ; then
@@ -516,7 +557,17 @@ fi
 #
 
 # create certs
-$svctool --postmaster=postmaster@$default_domain --config=cert --common_name=$default_domain $extra_opt
+if [ -n "$dir_prefix" ] ; then
+  create_ssl_cnf $dir_prefix $postmaster@$default_domain $default_domain > \
+    "$dir_prefix"$sysconfdir"/certs/servercert.cnf"
+  $svctool --postmaster=postmaster@$default_domain --config=cert \
+    --common_name=$default_domain $extra_opt
+  create_ssl_cnf "" $postmaster@$default_domain $default_domain > \
+    "$dir_prefix"$sysconfdir"/certs/servercert.cnf"
+else
+  $svctool --postmaster=postmaster@$default_domain --config=cert \
+    --common_name=$default_domain $extra_opt
+fi
 
 # fifolog service
 $svctool --fifologger=$logfifo --servicedir=$servicedir $extra_opt
@@ -568,11 +619,11 @@ if [ $noindimail -eq 0 ] ; then
   $svctool --servicedir=$servicedir --config=iselinux $extra_opt
 fi
 if [ -f "$dir_prefix"$sysconfdir/cronlist.q -a -d /etc/cron.d ] ; then
-  echo "adding indimali-mta cron entries"
+  echo "adding indimail-mta cron entries"
   $cp "$dir_prefix"$sysconfdir/cronlist.q /etc/cron.d
 fi
 if [ -f "$dir_prefix"$sysconfdir/cronlist.i -a -d /etc/cron.d ] ; then
-  echo "adding indimali cron entries"
+  echo "adding indimail cron entries"
   $cp "$dir_prefix"$sysconfdir/cronlist.i /etc/cron.d
 fi
 if [ $check_install -eq 1 ] ; then
