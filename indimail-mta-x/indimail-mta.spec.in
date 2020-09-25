@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.254 2020-09-24 16:12:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.255 2020-09-25 20:56:08+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -347,6 +347,7 @@ if [ -d %{name}-%{version} ] ; then
   %{__sed} 's{QMAIL{%{qmaildir}{' %{name}-%{version}/conf-qmail.in > %{name}-%{version}/conf-qmail
   %{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' %{name}-%{version}/conf-sysconfdir.in > %{name}-%{version}/conf-sysconfdir
   %{__sed} 's{SHAREDDIR{%{shareddir}{' %{name}-%{version}/conf-shared.in > %{name}-%{version}/conf-shared
+  %{__sed} 's{LIBEXECDIR{%{libexecdir}{' %{name}-%{version}/conf-libexec.in > %{name}-%{version}/conf-libexec
   %{__sed} 's{PREFIX{%{_prefix}{' %{name}-%{version}/conf-prefix.in > %{name}-%{version}/conf-prefix
   %if %notlsarr == 0
     echo "-DHASTLSA" > %{name}-%{version}/conf-tlsa
