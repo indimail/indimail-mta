@@ -68,11 +68,12 @@ man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
 	qmail-poppass.8 qscanq.8 run-cleanq.8
 
-include Makefile.$(SYSTEM)
-
-default: $(it) $(man)
+#default: $(it) $(man)
 
 all: $(it) $(man)
+
+
+include Makefile.$(SYSTEM)
 
 compile: make-compile warn-auto.sh systype conf-cc conf-cc-$(SYSTEM)
 	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
@@ -846,10 +847,10 @@ auto_assign.o auto_prefix.o auto_libexec.o
 instcheck.o: \
 compile instcheck.c
 	if test -f conf-logdir ; then \
-	./compile instcheck.c -DLOGDIR="\"`cat conf-logdir`\""; \
+		./compile instcheck.c -DLOGDIR="\"`cat conf-logdir`\""; \
 	else \
-	./compile instcheck.c -DLOGDIR=\"/var/log/svc\"; \
-	fi;
+		./compile instcheck.c -DLOGDIR=\"/var/log/svc\"; \
+	fi
 
 ip.o: \
 compile ip.c ip.h conf-ip
@@ -1429,10 +1430,10 @@ compile qmail-qread.c fmtqfn.h readsubdir.h direntry.h \
 control.h auto_qmail.h date822fmt.h envdir.h pathexec.h \
 variables.h conf-queue auto_control.h auto_sysconfdir.h
 	if test -f conf-queue ; then \
-	./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
+		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
 	else \
-	./compile -DQUEUE_COUNT=10 qmail-qread.c; \
-	fi;
+		./compile -DQUEUE_COUNT=10 qmail-qread.c; \
+	fi
 
 qmail-multi: load qmail-multi.o MakeArgs.o auto_control.o \
 auto_qmail.o variables.o control.o dns.lib socket.lib
@@ -1443,10 +1444,10 @@ auto_qmail.o variables.o control.o dns.lib socket.lib
 qmail-multi.o: \
 compile qmail-multi.c auto_qmail.h control.h conf-queue MakeArgs.h
 	if test -f conf-queue ; then \
-	./compile -DQUEUE_COUNT=`cat conf-queue` qmail-multi.c; \
+		./compile -DQUEUE_COUNT=`cat conf-queue` qmail-multi.c; \
 	else \
-	./compile -DQUEUE_COUNT=10 qmail-multi.c; \
-	fi;
+		./compile -DQUEUE_COUNT=10 qmail-multi.c; \
+	fi
 
 spawn-filter: \
 load spawn-filter.o variables.o evaluate.o \
@@ -1706,10 +1707,10 @@ load qmail-daemon.o control.o auto_qmail.o auto_control.o variables.o
 
 qmail-daemon.o: compile qmail-daemon.c control.h auto_qmail.h conf-queue
 	if test -f conf-queue ; then \
-	./compile -DQUEUE_COUNT=`cat conf-queue` qmail-daemon.c; \
+		./compile -DQUEUE_COUNT=`cat conf-queue` qmail-daemon.c; \
 	else \
-	./compile -DQUEUE_COUNT=10 qmail-daemon.c; \
-	fi;
+		./compile -DQUEUE_COUNT=10 qmail-daemon.c; \
+	fi
 
 get_uid.o: \
 compile get_uid.c auto_uids.h
@@ -1752,28 +1753,39 @@ qregex_sql.o tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
 auto_break.o auto_control.o auto_assign.o auto_prefix.o auto_sysconfdir.o \
 socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 	if test $(SYSTEM) = DARWIN ; then \
-	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so \
-	smtpd.o rcpthosts.o recipients.o indimail_stub.o load_mysql.o \
-	qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o \
-	etrn.o atrn.o received.o date822fmt.o wildmat.o qmail.o \
-	variables.o envrules.o bodycheck.o spf.o dns.o auto_qmail.o \
-	sqlmatch.o matchregex.o socket_v4mappedprefix.o \
-	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
-	mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
-	auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
-	tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
-	hmac_sha1.o `cat socket.lib dns.lib tls.lib` -lqmail ; \
+		$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so \
+		smtpd.o rcpthosts.o recipients.o indimail_stub.o load_mysql.o \
+		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o \
+		etrn.o atrn.o received.o date822fmt.o wildmat.o qmail.o \
+		variables.o envrules.o bodycheck.o spf.o dns.o auto_qmail.o \
+		sqlmatch.o matchregex.o socket_v4mappedprefix.o \
+		socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
+		mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
+		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
+		tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
+		hmac_sha1.o `cat socket.lib dns.lib tls.lib` -lqmail ; \
+	elif test $(SYSTEM) = FREEBSD ; then \
+		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
+		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
+		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
+		received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o \
+		bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o \
+		socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
+		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
+		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
+		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o hmac_sha1.o \
+		`cat socket.lib dns.lib tls.lib` -L/usr/local/lib -lqmail; \
 	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
-	smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
-	qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
-	received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o \
-	bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o \
-	socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
-	socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
-	greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
-	fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o hmac_sha1.o \
-	`cat socket.lib dns.lib tls.lib` -lqmail; \
+		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
+		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
+		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
+		received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o \
+		bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o \
+		socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
+		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
+		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
+		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o hmac_sha1.o \
+		`cat socket.lib dns.lib tls.lib` -lqmail ; \
 	fi
 
 qmail-smtpd: \
@@ -1930,10 +1942,10 @@ control.o auto_control.o
 qmail-tcpok.o: \
 compile qmail-tcpok.c auto_qmail.h variables.h control.h conf-queue
 	if test -f conf-queue ; then \
-	./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpok.c; \
+		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpok.c; \
 	else \
-	./compile -DQUEUE_COUNT=10 qmail-tcpok.c; \
-	fi;
+		./compile -DQUEUE_COUNT=10 qmail-tcpok.c; \
+	fi
 
 qmail-tcpto: \
 load qmail-tcpto.o ip.o auto_qmail.o \
@@ -1947,10 +1959,10 @@ qmail-tcpto.o: \
 compile qmail-tcpto.c auto_qmail.h ip.h variables.h \
 control.h tcpto.h ipalloc.h conf-tls conf-ip conf-queue
 	if test -f conf-queue ; then \
-	./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpto.c; \
+		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpto.c; \
 	else \
-	./compile -DQUEUE_COUNT=10 qmail-tcpto.c; \
-	fi;
+		./compile -DQUEUE_COUNT=10 qmail-tcpto.c; \
+	fi
 
 qmail-todo: \
 load qmail-todo.o control.o trigger.o fmtqfn.o \
@@ -3831,20 +3843,20 @@ smtpd-plugin0.so: dnsbl.o control.o auto_control.o variables.o \
 socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
 strsalloc.o tlsarralloc.o dns.o dns.lib
 	if test $(SYSTEM) = DARWIN ; then \
-	$(LD) -bundle -undefined dynamic_lookup \
-	-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
-	socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
-	strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -lqmail; \
+		$(LD) -bundle -undefined dynamic_lookup \
+		-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
+		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
+		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -lqmail; \
 	elif test $(SYSTEM) = FREEBSD ; then \
-	$(LD) -shared -o smtpd-plugin0.so dnsbl.o control.o \
-	auto_control.o variables.o socket_v6any.o \
-	socket_v4mappedprefix.o ip.o ipalloc.o \
-	strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -L/usr/lib -lqmail; \
+		$(LD) -shared -o smtpd-plugin0.so dnsbl.o control.o \
+		auto_control.o variables.o socket_v6any.o \
+		socket_v4mappedprefix.o ip.o ipalloc.o \
+		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -L/usr/local/lib -lqmail; \
 	else \
-	$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
-	-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
-	socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
-	strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -lqmail; \
+		$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
+		-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
+		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
+		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -lqmail; \
 	fi
 
 dnsbl.o: compile dnsbl.c smtp_plugin.h dns.h control.h
@@ -3852,24 +3864,30 @@ dnsbl.o: compile dnsbl.c smtp_plugin.h dns.h control.h
 
 smtpd-plugin.so:smtp_plugin.o
 	if test $(SYSTEM) = DARWIN ; then \
-	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
-	smtp_plugin.o; \
+		$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
+		smtp_plugin.o; \
 	elif test $(SYSTEM) = FREEBSD ; then \
-	$(LD) -shared -o smtpd-plugin.so smtp_plugin.o; \
+		$(LD) -shared -o smtpd-plugin.so smtp_plugin.o; \
 	else \
-	$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
-	-o smtpd-plugin.so smtp_plugin.o; fi
+		$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
+		-o smtpd-plugin.so smtp_plugin.o; \
+	fi
 
 smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
 	./compile smtp_plugin.c
 
 generic.so: generic.o auto_scancmd.o MakeArgs.o
 	if test $(SYSTEM) = DARWIN ; then \
-	$(LD) -bundle -undefined dynamic_lookup -o generic.so generic.o \
-	auto_scancmd.o MakeArgs.o -lqmail; \
+		$(LD) -bundle -undefined dynamic_lookup -o generic.so generic.o \
+		auto_scancmd.o MakeArgs.o -lqmail; \
+	elif test $(SYSTEM) = FREEBSD ; then \
+		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o \
+		generic.so generic.o auto_scancmd.o MakeArgs.o \
+		-L/usr/local/lib -lqmail; \
 	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o \
-	generic.so generic.o auto_scancmd.o MakeArgs.o -lqmail; fi
+		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o \
+		generic.so generic.o auto_scancmd.o MakeArgs.o -lqmail; \
+	fi
 
 perm_list.mta: perm_list.in mysql_config
 	$(edit) perm_list.in > $@
