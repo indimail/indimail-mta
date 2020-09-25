@@ -90,8 +90,8 @@ $ git clone https://github.com/mbhangui/indimail-mta.git
 ```
 $ cd /usr/local/src/indimail-mta/libdkim-x
 $ ./default.configure
-$ make
-$ sudo make -s install-strip
+$ ./qmake
+$ sudo ./qmake -s install-strip
 ```
 
 (check version in indimail-mta/libdkim-x/conf-version)
@@ -101,13 +101,31 @@ $ sudo make -s install-strip
 ```
 $ cd /usr/local/src/indimail-mta/libsrs2-x
 $ ./default.configure
-$ make
-$ sudo make install-strip
+$ ./qmake
+$ sudo ./qmake install-strip
 ```
 
 (check version in indimail-mta/libsrs2-x/conf-version)
 
 ## Build ucspi-tcp
+
+To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir and conf-shared. Defaults are given in the table below. You can also use the script default.configure to set the below values.
+
+**Linux**
+
+config file|value
+-----------|------
+conf-prefix|/usr
+conf-sysconfdir|/etc/indimail
+conf-shared|/usr/share/indimail
+
+**FreeBSD**
+
+config file|value
+-----------|------
+conf-prefix|/usr/local
+conf-sysconfdir|/usr/local/etc/indimail
+conf-shared|/usr/local/share/indimail
 
 ```
 $ cd /usr/local/src/indimail-mta/ucspi-tcp-x
@@ -119,16 +137,9 @@ $ sudo make install-strip
 
 ## Build indimail-mta
 
-```
-$ cd /usr/local/src
-$ ./default.configure
-$ make
-$ sudo make install-strip
-```
+To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared and conf-libexec. Defaults are given in the table below. You can also use the script default.configure to set the below values.
 
-To configure indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared and conf-libexec. Defaults are given in the table below. You can also use the script default.configure to set the below values.
-
-*** Linux ***
+**Linux**
 
 config file|value
 -----------|------
@@ -138,7 +149,7 @@ conf-sysconfdir|/etc/indimail
 conf-shared|/usr/share/indimail
 conf-libexec|/usr/libexec/indimail
 
-*** FreeBSD ***
+**FreeBSD**
 
 config file|value
 -----------|------
@@ -147,7 +158,6 @@ conf-qmail|/var/indimail
 conf-sysconfdir|/usr/local/etc/indimail
 conf-shared|/usr/local/share/indimail
 conf-libexec|/usr/local/libexec/indimail
-
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
