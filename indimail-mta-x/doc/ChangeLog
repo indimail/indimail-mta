@@ -55,3 +55,4 @@ Release 2.12 Start 21/05/2020
 32. svctool: use --defaults-file=indimail.cnf for shutdown script to avoid
     issues on FreeBSD
 33. removed libwatch service
+34. run svctool --fixsharedlibs during MySQL startup

@@ -33,3 +33,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * syncdir.c: FreeBSD port (use sys/syscall.h)
   * svctool: use --defaults-file=indimail.cnf for shutdown script to avoid issues on FreeBSD
   * removed libwatch service
+  * run svctool --fixsharedlibs during MySQL startup
