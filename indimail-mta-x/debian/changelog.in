@@ -29,3 +29,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * create_service: fixed certificate path for poppass, indisrvr service
   * use conf-cc-SYSTEM, conf-ld-SYSTEM for system specific CFLAGS, LDFLAGS
   * qmailctl: removed use of initsvc for start/stop
+  * Makefile - indimail-mta, ucspi-tcp: split into variables, main Makefile and system specific Makefile. New script qmake to do the build
+  * syncdir.c: FreeBSD port (use sys/syscall.h)

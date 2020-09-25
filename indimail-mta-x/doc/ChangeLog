@@ -47,3 +47,8 @@ Release 2.12 Start 21/05/2020
 27. create_service: fixed certificate path for poppass, indisrvr service
 28. use conf-cc-SYSTEM, conf-ld-SYSTEM for system specific CFLAGS, LDFLAGS
 29. qmailctl: removed use of initsvc for start/stop
+- 24/09/2020
+30. Makefile - indimail-mta, ucspi-tcp: split into variables, main Makefile and
+    system specific Makefile. New script qmake to do the build
+25/09/2020
+31. syncdir.c: FreeBSD port (use sys/syscall.h)
