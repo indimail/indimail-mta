@@ -54,3 +54,4 @@ Release 2.12 Start 21/05/2020
 31. syncdir.c: FreeBSD port (use sys/syscall.h)
 32. svctool: use --defaults-file=indimail.cnf for shutdown script to avoid
     issues on FreeBSD
+33. removed libwatch service

@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.37  2020-09-25 21:43:56+05:30  Cprogrammer
+# remove libwatch service
+#
 # Revision 1.36  2020-07-30 11:29:43+05:30  Cprogrammer
 # reverted interpreter back to /bin/sh
 #
@@ -106,7 +109,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.36 2020-07-30 11:29:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.37 2020-09-25 21:43:56+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -131,7 +134,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.sh,v 1.36 2020-07-30 11:29:43+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.37 2020-09-25 21:43:56+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -140,7 +143,7 @@ echo "Running $1 $Id: qlocal_upgrade.sh,v 1.36 2020-07-30 11:29:43+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.sh,v 1.36 2020-07-30 11:29:43+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.37 2020-09-25 21:43:56+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -336,6 +339,12 @@ fi
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
+if [ -d /service/libwatch ] ; then
+	mv /service/libwatch /service/.libwatch
+	svc -dx /service/.libwatch /service/.libwatch/log
+	sleep 1
+	/bin/rm -rf /service/.libwatch
+fi
 
 # for surbl
 if [ ! -d /etc/indimail/control/cache ] ; then
