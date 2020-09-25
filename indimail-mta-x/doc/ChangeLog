@@ -56,3 +56,4 @@ Release 2.12 Start 21/05/2020
     issues on FreeBSD
 33. removed libwatch service
 34. run svctool --fixsharedlibs during MySQL startup
+35. DIRS: use relative links in /var/indimail
