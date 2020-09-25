@@ -73,8 +73,12 @@ Installing and configuration is much simplied when you use the Binary Packages B
 
 **For RPM based distributions**
 
-`$ sudo rpm -ivh rpm_file`
+```
+$ sudo rpm -ivh rpm_file
+```
 
 **For Debian based distributions**
 
-`$ sudo dpkg -i debian_file`
+```
+$ sudo dpkg -i debian_file
+```
