@@ -604,3 +604,5 @@ MAN
 SHARED
 svscan_rc
 datemail.1
+Makefile.
+Makevars.
