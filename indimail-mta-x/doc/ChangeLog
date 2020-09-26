@@ -50,10 +50,13 @@ Release 2.12 Start 21/05/2020
 - 24/09/2020
 30. Makefile - indimail-mta, ucspi-tcp: split into variables, main Makefile and
     system specific Makefile. New script qmake to do the build
-25/09/2020
+- 25/09/2020
 31. syncdir.c: FreeBSD port (use sys/syscall.h)
 32. svctool: use --defaults-file=indimail.cnf for shutdown script to avoid
     issues on FreeBSD
 33. removed libwatch service
 34. run svctool --fixsharedlibs during MySQL startup
 35. DIRS: use relative links in /var/indimail
+- 26/09/2020
+36. svctool: allow setting of MySQL indimail, admin password, indimail UNIX password by
+    setting MYSQL_PASS, PRIV_PASS, ADMIN_PASS in env
