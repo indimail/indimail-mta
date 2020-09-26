@@ -1,4 +1,7 @@
 # $Log: envmigrate.sh,v $
+# Revision 1.6  2020-09-26 23:32:41+05:30  Cprogrammer
+# FreeBSD fix
+#
 # Revision 1.5  2020-06-15 19:49:57+05:30  Cprogrammer
 # added error checks for all commands used in script
 #
@@ -46,7 +49,7 @@ if [ $# -eq 4 ] ; then
 	perm=$4
 else
 	owner="root"
-	group="root"
+	group="0"
 	perm="500"
 fi
 if [ $? = 0 ] ; then
