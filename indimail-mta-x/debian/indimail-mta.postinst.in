@@ -169,7 +169,7 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
   for i in clamd greylist.1999 qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
     qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
-    qscanq udplogger.3000 libwatch
+    qscanq udplogger.3000
   do
     if [ -d ${servicedir}/$i ] ; then
       if [ -z "$svc_list" ] ; then
@@ -483,9 +483,6 @@ do
 done
 svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
-
-# libindimail/mysql_lib control file updater
-${prefix}/sbin/svctool --libwatch --servicedir=${servicedir}
 
 echo "compressing man pages"
 find ${mandir} -type f -exec gzip -q {} \;

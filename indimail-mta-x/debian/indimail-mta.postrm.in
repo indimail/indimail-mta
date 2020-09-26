@@ -213,9 +213,10 @@ if [ " $1" = " purge" ] ; then
 	${rmdir} --ignore-fail-on-non-empty ${qmaildir} 2>/dev/null || true
 
 	echo "removing startup services"
-	for i in clamd freshclam qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qscanq \
-	qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
-	greylist.1999 udplogger.3000 .svscan resolvconf dnscache
+    for i in clamd greylist.1999 qmail-send.25 qmail-qmqpd.628 \
+      qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
+      qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
+      qscanq udplogger.3000 .svscan
 	do
 		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 			touch ${servicedir}/$i/down
