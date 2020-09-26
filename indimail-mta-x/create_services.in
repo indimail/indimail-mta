@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.86 2020-09-25 20:55:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.87 2020-09-26 07:44:29+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -580,9 +580,6 @@ if [ ! -f "$dir_prefix"$sysconfdir/indimail.mrtg.cfg ] ; then
   $svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir $extra_opt
 fi
 
-# libindimail/mysql_lib control file updater
-$svctool --libwatch --servicedir=$servicedir $extra_opt
-
 # create svscan logging in indimail log directory
 $svctool --svscanlog --servicedir=$servicedir $extra_opt
 if [ $add_boot -eq 1 ] ; then
@@ -626,8 +623,10 @@ if [ -f "$dir_prefix"$sysconfdir/cronlist.i -a -d /etc/cron.d ] ; then
   echo "adding indimail cron entries"
   $cp "$dir_prefix"$sysconfdir/cronlist.i /etc/cron.d
 fi
+if [ $noindimail -eq 0 ] ; then
+  $svctool --fixsharedlibs $extra_opt
+fi
 if [ $check_install -eq 1 ] ; then
   $svctool --check-install --servicedir=$servicedir \
     --qbase=$qbase --qcount=$qcount --qstart=1 $extra_opt
 fi
-$svctool --fixsharedlibs $extra_opt
