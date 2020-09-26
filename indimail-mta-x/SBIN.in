@@ -40,7 +40,7 @@ c:::0751:/sbin/:qmail-daned:qmail-daned
 c:::0755:/sbin/:surblfilter:surblfilter
 c:::0755:/sbin/:surblqueue:surblqueue
 c:::0755:/sbin/:plugtest:plugtest
-c:::0755:/sbin/:svctool:svctool
+c:::0711:/sbin/:svctool:svctool
 c:::0755:/sbin/:qmail-newu:qmail-newu
 c:::0755:/sbin/:cdb-database:cdb-database
 c:::0755:/sbin/:qmail-cdb:qmail-cdb
