@@ -140,9 +140,11 @@ if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
     ${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service
+    /bin/systemctl daemon-reload
   elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
     cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || true
     ${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+    /bin/systemctl daemon-reload
   elif [ -f /sbin/initctl -a -d /etc/init ] ; then
     cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || true
     ${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf
