@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.498 2020-09-26 17:35:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.499 2020-09-26 18:13:36+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.498 2020-09-26 17:35:52+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.499 2020-09-26 18:13:36+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6421,28 +6421,12 @@ create_users()
   		grep "^indimail:" /etc/passwd >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating user indimail"
-			SALT=`date +'%s'`
-			CRYPT_PASS=$(openssl passwd -6 -salt $SALT $ADMIN_PASS)
-			if [ -f /bin/bash ] ; then
-				echo $pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/bash $opt2 indimail
-				if [ -n "$opt3" ] ; then
-					echo "$ADMIN_PASS" | $pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/bash $opt2 indimail -h 0
-				else
-					$pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/bash $opt2 indimail
-				fi
-				if [ $? -ne 0 ] ; then
-					exit 1
-				fi
-			else
-				echo $pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/sh $opt2 indimail
-				if [ -n "$opt3" ] ; then
-					echo "$ADMIN_PASS" | $pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/sh $opt2 indimail -h 0
-				else
-					$pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/sh $opt2 indimail
-				fi
-				if [ $? -ne 0 ] ; then
-					exit 1
-				fi
+			#SALT=`date +'%s'`
+			#CRYPT_PASS=$(openssl passwd -6 -salt $SALT $ADMIN_PASS)
+			# echo $ADMIN_PASS | $pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/sh $opt2 indimail -h 0
+			$pw useradd $opt1 -g indimail -d $QmailHOME -s /bin/sh $opt2 indimail
+			if [ $? -ne 0 ] ; then
+				exit 1
 			fi
 		fi
 		;;
@@ -6572,8 +6556,8 @@ create_users()
   		grep "^qscand" /etc/passwd >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating user qscand"
-			echo $pw useradd $opt1 -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell $opt2 qscand $opt3
-			$pw useradd $opt1 -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell $opt2 qscand $opt3
+			echo $pw useradd $opt1 -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell $opt2 qscand 
+			$pw useradd $opt1 -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell $opt2 qscand 
 			if [ $? -ne 0 ] ; then
 				exit 1
 			fi
