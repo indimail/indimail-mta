@@ -302,7 +302,6 @@ You can also run the script `create_services` which invokes svctool to setup few
 $ cd /usr/local/src/indimail-mta-x
 $ sudo ./create_services
 ```
-NOTE: I myself use RPMs for deploying indimail-mta on my own servers and do not use `create_services`. It is possible that it may not include few steps added recently in the pre/post install scripts written for the RPM/Debian builds. create\_service will create indimail UNIX user with password benhur20. Change the password or disable login. You can also set the environment variable ADMIN\_PASS before running create\_services to set you own UNIX password for indimail.
 
 ## Start Services
 
