@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.503 2020-09-27 14:41:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.504 2020-09-27 23:45:17+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.503 2020-09-27 14:41:40+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.504 2020-09-27 23:45:17+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2363,15 +2363,20 @@ fi
 echo "-x $sysconfdir/tcp/tcp.smtp.cdb \\"
 echo "-c $SERVICEDIR/qmail-smtpd.$tag/variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
 echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
+if [ -f /bin/false ] ; then
+	false="/bin/false"
+else
+	false="/usr/bin/false"
+fi
 if [ $shared_objects -eq 1 -a -f "$DESTDIR"@prefix@/lib/indimail/plugins/qmail_smtpd.so ] ; then
 	if [ -n "$authsmtp" -o -n "$forceauthsmtp" ] ; then
-		echo "@prefix@/lib/indimail/plugins/qmail_smtpd.so \$HOSTNAME \\\$AUTHMODULES /bin/false\""
+		echo "@prefix@/lib/indimail/plugins/qmail_smtpd.so \$HOSTNAME \\\$AUTHMODULES $false\""
 	else
 		echo "@prefix@/lib/indimail/plugins/qmail_smtpd.so\""
 	fi
 else
 	if [ -n "$authsmtp" -o -n "$forceauthsmtp" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-smtpd \$HOSTNAME \\\$AUTHMODULES /bin/false\""
+		echo "$QmailBinPrefix/sbin/qmail-smtpd \$HOSTNAME \\\$AUTHMODULES $false\""
 	else
 		echo "$QmailBinPrefix/sbin/qmail-smtpd\""
 	fi
@@ -5607,10 +5612,15 @@ if [ ! " $maxperip" = " " ] ; then
 else
 	echo 10 > $conf_dir/MAXPERIP
 fi
-if [ ! " $pwd_cmd" = " " ] ; then
-	echo "$pwd_cmd /bin/false" > $conf_dir/PASSWORD_COMMAND
+if [ -f /bin/false ] ; then
+	false="/bin/false"
 else
-	echo "$QmailBinPrefix""/sbin/vsetpass /bin/false" > $conf_dir/PASSWORD_COMMAND
+	false="/usr/bin/false"
+fi
+if [ ! " $pwd_cmd" = " " ] ; then
+	echo "$pwd_cmd $false" > $conf_dir/PASSWORD_COMMAND
+else
+	echo "$QmailBinPrefix""/sbin/vsetpass $false" > $conf_dir/PASSWORD_COMMAND
 fi
 if [ " $poppass_ssl" = " 1" ] ; then
 	echo $certfile > $conf_dir/CERTFILE
@@ -5648,8 +5658,13 @@ echo "-c $SERVICEDIR/qmail-poppass.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP -o 
 if [ " $poppass_ssl" = " 1" ] ; then
 	echo "-n \\\$CERTFILE \\"
 fi
+if [ -f /bin/false ] ; then
+	false="/bin/false"
+else
+	false="/usr/bin/false"
+fi
 echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\"
-echo "$QmailBinPrefix/sbin/qmail-poppass \$HOSTNAME $QmailBinPrefix/sbin/vchkpass /bin/false\""
+echo "$QmailBinPrefix/sbin/qmail-poppass \$HOSTNAME $QmailBinPrefix/sbin/vchkpass $false\""
 ) > /tmp/poppass-run.$$
 /bin/mv /tmp/poppass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/run
@@ -6332,8 +6347,10 @@ create_users()
 	fi
 	if [ -f /sbin/nologin ] ; then
 		safe_shell=/sbin/nologin
-	else
+	elif [ -f /bin/false ] ; then
 		safe_shell=/bin/false
+	else
+		safe_shell=/usr/bin/false
 	fi
 	case "$host" in
 		*-*-freebsd*)
