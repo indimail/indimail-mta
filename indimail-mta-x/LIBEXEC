@@ -71,6 +71,7 @@ c:::0755:/:batv:batv
 c:::0755:/:svscanboot:svscanboot
 c:::0755:/:envmigrate:envmigrate
 c:::0755:/:hostname:hostname
+c:::0755:/:svwait:svwait
 c:::0755:/:qmailconfig:qmailconfig
 c:::0755:/:config-fast:config-fast
 c:::0755:/:instcheck:instcheck

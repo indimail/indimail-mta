@@ -1123,3 +1123,5 @@ MAN
 SBIN
 SHARED
 svscan_rc
+svwait
+svwait.1

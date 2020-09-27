@@ -40,7 +40,7 @@ it = perm_list.mta 822date 822field 822header 822print 822received addcr \
 	qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue \
 	qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter qmail-qmqpc \
 	qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue qmail-remote qmail-rm \
-	qmail-rspawn qmail-send qmail-showctl qmail-daned \
+	qmail-rspawn qmail-send qmail-showctl qmail-daned svwait \
 	qmail-smtpd qmail_smtpd.so qmail-start qmail-tcpok qmail-tcpto \
 	qmail-todo qmail-upq qpq qquote qreceipt qsmhook queue-fix readproctitle \
 	recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
@@ -54,7 +54,7 @@ it = perm_list.mta 822date 822field 822header 822print 822received addcr \
 
 man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	svscan.8 cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
-	svctool.8 predate.1 datemail.1 \
+	svctool.8 predate.1 datemail.1 svwait.1 \
 	mlmatchup.8 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
 	logselect.8 qmail-daned.8 qmail-srs.5 qmail-limits.7 \
 	forward.1 condredirect.1 qmail-control.5 rrforward.1 \
@@ -1097,7 +1097,8 @@ warn-auto.sh mailsubj.sh conf-prefix conf-break conf-split
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> mailsubj
 
-doc/INSTALL-MINI: doc/INSTALL-MINI.in
+doc/INSTALL-MINI: doc/INSTALL-MINI.in \
+	conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
 
 myctime.o: \
@@ -2094,7 +2095,8 @@ installer.o: \
 compile installer.c
 	./compile installer.c
 
-DIRS: DIRS.in
+DIRS: DIRS.in \
+	conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
 
 BIN: BIN.in
@@ -3753,11 +3755,13 @@ conf-release:
 	fi
 
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config \
-conf-release conf-version ../ucspi-tcp-x/conf-version
+conf-release conf-version ../ucspi-tcp-x/conf-version \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
 
 debian/Makefile: debian/Makefile.in conf-release conf-version \
-../ucspi-tcp-x/conf-version
+../ucspi-tcp-x/conf-version \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
 
 hastlsv1_1_server.h: \
@@ -3889,17 +3893,29 @@ generic.so: generic.o auto_scancmd.o MakeArgs.o
 		generic.so generic.o auto_scancmd.o MakeArgs.o -lqmail; \
 	fi
 
-perm_list.mta: perm_list.in mysql_config
+perm_list.mta: perm_list.in mysql_config \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
 
-svctool: svctool.in mysql_config
+svctool: svctool.in mysql_config \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
 	chmod +x $@
 
-svctool.8: svctool.9 conf-qmail conf-sysconfdir mysql_config
+svwait: svwait.in conf-prefix \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
+	cat warn-auto.sh $@.in  | $(edit) > $@
+
+svwait.1: svwait.9 conf-prefix conf-libexec \
+conf-qmail conf-sysconfdir conf-shared
+	$(edit) svwait.9 > $@
+
+svctool.8: svctool.9 mysql_config \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) svctool.9 > $@
 
-create_services: create_services.in
+create_services: create_services.in \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@; chmod 755 $@
 	chmod +x $@
 
@@ -3911,13 +3927,17 @@ warn-auto.sh docker-entrypoint.sh conf-prefix
 	chmod 755 docker-entrypoint
 
 svscan_rc: \
-warn-auto.sh conf-prefix svscan_rc.in
+warn-auto.sh conf-prefix svscan_rc.in \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	(cat warn-auto.sh; $(edit) $@.in) > $@
 
 #################################################################
-indimail-mta-permissions.easy: indimail-mta-permissions.easy.in
+indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
-indimail-mta-permissions.secure: indimail-mta-permissions.secure.in
+indimail-mta-permissions.secure: indimail-mta-permissions.secure.in \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
-indimail-mta-permissions.paranoid: indimail-mta-permissions.paranoid.in
+indimail-mta-permissions.paranoid: indimail-mta-permissions.paranoid.in \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@

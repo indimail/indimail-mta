@@ -606,3 +606,5 @@ svscan_rc
 datemail.1
 Makefile.
 Makevars.
+svwait
+svwait.1

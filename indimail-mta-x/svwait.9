@@ -1,0 +1,34 @@
+.TH svwait 1
+.SH NAME
+svwait \- wait for a supervised service to be up
+
+.SH SYNOPSIS
+@libexecdir@/\fBsvwait\fR \fIservice\fR \fIwait_interval\fR
+
+.SH DESCRIPTION
+\fBsvwait\fR waits for a service monitored by supervise(8) to be up and
+returns only after the service has been up for more than \fIwait_interval\fR
+seconds. It uses svstat(8) command to check the uptime of \fIservice\fR. It
+can be used in run files of supervised services which depends on a service
+to be up. \fBsvwait\fR writes the status of \fIservice\fR in the file
+supervise/status of the service that calls \fBsvwait\fR. This is also displayed
+by the svstat command. e.g. here the service /service/inlookup.infifo
+has called svwait on /service/mysql.3306.
+
+.EX
+# svstat /service/inlookup.infifo
+/service/inlookup.infifo: up (pid 136525) 6 seconds
+/service/mysql.3306: down 18 seconds, normally up
+
+Once /service/mysql.3306 is up, it will wait till 30 seconds elapses since
+the service /service/mysql.3306 is up
+
+# svstat /service/inlookup.infifo
+/service/inlookup.infifo/: up (pid 136525) 88 seconds
+waiting till Sunday 27 September 2020 02:12:39 PM IST
+.EE
+
+.SH "SEE ALSO"
+svstat(8),
+svscan(8),
+supervise(8)
