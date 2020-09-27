@@ -54,7 +54,7 @@ it = perm_list.mta 822date 822field 822header 822print 822received addcr \
 
 man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	svscan.8 cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
-	svctool.8 predate.1 datemail.1 svwait.1 \
+	svctool.8 predate.1 datemail.1 svwait.8 \
 	mlmatchup.8 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
 	logselect.8 qmail-daned.8 qmail-srs.5 qmail-limits.7 \
 	forward.1 condredirect.1 qmail-control.5 rrforward.1 \
@@ -3906,7 +3906,7 @@ svwait: svwait.in conf-prefix \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	cat warn-auto.sh $@.in  | $(edit) > $@
 
-svwait.1: svwait.9 conf-prefix conf-libexec \
+svwait.8: svwait.9 conf-prefix conf-libexec \
 conf-qmail conf-sysconfdir conf-shared
 	$(edit) svwait.9 > $@
 

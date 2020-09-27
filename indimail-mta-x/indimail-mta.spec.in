@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.258 2020-09-27 14:22:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.259 2020-09-27 21:09:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1096,6 +1096,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/supervise.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svc.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svok.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/svwait.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svscan.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svstat.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/tai64n.8.gz

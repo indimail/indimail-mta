@@ -100,7 +100,6 @@ c:::0644:/man1/:udpclient.1:udpclient.1
 c:::0644:/man1/:xqp.1:xqp.1
 c:::0644:/man1/:xrecipient.1:xrecipient.1
 c:::0644:/man1/:xsender.1:xsender.1
-c:::0644:/man1/:svwait.1:svwait.1
 c:::0644:/man3/:greylist.3:greylist.3
 c:::0644:/man3/:plugin_init.3:plugin_init.3
 c:::0644:/man3/:tlsacheck.3:tlsacheck.3
@@ -209,6 +208,7 @@ c:::0644:/man8/:surblqueue.8:surblqueue.8
 c:::0644:/man8/:svc.8:svc.8
 c:::0644:/man8/:svctool.8:svctool.8
 c:::0644:/man8/:svok.8:svok.8
+c:::0644:/man8/:svwait.8:svwait.8
 c:::0644:/man8/:svscan.8:svscan.8
 c:::0644:/man8/:svscanboot.8:svscanboot.8
 c:::0644:/man8/:svstat.8:svstat.8

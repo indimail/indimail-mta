@@ -1124,4 +1124,4 @@ SBIN
 SHARED
 svscan_rc
 svwait
-svwait.1
+svwait.8
