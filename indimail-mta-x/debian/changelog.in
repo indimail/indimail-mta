@@ -36,3 +36,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * run svctool --fixsharedlibs during MySQL startup
   * DIRS: use relative links in /var/indimail
   * svctool: allow setting of MySQL indimail, admin password, indimail UNIX password by setting MYSQL_PASS, PRIV_PASS, ADMIN_PASS in env
+  * svctool, envmigrate: fixed handling of failure in imap/pop3 service creation

@@ -60,3 +60,6 @@ Release 2.12 Start 21/05/2020
 - 26/09/2020
 36. svctool: allow setting of MySQL indimail, admin password, indimail UNIX password by
     setting MYSQL_PASS, PRIV_PASS, ADMIN_PASS in env
+- 27/09/2020
+37. svctool, envmigrate: fixed handling of failure in imap/pop3 service
+creation
