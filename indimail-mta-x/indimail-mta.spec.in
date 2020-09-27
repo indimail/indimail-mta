@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.257 2020-09-27 09:29:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.258 2020-09-27 14:22:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -916,6 +916,7 @@ done
 %attr(0755,root,root)                   %{_prefix}/sbin/docker-entrypoint
 %attr(0755,root,root)                   %{_prefix}/sbin/fghack
 %attr(0755,root,root)                   %{_prefix}/sbin/pgrphack
+%attr(0755,root,root)                   %{libexecdir}/svwait
 
 # ucspi-tcp
 %attr(0755,root,root)                   %{_prefix}/bin/mconnect-io
@@ -1066,6 +1067,7 @@ done
 %attr(0755,root,root)                   %{_prefix}/sbin/svctool
 %attr(0755,root,root)                   %{_prefix}/sbin/fghack
 %attr(0755,root,root)                   %{_prefix}/sbin/pgrphack
+%attr(0755,root,root)                   %{libexecdir}/svwait
 
 %attr(0755,root,root)                   %{libexecdir}/svscanboot
 
