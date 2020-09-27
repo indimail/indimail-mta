@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.256 2020-09-25 21:43:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.257 2020-09-27 09:29:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -153,7 +153,7 @@ PreReq: permissions
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
-Requires: diffutils sed findutils pkgconfig
+Requires: diffutils sed findutils pkgconfig /usr/bin /usr/sbin
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 Requires: policycoreutils
@@ -275,7 +275,7 @@ Summary: IndiMail - Mini Client Installation
 Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
 Conflicts: indimail-mini < 2.0
-Requires: coreutils /bin/sh glibc openssl
+Requires: coreutils /bin/sh glibc openssl /usr/bin /usr/sbin
 
 %description -n indimail-mini
 This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
@@ -1167,6 +1167,7 @@ done
                                    %{qmaildir}/users
                                    %{qmaildir}/control
 %dir %attr(0755,indimail,indimail) %{qsysconfdir}/control
+%dir %attr(2775,indimail,qmail)    %{qsysconfdir}/users
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)         %{mandir}
 %dir %attr(0755,root,root)         %{mandir}/man1
