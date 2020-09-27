@@ -1,4 +1,7 @@
 # $Log: envmigrate.sh,v $
+# Revision 1.7  2020-09-27 08:15:00+05:30  Cprogrammer
+# fixed return status of mv
+#
 # Revision 1.6  2020-09-26 23:32:41+05:30  Cprogrammer
 # FreeBSD fix
 #
@@ -38,11 +41,6 @@ if [ -z "$mkdir" -o -z "$rmdir" -o -z "$mv" -o -z "$chmod" -o -z "$chown" -o -z 
 	echo "envmigrate: missing essentials" 1>&2
 	exit 1
 fi
-$mv $1 $1.tmp
-if [ $? -ne 0 ] ; then
-	echo "envmigrate: $mv $1 $1.tmp failed" 1>&2
-	exit 1
-fi
 if [ $# -eq 4 ] ; then
 	owner=$2
 	group=$3
@@ -52,6 +50,7 @@ else
 	group="0"
 	perm="500"
 fi
+$mv $1 $1.tmp
 if [ $? = 0 ] ; then
 	$mkdir $1
 	if [ $? -ne 0 ] ; then
@@ -75,6 +74,9 @@ if [ $? = 0 ] ; then
 		$mv $1.tmp $1
 		exit 1
 	fi
+else
+	echo "envmigrate: $mv $1 $1.tmp failed" 1>&2
+	exit 1
 fi
 $grep -v "^#" $1/."$file" | while read line
 do
@@ -88,3 +90,4 @@ do
 		fi
 	fi
 done
+exit 0
