@@ -38,4 +38,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: allow setting of MySQL indimail, admin password, indimail UNIX password by setting MYSQL_PASS, PRIV_PASS, ADMIN_PASS in env
   * svctool, envmigrate: fixed handling of failure in imap/pop3 service creation
   * new command svwait to wait for supervise service to come up
-  * svctool: make inlookup service wait for 30 seconds since MySQL services comes up
+  * svctool: make inlookup,pwdlookup service wait for 30 seconds since MySQL services comes up
