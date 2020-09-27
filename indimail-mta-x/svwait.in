@@ -1,7 +1,10 @@
 #
-# $Log: $
+# $Log: svwait.in,v $
+# Revision 1.1  2020-09-27 14:41:09+05:30  Cprogrammer
+# Initial revision
 #
-# $Id: $
+#
+# $Id: svwait.in,v 1.1 2020-09-27 14:41:09+05:30 Cprogrammer Exp mbhangui $
 #
 if [ $# != 2 ] ; then
 	echo "usage: svwait service wait_interval" 1>&2
@@ -29,7 +32,7 @@ do
 	fi
 	sleep 1
 	count=$(expr $count + 1)
-don)
+done
 count=$(echo $i| awk '{print $5}')
 if [ $count -lt $2 ] ; then
 	remaining=$(expr $2 - $count)
