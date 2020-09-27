@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.7  2020-09-28 00:06:20+05:30  Cprogrammer
+ * skip stripping of domain if STRIP_DOMAIN env variable is not set
+ *
  * Revision 1.6  2020-09-27 23:44:25+05:30  Cprogrammer
  * restore '@' sign in username
  *
@@ -208,10 +211,12 @@ main(int argc, char **argv)
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
 	response = tmpbuf + count + 1; /*- response */
-	i = str_chr(login, '@');
-	if (login[i]) {
-		login[i] = 0;
-		save = i;
+	if (env_get("STRIP_DOMAIN")) { /*- set this for roundcubemail */
+		i = str_chr(login, '@');
+		if (login[i]) {
+			login[i] = 0;
+			save = i;
+		}
 	}
 	if (!(pw = getpwnam(login))) {
 		if (errno != ETXTBSY)
@@ -290,7 +295,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.6 2020-09-27 23:44:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.7 2020-09-28 00:06:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
