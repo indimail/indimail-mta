@@ -63,3 +63,4 @@ Release 2.12 Start 21/05/2020
 - 27/09/2020
 37. svctool, envmigrate: fixed handling of failure in imap/pop3 service
 creation
+38. indimail-mta.spec: rpmlint fixes for danglin-relative-symlinks
