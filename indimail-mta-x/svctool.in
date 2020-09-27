@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.502 2020-09-27 14:17:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.503 2020-09-27 14:41:40+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.502 2020-09-27 14:17:44+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.503 2020-09-27 14:41:40+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4054,7 +4054,7 @@ echo "exec 2>&1"
 echo ""
 echo "# Wait for 30 seconds after MySQL service to be up"
 echo "if [ -d $SERVICEDIR/mysql.3306 -a ! -f $SERVICEDIR/mysql.3306/down ] ; then"
-echo "  $libexecdir/svwait /service/mysql.3306 30"
+echo "  $libexecdir/svwait /service/mysql.3306 10"
 echo "fi"
 echo ""
 echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/pwdlookup/variables \\"
@@ -4247,6 +4247,12 @@ echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "exec 2>&1"
+echo ""
+echo "# Wait for 30 seconds after MySQL service to be up"
+echo "if [ -d $SERVICEDIR/mysql.3306 -a ! -f $SERVICEDIR/mysql.3306/down ] ; then"
+echo "  $libexecdir/svwait /service/mysql.3306 10"
+echo "fi"
+echo ""
 echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/inlookup.$base_fifo_name/variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail $QmailBinPrefix/sbin/inlookup \\"
 echo "  -i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
