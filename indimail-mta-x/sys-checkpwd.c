@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.6  2020-09-27 23:44:25+05:30  Cprogrammer
+ * restore '@' sign in username
+ *
  * Revision 1.5  2020-04-01 19:00:49+05:30  Cprogrammer
  * display uid in debug login mode
  *
@@ -127,7 +130,7 @@ runcmmd(char *cmmd)
 }
 
 static void
-pipe_exec(char **argv, char *tmpbuf, int len)
+pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 {
 	int             pipe_fd[2];
 
@@ -139,6 +142,8 @@ pipe_exec(char **argv, char *tmpbuf, int len)
 		close(pipe_fd[0]);
 	if (pipe_fd[1] != 3 && pipe_fd[1] != 4)
 		close(pipe_fd[1]);
+	if (restore > 0)
+		tmpbuf[restore] = '@';
 	if (write(4, tmpbuf, len) != len)
 		strerr_die2sys(111, FATAL, "write: ");
 	close(4);
@@ -154,7 +159,7 @@ main(int argc, char **argv)
 	char           *ptr, *tmpbuf, *login, *response, *challenge, *stored;
 	char            strnum[FMT_ULONG];
 	static stralloc buf = {0};
-	int             i, count, offset, status;
+	int             i, count, offset, status, save = -1;
 	struct passwd  *pw;
 #ifdef HASUSERPW
 	struct userpw  *upw;
@@ -204,11 +209,13 @@ main(int argc, char **argv)
 		_exit(2);
 	response = tmpbuf + count + 1; /*- response */
 	i = str_chr(login, '@');
-	if (login[i])
+	if (login[i]) {
 		login[i] = 0;
+		save = i;
+	}
 	if (!(pw = getpwnam(login))) {
 		if (errno != ETXTBSY)
-			pipe_exec(argv, tmpbuf, offset);
+			pipe_exec(argv, tmpbuf, offset, save);
 		else
 			strerr_warn1("syspass: getpwnam: ", &strerr_sys);
 		print_error("getpwnam");
@@ -218,7 +225,7 @@ main(int argc, char **argv)
 #ifdef HASUSERPW
 	if (!(upw = getuserpw(login))) {
 		if (errno != ETXTBSY)
-			pipe_exec(argv, tmpbuf, offset);
+			pipe_exec(argv, tmpbuf, offset, save);
 		else
 			strerr_warn1("syspass: getuserpw: ", &strerr_sys);
 		print_error("getuserpw");
@@ -229,7 +236,7 @@ main(int argc, char **argv)
 #ifdef HASGETSPNAM
 	if (!(spw = getspnam(login))) {
 		if (errno != ETXTBSY)
-			pipe_exec(argv, tmpbuf, offset);
+			pipe_exec(argv, tmpbuf, offset, save);
 		else
 			strerr_warn1("syspass: getspnam: ", &strerr_sys);
 		print_error("getspnam");
@@ -260,7 +267,7 @@ main(int argc, char **argv)
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), 0))
 	{
-		pipe_exec(argv, tmpbuf, offset);
+		pipe_exec(argv, tmpbuf, offset, save);
 		print_error("exec");
 		_exit (111);
 	}
@@ -283,7 +290,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.5 2020-04-01 19:00:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.6 2020-09-27 23:44:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
