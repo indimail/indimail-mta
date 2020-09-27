@@ -39,3 +39,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool, envmigrate: fixed handling of failure in imap/pop3 service creation
   * new command svwait to wait for supervise service to come up
   * svctool: make inlookup,pwdlookup service wait for 30 seconds since MySQL services comes up
+  * svctool: replace /bin/false with /usr/bin/false on FreeBSD
+  * sys-checpwd.c: restore '@' sign in username for authmodules in the chain
