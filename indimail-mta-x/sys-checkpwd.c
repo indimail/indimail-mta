@@ -1,5 +1,11 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.9  2020-09-28 13:11:38+05:30  Cprogrammer
+ * added pid in debug log for authmodule
+ *
+ * Revision 1.8  2020-09-28 13:08:19+05:30  Cprogrammer
+ * display authmodule executed in debug logs
+ *
  * Revision 1.7  2020-09-28 00:06:20+05:30  Cprogrammer
  * skip stripping of domain if STRIP_DOMAIN env variable is not set
  *
@@ -47,6 +53,9 @@
 #include "MakeArgs.h"
 
 #define FATAL "sys-checkpwd: fatal: "
+#define WARN  "sys-checkpwd: warn: "
+
+static int      debug;
 
 void
 out(char *str)
@@ -81,11 +90,10 @@ static int
 runcmmd(char *cmmd)
 {
 	char          **argv;
-	int             status, i, retval, debug;
+	int             status, i, retval;
 	pid_t           pid;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
-	debug = env_get("DEBUG") ? 1 : 0;
 	switch ((pid = fork()))
 	{
 	case -1:
@@ -136,7 +144,11 @@ static void
 pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 {
 	int             pipe_fd[2];
+	char            strnum[FMT_ULONG];
 
+	strnum[fmt_ulong(strnum, getpid())] = 0;
+	if (debug)
+		strerr_warn6(argv[0], ": pid [", strnum, "] executing authmodule [", argv[1], "]", 0);
 	if (pipe(pipe_fd) == -1)
 		strerr_die2sys(111, FATAL, "pipe: ");
 	if (dup2(pipe_fd[0], 3) == -1 || dup2(pipe_fd[1], 4) == -1)
@@ -173,6 +185,7 @@ main(int argc, char **argv)
 
 	if (argc < 2)
 		_exit(2);
+	debug = env_get("DEBUG") ? 1 : 0;
 	if (!(tmpbuf = alloc((authlen + 1) * sizeof(char)))) {
 		print_error("out of memory");
 		strnum[fmt_uint(strnum, (unsigned int) authlen + 1)] = 0;
@@ -190,7 +203,7 @@ main(int argc, char **argv)
 #endif
 		if (count == -1) {
 			print_error("read error");
-			strerr_warn1("syspass: read: ", &strerr_sys);
+			strerr_warn1(WARN"read: ", &strerr_sys);
 			_exit(111);
 		}
 		else
@@ -222,7 +235,7 @@ main(int argc, char **argv)
 		if (errno != ETXTBSY)
 			pipe_exec(argv, tmpbuf, offset, save);
 		else
-			strerr_warn1("syspass: getpwnam: ", &strerr_sys);
+			strerr_warn1(WARN"getpwnam: ", &strerr_sys);
 		print_error("getpwnam");
 		_exit (111);
 	}
@@ -232,7 +245,7 @@ main(int argc, char **argv)
 		if (errno != ETXTBSY)
 			pipe_exec(argv, tmpbuf, offset, save);
 		else
-			strerr_warn1("syspass: getuserpw: ", &strerr_sys);
+			strerr_warn1(WARN"getuserpw: ", &strerr_sys);
 		print_error("getuserpw");
 		_exit (111);
 	}
@@ -243,7 +256,7 @@ main(int argc, char **argv)
 		if (errno != ETXTBSY)
 			pipe_exec(argv, tmpbuf, offset, save);
 		else
-			strerr_warn1("syspass: getspnam: ", &strerr_sys);
+			strerr_warn1(WARN"getspnam: ", &strerr_sys);
 		print_error("getspnam");
 		_exit (111);
 	}
@@ -251,7 +264,7 @@ main(int argc, char **argv)
 #endif
 	strnum[fmt_ulong(strnum, getuid())] = 0;
 	if (setuid(getuid()))
-		strerr_die4sys(111, FATAL, "sys-checkpwd: setuid: uid(", strnum, "):");
+		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
 	if (env_get("DEBUG_LOGIN")) {
 		out(argv[0]);
 		out(": ");
@@ -265,6 +278,16 @@ main(int argc, char **argv)
 		out(response);
 		out("] pw_passwd [");
 		out(stored);
+		out("]\n");
+		flush();
+	} else
+	if (debug) {
+		out(argv[0]);
+		out(": ");
+		out("uid (");
+		out(strnum);
+		out(") login [");
+		out(login);
 		out("]\n");
 		flush();
 	}
@@ -282,7 +305,7 @@ main(int argc, char **argv)
 				!stralloc_append(&buf, " ") ||
 				!stralloc_cats(&buf, login) ||
 				!stralloc_0(&buf)) {
-			strerr_warn1("syspass: out of memory: ", &strerr_sys);
+			strerr_warn1(WARN"out of memory: ", &strerr_sys);
 			_exit (111);
 		}
 		status = runcmmd(buf.s);
@@ -295,7 +318,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.7 2020-09-28 00:06:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.9 2020-09-28 13:11:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
