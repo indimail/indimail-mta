@@ -73,3 +73,5 @@ creation
     not set
 - 28/09/2020
 44. Makefile: fix perl path in perl scripts
+45. removed unused programs - qmail-lagcheck, qmail-lint, elq, pinq, qail
+46. added debug statments in sys-checkpwd

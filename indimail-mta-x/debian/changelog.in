@@ -43,3 +43,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * sys-checpwd.c: restore '@' sign in username for authmodules in the chain
   * sys-checkpwd.c: skip stripping of domain if STRIP_DOMAIN env variable is not set
   * Makefile: fix perl path in perl scripts
+  * removed unused programs - qmail-lagcheck, qmail-lint, elq, pinq, qail
+  * added debug statments in sys-checkpwd
