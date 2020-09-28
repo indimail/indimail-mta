@@ -2,14 +2,9 @@ d:::0555:::
 c:::0755:/qfilters/:qf-smtp-ratelimit:qf-smtp-ratelimit
 c:::0755:/:qfrontend:qfrontend
 c:::0755:/:qpq:qpq
-c:::0755:/:qail:qail
-c:::0755:/:elq:elq
-c:::0755:/:pinq:pinq
-c:::0755:/:qmail-lint:qmail-lint
 c:::0755:/:qsmhook:qsmhook
 c:::0755:/:etrn:etrn
 c:::0755:/:atrn:atrn
-c:::0755:/:qmail-lagcheck:qmail-lagcheck
 c:::0755:/:update_tmprsadh:update_tmprsadh
 c:::0755:/:rpmattr:rpmattr
 c:::0755:/:ipmeprint:ipmeprint

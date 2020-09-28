@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.259 2020-09-27 21:09:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.260 2020-09-28 10:30:29+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -809,7 +809,6 @@ done
 %attr(755,root,root)                    %{libexecdir}/leapsecs
 %attr(755,root,root)                    %{libexecdir}/yearcal
 %attr(755,root,root)                    %{libexecdir}/nowutc
-%attr(755,root,root)                    %{libexecdir}/qmail-lagcheck
 %attr(755,root,root)                    %{libexecdir}/batv
 %attr(755,root,root)                    %{libexecdir}/zsuccesses
 %attr(755,root,root)                    %{libexecdir}/deferrals
@@ -877,11 +876,7 @@ done
 %attr(755,root,root)                    %{libexecdir}/instcheck
 %attr(755,root,root)                    %{libexecdir}/whois
 %attr(755,root,root)                    %{libexecdir}/testzero
-%attr(755,root,root)                    %{libexecdir}/qmail-lint
 %attr(755,root,root)                    %{libexecdir}/ipmeprint
-%attr(755,root,root)                    %{libexecdir}/elq
-%attr(755,root,root)                    %{libexecdir}/pinq
-%attr(755,root,root)                    %{libexecdir}/qail
 %attr(755,root,root)                    %{libexecdir}/qpq
 %attr(755,root,root)                    %{libexecdir}/qfrontend
 %attr(755,root,root)                    %{libexecdir}/qfilters/qf-smtp-ratelimit

@@ -26,15 +26,15 @@ it = perm_list.mta 822date 822field 822header 822print 822received addcr \
 	binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm qnotify \
 	create_services cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr \
 	condredirect config-fast datemail delcr dk-filter dknewkey dktest dnscname \
-	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate elq \
+	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
 	envdir envuidgid qdane dnstlsarr etrn except fastforward fghack fixcrio \
 	forward generic.so greydaemon qf-smtp-ratelimit home home+df hostname \
 	idedit iftocc indimail.plist instcheck ipmeprint ldap-checkpwd leapsecs \
 	logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
 	maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate \
 	inewaliases newinclude new-inject nowutc ofmipd ofmipname parsedate \
-	pgrphack pinq plugtest installer predate preline printforward \
-	printmaillist proc proc+df qaes qail ctrlenv qarf qmail-cat qmail-cdb \
+	pgrphack plugtest installer predate preline printforward \
+	printmaillist proc proc+df qaes ctrlenv qarf qmail-cat qmail-cdb \
 	qmail-clean qmailconfig qmailctl maildirsize qmail-daemon qmaildirmake \
 	qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
 	qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue \
@@ -312,14 +312,31 @@ ripemd.o: compile ripemd.c ripemd.h
 digest_md5.o: compile digest_md5.c global.h md5.h
 	./compile digest_md5.c
 
-swaks: swaks.pl conf-qmail
+swaks: swaks.pl conf-qmail conf-prefix
 	cat swaks.pl \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> swaks
 	chmod 755 swaks
 
-qlogselect: qlogselect.pl conf-qmail
+mailroute: mailroute.pl conf-prefix
+	cat mailroute.pl \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	> mailroute
+
+do-spf: do-spf.pl conf-prefix
+	cat do-spf.pl \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	> do-spf
+
+greydaemon: greydaemon.pl conf-prefix
+	cat greydaemon.pl \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	> greydaemon
+
+qlogselect: qlogselect.pl conf-qmail conf-prefix
 	cat qlogselect.pl \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> qlogselect
 	chmod 755 qlogselect
@@ -604,12 +621,6 @@ dot-qmail.9 conf-break
 	cat dot-qmail.9 \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	> dot-qmail.5
-
-elq: \
-warn-auto.sh elq.sh conf-prefix conf-break conf-split
-	cat warn-auto.sh elq.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	> elq
 
 irmail: \
 warn-auto.sh rmail.sh conf-prefix
@@ -1109,14 +1120,6 @@ newfield.o: \
 compile newfield.c newfield.h
 	./compile newfield.c
 
-pinq: \
-warn-auto.sh pinq.sh conf-prefix conf-break conf-split
-	cat warn-auto.sh pinq.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPLIT}"`head -1 conf-split`"}g \
-	> pinq
-
 predate: load predate.o
 	./load predate -lqmail
 
@@ -1149,14 +1152,6 @@ proc+df.sh conf-prefix
 prot.o: \
 compile prot.c hasshsgr.h prot.h
 	./compile prot.c
-
-qail: \
-warn-auto.sh qail.sh conf-prefix conf-break conf-split
-	cat warn-auto.sh qail.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPLIT}"`head -1 conf-split`"}g \
-	> qail
 
 qmail-clean: load qmail-clean.o fmtqfn.o auto_qmail.o auto_split.o \
 variables.o

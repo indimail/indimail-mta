@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!PREFIX/bin/perl
 use Time::Local;
 
 $start_time = 0;

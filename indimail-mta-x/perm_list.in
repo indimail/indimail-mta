@@ -226,13 +226,8 @@
 %attr(0755,root,qmail) @libexecdir@/update_tmprsadh
 %attr(0755,root,qmail) @libexecdir@/instcheck
 %attr(0755,root,qmail) @libexecdir@/testzero
-%attr(0755,root,qmail) @libexecdir@/qmail-lint
 %attr(0755,root,qmail) @libexecdir@/ipmeprint
 %attr(0755,root,qmail) @libexecdir@/rpmattr
-%attr(0755,root,qmail) @libexecdir@/qmail-lagcheck
-%attr(0755,root,qmail) @libexecdir@/elq
-%attr(0755,root,qmail) @libexecdir@/pinq
-%attr(0755,root,qmail) @libexecdir@/qail
 %attr(0755,root,qmail) @libexecdir@/qpq
 %attr(0755,root,qmail) @libexecdir@/qfilters/qf-smtp-ratelimit
 %attr(0755,root,qmail) @libexecdir@/qfrontend

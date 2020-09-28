@@ -68,4 +68,8 @@ creation
 40. svctool: make inlookup,pwdlookup service wait for 30 seconds since MySQL services
     comes up
 41. svctool: replace /bin/false with /usr/bin/false on FreeBSD
-42. sys-checpwd.c: restore '@' sign in username for authmodules in the chain
+42. sys-checkpwd.c: restore '@' sign in username for authmodules in the chain
+43. sys-checkpwd.c: skip stripping of domain if STRIP_DOMAIN env variable is
+    not set
+- 28/09/2020
+44. Makefile: fix perl path in perl scripts

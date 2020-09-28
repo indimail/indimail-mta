@@ -41,3 +41,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: make inlookup,pwdlookup service wait for 30 seconds since MySQL services comes up
   * svctool: replace /bin/false with /usr/bin/false on FreeBSD
   * sys-checpwd.c: restore '@' sign in username for authmodules in the chain
+  * sys-checkpwd.c: skip stripping of domain if STRIP_DOMAIN env variable is not set
+  * Makefile: fix perl path in perl scripts

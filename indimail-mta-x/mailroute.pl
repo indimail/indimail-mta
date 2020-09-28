@@ -1,5 +1,4 @@
-#!/usr/bin/perl -w
-#!/usr/local/bin/perl -w
+#!PREFIX/bin/perl -w
 #
 # mailroute by Chris Garrigues <cwg@DeepEddy.Com>
 #
