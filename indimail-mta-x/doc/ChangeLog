@@ -75,3 +75,4 @@ creation
 44. Makefile: fix perl path in perl scripts
 45. removed unused programs - qmail-lagcheck, qmail-lint, elq, pinq, qail
 46. added debug statments in sys-checkpwd
+47. svctool: added all available authmodules as IMAPMODULES

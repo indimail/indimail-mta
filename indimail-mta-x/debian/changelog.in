@@ -45,3 +45,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * Makefile: fix perl path in perl scripts
   * removed unused programs - qmail-lagcheck, qmail-lint, elq, pinq, qail
   * added debug statments in sys-checkpwd
+  * svctool: added all available authmodules as IMAPMODULES
