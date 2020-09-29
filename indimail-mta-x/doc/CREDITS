@@ -93,7 +93,8 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 51. Ward Vandewege - badrcptto patch
 52. Kazinori Fujiwara - ipv6 patch
 53. Len Budney qscanq
-54. Christophe Saout - SPF checker
+54. qmail spf implementation (https://www.saout.de/misc/spf/qmail-spf-rc5.patch) by Jana Saout <jana@saout.de> 
+    Christophe Saout - SPF checker
 55. David Phillips - qmail's sendmail's -f set the default for the username like sendmail does.
 56. Mark Belnap - Bounce Lifetime patch
 57. Christopher K. Davis' DNS patch handles a problem qmail has with DNS responses larger than the standard
