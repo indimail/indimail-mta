@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.260 2020-09-28 10:30:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.261 2020-09-29 13:11:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -153,7 +153,10 @@ PreReq: permissions
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
-Requires: diffutils sed findutils pkgconfig /usr/bin /usr/sbin
+Requires: diffutils sed findutils pkgconfig
+%if %{undefined suse_version} && %{undefined sles_version}
+Requires: /usr/bin /usr/sbin
+%endif
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 Requires: policycoreutils
@@ -275,7 +278,10 @@ Summary: IndiMail - Mini Client Installation
 Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
 Conflicts: indimail-mini < 2.0
-Requires: coreutils /bin/sh glibc openssl /usr/bin /usr/sbin
+Requires: coreutils /bin/sh glibc openssl
+%if %{undefined suse_version} && %{undefined sles_version}
+Requires: /usr/bin /usr/sbin
+%endif
 
 %description -n indimail-mini
 This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
