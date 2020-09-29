@@ -90,8 +90,8 @@ $ git clone https://github.com/mbhangui/indimail-mta.git
 ```
 $ cd /usr/local/src/indimail-mta/libdkim-x
 $ ./default.configure
-$ ./qmake
-$ sudo ./qmake -s install-strip
+$ ./make
+$ sudo ./make -s install-strip
 ```
 
 (check version in indimail-mta/libdkim-x/conf-version)
@@ -101,8 +101,8 @@ $ sudo ./qmake -s install-strip
 ```
 $ cd /usr/local/src/indimail-mta/libsrs2-x
 $ ./default.configure
-$ ./qmake
-$ sudo ./qmake install-strip
+$ ./make
+$ sudo ./make install-strip
 ```
 
 (check version in indimail-mta/libsrs2-x/conf-version)
