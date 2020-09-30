@@ -35,6 +35,12 @@ case "$SYSTEM" in
 	fi
 	pkgconfigdir=$libdir/pkgconfig
 	;;
+	Darwin)
+	prefix=/opt/local
+	mandir=/opt/local/share/man
+	libdir=/opt/local/lib
+	pkgconfigdir=$libdir/pkgconfig
+	;;
 	*)
 	prefix=/usr
 	mandir=/usr/man
@@ -42,4 +48,5 @@ case "$SYSTEM" in
 	pkgconfigdir=$libdir/pkgconfig
 	;;
 esac
-./configure --prefix=$prefix --mandir=$mandir --libdir=$libdir --with-pkgconfigdir=$pkgconfigdir
+./configure --prefix=$prefix --mandir=$mandir --libdir=$libdir \
+	--with-pkgconfigdir=$pkgconfigdir

@@ -194,8 +194,23 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 #define SKIPWHITE(cp) while (isspace(*cp)) cp++;
 
 	if (!(daemonflags & DF_NOFORK)) {
-		if (daemon(0, 0) < 0)
+#ifdef DARWIN
+	switch (fork())
+	{
+		case 0:
+			setsid();
+			break;
+			;;
+		case -1:
 			perror("daemon");
+			exit (1);
+		default:
+			exit (0);
+	}
+#else
+	if (daemon(0, 0) < 0)
+		perror("daemon");
+#endif
 	}
 
 	for (;;) {
@@ -235,8 +250,7 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 						address = cp;
 						cp = strchr(address, ' ');
 						if (cp == NULL) {
-							fprintf(stderr, "No alias in %s on %d\n",
-											line, fd);
+							fprintf(stderr, "No alias in %s on %d\n", line, fd);
 							FINISH(fd);
 							continue;
 						}
@@ -244,18 +258,18 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 						while (isspace(*cp))
 							cp++;
 						alias = cp;
-						ret = srs_forward(srs, buf, BUFSIZ,
-										address, alias);
+						ret = srs_forward(srs, buf, BUFSIZ, address, alias);
 						if (ret != SRS_SUCCESS) {
 							fprintf(stderr, "SRS error: %s\n",
 											srs_strerror(ret));
 							FINISH(fd);
 							continue;
 						}
-						fprintf(stderr, "Forward %s, %s -> %s\n",
-										address, alias, buf);
-						if (write(fd, buf, strlen(buf)) == -1) ;
-						if (write(fd, "\n", 1) == -1) ;
+						fprintf(stderr, "Forward %s, %s -> %s\n", address, alias, buf);
+						if (write(fd, buf, strlen(buf)) == -1)
+							;
+						if (write(fd, "\n", 1) == -1)
+							;
 						FINISH(fd);
 						continue;
 					}
@@ -273,14 +287,15 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 						}
 						fprintf(stderr, "Reverse %s -> %s\n",
 										address, buf);
-						if (write(fd, buf, strlen(buf)) == -1) ;
-						if (write(fd, "\n", 1) == -1) ;
+						if (write(fd, buf, strlen(buf)) == -1)
+							;
+						if (write(fd, "\n", 1) == -1)
+							;
 						FINISH(fd);
 						continue;
 					}
 					else {
-						fprintf(stderr, "Unknown command %s on %d\n",
-										line, fd);
+						fprintf(stderr, "Unknown command %s on %d\n", line, fd);
 						FINISH(fd);
 						continue;
 					}
