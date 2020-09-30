@@ -47,3 +47,5 @@ installer
 installer.o
 mysql_inc
 make-makelib
+Makevars.
+conf-release
