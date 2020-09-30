@@ -1,5 +1,8 @@
 /*
  * $Log: domainkeys.c,v $
+ * Revision 1.21  2020-09-30 20:44:04+05:30  Cprogrammer
+ * define memcpy, strcasecmp, strncasecmp only if not defined
+ *
  * Revision 1.20  2017-08-31 10:36:07+05:30  Cprogrammer
  * added missing call to EVP_MD_CTX_new()
  *
@@ -94,9 +97,15 @@
 #include "alloc.h"
 #include "dktrace.h"
 
+#ifndef strncasecmp
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
+#endif
+#ifndef strcasecmp
 #define strcasecmp(x,y)    case_diffs((x), (y))
+#endif
+#ifndef memcpy
 #define memcpy(x,y,z)      byte_copy((x), (z), (y))
+#endif
 EVP_MD_CTX     *evptr = NULL; /*- the hash */
 
 /* STARTHEAD */
@@ -2124,7 +2133,7 @@ strncasestr(const char *s, const char *find, size_t slen)
 void
 getversion_domainkeys_c()
 {
-	static char    *x = "$Id: domainkeys.c,v 1.20 2017-08-31 10:36:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: domainkeys.c,v 1.21 2020-09-30 20:44:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
