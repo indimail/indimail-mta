@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.24  2020-09-30 20:46:33+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.23  2019-05-22 11:29:09+05:30  Cprogrammer
  * fix for 32 bit systems where time_t is 4 bytes & encounters year 2038 issue
  *
@@ -10,7 +13,7 @@
  * made scope of sFromDomain static
  *
  * Revision 1.20  2018-12-14 11:05:20+05:30  Cprogrammer
- * fixed 'conversion from 'int' to 'char' inside { }” for cross compiling on arm
+ * fixed 'conversion from 'int' to 'char' inside {}” for cross compiling on arm
  *
  * Revision 1.19  2018-08-08 23:56:27+05:30  Cprogrammer
  * changed comment style
@@ -1190,11 +1193,7 @@ SelectorInfo::Parse(char *Buffer)
 		const unsigned char  *qq; /*- public key data */
 
 		qq = M_ToConstUCharPtr(values[4]);
-#ifdef DARWIN
-		pkey = d2i_PUBKEY(NULL, (unsigned char **) &qq, PublicKeyLen);
-#else
 		pkey = d2i_PUBKEY(NULL, &qq, PublicKeyLen);
-#endif
 		if (!pkey)
 			return DKIM_SELECTOR_PUBLIC_KEY_INVALID;
 		/*- make sure public key is the correct type (we only support rsa) */
@@ -1296,7 +1295,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.23 2019-05-22 11:29:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.24 2020-09-30 20:46:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -26,18 +26,6 @@ AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
 PKG_INSTALLDIR
 
-defaultprefix="/var/indimail"
-LIBVER=1:0:0
-AC_SUBST([LIBTOOL_DEPS])
-AC_SUBST(defaultprefix)
-AC_SUBST(LIBVER)
-
-if test x$prefix = xNONE
-then
-	prefix="$defaultprefix"
-	ac_configure_args="$ac_configure_args -prefix=$prefix"
-fi
-
 case "$host" in
 *-*-sunos4.1.1*)
 	INSTALL="./install-sh -c"
@@ -61,14 +49,16 @@ case "$host" in
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	CXXFLAGS="$CXXFLAGS -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -pie"
 	STRIP_OPT=-s
 	;;
 *-*-darwin*)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
-	CFLAGS="$CFLAGS -O4 -Wall -pie"
-	CXXFLAGS="$CXXFLAGS -DDARWIN -O4 -Wall -fPIC"
+	CFLAGS="$CFLAGS -I/opt/local/include -Wall"
+	CXXFLAGS="$CXXFLAGS -DBIND_8_COMPAT -I/opt/local/include -DDARWIN -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	STRIP_OPT=-S
 	;;
 *)
@@ -79,6 +69,18 @@ case "$host" in
 	STRIP_OPT=-s
 	;;
 esac
+
+defaultprefix="/var/indimail"
+LIBVER=1:0:0
+AC_SUBST([LIBTOOL_DEPS])
+AC_SUBST(defaultprefix)
+AC_SUBST(LIBVER)
+
+if test x$prefix = xNONE
+then
+	prefix="$defaultprefix"
+	ac_configure_args="$ac_configure_args -prefix=$prefix"
+fi
 
 AC_CHECK_SIZEOF(time_t)
 
@@ -98,6 +100,7 @@ AC_CHECK_LIB([resolv], [__res_query],[AC_SUBST([LIB_RESOLV],["-lresolv"])],,-lre
 # Checks for header files.
 AC_HEADER_RESOLV
 AC_CHECK_HEADERS([fcntl.h netdb.h netinet/in.h stdlib.h string.h unistd.h openssl/evp.h])
+AC_CHECK_HEADERS([arpa/nameser.h nameser8_compat.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

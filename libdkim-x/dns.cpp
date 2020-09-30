@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.12  2020-09-30 20:46:38+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.11  2019-05-21 22:37:42+05:30  Cprogrammer
  * fixed pointers after realloc
  *
@@ -28,15 +31,20 @@
  * dns functions
  *
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <netdb.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <netinet/in.h>
-#ifdef DARWIN
+#ifdef NAMESER8_COMPAT_H
 #include <nameser8_compat.h>
 #endif
+#ifdef ARPA_NAMESER_H
 #include <arpa/nameser.h>
+#endif
 #include <resolv.h>
 #include <string.h>
 #include "dns.h"
@@ -326,7 +334,7 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.11 2019-05-21 22:37:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.12 2020-09-30 20:46:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
