@@ -1,0 +1,5 @@
+prefix    = $(shell head -1 conf-prefix 2>/dev/null)
+mandir    = $(shell [ -d $(prefix)/man ] && echo $(prefix)/man || echo $(prefix)/share/man)
+shareddir = $(shell head -1 conf-shared 2>/dev/null)
+DEFS      = $(shell uname -s | tr "[:lower:]" "[:upper:]")
+SYSTEM    = $(shell uname -s | tr "[:lower:]" "[:upper:]")
