@@ -18,6 +18,13 @@ case "$SYSTEM" in
 	sed 's{SHAREDDIR{/usr/local/share/indimail{'    conf-shared.in     > conf-shared
 	sed 's{LIBEXECDIR{/usr/local/libexec/indimail{' conf-libexec.in    > conf-libexec
 	;;
+	Darwin)
+	sed 's{PREFIX{/usr/local{'                      conf-prefix.in     > conf-prefix
+	sed 's{QMAIL{/var/indimail{'                    conf-qmail.in      > conf-qmail
+	sed 's{SYSCONFDIR{/usr/local/etc/indimail{'     conf-sysconfdir.in > conf-sysconfdir
+	sed 's{SHAREDDIR{/usr/local/share/indimail{'    conf-shared.in     > conf-shared
+	sed 's{LIBEXECDIR{/usr/local/libexec/indimail{' conf-libexec.in    > conf-libexec
+	;;
 	*)
 	echo "Unknown system $SYSTEM. Please configure conf-* files manually" 1>&2
 	exit 1

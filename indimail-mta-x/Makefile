@@ -1248,7 +1248,7 @@ qmail-local.9 conf-sysconfdir
 qmail-local.o: \
 compile qmail-local.c quote.h qmail.h slurpclose.h myctime.h \
 gfrom.h auto_patrn.h control.h auto_qmail.h variables.h hassrs.h \
-conf-sync conf-mailarch
+conf-sync conf-mailarch syncdir.h
 	./compile `grep -h -v "^#" conf-sync conf-mailarch` qmail-local.c
 
 qmail-lspawn.o: compile qmail-lspawn.c prot.h slurpclose.h auto_qmail.h \
@@ -1495,7 +1495,7 @@ qmail-queue.9 conf-qmail conf-prefix
 qmail-queue.o: \
 compile qmail-queue.c matchregex.h triggerpull.h MakeArgs.h \
 control.h auto_qmail.h auto_uids.h date822fmt.h fmtqfn.h \
-variables.h conf-sync conf-qhpsi conf-ip conf-mailarch
+variables.h conf-sync conf-qhpsi conf-ip conf-mailarch syncdir.h
 	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
 	qmail-queue.c
 
@@ -1558,33 +1558,36 @@ dktest.8: dktest.9 conf-sysconfdir
 
 dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
-	( ( ./compile -I/usr/include/dkim \
+	( ( ./compile -I/usr/include/dkim -I/opt/local/include/dkim \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o dns_text.o \
-	`cat dns.lib` -ldkim -lcrypto -ldkim -lqmail ) >/dev/null 2>&1 \
+	`cat dns.lib` -L/opt/local/lib \
+	-ldkim -lcrypto -ldkim -lqmail ) >/dev/null 2>&1 \
 	&& echo "-ldkim" || exit 0 ) > dkim.lib
 	rm -f trydkim.o trydkim
 
 hasdkim.h: dns_text.o \
 trydkim.c compile load dns.lib dkim.lib conf-indi
-	( ( ./compile -I/usr/include/dkim \
+	( ( ./compile -I/usr/include/dkim -I/opt/local/include/dkim \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o dns_text.o \
-	`cat dkim.lib dns.lib` -lcrypto -lqmail ) >/dev/null 2>&1 \
+	`cat dkim.lib dns.lib` -L/opt/local/lib \
+	-lcrypto -lqmail ) >/dev/null 2>&1 \
 	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h
 	rm -f trydkim.o trydkim
 
 qmail-dkim: qmail-dkim.o date822fmt.o auto_control.o \
 auto_qmail.o variables.o control.o MakeArgs.o dns_text.o \
 dns.lib dkim.lib
-	g++ -s -o qmail-dkim qmail-dkim.o date822fmt.o auto_control.o \
+	g++ -o qmail-dkim qmail-dkim.o date822fmt.o auto_control.o \
 	auto_qmail.o variables.o control.o MakeArgs.o \
-	dns_text.o `cat dns.lib dkim.lib` -lcrypto -lqmail
+	dns_text.o `cat dns.lib dkim.lib conf-ld-$(SYSTEM)` \
+	-lcrypto -lqmail
 
 qmail-dkim.o: \
 compile qmail-dkim.c qmail.h auto_qmail.h control.h domainkeys.h \
 hasdkim.h variables.h auto_control.h MakeArgs.h
-	./compile -I/usr/include/dkim qmail-dkim.c
+	./compile -I/usr/include/dkim -I/opt/local/include/dkim qmail-dkim.c
 
 qmail-dkim.8: qmail-dkim.9 conf-sysconfdir
 	cat qmail-dkim.9 \
@@ -1689,7 +1692,7 @@ qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 qmail-send.o: \
 compile qmail-send.c direntry.h control.h \
 auto_qmail.h trigger.h newfield.h quote.h \
-qmail.h qsutil.h prioq.h envrules.h \
+qmail.h qsutil.h prioq.h envrules.h syncdir.h \
 fmtqfn.h readsubdir.h direntry.h variables.h qmail-todo.h \
 auto_control.h conf-mime conf-sync conf-batv \
 hassrs.h conf-srs conf-locklogs
@@ -1759,7 +1762,7 @@ socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 		mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
 		tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
-		hmac_sha1.o `cat socket.lib dns.lib tls.lib` -lqmail ; \
+		hmac_sha1.o `cat socket.lib dns.lib tls.lib` -L/opt/local/lib -lqmail ; \
 	elif test $(SYSTEM) = FREEBSD ; then \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
@@ -1969,7 +1972,7 @@ auto_control.o variables.o libsyncdir.a
 	variables.o -L. -lsyncdir -lqmail
 
 qmail-todo.o: \
-compile qmail-todo.c auto_qmail.h control.h \
+compile qmail-todo.c auto_qmail.h control.h syncdir.h \
 direntry.h fmtqfn.h readsubdir.h trigger.h variables.h \
 qmail-todo.h auto_control.h conf-sync
 	./compile `grep -h -v "^#" conf-sync` qmail-todo.c
@@ -2193,20 +2196,21 @@ compile splogger.c
 	./compile splogger.c
 
 srs.lib: trysrs.c compile load conf-srs dns.lib
-	((./compile -I/usr/include/srs2 \
+	((./compile -I/usr/include/srs2 -I/opt/local/include/srs2 \
 	`grep -h -v "^#" conf-srs` trysrs.c && \
-	./load trysrs -lsrs2 ) >/dev/null 2>&1 \
+	./load trysrs -L/opt/local/lib -lsrs2 ) >/dev/null 2>&1 \
 	&& echo "-lsrs2" || exit 0 ) > srs.lib
 	rm -f trysrs.o trysrs
 
 hassrs.h:  trysrs.c compile load srs.lib conf-indi
-	((./compile -I/usr/include/srs2 `grep -h -v "^#" conf-srs` \
-	trysrs.c && ./load trysrs `cat srs.lib`) >/dev/null 2>&1 \
+	((./compile -I/usr/include/srs2 -I/opt/local/include/srs2 \
+	`grep -h -v "^#" conf-srs` \
+	trysrs.c && ./load trysrs -L/opt/local/lib `cat srs.lib`) >/dev/null 2>&1 \
 	&& (echo \#define HAVESRS 1) || exit 0 ) > hassrs.h
 	rm -f trysrs.o trysrs
 
 srs.o: compile srs.c hassrs.h srs.h auto_qmail.h control.h rcpthosts.h
-	./compile -I/usr/include/srs2 srs.c
+	./compile -I/usr/include/srs2 -I/opt/local/include/srs2 srs.c
 
 srsfilter: \
 load srsfilter.o srs.o qmail.o control.o rcpthosts.o \
@@ -3845,7 +3849,7 @@ strsalloc.o tlsarralloc.o dns.o dns.lib
 		$(LD) -bundle -undefined dynamic_lookup \
 		-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
 		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
-		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -lqmail; \
+		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -L /opt/local/lib -lqmail; \
 	elif test $(SYSTEM) = FREEBSD ; then \
 		$(LD) -shared -o smtpd-plugin0.so dnsbl.o control.o \
 		auto_control.o variables.o socket_v6any.o \
@@ -3878,7 +3882,7 @@ smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
 generic.so: generic.o auto_scancmd.o MakeArgs.o
 	if test $(SYSTEM) = DARWIN ; then \
 		$(LD) -bundle -undefined dynamic_lookup -o generic.so generic.o \
-		auto_scancmd.o MakeArgs.o -lqmail; \
+		auto_scancmd.o MakeArgs.o -L/opt/local/lib -lqmail; \
 	elif test $(SYSTEM) = FREEBSD ; then \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o \
 		generic.so generic.o auto_scancmd.o MakeArgs.o \
