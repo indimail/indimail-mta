@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.40  2020-09-30 20:39:44+05:30  Cprogrammer
+ * Darwin port for syncdir
+ *
  * Revision 1.39  2020-09-15 21:43:40+05:30  Cprogrammer
  * unset USE_SYNCDIR, USE_FSYNC only when use_syncdir, use_fsync is zero
  *
@@ -110,6 +113,9 @@
 #include "env.h"
 #include "variables.h"
 #include "trigger.h"
+#ifdef USE_FSYNC
+#include "syncdir.h"
+#endif
 
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
@@ -1158,7 +1164,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.39 2020-09-15 21:43:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.40 2020-09-30 20:39:44+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

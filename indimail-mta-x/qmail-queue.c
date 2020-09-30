@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.65  2020-09-30 20:39:38+05:30  Cprogrammer
+ * Darwin port for syncdir
+ *
  * Revision 1.64  2020-09-15 21:11:08+05:30  Cprogrammer
  * changed default value of use_fsync as -1
  *
@@ -204,6 +207,9 @@
 #include "mess822.h"
 #include "wait.h"
 #include "MakeArgs.h"
+#ifdef USE_FSYNC
+#include "syncdir.h"
+#endif
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR  1003
@@ -1228,7 +1234,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.64 2020-09-15 21:11:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.65 2020-09-30 20:39:38+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

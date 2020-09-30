@@ -1,5 +1,8 @@
 /*
  * $Log: syncdir.c,v $
+ * Revision 1.11  2020-09-30 20:39:50+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.10  2020-09-25 11:15:53+05:30  Cprogrammer
  * FreeBSD port
  *
@@ -51,7 +54,6 @@
  * You can reach me at bruce.guenter@qcc.sk.ca
  */
 
-
 #ifdef USE_FSYNC
 int             use_fsync = -1, use_syncdir = -1;
 #include <sys/types.h>
@@ -65,13 +67,21 @@ int             use_fsync = -1, use_syncdir = -1;
 #include <syscall.h>
 #elif defined(__FreeBSD__)
 #include <sys/syscall.h>
-#else
-#error "syscall.h presence unknown"
 #endif
 #include <errno.h>
 #include <unistd.h>
 #include "env.h"
 
+#ifdef DARWIN
+#define SYS_OPEN(FILE,FLAG,MODE) open(FILE,FLAG,MODE)
+#define SYS_CLOSE(FD)            close(FD)
+#define SYS_LINK(OLD,NEW)        link(OLD,NEW)
+#define SYS_UNLINK(PATH)         unlink(PATH)
+#define SYS_RENAME(OLD,NEW)      rename(OLD,NEW)
+#define SYS_FSYNC(FD)            fsync(FD)
+int             open(char *, int, ...);
+int             rename(char *, char *); 
+#else
 #if defined(SYS_openat) && defined(AT_FDCWD)
 #define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_openat,AT_FDCWD,FILE,FLAG,MODE)
 #else
@@ -94,6 +104,7 @@ int             use_fsync = -1, use_syncdir = -1;
 #define SYS_RENAME(OLD,NEW) syscall(SYS_rename,OLD,NEW)
 #endif
 #define SYS_FSYNC(FD) syscall(SYS_fsync, FD)
+#endif
 
 static int
 fdirsync(const char *filename, unsigned length)
@@ -143,7 +154,11 @@ fdirsyncfn(const char *filename)
 }
 
 int
+#ifdef DARWIN
+qopen(const char *file, int oflag, mode_t mode)
+#else
 open(const char *file, int oflag, mode_t mode)
+#endif
 {
 	int             fd = SYS_OPEN(file, oflag, mode);
 
@@ -161,7 +176,11 @@ open(const char *file, int oflag, mode_t mode)
 }
 
 int
+#ifdef DARWIN
+qlink(const char *oldpath, const char *newpath)
+#else
 link(const char *oldpath, const char *newpath)
+#endif
 {
 	if (SYS_LINK(oldpath, newpath) == -1)
 		return -1;
@@ -173,7 +192,11 @@ link(const char *oldpath, const char *newpath)
 }
 
 int
+#ifdef DARWIN
+qunlink(const char *path)
+#else
 unlink(const char *path)
+#endif
 {
 	if (SYS_UNLINK(path) == -1)
 		return -1;
@@ -185,7 +208,11 @@ unlink(const char *path)
 }
 
 int
+#ifdef DARWIN
+qrename(const char *oldpath, const char *newpath)
+#else
 rename(const char *oldpath, const char *newpath)
+#endif
 {
 	if (SYS_RENAME(oldpath, newpath) == -1)
 		return -1;
@@ -202,7 +229,7 @@ rename(const char *oldpath, const char *newpath)
 void
 getversion_syncdir_c()
 {
-	static char    *x = "$Id: syncdir.c,v 1.10 2020-09-25 11:15:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: syncdir.c,v 1.11 2020-09-30 20:39:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

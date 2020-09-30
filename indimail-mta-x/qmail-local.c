@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.33  2020-09-30 20:39:16+05:30  Cprogrammer
+ * Darwin port for syncdir
+ *
  * Revision 1.32  2020-09-15 21:08:02+05:30  Cprogrammer
  * changed default value of use_fsync to -1
  *
@@ -107,6 +110,9 @@
 #include "control.h"
 #include "variables.h"
 #include "hassrs.h"
+#ifdef USE_FSYNC
+#include "syncdir.h"
+#endif
 #ifdef HAVESRS
 #include "srs.h"
 #endif
@@ -1136,7 +1142,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.32 2020-09-15 21:08:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.33 2020-09-30 20:39:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

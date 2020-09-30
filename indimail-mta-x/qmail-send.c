@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.73  2020-09-30 20:39:41+05:30  Cprogrammer
+ * Darwin port for syncdir
+ *
  * Revision 1.72  2020-09-16 19:05:34+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -226,6 +229,9 @@
 #include "srs.h"
 #endif
 #include "wait.h"
+#ifdef USE_FSYNC
+#include "syncdir.h"
+#endif
 
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
@@ -2903,7 +2909,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.72 2020-09-16 19:05:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.73 2020-09-30 20:39:41+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
