@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.14  2020-09-30 23:24:52+05:30  Cprogrammer
+ *  Darwin Port
+ *
  *  Revision 1.13  2020-09-16 20:50:37+05:30  Cprogrammer
  *  fixed compiler warnings
  *
@@ -42,7 +45,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.13 2020-09-16 20:50:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.14 2020-09-30 23:24:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -62,7 +65,9 @@ static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.13 2020-09-16 20:50:37+0
 #include <env.h>
 #include <scan.h>
 #include <fmt.h>
+#ifndef DARWIN
 #include <link.h>
+#endif
 #ifndef HASDLMOPEN
 #include <dlfcn.h>
 #endif

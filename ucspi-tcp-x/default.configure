@@ -9,7 +9,7 @@ case "$SYSTEM" in
 	sed 's{SYSCONFDIR{/etc/indimail{'            conf-sysconfdir.in > conf-sysconfdir
 	sed 's{SHAREDDIR{/usr/share/indimail{'       conf-shared.in     > conf-shared
 	;;
-	FreeBSD)
+	FreeBSD|Darwin)
 	sed 's{PREFIX{/usr/local{'                   conf-prefix.in     > conf-prefix
 	sed 's{SYSCONFDIR{/usr/local/etc/indimail{'  conf-sysconfdir.in > conf-sysconfdir
 	sed 's{SHAREDDIR{/usr/local/share/indimail{' conf-shared.in     > conf-shared
@@ -19,3 +19,8 @@ case "$SYSTEM" in
 	exit 1
 	;;
 esac
+SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+if [ -f Makevars.$SYSTEM ] ; then
+	/bin/rm -f Makevars.
+	ln -s Makevars.$SYSTEM Makevars.
+fi

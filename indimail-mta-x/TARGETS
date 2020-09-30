@@ -1126,3 +1126,5 @@ svscan_rc
 svwait
 svwait.8
 greydaemon
+Makevars.
+Makefile.

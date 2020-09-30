@@ -39,6 +39,7 @@ case "$SYSTEM" in
 	prefix=/opt/local
 	mandir=/opt/local/share/man
 	libdir=/opt/local/lib
+	bindir=/usr/local/bin
 	pkgconfigdir=$libdir/pkgconfig
 	;;
 	*)

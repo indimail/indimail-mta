@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.16  2020-09-30 23:22:24+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.15  2020-09-16 20:49:20+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -60,7 +63,9 @@
 #include <fmt.h>
 #include <env.h>
 #include "pathexec.h"
+#ifndef DARWIN
 #include <link.h>
+#endif
 #ifndef HASDLMOPEN
 #include <dlfcn.h>
 #endif
@@ -181,7 +186,7 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	static char    *x = "$Id: load_shared.c,v 1.15 2020-09-16 20:49:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_shared.c,v 1.16 2020-09-30 23:22:24+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

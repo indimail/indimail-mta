@@ -11,14 +11,7 @@ case "$SYSTEM" in
 	sed 's{SHAREDDIR{/usr/share/indimail{'          conf-shared.in     > conf-shared
 	sed 's{LIBEXECDIR{/usr/libexec/indimail{'       conf-libexec.in    > conf-libexec
 	;;
-	FreeBSD)
-	sed 's{PREFIX{/usr/local{'                      conf-prefix.in     > conf-prefix
-	sed 's{QMAIL{/var/indimail{'                    conf-qmail.in      > conf-qmail
-	sed 's{SYSCONFDIR{/usr/local/etc/indimail{'     conf-sysconfdir.in > conf-sysconfdir
-	sed 's{SHAREDDIR{/usr/local/share/indimail{'    conf-shared.in     > conf-shared
-	sed 's{LIBEXECDIR{/usr/local/libexec/indimail{' conf-libexec.in    > conf-libexec
-	;;
-	Darwin)
+	FreeBSD|Darwin)
 	sed 's{PREFIX{/usr/local{'                      conf-prefix.in     > conf-prefix
 	sed 's{QMAIL{/var/indimail{'                    conf-qmail.in      > conf-qmail
 	sed 's{SYSCONFDIR{/usr/local/etc/indimail{'     conf-sysconfdir.in > conf-sysconfdir
@@ -30,6 +23,7 @@ case "$SYSTEM" in
 	exit 1
 	;;
 esac
+SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
 if [ -f Makefile.$SYSTEM ] ; then
 	/bin/rm -f Makefile.
 	ln -s Makefile.$SYSTEM Makefile.

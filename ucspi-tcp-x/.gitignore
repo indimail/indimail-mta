@@ -49,3 +49,5 @@ mysql_inc
 make-makelib
 Makevars.
 conf-release
+conf-shared
+conf-sysconfdir
