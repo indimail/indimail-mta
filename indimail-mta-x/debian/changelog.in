@@ -46,3 +46,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * removed unused programs - qmail-lagcheck, qmail-lint, elq, pinq, qail
   * added debug statments in sys-checkpwd
   * svctool: added all available authmodules as IMAPMODULES
+  * syncdir.c, syncdir.h, qmail-local.c, qmail-queue.c, qmail-send.c, qmail-todo.c: Darwin port for syncdir

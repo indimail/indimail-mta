@@ -76,3 +76,7 @@ creation
 45. removed unused programs - qmail-lagcheck, qmail-lint, elq, pinq, qail
 46. added debug statments in sys-checkpwd
 47. svctool: added all available authmodules as IMAPMODULES
+- 30/09/2020
+48. syncdir.c, syncdir.h, qmail-local.c, qmail-queue.c, qmail-send.c,
+    qmail-todo.c: Darwin port for syncdir
+49. domainkeys.c: define memcpy, strcasecmp, strncasecmp only if not defined
