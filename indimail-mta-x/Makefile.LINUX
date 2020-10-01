@@ -3,6 +3,6 @@ it += indimail-mta.fc indimail-mta.spec indimail-mta-permissions.easy \
 	indimail-mta.fc indimail-mta.spec inotify docker-entrypoint
 
 ifeq ($(USE_SQL),1)
-it += qmail-sql sql-database ldap-checkpwd
-man += qmail-sql.8 sql-database.8 ldap-checkpwd.8
+it += qmail-sql sql-database
+man += qmail-sql.8 sql-database.8
 endif

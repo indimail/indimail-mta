@@ -29,7 +29,7 @@ it = perm_list.mta 822date 822field 822header 822print 822received addcr \
 	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
 	envdir envuidgid qdane dnstlsarr etrn except fastforward fghack fixcrio \
 	forward generic.so greydaemon qf-smtp-ratelimit home home+df hostname \
-	idedit iftocc indimail.plist instcheck ipmeprint leapsecs \
+	idedit iftocc indimail.plist instcheck ipmeprint ldap-checkpwd leapsecs \
 	logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
 	maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate \
 	inewaliases newinclude new-inject nowutc ofmipd ofmipname parsedate \
@@ -68,10 +68,12 @@ man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
 	qmail-poppass.8 qscanq.8 run-cleanq.8
 
+include Makefile.$(SYSTEM)
+
+default: all
+
 all: $(it) $(man)
 
-
-include Makefile.$(SYSTEM)
 
 compile: make-compile warn-auto.sh systype conf-cc conf-cc-$(SYSTEM)
 	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
@@ -3627,14 +3629,14 @@ trycrypt.c compile load
 
 ldap.lib: \
 tryldap.c compile load hasldap.h
-	((./compile tryldap.c && \
+	((./compile -DLDAP_DEPRECATED=1 tryldap.c && \
 	./load tryldap -lldap ) >/dev/null 2>&1 \
 	&& echo -lldap || exit 0) > ldap.lib
 	rm -f tryldap.o tryldap
 
 hasldap.h: \
 tryldap.c compile load
-	((./compile tryldap.c && \
+	((./compile -DLDAP_DEPRECATED=1 tryldap.c && \
 	./load tryldap -lldap) >/dev/null 2>&1 \
 	&& echo "#define HASLDAP 1" || exit 0) > hasldap.h
 	rm -f tryldap.o tryldap
