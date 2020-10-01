@@ -306,7 +306,8 @@ compile prot.c hasshsgr.h prot.h
 
 rblsmtpd.so: \
 load rbl.o commands.o pathexec_rundl.o load_shared.o \
-dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
+dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib \
+conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
 	rbl.o commands.o pathexec_rundl.o load_shared.o \
@@ -315,7 +316,8 @@ dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o rblsmtpd.so \
 	rbl.o commands.o pathexec_rundl.o load_shared.o \
-	dlnamespace.o tcdlmopen.o dns.a unix.a `cat socket.lib` -lqmail -ldl; \
+	dlnamespace.o tcdlmopen.o dns.a unix.a `cat socket.lib` \
+	`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail -ldl; \
 	fi
 
 rblsmtpd: \

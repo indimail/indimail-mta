@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.15  2020-10-01 14:35:43+05:30  Cprogrammer
+ *  Darwin Port
+ *
  *  Revision 1.14  2020-09-30 23:24:52+05:30  Cprogrammer
  *  Darwin Port
  *
@@ -45,7 +48,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.14 2020-09-30 23:24:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.15 2020-10-01 14:35:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -54,23 +57,16 @@ static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.14 2020-09-30 23:24:52+0
 #include "hasdlmopen.h"
 #ifdef HASDLMOPEN
 #define _GNU_SOURCE
-#endif
-#include <unistd.h>
-#include "stralloc.h"
-#ifdef HASDLMOPEN
 #include "dlnamespace.h"
 #endif
+#include <dlfcn.h>
+#include <unistd.h>
+#include "stralloc.h"
 #include <strerr.h>
 #include <str.h>
 #include <env.h>
 #include <scan.h>
 #include <fmt.h>
-#ifndef DARWIN
-#include <link.h>
-#endif
-#ifndef HASDLMOPEN
-#include <dlfcn.h>
-#endif
 
 struct stralloc shared_objfn = {0};
 

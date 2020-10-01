@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.17  2020-10-01 14:35:33+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.16  2020-09-30 23:22:24+05:30  Cprogrammer
  * Darwin Port
  *
@@ -53,22 +56,15 @@
 #include "hasdlmopen.h"
 #ifdef HASDLMOPEN
 #define _GNU_SOURCE
-#endif
-#include <unistd.h>
-#ifdef HASDLMOPEN
 #include "dlnamespace.h"
 #endif
+#include <dlfcn.h>
+#include <unistd.h>
 #include <strerr.h>
 #include <str.h>
 #include <fmt.h>
 #include <env.h>
 #include "pathexec.h"
-#ifndef DARWIN
-#include <link.h>
-#endif
-#ifndef HASDLMOPEN
-#include <dlfcn.h>
-#endif
 
 #define FATAL "tcpserver: fatal: "
 
@@ -186,7 +182,7 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	static char    *x = "$Id: load_shared.c,v 1.16 2020-09-30 23:22:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_shared.c,v 1.17 2020-10-01 14:35:33+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

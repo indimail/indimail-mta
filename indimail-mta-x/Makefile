@@ -68,8 +68,6 @@ man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
 	qmail-poppass.8 qscanq.8 run-cleanq.8
 
-#default: $(it) $(man)
-
 all: $(it) $(man)
 
 
@@ -1578,10 +1576,11 @@ trydkim.c compile load dns.lib dkim.lib conf-indi
 
 qmail-dkim: qmail-dkim.o date822fmt.o auto_control.o \
 auto_qmail.o variables.o control.o MakeArgs.o dns_text.o \
-dns.lib dkim.lib
+dns.lib dkim.lib conf-ld-$(SYSTEM)
 	g++ -o qmail-dkim qmail-dkim.o date822fmt.o auto_control.o \
 	auto_qmail.o variables.o control.o MakeArgs.o \
-	dns_text.o `cat dns.lib dkim.lib conf-ld-$(SYSTEM)` \
+	dns_text.o `cat dns.lib dkim.lib` \
+	`cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	-lcrypto -lqmail
 
 qmail-dkim.o: \
@@ -1750,7 +1749,7 @@ socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o spf.o dns.o auto_qmail.o auto_uids.o \
 qregex_sql.o tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
 auto_break.o auto_control.o auto_assign.o auto_prefix.o auto_sysconfdir.o \
-socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
+socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 		$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o indimail_stub.o load_mysql.o \
@@ -1763,17 +1762,6 @@ socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
 		tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
 		hmac_sha1.o `cat socket.lib dns.lib tls.lib` -L/opt/local/lib -lqmail ; \
-	elif test $(SYSTEM) = FREEBSD ; then \
-		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
-		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
-		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
-		received.o date822fmt.o wildmat.o qmail.o variables.o envrules.o \
-		bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o \
-		socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
-		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
-		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
-		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o hmac_sha1.o \
-		`cat socket.lib dns.lib tls.lib` -L/usr/local/lib -lqmail; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
@@ -1784,7 +1772,8 @@ socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql
 		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
 		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o hmac_sha1.o \
-		`cat socket.lib dns.lib tls.lib` -lqmail ; \
+		`cat socket.lib dns.lib tls.lib` `cat conf-ld-$(SYSTEM) 2>/dev/null` \
+		-lqmail ; \
 	fi
 
 qmail-smtpd: \
@@ -3844,28 +3833,31 @@ ctrlenv.9 conf-prefix conf-sysconfdir
 # dnsblcheck plugin
 smtpd-plugin0.so: dnsbl.o control.o auto_control.o variables.o \
 socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
-strsalloc.o tlsarralloc.o dns.o dns.lib
+strsalloc.o tlsarralloc.o dns.o dns.lib conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 		$(LD) -bundle -undefined dynamic_lookup \
 		-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
 		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
-		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -L /opt/local/lib -lqmail; \
+		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` \
+		`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	elif test $(SYSTEM) = FREEBSD ; then \
 		$(LD) -shared -o smtpd-plugin0.so dnsbl.o control.o \
 		auto_control.o variables.o socket_v6any.o \
 		socket_v4mappedprefix.o ip.o ipalloc.o \
-		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -L/usr/local/lib -lqmail; \
+		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` \
+		`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	else \
 		$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
 		-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
 		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
-		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` -lqmail; \
+		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` \
+		`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	fi
 
 dnsbl.o: compile dnsbl.c smtp_plugin.h dns.h control.h
 	./compile dnsbl.c
 
-smtpd-plugin.so:smtp_plugin.o
+smtpd-plugin.so: smtp_plugin.o
 	if test $(SYSTEM) = DARWIN ; then \
 		$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
 		smtp_plugin.o; \
@@ -3879,17 +3871,15 @@ smtpd-plugin.so:smtp_plugin.o
 smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
 	./compile smtp_plugin.c
 
-generic.so: generic.o auto_scancmd.o MakeArgs.o
+generic.so: generic.o auto_scancmd.o MakeArgs.o conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 		$(LD) -bundle -undefined dynamic_lookup -o generic.so generic.o \
-		auto_scancmd.o MakeArgs.o -L/opt/local/lib -lqmail; \
-	elif test $(SYSTEM) = FREEBSD ; then \
-		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o \
-		generic.so generic.o auto_scancmd.o MakeArgs.o \
-		-L/usr/local/lib -lqmail; \
+		auto_scancmd.o MakeArgs.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
+		-lqmail; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o \
-		generic.so generic.o auto_scancmd.o MakeArgs.o -lqmail; \
+		generic.so generic.o auto_scancmd.o MakeArgs.o \
+		`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	fi
 
 perm_list.mta: perm_list.in mysql_config \
