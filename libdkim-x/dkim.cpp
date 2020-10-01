@@ -1,5 +1,8 @@
 /*
- * $Log: dkim.c,v $
+ * $Log: dkim.cpp,v $
+ * Revision 1.26  2020-10-01 14:14:34+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.25  2020-06-08 23:16:27+05:30  Cprogrammer
  * quench compiler warnings
  *
@@ -721,7 +724,11 @@ main(int argc, char **argv)
 			return (1);
 		}
 		if (!(PrivKey = (char *) DKIM_MALLOC(sizeof(char) * ((nPrivKeyLen = statbuf.st_size) + 1)))) {
+#ifdef DARWIN
+			fprintf(stderr, "malloc: %lld bytes: %s\n", statbuf.st_size + 1, strerror(errno));
+#else
 			fprintf(stderr, "malloc: %ld bytes: %s\n", statbuf.st_size + 1, strerror(errno));
+#endif
 			return (1);
 		}
 		if (read(PrivKeyFD, PrivKey, nPrivKeyLen) != nPrivKeyLen) {
@@ -877,7 +884,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.25 2020-06-08 23:16:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.26 2020-10-01 14:14:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

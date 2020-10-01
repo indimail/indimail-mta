@@ -7,7 +7,6 @@ PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_SRCDIR([dkimverify.h])
 AC_CONFIG_HEADERS([config.h])
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-mta@indimail.org")
 AC_CANONICAL_HOST
 LT_INIT
 AM_INIT_AUTOMAKE
@@ -28,45 +27,36 @@ PKG_INSTALLDIR
 
 case "$host" in
 *-*-sunos4.1.1*)
-	INSTALL="./install-sh -c"
-	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 *-*-solaris*)
-	INSTALL="./install-sh -c"
-	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 *-*-linux*)
-	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	CXXFLAGS="$CXXFLAGS -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -DLINUX -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
 	LDFLAGS="$LDFLAGS -pie"
-	STRIP_OPT=-s
+	;;
+*-*-freebsd*)
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include"
+	CFLAGS="$CFLAGS -I/opt/local/include -Wall"
+	CXXFLAGS="$CXXFLAGS -DFREEBSD -I/opt/local/include -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	;;
 *-*-darwin*)
-	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DDARWIN"
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include"
 	CFLAGS="$CFLAGS -I/opt/local/include -Wall"
-	CXXFLAGS="$CXXFLAGS -DBIND_8_COMPAT -I/opt/local/include -DDARWIN -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -DBIND_8_COMPAT -DDARWIN -I/opt/local/include -Wno-delete-non-abstract-non-virtual-dtor -Wno-reorder-ctor -Wall -fPIC"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
-	STRIP_OPT=-S
 	;;
 *)
-	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 esac
 
