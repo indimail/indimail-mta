@@ -127,10 +127,13 @@ conf-prefix|/usr/local
 conf-sysconfdir|/usr/local/etc/indimail
 conf-shared|/usr/local/share/indimail
 
+The build below depens on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
+
 ```
+$ ./default.configure
 $ cd /usr/local/src/indimail-mta/ucspi-tcp-x
-$ make
-$ sudo make install-strip
+$ make or ./qmake
+$ sudo make install or sudo ./qmake install
 ```
 
 (check version in indimail-mta/ucspi-tcp-x/conf-version)
@@ -159,11 +162,13 @@ conf-sysconfdir|/usr/local/etc/indimail
 conf-shared|/usr/local/share/indimail
 conf-libexec|/usr/local/libexec/indimail
 
+The build below depens on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
+
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ ./default.configure
-$ make
-$ sudo make install-strip
+$ make or ./qmake
+$ sudo make install or sudo qmake install
 ```
 
 (check version in indimail-mta/indimail-mta-x/conf-version)
