@@ -80,3 +80,5 @@ creation
 48. syncdir.c, syncdir.h, qmail-local.c, qmail-queue.c, qmail-send.c,
     qmail-todo.c: Darwin port for syncdir
 49. domainkeys.c: define memcpy, strcasecmp, strncasecmp only if not defined
+50. removed ldap-checkpwd for Darwin. Added it to Linux, FreeBSD Makefile
+    target

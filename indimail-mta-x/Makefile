@@ -29,7 +29,7 @@ it = perm_list.mta 822date 822field 822header 822print 822received addcr \
 	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
 	envdir envuidgid qdane dnstlsarr etrn except fastforward fghack fixcrio \
 	forward generic.so greydaemon qf-smtp-ratelimit home home+df hostname \
-	idedit iftocc indimail.plist instcheck ipmeprint ldap-checkpwd leapsecs \
+	idedit iftocc indimail.plist instcheck ipmeprint leapsecs \
 	logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
 	maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate \
 	inewaliases newinclude new-inject nowutc ofmipd ofmipname parsedate \
