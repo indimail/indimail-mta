@@ -1,7 +1,3 @@
-it += indimail-mta.fc indimail-mta.spec indimail-mta-permissions.easy \
-	indimail-mta-permissions.paranoid indimail-mta-permissions.secure \
-	indimail-mta.fc indimail-mta.spec inotify docker-entrypoint
-
 ifeq ($(USE_SQL),1)
 it += qmail-sql sql-database
 man += qmail-sql.8 sql-database.8
