@@ -9,7 +9,7 @@ includedir=@prefix@/include/srs2
 
 lib_LTLIBRARIES = libsrs2.la
 libsrs2_la_SOURCES = srs2.c sha1.c
-libsrs2_la_LDFLAGS = -version-info @LIBVER@ -pie
+libsrs2_la_LDFLAGS = -version-info @LIBVER@
 libsrs2_la_CFLAGS = -fPIC -fPIE
 
 srs2.$(OBJEXT): srs2.h win32.h

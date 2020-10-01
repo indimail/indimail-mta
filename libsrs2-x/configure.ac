@@ -47,6 +47,42 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 
+case "$host" in
+*-*-sunos4.1.1*)
+	CPPFLAGS="$CPPFLAGS -DSUNOS4"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
+	;;
+*-*-solaris*)
+	CPPFLAGS="$CPPFLAGS -DSOLARIS"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
+	;;
+*-*-linux*)
+	CPPFLAGS="$CPPFLAGS -DLINUX"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -pie"
+	;;
+*-*-freebsd*)
+	CPPFLAGS="$CPPFLAGS -DFREEBSD"
+	CFLAGS="$CFLAGS -I/usr/local/include -Wall"
+	CXXFLAGS="$CXXFLAGS -I/usr/local/include -DDARWIN -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	;;
+*-*-darwin*)
+	CPPFLAGS="$CPPFLAGS -DDARWIN"
+	CFLAGS="$CFLAGS -I/opt/local/include -Wall"
+	CXXFLAGS="$CXXFLAGS -DBIND_8_COMPAT -I/opt/local/include -DDARWIN -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	;;
+*)
+	INSTALL="/usr/bin/install -c"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -O4 -Wall -fPIC"
+	;;
+esac
+
 dnl Checks for library functions.
 AC_CHECK_FUNCS(strdup strstr)
 dnl Unix versions
