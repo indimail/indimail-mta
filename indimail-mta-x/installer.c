@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.4  2020-10-02 17:00:54+05:30  Cprogrammer
+ * set permissions for directory only if it is a new directory
+ *
  * Revision 1.3  2020-09-16 18:59:40+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -207,12 +210,15 @@ doit(stralloc *line)
 		print_info("makedir", 0, target.s, mode, uid, gid);
 		if (my_uid)
 			mode = 0755;
-		if (mkdir(target.s, mode == -1 ? 0755 : mode) == -1 && errno != error_exist)
-			strerr_die4sys(111, FATAL, "unable to mkdir ", target.s, ": ");
-		if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
-			strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
-		if (mode != -1 && !my_uid && chmod(target.s, (mode_t) mode) == -1)
-			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
+		if (mkdir(target.s, mode == -1 ? 0755 : mode) == -1) {
+			if (errno != error_exist)
+				strerr_die4sys(111, FATAL, "unable to mkdir ", target.s, ": ");
+		} else {
+			if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
+				strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
+			if (mode != -1 && !my_uid && chmod(target.s, (mode_t) mode) == -1)
+				strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
+		}
 		break;
 
 	case 'c':
@@ -289,7 +295,7 @@ main(argc, argv)
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.3 2020-09-16 18:59:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: installer.c,v 1.4 2020-10-02 17:00:54+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
