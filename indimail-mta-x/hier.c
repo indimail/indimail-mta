@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.275  2020-10-02 14:43:28+05:30  Cprogrammer
+ * fixes for FreeBSD, Darwnin
+ *
  * Revision 1.274  2020-09-19 17:24:20+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -903,8 +906,10 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "boot", "binm2+df", auto_uido, 0, 0755);
 	c(auto_shared,     "boot", "binm3", auto_uido, 0, 0755);
 	c(auto_shared,     "boot", "binm3+df", auto_uido, 0, 0755);
+#ifdef LINUX
 	c(auto_shared,     "boot", "upstart", auto_uido, 0, 0644);
 	c(auto_shared,     "boot", "systemd", auto_uido, 0, 0644);
+#endif
 #ifdef DARWIN
 	c(auto_shared,     "boot", "StartupParameters.plist", auto_uido, 0, 0444);
 	c(auto_shared,     "boot", "indimail.plist", auto_uido, 0, 0444);
@@ -950,7 +955,9 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "qnotify", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "rrt", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "qarf", auto_uido, 0, moder_x);
+#ifdef LINUX
 	c(auto_prefix, "bin", "inotify", auto_uido, 0, moder_x);
+#endif
 #if defined(HASDKIM) || defined(DOMAIN_KEYS)
 	c(auto_prefix, "bin", "dk-filter", auto_uido, 0, moder_x);
 #endif
@@ -1030,7 +1037,7 @@ hier(inst_dir, fatal, dev_package)
 #ifdef SMTP_PLUGIN
 	c(auto_prefix, "sbin", "plugtest", auto_uido, 0, moder_x);
 #endif
-	c(auto_prefix, "sbin", "svctool", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "svctool", auto_uido, 0, 0711);
 
 	c(auto_prefix, "sbin", "qmail-newu", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "cdb-database", auto_uido, 0, moder_x);
@@ -1124,7 +1131,9 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-multi", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-nullqueue", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "ldap-checkpwd", auto_uido, 0, moder_x);
+#ifdef LINUX
 	c(auto_prefix, "sbin", "docker-entrypoint", auto_uido, 0, moder_x);
+#endif
 
 #if defined(SMTP_PLUGIN) || defined(LOAD_SHARED_OBJECTS)
 	d(auto_prefix, "lib/indimail/plugins", auto_uido, 0, 0755);
@@ -1141,14 +1150,9 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec, "qfilters", "qf-smtp-ratelimit", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qfrontend", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qpq", auto_uido, 0, moder_x);
-	c(auto_libexec_dir, auto_libexec_base, "qail", auto_uido, 0, moder_x);
-	c(auto_libexec_dir, auto_libexec_base, "elq", auto_uido, 0, moder_x);
-	c(auto_libexec_dir, auto_libexec_base, "pinq", auto_uido, 0, moder_x);
-	c(auto_libexec_dir, auto_libexec_base, "qmail-lint", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qsmhook", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "etrn", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "atrn", auto_uido, 0, moder_x);
-	c(auto_libexec_dir, auto_libexec_base, "qmail-lagcheck", auto_uido, 0, moder_x);
 #ifdef TLS
 	c(auto_libexec_dir, auto_libexec_base, "update_tmprsadh", auto_uido, 0, moder_x);
 #endif
@@ -1306,7 +1310,9 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man1", "qnotify.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "rrt.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "qarf.1", uidr, gidr, moder_f);
+#ifdef LINUX
 	c(mandir_base,     "man/man1", "inotify.1", uidr, gidr, moder_f);
+#endif
 #ifdef HAVESRS
 	c(mandir_base,     "man/man1", "srsfilter.1", uidr, gidr, moder_f);
 #endif
@@ -1534,7 +1540,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.274 2020-09-19 17:24:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.275 2020-10-02 14:43:28+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
