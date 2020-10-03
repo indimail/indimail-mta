@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.87 2020-09-26 07:44:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.88 2020-10-03 07:34:36+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -94,6 +94,8 @@ if [ -x /usr/sbin/mysqld ] ; then # Linux
   mysql_base=/usr
 elif [ -x /usr/local/libexec/mysqld ] ; then # FreeBSD
   mysql_base=/usr/local
+elif [ -x /usr/local/mysql/bin/mysqld ] ; then # Darwin
+  mysql_base=/usr/local/mysql
 fi
 ID=`id -u`
 while test $# -gt 0; do
@@ -577,6 +579,8 @@ if [ ! -f "$dir_prefix"$sysconfdir/indimail.mrtg.cfg ] ; then
   if [ -f $sysconfdir/indimail.mrtg.cfg ] ; then
     cp $sysconfdir/indimail.mrtg.cfg "$dir_prefix"$sysconfdir/indimail.mrtg.cfg
   fi
+fi
+if [ -f "$dir_prefix"$sysconfdir/indimail.mrtg.cfg ] ; then
   $svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir $extra_opt
 fi
 
