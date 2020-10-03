@@ -82,3 +82,19 @@ creation
 49. domainkeys.c: define memcpy, strcasecmp, strncasecmp only if not defined
 50. removed ldap-checkpwd for Darwin. Added it to Linux, FreeBSD Makefile
     target
+-02/10/2020
+51. installer.c: set permissions for directory only if it is a new directory
+52. install indimail.plist in shareddir/boot
+52. svctool: updated macOSuseradd, macOSgroupadd
+-03/10/2020
+53. svctool, svwait: fix date command syntax for Darwin, FreeBSD
+55. svctool: --fixedharedlibs for Darwin
+56. svctool: use /bin/echo -n instead of builtin echo -n (which doesn't work on Darwin)
+57. svctool: create /var/run/mysqld for Darwin when creating mysqldb
+58. svctool: use openssl passwd -6 (sha512) missing on darwin use openssl passwd -1 (md5)
+59. svctool: use LC_ALL=C for tr command on Darwin
+60. svctool: check for mysqld in mysqlprefix/bin for Darwin
+61. svctool: updated macOSuseradd, macOSgroupadd functiona for Darwin
+62. svctool: fixed date command for getting time in seconds for Darwin/FreeBSD
+63. indimail.plist: service directory on Darwin changed to
+    /usr/local/etc/indimail/service

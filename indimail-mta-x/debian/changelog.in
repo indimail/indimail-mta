@@ -48,3 +48,16 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: added all available authmodules as IMAPMODULES
   * syncdir.c, syncdir.h, qmail-local.c, qmail-queue.c, qmail-send.c, qmail-todo.c: Darwin port for syncdir
   * removed ldap-checkpwd for Darwin. Added it to Linux, FreeBSD Makefile target
+  * installer.c: set permissions for directory only if it is a new directory
+  * install indimail.plist in shareddir/boot
+  * svctool: updated macOSuseradd, macOSgroupadd
+  * svctool, svwait: fix date command syntax for Darwin, FreeBSD
+  * svctool: --fixedharedlibs for Darwin
+  * svctool: use /bin/echo -n instead of builtin echo -n (which doesn't work on Darwin)
+  * svctool: create /var/run/mysqld for Darwin when creating mysqldb
+  * svctool: use openssl passwd -6 (sha512) missing on darwin use openssl passwd -1 (md5)
+  * svctool: use LC_ALL=C for tr command on Darwin
+  * svctool: check for mysqld in mysqlprefix/bin for Darwin
+  * svctool: updated macOSuseradd, macOSgroupadd functiona for Darwin
+  * svctool: fixed date command for getting time in seconds for Darwin/FreeBSD
+  * indimail.plist: service directory on Darwin changed to /usr/local/etc/indimail/service
