@@ -13,3 +13,4 @@ logdir = $(shell cat conf-logdir)
 USE_SQL = $(shell [ -n "`head -1 conf-sql`" ] && echo "1" || echo "")
 bash = $(shell [ -f /usr/local/bin/bash ] && echo "/usr/local/bin/bash" || echo "/bin/bash")
 SYSTEM = $(shell uname -s | tr "[:lower:]" "[:upper:]")
+servicedir = /service
