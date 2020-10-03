@@ -173,7 +173,7 @@
 %attr(0755,root,qmail) @prefix@/sbin/ldap-checkpwd
 %attr(0755,root,qmail) @prefix@/sbin/docker-entrypoint
 %attr(0755,root,qmail) @prefix@/sbin/plugtest
-%attr(0755,root,qmail) @prefix@/sbin/svctool
+%attr(0711,root,qmail) @prefix@/sbin/svctool
 %attr(0755,root,qmail) @prefix@/sbin/sys-checkpwd
 %attr(0755,root,qmail) @prefix@/sbin/svscan
 %attr(0755,root,qmail) @prefix@/sbin/readproctitle
