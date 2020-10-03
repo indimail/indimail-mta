@@ -1,7 +1,6 @@
 # Don't edit Makefile! Use conf-* for configuration.
 COFLAGS=-z+05:30
 SHELL=/bin/sh
-servicedir=/service
 include Makevars.$(SYSTEM)
 
 edit = sed \
@@ -29,7 +28,7 @@ it = perm_list.mta 822date 822field 822header 822print 822received addcr \
 	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
 	envdir envuidgid qdane dnstlsarr etrn except fastforward fghack fixcrio \
 	forward generic.so greydaemon qf-smtp-ratelimit home home+df hostname \
-	idedit iftocc indimail.plist instcheck ipmeprint ldap-checkpwd leapsecs \
+	idedit iftocc instcheck ipmeprint ldap-checkpwd leapsecs \
 	logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
 	maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate \
 	inewaliases newinclude new-inject nowutc ofmipd ofmipname parsedate \
@@ -667,9 +666,8 @@ warn-auto.sh qmailctl.sh conf-prefix conf-sysconfdir
 	> qmailctl
 	chmod +x $@
 
-indimail.plist: indimail.plist.in conf-libexec
-	cat indimail.plist.in | sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
-	> indimail.plist
+indimail.plist: indimail.plist.in conf-libexec conf-sysconfdir
+	$(edit) $@.in > $@
 
 indimail-mta.fc: \
 indimail-mta.fc.in conf-qmail conf-sysconfdir
@@ -2075,6 +2073,7 @@ compile sendmail.c auto_qmail.h
 install-strip: install
 
 distclean: clean
+	/bin/rm -f Makefile. Makevars.
 
 installer: \
 load installer.o
@@ -2085,8 +2084,10 @@ compile installer.c
 	./compile installer.c
 
 DIRS: DIRS.in \
-	conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
-	$(edit) $@.in > $@
+conf-prefix conf-libexec conf-qmail \
+conf-sysconfdir conf-shared
+	([ -f DIRS.$(SYSTEM) ] && \
+	$(edit) DIRS.in DIRS.$(SYSTEM) || $(edit) DIRS.in) > DIRS
 
 BIN: BIN.in
 	([ -f BIN.$(SYSTEM) ] && \
