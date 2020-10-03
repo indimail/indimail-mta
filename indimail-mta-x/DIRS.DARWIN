@@ -1,0 +1,5 @@
+l::::@indimaildir@/bin:@prefix@/bin:
+l::::@indimaildir@/sbin:@prefix@/sbin:
+l::::@indimaildir@/libexec:@libexecdir@:
+l::::@indimaildir@/users:@qsysconfdir@/users:
+l::::@indimaildir@/control:@qsysconfdir@/control:
