@@ -1,6 +1,6 @@
 prefix = $(shell head -1 conf-prefix 2>/dev/null)
 qmaildir = $(shell head -1 conf-qmail 2>/dev/null)
-mandir = $(shell [ -d "`head -1 conf-prefix`"/man ] && echo "`head -1 conf-prefix`/man" || echo "`head -1 conf-prefix`/share/man")
+mandir = $(shell [ -d "`head -1 conf-prefix`"/share/man ] && echo "`head -1 conf-prefix`/share/man" || echo "`head -1 conf-prefix`/man")
 shareddir = $(shell head -1 conf-shared 2>/dev/null)
 qsysconfdir = $(shell head -1 conf-sysconfdir 2>/dev/null)
 libexecdir = $(shell head -1 conf-libexec 2>/dev/null)
@@ -13,3 +13,4 @@ logdir = $(shell cat conf-logdir)
 USE_SQL = $(shell [ -n "`head -1 conf-sql`" ] && echo "1" || echo "")
 bash = $(shell [ -f /usr/local/bin/bash ] && echo "/usr/local/bin/bash" || echo "/bin/bash")
 SYSTEM = $(shell uname -s | tr "[:lower:]" "[:upper:]")
+servicedir = $qsysconfdir/service
