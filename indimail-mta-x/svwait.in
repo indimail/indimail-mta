@@ -1,11 +1,15 @@
 #
 # $Log: svwait.in,v $
+# Revision 1.2  2020-10-03 07:40:24+05:30  Cprogrammer
+# fix date command syntax for Darwin, FreeBSD
+#
 # Revision 1.1  2020-09-27 14:41:09+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: svwait.in,v 1.1 2020-09-27 14:41:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: svwait.in,v 1.2 2020-10-03 07:40:24+05:30 Cprogrammer Exp mbhangui $
 #
+host=@HOST@
 if [ $# != 2 ] ; then
 	echo "usage: svwait service wait_interval" 1>&2
 	exit 1
@@ -39,7 +43,14 @@ if [ $count -lt $2 ] ; then
 	if [ -d $service_pwd/supervise ] ; then
 		cur_time=$(date +'%s')
 		nxt_time=$(expr $cur_time + $remaining)
-		echo -n "wait until `date --date=@"$nxt_time"`" > $service_pwd/supervise/wait
+		case "$host" in
+			*-*-darwin*|*-*-freebsd*)
+			echo -n "wait until `date --r $nxt_time`" > $service_pwd/supervise/wait
+			;;
+			*)
+			echo -n "wait until `date --date=@"$nxt_time"`" > $service_pwd/supervise/wait
+			;;
+		esac
 	fi
 	sleep $remaining
 	if [ -d $service_pwd/supervise ] ; then
