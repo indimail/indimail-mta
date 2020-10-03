@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.261 2020-09-29 13:11:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.262 2020-10-03 07:35:47+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -780,7 +780,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/plugtest
 %attr(4551,root,root)                   %{_prefix}/sbin/sys-checkpwd
 %attr(755,root,root)                    %{_prefix}/sbin/ldap-checkpwd
-%attr(755,root,root)                    %{_prefix}/sbin/svctool
+%attr(711,root,root)                    %{_prefix}/sbin/svctool
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-nullqueue
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-multi
 %attr(755,root,root)                    %{_prefix}/sbin/cleanq
