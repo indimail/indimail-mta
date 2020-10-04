@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.276  2020-10-04 11:48:08+05:30  Cprogrammer
+ * renamed launchd unit file indimail.plist to svscan.plist
+ *
  * Revision 1.275  2020-10-02 14:43:28+05:30  Cprogrammer
  * fixes for FreeBSD, Darwnin
  *
@@ -912,7 +915,7 @@ hier(inst_dir, fatal, dev_package)
 #endif
 #ifdef DARWIN
 	c(auto_shared,     "boot", "StartupParameters.plist", auto_uido, 0, 0444);
-	c(auto_shared,     "boot", "indimail.plist", auto_uido, 0, 0444);
+	c(auto_shared,     "boot", "svscan.plist", auto_uido, 0, 0444);
 #endif
 
 	c(auto_sysconfdir, "control", "nodnscheck", auto_uido, auto_gidq, 0644);
@@ -1540,7 +1543,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.275 2020-10-02 14:43:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.276 2020-10-04 11:48:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
