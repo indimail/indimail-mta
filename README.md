@@ -76,7 +76,19 @@ $ sudo make install-strip
 
 (check version in libqmail/conf-version)
 
-NOTE: for FreeBSD, install automake, autoconf, libtool, pkgconf using pkg
+NOTE: for FreeBSD, install packages using pkg
+
+```
+# pkg install automake autoconf libtool pkgconf
+```
+
+NOTE: For Darwin (Mac OSX), install [MacPorts](https://www.macports.org/) or brew. You can look at this [document](https://paolozaino.wordpress.com/2015/05/05/how-to-install-and-use-autotools-on-mac-os-x/) for installing MacPorts.
+
+```
+# port install autoconf libtool automake pkgconfig
+# port install openssl
+# port update outdated
+```
 
 ## Download indimail-mta
 
@@ -173,6 +185,11 @@ $ sudo make install or sudo qmake install
 
 (check version in indimail-mta/indimail-mta-x/conf-version)
 
+Note: for Darwin
+```
+# port install openldap mrtg
+```
+
 ## Download optional components
 
 ```
@@ -190,6 +207,8 @@ $ ./default.configure
 $ make
 $ sudo make install-strip
 ```
+
+NOTE: Darwin doesn't have nsswitch. So don't waste time compiling this package
 
 (check version in indimail-virtualdomains/nssd-x/conf-version)
 
@@ -218,6 +237,11 @@ $ sudo make install-strip
 ```
 
 (check version in indimail-virtualdomains/courier-imap-x/conf-version)
+
+NOTE: for Darwin
+```
+# port install libidn2 pcre db48
+```
 
 ### Build fetchmail
 
@@ -308,14 +332,18 @@ $ cd /usr/local/src/indimail-mta-x
 $ sudo ./create_services
 ```
 
+NOTE: The Darwin Mac OSX system is broken for sending emails because you can't remove /usr/sbin/sendmail. [System Integrity Protection (SIP)](https://en.wikipedia.org/wiki/System_Integrity_Protection) ensures that you cannot modify anything in /bin, /sbin, /usr, /System, etc. You could disable it by using csrutil in recover mode but that is not adviseable. See [this](https://www.howtogeek.com/230424/how-to-disable-system-integrity-protection-on-a-mac-and-why-you-shouldnt/). indimail-mta requires services in /service to configure all startup items. On Mac OS X, it uses `/etc/synthetic.conf' to create a virtual symlink of /service to /usr/local/etc/indimail/service. This file is created/modified by 'svctool --add-boot' command. For program that need to send mails, you will need to call /usr/local/bin/sendmail (indimal-mta's sendmail replacement). The OS and all utilites like cron, mailx, etc will continue to use /usr/sbin/sendmail. There is nothing you can do about it, other than fooling around with SIP.
+
 ## Start Services
 
 ```
 $ sudo systemctl start svscan # Linux
 or
-$ sudo service svscan start # Universal
+$ sudo service svscan start # Linux/FreeBSD
 or
 $ /etc/init.d/svscan start # Linux
+or
+$ sudo launchctl start org.indimail.svscan # Mac OSX
 or
 $ qmailctl start # Universal
 ```
