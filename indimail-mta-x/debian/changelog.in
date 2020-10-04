@@ -67,3 +67,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: removed hardcoded directory for svwait in inlookup, pwdlookup service
   * hier.c, indimail-mta.spec, Makefile: renamed launchd unit file indimail.plist to svscan.plist
   * svwait: replace builtin echo with /bin/echo -n (for Darwin)
+  * svctool: fixed users getting added multiple times to com.apple.loginwindow HiddenUsersList

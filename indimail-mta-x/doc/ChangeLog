@@ -106,3 +106,5 @@ creation
 65. hier.c, indimail-mta.spec, Makefile: renamed launchd unit file indimail.plist
     to svscan.plist
 66. svwait: replace builtin echo with /bin/echo -n (for Darwin)
+67. svctool: fixed users getting added multiple times to com.apple.loginwindow
+    HiddenUsersList
