@@ -61,3 +61,9 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: updated macOSuseradd, macOSgroupadd functiona for Darwin
   * svctool: fixed date command for getting time in seconds for Darwin/FreeBSD
   * indimail.plist: service directory on Darwin changed to /usr/local/etc/indimail/service
+  * svctool: renamed launchd unit file indimail.plist to svscan.plist
+  * svctool: create /service link in /etc/synthetic.conf for Darwin
+  * svctool: create /var/indimail/inquery directory
+  * svctool: removed hardcoded directory for svwait in inlookup, pwdlookup service
+  * hier.c, indimail-mta.spec, Makefile: renamed launchd unit file indimail.plist to svscan.plist
+  * svwait: replace builtin echo with /bin/echo -n (for Darwin)

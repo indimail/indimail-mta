@@ -82,11 +82,11 @@ creation
 49. domainkeys.c: define memcpy, strcasecmp, strncasecmp only if not defined
 50. removed ldap-checkpwd for Darwin. Added it to Linux, FreeBSD Makefile
     target
--02/10/2020
+- 02/10/2020
 51. installer.c: set permissions for directory only if it is a new directory
 52. install indimail.plist in shareddir/boot
 52. svctool: updated macOSuseradd, macOSgroupadd
--03/10/2020
+- 03/10/2020
 53. svctool, svwait: fix date command syntax for Darwin, FreeBSD
 55. svctool: --fixedharedlibs for Darwin
 56. svctool: use /bin/echo -n instead of builtin echo -n (which doesn't work on Darwin)
@@ -98,3 +98,11 @@ creation
 62. svctool: fixed date command for getting time in seconds for Darwin/FreeBSD
 63. indimail.plist: service directory on Darwin changed to
     /usr/local/etc/indimail/service
+- 04/10/2020
+64. svctool: renamed launchd unit file indimail.plist to svscan.plist
+    create /service link in /etc/synthetic.conf for Darwin
+    create /var/indimail/inquery directory
+    removed hardcoded directory for svwait in inlookup, pwdlookup service
+65. hier.c, indimail-mta.spec, Makefile: renamed launchd unit file indimail.plist
+    to svscan.plist
+66. svwait: replace builtin echo with /bin/echo -n (for Darwin)
