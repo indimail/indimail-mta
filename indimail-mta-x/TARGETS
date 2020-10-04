@@ -942,7 +942,7 @@ qmail-qfilter.0
 matchregex.o
 qregex_sql.o
 sqlmatch.o
-indimail.plist
+svscan.plist
 qmail-poppass
 qmail-poppass.o
 qmail-poppass.0

@@ -1,2 +1,2 @@
 c:::0444:/boot/:StartupParameters.plist:StartupParameters.plist
-c:::0444:/boot/:indimail.plist:indimail.plist
+c:::0444:/boot/:svscan.plist:svscan.plist
