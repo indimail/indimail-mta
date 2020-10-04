@@ -1,5 +1,8 @@
 #
 # $Log: svwait.in,v $
+# Revision 1.3  2020-10-04 11:55:48+05:30  Cprogrammer
+# replace builtin echo with /bin/echo -n (for Darwin)
+#
 # Revision 1.2  2020-10-03 07:40:24+05:30  Cprogrammer
 # fix date command syntax for Darwin, FreeBSD
 #
@@ -7,7 +10,7 @@
 # Initial revision
 #
 #
-# $Id: svwait.in,v 1.2 2020-10-03 07:40:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: svwait.in,v 1.3 2020-10-04 11:55:48+05:30 Cprogrammer Exp mbhangui $
 #
 host=@HOST@
 if [ $# != 2 ] ; then
@@ -28,7 +31,7 @@ do
 		break
 	fi
 	if [ -d $service_pwd/supervise ] ; then
-		echo -n "$i" > $service_pwd/supervise/wait
+		/bin/echo -n "$i" > $service_pwd/supervise/wait
 		# open this file so that fuser, lsof
 		# and friends can find which services are waiting
 		# for some service to start
@@ -45,10 +48,10 @@ if [ $count -lt $2 ] ; then
 		nxt_time=$(expr $cur_time + $remaining)
 		case "$host" in
 			*-*-darwin*|*-*-freebsd*)
-			echo -n "wait until `date --r $nxt_time`" > $service_pwd/supervise/wait
+			/bin/echo -n "wait until `date --r $nxt_time`" > $service_pwd/supervise/wait
 			;;
 			*)
-			echo -n "wait until `date --date=@"$nxt_time"`" > $service_pwd/supervise/wait
+			/bin/echo -n "wait until `date --date=@"$nxt_time"`" > $service_pwd/supervise/wait
 			;;
 		esac
 	fi
