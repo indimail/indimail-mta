@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.262 2020-10-03 07:35:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.263 2020-10-04 11:48:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1431,9 +1431,9 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/event.d
     fi
   elif [ -d /System/Library/LaunchDaemons ] ; then
-    cmp -s %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
+    cmp -s %{shareddir}/boot/svscan.plist /Library/LaunchDaemons >/dev/null 2>&1
     if [ $? -ne 0 ] ; then
-      %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+      %{__cp} %{shareddir}/boot/svscan.plist /Library/LaunchDaemons
     fi
   fi
   # selinux
@@ -2108,9 +2108,9 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/event.d
     fi
   elif [ -d /System/Library/LaunchDaemons ] ; then
-    cmp -s %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
+    cmp -s %{shareddir}/boot/svscan.plist /Library/LaunchDaemons >/dev/null 2>&1
     if [ $? -ne 0 ] ; then
-      %{__cp} %{shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+      %{__cp} %{shareddir}/boot/svscan.plist /Library/LaunchDaemons
     fi
   fi
   if [ -f %{_sysconfdir}/inittab ] ; then # one of these days, this will disappear

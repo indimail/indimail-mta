@@ -666,7 +666,7 @@ warn-auto.sh qmailctl.sh conf-prefix conf-sysconfdir
 	> qmailctl
 	chmod +x $@
 
-indimail.plist: indimail.plist.in conf-libexec conf-sysconfdir
+svscan.plist: svscan.plist.in conf-libexec conf-sysconfdir
 	$(edit) $@.in > $@
 
 indimail-mta.fc: \
