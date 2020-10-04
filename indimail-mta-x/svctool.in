@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.508 2020-10-04 20:54:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.509 2020-10-04 22:02:28+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.508 2020-10-04 20:54:41+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.509 2020-10-04 22:02:28+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -6688,9 +6688,22 @@ create_users()
 	esac
 	case "$host" in
 		*-*-darwin*)
-			/usr/bin/defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList \
-				-array-add indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand \
-				mysql
+		loginwindow="/Library/Preferences/com.apple.loginwindow"
+		defaults read $loginwindow HiddenUsersList | while read line
+		do
+			if [ " $line" = " (" -o " $line" = " )" ] ; then
+				continue
+			fi
+			line=`echo $line | cut -d, -f1`
+			case "$line" in
+				indimail|alias|qmaild|qmaill|qmailp|qmailq|qmailr|qmails|qscand|mysql)
+				echo $line
+				;;
+				*)
+				defaults write $loginwindow HiddenUsersList -array-add $line
+				;;
+			esac
+		done
 		;;
 	esac
 	) 2>/tmp/svctool.user.$$
