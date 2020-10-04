@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.506 2020-10-03 12:47:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.507 2020-10-04 11:50:26+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -31,7 +31,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.506 2020-10-03 12:47:50+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.507 2020-10-04 11:50:26+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -1131,8 +1131,8 @@ elif [ -f /usr/lib/systemd/system/svscan.service -a -f /bin/systemctl ] ; then
   else
     echo "svscan service is configured to run via systemd"
   fi
-elif [ -d /System/Library/LaunchDaemons ] ; then
-  /bin/launchctl list indimail
+elif [ -d /Library/LaunchDaemons ] ; then
+  /bin/launchctl list org.indimail.svscan
   if [ $? -ne 0 ]; then
     echo "! svscan service not configured in launchd" 1>&2
     OK=0
@@ -1488,9 +1488,28 @@ if [ -f "$DESTDIR"$QmailBinPrefix/bin/bogofilter ] ; then
 		$chown alias:qmail "$DESTDIR"$QmailHOME/alias/.qmail-B"$i"
 	done
 fi
+if [ ! -d "$DESTDIR"$QmailHOME/domains ] ; then
+	/bin/mkdir -p "$DESTDIR"$QmailHOME/domains
+	if [ $? -ne 0 ] ; then
+		return 1
+	fi
+	$chown root:qmail "$DESTDIR"$QmailHOME/domains
+	/bin/chmod 775 "$DESTDIR"$QmailHOME/domains
+fi
+if [ ! -d "$DESTDIR"$QmailHOME/inquery ] ; then
+	/bin/mkdir -p "$DESTDIR"$QmailHOME/inquery
+	if [ $? -ne 0 ] ; then
+		return 1
+	fi
+	$chown indimail:qmail "$DESTDIR"$QmailHOME/inquery
+	/bin/chmod 770 "$DESTDIR"$QmailHOME/inquery
+fi
 if [ ! -d "$DESTDIR"$QmailHOME/domains/$default_domain ] ; then
-		/bin/mkdir -p "$DESTDIR"$QmailHOME/domains/$default_domain
-		$chown indimail:indimail "$DESTDIR"$QmailHOME/domains/$default_domain
+	/bin/mkdir -p "$DESTDIR"$QmailHOME/domains/$default_domain
+	if [ $? -ne 0 ] ; then
+		return 1
+	fi
+	$chown indimail:indimail "$DESTDIR"$QmailHOME/domains/$default_domain
 fi
 }
 
@@ -4096,7 +4115,7 @@ echo "exec 2>&1"
 echo ""
 echo "# Wait for 30 seconds after MySQL service to be up"
 echo "if [ -d $SERVICEDIR/mysql.3306 -a ! -f $SERVICEDIR/mysql.3306/down ] ; then"
-echo "  $libexecdir/svwait /service/mysql.3306 10"
+echo "  $libexecdir/svwait $SERVICEDIR/mysql.3306 10"
 echo "fi"
 echo ""
 echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/pwdlookup/variables \\"
@@ -4292,7 +4311,7 @@ echo "exec 2>&1"
 echo ""
 echo "# Wait for 30 seconds after MySQL service to be up"
 echo "if [ -d $SERVICEDIR/mysql.3306 -a ! -f $SERVICEDIR/mysql.3306/down ] ; then"
-echo "  $libexecdir/svwait /service/mysql.3306 10"
+echo "  $libexecdir/svwait $SERVICEDIR/mysql.3306 10"
 echo "fi"
 echo ""
 echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/inlookup.$base_fifo_name/variables sh -c \""
@@ -6769,7 +6788,33 @@ create_qmail_config()
 
 create_startup()
 {
-	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
+	case "$host" in
+		*-*-darwin*)
+		if [ -n "$DESTDIR" ] ; then
+			mkdir -p "$DESTDIR"/etc
+		fi
+		if [ ! -f /etc/synthetic.conf ] ; then
+			echo "Creating /service in /etc/synthetic.conf"
+			printf "service\tSystem/Volumes/Data%s\n" $sysconfdir"$servicedir" > "$DESTDIR"/etc/synthetic.conf
+		else
+			grep "^service" /etc/synthetic.conf >/dev/null
+			if [ $? -ne 0 ] ; then
+				echo "Creating /service in /etc/synthetic.conf"
+				if [ -z "$DESTDIR" ] ; then
+					printf "service\tSystem/Volumes/Data%s\n" $sysconfdir"$servicedir" >> /etc/synthetic.conf
+				else
+				(
+					printf "service\tSystem/Volumes/Data%s\n" $sysconfdir"$servicedir"
+					cat /etc/synthetic.conf
+				) > "$DESTDIR"/etc/synthetic.conf
+				fi
+			else
+				echo "/service exists in /etc/synthetic.conf"
+			fi
+		fi
+		;;
+	esac
+	if [ -x "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
 		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -status
 	else
 		if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
@@ -6804,11 +6849,11 @@ create_startup()
 				/bin/chmod 755 $QmailBinPrefix/etc/rc.d/svscan
 				service svscan enable
 			fi
-		elif [ -d /System/Library/LaunchDaemons ] ; then
-			cmp -s "$DESTDIR"$shareddir/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1
+		elif [ -d /Library/LaunchDaemons ] ; then
+			cmp -s "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist >/dev/null 2>&1
 			if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in upstart /System/Library/LaunchDaemons/indimail.plist"
-				/bin/cp "$DESTDIR"$shareddir/boot/indimail.plist /System/Library/LaunchDaemons
+				echo "svscan startup enabled in upstart /Library/LaunchDaemons/org.indimail.svscan.plist"
+				/bin/cp "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist
 			fi
 		fi
 	fi
@@ -10008,24 +10053,38 @@ case $option in
 		;;
 
 		add-boot)
+		[ `id -u` = 0 ] || exit 4
+		case "$host" in
+			*-*-darwin*)
+			if [ " $servicedir" = " " ] ; then
+				echo "Supervise Directory not specified" 1>&2
+				usage 1
+			fi
+			;;
+		esac
 		create_startup
 		;;
 
 		rm-boot)
+		[ `id -u` = 0 ] || exit 4
 		remove_startup
 		;;
 
 		add-alt)
+		[ `id -u` = 0 ] || exit 4
 		add_alternatives
 		;;
 		remove-alt)
+		[ `id -u` = 0 ] || exit 4
 		remove_alternatives
 		;;
 
 		iselinux)
+		[ `id -u` = 0 ] || exit 4
 		selinux_module $config_name $sysconfdir/indimail
 		;;
 		qselinux)
+		[ `id -u` = 0 ] || exit 4
 		selinux_module $config_name $sysconfdir/indimail-mta
 		;;
 
