@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>             <string>org.indimail.svscan</string>
+    <key>Disabled</key>          <false/>
+    <key>RunAtLoad</key>         <true/>
+    <key>KeepAlive</key>
+        <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+            <key>AfterInitialDemand</key>
+            <true/>
+        </dict>
+    <key>Program</key>           <string>@libexecdir@/svscanboot</string>
+    <key>ProgramArguments</key>
+        <array>
+            <string>@libexecdir@/svscanboot</string>
+            <string>@qsysconfdir@/service</string>
+        </array>
+    <key>WorkingDirectory</key>  <string>@sysconfdir@/service</string>
+    <key>EnvironmentVariables</key>
+        <dict>
+            <key>SCANINTERVAL</key>
+            <string>120</string>
+        </dict>
+</dict>
+</plist>
