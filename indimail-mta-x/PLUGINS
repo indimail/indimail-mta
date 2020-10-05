@@ -1,6 +1,14 @@
+#
+# Plugins installation input for installer
+#
+# Base Directory
 d:::0755:::
+
+#
+# @prefix@/lib/indimail/plugins
+#
 d:::0755:/plugins::
-c:::0755:/plugins/:smtpd-plugin.so:smtpd-plugin.so
-c:::0755:/plugins/:smtpd-plugin0.so:smtpd-plugin0.so
-c:::0755:/plugins/:generic.so:generic.so
-c:::0755:/plugins/:qmail_smtpd.so:qmail_smtpd.so
+f:::0755:/plugins/:smtpd-plugin.so:smtpd-plugin.so
+f:::0755:/plugins/:smtpd-plugin0.so:smtpd-plugin0.so
+f:::0755:/plugins/:generic.so:generic.so
+f:::0755:/plugins/:qmail_smtpd.so:qmail_smtpd.so

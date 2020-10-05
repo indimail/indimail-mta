@@ -1,3 +1,5 @@
+# compatibility links  in @indimaildir@ for Darwin
+#
 l::::@indimaildir@/bin:@prefix@/bin:
 l::::@indimaildir@/sbin:@prefix@/sbin:
 l::::@indimaildir@/libexec:@libexecdir@:

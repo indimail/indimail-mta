@@ -1,1 +1,2 @@
-c:::0755:/bin/:inotify:inotify
+# installer input files for Linux programs in @prefix@/bin
+f:::0755:/bin/:inotify:inotify

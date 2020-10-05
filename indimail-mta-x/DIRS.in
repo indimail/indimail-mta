@@ -1,3 +1,5 @@
+# installer input files for Universal directories
+#
 d:::0755:::
 d:root:qmail:0555:@indimaildir@::
 d:alias:qmail:02775:@indimaildir@/alias::

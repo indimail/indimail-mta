@@ -1,1 +1,3 @@
-c:::0644:/boot/:svscan:svscan_rc
+# installer input file for shared directories (FREEBSD)
+# files in @shared@/boot
+f:::0644:/boot/:svscan:svscan_rc

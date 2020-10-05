@@ -1,2 +1,5 @@
-c:::0444:/boot/:StartupParameters.plist:StartupParameters.plist
-c:::0444:/boot/:svscan.plist:svscan.plist
+# installer input files for shared directories (Darwin)
+# @shareddir@
+# files in @shared@/boot
+f:::0444:/boot/:StartupParameters.plist:StartupParameters.plist
+f:::0444:/boot/:svscan.plist:svscan.plist

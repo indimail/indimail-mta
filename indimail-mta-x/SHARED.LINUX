@@ -1,2 +1,5 @@
-c:::0644:/boot/:upstart:upstart
-c:::0644:/boot/:systemd:systemd
+# Linux specific files for startup
+#
+# @shareddir@/boot
+f:::0644:/boot/:upstart:upstart
+f:::0644:/boot/:systemd:systemd
