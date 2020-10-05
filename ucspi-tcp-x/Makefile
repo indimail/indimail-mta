@@ -371,7 +371,7 @@ compile installer.c
 DIRS: DIRS.in
 	$(edit) $@.in > $@
 
-install: it installer DIRS
+install: it installer DIRS BIN SHARED PLUGINS MAN
 	mkdir -p $(DESTDIR)$(prefix)
 	mkdir -p $(DESTDIR)$(prefix)/lib
 	mkdir -p $(DESTDIR)$(shareddir)
@@ -381,6 +381,13 @@ install: it installer DIRS
 	./installer $(DESTDIR)$(shareddir)             < SHARED
 	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
 	./installer $(DESTDIR)$(mandir)                < MAN
+
+uninstall: installer DIRS BIN SHARED PLUGINS MAN
+	sed -n '1!G;h;$p' DIRS    | ./installer $(DESTDIR)
+	sed -n '1!G;h;$p' BIN     | ./installer $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$p' SHARED  | ./installer $(DESTDIR)$(shareddir)
+	sed -n '1!G;h;$p' PLUGINS | ./installer $(DESTDIR)$(prefix)"/lib/indimail"
+	sed -n '1!G;h;$p' MAN     | ./installer $(DESTDIR)$(mandir)
 
 socket.lib: \
 trylsock.c compile load
