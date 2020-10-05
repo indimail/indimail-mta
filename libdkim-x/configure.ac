@@ -51,7 +51,9 @@ case "$host" in
 *-*-darwin*)
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include"
 	CFLAGS="$CFLAGS -I/opt/local/include -Wall"
-	CXXFLAGS="$CXXFLAGS -DBIND_8_COMPAT -DDARWIN -I/opt/local/include -Wno-delete-non-abstract-non-virtual-dtor -Wno-reorder-ctor -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -DDARWIN -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -DBIND_8_COMPAT -I/opt/local/include -Wno-c++11-extensions"
+	CXXFLAGS="$CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-reorder-ctor -Wno-reorder"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	;;
 *)
