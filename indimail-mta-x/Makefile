@@ -2105,7 +2105,7 @@ SHARED: SHARED.in
 MAN: MAN.in MAN.sql
 	([ -f MAN.$(SYSTEM) ] && \
 	cat MAN.in MAN.$(SYSTEM) || cat MAN.in; \
-	[ -n "$(USE_SQL)" ] && cat MAN.sql) > MAN
+	[ -n "$(USE_SQL)" ] && cat MAN.sql || true) > MAN
 
 
 install: \
@@ -2126,6 +2126,7 @@ $(it) $(man) installer DIRS BIN SBIN SHARED MAN
 	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
 	./installer $(DESTDIR)$(libexecdir)            < LIBEXEC
 	./installer $(DESTDIR)$(mandir)                < MAN
+	[ -z $(DESTDIR) ] && ./instcheck || true
 
 uninstall: installer DIRS BIN SBIN SHARED MAN
 	sed -n '1!G;h;$p' DIRS    | ./installer $(DESTDIR)
