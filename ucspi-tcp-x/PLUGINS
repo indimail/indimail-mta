@@ -1,3 +1,4 @@
+# installer input files for plugins - ucspi-tcp
 d::::::
 d::::/plugins::
-c:::0755:/plugins/:rblsmtpd.so:rblsmtpd.so
+f:::0755:/plugins/:rblsmtpd.so:rblsmtpd.so
