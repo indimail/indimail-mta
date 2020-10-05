@@ -68,3 +68,7 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * hier.c, indimail-mta.spec, Makefile: renamed launchd unit file indimail.plist to svscan.plist
   * svwait: replace builtin echo with /bin/echo -n (for Darwin)
   * svctool: fixed users getting added multiple times to com.apple.loginwindow HiddenUsersList
+  * installer new features, 1. uninstall option (-u, -i), 2. create devices, 3. create fifo
+  * Makefile: Added uninstall target
+  * Added comments in installer input files
+  * svctool: remove indimail, indimail-mta users from HiddenUsersList for Darwin

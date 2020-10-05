@@ -108,3 +108,10 @@ creation
 66. svwait: replace builtin echo with /bin/echo -n (for Darwin)
 67. svctool: fixed users getting added multiple times to com.apple.loginwindow
     HiddenUsersList
+- 05/10/2020
+68. installer new features, 1. uninstall option (-u, -i), 2. create devices,
+    3. create fifo
+69. Makefile: Added uninstall target
+70. Added comments in installer input files
+71. svctool: remove indimail, indimail-mta users from HiddenUsersList for
+    Darwin
