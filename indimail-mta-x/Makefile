@@ -2109,9 +2109,7 @@ MAN: MAN.in MAN.sql
 
 
 install: \
-$(it) $(man) conf-qmail conf-prefix conf-libexec \
-conf-shared conf-sysconfdir conf-logdir perm_list.mta \
-installer DIRS BIN SBIN SHARED MAN
+$(it) $(man) installer DIRS BIN SBIN SHARED MAN
 	mkdir -p $(DESTDIR)$(prefix)
 	mkdir -p $(DESTDIR)$(prefix)/lib
 	mkdir -p $(DESTDIR)$(qmaildir)
@@ -2128,6 +2126,16 @@ installer DIRS BIN SBIN SHARED MAN
 	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
 	./installer $(DESTDIR)$(libexecdir)            < LIBEXEC
 	./installer $(DESTDIR)$(mandir)                < MAN
+
+uninstall: installer DIRS BIN SBIN SHARED MAN
+	sed -n '1!G;h;$p' DIRS    | ./installer $(DESTDIR)
+	sed -n '1!G;h;$p' BIN     | ./installer $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$p' SBIN    | ./installer $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$p' SHARED  | ./installer $(DESTDIR)$(shareddir)
+	sed -n '1!G;h;$p' ETC     | ./installer $(DESTDIR)$(qsysconfdir)
+	sed -n '1!G;h;$p' PLUGINS | ./installer $(DESTDIR)$(prefix)"/lib/indimail"
+	sed -n '1!G;h;$p' LIBEXEC | ./installer $(DESTDIR)$(libexecdir)
+	sed -n '1!G;h;$p' MAN     | ./installer $(DESTDIR)$(mandir)
 
 slurpclose.o: compile slurpclose.c slurpclose.h
 	./compile slurpclose.c
