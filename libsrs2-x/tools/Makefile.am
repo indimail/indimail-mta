@@ -8,4 +8,5 @@ man_MANS = srs.1
 
 srs_SOURCES = srs.c
 srs_CFLAGS = -fPIC -fPIE
-srs_LDADD = -L../libsrs2 -lsrs2
+srs_LDFLAGS = $(LDFLAGS)
+srs_LDADD = ../libsrs2/libsrs2.la
