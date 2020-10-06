@@ -72,3 +72,8 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * Makefile: Added uninstall target
   * Added comments in installer input files
   * svctool: remove indimail, indimail-mta users from HiddenUsersList for Darwin
+  * Makefile: run instcheck to set permissions on make install.
+  * indimail-mta: Makefile: replaced g++ with c++ for portability
+  * indimail-mta, ucspi-tcp: fixed uninstall target
+  * installer.c: fixed setting of symbolic links
+  * qmail-local.c: fixed bug with loopcounter in qmail-local.c - initialized maxdeliveredto
