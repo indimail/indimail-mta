@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.34  2020-10-06 14:29:27+05:30  Cprogrammer
+ * fixed bug with loopcounter in qmail-local.c - initialized maxdeliveredto
+ *
  * Revision 1.33  2020-09-30 20:39:16+05:30  Cprogrammer
  * Darwin port for syncdir
  *
@@ -616,7 +619,7 @@ mailforward(char **recips)
 void
 bouncexf()
 {
-	int             match, matches = 0, maxdeliveredto;
+	int             match, found = 0, maxdeliveredto = 0;
 	substdio        ss;
 
 	if (seek_begin(0) == -1)
@@ -632,8 +635,8 @@ bouncexf()
 		if (messline.len <= 1)
 			break;
 		if (messline.len == dtline.len && !str_diffn(messline.s, dtline.s, dtline.len))
-			matches++;
-		if (maxdeliveredto > -1 && matches > maxdeliveredto)
+			found++;
+		if (maxdeliveredto > -1 && found > maxdeliveredto)
 			strerr_die1x(100, "This message is looping: it already has my Delivered-To line. (#5.4.6)");
 	}
 }
@@ -1142,7 +1145,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.33 2020-09-30 20:39:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.34 2020-10-06 14:29:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
