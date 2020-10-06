@@ -1557,6 +1557,7 @@ dktest.8: dktest.9 conf-sysconfdir
 dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
 	((./compile -I/usr/include/dkim -I/opt/local/include/dkim \
+		-I/usr/include/dkim \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 	c++ -o trydkim trydkim.o dns_text.o \
 	`cat dns.lib` -L/usr/local/lib -L/opt/local/lib \
@@ -1567,13 +1568,13 @@ compile trydkim.c dns_text.o conf-dkim dns.lib
 hasdkim.h: dns_text.o \
 trydkim.c compile load dns.lib dkim.lib conf-indi
 	((./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
+		-I/usr/include/dkim \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 		c++ -o trydkim trydkim.o dns_text.o \
 		`cat dkim.lib dns.lib` -L/usr/local/lib -L/opt/local/lib \
 		-lcrypto -lqmail ) >/dev/null 2>&1 \
 		&& (echo \#define HASDKIM 1) || exit 0) > hasdkim.h; \
-
-	rm -f trydkim.o trydkim
+		rm -f trydkim.o trydkim
 
 qmail-dkim: qmail-dkim.o date822fmt.o auto_control.o \
 auto_qmail.o variables.o control.o MakeArgs.o dns_text.o \
@@ -1587,7 +1588,8 @@ dns.lib dkim.lib conf-ld-$(SYSTEM)
 qmail-dkim.o: \
 compile qmail-dkim.c qmail.h auto_qmail.h control.h domainkeys.h \
 hasdkim.h variables.h auto_control.h MakeArgs.h
-	./compile -I/usr/include/dkim -I/opt/local/include/dkim qmail-dkim.c
+	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
+		-I/opt/local/include/dkim qmail-dkim.c
 
 qmail-dkim.8: qmail-dkim.9 conf-sysconfdir
 	cat qmail-dkim.9 \
@@ -1774,7 +1776,7 @@ socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql conf-ld-$(SYSTEM)
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
 		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o hmac_sha1.o \
 		`cat socket.lib dns.lib tls.lib` `cat conf-ld-$(SYSTEM) 2>/dev/null` \
-		-lqmail ; \
+		-L/usr/local/lib -lqmail ; \
 	fi
 
 qmail-smtpd: \
@@ -2198,21 +2200,25 @@ compile splogger.c
 	./compile splogger.c
 
 srs.lib: trysrs.c compile load conf-srs dns.lib
-	((./compile -I/usr/include/srs2 -I/opt/local/include/srs2 \
-	`grep -h -v "^#" conf-srs` trysrs.c && \
-	./load trysrs -L/opt/local/lib -lsrs2 ) >/dev/null 2>&1 \
-	&& echo "-lsrs2" || exit 0 ) > srs.lib
-	rm -f trysrs.o trysrs
+	((./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
+		-I/opt/local/include/srs2 \
+		`grep -h -v "^#" conf-srs` trysrs.c && \
+		./load trysrs --L/usr/local/lib L/opt/local/lib -lsrs2 ) \
+		>/dev/null 2>&1 && echo "-lsrs2" || exit 0 ) > srs.lib
+		rm -f trysrs.o trysrs
 
-hassrs.h:  trysrs.c compile load srs.lib conf-indi
-	((./compile -I/usr/include/srs2 -I/opt/local/include/srs2 \
-	`grep -h -v "^#" conf-srs` \
-	trysrs.c && ./load trysrs -L/opt/local/lib `cat srs.lib`) >/dev/null 2>&1 \
-	&& (echo \#define HAVESRS 1) || exit 0 ) > hassrs.h
-	rm -f trysrs.o trysrs
+hassrs.h: trysrs.c compile load srs.lib conf-indi
+	((./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
+		-I/opt/local/include/srs2 `grep -h -v "^#" conf-srs` \
+		trysrs.c && ./load trysrs -L/usr/local/lib \
+		-L/usr/local/lib -L/opt/local/lib `cat srs.lib`) \
+		>/dev/null 2>&1 \
+		&& (echo \#define HAVESRS 1) || exit 0 ) > hassrs.h
+		rm -f trysrs.o trysrs
 
 srs.o: compile srs.c hassrs.h srs.h auto_qmail.h control.h rcpthosts.h
-	./compile -I/usr/include/srs2 -I/opt/local/include/srs2 srs.c
+	./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
+		-I/opt/local/include/srs2 srs.c
 
 srsfilter: \
 load srsfilter.o srs.o qmail.o control.o rcpthosts.o \
