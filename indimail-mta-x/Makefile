@@ -1556,28 +1556,29 @@ dktest.8: dktest.9 conf-sysconfdir
 
 dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
-	( ( ./compile -I/usr/include/dkim -I/opt/local/include/dkim \
+	((./compile -I/usr/include/dkim -I/opt/local/include/dkim \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
-	g++ -o trydkim trydkim.o dns_text.o \
-	`cat dns.lib` -L/opt/local/lib \
-	-ldkim -lcrypto -ldkim -lqmail ) >/dev/null 2>&1 \
-	&& echo "-ldkim" || exit 0 ) > dkim.lib
+	c++ -o trydkim trydkim.o dns_text.o \
+	`cat dns.lib` -L/usr/local/lib -L/opt/local/lib \
+	-ldkim -lcrypto -ldkim -lqmail) >/dev/null 2>&1 \
+	&& echo "-ldkim" || exit 0) > dkim.lib
 	rm -f trydkim.o trydkim
 
 hasdkim.h: dns_text.o \
 trydkim.c compile load dns.lib dkim.lib conf-indi
-	( ( ./compile -I/usr/include/dkim -I/opt/local/include/dkim \
+	((./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
-	g++ -o trydkim trydkim.o dns_text.o \
-	`cat dkim.lib dns.lib` -L/opt/local/lib \
-	-lcrypto -lqmail ) >/dev/null 2>&1 \
-	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h
+		c++ -o trydkim trydkim.o dns_text.o \
+		`cat dkim.lib dns.lib` -L/usr/local/lib -L/opt/local/lib \
+		-lcrypto -lqmail ) >/dev/null 2>&1 \
+		&& (echo \#define HASDKIM 1) || exit 0) > hasdkim.h; \
+
 	rm -f trydkim.o trydkim
 
 qmail-dkim: qmail-dkim.o date822fmt.o auto_control.o \
 auto_qmail.o variables.o control.o MakeArgs.o dns_text.o \
 dns.lib dkim.lib conf-ld-$(SYSTEM)
-	g++ -o qmail-dkim qmail-dkim.o date822fmt.o auto_control.o \
+	c++ -o qmail-dkim qmail-dkim.o date822fmt.o auto_control.o \
 	auto_qmail.o variables.o control.o MakeArgs.o \
 	dns_text.o `cat dns.lib dkim.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` \
@@ -2129,14 +2130,14 @@ $(it) $(man) installer DIRS BIN SBIN SHARED MAN
 	[ -z $(DESTDIR) ] && ./instcheck || true
 
 uninstall: installer DIRS BIN SBIN SHARED MAN
-	sed -n '1!G;h;$p' DIRS    | ./installer $(DESTDIR)
-	sed -n '1!G;h;$p' BIN     | ./installer $(DESTDIR)$(prefix)
-	sed -n '1!G;h;$p' SBIN    | ./installer $(DESTDIR)$(prefix)
-	sed -n '1!G;h;$p' SHARED  | ./installer $(DESTDIR)$(shareddir)
-	sed -n '1!G;h;$p' ETC     | ./installer $(DESTDIR)$(qsysconfdir)
-	sed -n '1!G;h;$p' PLUGINS | ./installer $(DESTDIR)$(prefix)"/lib/indimail"
-	sed -n '1!G;h;$p' LIBEXEC | ./installer $(DESTDIR)$(libexecdir)
-	sed -n '1!G;h;$p' MAN     | ./installer $(DESTDIR)$(mandir)
+	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
+	sed -n '1!G;h;$$p' LIBEXEC | ./installer -ui $(DESTDIR)$(libexecdir)
+	sed -n '1!G;h;$$p' PLUGINS | ./installer -ui $(DESTDIR)$(prefix)"/lib/indimail"
+	sed -n '1!G;h;$$p' ETC     | ./installer -ui $(DESTDIR)$(qsysconfdir)
+	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
+	sed -n '1!G;h;$$p' SBIN    | ./installer -ui $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$$p' DIRS    | ./installer -u  $(DESTDIR)
 
 slurpclose.o: compile slurpclose.c slurpclose.h
 	./compile slurpclose.c
