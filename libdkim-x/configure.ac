@@ -44,9 +44,11 @@ case "$host" in
 	;;
 *-*-freebsd*)
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include"
-	CFLAGS="$CFLAGS -I/opt/local/include -Wall"
-	CXXFLAGS="$CXXFLAGS -DFREEBSD -I/opt/local/include -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
-	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	CFLAGS="$CFLAGS -I/usr/local/include -Wall"
+	CXXFLAGS="$CXXFLAGS -DFREEBSD -I/usr/local/include -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -Wno-delete-non-virtual-dtor -Wno-deprecated-register -Wno-reorder"
+	CXXFLAGS="$CXXFLAGS -Wno-delete-non-abstract-non-virtual-dtor"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	;;
 *-*-darwin*)
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include"
