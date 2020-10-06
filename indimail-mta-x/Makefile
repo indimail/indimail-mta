@@ -2203,7 +2203,7 @@ srs.lib: trysrs.c compile load conf-srs dns.lib
 	((./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
 		-I/opt/local/include/srs2 \
 		`grep -h -v "^#" conf-srs` trysrs.c && \
-		./load trysrs --L/usr/local/lib L/opt/local/lib -lsrs2 ) \
+		./load trysrs -L/usr/local/lib -L/opt/local/lib -lsrs2 ) \
 		>/dev/null 2>&1 && echo "-lsrs2" || exit 0 ) > srs.lib
 		rm -f trysrs.o trysrs
 
