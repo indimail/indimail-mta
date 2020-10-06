@@ -348,6 +348,35 @@ or
 $ qmailctl start # Universal
 ```
 
+After starting svscan as given above, your system will be ready to send and receive mails, provided you have set your system hostname, domain name IP addresses and setup mail exchanger in DNS. You can look at this [guide](https://www.godaddy.com/garage/configuring-dns-for-email-a-quick-beginners-guide/) to do that.
+
+## Check Status of Services
+
+The svstat command can be used to query the status of various services. You can query for all services like below. You can query the status of a single service like running a command like this.
+
+```
+% sudo svstat /service/qmail-smtpd.25
+```
+The argument to svstat should be a directory in /service. Each directory in /service refers to an indimail-mta/indimail service. e.g. `/service/qmail-smtpd.25` refers to the SMTP service serving port 25.
+
+```
+$ sudo svstat /service/*
+/service/dnscache: up (pid 120532) 4394 seconds
+/service/greylist.1999: up (pid 120502) 4394 seconds
+/service/pwdlookup: up (pid 120515) 4394 seconds
+/service/qmail-daned.1998: up (pid 120413) 4394 seconds
+/service/qmail-logfifo: up (pid 120499) 4394 seconds
+/service/qmail-qmqpd.628: down 4394 seconds
+/service/qmail-qmtpd.209: up (pid 120487) 4394 seconds
+/service/qmail-send.25: up (pid 120469) 4394 seconds
+/service/qmail-smtpd.25: up (pid 120416) 4394 seconds
+/service/qmail-smtpd.366: up (pid 120516) 4394 seconds
+/service/qmail-smtpd.465: up (pid 120492) 4394 seconds
+/service/qmail-smtpd.587: up (pid 120473) 4394 seconds
+/service/qscanq: up (pid 120500) 4394 seconds
+/service/udplogger.3000: up (pid 120463) 4394 seconds
+```
+
 # Binary Packages Build
 
 If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md)
