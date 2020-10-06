@@ -383,11 +383,11 @@ install: it installer DIRS BIN SHARED PLUGINS MAN
 	./installer $(DESTDIR)$(mandir)                < MAN
 
 uninstall: installer DIRS BIN SHARED PLUGINS MAN
-	sed -n '1!G;h;$p' DIRS    | ./installer $(DESTDIR)
-	sed -n '1!G;h;$p' BIN     | ./installer $(DESTDIR)$(prefix)
-	sed -n '1!G;h;$p' SHARED  | ./installer $(DESTDIR)$(shareddir)
-	sed -n '1!G;h;$p' PLUGINS | ./installer $(DESTDIR)$(prefix)"/lib/indimail"
-	sed -n '1!G;h;$p' MAN     | ./installer $(DESTDIR)$(mandir)
+	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
+	sed -n '1!G;h;$$p' PLUGINS | ./installer -ui $(DESTDIR)$(prefix)"/lib/indimail"
+	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
+	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$$p' DIRS    | ./installer -u  $(DESTDIR)
 
 socket.lib: \
 trylsock.c compile load
