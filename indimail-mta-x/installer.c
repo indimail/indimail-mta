@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.6  2020-10-06 11:51:26+05:30  Cprogrammer
+ * fixed handling of symbolic files
+ *
  * Revision 1.5  2020-10-05 14:57:42+05:30  Cprogrammer
  * added new features
  * 1. uninstall option (-u, -i)
@@ -209,16 +212,16 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		switch (*type)
 		{
 		case 'l':
-			print_info("ulink", 0, name, -1, -1, -1);
-			if (lstat(name, &st) == -1) {
+			print_info("unlink", 0, target.s, -1, -1, -1);
+			if (lstat(target.s, &st) == -1) {
 				if (errno == error_noent)
 					return;
-				strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
+				strerr_die4sys(111, FATAL, "lstat: ", target.s, ": ");
 			}
 			if ((st.st_mode & S_IFMT) == S_IFDIR)
-				strerr_die3x(111, FATAL, name, ": is a directory");
-			if (unlink(name) == -1 && errno != error_noent)
-				strerr_die4sys(111, FATAL, "unable to unlink ", name, ": ");
+				strerr_die3x(111, FATAL, target.s, ": is a directory");
+			if (unlink(target.s) == -1 && errno != error_noent)
+				strerr_die4sys(111, FATAL, "unable to unlink ", target.s, ": ");
 			break;
 		case 'd':
 			if (ign_dir)
@@ -394,7 +397,7 @@ main(argc, argv)
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.5 2020-10-05 14:57:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: installer.c,v 1.6 2020-10-06 11:51:26+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
