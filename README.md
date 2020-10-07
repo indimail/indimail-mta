@@ -65,6 +65,8 @@ Ubuntu 16.04 - libcom-err2, libmysqlclient-dev
 
 ## Download / clone libqmail
 
+libqmail uses GNU autotools. You need to haave autoconf, automake, libtool and pkg config package. Follow the instructions below to have them installed in case you don't have them.
+
 ```
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/libqmail.git
@@ -92,12 +94,16 @@ NOTE: For Darwin (Mac OSX), install [MacPorts](https://www.macports.org/) or bre
 
 ## Download indimail-mta
 
+After you clone indimail-mta, you will find two subfolders under indimail-mta directory (libdkim-x and libsrs2-x).
+
 ```
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/indimail-mta.git
 ```
 
 ## Compile libdkim-x (with dynamic libaries)
+
+This library from ALT-N Technologies is required for qmail-dkim. If you don't have this library, indimail-mta will be built without DKIM support.
 
 ```
 $ cd /usr/local/src/indimail-mta/libdkim-x
@@ -110,6 +116,8 @@ $ sudo ./make -s install-strip
 
 ## Compile libsrs2-x (with dynamic libaries)
 
+This library from [libsrs2.org](https://www.libsrs2.org/) is required for [SRS](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme). Else indimail-mta will get built without SRS support.
+
 ```
 $ cd /usr/local/src/indimail-mta/libsrs2-x
 $ ./default.configure
@@ -121,7 +129,7 @@ $ sudo ./make install-strip
 
 ## Build ucspi-tcp
 
-To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir and conf-shared. Defaults are given in the table below. You can also use the script default.configure to set the below values.
+To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir and conf-shared. Defaults are given in the table below. If you are ok with defaults, you can run the script default.configure to set the below values.
 
 **Linux**
 
@@ -152,7 +160,7 @@ $ sudo make install or sudo ./qmake install
 
 ## Build indimail-mta
 
-To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared and conf-libexec. Defaults are given in the table below. You can also use the script default.configure to set the below values.
+To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared and conf-libexec. Defaults are given in the table below. If you are OK with defaults, you can run the script default.configure to set the below values.
 
 **Linux**
 
@@ -199,7 +207,12 @@ $ git clone https://github.com/mbhangui/indimail-virtualdomains.git
 
 ### Build nssd
 
-Optional component. Required only if you require the Standard C library routines to use Name Service Switch to authenticate from a MySQL db (e.g. for authenticated SMTP, IMAP, POP3, etc). Your passwd(5) database gets extended to indimail's MySQL database. You will also need to edit /etc/nsswitch.conf and have a line like this `passwd: files nssd`. Check the man page for nssd(8) and nsswitch.conf(5)
+Optional component. Required only if you require the Standard C library routines to use Name Service Switch to authenticate from a MySQL db (e.g. for authenticated SMTP, IMAP, POP3, etc). Your passwd(5) database gets extended to indimail's MySQL database. You will also need to edit /etc/nsswitch.conf and have a line like this.
+```
+passwd: files nssd
+```
+
+Check the man page for nssd(8) and nsswitch.conf(5)
 
 ```
 $ cd /usr/local/src/indimail-virtualdomans/nssd-x
