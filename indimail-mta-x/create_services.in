@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.90 2020-10-07 16:51:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.91 2020-10-07 19:21:23+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -286,8 +286,13 @@ $svctool --config=users $extra_opt
 if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
   echo "Attempting to Stop & Disable MySQL service"
   if [ -f /usr/local/etc/rc.d/mysql-server ] ; then
-    /usr/local/etc/rc.d/mysql-server stop
-    service mysql disable
+    if [ -f /var/db/mysql/FreeBSD.org.pid ] ; then
+      /usr/local/etc/rc.d/mysql-server stop
+    fi
+    service mysql-server enabled
+    if [ $? -eq 0 ] ; then
+      service mysql-server disable
+    fi
   elif [ -f /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist ] ; then
     launchctl unload -w /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist 2>/dev/null
     launchctl remove /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist
