@@ -194,11 +194,17 @@ $ sudo make install or sudo qmake install
 (check version in indimail-mta/indimail-mta-x/conf-version)
 
 Note: for Darwin
+
 ```
-# port install openldap mrtg
+$ sudo port install openldap mrtg
 ```
 
-## Download optional components
+## Download/Build Optional Components
+
+If you don't need any of the optional components, you can directly jump to the 'Setup & Configuration' section below.
+
+-----------------------------------------------------
+## indimail-virtualdomains
 
 Optional. Required only if you want to use virtualdomains to create many domains on a single host
 
@@ -219,8 +225,9 @@ $ sudo make install-strip
 ```
 
 NOTE: for Darwin
+
 ```
-# port install db48
+$ sudo port install db48
 ```
 
 (check version in indimail-virtualdomains/bogofilter-x/conf-version)
@@ -239,6 +246,7 @@ $ sudo make install-strip
 ### Build nssd
 
 Optional component. Required only if you require the Standard C library routines to use Name Service Switch to authenticate from a MySQL db (e.g. for authenticated SMTP, IMAP, POP3, etc). Your passwd(5) database gets extended to indimail's MySQL database. You will also need to edit /etc/nsswitch.conf and have a line like this.
+
 ```
 passwd: files nssd
 ```
@@ -283,6 +291,7 @@ $ sudo make install-strip
 (check version in indimail-virtualdomains/courier-imap-x/conf-version)
 
 NOTE: for Darwin
+
 ```
 # port install libidn2 pcre db48
 ```
