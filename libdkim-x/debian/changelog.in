@@ -32,3 +32,4 @@ libdkim (@version@-@release@) unstable; urgency=medium
   * check for null domain after DKIMDOMAIN replacement
   * fixed BUG with domain assignment
   * renamed DKKIMDOMAIN to BOUNCEDOMAIN
+  * configure.ac: changes for FreeBSD, Darwin
