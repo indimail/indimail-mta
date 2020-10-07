@@ -139,7 +139,7 @@ conf-prefix|/usr
 conf-sysconfdir|/etc/indimail
 conf-shared|/usr/share/indimail
 
-**FreeBSD**
+**FreeBSD** / **Darwin**
 
 config file|value
 -----------|------
@@ -172,7 +172,7 @@ conf-sysconfdir|/etc/indimail
 conf-shared|/usr/share/indimail
 conf-libexec|/usr/libexec/indimail
 
-**FreeBSD**
+**FreeBSD** / **Darwin**
 
 config file|value
 -----------|------
