@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_fmt.c,v $
+ * Revision 1.5  2020-10-08 20:03:07+05:30  Cprogrammer
+ * fixed bug in ip6_fmt() - Erwin Hoffman
+ *
  * Revision 1.4  2020-08-03 17:24:33+05:30  Cprogrammer
  * use qmail library
  *
@@ -19,24 +22,27 @@
 #include "ip4.h"
 #include "ip6.h"
 
+/*
+ * authors fefe, Erwin Hoffman
+ */
+
 unsigned int
 ip6_fmt(char *s, char ip[16])
 {
-	unsigned int    len, i, temp, compressing, compressed;
+	unsigned int    len, i, temp, temp0, compressing, compressed;
 	int             j;
-	char            ip4[4];
 
 	len = compressing = compressed = 0;
 	for (j = 0; j < 16; j += 2) {
-		if (j == 12 && byte_equal((char *) ip, 12, (char *) V4mappedprefix)) {
-			for (i = 0; i < 4; i++) {
-				ip4[i] = ip[i + 12];
-			}
-			len += ip4_fmt(s, ip4);
+		if (j == 12 && ip6_isv4mapped(ip)) {
+			len += ip4_fmt(s, ip + 12);
 			break;
 		}
 		temp = ((unsigned long) (unsigned char) ip[j] << 8) + (unsigned long) (unsigned char) ip[j + 1];
-		if (temp == 0 && !compressed) {
+		temp0 = 0;
+		if (!compressing && j < 16)
+			temp0 = ((unsigned long) (unsigned char) ip[j + 2] << 8) + (unsigned long) (unsigned char) ip[j + 3];
+		if (temp == 0 && temp0 == 0 && !compressed) {
 			if (!compressing) {
 				compressing = 1;
 				if (j == 0) {
@@ -65,10 +71,10 @@ ip6_fmt(char *s, char ip[16])
 		}
 	}
 	if (compressing) {
-		if (s)
-			*s++ = ':';
+		*s++ = ':';
 		++len;
 	}
+
 	return len;
 }
 
