@@ -2985,16 +2985,6 @@ pathexec_run.o: compile pathexec_run.c pathexec.h
 pathexec_env.o: compile pathexec_env.c pathexec.h
 	./compile pathexec_env.c
 
-tomaildir: load tomaildir.o sig.a open.a  env.a \
-fs.a now.o
-	./load tomaildir sig.a open.a  env.a fs.a \
-	now.o
-
-tomaildir.o: compile tomaildir.c \
-sig.h byte.h exit.h substdio.h strerr.h error.h fmt.h \
-str.h now.h datetime.h env.h
-	./compile tomaildir.c
-
 getconf.o: compile getconf.c openreadclose.h getconf.h
 	./compile getconf.c
 
@@ -3244,35 +3234,37 @@ softlimit.o: compile pathexec.h softlimit.c
 supervise: deepsleep.o load supervise.o iopause.o
 	./load supervise deepsleep.o iopause.o -lqmail
 
-supervise.o: compile supervise.c deepsleep.h iopause.h
-	./compile supervise.c
+supervise.o: compile supervise.c deepsleep.h iopause.h \
+conf-runfs
+	./compile `grep -v "^#" conf-runfs` supervise.c
 
-sig.o: compile sig.c sig.h
-	./compile sig.c
+run_init.o: compile run_init.c
+	./compile `grep -v "^#" conf-runfs` run_init.c
 
-svc: load svc.o
-	./load svc -lqmail
+svc: load svc.o run_init.o
+	./load svc run_init.o -lqmail
 
-svc.o: compile svc.c
-	./compile svc.c
+svc.o: compile svc.c conf-runfs
+	./compile `grep -v "^#" conf-runfs` svc.c
 
-svok: load svok.o
-	./load svok -lqmail
+svok: load svok.o run_init.o
+	./load svok run_init.o -lqmail
 
-svok.o: compile svok.c
-	./compile svok.c
+svok.o: compile svok.c conf-runfs
+	./compile `grep -v "^#" conf-runfs` svok.c
 
 svscan: load svscan.o pathexec_run.o auto_sysconfdir.o
 	./load svscan pathexec_run.o auto_sysconfdir.o -lqmail
 
-svscan.o: compile direntry.h pathexec.h svscan.c auto_sysconfdir.h
-	./compile svscan.c
+svscan.o: compile direntry.h pathexec.h svscan.c \
+auto_sysconfdir.h conf-runfs
+	./compile `grep -v "^#" conf-runfs` svscan.c
 
-svstat: load svstat.o
-	./load svstat -lqmail
+svstat: load svstat.o run_init.o
+	./load svstat run_init.o -lqmail
 
-svstat.o: compile svstat.c
-	./compile svstat.c
+svstat.o: compile svstat.c conf-runfs
+	./compile `grep -v "^#" conf-runfs` svstat.c
 
 tai64n: load tai64n.o timestamp.o
 	./load tai64n timestamp.o -lqmail

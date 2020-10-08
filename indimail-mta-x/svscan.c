@@ -1,7 +1,7 @@
 /*
  * $Log: svscan.c,v $
- * Revision 1.17  2020-10-08 12:33:02+05:30  Cprogrammer
- * set SV_PWD as the parent directory for 'supervise log' process
+ * Revision 1.17  2020-10-08 18:29:45+05:30  Cprogrammer
+ * use /run, /var/run if available
  *
  * Revision 1.16  2020-09-19 20:24:35+05:30  Cprogrammer
  * call setsid() if SETSID environment variable is set
@@ -73,7 +73,7 @@
 #include "auto_sysconfdir.h"
 
 #define SERVICES 1000
-#define SVLOCK   ".svlock"
+#define PIDFILE  "svscan.pid"
 
 #define WARNING "svscan: warning: "
 #define FATAL "svscan: fatal: "
@@ -93,8 +93,30 @@ struct
 	int             pidlog;		/*- 0 if not running */
 	int             pi[2];		/*- defined if flaglog */
 } x[SERVICES];
-int             numx = 0;
-char            fnlog[260];
+static int      numx = 0;
+static int      fdsourcedir = -1;
+static char     fnlog[260];
+static char    *pidfile;
+
+#ifdef USE_RUNFS
+void
+initialize_run()
+{
+	if (!access("/run", F_OK)) {
+		pidfile = "/run/svscan/svscan.pid";
+		if (access("/run/svscan", F_OK) && mkdir("/run/svscan", 0755) == -1)
+			strerr_die2sys(111, FATAL, "unable to mkdir /run/svscan: ");
+	} else
+	if (!access("/var/run", F_OK)) {
+		pidfile = "/var/run/svscan/svscan.pid";
+		if (access("/var/run/svscan", F_OK) && mkdir("/var/run/svscan", 0755) == -1)
+			strerr_die2sys(111, FATAL, "unable to mkdir /var/run/svscan: ");
+	} else {
+		pidfile = "svscan.pid";
+		return;
+	}
+}
+#endif
 
 void
 init_cmd(char *cmmd, int dowait, int shutdown)
@@ -188,7 +210,7 @@ start(char *fn)
 		++numx;
 	}
 	x[i].flagactive = 1;
-	if (!x[i].pid) { /*- supervise pair only if it is not .svscan/log */
+	if (!x[i].pid) { /*- exec supervise fn only if it is not .svscan/log */
 		switch (child = fork())
 		{
 		case -1:
@@ -207,7 +229,7 @@ start(char *fn)
 			x[i].pid = child;
 		}
 	}
-	if (x[i].flaglog && !x[i].pidlog) {
+	if (x[i].flaglog && !x[i].pidlog) { /*- exec supervise log */
 		switch (child = fork())
 		{
 		case -1:
@@ -311,7 +333,7 @@ sighup(int i)
 static void
 sigterm(int i)
 {
-	unlink(SVLOCK);
+	unlink(pidfile);
 	signal(SIGTERM, SIG_IGN);
 	strerr_warn2(INFO, "Stopping svscan", 0);
 	init_cmd(0, 1, 1); /*- run .svscan/shutdown */
@@ -350,14 +372,13 @@ get_lock(char *sdir)
 	int             fd, n;
 	pid_t           pid;
 	char            strnum[FMT_ULONG], buf[8];
-	int             fdsourcedir = -1;
 
 	if (1 == getpid()) { /*- we are running under a docker container as init */
-		if (unlink(SVLOCK) == -1 && errno != error_noent)
+		if (unlink(pidfile) == -1 && errno != error_noent)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 	}
 	pid = -1;
-	if ((fd = open(SVLOCK, O_CREAT|O_WRONLY|O_EXCL, 0644)) >= 0) {
+	if ((fd = open(pidfile, O_CREAT|O_WRONLY|O_EXCL, 0644)) >= 0) {
 		pid = getpid();
 		strnum[n = fmt_ulong(strnum, pid)] = 0;
 		if (write(fd, (char *) &pid, sizeof(pid_t)) == -1 || 
@@ -368,10 +389,10 @@ get_lock(char *sdir)
 		return (0);
 	}
 	if (errno != error_exist)
-		strerr_die4sys(111, FATAL, "unable to obtain lock in ", sdir, ": ");
+		strerr_die4sys(111, FATAL, "unable to obtain lock for ", pidfile, ": ");
 	/* .svlock exists */
-	if ((fd = open(SVLOCK, O_RDONLY, 0644)) == -1)
-		strerr_die4sys(111, FATAL, "unable to read lock in ", sdir, ": ");
+	if ((fd = open(pidfile, O_RDONLY, 0644)) == -1)
+		strerr_die4sys(111, FATAL, "unable to read ", pidfile, ": ");
 	if (read(fd, (char *) &pid, sizeof(pid)) == -1)
 		strerr_die2sys(111, FATAL, "unable to get pid from lock: ");
 	close(fd);
@@ -379,7 +400,7 @@ get_lock(char *sdir)
 		return (0);
 	errno = 0;
 	if (pid == -1 || (kill(pid, 0) == -1 && errno == error_srch)) { /*- process does not exist */
-		if (unlink(SVLOCK) == -1)
+		if (unlink(pidfile) == -1)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 		return (1);
 	}
@@ -389,20 +410,14 @@ get_lock(char *sdir)
 	/*- let us find out if the process is svscan */
 	strnum[fmt_ulong(strnum, pid)] = 0;
 
-	/*- save the current dir */
-	if ((fdsourcedir = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
-		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-
 	/*- use the /proc filesystem to figure out command name */
-	if (chdir("/proc") == -1) { /*- on systems without /proc filesystem, give up */
-		strerr_warn5(FATAL, "chdir: ", sdir, ": running with pid ", strnum, 0);
-		_exit (111);
-	}
+	if (chdir("/proc") == -1) /*- on systems without /proc filesystem, give up */
+		strerr_die3x(111, FATAL, "chdir: svscan running with pid ", strnum);
 	if (chdir(strnum) == -1) { /*- process is now dead */
 		if (fchdir(fdsourcedir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
 		close(fdsourcedir);
-		if (unlink(SVLOCK) == -1)
+		if (unlink(pidfile) == -1)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 		return (1);
 	}
@@ -411,7 +426,7 @@ get_lock(char *sdir)
 		if (fchdir(fdsourcedir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
 		close(fdsourcedir);
-		if (unlink(SVLOCK) == -1)
+		if (unlink(pidfile) == -1)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 		return (1);
 	}
@@ -420,7 +435,7 @@ get_lock(char *sdir)
 		if (fchdir(fdsourcedir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
 		close(fdsourcedir);
-		if (unlink(SVLOCK) == -1)
+		if (unlink(pidfile) == -1)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 		return (1);
 	}
@@ -435,7 +450,7 @@ get_lock(char *sdir)
 	if (fchdir(fdsourcedir) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
 	close(fdsourcedir);
-	if (unlink(SVLOCK) == -1)
+	if (unlink(pidfile) == -1)
 		strerr_die2sys(111, FATAL, "unable to delete lock: ");
 	return (1);
 }
@@ -446,12 +461,24 @@ main(int argc, char **argv)
 	unsigned long   wait;
 	char           *s;
 
+	/*- save the current dir */
+	if ((fdsourcedir = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
+		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+#ifdef USE_RUNFS
+	initialize_run();
+#else
+	pidfile = "svscan.pid";
+#endif
 	if (argv[0] && argv[1]) {
 		if (chdir(argv[1]) == -1)
 			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[1], ": ");
 		while (get_lock(argv[1])) ;
-	} else
+	} else {
+#ifdef USE_RUNFS
+		pidfile = "svscan.pid";
+#endif
 		while (get_lock(".")) ;
+	}
 	if (env_get("SETSID"))
 		(void) setsid();
 	signal(SIGHUP, sighup);
@@ -477,7 +504,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.17 2020-10-08 12:33:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.17 2020-10-08 18:29:45+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }

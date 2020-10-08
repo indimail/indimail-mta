@@ -1,5 +1,8 @@
 /*
  * $Log: svstat.c,v $
+ * Revision 1.5  2020-10-08 18:34:17+05:30  Cprogrammer
+ * use /run, /var/run if system supports it
+ *
  * Revision 1.4  2020-09-27 14:16:09+05:30  Cprogrammer
  * display status written by svwait command
  *
@@ -22,6 +25,9 @@
 #include "fmt.h"
 #include "tai.h"
 #include "substdio.h"
+#ifdef USE_RUNFS
+#include "run_init.h"
+#endif
 
 #define FATAL "svstat: fatal: "
 #define WARNING "svstat: warning: "
@@ -67,6 +73,9 @@ doit(char *dir, int *retval)
 		normallyup = 1;
 	}
 
+#ifdef USE_RUNFS
+	run_init(dir, FATAL);
+#endif
 	if ((fd = open_write("supervise/ok")) == -1) {
 		if (errno == error_nodevice) {
 			substdio_puts(&b, "supervise not running");
@@ -185,7 +194,7 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	static char    *x = "$Id: svstat.c,v 1.4 2020-09-27 14:16:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svstat.c,v 1.5 2020-10-08 18:34:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

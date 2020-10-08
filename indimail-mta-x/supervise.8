@@ -23,8 +23,9 @@ to start ./run and to give other commands to
 
 .B supervise
 maintains status information in a binary format inside the directory
-.IR s /supervise,
-which must be writable to
+/run/svscan/\fIs\fR/supervise, /var/run/svscan/\fIs\fR/supervise or
+\fIs\fR/supervise, depending which path is found first.
+This directory \fIs\fR must be writable to
 .BR supervise .
 The status information can be read by
 .BR svstat (8).

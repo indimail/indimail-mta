@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.11  2020-10-08 18:33:24+05:30  Cprogrammer
+ * use /run, /var/run if system supports it
+ *
  * Revision 1.10  2020-09-16 19:07:40+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -48,8 +51,12 @@
 #include "iopause.h"
 #include "taia.h"
 #include "deepsleep.h"
+#ifdef USE_RUNFS
+#include "stralloc.h"
+#include "str.h"
+#endif
 
-#define FATAL "supervise: fatal: "
+#define FATAL   "supervise: fatal: "
 #define WARNING "supervise: warning: "
 
 int             rename(const char *, const char *);
@@ -66,6 +73,11 @@ int             flagwantup = 1;
 int             pid = 0;		/*- 0 means down */
 int             flagpaused;		/*- defined if (pid) */
 char            status[18];
+#ifdef USE_RUNFS
+char           *sdir;
+int             fddir;
+stralloc        run_service_dir = { 0 };
+#endif
 
 void
 pidchange(void)
@@ -130,15 +142,27 @@ trystart(void)
 	switch (f = fork())
 	{
 	case -1:
+#ifdef USE_RUNFS
+		strerr_warn4(WARNING, "unable to fork for ", sdir, ", sleeping 60 seconds: ", &strerr_sys);
+#else
 		strerr_warn4(WARNING, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
+#endif
 		deepsleep(60);
 		trigger();
 		return;
 	case 0:
 		sig_uncatch(sig_child);
 		sig_unblock(sig_child);
+#ifdef USE_RUNFS
+		if (fchdir(fddir) == -1)
+			strerr_die2sys(111, FATAL, "unable to set current directory: ");
+#endif
 		execve(*run, run, environ);
+#ifdef USE_RUNFS
+		strerr_die4sys(111, FATAL, "unable to start ", sdir, "/run: ");
+#else
 		strerr_die4sys(111, FATAL, "unable to start ", dir, "/run: ");
+#endif
 	}
 	flagpaused = 0;
 	pid = f;
@@ -156,15 +180,27 @@ trystop(void)
 	switch (f = fork())
 	{
 	case -1:
+#ifdef USE_RUNFS
+		strerr_warn4(WARNING, "unable to fork for ", sdir, ", sleeping 60 seconds: ", &strerr_sys);
+#else
 		strerr_warn4(WARNING, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
+#endif
 		deepsleep(60);
 		trigger();
 		return;
 	case 0:
 		sig_uncatch(sig_child);
 		sig_unblock(sig_child);
+#ifdef USE_RUNFS
+		if (fchdir(fddir) == -1)
+			strerr_die2sys(111, FATAL, "unable to set current directory: ");
+#endif
 		execve(*shutdown, shutdown, environ);
+#ifdef USE_RUNFS
+		strerr_die4sys(111, FATAL, "unable to exec ", sdir, "/shutdown: ");
+#else
 		strerr_die4sys(111, FATAL, "unable to exec ", dir, "/shutdown: ");
+#endif
 	default:
 		wait_pid(&wstat, f);
 	}
@@ -371,13 +407,86 @@ doit(void)
 	} /* for (;;) */
 }
 
+#ifdef USE_RUNFS
+void
+initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
+{
+	char           *run_dir, *parent_dir = (char *) 0;
+	char            buf[256];
+	int             i;
+
+	if (!access("/run", F_OK)) {
+		run_dir = "/run";
+		i = 4;
+	} else
+	if (!access("/var/run", F_OK)) {
+		run_dir = "/var/run";
+		i = 8;
+	} else
+		return;
+	if (!stralloc_copyb(&run_service_dir, run_dir, i) ||
+			!stralloc_catb(&run_service_dir, "/svscan/", 8))
+		strerr_die2x(111, FATAL, "out of memory");
+
+	if (!str_diff(service_dir, "log")) {
+		if (!(parent_dir = env_get("SV_PWD"))) {
+			if (!getcwd(buf, 255))
+				strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+			i = str_rchr(buf, '/');
+			if (!buf[i])
+				strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+			parent_dir = buf + i + 1;
+		}
+		if (!stralloc_cats(&run_service_dir, parent_dir))
+			strerr_die2x(111, FATAL, "out of memory");
+	} 
+	if (!stralloc_cats(&run_service_dir, service_dir) ||
+			!stralloc_0(&run_service_dir))
+		strerr_die2x(111, FATAL, "out of memory");
+	if (chdir(run_dir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", run_dir, ": ");
+#if 0
+	if (access("svscan", F_OK) && mkdir("svscan", 0755) == -1)
+		strerr_die4sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan: ");
+#endif
+	if (chdir("svscan") == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan: ");
+
+	if (parent_dir) { /*- we called called as supervise log */
+		if (access(parent_dir, F_OK)) {
+			if (mkdir(parent_dir, 0755) == -1)
+				strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", parent_dir, ": ");
+			if (chown(parent_dir, own, grp) == -1)
+				strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, ": ");
+		}
+		if (chdir(parent_dir) == -1)
+			strerr_die6sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan/", parent_dir, ": ");
+		if (access("log", F_OK)) {
+			if (mkdir("log", mode) == -1)
+				strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", parent_dir, "/log: ");
+			if (chown("log", own, grp) == -1)
+				strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, "/log: ");
+		}
+	} else
+	if (access(service_dir, F_OK)) {
+		if (mkdir(service_dir, mode) == -1)
+			strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", service_dir, ": ");
+		if (chown(service_dir, own, grp) == -1)
+			strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", service_dir, ": ");
+	}
+	if (chdir(service_dir) == -1)
+		strerr_die6sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan/", service_dir, ": ");
+	dir = run_service_dir.s;
+	return;
+}
+#endif
+
 int
 main(int argc, char **argv)
 {
 	struct stat     st;
 
-	dir = argv[1];
-	if (!dir || argv[2])
+	if (!(dir = argv[1]) || argv[2])
 		strerr_die1x(100, "supervise: usage: supervise dir");
 	if (pipe(selfpipe) == -1)
 		strerr_die4sys(111, FATAL, "unable to create pipe for ", dir, ": ");
@@ -394,6 +503,14 @@ main(int argc, char **argv)
 	else
 	if (errno != error_noent)
 		strerr_die4sys(111, FATAL, "unable to stat ", dir, "/down: ");
+#ifdef USE_RUNFS
+	if ((fddir = open_read(".")) == -1)
+		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+	if (stat(".", &st) == -1)
+		strerr_die2sys(111, FATAL, "unable to stat current directory: ");
+	sdir = dir; /*- original service direcory */
+	initialize_run(dir, st.st_mode, st.st_uid, st.st_gid); /*- this will set dir to new service directory in /run, /var/run */
+#endif
 	mkdir("supervise", 0700);
 	fdlock = open_append("supervise/lock");
 	if ((fdlock == -1) || (lock_exnb(fdlock) == -1))
@@ -423,7 +540,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.10 2020-09-16 19:07:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.11 2020-10-08 18:33:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

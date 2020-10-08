@@ -77,3 +77,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * indimail-mta, ucspi-tcp: fixed uninstall target
   * installer.c: fixed setting of symbolic links
   * qmail-local.c: fixed bug with loopcounter in qmail-local.c - initialized maxdeliveredto
+  * svscan, supervise, svc, svstat, svok - use /run or /var/run on systems that support it

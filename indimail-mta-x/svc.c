@@ -1,5 +1,8 @@
 /*
  * $Log: svc.c,v $
+ * Revision 1.7  2020-10-08 18:34:02+05:30  Cprogrammer
+ * use /run, /var/run if system supports it
+ *
  * Revision 1.6  2020-08-29 08:41:22+05:30  Cprogrammer
  * new option 'G' to send signal to entire process group
  *
@@ -28,8 +31,11 @@
 #include "substdio.h"
 #include "byte.h"
 #include "sig.h"
+#ifdef USE_RUNFS
+#include "run_init.h"
+#endif
 
-#define FATAL "svc: fatal: "
+#define FATAL   "svc: fatal: "
 #define WARNING "svc: warning: "
 
 int             datalen = 0;
@@ -69,6 +75,9 @@ main(int argc, char **argv)
 		if (chdir(dir) == -1)
 			strerr_warn4(WARNING, "unable to chdir to ", dir, ": ", &strerr_sys);
 		else {
+#ifdef USE_RUNFS
+			run_init(dir, FATAL);
+#endif
 			if((fd = open_write("supervise/control")) == -1) {
 				if (errno == error_nodevice) {
 					strerr_warn4(WARNING, "unable to control ", dir, ": supervise not running", 0);
@@ -92,7 +101,7 @@ main(int argc, char **argv)
 void
 getversion_svc_c()
 {
-	static char    *x = "$Id: svc.c,v 1.6 2020-08-29 08:41:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svc.c,v 1.7 2020-10-08 18:34:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
