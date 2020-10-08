@@ -1126,3 +1126,6 @@ svscan_rc
 svwait
 svwait.8
 greydaemon
+qmailctl.8
+debian/daemontools.postinst
+debian/daemontools.postrm

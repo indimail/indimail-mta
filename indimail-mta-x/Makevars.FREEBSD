@@ -13,4 +13,4 @@ HOST             != echo "`uname -m`-pc-`uname -s`-`uname -o|cut -d/ -f1`"|tr "[
 logdir           != cat conf-logdir
 USE_SQL          != [ -n "`head -1 conf-sql`" ] && echo "1" || echo ""
 bash             != [ -f /usr/local/bin/bash ] && echo "/usr/local/bin/bash" || echo "/bin/bash"
-servicedir = /service
+servicedir = $(libexecdir)/service

@@ -1,4 +1,7 @@
 # $Log: upstart.in,v $
+# Revision 1.9  2020-10-08 22:56:36+05:30  Cprogrammer
+# use variables from Makefile
+#
 # Revision 1.8  2017-03-09 21:54:17+05:30  Cprogrammer
 # FHS compliance
 #
@@ -29,10 +32,10 @@
 # to stop  - initctl emit qmailstop
 # start svscan
 # stop  svscan
-# $Id: upstart.in,v 1.8 2017-03-09 21:54:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: upstart.in,v 1.9 2020-10-08 22:56:36+05:30 Cprogrammer Exp mbhangui $
 description "Start IndiMail Services"
 author      "$Author: Cprogrammer $"
-version     "$Revision: 1.8 $"
+version     "$Revision: 1.9 $"
 
 umask 022
 
@@ -82,13 +85,13 @@ script
 		SCANINTERVAL=300
 	fi
 	cd /
-	PREFIX/bin/svc -dx /service/* /service/*/log /service/.svscan/log || true
+	PREFIX/bin/svc -dx @servicedir@/* @servicedir@/*/log @servicedir@/.svscan/log || true
 	exec env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
-		PREFIX/sbin/svscan /service 2>&1
+		PREFIX/sbin/svscan @servicedir@ 2>&1
 end script
 
 pre-stop script
-	PREFIX/bin/svc -dx /service/* || true
+	PREFIX/bin/svc -dx @servicedir@/* || true
 	sleep 5
 end script
 

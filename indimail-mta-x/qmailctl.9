@@ -18,17 +18,17 @@ You can setup services under \fBsupervise\fR(8) using \fBsvctool\fR(8).
 \fBstart\fR
 start \fBqmail-smtpd\fR(8) and \fBqmail-send\fR(8)
 .EX
- svc -u /service/qmail-smtpd.*
- svc -u /service/qmail-qmtpd.* /service/qmail-qmtpd.*
- svc -u /service/qmail-send.*
+ svc -u @servicedir@/qmail-smtpd.*
+ svc -u @servicedir@/qmail-qmtpd.* @servicedir@/qmail-qmtpd.*
+ svc -u @servicedir@/qmail-send.*
 .EE
 .TP
 \fBstop\fR
 stop \fBqmail-smtpd\fR(8) and \fBqmail-send\fR(8)
 .EX
- svc -d /service/qmail-smtpd.*
- svc -d /service/qmail-qmtpd.* /service/qmail-qmtpd.*
- svc -d /service/qmail-send.*
+ svc -d @servicedir@/qmail-smtpd.*
+ svc -d @servicedir@/qmail-qmtpd.* @servicedir@/qmail-qmtpd.*
+ svc -d @servicedir@/qmail-send.*
 .EE
 .TP
 \fBshut\fR
@@ -37,34 +37,34 @@ stop \fBsvscan\fR(8) and shut all services configured in services directory
 \fBrestart\fR
 stop \fBqmail-stmpd\fR(8), \fBqmail-send\fR(8) and restart \fBqmail-smtpd\fR(8), \fBqmail-send\fR(8)
 .EX
- svc -d /service/qmail-smtpd.*
- svc -d /service/qmail-qmtpd.* /service/qmail-qmqpd.*
- svc -d /service/qmail-send.*
- svc -u /service/qmail-smtpd.*
- svc -u /service/qmail-qmtpd.* /service/qmail-qmqpd.*
- svc -d /service/qmail-send.*
+ svc -d @servicedir@/qmail-smtpd.*
+ svc -d @servicedir@/qmail-qmtpd.* @servicedir@/qmail-qmqpd.*
+ svc -d @servicedir@/qmail-send.*
+ svc -u @servicedir@/qmail-smtpd.*
+ svc -u @servicedir@/qmail-qmtpd.* @servicedir@/qmail-qmqpd.*
+ svc -d @servicedir@/qmail-send.*
 .EE
 .TP
 \fBcondrestart\fR
 stop \fBqmail-stmpd\fR(8), send SIGTERM to \fBqmail-send\fR(8) and restart \fBqmail-smtpd\fR(8)
 .EX
- svc -d /service/qmail-smtpd.*
- svc -d /service/qmail-qmtpd.* /service/qmail-qmqpd.*
- svc -t /service/qmail-send.*
- svc -u /service/qmail-smtpd.*
- svc -u /service/qmail-qmtpd.* /service/qmail-qmqpd.*
+ svc -d @servicedir@/qmail-smtpd.*
+ svc -d @servicedir@/qmail-qmtpd.* @servicedir@/qmail-qmqpd.*
+ svc -t @servicedir@/qmail-send.*
+ svc -u @servicedir@/qmail-smtpd.*
+ svc -u @servicedir@/qmail-qmtpd.* @servicedir@/qmail-qmqpd.*
 .EE
 .TP
 \fBflush\fR
 Reset qmail tcp timeout table using \fBqmail-tcpok\fR(8) and send SIGALRM to \fBqmail-send\fR(8)
 .EX
- svc -a /service/qmail-send.*
+ svc -a @servicedir@/qmail-send.*
 .EE
 .TP
 \fBreload\fR
 send SIGHUP to \fBqmail-send\fR(8)
 .EX
- svc -h /service/qmail-send.*
+ svc -h @servicedir@/qmail-send.*
 .EE
 .TP
 \fBstatus\fR
@@ -79,13 +79,13 @@ run \fBqmail-qstat\fR(8)
 \fBpause\fR
 pause \fBqmail-send\fR(8), \fBqmail-smtpd\fR(8). This implies using \fBsvc\fR(8) with -p option.
 .EX
- svc -p /service/qmail-send.*
+ svc -p @servicedir@/qmail-send.*
 .EE
 .TP
 \fBcont\fR
 continue \fBqmail-send\fR(8), \fBqmail-smtpd\fR(8). This implies using \fBsvc\fR(8) with -c option.
 .EX
- svc -c /service/qmail-send.*
+ svc -c @servicedir@/qmail-send.*
 .EE
 .TP
 \fBcdb\fR

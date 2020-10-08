@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.20  2020-10-08 22:56:18+05:30  Cprogrammer
+# servicedir changed to libexecdir/service
+#
 # Revision 1.19  2020-07-11 22:08:41+05:30  Cprogrammer
 # removed svscan STATUSFILE
 #
@@ -9,7 +12,7 @@
 # removed RCS log.
 #
 #
-# $Id: svscanboot.sh,v 1.19 2020-07-11 22:08:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.20 2020-10-08 22:56:18+05:30 Cprogrammer Exp mbhangui $
 
 PATH=PREFIX/bin:/bin:/usr/local/bin:PREFIX/sbin:/sbin
 
@@ -24,6 +27,8 @@ if [ $# -eq 0 ] ; then
 		SERVICEDIR=/service1
 	elif [ -d /service2 ] ; then
 		SERVICEDIR=/service2
+	elif [ -d LIBEXEC/service ] ; then
+		SERVICEDIR=LIBEXEC/service
 	else
 		SERVICEDIR=/service
 	fi

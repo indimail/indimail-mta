@@ -98,6 +98,10 @@ indimail-mini.postinst: indimail-mini.postinst.in Makefile ../conf-version ../co
 	$(edit) $@.in > $@;
 indimail-mta.cron.d: indimail-mta.cron.d.in Makefile
 	$(edit) $@.in > $@
+daemontools.postrm: daemontools.postrm.in
+	$(edit) $@.in > $@
+daemontools.postinst: daemontools.postinst.in
+	$(edit) $@.in > $@
 
 debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
 indimail-mta.postrm rules changelog compat obs_deb_prep control usr.bin.freshclam \

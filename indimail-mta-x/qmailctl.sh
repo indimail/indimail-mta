@@ -10,10 +10,10 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.64 2020-09-22 20:57:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.65 2020-10-08 22:55:25+05:30 Cprogrammer Exp mbhangui $
 #
 #
-SERVICE=/service
+SERVICE=@servicedir@
 #
 #
 #
@@ -36,11 +36,7 @@ else
 		SYSTEM=`uname -s`
 	fi
 fi
-if [ -x PREFIX/bin/iecho ] ; then
-	ECHO=PREFIX/bin/iecho
-else
-	ECHO=echo
-fi
+ECHO=echo
 case "$SYSTEM" in
 	Darwin*|Debian|SuSE|FreeBSD)
 		RES_COL=60
@@ -135,8 +131,8 @@ esac
 if [ -x /usr/bin/systemctl ] ; then
 	/usr/bin/systemctl is-enabled svscan > /dev/null 2>&1
 	if [ $? -ne 0 ] ; then
-		if [ -f PREFIX/sbin/initsvc ] ; then
-			PREFIX/sbin/initsvc -on > /dev/null && $succ || $fail
+		if [ -f @prefix@/sbin/initsvc ] ; then
+			@prefix@/sbin/initsvc -on > /dev/null && $succ || $fail
 			$ECHO -ne "\n"
 		fi
 		/usr/bin/systemctl is-enabled svscan > /dev/null 2>&1
@@ -157,7 +153,7 @@ if [ -x /usr/bin/systemctl ] ; then
 	fi
 fi
 
-PATH=$PATH:PREFIX/bin:PREFIX/sbin:/usr/bin:/bin
+PATH=$PATH:@prefix@/bin:@prefix@/sbin:/usr/bin:/bin
 export PATH
 myhelp()
 {
@@ -207,7 +203,7 @@ stop()
 	for i in `echo $SERVICE/*`
 	do
 		$ECHO -n $"Stopping $i: "
-		PREFIX/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
+		@prefix@/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -256,7 +252,7 @@ start()
 	if [ -d /var/lock/subsys -a -f /var/lock/subsys/svscan ] ; then
 		exit 0
 	fi
-	PREFIX/bin/svstat $SERVICE/.svscan/log > /dev/null
+	@prefix@/bin/svstat $SERVICE/.svscan/log > /dev/null
 	if [ $? -ne 0 ] ; then
 		$ECHO -n $"Starting svscan: "
 		if [ -f /sbin/initctl ] ; then
@@ -273,7 +269,7 @@ start()
 				daemon_pid=/tmp/sv_daemon.pid
 			fi
 			env SETSID=1 /usr/sbin/daemon -cS -p $sv_pid -P $daemon_pid -R 5 \
-				-t "$SYSTEM"_svscan LIBEXEC/svscanboot && $succ || $fail
+				-t "$SYSTEM"_svscan @libexecdir@/svscanboot && $succ || $fail
 		else
 			if [ -w /dev/console ] ; then
 				device=/dev/console
@@ -284,9 +280,9 @@ start()
 			if [ $? -ne 0 ]; then
 				grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$ 2>&1
 				if [ " $SYSTEM" = " Debian" ] ; then
-					echo "SV:2345:respawn:PREFIX/sbin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
+					echo "SV:2345:respawn:@prefix@/sbin/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.svctool.$$
 				else
-					echo "SV:345:respawn:PREFIX/sbin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
+					echo "SV:345:respawn:@prefix@/sbin/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.svctool.$$
 				fi
 				if [ $? -eq 0 ] ; then
 					/bin/mv /etc/inittab.svctool.$$ /etc/inittab
@@ -302,7 +298,7 @@ start()
 		do
 			if [ ! -f $i/down ] ; then
 				$ECHO -n $"Starting $i: "
-				PREFIX/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
+				@prefix@/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
 				RETVAL=$?
 				echo
 				let ret+=$RETVAL
@@ -342,7 +338,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 	do
 		$ECHO -n $"Stopping $i: "
-		PREFIX/bin/svc -d $i && $succ || $fail
+		@prefix@/bin/svc -d $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -350,7 +346,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-send.*`
 	do
 		$ECHO -n $"Terminating $i: "
-		PREFIX/bin/svc -t $i && $succ || $fail
+		@prefix@/bin/svc -t $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -359,7 +355,7 @@ case "$1" in
 	do
 		if [ ! -f $i/down ] ; then
 		$ECHO -n $"Starting $i: "
-			PREFIX/bin/svc -u $i && $succ || $fail
+			@prefix@/bin/svc -u $i && $succ || $fail
 			RETVAL=$?
 			echo
 			let ret+=$RETVAL
@@ -391,7 +387,7 @@ case "$1" in
 	do
 		if [ -d $i/log ] ; then
 			$ECHO -n $"Rotating $i: "
-			PREFIX/bin/svc -a $i/log && $succ || $fail
+			@prefix@prefix@bin/svc -a $i/log && $succ || $fail
 			RETVAL=$?
 			echo
 			let ret+=$RETVAL
@@ -402,12 +398,12 @@ case "$1" in
   flush)
 	ret=0
 	$ECHO -n $"Flushing timeout table + ALRM signal to qmail-send."
-	PREFIX/sbin/qmail-tcpok > /dev/null && $succ || $fail
+	@prefix@/sbin/qmail-tcpok > /dev/null && $succ || $fail
 	echo
 	for i in `echo $SERVICE/qmail-send.*`
 	do
 		$ECHO -n $"Flushing $i: "
-		PREFIX/bin/svc -a $i && $succ || $fail
+		@prefix@/bin/svc -a $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -422,12 +418,12 @@ case "$1" in
 		ps -ef| grep svscanboot| grep -v grep
 	fi
 	RETVAL=$?
-	PREFIX/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
+	@prefix@/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
 	let ret+=$RETVAL
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
   queue)
-	PREFIX/bin/qmail-qread -c
+	@prefix@/bin/qmail-qread -c
 	ret=$?
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
@@ -436,7 +432,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-send.*`
 	do
 		$ECHO -n $"sending HUP signal to $i: "
-		PREFIX/bin/svc -h $i && $succ || $fail
+		@prefix@/bin/svc -h $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -448,7 +444,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 	do
 		$ECHO -n $"pausing $i: "
-		PREFIX/bin/svc -p $i && $succ || $fail
+		@prefix@/bin/svc -p $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -460,7 +456,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 	do
 		$ECHO -n $"continuing $i: "
-		PREFIX/bin/svc -c $i && $succ || $fail
+		@prefix@/bin/svc -c $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -471,7 +467,7 @@ case "$1" in
     ret=0
 	for i in smtp qmtp qmqp imap pop3 poppass
 	do
-		for j in `/bin/ls SYSCONFDIR/tcp*.$i.cdb 2>/dev/null`
+		for j in `/bin/ls @sysconfdir@/tcp*.$i.cdb 2>/dev/null`
 		do
 			t_file=`echo $j | cut -d. -f1,2`
 			if [ ! -f $t_file ] ; then
@@ -482,7 +478,7 @@ case "$1" in
 				let ret+=$RETVAL
 			fi
 		done
-		for j in `/bin/ls SYSCONFDIR/tcp/tcp*.$i 2>/dev/null`
+		for j in `/bin/ls @sysconfdir@/tcp/tcp*.$i 2>/dev/null`
 		do
 			t1=`date +'%s' -r $j`
 			if [ -f $j.cdb ] ; then
@@ -492,7 +488,7 @@ case "$1" in
 			fi
 			if [ $t1 -gt $t2 ] ; then
 				$ECHO -n $"building $j.cdb: "
-				PREFIX/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+				@prefix@/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
 					&& /bin/chown indimail:indimail $j.cdb && $succ || $fail
 				RETVAL=$?
 				echo

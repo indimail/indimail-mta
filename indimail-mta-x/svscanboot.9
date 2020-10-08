@@ -14,10 +14,10 @@ in the service directories, with output and error messages logged through
 
 \fBsvscanboot\fR (without any command-line arguments) runs \fBsvscan\fR command
 
-svscan /service 2>&1 
+svscan @servicedir@ 2>&1 
 
 If \fBsvscanboot\fR is given a command-line argument, it startups up svscan for the directory
-\fIservicedir\fR given on the command line (instead of just svscan /service).
+\fIservicedir\fR given on the command line (instead of just svscan @servicedir@).
 
 \fBsvscanboot\fR uses envdir(8) on \fIservicedir\fR/.svscan/variables to set environment variables
 and clear all other environment variables.
@@ -38,7 +38,7 @@ You can use the following variables
 
 The recommended old way was to put the following entry in /etc/inittab to invoke svscanboot.
 
-SV:345:respawn:LIBEXEC/svscanboot <>/dev/console 2<>/dev/console
+SV:345:respawn:@libexecdir@/svscanboot <>/dev/console 2<>/dev/console
 
 The current operating systems use systemd(1) replacement for init(1). \fBsvcanboot(8)\fR should be
 invoked by your boot scripts (systemd(1), upstart(1), init(1) or boot rc scripts.

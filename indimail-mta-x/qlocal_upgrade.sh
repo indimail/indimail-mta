@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.38  2020-10-08 22:55:18+05:30  Cprogrammer
+# use variables from Makefile
+#
 # Revision 1.37  2020-09-25 21:43:56+05:30  Cprogrammer
 # remove libwatch service
 #
@@ -109,7 +112,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.37 2020-09-25 21:43:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.38 2020-10-08 22:55:18+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -134,7 +137,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.sh,v 1.37 2020-09-25 21:43:56+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.38 2020-10-08 22:55:18+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -143,7 +146,7 @@ echo "Running $1 $Id: qlocal_upgrade.sh,v 1.37 2020-09-25 21:43:56+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.sh,v 1.37 2020-09-25 21:43:56+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.38 2020-10-08 22:55:18+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -153,10 +156,39 @@ if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 fi
 /bin/rm -f /lib/systemd/system/indimail.service
 /bin/rm -f /usr/lib/systemd/system/indimail.service
+if [ -d /run ] ; then
+	rundir=/run
+elif [ -d /private/var/run ] ; then
+	rundir=/private/var/run
+elif [ -d /var/run ] ; then
+	rundir=/var/run
+else
+	rundir=""
+fi
+if [ ! -d @servicedir@ -a -d /service ] ; then
+	mkdir -p @servicedir@
+	if [ $? -eq 0 ] ; then
+		cd /service
+		if [ -x /usr/bin/cpio -o -x /bin/cpio ] ; then
+			find . -depth -print | cpio -pdm @servicedir@ \
+				&& rmdir /service
+		else
+			mv /service/* /service/.svscan @servicedir@ \
+				&& rmdir /service
+		fi
+		if [ $? -eq 0 ] ; then
+			if [ -n "$rundir" ] ; then
+				ln -s $rundir/service /service
+			else
+				ln -s @servicedir@ /service
+			fi
+		fi
+	fi
+fi
 if [ -d /var/log/indimail -a ! -d /var/log/svc ] ; then
 	$mv /var/log/indimail /var/log/svc
 	if [ $? -eq 0 ] ; then
-		$sed -i 's{/var/log/indimail{/var/log/svc{' /service/*/log/run
+		$sed -i 's{/var/log/indimail{/var/log/svc{' @servicedir@/*/log/run
 	fi
 fi
 #
@@ -249,30 +281,30 @@ fi
 # Certificate location changed from /etc/indimail/control to /etc/indimail/certs
 for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25
 do
-	check_update_if_diff /service/$i/variables/CERTDIR /etc/indimail/certs
+	check_update_if_diff @servicedir@/$i/variables/CERTDIR /etc/indimail/certs
 	# increase for using dlmopen()
 	if [ ! " $i" = " qmail-send.25" ] ; then
-		check_update_if_diff /service/$i/variables/SOFT_MEM 536870912
+		check_update_if_diff @servicedir@/$i/variables/SOFT_MEM 536870912
 	fi
 	if [ "$i" = "qmail-send.25" ] ; then
-		if [ -f /etc/indimail/control/virtualdomains -a ! -f /service/$i/variables/ROUTE_NULL_USER ] ; then
-			echo > /service/$i/variables/ROUTE_NULL_USER
+		if [ -f /etc/indimail/control/virtualdomains -a ! -f @servicedir@/$i/variables/ROUTE_NULL_USER ] ; then
+			echo > @servicedir@/$i/variables/ROUTE_NULL_USER
 		fi
-		if [ ! -f /service/$i/variables/LOCK_LOGS ] ; then
-			echo > /service/$i/variables/LOCK_LOGS
+		if [ ! -f @servicedir@/$i/variables/LOCK_LOGS ] ; then
+			echo > @servicedir@/$i/variables/LOCK_LOGS
 		fi
 		continue
 	fi
-	if [ ! -f /service/$i/variables/DISABLE_PLUGIN ] ; then
-	echo > /service/$i/variables/DISABLE_PLUGIN
+	if [ ! -f @servicedir@/$i/variables/DISABLE_PLUGIN ] ; then
+	echo > @servicedir@/$i/variables/DISABLE_PLUGIN
 	fi
 done
 
 # service qmail-spamlog has been renamed to qmail-logfifo
 # fifo is now /tmp/logfifo instead of /tmp/spamfifo
-if [ -d /service/qmail-spamlog ] ; then
-	/bin/rm -rf /service/qmail-spamlog
-	/usr/sbin/svctool --fifologger=/tmp/logfifo --servicedir=/service
+if [ -d @servicedir@/qmail-spamlog ] ; then
+	/bin/rm -rf @servicedir@/qmail-spamlog
+	/usr/sbin/svctool --fifologger=/tmp/logfifo --servicedir=@servicedir@
 fi
 
 # for bogofilter to send back X-Bogosity back to qmail-smtpd as well as log entry
@@ -281,15 +313,15 @@ fi
 # in which case it will be logged to /var/log/svc/logfifo/current
 for i in qmail-smtpd.25 qmail-smtpd.465 fetchmail qmail-send.25
 do
-	if [ -d /service/$i -a -s /service/$i/variables/LOGFILTER ] ; then
-		check_update_if_diff /service/$i/variables/LOGFILTER /tmp/logfifo
+	if [ -d @servicedir@/$i -a -s @servicedir@/$i/variables/LOGFILTER ] ; then
+		check_update_if_diff @servicedir@/$i/variables/LOGFILTER /tmp/logfifo
 	fi
 done
-if [ -s /service/qmail-send.25/variables/QMAILLOCAL ] ; then
-	check_update_if_diff /service/qmail-send.25/variables/QMAILLOCAL /usr/sbin/qmail-local
+if [ -s @servicedir@/qmail-send.25/variables/QMAILLOCAL ] ; then
+	check_update_if_diff @servicedir@/qmail-send.25/variables/QMAILLOCAL /usr/sbin/qmail-local
 fi
-if [ -s /service/qmail-send.25/variables/QMAILREMOTE ] ; then
-	check_update_if_diff /service/qmail-send.25/variables/QMAILREMOTE /usr/sbin/qmail-remote
+if [ -s @servicedir@/qmail-send.25/variables/QMAILREMOTE ] ; then
+	check_update_if_diff @servicedir@/qmail-send.25/variables/QMAILREMOTE /usr/sbin/qmail-remote
 fi
 if [ -s /etc/indimail/control/defaultqueue/LOGFILTER ] ; then
 	check_update_if_diff /etc/indimail/control/defaultqueue/LOGFILTER /tmp/logfifo
@@ -304,10 +336,10 @@ if [ $? -eq 0 ] ; then
 fi
 
 # qmail-greyd, greydaemon path changed to /usr/sbin
-$sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' /service/greylist.1999/run
+$sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' @servicedir@/greylist.1999/run
 
 # remove STATUSFILE as .svlock serves the same purpose
-rm -f /service/.svscan/variables/STATUSFILE
+rm -f @servicedir@/.svscan/variables/STATUSFILE
 
 # copy updated cron entries
 if [ -f /etc/indimail/cronlist.q -a -d /etc/cron.d ] ; then
@@ -330,20 +362,20 @@ fi
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled clamav-freshclam >/dev/null 2>&1
 	if [ $? -eq 0 ] ; then
-		touch /service/freshclam/down
+		touch @servicedir@/freshclam/down
 	else
-		/bin/rm -f /service/freshclam/down
+		/bin/rm -f @servicedir@/freshclam/down
 	fi
 fi
 
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
-if [ -d /service/libwatch ] ; then
-	mv /service/libwatch /service/.libwatch
-	svc -dx /service/.libwatch /service/.libwatch/log
+if [ -d @servicedir@/libwatch ] ; then
+	mv @servicedir@/libwatch @servicedir@/.libwatch
+	svc -dx @servicedir@/.libwatch @servicedir@/.libwatch/log
 	sleep 1
-	/bin/rm -rf /service/.libwatch
+	/bin/rm -rf @servicedir@/.libwatch
 fi
 
 # for surbl

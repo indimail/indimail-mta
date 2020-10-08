@@ -65,7 +65,7 @@ man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	qmail-dk.8 dktest.8 qmail-multi.8 spawn-filter.8 \
 	qmail-inject.8 qmail-newmrh.8 recipient-cdb.8 qmail-cdb.8 \
 	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
-	qmail-poppass.8 qscanq.8 run-cleanq.8
+	qmail-poppass.8 qscanq.8 run-cleanq.8 qmailctl.8
 
 include Makefile.$(SYSTEM)
 
@@ -658,13 +658,13 @@ warn-auto.sh qpq.sh conf-qmail conf-prefix
 	> qpq
 
 qmailctl: \
-warn-auto.sh qmailctl.sh conf-prefix conf-sysconfdir
-	(head -1 warn-auto.sh | sed  s}/bin/sh}$(bash)};cat qmailctl.sh) \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
-	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	> qmailctl
+warn-auto.sh qmailctl.sh conf-prefix conf-sysconfdir \
+conf-libexec
+	$(edit) $@.sh > qmailctl
 	chmod +x $@
+
+qmailctl.8: qmailctl.9
+	$(edit) qmailctl.8 > $@
 
 svscan.plist: svscan.plist.in conf-libexec conf-sysconfdir
 	$(edit) $@.in > $@
@@ -707,25 +707,16 @@ systemd:systemd.in conf-prefix conf-libexec
 
 svscanboot.8: \
 svscanboot.9 conf-prefix conf-sysconfdir conf-libexec
-	cat svscanboot.9 \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
-	> svscanboot.8
+	$(edit) svscanboot.9 > svscanboot.8
 
 svscan.8: \
 svscan.9 conf-sysconfdir
-	cat svscan.9 \
-	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	> svscan.8
+	$(edit) svscan.9 > svscan.8
 
 cronlist.q:cronlist.in conf-prefix conf-libexec
 	( \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	cat cronlist.in \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
+	$(edit) cronlist.in \
 	) > cronlist.q
 
 except: \
@@ -986,7 +977,7 @@ auto_ageout.h: conf-ageout
 	mv auto_ageout.h.tmp auto_ageout.h
 
 run-cleanq: load run-cleanq.o auto_qmail.o
-	./load run-cleanq auto_qmail.o
+	./load run-cleanq auto_libexec.o -lqmail
 
 run-cleanq.o: compile run-cleanq.c auto_qmail.h
 	./compile run-cleanq.c
@@ -1037,10 +1028,8 @@ qscanq.9 conf-logdir conf-sysconfdir
 	> qscanq.8
 
 run-cleanq.8: \
-run-cleanq.9 conf-prefix
-	cat run-cleanq.9 \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	> run-cleanq.8
+run-cleanq.9 conf-libexec conf-prefix
+	$(edit) run-cleanq.9 > $@
 
 analyzer: \
 mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
@@ -1485,10 +1474,7 @@ control.o auto_control.o strsalloc.o socket.lib libsyncdir.a
 
 qmail-queue.8: \
 qmail-queue.9 conf-qmail conf-prefix
-	cat qmail-queue.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	> qmail-queue.8
+	$(edit) qmail-queue.9 > qmail-queue.8
 
 qmail-queue.o: \
 compile qmail-queue.c matchregex.h triggerpull.h MakeArgs.h \
@@ -3921,9 +3907,8 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 
 docker-entrypoint: \
 warn-auto.sh docker-entrypoint.sh conf-prefix
-	cat warn-auto.sh docker-entrypoint.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	> docker-entrypoint
+	cat warn-auto.sh $@.sh \
+	| $(edit) > $@
 	chmod 755 docker-entrypoint
 
 svscan_rc: \

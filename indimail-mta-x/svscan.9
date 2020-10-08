@@ -75,10 +75,10 @@ does not exist, or if the pid belongs to a non-svscan process. The file \fBsvsca
 .B svscan
 output can be driven through \fBmultilog\fR. If a directory (or symlink to a directory)
 named
-.B /service/.svscan
+.B @servicedir@/.svscan
 exists and the environment variable \fBSCANLOG\fR is defined. \fBsvscan\fR(8) will direct its
 stdout and stderr to the supervised service run from the
-.B /service/.svscan/log
+.B @servicedir@/.svscan/log
 directory. This simplifies
 .B svscan
 startup scripts and eliminates the use of
@@ -97,12 +97,12 @@ If \fBINITCMD\fR environment variable is defined and set to an empty string and 
 \fBINITCMD\fR can be set to full path of an executable or script to override \fBsvscan\fR running
 \fIrun\fR. If \fBWAIT_INITCMD\fR env variable is set, it will additionally wait for \fIrun\fR
 to exit, before starting the scan of \fIdirectory\fR. Typical use of \fBINITCMD\fR is to
-mount --bind SYSCONFDIR/resolv.conf as /etc/resolv.conf, to redirect all dns resolver requests,
+mount --bind @sysconfdir@/resolv.conf as /etc/resolv.conf, to redirect all dns resolver requests,
 to locally running \fBdnscache\fR(8).  A typical \fIrun\fR looks like this
 
 .EX
 #!/bin/sh
-/usr/bin/mount --bind SYSCONFDIR/resolv.conf /etc/resolv.conf
+/usr/bin/mount --bind @sysconfdir@/resolv.conf /etc/resolv.conf
 /usr/bin/mount -l
 .EE
 

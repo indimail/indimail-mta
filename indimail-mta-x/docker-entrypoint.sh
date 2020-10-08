@@ -1,7 +1,10 @@
 #
-# $Id: docker-entrypoint.sh,v 1.7 2020-05-06 15:30:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.8 2020-10-08 22:53:43+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.8  2020-10-08 22:53:43+05:30  Cprogrammer
+# use variables from Makefile
+#
 # Revision 1.7  2020-05-06 15:30:52+05:30  Cprogrammer
 # remove down file to start services
 #
@@ -41,25 +44,25 @@ indimail|indimail-mta|svscan|webmail)
 	fi
 	case "$1" in
 	webmail)
-		if [ -f /service/php-fpm/down ] ; then
-			echo "enabling /service/php-fpm"
-			/bin/rm -f /service/php-fpm/down
+		if [ -f @servicedir@/php-fpm/down ] ; then
+			echo "enabling @servicedir@/php-fpm"
+			/bin/rm -f @servicedir@/php-fpm/down
 		fi
-		if [ -f /service/httpd/down ] ; then
-			echo "enabling /service/httpd"
-			/bin/rm -f /service/httpd/down
+		if [ -f @servicedir@/httpd/down ] ; then
+			echo "enabling @servicedir@/httpd"
+			/bin/rm -f @servicedir@/httpd/down
 		else
 			echo "/usr/sbin/apachectl start"
 			/usr/sbin/apachectl start
 		fi
 	;;
 	esac
-	if [ -d /service/.svscan/variables ] ; then
-   		echo "docker-entrypoint: [$1] PREFIX/bin/envdir /service/.svscan/variables PREFIX/sbin/svscan /service"
-   		exec PREFIX/bin/envdir /service/.svscan/variables PREFIX/sbin/svscan /service
+	if [ -d @servicedir@/.svscan/variables ] ; then
+   		echo "docker-entrypoint: [$1] @prefix@/bin/envdir @servicedir@/.svscan/variables @prefix@/sbin/svscan @servicedir@"
+   		exec @prefix@/bin/envdir @servicedir@/.svscan/variables @prefix@/sbin/svscan @servicedir@
 	else
-   		echo "docker-entrypoint: [$1] executing PREFIX/sbin/svscan /service"
-   		exec PREFIX/sbin/svscan /service
+   		echo "docker-entrypoint: [$1] executing @prefix@/sbin/svscan @servicedir@"
+   		exec @prefix@/sbin/svscan @servicedir@
 	fi
 ;;
 *)

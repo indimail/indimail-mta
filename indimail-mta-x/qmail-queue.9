@@ -10,7 +10,7 @@ It then reads envelope information from descriptor 1.
 It places the message into the outgoing queue
 for future delivery by
 .BR qmail-send .
-The default outgoing queue is QMAILHOME/queue. This can be changed by setting environment variable QUEUEDIR to
+The default outgoing queue is @qmaildir@/queue. This can be changed by setting environment variable QUEUEDIR to
 point to a path having a valid qmail queue.
 
 The envelope information is an envelope sender address followed by a list of envelope recipient addresses.
@@ -208,7 +208,7 @@ for the virus scanner itself.
 
 The QHPSI extension for qmail-queue allows to call an arbitary virus scanner directly,
 scanning the incoming data-stream on STDIN or it allows plugins to be loaded from
-the PREFIX/lib/indimail/plugins directory. This directory can be changed by defining
+the @prefix@/lib/indimail/plugins directory. This directory can be changed by defining
 \fBPLUGINDIR\fR environment variable. QHPSI can be advised to pass
 multiple arguments to the virus scanner for customization. To run external scanner
 or load scanner plugins, \fBqmail-queue\fR calls \fBqhpsi\fR, a program setuid to \fIqscand\fR.
@@ -236,7 +236,7 @@ can be set either to the full path of a scanner or to a list of plugins.
 .LP
 .nr step 1 1
 .IP \n[step] 2
-is set to full path of the virus scanner, i.e. QHPSI=PREFIX/bin/clamdscan.
+is set to full path of the virus scanner, i.e. QHPSI=@prefix@/bin/clamdscan.
 If full path is not specified,
 .B qmail-queue
 will use execvp(2) to run the scanner. Else it uses execv(2).
@@ -262,7 +262,7 @@ is set to list of plugins starting with a keyword 'plugin:'.
 .EE
 
 Sets \fBqmail-queue\fR to load three plugins clamd, fsecure and symantec from
-PREFIX/lib/indimail/plugins directory.
+@prefix@/lib/indimail/plugins directory.
 
 You can also use the plugin generic.so. generic.so plugin can use any scanner defined
 by the \fBSCANCMD\fR environment variable.
@@ -424,15 +424,15 @@ Samples with clamd/clamdscan:
 Here is a typical sample how to customize QHPSI together
 with Clam AV (clamd/clamdscan) for a tcpserver tcp.smtpd file:
 
- :allow,QHPSI='PREFIX/bin/clamdscan %s --quiet --no-summary'
+ :allow,QHPSI='@prefix@/bin/clamdscan %s --quiet --no-summary'
 
 Comments:
 
  - The path of 'clamdscan' can be omitted, because it is in 
-   the standard path (PREFIX/bin).
+   the standard path (@prefix@/bin).
  - In the configuration file clamav.conf, the option
   'ScanMail' has to be enabled; clamd has to run as 'root'.
- - The argument QHPSI='PREFIX/bin/clamdscan %s --quiet --no-summary'
+ - The argument QHPSI='@prefix@/bin/clamdscan %s --quiet --no-summary'
    tells Clam AV to just provide the return status and print nothing
    on the stdout.
  - The argument QHPSIRC is not necessary, because
@@ -452,8 +452,8 @@ Comments:
    exceeds 9.000.000 byte, ~ 8.5MB.
 
 You can also set these variables outside tcp.smtp. e.g.
-  # echo PREFIX/bin/clamdscan %s --quiet --no-summary \\
-     > /service/qmail.smtpd.25/variables/QHPSI
+  # echo @prefix@/bin/clamdscan %s --quiet --no-summary \\
+     > @servicedir@/qmail.smtpd.25/variables/QHPSI
 
 .SH Compliance
 .TP

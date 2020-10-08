@@ -608,3 +608,6 @@ Makefile.
 Makevars.
 svwait
 svwait.8
+qmailctl.8
+debian/daemontools.postinst
+debian/daemontools.postrm

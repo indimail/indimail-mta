@@ -1,5 +1,8 @@
 /*
  * $Log: run-cleanq.c,v $
+ * Revision 1.5  2020-10-08 22:55:35+05:30  Cprogrammer
+ * servicedir changed to libexecdir/service
+ *
  * Revision 1.4  2004-10-22 20:30:03+05:30  Cprogrammer
  * added RCS id
  *
@@ -12,28 +15,24 @@
  */
 #include <sys/types.h>
 #include <unistd.h>
-#include "auto_qmail.h"
+#include <strerr.h>
+#include "auto_libexec.h"
 
-char           *svco_cmd[] = {
-	"bin/svc",
-	"-o",
-	"/service/qscanq",
-	0
-};
+#define FATAL   "run-cleanq: fatal: "
 
 int
 main()
 {
-	if (chdir(auto_qmail) == -1)
-		_exit(1);
-	execv(*svco_cmd, svco_cmd);
-	_exit(1);	/*- hopefully never reached */ ;
+	if (chdir(auto_libexec) == -1)
+		strerr_die4sys(111, FATAL, "chdir :", auto_libexec, ": ");
+	execlp("svc", "svc", "-o", "qscanq", (char *) 0);
+	_exit(111);	/*- hopefully never reached */ ;
 }
 
 void
 getversion_run_cleanq_c()
 {
-	static char    *x = "$Id: run-cleanq.c,v 1.4 2004-10-22 20:30:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: run-cleanq.c,v 1.5 2020-10-08 22:55:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

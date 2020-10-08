@@ -17,16 +17,16 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-prefix=/usr
-qmaildir=/var/indimail
+prefix=@prefix@
+qmaildir=@qmaildir@
 mandir=${prefix}/share/man
 shareddir=${prefix}/share/indimail
 qcount=5
 qbase=${qmaildir}/queue
 mbase=/home/mail
 logdir=/var/log/svc
-servicedir=/service
-qsysconfdir=/etc/indimail
+servicedir=@servicedir@
+qsysconfdir=@qsysconfdir@
 cp=/bin/cp
 rm=/bin/rm
 mv=/bin/mv
