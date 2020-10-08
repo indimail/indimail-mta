@@ -91,7 +91,7 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 49. Adrian Ho - RFC 2821 in qmail-remote
 50. Ingo Rohloff - SMTP authentication support to serialsmtp
 51. Ward Vandewege - badrcptto patch
-52. Kazinori Fujiwara - ipv6 patch
+52. Kazinori Fujiwara - qmail ipv6 patch
 53. Len Budney qscanq
 54. qmail spf implementation (https://www.saout.de/misc/spf/qmail-spf-rc5.patch) by Jana Saout <jana@saout.de> 
     Christophe Saout - SPF checker
@@ -166,4 +166,4 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 105.Bruce Guenter - qmail-remote patch to reduce cpu
 106.Rolf Eike Beer <eike@sf-mail.de> gen_allocdefs.h, GEN_ALLOC refactoring
     changes to fix memory overflow
-107.Fefe - felix-libowfat@fefe.de for functions taken from libowfat
+107.Fefe - felix-libowfat@fefe.de for functions taken from libowfat & ipv6 in ucspi-tcp
