@@ -1,5 +1,8 @@
 /*
  * $Log: multipipe.c,v $
+ * Revision 1.4  2020-10-08 12:07:42+05:30  Cprogrammer
+ * formatted code
+ *
  * Revision 1.3  2011-05-07 15:57:11+05:30  Cprogrammer
  * added error checks
  *
@@ -100,14 +103,12 @@ reset_buf_start(void)
 	bool            wrapped = (buf_end < buf_start);
 
 	buf_start = buf_end;
-	for (reader = readers; reader; reader = reader->next)
-	{
+	for (reader = readers; reader; reader = reader->next) {
 		unsigned        bp = reader->buf_pos;
 		if (bp < buf_start && (!wrapped || bp >= buf_end))
 			buf_start = bp;
 	}
-	if (buf_start == buf_end)
-	{
+	if (buf_start == buf_end) {
 		buf_end = buf_start = 0;
 		for (reader = readers; reader; reader = reader->next)
 			reader->buf_pos = 0;
@@ -121,8 +122,7 @@ read_input(void)
 	ssize_t         rd;
 	if (readable >= buf_left)
 		readable = buf_left;
-	rd = read(FD_STDIN, buffer + buf_end, readable);
-	if (rd <= 0)
+	if ((rd = read(FD_STDIN, buffer + buf_end, readable)) <= 0)
 		buf_eof = true;
 	else
 		buf_end = (buf_end + rd) % BUFSIZE;
@@ -133,8 +133,7 @@ write_output(struct reader *reader)
 {
 	unsigned        writable = buf_wrapped ? BUFSIZE - buf_end : buf_len;
 	ssize_t         wr = write(reader->fd, buffer + reader->buf_pos, writable);
-	if (wr > 0)
-	{
+	if (wr > 0) {
 		reader->buf_pos = (reader->buf_pos + wr) % BUFSIZE;
 		reset_buf_start();
 	}
@@ -158,11 +157,9 @@ del_reader(pid_t pid)
 {
 	struct reader  *curr = readers;
 	struct reader  *prev = 0;
-	while (curr)
-	{
+	while (curr) {
 		struct reader  *next = curr->next;
-		if (curr->pid == pid)
-		{
+		if (curr->pid == pid) {
 			if (prev)
 				prev->next = next;
 			else
@@ -182,8 +179,7 @@ start_reader(struct reader *reader)
 {
 	int             fd[2];
 
-	if (pipe(fd))
-	{
+	if (pipe(fd)) {
 		err2("Could not create pipe to reader ", reader->name);
 		_exit(111);
 	}
@@ -212,8 +208,7 @@ reap_children(void)
 {
 	pid_t           pid;
 	int             status;
-	while ((pid = waitpid(0, &status, WNOHANG)) > 0)
-	{
+	while ((pid = waitpid(0, &status, WNOHANG)) > 0) {
 		if (!del_reader(pid))
 			err("Caught exit of unknown process");
 	}
@@ -227,24 +222,20 @@ scan_dirs(void)
 	struct reader  *reader;
 	struct reader  *prev;
 
-	if (!dir)
-	{
+	if (!dir) {
 		err("Unable to read directory");
 		return;
 	}
 
-	/*
-	 * Clear all the marked flags 
-	 */
+	/*- Clear all the marked flags */
 	for (reader = readers; reader; reader = reader->next)
 		reader->marked = false;
 
-	/*
+	/*-
 	 * For each directory entry, mark the corresponding reader.
-	 * * If a matching reader is not found, make one. 
+	 * If a matching reader is not found, make one. 
 	 */
-	while ((entry = readdir(dir)) != 0)
-	{
+	while ((entry = readdir(dir)) != 0) {
 		struct stat     statbuf;
 		if (entry->d_name[0] == '.' || !strcmp(entry->d_name, "supervise"))
 			continue;
@@ -252,16 +243,13 @@ scan_dirs(void)
 			continue;
 		if (!S_ISDIR(statbuf.st_mode))
 			continue;
-		for (reader = readers; reader; reader = reader->next)
-		{
-			if (reader->inode == statbuf.st_ino)
-			{
+		for (reader = readers; reader; reader = reader->next) {
+			if (reader->inode == statbuf.st_ino) {
 				reader->marked = true;
 				break;
 			}
 		}
-		if (!reader)
-		{
+		if (!reader) {
 			add_reader(entry->d_name, statbuf.st_ino);
 			start_reader(readers);
 			readers->marked = true;
@@ -271,21 +259,15 @@ scan_dirs(void)
 
 	reap_children();
 
-	/*
-	 * Clean up any reader that was removed from the directory 
-	 */
+	/*- Clean up any reader that was removed from the directory */
 	prev = 0;
 	reader = readers;
-	while (reader)
-	{
+	while (reader) {
 		struct reader  *next = reader->next;
 
-		if (!reader->marked)
-		{
-			/*
+		if (!reader->marked) {
+			/*-
 			 * Don't stop it, since the directory is no longer there 
-			 */
-			/*
 			 * stop_reader(reader); 
 			 */
 			if (prev)
@@ -354,8 +336,7 @@ handle_signal(int sig)
 void
 main_loop(void)
 {
-	for (;;)
-	{
+	for (;;) {
 		struct reader  *reader;
 		fd_set          readfds;
 		fd_set          writefds;
@@ -363,17 +344,14 @@ main_loop(void)
 		FD_ZERO(&readfds);
 		FD_ZERO(&writefds);
 		FD_SET(selfpipe[0], &readfds);
-		if (buf_eof)
-		{
+		if (buf_eof) {
 			if (buf_start == buf_end)
 				return;
 		} else
 		if (buf_left)
 			FD_SET(FD_STDIN, &readfds);
-		for (reader = readers; reader; reader = reader->next)
-		{
-			if (reader->buf_pos != buf_end)
-			{
+		for (reader = readers; reader; reader = reader->next) {
+			if (reader->buf_pos != buf_end) {
 				int             fd = reader->fd;
 				FD_SET(fd, &writefds);
 				if (fd > fdmax)
@@ -385,8 +363,7 @@ main_loop(void)
 		/*
 		 * If an event arrived, skip all other I/O 
 		 */
-		if (FD_ISSET(selfpipe[0], &readfds))
-		{
+		if (FD_ISSET(selfpipe[0], &readfds)) {
 			read_event();
 			continue;
 		}
@@ -401,13 +378,11 @@ main_loop(void)
 int
 main(int argc, char **argv)
 {
-	if (argc > 1 && chdir(argv[1]) != 0)
-	{
+	if (argc > 1 && chdir(argv[1]) != 0) {
 		err2("Couldn't chdir to ", argv[1]);
 		return 1;
 	}
-	if (pipe(selfpipe))
-	{
+	if (pipe(selfpipe)) {
 		err("Couldn't create self pipe");
 		return 1;
 	}
@@ -426,7 +401,7 @@ main(int argc, char **argv)
 void
 getversion_multipipe_c()
 {
-	static char    *x = "$Id: multipipe.c,v 1.3 2011-05-07 15:57:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: multipipe.c,v 1.4 2020-10-08 12:07:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
