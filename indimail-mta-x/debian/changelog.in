@@ -78,3 +78,6 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * installer.c: fixed setting of symbolic links
   * qmail-local.c: fixed bug with loopcounter in qmail-local.c - initialized maxdeliveredto
   * svscan, supervise, svc, svstat, svok - use /run or /var/run on systems that support it
+  * Makefile: added run_init.o object for svc, svstat, svok
+  * Makefile: use conf-runfs to configure daemontools to use /run, /var/run
+  * ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman

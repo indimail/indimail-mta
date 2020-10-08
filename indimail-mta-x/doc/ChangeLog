@@ -126,4 +126,4 @@ creation
 78. svscan, supervise, svc, svstat, svok - use /run or /var/run on systems that support it
 79. Makefile: added run_init.o object for svc, svstat, svok
 80. Makefile: use conf-runfs to configure daemontools to use /run, /var/run
-
+81. ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
