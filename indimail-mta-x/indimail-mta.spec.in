@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.263 2020-10-04 11:48:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.264 2020-10-08 23:24:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1748,7 +1748,7 @@ svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
 # The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
 #
 echo "adding indimail startup"
-%{_prefix}/sbin/svctool --config=add-boot
+%{_prefix}/sbin/svctool --config=add-boot --servicedir=%{libexecdir}/service
 %{_prefix}/sbin/svctool --config=add-alt
 
 if [ -f %{qsysconfdir}/cronlist.q -a -d %{_sysconfdir}/cron.d ] ; then
