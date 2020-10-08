@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.17  2020-10-08 12:33:02+05:30  Cprogrammer
+ * set SV_PWD as the parent directory for 'supervise log' process
+ *
  * Revision 1.16  2020-09-19 20:24:35+05:30  Cprogrammer
  * call setsid() if SETSID environment variable is set
  *
@@ -99,7 +102,7 @@ init_cmd(char *cmmd, int dowait, int shutdown)
 	int             child, r, wstat;
 	char           *cpath, *args[4];
 
-	cpath = shutdown ? ".svscan/shutdown" : cmmd && *cmmd ? cmmd : ".svscan/run";
+	cpath = shutdown ? SVSCANINFO"/shutdown" : cmmd && *cmmd ? cmmd : SVSCANINFO"/run";
 	if (access(cpath, X_OK))
 		return;
 	switch (child = fork())
@@ -185,7 +188,7 @@ start(char *fn)
 		++numx;
 	}
 	x[i].flagactive = 1;
-	if (!x[i].pid) {
+	if (!x[i].pid) { /*- supervise pair only if it is not .svscan/log */
 		switch (child = fork())
 		{
 		case -1:
@@ -215,6 +218,8 @@ start(char *fn)
 				strerr_die4sys(111, WARNING, "unable to set up descriptors for ", fn, "/log: ");
 			if (chdir(fn) == -1)
 				strerr_die4sys(111, WARNING, "unable to switch to ", fn, ": ");
+			if (!env_put2("SV_PWD", fn))
+				strerr_die4sys(111, WARNING, "out of memory for ", fn, "/log: ");
 			args[0] = "supervise";
 			args[1] = "log";
 			args[2] = 0;
@@ -472,7 +477,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.16 2020-09-19 20:24:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.17 2020-10-08 12:33:02+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
