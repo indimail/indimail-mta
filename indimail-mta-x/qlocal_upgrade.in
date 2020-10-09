@@ -1,4 +1,7 @@
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.41  2020-10-09 17:30:18+05:30  Cprogrammer
+# migration only when servicedir != /service
+#
 # Revision 1.40  2020-10-09 12:47:30+05:30  Cprogrammer
 # use variables from conf-* files
 #
@@ -117,7 +120,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.in,v 1.40 2020-10-09 12:47:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.41 2020-10-09 17:30:18+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -145,7 +148,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.40 2020-10-09 12:47:30+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.41 2020-10-09 17:30:18+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -154,7 +157,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.40 2020-10-09 12:47:30+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.40 2020-10-09 12:47:30+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.41 2020-10-09 17:30:18+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -174,7 +177,7 @@ else
 	rundir=""
 fi
 # migrate from old style /service
-if [ ! -d $servicedir ] && [ -d /service -o -L /service ] ; then
+if [ "$servicedir" != "/service" ] && [ ! -d $servicedir ] && [ -d /service -o -L /service ] ; then
 	$mkdir -p $servicedir
 	if [ $? -eq 0 ] ; then
 		cd /service
