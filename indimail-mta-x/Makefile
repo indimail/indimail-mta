@@ -979,7 +979,7 @@ run-cleanq: load run-cleanq.o auto_libexec.o
 
 run-cleanq.o: compile run-cleanq.c auto_libexec.h \
 conf-servicedir
-	./compile -DSERVICEDIR=\"`cat conf-servicedir`\" run-cleanq.c
+	./compile -DSERVICEDIR=\"`head -1 conf-servicedir`\" run-cleanq.c
 
 MakeArgs.o: compile MakeArgs.c
 	./compile MakeArgs.c
