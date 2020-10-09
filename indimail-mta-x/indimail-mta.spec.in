@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.264 2020-10-08 23:24:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.265 2020-10-09 12:38:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -410,12 +410,6 @@ if [ -d %{name}-%{version} ] ; then
     %{__rm} -f /tmp/conf-groups
   fi
   %{name}-%{version}/catChangeLog %{name}-%{version}/doc/ChangeLog > ChangeLog-indimail-mta
-  if [ -f %{name}-%{version}/qupgrade.sh ] ; then
-    %{__cp} %{name}-%{version}/qupgrade.sh .
-  fi
-  if [ -f %{name}-%{version}/qlocal_upgrade.sh ] ; then
-    %{__cp} %{name}-%{version}/qlocal_upgrade.sh .
-  fi
   if [ -n "%{debug_package}" ] ; then
     echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail > %{name}-%{version}/conf-cc
     echo %{__cc} -rdynamic > %{name}-%{version}/conf-ld
@@ -481,19 +475,19 @@ done
 install -m 0644 %{name}-release  %{buildroot}%{qsysconfdir}/%{name}-release
 install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 install -m 0644 ChangeLog-indimail-mta %{buildroot}%{shareddir}/doc/ChangeLog-indimail-mta
-if [ -f qupgrade.sh ] ; then
-install -m 0755 qupgrade.sh %{buildroot}%{libexecdir}/qupgrade.sh
+if [ -f %{name}-%{version}/qupgrade.sh ] ; then
+  install -m 0755 %{name}-%{version}/qupgrade.sh %{buildroot}%{libexecdir}/qupgrade.sh
 fi
-if [ -f qlocal_upgrade.sh ] ; then
-install -m 0755 qlocal_upgrade.sh %{buildroot}%{libexecdir}/qlocal_upgrade.sh
+if [ -f %{name}-%{version}/qlocal_upgrade.sh ] ; then
+  install -m 0755 %{name}-%{version}/qlocal_upgrade.sh %{buildroot}%{libexecdir}/qlocal_upgrade.sh
 fi
 if [ -f %{name}-%{version}/indimail-mta.fc ] ; then
-install -m 0644 %{name}-%{version}/indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
+  install -m 0644 %{name}-%{version}/indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
 fi
 if [ -f %{name}-%{version}/indimail-mta.te ] ; then
-install -m 0644 %{name}-%{version}/indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
+  install -m 0644 %{name}-%{version}/indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
 fi
-/bin/rm -f ChangeLog qlocal_upgrade.sh qupgrade.sh %{name}-release %{name}-rpm.info
+/bin/rm -f ChangeLog %{name}-release %{name}-rpm.info
 
 if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srsfilter
