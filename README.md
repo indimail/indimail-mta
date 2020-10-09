@@ -433,7 +433,7 @@ The argument to svstat should be a directory in /service. Each directory in /ser
 If you don't have /service create a link to /usr/libexec/indimail/service (/usr/local/libexec/indimail/service on FreeBSD and Darwin). I'm working on creating this link automatically during setup.
 
 ```
-$ sudo svstat /service/\*
+$ sudo svstat /service/*
 /service/dnscache: up (pid 120532) 4394 seconds
 /service/greylist.1999: up (pid 120502) 4394 seconds
 /service/pwdlookup: up (pid 120515) 4394 seconds
