@@ -93,7 +93,7 @@ startup scripts which direct output exclusively to console, causing problems to 
 undetected for a long time.
 
 If \fBINITCMD\fR environment variable is defined and set to an empty string and if
-\fI/directory\fR/.svscan/\fIrun\fR exists and has the executable bit set, \fIrun\fR is executed.
+\fI@servicedir@\fR/.svscan/\fIrun\fR exists and has the executable bit set, \fIrun\fR is executed.
 \fBINITCMD\fR can be set to full path of an executable or script to override \fBsvscan\fR running
 \fIrun\fR. If \fBWAIT_INITCMD\fR env variable is set, it will additionally wait for \fIrun\fR
 to exit, before starting the scan of \fIdirectory\fR. Typical use of \fBINITCMD\fR is to
