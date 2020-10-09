@@ -1,0 +1,4 @@
+SERVICEDIR
+
+This is the daemontools service directory. This is where all services
+configured by svctool lie
