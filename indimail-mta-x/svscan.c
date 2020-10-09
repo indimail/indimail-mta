@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.18  2020-10-09 11:42:28+05:30  Cprogrammer
+ * renamed svscan.pid to .svscan.pid
+ *
  * Revision 1.17  2020-10-08 18:29:45+05:30  Cprogrammer
  * use /run, /var/run if available
  *
@@ -73,11 +76,11 @@
 #include "auto_sysconfdir.h"
 
 #define SERVICES 1000
-#define PIDFILE  "svscan.pid"
+#define PIDFILE  ".svscan.pid"
 
 #define WARNING "svscan: warning: "
-#define FATAL "svscan: fatal: "
-#define INFO  "svscan: info: "
+#define FATAL   "svscan: fatal: "
+#define INFO    "svscan: info: "
 
 #ifndef SVSCANINFO
 #define SVSCANINFO ".svscan"  /* must begin with dot ('.') */
@@ -103,16 +106,16 @@ void
 initialize_run()
 {
 	if (!access("/run", F_OK)) {
-		pidfile = "/run/svscan/svscan.pid";
+		pidfile = "/run/svscan/"PIDFILE;
 		if (access("/run/svscan", F_OK) && mkdir("/run/svscan", 0755) == -1)
 			strerr_die2sys(111, FATAL, "unable to mkdir /run/svscan: ");
 	} else
 	if (!access("/var/run", F_OK)) {
-		pidfile = "/var/run/svscan/svscan.pid";
+		pidfile = "/var/run/svscan/"PIDFILE;
 		if (access("/var/run/svscan", F_OK) && mkdir("/var/run/svscan", 0755) == -1)
 			strerr_die2sys(111, FATAL, "unable to mkdir /var/run/svscan: ");
 	} else {
-		pidfile = "svscan.pid";
+		pidfile = PIDFILE;
 		return;
 	}
 }
@@ -467,7 +470,7 @@ main(int argc, char **argv)
 #ifdef USE_RUNFS
 	initialize_run();
 #else
-	pidfile = "svscan.pid";
+	pidfile = PIDFILE;
 #endif
 	if (argv[0] && argv[1]) {
 		if (chdir(argv[1]) == -1)
@@ -475,7 +478,7 @@ main(int argc, char **argv)
 		while (get_lock(argv[1])) ;
 	} else {
 #ifdef USE_RUNFS
-		pidfile = "svscan.pid";
+		pidfile = PIDFILE;
 #endif
 		while (get_lock(".")) ;
 	}
@@ -504,7 +507,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.17 2020-10-08 18:29:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.18 2020-10-09 11:42:28+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }

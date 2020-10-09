@@ -65,12 +65,12 @@ it switches to that
 when it starts.
 
 .B svscan
-writes its pid to the file \fBsvscan.pid\fR in /run/svscan, /var/run/svscan or the directory
+writes its pid to the file \fB.svscan.pid\fR in /run/svscan, /var/run/svscan or the directory
 where it starts (which ever is found first). It uses this file to prevent multiple copies of
 .B svscan
 to run on the same directory. It also uses the /proc filesystem to verify if the pid belongs to a process named
 \fBsvscan\fR, by opening the file \fB/proc/pid/comm\fR. \fBsvscan\fR will start if the file does not exist, or if pid
-does not exist, or if the pid belongs to a non-svscan process. The file \fBsvscan.pid\fR is deleted on SIGTERM.
+does not exist, or if the pid belongs to a non-svscan process. The file \fB.svscan.pid\fR is deleted on SIGTERM.
 
 .B svscan
 output can be driven through \fBmultilog\fR. If a directory (or symlink to a directory)

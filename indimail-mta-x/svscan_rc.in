@@ -1,4 +1,7 @@
 # $Log: svscan_rc.in,v $
+# Revision 1.2  2020-10-09 11:42:38+05:30  Cprogrammer
+# renamed svscan.pid to .svscan.pid
+#
 # Revision 1.1  2020-09-19 17:30:01+05:30  Cprogrammer
 # Initial revision
 #
@@ -7,7 +10,7 @@
 # REQUIRE: DAEMON
 # KEYWORD: nojail shutdown
 # 
-# $Id: svscan_rc.in,v 1.1 2020-09-19 17:30:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscan_rc.in,v 1.2 2020-10-09 11:42:38+05:30 Cprogrammer Exp mbhangui $
 #
 
 . /etc/rc.subr
@@ -18,5 +21,5 @@ stop_cmd="@prefix@/bin/qmailctl stop"
 
 load_rc_config $name
 : ${svscan_enable="NO"}
-: ${svscan_pidfile="/var/run/svscan.pid"}
+: ${svscan_pidfile="/var/run/svscan/.svscan.pid"}
 run_rc_command "$@"

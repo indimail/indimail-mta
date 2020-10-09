@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.65 2020-10-08 22:55:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.66 2020-10-09 11:42:11+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -184,10 +184,10 @@ stop()
 		FreeBSD)
 		$ECHO -n $"Stopping svscan: "
 		if [ -d /run ] ; then
-			sv_pid=/run/svscan.pid
+			sv_pid=/run/svscan/.svscan.pid
 			daemon_pid=/run/sv_daemon.pid
 		elif [ -d /var/run ] ; then
-			sv_pid=/var/run/svscan.pid
+			sv_pid=/var/run/svscan/.svscan.pid
 			daemon_pid=/var/run/sv_daemon.pid
 		else
 			sv_pid=/tmp/svscan.pid
@@ -259,16 +259,13 @@ start()
 			/sbin/initctl start svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /usr/sbin/daemon ] ; then
 			if [ -d /run ] ; then
-				sv_pid=/run/svscan.pid
 				daemon_pid=/run/sv_daemon.pid
 			elif [ -d /var/run ] ; then
-				sv_pid=/var/run/svscan.pid
 				daemon_pid=/var/run/sv_daemon.pid
 			else
-				sv_pid=/tmp/svscan.pid
 				daemon_pid=/tmp/sv_daemon.pid
 			fi
-			env SETSID=1 /usr/sbin/daemon -cS -p $sv_pid -P $daemon_pid -R 5 \
+			env SETSID=1 /usr/sbin/daemon -cS -P $daemon_pid -R 5 \
 				-t "$SYSTEM"_svscan @libexecdir@/svscanboot && $succ || $fail
 		else
 			if [ -w /dev/console ] ; then

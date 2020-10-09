@@ -81,3 +81,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * Makefile: added run_init.o object for svc, svstat, svok
   * Makefile: use conf-runfs to configure daemontools to use /run, /var/run
   * ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
+  * qlocal_upgrade.sh: migrate /service to libexecdir
+  * svscan.c, qmailctl, svscan_rc - renamed svscan.pid to .svscan.pid

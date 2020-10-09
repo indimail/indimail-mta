@@ -122,8 +122,11 @@ creation
 76. svctool (freebsd): remove svscan config/rc file with --config=rm-boot
 77. qmail-local.c: fixed bug with loopcounter in qmail-local.c - initialized
     maxdeliveredto
--07/10/2020
+-08/10/2020
 78. svscan, supervise, svc, svstat, svok - use /run or /var/run on systems that support it
 79. Makefile: added run_init.o object for svc, svstat, svok
 80. Makefile: use conf-runfs to configure daemontools to use /run, /var/run
 81. ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
+-09/10/2020
+82. qlocal_upgrade.sh: migrate /service to libexecdir
+83. svscan.c, qmailctl, svscan_rc - renamed svscan.pid to .svscan.pid
