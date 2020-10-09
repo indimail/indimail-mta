@@ -1,4 +1,7 @@
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.40  2020-10-09 12:47:30+05:30  Cprogrammer
+# use variables from conf-* files
+#
 # Revision 1.39  2020-10-09 11:26:37+05:30  Cprogrammer
 # use servicedir from Makefile
 #
@@ -114,7 +117,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.in,v 1.39 2020-10-09 11:26:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.40 2020-10-09 12:47:30+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -129,6 +132,7 @@ mv=$(which mv)
 sed=$(which sed)
 cp=$(which cp)
 servicedir=@servicedir@
+sysconfdir=@sysconfdir@
 
 check_update_if_diff()
 {
@@ -141,7 +145,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.39 2020-10-09 11:26:37+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.40 2020-10-09 12:47:30+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -150,7 +154,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.39 2020-10-09 11:26:37+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.39 2020-10-09 11:26:37+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.40 2020-10-09 12:47:30+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -170,18 +174,23 @@ else
 	rundir=""
 fi
 # migrate from old style /service
-if [ ! -d @servicedir@ ] && [ -d /service -o -L /service ] ; then
-	$mkdir -p @servicedir@
+if [ ! -d $servicedir ] && [ -d /service -o -L /service ] ; then
+	$mkdir -p $servicedir
 	if [ $? -eq 0 ] ; then
 		cd /service
 		if [ -n "$cpio" ] ; then
-			find . -depth -print | $cpio -pdm @servicedir@ \
+			find . -depth -print | $cpio -pdm $servicedir \
 				&& $mv /service /service.old
 		else
-			$mv /service/* /service/.[a-z]* @servicedir@ \
+			$cp -rp /service $servicedir \
 				&& $mv /service /service.old
 		fi
 		if [ $? -eq 0 ] ; then
+			sed -i \
+  			-e 's{ /service{ @servicedir@{' \
+  			-e 's{"/service{"@servicedir@{' \
+				$servicedir/*/run $servicedir/*/log/run \
+				$servicedir/*/variables/.options
 			if [ -n "$rundir" ] ; then
 				$ln -s $rundir/svscan /service
 			else
@@ -194,74 +203,74 @@ fi
 if [ -d /var/log/indimail -a ! -d /var/log/svc ] ; then
 	$mv /var/log/indimail /var/log/svc
 	if [ $? -eq 0 ] ; then
-		$sed -i 's{/var/log/indimail{/var/log/svc{' $servicedir/*/log/run
+		$sed -i 's{/var/log/indimail{@logdir@{' $servicedir/*/log/run
 	fi
 fi
 #
 # certs were in /etc/indimail/control
 # they have been moved to /etc/indimail/certs
 #
-if [ ! -d /etc/indimail/certs ] ; then
-	$mkdir -p /etc/indimail/certs
+if [ ! -d $sysconfdir/certs ] ; then
+	$mkdir -p $sysconfdir/certs
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
-	$chown indimail:qmail /etc/indimail/certs
+	$chown indimail:qmail $sysconfdir/certs
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
-	$chmod 2775 /etc/indimail/certs
+	$chmod 2775 $sysconfdir/certs
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
 fi
 # move tcpserver access control to /etc/indimail/tcp
-if [ ! -d /etc/indimail/tcp ] ; then
-	$mkdir -p /etc/indimail/tcp
+if [ ! -d $sysconfdir/tcp ] ; then
+	$mkdir -p $sysconfdir/tcp
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
-	$chown indimail:qmail /etc/indimail/tcp
+	$chown indimail:qmail $sysconfdir/tcp
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
-	$chmod 2775 /etc/indimail/tcp
+	$chmod 2775 $sysconfdir/tcp
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
-	$mv /etc/indimail/tcp.* /etc/indimail/tcp > /dev/null
+	$mv $sysconfdir/tcp.* $sysconfdir/tcp > /dev/null
 else
-	$mv /etc/indimail/tcp.* /etc/indimail/tcp > /dev/null 2>&1
+	$mv $sysconfdir/tcp.* $sysconfdir/tcp > /dev/null 2>&1
 fi
-# move existing certs in control directory to /etc/indimail/certs
+# move existing certs in control directory to $sysconfdir/certs
 for i in servercert.pem clientcert.pem dh1024.pem dh512.pem \
 	rsa2048.pem dh2048.pem rsa512.pem couriersslcache servercert.cnf \
 	servercert.rand tlshosts notlshosts
 do
-	if [ -f /etc/indimail/control/$i -a ! -L /etc/indimail/control/$i ] ; then
-		$mv /etc/indimail/control/$i /etc/indimail/certs/$i
+	if [ -f $sysconfdir/control/$i -a ! -L $sysconfdir/control/$i ] ; then
+		$mv $sysconfdir/control/$i $sysconfdir/certs/$i
 		if [ $? -ne 0 ] ; then
 			exit 1
 		fi
 	fi
 	# move tlshosts, notlshosts directory to certs
-	if [ -d /etc/indimail/control/$i -a ! -L /etc/indimail/control/$i ] ; then
-		$mv /etc/indimail/control/$i /etc/indimail/certs/$i
+	if [ -d $sysconfdir/control/$i -a ! -L $sysconfdir/control/$i ] ; then
+		$mv $sysconfdir/control/$i $sysconfdir/certs/$i
 		if [ $? -ne 0 ] ; then
 			exit 1
 		fi
-		cd /etc/indimail/control
+		cd $sysconfdir/control
 		if [ $? -eq 0 ] ; then
 			$ln ../certs/$i $i
 		fi
 	fi
 done
 # remove clientcert.pem link to servercert.pem in control directory
-if [ -L /etc/indimail/control/clientcert.pem ] ; then
-	$rm -f /etc/indimail/control/clientcert.pem
+if [ -L $sysconfdir/control/clientcert.pem ] ; then
+	$rm -f $sysconfdir/control/clientcert.pem
 fi
-if [ ! -f /etc/indimail/certs/clientcert.pem -a ! -L /etc/indimail/certs/clientcert.pem ] ; then
-	cd /etc/indimail/certs
+if [ ! -f $sysconfdir/certs/clientcert.pem -a ! -L $sysconfdir/certs/clientcert.pem ] ; then
+	cd $sysconfdir/certs
 	$ln -s servercert.pem clientcert.pem
 fi
 
@@ -270,12 +279,12 @@ if [ $? -ne 2 ] ; then
 	for i in servercert.pem dh2048.pem rsa2048.pem dh1024.pem rsa1024.pem dh512.pem rsa512.pem
 	do
 		# roundcube (php) will require read access to certs
-		if [ -f /etc/indimail/certs/$i ] ; then
-			$chgrp qmail /etc/indimail/certs/$i
+		if [ -f $sysconfdir/certs/$i ] ; then
+			$chgrp qmail $sysconfdir/certs/$i
 		fi
 	done
 fi
-cd /etc/indimail/control
+cd $sysconfdir/control
 if [ $? -eq 0 ] ; then
 	if [ ! -f servercert.pem ] ; then
 	$ln -sf ../certs/servercert.pem servercert.pem
@@ -287,13 +296,13 @@ fi
 # Certificate location changed from /etc/indimail/control to /etc/indimail/certs
 for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25
 do
-	check_update_if_diff $servicedir/$i/variables/CERTDIR /etc/indimail/certs
+	check_update_if_diff $servicedir/$i/variables/CERTDIR $sysconfdir/certs
 	# increase for using dlmopen()
 	if [ ! " $i" = " qmail-send.25" ] ; then
 		check_update_if_diff $servicedir/$i/variables/SOFT_MEM 536870912
 	fi
 	if [ "$i" = "qmail-send.25" ] ; then
-		if [ -f /etc/indimail/control/virtualdomains -a ! -f $servicedir/$i/variables/ROUTE_NULL_USER ] ; then
+		if [ -f $sysconfdir/control/virtualdomains -a ! -f $servicedir/$i/variables/ROUTE_NULL_USER ] ; then
 			echo > $servicedir/$i/variables/ROUTE_NULL_USER
 		fi
 		if [ ! -f $servicedir/$i/variables/LOCK_LOGS ] ; then
@@ -329,16 +338,16 @@ fi
 if [ -s $servicedir/qmail-send.25/variables/QMAILREMOTE ] ; then
 	check_update_if_diff $servicedir/qmail-send.25/variables/QMAILREMOTE /usr/sbin/qmail-remote
 fi
-if [ -s /etc/indimail/control/defaultqueue/LOGFILTER ] ; then
-	check_update_if_diff /etc/indimail/control/defaultqueue/LOGFILTER /tmp/logfifo
+if [ -s $sysconfdir/control/defaultqueue/LOGFILTER ] ; then
+	check_update_if_diff $sysconfdir/control/defaultqueue/LOGFILTER /tmp/logfifo
 fi
 
 host=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 echo $host | grep "\." > /dev/null
 if [ $? -eq 0 ] ; then
-	check_update_if_diff /etc/indimail/control/envnoathost $host
-	check_update_if_diff /etc/indimail/control/defaultdomain $host
-	check_update_if_diff /etc/indimail/control/defaulthost $host
+	check_update_if_diff $sysconfdir/control/envnoathost $host
+	check_update_if_diff $sysconfdir/control/defaultdomain $host
+	check_update_if_diff $sysconfdir/control/defaulthost $host
 fi
 
 # qmail-greyd, greydaemon path changed to /usr/sbin
@@ -348,21 +357,21 @@ $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' $servicedir/greylist.1999/run
 rm -f $servicedir/.svscan/variables/STATUSFILE
 
 # copy updated cron entries
-if [ -f /etc/indimail/cronlist.q -a -d /etc/cron.d ] ; then
-	diff /etc/indimail/cronlist.q /etc/cron.d/cronlist.q >/dev/null 2>&1
+if [ -f $sysconfdir/cronlist.q -a -d /etc/cron.d ] ; then
+	diff $sysconfdir/cronlist.q /etc/cron.d/cronlist.q >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
-		$cp /etc/indimail/cronlist.q /etc/cron.d/cronlist.q
+		$cp $sysconfdir/cronlist.q /etc/cron.d/cronlist.q
 	fi
 fi
 # migrate clamd.conf to scan.conf
-if [ -f /etc/indimail/clamd.conf -a ! -f /etc/indimail/scan.conf ] ; then
-	$mv /etc/indimail/clamd.conf /etc/indimail/scan.conf
+if [ -f $sysconfdir/clamd.conf -a ! -f $sysconfdir/scan.conf ] ; then
+	$mv $sysconfdir/clamd.conf $sysconfdir/scan.conf
 fi
-if [ -d /etc/clamd.d -a -f /etc/indimail/scan.conf ] ; then
+if [ -d /etc/clamd.d -a -f $sysconfdir/scan.conf ] ; then
 	/bin/rm -f clamd.conf
 	if [ ! -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.d/scan.conf ] ; then
 		cd /etc/clamd.d
-		$ln -sf /etc/indimail/scan.conf
+		$ln -sf $sysconfdir/scan.conf
 	fi
 fi
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
@@ -385,10 +394,10 @@ if [ -d $servicedir/libwatch ] ; then
 fi
 
 # for surbl
-if [ ! -d /etc/indimail/control/cache ] ; then
-	$mkdir /etc/indimail/control/cache
-	$chown indimail:qmail /etc/indimail/control/cache
-	$chmod 2775 /etc/indimail/control/cache
+if [ ! -d $sysconfdir/control/cache ] ; then
+	$mkdir $sysconfdir/control/cache
+	$chown indimail:qmail $sysconfdir/control/cache
+	$chmod 2775 $sysconfdir/control/cache
 fi
 }
 
