@@ -3916,6 +3916,11 @@ warn-auto.sh conf-prefix svscan_rc.in \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	(cat warn-auto.sh; $(edit) $@.in) > $@
 
+qlocal_upgrade.sh: \
+warn-auto.sh qlocal_upgrade.in conf-prefix
+	cat warn-auto.sh qlocal_upgrade.in \
+	| $(edit) > $@
+
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared

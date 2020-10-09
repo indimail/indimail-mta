@@ -1,6 +1,7 @@
 it += indimail-mta.fc indimail-mta.spec indimail-mta-permissions.easy \
 	indimail-mta-permissions.paranoid indimail-mta-permissions.secure \
-	indimail-mta.fc indimail-mta.spec inotify docker-entrypoint
+	indimail-mta.fc indimail-mta.spec inotify docker-entrypoint \
+	qlocal_upgrade.sh
 
 ifeq ($(USE_SQL),1)
 it += qmail-sql sql-database
