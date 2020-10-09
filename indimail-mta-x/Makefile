@@ -696,13 +696,11 @@ upstart:upstart.in conf-prefix conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	) > upstart
 
-systemd:systemd.in conf-prefix conf-libexec
+systemd:systemd.in conf-libexec
 	( \
 	echo "# svscan - runlevel compatibility"; \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	cat systemd.in \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
+	cat systemd.in | $(edit) \
 	) > systemd
 
 svscanboot.8: \
@@ -3917,7 +3915,7 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	(cat warn-auto.sh; $(edit) $@.in) > $@
 
 qlocal_upgrade.sh: \
-warn-auto.sh qlocal_upgrade.in conf-prefix
+warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec conf-sysconfdir
 	cat warn-auto.sh qlocal_upgrade.in \
 	| $(edit) > $@
 
