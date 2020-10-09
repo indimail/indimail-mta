@@ -192,7 +192,7 @@ iftocc.0
 iftoccfrom
 iftoccfrom.0
 inc_deps
-indimail.plist
+svscan.plist
 instcheck
 iopause.h
 ipmeprint
@@ -612,3 +612,4 @@ qmailctl.8
 debian/daemontools.postinst
 debian/daemontools.postrm
 qlocal_upgrade.sh
+cleanq.8

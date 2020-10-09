@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.21  2020-10-09 17:32:11+05:30  Cprogrammer
+# use conf-prefix, conf-servicedir for configuring paths
+#
 # Revision 1.20  2020-10-08 22:56:18+05:30  Cprogrammer
 # servicedir changed to libexecdir/service
 #
@@ -12,9 +15,9 @@
 # removed RCS log.
 #
 #
-# $Id: svscanboot.sh,v 1.20 2020-10-08 22:56:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.21 2020-10-09 17:32:11+05:30 Cprogrammer Exp mbhangui $
 
-PATH=PREFIX/bin:/bin:/usr/local/bin:PREFIX/sbin:/sbin
+PATH=@prefix@/bin:/bin:/usr/local/bin:@prefix@/sbin:/sbin
 
 exec </dev/null
 exec >/dev/null
@@ -27,8 +30,8 @@ if [ $# -eq 0 ] ; then
 		SERVICEDIR=/service1
 	elif [ -d /service2 ] ; then
 		SERVICEDIR=/service2
-	elif [ -d LIBEXEC/service ] ; then
-		SERVICEDIR=LIBEXEC/service
+	elif [ -d @servicedir@ ] ; then
+		SERVICEDIR=@servicedir@
 	else
 		SERVICEDIR=/service
 	fi
@@ -45,22 +48,22 @@ if [ $# -eq 0 -o $# -eq 1 ] ; then
 	else
 		MOUNT_CMD=""
 	fi
-	PREFIX/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
+	@prefix@/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
 	if [ $use_readproctitle -eq 1 ] ; then
 		if [ -d $VARIABLES ] ; then
 		exec $MOUNT_CMD envdir $VARIABLES \
-			PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
-			PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
+			@prefix@/sbin/svscan $SERVICEDIR 2>&1 | \
+			@prefix@/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
 		else
-		exec $MOUNT_CMD PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
-			PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
+		exec $MOUNT_CMD @prefix@/sbin/svscan $SERVICEDIR 2>&1 | \
+			@prefix@/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
 		fi
 	else
 		if [ -d $VARIABLES ] ; then
 		exec $MOUNT_CMD envdir $VARIABLES \
-			PREFIX/sbin/svscan $SERVICEDIR
+			@prefix@/sbin/svscan $SERVICEDIR
 		else
-		exec $MOUNT_CMD PREFIX/sbin/svscan $SERVICEDIR
+		exec $MOUNT_CMD @prefix@/sbin/svscan $SERVICEDIR
 		fi
 	fi
 else
@@ -71,7 +74,7 @@ else
 		fi
 		SERVICEDIR=$i
 		VARIABLES=$SERVICEDIR/.svscan/variables
-		PREFIX/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log
+		@prefix@/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log
 		if [ ! -f $VARIABLES/SCANLOG -o -z $VARIABLES/SCANLOG ] ; then
 			use_readproctitle=1
 		else
@@ -85,18 +88,18 @@ else
 		if [ $use_readproctitle -eq 1 ] ; then
 			if [ -d $VARIABLES ] ; then
 			eval $MOUNT_CMD envdir $VARIABLES \
-				PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
-				PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
+				@prefix@/sbin/svscan $SERVICEDIR 2>&1 | \
+				@prefix@/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
 			else
-			eval $MOUNT_CMD PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
-				PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
+			eval $MOUNT_CMD @prefix@/sbin/svscan $SERVICEDIR 2>&1 | \
+				@prefix@/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
 			fi
 		else
 			if [ -d $VARIABLES ] ; then
 			eval $MOUNT_CMD envdir $VARIABLES \
-				PREFIX/sbin/svscan $SERVICEDIR &
+				@prefix@/sbin/svscan $SERVICEDIR &
 			else
-			eval $MOUNT_CMD PREFIX/sbin/svscan $SERVICEDIR &
+			eval $MOUNT_CMD @prefix@/sbin/svscan $SERVICEDIR &
 			fi
 		fi
 	done

@@ -9,6 +9,7 @@ edit = sed \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
 	-e 's,@sysconfdir\@,$(qsysconfdir),g' \
+	-e 's,@controldir\@,"$(qsysconfdir)/control",g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
@@ -65,7 +66,7 @@ man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	qmail-dk.8 dktest.8 qmail-multi.8 spawn-filter.8 \
 	qmail-inject.8 qmail-newmrh.8 recipient-cdb.8 qmail-cdb.8 \
 	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
-	qmail-poppass.8 qscanq.8 run-cleanq.8 qmailctl.8
+	qmail-poppass.8 qscanq.8 cleanq.8 run-cleanq.8 qmailctl.8
 
 include Makefile.$(SYSTEM)
 
@@ -645,9 +646,10 @@ warn-auto.sh atrn.sh conf-qmail conf-sysconfdir conf-prefix
 	> atrn
 
 multirotate: \
-warn-auto.sh multirotate.sh conf-prefix
+warn-auto.sh multirotate.sh conf-prefix conf-servicedir
 	cat warn-auto.sh multirotate.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}@servicedir\@}`head -1 conf-servicedir`}g \
 	> multirotate
 
 qpq: \
@@ -663,14 +665,15 @@ conf-libexec
 	$(edit) $@.sh > qmailctl
 	chmod +x $@
 
-qmailctl.8: qmailctl.9
+qmailctl.8: qmailctl.9 conf-servicedir
 	$(edit) qmailctl.8 > $@
 
-svscan.plist: svscan.plist.in conf-libexec conf-sysconfdir
+svscan.plist: svscan.plist.in conf-libexec \
+conf-sysconfdir conf-servicedir
 	$(edit) $@.in > $@
 
 indimail-mta.fc: \
-indimail-mta.fc.in conf-qmail conf-sysconfdir
+indimail-mta.fc.in conf-qmail conf-sysconfdir conf-servicedir
 	cat indimail-mta.fc.in \
 	| sed s}@servicedir\@}"$(servicedir)"}g \
 	| sed s}@qmaildir\@}"`head -1 conf-qmail`"}g \
@@ -678,44 +681,41 @@ indimail-mta.fc.in conf-qmail conf-sysconfdir
 	> indimail-mta.fc
 
 svscanboot: \
-warn-auto.sh svscanboot.sh conf-prefix conf-sysconfdir conf-libexec
+warn-auto.sh svscanboot.sh conf-prefix conf-sysconfdir \
+conf-libexec conf-servicedir
 	cat warn-auto.sh svscanboot.sh \
-	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
-	> svscanboot
+	| $(edit) > svscanboot
 
-upstart:upstart.in conf-prefix conf-sysconfdir
+upstart: warn-auto.sh upstart.in conf-prefix conf-sysconfdir \
+conf-servicedir
 	( \
+	cat warn-auto.sh; \
 	echo "# svscan - runlevel compatibility"; \
-	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	cat upstart.in \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	$(edit) upstart.in \
 	) > upstart
 
-systemd:systemd.in conf-libexec
+systemd: warn-auto.sh systemd.in conf-libexec conf-servicedir
 	( \
+	cat warn-auto.sh; \
 	echo "# svscan - runlevel compatibility"; \
-	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	cat systemd.in | $(edit) \
+	$(edit) systemd.in \
 	) > systemd
 
 svscanboot.8: \
-svscanboot.9 conf-prefix conf-sysconfdir conf-libexec
+svscanboot.9 conf-prefix conf-sysconfdir conf-libexec \
+conf-servicedir
 	$(edit) svscanboot.9 > svscanboot.8
 
 svscan.8: \
-svscan.9 conf-sysconfdir
+svscan.9 conf-sysconfdir conf-servicedir
 	$(edit) svscan.9 > svscan.8
 
-cronlist.q:cronlist.in conf-prefix conf-libexec
+cronlist.q: warn-auto.sh cronlist.in conf-prefix \
+conf-sysconfdir conf-servicedir
 	( \
-	echo "# WARNING: This file was auto-generated. Do not edit!"; \
+	cat warn-auto.sh; \
 	$(edit) cronlist.in \
-	) > cronlist.q
+	) > $@
 
 except: \
 load except.o
@@ -974,11 +974,12 @@ auto_ageout.h: conf-ageout
 	echo "#define MAX_AGE" "`head -1 < conf-ageout`" > auto_ageout.h.tmp && \
 	mv auto_ageout.h.tmp auto_ageout.h
 
-run-cleanq: load run-cleanq.o auto_qmail.o
+run-cleanq: load run-cleanq.o auto_libexec.o
 	./load run-cleanq auto_libexec.o -lqmail
 
-run-cleanq.o: compile run-cleanq.c auto_qmail.h
-	./compile run-cleanq.c
+run-cleanq.o: compile run-cleanq.c auto_libexec.h \
+conf-servicedir
+	./compile -DSERVICEDIR=\"`cat conf-servicedir`\" run-cleanq.c
 
 MakeArgs.o: compile MakeArgs.c
 	./compile MakeArgs.c
@@ -1020,13 +1021,14 @@ auto_scancmd.o: compile auto_scancmd.c
 
 qscanq.8: \
 qscanq.9 conf-logdir conf-sysconfdir
-	cat qscanq.9 \
-	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	| sed s}@LOGDIR\@}"`head -1 conf-logdir`"}g \
-	> qscanq.8
+	$(edit) qscanq.9 > qscanq.8
 
-run-cleanq.8: \
-run-cleanq.9 conf-libexec conf-prefix
+cleanq.8: \
+cleanq.9 conf-servicedir
+	$(edit) cleanq.9 > $@
+
+run-cleanq.8: run-cleanq.9 conf-sysconfdir \
+conf-prefix conf-servicedir
 	$(edit) run-cleanq.9 > $@
 
 analyzer: \
@@ -1471,7 +1473,7 @@ control.o auto_control.o strsalloc.o socket.lib libsyncdir.a
 	`cat socket.lib` -L. -lsyncdir -lqmail
 
 qmail-queue.8: \
-qmail-queue.9 conf-qmail conf-prefix
+qmail-queue.9 conf-qmail conf-prefix conf-servicedir
 	$(edit) qmail-queue.9 > qmail-queue.8
 
 qmail-queue.o: \
@@ -3739,7 +3741,8 @@ conf-release:
 
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config \
 conf-release conf-version ../ucspi-tcp-x/conf-version \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared \
+conf-servicedir
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
 
 debian/Makefile: debian/Makefile.in conf-release conf-version \
@@ -3882,7 +3885,8 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
 
 svctool: svctool.in mysql_config \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared \
+conf-servicedir
 	$(edit) $@.in > $@
 	chmod +x $@
 
@@ -3891,22 +3895,27 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	cat warn-auto.sh $@.in  | $(edit) > $@
 
 svwait.8: svwait.9 conf-prefix conf-libexec \
-conf-qmail conf-sysconfdir conf-shared
+conf-qmail conf-sysconfdir conf-shared \
+conf-servicedir
 	$(edit) svwait.9 > $@
 
 svctool.8: svctool.9 mysql_config \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared \
+conf-servicedir
 	$(edit) svctool.9 > $@
 
 create_services: create_services.in \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
+conf-prefix conf-libexec conf-qmail \
+conf-sysconfdir conf-shared conf-servicedir
 	$(edit) $@.in > $@; chmod 755 $@
 	chmod +x $@
 
 docker-entrypoint: \
-warn-auto.sh docker-entrypoint.sh conf-prefix
-	cat warn-auto.sh $@.sh \
-	| $(edit) > $@
+warn-auto.sh docker-entrypoint.sh conf-prefix conf-servicedir
+	( \
+	cat warn-auto.sh; \
+	$(edit) $@.sh \
+	) > $@
 	chmod 755 docker-entrypoint
 
 svscan_rc: \
@@ -3915,7 +3924,8 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	(cat warn-auto.sh; $(edit) $@.in) > $@
 
 qlocal_upgrade.sh: \
-warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec conf-sysconfdir
+warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec \
+conf-sysconfdir conf-servicedir
 	cat warn-auto.sh qlocal_upgrade.in \
 	| $(edit) > $@
 

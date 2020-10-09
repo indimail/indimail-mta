@@ -16,7 +16,7 @@
     <key>ProgramArguments</key>
         <array>
             <string>@libexecdir@/svscanboot</string>
-            <string>@qsysconfdir@/service</string>
+            <string>@servicedir@</string>
         </array>
     <key>WorkingDirectory</key>  <string>@sysconfdir@/service</string>
     <key>EnvironmentVariables</key>
