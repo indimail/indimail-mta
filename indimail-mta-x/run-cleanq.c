@@ -1,5 +1,8 @@
 /*
  * $Log: run-cleanq.c,v $
+ * Revision 1.6  2020-10-09 17:31:18+05:30  Cprogrammer
+ * use SERVICEDIR define for qscanq path
+ *
  * Revision 1.5  2020-10-08 22:55:35+05:30  Cprogrammer
  * servicedir changed to libexecdir/service
  *
@@ -23,16 +26,20 @@
 int
 main()
 {
+#ifdef SERVICEDIR
+	execlp("svc", "svc", "-o", SERVICEDIR"/qscanq", (char *) 0);
+#else
 	if (chdir(auto_libexec) == -1)
 		strerr_die4sys(111, FATAL, "chdir :", auto_libexec, ": ");
-	execlp("svc", "svc", "-o", "qscanq", (char *) 0);
+	execlp("svc", "svc", "-o", "service/qscanq", (char *) 0);
+#endif
 	_exit(111);	/*- hopefully never reached */ ;
 }
 
 void
 getversion_run_cleanq_c()
 {
-	static char    *x = "$Id: run-cleanq.c,v 1.5 2020-10-08 22:55:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: run-cleanq.c,v 1.6 2020-10-09 17:31:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
