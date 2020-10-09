@@ -1,4 +1,7 @@
 # $Log: upstart.in,v $
+# Revision 1.10  2020-10-09 17:33:00+05:30  Cprogrammer
+# use conf-prefix, conf-servicedir for configuring paths
+#
 # Revision 1.9  2020-10-08 22:56:36+05:30  Cprogrammer
 # use variables from Makefile
 #
@@ -32,10 +35,10 @@
 # to stop  - initctl emit qmailstop
 # start svscan
 # stop  svscan
-# $Id: upstart.in,v 1.9 2020-10-08 22:56:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: upstart.in,v 1.10 2020-10-09 17:33:00+05:30 Cprogrammer Exp mbhangui $
 description "Start IndiMail Services"
 author      "$Author: Cprogrammer $"
-version     "$Revision: 1.9 $"
+version     "$Revision: 1.10 $"
 
 umask 022
 
@@ -71,7 +74,7 @@ script
 			sleep 5
 		done
 	fi
-	PATH=PREFIX/bin:PREFIX/sbin:/bin:/sbin:/usr/bin:/usr/sbin
+	PATH=@prefix@/bin:@prefix@/sbin:/bin:/sbin:/usr/bin:/usr/sbin
 	if [ " $CONTROLDIR" = " " ] ; then
 		CONTROLDIR=@controldir@
 	fi
@@ -85,13 +88,13 @@ script
 		SCANINTERVAL=300
 	fi
 	cd /
-	PREFIX/bin/svc -dx @servicedir@/* @servicedir@/*/log @servicedir@/.svscan/log || true
+	@prefix@/bin/svc -dx @servicedir@/* @servicedir@/*/log @servicedir@/.svscan/log || true
 	exec env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
-		PREFIX/sbin/svscan @servicedir@ 2>&1
+		@prefix@/sbin/svscan @servicedir@ 2>&1
 end script
 
 pre-stop script
-	PREFIX/bin/svc -dx @servicedir@/* || true
+	@prefix@/bin/svc -dx @servicedir@/* || true
 	sleep 5
 end script
 
