@@ -74,12 +74,6 @@ default: all
 
 all: $(it) $(man)
 
-
-compile: make-compile warn-auto.sh systype conf-cc conf-cc-$(SYSTEM)
-	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
-	compile
-	chmod 755 compile
-
 make-compile: \
 make-compile.sh auto-ccld.sh
 	cat auto-ccld.sh make-compile.sh > make-compile
@@ -93,10 +87,20 @@ auto-ccld.sh: conf-cc conf-ld warn-auto.sh
 		echo LD=\'`head -1 conf-ld`\'; \
 	fi) > auto-ccld.sh
 
+compile: make-compile warn-auto.sh systype conf-cc conf-cc-$(SYSTEM)
+	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
+	compile
+	chmod 755 compile
+
 make-load: \
 make-load.sh auto-ccld.sh
 	cat auto-ccld.sh make-load.sh > make-load
 	chmod 755 make-load
+
+load: \
+make-load warn-auto.sh systype
+	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
+	chmod 755 load
 
 make-makelib: \
 make-makelib.sh auto-ccld.sh
@@ -108,12 +112,6 @@ make-makelib warn-auto.sh systype
 	( cat warn-auto.sh; ./make-makelib "`cat systype`" ) > \
 	makelib
 	chmod 755 makelib
-
-libsyncdir.a: makelib syncdir.o
-	./makelib libsyncdir.a syncdir.o
-
-syncdir.o: compile syncdir.c conf-sync
-	./compile `grep -h -v "^#" conf-sync` syncdir.c
 
 auto-gid: load auto-gid.o
 	./load auto-gid -lqmail
@@ -284,33 +282,6 @@ auto_usera.c: auto-str conf-users
 
 auto_usera.o: compile auto_usera.c
 	./compile auto_usera.c
-
-md5c.o: compile md5c.c md5.h global.h
-	./compile md5c.c
-
-hmac_md5.o: compile hmac_md5.c auth_cram.h global.h
-	./compile hmac_md5.c
-
-hmac_sha1.o: compile hmac_sha1.c sha1.h typesx.h
-	./compile hmac_sha1.c
-
-hmac_sha256.o: compile hmac_sha256.c sha1.h typesx.h
-	./compile hmac_sha256.c
-
-hmac_sha512.o: compile hmac_sha512.c sha1.h typesx.h
-	./compile hmac_sha512.c
-
-sha1.o: compile sha1.c sha1.h
-	./compile sha1.c
-
-hmac_ripemd.o: compile hmac_ripemd.c ripemd.h typesx.h
-	./compile hmac_ripemd.c
-
-ripemd.o: compile ripemd.c ripemd.h
-	./compile ripemd.c
-
-digest_md5.o: compile digest_md5.c global.h md5.h
-	./compile digest_md5.c
 
 swaks: swaks.pl conf-qmail conf-prefix
 	cat swaks.pl \
@@ -730,6 +701,10 @@ find-systype.sh auto-ccld.sh
 	cat auto-ccld.sh find-systype.sh > find-systype
 	chmod 755 find-systype
 
+systype: \
+find-systype trycpp.c
+	./find-systype > systype
+
 fmtqfn.o: compile fmtqfn.c fmtqfn.h auto_split.h
 	./compile fmtqfn.c
 
@@ -1046,11 +1021,6 @@ iftoccfrom ifaddr replier replier-config
 
 qlog: spipe qfilelog multipipe teepipe qlogselect
 
-load: \
-make-load warn-auto.sh systype
-	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
-	chmod 755 load
-
 maildir.o: \
 compile maildir.c prioq.h direntry.h maildir.h
 	./compile maildir.c
@@ -1216,6 +1186,12 @@ qmail-limits.9 conf-spawn
 	cat qmail-limits.9 \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-limits.7
+
+libsyncdir.a: makelib syncdir.o
+	./makelib libsyncdir.a syncdir.o
+
+syncdir.o: compile syncdir.c conf-sync
+	./compile `grep -h -v "^#" conf-sync` syncdir.c
 
 qmail-local: \
 load qmail-local.o qmail.o quote.o gfrom.o myctime.o \
@@ -1608,21 +1584,21 @@ rrt.1: rrt.9 conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> rrt.1
 
+qr_digest_md5.o: compile qr_digest_md5.c
+	./compile qr_digest_md5.c
+
 qmail-remote: \
 load qmail-remote.o control.o timeoutconn.o tcpto.o dns.o ip.o \
 ipalloc.o strsalloc.o ipme.o quote.o variables.o \
 auto_control.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
-md5c.o hmac_md5.o hmac_sha1.o hmac_sha256.o hmac_sha512.o hmac_ripemd.o sha1.o ripemd.o \
-tlsarralloc.o digest_md5.o socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o \
+tlsarralloc.o qr_digest_md5.o socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o \
 fn_handler.o query_skt.o tlsacheck.o auto_qmail.o dns.lib socket.lib tls.lib 
 	./load qmail-remote control.o tlsacheck.o auto_control.o timeoutconn.o \
 	tcpto.o dns.o ip.o socket_ip4loopback.o socket_v6loopback.o \
 	socket_v6any.o ipalloc.o socket_v4mappedprefix.o strsalloc.o \
-	ipme.o quote.o md5c.o hmac_md5.o hmac_sha1.o hmac_ripemd.o \
-	sha1.o ripemd.o digest_md5.o fn_handler.o query_skt.o \
+	ipme.o quote.o fn_handler.o qr_digest_md5.o query_skt.o \
 	tlsarralloc.o variables.o socket_tcp.o socket_tcp6.o \
-	hmac_sha256.o hmac_sha512.o auto_qmail.o \
-	`cat dns.lib socket.lib tls.lib` -lqmail
+	auto_qmail.o `cat dns.lib socket.lib tls.lib` -lqmail
 
 qmail-remote.8: \
 qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
@@ -1637,9 +1613,10 @@ compile qmail-remote.c tls.h ssl_timeoutio.h auth_cram.h \
 auto_qmail.h control.h dns.h quote.h ip.h ipalloc.h \
 query_skt.h ipme.h tcpto.h timeoutconn.h haveip6.h socket.h \
 variables.h hastlsv1_1_client.h hastlsv1_2_client.h \
-auth_digest_md5.h auto_control.h hastlsa.h tlsacheck.h fn_handler.h \
+auto_control.h hastlsa.h tlsacheck.h fn_handler.h \
 tlsarralloc.h conf-tls conf-ip conf-batv conf-mxps
-	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
+	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` \
+		qmail-remote.c
 
 qmail-rspawn: \
 load qmail-rspawn.o spawn.o tcpto_clean.o get_uid.o \
@@ -1738,7 +1715,7 @@ socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o spf.o dns.o auto_qmail.o auto_uids.o \
 qregex_sql.o tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
 auto_break.o auto_control.o auto_assign.o auto_prefix.o auto_sysconfdir.o \
-socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql conf-ld-$(SYSTEM)
+socket.lib dns.lib tls.lib mysql_config conf-sql conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 		$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o indimail_stub.o load_mysql.o \
@@ -1750,7 +1727,7 @@ socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql conf-ld-$(SYSTEM)
 		mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
 		tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
-		hmac_sha1.o `cat socket.lib dns.lib tls.lib` -L/opt/local/lib -lqmail ; \
+		`cat socket.lib dns.lib tls.lib` -L/opt/local/lib -lqmail ; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
@@ -1760,7 +1737,7 @@ socket.lib dns.lib tls.lib hmac_sha1.o mysql_config conf-sql conf-ld-$(SYSTEM)
 		socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
 		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
-		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o hmac_sha1.o \
+		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
 		`cat socket.lib dns.lib tls.lib` `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 		-L/usr/local/lib -lqmail ; \
 	fi
@@ -1775,7 +1752,7 @@ socket_v6any.o mail_acl.o spf.o dns.o auto_qmail.o auto_uids.o \
 qregex_sql.o tablematch.o greylist.o auto_assign.o qcount_dir.o \
 query_skt.o fn_handler.o tlsarralloc.o load_mysql.o \
 auto_sysconfdir.o auto_break.o auto_prefix.o socket.lib dns.lib tls.lib \
-hmac_sha1.o mysql_config conf-sql
+mysql_config conf-sql
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 	qcount_dir.o received.o date822fmt.o wildmat.o qmail.o variables.o \
@@ -1783,7 +1760,7 @@ hmac_sha1.o mysql_config conf-sql
 	matchregex.o socket_v4mappedprefix.o socket_ip4loopback.o \
 	socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	indimail_stub.o qregex_sql.o tablematch.o greylist.o auto_break.o \
-	auto_control.o auto_assign.o hmac_sha1.o query_skt.o fn_handler.o \
+	auto_control.o auto_assign.o query_skt.o fn_handler.o \
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
 	`cat socket.lib dns.lib tls.lib` -ldl -lqmail
 
@@ -2227,10 +2204,6 @@ trysyslog.c compile load
 	./load trysyslog -lgen ) >/dev/null 2>&1 \
 	&& echo -lgen || exit 0 ) > syslog.lib
 	rm -f trysyslog.o trysyslog
-
-systype: \
-find-systype trycpp.c
-	./find-systype > systype
 
 tcp-env: \
 load tcp-env.o dns.o remoteinfo.o control.o variables.o \
