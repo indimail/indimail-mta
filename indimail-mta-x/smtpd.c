@@ -86,14 +86,14 @@ void            tls_nogateway();
 #endif
 ssize_t         safewrite(int, char *, int);
 ssize_t         saferead(int, char *, int);
-int             auth_login(char *);
-int             auth_plain(char *);
-int             auth_cram_md5();
-int             auth_cram_sha1();
-int             auth_cram_sha256();
-int             auth_cram_sha512();
-int             auth_cram_ripemd();
-int             auth_digest_md5();
+static int      auth_login(char *);
+static int      auth_plain(char *);
+static int      auth_cram_md5();
+static int      auth_cram_sha1();
+static int      auth_cram_sha256();
+static int      auth_cram_sha512();
+static int      auth_cram_ripemd();
+static int      auth_digest_md5();
 int             err_noauth();
 int             err_noauthallowed();
 int             addrrelay();
@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.227 $";
+char           *revision = "$Revision: 1.228 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -4540,7 +4540,7 @@ authenticate(int method)
 		return (i);
 }
 
-int
+static int
 auth_login(char *arg)
 {
 	int             r;
@@ -4576,7 +4576,7 @@ auth_login(char *arg)
 	return (r);
 }
 
-int
+static int
 auth_plain(char *arg)
 {
 	int             r, id = 0;
@@ -4612,7 +4612,7 @@ auth_plain(char *arg)
 	return (r);
 }
 
-int
+static int
 auth_cram(int method)
 {
 	int             i, r;
@@ -4666,31 +4666,31 @@ auth_cram(int method)
 	return (r);
 }
 
-int
+static int
 auth_cram_md5()
 {
 	return (auth_cram(AUTH_CRAM_MD5));
 }
 
-int
+static int
 auth_cram_sha1()
 {
 	return (auth_cram(AUTH_CRAM_SHA1));
 }
 
-int
+static int
 auth_cram_sha256()
 {
 	return (auth_cram(AUTH_CRAM_SHA256));
 }
 
-int
+static int
 auth_cram_sha512()
 {
 	return (auth_cram(AUTH_CRAM_SHA512));
 }
 
-int
+static int
 auth_cram_ripemd()
 {
 	return (auth_cram(AUTH_CRAM_RIPEMD));
@@ -4740,7 +4740,7 @@ scan_response(stralloc * dst, stralloc * src, const char *search)
  */
 char            hextab[] = "0123456789abcdef";
 
-int
+static int
 auth_digest_md5()
 {
 	unsigned char   unique[FMT_ULONG + FMT_ULONG + 3];
@@ -6093,6 +6093,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.228  2020-10-10 21:21:33+05:30  Cprogrammer
+ * functions not needed outside made static
+ *
  * Revision 1.227  2020-09-15 09:40:00+05:30  Cprogrammer
  * ctl_maxcmdlen moved to libqmail
  *
@@ -6212,7 +6215,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.227 2020-09-15 09:40:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.228 2020-10-10 21:21:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
