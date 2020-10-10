@@ -9,7 +9,10 @@ edit = sed \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@prefix\@,$(prefix),g' \
-	-e 's,@DATE\@,$(DATE),g'
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@DATE\@,$(DATE),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g'
 
 default: it
 
@@ -370,6 +373,10 @@ compile installer.c
 
 DIRS: DIRS.in
 	$(edit) $@.in > $@
+
+ucspi-tcp.spec: ucspi-tcp.spec.in conf-prefix \
+conf-shared conf-sysconfdir
+	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
 
 install: it installer DIRS BIN SHARED PLUGINS MAN
 	mkdir -p $(DESTDIR)$(prefix)

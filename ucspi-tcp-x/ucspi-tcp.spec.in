@@ -1,0 +1,240 @@
+#
+#
+# $Id: indimail-mta.spec.in,v 1.249 2020-08-08 10:53:23+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%global _unpackaged_files_terminate_build 1
+%global debug_package %{nil}
+
+%if %{defined _project}
+# define if building on openSUSE build service
+%global build_on_obs       1
+%global reconfigure_mode   0
+%else
+%define _project           local
+%global build_on_obs       0
+%global reconfigure_mode   0
+%global _hardened_build    1
+%endif
+
+%global _prefix            @prefix@
+%global shareddir          @shareddir@
+%global mandir             @mandir@
+%global qsysconfdir        @sysconfdir@
+%global plugindir          %{_prefix}/lib/indimail/plugins
+%global tcpserver_plugin   1
+%global see_base           For a description of ucspi-tcp visit https://github.com/mbhangui/indimail-mta
+
+%global _verbose           0
+
+%if %build_on_obs == 1
+%global packager Manvendra Bhangui <ucspi-tcp@indimail.org>
+%endif
+
+%if 0%{?suse_version}
+%global dist suse
+%global disttag suse
+%endif
+
+%if 0%{?fedora_version}
+%global dist %{?dist}
+%global disttag fedora
+%endif
+
+Summary: A collection of tools for building TCP client-server applications
+Name: ucspi-tcp
+Version: @version@
+Release: @release@%{?dist}
+
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Base
+%else
+Group: Productivity/Networking/Email/Servers
+%endif
+Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+
+URL: https://github.com/mbhangui/indimail-mta
+#AutoReqProv: No
+Conflicts: indimail-mta < 2.11
+BuildRequires: gcc gcc-c++ make pkgconfig
+BuildRequires: sed findutils diffutils gzip coreutils grep
+BuildRequires: glibc glibc-devel
+BuildRequires: openssl openssl-devel mysql-devel
+BuildRequires: libqmail-devel
+
+##################################### OBS ####################################
+%if %build_on_obs == 1
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
+%endif
+%endif
+##############################################################################
+
+%if %build_on_obs == 1
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+%endif
+Requires: procps /usr/bin/awk /usr/bin/which
+Requires: coreutils grep /bin/sh glibc openssl
+Requires: diffutils sed findutils pkgconfig
+Requires: libqmail > 0.3
+
+%description
+tcpserver and tcpclient are easy-to-use command-line tools for building
+TCP client-server applications.
+
+tcpserver waits for incoming connections and, for each connection, runs
+a program of your choice. Your program receives environment variables
+showing the local and remote host names, IP addresses, and port numbers.
+
+tcpserver offers a concurrency limit to protect you from running out of
+processes and memory. When you are handling 40 (by default) simultaneous
+connections, tcpserver smoothly defers acceptance of new connections.
+
+tcpserver also provides TCP access control features, similar to
+tcp-wrappers/tcpd\'s hosts.allow but much faster. Its access control
+rules are compiled into a hashed format with cdb, so it can easily deal
+with thousands of different hosts.
+
+This package includes a recordio tool that monitors all the input and
+output of a server.
+
+tcpclient makes a TCP connection and runs a program of your choice. It
+sets up the same environment variables as tcpserver.
+
+This package includes several sample clients built on top of tcpclient:
+who@, date@, finger@, http@, tcpcat, and mconnect.
+
+tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
+Interface, using the TCP protocol. UCSPI tools are available for several
+different networks.
+
+Original Author: Dan J. Bernstein <djb@cr.yp.to>
+
+%prep
+%setup -q
+
+%build
+ID=$(id -u)
+(
+echo "---------------- INFORMATION ------------------------"
+echo target        %_target
+echo target_alias  %_target_alias
+echo target_cpu    %_target_cpu
+echo target_os     %_target_os
+echo target_vendor %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+
+(
+echo "NAME=%{name}"
+echo "Description=\"ucspi-tcp\""
+echo "UCSPITCP_version="%{version}""
+echo "ID=%{name}"
+echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
+echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui ucspi-tcp@indimail.org\""
+) > %{name}-release
+
+#### ucspi-tcp ######################
+%{__sed} 's{PREFIX{%{_prefix}{' conf-prefix.in conf-prefix
+%{__sed} 's{SHAREDDIR{%{shareddir}{' conf-shared.in > conf-shared
+%if %{tcpserver_plugin} == 1
+  echo "-DLOAD_SHARED_OBJECTS" >conf-dlopen
+%else
+  %{__rm} -f conf-dlopen
+%endif
+if [ -n "%{debug_package}" ] ; then
+  echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > conf-cc
+  echo %{__cc} -O2 > conf-ld
+fi
+
+%install
+ID=$(id -u)
+%{__mkdir_p} %{buildroot}%{_prefix}
+if [ %{_verbose} -eq 0 ] ; then
+  silent_opt="-s"
+else
+  silent_opt=""
+fi
+
+# rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
+%if 0%{?build_cflags:1}
+  CFLAGS="%{build_cflags}"
+%else
+  CFLAGS="%{optflags}"
+%endif
+%if 0%{?build_ldflags:1}
+  LDFLAGS="%{build_ldflags} $LDFLAGS"
+%endif
+%{__make} SYSTEM=LINUX "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+%{__make} SYSTEM=LINUX "$silent_opt" %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install-strip
+
+%{__mkdir_p} %{buildroot}%{shareddir}/doc
+%{__mkdir_p} %{buildroot}%{qsysconfdir}
+#copy files not copied by setup
+install -m 0644 %{name}-release  %{buildroot}%{qsysconfdir}/%{name}-release
+install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
+install -m 0644 doc/ChangeLog    %{buildroot}%{shareddir}/doc/ChangeLog-ucspi-tcp
+
+# Compress the man pages
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
+
+if [ -x /bin/touch ] ; then
+  TOUCH=/bin/touch
+elif [ -x /usr/bin/touch ] ; then
+  TOUCH=/usr/bin/touch
+else
+  TOUCH=/bin/touch
+fi
+
+%files
+%attr(0755,root,root)                     %{_prefix}/bin/tcpserver
+%attr(0755,root,root)                     %{_prefix}/bin/tcprules
+%attr(0755,root,root)                     %{_prefix}/bin/tcprulescheck
+%attr(0755,root,root)                     %{_prefix}/bin/tcpclient
+%attr(0755,root,root)                     %{_prefix}/bin/who@
+%attr(0755,root,root)                     %{_prefix}/bin/date@
+%attr(0755,root,root)                     %{_prefix}/bin/finger@
+%attr(0755,root,root)                     %{_prefix}/bin/http@
+%attr(0755,root,root)                     %{_prefix}/bin/tcpcat
+%attr(0755,root,root)                     %{_prefix}/bin/mconnect
+%attr(0755,root,root)                     %{_prefix}/bin/mconnect-io
+%attr(0755,root,root)                     %{_prefix}/bin/rblsmtpd
+
+%attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
+%attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
+%attr(0755,root,root)                     %{plugindir}/rblsmtpd.so
+
+%if "%{mandir}" != "/usr/share/man"
+%dir %attr(0755,root,root)                %{mandir}
+%dir %attr(0755,root,root)                %{mandir}/man1
+%dir %attr(0755,root,root)                %{mandir}/man8
+%endif
+
+%docdir %{mandir}
+%attr(0644,root,root)                     %{mandir}/man1/tcpserver.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/tcprules.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/tcprulescheck.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/tcpclient.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/who@.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/date@.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/finger@.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/http@.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/tcpcat.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/mconnect.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/mconnect-io.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/rblsmtpd.1.gz
+
+%attr(0644,root,root)                     %{shareddir}/doc/ChangeLog-ucspi-tcp
+%attr(0644,root,root)                     %{shareddir}/doc/README.ucspi-tcp
+
+%clean
+[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+
+# fix changelog for openSUSE buildservice
+%changelog

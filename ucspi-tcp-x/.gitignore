@@ -51,3 +51,6 @@ Makevars.
 conf-release
 conf-shared
 conf-sysconfdir
+ucspi-tcp.spec
+doc
+debian
