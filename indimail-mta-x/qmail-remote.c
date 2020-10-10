@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.133 2020-05-11 11:11:24+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.134 2020-10-10 21:20:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -60,7 +60,7 @@
 #include <openssl/x509v3.h>
 #include <openssl/x509.h>
 #include "auth_cram.h"
-#include "auth_digest_md5.h"
+#include "qr_digest_md5.h"
 #include "hastlsv1_1_client.h"
 #include "hastlsv1_2_client.h"
 #ifdef HASTLSA
@@ -1965,7 +1965,7 @@ auth_digest_md5(int use_size)
 		temp_nomem();
 	if (!
 		(s =
-		 (unsigned char *) digest_md5(user.s, user.len, realm.s, realm.len, pass.s, pass.len, 0, nonce.s, nonce.len, digesturi.s,
+		 (unsigned char *) qr_digest_md5(user.s, user.len, realm.s, realm.len, pass.s, pass.len, 0, nonce.s, nonce.len, digesturi.s,
 									  digesturi.len, (char *) cnonce, "00000001", "auth")))
 		quit("ZConnected to ", " but unable to generate response.", -1, -1);
 	if (!stralloc_cats(&slop, (char *) s))
@@ -3485,14 +3485,17 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.133 2020-05-11 11:11:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.134 2020-10-10 21:20:53+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
-	x = sccsidauthdigestmd5h;
+	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.134  2020-10-10 21:20:53+05:30  Cprogrammer
+ * renamed digest_md5() to qr_digest_md5() to avoid clash with digest_md5()
+ *
  * Revision 1.133  2020-05-11 11:11:24+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
