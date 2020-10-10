@@ -83,3 +83,6 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
   * qlocal_upgrade.sh: migrate /service to libexecdir
   * svscan.c, qmailctl, svscan_rc - renamed svscan.pid to .svscan.pid
+  * smtpd.c: auth functions made static
+  * qmail-remote.c: digest_md5() renamed to qr_digest_md5() to avoid clash
+  * removed functions duplicated in libqmail
