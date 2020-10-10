@@ -31,11 +31,11 @@ do
 		flag=2
 		continue
 	fi
-	echo "$line" |grep "^[0-9]" > /dev/null
+	echo "$line" |egrep "^- [0-9]|^[0-9]" > /dev/null
 	if [ $? -eq 0 ] ; then
 		echo "$line"
 	else
-		echo "    $line"
+		echo "  $line"
 	fi
 done
 
