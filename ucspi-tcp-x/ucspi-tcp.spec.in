@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.249 2020-08-08 10:53:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.1 2020-10-11 15:46:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -148,6 +148,7 @@ echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui ucspi-tcp@indimail.org\""
 %else
   %{__rm} -f conf-dlopen
 %endif
+./catChangeLog doc/ChangeLog > ChangeLog
 if [ -n "%{debug_package}" ] ; then
   echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > conf-cc
   echo %{__cc} -O2 > conf-ld
@@ -179,18 +180,11 @@ fi
 #copy files not copied by setup
 install -m 0644 %{name}-release  %{buildroot}%{qsysconfdir}/%{name}-release
 install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
-install -m 0644 doc/ChangeLog    %{buildroot}%{shareddir}/doc/ChangeLog-ucspi-tcp
+install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-ucspi-tcp
+%{__rm} -f ChangeLog
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
-
-if [ -x /bin/touch ] ; then
-  TOUCH=/bin/touch
-elif [ -x /usr/bin/touch ] ; then
-  TOUCH=/usr/bin/touch
-else
-  TOUCH=/bin/touch
-fi
 
 %files
 %attr(0755,root,root)                     %{_prefix}/bin/tcpserver
