@@ -1,0 +1,29 @@
+.TH docker-entrypoint 8
+.SH NAME
+docker-entrypoint \- entry point for docker/podman images
+
+.SH SYNOPSYS
+.B docker-entrypoint
+[
+.I options
+]
+
+.SH DESCRIPTION
+\fBdocker-entrypoint\fR is an entry point script for docker / podmain
+indimail/indimail-mta images. It gets automatically invoked when you start
+a docker/podman image. Depending on the image (indimail-mta, indimail or indimail
+image with Roundcube Mail, it is passed a specific option on the command line.
+It is not meant to be executed by the user
+
+.SH OPTIONS
+.TP
+.B indimail
+Start svscan in @servicedir@ directory and create a link /etc/mnttab to /proc/mounts
+
+.TP
+.B webmail
+Start svscan in @servicedir@ directory and create a link /etc/mnttab
+to /proc/mounts. ALso starts the httpd and php-fpm service
+
+.SH "SEE ALSO"
+docker(1), podman(1), svscan(8), svstat(8), svc(8), supervise(8)
