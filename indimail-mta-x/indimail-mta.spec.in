@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.265 2020-10-09 12:38:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.266 2020-10-11 15:38:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -853,6 +853,7 @@ done
 %verify (not md5 size mtime mode)       %{libexecdir}/qlocal_upgrade.sh
 
 %attr(755,root,root)                    %{libexecdir}/svscanboot
+%attr(755,root,root)                    %{libexecdir}/svwait
 %attr(755,root,root)                    %{libexecdir}/atrn
 %attr(755,root,root)                    %{libexecdir}/etrn
 %attr(755,root,root)                    %{libexecdir}/cdbmake-12
@@ -911,7 +912,6 @@ done
 %attr(0755,root,root)                   %{_prefix}/sbin/docker-entrypoint
 %attr(0755,root,root)                   %{_prefix}/sbin/fghack
 %attr(0755,root,root)                   %{_prefix}/sbin/pgrphack
-%attr(0755,root,root)                   %{libexecdir}/svwait
 
 # ucspi-tcp
 %attr(0755,root,root)                   %{_prefix}/bin/mconnect-io
@@ -1062,9 +1062,9 @@ done
 %attr(0755,root,root)                   %{_prefix}/sbin/svctool
 %attr(0755,root,root)                   %{_prefix}/sbin/fghack
 %attr(0755,root,root)                   %{_prefix}/sbin/pgrphack
-%attr(0755,root,root)                   %{libexecdir}/svwait
 
 %attr(0755,root,root)                   %{libexecdir}/svscanboot
+%attr(0755,root,root)                   %{libexecdir}/svwait
 
 %attr(0644,root,root)                   %{shareddir}/boot/upstart
 %attr(0644,root,root)                   %{shareddir}/boot/systemd
@@ -1091,7 +1091,6 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/supervise.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svc.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svok.8.gz
-%attr(0644,root,root)                   %{mandir}/man8/svwait.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svscan.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svstat.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/tai64n.8.gz
@@ -1099,6 +1098,8 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/tai64nunix.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/logselect.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svscanboot.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/svwait.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/docker-entrypoint.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/svctool.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmailctl.8.gz
 
@@ -1485,7 +1486,7 @@ echo "13. Configure udplogger service"
 echo "14. Configure qscanq/clamd/freshclam service"
 echo "15. Configure %{qsysconfdir}/control/signatures"
 echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
-echo "17. Configure %{name} startup"
+echo "17. Configure svscan startup"
 echo ""
 
 if [ ! -d %{logdir} ] ; then
@@ -1741,7 +1742,7 @@ svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
 # Install IndiMail to be started on system boot
 # The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
 #
-echo "adding indimail startup"
+echo "adding svscan startup"
 %{_prefix}/sbin/svctool --config=add-boot --servicedir=%{libexecdir}/service
 %{_prefix}/sbin/svctool --config=add-alt
 
@@ -1858,7 +1859,7 @@ if [ -f %{_sysconfdir}/init.d/svscan ] ; then
   fi
 fi
 # Remove IndiMail being started on system boot
-echo "removing indimail startup"
+echo "removing svscan startup"
 %{_prefix}/sbin/svctool --config=rm-boot
 %{_prefix}/sbin/svctool --config=remove-alt
 ) >> /var/log/%{name}-setup.log 2>&1
@@ -1918,7 +1919,7 @@ do
 done
 %{__rm} -rf %{qmaildir}/alias/Maildir
 
-echo "removing startup services"
+echo "removing svscan supervised startup services"
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
   for i in clamd freshclam
   do
@@ -2116,7 +2117,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   ) >> /var/log/%{name}-setup.log 2>&1
   exit 0
 fi
-echo "adding indimail startup"
+echo "adding svscan startup"
 %{_prefix}/sbin/svctool --config=add-boot
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir} --scanint=60
@@ -2186,7 +2187,7 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
 fi
 
 # Remove IndiMail being started on system boot
-echo "removing indimail startup"
+echo "removing svscan startup"
 %{_prefix}/sbin/svctool --config=rm-boot
 ) >> /var/log/daemontools-setup.log 2>&1
 

@@ -657,18 +657,25 @@ conf-libexec conf-servicedir
 	cat warn-auto.sh svscanboot.sh \
 	| $(edit) > svscanboot
 
-upstart: warn-auto.sh upstart.in conf-prefix conf-sysconfdir \
+svscan_rc: \
+warn-auto.sh conf-prefix svscan_rc.in \
+conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
+	(cat warn-auto.sh; $(edit) $@.in) > $@
+
+upstart: upstart.in conf-prefix conf-sysconfdir \
 conf-servicedir
 	( \
-	cat warn-auto.sh; \
 	echo "# svscan - runlevel compatibility"; \
+	echo "# WARNING: This file was auto-generated. Do not edit!"; \
+	echo "#"; \
 	$(edit) upstart.in \
 	) > upstart
 
-systemd: warn-auto.sh systemd.in conf-libexec conf-servicedir
+systemd: systemd.in conf-libexec conf-servicedir
 	( \
-	cat warn-auto.sh; \
 	echo "# svscan - runlevel compatibility"; \
+	echo "# WARNING: This file was auto-generated. Do not edit!"; \
+	echo "#"; \
 	$(edit) systemd.in \
 	) > systemd
 
@@ -3891,10 +3898,8 @@ warn-auto.sh docker-entrypoint.sh conf-prefix conf-servicedir
 	) > $@
 	chmod 755 docker-entrypoint
 
-svscan_rc: \
-warn-auto.sh conf-prefix svscan_rc.in \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
-	(cat warn-auto.sh; $(edit) $@.in) > $@
+docker-entrypoint.8: docker-entrypoint.9 conf-servicedir
+	$(edit) docker-entrypoint.9 > docker-entrypoint.8
 
 qlocal_upgrade.sh: \
 warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec \
