@@ -1132,3 +1132,4 @@ debian/daemontools.postrm
 qlocal_upgrade.sh
 cleanq.8
 svscan.plist
+docker-entrypoint.8

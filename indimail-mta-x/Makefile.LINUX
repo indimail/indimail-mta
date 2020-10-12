@@ -3,6 +3,8 @@ it += indimail-mta.fc indimail-mta.spec indimail-mta-permissions.easy \
 	indimail-mta.fc indimail-mta.spec inotify docker-entrypoint \
 	qlocal_upgrade.sh
 
+man += docker-entrypoint.8
+
 ifeq ($(USE_SQL),1)
 it += qmail-sql sql-database
 man += qmail-sql.8 sql-database.8
