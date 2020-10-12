@@ -86,3 +86,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * smtpd.c: auth functions made static
   * qmail-remote.c: digest_md5() renamed to qr_digest_md5() to avoid clash
   * removed functions duplicated in libqmail
+  * added man page for docker-entrypoint

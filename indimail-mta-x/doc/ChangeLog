@@ -134,3 +134,5 @@ creation
 84. smtpd.c: auth functions made static
 85. qmail-remote.c: digest_md5() renamed to qr_digest_md5() to avoid clash
 86. removed functions duplicated in libqmail
+-11/10/2020
+87. added man page for docker-entrypoint
