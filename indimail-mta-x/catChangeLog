@@ -38,7 +38,7 @@ do
 	if [ $? -eq 0 ] ; then
 		echo "$line"
 	else
-		echo "  $line"
+		echo "    $line"
 	fi
 done
 
