@@ -65,6 +65,8 @@ Release 1.5 Start 19/03/2009
 32. renamed DKKIMDOMAIN to BOUNCEDOMAIN
 - 06/10/2020
 33. configure.ac: changes for FreeBSD, Darwin
+- 13/10/2020
+34. added debuginfo package
 
 *
 ----------------------
