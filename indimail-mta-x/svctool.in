@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.516 2020-10-14 19:45:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.517 2020-10-16 12:31:43+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.516 2020-10-14 19:45:24+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.517 2020-10-16 12:31:43+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -1944,7 +1944,7 @@ echo "#!/bin/sh"
 echo "# $RCSID"
 echo "# $prog_args"
 echo ""
-echo "LOGFILTER=\`/bin/cat $SERVICEDIR/qmail-logfifo/variables/LOGFILTER\`"
+echo "LOGFILTER=\`/bin/cat variables/LOGFILTER\`"
 echo "FIFODIR=\`dirname \$LOGFILTER\`"
 echo "if [ ! -d \$FIFODIR ] ; then"
 echo "  mkdir -p \$FIFODIR"
@@ -2368,7 +2368,7 @@ echo "HOSTNAME=\`uname -n\`"
 echo
 echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" -o -z \"\$ME\" ]; then"
 echo "    echo QMAILDUID, NOFILESGID, or ME is unset in"
-echo "    echo $SERVICEDIR/qmail-smtpd.$tag/run"
+echo "    echo \`pwd\`/run"
 echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
@@ -2380,7 +2380,7 @@ echo "    exit 1"
 echo "fi"
 echo
 echo "exec 2>&1"
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-smtpd.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 if [ " $rbl" = " " ] ; then
 	echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
@@ -2404,7 +2404,7 @@ else
 	) > $conf_dir/RBLCOMMAND
 fi
 echo "-x $sysconfdir/tcp/tcp.smtp.cdb \\"
-echo "-c $SERVICEDIR/qmail-smtpd.$tag/variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
+echo "-c variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
 echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
 if [ -f /bin/false ] ; then
 	false="/bin/false"
@@ -2454,8 +2454,10 @@ fi
 # finally create fifologger as it modifies conf_dir
 if [ ! " $logfilter" = " " ] ; then
 	echo  $logfilter > $conf_dir/LOGFILTER
-	prog_args="$QmailBinPrefix/sbin/svctool --fifologger="$logfilter" --servicedir="$SERVICEDIR""
-	create_fifologger $logfilter $SERVICEDIR
+	if [ ! -f $SERVICEDIR/qmail-logfifo/run ] ; then
+		prog_args="$QmailBinPrefix/sbin/svctool --fifologger=\"$logfilter\" --servicedir=\"$SERVICEDIR\""
+		create_fifologger $logfilter $SERVICEDIR
+	fi
 else
 	> $conf_dir/LOGFILTER
 fi
@@ -2570,8 +2572,10 @@ esac
 echo "$prog_args" > $conf_dir/.options
 if [ ! " $logfilter" = " " ] ; then
 	echo  $logfilter > $conf_dir/LOGFILTER
-	prog_args="$QmailBinPrefix/sbin/svctool --fifologger="$logfilter" --servicedir="$SERVICEDIR""
-	create_fifologger $logfilter $SERVICEDIR
+	if [ ! -f $SERVICEDIR/qmail-logfifo/run ] ; then
+		prog_args="$QmailBinPrefix/sbin/svctool --fifologger=\"$logfilter\" --servicedir=\"$SERVICEDIR\""
+		create_fifologger $logfilter $SERVICEDIR
+	fi
 else
 	> $conf_dir/LOGFILTER
 fi
@@ -2753,13 +2757,13 @@ echo "HOSTNAME=\`uname -n\`"
 echo
 echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" -o -z \"\$ME\" ]; then"
 echo "    echo QMAILDUID, NOFILESGID, or ME is unset in"
-echo "    echo $SERVICEDIR/qmail-$type.$tag/run"
+echo "    echo \`pwd\`/run"
 echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
 echo
 echo "exec 2>&1"
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-$type.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
 case $type in
@@ -2770,7 +2774,7 @@ case $type in
 	echo "-x $sysconfdir/tcp/tcp.qmqp.cdb \\"
 	;;
 esac
-echo "-c $SERVICEDIR/qmail-$type.$tag/variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
+echo "-c variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
 echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\"
 echo "$QmailBinPrefix/sbin/qmail-$type\""
 ) > "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/run
@@ -2806,8 +2810,10 @@ fi
 
 if [ ! " $logfilter" = " " ] ; then
 	echo  $logfilter > $conf_dir/LOGFILTER
-	prog_args="$QmailBinPrefix/sbin/svctool --fifologger="$logfilter" --servicedir="$SERVICEDIR""
-	create_fifologger $logfilter $SERVICEDIR
+	if [ ! -f $SERVICEDIR/qmail-logfifo/run ] ; then
+		prog_args="$QmailBinPrefix/sbin/svctool --fifologger=\"$logfilter\" --servicedir=\"$SERVICEDIR\""
+		create_fifologger $logfilter $SERVICEDIR
+	fi
 else
 	> $conf_dir/LOGFILTER
 fi
@@ -2870,7 +2876,7 @@ echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "exec 2>&1"
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/udplogger.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 echo "$QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo " $QmailBinPrefix/sbin/udplogger -p \\\$PORT -t \\\$TIMEOUT \\\$LOCALIP\""
@@ -2965,7 +2971,7 @@ echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "exec 2>&1"
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-daned.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 echo "  $QmailBinPrefix/sbin/qmail-daned -w $WHITELIST -t $TIMEOUT_DAYS \\"
 echo "  -s $SAVE_INTERVAL -h $HASH_SIZE \\\$LOCALIP $CONTEXT_FILE\""
@@ -3068,7 +3074,7 @@ echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "exec 2>&1"
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/greylist.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 echo "$QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo " $GREYPROG -w $WHITELIST -t $TIMEOUT_DAYS -g $RESEND_WIN_HR \\"
@@ -3225,22 +3231,14 @@ echo "bindir=\${prefix}/bin"
 echo "libexecdir=${libexecdir}"
 echo ""
 echo "exec 2>&1"
-if [ " $imap_ssl" = " 1" ] ; then
-	echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/"$proxy_type"-$stype-ssl.$tag/variables sh -c \""
-else
-	echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/"$proxy_type"-$stype.$tag/variables sh -c \""
-fi
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "IMAPAUTHMODULES=\\\"\\\""
 echo "for f in \\\`echo \\\$IMAPMODULES\\\`"
 echo "do"
 echo "	IMAPAUTHMODULES=\\\"\\\$IMAPAUTHMODULES \$libexecdir/imapmodules/\\\$f\\\""
 echo "done"
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-if [ " $imap_ssl" = " 1" ] ; then
-	echo "$QmailBinPrefix/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-$stype-ssl.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
-else
-	echo "$QmailBinPrefix/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-$stype.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
-fi
+echo "$QmailBinPrefix/bin/tcpserver -v -c variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 echo "-x $sysconfdir/tcp/tcp.$cdb_f.cdb -X \\"
 if [ " $imap_ssl" = " 1" ] ; then
 	echo "-o -b \\\$MAXDAEMONS -H -l \\\$SSLADDRESS -R -u \$INDIUID -g \$INDIGID \\\$SSLADDRESS \\\$SSLPORT \\"
@@ -3730,7 +3728,7 @@ echo "    exit 1"
 echo "fi"
 echo ""
 echo "exec 2>&1"
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/indisrvr.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 if [ " $indisrvr_ssl" = " 1" ] ; then
 	echo "$QmailBinPrefix/sbin/indisrvr -i \\\$LOCALIP -p \\\$PORT -b \\\$MAXDAEMONS \\"
@@ -4117,11 +4115,11 @@ echo "fi"
 echo "exec 2>&1"
 echo ""
 echo "# Wait for 30 seconds after MySQL service to be up"
-echo "if [ -d $SERVICEDIR/mysql.3306 -a ! -f $SERVICEDIR/mysql.3306/down ] ; then"
-echo "  $libexecdir/svwait $SERVICEDIR/mysql.3306 10"
+echo "if [ -d ../mysql.3306 -a ! ../mysql.3306/down ] ; then"
+echo "  $libexecdir/svwait ../mysql.3306 10"
 echo "fi"
 echo ""
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/pwdlookup/variables \\"
+echo "exec $QmailBinPrefix/bin/envdir variables \\"
 echo "$QmailBinPrefix/bin/setuidgid indimail $QmailBinPrefix/sbin/nssd -d notice"
 ) > "$DESTDIR"$SERVICEDIR/pwdlookup/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/pwdlookup/run
@@ -4313,11 +4311,11 @@ echo ""
 echo "exec 2>&1"
 echo ""
 echo "# Wait for 30 seconds after MySQL service to be up"
-echo "if [ -d $SERVICEDIR/mysql.3306 -a ! -f $SERVICEDIR/mysql.3306/down ] ; then"
-echo "  $libexecdir/svwait $SERVICEDIR/mysql.3306 10"
+echo "if [ -d ../mysql.3306 -a ! -f ../mysql.3306/down ] ; then"
+echo "  $libexecdir/svwait ../mysql.3306 10"
 echo "fi"
 echo ""
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/inlookup.$base_fifo_name/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail $QmailBinPrefix/sbin/inlookup \\"
 echo "  -i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
 ) > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/run
@@ -5325,7 +5323,7 @@ echo "$RCSID"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailBinPrefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
+echo "exec $QmailBinPrefix/bin/svc -Gdx ../* ../*/log ./log"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 
@@ -5590,7 +5588,7 @@ echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "exec 2>&1"
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/fetchmail/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 echo "$QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 if [ $silent -eq 1 ] ; then
@@ -5627,8 +5625,10 @@ fi
 
 if [ ! " $logfilter" = " " ] ; then
 	echo  $logfilter > $conf_dir/LOGFILTER
-	prog_args="$QmailBinPrefix/sbin/svctool --fifologger="$logfilter" --servicedir="$SERVICEDIR""
-	create_fifologger $logfilter $SERVICEDIR
+	if [ ! -f $SERVICEDIR/qmail-logfifo/run ] ; then
+		prog_args="$QmailBinPrefix/sbin/svctool --fifologger=\"$logfilter\" --servicedir=\"$SERVICEDIR\""
+		create_fifologger $logfilter $SERVICEDIR
+	fi
 else
 	> $conf_dir/LOGFILTER
 fi
@@ -5720,7 +5720,7 @@ echo "HOSTNAME=\`uname -n\`"
 echo ""
 echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" ]; then"
 echo "    echo QMAILDUID or NOFILESGID is unset in"
-echo "    echo $SERVICEDIR/qmail-poppass.$tag/run"
+echo "    echo \`pwd\`/run"
 echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
@@ -5730,11 +5730,11 @@ echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
 echo ""
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-poppass.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
 echo "-x $sysconfdir/tcp/tcp.poppass.cdb -X \\"
-echo "-c $SERVICEDIR/qmail-poppass.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP -o -b \\\$MAXDAEMONS \\"
+echo "-c variables/MAXDAEMONS -C \\\$MAXPERIP -o -b \\\$MAXDAEMONS \\"
 if [ " $poppass_ssl" = " 1" ] ; then
 	echo "-n \\\$CERTFILE \\"
 fi
@@ -6007,8 +6007,8 @@ echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "exec 2>&1"
-echo "if [ -s @servicedir@/qmail-send.25/variables/CONTROLDIR ] ; then"
-echo "  cntrl_dir=\`/bin/cat @servicedir@/qmail-send.25/variables/CONTROLDIR\`"
+echo "if [ -s variables/CONTROLDIR ] ; then"
+echo "  cntrl_dir=\`/bin/cat variables/CONTROLDIR\`"
 echo "else"
 echo "  cntrl_dir=/etc/indimail/control"
 echo "fi"
@@ -6017,7 +6017,7 @@ echo "  defaultdelivery=\`/bin/cat \$cntrl_dir/defaultdelivery\`"
 echo "else"
 echo "  defaultdelivery=\"./Maildir/\""
 echo "fi"
-echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-send.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo "$QmailBinPrefix/sbin/qmail-daemon \$defaultdelivery\""
 ) > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
@@ -8543,10 +8543,10 @@ echo ""
 echo "exec 2>&1"
 echo "while true"
 echo "do"
-echo "  $QmailBinPrefix/bin/envdir $SERVICEDIR/mrtg/variables \\"
-echo "    /usr/bin/mrtg $SERVICEDIR/mrtg/etc/indimail.mrtg.cfg"
+echo "  $QmailBinPrefix/bin/envdir variables \\"
+echo "    /usr/bin/mrtg etc/indimail.mrtg.cfg"
 echo "  status=\$?"
-echo "  echo \"mrtg $SERVICEDIR/mrtg/etc/indimail.mrtg.cfg status \$status\""
+echo "  echo \"mrtg \`pwd\`/etc/indimail.mrtg.cfg status \$status\""
 if [ " $scan_interval" = " " ] ; then
 echo "  sleep 300"
 else
