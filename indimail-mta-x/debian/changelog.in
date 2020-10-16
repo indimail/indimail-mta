@@ -87,3 +87,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * qmail-remote.c: digest_md5() renamed to qr_digest_md5() to avoid clash
   * removed functions duplicated in libqmail
   * added man page for docker-entrypoint
+  * replaced absolute paths with relative path in services to make them work in any service directory

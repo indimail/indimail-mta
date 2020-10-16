@@ -138,3 +138,6 @@ creation
 87. added man page for docker-entrypoint
 - 12/10/2020
 88. added debuginfo package
+- 16/10/2020
+89. replaced absolute paths with relative path in services to make them work
+    in any service directory
