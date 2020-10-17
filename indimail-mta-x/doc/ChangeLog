@@ -87,7 +87,7 @@ creation
 - 03/10/2020
 53. svctool, svwait: fix date command syntax for Darwin, FreeBSD
 54. svctool: --fixedharedlibs for Darwin
-55. svctool: use /bin/echo -n instead of builtin echo -n (which doesn't work on Darwin)
+55. svctool: use /bin/echo -n instead of builtin echo -n (which doesn''t work on Darwin)
 56. svctool: create /var/run/mysqld for Darwin when creating mysqldb
 57. svctool: use openssl passwd -6 (sha512) missing on darwin use openssl passwd -1 (md5)
 58. svctool: use LC_ALL=C for tr command on Darwin
@@ -118,8 +118,8 @@ creation
 72. indimail-mta: Makefile: replaced g++ with c++ for portability
 73. indimail-mta, ucspi-tcp: fixed uninstall target
 74. installer.c: fixed setting of symbolic links
-75. svctool (freebsd): fix for libmysqlclient on freebsd.
-76. svctool (freebsd): remove svscan config/rc file with --config=rm-boot
+75. svctool -freebsd: fix for libmysqlclient on freebsd.
+76. svctool -freebsd: remove svscan config/rc file with --config=rm-boot
 77. qmail-local.c: fixed bug with loopcounter in qmail-local.c - initialized
     maxdeliveredto
 - 08/10/2020
@@ -141,3 +141,10 @@ creation
 - 16/10/2020
 89. replaced absolute paths with relative path in services to make them work
     in any service directory
+- 17/10/2020
+90. postinst: fixed overwriting of QMAILLOCAL, QMAILREMOTE by service creation
+    for odmr portk
+91. qmail-rspawn.c: fixed "Unable to run qmail-remote" when QMAILREMOTE
+    variable was unset
+92. svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable
+    wasn't set
