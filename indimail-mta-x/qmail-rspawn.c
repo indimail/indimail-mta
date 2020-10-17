@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.40  2020-10-17 16:16:07+05:30  Cprogrammer
+ * fixed "Unable to run qmail-remote" when QMAILREMOTE variable was unset
+ *
  * Revision 1.39  2020-03-31 13:18:04+05:30  Cprogrammer
  * fixed bug with setup_qrargs()
  *
@@ -126,7 +129,7 @@
 #include "stralloc.h"
 #include "auto_control.h"
 #include "variables.h"
-#include "auto_qmail.h"
+#include "auto_prefix.h"
 #include "indimail_stub.h"
 
 
@@ -264,7 +267,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	static stralloc libfn = { 0 };
 	int             i;
 	char           *ip, *real_domain, *libptr;
-	static char     smtproute[MAX_BUFF], CurDir[MAX_BUFF]; 
+	static char     smtproute[MAX_BUFF]; 
 	static int      rcptflag = 1;
 	extern void    *phandle;
 	int             (*is_distributed_domain) (char *);
@@ -317,15 +320,8 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	if (!(ptr = env_get("ROUTES")))
 		goto noroutes;
 	if ((!str_diffn(ptr, "smtp", 4) || !str_diffn(ptr, "qmtp", 4))) {
-		if (rcptflag) {
-			if (!getcwd(CurDir, MAX_BUFF - 1))
-				return (-1);
-			if (chdir(auto_qmail))
-				return (-1);
+		if (rcptflag)
 			rcptflag = rcpthosts_init();
-			if (chdir(CurDir))
-				return (-1);
-		}
 		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1) {
 			if (!(vget_real_domain = getlibObject(libptr, &phandle, "vget_real_domain", 0)))
 				return (-1);
@@ -363,6 +359,8 @@ noroutes:
 		if (fd_copy(2, 1) == -1)
 			_exit(111);
 		ptr = setup_qrargs();
+		if (chdir(auto_prefix))
+			_exit(111);
 		execvp(ptr, args);
 		if (error_temp(errno))
 			_exit(111);
@@ -374,7 +372,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.39 2020-03-31 13:18:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.40 2020-10-17 16:16:07+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
