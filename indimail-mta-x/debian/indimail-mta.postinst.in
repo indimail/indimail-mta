@@ -95,22 +95,22 @@ if [ $ID -ne 0 ] ; then
 fi
 
 case "$1" in
-    configure)
+	configure)
 		if [ " $2" = " " ] ; then
 		echo "installing indimail-mta"
 		else
 		echo "upgrading indimail-mta $2"
 		fi
-    ;;
+	;;
 
-    abort-upgrade|abort-remove|abort-deconfigure)
+	abort-upgrade|abort-remove|abort-deconfigure)
 	exit 0
-    ;;
+	;;
 
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+	*)
+		echo "postinst called with unknown argument \`$1'" >&2
+		exit 1
+	;;
 esac
 
 # dh_installdeb will replace this with shell code automatically
@@ -137,53 +137,53 @@ fi
 # indimail-mta.upgrade/indimail-mta.install are created
 # by the preinst script
 if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
-  if [ -f ${libexecdir}/qupgrade.sh ] ; then
-    echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
-  fi
-  if [ -f /etc/init.d/svscan ] ; then
-    cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
-		${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
-  fi
-  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
-    cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service
-    /bin/systemctl daemon-reload
-  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
-    cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
-    /bin/systemctl daemon-reload
-  elif [ -f /sbin/initctl -a -d /etc/init ] ; then
-    cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf
-  elif [ -d /etc/event.d ] ; then
-    cmp -s ${shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/upstart /etc/event.d
-  elif [ -d /System/Library/LaunchDaemons ] ; then
-    cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
-  fi
-  (
-  # refresh indimail-mta services
-  svc_list=""
-  for i in clamd greylist.1999 qmail-qmqpd.628 \
-    qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
-    qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
-    qscanq udplogger.3000
-  do
-    if [ -d ${servicedir}/$i ] ; then
-      if [ -z "$svc_list" ] ; then
-        svc_list="${servicedir}/$i"
-      else
-        svc_list="$svc_list ${servicedir}/$i"
-      fi
-    fi
-  done
-  svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
-  ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
-  ) >> /var/log/indimail-mta-setup.log
-  ${rm} -f /tmp/indimail-mta.upgrade
-  exit 0
+	if [ -f ${libexecdir}/qupgrade.sh ] ; then
+		echo "Running Custom Upgrade Script for post upgrade"
+		/bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
+	fi
+	if [ -f /etc/init.d/svscan ] ; then
+		cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
+			${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
+	fi
+	if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+		cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
+		${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service
+		/bin/systemctl daemon-reload
+	elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+		cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || true
+		${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+	/bin/systemctl daemon-reload
+	elif [ -f /sbin/initctl -a -d /etc/init ] ; then
+		cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || true
+		${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf
+	elif [ -d /etc/event.d ] ; then
+		cmp -s ${shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1 || true
+		${cp} ${shareddir}/boot/upstart /etc/event.d
+	elif [ -d /System/Library/LaunchDaemons ] ; then
+		cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
+		${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+	fi
+	(
+	# refresh indimail-mta services
+	svc_list=""
+	for i in clamd greylist.1999 qmail-qmqpd.628 \
+		qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
+		qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
+		qscanq udplogger.3000
+	do
+		if [ -d ${servicedir}/$i ] ; then
+			if [ -z "$svc_list" ] ; then
+				svc_list="${servicedir}/$i"
+			else
+				svc_list="$svc_list ${servicedir}/$i"
+			fi
+		fi
+	done
+	svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
+	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+	) >> /var/log/indimail-mta-setup.log
+	${rm} -f /tmp/indimail-mta.upgrade
+	exit 0
 fi
 ${rm} -f /tmp/indimail-mta.install
 if [ ! "${prefix}" = "/usr" ] ; then
@@ -341,21 +341,21 @@ eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 
 #odmr
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${servicedir} \
-	--infifo="" --query-cache --password-cache
+	--infifo="" --query-cache --password-cache --skipsend --memory=$smtp_soft_mem
 
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=${servicedir} --min-resend-min=2 \
-    --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65535 --save-interval=5 --whitelist=greylist.white
+	--resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
+	--hash-size=65535 --save-interval=5 --whitelist=greylist.white
 
 if [ ${notlsarr} -eq 0 ] ; then
-  # qmail-daned tlsa daemon
-  ${prefix}/sbin/qmail-daned > /dev/null 2>&1 || \
-  (test $? -ne 100 && ${prefix}/sbin/svctool \
-    --tlsa=1998 --servicedir=${servicedir} \
-    --timeout-days=30 --context-file=tlsa.context \
-    --hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) || \
-    echo "Not enabling qmail-daned service" 1>&2
+	# qmail-daned tlsa daemon
+	${prefix}/sbin/qmail-daned > /dev/null 2>&1 || \
+	(test $? -ne 100 && ${prefix}/sbin/svctool \
+		--tlsa=1998 --servicedir=${servicedir} \
+		--timeout-days=30 --context-file=tlsa.context \
+		--hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) || \
+	echo "Not enabling qmail-daned service" 1>&2
 fi
 
 # qmail-qmtpd service
@@ -379,19 +379,19 @@ if [ $have_clamav -eq 1 ] ; then
 	# create clamd, freshclam service
 	${prefix}/sbin/svctool --clamd --servicedir=${servicedir} --clamdPrefix=$clamdPrefix \
 		--sysconfdir=$mysysconfdir
-  if [ $have_clamav -eq 1 ] ; then
-    echo "Checking if clamd/freshclam is running"
-    count=`ps -e|grep clamd|wc -l`
-    if [ $count -gt 0 ] ; then
-      echo "Disabling clamd service"
-      $TOUCH ${servicedir}/clamd/down
-    fi
-    count=`ps -e|grep freshclam|wc -l`
-    if [ $count -gt 0 ] ; then
-      echo "Disabling freshclam service"
-      $TOUCH ${servicedir}/freshclam/down
-    fi
-  fi
+	if [ $have_clamav -eq 1 ] ; then
+		echo "Checking if clamd/freshclam is running"
+		count=`ps -e|grep clamd|wc -l`
+		if [ $count -gt 0 ] ; then
+			echo "Disabling clamd service"
+			$TOUCH ${servicedir}/clamd/down
+		fi
+		count=`ps -e|grep freshclam|wc -l`
+		if [ $count -gt 0 ] ; then
+			echo "Disabling freshclam service"
+			$TOUCH ${servicedir}/freshclam/down
+		fi
+	fi
 fi
 
 # udplogger service
@@ -473,13 +473,13 @@ done
 # turn off automatic refresh for services during first time installation
 svc_list=""
 for i in clamd greylist.1999 qmail-qmqpd.628 \
-  qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
-  qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
-  qmail-daned.1998
+	qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
+	qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
+	qmail-daned.1998
 do
-  if [ -d ${servicedir}/$i ] ; then
-    svc_list="$svc_list ${servicedir}/$i"
-  fi
+	if [ -d ${servicedir}/$i ] ; then
+		svc_list="$svc_list ${servicedir}/$i"
+	fi
 done
 svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
@@ -512,7 +512,7 @@ ${prefix}/sbin/svctool --disable-service sendmail exim4 postfix
 ${prefix}/sbin/svctool --config=add-boot --servicedir=$libexecdir/service
 ${prefix}/sbin/svctool --config=add-alt
 if [ -x /bin/systemctl ] ; then
-  /bin/systemctl enable svscan.service
+	/bin/systemctl enable svscan.service
 fi
 
 echo "Checking Installed Permissions"
