@@ -633,7 +633,8 @@ warn-auto.sh qpq.sh conf-qmail conf-prefix
 qmailctl: \
 warn-auto.sh qmailctl.sh conf-prefix conf-sysconfdir \
 conf-libexec
-	$(edit) $@.sh > qmailctl
+	cat warn-auto.sh $@.sh \
+	| $(edit) > qmailctl
 	chmod +x $@
 
 qmailctl.8: qmailctl.9 conf-servicedir
@@ -688,10 +689,10 @@ svscan.8: \
 svscan.9 conf-sysconfdir conf-servicedir
 	$(edit) svscan.9 > svscan.8
 
-cronlist.q: warn-auto.sh cronlist.in conf-prefix \
+cronlist.q: cronlist.in conf-prefix \
 conf-sysconfdir conf-servicedir
 	( \
-	cat warn-auto.sh; \
+	echo " * WARNING: This file was auto-generated. Do not edit!"; \
 	$(edit) cronlist.in \
 	) > $@
 
