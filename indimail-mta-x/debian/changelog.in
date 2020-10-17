@@ -91,3 +91,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * postinst: fixed overwriting of QMAILLOCAL, QMAILREMOTE by service creation for odmr portk
   * qmail-rspawn.c: fixed "Unable to run qmail-remote" when QMAILREMOTE variable was unset
   * svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable wasn't set
+  * svctool: use mkfifo -m to create qmail-logfifo with 666 perms

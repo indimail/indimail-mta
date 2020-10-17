@@ -148,3 +148,4 @@ creation
     variable was unset
 92. svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable
     wasn't set
+93. svctool: use mkfifo -m to create qmail-logfifo with 666 perms
