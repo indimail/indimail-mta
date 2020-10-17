@@ -1156,12 +1156,12 @@ qmail-inject: load qmail-inject.o headerbody.o hfield.o \
 newfield.o quote.o control.o date822fmt.o qmail.o envrules.o wildmat.o \
 matchregex.o pathexec_run.o openreadclose.o pathexec_env.o envdir_set.o \
 srs.o rcpthosts.o auto_control.o token822.o auto_qmail.o variables.o \
-auto_sysconfdir.o dns.lib srs.lib
+auto_sysconfdir.o srs.lib
 	./load qmail-inject headerbody.o hfield.o newfield.o \
 	quote.o control.o date822fmt.o qmail.o pathexec_run.o \
 	openreadclose.o pathexec_env.o envdir_set.o matchregex.o envrules.o \
 	wildmat.o srs.o rcpthosts.o auto_control.o variables.o auto_qmail.o \
-	auto_sysconfdir.o token822.o `cat dns.lib srs.lib` -lqmail
+	auto_sysconfdir.o token822.o `cat srs.lib` -lqmail
 
 qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
 	cat qmail-inject.9 \
@@ -1628,12 +1628,12 @@ tlsarralloc.h conf-tls conf-ip conf-batv conf-mxps
 qmail-rspawn: \
 load qmail-rspawn.o spawn.o tcpto_clean.o get_uid.o \
 auto_qmail.o auto_uids.o auto_spawn.o rcpthosts.o \
-control.o variables.o auto_sysconfdir.o auto_control.o \
+control.o variables.o auto_sysconfdir.o auto_qmail.o \
 dns.lib indimail_stub.o
 	./load qmail-rspawn spawn.o tcpto_clean.o get_uid.o \
-	auto_spawn.o rcpthosts.o control.o variables.o auto_sysconfdir.o \
-	auto_qmail.o auto_uids.o indimail_stub.o auto_control.o \
-	`cat dns.lib` -ldl -lqmail
+	auto_spawn.o rcpthosts.o control.o variables.o \
+	auto_sysconfdir.o auto_uids.o indimail_stub.o \
+	auto_qmail.o auto_control.o `cat dns.lib` -ldl -lqmail
 
 qmail-rspawn.o: compile qmail-rspawn.c \
 tcpto.h rcpthosts.h auto_qmail.h indimail_stub.h \
@@ -1688,14 +1688,14 @@ compile get_uid.c auto_uids.h
 	./compile get_uid.c
 
 qmail-showctl: \
-load qmail-showctl.o auto_uids.o control.o dns.lib \
+load qmail-showctl.o auto_uids.o control.o \
 auto_qmail.o auto_break.o indimail_stub.o \
 auto_patrn.o auto_spawn.o auto_split.o variables.o \
 get_uid.o auto_control.o auto_sysconfdir.o
 	./load qmail-showctl auto_uids.o control.o auto_qmail.o \
 	auto_break.o auto_patrn.o auto_spawn.o auto_control.o \
 	auto_split.o variables.o get_uid.o indimail_stub.o \
-	auto_sysconfdir.o `cat dns.lib` -ldl -lqmail
+	auto_sysconfdir.o -ldl -lqmail
 
 qmail-showctl.o: compile qmail-showctl.c control.h direntry.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
@@ -3446,7 +3446,7 @@ socket_v4mappedprefix.o variables.o auto_control.o \
 control.o auto_qmail.o tablematch.o
 	./load qmail-greyd auto_control.o ip.o socket_v6any.o \
 	socket_v4mappedprefix.o variables.o control.o \
-	auto_qmail.o tablematch.o -lm -lqmail
+	auto_qmail.o tablematch.o -lqmail
 
 qmail-greyd.o: \
 compile qmail-greyd.c auto_qmail.h ip.h control.h \
@@ -3467,7 +3467,7 @@ dns.lib tls.lib starttls.o
 	ipalloc.o dns.o dnsdoe.o strsalloc.o socket_tcp.o \
 	socket_tcp6.o timeoutconn.o socket_ip4loopback.o \
 	socket_v6loopback.o starttls.o MakeArgs.o \
-	`cat dns.lib tls.lib` -lm -lqmail
+	`cat dns.lib tls.lib` -lqmail
 
 qmail-daned.o: \
 compile qmail-daned.c control.h variables.h \
@@ -3565,9 +3565,9 @@ sql-database.9 conf-sysconfdir
 	> sql-database.8
 	
 sys-checkpwd: load sys-checkpwd.o MakeArgs.o \
-shadow.lib crypt.lib
+shadow.lib
 	./load sys-checkpwd MakeArgs.o \
-	`cat shadow.lib crypt.lib` -lqmail
+	`cat shadow.lib` -lqmail
 
 sys-checkpwd.o: \
 compile sys-checkpwd.c pathexec.h hasspnam.h \
@@ -3594,13 +3594,6 @@ tryuserpw.c compile load
 	  && ./load tryuserpw) >/dev/null 2>&1 \
 	&& echo \#define HASGETUSERPW 1 || exit 0 ) > hasuserpw.h
 	rm -f tryuserpw.o tryuserpw
-
-crypt.lib: \
-trycrypt.c compile load
-	((./compile trycrypt.c && \
-	./load trycrypt -lcrypt) >/dev/null 2>&1 \
-	&& echo -lcrypt || exit 0) > crypt.lib
-	rm -f trycrypt.o trycrypt
 
 ldap.lib: \
 tryldap.c compile load hasldap.h
