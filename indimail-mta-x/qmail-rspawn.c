@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-rspawn.c,v $
- * Revision 1.40  2020-10-17 16:16:07+05:30  Cprogrammer
- * fixed "Unable to run qmail-remote" when QMAILREMOTE variable was unset
+ * Revision 1.40  2020-10-17 17:15:01+05:30  Cprogrammer
+ * fixed "Unable to run qmail-remote" when QMAILREMOTE variable wasn't set
  *
  * Revision 1.39  2020-03-31 13:18:04+05:30  Cprogrammer
  * fixed bug with setup_qrargs()
@@ -129,7 +129,7 @@
 #include "stralloc.h"
 #include "auto_control.h"
 #include "variables.h"
-#include "auto_prefix.h"
+#include "auto_qmail.h"
 #include "indimail_stub.h"
 
 
@@ -359,7 +359,7 @@ noroutes:
 		if (fd_copy(2, 1) == -1)
 			_exit(111);
 		ptr = setup_qrargs();
-		if (chdir(auto_prefix))
+		if (chdir(auto_qmail))
 			_exit(111);
 		execvp(ptr, args);
 		if (error_temp(errno))
@@ -372,7 +372,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.40 2020-10-17 16:16:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.40 2020-10-17 17:15:01+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
