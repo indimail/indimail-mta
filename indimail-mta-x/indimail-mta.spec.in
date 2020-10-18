@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.268 2020-10-17 15:55:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.269 2020-10-18 20:02:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -13,6 +13,7 @@
 %global _hardened_build    1
 %endif
 
+%global nodebug            1
 %if %{defined nodebug}
 %global debug_package      %{nil}
 %endif
@@ -37,7 +38,6 @@
 %global nodksignatures     0
 %global notlsarr           0
 
-%global _verbose           0
 %global qcount             5
 %global qbase              %{qmaildir}/queue
 %global dkimkeyfn          default
@@ -176,7 +176,7 @@ Requires: initscripts
 %endif
 #
 %if %build_on_obs == 1
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -414,11 +414,11 @@ if [ -d %{name}-%{version} ] ; then
   fi
   %{name}-%{version}/catChangeLog %{name}-%{version}/doc/ChangeLog > ChangeLog-indimail-mta
   echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail > %{name}-%{version}/conf-cc
-  %if %{defined nodebug}
-    echo %{__cc} -s -rdynamic > %{name}-%{version}/conf-ld
-  %else
-    echo %{__cc} -rdynamic > %{name}-%{version}/conf-ld
-  %endif
+%if %{defined nodebug}
+  echo %{__cc} -O2 -s > %{name}-%{version}/conf-ld
+%else
+  echo %{__cc} -O2    > %{name}-%{version}/conf-ld
+%endif
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
@@ -431,26 +431,20 @@ if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
     %{__rm} -f ucspi-tcp-%{ucspitcp_version}/conf-dlopen
   %endif
   echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > ucspi-tcp-%{ucspitcp_version}/conf-cc
-  %if %{defined nodebug}
-    echo %{__cc} -s -O2 > ucspi-tcp-%{ucspitcp_version}/conf-ld
-  %else
-    echo %{__cc} -O2 > ucspi-tcp-%{ucspitcp_version}/conf-ld
-  %endif
+%if %{defined nodebug}
+  echo %{__cc} -O2 -s > ucspi-tcp-%{ucspitcp_version}/conf-ld
+%else
+  echo %{__cc} -O2    > ucspi-tcp-%{ucspitcp_version}/conf-ld
+%endif
 fi
 
 %install
-ID=$(id -u)
 %{__mkdir_p} %{buildroot}%{_prefix}
 # This is needed for to figure out versions e.g.
 # the following 3 lines in indimail-mta/Makefile
 # ucspitcp_version=$(shell cat ../ucspi-tcp-x/conf-version)
 if [ -d ucspi-tcp-%{ucspitcp_version} ] ; then
   ln -s ucspi-tcp-%{ucspitcp_version} ucspi-tcp-x
-fi
-if [ %{_verbose} -eq 0 ] ; then
-  silent_opt="-s"
-else
-  silent_opt=""
 fi
 
 for i in %{name}-%{version} ucspi-tcp-%{ucspitcp_version}
@@ -466,15 +460,14 @@ do
     %if 0%{?build_ldflags:1}
       LDFLAGS="%{build_ldflags} $LDFLAGS"
     %endif
-    %{__make} SYSTEM=LINUX "$silent_opt" %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
-    %{__make} SYSTEM=LINUX "$silent_opt" %{?_smp_mflags} DESTDIR=%{buildroot} install
+    %{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+    %{__make} SYSTEM=LINUX %{?_smp_mflags} DESTDIR=%{buildroot} install
     cd ..
   else
     echo "$i: No such file or directory" 1>&2
     exit 1
   fi
 done
-
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 %{__mkdir_p} %{buildroot}%{libexecdir}
 %{__mkdir_p} %{buildroot}%{qsysconfdir}
@@ -503,8 +496,8 @@ fi
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
-install -m 644 %{S:4} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
-install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+  install -m 644 %{S:4} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+  install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 %endif
 
@@ -518,28 +511,20 @@ if [ -x /usr/bin/chrpath ] ; then
 fi
 # remove devel files as we are not building a devel package
 %{__rm} -rf %{buildroot}%{mandir}/man3
-%{__rm} -rf %{buildroot}%{_prefix}/include
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
-if [ -x /bin/touch ] ; then
-  TOUCH=/bin/touch
-elif [ -x /usr/bin/touch ] ; then
-  TOUCH=/usr/bin/touch
-else
-  TOUCH=/bin/touch
-fi
 # Create these files so that %%ghost does not complain
 for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp \
 tcp.qmqp.cdb
 do
   if [ ! -f %{buildroot}%{qsysconfdir}/tcp/$i ] ; then
-    $TOUCH %{buildroot}%{qsysconfdir}/tcp/$i
+    touch %{buildroot}%{qsysconfdir}/tcp/$i
   fi
 done
-$TOUCH %{buildroot}%{qsysconfdir}/indimail-mta.pp
-$TOUCH %{buildroot}%{qsysconfdir}/indimail-mta.mod
+touch %{buildroot}%{qsysconfdir}/indimail-mta.pp
+touch %{buildroot}%{qsysconfdir}/indimail-mta.mod
 (
 for i in `cat %{name}-%{version}/controlfiles.q`
 do
@@ -555,7 +540,7 @@ do
   ;;
   esac
   echo $i 1>&3
-  $TOUCH %{buildroot}%{qsysconfdir}/control/$i
+  touch %{buildroot}%{qsysconfdir}/control/$i
 done
 
 for i in rsa2048.pem rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
@@ -563,22 +548,27 @@ dh2048.pem dh512.pem rsa512.pem servercert.rand
 do
   echo "%ghost %attr(0640,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/certs/$i"
   echo ../certs/$i 1>&3
-  $TOUCH %{buildroot}%{qsysconfdir}/certs/$i
+  touch %{buildroot}%{qsysconfdir}/certs/$i
 done
 echo "%ghost %attr(0644,root,root) %{qsysconfdir}/resolv.conf"
 echo ../resolv.conf 1>&3
 ) > config_files.list 3>%{buildroot}%{qsysconfdir}/controlfiles.q
 
 %if %{undefined suse_version} && %{undefined sles_version}
-%{__mkdir_p} %{buildroot}%{logdir}
-for i in deliver.25 greylist.1999 \
-  qmqpd.628 qmtpd.209 qscanq smtpd.25 resolvconf \
-  smtpd.366 smtpd.465 smtpd.587 qmail-daned.1998 \
-  svscan udplogger.3000
-do
-  %{__mkdir_p} %{buildroot}%{logdir}/$i
-  $TOUCH %{buildroot}%{logdir}/$i/current
-done
+  %{__mkdir_p} %{buildroot}%{logdir}
+  for i in deliver.25 greylist.1999 \
+    qmqpd.628 qmtpd.209 qscanq smtpd.25 resolvconf \
+    smtpd.366 smtpd.465 smtpd.587 qmail-daned.1998 \
+    svscan udplogger.3000
+  do
+    %{__mkdir_p} %{buildroot}%{logdir}/$i
+    touch %{buildroot}%{logdir}/$i/current
+  done
+%endif
+
+%if %{undefined nodebug}
+ /bin/chmod -R 755 %{buildroot}%{_prefix}/bin
+ /bin/chmod -R 755 %{buildroot}%{_prefix}/sbin
 %endif
 
 %files -f config_files.list
@@ -1467,13 +1457,6 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   ) >> /var/log//%{name}-setup.log 2>&1
   exit 0
 fi
-if [ -x /bin/touch ] ; then
-  TOUCH=/bin/touch
-elif [ -x /usr/bin/touch ] ; then
-  TOUCH=/usr/bin/touch
-else
-  TOUCH=/bin/touch
-fi
 
 echo "Doing Post Install"
 echo ""
@@ -1649,7 +1632,7 @@ eval %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qba
 eval %{_prefix}/sbin/svctool --qmqp=628 --servicedir=%{servicedir} --qbase=%{qbase} \
   --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
   --fsync --syncdir --memory=%{qmqp_soft_mem} --min-free=52428800 $extra_opt
-$TOUCH %{servicedir}/qmail-qmqpd.628/down
+touch %{servicedir}/qmail-qmqpd.628/down
 
 # virus/spam filtering
 %{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --scanint=200
@@ -1664,12 +1647,12 @@ if [ $have_clamav -eq 1 ] ; then
     count=`ps -e|grep clamd|wc -l`
     if [ $count -gt 0 ] ; then
       echo "Disabling clamd service"
-      $TOUCH %{servicedir}/clamd/down
+      touch %{servicedir}/clamd/down
     fi
     count=`ps -e|grep freshclam|wc -l`
     if [ $count -gt 0 ] ; then
       echo "Disabling freshclam service"
-      $TOUCH %{servicedir}/freshclam/down
+      touch %{servicedir}/freshclam/down
     fi
   fi
 fi
