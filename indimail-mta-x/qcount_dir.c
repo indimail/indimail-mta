@@ -1,5 +1,8 @@
 /*
  * $Log: qcount_dir.c,v $
+ * Revision 1.3  2020-10-18 12:59:56+05:30  Cprogrammer
+ * replaced alloc_re() with alloc()
+ *
  * Revision 1.2  2020-04-01 16:16:50+05:30  Cprogrammer
  * fixed alloc() core dump
  *
@@ -90,20 +93,21 @@ ssize_t qcount_dir(char *dir_name, size_t *mailcount)
 			continue;
 		filename_len = str_len(dp->d_name);
 		newlen = sizeof(char) * (filename_len + dirname_len + 2);
-		if (!oldlen || newlen > oldlen) {
-			if (!alloc_re((char *) &tmpstr, oldlen, newlen)) {
-				strnum[i = fmt_uint(strnum, newlen)] = 0;
-				strerr_warn3("qcount_dir: alloc_re: ", strnum, " bytes: ", &strerr_sys);
-				closedir(entry);
-				return (-1);
-			}
+		if (newlen > oldlen && oldlen)
+			alloc_free(tmpstr);
+		if (newlen > oldlen && !(tmpstr = alloc(newlen))) {
+			strnum[i = fmt_uint(strnum, newlen)] = 0;
+			strerr_warn3("qcount_dir: alloc: ", strnum, " bytes: ", &strerr_sys);
+			closedir(entry);
+			return (-1);
 		}
-		oldlen = newlen;
+		if (newlen > oldlen)
+			oldlen = newlen;
 		ptr = tmpstr;
 		ptr += fmt_strn(ptr, dir_name, dirname_len);
 		ptr += fmt_strn(ptr, "/", 1);
 		ptr += fmt_strn(ptr, dp->d_name, filename_len);
-		*ptr = 0;
+		*ptr++ = 0;
 		if ((ptr = str_str(dp->d_name, ",S=")) != NULL) {
 			ptr += 3;
 			scan_ulong(ptr, (unsigned long *) &tmp);
@@ -134,7 +138,7 @@ ssize_t qcount_dir(char *dir_name, size_t *mailcount)
 void
 getversion_qcount_dir_c()
 {
-	static char    *x = "$Id: qcount_dir.c,v 1.2 2020-04-01 16:16:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qcount_dir.c,v 1.3 2020-10-18 12:59:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
