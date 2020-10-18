@@ -1536,7 +1536,7 @@ compile trydkim.c dns_text.o conf-dkim dns.lib
 	rm -f trydkim.o trydkim
 
 hasdkim.h: dns_text.o \
-trydkim.c compile load dns.lib dkim.lib conf-indi
+trydkim.c compile dns.lib dkim.lib conf-indi
 	((./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
 		-I/usr/include/dkim \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
@@ -1548,8 +1548,8 @@ trydkim.c compile load dns.lib dkim.lib conf-indi
 
 qmail-dkim: qmail-dkim.o date822fmt.o auto_control.o \
 auto_qmail.o variables.o control.o MakeArgs.o dns_text.o \
-dns.lib dkim.lib conf-ld-$(SYSTEM)
-	c++ -o qmail-dkim qmail-dkim.o date822fmt.o auto_control.o \
+dns.lib dkim.lib conf-ld-$(SYSTEM) load
+	./load qmail-dkim date822fmt.o auto_control.o \
 	auto_qmail.o variables.o control.o MakeArgs.o \
 	dns_text.o `cat dns.lib dkim.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` \
