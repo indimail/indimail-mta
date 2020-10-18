@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.519 2020-10-17 19:02:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.520 2020-10-18 11:11:41+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.519 2020-10-17 19:02:00+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.520 2020-10-18 11:11:41+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -3453,7 +3453,7 @@ postmaster=$1
 cn=$2
 echo
 echo "RANDFILE = $sysconfdir/certs/servercert.rand"
-echo 
+echo
 echo "[ req ]"
 echo "default_bits = 4096"
 echo "encrypt_key = yes"
@@ -3464,7 +3464,7 @@ echo "default_md = sha256"
 echo
 echo "[v3_req]"
 echo "subjectAltName = DNS:$cn"
-echo 
+echo
 echo "[ req_dn ]"
 echo "C=IN"
 echo "ST=GOA"
@@ -3473,7 +3473,7 @@ echo "O=IndiMail Server"
 echo "OU=Automatically-generated SSL key"
 echo "CN=$cn"
 echo "emailAddress=$postmaster"
-echo 
+echo
 echo "[ cert_type ]"
 echo "nsCertType = server"
 }
@@ -5184,13 +5184,14 @@ echo "[mysqld]"
 echo "#"
 echo "# * Basic Settings"
 echo "#"
-echo 
+echo
 echo "#"
 echo "# * IMPORTANT"
 echo "#   If you make changes to these settings and your system uses apparmor, you may"
 echo "#   also need to also adjust /etc/apparmor.d/usr.sbin.mysqld."
 echo "#"
-echo 
+echo
+echo "#default-authentication-plugin=mysql_native_password"
 echo "#sql_mode=\"NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,STRICT_ALL_TABLES\""
 echo "sql_mode=\"NO_ENGINE_SUBSTITUTION,STRICT_ALL_TABLES\""
 if [ $mariadb -eq 1 -a -d "$DESTDIR"$databasedir/ssl ] ; then
@@ -8330,7 +8331,7 @@ report ()
 				echo "From: \"IndiMail Reporter\" <Mailer-Daemon>"
 				echo "Date: $date"
 				echo "Subject: $subject"
-				echo 
+				echo
 				echo ATTENTION: Mail Administrators
 				echo
 				echo Mail Statistics for `/bin/cat $CONTROLDIR/me`
@@ -8339,9 +8340,9 @@ report ()
 				echo
 				echo "Since I am good only at reporting, please do not reply"
 				echo "to me."
-				echo 
+				echo
 				echo "Thank you for using IndiMail"
-				echo 
+				echo
 				echo "I am enclosing a copy of the Statistics below"
 				echo
 				/bin/cat /tmp/report.$$
@@ -8358,7 +8359,7 @@ report ()
 				echo "I have attached a copy of the Statistics in zip file format."
 				echo "Since I am good only at reporting, please do not reply"
 				echo "to me."
-				echo 
+				echo
 				echo "Thank you for using IndiMail"
 				echo
 				) > /tmp/descfile.$$
