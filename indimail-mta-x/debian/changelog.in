@@ -92,3 +92,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * qmail-rspawn.c: fixed "Unable to run qmail-remote" when QMAILREMOTE variable was unset
   * svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable wasn't set
   * svctool: use mkfifo -m to create qmail-logfifo with 666 perms
+  * svctool: added default-authentication-plugin=mysql_native_password as a comment
+  * qcount_dir.c: replaced alloc_re() with alloc()

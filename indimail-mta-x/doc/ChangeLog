@@ -149,3 +149,6 @@ creation
 92. svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable
     wasn't set
 93. svctool: use mkfifo -m to create qmail-logfifo with 666 perms
+- 18/10/2020
+94. svctool: added default-authentication-plugin=mysql_native_password as a comment
+95. qcount_dir.c: replaced alloc_re() with alloc()
