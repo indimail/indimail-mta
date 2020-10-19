@@ -1397,7 +1397,7 @@ compile qmail-qread.c fmtqfn.h readsubdir.h direntry.h \
 control.h auto_qmail.h date822fmt.h envdir.h pathexec.h \
 variables.h conf-queue auto_control.h auto_sysconfdir.h
 	if test -f conf-queue ; then \
-		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
+		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`head -1 conf-queue` qmail-qread.c; \
 	else \
 		./compile -DQUEUE_COUNT=10 qmail-qread.c; \
 	fi
@@ -1411,7 +1411,7 @@ auto_qmail.o variables.o control.o dns.lib socket.lib
 qmail-multi.o: \
 compile qmail-multi.c auto_qmail.h control.h conf-queue MakeArgs.h
 	if test -f conf-queue ; then \
-		./compile -DQUEUE_COUNT=`cat conf-queue` qmail-multi.c; \
+		./compile -DQUEUE_COUNT=`head -1 conf-queue` qmail-multi.c; \
 	else \
 		./compile -DQUEUE_COUNT=10 qmail-multi.c; \
 	fi
@@ -1679,7 +1679,7 @@ load qmail-daemon.o control.o auto_qmail.o auto_control.o variables.o
 
 qmail-daemon.o: compile qmail-daemon.c control.h auto_qmail.h conf-queue
 	if test -f conf-queue ; then \
-		./compile -DQUEUE_COUNT=`cat conf-queue` qmail-daemon.c; \
+		./compile -DQUEUE_COUNT=`head -1 conf-queue` qmail-daemon.c; \
 	else \
 		./compile -DQUEUE_COUNT=10 qmail-daemon.c; \
 	fi
@@ -1904,7 +1904,7 @@ control.o auto_control.o
 qmail-tcpok.o: \
 compile qmail-tcpok.c auto_qmail.h variables.h control.h conf-queue
 	if test -f conf-queue ; then \
-		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpok.c; \
+		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`head -1 conf-queue` qmail-tcpok.c; \
 	else \
 		./compile -DQUEUE_COUNT=10 qmail-tcpok.c; \
 	fi
@@ -1921,7 +1921,7 @@ qmail-tcpto.o: \
 compile qmail-tcpto.c auto_qmail.h ip.h variables.h \
 control.h tcpto.h ipalloc.h conf-tls conf-ip conf-queue
 	if test -f conf-queue ; then \
-		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpto.c; \
+		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`head -1 conf-queue` qmail-tcpto.c; \
 	else \
 		./compile -DQUEUE_COUNT=10 qmail-tcpto.c; \
 	fi
