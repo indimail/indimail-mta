@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.22  2020-10-19 12:51:10+05:30  Cprogrammer
+# use control file servicedir.conf for servicedir
+#
 # Revision 1.21  2020-10-09 17:32:11+05:30  Cprogrammer
 # use conf-prefix, conf-servicedir for configuring paths
 #
@@ -15,7 +18,7 @@
 # removed RCS log.
 #
 #
-# $Id: svscanboot.sh,v 1.21 2020-10-09 17:32:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.22 2020-10-19 12:51:10+05:30 Cprogrammer Exp mbhangui $
 
 PATH=@prefix@/bin:/bin:/usr/local/bin:@prefix@/sbin:/sbin
 
@@ -26,10 +29,8 @@ exec 2>/dev/null
 cd /
 use_readproctitle=0
 if [ $# -eq 0 ] ; then
-	if [ -d /service1 ] ; then
-		SERVICEDIR=/service1
-	elif [ -d /service2 ] ; then
-		SERVICEDIR=/service2
+	if [ -f @sysconfdir@/control/servicedir.conf ] ; then
+		SERVICEDIR=`cat @sysconfdir@/control/servicedir.conf`
 	elif [ -d @servicedir@ ] ; then
 		SERVICEDIR=@servicedir@
 	else
