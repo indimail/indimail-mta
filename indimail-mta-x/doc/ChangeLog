@@ -152,3 +152,7 @@ creation
 - 18/10/2020
 94. svctool: added default-authentication-plugin=mysql_native_password as a comment
 95. qcount_dir.c: replaced alloc_re() with alloc()
+19/20/2020
+96. svctool: added control file servicedir.conf
+97. svscanboot: use servicedir.conf for servicedir
+98. controlfiles.q: added control file servicedir.conf

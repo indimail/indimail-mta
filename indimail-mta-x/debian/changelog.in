@@ -94,3 +94,6 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: use mkfifo -m to create qmail-logfifo with 666 perms
   * svctool: added default-authentication-plugin=mysql_native_password as a comment
   * qcount_dir.c: replaced alloc_re() with alloc()
+  * svctool: added control file servicedir.conf
+  * svscanboot: use servicedir.conf for servicedir
+  * controlfiles.q: added control file servicedir.conf

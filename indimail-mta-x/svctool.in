@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.520 2020-10-18 11:11:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.521 2020-10-19 12:51:02+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.520 2020-10-18 11:11:41+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.521 2020-10-19 12:51:02+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -637,7 +637,7 @@ Known values for OPTION are:
   mysqlPrefix    - Installation Prefix for mysql
   databasedir    - Directory containing the Database and Logs
   mysqlsocket    - Unix Domain Socket for connecting to mysql
-  config         - MySQL Configuration file (e.g. @sysconfdir@/indimail.cnf)
+  config         - MySQL Configuration file (e.g. $sysconfdir/indimail.cnf)
   service_path   - Path where supervise scripts will be installed
   default-domain - default domain name for which this host will handle mails
 
@@ -742,7 +742,7 @@ Known values for OPTION are:
   [--stdout]
   [--wipe]
 
-  mysql          - Create @sysconfdir@/indimail.cnf
+  mysql          - Create $sysconfdir/indimail.cnf
   mysqldb        - Create an initidalized MySQL db for IndiMail
   ssl_rsa        - Create SSL/TLS Certs for MariaDB
   qmail          - Create default qmail control files
@@ -822,7 +822,7 @@ Known values for OPTION are:
 
 --check-certs=[full path of certificate]
   Check certificate given as argument or
-  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
+  Check IndiMail Certificates in $sysconfdir/certs without any arguments
 
 --fixsharedlibs
 
@@ -1700,6 +1700,7 @@ if [ ! -d "$DESTDIR"$sysconfdir/tcp ] ; then
 fi
 echo "Creating Default qmail Control Files"
 hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+echo "servicedir.conf"
 echo "me"
 echo "defaultdomain"
 echo "plusdomain"
@@ -1712,6 +1713,10 @@ else
 fi
 
 echo "Setting Following Files to Reasonable Defaults"
+if [ ! -f "$DESTDIR"$CONTROLDIR/servicedir.conf ] ; then
+	echo "servicedir.conf"
+	echo "$servicedir" > "$DESTDIR"$CONTROLDIR/servicedir.conf
+fi
 if [ ! -f "$DESTDIR"$CONTROLDIR/defaultdelivery ] ; then
 	echo "defaultdelivery"
 	echo "./Maildir/" > "$DESTDIR"$CONTROLDIR/defaultdelivery
@@ -2475,7 +2480,7 @@ FIRST_QUEUE=$3
 QUEUE_DEF=$4
 
 if [ " $CONTROLDIR" = " " ] ; then
-	cntrldir=@sysconfdir@/control
+	cntrldir=$sysconfdir/control
 else
 	cntrldir=$CONTROLDIR
 fi
@@ -8589,7 +8594,7 @@ error=0
 if [ $# -eq 1 ] ; then
 	files=$1
 else
-	files="@sysconfdir@/certs/servercert.pem @sysconfdir@/certs/clientcert.pem"
+	files="$sysconfdir/certs/servercert.pem $sysconfdir/certs/clientcert.pem"
 fi
 for cert in $files
 do
@@ -8679,10 +8684,10 @@ else
 	chown=/bin/chown
 fi
 
-if [ -f @sysconfdir@/.svctool.cnf ] ; then
-	$chown root:0 @sysconfdir@/.svctool.cnf
-	/bin/chmod 400 @sysconfdir@/.svctool.cnf
-	. @sysconfdir@/.svctool.cnf
+if [ -f $sysconfdir/svctool.cnf ] ; then
+	$chown root:0 $sysconfdir/svctool.cnf
+	/bin/chmod 400 $sysconfdir/svctool.cnf
+	. $sysconfdir/svctool.cnf
 fi
 [ -z "$MYSQL_PASS" ] && MYSQL_PASS="ssh-1.5-"
 [ -z "$PRIV_PASS" ]  && PRIV_PASS="4-57343-"
@@ -8700,6 +8705,23 @@ forcetls=0
 nooverwrite=0
 run_file_only=0
 databytes=$DATABYTES
+if [ " $CONTROLDIR" = " " ] ; then
+	cntrldir=$sysconfdir/control
+else
+	slash=`echo $CONTROLDIR | cut -c1`
+	if [ " $slash" = " /" ] ; then
+		cntrldir=$CONTROLDIR
+	else
+		cntrldir=$sysconfdir/$CONTROLDIR
+	fi
+fi
+CONTROLDIR=$cntrldir
+export CONTROLDIR
+if [ -f $cntrldir/servicedir.conf ] ; then
+	servicedir=`cat $cntrldir/servicedir.conf`
+else
+	servicedir=@servicedir@
+fi
 if [ -x /bin/touch ] ; then
 	touch=/bin/touch
 elif [ -x /usr/bin/touch ] ; then
@@ -9399,18 +9421,6 @@ done
 #
 # Main
 #
-if [ " $CONTROLDIR" = " " ] ; then
-	cntrldir=@sysconfdir@/control
-else
-	slash=`echo $CONTROLDIR | cut -c1`
-	if [ " $slash" = " /" ] ; then
-		cntrldir=$CONTROLDIR
-	else
-		cntrldir=$sysconfdir/$CONTROLDIR
-	fi
-fi
-CONTROLDIR=$cntrldir
-export CONTROLDIR
 case $option in
 	1) # SMTP Service
 	# Check that we're a privileged user
