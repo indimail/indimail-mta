@@ -1133,3 +1133,8 @@ qlocal_upgrade.sh
 cleanq.8
 svscan.plist
 docker-entrypoint.8
+qr_digest_md5.o
+run_init.o
+indimail-mta-permissions.secure
+indimail-mta-permissions.paranoid
+indimail-mta-permissions.easy
