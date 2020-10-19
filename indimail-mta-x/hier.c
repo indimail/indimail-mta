@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.277  2020-10-19 22:31:00+05:30  Cprogrammer
+ * moved argv0, addcr, delcr, fixcrio, recordio from indimail-mta to ucspi-tcp
+ *
  * Revision 1.276  2020-10-04 11:48:08+05:30  Cprogrammer
  * renamed launchd unit file indimail.plist to svscan.plist
  *
@@ -983,11 +986,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "dknewkey", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "dktest", auto_uido, 0, moder_x);
 #endif
-	c(auto_prefix, "bin", "recordio", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "argv0", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "addcr", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "delcr", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "fixcrio", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "maildirsize", auto_uido, 0, moder_x);
 
 #ifdef DOMAIN_KEYS
@@ -1282,12 +1280,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man1", "qmail-cat.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "predate.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "datemail.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "argv0.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "addcr.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "delcr.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "fixcrio.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "maildirsize.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "recordio.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "uacl.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "qbase64.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "swaks.1", uidr, gidr, moder_f);
@@ -1543,7 +1536,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.276 2020-10-04 11:48:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.277 2020-10-19 22:31:00+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -47,11 +47,6 @@ f:::0755:/bin/:spfquery:spfquery
 f:::0755:/bin/:srsfilter:srsfilter
 f:::0755:/bin/:dknewkey:dknewkey
 f:::0755:/bin/:dktest:dktest
-f:::0755:/bin/:recordio:recordio
-f:::0755:/bin/:argv0:argv0
-f:::0755:/bin/:addcr:addcr
-f:::0755:/bin/:delcr:delcr
-f:::0755:/bin/:fixcrio:fixcrio
 f:::0755:/bin/:maildirsize:maildirsize
 f:::0755:/bin/:ofmipname:ofmipname
 f:::0755:/bin/:iftocc:iftocc

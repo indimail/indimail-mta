@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.15  2020-10-19 22:32:01+05:30  Cprogrammer
+ * moved argv0, addcr, delcr, fixcrio, recordio from indimail-mta to ucspi-tcp
+ *
  * Revision 1.14  2020-09-19 17:35:03+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -112,6 +115,11 @@ hier(inst_dir, fatal)
 	c(auto_ucspi_home, "bin",      "mconnect", -1, -1, 0755);
 	c(auto_ucspi_home, "bin",      "mconnect-io", -1, -1, 0755);
 	c(auto_ucspi_home, "bin",      "rblsmtpd", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "argv0", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "addcr", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "delcr", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "fixcrio", -1, -1, 0755);
+	c(auto_ucspi_home, "bin",      "recordio", -1, -1, 0755);
 	c(mandir_base,     "man/man1", "tcpserver.1", -1, -1, 0644);
 	c(mandir_base,     "man/man1", "tcprules.1", -1, -1, 0644);
 	c(mandir_base,     "man/man1", "tcprulescheck.1", -1, -1, 0644);
@@ -124,7 +132,12 @@ hier(inst_dir, fatal)
 	c(mandir_base,     "man/man1", "mconnect.1", -1, -1, 0644);
 	c(mandir_base,     "man/man1", "mconnect-io.1", -1, -1, 0644);
 	c(mandir_base,     "man/man1", "rblsmtpd.1", -1, -1, 0644);
-	c(auto_shared,     "doc",      "README.ucspi-tcp", -1, -1, 0444);
+	c(mandir_base,     "man/man1", "argv0.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "addcr.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "delcr.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "fixcrio.1", -1, -1, 0644);
+	c(mandir_base,     "man/man1", "recordio.1", -1, -1, 0644);
+	c(auto_shared,     "doc",      "README.ucspi-tcp", -1, -1, 0644);
 #ifdef LOAD_SHARED_OBJECTS
 	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, -1);
 	c(auto_ucspi_home, "lib/indimail/plugins", "rblsmtpd.so", -1, -1, 0755);

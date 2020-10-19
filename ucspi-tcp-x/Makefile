@@ -196,14 +196,6 @@ warn-auto.sh finger@.sh conf-prefix
 	> finger@
 	chmod 755 finger@
 
-fixcrio: \
-load fixcrio.o
-	./load fixcrio -lqmail
-
-fixcrio.o: \
-compile fixcrio.c pathexec.h
-	./compile fixcrio.c
-
 hasmysql.h: \
 choose compile load mysql_config.c hasmysql.h1 hasmysql.h2 mysql_config
 	./choose R "./mysql_config --include" hasmysql.h1 hasmysql.h2 > hasmysql.h
@@ -296,9 +288,10 @@ compile pathexec_run.c pathexec.h conf-dlopen
 	./compile pathexec_run.c
 
 prog: \
-tcpserver tcprules tcprulescheck tcpclient who@ date@ \
-finger@ http@ tcpcat mconnect mconnect-io \
-rblsmtpd rts
+tcpserver tcprules tcprulescheck tcpclient \
+who@ date@ finger@ http@ \
+tcpcat mconnect mconnect-io rblsmtpd \
+argv0 recordio addcr delcr fixcrio rts
 
 shared: \
 rblsmtpd.so
@@ -658,6 +651,49 @@ warn-auto.sh who@.sh conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> who@
 	chmod 755 who@
+
+recordio.o: \
+compile recordio.c iopause.h pathexec.h
+	./compile recordio.c
+
+recordio: \
+load recordio.o pathexec_run.o iopause.o
+	./load recordio pathexec_run.o iopause.o -lqmail
+
+argv0.o: \
+compile argv0.c pathexec.h
+	./compile argv0.c
+
+argv0: \
+load argv0.o pathexec_run.o
+	./load argv0 pathexec_run.o -lqmail
+
+addcr: load addcr.o 
+	./load addcr -lqmail
+
+addcr.o: \
+compile addcr.c
+	./compile addcr.c
+
+delcr: load delcr.o
+	./load delcr -lqmail
+
+delcr.o: \
+compile delcr.c
+	./compile delcr.c
+
+fixcrio: load fixcrio.o pathexec_run.o iopause.o
+	./load fixcrio pathexec_run.o iopause.o -lqmail
+
+fixcrio.o: \
+compile fixcrio.c iopause.h pathexec.h
+	./compile fixcrio.c
+
+iopause.h: choose compile iopause.h1 iopause.h2 load trypoll.c
+	./choose clr trypoll iopause.h1 iopause.h2 > iopause.h
+
+iopause.o: compile iopause.c iopause.h
+	./compile iopause.c
 
 clean:
 	rm -f `cat TARGETS`

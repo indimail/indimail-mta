@@ -13,3 +13,8 @@ f:::0644:/man1/:tcpcat.1:tcpcat.1
 f:::0644:/man1/:mconnect.1:mconnect.1
 f:::0644:/man1/:mconnect-io.1:mconnect-io.1
 f:::0644:/man1/:rblsmtpd.1:rblsmtpd.1
+f:::0644:/man1/:recordio.1:recordio.1
+f:::0644:/man1/:fixcrio.1:fixcrio.1
+f:::0644:/man1/:addcr.1:addcr.1
+f:::0644:/man1/:delcr.1:delcr.1
+f:::0644:/man1/:argv0.1:argv0.1

@@ -54,3 +54,8 @@ conf-sysconfdir
 ucspi-tcp.spec
 doc
 debian
+addcr
+argv0
+delcr
+fixcrio
+recordio

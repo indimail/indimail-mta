@@ -21,13 +21,13 @@ edit = sed \
 	-e 's,@ucspitcp_version\@,$(ucspitcp_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-it = perm_list.mta 822date 822field 822header 822print 822received addcr \
-	addrlist argv0 atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q \
+it = perm_list.mta 822date 822field 822header 822print 822received \
+	addrlist atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q \
 	binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm qnotify \
 	create_services cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr \
-	condredirect config-fast datemail delcr dk-filter dknewkey dktest dnscname \
+	condredirect config-fast datemail dk-filter dknewkey dktest dnscname \
 	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
-	envdir envuidgid qdane dnstlsarr etrn except fastforward fghack fixcrio \
+	envdir envuidgid qdane dnstlsarr etrn except fastforward fghack \
 	forward generic.so greydaemon qf-smtp-ratelimit home home+df hostname \
 	idedit iftocc instcheck ipmeprint ldap-checkpwd leapsecs \
 	logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
@@ -43,7 +43,7 @@ it = perm_list.mta 822date 822field 822header 822print 822received addcr \
 	qmail-rspawn qmail-send qmail-showctl qmail-daned svwait \
 	qmail-smtpd qmail_smtpd.so qmail-start qmail-tcpok qmail-tcpto \
 	qmail-todo qmail-upq qpq qquote qreceipt qsmhook queue-fix readproctitle \
-	recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
+	recipient-cdb relaytest rewind irmail rpmattr rrforward rrt \
 	sendmail serialcmd serialqmtp serialsmtp setforward setlock setmaillist \
 	setuidgid smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest \
 	spawn-filter spfquery splogger srsfilter supervise surblfilter surblqueue \
@@ -3276,43 +3276,6 @@ tai64n_decode.o: compile tai64n_decode.c tai.h bool.h
 
 tai64n_encode.o: compile tai64n_encode.c tai.h bool.h
 	./compile tai64n_encode.c
-
-recordio.o: \
-compile recordio.c iopause.h pathexec.h
-	./compile recordio.c
-
-recordio: \
-load recordio.o pathexec_run.o iopause.o
-	./load recordio pathexec_run.o iopause.o -lqmail
-
-argv0.o: \
-compile argv0.c pathexec.h
-	./compile argv0.c
-
-argv0: \
-load argv0.o pathexec_run.o
-	./load argv0 pathexec_run.o -lqmail
-
-addcr: load addcr.o 
-	./load addcr -lqmail
-
-addcr.o: \
-compile addcr.c
-	./compile addcr.c
-
-delcr: load delcr.o
-	./load delcr -lqmail
-
-delcr.o: \
-compile delcr.c
-	./compile delcr.c
-
-fixcrio: load fixcrio.o pathexec_run.o iopause.o
-	./load fixcrio pathexec_run.o iopause.o -lqmail
-
-fixcrio.o: \
-compile fixcrio.c iopause.h pathexec.h
-	./compile fixcrio.c
 
 logselect.o: compile direntry.h sorted.h pathexec.h \
 timestamp.h logselect.c

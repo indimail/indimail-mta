@@ -14,3 +14,8 @@ f:::0755:/bin/:tcpcat:tcpcat
 f:::0755:/bin/:mconnect:mconnect
 f:::0755:/bin/:mconnect-io:mconnect-io
 f:::0755:/bin/:rblsmtpd:rblsmtpd
+f:::0755:/bin/:recordio:recordio
+f:::0755:/bin/:argv0:argv0
+f:::0755:/bin/:addcr:addcr
+f:::0755:/bin/:delcr:delcr
+f:::0755:/bin/:fixcrio:fixcrio

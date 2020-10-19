@@ -20,8 +20,6 @@ f:::0644:/man1/:822headerfilter.1:822headerfilter.1
 f:::0644:/man1/:822headerok.1:822headerok.1
 f:::0644:/man1/:822print.1:822print.1
 f:::0644:/man1/:822received.1:822received.1
-f:::0644:/man1/:addcr.1:addcr.1
-f:::0644:/man1/:argv0.1:argv0.1
 f:::0644:/man1/:autoresponder.1:autoresponder.1
 f:::0644:/man1/:bouncesaying.1:bouncesaying.1
 f:::0644:/man1/:cdbdump.1:cdbdump.1
@@ -37,14 +35,12 @@ f:::0644:/man1/:columnt.1:columnt.1
 f:::0644:/man1/:condredirect.1:condredirect.1
 f:::0644:/man1/:condtomaildir.1:condtomaildir.1
 f:::0644:/man1/:datemail.1:datemail.1
-f:::0644:/man1/:delcr.1:delcr.1
 f:::0644:/man1/:dnstlsarr.1:dnstlsarr.1
 f:::0644:/man1/:dot-forward.1:dot-forward.1
 f:::0644:/man1/:drate.1:drate.1
 f:::0644:/man1/:except.1:except.1
 f:::0644:/man1/:fastforward.1:fastforward.1
 f:::0644:/man1/:filterto.1:filterto.1
-f:::0644:/man1/:fixcrio.1:fixcrio.1
 f:::0644:/man1/:forward.1:forward.1
 f:::0644:/man1/:ifaddr.1:ifaddr.1
 f:::0644:/man1/:iftocc.1:iftocc.1
@@ -81,7 +77,6 @@ f:::0644:/man1/:qmail-qfilter.1:qmail-qfilter.1
 f:::0644:/man1/:qmail-rm.1:qmail-rm.1
 f:::0644:/man1/:qnotify.1:qnotify.1
 f:::0644:/man1/:qreceipt.1:qreceipt.1
-f:::0644:/man1/:recordio.1:recordio.1
 f:::0644:/man1/:relaytest.1:relaytest.1
 f:::0644:/man1/:replier.1:replier.1
 f:::0644:/man1/:replier-config.1:replier-config.1
