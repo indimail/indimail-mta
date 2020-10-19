@@ -156,3 +156,4 @@ creation
 96. svctool: added control file servicedir.conf
 97. svscanboot: use servicedir.conf for servicedir
 98. controlfiles.q: added control file servicedir.conf
+99. conf-queue: added documenation

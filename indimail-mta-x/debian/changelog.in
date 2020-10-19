@@ -97,3 +97,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: added control file servicedir.conf
   * svscanboot: use servicedir.conf for servicedir
   * controlfiles.q: added control file servicedir.conf
+  * conf-queue: added documenation
