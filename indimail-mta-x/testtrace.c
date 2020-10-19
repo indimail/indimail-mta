@@ -1,8 +1,11 @@
 /*
- * $Log: $
+ * $Log: testtrace.c,v $
+ * Revision 1.1  2020-10-19 22:56:06+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 /*
- * $Id: testtrace.c,v 1.1 2005/06/16 19:37:03 domainkeys Exp $ 
+ * $Id: testtrace.c,v 1.1 2020-10-19 22:56:06+05:30 Cprogrammer Exp mbhangui $ 
  */
 
 #include "dktrace.h"

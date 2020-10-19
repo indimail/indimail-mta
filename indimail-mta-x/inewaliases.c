@@ -1,5 +1,5 @@
 /*
- * $Log: newaliases.c,v $
+ * $Log: inewaliases.c,v $
  * Revision 1.4  2005-08-23 17:33:17+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -413,7 +413,7 @@ main()
 void
 getversion_newaliases_c()
 {
-	static char    *x = "$Id: newaliases.c,v 1.4 2005-08-23 17:33:17+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: inewaliases.c,v 1.4 2005-08-23 17:33:17+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
