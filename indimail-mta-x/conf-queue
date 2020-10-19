@@ -2,7 +2,7 @@
 
 This is the upper limit on the number of queue that
 qmail-qread(8), qmail-multi(8), qmail-daemon(8),
-qmail-tcpok(8), qmail-tcpto(8) will process. This
+qmail-tcpok(8), qmail-tcpto(8) will process. These
 programs will use the env viriable QUEUE_COUNT for
 the value of system configured number of queues. You
 cannot go above the value configured above
