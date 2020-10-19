@@ -107,3 +107,4 @@ todointerval
 virtualdomains
 conf-fsync
 conf-syncdir
+servicedir.conf
