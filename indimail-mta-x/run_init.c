@@ -1,5 +1,8 @@
 /*
  * $Log: run_init.c,v $
+ * Revision 1.2  2020-10-20 16:27:46+05:30  Cprogrammer
+ * handle . as a dir argument
+ *
  * Revision 1.1  2020-10-08 18:25:19+05:30  Cprogrammer
  * Initial revision
  *
@@ -30,6 +33,19 @@ run_init(char *service_dir, char *fatal)
 	s += fmt_str(s, service_dir);
 	*s++ = 0;
 	p = basename(buf);
+	if (!str_diff(p, ".")) {
+		if (!getcwd(buf, 255))
+			strerr_die2sys(111, fatal, "unable to get current working directory: ");
+		p = basename(buf);
+		i = fmt_str(0, run_dir) + 9 + fmt_str(0, p);
+		if (i > 255)
+			return;
+		s = dirbuf;
+		s += fmt_str(s, run_dir);
+		s += fmt_strn(s, "/svscan/", 8);
+		s += fmt_str(s, p);	
+		*s++ = 0;
+	} else
 	if (!str_diff(p, "log")) {
 		if (!getcwd(buf, 255))
 			strerr_die2sys(111, fatal, "unable to get current working directory: ");
@@ -69,7 +85,7 @@ run_init(char *service_dir, char *fatal)
 void
 getversion_svrun_c()
 {
-	static char    *x = "$Id: run_init.c,v 1.1 2020-10-08 18:25:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: run_init.c,v 1.2 2020-10-20 16:27:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
