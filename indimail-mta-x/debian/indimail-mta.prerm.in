@@ -98,9 +98,7 @@ if [ -s ${qsysconfdir}/indimail-mta-stat.override -a -f /usr/sbin/dpkg-statoverr
 		fi
 	done
 fi
-# Remove indimail-mta being started on system boot
-echo "removing indimail-mta startup"
-$prefix/sbin/svctool --config=rm-boot
+echo "removing indimail-mta as an alternative"
 $prefix/sbin/svctool --config=remove-alt
 
 if [ $nocourierimap -eq 0 ] ; then
