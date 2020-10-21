@@ -88,7 +88,7 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * removed functions duplicated in libqmail
   * added man page for docker-entrypoint
   * replaced absolute paths with relative path in services to make them work in any service directory
-  * postinst: fixed overwriting of QMAILLOCAL, QMAILREMOTE by service creation for odmr portk
+  * postinst: fixed overwriting of QMAILLOCAL, QMAILREMOTE by service creation for odmr port (added --skipsend)
   * qmail-rspawn.c: fixed "Unable to run qmail-remote" when QMAILREMOTE variable was unset
   * svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable wasn't set
   * svctool: use mkfifo -m to create qmail-logfifo with 666 perms
@@ -98,3 +98,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svscanboot: use servicedir.conf for servicedir
   * controlfiles.q: added control file servicedir.conf
   * conf-queue: added documenation
+  * debian/daemontools.preinst: removed groupadd qmail

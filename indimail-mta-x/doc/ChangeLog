@@ -143,7 +143,7 @@ creation
     in any service directory
 - 17/10/2020
 90. postinst: fixed overwriting of QMAILLOCAL, QMAILREMOTE by service creation
-    for odmr portk
+    for odmr port (added --skipsend)
 91. qmail-rspawn.c: fixed "Unable to run qmail-remote" when QMAILREMOTE
     variable was unset
 92. svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable
@@ -157,3 +157,5 @@ creation
 97. svscanboot: use servicedir.conf for servicedir
 98. controlfiles.q: added control file servicedir.conf
 99. conf-queue: added documenation
+- 20/20/2020
+100. removed chrpath.
