@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.265 2020-10-09 12:38:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.1 2020-10-21 20:31:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
