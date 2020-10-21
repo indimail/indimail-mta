@@ -1,5 +1,9 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.28  2020-10-21 08:38:13+05:30  Cprogrammer
+ * skip chmod if mode == -1
+ * removed unused argument in perm()
+ *
  * Revision 1.27  2018-06-25 13:45:26+05:30  Cprogrammer
  * ignore permission denied errors when running as non-root
  *
@@ -93,16 +97,7 @@ int             uidinit(int);
 stralloc        dirbuf = { 0 };
 
 void
-perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
-	char           *prefix1;
-	char           *prefix2;
-	char           *prefix3;
-	char           *file;
-	int             type;
-	int             uid;
-	int             gid;
-	int             mode;
-	int             should_exit;
+perm(char *prefix1, char *prefix2, char *prefix3, char *file, int type, int uid, int gid, int mode)
 {
 	struct stat     st;
 	uid_t           myuid;
@@ -191,7 +186,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	if (err && chown(tfile, uid, gid) == -1)
 		strerr_die4sys(111, FATAL, "unable to chown ", tfile, ": ");
 	err = 0;
-	if ((st.st_mode & 07777) != mode) {
+	if (mode != -1 && (st.st_mode & 07777) != mode) {
 		err = 1;
 		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong permissions (will fix)", 0);
 	}
@@ -223,7 +218,7 @@ h(home, uid, gid, mode)
 	int             gid;
 	int             mode;
 {
-	perm("", "", "", home, S_IFDIR, uid, gid, mode, 1);
+	perm("", "", "", home, S_IFDIR, uid, gid, mode);
 }
 
 char           *
@@ -256,7 +251,7 @@ d(home, subdir, uid, gid, mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode, 1);
+	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode);
 }
 
 void
@@ -275,7 +270,7 @@ c(home, subdir, file, uid, gid, mode)
 			return;
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
 	}
-	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 1);
+	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode);
 }
 
 void
@@ -291,7 +286,7 @@ cd(home, subdir, file, uid, gid, mode)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
 	if (chdir(subdir) == -1)
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
-	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 1);
+	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode);
 }
 
 int
@@ -315,7 +310,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.27 2018-06-25 13:45:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.28 2020-10-21 08:38:13+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
