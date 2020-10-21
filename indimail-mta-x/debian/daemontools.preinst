@@ -44,7 +44,6 @@ case "$1" in
 	#
 	echo "Adding IndiMail users/groups"
 	/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
-	/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
 	/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}  -s /sbin/nologin qmaill || true
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
