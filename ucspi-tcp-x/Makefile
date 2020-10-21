@@ -129,64 +129,64 @@ dns_resolve.o dns_sortip.o dns_transmit.o dns_txt.o
 	dns_transmit.o dns_txt.o
 
 dns_dfd.o: \
-compile dns_dfd.c dns.h haveip6.h
+compile dns_dfd.c dns.h iopause.h haveip6.h
 	./compile dns_dfd.c
 
 dns_domain.o: \
-compile dns_domain.c dns.h haveip6.h
+compile dns_domain.c dns.h iopause.h haveip6.h
 	./compile dns_domain.c
 
 dns_dtda.o: \
-compile dns_dtda.c dns.h haveip6.h
+compile dns_dtda.c dns.h iopause.h haveip6.h
 	./compile dns_dtda.c
 
 dns_ip.o: \
-compile dns_ip.c dns.h haveip6.h conf-ip
+compile dns_ip.c dns.h iopause.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_ip.c
 
 dns_ipq.o: \
-compile dns_ipq.c dns.h haveip6.h conf-ip
+compile dns_ipq.c dns.h iopause.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_ipq.c
 
 dns_name.o: \
-compile dns_name.c ip6.h dns.h haveip6.h conf-ip
+compile dns_name.c ip6.h dns.h iopause.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_name.c
 
 dns_nd.o: \
-compile dns_nd.c dns.h haveip6.h conf-ip
+compile dns_nd.c dns.h iopause.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_nd.c
 
 dns_packet.o: \
-compile dns_packet.c dns.h haveip6.h
+compile dns_packet.c dns.h iopause.h haveip6.h
 	./compile dns_packet.c
 
 dns_random.o: \
-compile dns_random.c dns.h haveip6.h
+compile dns_random.c dns.h iopause.h haveip6.h
 	./compile dns_random.c
 
 dns_rcip.o: \
 compile dns_rcip.c openreadclose.h \
-ip4.h ip6.h dns.h haveip6.h conf-ip
+ip4.h ip6.h dns.h iopause.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_rcip.c
 
 dns_rcrw.o: \
-compile dns_rcrw.c openreadclose.h dns.h haveip6.h
+compile dns_rcrw.c openreadclose.h dns.h iopause.h haveip6.h
 	./compile dns_rcrw.c
 
 dns_resolve.o: \
-compile dns_resolve.c dns.h ip6.h haveip6.h conf-ip
+compile dns_resolve.c dns.h iopause.h ip6.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_resolve.c
 
 dns_sortip.o: \
-compile dns_sortip.c dns.h haveip6.h conf-ip
+compile dns_sortip.c dns.h iopause.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_sortip.c
 
 dns_transmit.o: \
-compile dns_transmit.c socket.h dns.h haveip6.h conf-ip
+compile dns_transmit.c socket.h dns.h iopause.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_transmit.c
 
 dns_txt.o: \
-compile dns_txt.c dns.h haveip6.h
+compile dns_txt.c dns.h iopause.h haveip6.h
 	./compile dns_txt.c
 
 finger@: \
@@ -324,12 +324,12 @@ dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
 	`cat socket.lib` -lqmail -ldl
 
 rblsmtpd.o: \
-compile rblsmtpd.c commands.h pathexec.h dns.h \
+compile rblsmtpd.c commands.h pathexec.h dns.h iopause.h \
 haveip6.h ip6.h conf-ip
 	./compile -DMAIN `grep -h -v "^#" conf-ip` rblsmtpd.c
 
 rbl.o: \
-compile rblsmtpd.c commands.h pathexec.h dns.h \
+compile rblsmtpd.c commands.h pathexec.h dns.h iopause.h \
 haveip6.h ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` rblsmtpd.c -o rbl.o
 
@@ -465,7 +465,7 @@ pathexec_run.o dns.a unix.a socket.lib
 
 tcpclient.o: \
 compile tcpclient.c ip4.h socket.h pathexec.h \
-timeoutconn.h tcpremoteinfo.h dns.h haveip6.h \
+timeoutconn.h tcpremoteinfo.h dns.h iopause.h haveip6.h \
 ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` tcpclient.c
 
@@ -523,7 +523,7 @@ mysql_inc: mysql_config
 
 tcpserver.o: \
 compile tcpserver.c ip4.h prot.h pathexec.h \
-socket.h tcpremoteinfo.h rules.h dns.h haveip6.h ip6.h \
+socket.h tcpremoteinfo.h rules.h dns.h iopause.h haveip6.h ip6.h \
 conf-tls conf-ip haveip6.h conf-mysqlrules conf-dlopen \
 hasmysql.h mysql_inc
 	./compile $(SSLINCS) \
