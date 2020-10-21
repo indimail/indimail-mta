@@ -1,5 +1,5 @@
 #
-# $Id: $
+# $Id: minisvc.in,v 1.1 2020-10-21 20:31:26+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: $"
+RCSID="# \$Id: minisvc.in,v 1.1 2020-10-21 20:31:26+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -564,6 +564,8 @@ create_startup()
 			else
 				/sbin/chkconfig --add svscan
 			fi
+		elif [ -f /usr/sbin/chkconfig ] ; then
+			/usr/sbin/chkconfig --add svscan
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d svscan start 14 2 3 4 5 . stop 91 0 1 6 .
 		fi
@@ -610,6 +612,8 @@ remove_startup()
 			else
 				/sbin/chkconfig --del svscan
 			fi
+		elif [ -f /sbin/chkconfig ] ; then
+				/usr/sbin/chkconfig --del svscan 2>/dev/null
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d -f svscan remove
 		fi
@@ -905,3 +909,9 @@ if [ ! " $prog_args" = " " ] ; then
 	fi
 fi
 exit 0
+#
+# $Log: minisvc.in,v $
+# Revision 1.1  2020-10-21 20:31:26+05:30  Cprogrammer
+# Initial revision
+#
+#
