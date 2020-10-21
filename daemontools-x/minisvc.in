@@ -25,7 +25,7 @@ usage()
 echo "Press ENTER for options, Cntrl C to quit" 1>&2
 read key
 $MORE <<EOF
-Usage: svctool [OPTION]
+Usage: minisvc [OPTION]
 
 Known values for OPTION are:
 
@@ -643,7 +643,7 @@ fi
 [ -z "$PRIV_PASS" ]  && PRIV_PASS="4-57343-"
 [ -z "$ADMIN_PASS" ] && ADMIN_PASS="benhur20"
 
-prog_args="$QmailBinPrefix/sbin/svctool"
+prog_args="$QmailBinPrefix/sbin/minisvc"
 force=0
 silent=0
 down_state=0
@@ -763,6 +763,10 @@ while test $# -gt 0; do
 
 	--initcmd=*)
 	svscan_init_cmd=$optarg
+	;;
+
+	--scanint=*)
+	scan_interval=$optarg
 	;;
 
 	--run-file-only)
