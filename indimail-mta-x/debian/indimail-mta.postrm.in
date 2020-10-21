@@ -84,12 +84,12 @@ if [ " $1" = " purge" ] ; then
 		fi
 	fi
 	(
-	for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
+	for i in alias qmaild qmailp qmailq qmailr qmails qscand indimail
 	do
 		echo "removing user $i"
 		/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 	done
-	for i in nofiles qmail qscand indimail
+	for i in qmail qscand indimail
 	do
 		echo "removing group $i"
 		/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
