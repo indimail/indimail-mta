@@ -13,6 +13,11 @@
 %global _hardened_build    1
 %endif
 
+%global xxxxxxx            0
+%if %{defined nodebug}
+%global debug_package      %{nil}
+%endif
+
 %global _prefix            @prefix@
 %global shareddir          @shareddir@
 %global mandir             @mandir@
@@ -114,7 +119,6 @@ Original Author: Dan J. Bernstein <djb@cr.yp.to>
 %setup -q
 
 %build
-ID=$(id -u)
 (
 echo "---------------- INFORMATION ------------------------"
 echo target        %_target
@@ -136,19 +140,23 @@ echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui ucspi-tcp@indimail.org\""
 ) > %{name}-release
 
 #### ucspi-tcp ######################
-%{__sed} 's{PREFIX{%{_prefix}{' conf-prefix.in conf-prefix
-%{__sed} 's{SHAREDDIR{%{shareddir}{' conf-shared.in > conf-shared
+%{__sed} 's{PREFIX{%{_prefix}{'         conf-prefix.in     > conf-prefix
+%{__sed} 's{SHAREDDIR{%{shareddir}{'    conf-shared.in     > conf-shared
+%{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' conf-sysconfdir.in > conf-sysconfdir
 %if %{tcpserver_plugin} == 1
-  echo "-DLOAD_SHARED_OBJECTS" >conf-dlopen
+  echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen
 %else
   %{__rm} -f conf-dlopen
 %endif
 ./catChangeLog doc/ChangeLog > ChangeLog
 echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > conf-cc
-echo %{__cc} -O2 > conf-ld
+%if %{defined nodebug}
+  echo %{__cc} -s -O2 > conf-ld
+%else
+  echo %{__cc} -O2 > conf-ld
+%endif
 
 %install
-ID=$(id -u)
 %{__mkdir_p} %{buildroot}%{_prefix}
 
 # rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
@@ -161,7 +169,11 @@ ID=$(id -u)
   LDFLAGS="%{build_ldflags} $LDFLAGS"
 %endif
 %{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+%if %{defined nodebug}
+%{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install-strip
+%else
 %{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install
+%endif
 
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 %{__mkdir_p} %{buildroot}%{qsysconfdir}
@@ -173,7 +185,8 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-ucspi-tc
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
-chmod 755 %{buildroot}%{_prefix}/bin/*
+chmod -R 755 %{buildroot}%{_prefix}/bin
+chmod -R 755 %{buildroot}%{plugindir}
 
 %files
 %attr(0755,root,root)                     %{_prefix}/bin/tcpserver

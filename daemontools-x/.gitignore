@@ -60,3 +60,8 @@ tai64nlocal
 tai64nunix
 teepipe
 upstart
+DIRS
+MAN
+SBIN
+SHARED
+installer

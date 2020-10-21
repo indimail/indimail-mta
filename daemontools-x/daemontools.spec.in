@@ -130,7 +130,6 @@ Original Author: Dan J. Bernstein <djb@cr.yp.to>
 %setup -q
 
 %build
-ID=$(id -u)
 (
 echo "---------------- INFORMATION ------------------------"
 echo target        %_target
@@ -151,9 +150,12 @@ echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
 echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui damontools@indimail.org\""
 ) > %{name}-release
 
-%{__sed} 's{SHAREDDIR{%{shareddir}{' conf-shared.in > conf-shared
-%{__sed} 's{LIBEXECDIR{%{libexecdir}{' conf-libexec.in > conf-libexec
-%{__sed} 's{PREFIX{%{_prefix}{' conf-prefix.in > conf-prefix
+%{__sed} 's{PREFIX{%{_prefix}{'         conf-prefix.in      > conf-prefix
+%{__sed} 's{QMAIL{%{qmaildir}{'         conf-qmail.in       > conf-qmail
+%{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' conf-sysconfdir.in  > conf-sysconfdir
+%{__sed} 's{SHAREDDIR{%{shareddir}{'    conf-shared.in      > conf-shared
+%{__sed} 's{LIBEXECDIR{%{libexecdir}{'  conf-libexec.in     > conf-libexec
+%{__sed} 's{SERVICEDIR{%{servicedir}{'  conf-servicedir.in  > conf-servicedir
 ./catChangeLog doc/ChangeLog > ChangeLog
 echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail > conf-cc
 %if %{defined nodebug}
@@ -163,7 +165,6 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
 %endif
 
 %install
-ID=$(id -u)
 %{__mkdir_p} %{buildroot}%{_prefix}
 
 # rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
@@ -176,7 +177,11 @@ ID=$(id -u)
   LDFLAGS="%{build_ldflags} $LDFLAGS"
 %endif
 %{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+%if %{defined nodebug}
 %{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install-strip
+%else
+%{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install
+%endif
 
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 %{__mkdir_p} %{buildroot}%{qsysconfdir}
