@@ -76,11 +76,8 @@ if [ " $1" = " purge" ] ; then
 	fi
 	echo "removing user qmaill"
 	/usr/bin/getent passwd qmaill > /dev/null && /usr/sbin/userdel qmaill >/dev/null || true
-	for i in nofiles qmail
-	do
-		echo "removing group $i"
-		/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
-	done
+	echo "removing group nofiles"
+	/usr/bin/getent group nofiles > /dev/null && /usr/sbin/groupdel nofiles  >/dev/null || true
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
