@@ -70,10 +70,8 @@ f:::0755:/:rspamsdomain:rspamsdomain
 f:::0755:/:rspamstat:rspamstat
 f:::0755:/:rspamhist:rspamhist
 f:::0755:/:batv:batv
-f:::0755:/:svscanboot:svscanboot
 f:::0755:/:envmigrate:envmigrate
 f:::0755:/:hostname:hostname
-f:::0755:/:svwait:svwait
 f:::0755:/:qmailconfig:qmailconfig
 f:::0755:/:config-fast:config-fast
 f:::0755:/:instcheck:instcheck

@@ -1,0 +1,3 @@
+# installer input files man pages for Linux specific programs
+# @mandir@
+f:::0644:/man8/:docker-entrypoint.8:docker-entrypoint.8

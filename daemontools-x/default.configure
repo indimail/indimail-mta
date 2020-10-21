@@ -1,0 +1,36 @@
+#!/bin/sh
+if [ ! -f conf-release ] ; then
+	echo 1.1 > conf-release
+fi
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	Linux)
+	sed 's{PREFIX{/usr{'                            conf-prefix.in     > conf-prefix
+	sed 's{QMAIL{/var/indimail{'                    conf-qmail.in      > conf-qmail
+	sed 's{SYSCONFDIR{/etc/indimail{'               conf-sysconfdir.in > conf-sysconfdir
+	sed 's{SHAREDDIR{/usr/share/indimail{'          conf-shared.in     > conf-shared
+	sed 's{LIBEXECDIR{/usr/libexec/indimail{'       conf-libexec.in    > conf-libexec
+	sed 's{SERVICEDIR{/service{'                    conf-servicedir.in > conf-servicedir
+	;;
+	FreeBSD|Darwin)
+	sed 's{PREFIX{/usr/local{'                      conf-prefix.in     > conf-prefix
+	sed 's{QMAIL{/var/indimail{'                    conf-qmail.in      > conf-qmail
+	sed 's{SYSCONFDIR{/usr/local/etc/indimail{'     conf-sysconfdir.in > conf-sysconfdir
+	sed 's{SHAREDDIR{/usr/local/share/indimail{'    conf-shared.in     > conf-shared
+	sed 's{LIBEXECDIR{/usr/local/libexec/indimail{' conf-libexec.in    > conf-libexec
+	sed 's{SERVICEDIR{/usr/local/etc/indimail/sv{'  conf-servicedir.in > conf-servicedir
+	;;
+	*)
+	echo "Unknown system $SYSTEM. Please configure conf-* files manually" 1>&2
+	exit 1
+	;;
+esac
+SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+if [ -f Makefile.$SYSTEM ] ; then
+	/bin/rm -f Makefile.
+	ln -s Makefile.$SYSTEM Makefile.
+fi
+if [ -f Makevars.$SYSTEM ] ; then
+	/bin/rm -f Makevars.
+	ln -s Makevars.$SYSTEM Makevars.
+fi

@@ -1,0 +1,9 @@
+# installer input file for shared directories (universal)
+# @shareddir@
+d:::0555:::
+d:::0555:/boot::
+#
+# files in @shared@/doc
+#
+d:::0555:/doc::
+f:::0644:/doc/:README.logselect:doc/README.logselect

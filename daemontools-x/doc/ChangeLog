@@ -1,0 +1,42 @@
+* 
+Release 1.1 Start 09/10/2020
+- 19/09/2020
+01. exploit svscan as session leader. Terminate all children using svc -G
+02. svcscan_rc: rc startup script for FreeBSD
+03. qmailctl: use daemon to start svscan in supervised mode
+- 22/09/2020
+04. qmailctl: removed use of initsvc for start/stop
+- 27/09/2020
+05. new command svwait to wait for supervise service to come up
+- 02/10/2020
+06. install indimail.plist in shareddir/boot
+- 03/10/2020
+07. svctool, svwait: fix date command syntax for Darwin, FreeBSD
+08. indimail.plist: service directory on Darwin changed to
+    /usr/local/etc/indimail/service
+- 04/10/2020
+09. svctool: renamed launchd unit file indimail.plist to svscan.plist
+    create /service link in /etc/synthetic.conf for Darwin
+    create /var/indimail/inquery directory
+    removed hardcoded directory for svwait in inlookup, pwdlookup service
+10. hier.c, indimail-mta.spec, Makefile: renamed launchd unit file indimail.plist
+    to svscan.plist
+11. svwait: replace builtin echo with /bin/echo -n (for Darwin)
+- 06/10/2020
+12. svctool -freebsd: remove svscan config/rc file with --config=rm-boot
+- 08/10/2020
+13. svscan, supervise, svc, svstat, svok - use /run or /var/run on systems that support it
+14. Makefile: added run_init.o object for svc, svstat, svok
+15. Makefile: use conf-runfs to configure daemontools to use /run, /var/run
+- 09/10/2020
+16. svscan.c, qmailctl, svscan_rc - renamed svscan.pid to .svscan.pid
+- 11/10/2020
+17. added man page for docker-entrypoint
+- 16/10/2020
+18. replaced absolute paths with relative path in services to make them work
+    in any service directory
+- 19/10/2020
+19. svctool: added control file servicedir.conf
+20. svscanboot: use servicedir.conf for servicedir
+- 09/10/2020
+01. First Release

@@ -36,126 +36,100 @@ Release 2.12 Start 21/05/2020
 - 17/09/2020
 20. svctool, create_services, update_tmprsadh, config-fast: fixes for FreeBSD
 - 19/09/2020
-21. exploit svscan as session leader. Terminate all children using svc -G
-22. svcscan_rc: rc startup script for FreeBSD
-23. portable Makefile for Linux, FreeBSD, OSX
-24. qmailctl: use daemon to start svscan in supervised mode
+21. portable Makefile for Linux, FreeBSD, OSX
 - 20/09/2020
-25. tcpserver.c: open ipv4, ipv6 sockets on FreeBSD and use select before accept()
-26. cronlist.q: skip run-cleanq if qscanq service is not installed
+22. tcpserver.c: open ipv4, ipv6 sockets on FreeBSD and use select before accept()
+23. cronlist.q: skip run-cleanq if qscanq service is not installed
 - 22/09/2020
-27. create_service: fixed certificate path for poppass, indisrvr service
-28. use conf-cc-SYSTEM, conf-ld-SYSTEM for system specific CFLAGS, LDFLAGS
-29. qmailctl: removed use of initsvc for start/stop
+24. create_service: fixed certificate path for poppass, indisrvr service
+25. use conf-cc-SYSTEM, conf-ld-SYSTEM for system specific CFLAGS, LDFLAGS
 - 24/09/2020
-30. Makefile - indimail-mta, ucspi-tcp: split into variables, main Makefile and
+26. Makefile - indimail-mta, ucspi-tcp: split into variables, main Makefile and
     system specific Makefile. New script qmake to do the build
 - 25/09/2020
-31. syncdir.c: FreeBSD port (use sys/syscall.h)
-32. svctool: use --defaults-file=indimail.cnf for shutdown script to avoid
+27. syncdir.c: FreeBSD port (use sys/syscall.h)
+28. svctool: use --defaults-file=indimail.cnf for shutdown script to avoid
     issues on FreeBSD
-33. removed libwatch service
-34. run svctool --fixsharedlibs during MySQL startup
-35. DIRS: use relative links in /var/indimail
+29. removed libwatch service
+30. run svctool --fixsharedlibs during MySQL startup
+31. DIRS: use relative links in /var/indimail
 - 26/09/2020
-36. svctool: allow setting of MySQL indimail, admin password, indimail UNIX password by
+32. svctool: allow setting of MySQL indimail, admin password, indimail UNIX password by
     setting MYSQL_PASS, PRIV_PASS, ADMIN_PASS in env
 - 27/09/2020
-37. svctool, envmigrate: fixed handling of failure in imap/pop3 service
+33. svctool, envmigrate: fixed handling of failure in imap/pop3 service
 creation
-38. indimail-mta.spec: rpmlint fixes for danglin-relative-symlinks
-39. new command svwait to wait for supervise service to come up
-40. svctool: make inlookup,pwdlookup service wait for 30 seconds since MySQL services
+34. indimail-mta.spec: rpmlint fixes for danglin-relative-symlinks
+35. svctool: make inlookup,pwdlookup service wait for 30 seconds since MySQL services
     comes up
-41. svctool: replace /bin/false with /usr/bin/false on FreeBSD
-42. sys-checkpwd.c: restore '@' sign in username for authmodules in the chain
-43. sys-checkpwd.c: skip stripping of domain if STRIP_DOMAIN env variable is
+36. svctool: replace /bin/false with /usr/bin/false on FreeBSD
+37. sys-checkpwd.c: restore '@' sign in username for authmodules in the chain
+38. sys-checkpwd.c: skip stripping of domain if STRIP_DOMAIN env variable is
     not set
 - 28/09/2020
-44. Makefile: fix perl path in perl scripts
-45. removed unused programs - qmail-lagcheck, qmail-lint, elq, pinq, qail
-46. added debug statments in sys-checkpwd
-47. svctool: added all available authmodules as IMAPMODULES
+39. Makefile: fix perl path in perl scripts
+40. removed unused programs - qmail-lagcheck, qmail-lint, elq, pinq, qail
+41. added debug statments in sys-checkpwd
+42. svctool: added all available authmodules as IMAPMODULES
 - 30/09/2020
-48. syncdir.c, syncdir.h, qmail-local.c, qmail-queue.c, qmail-send.c,
+43. syncdir.c, syncdir.h, qmail-local.c, qmail-queue.c, qmail-send.c,
     qmail-todo.c: Darwin port for syncdir
-49. domainkeys.c: define memcpy, strcasecmp, strncasecmp only if not defined
+44. domainkeys.c: define memcpy, strcasecmp, strncasecmp only if not defined
 - 02/10/2020
-50. installer.c: set permissions for directory only if it is a new directory
-51. install indimail.plist in shareddir/boot
-52. svctool: updated macOSuseradd, macOSgroupadd
+45. installer.c: set permissions for directory only if it is a new directory
+46. svctool: updated macOSuseradd, macOSgroupadd
 - 03/10/2020
-53. svctool, svwait: fix date command syntax for Darwin, FreeBSD
-54. svctool: --fixedharedlibs for Darwin
-55. svctool: use /bin/echo -n instead of builtin echo -n (which doesn''t work on Darwin)
-56. svctool: create /var/run/mysqld for Darwin when creating mysqldb
-57. svctool: use openssl passwd -6 (sha512) missing on darwin use openssl passwd -1 (md5)
-58. svctool: use LC_ALL=C for tr command on Darwin
-59. svctool: check for mysqld in mysqlprefix/bin for Darwin
-60. svctool: updated macOSuseradd, macOSgroupadd functiona for Darwin
-61. svctool: fixed date command for getting time in seconds for Darwin/FreeBSD
-62. indimail.plist: service directory on Darwin changed to
-    /usr/local/etc/indimail/service
+47. svctool: --fixedharedlibs for Darwin
+48. svctool: use /bin/echo -n instead of builtin echo -n (which doesn''t work on Darwin)
+49. svctool: create /var/run/mysqld for Darwin when creating mysqldb
+50. svctool: use openssl passwd -6 (sha512) missing on darwin use openssl passwd -1 (md5)
+51. svctool: use LC_ALL=C for tr command on Darwin
+52. svctool: check for mysqld in mysqlprefix/bin for Darwin
+53. svctool: updated macOSuseradd, macOSgroupadd functiona for Darwin
+54. svctool: fixed date command for getting time in seconds for Darwin/FreeBSD
 - 04/10/2020
-63. svctool: renamed launchd unit file indimail.plist to svscan.plist
-    create /service link in /etc/synthetic.conf for Darwin
+55. create /service link in /etc/synthetic.conf for Darwin
     create /var/indimail/inquery directory
-    removed hardcoded directory for svwait in inlookup, pwdlookup service
-64. hier.c, indimail-mta.spec, Makefile: renamed launchd unit file indimail.plist
-    to svscan.plist
-65. svwait: replace builtin echo with /bin/echo -n (for Darwin)
-66. svctool: fixed users getting added multiple times to com.apple.loginwindow
+    svctool: fixed users getting added multiple times to com.apple.loginwindow
     HiddenUsersList
 - 05/10/2020
-67. installer new features, 1. uninstall option (-u, -i), 2. create devices,
+56. installer new features, 1. uninstall option (-u, -i), 2. create devices,
     3. create fifo
-68. Makefile: Added uninstall target
-69. Added comments in installer input files
-70. svctool: remove indimail, indimail-mta users from HiddenUsersList for
+57. Makefile: Added uninstall target
+58. Added comments in installer input files
+59. svctool: remove indimail, indimail-mta users from HiddenUsersList for
     Darwin
-71. Makefile: run instcheck to set permissions on make install.
+60. Makefile: run instcheck to set permissions on make install.
 - 06/10/2020
-72. indimail-mta: Makefile: replaced g++ with c++ for portability
-73. indimail-mta, ucspi-tcp: fixed uninstall target
-74. installer.c: fixed setting of symbolic links
-75. svctool -freebsd: fix for libmysqlclient on freebsd.
-76. svctool -freebsd: remove svscan config/rc file with --config=rm-boot
-77. qmail-local.c: fixed bug with loopcounter in qmail-local.c - initialized
+61. indimail-mta: Makefile: replaced g++ with c++ for portability
+62. indimail-mta, ucspi-tcp: fixed uninstall target
+63. installer.c: fixed setting of symbolic links
+64. svctool -freebsd: fix for libmysqlclient on freebsd.
+65. qmail-local.c: fixed bug with loopcounter in qmail-local.c - initialized
     maxdeliveredto
 - 08/10/2020
-78. svscan, supervise, svc, svstat, svok - use /run or /var/run on systems that support it
-79. Makefile: added run_init.o object for svc, svstat, svok
-80. Makefile: use conf-runfs to configure daemontools to use /run, /var/run
-81. ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
+66. ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
 -09/10/2020
-82. qlocal_upgrade.sh: migrate /service to libexecdir
-83. svscan.c, qmailctl, svscan_rc - renamed svscan.pid to .svscan.pid
+67. qlocal_upgrade.sh: migrate /service to libexecdir
 - 10/10/2020
-84. smtpd.c: auth functions made static
-85. qmail-remote.c: digest_md5() renamed to qr_digest_md5() to avoid clash
-86. removed functions duplicated in libqmail
-- 11/10/2020
-87. added man page for docker-entrypoint
+68. smtpd.c: auth functions made static
+69. qmail-remote.c: digest_md5() renamed to qr_digest_md5() to avoid clash
+70. removed functions duplicated in libqmail
 - 12/10/2020
-88. added debuginfo package
-- 16/10/2020
-89. replaced absolute paths with relative path in services to make them work
-    in any service directory
+71. added debuginfo package
 - 17/10/2020
-90. postinst: fixed overwriting of QMAILLOCAL, QMAILREMOTE by service creation
+72. postinst: fixed overwriting of QMAILLOCAL, QMAILREMOTE by service creation
     for odmr port (added --skipsend)
-91. qmail-rspawn.c: fixed "Unable to run qmail-remote" when QMAILREMOTE
+73. qmail-rspawn.c: fixed "Unable to run qmail-remote" when QMAILREMOTE
     variable was unset
-92. svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable
+74. svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable
     wasn't set
-93. svctool: use mkfifo -m to create qmail-logfifo with 666 perms
+75. svctool: use mkfifo -m to create qmail-logfifo with 666 perms
 - 18/10/2020
-94. svctool: added default-authentication-plugin=mysql_native_password as a comment
-95. qcount_dir.c: replaced alloc_re() with alloc()
+76. svctool: added default-authentication-plugin=mysql_native_password as a comment
+77. qcount_dir.c: replaced alloc_re() with alloc()
 19/20/2020
-96. svctool: added control file servicedir.conf
-97. svscanboot: use servicedir.conf for servicedir
-98. controlfiles.q: added control file servicedir.conf
-99. conf-queue: added documenation
-- 20/20/2020
-100. removed chrpath.
+78. controlfiles.q: added control file servicedir.conf
+79. conf-queue: added documenation
+20/20/2020
+80. removed chrpath.

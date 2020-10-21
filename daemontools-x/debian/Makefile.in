@@ -1,0 +1,76 @@
+prefix=@prefix@
+qmaildir=@qmaildir@
+sysconfdir=/etc
+qsysconfdir=@qsysconfdir@
+mbase=/home/mail
+servicedir=@servicedir@
+mandir=@mandir@
+libexecdir=@libexecdir@
+shareddir=@shareddir@
+logdir=@logdir@
+libdir=/usr/lib
+version=@version@
+release=@release@
+
+all: rules daemontools.dsc daemontools-Debian_9.0.dsc \
+daemontools-Debian_10.dsc daemontools-xUbuntu_18.04.dsc \
+debian.tar.gz dummy.tar.gz
+
+edit = sed \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@mbase\@,$(mbase),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
+	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
+	-e 's,@libdir\@,$(libdir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
+	-e 's,@logdir\@,$(logdir),g' \
+	-e 's,@release\@,$(release),g' \
+	-e 's,@prefix\@,$(prefix),g'
+
+install: all
+install-strip: install
+distclean: clean
+
+clean:
+	/bin/rm -f rules *.dsc changelog \
+	daemontools.postinst daemontools.postrm \
+	debian.tar.gz dummy.tar.gz
+
+noinst_SCRIPTS = daemontools.install daemontools.preinst \
+				 daemontools.postinst daemontools.prerm daemontools.postrm \
+				 rules 
+MOSTLYCLEANFILES= rules changelog debian.tar.gz dummy.tar.gz
+
+dummy.tar.gz: README
+	tar cf - README |gzip > $@
+obs_deb_prep: Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+rules: rules.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+changelog: changelog.in ../conf-version ../conf-release
+	(cat $@.in; echo ""; \
+	echo " -- Manvendra Bhangui <daemontools@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
+	| $(edit) > $@
+daemontools.dsc: daemontools.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+daemontools-Debian_10.dsc: daemontools-Debian_10.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+daemontools-Debian_9.0.dsc: daemontools-Debian_9.0.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+daemontools-xUbuntu_18.04.dsc: daemontools-xUbuntu_18.04.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+daemontools.postrm: daemontools.postrm.in
+	$(edit) $@.in > $@
+daemontools.postinst: daemontools.postinst.in
+	$(edit) $@.in > $@
+
+debian.tar.gz: copyright rules changelog compat control \
+daemontools.install daemontools.preinst daemontools.postinst daemontools.prerm \
+daemontools.postrm
+	tar cf - copyright rules changelog compat daemontools.install \
+		daemontools.preinst daemontools.postinst daemontools.prerm \
+		daemontools.postrm control | gzip > $@

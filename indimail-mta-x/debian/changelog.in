@@ -20,15 +20,11 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * qmail-queue.c, qmail-local.c: changed default value of use_fsync, use_syncdir to -1
   * indimail-mta, ucspi-tcp: fixes for FreeBSD
   * svctool, create_services, update_tmprsadh, config-fast: fixes for FreeBSD
-  * exploit svscan as session leader. Terminate all children using svc -G
-  * svcscan_rc: rc startup script for FreeBSD
   * portable Makefile for Linux, FreeBSD, OSX
-  * qmailctl: use daemon to start svscan in supervised mode
   * tcpserver.c: open ipv4, ipv6 sockets on FreeBSD and use select before accept()
   * cronlist.q: skip run-cleanq if qscanq service is not installed
   * create_service: fixed certificate path for poppass, indisrvr service
   * use conf-cc-SYSTEM, conf-ld-SYSTEM for system specific CFLAGS, LDFLAGS
-  * qmailctl: removed use of initsvc for start/stop
   * Makefile - indimail-mta, ucspi-tcp: split into variables, main Makefile and system specific Makefile. New script qmake to do the build
   * syncdir.c: FreeBSD port (use sys/syscall.h)
   * svctool: use --defaults-file=indimail.cnf for shutdown script to avoid issues on FreeBSD
@@ -37,7 +33,6 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * DIRS: use relative links in /var/indimail
   * svctool: allow setting of MySQL indimail, admin password, indimail UNIX password by setting MYSQL_PASS, PRIV_PASS, ADMIN_PASS in env
   * svctool, envmigrate: fixed handling of failure in imap/pop3 service creation
-  * new command svwait to wait for supervise service to come up
   * svctool: make inlookup,pwdlookup service wait for 30 seconds since MySQL services comes up
   * svctool: replace /bin/false with /usr/bin/false on FreeBSD
   * sys-checpwd.c: restore '@' sign in username for authmodules in the chain
@@ -49,9 +44,7 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * syncdir.c, syncdir.h, qmail-local.c, qmail-queue.c, qmail-send.c, qmail-todo.c: Darwin port for syncdir
   * removed ldap-checkpwd for Darwin. Added it to Linux, FreeBSD Makefile target
   * installer.c: set permissions for directory only if it is a new directory
-  * install indimail.plist in shareddir/boot
   * svctool: updated macOSuseradd, macOSgroupadd
-  * svctool, svwait: fix date command syntax for Darwin, FreeBSD
   * svctool: --fixedharedlibs for Darwin
   * svctool: use /bin/echo -n instead of builtin echo -n (which doesn't work on Darwin)
   * svctool: create /var/run/mysqld for Darwin when creating mysqldb
@@ -60,8 +53,6 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: check for mysqld in mysqlprefix/bin for Darwin
   * svctool: updated macOSuseradd, macOSgroupadd functiona for Darwin
   * svctool: fixed date command for getting time in seconds for Darwin/FreeBSD
-  * indimail.plist: service directory on Darwin changed to /usr/local/etc/indimail/service
-  * svctool: renamed launchd unit file indimail.plist to svscan.plist
   * svctool: create /service link in /etc/synthetic.conf for Darwin
   * svctool: create /var/indimail/inquery directory
   * svctool: removed hardcoded directory for svwait in inlookup, pwdlookup service
@@ -77,25 +68,16 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * indimail-mta, ucspi-tcp: fixed uninstall target
   * installer.c: fixed setting of symbolic links
   * qmail-local.c: fixed bug with loopcounter in qmail-local.c - initialized maxdeliveredto
-  * svscan, supervise, svc, svstat, svok - use /run or /var/run on systems that support it
-  * Makefile: added run_init.o object for svc, svstat, svok
-  * Makefile: use conf-runfs to configure daemontools to use /run, /var/run
   * ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
   * qlocal_upgrade.sh: migrate /service to libexecdir
-  * svscan.c, qmailctl, svscan_rc - renamed svscan.pid to .svscan.pid
   * smtpd.c: auth functions made static
   * qmail-remote.c: digest_md5() renamed to qr_digest_md5() to avoid clash
   * removed functions duplicated in libqmail
-  * added man page for docker-entrypoint
-  * replaced absolute paths with relative path in services to make them work in any service directory
   * postinst: fixed overwriting of QMAILLOCAL, QMAILREMOTE by service creation for odmr port (added --skipsend)
   * qmail-rspawn.c: fixed "Unable to run qmail-remote" when QMAILREMOTE variable was unset
   * svctool: fixed "Unable to run qmail-remote" when QMAILREMOTE variable wasn't set
   * svctool: use mkfifo -m to create qmail-logfifo with 666 perms
   * svctool: added default-authentication-plugin=mysql_native_password as a comment
   * qcount_dir.c: replaced alloc_re() with alloc()
-  * svctool: added control file servicedir.conf
-  * svscanboot: use servicedir.conf for servicedir
   * controlfiles.q: added control file servicedir.conf
   * conf-queue: added documenation
-  * debian/daemontools.preinst: removed groupadd qmail

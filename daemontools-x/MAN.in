@@ -1,0 +1,37 @@
+# installer input files man pages for universal progams
+# @mandir@
+d:::0755:::
+d:::0755:/man1::
+d:::0755:/man8::
+
+# Man pages
+#
+f:::0644:/man1/:spipe.1:spipe.1
+f:::0644:/man1/:qfilelog.1:qfilelog.1
+f:::0644:/man1/:multipipe.1:multipipe.1
+f:::0644:/man1/:teepipe.1:teepipe.1
+f:::0644:/man1/:qlogselect.1:qlogselect.1
+f:::0644:/man1/:tai2tai64n.1:tai2tai64n.1
+f:::0644:/man1/:tai64n2tai.1:tai64n2tai.1
+f:::0644:/man8/:envdir.8:envdir.8
+f:::0644:/man8/:envuidgid.8:envuidgid.8
+f:::0644:/man8/:fghack.8:fghack.8
+f:::0644:/man8/:multilog.8:multilog.8
+f:::0644:/man8/:pgrphack.8:pgrphack.8
+f:::0644:/man8/:readproctitle.8:readproctitle.8
+f:::0644:/man8/:setlock.8:setlock.8
+f:::0644:/man8/:setuidgid.8:setuidgid.8
+f:::0644:/man8/:softlimit.8:softlimit.8
+f:::0644:/man8/:supervise.8:supervise.8
+f:::0644:/man8/:svc.8:svc.8
+f:::0644:/man8/:svok.8:svok.8
+f:::0644:/man8/:svwait.8:svwait.8
+f:::0644:/man8/:svscan.8:svscan.8
+f:::0644:/man8/:svstat.8:svstat.8
+f:::0644:/man8/:tai64n.8:tai64n.8
+f:::0644:/man8/:tai64nlocal.8:tai64nlocal.8
+f:::0644:/man8/:tai64nunix.8:tai64nunix.8
+f:::0644:/man8/:logselect.8:logselect.8
+f:::0644:/man8/:svscanboot.8:svscanboot.8
+f:::0644:/man8/:qmailctl.8:qmailctl.8
+f:::0644:/man8/:minisvc.8:minisvc.8

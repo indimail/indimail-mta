@@ -59,3 +59,5 @@ argv0
 delcr
 fixcrio
 recordio
+DIRS
+perm_list.ucspi-tcp

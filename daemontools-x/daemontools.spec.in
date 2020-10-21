@@ -1,0 +1,478 @@
+#
+#
+# $Id: indimail-mta.spec.in,v 1.265 2020-10-09 12:38:34+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%global _unpackaged_files_terminate_build 1
+
+%if %{defined _project}
+# define if building on openSUSE build service
+%global build_on_obs       1
+%else
+%define _project           local
+%global build_on_obs       0
+%global _hardened_build    1
+%endif
+
+%global xxxxxxx            0
+%if %{defined nodebug}
+%global debug_package      %{nil}
+%endif
+
+%global qmaildir           @qmaildir@
+%global _prefix            @prefix@
+%global libexecdir         @libexecdir@
+%global shareddir          @shareddir@
+%global mandir             @mandir@
+%global qsysconfdir        @sysconfdir@
+%global logdir             @logdir@
+%global servicedir         @servicedir@
+%global see_base           For a description of IndiMail visit https://github.com/mbhangui/indimail-mta
+
+%if %build_on_obs == 1
+%global packager Manvendra Bhangui <indimail-mta@indimail.org>
+%endif
+
+%if 0%{?suse_version}
+%global dist suse
+%global disttag suse
+%endif
+
+%if 0%{?fedora_version}
+%global dist %{?dist}
+%global disttag fedora
+%endif
+
+Summary: A collection of tools for managing UNIX services
+Name: daemontools
+Version: @version@
+Release: @release@%{?dist}
+
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Base
+%else
+Group: Productivity/Networking/Email/Servers
+%endif
+Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
+URL: https://github.com/mbhangui/indimail-mta
+
+AutoReq: Yes
+Conflicts: indimail-mta < 2.12
+Provides: user(qmaill)      > 999
+Provides: group(nofiles)    > 999
+%if %build_on_obs == 0
+Requires(pre): shadow-utils
+Requires(postun): shadow-utils
+%endif
+
+BuildRequires: gcc gcc-c++ make pkgconfig
+BuildRequires: sed findutils diffutils gzip coreutils grep
+BuildRequires: glibc glibc-devel
+BuildRequires: mysql-devel
+BuildRequires: libqmail-devel
+
+##################################### OBS ####################################
+%if %build_on_obs == 1
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
+%endif
+%endif
+##############################################################################
+
+Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
+Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
+Requires: coreutils grep /bin/sh glibc openssl
+Requires: diffutils sed findutils pkgconfig
+%if %{undefined suse_version} && %{undefined sles_version}
+Requires: /usr/bin /usr/sbin
+%endif
+
+%if 0%{?suse_version}
+Requires: insserv-compat
+%else
+Requires: initscripts
+%endif
+#
+%if %build_on_obs == 1
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+%endif
+#
+# IndiMail is choosy and runs on reliable OS only
+#
+Excludeos: windows
+
+%description
+daemontools is a collection of tools for managing UNIX services.
+
+svscan scans a directory and starts a supervise process for each
+subdirectory of the scanned directory. It restarts the supervise process if
+it dies.
+
+supervise monitors a service. It starts the service and restarts the
+service if it dies. Setting up a new service is easy: all supervise
+needs is a directory with a run script that runs the service.
+
+multilog saves error messages to one or more logs. It optionally
+timestamps each line and, for each log, includes or excludes lines
+matching specified patterns. It automatically rotates logs to limit the
+amount of disk space used. If the disk fills up, it pauses and tries
+again, without losing any data.
+
+Original Author: Dan J. Bernstein <djb@cr.yp.to>
+
+%prep
+%setup -q
+
+%build
+ID=$(id -u)
+(
+echo "---------------- INFORMATION ------------------------"
+echo target        %_target
+echo target_alias  %_target_alias
+echo target_cpu    %_target_cpu
+echo target_os     %_target_os
+echo target_vendor %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+
+(
+echo "NAME=%{name}"
+echo "Description=\"Daemontools\""
+echo "daemontools_version="%{version}""
+echo "ID=%{name}"
+echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
+echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui damontools@indimail.org\""
+) > %{name}-release
+
+%{__sed} 's{SHAREDDIR{%{shareddir}{' conf-shared.in > conf-shared
+%{__sed} 's{LIBEXECDIR{%{libexecdir}{' conf-libexec.in > conf-libexec
+%{__sed} 's{PREFIX{%{_prefix}{' conf-prefix.in > conf-prefix
+./catChangeLog doc/ChangeLog > ChangeLog
+echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail > conf-cc
+%if %{defined nodebug}
+  echo %{__cc} -s -rdynamic > conf-ld
+%else
+  echo %{__cc} -rdynamic > conf-ld
+%endif
+
+%install
+ID=$(id -u)
+%{__mkdir_p} %{buildroot}%{_prefix}
+
+# rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
+%if 0%{?build_cflags:1}
+  CFLAGS="%{build_cflags}"
+%else
+  CFLAGS="%{optflags}"
+%endif
+%if 0%{?build_ldflags:1}
+  LDFLAGS="%{build_ldflags} $LDFLAGS"
+%endif
+%{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+%{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install-strip
+
+%{__mkdir_p} %{buildroot}%{shareddir}/doc
+%{__mkdir_p} %{buildroot}%{qsysconfdir}
+#copy files not copied by setup
+install -m 0644 %{name}-release  %{buildroot}%{qsysconfdir}/%{name}-release
+install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
+install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemontools
+
+# Compress the man pages
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
+%if %{undefined nodebug}
+ /bin/chmod -R 755 %{buildroot}%{_prefix}/bin
+ /bin/chmod -R 755 %{buildroot}%{_prefix}/sbin
+%endif
+
+%files
+%defattr(-, root, root,-)
+#
+# Directories
+#
+%if %{undefined suse_version} && %{undefined sles_version}
+%ghost %dir %attr(0755,qmaill,nofiles)   %{logdir}
+%ghost %dir %attr(0755,qmaill,nofiles)   %{logdir}/*
+%ghost      %attr(-,qmaill,nofiles)      %{logdir}/*/*
+%endif
+
+%dir %attr(0555,root,root)               %{libexecdir}
+%dir %attr(0555,root,root)               %{shareddir}
+%dir %attr(0555,root,root)               %{shareddir}/boot
+%dir %attr(0555,root,root)               %{shareddir}/doc
+%if "%{mandir}" != "/usr/share/man"
+%dir %attr(0755,root,root)               %{mandir}
+%dir %attr(0755,root,root)               %{mandir}/man1
+%dir %attr(0755,root,root)               %{mandir}/man8
+%endif
+
+%attr(0755,root,root)                    %{_prefix}/bin/envdir
+%attr(0755,root,root)                    %{_prefix}/bin/envuidgid
+%attr(0755,root,root)                    %{_prefix}/bin/setlock
+%attr(0755,root,root)                    %{_prefix}/bin/setuidgid
+%attr(0755,root,root)                    %{_prefix}/bin/softlimit
+%attr(0755,root,root)                    %{_prefix}/bin/svc
+%attr(0755,root,root)                    %{_prefix}/bin/svok
+%attr(0755,root,root)                    %{_prefix}/bin/svstat
+%attr(0755,root,root)                    %{_prefix}/bin/tai64n
+%attr(0755,root,root)                    %{_prefix}/bin/tai64nlocal
+%attr(0755,root,root)                    %{_prefix}/bin/tai64nunix
+%attr(0755,root,root)                    %{_prefix}/bin/tai2tai64n
+%attr(0755,root,root)                    %{_prefix}/bin/tai64n2tai
+%attr(0755,root,root)                    %{_prefix}/bin/spipe
+%attr(0755,root,root)                    %{_prefix}/bin/qfilelog
+%attr(0755,root,root)                    %{_prefix}/bin/multipipe
+%attr(0755,root,root)                    %{_prefix}/bin/teepipe
+%attr(0755,root,root)                    %{_prefix}/bin/logselect
+%attr(0755,root,root)                    %{_prefix}/bin/qlogselect
+%attr(0755,root,root)                    %{_prefix}/bin/qmailctl
+%attr(0751,root,root)                    %{_prefix}/sbin/svscan
+%attr(0755,root,root)                    %{_prefix}/sbin/supervise
+%attr(0755,root,root)                    %{_prefix}/sbin/readproctitle
+%attr(0755,root,root)                    %{_prefix}/sbin/multilog
+%attr(0755,root,root)                    %{_prefix}/sbin/fghack
+%attr(0755,root,root)                    %{_prefix}/sbin/pgrphack
+%attr(0755,root,root)                    %{_prefix}/sbin/docker-entrypoint
+%attr(0755,root,root)                    %{_prefix}/sbin/minisvc
+
+%attr(0755,root,root)                    %{libexecdir}/svwait
+%attr(0755,root,root)                    %{libexecdir}/svscanboot
+%attr(444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
+%attr(444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
+
+%attr(0644,root,root)                    %{shareddir}/boot/upstart
+%attr(0644,root,root)                    %{shareddir}/boot/systemd
+
+%docdir %{mandir}
+%docdir %{shareddir}/doc
+%attr(0644,root,root)                    %{shareddir}/doc/ChangeLog-daemontools
+%attr(0644,root,root)                    %{shareddir}/doc/README.logselect
+%attr(0644,root,root)                    %{mandir}/man1/spipe.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/qfilelog.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/multipipe.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/teepipe.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/qlogselect.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/tai2tai64n.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/tai64n2tai.1.gz
+%attr(0644,root,root)                    %{mandir}/man8/envdir.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/envuidgid.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/fghack.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/multilog.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/pgrphack.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/readproctitle.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/setlock.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/setuidgid.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/softlimit.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/supervise.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/svc.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/svok.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/svwait.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/svscan.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/svstat.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/tai64n.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/tai64nlocal.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/tai64nunix.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/logselect.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/svscanboot.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/qmailctl.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/minisvc.8.gz
+%attr(0644,root,root)                    %{mandir}/man8/docker-entrypoint.8.gz
+
+%clean
+[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+
+### SCRIPTLET ###############################################################################
+%pre
+/usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
+/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir} -s /sbin/nologin qmaill || true
+
+### SCRIPTLET ###############################################################################
+%post
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+if [ ! -d %{logdir} ] ; then
+  echo "Creating %{logdir}"
+  %{__mkdir_p} %{logdir}
+fi
+if [ $argv1 -eq 2 ] ; then # upgrade
+  (
+  echo "doing post upgrade activities"
+  if [ -f %{_sysconfdir}/init.d/svscan ] ; then
+    cmp -s %{_prefix}/bin/qmailctl %{_sysconfdir}/init.d/svscan >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{_prefix}/bin/qmailctl %{_sysconfdir}/init.d/svscan
+    fi
+  fi
+  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/systemd /lib/systemd/system/svscan.service
+      /bin/systemctl daemon-reload
+    fi
+  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+      /bin/systemctl daemon-reload
+    fi
+  elif [ -f /sbin/initctl -a -d %{_sysconfdir}/init ] ; then
+    cmp -s %{shareddir}/boot/upstart %{_sysconfdir}/init/svscan.conf >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/init/svscan.conf
+    fi
+  elif [ -d %{_sysconfdir}/event.d ] ; then
+    cmp -s %{shareddir}/boot/upstart %{_sysconfdir}/event.d/upstart >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/upstart %{_sysconfdir}/event.d
+    fi
+  elif [ -d /System/Library/LaunchDaemons ] ; then
+    cmp -s %{shareddir}/boot/svscan.plist /Library/LaunchDaemons >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/svscan.plist /Library/LaunchDaemons
+    fi
+  fi
+  if [ -f %{_sysconfdir}/inittab ] ; then # one of these days, this will disappear
+    /bin/grep "^#SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      %{__sed} -i 's{^#SV:{SV:{' %{_sysconfdir}/inittab
+    fi
+  fi
+  ) >> /var/log/%{name}-setup.log 2>&1
+  exit 0
+fi
+echo "adding svscan startup"
+%{_prefix}/sbin/minisvc --config=add-boot
+# svscanlog service
+%{_prefix}/sbin/minisvc --svscanlog --servicedir=%{servicedir} --scanint=60
+
+### SCRIPTLET ###############################################################################
+%preun
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+(
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+  (
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for preun upgrade"
+    /bin/sh %{libexecdir}/qupgrade.sh preun upgrade %{version} "$argv1"
+  fi
+  ) >> /var/log/daemontools-setup.log 2>&1
+  exit 0
+fi
+if [ -f %{_prefix}/bin/svok ] ; then
+  %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
+  if [ $? -eq 0 ] ; then
+    echo "Giving svscan exactly 5 seconds to exit nicely"
+    if test -f %{_sysconfdir}/init/svscan.conf
+    then
+      /sbin/initctl emit qmailstop > /dev/null 2>&1
+    elif test -f %{_sysconfdir}/event.d/svscan
+    then
+      /sbin/initctl emit qmailstop > /dev/null 2>&1
+    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
+    then
+      /bin/systemctl stop svscan > /dev/null 2>&1
+    elif test -x %{_prefix}/sbin/initsvc
+    then
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
+      else
+        %{_prefix}/sbin/initsvc -status || true
+      fi
+      %{_prefix}/sbin/initsvc -off || true
+    else
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_sysconfdir}/init.d/svscan stop
+      fi
+      /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+      if [ $? -eq 0 ] ; then
+        %{__sed} -i 's{^SV:{#SV:{' %{_sysconfdir}/inittab
+        if [ $? -eq 0 ] ; then
+          /sbin/init q
+        fi
+      fi
+    fi
+    sleep 5
+  fi
+fi
+
+if [ -f %{libexecdir}/qupgrade.sh ] ; then
+  echo "Running Custom Un-Installation Script for preun pre-uninstall"
+  /bin/sh %{libexecdir}/qupgrade.sh preun uninstall %{version} "$argv1"
+fi
+
+# Remove svscan being started on system boot
+echo "removing svscan startup"
+%{_prefix}/sbin/minisvc --config=rm-boot
+) >> /var/log/daemontools-setup.log 2>&1
+
+### SCRIPTLET ###############################################################################
+%postun
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+  (
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for postun upgrade"
+    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
+  fi
+  ) >> /var/log/daemontools-setup.log
+  exit 0
+fi
+(
+# remove users / groups
+nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+if [ $nscd_up -ge 1 ] ; then
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd stop
+  fi
+fi
+echo "Removing user qmaill"
+/usr/bin/getent passwd qmaill > /dev/null && /usr/sbin/userdel qmaill >/dev/null || true
+
+if [ $nscd_up -ge 1 ] ; then
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd start
+  fi
+fi
+echo "removing logs"
+if [ -h %{logdir} ] ; then
+  log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
+else
+  log_dir=%{logdir}
+fi
+[ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
+) >> /var/log/%{name}-setup.log
+
+# fix changelog for openSUSE buildservice
+%changelog

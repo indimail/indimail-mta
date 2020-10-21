@@ -275,14 +275,14 @@ start()
 			fi
   			grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
-				grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$ 2>&1
+				grep -v "svscan" /etc/inittab > /etc/inittab.qmailctl.$$ 2>&1
 				if [ " $SYSTEM" = " Debian" ] ; then
-					echo "SV:2345:respawn:@prefix@/sbin/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.svctool.$$
+					echo "SV:2345:respawn:@prefix@/sbin/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
 				else
-					echo "SV:345:respawn:@prefix@/sbin/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.svctool.$$
+					echo "SV:345:respawn:@prefix@/sbin/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
 				fi
 				if [ $? -eq 0 ] ; then
-					/bin/mv /etc/inittab.svctool.$$ /etc/inittab
+					/bin/mv /etc/inittab.qmailctl.$$ /etc/inittab
 				fi
 				/sbin/init q
 			fi

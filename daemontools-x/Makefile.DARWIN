@@ -1,0 +1,5 @@
+it += svscan.plist
+ifeq ($(USE_SQL),1)
+it += qmail-sql sql-database
+man += qmail-sql.8 sql-database.8
+endif

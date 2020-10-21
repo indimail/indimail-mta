@@ -1,0 +1,903 @@
+#
+# $Id: $
+#
+
+#
+# User Configuration
+#
+QmailBinPrefix=@prefix@
+sysconfdir=@sysconfdir@
+shareddir=@shareddir@
+LOGDIR=@logdir@
+host=@HOST@
+RCSID="# \$Id: $"
+
+#
+# End of User Configuration
+#
+if [ -f /usr/bin/less ] ; then
+	MORE=/usr/bin/less
+else
+	MORE=/usr/bin/more
+fi
+usage()
+{
+echo "Press ENTER for options, Cntrl C to quit" 1>&2
+read key
+$MORE <<EOF
+Usage: svctool [OPTION]
+
+Known values for OPTION are:
+
+--svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
+
+  service_path - Path where supervise scripts will be installed
+  cmmd         - Program/Script to run instead of .svscan/run
+  n            - Scan interval for svscan command
+
+--unshare
+  Use unshare to mount private /etc/resolv.conf for using local dns
+
+--rmsvc=service_name
+
+  Disable supervise scripts for service
+  service_name   - name of service with full path
+                   e.g. (@servicedir@/qmail-smtpd.25)
+                   (give multiple services enclosed in double quotes)
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
+
+--ensvc=service_name
+
+  Enable supervise scripts for service
+  service_name   - name of service with full path
+                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   (give multiple services enclosed in double quotes)
+                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+
+--refreshsvc=service_name
+  [--run-file-only]
+
+  Enable supervise scripts for service
+  service_name   - name of service with full path
+                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   (give multiple services enclosed in double quotes)
+                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   service_name can be "all" to act on all services
+  run-file-only  - Recreate run files but not variables
+  NOTE: if the file .norefreshsvc is present in the variable or the config
+  directory, refresh is skipped
+
+--norefreshsvc="0|1 service_name"
+
+  Disable/Enable auto refresh of supervise scripts for service
+  0              - Disable autorefresh (create .norefreshsvc in variables directory)
+  1              - Enable  autorefresh (delete .norefreshsvc in variables directory)
+  service_name   - name of service with full path
+                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   service_name can be "all" to act on all services
+
+--config=add-boot|rm-boot
+
+  add-boot       - Add startup scripts for IndiMail to get started during boot
+  rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
+
+--down
+  Create any of the above supervisor services in down state
+
+--help
+
+  display this help and exit
+
+--version
+
+  output version information
+EOF
+exit $1
+}
+
+create_svscan()
+{
+if [ $# -lt 1 ] ; then
+	echo "USAGE: create_svscan supervise_dir [initcmd]" 1>&2
+	return 1
+fi
+SERVICEDIR=$1
+if [ $# -eq 2 ] ; then
+init_cmd=$2
+else
+init_cmd=""
+fi
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/.svscan/log ] ; then
+	return 0
+fi
+# Setup variables INITCMD, SCANINTERVAL, SCANLOG, UNSHARE
+conf_dir="$DESTDIR"$SERVICEDIR/.svscan/variables
+if [ $run_file_only -eq 1 ] ; then
+	if [ -d $conf_dir ] ; then
+		/bin/mv $conf_dir "$conf_dir".bak
+	fi
+fi
+/bin/mkdir -p $conf_dir
+/bin/chmod 500 $conf_dir
+echo "$prog_args" > $conf_dir/.options
+if [ -z $init_cmd ] ; then
+echo           > $conf_dir/INITCMD
+else
+echo $init_cmd > $conf_dir/INITCMD
+fi
+echo "/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin" > $conf_dir/PATH
+if [ " $scan_interval" = " " ] ; then
+echo           "300"  > $conf_dir/SCANINTERVAL
+else
+echo "$scan_interval" > $conf_dir/SCANINTERVAL
+fi
+echo > $conf_dir/SCANLOG
+if [ -x /usr/bin/unshare -a $use_unshare -eq 1 ] ; then
+echo > $conf_dir/UNSHARE
+else
+     > $conf_dir/UNSHARE
+fi
+
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
+/bin/mkdir -p "$DESTDIR"$sysconfdir
+(
+echo "# $prog_args"
+echo "search `uname -n`"
+echo "nameserver 127.0.0.1"
+) > "$DESTDIR"$sysconfdir/resolv.conf
+# svscan run script
+(
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
+echo "echo svscan \$PPID initialization PID \$\$"
+echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
+echo "/usr/bin/mount -l"
+) > "$DESTDIR"$SERVICEDIR/.svscan/run
+if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run ] ; then
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
+else
+/bin/chmod -x "$DESTDIR"$SERVICEDIR/.svscan/run
+fi
+
+(
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
+echo "exec $QmailBinPrefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
+) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
+
+if [ ! -d $LOGDIR ] ; then
+	/bin/mkdir -p $LOGDIR
+	$chown qmaill:nofiles $LOGDIR
+fi
+# svscan log script
+(
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/svscan"
+) > "$DESTDIR"$SERVICEDIR/.svscan/log/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/log/run
+
+if [ $run_file_only -eq 1 ] ; then
+	if [ -d "$conf_dir".bak ] ; then
+		/bin/rm -rf $conf_dir
+		/bin/mv "$conf_dir".bak $conf_dir
+	fi
+fi
+
+# resolvconf script using inotify
+if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run -a -x "$DESTDIR"$QmailBinPrefix/bin/inotify ] ; then
+conf_dir="$DESTDIR"$SERVICEDIR/resolvconf/variables
+if [ $run_file_only -eq 1 ] ; then
+	if [ -d $conf_dir ] ; then
+		/bin/mv $conf_dir "$conf_dir".bak
+	fi
+fi
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/resolvconf/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/resolvconf/down
+fi
+/bin/mkdir -p $conf_dir
+/bin/chmod 500 $conf_dir
+echo "$prog_args" > $conf_dir/.options
+# resolvconf run script
+(
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
+echo "trap clean_up 1 2 15"
+echo ""
+echo "function clean_up"
+echo "{"
+echo "	echo \"shutting down\""
+echo "	pkill -P \`jobs -p\` inotify"
+echo "	exit"
+echo "}"
+echo ""
+echo "if [ -f /etc/resolv.conf -a ! -L /etc/resolv.conf ] ; then"
+echo "	file=/etc/resolv.conf"
+echo "else"
+echo "	file=\`file /etc/resolv.conf |awk '{print \$5}'\`"
+echo "fi"
+echo "dir=\`dirname \$file\`"
+echo "echo \"starting with resolv_conf_dir=\$dir\""
+echo "/bin/cat /etc/resolv.conf"
+echo "exec 2>&1"
+echo "("
+echo "/usr/bin/inotify -n \$dir | while read line"
+echo "do"
+echo "	set \$line"
+echo "	if [ \" \$1\" != \" file\" ] ; then"
+echo "		continue"
+echo "	fi"
+echo "	file=\$2"
+echo "	event=\$3"
+echo "	if [ \" \$file\" != \" resolv.conf\" ] ; then"
+echo "		continue"
+echo "	fi"
+echo "	if [ \" \$event\" != \" closed\" ] ; then"
+echo "		continue"
+echo "	fi"
+echo "	list=\`grep nameserver /etc/resolv.conf\` > /dev/null"
+echo "	if [ \$? -eq 0 ] ; then"
+echo "		echo \$list"
+echo "		echo \"/usr/bin/umount /etc/resolv.conf\""
+echo "		/usr/bin/umount /etc/resolv.conf"
+echo "		echo \"/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf\""
+echo "		/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf"
+echo "	fi"
+echo "done"
+echo ") &"
+echo "wait"
+) > "$DESTDIR"$SERVICEDIR/resolvconf/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/run
+
+# resolvconf log script
+(
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/resolvconf"
+) > "$DESTDIR"$SERVICEDIR/resolvconf/log/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/log/run
+fi
+
+if [ $run_file_only -eq 1 ] ; then
+	if [ -d "$conf_dir".bak ] ; then
+		/bin/rm -rf $conf_dir
+		/bin/mv "$conf_dir".bak $conf_dir
+	fi
+fi
+}
+
+rmsvc()
+{
+if [ $# -lt 1 ] ; then
+	echo "rmsvc service_with_full_path" 1>&2
+	return 1
+fi
+for i in $*
+do
+	if [ ! -d $i ] ; then
+		echo "$i: No such file or directory" 1>&2
+		continue
+	fi
+	dir=`dirname $i`
+	svcname=`basename $i`
+	if [ ! -p $i/supervise/control ] ; then
+		echo "$i/supervise not a supervise directory" 1>&2
+		continue
+	fi
+	/bin/mv $i $dir/".""$svcname"
+	#
+	# prepend a . to the directory so that svscan will skip this directory
+	#
+	echo "Removed Service $svcname    : `"$DESTDIR"$QmailBinPrefix/bin/svc -d $dir/"."$svcname 2>&1`"
+	if [ -d $dir/"."$svcname/log ] ; then
+		echo "Removed Service $svcname/log: `"$DESTDIR"$QmailBinPrefix/bin/svc -d $dir/"."$svcname/log 2>&1`"
+	fi
+done
+}
+
+ensvc()
+{
+if [ $# -lt 1 ] ; then
+	echo "ensvc service_with_full_path" 1>&2
+	return 1
+fi
+for i in $*
+do
+	if [ ! -d $i ] ; then
+		echo "$i: No such file or directory" 1>&2
+		continue
+	fi
+	dir=`dirname $i`
+	svcname=`basename $i`
+	first_char=`echo $svcname | cut -c1`
+	if [ " $first_char" = " ." ] ; then
+		svcname=`echo $svcname | cut -c2-`
+		/bin/mv $i $dir/$svcname
+		echo "Enabled Service $svcname" 
+	else
+		echo "Service $i is not disabled (should have a '.' as the first char in $svcname)" 1>&2
+	fi
+done
+sleep 5
+for i in $*
+do
+	dir=`dirname $i`
+	svcname=`basename $i`
+	first_char=`echo $svcname | cut -c1`
+	if [ " $first_char" = " ." ] ; then
+		svcname=`echo $svcname | cut -c2-`
+		"$DESTDIR"$QmailBinPrefix/bin/svstat $dir/$svcname
+		if [ -d $dir/$svcname/log ] ; then
+			"$DESTDIR"$QmailBinPrefix/bin/svstat $dir/$svcname/log
+		fi
+	fi
+done
+}
+
+refreshsvc()
+{
+if [ $# -lt 1 ] ; then
+	echo "refreshsvc service_with_full_path" 1>&2
+	return 1
+fi
+if [ " $1" = " all" ] ; then
+	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
+	do
+		# remove last 19 char to get the directory+service_name
+		i=`echo $j|sed 's/.\{19\}$//'`
+		svcname=`basename $i`
+		if [ ! -s $i/variables/.options -a ! -s $i/.options ] ; then
+			echo "$i/variables/.options or $i/.options missing" 1>&2
+			continue
+		fi
+		if [ -f $i/variables/.norefreshsvc ] ; then
+			echo "Skip Refreshing service $svcname"
+		else
+			echo "Refreshing service $svcname command `/bin/cat $i/variables/.options`"
+			sh $i/variables/.options
+		fi
+	done
+	if [ -f "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc ] ; then
+		echo "Skip Refreshing config defaultqueue"
+	else
+		echo "Refreshing config defaultqueue command `/bin/cat "$DESTDIR"$sysconfdir/control/defaultqueue/.options`"
+		sh "$DESTDIR"$sysconfdir/control/defaultqueue/.options
+	fi
+else
+	for i in $*
+	do
+		if [ ! -d "$DESTDIR"$i ] ; then
+			echo "$i: No such file or directory" 1>&2
+			continue
+		fi
+		svcname=`basename $i`
+		if [ ! -s "$DESTDIR"$i/variables/.options -a ! -s "$DESTDIR"$i/.options ] ; then
+			echo "$i/variables/.options or $i/.options missing" 1>&2
+			continue
+		fi
+		if [ -f "$DESTDIR"$i/variables/.norefreshsvc -o -f "$DESTDIR"$i/.norefreshsvc ] ; then
+			echo "Skip Refreshing service/config $svcname"
+			continue
+		fi
+		if [ -f "$DESTDIR"$i/variables/.options ] ; then
+			echo "Refreshing service $svcname command `/bin/cat "$DESTDIR"$i/variables/.options`"
+			sh "$DESTDIR"$i/variables/.options
+		elif [ -f "$DESTDIR"$i/.options ] ; then
+			echo "Refreshing config $svcname command `/bin/cat "$DESTDIR"$i/.options`"
+			sh "$DESTDIR"$i/.options
+		fi
+	done
+fi
+}
+
+norefreshsvc()
+{
+if [ $# -lt 2 ] ; then
+	echo "norefreshsvc=0|1 service_with_full_path" 1>&2
+	return 1
+fi
+svc_opt=$1
+shift
+if [ " $1" = " all" ] ; then
+	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
+	do
+		# remove last 19 char to get the directory+service_name
+		i=`echo $j|sed 's/.\{19\}$//'`
+		if [ ! -s $i/variables/.options -a ! -s $i/.options ] ; then
+			echo "$i/variables/.options or $i/.options missing" 1>&2
+			continue
+		fi
+		if [ $svc_opt -eq 1 ] ; then
+			echo "Enabling  auto refresh for $i"
+			/bin/rm -f $i/variables/.norefreshsvc
+		else
+			echo "Disabling auto refresh for $i"
+			touch $i/variables/.norefreshsvc
+		fi
+	done
+	if [ $svc_opt -eq 1 ] ; then
+		echo "Enabling  auto refresh for $sysconfdir/control/defaultqueue"
+		/bin/rm -f "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc
+	else
+		echo "Disabling auto refresh for $sysconfdir/control/defaultqueue"
+		touch "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc
+	fi
+else
+	for i in $*
+	do
+		if [ ! -d "$DESTDIR"$i ] ; then
+			echo "$i: No such file or directory" 1>&2
+			continue
+		fi
+		if [ ! -s "$DESTDIR"$i/variables/.options -a ! -s "$DESTDIR"$i/.options ] ; then
+			echo "$i/variables/.options or $i/.options missing" 1>&2
+			continue
+		fi
+		if [ $svc_opt -eq 1 ] ; then
+			if [ -d $i/variables ] ; then
+				/bin/rm -f "$DESTDIR"$i/variables/.norefreshsvc
+			else
+				/bin/rm -f "$DESTDIR"$i/.norefreshsvc
+			fi
+		else
+			if [ -d "$DESTDIR"$i/variables ] ; then
+				touch "$DESTDIR"$i/variables/.norefreshsvc
+			else
+				touch "$DESTDIR"$i/.norefreshsvc
+			fi
+		fi
+	done
+fi
+}
+
+create_startup()
+{
+	case "$host" in
+		*-*-darwin*)
+		if [ -n "$DESTDIR" ] ; then
+			mkdir -p "$DESTDIR"/etc
+		fi
+		if [ ! -f /etc/synthetic.conf ] ; then
+			echo "Creating /service in /etc/synthetic.conf"
+			printf "service\t/private/var/run/svscan\n" > /etc/synthetic.conf
+		else
+			grep "^service" /etc/synthetic.conf >/dev/null
+			if [ $? -ne 0 ] ; then
+				echo "Creating /service in /etc/synthetic.conf"
+				if [ -z "$DESTDIR" ] ; then
+					printf "service\t/private/var/run/svscan\n" >> /etc/synthetic.conf
+				else
+				(
+					printf "service\t/private/var/run/svscan\n"
+					cat /etc/synthetic.conf
+				) > "$DESTDIR"/etc/synthetic.conf
+				fi
+			else
+				echo "/service exists in /etc/synthetic.conf"
+			fi
+		fi
+		;;
+		*)
+		if [ ! -d /service -a ! -L /service ] ; then
+			if [ -d /run ] ; then
+				ln -s /run/svscan /service
+			elif [ -d /var/run ] ; then
+				ln -s /var/run/svscan /service
+			elif [ "$servicedir" != "/service" ] ; then
+				ln -s $servicedir /service
+			fi
+		fi
+		;;
+	esac
+	if [ -x "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
+		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -status
+	else
+		if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    		cmp -s "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
+    		if [ $? -ne 0 ] ; then
+				echo "svscan startup enabled in systemd /lib/systemd/system/svscan.service"
+				/bin/cp "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service
+			fi
+		elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    		cmp -s "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
+    		if [ $? -ne 0 ] ; then
+				echo "svscan startup enabled in systemd /usr/lib/systemd/system/svscan.service"
+				/bin/cp "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service
+			fi
+		elif [ -f /sbin/initctl -a -d /etc/init ] ; then
+    		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
+    		if [ $? -ne 0 ] ; then
+				echo "svscan startup enabled in upstart /etc/init/svscan.conf"
+				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf
+			fi
+		elif [ -d /etc/event.d ] ; then
+    		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/event.d/upstart >/dev/null 2>&1
+    		if [ $? -ne 0 ] ; then
+				echo "svscan startup enabled in upstart /etc/event.d/upstart"
+				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/event.d
+			fi
+		elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
+			cmp -s "$DESTDIR"$shareddir/boot/svscan $QmailBinPrefix/etc/rc.d/svscan >/dev/null 2>&1
+			if [ $? -ne 0 ] ; then
+				echo "svscan startup enabled in rc $QmailBinPrefix/etc/rc.d/svscan"
+				/bin/cp "$DESTDIR"$shareddir/boot/svscan $QmailBinPrefix/etc/rc.d/svscan
+				/bin/chmod 755 $QmailBinPrefix/etc/rc.d/svscan
+				service svscan enable
+			fi
+		elif [ -d /Library/LaunchDaemons ] ; then
+			cmp -s "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist >/dev/null 2>&1
+			if [ $? -ne 0 ] ; then
+				echo "svscan startup enabled in upstart /Library/LaunchDaemons/org.indimail.svscan.plist"
+				/bin/cp "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist
+			fi
+		fi
+	fi
+	if [ -d /etc/init.d ] ; then
+		cmp -s "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1
+		if [ $? -ne 0 ] ; then
+			/bin/cp "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/svscan
+		fi
+	fi
+	if [ -f /etc/init.d/svscan ] ; then
+		if [ -f /sbin/chkconfig ] ; then
+			if [ -f /etc/debian_version ] ; then
+				/sbin/chkconfig --add svscan 2>/dev/null
+			else
+				/sbin/chkconfig --add svscan
+			fi
+		elif [ -f /usr/sbin/update-rc.d ] ; then
+			/usr/sbin/update-rc.d svscan start 14 2 3 4 5 . stop 91 0 1 6 .
+		fi
+	fi
+	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools
+		return 0
+	fi
+}
+
+remove_startup()
+{
+	echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
+	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
+		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -off
+	fi
+	if [ -f /lib/systemd/system/svscan.service -a -x /bin/systemctl ] ; then
+		/bin/systemctl stop svscan
+		/bin/systemctl disable svscan.service
+		/bin/rm -f /lib/systemd/system/svscan.service
+	elif [ -f /usr/lib/systemd/system/svscan.service -a -x /bin/systemctl ] ; then
+		/bin/systemctl stop svscan
+		/bin/systemctl disable svscan.service
+		/bin/rm -f /usr/lib/systemd/system/svscan
+	elif [ -f /etc/init/svscan.conf ] ; then
+		/sbin/initctl emit qmailstop > /dev/null
+		/bin/rm -f /etc/event.d/svscan
+	elif [ -f /etc/event.d/svscan ] ; then
+		/sbin/initctl emit qmailstop > /dev/null
+		/bin/rm -f /etc/event.d/svscan
+	elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
+		service svscan stop
+		service svscan disable
+		service svscan delete
+		/bin/rm -f $QmailBinPrefix/etc/rc.d/svscan
+	fi
+	if [ -f ${shareddir}/boot/rpm.init ] ; then
+		echo "Running Custom Un-Installation Script for preun" 1>&2
+		/bin/sh ${shareddir}/boot/rpm.init preun
+	fi
+	if [ -f /etc/init.d/svscan ] ; then
+		if [ -f /sbin/chkconfig ] ; then
+			if [ -f /etc/debian_version ] ; then
+				/sbin/chkconfig --del svscan 2>/dev/null
+			else
+				/sbin/chkconfig --del svscan
+			fi
+		elif [ -f /usr/sbin/update-rc.d ] ; then
+			/usr/sbin/update-rc.d -f svscan remove
+		fi
+		/bin/rm -f /etc/init.d/svscan
+	fi
+	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools. This should be called before removing package
+		return 0
+	fi
+}
+
+################################# Main ##################################
+if test $# -eq 0; then
+    usage 1
+fi
+if [ -x /bin/chown ] ; then
+	chown=/bin/chown
+elif [ -x /usr/sbin/chown ] ; then
+	chown=/usr/sbin/chown
+elif [ -x /usr/bin/chown ] ; then
+	chown=/usr/bin/chown
+else
+	chown=/bin/chown
+fi
+
+if [ -f @sysconfdir@/.svctool.cnf ] ; then
+	$chown root:0 @sysconfdir@/.svctool.cnf
+	/bin/chmod 400 @sysconfdir@/.svctool.cnf
+	. @sysconfdir@/.svctool.cnf
+fi
+[ -z "$MYSQL_PASS" ] && MYSQL_PASS="ssh-1.5-"
+[ -z "$PRIV_PASS" ]  && PRIV_PASS="4-57343-"
+[ -z "$ADMIN_PASS" ] && ADMIN_PASS="benhur20"
+
+prog_args="$QmailBinPrefix/sbin/svctool"
+force=0
+silent=0
+down_state=0
+use_unshare=0
+nooverwrite=0
+run_file_only=0
+if [ -x /bin/touch ] ; then
+	touch=/bin/touch
+elif [ -x /usr/bin/touch ] ; then
+	touch=/usr/bin/touch
+else
+	touch=/bin/touch
+fi
+while test $# -gt 0; do
+    case "$1" in
+    -*=*)
+	optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+	optval=`echo "$1" | cut -d'=' -f1`
+	prog_args="$prog_args $optval=\"$optarg\""
+	;;
+    *)
+	optarg=
+	prog_args="$prog_args $1"
+	;;
+    esac
+
+    case "$1" in
+    --verbose)
+	verbose="-v"
+	;;
+    --servicedir=*)
+	servicedir=$optarg
+	;;
+	--memory=*)
+	memory=$optarg
+	;;
+	--dmemory=*)
+	dmemory=$optarg
+	;;
+	--servicetag=*)
+	servicetag=$optarg
+	;;
+    --logdir=*)
+	LOGDIR=$optarg
+	export LOGDIR
+	;;
+	--force)
+	force=1
+	;;
+	--sysconfdir=*)
+	mysysconfdir=$optarg
+	;;
+	--nolog)
+	nolog=1
+	;;
+
+	--silent)
+	silent=1
+	;;
+
+	--destdir=*)
+	DESTDIR=$optarg
+	;;
+
+	--down)
+	down_state=1
+	;;
+	--unshare)
+	use_unshare=1
+	;;
+
+	--version)
+	echo "$RCSID"
+	exit 0
+	;;
+
+	--help)
+	usage 0
+	;;
+
+	--config=*)
+	if [ " $option" = " " ] ; then
+		option=1
+		config_name=$optarg
+	else
+		conf_file=$optarg
+	fi
+	;;
+
+	--rmsvc=*)
+	option=2
+	service=$optarg
+	;;
+
+	--ensvc=*)
+	option=3
+	service=$optarg
+	;;
+
+	--refreshsvc=*)
+	option=4
+	service=$optarg
+	;;
+
+	--norefreshsvc=*)
+	option=5
+	service=$optarg
+	;;
+
+	--nooverwrite)
+	nooverwrite=1
+	;;
+
+	--svscanlog)
+	option=19
+	;;
+
+	--initcmd=*)
+	svscan_init_cmd=$optarg
+	;;
+
+	--run-file-only)
+	if [ $option -eq 34 ] ; then
+		run_file_only=1
+	fi
+	;;
+
+	*)
+	echo "invalid option [$1]" 1>&2
+	read key
+	usage 1
+	;;
+	esac
+	shift
+done
+
+#
+# Main
+#
+if [ " $CONTROLDIR" = " " ] ; then
+	cntrldir=@sysconfdir@/control
+else
+	slash=`echo $CONTROLDIR | cut -c1`
+	if [ " $slash" = " /" ] ; then
+		cntrldir=$CONTROLDIR
+	else
+		cntrldir=$sysconfdir/$CONTROLDIR
+	fi
+fi
+CONTROLDIR=$cntrldir
+export CONTROLDIR
+case $option in
+	1)
+	# config creation for MySQL, MySQL Database creation, imap, 
+	# 1  MySQL Config creation
+	# 2  MySQL Database creation
+	# 4  IMAP config creation
+	# 5  POP3 config creation
+	# 6  qmail config creation
+	# 7  create indimail users from system (/etc/passwd,etc)
+	# 8  remove indimail users from system (/etc/passwd, etc)
+	# 9  create clamd, freschclam config, foxhole_all.cdb
+	# 10 create bogofilter config and wordlist.db
+	# 11 create CERTS
+	# 12 add startup for indimail at boot
+	# 13 remove startup for indimail from boot
+	# 14 enable selinux module
+
+	# Check that we're a privileged user
+	[ `id -u` = 0 ] || exit 4
+	case $config_name in
+		add-boot)
+		[ `id -u` = 0 ] || exit 4
+		case "$host" in
+			*-*-darwin*)
+			if [ -z "$servicedir" ] ; then
+				echo "Supervise Directory not specified" 1>&2
+				usage 1
+			fi
+			;;
+		esac
+		create_startup
+		;;
+
+		rm-boot)
+		[ `id -u` = 0 ] || exit 4
+		remove_startup
+		;;
+
+
+		*)
+		echo "Invalid configuration option $optarg" 1>&2
+		usage 1
+		;;
+	esac
+	;;
+
+	2) # remove service
+	# Check that we're a privileged user
+	[ `id -u` = 0 ] || exit 4
+	rmsvc "$service"
+	;;
+
+	3) # enable servie
+	# Check that we're a privileged user
+	[ `id -u` = 0 ] || exit 4
+	ensvc "$service"
+	;;
+
+	4)
+	[ `id -u` = 0 ] || exit 4
+	if [ " $servicedir" = " " ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	refreshsvc $service
+	;;
+
+	5)
+	[ `id -u` = 0 ] || exit 4
+	if [ " $servicedir" = " " ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	norefreshsvc $service
+	;;
+
+	6)
+	# Check that we're a privileged user
+	[ `id -u` = 0 ] || exit 4
+	if [ " $servicedir" = " " ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	echo "Creating svscan log Service Service $servicedir"
+	create_svscan $servicedir $svscan_init_cmd
+	;;
+
+	*)
+	if [ " $option" = " " ] ; then
+		echo "No Options Provided" 1>&2
+		read key
+	else
+		echo "Invalid Option [$option]" 1>&2
+	fi
+	;;
+esac
+
+if [ ! " $prog_args" = " " ] ; then
+	if [ " $nolog" = " " ] ; then
+		if [ ! -d "$DESTDIR"$LOGDIR ] ; then
+			/bin/mkdir -p "$DESTDIR"$LOGDIR
+		fi
+		echo "`date` $prog_args" >> "$DESTDIR"$LOGDIR/services.log
+	fi
+fi
+exit 0
