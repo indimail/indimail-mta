@@ -232,8 +232,6 @@ fi
 /bin/chown -R qmaill:nofiles ${logdir}
 
 # Misc/Configuration
-${prefix}/sbin/svctool --svscanlog --servicedir=${servicedir} --scanint=60
-
 echo "Creating default qmail configuraton and catch-all alias (${qmaildir}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${qmaildir}/alias/Maildir/
 
@@ -495,11 +493,8 @@ if [ -f ${mandir}/man7/authlib.7.gz ] ; then
 fi
 
 #
-# Install IndiMail to be started on system boot
-# The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
-#
-echo "adding indimail-mta startup"
 if [ /usr/lib/sm.bin/sendmail ] ; then
+	echo "removing sendmail as alternative"
 	if [ -x /usr/sbin/update-alternatives ] ; then
 	/usr/sbin/update-alternatives --remove-all sendmail-mta || true
 	/usr/sbin/update-alternatives --remove-all sendmail-msp || true
@@ -509,7 +504,7 @@ if [ /usr/lib/sm.bin/sendmail ] ; then
 	fi
 fi
 ${prefix}/sbin/svctool --disable-service sendmail exim4 postfix
-${prefix}/sbin/svctool --config=add-boot --servicedir=$libexecdir/service
+echo "addming indimail-mta as an alternative"
 ${prefix}/sbin/svctool --config=add-alt
 if [ -x /bin/systemctl ] ; then
 	/bin/systemctl enable svscan.service
@@ -542,7 +537,7 @@ else
 fi
 default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 echo "   You can also use the 'service' command to start indimail-mta"
-echo "   sudo service indimail start"
+echo "   sudo service svscan start"
 count=`expr $count + 1`
 echo "$count. Change your default domain in ${qsysconfdir}/control/defaultdomain"
 count=`expr $count + 1`
