@@ -4,7 +4,7 @@
  * removed unused argument to perm()
  *
  * Revision 1.6  2020-09-13 17:33:18+05:30  Cprogrammer
- * skip chmod of mode is -1
+ * skip chmod if mode is -1
  *
  * Revision 1.5  2020-08-03 17:23:52+05:30  Cprogrammer
  * use qmail library
