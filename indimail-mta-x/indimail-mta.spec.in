@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.271 2020-10-21 09:02:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.272 2020-10-21 10:12:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -201,7 +201,10 @@ Summary: A collection of tools for managing UNIX services
 Conflicts: indimail-mta
 Provides: user(qmaill)      > 999
 Provides: group(nofiles)    > 999
-Provides: group(qmail)      > 999
+%if %build_on_obs == 0
+Requires(pre): shadow-utils
+Requires(postun): shadow-utils
+%endif
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Base
 %else
@@ -2040,7 +2043,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %pre -n daemontools
 /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
-/usr/bin/getent group  qmail    > /dev/null || /usr/sbin/groupadd qmail    || true
 /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir} -s /sbin/nologin qmaill || true
 
 ### SCRIPTLET ###############################################################################
