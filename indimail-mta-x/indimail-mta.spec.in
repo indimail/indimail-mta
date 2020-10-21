@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.269 2020-10-18 20:02:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.273 2020-10-21 20:33:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1486,12 +1486,12 @@ if [ $nscd_up -ge 1 ] ; then
     %{_sysconfdir}/init.d/nscd stop
   fi
 fi
-for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
+for i in alias qmaild qmailp qmailq qmailr qmails qscand indimail
 do
   echo "Removing user $i"
   /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 done
-for i in nofiles qmail qscand indimail
+for i in qmail qscand indimail
 do
   echo "Removing group $i"
   /usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
