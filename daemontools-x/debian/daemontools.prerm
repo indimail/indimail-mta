@@ -92,5 +92,5 @@ fi
 echo "removing svscan startup"
 SERVICE_LIST="."
 export SERVICE_LIST
-$prefix/sbin/svctool --config=rm-boot >/dev/null || true
+$prefix/sbin/minisvc --config=rm-boot >/dev/null || true
 exit 0

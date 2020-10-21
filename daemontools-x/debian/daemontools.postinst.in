@@ -21,10 +21,7 @@ prefix=@prefix@
 qmaildir=@qmaildir@
 mandir=${prefix}/share/man
 shareddir=${prefix}/share/indimail
-qcount=5
-qbase=${qmaildir}/queue
-mbase=/home/mail
-logdir=/var/log/svc
+logdir=@logdir@
 servicedir=@servicedir@
 qsysconfdir=@qsysconfdir@
 cp=/bin/cp
@@ -137,6 +134,10 @@ if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
     echo "Running Custom Upgrade Script"
     /bin/sh ${shareddir}/boot/rpm.init upgrade
   fi
+  if [ -f /etc/init.d/svscan ] ; then
+    cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
+      ${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
+  fi
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
     ${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service
@@ -165,11 +166,11 @@ if [ ! -d ${logdir} ] ; then
 	/bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
-${prefix}/sbin/svctool --config=add-boot
+${prefix}/sbin/minisvc --config=add-boot
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
 fi
 # svscanlog service
-${prefix}/sbin/svctool --svscanlog --servicedir=${servicedir} --scanint=60 > /dev/null || true
+${prefix}/sbin/minisvc --svscanlog --servicedir=${servicedir} --scanint=60 > /dev/null || true
 
 exit 0

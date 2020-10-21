@@ -8,7 +8,6 @@ mandir=@mandir@
 libexecdir=@libexecdir@
 shareddir=@shareddir@
 logdir=@logdir@
-libdir=/usr/lib
 version=@version@
 release=@release@
 
@@ -25,7 +24,6 @@ edit = sed \
 	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
-	-e 's,@libdir\@,$(libdir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
 	-e 's,@release\@,$(release),g' \

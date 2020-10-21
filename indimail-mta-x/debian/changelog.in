@@ -53,11 +53,7 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: check for mysqld in mysqlprefix/bin for Darwin
   * svctool: updated macOSuseradd, macOSgroupadd functiona for Darwin
   * svctool: fixed date command for getting time in seconds for Darwin/FreeBSD
-  * svctool: create /service link in /etc/synthetic.conf for Darwin
   * svctool: create /var/indimail/inquery directory
-  * svctool: removed hardcoded directory for svwait in inlookup, pwdlookup service
-  * hier.c, indimail-mta.spec, Makefile: renamed launchd unit file indimail.plist to svscan.plist
-  * svwait: replace builtin echo with /bin/echo -n (for Darwin)
   * svctool: fixed users getting added multiple times to com.apple.loginwindow HiddenUsersList
   * installer new features, 1. uninstall option (-u, -i), 2. create devices, 3. create fifo
   * Makefile: Added uninstall target
@@ -65,10 +61,8 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: remove indimail, indimail-mta users from HiddenUsersList for Darwin
   * Makefile: run instcheck to set permissions on make install.
   * indimail-mta: Makefile: replaced g++ with c++ for portability
-  * indimail-mta, ucspi-tcp: fixed uninstall target
   * installer.c: fixed setting of symbolic links
   * qmail-local.c: fixed bug with loopcounter in qmail-local.c - initialized maxdeliveredto
-  * ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
   * qlocal_upgrade.sh: migrate /service to libexecdir
   * smtpd.c: auth functions made static
   * qmail-remote.c: digest_md5() renamed to qr_digest_md5() to avoid clash

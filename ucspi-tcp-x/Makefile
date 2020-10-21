@@ -6,10 +6,11 @@ SSLINCS := -I/usr/kerberos/include
 SSLLIBS := -lssl -lcrypto
 include Makevars.$(SYSTEM)
 edit = sed \
+	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@prefix\@,$(prefix),g' \
-	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@qsysconfdir\@,$(sysconfdir),g' \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g'
@@ -703,5 +704,5 @@ uninstall: installer DIRS BIN SHARED PLUGINS MAN
 	sed -n '1!G;h;$$p' DIRS    | ./installer -u  $(DESTDIR)
 
 debian/Makefile: debian/Makefile.in conf-release conf-version \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
+conf-prefix conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
