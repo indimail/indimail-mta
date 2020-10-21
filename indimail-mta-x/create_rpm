@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.14  2020-10-21 20:33:00+05:30  Cprogrammer
+# removed ucspi-tcp
+#
 # Revision 1.13  2020-09-24 16:11:42+05:30  Cprogrammer
 # Makefile split into three Makefiles (variables, main, system specific)
 #
@@ -40,7 +43,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.13 2020-09-24 16:11:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.14 2020-10-21 20:33:00+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 
