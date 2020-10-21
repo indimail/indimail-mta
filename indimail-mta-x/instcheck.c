@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.29  2020-10-21 20:33:45+05:30  Cprogrammer
+ * removed unused argument to prerm
+ *
  * Revision 1.27  2018-06-25 13:45:26+05:30  Cprogrammer
  * ignore permission denied errors when running as non-root
  *
@@ -315,7 +318,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.27 2018-06-25 13:45:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.29 2020-10-21 20:33:45+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
