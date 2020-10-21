@@ -464,6 +464,8 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 echo "Removing user qmaill"
 /usr/bin/getent passwd qmaill > /dev/null && /usr/sbin/userdel qmaill >/dev/null || true
+echo "Removing group nofiles"
+/usr/bin/getent group nofiles > /dev/null && /usr/sbin/groupdel nofiles  >/dev/null || true
 
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
