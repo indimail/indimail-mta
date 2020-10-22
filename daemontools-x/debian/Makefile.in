@@ -12,7 +12,7 @@ version=@version@
 release=@release@
 
 all: rules daemontools.dsc daemontools-Debian_8.0.dsc \
-daemontools-xUbuntu_16.04.dsc debian.tar.gz dummy.tar.gz
+daemontools-xUbuntu_16.04.dsc debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -35,14 +35,12 @@ distclean: clean
 clean:
 	/bin/rm -f rules *.dsc changelog \
 	preinst prerm postinst postrm \
-	debian.tar.gz dummy.tar.gz
+	debian.tar.gz
 
 noinst_SCRIPTS = daemontools.install preinst \
 				 postinst prerm postrm rules 
-MOSTLYCLEANFILES= rules changelog debian.tar.gz dummy.tar.gz
+MOSTLYCLEANFILES= rules changelog debian.tar.gz
 
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
 obs_deb_prep: Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 rules: rules.in Makefile ../conf-version ../conf-release
