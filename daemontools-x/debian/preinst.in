@@ -5,7 +5,7 @@
 
 set -e
 rm=/bin/rm
-qmaildir=/var/indimail
+qmaildir=@qmaildir@
 
 # summary of how this script can be called:
 #        * <new-preinst> `install'

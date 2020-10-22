@@ -16,11 +16,11 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-prefix=/usr
-qsysconfdir=/etc/indimail
+prefix=@prefix@
+qsysconfdir=@qsysconfdir@
+servicedir=@servicedir@
 rm=/bin/rm
 mv=/bin/mv
-nocourierimap=0
 
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
@@ -80,7 +80,7 @@ fi
 
 if [ -s ${qsysconfdir}/daemontools-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 	echo "reverting permissions"
-	/bin/cat ${qsysconfdir}/stat.override | while read line
+	/bin/cat ${qsysconfdir}/daemontools-stat.override | while read line
 	do
 		if [ -f $line ] ; then
 			echo "reverting permission for $line"
@@ -98,7 +98,7 @@ if [ -d ${servicedir}/.svscan/log -o -L ${servicedir}/.svscan/log ] ; then
   svc -dx ${servicedir}/.svscan/log || true
 fi
 if [ -d ${servicedir}/.svscan -o -L ${servicedir}/.svscan ] ; then
-  ${rm} -rf %{servicedir}/.svscan
+  ${rm} -rf ${servicedir}/.svscan
 fi
 # Remove svscan being started on system boot
 echo "removing svscan startup"

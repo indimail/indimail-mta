@@ -34,12 +34,11 @@ distclean: clean
 
 clean:
 	/bin/rm -f rules *.dsc changelog \
-	daemontools.postinst daemontools.postrm \
+	preinst prerm postinst postrm \
 	debian.tar.gz dummy.tar.gz
 
-noinst_SCRIPTS = daemontools.install daemontools.preinst \
-				 daemontools.postinst daemontools.prerm daemontools.postrm \
-				 rules 
+noinst_SCRIPTS = daemontools.install preinst \
+				 postinst prerm postrm rules 
 MOSTLYCLEANFILES= rules changelog debian.tar.gz dummy.tar.gz
 
 dummy.tar.gz: README
@@ -58,14 +57,16 @@ daemontools-Debian_8.0.dsc: daemontools-Debian_8.0.dsc.in Makefile ../conf-versi
 	$(edit) $@.in > $@
 daemontools-xUbuntu_16.04.dsc: daemontools-xUbuntu_16.04.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-daemontools.postrm: daemontools.postrm.in
+prerm: prerm.in
 	$(edit) $@.in > $@
-daemontools.postinst: daemontools.postinst.in
+postrm: postrm.in
+	$(edit) $@.in > $@
+preinst: preinst.in
+	$(edit) $@.in > $@
+postinst: postinst.in
 	$(edit) $@.in > $@
 
 debian.tar.gz: copyright rules changelog compat control \
-daemontools.install daemontools.preinst daemontools.postinst daemontools.prerm \
-daemontools.postrm
+daemontools.install preinst postinst prerm postrm
 	tar cf - copyright rules changelog compat daemontools.install \
-		daemontools.preinst daemontools.postinst daemontools.prerm \
-		daemontools.postrm control | gzip > $@
+		preinst postinst prerm postrm control | gzip > $@

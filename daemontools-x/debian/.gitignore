@@ -8,6 +8,8 @@ rules
 conf-release
 Makefile
 *.dsc
-daemontools.postinst
-daemontools.postrm
+preinst
+postinst
+prerm
+postrm
 changelog
