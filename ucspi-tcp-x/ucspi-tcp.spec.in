@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.4 2020-10-22 16:48:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.5 2020-10-22 20:25:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -20,7 +20,7 @@
 %global _prefix            @prefix@
 %global shareddir          @shareddir@
 %global mandir             @mandir@
-%global qsysconfdir        @sysconfdir@
+%global qsysconfdir        @qsysconfdir@
 %global plugindir          %{_prefix}/lib/indimail/plugins
 %global tcpserver_plugin   1
 %global see_base           For a description of ucspi-tcp visit https://github.com/mbhangui/indimail-mta
