@@ -12,16 +12,13 @@ include /usr/share/dpkg/buildflags.mk
 prefix=@prefix@
 qmaildir=@qmaildir@
 sysconfdir=@sysconfdir@
+shareddir=@shareddir@
 qsysconfdir=@qsysconfdir@
-
-mandir=$(prefix)/share/man
-libexecdir=$(prefix)/libexec/indimail
-
+servicedir=@servicedir@
+libexecdir=@libexecdir@
+mandir=@mandir@
 version=@version@
 
-arch=$(shell uname -m)
-# check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
-cp=/bin/cp
 rm=/bin/rm
 
 DESTDIR=$(CURDIR)/debian/daemontools.tmp
@@ -30,13 +27,13 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	#
-	# run configure script
-	#
-	#
-	# run make
-	#
+	# run configure
+	echo $(prefix)      > conf-prefix
 	echo $(qmaildir)    > conf-qmail
 	echo $(qsysconfdir) > conf-sysconfdir
+	echo $(shareddir)   > conf-shared
+	echo $(libexecdir)  > conf-libexec
+	echo $(servicedir)  > conf-servicedir
 	$(MAKE) SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
 	( \
 	echo NAME=daemontools; \
@@ -61,6 +58,9 @@ install: build
 	dh_testroot
 	dh_prep || dh_clean -k
 	dh_installdirs
+	#
+	# run make
+	#
 	$(MAKE) SYSTEM=LINUX -s install DESTDIR=$(DESTDIR)
 	if [ -f perm_list.daemontools ] ; then \
 		mkdir -p $(DESTDIR)$(qsysconfdir); \

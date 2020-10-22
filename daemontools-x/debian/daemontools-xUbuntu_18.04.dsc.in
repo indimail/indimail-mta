@@ -8,7 +8,7 @@ Version: @version@-@release@
 Maintainer: Manvendra Bhangui <daemontools@indimail.org>
 Homepage: https://github.com/mbhangui/indimail-mta
 Debtransform-Release: 1
+Debtransform-Tar: daemontools-@version@.tar.gz
 Debtransform-Files-Tar: debian.tar.gz
-Debtransform-Tar: dummy.tar.gz
 Standards-Version: 3.9.1
 Build-Depends: cdbs, debhelper (>= 10), gcc, g++, automake, libqmail-dev, m4, gawk

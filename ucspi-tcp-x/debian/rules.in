@@ -26,16 +26,12 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	#
-	# Extract source archives
-	#
-	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
-	#
 	# run configure script
 	#
 	if [ $(tcpserver_plugin) -eq 1 ] ; then \
-		echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-$(version)/conf-dlopen; \
+		echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen; \
 	else \
-		/bin/rm -f ucspi-tcp-$(version)/conf-dlopen; \
+		/bin/rm -f conf-dlopen; \
 	fi
 	#
 	# run make
@@ -72,7 +68,7 @@ install: build
 	unset FAKED_MODE; \
 	if [ -f perm_list.ucspi-tcp ] ; then \
 		mkdir -p $(DESTDIR)$(qsysconfdir); \
-		install -m 0644 perm_list.ucspi-tcp "$(DESTDIR)$(qsysconfdir)"/uspi-tcp_perm_list; \
+		install -m 0644 perm_list.ucspi-tcp "$(DESTDIR)$(qsysconfdir)"/ucspi-tcp.perms; \
 	fi
 	install -m 0644 ucspi-tcp-release "$(DESTDIR)$(qsysconfdir)"/ucspi-tcp-release
 	/bin/rm -f ucspi-tcp-release ucspi-tcp-x

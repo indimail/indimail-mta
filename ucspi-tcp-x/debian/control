@@ -1,3 +1,11 @@
+Source: ucspi-tcp
+Section: net
+Priority: optional
+Maintainer: Manvendra Bhangui <ucspi-tcp@indimail.org>
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, libqmail-dev, libssl-dev, m4, gawk
+Homepage: https://github.com/mbhangui/indimail-mta
+
 Package: ucspi-tcp
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils

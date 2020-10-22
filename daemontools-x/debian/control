@@ -1,3 +1,11 @@
+Source: daemontools
+Section: admin
+Priority: extra
+Maintainer: Manvendra Bhangui <daemontools@indimail.org>
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 9), gcc, automake, libqmail-dev, m4, gawk
+Homepage: https://github.com/mbhangui/indimail-mta
+
 Package: daemontools
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils
