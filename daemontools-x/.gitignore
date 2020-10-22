@@ -30,7 +30,7 @@ minisvc
 minisvc.8
 multilog
 multipipe
-perm_list.daemontools
+daemontools.perms
 pgrphack
 qfilelog
 qlogselect

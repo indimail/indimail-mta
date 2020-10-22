@@ -141,4 +141,4 @@ argv0
 delcr
 fixcrio
 recordio
-perm_list.ucspi-tcp
+ucspi-tcp.perms

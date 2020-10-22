@@ -59,4 +59,4 @@ delcr
 fixcrio
 recordio
 DIRS
-perm_list.ucspi-tcp
+ucspi-tcp.perms

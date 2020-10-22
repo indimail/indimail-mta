@@ -133,3 +133,4 @@ creation
 79. conf-queue: added documenation
 20/20/2020
 80. removed chrpath.
+81. removed ucspi-tcp, daemontools

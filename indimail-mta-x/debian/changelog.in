@@ -75,3 +75,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * qcount_dir.c: replaced alloc_re() with alloc()
   * controlfiles.q: added control file servicedir.conf
   * conf-queue: added documenation
+  * removed ucspi-tcp, daemontools

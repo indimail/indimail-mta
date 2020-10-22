@@ -66,9 +66,9 @@ install: build
 	FAKED_MODE=1;export FAKED_MODE; \
 	$(MAKE) SYSTEM=LINUX -s install DESTDIR=$(DESTDIR); \
 	unset FAKED_MODE; \
-	if [ -f perm_list.ucspi-tcp ] ; then \
+	if [ -f ucspi-tcp.perms ] ; then \
 		mkdir -p $(DESTDIR)$(qsysconfdir); \
-		install -m 0644 perm_list.ucspi-tcp "$(DESTDIR)$(qsysconfdir)"/ucspi-tcp.perms; \
+		install -m 0644 ucspi-tcp.perms "$(DESTDIR)$(qsysconfdir)"/ucspi-tcp.perms; \
 	fi
 	install -m 0644 ucspi-tcp-release "$(DESTDIR)$(qsysconfdir)"/ucspi-tcp-release
 	/bin/rm -f ucspi-tcp-release ucspi-tcp-x

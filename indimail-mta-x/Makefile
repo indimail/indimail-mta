@@ -20,7 +20,7 @@ edit = sed \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-it = perm_list.mta 822date 822field 822header 822print 822received \
+it = indimail-mta.perms 822date 822field 822header 822print 822received \
 	addrlist atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q \
 	binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm qnotify \
 	create_services cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr \
@@ -3568,7 +3568,7 @@ generic.so: generic.o auto_scancmd.o MakeArgs.o conf-ld-$(SYSTEM)
 		`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	fi
 
-perm_list.mta: perm_list.in mysql_config \
+indimail-mta.perms: perm_list.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
 

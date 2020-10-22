@@ -167,10 +167,11 @@ if [ ! -d ${logdir} ] ; then
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
 ${prefix}/sbin/minisvc --config=add-boot
+# svscanlog service
+${prefix}/sbin/minisvc --svscanlog --servicedir=${servicedir} --scanint=60 > /dev/null || true
+
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
 fi
-# svscanlog service
-${prefix}/sbin/minisvc --svscanlog --servicedir=${servicedir} --scanint=60 > /dev/null || true
 
 exit 0

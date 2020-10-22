@@ -92,7 +92,7 @@ chkshsgr.o: \
 compile chkshsgr.c
 	./compile chkshsgr.c
 
-perm_list.ucspi-tcp: perm_list.in \
+ucspi-tcp.perms: perm_list.in \
 conf-prefix conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
 
@@ -255,7 +255,7 @@ compile ip4_scan.c ip4.h
 	./compile ip4_scan.c
 
 it: prog instcheck tcpserver.1 shared \
-installer perm_list.ucspi-tcp
+installer ucspi-tcp.perms ucspi-tcp.spec
 
 load: warn-auto.sh conf-ld systype make-load
 	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load

@@ -45,7 +45,7 @@ systemd
 svscanboot
 svscanboot.8
 svscan.8
-perm_list.daemontools
+daemontools.perms
 daemontools.spec
 SHARED
 SBIN

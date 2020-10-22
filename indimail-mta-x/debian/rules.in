@@ -34,21 +34,17 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	#
-	# Extract source archives
-	#
-	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
-	#
-	# run configure script
+	# configure
 	#
 	if [ $(tcpserver_plugin) -eq 1 ] ; then \
-		echo "-DLOAD_SHARED_OBJECTS" > indimail-mta-$(version)/conf-dlopen; \
+		echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen; \
 	else \
-		/bin/rm -f indimail-mta-$(version)/conf-dlopen; \
+		/bin/rm -f conf-dlopen; \
 	fi
 	if [ $(notlsarr) -eq 0 ] ; then \
-		echo "-DHASTLSA" > indimail-mta-$(version)/conf-tlsa; \
+		echo "-DHASTLSA" > conf-tlsa; \
 	else \
-		/bin/rm -f indimail-mta-$(version)/conf-tlsa; \
+		/bin/rm -f conf-tlsa; \
 	fi
 	#
 	# run make
@@ -84,6 +80,10 @@ install: build
 	dh_installdirs
 	FAKED_MODE=1;export FAKED_MODE
 	$(MAKE) SYSTEM=LINUX -s install DESTDIR=$(DESTDIR)
+	if [ -f indimail-mta.perms ] ; then \
+		mkdir -p $(DESTDIR)$(qsysconfdir); \
+		install -m 0644 indimail-mta.perms "$(DESTDIR)$(qsysconfdir)"/indimail-mta.perm; \
+	fi
 	unset FAKED_MODE
 	${rm} -rf $(DESTDIR)$(mandir)/man3
 	${rm} -rf $(DESTDIR)$(prefix)/include

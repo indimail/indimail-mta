@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.2 2020-10-22 12:30:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.3 2020-10-22 16:45:26+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -367,6 +367,9 @@ echo "adding svscan startup"
 %{_prefix}/sbin/minisvc --config=add-boot
 # svscanlog service
 %{_prefix}/sbin/minisvc --svscanlog --servicedir=%{servicedir} --scanint=60
+if [ -x /bin/systemctl ] ; then
+  /bin/systemctl enable svscan
+fi
 
 ### SCRIPTLET ###############################################################################
 %preun

@@ -459,7 +459,6 @@ echo ../resolv.conf 1>&3
 %dir %attr(755,root,root)                          %{plugindir}
 
 %attr(444,root,root) %config(noreplace)            %{qsysconfdir}/controlfiles.q
-%attr(444,root,root) %config(noreplace)            %{qsysconfdir}/perm_list.mta
 
 %ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp/tcp.smtp
 %ghost %config(noreplace,missingok)                %{qsysconfdir}/tcp/tcp.qmtp
@@ -1051,7 +1050,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   # refresh indimail-mta services
   svc_list=""
   for i in clamd greylist.1999 qmail-qmqpd.628 \
-    qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
+    qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
     qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
     qmail-daned.1998
   do
@@ -1320,7 +1319,7 @@ done
 # turn off automatic refresh for services during first time installation
 svc_list=""
 for i in clamd greylist.1999 qmail-qmqpd.628 \
-  qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
+  qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
   qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
   qmail-daned.1998
 do
@@ -1345,9 +1344,6 @@ fi
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
   /bin/sh %{libexecdir}/qupgrade.sh post install %{version} $*
-fi
-if [ -x /bin/systemctl ] ; then
-  /bin/systemctl enable svscan
 fi
 ) >> /var/log/%{name}-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then

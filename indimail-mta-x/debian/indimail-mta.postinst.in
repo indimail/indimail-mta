@@ -121,10 +121,10 @@ esac
 #
 # We need to do this for debian. SIGH!!
 #
-if [ -f ${qsysconfdir}/perm_list.mta ] ; then
+if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
 	echo "Fixing Permissions (debian stupidity)"
 (
-/bin/grep -v "^#" ${qsysconfdir}/perm_list.mta | while read line
+/bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | while read line
 do
 	if [ " $line" = " " ] ; then
 		continue
@@ -506,9 +506,6 @@ fi
 ${prefix}/sbin/svctool --disable-service sendmail exim4 postfix
 echo "addming indimail-mta as an alternative"
 ${prefix}/sbin/svctool --config=add-alt
-if [ -x /bin/systemctl ] ; then
-	/bin/systemctl enable svscan.service
-fi
 
 echo "Checking Installed Permissions"
 if [ -x ${libexecdir}/instcheck ] ; then
