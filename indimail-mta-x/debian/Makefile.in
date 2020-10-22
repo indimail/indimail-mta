@@ -19,7 +19,7 @@ indimail-mini.postrm indimail-mini.postinst \
 indimail-mta.install \
 indimail-mta.dsc indimail-mta-Debian_9.0.dsc \
 indimail-mta-Debian_10.dsc indimail-mta-xUbuntu_18.04.dsc \
-debian.tar.gz dummy.tar.gz
+debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -44,7 +44,7 @@ clean:
 	/bin/rm -f rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
 	indimail-mini.postinst *.dsc changelog \
-	indimail-mta.install indimail-mta.postinst debian.tar.gz dummy.tar.gz
+	indimail-mta.install indimail-mta.postinst debian.tar.gz
 
 noinst_SCRIPTS = indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				 indimail-mta.postinst indimail-mta.install \
@@ -55,10 +55,8 @@ MOSTLYCLEANFILES= indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				  indimail-mta.postinst rules changelog \
 				  indimail-mini.prerm indimail-mini.preinst \
 				  indimail-mini.postrm indimail-mini.postinst \
-				  debian.tar.gz dummy.tar.gz
+				  debian.tar.gz
 
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
 rules: rules.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 changelog: changelog.in ../conf-version ../conf-release
