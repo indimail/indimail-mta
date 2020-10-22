@@ -12,7 +12,7 @@ include /usr/share/dpkg/buildflags.mk
 prefix=@prefix@
 sysconfdir=@sysconfdir@
 qsysconfdir=@qsysconfdir@
-mandir=$(prefix)/share/man
+mandir=@mandir@
 version=@version@
 
 tcpserver_plugin=1

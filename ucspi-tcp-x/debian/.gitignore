@@ -1,8 +1,6 @@
 Makefile
 debian.tar.gz
-dummy.tar.gz
 perm_list
-README
 rules
 conf-release
 ucspi-tcp-Debian_10.dsc

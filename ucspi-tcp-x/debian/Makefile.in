@@ -10,7 +10,7 @@ release=@release@
 
 all: rules ucspi-tcp.dsc ucspi-tcp-Debian_9.0.dsc \
 ucspi-tcp-Debian_10.dsc ucspi-tcp-xUbuntu_18.04.dsc \
-debian.tar.gz dummy.tar.gz
+debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -29,13 +29,11 @@ distclean: clean
 
 clean:
 	/bin/rm -f rules *.dsc changelog \
-	debian.tar.gz dummy.tar.gz
+	debian.tar.gz
 
 noinst_SCRIPTS = ucspi-tcp.install rules
-MOSTLYCLEANFILES= rules changelog debian.tar.gz dummy.tar.gz
+MOSTLYCLEANFILES= rules changelog debian.tar.gz
 
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
 rules: rules.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 changelog: changelog.in ../conf-version ../conf-release
