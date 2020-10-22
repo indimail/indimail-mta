@@ -76,3 +76,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * controlfiles.q: added control file servicedir.conf
   * conf-queue: added documenation
   * removed ucspi-tcp, daemontools
+  * upgrade: shutdown indimail-mta services instead of entire svscan service

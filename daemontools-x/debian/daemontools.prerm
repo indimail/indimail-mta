@@ -88,6 +88,18 @@ if [ -s ${qsysconfdir}/daemontools-stat.override -a -f /usr/sbin/dpkg-statoverri
 		fi
 	done
 fi
+echo "shutting down and removing .svscan service"
+if [ -d ${servicedir}/.svscan -o -L ${servicedir}/.svscan ] ; then
+  touch ${servicedir}/.svscan/down
+  svc -dx ${servicedir}/.svscan || true
+fi
+if [ -d ${servicedir}/.svscan/log -o -L ${servicedir}/.svscan/log ] ; then
+  touch ${servicedir}/.svscan/log/down
+  svc -dx ${servicedir}/.svscan/log || true
+fi
+if [ -d ${servicedir}/.svscan -o -L ${servicedir}/.svscan ] ; then
+  ${rm} -rf %{servicedir}/.svscan
+fi
 # Remove svscan being started on system boot
 echo "removing svscan startup"
 SERVICE_LIST="."

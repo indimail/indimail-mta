@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.3 2020-10-22 16:45:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.4 2020-10-22 18:07:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -298,6 +298,61 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
 
 ### SCRIPTLET ###############################################################################
+%pretrans
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ -f %{_prefix}/sbin/initsvc ] ; then
+  %{_prefix}/sbin/initsvc -status
+fi
+
+if [ -f %{_prefix}/bin/svok ] ; then
+  %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
+  if [ $? -eq 0 ] ; then
+    echo "Giving %{name} exactly 5 seconds to exit nicely"
+    if test -f %{_sysconfdir}/init/svscan.conf
+    then
+      /sbin/initctl emit qmailstop > /dev/null 2>&1
+    elif test -f %{_sysconfdir}/event.d/svscan
+    then
+      /sbin/initctl emit qmailstop > /dev/null 2>&1
+    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
+    then
+      /bin/systemctl stop svscan > /dev/null 2>&1
+    elif test -x %{_prefix}/sbin/initsvc
+    then
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
+      else
+        %{_prefix}/sbin/initsvc -status || true
+      fi
+      %{_prefix}/sbin/initsvc -off || true
+    else
+      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+        %{_sysconfdir}/init.d/svscan stop
+      fi
+      /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+      if [ $? -eq 0 ] ; then
+        %{__sed} -i 's{^SV:{#SV:{' %{_sysconfdir}/inittab
+        if [ $? -eq 0 ] ; then
+          /sbin/init q
+        fi
+      fi
+    fi
+    sleep 5
+  fi
+fi
+if [ -f %{libexecdir}/qupgrade.sh ] ; then
+(
+  echo "Running Custom Upgrade Script for pretrans"
+  /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs %{version} $*
+) > /var/log/%{name}-setup.log 2>&1
+fi
+
+### SCRIPTLET ###############################################################################
 %pre
 /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
 /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir} -s /sbin/nologin qmaill || true
@@ -393,6 +448,7 @@ if [ $argv1 -eq 1 ] ; then
   ) >> /var/log/daemontools-setup.log 2>&1
   exit 0
 fi
+
 if [ -f %{_prefix}/bin/svok ] ; then
   %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
   if [ $? -eq 0 ] ; then
@@ -433,6 +489,19 @@ fi
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
   /bin/sh %{libexecdir}/qupgrade.sh preun uninstall %{version} "$argv1"
+fi
+
+echo "shutting down and removing .svscan service"
+if [ -d %{servicedir}/.svscan -o -L %{servicedir}/.svscan ] ; then
+  touch %{servicedir}/.svscan/down
+  svc -dx %{servicedir}/.svscan || true
+fi
+if [ -d %{servicedir}/.svscan/log -o -L %{servicedir}/.svscan/log ] ; then
+  touch %{servicedir}/.svscan/log/down
+  svc -dx %{servicedir}/.svscan/log || true
+fi
+if [ -d %{servicedir}/.svscan -o -L %{servicedir}/.svscan ] ; then
+  %{__rm} -rf %{servicedir}/.svscan || true
 fi
 
 # Remove svscan being started on system boot

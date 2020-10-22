@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.274 2020-10-22 12:31:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.275 2020-10-22 18:08:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -905,46 +905,14 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-if [ -f %{_prefix}/sbin/initsvc ] ; then
-  %{_prefix}/sbin/initsvc -status
-fi
-
-if [ -f %{_prefix}/bin/svok ] ; then
-  %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
-  if [ $? -eq 0 ] ; then
-    echo "Giving %{name} exactly 5 seconds to exit nicely"
-    if test -f %{_sysconfdir}/init/svscan.conf
-    then
-      /sbin/initctl emit qmailstop > /dev/null 2>&1
-    elif test -f %{_sysconfdir}/event.d/svscan
-    then
-      /sbin/initctl emit qmailstop > /dev/null 2>&1
-    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
-    then
-      /bin/systemctl stop svscan > /dev/null 2>&1
-    elif test -x %{_prefix}/sbin/initsvc
-    then
-      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
-        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
-      else
-        %{_prefix}/sbin/initsvc -status || true
-      fi
-      %{_prefix}/sbin/initsvc -off || true
-    else
-      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
-        %{_sysconfdir}/init.d/svscan stop
-      fi
-      /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
-      if [ $? -eq 0 ] ; then
-        %{__sed} -i 's{^SV:{#SV:{' %{_sysconfdir}/inittab
-        if [ $? -eq 0 ] ; then
-          /sbin/init q
-        fi
-      fi
-    fi
-    sleep 5
-  fi
-fi
+echo "shutting down indimail-mta services"
+for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
+  qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
+  qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
+  qscanq resolvconf udplogger.3000
+do
+  svc -d %{servicedir}/$i
+done
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
   echo "Running Custom Upgrade Script for pretrans"
@@ -1398,47 +1366,30 @@ if [ $argv1 -eq 1 ] ; then
   ) >> /var/log/%{name}-setup.log 2>&1
   exit 0
 fi
-if [ -f %{_prefix}/bin/svok ] ; then
-  %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
-  if [ $? -eq 0 ] ; then
-    echo "Giving %{name} exactly 5 seconds to exit nicely"
-    if test -f %{_sysconfdir}/init/svscan.conf
-    then
-      /sbin/initctl emit qmailstop > /dev/null 2>&1
-    elif test -f %{_sysconfdir}/event.d/svscan
-    then
-      /sbin/initctl emit qmailstop > /dev/null 2>&1
-    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
-    then
-      /bin/systemctl stop svscan > /dev/null 2>&1
-    elif test -x %{_prefix}/sbin/initsvc
-    then
-      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
-        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
-      else
-        %{_prefix}/sbin/initsvc -status || true
-      fi
-      %{_prefix}/sbin/initsvc -off || true
-    else
-      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
-        %{_sysconfdir}/init.d/svscan stop
-      fi
-      /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
-      if [ $? -eq 0 ] ; then
-        %{__sed} -i 's{^SV:{#SV:{' %{_sysconfdir}/inittab
-        if [ $? -eq 0 ] ; then
-          /sbin/init q
-        fi
-      fi
-    fi
-    sleep 5
-  fi
-fi
 
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
   /bin/sh %{libexecdir}/qupgrade.sh preun uninstall %{version} "$argv1"
 fi
+
+echo "shutting down and removing indimail-mta/indimail-mta-log services"
+for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
+  qscanq qmail-smtpd.465 qmail-smtpd.587 \
+  qmail-qmtpd.209 qmail-qmqpd.628 greylist.1999 \
+  qmail-daned.1998 resolvconf udplogger.3000
+do
+  if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
+    touch %{servicedir}/$i/down
+    svc -dx %{servicedir}/$i
+  fi
+  if [ -d %{servicedir}/$i/log -o -L %{servicedir}/$i/log ] ; then
+    touch %{servicedir}/$i/log/down
+    svc -dx %{servicedir}/$i/log
+  fi
+  if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
+    %{__rm} -rf %{servicedir}/$i || true
+  fi
+done
 
 if [ -f %{_sysconfdir}/init.d/svscan ] ; then
   if [ -f /sbin/chkconfig ] ; then
@@ -1515,23 +1466,6 @@ if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
     fi
   done
 fi
-for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
-  qscanq qmail-smtpd.465 qmail-smtpd.587 \
-  qmail-qmtpd.209 qmail-qmqpd.628 greylist.1999 \
-  qmail-daned.1998 resolvconf udplogger.3000 .svscan
-do
-  if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
-    touch %{servicedir}/$i/down
-    svc -dx %{servicedir}/$i
-  fi
-  if [ -d %{servicedir}/$i/log -o -L %{servicedir}/$i/log ] ; then
-    touch %{servicedir}/$i/log/down
-    svc -dx %{servicedir}/$i/log
-  fi
-  if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
-    %{__rm} -rf %{servicedir}/$i || true
-  fi
-done
 
 count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
 if [ $count -eq 0 ] ; then # ignore disabled services

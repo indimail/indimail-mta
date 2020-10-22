@@ -42,29 +42,25 @@ case "$1" in
 	) >> /var/log/indimail-mta-setup.log 2>&1
 	fi
 	(
-	if [ -f ${prefix}/bin/svok ] ; then
-		set +e
-		${prefix}/bin/svok @servicedir@/.svscan/log 2>/dev/null
-		if [ $? -eq 0 ] ; then
-			echo "Giving indimail-mta exactly 5 seconds to exit nicely" 1>&2
-			if test -f /lib/systemd/system/svscan.service && test -x /bin/systemctl
-			then
-				/bin/systemctl stop svscan > /dev/null 2>&1 || true
-			elif test -f /etc/init/svscan.conf
-			then
-				/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
-			elif test -f /etc/event.d/svscan
-			then
-				/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
-			elif test -x ${prefix}/sbin/initsvc
-			then
-				${prefix}/sbin/initsvc -status || /etc/init.d/svscan stop || true
-			else
-				/etc/init.d/svscan stop || true
-			fi
-			sleep 5
+	echo "shutting down and removing indimail/indimail-log services"
+	for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
+		qscanq qmail-smtpd.465 qmail-smtpd.587 \
+		qmail-qmtpd.209 qmail-qmqpd.628 greylist.1999 \
+		qmail-daned.1998 resolvconf udplogger.3000
+	do
+		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
+			touch ${servicedir}/$i/down
+			svc -dx ${servicedir}/$i
 		fi
-	fi
+		if [ -d ${servicedir}/$i/log -o -L ${servicedir}/$i/log ] ; then
+			touch ${servicedir}/$i/log/down
+			svc -dx ${servicedir}/$i/log
+		fi
+		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
+			${rm} -rf ${servicedir}/$i || true
+		fi
+	done
+
 	) > /var/log/indimail-mta-setup.log 2>&1
     ;;
 

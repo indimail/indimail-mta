@@ -12,6 +12,7 @@ conf-qmail
 conf-servicedir
 conf-shared
 conf-sysconfdir
+conf-release
 daemontools.spec
 docker-entrypoint
 docker-entrypoint.8

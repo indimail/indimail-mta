@@ -134,3 +134,5 @@ creation
 20/20/2020
 80. removed chrpath.
 81. removed ucspi-tcp, daemontools
+22/20/2020
+82. upgrade: shutdown indimail-mta services instead of entire svscan service

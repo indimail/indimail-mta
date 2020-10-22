@@ -141,35 +141,24 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
 		echo "Running Custom Upgrade Script for post upgrade"
 		/bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
 	fi
-	if [ -f /etc/init.d/svscan ] ; then
-		cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
-			${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
-	fi
-	if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
-		cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service
-		/bin/systemctl daemon-reload
-	elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
-		cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
-	/bin/systemctl daemon-reload
-	elif [ -f /sbin/initctl -a -d /etc/init ] ; then
-		cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf
-	elif [ -d /etc/event.d ] ; then
-		cmp -s ${shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/upstart /etc/event.d
-	elif [ -d /System/Library/LaunchDaemons ] ; then
-		cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
-	fi
 	(
-	# refresh indimail-mta services
+	echo "shutting down indimail services"
 	svc_list=""
-	for i in clamd greylist.1999 qmail-qmqpd.628 \
+	for i in greylist.1999 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
 		qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
 		qscanq udplogger.3000
+	do
+		svc -d ${servicedir}/$i
+		if [ -d ${servicedir}/$i ] ; then
+			if [ -z "$svc_list" ] ; then
+				svc_list="${servicedir}/$i"
+			else
+				svc_list="$svc_list ${servicedir}/$i"
+			fi
+		fi
+	done
+	for i in clamd freshclam
 	do
 		if [ -d ${servicedir}/$i ] ; then
 			if [ -z "$svc_list" ] ; then
@@ -179,6 +168,8 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
 			fi
 		fi
 	done
+
+	# refresh indimail-mta services
 	svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
 	) >> /var/log/indimail-mta-setup.log
@@ -471,7 +462,7 @@ done
 # turn off automatic refresh for services during first time installation
 svc_list=""
 for i in clamd greylist.1999 qmail-qmqpd.628 \
-	qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
+	qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
 	qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
 	qmail-daned.1998
 do
