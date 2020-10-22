@@ -11,9 +11,8 @@ logdir=@logdir@
 version=@version@
 release=@release@
 
-all: rules daemontools.dsc daemontools-Debian_9.0.dsc \
-daemontools-Debian_10.dsc daemontools-xUbuntu_18.04.dsc \
-debian.tar.gz dummy.tar.gz
+all: rules daemontools.dsc daemontools-Debian_8.0.dsc \
+daemontools-xUbuntu_16.04.dsc debian.tar.gz dummy.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -55,11 +54,9 @@ changelog: changelog.in ../conf-version ../conf-release
 	| $(edit) > $@
 daemontools.dsc: daemontools.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-daemontools-Debian_10.dsc: daemontools-Debian_10.dsc.in Makefile ../conf-version ../conf-release
+daemontools-Debian_8.0.dsc: daemontools-Debian_8.0.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-daemontools-Debian_9.0.dsc: daemontools-Debian_9.0.dsc.in Makefile ../conf-version ../conf-release
-	$(edit) $@.in > $@
-daemontools-xUbuntu_18.04.dsc: daemontools-xUbuntu_18.04.dsc.in Makefile ../conf-version ../conf-release
+daemontools-xUbuntu_16.04.dsc: daemontools-xUbuntu_16.04.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 daemontools.postrm: daemontools.postrm.in
 	$(edit) $@.in > $@
