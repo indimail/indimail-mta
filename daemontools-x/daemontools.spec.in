@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.1 2020-10-21 20:31:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.2 2020-10-22 12:30:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -58,7 +58,6 @@ Group: System Environment/Base
 Group: Productivity/Networking/Email/Servers
 %endif
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
-Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 URL: https://github.com/mbhangui/indimail-mta
 
 AutoReq: Yes
@@ -189,6 +188,11 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
 install -m 0644 %{name}-release  %{buildroot}%{qsysconfdir}/%{name}-release
 install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemontools
+
+%if %{undefined suse_version} && %{undefined sles_version}
+%{__mkdir_p} %{buildroot}%{logdir}/svscan
+touch %{buildroot}%{logdir}/svscan/current
+%endif
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
