@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.9  2020-10-23 17:54:16+05:30  Cprogrammer
+ * copy the mode of the source file to target
+ *
  * Revision 1.8  2020-10-23 10:01:20+05:30  Cprogrammer
  * set actual mode
  *
@@ -270,8 +273,11 @@ doit(stralloc *line, int uninstall, int ign_dir)
 	} else
 		gid = -1;
 	if (*modestr) {
-		scan_8long(modestr, &m);
-		mode = (int) m;
+		scan_int(modestr, &mode);
+		if (mode != -1) {
+			scan_8long(modestr, &m);
+			mode = (int) m;
+		}
 	} else
 		mode = -1;
 	switch (*type)
@@ -326,8 +332,11 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		break;
 
 	case 'f':
-		if (mode == -1)
-			mode = 0755;
+		if (mode == -1) {
+			if (lstat(name, &st) == -1)
+				strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
+			mode = st.st_mode;
+		}
 		print_info("install file", name, target.s, mode, uid, gid);
 		if ((fdin = open_read(name)) == -1) {
 			if (opt)
@@ -409,7 +418,7 @@ main(argc, argv)
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.8 2020-10-23 10:01:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: installer.c,v 1.9 2020-10-23 17:54:16+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
