@@ -105,4 +105,5 @@ echo "removing svscan startup"
 SERVICE_LIST="."
 export SERVICE_LIST
 $prefix/sbin/minisvc --config=rm-boot >/dev/null || true
+${rm} -f ${qsysconfdir}/resolv.conf
 exit 0
