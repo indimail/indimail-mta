@@ -191,7 +191,7 @@
 %attr(0755,root,root)  @libexecdir@/envmigrate
 %attr(0755,root,root)  @libexecdir@/qsmhook
 %attr(0755,root,root)  @libexecdir@/update_tmprsadh
-%attr(0755,root,root)  @libexecdir@/instcheck
+%attr(0755,root,root)  @libexecdir@/instcheck.indimail-mta
 %attr(0755,root,root)  @libexecdir@/testzero
 %attr(0755,root,root)  @libexecdir@/ipmeprint
 %attr(0755,root,root)  @libexecdir@/rpmattr
