@@ -82,7 +82,7 @@ install: build
 	$(MAKE) SYSTEM=LINUX -s install DESTDIR=$(DESTDIR)
 	if [ -f indimail-mta.perms ] ; then \
 		mkdir -p $(DESTDIR)$(qsysconfdir); \
-		install -m 0644 indimail-mta.perms "$(DESTDIR)$(qsysconfdir)"/indimail-mta.perm; \
+		install -m 0644 indimail-mta.perms "$(DESTDIR)$(qsysconfdir)"/indimail-mta.perms; \
 	fi
 	unset FAKED_MODE
 	${rm} -rf $(DESTDIR)$(mandir)/man3
