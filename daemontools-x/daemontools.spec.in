@@ -418,7 +418,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       %{__sed} -i 's{^#SV:{SV:{' %{_sysconfdir}/inittab
     fi
   fi
-  if [ -f %{servicedir/svscan.down ] ; then
+  if [ -f %{servicedir}/svscan.down ] ; then
     %{__rm} -f %{servicedir}/svscan.down
     echo "Starting svscan"
     if test -f %{_sysconfdir}/init/svscan.conf
