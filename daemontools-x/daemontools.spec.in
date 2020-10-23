@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.8 2020-10-23 14:33:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.9 2020-10-23 17:55:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -99,7 +99,7 @@ Requires: initscripts
 %endif
 #
 %if %build_on_obs == 1
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -298,6 +298,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+%{__rm} -fr %{_builddir}/%{name}-%{version}
 
 ### SCRIPTLET ###############################################################################
 %pretrans

@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.8 2020-10-23 10:12:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.9 2020-10-23 17:56:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -280,6 +280,7 @@ done
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+%{__rm} -fr %{_builddir}/%{name}-%{version}
 
 # fix changelog for openSUSE buildservice
 %changelog
