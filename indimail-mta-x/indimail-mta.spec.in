@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.276 2020-10-23 10:43:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.277 2020-10-23 11:22:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -911,7 +911,11 @@ for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
   qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
   qscanq resolvconf udplogger.3000
 do
-  svc -d %{servicedir}/$i
+  %{_prefix}/bin/svok %{servicedir}/$i >/dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    touch %{servicedir}/$i.down
+    %{_prefix}/bin/svc -d %{servicedir}/$i
+  fi
 done
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
 (
@@ -1032,6 +1036,18 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   done
   svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
+
+  echo "starting indimail-mta services"
+  for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
+    qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
+    qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
+    qscanq resolvconf udplogger.3000
+  do
+    if [ -f %{servicedir}/$i.down ] ; then
+      %{__rm} -f %{servicedir}/$i.down
+      %{_prefix}/bin/svc -u %{servicedir}/$i
+    fi
+  done
   ) >> /var/log//%{name}-setup.log 2>&1
   exit 0
 fi
