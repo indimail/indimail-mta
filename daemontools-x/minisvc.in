@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.1 2020-10-21 20:31:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.2 2020-10-23 13:54:12+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.1 2020-10-21 20:31:26+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.2 2020-10-23 13:54:12+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -762,7 +762,7 @@ while test $# -gt 0; do
 	;;
 
 	--svscanlog)
-	option=19
+	option=6
 	;;
 
 	--initcmd=*)
@@ -911,6 +911,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.2  2020-10-23 13:54:12+05:30  Cprogrammer
+# fixed option
+#
 # Revision 1.1  2020-10-21 20:31:26+05:30  Cprogrammer
 # Initial revision
 #

@@ -158,6 +158,10 @@ if [ ! -d ${logdir} ] ; then
 	/bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
+echo "adding svscan startup"
+if [ ! -d ${servicedir} -a ! -L ${servicedir} ] ; then
+	mkdir -p ${servicedir}
+fi
 ${prefix}/sbin/minisvc --config=add-boot
 # svscanlog service
 ${prefix}/sbin/minisvc --svscanlog --servicedir=${servicedir} --scanint=60 > /dev/null || true

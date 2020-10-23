@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.6 2020-10-23 10:41:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.7 2020-10-23 13:54:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -455,6 +455,9 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   exit 0
 fi
 echo "adding svscan startup"
+if [ ! -d %{servicedir} -a ! -L %{servicedir} ] ; then
+  %{__mkdir_p} %{servicedir}
+fi
 %{_prefix}/sbin/minisvc --config=add-boot
 # svscanlog service
 %{_prefix}/sbin/minisvc --svscanlog --servicedir=%{servicedir} --scanint=60
