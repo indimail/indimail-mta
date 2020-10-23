@@ -32,7 +32,6 @@ f:::0644:/doc/:INSTALL.vsm:doc/INSTALL.vsm
 f:::0644:/doc/:README.licenses:doc/README.licenses
 f:::0644:/doc/:README.clamav:doc/README.clamav
 f:::0644:/doc/:README.greylist:doc/README.greylist
-f:::0644:/doc/:README.logselect:doc/README.logselect
 f:::0644:/doc/:README.srs:doc/README.srs
 f:::0644:/doc/:README.surbl:doc/README.surbl
 f:::0644:/doc/:README.filters:doc/README.filters
