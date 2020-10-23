@@ -1,6 +1,6 @@
 /*
  * $Log: hier.c,v $
- * Revision 1.1  2020-10-23 10:15:14+05:30  Cprogrammer
+ * Revision 1.1  2020-10-23 20:59:34+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -64,7 +64,6 @@ hier(inst_dir, fatal)
 	d(mandir_base,     "man", -1, -1, -1);
 	d(mandir_base,     "man/man1", -1, -1, -1);
 	d(mandir_base,     "man/man8", -1, -1, -1);
-	c(auto_tools_home, "bin",      "tcpserver", -1, -1, 0755);
 	c(auto_tools_home, "bin",      "envdir", -1, -1, 0755);
 	c(auto_tools_home, "bin",      "envuidgid", -1, -1, 0755);
 	c(auto_tools_home, "bin",      "logselect", -1, -1, 0755);
