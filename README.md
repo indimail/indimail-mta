@@ -166,7 +166,7 @@ $ sudo make install or sudo ./qmake install
 
 ## Build ucspi-tcp
 
-To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir and conf-shared. Defaults are given in the table below. If you are ok with the defaults, you can run the script default.configure to set the below values.
+To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. If you are ok with the defaults, you can run the script default.configure to set the below values.
 
 **Linux**
 
@@ -175,6 +175,8 @@ config file|value
 conf-prefix|/usr
 conf-sysconfdir|/etc/indimail
 conf-shared|/usr/share/indimail
+conf-libexec|/usr/libexec/indimail
+conf-servicedir|/service
 
 **FreeBSD** / **Darwin**
 
@@ -183,6 +185,8 @@ config file|value
 conf-prefix|/usr/local
 conf-sysconfdir|/usr/local/etc/indimail
 conf-shared|/usr/local/share/indimail
+conf-libexec|/usr/local/libexec/indimail
+conf-servicedir|/usr/local/libexec/indimail/service
 
 The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
 

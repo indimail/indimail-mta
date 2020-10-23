@@ -10,7 +10,9 @@ edit = sed \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@prefix\@,$(prefix),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@qsysconfdir\@,$(sysconfdir),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g'
@@ -80,8 +82,7 @@ auto_shared.o: \
 compile auto_shared.c
 	./compile auto_shared.c
 
-check: \
-it instcheck
+check: it instcheck
 	./instcheck
 
 chkshsgr: \
@@ -254,7 +255,7 @@ ip4_scan.o: \
 compile ip4_scan.c ip4.h
 	./compile ip4_scan.c
 
-it: prog instcheck tcpserver.1 shared \
+it: prog tcpserver.1 shared instcheck \
 installer ucspi-tcp.perms ucspi-tcp.spec
 
 load: warn-auto.sh conf-ld systype make-load
@@ -689,15 +690,18 @@ install: it installer DIRS BIN SHARED PLUGINS MAN
 	mkdir -p $(DESTDIR)$(prefix)
 	mkdir -p $(DESTDIR)$(prefix)/lib
 	mkdir -p $(DESTDIR)$(shareddir)
+	mkdir -p $(DESTDIR)$(libexecdir)
 	mkdir -p $(DESTDIR)$(mandir)
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
 	./installer $(DESTDIR)$(shareddir)             < SHARED
 	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
+	./installer $(DESTDIR)$(libexecdir)            < LIBEXEC
 	./installer $(DESTDIR)$(mandir)                < MAN
 
 uninstall: installer DIRS BIN SHARED PLUGINS MAN
 	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
+	sed -n '1!G;h;$$p' LIBEXEC | ./installer -ui $(DESTDIR)$(libexecdir)
 	sed -n '1!G;h;$$p' PLUGINS | ./installer -ui $(DESTDIR)$(prefix)"/lib/indimail"
 	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
 	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)

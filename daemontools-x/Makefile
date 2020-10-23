@@ -25,7 +25,7 @@ it = envdir envuidgid setlock setuidgid softlimit svc svok \
 	spipe qfilelog multipipe teepipe logselect svscan qlogselect \
 	supervise readproctitle multilog docker-entrypoint fghack \
 	pgrphack svwait svscanboot upstart systemd qmailctl minisvc \
-	daemontools.perms daemontools.spec
+	instcheck installer daemontools.perms daemontools.spec
 
 man = spipe.1 qfilelog.1 multipipe.1 teepipe.1 tai2tai64n.1 \
 	tai64n2tai.1 envdir.8 envuidgid.8 fghack.8 multilog.8 pgrphack.8 \
@@ -104,6 +104,22 @@ choose: choose.sh warn-auto.sh
 	rm -f choose
 	cat warn-auto.sh choose.sh > choose
 	chmod 555 choose
+
+auto_home.c: \
+auto-str conf-prefix
+	./auto-str auto_home `head -1 conf-prefix` > auto_home.c
+
+auto_home.o: \
+compile auto_home.c
+	./compile auto_home.c
+
+auto_shared.c: \
+auto-str conf-shared
+	./auto-str auto_shared `head -1 conf-shared` > auto_shared.c
+
+auto_shared.o: \
+compile auto_shared.c
+	./compile auto_shared.c
 
 auto_sysconfdir.c: auto-str conf-sysconfdir
 	./auto-str auto_sysconfdir `head -1 conf-sysconfdir` > auto_sysconfdir.c
@@ -217,8 +233,8 @@ svok: load svok.o run_init.o
 svok.o: compile svok.c conf-runfs
 	./compile `grep -v "^#" conf-runfs` svok.c
 
-svscan: load svscan.o pathexec_run.o auto_sysconfdir.o
-	./load svscan pathexec_run.o auto_sysconfdir.o -lqmail
+svscan: load svscan.o pathexec_run.o
+	./load svscan pathexec_run.o -lqmail
 
 svscan.o: compile direntry.h pathexec.h svscan.c \
 auto_sysconfdir.h conf-runfs
@@ -442,6 +458,19 @@ daemontools.spec: daemontools.spec.in doc/ChangeLog \
 conf-release conf-version conf-prefix conf-libexec conf-qmail \
 conf-sysconfdir conf-shared conf-servicedir
 	(cat $@.in; sh ./catChangeLog) | $(edit) > daemontools.spec
+
+instcheck: load instcheck.o hier.o auto_home.o \
+auto_shared.o auto_sysconfdir.o
+	./load instcheck hier.o auto_home.o auto_shared.o \
+		auto_sysconfdir.o -lqmail
+
+instcheck.o: \
+compile instcheck.c
+	./compile instcheck.c
+
+hier.o: \
+compile hier.c auto_home.h auto_shared.h 
+	./compile hier.c
 
 installer: \
 load installer.o

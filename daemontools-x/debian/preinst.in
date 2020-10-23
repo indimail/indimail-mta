@@ -25,24 +25,60 @@ case "$1" in
     install|upgrade)
 	${rm} -f /tmp/daemontools.install /tmp/daemontools.upgrade
 	touch /tmp/daemontools.$1
-	if [ -f ${libexecdir}/upgrade.sh ] ; then
-		echo "Running Custom Upgrade Script for pre $1"
-		/bin/sh ${libexecdir}/upgrade.sh pre $1 2.2 $* || true
-	fi
 	if [ " $1" = " upgrade" ] ; then
-		exit 0
-	fi
-	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
-	if [ $nscd_up -ge 1 ] ; then
-		if [ -x /etc/init.d/nscd ] ; then
-			/etc/init.d/nscd stop
+		if [ -f ${prefix}/sbin/initsvc ] ; then
+			${prefix}/sbin/initsvc -status
 		fi
+		if [ -f ${prefix}/bin/svok ] ; then
+			${prefix}/bin/svok ${servicedir}/.svscan/log 2>/dev/null
+			if [ $? -eq 0 ] ; then
+				touch ${servicedir}/svscan.down
+				echo "Giving svscan exactly 5 seconds to exit nicely"
+				if test -f /etc/init/svscan.conf
+				then
+					/sbin/initctl emit qmailstop > /dev/null 2>&1
+				elif test -f /etc/event.d/svscan
+				then
+					/sbin/initctl emit qmailstop > /dev/null 2>&1
+				elif test -f /etc/systemd/system/multi-user.target.wants/svscan.service
+				then
+					/bin/systemctl stop svscan > /dev/null 2>&1
+				elif test -x ${prefix}/sbin/initsvc
+				then
+					if [ -x /etc/init.d/svscan ] ; then
+						${prefix}/sbin/initsvc -status || /etc/init.d/svscan stop || true
+					else
+						${prefix}/sbin/initsvc -status || true
+					fi
+					${prefix}/sbin/initsvc -off || true
+				else
+					if [ -x /etc/init.d/svscan ] ; then
+						/etc/init.d/svscan stop
+					fi
+					/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+					if [ $? -eq 0 ] ; then
+						sed -i 's{^SV:{#SV:{' /etc/inittab
+						if [ $? -eq 0 ] ; then
+							/sbin/init q
+						fi
+					fi
+				fi
+				sleep 5
+			fi
+		fi
+		exit 0
 	fi
 	#
 	# Create a users and groups. Do not report any problems if they already
 	# exists.
 	#
 	echo "Adding IndiMail users/groups"
+	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+	if [ $nscd_up -ge 1 ] ; then
+		if [ -x /etc/init.d/nscd ] ; then
+			/etc/init.d/nscd stop
+		fi
+	fi
 	/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 	/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}  -s /sbin/nologin qmaill || true
 	if [ $nscd_up -ge 1 ] ; then

@@ -1,7 +1,9 @@
 prefix     != head -1 conf-prefix 2>/dev/null
 mandir     != [ -d $(prefix)/man ] && echo $(prefix)/man || echo $(prefix)/share/man
 shareddir  != head -1 conf-shared 2>/dev/null
+libexecdir != head -1 conf-libexec 2>/dev/null
 sysconfdir != head -1 conf-sysconfdir 2>/dev/null
+servicedir != head -1 conf-servicedir 2>/dev/null
 DEFS       != uname -s | tr "[:lower:]" "[:upper:]"
 SYSTEM     != uname -s | tr "[:lower:]" "[:upper:]"
 version    != cat conf-version

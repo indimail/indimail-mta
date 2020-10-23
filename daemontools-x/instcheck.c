@@ -1,27 +1,6 @@
 /*
  * $Log: instcheck.c,v $
- * Revision 1.8  2020-10-23 09:40:24+05:30  Cprogrammer
- * fixed error message
- *
- * Revision 1.7  2020-09-19 17:38:56+05:30  Cprogrammer
- * removed unused argument to perm()
- *
- * Revision 1.6  2020-09-13 17:33:18+05:30  Cprogrammer
- * skip chmod if mode is -1
- *
- * Revision 1.5  2020-08-03 17:23:52+05:30  Cprogrammer
- * use qmail library
- *
- * Revision 1.4  2016-05-27 20:46:20+05:30  Cprogrammer
- * FHS compliant instcheck
- *
- * Revision 1.3  2008-07-17 23:03:18+05:30  Cprogrammer
- * use unistd.h instead of readwrite.h
- *
- * Revision 1.2  2008-06-30 09:39:35+05:30  Cprogrammer
- * removed z()
- *
- * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
+ * Revision 1.1  2020-10-23 08:17:18+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -39,7 +18,7 @@ stralloc        dirbuf = { 0 };
 
 extern void     hier(char *, char *);
 
-#define FATAL "instcheck: fatal: "
+#define FATAL   "instcheck: fatal: "
 #define WARNING "instcheck: warning: "
 
 void
@@ -65,9 +44,6 @@ perm(char *prefix1, char *prefix2, char *prefix3, char *file, int type, int uid,
 				if (errno != error_noent)
 					strerr_warn4(WARNING, "unable to stat ", tfile, ": ", &strerr_sys);
 				else
-#ifdef INDIMAIL
-				if (!ignore_man_error)
-#endif
 					strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
 				if (tfile != file)
 					alloc_free(tfile);

@@ -1,6 +1,8 @@
 prefix=@prefix@
 sysconfdir=/etc
 qsysconfdir=@qsysconfdir@
+libexecdir=@libexecdir@
+servicedir=@servicedir@
 mbase=/home/mail
 mandir=@mandir@
 shareddir=@shareddir@
@@ -10,7 +12,7 @@ release=@release@
 
 all: rules ucspi-tcp.dsc ucspi-tcp-Debian_9.0.dsc \
 ucspi-tcp-Debian_10.dsc ucspi-tcp-xUbuntu_18.04.dsc \
-debian.tar.gz
+preinst postinst debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -18,6 +20,8 @@ edit = sed \
 	-e 's,@mbase\@,$(mbase),g' \
 	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@libdir\@,$(libdir),g' \
 	-e 's,@release\@,$(release),g' \
@@ -29,26 +33,37 @@ distclean: clean
 
 clean:
 	/bin/rm -f rules *.dsc changelog \
-	debian.tar.gz
+	preinst postinst debian.tar.gz
 
 noinst_SCRIPTS = ucspi-tcp.install rules
-MOSTLYCLEANFILES= rules changelog debian.tar.gz
+MOSTLYCLEANFILES = rules preinst postinst changelog debian.tar.gz
 
 rules: rules.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
+
+preinst: preinst.in Makefile
+	$(edit) $@.in > $@
+
+postinst: postinst.in Makefile
+	$(edit) $@.in > $@
+
 changelog: changelog.in ../conf-version ../conf-release
 	(cat $@.in; echo ""; \
 	echo " -- Manvendra Bhangui <ucspi-tcp@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
 	| $(edit) > $@
 ucspi-tcp.dsc: ucspi-tcp.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-ucspi-tcp-Debian_10.dsc: ucspi-tcp-Debian_10.dsc.in Makefile ../conf-version ../conf-release
+ucspi-tcp-Debian_10.dsc: ucspi-tcp-Debian_10.dsc.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@
-ucspi-tcp-Debian_9.0.dsc: ucspi-tcp-Debian_9.0.dsc.in Makefile ../conf-version ../conf-release
+ucspi-tcp-Debian_9.0.dsc: ucspi-tcp-Debian_9.0.dsc.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@
-ucspi-tcp-xUbuntu_18.04.dsc: ucspi-tcp-xUbuntu_18.04.dsc.in Makefile ../conf-version ../conf-release
+ucspi-tcp-xUbuntu_18.04.dsc: ucspi-tcp-xUbuntu_18.04.dsc.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@
 
-debian.tar.gz: copyright rules changelog compat control ucspi-tcp.install 
+debian.tar.gz: copyright rules changelog compat control ucspi-tcp.install \
+preinst postinst
 	tar cf - copyright rules changelog compat control \
-		ucspi-tcp.install | gzip > $@
+		preinst postinst ucspi-tcp.install | gzip > $@

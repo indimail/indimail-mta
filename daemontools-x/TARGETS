@@ -63,3 +63,6 @@ make-load
 *.o
 minisvc
 iopause.h
+instcheck
+auto_home.c
+auto_shared.c

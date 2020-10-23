@@ -64,7 +64,7 @@ install: build
 	$(MAKE) SYSTEM=LINUX -s install DESTDIR=$(DESTDIR)
 	if [ -f daemontools.perms ] ; then \
 		mkdir -p $(DESTDIR)$(qsysconfdir); \
-		install -m 0644 daemontools.perms "$(DESTDIR)$(qsysconfdir)"/daemontools.perm; \
+		install -m 0644 daemontools.perms "$(DESTDIR)$(qsysconfdir)"/daemontools.perms; \
 	fi
 	install -m 0644 daemontools-release "$(DESTDIR)$(qsysconfdir)"/daemontools-release
 	/bin/rm -f daemontools-release

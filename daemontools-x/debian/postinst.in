@@ -24,9 +24,9 @@ shareddir=${prefix}/share/indimail
 logdir=@logdir@
 servicedir=@servicedir@
 qsysconfdir=@qsysconfdir@
+libexecdir=@libexecdir@
 cp=/bin/cp
 rm=/bin/rm
-mv=/bin/mv
 ####################################
 
 setperm()
@@ -126,54 +126,6 @@ done
 fi
 
 if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
-  if [ -f ${shareddir}/boot/rpm.init ] ; then
-    if [ ! "${prefix}" = "/usr" ] ; then
-    echo "recreating ld.so cache"
-    /sbin/ldconfig
-    fi
-    echo "Running Custom Upgrade Script"
-    /bin/sh ${shareddir}/boot/rpm.init upgrade
-  fi
-  if [ -f ${prefix}/sbin/initsvc ] ; then
-    ${prefix}/sbin/initsvc -status
-  fi
-
-  if [ -f ${prefix}/bin/svok ] ; then
-    ${prefix}/bin/svok ${servicedir}/.svscan/log 2>/dev/null
-    if [ $? -eq 0 ] ; then
-      echo "Giving svscan exactly 5 seconds to exit nicely"
-      if test -f /etc/init/svscan.conf
-      then
-        /sbin/initctl emit qmailstop > /dev/null 2>&1
-      elif test -f /etc/event.d/svscan
-      then
-        /sbin/initctl emit qmailstop > /dev/null 2>&1
-      elif test -f /etc/systemd/system/multi-user.target.wants/svscan.service
-      then
-        /bin/systemctl stop svscan > /dev/null 2>&1
-      elif test -x ${prefix}/sbin/initsvc
-      then
-        if [ -x /etc/init.d/svscan ] ; then
-          ${prefix}/sbin/initsvc -status || /etc/init.d/svscan stop || true
-        else
-          ${prefix}/sbin/initsvc -status || true
-        fi
-        ${prefix}/sbin/initsvc -off || true
-      else
-        if [ -x /etc/init.d/svscan ] ; then
-          /etc/init.d/svscan stop
-        fi
-        /bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
-        if [ $? -eq 0 ] ; then
-          sed -i 's{^SV:{#SV:{' /etc/inittab
-          if [ $? -eq 0 ] ; then
-            /sbin/init q
-          fi
-        fi
-      fi
-      sleep 5
-    fi
-  fi
   if [ -f /etc/init.d/svscan ] ; then
     cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
       ${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
@@ -213,5 +165,41 @@ ${prefix}/sbin/minisvc --svscanlog --servicedir=${servicedir} --scanint=60 > /de
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
 fi
-
+echo "Checking Installed Permissions"
+if [ -x ${libexecdir}/instcheck.daemontools ] ; then
+	${libexecdir}/instcheck.daemontools > /dev/null 2>&1
+fi
+if [ -f ${servicedir}/svscan.down ] ; then
+  ${rm} -f ${servicedir}/svscan.down
+  echo "Starting svscan"
+  if test -f /etc/init/svscan.conf
+  then
+    /sbin/initctl emit qmailstart > /dev/null 2>&1
+  elif test -f /etc/event.d/svscan
+  then
+    /sbin/initctl emit qmailstart > /dev/null 2>&1
+  elif test -f /etc/systemd/system/multi-user.target.wants/svscan.service
+  then
+  /bin/systemctl start svscan > /dev/null 2>&1
+  elif test -x ${prefix}/sbin/initsvc
+  then
+    if [ -x /etc/init.d/svscan ] ; then
+      ${prefix}/sbin/initsvc -status || /etc/init.d/svscan start || true
+    else
+      ${prefix}/sbin/initsvc -status || true
+    fi
+    ${prefix}/sbin/initsvc -on || true
+  else
+    if [ -x /etc/init.d/svscan ] ; then
+      /etc/init.d/svscan start
+    fi
+    /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+    if [ $? -eq 0 ] ; then
+      sed -i 's{^#SV:{SV:{' /etc/inittab
+      if [ $? -eq 0 ] ; then
+        /sbin/init q
+      fi
+    fi
+  fi
+fi
 exit 0

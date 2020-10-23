@@ -60,3 +60,5 @@ fixcrio
 recordio
 DIRS
 ucspi-tcp.perms
+conf-libexec
+conf-servicedir

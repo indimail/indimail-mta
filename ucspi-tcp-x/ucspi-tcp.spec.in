@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.5 2020-10-22 20:25:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.8 2020-10-23 10:12:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -22,6 +22,8 @@
 %global mandir             @mandir@
 %global qsysconfdir        @qsysconfdir@
 %global plugindir          %{_prefix}/lib/indimail/plugins
+%global libexecdir         @libexecdir@
+%global servicedir         @servicedir@
 %global tcpserver_plugin   1
 %global see_base           For a description of ucspi-tcp visit https://github.com/mbhangui/indimail-mta
 
@@ -142,6 +144,8 @@ echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui ucspi-tcp@indimail.org\""
 %{__sed} 's{PREFIX{%{_prefix}{'         conf-prefix.in     > conf-prefix
 %{__sed} 's{SHAREDDIR{%{shareddir}{'    conf-shared.in     > conf-shared
 %{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' conf-sysconfdir.in > conf-sysconfdir
+%{__sed} 's{LIBEXECDIR{%{libexecdir}{'  conf-libexec.in    > conf-libexec
+%{__sed} 's{SERVICEDIR{%{servicedir}{'  conf-servicedir.in > conf-servicedir
 %if %{tcpserver_plugin} == 1
   echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen
 %else
@@ -184,8 +188,11 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-ucspi-tc
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
+%if %{undefined nodebug}
 chmod -R 755 %{buildroot}%{_prefix}/bin
+chmod -R 755 %{buildroot}%{libexecdir}
 chmod -R 755 %{buildroot}%{plugindir}
+%endif
 
 %files
 %attr(0755,root,root)                     %{_prefix}/bin/tcpserver
@@ -209,6 +216,7 @@ chmod -R 755 %{buildroot}%{plugindir}
 %attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
 %attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
 %attr(0755,root,root)                     %{plugindir}/rblsmtpd.so
+%attr(0755,root,root)                     %{libexecdir}/instcheck.ucspi-tcp
 
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)                %{mandir}
@@ -237,6 +245,38 @@ chmod -R 755 %{buildroot}%{plugindir}
 
 %attr(0644,root,root)                     %{shareddir}/doc/ChangeLog-ucspi-tcp
 %attr(0644,root,root)                     %{shareddir}/doc/README.ucspi-tcp
+
+### SCRIPTLET ###############################################################################
+%pretrans
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+for i in `egrep -l "tcpserver|tcpclient" %{servicedir}/*/run 2>/dev/null`
+do
+  %{_prefix}/bin/svok $i
+  if [ $? -eq 0 ] ; then
+    touch %{servicedir}/$i.down
+    %{_prefix}/bin/svc -d $i || true
+  fi
+done
+
+%post
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+for i in `egrep -l "tcpserver|tcpclient" %{servicedir}/*/run 2>/dev/null`
+do
+  if [ -f %{servicedir}/$i.down ] ; then
+    %{__rm} -f %{servicedir}/$i.down
+    %{_prefix}/bin/svc -u $i || true
+  fi
+done
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
