@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.3 2020-10-23 21:12:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.4 2020-10-23 21:28:54+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.3 2020-10-23 21:12:49+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.4 2020-10-23 21:28:54+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -159,7 +159,9 @@ echo "/usr/bin/mount -l"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
 else
-/bin/chmod -x "$DESTDIR"$SERVICEDIR/.svscan/run
+	if [ -x "$DESTDIR"$SERVICEDIR/.svscan/run
+		/bin/chmod -x "$DESTDIR"$SERVICEDIR/.svscan/run
+	fi
 fi
 
 (
@@ -911,6 +913,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.4  2020-10-23 21:28:54+05:30  Cprogrammer
+# fix chmod of .svscan/run
+#
 # Revision 1.3  2020-10-23 21:12:49+05:30  Cprogrammer
 # create svscan run script, resolv.conf only when unshare is present
 #
