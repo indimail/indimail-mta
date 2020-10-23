@@ -133,8 +133,8 @@ fi
 for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
 do
 	i=$(dirname $i)
-	if [ -f ${servicedir}/$i.down ] ; then
-		${rm} -f ${servicedir}/$i.down
+	if [ -f $i.down ] ; then
+		${rm} -f $i.down
 		${prefix}/bin/svc -u $i || true
 	fi
 done

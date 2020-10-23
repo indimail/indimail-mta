@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.11 2020-10-23 18:53:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.12 2020-10-23 18:57:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -259,7 +259,7 @@ do
   i=$(dirname $i)
   %{_prefix}/bin/svok $i
   if [ $? -eq 0 ] ; then
-    touch %{servicedir}/$i.down
+    touch $i.down
     %{_prefix}/bin/svc -d $i || true
   fi
 done
@@ -274,8 +274,8 @@ fi
 for i in `grep -l -E "tcpserver|tcpclient" %{servicedir}/*/run 2>/dev/null`
 do
   i=$(dirname $i)
-  if [ -f %{servicedir}/$i.down ] ; then
-    %{__rm} -f %{servicedir}/$i.down
+  if [ -f $i.down ] ; then
+    %{__rm} -f $i.down
     %{_prefix}/bin/svc -u $i || true
   fi
 done

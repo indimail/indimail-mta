@@ -32,7 +32,7 @@ case "$1" in
 			i=$(dirname $i)
 			${prefix}/bin/svok $i
 			if [ $? -eq 0 ] ; then
-				touch ${servicedir}/$i.down
+				touch $i.down
 				${prefix}/bin/svc -d $i || true
 			fi
 		done
