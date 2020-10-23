@@ -132,6 +132,7 @@ if [ -x ${libexecdir}/instcheck.ucspi-tcp ] ; then
 fi
 for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
 do
+	i=$(dirname $i)
 	if [ -f ${servicedir}/$i.down ] ; then
 		${rm} -f ${servicedir}/$i.down
 		${prefix}/bin/svc -u $i || true

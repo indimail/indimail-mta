@@ -29,6 +29,7 @@ case "$1" in
 	if [ " $1" = " upgrade" ] ; then
 		for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
 		do
+			i=$(dirname $i)
 			${prefix}/bin/svok $i
 			if [ $? -eq 0 ] ; then
 				touch ${servicedir}/$i.down
