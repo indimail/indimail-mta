@@ -130,7 +130,7 @@ echo "Checking Installed Permissions"
 if [ -x ${libexecdir}/instcheck.ucspi-tcp ] ; then
 	${libexecdir}/instcheck.ucspi-tcp > /dev/null 2>&1
 fi
-for i in `egrep -l "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
+for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
 do
 	if [ -f ${servicedir}/$i.down ] ; then
 		${rm} -f ${servicedir}/$i.down

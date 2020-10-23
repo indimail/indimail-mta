@@ -27,7 +27,7 @@ case "$1" in
 	${rm} -f /tmp/ucspi-tcp.install /tmp/ucspi-tcp.upgrade
 	touch /tmp/ucspi-tcp.$1
 	if [ " $1" = " upgrade" ] ; then
-		for i in `egrep -l "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
+		for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
 		do
 			${prefix}/bin/svok $i
 			if [ $? -eq 0 ] ; then
