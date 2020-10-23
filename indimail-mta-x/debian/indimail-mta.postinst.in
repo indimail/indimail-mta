@@ -142,23 +142,12 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
 		/bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
 	fi
 	(
-	echo "shutting down indimail services"
+	# refresh indimail-mta services
 	svc_list=""
 	for i in greylist.1999 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
 		qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
-		qscanq udplogger.3000
-	do
-		svc -d ${servicedir}/$i
-		if [ -d ${servicedir}/$i ] ; then
-			if [ -z "$svc_list" ] ; then
-				svc_list="${servicedir}/$i"
-			else
-				svc_list="$svc_list ${servicedir}/$i"
-			fi
-		fi
-	done
-	for i in clamd freshclam
+		qscanq udplogger.3000 clamd freshclam
 	do
 		if [ -d ${servicedir}/$i ] ; then
 			if [ -z "$svc_list" ] ; then
@@ -168,10 +157,19 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
 			fi
 		fi
 	done
-
-	# refresh indimail-mta services
 	svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+	echo "starting indimail-mta services"
+	for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
+		qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
+		qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
+		qscanq resolvconf udplogger.3000
+	do
+		if [ -f ${servicedir}/$i.down ] ; then
+			${rm} -f ${servicedir}/$i.down
+			${prefix}/bin/svc -u ${servicedir}/$i || true
+		fi
+	done
 	) >> /var/log/indimail-mta-setup.log
 	${rm} -f /tmp/indimail-mta.upgrade
 	exit 0
