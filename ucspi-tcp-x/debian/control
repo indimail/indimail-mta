@@ -35,5 +35,5 @@ Description: tcpserver and tcpclient are easy-to-use command-line tools for buil
  who@, date@, finger@, http@, tcpcat, and mconnect.
  .
  tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
- Interface, using the TCP protocol. UCSPI tools are available for several
- different networks.
+ Interface, using the TCP protocol. This package supports ipv6 and TLS
+ connections.

@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.12 2020-10-23 18:57:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.13 2020-10-23 19:08:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -111,8 +111,8 @@ This package includes several sample clients built on top of tcpclient:
 who@, date@, finger@, http@, tcpcat, and mconnect.
 
 tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
-Interface, using the TCP protocol. UCSPI tools are available for several
-different networks.
+Interface, using the TCP protocol. This package supports ipv6 and TLS
+connections.
 
 Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
