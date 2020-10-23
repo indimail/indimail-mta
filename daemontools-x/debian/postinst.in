@@ -126,6 +126,8 @@ done
 fi
 
 if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
+  (
+  echo "checking if system boot scripts need upgrade"
   if [ -f /etc/init.d/svscan ] ; then
     cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
       ${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
@@ -148,11 +150,45 @@ if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
     cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
     ${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
   fi
+  if [ -f ${servicedir}/svscan.down ] ; then
+    ${rm} -f ${servicedir}/svscan.down
+    echo "Starting svscan"
+    if test -f /etc/init/svscan.conf
+    then
+      /sbin/initctl emit qmailstart > /dev/null 2>&1
+    elif test -f /etc/event.d/svscan
+    then
+    /sbin/initctl emit qmailstart > /dev/null 2>&1
+    elif test -f /etc/systemd/system/multi-user.target.wants/svscan.service
+    then
+    /bin/systemctl start svscan > /dev/null 2>&1
+    elif test -x ${prefix}/sbin/initsvc
+    then
+      if [ -x /etc/init.d/svscan ] ; then
+        ${prefix}/sbin/initsvc -status || /etc/init.d/svscan start || true
+      else
+        ${prefix}/sbin/initsvc -status || true
+      fi
+      ${prefix}/sbin/initsvc -on || true
+    else
+      if [ -x /etc/init.d/svscan ] ; then
+        /etc/init.d/svscan start
+      fi
+      /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+      if [ $? -eq 0 ] ; then
+        sed -i 's{^#SV:{SV:{' /etc/inittab
+        if [ $? -eq 0 ] ; then
+          /sbin/init q
+        fi
+      fi
+    fi
+  fi
   ${rm} -f /tmp/daemontools.upgrade
+  ) >> /var/log/daemontools-setup.log 2>&1
   exit 0
 fi
 ${rm} -f /tmp/daemontools.install
-
+(
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
 	/bin/mkdir ${logdir}
@@ -173,37 +209,5 @@ echo "Checking Installed Permissions"
 if [ -x ${libexecdir}/instcheck.daemontools ] ; then
 	${libexecdir}/instcheck.daemontools > /dev/null 2>&1
 fi
-if [ -f ${servicedir}/svscan.down ] ; then
-  ${rm} -f ${servicedir}/svscan.down
-  echo "Starting svscan"
-  if test -f /etc/init/svscan.conf
-  then
-    /sbin/initctl emit qmailstart > /dev/null 2>&1
-  elif test -f /etc/event.d/svscan
-  then
-    /sbin/initctl emit qmailstart > /dev/null 2>&1
-  elif test -f /etc/systemd/system/multi-user.target.wants/svscan.service
-  then
-  /bin/systemctl start svscan > /dev/null 2>&1
-  elif test -x ${prefix}/sbin/initsvc
-  then
-    if [ -x /etc/init.d/svscan ] ; then
-      ${prefix}/sbin/initsvc -status || /etc/init.d/svscan start || true
-    else
-      ${prefix}/sbin/initsvc -status || true
-    fi
-    ${prefix}/sbin/initsvc -on || true
-  else
-    if [ -x /etc/init.d/svscan ] ; then
-      /etc/init.d/svscan start
-    fi
-    /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
-    if [ $? -eq 0 ] ; then
-      sed -i 's{^#SV:{SV:{' /etc/inittab
-      if [ $? -eq 0 ] ; then
-        /sbin/init q
-      fi
-    fi
-  fi
-fi
+) >> /var/log/daemontools-install.log 2>&1
 exit 0

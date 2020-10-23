@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.7 2020-10-23 13:54:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.8 2020-10-23 14:33:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -377,7 +377,7 @@ if [ ! -d %{logdir} ] ; then
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
-  echo "doing post upgrade activities"
+  echo "checking if system boot scripts need upgrade"
   if [ -f %{_sysconfdir}/init.d/svscan ] ; then
     cmp -s %{_prefix}/bin/qmailctl %{_sysconfdir}/init.d/svscan >/dev/null 2>&1
     if [ $? -ne 0 ] ; then
@@ -454,6 +454,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   ) >> /var/log/%{name}-setup.log 2>&1
   exit 0
 fi
+(
 echo "adding svscan startup"
 if [ ! -d %{servicedir} -a ! -L %{servicedir} ] ; then
   %{__mkdir_p} %{servicedir}
@@ -464,6 +465,7 @@ fi
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan
 fi
+) >> /var/log/%{name}-install.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %preun
