@@ -75,7 +75,7 @@ Provides: srs2-libs = %{version}
 Provides: srs2-libs%{?_isa} = %{version}
 
 %if %build_on_obs == 1
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 Requires: coreutils glibc findutils pkgconfig
 
@@ -153,6 +153,7 @@ of the SPF/SRS protocol pair.
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+%{__rm} -fr %{_builddir}/%{name}-%{version}
 
 %post
 argv1=$1
