@@ -1,6 +1,5 @@
 ucspi-tcp (@version@-@release@) unstable; urgency=low
 
-  * indimail-mta.spec: updated compiler flags for ucspi-tcp
   * ucspi-tcp: replaced setup with installer which uses text files for installation
   * ucspi-tcp: updated compiler switches
   * instcheck.c: skip chmod if mode is -1

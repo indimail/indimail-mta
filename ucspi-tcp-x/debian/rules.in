@@ -12,6 +12,9 @@ include /usr/share/dpkg/buildflags.mk
 prefix=@prefix@
 sysconfdir=@sysconfdir@
 qsysconfdir=@qsysconfdir@
+shareddir=@shareddir@
+libexecdir=@libexecdir@
+servicedir=@servicedir@
 mandir=@mandir@
 version=@version@
 
@@ -20,7 +23,7 @@ arch=$(shell uname -m)
 cp=/bin/cp
 rm=/bin/rm
 
-DESTDIR=$(CURDIR)/debian/indimail-mta.tmp
+DESTDIR=$(CURDIR)/debian/ucspi-tcp.tmp
 
 build: build-stamp
 build-stamp:
@@ -36,7 +39,11 @@ build-stamp:
 	#
 	# run make
 	#
-	echo $(prefix)      > conf-home
+	sed 's{PREFIX{${prefix}{'          conf-prefix.in     > conf-prefix
+	sed 's{SYSCONFDIR{${qsysconfdir}{' conf-sysconfdir.in > conf-sysconfdir
+	sed 's{SHAREDDIR{${shareddir}{'    conf-shared.in     > conf-shared
+	sed 's{LIBEXECDIR{${libexecdir}{'  conf-libexec.in    > conf-libexec
+	sed 's{SERVICEDIR{${servicedir}{'  conf-servicedir.in > conf-servicedir
 	$(MAKE) SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
 	( \
 	echo NAME=ucspi-tcp; \

@@ -13,18 +13,16 @@ prefix=@prefix@
 qmaildir=@qmaildir@
 sysconfdir=@sysconfdir@
 qsysconfdir=@qsysconfdir@
-
-mandir=$(prefix)/share/man
-libexecdir=$(prefix)/libexec/indimail
+shareddir=@shareddir@
+libexecdir=@libexecdir@
+servicedir=@servicedir@
+mandir=@mandir@
 
 version=@version@
-
 tcpserver_plugin=1
 notlsarr=0
-arch=$(shell uname -m)
 # check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
 libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)
-libdir=@libdir@
 cp=/bin/cp
 rm=/bin/rm
 
@@ -49,10 +47,13 @@ build-stamp:
 	#
 	# run make
 	#
-	echo $(qmaildir)    > conf-qmail
-	echo $(qsysconfdir) > conf-sysconfdir
+	sed 's{PREFIX{${prefix}{'          conf-prefix.in     > conf-prefix
+	sed 's{QMAIL{${qmaildir}{'         conf-qmail.in      > conf-qmail
+	sed 's{SYSCONFDIR{${qsysconfdir}{' conf-sysconfdir.in > conf-sysconfdir
+	sed 's{SHAREDDIR{${shareddir}{'    conf-shared.in     > conf-shared
+	sed 's{LIBEXECDIR{${libexecdir}{'  conf-libexec.in    > conf-libexec
+	sed 's{SERVICEDIR{${servicedir}{'  conf-servicedir.in > conf-servicedir
 	$(MAKE) SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
-	${rm} -f $(DESTDIR)$(prefix)/$(libd)/*.la
 	( \
 	echo NAME=indimail-mta; \
 	echo Description=\"IndiMail MTA\"; \
@@ -67,7 +68,7 @@ clean:
 	rm -f build-stamp configure-stamp
 	${rm} -rf $(DESTDIR)
 	FAKED_MODE=1;export FAKED_MODE
-	$(MAKE) SYSTEM=LINUX -s -C indimail-mta-$(version) clean||true
+	$(MAKE) SYSTEM=LINUX -s clean||true
 	unset FAKED_MODE
 	dh_testdir
 	dh_testroot
@@ -86,9 +87,6 @@ install: build
 	fi
 	unset FAKED_MODE
 	${rm} -rf $(DESTDIR)$(mandir)/man3
-	${rm} -rf $(DESTDIR)$(prefix)/include
-	${rm} -rf $(DESTDIR)$(prefix)/queue
-	${rm} -f  $(DESTDIR)$(prefix)/$(libd)/*.la
 	if [ ! -d $(DESTDIR)$(sysconfdir)/apparmor.d/local ] ; then \
 		mkdir -p $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
@@ -104,13 +102,13 @@ install: build
 	if [ -f ../BUILD/debian/usr.bin.freshclam ] ; then \
 		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
-	if [ -f indimail-mta-$(version)/qupgrade.sh ] ; then \
+	if [ -f qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 indimail-mta-$(version)/qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
+		install -m 0755 qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
 	fi
-	if [ -f indimail-mta-$(version)/qlocal_upgrade.sh ] ; then \
+	if [ -f qlocal_upgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 indimail-mta-$(version)/qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
+		install -m 0755 qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
 	fi
 	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
 	/bin/rm -f indimail-mta-release indimail-mta-x

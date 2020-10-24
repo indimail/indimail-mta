@@ -493,11 +493,11 @@ if [ /usr/lib/sm.bin/sendmail ] ; then
 	fi
 fi
 ${prefix}/sbin/svctool --disable-service sendmail exim4 postfix
-echo "addming indimail-mta as an alternative"
+echo "adding indimail-mta as an alternative"
 ${prefix}/sbin/svctool --config=add-alt
 
-echo "Checking Installed Permissions"
 if [ -x ${libexecdir}/instcheck.indimail-mta ] ; then
+	echo "Checking Installed Permissions"
 	${libexecdir}/instcheck.indimail-mta > /dev/null 2>&1
 fi
 
