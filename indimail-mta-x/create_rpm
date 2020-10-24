@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.14  2020-10-21 20:33:00+05:30  Cprogrammer
+# removed ucspi-tcp
+#
 # Revision 1.13  2020-09-24 16:11:42+05:30  Cprogrammer
 # Makefile split into three Makefiles (variables, main, system specific)
 #
@@ -40,10 +43,9 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.13 2020-09-24 16:11:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.14 2020-10-21 20:33:00+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
-ucspitcp_version=$(cat ../ucspi-tcp-x/conf-version)
 
 get_tar_files()
 {
@@ -55,8 +57,7 @@ do
 done
 ) | uniq | sed \
 	-e 's/%{name}/indimail-mta/g' \
-	-e "s/%{version}/$version/g" \
-	-e "s/%{ucspitcp_version}/$ucspitcp_version/g"
+	-e "s/%{version}/$version/g"
 }
 
 get_non_tar_files()
@@ -69,8 +70,7 @@ do
 done
 ) | sort -u | sed \
 	-e 's/%{name}/indimail-mta/g' \
-	-e "s/%{version}/$version/g" \
-	-e "s/%{ucspitcp_version}/$ucspitcp_version/g"
+	-e "s/%{version}/$version/g"
 }
 
 get_dirname()
@@ -172,27 +172,6 @@ do
 		cd ..
 		continue
 		;;
-		ucspi-tcp-$ucspitcp_version)
-		if [ ! -d ucspi-tcp-x ] ; then
-			echo "$i: No such file or directory" 1>&2
-			exit 1
-		fi
-		echo "Preparing ucpsi-tcp-$ucspitcp_version"
-		/bin/cp -rp ucspi-tcp-x stage/ucspi-tcp-"$ucspitcp_version"
-		cd stage/ucspi-tcp-"$ucspitcp_version"
-		echo "Cleaning ucspi-tcp-$ucspitcp_version"
-		make SYSTEM=$SYSTEM -s clean > /dev/null
-		cd ..
-		tar \
-			--exclude="ucspi-tcp-$ucspitcp_version/.git" \
-			--exclude="ucspi-tcp-$ucspitcp_version/debian" \
-			--exclude="ucspi-tcp-$ucspitcp_version/RCS" \
-			-cf - ucspi-tcp-"$ucspitcp_version" \
-			| gzip -c > $rpmbuild/SOURCES/ucspi-tcp-"$ucspitcp_version".tar.gz
-		SRC="$rpmbuild/SOURCES/ucspi-tcp-$ucspitcp_version.tar.gz $SRC"
-		cd ..
-		continue
-		;;
 	esac
 done
 echo "Copying permissions files and rpmlintrc"
@@ -250,7 +229,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/indimail-mta.spec
-		for i in indimail-mta indimail-mini daemontools ucspi-tcp
+		for i in indimail-mta indimail-mini
 		do
 			rpm --addsign $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
 		done
@@ -259,7 +238,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		read key
 		if [ " $key" = " Y" -o " $key" = " y" ] ; then
 			(
-			for i in indimail-mta indimail-mini daemontools ucspi-tcp
+			for i in indimail-mta indimail-mini
 			do
 				echo $i
 				rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm

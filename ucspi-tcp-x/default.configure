@@ -5,14 +5,18 @@ fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
 	Linux)
-	sed 's{PREFIX{/usr{'                         conf-prefix.in     > conf-prefix
-	sed 's{SYSCONFDIR{/etc/indimail{'            conf-sysconfdir.in > conf-sysconfdir
-	sed 's{SHAREDDIR{/usr/share/indimail{'       conf-shared.in     > conf-shared
+	sed 's{PREFIX{/usr{'                            conf-prefix.in     > conf-prefix
+	sed 's{SYSCONFDIR{/etc/indimail{'               conf-sysconfdir.in > conf-sysconfdir
+	sed 's{SHAREDDIR{/usr/share/indimail{'          conf-shared.in     > conf-shared
+	sed 's{LIBEXECDIR{/usr/libexec/indimail{'       conf-libexec.in    > conf-libexec
+	sed 's{SERVICEDIR{/service{'                    conf-servicedir.in > conf-servicedir
 	;;
 	FreeBSD|Darwin)
-	sed 's{PREFIX{/usr/local{'                   conf-prefix.in     > conf-prefix
-	sed 's{SYSCONFDIR{/usr/local/etc/indimail{'  conf-sysconfdir.in > conf-sysconfdir
-	sed 's{SHAREDDIR{/usr/local/share/indimail{' conf-shared.in     > conf-shared
+	sed 's{PREFIX{/usr/local{'                      conf-prefix.in     > conf-prefix
+	sed 's{SYSCONFDIR{/usr/local/etc/indimail{'     conf-sysconfdir.in > conf-sysconfdir
+	sed 's{SHAREDDIR{/usr/local/share/indimail{'    conf-shared.in     > conf-shared
+	sed 's{LIBEXECDIR{/usr/local/libexec/indimail{' conf-libexec.in    > conf-libexec
+	sed 's{SERVICEDIR{/usr/local/etc/indimail/sv{'  conf-servicedir.in > conf-servicedir
 	;;
 	*)
 	echo "Unknown system $SYSTEM. Please configure conf-* files manually" 1>&2

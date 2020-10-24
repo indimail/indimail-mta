@@ -11,7 +11,7 @@ debian/changelog
 auto_libexec.o
 qmail-srs.5
 indimail-mta.fc
-perm_list.mta
+indimail-mta.perms
 conf-prefix
 conf-shared
 conf-sysconfdir

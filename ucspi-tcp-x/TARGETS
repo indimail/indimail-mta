@@ -141,3 +141,9 @@ argv0
 delcr
 fixcrio
 recordio
+ucspi-tcp.perms
+fixcrio.o
+delcr.o
+addcr.o
+iopause.o
+iopause.h

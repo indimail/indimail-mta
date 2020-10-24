@@ -94,12 +94,12 @@ NOTE: For Darwin (Mac OSX), install [MacPorts](https://www.macports.org/) or bre
 
 ## Download indimail-mta
 
-After you clone indimail-mta, you will find two subfolders under indimail-mta directory (libdkim-x and libsrs2-x).
-
 ```
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/indimail-mta.git
 ```
+
+After you clone indimail-mta, you will find two subfolders under indimail-mta directory (libdkim-x and libsrs2-x). We now need to build libdkim and libsrs2. If you skip these two steps, indimail-mta will get built without DKIM and SRS2 support.
 
 ## Compile libdkim-x (with dynamic libaries)
 
@@ -127,9 +127,46 @@ $ sudo ./make install-strip
 
 (check version in indimail-mta/libsrs2-x/conf-version)
 
+## Build daemontools
+
+To configure the build for daemontools, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. If you are ok with the defaults, you can run the script default.configure to set the below values.
+
+**Linux**
+
+config file|value
+-----------|------
+conf-prefix|/usr
+conf-qmail|/var/indimail
+conf-sysconfdir|/etc/indimail
+conf-shared|/usr/share/indimail
+conf-libexec|/usr/libexec/indimail
+conf-servicedir|/service
+
+**FreeBSD**, **Darwin**
+
+config file|value
+-----------|------
+conf-prefix|/usr/local
+conf-qmail|/var/indimail
+conf-sysconfdir|/usr/local/etc/indimail
+conf-shared|/usr/local/share/indimail
+conf-libexec|/usr/local/libexec/indimail
+conf-servicedir|/usr/local/etc/indimail/sv
+
+The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
+
+```
+$ ./default.configure
+$ cd /usr/local/src/indimail-mta/daemontools-x
+$ make or ./qmake
+$ sudo make install or sudo ./qmake install
+```
+
+(check version in indimail-mta/daemontools-x/conf-version)
+
 ## Build ucspi-tcp
 
-To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir and conf-shared. Defaults are given in the table below. If you are ok with defaults, you can run the script default.configure to set the below values.
+To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. If you are ok with the defaults, you can run the script default.configure to set the below values.
 
 **Linux**
 
@@ -138,6 +175,8 @@ config file|value
 conf-prefix|/usr
 conf-sysconfdir|/etc/indimail
 conf-shared|/usr/share/indimail
+conf-libexec|/usr/libexec/indimail
+conf-servicedir|/service
 
 **FreeBSD** / **Darwin**
 
@@ -146,8 +185,10 @@ config file|value
 conf-prefix|/usr/local
 conf-sysconfdir|/usr/local/etc/indimail
 conf-shared|/usr/local/share/indimail
+conf-libexec|/usr/local/libexec/indimail
+conf-servicedir|/usr/local/libexec/indimail/service
 
-The build below depens on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
+The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
 
 ```
 $ ./default.configure
@@ -160,7 +201,7 @@ $ sudo make install or sudo ./qmake install
 
 ## Build indimail-mta
 
-To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. You can also use the script default.configure to set the below values.
+To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. If you are ok with the defaults, you can also use the script default.configure.
 
 **Linux**
 
@@ -184,7 +225,7 @@ conf-shared|/usr/local/share/indimail
 conf-libexec|/usr/local/libexec/indimail
 conf-servicedir|/usr/local/libexec/indimail/service
 
-The build below depens on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
+The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
@@ -436,7 +477,6 @@ If you don't have /service create a link to /usr/libexec/indimail/service (/usr/
 
 ```
 $ sudo svstat /service/*
-/service/dnscache: up (pid 120532) 4394 seconds
 /service/greylist.1999: up (pid 120502) 4394 seconds
 /service/pwdlookup: up (pid 120515) 4394 seconds
 /service/qmail-daned.1998: up (pid 120413) 4394 seconds

@@ -1,6 +1,6 @@
 qmail-srs.5
 indimail-mta.fc
-perm_list.mta
+indimail-mta.perms
 auto_libexec.c
 auto_libexec.o
 auto_prefix.c

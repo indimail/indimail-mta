@@ -1,0 +1,15 @@
+debian.tar.gz
+dummy.tar.gz
+perm_list
+daemontools.dsc
+daemontools-Debian_9.0.dsc
+README
+rules
+conf-release
+Makefile
+*.dsc
+preinst
+postinst
+prerm
+postrm
+changelog

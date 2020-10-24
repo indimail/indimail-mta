@@ -1,0 +1,7 @@
+f:::0755:/sbin/:svscan:svscan
+f:::0755:/sbin/:supervise:supervise
+f:::0755:/sbin/:readproctitle:readproctitle
+f:::0755:/sbin/:multilog:multilog
+f:::0755:/sbin/:fghack:fghack
+f:::0755:/sbin/:pgrphack:pgrphack
+f:::0755:/sbin/:minisvc:minisvc

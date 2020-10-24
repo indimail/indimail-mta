@@ -1,0 +1,23 @@
+daemontools (@version@-@release@) unstable; urgency=low
+
+  * First Release
+  * exploit svscan as session leader. Terminate all children using svc -G
+  * svcscan_rc: rc startup script for FreeBSD
+  * qmailctl: use daemon to start svscan in supervised mode
+  * qmailctl: removed use of initsvc for start/stop
+  * new command svwait to wait for supervise service to come up
+  * install indimail.plist in shareddir/boot
+  * svctool, svwait: fix date command syntax for Darwin, FreeBSD
+  * indimail.plist: service directory on Darwin changed to /usr/local/etc/indimail/service
+  * svctool: renamed launchd unit file indimail.plist to svscan.plist - create /service link in /etc/synthetic.conf for Darwin - create /var/indimail/inquery directory - removed hardcoded directory for svwait in inlookup, pwdlookup service
+  * hier.c, indimail-mta.spec, Makefile: renamed launchd unit file indimail.plist to svscan.plist
+  * svwait: replace builtin echo with /bin/echo -n (for Darwin)
+  * svctool -freebsd: remove svscan config/rc file with --config=rm-boot
+  * svscan, supervise, svc, svstat, svok - use /run or /var/run on systems that support it
+  * Makefile: added run_init.o object for svc, svstat, svok
+  * Makefile: use conf-runfs to configure daemontools to use /run, /var/run
+  * svscan.c, qmailctl, svscan_rc - renamed svscan.pid to .svscan.pid
+  * added man page for docker-entrypoint
+  * replaced absolute paths with relative path in services to make them work in any service directory
+  * svctool: added control file servicedir.conf
+  * svscanboot: use servicedir.conf for servicedir

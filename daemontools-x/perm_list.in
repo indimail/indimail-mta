@@ -1,0 +1,72 @@
+%dir %attr(0755,qmail,nofiles) @logdir@/svc
+%dir %attr(0555,root,root) @prefix@/share/indimail/doc
+%dir %attr(0555,root,root) @prefix@/share/indimail/boot
+
+%attr(0755,root,root) @prefix@/bin/qmailctl
+%attr(0755,root,root) @prefix@/bin/qlogselect
+%attr(0755,root,root) @prefix@/bin/logselect
+%attr(0755,root,root) @prefix@/bin/teepipe
+%attr(0755,root,root) @prefix@/bin/multipipe
+%attr(0755,root,root) @prefix@/bin/qfilelog
+%attr(0755,root,root) @prefix@/bin/spipe
+%attr(0755,root,root) @prefix@/bin/tai64n2tai
+%attr(0755,root,root) @prefix@/bin/tai2tai64n
+%attr(0755,root,root) @prefix@/bin/tai64nunix
+%attr(0755,root,root) @prefix@/bin/tai64nlocal
+%attr(0755,root,root) @prefix@/bin/tai64n
+%attr(0755,root,root) @prefix@/bin/svstat
+%attr(0755,root,root) @prefix@/bin/svok
+%attr(0755,root,root) @prefix@/bin/svc
+%attr(0755,root,root) @prefix@/bin/softlimit
+%attr(0755,root,root) @prefix@/bin/setuidgid
+%attr(0755,root,root) @prefix@/bin/setlock
+%attr(0755,root,root) @prefix@/bin/envuidgid
+%attr(0755,root,root) @prefix@/bin/envdir
+
+%attr(0755,root,root) @prefix@/sbin/docker-entrypoint
+%attr(0755,root,root) @prefix@/sbin/minisvc
+%attr(0755,root,root) @prefix@/sbin/pgrphack
+%attr(0755,root,root) @prefix@/sbin/fghack
+%attr(0755,root,root) @prefix@/sbin/multilog
+%attr(0755,root,root) @prefix@/sbin/readproctitle
+%attr(0755,root,root) @prefix@/sbin/supervise
+%attr(0755,root,root) @prefix@/sbin/svscan
+
+%attr(0755,root,root) @libexecdir@/svwait
+%attr(0755,root,root) @libexecdir@/svscanboot
+
+%attr(0755,root,root) @mandir@/man1/tai64n2tai.1.gz
+%attr(0755,root,root) @mandir@/man1/tai2tai64n.1.gz
+%attr(0755,root,root) @mandir@/man1/qlogselect.1.gz
+%attr(0755,root,root) @mandir@/man1/teepipe.1.gz
+%attr(0755,root,root) @mandir@/man1/multipipe.1.gz
+%attr(0755,root,root) @mandir@/man1/qfilelog.1.gz
+%attr(0755,root,root) @mandir@/man1/spipe.1.gz
+
+%attr(0644,root,root) @mandir@/man8/docker-entrypoint.8.gz
+%attr(0644,root,root) @mandir@/man8/minisvc.8.gz
+%attr(0644,root,root) @mandir@/man8/qmailctl.8.gz
+%attr(0644,root,root) @mandir@/man8/svscanboot.8.gz
+%attr(0644,root,root) @mandir@/man8/logselect.8.gz
+%attr(0644,root,root) @mandir@/man8/tai64nunix.8.gz
+%attr(0644,root,root) @mandir@/man8/tai64nlocal.8.gz
+%attr(0644,root,root) @mandir@/man8/tai64n.8.gz
+%attr(0644,root,root) @mandir@/man8/svstat.8.gz
+%attr(0644,root,root) @mandir@/man8/svscan.8.gz
+%attr(0644,root,root) @mandir@/man8/svwait.8.gz
+%attr(0644,root,root) @mandir@/man8/svok.8.gz
+%attr(0644,root,root) @mandir@/man8/svc.8.gz
+%attr(0644,root,root) @mandir@/man8/supervise.8.gz
+%attr(0644,root,root) @mandir@/man8/softlimit.8.gz
+%attr(0644,root,root) @mandir@/man8/setuidgid.8.gz
+%attr(0644,root,root) @mandir@/man8/setlock.8.gz
+%attr(0644,root,root) @mandir@/man8/readproctitle.8.gz
+%attr(0644,root,root) @mandir@/man8/pgrphack.8.gz
+%attr(0644,root,root) @mandir@/man8/multilog.8.gz
+%attr(0644,root,root) @mandir@/man8/fghack.8.gz
+%attr(0644,root,root) @mandir@/man8/envuidgid.8.gz
+%attr(0644,root,root) @mandir@/man8/envdir.8.gz
+
+%attr(0644,root,root) @sharedir@doc/README.logselect
+%attr(0644,root,root) @sharedir@boot/systemd
+%attr(0644,root,root) @sharedir@boot/upstart

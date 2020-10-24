@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.8  2020-10-23 09:40:24+05:30  Cprogrammer
+ * fixed error message
+ *
  * Revision 1.7  2020-09-19 17:38:56+05:30  Cprogrammer
  * removed unused argument to perm()
  *
@@ -112,7 +115,7 @@ perm(char *prefix1, char *prefix2, char *prefix3, char *file, int type, int uid,
 			if (!str_diffn(file, "man/", 4))
 				strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
 			else
-				strerr_die6sys(111, FATAL, prefix1, prefix2, prefix3, file, ": ");
+				strerr_die7sys(111, FATAL, prefix1, "/", prefix2, prefix3, file, ": ");
 			return;
 		}
 	}

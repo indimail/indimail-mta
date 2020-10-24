@@ -13,19 +13,16 @@ prefix=@prefix@
 qmaildir=@qmaildir@
 sysconfdir=@sysconfdir@
 qsysconfdir=@qsysconfdir@
+shareddir=@shareddir@
+libexecdir=@libexecdir@
+servicedir=@servicedir@
+mandir=@mandir@
 
-mandir=$(prefix)/share/man
-libexecdir=$(prefix)/libexec/indimail
-
-ucspitcp_version=@ucspitcp_version@
 version=@version@
-
 tcpserver_plugin=1
 notlsarr=0
-arch=$(shell uname -m)
 # check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
 libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)
-libdir=@libdir@
 cp=/bin/cp
 rm=/bin/rm
 
@@ -35,37 +32,28 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	#
-	# Extract source archives
-	#
-	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
-	#
-	# run configure script
+	# configure
 	#
 	if [ $(tcpserver_plugin) -eq 1 ] ; then \
-		echo "-DLOAD_SHARED_OBJECTS" > indimail-mta-$(version)/conf-dlopen; \
-		echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-$(ucspitcp_version)/conf-dlopen; \
+		echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen; \
 	else \
-		/bin/rm -f indimail-mta-$(version)/conf-dlopen; \
-		/bin/rm -f ucspi-tcp-$(ucspitcp_version)/conf-dlopen; \
+		/bin/rm -f conf-dlopen; \
 	fi
 	if [ $(notlsarr) -eq 0 ] ; then \
-		echo "-DHASTLSA" > indimail-mta-$(version)/conf-tlsa; \
+		echo "-DHASTLSA" > conf-tlsa; \
 	else \
-		/bin/rm -f indimail-mta-$(version)/conf-tlsa; \
-	fi
-	#
-	if [ -d ucspi-tcp-$(ucspitcp_version) -a ! -L ucspi-tcp-x ] ; then \
-		ln -s ucspi-tcp-$(ucspitcp_version) ucspi-tcp-x; \
+		/bin/rm -f conf-tlsa; \
 	fi
 	#
 	# run make
 	#
-	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then echo $(prefix)      > ucspi-tcp-$(ucspitcp_version)/conf-home; fi
-	if [ -d indimail-mta-$(version) ]       ; then echo $(qmaildir)    > indimail-mta-$(version)/conf-qmail; fi
-	if [ -d indimail-mta-$(version) ]       ; then echo $(qsysconfdir) > indimail-mta-$(version)/conf-sysconfdir; fi
-	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) SYSTEM=LINUX -s -C ucspi-tcp-$(ucspitcp_version) DESTDIR=$(DESTDIR); fi
-	if [ -d indimail-mta-$(version) ]       ; then $(MAKE) SYSTEM=LINUX -s -C indimail-mta-$(version)       DESTDIR=$(DESTDIR); fi
-	${rm} -f $(DESTDIR)$(prefix)/$(libd)/*.la
+	sed 's{PREFIX{${prefix}{'          conf-prefix.in     > conf-prefix
+	sed 's{QMAIL{${qmaildir}{'         conf-qmail.in      > conf-qmail
+	sed 's{SYSCONFDIR{${qsysconfdir}{' conf-sysconfdir.in > conf-sysconfdir
+	sed 's{SHAREDDIR{${shareddir}{'    conf-shared.in     > conf-shared
+	sed 's{LIBEXECDIR{${libexecdir}{'  conf-libexec.in    > conf-libexec
+	sed 's{SERVICEDIR{${servicedir}{'  conf-servicedir.in > conf-servicedir
+	$(MAKE) SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
 	( \
 	echo NAME=indimail-mta; \
 	echo Description=\"IndiMail MTA\"; \
@@ -79,12 +67,9 @@ build-stamp:
 clean:
 	rm -f build-stamp configure-stamp
 	${rm} -rf $(DESTDIR)
-	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) SYSTEM=LINUX -s -C ucspi-tcp-$(ucspitcp_version) clean||true; fi
-	if [ -d indimail-mta-$(version) ]       ; then \
-		FAKED_MODE=1;export FAKED_MODE; \
-		$(MAKE) SYSTEM=LINUX -s -C indimail-mta-$(version) clean||true; \
-		unset FAKED_MODE; \
-	fi
+	FAKED_MODE=1;export FAKED_MODE
+	$(MAKE) SYSTEM=LINUX -s clean||true
+	unset FAKED_MODE
 	dh_testdir
 	dh_testroot
 	dh_clean
@@ -94,16 +79,14 @@ install: build
 	dh_testroot
 	dh_prep || dh_clean -k
 	dh_installdirs
-	if [ -d ucspi-tcp-$(ucspitcp_version) ] ; then $(MAKE) SYSTEM=LINUX -s install -C ucspi-tcp-$(ucspitcp_version) DESTDIR=$(DESTDIR); fi
-	if [ -d indimail-mta-$(version) ]       ; then \
-		FAKED_MODE=1;export FAKED_MODE; \
-		$(MAKE) SYSTEM=LINUX -s install -C indimail-mta-$(version) DESTDIR=$(DESTDIR); \
-		unset FAKED_MODE; \
+	FAKED_MODE=1;export FAKED_MODE
+	$(MAKE) SYSTEM=LINUX -s install DESTDIR=$(DESTDIR)
+	if [ -f indimail-mta.perms ] ; then \
+		mkdir -p $(DESTDIR)$(qsysconfdir); \
+		install -m 0644 indimail-mta.perms "$(DESTDIR)$(qsysconfdir)"/indimail-mta.perms; \
 	fi
+	unset FAKED_MODE
 	${rm} -rf $(DESTDIR)$(mandir)/man3
-	${rm} -rf $(DESTDIR)$(prefix)/include
-	${rm} -rf $(DESTDIR)$(prefix)/queue
-	${rm} -f  $(DESTDIR)$(prefix)/$(libd)/*.la
 	if [ ! -d $(DESTDIR)$(sysconfdir)/apparmor.d/local ] ; then \
 		mkdir -p $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
@@ -119,20 +102,16 @@ install: build
 	if [ -f ../BUILD/debian/usr.bin.freshclam ] ; then \
 		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
-	if [ -f indimail-mta-$(version)/qupgrade.sh ] ; then \
+	if [ -f qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 indimail-mta-$(version)/qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
+		install -m 0755 qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
 	fi
-	if [ -f indimail-mta-$(version)/qlocal_upgrade.sh ] ; then \
+	if [ -f qlocal_upgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 indimail-mta-$(version)/qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
-	fi
-	if [ -f indimail-mta-$(version)/perm_list.mta ] ; then \
-		mkdir -p $(DESTDIR)$(qsysconfdir); \
-		install -m 0644 indimail-mta-$(version)/perm_list.mta "$(DESTDIR)$(qsysconfdir)"/daemontools_perm_list; \
+		install -m 0755 qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
 	fi
 	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
-	/bin/rm -f indimail-mta-release indimail-mta-x ucspi-tcp-x
+	/bin/rm -f indimail-mta-release indimail-mta-x
 
 binary-indep: build install
 	dh_testdir
@@ -141,8 +120,6 @@ binary-indep: build install
 	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-mta.install
 	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-mini.install
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mta
-	dh_install --sourcedir=$(DESTDIR) -pdaemontools
-	dh_install --sourcedir=$(DESTDIR) -pucspi-tcp
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mini
 	dh_installchangelogs
 	dh_installcron

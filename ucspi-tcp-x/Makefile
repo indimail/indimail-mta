@@ -6,10 +6,13 @@ SSLINCS := -I/usr/kerberos/include
 SSLLIBS := -lssl -lcrypto
 include Makevars.$(SYSTEM)
 edit = sed \
+	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@prefix\@,$(prefix),g' \
-	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
+	-e 's,@qsysconfdir\@,$(sysconfdir),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g'
@@ -79,8 +82,7 @@ auto_shared.o: \
 compile auto_shared.c
 	./compile auto_shared.c
 
-check: \
-it instcheck
+check: it instcheck
 	./instcheck
 
 chkshsgr: \
@@ -90,6 +92,10 @@ load chkshsgr.o
 chkshsgr.o: \
 compile chkshsgr.c
 	./compile chkshsgr.c
+
+ucspi-tcp.perms: perm_list.in \
+conf-prefix conf-sysconfdir conf-shared
+	$(edit) perm_list.in > $@
 
 sig.o: \
 compile sig.c
@@ -249,8 +255,8 @@ ip4_scan.o: \
 compile ip4_scan.c ip4.h
 	./compile ip4_scan.c
 
-it: \
-prog instcheck tcpserver.1 shared installer
+it: prog tcpserver.1 shared instcheck \
+installer ucspi-tcp.perms ucspi-tcp.spec
 
 load: warn-auto.sh conf-ld systype make-load
 	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
@@ -352,42 +358,6 @@ warn-auto.sh rts.sh conf-prefix
 rules.o: \
 compile rules.c rules.h ip4_bit.h ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` rules.c
-
-install-strip: install
-distclean: clean
-
-installer: \
-load installer.o
-	./load installer -lqmail
-
-installer.o: \
-compile installer.c
-	./compile installer.c
-
-DIRS: DIRS.in
-	$(edit) $@.in > $@
-
-ucspi-tcp.spec: ucspi-tcp.spec.in conf-prefix \
-conf-shared conf-sysconfdir
-	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
-
-install: it installer DIRS BIN SHARED PLUGINS MAN
-	mkdir -p $(DESTDIR)$(prefix)
-	mkdir -p $(DESTDIR)$(prefix)/lib
-	mkdir -p $(DESTDIR)$(shareddir)
-	mkdir -p $(DESTDIR)$(mandir)
-	./installer $(DESTDIR)                         < DIRS
-	./installer $(DESTDIR)$(prefix)                < BIN
-	./installer $(DESTDIR)$(shareddir)             < SHARED
-	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
-	./installer $(DESTDIR)$(mandir)                < MAN
-
-uninstall: installer DIRS BIN SHARED PLUGINS MAN
-	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
-	sed -n '1!G;h;$$p' PLUGINS | ./installer -ui $(DESTDIR)$(prefix)"/lib/indimail"
-	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
-	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)
-	sed -n '1!G;h;$$p' DIRS    | ./installer -u  $(DESTDIR)
 
 socket.lib: \
 trylsock.c compile load
@@ -697,3 +667,46 @@ iopause.o: compile iopause.c iopause.h
 
 clean:
 	rm -f `cat TARGETS`
+
+install-strip: install
+distclean: clean
+
+installer: \
+load installer.o
+	./load installer -lqmail
+
+installer.o: \
+compile installer.c
+	./compile installer.c
+
+DIRS: DIRS.in
+	$(edit) $@.in > $@
+
+ucspi-tcp.spec: ucspi-tcp.spec.in conf-prefix \
+conf-shared conf-sysconfdir
+	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
+
+install: it installer DIRS BIN SHARED PLUGINS MAN
+	mkdir -p $(DESTDIR)$(prefix)
+	mkdir -p $(DESTDIR)$(prefix)/lib
+	mkdir -p $(DESTDIR)$(shareddir)
+	mkdir -p $(DESTDIR)$(libexecdir)
+	mkdir -p $(DESTDIR)$(mandir)
+	./installer $(DESTDIR)                         < DIRS
+	./installer $(DESTDIR)$(prefix)                < BIN
+	./installer $(DESTDIR)$(shareddir)             < SHARED
+	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
+	./installer $(DESTDIR)$(libexecdir)            < LIBEXEC
+	./installer $(DESTDIR)$(mandir)                < MAN
+
+uninstall: installer DIRS BIN SHARED PLUGINS MAN
+	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
+	sed -n '1!G;h;$$p' LIBEXEC | ./installer -ui $(DESTDIR)$(libexecdir)
+	sed -n '1!G;h;$$p' PLUGINS | ./installer -ui $(DESTDIR)$(prefix)"/lib/indimail"
+	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
+	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$$p' DIRS    | ./installer -u  $(DESTDIR)
+
+debian/Makefile: debian/Makefile.in conf-release conf-version \
+conf-prefix conf-sysconfdir conf-shared
+	$(edit) $@.in > $@

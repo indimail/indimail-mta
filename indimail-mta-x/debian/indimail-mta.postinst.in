@@ -121,10 +121,10 @@ esac
 #
 # We need to do this for debian. SIGH!!
 #
-if [ -f ${qsysconfdir}/perm_list.mta ] ; then
+if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
 	echo "Fixing Permissions (debian stupidity)"
 (
-/bin/grep -v "^#" ${qsysconfdir}/perm_list.mta | while read line
+/bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | while read line
 do
 	if [ " $line" = " " ] ; then
 		continue
@@ -141,35 +141,13 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
 		echo "Running Custom Upgrade Script for post upgrade"
 		/bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
 	fi
-	if [ -f /etc/init.d/svscan ] ; then
-		cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
-			${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
-	fi
-	if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
-		cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service
-		/bin/systemctl daemon-reload
-	elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
-		cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
-	/bin/systemctl daemon-reload
-	elif [ -f /sbin/initctl -a -d /etc/init ] ; then
-		cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf
-	elif [ -d /etc/event.d ] ; then
-		cmp -s ${shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/upstart /etc/event.d
-	elif [ -d /System/Library/LaunchDaemons ] ; then
-		cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
-		${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
-	fi
 	(
 	# refresh indimail-mta services
 	svc_list=""
-	for i in clamd greylist.1999 qmail-qmqpd.628 \
+	for i in greylist.1999 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
 		qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
-		qscanq udplogger.3000
+		qscanq udplogger.3000 clamd freshclam
 	do
 		if [ -d ${servicedir}/$i ] ; then
 			if [ -z "$svc_list" ] ; then
@@ -181,6 +159,17 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
 	done
 	svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+	echo "starting indimail-mta services"
+	for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
+		qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
+		qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
+		qscanq resolvconf udplogger.3000
+	do
+		if [ -f ${servicedir}/$i.down ] ; then
+			${rm} -f ${servicedir}/$i.down
+			${prefix}/bin/svc -u ${servicedir}/$i || true
+		fi
+	done
 	) >> /var/log/indimail-mta-setup.log
 	${rm} -f /tmp/indimail-mta.upgrade
 	exit 0
@@ -232,8 +221,6 @@ fi
 /bin/chown -R qmaill:nofiles ${logdir}
 
 # Misc/Configuration
-${prefix}/sbin/svctool --svscanlog --servicedir=${servicedir} --scanint=60
-
 echo "Creating default qmail configuraton and catch-all alias (${qmaildir}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${qmaildir}/alias/Maildir/
 
@@ -473,7 +460,7 @@ done
 # turn off automatic refresh for services during first time installation
 svc_list=""
 for i in clamd greylist.1999 qmail-qmqpd.628 \
-	qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
+	qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
 	qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
 	qmail-daned.1998
 do
@@ -495,11 +482,8 @@ if [ -f ${mandir}/man7/authlib.7.gz ] ; then
 fi
 
 #
-# Install IndiMail to be started on system boot
-# The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
-#
-echo "adding indimail-mta startup"
 if [ /usr/lib/sm.bin/sendmail ] ; then
+	echo "removing sendmail as alternative"
 	if [ -x /usr/sbin/update-alternatives ] ; then
 	/usr/sbin/update-alternatives --remove-all sendmail-mta || true
 	/usr/sbin/update-alternatives --remove-all sendmail-msp || true
@@ -509,15 +493,12 @@ if [ /usr/lib/sm.bin/sendmail ] ; then
 	fi
 fi
 ${prefix}/sbin/svctool --disable-service sendmail exim4 postfix
-${prefix}/sbin/svctool --config=add-boot --servicedir=$libexecdir/service
+echo "adding indimail-mta as an alternative"
 ${prefix}/sbin/svctool --config=add-alt
-if [ -x /bin/systemctl ] ; then
-	/bin/systemctl enable svscan.service
-fi
 
-echo "Checking Installed Permissions"
-if [ -x ${libexecdir}/instcheck ] ; then
-	${libexecdir}/instcheck > /dev/null 2>&1
+if [ -x ${libexecdir}/instcheck.indimail-mta ] ; then
+	echo "Checking Installed Permissions"
+	${libexecdir}/instcheck.indimail-mta > /dev/null 2>&1
 fi
 
 #
@@ -542,7 +523,7 @@ else
 fi
 default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 echo "   You can also use the 'service' command to start indimail-mta"
-echo "   sudo service indimail start"
+echo "   sudo service svscan start"
 count=`expr $count + 1`
 echo "$count. Change your default domain in ${qsysconfdir}/control/defaultdomain"
 count=`expr $count + 1`

@@ -1,0 +1,14 @@
+Format: 1.0
+Source: daemontools
+Section: Misc
+Priority: extra
+Binary: daemontools
+Architecture: any
+Version: @version@-@release@
+Maintainer: Manvendra Bhangui <daemontools@indimail.org>
+Homepage: https://github.com/mbhangui/indimail-mta
+Debtransform-Release: 1
+Debtransform-Tar: daemontools-@version@.tar.gz
+Debtransform-Files-Tar: debian.tar.gz
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, libqmail-dev, m4, gawk

@@ -1,0 +1,92 @@
+.TH minisvc 8
+.SH NAME
+minisvc \- daemontools mini Service Configuration Tool
+
+.SH SYNOPSYS
+.B minisvc
+[
+.I options
+]
+
+.SH DESCRIPTION
+
+\fBminisvc\fR is a shell frontend for configuring supervise(8) services under
+svscan(8). You can install \fBsvscan(8)\fR to be started by the system using
+the command \fBminisvc --config=add-boot\fR.
+
+\fBminisvc\fR requires root privilege to run.
+
+.EX
+Usage: svctool [OPTION]
+
+Known values for OPTION are:
+
+--svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
+
+  service_path - Path where supervise scripts will be installed
+  cmmd         - Program/Script to run instead of .svscan/run
+  n            - Scan interval for svscan command
+
+--unshare
+  Use unshare to mount private /etc/resolv.conf for using local dns
+
+--config=add-boot|rm-boot
+
+  add-boot       - Add startup scripts for IndiMail to get started during boot
+  rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
+
+--down
+  Create any of the supervisor services in down state
+
+--rmsvc=service_name
+
+  Disable supervise scripts for service
+  service_name   - name of service with full path
+                   e.g. (@servicedir@/qmail-smtpd.25)
+                   (give multiple services enclosed in double quotes)
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
+
+--ensvc=service_name
+
+  Enable supervise scripts for service
+  service_name   - name of service with full path
+                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   (give multiple services enclosed in double quotes)
+                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+
+--refreshsvc=service_name
+  [--run-file-only]
+
+  Enable supervise scripts for service
+  service_name   - name of service with full path
+                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   (give multiple services enclosed in double quotes)
+                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   service_name can be "all" to act on all services
+  run-file-only  - Recreate run files but not variables
+  NOTE: if the file .norefreshsvc is present in the variable or the config
+  directory, refresh is skipped
+
+--norefreshsvc="0|1 service_name"
+
+  Disable/Enable auto refresh of supervise scripts for service
+  0              - Disable autorefresh (create .norefreshsvc in variables directory)
+  1              - Enable  autorefresh (delete .norefreshsvc in variables directory)
+  service_name   - name of service with full path
+                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   service_name can be "all" to act on all services
+
+--help
+
+  display this help and exit
+
+--version
+
+  output version information
+.EE
+
+.SH RETURN VALUE
+\fBsvctool\fR returns non-zero status on error.
+
+.SH "SEE ALSO"
+IndiMail(7), initsvc(1), svscan(8), svstat(8), svc(8), supervise(8)

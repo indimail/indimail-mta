@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.522 2020-10-19 17:05:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.525 2020-10-23 21:28:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.522 2020-10-19 17:05:52+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.525 2020-10-23 21:28:14+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -1042,19 +1042,22 @@ for i in qmail nofiles indimail qscand; do
 done
 
 echo "Checking IndiMail Installation Permission"
-if [ ! -x "$DESTDIR"$libexecdir/instcheck ]; then
-  echo "! Couldn't find "$DESTDIR"$libexecdir/instcheck" 1>&2
-  OK=0
-else
-  if [ "$VERB" = y ]; then
-    echo "instcheck from qmail is installed. Executing..."
-  fi
-  "$DESTDIR"$libexecdir/instcheck "$DESTDIR"$QmailHOME
-  if [ $? -ne 0 ]; then
-    echo "instcheck returned non-zero exit status. Check Installation"
+for i in indimail-mta daemontools ucspi-tcp
+do
+  if [ ! -x "$DESTDIR"$libexecdir/instcheck.$i ]; then
+    echo "! Couldn't find "$DESTDIR"$libexecdir/instcheck.$i" 1>&2
     OK=0
+  else
+    if [ "$VERB" = y ]; then
+      echo "instcheck.$i from $i is installed. Executing..."
+    fi
+    "$DESTDIR"$libexecdir/instcheck.$i "$DESTDIR"$QmailHOME
+    if [ $? -ne 0 ]; then
+      echo "instcheck.$i returned non-zero exit status. Check Installation"
+      OK=0
+    fi
   fi
-fi
+done
 if [ $indimail_installed -eq 1 ] ; then
   echo "Checking IndiMail Default MySQL Tables"
   if [ ! -x "$DESTDIR"$QmailBinPrefix/sbin/install_tables ]; then
@@ -5283,46 +5286,48 @@ fi
 /bin/chmod 500 $conf_dir
 echo "$prog_args" > $conf_dir/.options
 if [ -z $init_cmd ] ; then
-echo           > $conf_dir/INITCMD
+	echo           > $conf_dir/INITCMD
 else
-echo $init_cmd > $conf_dir/INITCMD
+	echo $init_cmd > $conf_dir/INITCMD
 fi
 echo "/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin" > $conf_dir/PATH
 if [ " $scan_interval" = " " ] ; then
-echo           "300"  > $conf_dir/SCANINTERVAL
-else
-echo "$scan_interval" > $conf_dir/SCANINTERVAL
+	echo           "300"  > $conf_dir/SCANINTERVAL
+	else
+	echo "$scan_interval" > $conf_dir/SCANINTERVAL
 fi
 echo > $conf_dir/SCANLOG
 if [ -x /usr/bin/unshare -a $use_unshare -eq 1 ] ; then
-echo > $conf_dir/UNSHARE
+	echo > $conf_dir/UNSHARE
 else
-     > $conf_dir/UNSHARE
+	     > $conf_dir/UNSHARE
 fi
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
 /bin/mkdir -p "$DESTDIR"$sysconfdir
-(
-echo "# $prog_args"
-echo "search `uname -n`"
-echo "nameserver 127.0.0.1"
-) > "$DESTDIR"$sysconfdir/resolv.conf
-# svscan run script
-(
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
-echo "echo svscan \$PPID initialization PID \$\$"
-echo "exec 2>&1"
-echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
-echo "/usr/bin/mount -l"
-) > "$DESTDIR"$SERVICEDIR/.svscan/run
 if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run ] ; then
-/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
+	# svscan run script
+	(
+	echo "#!/bin/sh"
+	echo "$RCSID"
+	echo "# generated on $host on `date`"
+	echo "# $prog_args"
+	echo ""
+	echo "echo svscan \$PPID initialization PID \$\$"
+	echo "exec 2>&1"
+	echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
+	echo "/usr/bin/mount -l"
+	) > "$DESTDIR"$SERVICEDIR/.svscan/run
+	(
+	echo "# $prog_args"
+	echo "search `uname -n`"
+	echo "nameserver 127.0.0.1"
+	) > "$DESTDIR"$sysconfdir/resolv.conf
+	/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
 else
-/bin/chmod -x "$DESTDIR"$SERVICEDIR/.svscan/run
+	if [ -x "$DESTDIR"$SERVICEDIR/.svscan/run ] ; then
+		/bin/chmod -x "$DESTDIR"$SERVICEDIR/.svscan/run
+	fi
 fi
 
 (

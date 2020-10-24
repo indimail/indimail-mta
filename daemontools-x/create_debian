@@ -1,0 +1,24 @@
+#!/bin/sh
+if [ ! -f /etc/debian_version ] ; then
+	echo "Not a debian or ubuntu distribution" 1>&2
+	exit 1
+fi
+version=$(cat conf-version)
+release=$(cat conf-release)
+ucspi_tcp_version=$(cat ../ucspi-tcp-x/conf-version)
+make -s debian/Makefile
+make -s -C debian
+echo "Cleaning Stage"
+/bin/rm -rf           $HOME/stage/indimail-mta
+mkdir -p              $HOME/stage/indimail-mta
+echo "Copying Stage"
+cp -rp .              $HOME/stage/indimail-mta/indimail-mta-$version
+cp -rp ../ucspi-tcp-x $HOME/stage/indimail-mta/ucspi-tcp-$ucspi_tcp_version
+cp -rp ./debian       $HOME/stage/indimail-mta
+cd                    $HOME/stage/indimail-mta
+echo "Building Stage"
+dpkg-buildpackage -tc -b
+if [ $? -eq 0 ] ; then
+	/bin/rm -rf           $HOME/stage/indimail-mta
+	ls -lt $HOME/stage
+fi

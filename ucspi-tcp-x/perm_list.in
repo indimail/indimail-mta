@@ -1,0 +1,39 @@
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/fixcrio
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/delcr
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/addcr
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/argv0
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/recordio
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/rblsmtpd
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/mconnect-io
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/mconnect
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/tcpcat
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/http@
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/finger@
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/date@
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/who@
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/tcpclient
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/tcprulescheck
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/tcprules
+%attr(0755,mbhangui,mbhangui) @prefix@/bin/tcpserver
+
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/argv0.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/delcr.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/addcr.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/fixcrio.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/recordio.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/rblsmtpd.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/mconnect-io.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/mconnect.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/tcpcat.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/http@.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/finger@.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/date@.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/who@.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/tcpclient.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/tcprulescheck.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/tcprules.1.gz
+%attr(0644,mbhangui,mbhangui) @mandir@/man1/tcpserver.1.gz
+
+%attr(0644,mbhangui,mbhangui) @prefix@/lib/indimail/plugins/rblsmtpd.so
+
+%attr(0644,mbhangui,mbhangui) @shareddir@/doc/README.ucspi-tcp

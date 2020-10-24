@@ -1,0 +1,16 @@
+SYSTEM           != uname -s | tr "[:lower:]" "[:upper:]"
+prefix           != head -1 conf-prefix 2>/dev/null
+qmaildir         != head -1 conf-qmail 2>/dev/null
+mandir           != [ -d "`head -1 conf-prefix`"/man ] && echo "`head -1 conf-prefix`/man" || echo "`head -1 conf-prefix`/share/man"
+shareddir        != head -1 conf-shared 2>/dev/null
+qsysconfdir      != head -1 conf-sysconfdir 2>/dev/null
+libexecdir       != head -1 conf-libexec 2>/dev/null
+servicedir       != head -1 conf-servicedir/dev/null
+version          != cat conf-version
+release          != cat conf-release 2>/dev/null ||echo "1.1"
+ucspitcp_version != [ -f ../ucspi-tcp-x/conf-version ] && cat ../ucspi-tcp-x/conf-version || echo "1.0"
+DATE             != date
+HOST             != echo "`uname -m`-pc-`uname -s`-`uname -o|cut -d/ -f1`"|tr "[:upper:]" "[:lower:]"
+logdir           != cat conf-logdir
+USE_SQL          != [ -n "`head -1 conf-sql`" ] && echo "1" || echo ""
+bash             != [ -f /usr/local/bin/bash ] && echo "/usr/local/bin/bash" || echo "/bin/bash"

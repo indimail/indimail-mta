@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.278  2020-10-23 10:43:07+05:30  Cprogrammer
+ * removed daemontools
+ *
  * Revision 1.277  2020-10-19 22:31:00+05:30  Cprogrammer
  * moved argv0, addcr, delcr, fixcrio, recordio from indimail-mta to ucspi-tcp
  *
@@ -912,14 +915,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "boot", "binm2+df", auto_uido, 0, 0755);
 	c(auto_shared,     "boot", "binm3", auto_uido, 0, 0755);
 	c(auto_shared,     "boot", "binm3+df", auto_uido, 0, 0755);
-#ifdef LINUX
-	c(auto_shared,     "boot", "upstart", auto_uido, 0, 0644);
-	c(auto_shared,     "boot", "systemd", auto_uido, 0, 0644);
-#endif
-#ifdef DARWIN
-	c(auto_shared,     "boot", "StartupParameters.plist", auto_uido, 0, 0444);
-	c(auto_shared,     "boot", "svscan.plist", auto_uido, 0, 0444);
-#endif
 
 	c(auto_sysconfdir, "control", "nodnscheck", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, "control", "level2-tlds", auto_uido, auto_gidq, 0644);
@@ -968,7 +963,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "dk-filter", auto_uido, 0, moder_x);
 #endif
 	c(auto_prefix, "bin", "queue-fix", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "qmailctl", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "uacl", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "qbase64", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "swaks", auto_uido, 0, moder_x);
@@ -1084,33 +1078,8 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "newinclude", auto_uido, 0, moder_x);
 
 	/* daemontools */
-	c(auto_prefix, "bin", "envdir", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "envuidgid", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "setlock", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "setuidgid", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "softlimit", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "svc", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "svok", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "svstat", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "tai64n", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "tai64nlocal", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "tai64nunix", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "tai2tai64n", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "tai64n2tai", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "spipe", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "qfilelog", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "multipipe", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "teepipe", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "logselect", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "qlogselect", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "udpclient", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "svscan", auto_uido, 0, moder_t);
-	c(auto_prefix, "sbin", "supervise", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "readproctitle", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "udplogger", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "multilog", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "fghack", auto_uido, 0, moder_x);
-	c(auto_prefix, "sbin", "pgrphack", auto_uido, 0, moder_x);
 
 	/* serialmail */
 	c(auto_prefix, "bin", "serialcmd", auto_uido, 0, moder_x);
@@ -1132,9 +1101,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-multi", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-nullqueue", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "ldap-checkpwd", auto_uido, 0, moder_x);
-#ifdef LINUX
-	c(auto_prefix, "sbin", "docker-entrypoint", auto_uido, 0, moder_x);
-#endif
 
 #if defined(SMTP_PLUGIN) || defined(LOAD_SHARED_OBJECTS)
 	d(auto_prefix, "lib/indimail/plugins", auto_uido, 0, 0755);
@@ -1223,14 +1189,12 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_libexec_dir, auto_libexec_base, "batv", auto_uido, 0, moder_x);
 #endif
 
-	/*- daemontools */
-	c(auto_libexec_dir, auto_libexec_base, "svscanboot", auto_uido, 0, moder_x);
 	/*- misc */
 	c(auto_libexec_dir, auto_libexec_base, "envmigrate", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "hostname", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qmailconfig", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "config-fast", auto_uido, 0, moder_x);
-	c(auto_libexec_dir, auto_libexec_base, "instcheck", auto_uido, 0, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "instcheck.indimail-mta", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "whois", auto_uido, 0, moder_x);
 
 	/* GPLv3 License, Man Pages, Documents */
@@ -1413,37 +1377,10 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man1", "replier-config.1", uidr, gidr, moder_f);
 
 	/*- daemontools */
-	c(mandir_base,     "man/man8", "envdir.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "envuidgid.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "fghack.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "multilog.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "pgrphack.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "readproctitle.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "setlock.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "setuidgid.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "softlimit.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "supervise.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "svc.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "svok.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "svscan.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "svstat.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "tai64n.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "tai64nlocal.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "tai64nunix.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "spipe.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "qfilelog.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "multipipe.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "teepipe.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "logselect.8", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "qlogselect.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "tai2tai64n.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "tai64n2tai.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man8", "svscanboot.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "udpclient.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "udplogger.8", uidr, gidr, moder_f);
 
 	/*- qmail */
-	c(mandir_base,     "man/man8", "qmailctl.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-local.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-lspawn.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-getpw.8", uidr, gidr, moder_f);
@@ -1536,7 +1473,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.277 2020-10-19 22:31:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.278 2020-10-23 10:43:07+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

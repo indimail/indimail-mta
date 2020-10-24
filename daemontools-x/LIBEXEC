@@ -1,0 +1,11 @@
+#
+# indimail programs for @libexecdir@
+#
+
+# Base directory
+d:::0555:::
+
+# scripts/programs
+f:::0755:/:svscanboot:svscanboot
+f:::0755:/:svwait:svwait
+f:::0755:/:instcheck.daemontools:instcheck

@@ -8,10 +8,10 @@ Homepage: https://github.com/mbhangui/indimail-mta
 
 Package: indimail-mta
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, diffutils, procps
-Provides: indimail-mini, daemontools, ucspi-tcp
-Conflicts: indimail-mini, daemontools, ucspi-tcp
-Replaces: indimail-mini, daemontools, ucspi-tcp
+Depends: ${shlibs:Depends}, ${misc:Depends}, daemontools, ucspi-tcp, net-tools, coreutils, binutils, diffutils, procps
+Provides: indimail-mini
+Conflicts: indimail-mini
+Replaces: indimail-mini
 Description: indimail-mta provides a standalone SMTP server that is part of the IndiMail
  messaging platform. It comprises of the following packages
  .
@@ -25,56 +25,6 @@ Description: indimail-mta provides a standalone SMTP server that is part of the 
  ucspi-tcp,
  .
  The package combines qmail with other packages like libsrs2
-
-Package: daemontools
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils
-Description: daemontools is a collection of tools for managing UNIX services. 
- svscan scans a directory and starts a supervise process for each
- subdirectory of the scanned directory. It restarts the supervise process if
- it dies.
- .
- supervise monitors a service. It starts the service and restarts the
- service if it dies. Setting up a new service is easy: all supervise
- needs is a directory with a run script that runs the service.
- .
- multilog saves error messages to one or more logs. It optionally
- timestamps each line and, for each log, includes or excludes lines
- matching specified patterns. It automatically rotates logs to limit the
- amount of disk space used. If the disk fills up, it pauses and tries
- again, without losing any data.
-
-Package: ucspi-tcp
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils
-Description: tcpserver and tcpclient are easy-to-use command-line tools for building
- TCP client-server applications.
- .
- tcpserver waits for incoming connections and, for each connection, runs
- a program of your choice. Your program receives environment variables
- showing the local and remote host names, IP addresses, and port numbers.
- .
- tcpserver offers a concurrency limit to protect you from running out of
- processes and memory. When you are handling 40 (by default) simultaneous
- connections, tcpserver smoothly defers acceptance of new connections.
- .
- tcpserver also provides TCP access control features, similar to
- tcp-wrappers/tcpd\'s hosts.allow but much faster. Its access control
- rules are compiled into a hashed format with cdb, so it can easily deal
- with thousands of different hosts.
- .
- This package includes a recordio tool that monitors all the input and
- output of a server.
- .
- tcpclient makes a TCP connection and runs a program of your choice. It
- sets up the same environment variables as tcpserver.
- .
- This package includes several sample clients built on top of tcpclient:
- who@, date@, finger@, http@, tcpcat, and mconnect.
- .
- tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
- Interface, using the TCP protocol. UCSPI tools are available for several
- different networks.
 
 Package: indimail-mini
 Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils

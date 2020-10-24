@@ -1,0 +1,106 @@
+#!/usr/bin/make -f
+
+# -*- makefile -*-
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This is the debhelper compatibility version to use.
+# export DH_COMPAT=4
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+
+prefix=@prefix@
+sysconfdir=@sysconfdir@
+qsysconfdir=@qsysconfdir@
+shareddir=@shareddir@
+libexecdir=@libexecdir@
+servicedir=@servicedir@
+mandir=@mandir@
+version=@version@
+
+tcpserver_plugin=1
+arch=$(shell uname -m)
+cp=/bin/cp
+rm=/bin/rm
+
+DESTDIR=$(CURDIR)/debian/ucspi-tcp.tmp
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+	#
+	# run configure script
+	#
+	if [ $(tcpserver_plugin) -eq 1 ] ; then \
+		echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen; \
+	else \
+		/bin/rm -f conf-dlopen; \
+	fi
+	#
+	# run make
+	#
+	sed 's{PREFIX{${prefix}{'          conf-prefix.in     > conf-prefix
+	sed 's{SYSCONFDIR{${qsysconfdir}{' conf-sysconfdir.in > conf-sysconfdir
+	sed 's{SHAREDDIR{${shareddir}{'    conf-shared.in     > conf-shared
+	sed 's{LIBEXECDIR{${libexecdir}{'  conf-libexec.in    > conf-libexec
+	sed 's{SERVICEDIR{${servicedir}{'  conf-servicedir.in > conf-servicedir
+	$(MAKE) SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
+	( \
+	echo NAME=ucspi-tcp; \
+	echo Description=\"Unix Client-Server Program Interface\"; \
+	echo UCSPI_TCP_version=$(version); \
+	echo ID=ucspi-tcp; \
+	echo HOME_URL="https://github.com/mbhangui/indimail-mta"; \
+	echo PACKAGE_BUGREPORT=\"Manvendra Bhangui ucspi-tcp@indimail.org\"; \
+	) > ucspi-tcp-release
+	touch build-stamp
+
+clean:
+	rm -f build-stamp configure-stamp
+	${rm} -rf $(DESTDIR)
+	FAKED_MODE=1;export FAKED_MODE; \
+	$(MAKE) SYSTEM=LINUX -s clean||true; \
+	unset FAKED_MODE;
+	dh_testdir
+	dh_testroot
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep || dh_clean -k
+	dh_installdirs
+	FAKED_MODE=1;export FAKED_MODE; \
+	$(MAKE) SYSTEM=LINUX -s install DESTDIR=$(DESTDIR); \
+	unset FAKED_MODE; \
+	if [ -f ucspi-tcp.perms ] ; then \
+		mkdir -p $(DESTDIR)$(qsysconfdir); \
+		install -m 0644 ucspi-tcp.perms "$(DESTDIR)$(qsysconfdir)"/ucspi-tcp.perms; \
+	fi
+	install -m 0644 ucspi-tcp-release "$(DESTDIR)$(qsysconfdir)"/ucspi-tcp-release
+	/bin/rm -f ucspi-tcp-release ucspi-tcp-x
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	dh_install --sourcedir=$(DESTDIR) -pucspi-tcp
+	dh_installchangelogs
+	dh_installcron
+	dh_installdocs
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_makeshlibs -V
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+# Build architecture-dependent files here. 
+binary-arch: build install
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

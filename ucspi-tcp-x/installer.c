@@ -1,5 +1,14 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.9  2020-10-23 17:54:16+05:30  Cprogrammer
+ * copy the mode of the source file to target
+ *
+ * Revision 1.8  2020-10-23 10:01:20+05:30  Cprogrammer
+ * set actual mode
+ *
+ * Revision 1.7  2020-10-23 07:24:36+05:30  Cprogrammer
+ * set default perms for dirs, executables, fifo and character special files
+ *
  * Revision 1.6  2020-10-06 11:51:26+05:30  Cprogrammer
  * fixed handling of symbolic files
  *
@@ -264,13 +273,18 @@ doit(stralloc *line, int uninstall, int ign_dir)
 	} else
 		gid = -1;
 	if (*modestr) {
-		scan_8long(modestr, &m);
-		mode = (int) m;
+		scan_int(modestr, &mode);
+		if (mode != -1) {
+			scan_8long(modestr, &m);
+			mode = (int) m;
+		}
 	} else
 		mode = -1;
 	switch (*type)
 	{
 	case 'c':
+		if (my_uid || mode == -1)
+			mode = 0666;
 		print_info("mknod", 0, target.s, mode, uid, gid);
 		scan_ulong(name, (unsigned long *) &dev);
 		if (mknod(target.s, mode, dev) == -1) {
@@ -279,20 +293,20 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		} else {
 			if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
 				strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
-			if (mode != -1 && !my_uid && chmod(target.s, (mode_t) mode) == -1)
+			if (chmod(target.s, (mode_t) mode) == -1)
 				strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		}
 	case 'p':
+		if (my_uid || mode == -1)
+			mode = 0644;
 		print_info("mkfifo", 0, target.s, mode, uid, gid);
-		if (my_uid)
-			mode = 0755;
 		if (fifo_make(target.s, mode) == -1) {
 			if (errno != error_exist)
 				strerr_die4sys(111, FATAL, "fifo_make: ", target.s, ": ");
 		} else {
 			if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
 				strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
-			if (mode != -1 && !my_uid && chmod(target.s, (mode_t) mode) == -1)
+			if (chmod(target.s, (mode_t) mode) == -1)
 				strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		}
 	case 'l': /*- here name is target */
@@ -301,21 +315,28 @@ doit(stralloc *line, int uninstall, int ign_dir)
 			strerr_die6sys(111, FATAL, "unable to symlink ", target.s, " to ", name, ": ");
 		break;
 	case 'd':
-		print_info("makedir", 0, target.s, mode, uid, gid);
-		if (my_uid)
+		if (my_uid || mode == -1)
 			mode = 0755;
+		print_info("makedir", 0, target.s, mode, uid, gid);
 		if (mkdir(target.s, mode == -1 ? 0755 : mode) == -1) {
 			if (errno != error_exist)
 				strerr_die4sys(111, FATAL, "unable to mkdir ", target.s, ": ");
 		} else {
 			if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
 				strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
-			if (mode != -1 && !my_uid && chmod(target.s, (mode_t) mode) == -1)
+			if (my_uid || mode == -1)
+				mode = 0755;
+			if (chmod(target.s, (mode_t) mode) == -1)
 				strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		}
 		break;
 
 	case 'f':
+		if (mode == -1) {
+			if (lstat(name, &st) == -1)
+				strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
+			mode = st.st_mode;
+		}
 		print_info("install file", name, target.s, mode, uid, gid);
 		if ((fdin = open_read(name)) == -1) {
 			if (opt)
@@ -343,7 +364,7 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		if (fsync(fdout) == -1)
 			strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
 		close(fdout);
-		if (mode != -1 && !my_uid && chmod(target.s, (mode_t) mode) == -1)
+		if (chmod(target.s, (mode_t) mode) == -1)
 			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
 			strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
@@ -397,7 +418,7 @@ main(argc, argv)
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.6 2020-10-06 11:51:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: installer.c,v 1.9 2020-10-23 17:54:16+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

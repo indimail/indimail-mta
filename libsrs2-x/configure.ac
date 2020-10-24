@@ -72,7 +72,6 @@ case "$host" in
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	;;
 *)
-	INSTALL="/usr/bin/install -c"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	;;
 esac

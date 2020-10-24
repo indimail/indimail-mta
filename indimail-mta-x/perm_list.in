@@ -44,8 +44,6 @@
 %attr(0755,root,root)  @prefix@/bin/822headerok
 %attr(0755,root,root)  @prefix@/bin/822print
 %attr(0755,root,root)  @prefix@/bin/822received
-%attr(0755,root,root)  @prefix@/bin/addcr
-%attr(0755,root,root)  @prefix@/bin/argv0
 %attr(0755,root,root)  @prefix@/bin/autoresponder
 %attr(0755,root,root)  @prefix@/bin/qbase64
 %attr(0755,root,root)  @prefix@/bin/bouncesaying
@@ -55,24 +53,18 @@
 %attr(0755,root,root)  @prefix@/bin/condredirect
 %attr(0755,root,root)  @prefix@/bin/condtomaildir
 %attr(0755,root,root)  @prefix@/bin/datemail
-%attr(0755,root,root)  @prefix@/bin/delcr
 %attr(0755,root,root)  @prefix@/bin/dk-filter
 %attr(0755,root,root)  @prefix@/bin/dknewkey
 %attr(0755,root,root)  @prefix@/bin/dktest
 %attr(0755,root,root)  @prefix@/bin/dot-forward
 %attr(0755,root,root)  @prefix@/bin/drate
-%attr(0755,root,root)  @prefix@/bin/envdir
-%attr(0755,root,root)  @prefix@/bin/envuidgid
 %attr(0755,root,root)  @prefix@/bin/except
 %attr(0755,root,root)  @prefix@/bin/fastforward
-%attr(0755,root,root)  @prefix@/bin/fghack
 %attr(0755,root,root)  @prefix@/bin/filterto
-%attr(0755,root,root)  @prefix@/bin/fixcrio
 %attr(0755,root,root)  @prefix@/bin/forward
 %attr(0755,root,root)  @prefix@/bin/ifaddr
 %attr(0755,root,root)  @prefix@/bin/iftocc
 %attr(0755,root,root)  @prefix@/bin/iftoccfrom
-%attr(0755,root,root)  @prefix@/bin/logselect
 %attr(0755,root,root)  @prefix@/bin/maildir2mbox
 %attr(0755,root,root)  @prefix@/bin/maildircmd
 %attr(0755,root,root)  @prefix@/bin/maildirdeliver
@@ -83,20 +75,16 @@
 %attr(0755,root,root)  @prefix@/bin/maildirwatch
 %attr(0755,root,root)  @prefix@/bin/mailsubj
 %attr(0755,root,root)  @prefix@/bin/mbox2maildir
-%attr(0755,root,root)  @prefix@/bin/multipipe
 %attr(0755,root,root)  @prefix@/bin/inewaliases
 %attr(0755,root,root)  @prefix@/bin/newinclude
 %attr(0755,root,root)  @prefix@/bin/new-inject
 %attr(0755,root,root)  @prefix@/bin/ofmipname
-%attr(0755,root,root)  @prefix@/bin/pgrphack
 %attr(0755,root,root)  @prefix@/bin/predate
 %attr(0755,root,root)  @prefix@/bin/preline
 %attr(0755,root,root)  @prefix@/bin/printforward
 %attr(0755,root,root)  @prefix@/bin/printmaillist
 %attr(0755,root,root)  @prefix@/bin/qarf
-%attr(0755,root,root)  @prefix@/bin/qfilelog
 %attr(0755,root,root)  @prefix@/bin/qmail-cat
-%attr(0755,root,root)  @prefix@/bin/qmailctl
 %attr(0755,root,root)  @prefix@/bin/qmaildirmake
 %attr(0755,root,root)  @prefix@/bin/qmail-inject
 %attr(0755,root,root)  @prefix@/bin/qmail-qfilter
@@ -106,7 +94,6 @@
 %attr(0755,root,root)  @prefix@/bin/qnotify
 %attr(0755,root,root)  @prefix@/bin/qreceipt
 %attr(0755,root,root)  @prefix@/bin/queue-fix
-%attr(0755,root,root)  @prefix@/bin/recordio
 %attr(0755,root,root)  @prefix@/bin/replier
 %attr(0755,root,root)  @prefix@/bin/replier-config
 %attr(0755,root,root)  @prefix@/bin/irmail
@@ -117,31 +104,16 @@
 %attr(0755,root,root)  @prefix@/bin/serialqmtp
 %attr(0755,root,root)  @prefix@/bin/serialsmtp
 %attr(0755,root,root)  @prefix@/bin/setforward
-%attr(0755,root,root)  @prefix@/bin/setlock
 %attr(0755,root,root)  @prefix@/bin/setmaillist
-%attr(0755,root,root)  @prefix@/bin/setuidgid
-%attr(0755,root,root)  @prefix@/bin/softlimit
 %attr(0755,root,root)  @prefix@/bin/spawn-filter
 %attr(0755,root,root)  @prefix@/bin/spfquery
-%attr(0755,root,root)  @prefix@/bin/spipe
 %attr(0755,root,root)  @prefix@/bin/srsfilter
 %attr(0755,root,root)  @prefix@/bin/inotify
-%attr(0755,root,root)  @prefix@/bin/supervise
-%attr(0755,root,root)  @prefix@/bin/svc
-%attr(0755,root,root)  @prefix@/bin/svok
-%attr(0755,root,root)  @prefix@/bin/svstat
 %attr(0755,root,root)  @prefix@/bin/swaks
-%attr(0755,root,root)  @prefix@/bin/tai64n
-%attr(0755,root,root)  @prefix@/bin/tai64nlocal
-%attr(0755,root,root)  @prefix@/bin/tai64nunix
 %attr(0755,root,root)  @prefix@/bin/tcp-env
-%attr(0755,root,root)  @prefix@/bin/teepipe
 %attr(0755,root,root)  @prefix@/bin/uacl
 %attr(0755,root,root)  @prefix@/bin/qaes
-%attr(0755,root,root)  @prefix@/bin/qlogselect
 %attr(0755,root,root)  @prefix@/bin/srs
-%attr(0755,root,root)  @prefix@/bin/tai2tai64n
-%attr(0755,root,root)  @prefix@/bin/tai64n2tai
 %attr(0755,root,root)  @prefix@/bin/udpclient
 %attr(0755,root,root)  @prefix@/bin/qdane
 #
@@ -149,7 +121,6 @@
 #
 %attr(0755,root,root)  @prefix@/sbin/udplogger
 %attr(0755,root,root)  @prefix@/sbin/qmail-popbull
-%attr(0755,root,root)  @prefix@/sbin/multilog
 %attr(0755,root,root)  @prefix@/sbin/ofmipd
 %attr(0755,root,root)  @prefix@/sbin/qmail-smtpd
 %attr(0755,root,root)  @prefix@/sbin/qmail-qmqpd
@@ -171,12 +142,9 @@
 %attr(0755,root,root)  @prefix@/sbin/qmail-qmqpc
 %attr(0755,root,root)  @prefix@/sbin/qscanq-stdin
 %attr(0755,root,root)  @prefix@/sbin/ldap-checkpwd
-%attr(0755,root,root)  @prefix@/sbin/docker-entrypoint
 %attr(0755,root,root)  @prefix@/sbin/plugtest
 %attr(0711,root,root)  @prefix@/sbin/svctool
 %attr(0755,root,root)  @prefix@/sbin/sys-checkpwd
-%attr(0755,root,root)  @prefix@/sbin/svscan
-%attr(0755,root,root)  @prefix@/sbin/readproctitle
 %attr(0755,root,root)  @prefix@/sbin/cleanq
 
 %attr(0751,root,root)  @prefix@/sbin/qmail-daemon
@@ -205,8 +173,6 @@
 %attr(0751,root,root)  @prefix@/sbin/qmail-newu
 %attr(0755,root,root)  @prefix@/sbin/recipient-cdb
 
-%attr(0755,root,root)  @libexecdir@/svwait
-%attr(0755,root,root)  @libexecdir@/svscanboot
 %attr(0755,root,root)  @libexecdir@/cdbmake-12
 %attr(0755,root,root)  @libexecdir@/cdbmake-sv
 %attr(0755,root,root)  @libexecdir@/atrn
@@ -225,7 +191,7 @@
 %attr(0755,root,root)  @libexecdir@/envmigrate
 %attr(0755,root,root)  @libexecdir@/qsmhook
 %attr(0755,root,root)  @libexecdir@/update_tmprsadh
-%attr(0755,root,root)  @libexecdir@/instcheck
+%attr(0755,root,root)  @libexecdir@/instcheck.indimail-mta
 %attr(0755,root,root)  @libexecdir@/testzero
 %attr(0755,root,root)  @libexecdir@/ipmeprint
 %attr(0755,root,root)  @libexecdir@/rpmattr
@@ -289,22 +255,8 @@
 %attr(6551,qscand,qmail) @prefix@/sbin/qhpsi
 %attr(4551,root,root)    @prefix@/sbin/sys-checkpwd
 #
-# ucspi-tcp
-#
-%attr(0755,root,root)  @prefix@/bin/mconnect
-%attr(0755,root,root)  @prefix@/bin/mconnect-io
-%attr(0755,root,root)  @prefix@/bin/rblsmtpd
-%attr(0755,root,root)  @prefix@/bin/tcpcat
-%attr(0755,root,root)  @prefix@/bin/tcpclient
-%attr(0755,root,root)  @prefix@/bin/tcprules
-%attr(0755,root,root)  @prefix@/bin/tcprulescheck
-%attr(0755,root,root)  @prefix@/bin/tcpserver
-%attr(0755,root,root)  @prefix@/bin/who@
-#
 # Boot
 #
-%attr(0444,root,root)  @shareddir@/boot/systemd
-%attr(0444,root,root)  @shareddir@/boot/upstart
 %attr(0755,root,root)  @shareddir@/boot/binm1
 %attr(0755,root,root)  @shareddir@/boot/binm1+df
 %attr(0755,root,root)  @shareddir@/boot/binm2
@@ -321,7 +273,6 @@
 %attr(0755,root,root)  @prefix@/lib/indimail/plugins/generic.so
 %attr(0755,root,root)  @prefix@/lib/indimail/plugins/smtpd-plugin0.so
 %attr(0755,root,root)  @prefix@/lib/indimail/plugins/smtpd-plugin.so
-%attr(0755,root,root)  @prefix@/lib/indimail/plugins/rblsmtpd.so
 %attr(0755,root,root)  @prefix@/lib/indimail/plugins/qmail_smtpd.so
 #
 # Config files
@@ -344,7 +295,6 @@
 %attr(0444,root,root)  @shareddir@/doc/README.indimail-mta
 %attr(0444,root,root)  @shareddir@/doc/README.EXTTODO
 %attr(0444,root,root)  @shareddir@/doc/README.clamav
-%attr(0444,root,root)  @shareddir@/doc/README.logselect
 %attr(0444,root,root)  @shareddir@/doc/README.greylist
 %attr(0444,root,root)  @shareddir@/doc/README.filters
 %attr(0444,root,root)  @shareddir@/doc/README.recipients
@@ -386,8 +336,6 @@
 %attr(0644,root,root) @mandir@/man1/822headerok.1.gz
 %attr(0644,root,root) @mandir@/man1/822print.1.gz
 %attr(0644,root,root) @mandir@/man1/822received.1.gz
-%attr(0644,root,root) @mandir@/man1/addcr.1.gz
-%attr(0644,root,root) @mandir@/man1/argv0.1.gz
 %attr(0644,root,root) @mandir@/man1/autoresponder.1.gz
 %attr(0644,root,root) @mandir@/man1/qbase64.1.gz
 %attr(0644,root,root) @mandir@/man1/bouncesaying.1.gz
@@ -404,16 +352,12 @@
 %attr(0644,root,root) @mandir@/man1/condtomaildir.1.gz
 %attr(0644,root,root) @mandir@/man1/date@.1.gz
 %attr(0644,root,root) @mandir@/man1/datemail.1.gz
-%attr(0644,root,root) @mandir@/man1/delcr.1.gz
 %attr(0644,root,root) @mandir@/man1/dot-forward.1.gz
 %attr(0644,root,root) @mandir@/man1/drate.1.gz
 %attr(0644,root,root) @mandir@/man1/except.1.gz
 %attr(0644,root,root) @mandir@/man1/fastforward.1.gz
 %attr(0644,root,root) @mandir@/man1/filterto.1.gz
-%attr(0644,root,root) @mandir@/man1/finger@.1.gz
-%attr(0644,root,root) @mandir@/man1/fixcrio.1.gz
 %attr(0644,root,root) @mandir@/man1/forward.1.gz
-%attr(0644,root,root) @mandir@/man1/http@.1.gz
 %attr(0644,root,root) @mandir@/man1/ifaddr.1.gz
 %attr(0644,root,root) @mandir@/man1/iftocc.1.gz
 %attr(0644,root,root) @mandir@/man1/iftoccfrom.1.gz
@@ -427,8 +371,6 @@
 %attr(0644,root,root) @mandir@/man1/maildirwatch.1.gz
 %attr(0644,root,root) @mandir@/man1/mailsubj.1.gz
 %attr(0644,root,root) @mandir@/man1/matchup.1.gz
-%attr(0644,root,root) @mandir@/man1/mconnect.1.gz
-%attr(0644,root,root) @mandir@/man1/multipipe.1.gz
 %attr(0644,root,root) @mandir@/man1/inewaliases.1.gz
 %attr(0644,root,root) @mandir@/man1/newinclude.1.gz
 %attr(0644,root,root) @mandir@/man1/new-inject.1.gz
@@ -439,8 +381,6 @@
 %attr(0644,root,root) @mandir@/man1/printmaillist.1.gz
 %attr(0644,root,root) @mandir@/man1/qaes.1.gz
 %attr(0644,root,root) @mandir@/man1/qarf.1.gz
-%attr(0644,root,root) @mandir@/man1/qfilelog.1.gz
-%attr(0644,root,root) @mandir@/man1/qlogselect.1.gz
 %attr(0644,root,root) @mandir@/man1/qmail-cat.1.gz
 %attr(0644,root,root) @mandir@/man1/cidr.1.gz
 %attr(0644,root,root) @mandir@/man1/qmaildirmake.1.gz
@@ -448,8 +388,6 @@
 %attr(0644,root,root) @mandir@/man1/qmail-rm.1.gz
 %attr(0644,root,root) @mandir@/man1/qnotify.1.gz
 %attr(0644,root,root) @mandir@/man1/qreceipt.1.gz
-%attr(0644,root,root) @mandir@/man1/rblsmtpd.1.gz
-%attr(0644,root,root) @mandir@/man1/recordio.1.gz
 %attr(0644,root,root) @mandir@/man1/replier.1.gz
 %attr(0644,root,root) @mandir@/man1/replier-config.1.gz
 %attr(0644,root,root) @mandir@/man1/rrforward.1.gz
@@ -460,25 +398,14 @@
 %attr(0644,root,root) @mandir@/man1/serialsmtp.1.gz
 %attr(0644,root,root) @mandir@/man1/setforward.1.gz
 %attr(0644,root,root) @mandir@/man1/setmaillist.1.gz
-%attr(0644,root,root) @mandir@/man1/spipe.1.gz
 %attr(0644,root,root) @mandir@/man1/srs.1.gz
 %attr(0644,root,root) @mandir@/man1/srsfilter.1.gz
 %attr(0644,root,root) @mandir@/man1/inotify.1.gz
 %attr(0644,root,root) @mandir@/man1/spfquery.1.gz
 %attr(0644,root,root) @mandir@/man1/qmail-srs.5.gz
 %attr(0644,root,root) @mandir@/man1/swaks.1.gz
-%attr(0644,root,root) @mandir@/man1/tai2tai64n.1.gz
-%attr(0644,root,root) @mandir@/man1/tai64n2tai.1.gz
-%attr(0644,root,root) @mandir@/man1/tcpcat.1.gz
-%attr(0644,root,root) @mandir@/man1/tcpclient.1.gz
-%attr(0644,root,root) @mandir@/man1/tcp-env.1.gz
-%attr(0644,root,root) @mandir@/man1/tcprules.1.gz
-%attr(0644,root,root) @mandir@/man1/tcprulescheck.1.gz
-%attr(0644,root,root) @mandir@/man1/tcpserver.1.gz
-%attr(0644,root,root) @mandir@/man1/teepipe.1.gz
 %attr(0644,root,root) @mandir@/man1/uacl.1.gz
 %attr(0644,root,root) @mandir@/man1/udpclient.1.gz
-%attr(0644,root,root) @mandir@/man1/who@.1.gz
 %attr(0644,root,root) @mandir@/man1/xqp.1.gz
 %attr(0644,root,root) @mandir@/man1/xrecipient.1.gz
 %attr(0644,root,root) @mandir@/man1/xsender.1.gz
@@ -519,22 +446,14 @@
 %attr(0644,root,root) @mandir@/man8/dkim.8.gz
 %attr(0644,root,root) @mandir@/man8/dknewkey.8.gz
 %attr(0644,root,root) @mandir@/man8/dktest.8.gz
-%attr(0644,root,root) @mandir@/man8/envdir.8.gz
-%attr(0644,root,root) @mandir@/man8/envuidgid.8.gz
-%attr(0644,root,root) @mandir@/man8/fghack.8.gz
 %attr(0644,root,root) @mandir@/man8/greydaemon.8.gz
 %attr(0644,root,root) @mandir@/man8/ldap-checkpwd.8.gz
-%attr(0644,root,root) @mandir@/man8/logselect.8.gz
 %attr(0644,root,root) @mandir@/man8/mlmatchup.8.gz
-%attr(0644,root,root) @mandir@/man8/multilog.8.gz
 %attr(0644,root,root) @mandir@/man8/ofmipd.8.gz
 %attr(0644,root,root) @mandir@/man8/ofmipname.8.gz
-%attr(0644,root,root) @mandir@/man8/pgrphack.8.gz
-%attr(0644,root,root) @mandir@/man8/svwait.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-cdb.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-clean.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-command.8.gz
-%attr(0644,root,root) @mandir@/man8/qmailctl.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-daemon.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dk.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dkim.8.gz
@@ -573,27 +492,12 @@
 %attr(0644,root,root) @mandir@/man8/queue-fix.0.gz
 %attr(0644,root,root) @mandir@/man8/queue-fix.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-popbull.8.gz
-%attr(0644,root,root) @mandir@/man8/readproctitle.8.gz
 %attr(0644,root,root) @mandir@/man8/recipient-cdb.8.gz
 %attr(0644,root,root) @mandir@/man8/irmail.8.gz
 %attr(0644,root,root) @mandir@/man8/isendmail.8.gz
 %attr(0644,root,root) @mandir@/man8/run-cleanq.8.gz
-%attr(0644,root,root) @mandir@/man8/setlock.8.gz
-%attr(0644,root,root) @mandir@/man8/setuidgid.8.gz
-%attr(0644,root,root) @mandir@/man8/softlimit.8.gz
 %attr(0644,root,root) @mandir@/man8/spawn-filter.8.gz
 %attr(0644,root,root) @mandir@/man8/splogger.8.gz
-%attr(0644,root,root) @mandir@/man8/supervise.8.gz
 %attr(0644,root,root) @mandir@/man8/surblfilter.8.gz
-%attr(0644,root,root) @mandir@/man8/svc.8.gz
-%attr(0644,root,root) @mandir@/man8/svok.8.gz
-%attr(0644,root,root) @mandir@/man8/svscan.8.gz
-%attr(0644,root,root) @mandir@/man8/svscanboot.8.gz
-%attr(0644,root,root) @mandir@/man8/svstat.8.gz
 %attr(0644,root,root) @mandir@/man8/sys-checkpwd.8.gz
-%attr(0644,root,root) @mandir@/man8/tai64n.8.gz
-%attr(0644,root,root) @mandir@/man8/tai64nlocal.8.gz
-%attr(0644,root,root) @mandir@/man8/tai64nunix.8.gz
 %attr(0644,root,root) @mandir@/man8/udplogger.8.gz
-%attr(0644,root,root) @mandir@/man8/svwait.8.gz
-%attr(0644,root,root) @mandir@/man8/docker-entrypoint.8.gz

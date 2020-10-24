@@ -1,0 +1,95 @@
+#!/usr/bin/make -f
+
+# -*- makefile -*-
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This is the debhelper compatibility version to use.
+# export DH_COMPAT=4
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+
+prefix=@prefix@
+qmaildir=@qmaildir@
+sysconfdir=@sysconfdir@
+shareddir=@shareddir@
+qsysconfdir=@qsysconfdir@
+servicedir=@servicedir@
+libexecdir=@libexecdir@
+mandir=@mandir@
+version=@version@
+
+rm=/bin/rm
+
+DESTDIR=$(CURDIR)/debian/daemontools.tmp
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+	#
+	# run configure
+	echo $(prefix)      > conf-prefix
+	echo $(qmaildir)    > conf-qmail
+	echo $(qsysconfdir) > conf-sysconfdir
+	echo $(shareddir)   > conf-shared
+	echo $(libexecdir)  > conf-libexec
+	echo $(servicedir)  > conf-servicedir
+	$(MAKE) SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
+	( \
+	echo NAME=daemontools; \
+	echo Description=\"daemontools\"; \
+	echo daemontools_version=$(version); \
+	echo ID=daemontools; \
+	echo HOME_URL="https://github.com/mbhangui/indimail-mta"; \
+	echo PACKAGE_BUGREPORT=\"Manvendra Bhangui daemontools@indimail.org\"; \
+	) > daemontools-release
+	touch build-stamp
+
+clean:
+	rm -f build-stamp configure-stamp
+	${rm} -rf $(DESTDIR)
+	$(MAKE) SYSTEM=LINUX -s clean||true
+	dh_testdir
+	dh_testroot
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep || dh_clean -k
+	dh_installdirs
+	#
+	# run make
+	#
+	$(MAKE) SYSTEM=LINUX -s install DESTDIR=$(DESTDIR)
+	if [ -f daemontools.perms ] ; then \
+		mkdir -p $(DESTDIR)$(qsysconfdir); \
+		install -m 0644 daemontools.perms "$(DESTDIR)$(qsysconfdir)"/daemontools.perms; \
+	fi
+	install -m 0644 daemontools-release "$(DESTDIR)$(qsysconfdir)"/daemontools-release
+	/bin/rm -f daemontools-release
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	dh_install --sourcedir=$(DESTDIR) -pdaemontools
+	dh_installchangelogs
+	dh_installcron
+	dh_installdocs
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_makeshlibs -V
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+# Build architecture-dependent files here. 
+binary-arch: build install
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

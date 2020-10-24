@@ -53,9 +53,12 @@ conf-shared
 conf-sysconfdir
 ucspi-tcp.spec
 doc
-debian
 addcr
 argv0
 delcr
 fixcrio
 recordio
+DIRS
+ucspi-tcp.perms
+conf-libexec
+conf-servicedir

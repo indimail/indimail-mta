@@ -1,0 +1,25 @@
+Source: daemontools
+Section: admin
+Priority: extra
+Maintainer: Manvendra Bhangui <daemontools@indimail.org>
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 9), gcc, automake, libqmail-dev, m4, gawk
+Homepage: https://github.com/mbhangui/indimail-mta
+
+Package: daemontools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils, procps
+Description: daemontools is a collection of tools for managing UNIX services. 
+ svscan scans a directory and starts a supervise process for each
+ subdirectory of the scanned directory. It restarts the supervise process if
+ it dies.
+ .
+ supervise monitors a service. It starts the service and restarts the
+ service if it dies. Setting up a new service is easy: all supervise
+ needs is a directory with a run script that runs the service.
+ .
+ multilog saves error messages to one or more logs. It optionally
+ timestamps each line and, for each log, includes or excludes lines
+ matching specified patterns. It automatically rotates logs to limit the
+ amount of disk space used. If the disk fills up, it pauses and tries
+ again, without losing any data.

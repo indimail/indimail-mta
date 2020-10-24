@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.3 2020-10-19 22:27:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.13 2020-10-23 19:08:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -13,11 +13,17 @@
 %global _hardened_build    1
 %endif
 
+%if %{defined nodebug}
+%global debug_package      %{nil}
+%endif
+
 %global _prefix            @prefix@
 %global shareddir          @shareddir@
 %global mandir             @mandir@
-%global qsysconfdir        @sysconfdir@
+%global qsysconfdir        @qsysconfdir@
 %global plugindir          %{_prefix}/lib/indimail/plugins
+%global libexecdir         @libexecdir@
+%global servicedir         @servicedir@
 %global tcpserver_plugin   1
 %global see_base           For a description of ucspi-tcp visit https://github.com/mbhangui/indimail-mta
 
@@ -105,8 +111,8 @@ This package includes several sample clients built on top of tcpclient:
 who@, date@, finger@, http@, tcpcat, and mconnect.
 
 tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
-Interface, using the TCP protocol. UCSPI tools are available for several
-different networks.
+Interface, using the TCP protocol. This package supports ipv6 and TLS
+connections.
 
 Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
@@ -114,7 +120,6 @@ Original Author: Dan J. Bernstein <djb@cr.yp.to>
 %setup -q
 
 %build
-ID=$(id -u)
 (
 echo "---------------- INFORMATION ------------------------"
 echo target        %_target
@@ -136,19 +141,25 @@ echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui ucspi-tcp@indimail.org\""
 ) > %{name}-release
 
 #### ucspi-tcp ######################
-%{__sed} 's{PREFIX{%{_prefix}{' conf-prefix.in conf-prefix
-%{__sed} 's{SHAREDDIR{%{shareddir}{' conf-shared.in > conf-shared
+%{__sed} 's{PREFIX{%{_prefix}{'         conf-prefix.in     > conf-prefix
+%{__sed} 's{SHAREDDIR{%{shareddir}{'    conf-shared.in     > conf-shared
+%{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' conf-sysconfdir.in > conf-sysconfdir
+%{__sed} 's{LIBEXECDIR{%{libexecdir}{'  conf-libexec.in    > conf-libexec
+%{__sed} 's{SERVICEDIR{%{servicedir}{'  conf-servicedir.in > conf-servicedir
 %if %{tcpserver_plugin} == 1
-  echo "-DLOAD_SHARED_OBJECTS" >conf-dlopen
+  echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen
 %else
   %{__rm} -f conf-dlopen
 %endif
 ./catChangeLog doc/ChangeLog > ChangeLog
 echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/include/qmail > conf-cc
-echo %{__cc} -O2 > conf-ld
+%if %{defined nodebug}
+  echo %{__cc} -s -O2 > conf-ld
+%else
+  echo %{__cc} -O2 > conf-ld
+%endif
 
 %install
-ID=$(id -u)
 %{__mkdir_p} %{buildroot}%{_prefix}
 
 # rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
@@ -161,7 +172,11 @@ ID=$(id -u)
   LDFLAGS="%{build_ldflags} $LDFLAGS"
 %endif
 %{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+%if %{defined nodebug}
+%{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install-strip
+%else
 %{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" DESTDIR=%{buildroot} install
+%endif
 
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 %{__mkdir_p} %{buildroot}%{qsysconfdir}
@@ -173,7 +188,11 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-ucspi-tc
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
-chmod 755 %{buildroot}%{_prefix}/bin/*
+%if %{undefined nodebug}
+chmod -R 755 %{buildroot}%{_prefix}/bin
+chmod -R 755 %{buildroot}%{libexecdir}
+chmod -R 755 %{buildroot}%{plugindir}
+%endif
 
 %files
 %attr(0755,root,root)                     %{_prefix}/bin/tcpserver
@@ -197,6 +216,7 @@ chmod 755 %{buildroot}%{_prefix}/bin/*
 %attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
 %attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
 %attr(0755,root,root)                     %{plugindir}/rblsmtpd.so
+%attr(0755,root,root)                     %{libexecdir}/instcheck.ucspi-tcp
 
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)                %{mandir}
@@ -226,8 +246,43 @@ chmod 755 %{buildroot}%{_prefix}/bin/*
 %attr(0644,root,root)                     %{shareddir}/doc/ChangeLog-ucspi-tcp
 %attr(0644,root,root)                     %{shareddir}/doc/README.ucspi-tcp
 
+### SCRIPTLET ###############################################################################
+%pretrans
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+for i in `grep -l -E "tcpserver|tcpclient" %{servicedir}/*/run 2>/dev/null`
+do
+  i=$(dirname $i)
+  %{_prefix}/bin/svok $i
+  if [ $? -eq 0 ] ; then
+    touch $i.down
+    %{_prefix}/bin/svc -d $i || true
+  fi
+done
+
+%post
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+for i in `grep -l -E "tcpserver|tcpclient" %{servicedir}/*/run 2>/dev/null`
+do
+  i=$(dirname $i)
+  if [ -f $i.down ] ; then
+    %{__rm} -f $i.down
+    %{_prefix}/bin/svc -u $i || true
+  fi
+done
+
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+%{__rm} -fr %{_builddir}/%{name}-%{version}
 
 # fix changelog for openSUSE buildservice
 %changelog

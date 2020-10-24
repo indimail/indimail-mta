@@ -18,55 +18,54 @@ edit = sed \
 	-e 's,@prefix\@,$(prefix),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
-	-e 's,@ucspitcp_version\@,$(ucspitcp_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-it = perm_list.mta 822date 822field 822header 822print 822received \
+it = indimail-mta.perms 822date 822field 822header 822print 822received \
 	addrlist atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q \
 	binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm qnotify \
 	create_services cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr \
 	condredirect config-fast datemail dk-filter dknewkey dktest dnscname \
 	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
-	envdir envuidgid qdane dnstlsarr etrn except fastforward fghack \
-	forward generic.so greydaemon qf-smtp-ratelimit home home+df hostname \
+	qdane dnstlsarr etrn except fastforward forward generic.so greydaemon \
+	qf-smtp-ratelimit home home+df hostname \
 	idedit iftocc instcheck ipmeprint ldap-checkpwd leapsecs \
-	logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
-	maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate \
+	maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
+	maildirsmtp maildirwatch mailsubj mbox2maildir multirotate \
 	inewaliases newinclude new-inject nowutc ofmipd ofmipname parsedate \
-	pgrphack plugtest installer predate preline printforward \
+	plugtest installer predate preline printforward \
 	printmaillist proc proc+df qaes ctrlenv qarf qmail-cat qmail-cdb \
-	qmail-clean qmailconfig qmailctl maildirsize qmail-daemon qmaildirmake \
+	qmail-clean qmailconfig maildirsize qmail-daemon qmaildirmake \
 	qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
 	qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue \
 	qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter qmail-qmqpc \
 	qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue qmail-remote qmail-rm \
-	qmail-rspawn qmail-send qmail-showctl qmail-daned svwait \
+	qmail-rspawn qmail-send qmail-showctl qmail-daned \
 	qmail-smtpd qmail_smtpd.so qmail-start qmail-tcpok qmail-tcpto \
-	qmail-todo qmail-upq qpq qquote qreceipt qsmhook queue-fix readproctitle \
+	qmail-todo qmail-upq qpq qquote qreceipt qsmhook queue-fix \
 	recipient-cdb relaytest rewind irmail rpmattr rrforward rrt \
-	sendmail serialcmd serialqmtp serialsmtp setforward setlock setmaillist \
-	setuidgid smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest \
-	spawn-filter spfquery splogger srsfilter supervise surblfilter surblqueue \
-	svc svok svscan svscanboot svstat swaks sys-checkpwd systemd tai2tai64n \
-	tai64n tai64n2tai tai64nlocal tai64nunix tcp-env testzero tokenize uacl \
-	udpclient udplogger update_tmprsadh upstart viruscanner whois yearcal \
-	cdb-database analyzer qtools qlog leapsecs.dat
+	sendmail serialcmd serialqmtp serialsmtp setforward setmaillist \
+	smtpd-plugin0.so smtpd-plugin.so sortedtest \
+	spawn-filter spfquery splogger srsfilter surblfilter surblqueue \
+	swaks sys-checkpwd \
+	tcp-env testzero tokenize uacl \
+	udpclient udplogger update_tmprsadh viruscanner whois yearcal \
+	cdb-database analyzer qtools leapsecs.dat
 
 man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
-	svscan.8 cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
-	svctool.8 predate.1 datemail.1 svwait.8 \
+	cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
+	svctool.8 predate.1 datemail.1 \
 	mlmatchup.8 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
-	logselect.8 qmail-daned.8 qmail-srs.5 qmail-limits.7 \
+	qmail-daned.8 qmail-srs.5 qmail-limits.7 \
 	forward.1 condredirect.1 qmail-control.5 rrforward.1 \
 	qreceipt.1 maildirserial.1 qmail-rm.1 dot-qmail.5 \
 	qmail-users.5 dot-forward.1 fastforward.1 new-inject.1 \
-	filterto.1 replier.1 svscanboot.8 qmail-local.8 \
+	filterto.1 replier.1 qmail-local.8 \
 	qmail-getpw.8 qmail-remote.8 qmail-send.8 qmail-todo.8 \
 	qmail-start.8 qmail-queue.8 qmail-dkim.8 dk-filter.8 \
 	qmail-dk.8 dktest.8 qmail-multi.8 spawn-filter.8 \
 	qmail-inject.8 qmail-newmrh.8 recipient-cdb.8 qmail-cdb.8 \
 	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
-	qmail-poppass.8 qscanq.8 cleanq.8 run-cleanq.8 qmailctl.8
+	qmail-poppass.8 qscanq.8 cleanq.8 run-cleanq.8
 
 include Makefile.$(SYSTEM)
 
@@ -305,13 +304,6 @@ greydaemon: greydaemon.pl conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> greydaemon
 
-qlogselect: qlogselect.pl conf-qmail conf-prefix
-	cat qlogselect.pl \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	> qlogselect
-	chmod 755 qlogselect
-
 binm1: \
 binm1.sh conf-qmail
 	cat binm1.sh \
@@ -363,12 +355,6 @@ check: \
 it man
 	./instcheck
 
-chkshsgr: load chkshsgr.o
-	./load chkshsgr
-
-chkshsgr.o: compile chkshsgr.c
-	./compile chkshsgr.c
-
 chkspawn: load chkspawn.o auto_spawn.o
 	./load chkspawn auto_spawn.o -lqmail
 
@@ -391,6 +377,10 @@ mysql_config.o: compile mysql_config.c conf-mysqlrules
 
 mysql_config: load mysql_config.o
 	./load mysql_config
+
+envdir_set.o: compile envdir_set.c openreadclose.h direntry.h \
+pathexec.h
+	./compile envdir_set.c
 
 condredirect: \
 load condredirect.o qmail.o envdir_set.o pathexec_env.o \
@@ -630,20 +620,6 @@ warn-auto.sh qpq.sh conf-qmail conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qpq
 
-qmailctl: \
-warn-auto.sh qmailctl.sh conf-prefix conf-sysconfdir \
-conf-libexec
-	cat warn-auto.sh $@.sh \
-	| $(edit) > qmailctl
-	chmod +x $@
-
-qmailctl.8: qmailctl.9 conf-servicedir
-	$(edit) qmailctl.8 > $@
-
-svscan.plist: svscan.plist.in conf-libexec \
-conf-sysconfdir conf-servicedir
-	$(edit) $@.in > $@
-
 indimail-mta.fc: \
 indimail-mta.fc.in conf-qmail conf-sysconfdir conf-servicedir
 	cat indimail-mta.fc.in \
@@ -651,43 +627,6 @@ indimail-mta.fc.in conf-qmail conf-sysconfdir conf-servicedir
 	| sed s}@qmaildir\@}"`head -1 conf-qmail`"}g \
 	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
 	> indimail-mta.fc
-
-svscanboot: \
-warn-auto.sh svscanboot.sh conf-prefix conf-sysconfdir \
-conf-libexec conf-servicedir
-	cat warn-auto.sh svscanboot.sh \
-	| $(edit) > svscanboot
-
-svscan_rc: \
-warn-auto.sh conf-prefix svscan_rc.in \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
-	(cat warn-auto.sh; $(edit) $@.in) > $@
-
-upstart: upstart.in conf-prefix conf-sysconfdir \
-conf-servicedir
-	( \
-	echo "# svscan - runlevel compatibility"; \
-	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	echo "#"; \
-	$(edit) upstart.in \
-	) > upstart
-
-systemd: systemd.in conf-libexec conf-servicedir
-	( \
-	echo "# svscan - runlevel compatibility"; \
-	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	echo "#"; \
-	$(edit) systemd.in \
-	) > systemd
-
-svscanboot.8: \
-svscanboot.9 conf-prefix conf-sysconfdir conf-libexec \
-conf-servicedir
-	$(edit) svscanboot.9 > svscanboot.8
-
-svscan.8: \
-svscan.9 conf-sysconfdir conf-servicedir
-	$(edit) svscan.9 > svscan.8
 
 cronlist.q: cronlist.in conf-prefix \
 conf-sysconfdir conf-servicedir
@@ -765,6 +704,12 @@ trysgprm.c compile load
 	2>&1 \
 	&& echo \#define HASSIGPROCMASK 1 || exit 0 ) > hassgprm.h
 	rm -f trysgprm.o trysgprm
+
+chkshsgr: load chkshsgr.o
+	./load chkshsgr
+
+chkshsgr.o: compile chkshsgr.c
+	./compile chkshsgr.c
 
 hasshsgr.h: \
 chkshsgr warn-shsgr tryshsgr.c compile load
@@ -1027,8 +972,6 @@ qtools: \
 822fields checkaddr checkdomain filterto condtomaildir \
 iftoccfrom ifaddr replier replier-config
 
-qlog: spipe qfilelog multipipe teepipe qlogselect
-
 maildir.o: \
 compile maildir.c prioq.h direntry.h maildir.h
 	./compile maildir.c
@@ -1113,10 +1056,6 @@ proc+df.sh conf-prefix
 	cat proc+df.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> proc+df
-
-prot.o: \
-compile prot.c hasshsgr.h prot.h
-	./compile prot.c
 
 qmail-clean: load qmail-clean.o fmtqfn.o auto_qmail.o auto_split.o \
 variables.o
@@ -1225,6 +1164,10 @@ conf-sync conf-mailarch syncdir.h
 qmail-lspawn.o: compile qmail-lspawn.c prot.h slurpclose.h auto_qmail.h \
 auto_uids.h qlx.h auto_assign.h indimail_stub.h auto_control.h variables.h
 	./compile qmail-lspawn.c
+
+prot.o: \
+compile prot.c hasshsgr.h prot.h
+	./compile prot.c
 
 qmail-lspawn: \
 load qmail-lspawn.o spawn.o prot.o slurpclose.o \
@@ -2974,32 +2917,8 @@ make-text.o: compile make-text.c
 help.t: make-text help.txt
 	./make-text <help.txt >help.t
 
-spipe: load spipe.o svcfns.o
-	./load spipe svcfns.o
-
-spipe.o: compile spipe.c bool.h svcfns.h
-	./compile spipe.c
-
 svcfns.o: compile svcfns.c bool.h svcfns.h
 	./compile svcfns.c
-
-qfilelog: load qfilelog.o
-	./load qfilelog
-
-qfilelog.o: compile qfilelog.c
-	./compile qfilelog.c
-
-multipipe: load multipipe.o svcfns.o
-	./load multipipe svcfns.o
-
-multipipe.o: compile multipipe.c direntry.h bool.h svcfns.h
-	./compile multipipe.c
-
-teepipe: load teepipe.o
-	./load teepipe
-
-teepipe.o: compile teepipe.c
-	./compile teepipe.c
 
 cert cert-req: Makefile-cert
 	@$(MAKE) -sf $< $@
@@ -3122,172 +3041,6 @@ newinclude.o: \
 compile newinclude.c token822.h control.h \
 auto_qmail.h variables.h
 	./compile newinclude.c
-
-envdir: load envdir.o envdir_set.o openreadclose.o pathexec_env.o \
-pathexec_run.o
-	./load envdir envdir_set.o openreadclose.o pathexec_env.o \
-	pathexec_run.o -lqmail
-
-envdir.o: compile envdir.c pathexec.h envdir.h
-	./compile envdir.c
-
-envdir_set.o: compile envdir_set.c openreadclose.h direntry.h \
-pathexec.h
-	./compile envdir_set.c
-
-envuidgid: envuidgid.o load pathexec_env.o pathexec_run.o
-	./load envuidgid pathexec_env.o pathexec_run.o -lqmail
-
-envuidgid.o: compile envuidgid.c pathexec.h
-	./compile envuidgid.c
-
-fghack: fghack.o load pathexec_run.o
-	./load fghack pathexec_run.o -lqmail
-
-fghack.o: compile fghack.c pathexec.h
-	./compile fghack.c
-	
-multilog: load multilog.o timestamp.o match.o deepsleep.o \
-iopause.o
-	./load multilog timestamp.o match.o deepsleep.o \
-	iopause.o -lqmail
-
-multilog.o: compile deepsleep.h direntry.h match.h multilog.c \
-timestamp.h
-	./compile multilog.c
-
-deepsleep.o: compile deepsleep.c deepsleep.h iopause.h
-	./compile deepsleep.c
-
-match.o: compile match.c match.h
-	./compile match.c
-
-iopause.h: choose compile iopause.h1 iopause.h2 load trypoll.c
-	./choose clr trypoll iopause.h1 iopause.h2 > iopause.h
-
-iopause.o: compile iopause.c iopause.h
-	./compile iopause.c
-
-pgrphack: load pgrphack.o pathexec_run.o
-	./load pgrphack pathexec_run.o -lqmail
-
-pgrphack.o: compile pathexec.h pgrphack.c
-	./compile pgrphack.c
-
-readproctitle: load readproctitle.o
-	./load readproctitle -lqmail
-
-readproctitle.o: compile readproctitle.c
-	./compile readproctitle.c
-
-setlock: load setlock.o pathexec_run.o
-	./load setlock pathexec_run.o -lqmail
-
-setlock.o: compile pathexec.h setlock.c
-	./compile setlock.c
-
-setuidgid: load setuidgid.o prot.o pathexec_run.o
-	./load setuidgid prot.o pathexec_run.o -lqmail
-
-setuidgid.o: compile pathexec.h prot.h setuidgid.c
-	./compile setuidgid.c
-
-softlimit: load softlimit.o pathexec_run.o
-	./load softlimit pathexec_run.o -lqmail
-
-softlimit.o: compile pathexec.h softlimit.c
-	./compile softlimit.c
-
-supervise: deepsleep.o load supervise.o iopause.o
-	./load supervise deepsleep.o iopause.o -lqmail
-
-supervise.o: compile supervise.c deepsleep.h iopause.h \
-conf-runfs
-	./compile `grep -v "^#" conf-runfs` supervise.c
-
-run_init.o: compile run_init.c
-	./compile `grep -v "^#" conf-runfs` run_init.c
-
-svc: load svc.o run_init.o
-	./load svc run_init.o -lqmail
-
-svc.o: compile svc.c conf-runfs
-	./compile `grep -v "^#" conf-runfs` svc.c
-
-svok: load svok.o run_init.o
-	./load svok run_init.o -lqmail
-
-svok.o: compile svok.c conf-runfs
-	./compile `grep -v "^#" conf-runfs` svok.c
-
-svscan: load svscan.o pathexec_run.o auto_sysconfdir.o
-	./load svscan pathexec_run.o auto_sysconfdir.o -lqmail
-
-svscan.o: compile direntry.h pathexec.h svscan.c \
-auto_sysconfdir.h conf-runfs
-	./compile `grep -v "^#" conf-runfs` svscan.c
-
-svstat: load svstat.o run_init.o
-	./load svstat run_init.o -lqmail
-
-svstat.o: compile svstat.c conf-runfs
-	./compile `grep -v "^#" conf-runfs` svstat.c
-
-tai64n: load tai64n.o timestamp.o
-	./load tai64n timestamp.o -lqmail
-
-tai64n.o: compile tai64n.c timestamp.h
-	./compile tai64n.c
-
-tai64nlocal: load tai64nlocal.o
-	./load tai64nlocal -lqmail
-
-tai64nlocal.o: compile tai64nlocal.c
-	./compile tai64nlocal.c
-
-tai64nunix: \
-load tai64nunix.o
-	./load tai64nunix -lqmail
-
-tai64nunix.o: \
-compile tai64nunix.c
-	./compile tai64nunix.c
-
-tai2tai64n: load tai2tai64n.o
-	./load tai2tai64n -lqmail
-
-tai2tai64n.o: compile tai2tai64n.c bool.h
-	./compile tai2tai64n.c
-
-tai64n2tai: load tai64n2tai.o
-	./load tai64n2tai -lqmail
-
-tai64n2tai.o: compile tai64n2tai.c bool.h
-	./compile tai64n2tai.c
-
-tai_decode.o: compile tai_decode.c bool.h
-	./compile tai_decode.c
-
-tai_encode.o: compile tai_encode.c bool.h
-	./compile tai_encode.c
-
-tai64n_decode.o: compile tai64n_decode.c tai.h bool.h
-	./compile tai64n_decode.c
-
-tai64n_encode.o: compile tai64n_encode.c tai.h bool.h
-	./compile tai64n_encode.c
-
-logselect.o: compile direntry.h sorted.h pathexec.h \
-timestamp.h logselect.c
-	./compile logselect.c
-
-logselect: load logselect.o sorted.o
-	./load logselect sorted.o -lqmail
-
-logselect.8: logselect.9 conf-prefix
-	cat logselect.9 \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	> logselect.8
 
 sorted.o: compile sorted.c sorted.h
 	./compile sorted.c
@@ -3677,13 +3430,11 @@ conf-release:
 	fi
 
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config \
-conf-release conf-version ../ucspi-tcp-x/conf-version \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared \
-conf-servicedir
+conf-release conf-version conf-prefix conf-libexec conf-qmail \
+conf-sysconfdir conf-shared conf-servicedir
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
 
 debian/Makefile: debian/Makefile.in conf-release conf-version \
-../ucspi-tcp-x/conf-version \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
 
@@ -3817,7 +3568,7 @@ generic.so: generic.o auto_scancmd.o MakeArgs.o conf-ld-$(SYSTEM)
 		`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	fi
 
-perm_list.mta: perm_list.in mysql_config \
+indimail-mta.perms: perm_list.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
 
@@ -3826,15 +3577,6 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared \
 conf-servicedir
 	$(edit) $@.in > $@
 	chmod +x $@
-
-svwait: svwait.in conf-prefix \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
-	cat warn-auto.sh $@.in  | $(edit) > $@
-
-svwait.8: svwait.9 conf-prefix conf-libexec \
-conf-qmail conf-sysconfdir conf-shared \
-conf-servicedir
-	$(edit) svwait.9 > $@
 
 svctool.8: svctool.9 mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared \
@@ -3846,17 +3588,6 @@ conf-prefix conf-libexec conf-qmail \
 conf-sysconfdir conf-shared conf-servicedir
 	$(edit) $@.in > $@; chmod 755 $@
 	chmod +x $@
-
-docker-entrypoint: \
-warn-auto.sh docker-entrypoint.sh conf-prefix conf-servicedir
-	( \
-	cat warn-auto.sh; \
-	$(edit) $@.sh \
-	) > $@
-	chmod 755 docker-entrypoint
-
-docker-entrypoint.8: docker-entrypoint.9 conf-servicedir
-	$(edit) docker-entrypoint.9 > docker-entrypoint.8
 
 qlocal_upgrade.sh: \
 warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec \
