@@ -2,16 +2,19 @@
 
 [qmail](http://cr.yp.to/qmail.html "qmail") fork with [DKIM](https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x), [SRS2](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) &amp; [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).  indimail-mta additionally includes forks of the following packages
 
+* [daemontools](https://cr.yp.to/daemontools.html "daemontools")
 * [ucspi-tcp](https://cr.yp.to/ucspi-tcp.html "ucspi-tcp")
-* [serialmail](https://cr.yp.to/serialmail.html "serialmail")
 * [qmailanalog](http://cr.yp.to/qmailanalog.html "qmailanalog")
+* [serialmail](https://cr.yp.to/serialmail.html "serialmail")
 * [dotforward](https://cr.yp.to/dot-forward.html "dot-foward")
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
 * [mess822](https://cr.yp.to/mess822.html "mess822")
-* [daemontools](https://cr.yp.to/daemontools.html "daemontools")
 
 indimail-mta is the default MTA installed when you install [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).
-Refer to this [README](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for a detailed understanding of Indimail Virtual Domains and indimail-mta.
+
+Components like qmail has been modified significantly to included features available in all possible patches growing wild. All possible hardcoding have been removed. indimail-mta is not tied to a specific directory, uid, gid, control/config file. Most of these can be changed by setting environment variables. Additionally indimail-mta can be configured based on the mail SENDER or RECIPIENT(s). Features like DKIM, SRS2, greylisting, DANE have been available since many years. ucspi-tcp too has been modifed to handle IPv6 and TLS. daemontools has lot more feature available like running a shutdown script on shutdown, seamlessly run with docker/podman. Other components like serialmail, qmailanalog, dotforward, fastforward, mess822 have been incorporated with minimal changes. All common functions used by qmail, daemontools, ucspi-tcp, serialmail, dotforward, fastforward, mess822 have been to a library [libqmail](https://github.com/mbhangui/libqmail).
+
+Refer to this [WIKI](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for a detailed understanding of Indimail Virtual Domains and indimail-mta.
 
 This document contains instructions for building indimail-mta from source.
 
