@@ -113,7 +113,9 @@ run qmail-smtpd under SSL (port 465).
 returns 0 on successful authentication, terminating the chain. Similarly \fIsubprogram\fR exits 0 on
 successful authentication, terminating the chain.
 
-\fIcheckprogram\fR, \fIsubprogram\fR should exit 3 if the user doesn't have relay privileges.
+\fIcheckprogram\fR, \fIsubprogram\fR should exit 3 if the user doesn't have relay privileges. You can haave
+as long chain of checkprogram subprogram1 subpgoram2 ... as long as the number of authentication mehods/databases
+you want to support.
 
 Once a user has authenticated or authentication is enforced MASQUERADE env variable can be used to enforce
 a certain behaviour.
