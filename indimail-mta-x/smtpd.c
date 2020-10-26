@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.228 $";
+char           *revision = "$Revision: 1.229 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -4513,6 +4513,11 @@ authenticate(int method)
 			if (substdio_copy(&ssout, &pwd_in) == -2)
 				die_read();
 		}
+		/* 
+		 * i == 3 - account doesn't have RELAY permissions.
+		 * pw_gid is set with NO_RELAY
+		 * This is returned by vchkpass auth program
+		 */
 		return (i == 111 ? -1 : i);
 	}
 	if (method == AUTH_DIGEST_MD5) {
@@ -6093,6 +6098,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.229  2020-10-26 22:55:33+05:30  Cprogrammer
+ * added documentation on return value of authenticate() with account has NO_RELAY
+ *
  * Revision 1.228  2020-10-10 21:21:33+05:30  Cprogrammer
  * functions not needed outside made static
  *
@@ -6215,7 +6223,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.228 2020-10-10 21:21:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.229 2020-10-26 22:55:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

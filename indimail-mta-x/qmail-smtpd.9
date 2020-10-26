@@ -89,11 +89,11 @@ includes a \'MAIL FROM:\' parameter parser and obeys \'Auth\' and \'Size\' adver
 can accept LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA256, CRAM-RIPEMD, DIGEST-MD5 AUTH types
 (See rfc-1321(5)).  It invokes
 .IR checkprogram ,
-which reads on file descriptor 3 the username, a 0 byte, the password
+which reads on file descriptor 3 the username, a NULL byte, the password
 or challenge derived from
 .IR hostname ,
-another 0 byte, a CRAM-MD5/CRAM-SHA1/CRAM-SHA256/CRAM-RIPEMD/DIGEST-MD5 response (if applicable to the AUTH type),
-and a final 0 byte.
+another NULL byte, a CRAM-MD5/CRAM-SHA1/CRAM-SHA256/CRAM-RIPEMD/DIGEST-MD5 response (if applicable to the AUTH type),
+and a final NULL byte.
 .I checkprogram
 invokes
 .I subprogram
@@ -108,6 +108,12 @@ methods by setting DISABLE_AUTH_LOGIN, DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5, DIS
 DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA512, DISABLE_CRAM_RIPEMD, DISABLE_DIGEST_MD5 environment variable. If you set
 the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled unless STARTTLS is issued or you
 run qmail-smtpd under SSL (port 465).
+
+.I checkprogram
+returns 0 on successful authentication, terminating the chain. Similarly \fIsubprogram\fR exits 0 on
+successful authentication, terminating the chain.
+
+\fIcheckprogram\fR, \fIsubprogram\fR should exit 3 if the user doesn't have relay privileges.
 
 Once a user has authenticated or authentication is enforced MASQUERADE env variable can be used to enforce
 a certain behaviour.
