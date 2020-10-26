@@ -57,7 +57,9 @@ of the user's active or inactive status.
 If the environment variable \fBDOMAIN_LIMITS\fR is defined, \fBsys-checkwd\fR validates domain
 expiry and password expiry set by \fBvmoduser(1)\fR program.
 
-\fBsys-checkwd\fR can execute a script defined by environment variable \fBPOSTAUTH\fR
+On successful authentication, \fBsys-checkwd\fR can execute a script defined by environment
+variable \fBPOSTAUTH\fR. In that case, the return value of \fBsys-checkpwd\fR will be the
+return value of \fBPOSTAUTH\fR program/script.
 .PP
 MUAs and AUTH types tested with this software are:
 
