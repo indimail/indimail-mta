@@ -26,7 +26,7 @@ case "$1" in
     install|upgrade)
 	${rm} -f /tmp/daemontools.install /tmp/daemontools.upgrade
 	touch /tmp/daemontools.$1
-	if [ " $1" = " upgrade" ] ; thenA
+	if [ " $1" = " upgrade" ] ; then
 		# shutdown svscan before upgrade
 		# create .svscan.down so that we
 		# can restore state after upgrade in postinst
