@@ -6,6 +6,7 @@
 set -e
 rm=/bin/rm
 qmaildir=@qmaildir@
+servicedir=@servicedir@
 
 # summary of how this script can be called:
 #        * <new-preinst> `install'
@@ -25,14 +26,18 @@ case "$1" in
     install|upgrade)
 	${rm} -f /tmp/daemontools.install /tmp/daemontools.upgrade
 	touch /tmp/daemontools.$1
-	if [ " $1" = " upgrade" ] ; then
+	if [ " $1" = " upgrade" ] ; thenA
+		# shutdown svscan before upgrade
+		# create .svscan.down so that we
+		# can restore state after upgrade in postinst
 		if [ -f ${prefix}/sbin/initsvc ] ; then
 			${prefix}/sbin/initsvc -status
 		fi
 		if [ -f ${prefix}/bin/svok ] ; then
+			set +e
 			${prefix}/bin/svok ${servicedir}/.svscan/log 2>/dev/null
 			if [ $? -eq 0 ] ; then
-				touch ${servicedir}/svscan.down
+				touch ${servicedir}/.svscan.down
 				echo "Giving svscan exactly 5 seconds to exit nicely"
 				if test -f /etc/init/svscan.conf
 				then
@@ -63,6 +68,7 @@ case "$1" in
 						fi
 					fi
 				fi
+				set -e
 				sleep 5
 			fi
 		fi

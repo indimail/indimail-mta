@@ -150,8 +150,9 @@ if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
     cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
     ${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
   fi
-  if [ -f ${servicedir}/svscan.down ] ; then
-    ${rm} -f ${servicedir}/svscan.down
+  # restore svscan service if we find .svscan.down
+  if [ -f ${servicedir}/.svscan.down ] ; then
+    ${rm} -f ${servicedir}/.svscan.down
     echo "Starting svscan"
     if test -f /etc/init/svscan.conf
     then

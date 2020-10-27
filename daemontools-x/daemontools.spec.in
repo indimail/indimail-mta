@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.9 2020-10-23 17:55:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.10 2020-10-27 17:38:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -313,9 +313,12 @@ if [ -f %{_prefix}/sbin/initsvc ] ; then
 fi
 
 if [ -f %{_prefix}/bin/svok ] ; then
+  # shutdown svscan before upgrade
+  # create .svscan.down so that we
+  # can restore state after upgrade in postinst
   %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
   if [ $? -eq 0 ] ; then
-    touch %{servicedir}/svscan.down
+    touch %{servicedir}/.svscan.down
     echo "Giving svscan exactly 5 seconds to exit nicely"
     if test -f %{_sysconfdir}/init/svscan.conf
     then
@@ -419,8 +422,9 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       %{__sed} -i 's{^#SV:{SV:{' %{_sysconfdir}/inittab
     fi
   fi
-  if [ -f %{servicedir}/svscan.down ] ; then
-    %{__rm} -f %{servicedir}/svscan.down
+  # restore svscan service if we find .svscan.down
+  if [ -f %{servicedir}/.svscan.down ] ; then
+    %{__rm} -f %{servicedir}/.svscan.down
     echo "Starting svscan"
     if test -f %{_sysconfdir}/init/svscan.conf
     then
