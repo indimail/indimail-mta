@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.72  2020-11-01 23:11:56+05:30  Cprogrammer
+ * unset FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE before calling qmail-local, qmail-remote
+ *
  * Revision 1.71  2020-05-11 10:59:51+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -429,6 +432,10 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 		filterargs = getDomainToken(domain, &filterdefs);
 	}
 	if (!filterargs) {
+		/*- Avoid loop if program(s) defined by FILTERARGS call qmail-inject, etc */
+		if (!env_unset("FILTERARGS") || !env_unset("SPAMFILTER") ||
+				!env_unset("QMAILREMOTE") || !env_unset("QMAILLOCAL"))
+			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		execv(mailprog, argv); /*- do the delivery (qmail-local/qmail-remote) */
 		report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 		_exit(111); /*- To make compiler happy */
@@ -1130,7 +1137,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.71 2020-05-11 10:59:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.72 2020-11-01 23:11:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
