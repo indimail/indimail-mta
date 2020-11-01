@@ -77,3 +77,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * conf-queue: added documenation
   * removed ucspi-tcp, daemontools
   * upgrade: shutdown indimail-mta services instead of entire svscan service
+  * svctool: added display for enabling/disabling auto refresh settings for service
+  * spawn-filter.c: unset FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE before calling qmail-local, qmail-remote

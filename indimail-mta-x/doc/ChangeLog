@@ -128,11 +128,16 @@ creation
 - 18/10/2020
 76. svctool: added default-authentication-plugin=mysql_native_password as a comment
 77. qcount_dir.c: replaced alloc_re() with alloc()
-19/20/2020
+- 19/10/2020
 78. controlfiles.q: added control file servicedir.conf
 79. conf-queue: added documenation
-20/20/2020
+- 20/10/2020
 80. removed chrpath.
 81. removed ucspi-tcp, daemontools
-22/20/2020
+- 22/10/2020
 82. upgrade: shutdown indimail-mta services instead of entire svscan service
+- 01/11/2020
+83. svctool: added display for enabling/disabling auto refresh settings for
+    service
+84. spawn-filter.c: unset FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE
+    before calling qmail-local, qmail-remote
