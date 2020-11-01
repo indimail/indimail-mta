@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.525 2020-10-23 21:28:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.526 2020-11-01 23:07:31+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.525 2020-10-23 21:28:14+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.526 2020-11-01 23:07:31+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -6236,12 +6236,14 @@ else
 			continue
 		fi
 		if [ $svc_opt -eq 1 ] ; then
+			echo "Enabling  auto refresh for $1"
 			if [ -d $i/variables ] ; then
 				/bin/rm -f "$DESTDIR"$i/variables/.norefreshsvc
 			else
 				/bin/rm -f "$DESTDIR"$i/.norefreshsvc
 			fi
 		else
+			echo "Disabling auto refresh for $i"
 			if [ -d "$DESTDIR"$i/variables ] ; then
 				touch "$DESTDIR"$i/variables/.norefreshsvc
 			else
