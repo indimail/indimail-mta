@@ -45,6 +45,9 @@ environment variable or by rules in the control file
 .BR filterargs .
 See the section on \fBEnvironment Variables\fR below.
 
+\fBspawn-filter\fR unsets FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE before running \fBqmail-local\fR
+or \fBqmail-remote\fR. \fBspawn-filter\fR unsets FILTERARGS, SPAMFILTER before running  filter.
+
 .SH Control Files
 
 .TP 5
