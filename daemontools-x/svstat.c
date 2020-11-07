@@ -1,5 +1,8 @@
 /*
  * $Log: svstat.c,v $
+ * Revision 1.6  2020-11-07 14:23:49+05:30  Cprogrammer
+ * print pid after displaying uptime
+ *
  * Revision 1.5  2020-10-08 18:34:17+05:30  Cprogrammer
  * use /run, /var/run if system supports it
  *
@@ -118,12 +121,9 @@ doit(char *dir, int *retval)
 	if (tai_less(&now, &when))
 		when = now;
 	tai_sub(&when, &now, &when);
-	if (pid) {
-		substdio_puts(&b, "up (pid ");
-		substdio_put(&b, strnum, fmt_ulong(strnum, pid));
-		substdio_puts(&b, ") ");
-		*retval = 0;
-	} else
+	if (pid)
+		substdio_puts(&b, "up ");
+	else
 		substdio_puts(&b, "down ");
 	substdio_put(&b, strnum, fmt_ulong(strnum, tai_approx(&when)));
 	substdio_puts(&b, " seconds");
@@ -138,6 +138,13 @@ doit(char *dir, int *retval)
 		substdio_puts(&b, ", want up");
 	if (pid && (want == 'd'))
 		substdio_puts(&b, ", want down");
+
+	if (pid) {
+		*retval = 0;
+		substdio_puts(&b, " pid ");
+		substdio_put(&b, strnum, fmt_ulong(strnum, pid));
+		substdio_puts(&b, " ");
+	}
 /*--------------------------------------------------------*/
 	if (stat("supervise/wait", &st) == -1) {
 		if (errno != error_noent) {
@@ -194,7 +201,7 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	static char    *x = "$Id: svstat.c,v 1.5 2020-10-08 18:34:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svstat.c,v 1.6 2020-11-07 14:23:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
