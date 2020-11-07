@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.10 2020-10-27 17:38:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.11 2020-11-07 14:25:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -231,6 +231,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                    %{_prefix}/bin/svc
 %attr(0755,root,root)                    %{_prefix}/bin/svok
 %attr(0755,root,root)                    %{_prefix}/bin/svstat
+%attr(0755,root,root)                    %{_prefix}/bin/svstats
 %attr(0755,root,root)                    %{_prefix}/bin/tai64n
 %attr(0755,root,root)                    %{_prefix}/bin/tai64nlocal
 %attr(0755,root,root)                    %{_prefix}/bin/tai64nunix

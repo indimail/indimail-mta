@@ -15,6 +15,7 @@
 %attr(0755,root,root) @prefix@/bin/tai64nlocal
 %attr(0755,root,root) @prefix@/bin/tai64n
 %attr(0755,root,root) @prefix@/bin/svstat
+%attr(0755,root,root) @prefix@/bin/svstats
 %attr(0755,root,root) @prefix@/bin/svok
 %attr(0755,root,root) @prefix@/bin/svc
 %attr(0755,root,root) @prefix@/bin/softlimit

@@ -24,8 +24,8 @@ it = envdir envuidgid setlock setuidgid softlimit svc svok \
 	svstat tai64n tai64nlocal tai64nunix tai2tai64n tai64n2tai \
 	spipe qfilelog multipipe teepipe logselect svscan qlogselect \
 	supervise readproctitle multilog docker-entrypoint fghack \
-	pgrphack svwait svscanboot upstart systemd qmailctl minisvc \
-	instcheck installer daemontools.perms daemontools.spec
+	pgrphack svwait svstats svscanboot upstart systemd qmailctl \
+	minisvc instcheck installer daemontools.perms daemontools.spec
 
 man = spipe.1 qfilelog.1 multipipe.1 teepipe.1 tai2tai64n.1 \
 	tai64n2tai.1 envdir.8 envuidgid.8 fghack.8 multilog.8 pgrphack.8 \
@@ -382,6 +382,10 @@ svwait: svwait.in conf-prefix
 
 svwait.8: svwait.9 conf-libexec conf-servicedir
 	$(edit) svwait.9 > $@
+
+svstats: svstats.in conf-prefix conf-servicedir
+	cat warn-auto.sh $@.in  | $(edit) > $@
+	chmod +x $@
 
 upstart: upstart.in conf-prefix conf-servicedir
 	( \

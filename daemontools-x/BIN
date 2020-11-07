@@ -13,6 +13,7 @@ f:::0755:/bin/:softlimit:softlimit
 f:::0755:/bin/:svc:svc
 f:::0755:/bin/:svok:svok
 f:::0755:/bin/:svstat:svstat
+f:::0755:/bin/:svstats:svstats
 f:::0755:/bin/:tai64n:tai64n
 f:::0755:/bin/:tai64nlocal:tai64nlocal
 f:::0755:/bin/:tai64nunix:tai64nunix
