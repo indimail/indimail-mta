@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.12  2020-11-07 14:30:35+05:30  Cprogrammer
+ * run alert script on abnormal exit of service
+ *
  * Revision 1.11  2020-10-08 18:33:24+05:30  Cprogrammer
  * use /run, /var/run if system supports it
  *
@@ -55,6 +58,7 @@
 #include "stralloc.h"
 #include "str.h"
 #endif
+#include "fmt.h"
 
 #define FATAL   "supervise: fatal: "
 #define WARNING "supervise: warning: "
@@ -132,7 +136,8 @@ trigger(void)
 }
 
 char           *run[2] =      { "./run", 0 };
-char           *shutdown[2] = { "./shutdown", 0 };
+char           *shutdown[3] = { "./shutdown", 0, 0 };
+char           *alert[3] = { "./alert", 0, 0 };
 
 void
 trystart(void)
@@ -172,10 +177,11 @@ trystart(void)
 }
 
 void
-trystop(void)
+tryaction(char **action, pid_t spid)
 {
 	int             f;
 	int             wstat;
+	char            strnum[FMT_ULONG];
 
 	switch (f = fork())
 	{
@@ -195,11 +201,13 @@ trystop(void)
 		if (fchdir(fddir) == -1)
 			strerr_die2sys(111, FATAL, "unable to set current directory: ");
 #endif
-		execve(*shutdown, shutdown, environ);
+		strnum[fmt_ulong(strnum, spid)] = 0;
+		action[1] = strnum;
+		execve(*action, action, environ);
 #ifdef USE_RUNFS
-		strerr_die4sys(111, FATAL, "unable to exec ", sdir, "/shutdown: ");
+		strerr_die6sys(111, FATAL, "unable to exec ", sdir, "/", *action, ": ");
 #else
-		strerr_die4sys(111, FATAL, "unable to exec ", dir, "/shutdown: ");
+		strerr_die6sys(111, FATAL, "unable to exec ", dir, "/", *action, ": ");
 #endif
 	default:
 		wait_pid(&wstat, f);
@@ -246,8 +254,19 @@ doit(void)
 				announce();
 				if (flagexit)
 					return;
-				if (flagwant && flagwantup)
+				if (flagwant && flagwantup) {
+#ifdef USE_RUNFS
+					if (fchdir(fddir) == -1)
+						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
+#endif
+					if (!access(*alert, F_OK))
+						tryaction(alert, r);
+#ifdef USE_RUNFS
+					if (chdir(dir) == -1)
+						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
+#endif
 					trystart();
+				}
 				break;
 			}
 		}
@@ -261,8 +280,16 @@ doit(void)
 				flagwant = 1;
 				flagwantup = 1;
 				if (pid) {
+#ifdef USE_RUNFS
+					if (fchdir(fddir) == -1)
+						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
+#endif
 					if (!access(*shutdown, F_OK))
-						trystop(); /*- run the shutdown command */
+						tryaction(shutdown, pid); /*- run the shutdown command */
+#ifdef USE_RUNFS
+					if (chdir(dir) == -1)
+						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
+#endif
 					kill(g ? 0 - pid : pid, SIGTERM);
 					kill(g ? 0 - pid : pid, SIGCONT);
 					if (g) {
@@ -288,8 +315,16 @@ doit(void)
 				flagwant = 1;
 				flagwantup = 0;
 				if (pid) {
+#ifdef USE_RUNFS
+					if (fchdir(fddir) == -1)
+						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
+#endif
 					if (!access(*shutdown, F_OK))
-						trystop(); /*- run the shutdown command */
+						tryaction(shutdown, pid); /*- run the shutdown command */
+#ifdef USE_RUNFS
+					if (chdir(dir) == -1)
+						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
+#endif
 					kill(g ? 0 - pid : pid, SIGTERM);
 					kill(g ? 0 - pid : pid, SIGCONT);
 					if (g) {
@@ -452,7 +487,7 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 	if (chdir("svscan") == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan: ");
 
-	if (parent_dir) { /*- we called called as supervise log */
+	if (parent_dir) { /*- we were called as supervise log */
 		if (access(parent_dir, F_OK)) {
 			if (mkdir(parent_dir, 0755) == -1)
 				strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", parent_dir, ": ");
@@ -540,7 +575,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.11 2020-10-08 18:33:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.12 2020-11-07 14:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
