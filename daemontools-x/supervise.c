@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.13  2020-11-09 09:30:24+05:30  Cprogrammer
+ * add wait for service feature
+ *
  * Revision 1.12  2020-11-07 14:30:35+05:30  Cprogrammer
  * run alert script on abnormal exit of service
  *
@@ -59,28 +62,33 @@
 #include "str.h"
 #endif
 #include "fmt.h"
+#include "substdio.h"
+#include "getln.h"
+#include "scan.h"
 
 #define FATAL   "supervise: fatal: "
 #define WARNING "supervise: warning: "
 
 int             rename(const char *, const char *);
 
-char           *dir;
-int             selfpipe[2];
-int             fdlock;
-int             fdcontrolwrite;
-int             fdcontrol;
-int             fdok;
-int             flagexit = 0;
-int             flagwant = 1;
-int             flagwantup = 1;
-int             pid = 0;		/*- 0 means down */
-int             flagpaused;		/*- defined if (pid) */
-char            status[18];
+static char    *dir;
+static int      selfpipe[2];
+static int      fdlock;
+static int      fdcontrolwrite;
+static int      fdcontrol;
+static int      fdok;
+static int      flagexit = 0;
+static int      flagwant = 1;
+static int      flagwantup = 1;
+static int      pid = 0;		/*- 0 means down */
+static int      flagpaused;		/*- defined if (pid) */
+static int      fddir;
+static char     waited;
+char            status[20];
+static stralloc wait_sv_file = {0};
 #ifdef USE_RUNFS
-char           *sdir;
-int             fddir;
-stralloc        run_service_dir = { 0 };
+static char    *sdir;
+static stralloc run_service_dir = { 0 };
 #endif
 
 void
@@ -103,13 +111,18 @@ pidchange(void)
 }
 
 void
-announce(void)
+announce(short sleep_interval)
 {
-	int             fd;
-	int             r;
+	int             fd, r;
+	short          *s;
 
 	status[16] = (pid ? flagpaused : 0);
 	status[17] = (flagwant ? (flagwantup ? 'u' : 'd') : 0);
+	if (sleep_interval) {
+		s = (short *) (status + 18);
+		*s = sleep_interval;
+	} else
+		status[18] = status[19] = 0;
 	if ((fd = open_trunc("supervise/status.new")) == -1) {
 		strerr_warn4(WARNING, "unable to open ", dir, "/supervise/status.new: ", &strerr_sys);
 		return;
@@ -139,11 +152,135 @@ char           *run[2] =      { "./run", 0 };
 char           *shutdown[3] = { "./shutdown", 0, 0 };
 char           *alert[3] = { "./alert", 0, 0 };
 
+int
+get_wait_params(unsigned short *interval, char **sv_name)
+{
+	int             fd, match, i;
+	static ushort   sleep_interval = 60;
+	unsigned long   t;
+	struct substdio ssin;
+	static stralloc tline = { 0 };
+	char            inbuf[256];
+
+	if (tline.len) {
+		*sv_name = tline.s;
+		*interval = sleep_interval;
+	}
+	*interval = 0;
+	*sv_name = (char *) 0;
+	if ((fd = open_read("wait")) == -1) {
+		if (errno == error_noent)
+			return 2;
+		strerr_die2sys(111, FATAL, "unable to open wait: ");
+		return -1;
+	}
+	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof (inbuf));
+	for (i = 0;i < 2; i++) {
+		if (getln(&ssin, &tline, &match, '\n') == -1)
+			strerr_die2sys(111, FATAL, "unable to read input");
+		if (!tline.len)
+			break;
+		if (match) {
+			tline.len--;
+			tline.s[tline.len] = 0;
+		} else {
+			if (!stralloc_0(&tline))
+				strerr_die2x(111, FATAL, "out of memory");
+			tline.len--;
+		}
+		if (!i) {/*- max value 32767 */
+			scan_ulong(tline.s, &t);
+			sleep_interval = t > 32767 ? 60 : (short) t;
+		}
+	} /*- for (i = 0;; i++) */
+	close(fd);
+	if (i < 2 || !tline.len)
+		return 1;
+	*sv_name = tline.s;
+	*interval = sleep_interval;
+	return 0;
+}
+
+void
+do_wait()
+{
+	int             fd, i, r;
+	unsigned short  sleep_interval = 60;
+	unsigned long   wpid;
+	char            wstatus[20];
+	char           *service_name;
+
+#ifdef USE_RUNFS
+	if (fchdir(fddir) == -1)
+		strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
+#endif
+	i = get_wait_params(&sleep_interval, &service_name);
+#ifdef USE_RUNFS
+	if (chdir(dir) == -1)
+		strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
+#endif
+	if (i)
+		return;
+	if (!stralloc_copyb(&wait_sv_file, "../", 3) ||
+			!stralloc_cats(&wait_sv_file, service_name) ||
+			!stralloc_catb(&wait_sv_file, "/supervise/status", 17) ||
+			!stralloc_0(&wait_sv_file))
+		strerr_die2x(111, FATAL, "out of memory");
+	pid = getpid();
+	pidchange();
+	for (;;) {
+		announce(-1);
+		if ((fd = open_read(wait_sv_file.s)) == -1) {
+			if (errno != error_noent)
+				strerr_warn4(WARNING, "unable to open ", wait_sv_file.s, ": ", &strerr_sys);
+			sleep(1);
+			waited = 0;
+			continue;
+		}
+		if ((r = read(fd, wstatus, sizeof wstatus)) == -1) {
+			strerr_warn4(WARNING, "unable to read ", wait_sv_file.s, ": ", &strerr_sys);
+			close(fd);
+			sleep(1);
+			waited = 0;
+			continue;
+		} else
+		if (!r) {
+			strerr_warn4(WARNING, "file ", wait_sv_file.s, " is of zero bytes: ", &strerr_sys);
+			close(fd);
+			sleep(1);
+			waited = 0;
+			continue;
+		}
+		close(fd);
+		wpid = (unsigned char) wstatus[15];
+		wpid <<= 8;
+		wpid += (unsigned char) wstatus[14];
+		wpid <<= 8;
+		wpid += (unsigned char) wstatus[13];
+		wpid <<= 8;
+		wpid += (unsigned char) wstatus[12];
+		/*- supervise started and not in paused and not in want down */
+		if (wpid && (!wstatus[16] && wstatus[17] != 'd'))
+			break;
+		waited = 0;
+	} /*- for (i = -1;;) */
+	if (!waited) {
+		waited = 1;
+		pidchange(); /*- update start time */
+		announce(sleep_interval);
+		deepsleep(sleep_interval);
+		pid = 0;
+		announce(0);
+	}
+	return;
+}
+
 void
 trystart(void)
 {
 	int             f;
 
+	do_wait();
 	switch (f = fork())
 	{
 	case -1:
@@ -172,7 +309,7 @@ trystart(void)
 	flagpaused = 0;
 	pid = f;
 	pidchange();
-	announce();
+	announce(0);
 	deepsleep(1);
 }
 
@@ -223,7 +360,7 @@ doit(void)
 	int             wstat, r, t, g = 0;
 	char            ch, c = 0;
 
-	announce();
+	announce(0);
 
 	for (;;) {
 		if (flagexit && !pid)
@@ -246,12 +383,12 @@ doit(void)
 		for (;;) {
 			if (!(r = wait_nohang(&wstat)))
 				break;
-			if ((r == -1) && (errno != error_intr))
+			if (r == -1 && errno != error_intr)
 				break;
 			if (r == pid) {
 				pid = 0;
 				pidchange();
-				announce();
+				announce(0);
 				if (flagexit)
 					return;
 				if (flagwant && flagwantup) {
@@ -269,14 +406,14 @@ doit(void)
 				}
 				break;
 			}
-		}
+		} /*- for (;;) */
 		if (read(fdcontrol, &ch, 1) == 1) {
 			switch (ch)
 			{
-			case 'G':
+			case 'G': /*- send signal to process group */
 				g = 1;
 				break;
-			case 'r':
+			case 'r': /*- restart */
 				flagwant = 1;
 				flagwantup = 1;
 				if (pid) {
@@ -307,11 +444,11 @@ doit(void)
 					c++;
 					usleep(100);
 				}
-				announce();
+				announce(0);
 				if (!t)
 					trystart();
 				break;
-			case 'd':
+			case 'd': /*- down */
 				flagwant = 1;
 				flagwantup = 0;
 				if (pid) {
@@ -333,22 +470,22 @@ doit(void)
 					}
 					g = flagpaused = 0;
 				}
-				announce();
+				announce(0);
 				break;
-			case 'u':
+			case 'u': /*- up */
 				flagwant = 1;
 				flagwantup = 1;
-				announce();
+				announce(0);
 				if (!pid)
 					trystart();
 				break;
-			case 'o':
+			case 'o': /*- run once */
 				flagwant = 0;
-				announce();
+				announce(0);
 				if (!pid)
 					trystart();
 				break;
-			case 'a':
+			case 'a': /*- send ALRM */
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGALRM);
 					if (g)
@@ -356,7 +493,7 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case 'h':
+			case 'h': /*- send HUP */
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGHUP);
 					if (g)
@@ -364,7 +501,7 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case 'k':
+			case 'k': /*- send kill */
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGKILL);
 					if (g)
@@ -372,7 +509,7 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case 't':
+			case 't': /*- send TERM */
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGTERM);
 					if (g)
@@ -380,7 +517,7 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case 'i':
+			case 'i': /*- send INT */
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGINT);
 					if (g)
@@ -388,7 +525,7 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case 'q':
+			case 'q': /*- send SIGQUIT */
 				if (pid) {
 					kill(g ? 0 - pid : pid,SIGQUIT);
 					if (g)
@@ -396,7 +533,7 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case 'U':
+			case 'U': /*- send USR1 */
 			case '1':
 				if (pid) {
 					kill(g ? 0 - pid : pid,SIGUSR1);
@@ -405,7 +542,7 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case '2':
+			case '2': /*- send USR2 */
 				if (pid) {
 					kill(g ? 0 - pid : pid,SIGUSR2);
 					if (g)
@@ -413,9 +550,9 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case 'p':
+			case 'p': /*- send STOP */
 				flagpaused = 1;
-				announce();
+				announce(0);
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGSTOP);
 					if (g)
@@ -423,9 +560,9 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case 'c':
+			case 'c': /*- send CONT */
 				flagpaused = 0;
-				announce();
+				announce(0);
 				if (pid) {
 					kill(g ? 0 - pid : pid, SIGCONT);
 					if (g)
@@ -433,9 +570,9 @@ doit(void)
 					g = 0;
 				}
 				break;
-			case 'x':
+			case 'x': /*- exit supervise */
 				flagexit = 1;
-				announce();
+				announce(0);
 				break;
 			} /*- switch (ch) */
 		} /*- if (read(fdcontrol, &ch, 1) == 1) */
@@ -472,7 +609,8 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 				strerr_die2sys(111, FATAL, "unable to get current working directory: ");
 			parent_dir = buf + i + 1;
 		}
-		if (!stralloc_cats(&run_service_dir, parent_dir))
+		if (!stralloc_cats(&run_service_dir, parent_dir) ||
+				!stralloc_append(&run_service_dir, "/"))
 			strerr_die2x(111, FATAL, "out of memory");
 	} 
 	if (!stralloc_cats(&run_service_dir, service_dir) ||
@@ -538,9 +676,9 @@ main(int argc, char **argv)
 	else
 	if (errno != error_noent)
 		strerr_die4sys(111, FATAL, "unable to stat ", dir, "/down: ");
-#ifdef USE_RUNFS
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+#ifdef USE_RUNFS
 	if (stat(".", &st) == -1)
 		strerr_die2sys(111, FATAL, "unable to stat current directory: ");
 	sdir = dir; /*- original service direcory */
@@ -560,7 +698,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to write ", dir, "/supervise/control: ");
 	coe(fdcontrolwrite);
 	pidchange();
-	announce();
+	announce(0);
 	fifo_make("supervise/ok", 0600);
 	if ((fdok = open_read("supervise/ok")) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", dir, "/supervise/ok: ");
@@ -568,14 +706,14 @@ main(int argc, char **argv)
 	if (!flagwant || flagwantup)
 		trystart();
 	doit();
-	announce();
+	announce(0);
 	_exit(0);
 }
 
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.12 2020-11-07 14:30:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.13 2020-11-09 09:30:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
