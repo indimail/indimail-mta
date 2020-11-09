@@ -39,4 +39,12 @@ Release 1.1 Start 09/10/2020
 19. svctool: added control file servicedir.conf
 20. svscanboot: use servicedir.conf for servicedir
 - 09/10/2020
-01. First Release
+  First Release
+- 07/11/2020
+21. svstat.c: print pid after displaying uptime
+22. added svstats program to display status of all services
+23. supervise.c: run alert script on abnormal exit of service
+- 09/11/2020
+24. supervise.c: add wait for service feature
+25. svstat.c: display wait status
+26. svstat.c: print errors to stderr instead of stdout

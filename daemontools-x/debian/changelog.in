@@ -21,3 +21,9 @@ daemontools (@version@-@release@) unstable; urgency=low
   * replaced absolute paths with relative path in services to make them work in any service directory
   * svctool: added control file servicedir.conf
   * svscanboot: use servicedir.conf for servicedir
+  * svstat.c: print pid after displaying uptime
+  * added svstats program to display status of all services
+  * supervise.c: run alert script on abnormal exit of service
+  * supervise.c: add wait for service feature
+  * svstat.c: display wait status
+  * svstat.c: print errors to stderr instead of stdout
