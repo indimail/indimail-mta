@@ -49,3 +49,5 @@ Release 1.1 Start 09/10/2020
 25. svstat.c: display wait status
 26. svstat.c: print errors to stderr instead of stdout
 27. removed svwait program
+28. supervise: avoid recreating status file with every invocation of
+    supervise.

@@ -28,3 +28,4 @@ daemontools (@version@-@release@) unstable; urgency=low
   * svstat.c: display wait status
   * svstat.c: print errors to stderr instead of stdout
   * removed svwait program
+  * supervise: avoid recreating status file with every invocation of supervise.
