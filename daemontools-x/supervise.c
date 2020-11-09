@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.14  2020-11-09 18:17:57+05:30  Cprogrammer
+ * recover from fork error - http://cr-yp-to.996295.n3.nabble.com/posible-bug-in-daemontools-td16964.html
+ *
  * Revision 1.13  2020-11-09 09:30:24+05:30  Cprogrammer
  * add wait for service feature
  *
@@ -83,7 +86,7 @@ static int      flagwantup = 1;
 static int      pid = 0;		/*- 0 means down */
 static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
-static char     waited;
+static char     waited, flagfailed;
 char            status[20];
 static stralloc wait_sv_file = {0};
 #ifdef USE_RUNFS
@@ -291,6 +294,7 @@ trystart(void)
 #endif
 		deepsleep(60);
 		trigger();
+		flagfailed = 1;
 		return;
 	case 0:
 		sig_uncatch(sig_child);
@@ -407,6 +411,10 @@ doit(void)
 				break;
 			}
 		} /*- for (;;) */
+		if (flagfailed && flagwant && flagwantup) {
+			flagfailed = 0;
+			trystart();
+		}
 		if (read(fdcontrol, &ch, 1) == 1) {
 			switch (ch)
 			{
@@ -713,7 +721,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.13 2020-11-09 09:30:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.14 2020-11-09 18:17:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
