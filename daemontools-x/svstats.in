@@ -1,9 +1,17 @@
-saveline=""
-@prefix@/bin/svstat @servicedir@/* > /tmp/svstats.$$
-status=$?
+# $Log: svstats.in,v $
+# Revision 1.1  2020-11-09 09:19:58+05:30  Cprogrammer
+# Initial revision
+#
+# 
+# $Id: svstats.in,v 1.1 2020-11-09 09:19:58+05:30 Cprogrammer Exp mbhangui $
+#
+@prefix@/bin/svstat @servicedir@/* @servicedir@/*/log 2>/dev/null|egrep -v "\.\.|^wait until" > /tmp/svstats.$$
+status=${PIPESTATUS[0]}
 if [ $status -ne 0 ] ; then
-	/bin/rm -f /tmp/svstats.$$
-	exit $status
+	if [ ! -s /tmp/svstats.$$ ] ; then
+		/bin/rm -f /tmp/svstats.$$
+		exit $status
+	fi
 fi
 
 max=0
@@ -19,7 +27,9 @@ do
 	fi
 done <<<$(cat /tmp/svstats.$$)
 
-grep -w down /tmp/svstats.$$ | sort -n -k3 | while read line
+echo
+echo "------------ Main -----------------"
+grep -w down /tmp/svstats.$$ | sort -n -k3 | grep -v "/log" | while read line
 do
 	set $line
 	name=`echo $1|cut -d: -f1`
@@ -28,11 +38,36 @@ do
 		break
 	fi
 done
-egrep -v -w down /tmp/svstats.$$ | sort -n -k3 | while read line
+egrep -w wait /tmp/svstats.$$ | sort -n -k3 | grep -v "/log" | while read line
 do
 	set $line
 	name=`echo $1|cut -d: -f1`
-	printf "%-"$max"s up   %7d secs pid %d\n" $name $3 $6
+	if [ $# -eq 9 ] ; then
+		printf "%-"$max"s wait %7d secs pid %7d remaining %7d seconds\n" $name $3 $6 $8
+	else
+		printf "%-"$max"s wait %7d secs pid %7d\n" $name $3 $6
+	fi
+	if [ $? -ne 0 ] ; then
+		break
+	fi
+done
+egrep -v -w "down|wait" /tmp/svstats.$$ | sort -n -k3 | grep -v "/log" | while read line
+do
+	set $line
+	name=`echo $1|cut -d: -f1`
+	printf "%-"$max"s up   %7d secs pid %7d\n" $name $3 $6
+	if [ $? -ne 0 ] ; then
+		break
+	fi
+done
+
+echo
+echo "------------ Logs -----------------"
+egrep "@servicedir@/.*/log" /tmp/svstats.$$ | sort -n -k3 | while read line
+do
+	set $line
+	name=`echo $1|cut -d: -f1`
+	printf "%-"$max"s up   %7d secs pid %7d\n" $name $3 $6
 	if [ $? -ne 0 ] ; then
 		break
 	fi
