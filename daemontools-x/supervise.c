@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.15  2020-11-09 21:32:09+05:30  Cprogrammer
+ * avoid recreating status file with every invocation of supervise.
+ *
  * Revision 1.14  2020-11-09 18:17:57+05:30  Cprogrammer
  * recover from fork error - http://cr-yp-to.996295.n3.nabble.com/posible-bug-in-daemontools-td16964.html
  *
@@ -68,17 +71,17 @@
 #include "substdio.h"
 #include "getln.h"
 #include "scan.h"
+#include "seek.h"
 
 #define FATAL   "supervise: fatal: "
 #define WARNING "supervise: warning: "
-
-int             rename(const char *, const char *);
 
 static char    *dir;
 static int      selfpipe[2];
 static int      fdlock;
 static int      fdcontrolwrite;
 static int      fdcontrol;
+static int      fdstatus;
 static int      fdok;
 static int      flagexit = 0;
 static int      flagwant = 1;
@@ -116,7 +119,7 @@ pidchange(void)
 void
 announce(short sleep_interval)
 {
-	int             fd, r;
+	int             r;
 	short          *s;
 
 	status[16] = (pid ? flagpaused : 0);
@@ -126,22 +129,19 @@ announce(short sleep_interval)
 		*s = sleep_interval;
 	} else
 		status[18] = status[19] = 0;
-	if ((fd = open_trunc("supervise/status.new")) == -1) {
-		strerr_warn4(WARNING, "unable to open ", dir, "/supervise/status.new: ", &strerr_sys);
+
+	if (seek_begin(fdstatus)) {
+		strerr_warn2(WARNING, "lseek: status: ", &strerr_sys);
 		return;
 	}
-	if ((r = write(fd, status, sizeof status)) == -1) {
-		strerr_warn4(WARNING, "unable to write ", dir, "/supervise/status.new: ", &strerr_sys);
-		close(fd);
+	if ((r = write(fdstatus, status, sizeof status)) == -1) {
+		strerr_warn4(WARNING, "unable to write ", dir, "/supervise/status: ", &strerr_sys);
 		return;
 	}
-	close(fd);
 	if (r < sizeof status) {
-		strerr_warn4(WARNING, "unable to write ", dir, "/supervise/status.new: partial write", 0);
+		strerr_warn4(WARNING, "unable to write ", dir, "/supervise/status: partial write: ", 0);
 		return;
 	}
-	if (rename("supervise/status.new", "supervise/status") == -1)
-		strerr_warn4(WARNING, "unable to rename ", dir, "/supervise/status.new to status: ", &strerr_sys);
 }
 
 void
@@ -626,10 +626,8 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		strerr_die2x(111, FATAL, "out of memory");
 	if (chdir(run_dir) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", run_dir, ": ");
-#if 0
 	if (access("svscan", F_OK) && mkdir("svscan", 0755) == -1)
 		strerr_die4sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan: ");
-#endif
 	if (chdir("svscan") == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan: ");
 
@@ -692,11 +690,18 @@ main(int argc, char **argv)
 	sdir = dir; /*- original service direcory */
 	initialize_run(dir, st.st_mode, st.st_uid, st.st_gid); /*- this will set dir to new service directory in /run, /var/run */
 #endif
-	mkdir("supervise", 0700);
+	if (mkdir("supervise", 0700) && errno != error_exist) 
+		strerr_die2sys(111, FATAL, "unable to create supervise directory: ");
+
+	if ((fdstatus = open_trunc("supervise/status")) == -1)
+		strerr_die4sys(111, FATAL, "unable to create ", dir, "/supervise/status: ");
+	coe(fdstatus);
+
 	fdlock = open_append("supervise/lock");
 	if ((fdlock == -1) || (lock_exnb(fdlock) == -1))
 		strerr_die4sys(111, FATAL, "unable to acquire ", dir, "/supervise/lock: ");
 	coe(fdlock);
+
 	fifo_make("supervise/control", 0600);
 	if ((fdcontrol = open_read("supervise/control")) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", dir, "/supervise/control: ");
@@ -705,8 +710,10 @@ main(int argc, char **argv)
 	if ((fdcontrolwrite = open_write("supervise/control")) == -1)
 		strerr_die4sys(111, FATAL, "unable to write ", dir, "/supervise/control: ");
 	coe(fdcontrolwrite);
+
 	pidchange();
 	announce(0);
+
 	fifo_make("supervise/ok", 0600);
 	if ((fdok = open_read("supervise/ok")) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", dir, "/supervise/ok: ");
@@ -721,7 +728,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.14 2020-11-09 18:17:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.15 2020-11-09 21:32:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
