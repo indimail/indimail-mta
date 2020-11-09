@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.11 2020-11-07 14:25:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.12 2020-11-09 09:22:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -253,7 +253,6 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                    %{_prefix}/sbin/docker-entrypoint
 %attr(0755,root,root)                    %{_prefix}/sbin/minisvc
 
-%attr(0755,root,root)                    %{libexecdir}/svwait
 %attr(0755,root,root)                    %{libexecdir}/svscanboot
 %attr(0755,root,root)                    %{libexecdir}/instcheck.daemontools
 %attr(444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
@@ -285,7 +284,6 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0644,root,root)                    %{mandir}/man8/supervise.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/svc.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/svok.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/svwait.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/svscan.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/svstat.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/tai64n.8.gz

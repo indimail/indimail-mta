@@ -33,7 +33,6 @@
 %attr(0755,root,root) @prefix@/sbin/supervise
 %attr(0755,root,root) @prefix@/sbin/svscan
 
-%attr(0755,root,root) @libexecdir@/svwait
 %attr(0755,root,root) @libexecdir@/svscanboot
 
 %attr(0755,root,root) @mandir@/man1/tai64n2tai.1.gz
