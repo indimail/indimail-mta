@@ -25,7 +25,6 @@ f:::0644:/man8/:softlimit.8:softlimit.8
 f:::0644:/man8/:supervise.8:supervise.8
 f:::0644:/man8/:svc.8:svc.8
 f:::0644:/man8/:svok.8:svok.8
-f:::0644:/man8/:svwait.8:svwait.8
 f:::0644:/man8/:svscan.8:svscan.8
 f:::0644:/man8/:svstat.8:svstat.8
 f:::0644:/man8/:tai64n.8:tai64n.8
