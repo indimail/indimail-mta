@@ -141,3 +141,5 @@ creation
     service
 84. spawn-filter.c: unset FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE
     before calling qmail-local, qmail-remote
+- 09/11/2020
+85. svctool: inlookup, pwdlookup service - removed svwait program. use waitfor service instead

@@ -79,3 +79,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * upgrade: shutdown indimail-mta services instead of entire svscan service
   * svctool: added display for enabling/disabling auto refresh settings for service
   * spawn-filter.c: unset FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE before calling qmail-local, qmail-remote
+  * svctool: inlookup, pwdlookup service - removed svwait program. use waitfor service instead

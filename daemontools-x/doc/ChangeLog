@@ -48,3 +48,4 @@ Release 1.1 Start 09/10/2020
 24. supervise.c: add wait for service feature
 25. svstat.c: display wait status
 26. svstat.c: print errors to stderr instead of stdout
+27. removed svwait program
