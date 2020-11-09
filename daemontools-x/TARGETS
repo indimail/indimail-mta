@@ -38,8 +38,6 @@ logselect
 logselect.8
 sortedtest
 qlogselect
-svwait
-svwait.8
 upstart
 systemd
 svscanboot
@@ -66,3 +64,4 @@ iopause.h
 instcheck
 auto_home.c
 auto_shared.c
+svstats

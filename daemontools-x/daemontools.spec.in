@@ -272,6 +272,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0644,root,root)                    %{mandir}/man1/qlogselect.1.gz
 %attr(0644,root,root)                    %{mandir}/man1/tai2tai64n.1.gz
 %attr(0644,root,root)                    %{mandir}/man1/tai64n2tai.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/svstats.1.gz
 %attr(0644,root,root)                    %{mandir}/man8/envdir.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/envuidgid.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/fghack.8.gz

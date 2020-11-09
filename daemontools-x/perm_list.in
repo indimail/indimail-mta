@@ -42,6 +42,7 @@
 %attr(0755,root,root) @mandir@/man1/multipipe.1.gz
 %attr(0755,root,root) @mandir@/man1/qfilelog.1.gz
 %attr(0755,root,root) @mandir@/man1/spipe.1.gz
+%attr(0755,root,root) @mandir@/man1/svstats.1.gz
 
 %attr(0644,root,root) @mandir@/man8/docker-entrypoint.8.gz
 %attr(0644,root,root) @mandir@/man8/minisvc.8.gz
@@ -53,7 +54,6 @@
 %attr(0644,root,root) @mandir@/man8/tai64n.8.gz
 %attr(0644,root,root) @mandir@/man8/svstat.8.gz
 %attr(0644,root,root) @mandir@/man8/svscan.8.gz
-%attr(0644,root,root) @mandir@/man8/svwait.8.gz
 %attr(0644,root,root) @mandir@/man8/svok.8.gz
 %attr(0644,root,root) @mandir@/man8/svc.8.gz
 %attr(0644,root,root) @mandir@/man8/supervise.8.gz
