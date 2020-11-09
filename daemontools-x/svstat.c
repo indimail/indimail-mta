@@ -1,5 +1,8 @@
 /*
  * $Log: svstat.c,v $
+ * Revision 1.7  2020-11-09 09:31:09+05:30  Cprogrammer
+ * display wait status. print errors to stderr instead of stdout
+ *
  * Revision 1.6  2020-11-07 14:23:49+05:30  Cprogrammer
  * print pid after displaying uptime
  *
@@ -35,33 +38,33 @@
 #define FATAL "svstat: fatal: "
 #define WARNING "svstat: warning: "
 
-char            bspace[1024];
-substdio        b = SUBSTDIO_FDBUF(write, 1, bspace, sizeof bspace);
+char            outbuf[256], errbuf[256];
+substdio        o = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
+substdio        e = SUBSTDIO_FDBUF(write, 2, errbuf, sizeof errbuf);
 
-char            status[18];
+char            status[20];
 char            strnum[FMT_ULONG];
 
 unsigned long   pid;
-unsigned char   normallyup;
-unsigned char   want;
-unsigned char   paused;
+unsigned char   normallyup, want, paused;
+static short    waiting;
 
 void
 doit(char *dir, int *retval)
 {
 	struct stat     st;
 	int             r, fd;
+	short          *s;
 	char           *x;
 	struct tai      when, now;
-	char            buf[80];
 
-	*retval = 1;
-	substdio_puts(&b, dir);
-	substdio_puts(&b, ": ");
+	*retval = 111;
 	if (chdir(dir) == -1) {
 		x = error_str(errno);
-		substdio_puts(&b, "unable to chdir: ");
-		substdio_puts(&b, x);
+		substdio_puts(&e, dir);
+		substdio_puts(&e, ": unable to chdir: ");
+		substdio_puts(&e, x);
+		substdio_puts(&e, "\n");
 		return;
 	}
 
@@ -69,8 +72,10 @@ doit(char *dir, int *retval)
 	if (stat("down", &st) == -1) {
 		if (errno != error_noent) {
 			x = error_str(errno);
-			substdio_puts(&b, "unable to stat down: ");
-			substdio_puts(&b, x);
+			substdio_puts(&e, dir);
+			substdio_puts(&e, ": unable to stat down: ");
+			substdio_puts(&e, x);
+			substdio_puts(&e, "\n");
 			return;
 		}
 		normallyup = 1;
@@ -81,19 +86,27 @@ doit(char *dir, int *retval)
 #endif
 	if ((fd = open_write("supervise/ok")) == -1) {
 		if (errno == error_nodevice) {
-			substdio_puts(&b, "supervise not running");
+			substdio_puts(&e, dir);
+			substdio_puts(&e, ": supervise not running\n");
+			*retval = 2;
 			return;
 		}
 		x = error_str(errno);
-		substdio_puts(&b, "unable to open supervise/ok: ");
-		substdio_puts(&b, x);
+		substdio_puts(&e, dir);
+		substdio_puts(&e, ": unable to open supervise/ok: ");
+		substdio_puts(&e, x);
+		substdio_puts(&e, "\n");
 		return;
 	}
 	close(fd);
 	if ((fd = open_read("supervise/status")) == -1) {
+		if (errno == error_noent)
+			*retval = 2;
 		x = error_str(errno);
-		substdio_puts(&b, "unable to open supervise/status: ");
-		substdio_puts(&b, x);
+		substdio_puts(&e, dir);
+		substdio_puts(&e, ": unable to open supervise/status: ");
+		substdio_puts(&e, x);
+		substdio_puts(&e, "\n");
 		return;
 	}
 	r = read(fd, status, sizeof status);
@@ -101,10 +114,14 @@ doit(char *dir, int *retval)
 	if (r < sizeof status) {
 		if (r == -1)
 			x = error_str(errno);
-		else
+		else {
+			*retval = 100;
 			x = "bad format";
-		substdio_puts(&b, "unable to read supervise/status: ");
-		substdio_puts(&b, x);
+		}
+		substdio_puts(&e, dir);
+		substdio_puts(&e, ": unable to read supervise/status: ");
+		substdio_puts(&e, x);
+		substdio_puts(&e, "\n");
 		return;
 	}
 	pid = (unsigned char) status[15];
@@ -114,68 +131,58 @@ doit(char *dir, int *retval)
 	pid += (unsigned char) status[13];
 	pid <<= 8;
 	pid += (unsigned char) status[12];
-	paused = status[16];
+	if ((paused = status[16]))
+		*retval = 3;
 	want = status[17];
+	s = (short *) (status + 18);
+	waiting = *s;
 	tai_unpack(status, &when);
 	tai_now(&now);
 	if (tai_less(&now, &when))
 		when = now;
 	tai_sub(&when, &now, &when);
-	if (pid)
-		substdio_puts(&b, "up ");
+	substdio_puts(&o, dir);
+	substdio_puts(&o, ": ");
+	if (waiting)
+		substdio_puts(&o, "wait ");
 	else
-		substdio_puts(&b, "down ");
-	substdio_put(&b, strnum, fmt_ulong(strnum, tai_approx(&when)));
-	substdio_puts(&b, " seconds");
+	if (pid)
+		substdio_puts(&o, "up ");
+	else
+		substdio_puts(&o, "down ");
+	substdio_put(&o, strnum, fmt_ulong(strnum, tai_approx(&when)));
+	substdio_puts(&o, " seconds");
 
 	if (pid && !normallyup)
-		substdio_puts(&b, ", normally down");
+		substdio_puts(&o, ", normally down");
 	if (!pid && normallyup)
-		substdio_puts(&b, ", normally up");
+		substdio_puts(&o, ", normally up");
 	if (pid && paused)
-		substdio_puts(&b, ", paused");
-	if (!pid && (want == 'u'))
-		substdio_puts(&b, ", want up");
-	if (pid && (want == 'd'))
-		substdio_puts(&b, ", want down");
+		substdio_puts(&o, ", paused");
+	if (!pid && (want == 'u')) {
+		*retval = 4;
+		substdio_puts(&o, ", want up");
+	}
+	if (pid && (want == 'd')) {
+		*retval = 5;
+		substdio_puts(&o, ", want down");
+	}
 
 	if (pid) {
-		*retval = 0;
-		substdio_puts(&b, " pid ");
-		substdio_put(&b, strnum, fmt_ulong(strnum, pid));
-		substdio_puts(&b, " ");
+		if (*retval != 3 && *retval != 5)
+			*retval = 0;
+		substdio_puts(&o, " pid ");
+		substdio_put(&o, strnum, fmt_ulong(strnum, pid));
+		substdio_puts(&o, " ");
+	} else
+		*retval = 1;
+	if (waiting > 0 && (waiting - when.x) > 0) {
+		substdio_puts(&o, "remaining ");
+		when.x = waiting - when.x;
+		substdio_put(&o, strnum, fmt_ulong(strnum, tai_approx(&when)));
+		substdio_puts(&o, " seconds");
 	}
-/*--------------------------------------------------------*/
-	if (stat("supervise/wait", &st) == -1) {
-		if (errno != error_noent) {
-			x = error_str(errno);
-			substdio_puts(&b, "unable to stat supervise/wait: ");
-			substdio_puts(&b, x);
-			return;
-		}
-	} else {
-		if ((fd = open_read("supervise/wait")) == -1) {
-			x = error_str(errno);
-			substdio_puts(&b, "unable to open supervise/wait: ");
-			substdio_puts(&b, x);
-			return;
-		}
-		substdio_puts(&b, "\n");
-		for (;;) {
-			if ((r = read(fd, buf, sizeof(buf))) == -1) {
-				x = error_str(errno);
-				close(fd);
-				substdio_puts(&b, "unable to read supervise/wait: ");
-				substdio_puts(&b, x);
-				return;
-			} else
-			if (!r)
-				break;
-			substdio_put(&b, buf, r);
-		}
-		close(fd);
-	}
-/*--------------------------------------------------------*/
+	substdio_puts(&o, "\n");
 }
 
 int
@@ -190,18 +197,29 @@ main(int argc, char **argv)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	while ((dir = *argv++)) {
 		doit(dir, &retval);
-		substdio_puts(&b, "\n");
 		if (fchdir(fdorigdir) == -1)
 			strerr_die2sys(111, FATAL, "unable to set directory: ");
 	}
-	substdio_flush(&b);
+	substdio_flush(&e);
+	substdio_flush(&o);
+	/*
+	 * 111 - system error
+	 * 100 - bad status
+	 *   0 - service running
+	 *   1 - service down
+	 *   2 - supervise not running
+	 *   3 - service paused
+	 *   4 - down - wants up
+	 *   5 - up   - wants down
+	 *   6 - wait - wating for service to come up
+	 */
 	_exit(retval);
 }
 
 void
 getversion_svstat_c()
 {
-	static char    *x = "$Id: svstat.c,v 1.6 2020-11-07 14:23:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svstat.c,v 1.7 2020-11-09 09:31:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
