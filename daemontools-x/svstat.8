@@ -2,9 +2,11 @@
 .SH NAME
 svstat \- prints the status of services monitored by
 .BR supervise (8).
+
 .SH SYNOPSIS
 .B svstat
 .I services
+
 .SH DESCRIPTION
 .I services
 consists of any number of arguments, each argument naming a directory.
@@ -14,6 +16,22 @@ prints one human-readable line for each directory, saying whether
 is successfully running in that directory, and reporting the status
 information maintained by
 .BR supervise (8).
+
+If the argument to \fBsvscan\fR names just one directory, then the return value will
+reflect various stats of a service as below
+
+.EX
+	 111 - system error
+	 100 - bad status
+	   0 - service running
+	   1 - service down
+	   2 - supervise not running
+	   3 - service paused
+	   4 - down - wants up
+	   5 - up   - wants down
+	   6 - wait - wating for service to come up
+.EE
+
 .SH SEE ALSO
 supervise(8),
 svc(8),

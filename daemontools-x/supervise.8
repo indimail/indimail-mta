@@ -48,7 +48,14 @@ is successfully running. You can use
 .BR svscan (8)
 to reliably start a collection of
 .B supervise
-processes. 
+processes.
+
+supervise can wait for another service by having file named \fIs\fR/\fIwait\fR.
+The second line in this file should be a service, say \fIw\fR which should be
+checked if it is running. The first line in this file should be the amount
+of time \fIt\fR, service \fIs\fR should wait, after the service \fIw\fR is up and
+running. The amount of time \fIt\fR is limited to a max of 32767 seconds. Any value
+above this value will be limited to 60 seconds.
 
 .SH SEE ALSO
 svc(8),
