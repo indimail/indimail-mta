@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.16  2020-11-10 19:11:24+05:30  Cprogrammer
+ * maintain pid of supervise in down state and status of down state in byte 20
+ *
  * Revision 1.15  2020-11-09 21:32:09+05:30  Cprogrammer
  * avoid recreating status file with every invocation of supervise.
  *
@@ -86,19 +89,20 @@ static int      fdok;
 static int      flagexit = 0;
 static int      flagwant = 1;
 static int      flagwantup = 1;
-static int      pid = 0;		/*- 0 means down */
 static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
 static char     waited, flagfailed;
-char            status[20];
+char            status[21];
 static stralloc wait_sv_file = {0};
 #ifdef USE_RUNFS
 static char    *sdir;
 static stralloc run_service_dir = { 0 };
 #endif
+static pid_t    childpid = 0;	/*- 0 means down */
+static pid_t    svpid;
 
 void
-pidchange(void)
+pidchange(pid_t pid, char up)
 {
 	struct taia     now;
 	unsigned long   u;
@@ -114,6 +118,7 @@ pidchange(void)
 	status[14] = u;
 	u >>= 8;
 	status[15] = u;
+	status[20] = up;
 }
 
 void
@@ -122,7 +127,7 @@ announce(short sleep_interval)
 	int             r;
 	short          *s;
 
-	status[16] = (pid ? flagpaused : 0);
+	status[16] = (childpid ? flagpaused : 0);
 	status[17] = (flagwant ? (flagwantup ? 'u' : 'd') : 0);
 	if (sleep_interval) {
 		s = (short *) (status + 18);
@@ -229,8 +234,7 @@ do_wait()
 			!stralloc_catb(&wait_sv_file, "/supervise/status", 17) ||
 			!stralloc_0(&wait_sv_file))
 		strerr_die2x(111, FATAL, "out of memory");
-	pid = getpid();
-	pidchange();
+	pidchange((svpid = getpid()), 0);
 	for (;;) {
 		announce(-1);
 		if ((fd = open_read(wait_sv_file.s)) == -1) {
@@ -269,10 +273,10 @@ do_wait()
 	} /*- for (i = -1;;) */
 	if (!waited) {
 		waited = 1;
-		pidchange(); /*- update start time */
+		pidchange(svpid, 0); /*- update start time */
 		announce(sleep_interval);
 		deepsleep(sleep_interval);
-		pid = 0;
+		childpid = 0;
 		announce(0);
 	}
 	return;
@@ -311,8 +315,7 @@ trystart(void)
 #endif
 	}
 	flagpaused = 0;
-	pid = f;
-	pidchange();
+	pidchange((childpid = f), 1);
 	announce(0);
 	deepsleep(1);
 }
@@ -367,7 +370,7 @@ doit(void)
 	announce(0);
 
 	for (;;) {
-		if (flagexit && !pid)
+		if (flagexit && !childpid)
 			return;
 
 		sig_unblock(sig_child);
@@ -389,9 +392,9 @@ doit(void)
 				break;
 			if (r == -1 && errno != error_intr)
 				break;
-			if (r == pid) {
-				pid = 0;
-				pidchange();
+			if (r == childpid) {
+				childpid = 0;
+				pidchange(svpid, 0);
 				announce(0);
 				if (flagexit)
 					return;
@@ -424,28 +427,28 @@ doit(void)
 			case 'r': /*- restart */
 				flagwant = 1;
 				flagwantup = 1;
-				if (pid) {
+				if (childpid) {
 #ifdef USE_RUNFS
 					if (fchdir(fddir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
-						tryaction(shutdown, pid); /*- run the shutdown command */
+						tryaction(shutdown, childpid); /*- run the shutdown command */
 #ifdef USE_RUNFS
 					if (chdir(dir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
 #endif
-					kill(g ? 0 - pid : pid, SIGTERM);
-					kill(g ? 0 - pid : pid, SIGCONT);
+					kill(g ? 0 - childpid : childpid, SIGTERM);
+					kill(g ? 0 - childpid : childpid, SIGCONT);
 					if (g) {
-						kill(pid, SIGTERM);
-						kill(pid, SIGCONT);
+						kill(childpid, SIGTERM);
+						kill(childpid, SIGCONT);
 					}
 					g = flagpaused = 0;
 				}
-				t = pid;
+				t = childpid;
 				while (c < 10) {
-					if (kill(pid, 0) && errno == error_srch) {
+					if (kill(childpid, 0) && errno == error_srch) {
 						t = 0;
 						break;
 					}
@@ -459,22 +462,22 @@ doit(void)
 			case 'd': /*- down */
 				flagwant = 1;
 				flagwantup = 0;
-				if (pid) {
+				if (childpid) {
 #ifdef USE_RUNFS
 					if (fchdir(fddir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
-						tryaction(shutdown, pid); /*- run the shutdown command */
+						tryaction(shutdown, childpid); /*- run the shutdown command */
 #ifdef USE_RUNFS
 					if (chdir(dir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
 #endif
-					kill(g ? 0 - pid : pid, SIGTERM);
-					kill(g ? 0 - pid : pid, SIGCONT);
+					kill(g ? 0 - childpid : childpid, SIGTERM);
+					kill(g ? 0 - childpid : childpid, SIGCONT);
 					if (g) {
-						kill(pid, SIGTERM);
-						kill(pid, SIGCONT);
+						kill(childpid, SIGTERM);
+						kill(childpid, SIGCONT);
 					}
 					g = flagpaused = 0;
 				}
@@ -484,97 +487,97 @@ doit(void)
 				flagwant = 1;
 				flagwantup = 1;
 				announce(0);
-				if (!pid)
+				if (!childpid)
 					trystart();
 				break;
 			case 'o': /*- run once */
 				flagwant = 0;
 				announce(0);
-				if (!pid)
+				if (!childpid)
 					trystart();
 				break;
 			case 'a': /*- send ALRM */
-				if (pid) {
-					kill(g ? 0 - pid : pid, SIGALRM);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid, SIGALRM);
 					if (g)
-						kill(pid, SIGALRM);
+						kill(childpid, SIGALRM);
 					g = 0;
 				}
 				break;
 			case 'h': /*- send HUP */
-				if (pid) {
-					kill(g ? 0 - pid : pid, SIGHUP);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid, SIGHUP);
 					if (g)
-						kill(pid, SIGHUP);
+						kill(childpid, SIGHUP);
 					g = 0;
 				}
 				break;
 			case 'k': /*- send kill */
-				if (pid) {
-					kill(g ? 0 - pid : pid, SIGKILL);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid, SIGKILL);
 					if (g)
-						kill(pid, SIGKILL);
+						kill(childpid, SIGKILL);
 					g = 0;
 				}
 				break;
 			case 't': /*- send TERM */
-				if (pid) {
-					kill(g ? 0 - pid : pid, SIGTERM);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid, SIGTERM);
 					if (g)
-						kill(pid, SIGTERM);
+						kill(childpid, SIGTERM);
 					g = 0;
 				}
 				break;
 			case 'i': /*- send INT */
-				if (pid) {
-					kill(g ? 0 - pid : pid, SIGINT);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid, SIGINT);
 					if (g)
-						kill(pid, SIGINT);
+						kill(childpid, SIGINT);
 					g = 0;
 				}
 				break;
 			case 'q': /*- send SIGQUIT */
-				if (pid) {
-					kill(g ? 0 - pid : pid,SIGQUIT);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid,SIGQUIT);
 					if (g)
-						kill(pid,SIGQUIT);
+						kill(childpid,SIGQUIT);
 					g = 0;
 				}
 				break;
 			case 'U': /*- send USR1 */
 			case '1':
-				if (pid) {
-					kill(g ? 0 - pid : pid,SIGUSR1);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid,SIGUSR1);
 					if (g)
-						kill(pid,SIGUSR1);
+						kill(childpid,SIGUSR1);
 					g = 0;
 				}
 				break;
 			case '2': /*- send USR2 */
-				if (pid) {
-					kill(g ? 0 - pid : pid,SIGUSR2);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid,SIGUSR2);
 					if (g)
-						kill(pid,SIGUSR2);
+						kill(childpid,SIGUSR2);
 					g = 0;
 				}
 				break;
 			case 'p': /*- send STOP */
 				flagpaused = 1;
 				announce(0);
-				if (pid) {
-					kill(g ? 0 - pid : pid, SIGSTOP);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid, SIGSTOP);
 					if (g)
-						kill(pid, SIGSTOP);
+						kill(childpid, SIGSTOP);
 					g = 0;
 				}
 				break;
 			case 'c': /*- send CONT */
 				flagpaused = 0;
 				announce(0);
-				if (pid) {
-					kill(g ? 0 - pid : pid, SIGCONT);
+				if (childpid) {
+					kill(g ? 0 - childpid : childpid, SIGCONT);
 					if (g)
-						kill(pid, SIGCONT);
+						kill(childpid, SIGCONT);
 					g = 0;
 				}
 				break;
@@ -711,7 +714,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to write ", dir, "/supervise/control: ");
 	coe(fdcontrolwrite);
 
-	pidchange();
+	pidchange(getpid(), 0);
 	announce(0);
 
 	fifo_make("supervise/ok", 0600);
@@ -728,7 +731,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.15 2020-11-09 21:32:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.16 2020-11-10 19:11:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
