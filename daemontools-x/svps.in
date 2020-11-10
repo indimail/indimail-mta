@@ -1,4 +1,7 @@
 # $Log: svps.in,v $
+# Revision 1.3  2020-11-10 19:14:47+05:30  Cprogrammer
+# display supervise process pid when service is down
+#
 # Revision 1.2  2020-11-10 16:53:38+05:30  Cprogrammer
 # added getopt style options
 #
@@ -6,7 +9,7 @@
 # Initial revision
 #
 # 
-# $Id: svps.in,v 1.2 2020-11-10 16:53:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.3 2020-11-10 19:14:47+05:30 Cprogrammer Exp mbhangui $
 #
 option=main
 while test $# -gt 0; do
@@ -70,7 +73,7 @@ if [ "$option" = "all" -o "$option" = "main" ] ; then
 	do
 		set $line
 		name=`echo $1|cut -d: -f1`
-		printf "%-"$max"s down %7d secs\n" $name $3
+		printf "%-"$max"s down %7d secs spid %7d\n" $name $3 $6
 		if [ $? -ne 0 ] ; then
 			break
 		fi
@@ -81,9 +84,9 @@ if [ "$option" = "all" -o "$option" = "main" ] ; then
 		set $line
 		name=`echo $1|cut -d: -f1`
 		if [ $# -eq 9 ] ; then
-			printf "%-"$max"s wait %7d secs pid %7d remaining %7d seconds\n" $name $3 $6 $8
+			printf "%-"$max"s wait %7d secs  pid %7d remaining %7d seconds\n" $name $3 $6 $8
 		else
-			printf "%-"$max"s wait %7d secs pid %7d\n" $name $3 $6
+			printf "%-"$max"s wait %7d secs  pid %7d\n" $name $3 $6
 		fi
 		if [ $? -ne 0 ] ; then
 			break
@@ -94,7 +97,7 @@ if [ "$option" = "all" -o "$option" = "main" ] ; then
 	do
 		set $line
 		name=`echo $1|cut -d: -f1`
-		printf "%-"$max"s up   %7d secs pid %7d\n" $name $3 $6
+		printf "%-"$max"s up   %7d secs  pid %7d\n" $name $3 $6
 		if [ $? -ne 0 ] ; then
 			break
 		fi
@@ -107,12 +110,12 @@ if [ "$option" = "all" -o "$option" = "logs" ] ; then
 
 	set `grep "@servicedir@/\.svscan/log" /tmp/svps.$$`
 	name=`echo $1|cut -d: -f1`
-	printf "%-"$max"s up   %7d secs pid %7d\n" $name $3 $6
+	printf "%-"$max"s up   %7d secs  pid %7d\n" $name $3 $6
 	egrep "@servicedir@/.*/log" /tmp/svps.$$ | sort -n -k3 | grep -v "\.svscan" | while read line
 	do
 		set $line
 		name=`echo $1|cut -d: -f1`
-		printf "%-"$max"s up   %7d secs pid %7d\n" $name $3 $6
+		printf "%-"$max"s up   %7d secs  pid %7d\n" $name $3 $6
 		if [ $? -ne 0 ] ; then
 			break
 		fi
