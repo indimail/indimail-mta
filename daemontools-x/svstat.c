@@ -1,5 +1,8 @@
 /*
  * $Log: svstat.c,v $
+ * Revision 1.8  2020-11-10 19:13:45+05:30  Cprogrammer
+ * use byte 20 from status to indicate if service is up
+ *
  * Revision 1.7  2020-11-09 09:31:09+05:30  Cprogrammer
  * display wait status. print errors to stderr instead of stdout
  *
@@ -42,7 +45,7 @@ char            outbuf[256], errbuf[256];
 substdio        o = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
 substdio        e = SUBSTDIO_FDBUF(write, 2, errbuf, sizeof errbuf);
 
-char            status[20];
+char            status[21];
 char            strnum[FMT_ULONG];
 
 unsigned long   pid;
@@ -146,32 +149,38 @@ doit(char *dir, int *retval)
 	if (waiting)
 		substdio_puts(&o, "wait ");
 	else
-	if (pid)
+	if (status[20])
 		substdio_puts(&o, "up ");
 	else
 		substdio_puts(&o, "down ");
 	substdio_put(&o, strnum, fmt_ulong(strnum, tai_approx(&when)));
 	substdio_puts(&o, " seconds");
 
-	if (pid && !normallyup)
+	if (status[20] && !normallyup)
 		substdio_puts(&o, ", normally down");
 	if (!pid && normallyup)
 		substdio_puts(&o, ", normally up");
-	if (pid && paused)
+	if (status[20] && paused)
 		substdio_puts(&o, ", paused");
 	if (!pid && (want == 'u')) {
 		*retval = 4;
 		substdio_puts(&o, ", want up");
 	}
-	if (pid && (want == 'd')) {
+	if (status[20] && (want == 'd')) {
 		*retval = 5;
 		substdio_puts(&o, ", want down");
 	}
 
-	if (pid) {
+	if (pid && status[20]) {
 		if (*retval != 3 && *retval != 5)
 			*retval = 0;
 		substdio_puts(&o, " pid ");
+		substdio_put(&o, strnum, fmt_ulong(strnum, pid));
+		substdio_puts(&o, " ");
+	} else
+	if (pid) {
+		*retval = 1;
+		substdio_puts(&o, " spid ");
 		substdio_put(&o, strnum, fmt_ulong(strnum, pid));
 		substdio_puts(&o, " ");
 	} else
@@ -219,7 +228,7 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	static char    *x = "$Id: svstat.c,v 1.7 2020-11-09 09:31:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svstat.c,v 1.8 2020-11-10 19:13:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
