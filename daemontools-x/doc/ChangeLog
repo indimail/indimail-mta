@@ -49,5 +49,10 @@ Release 1.1 Start 09/10/2020
 25. svstat.c: display wait status
 26. svstat.c: print errors to stderr instead of stdout
 27. removed svwait program
-28. supervise: avoid recreating status file with every invocation of
+28. supervise.c: avoid recreating status file with every invocation of
     supervise.
+- 10/11/2020
+29. supervise.c: maintain pid of supervise in down state and status of down
+    state in byte 20
+30. svstat.c: use byte 20 from status to indicate if service is up
+31. svps: display supervise process pid when service is down

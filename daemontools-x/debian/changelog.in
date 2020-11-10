@@ -29,3 +29,6 @@ daemontools (@version@-@release@) unstable; urgency=low
   * svstat.c: print errors to stderr instead of stdout
   * removed svwait program
   * supervise: avoid recreating status file with every invocation of supervise.
+  * supervise.c: maintain pid of supervise in down state and status of down state in byte 20
+  * svstat.c: use byte 20 from status to indicate if service is up
+  * svps: display supervise process pid when service is down
