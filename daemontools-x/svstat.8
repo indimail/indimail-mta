@@ -13,12 +13,37 @@ consists of any number of arguments, each argument naming a directory.
 .B svstat
 prints one human-readable line for each directory, saying whether
 .BR supervise (8)
-is successfully running in that directory, and reporting the status
-information maintained by
-.BR supervise (8).
+is successfully running in that directory, and reporting the status and
+process information maintained by \fBsupervise\fR(8). The information printed
+is the \fBstatus\fR and \fBpid\fR. The \fBstatus\fR is one of \fIup\fR,
+\fIdown\fR or \fIwait\fR. In case the service status is \fIup\fR, \fBpid\fR
+is the process id of the service. In case the status is either \fIdown\fR
+or \fIwait\fR, \fBpid\fR will be the process id of the supervise process.
+
+.EX
+# this service is up. here the pid of qmail-qmtpd is 153985
+$ svstat /service/qmail-qmtpd.209
+/service/qmail-qmtpd.209: up 6696 seconds pid 153985
+
+# this service is down. here the pid of supervise is 153899
+$ svstat /service/qmail-qmqpd.628
+/service/qmail-qmqpd.628: down 6776 seconds spid 153899
+
+# this service is waiting for a dependent service to be up
+# It has been waiting for the past 8 seconds. The pid
+# 153976 is the pid of the supervise process
+$ svstat /service/inlookup.infifo
+/service/inlookup.infifo: wait 8 seconds spid 153976
+
+# this service has already waited 4 seconds since a dependent
+# serivce came up. It will further wait for 26 seconds. The pid
+# 153976 is the pid of the supervise process
+$ svstat /service/inlookup.infifo
+/service/inlookup.infifo: wait 4 seconds spid 153976 remaining 26 seconds
+.EE
 
 If the argument to \fBsvscan\fR names just one directory, then the return value will
-reflect various stats of a service as below
+reflect various status of a service as below
 
 .EX
 	 111 - system error
@@ -34,6 +59,7 @@ reflect various stats of a service as below
 
 .SH SEE ALSO
 supervise(8),
+svps(1),
 svc(8),
 svok(8),
 svwait(8),
