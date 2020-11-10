@@ -7,7 +7,7 @@ d:::0755:/man8::
 # Man pages
 #
 f:::0644:/man1/:spipe.1:spipe.1
-f:::0644:/man1/:svstats.1:svstats.1
+f:::0644:/man1/:svps.1:svps.1
 f:::0644:/man1/:qfilelog.1:qfilelog.1
 f:::0644:/man1/:multipipe.1:multipipe.1
 f:::0644:/man1/:teepipe.1:teepipe.1

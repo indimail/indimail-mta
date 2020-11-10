@@ -1,12 +1,13 @@
-.TH svstats 1
+.TH svps 1
 .SH NAME
-svstats \- prints the status of all services started by \fBsvscan\fR
+svps \- prints the status of all services started by \fBsvscan\fR
 
 .SH SYNOPSIS
-.B svstats
+.B svps
+[--\fIall\fR | -a] [--\fImain\fR | -m] [--\fIlogs\fR | -l]
 
 .SH DESCRIPTION
-.B svstats
+.B svps
 prints one human-readable line for all supervise services started by
 \fIsvscan\fR(8). It prints human readable information for all
 directories where
@@ -14,6 +15,22 @@ directories where
 is successfully running in that directory, and reporting the status
 information maintained by
 .BR supervise (8).
+
+.SH OPTIONS
+.TP
+\-\-\fIall\fR or -a
+
+Print status for both main and log processes
+
+.TP
+.B \-\-main or -m
+
+Print status for main processes
+
+.TP
+.B \-\-logs or -l
+
+Print status for log processes
 
 .SH SEE ALSO
 svstat(8),

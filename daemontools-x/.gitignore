@@ -69,4 +69,4 @@ installer
 auto_home.c
 auto_shared.c
 instcheck
-svstats
+svps

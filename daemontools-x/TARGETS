@@ -64,4 +64,4 @@ iopause.h
 instcheck
 auto_home.c
 auto_shared.c
-svstats
+svps

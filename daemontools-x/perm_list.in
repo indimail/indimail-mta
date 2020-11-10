@@ -15,7 +15,7 @@
 %attr(0755,root,root) @prefix@/bin/tai64nlocal
 %attr(0755,root,root) @prefix@/bin/tai64n
 %attr(0755,root,root) @prefix@/bin/svstat
-%attr(0755,root,root) @prefix@/bin/svstats
+%attr(0755,root,root) @prefix@/bin/svps
 %attr(0755,root,root) @prefix@/bin/svok
 %attr(0755,root,root) @prefix@/bin/svc
 %attr(0755,root,root) @prefix@/bin/softlimit
@@ -42,7 +42,7 @@
 %attr(0755,root,root) @mandir@/man1/multipipe.1.gz
 %attr(0755,root,root) @mandir@/man1/qfilelog.1.gz
 %attr(0755,root,root) @mandir@/man1/spipe.1.gz
-%attr(0755,root,root) @mandir@/man1/svstats.1.gz
+%attr(0755,root,root) @mandir@/man1/svps.1.gz
 
 %attr(0644,root,root) @mandir@/man8/docker-entrypoint.8.gz
 %attr(0644,root,root) @mandir@/man8/minisvc.8.gz

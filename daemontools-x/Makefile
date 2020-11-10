@@ -24,7 +24,7 @@ it = envdir envuidgid setlock setuidgid softlimit svc svok \
 	svstat tai64n tai64nlocal tai64nunix tai2tai64n tai64n2tai \
 	spipe qfilelog multipipe teepipe logselect svscan qlogselect \
 	supervise readproctitle multilog docker-entrypoint fghack \
-	pgrphack svstats svscanboot upstart systemd qmailctl \
+	pgrphack svps svscanboot upstart systemd qmailctl \
 	minisvc instcheck installer daemontools.perms daemontools.spec
 
 man = spipe.1 qfilelog.1 multipipe.1 teepipe.1 tai2tai64n.1 \
@@ -377,7 +377,7 @@ qlogselect: qlogselect.pl conf-prefix
 	> qlogselect
 	chmod 755 qlogselect
 
-svstats: svstats.in conf-prefix conf-servicedir
+svps: svps.in conf-prefix conf-servicedir
 	cat warn-auto.sh $@.in  | $(edit) > $@
 	chmod +x $@
 

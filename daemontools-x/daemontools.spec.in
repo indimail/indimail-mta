@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.12 2020-11-09 09:22:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.13 2020-11-10 16:53:13+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -231,7 +231,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                    %{_prefix}/bin/svc
 %attr(0755,root,root)                    %{_prefix}/bin/svok
 %attr(0755,root,root)                    %{_prefix}/bin/svstat
-%attr(0755,root,root)                    %{_prefix}/bin/svstats
+%attr(0755,root,root)                    %{_prefix}/bin/svps
 %attr(0755,root,root)                    %{_prefix}/bin/tai64n
 %attr(0755,root,root)                    %{_prefix}/bin/tai64nlocal
 %attr(0755,root,root)                    %{_prefix}/bin/tai64nunix
@@ -272,7 +272,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0644,root,root)                    %{mandir}/man1/qlogselect.1.gz
 %attr(0644,root,root)                    %{mandir}/man1/tai2tai64n.1.gz
 %attr(0644,root,root)                    %{mandir}/man1/tai64n2tai.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/svstats.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/svps.1.gz
 %attr(0644,root,root)                    %{mandir}/man8/envdir.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/envuidgid.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/fghack.8.gz
