@@ -8,7 +8,7 @@
 # 
 # $Id: svps.in,v 1.2 2020-11-10 16:53:38+05:30 Cprogrammer Exp mbhangui $
 #
-option=all
+option=main
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
