@@ -559,14 +559,16 @@ Currently, the list of supported distributions for IndiMail is
           o SUSE Linux Enterprise 12 SP5
           o SUSE Linux Enterprise 15
           o SUSE Linux Enterprise 15 SP1
+          o SUSE Linux Enterprise 15 SP2
 
     * Red Hat
+          o Fedora 33
           o Fedora 32
-          o Fedora 31
           o Red Hat Enterprise Linux 6
           o Red Hat Enterprise Linux 7
           o CentOS 6
           o CentOS 7
+          o CentOS 8
 
     * Debian
           o Debian  8.0
@@ -578,6 +580,7 @@ Currently, the list of supported distributions for IndiMail is
           o Ubuntu 19.04
           o Ubuntu 19.10
           o Ubuntu 20.04
+          o Ubuntu 20.10
 ```
 
 ## NOTE for binary builds on debian
