@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.17  2020-11-11 09:27:23+05:30  Cprogrammer
+ * pass exit/signal of exited child to alert
+ *
  * Revision 1.16  2020-11-10 19:11:24+05:30  Cprogrammer
  * maintain pid of supervise in down state and status of down state in byte 20
  *
@@ -52,6 +55,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <signal.h>
 #include "sig.h"
 #include "strerr.h"
@@ -158,7 +162,7 @@ trigger(void)
 
 char           *run[2] =      { "./run", 0 };
 char           *shutdown[3] = { "./shutdown", 0, 0 };
-char           *alert[3] = { "./alert", 0, 0 };
+char           *alert[5] = { "./alert", 0, 0, 0, 0 }; /*- alert pid chilld_exit_value signal_value */
 
 int
 get_wait_params(unsigned short *interval, char **sv_name)
@@ -321,11 +325,10 @@ trystart(void)
 }
 
 void
-tryaction(char **action, pid_t spid)
+tryaction(char **action, pid_t spid, int wstat)
 {
-	int             f;
-	int             wstat;
-	char            strnum[FMT_ULONG];
+	int             f, t, i;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG + 1];
 
 	switch (f = fork())
 	{
@@ -345,8 +348,22 @@ tryaction(char **action, pid_t spid)
 		if (fchdir(fddir) == -1)
 			strerr_die2sys(111, FATAL, "unable to set current directory: ");
 #endif
-		strnum[fmt_ulong(strnum, spid)] = 0;
-		action[1] = strnum;
+		strnum1[fmt_ulong(strnum1, spid)] = 0;
+		if (WIFSTOPPED(wstat) || WIFSIGNALED(wstat)) {
+			action[3] = "stopped/signalled";
+			strnum2[fmt_uint(strnum2, WIFSTOPPED(wstat) ? WSTOPSIG(wstat) : WTERMSIG(wstat))] = 0;
+		} else
+		if (WIFEXITED(wstat)) {
+			action[3] = "exited";
+			if ((t = WEXITSTATUS(wstat)) < 0) {
+				i = fmt_uint(strnum2 + 1, 0 - t);
+				*strnum2 = '-';
+				strnum2[i + 1] = 0;
+			} else
+				strnum2[fmt_uint(strnum2, t)] = 0;
+		}
+		action[1] = strnum1;
+		action[2] = strnum2;
 		execve(*action, action, environ);
 #ifdef USE_RUNFS
 		strerr_die6sys(111, FATAL, "unable to exec ", sdir, "/", *action, ": ");
@@ -354,7 +371,7 @@ tryaction(char **action, pid_t spid)
 		strerr_die6sys(111, FATAL, "unable to exec ", dir, "/", *action, ": ");
 #endif
 	default:
-		wait_pid(&wstat, f);
+		wait_pid(&t, f);
 	}
 }
 
@@ -392,7 +409,7 @@ doit(void)
 				break;
 			if (r == -1 && errno != error_intr)
 				break;
-			if (r == childpid) {
+			if (r == childpid) { /*- process exited */
 				childpid = 0;
 				pidchange(svpid, 0);
 				announce(0);
@@ -404,7 +421,7 @@ doit(void)
 						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
 #endif
 					if (!access(*alert, F_OK))
-						tryaction(alert, r);
+						tryaction(alert, r, wstat);
 #ifdef USE_RUNFS
 					if (chdir(dir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
@@ -433,7 +450,7 @@ doit(void)
 						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
-						tryaction(shutdown, childpid); /*- run the shutdown command */
+						tryaction(shutdown, childpid, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
 					if (chdir(dir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
@@ -468,7 +485,7 @@ doit(void)
 						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
-						tryaction(shutdown, childpid); /*- run the shutdown command */
+						tryaction(shutdown, childpid, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
 					if (chdir(dir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
@@ -731,7 +748,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.16 2020-11-10 19:11:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.17 2020-11-11 09:27:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
