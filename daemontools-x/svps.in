@@ -1,4 +1,7 @@
 # $Log: svps.in,v $
+# Revision 1.6  2020-11-11 18:23:28+05:30  Cprogrammer
+# display uptime of svscan
+#
 # Revision 1.5  2020-11-11 18:05:14+05:30  Cprogrammer
 # display error if not running as root
 #
@@ -15,7 +18,7 @@
 # Initial revision
 #
 # 
-# $Id: svps.in,v 1.5 2020-11-11 18:05:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.6 2020-11-11 18:23:28+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -23,11 +26,26 @@ doit()
 option=$1
 max=$2
 
-ps ax|grep "svscan"|egrep -v "grep|multilog"
+if [ -d /run/svscan ] ; then
+	pidfile=/run/svscan/.svscan.pid
+elif [ -d /var/run/svscan ] ; then
+	pidfile=/var/run/svscan/.svscan.pid
+else
+	pidfile=@servicedir@/.svscan.pid
+fi
+
+mod=$(stat --printf="%Y\n" $pidfile)
+now=$(date +%s)
+diff=$(expr $now - $mod)
+
+line=$(ps ax|grep "svscan"|egrep -v "grep|multilog")
+set $line
+echo "------------ svscan ---------------"
+printf "%-"$max"s up   %7d secs  pid %7d\n" "$5 $6" $diff $1
 
 if [ "$option" = "all" -o "$option" = "main" ] ; then
 	echo
-	echo "------------ Main -----------------"
+	echo "------------ main -----------------"
 
 	grep -w down /tmp/svps.$$ | sort -n -k3 | grep -v "/log" | while read line
 	do
@@ -66,7 +84,7 @@ fi
 
 if [ "$option" = "all" -o "$option" = "logs" ] ; then
 	echo
-	echo "------------ Logs -----------------"
+	echo "------------ logs -----------------"
 
 	set `grep "@servicedir@/\.svscan/log" /tmp/svps.$$`
 	name=`echo $1|cut -d: -f1`
