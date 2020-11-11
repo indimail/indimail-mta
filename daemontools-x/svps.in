@@ -1,4 +1,7 @@
 # $Log: svps.in,v $
+# Revision 1.5  2020-11-11 18:05:14+05:30  Cprogrammer
+# display error if not running as root
+#
 # Revision 1.4  2020-11-11 18:01:37+05:30  Cprogrammer
 # send output through pager
 #
@@ -12,7 +15,7 @@
 # Initial revision
 #
 # 
-# $Id: svps.in,v 1.4 2020-11-11 18:01:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.5 2020-11-11 18:05:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -115,6 +118,12 @@ elif [ -x /usr/bin/more ] ; then
 	PAGER=/usr/bin/more
 fi
 
+ID=$(id -u)
+
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
 @prefix@/bin/svstat @servicedir@/* @servicedir@/*/log @servicedir@/.svscan/log 2>/dev/null \
 	|egrep -v "\.\.|^wait until" > /tmp/svps.$$
 status=${PIPESTATUS[0]}
