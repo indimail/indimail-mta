@@ -32,3 +32,7 @@ daemontools (@version@-@release@) unstable; urgency=low
   * supervise.c: maintain pid of supervise in down state and status of down state in byte 20
   * svstat.c: use byte 20 from status to indicate if service is up
   * svps: display supervise process pid when service is down
+  * supervise.c: pass exit/signal of exited child to alert script/program
+  * svps: display uptime of svscan
+  * svps: pass output through pager
+  * svps: display uptime of svscan
