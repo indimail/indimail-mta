@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.69  2020-11-11 19:50:11+05:30  Cprogrammer
+ * changed scope of global veriables limited to tcpserver.c
+ *
  * Revision 1.68  2020-09-20 10:55:06+05:30  Cprogrammer
  * open ipv4 and ipv6 sockets on FreeBSD
  *
@@ -230,68 +233,67 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.68 2020-09-20 10:55:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.69 2020-11-11 19:50:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
-int             forcev6 = 0;
-uint32          netif = 0;
+static int      forcev6 = 0;
+static uint32   netif = 0;
 #endif
-int             verbosity = 1;
-int             flagkillopts = 1;
-int             flagdelay = 1;
-char           *banner = "";
-int             flagremoteinfo = 1;
-int             flagremotehost = 1;
-int             flagparanoid = 0;
-int             verbose;
-unsigned long   timeout = 26, maxperip = 20, PerHostLimit = 20;
-unsigned long   limit = 40;
-unsigned long   alloc_count = 0;
-unsigned long   numchildren = 0;
-unsigned long   backlog = 20;
+static int      verbosity = 1;
+static int      flagkillopts = 1;
+static int      flagdelay = 1;
+static char    *banner = "";
+static int      flagremoteinfo = 1;
+static int      flagremotehost = 1;
+static int      flagparanoid = 0;
+static ulong    timeout = 26, maxperip = 20, PerHostLimit = 20;
+static ulong    limit = 40;
+static ulong    alloc_count = 0;
+static ulong    numchildren = 0;
+static ulong    backlog = 20;
 #ifdef TLS
-int             flagssl = 0;
+static int      flagssl = 0;
 struct stralloc certfile = {0};
 #endif
 
 static stralloc tcpremoteinfo;
-uint16          localport;
-char            localportstr[FMT_ULONG];
+static uint16   localport;
+static char     localportstr[FMT_ULONG];
 #ifdef IPV6
-char            localip[16];
-char            localipstr[IP6_FMT];
-char            localipstr6[IP6_FMT];
-char            remoteip[16];
-char            remoteipstr[IP6_FMT];
-char            remoteipstr6[IP6_FMT];
+static char     localip[16];
+static char     localipstr[IP6_FMT];
+static char     localipstr6[IP6_FMT];
+static char     remoteip[16];
+static char     remoteipstr[IP6_FMT];
+static char     remoteipstr6[IP6_FMT];
 #else
-char            localip[4];
-char            localipstr[IP4_FMT];
-char            remoteip[4];
-char            remoteipstr[IP4_FMT];
+static char     localip[4];
+static char     localipstr[IP4_FMT];
+static char     remoteip[4];
+static char     remoteipstr[IP4_FMT];
 #endif
 static stralloc localhostsa;
-char           *localhost = 0;
-uint16          remoteport;
-char            remoteportstr[FMT_ULONG];
+static char    *localhost = 0;
+static uint16   remoteport;
+static char     remoteportstr[FMT_ULONG];
 static stralloc remotehostsa;
-char           *remotehost = 0;
+static char    *remotehost = 0;
 
-char            strnum[FMT_ULONG];
-char            strnum2[FMT_ULONG];
+static char     strnum[FMT_ULONG];
+static char     strnum2[FMT_ULONG];
 
 static stralloc tmp;
 static stralloc fqdn;
 static stralloc addresses;
 
-int             flag1 = 0;
-char            bspace[16];
-substdio        b;
+static int      flag1 = 0;
+static char     bspace[16];
+static substdio b;
 static stralloc limitFile;
 
-uid_t           uid = 0;
-gid_t           gid = 0;
+static uid_t    uid = 0;
+static gid_t    gid = 0;
 
 struct iptable
 {
@@ -299,7 +301,8 @@ struct iptable
 	pid_t           pid;
 };
 typedef struct iptable IPTABLE;
-IPTABLE      **IpTable;
+static IPTABLE **IpTable;
+static char     tbuf[2048];
 
 void            add_ip(pid_t);
 void            print_ip();
@@ -318,9 +321,9 @@ extern char   **environ;
 
 #define DROP  "tcpserver: warning: dropping connection, "
 
-int             flagdeny = 0;
-int             flagallownorules = 0;
-char           *fnrules = 0;
+static int      flagdeny = 0;
+static int      flagallownorules = 0;
+static char    *fnrules = 0;
 
 void
 drop_nomem(void)
@@ -1817,7 +1820,7 @@ allwrite(int fd, char *buf, int len)
 }
 
 static int
-allwritessl(SSL * ssl, char *buf, int len)
+allwritessl(SSL *ssl, char *buf, int len)
 {
 	int             w;
 
@@ -1835,9 +1838,8 @@ allwritessl(SSL * ssl, char *buf, int len)
 	return 0;
 }
 
-char            tbuf[2048];
 void
-translate(SSL * ssl, int clearout, int clearin, unsigned int iotimeout)
+translate(SSL *ssl, int clearout, int clearin, unsigned int iotimeout)
 {
 	struct taia     now;
 	struct taia     deadline;
