@@ -292,6 +292,14 @@ seconds. Default: 26.
 .B \-n \fIcertfile
 Instead of the default servercert.pem certificate use the specified
 .IR certfile .
+.TP
+.B \-a \fIcafile
+Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
+special CA certificates are needed if an intermediate certificate used
+by your issuing CA expires. Note that the file given with -a is passed
+to SSL_CTX_load_verify_locations and thus may contain several CA
+certificates, which will be used during SSL connection negotiation to
+close any gap in the certificate chain.
 
 .SH IPv4-mapped IPv6 addresses
 Setting up tcpserver with simultaneous bindings to IPv4 and IPv6 addresses,

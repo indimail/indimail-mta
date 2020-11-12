@@ -255,6 +255,7 @@ static ulong    backlog = 20;
 #ifdef TLS
 static int      flagssl = 0;
 struct stralloc certfile = {0};
+struct stralloc cafile = {0};
 #endif
 
 static stralloc tcpremoteinfo;
@@ -312,7 +313,7 @@ int             socket_ipoptionskill(int);
 int             socket_ip6optionskill(int);
 int             socket_tcpnodelay(int);
 #ifdef TLS
-void            translate(SSL*, int, int, unsigned int);
+void            translate(SSL *, int, int, unsigned int);
 #endif
 int             tcpserver_plugin(char **, int);
 extern char   **environ;
@@ -1085,6 +1086,7 @@ usage(void)
 #ifdef TLS
 "[ -s ]\n"
 "[ -n certfile ]\n"
+"[ -a cafile ] \n"
 #endif
 #ifdef IPV6
 "[ -I interface ]\n"
@@ -1357,7 +1359,7 @@ main(int argc, char **argv, char **envp)
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 #ifdef TLS
-	if (!stralloc_cats(&options, "sn:"))
+	if (!stralloc_cats(&options, "sn:a:"))
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 	if (!stralloc_0(&options))
@@ -1484,6 +1486,10 @@ main(int argc, char **argv, char **envp)
 			if (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile))
 				strerr_die2x(111, FATAL, "out of memory");
 			break;
+		case 'a':
+			if (!stralloc_copys(&cafile, optarg) || !stralloc_0(&cafile))
+				strerr_die2x(111, FATAL, "out of memory");
+			break;
 #endif
 #ifdef IPV6
 		case '4':
@@ -1575,6 +1581,8 @@ main(int argc, char **argv, char **envp)
 			strerr_die2x(111, FATAL, "unable to load RSA private key");
 		if (SSL_CTX_use_certificate_file(ctx, certfile.s, SSL_FILETYPE_PEM) != 1)
 			strerr_die2x(111, FATAL, "unable to load certificate");
+		if (cafile.s && 1 != SSL_CTX_load_verify_locations(ctx, cafile.s, 0))
+			strerr_die2x(111, FATAL, "unable to load cafile");
 	}
 #endif
 #ifdef IPV6
