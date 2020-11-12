@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.18  2020-11-12 11:27:38+05:30  Cprogrammer
+ * initialize svpid in main()
+ *
  * Revision 1.17  2020-11-11 09:27:23+05:30  Cprogrammer
  * pass exit/signal of exited child to alert
  *
@@ -238,7 +241,7 @@ do_wait()
 			!stralloc_catb(&wait_sv_file, "/supervise/status", 17) ||
 			!stralloc_0(&wait_sv_file))
 		strerr_die2x(111, FATAL, "out of memory");
-	pidchange((svpid = getpid()), 0);
+	pidchange(svpid, 0);
 	for (;;) {
 		announce(-1);
 		if ((fd = open_read(wait_sv_file.s)) == -1) {
@@ -731,7 +734,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to write ", dir, "/supervise/control: ");
 	coe(fdcontrolwrite);
 
-	pidchange(getpid(), 0);
+	pidchange((svpid = getpid()), 0);
 	announce(0);
 
 	fifo_make("supervise/ok", 0600);
@@ -748,7 +751,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.17 2020-11-11 09:27:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.18 2020-11-12 11:27:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
