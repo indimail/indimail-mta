@@ -478,23 +478,59 @@ The svstat command can be used to query the status of various services. You can 
 ```
 The argument to svstat should be a directory in /service. Each directory in /service refers to an indimail-mta/indimail service. e.g. `/service/qmail-smtpd.25` refers to the SMTP service serving port 25.
 
-If you don't have /service create a link to /usr/libexec/indimail/service (/usr/local/libexec/indimail/service on FreeBSD and Darwin). I'm working on creating this link automatically during setup.
+If you don't have /service create a link to /usr/libexec/indimail/service (/usr/local/libexec/indimail/service on FreeBSD and Darwin).
 
 ```
 $ sudo svstat /service/*
-/service/greylist.1999: up (pid 120502) 4394 seconds
-/service/pwdlookup: up (pid 120515) 4394 seconds
-/service/qmail-daned.1998: up (pid 120413) 4394 seconds
-/service/qmail-logfifo: up (pid 120499) 4394 seconds
-/service/qmail-qmqpd.628: down 4394 seconds
-/service/qmail-qmtpd.209: up (pid 120487) 4394 seconds
-/service/qmail-send.25: up (pid 120469) 4394 seconds
-/service/qmail-smtpd.25: up (pid 120416) 4394 seconds
-/service/qmail-smtpd.366: up (pid 120516) 4394 seconds
-/service/qmail-smtpd.465: up (pid 120492) 4394 seconds
-/service/qmail-smtpd.587: up (pid 120473) 4394 seconds
-/service/qscanq: up (pid 120500) 4394 seconds
-/service/udplogger.3000: up (pid 120463) 4394 seconds
+/service/greylist.1999: up 5781 seconds pid 45102 
+/service/qmail-daned.1998: up 5781 seconds pid 45067 
+/service/qmail-logfifo: up 5781 seconds pid 45091 
+/service/qmail-qmqpd.628: down 5781 seconds spid 45007 
+/service/qmail-qmtpd.209: up 5781 seconds pid 45107 
+/service/qmail-send.25: up 5781 seconds pid 45131 
+/service/qmail-smtpd.25: up 5781 seconds pid 45066 
+/service/qmail-smtpd.366: up 5781 seconds pid 45065 
+/service/qmail-smtpd.465: up 5781 seconds pid 45124 
+/service/qmail-smtpd.587: up 5781 seconds pid 45136 
+/service/qscanq: up 5781 seconds pid 45096 
+/service/udplogger.3000: up 5781 seconds pid 45150 
+```
+
+or you could use svps command
+
+```
+$ sudo svps -a
+------------ svscan ---------------
+/usr/sbin/svscan /service          up      5781 secs  pid   44997
+
+------------ main -----------------
+/service/qmail-qmqpd.628           down    5781 secs spid   45007
+/service/greylist.1999             up      5781 secs  pid   45102
+/service/qmail-daned.1998          up      5781 secs  pid   45067
+/service/qmail-logfifo             up      5781 secs  pid   45091
+/service/qmail-qmtpd.209           up      5781 secs  pid   45107
+/service/qmail-send.25             up      5781 secs  pid   45131
+/service/qmail-smtpd.25            up      5781 secs  pid   45066
+/service/qmail-smtpd.366           up      5781 secs  pid   45065
+/service/qmail-smtpd.465           up      5781 secs  pid   45124
+/service/qmail-smtpd.587           up      5781 secs  pid   45136
+/service/qscanq                    up      5781 secs  pid   45096
+/service/udplogger.3000            up      5781 secs  pid   45150
+
+------------ logs -----------------
+/service/.svscan/log               up      5781 secs  pid   45024
+/service/greylist.1999/log         up      5781 secs  pid   45097
+/service/qmail-daned.1998/log      up      5781 secs  pid   45044
+/service/qmail-logfifo/log         up      5781 secs  pid   45135
+/service/qmail-qmqpd.628/log       up      5781 secs  pid   45113
+/service/qmail-qmtpd.209/log       up      5781 secs  pid   45106
+/service/qmail-send.25/log         up      5781 secs  pid   45129
+/service/qmail-smtpd.25/log        up      5781 secs  pid   45073
+/service/qmail-smtpd.366/log       up      5781 secs  pid   45068
+/service/qmail-smtpd.465/log       up      5781 secs  pid   45140
+/service/qmail-smtpd.587/log       up      5781 secs  pid   45121
+/service/qscanq/log                up      5781 secs  pid   45139
+/service/udplogger.3000/log        up      5781 secs  pid   45149
 ```
 
 # Binary Packages Build
