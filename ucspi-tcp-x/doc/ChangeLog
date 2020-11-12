@@ -1,0 +1,35 @@
+* 
+Release 1.0 Start 21/05/2020
+- 13/09/2020
+01. indimail-mta.spec: updated compiler flags for ucspi-tcp
+02. ucspi-tcp: replaced setup with installer which uses text files for installation
+03. ucspi-tcp: updated compiler switches
+04. instcheck.c: skip chmod if mode is -1
+05. hier.c: leave owner, group, permissions alone as they are owned by
+    indimail-mta package
+- 16/09/2020
+06. ucspi-tcp: fixes for FreeBSD
+- 20/09/2020
+07. tcpserver.c: open ipv4, ipv6 sockets on FreeBSD and use select before accept()
+- 22/09/2020
+08. use conf-cc-SYSTEM, conf-ld-SYSTEM for system specific CFLAGS, LDFLAGS
+- 24/09/2020
+09. Makefile - ucspi-tcp: split into variables, main Makefile and
+    system specific Makefile. New script qmake to do the build
+- 02/10/2020
+10. installer.c: set permissions for directory only if it is a new directory
+- 05/10/2020
+11. installer new features, 1. uninstall option (-u, -i), 2. create devices,
+    3. create fifo
+12. Makefile: Added uninstall target
+13. Added comments in installer input files
+- 06/10/2020
+14. indimail-mta, ucspi-tcp: fixed uninstall target
+15. installer.c: fixed setting of symbolic links
+- 08/10/2020
+16. ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
+- 11/11/2020
+17. tcpserver.c: changed scope of global variables to static, limited to
+    tcpserver.c
+- 12/11/2020
+18. tcpserver.c: added -a option to specify CA file
