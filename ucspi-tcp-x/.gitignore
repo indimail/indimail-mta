@@ -52,7 +52,6 @@ conf-release
 conf-shared
 conf-sysconfdir
 ucspi-tcp.spec
-doc
 addcr
 argv0
 delcr
