@@ -683,7 +683,7 @@ DIRS: DIRS.in
 	$(edit) $@.in > $@
 
 ucspi-tcp.spec: ucspi-tcp.spec.in conf-prefix \
-conf-shared conf-sysconfdir
+conf-shared conf-sysconfdir doc/ChangeLog
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
 
 install: it installer DIRS BIN SHARED PLUGINS MAN
