@@ -2,6 +2,8 @@
 
 This is a significant rewrite of [daemontools](https://cr.yp.to/daemontools.html) written by djb. This version of daaemontools is part of the [indimail-mta](https://github.com/mbhangui/indimail-mta), but can be used independently.
 
+Few of the changes are
+
 1. run shutdown script on svc -d, svc -r
 2. run alert scripts when services go down abnormally
 3. systemctl unit file for linux, rc for FreeBSD, launchd unit file for OSX
