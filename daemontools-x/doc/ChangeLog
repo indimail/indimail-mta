@@ -61,3 +61,6 @@ Release 1.1 Start 09/10/2020
 33. svps: display uptime of svscan
 34. svps: pass output through pager
 35. svps: display uptime of svscan
+- 12/11/2020
+36. supervise: initialize svpid in main()
+37. svps: fixed output for "normally up" and "normally down" status
