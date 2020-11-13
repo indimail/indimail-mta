@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.527 2020-11-09 09:46:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.528 2020-11-13 10:46:22+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.527 2020-11-09 09:46:03+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.528 2020-11-13 10:46:22+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -1873,23 +1873,25 @@ do
 done
 
 if [ ! -f "$DESTDIR"$CONTROLDIR/tlsserverciphers ] ; then
-echo "tlsserverciphers"
-(
-#echo -n "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:"
-#echo -n "ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS"
-/bin/echo -n "ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM:"
-/bin/echo -n "-EDH-RSA-DES-CBC3-SHA:-EDH-DSS-DES-CBC3-SHA:-DES-CBC3-SHA:"
-/bin/echo -n "-DES-CBC3-MD5:+SSLv3:+TLSv1:-SSLv2"
-echo
-) > "$DESTDIR"$CONTROLDIR/tlsserverciphers
+	echo "tlsserverciphers"
+	(
+	/bin/echo -n "ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM:"
+	/bin/echo -n "-EDH-RSA-DES-CBC3-SHA:-EDH-DSS-DES-CBC3-SHA:-DES-CBC3-SHA:"
+	/bin/echo -n "-DES-CBC3-MD5:+SSLv3:+TLSv1:-SSLv2"
+	echo
+	) > "$DESTDIR"$CONTROLDIR/tlsserverciphers
 fi
 if [ ! -f "$DESTDIR"$CONTROLDIR/tlsservermethod ] ; then
-echo tlsservermethod
-echo TLSv1_2 > "$DESTDIR"$CONTROLDIR/tlsservermethod
+	echo tlsservermethod
+	echo TLSv1_2 > "$DESTDIR"$CONTROLDIR/tlsservermethod
+fi
+if [ ! -f "$DESTDIR"$CONTROLDIR/tlsclientciphers ] ; then
+	echo "tlsclientciphers"
+	echo "ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP" > "$DESTDIR"$CONTROLDIR/tlsclientciphers
 fi
 if [ ! -f "$DESTDIR"$CONTROLDIR/tlsclientmethod ] ; then
-echo tlsclientmethod
-echo TLSv1_2 > "$DESTDIR"$CONTROLDIR/tlsclientmethod
+	echo tlsclientmethod
+	echo TLSv1_2 > "$DESTDIR"$CONTROLDIR/tlsclientmethod
 fi
 
 if [ ! -f "$DESTDIR"$sysconfdir/procmailrc ] ; then
