@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.283 2020-11-09 18:05:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.284 2020-11-14 07:10:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -13,7 +13,6 @@
 %global _hardened_build    1
 %endif
 
-%global xxxxxxx            0
 %if %{defined nodebug}
 %global debug_package      %{nil}
 %endif
@@ -298,9 +297,9 @@ fi
 ./catChangeLog doc/ChangeLog > ChangeLog-indimail-mta
 echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail > conf-cc
 %if %{defined nodebug}
-  echo %{__cc} -O2 -s > conf-ld
+  echo %{__cc} -O2 -fPIE -pie -s > conf-ld
 %else
-  echo %{__cc} -O2    > conf-ld
+  echo %{__cc} -O2 -fPIE -pie    > conf-ld
 %endif
 
 %install
