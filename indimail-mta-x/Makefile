@@ -2088,7 +2088,7 @@ variables.h indimail_stub.h auto_control.h
 
 spf.o: \
 compile spf.c ipme.h ip.h ipalloc.h strsalloc.h \
-conf-spf conf-tls conf-ip
+dns.h conf-spf conf-tls conf-ip
 	./compile `grep -h -v "^#" conf-spf conf-tls conf-ip` spf.c
 
 spfquery: \
@@ -2946,7 +2946,7 @@ domainkeys.h: domainkeys.c makeheader  dktrace.h
 makeheader: load makeheader.o
 	./load makeheader
 
-makehader.o: makeheader.c compile
+makeheader.o: makeheader.c compile
 	./compile makeheader.c
 
 dot-forward: \
