@@ -143,3 +143,5 @@ creation
     before calling qmail-local, qmail-remote
 - 09/11/2020
 85. svctool: inlookup, pwdlookup service - removed svwait program. use waitfor service instead
+- 14/11/2020
+86. indimail-mta.spec: enable openSUSE permissions
