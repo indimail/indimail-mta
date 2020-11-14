@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.284 2020-11-14 07:10:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.285 2020-11-14 17:14:15+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -27,11 +27,6 @@
 %global servicedir         @servicedir@
 %global plugindir          %{_prefix}/lib/indimail/plugins
 %global tcpserver_plugin   1
-%if 0%{?suse_version}
-%global noperms            1
-%else
-%global noperms            0
-%endif
 %global see_base           For a description of IndiMail visit https://github.com/mbhangui/indimail-mta
 %global nodksignatures     0
 %global notlsarr           0
@@ -97,12 +92,10 @@ Group: Productivity/Networking/Email/Servers
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 Source2: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
 Source3: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
 Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
-%endif
 %endif
 
 URL: https://github.com/mbhangui/indimail-mta
@@ -132,10 +125,8 @@ BuildRequires: openldap2-devel
 BuildRequires: openldap-devel
 %endif
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
-%endif
 %endif
 
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
@@ -195,6 +186,9 @@ Summary: IndiMail - Mini Client Installation
 Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
 Conflicts: indimail-mini < 2.0
+%if 0%{?suse_version} >= 1120
+PreReq: permissions
+%endif
 Requires: coreutils /bin/sh glibc openssl
 %if %{undefined suse_version} && %{undefined sles_version}
 Requires: /usr/bin /usr/sbin
@@ -337,12 +331,10 @@ if [ -f indimail-mta.te ] ; then
 fi
 /bin/rm -f ChangeLog %{name}-release %{name}-rpm.info
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
   install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
   install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
-%endif
 %endif
 
 # remove devel files as we are not building a devel package
@@ -431,20 +423,20 @@ echo ../resolv.conf 1>&3
 %dir %attr(555,root,root)                          %{shareddir}/boot
 %dir %attr(555,root,root)                          %{shareddir}/doc
 %dir %attr(755,root,qmail)                         %{qmaildir}/queue
-%dir %attr(2775,alias,qmail)                       %{qmaildir}/alias
 %dir %attr(750,qscand,qscand)                      %{qmaildir}/qscanq
 %dir %attr(750,qscand,qscand)                      %{qmaildir}/qscanq/root
 %dir %attr(750,qscand,qscand)                      %{qmaildir}/qscanq/root/scanq
+%dir %attr(2775,alias,qmail)                       %{qmaildir}/alias
+%dir %attr(2775,indimail,qmail)                    %{qmaildir}/autoturn
 %dir %attr(2755,root,qmail)                        %{qsysconfdir}
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/users
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/certs
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/control
-%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/tcp
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/control/cache
 %dir %attr(2775,qmailr,qmail)                      %{qsysconfdir}/control/ratelimit
 %dir %attr(2755,indimail,qmail)                    %{qsysconfdir}/control/domainkeys
+%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/tcp
 %dir %attr(755,indimail,qmail)                     %{qsysconfdir}/control/defaultqueue
-%dir %attr(2775,indimail,qmail)                    %{qmaildir}/autoturn
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)                          %{mandir}
 %dir %attr(755,root,root)                          %{mandir}/man1
@@ -484,11 +476,9 @@ echo ../resolv.conf 1>&3
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/level3-tlds
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/foxhole_all.cdb
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%attr(644,root,root)                               %{_sysconfdir}/permissions.d/%{name}-permissions
-%attr(644,root,root)                               %{_sysconfdir}/permissions.d/%{name}-permissions.secure
-%endif
+%attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 
 #
@@ -603,14 +593,9 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{_prefix}/sbin/cdbgetm
 %attr(755,root,root)                    %{_prefix}/sbin/cdbmake
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-newmrh
-%attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
-%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
-%attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
-%attr(2551,root,qscand)                 %{_prefix}/sbin/run-cleanq
 %attr(755,root,root)                    %{_prefix}/sbin/qscanq-stdin
 
 %attr(755,root,root)                    %{_prefix}/sbin/plugtest
-%attr(4551,root,root)                   %{_prefix}/sbin/sys-checkpwd
 %attr(755,root,root)                    %{_prefix}/sbin/ldap-checkpwd
 %attr(711,root,root)                    %{_prefix}/sbin/svctool
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-nullqueue
@@ -783,16 +768,18 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)                   %{shareddir}/doc/PIC.relaygood
 %attr(0644,root,root)                   %{shareddir}/doc/PIC.local2rem
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%verify (not user group mode) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
-%verify (not user group mode) %attr(2551, root, qscand)    %{_prefix}/sbin/run-cleanq
-%verify (not user group mode) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
-%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
-%verify (not user group mode) %attr(2775, alias, qmail)    %{qmaildir}/alias
-%verify (not user group mode) %attr(2775, indimail, qmail) %{qmaildir}/autoturn
-%verify (not user group mode) %attr(4551, root, root)      %{_prefix}/sbin/sys-checkpwd
-%endif
+%verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
+%verify (not user group mode caps) %attr(2551, root, qscand)    %{_prefix}/sbin/run-cleanq
+%verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
+%verify (not user group mode caps) %attr(4551, qscand, qscand)  %{_prefix}/sbin/qscanq
+%verify (not user group mode caps) %attr(4551, root, root)      %{_prefix}/sbin/sys-checkpwd
+%else
+%attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
+%attr(2551,root,qscand)                 %{_prefix}/sbin/run-cleanq
+%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
+%attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
+%attr(4551,root,root)                   %{_prefix}/sbin/sys-checkpwd
 %endif
 
 %files -n indimail-mini
@@ -805,7 +792,7 @@ echo ../resolv.conf 1>&3
                                    %{qmaildir}/sbin
                                    %{qmaildir}/users
                                    %{qmaildir}/control
-%dir %attr(0755,indimail,indimail) %{qsysconfdir}/control
+%dir %attr(2775,indimail,qmail)    %{qsysconfdir}/control
 %dir %attr(2775,indimail,qmail)    %{qsysconfdir}/users
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)         %{mandir}
@@ -825,6 +812,11 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/bin/maildir2mbox
 %attr(0755,root,root)              %{_prefix}/bin/maildirwatch
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
+
+%if 0%{?suse_version} >= 1120
+%attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions
+%attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions.secure
+%endif
 #
 %attr(0644,root,root)              %{mandir}/man1/forward.1.gz
 %attr(0644,root,root)              %{mandir}/man1/predate.1.gz
@@ -887,15 +879,22 @@ fi
 %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%verify_permissions -e %{_prefix}/sbin/qhpsi
-%verify_permissions -e %{_prefix}/sbin/run-cleanq
-%verify_permissions -e %{_prefix}/sbin/qmail-queue
-%verify_permissions -e %{_prefix}/sbin/qscanq
-%verify_permissions -e %{_prefix}/alias
-%verify_permissions -e %{_prefix}/autoturn
-%endif
+%verify_permissions -e %{_prefix}/sbin/qhpsi
+%verify_permissions -e %{_prefix}/sbin/run-cleanq
+%verify_permissions -e %{_prefix}/sbin/qmail-queue
+%verify_permissions -e %{_prefix}/sbin/qscanq
+%verify_permissions -e %{_prefix}/sbin/sys-checkpwd
+%verify_permissions -e %{qmaildir}/alias/
+%verify_permissions -e %{qmaildir}/autoturn/
+%verify_permissions -e %{qsysconfdir}/
+%verify_permissions -e %{qsysconfdir}/certs/
+%verify_permissions -e %{qsysconfdir}/control/
+%verify_permissions -e %{qsysconfdir}/control/cache/
+%verify_permissions -e %{qsysconfdir}/control/domainkeys/
+%verify_permissions -e %{qsysconfdir}/control/ratelimit/
+%verify_permissions -e %{qsysconfdir}/tcp/
+%verify_permissions -e %{qsysconfdir}/users/
 %endif
 
 ### SCRIPTLET ###############################################################################
@@ -1101,17 +1100,25 @@ else
   sign_opt="none"
 fi
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %if 0%{?set_permissions:1} > 0
-  if [ ! -f /tmp/no_permissions ] ; then
-    %set_permissions %{name}
-  fi
+  %set_permissions %{_prefix}/sbin/qhpsi
+  %set_permissions %{_prefix}/sbin/qmail-queue
+  %set_permissions %{_prefix}/sbin/qscanq
+  %set_permissions %{_prefix}/sbin/run-cleanq
+  %set_permissions %{_prefix}/sbin/sys-checkpwd
+  %set_permissions %{qmaildir}/alias/
+  %set_permissions %{qmaildir}/autoturn/
+  %set_permissions %{qsysconfdir}/
+  %set_permissions %{qsysconfdir}/certs/
+  %set_permissions %{qsysconfdir}/control/
+  %set_permissions %{qsysconfdir}/control/cache/
+  %set_permissions %{qsysconfdir}/control/domainkeys/
+  %set_permissions %{qsysconfdir}/control/ratelimit/
+  %set_permissions %{qsysconfdir}/tcp/
+  %set_permissions %{qsysconfdir}/users/
 %else
-  if [ ! -f /tmp/no_permissions ] ; then
-    %run_permissions
-  fi
-%endif
+  %run_permissions
 %endif
 %endif
 
@@ -1537,6 +1544,18 @@ if [ -f %{libexecdir}/qupgrade.sh ] ; then
 ) >> /var/log/%{name}-setup.log 2>&1
 fi
 
+%verifyscript -n indimail-mini
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+%if 0%{?suse_version} >= 1120
+%verify_permissions -e %{qsysconfdir}/
+%verify_permissions -e %{qsysconfdir}/control/
+%verify_permissions -e %{qsysconfdir}/users/
+%endif
+
 %post -n indimail-mini
 argv1=$1
 ID=$(id -u)
@@ -1589,6 +1608,15 @@ if [ $nscd_up -ge 1 ] ; then
     /bin/systemctl start nscd.service
   fi
 fi
+
+%if 0%{?suse_version} >= 1120
+%if 0%{?set_permissions:1} > 0
+  %set_permissions %{qsysconfdir}/control/
+  %set_permissions %{qsysconfdir}/users/
+%else
+  %run_permissions
+%endif
+%endif
 
 if [ -f %{_prefix}/sbin/qmail-qmqpc ] ; then
   %{__mv} %{_prefix}/sbin/qmail-queue %{_prefix}/sbin/qmail-queue.orig

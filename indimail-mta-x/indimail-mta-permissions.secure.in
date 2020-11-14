@@ -53,13 +53,21 @@
 # in your system.
 
 #
-@prefix@/bin/qhpsi                  qscand:qmail   6511
-@prefix@/bin/run-cleanq             root:qscand    2511
-@prefix@/bin/qmail-queue            qmailq:qmail   6511
-@prefix@/bin/qscanq                 qscand:qscand  4555
-
+@prefix@/sbin/qhpsi                 qscand:qmail   6551
+@prefix@/sbin/run-cleanq            root:qscand    2551
+@prefix@/sbin/qmail-queue           qmailq:qmail   6551
+@prefix@/sbin/qscanq                qscand:qscand  4551
+@prefix@/sbin/sys-checkpwd          root:root      4551
 #
 # Directories
 #
-@indimaildir@/alias                      alias:qmail    2555
-@indimaildir@/autoturn                   indimail:qmail 2755
+@indimaildir@/alias/                alias:qmail    2775
+@indimaildir@/autoturn/             indimail:qmail 2775
+@qsysconfdir@/                      root:qmail     2755
+@qsysconfdir@/users/                indimail:qmail 2775
+@qsysconfdir@/certs/                indimail:qmail 2775
+@qsysconfdir@/control/              indimail:qmail 2775
+@qsysconfdir@/control/cache/        indimail:qmail 2775
+@qsysconfdir@/control/ratelimit/    qmailr:qmail   2775
+@qsysconfdir@/control/domainkeys/   indimail:qmail 2755
+@qsysconfdir@/tcp/                  indimail:qmail 2775
