@@ -15,8 +15,6 @@ fi
 
 case "$1" in
     install|upgrade)
-	${rm} -f /tmp/indimail-devel.install /tmp/indimail-devel.upgrade
-	touch /tmp/indimail-devel.$1
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then

@@ -94,12 +94,14 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 
+upgrade=0
 case "$1" in
 	configure)
 		if [ " $2" = " " ] ; then
-		echo "installing indimail-mta"
+			echo "installing indimail-mta"
 		else
-		echo "upgrading indimail-mta $2"
+			echo "upgrading indimail-mta $2"
+			upgrade=1
 		fi
 	;;
 
@@ -136,7 +138,7 @@ fi
 
 # indimail-mta.upgrade/indimail-mta.install are created
 # by the preinst script
-if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
+if [ $upgrade -eq 1 ] ; then # upgrade
 	if [ -f ${libexecdir}/qupgrade.sh ] ; then
 		echo "Running Custom Upgrade Script for post upgrade"
 		/bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
@@ -171,10 +173,8 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
 		fi
 	done
 	) >> /var/log/indimail-mta-setup.log
-	${rm} -f /tmp/indimail-mta.upgrade
 	exit 0
 fi
-${rm} -f /tmp/indimail-mta.install
 if [ ! "${prefix}" = "/usr" ] ; then
 	# Recreate ld.so links and cache
 	echo "recreating ld.so cache"
@@ -501,9 +501,6 @@ if [ -x ${libexecdir}/instcheck.indimail-mta ] ; then
 	${libexecdir}/instcheck.indimail-mta > /dev/null 2>&1
 fi
 
-#
-# create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
-#
 ) >> /var/log/indimail-mta-setup.log 2>&1
 
 if [ -f ${sysconfdir}/init/svscan.conf -o -f ${sysconfdir}/event.d/svscan ] ; then

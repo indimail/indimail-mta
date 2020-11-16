@@ -26,13 +26,11 @@ fi
 
 case "$1" in
     install|upgrade)
-	${rm} -f /tmp/indimail-mta.install /tmp/indimail-mta.upgrade
-	touch /tmp/indimail-mta.$1
 	if [ -f ${libexecdir}/qupgrade.sh ] ; then
 	(
 		echo "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/qupgrade.sh pre $1 @version@ $* || true
-	) >> /tmp/indimail-mta-setup.log 2>&1
+	) >> /var/log/indimail-mta-setup.log 2>&1
 	fi
 	if [ " $1" = " upgrade" ] ; then
 		echo "shutting down indimail services"
@@ -85,7 +83,7 @@ case "$1" in
 			/etc/init.d/nscd start
 		fi
 	fi
-	) > /tmp/indimail-mta-setup.log 2>&1
+	) > /var/log/indimail-mta-setup.log 2>&1
 	;;
 
     abort-upgrade)
