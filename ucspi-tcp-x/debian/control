@@ -8,7 +8,7 @@ Homepage: https://github.com/mbhangui/indimail-mta
 
 Package: ucspi-tcp
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils
 Description: tcpserver and tcpclient are easy-to-use command-line tools for building
  TCP client-server applications.
  .

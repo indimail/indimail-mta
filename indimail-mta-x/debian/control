@@ -8,7 +8,7 @@ Homepage: https://github.com/mbhangui/indimail-mta
 
 Package: indimail-mta
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, daemontools, ucspi-tcp, net-tools, coreutils, binutils, diffutils, procps
+Depends: ${shlibs:Depends}, ${misc:Depends}, daemontools, ucspi-tcp, net-tools, coreutils, diffutils, procps
 Provides: indimail-mini
 Conflicts: indimail-mini
 Replaces: indimail-mini
@@ -27,7 +27,7 @@ Description: indimail-mta provides a standalone SMTP server that is part of the 
  The package combines qmail with other packages like libsrs2
 
 Package: indimail-mini
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils
 Section: misc
 Architecture: any
 Breaks: indimail-mta

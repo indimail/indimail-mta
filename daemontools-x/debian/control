@@ -8,7 +8,7 @@ Homepage: https://github.com/mbhangui/indimail-mta
 
 Package: daemontools
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, binutils, procps
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, procps
 Description: daemontools is a collection of tools for managing UNIX services. 
  svscan scans a directory and starts a supervise process for each
  subdirectory of the scanned directory. It restarts the supervise process if
