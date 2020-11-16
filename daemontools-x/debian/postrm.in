@@ -43,7 +43,7 @@ case "$1" in
 	(
 		echo "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/upgrade.sh postrm $1 2.2 $* || true
-	) >> /tmp/daemontools-setup.log 2>&1
+	) >> /var/log/daemontools-setup.log 2>&1
 	fi
     ;;
 

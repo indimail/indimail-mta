@@ -80,12 +80,14 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 
+upgrade=0
 case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
-		echo "installing ucspi-tcp"
+			echo "installing ucspi-tcp"
 		else
-		echo "upgrading ucspi-tcp $2"
+			echo "upgrading ucspi-tcp $2"
+			upgrade=1
 		fi
     ;;
 
@@ -120,8 +122,7 @@ done
 ) > ${qsysconfdir}/ucspi-tcp-stat.override
 fi
 
-if [ -f /tmp/ucspi-tcp.upgrade ] ; then # upgrade
-	${rm} -f /tmp/ucspi-tcp.upgrade
+if [ $upgrade -eq 1 ] ; then # upgrade
 	for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
 	do
 		i=$(dirname $i)
@@ -132,7 +133,6 @@ if [ -f /tmp/ucspi-tcp.upgrade ] ; then # upgrade
 	done
 	exit 0
 fi
-${rm} -f /tmp/ucspi-tcp.install
 
 if [ -x ${libexecdir}/instcheck.ucspi-tcp ] ; then
 	echo "Checking Installed Permissions"

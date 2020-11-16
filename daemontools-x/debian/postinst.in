@@ -85,12 +85,14 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 
+upgrade=0
 case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
-		echo "installing daemontools"
+			echo "installing daemontools"
 		else
-		echo "upgrading daemontools $2"
+			echo "upgrading daemontools $2"
+			upgrade=1
 		fi
     ;;
 
@@ -125,7 +127,7 @@ done
 ) > ${qsysconfdir}/daemontools-stat.override
 fi
 
-if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
+if [ $upgrade -eq 1 ] ; then # upgrade
   (
   echo "checking if system boot scripts need upgrade"
   if [ -f /etc/init.d/svscan ] ; then
@@ -184,11 +186,9 @@ if [ -f /tmp/daemontools.upgrade ] ; then # upgrade
       fi
     fi
   fi
-  ${rm} -f /tmp/daemontools.upgrade
   ) >> /var/log/daemontools-setup.log 2>&1
   exit 0
 fi
-${rm} -f /tmp/daemontools.install
 (
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
