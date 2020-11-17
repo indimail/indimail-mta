@@ -1135,3 +1135,5 @@ svscan.plist
 docker-entrypoint.8
 qr_digest_md5.o
 run_init.o
+sslerator
+sslerator.o

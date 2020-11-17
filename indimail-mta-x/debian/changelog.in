@@ -81,3 +81,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * spawn-filter.c: unset FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE before calling qmail-local, qmail-remote
   * svctool: inlookup, pwdlookup service - removed svwait program. use waitfor service instead
   * indimail-mta.spec: enable openSUSE permissions
+  * qmail-daned.c: set default value for timeoutssl to prevent select() doing poll
+  * sslerator: added tls/ssl protocol wrapper from indimail-virtudomains package

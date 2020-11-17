@@ -1,0 +1,73 @@
+.TH "sslerator" "1" "06 Mar 2010" "Manvendra Bhangui" ""
+
+.SH NAME
+sslerator \- TLS/SSL protocol wrapper
+.SH SYNOPSIS
+
+\fBsslerator\fR [ \fB\fIoption\fB\fR\fI ...\fR ] \fB\fIprog\fB\fR \fB\fIarg\fB\fR\fI ...\fR
+
+.SH "DESCRIPTION"
+.PP
+The \fBsslerator\fR program is used by applications to encrypt a
+network connection using SSL/TLS, without having the application deal with the
+gory details of SSL/TLS. \fBsslerator\fR is used by the IndiMail
+proxy IMAP and POP3 servers.
+.PP
+\fBsslerator\fR is not usually run directly from the commandline.
+An application typically creates a network connection, then runs
+\fBsslerator\fR with appropriate options to encrypt the network
+connection with SSL/TLS.
+
+.SH "OPTIONS"
+.TP
+\fB-n=\fIcertfile\fB\fR
+Use \fIcertfile\fR as the certificate
+The certificate to use and is required for SSL/TLS servers.
+\fIcertfile\fR must not be world-readable. This option overrides
+environment variable TLS_CERTFILE.
+
+.TP
+\fB-t=\fItimeout\fB\fR
+Timeout after \fItimeout\fR seconds if no data is received
+
+.TP
+\fB-b=\fIbanner\fB\fR
+Use \fIbanner\fR as greeting. This is overriden if -s startls stmp option is given.
+This option overrides environment variable BANNER.
+
+.TP
+\fB-e\fR
+Write ssl library errors to the network. If not provided, \fBsslerator\fR will write
+all ssl library errors to fd 2. This mode is disabled if environment variable TCPREMOTEIP
+is defined (running under tcpserver(1))
+
+.TP
+\fB-s\fR
+Issue SMTP Greeting code on successful TLS/SSL negotiation. This code is obtained from
+\fIprog\fR. \fIprog\fR could be something like qmail-smtpd from qmail/indimail/notqmail/netqmail package.
+
+.SH "ENVIRONMENT VARIABLES"
+.PP
+\fBsslerator\fR reads the following environment variables in
+order to configure the SSL/TLS protocol:
+.TP
+\fBTLS_CERTFILE=\fIfilename\fB\fR
+The certificate to use.
+\fBTLS_CERTFILE\fR is required for SSL/TLS servers, and is optional
+for SSL/TLS clients.
+\fIfilename\fR must not be world-readable.
+
+.TP
+\fBSSL_CIPHER=\fIcipherList\fB\fR
+A set of OpenSSL cipher strings. Multiple ciphers contained in a
+string should be separated by a colon.
+
+.TP
+\fBBANNER=\fIstring\fB\fR
+Banner to issue before starting SSL/TLS negotiation.
+
+.SH "SEE ALSO"
+.PP
+\fBproxyimap\fR(8),
+\fBproxypop3\fR(8),
+\fBqmail-smtpd\fR(8)

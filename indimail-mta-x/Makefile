@@ -27,7 +27,7 @@ it = indimail-mta.perms 822date 822field 822header 822print 822received \
 	condredirect config-fast datemail dk-filter dknewkey dktest dnscname \
 	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
 	qdane dnstlsarr etrn except fastforward forward generic.so greydaemon \
-	qf-smtp-ratelimit home home+df hostname \
+	qf-smtp-ratelimit home home+df hostname sslerator \
 	idedit iftocc instcheck ipmeprint ldap-checkpwd leapsecs \
 	maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
 	maildirsmtp maildirwatch mailsubj mbox2maildir multirotate \
@@ -563,14 +563,14 @@ compile dnstxt.c strsalloc.h dns.h dnsdoe.h ip.h
 dnstlsarr: \
 load dnstlsarr.o dns.o dnsdoe.o ip.o tlsarralloc.o ipalloc.o \
 starttls.o strsalloc.o socket_v4mappedprefix.o socket_v6any.o \
-auto_control.o variables.o control.o socket_tcp.o \
+auto_control.o variables.o control.o socket_tcp.o tls.o \
 socket_tcp6.o timeoutconn.o socket_v6loopback.o \
 socket_ip4loopback.o dns.lib socket.lib tls.lib
 	./load dnstlsarr dns.o dnsdoe.o tlsarralloc.o ip.o ipalloc.o \
 	starttls.o strsalloc.o socket_v4mappedprefix.o socket_v6any.o \
 	auto_control.o socket_tcp.o socket_tcp6.o timeoutconn.o \
 	socket_v6loopback.o socket_ip4loopback.o variables.o control.o \
-	`cat dns.lib` `cat socket.lib tls.lib` -lqmail
+	tls.o `cat dns.lib` `cat socket.lib tls.lib` -lqmail
 
 dnstlsarr.o: \
 compile dnstlsarr.c dns.h dnsdoe.h tlsarralloc.h \
@@ -1540,7 +1540,7 @@ qr_digest_md5.o: compile qr_digest_md5.c
 
 qmail-remote: \
 load qmail-remote.o control.o timeoutconn.o tcpto.o dns.o ip.o \
-ipalloc.o strsalloc.o ipme.o quote.o variables.o \
+ipalloc.o strsalloc.o ipme.o quote.o variables.o tls.o \
 auto_control.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 tlsarralloc.o qr_digest_md5.o socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o \
 fn_handler.o query_skt.o tlsacheck.o auto_qmail.o dns.lib socket.lib tls.lib 
@@ -1548,7 +1548,7 @@ fn_handler.o query_skt.o tlsacheck.o auto_qmail.o dns.lib socket.lib tls.lib
 	tcpto.o dns.o ip.o socket_ip4loopback.o socket_v6loopback.o \
 	socket_v6any.o ipalloc.o socket_v4mappedprefix.o strsalloc.o \
 	ipme.o quote.o fn_handler.o qr_digest_md5.o query_skt.o \
-	tlsarralloc.o variables.o socket_tcp.o socket_tcp6.o \
+	tlsarralloc.o variables.o socket_tcp.o socket_tcp6.o tls.o \
 	auto_qmail.o `cat dns.lib socket.lib tls.lib` -lqmail
 
 qmail-remote.8: \
@@ -1660,7 +1660,7 @@ compile plugtest.c auto_qmail.h auto_prefix.h smtp_plugin.h
 qmail_smtpd.so: \
 smtpd.o rcpthosts.o recipients.o indimail_stub.o \
 ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
-received.o date822fmt.o wildmat.o qmail.o variables.o \
+received.o date822fmt.o wildmat.o qmail.o variables.o tls.o \
 envrules.o bodycheck.o sqlmatch.o matchregex.o qcount_dir.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o spf.o dns.o auto_qmail.o auto_uids.o \
@@ -1677,7 +1677,7 @@ socket.lib dns.lib tls.lib mysql_config conf-sql conf-ld-$(SYSTEM)
 		socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 		mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
-		tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
+		tlsarralloc.o auto_prefix.o auto_sysconfdir.o tls.o \
 		`cat socket.lib dns.lib tls.lib` -L/opt/local/lib -lqmail ; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
@@ -1688,7 +1688,7 @@ socket.lib dns.lib tls.lib mysql_config conf-sql conf-ld-$(SYSTEM)
 		socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
 		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
-		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
+		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o tls.o \
 		`cat socket.lib dns.lib tls.lib` `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 		-L/usr/local/lib -lqmail ; \
 	fi
@@ -1701,7 +1701,7 @@ envrules.o bodycheck.o sqlmatch.o matchregex.o indimail_stub.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o spf.o dns.o auto_qmail.o auto_uids.o \
 qregex_sql.o tablematch.o greylist.o auto_assign.o qcount_dir.o \
-query_skt.o fn_handler.o tlsarralloc.o load_mysql.o \
+query_skt.o fn_handler.o tlsarralloc.o load_mysql.o tls.o \
 auto_sysconfdir.o auto_break.o auto_prefix.o socket.lib dns.lib tls.lib \
 mysql_config conf-sql
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o \
@@ -1711,7 +1711,7 @@ mysql_config conf-sql
 	matchregex.o socket_v4mappedprefix.o socket_ip4loopback.o \
 	socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	indimail_stub.o qregex_sql.o tablematch.o greylist.o auto_break.o \
-	auto_control.o auto_assign.o query_skt.o fn_handler.o \
+	auto_control.o auto_assign.o query_skt.o fn_handler.o tls.o \
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
 	`cat socket.lib dns.lib tls.lib` -ldl -lqmail
 
@@ -2066,10 +2066,10 @@ trylsock.c compile load
 	rm -f trylsock.o trylsock
 
 tls.lib: \
-trytls.c compile conf-tls load tls.o ssl_timeoutio.o
+trytls.c compile conf-tls load ssl_timeoutio.o
 	( ( ./compile `grep -v "^#" conf-tls` trytls.c && \
 	./load trytls -lssl -lcrypto ) >/dev/null 2>&1 \
-	&& echo tls.o ssl_timeoutio.o -lssl -lcrypto || exit 0 ) > tls.lib
+	&& echo ssl_timeoutio.o -lssl -lcrypto || exit 0 ) > tls.lib
 	rm -f trytls.o trytls
 
 tls.o: \
@@ -3177,14 +3177,14 @@ variables.o auto_control.o control.o auto_qmail.o \
 ipalloc.o dns.o dnsdoe.o strsalloc.o socket_tcp.o \
 socket_tcp6.o timeoutconn.o tlsarralloc.o \
 socket_ip4loopback.o socket_v6loopback.o MakeArgs.o \
-dns.lib tls.lib starttls.o
+dns.lib tls.o tls.lib starttls.o
 	./load qmail-daned auto_control.o \
 	ip.o socket_v6any.o socket_v4mappedprefix.o \
 	tlsarralloc.o variables.o control.o auto_qmail.o \
 	ipalloc.o dns.o dnsdoe.o strsalloc.o socket_tcp.o \
 	socket_tcp6.o timeoutconn.o socket_ip4loopback.o \
 	socket_v6loopback.o starttls.o MakeArgs.o \
-	`cat dns.lib tls.lib` -lqmail
+	tls.o `cat dns.lib tls.lib` -lqmail
 
 qmail-daned.o: \
 compile qmail-daned.c control.h variables.h \
@@ -3242,9 +3242,9 @@ matchregex.h control.h
 qmail-sql: \
 load qmail-sql.o variables.o auto_control.o \
 load_mysql.o sqlmatch.o auto_uids.o auto_sysconfdir.o indimail_stub.o \
-control.o auto_qmail.o tls.lib
+control.o auto_qmail.o tls.o tls.lib
 	./load qmail-sql indimail_stub.o \
-	variables.o auto_control.o \
+	variables.o auto_control.o tls.o \
 	control.o sqlmatch.o auto_uids.o auto_sysconfdir.o \
 	auto_qmail.o load_mysql.o `cat tls.lib` -ldl -lqmail
 
@@ -3263,9 +3263,9 @@ qmail-sql.9 conf-sysconfdir
 sql-database: \
 load sql-database.o variables.o auto_control.o \
 load_mysql.o sqlmatch.o auto_uids.o auto_sysconfdir.o indimail_stub.o \
-control.o auto_qmail.o tls.lib
+control.o auto_qmail.o tls.o tls.lib
 	./load sql-database indimail_stub.o \
-	variables.o auto_control.o \
+	variables.o auto_control.o tls.o \
 	control.o sqlmatch.o auto_uids.o auto_sysconfdir.o \
 	auto_qmail.o load_mysql.o `cat tls.lib` -ldl -lqmail
 
@@ -3514,6 +3514,15 @@ ctrlenv.9 conf-prefix conf-sysconfdir
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}CONTROL}"`head -1 conf-sysconfdir`"}g \
 	> ctrlenv.8
+
+sslerator: load sslerator.o variables.o auto_control.o \
+control.o tls.lib
+	./load sslerator variables.o auto_control.o \
+		control.o -lqmail `cat tls.lib`
+
+sslerator.o: compile sslerator.c control.h \
+ssl_timeoutio.h conf-tls
+	./compile `grep -h -v "^#" conf-tls` sslerator.c
 
 ################### PLUGINS ########################################
 # dnsblcheck plugin
