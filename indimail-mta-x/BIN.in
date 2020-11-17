@@ -85,3 +85,4 @@ f:::0755:/bin/:maildircmd:maildircmd
 f:::0755:/bin/:maildirqmtp:maildirqmtp
 f:::0755:/bin/:maildirsmtp:maildirsmtp
 f:::0755:/bin/:maildirserial:maildirserial
+f:::0755:/bin/:sslerator:sslerator

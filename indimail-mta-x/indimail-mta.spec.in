@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.285 2020-11-14 17:14:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.286 2020-11-17 16:27:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -564,6 +564,7 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{_prefix}/bin/srsfilter
 %attr(755,root,root)                    %{_prefix}/bin/inotify
 %attr(0755,root,root)                   %{_prefix}/bin/udpclient
+%attr(0755,root,root)                   %{_prefix}/bin/sslerator
 %if %notlsarr == 0
 %attr(755,root,root)                    %{_prefix}/bin/qdane
 %endif
