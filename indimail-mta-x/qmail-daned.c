@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.24  2020-11-17 16:19:23+05:30  Cprogrammer
+ * set default value for timeoutssl to avoid polling
+ *
  * Revision 1.23  2020-09-16 19:03:44+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -141,7 +144,7 @@ int             hash_size, h_allocated = 0;
 int             verbose = 0;
 unsigned long   timeout;
 int             timeoutconnect = 60;
-int             timeoutssl;
+int             timeoutssl = 300;
 char           *whitefn = 0, *tlsadomainsfn = 0;
 stralloc        context_file = { 0 };
 stralloc        line = { 0 };
@@ -1366,7 +1369,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.23 2020-09-16 19:03:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.24 2020-11-17 16:19:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
