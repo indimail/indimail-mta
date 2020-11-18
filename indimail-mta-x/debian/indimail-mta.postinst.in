@@ -161,17 +161,27 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 	done
 	svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+	set +e
+	if [ -d /run ] ; then
+		rundir=/run
+	elif [ -d /var/run ] ; then
+		rundir=/var/run
+	else
+		rundir=${servicedir}
+	fi
 	echo "starting indimail-mta services"
 	for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
 		qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
 		qscanq resolvconf udplogger.3000
 	do
-		if [ -f ${servicedir}/$i.down ] ; then
-			${rm} -f ${servicedir}/$i.down
-			${prefix}/bin/svc -u ${servicedir}/$i || true
+		${prefix}/bin/svok ${servicedir}/$i 2>&1
+		if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
+			${rm} -f ${rundir}/$i/.down
+			${prefix}/bin/svc -u ${servicedir}/$i
 		fi
 	done
+	set -e
 	) >> /var/log/indimail-mta-setup.log
 	exit 0
 fi

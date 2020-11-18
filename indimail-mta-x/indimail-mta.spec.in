@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.286 2020-11-17 16:27:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.287 2020-11-18 18:13:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -907,6 +907,13 @@ if [ $ID -ne 0 ] ; then
   exit 1
 fi
 (
+if [ -d /run ] ; then
+  rundir=/run/svscan
+elif [ -d /var/run ] ; then
+  rundir=/var/run/svscan
+else
+  rundir=%{servicedir}
+fi
 echo "shutting down indimail-mta services"
 for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
@@ -915,7 +922,8 @@ for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
 do
   %{_prefix}/bin/svok %{servicedir}/$i >/dev/null 2>&1
   if [ $? -eq 0 ] ; then
-    touch %{servicedir}/$i.down
+    %{__mkdir_p} %{rundir}/$i
+    touch %{rundir}/.down
     %{_prefix}/bin/svc -d %{servicedir}/$i
   fi
 done
@@ -1039,13 +1047,21 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
 
   echo "starting indimail-mta services"
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=%{servicedir}
+  fi
   for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
     qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
     qscanq resolvconf udplogger.3000
   do
-    if [ -f %{servicedir}/$i.down ] ; then
-      %{__rm} -f %{servicedir}/$i.down
+    %{_prefix}/bin/svok %{servicedir}/$i
+    if [ $? -eq 0 -a -f %{rundir}/$i/.down ] ; then
+      %{__rm} -f %{rundir}/$i/.down
       %{_prefix}/bin/svc -u %{servicedir}/$i
     fi
   done
