@@ -923,7 +923,7 @@ do
   %{_prefix}/bin/svok %{servicedir}/$i >/dev/null 2>&1
   if [ $? -eq 0 ] ; then
     %{__mkdir_p} %{rundir}/$i
-    touch %{rundir}/.down
+    touch %{rundir}/$i/.down
     %{_prefix}/bin/svc -d %{servicedir}/$i
   fi
 done
