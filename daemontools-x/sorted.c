@@ -1,5 +1,8 @@
 /*
  * $Log: sorted.c,v $
+ * Revision 1.3  2020-11-23 00:17:54+05:30  Cprogrammer
+ * removed supression of ANSI C proto for alloc()
+ *
  * Revision 1.2  2020-05-10 17:47:09+05:30  Cprogrammer
  * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
  *
@@ -8,9 +11,7 @@
  *
  */
 #include "stralloc.h"
-#define _ALLOC_
 #include "alloc.h"
-#undef _ALLOC_
 #include "gen_allocdefs.h"
 #include "sorted.h"
 #include "byte.h"
@@ -55,7 +56,7 @@ sorted_insert(sl, sa)
 void
 getversion_sorted_c()
 {
-	static char    *x = "$Id: sorted.c,v 1.2 2020-05-10 17:47:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sorted.c,v 1.3 2020-11-23 00:17:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
