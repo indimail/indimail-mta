@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.287 2020-11-18 18:13:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.288 2020-11-22 23:10:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -920,7 +920,7 @@ for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
   qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
   qscanq resolvconf udplogger.3000
 do
-  %{_prefix}/bin/svok %{servicedir}/$i >/dev/null 2>&1
+  %{_prefix}/bin/svstat %{servicedir}/$i >/dev/null 2>&1
   if [ $? -eq 0 ] ; then
     %{__mkdir_p} %{rundir}/$i
     touch %{rundir}/$i/.down
