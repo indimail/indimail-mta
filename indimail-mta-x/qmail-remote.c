@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.134 2020-10-10 21:20:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.135 2020-11-22 23:12:06+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -30,9 +30,7 @@
 #warning "not compiled with -DHASTLSA"
 #endif /*- #if defined(TLS) && defined(HASTLSA) */
 #include "dns.h"
-#define _ALLOC_
 #include "alloc.h"
-#undef _ALLOC_
 #include "quote.h"
 #include "ip.h"
 #include "ipalloc.h"
@@ -3485,7 +3483,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.134 2020-10-10 21:20:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.135 2020-11-22 23:12:06+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3493,6 +3491,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.135  2020-11-22 23:12:06+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
  * Revision 1.134  2020-10-10 21:20:53+05:30  Cprogrammer
  * renamed digest_md5() to qr_digest_md5() to avoid clash with digest_md5()
  *

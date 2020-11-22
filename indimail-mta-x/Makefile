@@ -1,5 +1,4 @@
 # Don't edit Makefile! Use conf-* for configuration.
-COFLAGS=-z+05:30
 SHELL=/bin/sh
 include Makevars.$(SYSTEM)
 

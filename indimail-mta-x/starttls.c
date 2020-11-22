@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.8  2020-11-22 23:12:12+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
  * Revision 1.7  2020-05-11 10:59:44+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -34,9 +37,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-#define _ALLOC_
 #include "alloc.h"
-#undef _ALLOC_
 #include "gen_alloc.h"
 #include "gen_allocdefs.h"
 #include "ssl_timeoutio.h"
@@ -1490,7 +1491,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.7 2020-05-11 10:59:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.8 2020-11-22 23:12:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

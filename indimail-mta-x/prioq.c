@@ -1,5 +1,8 @@
 /*
  * $Log: prioq.c,v $
+ * Revision 1.6  2020-11-22 23:12:00+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
  * Revision 1.5  2020-05-10 17:46:56+05:30  Cprogrammer
  * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
  *
@@ -13,9 +16,7 @@
  * added RCS log
  *
  */
-#define _ALLOC_
 #include "alloc.h"
-#undef _ALLOC_
 #include "gen_allocdefs.h"
 #include "prioq.h"
 
@@ -89,7 +90,7 @@ prioq_delmin(pq)
 void
 getversion_prioq_c()
 {
-	static char    *x = "$Id: prioq.c,v 1.5 2020-05-10 17:46:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: prioq.c,v 1.6 2020-11-22 23:12:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

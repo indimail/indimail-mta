@@ -1,5 +1,8 @@
 /*
  * $Log: ipalloc.c,v $
+ * Revision 1.9  2020-11-22 23:11:05+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
  * Revision 1.8  2020-05-10 17:46:42+05:30  Cprogrammer
  * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
  *
@@ -22,9 +25,7 @@
  * added RCS log
  *
  */
-#define _ALLOC_
 #include "alloc.h"
-#undef _ALLOC_
 #include "gen_allocdefs.h"
 #include "ip.h"
 #include "ipalloc.h"
@@ -35,7 +36,7 @@ GEN_ALLOC_append(ipalloc, struct ip_mx, ix, len, a, 10, ipalloc_readyplus, ipall
 void
 getversion_ipalloc_c()
 {
-	static char    *x = "$Id: ipalloc.c,v 1.8 2020-05-10 17:46:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipalloc.c,v 1.9 2020-11-22 23:11:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

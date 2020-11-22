@@ -1,5 +1,8 @@
 /*
  * $Log: mlmatchup.c,v $
+ * Revision 1.3  2020-11-22 23:11:57+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
  * Revision 1.2  2020-05-10 17:46:51+05:30  Cprogrammer
  * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
  *
@@ -10,9 +13,7 @@
 #include "stralloc.h"
 #include "gen_alloc.h"
 #include "gen_allocdefs.h"
-#define _ALLOC_
 #include "alloc.h"
-#undef _ALLOC_
 #include "strerr.h"
 #include "getln.h"
 #include "substdio.h"
@@ -725,7 +726,7 @@ main()
 void
 getversion_mlmatchup_c()
 {
-	static char    *x = "$Id: mlmatchup.c,v 1.2 2020-05-10 17:46:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mlmatchup.c,v 1.3 2020-11-22 23:11:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

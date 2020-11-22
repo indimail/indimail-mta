@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.34  2020-11-22 23:12:03+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
  * Revision 1.33  2020-05-10 17:46:59+05:30  Cprogrammer
  * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
  *
@@ -105,9 +108,7 @@
 #include "stralloc.h"
 #include "subfd.h"
 #include "getln.h"
-#define _ALLOC_
 #include "alloc.h"
-#undef _ALLOC_
 #include "str.h"
 #include "fmt.h"
 #include "hfield.h"
@@ -1290,7 +1291,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.33 2020-05-10 17:46:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.34 2020-11-22 23:12:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
