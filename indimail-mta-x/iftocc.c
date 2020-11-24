@@ -1,5 +1,8 @@
 /*
  * $Log: iftocc.c,v $
+ * Revision 1.3  2020-11-24 13:45:30+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2004-10-22 20:25:50+05:30  Cprogrammer
  * added RCS id
  *
@@ -7,6 +10,7 @@
  * Initial revision
  *
  */
+#include <unistd.h>
 #include "substdio.h"
 #include "strerr.h"
 #include "subfd.h"
@@ -14,7 +18,6 @@
 #include "mess822.h"
 #include "case.h"
 #include "env.h"
-#include "exit.h"
 
 #define FATAL "iftocc: fatal: "
 
@@ -101,7 +104,7 @@ main(argc, argv)
 void
 getversion_iftocc_c()
 {
-	static char    *x = "$Id: iftocc.c,v 1.2 2004-10-22 20:25:50+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: iftocc.c,v 1.3 2020-11-24 13:45:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

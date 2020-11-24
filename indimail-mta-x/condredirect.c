@@ -1,5 +1,8 @@
 /*
  * $Log: condredirect.c,v $
+ * Revision 1.15  2020-11-24 13:44:37+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.14  2020-04-04 11:36:55+05:30  Cprogrammer
  * use auto_sysconfdir instead of auto_qmail
  *
@@ -34,7 +37,6 @@
 #include "pathexec.h"
 #include "auto_sysconfdir.h"
 #include "auto_control.h"
-#include "exit.h"
 #include "env.h"
 #include "error.h"
 #include "wait.h"
@@ -184,7 +186,7 @@ main(argc, argv)
 void
 getversion_condredirect_c()
 {
-	static char    *x = "$Id: condredirect.c,v 1.14 2020-04-04 11:36:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: condredirect.c,v 1.15 2020-11-24 13:44:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: chkspawn.c,v $
+ * Revision 1.6  2020-11-24 13:44:31+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.5  2004-10-22 20:23:54+05:30  Cprogrammer
  * added RCS id
  *
@@ -7,11 +10,11 @@
  * added RCS log
  *
  */
+#include <unistd.h>
 #include "substdio.h"
 #include "subfd.h"
 #include "fmt.h"
 #include "select.h"
-#include "exit.h"
 #include "auto_spawn.h"
 
 char            num[FMT_ULONG];
@@ -63,7 +66,7 @@ limit in conf-spawn be at most ");
 void
 getversion_chkspawn_c()
 {
-	static char    *x = "$Id: chkspawn.c,v 1.5 2004-10-22 20:23:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: chkspawn.c,v 1.6 2020-11-24 13:44:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

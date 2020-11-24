@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.35  2020-11-24 13:46:52+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.34  2020-11-22 23:12:03+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *
@@ -120,7 +123,6 @@
 #include "error.h"
 #include "qmail.h"
 #include "now.h"
-#include "exit.h"
 #include "quote.h"
 #include "headerbody.h"
 #include "auto_sysconfdir.h"
@@ -1291,7 +1293,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.34 2020-11-22 23:12:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.35 2020-11-24 13:46:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

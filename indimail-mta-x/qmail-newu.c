@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newu.c,v $
+ * Revision 1.10  2020-11-24 13:47:04+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.9  2016-05-18 15:20:59+05:30  Cprogrammer
  * use env variable ASSIGNDIR or auto_assign for users/cdb and user/assign file
  *
@@ -27,7 +30,6 @@
 #include "getln.h"
 #include "substdio.h"
 #include "cdbmss.h"
-#include "exit.h"
 #include "byte.h"
 #include "env.h"
 #include "open.h"
@@ -209,7 +211,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_newu_c()
 {
-	static char    *x = "$Id: qmail-newu.c,v 1.9 2016-05-18 15:20:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-newu.c,v 1.10 2020-11-24 13:47:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

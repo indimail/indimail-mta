@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.41  2020-11-24 13:47:41+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.40  2020-09-30 20:39:44+05:30  Cprogrammer
  * Darwin port for syncdir
  *
@@ -97,7 +100,6 @@
 #include "control.h"
 #include "direntry.h"
 #include "error.h"
-#include "exit.h"
 #include "fmt.h"
 #include "fmtqfn.h"
 #include "getln.h"
@@ -1164,7 +1166,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.40 2020-09-30 20:39:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.41 2020-11-24 13:47:41+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

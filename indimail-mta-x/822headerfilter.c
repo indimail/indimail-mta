@@ -1,5 +1,8 @@
 /*
  * $Log: 822headerfilter.c,v $
+ * Revision 1.4  2020-11-24 13:42:56+05:30  Cprogrammer
+ * /usr/local/src/projects/rpmbuild/RPMS/x86_64/libqmail-devel-1.0-1.1.fc33.x86_64.rpm
+ *
  * Revision 1.3  2004-10-22 20:14:08+05:30  Cprogrammer
  * added RCS id
  *
@@ -11,7 +14,6 @@
  *
  */
 #include <unistd.h>
-#include "exit.h"
 #include "error.h"
 #include "wait.h"
 #include "strerr.h"
@@ -98,7 +100,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_822headerfilter_c()
 {
-	static char    *x = "$Id: 822headerfilter.c,v 1.3 2004-10-22 20:14:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: 822headerfilter.c,v 1.4 2020-11-24 13:42:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

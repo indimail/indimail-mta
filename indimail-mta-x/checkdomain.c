@@ -1,5 +1,8 @@
 /*
  * $Log: checkdomain.c,v $
+ * Revision 1.3  2020-11-24 13:44:25+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2004-10-22 20:23:52+05:30  Cprogrammer
  * added RCS id
  *
@@ -15,7 +18,6 @@
 #include "mess822.h"
 #include "case.h"
 #include "env.h"
-#include "exit.h"
 
 #define FATAL "checkdomain: fatal: "
 
@@ -88,7 +90,7 @@ main(argc, argv)
 void
 getversion_checkdomain_c()
 {
-	static char    *x = "$Id: checkdomain.c,v 1.2 2004-10-22 20:23:52+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: checkdomain.c,v 1.3 2020-11-24 13:44:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

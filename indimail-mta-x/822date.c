@@ -1,5 +1,8 @@
 /*
  * $Log: 822date.c,v $
+ * Revision 1.8  2020-11-24 13:42:12+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2016-05-21 14:47:32+05:30  Cprogrammer
  * use auto_sysconfdir for leapsecs_init()
  *
@@ -30,7 +33,6 @@
 #include "subfd.h"
 #include "getln.h"
 #include "mess822.h"
-#include "exit.h"
 #include "leapsecs.h"
 #include "caltime.h"
 #include "tai.h"
@@ -120,7 +122,7 @@ main(argc, argv)
 void
 getversion_822date_c()
 {
-	static char    *x = "$Id: 822date.c,v 1.7 2016-05-21 14:47:32+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: 822date.c,v 1.8 2020-11-24 13:42:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.30  2020-11-24 13:48:50+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.29  2020-10-21 20:33:45+05:30  Cprogrammer
  * removed unused argument to prerm
  *
@@ -85,7 +88,6 @@
 #include "alloc.h"
 #include "error.h"
 #include "stralloc.h"
-#include "exit.h"
 
 void            hier(char *, char *, int);
 int             uidinit(int);
@@ -318,7 +320,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.29 2020-10-21 20:33:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.30 2020-11-24 13:48:50+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

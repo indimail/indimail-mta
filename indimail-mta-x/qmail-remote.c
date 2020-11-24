@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.135 2020-11-22 23:12:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.136 2020-11-24 13:47:20+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -39,7 +39,6 @@
 #include "gen_allocdefs.h"
 #include "str.h"
 #include "now.h"
-#include "exit.h"
 #include "constmap.h"
 #include "tcpto.h"
 #include "timeoutconn.h"
@@ -3483,7 +3482,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.135 2020-11-22 23:12:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.136 2020-11-24 13:47:20+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3491,6 +3490,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.136  2020-11-24 13:47:20+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.135  2020-11-22 23:12:06+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *

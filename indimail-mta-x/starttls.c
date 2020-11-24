@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.9  2020-11-24 13:48:34+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.8  2020-11-22 23:12:12+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *
@@ -52,7 +55,6 @@
 #include "subfd.h"
 #include "tls.h"
 #include "strerr.h"
-#include "exit.h"
 #include "ip.h"
 #include "env.h"
 #include "case.h"
@@ -1491,7 +1493,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.8 2020-11-22 23:12:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.9 2020-11-24 13:48:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

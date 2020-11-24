@@ -1,5 +1,8 @@
 /*
  * $Log: auto-int.c,v $
+ * Revision 1.7  2020-11-24 13:43:54+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2004-10-22 15:34:12+05:30  Cprogrammer
  * replaced readwrite.h with unistd.h
  *
@@ -9,7 +12,6 @@
  */
 #include <unistd.h>
 #include "substdio.h"
-#include "exit.h"
 #include "scan.h"
 #include "fmt.h"
 

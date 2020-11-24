@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipname.c,v $
+ * Revision 1.4  2020-11-24 13:46:25+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.3  2005-08-23 17:33:28+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -18,7 +21,6 @@
 #include "subfd.h"
 #include "stralloc.h"
 #include "getln.h"
-#include "exit.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -153,7 +155,7 @@ main(argc, argv)
 void
 getversion_ofmipname_c()
 {
-	static char    *x = "$Id: ofmipname.c,v 1.3 2005-08-23 17:33:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ofmipname.c,v 1.4 2020-11-24 13:46:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

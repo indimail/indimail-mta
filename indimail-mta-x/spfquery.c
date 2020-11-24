@@ -1,5 +1,8 @@
 /*
  * $Log: spfquery.c,v $
+ * Revision 1.6  2020-11-24 13:49:42+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.5  2018-07-31 21:22:27+05:30  Cprogrammer
  * removed redundant variable remoteip
  *
@@ -23,8 +26,7 @@
 #include "dns.h"
 #ifdef USE_SPF
 #include "spf.h"
-#include "exit.h"
-#include <string.h>
+#include <unistd.h>
 
 void
 die(e, s)
@@ -166,7 +168,7 @@ main(argc, argv)
 void
 getversion_spfquery_c()
 {
-	static char    *x = "$Id: spfquery.c,v 1.5 2018-07-31 21:22:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spfquery.c,v 1.6 2020-11-24 13:49:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

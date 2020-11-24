@@ -1,5 +1,8 @@
 /*
  * $Log: tcp-env.c,v $
+ * Revision 1.12  2020-11-24 13:48:38+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.11  2015-08-24 19:09:31+05:30  Cprogrammer
  * replace ip_fmt() with ip4_fmt()
  *
@@ -45,7 +48,6 @@
 #include "dns.h"
 #include "byte.h"
 #include "remoteinfo.h"
-#include "exit.h"
 #include "case.h"
 
 union sockunion salocal;
@@ -436,7 +438,7 @@ warn_mail(stralloc * msg, char *source)
 void
 getversion_tcp_env_c()
 {
-	static char    *x = "$Id: tcp-env.c,v 1.11 2015-08-24 19:09:31+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tcp-env.c,v 1.12 2020-11-24 13:48:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

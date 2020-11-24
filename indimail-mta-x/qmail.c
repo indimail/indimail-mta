@@ -1,5 +1,8 @@
 /*
  * $Log: qmail.c,v $
+ * Revision 1.27  2020-11-24 13:46:41+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.26  2020-05-12 12:11:46+05:30  Cprogrammer
  * c89 prototypes
  * fix integer signedness error in qmail_put() (CVE-2005-1515)
@@ -61,7 +64,6 @@
 #include "substdio.h"
 #include "wait.h"
 #include "scan.h"
-#include "exit.h"
 #include "fd.h"
 #include "qmail.h"
 #include "auto_qmail.h"
@@ -306,7 +308,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.26 2020-05-12 12:11:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.27 2020-11-24 13:46:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

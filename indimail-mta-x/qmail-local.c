@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.35  2020-11-24 13:46:55+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.34  2020-10-06 14:29:27+05:30  Cprogrammer
  * fixed bug with loopcounter in qmail-local.c - initialized maxdeliveredto
  *
@@ -86,7 +89,6 @@
 #include "sig.h"
 #include "env.h"
 #include "byte.h"
-#include "exit.h"
 #include "open.h"
 #include "wait.h"
 #include "lock.h"
@@ -1145,7 +1147,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.34 2020-10-06 14:29:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.35 2020-11-24 13:46:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

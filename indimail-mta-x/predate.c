@@ -1,5 +1,8 @@
 /*
  * $Log: predate.c,v $
+ * Revision 1.8  2020-11-24 13:46:28+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2004-10-22 20:27:58+05:30  Cprogrammer
  * added RCS id
  *
@@ -21,7 +24,6 @@
 #include "substdio.h"
 #include "subfd.h"
 #include "sig.h"
-#include "exit.h"
 
 #define FATAL "predate: fatal: "
 
@@ -133,7 +135,7 @@ main(argc, argv)
 void
 getversion_predate_c()
 {
-	static char    *x = "$Id: predate.c,v 1.7 2004-10-22 20:27:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: predate.c,v 1.8 2020-11-24 13:46:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

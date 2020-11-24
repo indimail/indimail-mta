@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.21  2020-11-24 13:47:09+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.20  2020-05-11 11:10:41+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -61,7 +64,6 @@
 #include "env.h"
 #include "scan.h"
 #include "getln.h"
-#include "exit.h"
 #include "stralloc.h"
 #include "slurpclose.h"
 #include "error.h"
@@ -404,7 +406,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.20 2020-05-11 11:10:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.21 2020-11-24 13:47:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

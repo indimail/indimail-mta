@@ -171,12 +171,11 @@ compile dns_random.c dns.h iopause.h haveip6.h
 	./compile dns_random.c
 
 dns_rcip.o: \
-compile dns_rcip.c openreadclose.h \
-ip4.h ip6.h dns.h iopause.h haveip6.h conf-ip
+compile dns_rcip.c ip4.h ip6.h dns.h iopause.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` dns_rcip.c
 
 dns_rcrw.o: \
-compile dns_rcrw.c openreadclose.h dns.h iopause.h haveip6.h
+compile dns_rcrw.c dns.h iopause.h haveip6.h
 	./compile dns_rcrw.c
 
 dns_resolve.o: \
@@ -276,10 +275,6 @@ load mconnect-io.o unix.a
 mconnect-io.o: \
 compile mconnect-io.c
 	./compile mconnect-io.c
-
-openreadclose.o: \
-compile openreadclose.c readclose.h openreadclose.h 
-	./compile openreadclose.c
 
 pathexec_env.o: \
 compile pathexec_env.c pathexec.h conf-dlopen
@@ -517,8 +512,7 @@ compile timeoutconn.c socket.h haveip6.h timeoutconn.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` timeoutconn.c
 
 unix.a: \
-makelib openreadclose.o \
-pathexec_env.o prot.o readclose.o socket_accept.o socket_bind.o \
+makelib pathexec_env.o prot.o readclose.o socket_accept.o socket_bind.o \
 socket_conn.o socket_delay.o socket_listen.o socket_local.o \
 socket_opts.o socket_opts6.o socket_remote.o socket_tcp.o socket_udp.o \
 socket_conn6.o socket_bind6.o socket_accept6.o socket_recv6.o \
@@ -526,8 +520,7 @@ socket_send6.o socket_local6.o socket_tcp6.o ip4_fmt.o ip6_fmt.o \
 ip4_bit.o ip6_bit.o ip4_scan.o ip6_scan.o socket_getifname.o \
 socket_getifidx.o socket_v4mappedprefix.o socket_ip4loopback.o \
 socket_v6any.o socket_v6loopback.o ip6_compactaddr.o ip6_expandaddr.o
-	./makelib unix.a openreadclose.o \
-	pathexec_env.o prot.o readclose.o socket_accept.o \
+	./makelib unix.a pathexec_env.o prot.o readclose.o socket_accept.o \
 	socket_bind.o socket_conn.o socket_delay.o socket_listen.o \
 	socket_local.o socket_opts.o socket_opts6.o socket_remote.o \
 	socket_tcp.o socket_udp.o socket_conn6.o socket_bind6.o \

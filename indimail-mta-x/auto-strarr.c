@@ -1,12 +1,14 @@
 /*
  * $Log: auto-strarr.c,v $
+ * Revision 1.2  2020-11-24 13:43:59+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.1  2004-09-19 18:53:21+05:30  Cprogrammer
  * Initial revision
  *
  */
 #include <unistd.h>
 #include "substdio.h"
-#include "exit.h"
 
 char            buf1[256];
 substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));

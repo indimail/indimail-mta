@@ -1,5 +1,8 @@
 /*
  * $Log: 822headerok.c,v $
+ * Revision 1.3  2020-11-24 13:43:38+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2004-10-22 20:14:12+05:30  Cprogrammer
  * added RCS id
  *
@@ -12,7 +15,6 @@
 #include "error.h"
 #include "getln.h"
 #include "mess822.h"
-#include "exit.h"
 
 stralloc        line = { 0 };
 int             match;
@@ -47,7 +49,7 @@ main(argc, argv)
 void
 getversion_822headerok_c()
 {
-	static char    *x = "$Id: 822headerok.c,v 1.2 2004-10-22 20:14:12+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: 822headerok.c,v 1.3 2020-11-24 13:43:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

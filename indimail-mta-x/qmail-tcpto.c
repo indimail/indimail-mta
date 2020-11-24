@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpto.c,v $
+ * Revision 1.22  2020-11-24 13:47:38+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.21  2015-08-24 19:08:47+05:30  Cprogrammer
  * replace ip_fmt() with ip4_fmt()
  *
@@ -74,7 +77,6 @@
 #include "ip.h"
 #include "lock.h"
 #include "error.h"
-#include "exit.h"
 #include "datetime.h"
 #include "env.h"
 #include "now.h"
@@ -358,7 +360,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpto_c()
 {
-	static char    *x = "$Id: qmail-tcpto.c,v 1.21 2015-08-24 19:08:47+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-tcpto.c,v 1.22 2020-11-24 13:47:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

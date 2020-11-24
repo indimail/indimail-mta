@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.66  2020-11-24 13:47:17+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.65  2020-09-30 20:39:38+05:30  Cprogrammer
  * Darwin port for syncdir
  *
@@ -185,7 +188,6 @@
 #include "case.h"
 #include "str.h"
 #include "getln.h"
-#include "exit.h"
 #include "open.h"
 #include "seek.h"
 #include "fmt.h"
@@ -1234,7 +1236,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.65 2020-09-30 20:39:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.66 2020-11-24 13:47:17+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

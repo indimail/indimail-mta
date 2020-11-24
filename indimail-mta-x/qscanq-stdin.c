@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq-stdin.c,v $
+ * Revision 1.5  2020-11-24 13:47:46+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.4  2016-06-03 09:58:33+05:30  Cprogrammer
  * moved qmail-multi to sbin
  *
@@ -20,7 +23,6 @@
 #include <sys/stat.h>
 #include "auto_qmail.h"
 #include "substdio.h"
-#include "exit.h"
 #include "open.h"
 #include "fd.h"
 #include "wait.h"
@@ -198,7 +200,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_stdin_c()
 {
-	static char    *x = "$Id: qscanq-stdin.c,v 1.4 2016-06-03 09:58:33+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qscanq-stdin.c,v 1.5 2020-11-24 13:47:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

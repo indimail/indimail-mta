@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.10  2020-11-24 13:46:11+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.9  2020-11-22 23:11:54+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *
@@ -37,7 +40,6 @@
 #include "getln.h"
 #include "substdio.h"
 #include "subfd.h"
-#include "exit.h"
 #include "str.h"
 #include "fmt.h"
 #include "scan.h"
@@ -757,7 +759,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.9 2020-11-22 23:11:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.10 2020-11-24 13:46:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

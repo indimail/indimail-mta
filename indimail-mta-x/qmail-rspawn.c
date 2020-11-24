@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.41  2020-11-24 13:47:23+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.40  2020-10-17 17:15:01+05:30  Cprogrammer
  * fixed "Unable to run qmail-remote" when QMAILREMOTE variable wasn't set
  *
@@ -120,7 +123,6 @@
 #include "str.h"
 #include "wait.h"
 #include "substdio.h"
-#include "exit.h"
 #include "error.h"
 #include "tcpto.h"
 #include "env.h"
@@ -372,7 +374,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.40 2020-10-17 17:15:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.41 2020-11-24 13:47:23+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

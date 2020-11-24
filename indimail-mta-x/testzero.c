@@ -1,12 +1,15 @@
 /*
  * $Log: testzero.c,v $
+ * Revision 1.2  2020-11-24 13:48:40+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.1  2008-09-16 09:09:05+05:30  Cprogrammer
  * Initial revision
  *
  */
+#include <unistd.h>
 #include "uint32.h"
 #include "scan.h"
-#include "exit.h"
 #include "strerr.h"
 #include "cdb_make.h"
 
@@ -47,7 +50,7 @@ main(int argc, char **argv)
 void
 getversion_testzero_c()
 {
-	static char    *x = "$Id: testzero.c,v 1.1 2008-09-16 09:09:05+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: testzero.c,v 1.2 2020-11-24 13:48:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

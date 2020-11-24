@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.13  2020-11-24 13:45:02+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.12  2018-06-01 22:52:11+05:30  Cprogrammer
  * exit on incorrect usage
  *
@@ -39,7 +42,6 @@
  */
 #include "substdio.h"
 #include "subfd.h"
-#include "exit.h"
 #include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
 #include <sys/types.h>
@@ -278,7 +280,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.12 2018-06-01 22:52:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.13 2020-11-24 13:45:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: splogger.c,v $
+ * Revision 1.5  2020-11-24 13:48:27+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.4  2004-10-22 20:30:43+05:30  Cprogrammer
  * added RCS id
  *
@@ -7,13 +10,13 @@
  * added RCS log
  *
  */
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <syslog.h>
 #include "error.h"
 #include "substdio.h"
 #include "subfd.h"
-#include "exit.h"
 #include "str.h"
 #include "scan.h"
 #include "fmt.h"
@@ -102,7 +105,7 @@ main(argc, argv)
 void
 getversion_splogger_c()
 {
-	static char    *x = "$Id: splogger.c,v 1.4 2004-10-22 20:30:43+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: splogger.c,v 1.5 2020-11-24 13:48:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

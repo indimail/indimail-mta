@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.12  2020-11-24 13:48:05+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.11  2020-05-15 11:00:31+05:30  Cprogrammer
  * use unsigned int to store return value of str_len
  *
@@ -28,7 +31,6 @@
 #include "subfd.h"
 #include "alloc.h"
 #include "auto_qmail.h"
-#include "exit.h"
 #include "env.h"
 #include "str.h"
 
@@ -256,7 +258,7 @@ main(argc, argv)
 void
 getversion_sendmail_c()
 {
-	static char    *x = "$Id: sendmail.c,v 1.11 2020-05-15 11:00:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sendmail.c,v 1.12 2020-11-24 13:48:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

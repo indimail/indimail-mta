@@ -1,5 +1,8 @@
 /*
  * $Log: auto-str.c,v $
+ * Revision 1.8  2020-11-24 13:44:02+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2020-06-17 16:58:35+05:30  Cprogrammer
  * make output readable
  *
@@ -13,7 +16,6 @@
 #include <ctype.h>
 #include <unistd.h>
 #include "substdio.h"
-#include "exit.h"
 
 char            buf1[256];
 substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));

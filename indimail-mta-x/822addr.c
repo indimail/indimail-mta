@@ -1,5 +1,8 @@
 /*
  * $Log: 822addr.c,v $
+ * Revision 1.3  2020-11-24 13:41:57+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2004-10-22 20:12:48+05:30  Cprogrammer
  * added RCS id
  *
@@ -15,7 +18,6 @@
 #include "mess822.h"
 #include "case.h"
 #include "stralloc.h"
-#include "exit.h"
 
 #define FATAL "822addr: fatal: "
 
@@ -107,7 +109,7 @@ main(int argc, char **argv)
 void
 getversion_822addr_c()
 {
-	static char    *x = "$Id: 822addr.c,v 1.2 2004-10-22 20:12:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: 822addr.c,v 1.3 2020-11-24 13:41:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

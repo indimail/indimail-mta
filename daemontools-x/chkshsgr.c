@@ -13,7 +13,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <grp.h>
-#include "exit.h"
 int
 main()
 {

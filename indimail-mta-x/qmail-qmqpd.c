@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpd.c,v $
+ * Revision 1.8  2020-11-24 13:47:12+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2008-07-15 19:52:41+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -21,7 +24,6 @@
 #include "byte.h"
 #include "str.h"
 #include "substdio.h"
-#include "exit.h"
 #include "now.h"
 #include "fmt.h"
 #include "env.h"
@@ -226,7 +228,7 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	static char    *x = "$Id: qmail-qmqpd.c,v 1.7 2008-07-15 19:52:41+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qmqpd.c,v 1.8 2020-11-24 13:47:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

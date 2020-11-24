@@ -1,5 +1,8 @@
 /*
  * $Log: chkshsgr.c,v $
+ * Revision 1.7  2020-11-24 13:44:29+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2007-12-20 12:43:15+05:30  Cprogrammer
  * changed data type to gid_t
  *
@@ -13,7 +16,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <grp.h>
-#include "exit.h"
 int
 main()
 {
@@ -28,7 +30,7 @@ main()
 void
 getversion_chkshsgr_c()
 {
-	static char    *x = "$Id: chkshsgr.c,v 1.6 2007-12-20 12:43:15+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: chkshsgr.c,v 1.7 2020-11-24 13:44:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

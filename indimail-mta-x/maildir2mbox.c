@@ -1,5 +1,8 @@
 /*
  * $Log: maildir2mbox.c,v $
+ * Revision 1.6  2020-11-24 13:45:41+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.5  2004-10-22 20:26:09+05:30  Cprogrammer
  * added RCS id
  *
@@ -21,7 +24,6 @@
 #include "lock.h"
 #include "gfrom.h"
 #include "str.h"
-#include "exit.h"
 #include "myctime.h"
 #include "maildir.h"
 
@@ -178,7 +180,7 @@ main()
 void
 getversion_maildir2mbox_c()
 {
-	static char    *x = "$Id: maildir2mbox.c,v 1.5 2004-10-22 20:26:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: maildir2mbox.c,v 1.6 2020-11-24 13:45:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

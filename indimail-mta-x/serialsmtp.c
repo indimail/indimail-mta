@@ -1,5 +1,8 @@
 /*
  * $Log: serialsmtp.c,v $
+ * Revision 1.7  2020-11-24 13:48:10+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2010-07-27 09:47:15+05:30  Cprogrammer
  * added logging of sender and recipients
  *
@@ -26,7 +29,6 @@
 #include "open.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
-#include "exit.h"
 #include "stralloc.h"
 #include "sig.h"
 #include "str.h"
@@ -453,7 +455,7 @@ main(argc, argv)
 void
 getversion_serialsmtp_c()
 {
-	static char    *x = "$Id: serialsmtp.c,v 1.6 2010-07-27 09:47:15+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: serialsmtp.c,v 1.7 2020-11-24 13:48:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

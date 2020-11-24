@@ -1,5 +1,8 @@
 /*
  * $Log: filterto.c,v $
+ * Revision 1.10  2020-11-24 13:45:17+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.9  2020-04-04 11:45:05+05:30  Cprogrammer
  * use auto_sysconfdir instead of auto_qmail
  *
@@ -34,7 +37,6 @@
 #include "auto_control.h"
 #include "envdir.h"
 #include "sig.h"
-#include "exit.h"
 #include "env.h"
 #include "error.h"
 #include "wait.h"
@@ -165,7 +167,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.9 2020-04-04 11:45:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: filterto.c,v 1.10 2020-11-24 13:45:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

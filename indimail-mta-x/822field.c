@@ -1,5 +1,8 @@
 /*
  * $Log: 822field.c,v $
+ * Revision 1.4  2020-11-24 13:42:20+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.3  2004-10-22 20:13:52+05:30  Cprogrammer
  * added RCS id
  *
@@ -10,12 +13,12 @@
  * Initial revision
  *
  */
+#include <unistd.h>
 #include "substdio.h"
 #include "strerr.h"
 #include "subfd.h"
 #include "getln.h"
 #include "mess822.h"
-#include "exit.h"
 
 #define FATAL "822field: fatal: "
 
@@ -67,7 +70,7 @@ main(argc, argv)
 void
 getversion_822field_c()
 {
-	static char    *x = "$Id: 822field.c,v 1.3 2004-10-22 20:13:52+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: 822field.c,v 1.4 2020-11-24 13:42:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

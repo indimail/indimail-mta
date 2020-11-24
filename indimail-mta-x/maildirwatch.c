@@ -1,5 +1,8 @@
 /*
  * $Log: maildirwatch.c,v $
+ * Revision 1.7  2020-11-24 13:45:47+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2004-10-22 20:26:30+05:30  Cprogrammer
  * added RCS id
  *
@@ -17,7 +20,6 @@
 #include "prioq.h"
 #include "stralloc.h"
 #include "str.h"
-#include "exit.h"
 #include "hfield.h"
 #include "open.h"
 #include "headerbody.h"
@@ -163,7 +165,7 @@ main()
 void
 getversion_maildirwatch_c()
 {
-	static char    *x = "$Id: maildirwatch.c,v 1.6 2004-10-22 20:26:30+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: maildirwatch.c,v 1.7 2020-11-24 13:45:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: serialqmtp.c,v $
+ * Revision 1.7  2020-11-24 13:48:07+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2008-07-15 19:53:48+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -30,7 +33,6 @@
 #include "timeoutread.h"
 #include "timeoutwrite.h"
 #include "fd.h"
-#include "exit.h"
 #include "open.h"
 #include "wait.h"
 #include "str.h"
@@ -347,7 +349,7 @@ main(argc, argv)
 void
 getversion_serialqmtp_c()
 {
-	static char    *x = "$Id: serialqmtp.c,v 1.6 2008-07-15 19:53:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: serialqmtp.c,v 1.7 2020-11-24 13:48:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

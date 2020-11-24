@@ -1,5 +1,8 @@
 /*
  * $Log: qsmhook.c,v $
+ * Revision 1.9  2020-11-24 13:47:49+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.8  2020-05-15 10:58:21+05:30  Cprogrammer
  * use unsigned int to store return value of str_len
  *
@@ -22,7 +25,6 @@
 #include "byte.h"
 #include "str.h"
 #include "alloc.h"
-#include "exit.h"
 #include "case.h"
 #include "subfd.h"
 #include "error.h"
@@ -206,7 +208,7 @@ main(argc, argv)
 void
 getversion_qsmhook_c()
 {
-	static char    *x = "$Id: qsmhook.c,v 1.8 2020-05-15 10:58:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsmhook.c,v 1.9 2020-11-24 13:47:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

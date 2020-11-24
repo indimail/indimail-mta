@@ -1,5 +1,8 @@
 /*
  * $Log: replier-config.c,v $
+ * Revision 1.4  2020-11-24 13:47:56+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.3  2004-10-22 20:29:58+05:30  Cprogrammer
  * added RCS id
  *
@@ -18,7 +21,6 @@
 #include "substdio.h"
 #include "stralloc.h"
 #include "open.h"
-#include "exit.h"
 #include "auto_ezmlm.h"
 #include "auto_qmail.h"
 #include "str.h"
@@ -314,7 +316,7 @@ main(int argc, char **argv)
 void
 getversion_replier_config_c()
 {
-	static char    *x = "$Id: replier-config.c,v 1.3 2004-10-22 20:29:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: replier-config.c,v 1.4 2020-11-24 13:47:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.27  2020-11-24 13:48:16+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.26  2020-05-11 11:12:35+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -70,7 +73,6 @@
 #include "str.h"
 #include "stralloc.h"
 #include "select.h"
-#include "exit.h"
 #include "coe.h"
 #include "open.h"
 #include "env.h"
@@ -541,7 +543,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.26 2020-05-11 11:12:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.27 2020-11-24 13:48:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

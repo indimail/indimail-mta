@@ -4,9 +4,9 @@
  * Initial revision
  *
  */
+#include <unistd.h>
 #include "substdio.h"
 #include "subfd.h"
-#include "exit.h"
 
 int
 main()

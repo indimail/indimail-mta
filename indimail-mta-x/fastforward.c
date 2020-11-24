@@ -1,5 +1,8 @@
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.10  2020-11-24 13:45:14+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.9  2020-04-04 11:41:41+05:30  Cprogrammer
  * use auto_sysconfdir instead of auto_qmail
  *
@@ -44,7 +47,6 @@
 #include "byte.h"
 #include "slurpclose.h"
 #include "strset.h"
-#include "exit.h"
 #include "strerr.h"
 #include "env.h"
 #include "sig.h"
@@ -532,7 +534,7 @@ main(argc, argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.9 2020-04-04 11:41:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.10 2020-11-24 13:45:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

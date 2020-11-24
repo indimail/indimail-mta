@@ -1,10 +1,13 @@
 /*
  * $Log: cdbdump.c,v $
+ * Revision 1.2  2020-11-24 13:44:11+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.1  2008-09-16 08:14:14+05:30  Cprogrammer
  * Initial revision
  *
  */
-#include "exit.h"
+#include <unistd.h>
 #include "uint32.h"
 #include "fmt.h"
 #include "subfd.h"
@@ -109,7 +112,7 @@ main()
 void
 getversion_cdbdump_c()
 {
-	static char    *x = "$Id: cdbdump.c,v 1.1 2008-09-16 08:14:14+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: cdbdump.c,v 1.2 2020-11-24 13:44:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

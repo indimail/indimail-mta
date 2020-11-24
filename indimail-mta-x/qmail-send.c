@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.74  2020-11-24 13:47:27+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.73  2020-09-30 20:39:41+05:30  Cprogrammer
  * Darwin port for syncdir
  *
@@ -195,7 +198,6 @@
 #include "select.h"
 #include "open.h"
 #include "seek.h"
-#include "exit.h"
 #include "lock.h"
 #include "ndelay.h"
 #include "now.h"
@@ -2909,7 +2911,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.73 2020-09-30 20:39:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.74 2020-11-24 13:47:27+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

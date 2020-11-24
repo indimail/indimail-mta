@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.13  2020-11-24 13:46:16+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.12  2020-05-11 11:07:43+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -50,7 +53,6 @@
 #include "getln.h"
 #include "mess822.h"
 #include "strerr.h"
-#include "exit.h"
 #include "caltime.h"
 #include "leapsecs.h"
 #include "tai.h"
@@ -688,7 +690,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.12 2020-05-11 11:07:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.13 2020-11-24 13:46:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

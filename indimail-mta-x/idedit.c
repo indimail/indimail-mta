@@ -1,5 +1,8 @@
 /*
  * $Log: idedit.c,v $
+ * Revision 1.8  2020-11-24 13:45:25+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2004-10-22 20:25:47+05:30  Cprogrammer
  * added RCS id
  *
@@ -14,7 +17,6 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
-#include "exit.h"
 #include "wait.h"
 #include "scan.h"
 #include "fmt.h"
@@ -170,7 +172,7 @@ main(argc, argv)
 void
 getversion_idedit_c()
 {
-	static char    *x = "$Id: idedit.c,v 1.7 2004-10-22 20:25:47+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: idedit.c,v 1.8 2020-11-24 13:45:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: ipmeprint.c,v $
+ * Revision 1.12  2020-11-24 13:45:39+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.11  2015-08-24 19:06:55+05:30  Cprogrammer
  * replace ip_fmt() with ip4_fmt()
  *
@@ -30,7 +33,6 @@
 #include "ip.h"
 #include "fmt.h"
 #include "ipme.h"
-#include "exit.h"
 
 char            temp[IPFMT];
 
@@ -80,7 +82,7 @@ main()
 void
 getversion_ipmeprint_c()
 {
-	static char    *x = "$Id: ipmeprint.c,v 1.11 2015-08-24 19:06:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ipmeprint.c,v 1.12 2020-11-24 13:45:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

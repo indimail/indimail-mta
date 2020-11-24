@@ -1,5 +1,8 @@
 /*
  * $Log: dnsfq.c,v $
+ * Revision 1.9  2020-11-24 13:44:50+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.8  2005-08-23 17:32:23+05:30  Cprogrammer
  * ipv6 correction
  *
@@ -16,6 +19,7 @@
  * added RCS log
  *
  */
+#include <unistd.h>
 #include <sys/socket.h>
 #include "substdio.h"
 #include "subfd.h"
@@ -27,7 +31,6 @@
 #ifdef USE_SPF
 #include "strsalloc.h"
 #endif
-#include "exit.h"
 
 stralloc        sa = { 0 };
 ipalloc         ia = { 0 };
@@ -84,7 +87,7 @@ main(argc, argv)
 void
 getversion_dnsfq_c()
 {
-	static char    *x = "$Id: dnsfq.c,v 1.8 2005-08-23 17:32:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dnsfq.c,v 1.9 2020-11-24 13:44:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

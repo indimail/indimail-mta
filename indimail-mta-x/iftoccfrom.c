@@ -1,5 +1,8 @@
 /*
  * $Log: iftoccfrom.c,v $
+ * Revision 1.3  2020-11-24 13:45:33+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2004-10-22 20:25:51+05:30  Cprogrammer
  * added RCS id
  *
@@ -14,7 +17,6 @@
 #include "mess822.h"
 #include "case.h"
 #include "env.h"
-#include "exit.h"
 
 #define FATAL "iftoccfrom: fatal: "
 
@@ -91,7 +93,7 @@ char **argv;
 void
 getversion_iftoccfrom_c()
 {
-	static char    *x = "$Id: iftoccfrom.c,v 1.2 2004-10-22 20:25:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: iftoccfrom.c,v 1.3 2020-11-24 13:45:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

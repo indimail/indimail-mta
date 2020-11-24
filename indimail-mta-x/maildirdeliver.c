@@ -1,5 +1,8 @@
 /*
  * $Log: maildirdeliver.c,v $
+ * Revision 1.8  2020-11-24 13:45:44+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2004-10-22 20:26:12+05:30  Cprogrammer
  * added RCS id
  *
@@ -21,7 +24,6 @@
 #include <sys/stat.h>
 #include "byte.h"
 #include "error.h"
-#include "exit.h"
 #include "fmt.h"
 #include "now.h"
 #include "open.h"
@@ -197,7 +199,7 @@ main(int argc, char **argv)
 void
 getversion_maildirdeliver_c()
 {
-	static char    *x = "$Id: maildirdeliver.c,v 1.7 2004-10-22 20:26:12+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: maildirdeliver.c,v 1.8 2020-11-24 13:45:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

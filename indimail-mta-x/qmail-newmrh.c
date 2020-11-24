@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newmrh.c,v $
+ * Revision 1.11  2020-11-24 13:47:01+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.10  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -33,7 +36,6 @@
 #include "substdio.h"
 #include "getln.h"
 #include "case.h"
-#include "exit.h"
 #include "open.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
@@ -153,7 +155,7 @@ main()
 void
 getversion_qmail_newmrh_c()
 {
-	static char    *x = "$Id: qmail-newmrh.c,v 1.10 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-newmrh.c,v 1.11 2020-11-24 13:47:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

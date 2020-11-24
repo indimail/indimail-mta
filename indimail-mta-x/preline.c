@@ -1,5 +1,8 @@
 /*
  * $Log: preline.c,v $
+ * Revision 1.9  2020-11-24 13:46:31+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.8  2010-04-07 16:05:53+05:30  Cprogrammer
  * fixed SIGSEGV when QQEH env variable was absent
  *
@@ -19,7 +22,6 @@
 #include "sgetopt.h"
 #include "strerr.h"
 #include "substdio.h"
-#include "exit.h"
 #include "wait.h"
 #include "env.h"
 #include "sig.h"
@@ -126,7 +128,7 @@ main(argc, argv)
 void
 getversion_preline_c()
 {
-	static char    *x = "$Id: preline.c,v 1.8 2010-04-07 16:05:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: preline.c,v 1.9 2020-11-24 13:46:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

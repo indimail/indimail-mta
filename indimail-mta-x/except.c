@@ -1,5 +1,8 @@
 /*
  * $Log: except.c,v $
+ * Revision 1.7  2020-11-24 13:45:11+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2004-10-22 20:24:59+05:30  Cprogrammer
  * added RCS id
  *
@@ -11,7 +14,6 @@
 #include "strerr.h"
 #include "wait.h"
 #include "error.h"
-#include "exit.h"
 
 #define FATAL "except: fatal: "
 
@@ -55,7 +57,7 @@ main(argc, argv)
 void
 getversion_except_c()
 {
-	static char    *x = "$Id: except.c,v 1.6 2004-10-22 20:24:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: except.c,v 1.7 2020-11-24 13:45:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

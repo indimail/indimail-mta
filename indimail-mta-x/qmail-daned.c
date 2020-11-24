@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.25  2020-11-24 13:46:44+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.24  2020-11-17 16:19:23+05:30  Cprogrammer
  * set default value for timeoutssl to avoid polling
  *
@@ -75,7 +78,6 @@
  */
 #include "hastlsa.h"
 #include "subfd.h"
-#include "exit.h"
 #if defined(HASTLSA) && defined(TLS)
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -1369,7 +1371,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.24 2020-11-17 16:19:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.25 2020-11-24 13:46:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

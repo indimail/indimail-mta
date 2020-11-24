@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-getpw.c,v $
+ * Revision 1.7  2020-11-24 13:46:50+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2004-10-22 20:28:20+05:30  Cprogrammer
  * added RCS id
  *
@@ -17,7 +20,6 @@
 #include "substdio.h"
 #include "subfd.h"
 #include "error.h"
-#include "exit.h"
 #include "byte.h"
 #include "str.h"
 #include "case.h"
@@ -121,7 +123,7 @@ main(argc, argv)
 void
 getversion_qmail_getpw_c()
 {
-	static char    *x = "$Id: qmail-getpw.c,v 1.6 2004-10-22 20:28:20+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-getpw.c,v 1.7 2020-11-24 13:46:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

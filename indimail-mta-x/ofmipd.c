@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.18  2020-11-24 13:46:21+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.17  2020-09-15 09:40:18+05:30  Cprogrammer
  * ctl_maxcmdlen moved to libqmail
  *
@@ -71,7 +74,6 @@
 #include "substdio.h"
 #include "sconfig.h"
 #include "env.h"
-#include "exit.h"
 #include "error.h"
 #include "str.h"
 #include "fmt.h"
@@ -1219,7 +1221,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.17 2020-09-15 09:40:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.18 2020-11-24 13:46:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

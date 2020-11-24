@@ -1,5 +1,8 @@
 /*
  * $Log: forward.c,v $
+ * Revision 1.12  2020-11-24 13:45:20+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.11  2020-04-04 11:46:26+05:30  Cprogrammer
  * use auto_sysconfdir instead of auto_qmail
  *
@@ -34,7 +37,6 @@
 #include "envdir.h"
 #include "pathexec.h"
 #include "sig.h"
-#include "exit.h"
 #include "env.h"
 #include "qmail.h"
 #include "strerr.h"
@@ -157,7 +159,7 @@ main(argc, argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.11 2020-04-04 11:46:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: forward.c,v 1.12 2020-11-24 13:45:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

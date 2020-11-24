@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.19  2020-11-24 13:47:32+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.18  2020-06-16 22:33:09+05:30  Cprogrammer
  * use prot_gid() to lose existing qmail group privileges (qmailr)
  *
@@ -44,7 +47,6 @@
 #include "env.h"
 #include "alloc.h"
 #include "prot.h"
-#include "exit.h"
 #include "qmail-todo.h"
 #include "auto_uids.h"
 #include "setuserid.h"
@@ -396,7 +398,7 @@ main(argc, argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.18 2020-06-16 22:33:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.19 2020-11-24 13:47:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

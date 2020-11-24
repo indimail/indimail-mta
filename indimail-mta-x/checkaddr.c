@@ -1,5 +1,8 @@
 /*
  * $Log: checkaddr.c,v $
+ * Revision 1.3  2020-11-24 13:44:22+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2004-10-22 20:23:50+05:30  Cprogrammer
  * added RCS id
  *
@@ -14,7 +17,6 @@
 #include "mess822.h"
 #include "case.h"
 #include "env.h"
-#include "exit.h"
 
 #define FATAL "checkaddr: fatal: "
 
@@ -66,7 +68,7 @@ char **argv;
 void
 getversion_checkaddr_c()
 {
-	static char    *x = "$Id: checkaddr.c,v 1.2 2004-10-22 20:23:50+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: checkaddr.c,v 1.3 2020-11-24 13:44:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

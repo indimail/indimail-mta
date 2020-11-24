@@ -1,5 +1,8 @@
 /*
  * $Log: recipient-cdb.c,v $
+ * Revision 1.9  2020-11-24 13:47:52+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.8  2016-05-18 15:34:23+05:30  Cprogrammer
  * use directory defined by auto_assign for writing recipients.cdb
  *
@@ -31,7 +34,6 @@
 #include "stralloc.h"
 #include "substdio.h"
 #include "getln.h"
-#include "exit.h"
 #include "open.h"
 #include "case.h"
 #include "auto_assign.h"
@@ -126,7 +128,7 @@ main()
 void
 getversion_qmail_recipients_c()
 {
-	static char    *x = "$Id: recipient-cdb.c,v 1.8 2016-05-18 15:34:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: recipient-cdb.c,v 1.9 2020-11-24 13:47:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

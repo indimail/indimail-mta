@@ -1,5 +1,8 @@
 /*
  * $Log: hostname.c,v $
+ * Revision 1.7  2020-11-24 13:45:23+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2004-10-22 20:25:46+05:30  Cprogrammer
  * added RCS id
  *
@@ -13,7 +16,6 @@
 #include <unistd.h>
 #include "substdio.h"
 #include "subfd.h"
-#include "exit.h"
 
 char            host[256];
 
@@ -32,7 +34,7 @@ main()
 void
 getversion_hostname_c()
 {
-	static char    *x = "$Id: hostname.c,v 1.6 2004-10-22 20:25:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hostname.c,v 1.7 2020-11-24 13:45:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

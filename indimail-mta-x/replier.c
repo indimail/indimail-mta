@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.9  2020-11-24 13:47:58+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.8  2020-04-04 12:48:43+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -46,7 +49,6 @@
 #include "scan.h"
 #include "str.h"
 #include "fmt.h"
-#include "exit.h"
 #include "substdio.h"
 #include "getconf.h"
 #include "constmap.h"
@@ -321,7 +323,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.8 2020-04-04 12:48:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier.c,v 1.9 2020-11-24 13:47:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

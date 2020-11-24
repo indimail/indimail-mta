@@ -1,5 +1,8 @@
 /*
  * $Log: ifaddr.c,v $
+ * Revision 1.3  2020-11-24 13:45:27+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2004-10-22 20:25:48+05:30  Cprogrammer
  * added RCS id
  *
@@ -16,7 +19,6 @@
 #include "mess822.h"
 #include "case.h"
 #include "env.h"
-#include "exit.h"
 
 #define FATAL "ifaddr: fatal: "
 
@@ -169,7 +171,7 @@ main(int argc, char **argv)
 void
 getversion_ifaddr_c()
 {
-	static char    *x = "$Id: ifaddr.c,v 1.2 2004-10-22 20:25:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ifaddr.c,v 1.3 2020-11-24 13:45:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

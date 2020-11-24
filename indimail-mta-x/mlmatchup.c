@@ -1,5 +1,8 @@
 /*
  * $Log: mlmatchup.c,v $
+ * Revision 1.4  2020-11-24 13:46:14+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.3  2020-11-22 23:11:57+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *
@@ -18,7 +21,6 @@
 #include "getln.h"
 #include "substdio.h"
 #include "subfd.h"
-#include "exit.h"
 #include "str.h"
 #include "fmt.h"
 #include "scan.h"
@@ -726,7 +728,7 @@ main()
 void
 getversion_mlmatchup_c()
 {
-	static char    *x = "$Id: mlmatchup.c,v 1.3 2020-11-22 23:11:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mlmatchup.c,v 1.4 2020-11-24 13:46:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: bouncesaying.c,v $
+ * Revision 1.7  2020-11-24 13:44:08+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2004-10-22 20:22:09+05:30  Cprogrammer
  * added RCS id
  *
@@ -12,7 +15,6 @@
 #include "error.h"
 #include "wait.h"
 #include "sig.h"
-#include "exit.h"
 
 #define FATAL "bouncesaying: fatal: "
 
@@ -60,7 +62,7 @@ main(argc, argv)
 void
 getversion_bouncesaying_c()
 {
-	static char    *x = "$Id: bouncesaying.c,v 1.6 2004-10-22 20:22:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: bouncesaying.c,v 1.7 2020-11-24 13:44:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

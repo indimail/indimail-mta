@@ -1,5 +1,8 @@
 /*
  * $Log: 822header.c,v $
+ * Revision 1.7  2020-11-24 13:42:27+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2005-04-05 21:19:59+05:30  Cprogrammer
  * removed superfluous lines
  *
@@ -28,7 +31,6 @@
 #include "subfd.h"
 #include "getln.h"
 #include "mess822.h"
-#include "exit.h"
 
 #define FATAL "822header: fatal: "
 
@@ -144,7 +146,7 @@ main(argc, argv)
 void
 getversion_822header_c()
 {
-	static char    *x = "$Id: 822header.c,v 1.6 2005-04-05 21:19:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: 822header.c,v 1.7 2020-11-24 13:42:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

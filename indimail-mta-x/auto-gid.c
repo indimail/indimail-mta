@@ -1,5 +1,8 @@
 /*
  * $Log: auto-gid.c,v $
+ * Revision 1.8  2020-11-24 13:43:49+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2018-05-29 09:36:03+05:30  Cprogrammer
  * use effective gid when group or default group "mail" does not exist
  *
@@ -18,7 +21,6 @@
 #include <grp.h>
 #include "subfd.h"
 #include "substdio.h"
-#include "exit.h"
 #include "scan.h"
 #include "fmt.h"
 

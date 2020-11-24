@@ -1,5 +1,8 @@
 /*
  * $Log: dnscname.c,v $
+ * Revision 1.7  2020-11-24 13:44:44+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2004-10-22 20:24:23+05:30  Cprogrammer
  * added RCS id
  *
@@ -16,7 +19,6 @@
 #include "stralloc.h"
 #include "dns.h"
 #include "dnsdoe.h"
-#include "exit.h"
 
 stralloc        sa = { 0 };
 
@@ -43,7 +45,7 @@ main(argc, argv)
 void
 getversion_dnscname_c()
 {
-	static char    *x = "$Id: dnscname.c,v 1.6 2004-10-22 20:24:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dnscname.c,v 1.7 2020-11-24 13:44:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

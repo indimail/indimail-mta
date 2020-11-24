@@ -1,5 +1,8 @@
 /*
  * $Log: rrforward.c,v $
+ * Revision 1.8  2020-11-24 13:48:01+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2020-04-04 12:56:49+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -34,7 +37,6 @@
 #include "str.h"
 #include "scan.h"
 #include "seek.h"
-#include "exit.h"
 #include "env.h"
 #include "qmail.h"
 #include "strerr.h"
@@ -189,7 +191,7 @@ main(argc, argv)
 void
 getversion_rrforward_c()
 {
-	static char    *x = "$Id: rrforward.c,v 1.7 2020-04-04 12:56:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrforward.c,v 1.8 2020-11-24 13:48:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: auto-fnlen.c,v $
+ * Revision 1.3  2020-11-24 13:43:46+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2004-10-22 15:33:46+05:30  Cprogrammer
  * removed readwrite.h
  *
@@ -10,7 +13,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "substdio.h"
-#include "exit.h"
 #include "scan.h"
 #include "fmt.h"
 #include "timestamp.h"

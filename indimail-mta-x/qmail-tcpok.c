@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpok.c,v $
+ * Revision 1.23  2020-11-24 13:47:35+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.22  2010-02-10 08:59:10+05:30  Cprogrammer
  * use -DMULTI_QUEUE for using multiple queues
  *
@@ -72,7 +75,6 @@
 #include "variables.h"
 #include "stralloc.h"
 #include "fmt.h"
-#include "exit.h"
 #include "tcpto.h"
 
 #ifndef QUEUE_COUNT
@@ -256,7 +258,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	static char    *x = "$Id: qmail-tcpok.c,v 1.22 2010-02-10 08:59:10+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-tcpok.c,v 1.23 2020-11-24 13:47:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

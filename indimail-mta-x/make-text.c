@@ -1,15 +1,18 @@
 /*
  * $Log: make-text.c,v $
+ * Revision 1.2  2020-11-24 13:46:08+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.1  2004-07-17 20:56:31+05:30  Cprogrammer
  * Initial revision
  *
  */
+#include <unistd.h>
 #include "substdio.h"
 #include "subfd.h"
 #include "stralloc.h"
 #include "getln.h"
 #include "str.h"
-#include "exit.h"
 
 stralloc        line = { 0 };
 int             match;

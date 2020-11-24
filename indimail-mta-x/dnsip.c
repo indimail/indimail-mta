@@ -1,5 +1,8 @@
 /*
  * $Log: dnsip.c,v $
+ * Revision 1.8  2020-11-24 13:44:53+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2015-08-24 19:05:24+05:30  Cprogrammer
  * replace ip_fmt() with ip4_fmt()
  *
@@ -13,6 +16,7 @@
  * added RCS log
  *
  */
+#include <unistd.h>
 #include <sys/socket.h>
 #include "substdio.h"
 #include "subfd.h"
@@ -22,7 +26,6 @@
 #include "dnsdoe.h"
 #include "ip.h"
 #include "ipalloc.h"
-#include "exit.h"
 
 char            temp[IPFMT];
 
@@ -71,7 +74,7 @@ main(argc, argv)
 void
 getversion_dnsip_c()
 {
-	static char    *x = "$Id: dnsip.c,v 1.7 2015-08-24 19:05:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dnsip.c,v 1.8 2020-11-24 13:44:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

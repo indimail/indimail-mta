@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.12  2020-11-24 13:45:08+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.11  2020-09-16 18:58:48+05:30  Cprogrammer
  * fix compiler warning
  *
@@ -42,7 +45,6 @@
 #include "getln.h"
 #include "strerr.h"
 #include "error.h"
-#include "exit.h"
 #include "open.h"
 #include "fd.h"
 #include "sig.h"
@@ -535,7 +537,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.11 2020-09-16 18:58:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.12 2020-11-24 13:45:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmaildirmake.c,v $
+ * Revision 1.7  2020-11-24 13:46:47+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.6  2009-06-25 12:39:47+05:30  Cprogrammer
  * renamed maildirmake to qmaildirmake
  *
@@ -17,7 +20,6 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include "strerr.h"
-#include "exit.h"
 
 #define FATAL "maildirmake: fatal: "
 
@@ -60,7 +62,7 @@ main(argc, argv)
 void
 getversion_maildirmake_c()
 {
-	static char    *x = "$Id: qmaildirmake.c,v 1.6 2009-06-25 12:39:47+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmaildirmake.c,v 1.7 2020-11-24 13:46:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

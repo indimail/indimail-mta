@@ -19,7 +19,6 @@
 #include "byte.h"
 #include "env.h"
 #include "now.h"
-#include "exit.h"
 #include "rcpthosts.h"
 #include "recipients.h"
 #include "timeoutread.h"
@@ -106,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.229 $";
+char           *revision = "$Revision: 1.230 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6098,6 +6097,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.230  2020-11-24 13:48:13+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.229  2020-10-26 22:55:33+05:30  Cprogrammer
  * added documentation on return value of authenticate() with account has NO_RELAY
  *
@@ -6223,7 +6225,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.229 2020-10-26 22:55:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.230 2020-11-24 13:48:13+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

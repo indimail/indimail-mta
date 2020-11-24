@@ -1,5 +1,8 @@
 /*
  * $Log: 822bodyfilter.c,v $
+ * Revision 1.3  2020-11-24 13:42:08+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2004-10-22 20:13:44+05:30  Cprogrammer
  * removed readwrite.h
  * added RCS id
@@ -9,7 +12,6 @@
  *
  */
 #include <unistd.h>
-#include "exit.h"
 #include "error.h"
 #include "strerr.h"
 #include "substdio.h"
@@ -86,7 +88,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_822bodyfilter_c()
 {
-	static char    *x = "$Id: 822bodyfilter.c,v 1.2 2004-10-22 20:13:44+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: 822bodyfilter.c,v 1.3 2020-11-24 13:42:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -9,7 +9,6 @@
 #include "sig.h"
 #include "strerr.h"
 #include "byte.h"
-#include "exit.h"
 #include "iopause.h"
 #include "pathexec.h"
 #include "fd.h"

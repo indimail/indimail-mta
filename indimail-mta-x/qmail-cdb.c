@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cdb.c,v $
+ * Revision 1.9  2020-11-24 13:46:34+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.8  2017-10-05 08:46:33+05:30  Cprogrammer
  * fixed wrong control filename display in error message
  *
@@ -33,7 +36,6 @@
 #include "substdio.h"
 #include "getln.h"
 #include "case.h"
-#include "exit.h"
 #include "open.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
@@ -170,7 +172,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	static char    *x = "$Id: qmail-cdb.c,v 1.8 2017-10-05 08:46:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-cdb.c,v 1.9 2020-11-24 13:46:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

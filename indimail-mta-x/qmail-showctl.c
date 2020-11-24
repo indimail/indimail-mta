@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.69  2020-11-24 13:47:30+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.68  2020-05-11 10:59:57+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -132,7 +135,6 @@
 #include <openssl/ssl.h>
 #include "substdio.h"
 #include "subfd.h"
-#include "exit.h"
 #include "fmt.h"
 #include "str.h"
 #include "control.h"
@@ -869,7 +871,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.68 2020-05-11 10:59:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.69 2020-11-24 13:47:30+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

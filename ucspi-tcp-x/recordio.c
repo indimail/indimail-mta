@@ -10,7 +10,6 @@
 #include "strerr.h"
 #include "str.h"
 #include "byte.h"
-#include "exit.h"
 #include "fmt.h"
 #include "iopause.h"
 #include "fd.h"

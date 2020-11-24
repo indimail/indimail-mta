@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.35  2020-11-24 13:46:58+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.34  2020-03-31 13:17:52+05:30  Cprogrammer
  * fixed bug with setup_qlargs()
  *
@@ -114,7 +117,6 @@
 #include "substdio.h"
 #include "stralloc.h"
 #include "scan.h"
-#include "exit.h"
 #include "error.h"
 #include "cdb.h"
 #include "case.h"
@@ -656,7 +658,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.34 2020-03-31 13:17:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.35 2020-11-24 13:46:58+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

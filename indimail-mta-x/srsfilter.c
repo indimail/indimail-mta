@@ -1,5 +1,8 @@
 /*
  * $Log: srsfilter.c,v $
+ * Revision 1.3  2020-11-24 13:48:31+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.2  2019-07-18 10:53:18+05:30  Cprogrammer
  * replaced readwrite.h with unistd.h
  *
@@ -11,7 +14,6 @@
 #ifdef HAVESRS
 #include <unistd.h>
 #include "sig.h"
-#include "exit.h"
 #include "env.h"
 #include "qmail.h"
 #include "strerr.h"
@@ -205,7 +207,7 @@ main(argc, argv)
 void
 getversion_srsfilter_c()
 {
-	static char    *x = "$Id: srsfilter.c,v 1.2 2019-07-18 10:53:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: srsfilter.c,v 1.3 2020-11-24 13:48:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

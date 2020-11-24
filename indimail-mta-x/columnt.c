@@ -1,5 +1,8 @@
 /*
  * $Log: columnt.c,v $
+ * Revision 1.5  2020-11-24 13:44:34+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.4  2004-10-22 20:23:59+05:30  Cprogrammer
  * added RCS id
  *
@@ -19,7 +22,6 @@
 #include "slurpclose.h"
 #include "strerr.h"
 #include "substdio.h"
-#include "exit.h"
 
 #define FATAL "columnt: fatal: "
 
@@ -169,7 +171,7 @@ main()
 void
 getversion_columnt_c()
 {
-	static char    *x = "$Id: columnt.c,v 1.4 2004-10-22 20:23:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: columnt.c,v 1.5 2020-11-24 13:44:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

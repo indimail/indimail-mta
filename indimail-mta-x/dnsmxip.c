@@ -1,5 +1,8 @@
 /*
  * $Log: dnsmxip.c,v $
+ * Revision 1.9  2020-11-24 13:44:56+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.8  2018-05-17 16:10:24+05:30  Cprogrammer
  * print the mx domain along with the ip
  *
@@ -16,6 +19,7 @@
  * added RCS log
  *
  */
+#include <unistd.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include "substdio.h"
@@ -27,7 +31,6 @@
 #include "ip.h"
 #include "ipalloc.h"
 #include "now.h"
-#include "exit.h"
 
 char            temp[IPFMT + FMT_ULONG];
 
@@ -81,7 +84,7 @@ main(argc, argv)
 void
 getversion_dnsmxip_c()
 {
-	static char    *x = "$Id: dnsmxip.c,v 1.8 2018-05-17 16:10:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsmxip.c,v 1.9 2020-11-24 13:44:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

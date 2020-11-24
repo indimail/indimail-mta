@@ -1,5 +1,8 @@
 /*
  * $Log: dnstxt.c,v $
+ * Revision 1.8  2020-11-24 13:45:05+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2017-09-12 14:09:27+05:30  Cprogrammer
  * refactored code
  *
@@ -22,11 +25,11 @@
  * Initial revision
  *
  */
+#include <unistd.h>
 #include "substdio.h"
 #include "subfd.h"
 #include "stralloc.h"
 #include "str.h"
-#include "exit.h"
 #include "fmt.h"
 
 char           *dns_text(char *);
@@ -68,7 +71,7 @@ main(argc, argv)
 void
 getversion_dnstxt_c()
 {
-	static char    *x = "$Id: dnstxt.c,v 1.7 2017-09-12 14:09:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstxt.c,v 1.8 2020-11-24 13:45:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

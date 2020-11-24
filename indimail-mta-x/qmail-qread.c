@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.30  2020-11-24 13:47:14+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.29  2020-04-04 12:13:55+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -86,7 +89,6 @@
 #include "error.h"
 #include "control.h"
 #include "variables.h"
-#include "exit.h"
 #include "envdir.h"
 #include "pathexec.h"
 
@@ -662,7 +664,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.29 2020-04-04 12:13:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.30 2020-11-24 13:47:14+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: cdbget.c,v $
+ * Revision 1.4  2020-11-24 13:44:14+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.3  2019-07-18 10:46:16+05:30  Cprogrammer
  * use cdb_init() from libqmail
  *
@@ -10,7 +13,7 @@
  * Initial revision
  *
  */
-#include "exit.h"
+#include <unistd.h>
 #include "scan.h"
 #include "str.h"
 #include "subfd.h"
@@ -96,7 +99,7 @@ main(int argc, char **argv)
 void
 getversion_cdbget_c()
 {
-	static char    *x = "$Id: cdbget.c,v 1.3 2019-07-18 10:46:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdbget.c,v 1.4 2020-11-24 13:44:14+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

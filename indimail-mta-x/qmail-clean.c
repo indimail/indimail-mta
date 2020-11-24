@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-clean.c,v $
+ * Revision 1.10  2020-11-24 13:46:37+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.9  2010-02-10 08:58:19+05:30  Cprogrammer
  * removed dependency on indimail
  *
@@ -31,7 +34,6 @@
 #include "scan.h"
 #include "fmt.h"
 #include "error.h"
-#include "exit.h"
 #include "fmtqfn.h"
 #include "env.h"
 #include "variables.h"
@@ -172,7 +174,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.9 2010-02-10 08:58:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.10 2020-11-24 13:46:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qreceipt.c,v $
+ * Revision 1.11  2020-11-24 13:47:44+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.10  2020-04-04 12:43:35+05:30  Cprogrammer
  * removed redundant code
  *
@@ -43,7 +46,6 @@
 #include "gen_alloc.h"
 #include "gen_allocdefs.h"
 #include "headerbody.h"
-#include "exit.h"
 #include "open.h"
 #include "quote.h"
 #include "qmail.h"
@@ -278,7 +280,7 @@ main(argc, argv)
 void
 getversion_qreceipt_c()
 {
-	static char    *x = "$Id: qreceipt.c,v 1.10 2020-04-04 12:43:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qreceipt.c,v 1.11 2020-11-24 13:47:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

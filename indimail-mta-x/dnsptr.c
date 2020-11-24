@@ -1,5 +1,8 @@
 /*
  * $Log: dnsptr.c,v $
+ * Revision 1.9  2020-11-24 13:44:58+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.8  2015-08-24 19:05:47+05:30  Cprogrammer
  * replace ip_scan() with ip4_scan()
  *
@@ -16,6 +19,7 @@
  * added RCS log
  *
  */
+#include <unistd.h>
 #include "substdio.h"
 #include "subfd.h"
 #include "stralloc.h"
@@ -27,7 +31,6 @@
 #ifdef USE_SPF
 #include "strsalloc.h"
 #endif
-#include "exit.h"
 
 int
 main(argc, argv)
@@ -64,7 +67,7 @@ main(argc, argv)
 void
 getversion_dnsptr_c()
 {
-	static char    *x = "$Id: dnsptr.c,v 1.8 2015-08-24 19:05:47+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dnsptr.c,v 1.9 2020-11-24 13:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: dnsdoe.c,v $
+ * Revision 1.4  2020-11-24 13:44:47+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.3  2004-10-22 20:24:26+05:30  Cprogrammer
  * added RCS id
  *
@@ -7,9 +10,9 @@
  * added RCS log
  *
  */
+#include <unistd.h>
 #include "substdio.h"
 #include "subfd.h"
-#include "exit.h"
 #include "dns.h"
 #include "dnsdoe.h"
 
@@ -34,7 +37,7 @@ dnsdoe(r)
 void
 getversion_dnsdoe_c()
 {
-	static char    *x = "$Id: dnsdoe.c,v 1.3 2004-10-22 20:24:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dnsdoe.c,v 1.4 2020-11-24 13:44:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
