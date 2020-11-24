@@ -377,16 +377,16 @@ mysql_config.o: compile mysql_config.c conf-mysqlrules
 mysql_config: load mysql_config.o
 	./load mysql_config
 
-envdir_set.o: compile envdir_set.c openreadclose.h direntry.h \
+envdir_set.o: compile envdir_set.c direntry.h \
 pathexec.h
 	./compile envdir_set.c
 
 condredirect: \
 load condredirect.o qmail.o envdir_set.o pathexec_env.o \
-openreadclose.o auto_sysconfdir.o variables.o auto_control.o \
+auto_sysconfdir.o variables.o auto_control.o \
 auto_qmail.o pathexec_run.o
 	./load condredirect qmail.o envdir_set.o pathexec_env.o \
-	openreadclose.o auto_sysconfdir.o variables.o auto_control.o \
+	auto_sysconfdir.o variables.o auto_control.o \
 	auto_qmail.o pathexec_run.o -lqmail
 
 condredirect.o: compile condredirect.c qmail.h \
@@ -656,10 +656,10 @@ fmtqfn.o: compile fmtqfn.c fmtqfn.h auto_split.h
 
 forward: \
 load forward.o auto_qmail.o qmail.o variables.o \
-openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
+envdir_set.o pathexec_env.o pathexec_run.o \
 auto_sysconfdir.o auto_control.o
 	./load forward auto_qmail.o qmail.o variables.o \
-	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
+	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o auto_control.o -lqmail
 
 forward.1: forward.9 conf-sysconfdir
@@ -1093,12 +1093,12 @@ qlx.h
 
 qmail-inject: load qmail-inject.o headerbody.o hfield.o \
 newfield.o quote.o control.o date822fmt.o qmail.o envrules.o wildmat.o \
-matchregex.o pathexec_run.o openreadclose.o pathexec_env.o envdir_set.o \
+matchregex.o pathexec_run.o pathexec_env.o envdir_set.o \
 srs.o rcpthosts.o auto_control.o token822.o auto_qmail.o variables.o \
 auto_sysconfdir.o srs.lib
 	./load qmail-inject headerbody.o hfield.o newfield.o \
 	quote.o control.o date822fmt.o qmail.o pathexec_run.o \
-	openreadclose.o pathexec_env.o envdir_set.o matchregex.o envrules.o \
+	pathexec_env.o envdir_set.o matchregex.o envrules.o \
 	wildmat.o srs.o rcpthosts.o auto_control.o variables.o auto_qmail.o \
 	auto_sysconfdir.o token822.o `cat srs.lib` -lqmail
 
@@ -1323,11 +1323,11 @@ qmail-qread: \
 load qmail-qread.o fmtqfn.o readsubdir.o date822fmt.o \
 auto_qmail.o auto_split.o variables.o control.o envdir_set.o \
 pathexec_env.o auto_sysconfdir.o auto_control.o \
-pathexec_run.o openreadclose.o
+pathexec_run.o 
 	./load qmail-qread fmtqfn.o readsubdir.o date822fmt.o \
 	control.o auto_qmail.o auto_split.o variables.o \
 	envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_sysconfdir.o auto_control.o openreadclose.o -lqmail
+	auto_sysconfdir.o auto_control.o -lqmail
 
 qmail-qread.8: qmail-qread.9 conf-sysconfdir
 	cat qmail-qread.9 \
@@ -1901,10 +1901,10 @@ qmail.o: compile qmail.c qmail.h auto_qmail.h
 
 qreceipt: \
 load qreceipt.o headerbody.o hfield.o quote.o token822.o qmail.o \
-envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
+envdir_set.o pathexec_env.o pathexec_run.o \
 auto_sysconfdir.o variables.o auto_qmail.o auto_control.o
 	./load qreceipt headerbody.o hfield.o quote.o token822.o \
-	envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
+	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o variables.o auto_control.o \
 	auto_qmail.o qmail.o -lqmail
 
@@ -1961,10 +1961,10 @@ haveip6.h socket.h remoteinfo.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` remoteinfo.c
 
 rrforward: \
-load rrforward.o qmail.o openreadclose.o auto_qmail.o \
+load rrforward.o qmail.o auto_qmail.o \
 envdir_set.o pathexec_env.o pathexec_run.o \
 auto_sysconfdir.o auto_control.o variables.o
-	./load rrforward qmail.o openreadclose.o auto_qmail.o \
+	./load rrforward qmail.o auto_qmail.o \
 	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o auto_control.o variables.o -lqmail
 
@@ -2341,10 +2341,10 @@ qmail.h pathexec.h envdir.h auto_sysconfdir.h
 	./compile filterto.c
 
 filterto: load filterto.o auto_qmail.o qmail.o \
-openreadclose.o envdir_set.o pathexec_env.o variables.o \
+envdir_set.o pathexec_env.o variables.o \
 auto_sysconfdir.o auto_control.o
 	./load filterto auto_qmail.o qmail.o variables.o \
-	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
+	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o auto_control.o -lqmail
 
 filterto.1: filterto.9 conf-sysconfdir
@@ -2371,10 +2371,10 @@ ifaddr.o: compile ifaddr.c
 	./compile ifaddr.c
 
 replier: load replier.o qmail.o variables.o pathexec_env.o \
-pathexec_run.o openreadclose.o getconf.o auto_qmail.o \
+pathexec_run.o getconf.o auto_qmail.o \
 auto_sysconfdir.o auto_control.o envdir_set.o
 	./load replier qmail.o variables.o auto_control.o \
-	pathexec_env.o pathexec_run.o openreadclose.o \
+	pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o getconf.o auto_qmail.o \
 	envdir_set.o -lqmail
 
@@ -2406,10 +2406,10 @@ compile serialsmtp.c quote.h conf-ip
 
 maildirserial: \
 load maildirserial.o auto_qmail.o qmail.o maildir.o quote.o \
-openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o variables.o \
+envdir_set.o pathexec_env.o pathexec_run.o variables.o \
 auto_sysconfdir.o auto_control.o prioq.o
 	./load maildirserial auto_qmail.o qmail.o maildir.o variables.o \
-	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
+	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_control.o auto_sysconfdir.o quote.o prioq.o \
 	-lqmail
 
@@ -2741,11 +2741,10 @@ qarf.o: compile qarf.c date822fmt.h
 qnotify: \
 load  qnotify.o date822fmt.o qmail.o auto_qmail.o \
 pathexec_env.o pathexec_run.o envdir_set.o variables.o \
-openreadclose.o auto_sysconfdir.o \
-auto_control.o
+auto_sysconfdir.o auto_control.o
 	./load qnotify date822fmt.o qmail.o \
 	auto_qmail.o pathexec_env.o pathexec_run.o envdir_set.o \
-	variables.o openreadclose.o auto_sysconfdir.o \
+	variables.o auto_sysconfdir.o \
 	auto_control.o -lqmail
 
 qnotify.o: \
@@ -2763,11 +2762,10 @@ pathexec.h auto_control.h
 rrt: \
 load rrt.o auto_qmail.o qmail.o control.o variables.o \
 auto_control.o envdir_set.o pathexec_env.o \
-auto_sysconfdir.o pathexec_run.o openreadclose.o  date822fmt.o
+auto_sysconfdir.o pathexec_run.o date822fmt.o
 	./load rrt auto_qmail.o qmail.o control.o variables.o \
 	envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_sysconfdir.o auto_control.o openreadclose.o \
-	date822fmt.o -lqmail
+	auto_sysconfdir.o auto_control.o date822fmt.o -lqmail
 
 
 qmail-poppass: \
@@ -2828,11 +2826,11 @@ compile ofmipname.c cdbmss.h
 
 new-inject: \
 load new-inject.o qmail.o auto_sysconfdir.o rwhconfig.o \
-envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
+envdir_set.o pathexec_env.o pathexec_run.o \
 variables.o auto_qmail.o auto_control.o
 	./load new-inject qmail.o auto_sysconfdir.o variables.o \
 	auto_qmail.o envdir_set.o pathexec_env.o pathexec_run.o \
-	openreadclose.o auto_control.o rwhconfig.o -lqmail
+	auto_control.o rwhconfig.o -lqmail
 
 new-inject.1: new-inject.9 conf-sysconfdir
 	cat new-inject.9 \
@@ -2894,11 +2892,8 @@ pathexec_run.o: compile pathexec_run.c pathexec.h
 pathexec_env.o: compile pathexec_env.c pathexec.h
 	./compile pathexec_env.c
 
-getconf.o: compile getconf.c openreadclose.h getconf.h
+getconf.o: compile getconf.c getconf.h
 	./compile getconf.c
-
-openreadclose.o: compile openreadclose.c openreadclose.h
-	./compile openreadclose.c
 
 auto_ezmlm.o: compile \
 auto_ezmlm.c
@@ -2950,10 +2945,10 @@ makeheader.o: makeheader.c compile
 
 dot-forward: \
 load dot-forward.o control.o qmail.o auto_qmail.o variables.o \
-openreadclose.o envdir_set.o pathexec_env.o token822.o \
+envdir_set.o pathexec_env.o token822.o \
 auto_sysconfdir.o auto_control.o pathexec_run.o
 	./load dot-forward control.o qmail.o auto_qmail.o variables.o \
-	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
+	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o auto_control.o token822.o -lqmail
 
 dot-forward.1: dot-forward.9 conf-sysconfdir
@@ -2967,10 +2962,10 @@ auto_sysconfdir.h variables.h envdir.h pathexec.h auto_control.h
 
 fastforward: \
 load fastforward.o slurpclose.o strset.o qmail.o auto_qmail.o \
-envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o variables.o \
+envdir_set.o pathexec_env.o pathexec_run.o variables.o \
 auto_sysconfdir.o auto_control.o
 	./load fastforward slurpclose.o strset.o qmail.o variables.o \
-	envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
+	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o auto_qmail.o auto_control.o -lqmail
 
 fastforward.1: fastforward.9 conf-sysconfdir
