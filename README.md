@@ -580,7 +580,7 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail/indimail-mta - [altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_(Unix)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x) - customizable menu based admin interface)
 
 ```
-Currently, the list of supported distributions for IndiMail is
+Currently, the list of supported distributions for indimail-mta is
 
     * SUSE
           o openSUSE_Leap_15.0
