@@ -536,7 +536,57 @@ $ sudo svps -a
 # Binary Packages Build
 
 If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md)
-You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build Service) .
+
+You can also download pre-built binary packages at openSUSE Build Service
+
+* [Stable Releases](http://download.opensuse.org/repositories/home:/indimail/)
+* [Experimental Releases](http://download.opensuse.org/repositories/home:/mbhangui/)
+
+If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories, depending on whether you want to install a stable or an experimental release, are
+
+* [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=libqmail)
+* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=libqmail)
+
+```
+Currently, the list of supported distributions for indimail-mta is
+
+    * SUSE
+          o openSUSE_Leap_15.0
+          o openSUSE_Leap_15.1
+          o openSUSE_Leap_15.2
+          o openSUSE_Tumbleweed
+          o SUSE Linux Enterprise 12
+          o SUSE Linux Enterprise 12 SP1
+          o SUSE Linux Enterprise 12 SP2
+          o SUSE Linux Enterprise 12 SP3
+          o SUSE Linux Enterprise 12 SP4
+          o SUSE Linux Enterprise 12 SP5
+          o SUSE Linux Enterprise 15
+          o SUSE Linux Enterprise 15 SP1
+
+    * Red Hat
+          o Fedora 33
+          o Fedora 32
+          o Red Hat Enterprise Linux 6
+          o Red Hat Enterprise Linux 7
+          o CentOS 6
+          o CentOS 7
+          o CentOS 8
+
+    * Debian
+          o Debian  8.0
+          o Debian  9.0
+          o Debian 10.0
+
+    * Ubuntu
+          o Ubuntu 16.04
+          o Ubuntu 17.04
+          o Ubuntu 18.04
+          o Ubuntu 19.04
+          o Ubuntu 19.10
+          o Ubuntu 20.04
+          o Ubuntu 20.10
+```
 
 NOTE: binary package for FreeBSD and OSX is in my TODO list.
 
