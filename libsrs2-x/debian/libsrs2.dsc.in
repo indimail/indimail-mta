@@ -9,4 +9,4 @@ Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: libsrs2-@version@.tar.gz
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, autoconf, m4, gawk, pkg-config
+Build-Depends: cdbs, debhelper (>= 9), gcc, binutils, automake, autoconf, m4, gawk, pkg-config

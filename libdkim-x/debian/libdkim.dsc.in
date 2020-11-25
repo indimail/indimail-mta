@@ -9,4 +9,4 @@ Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: libdkim-@version@.tar.gz
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, autoconf, m4, gawk, libssl-dev, pkg-config
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, binutils, coreutils, automake, autoconf, m4, gawk, libssl-dev, pkg-config

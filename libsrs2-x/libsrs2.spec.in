@@ -60,7 +60,7 @@ Source1: http://downloads.sourceforge.net/indimail/libsrs2-rpmlintrc
 URL: https://github.com/mbhangui/indimail-mta
 BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
 BuildRequires: findutils diffutils gzip coreutils
-BuildRequires: glibc glibc-devel
+BuildRequires: glibc glibc-devel binutils
 
 ##################################### OBS ####################################
 %if %build_on_obs == 1
