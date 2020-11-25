@@ -64,3 +64,5 @@ Release 1.1 Start 09/10/2020
 - 12/11/2020
 36. supervise: initialize svpid in main()
 37. svps: fixed output for "normally up" and "normally down" status
+- 25/11/2020
+38. systemd: Chanaged service name to SVscan Service

@@ -17,3 +17,4 @@ ucspi-tcp (@version@-@release@) unstable; urgency=low
   * ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
   * tcpserver.c: changed scope of global variables to static, limited to tcpserver.c
   * tcpserver.c: added -a option to specify CA file
+  * removed exit.h

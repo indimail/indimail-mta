@@ -33,3 +33,5 @@ Release 1.0 Start 21/05/2020
     tcpserver.c
 - 12/11/2020
 18. tcpserver.c: added -a option to specify CA file
+- 25/11/2020
+19. removed exit.h

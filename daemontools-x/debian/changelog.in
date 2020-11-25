@@ -38,3 +38,4 @@ daemontools (@version@-@release@) unstable; urgency=low
   * svps: display uptime of svscan
   * supervise: initialize svpid in main()
   * svps: fixed output for "normally up" and "normally down" status
+  * systemd: Chanaged service name to SVscan Service
