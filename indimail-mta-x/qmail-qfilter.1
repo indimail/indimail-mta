@@ -10,7 +10,7 @@ qmail-qfilter \- front end for qmail-multi that does filtering
 .SH DESCRIPTION
 .B qmail-qfilter
 sends the message text through each of the filter commands named on
-the command line. 
+the command line.
 Each filter is run seperately, with standard input opened to the input
 email, and standard output opened to a new temporary file that will
 become the input to either the next filter, or
@@ -20,7 +20,7 @@ next step.
 It also makes the envelope available to each filter as
 file descriptor 3.  File descriptor 4 is opened to a new temporary file for the
 modified envelope, allowing the filter to modify the envelope or the
-message.  If the filter does not modify the envelope, the envelope
+message. If the filter does not modify the envelope, the envelope
 remains unchanged for either the next filter or 
 .BR qmail-multi .  
 This provides compatibility for existing filters that do not know about
@@ -32,19 +32,22 @@ used to specify a program to execute in place of
 .BR qmail-multi .
 Each filter on the command line in seperated with
 .BR -- .  
+
 .SH "RETURN VALUES"
 Returns 51 (out of memory), 53 (write error), or 81 (internal error)
 if it can't create the temporary files or has problems executing the
 filters.
 Returns 91 (bad envelope data) if it can't read or parse the envelope
 data.
-If a filter returns anything other than 0 or 99,
 .B qmail-qfilter
-returns its exit code. If your filter exits 88, you can put your custom error string
-on standard error. This enables client like \fBqmail-smtpd\fR to report the error. If a
-filter returns 99, \fBqmail-qfilter\fR returns 0 immediately without running any other filters.
-Otherwise returns the exit code of
+returns exit code of filter, if the filter returns anything other than
+0 or 99. If your filter exits 88, you can put your custom error string
+on standard error. This enables client like \fBqmail-smtpd\fR to report
+the error. If a filter returns 99, \fBqmail-qfilter\fR returns 0
+immediately without running any other filters. Otherwise returns the exit
+code of
 .BR qmail-multi .
+
 .SH ENVIRONMENT
 For compatibility with previous versions,
 .B qmail-qfilter
@@ -72,9 +75,11 @@ If
 .B QQF_QMAILQUEUE
 is set, its value is used in place of
 .BR qmail-multi .
+
 .SH "SEE ALSO"
 qmail-queue(8),
 qmail-multi(8)
+
 .SH NOTES
 .B $QMAILQUEUE
 is deliberately not used to override
