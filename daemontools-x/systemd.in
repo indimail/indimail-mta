@@ -26,7 +26,7 @@
 # $Id: systemd.in,v 1.6 2020-10-09 12:48:03+05:30 Cprogrammer Exp mbhangui $
 #
 [Unit]
-Description=IndiMail Messaging Platform
+Description=SVscan Service
 After=local-fs.target network.target
 
 [Service]
