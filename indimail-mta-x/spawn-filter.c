@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.73  2020-11-26 22:23:03+05:30  Cprogrammer
+ * indicate the filter name in report to qmail-rspawn
+ *
  * Revision 1.72  2020-11-01 23:11:56+05:30  Cprogrammer
  * unset FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE before calling qmail-local, qmail-remote
  *
@@ -293,11 +296,16 @@ static void
 report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 {
 	if (!remotE) /*- strerr_die does not return */
-		strerr_die6x(errCode, s1, s2, s3, s4, s5, s6);
+		strerr_die7x(errCode, s1, ": ", s2, s3, s4, s5, s6);
 	if (!errCode) {
-		if (substdio_put(subfdoutsmall, 
-			"r\0Kfilter accepted message.\n"
-			"filter said: 250 ok notification queued\n\0", 82) == -1)
+		if (substdio_put(subfdoutsmall, "r\0Kfilter accepted message.\n", 28) == -1)
+			_exit(111);
+		if (s1) {
+			if (substdio_puts(subfdoutsmall, s1) == -1 ||
+					substdio_put(subfdoutsmall, "\n", 1) == -1)
+				_exit(111);
+		} else
+		if (substdio_put(subfdoutsmall, "filter said: 250 ok notification queued\n\0", 41) == -1)
 			_exit(111);
 	} else {
 		/*- h - hard, s - soft */
@@ -504,7 +512,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 		execv(mailprog, argv); /*- do the delivery (qmail-local/qmail-remote) */
 		report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 	case 2:
-		report(0, "blackholed: ", filterargs, 0, 0, 0, 0); /*- Blackhole */
+		report(0, "blackholed", filterargs, 0, 0, 0, 0); /*- Blackhole */
 	case 100:
 		report(100, "Mail Rejected (#5.7.1)", 0, 0, 0, 0, 0);
 	default:
@@ -1120,10 +1128,10 @@ main(int argc, char **argv)
 				if (*rejectspam == '1')
 					report(100, "SPAM or junk mail threshold exceeded (#5.7.1)", 0, 0, 0, 0, 0);
 				else /*- BLACKHOLE sender */
-					report(0, 0, 0, 0, 0, 0, 0);
+					report(0, "blackholed", spamfilterprog, 0, 0, 0, 0);
 			}
 			if (notifyaddress && *notifyaddress)
-				report(0, 0, 0, 0, 0, 0, 0);
+				report(0, "notify", notifyaddress, 0, 0, 0, 0);
 		}
 	} else
 		report(111, "spawn-filter bug. (#4.3.0)", 0, 0, 0, 0, 0);
@@ -1137,7 +1145,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.72 2020-11-01 23:11:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.73 2020-11-26 22:23:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
