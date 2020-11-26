@@ -1,4 +1,7 @@
 # $Log: svps.in,v $
+# Revision 1.8  2020-11-26 23:01:52+05:30  Cprogrammer
+# remove PIPESTATUS as it is not portable
+#
 # Revision 1.7  2020-11-12 11:28:09+05:30  Cprogrammer
 # fixed output for normally up and normally down status
 #
@@ -21,7 +24,7 @@
 # Initial revision
 #
 # 
-# $Id: svps.in,v 1.7 2020-11-12 11:28:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.8 2020-11-26 23:01:52+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -153,17 +156,18 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-@prefix@/bin/svstat @servicedir@/* @servicedir@/*/log @servicedir@/.svscan/log 2>/dev/null \
-	|egrep -v "\.\.|^wait until" > /tmp/svps.$$
-status=${PIPESTATUS[0]}
-if [ $status -ne 0 ] ; then
-	if [ ! -s /tmp/svps.$$ ] ; then
-		/bin/cat /tmp/svps.$$
-		/bin/rm -f /tmp/svps.$$
-		exit $status
+@prefix@/bin/svstat @servicedir@/* @servicedir@/*/log \
+	@servicedir@/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
+if [ $? -ne 0 ] ; then
+	if [ -s /tmp/svpserr.$$ ] ; then
+		cat /tmp/svpserr.$$
 	fi
+	/bin/rm -f /tmp/svpserr.$$ /tmp/svps_tmp.$$
+	exit $status
+else
+	egrep -v "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
+	/bin/rm -f /tmp/svps_tmp.$$
 fi
-
 max=0
 while read line
 do
