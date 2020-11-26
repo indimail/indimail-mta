@@ -155,3 +155,5 @@ creation
     modules
 90. preinst/postinst: modified service shutdown/startup during upgrade by
     using /run, /var/run
+- 26/11/2020
+91. smtpd.c: refactored batv code

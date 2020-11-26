@@ -85,3 +85,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * sslerator: added tls/ssl protocol wrapper from indimail-virtudomains package
   * svctool: make authpam the last module as it cannot execute additional modules
   * preinst/postinst: modified service shutdown/startup during upgrade by using /run, /var/run
+  * smtpd.c: refactored batv code
