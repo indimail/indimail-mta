@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.230 $";
+char           *revision = "$Revision: 1.231 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2336,10 +2336,6 @@ open_control_files()
 			{
 			case -1:
 				die_control();
-			case 0:
-				if (!constmap_init(&mapnosign, "", 0, 1))
-					die_nomem();
-				break;
 			case 1:
 				if (!constmap_init(&mapnosign, nosign.s, nosign.len, 0))
 					die_nomem();
@@ -2443,7 +2439,7 @@ smtp_init(int force_flag)
 	if ((chkrcptok = control_readfile(&chkrcpt, "chkrcptdomains", 0)) == -1)
 		die_control();
 	if (chkrcptok && !constmap_init(&mapchkrcpt, chkrcpt.s, chkrcpt.len, 0))
-			die_nomem();
+		die_nomem();
 	if ((chkdomok = control_readfile(&chkdom, "authdomains", 0)) == -1)
 		die_control();
 	if (chkdomok && !constmap_init(&mapchkdom, chkdom.s, chkdom.len, 0))
@@ -3533,7 +3529,7 @@ nohasvirtual:
 			|| stralloc_starts(&addr, "Mailer-Daemon@")
 			|| stralloc_starts(&addr, "MAILER-DAEMON@")) {
 			ret = str_rchr(addr.s, '@');
-			if (!addr.s[ret] || !constmap(&mapnosign, addr.s + ret + 1, addr.len - ret - 2))
+			if (!addr.s[ret] || !nosign.len || !constmap(&mapnosign, addr.s + ret + 1, addr.len - ret - 2))
 				isbounce = 1;
 		}
 	}
@@ -6097,6 +6093,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.231  2020-11-26 14:01:08+05:30  Cprogrammer
+ * refactored batv code
+ *
  * Revision 1.230  2020-11-24 13:48:13+05:30  Cprogrammer
  * removed exit.h
  *
@@ -6225,7 +6224,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.230 2020-11-24 13:48:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.231 2020-11-26 14:01:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
