@@ -170,7 +170,7 @@ if [ $status -ne 0 ] ; then
 	exit $status
 else
 	egrep -v "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
-	/bin/rm -f /tmp/svps_tmp.$$
+	/bin/rm -f /tmp/svpserr.$$ /tmp/svps_tmp.$$
 fi
 max=0
 while read line
