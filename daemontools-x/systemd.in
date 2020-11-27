@@ -1,5 +1,8 @@
 #
 # $Log: systemd.in,v $
+# Revision 1.7  2020-11-27 17:30:52+05:30  Cprogrammer
+# changed name to SVscan Service
+#
 # Revision 1.6  2020-10-09 12:48:03+05:30  Cprogrammer
 # servicedir changed to libexecdir/service
 #
@@ -23,7 +26,7 @@
 # to start - systemctl start svscan|indimail|indimail-mta
 # to stop  - systemctl stop  svscan|indimail|indimail-mta
 #
-# $Id: systemd.in,v 1.6 2020-10-09 12:48:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: systemd.in,v 1.7 2020-11-27 17:30:52+05:30 Cprogrammer Exp mbhangui $
 #
 [Unit]
 Description=SVscan Service
