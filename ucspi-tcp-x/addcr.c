@@ -1,5 +1,8 @@
 /*
  * $Log: addcr.c,v $
+ * Revision 1.2  2020-11-27 17:32:07+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.1  2005-01-22 00:56:23+05:30  Cprogrammer
  * Initial revision
  *
@@ -39,7 +42,7 @@ main()
 void
 getversion_addcr_c()
 {
-	static char    *x = "$Id: addcr.c,v 1.1 2005-01-22 00:56:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: addcr.c,v 1.2 2020-11-27 17:32:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

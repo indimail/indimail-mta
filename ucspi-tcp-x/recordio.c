@@ -1,5 +1,8 @@
 /*
  * $Log: recordio.c,v $
+ * Revision 1.2  2020-11-27 17:34:08+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.1  2005-01-22 01:01:37+05:30  Cprogrammer
  * Initial revision
  *
@@ -205,7 +208,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_recordio_c()
 {
-	static char    *x = "$Id: recordio.c,v 1.1 2005-01-22 01:01:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: recordio.c,v 1.2 2020-11-27 17:34:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
