@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.70  2020-11-27 17:34:22+05:30  Cprogrammer
+ * added option to specify CA file
+ *
  * Revision 1.69  2020-11-11 19:50:11+05:30  Cprogrammer
  * changed scope of global veriables limited to tcpserver.c
  *
@@ -233,7 +236,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.69 2020-11-11 19:50:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.70 2020-11-27 17:34:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
