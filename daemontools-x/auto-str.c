@@ -1,5 +1,8 @@
 /*
  * $Log: auto-str.c,v $
+ * Revision 1.8  2020-11-27 17:30:16+05:30  Cprogrammer
+ * removed exit.h
+ *
  * Revision 1.7  2020-06-17 16:58:35+05:30  Cprogrammer
  * make output readable
  *
