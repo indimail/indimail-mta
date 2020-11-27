@@ -1,4 +1,7 @@
 # $Log: svps.in,v $
+# Revision 1.9  2020-11-27 17:30:27+05:30  Cprogrammer
+# set status variable
+#
 # Revision 1.8  2020-11-26 23:01:52+05:30  Cprogrammer
 # remove PIPESTATUS as it is not portable
 #
@@ -24,7 +27,7 @@
 # Initial revision
 #
 # 
-# $Id: svps.in,v 1.8 2020-11-26 23:01:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.9 2020-11-27 17:30:27+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -158,7 +161,8 @@ if [ $ID -ne 0 ] ; then
 fi
 @prefix@/bin/svstat @servicedir@/* @servicedir@/*/log \
 	@servicedir@/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
-if [ $? -ne 0 ] ; then
+status=$?
+if [ $status -ne 0 ] ; then
 	if [ -s /tmp/svpserr.$$ ] ; then
 		cat /tmp/svpserr.$$
 	fi
