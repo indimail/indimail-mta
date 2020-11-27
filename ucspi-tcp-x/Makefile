@@ -334,10 +334,6 @@ compile rblsmtpd.c commands.h pathexec.h dns.h iopause.h \
 haveip6.h ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` rblsmtpd.c -o rbl.o
 
-readclose.o: \
-compile readclose.c readclose.h 
-	./compile readclose.c
-
 tcpremoteinfo.o: \
 compile tcpremoteinfo.c socket.h timeoutconn.h \
 tcpremoteinfo.h haveip6.h conf-ip
@@ -512,7 +508,7 @@ compile timeoutconn.c socket.h haveip6.h timeoutconn.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` timeoutconn.c
 
 unix.a: \
-makelib pathexec_env.o prot.o readclose.o socket_accept.o socket_bind.o \
+makelib pathexec_env.o prot.o socket_accept.o socket_bind.o \
 socket_conn.o socket_delay.o socket_listen.o socket_local.o \
 socket_opts.o socket_opts6.o socket_remote.o socket_tcp.o socket_udp.o \
 socket_conn6.o socket_bind6.o socket_accept6.o socket_recv6.o \
@@ -520,7 +516,7 @@ socket_send6.o socket_local6.o socket_tcp6.o ip4_fmt.o ip6_fmt.o \
 ip4_bit.o ip6_bit.o ip4_scan.o ip6_scan.o socket_getifname.o \
 socket_getifidx.o socket_v4mappedprefix.o socket_ip4loopback.o \
 socket_v6any.o socket_v6loopback.o ip6_compactaddr.o ip6_expandaddr.o
-	./makelib unix.a pathexec_env.o prot.o readclose.o socket_accept.o \
+	./makelib unix.a pathexec_env.o prot.o socket_accept.o \
 	socket_bind.o socket_conn.o socket_delay.o socket_listen.o \
 	socket_local.o socket_opts.o socket_opts6.o socket_remote.o \
 	socket_tcp.o socket_udp.o socket_conn6.o socket_bind6.o \
