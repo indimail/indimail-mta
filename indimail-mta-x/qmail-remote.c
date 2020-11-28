@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.136 2020-11-24 13:47:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.137 2020-11-28 22:48:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -815,32 +815,46 @@ get(char *ch)
 }
 
 unsigned long
+get_3digit()
+{
+	char            str[4];
+	unsigned long   code;
+
+	substdio_get(&smtpfrom, str, 3);
+	str[3] = 0;
+	scan_ulong(str, &code);
+	if (smtptext.len < HUGESMTPTEXT) {
+		if (!stralloc_catb(&smtptext, str, 3))
+			temp_nomem();
+	}
+	return code;
+}
+
+unsigned long
 smtpcode()
 {
 	unsigned char   ch;
 	unsigned long   code;
+	int             err = 0;
 
 	if (!stralloc_copys(&smtptext, ""))
 		temp_nomem();
-	get((char *) &ch);
-	code = ch - '0';
-	get((char *) &ch);
-	code = code * 10 + (ch - '0');
-	get((char *) &ch);
-	code = code * 10 + (ch - '0');
+	if ((code = get_3digit()) < 200)
+		err = 1;
 	for (;;) {
 		get((char *) &ch);
+		if (ch != ' ' && ch != '-')
+			err = 1;
 		if (ch != '-')
 			break;
 		while (ch != '\n')
 			get((char *) &ch);
-		get((char *) &ch);
-		get((char *) &ch);
-		get((char *) &ch);
+		if (get_3digit() != code)
+			err = 1;
 	}
 	while (ch != '\n')
 		get((char *) &ch);
-	return code;
+	return err ? 400 : code;
 }
 
 saa             ehlokw = { 0 };	/*- list of EHLO keywords and parameters */
@@ -3482,7 +3496,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.136 2020-11-24 13:47:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.137 2020-11-28 22:48:25+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3490,6 +3504,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.137  2020-11-28 22:48:25+05:30  Cprogrammer
+ * fixed smtpcode() to handle in case remote smtp server returns improper codes
+ *
  * Revision 1.136  2020-11-24 13:47:20+05:30  Cprogrammer
  * removed exit.h
  *
