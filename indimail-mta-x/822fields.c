@@ -1,5 +1,8 @@
 /*
  * $Log: 822fields.c,v $
+ * Revision 1.4  2020-11-28 12:43:14+05:30  Cprogrammer
+ * +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text
+ *
  * Revision 1.3  2020-11-24 13:42:24+05:30  Cprogrammer
  * removed exit.h
  *
@@ -21,7 +24,7 @@
 
 #define FATAL "822fields: fatal: "
 
-int             flag;
+static int      flag, t = 2;
 stralloc        value = { 0 };
 static char     ssinbuf[1024];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
@@ -52,15 +55,13 @@ init(int n, char **s)
 
 	if (!n)
 		return a0;
-
 	a1 = (mess822_action *) alloc((n + 1) * sizeof(mess822_action));
 	if (!a1)
 		nomem();
-
-	for (i = 0; i < n; i++)
-	{
-		a1[i].name = *s;
-		a1[i].flag = &flag;
+	for (i = 0; i < n; i++) {
+		a1[i].name = *s[0] == '+' ? *s + 1 : *s;
+		if (!a1[i].name[1])
+			a1[i].name = "subject";
 		a1[i].copy = 0;
 		a1[i].value = &value;
 		a1[i].addr = 0;
@@ -73,23 +74,22 @@ init(int n, char **s)
 	a1[n].value = 0;
 	a1[n].addr = 0;
 	a1[n].when = 0;
-
 	return a1;
 }
 
 int
 main(int argc, char **argv)
 {
-	a = init(argc - 1, ++argv);
+	int             i;
 
+	a = init(argc - 1, ++argv);
 	if (!mess822_begin(&h, a))
 		nomem();
-
-	for (;;)
-	{
+	for (i = 0; i < argc - 1; i++)
+		a[i].flag = *argv[i] == '+' ? &t : &flag;
+	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
-
 		if (!mess822_ok(&line))
 			break;
 		if (!mess822_line(&h, &line))
@@ -97,19 +97,16 @@ main(int argc, char **argv)
 		if (!match)
 			break;
 	}
-
 	if (!mess822_end(&h))
 		nomem();
-
 	substdio_putflush(&ssout, value.s, value.len);
-
 	_exit(flag ? 0 : 100);
 }
 
 void
 getversion_822fields_c()
 {
-	static char    *x = "$Id: 822fields.c,v 1.3 2020-11-24 13:42:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822fields.c,v 1.4 2020-11-28 12:43:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

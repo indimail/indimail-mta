@@ -86,3 +86,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: make authpam the last module as it cannot execute additional modules
   * preinst/postinst: modified service shutdown/startup during upgrade by using /run, /var/run
   * smtpd.c: refactored batv code
+  * 822field.c, 822fields.c: +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text

@@ -157,3 +157,6 @@ creation
     using /run, /var/run
 - 26/11/2020
 91. smtpd.c: refactored batv code
+- 28/11/2020
+92. 822field.c, 822fields.c: +HeaderName feature by Erwin Hoffman: display all
+    headers which have HeaderName as the initial text

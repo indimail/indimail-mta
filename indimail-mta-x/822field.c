@@ -1,5 +1,8 @@
 /*
  * $Log: 822field.c,v $
+ * Revision 1.5  2020-11-28 12:43:07+05:30  Cprogrammer
+ * +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text
+ *
  * Revision 1.4  2020-11-24 13:42:20+05:30  Cprogrammer
  * removed exit.h
  *
@@ -45,12 +48,24 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	if (argv[1])
-		a[0].name = argv[1];
+	int             t = 0;
+
+	if (argv[1]) {
+		if (*argv[1] == '+') {
+			t = 1;
+			if (!*(argv[1] + 1))
+				a[0].name = "subject";
+			else {
+				a[0].name = argv[1] + 1;
+			}
+		} else
+			a[0].name = argv[1];
+	}
 	if (!mess822_begin(&h, a))
 		nomem();
-	for (;;)
-	{
+	if (t)
+		*a->flag = 2; /*- do a match on the initial length */
+	for (;;) {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		if (!mess822_ok(&line))
@@ -70,7 +85,7 @@ main(argc, argv)
 void
 getversion_822field_c()
 {
-	static char    *x = "$Id: 822field.c,v 1.4 2020-11-24 13:42:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822field.c,v 1.5 2020-11-28 12:43:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
