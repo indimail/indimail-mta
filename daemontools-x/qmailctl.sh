@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.66 2020-10-09 11:42:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.67 2020-11-29 17:53:54+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -47,40 +47,53 @@ case "$SYSTEM" in
 		SETCOLOR_NORMAL="$ECHO -en \\033[0;39m"
 		;;
 esac
+if [ -f /etc/indimail/indimail-mta-release ] ; then
+	have_qmail=1
+else
+	have_qmail=0
+fi
 
 myecho_success() {
-  $MOVE_TO_COL
-  $ECHO -n "["
-  $SETCOLOR_SUCCESS
-  $ECHO -n "  OK  "
-  $SETCOLOR_NORMAL
-  $ECHO -n "]"
-  $ECHO -ne "\r"
-  return 0
+	$MOVE_TO_COL
+	$ECHO -n "["
+	$SETCOLOR_SUCCESS
+	$ECHO -n "  OK  "
+	$SETCOLOR_NORMAL
+	$ECHO -n "]"
+	$ECHO -ne "\r"
+	return 0
 }
 
 myecho_failure() {
-  $MOVE_TO_COL
-  $ECHO -n "["
-  $SETCOLOR_FAILURE
-  $ECHO -n $"FAILED"
-  $SETCOLOR_NORMAL
-  $ECHO -n "]"
-  $ECHO -ne "\r"
-  return 1
+	$MOVE_TO_COL
+	$ECHO -n "["
+	$SETCOLOR_FAILURE
+	$ECHO -n $"FAILED"
+	$SETCOLOR_NORMAL
+	$ECHO -n "]"
+	$ECHO -ne "\r"
+	return 1
+}
+
+noqmail() {
+	if [ $have_qmail -ne 1 ] ; then
+		echo "Usage: `basename $0` {start|stop|restart|shut|stat|rotate|help}"
+		myhelp
+		exit 1
+	fi
 }
 
 # Log that something succeeded
 mysuccess() {
-  myecho_success
-  return 0
+	myecho_success
+	return 0
 }
 
 # Log that something failed
 myfailure() {
-  local rc=$?
-  myecho_failure
-  return $rc
+	local rc=$?
+	myecho_failure
+	return $rc
 }
 
 # Check that we're a privileged user
@@ -157,7 +170,8 @@ PATH=$PATH:@prefix@/bin:@prefix@/sbin:/usr/bin:/bin
 export PATH
 myhelp()
 {
-    /bin/cat <<HELP
+if [ $qmail -eq 1 ] ; then
+/bin/cat <<HELP
   start -- starts mail service (smtp connection accepted, mail can go out)
    stop -- stops mail service (smtp connections refused, nothing goes out)
 restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
@@ -172,6 +186,16 @@ restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
    cont -- continues paused mail service
     cdb -- rebuild the tcpserver cdb file for smtp, qmtp, qmqp, imap, pop3 and poppass
 HELP
+else
+/bin/cat <<HELP
+  start -- starts svscan service
+   stop -- stops  svscan service
+restart -- stops and restarts svscan service
+   shut -- Shutdown entire svscan service.
+ status -- status of svscan process and configured services
+ rotate -- rotate all logfiles (sending ALRM to multilog)
+HELP
+fi
 }
 
 stop()
@@ -273,7 +297,7 @@ start()
 			else
 				device=/dev/null
 			fi
-  			grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
+			grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
 				grep -v "svscan" /etc/inittab > /etc/inittab.qmailctl.$$ 2>&1
 				if [ " $SYSTEM" = " Debian" ] ; then
@@ -313,199 +337,212 @@ start()
 }
 
 case "$1" in
-  stop)
-	stop
-	[ $? -eq 0 ] && exit 0 || exit 1
-	;;
-  start)
-	start
-	[ $? -eq 0 ] && exit 0 || exit 1
-	;;
-  restart|force-reload)
-	stop
-	RETVAL=$?
-	let ret+=$RETVAL
-	start
-	RETVAL=$?
-	let ret+=$RETVAL
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  condrestart|try-restart)
-	ret=0
-	for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
-	do
-		$ECHO -n $"Stopping $i: "
-		@prefix@/bin/svc -d $i && $succ || $fail
+	stop)
+		stop
+		[ $? -eq 0 ] && exit 0 || exit 1
+		;;
+		start)
+		start
+		[ $? -eq 0 ] && exit 0 || exit 1
+		;;
+	restart|force-reload)
+		stop
 		RETVAL=$?
-		echo
 		let ret+=$RETVAL
-	done
-	for i in `echo $SERVICE/qmail-send.*`
-	do
-		$ECHO -n $"Terminating $i: "
-		@prefix@/bin/svc -t $i && $succ || $fail
+		start
 		RETVAL=$?
-		echo
 		let ret+=$RETVAL
-	done
-	for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
-	do
-		if [ ! -f $i/down ] ; then
-		$ECHO -n $"Starting $i: "
-			@prefix@/bin/svc -u $i && $succ || $fail
-			RETVAL=$?
-			echo
-			let ret+=$RETVAL
-		fi
-	done
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  shut)
-	$ECHO -n $"shutdown svscan: "
-	if [ -f /sbin/initctl ] ; then
-		/sbin/initctl stop svscan >/dev/null && $succ || $fail
-	else
-		/usr/bin/killall -e -w svscan && $succ || $fail
-	fi
-	ret=$?
-	echo
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  kill)
-	$ECHO -n $"killing tcpserver,supervise,qmail-send: "
-	kill `ps -ef| egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $2}'` && $succ || $fail
-	ret=$?
-	echo
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
- rotate)
-	ret=0
-	for i in `echo $SERVICE/* $SERviCE/.svscan`
-	do
-		if [ -d $i/log ] ; then
-			$ECHO -n $"Rotating $i: "
-			@prefix@prefix@bin/svc -a $i/log && $succ || $fail
-			RETVAL=$?
-			echo
-			let ret+=$RETVAL
-		fi
-	done
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  flush)
-	ret=0
-	$ECHO -n $"Flushing timeout table + ALRM signal to qmail-send."
-	@prefix@/sbin/qmail-tcpok > /dev/null && $succ || $fail
-	echo
-	for i in `echo $SERVICE/qmail-send.*`
-	do
-		$ECHO -n $"Flushing $i: "
-		@prefix@/bin/svc -a $i && $succ || $fail
-		RETVAL=$?
-		echo
-		let ret+=$RETVAL
-	done
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  status|stat)
-	ret=0
-	if [ -x /sbin/initctl ] ; then
-		/sbin/initctl status svscan
-	else
-		ps -ef| grep svscanboot| grep -v grep
-	fi
-	RETVAL=$?
-	@prefix@/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
-	let ret+=$RETVAL
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  queue)
-	@prefix@/bin/qmail-qread -c
-	ret=$?
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  reload)
-    ret=0
-	for i in `echo $SERVICE/qmail-send.*`
-	do
-		$ECHO -n $"sending HUP signal to $i: "
-		@prefix@/bin/svc -h $i && $succ || $fail
-		RETVAL=$?
-		echo
-		let ret+=$RETVAL
-	done
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  pause)
-    ret=0
-	for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
-	do
-		$ECHO -n $"pausing $i: "
-		@prefix@/bin/svc -p $i && $succ || $fail
-		RETVAL=$?
-		echo
-		let ret+=$RETVAL
-	done
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  cont)
-    ret=0
-	for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
-	do
-		$ECHO -n $"continuing $i: "
-		@prefix@/bin/svc -c $i && $succ || $fail
-		RETVAL=$?
-		echo
-		let ret+=$RETVAL
-	done
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  cdb)
-    ret=0
-	for i in smtp qmtp qmqp imap pop3 poppass
-	do
-		for j in `/bin/ls @sysconfdir@/tcp*.$i.cdb 2>/dev/null`
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	condrestart|try-restart)
+		noqmail
+		ret=0
+		for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 		do
-			t_file=`echo $j | cut -d. -f1,2`
-			if [ ! -f $t_file ] ; then
-				$ECHO -n $"deleting $j: "
-				/bin/rm -f $j && $succ || $fail
+			$ECHO -n $"Stopping $i: "
+			@prefix@/bin/svc -d $i && $succ || $fail
+			RETVAL=$?
+			echo
+			let ret+=$RETVAL
+		done
+		for i in `echo $SERVICE/qmail-send.*`
+		do
+			$ECHO -n $"Terminating $i: "
+			@prefix@/bin/svc -t $i && $succ || $fail
+			RETVAL=$?
+			echo
+			let ret+=$RETVAL
+		done
+		for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
+		do
+			if [ ! -f $i/down ] ; then
+			$ECHO -n $"Starting $i: "
+				@prefix@/bin/svc -u $i && $succ || $fail
 				RETVAL=$?
 				echo
 				let ret+=$RETVAL
 			fi
 		done
-		for j in `/bin/ls @sysconfdir@/tcp/tcp*.$i 2>/dev/null`
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	shut)
+		$ECHO -n $"shutdown svscan: "
+		if [ -f /sbin/initctl ] ; then
+			/sbin/initctl stop svscan >/dev/null && $succ || $fail
+		elif [ -f /bin/systemctl ] ; then
+			/bin/systemctl stop svscan && $succ || $fail
+		else
+			/usr/bin/killall -e -w svscan && $succ || $fail
+		fi
+		ret=$?
+		echo
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	kill)
+		noqmail
+		$ECHO -n $"killing tcpserver,supervise,qmail-send: "
+		kill `ps -ef| egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $2}'` && $succ || $fail
+		ret=$?
+		echo
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	rotate)
+		ret=0
+		for i in `echo $SERVICE/* $SERviCE/.svscan`
 		do
-			t1=`date +'%s' -r $j`
-			if [ -f $j.cdb ] ; then
-				t2=`date +'%s' -r $j.cdb`
-			else
-				t2=0
-			fi
-			if [ $t1 -gt $t2 ] ; then
-				$ECHO -n $"building $j.cdb: "
-				@prefix@/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-					&& /bin/chown indimail:indimail $j.cdb && $succ || $fail
+			if [ -d $i/log ] ; then
+				$ECHO -n $"Rotating $i: "
+				@prefix@/bin/svc -a $i/log && $succ || $fail
 				RETVAL=$?
 				echo
-			else
-				RETVAL=0
+				let ret+=$RETVAL
 			fi
+		done
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	flush)
+		noqmail
+		ret=0
+		$ECHO -n $"Flushing timeout table + ALRM signal to qmail-send."
+		@prefix@/sbin/qmail-tcpok > /dev/null && $succ || $fail
+		echo
+		for i in `echo $SERVICE/qmail-send.*`
+		do
+			$ECHO -n $"Flushing $i: "
+			@prefix@/bin/svc -a $i && $succ || $fail
+			RETVAL=$?
+			echo
 			let ret+=$RETVAL
 		done
-	done
-	[ $ret -eq 0 ] && exit 0 || exit 1
-	;;
-  help)
-	myhelp
-	exit 0
-	;;
-  *)
-    echo "Usage: `basename $0` {start|stop|condrestart|restart|shut|kill|flush|rotate|reload|stat|queue|pause|cont|cdb|help}"
-	myhelp
-	exit 1
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	status|stat)
+		ret=0
+		if [ -x /sbin/initctl ] ; then
+			/sbin/initctl status svscan
+		else
+			ps -ef| grep svscanboot| grep -v grep
+		fi
+		RETVAL=$?
+		@prefix@/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
+		let ret+=$RETVAL
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	queue)
+		noqmail
+		@prefix@/bin/qmail-qread -c
+		ret=$?
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	reload)
+		noqmail
+		ret=0
+		for i in `echo $SERVICE/qmail-send.*`
+		do
+			$ECHO -n $"sending HUP signal to $i: "
+			@prefix@/bin/svc -h $i && $succ || $fail
+			RETVAL=$?
+			echo
+			let ret+=$RETVAL
+		done
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	pause)
+		noqmail
+		ret=0
+		for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
+		do
+			$ECHO -n $"pausing $i: "
+			@prefix@/bin/svc -p $i && $succ || $fail
+			RETVAL=$?
+			echo
+			let ret+=$RETVAL
+		done
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	cont)
+		noqmail
+		ret=0
+		for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
+		do
+			$ECHO -n $"continuing $i: "
+			@prefix@/bin/svc -c $i && $succ || $fail
+			RETVAL=$?
+			echo
+			let ret+=$RETVAL
+		done
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	cdb)
+		noqmail
+		ret=0
+		for i in smtp qmtp qmqp imap pop3 poppass
+		do
+			for j in `/bin/ls @sysconfdir@/tcp*.$i.cdb 2>/dev/null`
+			do
+				t_file=`echo $j | cut -d. -f1,2`
+				if [ ! -f $t_file ] ; then
+					$ECHO -n $"deleting $j: "
+					/bin/rm -f $j && $succ || $fail
+					RETVAL=$?
+					echo
+					let ret+=$RETVAL
+				fi
+			done
+			for j in `/bin/ls @sysconfdir@/tcp/tcp*.$i 2>/dev/null`
+			do
+				t1=`date +'%s' -r $j`
+				if [ -f $j.cdb ] ; then
+					t2=`date +'%s' -r $j.cdb`
+				else
+					t2=0
+				fi
+				if [ $t1 -gt $t2 ] ; then
+					$ECHO -n $"building $j.cdb: "
+					@prefix@/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+						&& /bin/chown indimail:indimail $j.cdb && $succ || $fail
+					RETVAL=$?
+					echo
+				else
+					RETVAL=0
+				fi
+				let ret+=$RETVAL
+			done
+		done
+		[ $ret -eq 0 ] && exit 0 || exit 1
+		;;
+	help)
+		myhelp
+		exit 0
+		;;
+	*)
+		if [ $have_qmail -eq 1 ] ; then
+			echo "Usage: `basename $0` {start|stop|condrestart|restart|shut|kill|flush|rotate|reload|stat|queue|pause|cont|cdb|help}"
+		else
+			echo "Usage: `basename $0` {start|stop|restart|shut|stat|rotate|help}"
+		fi
+		myhelp
+		exit 1
 	;;
 esac
-
 exit 0
