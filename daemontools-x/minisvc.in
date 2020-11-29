@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.4 2020-10-23 21:28:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.5 2020-11-29 17:51:10+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.4 2020-10-23 21:28:54+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.5 2020-11-29 17:51:10+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -141,25 +141,25 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
 /bin/mkdir -p "$DESTDIR"$sysconfdir
 if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run ] ; then
-# svscan run script
-(
-echo "# $prog_args"
-echo "search `uname -n`"
-echo "nameserver 127.0.0.1"
-) > "$DESTDIR"$sysconfdir/resolv.conf
-(
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
-echo "echo svscan \$PPID initialization PID \$\$"
-echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
-echo "/usr/bin/mount -l"
-) > "$DESTDIR"$SERVICEDIR/.svscan/run
-/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
+	# svscan run script
+	(
+	echo "# $prog_args"
+	echo "search `uname -n`"
+	echo "nameserver 127.0.0.1"
+	) > "$DESTDIR"$sysconfdir/resolv.conf
+	(
+	echo "#!/bin/sh"
+	echo "$RCSID"
+	echo "# generated on $host on `date`"
+	echo "# $prog_args"
+	echo ""
+	echo "echo svscan \$PPID initialization PID \$\$"
+	echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
+	echo "/usr/bin/mount -l"
+	) > "$DESTDIR"$SERVICEDIR/.svscan/run
+	/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
 else
-	if [ -x "$DESTDIR"$SERVICEDIR/.svscan/run
+	if [ -x "$DESTDIR"$SERVICEDIR/.svscan/run ] ; then
 		/bin/chmod -x "$DESTDIR"$SERVICEDIR/.svscan/run
 	fi
 fi
@@ -913,6 +913,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.5  2020-11-29 17:51:10+05:30  Cprogrammer
+# fixed syntax error
+#
 # Revision 1.4  2020-10-23 21:28:54+05:30  Cprogrammer
 # fix chmod of .svscan/run
 #
