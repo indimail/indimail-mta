@@ -115,7 +115,7 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${qsysconfdir}/daemontools_perm_list ] ; then
-	echo "Fixing Permissions (debian stupidity)"
+	echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${qsysconfdir}/daemontools_perm_list | while read line
 do
