@@ -87,3 +87,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * preinst/postinst: modified service shutdown/startup during upgrade by using /run, /var/run
   * smtpd.c: refactored batv code
   * 822field.c, 822fields.c: +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text
+  * qmail-remote: fixed smtpcode() to handle in case remote smtp server returns improper codes

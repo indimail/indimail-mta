@@ -160,3 +160,5 @@ creation
 - 28/11/2020
 92. 822field.c, 822fields.c: +HeaderName feature by Erwin Hoffman: display all
     headers which have HeaderName as the initial text
+93. qmail-remote: fixed smtpcode() to handle in case remote smtp server returns
+    improper codes
