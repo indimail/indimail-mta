@@ -1,4 +1,7 @@
 # $Log: svps.in,v $
+# Revision 1.10  2020-11-29 16:26:02+05:30  Cprogrammer
+# use portable way to use while loop
+#
 # Revision 1.9  2020-11-27 17:30:27+05:30  Cprogrammer
 # set status variable
 #
@@ -27,7 +30,7 @@
 # Initial revision
 #
 # 
-# $Id: svps.in,v 1.9 2020-11-27 17:30:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.10 2020-11-29 16:26:02+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -183,7 +186,7 @@ do
 	if [ $len -gt $max ] ; then
 		max=$len
 	fi
-done <<<$(cat /tmp/svps.$$)
+done < /tmp/svps.$$
 
 if [ -n "$PAGER" ] ; then
 	doit $option $max | $PAGER
