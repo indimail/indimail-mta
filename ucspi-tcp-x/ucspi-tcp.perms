@@ -1,0 +1,39 @@
+%attr(0755,root,root) /usr/bin/fixcrio
+%attr(0755,root,root) /usr/bin/delcr
+%attr(0755,root,root) /usr/bin/addcr
+%attr(0755,root,root) /usr/bin/argv0
+%attr(0755,root,root) /usr/bin/recordio
+%attr(0755,root,root) /usr/bin/rblsmtpd
+%attr(0755,root,root) /usr/bin/mconnect-io
+%attr(0755,root,root) /usr/bin/mconnect
+%attr(0755,root,root) /usr/bin/tcpcat
+%attr(0755,root,root) /usr/bin/http@
+%attr(0755,root,root) /usr/bin/finger@
+%attr(0755,root,root) /usr/bin/date@
+%attr(0755,root,root) /usr/bin/who@
+%attr(0755,root,root) /usr/bin/tcpclient
+%attr(0755,root,root) /usr/bin/tcprulescheck
+%attr(0755,root,root) /usr/bin/tcprules
+%attr(0755,root,root) /usr/bin/tcpserver
+
+%attr(0644,root,root) /usr/share/man/man1/argv0.1.gz
+%attr(0644,root,root) /usr/share/man/man1/delcr.1.gz
+%attr(0644,root,root) /usr/share/man/man1/addcr.1.gz
+%attr(0644,root,root) /usr/share/man/man1/fixcrio.1.gz
+%attr(0644,root,root) /usr/share/man/man1/recordio.1.gz
+%attr(0644,root,root) /usr/share/man/man1/rblsmtpd.1.gz
+%attr(0644,root,root) /usr/share/man/man1/mconnect-io.1.gz
+%attr(0644,root,root) /usr/share/man/man1/mconnect.1.gz
+%attr(0644,root,root) /usr/share/man/man1/tcpcat.1.gz
+%attr(0644,root,root) /usr/share/man/man1/http@.1.gz
+%attr(0644,root,root) /usr/share/man/man1/finger@.1.gz
+%attr(0644,root,root) /usr/share/man/man1/date@.1.gz
+%attr(0644,root,root) /usr/share/man/man1/who@.1.gz
+%attr(0644,root,root) /usr/share/man/man1/tcpclient.1.gz
+%attr(0644,root,root) /usr/share/man/man1/tcprulescheck.1.gz
+%attr(0644,root,root) /usr/share/man/man1/tcprules.1.gz
+%attr(0644,root,root) /usr/share/man/man1/tcpserver.1.gz
+
+%attr(0755,root,root) /usr/lib/indimail/plugins/rblsmtpd.so
+
+%attr(0644,root,root) /usr/share/indimail/doc/README.ucspi-tcp
