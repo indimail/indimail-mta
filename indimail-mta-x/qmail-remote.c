@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.137 2020-11-28 22:48:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.137 2020-11-29 10:13:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -803,30 +803,31 @@ char            smtpfrombuf[128];
 substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
 
 void
-get(char *ch)
+get1(char *ch)
 {
 	substdio_get(&smtpfrom, ch, 1);
-	if (*ch != '\r') {
-		if (smtptext.len < HUGESMTPTEXT) {
-			if (!stralloc_append(&smtptext, ch))
-				temp_nomem();
-		}
-	}
+	if (*ch != '\r' && smtptext.len < HUGESMTPTEXT &&
+			!stralloc_append(&smtptext, ch))
+		temp_nomem();
 }
 
 unsigned long
-get_3digit()
+get3()
 {
 	char            str[4];
+	int             i;
 	unsigned long   code;
 
 	substdio_get(&smtpfrom, str, 3);
 	str[3] = 0;
-	scan_ulong(str, &code);
-	if (smtptext.len < HUGESMTPTEXT) {
-		if (!stralloc_catb(&smtptext, str, 3))
+	for (i = 0; i < 3; i++) {
+		if (str[i] == '\r')
+			continue;
+		if (smtptext.len < HUGESMTPTEXT &&
+				!stralloc_append(&smtptext, str + i))
 			temp_nomem();
 	}
+	scan_ulong(str, &code);
 	return code;
 }
 
@@ -839,21 +840,21 @@ smtpcode()
 
 	if (!stralloc_copys(&smtptext, ""))
 		temp_nomem();
-	if ((code = get_3digit()) < 200)
+	if ((code = get3()) < 200)
 		err = 1;
 	for (;;) {
-		get((char *) &ch);
+		get1((char *) &ch);
 		if (ch != ' ' && ch != '-')
 			err = 1;
 		if (ch != '-')
 			break;
 		while (ch != '\n')
-			get((char *) &ch);
-		if (get_3digit() != code)
+			get1((char *) &ch);
+		if (get3() != code)
 			err = 1;
 	}
 	while (ch != '\n')
-		get((char *) &ch);
+		get1((char *) &ch);
 	return err ? 400 : code;
 }
 
@@ -2368,7 +2369,7 @@ qmtp(stralloc *h, char *ip, int port_num)
 	for (i = 0; i < reciplist.len; ++i) {
 		len = 0;
 		for (;;) {
-			get((char *) &ch);
+			get1((char *) &ch);
 			if (ch == ':')
 				break;
 			if (len > 200000000)
@@ -2379,7 +2380,7 @@ qmtp(stralloc *h, char *ip, int port_num)
 		}
 		if (!len)
 			temp_proto();
-		get((char *) &ch);
+		get1((char *) &ch);
 		--len;
 		if ((ch != 'Z') && (ch != 'D') && (ch != 'K'))
 			temp_proto();
@@ -2388,7 +2389,7 @@ qmtp(stralloc *h, char *ip, int port_num)
 		if (!stralloc_cats(&smtptext, "Remote host said: "))
 			temp_nomem();
 		while (len > 0) {
-			get((char *) &ch);
+			get1((char *) &ch);
 			--len;
 		}
 		for (len = 0; len < smtptext.len; ++len) {
@@ -2396,7 +2397,7 @@ qmtp(stralloc *h, char *ip, int port_num)
 			if ((ch < 32) || (ch > 126))
 				smtptext.s[len] = '?';
 		}
-		get((char *) &ch);
+		get1((char *) &ch);
 		if (ch != ',')
 			temp_proto();
 		smtptext.s[smtptext.len - 1] = '\n';
@@ -3496,7 +3497,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.137 2020-11-28 22:48:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.137 2020-11-29 10:13:00+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3504,8 +3505,8 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
- * Revision 1.137  2020-11-28 22:48:25+05:30  Cprogrammer
- * fixed smtpcode() to handle in case remote smtp server returns improper codes
+ * Revision 1.137  2020-11-29 10:13:00+05:30  Cprogrammer
+ * use get1(), get3() functions to read smtp code
  *
  * Revision 1.136  2020-11-24 13:47:20+05:30  Cprogrammer
  * removed exit.h
