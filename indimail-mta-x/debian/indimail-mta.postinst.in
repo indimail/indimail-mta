@@ -124,7 +124,7 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
-	echo "Fixing Permissions (debian stupidity)"
+	echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | while read line
 do

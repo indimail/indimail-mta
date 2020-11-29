@@ -110,7 +110,7 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${qsysconfdir}/ucspi-tcp.perms ] ; then
-	echo "Fixing Permissions (debian stupidity)"
+	echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${qsysconfdir}/ucspi-tcp.perms | while read line
 do
