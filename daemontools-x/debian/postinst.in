@@ -158,13 +158,13 @@ if [ $upgrade -eq 1 ] ; then # upgrade
     echo "Starting svscan"
     if test -f /etc/init/svscan.conf
     then
-      /sbin/initctl emit qmailstart > /dev/null 2>&1
+      /sbin/initctl emit qmailstart
     elif test -f /etc/event.d/svscan
     then
-    /sbin/initctl emit qmailstart > /dev/null 2>&1
+      /sbin/initctl emit qmailstart
     elif test -f /etc/systemd/system/multi-user.target.wants/svscan.service
     then
-    /bin/systemctl start svscan > /dev/null 2>&1
+      /bin/systemctl start svscan
     elif test -x ${prefix}/sbin/initsvc
     then
       if [ -x /etc/init.d/svscan ] ; then
