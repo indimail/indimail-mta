@@ -4,9 +4,10 @@
 # see: dh_installdeb(1)
 
 set -e
-rm=/bin/rm
+prefix=@prefix@
 qmaildir=@qmaildir@
 servicedir=@servicedir@
+rm=/bin/rm
 
 # summary of how this script can be called:
 #        * <new-preinst> `install'
