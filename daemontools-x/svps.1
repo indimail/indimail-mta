@@ -16,6 +16,78 @@ is successfully running in that directory, and reporting the status
 information maintained by
 .BR supervise (8).
 
+.EX
+Typical output of svps on a fully configured IndiMail system will be like below
+
+------------ svscan ---------------
+/usr/sbin/svscan /service          up         3 secs  pid   74847
+
+------------ main -----------------
+/service/fetchmail                 down       3 secs spid   74909
+/service/qmail-qmqpd.628           down       3 secs spid   74852
+/service/inlookup.infifo           wait       3 secs  pid   74922 remaining      27 seconds
+/service/pwdlookup                 wait       3 secs  pid   74913 remaining      27 seconds
+/service/dnscache                  up         3 secs  pid   74992
+/service/greylist.1999             up         3 secs  pid   74980
+/service/indisrvr.4000             up         3 secs  pid   74938
+/service/mrtg                      up         3 secs  pid   74946
+/service/mysql.3306                up         3 secs  pid   74981
+/service/proxy-imapd.4143          up         3 secs  pid   74941
+/service/proxy-imapd-ssl.9143      up         3 secs  pid   74953
+/service/proxy-pop3d.4110          up         3 secs  pid   74989
+/service/proxy-pop3d-ssl.9110      up         3 secs  pid   74990
+/service/qmail-daned.1998          up         3 secs  pid   74916
+/service/qmail-imapd.143           up         3 secs  pid   74901
+/service/qmail-imapd-ssl.993       up         3 secs  pid   74907
+/service/qmail-logfifo             up         3 secs  pid   74967
+/service/qmail-pop3d.110           up         3 secs  pid   74932
+/service/qmail-pop3d-ssl.995       up         3 secs  pid   74903
+/service/qmail-poppass.106         up         3 secs  pid   74945
+/service/qmail-qmtpd.209           up         3 secs  pid   74929
+/service/qmail-send.25             up         3 secs  pid   74937
+/service/qmail-smtpd.25            up         3 secs  pid   74944
+/service/qmail-smtpd.366           up         3 secs  pid   74960
+/service/qmail-smtpd.465           up         3 secs  pid   74956
+/service/qmail-smtpd.587           up         3 secs  pid   74959
+/service/qscanq                    up         3 secs  pid   74940
+/service/udplogger.3000            up         3 secs  pid   74954
+
+------------ logs -----------------
+/service/.svscan/log               up         3 secs  pid   74867
+/service/dnscache/log              up         3 secs  pid   74987
+/service/fetchmail/log             up         3 secs  pid   74975
+/service/greylist.1999/log         up         3 secs  pid   74991
+/service/indisrvr.4000/log         up         3 secs  pid   74962
+/service/inlookup.infifo/log       up         3 secs  pid   74983
+/service/mrtg/log                  up         3 secs  pid   74939
+/service/mysql.3306/log            up         3 secs  pid   74963
+/service/proxy-imapd.4143/log      up         3 secs  pid   74996
+/service/proxy-imapd-ssl.9143/log  up         3 secs  pid   74988
+/service/proxy-pop3d.4110/log      up         3 secs  pid   74972
+/service/proxy-pop3d-ssl.9110/log  up         3 secs  pid   74985
+/service/pwdlookup/log             up         3 secs  pid   74970
+/service/qmail-daned.1998/log      up         3 secs  pid   74936
+/service/qmail-imapd.143/log       up         3 secs  pid   74934
+/service/qmail-imapd-ssl.993/log   up         3 secs  pid   74899
+/service/qmail-logfifo/log         up         3 secs  pid   74933
+/service/qmail-pop3d.110/log       up         3 secs  pid   74930
+/service/qmail-pop3d-ssl.995/log   up         3 secs  pid   74905
+/service/qmail-poppass.106/log     up         3 secs  pid   74906
+/service/qmail-qmqpd.628/log       up         3 secs  pid   74869
+/service/qmail-qmtpd.209/log       up         3 secs  pid   74942
+/service/qmail-send.25/log         up         3 secs  pid   74943
+/service/qmail-smtpd.25/log        up         3 secs  pid   74931
+/service/qmail-smtpd.366/log       up         3 secs  pid   74900
+/service/qmail-smtpd.465/log       up         3 secs  pid   74984
+/service/qmail-smtpd.587/log       up         3 secs  pid   74976
+/service/qscanq/log                up         3 secs  pid   74965
+/service/udplogger.3000/log        up         3 secs  pid   74993
+.EE
+
+Status can be down, wait or up. When service is in wait status, svps will display
+the number of seconds supervise will wait before starting it up
+The process id can be of the service (pid) or the supervise process (spid)
+
 .SH OPTIONS
 .TP
 \-\-\fIall\fR or -a
