@@ -40,3 +40,5 @@ daemontools (@version@-@release@) unstable; urgency=low
   * svps: fixed output for "normally up" and "normally down" status
   * systemd: Chanaged service name to SVscan Service
   * svps: remove unportable PIPESTATUS
+  * minisvc: fixed syntax error
+  * qmailctl: adapted for non-indimail-mta systems

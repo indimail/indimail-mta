@@ -68,3 +68,6 @@ Release 1.1 Start 09/10/2020
 38. systemd: Chanaged service name to SVscan Service
 26/11/2020
 39. svps: remove unportable PIPESTATUS
+29/11/2020
+40. minisvc: fixed syntax error
+41. qmailctl: adapted for non-indimail-mta systems
