@@ -31,73 +31,73 @@ rm=/bin/rm
 
 setperm()
 {
-	local user="$1"; shift
-	local group="$1"; shift
-	local mode="$1"; shift
-	local file="$1"; shift
-	/usr/sbin/dpkg-statoverride --list "$file" >/dev/null && return 0
-	/usr/sbin/dpkg-statoverride --update --add "$user" "$group" "$mode" "$file"
+  local user="$1"; shift
+  local group="$1"; shift
+  local mode="$1"; shift
+  local file="$1"; shift
+  /usr/sbin/dpkg-statoverride --list "$file" >/dev/null && return 0
+  /usr/sbin/dpkg-statoverride --update --add "$user" "$group" "$mode" "$file"
 }
 
 fixperms()
 {
-	if [ $# -eq 3 ] ; then # directory
-	#%dir %attr(0555,root,indimail) /var/indimail/sbin
-		lin=$2
-		file=$3
-		if [ ! -d $file ] ; then
-			return 0
-		fi
-	elif [ $# = 2 ] ; then # file
-	#%attr(0555,root,qmail) /var/indimail/bin/rsmtp
-		lin=$1
-		file=$2
-		if [ ! -f $file ] ; then
-			return 0
-		fi
-	fi
-	perm=`echo $lin|cut -d\( -f2 | cut -d, -f1`
-	perm_f1=`echo $perm | cut -c1`
-	own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
-	grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
-	if [ -f $file ] ; then
-		if [ $perm_f1 -eq 0 ] ; then # 4755, 0644
-			/bin/chown $own:$grp $file
-			/bin/chmod $perm $file
-		else
-			echo $file
-			if [ -f /usr/sbin/dpkg-statoverride ] ; then
-				setperm $own $grp $perm $file
-			else
-				/bin/chown $own:$grp $file
-				/bin/chmod $perm $file
-			fi
-		fi
-	elif [ -d $file ] ; then
-		/bin/chown $own:$grp $file
-		/bin/chmod $perm $file
-	fi
+  if [ $# -eq 3 ] ; then # directory
+  #%dir %attr(0555,root,indimail) /var/indimail/sbin
+    lin=$2
+    file=$3
+    if [ ! -d $file ] ; then
+      return 0
+    fi
+  elif [ $# = 2 ] ; then # file
+  #%attr(0555,root,qmail) /var/indimail/bin/rsmtp
+    lin=$1
+    file=$2
+    if [ ! -f $file ] ; then
+      return 0
+    fi
+  fi
+  perm=`echo $lin|cut -d\( -f2 | cut -d, -f1`
+  perm_f1=`echo $perm | cut -c1`
+  own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
+  grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
+  if [ -f $file ] ; then
+    if [ $perm_f1 -eq 0 ] ; then # 4755, 0644
+      /bin/chown $own:$grp $file
+      /bin/chmod $perm $file
+    else
+      echo $file
+      if [ -f /usr/sbin/dpkg-statoverride ] ; then
+        setperm $own $grp $perm $file
+      else
+        /bin/chown $own:$grp $file
+        /bin/chmod $perm $file
+      fi
+    fi
+  elif [ -d $file ] ; then
+    /bin/chown $own:$grp $file
+    /bin/chmod $perm $file
+  fi
 }
 
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
-	echo "You are not root" >&2
-	exit 1
+  echo "You are not root" >&2
+  exit 1
 fi
 
 upgrade=0
 case "$1" in
     configure)
-		if [ " $2" = " " ] ; then
-			echo "installing daemontools"
-		else
-			echo "upgrading daemontools $2"
-			upgrade=1
-		fi
+    if [ " $2" = " " ] ; then
+      echo "installing daemontools"
+    else
+      echo "upgrading daemontools $2"
+      upgrade=1
+    fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
-	exit 0
+  exit 0
     ;;
 
     *)
@@ -115,14 +115,14 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${qsysconfdir}/daemontools_perm_list ] ; then
-	echo "Fixing Permissions"
+  echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${qsysconfdir}/daemontools_perm_list | while read line
 do
-	if [ " $line" = " " ] ; then
-		continue
-	fi
-	fixperms $line
+  if [ " $line" = " " ] ; then
+    continue
+  fi
+  fixperms $line
 done
 ) > ${qsysconfdir}/daemontools-stat.override
 fi
@@ -132,25 +132,25 @@ if [ $upgrade -eq 1 ] ; then # upgrade
   echo "checking if system boot scripts need upgrade"
   if [ -f /etc/init.d/svscan ] ; then
     cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
-      ${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
+      (${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan && echo "installed new /etc/init.d/svscan")
   fi
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
-    cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service
-    /bin/systemctl daemon-reload
+    cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || \
+      (${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service &&
+      /bin/systemctl daemon-reload && echo "installed new svscan service")
   elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
-    cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
-    /bin/systemctl daemon-reload
+    cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || \
+      (${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service &&
+      /bin/systemctl daemon-reload && echo "installed new svscan service")
   elif [ -f /sbin/initctl -a -d /etc/init ] ; then
-    cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf
+    cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || \
+      (${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf && echo "insalled new svscan.conf")
   elif [ -d /etc/event.d ] ; then
-    cmp -s ${shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/upstart /etc/event.d
+    cmp -s ${shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1 || \
+      (${cp} ${shareddir}/boot/upstart /etc/event.d && echo "installed new upstart config")
   elif [ -d /System/Library/LaunchDaemons ] ; then
-    cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || true
-    ${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons
+    cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || \
+      (${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons && echo "installed new indimail.plist")
   fi
   # restore svscan service if we find .svscan.down
   if [ -f ${servicedir}/.svscan.down ] ; then
@@ -158,29 +158,36 @@ if [ $upgrade -eq 1 ] ; then # upgrade
     echo "Starting svscan"
     if test -f /etc/init/svscan.conf
     then
+      echo /sbin/initctl emit qmailstart
       /sbin/initctl emit qmailstart
     elif test -f /etc/event.d/svscan
     then
+      echo /sbin/initctl emit qmailstart
       /sbin/initctl emit qmailstart
     elif test -f /etc/systemd/system/multi-user.target.wants/svscan.service
     then
+      echo /bin/systemctl start svscan
       /bin/systemctl start svscan
     elif test -x ${prefix}/sbin/initsvc
     then
       if [ -x /etc/init.d/svscan ] ; then
-        ${prefix}/sbin/initsvc -status || /etc/init.d/svscan start || true
+        echo "/etc/init.d/svscan start"
+        ${prefix}/sbin/initsvc -status || /etc/init.d/svscan start
       else
-        ${prefix}/sbin/initsvc -status || true
+        ${prefix}/sbin/initsvc -status
       fi
-      ${prefix}/sbin/initsvc -on || true
+       echo "initsvc -on"
+      ${prefix}/sbin/initsvc -on 
     else
       if [ -x /etc/init.d/svscan ] ; then
+        echo "/etc/init.d/svscan start"
         /etc/init.d/svscan start
       fi
       /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
       if [ $? -eq 0 ] ; then
         sed -i 's{^#SV:{SV:{' /etc/inittab
         if [ $? -eq 0 ] ; then
+          echo /sbin/init q
           /sbin/init q
         fi
       fi
@@ -192,12 +199,12 @@ fi
 (
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
-	/bin/mkdir ${logdir}
+  /bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
 echo "adding svscan startup"
 if [ ! -d ${servicedir} -a ! -L ${servicedir} ] ; then
-	mkdir -p ${servicedir}
+  mkdir -p ${servicedir}
 fi
 ${prefix}/sbin/minisvc --config=add-boot
 # svscanlog service
@@ -207,8 +214,8 @@ if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
 fi
 if [ -x ${libexecdir}/instcheck.daemontools ] ; then
-	echo "Checking Installed Permissions"
-	${libexecdir}/instcheck.daemontools > /dev/null 2>&1
+  echo "Checking Installed Permissions"
+  ${libexecdir}/instcheck.daemontools > /dev/null 2>&1
 fi
-) >> /var/log/daemontools-install.log 2>&1
+) >> /var/log/daemontools-setup.log 2>&1
 exit 0

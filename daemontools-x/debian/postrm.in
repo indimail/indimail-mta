@@ -68,6 +68,8 @@ esac
 # Debian silliness
 #
 if [ " $1" = " purge" ] ; then
+	(
+	echo "postrm $1"
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
@@ -83,5 +85,6 @@ if [ " $1" = " purge" ] ; then
 			/etc/init.d/nscd start
 		fi
 	fi
+	) >> /var/log/daemontools-setup.log 2>&1
 fi
 exit 0
