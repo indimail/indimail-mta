@@ -74,3 +74,4 @@ Release 1.1 Start 09/10/2020
 41. qmailctl: adapted for non-indimail-mta systems
 42. run_init.c: changed return type to int. Return error instead of doing exit
 43. svstat, svc: continue to next directory if operation on current directory fails
+44. svstat, svc, svok: change warning text message for missing directory in /run

@@ -1,5 +1,8 @@
 /*
  * $Log: svstat.c,v $
+ * Revision 1.10  2020-11-30 23:20:31+05:30  Cprogrammer
+ * change warning text message for missing directory in /run
+ *
  * Revision 1.9  2020-11-30 22:56:02+05:30  Cprogrammer
  * continue instead of exit on run_init() failure
  *
@@ -96,7 +99,7 @@ doit(char *dir, int *retval)
 		strerr_warn2(WARN, "unable to get current working directory: ", &strerr_sys);
 		return;
 	case -2:
-		strerr_warn4(WARN, "unable to chdir to ", dir, ": ", &strerr_sys);
+		strerr_warn4(WARN, "No run state information for ", dir, ": ", &strerr_sys);
 		return;
 	}
 #endif
@@ -241,7 +244,7 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	static char    *x = "$Id: svstat.c,v 1.9 2020-11-30 22:56:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svstat.c,v 1.10 2020-11-30 23:20:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

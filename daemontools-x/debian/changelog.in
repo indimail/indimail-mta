@@ -44,3 +44,4 @@ daemontools (@version@-@release@) unstable; urgency=low
   * qmailctl: adapted for non-indimail-mta systems
   * run_init.c: changed return type to int. Return error instead of doing exit
   * svstat, svc: continue to next directory if operation on current directory fails
+  * svstat, svc, svok: change warning text message for missing directory in /run
