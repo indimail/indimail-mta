@@ -1,5 +1,8 @@
 /*
  * $Log: svc.c,v $
+ * Revision 1.8  2020-11-30 22:53:40+05:30  Cprogrammer
+ * continue instead of exit on run_init() failure
+ *
  * Revision 1.7  2020-10-08 18:34:02+05:30  Cprogrammer
  * use /run, /var/run if system supports it
  *
@@ -35,8 +38,8 @@
 #include "run_init.h"
 #endif
 
-#define FATAL   "svc: fatal: "
-#define WARNING "svc: warning: "
+#define FATAL "svc: fatal: "
+#define WARN   "svc: warning: "
 
 int             datalen = 0;
 char            data[20];
@@ -49,7 +52,7 @@ int             fdorigdir;
 int
 main(int argc, char **argv)
 {
-	int             opt;
+	int             opt, i;
 	int             fd, exit_stat;
 	char           *dir;
 
@@ -72,28 +75,43 @@ main(int argc, char **argv)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	exit_stat = 0;
 	while ((dir = *argv++)) {
-		if (chdir(dir) == -1)
-			strerr_warn4(WARNING, "unable to chdir to ", dir, ": ", &strerr_sys);
-		else {
+		if (chdir(dir) == -1) {
+			strerr_warn4(WARN, "unable to chdir to ", dir, ": ", &strerr_sys);
+			continue;
+		}
 #ifdef USE_RUNFS
-			run_init(dir, FATAL);
+		switch ((i = run_init(dir)))
+		{
+		case 0:
+			break;
+		case -1:
+			strerr_warn2(WARN, "unable to get current working directory: ", &strerr_sys);
+			break;
+		case -2:
+			strerr_warn4(WARN, "unable to chdir to ", dir, ": ", &strerr_sys);
+			break;
+		}
 #endif
-			if((fd = open_write("supervise/control")) == -1) {
-				if (errno == error_nodevice) {
-					strerr_warn4(WARNING, "unable to control ", dir, ": supervise not running", 0);
-					exit_stat = 2;
-				} else
-					strerr_warn4(WARNING, "unable to control ", dir, ": ", &strerr_sys);
-			} else {
-				ndelay_off(fd);
-				substdio_fdbuf(&b, write, fd, bspace, sizeof bspace);
-				if (substdio_putflush(&b, data, datalen) == -1)
-					strerr_warn4(WARNING, "error writing commands to ", dir, ": ", &strerr_sys);
-				close(fd);
-			}
+		if (i) {
+			if (fchdir(fdorigdir) == -1)
+				strerr_die2sys(111, FATAL, "unable to revert directory: ");
+			continue;
+		}
+		if ((fd = open_write("supervise/control")) == -1) {
+			if (errno == error_nodevice) {
+				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running", 0);
+				exit_stat = 2;
+			} else
+				strerr_warn4(WARN, "unable to control ", dir, ": ", &strerr_sys);
+		} else {
+			ndelay_off(fd);
+			substdio_fdbuf(&b, write, fd, bspace, sizeof bspace);
+			if (substdio_putflush(&b, data, datalen) == -1)
+				strerr_warn4(WARN, "error writing commands to ", dir, ": ", &strerr_sys);
+			close(fd);
 		}
 		if (fchdir(fdorigdir) == -1)
-			strerr_die2sys(111, FATAL, "unable to set directory: ");
+			strerr_die2sys(111, FATAL, "unable to revert directory: ");
 	}
 	_exit(exit_stat);
 }
@@ -101,7 +119,7 @@ main(int argc, char **argv)
 void
 getversion_svc_c()
 {
-	static char    *x = "$Id: svc.c,v 1.7 2020-10-08 18:34:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svc.c,v 1.8 2020-11-30 22:53:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
