@@ -165,3 +165,4 @@ creation
 - 29/11/2020
 94. queue-fix: replaced stdio with substdio and added option to specify queue
     subdirectory split
+95. hier.c: moved README.logselect to daemontools
