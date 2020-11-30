@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.279  2020-11-30 12:23:29+05:30  Cprogrammer
+ * moved README.logselect to daemontools
+ *
  * Revision 1.278  2020-10-23 10:43:07+05:30  Cprogrammer
  * removed daemontools
  *
@@ -1211,7 +1214,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_shared,     "doc", "README.licenses", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "README.clamav", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "README.greylist", auto_uido, 0, 0644);
-	c(auto_shared,     "doc", "README.logselect", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "README.srs", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "README.surbl", auto_uido, 0, 0644);
 	c(auto_shared,     "doc", "README.filters", auto_uido, 0, 0644);
@@ -1473,7 +1475,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.278 2020-10-23 10:43:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.279 2020-11-30 12:23:29+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
