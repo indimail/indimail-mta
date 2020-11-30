@@ -1,5 +1,8 @@
 /*
  * $Log: svstat.c,v $
+ * Revision 1.9  2020-11-30 22:56:02+05:30  Cprogrammer
+ * continue instead of exit on run_init() failure
+ *
  * Revision 1.8  2020-11-10 19:13:45+05:30  Cprogrammer
  * use byte 20 from status to indicate if service is up
  *
@@ -39,7 +42,7 @@
 #endif
 
 #define FATAL "svstat: fatal: "
-#define WARNING "svstat: warning: "
+#define WARN  "svstat: warning: "
 
 char            outbuf[256], errbuf[256];
 substdio        o = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
@@ -85,7 +88,17 @@ doit(char *dir, int *retval)
 	}
 
 #ifdef USE_RUNFS
-	run_init(dir, FATAL);
+	switch (run_init(dir))
+	{
+	case 0:
+		break;
+	case -1:
+		strerr_warn2(WARN, "unable to get current working directory: ", &strerr_sys);
+		return;
+	case -2:
+		strerr_warn4(WARN, "unable to chdir to ", dir, ": ", &strerr_sys);
+		return;
+	}
 #endif
 	if ((fd = open_write("supervise/ok")) == -1) {
 		if (errno == error_nodevice) {
@@ -207,7 +220,7 @@ main(int argc, char **argv)
 	while ((dir = *argv++)) {
 		doit(dir, &retval);
 		if (fchdir(fdorigdir) == -1)
-			strerr_die2sys(111, FATAL, "unable to set directory: ");
+			strerr_die2sys(111, FATAL, "unable to revert directory: ");
 	}
 	substdio_flush(&e);
 	substdio_flush(&o);
@@ -228,7 +241,7 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	static char    *x = "$Id: svstat.c,v 1.8 2020-11-10 19:13:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svstat.c,v 1.9 2020-11-30 22:56:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
