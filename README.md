@@ -621,15 +621,9 @@ Currently, the list of supported distributions for indimail-mta is
 
 ## NOTE for binary builds on debian
 
-debian/ubuntu repositories already has daemontools and ucspi-tcp which is
-far behind in terms of feature list that the indimail-mta repo provides.
-When you install indimail-mta, you get both. But in case you want to install
-daemontools, ucspi-tcp or both you can ensure that the two packages get
-installed from the indimail-mta repository instead of the debian repository.
+debian/ubuntu repositories already has daemontools and ucspi-tcp which is far behind in terms of feature list that the indimail-mta repo provides. When you install indimail-mta, apt-get may pull the wrong version with limited features. Also `apt-get install indimail` or `apt-get install indimail-mta` will get installed with errors, leading to an incomplete setup. You need to ensure that the two packages get installed from the indimail-mta repository instead of the debian repository.
 
-All you need to do is set a higher preference for the indimail-mta
-repository by creating /etc/apt/preferences.d/preferences with
-the following conents
+All you need to do is set a higher preference for the indimail-mta repository by creating /etc/apt/preferences.d/preferences with the following conents
 
 ```
 $ sudo /bin/bash
