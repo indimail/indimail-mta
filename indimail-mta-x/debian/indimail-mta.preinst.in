@@ -7,6 +7,7 @@ set -e
 prefix=@prefix@
 qmaildir=@qmaildir@
 libexecdir=@libexecdir@
+servicedir=@servicedir@
 logdir=@logdir@
 rm=/bin/rm
 
@@ -26,11 +27,10 @@ fi
 
 case "$1" in
     upgrade)
+	(
 	if [ -f ${libexecdir}/qupgrade.sh ] ; then
-		(
 		echo "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/qupgrade.sh pre $1 @version@ $* || true
-		) >> /var/log/indimail-mta-setup.log 2>&1
 	fi
 	if [ -d /run ] ; then
 		rundir=/run
@@ -46,7 +46,7 @@ case "$1" in
 		qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
 		qscanq udplogger.3000
 	do
-		${prefix}/bin/svstat ${servicedir}/$i >/dev/null 2>&1
+		${prefix}/bin/svstat ${servicedir}/$i
 		if [ $? -eq 0 ] ; then
 			mkdir -p ${rundir}/$i
 			touch ${rundir}/$i/.down
@@ -54,6 +54,7 @@ case "$1" in
 		fi
 	done
 	set -e
+	) >> /var/log/indimail-mta-setup.log 2>&1
 	exit 0
 	;;
 	install)

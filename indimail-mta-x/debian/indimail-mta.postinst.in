@@ -139,11 +139,11 @@ fi
 # indimail-mta.upgrade/indimail-mta.install are created
 # by the preinst script
 if [ $upgrade -eq 1 ] ; then # upgrade
+	(
 	if [ -f ${libexecdir}/qupgrade.sh ] ; then
 		echo "Running Custom Upgrade Script for post upgrade"
 		/bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
 	fi
-	(
 	# refresh indimail-mta services
 	svc_list=""
 	for i in greylist.1999 qmail-qmqpd.628 \
