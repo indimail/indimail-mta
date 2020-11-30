@@ -617,3 +617,4 @@ cleanq.8
 docker-entrypoint.8
 sslerator
 sslerator.o
+queue-fix.8

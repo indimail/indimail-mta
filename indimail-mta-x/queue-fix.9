@@ -1,0 +1,40 @@
+.TH queue-fix 8
+.SH NAME
+queue-fix \- Create or Repair a qmail queue structure
+.SH SYNOPSIS
+\fBqueue-fix\fR [-\fBi\fR -\fBN\fR -\fBv\fR] [-s \fIsplit\fR] \fIqueue_dir\fR
+
+.SH DESCRIPTION
+\fBqueue-fix\fR is a small utility for checking and repairing the qmail queue
+structure. It will fix uid/gid settings and permissions. It will rename the
+message files to match their inodes. It will even create directories and
+files that don't exist. You can even create a queue from scratch). It will
+also print warnings for any files it finds that should not exist.
+
+.SH OPTIONS
+.TP
+\fB\-i\fR
+Interactive mode
+
+.TP
+\fB\-N\fR
+Test mode
+
+.TP
+\fB\-s\fR \fIsplit\fR
+specify the queue subdirectory split (default SPLIT)
+
+.TP
+\fB\-v\fR
+Verbose mode
+
+.TP
+\fIqueue_dir\fR
+Directory where the qmail queue stucture is created. This directory has the subdirectories
+bounce, info, intd, local, lock, mess, pid, remote, todo, yanked.
+
+.SH "SEE ALSO"
+qmail-rm(1), svctool(8), qmail-queue(8), qmail-multi(8)
+
+.SH AUTHOR
+Eric Huss

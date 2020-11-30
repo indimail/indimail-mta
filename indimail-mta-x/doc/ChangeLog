@@ -162,3 +162,6 @@ creation
     headers which have HeaderName as the initial text
 93. qmail-remote: fixed smtpcode() to handle in case remote smtp server returns
     improper codes
+- 29/11/2020
+94. queue-fix: replaced stdio with substdio and added option to specify queue
+    subdirectory split

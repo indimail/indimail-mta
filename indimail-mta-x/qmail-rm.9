@@ -44,7 +44,7 @@ assumes that your qmail queue is stored in
 QMAILHOME/queue, but this can be changed with a command line option.
 Similarly,
 .B qmail-rm
-assumes that your queue "split" is 151 by
+assumes that your queue "split" is SPLIT by
 default, among other things.
 
 See qmail-rm -h for more commandline options.
@@ -76,7 +76,7 @@ actually remove files not yank them, no -p will delete all the messages!
 actually remove files, without this we'll only print them
 .TP
 -s \fIsplit\fR
-specify your conf-split value if non-standard [default: 151]
+specify your conf-split value if non-standard [default: SPLIT]
 .TP
 -y \fIyankdir\fR
 directory to put files yanked from the queue [default: <queuedir>/yanked]
@@ -96,3 +96,9 @@ increase verbosity (can be used more than once)
 .TP
 -h, -?
 this help message
+
+.SH "SEE ALSO"
+queue-fix(8)
+
+.SH Author
+qmail-rm has been adapted from qmail-remove at https://www.linuxmagic.com/opensource/qmail/qmail-remove

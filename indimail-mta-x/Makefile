@@ -52,7 +52,7 @@ it = indimail-mta.perms 822date 822field 822header 822print 822received \
 
 man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
-	svctool.8 predate.1 datemail.1 \
+	svctool.8 predate.1 datemail.1 queue-fix.8 \
 	mlmatchup.8 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
 	qmail-daned.8 qmail-srs.5 qmail-limits.7 \
 	forward.1 condredirect.1 qmail-control.5 rrforward.1 \
@@ -2225,6 +2225,11 @@ queue-fix.o: \
 compile queue-fix.c direntry.h auto_split.h auto_uids.h tcpto.h
 	./compile queue-fix.c
 
+queue-fix.8: queue-fix.9 conf-split
+	cat queue-fix.9 \
+	| sed s}SPLIT}"`head -1 conf-split`"}g \
+	> queue-fix.8
+
 qbase64: \
 load qbase64.o
 	./load qbase64 -lqmail
@@ -2251,6 +2256,7 @@ control.h
 
 qmail-rm.1: qmail-rm.9 conf-qmail
 	cat qmail-rm.9 \
+	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> qmail-rm.1
 
