@@ -54,11 +54,11 @@ case "$1" in
 		qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
 		qscanq udplogger.3000
 	do
-		${prefix}/bin/svstat ${servicedir}/$i >/dev/null 2>&1
+		${prefix}/bin/svstat ${servicedir}/$i
 		if [ $? -eq 0 ] ; then
 			mkdir -p ${rundir}/$i
 			touch ${rundir}/$i/.down
-			${prefix}/bin/svc -d ${servicedir}/$i || true
+			${prefix}/bin/svc -d ${servicedir}/$i
 		fi
 	done
 	set -e
