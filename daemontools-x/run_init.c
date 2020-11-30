@@ -1,5 +1,8 @@
 /*
  * $Log: run_init.c,v $
+ * Revision 1.3  2020-11-30 22:52:32+05:30  Cprogrammer
+ * changed return type to int to return error instead of doing exit
+ *
  * Revision 1.2  2020-10-20 16:27:46+05:30  Cprogrammer
  * handle . as a dir argument
  *
@@ -13,33 +16,34 @@
 #include <str.h>
 #include <fmt.h>
 #include <libgen.h>
-void
-run_init(char *service_dir, char *fatal)
+
+int
+run_init(char *service_dir)
 {
 	char           *run_dir, *p, *s;
 	char            buf[256], dirbuf[256];
 	int             i;
 
-	if (!access("/run", F_OK)) {
+	if (!access("/run", F_OK))
 		run_dir = "/run";
-	} else
-	if (!access("/var/run", F_OK)) {
+	else
+	if (!access("/var/run", F_OK))
 		run_dir = "/var/run";
-	} else
-		return;
+	else
+		return 1;
 	if ((i = str_len(service_dir)) > 255)
-		return;
+		return 1;
 	s = buf;
 	s += fmt_str(s, service_dir);
 	*s++ = 0;
 	p = basename(buf);
 	if (!str_diff(p, ".")) {
 		if (!getcwd(buf, 255))
-			strerr_die2sys(111, fatal, "unable to get current working directory: ");
+			return -1;
 		p = basename(buf);
 		i = fmt_str(0, run_dir) + 9 + fmt_str(0, p);
 		if (i > 255)
-			return;
+			return 1;
 		s = dirbuf;
 		s += fmt_str(s, run_dir);
 		s += fmt_strn(s, "/svscan/", 8);
@@ -48,7 +52,7 @@ run_init(char *service_dir, char *fatal)
 	} else
 	if (!str_diff(p, "log")) {
 		if (!getcwd(buf, 255))
-			strerr_die2sys(111, fatal, "unable to get current working directory: ");
+			return -1;
 		/*-
 		 * dirname needs to be called
 		 * this will put a null before the last component.
@@ -59,7 +63,7 @@ run_init(char *service_dir, char *fatal)
 		p = basename(buf);
 		i = fmt_str(0, run_dir) + 13 + fmt_str(0, p);
 		if (i > 255)
-			return;
+			return 1;
 		s = dirbuf;
 		s += fmt_str(s, run_dir);
 		s += fmt_strn(s, "/svscan/", 8);
@@ -69,7 +73,7 @@ run_init(char *service_dir, char *fatal)
 	} else {
 		i = fmt_str(0, run_dir) + 9 + fmt_str(0, p);
 		if (i > 255)
-			return;
+			return 1;
 		s = dirbuf;
 		s += fmt_str(s, run_dir);
 		s += fmt_strn(s, "/svscan/", 8);
@@ -77,15 +81,15 @@ run_init(char *service_dir, char *fatal)
 		*s++ = 0;
 	}
 	if (chdir(dirbuf) == -1)
-		strerr_die4sys(111, fatal, "unable to chdir to ", dirbuf, ": ");
-	return;
+		return -2;
+	return 0;
 }
 #endif
 
 void
 getversion_svrun_c()
 {
-	static char    *x = "$Id: run_init.c,v 1.2 2020-10-20 16:27:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: run_init.c,v 1.3 2020-11-30 22:52:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
