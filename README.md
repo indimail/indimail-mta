@@ -59,13 +59,13 @@ Install the following packages using apt
 
 ```
 Universal
-cdbs, debhelper, gcc, g++, automake, autoconf, libtool libqmail-dev, libqmail,
-libldap2-dev, libssl-dev, mime-support, m4, gawk, openssl, procps, sed,
-findutils, diffutils, readline, gzip, binutils, coreutils, grep
+cdbs debhelper gcc g++ automake autoconf libtool libqmail-dev libqmail
+libldap2-dev libssl-dev mime-support m4 gawk openssl procps sed
+findutils diffutils readline gzip binutils coreutils grep
 
 Debian 9, Debian 10 - default-libmysqlclient-dev
-Remaining - libmysqlclient-dev,
-Ubuntu 16.04 - libcom-err2, libmysqlclient-dev
+Remaining - libmysqlclient-dev
+Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
 ## Download / clone libqmail
