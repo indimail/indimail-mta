@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.289 2020-11-25 19:45:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.291 2020-12-02 19:07:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -49,7 +49,7 @@
 %global disttag fedora
 %endif
 
-Summary: A Flexible SMTP server
+Summary: A Flexible & Highly Configurable MTA
 Name: indimail-mta
 Version: @version@
 Release: @release@%{?dist}
@@ -162,22 +162,19 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-build
 Excludeos: windows
 
 %description
-indimail-mta provides a standalone mta server that is part of the IndiMail
-messaging platform. It comprises of the following packages
+indimail-mta provides a MTA that is part of the IndiMail
+messaging platform. The base is built on the following
+software code written by Dan J. Bernstein <djb@cr.yp.to>
 
 qmail,
 serialmail,
 qmailanalog,
 dotforward,
 fastforward,
-mess822,
-daemontools,
-ucspi-tcp,
+mess822
 
-The package combines qmail with other packages qmail, daemontools,
-ucspi-tcp, serialmail, qmailanalog, fastforward, mess822
-
-Original Author: Dan J. Bernstein <djb@cr.yp.to>
+The package provides most features required in a modern MTA
+missing in qmail.
 
 %{see_base}
 

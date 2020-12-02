@@ -12,19 +12,19 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, daemontools, ucspi-tcp, net-tools, 
 Provides: indimail-mini
 Conflicts: indimail-mini
 Replaces: indimail-mini
-Description: indimail-mta provides a standalone SMTP server that is part of the IndiMail
- messaging platform. It comprises of the following packages
+Description: indimail-mta provides a MTA that is part of the IndiMail
+ messaging platform. The base is built on the following software code
+ written by Dan J. Bernstein <djb@cr.yp.to>
  .
  qmail,
  serialmail,
  qmailanalog,
  dotforward,
  fastforward,
- mess822,
- daemontools,
- ucspi-tcp,
+ mess822
  .
- The package combines qmail with other packages like libsrs2
+ The package provides most features required in a modern MTA missing
+ in qmail.
 
 Package: indimail-mini
 Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils
