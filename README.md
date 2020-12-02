@@ -121,7 +121,7 @@ $ sudo ./make -s install-strip
 
 ## Compile libsrs2-x (with dynamic libaries)
 
-This library from [libsrs2.org](https://www.libsrs2.org/) is required for [SRS](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme). Else indimail-mta will get built without SRS support.
+This library from [libsrs2.org](https://www.libsrs2.org/) is required for [SRS](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme), else indimail-mta will get built without SRS support.
 
 ```
 $ cd /usr/local/src/indimail-mta/libsrs2-x
@@ -134,7 +134,7 @@ $ sudo ./make install-strip
 
 ## Build daemontools
 
-To configure the build for daemontools, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. If you are ok with the defaults, you can run the script default.configure to set the below values.
+To configure the build for daemontools, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir in daemontools-x subdirectory. Defaults are given in the table below. If you are ok with the defaults, you can run the script default.configure to set the below values.
 
 **Linux**
 
@@ -171,7 +171,7 @@ $ sudo make install or sudo ./qmake install
 
 ## Build ucspi-tcp
 
-To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. If you are ok with the defaults, you can run the script default.configure to set the below values.
+To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir in ucspi-tcp-x subdirectory. Defaults are given in the table below. If you are ok with the defaults, you can run the script default.configure to set the below values.
 
 **Linux**
 
@@ -206,7 +206,7 @@ $ sudo make install or sudo ./qmake install
 
 ## Build indimail-mta
 
-To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. If you are ok with the defaults, you can also use the script default.configure.
+To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir in the indimail-mta-x subdirectory. Defaults are given in the table below. If you are ok with the defaults, you can also use the script default.configure.
 
 **Linux**
 
