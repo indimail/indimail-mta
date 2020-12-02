@@ -598,8 +598,8 @@ Currently, the list of supported distributions for indimail-mta is
           o SUSE Linux Enterprise 15 SP2
 
     * Red Hat
-          o Fedora 33
           o Fedora 32
+          o Fedora 33
           o Red Hat Enterprise Linux 6
           o Red Hat Enterprise Linux 7
           o CentOS 6
@@ -607,7 +607,6 @@ Currently, the list of supported distributions for indimail-mta is
           o CentOS 8
 
     * Debian
-          o Debian  8.0
           o Debian  9.0
           o Debian 10.0
           o Ubuntu 16.04
