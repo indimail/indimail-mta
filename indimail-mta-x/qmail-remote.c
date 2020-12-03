@@ -164,6 +164,7 @@ struct constmap maptlsadomains;
 static stralloc firstpart = { 0 };
 static stralloc asciihost = { 0 };
 static int      smtputf8 = 0;
+static char    *enable_utf8 = 0;
 #endif
 
 void            temp_nomem();
@@ -995,7 +996,8 @@ blast()
 		substdio_put(&smtpto, qqeh.s + r, 1);
 	}
 #ifdef SMTPUTF8
-	substdio_put(&smtpto, firstpart.s, firstpart.len);
+	if (enable_utf8)
+		substdio_put(&smtpto, firstpart.s, firstpart.len);
 #endif
 	for (sol = 1;;) {
 		if (!(r = substdio_get(&ssin, in, sizeof(in))))
@@ -1969,7 +1971,7 @@ mailfrom(int use_size)
 	} else
 		substdio_put(&smtpto, ">", 1);
 #ifdef SMTPUTF8
-	if (smtputf8 && utf8message)
+	if (enable_utf8 && smtputf8 && utf8message)
 		substdio_put(&smtpto, " SMTPUTF8", 9);
 #endif
 	substdio_put(&smtpto, "\r\n", 2);
@@ -1990,7 +1992,7 @@ mailfrom_xtext(int use_size)
 		substdio_puts(&smtpto, "> AUTH=");
 	substdio_put(&smtpto, xuser.s, xuser.len);
 #ifdef SMTPUTF8
-	if (smtputf8 && utf8message)
+	if (enable_utf8 && smtputf8 && utf8message)
 		substdio_put(&smtpto, " SMTPUTF8", 9);
 #endif
 	substdio_puts(&smtpto, "\r\n");
@@ -2740,8 +2742,12 @@ smtp()
 			i += 5 + str_chr(smtptext.s + i, '\n');
 			use_size = !case_diffb(smtptext.s + i, 4, "SIZE");
 #ifdef SMTPUTF8
-			smtputf8 = !case_diffb(smtptext.s + i, 9, "SMTPUTF8");
-			if (use_size && smtputf8)
+			smtputf8 = enable_utf8 ? !case_diffb(smtptext.s + i, 9, "SMTPUTF8") : 0;
+			if (enable_utf8) {
+				if (use_size && smtputf8)
+					break;
+			} else
+			if (use_size)
 				break;
 #else
 			if (use_size)
@@ -2750,9 +2756,11 @@ smtp()
 		} while (smtptext.s[i - 1] == '-');
 	}
 #ifdef SMTPUTF8
-	checkutf8message();
-	if (utf8message && !smtputf8)
-		quit("DConnected to ", " but server does not support unicode in email addresses", code, 1);
+	if (enable_utf8) {
+		checkutf8message();
+		if (utf8message && !smtputf8)
+			quit("DConnected to ", " but server does not support unicode in email addresses", code, 1);
+	}
 #endif
 	smtp_auth(use_auth_smtp, use_size);
 	substdio_flush(&smtpto);
@@ -3359,6 +3367,9 @@ main(int argc, char **argv)
 	dns_init(0);
 	protocol_t = env_get("SMTPS") ? 'S' : 's';
 	use_auth_smtp = env_get("AUTH_SMTP");
+#ifdef SMTPUTF8
+	enable_utf8 = env_get("UTF8");
+#endif
 	/*- Per user SMTPROUTE functionality using moresmtproutes.cdb */
 	relayhost = lookup_host(*recips, str_len(*recips));
 	min_penalty = (x = env_get("MIN_PENALTY")) ? scan_int(x, &min_penalty) : MIN_PENALTY;

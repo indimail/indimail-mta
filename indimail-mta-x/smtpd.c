@@ -2841,7 +2841,7 @@ smtp_ehlo(char *arg)
 	}
 #endif
 #ifdef SMTPUTF8
-	if (env_get("SMTPUTF8")) {
+	if (env_get("UTF8")) {
 		smtputf8_enable = 1;
 		out("250-SMTPUTF8\r\n");
 	}
