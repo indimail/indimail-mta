@@ -14,7 +14,7 @@ qmail-remote \- send mail via SMTP / ESMTP or QMTP
 recipients at a remote host. The remote host \fIhost\fR is \fBqmail-remote\fR's first argument.
 \fBqmail-remote\fR sends the message to \fIhost\fR, or to a mail exchanger for \fIhost\fR
 listed in the Domain Name System, via the Simple Mail Transfer Protocol (SMTP/ESMTP) or the
-Quick Mail Transfer Protocol (QMTP).  QMTP is implemented by \fBqmail-qmtpd\fR. \fIhost\fR can
+Quick Mail Transfer Protocol (QMTP). QMTP is implemented by \fBqmail-qmtpd\fR. \fIhost\fR can
 be either a fully-qualified domain name:
 
 .EX
@@ -34,6 +34,9 @@ this value to process the mail, the value is only passed to the remote mailserve
 The envelope recipient addresses are listed as \fIrecip\fR arguments to \fBqmail-remote\fR.
 
 The envelope sender address is listed as \fIsender\fR.
+
+qmail-remote respects SMTPUTF8 and EAI addresses. If message is utf8, qmail-remote will
+use idn2_lookup_u8(3) to perform IDNA2008 lookup string conversion on \fIhost\fR.
 
 Any Qmail Queue Extra Header (QQEH) information passed to \fBqmail-queue(8)\fR is passed in
 \fIqqeh\fR.
