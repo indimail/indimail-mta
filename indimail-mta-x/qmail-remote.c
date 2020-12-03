@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.138 2020-12-03 17:29:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.139 2020-12-03 23:11:54+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -1985,12 +1985,13 @@ mailfrom_xtext(int use_size)
 	substdio_puts(&smtpto, "MAIL FROM:<");
 	substdio_put(&smtpto, sender.s, sender.len);
 	if (use_size) {
-		substdio_puts(&smtpto, "> SIZE=");
+		substdio_put(&smtpto, "> SIZE=", 7);
 		substdio_puts(&smtpto, msgsize);
-		substdio_puts(&smtpto, " AUTH=");
+		substdio_put(&smtpto, " AUTH=<", 7);
 	} else
-		substdio_puts(&smtpto, "> AUTH=");
+		substdio_put(&smtpto, "> AUTH=<", 8);
 	substdio_put(&smtpto, xuser.s, xuser.len);
+	substdio_put(&smtpto, ">", 1);
 #ifdef SMTPUTF8
 	if (enable_utf8 && smtputf8 && utf8message)
 		substdio_put(&smtpto, " SMTPUTF8", 9);
@@ -3692,7 +3693,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.138 2020-12-03 17:29:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.139 2020-12-03 23:11:54+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3700,6 +3701,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.139  2020-12-03 23:11:54+05:30  Cprogrammer
+ * quote AUTH address
+ *
  * Revision 1.138  2020-12-03 17:29:29+05:30  Cprogrammer
  * added EAI - RFC 6530-32 - unicode address support
  *
