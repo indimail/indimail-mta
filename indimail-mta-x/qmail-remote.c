@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.137 2020-11-29 10:13:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.138 2020-12-03 17:29:29+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -3692,7 +3692,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.137 2020-11-29 10:13:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.138 2020-12-03 17:29:29+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3700,6 +3700,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.138  2020-12-03 17:29:29+05:30  Cprogrammer
+ * added EAI - RFC 6530-32 - unicode address support
+ *
  * Revision 1.137  2020-11-29 10:13:00+05:30  Cprogrammer
  * use get1(), get3() functions to read smtp code
  *

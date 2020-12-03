@@ -64,6 +64,7 @@ Known values for OPTION are:
   [--dksign=dk|dkim|both|none --private_key=private_key]
   [--password-cache] [--query-cache]
   [--smtp-plugin]
+  [--utf8]
   --default-domain=domain
 
  Installs a new queue with a SMTP Listener
@@ -158,6 +159,7 @@ Known values for OPTION are:
   shared-objects - Enabled tcpserver plugins, 0 - disabled, 1 - enabled
   use-dlmopen    - Use dlmopen() instead of dlopen() to load shared objects
   smtp-plugin    - Enable SMTP Plugin support
+  utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
   --servicedir=service_path
@@ -179,6 +181,7 @@ Known values for OPTION are:
   [--dksign=dk|dkim|both|none --private_key=private_key]
   [--remote-authsmtp=b]
   [--ssl]
+  [--utf8]
   --default-domain=domain
 
  Installs a new queue without a SMTP listener
@@ -228,6 +231,7 @@ Known values for OPTION are:
                    delivery times.
   b              - Authenticated SMTP method to use by qmail-remote (plain, login, cram-md5)
   ssl            - Use SSL encrypted communication in qmail-remote
+  utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
   [--cntrldir=cntrl_path]

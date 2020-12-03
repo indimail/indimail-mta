@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.231 $";
+char           *revision = "$Revision: 1.232 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6112,6 +6112,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.232  2020-12-03 17:29:59+05:30  Cprogrammer
+ * added EAI - RFC 6530-32 - unicode address support
+ *
  * Revision 1.231  2020-11-26 14:01:08+05:30  Cprogrammer
  * refactored batv code
  *
@@ -6243,7 +6246,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.231 2020-11-26 14:01:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.232 2020-12-03 17:29:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

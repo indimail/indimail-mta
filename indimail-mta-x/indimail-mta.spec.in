@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.291 2020-12-02 19:07:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.292 2020-12-03 17:28:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1173,19 +1173,15 @@ for port in 465 25 587
 do
   extra_opt=""
   if [ $port -eq 465 ] ; then
-    extra_opt="--skipsend --authsmtp --ssl"
+    extra_opt="--skipsend --authsmtp --ssl --utf8"
     extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   elif [ $port -eq 587 ] ; then
-    extra_opt="--skipsend --forceauthsmtp --antispoof --forcetls"
+    extra_opt="--skipsend --forceauthsmtp --antispoof --forcetls --utf8"
   else
-    if [ $port -eq 25 ] ; then
-      extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
-      extra_opt="--dmemory=%{send_soft_mem}"
-    else
-      extra_opt="--authsmtp"
-    fi
+    extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
     extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
     extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+    extra_opt="$extra_opt --dmemory=%{send_soft_mem} --utf8"
   fi
 %if %{tcpserver_plugin} == 1
     extra_opt="$extra_opt --shared-objects=1 --use-dlmopen=1"
