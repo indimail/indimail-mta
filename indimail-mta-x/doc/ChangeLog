@@ -160,9 +160,11 @@ creation
 - 28/11/2020
 92. 822field.c, 822fields.c: +HeaderName feature by Erwin Hoffman: display all
     headers which have HeaderName as the initial text
-93. qmail-remote: fixed smtpcode() to handle in case remote smtp server returns
+93. qmail-remote: fixed smtpcode() handle cases where remote smtp server returns
     improper codes
 - 29/11/2020
 94. queue-fix: replaced stdio with substdio and added option to specify queue
     subdirectory split
 95. hier.c: moved README.logselect to daemontools
+- 03/12/2020
+96. smtpd.c, qmail-remote.c: Added EAI RFC 6530-32 - unicode address support
