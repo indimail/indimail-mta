@@ -163,8 +163,8 @@ struct constmap maptlsadomains;
 #ifdef SMTPUTF8
 static stralloc firstpart = { 0 };
 static stralloc asciihost = { 0 };
-static int      smtputf8 = 0;
-static char    *enable_utf8 = 0;
+static int      smtputf8 = 0; /*- if remove has SMTPUTF8 capability */
+static char    *enable_utf8 = 0; /*- enable utf8 */
 #endif
 
 void            temp_nomem();
@@ -3492,8 +3492,9 @@ main(int argc, char **argv)
 			default:
 				perm_dns();
 			}
-			if (!stralloc_copys(&asciihost, ascii))
+			if (!stralloc_copys(&asciihost, ascii) || !stralloc_0(&asciihost))
 				temp_nomem();
+			asciihost.len--;
 		}
 #endif
 	}
