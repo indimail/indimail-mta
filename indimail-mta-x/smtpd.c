@@ -72,6 +72,7 @@
 #include <dlfcn.h>
 #endif
 #include <pwd.h>
+#include "hassmtputf8.h"
 
 #define MAXHOPS   100
 #define SMTP_PORT  25
@@ -362,6 +363,9 @@ struct authcmd {
 /*- misc */
 static stralloc sa = { 0 };
 static stralloc domBuf = { 0 };
+#ifdef SMTPUTF8
+int             smtputf8 = 0, smtputf8_enable = 0;
+#endif
 
 int             smtp_port;
 void           *phandle;
@@ -2836,6 +2840,12 @@ smtp_ehlo(char *arg)
 		alloc_free(filename.s);
 	}
 #endif
+#ifdef SMTPUTF8
+	if (env_get("SMTPUTF8")) {
+		smtputf8_enable = 1;
+		out("250-SMTPUTF8\r\n");
+	}
+#endif
 	out("250 HELP\r\n");
 	if (!arg || !*arg)
 		dohelo(remoteip);
@@ -3064,6 +3074,10 @@ mailfrom_parms(char *arg)
 			arg++;
 			len--;
 			if (*arg == ' ' || *arg == '\0') {
+#ifdef SMTPUTF8
+				if (smtputf8_enable && case_starts(mfparms.s, "SMTPUTF8"))
+					smtputf8 = 1;
+#endif
 				if (case_starts(mfparms.s, "SIZE=") && mailfrom_size(mfparms.s + 5)) {
 					flagsize = 1;
 					return;
@@ -3086,10 +3100,9 @@ smtp_mail(char *arg)
 {
 	struct passwd  *pw;
 	char           *x;
-	int             ret;
+	int             ret, i;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
-	int             i;
 #endif
 #ifdef USE_SPF
 	int             r;
@@ -3128,24 +3141,30 @@ smtp_mail(char *arg)
 		smtp_badip(remoteip);
 		return;
 	}
-	if (!env_put2("SPFRESULT", "unknown"))
-		die_nomem();
 	if (!seenhelo) {
 		out("503 Polite people say hello first (#5.5.4)\r\n");
 		return;
 	}
+	if (!addrparse(arg)) {
+		err_syntax();
+		return;
+	}
+	if (!env_put2("SPFRESULT", "unknown"))
+		die_nomem();
+#ifdef SMTPUTF8
+	if (!stralloc_catb(&proto, smtputf8 ? "UTF8ESMTP" : "ESMTP", smtputf8 ? 9 : 5))
+		die_nomem();
+#else
 	if (!stralloc_catb(&proto, "ESMTP", 5))
 		die_nomem();
+#endif
 #ifdef TLS
 	if (ssl && !stralloc_append(&proto, "S"))
 		die_nomem();
 #endif
 	if (authd && !stralloc_append(&proto, "A"))
 		die_nomem();
-	if (!addrparse(arg)) {
-		err_syntax();
-		return;
-	}
+
 #if BATV
 	if (batvok)
 		(void) check_batv_sig(); /*- unwrap in case it's ours */

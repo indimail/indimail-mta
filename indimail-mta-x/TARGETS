@@ -1138,3 +1138,4 @@ run_init.o
 sslerator
 sslerator.o
 queue-fix.8
+hassmtputf8.h

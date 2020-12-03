@@ -64,6 +64,10 @@
 #include "tlsacheck.h"
 #endif
 #endif /*- #ifdef TLS */
+#include "hassmtputf8.h"
+#ifdef SMTPUTF8
+#include <idn2.h>
+#endif
 
 #define EHLO 1
 #define HUGESMTPTEXT  5000
@@ -154,6 +158,12 @@ stralloc        hexstring = { 0 };
 stralloc        hextmp = { 0 };
 stralloc        tlsadomains = { 0 };
 struct constmap maptlsadomains;
+#endif
+
+#ifdef SMTPUTF8
+static stralloc firstpart = { 0 };
+static stralloc asciihost = { 0 };
+static int      smtputf8 = 0;
 #endif
 
 void            temp_nomem();
@@ -887,7 +897,7 @@ ehlo()
 	if ((code = smtpcode()) != 250)
 		return code;
 	s = smtptext.s;
-	while (*s++ != '\n');		/*- skip the first line: contains the domain */
+	while (*s++ != '\n'); /*- skip the first line: contains the domain */
 	e = smtptext.s + smtptext.len - 6;	/*- 250-?\n */
 	while (s <= e) {
 		int             wasspace = 0;
@@ -984,6 +994,9 @@ blast()
 			substdio_put(&smtpto, "\r", 1);
 		substdio_put(&smtpto, qqeh.s + r, 1);
 	}
+#ifdef SMTPUTF8
+	substdio_put(&smtpto, firstpart.s, firstpart.len);
+#endif
 	for (sol = 1;;) {
 		if (!(r = substdio_get(&ssin, in, sizeof(in))))
 			break;
@@ -1014,6 +1027,129 @@ blast()
 	substdio_put(&smtpto, ".\r\n", 3);
 	substdio_flush(&smtpto);
 }
+
+#ifdef SMTPUTF8
+int
+containsutf8(p, l)
+	unsigned char  *p;
+	int             l;
+{
+	int             i = 0;
+
+	while (i < l)
+		if (p[i++] > 127)
+			return 1;
+	return 0;
+}
+
+int             utf8message;
+
+void
+checkutf8message()
+{
+	int             pos, i, r, state;
+	char            ch;
+
+	if (containsutf8(sender.s, sender.len)) {
+		utf8message = 1;
+		return;
+	}
+	for (i = 0; i < reciplist.len; ++i) {
+		if (containsutf8(reciplist.sa[i].s, reciplist.sa[i].len)) {
+			utf8message = 1;
+			return;
+		}
+	}
+	state = 0;
+	pos = 0;
+	/*
+	 * "Received: from relay1.uu.net (HELO uunet.uu.net) (7@192.48.96.5)"
+	 * "  by silverton.berkeley.edu with UTF8SMTP; 29 Nov 2020 04:46:54 -0000\n"
+	 */
+	for (;;) {
+		if (!(r = substdio_get(&ssin, &ch, 1)))
+			break;
+		else
+		if (r == -1)
+			temp_read();
+		if (ch == '\n' && !stralloc_cats(&firstpart, "\r"))
+			temp_nomem();
+		if (!stralloc_append(&firstpart, &ch))
+			temp_nomem();
+		if (ch == '\r')
+			continue;
+		if (ch == '\t')
+			ch = ' ';
+		if (ch == '\n' && utf8message)
+			return;
+		switch (state)
+		{
+		case 6: /* in Received, at LF but before WITH clause */
+			if (ch == ' ') {
+				state = 3;
+				pos = 1;
+				continue;
+			}
+			state = 0;
+			/*- FALL THROUGH */
+		case 0: /* start of header field */
+			if (ch == '\n')
+				return;
+			state = 1;
+			pos = 0;
+			/*- FALL THROUGH */
+		case 1: /* partway through "Received:" */
+			if (ch != "RECEIVED:"[pos] && ch != "received:"[pos]) {
+				state = 2;
+				continue;
+			}
+			if (++pos == 9) {
+				state = 3;
+				pos = 0;
+			}
+			continue;
+		case 2: /* other header field */
+			if (ch == '\n')
+				state = 0;
+			continue;
+		case 3: /* in Received, before WITH clause or partway though " with " */
+			if (ch == '\n') {
+				state = 6;
+				continue;
+			}
+			if (ch != " WITH "[pos] && ch != " with "[pos]) {
+				pos = 0;
+				continue;
+			}
+			if (++pos == 6) {
+				state = 4;
+				pos = 0;
+			}
+			continue;
+		case 4: /* in Received, having seen with, before the argument */
+			if (pos == 0 && ch == ' ')
+				continue;
+			if (ch != "UTF8"[pos] && ch != "utf8"[pos]) {
+				state = 5;
+				continue;
+			}
+			if (++pos == 4) {
+				utf8message = 1;
+				state = 5;
+				continue;
+			}
+			continue;
+		case 5: /* after the RECEIVED WITH argument */
+			/*- blast() assumes that it copies whole lines */
+			if (ch == '\n')
+				return;
+			state = 1;
+			pos = 0;
+			continue;
+		}
+	}
+}
+#endif
 
 #ifdef TLS
 
@@ -1828,11 +1964,15 @@ mailfrom(int use_size)
 	substdio_puts(&smtpto, "MAIL FROM:<");
 	substdio_put(&smtpto, sender.s, sender.len);
 	if (use_size) {
-		substdio_puts(&smtpto, "> SIZE=");
+		substdio_put(&smtpto, "> SIZE=", 7);
 		substdio_puts(&smtpto, msgsize);
-		substdio_puts(&smtpto, "\r\n");
 	} else
-		substdio_puts(&smtpto, ">\r\n");
+		substdio_put(&smtpto, ">", 1);
+#ifdef SMTPUTF8
+	if (smtputf8 && utf8message)
+		substdio_put(&smtpto, " SMTPUTF8", 9);
+#endif
+	substdio_put(&smtpto, "\r\n", 2);
 }
 
 void
@@ -1845,10 +1985,14 @@ mailfrom_xtext(int use_size)
 	if (use_size) {
 		substdio_puts(&smtpto, "> SIZE=");
 		substdio_puts(&smtpto, msgsize);
-		substdio_puts(&smtpto, " AUTH=<");
+		substdio_puts(&smtpto, " AUTH=");
 	} else
 		substdio_puts(&smtpto, "> AUTH=");
 	substdio_put(&smtpto, xuser.s, xuser.len);
+#ifdef SMTPUTF8
+	if (smtputf8 && utf8message)
+		substdio_put(&smtpto, " SMTPUTF8", 9);
+#endif
 	substdio_puts(&smtpto, "\r\n");
 	substdio_flush(&smtpto);
 }
@@ -2492,14 +2636,14 @@ smtp()
 	else
 	if (code != 220)
 		quit("ZConnected to ", " but greeting failed", code, -1);
-#ifdef TLS
-	if (!smtps)
-		code = ehlo();
 	/*-
  	 * RFC2487 says we should issue EHLO (even if we might not need
  	 * extensions); at the same time, it does not prohibit a server
  	 * to reject the EHLO and make us fallback to HELO
  	 */
+#ifdef TLS
+	if (!smtps)
+		code = ehlo();
 #ifdef HASTLSA
 	if (do_tlsa && ta.len) {
 		match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
@@ -2588,17 +2732,28 @@ smtp()
 	}
 	/*-
  	 * go through all lines of the multi line answer until one begins
- 	 * with "XXX[ -]SIZE" or we reach the last line
+ 	 * with "XXX[ |-]SIZE", XXX[ |-]SMTPUTF8 or we reach the last line
  	 */
 	if (is_esmtp) {
 		i = 0;
 		do {
 			i += 5 + str_chr(smtptext.s + i, '\n');
 			use_size = !case_diffb(smtptext.s + i, 4, "SIZE");
+#ifdef SMTPUTF8
+			smtputf8 = !case_diffb(smtptext.s + i, 9, "SMTPUTF8");
+			if (use_size && smtputf8)
+				break;
+#else
 			if (use_size)
 				break;
+#endif
 		} while (smtptext.s[i - 1] == '-');
 	}
+#ifdef SMTPUTF8
+	checkutf8message();
+	if (utf8message && !smtputf8)
+		quit("DConnected to ", " but server does not support unicode in email addresses", code, 1);
+#endif
 	smtp_auth(use_auth_smtp, use_size);
 	substdio_flush(&smtpto);
 	code = smtpcode();
@@ -3306,8 +3461,31 @@ main(int argc, char **argv)
 		}
 		if (!stralloc_copys(&host, relayhost))
 			temp_nomem();
-	} else
+	} else {
+#ifdef SMTPUTF8
+		char           *ascii;
+#endif
+
 		use_auth_smtp = 0;
+#ifdef SMTPUTF8
+		if (smtputf8) {
+			if (!stralloc_0(&host))
+				temp_nomem();
+			host.len--;
+			switch (idn2_lookup_u8((const uint8_t *) host.s, (uint8_t **) &ascii, IDN2_NFC_INPUT))
+			{
+			case IDN2_OK:
+				break;
+			case IDN2_MALLOC:
+				temp_nomem();
+			default:
+				perm_dns();
+			}
+			if (!stralloc_copys(&asciihost, ascii))
+				temp_nomem();
+		}
+#endif
+	}
 #if BATV
 	if (batvok && sender.len && signkey.len) {
 		if (!stralloc_0(&sender))
@@ -3337,7 +3515,12 @@ main(int argc, char **argv)
 		++recips;
 	}
 	random = now() + (getpid() << 16);
-	switch (relayhost ? dns_ip(&ip, &host) : dns_mxip(&ip, &host, random))
+#ifdef SMTPUTF8
+	i = relayhost ? dns_ip(&ip, &host) : dns_mxip(&ip, smtputf8 ? &asciihost : &host, random);
+#else
+	i = relayhost ? dns_ip(&ip, &host) : dns_mxip(&ip, &host, random);
+#endif
+	switch (i)
 	{
 	case DNS_MEM:
 		temp_nomem();
