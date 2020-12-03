@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.292 2020-12-03 17:28:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.293 2020-12-03 20:59:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -106,7 +106,7 @@ Conflicts: indimail-mta < 2.0
 Obsoletes: indimail-mta < 2.0
 BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
 BuildRequires: sed findutils diffutils gzip coreutils grep
-BuildRequires: glibc glibc-devel binutils
+BuildRequires: glibc glibc-devel binutils libidn2-devel
 BuildRequires: openssl openssl-devel mysql-devel
 BuildRequires: libqmail-devel libdkim-devel libsrs2-devel
 
