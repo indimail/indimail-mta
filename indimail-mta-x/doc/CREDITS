@@ -167,3 +167,4 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 106.Rolf Eike Beer <eike@sf-mail.de> gen_allocdefs.h, GEN_ALLOC refactoring
     changes to fix memory overflow
 107.Fefe - felix-libowfat@fefe.de for functions taken from libowfat & ipv6 in ucspi-tcp
+108.RFC 6530-32 EAI - Adapted from Arnt Gulbrandsen unicode address support patch for qmail.
