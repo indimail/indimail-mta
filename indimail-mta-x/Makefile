@@ -1540,15 +1540,17 @@ qr_digest_md5.o: compile qr_digest_md5.c
 qmail-remote: \
 load qmail-remote.o control.o timeoutconn.o tcpto.o dns.o ip.o \
 ipalloc.o strsalloc.o ipme.o quote.o variables.o tls.o \
-auto_control.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
-tlsarralloc.o qr_digest_md5.o socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o \
-fn_handler.o query_skt.o tlsacheck.o auto_qmail.o dns.lib socket.lib tls.lib 
-	./load qmail-remote control.o tlsacheck.o auto_control.o timeoutconn.o \
-	tcpto.o dns.o ip.o socket_ip4loopback.o socket_v6loopback.o \
-	socket_v6any.o ipalloc.o socket_v4mappedprefix.o strsalloc.o \
-	ipme.o quote.o fn_handler.o qr_digest_md5.o query_skt.o \
-	tlsarralloc.o variables.o socket_tcp.o socket_tcp6.o tls.o \
-	auto_qmail.o `cat dns.lib socket.lib tls.lib` -lqmail -lidn2
+auto_control.o socket_ip4loopback.o socket_v6loopback.o \
+socket_v6any.o tlsarralloc.o qr_digest_md5.o fn_handler.o \
+query_skt.o tlsacheck.o auto_qmail.o dns.lib socket.lib tls.lib \
+socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o idn2.lib
+	./load qmail-remote control.o tlsacheck.o auto_control.o \
+	timeoutconn.o tcpto.o dns.o ip.o socket_ip4loopback.o \
+	socket_v6loopback.o socket_v6any.o ipalloc.o \
+	socket_v4mappedprefix.o strsalloc.o ipme.o quote.o fn_handler.o \
+	qr_digest_md5.o query_skt.o tlsarralloc.o variables.o \
+	socket_tcp.o socket_tcp6.o tls.o auto_qmail.o `cat dns.lib \
+	socket.lib tls.lib idn2.lib` -lqmail
 
 qmail-remote.8: \
 qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
@@ -1562,7 +1564,14 @@ hassmtputf8.h: \
 tryinotify.c compile load conf-smtputf8
 	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
 		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
-	&& echo \#define SMTPUTF8 1 || exit 0) > hassmtputf8.h
+	&& echo \#define SMTPUTF8 1 || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1<&2) > hassmtputf8.h
+	rm -f tryidn2.o tryidn2
+
+idn2.lib: \
+tryinotify.c compile load conf-smtputf8
+	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
+		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
+	&& echo "-lidn2" || echo "WARNING!!! Not linked with libidn2" 1>&2) > idn2.lib
 	rm -f tryidn2.o tryidn2
 
 qmail-remote.o: \
@@ -2178,7 +2187,7 @@ tlsarralloc.o dns.lib socket.lib
 
 tcp-env.o: \
 compile tcp-env.c strsalloc.h ip.h dns.h remoteinfo.h \
-socket.h haveip6.h conf-spf conf-ip
+hassalen.h socket.h haveip6.h conf-spf conf-ip
 	./compile `grep -h -v "^#" conf-spf conf-ip` tcp-env.c
 
 tcpto.o: \
