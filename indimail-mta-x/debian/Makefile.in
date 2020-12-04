@@ -16,10 +16,10 @@ all: rules indimail-mta.prerm indimail-mta.preinst \
 indimail-mta.postrm indimail-mta.postinst \
 indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst \
-indimail-mta.install \
-indimail-mta.dsc indimail-mta-Debian_9.0.dsc \
-indimail-mta-Debian_10.dsc indimail-mta-xUbuntu_18.04.dsc \
-debian.tar.gz
+indimail-mta.install indimail-mta.dsc \
+indimail-mta-Debian_9.0.dsc indimail-mta-Debian_10.dsc \
+indimail-mta-xUbuntu_18.04.dsc indimail-mta-Raspbian_10.dsc \
+indimail-mta-Raspbian_9.0.dsc debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -66,6 +66,10 @@ changelog: changelog.in ../conf-version ../conf-release
 indimail-mta.install: indimail-mta.install.in Makefile
 	$(edit) $@.in > $@
 indimail-mta.dsc: indimail-mta.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+indimail-mta-Raspbian_10.dsc: indimail-mta-Raspbian_10.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+indimail-mta-Raspbian_9.0.dsc: indimail-mta-Raspbian_9.0.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 indimail-mta-Debian_10.dsc: indimail-mta-Debian_10.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
