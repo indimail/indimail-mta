@@ -3066,8 +3066,7 @@ mailfrom_parms(char *arg)
 	int             len;
 
 	len = str_len(arg);
-	if (!stralloc_copys(&mfparms, ""))
-		die_nomem();
+	mfparms.len = 0;
 	i = byte_chr(arg, len, '>');
 	if (i > 4 && i < len) {
 		while (len) {
@@ -3075,17 +3074,22 @@ mailfrom_parms(char *arg)
 			len--;
 			if (*arg == ' ' || *arg == '\0') {
 #ifdef SMTPUTF8
-				if (smtputf8_enable && case_starts(mfparms.s, "SMTPUTF8"))
+				if (smtputf8_enable && case_starts(mfparms.s, "SMTPUTF8")) {
 					smtputf8 = 1;
+				} else
 #endif
-				if (case_starts(mfparms.s, "SIZE=") && mailfrom_size(mfparms.s + 5)) {
-					flagsize = 1;
-					return;
-				}
-				if (case_starts(mfparms.s, "AUTH="))
+				if (case_starts(mfparms.s, "SIZE=")) {
+					mfparms.s[mfparms.len] = 0;
+					if (mailfrom_size(mfparms.s + 5)) {
+						flagsize = 1;
+						return;
+					}
+				} else
+				if (case_starts(mfparms.s, "AUTH=")) {
+					mfparms.s[mfparms.len] = 0;
 					mailfrom_auth(mfparms.s + 5, mfparms.len - 5);
-				if (!stralloc_copys(&mfparms, ""))
-					die_nomem();
+				}
+				mfparms.len = 0;
 			} else
 			if (!stralloc_catb(&mfparms, arg, 1))
 				die_nomem();
