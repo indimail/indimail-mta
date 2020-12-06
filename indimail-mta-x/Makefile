@@ -1537,6 +1537,20 @@ rrt.1: rrt.9 conf-sysconfdir
 qr_digest_md5.o: compile qr_digest_md5.c
 	./compile qr_digest_md5.c
 
+hassmtputf8.h: \
+tryidn2.c compile load conf-smtputf8
+	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
+		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
+	&& echo \#define SMTPUTF8 1 || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1<&2) > hassmtputf8.h
+	rm -f tryidn2.o tryidn2
+
+idn2.lib: \
+tryidn2.c compile load conf-smtputf8
+	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
+		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
+	&& echo "-lidn2" || echo "WARNING!!! Not linked with libidn2" 1>&2) > idn2.lib
+	rm -f tryidn2.o tryidn2
+
 qmail-remote: \
 load qmail-remote.o control.o timeoutconn.o tcpto.o dns.o ip.o \
 ipalloc.o strsalloc.o ipme.o quote.o variables.o tls.o \
@@ -1559,20 +1573,6 @@ qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
 	> qmail-remote.8
-
-hassmtputf8.h: \
-tryinotify.c compile load conf-smtputf8
-	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
-		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
-	&& echo \#define SMTPUTF8 1 || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1<&2) > hassmtputf8.h
-	rm -f tryidn2.o tryidn2
-
-idn2.lib: \
-tryinotify.c compile load conf-smtputf8
-	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
-		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
-	&& echo "-lidn2" || echo "WARNING!!! Not linked with libidn2" 1>&2) > idn2.lib
-	rm -f tryidn2.o tryidn2
 
 qmail-remote.o: \
 compile qmail-remote.c tls.h ssl_timeoutio.h auth_cram.h \
