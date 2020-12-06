@@ -161,10 +161,11 @@ struct constmap maptlsadomains;
 #endif
 
 #ifdef SMTPUTF8
-static stralloc firstpart = { 0 };
-static stralloc asciihost = { 0 };
+static stralloc header = { 0 };
+static stralloc idnhost = { 0 };
 static int      smtputf8 = 0; /*- if remove has SMTPUTF8 capability */
 static char    *enable_utf8 = 0; /*- enable utf8 */
+int             flagutf8;
 #endif
 
 void            temp_nomem();
@@ -995,10 +996,6 @@ blast()
 			substdio_put(&smtpto, "\r", 1);
 		substdio_put(&smtpto, qqeh.s + r, 1);
 	}
-#ifdef SMTPUTF8
-	if (enable_utf8)
-		substdio_put(&smtpto, firstpart.s, firstpart.len);
-#endif
 	for (sol = 1;;) {
 		if (!(r = substdio_get(&ssin, in, sizeof(in))))
 			break;
@@ -1044,8 +1041,6 @@ containsutf8(p, l)
 	return 0;
 }
 
-int             utf8message;
-
 void
 checkutf8message()
 {
@@ -1053,12 +1048,12 @@ checkutf8message()
 	char            ch;
 
 	if (containsutf8(sender.s, sender.len)) {
-		utf8message = 1;
+		flagutf8 = 1;
 		return;
 	}
 	for (i = 0; i < reciplist.len; ++i) {
 		if (containsutf8(reciplist.sa[i].s, reciplist.sa[i].len)) {
-			utf8message = 1;
+			flagutf8 = 1;
 			return;
 		}
 	}
@@ -1074,15 +1069,15 @@ checkutf8message()
 		else
 		if (r == -1)
 			temp_read();
-		if (ch == '\n' && !stralloc_cats(&firstpart, "\r"))
+		if (ch == '\n' && !stralloc_cats(&header, "\r"))
 			temp_nomem();
-		if (!stralloc_append(&firstpart, &ch))
+		if (!stralloc_append(&header, &ch))
 			temp_nomem();
 		if (ch == '\r')
 			continue;
 		if (ch == '\t')
 			ch = ' ';
-		if (ch == '\n' && utf8message)
+		if (ch == '\n' && flagutf8)
 			return;
 		switch (state)
 		{
@@ -1136,7 +1131,7 @@ checkutf8message()
 				continue;
 			}
 			if (++pos == 4) {
-				utf8message = 1;
+				flagutf8 = 1;
 				state = 5;
 				continue;
 			}
@@ -1971,7 +1966,7 @@ mailfrom(int use_size)
 	} else
 		substdio_put(&smtpto, ">", 1);
 #ifdef SMTPUTF8
-	if (enable_utf8 && smtputf8 && utf8message)
+	if (enable_utf8 && smtputf8 && flagutf8)
 		substdio_put(&smtpto, " SMTPUTF8", 9);
 #endif
 	substdio_put(&smtpto, "\r\n", 2);
@@ -1993,7 +1988,7 @@ mailfrom_xtext(int use_size)
 	substdio_put(&smtpto, xuser.s, xuser.len);
 	substdio_put(&smtpto, ">", 1);
 #ifdef SMTPUTF8
-	if (enable_utf8 && smtputf8 && utf8message)
+	if (enable_utf8 && smtputf8 && flagutf8)
 		substdio_put(&smtpto, " SMTPUTF8", 9);
 #endif
 	substdio_puts(&smtpto, "\r\n");
@@ -2619,6 +2614,7 @@ smtp()
 	tlsarr         *rp;
 #endif
 
+	smtputf8 = 0;
 	inside_greeting = 1;
 #ifdef TLS
 	if (protocol_t == 'S' || (protocol_t != 'q' && port == 465))
@@ -2758,8 +2754,9 @@ smtp()
 	}
 #ifdef SMTPUTF8
 	if (enable_utf8) {
-		checkutf8message();
-		if (utf8message && !smtputf8)
+		if (!flagutf8)
+			checkutf8message();
+		if (flagutf8 && !smtputf8)
 			quit("DConnected to ", " but server does not support unicode in email addresses", code, 1);
 	}
 #endif
@@ -2816,6 +2813,10 @@ smtp()
 		quit("D", " failed on DATA command", code, 1);
 	if (code >= 400)
 		quit("Z", " failed on DATA command", code, -1);
+#ifdef SMTPUTF8
+	if (enable_utf8 && header.len)
+		substdio_put(&smtpto, header.s, header.len);
+#endif
 	blast();
 	code = smtpcode();
 	flagcritical = 0;
@@ -3475,7 +3476,7 @@ main(int argc, char **argv)
 			temp_nomem();
 	} else {
 #ifdef SMTPUTF8
-		char           *ascii;
+		char           *asciihost;
 #endif
 
 		use_auth_smtp = 0;
@@ -3484,7 +3485,7 @@ main(int argc, char **argv)
 			if (!stralloc_0(&host))
 				temp_nomem();
 			host.len--;
-			switch (idn2_lookup_u8((const uint8_t *) host.s, (uint8_t **) &ascii, IDN2_NFC_INPUT))
+			switch (idn2_lookup_u8((const uint8_t *) host.s, (uint8_t **) &asciihost, IDN2_NFC_INPUT))
 			{
 			case IDN2_OK:
 				break;
@@ -3493,9 +3494,9 @@ main(int argc, char **argv)
 			default:
 				perm_dns();
 			}
-			if (!stralloc_copys(&asciihost, ascii) || !stralloc_0(&asciihost))
+			if (!stralloc_copys(&idnhost, asciihost) || !stralloc_0(&idnhost))
 				temp_nomem();
-			asciihost.len--;
+			idnhost.len--;
 		}
 #endif
 	}
@@ -3529,7 +3530,7 @@ main(int argc, char **argv)
 	}
 	random = now() + (getpid() << 16);
 #ifdef SMTPUTF8
-	i = relayhost ? dns_ip(&ip, &host) : dns_mxip(&ip, smtputf8 ? &asciihost : &host, random);
+	i = relayhost ? dns_ip(&ip, &host) : dns_mxip(&ip, smtputf8 ? &idnhost : &host, random);
 #else
 	i = relayhost ? dns_ip(&ip, &host) : dns_mxip(&ip, &host, random);
 #endif
