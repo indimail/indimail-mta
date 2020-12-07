@@ -37,7 +37,7 @@ Each filter on the command line in seperated with
 Returns 51 (out of memory), 53 (write error), or 81 (internal error)
 if it can't create the temporary files or has problems executing the
 filters.
-Returns 91 (bad envelope data) if it can't read or parse the envelope
+Returns 79 (bad envelope data) if it can't read or parse the envelope
 data.
 .B qmail-qfilter
 returns exit code of filter, if the filter returns anything other than
@@ -85,10 +85,8 @@ qmail-multi(8)
 is deliberately not used to override
 .B qmail-queue
 in order to avoid recursive loops with configurations that set
-.B $QMAILQUEUE
-to invoke
-.B qmail-qfilter
-itself.
+.B $QMAILQUEUE .
+
 .SH WARNINGS
 If you are using
 .B qmail-inject -n
