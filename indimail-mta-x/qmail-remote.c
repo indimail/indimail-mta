@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.139 2020-12-03 23:11:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.140 2020-12-07 12:05:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -3694,7 +3694,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.139 2020-12-03 23:11:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.140 2020-12-07 12:05:49+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3702,6 +3702,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.140  2020-12-07 12:05:49+05:30  Cprogrammer
+ * renamed utf8message to flagutf8, firstpart to header
+ *
  * Revision 1.139  2020-12-03 23:11:54+05:30  Cprogrammer
  * quote AUTH address
  *
