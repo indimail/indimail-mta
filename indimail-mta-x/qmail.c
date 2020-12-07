@@ -1,5 +1,8 @@
 /*
  * $Log: qmail.c,v $
+ * Revision 1.28  2020-12-07 16:08:20+05:30  Cprogrammer
+ * added exit code 79 as duplicate to 91 for Envelope format error
+ *
  * Revision 1.27  2020-11-24 13:46:41+05:30  Cprogrammer
  * removed exit.h
  *
@@ -200,8 +203,7 @@ qmail_close(struct qmail *qq)
 		qq->flagerr = 1;
 	close(qq->fde);
 	substdio_fdbuf(&qq->ss, read, qq->fdc, qq->buf, sizeof(qq->buf));
-	while (substdio_bget(&qq->ss, &ch, 1) && len < (sizeof(errstr) - 1))
-	{
+	while (substdio_bget(&qq->ss, &ch, 1) && len < (sizeof(errstr) - 1)) {
 		errstr[len] = ch;
 		len++;
 	}
@@ -281,12 +283,15 @@ qmail_close(struct qmail *qq)
 		return "Ztemporary problem with SPAM filter (#4.3.0)";
 	case 77: /*- thanks to problem repoted by peter cheng */
 		return "Zqq unable to run QHPSI scanner (#4.3.0)";
+	case 79:
+		return "Zqq Envelope format error (#4.3.0)";
 	case 91:
 		/*- fall through */
 	case 81:
 		return "Zqq internal bug (#4.3.0)";
 	case 87: /*-*/
 		return "Zmail system incorrectly configured. (#4.3.5)";
+	case 82: /*- compatability with simscan, notqmail, etc */
 	case 88: /*- custom error */
 		if (len > 2)
 			return errstr;
@@ -308,7 +313,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.27 2020-11-24 13:46:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.28 2020-12-07 16:08:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
