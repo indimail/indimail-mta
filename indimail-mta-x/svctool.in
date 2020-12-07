@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.529 2020-11-18 15:01:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.530 2020-12-03 17:30:09+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.529 2020-11-18 15:01:22+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.530 2020-12-03 17:30:09+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -97,6 +97,7 @@ Known values for OPTION are:
   [--dksign=dk|dkim|both|none --private_key=private_key]
   [--password-cache] [--query-cache]
   [--smtp-plugin]
+  [--utf8]
   --default-domain=domain
 
  Installs a new queue with a SMTP Listener
@@ -191,6 +192,7 @@ Known values for OPTION are:
   shared-objects - Enabled tcpserver plugins, 0 - disabled, 1 - enabled
   use-dlmopen    - Use dlmopen() instead of dlopen() to load shared objects
   smtp-plugin    - Enable SMTP Plugin support
+  utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
   --servicedir=service_path
@@ -212,9 +214,10 @@ Known values for OPTION are:
   [--dksign=dk|dkim|both|none --private_key=private_key]
   [--remote-authsmtp=b]
   [--ssl]
+  [--utf8]
   --default-domain=domain
 
- Installs a new queue without a SMTP listener
+ Installs a new queue with a delivery daemon
   N              - No of Queues
   I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
@@ -261,6 +264,7 @@ Known values for OPTION are:
                    delivery times.
   b              - Authenticated SMTP method to use by qmail-remote (plain, login, cram-md5)
   ssl            - Use SSL encrypted communication in qmail-remote
+  utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
   [--cntrldir=cntrl_path]
@@ -277,7 +281,7 @@ Known values for OPTION are:
   [--dkverify=dk|dkim|both|none]
   [--dksign=dk|dkim|both|none --private_key=private_key]
 
- Installs a new queue with a SMTP Listener
+ Installs a new queue without a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
@@ -1991,8 +1995,8 @@ echo "$prog_args" > $conf_dir/.options
 
 create_smtp()
 {
-if [ $# -ne 10 ] ; then
-	echo "USAGE: create_smtp qbase queue_count first_queue_no supervise_dir smtp_port check_user=0|1 check_relay=0|1 use_ssl=0|1 force_tls=0|1 infifo=fifo_path" 1>&2
+if [ $# -ne 11 ] ; then
+	echo "USAGE: create_smtp qbase queue_count first_queue_no supervise_dir smtp_port check_user=0|1 check_relay=0|1 use_ssl=0|1 force_tls=0|1 infifo=fifo_path utf8=0|1" 1>&2
 	return 1
 fi
 QUEUE_BASE=$1
@@ -2005,6 +2009,7 @@ chkrelay=$7
 smtp_ssl=$8
 force_tls=$9
 infifo=${10}
+utf8=${11}
 
 # qmail-smtpd script
 if [ " $servicetag" = " " ] ; then
@@ -2249,6 +2254,11 @@ if [ " $odmr" = " " ] ; then
 				> $conf_dir/CHECKRELAY
 			fi
 		fi
+	fi
+	if [ $utf -eq 1 ] ; then
+		echo > $conf_dir/UTF8
+	else
+		> $conf_dir/UTF8
 	fi
 fi # odmr
 if [ $shared_objects -eq 1 ] ; then
@@ -5795,10 +5805,10 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 }
 
-create_queue()
+create_delivery()
 {
-if [ $# -ne 7 ] ; then
-	echo "USAGE: create_queue qbase queue_count first_queue_no supervise_dir ident routes=smtp|qmtp|static use_ssl" 1>&2
+if [ $# -ne 8 ] ; then
+	echo "USAGE: create_delivery qbase queue_count first_queue_no supervise_dir ident routes=smtp|qmtp|static use_ssl utf8" 1>&2
 	return 1
 fi
 QUEUE_BASE=$1
@@ -5808,6 +5818,7 @@ SERVICEDIR=$4
 QUEUE_IDENT=$5
 routes=$6
 qmr_ssl=$7
+utf8=$8
 if [ " $servicetag" = " " ] ; then
 	tag=$QUEUE_IDENT
 else
@@ -5892,6 +5903,11 @@ else
 fi
 if [ $qmr_ssl -eq 1 ] ; then
 echo $sysconfdir/certs > $conf_dir/CERTDIR #for qmail-remote
+fi
+if [ $utf8 -eq 1 ] ; then
+	echo $utf8 > $conf_dir/UTF8
+else
+	> $conf_dir/UTF8
 fi
 if [ ! " $routes" = " " ] ; then
 	echo $routes > $conf_dir/ROUTES
@@ -8717,6 +8733,7 @@ use_starttls=0
 forcetls=0
 nooverwrite=0
 run_file_only=0
+utf8=0
 databytes=$DATABYTES
 if [ " $CONTROLDIR" = " " ] ; then
 	cntrldir=$sysconfdir/control
@@ -8965,6 +8982,9 @@ while test $# -gt 0; do
 	;;
 	--routes=*)
 	routes=$optarg
+	;;
+	--utf8)
+	utf8=1
 	;;
 	--cname-lookup)
 	enable_cname_lookup="yes"
@@ -9498,9 +9518,9 @@ case $option in
 		if [ " $skipsend" = " " ] ; then
 			echo "Creating $qcount queues"
 			if [ $use_starttls -ne 0 -o $use_ssl -ne 0 ] ; then
-				create_queue "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$routes" "1"
+				create_delivery "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$routes" "1" "$utf8"
 			else
-				create_queue "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$routes" "0"
+				create_delivery "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$routes" "0" "$utf8"
 			fi
 		fi
 	fi
@@ -9509,7 +9529,7 @@ case $option in
 	else
 	echo "Creating SMTP Listener Port $smtp_port, Service $servicedir"
 	fi
-	create_smtp "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$chkrecipient" "$chkrelay" "$use_ssl" "$forcetls" "$infifo"
+	create_smtp "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$chkrecipient" "$chkrelay" "$use_ssl" "$forcetls" "$infifo" "$utf8"
 	;;
 
 	2) # IMAP Service
@@ -9701,7 +9721,7 @@ case $option in
 	create_fetchmail "$qbase" "$qcount" "$qstart" "$servicedir"
 	;;
 
-	10)
+	10) # --config
 	# config creation for MySQL, MySQL Database creation, imap, 
 	# 1  MySQL Config creation
 	# 2  MySQL Database creation
@@ -10172,7 +10192,7 @@ case $option in
 	esac
 	;;
 
-	11)
+	11) # check install
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $qbase" = " " ] ; then
@@ -10191,7 +10211,7 @@ case $option in
 	check_installation "$qbase" "$qcount" "$qstart" "$servicedir" "$verbose"
 	;;
 
-	12)
+	12) # create_svscan
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10221,7 +10241,7 @@ case $option in
 	fi
 	;;
 
-	13)
+	13) # mysqldump
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10251,7 +10271,7 @@ case $option in
 	fi
 	;;
 
-	14)
+	14) # repair tables
 	if [ " $mysqlPrefix" = " " ] ; then
 		echo "MySQL Installation Prefix directory not specified" 1>&2
 		usage 1
@@ -10259,13 +10279,13 @@ case $option in
 	repair_tables
 	;;
 
-	15)
+	15) # reports
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	report $report_option
 	;;
 
-	16)
+	16) # create_qscanq
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10293,7 +10313,7 @@ case $option in
 	create_clamd $clamdPrefix $servicedir $mysysconfdir
 	;;
 
-	18)
+	18) # create_poppass
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $poppass_port" = " " ] ; then
@@ -10316,7 +10336,7 @@ case $option in
 	create_poppass "$servicedir" "$poppass_port" "$password_cmd" "$use_ssl"
 	;;
 
-	19)
+	19) # create_svscan
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10327,7 +10347,7 @@ case $option in
 	create_svscan $servicedir $svscan_init_cmd
 	;;
 
-	20)
+	20) # create_pwdlookup service
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10360,7 +10380,7 @@ case $option in
 	"$mysql_pass" "$mysql_port" "$mysql_socket"
 	;;
 
-	21)
+	21) # dump config
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10370,7 +10390,7 @@ case $option in
 	dump_config "$servicedir" "$cntrldir"
 	;;
 
-	22)
+	22) # create_greylist
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10380,7 +10400,7 @@ case $option in
 	create_greylist "$servicedir" "$grey_port" "$min_resend_min" " $resend_win_hr" "$timeout_days" "$context_file" "$save_interval" "$hash_size" "$whitelist" "$use_greydaemon"
 	;;
 
-	23)
+	23) # create_qmtp
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10413,7 +10433,7 @@ case $option in
 	create_qmtp_or_qmqp "qmtpd" "$qbase" "$qcount" "$qstart" "$servicedir" "$qmtp_port"
 	;;
 
-	24)
+	24) # create_qmqp
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10446,7 +10466,7 @@ case $option in
 	create_qmtp_or_qmqp "qmqpd" "$qbase" "$qcount" "$qstart" "$servicedir" "$qmqp_port"
 	;;
 
-	25)
+	25) # create_queuedef
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $queuedef" = " " ] ; then
@@ -10496,7 +10516,7 @@ case $option in
 	create_queuedef "$qbase" "$qcount" "$qstart" "$queuedef"
 	;;
 
-	26)
+	26) # crete_delivery
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10548,13 +10568,13 @@ case $option in
 	esac
 	echo "Creating delivery only $qcount queues"
 	if [ $use_starttls -ne 0 -o $use_ssl -ne 0 ] ; then
-		create_queue "$qbase" "$qcount" "$qstart" "$servicedir" "$queue_ident" "$routes" 1
+		create_delivery "$qbase" "$qcount" "$qstart" "$servicedir" "$queue_ident" "$routes" 1 $utf8
 	else
-		create_queue "$qbase" "$qcount" "$qstart" "$servicedir" "$queue_ident" "$routes" 0
+		create_delivery "$qbase" "$qcount" "$qstart" "$servicedir" "$queue_ident" "$routes" 0 $utf8
 	fi
 	;;
 
-	27)
+	27) # create_udplogger
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
@@ -10566,7 +10586,7 @@ case $option in
 	create_udplogger "$udp_port" "$servicedir"
 	;;
 
-	28)
+	28) # create_fifologger
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
@@ -10579,7 +10599,7 @@ case $option in
 	create_fifologger $logfilter $servicedir
 	;;
 
-	29)
+	29) # create mrtg
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
@@ -10592,7 +10612,7 @@ case $option in
 	create_mrtg $htmldir $servicedir
 	;;
 
-	30)
+	30) # tls certificate check
 	[ `id -u` = 0 ] || exit 4
 	if [ -z "$cert_file" ] ; then
 		tls_cert_check
@@ -10601,17 +10621,17 @@ case $option in
 	fi
 	;;
 
-	31)
+	31) # enable service
 	shift
 	enable_service $*
 	;;
 
-	32)
+	32) # disable service
 	shift
 	disable_service $*
 	;;
 
-	33)
+	33) # create dane
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
@@ -10621,7 +10641,7 @@ case $option in
 	create_dane "$servicedir" "$dane_port" "$timeout_days" "$context_file" "$save_interval" "$hash_size" "$whitelist"
 	;;
 
-	34)
+	34) # refresh services
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
@@ -10630,7 +10650,7 @@ case $option in
 	refreshsvc $service
 	;;
 
-	35)
+	35) # set norefresh service flag
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2

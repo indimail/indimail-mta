@@ -72,6 +72,7 @@
 #include <dlfcn.h>
 #endif
 #include <pwd.h>
+#include "hassmtputf8.h"
 
 #define MAXHOPS   100
 #define SMTP_PORT  25
@@ -105,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.231 $";
+char           *revision = "$Revision: 1.233 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -362,6 +363,9 @@ struct authcmd {
 /*- misc */
 static stralloc sa = { 0 };
 static stralloc domBuf = { 0 };
+#ifdef SMTPUTF8
+int             smtputf8 = 0, smtputf8_enable = 0;
+#endif
 
 int             smtp_port;
 void           *phandle;
@@ -2836,6 +2840,12 @@ smtp_ehlo(char *arg)
 		alloc_free(filename.s);
 	}
 #endif
+#ifdef SMTPUTF8
+	if (env_get("UTF8")) {
+		smtputf8_enable = 1;
+		out("250-SMTPUTF8\r\n");
+	}
+#endif
 	out("250 HELP\r\n");
 	if (!arg || !*arg)
 		dohelo(remoteip);
@@ -3056,22 +3066,30 @@ mailfrom_parms(char *arg)
 	int             len;
 
 	len = str_len(arg);
-	if (!stralloc_copys(&mfparms, ""))
-		die_nomem();
+	mfparms.len = 0;
 	i = byte_chr(arg, len, '>');
 	if (i > 4 && i < len) {
 		while (len) {
 			arg++;
 			len--;
 			if (*arg == ' ' || *arg == '\0') {
-				if (case_starts(mfparms.s, "SIZE=") && mailfrom_size(mfparms.s + 5)) {
-					flagsize = 1;
-					return;
-				}
-				if (case_starts(mfparms.s, "AUTH="))
+#ifdef SMTPUTF8
+				if (smtputf8_enable && case_starts(mfparms.s, "SMTPUTF8")) {
+					smtputf8 = 1;
+				} else
+#endif
+				if (case_starts(mfparms.s, "SIZE=")) {
+					mfparms.s[mfparms.len] = 0;
+					if (mailfrom_size(mfparms.s + 5)) {
+						flagsize = 1;
+						return;
+					}
+				} else
+				if (case_starts(mfparms.s, "AUTH=")) {
+					mfparms.s[mfparms.len] = 0;
 					mailfrom_auth(mfparms.s + 5, mfparms.len - 5);
-				if (!stralloc_copys(&mfparms, ""))
-					die_nomem();
+				}
+				mfparms.len = 0;
 			} else
 			if (!stralloc_catb(&mfparms, arg, 1))
 				die_nomem();
@@ -3086,10 +3104,9 @@ smtp_mail(char *arg)
 {
 	struct passwd  *pw;
 	char           *x;
-	int             ret;
+	int             ret, i;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
-	int             i;
 #endif
 #ifdef USE_SPF
 	int             r;
@@ -3128,24 +3145,30 @@ smtp_mail(char *arg)
 		smtp_badip(remoteip);
 		return;
 	}
-	if (!env_put2("SPFRESULT", "unknown"))
-		die_nomem();
 	if (!seenhelo) {
 		out("503 Polite people say hello first (#5.5.4)\r\n");
 		return;
 	}
+	if (!addrparse(arg)) {
+		err_syntax();
+		return;
+	}
+	if (!env_put2("SPFRESULT", "unknown"))
+		die_nomem();
+#ifdef SMTPUTF8
+	if (!stralloc_catb(&proto, smtputf8 ? "UTF8ESMTP" : "ESMTP", smtputf8 ? 9 : 5))
+		die_nomem();
+#else
 	if (!stralloc_catb(&proto, "ESMTP", 5))
 		die_nomem();
+#endif
 #ifdef TLS
 	if (ssl && !stralloc_append(&proto, "S"))
 		die_nomem();
 #endif
 	if (authd && !stralloc_append(&proto, "A"))
 		die_nomem();
-	if (!addrparse(arg)) {
-		err_syntax();
-		return;
-	}
+
 #if BATV
 	if (batvok)
 		(void) check_batv_sig(); /*- unwrap in case it's ours */
@@ -6093,6 +6116,12 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.233  2020-12-07 12:06:27+05:30  Cprogrammer
+ * refactored mailfrom_parms()
+ *
+ * Revision 1.232  2020-12-03 17:29:59+05:30  Cprogrammer
+ * added EAI - RFC 6530-32 - unicode address support
+ *
  * Revision 1.231  2020-11-26 14:01:08+05:30  Cprogrammer
  * refactored batv code
  *
@@ -6224,7 +6253,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.231 2020-11-26 14:01:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.233 2020-12-07 12:06:27+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

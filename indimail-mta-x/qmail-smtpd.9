@@ -48,6 +48,14 @@ normally on port 465). Otherwise, if you set the \fBSTARTTLS\fR environment vari
 .B qmail-smtpd
 offers the STARTTLS extension to ESMTP.
 
+If the environment variable
+.B UTF8
+is non-empty
+.B qmail-smtpd
+offers RFC 5336 SMTP Email Address Internationalization support and will advertize the
+capability in the EHLO greeting. Since qmail-smtpd is 8 bit clean, setting of UTF8 has no real
+consequences except for displaying this setting in the received headers as \fBUTF8(E)SMTP\fR.
+
 If the environment variable \fBLOGFILTER\fR is defined, \fBqmail-smtpd\fR will open a fifo 
 defined by \fBLOGFILTER\fR environment variable in O_WRONLY mode. It will write
 the SMTP transaction log to the fifo. This makes it possible for \fBqmail-smtpd\fR to push

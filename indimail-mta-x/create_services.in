@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.91 2020-10-07 19:21:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.92 2020-12-03 17:28:17+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -412,20 +412,16 @@ fi
 for port in 465 25 587
 do
   if [ $port -eq 465 ] ; then
-    e_opt="--skipsend --authsmtp --ssl"
+    e_opt="--skipsend --authsmtp --ssl --utf8"
     e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   elif [ $port -eq 587 ] ; then
     nobogofilter=1
-    e_opt="--skipsend --forceauthsmtp --antispoof --forcetls"
+    e_opt="--skipsend --forceauthsmtp --antispoof --forcetls --utf8"
   else
-    if [ $port -eq 25 ] ; then
     e_opt="--remote-authsmtp=plain --localfilter --remotefilter"
-    e_opt="--dmemory=$send_soft_mem"
-    else
-    e_opt="--authsmtp"
-    fi
     e_opt="$e_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
     e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+    e_opt="$e_opt --dmemory=$send_soft_mem --utf8"
   fi
   if [ $tcpserver_plugin -eq 1 ] ; then
     e_opt="$e_opt --shared-objects=1 --use-dlmopen=1"

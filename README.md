@@ -49,7 +49,7 @@ Universal
 gcc gcc-c++ make autoconf automaake libtool pkgconfig
 sed findutils diffutils gzip binutils coreutils grep
 glibc glibc-devel procps openssl openssl-devel mysql-devel
-libqmail-devel libqmail
+libqmail-devel libqmail libidn2-devel
 
 opensuse - openldap2-devel instead of openldap-devel
 ```
@@ -60,12 +60,18 @@ Install the following packages using apt
 ```
 Universal
 cdbs debhelper gcc g++ automake autoconf libtool libqmail-dev libqmail
-libldap2-dev libssl-dev mime-support m4 gawk openssl procps sed
-findutils diffutils readline gzip binutils coreutils grep
+libldap2-dev libssl-dev libidn2-0-dev mime-support m4 gawk openssl 
+procps sed findutils diffutils readline gzip binutils coreutils grep
 
 Debian 9, Debian 10 - default-libmysqlclient-dev
 Remaining - libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
+```
+
+NOTE: for Darwin
+
+```
+# port install libidn2
 ```
 
 ## Download / clone libqmail

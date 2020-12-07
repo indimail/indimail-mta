@@ -1537,18 +1537,34 @@ rrt.1: rrt.9 conf-sysconfdir
 qr_digest_md5.o: compile qr_digest_md5.c
 	./compile qr_digest_md5.c
 
+hassmtputf8.h: \
+tryidn2.c compile load conf-smtputf8
+	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
+		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
+	&& echo \#define SMTPUTF8 1 || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1<&2) > hassmtputf8.h
+	rm -f tryidn2.o tryidn2
+
+idn2.lib: \
+tryidn2.c compile load conf-smtputf8
+	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
+		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
+	&& echo "-lidn2" || echo "WARNING!!! Not linked with libidn2" 1>&2) > idn2.lib
+	rm -f tryidn2.o tryidn2
+
 qmail-remote: \
 load qmail-remote.o control.o timeoutconn.o tcpto.o dns.o ip.o \
 ipalloc.o strsalloc.o ipme.o quote.o variables.o tls.o \
-auto_control.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
-tlsarralloc.o qr_digest_md5.o socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o \
-fn_handler.o query_skt.o tlsacheck.o auto_qmail.o dns.lib socket.lib tls.lib 
-	./load qmail-remote control.o tlsacheck.o auto_control.o timeoutconn.o \
-	tcpto.o dns.o ip.o socket_ip4loopback.o socket_v6loopback.o \
-	socket_v6any.o ipalloc.o socket_v4mappedprefix.o strsalloc.o \
-	ipme.o quote.o fn_handler.o qr_digest_md5.o query_skt.o \
-	tlsarralloc.o variables.o socket_tcp.o socket_tcp6.o tls.o \
-	auto_qmail.o `cat dns.lib socket.lib tls.lib` -lqmail
+auto_control.o socket_ip4loopback.o socket_v6loopback.o \
+socket_v6any.o tlsarralloc.o qr_digest_md5.o fn_handler.o \
+query_skt.o tlsacheck.o auto_qmail.o dns.lib socket.lib tls.lib \
+socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o idn2.lib
+	./load qmail-remote control.o tlsacheck.o auto_control.o \
+	timeoutconn.o tcpto.o dns.o ip.o socket_ip4loopback.o \
+	socket_v6loopback.o socket_v6any.o ipalloc.o \
+	socket_v4mappedprefix.o strsalloc.o ipme.o quote.o fn_handler.o \
+	qr_digest_md5.o query_skt.o tlsarralloc.o variables.o \
+	socket_tcp.o socket_tcp6.o tls.o auto_qmail.o `cat dns.lib \
+	socket.lib tls.lib idn2.lib` -lqmail
 
 qmail-remote.8: \
 qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
@@ -1564,9 +1580,10 @@ auto_qmail.h control.h dns.h quote.h ip.h ipalloc.h \
 query_skt.h ipme.h tcpto.h timeoutconn.h haveip6.h socket.h \
 variables.h hastlsv1_1_client.h hastlsv1_2_client.h \
 auto_control.h hastlsa.h tlsacheck.h fn_handler.h \
-tlsarralloc.h conf-tls conf-ip conf-batv conf-mxps
-	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` \
-		qmail-remote.c
+tlsarralloc.h hassmtputf8.h conf-tls conf-ip conf-batv conf-mxps \
+conf-smtputf8
+	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps \
+		conf-batv` qmail-remote.c
 
 qmail-rspawn: \
 load qmail-rspawn.o spawn.o tcpto_clean.o get_uid.o \
@@ -1657,15 +1674,16 @@ compile plugtest.c auto_qmail.h auto_prefix.h smtp_plugin.h
 	./compile plugtest.c
 
 qmail_smtpd.so: \
-smtpd.o rcpthosts.o recipients.o indimail_stub.o \
-ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
-received.o date822fmt.o wildmat.o qmail.o variables.o tls.o \
-envrules.o bodycheck.o sqlmatch.o matchregex.o qcount_dir.o \
+smtpd.o rcpthosts.o recipients.o indimail_stub.o ip.o ipme.o \
+ipalloc.o strsalloc.o control.o etrn.o atrn.o received.o \
+date822fmt.o wildmat.o qmail.o variables.o tls.o envrules.o \
+bodycheck.o sqlmatch.o matchregex.o qcount_dir.o mail_acl.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
-socket_v6any.o mail_acl.o spf.o dns.o auto_qmail.o auto_uids.o \
-qregex_sql.o tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
-auto_break.o auto_control.o auto_assign.o auto_prefix.o auto_sysconfdir.o \
-socket.lib dns.lib tls.lib mysql_config conf-sql conf-ld-$(SYSTEM)
+socket_v6any.o spf.o dns.o auto_qmail.o auto_uids.o qregex_sql.o \
+tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
+auto_break.o auto_control.o auto_assign.o auto_prefix.o \
+auto_sysconfdir.o socket.lib dns.lib tls.lib \
+mysql_config conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 		$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o indimail_stub.o load_mysql.o \
@@ -1802,8 +1820,8 @@ matchregex.o variables.h rcpthosts.h etrn.h date822fmt.h \
 envrules.h tablematch.h matchregex.h qregex.h sqlmatch.h \
 smtp_plugin.h auto_prefix.h hastlsv1_1_server.h \
 hastlsv1_2_server.h hasmysql.h indimail_stub.h \
-auto_control.h dns.h conf-tls conf-spf conf-ip \
-conf-plugin conf-batv mysql_config mysql_inc
+auto_control.h dns.h hassmtputf8.h conf-tls conf-spf conf-ip \
+conf-plugin conf-batv conf-smtputf8 mysql_config mysql_inc
 	./compile `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin mysql_inc` smtpd.c
 
@@ -2169,7 +2187,7 @@ tlsarralloc.o dns.lib socket.lib
 
 tcp-env.o: \
 compile tcp-env.c strsalloc.h ip.h dns.h remoteinfo.h \
-socket.h haveip6.h conf-spf conf-ip
+hassalen.h socket.h haveip6.h conf-spf conf-ip
 	./compile `grep -h -v "^#" conf-spf conf-ip` tcp-env.c
 
 tcpto.o: \
@@ -3468,7 +3486,7 @@ trytlsv1_2_client.c compile load
 
 hasinotify.h: \
 tryinotify.c compile load
-	( ( ./compile tryinotify.c && ./load tryinotify ) >/dev/null \
+	(( ./compile tryinotify.c && ./load tryinotify ) >/dev/null \
 	2>&1 \
 	&& echo \#define HASINOTIFY 1 || exit 0 ) > hasinotify.h
 	rm -f tryinotify.o tryinotify

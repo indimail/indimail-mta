@@ -14,7 +14,7 @@ qmail-remote \- send mail via SMTP / ESMTP or QMTP
 recipients at a remote host. The remote host \fIhost\fR is \fBqmail-remote\fR's first argument.
 \fBqmail-remote\fR sends the message to \fIhost\fR, or to a mail exchanger for \fIhost\fR
 listed in the Domain Name System, via the Simple Mail Transfer Protocol (SMTP/ESMTP) or the
-Quick Mail Transfer Protocol (QMTP).  QMTP is implemented by \fBqmail-qmtpd\fR. \fIhost\fR can
+Quick Mail Transfer Protocol (QMTP). QMTP is implemented by \fBqmail-qmtpd\fR. \fIhost\fR can
 be either a fully-qualified domain name:
 
 .EX
@@ -26,7 +26,7 @@ or an IP address enclosed in brackets:
 .EX
      [128.32.183.163]
 .EE
- 
+
 The size parameter is only used if the remote host uses the ESMTP SIZE extension defined in
 \fIRFC- 1870\fR. It gives the size of the message in bytes. \fBqmail-remote\fR does not use
 this value to process the mail, the value is only passed to the remote mailserver.
@@ -34,6 +34,11 @@ this value to process the mail, the value is only passed to the remote mailserve
 The envelope recipient addresses are listed as \fIrecip\fR arguments to \fBqmail-remote\fR.
 
 The envelope sender address is listed as \fIsender\fR.
+
+If the environment variable UTF8 is defined, qmail-remote will respect
+SMTPUTF8 and EAI addresses. If message is utf8, qmail-remote will
+use idn2_lookup_u8(3) to perform IDNA2008 lookup string conversion
+on \fIhost\fR.
 
 Any Qmail Queue Extra Header (QQEH) information passed to \fBqmail-queue(8)\fR is passed in
 \fIqqeh\fR.
@@ -111,17 +116,17 @@ K
 no supported AUTH method found, continuing without authentication.
 .TP 5
 Z
-Connected to 
+Connected to
 .I host
 but authentication was rejected (AUTH PLAIN).
 .TP 5
 Z
-Connected to 
-.I host 
+Connected to
+.I host
 but unable to base64encode (plain).
 .TP 5
 Z
-Connected to 
+Connected to
 .I host
 but authentication was rejected (plain)."
 .TP 5
@@ -131,23 +136,23 @@ Connected to
 but authentication was rejected (AUTH LOGIN).
 .TP 5
 Z
-Connected to 
+Connected to
 .I host
 but unable to base64encode user.
 .TP 5
 Z
-Connected to 
-.I host 
+Connected to
+.I host
 but authentication was rejected (username).
 .TP 5
 Z
-Connected to 
-.I host 
+Connected to
+.I host
 but unable to base64encode pass.
 .TP 5
 Z
-Connected to 
-.I host 
+Connected to
+.I host
 but authentication was rejected (password).
 .TP 5
 Z
@@ -156,28 +161,28 @@ Connected to
 but authentication was rejected (AUTH CRAM-MD5/CRAM-SHA1/CRAM-SHA256/CRAM-RIPEMD/DIGEST-MD5).
 .TP 5
 Z
-Connected to 
+Connected to
 .I host
 but unable to base64decode challenge.
 .TP 5
 Z
-Connected to 
+Connected to
 .I host
 but got no challenge.
 .TP 5
 Z
-Connected to 
+Connected to
 .I host
 but unable to base64encode username+digest.
 .TP 5
 Z
-Connected to 
-.I host 
+Connected to
+.I host
 but authentication was rejected (username+digest).
 
 .SH "RESULTS"
 .B qmail-remote
-prints some number of 
+prints some number of
 .I recipient reports\fP,
 followed by a
 .I message report\fR.
@@ -332,11 +337,11 @@ while envelope senders in
 (but not
 .B user1@example.com
 itself)
-are bound to 
+are bound to
 .BR 5.6.7.8 ,
 and senders in
 .B heaven.af.mil
-are bound to 
+are bound to
 .BR 1.2.3.4 .
 Connection for message with an envelope sender address of \fBuser1@example.com\fR gets
 bound to
@@ -471,7 +476,7 @@ you are always safe using
 .I smtproutes
 if you do not accept mail from the network.
 Additionally,
-.I smtproutes 
+.I smtproutes
 allows to forward bounces (with a 'Nullsender' MAIL FROM: <>)
 literally expressed as '!@'
 to a particular bounce host:
@@ -502,11 +507,11 @@ without any extra spaces. If the environment variable
 .B AUTH_SMTP
 is set,
 .B qmail-remote
-will use 
+will use
 .B username
 and
 .B password
-to relay out mails through server 
+to relay out mails through server
 .B relay
 using authenticated SMTP. <sp> is a single space character. AUTH_SMTP can also have the values
 DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA256, CRAM-MD5, LOGIN or PLAIN to use
@@ -526,20 +531,20 @@ of the following environment variables
 If you set the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled, unless qmail-remote
 has opened a TLS session wth the remote host. See the control file \fIclientcert.pem\fR
 
-If all connections to the 
+If all connections to the
 .I relay
-server fail for a 
+server fail for a
 .I max_tolerance
 seconds, further connections to the same server are avoided for a period of at least
 .I penalty
 seconds.
-The default maximum period of failures that will be tolerated - 
-.I max_tolerance 
-is 120 seconds and the minimum penalty - 
-.I penalty 
+The default maximum period of failures that will be tolerated -
+.I max_tolerance
+is 120 seconds and the minimum penalty -
+.I penalty
 is 1 hour.
-By setting the 
-.I penalty 
+By setting the
+.I penalty
 to 0, connections to the server will be attempted inspite of failures. The default values of 1
 hour for minimum penalty, can be changed by setting the environment variable
 .IR MIN_PENALTY .
@@ -579,7 +584,7 @@ without any extra spaces.
 .I qmtproutes
 follows the same syntax as
 .IR smtproutes .
-By default, 
+By default,
 .B qmail-remote
 connects to QMTP service port 209. However
 you can chose a dedicated high-port for QMTP communication
@@ -689,8 +694,8 @@ this option may cause mail to be delayed, bounced, doublebounced, or lost.
 .B qmail-remote
 will not try TLS on servers for which this file exists
 .RB ( <FQDN>
-is the fully-qualified domain name of the remote SMTP server). 
-.IR (tlshosts/<FQDN>.pem 
+is the fully-qualified domain name of the remote SMTP server).
+.IR (tlshosts/<FQDN>.pem
 takes precedence over this file however).
 The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
 
@@ -699,8 +704,8 @@ The default location of @sysconfdir@/control can be overriden by environment var
 .B qmail-remote
 will not try TLS on servers for which this file exists
 .RB ( host
-is the domain name of the recipient). 
-.IR (tlshosts/<FQDN>.pem 
+is the domain name of the recipient).
+.IR (tlshosts/<FQDN>.pem
 takes precedence over this file however).
 The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
 
@@ -726,4 +731,5 @@ qmail-qmtpd(8),
 qmail-daned(8),
 tlsacheck(3),
 qmail-tcpok(8),
-qmail-tcpto(8)
+qmail-tcpto(8),
+idn2_lookup_u8(3)
