@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.22  2020-12-07 16:10:05+05:30  Cprogrammer
+ * use exit code 79 for envelope format error
+ *
  * Revision 1.21  2020-11-24 13:47:09+05:30  Cprogrammer
  * removed exit.h
  *
@@ -140,7 +143,7 @@ die_conn()
 void
 die_format()
 {
-	_exit(91);
+	_exit(79);
 }
 
 int             lasterror = 55;
@@ -406,7 +409,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.21 2020-11-24 13:47:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.22 2020-12-07 16:10:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

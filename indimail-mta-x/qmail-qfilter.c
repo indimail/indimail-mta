@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.12  2020-12-07 16:09:42+05:30  Cprogrammer
+ * use exit code 79 for envelope format error
+ *
  * Revision 1.11  2019-02-17 11:40:14+05:30  Cprogrammer
  * fixed indentation
  *
@@ -79,8 +82,8 @@
 #define QQ_OOM         51
 #define QQ_WRITE_ERROR 53
 #define QQ_READ_ERROR  54
+#define QQ_BAD_ENV     79
 #define QQ_INTERNAL    81
-#define QQ_BAD_ENV     91
 #define QQ_DROP_MSG    99
 
 #define MSGIN  0
@@ -450,7 +453,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.11 2019-02-17 11:40:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.12 2020-12-07 16:09:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

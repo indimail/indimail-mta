@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.67  2020-12-07 16:10:12+05:30  Cprogrammer
+ * use exit code 79 for envelope format error
+ *
  * Revision 1.66  2020-11-24 13:47:17+05:30  Cprogrammer
  * removed exit.h
  *
@@ -1035,7 +1038,7 @@ main()
 	/*- Get the Sender */
 	if (ch != 'F') {
 		cleanup();
-		die(91);
+		die(79);
 	}
 	if (substdio_bput(&ssout, &ch, 1) == -1)
 		die_write();
@@ -1118,7 +1121,7 @@ main()
 #endif
 		if (ch != 'T') {
 			cleanup();
-			die(91);
+			die(79);
 		}
 		if (flagquarantine) {
 			if (!stralloc_append(&qqehextra, ",")) {
@@ -1236,7 +1239,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.66 2020-11-24 13:47:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.67 2020-12-07 16:10:12+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
