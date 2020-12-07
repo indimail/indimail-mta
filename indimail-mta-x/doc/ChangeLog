@@ -168,3 +168,7 @@ creation
 95. hier.c: moved README.logselect to daemontools
 - 03/12/2020
 96. smtpd.c, qmail-remote.c: Added EAI RFC 6530-32 - unicode address support
+- 07/12/2020
+97. qmail.c: added exit code 79 as duplicate to 91 for Envelope format error
+98. qmail-qfilter.c, qmail-qmqpc.c, qmail-queue.c -m 'use exit code 79 for
+    envelope format error'

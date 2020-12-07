@@ -91,3 +91,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * queue-fix: replaced stdio with substdio and added option to specify queue subdirectory split
   * hier.c: moved README.logselect to daemontools
   * smtpd.c, qmail-remote.c: Added EAI RFC 6530-32 - unicode address support
+  * qmail.c: added exit code 79 as duplicate to 91 for Envelope format error
+  * qmail-qfilter.c, qmail-qmqpc.c, qmail-queue.c -m 'use exit code 79 for envelope format error'
