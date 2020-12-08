@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.74  2020-12-08 14:15:41+05:30  Cprogrammer
+ * save original errno
+ *
  * Revision 1.73  2020-11-26 22:23:03+05:30  Cprogrammer
  * indicate the filter name in report to qmail-rspawn
  *
@@ -287,7 +290,7 @@ static stralloc spf = { 0 };
 static int      sppok = 0;
 static stralloc spp = { 0 };
 struct constmap mapspf;
-static int      remotE;
+enum  dtype     {local, remote} delivery;
 stralloc        sender = { 0 };
 stralloc        recipient = { 0 };
 stralloc        QueueBase = { 0 };
@@ -295,7 +298,7 @@ stralloc        QueueBase = { 0 };
 static void
 report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 {
-	if (!remotE) /*- strerr_die does not return */
+	if (delivery == local) /*- strerr_die does not return */
 		strerr_die7x(errCode, s1, ": ", s2, s3, s4, s5, s6);
 	if (!errCode) {
 		if (substdio_put(subfdoutsmall, "r\0Kfilter accepted message.\n", 28) == -1)
@@ -358,7 +361,7 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 		report(111, "spawn-filter: open: ", fifo_name, ": ", error_str(errno), ". (#4.3.0)", 0);
 	}
 	substdio_fdbuf(&spamout, write, logfifo, spambuf, sizeof(spambuf));
-	if (substdio_puts(&spamout, remotE ? "qmail-remote: ": "qmail-local: ") == -1)
+	if (substdio_puts(&spamout, delivery == remote ? "qmail-remote: ": "qmail-local: ") == -1)
 		report(111, "spawn-filter: write: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if (substdio_puts(&spamout, "pid ") == -1)
 		report(111, "spawn-filter: write: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
@@ -426,7 +429,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 	char            strnum[FMT_ULONG];
 	pid_t           filt_pid;
 	int             pipefd[2], pipefe[2];
-	int             wstat, filt_exitcode, len = 0;
+	int             wstat, filt_exitcode, e, len = 0;
 	char           *filterargs;
 	static stralloc filterdefs = { 0 };
 	static char     errstr[1024];
@@ -480,30 +483,38 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 		close(pipefe[1]);
 		close(pipefd[1]);
 		if (dup2(pipefd[0], 0)) {
+			e = errno;
 			close(pipefd[0]);
 			close(pipefe[0]);
 			wait_pid(&wstat, filt_pid);
+			errno = e;
 			report(111, "spawn-filter: dup2 error: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		}
 		if (pipefd[0] != 0)
 			close(pipefd[0]);
 		if (mkTempFile(0)) {
+			e = errno;
 			close(0);
 			close(pipefe[0]);
 			wait_pid(&wstat, filt_pid);
+			errno = e;
 			report(111, "spawn-filter: lseek error: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		}
 		break;
 	}
 	/*- Process message if exit code is 0, bounce if 100 */
 	if (wait_pid(&wstat, filt_pid) != filt_pid) {
+		e = errno;
 		close(0);
 		close(pipefe[0]);
+		errno = e;
 		report(111, "spawn-filter: waitpid surprise: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	}
 	if (wait_crashed(wstat)) {
+		e = errno;
 		close(0);
 		close(pipefe[0]);
+		errno = e;
 		report(111, "spawn-filter: filter crashed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	}
 	switch (filt_exitcode = wait_exitcode(wstat))
@@ -516,11 +527,13 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 	case 100:
 		report(100, "Mail Rejected (#5.7.1)", 0, 0, 0, 0, 0);
 	default:
+		e = errno;
 		substdio_fdbuf(&errbuf, read, pipefe[0], inbuf, sizeof(inbuf));
 		for (len = 0; substdio_bget(&errbuf, &ch, 1) && len < (sizeof(errstr) - 1); len++)
 			errstr[len] = ch;
 		errstr[len] = 0;
 		strnum[fmt_ulong(strnum, filt_exitcode)] = 0;
+		errno = e;
 		report(111, filterargs, ": (spawn-filter) exit code: ", strnum, *errstr ? ": " : 0, *errstr ? errstr : 0, ". (#4.3.0)");
 	}
 	/*- Not reached */
@@ -551,7 +564,7 @@ getDomainToken(char *domain, stralloc *sa)
 			*p = ':';
 			if (!retval) { /*- match occurred for domain or wildcard */
 				/* check for local/remote directives */
-				if (remotE) { /*- remote delivery */
+				if (delivery == remote) { /*- remote delivery */
 					if (!str_diffn(p + 1, "remote:", 7))
 						return (p + 8);
 					if (!str_diffn(p + 1, "local:", 6)) {
@@ -923,7 +936,7 @@ main(int argc, char **argv)
 		domain = argv[7];
 		ext = argv[6];
 		qqeh = argv[10];
-		remotE = 0;
+		delivery = local;
 		if (!env_unset("QMAILREMOTE"))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!fstat(0, &statbuf)) {
@@ -956,7 +969,7 @@ main(int argc, char **argv)
 		ext = argv[5];
 		qqeh = argv[3];
 		size = argv[4];
-		remotE = 1;
+		delivery = remote;
 		if (!env_unset("QMAILLOCAL"))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		/*- sender */
@@ -1145,7 +1158,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.73 2020-11-26 22:23:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.74 2020-12-08 14:15:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
