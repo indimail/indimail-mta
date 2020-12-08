@@ -68,10 +68,16 @@ Remaining - libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
+NOTE: For FreeBSD
+
+```
+# pkg install pkgconf libidn2
+```
+
 NOTE: for Darwin
 
 ```
-# port install libidn2
+# port install pkgconfig libidn2
 ```
 
 ## Download / clone libqmail
