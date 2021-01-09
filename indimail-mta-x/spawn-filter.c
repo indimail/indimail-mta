@@ -300,7 +300,7 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 {
 	if (delivery == local) /*- strerr_die does not return */
 		strerr_die7x(errCode, s1, ": ", s2, s3, s4, s5, s6);
-	if (!errCode) {
+	if (!errCode) { /*- should never happen */
 		if (substdio_put(subfdoutsmall, "r\0Kfilter accepted message.\n", 28) == -1)
 			_exit(111);
 		if (s1) {
