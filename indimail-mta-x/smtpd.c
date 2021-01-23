@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.234 $";
+char           *revision = "$Revision: 1.235 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2118,7 +2118,7 @@ dohelo(char *arg)
 		die_nomem();
 	if (!stralloc_0(&helohost))
 		die_nomem();
-	if (!relayclient) { /*- turn on if user not authenticated */
+	if (!relayclient) { /*- turn on helo check if user not authenticated */
 		if (env_get("ENFORCE_FQDN_HELO")) {
 			i = str_chr(arg, '.');
 			if (!arg[i])
@@ -2546,11 +2546,9 @@ setup()
 	if (env_get("SMTPS")) {
 		smtps = 1;
 		tls_init();
-	} else
-		dohelo(remotehost);
-#else
-	dohelo(remotehost);
+	}
 #endif
+	dohelo(remotehost);
 }
 
 int
@@ -2671,7 +2669,7 @@ smtp_helo(char *arg)
 	}
 	out("\r\n");
 	if (!arg || !*arg)
-		dohelo(remoteip);
+		dohelo(remotehost);
 	else
 		dohelo(arg);
 }
@@ -2848,7 +2846,7 @@ smtp_ehlo(char *arg)
 #endif
 	out("250 HELP\r\n");
 	if (!arg || !*arg)
-		dohelo(remoteip);
+		dohelo(remotehost);
 	else
 		dohelo(arg);
 }
@@ -5297,8 +5295,11 @@ smtp_tls(char *arg)
 	else
 	if (*arg)
 		out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n");
-	else
+	else {
 		tls_init();
+		/*- have to discard the pre-STARTTLS HELO/EHLO argument, if any */
+		dohelo(remotehost);
+	}
 }
 
 RSA            *
@@ -5771,8 +5772,6 @@ tls_init()
 		die_nomem();
 	if (!stralloc_catb(&proto, " encrypted) ", 12))
 		die_nomem();
-	/*- have to discard the pre-STARTTLS HELO/EHLO argument, if any */
-	dohelo(remotehost);
 }
 #endif
 
@@ -6115,6 +6114,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.235  2021-01-23 15:17:55+05:30  Cprogrammer
+ * use remotehost for automatic helo
+ *
  * Revision 1.234  2021-01-23 08:14:52+05:30  Cprogrammer
  * renamed env variable UTF8 to SMTPUTF8
  * check FORCE_TLS in smtp_mail()
@@ -6256,7 +6258,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.234 2021-01-23 08:14:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.235 2021-01-23 15:17:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
