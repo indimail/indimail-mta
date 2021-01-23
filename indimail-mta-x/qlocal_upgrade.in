@@ -1,4 +1,7 @@
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.42  2021-01-23 17:07:59+05:30  Cprogrammer
+# fixed logfifo path
+#
 # Revision 1.41  2020-10-09 17:30:18+05:30  Cprogrammer
 # migration only when servicedir != /service
 #
@@ -120,7 +123,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.in,v 1.41 2020-10-09 17:30:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.42 2021-01-23 17:07:59+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -148,7 +151,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.41 2020-10-09 17:30:18+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.42 2021-01-23 17:07:59+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -157,7 +160,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.41 2020-10-09 17:30:18+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.41 2020-10-09 17:30:18+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.42 2021-01-23 17:07:59+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -320,9 +323,18 @@ done
 
 # service qmail-spamlog has been renamed to qmail-logfifo
 # fifo is now /tmp/logfifo instead of /tmp/spamfifo
+if [ -d /run ] ; then
+	logfifo="/run/indimail/logfifo"
+	$mkdir -p /run/indimail
+elif [ -d /var/run ] ; then
+	logfifo="/var/run/indimail/logfifo"
+	$mkdir -p /var/run/indimail
+else
+	logfifo="/tmp/logfifo"
+fi
 if [ -d $servicedir/qmail-spamlog ] ; then
 	/bin/rm -rf $servicedir/qmail-spamlog
-	/usr/sbin/svctool --fifologger=/tmp/logfifo --servicedir=$servicedir
+	/usr/sbin/svctool --fifologger=$logfifo --servicedir=$servicedir
 fi
 
 # for bogofilter to send back X-Bogosity back to qmail-smtpd as well as log entry
@@ -332,17 +344,17 @@ fi
 for i in qmail-smtpd.25 qmail-smtpd.465 fetchmail qmail-send.25
 do
 	if [ -d $servicedir/$i -a -s $servicedir/$i/variables/LOGFILTER ] ; then
-		check_update_if_diff $servicedir/$i/variables/LOGFILTER /tmp/logfifo
+		check_update_if_diff $servicedir/$i/variables/LOGFILTER $logfifo
 	fi
 done
+if [ -s $sysconfdir/control/defaultqueue/LOGFILTER ] ; then
+	check_update_if_diff $sysconfdir/control/defaultqueue/LOGFILTER $logfifo
+fi
 if [ -s $servicedir/qmail-send.25/variables/QMAILLOCAL ] ; then
 	check_update_if_diff $servicdi@/qmail-send.25/variables/QMAILLOCAL /usr/sbin/qmail-local
 fi
 if [ -s $servicedir/qmail-send.25/variables/QMAILREMOTE ] ; then
 	check_update_if_diff $servicedir/qmail-send.25/variables/QMAILREMOTE /usr/sbin/qmail-remote
-fi
-if [ -s $sysconfdir/control/defaultqueue/LOGFILTER ] ; then
-	check_update_if_diff $sysconfdir/control/defaultqueue/LOGFILTER /tmp/logfifo
 fi
 
 host=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
