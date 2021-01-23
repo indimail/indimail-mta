@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.141 2021-01-23 08:14:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.142 2021-01-23 21:25:17+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -163,9 +163,9 @@ struct constmap maptlsadomains;
 #ifdef SMTPUTF8
 static stralloc header = { 0 };
 static stralloc idnhost = { 0 };
-static int      smtputf8 = 0; /*- if remove has SMTPUTF8 capability */
-static char    *enable_utf8 = 0; /*- enable utf8 */
-int             flagutf8;
+static int      smtputf8 = 0;    /*- if remote has SMTPUTF8 capability */
+static char    *enable_utf8 = 0; /*- enable utf8 using SMTPUTF8 env variable */
+int             flagutf8;        /*- sender, recipient or received header has UTF8 */
 #endif
 
 void            temp_nomem();
@@ -2614,7 +2614,9 @@ smtp()
 	tlsarr         *rp;
 #endif
 
+#ifdef SMTPUTF8
 	smtputf8 = 0;
+#endif
 	inside_greeting = 1;
 #ifdef TLS
 	if (protocol_t == 'S' || (protocol_t != 'q' && port == 465))
@@ -3694,7 +3696,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.141 2021-01-23 08:14:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.142 2021-01-23 21:25:17+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3702,6 +3704,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.142  2021-01-23 21:25:17+05:30  Cprogrammer
+ * added comments for smtputf8 variables
+ *
  * Revision 1.141  2021-01-23 08:14:37+05:30  Cprogrammer
  * renamed env variale UTF8 to SMTPUTF8
  *
