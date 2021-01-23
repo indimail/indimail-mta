@@ -168,11 +168,14 @@ creation
 95. hier.c: moved README.logselect to daemontools
 - 03/12/2020
 96. smtpd.c, qmail-remote.c: Added EAI RFC 6530-32 - unicode address support
+- 04/12/2020
+97. Makefile: fixed hassalen.h dependency for tcp-env.o
 - 07/12/2020
-97. qmail.c: added exit code 79 as duplicate to 91 for Envelope format error
-98. qmail-qfilter.c, qmail-qmqpc.c, qmail-queue.c -m 'use exit code 79 for
+98. qmail.c: added exit code 79 as duplicate to 91 for Envelope format error
+99. qmail-qfilter.c, qmail-qmqpc.c, qmail-queue.c -m 'use exit code 79 for
     envelope format error'
-- 23/12/2020
-99. smtpd.c, qmail-remote.c: Renamed env variable UTF8 to SMTPUTF8
-100. smtpd.c: use FORCE_TLS in smtp_mail()
-101. smtpd.c: use remotehost for automatic helo
+- 23/01/2021
+100. smtpd.c, qmail-remote.c: Renamed env variable UTF8 to SMTPUTF8
+101. smtpd.c: use FORCE_TLS in smtp_mail()
+102. smtpd.c: use remotehost for automatic helo
+103. qlocal_upgrade: fixed LOGFILTER path
