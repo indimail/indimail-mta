@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.293 2020-12-03 20:59:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.294 2021-01-23 17:07:41+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1138,7 +1138,7 @@ fi
 
 # SMTP
 %ifarch x86_64
-%global smtp_soft_mem 104857600
+%global smtp_soft_mem 536870912
 %global qmtp_soft_mem 104857600
 %global qmqp_soft_mem 104857600
 %global send_soft_mem 104857600
