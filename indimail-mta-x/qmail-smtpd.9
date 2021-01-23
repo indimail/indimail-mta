@@ -46,7 +46,9 @@ is non-empty,
 starts a TLS session (to support the deprecated SMTPS protocol,
 normally on port 465). Otherwise, if you set the \fBSTARTTLS\fR environment variable,
 .B qmail-smtpd
-offers the STARTTLS extension to ESMTP.
+offers the STARTTLS extension to ESMTP. If you set \fBFORCE_TLS\fR environment variable,
+.B qmail-smtpd
+does not accept MAIL FROM, RCPT TO commands unless the client issues a STARTTLS command.
 
 If the environment variable
 .B SMTPUTF8
