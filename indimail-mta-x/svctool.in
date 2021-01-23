@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.530 2020-12-03 17:30:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.531 2021-01-23 15:20:31+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.530 2020-12-03 17:30:09+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.531 2021-01-23 15:20:31+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -2403,10 +2403,10 @@ echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 if [ " $rbl" = " " ] ; then
-	echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
+	echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \$HOSTNAME \\"
 	> $conf_dir/RBLCOMMAND
 else
-	echo "$QmailBinPrefix/bin/tcpserver -v -h -R -l \\\$LOCALIP \\"
+	echo "$QmailBinPrefix/bin/tcpserver -v -h -R -l \$HOSTNAME \\"
 	(
 	if [ " $rbl_list" = " " ] ; then
 		if [ $shared_objects -eq 1 -a -f "$DESTDIR"@prefix@/lib/indimail/plugins/rblsmtpd.so ] ; then
@@ -2785,7 +2785,7 @@ echo
 echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
+echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \$HOSTNAME \\"
 case $type in
 	qmtpd)
 	echo "-x $sysconfdir/tcp/tcp.qmtp.cdb \\"
@@ -3245,6 +3245,7 @@ echo "# $prog_args"
 echo ""
 echo "INDIUID=\`/usr/bin/id -u indimail\`"
 echo "INDIGID=\`/usr/bin/id -g indimail\`"
+echo "HOSTNAME=\`uname -n\`"
 echo ""
 echo "prefix=$QmailBinPrefix"
 echo "bindir=\${prefix}/bin"
@@ -3261,10 +3262,10 @@ echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo "$QmailBinPrefix/bin/tcpserver -v -c variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 echo "-x $sysconfdir/tcp/tcp.$cdb_f.cdb -X \\"
 if [ " $imap_ssl" = " 1" ] ; then
-	echo "-o -b \\\$MAXDAEMONS -H -l \\\$SSLADDRESS -R -u \$INDIUID -g \$INDIGID \\\$SSLADDRESS \\\$SSLPORT \\"
+	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$INDIUID -g \$INDIGID \\\$SSLADDRESS \\\$SSLPORT \\"
 	echo "\$prefix/bin/couriertls -server -tcpd \\"
 else
-	echo "-o -b \\\$MAXDAEMONS -H -l \\\$LOCALIP -R -u \$INDIUID -g \$INDIGID \\\$LOCALIP \\\$PORT \\"
+	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$INDIUID -g \$INDIGID \\\$LOCALIP \\\$PORT \\"
 fi
 if [ " $proxy_port" = " " ] ;then
 	echo "\$prefix/sbin/"$cdb_f"login \\\$IMAPAUTHMODULES \$bindir/$stype Maildir\""
@@ -5762,7 +5763,7 @@ echo "fi"
 echo ""
 echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
+echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \$HOSTNAME \\"
 echo "-x $sysconfdir/tcp/tcp.poppass.cdb -X \\"
 echo "-c variables/MAXDAEMONS -C \\\$MAXPERIP -o -b \\\$MAXDAEMONS \\"
 if [ " $poppass_ssl" = " 1" ] ; then
