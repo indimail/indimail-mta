@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.233 $";
+char           *revision = "$Revision: 1.234 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2841,7 +2841,7 @@ smtp_ehlo(char *arg)
 	}
 #endif
 #ifdef SMTPUTF8
-	if (env_get("UTF8")) {
+	if (env_get("SMTPUTF8")) {
 		smtputf8_enable = 1;
 		out("250-SMTPUTF8\r\n");
 	}
@@ -3557,6 +3557,14 @@ nohasvirtual:
 		}
 	}
 #endif /*- BATV*/
+#ifdef TLS
+	if (env_get("FORCE_TLS")) {
+		if (!ssl) {
+			out("530 must issue STARTTLS first (#5.7.0)\r\n");
+			return;
+		}
+	}
+#endif
 	seenmail = 1;
 	out("250 ok\r\n");
 }
@@ -4960,15 +4968,6 @@ smtp_auth(char *arg)
 		return;
 	}
 
-/*- forcetls patch */
-#ifdef TLS
-	if (env_get("FORCE_TLS")) {
-		if (!ssl) {
-			out("530 must issue STARTTLS first (#5.7.0)\r\n");
-			return;
-		}
-	}
-#endif
 	if (seenmail) {
 		err_transaction("auth");
 		return;
@@ -6116,6 +6115,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.234  2021-01-23 08:14:52+05:30  Cprogrammer
+ * renamed env variable UTF8 to SMTPUTF8
+ * check FORCE_TLS in smtp_mail()
+ *
  * Revision 1.233  2020-12-07 12:06:27+05:30  Cprogrammer
  * refactored mailfrom_parms()
  *
@@ -6253,7 +6256,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.233 2020-12-07 12:06:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.234 2021-01-23 08:14:52+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

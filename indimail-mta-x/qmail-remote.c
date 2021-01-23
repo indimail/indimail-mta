@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.140 2020-12-07 12:05:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.141 2021-01-23 08:14:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -3370,7 +3370,7 @@ main(int argc, char **argv)
 	protocol_t = env_get("SMTPS") ? 'S' : 's';
 	use_auth_smtp = env_get("AUTH_SMTP");
 #ifdef SMTPUTF8
-	enable_utf8 = env_get("UTF8");
+	enable_utf8 = env_get("SMTPUTF8");
 #endif
 	/*- Per user SMTPROUTE functionality using moresmtproutes.cdb */
 	relayhost = lookup_host(*recips, str_len(*recips));
@@ -3694,7 +3694,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.140 2020-12-07 12:05:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.141 2021-01-23 08:14:37+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3702,6 +3702,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.141  2021-01-23 08:14:37+05:30  Cprogrammer
+ * renamed env variale UTF8 to SMTPUTF8
+ *
  * Revision 1.140  2020-12-07 12:05:49+05:30  Cprogrammer
  * renamed utf8message to flagutf8, firstpart to header
  *

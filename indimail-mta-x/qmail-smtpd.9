@@ -49,11 +49,11 @@ normally on port 465). Otherwise, if you set the \fBSTARTTLS\fR environment vari
 offers the STARTTLS extension to ESMTP.
 
 If the environment variable
-.B UTF8
-is non-empty
+.B SMTPUTF8
+is defined and non-empty
 .B qmail-smtpd
 offers RFC 5336 SMTP Email Address Internationalization support and will advertize the
-capability in the EHLO greeting. Since qmail-smtpd is 8 bit clean, setting of UTF8 has no real
+capability in the EHLO greeting. Since qmail-smtpd is 8 bit clean, setting of SMTPUTF8 has no real
 consequences except for displaying this setting in the received headers as \fBUTF8(E)SMTP\fR.
 
 If the environment variable \fBLOGFILTER\fR is defined, \fBqmail-smtpd\fR will open a fifo 

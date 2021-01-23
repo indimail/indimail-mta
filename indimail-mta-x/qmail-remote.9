@@ -35,7 +35,7 @@ The envelope recipient addresses are listed as \fIrecip\fR arguments to \fBqmail
 
 The envelope sender address is listed as \fIsender\fR.
 
-If the environment variable UTF8 is defined, qmail-remote will respect
+If the environment variable SMTPUTF8 is defined, qmail-remote will respect
 SMTPUTF8 and EAI addresses. If message is utf8, qmail-remote will
 use idn2_lookup_u8(3) to perform IDNA2008 lookup string conversion
 on \fIhost\fR.
