@@ -172,3 +172,7 @@ creation
 97. qmail.c: added exit code 79 as duplicate to 91 for Envelope format error
 98. qmail-qfilter.c, qmail-qmqpc.c, qmail-queue.c -m 'use exit code 79 for
     envelope format error'
+- 23/12/2020
+99. smtpd.c, qmail-remote.c: Renamed env variable UTF8 to SMTPUTF8
+100. smtpd.c: use FORCE_TLS in smtp_mail()
+101. smtpd.c: use remotehost for automatic helo
