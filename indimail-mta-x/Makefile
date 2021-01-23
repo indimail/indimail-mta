@@ -1546,10 +1546,10 @@ tryidn2.c compile load conf-smtputf8
 
 idn2.lib: \
 tryidn2.c compile load conf-smtputf8
-	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
-		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
+	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c -o tryidn21.o \
+		&& ./load tryidn21 -lidn2) >/dev/null 2>&1 \
 	&& echo "-lidn2" || echo "WARNING!!! Not linked with libidn2" 1>&2) > idn2.lib
-	rm -f tryidn2.o tryidn2
+	rm -f tryidn21.o tryidn21
 
 qmail-remote: \
 load qmail-remote.o control.o timeoutconn.o tcpto.o dns.o ip.o \
