@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.142 2021-01-23 21:25:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.143 2021-01-27 13:21:47+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -2759,7 +2759,7 @@ smtp()
 		if (!flagutf8)
 			checkutf8message();
 		if (flagutf8 && !smtputf8)
-			quit("DConnected to ", " but server does not support unicode in email addresses", code, 1);
+			quit("DConnected to ", " but server does not support unicode in email addresses", 553, 1);
 	}
 #endif
 	smtp_auth(use_auth_smtp, use_size);
@@ -3696,7 +3696,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.142 2021-01-23 21:25:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.143 2021-01-27 13:21:47+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3704,6 +3704,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.143  2021-01-27 13:21:47+05:30  Cprogrammer
+ * corrected SMTP code for unicode error
+ *
  * Revision 1.142  2021-01-23 21:25:17+05:30  Cprogrammer
  * added comments for smtputf8 variables
  *
