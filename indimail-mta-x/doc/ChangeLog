@@ -179,3 +179,5 @@ creation
 101. smtpd.c: use FORCE_TLS in smtp_mail()
 102. smtpd.c: use remotehost for automatic helo
 103. qlocal_upgrade: fixed LOGFILTER path
+104. qmail-remote.c: added comments for smtputf8. Added missing 
+     #ifdef SMTPUTF8
