@@ -1468,24 +1468,24 @@ dktest.8: dktest.9 conf-sysconfdir
 
 dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
-	((./compile -I/usr/include/dkim -I/opt/local/include/dkim \
+	( ( ./compile -I/usr/include/dkim -I/opt/local/include/dkim \
 		-I/usr/include/dkim \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 	c++ -o trydkim trydkim.o dns_text.o \
 	`cat dns.lib` -L/usr/local/lib -L/opt/local/lib \
-	-ldkim -lcrypto -ldkim -lqmail) >/dev/null 2>&1 \
-	&& echo "-ldkim" || exit 0) > dkim.lib
+	-ldkim -lcrypto -ldkim -lqmail ) >/dev/null 2>&1 \
+	&& echo "-ldkim" || exit 0 ) > dkim.lib
 	rm -f trydkim.o trydkim
 
 hasdkim.h: dns_text.o \
 trydkim.c compile dns.lib dkim.lib conf-indi
-	((./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
+	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
 		-I/usr/include/dkim \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 		c++ -o trydkim trydkim.o dns_text.o \
 		`cat dkim.lib dns.lib` -L/usr/local/lib -L/opt/local/lib \
 		-lcrypto -lqmail ) >/dev/null 2>&1 \
-		&& (echo \#define HASDKIM 1) || exit 0) > hasdkim.h; \
+		&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h; \
 		rm -f trydkim.o trydkim
 
 qmail-dkim: qmail-dkim.o date822fmt.o auto_control.o \
@@ -1539,16 +1539,16 @@ qr_digest_md5.o: compile qr_digest_md5.c
 
 hassmtputf8.h: \
 tryidn2.c compile load conf-smtputf8
-	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
-		&& ./load tryidn2 -lidn2) >/dev/null 2>&1 \
-	&& echo \#define SMTPUTF8 1 || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1<&2) > hassmtputf8.h
+	( ( ./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
+		&& ./load tryidn2 -lidn2 ) >/dev/null 2>&1 \
+	&& echo \#define SMTPUTF8 1 || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1<&2 ) > hassmtputf8.h
 	rm -f tryidn2.o tryidn2
 
 idn2.lib: \
 tryidn2.c compile load conf-smtputf8
-	((./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c -o tryidn21.o \
-		&& ./load tryidn21 -lidn2) >/dev/null 2>&1 \
-	&& echo "-lidn2" || echo "WARNING!!! Not linked with libidn2" 1>&2) > idn2.lib
+	( ( ./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c -o tryidn21.o \
+		&& ./load tryidn21 -lidn2 ) >/dev/null 2>&1 \
+	&& echo "-lidn2" || echo "WARNING!!! Not linked with libidn2" 1>&2 ) > idn2.lib
 	rm -f tryidn21.o tryidn21
 
 qmail-remote: \
@@ -2131,7 +2131,7 @@ compile splogger.c
 	./compile splogger.c
 
 srs.lib: trysrs.c compile load conf-srs dns.lib
-	((./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
+	( ( ./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
 		-I/opt/local/include/srs2 \
 		`grep -h -v "^#" conf-srs` trysrs.c && \
 		./load trysrs -L/usr/local/lib -L/opt/local/lib -lsrs2 ) \
@@ -2139,10 +2139,10 @@ srs.lib: trysrs.c compile load conf-srs dns.lib
 		rm -f trysrs.o trysrs
 
 hassrs.h: trysrs.c compile load srs.lib conf-indi
-	((./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
+	( ( ./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
 		-I/opt/local/include/srs2 `grep -h -v "^#" conf-srs` \
 		trysrs.c && ./load trysrs -L/usr/local/lib \
-		-L/usr/local/lib -L/opt/local/lib `cat srs.lib`) \
+		-L/usr/local/lib -L/opt/local/lib `cat srs.lib` ) \
 		>/dev/null 2>&1 \
 		&& (echo \#define HAVESRS 1) || exit 0 ) > hassrs.h
 		rm -f trysrs.o trysrs
@@ -3311,44 +3311,44 @@ hasuserpw.h MakeArgs.h
 
 hasifaddr.h: \
 tryifaddr.c compile load
-	((./compile tryifaddr.c \
-	&& ./load tryifaddr) >/dev/null 2>&1 \
+	( ( ./compile tryifaddr.c \
+	&& ./load tryifaddr ) >/dev/null 2>&1 \
 	&& echo \#define HASIFADDR 1 || exit 0 ) > hasifaddr.h
 	rm -f tryifaddr.o tryifaddr
 
 hasspnam.h: \
 tryspnam.c compile load
-	((./compile tryspnam.c \
-	&& ./load tryspnam) >/dev/null 2>&1 \
+	( ( ./compile tryspnam.c \
+	&& ./load tryspnam ) >/dev/null 2>&1 \
 	&& echo \#define HASGETSPNAM 1 || exit 0 ) > hasspnam.h
 	rm -f tryspnam.o tryspnam
 
 hasuserpw.h: \
 tryuserpw.c compile load
-	((./compile tryuserpw.c \
-	  && ./load tryuserpw) >/dev/null 2>&1 \
+	( ( ./compile tryuserpw.c \
+	  && ./load tryuserpw ) >/dev/null 2>&1 \
 	&& echo \#define HASGETUSERPW 1 || exit 0 ) > hasuserpw.h
 	rm -f tryuserpw.o tryuserpw
 
 ldap.lib: \
 tryldap.c compile load hasldap.h
-	((./compile -DLDAP_DEPRECATED=1 tryldap.c && \
+	( ( ./compile -DLDAP_DEPRECATED=1 tryldap.c && \
 	./load tryldap -lldap ) >/dev/null 2>&1 \
-	&& echo -lldap || exit 0) > ldap.lib
+	&& echo -lldap || exit 0 ) > ldap.lib
 	rm -f tryldap.o tryldap
 
 hasldap.h: \
 tryldap.c compile load
-	((./compile -DLDAP_DEPRECATED=1 tryldap.c && \
-	./load tryldap -lldap) >/dev/null 2>&1 \
-	&& echo "#define HASLDAP 1" || exit 0) > hasldap.h
+	( ( ./compile -DLDAP_DEPRECATED=1 tryldap.c && \
+	./load tryldap -lldap ) >/dev/null 2>&1 \
+	&& echo "#define HASLDAP 1" || exit 0 ) > hasldap.h
 	rm -f tryldap.o tryldap
 
 shadow.lib: \
 tryshadow.c compile load
-	((./compile tryshadow.c && \
-	./load tryshadow -lshadow) >/dev/null 2>&1 \
-	&& echo -lshadow || exit 0) > shadow.lib
+	( ( ./compile tryshadow.c && \
+	./load tryshadow -lshadow ) >/dev/null 2>&1 \
+	&& echo -lshadow || exit 0 ) > shadow.lib
 	rm -f tryshadow.o tryshadow
 
 ldap-checkpwd: \
@@ -3458,35 +3458,35 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 
 hastlsv1_1_server.h: \
 trytlsv1_1_server.c compile load
-	((./compile trytlsv1_1_server.c && ./load trytlsv1_1_server \
-	-lssl -lcrypto) >/dev/null 2>&1 \
+	( ( ./compile trytlsv1_1_server.c && ./load trytlsv1_1_server \
+	-lssl -lcrypto ) >/dev/null 2>&1 \
 	&& echo \#define TLSV1_1_SERVER_METHOD 1 || exit 0 ) > hastlsv1_1_server.h
 	rm -f trytlsv1_1_server.o trytlsv1_1_server
 
 hastlsv1_2_server.h: \
 trytlsv1_2_server.c compile load
-	((./compile trytlsv1_2_server.c && ./load trytlsv1_2_server \
-	-lssl -lcrypto) >/dev/null 2>&1 \
+	( ( ./compile trytlsv1_2_server.c && ./load trytlsv1_2_server \
+	-lssl -lcrypto ) >/dev/null 2>&1 \
 	&& echo \#define TLSV1_2_SERVER_METHOD 1 || exit 0 ) > hastlsv1_2_server.h
 	rm -f trytlsv1_2_server.o trytlsv1_2_server
 
 hastlsv1_1_client.h: \
 trytlsv1_1_client.c compile load
-	(( ./compile trytlsv1_1_client.c && ./load trytlsv1_1_client \
-	-lssl -lcrypto) >/dev/null 2>&1 \
+	( ( ./compile trytlsv1_1_client.c && ./load trytlsv1_1_client \
+	-lssl -lcrypto ) >/dev/null 2>&1 \
 	&& echo \#define TLSV1_1_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_1_client.h
 	rm -f trytlsv1_1_client.o trytlsv1_1_client
 
 hastlsv1_2_client.h: \
 trytlsv1_2_client.c compile load
-	(( ./compile trytlsv1_2_client.c && ./load trytlsv1_2_client \
-	-lssl -lcrypto) >/dev/null 2>&1 \
+	( ( ./compile trytlsv1_2_client.c && ./load trytlsv1_2_client \
+	-lssl -lcrypto ) >/dev/null 2>&1 \
 	&& echo \#define TLSV1_2_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_2_client.h
 	rm -f trytlsv1_2_client.o trytlsv1_2_client
 
 hasinotify.h: \
 tryinotify.c compile load
-	(( ./compile tryinotify.c && ./load tryinotify ) >/dev/null \
+	( ( ./compile tryinotify.c && ./load tryinotify ) >/dev/null \
 	2>&1 \
 	&& echo \#define HASINOTIFY 1 || exit 0 ) > hasinotify.h
 	rm -f tryinotify.o tryinotify
