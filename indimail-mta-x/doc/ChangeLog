@@ -181,3 +181,7 @@ creation
 103. qlocal_upgrade: fixed LOGFILTER path
 104. qmail-remote.c: added comments for smtputf8. Added missing 
      #ifdef SMTPUTF8
+- 27/01/2021
+105. ldap-checkpwd.c: added dovecot support
+106. pam-checkpwd.c: env variable NATIVE_CHECKPASSWORD to comply exactly with
+    checkpassword protocol

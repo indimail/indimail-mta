@@ -2,7 +2,7 @@
 .SH NAME
 ldap-checkpwd \- LDAP checkpassword Interface
 .SH SYNOPSIS
-\fBldap-checkpwd\fR \fIprog\fR
+\fBldap-checkpwd\fR \fIprog\fR \fIargs\fR
 
 .SH DESCRIPTION
 \fBldap-checkpwd\fR reads descriptor 3 through end of file and then closes descriptor 3. There
@@ -12,15 +12,20 @@ The information supplied on descriptor 3 is a login name terminated by \\0, a pa
 terminated by \\0, a timestamp terminated by \\0, and possibly more data. There are no other
 restrictions on the form of the login name, password, and timestamp.
 
+.SH RETURN VALUE
 If the password is acceptable, ldap-checkpwd exits 0. If ldap-checkpwd is misused, it may
 instead exit 2. If there is a temporary problem checking the password, ldap-checkpwd exits 111.
 
 If the password is unacceptable, ldap-checkpwd runs \fIprog\fR. \fIprog\fR consists of one or more
 arguments.
 
-\fBldap-checkpwd\fR requires series of environment variables to run;
+If the environment variable \fBNATIVE_CHECKPASSWORD\fR is set, ldap-checkpwd will run \fIprog\fR
+on successful authentication and exit 1 if password is unacceptable.
 
 .SH Environment Variables
+
+\fBldap-checkpwd\fR requires series of environment variables to run;
+
 .TP
 .B DEBUG
 Causes debug statements to be printed on file descriptor 1 and error messages on file descriptor 2.

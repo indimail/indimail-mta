@@ -99,3 +99,5 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * smtpd.c: use remotehost for automatic helo
   * qlocal_upgrade: fixed LOGFILTER path
   * qmail-remote.c: added comments for smtputf8. Added missing #ifdef SMTPUTF8
+  * ldap-checkpwd.c: added dovecot support
+  * pam-checkpwd.c: env variable NATIVE_CHECKPASSWORD to comply exactly with checkpassword protocol

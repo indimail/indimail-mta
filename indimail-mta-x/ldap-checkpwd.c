@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.10  2021-01-27 18:56:32+05:30  Cprogrammer
+ * use env variable NATIVE_CHECKPASSWORD to comply with checkpassword protocol
+ *
  * Revision 1.9  2021-01-27 16:54:02+05:30  Cprogrammer
  * added dovecot support
  *
@@ -149,7 +152,7 @@ int
 main(int argc, char *argv[])
 {
 	char           *login, *password, *ptr, *error = 0;
-	int             uplen, i, r, use_dovecot;
+	int             uplen, i, r, native_checkpassword;
 	uid_t           uid;
 	gid_t           gid;
 
@@ -186,8 +189,8 @@ main(int argc, char *argv[])
 			my_error("invalid data", 0, 2);
 	if (!*login || !*password)
 		my_error("invalid data", 0, 2);
-	use_dovecot = env_get("DOVECOT_VERSION") ? 1 : 0;
-	if (use_dovecot) {
+	native_checkpassword = (env_get("NATIVE_CHECKPASSWORD") || env_get("DOVECOT_VERSION")) ? 1 : 0;
+	if (native_checkpassword) {
 		if (!env_unset("userdb_uid") || !env_unset("userdb_gid") ||
 				!env_unset("EXTRA"))
 			my_error("out of mem", 0, -1);
@@ -209,7 +212,7 @@ main(int argc, char *argv[])
 		my_error("out of mem", 0, -1);
 #endif
 	if (!i) {
-		if (use_dovecot) { /*- support dovecot checkpassword */
+		if (native_checkpassword) { /*- support dovecot checkpassword */
 			if (!env_put2("userdb_uid", "indimail") ||
 					!env_put2("userdb_gid", "indimail"))
 				my_error("out of memory", 0, -1);
@@ -230,7 +233,7 @@ main(int argc, char *argv[])
 		_exit (0);
 	}
 	/*- authenticaion did not succeed */
-	if (use_dovecot)
+	if (native_checkpassword)
 		_exit (1);
 	execvp(argv[1], argv + 1);
 	my_error("execvp", argv[1], -1);
@@ -566,7 +569,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.9 2021-01-27 16:54:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.10 2021-01-27 18:56:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
