@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.9  2021-01-27 16:54:02+05:30  Cprogrammer
+ * added dovecot support
+ *
  * Revision 1.8  2019-12-24 07:19:24+05:30  Cprogrammer
  * use LDAP_FIELD_xxx environment variables to get value of any ldap field
  *
@@ -134,6 +137,7 @@ my_error(char *s1, char *s2, int exit_val)
 }
 
 static char     up[513];
+static stralloc buf = {0};
 #ifdef EXTENDED_ATTRIBUTES
 static stralloc homedir = {0};
 #endif
@@ -144,8 +148,8 @@ int             ldap_lookup(char *, char *, char **, uid_t *, gid_t *);
 int
 main(int argc, char *argv[])
 {
-	char           *login, *password, *error = 0;
-	int             uplen, i, r;
+	char           *login, *password, *ptr, *error = 0;
+	int             uplen, i, r, use_dovecot;
 	uid_t           uid;
 	gid_t           gid;
 
@@ -182,6 +186,12 @@ main(int argc, char *argv[])
 			my_error("invalid data", 0, 2);
 	if (!*login || !*password)
 		my_error("invalid data", 0, 2);
+	use_dovecot = env_get("DOVECOT_VERSION") ? 1 : 0;
+	if (use_dovecot) {
+		if (!env_unset("userdb_uid") || !env_unset("userdb_gid") ||
+				!env_unset("EXTRA"))
+			my_error("out of mem", 0, -1);
+	}
 	if (debug) {
 		out("login [");
 		out(login);
@@ -190,16 +200,38 @@ main(int argc, char *argv[])
 		out("]\n");
 		flush();
 	}
-	i = ldap_lookup(login, password, &error, &uid, &gid);
-	if (i == -1)
+	if ((i = ldap_lookup(login, password, &error, &uid, &gid)) == -1)
 		my_error("ldap lookup error", error, 111);
-	if (!i)
-		_exit (0);
-	/*- authenticaion did not succeed */
 #ifdef EXTENDED_ATTRIBUTES
 	if (homedir.len && chdir(homedir.s) != 0)
 		my_error("chdir", homedir.s, -1);
+	if (!env_put2("HOME", homedir.s))
+		my_error("out of mem", 0, -1);
 #endif
+	if (!i) {
+		if (use_dovecot) { /*- support dovecot checkpassword */
+			if (!env_put2("userdb_uid", "indimail") ||
+					!env_put2("userdb_gid", "indimail"))
+				my_error("out of memory", 0, -1);
+			if ((ptr = env_get("EXTRA"))) {
+				if (!stralloc_copyb(&buf, "userdb_uid userdb_gid ", 22) ||
+						!stralloc_cats(&buf, ptr) || !stralloc_0(&buf))
+				my_error("out of memory", 0, -1);
+			} else
+			if (!stralloc_copyb(&buf, "userdb_uid userdb_gid", 21) ||
+					!stralloc_0(&buf))
+				my_error("out of memory", 0, -1);
+			if (!env_put2("EXTRA", buf.s))
+				my_error("out of memory", 0, -1);
+			execv(argv[1], argv + 1);
+			my_error("execvp", argv[1], -1);
+			_exit (111);
+		}
+		_exit (0);
+	}
+	/*- authenticaion did not succeed */
+	if (use_dovecot)
+		_exit (1);
 	execvp(argv[1], argv + 1);
 	my_error("execvp", argv[1], -1);
 	/*- Not reached */
@@ -534,7 +566,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.8 2019-12-24 07:19:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.9 2021-01-27 16:54:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
