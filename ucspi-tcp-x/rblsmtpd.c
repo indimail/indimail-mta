@@ -1,5 +1,9 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.21  2021-01-28 18:22:39+05:30  Cprogrammer
+ * added ehlo() function
+ * change greeting using RBLGREETING env variable
+ *
  * Revision 1.20  2020-09-16 20:49:57+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -87,7 +91,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.20 2020-09-16 20:49:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.21 2021-01-28 18:22:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -102,7 +106,7 @@ usage(void)
 	strerr_die1x(100, "usage: rblsmtpd -r base [ -b ] [ -R ] [ -t timeout ] [ -a base ] [-W] [-w delay] smtpd [ arg ... ]");
 }
 
-char           *ip_env;
+char           *ip_env, *rbl_greeting, *rbl_ehlo;
 char            pid_str[FMT_ULONG] = "?PID?";
 static stralloc addr = { 0 };
 static stralloc ip_reverse;
@@ -352,13 +356,29 @@ reject()
 void
 accept()
 {
-	substdio_putsflush(&out, "250 rblsmtpd.indimail\r\n");
+  substdio_put(&out, "250 ", 4);
+  substdio_puts(&out, rbl_greeting);
+  substdio_putsflush(&out, "\r\n");
+}
+
+void
+smtp_ehlo()
+{
+  if (rbl_ehlo) {
+  substdio_put(&out, "250-", 4);
+  substdio_puts(&out, rbl_greeting);
+  substdio_putsflush(&out, 
+    "\r\n250-PIPELINING\r\n250-8BITMIME\r\n250-STARTTLS\r\n250 HELP\r\n");
+  } else
+    accept();
 }
 
 void
 verify()
 {
-	substdio_putsflush(&out, "252 rblsmtpd.indimail\r\n");
+  substdio_put(&out, "252 ", 4);
+  substdio_puts(&out, rbl_greeting);
+  substdio_putsflush(&out, "\r\n");
 }
 
 static int
@@ -465,14 +485,18 @@ rblsmtp_rcpt(char *arg)
 void
 greet()
 {
-	substdio_putsflush(&out, "220 rblsmtpd.indimail\r\n");
+  substdio_put(&out, "220 ", 4);
+  substdio_puts(&out, rbl_greeting);
+  substdio_putsflush(&out, "\r\n");
 }
 
 void
 quit()
 {
-	substdio_putsflush(&out, "221 rblsmtpd.indimail\r\n");
-	_exit(0);
+  substdio_put(&out, "221 ", 4);
+  substdio_puts(&out, rbl_greeting);
+  substdio_putsflush(&out, "\r\n");
+  _exit(0);
 }
 
 void
@@ -484,7 +508,7 @@ drop()
 struct commands rbl_smtpcommands[] = {
 	{"quit", quit, 0},
 	{"helo", accept, 0},
-	{"ehlo", accept, 0},
+	{"ehlo", smtp_ehlo, 0},
 	{"mail", rblsmtp_mail, 0},
 	{"rcpt", rblsmtp_rcpt, 0},
 	{"rset", accept, 0},
@@ -542,6 +566,9 @@ rblsmtpd(int argc, char **argv, char **envp)
 	e = environ;
 	environ = envp;
 	ip_init();
+	if (!(rbl_greeting = env_get("RBLGREETING")))
+		rbl_greeting = "rblsmtpd.indimail";
+	rbl_ehlo = env_get("RBLEHLO");
 	if ((x = env_get("RBLSMTPD"))) {
 		if (!*x)
 			decision = 1;
