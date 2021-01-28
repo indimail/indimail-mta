@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.75  2021-01-28 18:15:34+05:30  Cprogrammer
+ * fixed indentation
+ *
  * Revision 1.74  2020-12-08 14:15:41+05:30  Cprogrammer
  * save original errno
  *
@@ -954,8 +957,8 @@ main(int argc, char **argv)
 			if (!stralloc_copys(&recipient, ext))
 				report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		} else /*- user */
-			if (!stralloc_copys(&recipient, argv[2]))
-				report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+		if (!stralloc_copys(&recipient, argv[2]))
+			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!stralloc_cats(&recipient, "@"))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!stralloc_cats(&recipient, domain))
@@ -1158,7 +1161,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.74 2020-12-08 14:15:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.75 2021-01-28 18:15:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
