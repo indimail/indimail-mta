@@ -135,6 +135,12 @@ inverse nibble format, depending on the setting of PROTO. If PROTO=TCP the stand
 inverse IPv4 address scheme is used, whereas in case of PROTO=TCP6 the IPv6 inverse
 nibble format is computed based on the expanded IPv6 address:
 
+The default greeting rblsmtpd.greeting can be changed by setting the \fBRBLGREETING\fR
+environment variable.
+
+You can make rblsmtpd respond to ehlo with a dummy output by setting \fBRBLEHLO\fR environment
+variable.
+
 .EX
 fe80::1 => 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.e.f.(tld)
 .EE
