@@ -318,7 +318,10 @@ IPv4/IPv6 bindings.
 
 .SH Loading Shared Objects
 tcpserver can load shared objects by specifying a shared object on the
-command line. A special case can be setup for qmail-smtpd and rblmstpd
+command line. In such cases tcpserver will execute the basename of the
+shared object.
+
+A special case can be setup for qmail-smtpd and rblmstpd
 by specifying the following environment variables
 
 .EX
@@ -330,11 +333,10 @@ PLUGIN1=PREFIX/lib/indimail/plugins/rblsmtpd.so
 
 The above causes tcpserver to load qmail_smtpd.so and execute the smtp_init(1)
 function, after changing directory to /var/indimail, in the parent. smtp_init()
-loads all qmail-smtpd control files. Additionally, if
-PREFIX/lib/indimail/plugins/qmail_smtpd.so is specfied in the command line
-argument, instead of PREFIX/bin/qmail-smtpd, tcpserver will execute the
-fuction qmail_smtpd() instead of exec of the qmail-smtpd executable. This
-improves the perfomance of the smtp service. In the above example, rblsmtpd.so
+loads all qmail-smtpd control files. Here PLUGIN0 is defined as
+PREFIX/lib/indimail/plugins/qmail_smtpd.so, which causes the function
+qmail_smtpd() to be preloaded. This improves the perfomance of the smtp 
+service. In the above example, rblsmtpd.so
 is loaded without executing any initialization function and without changing
 directory. On SIGHUP, tcpserver executes the function smtp_init(0). The
 variable PLUGINn_dir should be used if your function expects to be in a
@@ -342,6 +344,21 @@ particular directory to function properly. PLUGIN1 causes tcpserver to preload
 rblsmtpd.so and if \fIprog\fR is PREFIX/lib/indimail/plugins/rblsmtpd.so, it
 will simply execute the function \fIrblsmtpd\fR, from the shared library
 rblsmtpd.so already preloaded in the memory.
+
+The function (basename of the shared objec) is passed argc, argv and envp.
+
+.EX
+func(int argc, char **argv, char **env)
+.EE
+
+Here argc is the number if arguments passed to the shared object, argv the
+arguments and envp is the modified environment variables set by tcpserver.
+See tcp-env(1). If you want your function to inherit all env variables set
+by tcpserver, just do the following in your function
+
+.EX
+environ = envp;
+.EE
 
 .SH ENVIRONMENT
 .TP
