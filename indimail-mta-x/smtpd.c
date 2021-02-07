@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.236 $";
+char           *revision = "$Revision: 1.237 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3772,13 +3772,17 @@ smtp_rcpt(char *arg)
 			switch (isgoodrcpt)
 			{
 			case 1:	/* reject if user not in sql db */
-				at = byte_rchr(addr.s, addr.len - 1, '@');
-				isLocal = (constmap(&maplocals, addr.s + at + 1, addr.len - at - 2) ? 1 : 0);
+				if ((at = byte_rchr(addr.s, addr.len - 1, '@')) < addr.len - 1)
+					isLocal = (constmap(&maplocals, addr.s + at + 1, addr.len - at - 2) ? 1 : 0);
+				else
+					isLocal = 1;
 				result = (isLocal ? check_recipient_pwd : check_recipient_sql) (addr.s, at);
 				break;
 			case 2:	/* reject if user not in both recipient.cdb and sql db */
-				at = byte_rchr(addr.s, addr.len - 1, '@');
-				isLocal = (constmap(&maplocals, addr.s + at + 1, addr.len - at - 2) ? 1 : 0);
+				if ((at = byte_rchr(addr.s, addr.len - 1, '@')) < addr.len - 1)
+					isLocal = (constmap(&maplocals, addr.s + at + 1, addr.len - at - 2) ? 1 : 0);
+				else
+					isLocal = 1;
 				if ((result = !check_recipient_cdb(addr.s)))
 					result = (isLocal ? check_recipient_pwd : check_recipient_sql) (addr.s, at);
 				break;
@@ -6148,6 +6152,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.237  2021-02-08 00:05:54+05:30  Cprogrammer
+ * fixed checkrecipient for local users
+ *
  * Revision 1.236  2021-02-07 23:14:51+05:30  Cprogrammer
  * use functions directly from libindimail
  *
@@ -6295,7 +6302,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.236 2021-02-07 23:14:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.237 2021-02-08 00:05:54+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
