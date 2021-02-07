@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.70  2021-02-07 21:13:07+05:30  Cprogrammer
+ * removed non-existent control file inquery
+ *
  * Revision 1.69  2020-11-24 13:47:30+05:30  Cprogrammer
  * removed exit.h
  *
@@ -819,8 +822,6 @@ main(int argc, char **argv)
 			continue;
 		if (str_equal(d->d_name, "bindroutes"))
 			continue;
-		if (str_equal(d->d_name, "inquery"))
-			continue;
 		if (str_equal(d->d_name, "mcdinfo"))
 			continue;
 		if (str_equal(d->d_name, "host.mysql"))
@@ -871,7 +872,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.69 2020-11-24 13:47:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.70 2021-02-07 21:13:07+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
