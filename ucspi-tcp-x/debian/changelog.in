@@ -18,3 +18,5 @@ ucspi-tcp (@version@-@release@) unstable; urgency=low
   * tcpserver.c: changed scope of global variables to static, limited to tcpserver.c
   * tcpserver.c: added -a option to specify CA file
   * removed exit.h
+  * rblsmtpd.c: Set greeting using RBLGREETING env variable
+  * rblsmtpd.c: enable dummy ehlo function using RBLEHLO env variable

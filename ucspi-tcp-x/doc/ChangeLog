@@ -35,3 +35,6 @@ Release 1.0 Start 21/05/2020
 18. tcpserver.c: added -a option to specify CA file
 - 25/11/2020
 19. removed exit.h
+- 28/01/2021
+20. rblsmtpd.c: Set greeting using RBLGREETING env variable
+21. rblsmtpd.c: enable dummy ehlo function using RBLEHLO env variable
