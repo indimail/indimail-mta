@@ -1462,7 +1462,7 @@ err_child()
 	return -1;
 }
 
-int
+void
 err_library(char *arg)
 {
 	out("451 Requested action aborted: problem with loading shared libs (#4.3.0)\r\n");
@@ -1472,7 +1472,7 @@ err_library(char *arg)
 		logerr(arg);
 		logerrf("\n");
 	}
-	return -1;
+	return;
 }
 
 int
@@ -1811,6 +1811,34 @@ check_recipient_pwd(char *rcpt, int len)
 	return (1);
 }
 
+char           *
+load_virtual()
+{
+	char           *ptr;
+
+	if (!hasvirtual) {
+		err_library("libindimail.so not loaded");
+		return ((char *) NULL);
+	}
+	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!libfn.len) {
+			if (!stralloc_copys(&libfn, controldir))
+				die_nomem();
+			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+				die_nomem();
+			if (!stralloc_catb(&libfn, "libindimail", 11) ||
+					!stralloc_0(&libfn))
+				die_nomem();
+		}
+		return libfn.s;
+	}
+	return ptr;
+}
+
 /*
  * This function returns
  *  0: User is fine
@@ -1822,15 +1850,19 @@ check_recipient_pwd(char *rcpt, int len)
 int
 check_recipient_sql(char *rcpt, int len)
 {
-	char           *ptr;
+	char           *ptr, *errstr;
+	void           *(*inquery) (char, char *, char *);
 
-	if ((ptr = inquery(USER_QUERY, rcpt, 0))) {
+	ptr = load_virtual();
+	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &errstr))) {
+		err_library(errstr);
+		return -1;
+	}
+	if ((ptr = (*inquery) (USER_QUERY, rcpt, 0))) {
 		if (*ptr == 4)	   /*- allow aliases */
 			return (0);
 		return (*ptr);
 	}
-	if (userNotFound)
-		return (1);
 	out("451 Requested action aborted: database error (#4.3.2)\r\n");
 	flush();
 	logerr("qmail-smtpd: ");
@@ -2932,25 +2964,26 @@ check_batv_sig()
 int
 pop_bef_smtp(char *mfrom)
 {
-	char           *ptr;
+	char           *ptr, *errstr;
+	void           *(*inquery) (char, char *, char *);
 
-	if ((ptr = inquery(RELAY_QUERY, mfrom, remoteip))) {
+	ptr = load_virtual();
+	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &errstr))) {
+		err_library(errstr);
+		return 1;
+	}
+
+	if ((ptr = (*inquery) (RELAY_QUERY, mfrom, remoteip))) {
 		if ((authenticated = *ptr)) /*- also set authenticated variable */
 			relayclient = "";
 		if (!env_put2("AUTHENTICATED", authenticated == 1 ? "1" : "0"))
 			die_nomem();
 	} else {
-		if (userNotFound) {
-			authenticated = -1;
-			if (!env_put2("AUTHENTICATED", "0"))
-				die_nomem();
-		} else {
-			out("451 Requested action aborted: database error (#4.3.2)\r\n");
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerrf("Database error\n");
-			return (1);
-		}
+		out("451 Requested action aborted: database error (#4.3.2)\r\n");
+		logerr("qmail-smtpd: ");
+		logerrpid();
+		logerrf("Database error\n");
+		return (1);
 	}
 	return (0);
 }
@@ -2962,30 +2995,29 @@ pop_bef_smtp(char *mfrom)
 int
 domain_compare(char *dom1, char *dom2)
 {
-	char           *tmpdom1, *tmpdom2;
+	char           *ptr, *tmpdom1, *tmpdom2, *errstr;
+	void           *(*inquery) (char, char *, char *);
+
+	ptr = load_virtual();
+	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &errstr))) {
+		err_library(errstr);
+		return -1;
+	}
 
 	if (str_diff(dom1, dom2)) {
-		if (!(tmpdom1 = inquery(DOMAIN_QUERY, dom1, 0))) {
-			if (userNotFound)
-				tmpdom1 = dom1;
-			else {
-				out("451 Requested action aborted: database error (#4.3.2)\r\n");
-				logerr("qmail-smtpd: ");
-				logerrpid();
-				logerrf("Database error\n");
-				return (-1);
-			}
+		if (!(tmpdom1 = (*inquery) (DOMAIN_QUERY, dom1, 0))) {
+			out("451 Requested action aborted: database error (#4.3.2)\r\n");
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerrf("Database error\n");
+			return (-1);
 		}
-		if (!(tmpdom2 = inquery(DOMAIN_QUERY, dom2, 0))) {
-			if (userNotFound)
-				tmpdom2 = dom2;
-			else {
-				out("451 Requested action aborted: database error (#4.3.2)\r\n");
-				logerr("qmail-smtpd: ");
-				logerrpid();
-				logerrf("Database error\n");
-				return (-1);
-			}
+		if (!(tmpdom2 = (*inquery) (DOMAIN_QUERY, dom2, 0))) {
+			out("451 Requested action aborted: database error (#4.3.2)\r\n");
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerrf("Database error\n");
+			return (-1);
 		}
 		if (str_diff(tmpdom1, tmpdom2)) {
 			err_nogateway(remoteip, mailfrom.s, 0, 1);
@@ -3101,14 +3133,22 @@ void
 smtp_mail(char *arg)
 {
 	struct passwd  *pw;
-	char           *x;
+	char           *x, *ptr;
 	int             ret, i;
+	int            *u_not_found, *i_inactive;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
 #endif
 #ifdef USE_SPF
 	int             r;
 #endif
+	void           *(*inquery) (char, char *, char *);
+
+	ptr = load_virtual();
+	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &x))) {
+		err_library(x);
+		return;
+	}
 
 	/*-
 	 * If this is the second session restore original environment.
@@ -3315,8 +3355,12 @@ smtp_mail(char *arg)
 			out("553 SMTP Access denied (#5.7.1)\r\n");
 			return;
 		}
-		if (!(pw = inquery(PWD_QUERY, mailfrom.s, 0))) {
-			if (userNotFound) {
+		if (!(pw = (*inquery) (PWD_QUERY, mailfrom.s, 0))) {
+			if (!(u_not_found = (int *) getlibObject(ptr, &phandle, "userNotFound", &x))) {
+				err_library(x);
+				return;
+			}
+			if (*u_not_found) {
 				/*- 
 				 * Accept the mail as denial could be stupid
 				 * like the vrfy command
@@ -3338,17 +3382,22 @@ smtp_mail(char *arg)
 				out("451 Requested action aborted: database error (#4.3.2)\r\n");
 				return;
 			}
-		} else
-		if (is_inactive || pw->pw_gid & NO_SMTP) {
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" SMTP Access denied to <");
-			logerr(mailfrom.s);
-			logerr("> ");
-			logerrf(is_inactive ? "user inactive" : "No SMTP Flag");
-			out("553 SMTP Access denied (#5.7.1)\r\n");
-			return;
+		} else {
+			if (!(i_inactive = (int *) getlibObject(ptr, &phandle, "is_inactive", &x))) {
+				err_library(x);
+				return;
+			}
+			if (*i_inactive || pw->pw_gid & NO_SMTP) {
+				logerr("qmail-smtpd: ");
+				logerrpid();
+				logerr(remoteip);
+				logerr(" SMTP Access denied to <");
+				logerr(mailfrom.s);
+				logerr("> ");
+				logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
+				out("553 SMTP Access denied (#5.7.1)\r\n");
+				return;
+			}
 		}
 	} /*- if (env_get("CUGMAIL")) */
 	/*-
@@ -5129,9 +5178,10 @@ smtp_atrn(char *arg)
 	int             i, end_flag, status, Reject = 0, Accept = 0;
 	char            err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 	static stralloc a_user = {0}, domain = {0};
-	void            (*vclose) (void);
-	char           *(*vshow_atrn_map) (char **, char **);
+	void            (*iclose) (void);
+	char           *(*show_atrn_map) (char **, char **);
 	int             (*atrn_access) (char *, char *);
+	int             (*parse_email) (char *, stralloc *, stralloc *);
 
 	if (!authd) {
 		err_authrequired();
@@ -5145,32 +5195,12 @@ smtp_atrn(char *arg)
 		err_transaction("ATRN");
 		return;
 	}
-	if (!hasvirtual) {
-		err_library("libindimail.so not loaded");
-		return;
-	}
-	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!libfn.len) {
-			if (!stralloc_copys(&libfn, controldir))
-				die_nomem();
-			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
-				die_nomem();
-			if (!stralloc_catb(&libfn, "libindimail", 11) ||
-					!stralloc_0(&libfn))
-				die_nomem();
-		}
-		ptr = libfn.s;
-	} else
-		ptr = "VIRTUAL_PKG_LIB";
-	if (!(vclose = getlibObject(ptr, &phandle, "vclose", &errstr))) {
+	ptr = load_virtual();
+	if (!(iclose = getlibObject(ptr, &phandle, "iclose", &errstr))) {
 		err_library(errstr);
 		return;
 	} else
-	if (!(vshow_atrn_map = getlibObject(ptr, &phandle, "vshow_atrn_map", &errstr))) {
+	if (!(show_atrn_map = getlibObject(ptr, &phandle, "show_atrn_map", &errstr))) {
 		err_library(errstr);
 		return;
 	} else
@@ -5183,24 +5213,28 @@ smtp_atrn(char *arg)
 	if (*arg)
 		domain_ptr = arg;
 	else {
-		parse_email(remoteinfo, &a_user, &domain);
+		if (!(parse_email = getlibObject(ptr, &phandle, "parse_email", &errstr))) {
+			err_library(errstr);
+			return;
+		}
+		(*parse_email) (remoteinfo, &a_user, &domain);
 		for (user_tmp = a_user.s, domain_tmp = domain.s, end_flag = 0;;) {
-			if (!(ptr = (*vshow_atrn_map) (&user_tmp, &domain_tmp)))
+			if (!(ptr = (*show_atrn_map) (&user_tmp, &domain_tmp)))
 				break;
 			if (end_flag) {
 				if (!stralloc_cats(&domBuf, " ")) {
-					vclose();
+					(*iclose) ();
 					die_nomem();
 				}
 			}
 			if (!stralloc_cats(&domBuf, ptr)) {
-				vclose();
+				(*iclose) ();
 				die_nomem();
 			}
 			end_flag = 1;
 		}
 		if (!stralloc_0(&domBuf)) {
-			vclose();
+			(*iclose) ();
 			die_nomem();
 		}
 		domain_ptr = domBuf.s;
@@ -5216,7 +5250,7 @@ smtp_atrn(char *arg)
 				out("501 invalid parameter syntax (#5.3.2)\r\n");
 				return;
 			}
-			if (atrn_access(remoteinfo, domain_ptr)) {
+			if ((*atrn_access) (remoteinfo, domain_ptr)) {
 				Reject = 1;
 				break;
 			} else
@@ -5228,7 +5262,7 @@ smtp_atrn(char *arg)
 			domain_ptr = cptr + 1;
 		}
 	}
-	vclose();
+	(*iclose) ();
 	if (Reject) {
 		log_atrn(remoteip, remoteinfo, domain_ptr, "ATRN Rejected");
 		if (Accept)

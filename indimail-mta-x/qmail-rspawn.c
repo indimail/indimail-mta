@@ -272,8 +272,9 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	static char     smtproute[MAX_BUFF]; 
 	static int      rcptflag = 1;
 	extern void    *phandle;
+	int            *u_not_found;
 	int             (*is_distributed_domain) (char *);
-	char *          (*vget_real_domain) (char *);
+	char *          (*get_real_domain) (char *);
 	char *          (*findhost) (char *, int);
 
 	size_buf[fmt_ulong(size_buf, msgsize)] = 0;
@@ -325,13 +326,13 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 		if (rcptflag)
 			rcptflag = rcpthosts_init();
 		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1) {
-			if (!(vget_real_domain = getlibObject(libptr, &phandle, "vget_real_domain", 0)))
+			if (!(get_real_domain = getlibObject(libptr, &phandle, "get_real_domain", 0)))
 				return (-1);
 			if (!(is_distributed_domain = getlibObject(libptr, &phandle, "is_distributed_domain", 0)))
 				return (-1);
 			if (!(findhost = getlibObject(libptr, &phandle, "findhost", 0)))
 				return (-1);
-			if ((real_domain = (*vget_real_domain) (r + at + 1))
+			if ((real_domain = (*get_real_domain) (r + at + 1))
 				&& ((*is_distributed_domain) (real_domain) == 1)) {
 				if ((ip = (*findhost) (r, 0)) != (char *) 0) {
 					i = fmt_str(smtproute, !str_diffn(ptr, "smtp", 4) ? "SMTPROUTE=" : "QMTPROUTE=");
@@ -341,9 +342,12 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 					smtproute[i] = 0;
 					if (!env_put(smtproute))
 						return (-1);
-				} else
-				if (!userNotFound) /*- temp MySQL error */
-					return (-2);
+				} else {
+					if (!(u_not_found = (int *) getlibObject(libptr, &phandle, "userNotFound", 0)))
+						return (-1);
+					if (!*u_not_found) /*- temp MySQL error */
+						return (-2);
+				}
 			}
 		}
 	}

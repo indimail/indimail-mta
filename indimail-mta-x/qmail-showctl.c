@@ -312,7 +312,7 @@ main(int argc, char **argv)
 	direntry       *d;
 	void           *handle = (void *) 0;
 	char           *ptr, *local_ip, *qbase, *local_id, *errstr;
-	int             i;
+	int             i, verbose;
 	struct stat     stmrh, stmrhcdb;
 	char           *(*get_local_ip) (void);
 	char           *(*get_local_hostid) (void);

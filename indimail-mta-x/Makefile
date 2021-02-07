@@ -1736,8 +1736,8 @@ mail_acl.o: compile mail_acl.c matchregex.h
 	./compile mail_acl.c
 
 indimail_stub.o: \
-compile indimail_stub.c auto_qmail.h auto_sysconfdir.h auto_uids.h \
-auto_control.h variables.h
+compile indimail_stub.c control.h \
+variables.h indimail_stub.h
 	./compile indimail_stub.c
 
 qregex.o: \
