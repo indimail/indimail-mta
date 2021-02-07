@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.71  2021-02-07 23:14:18+05:30  Cprogrammer
+ * declare verbose variable removed from indimail_stub
+ *
  * Revision 1.70  2021-02-07 21:13:07+05:30  Cprogrammer
  * removed non-existent control file inquery
  *
@@ -872,7 +875,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.70 2021-02-07 21:13:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.71 2021-02-07 23:14:18+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

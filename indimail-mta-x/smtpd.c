@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.235 $";
+char           *revision = "$Revision: 1.236 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6148,6 +6148,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.236  2021-02-07 23:14:51+05:30  Cprogrammer
+ * use functions directly from libindimail
+ *
  * Revision 1.235  2021-01-23 15:17:55+05:30  Cprogrammer
  * use remotehost for automatic helo
  *
@@ -6292,7 +6295,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.235 2021-01-23 15:17:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.236 2021-02-07 23:14:51+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

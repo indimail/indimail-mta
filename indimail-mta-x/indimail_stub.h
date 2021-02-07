@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.h,v $
+ * Revision 1.6  2021-02-07 23:12:58+05:30  Cprogrammer
+ * use inquery(), parse_email() from libindimail
+ *
  * Revision 1.5  2019-04-20 19:50:44+05:30  Cprogrammer
  * changed interface for loadLibrary(), closeLibrary() and getlibObject()
  *

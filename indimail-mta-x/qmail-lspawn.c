@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.36  2021-02-07 23:13:32+05:30  Cprogrammer
+ * avoid use of compat functions
+ *
  * Revision 1.35  2020-11-24 13:46:58+05:30  Cprogrammer
  * removed exit.h
  *
@@ -663,7 +666,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.35 2020-11-24 13:46:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.36 2021-02-07 23:13:32+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

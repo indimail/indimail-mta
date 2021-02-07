@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.15  2021-02-07 23:12:39+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.14  2020-03-24 13:00:43+05:30  Cprogrammer
  * BUG Fix. Absence of control file shouldn't be treated as an error
  *
@@ -268,7 +271,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.14 2020-03-24 13:00:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.15 2021-02-07 23:12:39+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

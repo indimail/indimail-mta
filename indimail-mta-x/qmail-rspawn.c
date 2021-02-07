@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.42  2021-02-07 23:14:09+05:30  Cprogrammer
+ * avoid use of compat functions
+ *
  * Revision 1.41  2020-11-24 13:47:23+05:30  Cprogrammer
  * removed exit.h
  *
@@ -378,7 +381,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.41 2020-11-24 13:47:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.42 2021-02-07 23:14:09+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
