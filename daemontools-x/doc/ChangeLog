@@ -25,7 +25,8 @@ Release 1.1 Start 09/10/2020
 - 06/10/2020
 12. svctool -freebsd: remove svscan config/rc file with --config=rm-boot
 - 08/10/2020
-13. svscan, supervise, svc, svstat, svok - use /run or /var/run on systems that support it
+13. svscan, supervise, svc, svstat, svok - use /run or /var/run on systems
+    that support it
 14. Makefile: added run_init.o object for svc, svstat, svok
 15. Makefile: use conf-runfs to configure daemontools to use /run, /var/run
 - 09/10/2020
@@ -60,18 +61,17 @@ Release 1.1 Start 09/10/2020
 32. supervise.c: pass exit/signal of exited child to alert script/program
 33. svps: display uptime of svscan
 34. svps: pass output through pager
-35. svps: display uptime of svscan
 - 12/11/2020
-36. supervise: initialize svpid in main()
-37. svps: fixed output for "normally up" and "normally down" status
+35. supervise: initialize svpid in main()
+36. svps: fixed output for "normally up" and "normally down" status
 - 25/11/2020
-38. systemd: Chanaged service name to SVscan Service
+37. systemd: Chanaged service name to SVscan Service
 26/11/2020
-39. svps: remove unportable PIPESTATUS
+38. svps: remove unportable PIPESTATUS
 29/11/2020
-40. minisvc: fixed syntax error
+39. minisvc: fixed syntax error
 30/11/2020
-41. qmailctl: adapted for non-indimail-mta systems
-42. run_init.c: changed return type to int. Return error instead of doing exit
-43. svstat, svc: continue to next directory if operation on current directory fails
-44. svstat, svc, svok: change warning text message for missing directory in /run
+40. qmailctl: adapted for non-indimail-mta systems
+41. run_init.c: changed return type to int. Return error instead of doing exit
+42. svstat, svc: continue to next directory if operation on current directory fails
+43. svstat, svc, svok: change warning text message for missing directory in /run
