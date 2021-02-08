@@ -2,11 +2,13 @@
 Release 2.12 Start 21/05/2020
 - 12/09/2020
 01. hier.c: use 0755 for bin and sbin
-02. indimail-mta: replaced setup with installer which uses text files for installation
+02. indimail-mta: replaced setup with installer which uses text files for
+    installation
 03. indimail-mta.spec: fixed AutoReq
 - 13/09/2020
 04. indimail-mta.spec: updated compiler flags for ucspi-tcp
-05. ucspi-tcp: replaced setup with installer which uses text files for installation
+05. ucspi-tcp: replaced setup with installer which uses text files for
+    installation
 06. ucspi-tcp: updated compiler switches
 07. instcheck.c: skip chmod if mode is -1
 08. hier.c: leave owner, group, permissions alone as they are owned by
@@ -54,14 +56,14 @@ Release 2.12 Start 21/05/2020
 30. run svctool --fixsharedlibs during MySQL startup
 31. DIRS: use relative links in /var/indimail
 - 26/09/2020
-32. svctool: allow setting of MySQL indimail, admin password, indimail UNIX password by
-    setting MYSQL_PASS, PRIV_PASS, ADMIN_PASS in env
+32. svctool: allow setting of MySQL indimail, admin password, indimail UNIX
+    password by setting MYSQL_PASS, PRIV_PASS, ADMIN_PASS in svctool.cnf
 - 27/09/2020
 33. svctool, envmigrate: fixed handling of failure in imap/pop3 service
 creation
 34. indimail-mta.spec: rpmlint fixes for danglin-relative-symlinks
-35. svctool: make inlookup,pwdlookup service wait for 30 seconds since MySQL services
-    comes up
+35. svctool: make inlookup, pwdlookup service wait for 30 seconds since
+    MySQL services comes up
 36. svctool: replace /bin/false with /usr/bin/false on FreeBSD
 37. sys-checkpwd.c: restore '@' sign in username for authmodules in the chain
 38. sys-checkpwd.c: skip stripping of domain if STRIP_DOMAIN env variable is
@@ -80,9 +82,11 @@ creation
 46. svctool: updated macOSuseradd, macOSgroupadd
 - 03/10/2020
 47. svctool: --fixedharedlibs for Darwin
-48. svctool: use /bin/echo -n instead of builtin echo -n (which doesn''t work on Darwin)
+48. svctool: use /bin/echo -n instead of builtin echo -n (which doesn''t work
+    on Darwin)
 49. svctool: create /var/run/mysqld for Darwin when creating mysqldb
-50. svctool: use openssl passwd -6 (sha512) missing on darwin use openssl passwd -1 (md5)
+50. svctool: use openssl passwd -6 (sha512) missing on darwin use openssl
+    passwd -1 (md5)
 51. svctool: use LC_ALL=C for tr command on Darwin
 52. svctool: check for mysqld in mysqlprefix/bin for Darwin
 53. svctool: updated macOSuseradd, macOSgroupadd functiona for Darwin
@@ -93,7 +97,9 @@ creation
     svctool: fixed users getting added multiple times to com.apple.loginwindow
     HiddenUsersList
 - 05/10/2020
-56. installer new features, 1. uninstall option (-u, -i), 2. create devices,
+56. installer new features,
+    1. uninstall option (-u, -i)
+    2. create devices,
     3. create fifo
 57. Makefile: Added uninstall target
 58. Added comments in installer input files
@@ -126,14 +132,15 @@ creation
     wasn't set
 75. svctool: use mkfifo -m to create qmail-logfifo with 666 perms
 - 18/10/2020
-76. svctool: added default-authentication-plugin=mysql_native_password as a comment
+76. svctool: added default-authentication-plugin=mysql_native_password as
+    a comment
 77. qcount_dir.c: replaced alloc_re() with alloc()
 - 19/10/2020
 78. controlfiles.q: added control file servicedir.conf
 79. conf-queue: added documenation
 - 20/10/2020
 80. removed chrpath.
-81. removed ucspi-tcp, daemontools
+81. moved ucspi-tcp, daemontools as independent packages
 - 22/10/2020
 82. upgrade: shutdown indimail-mta services instead of entire svscan service
 - 01/11/2020
@@ -142,7 +149,8 @@ creation
 84. spawn-filter.c: unset FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE
     before calling qmail-local, qmail-remote
 - 09/11/2020
-85. svctool: inlookup, pwdlookup service - removed svwait program. use waitfor service instead
+85. svctool: inlookup, pwdlookup service - removed svwait program. use
+    waitfor service instead
 - 14/11/2020
 86. indimail-mta.spec: enable openSUSE permissions
 - 17/11/2020
@@ -160,8 +168,8 @@ creation
 - 28/11/2020
 92. 822field.c, 822fields.c: +HeaderName feature by Erwin Hoffman: display all
     headers which have HeaderName as the initial text
-93. qmail-remote: fixed smtpcode() handle cases where remote smtp server returns
-    improper codes
+93. qmail-remote: fixed smtpcode() to handle cases where remote smtp server
+    returns improper codes
 - 29/11/2020
 94. queue-fix: replaced stdio with substdio and added option to specify queue
     subdirectory split
@@ -173,11 +181,11 @@ creation
 - 07/12/2020
 98. qmail.c: added exit code 79 as duplicate to 91 for Envelope format error
 99. qmail-qfilter.c, qmail-qmqpc.c, qmail-queue.c -m 'use exit code 79 for
-    envelope format error'
+    envelope format error
 - 23/01/2021
 100. smtpd.c, qmail-remote.c: Renamed env variable UTF8 to SMTPUTF8
 101. smtpd.c: use FORCE_TLS in smtp_mail()
-102. smtpd.c: use remotehost for automatic helo
+102. smtpd.c: use TCPREMOTEHOST for automatic helo
 103. qlocal_upgrade: fixed LOGFILTER path
 104. qmail-remote.c: added comments for smtputf8. Added missing 
      #ifdef SMTPUTF8
