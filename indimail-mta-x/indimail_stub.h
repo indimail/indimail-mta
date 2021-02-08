@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.h,v $
+ * Revision 1.6  2021-02-07 23:12:58+05:30  Cprogrammer
+ * use inquery(), parse_email() from libindimail
+ *
  * Revision 1.5  2019-04-20 19:50:44+05:30  Cprogrammer
  * changed interface for loadLibrary(), closeLibrary() and getlibObject()
  *
@@ -17,8 +20,6 @@
  *
  */
 /* gid flags */
-#include <pwd.h>
-#include "stralloc.h"
 #define NO_PASSWD_CHNG 0x01
 #define NO_POP         0x02
 #define NO_WEBMAIL     0x04
@@ -34,6 +35,7 @@
 #define V_USER2        0x1000
 #define V_USER3        0x2000
 
+/*- inquery types */
 #define USER_QUERY     1
 #define RELAY_QUERY    2
 #define PWD_QUERY      3
@@ -42,19 +44,10 @@
 #define LIMIT_QUERY    6
 #define DOMAIN_QUERY   7
 #define MAX_BUFF       300
+#define CNTRL_HOST     "localhost"
+#define MASTER_HOST    "localhost"
+#define MYSQL_HOST     "localhost"
 
-#define CNTRL_HOST              "localhost"
-#define MASTER_HOST             "localhost"
-#define MYSQL_HOST              "localhost"
-
-extern int      userNotFound;
-extern int      is_inactive;
-extern int      is_overquota;
-extern int      verbose;
-extern int      use_etrn;
-
-void           *inquery(char, char *, char *);
-int             parse_email(char *, stralloc *, stralloc *);
 void           *loadLibrary(void **, char *, int *, char **);
 void           *getlibObject(char *, void **, char *, char **);
 void            closeLibrary(void **);

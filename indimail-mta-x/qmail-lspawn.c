@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.36  2021-02-07 23:13:32+05:30  Cprogrammer
+ * avoid use of compat functions
+ *
  * Revision 1.35  2020-11-24 13:46:58+05:30  Cprogrammer
  * removed exit.h
  *
@@ -341,7 +344,7 @@ stralloc        pwstruct = { 0 };
 static char     strnum[FMT_ULONG];
 
 int
-copy_pwstruct(struct passwd *pw, char *recip, int at)
+copy_pwstruct(struct passwd *pw, char *recip, int at, int is_inactive)
 {
 	if (!stralloc_copyb(&pwstruct, "PWSTRUCT=", 9))
 		return (-1);
@@ -420,11 +423,12 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 	/*- indimail */
 	struct passwd  *pw;
 	extern void    *phandle;
-	void            (*vclose) (void);
+	void            (*iclose) (void);
 	int             (*isvirtualdomain) (char *);
-	int             (*vauth_open) (char *);
+	int             (*iopen) (char *);
+	void *          (*inquery) (char, char *, char *);
 	int            *u_not_found, *i_inactive;
-	struct passwd*  (*vauth_getpw) (char *, char *);
+	struct passwd*  (*sql_getpw) (char *, char *);
 
 	if (!env_unset("QMAILREMOTE"))
 		_exit(-1);
@@ -454,13 +458,16 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 	if (!(isvirtualdomain = getlibObject(libptr, &phandle, "isvirtualdomain", 0)))
 		_exit(-3);
 	else
-	if (!(vauth_open = getlibObject(libptr, &phandle, "vauth_open", 0)))
+	if (!(iopen = getlibObject(libptr, &phandle, "iopen", 0)))
 		_exit(-3);
 	else
-	if (!(vauth_getpw = getlibObject(libptr, &phandle, "vauth_getpw", 0)))
+	if (!(sql_getpw = getlibObject(libptr, &phandle, "sql_getpw", 0)))
 		_exit(-3);
 	else
-	if (!(vclose = getlibObject(libptr, &phandle, "vclose", 0)))
+	if (!(iclose = getlibObject(libptr, &phandle, "iclose", 0)))
+		_exit(-3);
+	else
+	if (!(inquery = getlibObject(libptr, &phandle, "inquery", 0)))
 		_exit(-3);
 	/*-
 	 * recip = example1-example2.com-some_user@example1-example2.com
@@ -471,15 +478,17 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 			if (!env_unset("PWSTRUCT"))
 				return (-1);
 			f = str_len(recip + at + 1);
-			if ((pw = inquery(PWD_QUERY, recip + f + 1, 0))) {
-				if (copy_pwstruct(pw, recip, at))
+			if ((pw = (*inquery) (PWD_QUERY, recip + f + 1, 0))) {
+				if (!(i_inactive = (int *) getlibObject(libptr, &phandle, "is_inactive", 0)))
+					_exit(-3);
+				if (copy_pwstruct(pw, recip, at, *i_inactive))
 					return (-1);
 				if (!env_put(pwstruct.s))
 					return (-1);
 			}
 		}
 	} else
-	if ((*isvirtualdomain) (recip + at + 1) && !(*vauth_open) ((char *) 0)) {
+	if ((*isvirtualdomain) (recip + at + 1) && !(*iopen) ((char *) 0)) {
 		if (!env_unset("PWSTRUCT"))
 			return (-1);
 		f = str_len(recip + at + 1); /*- domain length */
@@ -533,17 +542,16 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 			recip = save.s;
 			at = f + 1 + len;
 		}
-		if (!(u_not_found = (int *) getlibObject(libptr, &phandle, "userNotFound", 0)))
-			_exit(-3);
-		if ((pw = (struct passwd *) (*vauth_getpw) (user.s, recip + at + 1))) {
+		if ((pw = (struct passwd *) (*sql_getpw) (user.s, recip + at + 1))) {
 			if (!(i_inactive = (int *) getlibObject(libptr, &phandle, "is_inactive", 0)))
 				_exit(-3);
-			is_inactive = *i_inactive;
-			if (copy_pwstruct(pw, recip, at))
+			if (copy_pwstruct(pw, recip, at, *i_inactive))
 				return (-1);
 			if (!env_put(pwstruct.s))
 				return (-1);
 		} else {
+			if (!(u_not_found = (int *) getlibObject(libptr, &phandle, "userNotFound", 0)))
+				_exit(-3);
 			if (*u_not_found) {
 				if (!stralloc_copys(&pwstruct, "PWSTRUCT=No such user "))
 					return (-1);
@@ -563,11 +571,11 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 				if (!env_put(pwstruct.s))
 					return (-1);
 			} else {
-				vclose();
+				(*iclose) ();
 				return (-2);
 			}
 		}
-	} /*- if ((*isvirtualdomain) (recip_t + at_t + 1) && !(*vauth_open) ((char *) 0)) */
+	} /*- if ((*isvirtualdomain) (recip_t + at_t + 1) && !(*iopen) ((char *) 0)) */
 /*- end indimail */
 noauthself: /*- deliver to local user in control/locals */
 	if (!(f = fork())) {
@@ -658,7 +666,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.35 2020-11-24 13:46:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.36 2021-02-07 23:13:32+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
