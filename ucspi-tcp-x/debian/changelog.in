@@ -1,22 +1,3 @@
 ucspi-tcp (@version@-@release@) unstable; urgency=low
 
-  * ucspi-tcp: replaced setup with installer which uses text files for installation
-  * ucspi-tcp: updated compiler switches
-  * instcheck.c: skip chmod if mode is -1
-  * hier.c: leave owner, group, permissions alone as they are owned by indimail-mta package
-  * ucspi-tcp: fixes for FreeBSD
-  * tcpserver.c: open ipv4, ipv6 sockets on FreeBSD and use select before accept()
-  * use conf-cc-SYSTEM, conf-ld-SYSTEM for system specific CFLAGS, LDFLAGS
-  * Makefile - ucspi-tcp: split into variables, main Makefile and system specific Makefile. New script qmake to do the build
-  * installer.c: set permissions for directory only if it is a new directory
-  * installer new features, 1. uninstall option (-u, -i), 2. create devices, 3. create fifo
-  * Makefile: Added uninstall target
-  * Added comments in installer input files
-  * indimail-mta, ucspi-tcp: fixed uninstall target
-  * installer.c: fixed setting of symbolic links
-  * ucspi-tcp/ip6_fmt.c: Fixed bug - Erwin Hoffman
-  * tcpserver.c: changed scope of global variables to static, limited to tcpserver.c
-  * tcpserver.c: added -a option to specify CA file
-  * removed exit.h
-  * rblsmtpd.c: Set greeting using RBLGREETING env variable
-  * rblsmtpd.c: enable dummy ehlo function using RBLEHLO env variable
+  *
