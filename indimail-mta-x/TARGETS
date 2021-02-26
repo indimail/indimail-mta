@@ -269,7 +269,6 @@ envdir_set.o
 envdir
 envdir.o
 envelopes.0
-envmigrate
 env.o
 envread.o
 envrules.o
