@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.280  2021-02-26 23:11:17+05:30  Cprogrammer
+ * removed envmigrate
+ *
  * Revision 1.279  2020-11-30 12:23:29+05:30  Cprogrammer
  * moved README.logselect to daemontools
  *
@@ -1193,7 +1196,6 @@ hier(inst_dir, fatal, dev_package)
 #endif
 
 	/*- misc */
-	c(auto_libexec_dir, auto_libexec_base, "envmigrate", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "hostname", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qmailconfig", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "config-fast", auto_uido, 0, moder_x);
@@ -1475,7 +1477,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.279 2020-11-30 12:23:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.280 2021-02-26 23:11:17+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

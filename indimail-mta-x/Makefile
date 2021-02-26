@@ -964,7 +964,7 @@ deferrals failures successes rhosts recipients rxdelay senders suids \
 zddist zdeferrals zfailures zsuccesses zrhosts zrecipients zrxdelay \
 zsenders zsuids zsmtp rsmtp rsmtpfailures rsmtpsdomains rsmtprdomains \
 rsmtpsenders rsmtprecipients multilog-matchup smtp-matchup rspamrdomain \
-rspamsdomain zspam envmigrate rspamstat rspamhist
+rspamsdomain zspam rspamstat rspamhist
 
 qtools: \
 822body 822headerok 822bodyfilter 822headerfilter 822addr \
@@ -2651,11 +2651,6 @@ rhosts: \
 warn-auto.sh rhosts.sh
 	cat warn-auto.sh rhosts.sh \
 	> rhosts
-
-envmigrate: \
-warn-auto.sh envmigrate.sh
-	cat warn-auto.sh envmigrate.sh \
-	> envmigrate
 
 rsmtp: \
 warn-auto.sh rsmtp.sh conf-sysconfdir
