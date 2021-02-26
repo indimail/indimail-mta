@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.531 2021-01-23 15:20:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.532 2021-02-26 23:14:16+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.531 2021-01-23 15:20:31+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.532 2021-02-26 23:14:16+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -118,7 +118,7 @@ Known values for OPTION are:
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
   Port           - Bind on this port for SMTP
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
                    @qmaildir@
@@ -227,7 +227,7 @@ Known values for OPTION are:
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
                    @qmaildir@
@@ -326,7 +326,7 @@ Known values for OPTION are:
   Installs a new Greylist Daemon
   a              - IP Address to listen
   Port           - Bind on this port for qmail-greyd
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   m              - Minimum resend time after which mail will be accepted
   g              - Window in which mail must be seen
   t              - Max period for a mail to be received after which IP will be removed
@@ -343,7 +343,7 @@ Known values for OPTION are:
   Installs a new qmail-daned TLSA verification Daemon
   a              - IP Address to listen
   Port           - Bind on this port for qmail-greyd
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   t              - Max period for a mail to be received after which IP will be removed
                    from whitelist
   s              - Size of hash table (0 to disable hashing)
@@ -378,7 +378,7 @@ Known values for OPTION are:
   d              - Max size of email that can be submitted to SMTP or
                    injected locally
   Port           - Bind on this port for QMTP
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
                    @qmaildir@
@@ -422,7 +422,7 @@ Known values for OPTION are:
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
   Port           - Bind on this port for QMTP
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
                    @qmaildir@
@@ -456,7 +456,7 @@ Known values for OPTION are:
 
   Installs a new IMAP4 Listner
   Port           - Bind on this port for IMAP
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   nolastauth     - Do not update lastauth
   proxy          - Install as a proxy and connect to actual imap on destport
@@ -488,7 +488,7 @@ Known values for OPTION are:
 
   Installs a new POP3 Listner
   Port           - Bind on this port for POP3
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   nolastauth     - Do not update lastauth
   proxy          - Install as a proxy
@@ -512,50 +512,50 @@ Known values for OPTION are:
 --dumpconfig --servicedir=service_path --cntrldir=cntrl_path
 
   Dumps all service configuration for Supervise Scripts, control files and software information
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   cntrl_path   - Path where Qmail control files are stored
 
 --queuefix=queue_path
 
   Fix Qmail Queue where queue_path is the absolute path of a queue
 
---rmsvc=service_name
+--rmsvc=service_path
 
-  Disable supervise scripts for service
-  service_name   - name of service with full path
+  Disable supervise for service
+  service_path   - Full path of service
                    e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
                    "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
 
---ensvc=service_name
+--ensvc=service_path
 
-  Enable supervise scripts for service
-  service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+  Enable supervise for service
+  service_path   - Full path of service
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
 
---refreshsvc=service_name
+--refreshsvc=service_path
   [--run-file-only]
 
-  Enable supervise scripts for service
-  service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+  Refresh run script and variables for a supervise service
+  service_path   - Full path of service
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
-                   service_name can be "all" to act on all services
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
+                   service_path can be "all" to act on all services
   run-file-only  - Recreate run files but not variables
   NOTE: if the file .norefreshsvc is present in the variable or the config
   directory, refresh is skipped
 
---norefreshsvc="0|1 service_name"
+--norefreshsvc="0|1 service_path"
 
   Disable/Enable auto refresh of supervise scripts for service
   0              - Disable autorefresh (create .norefreshsvc in variables directory)
   1              - Enable  autorefresh (delete .norefreshsvc in variables directory)
-  service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
-                   service_name can be "all" to act on all services
+  service_path   - name of service with full path
+                   e.g. (@servicedir@/qmail-smtpd.25)
+                   service_path can be "all" to act on all services
 
 --enable-service name1 name2 ..
 
@@ -568,6 +568,94 @@ Known values for OPTION are:
   Remove a service to be started at system boot. The unit file for the service should exist
   name1 name2 .. - name of a service or list of services to be removed
                    This should be a SYSV style service, systemd, event.d unit file
+
+--set-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Set a new variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Overwrite variable if it exists
+
+--modify-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Modify an existing variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Set the variable even if does not exist
+
+--unset-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Unset any existing environment variable named 'n'
+  n              - variable name
+  service_name   - Service name
+
+--remove-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Remove an existing variable for a supervise service
+  n              - variable name
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+
+--restore-variables
+  --servicedir=service_path
+  --service-name=service_name
+
+  Clean and Restore all variables to original state from
+  servicedir/service_name/variables/.variables file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+
+--import-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Import new environment variables from a file having one more multiple
+  key=value pairs
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - Set the variable if variable already exists
+
+--export-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Export existing environment variables to a file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - overwrite service_path/service_name/variables/.variables
+
+--save-variables
+  --servicedir=service_path
+
+  Export variables for all service in @servicedir@ and
+  @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
+
+--restore-all-variables
+  --servicedir=service_path
+
+  Restore all variables to orignal state for all service in
+  @servicedir@ and @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
 
 --inlookup=fifo_path --threads=N
   --servicedir=service_path
@@ -584,7 +672,7 @@ Known values for OPTION are:
                    (e.g. @qmaildir@/inquery/infifo)
   N              - No of parallel inlookup threads to spawn
   A              - Max days for which a user has been active
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   cntrl_path     - Path where Qmail control files are stored
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   use-btree      - Use Binary Tree algorithm to search for User records
@@ -608,7 +696,7 @@ Known values for OPTION are:
   mysqlpass      - Passwd for connecting to mysql
   mysqlport      - Port for connecting to mysql
   mysqlsocket    - Unix Domain Socket for connecting to mysql
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
 
 --indisrvr=Port --mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass
   --localip=a --maxdaemons=m --maxperip=i
@@ -628,7 +716,7 @@ Known values for OPTION are:
   i              - Concurrency of connections to be allowed from a
                    single ip address
   a              - IP Address to listen
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
 
 --mysql=mysqlport --mysqlPrefix=mysqlPrefix --databasedir=databasedir
@@ -641,8 +729,8 @@ Known values for OPTION are:
   mysqlPrefix    - Installation Prefix for mysql
   databasedir    - Directory containing the Database and Logs
   mysqlsocket    - Unix Domain Socket for connecting to mysql
-  config         - MySQL Configuration file (e.g. $sysconfdir/indimail.cnf)
-  service_path   - Path where supervise scripts will be installed
+  config         - MySQL Configuration file (e.g. @sysconfdir@/indimail.cnf)
+  service_path   - Path where supervise service will be installed
   default-domain - default domain name for which this host will handle mails
 
 --fetchmail --qbase=queue_path --qcount=N --qstart=I --servicedir=service_path
@@ -667,7 +755,7 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that Fetchmail can allocate
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   cntrl_path     - Path where Qmail control files are stored
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
@@ -687,13 +775,13 @@ Known values for OPTION are:
 
 --qscanq --servicedir=service_path [--scanint=n]
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   n            - Scan interval for Virus scanning
 
 --clamd --servicedir=service_path --clamdPrefix=clamdPrefix
   [--sysconfdir=sysconfdir]
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   clamdPrefix  - Installation Prefix for clamd
   sysconfdir   - Path for config files (scan.conf)
 
@@ -710,7 +798,7 @@ Known values for OPTION are:
   cmd            - Path of a setpassword compatible program
   certficate     - Path to openssl certificate
   ssl            - Use SSL encrypted communication
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
 
   Installs a new IndiMail poppassd Server
 
@@ -718,17 +806,17 @@ Known values for OPTION are:
   Port         - UDP/IP port on which to bind
   a            - IP Address to listen
   t            - Timeout for reads
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
 
 --fifologger=fifo_path --servicedir=service_path
   fifo_path    - Path to a writeable fifo which can be used by
                  any application to log messages to qmail-logfifo
                  service
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
 
 --mrtg=htmldir --servicedir=service_path [--scanint=n]
   htmldir      - Path in /var/www/html directory
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   n            - Scan interval for mrtg command
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
@@ -746,7 +834,7 @@ Known values for OPTION are:
   [--stdout]
   [--wipe]
 
-  mysql          - Create $sysconfdir/indimail.cnf
+  mysql          - Create @sysconfdir@/indimail.cnf
   mysqldb        - Create an initidalized MySQL db for IndiMail
   ssl_rsa        - Create SSL/TLS Certs for MariaDB
   qmail          - Create default qmail control files
@@ -782,7 +870,7 @@ Known values for OPTION are:
 --check-install --servicedir=service_path --qbase=queue_path --qcount=N --qstart=I
   [--skip-sendmail]
 
-  service_path  - Path where supervise scripts have been installed
+  service_path  - Path where supervise service have been installed
   queue_path    - Path where the queues are installed.
   N             - No of Queues
   I             - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
@@ -790,11 +878,11 @@ Known values for OPTION are:
 
 --inittab --servicedir=service_path
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
 
 --svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   cmmd         - Program/Script to run instead of .svscan/run
   n            - Scan interval for svscan command
 
@@ -826,11 +914,11 @@ Known values for OPTION are:
 
 --check-certs=[full path of certificate]
   Check certificate given as argument or
-  Check IndiMail Certificates in $sysconfdir/certs without any arguments
+  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
 
 --fixsharedlibs
 
-  fix mysql shared library in $sysconfdir/control/mysql_lib
+  fix mysql shared library in @sysconfdir@/control/mysql_lib
 
 --help
 
@@ -1278,7 +1366,7 @@ else
 fi
 LOGDIRS="`ls -d $logdir/* 2>/dev/null`"
 for i in $LOGDIRS; do
-  if [ $i = $logdir"/services.log" ] ; then
+  if [ $i = $logdir"/svctool.log" ] ; then
     continue
   fi
   echo $i
@@ -1514,9 +1602,16 @@ fi
 
 check_update_if_diff()
 {
-	val=`cat $1 2>/dev/null`
-	if [ ! " $val" = " $2" ] ; then
-		echo "updating $1 with $2"
+	if [ ! -s $1 -o ! -f $1 ] ; then
+		update=1
+	else
+		update=0
+		val=`cat $1 2>/dev/null`
+	fi
+	if [ $update -eq 1 -o ! " $val" = " $2" ] ; then
+		if [ $silent -eq 0 ] ; then
+			echo "updating $1 with $2"
+		fi
 		echo $2 > $1
 		return 1
 	else
@@ -3179,63 +3274,41 @@ fi
 if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/down
 fi
-if [ $run_file_only -eq 1 ] ; then
-	if [ -d $conf_dir ] ; then
-		/bin/mv $conf_dir "$conf_dir".bak
+mkdir -p $conf_dir
+$chown root:indimail $conf_dir
+/bin/chmod 550 $conf_dir
+if [ $run_file_only -ne 1 ] ; then
+	if [ " $imap_ssl" = " 1" ] ; then
+		# /service/[qmail|proxy]-[pop3d|imapd]-ssl.nnn/variables
+		(
+		create_"$cdb_f"_config $COURIER_PORT $infifo
+		create_"$cdb_f"_config_ssl
+		) > $conf_dir/.courier_variables
+	else
+		# /service/[qmail|proxy]-[pop3d|imapd].nnn/variables
+		# this will have all variables of "$cdb_f"_config_ssl also
+		create_"$cdb_f"_config $COURIER_PORT $infifo > $conf_dir/.courier_variables
 	fi
-fi
-if [ -d $conf_dir ] ; then
-	echo "moving $conf_dir/.variables to $conf_dir.$ext"
-	/bin/mv $conf_dir/.variables $conf_dir.vsafe
-	/bin/mv $conf_dir $conf_dir.safe
-fi
-if [ " $imap_ssl" = " 1" ] ; then
-	# /service/[qmail|proxy]-[pop3d|imapd]-ssl.nnn/variables
-	(
-	create_"$cdb_f"_config $COURIER_PORT $infifo
-	create_"$cdb_f"_config_ssl
-	) > $conf_dir
-else
-	# /service/[qmail|proxy]-[pop3d|imapd].nnn/variables
-	# this will have all variables of "$cdb_f"_config_ssl also
-	create_"$cdb_f"_config $COURIER_PORT $infifo > $conf_dir
-fi
-# read all variables in $conf_dir file.
-# delete $conf_dir file
-# create $conf_dir directory
-# create $conf_dir variables for supervise
-if [ -x "$DESTDIR"$libexecdir/envmigrate ] ; then
-	"$DESTDIR"$libexecdir/envmigrate $conf_dir root indimail 550
-else
-	echo "Unable to execute envmigrate" 1>&2
-	return 1
-fi
-if [ ! -d $conf_dir ] ; then
-	echo "$conf_dir: No such file or directory" 1>&2
-	if [ -d $conf_dir.safe ] ; then
-		/bin/mv $conf_dir.safe $conf_dir
+	if [ ! " $memory" = " " ] ; then
+		echo $memory > $conf_dir/SOFT_MEM
+	else
+		echo 5242880 > $conf_dir/SOFT_MEM
 	fi
-	if [ -f $conf_dir.vsafe ] ; then
-		/bin/mv $conf_dir.vsafe $conf_dir/.variables
+	if [ ! " $domainlimits" = " " ] ; then
+		echo  > $conf_dir/DOMAIN_LIMITS
+	else
+		> $conf_dir/DOMAIN_LIMITS
 	fi
-	return 1
-else
-	/bin/rm -rf $conf_dir.safe $conf_dir.vsafe
-fi
-if [ ! " $memory" = " " ] ; then
-	echo $memory > $conf_dir/SOFT_MEM
-else
-	echo 5242880 > $conf_dir/SOFT_MEM
-fi
-if [ ! " $domainlimits" = " " ] ; then
-	echo  > $conf_dir/DOMAIN_LIMITS
-else
-	> $conf_dir/DOMAIN_LIMITS
-fi
-if [ " $query_cache" = " " ] ; then
-	> $conf_dir/QUERY_CACHE
-else
-	echo > $conf_dir/QUERY_CACHE
+	if [ " $query_cache" = " " ] ; then
+		> $conf_dir/QUERY_CACHE
+	else
+		echo > $conf_dir/QUERY_CACHE
+	fi
+	import_variables $conf_dir $conf_dir/.courier_variables 0 root indimail 640
+	old=$force
+	force=1
+	export_variables $conf_dir $conf_dir/.variables root indimail 640
+	force=$old
 fi
 (
 echo "#!/bin/sh"
@@ -3312,13 +3385,6 @@ else
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/log/run
 fi
 echo "$prog_args" > $conf_dir/.options
-
-if [ $run_file_only -eq 1 ] ; then
-	if [ -d "$conf_dir".bak ] ; then
-		/bin/rm -rf $conf_dir
-		/bin/mv "$conf_dir".bak $conf_dir
-	fi
-fi
 }
 
 create_imap_config()
@@ -3347,10 +3413,8 @@ echo "FIFODIR=$fifo_dir"
 
 if [ " $ipaddress" = " " ] ; then
 	echo "LOCALIP=0"
-	echo "SSLADDRESS=0"
 else
 	echo "LOCALIP=$ipaddress"
-	echo "SSLADDRESS=$ipaddress"
 fi
 if [ ! " $nolastauth" = " " ] ; then
 	echo "NOLASTAUTHLOGGING=1"
@@ -6166,7 +6230,7 @@ if [ $# -lt 1 ] ; then
 	return 1
 fi
 if [ " $1" = " all" ] ; then
-	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
+	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options "$DESTDIR"$servicedir/.svscan/variables/.options 2>/dev/null`
 	do
 		# remove last 19 char to get the directory+service_name
 		i=`echo $j|sed 's/.\{19\}$//'`
@@ -6224,7 +6288,7 @@ fi
 svc_opt=$1
 shift
 if [ " $1" = " all" ] ; then
-	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
+	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options "$DESTDIR"$servicedir/.svscan/variables/.options 2>/dev/null`
 	do
 		# remove last 19 char to get the directory+service_name
 		i=`echo $j|sed 's/.\{19\}$//'`
@@ -8700,6 +8764,192 @@ if [ $error -eq 0 ] ; then
 fi
 }
 
+import_variables()
+{
+if [ $# -ne 6 ] ; then
+	echo "usage: import_variables dir envfile restore_flag owner group mode" 1>&2
+	exit 1
+fi
+dir=$1
+env_file=$2
+restore_flag=$3
+owner=$4
+group=$5
+mode=$6
+if [ $restore_flag -eq 1 ] ; then
+	printf "Restoring %-40s from %s\n" $dir $env_file
+else
+	printf "importing %-40s from %s\n" $dir $env_file
+fi
+old=$silent
+silent=1
+grep -v "^#" $env_file | while read line
+do
+	if [ -z "$line" ] ; then
+		continue
+	fi
+	file=`echo $line | cut -d= -f1`
+	value=`echo $line | cut -d= -f2- | tr -d \"`
+	if [ $force -eq 0 -a -f $dir/$file ] ; then
+		echo "env variable $file exists and --force not specified"
+		silent=$old
+		return 1
+	fi
+	if [ -z "$value" ] ; then
+		value=`echo $line | cut -d= -f2-`
+		if [ -z "$value" ] ; then
+			# variable=
+			# unset/remove variable
+			if [ -s $dir/$file -o ! -f $dir/$file ] ; then
+				echo "unset env variable $file"
+				> $dir/$file
+			fi
+		else
+			# variable=""
+			# set variable with empty value
+			value=`echo $value | tr -d \"`
+			check_update_if_diff $dir/$file "$value"
+			if [ $? -ne 0 ] ; then
+				echo "set env variable $file=[$value]"
+			fi
+		fi
+	else
+		# variable="some value"
+		# set variable=$value
+		check_update_if_diff $dir/$file "$value"
+		if [ $? -ne 0 ] ; then
+			echo "set env variable $file=[$value]"
+		fi
+	fi
+	if [ -n "$mode" ] ; then
+		/bin/chmod $mode $dir/$file
+	fi
+	if [ -n "$owner" -a -n "$group" ] ; then
+		$chown $owner:$group $dir/$file
+	elif [ -n "$owner" ] ; then
+		$chown $owner $dir/$file
+	fi
+done
+silent=$old
+if [ $restore_flag -ne 0 ] ; then
+	out=`mktemp -dt surblXXXXXXXXXX`
+	if [ $? -ne 0 ] ; then
+		echo "unable to create temp dir" 1>&2
+		return 1
+	fi
+	cat $env_file | while read line
+	do
+		file=`echo $line | cut -d= -f1`
+		touch $out/$file
+	done
+	for j in `/bin/ls $dir`
+	do
+		if [ ! -f $out/$j ] ; then
+			/bin/rm -f $dir/$j
+		fi
+	done
+	/bin/rm -rf $out
+fi
+return 0
+}
+
+export_variables()
+{
+if [ $# -ne 5 ] ; then
+	echo "usage: export_variables($#) dir envfile owner group mode" 1>&2
+	exit 1
+fi
+dir=$1
+file=$2
+owner=$3
+group=$4
+mode=$5
+if [ ! -d $dir ] ; then
+	echo "$dir: No such file or directory" 1>&2
+	exit 1
+fi
+if [ $? -ne 0 ] ; then
+	echo "$dir: unable to chdir" 1>&2
+	exit 1
+fi
+if [ $force -eq 0 -a -f $file ] ; then
+	echo "$file exists and --force not specified" 1>&2
+	return 1
+fi
+(
+for i in `/bin/ls $dir`
+do
+	if [ -s $dir/$i ] ; then
+		value=`cat $dir/$i`
+		if [ -n "$value" ] ; then
+			echo $i="$value"
+		else
+			echo $i=\"\"
+		fi
+	else
+		echo "$i="
+	fi
+done
+) > $file
+if [ -s $file ] ; then
+	/bin/chmod $mode $file
+	$chown $owner:$group $file
+else
+	/bin/rm -f $file
+fi
+}
+
+save_all_variables()
+{
+if [ -z "$owner" ] ; then
+	owner=root
+fi
+if [ -z "$group" ] ; then
+	group=0
+fi
+if [ -z $mode ] ; then
+	mode=0640
+fi
+for i in `/bin/ls -d "$DESTDIR"$servicedir/*/variables "$DESTDIR"$servicedir/.svscan/variables 2>/dev/null`
+do
+	printf "export %-35s %s %s %s\n" "`dirname $i`" $owner $group $mode
+	export_variables $i $i/.variables $owner $group $mode 
+done
+dir="$DESTDIR"$sysconfdir/control/defaultqueue 
+if [ -d $dir ] ; then
+	printf "export %-35s %s %s %s\n" $dir $owner $group $mode
+	export_variables $dir $dir/.variables $owner $group $mode
+fi
+}
+
+restore_all_variables()
+{
+if [ -z "$owner" ] ; then
+	owner=root
+fi
+if [ -z "$group" ] ; then
+	group=0
+fi
+if [ -z $mode ] ; then
+	mode=0640
+fi
+old=$force
+force=1
+for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.variables "$DESTDIR"$servicedir/.svscan/variables/.variables 2>/dev/nul`
+do
+	# remove last 21 char to get the directory+service_name
+	i=`echo $j|sed 's/.\{21\}$//'`
+	if [ ! -s $i/variables/.variables -a ! -s $i/.variables ] ; then
+		echo "$i/variables/.variables or $i/.variables missing" 1>&2
+		continue
+	fi
+	import_variables $i/variables $i/variables/.variables 1 $owner $group $mode
+done
+dir="$DESTDIR"$sysconfdir/control/defaultqueue
+import_variables $dir $dir/.variables 1 $owner $group $mode
+force=$old
+}
+
 ################################# Main ##################################
 if test $# -eq 0; then
     usage 1
@@ -9215,15 +9465,6 @@ while test $# -gt 0; do
 	use_unshare=1
 	;;
 
-	--version)
-	echo "$RCSID"
-	exit 0
-	;;
-
-	--help)
-	usage 0
-	;;
-
 	--smtp=*)
 	option=1
 	smtp_port=$optarg
@@ -9424,7 +9665,7 @@ while test $# -gt 0; do
 
 	--refreshsvc=*)
 	option=34
-	service=$optarg
+	service_name=$optarg
 	;;
 
 	--run-file-only)
@@ -9435,7 +9676,7 @@ while test $# -gt 0; do
 
 	--norefreshsvc=*)
 	option=35
-	service=$optarg
+	service_name=$optarg
 	;;
 
 	--mysqlupgrade)
@@ -9447,6 +9688,64 @@ while test $# -gt 0; do
 		echo "Running MySQL Upgrade to fix MySQL 8.0 Montrosity"
 		$mysqlPrefix/bin/mysql_upgrade -u mysql -p"$PRIV_PASS"
 	fi
+	;;
+
+	--mode=*)
+	group=$optarg
+	;;
+	--owner=*)
+	owner=$optarg
+	;;
+	--group=*)
+	group=$optarg
+	;;
+	--service-name=*)
+	service_name=$optarg
+	;;
+	--variable-value=*)
+	variable_value=$optarg
+	;;
+	--set-variable=*)
+	variable_name=$optarg
+	option=36
+	;;
+	--modify-variable=*)
+	variable_name=$optarg
+	option=37
+	;;
+	--unset-variable=*)
+	variable_name=$optarg
+	option=38
+	;;
+	--remove-variable=*)
+	variable_name=$optarg
+	option=39
+	;;
+	--restore-variables)
+	option=40
+	;;
+	--import-variables=*)
+	option=41
+	env_file=$optarg
+	;;
+	--export-variables=*)
+	option=42
+	env_file=$optarg
+	;;
+	--save-variables)
+	option=43
+	;;
+	--restore-all-variables)
+	option=44
+	;;
+
+	--version)
+	echo "$RCSID"
+	exit 0
+	;;
+
+	--help)
+	usage 0
 	;;
 
 	*)
@@ -10648,7 +10947,7 @@ case $option in
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
-	refreshsvc $service
+	refreshsvc $service_name
 	;;
 
 	35) # set norefresh service flag
@@ -10657,7 +10956,142 @@ case $option in
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
-	norefreshsvc $service
+	norefreshsvc $service_name
+	;;
+
+	36|37|38|39) # set, modify, unset variables
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	if [ -z "$service_name" ] ; then
+		echo "service name not specified" 1>&2
+		usage 1
+	fi
+	if [ -z "$variable_name" ] ; then
+		echo "variable name not specified" 1>&2
+		usage 1
+	fi
+	if [ ! -d $servicedir/$service_name ] ; then
+		echo "$servicedir/$service_name: No such file or directory" 1>&2
+		exit 1
+	fi
+	case $option in
+		36) #set variable
+		if [ $force -ne 1 -a -f $servicedir/$service_name/variables/$variable_name ] ; then
+			echo "$variable_name exists. Use --force to overwrite" 1>&2
+			usage 1
+		fi
+		;;
+		37) # modify variable
+		if [ $force -ne 1 -a ! -f $servicedir/$service_name/variables/$variable_name ] ; then
+			echo "$variable_name does not exists. Use --force to create" 1>&2
+			usage 1
+		fi
+		;;
+		38) # unset variable
+		echo "unsetting env variable $variable_name"
+		> $servicedir/$service_name/variables/$variable_name
+		;;
+		39) # delete variable
+		echo "removing env variable $variable_name"
+		/bin/rm -f $servicedir/$service_name/variables/$variable_name
+		;;
+	esac
+	if [ -z "$owner" ] ; then
+		owner=root
+	fi
+	if [ -z "$group" ] ; then
+		group=0
+	fi
+	if [ -z $mode ] ; then
+		mode=0640
+	fi
+	dir=$servicedir/$service_name
+	if [ $option -eq 36 -o $option -eq 37 ] ; then
+		if [ -n "$variable_value" ] ; then
+			echo "setting env variable $variable_name=[$variable_value]"
+			echo $variable_value > $dir/variables/$variable_name
+		else
+			echo "setting env variable $variable_name"
+			echo > $dir/variables/$variable_name
+		fi
+	fi
+	old=$force
+	force=1
+	printf "export %-35s %s %s %s\n" "`dirname $dir`" $owner $group $mode
+	export_variables $dir/variables $dir/variables/.variables $owner $group $mode
+	force=$old
+	if [ $option -ne 39 ] ; then
+		if [ -n "$mode" ] ; then
+			/bin/chmod $mode $dir/variables/$variable_name
+		fi
+		if [ -n "$owner" -a -n "$group" ] ; then
+			$chown $owner:$group $dir/variables/$variable_name
+		elif [ -n "$owner" ] ; then
+			$chown $owner $dir/variables/$variable_name
+		fi
+	fi
+	;;
+
+	40|41|42) # restore variables, import variables, export variables
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	if [ -z "$service_name" ] ; then
+		echo "service name not specified" 1>&2
+		usage 1
+	fi
+	if [ ! -d $servicedir/$service_name ] ; then
+		echo "$servicedir/$service_name: No such file or directory" 1>&2
+		exit 1
+	fi
+	if [ -z "$owner" ] ; then
+		owner=root
+	fi
+	if [ -z "$group" ] ; then
+		group=0
+	fi
+	if [ -z $mode ] ; then
+		mode=0640
+	fi
+	if [ $option -eq 40 ] ; then
+		file=$servicedir/$service_name/variables/.variables
+		if [ ! -f $file ] ; then
+			echo "env file for $service_name (.variables) doesn't exist" 1>&2
+			usage 1
+		fi
+	else
+		file=$env_file
+		if [ ! -f $file ] ; then
+			echo "$file: No such file or directory" 1>&2
+			usage 1
+		fi
+	fi
+	if [ $option -eq 40 ] ; then   # restore variables to original state
+		import_variables $servicedir/$service_name/variables $file 1 $owner $group $mode
+	elif [ $option -eq 41 ] ; then # import new variables
+		import_variables $servicedir/$service_name/variables $file 0 $owner $group $mode
+	else
+		printf "export %-35s %s %s %s\n" "$servicedir/$service_name" $owner $group $mode
+		export_variables $servicedir/$service_name/variables $file $owner $group $mode
+	fi
+	;;
+
+	43)
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	save_all_variables
+	;;
+	44)
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	restore_all_variables
 	;;
 
 	*)
@@ -10675,7 +11109,7 @@ if [ ! " $prog_args" = " " ] ; then
 		if [ ! -d "$DESTDIR"$LOGDIR ] ; then
 			/bin/mkdir -p "$DESTDIR"$LOGDIR
 		fi
-		echo "`date` $prog_args" >> "$DESTDIR"$LOGDIR/services.log
+		echo "`date` $prog_args" >> "$DESTDIR"$LOGDIR/svctool.log
 	fi
 fi
 exit 0

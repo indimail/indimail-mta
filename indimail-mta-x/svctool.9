@@ -18,6 +18,25 @@ the command \fBsvctool --config=add-boot\fR.
 
 \fBsvctool\fR requires root privilege to run.
 
+\fBsvctool\fR stores configuration in the file
+@servicedir@/\fIservice\fR/variables/.options. This is used by svctool to
+recreate entire configuration for a service when you use the --refreshsvc
+option.
+
+\fBsvctool\fR stores environment variables set for a service in
+@servicedir@/\fIservice\fR/variables/.variables. This is used by svctool
+to recreate all variables for a service when you use the --refreshsvc option.
+
+\fIservice\fR refers to a supervised service name. See svscan(8), supervise(8).
+
+\fBsvctool\fR sources the file @sysconfdir@/svctool.cnf for setting
+passwords used for accessing MySQL. You can set
+
+.EX
+\fBMYSQL_PASS\fR - password for accessing IndiMail MySQL database
+\fBPRIV_PASS\fR  - password for accessing MySQL as an admin user
+\fBADMIN_PASS\fR - password for MySQL user having shutdown privileges
+
 .EX
 Usage: svctool [OPTION]
 
@@ -169,7 +188,7 @@ Known values for OPTION are:
   [--persistdb]
   [--fsync --syncdir]
   [--qregex]
-  [--memory=c]
+  [--dmemory=c]
   [--overquota_mailsize=o]
   [--domainlimits]
   [--routes=smtp|qmtp|static]
@@ -184,7 +203,7 @@ Known values for OPTION are:
   [--utf8]
   --default-domain=domain
 
- Installs a new queue without a SMTP listener
+ Installs a new queue with a delivery daemon
   N              - No of Queues
   I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
@@ -248,7 +267,7 @@ Known values for OPTION are:
   [--dkverify=dk|dkim|both|none]
   [--dksign=dk|dkim|both|none --private_key=private_key]
 
- Installs a new queue with a SMTP Listener
+ Installs a new queue without a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
@@ -486,43 +505,43 @@ Known values for OPTION are:
 
   Fix Qmail Queue where queue_path is the absolute path of a queue
 
---rmsvc=service_name
+--rmsvc=service_path
 
   Disable supervise scripts for service
-  service_name   - name of service with full path
+  service_path   - Full path of service
                    e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
                    "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
 
---ensvc=service_name
+--ensvc=service_path
 
   Enable supervise scripts for service
-  service_name   - name of service with full path
+  service_path   - Full path of service
                    e.g. (@servicedir@/.qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
                    "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
 
---refreshsvc=service_name
+--refreshsvc=service_path
   [--run-file-only]
 
   Enable supervise scripts for service
-  service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+  service_path   - Full path of service
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
-                   service_name can be "all" to act on all services
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
+                   service_path can be "all" to act on all services
   run-file-only  - Recreate run files but not variables
   NOTE: if the file .norefreshsvc is present in the variable or the config
   directory, refresh is skipped
 
---norefreshsvc="0|1 service_name"
+--norefreshsvc="0|1 service_path"
 
   Disable/Enable auto refresh of supervise scripts for service
   0              - Disable autorefresh (create .norefreshsvc in variables directory)
   1              - Enable  autorefresh (delete .norefreshsvc in variables directory)
-  service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
-                   service_name can be "all" to act on all services
+  service_path   - name of service with full path
+                   e.g. (@servicedir@/qmail-smtpd.25)
+                   service_path can be "all" to act on all services
 
 --enable-service name1 name2 ..
 
@@ -535,6 +554,94 @@ Known values for OPTION are:
   Remove a service to be started at system boot. The unit file for the service should exist
   name1 name2 .. - name of a service or list of services to be removed
                    This should be a SYSV style service, systemd, event.d unit file
+
+--set-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Set a new variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Overwrite variable if it exists
+
+--modify-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Modify an existing variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Set the variable even if does not exist
+
+--unset-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Unset any existing environment variable named 'n'
+  n              - variable name
+  service_name   - Service name
+
+--remove-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Remove an existing variable for a supervise service
+  n              - variable name
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+
+--restore-variables
+  --servicedir=service_path
+  --service-name=service_name
+
+  Clean and Restore all variables to original state from
+  servicedir/service_name/variables/.variables file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+
+--import-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Import new environment variables from a file having one more multiple
+  key=value pairs
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - Set the variable if variable already exists
+
+--export-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Export existing environment variables to a file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - overwrite service_path/service_name/variables/.variables
+
+--save-variables
+  --servicedir=service_path
+
+  Export variables for all service in @servicedir@ and
+  @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
+
+--restore-all-variables
+  --servicedir=service_path
+
+  Restore all variables to orignal state for all service in
+  @servicedir@ and @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
 
 --inlookup=fifo_path --threads=N
   --servicedir=service_path
@@ -608,7 +715,7 @@ Known values for OPTION are:
   mysqlPrefix    - Installation Prefix for mysql
   databasedir    - Directory containing the Database and Logs
   mysqlsocket    - Unix Domain Socket for connecting to mysql
-  config         - MySQL Configuration file (e.g. @sysconfdir@/indimail.cnf)
+  config         - MySQL Configuration file (e.g. @qsysconfdir@/indimail.cnf)
   service_path   - Path where supervise scripts will be installed
   default-domain - default domain name for which this host will handle mails
 
@@ -698,9 +805,6 @@ Known values for OPTION are:
   service_path - Path where supervise scripts will be installed
   n            - Scan interval for mrtg command
 
---libwatch --servicedir=service_path
-  service_path - Path where supervise scripts will be installed
-
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
 --config=add-alt|remove-alt|qselinux|iselinux
   [--postmaster=user[@domain]]
@@ -716,7 +820,7 @@ Known values for OPTION are:
   [--stdout]
   [--wipe]
 
-  mysql          - Create @sysconfdir@/indimail.cnf
+  mysql          - Create @qsysconfdir@/indimail.cnf
   mysqldb        - Create an initidalized MySQL db for IndiMail
   ssl_rsa        - Create SSL/TLS Certs for MariaDB
   qmail          - Create default qmail control files
@@ -796,11 +900,11 @@ Known values for OPTION are:
 
 --check-certs=[full path of certificate]
   Check certificate given as argument or
-  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
+  Check IndiMail Certificates in @qsysconfdir@/certs without any arguments
 
 --fixsharedlibs
 
-  fix mysql shared library in $sysconfdir/control/mysql_lib
+  fix mysql shared library in @qsysconfdir@/control/mysql_lib
 
 --help
 
