@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.532 2021-02-26 23:14:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.533 2021-02-27 11:52:04+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.532 2021-02-26 23:14:16+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.533 2021-02-27 11:52:04+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -1159,12 +1159,10 @@ if [ $indimail_installed -eq 1 ] ; then
     if [ "$VERB" = y ]; then
       echo "install_tables from indimail is installed. Executing..."
     fi
-    if [ ! -f /tmp/skip-install_tables ] ; then
-      "$DESTDIR"$QmailBinPrefix/sbin/install_tables > /dev/null
-      if [ $? -ne 0 ]; then
-        echo "install_tables returned non-zero exit status. Check Installation" 1>&2
-        OK=0
-      fi
+    "$DESTDIR"$QmailBinPrefix/sbin/install_tables > /dev/null
+    if [ $? -ne 0 ]; then
+      echo "install_tables returned non-zero exit status. Check Installation" 1>&2
+      OK=0
     fi
   fi
 fi
@@ -1843,10 +1841,10 @@ fi
 
 "$DESTDIR"$libexecdir/ipmeprint | \
 	egrep -vw "::|::1|0\.0\.0\.0|127\.0\.0\.1|172.17.0|0000:0000:0000:0000:0000:0000:0000:0000" | \
-	head -1|awk '{print $3}'> /tmp/localiphost.$$
-if [ -s /tmp/localiphost.$$ ] ; then
+	head -1|awk '{print $3}'> $TMPDIR/localiphost.$$
+if [ -s $TMPDIR/localiphost.$$ ] ; then
 	echo "localiphost"
-	/bin/mv /tmp/localiphost.$$ "$DESTDIR"$CONTROLDIR/localiphost
+	/bin/mv $TMPDIR/localiphost.$$ "$DESTDIR"$CONTROLDIR/localiphost
 else
 	echo "localiphost"
 	echo 127.0.0.1 > "$DESTDIR"$CONTROLDIR/localiphost
@@ -3345,13 +3343,13 @@ if [ " $proxy_port" = " " ] ;then
 else
 	echo "$QmailBinPrefix/bin/proxy"$cdb_f" \$bindir/$stype Maildir\""
 fi
-) > /tmp/courier-run.$$
+) > $TMPDIR/courier-run.$$
 
 if [ " $imap_ssl" = " 1" ] ; then
-	/bin/mv /tmp/courier-run.$$ "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype-ssl.$tag/run
+	/bin/mv $TMPDIR/courier-run.$$ "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype-ssl.$tag/run
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype-ssl.$tag/run
 else
-	/bin/mv /tmp/courier-run.$$ "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/run
+	/bin/mv $TMPDIR/courier-run.$$ "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/run
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/run
 fi
 
@@ -3376,12 +3374,12 @@ if [ " $proxy_port" = " " ] ;then
 else
 	echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/proxy"`echo $cdb_f|tr '[:lower:]' '[:upper:]'`".$tag"
 fi
-) > /tmp/courierlog-run.$$
+) > $TMPDIR/courierlog-run.$$
 if [ " $imap_ssl" = " 1" ] ; then
-	/bin/mv /tmp/courierlog-run.$$ "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype-ssl.$tag/log/run
+	/bin/mv $TMPDIR/courierlog-run.$$ "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype-ssl.$tag/log/run
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype-ssl.$tag/log/run
 else
-	/bin/mv /tmp/courierlog-run.$$ "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/log/run
+	/bin/mv $TMPDIR/courierlog-run.$$ "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/log/run
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/"$proxy_type"-$stype.$tag/log/run
 fi
 echo "$prog_args" > $conf_dir/.options
@@ -4237,10 +4235,10 @@ if [ $run_file_only -eq 1 ] ; then
 		/bin/mv "$conf_dir".bak $conf_dir
 	fi
 else
-	create_pwdlookup_conf "$5" "$6" "$7" "$8" "$9" > /tmp/config.cnf.$$
+	create_pwdlookup_conf "$5" "$6" "$7" "$8" "$9" > $TMPDIR/config.cnf.$$
 	if [ $? -eq 0 ] ; then
 		conf_file=$DESTDIR"$sysconfdir/nssd.conf"
-		change_config $conf_file /tmp/config.cnf.$$
+		change_config $conf_file $TMPDIR/config.cnf.$$
 	fi
 fi
 }
@@ -5840,8 +5838,8 @@ else
 fi
 echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\"
 echo "$QmailBinPrefix/sbin/qmail-poppass \$HOSTNAME $QmailBinPrefix/sbin/vchkpass $false\""
-) > /tmp/poppass-run.$$
-/bin/mv /tmp/poppass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/run
+) > $TMPDIR/poppass-run.$$
+/bin/mv $TMPDIR/poppass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/run
 
 if [ ! -d $LOGDIR ] ; then
@@ -5857,8 +5855,8 @@ echo "# $prog_args"
 echo ""
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/poppass.$tag"
-) > /tmp/popass-run.$$
-/bin/mv /tmp/popass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log/run
+) > $TMPDIR/popass-run.$$
+/bin/mv $TMPDIR/popass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -6814,13 +6812,13 @@ create_users()
 		done
 		;;
 	esac
-	) 2>/tmp/svctool.user.$$
-	if [ -s /tmp/svctool.user.$$ ] ; then
-		/bin/cat /tmp/svctool.user.$$
-		/bin/rm -f /tmp/svctool.user.$$
+	) 2>$TMPDIR/svctool.user.$$
+	if [ -s $TMPDIR/svctool.user.$$ ] ; then
+		/bin/cat $TMPDIR/svctool.user.$$
+		/bin/rm -f $TMPDIR/svctool.user.$$
 		return 1
 	else
-		/bin/rm -f /tmp/svctool.user.$$
+		/bin/rm -f $TMPDIR/svctool.user.$$
 		return 0
 	fi
 }
@@ -6860,13 +6858,13 @@ delUsers()
 		done
 		;;
 	esac
-	) 2>/tmp/svctool.user.$$
-	if [ -s /tmp/svctool.user.$$ ] ; then
-		/bin/cat /tmp/svctool.user.$$
-		/bin/rm -f /tmp/svctool.user.$$
+	) 2>$TMPDIR/svctool.user.$$
+	if [ -s $TMPDIR/svctool.user.$$ ] ; then
+		/bin/cat $TMPDIR/svctool.user.$$
+		/bin/rm -f $TMPDIR/svctool.user.$$
 		return 1
 	else
-		/bin/rm -f /tmp/svctool.user.$$
+		/bin/rm -f $TMPDIR/svctool.user.$$
 		return 0
 	fi
 }
@@ -8417,10 +8415,10 @@ report ()
 				echo
 			done
 		fi
-		) > /tmp/report.$$
+		) > $TMPDIR/report.$$
 		if [ " $postmaster" = " " ] ; then
-			/bin/cat /tmp/report.$$
-			/bin/rm -f /tmp/report.$$
+			/bin/cat $TMPDIR/report.$$
+			/bin/rm -f $TMPDIR/report.$$
 		else
 			subject="Mail Statistics for `/usr/bin/head -1 $CONTROLDIR/me` on $EXT"
 			date=`/bin/date -R`
@@ -8444,8 +8442,8 @@ report ()
 				echo
 				echo "I am enclosing a copy of the Statistics below"
 				echo
-				/bin/cat /tmp/report.$$
-				/bin/rm -f /tmp/report.$$
+				/bin/cat $TMPDIR/report.$$
+				/bin/rm -f $TMPDIR/report.$$
 				) | "$DESTDIR"$QmailBinPrefix/bin/sendmail -t
 			else
 				(
@@ -8461,17 +8459,17 @@ report ()
 				echo
 				echo "Thank you for using IndiMail"
 				echo
-				) > /tmp/descfile.$$
-				/usr/bin/zip -q -j -m /tmp/report.$$.zip /tmp/report.$$
+				) > $TMPDIR/descfile.$$
+				/usr/bin/zip -q -j -m $TMPDIR/report.$$.zip $TMPDIR/report.$$
 				QMAILUSER=postmaster
 				if [ ! " $default_domain" = " " ] ; then
 					QMAILHOST=$default_domain
 				fi
 				QMAILNAME="IndiMail Reporter"
 				export QMAILNAME
-				"$DESTDIR"$QmailBinPrefix/bin/mpack -s "$subject" -d /tmp/descfile.$$ \
-				-c "application/zip" /tmp/report.$$.zip $postmaster
-				/bin/rm -f /tmp/descfile.$$ /tmp/report.$$.zip
+				"$DESTDIR"$QmailBinPrefix/bin/mpack -s "$subject" -d $TMPDIR/descfile.$$ \
+				-c "application/zip" $TMPDIR/report.$$.zip $postmaster
+				/bin/rm -f $TMPDIR/descfile.$$ $TMPDIR/report.$$.zip
 			fi
 		fi
 		/bin/rm -f $LOGDIR/reports/deliver25 $LOGDIR/reports/smtp25 \
@@ -8560,7 +8558,6 @@ echo
 echo "IndiMail Assign File:"
 /bin/cat "$DESTDIR"$sysconfdir/users/assign
 echo
-/bin/rm -f /tmp/svctool.ver.$$
 }
 
 # backup /service, system-startup config, indimail configuration
@@ -8972,6 +8969,7 @@ fi
 [ -z "$MYSQL_PASS" ] && MYSQL_PASS="ssh-1.5-"
 [ -z "$PRIV_PASS" ]  && PRIV_PASS="4-57343-"
 [ -z "$ADMIN_PASS" ] && ADMIN_PASS="benhur20"
+[ -z "$TMPDIR" ] && TMPDIR="/tmp/indimail" && mkdir -m 0700 -p /tmp/indimail
 
 prog_args="$QmailBinPrefix/sbin/svctool"
 force=0
@@ -10076,12 +10074,12 @@ case $option in
 		conf_file="$DESTDIR"$sysconfdir/indimail.cnf
 		mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
 		echo "creating mysql config MySQL version $mysql_version"
-		create_mysql_config > /tmp/config.cnf.$$
+		create_mysql_config > $TMPDIR/config.cnf.$$
 		conf_dir=`dirname $conf_file`
 		if [ ! -d $conf_dir ] ; then
 			mkdir -p $conf_dir
 		fi
-		change_config $conf_file /tmp/config.cnf.$$
+		change_config $conf_file $TMPDIR/config.cnf.$$
 		echo $mysql_version |grep MariaDB > /dev/null 2>&1
 		if [ $? -eq 0 ] ; then
 			mysql_version=`echo $mysql_version|cut -d- -f1`
@@ -10228,20 +10226,20 @@ case $option in
 					-e 's,#FixStaleSocket,FixStaleSocket,g' \
 					-e 's,User.*,User qscand,g'  \
 					-e 's,#Foreground,Foreground,g' \
-					-e '0,/^#Example$/d' > /tmp/config.cnf.$$
-				if [ ! -s /tmp/config.cnf.$$ ] ; then
-					create_clamd_conf > /tmp/config.cnf.$$
+					-e '0,/^#Example$/d' > $TMPDIR/config.cnf.$$
+				if [ ! -s $TMPDIR/config.cnf.$$ ] ; then
+					create_clamd_conf > $TMPDIR/config.cnf.$$
 				fi
 			elif [ ! -f /etc/clamd.d/scan.conf ] ; then
-				create_clamd_conf > /tmp/config.cnf.$$
+				create_clamd_conf > $TMPDIR/config.cnf.$$
 			fi
 		else
-			create_clamd_conf > /tmp/config.cnf.$$
+			create_clamd_conf > $TMPDIR/config.cnf.$$
 		fi
 		if [ $? -eq 0 ] ; then
-			change_config $conf_file /tmp/config.cnf.$$
+			change_config $conf_file $TMPDIR/config.cnf.$$
 		else
-			/bin/rm -f /tmp/config.cnf.$$
+			/bin/rm -f $TMPDIR/config.cnf.$$
 		fi
 		dbd=`grep -w "^DatabaseDirectory" $conf_file | awk '{print $2}'`
 		if [ -z "$dbd" ] ; then
@@ -10289,17 +10287,17 @@ case $option in
 				-e 's,#DatabaseDirectory.*,DatabaseDirectory /var/indimail/clamd,g' \
 				-e 's,#DatabaseOwner.*,DatabaseOwner qscand,g'  \
 				-e 's,#Foreground,Foreground,g' \
-				-e '0,/^#Example$/d' > /tmp/config.cnf.$$
-			if [ ! -s /tmp/config.cnf.$$ ] ; then
-				create_freshclam_conf > /tmp/config.cnf.$$
+				-e '0,/^#Example$/d' > $TMPDIR/config.cnf.$$
+			if [ ! -s $TMPDIR/config.cnf.$$ ] ; then
+				create_freshclam_conf > $TMPDIR/config.cnf.$$
 			fi
 		elif [ ! -f /etc/freshclam.conf ] ; then
-			create_freshclam_conf > /tmp/config.cnf.$$
+			create_freshclam_conf > $TMPDIR/config.cnf.$$
 		fi
 		if [ $? -eq 0 ] ; then
-			change_config $conf_file /tmp/config.cnf.$$
+			change_config $conf_file $TMPDIR/config.cnf.$$
 		else
-			/bin/rm -f /tmp/config.cnf.$$
+			/bin/rm -f $TMPDIR/config.cnf.$$
 		fi
 		if [ -f /etc/freshclam.conf -a ! -L /etc/freshclam.conf ] ; then
 			mv /etc/freshclam.conf /etc/freshclam.conf.BAK
@@ -10351,11 +10349,11 @@ case $option in
 
 		bogofilter)
 		conf_file="$DESTDIR"$sysconfdir/bogofilter.cf
-		create_bogofilter_conf > /tmp/config.cnf.$$
+		create_bogofilter_conf > $TMPDIR/config.cnf.$$
 		if [ $? -eq 0 ] ; then
-			change_config $conf_file /tmp/config.cnf.$$
+			change_config $conf_file $TMPDIR/config.cnf.$$
 		else
-			/bin/rm -f /tmp/config.cnf.$$
+			/bin/rm -f $TMPDIR/config.cnf.$$
 		fi
 		if [ ! -f "$DESTDIR"$sysconfdir/wordlist.db ] ; then
 			# create empty wordlist.db
@@ -10378,11 +10376,11 @@ case $option in
 			exit 1
 		fi
 		echo "Creating SSL Configuration"
-		create_ssl_cnf $postmaster $common_name > /tmp/config.cnf.$$
+		create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
 		/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
 		conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
 		/bin/rm -f $conf_file
-		change_config $conf_file /tmp/config.cnf.$$
+		change_config $conf_file $TMPDIR/config.cnf.$$
 		/bin/chmod 640 $conf_file
 		$chown indimail:qmail $conf_file
 		if [ ! -f "$DESTDIR"$sysconfdir/certs/servercert.pem ] ; then
