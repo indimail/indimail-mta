@@ -6298,7 +6298,7 @@ if [ " $1" = " all" ] ; then
 			/bin/rm -f $i/variables/.norefreshsvc
 		else
 			echo "Disabling auto refresh for $i"
-			touch $i/variables/.norefreshsvc
+			$touch $i/variables/.norefreshsvc
 		fi
 	done
 	if [ $svc_opt -eq 1 ] ; then
@@ -6306,7 +6306,7 @@ if [ " $1" = " all" ] ; then
 		/bin/rm -f "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc
 	else
 		echo "Disabling auto refresh for $sysconfdir/control/defaultqueue"
-		touch "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc
+		$touch "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc
 	fi
 else
 	for i in $*
@@ -6329,9 +6329,9 @@ else
 		else
 			echo "Disabling auto refresh for $i"
 			if [ -d "$DESTDIR"$i/variables ] ; then
-				touch "$DESTDIR"$i/variables/.norefreshsvc
+				$touch "$DESTDIR"$i/variables/.norefreshsvc
 			else
-				touch "$DESTDIR"$i/.norefreshsvc
+				$touch "$DESTDIR"$i/.norefreshsvc
 			fi
 		fi
 	done
@@ -8836,7 +8836,7 @@ if [ $restore_flag -ne 0 ] ; then
 	cat $env_file | while read line
 	do
 		file=`echo $line | cut -d= -f1`
-		touch $out/$file
+		$touch $out/$file
 	done
 	for j in `/bin/ls $dir`
 	do
