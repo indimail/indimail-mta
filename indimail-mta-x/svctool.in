@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.533 2021-02-27 11:52:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.534 2021-02-27 12:18:55+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.533 2021-02-27 11:52:04+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.534 2021-02-27 12:18:55+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -505,158 +505,6 @@ Known values for OPTION are:
   a              - IP Address to listen
   default-domain - default domain name for which this host will handle mails
 
---showctl=DIR
-
-  Shows Qmail Control Information for Control Directory at DIR
-
---dumpconfig --servicedir=service_path --cntrldir=cntrl_path
-
-  Dumps all service configuration for Supervise Scripts, control files and software information
-  service_path - Path where supervise service will be installed
-  cntrl_path   - Path where Qmail control files are stored
-
---queuefix=queue_path
-
-  Fix Qmail Queue where queue_path is the absolute path of a queue
-
---rmsvc=service_path
-
-  Disable supervise for service
-  service_path   - Full path of service
-                   e.g. (@servicedir@/qmail-smtpd.25)
-                   (give multiple services enclosed in double quotes)
-                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
-
---ensvc=service_path
-
-  Enable supervise for service
-  service_path   - Full path of service
-                   e.g. (@servicedir@/qmail-smtpd.25)
-                   (give multiple services enclosed in double quotes)
-                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
-
---refreshsvc=service_path
-  [--run-file-only]
-
-  Refresh run script and variables for a supervise service
-  service_path   - Full path of service
-                   e.g. (@servicedir@/qmail-smtpd.25)
-                   (give multiple services enclosed in double quotes)
-                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
-                   service_path can be "all" to act on all services
-  run-file-only  - Recreate run files but not variables
-  NOTE: if the file .norefreshsvc is present in the variable or the config
-  directory, refresh is skipped
-
---norefreshsvc="0|1 service_path"
-
-  Disable/Enable auto refresh of supervise scripts for service
-  0              - Disable autorefresh (create .norefreshsvc in variables directory)
-  1              - Enable  autorefresh (delete .norefreshsvc in variables directory)
-  service_path   - name of service with full path
-                   e.g. (@servicedir@/qmail-smtpd.25)
-                   service_path can be "all" to act on all services
-
---enable-service name1 name2 ..
-
-  Add a service to be started at system boot. The unit file for the service should exist
-  name1 name2 .. - name of a service or list of services to be added
-                   This should be a SYSV style service, systemd, event.d unit file
-
---disable-service name1 name2 ..
-
-  Remove a service to be started at system boot. The unit file for the service should exist
-  name1 name2 .. - name of a service or list of services to be removed
-                   This should be a SYSV style service, systemd, event.d unit file
-
---set-variable=n --variable-value=v
-  --servicedir=service_path
-  --service-name=service_name
-  [--force]
-
-  Set a new variable for a supervise service
-  n              - variable name
-  v              - variable value
-  service_path   - Path where supervise service will be installed
-  service_name   - Service name
-  force          - Overwrite variable if it exists
-
---modify-variable=n --variable-value=v
-  --servicedir=service_path
-  --service-name=service_name
-  [--force]
-
-  Modify an existing variable for a supervise service
-  n              - variable name
-  v              - variable value
-  service_path   - Path where supervise service will be installed
-  service_name   - Service name
-  force          - Set the variable even if does not exist
-
---unset-variable=n
-  --servicedir=service_path
-  --service-name=service_name
-
-  Unset any existing environment variable named 'n'
-  n              - variable name
-  service_name   - Service name
-
---remove-variable=n
-  --servicedir=service_path
-  --service-name=service_name
-
-  Remove an existing variable for a supervise service
-  n              - variable name
-  service_path   - Path where supervise service will be installed
-  service_name   - Service name
-
---restore-variables
-  --servicedir=service_path
-  --service-name=service_name
-
-  Clean and Restore all variables to original state from
-  servicedir/service_name/variables/.variables file
-  service_path   - Path where supervise service will be installed
-  service_name   - name of supervise service without path
-                   e.g. (qmail-smtpd.25)
-
---import-variables=file
-  --servicedir=service_path
-  --service-name=service_name
-  [--force]
-
-  Import new environment variables from a file having one more multiple
-  key=value pairs
-  service_path   - Path where supervise service will be installed
-  service_name   - name of supervise service without path
-                   e.g. (qmail-smtpd.25)
-  force          - Set the variable if variable already exists
-
---export-variables=file
-  --servicedir=service_path
-  --service-name=service_name
-  [--force]
-
-  Export existing environment variables to a file
-  service_path   - Path where supervise service will be installed
-  service_name   - name of supervise service without path
-                   e.g. (qmail-smtpd.25)
-  force          - overwrite service_path/service_name/variables/.variables
-
---save-variables
-  --servicedir=service_path
-
-  Export variables for all service in @servicedir@ and
-  @qsysconfdir@/control/defaultqueue
-  service_path   - Path where supervise service will be installed
-
---restore-all-variables
-  --servicedir=service_path
-
-  Restore all variables to orignal state for all service in
-  @servicedir@ and @qsysconfdir@/control/defaultqueue
-  service_path   - Path where supervise service will be installed
-
 --inlookup=fifo_path --threads=N
   --servicedir=service_path
   --domainlimits
@@ -814,10 +662,174 @@ Known values for OPTION are:
                  service
   service_path - Path where supervise service will be installed
 
+--svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
+
+  service_path - Path where supervise service will be installed
+  cmmd         - Program/Script to run instead of .svscan/run
+  n            - Scan interval for svscan command
+
+--unshare
+  use unshare to mount private /etc/resolv.conf for using local dns
+
 --mrtg=htmldir --servicedir=service_path [--scanint=n]
   htmldir      - Path in /var/www/html directory
   service_path - Path where supervise service will be installed
   n            - Scan interval for mrtg command
+
+--down
+  Create any of the above supervisor services in down state
+
+--showctl=DIR || --showctl
+
+  Shows Qmail Control Information for Control Directory at DIR or @sysconfdir@
+
+--dumpconfig --servicedir=service_path --cntrldir=cntrl_path
+
+  Dumps all service configuration for Supervise Scripts, control files and software information
+  service_path - Path where supervise service will be installed
+  cntrl_path   - Path where Qmail control files are stored
+
+--queuefix=queue_path
+
+  Fix Qmail Queue where queue_path is the absolute path of a queue
+
+--rmsvc=service_path
+
+  Disable supervise for service
+  service_path   - Full path of service
+                   e.g. (@servicedir@/qmail-smtpd.25)
+                   (give multiple services enclosed in double quotes)
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
+
+--ensvc=service_path
+
+  Enable supervise for service
+  service_path   - Full path of service
+                   e.g. (@servicedir@/qmail-smtpd.25)
+                   (give multiple services enclosed in double quotes)
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
+
+--refreshsvc=service_path
+  [--run-file-only]
+
+  Refresh run script and variables for a supervise service
+  service_path   - Full path of service
+                   e.g. (@servicedir@/qmail-smtpd.25)
+                   (give multiple services enclosed in double quotes)
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
+                   service_path can be "all" to act on all services
+  run-file-only  - Recreate run files but not variables
+  NOTE: if the file .norefreshsvc is present in the variable or the config
+  directory, refresh is skipped
+
+--norefreshsvc="0|1 service_path"
+
+  Disable/Enable auto refresh of supervise scripts for service
+  0              - Disable autorefresh (create .norefreshsvc in variables directory)
+  1              - Enable  autorefresh (delete .norefreshsvc in variables directory)
+  service_path   - name of service with full path
+                   e.g. (@servicedir@/qmail-smtpd.25)
+                   service_path can be "all" to act on all services
+
+--enable-service name1 name2 ..
+
+  Add a service to be started at system boot. The unit file for the service should exist
+  name1 name2 .. - name of a service or list of services to be added
+                   This should be a SYSV style service, systemd, event.d unit file
+
+--disable-service name1 name2 ..
+
+  Remove a service to be started at system boot. The unit file for the service should exist
+  name1 name2 .. - name of a service or list of services to be removed
+                   This should be a SYSV style service, systemd, event.d unit file
+
+--set-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Set a new variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Overwrite variable if it exists
+
+--modify-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Modify an existing variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Set the variable even if does not exist
+
+--unset-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Unset any existing environment variable named 'n'
+  n              - variable name
+  service_name   - Service name
+
+--remove-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Remove an existing variable for a supervise service
+  n              - variable name
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+
+--restore-variables
+  --servicedir=service_path
+  --service-name=service_name
+
+  Clean and Restore all variables to original state from
+  servicedir/service_name/variables/.variables file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+
+--import-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Import new environment variables from a file having one more multiple
+  key=value pairs
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - Set the variable if variable already exists
+
+--export-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Export existing environment variables to a file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - overwrite service_path/service_name/variables/.variables
+
+--save-variables
+  --servicedir=service_path
+
+  Export variables for all service in @servicedir@ and
+  @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
+
+--restore-all-variables
+  --servicedir=service_path
+
+  Restore all variables to orignal state for all service in
+  @servicedir@ and @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
 --config=add-alt|remove-alt|qselinux|iselinux
@@ -880,12 +892,6 @@ Known values for OPTION are:
 
   service_path - Path where supervise service will be installed
 
---svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
-
-  service_path - Path where supervise service will be installed
-  cmmd         - Program/Script to run instead of .svscan/run
-  n            - Scan interval for svscan command
-
 --backup=backupdir --servicedir=service_path --mysqlPrefix=mysqlPrefix
 
   mysqlPrefix  - Installation Prefix for mysql
@@ -905,12 +911,6 @@ Known values for OPTION are:
 
   postmaster - name of the user who will recieve the report.
   attach     - zip and send the report as an attachment
-
---unshare
-  Use unshare to mount private /etc/resolv.conf for using local dns
-
---down
-  Create any of the above supervisor services in down state
 
 --check-certs=[full path of certificate]
   Check certificate given as argument or
@@ -9359,8 +9359,12 @@ while test $# -gt 0; do
 	fi
 	;;
 
-	--showctl=*)
-	CONTROLDIR=$optarg
+	--showctl|--showctl=*)
+	if [ -z "$optarg" ] ; then
+		CONTROLDIR=control
+	else
+		CONTROLDIR=$optarg
+	fi
 	export CONTROLDIR
 	echo $CONTROLDIR | grep '/' >/dev/null 2>&1
 	if [ $? -eq 0 ] ; then
