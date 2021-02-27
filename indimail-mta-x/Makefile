@@ -914,7 +914,8 @@ MakeArgs.o: compile MakeArgs.c
 qscanq-stdin: load qscanq-stdin.o auto_qmail.o timestamp.o \
 auto_spool.o mkfn.o MakeArgs.o do_ripmime.o auto_ripmime_cmd.o \
 do_scan.o auto_scancmd.o do_cleanq.o auto_cleaner.o qregex.o \
-wildmat.o matchregex.o variables.o auto_control.o  fmt_xpid.o
+wildmat.o matchregex.o variables.o control.o auto_control.o \
+fmt_xpid.o
 	./load qscanq-stdin auto_qmail.o timestamp.o MakeArgs.o \
 	matchregex.o auto_spool.o mkfn.o do_ripmime.o \
 	auto_ripmime_cmd.o do_scan.o auto_scancmd.o do_cleanq.o \
@@ -3555,7 +3556,7 @@ strsalloc.o tlsarralloc.o dns.o dns.lib conf-ld-$(SYSTEM)
 		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` \
 		`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	else \
-		$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
+		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 \
 		-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
 		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
 		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` \
@@ -3572,7 +3573,7 @@ smtpd-plugin.so: smtp_plugin.o
 	elif test $(SYSTEM) = FREEBSD ; then \
 		$(LD) -shared -o smtpd-plugin.so smtp_plugin.o; \
 	else \
-		$(CC) -Wl,-symbolic -shared -rdynamic -nostartfiles -fPIC -s -O4 \
+		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 \
 		-o smtpd-plugin.so smtp_plugin.o; \
 	fi
 
@@ -3585,8 +3586,8 @@ generic.so: generic.o auto_scancmd.o MakeArgs.o conf-ld-$(SYSTEM)
 		auto_scancmd.o MakeArgs.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 		-lqmail; \
 	else \
-		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o \
-		generic.so generic.o auto_scancmd.o MakeArgs.o \
+		$(CC) -shared -rdynamic -nostartfiles -fPIC -s \
+		-O4 -o generic.so generic.o auto_scancmd.o MakeArgs.o \
 		`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	fi
 
