@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.295 2021-02-26 23:11:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.296 2021-02-27 11:53:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1341,6 +1341,9 @@ if [ -f %{qsysconfdir}/cronlist.q -a -d %{_sysconfdir}/cron.d ] ; then
   echo "adding cron entries"
   %{__cp} %{qsysconfdir}/cronlist.q %{_sysconfdir}/cron.d
 fi
+
+# saving all variables
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --save-variables --force
 
 if [ -f %{libexecdir}/qupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"

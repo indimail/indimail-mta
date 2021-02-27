@@ -161,6 +161,7 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 	done
 	svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+
 	set +e
 	if [ -d /run ] ; then
 		rundir=/run
@@ -480,6 +481,9 @@ do
 done
 svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
+
+# saving all variables
+${prefix}/sbin/svctool --servicedir=${servicedir} --save-variables --force
 
 echo "compressing man pages"
 find ${mandir} -type f -exec gzip -q {} \;
