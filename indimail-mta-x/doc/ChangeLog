@@ -1,5 +1,12 @@
 * 
 Release 2.13 Start 14/02/2021
+- 26/02/2021
+01. svctool: added options to set, unset, remove env variables for supervised
+    services
+- 27/02/2021
+02. install: save all variables using svctool --save-variables --force
+03. svctool: use TMPDIR env variable for temp directory
+04. updated svctool man page
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

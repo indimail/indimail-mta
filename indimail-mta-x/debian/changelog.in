@@ -1,3 +1,6 @@
 indimail-mta (@version@-@release@) unstable; urgency=low
 
-  *
+  * svctool: added options to set, unset, remove env variables for supervised services
+  * install: save all variables using svctool --save-variables --force
+  * svctool: use TMPDIR env variable for temp directory
+  * updated svctool man page
