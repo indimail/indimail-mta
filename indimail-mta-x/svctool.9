@@ -48,9 +48,17 @@ on stdout
 svctool --servicedir=@servicedir@ --dumpconfig --cntrldir=@sysconfdir@/control
 .EE
 
-\fBsvctool\fR logs activity to @logdir@/svctool.log
+or just the qmail configuration
 
-.SH SERVICES and Environment variables
+.EX
+svctool --servicedir=@servicedir@ --showctl
+.EE
+
+\fBsvctool\fR logs activity to @logdir@/svctool.log. \fBsvctool\fR can
+do much more than what is summarized here. You can find detailed option
+in the section \fBServices & Environment variable\fR below
+
+.SH Services & Environment variables
 
 \fBsvctool\fR primary function is for creating supervised services in
 @servicedir@. You can change the location of the service directory by
@@ -864,11 +872,12 @@ Known values for OPTION are:
   service_path   - Path where supervise service will be installed
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
---config=add-alt|remove-alt|qselinux|iselinux
+--config=add-alt|remove-alt|qselinux|iselinux|inittab
   [--postmaster=user[@domain]]
   [--common_name=CN]
   [--capath=ca_path_dir]
   [--certdir=certdir]
+  [--servicedir=service_path]
   [--default-domain=domain]
   [--mysqlPrefix=mysqlPrefix]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
@@ -893,11 +902,13 @@ Known values for OPTION are:
   remove-alt     - Remove indimail as the default MTA
   iselinux       - Enable selinux module for indimail
   qselinux       - Enable selinux module for indimail-mta
+  inittab        - Install svscan started by configuration in /etc/inittab
   postmaster     - name of the user who will recieve bounces on the local host.
                    This can also be a remote user i.e. &postmaster@indi.com
   common_name    - Common Name (CN) for server
   ca_path_dir    - Directory having CA certificate
   certdir        - Directory in which new certificates will be placed
+  service_path   - Path where supervise service have been installed
   default-domain - default domain name for which this host will handle mails
   mysqlPrefix    - Installation Prefix for mysql
   mysqlhost      - MySQL Host having authentication tables
@@ -920,9 +931,9 @@ Known values for OPTION are:
   I             - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   skip-sendmail - Skip Checking sendmail paths in /usr/sbin and /usr/lib
 
---inittab --servicedir=service_path
-
-  service_path - Path where supervise service will be installed
+--check-certs=[full path of certificate]
+  Check certificate given as argument or
+  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
 
 --backup=backupdir --servicedir=service_path --mysqlPrefix=mysqlPrefix
 
@@ -935,6 +946,10 @@ Known values for OPTION are:
 --mysqlupgrade --mysqlPrefix=mysqlPrefix
   mysqlPrefix  - Installation Prefix for mysql
 
+--fixsharedlibs
+
+  fix mysql shared library in @sysconfdir@/control/mysql_lib
+
 --report=all| zddist| zdeferrals| zfailures| zoverall| zrecipients| zrhosts|
   zrxdelay| zsenders| zsendmail| zsuccesses| zsuids | zsmtp | zspam
   [--postmaster=user[@domain]]
@@ -943,14 +958,6 @@ Known values for OPTION are:
 
   postmaster - name of the user who will recieve the report.
   attach     - zip and send the report as an attachment
-
---check-certs=[full path of certificate]
-  Check certificate given as argument or
-  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
-
---fixsharedlibs
-
-  fix mysql shared library in @sysconfdir@/control/mysql_lib
 
 --help
 

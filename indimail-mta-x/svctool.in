@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.534 2021-02-27 12:18:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.535 2021-02-27 13:38:13+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.534 2021-02-27 12:18:55+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.535 2021-02-27 13:38:13+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -832,11 +832,12 @@ Known values for OPTION are:
   service_path   - Path where supervise service will be installed
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
---config=add-alt|remove-alt|qselinux|iselinux
+--config=add-alt|remove-alt|qselinux|iselinux|inittab
   [--postmaster=user[@domain]]
   [--common_name=CN]
   [--capath=ca_path_dir]
   [--certdir=certdir]
+  [--servicedir=service_path]
   [--default-domain=domain]
   [--mysqlPrefix=mysqlPrefix]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
@@ -861,11 +862,13 @@ Known values for OPTION are:
   remove-alt     - Remove indimail as the default MTA
   iselinux       - Enable selinux module for indimail
   qselinux       - Enable selinux module for indimail-mta
+  inittab        - Install svscan started by configuration in /etc/inittab
   postmaster     - name of the user who will recieve bounces on the local host.
                    This can also be a remote user i.e. &postmaster@indi.com
   common_name    - Common Name (CN) for server
   ca_path_dir    - Directory having CA certificate
   certdir        - Directory in which new certificates will be placed
+  service_path   - Path where supervise service have been installed
   default-domain - default domain name for which this host will handle mails
   mysqlPrefix    - Installation Prefix for mysql
   mysqlhost      - MySQL Host having authentication tables
@@ -888,9 +891,9 @@ Known values for OPTION are:
   I             - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   skip-sendmail - Skip Checking sendmail paths in /usr/sbin and /usr/lib
 
---inittab --servicedir=service_path
-
-  service_path - Path where supervise service will be installed
+--check-certs=[full path of certificate]
+  Check certificate given as argument or
+  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
 
 --backup=backupdir --servicedir=service_path --mysqlPrefix=mysqlPrefix
 
@@ -903,6 +906,10 @@ Known values for OPTION are:
 --mysqlupgrade --mysqlPrefix=mysqlPrefix
   mysqlPrefix  - Installation Prefix for mysql
 
+--fixsharedlibs
+
+  fix mysql shared library in @sysconfdir@/control/mysql_lib
+
 --report=all| zddist| zdeferrals| zfailures| zoverall| zrecipients| zrhosts|
   zrxdelay| zsenders| zsendmail| zsuccesses| zsuids | zsmtp | zspam
   [--postmaster=user[@domain]]
@@ -911,14 +918,6 @@ Known values for OPTION are:
 
   postmaster - name of the user who will recieve the report.
   attach     - zip and send the report as an attachment
-
---check-certs=[full path of certificate]
-  Check certificate given as argument or
-  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
-
---fixsharedlibs
-
-  fix mysql shared library in @sysconfdir@/control/mysql_lib
 
 --help
 
@@ -9532,10 +9531,6 @@ while test $# -gt 0; do
 	option=11
 	;;
 
-	--inittab)
-	option=12
-	;;
-
 	--backup=*)
 	backupdir=$optarg
 	option=13
@@ -10038,6 +10033,7 @@ case $option in
 	# 12 add startup for indimail at boot
 	# 13 remove startup for indimail from boot
 	# 14 enable selinux module
+	# 15 enable svscan in inittab
 
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
@@ -10485,6 +10481,36 @@ case $option in
 		qselinux)
 		[ `id -u` = 0 ] || exit 4
 		selinux_module $config_name $sysconfdir/indimail-mta
+		;;
+
+		inittab)
+		# Check that we're a privileged user
+		[ `id -u` = 0 ] || exit 4
+		if [ " $servicedir" = " " ] ; then
+			echo "Supervise Directory not specified" 1>&2
+			usage 1
+		fi
+		grep "svscanboot" /etc/inittab >/dev/null
+		if [ $? -ne 0 ]; then
+			if [ -f /etc/debian_release ] ; then
+				echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
+			else
+				echo "SV:345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
+			fi
+			create_svscan $servicedir
+		else
+			grep "svscanboot" /etc/inittab |grep respawn >/dev/null
+			if [ $? -ne 0 ]; then
+				grep -v "svscanboot" /etc/inittab > /etc/inittab.svctool.$$
+				if [ -f /etc/debian_release ] ; then
+					echo "SV:345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
+				else
+					echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
+				fi
+				/bin/mv /etc/inittab.svctool.$$ /etc/inittab
+				create_svscan $servicedir
+			fi
+		fi
 		;;
 
 		*)

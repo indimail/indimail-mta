@@ -4,3 +4,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * install: save all variables using svctool --save-variables --force
   * svctool: use TMPDIR env variable for temp directory
   * updated svctool man page
+  * svctool: moved --inittab option to --config
