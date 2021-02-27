@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.535 2021-02-27 13:38:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.536 2021-02-27 21:32:20+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.535 2021-02-27 13:38:13+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.536 2021-02-27 21:32:20+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -2019,6 +2019,16 @@ fi
 check_libmysqlclient_lib
 }
 
+dump_run_header()
+{
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "# using below command"
+echo "# $prog_args"
+echo ""
+}
+
 create_fifologger()
 {
 if [ $# -ne 2 ] ; then
@@ -2046,10 +2056,7 @@ if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-logfifo/down
 fi
 (
-echo "#!/bin/sh"
-echo "# $RCSID"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "LOGFILTER=\`/bin/cat variables/LOGFILTER\`"
 echo "FIFODIR=\`dirname \$LOGFILTER\`"
@@ -2073,11 +2080,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 #qmail-logfifo log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/logfifo"
 ) > "$DESTDIR"$SERVICEDIR/qmail-logfifo/log/run
@@ -2347,7 +2350,7 @@ if [ " $odmr" = " " ] ; then
 			fi
 		fi
 	fi
-	if [ $utf -eq 1 ] ; then
+	if [ $utf8 -eq 1 ] ; then
 		echo > $conf_dir/UTF8
 	else
 		> $conf_dir/UTF8
@@ -2468,11 +2471,7 @@ else
 > $conf_dir/AUTHMODULES
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "QMAILDUID=\`/usr/bin/id -u indimail\`"
 echo "NOFILESGID=\`/usr/bin/id -g indimail\`"
 echo "ME=\`head -1 $CONTROLDIR/me\`"
@@ -2545,11 +2544,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/smtpd.$tag"
 ) > "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log/run
@@ -2857,11 +2852,7 @@ else
 	echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "QMAILDUID=\`/usr/bin/id -u indimail\`"
 echo "NOFILESGID=\`/usr/bin/id -g indimail\`"
 echo "ME=\`head -1 $CONTROLDIR/me\`"
@@ -2902,11 +2893,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/$type.$tag"
 ) > "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log/run
@@ -2982,11 +2969,7 @@ else
 fi
 
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
@@ -3001,11 +2984,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/udplogger.$tag"
 ) > "$DESTDIR"$SERVICEDIR/udplogger.$tag/log/run
@@ -3077,11 +3056,7 @@ WHITELIST=$CONTROLDIR/$WHITELIST
 CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
@@ -3096,11 +3071,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/daned.$tag"
 ) > "$DESTDIR"$SERVICEDIR/qmail-daned.$tag/log/run
@@ -3180,11 +3151,7 @@ WHITELIST=$CONTROLDIR/$WHITELIST
 CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
@@ -3204,11 +3171,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/greylist.$tag"
 ) > "$DESTDIR"$SERVICEDIR/greylist.$tag/log/run
@@ -3308,11 +3271,7 @@ if [ $run_file_only -ne 1 ] ; then
 	force=$old
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "INDIUID=\`/usr/bin/id -u indimail\`"
 echo "INDIGID=\`/usr/bin/id -g indimail\`"
 echo "HOSTNAME=\`uname -n\`"
@@ -3358,11 +3317,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # qmail-[imapd|pop3d] log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 if [ " $proxy_port" = " " ] ;then
 	if [ " $imap_ssl" = " 1" ] ; then
@@ -3804,11 +3759,7 @@ else
 fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "if [ ! -f \$CERTFILE ]; then"
 echo "    echo Certificate not present"
 echo "    sleep 5"
@@ -3833,11 +3784,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # indisrvr log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/indisrvr.$tag"
 ) > "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log/run
@@ -3887,11 +3834,7 @@ $chown qscand "$DESTDIR"$SERVICEDIR/qscanq
 
 # qscanq script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 if [ " $scan_interval" = " " ] ; then
 	scan_interval=10
@@ -3907,11 +3850,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # qscanq log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t \\"
 #echo "	'-* cleanq starting' '-* deleting: *: not sticky' \\"
@@ -3958,11 +3897,7 @@ fi
 /bin/chmod 500 $conf_dir
 # clamd script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "CLAMD_SOCK=\`grep -w ^LocalSocket $mysysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$CLAMD_SOCK\" ] ; then"
@@ -4023,11 +3958,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # clamd log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/clamd"
 ) > "$DESTDIR"$SERVICEDIR/clamd/log/run
@@ -4056,11 +3987,7 @@ fi
 qsysconfdir=/etc # weird tha clamd and freshclam do not share the same dir for config files
 # freshclam script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "dbd=\`grep -w \"^DatabaseDirectory\" $qsysconfdir/freshclam.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$dbd\" ] ; then"
@@ -4116,11 +4043,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # freshclam log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/freshclam"
 ) > "$DESTDIR"$SERVICEDIR/freshclam/log/run
@@ -4186,11 +4109,7 @@ fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "if [ -d /run ] ; then"
 echo "  mkdir -p /run/indimail"
 echo "  chown indimail:indimail /run/indimail"
@@ -4217,11 +4136,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # pwdlookup log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/pwdlookup"
 ) > "$DESTDIR"$SERVICEDIR/pwdlookup/log/run
@@ -4390,11 +4305,7 @@ echo $sysconfdir/indimail.cnf > $conf_dir/MYSQL_READ_DEFAULT_FILE
 echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo ""
 echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
@@ -4413,11 +4324,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # inlookup log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/inlookup.$base_fifo_name"
 ) > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
@@ -4695,8 +4602,8 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 		(
 		echo "$RCSID"
 		echo "# generated on $host on `date`"
+		echo "# $prog_args"
 		echo ""
-		echo "$prog_args"
 		) > "$DESTDIR"$databasedir/README
 		$chown -R mysql:mysql "$DESTDIR"$databasedir
 		echo "Creating MySQL Database in "$DESTDIR"$databasedir/data" 1>&2
@@ -5120,11 +5027,7 @@ if [ " $mysql_socket" = " " ]; then
 	fi
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "socket_dir=\`dirname \$(grep socket $sysconfdir/indimail.cnf 2>/dev/null| head -1 | cut -d= -f2) 2>/dev/null\`"
 echo "if [ -z \"\$socket_dir\" ] ; then"
@@ -5174,11 +5077,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/mysql.$port/run
 
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "MYSQL_BASE=$mysqlPrefix"
 echo ""
 echo "exec 2>&1"
@@ -5193,11 +5092,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # mysql log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/mysql.$port"
 ) > "$DESTDIR"$SERVICEDIR/mysql.$port/log/run
@@ -5251,6 +5146,10 @@ if [ -d "$DESTDIR"$databasedir ] ; then
 	fi
 fi
 
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
 echo "[client]"
 echo "port      = $mysql_port"
 echo "socket    = $mysql_socket"
@@ -5386,11 +5285,7 @@ fi
 if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run ] ; then
 	# svscan run script
 	(
-	echo "#!/bin/sh"
-	echo "$RCSID"
-	echo "# generated on $host on `date`"
-	echo "# $prog_args"
-	echo ""
+	dump_run_header
 	echo "echo svscan \$PPID initialization PID \$\$"
 	echo "exec 2>&1"
 	echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
@@ -5409,11 +5304,7 @@ else
 fi
 
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/svc -Gdx ../* ../*/log ./log"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
@@ -5425,11 +5316,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # svscan log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/svscan"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/log/run
@@ -5459,11 +5346,7 @@ fi
 echo "$prog_args" > $conf_dir/.options
 # resolvconf run script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "trap clean_up 1 2 15"
 echo ""
 echo "function clean_up"
@@ -5513,11 +5396,7 @@ echo "wait"
 
 # resolvconf log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/resolvconf"
 ) > "$DESTDIR"$SERVICEDIR/resolvconf/log/run
@@ -5674,11 +5553,7 @@ case "$dkverify_option" in
 	;;
 esac
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
@@ -5697,11 +5572,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # fetchmail log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/fetchmail"
 ) > "$DESTDIR"$SERVICEDIR/fetchmail/log/run
@@ -5800,11 +5671,7 @@ else
 	> $conf_dir/CERTFILE
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "QMAILDUID=\`/usr/bin/id -u indimail\`"
 echo "NOFILESGID=\`/usr/bin/id -g indimail\`"
@@ -5847,11 +5714,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # qmail-poppass log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/poppass.$tag"
 ) > $TMPDIR/popass-run.$$
@@ -6099,11 +5962,7 @@ case "$dksign_option" in
 	;;
 esac
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "if [ -s variables/CONTROLDIR ] ; then"
 echo "  cntrl_dir=\`/bin/cat variables/CONTROLDIR\`"
@@ -6131,11 +5990,7 @@ if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-send.$tag/down
 fi
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/deliver."$tag""
 ) > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log/run
@@ -8634,11 +8489,7 @@ $indexmaker --title="IndiMail Statistics" --section=title \
 	--output=$htmldir/index.html  $conf_dir/../etc/indimail.mrtg.cfg
 # mrtg run script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec 2>&1"
 echo "while true"
 echo "do"
@@ -8662,11 +8513,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # mrtg log script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/mrtg"
 ) > "$DESTDIR"$SERVICEDIR/mrtg/log/run
