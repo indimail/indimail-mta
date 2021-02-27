@@ -10,24 +10,20 @@ svctool \- IndiMail/indimail-mta Service Configuration Tool
 
 .SH DESCRIPTION
 
-\fBsvctool\fR is a shell frontend for configuring IndiMail services, configuring
-\fBIndiMail(7)\fR, taking backups of configuration and data. All services are configured to
-run under \fBsupervise(8)\fR. \fBsupervise(8)\fR itself gets started by \fBsvscan(8)\fR.
-You can install \fBsvscan(8)\fR to be started by the system using
-the command \fBsvctool --config=add-boot\fR.
+\fBsvctool\fR is a shell frontend for configuring IndiMail services,
+configuring \fBIndiMail(7)\fR, taking backups of configuration and
+data. All services are configured to run under \fBsupervise(8)\fR.
+\fBsupervise(8)\fR itself gets started by \fBsvscan(8)\fR. You can
+install \fBsvscan(8)\fR to be started by the system using the command
 
-\fBsvctool\fR requires root privilege to run.
+.EX
+\fBsvctool --config=add-boot\fR.
+.EE
 
-\fBsvctool\fR stores configuration in the file
-@servicedir@/\fIservice\fR/variables/.options. This is used by svctool to
-recreate entire configuration for a service when you use the --refreshsvc
-option.
-
-\fBsvctool\fR stores environment variables set for a service in
-@servicedir@/\fIservice\fR/variables/.variables. This is used by svctool
-to recreate all variables for a service when you use the --refreshsvc option.
-
-\fIservice\fR refers to a supervised service name. See svscan(8), supervise(8).
+\fBsvctool\fR requires root privilege to run. \fBsvctool\fR uses
+\fBTMPDIR\fR environment variable for operations that require a
+temporary directory. By default this is /tmp/indimail. You can set
+your own secure location for this variable.
 
 \fBsvctool\fR sources the file @sysconfdir@/svctool.cnf for setting
 passwords used for accessing MySQL. You can set
@@ -36,7 +32,50 @@ passwords used for accessing MySQL. You can set
 \fBMYSQL_PASS\fR - password for accessing IndiMail MySQL database
 \fBPRIV_PASS\fR  - password for accessing MySQL as an admin user
 \fBADMIN_PASS\fR - password for MySQL user having shutdown privileges
+.EE
 
+If the above file is not present, svctool uses hard coded, installation
+time defaults in the script. If you change any of the above passwords,
+you can store them in svctool.conf. Please ensure that no unprivileged
+users have read/write access to svctool.conf. When you run \fBsvctool\fR
+the permissions of these file will be automatically changed for not
+allowing non-root users to have read/write access.
+
+\fBsvctool\fR logs activity to @logdir@/svctool.log
+
+.SH SERVICES and Environment variables
+
+\fBsvctool\fR primary function is for creating supervised services in
+@servicedir@. You can change the location of the service directory by
+specifying \fB--servicedir\fR option.
+
+When you create any service, \fBsvctool\fR stores the entire command line
+invocation wth arguments in @servicedir@/\fIservice\fR/variables/.options.
+This allows svctool to recreate entire configuration for a service when
+you use the --refreshsvc option. Using envdir(8), supervise(8) services can
+be run with set of environment variables or a set of variables removed from
+the environment. The environment variables are those needed by applications
+run by supervise(8). These environment variables are stored as files in
+@servicedir@/\fIservice\fR/variables directory. \fBsvctool\fR can store all
+environment variables set for a service
+in @servicedir@/\fIservice\fR/variables/.variables. This file can be created
+by running the command
+
+.EX
+svctool --servicedir=@servicedir@ --save-variables --force
+.EE
+
+Once you have saved all environment variables as key=value lines in a file,
+\fBsvctool\fR can restore all environment variables to original state by
+running the command
+
+.EX
+svctool --servicedir=@servicedir@ --restore-all-variables --force
+.EE
+
+\fIservice\fR refers to a supervised service name. See svscan(8), supervise(8).
+
+.SH Options
 .EX
 Usage: svctool [OPTION]
 
@@ -104,7 +143,7 @@ Known values for OPTION are:
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
   Port           - Bind on this port for SMTP
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
                    @qmaildir@
@@ -213,7 +252,7 @@ Known values for OPTION are:
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
                    @qmaildir@
@@ -312,7 +351,7 @@ Known values for OPTION are:
   Installs a new Greylist Daemon
   a              - IP Address to listen
   Port           - Bind on this port for qmail-greyd
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   m              - Minimum resend time after which mail will be accepted
   g              - Window in which mail must be seen
   t              - Max period for a mail to be received after which IP will be removed
@@ -329,7 +368,7 @@ Known values for OPTION are:
   Installs a new qmail-daned TLSA verification Daemon
   a              - IP Address to listen
   Port           - Bind on this port for qmail-greyd
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   t              - Max period for a mail to be received after which IP will be removed
                    from whitelist
   s              - Size of hash table (0 to disable hashing)
@@ -364,7 +403,7 @@ Known values for OPTION are:
   d              - Max size of email that can be submitted to SMTP or
                    injected locally
   Port           - Bind on this port for QMTP
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
                    @qmaildir@
@@ -408,7 +447,7 @@ Known values for OPTION are:
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
   Port           - Bind on this port for QMTP
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
                    @qmaildir@
@@ -442,7 +481,7 @@ Known values for OPTION are:
 
   Installs a new IMAP4 Listner
   Port           - Bind on this port for IMAP
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   nolastauth     - Do not update lastauth
   proxy          - Install as a proxy and connect to actual imap on destport
@@ -474,7 +513,7 @@ Known values for OPTION are:
 
   Installs a new POP3 Listner
   Port           - Bind on this port for POP3
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   nolastauth     - Do not update lastauth
   proxy          - Install as a proxy
@@ -498,7 +537,7 @@ Known values for OPTION are:
 --dumpconfig --servicedir=service_path --cntrldir=cntrl_path
 
   Dumps all service configuration for Supervise Scripts, control files and software information
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   cntrl_path   - Path where Qmail control files are stored
 
 --queuefix=queue_path
@@ -507,7 +546,7 @@ Known values for OPTION are:
 
 --rmsvc=service_path
 
-  Disable supervise scripts for service
+  Disable supervise for service
   service_path   - Full path of service
                    e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
@@ -515,16 +554,16 @@ Known values for OPTION are:
 
 --ensvc=service_path
 
-  Enable supervise scripts for service
+  Enable supervise for service
   service_path   - Full path of service
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
 
 --refreshsvc=service_path
   [--run-file-only]
 
-  Enable supervise scripts for service
+  Refresh run script and variables for a supervise service
   service_path   - Full path of service
                    e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
@@ -658,7 +697,7 @@ Known values for OPTION are:
                    (e.g. @qmaildir@/inquery/infifo)
   N              - No of parallel inlookup threads to spawn
   A              - Max days for which a user has been active
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   cntrl_path     - Path where Qmail control files are stored
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   use-btree      - Use Binary Tree algorithm to search for User records
@@ -682,7 +721,7 @@ Known values for OPTION are:
   mysqlpass      - Passwd for connecting to mysql
   mysqlport      - Port for connecting to mysql
   mysqlsocket    - Unix Domain Socket for connecting to mysql
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
 
 --indisrvr=Port --mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass
   --localip=a --maxdaemons=m --maxperip=i
@@ -702,7 +741,7 @@ Known values for OPTION are:
   i              - Concurrency of connections to be allowed from a
                    single ip address
   a              - IP Address to listen
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
 
 --mysql=mysqlport --mysqlPrefix=mysqlPrefix --databasedir=databasedir
@@ -715,8 +754,8 @@ Known values for OPTION are:
   mysqlPrefix    - Installation Prefix for mysql
   databasedir    - Directory containing the Database and Logs
   mysqlsocket    - Unix Domain Socket for connecting to mysql
-  config         - MySQL Configuration file (e.g. @qsysconfdir@/indimail.cnf)
-  service_path   - Path where supervise scripts will be installed
+  config         - MySQL Configuration file (e.g. @sysconfdir@/indimail.cnf)
+  service_path   - Path where supervise service will be installed
   default-domain - default domain name for which this host will handle mails
 
 --fetchmail --qbase=queue_path --qcount=N --qstart=I --servicedir=service_path
@@ -741,7 +780,7 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that Fetchmail can allocate
-  service_path   - Path where supervise scripts will be installed
+  service_path   - Path where supervise service will be installed
   cntrl_path     - Path where Qmail control files are stored
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
@@ -761,13 +800,13 @@ Known values for OPTION are:
 
 --qscanq --servicedir=service_path [--scanint=n]
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   n            - Scan interval for Virus scanning
 
 --clamd --servicedir=service_path --clamdPrefix=clamdPrefix
   [--sysconfdir=sysconfdir]
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   clamdPrefix  - Installation Prefix for clamd
   sysconfdir   - Path for config files (scan.conf)
 
@@ -784,7 +823,7 @@ Known values for OPTION are:
   cmd            - Path of a setpassword compatible program
   certficate     - Path to openssl certificate
   ssl            - Use SSL encrypted communication
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
 
   Installs a new IndiMail poppassd Server
 
@@ -792,17 +831,17 @@ Known values for OPTION are:
   Port         - UDP/IP port on which to bind
   a            - IP Address to listen
   t            - Timeout for reads
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
 
 --fifologger=fifo_path --servicedir=service_path
   fifo_path    - Path to a writeable fifo which can be used by
                  any application to log messages to qmail-logfifo
                  service
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
 
 --mrtg=htmldir --servicedir=service_path [--scanint=n]
   htmldir      - Path in /var/www/html directory
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   n            - Scan interval for mrtg command
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
@@ -820,7 +859,7 @@ Known values for OPTION are:
   [--stdout]
   [--wipe]
 
-  mysql          - Create @qsysconfdir@/indimail.cnf
+  mysql          - Create @sysconfdir@/indimail.cnf
   mysqldb        - Create an initidalized MySQL db for IndiMail
   ssl_rsa        - Create SSL/TLS Certs for MariaDB
   qmail          - Create default qmail control files
@@ -856,7 +895,7 @@ Known values for OPTION are:
 --check-install --servicedir=service_path --qbase=queue_path --qcount=N --qstart=I
   [--skip-sendmail]
 
-  service_path  - Path where supervise scripts have been installed
+  service_path  - Path where supervise service have been installed
   queue_path    - Path where the queues are installed.
   N             - No of Queues
   I             - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
@@ -864,11 +903,11 @@ Known values for OPTION are:
 
 --inittab --servicedir=service_path
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
 
 --svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   cmmd         - Program/Script to run instead of .svscan/run
   n            - Scan interval for svscan command
 
@@ -900,11 +939,11 @@ Known values for OPTION are:
 
 --check-certs=[full path of certificate]
   Check certificate given as argument or
-  Check IndiMail Certificates in @qsysconfdir@/certs without any arguments
+  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
 
 --fixsharedlibs
 
-  fix mysql shared library in @qsysconfdir@/control/mysql_lib
+  fix mysql shared library in @sysconfdir@/control/mysql_lib
 
 --help
 
