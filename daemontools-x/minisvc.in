@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.5 2020-11-29 17:51:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.6 2021-02-27 17:23:08+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.5 2020-11-29 17:51:10+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.6 2021-02-27 17:23:08+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -31,12 +31,15 @@ Known values for OPTION are:
 
 --svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   cmmd         - Program/Script to run instead of .svscan/run
   n            - Scan interval for svscan command
 
 --unshare
   Use unshare to mount private /etc/resolv.conf for using local dns
+
+--down
+  Create supervisor services in down state
 
 --rmsvc=service_name
 
@@ -50,18 +53,18 @@ Known values for OPTION are:
 
   Enable supervise scripts for service
   service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
 
 --refreshsvc=service_name
   [--run-file-only]
 
   Enable supervise scripts for service
   service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
                    service_name can be "all" to act on all services
   run-file-only  - Recreate run files but not variables
   NOTE: if the file .norefreshsvc is present in the variable or the config
@@ -73,7 +76,7 @@ Known values for OPTION are:
   0              - Disable autorefresh (create .norefreshsvc in variables directory)
   1              - Enable  autorefresh (delete .norefreshsvc in variables directory)
   service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    service_name can be "all" to act on all services
 
 --config=add-boot|rm-boot
@@ -81,8 +84,99 @@ Known values for OPTION are:
   add-boot       - Add startup scripts for IndiMail to get started during boot
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
 
---down
-  Create any of the above supervisor services in down state
+--set-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Set a new variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Overwrite variable if it exists
+
+--modify-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Modify an existing variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Set the variable even if does not exist
+
+--unset-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Unset any existing environment variable named 'n'
+  n              - variable name
+  service_name   - Service name
+
+--remove-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Remove an existing variable for a supervise service
+  n              - variable name
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+
+--restore-variables
+  --servicedir=service_path
+  --service-name=service_name
+
+  Clean and Restore all variables to original state from
+  servicedir/service_name/variables/.variables file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+
+--import-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Import new environment variables from a file having one more multiple
+  key=value pairs
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - Set the variable if variable already exists
+
+--export-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Export existing environment variables to a file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - overwrite service_path/service_name/variables/.variables
+
+--save-variables
+  --servicedir=service_path
+
+  Export variables for all service in @servicedir@ and
+  @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
+
+--restore-all-variables
+  --servicedir=service_path
+
+  Restore all variables to orignal state for all service in
+  @servicedir@ and @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
+
+--dumpconfig --servicedir=service_path --cntrldir=cntrl_path
+
+  Dumps all service configuration for Supervise Scripts, control files and software information
+  service_path - Path where supervise service will be installed
+  cntrl_path   - Path where Qmail control files are stored
 
 --help
 
@@ -626,6 +720,294 @@ remove_startup()
 	fi
 }
 
+check_update_if_diff()
+{
+	if [ ! -s $1 -o ! -f $1 ] ; then
+		update=1
+	else
+		update=0
+		val=`cat $1 2>/dev/null`
+	fi
+	if [ $update -eq 1 -o ! " $val" = " $2" ] ; then
+		if [ $silent -eq 0 ] ; then
+			echo "updating $1 with $2"
+		fi
+		echo $2 > $1
+		return 1
+	else
+		return 0
+	fi
+}
+
+import_variables()
+{
+if [ $# -ne 6 ] ; then
+	echo "usage: import_variables dir envfile restore_flag owner group mode" 1>&2
+	exit 1
+fi
+dir=$1
+env_file=$2
+restore_flag=$3
+owner=$4
+group=$5
+mode=$6
+if [ $restore_flag -eq 1 ] ; then
+	printf "Restoring %-40s from %s\n" $dir $env_file
+else
+	printf "importing %-40s from %s\n" $dir $env_file
+fi
+old=$silent
+silent=1
+grep -v "^#" $env_file | while read line
+do
+	if [ -z "$line" ] ; then
+		continue
+	fi
+	file=`echo $line | cut -d= -f1`
+	value=`echo $line | cut -d= -f2- | tr -d \"`
+	if [ $force -eq 0 -a -f $dir/$file ] ; then
+		echo "env variable $file exists and --force not specified"
+		silent=$old
+		return 1
+	fi
+	if [ -z "$value" ] ; then
+		value=`echo $line | cut -d= -f2-`
+		if [ -z "$value" ] ; then
+			# variable=
+			# unset/remove variable
+			if [ -s $dir/$file -o ! -f $dir/$file ] ; then
+				echo "unset env variable $file"
+				> $dir/$file
+			fi
+		else
+			# variable=""
+			# set variable with empty value
+			value=`echo $value | tr -d \"`
+			check_update_if_diff $dir/$file "$value"
+			if [ $? -ne 0 ] ; then
+				echo "set env variable $file=[$value]"
+			fi
+		fi
+	else
+		# variable="some value"
+		# set variable=$value
+		check_update_if_diff $dir/$file "$value"
+		if [ $? -ne 0 ] ; then
+			echo "set env variable $file=[$value]"
+		fi
+	fi
+	if [ -n "$mode" ] ; then
+		/bin/chmod $mode $dir/$file
+	fi
+	if [ -n "$owner" -a -n "$group" ] ; then
+		$chown $owner:$group $dir/$file
+	elif [ -n "$owner" ] ; then
+		$chown $owner $dir/$file
+	fi
+done
+silent=$old
+if [ $restore_flag -ne 0 ] ; then
+	out=`mktemp -dt surblXXXXXXXXXX`
+	if [ $? -ne 0 ] ; then
+		echo "unable to create temp dir" 1>&2
+		return 1
+	fi
+	cat $env_file | while read line
+	do
+		file=`echo $line | cut -d= -f1`
+		touch $out/$file
+	done
+	for j in `/bin/ls $dir`
+	do
+		if [ ! -f $out/$j ] ; then
+			/bin/rm -f $dir/$j
+		fi
+	done
+	/bin/rm -rf $out
+fi
+return 0
+}
+
+export_variables()
+{
+if [ $# -ne 5 ] ; then
+	echo "usage: export_variables($#) dir envfile owner group mode" 1>&2
+	exit 1
+fi
+dir=$1
+file=$2
+owner=$3
+group=$4
+mode=$5
+if [ ! -d $dir ] ; then
+	echo "$dir: No such file or directory" 1>&2
+	exit 1
+fi
+if [ $? -ne 0 ] ; then
+	echo "$dir: unable to chdir" 1>&2
+	exit 1
+fi
+if [ $force -eq 0 -a -f $file ] ; then
+	echo "$file exists and --force not specified" 1>&2
+	return 1
+fi
+(
+for i in `/bin/ls $dir`
+do
+	if [ -s $dir/$i ] ; then
+		value=`cat $dir/$i`
+		if [ -n "$value" ] ; then
+			echo $i="$value"
+		else
+			echo $i=\"\"
+		fi
+	else
+		echo "$i="
+	fi
+done
+) > $file
+if [ -s $file ] ; then
+	/bin/chmod $mode $file
+	$chown $owner:$group $file
+else
+	/bin/rm -f $file
+fi
+}
+
+save_all_variables()
+{
+if [ -z "$owner" ] ; then
+	owner=root
+fi
+if [ -z "$group" ] ; then
+	group=0
+fi
+if [ -z $mode ] ; then
+	mode=0640
+fi
+for i in `/bin/ls -d "$DESTDIR"$servicedir/*/variables "$DESTDIR"$servicedir/.svscan/variables 2>/dev/null`
+do
+	printf "export %-35s %s %s %s\n" "`dirname $i`" $owner $group $mode
+	export_variables $i $i/.variables $owner $group $mode 
+done
+dir="$DESTDIR"$sysconfdir/control/defaultqueue 
+if [ -d $dir ] ; then
+	printf "export %-35s %s %s %s\n" $dir $owner $group $mode
+	export_variables $dir $dir/.variables $owner $group $mode
+fi
+}
+
+restore_all_variables()
+{
+if [ -z "$owner" ] ; then
+	owner=root
+fi
+if [ -z "$group" ] ; then
+	group=0
+fi
+if [ -z $mode ] ; then
+	mode=0640
+fi
+old=$force
+force=1
+for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.variables "$DESTDIR"$servicedir/.svscan/variables/.variables 2>/dev/nul`
+do
+	# remove last 21 char to get the directory+service_name
+	i=`echo $j|sed 's/.\{21\}$//'`
+	if [ ! -s $i/variables/.variables -a ! -s $i/.variables ] ; then
+		echo "$i/variables/.variables or $i/.variables missing" 1>&2
+		continue
+	fi
+	import_variables $i/variables $i/variables/.variables 1 $owner $group $mode
+done
+dir="$DESTDIR"$sysconfdir/control/defaultqueue
+import_variables $dir $dir/.variables 1 $owner $group $mode
+force=$old
+}
+
+dump_config()
+{
+if [ $# -ne 2 ] ; then
+	echo "USAGE: dump_config servicedir controldir" 1>&2
+	return 1
+fi
+servicedir=$1
+CONTROLDIR=$2
+export CONTROLDIR
+if [ ! -d $servicedir ] ; then
+	echo "servicedir: No such file or directory" 1>&2
+	return 1
+fi
+echo "Service Configuration ================================================"
+echo Service Directory $servicedir
+cd $servicedir
+scount=1
+for j in `/bin/ls -a $servicedir`
+do
+	if [ " $j" = " ." -o " $j" = " .." ] ; then
+		continue
+	fi
+	printf "Service %05d %s\n" $scount $j
+	scount=`expr $scount + 1`
+	if [ -f $j/run ] ; then
+		echo "Run File [$j/run]"
+		/bin/cat $j/run
+		/bin/echo -n "- EOF -----------------"
+		printf "%-20s" "$j/run"
+		echo "-----------------------"
+		echo
+	fi
+	if [ -f $j/log/run ] ; then
+		echo "Log Run File [$j/log/run]"
+		/bin/cat $j/log/run
+		/bin/echo -n "- EOF -----------------"
+		printf "%-20s" "$j/log/run"
+		echo "-----------------------"
+		echo
+	fi
+	if [ -f $j/shutdown ] ; then
+		echo "Shutdown File [$j/shutdown]"
+		/bin/cat $j/shutdown
+		/bin/echo -n "- EOF -----------------"
+		printf "%-20s" "$j/shutdown"
+		echo "-----------------------"
+		echo
+	fi
+	if [ -d $j/variables ] ; then
+		count=1
+		for k in `ls $j/variables`
+		do
+			if [ $count -eq 1 ] ; then
+				echo "Variables List"
+			fi
+			if [ -s $j/variables/$k ] ; then
+				printf "%-3d %s\nValue:[" $count $k
+				val=`/bin/cat $j/variables/$k`
+				if [ " $val" = " " ] ; then
+					/bin/echo -n "SET"
+				else
+					/bin/echo -n $val
+				fi
+				printf "]\n"
+			else
+				printf "%-3d %s\nValue:[UNSET]\n" $count $k
+			fi
+			count=`expr $count + 1`
+			echo
+		done
+	fi
+	echo
+done
+echo
+echo "Control Configuration ================================================="
+echo
+"$DESTDIR"$QmailBinPrefix/bin/qmail-showctl
+echo
+echo "IndiMail Assign File:"
+/bin/cat "$DESTDIR"$sysconfdir/users/assign
+echo
+}
+
 ################################# Main ##################################
 if test $# -eq 0; then
     usage 1
@@ -645,9 +1027,7 @@ if [ -f @sysconfdir@/.svctool.cnf ] ; then
 	/bin/chmod 400 @sysconfdir@/.svctool.cnf
 	. @sysconfdir@/.svctool.cnf
 fi
-[ -z "$MYSQL_PASS" ] && MYSQL_PASS="ssh-1.5-"
-[ -z "$PRIV_PASS" ]  && PRIV_PASS="4-57343-"
-[ -z "$ADMIN_PASS" ] && ADMIN_PASS="benhur20"
+[ -z "$TMPDIR" ] && TMPDIR="/tmp/indimail" && mkdir -m 0700 -p /tmp/indimail
 
 prog_args="$QmailBinPrefix/sbin/minisvc"
 force=0
@@ -656,13 +1036,25 @@ down_state=0
 use_unshare=0
 nooverwrite=0
 run_file_only=0
-if [ -x /bin/touch ] ; then
-	touch=/bin/touch
-elif [ -x /usr/bin/touch ] ; then
-	touch=/usr/bin/touch
+
+if [ " $CONTROLDIR" = " " ] ; then
+	cntrldir=$sysconfdir/control
 else
-	touch=/bin/touch
+	slash=`echo $CONTROLDIR | cut -c1`
+	if [ " $slash" = " /" ] ; then
+		cntrldir=$CONTROLDIR
+	else
+		cntrldir=$sysconfdir/$CONTROLDIR
+	fi
 fi
+CONTROLDIR=$cntrldir
+export CONTROLDIR
+if [ -f $cntrldir/servicedir.conf ] ; then
+	servicedir=`cat $cntrldir/servicedir.conf`
+else
+	servicedir=@servicedir@
+fi
+
 while test $# -gt 0; do
     case "$1" in
     -*=*)
@@ -721,15 +1113,6 @@ while test $# -gt 0; do
 	use_unshare=1
 	;;
 
-	--version)
-	echo "$RCSID"
-	exit 0
-	;;
-
-	--help)
-	usage 0
-	;;
-
 	--config=*)
 	if [ " $option" = " " ] ; then
 		option=1
@@ -779,6 +1162,68 @@ while test $# -gt 0; do
 	if [ $option -eq 34 ] ; then
 		run_file_only=1
 	fi
+	;;
+
+	--mode=*)
+	group=$optarg
+	;;
+	--owner=*)
+	owner=$optarg
+	;;
+	--group=*)
+	group=$optarg
+	;;
+	--service-name=*)
+	service_name=$optarg
+	;;
+	--variable-value=*)
+	variable_value=$optarg
+	;;
+	--set-variable=*)
+	variable_name=$optarg
+	option=7
+	;;
+	--modify-variable=*)
+	variable_name=$optarg
+	option=8
+	;;
+	--unset-variable=*)
+	variable_name=$optarg
+	option=9
+	;;
+	--remove-variable=*)
+	variable_name=$optarg
+	option=10
+	;;
+	--restore-variables)
+	option=11
+	;;
+	--import-variables=*)
+	option=12
+	env_file=$optarg
+	;;
+	--export-variables=*)
+	option=13
+	env_file=$optarg
+	;;
+	--save-variables)
+	option=14
+	;;
+	--restore-all-variables)
+	option=15
+	;;
+
+	--dumpconfig)
+	option=16
+	;;
+
+	--version)
+	echo "$RCSID"
+	exit 0
+	;;
+
+	--help)
+	usage 0
 	;;
 
 	*)
@@ -892,6 +1337,151 @@ case $option in
 	create_svscan $servicedir $svscan_init_cmd
 	;;
 
+	7|8|9|10) # set, modify, unset variables
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	if [ -z "$service_name" ] ; then
+		echo "service name not specified" 1>&2
+		usage 1
+	fi
+	if [ -z "$variable_name" ] ; then
+		echo "variable name not specified" 1>&2
+		usage 1
+	fi
+	if [ ! -d $servicedir/$service_name ] ; then
+		echo "$servicedir/$service_name: No such file or directory" 1>&2
+		exit 1
+	fi
+	case $option in
+		7) #set variable
+		if [ $force -ne 1 -a -f $servicedir/$service_name/variables/$variable_name ] ; then
+			echo "$variable_name exists. Use --force to overwrite" 1>&2
+			usage 1
+		fi
+		;;
+		8) # modify variable
+		if [ $force -ne 1 -a ! -f $servicedir/$service_name/variables/$variable_name ] ; then
+			echo "$variable_name does not exists. Use --force to create" 1>&2
+			usage 1
+		fi
+		;;
+		9) # unset variable
+		echo "unsetting env variable $variable_name"
+		> $servicedir/$service_name/variables/$variable_name
+		;;
+		10) # delete variable
+		echo "removing env variable $variable_name"
+		/bin/rm -f $servicedir/$service_name/variables/$variable_name
+		;;
+	esac
+	if [ -z "$owner" ] ; then
+		owner=root
+	fi
+	if [ -z "$group" ] ; then
+		group=0
+	fi
+	if [ -z $mode ] ; then
+		mode=0640
+	fi
+	dir=$servicedir/$service_name
+	if [ $option -eq 7 -o $option -eq 8 ] ; then
+		if [ -n "$variable_value" ] ; then
+			echo "setting env variable $variable_name=[$variable_value]"
+			echo $variable_value > $dir/variables/$variable_name
+		else
+			echo "setting env variable $variable_name"
+			echo > $dir/variables/$variable_name
+		fi
+	fi
+	old=$force
+	force=1
+	printf "export %-35s %s %s %s\n" "`dirname $dir`" $owner $group $mode
+	export_variables $dir/variables $dir/variables/.variables $owner $group $mode
+	force=$old
+	if [ $option -ne 10 ] ; then
+		if [ -n "$mode" ] ; then
+			/bin/chmod $mode $dir/variables/$variable_name
+		fi
+		if [ -n "$owner" -a -n "$group" ] ; then
+			$chown $owner:$group $dir/variables/$variable_name
+		elif [ -n "$owner" ] ; then
+			$chown $owner $dir/variables/$variable_name
+		fi
+	fi
+	;;
+
+	11|12|13) # restore variables, import variables, export variables
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	if [ -z "$service_name" ] ; then
+		echo "service name not specified" 1>&2
+		usage 1
+	fi
+	if [ ! -d $servicedir/$service_name ] ; then
+		echo "$servicedir/$service_name: No such file or directory" 1>&2
+		exit 1
+	fi
+	if [ -z "$owner" ] ; then
+		owner=root
+	fi
+	if [ -z "$group" ] ; then
+		group=0
+	fi
+	if [ -z $mode ] ; then
+		mode=0640
+	fi
+	if [ $option -eq 11 ] ; then
+		file=$servicedir/$service_name/variables/.variables
+		if [ ! -f $file ] ; then
+			echo "env file for $service_name (.variables) doesn't exist" 1>&2
+			usage 1
+		fi
+	else
+		file=$env_file
+		if [ ! -f $file ] ; then
+			echo "$file: No such file or directory" 1>&2
+			usage 1
+		fi
+	fi
+	if [ $option -eq 11 ] ; then   # restore variables to original state
+		import_variables $servicedir/$service_name/variables $file 1 $owner $group $mode
+	elif [ $option -eq 12 ] ; then # import new variables
+		import_variables $servicedir/$service_name/variables $file 0 $owner $group $mode
+	else
+		printf "export %-35s %s %s %s\n" "$servicedir/$service_name" $owner $group $mode
+		export_variables $servicedir/$service_name/variables $file $owner $group $mode
+	fi
+	;;
+
+	14)
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	save_all_variables
+	;;
+	15)
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	restore_all_variables
+	;;
+
+	16) # dump config
+	if [ " $servicedir" = " " ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	# Check that we're a privileged user
+	[ `id -u` = 0 ] || exit 4
+	dump_config "$servicedir" "$cntrldir"
+	;;
+
 	*)
 	if [ " $option" = " " ] ; then
 		echo "No Options Provided" 1>&2
@@ -913,6 +1503,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.6  2021-02-27 17:23:08+05:30  Cprogrammer
+# added options to set, unset, remove env variables for supervised services
+#
 # Revision 1.5  2020-11-29 17:51:10+05:30  Cprogrammer
 # fixed syntax error
 #

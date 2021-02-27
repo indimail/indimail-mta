@@ -1,3 +1,5 @@
 daemontools (@version@-@release@) unstable; urgency=low
 
-  *
+  * minisvc: added options to set, unset, remove env variables for supervised services
+  * minisvc: added --dumpconfig option
+  * updated minisvc man page

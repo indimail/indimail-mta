@@ -15,29 +15,66 @@ svscan(8). You can install \fBsvscan(8)\fR to be started by the system using
 the command \fBminisvc --config=add-boot\fR.
 
 \fBminisvc\fR offers tiny subset of indimail-mta's svctool(8) config tool features.
-\fBminisvc\fR requires root privilege to run.
+
+\fBsvctool\fR can be used to dump the entire configuration of indimail
+on stdout
 
 .EX
-Usage: svctool [OPTION]
+minisvc --servicedir=@servicedir@ --dumpconfig --cntrldir=@sysconfdir@/control
+.EE
+
+\fBminisvc\fR requires root privilege to run.
+
+.SH Services & Environment variables
+
+\fBsvctool\fR primary function is for creating supervised services in
+@servicedir@. You can change the location of the service directory by
+specifying \fB--servicedir\fR option.
+
+When you create any service, \fBsvctool\fR stores the entire command line
+invocation wth arguments in @servicedir@/\fIservice\fR/variables/.options.
+This allows svctool to recreate entire configuration for a service when
+you use the --refreshsvc option. Using envdir(8), supervise(8) services can
+be run with set of environment variables or a set of variables removed from
+the environment. The environment variables are those needed by applications
+run by supervise(8). These environment variables are stored as files in
+@servicedir@/\fIservice\fR/variables directory. \fBsvctool\fR can store all
+environment variables set for a service
+in @servicedir@/\fIservice\fR/variables/.variables. This file can be created
+by running the command
+
+.EX
+svctool --servicedir=@servicedir@ --save-variables --force
+.EE
+
+Once you have saved all environment variables as key=value lines in a file,
+\fBsvctool\fR can restore all environment variables to original state by
+running the command
+
+.EX
+svctool --servicedir=@servicedir@ --restore-all-variables --force
+.EE
+
+\fIservice\fR refers to a supervised service name. See svscan(8), supervise(8).
+
+.SH OPTIONS
+
+.EX
+Usage: minisvc [OPTION]
 
 Known values for OPTION are:
 
 --svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
 
-  service_path - Path where supervise scripts will be installed
+  service_path - Path where supervise service will be installed
   cmmd         - Program/Script to run instead of .svscan/run
   n            - Scan interval for svscan command
 
 --unshare
   Use unshare to mount private /etc/resolv.conf for using local dns
 
---config=add-boot|rm-boot
-
-  add-boot       - Add startup scripts for IndiMail to get started during boot
-  rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
-
 --down
-  Create any of the supervisor services in down state
+  Create supervisor services in down state
 
 --rmsvc=service_name
 
@@ -51,18 +88,18 @@ Known values for OPTION are:
 
   Enable supervise scripts for service
   service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
 
 --refreshsvc=service_name
   [--run-file-only]
 
   Enable supervise scripts for service
   service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    (give multiple services enclosed in double quotes)
-                   "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
+                   "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
                    service_name can be "all" to act on all services
   run-file-only  - Recreate run files but not variables
   NOTE: if the file .norefreshsvc is present in the variable or the config
@@ -74,8 +111,107 @@ Known values for OPTION are:
   0              - Disable autorefresh (create .norefreshsvc in variables directory)
   1              - Enable  autorefresh (delete .norefreshsvc in variables directory)
   service_name   - name of service with full path
-                   e.g. (@servicedir@/.qmail-smtpd.25)
+                   e.g. (@servicedir@/qmail-smtpd.25)
                    service_name can be "all" to act on all services
+
+--config=add-boot|rm-boot
+
+  add-boot       - Add startup scripts for IndiMail to get started during boot
+  rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
+
+--set-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Set a new variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Overwrite variable if it exists
+
+--modify-variable=n --variable-value=v
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Modify an existing variable for a supervise service
+  n              - variable name
+  v              - variable value
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+  force          - Set the variable even if does not exist
+
+--unset-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Unset any existing environment variable named 'n'
+  n              - variable name
+  service_name   - Service name
+
+--remove-variable=n
+  --servicedir=service_path
+  --service-name=service_name
+
+  Remove an existing variable for a supervise service
+  n              - variable name
+  service_path   - Path where supervise service will be installed
+  service_name   - Service name
+
+--restore-variables
+  --servicedir=service_path
+  --service-name=service_name
+
+  Clean and Restore all variables to original state from
+  servicedir/service_name/variables/.variables file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+
+--import-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Import new environment variables from a file having one more multiple
+  key=value pairs
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - Set the variable if variable already exists
+
+--export-variables=file
+  --servicedir=service_path
+  --service-name=service_name
+  [--force]
+
+  Export existing environment variables to a file
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
+  force          - overwrite service_path/service_name/variables/.variables
+
+--save-variables
+  --servicedir=service_path
+
+  Export variables for all service in @servicedir@ and
+  @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
+
+--restore-all-variables
+  --servicedir=service_path
+
+  Restore all variables to orignal state for all service in
+  @servicedir@ and @qsysconfdir@/control/defaultqueue
+  service_path   - Path where supervise service will be installed
+
+--dumpconfig --servicedir=service_path --cntrldir=cntrl_path
+
+  Dumps all service configuration for Supervise Scripts, control files and software information
+  service_path - Path where supervise service will be installed
+  cntrl_path   - Path where Qmail control files are stored
 
 --help
 
