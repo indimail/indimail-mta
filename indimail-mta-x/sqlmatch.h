@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.h,v $
+ * Revision 1.6  2021-02-27 20:59:49+05:30  Cprogrammer
+ * changed error to warning for missing MySQL libs
+ *
  * Revision 1.5  2020-04-30 18:04:44+05:30  Cprogrammer
  * define function prototypes as extern
  *
@@ -18,7 +21,9 @@
  */
 #ifndef _SQLMATCH_H_
 #define _SQLMATCH_H_
+#ifdef HAS_MYSQL
 #include <mysql.h>
+#endif
 
 #ifndef AM_MEMORY_ERR
 #define  AM_MEMORY_ERR -1
@@ -37,7 +42,9 @@
 #endif
 #ifndef AM_MYSQL_ERR
 #define  AM_MYSQL_ERR  -6
+#endif
 
+#ifdef HAS_MYSQL
 extern int      create_sqltable(MYSQL *, char *, char **);
 extern int      connect_sqldb(char *, MYSQL **, char **, char **);
 extern int      check_db(MYSQL *, char *, unsigned long *, unsigned long *, char **);

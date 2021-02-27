@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.9  2021-02-27 20:59:05+05:30  Cprogrammer
+ * changed error to warning for missing MySQL libs
+ *
  * Revision 1.8  2020-04-09 16:00:18+05:30  Cprogrammer
  * collapsed stralloc calls
  *
@@ -276,7 +279,14 @@ main(int argc, char **argv)
 	return (0);
 }
 #else
-#error "MySQL libs required for -DUSE_SQL"
+#warning "MySQL libs required for -DUSE_SQL"
+int
+main(int argc, char **argv)
+{
+	substdio_puts(subfderr, "This program was compiled with MySQL lib missing. It won't function\n");
+	substdio_flush(subfderr);
+	_exit(111);
+}
 #endif
 #else
 #warning "not compiled with -DUSE_SQL."
@@ -292,7 +302,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.8 2020-04-09 16:00:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.9 2021-02-27 20:59:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

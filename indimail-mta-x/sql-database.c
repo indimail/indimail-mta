@@ -1,5 +1,8 @@
 /*
  * $Log: sql-database.c,v $
+ * Revision 1.2  2021-02-27 20:59:43+05:30  Cprogrammer
+ * changed error to warning for missing MySQL libs
+ *
  * Revision 1.1  2020-04-09 16:34:39+05:30  Cprogrammer
  * Initial revision
  *
@@ -333,7 +336,14 @@ main(int argc, char **argv)
 	return (0);
 }
 #else
-#error "MySQL libs required for -DUSE_SQL"
+#warning "MySQL libs required for -DUSE_SQL"
+int
+main(int argc, char **argv)
+{
+	substdio_puts(subfderr, "This program was compiled with MySQL lib missing. It won't function\n");
+	substdio_flush(subfderr);
+	_exit(111);
+}
 #endif
 #else
 #warning "not compiled with -DUSE_SQL."
@@ -349,7 +359,7 @@ main(int argc, char **argv)
 void
 getversion_sql_database_c()
 {
-	static char    *x = "$Id: sql-database.c,v 1.1 2020-04-09 16:34:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sql-database.c,v 1.2 2021-02-27 20:59:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.13  2021-02-27 20:59:46+05:30  Cprogrammer
+ * changed error to warning for missing MySQL libs
+ *
  * Revision 1.12  2020-04-09 16:03:16+05:30  Cprogrammer
  * removed not needed arguments to check_db()
  *
@@ -406,7 +409,12 @@ sqlmatch_close_db(void)
 	db_mysql = (MYSQL *) 0;
 }
 #else
-#error "MySQL libs required for -DUSE_SQL"
+#warning "MySQL libs required for -DUSE_SQL. sqlmatch will always return false"
+int
+sqlmatch(char *fn, char *addr, int len, char **errStr)
+{
+	return (0);
+}
 #endif /*- #ifdef HAS_MYSQL*/
 #else  /*- #ifdef USE_SQL */
 #warning "not compiled with -DUSE_SQL"
@@ -426,7 +434,7 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.12 2020-04-09 16:03:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.13 2021-02-27 20:59:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
