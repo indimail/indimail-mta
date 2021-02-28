@@ -88,15 +88,15 @@ variable\fR below
 using the \fB--servicedir\fR option, the default being @servicedir@.
 
 When you create any service, \fBsvctool\fR stores the entire command line
-invocation wth arguments in @servicedir@/\fIservice\fR/variables/.options.
+invocation wth arguments in @servicedir@/\fIname\fR/variables/.options.
 This allows svctool to recreate entire configuration for a service when
 you use the --refreshsvc option. Using envdir(8), supervise(8) services can
 be run with set of environment variables or a set of variables removed from
 the environment. The environment variables are those needed by applications
 run by supervise(8). These environment variables are stored as files in
-@servicedir@/\fIservice\fR/variables directory. \fBsvctool\fR can store all
+@servicedir@/\fIname\fR/variables directory. \fBsvctool\fR can store all
 these environment variables set for a service in a single in
-@servicedir@/\fIservice\fR/variables/.variables file. This file can be
+@servicedir@/\fIname\fR/variables/.variables file. This file can be
 created by running the command
 
 .EX
@@ -111,7 +111,7 @@ running the command
 svctool --servicedir=@servicedir@ --restore-all-variables --force
 .EE
 
-\fIservice\fR refers to a supervised service name. See svscan(8), supervise(8).
+\fIname\fR refers to a supervised service name. See svscan(8), supervise(8).
 
 .SH Options
 .EX
