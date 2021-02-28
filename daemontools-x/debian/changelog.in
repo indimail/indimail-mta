@@ -3,3 +3,4 @@ daemontools (@version@-@release@) unstable; urgency=low
   * minisvc: added options to set, unset, remove env variables for supervised services
   * minisvc: added --dumpconfig option
   * updated minisvc man page
+  * minisvc: use common functions dump_run_header, dump_log_header for generating run, log/run
