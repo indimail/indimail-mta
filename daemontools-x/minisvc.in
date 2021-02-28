@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.7 2021-02-28 17:23:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.8 2021-02-28 21:26:00+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.7 2021-02-28 17:23:09+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.8 2021-02-28 21:26:00+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -142,6 +142,7 @@ Known values for OPTION are:
 
   Import new environment variables from a file having one more multiple
   key=value pairs
+  file           - File from which to import key=value environment variables
   service_path   - Path where supervise service will be installed
   service_name   - name of supervise service without path
                    e.g. (qmail-smtpd.25)
@@ -153,6 +154,7 @@ Known values for OPTION are:
   [--force]
 
   Export existing environment variables to a file
+  file           - File in which to save key=value environment variables
   service_path   - Path where supervise service will be installed
   service_name   - name of supervise service without path
                    e.g. (qmail-smtpd.25)
@@ -1501,6 +1503,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.8  2021-02-28 21:26:00+05:30  Cprogrammer
+# updated help message
+#
 # Revision 1.7  2021-02-28 17:23:09+05:30  Cprogrammer
 # use common functions dump_run_header, dump_log_header for generating run, log/run
 #
