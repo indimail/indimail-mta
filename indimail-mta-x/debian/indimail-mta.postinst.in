@@ -477,13 +477,13 @@ for i in clamd greylist.1999 qmail-qmqpd.628 \
 do
 	if [ -d ${servicedir}/$i ] ; then
 		svc_list="$svc_list ${servicedir}/$i"
+		# save variables
+		${prefix}/sbin/svctool --servicedir=${servicedir}
+			--export-variables=${servicedir}/$i/variables/.variables  --force
 	fi
 done
 svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
-
-# saving all variables
-${prefix}/sbin/svctool --servicedir=${servicedir} --save-variables --force
 
 echo "compressing man pages"
 find ${mandir} -type f -exec gzip -q {} \;
