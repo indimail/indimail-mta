@@ -15,6 +15,7 @@ Release 2.13 Start 14/02/2021
 08. svctool: use common function dump_log_header to create all multilog logger
     scripts
 09. svctool: fixed updation of control files mysql_lib and libindimail
+10. post install: save variables
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

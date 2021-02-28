@@ -9,3 +9,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * changed error to warning for missing MySQL libs
   * svctool: use common function dump_log_header to create all multilog logger scripts
   * svctool: fixed updation of control files mysql_lib and libindimail
+  * post install: save variables
