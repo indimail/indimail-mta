@@ -1,5 +1,4 @@
 *
-Release 1.1 Start 14/02/2021
 Release 1.1 Start 27/02/2021
 - 27/02/2021
 01. minisvc: added options to set, unset, remove env variables for supervised
