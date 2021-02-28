@@ -2366,8 +2366,8 @@ qmail.h pathexec.h envdir.h auto_sysconfdir.h
 	./compile filterto.c
 
 filterto: load filterto.o auto_qmail.o qmail.o \
-envdir_set.o pathexec_env.o variables.o \
-auto_sysconfdir.o auto_control.o
+variables.o envdir_set.o pathexec_env.o \
+pathexec_run.o auto_sysconfdir.o auto_control.o
 	./load filterto auto_qmail.o qmail.o variables.o \
 	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o auto_control.o -lqmail
