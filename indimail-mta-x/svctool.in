@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.537 2021-02-28 13:12:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.538 2021-02-28 17:21:25+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.537 2021-02-28 13:12:49+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.538 2021-02-28 17:21:25+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -1637,7 +1637,6 @@ check_libmysqlclient_lib()
 	if [ -f "$DESTDIR"$CONTROLDIR/mysql_lib ] ; then
 		mysqllib=`cat "$DESTDIR"$CONTROLDIR/mysql_lib 2>/dev/null`
 		if [ -f $mysqllib ] ; then
-			echo ""$DESTDIR"$CONTROLDIR/mysql_lib exists: No Change" 1>&2
 			return 0
 		fi
 	fi
@@ -1771,12 +1770,9 @@ check_libmysqlclient_lib()
 			fi
 		done
 	fi
-	if [ -n "$mysqllib" -a -f "$mysqllib" ] ; then
+	if [ -n "$mysqllib" ] ; then
 		check_update_if_diff "$DESTDIR"$CONTROLDIR/mysql_lib $mysqllib
-		if [ $? -eq 0 ] ; then
-			echo ""$DESTDIR"$CONTROLDIR/mysql_lib exists: No Change" 1>&2
-		fi
-	elif [ -f "$DESTDIR"$CONTROLDIR/mysql_lib ] ; then
+	else
 		echo "removing "$DESTDIR"$CONTROLDIR/mysql_lib"
 		/bin/rm -f "$DESTDIR"$CONTROLDIR/mysql_lib
 	fi
@@ -2007,12 +2003,9 @@ if [ -n "$DESTDIR" ] ; then
 else
 	indlib=`ls -d $QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null`
 fi
-if [ -n "$indlib" -a -f "$indlib" ] ; then
+if [ -n "$indlib" ] ; then
 	check_update_if_diff "$DESTDIR"$CONTROLDIR/libindimail $indlib
-	if [ $? -eq 0 ] ; then
-		echo ""$DESTDIR"$CONTROLDIR/libindimail exists: No Change" 1>&2
-	fi
-elif [ -f "$DESTDIR"$CONTROLDIR/libindimail ] ; then
+else
 	echo "removing "$DESTDIR"$CONTROLDIR/libindimail"
 	/bin/rm -f "$DESTDIR"$CONTROLDIR/libindimail
 fi
@@ -9186,12 +9179,9 @@ while test $# -gt 0; do
 		fi
 		;;
 	esac
-	if [ -n "$indlib" -a -f "$indlib" ] ; then
+	if [ -n "$indlib" ] ; then
 		check_update_if_diff "$DESTDIR"$CONTROLDIR/libindimail $indlib
-		if [ $? -eq 0 ] ; then
-			echo ""$DESTDIR"$CONTROLDIR/libindimail exists: No Change" 1>&2
-		fi
-	elif [ -f "$DESTDIR"$CONTROLDIR/libindimail ] ; then
+	else
 		echo "removing "$DESTDIR"$CONTROLDIR/libindimail"
 		/bin/rm -f "$DESTDIR"$CONTROLDIR/libindimail
 	fi
