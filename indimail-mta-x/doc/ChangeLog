@@ -8,6 +8,13 @@ Release 2.13 Start 14/02/2021
 03. svctool: use TMPDIR env variable for temp directory
 04. updated svctool man page
 05. svctool: moved --inittab option to --config
+06. svctool: use common function dump_run_header to generate header for all
+    run scripts
+07. changed error to warning for missing MySQL libs
+- 28/02/2021
+08. svctool: use common function dump_log_header to create all multilog logger
+    scripts
+09. svctool: fixed updation of control files mysql_lib and libindimail
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

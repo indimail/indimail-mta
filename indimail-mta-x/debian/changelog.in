@@ -5,3 +5,7 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: use TMPDIR env variable for temp directory
   * updated svctool man page
   * svctool: moved --inittab option to --config
+  * svctool: use common function dump_run_header to generate header for all run scripts
+  * changed error to warning for missing MySQL libs
+  * svctool: use common function dump_log_header to create all multilog logger scripts
+  * svctool: fixed updation of control files mysql_lib and libindimail
