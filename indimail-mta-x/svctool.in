@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.536 2021-02-27 21:32:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.537 2021-02-28 13:12:49+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.536 2021-02-27 21:32:20+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.537 2021-02-28 13:12:49+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -1363,7 +1363,7 @@ else
 fi
 LOGDIRS="`ls -d $logdir/* 2>/dev/null`"
 for i in $LOGDIRS; do
-  if [ $i = $logdir"/svctool.log" ] ; then
+  if [ $i = $logdir"/svctool.log" -o $i = $logdir"/services.log" ] ; then
     continue
   fi
   echo $i
@@ -1428,7 +1428,7 @@ else
 fi
 
 echo "Checking Sendmail Status"
-if netstat -a | grep smtp | grep -i listen >/dev/null; then
+if netstat -an | grep "^tcp"| grep ":25" | grep -i listen >/dev/null; then
   if $PS | grep sendmail | grep -v grep >/dev/null; then
     echo "! Sendmail is still running" 1>&2
     echo "...try: $RCDIR/init.d/sendmail stop" 1>&2
@@ -2023,10 +2023,26 @@ dump_run_header()
 {
 echo "#!/bin/sh"
 echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# using below command"
+echo "# generated run script for $host on `date`"
+echo "# by the below command"
 echo "# $prog_args"
 echo ""
+}
+
+dump_log_header()
+{
+if [ $# -ne 1 ] ; then
+	echo "Usage: dump_log_header log_sub_dir" 1>&2
+	exit 1
+fi
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated log script for $host on `date`"
+echo "# by the below command"
+echo "# $prog_args"
+echo ""
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "  $QmailBinPrefix/sbin/multilog t $LOGDIR/$1"
 }
 
 create_fifologger()
@@ -2079,11 +2095,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 #qmail-logfifo log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/logfifo"
-) > "$DESTDIR"$SERVICEDIR/qmail-logfifo/log/run
+dump_log_header logfifo > "$DESTDIR"$SERVICEDIR/qmail-logfifo/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-logfifo/log/run
 echo "$prog_args" > $conf_dir/.options
 }
@@ -2543,11 +2555,7 @@ if [ ! -d $LOGDIR ] ; then
 	/bin/mkdir -p $LOGDIR
 	$chown qmaill:nofiles $LOGDIR
 fi
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/smtpd.$tag"
-) > "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log/run
+dump_log_header smtpd.$tag > "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -2892,11 +2900,7 @@ if [ ! -d $LOGDIR ] ; then
 	/bin/mkdir -p $LOGDIR
 	$chown qmaill:nofiles $LOGDIR
 fi
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/$type.$tag"
-) > "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log/run
+dump_log_header $type.$tag > "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -2983,11 +2987,7 @@ if [ ! -d $LOGDIR ] ; then
 	/bin/mkdir -p $LOGDIR
 	$chown qmaill:nofiles $LOGDIR
 fi
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/udplogger.$tag"
-) > "$DESTDIR"$SERVICEDIR/udplogger.$tag/log/run
+dump_log_header udplogger.$tag > "$DESTDIR"$SERVICEDIR/udplogger.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/udplogger.$tag/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -3070,11 +3070,7 @@ if [ ! -d $LOGDIR ] ; then
 	/bin/mkdir -p $LOGDIR
 	$chown qmaill:nofiles $LOGDIR
 fi
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/daned.$tag"
-) > "$DESTDIR"$SERVICEDIR/qmail-daned.$tag/log/run
+dump_log_header daned.$tag > "$DESTDIR"$SERVICEDIR/qmail-daned.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-daned.$tag/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -3170,11 +3166,7 @@ if [ ! -d $LOGDIR ] ; then
 	/bin/mkdir -p $LOGDIR
 	$chown qmaill:nofiles $LOGDIR
 fi
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/greylist.$tag"
-) > "$DESTDIR"$SERVICEDIR/greylist.$tag/log/run
+dump_log_header greylist.$tag > "$DESTDIR"$SERVICEDIR/greylist.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/greylist.$tag/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -3317,16 +3309,14 @@ if [ ! -d $LOGDIR ] ; then
 fi
 # qmail-[imapd|pop3d] log script
 (
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 if [ " $proxy_port" = " " ] ;then
 	if [ " $imap_ssl" = " 1" ] ; then
-		echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/$stype-ssl.$tag"
+		dump_log_header $stype-ssl.$tag
 	else
-		echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/$stype.$tag"
+		dump_log_header $stype.$tag
 	fi
 else
-	echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/proxy"`echo $cdb_f|tr '[:lower:]' '[:upper:]'`".$tag"
+	dump_log_header proxy"`echo $cdb_f|tr '[:lower:]' '[:upper:]'`".$tag
 fi
 ) > $TMPDIR/courierlog-run.$$
 if [ " $imap_ssl" = " 1" ] ; then
@@ -3783,11 +3773,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # indisrvr log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/indisrvr.$tag"
-) > "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log/run
+dump_log_header indisrvr.$tag > "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -3849,13 +3835,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # qscanq log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t \\"
-#echo "	'-* cleanq starting' '-* deleting: *: not sticky' \\"
-echo "$LOGDIR/qscanq"
-) > "$DESTDIR"$SERVICEDIR/qscanq/log/run
+dump_log_header qscanq > "$DESTDIR"$SERVICEDIR/qscanq/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qscanq/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -3957,11 +3937,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # clamd log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/clamd"
-) > "$DESTDIR"$SERVICEDIR/clamd/log/run
+dump_log_header clamd > "$DESTDIR"$SERVICEDIR/clamd/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/clamd/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -4042,11 +4018,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # freshclam log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/freshclam"
-) > "$DESTDIR"$SERVICEDIR/freshclam/log/run
+dump_log_header freshclam > "$DESTDIR"$SERVICEDIR/freshclam/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/freshclam/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -4135,11 +4107,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # pwdlookup log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/pwdlookup"
-) > "$DESTDIR"$SERVICEDIR/pwdlookup/log/run
+dump_log_header pwdlookup > "$DESTDIR"$SERVICEDIR/pwdlookup/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/pwdlookup/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -4323,11 +4291,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # inlookup log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/inlookup.$base_fifo_name"
-) > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
+dump_log_header inlookup.$base_fifo_name > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -5091,11 +5055,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # mysql log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/mysql.$port"
-) > "$DESTDIR"$SERVICEDIR/mysql.$port/log/run
+dump_log_header mysql.$port > "$DESTDIR"$SERVICEDIR/mysql.$port/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/mysql.$port/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -5315,11 +5275,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # svscan log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/svscan"
-) > "$DESTDIR"$SERVICEDIR/.svscan/log/run
+dump_log_header svscan > "$DESTDIR"$SERVICEDIR/.svscan/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/log/run
 
 if [ $run_file_only -eq 1 ] ; then
@@ -5395,11 +5351,7 @@ echo "wait"
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/run
 
 # resolvconf log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/resolvconf"
-) > "$DESTDIR"$SERVICEDIR/resolvconf/log/run
+dump_log_header resolvconf > "$DESTDIR"$SERVICEDIR/resolvconf/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/log/run
 fi
 
@@ -5571,11 +5523,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # fetchmail log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/fetchmail"
-) > "$DESTDIR"$SERVICEDIR/fetchmail/log/run
+dump_log_header fetchmail > "$DESTDIR"$SERVICEDIR/fetchmail/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/fetchmail/log/run
 echo "$prog_args" > $conf_dir/.options
 
@@ -5713,11 +5661,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # qmail-poppass log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/poppass.$tag"
-) > $TMPDIR/popass-run.$$
+dump_log_header poppass.$tag > $TMPDIR/popass-run.$$
 /bin/mv $TMPDIR/popass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log/run
 echo "$prog_args" > $conf_dir/.options
@@ -5989,11 +5933,7 @@ fi
 if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-send.$tag/down
 fi
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/deliver."$tag""
-) > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log/run
+dump_log_header deliver.$tag > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log/run
 if [ -z "$skipsend" ] ; then
 	echo "$prog_args" > $conf_dir/.options
@@ -6005,6 +5945,71 @@ if [ $run_file_only -eq 1 ] ; then
 		/bin/mv "$conf_dir".bak $conf_dir
 	fi
 fi
+}
+
+create_mrtg()
+{
+if [ $# -lt 2 ] ; then
+	echo "create_mrtg htmldir service_dir" 1>&2
+	return 1
+fi
+htmldir=$1
+SERVICEDIR=$2
+conf_dir="$DESTDIR"$SERVICEDIR/mrtg/variables
+if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
+	return 0
+fi
+/bin/mkdir -p $htmldir
+$chown root:0 $htmldir
+/bin/chmod 755 $htmldir
+# mrtg - script
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/mrtg/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/mrtg/down
+fi
+/bin/mkdir -p $conf_dir
+/bin/chmod 500 $conf_dir
+$chown root:0 $conf_dir
+/bin/mkdir -p "$conf_dir"/../etc
+/bin/chmod 555 $conf_dir/../etc
+$chown root:0 $conf_dir/../etc
+echo C > $conf_dir/LANG
+sed "s{MRTGHOSTNAME{`hostname`{;  s{HTMLDIR{$htmldir\/{" \
+	$sysconfdir/indimail.mrtg.cfg > $conf_dir/../etc/indimail.mrtg.cfg
+#
+# Create index.html in htmldir
+#
+indexmaker=$(which indexmaker)
+$indexmaker --title="IndiMail Statistics" --section=title \
+	--output=$htmldir/index.html  $conf_dir/../etc/indimail.mrtg.cfg
+# mrtg run script
+(
+dump_run_header
+echo "exec 2>&1"
+echo "while true"
+echo "do"
+echo "  $QmailBinPrefix/bin/envdir variables \\"
+echo "    /usr/bin/mrtg etc/indimail.mrtg.cfg"
+echo "  status=\$?"
+echo "  echo \"mrtg \`pwd\`/etc/indimail.mrtg.cfg status \$status\""
+if [ " $scan_interval" = " " ] ; then
+echo "  sleep 300"
+else
+echo "  sleep $scan_interval"
+fi
+echo "done"
+echo "exit \$status"
+) > "$DESTDIR"$SERVICEDIR/mrtg/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/mrtg/run
+
+if [ ! -d $LOGDIR ] ; then
+	/bin/mkdir -p $LOGDIR
+	$chown qmaill:nofiles $LOGDIR
+fi
+# mrtg log script
+dump_log_header mrtg > "$DESTDIR"$SERVICEDIR/mrtg/log/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/mrtg/log/run
+echo "$prog_args" > $conf_dir/.options
 }
 
 rmsvc()
@@ -8450,75 +8455,6 @@ do
 	fi
 done
 ) | sort -u
-}
-
-create_mrtg()
-{
-if [ $# -lt 2 ] ; then
-	echo "create_mrtg htmldir service_dir" 1>&2
-	return 1
-fi
-htmldir=$1
-SERVICEDIR=$2
-conf_dir="$DESTDIR"$SERVICEDIR/mrtg/variables
-if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
-	return 0
-fi
-/bin/mkdir -p $htmldir
-$chown root:0 $htmldir
-/bin/chmod 755 $htmldir
-# mrtg - script
-/bin/mkdir -p "$DESTDIR"$SERVICEDIR/mrtg/log
-if [ $down_state -eq 1 ] ; then
-	$TOUCH "$DESTDIR"$SERVICEDIR/mrtg/down
-fi
-/bin/mkdir -p $conf_dir
-/bin/chmod 500 $conf_dir
-$chown root:0 $conf_dir
-/bin/mkdir -p "$conf_dir"/../etc
-/bin/chmod 555 $conf_dir/../etc
-$chown root:0 $conf_dir/../etc
-echo C > $conf_dir/LANG
-sed "s{MRTGHOSTNAME{`hostname`{;  s{HTMLDIR{$htmldir\/{" \
-	$sysconfdir/indimail.mrtg.cfg > $conf_dir/../etc/indimail.mrtg.cfg
-#
-# Create index.html in htmldir
-#
-indexmaker=$(which indexmaker)
-$indexmaker --title="IndiMail Statistics" --section=title \
-	--output=$htmldir/index.html  $conf_dir/../etc/indimail.mrtg.cfg
-# mrtg run script
-(
-dump_run_header
-echo "exec 2>&1"
-echo "while true"
-echo "do"
-echo "  $QmailBinPrefix/bin/envdir variables \\"
-echo "    /usr/bin/mrtg etc/indimail.mrtg.cfg"
-echo "  status=\$?"
-echo "  echo \"mrtg \`pwd\`/etc/indimail.mrtg.cfg status \$status\""
-if [ " $scan_interval" = " " ] ; then
-echo "  sleep 300"
-else
-echo "  sleep $scan_interval"
-fi
-echo "done"
-echo "exit \$status"
-) > "$DESTDIR"$SERVICEDIR/mrtg/run
-/bin/chmod +x "$DESTDIR"$SERVICEDIR/mrtg/run
-
-if [ ! -d $LOGDIR ] ; then
-	/bin/mkdir -p $LOGDIR
-	$chown qmaill:nofiles $LOGDIR
-fi
-# mrtg log script
-(
-dump_run_header
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/mrtg"
-) > "$DESTDIR"$SERVICEDIR/mrtg/log/run
-/bin/chmod +x "$DESTDIR"$SERVICEDIR/mrtg/log/run
-echo "$prog_args" > $conf_dir/.options
 }
 
 tls_cert_check()
