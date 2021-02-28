@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.6 2021-02-27 17:23:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.7 2021-02-28 17:23:09+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.6 2021-02-27 17:23:08+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.7 2021-02-28 17:23:09+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -189,6 +189,32 @@ EOF
 exit $1
 }
 
+dump_run_header()
+{
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated run script for $host on `date`"
+echo "# by the below command"
+echo "# $prog_args"
+echo ""
+}
+
+dump_log_header()
+{
+if [ $# -ne 1 ] ; then
+	echo "Usage: dump_log_header log_sub_dir" 1>&2
+	exit 1
+fi
+echo "#!/bin/sh"
+echo "$RCSID"
+echo "# generated log script for $host on `date`"
+echo "# by the below command"
+echo "# $prog_args"
+echo ""
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "  $QmailBinPrefix/sbin/multilog t $LOGDIR/$1"
+}
+
 create_svscan()
 {
 if [ $# -lt 1 ] ; then
@@ -242,11 +268,7 @@ if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run ] ; then
 	echo "nameserver 127.0.0.1"
 	) > "$DESTDIR"$sysconfdir/resolv.conf
 	(
-	echo "#!/bin/sh"
-	echo "$RCSID"
-	echo "# generated on $host on `date`"
-	echo "# $prog_args"
-	echo ""
+	dump_run_header
 	echo "echo svscan \$PPID initialization PID \$\$"
 	echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
 	echo "/usr/bin/mount -l"
@@ -259,11 +281,7 @@ else
 fi
 
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "exec $QmailBinPrefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
@@ -273,15 +291,7 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # svscan log script
-(
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/svscan"
-) > "$DESTDIR"$SERVICEDIR/.svscan/log/run
+dump_log_header svscan > "$DESTDIR"$SERVICEDIR/.svscan/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/log/run
 
 if [ $run_file_only -eq 1 ] ; then
@@ -308,11 +318,7 @@ fi
 echo "$prog_args" > $conf_dir/.options
 # resolvconf run script
 (
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
+dump_run_header
 echo "trap clean_up 1 2 15"
 echo ""
 echo "function clean_up"
@@ -361,15 +367,7 @@ echo "wait"
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/run
 
 # resolvconf log script
-(
-echo "#!/bin/sh"
-echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "# $prog_args"
-echo ""
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "$QmailBinPrefix/sbin/multilog t $LOGDIR/resolvconf"
-) > "$DESTDIR"$SERVICEDIR/resolvconf/log/run
+dump_log_header resolvconf > "$DESTDIR"$SERVICEDIR/resolvconf/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/log/run
 fi
 
@@ -1503,6 +1501,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.7  2021-02-28 17:23:09+05:30  Cprogrammer
+# use common functions dump_run_header, dump_log_header for generating run, log/run
+#
 # Revision 1.6  2021-02-27 17:23:08+05:30  Cprogrammer
 # added options to set, unset, remove env variables for supervised services
 #
