@@ -478,7 +478,7 @@ do
 	if [ -d ${servicedir}/$i ] ; then
 		svc_list="$svc_list ${servicedir}/$i"
 		# save variables
-		${prefix}/sbin/svctool --servicedir=${servicedir}
+		${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=$i \
 			--export-variables=${servicedir}/$i/variables/.variables  --force
 	fi
 done

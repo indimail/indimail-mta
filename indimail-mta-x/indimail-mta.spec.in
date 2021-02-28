@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.297 2021-02-28 21:23:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.298 2021-02-28 22:09:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1328,7 +1328,7 @@ do
     svc_list="$svc_list %{servicedir}/$i"
   fi
   # save variables
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir}
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force
 done
 svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
