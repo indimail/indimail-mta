@@ -209,6 +209,9 @@ fi
 ${prefix}/sbin/minisvc --config=add-boot
 # svscanlog service
 ${prefix}/sbin/minisvc --svscanlog --servicedir=${servicedir} --scanint=60 > /dev/null || true
+# save variables
+${prefix}/sbin/minisvc --servicedir=${servicedir}
+  --export-variables=${servicedir}/.svscan/variables/.variables --force
 
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
