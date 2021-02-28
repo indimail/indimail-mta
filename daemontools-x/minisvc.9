@@ -10,9 +10,20 @@ minisvc \- daemontools mini Service Configuration Tool
 
 .SH DESCRIPTION
 
-\fBminisvc\fR is a shell frontend for configuring supervise(8) services under
-svscan(8). You can install \fBsvscan(8)\fR to be started by the system using
-the command \fBminisvc --config=add-boot\fR.
+\fBminisvc\fR is a shell frontend for configuring supervise(8) services
+under svscan(8). For every service created, it also creates a supervised
+log service, that uses multilog(8), in @logdir@ direcotry. You can install
+\fBsvscan(8)\fR to be started by the system using the command
+
+.EX
+\fBminisvc --config=add-boot\fR.
+.EE
+
+Similarly, you can remove \fBsvscan(8)\fR from startup by using the command
+
+.EX
+\fBminisvc --config=rm-boot\fR.
+.EE
 
 \fBminisvc\fR offers tiny subset of indimail-mta's svctool(8) config tool features.
 
@@ -226,4 +237,4 @@ Known values for OPTION are:
 \fBsvctool\fR returns non-zero status on error.
 
 .SH "SEE ALSO"
-IndiMail(7), initsvc(1), svscan(8), svstat(8), svc(8), supervise(8)
+IndiMail(7), initsvc(1), svscan(8), svstat(8), svc(8), supervise(8), multilog(8)
