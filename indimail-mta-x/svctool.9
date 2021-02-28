@@ -12,12 +12,23 @@ svctool \- IndiMail/indimail-mta Service Configuration Tool
 
 \fBsvctool\fR is a shell frontend for configuring IndiMail services,
 configuring \fBIndiMail(7)\fR, taking backups of configuration and
-data. All services are configured to run under \fBsupervise(8)\fR.
-\fBsupervise(8)\fR itself gets started by \fBsvscan(8)\fR. You can
-install \fBsvscan(8)\fR to be started by the system using the command
+data. svctool configures all indimail/indimail-mta services to be
+configured to run under \fBsupervise(8)\fR. When supervised services
+are created by svctool, a supervised log service is also created along
+with the service. The output and errors of all commands, run under
+supervise, get logged to logs in @logdir@ directory using multilog(8).
+\fBsupervise(8)\fR itself gets started by \fBsvscan(8)\fR. You can install
+\fBsvscan(8)\fR to be started automatically, by the system, by using the
+command
 
 .EX
 \fBsvctool --config=add-boot\fR.
+.EE
+
+Similarly, you can remove auto start of svscan by using the command
+
+.EX
+\fBsvctool --config=rm-boot\fR.
 .EE
 
 \fBsvctool\fR requires root privilege to run. \fBsvctool\fR uses
@@ -54,15 +65,27 @@ or just the qmail configuration
 svctool --servicedir=@servicedir@ --showctl
 .EE
 
-\fBsvctool\fR logs activity to @logdir@/svctool.log. \fBsvctool\fR can
-do much more than what is summarized here. You can find detailed option
-in the section \fBServices & Environment variable\fR below
+\fBsvctool\fR can check the status of your indimail installation with
+the following command
+
+.EX
+svctool --check-install --servicedir=@servicedir@ \\
+  --qbase=@qmaildir@/queue --qcount=5 --qstart=1
+.EE
+
+\fBsvctool\fR logs its activity to @logdir@/svctool.log. \fBsvctool\fR can
+do much more than what is summarized here. In fact, indimail, indimail-mta
+can be entirely setup by using svctool without requiring any commands to be
+run manually or files to be edited. The binary installation methods using
+RPM, debian packages use svctool to configure indimail-mta, indimail. You
+can find detailed options in the section \fBServices & Environment
+variable\fR below
 
 .SH Services & Environment variables
 
-\fBsvctool\fR primary function is for creating supervised services in
-@servicedir@. You can change the location of the service directory by
-specifying \fB--servicedir\fR option.
+\fBsvctool\fR primary function is to create supervised services in
+@servicedir@. The location of the service directory is specified by
+using the \fB--servicedir\fR option, the default being @servicedir@.
 
 When you create any service, \fBsvctool\fR stores the entire command line
 invocation wth arguments in @servicedir@/\fIservice\fR/variables/.options.
@@ -72,9 +95,9 @@ be run with set of environment variables or a set of variables removed from
 the environment. The environment variables are those needed by applications
 run by supervise(8). These environment variables are stored as files in
 @servicedir@/\fIservice\fR/variables directory. \fBsvctool\fR can store all
-environment variables set for a service
-in @servicedir@/\fIservice\fR/variables/.variables. This file can be created
-by running the command
+these environment variables set for a service in a single in
+@servicedir@/\fIservice\fR/variables/.variables file. This file can be
+created by running the command
 
 .EX
 svctool --servicedir=@servicedir@ --save-variables --force
@@ -972,4 +995,4 @@ Known values for OPTION are:
 \fBsvctool\fR returns non-zero status on error.
 
 .SH "SEE ALSO"
-IndiMail(7), initsvc(1), svscan(8), svstat(8), svc(8), supervise(8)
+IndiMail(7), initsvc(1), svscan(8), svstat(8), svc(8), supervise(8), multilog(8)
