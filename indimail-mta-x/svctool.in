@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.539 2021-02-28 21:23:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.540 2021-03-01 18:01:19+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.539 2021-02-28 21:23:44+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.540 2021-03-01 18:01:19+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -3251,9 +3251,9 @@ if [ $run_file_only -ne 1 ] ; then
 	else
 		echo > $conf_dir/QUERY_CACHE
 	fi
-	import_variables $conf_dir $conf_dir/.courier_variables 0 root indimail 640
 	old=$force
 	force=1
+	import_variables $conf_dir $conf_dir/.courier_variables 0 root indimail 640
 	export_variables $conf_dir $conf_dir/.variables root indimail 640
 	force=$old
 fi
@@ -3408,13 +3408,14 @@ echo "DEBUG_LOGIN=0"
 IMAP_CAPABILITY="IMAP4rev1 UIDPLUS CHILDREN NAMESPACE THREAD=ORDEREDSUBJECT THREAD=REFERENCES SORT QUOTA IDLE"
 echo "#SMAP_CAPABILITY=SMAP1"
 echo "IMAP_KEYWORDS=1"
+echo "IMAP_ACL=1"
 echo "IMAP_DISABLETHREADSORT=0"
 echo "IMAP_CHECK_ALL_FOLDERS=0"
 echo "IMAP_OBSOLETE_CLIENT=0"
 echo "IMAP_UMASK=022"
 echo "IMAP_USELOCKS=0"
-echo "IMAP_ENHANCEDIDLE=1"
 echo "IMAP_IDLE_TIMEOUT=60"
+echo "IMAP_MAILBOX_SANITY_CHECK=1"
 echo "IMAP_TRASHFOLDERNAME=Trash"
 echo "IMAP_EMPTYTRASH=Trash:7"
 echo "IMAP_MOVE_EXPUNGE_TO_TRASH=0"
@@ -3425,7 +3426,8 @@ echo "SENDMAIL=$QmailBinPrefix/bin/sendmail"
 echo "HEADERFROM=X-IMAP-Sender"
 echo "IMAP_SHAREDINDEXFILE=$sysconfdir/shared/index"
 echo "MAILDIRPATH=Maildir"
-echo "IMAP_CAPABILITY=\"$IMAP_CAPABILITY AUTH=LOGIN AUTH=PLAIN AUTH=CRAM-MD5 AUTH=CRAM-SHA1 AUTH=CRAM-SHA256\""
+echo "IMAP_CAPABILITY=\"$IMAP_CAPABILITY AUTH=CRAM-MD5 AUTH=CRAM-SHA1 AUTH=CRAM-SHA256\""
+echo "IMAP_CAPABILITY_TLS=\"$IMAP_CAPABILITY AUTH=PLAIN AUTH=LOGIN AUTH=CRAM-MD5 AUTH=CRAM-SHA1 AUTH=CRAM-SHA256\""
 
 # IMAP_STARTTLS, IMAP_TLS_REQUIRED, COURIERTLS required for advertising STARTTLS
 if [ $use_starttls -eq 1 ] ; then
@@ -3452,7 +3454,6 @@ if [ " $ipaddress" = " " ] ; then
 else
 	echo "SSLADDRESS=$ipaddress"
 fi
-echo "IMAP_CAPABILITY_TLS=\"$IMAP_CAPABILITY\""
 echo "TLS_PROTOCOL=SSL23"
 echo "TLS_STARTTLS_PROTOCOL=TLS1"
 echo "# TLS_CIPHER_LIST=\"TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH\""
@@ -3466,6 +3467,7 @@ echo "# TLS_TRUSTCERTS="
 echo "TLS_VERIFYPEER=NONE"
 echo "TLS_CACHEFILE=$sysconfdir/certs/couriersslcache"
 echo "TLS_CACHESIZE=524288"
+echo "TLS_ALPN=imap"
 }
 
 create_ssl_cnf()
@@ -3652,6 +3654,7 @@ echo "# TLS_TRUSTCERTS="
 echo "TLS_VERIFYPEER=NONE"
 echo "TLS_CACHEFILE=$sysconfdir/certs/couriersslcache"
 echo "TLS_CACHESIZE=524288"
+echo "TLS_ALPN=pop3"
 }
 
 create_indisrvr()
