@@ -16,6 +16,8 @@ Release 2.13 Start 14/02/2021
     scripts
 09. svctool: fixed updation of control files mysql_lib and libindimail
 10. post install: save variables
+- 01/03/2021
+11. svctool: updated courier variables
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
