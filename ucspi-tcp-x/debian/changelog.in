@@ -1,3 +1,3 @@
 ucspi-tcp (@version@-@release@) unstable; urgency=low
 
-  *
+  * tcpserver.c renamed SSL_CIPHER to TLS_CIPHER_LIST

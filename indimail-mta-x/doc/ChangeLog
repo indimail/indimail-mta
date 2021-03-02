@@ -22,6 +22,9 @@ Release 2.13 Start 14/02/2021
 - 02/03/2021
 12. svctool: fixed dir variable getting clobbered by export_variables()
 13. svctool: added back IMAP_ENHANCEDIDLE for courier-imap-5.0.14
+14. smtpd.c: renamed TLSCIPHERS to TLS_CIPHER_LIST
+15. sslerator.c: renamed SSL_CIPHER to TLS_CIPHER_LIST
+16. indimail.spec: fixed rpmlint percent in pretrans, post
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
