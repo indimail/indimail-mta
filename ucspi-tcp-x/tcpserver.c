@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.71  2021-03-02 10:44:07+05:30  Cprogrammer
+ * renamed SSL_CIPHER to TLS_CIPHER_LIST
+ *
  * Revision 1.70  2020-11-27 17:34:22+05:30  Cprogrammer
  * added option to specify CA file
  *
@@ -236,7 +239,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.70 2020-11-27 17:34:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.71 2021-03-02 10:44:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1576,7 +1579,7 @@ main(int argc, char **argv, char **envp)
 			strerr_die2x(111, FATAL, "unable to create SSL context");
 		/* set prefered ciphers */
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
-		x = env_get("SSL_CIPHER");
+		x = env_get("TLS_CIPHER_LIST");
 		if (x && !SSL_CTX_set_cipher_list(ctx, x))
 			strerr_die3x(111, FATAL, "unable to set cipher list:", x);
 #endif
@@ -1778,7 +1781,7 @@ main(int argc, char **argv, char **envp)
 					if (!ssl)
 						strerr_die2x(111, DROP, "unable to set up SSL session");
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
-					if (!(x = env_get("SSL_CIPHER")))
+					if (!(x = env_get("TLS_CIPHER_LIST")))
 						x = "PROFILE:SYSTEM";
 					if (!SSL_set_cipher_list(myssl, x))
 						strerr_die3x(111, FATAL, "unable to set cipher list:", x);
