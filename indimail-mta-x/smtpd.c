@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.237 $";
+char           *revision = "$Revision: 1.238 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5762,7 +5762,7 @@ tls_init()
 		return;
 	}
 	alloc_free(filename.s);
-	if (!(ciphers = env_get("TLSCIPHERS"))) {
+	if (!(ciphers = env_get("TLS_CIPHER_LIST"))) {
 		if (control_readfile(&saciphers, "tlsserverciphers", 0) == -1) {
 			SSL_free(myssl);
 			die_control();
@@ -6152,6 +6152,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.238  2021-03-02 10:40:40+05:30  Cprogrammer
+ * renamed TLSCIPHERS env variable to TLS_CIPHER_LIST
+ *
  * Revision 1.237  2021-02-08 00:05:54+05:30  Cprogrammer
  * fixed checkrecipient for local users
  *
@@ -6302,7 +6305,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.237 2021-02-08 00:05:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.238 2021-03-02 10:40:40+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
