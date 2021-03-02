@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.2  2021-03-02 10:41:58+05:30  Cprogrammer
+ * renamed SSL_CIPHER to TLS_CIPHER_LIST
+ *
  * Revision 1.1  2020-11-17 16:22:57+05:30  Cprogrammer
  * Initial revision
  *
@@ -188,7 +191,7 @@ load_certificate(char *certfile)
 	}
 	/* set prefered ciphers */
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
-	ptr = env_get("SSL_CIPHER");
+	ptr = env_get("TLS_CIPHER_LIST");
 	if (ptr && !SSL_CTX_set_cipher_list(myctx, ptr)) {
 		strer_warn3("SSL_CTX_set_cipher_list: unable to set cipher list: ", ptr,
 			ERR_error_string(ERR_get_error(), 0), 0);
@@ -337,7 +340,7 @@ main(argc, argv)
 	}
 	SSL_CTX_free(ctx);
 #ifndef CRYPTO_POLICY_NON_COMPLIANCE
-	if (!(ptr = env_get("SSL_CIPHER")))
+	if (!(ptr = env_get("TLS_CIPHER_LIST")))
 		ptr = "PROFILE=SYSTEM";
 	if (!SSL_set_cipher_list(ssl, ptr)) {
 		strerr_warn5(FATAL, "unable to set ciphers: ", ptr,
@@ -426,7 +429,7 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.1 2020-11-17 16:22:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.2 2021-03-02 10:41:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
