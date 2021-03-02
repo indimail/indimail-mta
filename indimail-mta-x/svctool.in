@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.540 2021-03-01 18:01:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.541 2021-03-02 09:07:24+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.540 2021-03-01 18:01:19+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.541 2021-03-02 09:07:24+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -3414,6 +3414,7 @@ echo "IMAP_CHECK_ALL_FOLDERS=0"
 echo "IMAP_OBSOLETE_CLIENT=0"
 echo "IMAP_UMASK=022"
 echo "IMAP_USELOCKS=0"
+echo "IMAP_ENHANCEDIDLE=1"
 echo "IMAP_IDLE_TIMEOUT=60"
 echo "IMAP_MAILBOX_SANITY_CHECK=1"
 echo "IMAP_TRASHFOLDERNAME=Trash"
@@ -8636,17 +8637,17 @@ if [ $# -ne 5 ] ; then
 	echo "usage: export_variables($#) dir envfile owner group mode" 1>&2
 	exit 1
 fi
-dir=$1
+vdir=$1
 file=$2
 owner=$3
 group=$4
 mode=$5
-if [ ! -d $dir ] ; then
-	echo "$dir: No such file or directory" 1>&2
+if [ ! -d $vdir ] ; then
+	echo "$vdir: No such file or directory" 1>&2
 	exit 1
 fi
 if [ $? -ne 0 ] ; then
-	echo "$dir: unable to chdir" 1>&2
+	echo "$vdir: unable to chdir" 1>&2
 	exit 1
 fi
 if [ $force -eq 0 -a -f $file ] ; then
@@ -8654,10 +8655,10 @@ if [ $force -eq 0 -a -f $file ] ; then
 	return 1
 fi
 (
-for i in `/bin/ls $dir`
+for i in `/bin/ls $vdir`
 do
-	if [ -s $dir/$i ] ; then
-		value=`cat $dir/$i`
+	if [ -s $vdir/$i ] ; then
+		value=`cat $vdir/$i`
 		if [ -n "$value" ] ; then
 			echo $i="$value"
 		else
@@ -10825,10 +10826,11 @@ case $option in
 	fi
 	old=$force
 	force=1
-	printf "export %-35s %s %s %s\n" "`dirname $dir`" $owner $group $mode
+	printf "export %-35s %s %s %s\n" "`basename $dir`" $owner $group $mode
 	export_variables $dir/variables $dir/variables/.variables $owner $group $mode
 	force=$old
 	if [ $option -ne 39 ] ; then
+		dir=$servicedir/$service_name
 		if [ -n "$mode" ] ; then
 			/bin/chmod $mode $dir/variables/$variable_name
 		fi
