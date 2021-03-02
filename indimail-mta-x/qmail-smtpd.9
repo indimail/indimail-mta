@@ -545,7 +545,7 @@ You can set regex patterns in \fIbadmailfrom\fR itself if \fBQREGEX\fR environme
 .I tlsserverciphers
 A set of OpenSSL cipher strings. Multiple ciphers contained in a
 string should be separated by a colon. If the environment variable
-.B TLSCIPHERS
+.B TLS_CIPHER_LIST
 is set to such a string, it takes precedence.
 
 .TP 5
@@ -1561,7 +1561,7 @@ The following list of environment variables can be modified using envrules
 .IR GOODRCPTTO ,
 .IR GOODRCPTPATTERNS ,
 .IR CLIENTCA ,
-.IR TLSCIPHERS ,
+.IR TLS_CIPHER_LIST ,
 .IR SERVERCERT ,
 .IR BLACKHOLEDSENDER ,
 .IR BLACKHOLEDPATTERNS ,
