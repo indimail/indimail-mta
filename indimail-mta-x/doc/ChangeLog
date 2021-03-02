@@ -17,7 +17,11 @@ Release 2.13 Start 14/02/2021
 09. svctool: fixed updation of control files mysql_lib and libindimail
 10. post install: save variables
 - 01/03/2021
-11. svctool: updated courier variables
+11. svctool: updated courier variables (removed IMAP_ENHANCEDVARIABLE for
+    courier-imap-5.0.12)
+- 02/03/2021
+12. svctool: fixed dir variable getting clobbered by export_variables()
+13. svctool: added back IMAP_ENHANCEDIDLE for courier-imap-5.0.14
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

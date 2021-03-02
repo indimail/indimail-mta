@@ -80,9 +80,9 @@ Release 1.0 Start 09/10/2020
 37. systemd: Chanaged service name to SVscan Service
 26/11/2020
 38. svps: remove unportable PIPESTATUS
-29/11/2020
+- 29/11/2020
 39. minisvc: fixed syntax error
-30/11/2020
+- 30/11/2020
 40. qmailctl: adapted for non-indimail-mta systems
 41. run_init.c: changed return type to int. Return error instead of doing exit
 42. svstat, svc: continue to next directory if operation on current directory fails

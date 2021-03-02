@@ -10,4 +10,6 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: use common function dump_log_header to create all multilog logger scripts
   * svctool: fixed updation of control files mysql_lib and libindimail
   * post install: save variables
-  * svctool: updated courier variables
+  * svctool: updated courier variables (removed IMAP_ENHANCEDVARIABLE for courier-imap-5.0.12)
+  * svctool: fixed dir variable getting clobbered by export_variables()
+  * svctool: added back IMAP_ENHANCEDIDLE for courier-imap-5.0.14
