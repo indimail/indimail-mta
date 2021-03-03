@@ -418,7 +418,7 @@ warn-auto.sh tcpcat.sh conf-prefix
 	chmod 755 tcpcat
 
 tcpclientrw: \
-load tcpclientrw.o -lqmail
+load tcpclientrw.o
 	./load tcpclientrw -lqmail
 
 tcpclientrw.o: \
