@@ -94,22 +94,22 @@ main(int argc, char **argv)
 		}
 		if (FD_ISSET(0, &rfds)) {
 			if ((n = read(0, buf, sizeof(buf))) == -1)
-				strerr_die2sys(111, FATAL, "read-stdin: ");
+				strerr_die2sys(3, FATAL, "read-stdin: ");
 			if (!n)
 				break;
 			if ((n = safewrite(7, buf, n)) == -1)
-				strerr_die2sys(111, FATAL, "write-network: ");
+				strerr_die2sys(1, FATAL, "write-network: ");
 		}
 		if (FD_ISSET(6, &rfds)) {
 			if ((n = saferead(6, buf, sizeof(buf))) == -1)
-				strerr_die2sys(111, FATAL, "read-network: ");
+				strerr_die2sys(3, FATAL, "read-network: ");
 			if (!n) {
 				close(6);
 				close(7);
 				_exit(0);
 			}
 			if ((n = safewrite(1, buf, n)) == -1)
-				strerr_die2sys(111, FATAL, "write-stdout: ");
+				strerr_die2sys(1, FATAL, "write-stdout: ");
 		}
 	}
 	_exit(0);
