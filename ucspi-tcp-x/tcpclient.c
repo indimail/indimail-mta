@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.14  2021-03-03 17:44:14+05:30  Cprogrammer
+ * added client mode feature
+ *
  * Revision 1.13  2021-03-03 13:46:07+05:30  Cprogrammer
  * fixed compiler warning
  *
@@ -85,7 +88,7 @@
 #define CONNECT "tcpclient: unable to connect to "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.13 2021-03-03 13:46:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.14 2021-03-03 17:44:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -113,10 +116,10 @@ usage(void)
 #ifdef TLS
 " [ -n clientcert ]\n"
 " [ -c cafile ] \n"
+#endif
 " [ -a timeoutdata ]\n"
 " [ -e timeoutidle ]\n"
-#endif
-" host port program");
+" host port [program]");
 }
 
 int             verbosity = 1;
@@ -147,7 +150,6 @@ static stralloc fqdn;
 char            strnum[FMT_ULONG], strnum2[FMT_ULONG];
 char            seed[128];
 #ifdef TLS
-static int      flagssl = 0;
 struct stralloc certfile = {0};
 unsigned long   dtimeout = 60;
 #endif
@@ -178,6 +180,110 @@ sigchld()
 #endif
 
 int
+do_select(char **argv, int client_mode, int s)
+{
+	char            buf[512];
+	int             wstat, r, pid, pi1[2], pi2[2], fdhigh,
+					fdin, fdout, flagexitasp = 0;
+	ssize_t         n;
+	fd_set          rfds;	/*- File descriptor mask for select -*/
+	struct timeval  timeout;
+
+	if (!client_mode) {
+		sig_catch(sig_child, sigchld);
+		sig_ignore(sig_pipe);
+		sig_catch(sig_child, sigchld);
+		sig_catch(sig_term, sigterm);
+		if (pipe(pi1) != 0 || pipe(pi2) != 0)
+			strerr_die2sys(111, FATAL, "unable to create pipe: ");
+		switch (pid = fork())
+		{
+			case -1:
+				strerr_die2sys(111, FATAL, "fork: ");
+			case 0:
+				sig_uncatch(sig_pipe);
+				sig_uncatch(sig_child);
+				sig_uncatch(sig_term);
+				close(pi1[1]);
+				close(pi2[0]);
+				if ((fd_move(6, pi1[0]) == -1) || (fd_move(7, pi2[1]) == -1))
+					strerr_die2sys(111, FATAL, "unable to set up descriptors: ");
+				pathexec(argv);
+				strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
+				/* Not reached */
+				_exit(0);
+			default:
+				break;
+		}
+		fdhigh = pi2[0];
+		fdin = pi2[0];
+		fdout = pi1[1];
+	} else {
+		pid = -1;
+		fdhigh = s;
+		fdin = 0;
+		fdout = 1;
+	}
+	while (!flagexitasp) {
+		timeout.tv_sec = itimeout;
+		timeout.tv_usec = 0;
+		FD_ZERO(&rfds);
+		FD_SET(s, &rfds);
+		FD_SET(fdin, &rfds);
+		if ((r = select(fdhigh + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
+#ifdef ERESTART
+			if (errno == EINTR || errno == ERESTART)
+#else
+			if (errno == EINTR)
+#endif
+				continue;
+			strerr_die2sys(111, FATAL, "select: ");
+		} else
+		if (!r) { /*-timeout */
+			timeout.tv_sec = itimeout;
+			timeout.tv_usec = 0;
+			strnum[fmt_ulong(strnum, timeout.tv_sec)] = 0;
+			strerr_warn4(FATAL, "timeout reached without input [", strnum, " sec]", 0);
+			close(s);
+			_exit(111);
+		}
+		if (FD_ISSET(s, &rfds)) {
+			if ((n = saferead(s, buf, sizeof(buf), dtimeout)) < 0)
+				strerr_die2sys(111, FATAL, "unable to read from network: ");
+			else
+			if (!n) { /*- remote closed socket */
+				flagexitasp = 1;
+				close(pi1[1]);
+				break;
+			}
+			if ((n = timeoutwrite(dtimeout, fdout, buf, n)) == -1)
+				strerr_die2sys(111, FATAL, "unable to write to child: ");
+		}
+		if (FD_ISSET(fdin, &rfds)) {
+			if ((n = timeoutread(dtimeout, fdin, buf, sizeof(buf))) == -1)
+				strerr_die2sys(111, FATAL, "unable to read from child: ");
+			else
+			if (!n) { /*- prog exited */
+				flagexitasp = 1;
+				if (!client_mode)
+					close(pi1[1]);
+				break;
+			}
+			if ((n = safewrite(s, buf, n, dtimeout)) == -1)
+				strerr_die2sys(111, FATAL, "unable to write to network: ");
+		}
+	}
+	if (pid > 0) {
+		if (wait_pid(&wstat, pid) == -1)
+				strerr_die2sys(111, FATAL, "unable to get child status: ");
+		if (wait_crashed(wstat))
+			strerr_die2x(111, FATAL, "child crashed");
+		_exit(wait_exitcode(wstat));
+	}
+	return (close(s)); 
+}
+
+int
 main(int argc, char **argv)
 {
 	unsigned long   u;
@@ -185,14 +291,10 @@ main(int argc, char **argv)
 #ifdef IPV6
 	int             fakev4 = 0;
 #endif
-	int             opt, j, s, cloop;
+	int             opt, j, s, cloop, client_mode = 0;
 #ifdef TLS
+	int             flagssl = 0;
 	char           *controldir, *cafile = NULL;
-	char            buf[512];
-	int             wstat, r, pid, pi1[2], pi2[2], flagexitasp = 0;
-	ssize_t         n;
-	fd_set          rfds;	/*- File descriptor mask for select -*/
-	struct timeval  timeout;
 #endif
 
 	dns_random_init(seed);
@@ -215,13 +317,13 @@ main(int argc, char **argv)
 #ifdef TLS
 	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:n:c:a:e:")) != opteof)
 #else
-	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:")) != opteof)
+	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:m")) != opteof)
 #endif
 #else
 #ifdef TLS
 	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:n:c:a:e:")) != opteof)
 #else
-	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:")) != opteof)
+	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:m")) != opteof)
 #endif
 #endif
 	{
@@ -289,7 +391,6 @@ main(int argc, char **argv)
 			scan_ulong(optarg, &u);
 			portlocal = u;
 			break;
-#ifdef TLS
 		case 'e':
 			scan_ulong(optarg, &u);
 			itimeout = u;
@@ -298,7 +399,10 @@ main(int argc, char **argv)
 			scan_ulong(optarg, &u);
 			dtimeout = u;
 			break;
+#ifdef TLS
 		case 'n':
+			if (!optarg)
+				usage();
 			flagssl = 1;
 			if (*optarg  && (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile)))
 				strerr_die2x(111, FATAL, "out of memory");
@@ -335,7 +439,7 @@ main(int argc, char **argv)
 		/*- i continue to be amazed at the stupidity of the s_port interface */
 	}
 	if (!*++argv)
-		usage();
+		client_mode = 1;
 	if (!stralloc_copys(&tmp, hostname))
 		nomem();
 #ifdef IPV6
@@ -502,96 +606,20 @@ CONNECTED:
 #ifdef TLS
 	if (flagssl && tls_init(s, certfile.s, cafile))
 		_exit(111);
-	sig_catch(sig_child, sigchld);
-	sig_ignore(sig_pipe);
-	sig_catch(sig_child, sigchld);
-	sig_catch(sig_term, sigterm);
-	if (pipe(pi1) != 0 || pipe(pi2) != 0)
-		strerr_die2sys(111, FATAL, "unable to create pipe: ");
-	switch (pid = fork())
-	{
-		case -1:
-			strerr_die2sys(111, FATAL, "fork: ");
-		case 0:
-			sig_uncatch(sig_pipe);
-			sig_uncatch(sig_child);
-			sig_uncatch(sig_term);
-			close(pi1[1]);
-			close(pi2[0]);
-			if ((fd_move(6, pi1[0]) == -1) || (fd_move(7, pi2[1]) == -1))
-				strerr_die2sys(111, FATAL, "unable to set up descriptors: ");
-			pathexec(argv);
-			strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
-			/* Not reached */
-			_exit(0);
-		default:
-			break;
-	}
-	while (!flagexitasp) {
-		timeout.tv_sec = itimeout;
-		timeout.tv_usec = 0;
-		FD_ZERO(&rfds);
-		FD_SET(s, &rfds);
-		FD_SET(pi2[0], &rfds);
-		if ((r = select(pi2[0] + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
-#ifdef ERESTART
-			if (errno == EINTR || errno == ERESTART)
-#else
-			if (errno == EINTR)
 #endif
-				continue;
-			strerr_die2sys(111, FATAL, "select: ");
-		} else
-		if (!r) { /*-timeout */
-			timeout.tv_sec = itimeout;
-			timeout.tv_usec = 0;
-			strnum[fmt_ulong(strnum, timeout.tv_sec)] = 0;
-			strerr_warn4(FATAL, "timeout reached without input [", strnum, " sec]", 0);
-			close(s);
-			_exit(111);
-		}
-		if (FD_ISSET(s, &rfds)) {
-			if ((n = saferead(s, buf, sizeof(buf), dtimeout)) < 0)
-				strerr_die2sys(111, FATAL, "unable to read from network: ");
-			else
-			if (!n) { /*- remote closed socket */
-				flagexitasp = 1;
-				close(pi1[1]);
-				break;
-			}
-			if ((n = timeoutwrite(dtimeout, pi1[1], buf, n)) == -1)
-				strerr_die2sys(111, FATAL, "unable to write to child: ");
-		}
-		if (FD_ISSET(pi2[0], &rfds)) {
-			if ((n = timeoutread(dtimeout, pi2[0], buf, sizeof(buf))) == -1)
-				strerr_die2sys(111, FATAL, "unable to read from child: ");
-			else
-			if (!n) { /*- prog exited */
-				flagexitasp = 1;
-				close(pi1[1]);
-				break;
-			}
-			if ((n = safewrite(s, buf, n, dtimeout)) == -1)
-				strerr_die2sys(111, FATAL, "unable to write to network: ");
-		}
+	if (client_mode || flagssl)
+		_exit(do_select(argv, client_mode, s));
+	else {
+		if (fd_move(6, s) == -1)
+			strerr_die2sys(111, FATAL, "unable to set up descriptor 6: ");
+		if (fd_copy(7, 6) == -1)
+			strerr_die2sys(111, FATAL, "unable to set up descriptor 7: ");
+		sig_uncatch(sig_pipe);
+		pathexec(argv);
+		strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
 	}
-	close(s);
-	if (wait_pid(&wstat, pid) == -1)
-		strerr_die2sys(111, FATAL, "unable to get child status: ");
-	if (wait_crashed(wstat))
-		strerr_die2x(111, FATAL, "child crashed");
-	_exit(wait_exitcode(wstat));
-#else
-	if (fd_move(6, s) == -1)
-		strerr_die2sys(111, FATAL, "unable to set up descriptor 6: ");
-	if (fd_copy(7, 6) == -1)
-		strerr_die2sys(111, FATAL, "unable to set up descriptor 7: ");
-	sig_uncatch(sig_pipe);
-	pathexec(argv);
-	strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
-#endif
 	/* Not reached */
-	return(0);
+	return (0);
 }
 
 void

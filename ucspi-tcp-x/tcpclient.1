@@ -2,11 +2,8 @@
 .SH NAME
 tcpclient \- creates an outgoing TCP IPv4 or IPv6 connection.
 .SH SYNOPSIS
-.B tcpclient
-.I opts
-.I host
-.I port
-.I prog
+\fBtcpclient\ffR [\fIopts\fR] \fIhost\fR \fIport\fR [\fIprog\fR]
+
 .SH DESCRIPTION
 .I opts
 is a series of getopt-style options.
@@ -15,7 +12,10 @@ is one argument.
 .I port
 is one argument.
 .I prog
-consists of one or more arguments. 
+consists of one or more arguments. If \fIprog\fR is omitted, tcpclient enters
+client mode where it passes data from fd 0 to the network and data from the
+network to fd 1. client mode is similar to how you would use programs like telnet(1),
+ssh(1), etc.
 
 .B tcpclient
 attempts to connect to a TCP server. If it is successful, it runs
@@ -23,7 +23,8 @@ attempts to connect to a TCP server. If it is successful, it runs
 with descriptor 6 reading from the network and descriptor 7 writing to the
 network. It also sets up several environment variables (see
 .BR tcp-environ (5)
-).
+). In client mode, when \fIprog\fR is not run, \fBtcpclient\fR will pass
+data from fd 0 to the network and from the network to fd 1.
 
 .B tcpclient
 can also do SSL/TLS negotiate with a remote host (-n option). This requires
@@ -49,15 +50,15 @@ tries each address in turn.
 
 .TP
 .B \-q
-Quiet. Do not print error messages. 
+Quiet. Do not print error messages.
 
 .TP
 .B \-Q
-(Default.) Print error messages. 
+(Default.) Print error messages.
 
 .TP
 .B \-v
-Verbose. Print error messages and status messages. 
+Verbose. Print error messages and status messages.
 .P
 .B Connection options:
 
@@ -79,7 +80,7 @@ to skip the second try. Before version 0.88,
 .BR tcpserver (1)
 will use only
 .I x
-(default: 60). 
+(default: 60).
 
 .TP
 .B \-i \fIlocalip
@@ -89,7 +90,7 @@ as the IP address for the local side of the connection; quit if
 .I localip
 is not available. Normally
 .B tcpclient
-lets the operating system choose an address. 
+lets the operating system choose an address.
 
 .TP
 .B \-p \fIlocalport
@@ -99,17 +100,17 @@ as the TCP port for the local side of the connection; quit if
 .I localport
 is not available. Normally
 .B tcpclient
-lets the operating system choose a port. 
+lets the operating system choose a port.
 
 .TP
 .B \-d
 Delay sending data for a fraction of a second whenever the remote host is
 responding slowly. This is currently the default, but it may not be in the
-future; if you want it, set it explicitly. 
+future; if you want it, set it explicitly.
 
 .TP
 .B \-D
-Never delay sending data; enable TCP_NODELAY. 
+Never delay sending data; enable TCP_NODELAY.
 
 .TP
 .B \-n \fIclientcert
@@ -140,12 +141,12 @@ Quit if read or write to/from \fIhost\fR exceeds \fIdatatimeout\fR seconds
 .TP
 .B \-h
 (Default.) Look up the remote host name in DNS to set the environment variable
-$TCPREMOTEHOST. 
+$TCPREMOTEHOST.
 
 .TP
 .B \-H
 Do not look up the remote host name in DNS; remove the environment variable
-$TCPREMOTEHOST. 
+$TCPREMOTEHOST.
 
 .TP
 .B \-l \fIlocalname
@@ -160,13 +161,13 @@ for the environment variable $TCPLOCALHOST. A common choice for localname is
 
 .TP
 .B \-R
-Do not attempt to obtain $TCPREMOTEINFO from the remote host. 
+Do not attempt to obtain $TCPREMOTEINFO from the remote host.
 
 .TP
 .B \-t \fIn
 Give up on the $TCPREMOTEINFO connection attempt after
 .I n
-seconds. Default: 26. 
+seconds. Default: 26.
 
 .SH ENVIRONMENT
 .TP
