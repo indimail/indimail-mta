@@ -1,7 +1,7 @@
 /*
  * $Log: tls.h,v $
- * Revision 1.1  2019-04-13 23:39:28+05:30  Cprogrammer
- * tls.h
+ * Revision 1.1  2021-03-03 22:27:08+05:30  Cprogrammer
+ * Initial revision
  *
  */
 #ifndef TLS_H

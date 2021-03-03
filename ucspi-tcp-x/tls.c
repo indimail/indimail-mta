@@ -1,6 +1,6 @@
 /*
  * $Log: tls.c,v $
- * Revision 1.1  2019-04-18 08:36:33+05:30  Cprogrammer
+ * Revision 1.1  2021-03-03 22:26:54+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -14,6 +14,11 @@
 #include <error.h>
 #include "timeoutread.h"
 #include "timeoutwrite.h"
+#include "tls.h"
+
+#ifndef	lint
+static char     sccsid[] = "$Id: tls.c,v 1.1 2021-03-03 22:26:54+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 static int      usessl = 0;
 static char    *sslerr_str = 0;
@@ -279,4 +284,11 @@ safewrite(int fd, char *buf, size_t len, long timeout)
 	r = timeoutwrite(timeout, fd, buf, len);
 #endif
 	return r;
+}
+
+void
+getversion_tls_c()
+{
+	if (write(1, sccsid, 0) == -1)
+		;
 }
