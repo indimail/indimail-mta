@@ -5,6 +5,7 @@ Release 1.1 Start 14/02/2021
 - 03/03/2021
 02. tcpclient.c: added SSL/TLS support
 03. added tcpclientrw program
+04. tcpclient.c: added client mode feature maing prog optional
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 21/05/2020
