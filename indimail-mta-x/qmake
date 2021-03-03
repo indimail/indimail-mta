@@ -1,0 +1,13 @@
+#!/bin/sh
+SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+if [ -s Makevars. ] ; then
+	link_name=`readlink Makevars.`
+	if [ ! "$link_name" = "Makevars.$SYSTEM" ] ; then
+		/bin/rm -f Makevars.
+		ln -s Makevars.$SYSTEM Makevars.
+	fi
+else
+	/bin/rm -f Makevars.
+	ln -s Makevars.$SYSTEM Makevars.
+fi
+make SYSTEM=$SYSTEM $@
