@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.15  2021-03-03 18:45:24+05:30  Cprogrammer
+ * fixed idle timeout
+ *
  * Revision 1.14  2021-03-03 17:44:14+05:30  Cprogrammer
  * added client mode feature
  *
@@ -88,7 +91,7 @@
 #define CONNECT "tcpclient: unable to connect to "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.14 2021-03-03 17:44:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.15 2021-03-03 18:45:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -128,6 +131,7 @@ int             flagremoteinfo = 1;
 int             flagremotehost = 1;
 unsigned long   itimeout = 26;
 unsigned long   ctimeout[2] = { 2, 58 };
+unsigned long   dtimeout = 60, idle_timeout=300;
 #ifdef IPV6
 int             forcev6 = 0;
 char            iplocal[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
@@ -151,7 +155,6 @@ char            strnum[FMT_ULONG], strnum2[FMT_ULONG];
 char            seed[128];
 #ifdef TLS
 struct stralloc certfile = {0};
-unsigned long   dtimeout = 60;
 #endif
 
 #ifdef TLS
@@ -225,7 +228,7 @@ do_select(char **argv, int client_mode, int s)
 		fdout = 1;
 	}
 	while (!flagexitasp) {
-		timeout.tv_sec = itimeout;
+		timeout.tv_sec = idle_timeout;
 		timeout.tv_usec = 0;
 		FD_ZERO(&rfds);
 		FD_SET(s, &rfds);
@@ -240,10 +243,10 @@ do_select(char **argv, int client_mode, int s)
 			strerr_die2sys(111, FATAL, "select: ");
 		} else
 		if (!r) { /*-timeout */
-			timeout.tv_sec = itimeout;
+			timeout.tv_sec = idle_timeout;
 			timeout.tv_usec = 0;
 			strnum[fmt_ulong(strnum, timeout.tv_sec)] = 0;
-			strerr_warn4(FATAL, "timeout reached without input [", strnum, " sec]", 0);
+			strerr_warn4(FATAL, "idle timeout reached without input [", strnum, " sec]", 0);
 			close(s);
 			_exit(111);
 		}
@@ -393,7 +396,7 @@ main(int argc, char **argv)
 			break;
 		case 'e':
 			scan_ulong(optarg, &u);
-			itimeout = u;
+			idle_timeout = u;
 			break;
 		case 'a':
 			scan_ulong(optarg, &u);
