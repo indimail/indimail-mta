@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: tcpclientrw.c,v $
+ * Revision 1.1  2021-03-03 13:42:55+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -20,6 +23,10 @@
 #include <timeoutwrite.h>
 
 #define FATAL "tcpclientrw: fatal: "
+
+#ifndef	lint
+static char     sccsid[] = "$Id: tcpclientrw.c,v 1.1 2021-03-03 13:42:55+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 unsigned long   timeout = 300;
 

@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.12  2021-03-03 13:43:26+05:30  Cprogrammer
+ * added SSL/TLS support
+ *
  * Revision 1.11  2020-09-16 20:50:19+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -77,6 +80,10 @@
 
 #define FATAL "tcpclient: fatal: "
 #define CONNECT "tcpclient: unable to connect to "
+
+#ifndef	lint
+static char     sccsid[] = "$Id: tcpclient.c,v 1.12 2021-03-03 13:43:26+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 extern int      socket_tcpnodelay(int);
 
