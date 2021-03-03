@@ -2,7 +2,6 @@
 COFLAGS=-z+05:30
 SHELL=/bin/sh
 OPENSSLBIN=openssl
-SSLINCS := -I/usr/kerberos/include
 SSLLIBS := -lssl -lcrypto
 include Makevars.$(SYSTEM)
 edit = sed \
@@ -487,9 +486,8 @@ compile tcpserver.c ip4.h prot.h pathexec.h \
 socket.h tcpremoteinfo.h rules.h dns.h iopause.h haveip6.h ip6.h \
 conf-tls conf-ip haveip6.h conf-mysqlrules conf-dlopen \
 hasmysql.h mysql_inc
-	./compile $(SSLINCS) \
-	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen mysql_inc` \
-	tcpserver.c
+	./compile `grep -h -v "^#" conf-tls conf-ip conf-mysqlrules \
+	conf-dlopen mysql_inc` tcpserver.c
 
 mysql_config.o: compile mysql_config.c conf-mysqlrules
 	./compile `grep -h -v "^#" conf-mysqlrules` mysql_config.c
