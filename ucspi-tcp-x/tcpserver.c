@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.72  2021-03-03 12:11:09+05:30  Cprogrammer
+ * changed return types to ssize_t for read, write functions
+ *
  * Revision 1.71  2021-03-02 10:44:07+05:30  Cprogrammer
  * renamed SSL_CIPHER to TLS_CIPHER_LIST
  *
@@ -239,7 +242,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.71 2021-03-02 10:44:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.72 2021-03-03 12:11:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -262,6 +265,7 @@ static ulong    backlog = 20;
 static int      flagssl = 0;
 struct stralloc certfile = {0};
 struct stralloc cafile = {0};
+static char     tbuf[2048];
 #endif
 
 static stralloc tcpremoteinfo;
@@ -309,7 +313,6 @@ struct iptable
 };
 typedef struct iptable IPTABLE;
 static IPTABLE **IpTable;
-static char     tbuf[2048];
 
 void            add_ip(pid_t);
 void            print_ip();
@@ -394,8 +397,7 @@ drop_rules(void)
 void
 found(char *data, unsigned int datalen)
 {
-	unsigned int    next0;
-	unsigned int    split;
+	unsigned int    next0, split;
 
 	while ((next0 = byte_chr(data, datalen, 0)) < datalen) {
 		switch (data[0])
@@ -664,11 +666,10 @@ my_strchr(char *str, char ch)
 int
 matchinet(char *ip, char *token)
 {
-	char            field1[8];
-	char            field2[8];
+	char            field1[8], field2[8];
+	char           *ptr, *ptr1, *ptr2, *cptr;
 	unsigned long   lnum, hnum, t;
 	int             idx1, idx2, match;
-	char           *ptr, *ptr1, *ptr2, *cptr;
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 	struct addrinfo hints = {0}, *addr_res = 0, *addr_res0 = 0;
 	struct sockaddr     sa;
@@ -1814,10 +1815,11 @@ main(int argc, char **argv, char **envp)
 }
 
 #ifdef TLS
-static int
+static ssize_t
 allwrite(int fd, char *buf, int len)
 {
-	int             w;
+	ssize_t         w;
+	size_t          total = 0;
 
 	while (len) {
 		if ((w = write(fd, buf, len)) == -1) {
@@ -1828,15 +1830,17 @@ allwrite(int fd, char *buf, int len)
 		if (w == 0)
 			;	/*- luser's fault */
 		buf += w;
+		total += w;
 		len -= w;
 	}
-	return 0;
+	return total;
 }
 
-static int
+static ssize_t
 allwritessl(SSL *ssl, char *buf, int len)
 {
-	int             w;
+	ssize_t         w;
+	size_t          total = 0;
 
 	while (len) {
 		if ((w = SSL_write(ssl, buf, len)) == -1) {
@@ -1847,21 +1851,19 @@ allwritessl(SSL *ssl, char *buf, int len)
 		if (w == 0)
 			;	/*- luser's fault */
 		buf += w;
+		total += w;
 		len -= w;
 	}
-	return 0;
+	return total;
 }
 
 void
 translate(SSL *ssl, int clearout, int clearin, unsigned int iotimeout)
 {
-	struct taia     now;
-	struct taia     deadline;
+	struct taia     now, deadline;
 	iopause_fd      iop[2];
-	int             flagexitasap;
-	int             iopl;
-	int             sslout, sslin;
-	int             n, r;
+	int             flagexitasap, iopl, sslout, sslin;
+	ssize_t         n, r;
 
 	if ((sslin = SSL_get_fd(ssl)) == -1 || (sslout = SSL_get_fd(ssl)) == -1)
 		strerr_die2x(111, DROP, "unable to set up SSL connection");
@@ -1884,24 +1886,20 @@ translate(SSL *ssl, int clearout, int clearin, unsigned int iotimeout)
 		iopause(iop, iopl, &deadline, &now);
 		if (iop[0].revents) {
 			/*- data on sslin */
-			n = SSL_read(ssl, tbuf, sizeof(tbuf));
-			if (n < 0)
+			if ((n = SSL_read(ssl, tbuf, sizeof(tbuf))) < 0)
 				strerr_die2sys(111, DROP, "unable to read from network: ");
 			if (n == 0)
 				flagexitasap = 1;
-			r = allwrite(clearout, tbuf, n);
-			if (r < 0)
+			if ((r = allwrite(clearout, tbuf, n)) == -1)
 				strerr_die2sys(111, DROP, "unable to write to client: ");
 		}
 		if (iop[1].revents) {
 			/*- data on clearin */
-			n = read(clearin, tbuf, sizeof(tbuf));
-			if (n < 0)
+			if ((n = read(clearin, tbuf, sizeof(tbuf))) < 0)
 				strerr_die2sys(111, DROP, "unable to read from client: ");
 			if (n == 0)
 				flagexitasap = 1;
-			r = allwritessl(ssl, tbuf, n);
-			if (r < 0)
+			if ((r = allwritessl(ssl, tbuf, n)) == -1)
 				strerr_die2sys(111, DROP, "unable to write to network: ");
 		}
 		if (!iop[0].revents && !iop[1].revents)
