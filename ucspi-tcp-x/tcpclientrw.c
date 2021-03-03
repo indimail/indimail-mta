@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclientrw.c,v $
+ * Revision 1.3  2021-03-03 21:54:42+05:30  Cprogrammer
+ * use saferead(), safewrite() instead of substdio
+ *
  * Revision 1.2  2021-03-03 13:46:14+05:30  Cprogrammer
  * fixed compiler warning
  *
@@ -8,15 +11,12 @@
  *
  */
 #include <unistd.h>
-#include <substdio.h>
 #include <getopt.h>
 #ifdef DARWIN
 #define opteof -1
 #else
 #include <sgetopt.h>
 #endif
-#include <subfd.h>
-#include <getln.h>
 #include <stralloc.h>
 #include <error.h>
 #include <errno.h>
@@ -28,7 +28,7 @@
 #define FATAL "tcpclientrw: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclientrw.c,v 1.2 2021-03-03 13:46:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclientrw.c,v 1.3 2021-03-03 21:54:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 unsigned long   timeout = 300;
@@ -64,11 +64,9 @@ saferead(int fd, char *buf, int len)
 int
 main(int argc, char **argv)
 {
-	struct substdio ssout;
-	char            buf[512], outbuf[512];
-	static stralloc line = {0};
+	char            buf[512];
 	ssize_t         n;
-	int             r, opt, match;
+	int             r, opt;
 	fd_set          rfds;	/*- File descriptor mask for select -*/
 
 	while ((opt = getopt(argc, argv, "t:")) != opteof) {
@@ -81,16 +79,6 @@ main(int argc, char **argv)
 			strerr_die1x(100, "usage: tcpclientrw [-t timeout]\n");
 		}
 	}
-	if ((n = saferead(6, buf, sizeof(buf))) == -1)
-		strerr_die2sys(111, FATAL, "read-net: ");
-	if (!n) {
-		close(7);
-		close(6);
-		_exit(0);
-	}
-	if (substdio_put(subfdout, buf, n) || substdio_flush(subfdout))
-		strerr_die2sys(111, FATAL, "write-stdout: ");
-	substdio_fdbuf(&ssout, safewrite, 7, outbuf, sizeof(outbuf));
 	for (;;) {
 		FD_ZERO(&rfds);
 		FD_SET(0, &rfds);
@@ -105,22 +93,22 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "select: ");
 		}
 		if (FD_ISSET(0, &rfds)) {
-			if (getln(subfdin, &line, &match, '\n') == -1)
-				strerr_die2sys(111, FATAL, "getln: read-stdin: ");
-			if (line.len == 0 || !match)
+			if ((n = read(0, buf, sizeof(buf))) == -1)
+				strerr_die2sys(111, FATAL, "read-stdin: ");
+			if (!n)
 				break;
-			if (substdio_put(&ssout, line.s, line.len) || substdio_flush(&ssout))
-				strerr_die2sys(111, FATAL, "write-net: ");
+			if ((n = safewrite(7, buf, n)) == -1)
+				strerr_die2sys(111, FATAL, "write-network: ");
 		}
 		if (FD_ISSET(6, &rfds)) {
 			if ((n = saferead(6, buf, sizeof(buf))) == -1)
-				strerr_die2sys(111, FATAL, "read-net: ");
+				strerr_die2sys(111, FATAL, "read-network: ");
 			if (!n) {
 				close(6);
 				close(7);
 				_exit(0);
 			}
-			if (substdio_put(subfdout, buf, n) || substdio_flush(subfdout))
+			if ((n = safewrite(1, buf, n)) == -1)
 				strerr_die2sys(111, FATAL, "write-stdout: ");
 		}
 	}
