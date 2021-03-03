@@ -14,8 +14,8 @@ is one argument.
 .I prog
 consists of one or more arguments. If \fIprog\fR is omitted, tcpclient enters
 client mode where it passes data from fd 0 to the network and data from the
-network to fd 1. client mode is similar to how you would use programs like telnet(1),
-ssh(1), etc.
+network to fd 1. client mode is similar to how you would use programs like
+telnet(1), ssh(1), etc.
 
 .B tcpclient
 attempts to connect to a TCP server. If it is successful, it runs
@@ -27,9 +27,8 @@ network. It also sets up several environment variables (see
 data from fd 0 to the network and from the network to fd 1.
 
 .B tcpclient
-can also do SSL/TLS negotiate with a remote host (-n option). This requires
-a \fIclientcert\fR to be provided. Additional optoins -a, -e can be given
-when doing SSL/TLS encryption.
+can also do SSL/TLS negotiation with a remote host (-n option). This requires
+a \fIclientcert\fR to be provided.
 
 The server's address is given by
 .I host
@@ -39,7 +38,8 @@ and
 may be a name from /etc/services or a number.
 .I host
 may be 0, referring to the local machine, or a dotted-decimal IP address or
-IPv6 address, or a host name; it is fed through qualification using dns_ip4_qualify.
+IPv6 address, or a host name; it is fed through qualification using
+dns_ip4_qualify.
 
 If the server has several IP addresses,
 .B tcpclient
@@ -118,10 +118,10 @@ Instead of the default clientcert.pem certificate use the specified
 .IR certfile .
 
 .TP
-.B \-n \fIcafile
+.B \-c \fIcafile
 Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
 special CA certificates are needed if an intermediate certificate used
-by your issuing CA expires. Note that the file given with -a is passed
+by your issuing CA expires. Note that the file given with -c is passed
 to SSL_CTX_load_verify_locations and thus may contain several CA
 certificates, which will be used during SSL connection negotiation to
 close any gap in the certificate chain.
@@ -140,20 +140,20 @@ Quit if read or write to/from \fIhost\fR exceeds \fIdatatimeout\fR seconds
 
 .TP
 .B \-h
-(Default.) Look up the remote host name in DNS to set the environment variable
-$TCPREMOTEHOST.
+(Default.) Look up the remote host name in DNS to set the environment
+variable $TCPREMOTEHOST.
 
 .TP
 .B \-H
-Do not look up the remote host name in DNS; remove the environment variable
-$TCPREMOTEHOST.
+Do not look up the remote host name in DNS; remove the environment
+variable $TCPREMOTEHOST.
 
 .TP
 .B \-l \fIlocalname
 Do not look up the local host name in DNS; use
 .I localname
-for the environment variable $TCPLOCALHOST. A common choice for localname is
-0.
+for the environment variable $TCPLOCALHOST. A common choice for localname
+is 0.
 
 .TP
 .B \-r
