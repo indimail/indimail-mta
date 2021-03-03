@@ -199,7 +199,6 @@ chmod -R 755 %{buildroot}%{plugindir}
 %attr(0755,root,root)                     %{_prefix}/bin/tcprules
 %attr(0755,root,root)                     %{_prefix}/bin/tcprulescheck
 %attr(0755,root,root)                     %{_prefix}/bin/tcpclient
-%attr(0755,root,root)                     %{_prefix}/bin/tcpclientrw
 %attr(0755,root,root)                     %{_prefix}/bin/who@
 %attr(0755,root,root)                     %{_prefix}/bin/date@
 %attr(0755,root,root)                     %{_prefix}/bin/finger@
@@ -230,7 +229,6 @@ chmod -R 755 %{buildroot}%{plugindir}
 %attr(0644,root,root)                     %{mandir}/man1/tcprules.1.gz
 %attr(0644,root,root)                     %{mandir}/man1/tcprulescheck.1.gz
 %attr(0644,root,root)                     %{mandir}/man1/tcpclient.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/tcpclientrw.1.gz
 %attr(0644,root,root)                     %{mandir}/man1/who@.1.gz
 %attr(0644,root,root)                     %{mandir}/man1/date@.1.gz
 %attr(0644,root,root)                     %{mandir}/man1/finger@.1.gz

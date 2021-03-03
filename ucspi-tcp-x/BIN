@@ -6,7 +6,6 @@ f:::0755:/bin/:tcpserver:tcpserver
 f:::0755:/bin/:tcprules:tcprules
 f:::0755:/bin/:tcprulescheck:tcprulescheck
 f:::0755:/bin/:tcpclient:tcpclient
-f:::0755:/bin/:tcpclientrw:tcpclientrw
 f:::0755:/bin/:who@:who@
 f:::0755:/bin/:date@:date@
 f:::0755:/bin/:finger@:finger@

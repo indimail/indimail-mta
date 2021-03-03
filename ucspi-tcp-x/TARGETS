@@ -147,6 +147,4 @@ delcr.o
 addcr.o
 iopause.o
 iopause.h
-tcpclientrw
-tcpclientrw.o
 tls.o

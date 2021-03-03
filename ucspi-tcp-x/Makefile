@@ -253,7 +253,7 @@ ip4_scan.o: \
 compile ip4_scan.c ip4.h
 	./compile ip4_scan.c
 
-it: prog tcpserver.1 shared instcheck tcpclientrw \
+it: prog tcpserver.1 shared instcheck \
 installer ucspi-tcp.perms ucspi-tcp.spec
 
 load: warn-auto.sh conf-ld systype make-load
@@ -416,14 +416,6 @@ warn-auto.sh tcpcat.sh conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> tcpcat
 	chmod 755 tcpcat
-
-tcpclientrw: \
-load tcpclientrw.o
-	./load tcpclientrw -lqmail
-
-tcpclientrw.o: \
-compile tcpclientrw.c
-	./compile tcpclientrw.c
 
 tcpclient: \
 load tcpclient.o tcpremoteinfo.o timeoutconn.o \

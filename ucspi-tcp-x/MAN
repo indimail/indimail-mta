@@ -5,7 +5,6 @@ f:::0644:/man1/:tcpserver.1:tcpserver.1
 f:::0644:/man1/:tcprules.1:tcprules.1
 f:::0644:/man1/:tcprulescheck.1:tcprulescheck.1
 f:::0644:/man1/:tcpclient.1:tcpclient.1
-f:::0644:/man1/:tcpclientrw.1:tcpclientrw.1
 f:::0644:/man1/:who@.1:who@.1
 f:::0644:/man1/:date@.1:date@.1
 f:::0644:/man1/:finger@.1:finger@.1
