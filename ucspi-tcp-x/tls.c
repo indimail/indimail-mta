@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.2  2021-03-04 00:28:07+05:30  Cprogrammer
+ * fixed compilation for non tls
+ *
  * Revision 1.1  2021-03-03 22:26:54+05:30  Cprogrammer
  * Initial revision
  *
@@ -17,9 +20,10 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.1 2021-03-03 22:26:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.2 2021-03-04 00:28:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#ifdef TLS
 static int      usessl = 0;
 static char    *sslerr_str = 0;
 static SSL     *ssl = 0;
@@ -245,6 +249,7 @@ ssl_timeoutwrite(long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 		return 0;
 	return ssl_timeoutio(SSL_write, t, rfd, wfd, myssl, buf, len);
 }
+#endif
 
 ssize_t
 saferead(int fd, char *buf, size_t len, long timeout)

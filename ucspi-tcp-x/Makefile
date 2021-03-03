@@ -1,7 +1,6 @@
 # Don't edit Makefile! Use conf-* for configuration.
 COFLAGS=-z+05:30
 SHELL=/bin/sh
-OPENSSLBIN=openssl
 SSLLIBS := -lssl -lcrypto
 include Makevars.$(SYSTEM)
 edit = sed \

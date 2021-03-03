@@ -81,13 +81,13 @@
 #include "tcpremoteinfo.h"
 #include "dns.h"
 #include <unistd.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
+#include <wait.h>
+#include "tls.h"
 #ifdef TLS
 #include <openssl/ssl.h>
 #include <env.h>
-#include <wait.h>
-#include <timeoutread.h>
-#include <timeoutwrite.h>
-#include "tls.h"
 #endif
 
 #define FATAL "tcpclient: fatal: "
@@ -160,7 +160,6 @@ char            seed[128];
 struct stralloc certfile = {0};
 #endif
 
-#ifdef TLS
 void
 sigterm()
 {
@@ -183,7 +182,6 @@ sigchld()
 		}
 	}
 }
-#endif
 
 int
 do_select(char **argv, int client_mode, int s)
@@ -297,9 +295,8 @@ main(int argc, char **argv)
 #ifdef IPV6
 	int             fakev4 = 0;
 #endif
-	int             opt, j, s, cloop, client_mode = 0;
+	int             opt, j, s, cloop, client_mode = 0, flagssl = 0;
 #ifdef TLS
-	int             flagssl = 0;
 	char           *controldir, *cafile = NULL;
 #endif
 
