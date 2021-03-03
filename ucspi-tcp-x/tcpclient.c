@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.16  2021-03-03 22:50:55+05:30  Cprogrammer
+ * renamed default certificate to clientcert.pem
+ *
  * Revision 1.15  2021-03-03 18:45:24+05:30  Cprogrammer
  * fixed idle timeout
  *
@@ -91,7 +94,7 @@
 #define CONNECT "tcpclient: unable to connect to "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.15 2021-03-03 18:45:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.16 2021-03-03 22:50:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -310,7 +313,7 @@ main(int argc, char **argv)
 	if (!stralloc_copys(&certfile, controldir))
 		strerr_die2x(111, FATAL, "out of memory");
 	else
-	if (!stralloc_cats(&certfile, "/servercert.pem"))
+	if (!stralloc_cats(&certfile, "/clientcert.pem"))
 		strerr_die2x(111, FATAL, "out of memory");
 	else
 	if (!stralloc_0(&certfile) )
