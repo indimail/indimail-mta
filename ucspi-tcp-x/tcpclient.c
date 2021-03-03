@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.13  2021-03-03 13:46:07+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.12  2021-03-03 13:43:26+05:30  Cprogrammer
  * added SSL/TLS support
  *
@@ -82,7 +85,7 @@
 #define CONNECT "tcpclient: unable to connect to "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.12 2021-03-03 13:43:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.13 2021-03-03 13:46:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -589,4 +592,11 @@ CONNECTED:
 #endif
 	/* Not reached */
 	return(0);
+}
+
+void
+getversion_tcpclient_c()
+{
+	if (write(1, sccsid, 0) == -1)
+		;
 }

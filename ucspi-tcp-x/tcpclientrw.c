@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclientrw.c,v $
+ * Revision 1.2  2021-03-03 13:46:14+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.1  2021-03-03 13:42:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -25,7 +28,7 @@
 #define FATAL "tcpclientrw: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclientrw.c,v 1.1 2021-03-03 13:42:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclientrw.c,v 1.2 2021-03-03 13:46:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 unsigned long   timeout = 300;
@@ -122,4 +125,11 @@ main(int argc, char **argv)
 		}
 	}
 	_exit(0);
+}
+
+void
+getversion_tcpclientrw_c()
+{
+	if (write(1, sccsid, 0) == -1)
+		;
 }
