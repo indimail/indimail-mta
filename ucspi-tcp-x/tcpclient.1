@@ -1,6 +1,6 @@
 .TH tcpclient 1
 .SH NAME
-tcpclient \- creates an outgoing TCP connection.
+tcpclient \- creates an outgoing TCP IPv4 or IPv6 connection.
 .SH SYNOPSIS
 .B tcpclient
 .I opts
@@ -25,6 +25,11 @@ network. It also sets up several environment variables (see
 .BR tcp-environ (5)
 ).
 
+.B tcpclient
+can also do SSL/TLS negotiate with a remote host (-n option). This requires
+a \fIclientcert\fR to be provided. Additional optoins -a, -e can be given
+when doing SSL/TLS encryption.
+
 The server's address is given by
 .I host
 and
@@ -32,25 +37,30 @@ and
 .I port
 may be a name from /etc/services or a number.
 .I host
-may be 0, referring to the local machine, or a dotted-decimal IP address, or
-a host name; it is fed through qualification using dns_ip4_qualify.
+may be 0, referring to the local machine, or a dotted-decimal IP address or
+IPv6 address, or a host name; it is fed through qualification using dns_ip4_qualify.
 
 If the server has several IP addresses,
 .B tcpclient
 tries each address in turn.
+
 .SH OPTIONS
 .B General options:
+
 .TP
 .B \-q
 Quiet. Do not print error messages. 
+
 .TP
 .B \-Q
 (Default.) Print error messages. 
+
 .TP
 .B \-v
 Verbose. Print error messages and status messages. 
 .P
 .B Connection options:
+
 .TP
 .B \-T \fIx\fR+\fIy
 Give up on the connection attempt after
@@ -70,6 +80,7 @@ to skip the second try. Before version 0.88,
 will use only
 .I x
 (default: 60). 
+
 .TP
 .B \-i \fIlocalip
 Use
@@ -79,6 +90,7 @@ as the IP address for the local side of the connection; quit if
 is not available. Normally
 .B tcpclient
 lets the operating system choose an address. 
+
 .TP
 .B \-p \fIlocalport
 Use
@@ -88,43 +100,89 @@ as the TCP port for the local side of the connection; quit if
 is not available. Normally
 .B tcpclient
 lets the operating system choose a port. 
+
 .TP
 .B \-d
 Delay sending data for a fraction of a second whenever the remote host is
 responding slowly. This is currently the default, but it may not be in the
 future; if you want it, set it explicitly. 
+
 .TP
 .B \-D
 Never delay sending data; enable TCP_NODELAY. 
+
+.TP
+.B \-n \fIclientcert
+Instead of the default clientcert.pem certificate use the specified
+.IR certfile .
+
+.TP
+.B \-n \fIcafile
+Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
+special CA certificates are needed if an intermediate certificate used
+by your issuing CA expires. Note that the file given with -a is passed
+to SSL_CTX_load_verify_locations and thus may contain several CA
+certificates, which will be used during SSL connection negotiation to
+close any gap in the certificate chain.
+
+.TP
+.B \-e \fIidletimeout
+Quit if no data is received from \fIhost\fR or \fIprog\fR for more than
+\fIidletimeout\fR seconds
+
+.TP
+.B \-a \fIdatatimeout
+Quit if read or write to/from \fIhost\fR exceeds \fIdatatimeout\fR seconds
+
 .P
 .B Data-gathering options:
+
 .TP
 .B \-h
 (Default.) Look up the remote host name in DNS to set the environment variable
 $TCPREMOTEHOST. 
+
 .TP
 .B \-H
 Do not look up the remote host name in DNS; remove the environment variable
 $TCPREMOTEHOST. 
+
 .TP
 .B \-l \fIlocalname
 Do not look up the local host name in DNS; use
 .I localname
 for the environment variable $TCPLOCALHOST. A common choice for localname is
 0.
+
 .TP
 .B \-r
 (Default.) Attempt to obtain $TCPREMOTEINFO from the remote host.
+
 .TP
 .B \-R
 Do not attempt to obtain $TCPREMOTEINFO from the remote host. 
+
 .TP
 .B \-t \fIn
 Give up on the $TCPREMOTEINFO connection attempt after
 .I n
 seconds. Default: 26. 
+
+.SH ENVIRONMENT
+.TP
+.B TLS_CIPHER_LIST
+Specifies the ciphers that should be used in SSL/TLS mode. See
+.I openssl(1)
+for more information.
+.TP
+.B CONTROLDIR
+Sub-directory relative to SYSCONFDIR, having servercert.pem.
+Default is SYSCONFDIR/control.
+
 .SH SEE ALSO
 tcpserver(1),
+tcpclientrw(1),
+openssl(1),
 tcprules(1),
 tcprulescheck(1),
 argv0(1),
