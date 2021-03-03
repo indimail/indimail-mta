@@ -1,8 +1,8 @@
 *
 Release 1.1 Start 14/02/2021
-02/03/2021
+- 02/03/2021
 01. tcpserver.c renamed SSL_CIPHER to TLS_CIPHER_LIST
-03/03/2021
+- 03/03/2021
 02. tcpclient.c: added SSL/TLS support
 03. added tcpclientrw program
 
