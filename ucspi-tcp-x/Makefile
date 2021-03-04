@@ -16,6 +16,8 @@ edit = sed \
 
 default: it
 
+man: tcpserver.1 tcpclient.1
+
 compile: make-compile warn-auto.sh systype conf-cc-$(SYSTEM)
 	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
 	compile
@@ -250,7 +252,7 @@ ip4_scan.o: \
 compile ip4_scan.c ip4.h
 	./compile ip4_scan.c
 
-it: prog tcpserver.1 shared instcheck \
+it: prog man shared instcheck \
 installer ucspi-tcp.perms ucspi-tcp.spec
 
 load: warn-auto.sh conf-ld systype make-load
