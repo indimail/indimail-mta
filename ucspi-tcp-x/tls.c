@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.4  2021-03-04 22:58:55+05:30  Cprogrammer
+ * generic tls.c for connect, accept
+ *
  * Revision 1.3  2021-03-04 11:45:18+05:30  Cprogrammer
  * match host with common name
  *
@@ -26,7 +29,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.3 2021-03-04 11:45:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.4 2021-03-04 22:58:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -83,41 +86,41 @@ check_cert(SSL *myssl, char *host)
 	return (0);
 }
 
-int
-tls_init(int fd, char *host, char *clientcert, char *cafile)
+SSL            *
+tls_init(int fd, char *clientcert, char *cafile)
 {
-	int             ret;
 	SSL            *myssl;
 	SSL_CTX        *ctx;
 	BIO            *sbio;
 	char           *ciphers;
 
-	if (!(usessl = (access(clientcert, F_OK) ? 0 : 1)))
-		return (0);
+	if (usessl)
+		return ssl;
 	SSL_library_init();
 	if (!(ctx = SSL_CTX_new(SSLv23_client_method()))) {
 		strerr_warn2("SSL_CTX_new: unable to create SSL context: ",
 			ERR_error_string(ERR_get_error(), 0), 0);
-		return (1);
+		return ((SSL *) NULL);
 	}
 	if (!SSL_CTX_load_verify_locations(ctx, clientcert, NULL)) {
 		strerr_warn4("TLS unable to load ", clientcert, ": ",
 			ERR_error_string(ERR_get_error(), 0), 0);
 		SSL_CTX_free(ctx);
-		return (1);
+		return ((SSL *) NULL);
 	}
 	/*
 	 * set the callback here; SSL_set_verify didn't work before 0.9.6c
 	 */
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
     /*- Set our cipher list */
-	ciphers = env_get("TLS_CIPHER_LIST");
+	if (!(ciphers = env_get("TLS_CIPHER_LIST")))
+		ciphers = "PROFILE=SYSTEM";
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
-	if (ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers)) {
+	if (!SSL_CTX_set_cipher_list(ctx, ciphers)) {
 		strerr_warn4("unable to set ciphers: ", ciphers, ": ",
 			ERR_error_string(ERR_get_error(), 0), 0);
 		SSL_CTX_free(ctx);
-		return (1);
+		return ((SSL *) NULL);
 	}
 #endif
 	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert)) {
@@ -125,54 +128,76 @@ tls_init(int fd, char *host, char *clientcert, char *cafile)
 			strerr_warn4("SSL_CTX_use_RSAPrivateKey: unable to load RSA private key: ",
 				clientcert, ": ", ERR_error_string(ERR_get_error(), 0), 0);
 			SSL_CTX_free(ctx);
-			return (1);
+			return ((SSL *) NULL);
 		}
 		if (SSL_CTX_use_certificate_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1) {
 			strerr_warn4("SSL_CTX_use_certificate_file: unable to load certificate: ",
 				clientcert, ": ", ERR_error_string(ERR_get_error(), 0), 0);
 			SSL_CTX_free(ctx);
-			return (1);
+			return ((SSL *) NULL);
 		}
 		if (cafile && 1 != SSL_CTX_load_verify_locations(ctx, cafile, 0)) {
 			strerr_warn4("SSL_CTX_load_verify_locations: unable to load certificate: ",
 				clientcert, ": ", ERR_error_string(ERR_get_error(), 0), 0);
 			SSL_CTX_free(ctx);
-			return (1);
+			return ((SSL *) NULL);
 		}
 	}
 	if (!(myssl = SSL_new(ctx))) {
 		strerr_warn2("unable to set up SSL session: ",
 			ERR_error_string(ERR_get_error(), 0), 0);
 		SSL_CTX_free(ctx);
-		return (1);
+		return ((SSL *) NULL);
 	}
-	ssl = myssl;
 	SSL_CTX_free(ctx);
 #ifndef CRYPTO_POLICY_NON_COMPLIANCE
-	if (!ciphers)
-		ciphers = "PROFILE=SYSTEM";
-	if (!SSL_set_cipher_list(ssl, ciphers)) {
+	if (!SSL_set_cipher_list(myssl, ciphers)) {
 		strerr_warn4("unable to set ciphers: ", ciphers, ": ",
 			ERR_error_string(ERR_get_error(), 0), 0);
-		SSL_free(ssl);
-		return (1);
+		SSL_shutdown(myssl);
+		SSL_free(myssl);
+		return ((SSL *) NULL);
 	}
 #endif
     if (!(sbio = BIO_new_socket(fd, BIO_NOCLOSE))) {
 		strerr_warn1("BIO_new_socket failed: ", &strerr_sys);
+		SSL_shutdown(myssl);
 		SSL_free(myssl);
-		return (1);
+		return ((SSL *) NULL);
 	}
     SSL_set_bio(myssl, sbio, sbio); /*- cannot fail */
-    if ((ret = SSL_connect(myssl)) <= 0) {
-		SSL_free(myssl);
+	usessl = 1;
+	return (ssl = myssl);
+}
+
+int
+tls_connect(SSL *myssl, char *host)
+{
+   	if (SSL_connect(myssl) <= 0) {
 		strerr_warn2("SSL_connect: SSL Handshake: ", ERR_error_string(ERR_get_error(), 0), 0);
 		/*- SSL_get_error(myssl, ret)); -*/
-		usessl = 0;
-		errno = EPROTO;
-		return (1);
+		SSL_shutdown(myssl);
+		SSL_free(myssl);
+		return -1;
 	}
-    return (check_cert(myssl, host));
+   	if (check_cert(myssl, host)) {
+		SSL_shutdown(myssl);
+		SSL_free(myssl);
+		return -1;
+	}
+	return 0;
+}
+
+int
+tls_accept(SSL *myssl)
+{
+	if (SSL_accept(ssl) <= 0) {
+		strerr_warn2("SSL_accept: unable to accept SSL connection", ERR_error_string(ERR_get_error(), 0), 0);
+		SSL_shutdown(myssl);
+		SSL_free(myssl);
+		return -1;
+	}
+	return 0;
 }
 
 const char     *
