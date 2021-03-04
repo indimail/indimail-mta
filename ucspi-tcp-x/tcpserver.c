@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.74  2021-03-04 23:00:14+05:30  Cprogrammer
+ * added idle timeout parameter
+ *
  * Revision 1.73  2021-03-04 11:42:45+05:30  Cprogrammer
  * use CERTSDIR for certificates
  *
@@ -246,7 +249,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.73 2021-03-04 11:42:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.74 2021-03-04 23:00:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
