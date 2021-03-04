@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.3  2021-03-04 23:02:07+05:30  Cprogrammer
+ * fixed usage strings
+ *
  * Revision 1.2  2021-03-02 10:41:58+05:30  Cprogrammer
  * renamed SSL_CIPHER to TLS_CIPHER_LIST
  *
@@ -429,7 +432,7 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.2 2021-03-02 10:41:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.3 2021-03-04 23:02:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
