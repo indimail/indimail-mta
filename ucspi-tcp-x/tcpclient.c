@@ -1,5 +1,9 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.17  2021-03-04 11:43:16+05:30  Cprogrammer
+ * use CERTSDIR for certificates
+ * added -m option for matching host with common name
+ *
  * Revision 1.16  2021-03-03 22:50:55+05:30  Cprogrammer
  * renamed default certificate to clientcert.pem
  *
@@ -94,7 +98,7 @@
 #define CONNECT "tcpclient: unable to connect to "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.16 2021-03-03 22:50:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.17 2021-03-04 11:43:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -110,7 +114,11 @@ usage(void)
 {
 	strerr_die1x(100, "usage: tcpclient"
 #ifdef IPV6
-" [ -46hHrRdDqQv ] "
+#ifdef TLS
+" [ -46hHrRdDqQmv ]\n"
+#else
+" [ -46hHrRdDqQv ]\n"
+#endif
 #else
 " [ -hHrRdDqQv ]\n"
 #endif
@@ -297,7 +305,8 @@ main(int argc, char **argv)
 #endif
 	int             opt, j, s, cloop, client_mode = 0, flagssl = 0;
 #ifdef TLS
-	char           *controldir, *cafile = NULL;
+	char           *certsdir, *cafile = NULL;
+	int             match_cn = 0;
 #endif
 
 	dns_random_init(seed);
@@ -305,9 +314,9 @@ main(int argc, char **argv)
 	close(7);
 	sig_ignore(sig_pipe);
 #ifdef TLS
-	if (!(controldir = env_get("CONTROLDIR")))
-		controldir = "/etc/indimail/control";
-	if (!stralloc_copys(&certfile, controldir))
+	if (!(certsdir = env_get("CERTSDIR")))
+		certsdir = "/etc/indimail/certs";
+	if (!stralloc_copys(&certfile, certsdir))
 		strerr_die2x(111, FATAL, "out of memory");
 	else
 	if (!stralloc_cats(&certfile, "/clientcert.pem"))
@@ -318,13 +327,13 @@ main(int argc, char **argv)
 #endif
 #ifdef IPV6
 #ifdef TLS
-	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:n:c:a:e:")) != opteof)
+	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:n:c:a:e:m")) != opteof)
 #else
-	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:m")) != opteof)
+	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:")) != opteof)
 #endif
 #else
 #ifdef TLS
-	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:n:c:a:e:")) != opteof)
+	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:n:c:a:e:m")) != opteof)
 #else
 	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:m")) != opteof)
 #endif
@@ -412,6 +421,9 @@ main(int argc, char **argv)
 			break;
 		case 'c':
 			cafile = optarg;
+			break;
+		case 'm':
+			match_cn = 1;
 			break;
 #endif
 		default:
@@ -607,7 +619,7 @@ CONNECTED:
 	if (!pathexec_env("TCPREMOTEINFO", x))
 		nomem();
 #ifdef TLS
-	if (flagssl && tls_init(s, certfile.s, cafile))
+	if (flagssl && tls_init(s, match_cn ? hostname : 0, certfile.s, cafile))
 		_exit(111);
 #endif
 	if (client_mode || flagssl)
