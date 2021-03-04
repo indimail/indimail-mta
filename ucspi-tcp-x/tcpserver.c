@@ -238,6 +238,7 @@
 #include "tcpremoteinfo.h"
 #include "rules.h"
 #include <sig.h>
+#include "iopause.h"
 #include "dns.h"
 #include "hasmysql.h"
 #include "control.h"
@@ -259,7 +260,8 @@ static char    *banner = "";
 static int      flagremoteinfo = 1;
 static int      flagremotehost = 1;
 static int      flagparanoid = 0;
-static ulong    timeout = 26, maxperip = 20, PerHostLimit = 20;
+static ulong    itimeout = 26, maxperip = 20, PerHostLimit = 20;
+static ulong    idle_timeout = 300;
 static ulong    limit = 40;
 static ulong    alloc_count = 0;
 static ulong    numchildren = 0;
@@ -562,9 +564,9 @@ doit(int t)
 #endif
 	if (flagremoteinfo) {
 #ifdef IPV6
-		if (remoteinfo6(&tcpremoteinfo, remoteip, remoteport, localip, localport, timeout, netif) == -1)
+		if (remoteinfo6(&tcpremoteinfo, remoteip, remoteport, localip, localport, itimeout, netif) == -1)
 #else
-		if (remoteinfo(&tcpremoteinfo, remoteip, remoteport, localip, localport, timeout) == -1)
+		if (remoteinfo(&tcpremoteinfo, remoteip, remoteport, localip, localport, itimeout) == -1)
 #endif
 			flagremoteinfo = 0;
 		if (!stralloc_0(&tcpremoteinfo))
@@ -1090,6 +1092,7 @@ usage(void)
 "[ -b backlog ]\n"
 "[ -l localname ]\n"
 "[ -t timeout ]\n"
+"[ -T timeoutidle ]\n"
 #if defined(HAS_MYSQL)
 "[ -m db.conf ]\n"
 #endif
@@ -1362,7 +1365,7 @@ main(int argc, char **argv, char **envp)
 		scan_ulong(x, &PerHostLimit);
 		maxperip = PerHostLimit;
 	}
-	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:t:u:g:l:b:B:c:C:pPoO"))
+	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:t:T:u:g:l:b:B:c:C:pPoO"))
 		strerr_die2x(111, FATAL, "out of memory");
 #ifdef IPV6
 	if (!stralloc_cats(&options, "46I:"))
@@ -1467,7 +1470,10 @@ main(int argc, char **argv, char **envp)
 			flagremoteinfo = 1;
 			break;
 		case 't':
-			scan_ulong(optarg, &timeout);
+			scan_ulong(optarg, &itimeout);
+			break;
+		case 'T':
+			scan_ulong(optarg, &idle_timeout);
 			break;
 		case 'U':
 			if ((x = env_get("UID")))
@@ -1798,7 +1804,7 @@ main(int argc, char **argv, char **envp)
 					SSL_set_bio(ssl, sbio, sbio);
 					close(pi2c[0]);
 					close(pi4c[1]);
-					translate(ssl, pi2c[1], pi4c[0], 3600);
+					translate(ssl, pi2c[1], pi4c[0], idle_timeout);
 					SSL_free(ssl);
 					_exit(0);
 				}
@@ -1868,11 +1874,11 @@ translate(SSL *ssl, int clearout, int clearin, unsigned int iotimeout)
 	int             flagexitasap, iopl, sslout, sslin;
 	ssize_t         n, r;
 
+	if (SSL_accept(ssl) <= 0)
+		strerr_die2x(111, DROP, "unable to accept SSL connection");
 	if ((sslin = SSL_get_fd(ssl)) == -1 || (sslout = SSL_get_fd(ssl)) == -1)
 		strerr_die2x(111, DROP, "unable to set up SSL connection");
 	flagexitasap = 0;
-	if (SSL_accept(ssl) <= 0)
-		strerr_die2x(111, DROP, "unable to accept SSL connection");
 	while (!flagexitasap) {
 		taia_now(&now);
 		taia_uint(&deadline, iotimeout);
