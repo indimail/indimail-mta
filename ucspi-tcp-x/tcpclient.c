@@ -95,7 +95,6 @@
 #endif
 
 #define FATAL "tcpclient: fatal: "
-#define CONNECT "tcpclient: unable to connect to "
 
 #ifndef	lint
 static char     sccsid[] = "$Id: tcpclient.c,v 1.17 2021-03-04 11:43:16+05:30 Cprogrammer Exp mbhangui $";
@@ -124,15 +123,15 @@ usage(void)
 #endif
 " [ -i localip ]\n"
 " [ -p localport ]\n"
-" [ -T timeoutconn ]\n"
 " [ -l localname ]\n"
+" [ -T timeoutconn ]\n"
 " [ -t timeoutinfo ]\n"
+" [ -a timeoutdata ]\n"
+" [ -e timeoutidle ]\n"
 #ifdef TLS
 " [ -n clientcert ]\n"
 " [ -c cafile ] \n"
 #endif
-" [ -a timeoutdata ]\n"
-" [ -e timeoutidle ]\n"
 " host port [program]");
 }
 
@@ -206,13 +205,17 @@ do_select(char **argv, int client_mode, int s)
 		sig_ignore(sig_pipe);
 		sig_catch(sig_child, sigchld);
 		sig_catch(sig_term, sigterm);
-		if (pipe(pi1) != 0 || pipe(pi2) != 0)
+		if (pipe(pi1) != 0 || pipe(pi2) != 0) {
+			ssl_free();
 			strerr_die2sys(111, FATAL, "unable to create pipe: ");
+		}
 		switch (pid = fork())
 		{
 			case -1:
+				ssl_free();
 				strerr_die2sys(111, FATAL, "fork: ");
 			case 0:
+				ssl_free();
 				sig_uncatch(sig_pipe);
 				sig_uncatch(sig_child);
 				sig_uncatch(sig_term);
@@ -249,6 +252,7 @@ do_select(char **argv, int client_mode, int s)
 			if (errno == EINTR)
 #endif
 				continue;
+			ssl_free();
 			strerr_die2sys(111, FATAL, "select: ");
 		} else
 		if (!r) { /*-timeout */
@@ -257,6 +261,7 @@ do_select(char **argv, int client_mode, int s)
 			strnum[fmt_ulong(strnum, timeout.tv_sec)] = 0;
 			strerr_warn4(FATAL, "idle timeout reached without input [", strnum, " sec]", 0);
 			close(s);
+			ssl_free();
 			_exit(111);
 		}
 		if (FD_ISSET(s, &rfds)) {
@@ -281,13 +286,16 @@ do_select(char **argv, int client_mode, int s)
 					close(pi1[1]);
 				break;
 			}
-			if ((n = safewrite(s, buf, n, dtimeout)) == -1)
+			if ((n = safewrite(s, buf, n, dtimeout)) == -1) {
+				ssl_free();
 				strerr_die2sys(111, FATAL, "unable to write to network: ");
+			}
 		}
 	}
 	if (pid > 0) {
+		ssl_free();
 		if (wait_pid(&wstat, pid) == -1)
-				strerr_die2sys(111, FATAL, "unable to get child status: ");
+			strerr_die2sys(111, FATAL, "unable to get child status: ");
 		if (wait_crashed(wstat))
 			strerr_die2x(111, FATAL, "child crashed");
 		_exit(wait_exitcode(wstat));
@@ -305,6 +313,7 @@ main(int argc, char **argv)
 #endif
 	int             opt, j, s, cloop, client_mode = 0, flagssl = 0;
 #ifdef TLS
+	SSL             *ssl;
 	char           *certsdir, *cafile = NULL;
 	int             match_cn = 0;
 #endif
@@ -415,9 +424,9 @@ main(int argc, char **argv)
 		case 'n':
 			if (!optarg)
 				usage();
-			flagssl = 1;
 			if (*optarg  && (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile)))
 				strerr_die2x(111, FATAL, "out of memory");
+			flagssl = access(certfile.s, F_OK) ? 0 : 1;
 			break;
 		case 'c':
 			cafile = optarg;
@@ -519,7 +528,7 @@ main(int argc, char **argv)
 #else
 				ipstr[ip4_fmt(ipstr, addresses.s + j)] = 0;
 #endif
-				strerr_warn5(CONNECT, ipstr, " port ", strnum, ": ", &strerr_sys);
+				strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ", strnum, ": ", &strerr_sys);
 			}
 		}
 		if (!stralloc_copy(&addresses, &moreaddresses))
@@ -619,8 +628,12 @@ CONNECTED:
 	if (!pathexec_env("TCPREMOTEINFO", x))
 		nomem();
 #ifdef TLS
-	if (flagssl && tls_init(s, match_cn ? hostname : 0, certfile.s, cafile))
-		_exit(111);
+	if (flagssl) {
+		if (!(ssl = tls_init(s, certfile.s, cafile)))
+			_exit(111);
+		if (tls_connect(ssl, match_cn ? hostname : 0) == -1)
+			_exit(111);
+	}
 #endif
 	if (client_mode || flagssl)
 		_exit(do_select(argv, client_mode, s));
