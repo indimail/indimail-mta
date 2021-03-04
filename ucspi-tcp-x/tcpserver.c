@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.73  2021-03-04 11:42:45+05:30  Cprogrammer
+ * use CERTSDIR for certificates
+ *
  * Revision 1.72  2021-03-03 12:11:09+05:30  Cprogrammer
  * changed return types to ssize_t for read, write functions
  *
@@ -242,7 +245,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.72 2021-03-03 12:11:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.73 2021-03-04 11:42:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1350,7 +1353,7 @@ main(int argc, char **argv, char **envp)
 	BIO            *sbio;
 	SSL            *ssl;
 	SSL_CTX        *ctx;
-	char           *controldir;
+	char           *certsdir;
 	int             pi2c[2], pi4c[2];
 #endif
 	struct stralloc options = {0};
@@ -1373,9 +1376,9 @@ main(int argc, char **argv, char **envp)
 		strerr_die2x(111, FATAL, "out of memory");
 #ifdef TLS
 	ctx = NULL;
-	if (!(controldir = env_get("CONTROLDIR")))
-		controldir = "/etc/indimail/control";
-	if (!stralloc_copys(&certfile, controldir))
+	if (!(certsdir = env_get("CERTSDIR")))
+		certsdir = "/etc/indimail/certs";
+	if (!stralloc_copys(&certfile, certsdir))
 		strerr_die2x(111, FATAL, "out of memory");
 	else
 	if (!stralloc_cats(&certfile, "/servercert.pem"))
