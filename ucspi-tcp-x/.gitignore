@@ -61,3 +61,4 @@ DIRS
 conf-libexec
 conf-servicedir
 ucspi-tcp.perms
+tcpclient.1

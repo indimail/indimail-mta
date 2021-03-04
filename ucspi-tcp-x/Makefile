@@ -4,7 +4,6 @@ SHELL=/bin/sh
 SSLLIBS := -lssl -lcrypto
 include Makevars.$(SYSTEM)
 edit = sed \
-	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@prefix\@,$(prefix),g' \
@@ -107,10 +106,9 @@ warn-auto.sh choose.sh conf-prefix
 	chmod 755 choose
 
 tcpserver.1: tcpserver.9
-	cat tcpserver.9 \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	> tcpserver.1
+	$(edit) tcpserver.9 > $@
+tcpclient.1: tcpclient.9
+	$(edit) tcpclient.9 > $@
 
 commands.o: \
 compile commands.c commands.h

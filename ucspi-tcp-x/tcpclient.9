@@ -114,8 +114,9 @@ Never delay sending data; enable TCP_NODELAY.
 
 .TP
 .B \-n \fIclientcert
-Instead of the default clientcert.pem certificate use the specified
-.IR certfile .
+Instead of the default clientcert.pem certificate in @qsysconfdir@/certs,
+use the specified \fIclientcert\fR. The location of certificate directory
+can be changed by setting \fBCERTSDIR\fR environment variable.
 
 .TP
 .B \-c \fIcafile
@@ -125,6 +126,10 @@ by your issuing CA expires. Note that the file given with -c is passed
 to SSL_CTX_load_verify_locations and thus may contain several CA
 certificates, which will be used during SSL connection negotiation to
 close any gap in the certificate chain.
+
+.TP
+.B \-m
+Match \fIhost\fR with common name in certificate (CN)
 
 .TP
 .B \-e \fIidletimeout
@@ -176,9 +181,9 @@ Specifies the ciphers that should be used in SSL/TLS mode. See
 .I openssl(1)
 for more information.
 .TP
-.B CONTROLDIR
-Sub-directory relative to SYSCONFDIR, having servercert.pem.
-Default is SYSCONFDIR/control.
+.B CERTSDIR
+Sub-directory relative to @qsysconfdir@, having servercert.pem.
+Default is @qsysconfdir@/certs.
 
 .SH SEE ALSO
 tcpserver(1),

@@ -148,3 +148,4 @@ addcr.o
 iopause.o
 iopause.h
 tls.o
+tcpclient.1

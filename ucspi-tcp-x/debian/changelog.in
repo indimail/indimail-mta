@@ -3,3 +3,6 @@ ucspi-tcp (@version@-@release@) unstable; urgency=low
   * tcpserver.c renamed SSL_CIPHER to TLS_CIPHER_LIST
   * tcpclient.c: added SSL/TLS support
   * tcpclient.c: added client mode feature making prog optional
+  * tls.c: added option to match host with common name
+  * tcpclient.c, tcpserver.c: Use CERTSDIR env variable to specify custom certificate location
+  * tcpclient.c: added -m option to match host with common name
