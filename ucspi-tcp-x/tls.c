@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.3  2021-03-04 11:45:18+05:30  Cprogrammer
+ * match host with common name
+ *
  * Revision 1.2  2021-03-04 00:28:07+05:30  Cprogrammer
  * fixed compilation for non tls
  *
@@ -8,19 +11,22 @@
  *
  */
 #include <sys/types.h>
+#ifdef TLS
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <case.h>
+#endif
 #include <sys/select.h>
 #include <unistd.h>
 #include <strerr.h>
 #include <env.h>
 #include <error.h>
-#include "timeoutread.h"
-#include "timeoutwrite.h"
+#include <timeoutread.h>
+#include <timeoutwrite.h>
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.2 2021-03-04 00:28:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.3 2021-03-04 11:45:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -46,8 +52,8 @@ verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
 	return 1;
 }
 
-int
-check_cert(SSL *myssl)
+static int
+check_cert(SSL *myssl, char *host)
 {
 	X509           *peer;
     char            peer_CN[256];
@@ -69,16 +75,16 @@ check_cert(SSL *myssl)
 			ERR_error_string(ERR_get_error(), 0), 0);
 		return (1);
 	}
-    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, 256);
-	/*-
-    if (strcasecmp(peer_CN,host))
-    err_exit("Common name doesn't match host name");
-	*/
+    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, sizeof(peer_CN) - 1);
+	if (host && case_diffs(peer_CN, host)) {
+    	strerr_warn2("hostname doesn't match Common Name ", peer_CN, 0);
+		return (1);
+	}
 	return (0);
 }
 
 int
-tls_init(int fd, char *clientcert, char *cafile)
+tls_init(int fd, char *host, char *clientcert, char *cafile)
 {
 	int             ret;
 	SSL            *myssl;
@@ -166,7 +172,7 @@ tls_init(int fd, char *clientcert, char *cafile)
 		errno = EPROTO;
 		return (1);
 	}
-    return (check_cert(myssl));
+    return (check_cert(myssl, host));
 }
 
 const char     *
