@@ -1,23 +1,7 @@
 /*
  * $Log: tcpclient.c,v $
- * Revision 1.17  2021-03-04 11:43:16+05:30  Cprogrammer
- * use CERTSDIR for certificates
- * added -m option for matching host with common name
- *
- * Revision 1.16  2021-03-03 22:50:55+05:30  Cprogrammer
- * renamed default certificate to clientcert.pem
- *
- * Revision 1.15  2021-03-03 18:45:24+05:30  Cprogrammer
- * fixed idle timeout
- *
- * Revision 1.14  2021-03-03 17:44:14+05:30  Cprogrammer
- * added client mode feature
- *
- * Revision 1.13  2021-03-03 13:46:07+05:30  Cprogrammer
- * fixed compiler warning
- *
- * Revision 1.12  2021-03-03 13:43:26+05:30  Cprogrammer
- * added SSL/TLS support
+ * Revision 1.12  2021-03-06 21:24:02+05:30  Cprogrammer
+ * added SSL/TLS and opportunistic TLS
  *
  * Revision 1.11  2020-09-16 20:50:19+05:30  Cprogrammer
  * FreeBSD fix
@@ -53,11 +37,11 @@
  * Initial revision
  *
  */
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <netdb.h>
 #include <sig.h>
-#include <getopt.h>
 #ifdef DARWIN
 #define opteof -1
 #else
@@ -84,20 +68,21 @@
 #include "timeoutconn.h"
 #include "tcpremoteinfo.h"
 #include "dns.h"
-#include <unistd.h>
 #include <timeoutread.h>
 #include <timeoutwrite.h>
 #include <wait.h>
 #include "tls.h"
 #ifdef TLS
 #include <openssl/ssl.h>
+#include <case.h>
 #include <env.h>
+#include <getln.h>
 #endif
 
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.17 2021-03-04 11:43:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.12 2021-03-06 21:24:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -114,25 +99,25 @@ usage(void)
 	strerr_die1x(100, "usage: tcpclient"
 #ifdef IPV6
 #ifdef TLS
-" [ -46hHrRdDqQmv ]\n"
+	 " [ -46hHrRdDqQmv ]\n"
 #else
-" [ -46hHrRdDqQv ]\n"
+	 " [ -46hHrRdDqQv ]\n"
 #endif
 #else
-" [ -hHrRdDqQv ]\n"
+	 " [ -hHrRdDqQv ]\n"
 #endif
-" [ -i localip ]\n"
-" [ -p localport ]\n"
-" [ -l localname ]\n"
-" [ -T timeoutconn ]\n"
-" [ -t timeoutinfo ]\n"
-" [ -a timeoutdata ]\n"
-" [ -e timeoutidle ]\n"
+	 " [ -i localip ]\n"
+	 " [ -p localport ]\n"
+	 " [ -l localname ]\n"
+	 " [ -T timeoutconn ]\n"
+	 " [ -t timeoutinfo ]\n"
+	 " [ -a timeoutdata ]\n"
 #ifdef TLS
-" [ -n clientcert ]\n"
-" [ -c cafile ] \n"
+	 " [ -n clientcert ]\n"
+	 " [ -c cafile ] \n"
+	 " [ -s starttlsType (smpt|pop3|imap) ]\n"
 #endif
-" host port [program]");
+	 " host port [program]");
 }
 
 int             verbosity = 1;
@@ -141,7 +126,7 @@ int             flagremoteinfo = 1;
 int             flagremotehost = 1;
 unsigned long   itimeout = 26;
 unsigned long   ctimeout[2] = { 2, 58 };
-unsigned long   dtimeout = 60, idle_timeout=300;
+unsigned long   dtimeout = 300;
 #ifdef IPV6
 int             forcev6 = 0;
 char            iplocal[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
@@ -176,7 +161,8 @@ sigterm()
 void
 sigchld()
 {
-	int             i, wstat, pid;
+	int             i, wstat;
+	pid_t           pid;
 
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		strnum[fmt_ulong(strnum, pid)] = 0;
@@ -191,18 +177,17 @@ sigchld()
 }
 
 int
-do_select(char **argv, int client_mode, int s)
+do_select(char **argv, int flag_tcpclient, int s)
 {
 	char            buf[512];
-	int             wstat, r, pid, pi1[2], pi2[2], fdhigh,
-					fdin, fdout, flagexitasp = 0;
+	int             wstat, r, pi1[2], pi2[2], fdhigh, fdin, fdout,
+					flagexitasap = 0;
+	pid_t           pid;
 	ssize_t         n;
 	fd_set          rfds;	/*- File descriptor mask for select -*/
 	struct timeval  timeout;
 
-	if (!client_mode) {
-		sig_catch(sig_child, sigchld);
-		sig_ignore(sig_pipe);
+	if (flag_tcpclient) {
 		sig_catch(sig_child, sigchld);
 		sig_catch(sig_term, sigterm);
 		if (pipe(pi1) != 0 || pipe(pi2) != 0) {
@@ -211,37 +196,36 @@ do_select(char **argv, int client_mode, int s)
 		}
 		switch (pid = fork())
 		{
-			case -1:
-				ssl_free();
-				strerr_die2sys(111, FATAL, "fork: ");
-			case 0:
-				ssl_free();
-				sig_uncatch(sig_pipe);
-				sig_uncatch(sig_child);
-				sig_uncatch(sig_term);
-				close(pi1[1]);
-				close(pi2[0]);
-				if ((fd_move(6, pi1[0]) == -1) || (fd_move(7, pi2[1]) == -1))
-					strerr_die2sys(111, FATAL, "unable to set up descriptors: ");
-				pathexec(argv);
-				strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
-				/* Not reached */
-				_exit(0);
-			default:
-				break;
+		case -1:
+			ssl_free();
+			strerr_die2sys(111, FATAL, "fork: ");
+		case 0:
+			ssl_free();
+			sig_uncatch(sig_pipe);
+			sig_uncatch(sig_child);
+			sig_uncatch(sig_term);
+			close(pi1[1]);
+			close(pi2[0]);
+			if ((fd_move(6, pi1[0]) == -1) || (fd_move(7, pi2[1]) == -1))
+				strerr_die2sys(111, FATAL, "unable to set up descriptors: ");
+			pathexec(argv);
+			strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
+			/* Not reached */
+			_exit(0);
+		default:
+			break;
 		}
 		fdhigh = pi2[0];
 		fdin = pi2[0];
 		fdout = pi1[1];
 	} else {
-		pid = -1;
 		fdhigh = s;
 		fdin = 0;
 		fdout = 1;
 	}
-	while (!flagexitasp) {
-		timeout.tv_sec = idle_timeout;
-		timeout.tv_usec = 0;
+	timeout.tv_sec = dtimeout;
+	timeout.tv_usec = 0;
+	while (!flagexitasap) {
 		FD_ZERO(&rfds);
 		FD_SET(s, &rfds);
 		FD_SET(fdin, &rfds);
@@ -252,16 +236,14 @@ do_select(char **argv, int client_mode, int s)
 			if (errno == EINTR)
 #endif
 				continue;
-			ssl_free();
 			strerr_die2sys(111, FATAL, "select: ");
 		} else
 		if (!r) { /*-timeout */
-			timeout.tv_sec = idle_timeout;
+			timeout.tv_sec = dtimeout;
 			timeout.tv_usec = 0;
 			strnum[fmt_ulong(strnum, timeout.tv_sec)] = 0;
 			strerr_warn4(FATAL, "idle timeout reached without input [", strnum, " sec]", 0);
 			close(s);
-			ssl_free();
 			_exit(111);
 		}
 		if (FD_ISSET(s, &rfds)) {
@@ -269,7 +251,7 @@ do_select(char **argv, int client_mode, int s)
 				strerr_die2sys(111, FATAL, "unable to read from network: ");
 			else
 			if (!n) { /*- remote closed socket */
-				flagexitasp = 1;
+				flagexitasap = 1;
 				close(pi1[1]);
 				break;
 			}
@@ -281,19 +263,17 @@ do_select(char **argv, int client_mode, int s)
 				strerr_die2sys(111, FATAL, "unable to read from child: ");
 			else
 			if (!n) { /*- prog exited */
-				flagexitasp = 1;
-				if (!client_mode)
+				flagexitasap = 1;
+				if (flag_tcpclient)
 					close(pi1[1]);
 				break;
 			}
 			if ((n = safewrite(s, buf, n, dtimeout)) == -1) {
-				ssl_free();
 				strerr_die2sys(111, FATAL, "unable to write to network: ");
 			}
 		}
-	}
-	if (pid > 0) {
-		ssl_free();
+	} /*- while (!flagexitasap) */
+	if (flag_tcpclient) {
 		if (wait_pid(&wstat, pid) == -1)
 			strerr_die2sys(111, FATAL, "unable to get child status: ");
 		if (wait_crashed(wstat))
@@ -303,6 +283,49 @@ do_select(char **argv, int client_mode, int s)
 	return (close(s)); 
 }
 
+#ifdef TLS
+ssize_t
+sslread(int fd, char *buf, size_t len)
+{
+	return (saferead(fd, buf, len, dtimeout));
+}
+
+int
+do_starttls(int sfd, enum starttls stls, char *clientcert)
+{
+	char            inbuf[512];
+	int             match;
+	unsigned long   code;
+	static stralloc line = { 0 };
+	struct substdio ssin;
+
+	switch (stls)
+	{
+	case smtp:
+		substdio_fdbuf(&ssin, sslread, sfd, inbuf, sizeof(inbuf));
+		if (safewrite(sfd, "STARTTLS\r\n", 10, dtimeout) == -1)
+			strerr_die2sys(111, FATAL, "unable to write to network: ");
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+		if (!line.len || !match)
+			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
+		scan_ulong(line.s, &code);
+		if (code != 220)
+			strerr_die4x(111, FATAL, "STARTTLS rejected while ", clientcert, " exists");
+		break;
+	case pop3:
+		strerr_die2x(100, FATAL, "startls pop3 code not yet ready");
+		break;
+	case imap:
+		strerr_die2x(100, FATAL, "startls imap code not yet ready");
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
+#endif
+
 int
 main(int argc, char **argv)
 {
@@ -311,10 +334,12 @@ main(int argc, char **argv)
 #ifdef IPV6
 	int             fakev4 = 0;
 #endif
-	int             opt, j, s, cloop, client_mode = 0, flagssl = 0;
+	int             opt, j, s, cloop, flag_tcpclient = 0, flagssl = 0;
 #ifdef TLS
-	SSL             *ssl;
-	char           *certsdir, *cafile = NULL;
+	SSL_CTX        *ctx;
+	SSL            *ssl;
+	char           *certsdir, *cafile = (char *) NULL, *ciphers = (char *) NULL;
+	enum starttls   stls = unknown;
 	int             match_cn = 0;
 #endif
 
@@ -336,15 +361,15 @@ main(int argc, char **argv)
 #endif
 #ifdef IPV6
 #ifdef TLS
-	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:n:c:a:e:m")) != opteof)
+	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:a:n:c:s:m")) != opteof)
 #else
-	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:")) != opteof)
+	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:a:")) != opteof)
 #endif
 #else
 #ifdef TLS
-	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:n:c:a:e:m")) != opteof)
+	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:a:n:c:s:m")) != opteof)
 #else
-	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:m")) != opteof)
+	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:a:")) != opteof)
 #endif
 #endif
 	{
@@ -412,10 +437,6 @@ main(int argc, char **argv)
 			scan_ulong(optarg, &u);
 			portlocal = u;
 			break;
-		case 'e':
-			scan_ulong(optarg, &u);
-			idle_timeout = u;
-			break;
 		case 'a':
 			scan_ulong(optarg, &u);
 			dtimeout = u;
@@ -430,6 +451,19 @@ main(int argc, char **argv)
 			break;
 		case 'c':
 			cafile = optarg;
+			break;
+		case 's':
+			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3")
+					&& case_diffs(optarg, "imap"))
+				usage();
+			if (!case_diffs(optarg, "smtp"))
+				stls = smtp;
+			else
+			if (!case_diffs(optarg, "pop3"))
+				stls = pop3;
+			else
+			if (!case_diffs(optarg, "imap"))
+				stls = imap;
 			break;
 		case 'm':
 			match_cn = 1;
@@ -462,8 +496,8 @@ main(int argc, char **argv)
 		portremote = ntohs(se->s_port);
 		/*- i continue to be amazed at the stupidity of the s_port interface */
 	}
-	if (!*++argv)
-		client_mode = 1;
+	if (*++argv)
+		flag_tcpclient = 1;
 	if (!stralloc_copys(&tmp, hostname))
 		nomem();
 #ifdef IPV6
@@ -629,14 +663,22 @@ CONNECTED:
 		nomem();
 #ifdef TLS
 	if (flagssl) {
-		if (!(ssl = tls_init(s, certfile.s, cafile)))
+		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
+			ciphers = "PROFILE=SYSTEM";
+		if (!(ctx = tls_init(certfile.s, cafile, ciphers, client)))
 			_exit(111);
+		if (!(ssl = tls_session(ctx, s, ciphers)))
+			_exit(111);
+		SSL_CTX_free(ctx);
+		ctx = (SSL_CTX *) NULL;
+		if (stls != unknown)
+			do_starttls(s, stls, certfile.s);
 		if (tls_connect(ssl, match_cn ? hostname : 0) == -1)
 			_exit(111);
 	}
 #endif
-	if (client_mode || flagssl)
-		_exit(do_select(argv, client_mode, s));
+	if (!flag_tcpclient || flagssl)
+		_exit(do_select(argv, flag_tcpclient, s));
 	else {
 		if (fd_move(6, s) == -1)
 			strerr_die2sys(111, FATAL, "unable to set up descriptor 6: ");
@@ -650,9 +692,11 @@ CONNECTED:
 	return (0);
 }
 
+#ifndef lint
 void
 getversion_tcpclient_c()
 {
 	if (write(1, sccsid, 0) == -1)
 		;
 }
+#endif
