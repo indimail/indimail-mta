@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.75  2021-03-06 23:13:51+05:30  Cprogrammer
+ * use tls functions from tls.c
+ *
  * Revision 1.74  2021-03-04 23:00:14+05:30  Cprogrammer
  * added idle timeout parameter
  *
@@ -203,6 +206,7 @@
 #include <sys/ipc.h>
 #ifdef TLS
 #include <openssl/ssl.h>
+#include "tls.h"
 #endif
 #include <str.h>
 #include <byte.h>
@@ -229,7 +233,6 @@
 #include <subfd.h>
 #include <error.h>
 #include <strerr.h>
-#include <getopt.h>
 #ifdef DARWIN
 #define opteof -1
 #else
@@ -249,7 +252,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.74 2021-03-04 23:00:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.75 2021-03-06 23:13:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -272,8 +275,6 @@ static ulong    backlog = 20;
 #ifdef TLS
 static int      flagssl = 0;
 struct stralloc certfile = {0};
-struct stralloc cafile = {0};
-static char     tbuf[2048];
 #endif
 
 static stralloc tcpremoteinfo;
@@ -329,9 +330,6 @@ void            remove_ip(pid_t);
 int             socket_ipoptionskill(int);
 int             socket_ip6optionskill(int);
 int             socket_tcpnodelay(int);
-#ifdef TLS
-void            translate(SSL *, int, int, unsigned int);
-#endif
 int             tcpserver_plugin(char **, int);
 extern char   **environ;
 
@@ -1080,34 +1078,34 @@ void
 usage(void)
 {
 	strerr_warn1(
-"tcpserver: usage: tcpserver\n"
+		 "tcpserver: usage: tcpserver\n"
 #ifdef IPV6
-"[ -461UXpPhHrRoOdDqQv ]\n"
+		 "[ -461UXpPhHrRoOdDqQv ]\n"
 #else
-"[ -1UXpPhHrRoOdDqQv ]\n"
+		 "[ -1UXpPhHrRoOdDqQv ]\n"
 #endif
-"[ -c Maxlimit | -c concurrency_file]\n"
-"[ -C PerHostlimit ]\n"
-"[ -x rules.cdb ]\n"
-"[ -B banner ]\n"
-"[ -g gid ]\n"
-"[ -u uid ]\n"
-"[ -b backlog ]\n"
-"[ -l localname ]\n"
-"[ -t timeout ]\n"
-"[ -T timeoutidle ]\n"
+		 "[ -c Maxlimit | -c concurrency_file]\n"
+		 "[ -C PerHostlimit ]\n"
+		 "[ -x rules.cdb ]\n"
+		 "[ -B banner ]\n"
+		 "[ -g gid ]\n"
+		 "[ -u uid ]\n"
+		 "[ -b backlog ]\n"
+		 "[ -l localname ]\n"
+		 "[ -t timeout ]\n"
+		 "[ -T timeoutidle ]\n"
 #if defined(HAS_MYSQL)
-"[ -m db.conf ]\n"
+		 "[ -m db.conf ]\n"
 #endif
 #ifdef TLS
-"[ -s ]\n"
-"[ -n certfile ]\n"
-"[ -a cafile ] \n"
+		 "[ -s ]\n"
+		 "[ -n certfile ]\n"
+		 "[ -a cafile ] \n"
 #endif
 #ifdef IPV6
-"[ -I interface ]\n"
+		 "[ -I interface ]\n"
 #endif
-"host port program", 0);
+		 "host port program", 0);
 	_exit(100);
 }
 
@@ -1356,10 +1354,10 @@ main(int argc, char **argv, char **envp)
 #endif
 #endif
 #ifdef TLS
-	BIO            *sbio;
 	SSL            *ssl;
-	SSL_CTX        *ctx;
-	char           *certsdir;
+	SSL_CTX        *ctx = (SSL_CTX *) NULL;
+	char           *certsdir, *ciphers = (char *) NULL,
+				   *cafile = (char *) NULL;
 	int             pi2c[2], pi4c[2];
 #endif
 	struct stralloc options = {0};
@@ -1381,7 +1379,6 @@ main(int argc, char **argv, char **envp)
 	if (!stralloc_0(&options))
 		strerr_die2x(111, FATAL, "out of memory");
 #ifdef TLS
-	ctx = NULL;
 	if (!(certsdir = env_get("CERTSDIR")))
 		certsdir = "/etc/indimail/certs";
 	if (!stralloc_copys(&certfile, certsdir))
@@ -1506,8 +1503,7 @@ main(int argc, char **argv, char **envp)
 				strerr_die2x(111, FATAL, "out of memory");
 			break;
 		case 'a':
-			if (!stralloc_copys(&cafile, optarg) || !stralloc_0(&cafile))
-				strerr_die2x(111, FATAL, "out of memory");
+			cafile = optarg;
 			break;
 #endif
 #ifdef IPV6
@@ -1587,21 +1583,10 @@ main(int argc, char **argv, char **envp)
 #ifdef TLS
 	if (flagssl == 1) {
     	/* setup SSL context (load key and cert into ctx) */
-		SSL_library_init();
-		if (!(ctx = SSL_CTX_new(SSLv23_server_method())))
-			strerr_die2x(111, FATAL, "unable to create SSL context");
-		/* set prefered ciphers */
-#ifdef CRYPTO_POLICY_NON_COMPLIANCE
-		x = env_get("TLS_CIPHER_LIST");
-		if (x && !SSL_CTX_set_cipher_list(ctx, x))
-			strerr_die3x(111, FATAL, "unable to set cipher list:", x);
-#endif
-		if (SSL_CTX_use_RSAPrivateKey_file(ctx, certfile.s, SSL_FILETYPE_PEM) != 1)
-			strerr_die2x(111, FATAL, "unable to load RSA private key");
-		if (SSL_CTX_use_certificate_file(ctx, certfile.s, SSL_FILETYPE_PEM) != 1)
-			strerr_die2x(111, FATAL, "unable to load certificate");
-		if (cafile.s && 1 != SSL_CTX_load_verify_locations(ctx, cafile.s, 0))
-			strerr_die2x(111, FATAL, "unable to load cafile");
+		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
+			ciphers = "PROFILE=SYSTEM";
+		if (!(ctx = tls_init(certfile.s, cafile, ciphers, server)))
+			_exit(111);
 	}
 #endif
 #ifdef IPV6
@@ -1789,28 +1774,19 @@ main(int argc, char **argv, char **envp)
 				case -1:
 					strerr_die2sys(111, DROP, "unable to fork: ");
 				default:
-					ssl = SSL_new(ctx);
-					SSL_CTX_free(ctx);
-					if (!ssl)
-						strerr_die2x(111, DROP, "unable to set up SSL session");
-#ifdef CRYPTO_POLICY_NON_COMPLIANCE
-					if (!(x = env_get("TLS_CIPHER_LIST")))
-						x = "PROFILE:SYSTEM";
-					if (!SSL_set_cipher_list(myssl, x))
-						strerr_die3x(111, FATAL, "unable to set cipher list:", x);
-#endif
-					sbio = BIO_new_socket(0, BIO_NOCLOSE);
-					if (!sbio) {
-						SSL_free(ssl);
-						strerr_die2x(111, DROP, "unable to set up BIO socket");
-					}
-					SSL_set_bio(ssl, sbio, sbio);
 					close(pi2c[0]);
 					close(pi4c[1]);
-					translate(ssl, pi2c[1], pi4c[0], idle_timeout);
-					SSL_free(ssl);
-					_exit(0);
-				}
+					break;
+				} /*- switch fork() */
+				if (!(ssl = tls_session(ctx, 0, ciphers)))
+					strerr_die2x(111, DROP, "unable to setup SSL session");
+				SSL_CTX_free(ctx);
+				ctx = (SSL_CTX *) NULL;
+				if (tls_accept(ssl))
+					strerr_die2x(111, DROP, "unable to accept SSL connection");
+				translate(ssl, pi2c[1], pi4c[0], idle_timeout);
+				SSL_free(ssl);
+				_exit(0);
 			}
 #endif
 			pathexec(argv);
@@ -1825,100 +1801,6 @@ main(int argc, char **argv, char **envp)
 		close(t);
 	}
 }
-
-#ifdef TLS
-static ssize_t
-allwrite(int fd, char *buf, int len)
-{
-	ssize_t         w;
-	size_t          total = 0;
-
-	while (len) {
-		if ((w = write(fd, buf, len)) == -1) {
-			if (errno == error_intr)
-				continue;
-			return -1;	/*- note that some data may have been written */
-		}
-		if (w == 0)
-			;	/*- luser's fault */
-		buf += w;
-		total += w;
-		len -= w;
-	}
-	return total;
-}
-
-static ssize_t
-allwritessl(SSL *ssl, char *buf, int len)
-{
-	ssize_t         w;
-	size_t          total = 0;
-
-	while (len) {
-		if ((w = SSL_write(ssl, buf, len)) == -1) {
-			if (errno == error_intr)
-				continue;
-			return -1;	/*- note that some data may have been written */
-		}
-		if (w == 0)
-			;	/*- luser's fault */
-		buf += w;
-		total += w;
-		len -= w;
-	}
-	return total;
-}
-
-void
-translate(SSL *ssl, int clearout, int clearin, unsigned int iotimeout)
-{
-	struct taia     now, deadline;
-	iopause_fd      iop[2];
-	int             flagexitasap, iopl, sslout, sslin;
-	ssize_t         n, r;
-
-	if (SSL_accept(ssl) <= 0)
-		strerr_die2x(111, DROP, "unable to accept SSL connection");
-	if ((sslin = SSL_get_fd(ssl)) == -1 || (sslout = SSL_get_fd(ssl)) == -1)
-		strerr_die2x(111, DROP, "unable to set up SSL connection");
-	flagexitasap = 0;
-	while (!flagexitasap) {
-		taia_now(&now);
-		taia_uint(&deadline, iotimeout);
-		taia_add(&deadline, &now, &deadline);
-
-		/*- fill iopause struct */
-		iopl = 2;
-		iop[0].fd = sslin;
-		iop[0].events = IOPAUSE_READ;
-		iop[1].fd = clearin;
-		iop[1].events = IOPAUSE_READ;
-
-		/*- do iopause read */
-		iopause(iop, iopl, &deadline, &now);
-		if (iop[0].revents) {
-			/*- data on sslin */
-			if ((n = SSL_read(ssl, tbuf, sizeof(tbuf))) < 0)
-				strerr_die2sys(111, DROP, "unable to read from network: ");
-			if (n == 0)
-				flagexitasap = 1;
-			if ((r = allwrite(clearout, tbuf, n)) == -1)
-				strerr_die2sys(111, DROP, "unable to write to client: ");
-		}
-		if (iop[1].revents) {
-			/*- data on clearin */
-			if ((n = read(clearin, tbuf, sizeof(tbuf))) < 0)
-				strerr_die2sys(111, DROP, "unable to read from client: ");
-			if (n == 0)
-				flagexitasap = 1;
-			if ((r = allwritessl(ssl, tbuf, n)) == -1)
-				strerr_die2sys(111, DROP, "unable to write to network: ");
-		}
-		if (!iop[0].revents && !iop[1].revents)
-			strerr_die2x(0, DROP, "timeout reached without input");
-	}
-}
-#endif
 
 void
 getversion_tcpserver_c()
