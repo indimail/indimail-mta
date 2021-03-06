@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.13  2021-03-06 23:12:11+05:30  Cprogrammer
+ * make specifying certificate mandatory for starttls option
+ *
  * Revision 1.12  2021-03-06 21:24:02+05:30  Cprogrammer
  * added SSL/TLS and opportunistic TLS
  *
@@ -82,7 +85,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.12 2021-03-06 21:24:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.13 2021-03-06 23:12:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -459,11 +462,14 @@ main(int argc, char **argv)
 			if (!case_diffs(optarg, "smtp"))
 				stls = smtp;
 			else
-			if (!case_diffs(optarg, "pop3"))
+			if (!case_diffs(optarg, "pop3")) {
 				stls = pop3;
-			else
-			if (!case_diffs(optarg, "imap"))
+				strerr_die2x(100, FATAL, "starttls pop3 code not yet ready");
+			} else
+			if (!case_diffs(optarg, "imap")) {
 				stls = imap;
+				strerr_die2x(100, FATAL, "starttls imap code not yet ready");
+			}
 			break;
 		case 'm':
 			match_cn = 1;
@@ -498,6 +504,8 @@ main(int argc, char **argv)
 	}
 	if (*++argv)
 		flag_tcpclient = 1;
+	if (!flagssl && stls != unknown)
+		strerr_die2x(100, FATAL, "STARTTLS options require Certificates");
 	if (!stralloc_copys(&tmp, hostname))
 		nomem();
 #ifdef IPV6
