@@ -1,5 +1,8 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.4  2021-03-06 23:14:58+05:30  Cprogrammer
+ * added server functions
+ *
  * Revision 1.3  2021-03-04 22:59:59+05:30  Cprogrammer
  * generic tls.c for connect, accept
  *
@@ -17,15 +20,21 @@
 #include <openssl/ssl.h>
 #endif
 
-enum  tlsmode  {client, server};
+enum tlsmode  {none = 0, client = 1, server = 2};
+enum starttls {smtp, pop3, imap, unknown};
 
 ssize_t         saferead(int, char *, size_t, long);
 ssize_t         safewrite(int, char *, size_t, long);
+ssize_t         allwrite(int, char *, int);
 #ifdef TLS
-SSL            *tls_init(int, char *, char *);
+SSL_CTX        *tls_init(char *, char *, char *, enum tlsmode);
+SSL            *tls_session(SSL_CTX *, int, char *);
 int             tls_connect(SSL *, char *);
 int             tls_accept(SSL *);
 void            ssl_free();
+int             translate(SSL *, int, int, unsigned int);
+ssize_t         allwritessl(SSL *ssl, char *buf, int len);
+const char     *myssl_error_str();
 #endif
 
 #endif

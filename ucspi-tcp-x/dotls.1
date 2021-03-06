@@ -1,0 +1,81 @@
+.TH "dotls" "1" "06 Mar 2010" "Manvendra Bhangui" ""
+
+.SH NAME
+dotls \- TLS/SSL protocol wrapper
+.SH SYNOPSIS
+
+\fBdotls\fR [ \fB\fIoptions\fB\fR ] \fB\fIprog\fB\fR \fB\fIarg\fB\fR\fI ...\fR
+
+.SH "DESCRIPTION"
+.PP
+The \fBdotls\fR program is used by applications to encrypt a
+network connection using SSL/TLS, without having the application
+deal with the gory details of SSL/TLS.
+
+.PP
+\fBdotls\fR is not usually run directly from the command line.
+An application typically creates a network connection, then runs
+\fBdotls\fR with appropriate options to encrypt the network
+connection with SSL/TLS. \fBdotls\fR can also do opportunistic
+SSL/TLS for smtp in server mode.
+
+\fBdotls\fR can be run under \fBtcpserver\fR(1) to provide SSL/TLS or
+opportunistic TLS for qmail-smtpd, qmail-pop3d. This is known as
+\fBserver mode\fR.
+
+\fBdotls\fR can be run under \fBtcpclient\fR(1) to connect to any SSL/TLS
+enabled server. This is knwn is \fBclient mode\fR. This gets enabled
+when you use \fB\-T\fR or the \fB\-C\fR options.
+
+\fBdotls\fR is not needed by indimail-mta as all features offered by
+\fBdotls\fR are built-in tcpserver(1) and tcpclient(1) provided by
+ucspi-tcp package from indimail-mta git repo at
+https://github.com/mbhangui/indimail-mta/tree/master/ucspi-tcp-x
+
+.SH "OPTIONS"
+.TP
+\fB-n \fIcertfile\fB\fR
+Use \fIcertfile\fR as the certificate
+The certificate to use and is required for SSL/TLS servers.
+\fIcertfile\fR must not be world-readable. This option overrides
+environment variable TLS_CERTFILE.
+
+.TP
+\fB-t\fR \fItimeout\fB\fR
+Timeout after \fItimeout\fR seconds if no data is received
+
+.TP
+.B \-s \fIstartlsType
+Specify smtp, pop3 or imap for \fIstarttlsType\fR. In this mode,
+\fBdotls\fR will offer STARTTLS extension. It will initiate SSL/TLS
+negotation only when iit receives \fBSTARTTLS\fR command from client.
+Currently, only \fBsmtp\fR is supported.
+
+.TP
+.B \-C
+\fBclient\fR mode. In this mode, \fBdotls\fR acts as a tls client,
+reading fd 0 for input and using fd 1 for output.
+
+.TP
+.B \-T
+\fBclient\fR mode. In this mode, \fBdotls\fR acts as a tls client,
+reading fd 6 for input and using fd 7 for output.
+
+.SH "ENVIRONMENT VARIABLES"
+.PP
+\fBdotls\fR reads the following environment variables in
+order to configure the SSL/TLS protocol:
+.TP
+.B CERTSDIR
+Sub-directory relative to @qsysconfdir@, having servercert.pem.
+Default is @qsysconfdir@/certs.
+
+.TP
+\fBTLS_CIPHER_LIST=\fIcipherList\fB\fR
+A set of OpenSSL cipher strings. Multiple ciphers contained in a
+string should be separated by a colon.
+
+.SH "SEE ALSO"
+.PP
+\fBtcpclient\fR(1),
+\fBtcpserver\fR(1)

@@ -62,3 +62,5 @@ conf-libexec
 conf-servicedir
 ucspi-tcp.perms
 tcpclient.1
+dotls.o
+dotls

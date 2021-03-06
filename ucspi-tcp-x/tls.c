@@ -1,5 +1,9 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.5  2021-03-06 23:14:33+05:30  Cprogrammer
+ * added server functions
+ * added translate() function for ssl io
+ *
  * Revision 1.4  2021-03-04 22:58:55+05:30  Cprogrammer
  * generic tls.c for connect, accept
  *
@@ -19,6 +23,7 @@
 #include <openssl/err.h>
 #include <case.h>
 #endif
+#include "iopause.h"
 #include <sys/select.h>
 #include <unistd.h>
 #include <strerr.h>
@@ -29,21 +34,24 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.4 2021-03-04 22:58:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.5 2021-03-06 23:14:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
-static int      usessl = 0;
+static enum tlsmode usessl = none;
 static char    *sslerr_str = 0;
-static SSL     *ssl = 0;
+static SSL     *ssl_t = 0;
 
 void
 ssl_free()
 {
-	if (!ssl)
+	if (!ssl_t)
 		return;
-	SSL_shutdown(ssl);
-	SSL_free(ssl);
+	SSL_shutdown(ssl_t);
+	SSL_free(ssl_t);
+	if (usessl != none)
+		usessl = none;
+	ssl_t = (SSL *) NULL;
 }
 
 /*
@@ -62,8 +70,8 @@ check_cert(SSL *myssl, char *host)
     char            peer_CN[256];
 
     if (SSL_get_verify_result(myssl) != X509_V_OK) {
-		strerr_warn2("check_cert: Unable to get verify result: ",
-			ERR_error_string(ERR_get_error(), 0), 0);
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("SSL_get_verify_result: ", sslerr_str, 0);
 		return (1);
 	}
     /*
@@ -74,8 +82,8 @@ check_cert(SSL *myssl, char *host)
 
     /*- Check the common name */
     if (!(peer = SSL_get_peer_certificate(myssl))) {
-		strerr_warn2("check_cert: Unable to get peer certificate: ",
-			ERR_error_string(ERR_get_error(), 0), 0);
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("SSL_get_peer_certificate: ", sslerr_str, 0);
 		return (1);
 	}
     X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, sizeof(peer_CN) - 1);
@@ -86,117 +94,123 @@ check_cert(SSL *myssl, char *host)
 	return (0);
 }
 
-SSL            *
-tls_init(int fd, char *clientcert, char *cafile)
+SSL_CTX        *
+tls_init(char *cert, char *cafile, char *ciphers, enum tlsmode tmode)
 {
-	SSL            *myssl;
-	SSL_CTX        *ctx;
-	BIO            *sbio;
-	char           *ciphers;
+	static SSL_CTX *ctx = (SSL_CTX *) NULL;
 
-	if (usessl)
-		return ssl;
+	if (ctx)
+		return (ctx);
 	SSL_library_init();
-	if (!(ctx = SSL_CTX_new(SSLv23_client_method()))) {
-		strerr_warn2("SSL_CTX_new: unable to create SSL context: ",
-			ERR_error_string(ERR_get_error(), 0), 0);
-		return ((SSL *) NULL);
+	if (!(ctx = SSL_CTX_new(tmode == client ? SSLv23_client_method() : SSLv23_server_method()))) {
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("SSL_CTX_new: ", sslerr_str, 0);
+		return ((SSL_CTX *) NULL);
 	}
-	if (!SSL_CTX_load_verify_locations(ctx, clientcert, NULL)) {
-		strerr_warn4("TLS unable to load ", clientcert, ": ",
-			ERR_error_string(ERR_get_error(), 0), 0);
+	if (!SSL_CTX_load_verify_locations(ctx, cert, NULL)) {
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn4("unable to load certificate: ", cert, ": ", sslerr_str, 0);
 		SSL_CTX_free(ctx);
-		return ((SSL *) NULL);
+		return ((SSL_CTX *) NULL);
 	}
 	/*
 	 * set the callback here; SSL_set_verify didn't work before 0.9.6c
 	 */
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
-    /*- Set our cipher list */
-	if (!(ciphers = env_get("TLS_CIPHER_LIST")))
-		ciphers = "PROFILE=SYSTEM";
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
+    /*- Set our cipher list */
 	if (!SSL_CTX_set_cipher_list(ctx, ciphers)) {
-		strerr_warn4("unable to set ciphers: ", ciphers, ": ",
-			ERR_error_string(ERR_get_error(), 0), 0);
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn4("tls_init: unable to set ciphers: ", ciphers, ": ", sslerr_str, 0);
 		SSL_CTX_free(ctx);
-		return ((SSL *) NULL);
+		return ((SSL_CTX *) NULL);
 	}
 #endif
-	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert)) {
-		if (SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1) {
-			strerr_warn4("SSL_CTX_use_RSAPrivateKey: unable to load RSA private key: ",
-				clientcert, ": ", ERR_error_string(ERR_get_error(), 0), 0);
+	if (SSL_CTX_use_certificate_chain_file(ctx, cert)) {
+		if (SSL_CTX_use_RSAPrivateKey_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
+			sslerr_str = (char *) myssl_error_str();
+			strerr_warn2("SSL_CTX_use_RSAPrivateKey_file: Unable to load RSA private keys: ", sslerr_str, 0);
 			SSL_CTX_free(ctx);
-			return ((SSL *) NULL);
+			return ((SSL_CTX *) NULL);
 		}
-		if (SSL_CTX_use_certificate_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1) {
-			strerr_warn4("SSL_CTX_use_certificate_file: unable to load certificate: ",
-				clientcert, ": ", ERR_error_string(ERR_get_error(), 0), 0);
+		if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
+			sslerr_str = (char *) myssl_error_str();
+			strerr_warn4("SSL_CTX_use_certificate_file: Unable to use cerficate: ", cert, ": ", sslerr_str, 0);
 			SSL_CTX_free(ctx);
-			return ((SSL *) NULL);
+			return ((SSL_CTX *) NULL);
 		}
 		if (cafile && 1 != SSL_CTX_load_verify_locations(ctx, cafile, 0)) {
-			strerr_warn4("SSL_CTX_load_verify_locations: unable to load certificate: ",
-				clientcert, ": ", ERR_error_string(ERR_get_error(), 0), 0);
+			sslerr_str = (char *) myssl_error_str();
+			strerr_warn4("SSL_CTX_load_verify_locations: Unable to use ca certificate: ", cafile, ": ", sslerr_str, 0);
 			SSL_CTX_free(ctx);
-			return ((SSL *) NULL);
+			return ((SSL_CTX *) NULL);
 		}
 	}
+	return (ctx);
+}
+
+SSL            *
+tls_session(SSL_CTX *ctx, int fd, char *ciphers)
+{
+	SSL            *myssl;
+	BIO            *sbio;
+
+	if (usessl != none)
+		return ssl_t;
 	if (!(myssl = SSL_new(ctx))) {
-		strerr_warn2("unable to set up SSL session: ",
-			ERR_error_string(ERR_get_error(), 0), 0);
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("SSL_new: Unable to setup SSL session: ", sslerr_str, 0);
 		SSL_CTX_free(ctx);
 		return ((SSL *) NULL);
 	}
-	SSL_CTX_free(ctx);
 #ifndef CRYPTO_POLICY_NON_COMPLIANCE
 	if (!SSL_set_cipher_list(myssl, ciphers)) {
-		strerr_warn4("unable to set ciphers: ", ciphers, ": ",
-			ERR_error_string(ERR_get_error(), 0), 0);
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn4("tls_session: unable to set ciphers: ", ciphers, ": ", sslerr_str, 0);
 		SSL_shutdown(myssl);
 		SSL_free(myssl);
 		return ((SSL *) NULL);
 	}
 #endif
     if (!(sbio = BIO_new_socket(fd, BIO_NOCLOSE))) {
-		strerr_warn1("BIO_new_socket failed: ", &strerr_sys);
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("BIO_new_socket: ", sslerr_str, 0);
 		SSL_shutdown(myssl);
 		SSL_free(myssl);
 		return ((SSL *) NULL);
 	}
     SSL_set_bio(myssl, sbio, sbio); /*- cannot fail */
-	usessl = 1;
-	return (ssl = myssl);
+	return (ssl_t = myssl);
 }
 
 int
 tls_connect(SSL *myssl, char *host)
 {
    	if (SSL_connect(myssl) <= 0) {
-		strerr_warn2("SSL_connect: SSL Handshake: ", ERR_error_string(ERR_get_error(), 0), 0);
-		/*- SSL_get_error(myssl, ret)); -*/
-		SSL_shutdown(myssl);
-		SSL_free(myssl);
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("SSL_connect: SSL Handshake: ", sslerr_str, 0);
+		ssl_free();
 		return -1;
 	}
    	if (check_cert(myssl, host)) {
-		SSL_shutdown(myssl);
-		SSL_free(myssl);
+		ssl_free();
 		return -1;
 	}
+	usessl = client;
 	return 0;
 }
 
 int
 tls_accept(SSL *myssl)
 {
-	if (SSL_accept(ssl) <= 0) {
-		strerr_warn2("SSL_accept: unable to accept SSL connection", ERR_error_string(ERR_get_error(), 0), 0);
+	if (SSL_accept(myssl) <= 0) {
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("SSL_accept: unable to accept SSL connection: ", sslerr_str, 0);
 		SSL_shutdown(myssl);
 		SSL_free(myssl);
 		return -1;
 	}
+	usessl = server;
 	return 0;
 }
 
@@ -223,7 +237,7 @@ myssl_error_str()
 }
 
 ssize_t
-ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
+ssl_timeoutio(ssize_t (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 {
 	int             n = 0;
 	const long      end = t + time(NULL);
@@ -264,13 +278,55 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, si
 }
 
 ssize_t
+allwrite(int fd, char *buf, int len)
+{
+	ssize_t         w;
+	size_t          total = 0;
+
+	while (len) {
+		if ((w = write(fd, buf, len)) == -1) {
+			if (errno == error_intr)
+				continue;
+			return -1;	/*- note that some data may have been written */
+		}
+		if (w == 0)
+			;	/*- luser's fault */
+		buf += w;
+		total += w;
+		len -= w;
+	}
+	return total;
+}
+
+ssize_t
+allwritessl(SSL *myssl, char *buf, int len)
+{
+	ssize_t         w;
+	size_t          total = 0;
+
+	while (len) {
+		if ((w = SSL_write(myssl, buf, len)) == -1) {
+			if (errno == error_intr)
+				continue;
+			return -1;	/*- note that some data may have been written */
+		}
+		if (w == 0)
+			;	/*- luser's fault */
+		buf += w;
+		total += w;
+		len -= w;
+	}
+	return total;
+}
+
+ssize_t
 ssl_timeoutread(long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 {
 	if (!buf)
 		return 0;
 	if (SSL_pending(myssl))
 		return SSL_read(myssl, buf, len);
-	return ssl_timeoutio(SSL_read, t, rfd, wfd, myssl, buf, len);
+	return ssl_timeoutio((ssize_t (*)()) SSL_read, t, rfd, wfd, myssl, buf, len);
 }
 
 ssize_t
@@ -278,7 +334,89 @@ ssl_timeoutwrite(long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 {
 	if (!buf)
 		return 0;
-	return ssl_timeoutio(SSL_write, t, rfd, wfd, myssl, buf, len);
+	return ssl_timeoutio(allwritessl, t, rfd, wfd, myssl, buf, len);
+}
+
+int
+translate(SSL *myssl, int clearout, int clearin, unsigned int iotimeout)
+{
+	struct taia     now, deadline;
+	iopause_fd      iop[2];
+	int             flagexitasap, iopl, sslfd;
+	ssize_t         n, r;
+	char            tbuf[2048];
+
+	if ((sslfd = SSL_get_fd(myssl)) == -1) {
+		sslerr_str = (char *) myssl_error_str();
+		if (sslerr_str)
+			strerr_warn3("SSL_get_fd: ", sslerr_str, ": ", &strerr_sys);
+		else
+			strerr_warn1("SSL_get_fd:: ", &strerr_sys);
+		return -1;
+	}
+	flagexitasap = 0;
+	while (!flagexitasap) {
+		taia_now(&now);
+		taia_uint(&deadline, iotimeout);
+		taia_add(&deadline, &now, &deadline);
+
+		/*- fill iopause struct */
+		iopl = 2;
+		iop[0].fd = sslfd;
+		iop[0].events = IOPAUSE_READ;
+		iop[1].fd = clearin;
+		iop[1].events = IOPAUSE_READ;
+
+		/*- do iopause read */
+		iopause(iop, iopl, &deadline, &now);
+		if (iop[0].revents) {
+			/*- data on sslfd */
+			if ((n = SSL_read(myssl, tbuf, sizeof(tbuf))) < 0) {
+				sslerr_str = (char *) myssl_error_str();
+				if (sslerr_str)
+					strerr_warn3("SSL_read: ", sslerr_str, ": ", &strerr_sys);
+				else
+					strerr_warn1("SSL_read: ", &strerr_sys);
+				return -1;
+			} else
+			if (!n)
+				flagexitasap = 1;
+			if ((r = allwrite(clearout, tbuf, n)) == -1) {
+				sslerr_str = (char *) myssl_error_str();
+				if (sslerr_str)
+					strerr_warn3("unable to write: ", sslerr_str, ": ", &strerr_sys);
+				else
+					strerr_warn1("unable to write: ", &strerr_sys);
+				return -1;
+			}
+		}
+		if (iop[1].revents) {
+			/*- data on clearin */
+			if ((n = read(clearin, tbuf, sizeof(tbuf))) < 0) {
+				sslerr_str = (char *) myssl_error_str();
+				if (sslerr_str)
+					strerr_warn3("unable to read: ", sslerr_str, ": ", &strerr_sys);
+				else
+					strerr_warn1("unable to read: ", &strerr_sys);
+				return -1;
+			} else
+			if (!n)
+				flagexitasap = 1;
+			if ((r = allwritessl(myssl, tbuf, n)) == -1) {
+				sslerr_str = (char *) myssl_error_str();
+				if (sslerr_str)
+					strerr_warn3("SSL_write: ", sslerr_str, ": ", &strerr_sys);
+				else
+					strerr_warn1("SSL_write: ", &strerr_sys);
+				return -1;
+			}
+		}
+		if (!iop[0].revents && !iop[1].revents) {
+			strerr_warn1("timeout reached without input", 0);
+			return -1;
+		}
+	} /*- while (!flagexitasap) */
+	return 0;
 }
 #endif
 
@@ -288,11 +426,13 @@ saferead(int fd, char *buf, size_t len, long timeout)
 	ssize_t         r;
 
 #ifdef TLS
-	if (usessl) {
-		if ((r = ssl_timeoutread(timeout, fd, fd, ssl, buf, len)) < 0) {
+	if (usessl != none) {
+		if ((r = ssl_timeoutread(timeout, fd, fd, ssl_t, buf, len)) < 0) {
 			sslerr_str = (char *) myssl_error_str();
 			if (sslerr_str)
 				strerr_warn3("saferead: ", sslerr_str, ": ", &strerr_sys);
+			else
+				strerr_warn1("saferead: ", &strerr_sys);
 		}
 	} else
 		r = timeoutread(timeout, fd, buf, len);
@@ -308,11 +448,13 @@ safewrite(int fd, char *buf, size_t len, long timeout)
 	ssize_t         r;
 
 #ifdef TLS
-	if (usessl) {
-		if ((r = ssl_timeoutwrite(timeout, fd, fd, ssl, buf, len)) < 0) {
+	if (usessl != none) {
+		if ((r = ssl_timeoutwrite(timeout, fd, fd, ssl_t, buf, len)) < 0) {
 			sslerr_str = (char *) myssl_error_str();
 			if (sslerr_str)
 				strerr_warn3("safewrite: ", sslerr_str, ": ", &strerr_sys);
+			else
+				strerr_warn1("safewrite: ", &strerr_sys);
 		}
 	} else
 		r = timeoutwrite(timeout, fd, buf, len);

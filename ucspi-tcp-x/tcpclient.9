@@ -28,7 +28,9 @@ data from fd 0 to the network and from the network to fd 1.
 
 .B tcpclient
 can also do SSL/TLS negotiation with a remote host (-n option). This requires
-a \fIclientcert\fR to be provided.
+a \fIclientcert\fR to be provided. One can also do opportunistic TLS by using
+\fB\-s\fR \fIstarttls\fR option. The currently support option for \fIstarttls\fR
+is \fBsmtp\fR. \fBpop3\fR and \fBimap\fR will be added later.
 
 The server's address is given by
 .I host
@@ -128,17 +130,27 @@ certificates, which will be used during SSL connection negotiation to
 close any gap in the certificate chain.
 
 .TP
+\fB\-s\fR \fIstartlsType\fR
+Specify smtp, pop3 or imap for \fIstarttlsType\fR. This works
+differently for \fBserver mode\fR and \fBclient mode\fR
+
+\fBclient mode - \fB
+In this mode, \fBtcpclient\fR will initiate SSL/TLS negotation only after
+issuing \fBSTARTTLS\fR command to the remote server. Currently, only
+\fBsmtp\fR is supported.
+
+\fBserver mode - \fB
+In this mode, \fBtcpclient\fR will start unencrypted and automatically
+add \fBSTARTTLS\fR capability for clients. It will initiate a TLS session
+only when it receives \fBSTARTTLS\fR command from client.
+
+.TP
 .B \-m
 Match \fIhost\fR with common name in certificate (CN)
 
 .TP
-.B \-e \fIidletimeout
-Quit if no data is received from \fIhost\fR or \fIprog\fR for more than
-\fIidletimeout\fR seconds
-
-.TP
-.B \-a \fIdatatimeout
-Quit if read or write to/from \fIhost\fR exceeds \fIdatatimeout\fR seconds
+.B \-a \fItimeoutdata
+Quit if read or write to/from \fIhost\fR exceeds \fItimeoutdata\fR seconds
 
 .P
 .B Data-gathering options:

@@ -112,10 +112,6 @@ tcpserver.1: tcpserver.9
 tcpclient.1: tcpclient.9
 	$(edit) tcpclient.9 > $@
 
-commands.o: \
-compile commands.c commands.h
-	./compile commands.c
-
 date@: \
 warn-auto.sh date@.sh conf-prefix
 	cat warn-auto.sh date@.sh \
@@ -252,8 +248,8 @@ ip4_scan.o: \
 compile ip4_scan.c ip4.h
 	./compile ip4_scan.c
 
-it: prog man shared instcheck \
-installer ucspi-tcp.perms ucspi-tcp.spec
+it: prog man shared instcheck installer \
+dotls ucspi-tcp.perms ucspi-tcp.spec
 
 load: warn-auto.sh conf-ld systype make-load
 	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
@@ -300,35 +296,35 @@ compile prot.c hasshsgr.h prot.h
 	./compile prot.c
 
 rblsmtpd.so: \
-load rbl.o commands.o pathexec_rundl.o load_shared.o \
+load rbl.o pathexec_rundl.o load_shared.o \
 dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib \
 conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
-	rbl.o commands.o pathexec_rundl.o load_shared.o \
+	rbl.o pathexec_rundl.o load_shared.o \
 	tcdlmopen.o dlnamespace.o dns.a unix.a `cat socket.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o rblsmtpd.so \
-	rbl.o commands.o pathexec_rundl.o load_shared.o \
+	rbl.o pathexec_rundl.o load_shared.o \
 	dlnamespace.o tcdlmopen.o dns.a unix.a `cat socket.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail -ldl; \
 	fi
 
 rblsmtpd: \
-load rblsmtpd.o commands.o pathexec_rundl.o load_shared.o \
+load rblsmtpd.o pathexec_rundl.o load_shared.o \
 dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
-	./load rblsmtpd commands.o pathexec_rundl.o load_shared.o \
+	./load rblsmtpd pathexec_rundl.o load_shared.o \
 	dlnamespace.o tcdlmopen.o dns.a unix.a \
 	`cat socket.lib` -lqmail -ldl
 
 rblsmtpd.o: \
-compile rblsmtpd.c commands.h pathexec.h dns.h iopause.h \
+compile rblsmtpd.c pathexec.h dns.h iopause.h \
 haveip6.h ip6.h conf-ip
 	./compile -DMAIN `grep -h -v "^#" conf-ip 2>/dev/null` rblsmtpd.c
 
 rbl.o: \
-compile rblsmtpd.c commands.h pathexec.h dns.h iopause.h \
+compile rblsmtpd.c pathexec.h dns.h iopause.h \
 haveip6.h ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` rblsmtpd.c -o rbl.o
 
@@ -430,6 +426,16 @@ tls.h haveip6.h ip6.h conf-ip conf-tls
 	./compile \
 	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` tcpclient.c
 
+dotls: \
+load dotls.o tls.o pathexec_run.o pathexec_env.o
+	./load dotls tls.o pathexec_run.o \
+	pathexec_env.o $(SSLLIBS) -lqmail
+
+dotls.o: \
+compile dotls.c tls.c tls.h pathexec.h
+	./compile \
+	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` dotls.c
+
 tls.o: \
 compile tls.c conf-tls
 	./compile \
@@ -477,10 +483,10 @@ compile dlnamespace.c hasdlmopen.h pathexec.h
 tcpserver: \
 load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o pathexec_rundl.o \
 tcpserver_plugin.o load_shared.o control.o auto_home.o dlnamespace.o \
-tcdlmopen.o load_mysql.o dns.a unix.a socket.lib mysql_config \
+tcdlmopen.o tls.o load_mysql.o dns.a unix.a socket.lib mysql_config \
 conf-ld-$(SYSTEM)
 	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o load_mysql.o \
-	control.o auto_home.o tcpserver_plugin.o load_shared.o \
+	control.o auto_home.o tcpserver_plugin.o load_shared.o tls.o \
 	dlnamespace.o tcdlmopen.o pathexec_rundl.o dns.a unix.a \
 	`cat socket.lib conf-ld-$(SYSTEM) 2>/dev/null` $(SSLLIBS) -lqmail -ldl
 

@@ -6,3 +6,5 @@ ucspi-tcp (@version@-@release@) unstable; urgency=low
   * tls.c: added option to match host with common name
   * tcpclient.c, tcpserver.c: Use CERTSDIR env variable to specify custom certificate location
   * tcpclient.c: added -m option to match host with common name
+  * dotls.c: SSL/TLS client / server wrapper for SSL/TLS and opportunistic TLS
+  * tcpclient.c: added opportunistic TLS (STARTLS) capability.

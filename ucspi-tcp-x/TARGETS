@@ -149,3 +149,5 @@ iopause.o
 iopause.h
 tls.o
 tcpclient.1
+dotls.o
+dotls
