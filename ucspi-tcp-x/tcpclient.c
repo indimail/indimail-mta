@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.14  2021-03-07 18:09:06+05:30  Cprogrammer
+ * added starttls for pop3 and imap
+ *
  * Revision 1.13  2021-03-06 23:12:11+05:30  Cprogrammer
  * make specifying certificate mandatory for starttls option
  *
@@ -85,7 +88,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.13 2021-03-06 23:12:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.14 2021-03-07 18:09:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -302,10 +305,10 @@ do_starttls(int sfd, enum starttls stls, char *clientcert)
 	static stralloc line = { 0 };
 	struct substdio ssin;
 
+	substdio_fdbuf(&ssin, sslread, sfd, inbuf, sizeof(inbuf));
 	switch (stls)
 	{
 	case smtp:
-		substdio_fdbuf(&ssin, sslread, sfd, inbuf, sizeof(inbuf));
 		if (safewrite(sfd, "STARTTLS\r\n", 10, dtimeout) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to network: ");
 		if (getln(&ssin, &line, &match, '\n') == -1)
@@ -317,10 +320,24 @@ do_starttls(int sfd, enum starttls stls, char *clientcert)
 			strerr_die4x(111, FATAL, "STARTTLS rejected while ", clientcert, " exists");
 		break;
 	case pop3:
-		strerr_die2x(100, FATAL, "startls pop3 code not yet ready");
+		if (safewrite(sfd, "STLS\r\n", 6, dtimeout) == -1)
+			strerr_die2sys(111, FATAL, "unable to write to network: ");
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+		if (!line.len || !match)
+			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
+		if (!case_startb(line.s, 3, "+OK"))
+			strerr_die4x(111, FATAL, "STLS rejected while ", clientcert, " exists");
 		break;
 	case imap:
-		strerr_die2x(100, FATAL, "startls imap code not yet ready");
+		if (safewrite(sfd, "A1 STARTTLS\r\n", 13, dtimeout) == -1)
+			strerr_die2sys(111, FATAL, "unable to write to network: ");
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+		if (!line.len || !match)
+			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
+		if (case_startb(line.s, 5, "A1 OK"))
+			strerr_die4x(111, FATAL, "STARTTLS rejected while ", clientcert, " exists");
 		break;
 	default:
 		break;
