@@ -1,19 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
- * Revision 1.75  2021-03-06 23:13:51+05:30  Cprogrammer
- * use tls functions from tls.c
- *
- * Revision 1.74  2021-03-04 23:00:14+05:30  Cprogrammer
+ * Revision 1.71  2021-03-07 08:30:07+05:30  Cprogrammer
+ * use common tls functions from tls.c
  * added idle timeout parameter
- *
- * Revision 1.73  2021-03-04 11:42:45+05:30  Cprogrammer
- * use CERTSDIR for certificates
- *
- * Revision 1.72  2021-03-03 12:11:09+05:30  Cprogrammer
- * changed return types to ssize_t for read, write functions
- *
- * Revision 1.71  2021-03-02 10:44:07+05:30  Cprogrammer
- * renamed SSL_CIPHER to TLS_CIPHER_LIST
  *
  * Revision 1.70  2020-11-27 17:34:22+05:30  Cprogrammer
  * added option to specify CA file
@@ -252,7 +241,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.75 2021-03-06 23:13:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.71 2021-03-07 08:30:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1078,7 +1067,7 @@ void
 usage(void)
 {
 	strerr_warn1(
-		 "tcpserver: usage: tcpserver\n"
+		 "usage: tcpserver\n"
 #ifdef IPV6
 		 "[ -461UXpPhHrRoOdDqQv ]\n"
 #else
@@ -1355,9 +1344,8 @@ main(int argc, char **argv, char **envp)
 #endif
 #ifdef TLS
 	SSL            *ssl;
-	SSL_CTX        *ctx = (SSL_CTX *) NULL;
-	char           *certsdir, *ciphers = (char *) NULL,
-				   *cafile = (char *) NULL;
+	SSL_CTX        *ctx = NULL;
+	char           *certsdir, *ciphers = NULL, *cafile = NULL;
 	int             pi2c[2], pi4c[2];
 #endif
 	struct stralloc options = {0};
@@ -1781,7 +1769,7 @@ main(int argc, char **argv, char **envp)
 				if (!(ssl = tls_session(ctx, 0, ciphers)))
 					strerr_die2x(111, DROP, "unable to setup SSL session");
 				SSL_CTX_free(ctx);
-				ctx = (SSL_CTX *) NULL;
+				ctx = NULL;
 				if (tls_accept(ssl))
 					strerr_die2x(111, DROP, "unable to accept SSL connection");
 				translate(ssl, pi2c[1], pi4c[0], idle_timeout);
