@@ -1,5 +1,8 @@
 /*
  * $Log: dotls.c,v $
+ * Revision 1.3  2021-03-07 21:37:12+05:30  Cprogrammer
+ * fixed usage
+ *
  * Revision 1.2  2021-03-07 18:11:04+05:30  Cprogrammer
  * added opportunistic TLS for pop3
  *
@@ -33,11 +36,11 @@
 #include "pathexec.h"
 #include "tls.h"
 
-#define FATAL         "sslerator: fatal: "
+#define FATAL         "dotls: fatal: "
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.2 2021-03-07 18:11:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.3 2021-03-07 21:37:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_bulk();
@@ -68,7 +71,7 @@ struct scommd
 void
 usage(void)
 {
-	strerr_die1x(100, "usage: sslerator"
+	strerr_die1x(100, "usage: dotls"
 		 " [ -CT ]\n"
 		 " [ -h host ]\n"
 		 " [ -t timeoutdata ]\n"
@@ -573,6 +576,8 @@ main(int argc, char **argv)
 		}
 	}
 	argv += optind;
+	if (!*argv)
+		usage();
 	if (pipe(pi1) != 0 || pipe(pi2) != 0)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
 	if (!(ciphers = env_get("TLS_CIPHER_LIST")))
