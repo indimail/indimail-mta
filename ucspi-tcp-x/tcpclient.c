@@ -341,7 +341,7 @@ main(int argc, char **argv)
 #ifdef TLS
 	SSL_CTX        *ctx;
 	SSL            *ssl;
-	char           *certsdir, *cafile = (char *) NULL, *ciphers = (char *) NULL;
+	char           *certsdir, *cafile = NULL, *ciphers = NULL;
 	enum starttls   stls = unknown;
 	int             match_cn = 0;
 #endif
@@ -678,7 +678,7 @@ CONNECTED:
 		if (!(ssl = tls_session(ctx, s, ciphers)))
 			_exit(111);
 		SSL_CTX_free(ctx);
-		ctx = (SSL_CTX *) NULL;
+		ctx = NULL;
 		if (stls != unknown)
 			do_starttls(s, stls, certfile.s);
 		if (tls_connect(ssl, match_cn ? hostname : 0) == -1)
