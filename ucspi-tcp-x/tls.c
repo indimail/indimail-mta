@@ -39,8 +39,8 @@ static char     sccsid[] = "$Id: tls.c,v 1.5 2021-03-06 23:14:33+05:30 Cprogramm
 
 #ifdef TLS
 static enum tlsmode usessl = none;
-static char    *sslerr_str = 0;
-static SSL     *ssl_t = 0;
+static char    *sslerr_str;
+static SSL     *ssl_t;
 
 void
 ssl_free()
@@ -51,7 +51,7 @@ ssl_free()
 	SSL_free(ssl_t);
 	if (usessl != none)
 		usessl = none;
-	ssl_t = (SSL *) NULL;
+	ssl_t = NULL;
 }
 
 /*
