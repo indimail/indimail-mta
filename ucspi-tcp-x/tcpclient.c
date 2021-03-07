@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.15  2021-03-07 21:15:44+05:30  Cprogrammer
+ * call ssl_free() as last step on do_select()
+ *
  * Revision 1.14  2021-03-07 18:09:06+05:30  Cprogrammer
  * added starttls for pop3 and imap
  *
@@ -88,7 +91,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.14 2021-03-07 18:09:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.15 2021-03-07 21:15:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -196,17 +199,16 @@ do_select(char **argv, int flag_tcpclient, int s)
 	if (flag_tcpclient) {
 		sig_catch(sig_child, sigchld);
 		sig_catch(sig_term, sigterm);
-		if (pipe(pi1) != 0 || pipe(pi2) != 0) {
-			ssl_free();
+		if (pipe(pi1) != 0 || pipe(pi2) != 0)
 			strerr_die2sys(111, FATAL, "unable to create pipe: ");
-		}
 		switch (pid = fork())
 		{
 		case -1:
-			ssl_free();
 			strerr_die2sys(111, FATAL, "fork: ");
 		case 0:
+#ifdef TLS
 			ssl_free();
+#endif
 			sig_uncatch(sig_pipe);
 			sig_uncatch(sig_child);
 			sig_uncatch(sig_term);
@@ -286,6 +288,9 @@ do_select(char **argv, int flag_tcpclient, int s)
 			strerr_die2x(111, FATAL, "child crashed");
 		_exit(wait_exitcode(wstat));
 	}
+#ifdef TLS
+	ssl_free();
+#endif
 	return (close(s)); 
 }
 
@@ -521,8 +526,10 @@ main(int argc, char **argv)
 	}
 	if (*++argv)
 		flag_tcpclient = 1;
+#ifdef TLS
 	if (!flagssl && stls != unknown)
 		strerr_die2x(100, FATAL, "STARTTLS options require Certificates");
+#endif
 	if (!stralloc_copys(&tmp, hostname))
 		nomem();
 #ifdef IPV6
