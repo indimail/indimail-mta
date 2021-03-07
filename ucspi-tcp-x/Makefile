@@ -432,7 +432,7 @@ load dotls.o tls.o pathexec_run.o pathexec_env.o
 	pathexec_env.o $(SSLLIBS) -lqmail
 
 dotls.o: \
-compile dotls.c tls.c tls.h pathexec.h
+compile dotls.c tls.c tls.h pathexec.h conf-tls
 	./compile \
 	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` dotls.c
 
