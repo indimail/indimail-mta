@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: dotls.c,v $
+ * Revision 1.1  2021-03-07 08:13:57+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #ifdef TLS
 #include <unistd.h>
@@ -30,7 +33,7 @@
 #define HUGESMTPTEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: $";
+static char     sccsid[] = "$Id: dotls.c,v 1.1 2021-03-07 08:13:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct substdio ssin, ssto, smtpin, smtpto;
@@ -147,7 +150,7 @@ get3()
 unsigned long
 smtpcode(unsigned int *len)
 {
-	unsigned char   ch;
+	char            ch;
 	unsigned long   code;
 	int             err = 0;
 
@@ -156,7 +159,7 @@ smtpcode(unsigned int *len)
 	if ((code = get3()) < 200)
 		err = 1;
 	for (;;) {
-		get1((char *) &ch);
+		get1(&ch);
 		if (ch != ' ' && ch != '-')
 			err = 1;
 		if (ch == ' ')
@@ -164,12 +167,12 @@ smtpcode(unsigned int *len)
 		if (ch != '-')
 			break;
 		while (ch != '\n')
-			get1((char *) &ch);
+			get1(&ch);
 		if (get3() != code)
 			err = 1;
 	}
 	while (ch != '\n')
-		get1((char *) &ch);
+		get1(&ch);
 	return err ? 400 : code;
 }
 
