@@ -14,6 +14,8 @@ Release 1.1 Start 14/02/2021
 07. dotls.c: SSL/TLS client / server wrapper for SSL/TLS and opportunistic
     TLS
 08. tcpclient.c: added opportunistic TLS (STARTLS) capability.
+- 07/03/2021
+09. tcpclient.c: added starttls for pop3, imap
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 21/05/2020

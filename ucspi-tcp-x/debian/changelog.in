@@ -8,3 +8,4 @@ ucspi-tcp (@version@-@release@) unstable; urgency=low
   * tcpclient.c: added -m option to match host with common name
   * dotls.c: SSL/TLS client / server wrapper for SSL/TLS and opportunistic TLS
   * tcpclient.c: added opportunistic TLS (STARTLS) capability.
+  * tcpclient.c: added starttls for pop3, imap
