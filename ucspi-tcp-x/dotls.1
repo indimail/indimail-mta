@@ -75,6 +75,23 @@ Default is @qsysconfdir@/certs.
 A set of OpenSSL cipher strings. Multiple ciphers contained in a
 string should be separated by a colon.
 
+.SH EXAMPLES
+.EX
+1. Add STARTTLS extension for qmail-smtpd
+   tcpserver 0 25 /usr/bin/dotls -n "" -s smtp /var/qmail/bin/qmail-smtpd
+
+2. Provide SMTPS service on port 465
+   tcpserver 0 465 /usr/bin/dotls -n "" /var/qmail/bin/qmail-smtpd
+
+3. Add STLS extension for qmail-pop3d
+   tcpserver 0 110 /usr/bin/dotls -n "" -s pop3 qmail-popup host \\
+     checkpassword qmail-pop3d Maildir
+
+4. Provide POP3S service on port 993
+   tcpserver 0 993 /usr/bin/dotls -n "" qmail-popup host checkpassword \\
+     qmail-pop3d Maildir
+.EE
+
 .SH "SEE ALSO"
 .PP
 \fBtcpclient\fR(1),
