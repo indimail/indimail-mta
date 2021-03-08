@@ -1,5 +1,9 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.17  2021-03-09 00:54:22+05:30  Cprogrammer
+ * use non-blocking io
+ * use translate() functions from tls.c instead of select()
+ *
  * Revision 1.16  2021-03-08 15:28:56+05:30  Cprogrammer
  * removed imap options
  *
@@ -89,12 +93,13 @@
 #include <case.h>
 #include <env.h>
 #include <getln.h>
+#include <ndelay.h>
 #endif
 
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.16 2021-03-08 15:28:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.17 2021-03-09 00:54:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -189,14 +194,10 @@ sigchld()
 }
 
 int
-do_select(char **argv, int flag_tcpclient, int s, enum starttls stls)
+do_select(char **argv, int flag_tcpclient, int s)
 {
-	char            buf[512];
-	int             wstat, r, pi1[2], pi2[2], fdhigh, fdin, fdout,
-					flagexitasap = 0, n, flag_stdin;
+	int             wstat, r, pi1[2], pi2[2], fdin, fdout;
 	pid_t           pid;
-	fd_set          rfds;	/*- File descriptor mask for select -*/
-	struct timeval  timeout;
 
 	if (flag_tcpclient) {
 		sig_catch(sig_child, sigchld);
@@ -223,66 +224,14 @@ do_select(char **argv, int flag_tcpclient, int s, enum starttls stls)
 		default:
 			break;
 		}
-		fdhigh = pi2[0];
 		fdin = pi2[0];
 		fdout = pi1[1];
 	} else {
-		fdhigh = s;
 		fdin = 0;
 		fdout = 1;
 	}
-	flag_stdin = (stls == unknown ? 1 : 0);
-	timeout.tv_sec = dtimeout;
-	timeout.tv_usec = 0;
-	while (!flagexitasap) {
-		FD_ZERO(&rfds);
-		if (flag_stdin)
-			FD_SET(s, &rfds);
-		FD_SET(fdin, &rfds);
-		if ((r = select(fdhigh + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
-#ifdef ERESTART
-			if (errno == EINTR || errno == ERESTART)
-#else
-			if (errno == EINTR)
-#endif
-				continue;
-			strerr_die2sys(111, FATAL, "select: ");
-		} else
-		if (!r) { /*-timeout */
-			timeout.tv_sec = dtimeout;
-			timeout.tv_usec = 0;
-			strnum[fmt_ulong(strnum, timeout.tv_sec)] = 0;
-			strerr_warn4(FATAL, "idle timeout reached without input [", strnum, " sec]", 0);
-			close(s);
-			_exit(111);
-		}
-		if (FD_ISSET(fdin, &rfds)) {
-			flag_stdin = 1;
-			if ((n = timeoutread(dtimeout, fdin, buf, sizeof(buf))) < 0)
-				strerr_die2sys(111, FATAL, "unable to read from child: ");
-			else
-			if (!n) { /*- prog exited */
-				flagexitasap = 1;
-				if (flag_tcpclient)
-					close(pi1[1]);
-				break;
-			}
-			if (safewrite(s, buf, n, dtimeout) < 0)
-				strerr_die2sys(111, FATAL, "unable to write to network: ");
-		}
-		if (flag_stdin && FD_ISSET(s, &rfds)) {
-			if ((n = saferead(s, buf, sizeof(buf), dtimeout)) < 0)
-				strerr_die2sys(111, FATAL, "unable to read from network: ");
-			else
-			if (!n) { /*- remote closed socket */
-				flagexitasap = 1;
-				close(pi1[1]);
-				break;
-			}
-			if (timeoutwrite(dtimeout, fdout, buf, n) < 0)
-				strerr_die2sys(111, FATAL, "unable to write to child: ");
-		}
-	} /*- while (!flagexitasap) */
+	if ((r = translate(s, fdout, fdin, dtimeout)))
+		strerr_warn1("tcpclient: translate returned non-zero: ", &strerr_sys);
 	if (flag_tcpclient) {
 		if (wait_pid(&wstat, pid) == -1)
 			strerr_die2sys(111, FATAL, "unable to get child status: ");
@@ -702,14 +651,15 @@ CONNECTED:
 			do_starttls(s, stls, certfile.s, !flag_tcpclient);
 		if (tls_connect(ssl, match_cn ? hostname : 0) == -1)
 			_exit(111);
-#if 1
-		SSL_set_mode(ssl, SSL_MODE_ENABLE_PARTIAL_WRITE);
-#endif
 	}
 #endif
-	if (!flag_tcpclient || flagssl)
-		_exit(do_select(argv, flag_tcpclient, s, stls));
-	else {
+	if (!flag_tcpclient || flagssl) {
+#ifdef TLS
+		if (stls != unknown)
+			ndelay_on(s);
+#endif
+		_exit(do_select(argv, flag_tcpclient, s));
+	} else {
 		if (fd_move(6, s) == -1)
 			strerr_die2sys(111, FATAL, "unable to set up descriptor 6: ");
 		if (fd_copy(7, 6) == -1)
