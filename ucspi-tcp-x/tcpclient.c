@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.16  2021-03-08 15:28:56+05:30  Cprogrammer
+ * removed imap options
+ *
  * Revision 1.15  2021-03-07 21:15:44+05:30  Cprogrammer
  * call ssl_free() as last step on do_select()
  *
@@ -91,7 +94,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.15 2021-03-07 21:15:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.16 2021-03-08 15:28:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -124,7 +127,7 @@ usage(void)
 #ifdef TLS
 	 " [ -n clientcert ]\n"
 	 " [ -c cafile ] \n"
-	 " [ -s starttlsType (smpt|pop3|imap) ]\n"
+	 " [ -s starttlsType (smtp|pop3) ]\n"
 #endif
 	 " host port [program]");
 }
@@ -186,13 +189,12 @@ sigchld()
 }
 
 int
-do_select(char **argv, int flag_tcpclient, int s)
+do_select(char **argv, int flag_tcpclient, int s, enum starttls stls)
 {
 	char            buf[512];
 	int             wstat, r, pi1[2], pi2[2], fdhigh, fdin, fdout,
-					flagexitasap = 0;
+					flagexitasap = 0, n, flag_stdin;
 	pid_t           pid;
-	ssize_t         n;
 	fd_set          rfds;	/*- File descriptor mask for select -*/
 	struct timeval  timeout;
 
@@ -206,9 +208,7 @@ do_select(char **argv, int flag_tcpclient, int s)
 		case -1:
 			strerr_die2sys(111, FATAL, "fork: ");
 		case 0:
-#ifdef TLS
-			ssl_free();
-#endif
+			close(s);
 			sig_uncatch(sig_pipe);
 			sig_uncatch(sig_child);
 			sig_uncatch(sig_term);
@@ -231,11 +231,13 @@ do_select(char **argv, int flag_tcpclient, int s)
 		fdin = 0;
 		fdout = 1;
 	}
+	flag_stdin = (stls == unknown ? 1 : 0);
 	timeout.tv_sec = dtimeout;
 	timeout.tv_usec = 0;
 	while (!flagexitasap) {
 		FD_ZERO(&rfds);
-		FD_SET(s, &rfds);
+		if (flag_stdin)
+			FD_SET(s, &rfds);
 		FD_SET(fdin, &rfds);
 		if ((r = select(fdhigh + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
 #ifdef ERESTART
@@ -254,20 +256,9 @@ do_select(char **argv, int flag_tcpclient, int s)
 			close(s);
 			_exit(111);
 		}
-		if (FD_ISSET(s, &rfds)) {
-			if ((n = saferead(s, buf, sizeof(buf), dtimeout)) < 0)
-				strerr_die2sys(111, FATAL, "unable to read from network: ");
-			else
-			if (!n) { /*- remote closed socket */
-				flagexitasap = 1;
-				close(pi1[1]);
-				break;
-			}
-			if ((n = timeoutwrite(dtimeout, fdout, buf, n)) == -1)
-				strerr_die2sys(111, FATAL, "unable to write to child: ");
-		}
 		if (FD_ISSET(fdin, &rfds)) {
-			if ((n = timeoutread(dtimeout, fdin, buf, sizeof(buf))) == -1)
+			flag_stdin = 1;
+			if ((n = timeoutread(dtimeout, fdin, buf, sizeof(buf))) < 0)
 				strerr_die2sys(111, FATAL, "unable to read from child: ");
 			else
 			if (!n) { /*- prog exited */
@@ -276,9 +267,20 @@ do_select(char **argv, int flag_tcpclient, int s)
 					close(pi1[1]);
 				break;
 			}
-			if ((n = safewrite(s, buf, n, dtimeout)) == -1) {
+			if (safewrite(s, buf, n, dtimeout) < 0)
 				strerr_die2sys(111, FATAL, "unable to write to network: ");
+		}
+		if (flag_stdin && FD_ISSET(s, &rfds)) {
+			if ((n = saferead(s, buf, sizeof(buf), dtimeout)) < 0)
+				strerr_die2sys(111, FATAL, "unable to read from network: ");
+			else
+			if (!n) { /*- remote closed socket */
+				flagexitasap = 1;
+				close(pi1[1]);
+				break;
 			}
+			if (timeoutwrite(dtimeout, fdout, buf, n) < 0)
+				strerr_die2sys(111, FATAL, "unable to write to child: ");
 		}
 	} /*- while (!flagexitasap) */
 	if (flag_tcpclient) {
@@ -295,14 +297,8 @@ do_select(char **argv, int flag_tcpclient, int s)
 }
 
 #ifdef TLS
-ssize_t
-sslread(int fd, char *buf, size_t len)
-{
-	return (saferead(fd, buf, len, dtimeout));
-}
-
 int
-do_starttls(int sfd, enum starttls stls, char *clientcert)
+do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 {
 	char            inbuf[512];
 	int             match;
@@ -310,21 +306,37 @@ do_starttls(int sfd, enum starttls stls, char *clientcert)
 	static stralloc line = { 0 };
 	struct substdio ssin;
 
-	substdio_fdbuf(&ssin, sslread, sfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, read, sfd, inbuf, sizeof(inbuf));
 	switch (stls)
 	{
 	case smtp:
+		/*- read greeting */
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+		if (!line.len || !match)
+			strerr_die2x(111, FATAL, "failed to get greeting");
+		if (verbose)
+			write(1, line.s, line.len);
+		line.s[line.len - 1] = 0;
+		scan_ulong(line.s, &code);
+		if (code != 220)
+			strerr_die2x(111, FATAL, "connected but greeting failed");
 		if (safewrite(sfd, "STARTTLS\r\n", 10, dtimeout) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to network: ");
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
 		if (!line.len || !match)
 			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
+		line.s[line.len - 1] = 0;
 		scan_ulong(line.s, &code);
 		if (code != 220)
 			strerr_die4x(111, FATAL, "STARTTLS rejected while ", clientcert, " exists");
+		ssin.p = 0;
+		substdio_flush(&ssin);
 		break;
 	case pop3:
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
 		if (safewrite(sfd, "STLS\r\n", 6, dtimeout) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to network: ");
 		if (getln(&ssin, &line, &match, '\n') == -1)
@@ -333,16 +345,6 @@ do_starttls(int sfd, enum starttls stls, char *clientcert)
 			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
 		if (!case_startb(line.s, 3, "+OK"))
 			strerr_die4x(111, FATAL, "STLS rejected while ", clientcert, " exists");
-		break;
-	case imap:
-		if (safewrite(sfd, "A1 STARTTLS\r\n", 13, dtimeout) == -1)
-			strerr_die2sys(111, FATAL, "unable to write to network: ");
-		if (getln(&ssin, &line, &match, '\n') == -1)
-			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
-		if (!line.len || !match)
-			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
-		if (case_startb(line.s, 5, "A1 OK"))
-			strerr_die4x(111, FATAL, "STARTTLS rejected while ", clientcert, " exists");
 		break;
 	default:
 		break;
@@ -361,8 +363,8 @@ main(int argc, char **argv)
 #endif
 	int             opt, j, s, cloop, flag_tcpclient = 0, flagssl = 0;
 #ifdef TLS
-	SSL_CTX        *ctx;
-	SSL            *ssl;
+	SSL_CTX        *ctx = (SSL_CTX *) NULL;
+	SSL            *ssl = (SSL *) NULL;
 	char           *certsdir, *cafile = NULL, *ciphers = NULL;
 	enum starttls   stls = unknown;
 	int             match_cn = 0;
@@ -478,20 +480,13 @@ main(int argc, char **argv)
 			cafile = optarg;
 			break;
 		case 's':
-			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3")
-					&& case_diffs(optarg, "imap"))
+			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3"))
 				usage();
 			if (!case_diffs(optarg, "smtp"))
 				stls = smtp;
 			else
-			if (!case_diffs(optarg, "pop3")) {
+			if (!case_diffs(optarg, "pop3"))
 				stls = pop3;
-				strerr_die2x(100, FATAL, "starttls pop3 code not yet ready");
-			} else
-			if (!case_diffs(optarg, "imap")) {
-				stls = imap;
-				strerr_die2x(100, FATAL, "starttls imap code not yet ready");
-			}
 			break;
 		case 'm':
 			match_cn = 1;
@@ -704,13 +699,16 @@ CONNECTED:
 		SSL_CTX_free(ctx);
 		ctx = NULL;
 		if (stls != unknown)
-			do_starttls(s, stls, certfile.s);
+			do_starttls(s, stls, certfile.s, !flag_tcpclient);
 		if (tls_connect(ssl, match_cn ? hostname : 0) == -1)
 			_exit(111);
+#if 1
+		SSL_set_mode(ssl, SSL_MODE_ENABLE_PARTIAL_WRITE);
+#endif
 	}
 #endif
 	if (!flag_tcpclient || flagssl)
-		_exit(do_select(argv, flag_tcpclient, s));
+		_exit(do_select(argv, flag_tcpclient, s, stls));
 	else {
 		if (fd_move(6, s) == -1)
 			strerr_die2sys(111, FATAL, "unable to set up descriptor 6: ");
