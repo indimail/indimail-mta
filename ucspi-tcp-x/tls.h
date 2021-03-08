@@ -21,11 +21,11 @@
 #endif
 
 enum tlsmode  {none = 0, client = 1, server = 2};
-enum starttls {smtp, pop3, imap, unknown};
+enum starttls {smtp, pop3, unknown};
 
 ssize_t         saferead(int, char *, size_t, long);
 ssize_t         safewrite(int, char *, size_t, long);
-ssize_t         allwrite(int, char *, int);
+ssize_t         allwrite(int, char *, size_t);
 #ifdef TLS
 SSL_CTX        *tls_init(char *, char *, char *, enum tlsmode);
 SSL            *tls_session(SSL_CTX *, int, char *);
@@ -33,7 +33,7 @@ int             tls_connect(SSL *, char *);
 int             tls_accept(SSL *);
 void            ssl_free();
 int             translate(SSL *, int, int, unsigned int);
-ssize_t         allwritessl(SSL *ssl, char *buf, int len);
+ssize_t         allwritessl(SSL *ssl, char *buf, size_t len);
 const char     *myssl_error_str();
 #endif
 
