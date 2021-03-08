@@ -1,5 +1,8 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.5  2021-03-08 20:02:57+05:30  Cprogrammer
+ * fixed datatypes for allwrite(), allwritessl() arguments
+ *
  * Revision 1.4  2021-03-06 23:14:58+05:30  Cprogrammer
  * added server functions
  *
