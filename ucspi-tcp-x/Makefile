@@ -437,7 +437,7 @@ compile dotls.c tls.c tls.h pathexec.h conf-tls
 	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` dotls.c
 
 tls.o: \
-compile tls.c conf-tls
+compile tls.c tls.h iopause.h conf-tls
 	./compile \
 	`grep -h -v "^#" conf-tls 2>/dev/null` tls.c
 
