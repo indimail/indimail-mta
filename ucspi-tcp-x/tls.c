@@ -1,8 +1,7 @@
 /*
  * $Log: tls.c,v $
- * Revision 1.6  2021-03-08 15:25:33+05:30  Cprogrammer
- * use TLS_method() if method is not client or server
- * fixed data types in read/write functions
+ * Revision 1.6  2021-03-08 15:47:17+05:30  Cprogrammer
+ * use TLS_client_method(), TLS_server_method() functions
  *
  * Revision 1.5  2021-03-06 23:14:33+05:30  Cprogrammer
  * added server functions
@@ -38,7 +37,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.6 2021-03-08 15:25:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.6 2021-03-08 15:47:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -106,6 +105,9 @@ tls_init(char *cert, char *cafile, char *ciphers, enum tlsmode tmode)
 	if (ctx)
 		return (ctx);
 	SSL_library_init();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	ctx = SSL_CTX_new(tmode == client ? SSLv23_client_method() : SSLv23_server_method());
+#else
 	switch (tmode)
 	{
 	case client:
@@ -118,6 +120,7 @@ tls_init(char *cert, char *cafile, char *ciphers, enum tlsmode tmode)
 		ctx = SSL_CTX_new(TLS_method());
 		break;
 	}
+#endif
 	if (!ctx) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("SSL_CTX_new: error initializing methhod: ", sslerr_str, 0);
