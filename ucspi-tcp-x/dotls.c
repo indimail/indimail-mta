@@ -77,7 +77,7 @@ usage(void)
 		 " [ -t timeoutdata ]\n"
 		 " [ -n clientcert ]\n"
 		 " [ -c cafile ] \n"
-		 " [ -s starttlsType (smpt|pop3) ]\n"
+		 " [ -s starttlsType (smtp|pop3) ]\n"
 		 " program");
 }
 
