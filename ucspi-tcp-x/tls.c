@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.7  2021-03-08 20:02:32+05:30  Cprogrammer
+ * include taia.h explicitly
+ *
  * Revision 1.6  2021-03-08 15:47:17+05:30  Cprogrammer
  * use TLS_client_method(), TLS_server_method() functions
  *
@@ -20,24 +23,25 @@
  * Initial revision
  *
  */
+#include <unistd.h>
 #include <sys/types.h>
+#include <sys/select.h>
 #ifdef TLS
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <case.h>
 #endif
-#include "iopause.h"
-#include <sys/select.h>
-#include <unistd.h>
+#include <taia.h>
 #include <strerr.h>
 #include <env.h>
 #include <error.h>
 #include <timeoutread.h>
 #include <timeoutwrite.h>
+#include "iopause.h"
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.6 2021-03-08 15:47:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.7 2021-03-08 20:02:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -70,7 +74,7 @@ static int
 check_cert(SSL *myssl, char *host)
 {
 	X509           *peer;
-    char            peer_CN[256];
+	char            peer_CN[256];
 
     if (SSL_get_verify_result(myssl) != X509_V_OK) {
 		sslerr_str = (char *) myssl_error_str();
@@ -84,14 +88,14 @@ check_cert(SSL *myssl, char *host)
 	 */
 
     /*- Check the common name */
-    if (!(peer = SSL_get_peer_certificate(myssl))) {
+	if (!(peer = SSL_get_peer_certificate(myssl))) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("SSL_get_peer_certificate: ", sslerr_str, 0);
 		return (1);
 	}
-    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, sizeof(peer_CN) - 1);
+	X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, sizeof(peer_CN) - 1);
 	if (host && case_diffs(peer_CN, host)) {
-    	strerr_warn2("hostname doesn't match Common Name ", peer_CN, 0);
+		strerr_warn2("hostname doesn't match Common Name ", peer_CN, 0);
 		return (1);
 	}
 	return (0);
@@ -138,7 +142,7 @@ tls_init(char *cert, char *cafile, char *ciphers, enum tlsmode tmode)
 	 */
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
-    /*- Set our cipher list */
+	/*- Set our cipher list */
 	if (ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers)) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn4("tls_init: unable to set ciphers: ", ciphers, ": ", sslerr_str, 0);
@@ -192,27 +196,27 @@ tls_session(SSL_CTX *ctx, int fd, char *ciphers)
 		return ((SSL *) NULL);
 	}
 #endif
-    if (!(sbio = BIO_new_socket(fd, BIO_NOCLOSE))) {
+	if (!(sbio = BIO_new_socket(fd, BIO_NOCLOSE))) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("BIO_new_socket: ", sslerr_str, 0);
 		SSL_shutdown(myssl);
 		SSL_free(myssl);
 		return ((SSL *) NULL);
 	}
-    SSL_set_bio(myssl, sbio, sbio); /*- cannot fail */
+	SSL_set_bio(myssl, sbio, sbio); /*- cannot fail */
 	return (ssl_t = myssl);
 }
 
 int
 tls_connect(SSL *myssl, char *host)
 {
-   	if (SSL_connect(myssl) <= 0) {
+	if (SSL_connect(myssl) <= 0) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("SSL_connect: ", sslerr_str, 0);
 		ssl_free();
 		return -1;
 	}
-   	if (host && check_cert(myssl, host)) {
+	if (host && check_cert(myssl, host)) {
 		ssl_free();
 		return -1;
 	}
