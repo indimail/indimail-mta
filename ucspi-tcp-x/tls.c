@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.9  2021-03-09 01:15:04+05:30  Cprogrammer
+ * removed string.h
+ *
  * Revision 1.8  2021-03-09 00:51:43+05:30  Cprogrammer
  * handle pending SSL reads with non-blocking IO, SSL_ERROR_WANT_READ.
  * translate() function made generic and can work with non-ssl
@@ -28,7 +31,6 @@
  *
  */
 #include <unistd.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/select.h>
 #ifdef TLS
@@ -46,7 +48,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.8 2021-03-09 00:51:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.9 2021-03-09 01:15:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
