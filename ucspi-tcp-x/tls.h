@@ -1,5 +1,9 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.6  2021-03-09 00:53:13+05:30  Cprogrammer
+ * translate() function made generic and can work with non-ssl
+ * added ssl_timeout.. functions
+ *
  * Revision 1.5  2021-03-08 20:02:57+05:30  Cprogrammer
  * fixed datatypes for allwrite(), allwritessl() arguments
  *
@@ -35,8 +39,12 @@ SSL            *tls_session(SSL_CTX *, int, char *);
 int             tls_connect(SSL *, char *);
 int             tls_accept(SSL *);
 void            ssl_free();
-int             translate(SSL *, int, int, unsigned int);
+int             translate(int, int, int, unsigned int);
 ssize_t         allwritessl(SSL *ssl, char *buf, size_t len);
+ssize_t         ssl_timeoutio(int (*fun) (), long, int, int, SSL *, char *, size_t);
+ssize_t         ssl_timeoutread(long, int, int, SSL *, char *, size_t);
+ssize_t         ssl_timeoutwrite(long, int, int, SSL *, char *, size_t);
+int             ssl_timeoutrehandshake(long, int, int, SSL *);
 const char     *myssl_error_str();
 #endif
 

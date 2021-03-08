@@ -1,5 +1,9 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.8  2021-03-09 00:51:43+05:30  Cprogrammer
+ * handle pending SSL reads with non-blocking IO, SSL_ERROR_WANT_READ.
+ * translate() function made generic and can work with non-ssl
+ *
  * Revision 1.7  2021-03-08 20:02:32+05:30  Cprogrammer
  * include taia.h explicitly
  *
@@ -24,6 +28,7 @@
  *
  */
 #include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/select.h>
 #ifdef TLS
@@ -41,7 +46,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.7 2021-03-08 20:02:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.8 2021-03-09 00:51:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -284,10 +289,14 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, si
 		default:
 			return r;	/*- some other error */
 		case SSL_ERROR_WANT_READ:
+			if (errno == EAGAIN)
+				return -1;
 			FD_SET(rfd, &fds);
 			n = select(rfd + 1, &fds, NULL, NULL, &tv);
 			break;
 		case SSL_ERROR_WANT_WRITE:
+			if (errno == EAGAIN)
+				return -1;
 			FD_SET(wfd, &fds);
 			n = select(wfd + 1, NULL, &fds, NULL, &tv);
 			break;
@@ -296,9 +305,31 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, si
 		 * n is the number of descriptors that changed status
 		 */
 	} while (n > 0);
-	if (n != -1)
-		errno = ETIMEDOUT;
 	return -1;
+}
+
+int
+ssl_timeoutrehandshake(long t, int rfd, int wfd, SSL *ssl)
+{
+	int             r;
+
+	SSL_renegotiate(ssl);
+	r = ssl_timeoutio(SSL_do_handshake, t, rfd, wfd, ssl, NULL, 0);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	if (r <= 0 || SSL_get_state(ssl) == SSL_ST_CONNECT)
+#else
+	if (r <= 0 || ssl->type == SSL_ST_CONNECT)
+#endif
+		return r;
+	/*
+	 * this is for the server only 
+	 */
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	SSL_set_accept_state(ssl);
+#else
+	ssl->state = SSL_ST_ACCEPT;
+#endif
+	return ssl_timeoutio(SSL_do_handshake, t, rfd, wfd, ssl, NULL, 0);
 }
 
 ssize_t
@@ -360,24 +391,17 @@ ssl_timeoutwrite(long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 		return 0;
 	return ssl_timeoutio((int (*)())allwritessl, t, rfd, wfd, myssl, buf, len);
 }
+#endif
 
 int
-translate(SSL *myssl, int clearout, int clearin, unsigned int iotimeout)
+translate(int sfd, int clearout, int clearin, unsigned int iotimeout)
 {
 	struct taia     now, deadline;
 	iopause_fd      iop[2];
-	int             flagexitasap, iopl, sslfd;
+	int             flagexitasap, iopl;
 	ssize_t         n, r;
 	char            tbuf[2048];
 
-	if ((sslfd = SSL_get_fd(myssl)) == -1) {
-		sslerr_str = (char *) myssl_error_str();
-		if (sslerr_str)
-			strerr_warn3("SSL_get_fd: ", sslerr_str, ": ", &strerr_sys);
-		else
-			strerr_warn1("SSL_get_fd:: ", &strerr_sys);
-		return -1;
-	}
 	flagexitasap = 0;
 	while (!flagexitasap) {
 		taia_now(&now);
@@ -386,7 +410,7 @@ translate(SSL *myssl, int clearout, int clearin, unsigned int iotimeout)
 
 		/*- fill iopause struct */
 		iopl = 2;
-		iop[0].fd = sslfd;
+		iop[0].fd = sfd;
 		iop[0].events = IOPAUSE_READ;
 		iop[1].fd = clearin;
 		iop[1].events = IOPAUSE_READ;
@@ -394,44 +418,38 @@ translate(SSL *myssl, int clearout, int clearin, unsigned int iotimeout)
 		/*- do iopause read */
 		iopause(iop, iopl, &deadline, &now);
 		if (iop[0].revents) {
-			/*- data on sslfd */
-			if ((n = SSL_read(myssl, tbuf, sizeof(tbuf))) < 0) {
-				sslerr_str = (char *) myssl_error_str();
-				if (sslerr_str)
-					strerr_warn3("SSL_read: ", sslerr_str, ": ", &strerr_sys);
-				else
-					strerr_warn1("SSL_read: ", &strerr_sys);
+			/*- data on sfd */
+			if ((n = saferead(sfd, tbuf, sizeof(tbuf), iotimeout)) < 0) {
+				if (errno == EAGAIN)
+					continue;
+				strerr_warn1("unable to read from network", &strerr_sys);
 				return -1;
 			} else
-			if (!n)
+			if (!n) {
 				flagexitasap = 1;
+				break;
+			}
 			if ((r = allwrite(clearout, tbuf, n)) == -1) {
-				sslerr_str = (char *) myssl_error_str();
-				if (sslerr_str)
-					strerr_warn3("unable to write: ", sslerr_str, ": ", &strerr_sys);
-				else
-					strerr_warn1("unable to write: ", &strerr_sys);
+				if (errno == EAGAIN)
+					continue;
+				strerr_warn1("unable to write: ", &strerr_sys);
 				return -1;
 			}
 		}
 		if (iop[1].revents) {
 			/*- data on clearin */
-			if ((n = read(clearin, tbuf, sizeof(tbuf))) < 0) {
-				sslerr_str = (char *) myssl_error_str();
-				if (sslerr_str)
-					strerr_warn3("unable to read: ", sslerr_str, ": ", &strerr_sys);
-				else
-					strerr_warn1("unable to read: ", &strerr_sys);
+			if ((n = timeoutread(iotimeout, clearin, tbuf, sizeof(tbuf))) < 0) {
+				strerr_warn1("unable to read: ", &strerr_sys);
 				return -1;
 			} else
-			if (!n)
+			if (!n) {
 				flagexitasap = 1;
-			if ((r = allwritessl(myssl, tbuf, n)) == -1) {
-				sslerr_str = (char *) myssl_error_str();
-				if (sslerr_str)
-					strerr_warn3("SSL_write: ", sslerr_str, ": ", &strerr_sys);
-				else
-					strerr_warn1("SSL_write: ", &strerr_sys);
+				break;
+			}
+			if ((r = safewrite(sfd, tbuf, n, iotimeout)) == -1) {
+				if (errno == EAGAIN)
+					continue;
+				strerr_warn1("unable to write to network: ", &strerr_sys);
 				return -1;
 			}
 		}
@@ -442,7 +460,6 @@ translate(SSL *myssl, int clearout, int clearin, unsigned int iotimeout)
 	} /*- while (!flagexitasap) */
 	return 0;
 }
-#endif
 
 ssize_t
 saferead(int fd, char *buf, size_t len, long timeout)
@@ -452,6 +469,8 @@ saferead(int fd, char *buf, size_t len, long timeout)
 #ifdef TLS
 	if (usessl != none) {
 		if ((r = ssl_timeoutread(timeout, fd, fd, ssl_t, buf, len)) < 0) {
+			if (errno == EAGAIN)
+				return -1;
 			sslerr_str = (char *) myssl_error_str();
 			if (sslerr_str)
 				strerr_warn2("saferead: ", sslerr_str, 0);
@@ -474,6 +493,8 @@ safewrite(int fd, char *buf, size_t len, long timeout)
 #ifdef TLS
 	if (usessl != none) {
 		if ((r = ssl_timeoutwrite(timeout, fd, fd, ssl_t, buf, len)) < 0) {
+			if (errno == EAGAIN)
+				return -1;
 			sslerr_str = (char *) myssl_error_str();
 			if (sslerr_str)
 				strerr_warn3("safewrite: ", sslerr_str, ": ", &strerr_sys);
