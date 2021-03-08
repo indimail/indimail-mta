@@ -1,5 +1,8 @@
 /*
  * $Log: dotls.c,v $
+ * Revision 1.4  2021-03-09 00:55:32+05:30  Cprogrammer
+ * SSL argument to translate replaced with fd
+ *
  * Revision 1.3  2021-03-07 21:37:12+05:30  Cprogrammer
  * fixed usage
  *
@@ -40,7 +43,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.3 2021-03-07 21:37:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.4 2021-03-09 00:55:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_bulk();
@@ -168,7 +171,7 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int rfd, int wfd)
 		}
 		if (tls_accept(ssl))
 			strerr_die2x(111, FATAL, "unable to accept SSL connection");
-		i = translate(ssl, wfd, rfd, dtimeout); /*- returns only when one side closes */
+		i = translate(0, wfd, rfd, dtimeout); /*- returns only when one side closes */
 		ssl_free();
 		_exit(i);
 	}
@@ -625,7 +628,7 @@ main(int argc, char **argv)
 		default:
 			if (tls_accept(ssl))
 				strerr_die2x(111, FATAL, "unable to accept SSL connection");
-			translate(ssl, pi1[1], pi2[0], dtimeout);
+			translate(0, pi1[1], pi2[0], dtimeout);
 			SSL_free(ssl);
 			break;
 		}
