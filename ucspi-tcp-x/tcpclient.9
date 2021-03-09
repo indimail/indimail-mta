@@ -1,0 +1,234 @@
+.TH tcpclient 1
+.SH NAME
+tcpclient \- creates an outgoing TCP IPv4 or IPv6 connection.
+.SH SYNOPSIS
+\fBtcpclient\fR [\fIopts\fR] \fIhost\fR \fIport\fR [\fIprog\fR]
+
+.SH DESCRIPTION
+.I opts
+is a series of getopt-style options.
+.I host
+is one argument.
+.I port
+is one argument.
+.I prog
+consists of one or more arguments. If \fIprog\fR is omitted, tcpclient enters
+client mode where it passes data from fd 0 to the network and data from the
+network to fd 1. client mode is similar to how you would use programs like
+telnet(1), ssh(1), etc.
+
+.B tcpclient
+attempts to connect to a TCP server. If it is successful, it runs
+.IR prog ,
+with descriptor 6 reading from the network and descriptor 7 writing to the
+network. It also sets up several environment variables (see
+.BR tcp-environ (5)
+). In client mode, when \fIprog\fR is not run, \fBtcpclient\fR will pass
+data from fd 0 to the network and from the network to fd 1.
+
+.B tcpclient
+can also do SSL/TLS negotiation with a remote host (-n option). This requires
+a \fIclientcert\fR to be provided. One can also do opportunistic TLS by using
+\fB\-s\fR \fIstarttls\fR option. The currently support option for \fIstarttls\fR
+is \fBsmtp\fR. \fBpop3\fR and \fBimap\fR will be added later.
+
+The server's address is given by
+.I host
+and
+.IR port .
+.I port
+may be a name from /etc/services or a number.
+.I host
+may be 0, referring to the local machine, or a dotted-decimal IP address or
+IPv6 address, or a host name; it is fed through qualification using
+dns_ip4_qualify.
+
+If the server has several IP addresses,
+.B tcpclient
+tries each address in turn.
+
+.SH OPTIONS
+.B General options:
+
+.TP
+.B \-q
+Quiet. Do not print error messages.
+
+.TP
+.B \-Q
+(Default.) Print error messages.
+
+.TP
+.B \-v
+Verbose. Print error messages and status messages.
+.P
+.B Connection options:
+
+.TP
+.B \-T \fIx\fR+\fIy
+Give up on the connection attempt after
+.I x\fR+\fIy
+seconds. Default: 2+58. When a host has several IP addresses,
+.B tcpclient
+tries to connect to the first IP address, waits
+.I x
+seconds, tries to connect to the second IP address, waits
+.I x
+seconds, etc.; then it retries each address that timed out, waiting
+.I y
+seconds per address. You may omit
+.RI + y
+to skip the second try. Before version 0.88,
+.BR tcpserver (1)
+will use only
+.I x
+(default: 60).
+
+.TP
+.B \-i \fIlocalip
+Use
+.I localip
+as the IP address for the local side of the connection; quit if
+.I localip
+is not available. Normally
+.B tcpclient
+lets the operating system choose an address.
+
+.TP
+.B \-p \fIlocalport
+Use
+.I localport
+as the TCP port for the local side of the connection; quit if
+.I localport
+is not available. Normally
+.B tcpclient
+lets the operating system choose a port.
+
+.TP
+.B \-d
+Delay sending data for a fraction of a second whenever the remote host is
+responding slowly. This is currently the default, but it may not be in the
+future; if you want it, set it explicitly.
+
+.TP
+.B \-D
+Never delay sending data; enable TCP_NODELAY.
+
+.TP
+.B \-n \fIclientcert
+Instead of the default clientcert.pem certificate in @qsysconfdir@/certs,
+use the specified \fIclientcert\fR. The location of certificate directory
+can be changed by setting \fBCERTSDIR\fR environment variable.
+
+.TP
+.B \-c \fIcafile
+Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
+special CA certificates are needed if an intermediate certificate used
+by your issuing CA expires. Note that the file given with -c is passed
+to SSL_CTX_load_verify_locations and thus may contain several CA
+certificates, which will be used during SSL connection negotiation to
+close any gap in the certificate chain.
+
+.TP
+\fB\-s\fR \fIstartlsType\fR
+Specify smtp, pop3 or imap for \fIstarttlsType\fR. This works
+differently for \fBserver mode\fR and \fBclient mode\fR
+
+\fBclient mode - \fB
+In this mode, \fBtcpclient\fR will initiate SSL/TLS negotation only after
+issuing \fBSTARTTLS\fR command to the remote server. Currently, only
+\fBsmtp\fR is supported.
+
+\fBserver mode - \fB
+In this mode, \fBtcpclient\fR will start unencrypted and automatically
+add \fBSTARTTLS\fR capability for clients. It will initiate a TLS session
+only when it receives \fBSTARTTLS\fR command from client.
+
+.TP
+.B \-m
+Match \fIhost\fR with common name in certificate (CN)
+
+.TP
+.B \-a \fItimeoutdata
+Quit if read or write to/from \fIhost\fR exceeds \fItimeoutdata\fR seconds
+
+.P
+.B Data-gathering options:
+
+.TP
+.B \-h
+(Default.) Look up the remote host name in DNS to set the environment
+variable $TCPREMOTEHOST.
+
+.TP
+.B \-H
+Do not look up the remote host name in DNS; remove the environment
+variable $TCPREMOTEHOST.
+
+.TP
+.B \-l \fIlocalname
+Do not look up the local host name in DNS; use
+.I localname
+for the environment variable $TCPLOCALHOST. A common choice for localname
+is 0.
+
+.TP
+.B \-r
+(Default.) Attempt to obtain $TCPREMOTEINFO from the remote host.
+
+.TP
+.B \-R
+Do not attempt to obtain $TCPREMOTEINFO from the remote host.
+
+.TP
+.B \-t \fIn
+Give up on the $TCPREMOTEINFO connection attempt after
+.I n
+seconds. Default: 26.
+
+.SH ENVIRONMENT
+.TP
+.B TLS_CIPHER_LIST
+Specifies the ciphers that should be used in SSL/TLS mode. See
+.I openssl(1)
+for more information.
+.TP
+.B CERTSDIR
+Sub-directory relative to @qsysconfdir@, having servercert.pem.
+Default is @qsysconfdir@/certs.
+
+.SH EXAMPLES
+.EX
+1. Connect to port 25 and issue the starttls command
+   tcpclient -n "" -s smtp 0 25
+
+2. Connect to port 110 and issue the STLS command
+   tcpclient -n "" -s pop3 0 110
+
+3. Connect to port 25 on 127.0.0.1 like telnet
+   read from fd 0 & write to network, read from network & write to fd 1
+   tcpclient -n "" 127.0.0.1 25
+
+6. Run a script under tcpclient that connects to a SSL server on port 5555
+   read from fd 6 reads from network, write to fd 7 writes to network
+   tcpclient -n "" 0 5555 /usr/bin/my_script
+.EE
+
+.SH SEE ALSO
+tcpserver(1),
+openssl(1),
+tcprules(1),
+tcprulescheck(1),
+argv0(1),
+fixcrio(1),
+recordio(1),
+rblsmtpd(1),
+who@(1),
+date@(1),
+finger@(1),
+http@(1),
+tcpcat(1),
+mconnect(1),
+tcp-environ(5)
+
+http://cr.yp.to/ucspi-tcp.html

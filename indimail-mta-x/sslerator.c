@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.3  2021-03-04 23:02:07+05:30  Cprogrammer
+ * fixed usage strings
+ *
  * Revision 1.2  2021-03-02 10:41:58+05:30  Cprogrammer
  * renamed SSL_CIPHER to TLS_CIPHER_LIST
  *
@@ -249,9 +252,9 @@ get_options(int argc, char **argv, char **certfile, char **banner, int *timeout,
 			scan_int(optarg, timeout);
 			break;
 		default:
-			strerr_warn2(FATAL, "usage: sslerator [-n certfile][-t timeout][-s][-f fd][-v] prog [args]", 0);
-			strerr_warn2(FATAL, "       s - starttls smtp", 0);
-			strerr_warn2(FATAL, "       v - verbose", 0);
+			strerr_warn1("usage: sslerator [-n certfile][-t timeout][-s][-f fd][-v] prog [args]", 0);
+			strerr_warn1("       s - starttls smtp", 0);
+			strerr_warn1("       v - verbose", 0);
 			return (1);
 		}
 	}
@@ -264,9 +267,9 @@ get_options(int argc, char **argv, char **certfile, char **banner, int *timeout,
 	if (optind < argc)
 		*pgargs = argv + optind;
 	else {
-		strerr_warn2(FATAL, "usage: sslerator [-n certfile][-t timeout][-s][-f fd][-v] prog [args]", 0);
-		strerr_warn2(FATAL, "       s - starttls smtp", 0);
-		strerr_warn2(FATAL, "       v - verbose", 0);
+		strerr_warn1("usage: sslerator [-n certfile][-t timeout][-s][-f fd][-v] prog [args]", 0);
+		strerr_warn1("       s - starttls smtp", 0);
+		strerr_warn1("       v - verbose", 0);
 		return (1);
 	}
 	return (0);
@@ -429,7 +432,7 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.2 2021-03-02 10:41:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.3 2021-03-04 23:02:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

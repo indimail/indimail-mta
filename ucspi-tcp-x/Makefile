@@ -1,11 +1,9 @@
 # Don't edit Makefile! Use conf-* for configuration.
 COFLAGS=-z+05:30
 SHELL=/bin/sh
-OPENSSLBIN=openssl
 SSLLIBS := -lssl -lcrypto
 include Makevars.$(SYSTEM)
 edit = sed \
-	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@prefix\@,$(prefix),g' \
@@ -17,6 +15,8 @@ edit = sed \
 	-e 's,@release\@,$(release),g'
 
 default: it
+
+man: tcpserver.1 tcpclient.1
 
 compile: make-compile warn-auto.sh systype conf-cc-$(SYSTEM)
 	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
@@ -96,10 +96,6 @@ ucspi-tcp.perms: perm_list.in \
 conf-prefix conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
 
-sig.o: \
-compile sig.c
-	./compile sig.c
-
 choose: \
 warn-auto.sh choose.sh conf-prefix
 	cat warn-auto.sh choose.sh \
@@ -108,14 +104,9 @@ warn-auto.sh choose.sh conf-prefix
 	chmod 755 choose
 
 tcpserver.1: tcpserver.9
-	cat tcpserver.9 \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	> tcpserver.1
-
-commands.o: \
-compile commands.c commands.h
-	./compile commands.c
+	$(edit) tcpserver.9 > $@
+tcpclient.1: tcpclient.9
+	$(edit) tcpclient.9 > $@
 
 date@: \
 warn-auto.sh date@.sh conf-prefix
@@ -147,19 +138,19 @@ compile dns_dtda.c dns.h iopause.h haveip6.h
 
 dns_ip.o: \
 compile dns_ip.c dns.h iopause.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` dns_ip.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_ip.c
 
 dns_ipq.o: \
 compile dns_ipq.c dns.h iopause.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` dns_ipq.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_ipq.c
 
 dns_name.o: \
 compile dns_name.c ip6.h dns.h iopause.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` dns_name.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_name.c
 
 dns_nd.o: \
 compile dns_nd.c dns.h iopause.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` dns_nd.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_nd.c
 
 dns_packet.o: \
 compile dns_packet.c dns.h iopause.h haveip6.h
@@ -171,7 +162,7 @@ compile dns_random.c dns.h iopause.h haveip6.h
 
 dns_rcip.o: \
 compile dns_rcip.c ip4.h ip6.h dns.h iopause.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` dns_rcip.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_rcip.c
 
 dns_rcrw.o: \
 compile dns_rcrw.c dns.h iopause.h haveip6.h
@@ -179,15 +170,15 @@ compile dns_rcrw.c dns.h iopause.h haveip6.h
 
 dns_resolve.o: \
 compile dns_resolve.c dns.h iopause.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` dns_resolve.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_resolve.c
 
 dns_sortip.o: \
 compile dns_sortip.c dns.h iopause.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` dns_sortip.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_sortip.c
 
 dns_transmit.o: \
 compile dns_transmit.c socket.h dns.h iopause.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` dns_transmit.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_transmit.c
 
 dns_txt.o: \
 compile dns_txt.c dns.h iopause.h haveip6.h
@@ -224,7 +215,7 @@ choose compile load trywaitp.c haswaitp.h1 haswaitp.h2
 
 hier.o: \
 compile hier.c auto_home.h auto_shared.h conf-dlopen
-	./compile `grep -h -v "^#" conf-dlopen` hier.c
+	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` hier.c
 
 http@: \
 warn-auto.sh http@.sh conf-prefix
@@ -253,8 +244,8 @@ ip4_scan.o: \
 compile ip4_scan.c ip4.h
 	./compile ip4_scan.c
 
-it: prog tcpserver.1 shared instcheck \
-installer ucspi-tcp.perms ucspi-tcp.spec
+it: prog man shared instcheck installer \
+dotls ucspi-tcp.perms ucspi-tcp.spec
 
 load: warn-auto.sh conf-ld systype make-load
 	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
@@ -277,11 +268,11 @@ compile mconnect-io.c
 
 pathexec_env.o: \
 compile pathexec_env.c pathexec.h conf-dlopen
-	./compile `grep -h -v "^#" conf-dlopen` pathexec_env.c
+	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` pathexec_env.c
 
 pathexec_rundl.o: \
 compile pathexec_run.c pathexec.h conf-dlopen
-	./compile `grep -h -v "^#" conf-dlopen` pathexec_run.c -o pathexec_rundl.o
+	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` pathexec_run.c -o pathexec_rundl.o
 
 pathexec_run.o: \
 compile pathexec_run.c pathexec.h conf-dlopen
@@ -301,42 +292,42 @@ compile prot.c hasshsgr.h prot.h
 	./compile prot.c
 
 rblsmtpd.so: \
-load rbl.o commands.o pathexec_rundl.o load_shared.o \
+load rbl.o pathexec_rundl.o load_shared.o \
 dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib \
 conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
-	rbl.o commands.o pathexec_rundl.o load_shared.o \
+	rbl.o pathexec_rundl.o load_shared.o \
 	tcdlmopen.o dlnamespace.o dns.a unix.a `cat socket.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o rblsmtpd.so \
-	rbl.o commands.o pathexec_rundl.o load_shared.o \
+	rbl.o pathexec_rundl.o load_shared.o \
 	dlnamespace.o tcdlmopen.o dns.a unix.a `cat socket.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail -ldl; \
 	fi
 
 rblsmtpd: \
-load rblsmtpd.o commands.o pathexec_rundl.o load_shared.o \
+load rblsmtpd.o pathexec_rundl.o load_shared.o \
 dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
-	./load rblsmtpd commands.o pathexec_rundl.o load_shared.o \
+	./load rblsmtpd pathexec_rundl.o load_shared.o \
 	dlnamespace.o tcdlmopen.o dns.a unix.a \
 	`cat socket.lib` -lqmail -ldl
 
 rblsmtpd.o: \
-compile rblsmtpd.c commands.h pathexec.h dns.h iopause.h \
+compile rblsmtpd.c pathexec.h dns.h iopause.h \
 haveip6.h ip6.h conf-ip
-	./compile -DMAIN `grep -h -v "^#" conf-ip` rblsmtpd.c
+	./compile -DMAIN `grep -h -v "^#" conf-ip 2>/dev/null` rblsmtpd.c
 
 rbl.o: \
-compile rblsmtpd.c commands.h pathexec.h dns.h iopause.h \
+compile rblsmtpd.c pathexec.h dns.h iopause.h \
 haveip6.h ip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` rblsmtpd.c -o rbl.o
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` rblsmtpd.c -o rbl.o
 
 tcpremoteinfo.o: \
 compile tcpremoteinfo.c socket.h timeoutconn.h \
 tcpremoteinfo.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` tcpremoteinfo.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` tcpremoteinfo.c
 
 rts: \
 warn-auto.sh rts.sh conf-prefix
@@ -347,7 +338,7 @@ warn-auto.sh rts.sh conf-prefix
 
 rules.o: \
 compile rules.c rules.h ip4_bit.h ip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` rules.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` rules.c
 
 socket.lib: \
 trylsock.c compile load
@@ -358,15 +349,15 @@ trylsock.c compile load
 
 socket_accept.o: \
 compile socket_accept.c socket.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_accept.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_accept.c
 
 socket_bind.o: \
 compile socket_bind.c socket.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_bind.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_bind.c
 
 socket_conn.o: \
 compile socket_conn.c socket.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_conn.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_conn.c
 
 socket_delay.o: \
 compile socket_delay.c socket.h haveip6.h
@@ -378,7 +369,7 @@ compile socket_listen.c socket.h haveip6.h
 
 socket_local.o: \
 compile socket_local.c socket.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_local.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_local.c
 
 socket_opts.o: \
 compile socket_opts.c socket.h haveip6.h
@@ -390,15 +381,15 @@ compile socket_opts6.c socket.h haveip6.h
 
 socket_remote.o: \
 compile socket_remote.c socket.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_remote.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_remote.c
 
 socket_tcp.o: \
 compile socket_tcp.c socket.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_tcp.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_tcp.c
 
 socket_udp.o: \
 compile socket_udp.c socket.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_udp.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_udp.c
 
 systype: find-systype.sh conf-cc conf-ld trycpp.c x86cpuid.c
 	( cat warn-auto.sh; \
@@ -419,15 +410,32 @@ warn-auto.sh tcpcat.sh conf-prefix
 
 tcpclient: \
 load tcpclient.o tcpremoteinfo.o timeoutconn.o \
-pathexec_run.o dns.a unix.a socket.lib
+pathexec_run.o tls.o dns.a unix.a socket.lib
 	./load tcpclient tcpremoteinfo.o timeoutconn.o \
-	pathexec_run.o dns.a unix.a `cat socket.lib` -lqmail
+	pathexec_run.o tls.o dns.a unix.a \
+	$(SSLLIBS) `cat socket.lib` -lqmail
 
 tcpclient.o: \
 compile tcpclient.c ip4.h socket.h pathexec.h \
-timeoutconn.h tcpremoteinfo.h dns.h iopause.h haveip6.h \
-ip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` tcpclient.c
+timeoutconn.h tcpremoteinfo.h dns.h iopause.h \
+tls.h haveip6.h ip6.h conf-ip conf-tls
+	./compile \
+	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` tcpclient.c
+
+dotls: \
+load dotls.o tls.o pathexec_run.o pathexec_env.o
+	./load dotls tls.o pathexec_run.o \
+	pathexec_env.o $(SSLLIBS) -lqmail
+
+dotls.o: \
+compile dotls.c tls.c tls.h pathexec.h conf-tls
+	./compile \
+	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` dotls.c
+
+tls.o: \
+compile tls.c tls.h iopause.h conf-tls
+	./compile \
+	`grep -h -v "^#" conf-tls 2>/dev/null` tls.c
 
 tcprules: \
 load tcprules.o unix.a
@@ -435,7 +443,7 @@ load tcprules.o unix.a
 
 tcprules.o: \
 compile tcprules.c conf-ip
-	./compile `grep -h -v "^#" conf-ip` tcprules.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` tcprules.c
 
 tcprulescheck: \
 load tcprulescheck.o rules.o socket_v4mappedprefix.o \
@@ -453,28 +461,28 @@ choose compile load trydlmopen.c hasdlmopen.h1 hasdlmopen.h2 conf-dlmopen
 
 load_shared.o: \
 compile load_shared.c dlnamespace.h hasdlmopen.h pathexec.h
-	./compile `grep -h -v "^#" conf-dlopen` load_shared.c
+	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` load_shared.c
 
 tcdlmopen.o: \
 compile tcdlmopen.c env.h dlnamespace.h \
 hasdlmopen.h conf-dlopen
-	./compile `grep -h -v "^#" conf-dlopen` tcdlmopen.c
+	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` tcdlmopen.c
 
 tcpserver_plugin.o: \
 compile tcpserver_plugin.c hasdlmopen.h dlnamespace.h conf-dlopen
-	./compile `grep -h -v "^#" conf-dlopen` tcpserver_plugin.c
+	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` tcpserver_plugin.c
 
 dlnamespace.o: \
 compile dlnamespace.c hasdlmopen.h pathexec.h
-	./compile `grep -h -v "^#" conf-dlopen` dlnamespace.c
+	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` dlnamespace.c
 
 tcpserver: \
 load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o pathexec_rundl.o \
 tcpserver_plugin.o load_shared.o control.o auto_home.o dlnamespace.o \
-tcdlmopen.o load_mysql.o dns.a unix.a socket.lib mysql_config \
+tcdlmopen.o tls.o load_mysql.o dns.a unix.a socket.lib mysql_config \
 conf-ld-$(SYSTEM)
 	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o load_mysql.o \
-	control.o auto_home.o tcpserver_plugin.o load_shared.o \
+	control.o auto_home.o tcpserver_plugin.o load_shared.o tls.o \
 	dlnamespace.o tcdlmopen.o pathexec_rundl.o dns.a unix.a \
 	`cat socket.lib conf-ld-$(SYSTEM) 2>/dev/null` $(SSLLIBS) -lqmail -ldl
 
@@ -482,20 +490,21 @@ mysql_inc: mysql_config
 	./mysql_config --include > mysql_inc || true
 
 tcpserver.o: \
-compile tcpserver.c ip4.h prot.h pathexec.h \
+compile tcpserver.c ip4.h prot.h pathexec.h tls.h load_mysql.h \
 socket.h tcpremoteinfo.h rules.h dns.h iopause.h haveip6.h ip6.h \
-conf-tls conf-ip haveip6.h conf-mysqlrules conf-dlopen \
-hasmysql.h mysql_inc
-	./compile `grep -h -v "^#" conf-tls conf-ip conf-mysqlrules \
-	conf-dlopen mysql_inc` tcpserver.c
+conf-tls conf-ip conf-mysqlrules conf-dlopen control.h \
+hasmysql.h auto_home.h mysql_inc
+	./compile \
+	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen mysql_inc 2>/dev/null` \
+	tcpserver.c
 
 mysql_config.o: compile mysql_config.c conf-mysqlrules
-	./compile `grep -h -v "^#" conf-mysqlrules` mysql_config.c
+	./compile `grep -h -v "^#" conf-mysqlrules 2>/dev/null` mysql_config.c
 mysql_config: load mysql_config.o
 	./load mysql_config
 
 load_mysql.o: compile load_mysql.c hasmysql.h mysql_inc
-	./compile `grep -h -v "^#" conf-mysqlrules mysql_inc` load_mysql.c
+	./compile `grep -h -v "^#" conf-mysqlrules mysql_inc 2>/dev/null` load_mysql.c
 
 control.o: \
 compile control.c control.h
@@ -503,7 +512,7 @@ compile control.c control.h
 
 timeoutconn.o: \
 compile timeoutconn.c socket.h haveip6.h timeoutconn.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` timeoutconn.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` timeoutconn.c
 
 unix.a: \
 makelib pathexec_env.o prot.o socket_accept.o socket_bind.o \
@@ -526,27 +535,27 @@ socket_v6any.o socket_v6loopback.o ip6_compactaddr.o ip6_expandaddr.o
 
 socket_conn6.o: \
 compile socket_conn6.c socket.h ip4.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_conn6.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_conn6.c
 
 socket_bind6.o: \
 compile socket_bind6.c socket.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_bind6.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_bind6.c
 
 socket_accept6.o: \
 compile socket_accept6.c socket.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_accept6.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_accept6.c
 
 socket_recv6.o: \
 compile socket_recv6.c socket.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_recv6.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_recv6.c
 
 socket_send6.o: \
 compile socket_send6.c socket.h ip4.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_send6.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_send6.c
 
 socket_local6.o: \
 compile socket_local6.c socket.h haveip6.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_local6.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_local6.c
 
 ip6_compactaddr.o: \
 compile ip6_compactaddr.c ip6.h 
@@ -558,11 +567,11 @@ compile ip6_expandaddr.c ip6.h
 
 ip6_fmt.o: \
 compile ip6_fmt.c ip4.h ip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` ip6_fmt.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` ip6_fmt.c
 
 ip6_scan.o: \
 compile ip6_scan.c ip4.h ip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` ip6_scan.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` ip6_scan.c
 
 ip6_bit.o: \
 compile ip6_bit.c ip6.h ip6.h
@@ -570,11 +579,11 @@ compile ip6_bit.c ip6.h ip6.h
 
 socket_tcp6.o: \
 compile socket_tcp6.c socket.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_tcp6.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_tcp6.c
 
 haveip6.h: \
 choose tryip6.c compile haveip6.h1 haveip6.h2 conf-ip
-	./compile `grep -h -v "^#" conf-ip` tryip6.c; \
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` tryip6.c; \
 	cc tryip6.o -o tryip6; \
 	./choose r tryip6 haveip6.h1 haveip6.h2 > haveip6.h
 
@@ -592,15 +601,15 @@ compile socket_ip4loopback.c
 
 socket_v4mappedprefix.o: \
 compile socket_v4mappedprefix.c conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_v4mappedprefix.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_v4mappedprefix.c
 
 socket_v6any.o: \
 compile socket_v6any.c conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_v6any.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_v6any.c
 
 socket_v6loopback.o: \
 compile socket_v6loopback.c conf-ip
-	./compile `grep -h -v "^#" conf-ip` socket_v6loopback.c
+	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_v6loopback.c
 
 who@: \
 warn-auto.sh who@.sh conf-prefix

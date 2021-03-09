@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.22  2021-03-06 23:13:31+05:30  Cprogrammer
+ * use commands from libqmail
+ *
  * Revision 1.21  2021-01-28 18:22:39+05:30  Cprogrammer
  * added ehlo() function
  * change greeting using RBLGREETING env variable
@@ -81,7 +84,7 @@
 #endif
 #include <strerr.h>
 #include <stralloc.h>
-#include "commands.h"
+#include <commands.h>
 #include "pathexec.h"
 #include "dns.h"
 #ifdef IPV6
@@ -91,7 +94,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.21 2021-01-28 18:22:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.22 2021-03-06 23:13:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void

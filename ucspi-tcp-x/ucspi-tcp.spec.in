@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.14 2020-10-27 17:34:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.17 2021-03-06 23:15:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -111,8 +111,8 @@ This package includes several sample clients built on top of tcpclient:
 who@, date@, finger@, http@, tcpcat, and mconnect.
 
 tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
-Interface, using the TCP protocol. This package supports ipv6 and TLS
-connections.
+Interface, using the TCP protocol. tcpserver and tcpclient support ipv6
+and TLS connections.
 
 Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
@@ -212,6 +212,7 @@ chmod -R 755 %{buildroot}%{plugindir}
 %attr(0755,root,root)                     %{_prefix}/bin/delcr
 %attr(0755,root,root)                     %{_prefix}/bin/fixcrio
 %attr(0755,root,root)                     %{_prefix}/bin/recordio
+%attr(0755,root,root)                     %{_prefix}/bin/dotls
 
 %attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
 %attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
@@ -242,6 +243,7 @@ chmod -R 755 %{buildroot}%{plugindir}
 %attr(0644,root,root)                     %{mandir}/man1/delcr.1.gz
 %attr(0644,root,root)                     %{mandir}/man1/fixcrio.1.gz
 %attr(0644,root,root)                     %{mandir}/man1/recordio.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/dotls.1.gz
 
 %attr(0644,root,root)                     %{shareddir}/doc/ChangeLog-ucspi-tcp
 %attr(0644,root,root)                     %{shareddir}/doc/README.ucspi-tcp

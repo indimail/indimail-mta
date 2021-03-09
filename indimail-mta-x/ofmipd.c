@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.19  2021-03-04 23:02:29+05:30  Cprogrammer
+ * ansic c prototype for safewrite()
+ *
  * Revision 1.18  2020-11-24 13:46:21+05:30  Cprogrammer
  * removed exit.h
  *
@@ -122,10 +125,7 @@ void            logerrf(char *);
 void            logerr_start();
 
 ssize_t
-safewrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+safewrite(int fd, char *buf, size_t len)
 {
 	int             r;
 
@@ -1221,7 +1221,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.18 2020-11-24 13:46:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.19 2021-03-04 23:02:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

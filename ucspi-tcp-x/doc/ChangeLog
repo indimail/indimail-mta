@@ -1,7 +1,28 @@
 *
 Release 1.1 Start 14/02/2021
-02/03/2021
+- 02/03/2021
 01. tcpserver.c renamed SSL_CIPHER to TLS_CIPHER_LIST
+- 03/03/2021
+02. tcpclient.c: added SSL/TLS support
+03. tcpclient.c: added client mode feature making prog optional
+- 04/03/2021
+04. tls.c: added option to match host with common name
+05. tcpclient.c, tcpserver.c: Use CERTSDIR env variable to specify custom
+    certificate location
+06. tcpclient.c: added -m option to match host with common name
+- 06/03/2021
+07. dotls.c: SSL/TLS client / server wrapper for SSL/TLS and opportunistic
+    TLS
+08. tcpclient.c: added opportunistic TLS (STARTLS) capability.
+- 07/03/2021
+09. tcpclient.c: added starttls for pop3
+- 09/03/2021
+10. tls.c: check for SSL_ERROR_WANT_READ to retry SSL_read() when using
+    non-blocking io
+11. tls.c, tcpclient.c: retry read. write on errno == EAGAIN to fix blocking
+    IO problem with SSL_read()
+12. tls.c: made translate() generic. Replaced SSL with fd parameter
+13. doit.c, tcpclient.c: use new translate() from tls.c
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 21/05/2020

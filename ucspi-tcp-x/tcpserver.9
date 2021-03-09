@@ -289,9 +289,13 @@ Give up on the $TCPREMOTEINFO connection attempt after
 .I n
 seconds. Default: 26.
 .TP
+.B \-s
+Use default cert servercert.pem in @qsysconfdir@/certs. The location
+of certificate directory can be changed by setting \fBCERTSDIR\fR
+environment variable.
+.TP
 .B \-n \fIcertfile
-Instead of the default servercert.pem certificate use the specified
-.IR certfile .
+Use \fIcertfile\fR as the default certificate instead of servercert.pem.
 .TP
 .B \-a \fIcafile
 Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
@@ -325,23 +329,23 @@ A special case can be setup for qmail-smtpd and rblmstpd
 by specifying the following environment variables
 
 .EX
-PLUGIN0=PREFIX/lib/indimail/plugins/qmail_smtpd.so
-PLUGIN0_dir=/var/indimail
+PLUGIN0=@prefix@/lib/indimail/plugins/qmail_smtpd.so
+PLUGIN0_dir=@qsysconfdir@
 PLUGIN0_init=smtp_init
-PLUGIN1=PREFIX/lib/indimail/plugins/rblsmtpd.so
+PLUGIN1=@prefix@/lib/indimail/plugins/rblsmtpd.so
 .EE
 
 The above causes tcpserver to load qmail_smtpd.so and execute the smtp_init(1)
 function, after changing directory to /var/indimail, in the parent. smtp_init()
 loads all qmail-smtpd control files. Here PLUGIN0 is defined as
-PREFIX/lib/indimail/plugins/qmail_smtpd.so, which causes the function
+@prefix@/lib/indimail/plugins/qmail_smtpd.so, which causes the function
 qmail_smtpd() to be preloaded. This improves the perfomance of the smtp 
 service. In the above example, rblsmtpd.so
 is loaded without executing any initialization function and without changing
 directory. On SIGHUP, tcpserver executes the function smtp_init(0). The
 variable PLUGINn_dir should be used if your function expects to be in a
 particular directory to function properly. PLUGIN1 causes tcpserver to preload
-rblsmtpd.so and if \fIprog\fR is PREFIX/lib/indimail/plugins/rblsmtpd.so, it
+rblsmtpd.so and if \fIprog\fR is @prefix@/lib/indimail/plugins/rblsmtpd.so, it
 will simply execute the function \fIrblsmtpd\fR, from the shared library
 rblsmtpd.so already preloaded in the memory.
 
@@ -367,9 +371,9 @@ Specifies the ciphers that should be used in SSL/TLS mode. See
 .I openssl(1)
 for more information.
 .TP
-.B CONTROLDIR
-Sub-directory relative to SYSCONFDIR, having servercert.pem.
-Default is SYSCONFDIR/control.
+.B CERTSDIR
+Sub-directory relative to @qsysconfdir@, having servercert.pem.
+Default is @qsysconfdir@/certs.
 
 .SH SEE ALSO
 tcprules(1),
