@@ -96,10 +96,6 @@ ucspi-tcp.perms: perm_list.in \
 conf-prefix conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
 
-sig.o: \
-compile sig.c
-	./compile sig.c
-
 choose: \
 warn-auto.sh choose.sh conf-prefix
 	cat warn-auto.sh choose.sh \
@@ -494,10 +490,10 @@ mysql_inc: mysql_config
 	./mysql_config --include > mysql_inc || true
 
 tcpserver.o: \
-compile tcpserver.c ip4.h prot.h pathexec.h \
+compile tcpserver.c ip4.h prot.h pathexec.h tls.h load_mysql.h \
 socket.h tcpremoteinfo.h rules.h dns.h iopause.h haveip6.h ip6.h \
-conf-tls conf-ip haveip6.h conf-mysqlrules conf-dlopen \
-hasmysql.h mysql_inc
+conf-tls conf-ip conf-mysqlrules conf-dlopen control.h \
+hasmysql.h auto_home.h mysql_inc
 	./compile \
 	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen mysql_inc 2>/dev/null` \
 	tcpserver.c
