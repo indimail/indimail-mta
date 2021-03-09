@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.72  2021-03-09 08:30:40+05:30  Cprogrammer
+ * change in translate() function.
+ *
  * Revision 1.71  2021-03-07 08:30:07+05:30  Cprogrammer
  * use common tls functions from tls.c
  * added idle timeout parameter
@@ -222,6 +225,7 @@
 #include <subfd.h>
 #include <error.h>
 #include <strerr.h>
+#include <sig.h>
 #ifdef DARWIN
 #define opteof -1
 #else
@@ -232,7 +236,6 @@
 #include <ndelay.h>
 #include "tcpremoteinfo.h"
 #include "rules.h"
-#include <sig.h>
 #include "iopause.h"
 #include "dns.h"
 #include "hasmysql.h"
@@ -241,12 +244,12 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.71 2021-03-07 08:30:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.72 2021-03-09 08:30:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
-static int      forcev6 = 0;
-static uint32   netif = 0;
+static int      forcev6;
+static uint32   netif;
 #endif
 static int      verbosity = 1;
 static int      flagkillopts = 1;
@@ -254,16 +257,16 @@ static int      flagdelay = 1;
 static char    *banner = "";
 static int      flagremoteinfo = 1;
 static int      flagremotehost = 1;
-static int      flagparanoid = 0;
+static int      flagparanoid;
 static ulong    itimeout = 26, maxperip = 20, PerHostLimit = 20;
 static ulong    idle_timeout = 300;
 static ulong    limit = 40;
-static ulong    alloc_count = 0;
-static ulong    numchildren = 0;
+static ulong    alloc_count;
+static ulong    numchildren;
 static ulong    backlog = 20;
 #ifdef TLS
-static int      flagssl = 0;
-struct stralloc certfile = {0};
+static int      flagssl;
+struct stralloc certfile;
 #endif
 
 static stralloc tcpremoteinfo;
@@ -283,11 +286,11 @@ static char     remoteip[4];
 static char     remoteipstr[IP4_FMT];
 #endif
 static stralloc localhostsa;
-static char    *localhost = 0;
+static char    *localhost;
 static uint16   remoteport;
 static char     remoteportstr[FMT_ULONG];
 static stralloc remotehostsa;
-static char    *remotehost = 0;
+static char    *remotehost;
 
 static char     strnum[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
@@ -296,13 +299,13 @@ static stralloc tmp;
 static stralloc fqdn;
 static stralloc addresses;
 
-static int      flag1 = 0;
+static int      flag1;
 static char     bspace[16];
 static substdio b;
 static stralloc limitFile;
 
-static uid_t    uid = 0;
-static gid_t    gid = 0;
+static uid_t    uid = -1;
+static gid_t    gid = -1;
 
 struct iptable
 {
@@ -326,9 +329,9 @@ extern char   **environ;
 
 #define DROP  "tcpserver: warning: dropping connection, "
 
-static int      flagdeny = 0;
-static int      flagallownorules = 0;
-static char    *fnrules = 0;
+static int      flagdeny;
+static int      flagallownorules;
+static char    *fnrules;
 
 void
 drop_nomem(void)
@@ -785,11 +788,11 @@ matchinet(char *ip, char *token)
 #include <mysql.h>
 #include <mysqld_error.h>
 
-struct stralloc dbserver = {0};
-struct stralloc dbuser = {0};
-struct stralloc dbpass = {0};
-struct stralloc dbname = {0};
-struct stralloc dbtable = {0};
+struct stralloc dbserver;
+struct stralloc dbuser;
+struct stralloc dbpass;
+struct stralloc dbname;
+struct stralloc dbtable;
 MYSQL          *conn = (MYSQL *) 0;
 
 void
@@ -1641,9 +1644,9 @@ main(int argc, char **argv, char **envp)
 		noipv6 = 0;
 	}
 #endif /*- #if defined(IPV6) && defined(FREEBSD) */
-	if (gid && prot_gid(gid) == -1)
+	if (gid != -1 && prot_gid(gid) == -1)
 		strerr_die2sys(111, FATAL, "unable to set gid: ");
-	if (uid && prot_uid(uid) == -1)
+	if (uid != -1 && prot_uid(uid) == -1)
 		strerr_die2sys(111, FATAL, "unable to set uid: ");
 	if (tcpserver_plugin(envp, 1))
 		_exit(111);
@@ -1772,7 +1775,7 @@ main(int argc, char **argv, char **envp)
 				ctx = NULL;
 				if (tls_accept(ssl))
 					strerr_die2x(111, DROP, "unable to accept SSL connection");
-				translate(ssl, pi2c[1], pi4c[0], idle_timeout);
+				translate(0, pi2c[1], pi4c[0], idle_timeout);
 				SSL_free(ssl);
 				_exit(0);
 			}
