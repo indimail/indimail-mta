@@ -25,6 +25,8 @@ Release 2.13 Start 14/02/2021
 14. smtpd.c: renamed TLSCIPHERS to TLS_CIPHER_LIST
 15. sslerator.c: renamed SSL_CIPHER to TLS_CIPHER_LIST
 16. indimail.spec: fixed rpmlint percent in pretrans, post
+- 09/03/2021
+18. svctool: added timeout parameter for indisrvr
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

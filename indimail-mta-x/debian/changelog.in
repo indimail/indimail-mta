@@ -15,3 +15,4 @@ indimail-mta (@version@-@release@) unstable; urgency=low
   * svctool: added back IMAP_ENHANCEDIDLE for courier-imap-5.0.14
   * smtpd.c: renamed TLSCIPHERS to TLS_CIPHER_LIST
   * sslerator.c: renamed SSL_CIPHER to TLS_CIPHER_LIST
+  * svctool: added timeout parameter for indisrvr
