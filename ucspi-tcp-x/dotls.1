@@ -17,7 +17,7 @@ deal with the gory details of SSL/TLS.
 An application typically creates a network connection, then runs
 \fBdotls\fR with appropriate options to encrypt the network
 connection with SSL/TLS. \fBdotls\fR can also do opportunistic
-SSL/TLS for smtp in server mode.
+SSL/TLS (or delayed encryption) for smtp in server mode.
 
 \fBdotls\fR can be run under \fBtcpserver\fR(1) to provide SSL/TLS or
 opportunistic TLS for qmail-smtpd, qmail-pop3d. This is known as
@@ -27,9 +27,9 @@ opportunistic TLS for qmail-smtpd, qmail-pop3d. This is known as
 enabled server. This is knwn is \fBclient mode\fR. This gets enabled
 when you use \fB\-T\fR or the \fB\-C\fR options.
 
-\fBdotls\fR is not needed by indimail-mta as all features offered by
-\fBdotls\fR are built-in tcpserver(1) and tcpclient(1) provided by
-ucspi-tcp package from indimail-mta git repo at
+\fBdotls\fR is not needed by indimail-mta, as all features offered by
+\fBdotls\fR are built-in tcpserver(1) and tcpclient(1), provided by
+ucspi-tcp package from indimail-mta git repo at,
 https://github.com/mbhangui/indimail-mta/tree/master/ucspi-tcp-x
 
 .SH "OPTIONS"
@@ -80,16 +80,24 @@ string should be separated by a colon.
 1. Add STARTTLS extension for qmail-smtpd
    tcpserver 0 25 /usr/bin/dotls -n "" -s smtp /var/qmail/bin/qmail-smtpd
 
-2. Provide SMTPS service on port 465
+2. Provide SMTPS service on port 465 for qmail-smtpd
    tcpserver 0 465 /usr/bin/dotls -n "" /var/qmail/bin/qmail-smtpd
 
 3. Add STLS extension for qmail-pop3d
    tcpserver 0 110 /usr/bin/dotls -n "" -s pop3 qmail-popup host \\
      checkpassword qmail-pop3d Maildir
 
-4. Provide POP3S service on port 993
+4. Provide POP3S service on port 993 for qmail-pop3d
    tcpserver 0 993 /usr/bin/dotls -n "" qmail-popup host checkpassword \\
      qmail-pop3d Maildir
+
+5. Run a script under tcpclient that connects to a SSL server on port 5555
+   read from fd 0 reads from network & write to fd 1 writes to network
+   tcpclient 0 555 /usr/bin/dotls -n "" -C /usr/bin/myscript
+
+6. Run a script under tcpclient that connects to a SSL server on port 5555
+   read from fd 6 reads from network & write to fd 7 writes to network
+   tcpclient 0 555 /usr/bin/dotls -n "" -CT /usr/bin/myscript
 .EE
 
 .SH "SEE ALSO"
