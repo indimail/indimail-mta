@@ -1,7 +1,7 @@
 /*
  * $Log: tls.c,v $
- * Revision 1.9  2021-03-09 11:56:48+05:30  Cprogrammer
- * return SSL_read() within ssl_timeout() on EAGAIN
+ * Revision 1.9  2021-03-09 21:35:57+05:30  Cprogrammer
+ * return ETIMEDOUT on timeout
  *
  * Revision 1.8  2021-03-09 09:38:08+05:30  Cprogrammer
  * make translate() function generic by using fd instead of SSL structure
@@ -51,7 +51,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.9 2021-03-09 11:56:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.9 2021-03-09 21:35:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -297,13 +297,13 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, si
 			return r;	/*- some other error */
 		case SSL_ERROR_WANT_READ:
 			if (errno == EAGAIN)
-				continue;
+				return -1;
 			FD_SET(rfd, &fds);
 			n = select(rfd + 1, &fds, NULL, NULL, &tv);
 			break;
 		case SSL_ERROR_WANT_WRITE:
 			if (errno == EAGAIN)
-				continue;
+				return -1;
 			FD_SET(wfd, &fds);
 			n = select(wfd + 1, NULL, &fds, NULL, &tv);
 			break;
