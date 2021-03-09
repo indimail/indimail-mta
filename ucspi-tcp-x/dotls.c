@@ -1,5 +1,8 @@
 /*
  * $Log: dotls.c,v $
+ * Revision 1.5  2021-03-09 08:15:56+05:30  Cprogrammer
+ * removed unnecessary initializations and type casts
+ *
  * Revision 1.4  2021-03-09 00:55:32+05:30  Cprogrammer
  * SSL argument to translate replaced with fd
  *
@@ -43,7 +46,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.4 2021-03-09 00:55:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.5 2021-03-09 08:15:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_bulk();
@@ -58,10 +61,10 @@ void            flush();
 
 struct substdio ssin, ssto, smtpin, smtpto;
 unsigned long   dtimeout = 60;
-stralloc        certfile = { 0 };
-stralloc        capatext = { 0 };
-stralloc        sauninit = { 0 };
-stralloc        line = { 0 };
+stralloc        certfile;
+stralloc        capatext;
+stralloc        sauninit;
+stralloc        line;
 char            strnum[FMT_ULONG];
 int             linemode = 1;
 struct scommd
@@ -523,10 +526,9 @@ main(int argc, char **argv)
 {
 	int             opt, pi1[2], pi2[2], client_mode = 0, tcpclient = 0;
 	pid_t           pid;
-	char           *certsdir, *cafile = (char *) NULL,
-				   *host = (char *) NULL, *ciphers = (char *) NULL;
+	char           *certsdir, *cafile = NULL, *host = NULL, *ciphers = NULL;
 	SSL            *ssl;
-	SSL_CTX        *ctx = (SSL_CTX *) NULL;
+	SSL_CTX        *ctx = NULL;
 	enum starttls   stls = unknown;
 	unsigned long   u;
 
@@ -615,7 +617,7 @@ main(int argc, char **argv)
 	if (!(ssl = tls_session(ctx, client_mode ? 6 : 0, ciphers)))
 		strerr_die2x(111, FATAL, "unable to setup SSL session");
 	SSL_CTX_free(ctx);
-	ctx = (SSL_CTX *) NULL;
+	ctx = NULL;
 	if (client_mode && tls_connect(ssl, host) == -1)
 		_exit(111);
 	else { /*- server mode */

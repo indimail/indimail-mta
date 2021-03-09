@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.18  2021-03-09 08:17:19+05:30  Cprogrammer
+ * removed unnecessary initializations and type casts
+ *
  * Revision 1.17  2021-03-09 00:54:22+05:30  Cprogrammer
  * use non-blocking io
  * use translate() functions from tls.c instead of select()
@@ -99,7 +102,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.17 2021-03-09 00:54:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.18 2021-03-09 08:17:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -145,18 +148,18 @@ unsigned long   itimeout = 26;
 unsigned long   ctimeout[2] = { 2, 58 };
 unsigned long   dtimeout = 300;
 #ifdef IPV6
-int             forcev6 = 0;
+int             forcev6;
 char            iplocal[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 char            ipremote[16];
 char            ipstr[IP6_FMT];
-uint32          netif = 0;
+uint32          netif;
 #else
 char            iplocal[4] = {0, 0, 0, 0};
 char            ipremote[4];
 char            ipstr[IP4_FMT];
 #endif
-uint16          portlocal = 0;
-char           *forcelocal = 0;
+uint16          portlocal;
+char           *forcelocal;
 uint16          portremote;
 char           *hostname;
 static stralloc addresses;
@@ -166,7 +169,7 @@ static stralloc fqdn;
 char            strnum[FMT_ULONG], strnum2[FMT_ULONG];
 char            seed[128];
 #ifdef TLS
-struct stralloc certfile = {0};
+struct stralloc certfile;
 #endif
 
 void
@@ -312,8 +315,8 @@ main(int argc, char **argv)
 #endif
 	int             opt, j, s, cloop, flag_tcpclient = 0, flagssl = 0;
 #ifdef TLS
-	SSL_CTX        *ctx = (SSL_CTX *) NULL;
-	SSL            *ssl = (SSL *) NULL;
+	SSL_CTX        *ctx = NULL;
+	SSL            *ssl = NULL;
 	char           *certsdir, *cafile = NULL, *ciphers = NULL;
 	enum starttls   stls = unknown;
 	int             match_cn = 0;
