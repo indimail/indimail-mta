@@ -1,6 +1,6 @@
 /*
  * $Log: tcpclient.c,v $
- * Revision 1.18  2021-03-09 08:17:19+05:30  Cprogrammer
+ * Revision 1.18  2021-03-09 08:37:06+05:30  Cprogrammer
  * removed unnecessary initializations and type casts
  *
  * Revision 1.17  2021-03-09 00:54:22+05:30  Cprogrammer
@@ -102,7 +102,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.18 2021-03-09 08:17:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.18 2021-03-09 08:37:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -267,12 +267,13 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
 		if (!line.len || !match)
 			strerr_die2x(111, FATAL, "failed to get greeting");
-		if (verbose)
-			write(1, line.s, line.len);
+		if (verbose && write(1, line.s, line.len) == -1)
+			strerr_die2sys(111, FATAL, "unable to write to network: ");
 		line.s[line.len - 1] = 0;
 		scan_ulong(line.s, &code);
 		if (code != 220)
 			strerr_die2x(111, FATAL, "connected but greeting failed");
+		/*- issue STARTTLS command and check response */
 		if (safewrite(sfd, "STARTTLS\r\n", 10, dtimeout) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to network: ");
 		if (getln(&ssin, &line, &match, '\n') == -1)
