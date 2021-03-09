@@ -11,6 +11,6 @@ ucspi-tcp (@version@-@release@) unstable; urgency=low
   * tcpclient.c: added starttls for pop3
   * tls.c: check for SSL_ERROR_WANT_READ to retry SSL_read() when using
     non-blocking io
-  * tls.c, tcpclient.c: retry read. write on errno == EAGAIN
+  * tls.c, tcpclient.c: retry read. write on errno == EAGAIN to fix blocking IO problem with SSL_read()
   * tls.c: made translate() generic. Replaced SSL with fd parameter
   * doit.c, tcpclient.c: use new translate() from tls.c
