@@ -23,6 +23,8 @@ Release 1.1 Start 14/02/2021
     IO problem with SSL_read()
 12. tls.c: made translate() generic. Replaced SSL with fd parameter
 13. doit.c, tcpclient.c: use new translate() from tls.c
+- 10/03/2021
+14. tls.c, tcpclient.c: use set_essential_fd() to avoid deadlock
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 21/05/2020

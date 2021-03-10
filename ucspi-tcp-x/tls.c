@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.10  2021-03-10 18:24:06+05:30  Cprogrammer
+ * use set_essential_fd() to avoid deadlock
+ *
  * Revision 1.9  2021-03-09 21:35:57+05:30  Cprogrammer
  * return ETIMEDOUT on timeout
  *
@@ -51,13 +54,20 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.9 2021-03-09 21:35:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.10 2021-03-10 18:24:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
 static enum tlsmode usessl = none;
 static char    *sslerr_str;
 static SSL     *ssl_t;
+static int      efd = -1;
+
+void
+set_essential_fd(int fd)
+{
+	efd = fd;
+}
 
 void
 ssl_free()
@@ -78,6 +88,28 @@ static int
 verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
 {
 	return 1;
+}
+
+const char     *
+myssl_error()
+{
+	int             r = ERR_get_error();
+	if (!r)
+		return NULL;
+	SSL_load_error_strings();
+	return ERR_error_string(r, NULL);
+}
+
+const char     *
+myssl_error_str()
+{
+	const char     *err = myssl_error();
+
+	if (err)
+		return err;
+	if (!errno)
+		return 0;
+	return (errno == ETIMEDOUT) ? "timed out" : error_str(errno);
 }
 
 static int
@@ -248,28 +280,6 @@ tls_accept(SSL *myssl)
 	return 0;
 }
 
-const char     *
-myssl_error()
-{
-	int             r = ERR_get_error();
-	if (!r)
-		return NULL;
-	SSL_load_error_strings();
-	return ERR_error_string(r, NULL);
-}
-
-const char     *
-myssl_error_str()
-{
-	const char     *err = myssl_error();
-
-	if (err)
-		return err;
-	if (!errno)
-		return 0;
-	return (errno == ETIMEDOUT) ? "timed out" : error_str(errno);
-}
-
 ssize_t
 ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 {
@@ -296,14 +306,25 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, si
 		default:
 			return r;	/*- some other error */
 		case SSL_ERROR_WANT_READ:
-			if (errno == EAGAIN)
-				return -1;
+			if (errno == EAGAIN && usessl == client && fun == SSL_read && efd != -1)
+				FD_SET(efd, &fds);
 			FD_SET(rfd, &fds);
-			n = select(rfd + 1, &fds, NULL, NULL, &tv);
+			n = select(efd != -1 && efd > rfd ? efd + 1 : rfd + 1, &fds, NULL, NULL, &tv);
+			/*- this avoids deadlock in tcpclient
+			 * where data is initiated by tcpclient by reading fd 0
+			 * but if tcpclient blocks on rfd, this will never happen
+			 * and tcpcliet will continue to block on rfd.
+			 * checking efd for input allows ssl_timeoutio() to
+			 * return when data is available to be written to SSL.
+			 */
+			if (usessl == client && fun == SSL_read && efd != -1) {
+				if (FD_ISSET(efd, &fds)) {
+					errno = EAGAIN;
+					return -1;
+				}
+			}
 			break;
 		case SSL_ERROR_WANT_WRITE:
-			if (errno == EAGAIN)
-				return -1;
 			FD_SET(wfd, &fds);
 			n = select(wfd + 1, NULL, &fds, NULL, &tv);
 			break;
@@ -312,6 +333,8 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, si
 		 * n is the number of descriptors that changed status
 		 */
 	} while (n > 0);
+	if (!n)
+		errno = ETIMEDOUT;
 	return -1;
 }
 
@@ -476,7 +499,7 @@ saferead(int fd, char *buf, size_t len, long timeout)
 #ifdef TLS
 	if (usessl != none) {
 		if ((r = ssl_timeoutread(timeout, fd, fd, ssl_t, buf, len)) < 0) {
-			if (errno == EAGAIN)
+			if (errno == EAGAIN || errno == ETIMEDOUT)
 				return -1;
 			sslerr_str = (char *) myssl_error_str();
 			if (sslerr_str)
@@ -500,7 +523,7 @@ safewrite(int fd, char *buf, size_t len, long timeout)
 #ifdef TLS
 	if (usessl != none) {
 		if ((r = ssl_timeoutwrite(timeout, fd, fd, ssl_t, buf, len)) < 0) {
-			if (errno == EAGAIN)
+			if (errno == EAGAIN || errno == ETIMEDOUT)
 				return -1;
 			sslerr_str = (char *) myssl_error_str();
 			if (sslerr_str)

@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.19  2021-03-10 18:23:43+05:30  Cprogrammer
+ * use set_essential_fd() to avoid deadlock
+ *
  * Revision 1.18  2021-03-09 08:37:06+05:30  Cprogrammer
  * removed unnecessary initializations and type casts
  *
@@ -102,7 +105,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.18 2021-03-09 08:37:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.19 2021-03-10 18:23:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -659,8 +662,11 @@ CONNECTED:
 #endif
 	if (!flag_tcpclient || flagssl) {
 #ifdef TLS
-		if (stls != unknown)
-			ndelay_on(s);
+		if (stls != unknown) {
+			set_essential_fd(0);
+			if (ndelay_on(s) == -1)
+				strerr_die2sys(111, FATAL, "unable to set up non-blocking mode for socket: ");
+		}
 #endif
 		_exit(do_select(argv, flag_tcpclient, s));
 	} else {
