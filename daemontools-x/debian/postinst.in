@@ -88,10 +88,7 @@ fi
 upgrade=0
 case "$1" in
     configure)
-    if [ " $2" = " " ] ; then
-      echo "installing daemontools"
-    else
-      echo "upgrading daemontools $2"
+    if [ -n "$2" ] ; then
       upgrade=1
     fi
     ;;
@@ -115,7 +112,6 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${qsysconfdir}/daemontools_perm_list ] ; then
-  echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${qsysconfdir}/daemontools_perm_list | while read line
 do
@@ -197,15 +193,15 @@ if [ $upgrade -eq 1 ] ; then # upgrade
   exit 0
 fi
 (
-echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
+  echo "Creating ${logdir}"
   /bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
-echo "adding svscan startup"
 if [ ! -d ${servicedir} -a ! -L ${servicedir} ] ; then
   mkdir -p ${servicedir}
 fi
+echo "adding svscan startup"
 ${prefix}/sbin/minisvc --config=add-boot
 # svscanlog service
 ${prefix}/sbin/minisvc --svscanlog --servicedir=${servicedir} --scanint=60 > /dev/null || true
@@ -217,7 +213,6 @@ if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan.service
 fi
 if [ -x ${libexecdir}/instcheck.daemontools ] ; then
-  echo "Checking Installed Permissions"
   ${libexecdir}/instcheck.daemontools > /dev/null 2>&1
 fi
 ) >> /var/log/daemontools-setup.log 2>&1

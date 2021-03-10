@@ -83,10 +83,7 @@ fi
 upgrade=0
 case "$1" in
     configure)
-		if [ " $2" = " " ] ; then
-			echo "installing ucspi-tcp"
-		else
-			echo "upgrading ucspi-tcp $2"
+		if [ -n "$2" ] ; then
 			upgrade=1
 		fi
     ;;
@@ -110,7 +107,6 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${qsysconfdir}/ucspi-tcp.perms ] ; then
-	echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${qsysconfdir}/ucspi-tcp.perms | while read line
 do
@@ -135,7 +131,6 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 fi
 
 if [ -x ${libexecdir}/instcheck.ucspi-tcp ] ; then
-	echo "Checking Installed Permissions"
 	${libexecdir}/instcheck.ucspi-tcp > /dev/null 2>&1
 fi
 exit 0
