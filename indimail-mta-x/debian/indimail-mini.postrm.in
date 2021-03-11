@@ -62,7 +62,6 @@ if [ " $1" = " purge" ] ; then
 			/etc/init.d/nscd stop
 		fi
 	fi
-	echo "purging configuration"
 	echo "removing user indimail"
 	/usr/bin/getent passwd indimail > /dev/null && /usr/sbin/userdel indimail >/dev/null || true
 	echo "removing group indimail"
