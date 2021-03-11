@@ -18,10 +18,7 @@ fi
 upgarde=0
 case "$1" in
     configure)
-		if [ " $2" = " " ] ; then
-			echo "installing indimail @version@"
-		else
-			echo "upgrading to indimail $2"
+		if [ -n "$2" ] ; then
 			upgrade=1
 		fi
     ;;
@@ -46,8 +43,6 @@ if [ -f ${prefix}/sbin/qmail-qmqpc ] ; then
 fi
 cd ${prefix}/sbin
 /bin/ln -sf qmail-qmqpc qmail-queue
-echo "compressing man pages"
-find ${mandir} -type f -exec gzip -q {} \;
 if [ -f /etc/init.d/sendmail ] ; then
 	/etc/init.d/sendmail stop
 	if [ -f /sbin/chkconfig ] ; then
@@ -109,8 +104,8 @@ if [ ! -f ${qsysconfdir}/control/idhost ] ; then
 fi
 if [ ! "${prefix}" = "/usr" ] ; then
 	# Recreate ld.so links and cache
-	echo "recreating ld.so cache"
 	if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
+	echo "recreating ld.so cache"
 	(
 		if [ -d /usr/lib64 ] ; then
 			echo /usr/lib64
