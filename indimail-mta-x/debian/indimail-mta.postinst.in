@@ -97,10 +97,7 @@ fi
 upgrade=0
 case "$1" in
 	configure)
-		if [ " $2" = " " ] ; then
-			echo "installing indimail-mta"
-		else
-			echo "upgrading indimail-mta $2"
+		if [ -n "$2" ] ; then
 			upgrade=1
 		fi
 	;;
@@ -124,7 +121,6 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
-	echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | while read line
 do
@@ -188,8 +184,8 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 fi
 if [ ! "${prefix}" = "/usr" ] ; then
 	# Recreate ld.so links and cache
-	echo "recreating ld.so cache"
 	if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
+	echo "recreating ld.so cache"
 	(
 		if [ -d /usr/lib64 ] ; then
 			echo /usr/lib64
