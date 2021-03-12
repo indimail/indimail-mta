@@ -2033,7 +2033,7 @@ SBIN: SBIN.in SBIN.sql
 	cat SBIN.in SBIN.$(SYSTEM) || cat SBIN.in; \
 	[ -n "$(USE_SQL)" ] && cat SBIN.sql) > SBIN
 
-SHARED: SHARED.in
+SHARED: SHARED.in doc/INSTALL-MINI
 	([ -f SHARED.$(SYSTEM) ] && \
 	cat SHARED.in SHARED.$(SYSTEM) || cat SHARED.in) > SHARED
 
