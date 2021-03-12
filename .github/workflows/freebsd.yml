@@ -9,18 +9,15 @@ jobs:
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
       MYTOKEN2: "value2"
-
     steps:
-    - name: checkout_qmail
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+      with:
+        path: main
+    - uses: actions/checkout@v2
       with:
         repository: mbhangui/libqmail
         path: libqmail
-
-    - name: checkout_main
-      uses: actions/checkout@v2
-      with:
-        path: main
+    - name: install indimail-mta
       id: FreeBSD
       uses: vmactions/freebsd-vm@v0.1.2
       with:
@@ -28,8 +25,6 @@ jobs:
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf
         run: |
-          pwd
-          ls -l
-          cd main; ./default.configure
+          pwd; ls -l
+          ./default.configure
           make
-
