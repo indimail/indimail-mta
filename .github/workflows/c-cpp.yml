@@ -18,7 +18,7 @@ jobs:
     
     steps:
     - name: extra_packages
-      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; brew link --force openssl; ln -s /usr/local/opt/openssl/include/openssl /usr/local/include; fi
+      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl fi
       env:
         OS: ${{ matrix.host }}
 
@@ -34,14 +34,14 @@ jobs:
         path: libqmail
 
     - name: install_qmail
-      run: cd libqmail;./default.configure; make; sudo make install-strip
+      run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
     - name: install_libdkim
-      run: cd main/libdkim-x; ./default.configure; make; sudo make install-strip
+      run: cd main/libdkim-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
     - name: install_libsrs2
       run: cd main/libsrs2-x; ./default.configure; make; sudo make install-strip
     - name: build_ucspi-tcp
-      run: cd main/ucspi-tcp-x; ./default.configure; ./qmake
+      run: cd main/ucspi-tcp-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./qmake
     - name: build_daemontools
       run: cd main/daemontools-x; ./default.configure; ./qmake
     - name: build_indimail-mta
-      run: cd main/indimail-mta-x; ./default.configure; ./qmake
+      run: cd main/indimail-mta-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./qmake
