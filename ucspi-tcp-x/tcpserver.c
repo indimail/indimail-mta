@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.74  2021-03-12 14:05:48+05:30  Cprogrammer
+ * use typedef my_ulong instead of ulong
+ *
  * Revision 1.73  2021-03-12 13:55:08+05:30  Cprogrammer
  * use MYSQL_CONFIG for conditional compilation of mysql code
  *
@@ -249,13 +252,14 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.73 2021-03-12 13:55:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.74 2021-03-12 14:05:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
 static int      forcev6;
 static uint32   netif;
 #endif
+typedef unsigned long my_ulong;
 static int      verbosity = 1;
 static int      flagkillopts = 1;
 static int      flagdelay = 1;
@@ -263,12 +267,12 @@ static char    *banner = "";
 static int      flagremoteinfo = 1;
 static int      flagremotehost = 1;
 static int      flagparanoid;
-static ulong    itimeout = 26, maxperip = 20, PerHostLimit = 20;
-static ulong    idle_timeout = 300;
-static ulong    limit = 40;
-static ulong    alloc_count;
-static ulong    numchildren;
-static ulong    backlog = 20;
+static my_ulong itimeout = 26, maxperip = 20, PerHostLimit = 20;
+static my_ulong idle_timeout = 300;
+static my_ulong limit = 40;
+static my_ulong alloc_count;
+static my_ulong numchildren;
+static my_ulong backlog = 20;
 #ifdef TLS
 static int      flagssl;
 struct stralloc certfile;
