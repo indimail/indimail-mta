@@ -504,7 +504,7 @@ mysql_config.o: compile mysql_config.c conf-mysqlrules
 mysql_config: load mysql_config.o
 	./load mysql_config
 
-load_mysql.o: compile load_mysql.c hasmysql.h mysql_inc
+load_mysql.o: compile load_mysql.c hasmysql.h mysql_inc conf-mysqlrules
 	./compile `grep -h -v "^#" conf-mysqlrules mysql_inc 2>/dev/null` load_mysql.c
 
 control.o: \
