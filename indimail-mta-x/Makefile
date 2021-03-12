@@ -2086,9 +2086,10 @@ trylsock.c compile load
 tls.lib: \
 trytls.c compile conf-tls load ssl_timeoutio.o conf-ld-$(SYSTEM)
 	( ( ./compile `grep -v "^#" conf-tls` trytls.c && \
-	./load trytls `cat conf-ld-$(SYSTEM)` -lssl -lcrypto ) \
-	&& echo `cat conf-ld-$(SYSTEM)` -lssl -lcrypto \
-	|| exit 0 ) > tls.lib
+	./load trytls `cat conf-ld-$(SYSTEM)` -lssl2 -lcrypto ) \
+	>/dev/null 2>&1 \
+	&& echo `cat conf-ld-$(SYSTEM)` -lssl -lcrypto > tls.lib\
+	|| > tls.lib )
 	rm -f trytls.o trytls
 
 tls.o: \
