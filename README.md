@@ -24,6 +24,9 @@ To install you need to do the following
 
 # Source Compiling/Linking
 
+[![Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/c-cpp.yml)
+[![FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/freebsd.yml)
+
 The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Binary Packages](.github/CREATE-Packages.md)
 
 You can also use docker / podman images to deploy indimail-mta. Look at the chapter [Docker / Podman Repository](#docker-/-podman-repository) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
