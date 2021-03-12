@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.2  2021-03-12 14:26:54+05:30  Cprogrammer
+ * removed auto_uido
+ *
  * Revision 1.1  2020-10-23 20:59:34+05:30  Cprogrammer
  * Initial revision
  *
@@ -130,8 +133,8 @@ hier(inst_dir, fatal)
 	c(auto_shared,     "boot",     "svscan_rc", -1, -1, 0644);
 #endif
 #ifdef DARWIN
-	c(auto_shared,     "boot",     "StartupParameters.plist", auto_uido, 0, 0444);
-	c(auto_shared,     "boot",     "svscan.plist", auto_uido, 0, 0444);
+	c(auto_shared,     "boot",     "StartupParameters.plist", -1, 0, 0444);
+	c(auto_shared,     "boot",     "svscan.plist", -1, 0, 0444);
 #endif
 	c(auto_shared,     "doc",      "README.logselect", -1, -1, 0644);
 }
