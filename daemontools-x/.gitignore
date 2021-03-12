@@ -70,3 +70,4 @@ auto_home.c
 auto_shared.c
 instcheck
 svps
+svscan.plist
