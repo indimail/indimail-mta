@@ -500,6 +500,7 @@ hasmysql.h auto_home.h mysql_inc
 
 mysql_config.o: compile mysql_config.c conf-mysqlrules
 	./compile `grep -h -v "^#" conf-mysqlrules 2>/dev/null` mysql_config.c
+
 mysql_config: load mysql_config.o
 	./load mysql_config
 

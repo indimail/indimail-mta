@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.4  2021-03-12 13:53:54+05:30  Cprogrammer
+ * use MYSQL_CONFIG for conditional compilation of mysql code
+ *
  * Revision 1.3  2020-04-30 18:01:14+05:30  Cprogrammer
  * define function prototypes as extern
  *
@@ -12,6 +15,7 @@
  */
 #ifndef LOAD_MYSQL_H
 #define LOAD_MYSQL_H
+#ifdef MYSQL_CONFIG
 #include <mysql.h>
 
 typedef unsigned int i_uint;
@@ -39,5 +43,6 @@ extern void    *loadLibrary(void **, char *, int *, char **);
 extern void    *getlibObject(char *, void **, char *, char **);
 extern void     closeLibrary(void **);
 extern int      initMySQLlibrary(char **);
+#endif
 
 #endif

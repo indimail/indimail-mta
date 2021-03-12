@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.73  2021-03-12 13:55:08+05:30  Cprogrammer
+ * use MYSQL_CONFIG for conditional compilation of mysql code
+ *
  * Revision 1.72  2021-03-09 08:30:40+05:30  Cprogrammer
  * change in translate() function.
  *
@@ -238,13 +241,15 @@
 #include "rules.h"
 #include "iopause.h"
 #include "dns.h"
+#ifdef MYSQL_CONNFIG
 #include "hasmysql.h"
-#include "control.h"
 #include "load_mysql.h"
+#endif
+#include "control.h"
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.72 2021-03-09 08:30:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.73 2021-03-12 13:55:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1108,7 +1113,11 @@ printstatus(void)
 		return;
 	strnum[fmt_ulong(strnum, numchildren)] = 0;
 	strnum2[fmt_ulong(strnum2, limit)] = 0;
+#ifdef HAS_MYSQL
 	strerr_warn5("tcpserver: status: ", strnum, "/", strnum2, use_sql ? " sql: 1" : " sql: 0", 0);
+#else
+	strerr_warn4("tcpserver: status: ", strnum, "/", strnum2, 0);
+#endif
 }
 
 void
