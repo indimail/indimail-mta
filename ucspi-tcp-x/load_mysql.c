@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.10  2021-03-12 14:16:17+05:30  Cprogrammer
+ * conditional compilation of mysql code
+ *
  * Revision 1.9  2020-08-03 17:24:48+05:30  Cprogrammer
  * use qmail library
  *
@@ -30,6 +33,8 @@
  *
  */
 #ifdef MYSQL_CONFIG
+#include "hasmysql.h"
+#ifdef HAS_MYSQL
 #include <unistd.h>
 #include <dlfcn.h>
 #include <mysql.h>
@@ -251,11 +256,12 @@ initMySQLlibrary(char **errstr)
 	return (0);
 }
 #endif
+#endif
 
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.9 2020-08-03 17:24:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.10 2021-03-12 14:16:17+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
