@@ -2088,7 +2088,7 @@ trytls.c compile conf-tls load conf-ld-$(SYSTEM)
 	( ( ./compile `grep -v "^#" conf-tls` trytls.c && \
 	./load trytls `cat conf-ld-$(SYSTEM)` \
 	-lssl -lcrypto ) >tls.err 2>&1 \
-	&& echo `cat conf-ld-$(SYSTEM)` -lssl -lcrypto || exit 0 ) > tls.lib
+	&& echo $(LDFLAGS) `cat conf-ld-$(SYSTEM)` -lssl -lcrypto || exit 0 ) > tls.lib
 	echo -tls.err----; cat tls.err;echo ---tls.lib---; cat tls.lib
 	rm -f trytls.o trytls tls.err
 
