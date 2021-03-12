@@ -416,6 +416,14 @@ warn-auto.sh conf-prefix svscan_rc.in \
 conf-prefix conf-libexec conf-sysconfdir conf-shared
 	(cat warn-auto.sh; $(edit) $@.in) > $@
 
+svscan.plist: \
+warn-auto.sh conf-sysconfdir conf-libexec conf-servicedir
+	( \
+	echo "# WARNING: This file was auto-generated. Do not edit!"; \
+	echo "#"; \
+	$(edit) $@.in \
+	) > $@
+
 qmailctl: warn-auto.sh qmailctl.sh conf-prefix conf-libexec \
 conf-servicedir conf-sysconfdir
 	( \
