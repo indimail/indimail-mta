@@ -28,7 +28,7 @@ jobs:
         repository: mbhangui/libqmail
         path: libqmail
       
-    - name: Darwin
+    - name: extra_packages
       run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; brew link --force openssl; ln -s /usr/local/opt/openssl/include/openssl /usr/local/include; fi
       env:
         OS: ${{ matrix.host }}
@@ -39,6 +39,6 @@ jobs:
     - name: configure_indimail-mta
       run: cd main/indimail-mta-x; ./default.configure; ./qmake
     - name: configure_ucspi-tcp
-      run: cd main/indimail-ucspi-tcp; ./default.configure; ./qmake
+      run: cd main/ucspi-tcp-x; ./default.configure; ./qmake
     - name: configure_daemontools
-      run: cd main/indimail-daemontools; ./default.configure; ./qmake
+      run: cd main/daemontools-x; ./default.configure; ./qmake
