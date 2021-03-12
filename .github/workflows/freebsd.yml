@@ -21,15 +21,15 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: main
+      id: FreeBSD
+      uses: vmactions/freebsd-vm@v0.1.2
+      with:
+        envs: 'MYTOKEN MYTOKEN2'
+        usesh: true
+        prepare: pkg install -y curl automake autoconf libtool pkgconf
+        run: |
+          pwd
+          ls -l
+          cd main; ./default.configure
+          make
 
-    id: FreeBSD
-    uses: vmactions/freebsd-vm@v0.1.2
-    with:
-      envs: 'MYTOKEN MYTOKEN2'
-      usesh: true
-      prepare: pkg install -y curl automake autoconf libtool pkgconf
-      run: |
-        pwd
-        ls -l
-        cd main; ./default.configure
-        make
