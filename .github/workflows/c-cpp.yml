@@ -18,7 +18,7 @@ jobs:
     
     steps:
     - name: extra_packages
-      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl fi
+      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; fi
       env:
         OS: ${{ matrix.host }}
 
