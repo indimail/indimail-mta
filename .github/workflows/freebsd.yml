@@ -1,0 +1,44 @@
+name: FreeBSD
+
+on: [push]
+
+jobs:
+  testfreebsd:
+    runs-on: macos-latest
+    name: A job to run test FreeBSD
+    env:
+      MYTOKEN : ${{ secrets.MYTOKEN }}
+      MYTOKEN2: "value2"
+
+    steps:
+    - name: checkout_main
+    - uses: actions/checkout@v2
+      with:
+        path: main
+      
+    - name: checkout_qmail
+      uses: actions/checkout@v2
+      with:
+        repository: mbhangui/libqmail
+        path: libqmail
+
+      id: FreeBSD
+      uses: vmactions/freebsd-vm@v0.1.2
+      with:
+        envs: 'MYTOKEN MYTOKEN2'
+        usesh: true
+        prepare: pkg install -y curl automake autoconf libtool pkgconf
+        run: |
+          pwd; ls -l
+          cd libqmail
+          ./default.configure; make; make -install-strip
+          cd ../main/libdkim-x
+          ./default.configure; make; make -install-strip
+          cd ../main/libsrs2-x
+          ./default.configure; make; make -install-strip
+          cd ../main/ucspi-tcp-x
+          ./default.configure; ./qmake; make -install
+          cd ../main/daemontools-x
+          ./default.configure; ./qmake; make -install
+          cd ../main/indimail-mta-x
+          ./default.configure; ./qmake; make -install
