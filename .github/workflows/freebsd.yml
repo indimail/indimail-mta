@@ -28,15 +28,8 @@ jobs:
         envs: 'MYTOKEN MYTOKEN2'
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf
-        - name: install_qmail
-          run: cd libqmail;./default.configure; make; sudo make install-strip
-        - name: install_libdkim
-          run: cd main/libdkim-x; ./default.configure; make; sudo make install-strip
-        - name: install_libsrs2
-          run: cd main/libsrs2-x; ./default.configure; make; sudo make install-strip
-        - name: build_ucspi-tcp
-          run: cd main/ucspi-tcp-x; ./default.configure; ./qmake
-        - name: build_daemontools
-          run: cd main/daemontools-x; ./default.configure; ./qmake
-        - name: build_indimail-mta
-          run: cd main/indimail-mta-x; ./default.configure; ./qmake
+        run: |
+          pwd
+          ls -l
+          cd libqmail; ./default.configure
+          make
