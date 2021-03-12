@@ -27,7 +27,7 @@ jobs:
         run: |
           cd libqmail; ./default.configure; make; make install-strip
           cd ../main/libdkim-x; ./default.configure; make; make install-strip
-          cd ../main/libsrs2-x; ./default.configure; make; make install-strip
-          cd ../main/ucspi-tcp-x; ./default.configure; make; make install
-          cd ../main/daemontools-x; ./default.configure; make; make install
-          cd ../main/indimail-mta-x; ./default.configure; make; make install
+          cd ../libsrs2-x; ./default.configure; make; make install-strip
+          cd ../ucspi-tcp-x; ./default.configure; make; make install
+          cd ../daemontools-x; ./default.configure; make; make install
+          cd ../indimail-mta-x; ./default.configure; make; make install
