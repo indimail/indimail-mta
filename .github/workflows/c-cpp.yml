@@ -17,28 +17,31 @@ jobs:
         host: [ubuntu-latest, macos-latest]
     
     steps:
-    - name: checkout_main
-      uses: actions/checkout@v2
-      with:
-        path: main
-
-    - name: install_qmail
-      uses: actions/checkout@v2
-      with:
-        repository: mbhangui/libqmail
-        path: libqmail
-      
     - name: extra_packages
       run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; brew link --force openssl; ln -s /usr/local/opt/openssl/include/openssl /usr/local/include; fi
       env:
         OS: ${{ matrix.host }}
 
-    - name: configure_qmail
-      run: cd libqmail;./default.configure; make; sudo make install-strip
+    - name: checkout_main
+      uses: actions/checkout@v2
+      with:
+        path: main
+      
+    - name: checkout_qmail
+      uses: actions/checkout@v2
+      with:
+        repository: mbhangui/libqmail
+        path: libqmail
 
-    - name: configure_indimail-mta
-      run: cd main/indimail-mta-x; ./default.configure; ./qmake
-    - name: configure_ucspi-tcp
+    - name: install_qmail
+      run: cd libqmail;./default.configure; make; sudo make install-strip
+    - name: install_libdkim
+      run: cd main/libdkim-x; ./default.configure; make; sudo make install-strip
+    - name: install_libsrs2
+      run: cd main/libsrs2-x; ./default.configure; make; sudo make install-strip
+    - name: build_ucspi-tcp
       run: cd main/ucspi-tcp-x; ./default.configure; ./qmake
-    - name: configure_daemontools
+    - name: build_daemontools
       run: cd main/daemontools-x; ./default.configure; ./qmake
+    - name: build_indimail-mta
+      run: cd main/indimail-mta-x; ./default.configure; ./qmake
