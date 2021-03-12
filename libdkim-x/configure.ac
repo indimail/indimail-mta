@@ -79,10 +79,10 @@ fi
 AC_CHECK_SIZEOF(time_t)
 
 # Checks for libraries.
-AC_CHECK_LIB([crypto],[EVP_sha256],[AC_SUBST([LIB_CRYPTO],["-lcrypto"]) AC_DEFINE([HAVE_EVP_SHA256],[1],[HAVE_EVP_SHA256])],,-lcrypto)
+AC_CHECK_LIB([crypto -L/usr/local/lib],[EVP_sha256],[AC_SUBST([LIB_CRYPTO],["-L/usr/local/lib -lcrypto"]) AC_DEFINE([HAVE_EVP_SHA256],[1],[HAVE_EVP_SHA256])],,-lcrypto)
 if test " $LIB_CRYPTO" = " "
 then
-	AC_CHECK_LIB([crypto], [EVP_sha1],[AC_SUBST([LIB_CRYPTO], ["-lcrypto"])],,-lcrypto)
+	AC_CHECK_LIB([crypto -L/usr/local/lib], [EVP_sha1],[AC_SUBST([LIB_CRYPTO], ["-L/usr/local/lib -lcrypto"])],,-lcrypto)
 	if test " $LIB_CRYPTO" = " "
 	then
     	AC_MSG_ERROR(Could not find crypto library.)
