@@ -5,7 +5,7 @@ on: [push]
 jobs:
   testfreebsd:
     runs-on: macos-latest
-    name: A job to run test FreeBSD
+    name: FreeBSD
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
       MYTOKEN2: "value2"
@@ -25,6 +25,9 @@ jobs:
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf
         run: |
-          pwd; ls -l
-          ./default.configure
-          make
+          cd libqmail; ./default.configure; make; make install-strip
+          cd ../main/libdkim-x; ./default.configure; make; make install-strip
+          cd ../main/libsrs2-x; ./default.configure; make; make install-strip
+          cd ../main/ucspi-tcp-x; ./default.configure; make; make install
+          cd ../main/daemontools-x; ./default.configure; make; make install
+          cd ../main/indimail-mta-x; ./default.configure; make; make install
