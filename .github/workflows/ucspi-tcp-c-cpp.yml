@@ -42,4 +42,4 @@ jobs:
     - name: install_qmail
       run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
     - name: build_ucspi-tcp
-      run: cd main/ucspi-tcp-x; ./default.configure; ./qmake
+      run: cd main/ucspi-tcp-x;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./qmake
