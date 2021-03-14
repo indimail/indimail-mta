@@ -5,10 +5,11 @@ on:
     branches:
       - master
     paths:
-      - '**indimail-mta-x/ucspi-tcp-x/**'
+      - '**/ucspi-tcp-x/**'
       - .github/workflows/ucspi-tcp-c-cpp.yml
-      - '!**/indimail-mta-x/ucspi-tcp-x/debian/*'
-      - '!**/indimail-mta-x/ucspi-tcp-x/doc/*'
+      - '!**/ucspi-tcp-x/debian/*'
+      - '!**/ucspi-tcp-x/doc/*'
+      - '!**/ucspi-tcp-x/ucspi-tcp.spec.in'
       - '!**.md'
   pull_request:
     branches: [ master ]

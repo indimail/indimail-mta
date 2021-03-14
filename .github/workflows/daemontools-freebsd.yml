@@ -5,10 +5,11 @@ on:
     branches:
       - master
     paths:
-      - '**indimail-mta-x/daemontools-x/**'
+      - '**/daemontools-x/**'
       - .github/workflows/daemontools-freebsd.yml
-      - '!**/indimail-mta-x/daemontools-x/debian/*'
-      - '!**/indimail-mta-x/daemontools-x/doc/*'
+      - '!**/daemontools-x/debian/*'
+      - '!**/daemontools-x/doc/*'
+      - '!**/daemontools-x/daemontools.spec.in'
       - '!**.md'
   pull_request:
     branches: [ master ]
