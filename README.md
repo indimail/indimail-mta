@@ -19,8 +19,8 @@
 [![ucspi-tcp Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml)
 [![ucspi-tcp FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml)
 
-[![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml)
-[![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml)
+[![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml)
+[![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml)
 
 indimail-mta is the default MTA installed when you install [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).
 
