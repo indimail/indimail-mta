@@ -10,6 +10,18 @@
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
 * [mess822](https://cr.yp.to/mess822.html "mess822")
 
+**Complation Status (from Github Actions)**
+
+[![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
+[![indimail-mta FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml)
+[![daemontools Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-c-cpp.yml)
+[![daemontools FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml)
+[![ucspi-tcp Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml)
+[![ucspi-tcp FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml)
+
+[![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml)
+[![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml)
+
 indimail-mta is the default MTA installed when you install [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).
 
 indimail-mta is [FHS 3.0](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard) compliant. Components like qmail, ucspi-tcp, demontools have been modified significantly to include features available in all possible patches growing wild. All possible hardcoding have been removed. indimail-mta is not tied to a specific directory, uid, gid, control/config file. Most of these can be changed by setting environment variables. Additionally indimail-mta can be configured based on the mail SENDER or RECIPIENT(s). Features like DKIM, SRS2, greylisting, DANE have been natively available since many years. ucspi-tcp too has been modifed to handle IPv6 and TLS. daemontools has lot more feature available like running a shutdown script on shutdown, seamlessly run with docker/podman. svscan uses the [/run](http://www.h-online.com/open/news/item/Linux-distributions-to-include-run-directory-1219006.html) filesystem to store state information in the supervise directory. The changes made to ucspi-tcp and daemontools are briefly mentioned [here](https://github.com/mbhangui/indimail-mta/blob/master/ucspi-tcp-x/README.md) and [here](https://github.com/mbhangui/indimail-mta/blob/master/daemontools-x/README.md). Other components like serialmail, qmailanalog, dotforward, fastforward, mess822 have been incorporated with minimal changes. All common functions used by qmail, daemontools, ucspi-tcp, serialmail, dotforward, fastforward, mess822 have been moved to common library [libqmail](https://github.com/mbhangui/libqmail).
@@ -23,9 +35,6 @@ This document contains instructions for building indimail-mta from source. indim
 To install you need to do the following
 
 # Source Compiling/Linking
-
-[![Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/c-cpp.yml)
-[![FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/freebsd.yml)
 
 The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Binary Packages](.github/CREATE-Packages.md)
 

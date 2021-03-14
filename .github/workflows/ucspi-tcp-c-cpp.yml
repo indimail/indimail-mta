@@ -5,10 +5,10 @@ on:
     branches:
       - master
     paths:
-      - '**indimail-mta-x/ucspi-tcp-x**'
+      - '**indimail-mta-x/ucspi-tcp-x/**'
       - .github/workflows/ucspi-tcp-c-cpp.yml
-      - '!**/indimail-x/ucspi-tcp-x/debian/*'
-      - '!**/indimail-x/ucspi-tcp-x/doc/*'
+      - '!**/indimail-mta-x/ucspi-tcp-x/debian/*'
+      - '!**/indimail-mta-x/ucspi-tcp-x/doc/*'
       - '!**.md'
   pull_request:
     branches: [ master ]
@@ -42,4 +42,4 @@ jobs:
     - name: install_qmail
       run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
     - name: build_ucspi-tcp
-      run: cd main/ucspi-tcp-x;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./qmake
+      run: cd main/ucspi-tcp-x;env CFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure;env CFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./qmake

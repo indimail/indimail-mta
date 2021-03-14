@@ -7,8 +7,8 @@ on:
     paths:
       - '**indimail-mta-x/daemontools-x/**'
       - .github/workflows/daemontools-c-cpp.yml
-      - '!**/indimail-x/daemontools-x/debian/*'
-      - '!**/indimail-x/daemontools-x/doc/*'
+      - '!**/indimail-mta-x/daemontools-x/debian/*'
+      - '!**/indimail-mta-x/daemontools-x/doc/*'
       - '!**.md'
   pull_request:
     branches: [ master ]
