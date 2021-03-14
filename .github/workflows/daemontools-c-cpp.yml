@@ -24,7 +24,7 @@ jobs:
     
     steps:
     - name: extra_packages
-      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig; fi
+      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; fi
       env:
         OS: ${{ matrix.host }}
 
@@ -40,6 +40,6 @@ jobs:
         path: libqmail
 
     - name: install_qmail
-      run: cd libqmail; ./default.configure; make; sudo make install-strip
+      run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
     - name: build_daemontools
       run: cd main/daemontools-x; ./default.configure; ./qmake
