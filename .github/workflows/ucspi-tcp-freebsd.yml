@@ -37,4 +37,4 @@ jobs:
         prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2
         run: |
           cd libqmail; ./default.configure; make; make install-strip
-          cd ../ucspi-tcp-x; ./default.configure; ./qmake
+          cd ../main/ucspi-tcp-x; ./default.configure; ./qmake
