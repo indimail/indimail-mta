@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - '**indimail-mta-x/ucspi-tcp-x**'
-      - .github/workflows/ucspi-tcp-c-cpp.yml
+      - .github/workflows/ucspi-tcp-freebsd.yml
       - '!**/indimail-x/ucspi-tcp-x/debian/*'
       - '!**/indimail-x/ucspi-tcp-x/doc/*'
       - '!**.md'

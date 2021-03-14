@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - '**indimail-mta-x/daemontools-x/**'
-      - .github/workflows/daemontools-c-cpp.yml
+      - .github/workflows/daemontools-freebsd.yml
       - '!**/indimail-x/daemontools-x/debian/*'
       - '!**/indimail-x/daemontools-x/doc/*'
       - '!**.md'
