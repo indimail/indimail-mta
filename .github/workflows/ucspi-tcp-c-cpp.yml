@@ -1,0 +1,45 @@
+name: ucspi-tcp Ubuntu, Mac OSX CI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**indimail-mta-x/ucspi-tcp-x**'
+      - .github/workflows/ucspi-tcp-c-cpp.yml
+      - '!**/indimail-x/ucspi-tcp-x/debian/*'
+      - '!**/indimail-x/ucspi-tcp-x/doc/*'
+      - '!**.md'
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: ${{ matrix.host }}-${{ matrix.config.name }}
+    runs-on: ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [ubuntu-latest, macos-latest]
+    
+    steps:
+    - name: extra_packages
+      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; fi
+      env:
+        OS: ${{ matrix.host }}
+
+    - name: checkout_main
+      uses: actions/checkout@v2
+      with:
+        path: main
+      
+    - name: checkout_qmail
+      uses: actions/checkout@v2
+      with:
+        repository: mbhangui/libqmail
+        path: libqmail
+
+    - name: install_qmail
+      run: cd libqmail; ./default.configure; make; sudo make install-strip
+    - name: build_ucspi-tcp
+      run: cd main/ucspi-tcp-x; ./default.configure; ./qmake
