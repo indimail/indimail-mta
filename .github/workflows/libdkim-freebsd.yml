@@ -38,4 +38,4 @@ jobs:
         prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2
         run: |
           cd libqmail; ./default.configure; make; make install-strip
-          cd ../main/libdkim-x; ./default.configure; ./qmake
+          cd ../main/libdkim-x; ./default.configure; make

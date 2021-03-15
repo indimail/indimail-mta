@@ -9,7 +9,7 @@ on:
       - '**/libdkim-x/**'
       - '**/libsrs2-x/**'
       - .github/workflows/indimail-mta-c-cpp.yml
-      - '!**/indimail-mta-x/daemontools.spec.in'
+      - '!**/indimail-mta-x/indimail-mta.spec.in'
       - '!**/libdkim-x/libdkim.spec.in'
       - '!**/libdkim-x/libsrs2.spec.in'
       - '!**/indimail-mta-x/debian/*'
