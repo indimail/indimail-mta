@@ -1,0 +1,41 @@
+name: libsrs2 FreeBSD CI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/libsrs2-x/**'
+      - .github/workflows/libsrs2-freebsd.yml
+      - '!**/libsrs2-x/debian/*'
+      - '!**/libsrs2-x/doc/*'
+      - '!**/libsrs2-x/libsrs2.spec.in'
+      - '!**.md'
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  testfreebsd:
+    runs-on: macos-latest
+    name: FreeBSD
+    env:
+      MYTOKEN : ${{ secrets.MYTOKEN }}
+      MYTOKEN2: "value2"
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        path: main
+    - uses: actions/checkout@v2
+      with:
+        repository: mbhangui/libqmail
+        path: libqmail
+    - name: build libsrs2
+      id: FreeBSD
+      uses: vmactions/freebsd-vm@v0.1.2
+      with:
+        envs: 'MYTOKEN MYTOKEN2'
+        usesh: true
+        prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2
+        run: |
+          cd libqmail; ./default.configure; make; make install-strip
+          cd ../main/libsrs2-x; ./default.configure; make
