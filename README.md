@@ -687,6 +687,8 @@ ucspi-tcp:
 
 # Docker / Podman Repository
 
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/cprogrammer/indimail-mta)
+
 The [docker repository](https://hub.docker.com/r/cprogrammer/indimail) can be used to pull docker/podman images
 for indimail.
 
