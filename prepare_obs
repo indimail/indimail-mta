@@ -1,0 +1,67 @@
+#!/bin/sh
+#
+# This script prepares artifacts that can be downloaded for openSUSE build service
+# It creates name.tar.gz, debian.tar.gz and name.spec
+#
+set -e
+if [ $# -lt 1 ] ; then
+	echo "USAGE: prepare_obs name" 1>&2
+	exit 1
+fi
+name=$1
+if [ $# -eq 2 ] ; then
+	type=$2
+else
+	type=0
+fi
+ver=$(cat conf-version)
+if [ -z "$ver" ] ; then
+	exit 1
+fi
+if [ $type -eq 1 ] ; then
+	/bin/rm -f ../$name.spec ../$name-$ver.tar.gz ../debian.tar.gz
+fi
+if [ ! -f ./configure -o ! -f ./Makefile ] ; then
+  ./default.configure
+fi
+
+# Create spec file
+if [ ! -f ./$name.spec ] ; then
+  make $name.spec
+fi
+mkdir -p ../stage
+
+# Create debian.tar.gz
+make debian/Makefile
+make -C debian
+cp debian/debian.tar.gz ../stage
+cp $name.spec ../stage
+cp debian/*.dsc ../stage
+if [ -f $name-rpmlintrc ] ; then
+	cp $name-rpmlintrc ../stage
+fi
+
+make -C debian clean
+make clean
+cp -rpf . ../stage/$name-$ver
+
+# change cwd to staging directory
+cd ../stage
+
+#remove debian directory
+/bin/rm -rf $name-$ver/debian
+tar cfz $name-$ver.tar.gz $name-$ver
+mv $name.spec debian.tar.gz $name-$ver.tar.gz *.dsc $HOME
+if [ -f $name-rpmlintrc ] ; then
+	mv $name-rpmlintrc $HOME
+fi
+status=$?
+cd $HOME
+echo HOME=$HOME
+if [ -f $name-rpmlintrc ] ; then
+  /bin/ls -l $name-$ver.tar.gz $name.spec *.dsc debian.tar.gz $name-rpmlintrc
+else
+  /bin/ls -l $name-$ver.tar.gz $name.spec *.dsc debian.tar.gz
+fi
+rmdir stage 2>/dev/null || true
+exit $?
