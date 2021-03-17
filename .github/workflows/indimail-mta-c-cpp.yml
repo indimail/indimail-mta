@@ -37,7 +37,7 @@ jobs:
       env:
         OS: ${{ matrix.host }}
 
-    - name: checkout_main
+    - name: checkout_indimail-mta
       uses: actions/checkout@v2
       with:
         path: main
