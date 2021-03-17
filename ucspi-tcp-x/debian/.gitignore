@@ -5,6 +5,8 @@ rules
 conf-release
 ucspi-tcp-Debian_10.dsc
 ucspi-tcp-Debian_9.0.dsc
+ucspi-tcp-Raspbian_10.dsc
+ucspi-tcp-Raspbian_9.0.dsc
 ucspi-tcp.dsc
 ucspi-tcp-xUbuntu_18.04.dsc
 changelog
