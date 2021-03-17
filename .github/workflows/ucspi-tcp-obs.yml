@@ -1,4 +1,4 @@
-name: ucspi-tcp obs CI
+name: ucspi-tcp obs trigger
 
 on:
   push:
@@ -18,11 +18,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout_main
+    - name: checkout_ucspi-tcp
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install curl; ./prepare_obs ucspi-tcp
+      run: sudo apt-get update; sudo apt-get install curl; cd ucspi-tcp-x; ./prepare_obs ucspi-tcp
     - uses: actions/upload-artifact@v2
       with:
         name: ucspi-tcp
