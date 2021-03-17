@@ -1,4 +1,4 @@
-name: indimail-mta obs CI
+name: indimail-mta obs trigger
 
 on:
   push:
@@ -18,11 +18,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout_main
+    - name: checkout_indimail-mta
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install curl; ./prepare_obs indimail-mta
+      run: sudo apt-get update; sudo apt-get install curl; cd indimail-mta-x; ./prepare_obs indimail-mta
     - uses: actions/upload-artifact@v2
       with:
         name: indimail-mta
