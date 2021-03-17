@@ -3,3 +3,4 @@ cscope.*
 RCS
 bak
 stage
+libdkim-x/Makefile
