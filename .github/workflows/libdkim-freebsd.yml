@@ -23,12 +23,6 @@ jobs:
       MYTOKEN2: "value2"
     steps:
     - uses: actions/checkout@v2
-      with:
-        path: main
-    - uses: actions/checkout@v2
-      with:
-        repository: mbhangui/libqmail
-        path: libqmail
     - name: build libdkim
       id: FreeBSD
       uses: vmactions/freebsd-vm@v0.1.2
@@ -36,6 +30,4 @@ jobs:
         envs: 'MYTOKEN MYTOKEN2'
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2
-        run: |
-          cd libqmail; ./default.configure; make; make install-strip
-          cd ../main/libdkim-x; ./default.configure; make
+        run: cd ../main/libdkim-x; ./default.configure; make

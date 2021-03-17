@@ -29,18 +29,8 @@ jobs:
       env:
         OS: ${{ matrix.host }}
 
-    - name: checkout_main
+    - name: checkout_libdkim
       uses: actions/checkout@v2
-      with:
-        path: main
       
-    - name: checkout_qmail
-      uses: actions/checkout@v2
-      with:
-        repository: mbhangui/libqmail
-        path: libqmail
-
-    - name: install_qmail
-      run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
     - name: build_libdkim
-      run: cd main/libdkim-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make
+      run: cd libdkim-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make
