@@ -2,7 +2,6 @@ tools/srs
 debian/files
 debian/postinst
 debian/rules
-Makefile
 Makefile.in
 aclocal.m4
 compile

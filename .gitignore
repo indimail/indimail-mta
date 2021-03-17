@@ -4,3 +4,4 @@ RCS
 bak
 stage
 libdkim-x/Makefile
+libsrs2-x/Makefile
