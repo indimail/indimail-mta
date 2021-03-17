@@ -1,4 +1,4 @@
-name: libdkim obs CI
+name: libdkim obs trigger
 
 on:
   push:
@@ -18,11 +18,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout_main
+    - name: checkout_libdkim
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install curl; ./prepare_obs libdkim
+      run: sudo apt-get update; sudo apt-get install curl; cd libdkim-x; ./prepare_obs libdkim
     - uses: actions/upload-artifact@v2
       with:
         name: libdkim
