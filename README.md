@@ -563,7 +563,7 @@ $ sudo svps -a
 
 # Binary Packages Build
 
-**Build Stats on [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
+**Build Status on [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
 
 [![indimail-mta obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml)
 [![daemontools obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml)
