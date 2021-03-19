@@ -13,11 +13,9 @@ on:
       - '!**/libdkim-x/libdkim.spec.in'
       - '!**/libdkim-x/libsrs2.spec.in'
       - '!**/indimail-mta-x/debian/*'
-      - '!**/indimail-mta-x/doc/*'
       - '!**/libdkim-x/debian/*'
-      - '!**/libdkim-x/doc/*'
       - '!**/libsrs2-x/debian/*'
-      - '!**/libsrs2-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
   pull_request:
     branches: [ master ]

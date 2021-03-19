@@ -8,8 +8,8 @@ on:
       - '**/ucspi-tcp-x/**'
       - .github/workflows/ucspi-tcp-freebsd.yml
       - '!**/ucspi-tcp-x/debian/*'
-      - '!**/ucspi-tcp-x/doc/*'
       - '!**/ucspi-tcp-x/ucspi-tcp.spec.in'
+      - '!**/doc/*'
       - '!**.md'
   pull_request:
     branches: [ master ]

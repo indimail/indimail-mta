@@ -8,8 +8,8 @@ on:
       - '**/libdkim-x/**'
       - .github/workflows/libdkim-c-cpp.yml
       - '!**/libdkim-x/debian/*'
-      - '!**/libdkim-x/doc/*'
       - '!**/libdkim-x/libdkim.spec.in'
+      - '!**/doc/*'
       - '!**.md'
   pull_request:
     branches: [ master ]
