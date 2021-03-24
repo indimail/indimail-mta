@@ -2,17 +2,11 @@ name: ucspi-tcp obs trigger
 
 on:
   push:
-    branches:
-      - master
     paths:
       - '**/ucspi-tcp-x/**'
       - .github/workflows/ucspi-tcp-obs.yml
       - '!**/doc/*'
       - '!**.md'
-      - '!**/*.freebsd.yml'
-      - '!**/*.c-cpp.yml'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -20,7 +14,16 @@ jobs:
     steps:
     - name: checkout_ucspi-tcp
       uses: actions/checkout@v2
+    - name: checkout_qmail
+      uses: actions/checkout@v2
+      with:
+        repository: mbhangui/libqmail
+        path: libqmail
 
+    - name: install_qmail
+      run: |
+        sudo apt-get update; sudo apt-get install libssl-dev libmysqlclient-dev
+        cd libqmail; ./default.configure; make; sudo make install-strip
     - name: prepare obs
       run: sudo apt-get update; sudo apt-get install curl; cd ucspi-tcp-x; ./prepare_obs ucspi-tcp
     - uses: actions/upload-artifact@v2
@@ -33,4 +36,12 @@ jobs:
     - shell: bash
       name: trigger_obs
       run: |
-        curl -H "Authorization: Token ${{secrets.ucspi_tcp_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice
+        mkdir ~/.ssh
+        echo "${{secrets.sf_private_key}}" > ~/.private_key
+        chmod 600 ~/.private_key
+        echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
+        cd ~
+        tar cvfz $GITHUB_WORKSPACE/ucspi-tcp-obs.tar.gz *.tar.gz *.spec *.dsc
+        # copy to /home/frs/project/indimail
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/ucspi-tcp-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_path}}"
+        rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/ucspi-tcp-obs.tar.gz

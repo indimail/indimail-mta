@@ -2,8 +2,6 @@ name: daemontools FreeBSD CI
 
 on:
   push:
-    branches:
-      - master
     paths:
       - '**/daemontools-x/**'
       - .github/workflows/daemontools-freebsd.yml
@@ -11,8 +9,6 @@ on:
       - '!**/daemontools-x/daemontools.spec.in'
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   testfreebsd:

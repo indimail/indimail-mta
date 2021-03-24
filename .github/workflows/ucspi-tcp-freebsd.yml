@@ -2,8 +2,6 @@ name: ucspi-tcp FreeBSD CI
 
 on:
   push:
-    branches:
-      - master
     paths:
       - '**/ucspi-tcp-x/**'
       - .github/workflows/ucspi-tcp-freebsd.yml
@@ -11,8 +9,6 @@ on:
       - '!**/ucspi-tcp-x/ucspi-tcp.spec.in'
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   testfreebsd:
