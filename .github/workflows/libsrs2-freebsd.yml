@@ -2,8 +2,6 @@ name: libsrs2 FreeBSD CI
 
 on:
   push:
-    branches:
-      - master
     paths:
       - '**/libsrs2-x/**'
       - .github/workflows/libsrs2-freebsd.yml
@@ -11,8 +9,6 @@ on:
       - '!**/libsrs2-x/libsrs2.spec.in'
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   testfreebsd:

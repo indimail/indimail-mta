@@ -2,17 +2,11 @@ name: libdkim obs trigger
 
 on:
   push:
-    branches:
-      - master
     paths:
       - '**/libdkim-x/**'
       - .github/workflows/libdkim-obs.yml
       - '!**/doc/*'
       - '!**.md'
-      - '!**/*.freebsd.yml'
-      - '!**/*.c-cpp.yml'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -33,4 +27,12 @@ jobs:
     - shell: bash
       name: trigger_obs
       run: |
-        curl -H "Authorization: Token ${{secrets.libdkim_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice
+        mkdir ~/.ssh
+        echo "${{secrets.sf_private_key}}" > ~/.private_key
+        chmod 600 ~/.private_key
+        echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
+        cd ~
+        tar cvfz $GITHUB_WORKSPACE/libdkim-obs.tar.gz *.tar.gz *.spec *.dsc
+        # copy to /home/frs/project/indimail
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/libdkim-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
+        rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/libdkim-obs.tar.gz

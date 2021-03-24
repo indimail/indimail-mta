@@ -2,8 +2,6 @@ name: indimail-mta FreeBSD CI
 
 on:
   push:
-    branches:
-      - master
     paths:
       - '**/indimail-mta-x/**'
       - '**/libdkim-x/**'
@@ -17,8 +15,6 @@ on:
       - '!**/libsrs2-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   testfreebsd:
