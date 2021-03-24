@@ -34,5 +34,5 @@ jobs:
         cd ~
         tar cvfz $GITHUB_WORKSPACE/libsrs2-obs.tar.gz *.tar.gz *.spec *.dsc
         # copy to /home/frs/project/indimail
-        scp -q -i ~/.private_key $GITHUB_WORKSPACE/libsrs2-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_path}}"
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/libsrs2-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
         rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/libsrs2-obs.tar.gz
