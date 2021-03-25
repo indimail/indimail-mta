@@ -96,6 +96,8 @@ NOTE: for Darwin
 # port install pkgconfig libidn2
 ```
 
+Without libidn2, indimail-mta will get build without [International Email Addresses (RFC6531)](https://tools.ietf.org/html/rfc6531)
+
 ## Download / clone libqmail
 
 libqmail uses GNU autotools. You need to haave autoconf, automake, libtool and pkg config package. Follow the instructions below to have them installed in case you don't have them.
