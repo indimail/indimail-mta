@@ -51,17 +51,9 @@ cd ../stage
 #remove debian directory
 /bin/rm -rf $name-$ver/debian
 tar cfz $name-$ver.tar.gz $name-$ver
-mv $name.spec debian.tar.gz $name-$ver.tar.gz *.dsc $HOME
-if [ -f $name-rpmlintrc ] ; then
-	mv $name-rpmlintrc $HOME
-fi
 status=$?
-cd $HOME
-echo HOME=$HOME
-if [ -f $name-rpmlintrc ] ; then
-  /bin/ls -l $name-$ver.tar.gz $name.spec *.dsc debian.tar.gz $name-rpmlintrc
-else
-  /bin/ls -l $name-$ver.tar.gz $name.spec *.dsc debian.tar.gz
-fi
+cd $HOME/stage
+echo STAGE=$HOME/stage
+/bin/ls -l 
 rmdir stage 2>/dev/null || true
 exit $?
