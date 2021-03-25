@@ -100,7 +100,7 @@ Without libidn2, indimail-mta will get built without [Internationalized Email Ad
 
 ## Download / clone libqmail
 
-libqmail uses GNU autotools. You need to haave autoconf, automake, libtool and pkg config package. Follow the instructions below to have them installed in case you don't have them.
+libqmail uses GNU autotools. You need to have autoconf, automake, libtool and pkg config package. Follow the instructions below to have them installed in case you don't have them.
 
 ```
 $ cd /usr/local/src
@@ -565,7 +565,7 @@ $ sudo svps -a
 
 # Binary Packages Build
 
-**Build Status on [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
+**Build Status on [Open Build Service](https://build.opensuse.org/project/monitor/home:mbhangui)**
 
 [![indimail-mta obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml)
 [![daemontools obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml)
