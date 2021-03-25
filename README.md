@@ -96,7 +96,7 @@ NOTE: for Darwin
 # port install pkgconfig libidn2
 ```
 
-Without libidn2, indimail-mta will get build without [International Email Addresses (RFC6531)](https://tools.ietf.org/html/rfc6531)
+Without libidn2, indimail-mta will get build without [Internationalized Email Addresses (RFC6531)](https://tools.ietf.org/html/rfc6531)
 
 ## Download / clone libqmail
 
