@@ -17,7 +17,7 @@ edit = sed \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 
-libsrs2.spec: libsrs2.spec.in catChangeLog ChangeLog conf-version conf-release conf-email
+libsrs2.spec: libsrs2.spec.in catChangeLog doc/ChangeLog conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 libsrs2.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
