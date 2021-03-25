@@ -1,4 +1,0 @@
-libsrs2 (@version@-@release@) unstable; urgency=medium
-
-  * First version
-  * FreeBSD, Darwin Port

@@ -38,6 +38,7 @@ conf-release
 config.h.in.BAK
 config.h.in~
 libsrs2.spec
+libsrs2.changes
 libsrs2.pc
 debian/debian.tar.gz
 debian/libsrs2-dev.install
@@ -45,3 +46,5 @@ debian/libsrs2.dsc
 debian/libsrs2.install
 debian/README.debian
 debian/changelog
+debian/copyright
+debian/control

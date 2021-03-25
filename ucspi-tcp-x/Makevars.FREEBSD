@@ -8,3 +8,4 @@ DEFS       != uname -s | tr "[:lower:]" "[:upper:]"
 SYSTEM     != uname -s | tr "[:lower:]" "[:upper:]"
 version    != cat conf-version
 release    != cat conf-release 2>/dev/null || echo "1.1"
+email      != cat conf-email

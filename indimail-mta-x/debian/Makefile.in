@@ -11,6 +11,7 @@ logdir=@logdir@
 libdir=/usr/lib
 version=@version@
 release=@release@
+email=@email@
 
 all: rules indimail-mta.prerm indimail-mta.preinst \
 indimail-mta.postrm indimail-mta.postinst \
@@ -34,6 +35,7 @@ edit = sed \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 install: all
@@ -57,41 +59,59 @@ MOSTLYCLEANFILES= indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				  indimail-mini.postrm indimail-mini.postinst \
 				  debian.tar.gz
 
-rules: rules.in Makefile ../conf-version ../conf-release
+rules: rules.in Makefile ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
-changelog: changelog.in ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <indimail-mta@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release \
+../conf-email
+	../catChangeLog --debian --name=indimail-mta --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
 indimail-mta.install: indimail-mta.install.in Makefile
 	$(edit) $@.in > $@
-indimail-mta.dsc: indimail-mta.dsc.in Makefile ../conf-version ../conf-release
+indimail-mta.dsc: indimail-mta.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
-indimail-mta-Raspbian_10.dsc: indimail-mta-Raspbian_10.dsc.in Makefile ../conf-version ../conf-release
+indimail-mta-Raspbian_10.dsc: indimail-mta-Raspbian_10.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
-indimail-mta-Raspbian_9.0.dsc: indimail-mta-Raspbian_9.0.dsc.in Makefile ../conf-version ../conf-release
+indimail-mta-Raspbian_9.0.dsc: indimail-mta-Raspbian_9.0.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
-indimail-mta-Debian_10.dsc: indimail-mta-Debian_10.dsc.in Makefile ../conf-version ../conf-release
+indimail-mta-Debian_10.dsc: indimail-mta-Debian_10.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
-indimail-mta-Debian_9.0.dsc: indimail-mta-Debian_9.0.dsc.in Makefile ../conf-version ../conf-release
+indimail-mta-Debian_9.0.dsc: indimail-mta-Debian_9.0.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
-indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile ../conf-version ../conf-release
+indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
-indimail-mta.postrm: indimail-mta.postrm.in Makefile ../conf-version ../conf-release
+indimail-mta.postrm: indimail-mta.postrm.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@
-indimail-mta.prerm: indimail-mta.prerm.in Makefile ../conf-version ../conf-release
+indimail-mta.prerm: indimail-mta.prerm.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@
-indimail-mta.postinst: indimail-mta.postinst.in Makefile ../conf-version ../conf-release
+indimail-mta.postinst: indimail-mta.postinst.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@
-indimail-mta.preinst: indimail-mta.preinst.in Makefile ../conf-version ../conf-release
+indimail-mta.preinst: indimail-mta.preinst.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@
-indimail-mini.prerm: indimail-mini.prerm.in Makefile ../conf-version ../conf-release
+indimail-mini.prerm: indimail-mini.prerm.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-mini.preinst: indimail-mini.preinst.in Makefile ../conf-version ../conf-release
+indimail-mini.preinst: indimail-mini.preinst.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-mini.postrm: indimail-mini.postrm.in Makefile ../conf-version ../conf-release
+indimail-mini.postrm: indimail-mini.postrm.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-mini.postinst: indimail-mini.postinst.in Makefile ../conf-version ../conf-release
+indimail-mini.postinst: indimail-mini.postinst.in Makefile \
+../conf-version ../conf-release
 	$(edit) $@.in > $@;
 indimail-mta.cron.d: indimail-mta.cron.d.in Makefile
 	$(edit) $@.in > $@

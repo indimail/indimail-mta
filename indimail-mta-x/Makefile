@@ -17,6 +17,7 @@ edit = sed \
 	-e 's,@prefix\@,$(prefix),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
 it = indimail-mta.perms 822date 822field 822header 822print 822received \
@@ -26,7 +27,7 @@ it = indimail-mta.perms 822date 822field 822header 822print 822received \
 	condredirect config-fast datemail dk-filter dknewkey dktest dnscname \
 	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
 	qdane dnstlsarr etrn except fastforward forward generic.so greydaemon \
-	qf-smtp-ratelimit home home+df hostname sslerator \
+	qf-smtp-ratelimit home home+df hostname sslerator indimail-mta.changes \
 	idedit iftocc instcheck ipmeprint ldap-checkpwd leapsecs \
 	maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
 	maildirsmtp maildirwatch mailsubj mbox2maildir multirotate \
@@ -3447,8 +3448,11 @@ conf-release:
 
 indimail-mta.spec: indimail-mta.spec.in doc/ChangeLog mysql_config \
 conf-release conf-version conf-prefix conf-libexec conf-qmail \
-conf-sysconfdir conf-shared conf-servicedir
+conf-sysconfdir conf-shared conf-servicedir conf-email
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
+
+indimail-mta.changes: catChangeLog doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 
 debian/Makefile: debian/Makefile.in conf-release conf-version \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared

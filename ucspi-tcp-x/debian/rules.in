@@ -51,7 +51,7 @@ build-stamp:
 	echo UCSPI_TCP_version=$(version); \
 	echo ID=ucspi-tcp; \
 	echo HOME_URL="https://github.com/mbhangui/indimail-mta"; \
-	echo PACKAGE_BUGREPORT=\"Manvendra Bhangui ucspi-tcp@indimail.org\"; \
+	echo PACKAGE_BUGREPORT=\"@email@\"; \
 	) > ucspi-tcp-release
 	touch build-stamp
 

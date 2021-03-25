@@ -36,7 +36,7 @@
 %global dkimkeyfn          default
 
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <indimail-mta@indimail.org>
+%global packager @email@
 %endif
 
 %if 0%{?suse_version}
@@ -221,7 +221,7 @@ echo "Description=\"IndiMail MTA\""
 echo "MTA_version="%{version}""
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
-echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-mta@indimail.org\""
+echo "PACKAGE_BUGREPORT=\"@email@\""
 ) > %{name}-release
 
 #### qmail ######################

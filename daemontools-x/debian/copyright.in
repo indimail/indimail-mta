@@ -1,9 +1,9 @@
 Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
 Name: IndiMail
-Maintainer: Manvendra Bhangui <daemontools@indimail.org>
+Maintainer: @email@
 Source: https://github.com/mbhangui/indimail-mta
 
-Copyright: 2008-2020, Manvendra Bhangui <daemontools@indimail.org>
+Copyright: 2008-2020, Manvendra Bhangui <mbhangui@gmail.com>
 License: GPL-3+
 
 License: GPL-3+

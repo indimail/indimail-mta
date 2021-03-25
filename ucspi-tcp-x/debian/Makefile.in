@@ -9,6 +9,7 @@ shareddir=@shareddir@
 libdir=/usr/lib
 version=@version@
 release=@release@
+email=@email@
 
 all: rules ucspi-tcp.dsc ucspi-tcp-Debian_9.0.dsc \
 ucspi-tcp-Debian_10.dsc ucspi-tcp-xUbuntu_18.04.dsc \
@@ -19,6 +20,7 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@mbase\@,$(mbase),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
@@ -39,7 +41,15 @@ clean:
 noinst_SCRIPTS = ucspi-tcp.install rules
 MOSTLYCLEANFILES = rules preinst postinst changelog debian.tar.gz
 
-rules: rules.in Makefile ../conf-version ../conf-release
+rules: rules.in Makefile ../conf-version ../conf-release ../conf-email
+	$(edit) $@.in > $@
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release \
+../conf-email
+	../catChangeLog --debian --name=indimail-mta --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
 	$(edit) $@.in > $@
 
 preinst: preinst.in Makefile
@@ -48,10 +58,6 @@ preinst: preinst.in Makefile
 postinst: postinst.in Makefile
 	$(edit) $@.in > $@
 
-changelog: changelog.in ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <ucspi-tcp@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
 ucspi-tcp.dsc: ucspi-tcp.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 ucspi-tcp-Debian_10.dsc: ucspi-tcp-Debian_10.dsc.in Makefile \

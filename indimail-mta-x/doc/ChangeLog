@@ -27,6 +27,10 @@ Release 2.13 Start 14/02/2021
 16. indimail.spec: fixed rpmlint percent in pretrans, post
 - 09/03/2021
 18. svctool: added timeout parameter for indisrvr
+- 17/03/2021
+19. Open Build Service integration
+- 22/03/2021
+20. svctool: removed IMAP_ENHANCEDIDLE variable for courier-imap-5.1.1
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

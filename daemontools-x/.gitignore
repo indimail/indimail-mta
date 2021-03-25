@@ -14,6 +14,7 @@ conf-shared
 conf-sysconfdir
 conf-release
 daemontools.spec
+daemontools.changes
 docker-entrypoint
 docker-entrypoint.8
 envdir

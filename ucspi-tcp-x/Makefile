@@ -11,6 +11,7 @@ edit = sed \
 	-e 's,@qsysconfdir\@,$(sysconfdir),g' \
 	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@DATE\@,$(DATE),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g'
 
@@ -245,7 +246,8 @@ compile ip4_scan.c ip4.h
 	./compile ip4_scan.c
 
 it: prog man shared instcheck installer \
-dotls ucspi-tcp.perms ucspi-tcp.spec
+dotls ucspi-tcp.perms ucspi-tcp.spec \
+ucspi-tcp.changes
 
 load: warn-auto.sh conf-ld systype make-load
 	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
@@ -680,8 +682,11 @@ DIRS: DIRS.in
 	$(edit) $@.in > $@
 
 ucspi-tcp.spec: ucspi-tcp.spec.in conf-prefix \
-conf-shared conf-sysconfdir doc/ChangeLog
+conf-shared conf-sysconfdir doc/ChangeLog conf-email
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
+
+ucspi-tcp.changes: catChangeLog doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 
 install: it installer DIRS BIN SHARED PLUGINS MAN
 	mkdir -p $(DESTDIR)$(prefix)

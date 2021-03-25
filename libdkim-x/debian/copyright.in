@@ -1,6 +1,6 @@
 Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
 Name: libdkim
-Maintainer: Manvendra Bhangui <libdkim@indimail.org>
+Maintainer: @email@
 Source: https://github.com/mbhangui/indimail-mta
 
 Upstream Author: Alt-N Technologies, http://www.altn.com

@@ -3,7 +3,7 @@ Source: libdkim
 Binary: libdkim, libdkim-dev
 Architecture: any
 Version: @version@-@release@
-Maintainer: Manvendra Bhangui <libdkim@indimail.org>
+Maintainer: @email@
 Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x
 Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz
