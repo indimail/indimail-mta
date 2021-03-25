@@ -23,9 +23,6 @@ jobs:
       with:
         name: libsrs2
         path: ~/stage
-          ~/*.tar.gz
-          ~/*.spec
-          ~/*.dsc
     - shell: bash
       name: trigger_obs
       run: |
