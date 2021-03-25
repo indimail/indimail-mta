@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '**/libsrs2-x/**'
+      - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/libsrs2-obs.yml
       - '!**/doc/*'
       - '!**.md'
@@ -20,10 +22,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: libsrs2
-        path: |
-          ~/*.tar.gz
-          ~/*.spec
-          ~/*.dsc
+        path: ~/stage
     - shell: bash
       name: trigger_obs
       run: |
@@ -31,8 +30,9 @@ jobs:
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
-        cd ~
-        tar cvfz $GITHUB_WORKSPACE/libsrs2-obs.tar.gz *.tar.gz *.spec *.dsc
+        cd ~/stage
+        tar cvfz $GITHUB_WORKSPACE/libsrs2-obs.tar.gz *
         # copy to /home/frs/project/indimail
         scp -q -i ~/.private_key $GITHUB_WORKSPACE/libsrs2-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
         rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/libsrs2-obs.tar.gz
+        rm -rf ~/stage

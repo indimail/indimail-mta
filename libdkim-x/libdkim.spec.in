@@ -27,7 +27,7 @@
 %global _verbose           0
 
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <libdkim@indimail.org>
+%global packager @email@
 %endif
 
 %if 0%{?suse_version}

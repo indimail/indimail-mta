@@ -17,7 +17,7 @@ libdkim_la_CXXFLAGS = -fPIE
 libdkimdir=@libdir@
 dkimbindir=@prefix@/bin
 dkimbin_PROGRAMS = dkim
-noinst_DATA = libdkim.spec
+noinst_DATA = libdkim.spec libdkim.changes
 
 dkim_SOURCES = dkim.cpp
 dkim_LDFLAGS = $(LDFLAGS)
@@ -40,13 +40,16 @@ edit = sed \
 	-e 's}@PACKAGE_VERSION\@}$(PACKAGE_VERSION)}g' \
 	-e 's}@version\@}$(VERSION)}g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
+	-e 's|@email\@|'"`cat conf-email`"'|g' \
 	-e 's}@pkgconfigdir\@}$(pkgconfigdir)}g' \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 dkim.8: dkim.9
 	cat $^ | sed s}INDIMAIL}$(prefix)}g > $@
-libdkim.spec: libdkim.spec.in catChangeLog ChangeLog conf-version conf-release
+libdkim.spec: libdkim.spec.in catChangeLog doc/ChangeLog conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
+libdkim.changes: doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)

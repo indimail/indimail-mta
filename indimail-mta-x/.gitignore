@@ -8,6 +8,8 @@ debian/indimail-mini.postrm
 debian/indimail-mini.preinst
 debian/indimail-mini.prerm
 debian/changelog
+debian/copyright
+debian/control
 auto_libexec.o
 qmail-srs.5
 indimail-mta.fc
@@ -537,6 +539,7 @@ yearcal.o
 *.o
 debian/_service
 indimail-mta.spec
+indimail-mta.changes
 *.a
 *.lib
 hastlsv1_1_client.h

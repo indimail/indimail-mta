@@ -1,7 +1,7 @@
 Source: libsrs2
 Section: libs
 Priority: optional
-Maintainer: Manvendra Bhangui <libsrs2@indimail.org>
+Maintainer: @email@
 Standards-Version: 3.9.5
 Build-Depends: debhelper (>= 9), pkg-config, autoconf (>= 2.53-2 ), gcc, binutils, perl, perl-modules, file
 Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x

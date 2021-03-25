@@ -13,3 +13,5 @@ postinst
 prerm
 postrm
 changelog
+copyright
+control

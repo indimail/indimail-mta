@@ -1,17 +1,22 @@
 all: debian.tar.gz
 version=$(shell cat ../conf-version)
 arch=$(shell uname -m)
+email=$(shell cat ../conf-email)
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e "s,@release\@,"`cat ../conf-release`",g" \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-changelog: changelog.in ../conf-release ../conf-version
-	(cat $@.in; echo ""; \
-	echo " -- libdkim <libdkim@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+	../catChangeLog --debian --name=libdkim --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
 
 libdkim.dsc: libdkim.dsc.in ../conf-release ../conf-version
 	$(edit) $@.in > $@

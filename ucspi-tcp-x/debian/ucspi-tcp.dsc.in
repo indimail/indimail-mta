@@ -5,7 +5,7 @@ Priority: extra
 Binary: ucspi-tcp
 Architecture: any
 Version: @version@-@release@
-Maintainer: Manvendra Bhangui <ucspi-tcp@indimail.org>
+Maintainer: @email@
 Homepage: https://github.com/mbhangui/indimail-mta
 Debtransform-Release: 1
 Debtransform-Tar: ucspi-tcp-@version@.tar.gz

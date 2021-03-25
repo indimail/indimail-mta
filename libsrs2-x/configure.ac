@@ -1,10 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([libsrs2],m4_normalize(m4_include([conf-version])), [Manvendra Bhangui libsrs2@indimail.org], libsrs2)
+AC_INIT([libsrs2],m4_normalize(m4_include([conf-version])), m4_normalize(m4_include([conf-email])), libsrs2)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE()
+AM_INIT_AUTOMAKE([foreign])
 
 dnl Weird Unix variants
 AC_AIX

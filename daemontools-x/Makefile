@@ -18,6 +18,7 @@ edit = sed \
 	-e 's,@prefix\@,$(prefix),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
 it = envdir envuidgid setlock setuidgid softlimit svc svok \
@@ -25,7 +26,7 @@ it = envdir envuidgid setlock setuidgid softlimit svc svok \
 	spipe qfilelog multipipe teepipe logselect svscan qlogselect \
 	supervise readproctitle multilog docker-entrypoint fghack \
 	pgrphack svps svscanboot upstart systemd qmailctl \
-	minisvc instcheck installer daemontools.perms daemontools.spec
+	minisvc instcheck installer daemontools.perms daemontools.changes
 
 man = spipe.1 qfilelog.1 multipipe.1 teepipe.1 tai2tai64n.1 \
 	tai64n2tai.1 envdir.8 envuidgid.8 fghack.8 multilog.8 pgrphack.8 \
@@ -463,8 +464,11 @@ conf-prefix conf-libexec conf-sysconfdir conf-shared
 
 daemontools.spec: daemontools.spec.in doc/ChangeLog \
 conf-release conf-version conf-prefix conf-libexec conf-qmail \
-conf-sysconfdir conf-shared conf-servicedir
+conf-sysconfdir conf-shared conf-servicedir conf-email
 	(cat $@.in; sh ./catChangeLog) | $(edit) > daemontools.spec
+
+daemontools.changes: catChangeLog doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 
 instcheck: load instcheck.o hier.o auto_home.o \
 auto_shared.o auto_sysconfdir.o
