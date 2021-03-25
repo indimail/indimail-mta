@@ -29,24 +29,24 @@ fi
 if [ ! -f ./$name.spec ] ; then
   make $name.spec
 fi
-mkdir -p ../stage
+mkdir -p $HOME/stage
 
 # Create debian.tar.gz
 make debian/Makefile
 make -C debian
-cp debian/debian.tar.gz ../stage
-cp $name.spec ../stage
-cp debian/*.dsc ../stage
+cp debian/debian.tar.gz $HOME/stage
+cp $name.spec $HOME/stage
+cp debian/*.dsc $HOME/stage
 if [ -f $name-rpmlintrc ] ; then
-	cp $name-rpmlintrc ../stage
+	cp $name-rpmlintrc $HOME/stage
 fi
 
 make -C debian clean
 make clean
-cp -rpf . ../stage/$name-$ver
+cp -rpf . $HOME/stage/$name-$ver
 
 # change cwd to staging directory
-cd ../stage
+cd $HOME/stage
 
 #remove debian directory
 /bin/rm -rf $name-$ver/debian
@@ -55,5 +55,4 @@ status=$?
 cd $HOME/stage
 echo STAGE=$HOME/stage
 /bin/ls -l 
-rmdir stage 2>/dev/null || true
 exit $?
