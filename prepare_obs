@@ -52,7 +52,7 @@ prepare_artifacts()
       make $pkg_name.spec
     fi
     # This will build the $name.changes file
-    ./catChangeLog --changes
+    ./catChangeLog --changes > $pkg_name.changes
 
     for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
     do
@@ -150,7 +150,7 @@ if [ -f $name.packages ] ; then
     make $name.spec
   fi
   # This will build the $name.changes file
-  ./catChangeLog --changes
+  ./catChangeLog --changes > $name.changes
 
   for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
   do
