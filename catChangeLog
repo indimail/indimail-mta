@@ -129,7 +129,9 @@ if [ -z "$email" ] ; then
 	fi
 fi
 
-cat $file|while read line
+nonewline=0
+exec 0<$file
+while read line
 do
 	echo "$line"|grep "^*" > /dev/null
 	if [ $? -eq 0 -a $flag -ne 0 ] ; then
@@ -161,6 +163,10 @@ do
 	fi
 	echo "$line" |egrep "^[0-9]|^[0-9][0-9]|^[0-9][0-9][0-9]" > /dev/null
 	if [ $? -eq 0 ] ; then
+		if [ $option -eq 2 -a $nonewline -eq 1 ] ; then
+			echo
+		fi
+		nonewline=0
 		if [ $option -eq 1 -o $option -eq 3 ] ; then
 			set $line
 			shift
@@ -168,15 +174,22 @@ do
 		elif [ $option -eq 2 ] ; then
 			set $line
 			shift
-			echo "  * $*"
+			nonewline=1
+			echo -n "  * $*"
 		fi
 	elif [ -n "$line" ] ; then
 		if [ $option -eq 1 -o $option -eq 3 ] ; then
 			echo "  $line"
+		elif [ $option -eq 2 ] ; then
+			echo " $line"
+			nonewline=2
 		fi
 	fi
 done
 if [ $option -eq 2 ] ; then
+	if [ $nonewline -eq 1 ] ; then
+		echo
+	fi
 	echo
 	echo " -- $email  `date +'%a, %d %b %Y %H:%M:%S %z'`"
 elif [ $option -eq 3 ] ; then
