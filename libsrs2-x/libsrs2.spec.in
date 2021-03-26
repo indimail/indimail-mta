@@ -139,7 +139,7 @@ of the SPF/SRS protocol pair.
 %defattr(-, root, root,-)
 %{_libdir}/libsrs2.so.1
 %{_libdir}/libsrs2.so.1.0.0
-%doc AUTHORS ChangeLog COPYING LICENSE.BSD LICENSE.GPL-2
+%doc AUTHORS doc/ChangeLog COPYING LICENSE.BSD LICENSE.GPL-2
 %doc %attr(644,root,root)               %{mandir}/man1/srs.1.gz
 
 %attr(755,root,root)                    %{_prefix}/bin/srs

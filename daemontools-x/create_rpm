@@ -120,6 +120,8 @@ do
 		fi
 		echo "Preparing daemontools-"$version""
 		/bin/cp -rp daemontools-x stage/daemontools-"$version"
+		/bin/rm -f stage/daemontools-"$version"/catChangeLog
+		/bin/cp daemontools-x/catChangeLog stage/daemontools-"$version"
 		cd stage/daemontools-"$version"
 		echo "Cleaning daemontools"
 		make SYSTEM=$SYSTEM -s clean > /dev/null

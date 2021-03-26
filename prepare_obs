@@ -139,17 +139,17 @@ if [ -f $name.packages ] ; then
   fi
   mkdir -p $HOME/stage
   echo "Preparing $name-$ver"
-  cp -rp ../catChangeLog $HOME/stage # for spec file, changes, debian/changelog to get built
   cp -rp . $HOME/stage/$name-$ver
+  /bin/rm -f $HOME/stage/$name-$ver/catChangeLog
+  cp catChangeLog $HOME/stage/$name-$ver # for spec file, changes, debian/changelog to get built
   cd $HOME/stage/$name-$ver
 
-  # now build the master spec file and master dsc files
-  for i in spec changes
-  do
-    if [ -f $name.$i.in -a -f Makefile -a ! -f $name.$i ] ; then
-      make $name.$i
-    fi
-  done
+  # now build the spec, changes and dsc files
+  if [ -f $name.spec.in -a -f Makefile -a ! -f $name.$i ] ; then
+    make $name.spec
+  fi
+  # This will build the $name.changes file
+  ./catChangeLog --changes
 
   for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
   do

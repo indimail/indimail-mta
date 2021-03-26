@@ -1,10 +1,13 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.2  2021-03-26 11:34:58+05:30  Cprogrammer
+# copy catChangeLog as a file instead of link
+#
 # Revision 1.1  2020-09-13 01:33:33+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.1 2020-09-13 01:33:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.2 2021-03-26 11:34:58+05:30 Cprogrammer Exp mbhangui $
 #
 curdir=`pwd`
 version=$(cat conf-version)
@@ -73,6 +76,8 @@ if [ $copy_src -eq 1 ] ; then
 cd ..
 /bin/rm -rf stage/libdkim-"$version"
 cp -rp libdkim-x stage/libdkim-"$version"
+/bin/rm -f stage/libdkim-"$version"/catChangeLog
+/bin/cp libdkim-x/catChangeLog stage/libdkim-"$version"
 cd stage/libdkim-"$version"
 make -s clean
 make -s distclean

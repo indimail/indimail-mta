@@ -115,6 +115,8 @@ do
 		fi
 		echo "Preparing ucspi-tcp-"$version""
 		/bin/cp -rp ucspi-tcp-x stage/ucspi-tcp-"$version"
+		/bin/rm -f stage/ucspi-tcp-"$version"/catChangeLog
+		/bin/cp ucspi-tcp-x/catChangeLog stage/ucspi-tcp-"$version"
 		cd stage/ucspi-tcp-"$version"
 		echo "Cleaning ucspi-tcp"
 		make SYSTEM=$SYSTEM -s clean > /dev/null

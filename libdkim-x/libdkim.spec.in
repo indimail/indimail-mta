@@ -1,6 +1,6 @@
 #
 #
-# $Id: libdkim.spec.in,v 1.2 2021-03-12 11:57:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: libdkim.spec.in,v 1.3 2021-03-26 11:35:18+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -155,7 +155,7 @@ or both.
 %defattr(-, root, root,-)
 %{_libdir}/libdkim.so.1
 %{_libdir}/libdkim.so.1.0.0
-%doc AUTHORS COPYING README ChangeLog yahoo-patent-license-1.2.txt
+%doc AUTHORS COPYING README doc/ChangeLog yahoo-patent-license-1.2.txt
 %doc %attr(644,root,root)               %{mandir}/man8/dkim.8.gz
 
 %attr(755,root,root)                    %{_prefix}/bin/dkim

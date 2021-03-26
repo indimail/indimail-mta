@@ -70,6 +70,8 @@ if [ $copy_src -eq 1 ] ; then
 cd ..
 /bin/rm -rf stage/libsrs2-"$version"
 cp -rp libsrs2-x stage/libsrs2-"$version"
+/bin/rm -f stage/libsrs2-"$version"/catChangeLog
+/bin/cp libsrs2-x/catChangeLog stage/libsrs2-"$version"
 cd stage/libsrs2-"$version"
 make -s clean
 make -s distclean
