@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.15  2021-03-26 18:15:02+05:30  Cprogrammer
+# fixed missing catChangeLog in debian builds
+#
 # Revision 1.14  2020-10-21 20:33:00+05:30  Cprogrammer
 # removed ucspi-tcp
 #
@@ -43,7 +46,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.14 2020-10-21 20:33:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.15 2021-03-26 18:15:02+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 
