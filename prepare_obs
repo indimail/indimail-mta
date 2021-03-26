@@ -47,13 +47,12 @@ prepare_artifacts()
 
   mkdir -p $stage
   if [ $multi_mode -eq 0 ] ; then
-    # Create spec file
-    for i in spec changes
-    do
-      if [ -f $pkg_name.$i.in -a -f Makefile -a ! -f $pkg_name.$i ] ; then
-        make $pkg_name.$i
-      fi
-    done
+    # Create spec, changes file
+    if [ -f $pkg_name.spec.in -a -f Makefile -a ! -f $pkg_name.spec ] ; then
+      make $pkg_name.spec
+    fi
+    # This will build the $name.changes file
+    ./catChangeLog --changes
 
     for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
     do
@@ -100,6 +99,8 @@ prepare_artifacts()
   fi
 
   cp -rpf . $stage/$pkg_name-$ver
+  /bin/rm -f $stage/$pkg_name-$ver/catChangeLog
+  cp catChangeLog $stage/$pkg_name-$ver # for spec file, changes, debian/changelog to get built
   # change cwd to staging directory
   cd $stage
   if [ $multi_mode -eq 1 ] ; then
