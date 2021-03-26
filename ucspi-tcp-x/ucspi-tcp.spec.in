@@ -137,7 +137,7 @@ echo "Description=\"ucspi-tcp\""
 echo "UCSPITCP_version="%{version}""
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
-echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui ucspi-tcp@indimail.org\""
+echo "PACKAGE_BUGREPORT=\"'@email@'\""
 ) > %{name}-release
 
 #### ucspi-tcp ######################

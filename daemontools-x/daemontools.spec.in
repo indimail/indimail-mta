@@ -146,7 +146,7 @@ echo "Description=\"Daemontools\""
 echo "daemontools_version="%{version}""
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
-echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui damontools@indimail.org\""
+echo "PACKAGE_BUGREPORT=\"'@email@'\""
 ) > %{name}-release
 
 %{__sed} 's{PREFIX{%{_prefix}{'         conf-prefix.in      > conf-prefix

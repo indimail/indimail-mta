@@ -41,7 +41,7 @@ build-stamp:
 	echo daemontools_version=$(version); \
 	echo ID=daemontools; \
 	echo HOME_URL="https://github.com/mbhangui/indimail-mta"; \
-	echo PACKAGE_BUGREPORT=\"@email@\"; \
+	echo PACKAGE_BUGREPORT=\"'@email@'\"; \
 	) > daemontools-release
 	touch build-stamp
 

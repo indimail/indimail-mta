@@ -221,7 +221,7 @@ echo "Description=\"IndiMail MTA\""
 echo "MTA_version="%{version}""
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
-echo "PACKAGE_BUGREPORT=\"@email@\""
+echo "PACKAGE_BUGREPORT=\"'@email@'\""
 ) > %{name}-release
 
 #### qmail ######################
