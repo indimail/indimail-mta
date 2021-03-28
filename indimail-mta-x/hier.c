@@ -721,7 +721,6 @@
 #include "auto_prefix.h"
 #include "auto_libexec.h"
 #include "auto_uids.h"
-#include "qmail-todo.h"
 #include "fmt.h"
 #include "fifo.h"
 #include "str.h"
