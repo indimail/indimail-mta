@@ -1,5 +1,8 @@
 /*
  * $Log: strset.h,v $
+ * Revision 1.2  2021-03-28 23:49:51+05:30  Cprogrammer
+ * minor code beautification
+ *
  * Revision 1.1  2004-10-21 22:48:15+05:30  Cprogrammer
  * Initial revision
  *
@@ -13,8 +16,7 @@ typedef struct strset_list
 {
 	uint32          h;
 	int             next;
-}
-strset_list;
+} strset_list;
 
 typedef struct
 {
