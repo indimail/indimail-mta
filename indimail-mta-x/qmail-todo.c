@@ -85,7 +85,6 @@
  * added code for future log_stat()
  *
  */
-#include "qmail-todo.h"
 #ifdef EXTERNAL_TODO
 #include <fcntl.h>
 #include <unistd.h>

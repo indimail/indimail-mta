@@ -47,7 +47,6 @@
 #include "env.h"
 #include "alloc.h"
 #include "prot.h"
-#include "qmail-todo.h"
 #include "auto_uids.h"
 #include "setuserid.h"
 

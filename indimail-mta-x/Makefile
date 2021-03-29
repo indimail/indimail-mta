@@ -730,11 +730,13 @@ compile hfield.c hfield.h
 
 hier.o: \
 compile hier.c auto_qmail.h auto_split.h auto_uids.h \
-qmail-todo.h tcpto.h hassrs.h conf-domainkeys conf-srs \
+tcpto.h hassrs.h conf-domainkeys conf-srs \
 conf-spf conf-dkim conf-batv auto_shared.h auto_control.h \
-auto_assign.h auto_sysconfdir.h auto_prefix.h conf-plugin conf-dlopen
-	./compile `grep -h -v "^#" conf-tls conf-spf conf-domainkeys conf-dkim \
-	conf-batv conf-plugin conf-dlopen conf-tlsa` hier.c
+auto_assign.h auto_sysconfdir.h auto_prefix.h conf-plugin \
+conf-dlopen conf-todo
+	./compile `grep -h -v "^#" conf-tls conf-spf conf-domainkeys \
+	conf-dkim conf-batv conf-plugin conf-dlopen conf-tlsa \
+	conf-todo` hier.c
 
 home: \
 home.sh conf-prefix
@@ -1628,10 +1630,10 @@ qmail-send.o: \
 compile qmail-send.c direntry.h control.h \
 auto_qmail.h trigger.h newfield.h quote.h \
 qmail.h qsutil.h prioq.h envrules.h syncdir.h \
-fmtqfn.h readsubdir.h direntry.h variables.h qmail-todo.h \
+fmtqfn.h readsubdir.h direntry.h variables.h \
 auto_control.h conf-mime conf-sync conf-batv \
-hassrs.h conf-srs conf-locklogs
-	./compile `grep -h -v "^#" conf-mime \
+hassrs.h conf-srs conf-locklogs conf-todo
+	./compile `grep -h -v "^#" conf-mime conf-todo \
 		conf-sync conf-batv conf-locklogs` qmail-send.c
 
 qmail-daemon: \
@@ -1854,8 +1856,8 @@ qmail-start.9 conf-qmail
 	> qmail-start.8
 
 qmail-start.o: \
-compile qmail-start.c prot.h auto_uids.h qmail-todo.h
-	./compile qmail-start.c
+compile qmail-start.c prot.h auto_uids.h conf-todo
+	./compile `grep -h -v "^#" conf-todo` qmail-start.c
 
 qmail-tcpok: \
 load qmail-tcpok.o auto_qmail.o variables.o \
@@ -1899,8 +1901,8 @@ auto_control.o variables.o libsyncdir.a
 qmail-todo.o: \
 compile qmail-todo.c auto_qmail.h control.h syncdir.h \
 direntry.h fmtqfn.h readsubdir.h trigger.h variables.h \
-qmail-todo.h auto_control.h conf-sync
-	./compile `grep -h -v "^#" conf-sync` qmail-todo.c
+auto_control.h conf-sync conf-todo
+	./compile `grep -h -v "^#" conf-sync conf-todo` qmail-todo.c
 
 qmail-upq: \
 warn-auto.sh qmail-upq.sh conf-qmail conf-split
