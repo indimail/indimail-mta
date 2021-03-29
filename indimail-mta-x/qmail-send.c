@@ -878,6 +878,7 @@ job_avail()
 {
 	int             j;
 
+    /*- Rolf Eike Beer */
 	for (j = 0; j < numjobs; ++j) {
 		if (!jo[j].refs)
 			return j;
@@ -888,6 +889,7 @@ job_avail()
 static void
 job_open(unsigned long id, int channel, int j)
 {
+    /*- Rolf Eike Beer */
 	jo[j].refs = 1;
 	jo[j].id = id;
 	jo[j].channel = channel;
@@ -902,6 +904,7 @@ job_close(int j)
 	struct prioq_elt pe;
 	struct stat     st;
 
+    /*- Rolf Eike Beer */
 	if (0 < --jo[j].refs)
 		return;
 	pe.id = jo[j].id;
