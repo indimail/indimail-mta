@@ -95,12 +95,14 @@ prepare_artifacts()
 
   if [ -f Makefile ] ; then
     make clean >/dev/null
-	find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
+    find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
   fi
 
   cp -rpf . $stage/$pkg_name-$ver
-  /bin/rm -f $stage/$pkg_name-$ver/catChangeLog
-  cp catChangeLog $stage/$pkg_name-$ver # for spec file, changes, debian/changelog to get built
+  if [ -L $stage/$pkg_name-$ver/catChangeLog ] ; then
+    /bin/rm -f $stage/$pkg_name-$ver/catChangeLog
+    cp catChangeLog $stage/$pkg_name-$ver # for spec file, changes, debian/changelog to get built
+  fi
   # change cwd to staging directory
   cd $stage
   if [ $multi_mode -eq 1 ] ; then
@@ -141,8 +143,10 @@ if [ -f $name.packages ] ; then
   mkdir -p $HOME/stage
   echo "Preparing $name-$ver"
   cp -rp . $HOME/stage/$name-$ver
-  /bin/rm -f $HOME/stage/$name-$ver/catChangeLog
-  cp catChangeLog $HOME/stage/$name-$ver # for spec file, changes, debian/changelog to get built
+  if [ -L $HOME/stage/$name-$ver/catChangeLog ] ; then
+    /bin/rm -f $HOME/stage/$name-$ver/catChangeLog
+    cp catChangeLog $HOME/stage/$name-$ver # for spec file, changes, debian/changelog to get built
+  fi
   cd $HOME/stage/$name-$ver
 
   # now build the spec, changes and dsc files
