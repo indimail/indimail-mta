@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo "# ChangeLogs"
+echo
+for i in `ls */doc/ChangeLog`
+do
+    dir=$(echo $i | sed 's{/doc/ChangeLog{{g')
+    cd $dir
+    name=$(echo $dir | sed 's{-x{{g')
+    echo "# $name"
+    echo
+    ./catChangeLog $* --name=$name
+    echo
+    cd ..
+done

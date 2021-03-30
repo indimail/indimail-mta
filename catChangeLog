@@ -96,7 +96,6 @@ while test $# -gt 0; do
 	fi
 	shift
 done
-flag=0
 if [ $# -eq 0 ] ; then
 	file=doc/ChangeLog
 else
@@ -104,7 +103,7 @@ else
 fi
 if [ $option -eq 2 ] ; then
 	if [ -z "$name" -o -z "$state" -o -z "$urgency" ] ; then
-		echo "you have to give --name --state --urgency otions" 1>&1
+		echo "you have to give --name --state --urgency options" 1>&1
 	fi
 fi
 if [ -z "$version" ] ; then
@@ -129,14 +128,19 @@ if [ -z "$email" ] ; then
 	fi
 fi
 
+flag=0
 nonewline=0
 exec 0<$file
 while read line
 do
 	echo "$line"|grep "^*" > /dev/null
-	if [ $? -eq 0 -a $flag -ne 0 ] ; then
+    status=$?
+	if [ $status -eq 0 -a $flag -ne 0 ] ; then
 		break
 	fi
+    if [ $option -eq 1 -a $status -ne 0 -a $flag -eq 0 ] ; then
+        continue
+    fi
 	echo "$line" | grep "^- [0-9]*/.*/.*" > /dev/null # skip dates
 	if [ $? -eq 0 ] ; then
 		continue
@@ -156,7 +160,7 @@ do
 		continue
 	elif [ $flag -eq 1 ] ; then # second line
 		if [ $option -eq 1 ] ; then
-			echo "$line"
+			echo "$line" | sed -e "s|@version\@|$version|g" -e "s|@release\@|$release|g"
 		fi
 		flag=2
 		continue

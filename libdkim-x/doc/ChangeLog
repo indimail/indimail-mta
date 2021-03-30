@@ -14,7 +14,7 @@ Release 1.5 Start 19/03/2009
 1.  Added libdkim-1.0 - DKIM signing/verification library by ALT-N
     technologies. New program dkim for testing dkim signatures
 2.  Fixed bugs with DKIM/DK verification
-28/03/2009
+- 28/03/2009
 3.  Released libdkim-1.1
 4.  Added ADSP/SSP to qmail-dkim, libdkim
 5.  Added Return-Path to use as domain in dkimsign.cpp
@@ -65,7 +65,7 @@ Release 1.5 Start 19/03/2009
 32. renamed DKKIMDOMAIN to BOUNCEDOMAIN
 - 06/10/2020
 33. configure.ac: changes for FreeBSD, Darwin
-- 13/10/2020
+- 13/10/2020 indimail-mta-2.12
 34. added debuginfo package
 
 *
