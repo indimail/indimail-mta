@@ -18,7 +18,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install curl; cd libsrs2-x; ./prepare_obs libsrs2
+      run: cd libsrs2-x; ./prepare_obs libsrs2
     - uses: actions/upload-artifact@v2
       with:
         name: libsrs2

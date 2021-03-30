@@ -27,7 +27,7 @@ jobs:
         sudo apt-get update; sudo apt-get install libssl-dev libmysqlclient-dev
         cd libqmail; ./default.configure; make; sudo make install-strip
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install; cd daemontools-x; ./prepare_obs daemontools
+      run: cd daemontools-x; ./prepare_obs daemontools
     - uses: actions/upload-artifact@v2
       with:
         name: daemontools
