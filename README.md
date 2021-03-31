@@ -191,8 +191,8 @@ conf-servicedir|/usr/local/etc/indimail/sv
 The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can replace `make` with `./qmake`
 
 ```
-$ ./default.configure
 $ cd /usr/local/src/indimail-mta/daemontools-x
+$ ./default.configure
 $ make or ./qmake
 $ sudo make install or sudo ./qmake install
 ```
@@ -226,8 +226,8 @@ conf-servicedir|/usr/local/libexec/indimail/service
 The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
 
 ```
-$ ./default.configure
 $ cd /usr/local/src/indimail-mta/ucspi-tcp-x
+$ ./default.configure
 $ make or ./qmake
 $ sudo make install or sudo ./qmake install
 ```
