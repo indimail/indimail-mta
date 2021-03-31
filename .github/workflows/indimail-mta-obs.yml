@@ -37,13 +37,25 @@ jobs:
     - shell: bash
       name: trigger_obs
       run: |
+        # create ssh environment
         mkdir ~/.ssh
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
+        # create gpg environment
+        echo "Importing gpg key"
+        echo "${{secrets.software_key}}" | gpg --batch --import
+        echo "Listing gpg key"
+        gpg --list-secret-keys --keyid-format LONG
+        # create archive and transfer
         cd ~/stage
         tar cvfz $GITHUB_WORKSPACE/indimail-mta-obs.tar.gz *
-        # copy to /home/frs/project/indimail
-        scp -q -i ~/.private_key $GITHUB_WORKSPACE/indimail-mta-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
+        # create detached signature for obs archive
+        echo "${{secrets.software_passphrase}}" | gpg2 --pinentry-mode loopback \
+          --passphrase-fd 0 --default-key "${{secrets.software_user}}" \
+          -o indimail-mta-obs.sig --detach-sig $GITHUB_WORKSPACE/indimail-mta-obs.tar.gz
+        # copy to /home/frs/project/indimail/github
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/indimail-mta-obs.tar.gz \
+          ~/stage/indimail-mta-obs.sig "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
         rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/indimail-mta-obs.tar.gz
         rm -rf ~/stage
