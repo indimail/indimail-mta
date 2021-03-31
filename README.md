@@ -357,7 +357,7 @@ $ sudo make install-strip
 
 ### Build courier-imap
 
-Optional. Required only if you want IMAP, POP3 to retrieve your mails
+Optional. Required only if you want IMAP, POP3 to retreive your mails
 
 ```
 $ cd /usr/local/src/indimail-virtualdomans/courier-imap-x
@@ -376,7 +376,7 @@ NOTE: for Darwin
 
 ### Build fetchmail
 
-Optional. Required only if you want fetchmail to retrieve your mails
+Optional. Required only if you want fetchmail to retreive your mails
 
 ```
 $ cd /usr/local/src/indimail-virtualdomans/fetchmail-x
