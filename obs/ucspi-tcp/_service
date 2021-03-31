@@ -1,0 +1,11 @@
+<services>
+  <service name="download_url">
+    <param name="protocol">https</param>
+    <param name="host">sourceforge.net</param>
+    <param name="path">/projects/indimail/files/github/ucspi-tcp-obs.tar.gz</param>
+  </service>
+  <service name="extract_file">
+    <param name="archive">*.tar.gz</param>
+    <param name="files">*.tar.gz *.dsc *.spec *.changes</param>
+  </service>
+</services>
