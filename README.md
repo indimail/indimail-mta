@@ -62,7 +62,7 @@ Install the following packages using dnf/yum
 
 ```
 Universal
-gcc gcc-c++ make autoconf automaake libtool pkgconfig
+gcc gcc-c++ make autoconf automake libtool pkgconfig
 sed findutils diffutils gzip binutils coreutils grep
 glibc glibc-devel procps openssl openssl-devel mysql-devel
 libqmail-devel libqmail libidn2-devel
@@ -144,8 +144,7 @@ NOTE: for FreeBSD, install packages using pkg
 NOTE: For Darwin (Mac OSX), install [MacPorts](https://www.macports.org/) or brew. You can look at this [document](https://paolozaino.wordpress.com/2015/05/05/how-to-install-and-use-autotools-on-mac-os-x/) for installing MacPorts.
 
 ```
-# port install autoconf libtool automake pkgconfig
-# port install openssl
+# port install autoconf libtool automake pkgconfig openssl
 # port update outdated
 ```
 
