@@ -1104,7 +1104,7 @@ auto_sysconfdir.o srs.lib
 	quote.o control.o date822fmt.o qmail.o pathexec_run.o \
 	pathexec_env.o envdir_set.o matchregex.o envrules.o \
 	wildmat.o srs.o rcpthosts.o auto_control.o variables.o auto_qmail.o \
-	auto_sysconfdir.o token822.o `cat srs.lib` -lqmail
+	auto_sysconfdir.o token822.o -L../libsrs2-x/libsrs2/.libs `cat srs.lib` -lqmail
 
 qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
 	cat qmail-inject.9 \
@@ -1150,7 +1150,8 @@ auto_control.o variables.o control.o libsyncdir.a socket.lib srs.lib
 	./load qmail-local qmail.o quote.o gfrom.o myctime.o \
 	slurpclose.o srs.o auto_qmail.o rcpthosts.o \
 	auto_patrn.o variables.o auto_control.o control.o \
-	`cat socket.lib srs.lib` -L. -lsyncdir -lqmail
+	-L../libsrs2-x/libsrs2/.libs `cat socket.lib srs.lib` \
+	-L. -lsyncdir -lqmail
 
 qmail-local.8:\
 qmail-local.9 conf-sysconfdir
@@ -1473,31 +1474,31 @@ dktest.8: dktest.9 conf-sysconfdir
 dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
 	( ( ./compile -I/usr/include/dkim -I/opt/local/include/dkim \
-		-I/usr/include/dkim \
-		`grep -h -v "^#" conf-dkim` trydkim.c && \
+	-I/usr/include/dkim -I../libdkim-x \
+	`grep -h -v "^#" conf-dkim` trydkim.c && \
 	c++ -o trydkim trydkim.o dns_text.o \
 	`cat dns.lib` -L/usr/local/lib -L/opt/local/lib \
-	-ldkim -lcrypto -ldkim -lqmail ) >/dev/null 2>&1 \
+	-L../libdkim-x/.libs -ldkim -lcrypto -ldkim -lqmail ) >/dev/null 2>&1 \
 	&& echo "-ldkim" || exit 0 ) > dkim.lib
 	rm -f trydkim.o trydkim
 
 hasdkim.h: dns_text.o \
 trydkim.c compile dns.lib dkim.lib conf-indi
 	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
-		-I/usr/include/dkim \
-		`grep -h -v "^#" conf-dkim` trydkim.c && \
-		c++ -o trydkim trydkim.o dns_text.o \
-		`cat dkim.lib dns.lib` -L/usr/local/lib -L/opt/local/lib \
-		-lcrypto -lqmail ) >/dev/null 2>&1 \
-		&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h; \
-		rm -f trydkim.o trydkim
+	-I/usr/include/dkim -I../libdkim-x \
+	`grep -h -v "^#" conf-dkim` trydkim.c && \
+	c++ -o trydkim trydkim.o dns_text.o \
+	`cat dkim.lib dns.lib` -L/usr/local/lib -L/opt/local/lib \
+	-L../libdkim-x/.libs -lcrypto -lqmail ) >/dev/null 2>&1 \
+	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h; \
+	rm -f trydkim.o trydkim
 
 qmail-dkim: qmail-dkim.o date822fmt.o auto_control.o \
 auto_qmail.o variables.o control.o MakeArgs.o dns_text.o \
 dns.lib dkim.lib conf-ld-$(SYSTEM) load
 	./load qmail-dkim date822fmt.o auto_control.o \
 	auto_qmail.o variables.o control.o MakeArgs.o \
-	dns_text.o `cat dns.lib dkim.lib` \
+	dns_text.o -L../libdkim-x/.libs `cat dns.lib dkim.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	-lcrypto -lqmail
 
@@ -1505,7 +1506,7 @@ qmail-dkim.o: \
 compile qmail-dkim.c qmail.h auto_qmail.h control.h domainkeys.h \
 hasdkim.h variables.h auto_control.h MakeArgs.h
 	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
-		-I/opt/local/include/dkim qmail-dkim.c
+		-I../libdkim-x -I/opt/local/include/dkim qmail-dkim.c
 
 qmail-dkim.8: qmail-dkim.9 conf-sysconfdir
 	cat qmail-dkim.9 \
@@ -1614,7 +1615,8 @@ envrules.o qregex.o wildmat.o libsyncdir.a srs.lib
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
 	wildmat.o qmail.o date822fmt.o auto_qmail.o auto_split.o \
 	variables.o envrules.o matchregex.o srs.o rcpthosts.o \
-	auto_control.o -L. -lsyncdir `cat srs.lib` -ldl -lqmail
+	auto_control.o -L. -lsyncdir -L../libsrs2-x/libsrs2/.libs \
+	`cat srs.lib` -ldl -lqmail
 
 qmail-send.8: \
 qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -2138,31 +2140,32 @@ compile splogger.c
 
 srs.lib: trysrs.c compile load conf-srs dns.lib
 	( ( ./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
-		-I/opt/local/include/srs2 \
-		`grep -h -v "^#" conf-srs` trysrs.c && \
-		./load trysrs -L/usr/local/lib -L/opt/local/lib -lsrs2 ) \
-		>/dev/null 2>&1 && echo "-lsrs2" || exit 0 ) > srs.lib
-		rm -f trysrs.o trysrs
+	-I/opt/local/include/srs2 -I../libsrs2-x/libsrs2 \
+	`grep -h -v "^#" conf-srs` trysrs.c && \
+	./load trysrs -L/usr/local/lib -L/opt/local/lib \
+	-L../libsrs2-x/libsrs2/.libs -lsrs2 ) \
+	>/dev/null 2>&1 && echo "-lsrs2" || exit 0 ) > srs.lib
+	rm -f trysrs.o trysrs
 
 hassrs.h: trysrs.c compile load srs.lib conf-indi
 	( ( ./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
-		-I/opt/local/include/srs2 `grep -h -v "^#" conf-srs` \
-		trysrs.c && ./load trysrs -L/usr/local/lib \
-		-L/usr/local/lib -L/opt/local/lib `cat srs.lib` ) \
-		>/dev/null 2>&1 \
-		&& (echo \#define HAVESRS 1) || exit 0 ) > hassrs.h
-		rm -f trysrs.o trysrs
+	-I/opt/local/include/srs2 -I../libsrs2-x/libsrs2 \
+	`grep -h -v "^#" conf-srs` trysrs.c && \
+	./load trysrs -L/usr/local/lib -L/usr/local/lib \
+	-L/opt/local/lib -L../libsrs2-x/libsrs2/.libs `cat srs.lib` ) \
+	 >/dev/null 2>&1 && (echo \#define HAVESRS 1) || exit 0 ) > hassrs.h
+	rm -f trysrs.o trysrs
 
 srs.o: compile srs.c hassrs.h srs.h auto_qmail.h control.h rcpthosts.h
 	./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
-		-I/opt/local/include/srs2 srs.c
+		-I../libsrs2-x/libsrs2 -I/opt/local/include/srs2 srs.c
 
 srsfilter: \
 load srsfilter.o srs.o qmail.o control.o rcpthosts.o \
 auto_control.o variables.o auto_qmail.o srs.lib
 	./load srsfilter srs.o qmail.o control.o rcpthosts.o \
 	auto_control.o variables.o auto_qmail.o \
-	`cat srs.lib` -lqmail
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -lqmail
 
 srsfilter.o: \
 compile srsfilter.c qmail.h srs.h hassrs.h
