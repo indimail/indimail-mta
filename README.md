@@ -34,7 +34,7 @@ indimail-mta, indimail-virtualdomains, libqmail gets installed with man pages.
 
 Refer to this [WIKI](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for a detailed understanding of Indimail Virtual Domains and indimail-mta.
 
-This document contains instructions for building indimail-mta from source. indimail-mta compiles and runs on all linux distros, FreeBSD and Mac OS X. Let me know if you want me to try it on any other OS.
+This document contains instructions for building indimail-mta from source. indimail-mta compiles and runs on all linux distros, Arch Linux, FreeBSD and Mac OS X. Let me know if you want me to try it on any other OS.
 
 To install you need to do the following
 
@@ -84,19 +84,41 @@ Remaining - libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
-NOTE: For FreeBSD
+**Arch Linux**
 
 ```
+# pacman -S --needed archlinux-keyring
+# pacman -S --refresh --sysupgrade
+# pacman -S base-devel diffutils coreutils openssl openldap mysql libidn2
+```
+
+**NOTES**
+
+You need libi2nd, without which, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
+
+```
+FreeBSD
 # pkg install pkgconf libidn2
-```
 
-NOTE: for Darwin
-
-```
+Darwin
 # port install pkgconfig libidn2
 ```
 
-Without libidn2, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
+FreeBSD / Darwin OSX
+
+You require the MySQL client libraries and header files (either libmysqlclient or libmariadb). The steps below will help you do that.
+
+FreeBSD - Install the following using pkg
+
+```
+# pkg install mysql80-server mysql80-client
+```
+
+- You also need either MariaDB (Linux only) or MySQL community server (All Unix distributions)
+- You can get mysql-community-server for all distributions [here](https://dev.mysql.com/downloads/mysql/)
+- You can get MariaDB [here](https://mariadb.org/download/)
+
+If you need MariaDB for Mac OSX, you can try MacPorts or Brew.
 
 ## Download / clone libqmail
 
