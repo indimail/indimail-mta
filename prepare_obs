@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # This script prepares artifacts that can be downloaded for openSUSE build service
-# It creates name.tar.gz, debian.tar.gz and name.spec name.changes
+# It creates name.tar.gz, debian.tar.gz, name.spec name.changes and PKGBUILD
 #
 set -e
 
@@ -47,12 +47,16 @@ prepare_artifacts()
 
   mkdir -p $stage
   if [ $multi_mode -eq 0 ] ; then
-    # Create spec, changes file
+    # This will build the $name.changes file
+    ./catChangeLog --changes > $pkg_name.changes
+
+    # Create spec, PKGBUILD file
     if [ -f $pkg_name.spec.in -a -f Makefile -a ! -f $pkg_name.spec ] ; then
       make $pkg_name.spec
     fi
-    # This will build the $name.changes file
-    ./catChangeLog --changes > $pkg_name.changes
+    if [ -f PKGBUILD.in -a -f Makefile -a ! -f PKGBUILD ] ; then
+      make PKGBUILD
+    fi
 
     for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
     do
@@ -61,10 +65,10 @@ prepare_artifacts()
         fi
     done
 
-    for i in spec changes
+    for i in $pkg_name.spec $pkg_name.changes PKGBUILD
     do
-      if [ -f $pkg_name.$i ] ; then
-        cp $pkg_name.$i $stage
+      if [ -f $i ] ; then
+        cp $i $stage
       fi
     done
 
@@ -110,7 +114,7 @@ prepare_artifacts()
   fi
 
   # remove debian directory from archive
-  /bin/rm -rf $pkg_name-$ver/debian
+  /bin/rm -rf $pkg_name-$ver/debian $pkg_name-$ver/.git
   tar cfz $pkg_name-$ver.tar.gz $pkg_name-$ver
   if [ $multi_mode -eq 0 ] ; then
     /bin/rm -rf $pkg_name-$ver
@@ -149,12 +153,16 @@ if [ -f $name.packages ] ; then
   fi
   cd $HOME/stage/$name-$ver
 
-  # now build the spec, changes and dsc files
-  if [ -f $name.spec.in -a -f Makefile -a ! -f $name.$i ] ; then
-    make $name.spec
-  fi
   # This will build the $name.changes file
   ./catChangeLog --changes > $name.changes
+
+  # now build the spec, PKGBUILD and dsc files
+  if [ -f $name.spec.in -a -f Makefile -a ! -f $name.$spec ] ; then
+    make $name.spec
+  fi
+  if [ -f PKGBUILD.in -a -f Makefile -a ! -f PKGBUILD ] ; then
+    make PKGBUILD
+  fi
 
   for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
   do
@@ -163,10 +171,10 @@ if [ -f $name.packages ] ; then
       fi
   done
 
-  for i in spec changes
+  for i in $name.spec $name.changes PKGBUILD
   do
-    if [ -f $name.$i ] ; then
-      cp $name.$i $stage
+    if [ -f $i ] ; then
+      cp $i $stage
     fi
   done
 
