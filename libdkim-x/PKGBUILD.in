@@ -1,0 +1,34 @@
+# Maintainer: @email@
+pkgname=libdkim
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="DKIM Library by Alt-N Tehnologies"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/$pkgname"
+license=('GPL2')
+groups=('base-devel')
+depends=('coreutils' 'findutils' 'sed' 'openssl')
+makedepends=('pkgconfig')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+provides=("$pkgname")
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+changelog=$pkgname.changes
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  ./default.configure
+  make -s
+  cd $srcdir
+}
+
+package() {
+  cd $srcdir/$pkgname-${pkgver}
+  make DESTDIR=${pkgdir} install
+  for i in AUTHORS COPYING README libdkim.changes yahoo-patent-license-1.2.txt
+  do
+    install -D -m 0644 $i "$pkgdir"${_prefix}/share/doc/$pkgname/$i
+  done
+  # fix WARNING: Package contains reference to $srcdir
+  sed -i "s{ -fdebug-prefix-map=${srcdir}=/usr/src/debug{{g" ${pkgdir}/usr/lib/pkgconfig/$pkgname.pc
+}

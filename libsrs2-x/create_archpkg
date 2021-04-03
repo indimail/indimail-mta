@@ -1,0 +1,99 @@
+#!/bin/sh
+# $Log: $
+#
+# $Id: $
+#
+curdir=`pwd`
+version=$(cat conf-version)
+name=libsrs2
+if [ ! -f /etc/arch-release ] ; then
+  echo "you can't make arch package on a non Arch Linux system" 1>&2
+  exit 1
+fi
+
+verbose=0
+release=1
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+    ;;
+    *) optarg=
+    ;;
+    esac
+
+    case "$1" in
+    --verbose)
+    verbose=1
+    ;;
+    --release=*)
+    release=$optarg
+    ;;
+    *)
+    echo "invalid option [$1]"
+    read key
+    usage 1
+    ;;
+    esac
+
+    shift
+done
+
+copy_src=0
+echo -n "Copy Source Files - "
+read key
+if [ " $key" = " y" -o " $key" = " Y" ] ; then
+  copy_src=1
+fi
+
+mkdir -p $HOME/stage/arch/$name
+
+if [ -d ../stage ] ; then
+  /bin/rm -rf ../stage
+fi
+mkdir ../stage
+if [ $copy_src -eq 1 ] ; then
+  cd ..
+  /bin/rm -rf stage/$name-"$version"
+  cp -rp $name-x stage/$name-"$version"
+  /bin/rm -f stage/$name-"$version"/catChangeLog
+  /bin/cp $name-x/catChangeLog stage/$name-"$version"
+  cd stage/$name-"$version"
+  make -s PKGBUILD
+  if [ $? -ne 0 ] ; then
+    echo "make failed" 1>&2
+    exit 1
+  fi
+  cp PKGBUILD $name.changes $HOME/stage/arch/$name
+  make -s clean
+  make -s distclean
+
+  /bin/rm -rf autom4te.cache .deps
+  cd ..
+  echo "Archiving $name-"$version".tar.gz in `pwd`"
+  tar \
+    --exclude="$name-$version/.git" \
+    --exclude="$name-$version/debian"  \
+    --exclude="$name-$version/RCS" \
+    -cf - $name-"$version" \
+      | gzip -c > $HOME/stage/arch/$name/$name-"$version".tar.gz
+  dist=`uname -r |cut -d . -f4`
+  cd ..
+  /bin/rm -rf stage/$name-"$version"
+fi
+echo -n "Build Arch Package for $name-"$version"-1."$release" (Y/N) - "
+read key
+if [ " $key" = " Y" -o " $key" = " y" ] ; then
+  cd $curdir
+  tmprel=`cat conf-release 2>/dev/null`
+  if [ ! " $tmprel" = " 1.$release" ] ; then
+    sed -i -e "s|^pkgrel=.*|pkgrel=1.$release|g" $HOME/stage/arch/$name/PKGBUILD
+    echo 1.$release > conf-release
+  fi
+  cd $HOME/stage/arch/$name
+  makepkg -f
+fi
+echo -n "Remove Source (Y/N) - "
+read key
+if [ " $key" = " Y" -o " $key" = " y" ] ; then
+  /bin/rm -rf $HOME/stage/arch/$name
+fi

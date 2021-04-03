@@ -1,0 +1,667 @@
+# Maintainer: @email@
+pkgname=indimail-mta
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="MTA for IndiMail virtualdoamins"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-mta"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'findutils' 'sed' 'openssl' 'libidn2' 'mariadb-libs' 'libqmail' 'libdkim' 'libsrs2' 'libldap')
+makedepends=('pkgconfig')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+backup=(${_myconfdir}/{'controlfiles.q','cronlist.q'}
+        ${_myconfdir}/{'leapsecs.dat','leapsecs.txt'}
+        ${_myconfdir}/control/{'nodnscheck','level2.tlds','level3.tlds','foxhole_all.cdb'}
+        ${_myconfdir}/tcp/{'tcp.smtp','tcp.qmtp','tcp.qmqp')
+provides=('indimail-mta')
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+changelog=$pkgname.changes
+_prefix=@prefix@
+_servicedir=@servicedir@
+_qmaildir=@qmaildir@
+_libexecdir=@libexecdir@
+_shareddir=@shareddir@
+_mandir=@mandir@
+_logdir=@logdir@
+_tcpserver_plugin=1
+_qcount=5
+_qbase=@qmaildir@/queue
+_dkimkeyfn=default
+_nodksignatures=0
+_notlsarr=0
+_uid=555
+_gid=555
+_username=indimail
+_groupname=indimail
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  sed "s{PREFIX{${_prefix}{"          conf-prefix.in     > conf-prefix
+  sed "s{QMAIL{${_qmaildir}{"         conf-qmail.in      > conf-qmail
+  sed "s{SYSCONFDIR{${_sysconfdir}{" conf-sysconfdir.in > conf-sysconfdir
+  sed "s{SHAREDDIR{${_shareddir}{"    conf-shared.in     > conf-shared
+  sed "s{LIBEXECDIR{${_libexecdir}{"  conf-libexec.in    > conf-libexec
+  sed "s{SERVICEDIR{${_servicedir}{"  conf-servicedir.in > conf-servicedir
+  if [ ${_notlsarr} -eq 0 ] ; then
+    echo "-DHASTLSA" > conf-tlsa
+  else
+    > conf-tlsa
+  fi
+  if [ ${_tcpserver_plugin} -eq 1 ] ; then
+    echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen
+  else
+    rm -f conf-dlopen
+  fi
+  # create conf-users
+  (
+  echo "alias"
+  echo "qmaild"
+  echo "qmaill"
+  echo "root"
+  echo "qmailp"
+  echo "qmailq"
+  echo "qmailr"
+  echo "qmails"
+  echo ${_username}
+  echo "qscand"
+  echo
+  echo "The qmail system is heavily partitioned for security; it does almost"
+  echo "nothing as root."
+  echo
+  echo "The first nine lines of this file are the alias user, the daemon user,"
+  echo "the log user, the owner of miscellaneous files such as binaries, the"
+  echo "passwd user, the queue user, the remote user, the send user, the"
+  echo "indimail user and the virus scan user."
+  ) > /tmp/conf-users
+  diff /tmp/conf-users conf-users > /dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+    mv /tmp/conf-users conf-users
+  else
+    rm -f /tmp/conf-users
+  fi
+  # create conf-groups
+  (
+  echo "qmail"
+  echo "nofiles"
+  echo ${_groupname}
+  echo "qscand"
+  echo
+  echo "These are the qmail groups. The second group should not have access to"
+  echo "any files, but it must be usable for processes; this requirement"
+  echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
+  ) > /tmp/conf-groups
+  diff /tmp/conf-groups conf-groups > /dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+    mv /tmp/conf-groups conf-groups
+  else
+    rm -f /tmp/conf-groups
+  fi
+  ./catChangeLog doc/ChangeLog > ChangeLog-indimail-mta
+  ./qmake -s
+}
+
+package() {
+  depends=('shadow' 'daemontools>=1.0' 'ucspi-tcp>=1.0')
+  cd $srcdir/$pkgname-${pkgver}
+  ./qmake DESTDIR=${pkgdir} install
+  if [ -f qupgrade.sh ] ; then
+    install -D -m 0755 qupgrade.sh ${pkgdir}${_libexecdir}/qupgrade.sh
+  fi
+  if [ -f qlocal_upgrade.sh ] ; then
+    install -D -m 0755 qlocal_upgrade.sh ${pkgdir}${_libexecdir}/qlocal_upgrade.sh
+  fi
+  install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"IndiMail MTA\""
+  echo "version="${pkgver}-${pkgrel}""
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+  install -D -m 0644 ${pkgname}-release "$pkgdir""${_sysconfdir}"/${pkgname}-release
+}
+
+shutdown_service() {
+  (
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=${_servicedir}
+  fi
+  echo "shutting down indimail-mta services"
+  for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
+    qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
+    qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
+    qscanq resolvconf udplogger.3000
+  do
+    ${_prefix}/bin/svstat ${_servicedir}/$i >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      mkdir -p ${rundir}/$i
+      touch ${rundir}/$i/.down
+      ${_prefix}/bin/svc -d ${_servicedir}/$i
+    fi
+  done
+  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+    echo "Running Custom Upgrade Script for pretrans"
+    /bin/sh ${_libexecdir}/qupgrade.sh pretrans noargs ${pkgver} $*
+  fi
+  ) > /var/log/${pkgname}-setup.log 2>&1
+}
+
+pre_install() {
+  shutdown_service
+  #
+  # Create a users and groups. Do not report any problems if they already
+  # exists.
+  #
+  (
+  nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+  if [ $nscd_up -ge 1 ] ; then
+    if [ -x ${confdir}/init.d/nscd ] ; then
+      ${confdir}/init.d/nscd stop
+    fi
+  fi
+  echo "Adding indimail-mta users/groups"
+  /usr/bin/getent group ${_groupname}  > /dev/null || /usr/sbin/groupadd -r -g ${_gid} ${_groupname} || true
+  if [ $? = 4 ] ; then
+    /usr/sbin/groupadd ${_groupname}
+  fi
+  /usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
+  /usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
+  /usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
+
+  /usr/bin/getent passwd ${_username} > /dev/null || /usr/sbin/useradd -r -g ${_groupname} -u ${_uid} -d ${_qmaildir} ${_username} || true
+  if [ $? = 4 ] ; then
+    /usr/sbin/useradd -r -g ${_groupname} -d ${_qmaildir} ${_username}
+  fi
+  /usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_qmaildir}/alias  -s /sbin/nologin alias  || true
+  /usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_qmaildir}        -s /sbin/nologin qmaild || true
+  /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_logdir}          -s /sbin/nologin qmaill || true
+  /usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_qmaildir}        -s /sbin/nologin qmailp || true
+  /usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${_qmaildir}        -s /sbin/nologin qmailq || true
+  /usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${_qmaildir}        -s /sbin/nologin qmailr || true
+  /usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${_qmaildir}        -s /sbin/nologin qmails || true
+  /usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d ${_qmaildir}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
+
+  for i in ${_username} alias qmaild qmaill qmailp qmailq qmailr qmails qscand
+  do
+    rm -f /var/spool/mail/$i
+  done
+  if [ $nscd_up -ge 1 ] ; then
+    if [ -x ${confdir}/init.d/nscd ] ; then
+      ${confdir}/init.d/nscd start
+    fi
+  fi
+  ) >> /var/log/${pkgname}-setup.log 2>&1
+}
+
+post_install() {
+  echo "Doing Post Install"
+  echo ""
+  echo " 1. Configure ${_logdir} for multilog"
+  echo " 2. Configure ${_servicedir}"
+  echo " 3. Configure standard catch-all accounts, default qmail configuration"
+  echo " 4. Configure DKIM, Domainkeys signature"
+  echo " 5. Configure QHPSI for inline virus scanning"
+  echo " 6. Configure SMTP services on port in 465 25 587"
+  echo " 7. Configure default queue configuration for sendmail, qmail-inject"
+  echo " 8. Configure ODMR service"
+  echo " 9. Configure greylisting service"
+  echo "10. Configure QMTP service"
+  echo "11. Configure QMQP service"
+  echo "12. Configure udplogger service"
+  echo "13. Configure qscanq/clamd/freshclam service"
+  echo "14. Configure ${_sysconfdir}/control/signatures"
+  echo "15. Configure tcprules database for SMTP, QMTP, QMQP"
+  echo ""
+
+  if [ ! -d ${_logdir} ] ; then
+    echo "Creating ${_logdir}"
+    mkdir -p ${_logdir}
+  fi
+  chown -R qmaill:nofiles ${_logdir}
+
+  (
+  ${_prefix}/sbin/svctool --config=qmail --postmaster=${_qmaildir}/alias/Maildir/
+
+  if [ %nodksignatures -eq 0 ] ; then
+    if [ -x ${_prefix}/bin/dknewkey ] ; then
+      ver_opt="dkim"
+      sign_opt="dkim"
+      key_bit=$KEYBIT # set KEYBIT in environment variable
+      if [ " $key_bit" = " " ] ; then
+        key_bit=1024
+      fi
+      ${_prefix}/bin/dknewkey ${_sysconfdir}/control/domainkeys/${_dkimkeyfn} $key_bit
+      chown indimail:qmail ${_sysconfdir}/control/domainkeys/${_dkimkeyfn}
+      /bin/chmod 640 ${_sysconfdir}/control/domainkeys/${_dkimkeyfn}
+    else
+      ver_opt="none"
+      sign_opt="none"
+    fi
+  else
+    ver_opt="none"
+    sign_opt="none"
+  fi
+
+  # SMTP
+  if [ " $HOSTTYPE" = " x86_64" ] ; then
+    smtp_soft_mem=536870912
+    qmtp_soft_mem=104857600
+    qmqp_soft_mem=104857600
+    send_soft_mem=104857600
+  else
+    smtp_soft_mem=26214400
+    qmtp_soft_mem=26214400
+    qmqp_soft_mem=26214400
+    send_soft_mem=83886080
+  fi
+
+  # Define QHPSI for inline virus scanning by qmail-queue
+  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+    have_clamav=1
+    clamdPrefix="/usr"
+    if [ -d ${confdir}/clamav ] ; then
+      mysysconfdir=${confdir}/clamav
+    elif [ -d ${confdir}/clamd.d ] ; then
+      mysysconfdir=${confdir}/clamd.d
+    elif [ -d ${_sysconfdir} ] ; then
+      mysysconfdir=${_sysconfdir}
+    else
+      mysysconfdir=${confdir}
+    fi
+    qhpsi="/usr/bin/clamdscan %s --config=${_mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
+    # let qscand get qmail group for socket permission
+    /usr/sbin/usermod -aG qmail qscand || true
+  else
+    have_clamav=0
+  fi
+  # SMTP ports
+  for port in 465 25 587
+  do
+    extra_opt=""
+    if [ $port -eq 465 ] ; then
+      extra_opt="--skipsend --authsmtp --ssl --utf8"
+      extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+    elif [ $port -eq 587 ] ; then
+      extra_opt="--skipsend --forceauthsmtp --antispoof --forcetls --utf8"
+    else
+      extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+      extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
+      extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+      extra_opt="$extra_opt --dmemory=${send_soft_mem} --utf8"
+    fi
+    if [ ${_tcpserver_plugin} -eq 1 ] ; then
+      extra_opt="$extra_opt --shared-objects=1 --use-dlmopen=1"
+    fi
+    if [ $have_clamav -eq 1 ] ; then
+      extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
+    fi
+    eval ${_prefix}/sbin/svctool --smtp=$port --servicedir=${_servicedir} \
+      --qbase=${_qbase} --qcount=${_qcount} --qstart=1 \
+      --query-cache --dnscheck --password-cache \
+      --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+      --starttls --fsync --syncdir --memory=${smtp_soft_mem} \
+      --chkrecipient --chkrelay --masquerade \
+      --min-free=52428800 --content-filter --virus-filter \
+      --dmasquerade --infifo=infifo \
+      --dkverify=${ver_opt} \
+      --dksign=${sign_opt} --private_key="${_sysconfdir}/control/domainkeys/%/${_dkimkeyfn}" \
+      $extra_opt
+  done
+
+  # queue parameters in control/defaultqueue for qmail-inject, sendmail
+  extra_opt=""
+  if [ $have_clamav -eq 1 ] ; then
+    extra_opt="--qhpsi=\"$qhpsi\""
+  fi
+  eval ${_prefix}/sbin/svctool --queueParam=defaultqueue \
+    --qbase=${_qbase} --qcount=${_qcount} --qstart=1 \
+    --min-free=52428800 --fsync --syncdir --virus-filter \
+    --dkverify="none" --dksign=${sign_opt} \
+    --private_key=${_sysconfdir}/control/domainkeys/%/${_dkimkeyfn} \
+    $extra_opt
+
+  # ODMR service
+  ${_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${_servicedir} \
+    --infifo="" --query-cache --password-cache --skipsend --memory=${smtp_soft_mem}
+
+  # Greylist daemon
+  ${_prefix}/sbin/svctool --greylist=1999 --servicedir=${_servicedir} --min-resend-min=2 \
+    --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
+    --hash-size=65535 --save-interval=5 --whitelist=greylist.white
+  if [ ${_notlsarr} -eq 0 ] ; then
+    # qmail-daned tlsa daemon
+    ${_prefix}/sbin/qmail-daned > /dev/null 2>&1 || \
+    (test $? -ne 100 && ${_prefix}/sbin/svctool \
+      --tlsa=1998 --servicedir=${_servicedir} \
+      --timeout-days=30 --context-file=tlsa.context \
+      --hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) || \
+      echo "Not enabling qmail-daned service" 1>&2
+  fi
+  # qmail-qmtpd service
+  eval ${_prefix}/sbin/svctool --qmtp=209 --servicedir=${_servicedir} --qbase=${_qbase} \
+    --qcount=${_qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+    --fsync --syncdir --memory=${qmtp_soft_mem} --min-free=52428800 $extra_opt
+  # qmail-qmqpd service
+  eval ${_prefix}/sbin/svctool --qmqp=628 --servicedir=${_servicedir} --qbase=${_qbase} \
+    --qcount=${_qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+    --fsync --syncdir --memory=${qmqp_soft_mem} --min-free=52428800 $extra_opt
+  touch ${_servicedir}/qmail-qmqpd.628/down
+
+  # virus/spam filtering
+  ${_prefix}/sbin/svctool --qscanq --servicedir=${_servicedir} --scanint=200
+  if [ $have_clamav -eq 1 ] ; then
+    ${_prefix}/sbin/svctool --config=clamd
+    ${_prefix}/sbin/svctool --config=foxhole
+    # create clamd, freshclam service
+   eval ${_prefix}/sbin/svctool --clamd --servicedir=${_servicedir} --clamdPrefix=$clamdPrefix \
+      --sysconfdir=${mysysconfdir}
+    if [ $have_clamav -eq 1 ] ; then
+      echo "Checking if clamd/freshclam is running"
+      count=`ps -e|grep clamd|wc -l`
+      if [ $count -gt 0 ] ; then
+        echo "Disabling clamd service"
+        touch ${_servicedir}/clamd/down
+      fi
+      count=`ps -e|grep freshclam|wc -l`
+      if [ $count -gt 0 ] ; then
+        echo "Disabling freshclam service"
+        touch ${_servicedir}/freshclam/down
+      fi
+    fi
+  fi
+
+  # udplogger service
+  ${_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=${_servicedir}
+
+cat <<EOF > ${_sysconfdir}/control/signatures
+# Windows executables seen in active virii
+TVqQAAMAA:
+TVpQAAIAA
+# Additional windows executable signatures not yet seen in virii
+TVpAALQAc
+TVpyAXkAX
+TVrmAU4AA
+TVrhARwAk
+TVoFAQUAA
+TVoAAAQAA
+TVoIARMAA
+TVouARsAA
+TVrQAT8AA
+# .ZIPfile signature seen in SoBig.E and mydoom:
+#UEsDBBQAA:SoBig.e Virus
+#UEsDBAoAAA:mydoom Virus
+# .GIF file found in a previous Microsoft virus making the rounds.
+R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Virus in .gif files
+# http://www.gossamer-threads.com/lists/qmail/users/114447
+UEsDBAoAAQAAAEBHYzCf4kJRDDAAAAAwAAAKAAAAc3ZtaXhlLmV4ZcuI1rOkjfn48VwCkMYHRTfM
+EOF
+  chown qscand:qscand ${_sysconfdir}/control/signatures
+
+  # Recreate ld.so links and cache
+  if [ "${_prefix}" != "/usr" ] ; then
+    if [ -d ${confdir}/ld.so.conf.d ] ; then
+      echo ${_libdir} > ${confdir}/ld.so.conf.d/indimail-${HOSTTYPE}.conf
+    fi
+    /sbin/ldconfig
+  fi
+
+  # rebuild cdb
+  for i in smtp qmtp qmqp
+  do
+    for j in `/bin/ls ${_sysconfdir}/tcp/tcp*.$i 2>/dev/null`
+    do
+      t1=`date +'%s' -r $j`
+      if [ -f $j.cdb ] ; then
+        t2=`date +'%s' -r $j.cdb`
+      else
+        t2=0
+      fi
+      if [ $t1 -gt $t2 ] ; then
+        echo "Creating CDB $j.cdb"
+        ${_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+          && chown indimail:indimail $j.cdb
+      fi
+    done
+  done
+
+  # turn off automatic refresh for services during first time installation
+  svc_list=""
+  for i in clamd greylist.1999 qmail-qmqpd.628 \
+    qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
+    qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
+    qmail-daned.1998
+  do
+    if [ -d ${_servicedir}/$i ] ; then
+      svc_list="$svc_list ${_servicedir}/$i"
+    fi
+    # save variables
+    ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=$i \
+      --export-variables=${_servicedir}/$i/variables/.variables --force
+  done
+  svc_list="$svc_list ${_sysconfdir}/control/defaultqueue"
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --norefreshsvc="0 $svc_list"
+
+  echo "configuring indimail-mta as alternatives"
+  ${_prefix}/sbin/svctool --config=add-alt
+
+  if [ -f ${_sysconfdir}/cronlist.q -a -d ${confdir}/cron.d ] ; then
+    echo "adding cron entries"
+    cp ${_sysconfdir}/cronlist.q ${confdir}/cron.d
+  fi
+
+  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+    echo "Running Custom Installation Script for post install"
+    /bin/sh ${_libexecdir}/qupgrade.sh post install ${pkgver} $*
+  fi
+  ) >> /var/log/${pkgname}-setup.log 2>&1
+  if [ -f ${confdir}/init/svscan.conf -o -f ${confdir}/event.d/svscan ] ; then
+    echo "1. Execute /sbin/initctl emit qmailstart to start services"
+    count=1
+  elif [ -f ${confdir}/systemd/system/multi-user.target.wants/svscan.service ] ; then
+    echo "1. Execute /bin/systemctl start svscan to start services"
+    count=1
+  else
+    if [ -f ${_prefix}/sbin/initsvc ] ; then
+    echo "1. Execute ${_prefix}/sbin/initsvc -on"
+    else
+    echo "1. Execute ${confdir}/init.d/svscan start"
+    fi
+    echo "2. Execute /sbin/init q to start services"
+    count=2
+  fi
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+  count=`expr $count + 1`
+  echo "$count. Change your default domain in ${_sysconfdir}/control/defaultdomain"
+  count=`expr $count + 1`
+  echo "$count. You can optionally run the following command to verify installation"
+  echo "   sudo rpm -V indimail"
+  if [ ! -f ${_sysconfdir}/certs/servercert.pem ] ; then
+    count=`expr $count + 1`
+    echo "$count. You need to create CERTS for SSL/TLS/STARTTLS"
+    echo "   Execute the following command to create the certificate"
+    echo "   ${_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
+  fi
+  echo
+  echo "Look at /var/log/${pkgname}-setup.log for the installation log"
+}
+
+pre_upgrade() {
+  shutdown_service
+}
+
+post_upgrade() {
+  (
+  echo "doing post upgrade activities"
+  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+    if [ "${_prefix}" != "/usr" ] ; then
+      /sbin/ldconfig
+    fi
+    echo "Running Custom Upgrade Script for post upgrade"
+    /bin/sh ${_libexecdir}/qupgrade.sh post upgrade ${pkgver} $*
+  fi
+  if [ -f ${confdir}/inittab ] ; then # one of these days, this will disappear
+    /bin/grep "^#SV:" ${confdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      sed -i 's{^#SV:{SV:{' ${confdir}/inittab
+    fi
+  fi
+
+  # refresh indimail-mta services
+  svc_list=""
+  for i in clamd greylist.1999 qmail-qmqpd.628 \
+    qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
+    qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
+    qmail-daned.1998
+  do
+    if [ -d ${_servicedir}/$i ] ; then
+      if [ -z "$svc_list" ] ; then
+        svc_list="${_servicedir}/$i"
+      else
+        svc_list="$svc_list ${_servicedir}/$i"
+      fi
+    fi
+  done
+  svc_list="$svc_list ${_sysconfdir}/control/defaultqueue"
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --refreshsvc="$svc_list"
+
+  echo "starting indimail-mta services"
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=${_servicedir}
+  fi
+  for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
+    qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
+    qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
+    qscanq resolvconf udplogger.3000
+  do
+    ${_prefix}/bin/svok ${_servicedir}/$i
+    if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
+      rm -f ${rundir}/$i/.down
+      ${_prefix}/bin/svc -u ${_servicedir}/$i
+    fi
+  done
+  ) >> /var/log//${pkgname}-setup.log 2>&1
+}
+
+pre_remove() {
+  (
+  # we are doing upgrade
+  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for preun pre-uninstall"
+    /bin/sh ${_libexecdir}/qupgrade.sh preun uninstall ${pkgver} "$argv1"
+  fi
+
+  echo "shutting down and removing indimail-mta/indimail-mta-log services"
+  for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
+    qscanq qmail-smtpd.465 qmail-smtpd.587 \
+    qmail-qmtpd.209 qmail-qmqpd.628 greylist.1999 \
+    qmail-daned.1998 resolvconf udplogger.3000
+  do
+    if [ -d ${_servicedir}/$i -o -L ${_servicedir}/$i ] ; then
+      touch ${_servicedir}/$i/down
+      svc -dx ${_servicedir}/$i
+    fi
+    if [ -d ${_servicedir}/$i/log -o -L ${_servicedir}/$i/log ] ; then
+      touch ${_servicedir}/$i/log/down
+      svc -dx ${_servicedir}/$i/log
+    fi
+    if [ -d ${_servicedir}/$i -o -L ${_servicedir}/$i ] ; then
+      rm -rf ${_servicedir}/$i || true
+    fi
+  done
+  
+  if [ -f ${confdir}/init.d/svscan ] ; then
+    if [ -f /sbin/chkconfig ] ; then
+      /sbin/chkconfig --add sendmail
+    fi
+  fi
+  echo "removing indimail-mta as alternatives"
+  ${_prefix}/sbin/svctool --config=remove-alt
+  ) >> /var/log/${pkgname}-setup.log 2>&1
+}
+
+post_remove() {
+(
+  # remove users / groups
+  nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+  if [ $nscd_up -ge 1 ] ; then
+    if [ -x ${confdir}/init.d/nscd ] ; then
+      ${confdir}/init.d/nscd stop
+    fi
+  fi
+  for i in alias qmaild qmailp qmailq qmailr qmails qscand indimail
+  do
+    echo "Removing user $i"
+    /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
+  done
+  for i in qmail qscand indimail
+  do
+    echo "Removing group $i"
+    /usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
+  done
+  if [ $nscd_up -ge 1 ] ; then
+    if [ -x ${confdir}/init.d/nscd ] ; then
+      ${confdir}/init.d/nscd start
+    fi
+  fi
+
+  for i in postmaster mailer-daemon root ham spam register-ham register-spam
+  do
+    rm -f ${_qmaildir}/alias/.qmail-"$i"
+  done
+  rm -rf ${_qmaildir}/alias/Maildir
+
+  echo "removing svscan supervised startup services"
+  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+    for i in clamd freshclam
+    do
+      if [ -d ${_servicedir}/$i ] ; then
+        rm -rf ${_servicedir}/$i || true
+      elif [ -L ${_servicedir}/$i ] ; then
+        rm -rf ${_servicedir}/$i || true
+      fi
+    done
+  fi
+
+  count=`/bin/ls ${_servicedir} 2>/dev/null| /usr/bin/wc -l`
+  if [ $count -eq 0 ] ; then # ignore disabled services
+    rm -rf ${_servicedir} || true
+  fi
+
+  if [ -d ${confdir}/cron.d ] ; then
+    echo "removing cron entries"
+    rm -f ${confdir}/cron.d/cronlist.q
+  fi
+
+  echo "removing logs"
+  if [ -h ${_logdir} ] ; then
+    log_dir=`/bin/ls -ld ${_logdir} | /usr/bin/awk '{print $10}'`
+  else
+    log_dir=${_logdir}
+  fi
+  [ "$log_dir" != "/" ] && rm -fr $log_dir
+
+  if [ "${_prefix}" != "/usr" ] ; then
+    echo "recreating ld.so cache"
+    /sbin/ldconfig
+  fi
+
+  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for postun uninstall"
+    /bin/sh ${_libexecdir}/qupgrade.sh postun uninstall ${pkgver} $*
+  fi
+  ) >> /var/log/${pkgname}-setup.log 2>&1
+}

@@ -5,7 +5,7 @@ doc_list = AUTHORS COPYING LICENSE.BSD LICENSE.GPL-2
 
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA = libsrs2.pc
-noinst_DATA = libsrs2.spec libsrs2.changes
+noinst_DATA = libsrs2.spec libsrs2.changes PKGBUILD
 
 edit = sed \
 	-e 's}@PACKAGE\@}$(PACKAGE)}g' \
@@ -21,6 +21,9 @@ libsrs2.spec: libsrs2.spec.in catChangeLog doc/ChangeLog conf-version conf-relea
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 libsrs2.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in catChangeLog Makefile conf-email \
+conf-version conf-release doc/ChangeLog libsrs2.changes
+	cat $@.in | $(edit) > $@
 
 dist-hook:
 	@for file in $(EXTRA_DIST); do \

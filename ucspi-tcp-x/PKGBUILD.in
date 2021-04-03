@@ -1,0 +1,77 @@
+# Maintainer: @email@
+pkgname=ucspi-tcp
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="Tools to manage Unix Services"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-mta"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'findutils' 'sed' 'openssl' 'mariadb-libs' 'libqmail')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+provides=("pkgname")
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+changelog=$pkgname.changes
+_prefix=@prefix@
+_servicedir=@servicedir@
+_qmaildir=@qmaildir@
+_libexecdir=@libexecdir@
+_shareddir=@shareddir@
+_plugindir=@prefix@/lib/indimail/plugins
+_tcpserver_plugin=1
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  ./qmake -s
+}
+
+package() {
+  depends=('shadow' 'libqmail>0.3')
+  cd $srcdir/$pkgname-${pkgver}
+  ./qmake -s DESTDIR=${pkgdir} install
+  install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"ucspi-tcp\""
+  echo "UCSPITCP_version=${pkgver}-${pkgrel}"
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+  install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
+}
+
+stop_services() {
+  for i in `grep -l -E "tcpserver|tcpclient" ${_servicedir}/*/run 2>/dev/null`
+  do
+    i=$(dirname $i)
+    ${_prefix}/bin/svok $i
+    if [ $? -eq 0 ] ; then
+      touch $i.down
+      ${_prefix}/bin/svc -d $i || true
+    fi
+  done
+}
+
+pre_upgrade() {
+  stop_service
+}
+
+post_upgrade() {
+  for i in `grep -l -E "tcpserver|tcpclient" ${_servicedir}/*/run 2>/dev/null`
+  do
+    i=$(dirname $i)
+    if [ -f $i.down ] ; then
+      rm -f $i.down
+      ${_prefix}/bin/svc -u $i || true
+    fi
+  done
+}
+
+pre_remove() {
+  stop_service
+}

@@ -69,7 +69,7 @@ Requires(pre): shadow-utils
 Requires(postun): shadow-utils
 %endif
 
-BuildRequires: gcc gcc-c++ make pkgconfig
+BuildRequires: gcc gcc-c++ make
 BuildRequires: sed findutils diffutils gzip coreutils grep
 BuildRequires: glibc glibc-devel
 BuildRequires: mysql-devel
@@ -86,8 +86,8 @@ BuildRequires: -post-build-checks
 
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
-Requires: coreutils grep /bin/sh glibc openssl
-Requires: diffutils sed findutils pkgconfig
+Requires: coreutils grep /bin/sh glibc
+Requires: diffutils sed findutils
 %if %{undefined suse_version} && %{undefined sles_version}
 Requires: /usr/bin /usr/sbin
 %endif
@@ -352,11 +352,6 @@ if [ -f %{_prefix}/bin/svok ] ; then
     sleep 5
   fi
 fi
-if [ -f %{libexecdir}/qupgrade.sh ] ; then
-(
-  echo "Running Custom Upgrade Script for pretrans"
-  /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs %{version} $*
-) > /var/log/%{name}-setup.log 2>&1
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -422,7 +417,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       %{__sed} -i 's{^#SV:{SV:{' %{_sysconfdir}/inittab
     fi
   fi
-  # restore svscan service if we find .svscan.down
+  # restart svscan service if we find .svscan.down
   if [ -f %{servicedir}/.svscan.down ] ; then
     %{__rm} -f %{servicedir}/.svscan.down
     echo "Starting svscan"
@@ -489,12 +484,6 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-  (
-  if [ -f %{libexecdir}/qupgrade.sh ] ; then
-    echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh preun upgrade %{version} "$argv1"
-  fi
-  ) >> /var/log/daemontools-setup.log 2>&1
   exit 0
 fi
 
@@ -535,11 +524,6 @@ if [ -f %{_prefix}/bin/svok ] ; then
   fi
 fi
 
-if [ -f %{libexecdir}/qupgrade.sh ] ; then
-  echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/qupgrade.sh preun uninstall %{version} "$argv1"
-fi
-
 echo "shutting down and removing .svscan service"
 if [ -d %{servicedir}/.svscan -o -L %{servicedir}/.svscan ] ; then
   touch %{servicedir}/.svscan/down
@@ -568,16 +552,6 @@ if [ $ID -ne 0 ] ; then
 fi
 if [ -z "$argv1" ] ; then
   argv1=0
-fi
-# we are doing upgrade
-if [ $argv1 -eq 1 ] ; then
-  (
-  if [ -f %{libexecdir}/qupgrade.sh ] ; then
-    echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
-  fi
-  ) >> /var/log/daemontools-setup.log
-  exit 0
 fi
 (
 # remove users / groups

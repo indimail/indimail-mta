@@ -247,7 +247,7 @@ compile ip4_scan.c ip4.h
 
 it: prog man shared instcheck installer \
 dotls ucspi-tcp.perms ucspi-tcp.spec \
-ucspi-tcp.changes
+ucspi-tcp.changes PKGBUILD
 
 load: warn-auto.sh conf-ld systype make-load
 	( cat warn-auto.sh; ./make-load "`cat systype`" ) > load
@@ -685,8 +685,14 @@ ucspi-tcp.spec: ucspi-tcp.spec.in conf-prefix \
 conf-shared conf-sysconfdir doc/ChangeLog conf-email
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
 
-ucspi-tcp.changes: catChangeLog doc/ChangeLog conf-version conf-release conf-email
+ucspi-tcp.changes: catChangeLog doc/ChangeLog conf-version \
+conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+
+PKGBUILD: PKGBUILD.in doc/ChangeLog conf-release \
+conf-version conf-prefix conf-sysconfdir conf-shared \
+conf-email ucspi-tcp.changes
+	cat $@.in | $(edit) > PKGBUILD
 
 install: it installer DIRS BIN SHARED PLUGINS MAN
 	mkdir -p $(DESTDIR)$(prefix)
