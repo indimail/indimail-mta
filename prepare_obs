@@ -58,9 +58,27 @@ prepare_artifacts()
       make PKGBUILD
     fi
     if [ -f PKGBUILD ] ; then
-      sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD > archpkg.install
-      if [ ! -s archpkg.install ] ; then
-        rm -f archpkg.install
+      total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
+      if [ $total -eq 1 ] ; then
+        sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
+            | grep -v "^####" > $HOME/stage/arch/$name/archpkg.install
+        if [ ! -s $HOME/stage/arch/$name/archpkg.install ] ; then
+          rm -f $HOME/stage/arch/$name/archpkg.install
+        fi
+      else
+        count=1
+        while true
+        do
+          sed -n "/#### INSTALL$count SCRIPTS ####/,\$p" PKGBUILD \
+              | grep -v "^####" > $HOME/stage/arch/$name/archpkg$count.install
+          if [ ! -s $HOME/stage/arch/$name/archpkg$count.install ] ; then
+            rm -f $HOME/stage/arch/$name/archpkg$count.install
+          fi
+          if [ $count -eq $total ] ; then
+              break
+          fi
+          count=$(expr $count + 1)
+        done
       fi
     fi
 
@@ -71,7 +89,7 @@ prepare_artifacts()
         fi
     done
 
-    for i in $pkg_name.spec $pkg_name.changes PKGBUILD archpkg.install
+    for i in $pkg_name.spec $pkg_name.changes PKGBUILD archpkg*.install
     do
       if [ -f $i ] ; then
         cp $i $stage
@@ -169,6 +187,30 @@ if [ -f $name.packages ] ; then
   if [ -f PKGBUILD.in -a -f Makefile -a ! -f PKGBUILD ] ; then
     make PKGBUILD
   fi
+  if [ -f PKGBUILD ] ; then
+    total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
+    if [ $total -eq 1 ] ; then
+      sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
+          | grep -v "^####" > $HOME/stage/arch/$name/archpkg.install
+      if [ ! -s $HOME/stage/arch/$name/archpkg.install ] ; then
+        rm -f $HOME/stage/arch/$name/archpkg.install
+      fi
+    else
+      count=1
+      while true
+      do
+        sed -n "/#### INSTALL$count SCRIPTS ####/,\$p" PKGBUILD \
+            | grep -v "^####" > $HOME/stage/arch/$name/archpkg$count.install
+        if [ ! -s $HOME/stage/arch/$name/archpkg$count.install ] ; then
+          rm -f $HOME/stage/arch/$name/archpkg$count.install
+        fi
+        if [ $count -eq $total ] ; then
+            break
+        fi
+        count=$(expr $count + 1)
+      done
+    fi
+  fi
 
   for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
   do
@@ -177,7 +219,7 @@ if [ -f $name.packages ] ; then
       fi
   done
 
-  for i in $name.spec $name.changes PKGBUILD
+  for i in $name.spec $name.changes PKGBUILD archpkg*.install
   do
     if [ -f $i ] ; then
       cp $i $stage

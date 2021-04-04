@@ -59,9 +59,27 @@ if [ $copy_src -eq 1 ] ; then
     exit 1
   fi
   cp PKGBUILD $name.changes $HOME/stage/arch/$name
-  sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD > $HOME/stage/arch/$name/archpkg.install
-  if [ ! -s $HOME/stage/arch/$name/archpkg.install ] ; then
-    rm -f $HOME/stage/arch/$name/archpkg.install
+  total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
+  if [ $total -eq 1 ] ; then
+    sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
+        | grep -v "^####" > $HOME/stage/arch/$name/archpkg.install
+    if [ ! -s $HOME/stage/arch/$name/archpkg.install ] ; then
+      rm -f $HOME/stage/arch/$name/archpkg.install
+    fi
+  else
+    count=1
+    while true
+    do
+      sed -n "/#### INSTALL$count SCRIPTS ####/,\$p" PKGBUILD \
+          | grep -v "^####" > $HOME/stage/arch/$name/archpkg$count.install
+      if [ ! -s $HOME/stage/arch/$name/archpkg$count.install ] ; then
+        rm -f $HOME/stage/arch/$name/archpkg$count.install
+      fi
+      if [ $count -eq $total ] ; then
+          break
+      fi
+      count=$(expr $count + 1)
+    done
   fi
   make -s clean
   make -s distclean
@@ -87,7 +105,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
     sed -i -e "s|^pkgrel=.*|pkgrel=1.$release|g" $HOME/stage/arch/$name/PKGBUILD
   fi
   cd $HOME/stage/arch/$name
-  makepkg -f
+  makepkg -f --clean
 fi
 echo -n "Remove Source (Y/N) - "
 read key
