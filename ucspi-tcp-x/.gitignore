@@ -66,3 +66,4 @@ tcpclient.1
 dotls.o
 dotls
 PKGBUILD
+archpkg*.install
