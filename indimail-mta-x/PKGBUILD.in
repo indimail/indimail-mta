@@ -7,13 +7,11 @@ arch=('i686' 'x86_64')
 url="https://github.com/mbhangui/indimail-mta"
 license=('GPL3')
 groups=('base-devel')
-depends=('coreutils' 'findutils' 'sed' 'openssl' 'libidn2' 'mariadb-libs' 'libqmail' 'libdkim' 'libsrs2' 'libldap')
-makedepends=('pkgconfig')
+makedepends=('pkgconfig' 'findutils' 'sed' 'openssl' 'libidn2' 'mariadb-libs' 'libqmail' 'libdkim' 'libsrs2' 'libldap')
 source=("$pkgname-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 _sysconfdir=@sysconfdir@
 _myconfdir=$(echo ${_sysconfdir} | cut -c2-)
-provides=('indimail-mta')
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
 changelog=$pkgname.changes
 _prefix=@prefix@
@@ -100,6 +98,7 @@ package_indimail-mta() {
         ${_myconfdir}/tcp/{'tcp.smtp','tcp.qmtp','tcp.qmqp')
   depends=('shadow' 'coreutils' 'openssl' 'libidn2' 'mariadb-libs' 'libqmail' 'libdkim' 'libsrs2' 'libldap' 'daemontools>=1.0' 'ucspi-tcp>=1.0')
   install=archpkg1.install
+  provides=('indimail-mta')
   cd $srcdir/$pkgname-${pkgver}
   sed -i 's|/sbin/|/bin/|g' SBIN.in
   sed -i 's|/sbin/|/bin/|g' SBIN.sql
@@ -131,6 +130,7 @@ package_indimail-mini() {
   pkgdesc="Mini MTA for IndiMail virtualdomains"
   depends=('shadow' 'coreutils' 'libqmail' 'daemontools>=1.0' 'ucspi-tcp>=1.0')
   install=archpkg2.install
+  provides=('indimail-mini')
   cd $srcdir/indimail-mta-${pkgver}
   (
   echo "d:::0755:::"
