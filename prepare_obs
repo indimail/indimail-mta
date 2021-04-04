@@ -59,20 +59,20 @@ prepare_artifacts()
     fi
     if [ -f PKGBUILD ] ; then
       total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
-      if [ $total -eq 1 ] ; then
+      if [ $total -le 1 ] ; then
         sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
-            | grep -v "^####" > archpkg.install
+            | grep -v "^####" > archpkg.install || true
         if [ ! -s archpkg.install ] ; then
-          rm -f archpkg.install
+          /bin/rm -f archpkg.install
         fi
       else
         count=1
         while true
         do
-          sed -n "/#### INSTALL$count SCRIPTS ####/,\$p" PKGBUILD \
-              | grep -v "^####" > archpkg$count.install
+          sed -n "/#### INSTALL$count SCRIPTS ####/,/#### END ####/" PKGBUILD \
+              | grep -v "^####" > archpkg"$count".install || true
           if [ ! -s archpkg"$count".install ] ; then
-            rm -f archpkg"$count".install
+            /bin/rm -f archpkg"$count".install
           fi
           if [ $count -eq $total ] ; then
               break
@@ -189,20 +189,20 @@ if [ -f $name.packages ] ; then
   fi
   if [ -f PKGBUILD ] ; then
     total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
-    if [ $total -eq 1 ] ; then
+    if [ $total -le 1 ] ; then
       sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
-          | grep -v "^####" > archpkg.install
+          | grep -v "^####" > archpkg.install || true
       if [ ! -s archpkg.install ] ; then
-        rm -f archpkg.install
+        /bin/rm -f archpkg.install
       fi
     else
       count=1
       while true
       do
-        sed -n "/#### INSTALL$count SCRIPTS ####/,\$p" PKGBUILD \
-            | grep -v "^####" > archpkg"$count".install
+        sed -n "/#### INSTALL$count SCRIPTS ####/,/#### END ####/" PKGBUILD \
+            | grep -v "^####" > archpkg"$count".install || true
         if [ ! -s archpkg"$count".install ] ; then
-          rm -f archpkg"$count".install
+          /bin/rm -f archpkg"$count".install
         fi
         if [ $count -eq $total ] ; then
             break
