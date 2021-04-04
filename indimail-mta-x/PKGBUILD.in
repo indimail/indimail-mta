@@ -14,27 +14,20 @@ sha256sums=('SKIP')
 _sysconfdir=@sysconfdir@
 _myconfdir=$(echo ${_sysconfdir} | cut -c2-)
 backup=(${_myconfdir}/{'controlfiles.q','cronlist.q'}
-        ${_myconfdir}/{'leapsecs.dat','leapsecs.txt'}
-        ${_myconfdir}/control/{'nodnscheck','level2.tlds','level3.tlds','foxhole_all.cdb'}
+        ${_myconfdir}/{'leapsecs.dat','leapsecs.txt','foxhole_all.cdb'}
+        ${_myconfdir}/control/{'nodnscheck','level2-tlds','level3-tlds'}
         ${_myconfdir}/tcp/{'tcp.smtp','tcp.qmtp','tcp.qmqp')
 provides=('indimail-mta')
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+install=archpkg.install
 changelog=$pkgname.changes
 _prefix=@prefix@
 _servicedir=@servicedir@
 _qmaildir=@qmaildir@
 _libexecdir=@libexecdir@
 _shareddir=@shareddir@
-_mandir=@mandir@
-_logdir=@logdir@
 _tcpserver_plugin=1
-_qcount=5
-_qbase=@qmaildir@/queue
-_dkimkeyfn=default
-_nodksignatures=0
 _notlsarr=0
-_uid=555
-_gid=555
 _username=indimail
 _groupname=indimail
 
@@ -107,6 +100,10 @@ build() {
 package() {
   depends=('shadow' 'daemontools>=1.0' 'ucspi-tcp>=1.0')
   cd $srcdir/$pkgname-${pkgver}
+  sed -i 's|/sbin/|/bin/|g' SBIN.in
+  sed -i 's|/sbin/|/bin/|g' SBIN.sql
+  sed -i '/\/sbin/d' DIRS.in
+  sed -i '/\/sbin/d' DIRS.LINUX
   ./qmake DESTDIR=${pkgdir} install
   if [ -f qupgrade.sh ] ; then
     install -D -m 0755 qupgrade.sh ${pkgdir}${_libexecdir}/qupgrade.sh
@@ -115,6 +112,7 @@ package() {
     install -D -m 0755 qlocal_upgrade.sh ${pkgdir}${_libexecdir}/qlocal_upgrade.sh
   fi
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  install -D -m 0644 controlfiles.q "$pkgdir"${_sysconfdir}/controlfiles.q
   cd $srcdir
   (
   echo "NAME=${pkgname}"
@@ -124,8 +122,26 @@ package() {
   echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
   echo "PACKAGE_BUGREPORT=\"'@email@'\""
   ) > ${pkgname}-release
-  install -D -m 0644 ${pkgname}-release "$pkgdir""${_sysconfdir}"/${pkgname}-release
+  install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
 }
+#### INSTALL SCRIPTS ####
+pkgname=indimail-mta
+_sysconfdir=@sysconfdir@
+_prefix=@prefix@
+_servicedir=@servicedir@
+_qmaildir=@qmaildir@
+_libexecdir=@libexecdir@
+_logdir=@logdir@
+_tcpserver_plugin=1
+_qcount=5
+_qbase=@qmaildir@/queue
+_dkimkeyfn=default
+_nodksignatures=0
+_notlsarr=0
+_uid=555
+_gid=555
+_username=indimail
+_groupname=indimail
 
 shutdown_service() {
   (
@@ -204,6 +220,7 @@ pre_install() {
 }
 
 post_install() {
+  ${_libexecdir}/instcheck.${pkgname}
   echo "Doing Post Install"
   echo ""
   echo " 1. Configure ${_logdir} for multilog"
@@ -232,7 +249,7 @@ post_install() {
   (
   ${_prefix}/sbin/svctool --config=qmail --postmaster=${_qmaildir}/alias/Maildir/
 
-  if [ %nodksignatures -eq 0 ] ; then
+  if [ ${_nodksignatures} -eq 0 ] ; then
     if [ -x ${_prefix}/bin/dknewkey ] ; then
       ver_opt="dkim"
       sign_opt="dkim"
@@ -500,6 +517,7 @@ pre_upgrade() {
 }
 
 post_upgrade() {
+  ${_libexecdir}/instcheck.${pkgname}
   (
   echo "doing post upgrade activities"
   if [ -f ${_libexecdir}/qupgrade.sh ] ; then

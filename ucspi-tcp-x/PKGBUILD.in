@@ -11,20 +11,28 @@ depends=('coreutils' 'findutils' 'sed' 'openssl' 'mariadb-libs' 'libqmail')
 source=("$pkgname-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 _sysconfdir=@sysconfdir@
-_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
 provides=("pkgname")
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+install=archpkg.install
 changelog=$pkgname.changes
 _prefix=@prefix@
 _servicedir=@servicedir@
-_qmaildir=@qmaildir@
 _libexecdir=@libexecdir@
 _shareddir=@shareddir@
-_plugindir=@prefix@/lib/indimail/plugins
 _tcpserver_plugin=1
 
 build() {
   cd $srcdir/$pkgname-${pkgver}
+  sed "s{PREFIX{${_prefix}{"         conf-prefix.in     > conf-prefix
+  sed "s{SHAREDDIR{${_shareddir}{"   conf-shared.in     > conf-shared
+  sed "s{SYSCONFDIR{${_sysconfdir}{" conf-sysconfdir.in > conf-sysconfdir
+  sed "s{LIBEXECDIR{${_libexecdir}{" conf-libexec.in    > conf-libexec
+  sed "s{SERVICEDIR{${_servicedir}{" conf-servicedir.in > conf-servicedir
+  if [ ${_tcpserver_plugin} -eq 1 ] ; then
+    echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen
+  else
+    rm -f conf-dlopen
+  fi
   ./qmake -s
 }
 
@@ -44,6 +52,10 @@ package() {
   ) > ${pkgname}-release
   install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
 }
+#### INSTALL SCRIPTS ####
+pkgname=ucspi-tcp
+_prefix=@prefix@
+_servicedir=@servicedir@
 
 stop_services() {
   for i in `grep -l -E "tcpserver|tcpclient" ${_servicedir}/*/run 2>/dev/null`
@@ -57,11 +69,16 @@ stop_services() {
   done
 }
 
+post_install() {
+  ${_libexecdir}/instcheck.${pkgname}
+}
+
 pre_upgrade() {
-  stop_service
+  stop_services
 }
 
 post_upgrade() {
+  ${_libexecdir}/instcheck.${pkgname}
   for i in `grep -l -E "tcpserver|tcpclient" ${_servicedir}/*/run 2>/dev/null`
   do
     i=$(dirname $i)
@@ -73,5 +90,5 @@ post_upgrade() {
 }
 
 pre_remove() {
-  stop_service
+  stop_services
 }

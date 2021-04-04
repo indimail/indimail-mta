@@ -46,18 +46,13 @@ if [ " $key" = " y" -o " $key" = " Y" ] ; then
 fi
 
 mkdir -p $HOME/stage/arch/$name
-
-if [ -d ../stage ] ; then
-  /bin/rm -rf ../stage
-fi
-mkdir ../stage
+STAGE=$HOME/stage/arch/$name-$version
 if [ $copy_src -eq 1 ] ; then
-  cd ..
-  /bin/rm -rf stage/$name-"$version"
-  cp -rp $name-x stage/$name-"$version"
-  /bin/rm -f stage/$name-"$version"/catChangeLog
-  /bin/cp $name-x/catChangeLog stage/$name-"$version"
-  cd stage/$name-"$version"
+  /bin/rm -rf $STAGE
+  cp -rp . $STAGE
+  /bin/rm -f $STAGE/catChangeLog
+  /bin/cp catChangeLog $STAGE/catChangeLog
+  cd $STAGE
   make -s PKGBUILD
   if [ $? -ne 0 ] ; then
     echo "make failed" 1>&2
@@ -68,7 +63,7 @@ if [ $copy_src -eq 1 ] ; then
   make -s distclean
 
   /bin/rm -rf autom4te.cache .deps
-  cd ..
+  cd $HOME/stage/arch
   echo "Archiving $name-"$version".tar.gz in `pwd`"
   tar \
     --exclude="$name-$version/.git" \
@@ -77,8 +72,7 @@ if [ $copy_src -eq 1 ] ; then
     -cf - $name-"$version" \
       | gzip -c > $HOME/stage/arch/$name/$name-"$version".tar.gz
   dist=`uname -r |cut -d . -f4`
-  cd ..
-  /bin/rm -rf stage/$name-"$version"
+  /bin/rm -rf $STAGE
 fi
 echo -n "Build Arch Package for $name-"$version"-1."$release" (Y/N) - "
 read key
@@ -87,7 +81,6 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
   tmprel=`cat conf-release 2>/dev/null`
   if [ ! " $tmprel" = " 1.$release" ] ; then
     sed -i -e "s|^pkgrel=.*|pkgrel=1.$release|g" $HOME/stage/arch/$name/PKGBUILD
-    echo 1.$release > conf-release
   fi
   cd $HOME/stage/arch/$name
   makepkg -f

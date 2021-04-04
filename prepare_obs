@@ -57,6 +57,12 @@ prepare_artifacts()
     if [ -f PKGBUILD.in -a -f Makefile -a ! -f PKGBUILD ] ; then
       make PKGBUILD
     fi
+    if [ -f PKGBUILD ] ; then
+      sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD > archpkg.install
+      if [ ! -s archpkg.install ] ; then
+        rm -f archpkg.install
+      fi
+    fi
 
     for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
     do
@@ -65,7 +71,7 @@ prepare_artifacts()
         fi
     done
 
-    for i in $pkg_name.spec $pkg_name.changes PKGBUILD
+    for i in $pkg_name.spec $pkg_name.changes PKGBUILD archpkg.install
     do
       if [ -f $i ] ; then
         cp $i $stage

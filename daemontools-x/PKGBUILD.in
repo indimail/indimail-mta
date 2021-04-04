@@ -11,16 +11,15 @@ depends=('coreutils' 'findutils' 'sed' 'mariadb-libs' 'libqmail')
 source=("$pkgname-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 _sysconfdir=@sysconfdir@
-_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
 provides=("pkgname")
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+install=archpkg.install
 changelog=$pkgname.changes
 _prefix=@prefix@
 _servicedir=@servicedir@
 _qmaildir=@qmaildir@
 _libexecdir=@libexecdir@
 _shareddir=@shareddir@
-_logdir=@logdir@
 
 build() {
   cd $srcdir/$pkgname-${pkgver}
@@ -36,6 +35,9 @@ build() {
 package() {
   depends=('shadow')
   cd $srcdir/$pkgname-${pkgver}
+  sed -i 's|/sbin/|/bin/|g' SBIN.in
+  sed -i 's|/sbin/|/bin/|g' SBIN.LINUX
+  sed -i '/\/sbin/d' DIRS.in
   ./qmake DESTDIR=${pkgdir} install
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
   cd $srcdir
@@ -49,6 +51,13 @@ package() {
   ) > ${pkgname}-release
   install -Dm 0644 ${pkgname}-release "$pkgdir""${_sysconfdir}"/${pkgname}-release
 }
+#### INSTALL SCRIPTS ####
+pkgname=daemontools
+_prefix=@prefix@
+_servicedir=@servicedir@
+_qmaildir=@qmaildir@
+_shareddir=@shareddir@
+_logdir=@logdir@
 
 stop_service()
 {
@@ -101,10 +110,11 @@ stop_service()
 pre_install() {
   stop_service
   /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
-  /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_qmaildir} -s /sbin/nologin qmaill || true
+  /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles -d ${_qmaildir} -s /bin/nologin qmaill || true
 }
 
 post_install() {
+  ${_libexecdir}/instcheck.${pkgname}
   (
   echo "adding svscan startup"
   if [ ! -d ${_servicedir} -a ! -L ${_servicedir} ] ; then
@@ -114,7 +124,7 @@ post_install() {
   # svscanlog service
   ${_prefix}/sbin/minisvc --svscanlog --servicedir=${_servicedir} --scanint=60
   # save variables
-  ${_prefix}/sbin/minisvc --servicedir=${_servicedir} --service-name=$i \
+  ${_prefix}/sbin/minisvc --servicedir=${_servicedir} --service-name=.svscan \
     --export-variables=${_servicedir}/.svscan/variables/.variables --force
   if [ -x /bin/systemctl ] ; then
     /bin/systemctl enable svscan
@@ -127,6 +137,7 @@ pre_upgrade() {
 }
 
 post_upgrade() {
+  ${_libexecdir}/instcheck.${pkgname}
   (
   echo "checking if system boot scripts need upgrade"
   if [ -f ${confdir}/init.d/svscan ] ; then
@@ -244,7 +255,7 @@ post_remove() {
   fi
   echo "removing logs"
     if [ -h ${_logdir} ] ; then
-    log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
+    log_dir=`/bin/ls -ld ${_logdir} | /usr/bin/awk '{print $10}'`
   else
     log_dir=${_logdir}
   fi

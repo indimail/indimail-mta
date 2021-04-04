@@ -1,6 +1,6 @@
 d::::::
-d::::@shareddir@::
-d::::@shareddir@/doc::
+d:::0555:@shareddir@::
+d:::0555:@shareddir@/doc::
 d::::@mandir@::
 d::::@mandir@/man1::
 d::::@prefix@/lib/indimail::
