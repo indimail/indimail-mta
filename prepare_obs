@@ -61,18 +61,18 @@ prepare_artifacts()
       total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
       if [ $total -eq 1 ] ; then
         sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
-            | grep -v "^####" > $HOME/stage/arch/$name/archpkg.install
-        if [ ! -s $HOME/stage/arch/$name/archpkg.install ] ; then
-          rm -f $HOME/stage/arch/$name/archpkg.install
+            | grep -v "^####" > archpkg.install
+        if [ ! -s archpkg.install ] ; then
+          rm -f archpkg.install
         fi
       else
         count=1
         while true
         do
           sed -n "/#### INSTALL$count SCRIPTS ####/,\$p" PKGBUILD \
-              | grep -v "^####" > $HOME/stage/arch/$name/archpkg$count.install
-          if [ ! -s $HOME/stage/arch/$name/archpkg$count.install ] ; then
-            rm -f $HOME/stage/arch/$name/archpkg$count.install
+              | grep -v "^####" > archpkg$count.install
+          if [ ! -s archpkg"$count".install ] ; then
+            rm -f archpkg"$count".install
           fi
           if [ $count -eq $total ] ; then
               break
@@ -191,18 +191,18 @@ if [ -f $name.packages ] ; then
     total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
     if [ $total -eq 1 ] ; then
       sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
-          | grep -v "^####" > $HOME/stage/arch/$name/archpkg.install
-      if [ ! -s $HOME/stage/arch/$name/archpkg.install ] ; then
-        rm -f $HOME/stage/arch/$name/archpkg.install
+          | grep -v "^####" > archpkg.install
+      if [ ! -s archpkg.install ] ; then
+        rm -f archpkg.install
       fi
     else
       count=1
       while true
       do
         sed -n "/#### INSTALL$count SCRIPTS ####/,\$p" PKGBUILD \
-            | grep -v "^####" > $HOME/stage/arch/$name/archpkg$count.install
-        if [ ! -s $HOME/stage/arch/$name/archpkg$count.install ] ; then
-          rm -f $HOME/stage/arch/$name/archpkg$count.install
+            | grep -v "^####" > archpkg"$count".install
+        if [ ! -s archpkg"$count".install ] ; then
+          rm -f archpkg"$count".install
         fi
         if [ $count -eq $total ] ; then
             break
