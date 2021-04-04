@@ -624,3 +624,4 @@ queue-fix.8
 PKGBUILD.proto
 hassmtputf8.h
 PKGBUILD
+archpkg*.install
