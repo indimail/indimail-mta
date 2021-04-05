@@ -120,6 +120,7 @@ prepare_artifacts()
       cp $pkg_name-rpmlintrc $stage
     fi
     if [ -f extra_src ] ; then
+      make `grep -h -v "^#" extra_src`
       cp -rpf `grep -h -v "^#" extra_src` $stage
     fi
   fi # multi-mode = 0
@@ -237,6 +238,7 @@ if [ -f $name.packages ] ; then
       fi
   done
   if [ -f extra_src ] ; then
+    make `grep -h -v "^#" extra_src`
     cp -rpf `grep -h -v "^#" extra_src` $stage
   fi
 
