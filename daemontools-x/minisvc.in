@@ -1440,20 +1440,30 @@ case $option in
 			echo "env file for $service_name (.variables) doesn't exist" 1>&2
 			usage 1
 		fi
-	else
+	elif [ $option -eq 12 ] ; then
 		file=$env_file
 		if [ ! -f $file ] ; then
 			echo "$file: No such file or directory" 1>&2
 			usage 1
 		fi
+	else
+		file=$(basename $env_file)
 	fi
 	if [ $option -eq 11 ] ; then   # restore variables to original state
 		import_variables $servicedir/$service_name/variables $file 1 $owner $group $mode
 	elif [ $option -eq 12 ] ; then # import new variables
 		import_variables $servicedir/$service_name/variables $file 0 $owner $group $mode
 	else
-		printf "export %-35s %s %s %s\n" "$servicedir/$service_name" $owner $group $mode
-		export_variables $servicedir/$service_name/variables $file $owner $group $mode
+		dir="$servicedir/$service_name"
+		printf "export %-35s %s %s %s\n" "$dir" $owner $group $mode
+		if [ ! "$dir/variables/$file" = "$env_file" ] ; then
+			old=$force
+			force=1
+			export_variables $dir/variables $env_file $owner $group $mode
+			force=$old
+		else
+			export_variables $dir/variables $dir/variables/$file $owner $group $mode
+		fi
 	fi
 	;;
 
