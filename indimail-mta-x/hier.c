@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.281  2021-04-05 07:18:20+05:30  Cprogrammer
+ * added qmail-todo.h
+ *
  * Revision 1.280  2021-02-26 23:11:17+05:30  Cprogrammer
  * removed envmigrate
  *
@@ -1476,7 +1479,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.280 2021-02-26 23:11:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.281 2021-04-05 07:18:20+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

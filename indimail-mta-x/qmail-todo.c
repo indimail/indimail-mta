@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.42  2021-04-05 07:19:58+05:30  Cprogrammer
+ * added qmail-todo.h
+ *
  * Revision 1.41  2020-11-24 13:47:41+05:30  Cprogrammer
  * removed exit.h
  *
@@ -1165,7 +1168,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.41 2020-11-24 13:47:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.42 2021-04-05 07:19:58+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
