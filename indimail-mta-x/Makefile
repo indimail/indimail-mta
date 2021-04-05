@@ -773,7 +773,7 @@ auto_assign.o auto_prefix.o auto_libexec.o
 	auto_control.o auto_assign.o auto_uids.o auto_libexec.o -lqmail
 
 instcheck.o: \
-compile instcheck.c
+compile instcheck.c auto_uids.h
 	if test -f conf-logdir ; then \
 		./compile instcheck.c -DLOGDIR="\"`cat conf-logdir`\""; \
 	else \
