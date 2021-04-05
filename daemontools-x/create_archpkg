@@ -5,7 +5,7 @@
 #
 curdir=`pwd`
 version=$(cat conf-version)
-name=daemontools
+name=$(basename $curdir|sed -e 's{-x{{g')
 if [ ! -f /etc/arch-release ] ; then
   echo "you can't make arch package on a non Arch Linux system" 1>&2
   exit 1
@@ -13,6 +13,7 @@ fi
 
 verbose=0
 release=1
+clean=0
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
@@ -28,6 +29,9 @@ while test $# -gt 0; do
     --release=*)
     release=$optarg
     ;;
+    --clean)
+    clean=1
+    ;;
     *)
     echo "invalid option [$1]"
     read key
@@ -39,17 +43,64 @@ while test $# -gt 0; do
 done
 
 copy_src=0
+meta_pkg=0
 echo -n "Copy Source Files - "
 read key
 if [ " $key" = " y" -o " $key" = " Y" ] ; then
   copy_src=1
 fi
 
-mkdir -p $HOME/stage/arch/$name
-STAGE=$HOME/stage/arch/$name-$version
+pkg_dir=$HOME/stage/arch/$name
+mkdir -p $pkg_dir
 if [ $copy_src -eq 1 ] ; then
+  if [ -f $name.packages ] ; then
+      meta_pkg=1
+      for dir in `cat $name.packages`
+      do
+        real_dir=$(basename $dir)
+        echo $dir|grep "/" >/dev/null
+        if [ $? -eq 0 ] ; then
+          pkg_name=$(basename $dir|sed -e 's{-x{{g')
+        else
+          pkg_name=$(echo $dir|sed -e 's{-x{{g')
+        fi
+        if [ -d $dir ] ; then
+          cd $dir
+        else
+          echo "$dir: No such file or directory" 1>&2
+          exit 1
+        fi
+        ver=$(cat conf-version)
+        if [ -z "$ver" ] ; then
+          echo "no version found for package $pkg_name" 1>&2
+          exit 1
+        fi
+        STAGE=$HOME/stage/arch/$pkg_name-$ver
+        echo Preparing $pkg_name-$ver
+        cp -rpf . $STAGE
+        if [ ! -L $HOME/stage/arch/$real_dir ] ; then
+          ln -sr $STAGE $HOME/stage/arch/$real_dir
+        fi
+        cd $STAGE
+        echo "Cleaning stage before making a tar archive"
+        make -s clean >/dev/null 2>&1
+        make -s distclean >/dev/null 2>&1
+        /bin/rm -rf autom4te.cache .deps
+        cd $HOME/stage/arch
+        echo "Archiving $pkg_name-"$ver".tar.gz in `pwd`"
+        tar \
+          --exclude="$pkg_name-$ver/.git" \
+          --exclude="$pkg_name-$ver/debian"  \
+          --exclude="$pkg_name-$ver/RCS" \
+          -cf - $pkg_name-"$ver" \
+            | gzip -c > $pkg_dir/$pkg_name-"$ver".tar.gz
+        cd $curdir
+      done
+  fi
+
+  STAGE=$HOME/stage/arch/$name-$version
   /bin/rm -rf $STAGE
-  cp -rp . $STAGE
+  cp -rpf $curdir $STAGE
   /bin/rm -f $STAGE/catChangeLog
   /bin/cp catChangeLog $STAGE/catChangeLog
   cd $STAGE
@@ -58,24 +109,50 @@ if [ $copy_src -eq 1 ] ; then
     echo "make failed" 1>&2
     exit 1
   fi
-  cp PKGBUILD $name.changes $HOME/stage/arch/$name
-  sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD > $HOME/stage/arch/$name/archpkg.install
-  if [ ! -s $HOME/stage/arch/$name/archpkg.install ] ; then
-    rm -f $HOME/stage/arch/$name/archpkg.install
+  cp PKGBUILD $name.changes $pkg_dir
+  if [ -f extra_src ] ; then
+      cp -rpf `grep -h -v "^#" extra_src` $pkg_dir
   fi
-  make -s clean
-  make -s distclean
-
-  /bin/rm -rf autom4te.cache .deps
-  cd $HOME/stage/arch
-  echo "Archiving $name-"$version".tar.gz in `pwd`"
-  tar \
-    --exclude="$name-$version/.git" \
-    --exclude="$name-$version/debian"  \
-    --exclude="$name-$version/RCS" \
-    -cf - $name-"$version" \
-      | gzip -c > $HOME/stage/arch/$name/$name-"$version".tar.gz
-  dist=`uname -r |cut -d . -f4`
+  total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
+  echo "Total scripts in PKGBUILD=$total"
+  if [ $total -le 1 ] ; then
+    echo "Creating archpkg.install"
+    sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
+        | grep -v "^####" > $pkg_dir/archpkg.install
+    if [ ! -s $pkg_dir/archpkg.install ] ; then
+      rm -f $pkg_dir/archpkg.install
+    fi
+  else
+    count=1
+    while true
+    do
+      echo "Creating archpkg"$count".install"
+      sed -n "/#### INSTALL$count SCRIPTS ####/,\$p" PKGBUILD \
+          | grep -v "^####" > $pkg_dir/archpkg$count.install
+      if [ ! -s $pkg_dir/archpkg$count.install ] ; then
+        rm -f $pkg_dir/archpkg$count.install
+      fi
+      if [ $count -eq $total ] ; then
+          break
+      fi
+      count=$(expr $count + 1)
+    done
+  fi
+  if [ $meta_pkg -eq 0 ] ; then
+    ## tar the main package
+    echo "Cleaning stage before making a tar archive"
+    make -s clean >/dev/null 2>&1
+    make -s distclean >/dev/null 2>&1
+    /bin/rm -rf autom4te.cache .deps
+    cd $HOME/stage/arch
+    echo "Archiving $name-"$version".tar.gz in `pwd`"
+    tar \
+      --exclude="$name-$version/.git" \
+      --exclude="$name-$version/debian"  \
+      --exclude="$name-$version/RCS" \
+      -cf - $name-"$version" \
+        | gzip -c > $pkg_dir/$name-"$version".tar.gz
+  fi
   /bin/rm -rf $STAGE
 fi
 echo -n "Build Arch Package for $name-"$version"-1."$release" (Y/N) - "
@@ -84,13 +161,17 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
   cd $curdir
   tmprel=`cat conf-release 2>/dev/null`
   if [ ! " $tmprel" = " 1.$release" ] ; then
-    sed -i -e "s|^pkgrel=.*|pkgrel=1.$release|g" $HOME/stage/arch/$name/PKGBUILD
+    sed -i -e "s|^pkgrel=.*|pkgrel=1.$release|g" $pkg_dir/PKGBUILD
   fi
-  cd $HOME/stage/arch/$name
-  makepkg -f
+  cd $pkg_dir
+  if [ $clean -eq 1 ] ; then
+    makepkg -sf --clean
+  else
+    makepkg -sf
+  fi
 fi
 echo -n "Remove Source (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
-  /bin/rm -rf $HOME/stage/arch/$name
+  /bin/rm -rf $pkg_dir
 fi
