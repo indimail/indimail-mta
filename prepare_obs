@@ -119,17 +119,21 @@ prepare_artifacts()
     if [ -f $pkg_name-rpmlintrc ] ; then
       cp $pkg_name-rpmlintrc $stage
     fi
+    if [ -f extra_src ] ; then
+      cp -rpf `grep -h -v "^#" extra_src` $stage
+    fi
   fi # multi-mode = 0
-
-  if [ -f Makefile ] ; then
-    make clean >/dev/null
-    find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
-  fi
 
   cp -rpf . $stage/$pkg_name-$ver
   if [ -L $stage/$pkg_name-$ver/catChangeLog ] ; then
     /bin/rm -f $stage/$pkg_name-$ver/catChangeLog
     cp catChangeLog $stage/$pkg_name-$ver # for spec file, changes, debian/changelog to get built
+  fi
+
+  cd $stage/$pkg_name-$ver
+  if [ -f Makefile ] ; then
+    make clean >/dev/null
+    find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
   fi
   # change cwd to staging directory
   cd $stage
@@ -232,6 +236,9 @@ if [ -f $name.packages ] ; then
         cp $name-$i $stage
       fi
   done
+  if [ -f extra_src ] ; then
+    cp -rpf `grep -h -v "^#" extra_src` $stage
+  fi
 
   if [ -f debian/Makefile.in ] ; then
     make debian/Makefile
@@ -244,7 +251,7 @@ if [ -f $name.packages ] ; then
   fi
   cd $SAVE
   # do cleanup
-  /bin/rm -rf $HOME/stage/$name-$ver $HOME/stage/catChangeLog
+  /bin/rm -rf $HOME/stage/$name-$ver
   for pkg_dir in `cat $name.packages`
   do
     real_name=$(basename $pkg_dir)
