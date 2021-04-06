@@ -36,3 +36,4 @@ debian/debian.tar.gz
 debian/libdkim-dev.install
 debian/libdkim.dsc
 debian/libdkim.install
+PKGBUILD

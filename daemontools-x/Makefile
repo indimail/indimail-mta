@@ -470,6 +470,12 @@ conf-sysconfdir conf-shared conf-servicedir conf-email
 daemontools.changes: catChangeLog doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
 
+PKGBUILD: PKGBUILD.in doc/ChangeLog conf-release \
+conf-version conf-prefix conf-libexec conf-qmail \
+conf-sysconfdir conf-shared conf-servicedir conf-email \
+daemontools.changes
+	cat $@.in | $(edit) > PKGBUILD
+
 instcheck: load instcheck.o hier.o auto_home.o \
 auto_shared.o auto_sysconfdir.o
 	./load instcheck hier.o auto_home.o auto_shared.o \

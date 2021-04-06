@@ -1,0 +1,94 @@
+# Maintainer: @email@
+pkgname=ucspi-tcp
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="Tools to manage Unix Services"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-mta"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'findutils' 'sed' 'openssl' 'mariadb-libs' 'libqmail')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+provides=("pkgname")
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+install=archpkg.install
+changelog=$pkgname.changes
+_prefix=@prefix@
+_servicedir=@servicedir@
+_libexecdir=@libexecdir@
+_shareddir=@shareddir@
+_tcpserver_plugin=1
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  sed "s{PREFIX{${_prefix}{"         conf-prefix.in     > conf-prefix
+  sed "s{SHAREDDIR{${_shareddir}{"   conf-shared.in     > conf-shared
+  sed "s{SYSCONFDIR{${_sysconfdir}{" conf-sysconfdir.in > conf-sysconfdir
+  sed "s{LIBEXECDIR{${_libexecdir}{" conf-libexec.in    > conf-libexec
+  sed "s{SERVICEDIR{${_servicedir}{" conf-servicedir.in > conf-servicedir
+  if [ ${_tcpserver_plugin} -eq 1 ] ; then
+    echo "-DLOAD_SHARED_OBJECTS" > conf-dlopen
+  else
+    rm -f conf-dlopen
+  fi
+  ./qmake -s
+}
+
+package() {
+  depends=('shadow' 'libqmail>0.3')
+  cd $srcdir/$pkgname-${pkgver}
+  ./qmake -s DESTDIR=${pkgdir} install
+  install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"ucspi-tcp\""
+  echo "UCSPITCP_version=${pkgver}-${pkgrel}"
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+  install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
+}
+#### INSTALL SCRIPTS ####
+pkgname=ucspi-tcp
+_prefix=@prefix@
+_servicedir=@servicedir@
+
+stop_services() {
+  for i in `grep -l -E "tcpserver|tcpclient" ${_servicedir}/*/run 2>/dev/null`
+  do
+    i=$(dirname $i)
+    ${_prefix}/bin/svok $i
+    if [ $? -eq 0 ] ; then
+      touch $i.down
+      ${_prefix}/bin/svc -d $i || true
+    fi
+  done
+}
+
+post_install() {
+  ${_libexecdir}/instcheck.${pkgname}
+}
+
+pre_upgrade() {
+  stop_services
+}
+
+post_upgrade() {
+  ${_libexecdir}/instcheck.${pkgname}
+  for i in `grep -l -E "tcpserver|tcpclient" ${_servicedir}/*/run 2>/dev/null`
+  do
+    i=$(dirname $i)
+    if [ -f $i.down ] ; then
+      rm -f $i.down
+      ${_prefix}/bin/svc -u $i || true
+    fi
+  done
+}
+
+pre_remove() {
+  stop_services
+}

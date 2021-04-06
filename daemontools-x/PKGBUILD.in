@@ -1,0 +1,264 @@
+# Maintainer: @email@
+pkgname=daemontools
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="Tools to manage Unix Services"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-mta"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'findutils' 'sed' 'mariadb-libs' 'libqmail')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+provides=("pkgname")
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+install=archpkg.install
+changelog=$pkgname.changes
+_prefix=@prefix@
+_servicedir=@servicedir@
+_qmaildir=@qmaildir@
+_libexecdir=@libexecdir@
+_shareddir=@shareddir@
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  sed "s{PREFIX{${_prefix}{"         conf-prefix.in      > conf-prefix
+  sed "s{QMAIL{${_qmaildir}{"        conf-qmail.in       > conf-qmail
+  sed "s{SYSCONFDIR{${_sysconfdir}{" conf-sysconfdir.in  > conf-sysconfdir
+  sed "s{SHAREDDIR{${_shareddir}{"   conf-shared.in      > conf-shared
+  sed "s{LIBEXECDIR{${_libexecdir}{" conf-libexec.in     > conf-libexec
+  sed "s{SERVICEDIR{${_servicedir}{" conf-servicedir.in  > conf-servicedir
+  ./qmake -s
+}
+
+package() {
+  depends=('shadow')
+  cd $srcdir/$pkgname-${pkgver}
+  sed -i 's|/sbin/|/bin/|g' SBIN.in
+  sed -i 's|/sbin/|/bin/|g' SBIN.LINUX
+  sed -i '/\/sbin/d' DIRS.in
+  ./qmake DESTDIR=${pkgdir} install
+  install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"Daemontools\""
+  echo "daemontools_version=${pkgver}-${pkgrel}"
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+  install -Dm 0644 ${pkgname}-release "$pkgdir""${_sysconfdir}"/${pkgname}-release
+}
+#### INSTALL SCRIPTS ####
+pkgname=daemontools
+_prefix=@prefix@
+_servicedir=@servicedir@
+_qmaildir=@qmaildir@
+_shareddir=@shareddir@
+_logdir=@logdir@
+
+stop_service()
+{
+  if [ -f ${_prefix}/sbin/initsvc ] ; then
+    ${_prefix}/sbin/initsvc -status
+  fi
+
+  if [ -f ${_prefix}/bin/svok ] ; then
+    # shutdown svscan before upgrade
+    # create .svscan.down so that we
+    # can restore state after upgrade in postinst
+    ${_prefix}/bin/svok ${_servicedir}/.svscan/log 2>/dev/null
+    if [ $? -eq 0 ] ; then
+      touch ${_servicedir}/.svscan.down
+      echo "Giving svscan exactly 5 seconds to exit nicely"
+      if test -f ${confdir}/init/svscan.conf
+      then
+          /sbin/initctl emit qmailstop > /dev/null 2>&1
+      elif test -f ${confdir}/event.d/svscan
+        then
+        /sbin/initctl emit qmailstop > /dev/null 2>&1
+      elif test -f ${confdir}/systemd/system/multi-user.target.wants/svscan.service
+      then
+        /bin/systemctl stop svscan > /dev/null 2>&1
+      elif test -x ${_prefix}/sbin/initsvc
+      then
+        if [ -x ${confdir}/init.d/svscan ] ; then
+          ${_prefix}/sbin/initsvc -status || ${confdir}/init.d/svscan stop || true
+        else
+          ${_prefix}/sbin/initsvc -status || true
+        fi
+        ${_prefix}/sbin/initsvc -off || true
+      else
+        if [ -x ${confdir}/init.d/svscan ] ; then
+          ${confdir}/init.d/svscan stop
+        fi
+        /bin/grep "^SV:" ${confdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+        if [ $? -eq 0 ] ; then
+          sed -i 's{^SV:{#SV:{' ${confdir}/inittab
+          if [ $? -eq 0 ] ; then
+            /sbin/init q
+          fi
+        fi
+      fi
+      sleep 5
+    fi
+  fi
+}
+
+pre_install() {
+  stop_service
+  /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
+  /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles -d ${_qmaildir} -s /bin/nologin qmaill || true
+}
+
+post_install() {
+  ${_libexecdir}/instcheck.${pkgname}
+  (
+  echo "adding svscan startup"
+  if [ ! -d ${_servicedir} -a ! -L ${_servicedir} ] ; then
+    mkdir -p ${_servicedir}
+  fi
+  ${_prefix}/sbin/minisvc --config=add-boot
+  # svscanlog service
+  ${_prefix}/sbin/minisvc --svscanlog --servicedir=${_servicedir} --scanint=60
+  # save variables
+  ${_prefix}/sbin/minisvc --servicedir=${_servicedir} --service-name=.svscan \
+    --export-variables=${_servicedir}/.svscan/variables/.variables --force
+  if [ -x /bin/systemctl ] ; then
+    /bin/systemctl enable svscan
+  fi
+  ) >> /var/log/${pkgname}-install.log 2>&1
+}
+
+pre_upgrade() {
+  stop_service
+}
+
+post_upgrade() {
+  ${_libexecdir}/instcheck.${pkgname}
+  (
+  echo "checking if system boot scripts need upgrade"
+  if [ -f ${confdir}/init.d/svscan ] ; then
+    cmp -s ${_prefix}/bin/qmailctl ${confdir}/init.d/svscan >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      cp ${_prefix}/bin/qmailctl ${confdir}/init.d/svscan
+    fi
+  fi
+  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    cmp -s ${_shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      cp ${_shareddir}/boot/systemd /lib/systemd/system/svscan.service
+      /bin/systemctl daemon-reload
+    fi
+  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    cmp -s ${_shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      cp ${_shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service
+      /bin/systemctl daemon-reload
+    fi
+  elif [ -f /sbin/initctl -a -d ${confdir}/init ] ; then
+    cmp -s ${_shareddir}/boot/upstart ${confdir}/init/svscan.conf >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      cp ${_shareddir}/boot/upstart ${confdir}/init/svscan.conf
+    fi
+  elif [ -d ${confdir}/event.d ] ; then
+    cmp -s ${_shareddir}/boot/upstart ${confdir}/event.d/upstart >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      cp ${_shareddir}/boot/upstart ${confdir}/event.d
+    fi
+  fi
+  if [ -f ${confdir}/inittab ] ; then # one of these days, this will disappear
+    /bin/grep "^#SV:" ${confdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      sed -i 's{^#SV:{SV:{' ${confdir}/inittab
+    fi
+  fi
+  # restart svscan service if we find .svscan.down
+  if [ -f ${_servicedir}/.svscan.down ] ; then
+    rm -f ${_servicedir}/.svscan.down
+    echo "Starting svscan"
+    if test -f ${confdir}/init/svscan.conf
+    then
+      /sbin/initctl emit qmailstart > /dev/null 2>&1
+    elif test -f ${confdir}/event.d/svscan
+    then
+      /sbin/initctl emit qmailstart > /dev/null 2>&1
+    elif test -f ${confdir}/systemd/system/multi-user.target.wants/svscan.service
+    then
+      /bin/systemctl start svscan > /dev/null 2>&1
+    elif test -x ${_prefix}/sbin/initsvc
+    then
+      if [ -x ${confdir}/init.d/svscan ] ; then
+        ${_prefix}/sbin/initsvc -status || ${confdir}/init.d/svscan start || true
+      else
+        ${_prefix}/sbin/initsvc -status || true
+      fi
+      ${_prefix}/sbin/initsvc -on || true
+    else
+      if [ -x ${confdir}/init.d/svscan ] ; then
+        ${confdir}/init.d/svscan start
+      fi
+      /bin/grep "^#SV:" ${confdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+      if [ $? -eq 0 ] ; then
+        sed -i 's{^#SV:{SV:{' ${confdir}/inittab
+        if [ $? -eq 0 ] ; then
+          /sbin/init q
+        fi
+      fi
+    fi
+  fi
+  ) >> /var/log/${pkgname}-setup.log 2>&1
+}
+
+pre_remove() {
+  stop_service
+  (
+  echo "shutting down and removing .svscan service"
+  if [ -d ${_servicedir}/.svscan -o -L ${_servicedir}/.svscan ] ; then
+    touch ${_servicedir}/.svscan/down
+    svc -dx ${_servicedir}/.svscan || true
+  fi
+  if [ -d ${_servicedir}/.svscan/log -o -L ${_servicedir}/.svscan/log ] ; then
+    touch ${_servicedir}/.svscan/log/down
+    svc -dx ${_servicedir}/.svscan/log || true
+  fi
+  if [ -d ${_servicedir}/.svscan -o -L ${_servicedir}/.svscan ] ; then
+    rm -rf ${_servicedir}/.svscan || true
+  fi
+
+  # Remove svscan being started on system boot
+  echo "removing svscan startup"
+  ${_prefix}/sbin/minisvc --config=rm-boot
+  ) >> /var/log/${pkgname}-setup.log
+}
+
+post_remove() {
+  (
+  # remove users / groups
+  nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+  if [ $nscd_up -ge 1 ] ; then
+    if [ -x ${confdir}/init.d/nscd ] ; then
+      ${confdir}/init.d/nscd stop
+    fi
+  fi
+  echo "Removing user qmaill"
+  /usr/bin/getent passwd qmaill > /dev/null && /usr/sbin/userdel qmaill >/dev/null || true
+  echo "Removing group nofiles"
+  /usr/bin/getent group nofiles > /dev/null && /usr/sbin/groupdel nofiles  >/dev/null || true
+
+  if [ $nscd_up -ge 1 ] ; then
+    if [ -x ${confdir}/init.d/nscd ] ; then
+      ${confdir}/init.d/nscd start
+    fi
+  fi
+  echo "removing logs"
+    if [ -h ${_logdir} ] ; then
+    log_dir=`/bin/ls -ld ${_logdir} | /usr/bin/awk '{print $10}'`
+  else
+    log_dir=${_logdir}
+  fi
+  [ "$log_dir" != "/" ] && rm -fr $log_dir
+  ) >> /var/log/${pkgname}-setup.log
+}

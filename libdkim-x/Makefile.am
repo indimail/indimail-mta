@@ -17,7 +17,7 @@ libdkim_la_CXXFLAGS = -fPIE
 libdkimdir=@libdir@
 dkimbindir=@prefix@/bin
 dkimbin_PROGRAMS = dkim
-noinst_DATA = libdkim.spec libdkim.changes
+noinst_DATA = libdkim.spec libdkim.changes PKGBUILD
 
 dkim_SOURCES = dkim.cpp
 dkim_LDFLAGS = $(LDFLAGS)
@@ -50,6 +50,9 @@ libdkim.spec: libdkim.spec.in catChangeLog doc/ChangeLog conf-version conf-relea
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 libdkim.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in catChangeLog Makefile conf-email \
+conf-version conf-release doc/ChangeLog libdkim.changes
+	cat $@.in | $(edit) > $@
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)

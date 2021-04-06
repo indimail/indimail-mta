@@ -66,3 +66,4 @@ auto_home.c
 auto_shared.c
 svps
 svscan.plist
+PKGBUILD

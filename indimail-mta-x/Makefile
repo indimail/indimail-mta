@@ -3456,6 +3456,11 @@ conf-release conf-version conf-prefix conf-libexec conf-qmail \
 conf-sysconfdir conf-shared conf-servicedir conf-email
 	(cat $@.in; sh ./catChangeLog) | $(edit) > indimail-mta.spec
 
+PKGBUILD: PKGBUILD.in doc/ChangeLog mysql_config conf-release \
+conf-version conf-prefix conf-libexec conf-qmail conf-sysconfdir \
+conf-shared conf-servicedir conf-email indimail-mta.changes
+	cat $@.in | $(edit) > PKGBUILD
+
 indimail-mta.changes: catChangeLog doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
 

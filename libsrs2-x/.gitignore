@@ -48,3 +48,4 @@ debian/README.debian
 debian/changelog
 debian/copyright
 debian/control
+PKGBUILD

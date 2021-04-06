@@ -1,7 +1,5 @@
 # installer input files for universal programs in @prefix@/sbin
 # @prefix@/sbin
-d:::0755:::
-d:::0555:/sbin::
 #
 # Files in @prefix@/sbin
 #

@@ -72,3 +72,5 @@ auto_shared.c
 instcheck
 svps
 svscan.plist
+PKGBUILD
+archpkg*.install

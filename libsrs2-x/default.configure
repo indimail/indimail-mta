@@ -1,57 +1,59 @@
 #!/bin/sh
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-	autoreconf -fiv
+  autoreconf -fiv
 fi
 if [ ! -f conf-release ] ; then
-	echo 1.1 > conf-release
+  echo 1.1 > conf-release
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	FreeBSD)
-	prefix=/usr/local
-	bindir=$prefix/bin
-	mandir=/usr/local/man
-	pkgconfigdir=/usr/local/libdata/pkgconfig
-	libdir=/usr/local/lib
-	;;
-	Linux)
-	prefix=/usr
-	bindir=$prefix/bin
-	mandir=$prefix/share/man
-	arch=$(uname -m)
-	if [ -f /etc/debian_version ] ; then
-		if [ -d /usr/lib/$arch-linux-gnu ] ; then
-			libdir=/usr/lib/$arch-linux-gnu
-		else
-			libdir=/usr/lib
-		fi
-	else
-		if [ -d /usr/lib64 ] ; then
-			libdir=/usr/lib64
-		elif [ -d /usr/lib ] ;then
-			libdir=/usr/lib
-		else
-			echo "could not find libdir " 1>&2
-			exit 1
-		fi
-	fi
-	pkgconfigdir=$libdir/pkgconfig
-	;;
-	Darwin)
-	prefix=/opt/local
-	bindir=/usr/local/bin
-	mandir=/opt/local/share/man
-	libdir=/opt/local/lib
-	pkgconfigdir=$libdir/pkgconfig
-	;;
-	*)
-	prefix=/usr
-	bindir=$prefix/bin
-	mandir=/usr/man
-	libdir=/usr/lib
-	pkgconfigdir=$libdir/pkgconfig
-	;;
+  FreeBSD)
+  prefix=/usr/local
+  bindir=$prefix/bin
+  mandir=/usr/local/man
+  pkgconfigdir=/usr/local/libdata/pkgconfig
+  libdir=/usr/local/lib
+  ;;
+  Linux)
+  prefix=/usr
+  bindir=$prefix/bin
+  mandir=$prefix/share/man
+  arch=$(uname -m)
+  if [ -f /etc/debian_version ] ; then
+    if [ -d /usr/lib/$arch-linux-gnu ] ; then
+      libdir=/usr/lib/$arch-linux-gnu
+    else
+      libdir=/usr/lib
+    fi
+  elif [ -f /etc/arch-release ] ; then
+    libdir=/usr/lib
+  else
+    if [ -d /usr/lib64 ] ; then
+      libdir=/usr/lib64
+    elif [ -d /usr/lib ] ;then
+      libdir=/usr/lib
+    else
+      echo "could not find libdir " 1>&2
+      exit 1
+    fi
+  fi
+  pkgconfigdir=$libdir/pkgconfig
+  ;;
+  Darwin)
+  prefix=/opt/local
+  bindir=/usr/local/bin
+  mandir=/opt/local/share/man
+  libdir=/opt/local/lib
+  pkgconfigdir=$libdir/pkgconfig
+  ;;
+  *)
+  prefix=/usr
+  bindir=$prefix/bin
+  mandir=/usr/man
+  libdir=/usr/lib
+  pkgconfigdir=$libdir/pkgconfig
+  ;;
 esac
 ./configure --prefix=$prefix --bindir=$bindir \
-	--mandir=$mandir --libdir=$libdir \
-	--with-pkgconfigdir=$pkgconfigdir
+  --mandir=$mandir --libdir=$libdir \
+  --with-pkgconfigdir=$pkgconfigdir
