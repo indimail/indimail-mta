@@ -4,271 +4,182 @@
 # It creates name.tar.gz, debian.tar.gz, name.spec name.changes and PKGBUILD
 #
 set -e
-
-prepare_artifacts()
-{
-  pkg_dir=$1
-  stage=$2
-
-  multi_mode=$3
-
-  if [ $multi_mode -eq 1 ] ; then
-    real_name=$(basename $pkg_dir)
-    echo $pkg_dir|grep "/" >/dev/null
-    if [ $? -eq 0 ] ; then
-      pkg_name=$(basename $pkg_dir|sed -e 's{-x{{g')
-    else
-      pkg_name=$(echo $pkg_dir|sed -e 's{-x{{g')
-    fi
-    if [ -d $pkg_dir ] ; then
-      cd $pkg_dir
-    else
-      echo "$pkg_dir: No such file or directory" 1>&2
-      return 1
-    fi
-    ver=$(cat conf-version)
-    if [ -z "$ver" ] ; then
-      echo "no version found for package $pkg_name" 1>&2
-      exit 1
-    fi
-    echo Preparing $pkg_name-$ver
-  else
-    pkg_name=$1
-    ver=$(cat conf-version)
-    if [ -z "$ver" ] ; then
-      echo "no version found for package $pkg_name" 1>&2
-      exit 1
-    fi
-    echo Preparing $pkg_dir-$ver
-  fi
-  if [ -f default.configure -a ! -f ./configure -o ! -f ./Makefile ] ; then
-    ./default.configure
-  fi
-
-  mkdir -p $stage
-  if [ $multi_mode -eq 0 ] ; then
-    # This will build the $name.changes file
-    ./catChangeLog --changes > $pkg_name.changes
-
-    # Create spec, PKGBUILD file
-    if [ -f $pkg_name.spec.in -a -f Makefile -a ! -f $pkg_name.spec ] ; then
-      make $pkg_name.spec
-    fi
-    if [ -f PKGBUILD.in -a -f Makefile -a ! -f PKGBUILD ] ; then
-      make PKGBUILD
-    fi
-    if [ -f PKGBUILD ] ; then
-      total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
-      if [ $total -le 1 ] ; then
-        sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
-            | grep -v "^####" > archpkg.install || true
-        if [ ! -s archpkg.install ] ; then
-          /bin/rm -f archpkg.install
-        fi
-      else
-        count=1
-        while true
-        do
-          sed -n "/#### INSTALL${count} SCRIPTS ####/,/#### END ####/p" PKGBUILD \
-              | grep -v "^####" > archpkg"$count".install || true
-          if [ ! -s archpkg"$count".install ] ; then
-            /bin/rm -f archpkg"$count".install
-          fi
-          if [ $count -eq $total ] ; then
-              break
-          fi
-          count=$(expr $count + 1)
-        done
-      fi
-    fi
-
-    for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
-    do
-        if [ -f $pkg_name-$i.in -a -f Makefile -a ! -f $pkg_name-$i ] ; then
-          make $pkg_name-$i
-        fi
-    done
-
-    for i in $pkg_name.spec $pkg_name.changes PKGBUILD archpkg*.install
-    do
-      if [ -f $i ] ; then
-        cp $i $stage
-      fi
-    done
-
-    for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
-    do
-        if [ -f $pkg_name-$i ] ; then
-          cp $pkg_name-$i $stage
-        fi
-    done
-  
-    if [ -d debian ] ; then
-      # Create debian.tar.gz
-      if [ -f debian/Makefile.in ] ; then
-        make debian/Makefile
-      fi
-      # all indimail, indimail-mta packages have debian/Makefile
-      if [ -f debian/Makefile ] ; then
-        make -C debian
-          cp debian/debian.tar.gz $stage
-        cp debian/*.dsc $stage
-        make -C debian clean >/dev/null
-      fi
-    fi
-    if [ -f $pkg_name-rpmlintrc ] ; then
-      cp $pkg_name-rpmlintrc $stage
-    fi
-    if [ -f extra_src ] ; then
-      make `grep -h -v "^#" extra_src`
-      cp -rpf `grep -h -v "^#" extra_src` $stage
-    fi
-  fi # multi-mode = 0
-
-  cp -rpf . $stage/$pkg_name-$ver
-  if [ -L $stage/$pkg_name-$ver/catChangeLog ] ; then
-    /bin/rm -f $stage/$pkg_name-$ver/catChangeLog
-    cp catChangeLog $stage/$pkg_name-$ver # for spec file, changes, debian/changelog to get built
-  fi
-
-  cd $stage/$pkg_name-$ver
-  if [ -f Makefile ] ; then
-    make clean >/dev/null
-    find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
-  fi
-  # change cwd to staging directory
-  cd $stage
-  if [ $multi_mode -eq 1 ] ; then
-    ln -s $pkg_name-$ver $real_name
-  fi
-
-  # remove debian directory from archive
-  /bin/rm -rf $pkg_name-$ver/debian $pkg_name-$ver/.git
-  tar cfz $pkg_name-$ver.tar.gz $pkg_name-$ver
-  if [ $multi_mode -eq 0 ] ; then
-    /bin/rm -rf $pkg_name-$ver
-  fi
-}
-
 if [ $# -ne 1 ] ; then
   echo "USAGE: prepare_obs name" 1>&2
   exit 1
 fi
 name=$1
-SAVE=$PWD
-if [ -f $name.packages ] ; then
-  /bin/rm -rf $HOME/stage/$name-$ver
-  for i in `cat $name.packages`
-  do
-    prepare_artifacts $i $HOME/stage 1
-    cd $SAVE
-  done
-
-  cd $SAVE
-  if [ ! -f conf-version ] ; then
-    echo "$name: conf-version: No such file or directory" 1>&2
-    return 1
-  fi
-  ver=$(cat conf-version)
-  if [ ! -f conf-release ] ; then
+curdir=$PWD
+version=$(cat conf-version)
+stage=$HOME/stage
+mkdir -p $stage
+meta_pkg=0
+if [ ! -f conf-release ] ; then
     echo 1.1 > conf-release
-  fi
-  mkdir -p $HOME/stage
-  echo "Preparing $name-$ver"
-  cp -rp . $HOME/stage/$name-$ver
-  if [ -L $HOME/stage/$name-$ver/catChangeLog ] ; then
-    /bin/rm -f $HOME/stage/$name-$ver/catChangeLog
-    cp catChangeLog $HOME/stage/$name-$ver # for spec file, changes, debian/changelog to get built
-  fi
-  cd $HOME/stage/$name-$ver
+fi
+if [ -f $name.packages ] ; then
+    meta_pkg=1
+    for dir in `cat $name.packages`
+    do
+      real_dir=$(basename $dir)
+      echo $dir|grep "/" >/dev/null
+      if [ $? -eq 0 ] ; then
+        pkg_name=$(basename $dir|sed -e 's{-x{{g')
+      else
+        pkg_name=$(echo $dir|sed -e 's{-x{{g')
+      fi
+      if [ -d $dir ] ; then
+        cd $dir
+      else
+        echo "$dir: No such file or directory" 1>&2
+        exit 1
+      fi
+      ver=$(cat conf-version)
+      if [ -z "$ver" ] ; then
+        echo "no version found for package $pkg_name" 1>&2
+        exit 1
+      fi
+      echo Preparing $pkg_name-$ver
+      cp -rpf . $stage/$pkg_name-$ver
+      cd $stage/$pkg_name-$ver
+      if [ -f default.configure -a ! -f ./configure -o ! -f ./Makefile ] ; then
+        echo reconfiguring $pkg_name-$ver
+        ./default.configure >/dev/null 2>&1
+      fi
+      if [ -f Makefile ] ; then
+        echo cleaning $pkg_name-$ver
+        make clean >/dev/null 2>&1
+        find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
+      fi
+      # remove debian directory from archive
+      #/bin/rm -rf debian .git RCS
+      cd ..
+      echo "creating archive $pkg_name-$ver.tar.gz"
+      tar cfz $pkg_name-$ver.tar.gz $pkg_name-$ver
+      if [ ! "$real_dir" = "$pkg_name" -a ! -L $real_dir ] ; then
+        ln -sr $pkg_name-$ver $real_dir
+      fi
+      cd $curdir
+    done
+fi
+echo "Preparing $name-$version"
+cp -rp . $stage/$name-$version
+if [ -L $stage/$name-$version/catChangeLog ] ; then
+  /bin/rm -f $stage/$name-$version/catChangeLog
+  cp catChangeLog $stage/$name-$version # for spec file, changes, debian/changelog to get built
+fi
+cd $stage/$name-$version
+if [ -f default.configure -a ! -f ./configure -o ! -f ./Makefile ] ; then
+  echo reconfiguring $name-$version
+  ./default.configure >/dev/null 2>&1
+fi
 
+if [ ! -f $name.changes ] ; then
+  make $name.changes
+fi
+if [ ! -f $name.changes ] ; then
   # This will build the $name.changes file
   ./catChangeLog --changes > $name.changes
-
-  # now build the spec, PKGBUILD and dsc files
-  if [ -f $name.spec.in -a -f Makefile -a ! -f $name.$spec ] ; then
-    make $name.spec
-  fi
-  if [ -f PKGBUILD.in -a -f Makefile -a ! -f PKGBUILD ] ; then
-    make PKGBUILD
-  fi
-  if [ -f PKGBUILD ] ; then
-    total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
-    if [ $total -le 1 ] ; then
-      sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
-          | grep -v "^####" > archpkg.install || true
-      if [ ! -s archpkg.install ] ; then
-        /bin/rm -f archpkg.install
-      fi
-    else
-      count=1
-      while true
-      do
-        sed -n "/#### INSTALL$count SCRIPTS ####/,/#### END ####/p" PKGBUILD \
-            | grep -v "^####" > archpkg"$count".install || true
-        if [ ! -s archpkg"$count".install ] ; then
-          /bin/rm -f archpkg"$count".install
-        fi
-        if [ $count -eq $total ] ; then
-            break
-        fi
-        count=$(expr $count + 1)
-      done
-    fi
-  fi
-
-  for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
-  do
-      if [ -f $name-$i.in -a -f Makefile -a ! -f $name-$i ] ; then
-        make $name-$i
-      fi
-  done
-
-  for i in $name.spec $name.changes PKGBUILD archpkg*.install
-  do
-    if [ -f $i ] ; then
-      cp $i $stage
-    fi
-  done
-
-  for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
-  do
-      if [ -f $name-$i ] ; then
-        cp $name-$i $stage
-      fi
-  done
-  if [ -f extra_src ] ; then
-    make `grep -h -v "^#" extra_src`
-    cp -rpf `grep -h -v "^#" extra_src` $stage
-  fi
-
-  if [ -f debian/Makefile.in ] ; then
-    make debian/Makefile
-  fi
-  if [ -f debian/Makefile ] ; then
-    make -C debian
-    cp debian/debian.tar.gz $HOME/stage
-    cp debian/*.dsc $HOME/stage
-    make -C debian clean >/dev/null
-  fi
-  cd $SAVE
-  # do cleanup
-  /bin/rm -rf $HOME/stage/$name-$ver
-  for pkg_dir in `cat $name.packages`
-  do
-    real_name=$(basename $pkg_dir)
-    pkg_name=$(echo $real_name|sed -e 's{-x{{g')
-    if [ ! -f $pkg_dir/conf-version ] ; then
-      echo "$pkg_dir/conf-version: No such file or directory" 1>&2
-      return 1
-    fi
-    ver=$(cat $pkg_dir/conf-version)
-    /bin/rm -rf $HOME/stage/$pkg_name-$ver
-    /bin/rm -f $HOME/stage/$real_name
-  done
-else
-  prepare_artifacts $1 $HOME/stage 0
 fi
-ls -l $HOME/stage
-echo STAGE=$HOME/stage
-exit $?
+
+# now build the spec, PKGBUILD and dsc files
+
+# rpm distributions
+if [ -f $name.spec.in -a -f Makefile -a ! -f $name.$spec ] ; then
+  make $name.spec
+fi
+
+for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
+do
+  if [ -f $name-$i.in -a -f Makefile -a ! -f $name-$i ] ; then
+    make $name-$i
+  fi
+  if [ -f $name-$i ] ; then
+    cp $name-$i $stage
+  fi
+done
+
+# debian
+if [ -f debian/Makefile.in ] ; then
+  make debian/Makefile
+fi
+
+if [ -f debian/Makefile ] ; then
+  make -C debian
+  cp debian/debian.tar.gz $stage
+  cp debian/*.dsc $stage
+  make -C debian clean >/dev/null
+fi
+
+# arch linux
+if [ -f PKGBUILD.in -a -f Makefile -a ! -f PKGBUILD ] ; then
+  make PKGBUILD
+fi
+
+if [ -f PKGBUILD ] ; then
+  sed -i 's/_build_on_obs=.*/_build_on_obs=1/g' PKGBUILD
+  total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
+  if [ $total -le 1 ] ; then
+    sed -n '/#### INSTALL SCRIPTS ####/,$p' PKGBUILD \
+        | grep -v "^####" > archpkg.install || true
+    if [ ! -s archpkg.install ] ; then
+      /bin/rm -f archpkg.install
+    fi
+  else
+    count=1
+    while true
+    do
+      sed -n "/#### INSTALL$count SCRIPTS ####/,/#### END ####/p" PKGBUILD \
+          | grep -v "^####" > archpkg"$count".install || true
+      if [ ! -s archpkg"$count".install ] ; then
+        /bin/rm -f archpkg"$count".install
+      fi
+      if [ $count -eq $total ] ; then
+          break
+      fi
+      count=$(expr $count + 1)
+    done
+  fi
+fi
+
+for i in $name.spec $name.changes PKGBUILD archpkg*.install
+do
+  if [ -f $i ] ; then
+    cp $i $stage
+  fi
+done
+if [ -f extra_src ] ; then
+  make `grep -h -v "^#" extra_src`
+  cp -rpf `grep -h -v "^#" extra_src` $stage
+fi
+if [ -f Makefile ] ; then
+  echo cleaning $name-$version
+  make clean >/dev/null 2>&1
+  find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
+fi
+
+# clean meta packages
+if [ $meta_pkg -eq 1 ] ; then
+  for dir in `cat $name.packages`
+  do
+    real_dir=$(basename $dir)
+    echo $dir | grep "/" >/dev/null
+    if [ $? -eq 0 ] ; then
+      pkg_name=$(echo $real_dir | sed -e 's{-x{{g')
+    else
+      pkg_name=$(echo $dir | sed -e 's{-x{{g')
+    fi
+    ver=$(cat $dir/conf-version)
+    /bin/rm -rf $stage/$pkg_name-$ver
+    if [ ! "$real_dir" = "$pkg_name" -a -L $stage/$real_dir ] ; then
+      /bin/rm -f $stage/$real_dir
+    fi
+  done
+  /bin/rm -rf $stage/$name-$version
+else
+  /bin/rm -rf debian .git RCS
+  cd ..
+  echo "creating archive $name-$version.tar.gz"
+  tar cfz $name-$version.tar.gz $name-$version
+  /bin/rm -rf $name-$version
+fi
