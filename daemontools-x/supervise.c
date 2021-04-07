@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.19  2021-04-07 22:37:08+05:30  Cprogrammer
+ * allow extra parent_dir argument for log process
+ *
  * Revision 1.18  2020-11-12 11:27:38+05:30  Cprogrammer
  * initialize svpid in main()
  *
@@ -688,8 +691,8 @@ main(int argc, char **argv)
 {
 	struct stat     st;
 
-	if (!(dir = argv[1]) || argv[2])
-		strerr_die1x(100, "supervise: usage: supervise dir");
+	if (!(dir = argv[1]) || argc > 3)
+		strerr_die1x(100, "supervise: usage: supervise dir [log_parent]");
 	if (pipe(selfpipe) == -1)
 		strerr_die4sys(111, FATAL, "unable to create pipe for ", dir, ": ");
 	coe(selfpipe[0]);
@@ -751,7 +754,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.18 2020-11-12 11:27:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.19 2021-04-07 22:37:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
