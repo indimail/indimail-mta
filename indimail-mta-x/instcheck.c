@@ -1,5 +1,10 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.31  2021-04-07 18:29:18+05:30  Cprogrammer
+ * 1. use ansi c function prototypes
+ * 2. fix for systems not having man pages installed
+ * 3. fix when running under non-root uid
+ *
  * Revision 1.30  2020-11-24 13:48:50+05:30  Cprogrammer
  * removed exit.h
  *
@@ -98,41 +103,30 @@ int             uidinit(int);
 stralloc        dirbuf = { 0 };
 
 void
-perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
-	char           *prefix1;
-	char           *prefix2;
-	char           *prefix3;
-	char           *file;
-	int             type;
-	int             uid;
-	int             gid;
-	int             mode;
-	int             should_exit;
+perm(char *prefix1, char *prefix2, char *prefix3, char *file, int type, int uid, int gid, int mode)
 {
 	struct stat     st;
-	uid_t           myuid;
 	int             len, err = 0;
 	char           *tfile = 0, *slashd;
 
-	myuid = getuid();
 	slashd = (prefix1 && *prefix1) ? "/" : "";
 	if (stat(file, &st) != -1)
 		tfile = file;
 	else {
 		if (errno != error_noent) {
-			if (errno == error_acces)
-				return;
-			strerr_die4sys(111, FATAL, "unable to stat ", file, ": ");
+			if (errno != error_acces)
+				strerr_die8sys(111, FATAL, "unable to stat ", prefix1, slashd, prefix2, prefix3, file, ": ");
+			strerr_warn8(WARNING, "unable to stat ", prefix1, slashd, prefix2, prefix3, file, ": ", &strerr_sys);
+			return;
 		}
-		if (!str_diffn(prefix2, "man/", 4)) {
+		if (!str_diffn(prefix2, "man/", 4)) { /*- check for .gz extension */
 			if (!(tfile = (char *) alloc((len = str_len(file)) + 4)))
 				strerr_die2sys(111, FATAL, "unable to allocate mem: ");
-			/*- check for .gz extension */
 			str_copy(tfile, file);
 			str_copy(tfile + len, ".gz");
 			if (stat(tfile, &st) == -1) {
-				if (myuid == 0 && errno != error_noent)
-					strerr_die4sys(111, FATAL, "unable to stat ", tfile, ": ");
+				if (errno != error_noent)
+					strerr_die7sys(111, FATAL, prefix1, slashd, prefix2, prefix3, file, ": ");
 				else
 					strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 				if (tfile != file)
@@ -142,7 +136,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 		} else
 		if (!str_diffn(file, "lib", 3)) {
 			if (stat("../lib64", &st) == -1) {
-				strerr_warn4(WARNING, "unable to stat file", file, ": ", &strerr_sys);
+				strerr_warn8(WARNING, "unable to stat file", prefix1, slashd, prefix2, prefix3, file, ": ", &strerr_sys);
 				return;
 			} else {
 				if (chdir("../lib64") == -1) {
@@ -178,7 +172,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			}
 			tfile = file;
 		} else {
-			if (!str_diffn(file, "man/", 4))
+			if (!str_diffn(file, "man", 3))
 				strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 			else
 				strerr_die7sys(111, FATAL, prefix1, slashd, prefix2, prefix3, file, ": ");
@@ -196,7 +190,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	if (err && chown(tfile, uid, gid) == -1)
 		strerr_die4sys(111, FATAL, "unable to chown ", tfile, ": ");
 	err = 0;
-	if ((st.st_mode & 07777) != mode) {
+	if (mode != -1 && (st.st_mode & 07777) != mode) {
 		err = 1;
 		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong permissions (will fix)", 0);
 	}
@@ -209,11 +203,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 }
 
 void
-l(home, subdir, target, dummy)
-	char           *home;
-	char           *subdir;
-	char           *target;
-	int             dummy;
+l(char *home, char *subdir, char *target, int dummy)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
@@ -222,13 +212,9 @@ l(home, subdir, target, dummy)
 }
 
 void
-h(home, uid, gid, mode)
-	char           *home;
-	int             uid;
-	int             gid;
-	int             mode;
+h(char *home, int uid, int gid, int mode)
 {
-	perm("", "", "", home, S_IFDIR, uid, gid, mode, 1);
+	perm("", "", "", home, S_IFDIR, uid, gid, mode);
 }
 
 char           *
@@ -252,51 +238,36 @@ getdirname(char *dir, char **basedir)
 }
 
 void
-d(home, subdir, uid, gid, mode)
-	char           *home;
-	char           *subdir;
-	int             uid;
-	int             gid;
-	int             mode;
+d(char *home, char *subdir, int uid, int gid, int mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode, 1);
+	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode);
 }
 
 void
-c(home, subdir, file, uid, gid, mode)
-	char           *home;
-	char           *subdir;
-	char           *file;
-	int             uid;
-	int             gid;
-	int             mode;
+c(char *home, char *subdir, char *file, int uid, int gid, int mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
 	if (chdir(subdir) == -1) {
-		if (errno == error_noent && !str_diffn(subdir, "man/", 4))
+		if (errno == error_noent && !str_diffn(subdir, "man/", 4)) {
+			strerr_warn8(WARNING, "skipping ", home, "/", subdir, "/", file, ": ", &strerr_sys);
 			return;
+		}
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
 	}
-	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 1);
+	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode);
 }
 
 void
-cd(home, subdir, file, uid, gid, mode)
-	char           *home;
-	char           *subdir;
-	char           *file;
-	int             uid;
-	int             gid;
-	int             mode;
+cd(char *home, char *subdir, char *file, int uid, int gid, int mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
 	if (chdir(subdir) == -1)
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
-	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 1);
+	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode);
 }
 
 int
@@ -320,7 +291,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.30 2020-11-24 13:48:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.31 2021-04-07 18:29:18+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

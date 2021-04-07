@@ -1,4 +1,4 @@
 # installer input files for docs - ucspi-tcp
 d::::::
 d::::/doc::
-f:::0444:/doc/:README.ucspi-tcp:README.ucspi-tcp
+f:::0644:/doc/:README.ucspi-tcp:README.ucspi-tcp

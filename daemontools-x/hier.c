@@ -1,5 +1,9 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.3  2021-04-07 18:41:28+05:30  Cprogrammer
+ * 1. added dotls
+ * 2. set owner, group to root as default
+ *
  * Revision 1.2  2021-03-12 14:26:54+05:30  Cprogrammer
  * removed auto_uido
  *
@@ -67,74 +71,74 @@ hier(inst_dir, fatal)
 	d(mandir_base,     "man", -1, -1, -1);
 	d(mandir_base,     "man/man1", -1, -1, -1);
 	d(mandir_base,     "man/man8", -1, -1, -1);
-	c(auto_tools_home, "bin",      "envdir", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "envuidgid", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "logselect", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "multipipe", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "qfilelog", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "qlogselect", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "qmailctl", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "setlock", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "setuidgid", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "softlimit", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "spipe", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "svc", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "svok", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "svstat", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "tai2tai64n", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "tai64n", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "tai64n2tai", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "tai64nlocal", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "tai64nunix", -1, -1, 0755);
-	c(auto_tools_home, "bin",      "teepipe", -1, -1, 0755);
+	c(auto_tools_home, "bin",      "envdir", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "envuidgid", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "logselect", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "multipipe", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "qfilelog", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "qlogselect", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "qmailctl", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "setlock", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "setuidgid", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "softlimit", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "spipe", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "svc", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "svok", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "svstat", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "tai2tai64n", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "tai64n", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "tai64n2tai", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "tai64nlocal", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "tai64nunix", 0, 0, 0755);
+	c(auto_tools_home, "bin",      "teepipe", 0, 0, 0755);
 #ifdef LINUX
-	c(auto_tools_home, "sbin",     "docker-entrypoint", -1, -1, 0755);
+	c(auto_tools_home, "sbin",     "docker-entrypoint", 0, 0, 0755);
 #endif
-	c(auto_tools_home, "sbin",     "fghack", -1, -1, 0755);
-	c(auto_tools_home, "sbin",     "minisvc", -1, -1, 0755);
-	c(auto_tools_home, "sbin",     "multilog", -1, -1, 0755);
-	c(auto_tools_home, "sbin",     "pgrphack", -1, -1, 0755);
-	c(auto_tools_home, "sbin",     "readproctitle", -1, -1, 0755);
-	c(auto_tools_home, "sbin",     "supervise", -1, -1, 0755);
-	c(auto_tools_home, "sbin",     "svscan", -1, -1, 0751);
-	c(mandir_base,     "man/man1", "multipipe.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "qfilelog.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "qlogselect.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "spipe.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "tai2tai64n.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "tai64n2tai.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "teepipe.1", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "docker-entrypoint.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "envdir.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "envuidgid.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "fghack.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "logselect.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "minisvc.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "multilog.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "pgrphack.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "qmailctl.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "readproctitle.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "setlock.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "setuidgid.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "softlimit.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "supervise.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "svc.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "svok.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "svscan.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "svscanboot.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "tai64n.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "tai64nlocal.8", -1, -1, 0644);
-	c(mandir_base,     "man/man8", "tai64nunix.8", -1, -1, 0644);
+	c(auto_tools_home, "sbin",     "fghack", 0, 0, 0755);
+	c(auto_tools_home, "sbin",     "minisvc", 0, 0, 0755);
+	c(auto_tools_home, "sbin",     "multilog", 0, 0, 0755);
+	c(auto_tools_home, "sbin",     "pgrphack", 0, 0, 0755);
+	c(auto_tools_home, "sbin",     "readproctitle", 0, 0, 0755);
+	c(auto_tools_home, "sbin",     "supervise", 0, 0, 0755);
+	c(auto_tools_home, "sbin",     "svscan", 0, 0, 0751);
+	c(mandir_base,     "man/man1", "multipipe.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "qfilelog.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "qlogselect.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "spipe.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "tai2tai64n.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "tai64n2tai.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "teepipe.1", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "docker-entrypoint.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "envdir.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "envuidgid.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "fghack.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "logselect.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "minisvc.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "multilog.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "pgrphack.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "qmailctl.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "readproctitle.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "setlock.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "setuidgid.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "softlimit.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "supervise.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "svc.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "svok.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "svscan.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "svscanboot.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "tai64n.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "tai64nlocal.8", 0, 0, 0644);
+	c(mandir_base,     "man/man8", "tai64nunix.8", 0, 0, 0644);
 #ifdef LINUX
-	c(auto_shared,     "boot",     "systemd", -1, -1, 0644);
-	c(auto_shared,     "boot",     "upstart", -1, -1, 0644);
+	c(auto_shared,     "boot",     "systemd", 0, 0, 0644);
+	c(auto_shared,     "boot",     "upstart", 0, 0, 0644);
 #endif
 #ifdef FREEBSD
-	c(auto_shared,     "boot",     "svscan_rc", -1, -1, 0644);
+	c(auto_shared,     "boot",     "svscan_rc", 0, 0, 0644);
 #endif
 #ifdef DARWIN
 	c(auto_shared,     "boot",     "StartupParameters.plist", -1, 0, 0444);
 	c(auto_shared,     "boot",     "svscan.plist", -1, 0, 0444);
 #endif
-	c(auto_shared,     "doc",      "README.logselect", -1, -1, 0644);
+	c(auto_shared,     "doc",      "README.logselect", 0, 0, 0644);
 }
