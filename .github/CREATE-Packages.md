@@ -14,7 +14,38 @@ $ git clone https://github.com/mbhangui/indimail-mta.git
 $ git clone https://github.com/mbhangui/indimail-virtualdomains.git
 ```
 
+## Build libqmail package
+
+Common library used by indimail, indimail-mta, ezmlm-idx, tinydnssec packages
+
+```
+$ cd /usr/local/src/libqmail
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst (Arch Linux)
+```
+
+## Build libdkim package
+
+```
+$ cd /usr/local/src/indimail-mta/libdkim-x
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst (Arch Linux)
+```
+
+## Build libsrs2 package
+
+```
+$ cd /usr/local/src/indimail-mta/libsrs2-x
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst (Arch Linux)
+```
+
 ## Build indimail-mta package
+
+Essential component required for providng MTA functions
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
