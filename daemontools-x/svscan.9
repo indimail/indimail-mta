@@ -32,7 +32,8 @@ is at most 255 bytes long and
 .I s\fR/\fBlog
 exists.
 .B svscan
-needs two free descriptors for each pipe.
+needs two free descriptors for each pipe. The \fIlog\fR supervise process
+additionally sets argv2 as \fIs\fR to easily locate the process in ps output.
 
 Every five seconds,
 .B svscan
