@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.17 2021-04-07 10:25:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.18 2021-04-07 22:57:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -352,7 +352,6 @@ if [ -f %{_prefix}/bin/svok ] ; then
     sleep 5
   fi
 fi
-fi
 
 ### SCRIPTLET ###############################################################################
 %pre
@@ -552,6 +551,10 @@ if [ $ID -ne 0 ] ; then
 fi
 if [ -z "$argv1" ] ; then
   argv1=0
+fi
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+  exit 0
 fi
 (
 # remove users / groups
