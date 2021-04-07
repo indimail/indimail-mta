@@ -18,9 +18,9 @@ $ git clone https://github.com/mbhangui/indimail-virtualdomains.git
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst (Arch Linux)
 ```
 
 ## Build indimail-auth package
@@ -29,9 +29,9 @@ Optional component. Required only if you require a Name Service Switch & extra P
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-auth
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst (Arch Linux)
 ```
 
 ## Build indimail-access package
@@ -40,9 +40,9 @@ Optional. You require this if you want IMAP/POP3 or fetchmail to retrieve your m
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-access
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst (Arch Linux)
 ```
 
 ## Build indimail-utils package
@@ -51,9 +51,9 @@ Optional. Required only if you want utilities like altermime, ripmime, flash men
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-utils
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst (Arch Linux)
 ```
 
 ## Build indimail-spamfilter package
@@ -62,9 +62,9 @@ Optional. Required only if you want to use bogofilter to filter SPAM mails
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst (Arch Linux)
 ```
 
 ## Install Packages
@@ -74,11 +74,17 @@ Installing and configuration is much simplied when you use the Binary Packages B
 **For RPM based distributions**
 
 ```
-$ sudo rpm -ivh rpm_file
+$ sudo rpm -ivh file.rpm
 ```
 
 **For Debian based distributions**
 
 ```
-$ sudo dpkg -i debian_file
+$ sudo dpkg -i file.deb
+```
+
+**For Arch Linux**
+
+```
+$ sudo pacman -U file.zst
 ```
