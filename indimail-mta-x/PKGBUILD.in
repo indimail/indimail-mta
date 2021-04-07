@@ -103,7 +103,6 @@ package_indimail-mta() {
   sed -i 's|/sbin/|/bin/|g' SBIN.in
   sed -i 's|/sbin/|/bin/|g' SBIN.sql
   sed -i '/\/sbin/d' DIRS.in
-  sed -i '/\/sbin/d' DIRS.LINUX
   ./qmake DESTDIR=${pkgdir} install
   if [ -f qupgrade.sh ] ; then
     install -D -m 0755 qupgrade.sh ${pkgdir}${_libexecdir}/qupgrade.sh
@@ -799,6 +798,15 @@ post_upgrade() {
       /sbin/chkconfig --del sendmail
     fi
   fi
+  move="/usr/lib/sendmail"
+  if [ -L /usr/sbin ] ; then
+    link=$(readlink /usr/sbin)
+    if [ ! " $link" = " bin" -a ! " $link" = " /usr/sbin" ] ; then
+      move="$move /usr/sbin/sendmail"
+    fi
+  else
+    move="$move /usr/sbin/sendmail"
+  fi
   if [ -x /usr/sbin/alternatives ] ; then
     alternatives_cmd=/usr/sbin/alternatives
   elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -806,8 +814,8 @@ post_upgrade() {
   else
     alternatives_cmd=""
   fi
-  if [ -n $alternatives_cmd ] ; then
-    for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+  if [ -n "$alternatives_cmd" ] ; then
+    for i in $move; do
       if [ -f $i -a ! -L $i ]; then
         echo "! $i is a file, should be a link" 1>&2
         mv $i $i.old
@@ -831,7 +839,7 @@ post_upgrade() {
       --slave /usr/bin/rmail mta-rmail ${_prefix}/bin/irmail
     $alternatives_cmd --set mta ${_prefix}/bin/sendmail
   else
-    for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+    for i in $move; do
       if [ -f $i -a ! -L $i ]; then
         echo "! $i is a file, should be a link" 1>&2
         mv $i $i.old
@@ -880,7 +888,7 @@ post_remove() {
   else
     alternatives_cmd=""
   fi
-  if [ -n $alternatives_cmd ] ; then
+  if [ -n "$alternatives_cmd" ] ; then
     $alternatives_cmd --remove mta ${_prefix}/bin/sendmail
     $alternatives_cmd --auto mta
     for i in /usr/lib/sendmail /usr/sbin/sendmail ${confdir}/pam.d/smtp; do
