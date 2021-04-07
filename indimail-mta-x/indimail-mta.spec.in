@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.301 2021-03-26 18:15:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.302 2021-04-07 18:53:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1641,6 +1641,15 @@ if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
     /sbin/chkconfig --del sendmail
   fi
 fi
+move="/usr/lib/sendmail"
+if [ -L /usr/sbin ] ; then
+  link=$(readlink /usr/sbin)
+  if [ ! " $link" = " bin" -a ! " $link" = " /usr/sbin" ] ; then
+    move="$move /usr/sbin/sendmail"
+  fi
+else
+  move="$move /usr/sbin/sendmail"
+fi
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -1648,8 +1657,8 @@ elif [ -x /usr/sbin/update-alternatives ] ; then
 else
   alternatives_cmd=""
 fi
-if [ -n $alternatives_cmd ] ; then
-  for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+if [ -n "$alternatives_cmd" ] ; then
+  for i in $move; do
     if [ -f $i -a ! -L $i ]; then
       echo "! $i is a file, should be a link" 1>&2
       %{__mv} $i $i.old
@@ -1673,7 +1682,7 @@ if [ -n $alternatives_cmd ] ; then
     --slave /usr/bin/rmail mta-rmail %{_prefix}/bin/irmail
   $alternatives_cmd --set mta %{_prefix}/bin/sendmail
 else
-  for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+  for i in $move; do
     if [ -f $i -a ! -L $i ]; then
       echo "! $i is a file, should be a link" 1>&2
       %{__mv} $i $i.old
