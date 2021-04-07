@@ -19,11 +19,12 @@ d::::@mandir@/man7::
 d::::@mandir@/man8::
 d:::0555:@libexecdir@::
 d:::0555:@libexecdir@/qfilters::
+d:::0755:@prefix@::
 d::::@prefix@/lib::
 d:::0755:@prefix@/lib/indimail::
 d:::0755:@prefix@/lib/indimail/plugins::
-d::::@prefix@/bin::
-d::::@prefix@/sbin::
+d:::0555:@prefix@/bin::
+d:::0555:@prefix@/sbin::
 d:root:qmail:02755:@qsysconfdir@::
 d:indimail:qmail:02775:@qsysconfdir@/control::
 d:indimail:qmail:02775:@qsysconfdir@/control/cache::

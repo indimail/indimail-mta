@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         host: [ubuntu-latest, macos-latest]
-    
+
     steps:
     - name: extra_packages
       run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; fi
@@ -27,6 +27,6 @@ jobs:
 
     - name: checkout_libdkim
       uses: actions/checkout@v2
-      
+
     - name: build_libdkim
       run: cd libdkim-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make

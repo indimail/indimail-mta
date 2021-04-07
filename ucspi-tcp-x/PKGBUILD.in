@@ -56,6 +56,7 @@ package() {
 pkgname=ucspi-tcp
 _prefix=@prefix@
 _servicedir=@servicedir@
+_libexecdir=@libexecdir@
 
 stop_services() {
   for i in `grep -l -E "tcpserver|tcpclient" ${_servicedir}/*/run 2>/dev/null`

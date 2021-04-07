@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         host: [ubuntu-latest, macos-latest]
-    
+
     steps:
     - name: extra_packages
       run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; fi
@@ -27,6 +27,6 @@ jobs:
 
     - name: checkout_libsrs2
       uses: actions/checkout@v2
-      
+
     - name: build_libsrs2
       run: cd libsrs2-x; ./default.configure; make

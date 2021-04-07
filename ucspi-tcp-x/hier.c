@@ -1,5 +1,9 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.16  2021-04-07 18:48:56+05:30  Cprogrammer
+ * 1. added dotls
+ * 2. set default owner, group to root
+ *
  * Revision 1.15  2020-10-19 22:32:01+05:30  Cprogrammer
  * moved argv0, addcr, delcr, fixcrio, recordio from indimail-mta to ucspi-tcp
  *
@@ -103,41 +107,43 @@ hier(inst_dir, fatal)
 	d(auto_shared,     "doc", -1, -1, -1);
 	d(mandir_base,     "man", -1, -1, -1);
 	d(mandir_base,     "man/man1", -1, -1, -1);
-	c(auto_ucspi_home, "bin",      "tcpserver", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "tcprules", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "tcprulescheck", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "tcpclient", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "who@", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "date@", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "finger@", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "http@", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "tcpcat", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "mconnect", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "mconnect-io", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "rblsmtpd", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "argv0", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "addcr", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "delcr", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "fixcrio", -1, -1, 0755);
-	c(auto_ucspi_home, "bin",      "recordio", -1, -1, 0755);
-	c(mandir_base,     "man/man1", "tcpserver.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "tcprules.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "tcprulescheck.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "tcpclient.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "who@.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "date@.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "finger@.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "http@.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "tcpcat.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "mconnect.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "mconnect-io.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "rblsmtpd.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "argv0.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "addcr.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "delcr.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "fixcrio.1", -1, -1, 0644);
-	c(mandir_base,     "man/man1", "recordio.1", -1, -1, 0644);
-	c(auto_shared,     "doc",      "README.ucspi-tcp", -1, -1, 0644);
+	c(auto_ucspi_home, "bin",      "tcpserver", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "tcprules", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "tcprulescheck", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "tcpclient", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "who@", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "date@", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "finger@", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "http@", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "tcpcat", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "mconnect", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "mconnect-io", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "rblsmtpd", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "argv0", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "addcr", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "delcr", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "fixcrio", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "recordio", 0, 0, 0755);
+	c(auto_ucspi_home, "bin",      "dotls", 0, 0, 0755);
+	c(mandir_base,     "man/man1", "tcpserver.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "tcprules.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "tcprulescheck.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "tcpclient.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "who@.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "date@.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "finger@.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "http@.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "tcpcat.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "mconnect.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "mconnect-io.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "rblsmtpd.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "argv0.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "addcr.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "delcr.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "fixcrio.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "recordio.1", 0, 0, 0644);
+	c(mandir_base,     "man/man1", "dotls.1", 0, 0, 0644);
+	c(auto_shared,     "doc",      "README.ucspi-tcp", 0, 0, 0644);
 #ifdef LOAD_SHARED_OBJECTS
 	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, -1);
 	c(auto_ucspi_home, "lib/indimail/plugins", "rblsmtpd.so", -1, -1, 0755);

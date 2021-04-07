@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.10  2021-04-07 17:07:31+05:30  Cprogrammer
+ * feature to update permissions for staged builds
+ *
  * Revision 1.9  2020-10-23 17:54:16+05:30  Cprogrammer
  * copy the mode of the source file to target
  *
@@ -117,6 +120,19 @@ print_info(char *str, char *source, char *dest, int mode, int uid, int gid)
 	}
 	substdio_puts(subfdout, "\n");
 	substdio_flush(subfdout);
+}
+
+void
+set_perms(char *dest, uid_t uid, gid_t gid, mode_t mode)
+{
+	struct stat     st;
+
+	if (lstat(dest, &st) == -1)
+		strerr_die4sys(111, FATAL, "lstat: ", dest, ": ");
+	if ((st.st_uid != uid || st.st_gid != gid) && chown(dest, (uid_t) uid, (gid_t) gid) == -1)
+		strerr_die4sys(111, FATAL, "unable to chown ", dest, ": ");
+	if (st.st_mode != mode && chmod(dest, (mode_t) mode) == -1)
+		strerr_die4sys(111, FATAL, "unable to chmod ", dest, ": ");
 }
 
 /*
@@ -290,12 +306,16 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		if (mknod(target.s, mode, dev) == -1) {
 			if (errno != error_exist)
 				strerr_die4sys(111, FATAL, "mknod ", target.s, ": ");
-		} else {
-			if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
-				strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
-			if (chmod(target.s, (mode_t) mode) == -1)
-				strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
+		} 
+		if (!my_uid && (uid != -1 || gid != -1)) {
+			if (uid == -1)
+				uid = 0;
+			if (gid == -1)
+				gid = 0;
+			set_perms(target.s, (uid_t) uid, (gid_t) gid, mode);
 		}
+		if (!my_uid && mode != -1 && chmod(target.s, (mode_t) mode) == -1)
+			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 	case 'p':
 		if (my_uid || mode == -1)
 			mode = 0644;
@@ -303,12 +323,16 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		if (fifo_make(target.s, mode) == -1) {
 			if (errno != error_exist)
 				strerr_die4sys(111, FATAL, "fifo_make: ", target.s, ": ");
-		} else {
-			if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
-				strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
-			if (chmod(target.s, (mode_t) mode) == -1)
-				strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		}
+		if (!my_uid && (uid != -1 || gid != -1)) {
+			if (uid == -1)
+				uid = 0;
+			if (gid == -1)
+				gid = 0;
+			set_perms(target.s, (uid_t) uid, (gid_t) gid, mode);
+		}
+		if (!my_uid && mode != -1 && chmod(target.s, (mode_t) mode) == -1)
+			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 	case 'l': /*- here name is target */
 		print_info("make link", name, target.s, -1, -1, -1);
 		if (symlink(name, target.s) == -1 && errno != error_exist)
@@ -321,14 +345,18 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		if (mkdir(target.s, mode == -1 ? 0755 : mode) == -1) {
 			if (errno != error_exist)
 				strerr_die4sys(111, FATAL, "unable to mkdir ", target.s, ": ");
-		} else {
-			if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
-				strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
-			if (my_uid || mode == -1)
-				mode = 0755;
-			if (chmod(target.s, (mode_t) mode) == -1)
-				strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		}
+		if (!my_uid && (uid != -1 || gid != -1)) {
+			if (uid == -1)
+				uid = 0;
+			if (gid == -1)
+				gid = 0;
+			set_perms(target.s, (uid_t) uid, (gid_t) gid, mode);
+		}
+		if (my_uid || mode == -1)
+			mode = 0755;
+		if (chmod(target.s, (mode_t) mode) == -1)
+			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		break;
 
 	case 'f':
@@ -364,10 +392,18 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		if (fsync(fdout) == -1)
 			strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
 		close(fdout);
+		if (mode == -1)
+			mode = 0644;
 		if (chmod(target.s, (mode_t) mode) == -1)
 			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
-		if (uid != -1 && gid != -1 && !my_uid && chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
-			strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
+		if (!my_uid && (uid != -1 || gid != -1)) {
+			if (uid == -1)
+				uid = 0;
+			if (gid == -1)
+				gid = 0;
+			if (chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
+				strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
+		}
 		break;
 
 	default:
@@ -418,7 +454,7 @@ main(argc, argv)
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.9 2020-10-23 17:54:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: installer.c,v 1.10 2021-04-07 17:07:31+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
