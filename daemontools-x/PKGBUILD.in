@@ -33,7 +33,7 @@ build() {
 }
 
 package() {
-  depends=('shadow')
+  depends=('shadow' 'libqmail')
   cd $srcdir/$pkgname-${pkgver}
   sed -i 's|/sbin/|/bin/|g' SBIN.in
   sed -i 's|/sbin/|/bin/|g' SBIN.LINUX
@@ -58,6 +58,7 @@ _servicedir=@servicedir@
 _qmaildir=@qmaildir@
 _shareddir=@shareddir@
 _logdir=@logdir@
+_libexecdir=@libexecdir@
 
 stop_service()
 {
