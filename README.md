@@ -94,7 +94,7 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 
 **NOTES**
 
-You need libi2nd, without which, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
+You need libidn2, without which, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
 
 ```
 FreeBSD
