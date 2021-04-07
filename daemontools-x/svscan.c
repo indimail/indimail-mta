@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.19  2021-04-07 22:34:16+05:30  Cprogrammer
+ * display parent name as argv2 for log process
+ *
  * Revision 1.18  2020-10-09 11:42:28+05:30  Cprogrammer
  * renamed svscan.pid to .svscan.pid
  *
@@ -165,7 +168,7 @@ start(char *fn)
 	struct stat     st;
 	int             child;
 	int             i;
-	char           *args[3];
+	char           *args[4];
 
 	if (fn[0] == '.' && str_diff(fn, SVSCANINFO))
 		return;
@@ -247,7 +250,8 @@ start(char *fn)
 				strerr_die4sys(111, WARNING, "out of memory for ", fn, "/log: ");
 			args[0] = "supervise";
 			args[1] = "log";
-			args[2] = 0;
+            args[2] = fn;
+			args[3] = 0;
 			pathexec_run(*args, args, environ);
 			strerr_die4sys(111, FATAL, "unable to start supervise ", fn, "/log: ");
 		default:
@@ -507,7 +511,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.18 2020-10-09 11:42:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.19 2021-04-07 22:34:16+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
