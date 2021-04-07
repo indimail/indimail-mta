@@ -4,6 +4,7 @@ For this to work you need few things to be installed on your system. Check your 
 
 * RPM based systems - rpm-build, gcc, g++, autoconf, automake, libtool, aclocal, rpmdevtools
 * Debian based systems - build-essentials, cdbs, debhelper, gnupg2
+* Arch Linux - base-devel
 
 ## Clone git repository
 
