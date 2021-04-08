@@ -1,5 +1,8 @@
 #
 # $Log: systemd.in,v $
+# Revision 1.8  2021-04-08 11:29:36+05:30  Cprogrammer
+# use PrivateTmp in systemd service
+#
 # Revision 1.7  2020-11-27 17:30:52+05:30  Cprogrammer
 # changed name to SVscan Service
 #
@@ -26,7 +29,7 @@
 # to start - systemctl start svscan|indimail|indimail-mta
 # to stop  - systemctl stop  svscan|indimail|indimail-mta
 #
-# $Id: systemd.in,v 1.7 2020-11-27 17:30:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: systemd.in,v 1.8 2021-04-08 11:29:36+05:30 Cprogrammer Exp mbhangui $
 #
 [Unit]
 Description=SVscan Service
@@ -37,6 +40,7 @@ ExecStart=@libexecdir@/svscanboot @servicedir@
 ExecStop=/etc/init.d/svscan stop
 Restart=on-failure
 Type=simple
+PrivateTmp=yes
 
 [Install]
 Alias=indimail.service
