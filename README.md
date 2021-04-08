@@ -40,7 +40,7 @@ To install you need to do the following
 
 # Source Compiling/Linking
 
-The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Binary Packages](.github/CREATE-Packages.md)
+The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Create Local Binary Packages](.github/CREATE-Packages.md)
 
 You can also use docker / podman images to deploy indimail-mta. Look at the chapter [Docker / Podman Repository](#docker-/-podman-repository) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
@@ -584,17 +584,9 @@ $ sudo svps -a
 /service/udplogger.3000/log        up      5781 secs  pid   45149
 ```
 
-# Binary Packages Build
+# Create Local Binary Packages
 
-**[Build Status on](https://build.opensuse.org/project/monitor/home:mbhangui) [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
-
-[![indimail-mta obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml)
-[![daemontools obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml)
-[![ucspi-tcp obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-obs.yml)
-[![libdkim obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-obs.yml)
-[![libsrs2 obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-obs.yml)
-
-If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md)
+If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Create Local Binary Packages](.github/CREATE-Packages.md)
 You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build Service) .
 
 NOTE: binary package for FreeBSD and OSX is in my TODO list.
@@ -620,6 +612,14 @@ You can have the old non-fhs behaviour by having /var/indimail in the above 5 fi
 ```
 
 # Binary Builds on openSUSE Build Service
+
+**[Build Status on](https://build.opensuse.org/project/monitor/home:mbhangui) [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
+
+[![indimail-mta obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml)
+[![daemontools obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml)
+[![ucspi-tcp obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-obs.yml)
+[![libdkim obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-obs.yml)
+[![libsrs2 obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-obs.yml)
 
 You can get binary RPM / Debian packages at
 
