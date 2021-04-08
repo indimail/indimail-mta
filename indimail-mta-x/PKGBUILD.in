@@ -1,4 +1,12 @@
 # Maintainer: @email@
+#
+# $Log: PKGBUILD.in,v $
+# Revision 1.1  2021-04-08 15:48:19+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: PKGBUILD.in,v 1.1 2021-04-08 15:48:19+05:30 Cprogrammer Exp mbhangui $
+#
 pkgname=('indimail-mta' 'indimail-mini')
 pkgver=@version@
 pkgrel=@release@
@@ -27,12 +35,12 @@ _groupname=indimail
 
 build() {
   cd $srcdir/$pkgname-${pkgver}
-  sed "s{PREFIX{${_prefix}{"          conf-prefix.in     > conf-prefix
-  sed "s{QMAIL{${_qmaildir}{"         conf-qmail.in      > conf-qmail
+  sed "s{PREFIX{${_prefix}{"         conf-prefix.in     > conf-prefix
+  sed "s{QMAIL{${_qmaildir}{"        conf-qmail.in      > conf-qmail
   sed "s{SYSCONFDIR{${_sysconfdir}{" conf-sysconfdir.in > conf-sysconfdir
-  sed "s{SHAREDDIR{${_shareddir}{"    conf-shared.in     > conf-shared
-  sed "s{LIBEXECDIR{${_libexecdir}{"  conf-libexec.in    > conf-libexec
-  sed "s{SERVICEDIR{${_servicedir}{"  conf-servicedir.in > conf-servicedir
+  sed "s{SHAREDDIR{${_shareddir}{"   conf-shared.in     > conf-shared
+  sed "s{LIBEXECDIR{${_libexecdir}{" conf-libexec.in    > conf-libexec
+  sed "s{SERVICEDIR{${_servicedir}{" conf-servicedir.in > conf-servicedir
   if [ ${_notlsarr} -eq 0 ] ; then
     echo "-DHASTLSA" > conf-tlsa
   else
