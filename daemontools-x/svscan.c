@@ -250,7 +250,7 @@ start(char *fn)
 				strerr_die4sys(111, WARNING, "out of memory for ", fn, "/log: ");
 			args[0] = "supervise";
 			args[1] = "log";
-            args[2] = fn;
+			args[2] = fn;
 			args[3] = 0;
 			pathexec_run(*args, args, environ);
 			strerr_die4sys(111, FATAL, "unable to start supervise ", fn, "/log: ");
