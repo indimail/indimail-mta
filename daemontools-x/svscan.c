@@ -1,6 +1,6 @@
 /*
  * $Log: svscan.c,v $
- * Revision 1.19  2021-04-07 22:34:16+05:30  Cprogrammer
+ * Revision 1.19  2021-04-11 12:15:24+05:30  Cprogrammer
  * display parent name as argv2 for log process
  *
  * Revision 1.18  2020-10-09 11:42:28+05:30  Cprogrammer
@@ -180,16 +180,19 @@ start(char *fn)
 		return;
 	for (i = 0; i < numx; ++i) {
 		if (x[i].ino == st.st_ino && x[i].dev == st.st_dev)
-			break;
+			break; /*- existing service */
 	}
-	if (i == numx) {
+	if (i == numx) { /*- we found a new service to start */
 		if (numx >= SERVICES) {
 			strerr_warn4(WARNING, "unable to start ", fn, ": running too many services", 0);
 			return;
 		}
 		x[i].ino = st.st_ino;
 		x[i].dev = st.st_dev;
-		/*(fn[0]=='.' here only if SVSCANINFO; if so only supervise log/ subdir)*/
+		/*- 
+		 * (fn[0] == '.' possible only if fn is SVSCANINFO.
+		 * if so supervise ./log subdir only)
+		 */
 		x[i].pid = (fn[0] != '.') ? 0 : -1;
 		x[i].pidlog = 0;
 		x[i].flaglog = 0;
@@ -280,7 +283,7 @@ doit(void)
 			break;
 		if (r == -1) {
 			if (errno == error_intr)
-				continue;		/*- impossible */
+				continue; /*- impossible */
 			break;
 		}
 		for (i = 0; i < numx; ++i) {
@@ -354,9 +357,7 @@ open_svscan_log(void)
 	struct stat     st;
 	static char     fn[] = SVSCANINFO;	/*- avoid compiler warning on const string */
 
-	/*
-	 * (semi-paranoid; could be moreso) 
-	 */
+	/*- (semi-paranoid; could be more so) */
 	if (fstat(STDIN_FILENO, &st) != 0 && errno == EBADF)
 		(void) open("/dev/null", O_RDONLY);
 	if (fstat(STDOUT_FILENO, &st) != 0 && errno == EBADF)
@@ -511,7 +512,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.19 2021-04-07 22:34:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.19 2021-04-11 12:15:24+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
