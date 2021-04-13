@@ -25,7 +25,6 @@ fi
 
 case "$1" in
     install|upgrade)
-	echo "doing [$1]"
 	if [ " $1" = " upgrade" ] ; then
 		# shutdown svscan before upgrade
 		# create .svscan.down so that we
