@@ -1,16 +1,16 @@
 #
-# $Id: minisvc.in,v 1.9 2021-04-05 07:20:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.10 2021-04-15 18:26:39+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
 # User Configuration
 #
-QmailBinPrefix=@prefix@
+prefix=@prefix@
 sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.9 2021-04-05 07:20:31+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.10 2021-04-15 18:26:39+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -213,8 +213,8 @@ echo "# generated log script for $host on `date`"
 echo "# by the below command"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-echo "  $QmailBinPrefix/sbin/multilog t $LOGDIR/$1"
+echo "exec $prefix/bin/setuidgid qmaill \\"
+echo "  $prefix/sbin/multilog t $LOGDIR/$1"
 }
 
 create_svscan()
@@ -284,7 +284,7 @@ fi
 
 (
 dump_run_header
-echo "exec $QmailBinPrefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
+echo "exec $prefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 
@@ -304,7 +304,7 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 
 # resolvconf script using inotify
-if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run -a -x "$DESTDIR"$QmailBinPrefix/bin/inotify ] ; then
+if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run -a -x $prefix/bin/inotify ] ; then
 conf_dir="$DESTDIR"$SERVICEDIR/resolvconf/variables
 if [ $run_file_only -eq 1 ] ; then
 	if [ -d $conf_dir ] ; then
@@ -387,6 +387,11 @@ if [ $# -lt 1 ] ; then
 	echo "rmsvc service_with_full_path" 1>&2
 	return 1
 fi
+if [ -d /run ] ; then
+	rundir=/run/svscan
+elif [ -d /var/run ] ; then
+	rundir=/var/run/svscan
+fi
 for i in $*
 do
 	if [ ! -d $i ] ; then
@@ -395,17 +400,36 @@ do
 	fi
 	dir=`dirname $i`
 	svcname=`basename $i`
-	if [ ! -p $i/supervise/control ] ; then
-		echo "$i/supervise not a supervise directory" 1>&2
+	if [ -n "$rundir" ] ; then
+		if [ ! -p $rundir/$svcname/supervise/control ] ; then
+			echo "$i/supervise not a supervise directory" 1>&2
+			continue
+		fi
+	else
+		if [ ! -p $i/supervise/control ] ; then
+			echo "$i/supervise not a supervise directory" 1>&2
+			continue
+		fi
+	fi
+	/bin/mv $i $dir/"."${svcname}
+	if [ $? -ne 0 ] ; then
 		continue
 	fi
-	/bin/mv $i $dir/".""$svcname"
+	if [ -n "$rundir" ] ; then
+		/bin/mv $rundir/$svcname $rudir/"."${svcname}
+		if [ $? -ne 0 ] ; then
+			continue
+		fi
+		dir=$rundir
+	fi
 	#
 	# prepend a . to the directory so that svscan will skip this directory
 	#
-	echo "Removed Service $svcname    : `"$DESTDIR"$QmailBinPrefix/bin/svc -d $dir/"."$svcname 2>&1`"
+	echo "Removed Service $svcname"
+	"$DESTDIR"$prefix/bin/svc -dx $dir/"."${svcname}
 	if [ -d $dir/"."$svcname/log ] ; then
-		echo "Removed Service $svcname/log: `"$DESTDIR"$QmailBinPrefix/bin/svc -d $dir/"."$svcname/log 2>&1`"
+		echo "Removed Service $svcname/log"
+		"$DESTDIR"$prefix/bin/svc -dx $dir/"."${svcname}/log
 	fi
 done
 }
@@ -415,6 +439,11 @@ ensvc()
 if [ $# -lt 1 ] ; then
 	echo "ensvc service_with_full_path" 1>&2
 	return 1
+fi
+if [ -d /run ] ; then
+	rundir=/run/svscan
+elif [ -d /var/run ] ; then
+	rundir=/var/run/svscan
 fi
 for i in $*
 do
@@ -428,6 +457,9 @@ do
 	if [ " $first_char" = " ." ] ; then
 		svcname=`echo $svcname | cut -c2-`
 		/bin/mv $i $dir/$svcname
+		if [ -n "$rundir" ] ; then
+			/bin/rm -rf $rundir/"."${svcname}
+		fi
 		echo "Enabled Service $svcname" 
 	else
 		echo "Service $i is not disabled (should have a '.' as the first char in $svcname)" 1>&2
@@ -441,9 +473,9 @@ do
 	first_char=`echo $svcname | cut -c1`
 	if [ " $first_char" = " ." ] ; then
 		svcname=`echo $svcname | cut -c2-`
-		"$DESTDIR"$QmailBinPrefix/bin/svstat $dir/$svcname
+		"$DESTDIR"$prefix/bin/svstat $dir/$svcname
 		if [ -d $dir/$svcname/log ] ; then
-			"$DESTDIR"$QmailBinPrefix/bin/svstat $dir/$svcname/log
+			"$DESTDIR"$prefix/bin/svstat $dir/$svcname/log
 		fi
 	fi
 done
@@ -604,8 +636,8 @@ create_startup()
 		fi
 		;;
 	esac
-	if [ -x "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
-		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -status
+	if [ -x "$DESTDIR"$prefix/sbin/initsvc ] ; then
+		"$DESTDIR"$prefix/sbin/initsvc -status
 	else
 		if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
@@ -632,11 +664,11 @@ create_startup()
 				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/event.d
 			fi
 		elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
-			cmp -s "$DESTDIR"$shareddir/boot/svscan $QmailBinPrefix/etc/rc.d/svscan >/dev/null 2>&1
+			cmp -s "$DESTDIR"$shareddir/boot/svscan $prefix/etc/rc.d/svscan >/dev/null 2>&1
 			if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in rc $QmailBinPrefix/etc/rc.d/svscan"
-				/bin/cp "$DESTDIR"$shareddir/boot/svscan $QmailBinPrefix/etc/rc.d/svscan
-				/bin/chmod 755 $QmailBinPrefix/etc/rc.d/svscan
+				echo "svscan startup enabled in rc $prefix/etc/rc.d/svscan"
+				/bin/cp "$DESTDIR"$shareddir/boot/svscan $prefix/etc/rc.d/svscan
+				/bin/chmod 755 $prefix/etc/rc.d/svscan
 				service svscan enable
 			fi
 		elif [ -d /Library/LaunchDaemons ] ; then
@@ -648,9 +680,9 @@ create_startup()
 		fi
 	fi
 	if [ -d /etc/init.d ] ; then
-		cmp -s "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1
+		cmp -s "$DESTDIR"$prefix/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1
 		if [ $? -ne 0 ] ; then
-			/bin/cp "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/svscan
+			/bin/cp "$DESTDIR"$prefix/bin/qmailctl /etc/init.d/svscan
 		fi
 	fi
 	if [ -f /etc/init.d/svscan ] ; then
@@ -666,7 +698,7 @@ create_startup()
 			/usr/sbin/update-rc.d svscan start 14 2 3 4 5 . stop 91 0 1 6 .
 		fi
 	fi
-	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools
+	if [ ! -f $prefix/bin/qmail-inject ] ; then # daemontools
 		return 0
 	fi
 }
@@ -674,8 +706,8 @@ create_startup()
 remove_startup()
 {
 	echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
-	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
-		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -off
+	if [ -f "$DESTDIR"$prefix/sbin/initsvc ] ; then
+		"$DESTDIR"$prefix/sbin/initsvc -off
 	fi
 	if [ -f /lib/systemd/system/svscan.service -a -x /bin/systemctl ] ; then
 		/bin/systemctl stop svscan
@@ -695,7 +727,7 @@ remove_startup()
 		service svscan stop
 		service svscan disable
 		service svscan delete
-		/bin/rm -f $QmailBinPrefix/etc/rc.d/svscan
+		/bin/rm -f $prefix/etc/rc.d/svscan
 	fi
 	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for preun" 1>&2
@@ -715,7 +747,7 @@ remove_startup()
 		fi
 		/bin/rm -f /etc/init.d/svscan
 	fi
-	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools. This should be called before removing package
+	if [ ! -f $prefix/bin/qmail-inject ] ; then # daemontools. This should be called before removing package
 		return 0
 	fi
 }
@@ -1001,7 +1033,7 @@ done
 echo
 echo "Control Configuration ================================================="
 echo
-"$DESTDIR"$QmailBinPrefix/bin/qmail-showctl
+"$DESTDIR"$prefix/bin/qmail-showctl
 echo
 echo "IndiMail Assign File:"
 /bin/cat "$DESTDIR"$sysconfdir/users/assign
@@ -1029,7 +1061,7 @@ if [ -f @sysconfdir@/.svctool.cnf ] ; then
 fi
 [ -z "$TMPDIR" ] && TMPDIR="/tmp/indimail" && mkdir -m 0700 -p /tmp/indimail
 
-prog_args="$QmailBinPrefix/sbin/minisvc"
+prog_args="$prefix/sbin/minisvc"
 force=0
 silent=0
 down_state=0
@@ -1513,6 +1545,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.10  2021-04-15 18:26:39+05:30  Cprogrammer
+# take into account /run filesystem when enabling, disabling service
+#
 # Revision 1.9  2021-04-05 07:20:31+05:30  Cprogrammer
 # fixed --export-variables
 #
