@@ -34,6 +34,9 @@ Release 2.13 Start 14/02/2021
 - 29/03/2021
 21. qmail-send.c, qmail-todo.c: make internal functions, variables static
 22. qmail-send.c: refactored job functions (author Rolf Eike Beer - @notqmail)
+- 15/04/2021
+23. svctool: use /run filesystem for service directory when enabling/disabling
+    service
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
