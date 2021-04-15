@@ -148,13 +148,13 @@ do
 	if [ $flag -eq 0 ] ; then # first line
 		flag=1
 		if [ $option -eq 1 ] ; then
-			echo "* `date +"%a %b %d %Y %H:%M:%S %z"` $email" "$version"-"$release"%{?dist}
+			echo "* `date -u +"%a %b %d %Y %H:%M:%S %z"` $email" "$version"-"$release"%{?dist}
 		elif [ $option -eq 2 ] ; then
 			echo "$name ($version-$release) $state; urgency=$urgency"
 			echo
 		elif [ $option -eq 3 ] ; then
 			printf "%0*d\n" 67 |sed 's}0}-}g' 
-			date -u "+%a %b %d %H:%M:%S UTC %Y - $email"
+			date "+%a, %b %d %H:%M:%S %Z %Y - $email"
 			echo
 		fi
 		continue
@@ -195,7 +195,7 @@ if [ $option -eq 2 ] ; then
 		echo
 	fi
 	echo
-	echo " -- $email  `date +'%a, %d %b %Y %H:%M:%S %z'`"
+	echo " -- $email  `date -u +'%a, %d %b %Y %H:%M:%S %z'`"
 elif [ $option -eq 3 ] ; then
 	echo
 fi
