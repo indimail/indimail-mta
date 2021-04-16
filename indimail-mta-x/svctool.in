@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.546 2021-04-15 17:45:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.547 2021-04-16 10:55:21+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.546 2021-04-15 17:45:28+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.547 2021-04-16 10:55:21+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -6032,8 +6032,13 @@ do
 	fi
 	dir=`dirname $i`
 	svcname=`basename $i`
+	first_char=`echo ${svcname} | cut -c1`
+	if [ " $first_char" = " ." ] ; then
+		echo "skipping $i that starts with ." 1>&2
+		continue
+	fi
 	if [ -n "$rundir" ] ; then
-		if [ ! -p $rundir/$svcname/supervise/control ] ; then
+		if [ ! -p $rundir/${svcname}/supervise/control ] ; then
 			echo "$i/supervise not a supervise directory" 1>&2
 			continue
 		fi
@@ -6048,20 +6053,22 @@ do
 		continue
 	fi
 	if [ -n "$rundir" ] ; then
-		/bin/mv $rundir/$svcname $rudir/"."${svcname}
-		if [ $? -ne 0 ] ; then
-			continue
+		if [ -d $rundir/${svcname} -a ! -d $rundir/"."${svcname} ] ; then
+			/bin/mv $rundir/${svcname} $rundir/"."${svcname}
+			if [ $? -ne 0 ] ; then
+				continue
+			fi
 		fi
 		dir=$rundir
 	fi
 	#
 	# prepend a . to the directory so that svscan will skip this directory
 	#
-	echo "Removed Service $svcname"
-	"$DESTDIR"$QmailBinPrefix/bin/svc -dx $dir/"."${svcname}
-	if [ -d $dir/"."$svcname/log ] ; then
-		echo "Removed Service $svcname/log"
-		"$DESTDIR"$QmailBinPrefix/bin/svc -dx $dir/"."${svcname}/log
+	echo "Removed Service ${svcname}"
+	"$DESTDIR"$prefix/bin/svc -dx $dir/"."${svcname}
+	if [ -d $dir/"."${svcname}/log ] ; then
+		echo "Removed Service ${svcname}/log"
+		"$DESTDIR"$prefix/bin/svc -dx $dir/"."${svcname}/log
 	fi
 done
 }
@@ -6085,16 +6092,28 @@ do
 	fi
 	dir=`dirname $i`
 	svcname=`basename $i`
-	first_char=`echo $svcname | cut -c1`
+	first_char=`echo ${svcname} | cut -c1`
 	if [ " $first_char" = " ." ] ; then
-		svcname=`echo $svcname | cut -c2-`
-		/bin/mv $i $dir/$svcname
+		second_char=`echo ${svcname} | cut -c2`
+		if [ " $second_char" = " ." -o -z "$second_char" ] ; then
+			echo "skipping $i" 1>&2
+			continue
+		fi
+		svcname=`echo ${svcname} | cut -c2-`
+		if [ -d $dir/${svcname} ] ; then
+			echo "$dir/${svcname} exists"
+			continue;
+		fi
+		/bin/mv $i $dir/${svcname}
+		if [ $? -ne 0 ] ; then
+			continue
+		fi
 		if [ -n "$rundir" ] ; then
 			/bin/rm -rf $rundir/"."${svcname}
 		fi
-		echo "Enabled Service $svcname" 
+		echo "Enabled Service ${svcname}" 
 	else
-		echo "Service $i is not disabled (should have a '.' as the first char in $svcname)" 1>&2
+		echo "Service $i is not disabled (should have a '.' as the first char in ${svcname})" 1>&2
 	fi
 done
 sleep 5
@@ -6102,12 +6121,17 @@ for i in $*
 do
 	dir=`dirname $i`
 	svcname=`basename $i`
-	first_char=`echo $svcname | cut -c1`
+	first_char=`echo ${svcname} | cut -c1`
 	if [ " $first_char" = " ." ] ; then
-		svcname=`echo $svcname | cut -c2-`
-		"$DESTDIR"$QmailBinPrefix/bin/svstat $dir/$svcname
-		if [ -d $dir/$svcname/log ] ; then
-			"$DESTDIR"$QmailBinPrefix/bin/svstat $dir/$svcname/log
+		second_char=`echo ${svcname} | cut -c2`
+		if [ " $second_char" = " ." -o -z "$second_char" ] ; then
+			echo "skipping $i" 1>&2
+			continue
+		fi
+		svcname=`echo ${svcname} | cut -c2-`
+		"$DESTDIR"$prefix/bin/svstat $dir/$svcname
+		if [ -d $dir/${svcname}/log ] ; then
+			"$DESTDIR"$prefix/bin/svstat $dir/${svcname}/log
 		fi
 	fi
 done
