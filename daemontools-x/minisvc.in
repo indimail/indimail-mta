@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.11 2021-04-16 10:54:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.12 2021-04-16 16:23:16+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.11 2021-04-16 10:54:33+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.12 2021-04-16 16:23:16+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -678,13 +678,13 @@ create_startup()
 		elif [ -f /sbin/initctl -a -d /etc/init ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in upstart /etc/init/svscan.conf"
+				echo "svscan startup enabled in /etc/init/svscan.conf"
 				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf
 			fi
 		elif [ -d /etc/event.d ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/event.d/upstart >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in upstart /etc/event.d/upstart"
+				echo "svscan startup enabled in /etc/event.d/upstart"
 				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/event.d
 			fi
 		elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
@@ -698,7 +698,7 @@ create_startup()
 		elif [ -d /Library/LaunchDaemons ] ; then
 			cmp -s "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist >/dev/null 2>&1
 			if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in upstart /Library/LaunchDaemons/org.indimail.svscan.plist"
+				echo "svscan startup enabled in /Library/LaunchDaemons/org.indimail.svscan.plist"
 				/bin/cp "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist
 			fi
 		fi
@@ -1569,6 +1569,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.12  2021-04-16 16:23:16+05:30  Cprogrammer
+# fixed typo
+#
 # Revision 1.11  2021-04-16 10:54:33+05:30  Cprogrammer
 # added additional checks when enabling, disabling supervise services
 #
