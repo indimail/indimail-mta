@@ -14,6 +14,10 @@ Release 1.1 Start 27/02/2021
 07. supervise: allow supervise for log process to run with three arguments
 - 15/04/2021
 08. minisvc: take into account /run filesystem when enabling, disabling service
+- 16/04/2021
+09. svscan: disable service in /run filesystem when service is disabled in
+    /service
+10. minisvc: added checks when enabling, disabling service
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
