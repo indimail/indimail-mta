@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.20  2021-04-16 10:56:27+05:30  Cprogrammer
+ * disable service in run filesystem if service is disabled in /service
+ *
  * Revision 1.19  2021-04-11 12:15:24+05:30  Cprogrammer
  * display parent name as argv2 for log process
  *
@@ -89,6 +92,8 @@
 #define SVSCANINFO ".svscan"  /* must begin with dot ('.') */
 #endif
 
+int             rename(char *, const char *);
+
 struct
 {
 	unsigned long   dev;
@@ -166,12 +171,30 @@ start(char *fn)
 {
 	unsigned int    fnlen;
 	struct stat     st;
-	int             child;
-	int             i;
+	int             child, i;
+	char           *run_dir;
 	char           *args[4];
 
-	if (fn[0] == '.' && str_diff(fn, SVSCANINFO))
+	if (fn[0] == '.' && str_diff(fn, SVSCANINFO)) {
+		if (!fn[1] || fn[1] == '.') /*- . and .. */
+			return;
+		if (!access("/run", F_OK))
+			run_dir = "/run";
+		else
+		if (!access("/var/run", F_OK))
+			run_dir = "/var/run";
+		else
+			return;
+		if (chdir(run_dir) == -1) {
+			strerr_warn4(WARNING, "unable to switch to ", run_dir, ": ", &strerr_sys);
+			return;
+		}
+		if (!access(fn, F_OK))
+			return;
+		if (!access(fn + 1, F_OK) && rename(fn + 1, fn))
+			strerr_warn6(WARNING, "unable to rename ", fn + 1, " to ", fn, ": ", &strerr_sys);
 		return;
+	}
 	if (stat(fn, &st) == -1) {
 		strerr_warn4(WARNING, "unable to stat ", fn, ": ", &strerr_sys);
 		return;
@@ -512,7 +535,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.19 2021-04-11 12:15:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.20 2021-04-16 10:56:27+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
