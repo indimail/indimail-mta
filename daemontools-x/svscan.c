@@ -1,7 +1,7 @@
 /*
  * $Log: svscan.c,v $
- * Revision 1.20  2021-04-16 10:56:27+05:30  Cprogrammer
- * disable service in run filesystem if service is disabled in /service
+ * Revision 1.20  2021-04-16 12:24:13+05:30  Cprogrammer
+ * disable service in run filesystem when disabled in original service directory
  *
  * Revision 1.19  2021-04-11 12:15:24+05:30  Cprogrammer
  * display parent name as argv2 for log process
@@ -105,7 +105,6 @@ struct
 	int             pi[2];		/*- defined if flaglog */
 } x[SERVICES];
 static int      numx = 0;
-static int      fdsourcedir = -1;
 static char     fnlog[260];
 static char    *pidfile;
 
@@ -171,28 +170,41 @@ start(char *fn)
 {
 	unsigned int    fnlen;
 	struct stat     st;
-	int             child, i;
-	char           *run_dir;
+	int             child, i, fdsource;
+	char           *run_dir, *sdir;
+	char            dirbuf[256];
 	char           *args[4];
 
 	if (fn[0] == '.' && str_diff(fn, SVSCANINFO)) {
 		if (!fn[1] || fn[1] == '.') /*- . and .. */
 			return;
 		if (!access("/run", F_OK))
-			run_dir = "/run";
+			run_dir = "/run/svscan";
 		else
 		if (!access("/var/run", F_OK))
-			run_dir = "/var/run";
+			run_dir = "/var/run/svscan";
 		else
 			return;
+		if ((fdsource = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
+			strerr_die2sys(111, FATAL, "unable to open current directory: ");
 		if (chdir(run_dir) == -1) {
 			strerr_warn4(WARNING, "unable to switch to ", run_dir, ": ", &strerr_sys);
+			close(fdsource);
 			return;
 		}
-		if (!access(fn, F_OK))
+		if (!(sdir = getcwd(dirbuf, 255)))
+			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+		if (!access(fn, F_OK)) { /*- no need to rename */
+			if (fchdir(fdsource) == -1)
+				strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+			close(fdsource);
 			return;
+		}
 		if (!access(fn + 1, F_OK) && rename(fn + 1, fn))
 			strerr_warn6(WARNING, "unable to rename ", fn + 1, " to ", fn, ": ", &strerr_sys);
+		if (fchdir(fdsource) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+		close(fdsource);
 		return;
 	}
 	if (stat(fn, &st) == -1) {
@@ -398,11 +410,12 @@ open_svscan_log(void)
 }
 
 int
-get_lock(char *sdir)
+get_lock()
 {
-	int             fd, n;
+	int             fd, n, fdsource;
 	pid_t           pid;
-	char            strnum[FMT_ULONG], buf[8];
+	char            strnum[FMT_ULONG], buf[8], dirbuf[256];
+	char           *sdir;
 
 	if (1 == getpid()) { /*- we are running under a docker container as init */
 		if (unlink(pidfile) == -1 && errno != error_noent)
@@ -441,31 +454,35 @@ get_lock(char *sdir)
 	/*- let us find out if the process is svscan */
 	strnum[fmt_ulong(strnum, pid)] = 0;
 
+	if (!(sdir = env_get("PWD")) && !((sdir = getcwd(dirbuf, 255))))
+		strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+	if ((fdsource = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
+		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	/*- use the /proc filesystem to figure out command name */
 	if (chdir("/proc") == -1) /*- on systems without /proc filesystem, give up */
-		strerr_die3x(111, FATAL, "chdir: svscan running with pid ", strnum);
+		strerr_die2sys(111, FATAL, "chdir: /proc: ");
 	if (chdir(strnum) == -1) { /*- process is now dead */
-		if (fchdir(fdsourcedir) == -1)
+		if (fchdir(fdsource) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
-		close(fdsourcedir);
+		close(fdsource);
 		if (unlink(pidfile) == -1)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 		return (1);
 	}
 	/*- open 'comm' to get the command name */
 	if ((fd = open("comm", O_RDONLY, 0)) == -1) { /*- process is now dead */
-		if (fchdir(fdsourcedir) == -1)
+		if (fchdir(fdsource) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
-		close(fdsourcedir);
+		close(fdsource);
 		if (unlink(pidfile) == -1)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 		return (1);
 	}
 	if ((n = read(fd, buf, 7)) != 7) { /*- non-svcan process is running with this pid */
 		close(fd);
-		if (fchdir(fdsourcedir) == -1)
+		if (fchdir(fdsource) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
-		close(fdsourcedir);
+		close(fdsource);
 		if (unlink(pidfile) == -1)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 		return (1);
@@ -478,9 +495,9 @@ get_lock(char *sdir)
 		_exit (111);
 	}
 	/*- some non-svscan process is running with pid */
-	if (fchdir(fdsourcedir) == -1)
+	if (fchdir(fdsource) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
-	close(fdsourcedir);
+	close(fdsource);
 	if (unlink(pidfile) == -1)
 		strerr_die2sys(111, FATAL, "unable to delete lock: ");
 	return (1);
@@ -493,22 +510,20 @@ main(int argc, char **argv)
 	char           *s;
 
 	/*- save the current dir */
-	if ((fdsourcedir = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
-		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 #ifdef USE_RUNFS
 	initialize_run();
 #else
 	pidfile = PIDFILE;
 #endif
-	if (argv[0] && argv[1]) {
+	if (argc > 1 && argv[1]) {
 		if (chdir(argv[1]) == -1)
 			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[1], ": ");
-		while (get_lock(argv[1])) ;
+		while (get_lock()) ;
 	} else {
 #ifdef USE_RUNFS
 		pidfile = PIDFILE;
 #endif
-		while (get_lock(".")) ;
+		while (get_lock()) ;
 	}
 	if (env_get("SETSID"))
 		(void) setsid();
@@ -535,7 +550,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.20 2021-04-16 10:56:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.20 2021-04-16 12:24:13+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
