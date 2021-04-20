@@ -38,4 +38,4 @@ libsrs2-dev.install libsrs2-dev.docs libsrs2.docs
 		libsrs2-dev.docs libsrs2.docs libsrs2.dsc \
 		rules libsrs2.install \
 		libsrs2-dev.install libsrs2-dev.docs \
-		libsrs2.docs | gzip -c >$@
+		libsrs2.docs source | gzip -c >$@

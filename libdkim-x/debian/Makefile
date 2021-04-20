@@ -38,4 +38,4 @@ libdkim-dev.install libdkim-dev.docs libdkim.docs
 		libdkim-dev.docs libdkim.docs libdkim.dsc \
 		README.Debian rules libdkim.install \
 		libdkim-dev.install libdkim-dev.docs \
-		libdkim.docs | gzip -c >$@
+		libdkim.docs source | gzip -c >$@
