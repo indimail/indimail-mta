@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.12 2021-04-16 16:23:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.13 2021-04-20 09:13:51+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.12 2021-04-16 16:23:16+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.13 2021-04-20 09:13:51+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -512,7 +512,7 @@ if [ $# -lt 1 ] ; then
 	return 1
 fi
 if [ " $1" = " all" ] ; then
-	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
+	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options "$DESTDIR"$servicedir/.svscan/variables/.options 2>/dev/null`
 	do
 		# remove last 19 char to get the directory+service_name
 		i=`echo $j|sed 's/.\{19\}$//'`
@@ -522,16 +522,24 @@ if [ " $1" = " all" ] ; then
 			continue
 		fi
 		if [ -f $i/variables/.norefreshsvc ] ; then
-			echo "Skip Refreshing service $svcname"
+			if [ $silent -eq 0 ] ; then
+				echo "Skip Refreshing service $svcname"
+			fi
 		else
-			echo "Refreshing service $svcname command `/bin/cat $i/variables/.options`"
+			if [ $silent -eq 0 ] ; then
+				echo "Refreshing service $svcname command `/bin/cat $i/variables/.options`"
+			fi
 			sh $i/variables/.options
 		fi
 	done
 	if [ -f "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc ] ; then
-		echo "Skip Refreshing config defaultqueue"
+		if [ $silent -eq 0 ] ; then
+			echo "Skip Refreshing config defaultqueue"
+		fi
 	else
-		echo "Refreshing config defaultqueue command `/bin/cat "$DESTDIR"$sysconfdir/control/defaultqueue/.options`"
+		if [ $silent -eq 0 ] ; then
+			echo "Refreshing config defaultqueue command `/bin/cat "$DESTDIR"$sysconfdir/control/defaultqueue/.options`"
+		fi
 		sh "$DESTDIR"$sysconfdir/control/defaultqueue/.options
 	fi
 else
@@ -547,14 +555,20 @@ else
 			continue
 		fi
 		if [ -f "$DESTDIR"$i/variables/.norefreshsvc -o -f "$DESTDIR"$i/.norefreshsvc ] ; then
-			echo "Skip Refreshing service/config $svcname"
+			if [ $silent -eq 0 ] ; then
+				echo "Skip Refreshing service/config $svcname"
+			fi
 			continue
 		fi
 		if [ -f "$DESTDIR"$i/variables/.options ] ; then
-			echo "Refreshing service $svcname command `/bin/cat "$DESTDIR"$i/variables/.options`"
+			if [ $silent -eq 0 ] ; then
+				echo "Refreshing service $svcname command `/bin/cat "$DESTDIR"$i/variables/.options`"
+			fi
 			sh "$DESTDIR"$i/variables/.options
 		elif [ -f "$DESTDIR"$i/.options ] ; then
-			echo "Refreshing config $svcname command `/bin/cat "$DESTDIR"$i/.options`"
+			if [ $silent -eq 0 ] ; then
+				echo "Refreshing config $svcname command `/bin/cat "$DESTDIR"$i/.options`"
+			fi
 			sh "$DESTDIR"$i/.options
 		fi
 	done
@@ -570,7 +584,7 @@ fi
 svc_opt=$1
 shift
 if [ " $1" = " all" ] ; then
-	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options $servicedir/.svscan/variables/.options`
+	for j in `/bin/ls "$DESTDIR"$servicedir/*/variables/.options "$DESTDIR"$servicedir/.svscan/variables/.options 2>/dev/null`
 	do
 		# remove last 19 char to get the directory+service_name
 		i=`echo $j|sed 's/.\{19\}$//'`
@@ -579,18 +593,26 @@ if [ " $1" = " all" ] ; then
 			continue
 		fi
 		if [ $svc_opt -eq 1 ] ; then
-			echo "Enabling  auto refresh for $i"
+			if [ $silent -eq 0 ] ; then
+				echo "Enabling  auto refresh for $i"
+			fi
 			/bin/rm -f $i/variables/.norefreshsvc
 		else
-			echo "Disabling auto refresh for $i"
+			if [ $silent -eq 0 ] ; then
+				echo "Disabling auto refresh for $i"
+			fi
 			touch $i/variables/.norefreshsvc
 		fi
 	done
 	if [ $svc_opt -eq 1 ] ; then
-		echo "Enabling  auto refresh for $sysconfdir/control/defaultqueue"
+		if [ $silent -eq 0 ] ; then
+			echo "Enabling  auto refresh for $sysconfdir/control/defaultqueue"
+		fi
 		/bin/rm -f "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc
 	else
-		echo "Disabling auto refresh for $sysconfdir/control/defaultqueue"
+		if [ $silent -eq 0 ] ; then
+			echo "Disabling auto refresh for $sysconfdir/control/defaultqueue"
+		fi
 		touch "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc
 	fi
 else
@@ -605,12 +627,18 @@ else
 			continue
 		fi
 		if [ $svc_opt -eq 1 ] ; then
+			if [ $silent -eq 0 ] ; then
+				echo "Enabling  auto refresh for $1"
+			fi
 			if [ -d $i/variables ] ; then
 				/bin/rm -f "$DESTDIR"$i/variables/.norefreshsvc
 			else
 				/bin/rm -f "$DESTDIR"$i/.norefreshsvc
 			fi
 		else
+			if [ $silent -eq 0 ] ; then
+				echo "Disabling auto refresh for $i"
+			fi
 			if [ -d "$DESTDIR"$i/variables ] ; then
 				touch "$DESTDIR"$i/variables/.norefreshsvc
 			else
@@ -629,12 +657,16 @@ create_startup()
 			mkdir -p "$DESTDIR"/etc
 		fi
 		if [ ! -f /etc/synthetic.conf ] ; then
-			echo "Creating /service in /etc/synthetic.conf"
+			if [ $silent -eq 0 ] ; then
+				echo "Creating /service in /etc/synthetic.conf"
+			fi
 			printf "service\t/private/var/run/svscan\n" > /etc/synthetic.conf
 		else
 			grep "^service" /etc/synthetic.conf >/dev/null
 			if [ $? -ne 0 ] ; then
-				echo "Creating /service in /etc/synthetic.conf"
+				if [ $silent -eq 0 ] ; then
+					echo "Creating /service in /etc/synthetic.conf"
+				fi
 				if [ -z "$DESTDIR" ] ; then
 					printf "service\t/private/var/run/svscan\n" >> /etc/synthetic.conf
 				else
@@ -644,7 +676,7 @@ create_startup()
 				) > "$DESTDIR"/etc/synthetic.conf
 				fi
 			else
-				echo "/service exists in /etc/synthetic.conf"
+				echo "/service exists in /etc/synthetic.conf" 1>&2
 			fi
 		fi
 		;;
@@ -666,31 +698,41 @@ create_startup()
 		if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in systemd /lib/systemd/system/svscan.service"
+				if [ $silent -eq 0 ] ; then
+					echo "svscan startup enabled in systemd /lib/systemd/system/svscan.service"
+				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service
 			fi
 		elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in systemd /usr/lib/systemd/system/svscan.service"
+				if [ $silent -eq 0 ] ; then
+					echo "svscan startup enabled in systemd /usr/lib/systemd/system/svscan.service"
+				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service
 			fi
 		elif [ -f /sbin/initctl -a -d /etc/init ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in /etc/init/svscan.conf"
+				if [ $silent -eq 0 ] ; then
+					echo "svscan startup enabled in /etc/init/svscan.conf"
+				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf
 			fi
 		elif [ -d /etc/event.d ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/event.d/upstart >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in /etc/event.d/upstart"
+				if [ $silent -eq 0 ] ; then
+					echo "svscan startup enabled in /etc/event.d/upstart"
+				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/event.d
 			fi
 		elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
 			cmp -s "$DESTDIR"$shareddir/boot/svscan $prefix/etc/rc.d/svscan >/dev/null 2>&1
 			if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in rc $prefix/etc/rc.d/svscan"
+				if [ $silent -eq 0 ] ; then
+					echo "svscan startup enabled in rc $prefix/etc/rc.d/svscan"
+				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/svscan $prefix/etc/rc.d/svscan
 				/bin/chmod 755 $prefix/etc/rc.d/svscan
 				service svscan enable
@@ -698,7 +740,9 @@ create_startup()
 		elif [ -d /Library/LaunchDaemons ] ; then
 			cmp -s "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist >/dev/null 2>&1
 			if [ $? -ne 0 ] ; then
-				echo "svscan startup enabled in /Library/LaunchDaemons/org.indimail.svscan.plist"
+				if [ $silent -eq 0 ] ; then
+					echo "svscan startup enabled in /Library/LaunchDaemons/org.indimail.svscan.plist"
+				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist
 			fi
 		fi
@@ -807,10 +851,12 @@ restore_flag=$3
 owner=$4
 group=$5
 mode=$6
-if [ $restore_flag -eq 1 ] ; then
-	printf "Restoring %-40s from %s\n" $dir $env_file
-else
-	printf "importing %-40s from %s\n" $dir $env_file
+if [ $silent -eq 0 ] ; then
+	if [ $restore_flag -eq 1 ] ; then
+		printf "Restoring %-40s from %s\n" $dir $env_file
+	else
+		printf "importing %-40s from %s\n" $dir $env_file
+	fi
 fi
 old=$silent
 silent=1
@@ -822,7 +868,7 @@ do
 	file=`echo $line | cut -d= -f1`
 	value=`echo $line | cut -d= -f2- | tr -d \"`
 	if [ $force -eq 0 -a -f $dir/$file ] ; then
-		echo "env variable $file exists and --force not specified"
+		echo "env variable $file exists and --force not specified" 1>&2
 		silent=$old
 		return 1
 	fi
@@ -832,7 +878,9 @@ do
 			# variable=
 			# unset/remove variable
 			if [ -s $dir/$file -o ! -f $dir/$file ] ; then
-				echo "unset env variable $file"
+				if [ $silent -eq 0 ] ; then
+					echo "unset env variable $file"
+				fi
 				> $dir/$file
 			fi
 		else
@@ -840,7 +888,7 @@ do
 			# set variable with empty value
 			value=`echo $value | tr -d \"`
 			check_update_if_diff $dir/$file "$value"
-			if [ $? -ne 0 ] ; then
+			if [ $? -ne 0 -a $silent -eq 0 ] ; then
 				echo "set env variable $file=[$value]"
 			fi
 		fi
@@ -848,7 +896,7 @@ do
 		# variable="some value"
 		# set variable=$value
 		check_update_if_diff $dir/$file "$value"
-		if [ $? -ne 0 ] ; then
+		if [ $? -ne 0 -a $silent -eq 0 ] ; then
 			echo "set env variable $file=[$value]"
 		fi
 	fi
@@ -943,12 +991,16 @@ if [ -z $mode ] ; then
 fi
 for i in `/bin/ls -d "$DESTDIR"$servicedir/*/variables "$DESTDIR"$servicedir/.svscan/variables 2>/dev/null`
 do
-	printf "export %-35s %s %s %s\n" "`dirname $i`" $owner $group $mode
+	if [ $silent -eq 0 ] ; then
+		printf "export %-35s %s %s %s\n" "`dirname $i`" $owner $group $mode
+	fi
 	export_variables $i $i/.variables $owner $group $mode 
 done
 dir="$DESTDIR"$sysconfdir/control/defaultqueue 
 if [ -d $dir ] ; then
-	printf "export %-35s %s %s %s\n" $dir $owner $group $mode
+	if [ $silent -eq 0 ] ; then
+		printf "export %-35s %s %s %s\n" $dir $owner $group $mode
+	fi
 	export_variables $dir $dir/.variables $owner $group $mode
 fi
 }
@@ -1092,6 +1144,7 @@ down_state=0
 use_unshare=0
 nooverwrite=0
 run_file_only=0
+verbose=""
 
 if [ " $CONTROLDIR" = " " ] ; then
 	cntrldir=$sysconfdir/control
@@ -1569,6 +1622,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.13  2021-04-20 09:13:51+05:30  Cprogrammer
+# make output less verbose with --silent parameter
+#
 # Revision 1.12  2021-04-16 16:23:16+05:30  Cprogrammer
 # fixed typo
 #
