@@ -43,6 +43,7 @@ Release 2.13 Start 14/02/2021
 25. date822fmt() moved to libqmail
 - 20/04/2021
 26. svctool - make output less verbose with --silent parameter
+27. minisvc - honour --silent in export variables
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

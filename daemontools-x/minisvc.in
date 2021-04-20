@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.13 2021-04-20 09:13:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.14 2021-04-20 13:48:56+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.13 2021-04-20 09:13:51+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.14 2021-04-20 13:48:56+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1506,7 +1506,9 @@ case $option in
 	fi
 	old=$force
 	force=1
-	printf "export %-35s %s %s %s\n" "`dirname $dir`" $owner $group $mode
+	if [ $silent -eq 0 ] ; then
+		printf "export %-35s %s %s %s\n" "`dirname $dir`" $owner $group $mode
+	fi
 	export_variables $dir/variables $dir/variables/.variables $owner $group $mode
 	force=$old
 	if [ $option -ne 10 ] ; then
@@ -1564,7 +1566,9 @@ case $option in
 		import_variables $servicedir/$service_name/variables $file 0 $owner $group $mode
 	else
 		dir="$servicedir/$service_name"
-		printf "export %-35s %s %s %s\n" "$dir" $owner $group $mode
+		if [ $silent -eq 0 ] ; then
+			printf "export %-35s %s %s %s\n" "$dir" $owner $group $mode
+		fi
 		if [ ! "$dir/variables/$file" = "$env_file" ] ; then
 			old=$force
 			force=1
@@ -1622,6 +1626,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.14  2021-04-20 13:48:56+05:30  Cprogrammer
+# honour --silent in export variables
+#
 # Revision 1.13  2021-04-20 09:13:51+05:30  Cprogrammer
 # make output less verbose with --silent parameter
 #
