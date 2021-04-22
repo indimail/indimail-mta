@@ -44,6 +44,8 @@ Release 2.13 Start 14/02/2021
 - 20/04/2021
 26. svctool - make output less verbose with --silent parameter
 27. minisvc - honour --silent in export variables
+- 22/04/2021
+28. svctool - fixed check_libmysqlclient_lib function
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
