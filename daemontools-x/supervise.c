@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.20  2021-04-27 14:16:23+05:30  Cprogrammer
+ * do not treat error_exist as error for mkdir
+ *
  * Revision 1.19  2021-04-07 22:37:08+05:30  Cprogrammer
  * allow extra parent_dir argument for log process
  *
@@ -659,7 +662,7 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 
 	if (parent_dir) { /*- we were called as supervise log */
 		if (access(parent_dir, F_OK)) {
-			if (mkdir(parent_dir, 0755) == -1)
+			if (mkdir(parent_dir, 0755) == -1 && errno != error_exist)
 				strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", parent_dir, ": ");
 			if (chown(parent_dir, own, grp) == -1)
 				strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, ": ");
@@ -667,14 +670,14 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		if (chdir(parent_dir) == -1)
 			strerr_die6sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan/", parent_dir, ": ");
 		if (access("log", F_OK)) {
-			if (mkdir("log", mode) == -1)
+			if (mkdir("log", mode) == -1 && errno != error_exist)
 				strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", parent_dir, "/log: ");
 			if (chown("log", own, grp) == -1)
 				strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, "/log: ");
 		}
 	} else
 	if (access(service_dir, F_OK)) {
-		if (mkdir(service_dir, mode) == -1)
+		if (mkdir(service_dir, mode) == -1 && errno != error_exist)
 			strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", service_dir, ": ");
 		if (chown(service_dir, own, grp) == -1)
 			strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", service_dir, ": ");
@@ -754,7 +757,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.19 2021-04-07 22:37:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.20 2021-04-27 14:16:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
