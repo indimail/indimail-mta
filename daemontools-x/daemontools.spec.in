@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.18 2021-04-07 22:57:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.19 2021-04-28 10:12:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -260,6 +260,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %attr(0644,root,root)                    %{shareddir}/boot/upstart
 %attr(0644,root,root)                    %{shareddir}/boot/systemd
+%attr(0644,root,root)                    %{shareddir}/boot/systemd.override.conf
 
 %docdir %{mandir}
 %docdir %{shareddir}/doc

@@ -535,6 +535,42 @@ or
 $ qmailctl start # Universal
 ```
 
+indimail, indimail-mta uses [systemd.unit](https://www.freedesktop.org/software/systemd/man/systemd.unit.html) file to load all indimail services. This is the standard unit file that gets installed as /lib/systemd/system/svscan.service
+
+```
+[Unit]
+Description=SVscan Service
+After=local-fs.target network.target
+
+[Service]
+ExecStart=/usr/libexec/indimail/svscanboot /service
+ExecStop=/etc/init.d/svscan stop
+Restart=on-failure
+Type=simple
+PrivateTmp=yes
+
+[Install]
+Alias=indimail.service
+Alias=indimail-mta.service
+WantedBy=multi-user.target
+```
+
+You can override values by creating a file override.conf in /lib/systemd/system/svscan.service.d. As an example, on a raspberry pi system, you should have svscan started only after the system clock is synchronized with a NTP source (many SBC don't have battery backed Real Time Clock - RTC). This ensures that svscan gets started when the system has a correct date, time so that logs created will not have absurd timestamps.
+
+```
+[Unit]
+Wants=time-sync.target
+After=local-fs.target remote-fs.target time-sync.target network.target network-online.target systemd-networkd-wait-online.service
+```
+
+So if you have a system without a battery backed RTC, you should do this (even when you do a binary installation)
+
+```
+$ sudo mkdir /lib/systemd/system/svscan.service.d
+$ sudo cp /usr/share/indimail/boot/systemd.override.conf /lib/systemd/system/svscan.service.d/override.conf
+$ sudo systemctl daemon-reload
+```
+
 After starting svscan as given above, your system will be ready to send and receive mails, provided you have set your system hostname, domain name IP addresses and setup mail exchanger in DNS. You can look at this [guide](https://www.godaddy.com/garage/configuring-dns-for-email-a-quick-beginners-guide/) to do that.
 
 ## Check Status of Services

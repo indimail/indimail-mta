@@ -24,6 +24,9 @@ Release 1.1 Start 27/02/2021
 13. minisvc - honour --silent in export variables
 - 27/04/2021
 14. supervise: do not treat error_exist as error for mkdir
+- 28/04/2021
+15. systemd.override.conf: added systemd override unit file for systems
+    without battery backed RTC
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

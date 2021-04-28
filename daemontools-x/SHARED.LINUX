@@ -3,3 +3,4 @@
 # @shareddir@/boot
 f:::0644:/boot/:upstart:upstart
 f:::0644:/boot/:systemd:systemd
+f:::0644:/boot/:systemd.override.conf:systemd.override.conf
