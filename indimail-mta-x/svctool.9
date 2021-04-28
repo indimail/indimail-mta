@@ -773,7 +773,7 @@ Known values for OPTION are:
                    "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
 
 --refreshsvc=service_path
-  [--run-file-only]
+  [--run-file-only] [--force]
 
   Refresh run script and variables for a supervise service
   service_path   - Full path of service
@@ -782,6 +782,7 @@ Known values for OPTION are:
                    "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
                    service_path can be "all" to act on all services
   run-file-only  - Recreate run files but not variables
+  force          - Recreate service even if it has norefreshsvc flag
   NOTE: if the file .norefreshsvc is present in the variable or the config
   directory, refresh is skipped
 

@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.14 2021-04-20 13:48:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.15 2021-04-28 11:22:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.14 2021-04-20 13:48:56+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.15 2021-04-28 11:22:14+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -58,7 +58,7 @@ Known values for OPTION are:
                    "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
 
 --refreshsvc=service_name
-  [--run-file-only]
+  [--run-file-only] [--force]
 
   Enable supervise scripts for service
   service_name   - name of service with full path
@@ -67,6 +67,7 @@ Known values for OPTION are:
                    "@servicedir@/qmail-smtpd.25 @servicedir@/qmail-imapd.143"
                    service_name can be "all" to act on all services
   run-file-only  - Recreate run files but not variables
+  force          - Recreate service even if it has norefreshsvc flag
   NOTE: if the file .norefreshsvc is present in the variable or the config
   directory, refresh is skipped
 
@@ -521,7 +522,7 @@ if [ " $1" = " all" ] ; then
 			echo "$i/variables/.options or $i/.options missing" 1>&2
 			continue
 		fi
-		if [ -f $i/variables/.norefreshsvc ] ; then
+		if [ -f $i/variables/.norefreshsvc -a $force -eq 0 ] ; then
 			if [ $silent -eq 0 ] ; then
 				echo "Skip Refreshing service $svcname"
 			fi
@@ -532,7 +533,7 @@ if [ " $1" = " all" ] ; then
 			sh $i/variables/.options
 		fi
 	done
-	if [ -f "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc ] ; then
+	if [ -f "$DESTDIR"$sysconfdir/control/defaultqueue/.norefreshsvc -a $force -eq 0 ] ; then
 		if [ $silent -eq 0 ] ; then
 			echo "Skip Refreshing config defaultqueue"
 		fi
@@ -555,10 +556,12 @@ else
 			continue
 		fi
 		if [ -f "$DESTDIR"$i/variables/.norefreshsvc -o -f "$DESTDIR"$i/.norefreshsvc ] ; then
-			if [ $silent -eq 0 ] ; then
-				echo "Skip Refreshing service/config $svcname"
+			if [ $force -eq 0 ] ; then
+				if [ $silent -eq 0 ] ; then
+					echo "Skip Refreshing service/config $svcname"
+				fi
+				continue
 			fi
-			continue
 		fi
 		if [ -f "$DESTDIR"$i/variables/.options ] ; then
 			if [ $silent -eq 0 ] ; then
@@ -1626,6 +1629,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.15  2021-04-28 11:22:14+05:30  Cprogrammer
+# allow --force to override norefreshsvc flag for a service
+#
 # Revision 1.14  2021-04-20 13:48:56+05:30  Cprogrammer
 # honour --silent in export variables
 #

@@ -27,6 +27,7 @@ Release 1.1 Start 27/02/2021
 - 28/04/2021
 15. systemd.override.conf: added systemd override unit file for systems
     without battery backed RTC
+16. minisvc - allow --force to override norefreshsvc flag for a service
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
