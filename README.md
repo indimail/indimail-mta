@@ -523,18 +523,6 @@ $ sudo /usr/sbin/svctool --config=rm-boot
 
 ## Start Services
 
-```
-$ sudo systemctl start svscan # Linux
-or
-$ sudo service svscan start # Linux/FreeBSD
-or
-$ /etc/init.d/svscan start # Linux
-or
-$ sudo launchctl start org.indimail.svscan # Mac OSX
-or
-$ qmailctl start # Universal
-```
-
 indimail, indimail-mta uses [systemd.unit](https://www.freedesktop.org/software/systemd/man/systemd.unit.html) file to load all indimail services. This is the standard unit file that gets installed as /lib/systemd/system/svscan.service
 
 ```
@@ -569,6 +557,20 @@ So if you have a system without a battery backed RTC, you should do this (even w
 $ sudo mkdir /lib/systemd/system/svscan.service.d
 $ sudo cp /usr/share/indimail/boot/systemd.override.conf /lib/systemd/system/svscan.service.d/override.conf
 $ sudo systemctl daemon-reload
+```
+
+Now you can start the indimail/indimail-mta service
+
+```
+$ sudo systemctl start svscan # Linux
+or
+$ sudo service svscan start # Linux/FreeBSD
+or
+$ /etc/init.d/svscan start # Linux
+or
+$ sudo launchctl start org.indimail.svscan # Mac OSX
+or
+$ qmailctl start # Universal
 ```
 
 After starting svscan as given above, your system will be ready to send and receive mails, provided you have set your system hostname, domain name IP addresses and setup mail exchanger in DNS. You can look at this [guide](https://www.godaddy.com/garage/configuring-dns-for-email-a-quick-beginners-guide/) to do that.
