@@ -16,6 +16,7 @@
 @prefix@/sbin/qhpsi                 qscand:qmail   6551
 @prefix@/sbin/run-cleanq            root:qscand    2551
 @prefix@/sbin/qmail-queue           qmailq:qmail   6551
+@prefix@/sbin/qmail-deliver         root:indimail  4551
 @prefix@/sbin/qscanq                qscand:qscand  4551
 @prefix@/sbin/sys-checkpwd          root:root      4551
 #

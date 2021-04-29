@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.303 2021-04-29 12:03:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.304 2021-04-29 20:28:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -186,7 +186,7 @@ Conflicts: indimail-mini < 2.0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
 %endif
-Requires: coreutils /bin/sh glibc openssl
+Requires: coreutils /bin/sh glibc openssl procps
 %if %{undefined suse_version} && %{undefined sles_version}
 Requires: /usr/bin /usr/sbin
 %endif
@@ -333,6 +333,9 @@ fi
   install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
   install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
+%{__mkdir_p} %{buildroot}%{qsysconfdir}/control/defaultqueue
+echo "%{_prefix}/sbin/qmail-qmqpc" > %{buildroot}%{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+echo "root" > %{buildroot}%{qsysconfdir}/control/direct_mail_users
 
 # remove devel files as we are not building a devel package
 %{__rm} -rf %{buildroot}%{mandir}/man3
@@ -769,12 +772,14 @@ echo ../resolv.conf 1>&3
 %verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
 %verify (not user group mode caps) %attr(2551, root, qscand)    %{_prefix}/sbin/run-cleanq
 %verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
+%verify (not user group mode caps) %attr(4551, root, qmail)     %{_prefix}/sbin/qmail-deliver
 %verify (not user group mode caps) %attr(4551, qscand, qscand)  %{_prefix}/sbin/qscanq
 %verify (not user group mode caps) %attr(4551, root, root)      %{_prefix}/sbin/sys-checkpwd
 %else
 %attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
 %attr(2551,root,qscand)                 %{_prefix}/sbin/run-cleanq
 %attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
+%attr(4551,root,qmail)                  %{_prefix}/sbin/qmail-deliver
 %attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
 %attr(4551,root,root)                   %{_prefix}/sbin/sys-checkpwd
 %endif
@@ -789,7 +794,6 @@ echo ../resolv.conf 1>&3
                                    %{qmaildir}/sbin
                                    %{qmaildir}/users
                                    %{qmaildir}/control
-                                   %{qmaildir}/libexec
 %dir %attr(2775,indimail,qmail)    %{qsysconfdir}/control
 %dir %attr(2775,indimail,qmail)    %{qsysconfdir}/users
 %if "%{mandir}" != "/usr/share/man"
@@ -797,6 +801,7 @@ echo ../resolv.conf 1>&3
 %dir %attr(0755,root,root)         %{mandir}/man1
 %dir %attr(0755,root,root)         %{mandir}/man8
 %endif
+%dir %attr(755,indimail,qmail)     %{qsysconfdir}/control/defaultqueue
 #
 %attr(0755,root,root)              %{_prefix}/bin/sendmail
 %attr(0755,root,root)              %{_prefix}/bin/qmail-inject
@@ -805,11 +810,16 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/bin/predate
 %attr(0755,root,root)              %{_prefix}/bin/datemail
 %attr(0755,root,root)              %{_prefix}/bin/mailsubj
+%attr(0755,root,root)              %{_prefix}/bin/queue-fix
 %attr(0755,root,root)              %{_prefix}/bin/qmail-showctl
 %attr(0755,root,root)              %{_prefix}/bin/qmaildirmake
 %attr(0755,root,root)              %{_prefix}/bin/maildir2mbox
 %attr(0755,root,root)              %{_prefix}/bin/maildirwatch
+%attr(755,root,root)               %{_prefix}/bin/srsfilter
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
+
+%attr(644,root,root)  %config(missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+%attr(644,root,root)  %config(missingok) %{qsysconfdir}/control/direct_mail_users
 
 %if 0%{?suse_version} >= 1120
 %attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions
@@ -823,6 +833,7 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)              %{mandir}/man1/qmaildirmake.1.gz
 %attr(0644,root,root)              %{mandir}/man1/maildir2mbox.1.gz
 %attr(0644,root,root)              %{mandir}/man1/maildirwatch.1.gz
+%attr(0644,root,root)              %{mandir}/man1/srsfilter.1.gz
 #
 %attr(0644,root,root)              %{mandir}/man5/qmail-srs.5.gz
 #
@@ -830,9 +841,30 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)              %{mandir}/man8/qmail-inject.8.gz
 %attr(0644,root,root)              %{mandir}/man8/isendmail.8.gz
 %attr(0644,root,root)              %{mandir}/man8/qmail-qmqpc.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qmail-queue.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qmail-deliver.8.gz
 %attr(0644,root,root)              %{mandir}/man8/irmail.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qhpsi.8.gz
+%attr(0644,root,root)              %{mandir}/man8/queue-fix.8.gz
 
+%if %build_on_obs == 0
+%license %attr(0644,root,root)     %{shareddir}/doc/COPYING-indimail-mta
+%license %attr(0644,root,root)     %{shareddir}/doc/README.licenses
+%license %attr(0644,root,root)     %{shareddir}/doc/LICENSE.qhpsi
+%else
+%attr(0644,root,root)              %{shareddir}/doc/COPYING-indimail-mta
+%attr(0644,root,root)              %{shareddir}/doc/README.licenses
+%attr(0644,root,root)              %{shareddir}/doc/LICENSE.qhpsi
+%endif
+%attr(0644,root,root)              %{shareddir}/doc/softwarelicense1-1.html
 %attr(0644,root,root)              %{shareddir}/doc/INSTALL-MINI
+%attr(0644,root,root)              %{shareddir}/doc/README.clamav
+%attr(0644,root,root)              %{shareddir}/doc/README.indimail-mta
+%attr(0644,root,root)              %{shareddir}/doc/README.qhpsi
+%attr(0644,root,root)              %{shareddir}/doc/README.queue-fix
+%attr(0644,root,root)              %{shareddir}/doc/README.srs
+%attr(0644,root,root)              %{shareddir}/doc/CREDITS
+%attr(0644,root,root)              %{shareddir}/doc/ChangeLog-indimail-mta
 
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
 # and /var/qmail/control/plusdomain from your central server, so that
@@ -840,6 +872,15 @@ echo ../resolv.conf 1>&3
 # this host's name in /var/qmail/control/idhost, so that
 # qmail-inject generates Message-ID without any risk of collision
 
+%if 0%{?suse_version} >= 1120
+%verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
+%verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
+%verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-deliver
+%else
+%attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
+%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
+%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-deliver
+%endif
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
@@ -881,6 +922,7 @@ fi
 %verify_permissions -e %{_prefix}/sbin/qhpsi
 %verify_permissions -e %{_prefix}/sbin/run-cleanq
 %verify_permissions -e %{_prefix}/sbin/qmail-queue
+%verify_permissions -e %{_prefix}/sbin/qmail-deliver
 %verify_permissions -e %{_prefix}/sbin/qscanq
 %verify_permissions -e %{_prefix}/sbin/sys-checkpwd
 %verify_permissions -e %{qmaildir}/alias/
@@ -960,6 +1002,8 @@ nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl stop nscd.service
   fi
 fi
 echo "Adding indimail-mta users/groups"
@@ -991,6 +1035,8 @@ done
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
   fi
 fi
 ) >> /var/log/%{name}-setup.log 2>&1
@@ -1118,6 +1164,7 @@ fi
 %if 0%{?set_permissions:1} > 0
   %set_permissions %{_prefix}/sbin/qhpsi
   %set_permissions %{_prefix}/sbin/qmail-queue
+  %set_permissions %{_prefix}/sbin/qmail-deliver
   %set_permissions %{_prefix}/sbin/qscanq
   %set_permissions %{_prefix}/sbin/run-cleanq
   %set_permissions %{_prefix}/sbin/sys-checkpwd
@@ -1468,6 +1515,8 @@ nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl stop nscd.service
   fi
 fi
 for i in alias qmaild qmailp qmailq qmailr qmails qscand indimail
@@ -1483,6 +1532,8 @@ done
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
   fi
 fi
 
@@ -1596,8 +1647,8 @@ nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
-  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl start nscd.service
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl stop nscd.service
   fi
 fi
 echo "Adding IndiMail users/groups"
@@ -1614,10 +1665,11 @@ fi
 if [ $? = 4 ] ; then
   /usr/sbin/useradd -r -g indimail -d %{qmaildir} indimail
 fi
+/usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailq || true
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
-  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
     /bin/systemctl start nscd.service
   fi
 fi
@@ -1632,10 +1684,9 @@ fi
 %endif
 
 if [ -f %{_prefix}/sbin/qmail-qmqpc ] ; then
-  %{__mv} %{_prefix}/sbin/qmail-queue %{_prefix}/sbin/qmail-queue.orig
+  %{__mkdir_p} %{qsysconfdir}/control/defaultqueue
+  echo "%{_prefix}/sbin/qmail-qmqpc" > %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 fi
-cd %{_prefix}/sbin
-/bin/ln -sf qmail-qmqpc qmail-queue
 if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
   %{_sysconfdir}/init.d/sendmail stop
   if [ -f /sbin/chkconfig ] ; then
@@ -1787,6 +1838,31 @@ if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   echo "recreating ld.so cache"
   /sbin/ldconfig
 fi
+echo "removing user indimail"
+/usr/bin/getent passwd indimail > /dev/null && /usr/sbin/userdel indimail >/dev/null || true
+echo "removing user qmailq"
+/usr/bin/getent passwd qmailq > /dev/null && /usr/sbin/userdel qmailq >/dev/null || true
+echo "removing group indimail"
+/usr/bin/getent group indimail  > /dev/null && /usr/sbin/groupdel indimail >/dev/null || true
+if [ $nscd_up -ge 1 ] ; then
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
+  fi
+fi
+for i in idhost defaulthost defaultdomain plusdomain
+do
+  %{__rm} -f %{qsysconfdir}/control/$i || true
+done
+%if "%{_prefix}" != "/usr"
+  for i in bin sbin libexecdir/indimail lib/indimail share/indimail
+  do
+    %{__rm} -rf %{_prefix}/$i || true
+  done
+  rmdir --ignore-fail-on-non-empty %{_prefix} 2>/dev/null || true
+%endif
+rmdir --ignore-fail-on-non-empty %{qsysconfdir} 2>/dev/null || true
 ) >> /var/log/%{name}-setup.log
 
 # fix changelog for openSUSE buildservice

@@ -51,6 +51,7 @@ f:::0755:/sbin/:ctrlenv:ctrlenv
 f:::0755:/sbin/:udplogger:udplogger
 f:::0751:/sbin/:ofmipd:ofmipd
 f:qmailq:qmail:06551:/sbin/:qmail-queue:qmail-queue
+f:root:qmail:04551:/sbin/:qmail-deliver:qmail-deliver
 f:qscand:qmail:06551:/sbin/:qhpsi:qhpsi
 f:qscand:qscand:04551:/sbin/:qscanq:qscanq
 f:root:qscand:02551:/sbin/:run-cleanq:run-cleanq

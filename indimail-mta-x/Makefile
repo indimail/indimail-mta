@@ -35,15 +35,15 @@ it = indimail-mta.perms 822date 822field 822header 822print 822received \
 	plugtest installer predate preline printforward \
 	printmaillist proc proc+df qaes ctrlenv qarf qmail-cat qmail-cdb \
 	qmail-clean qmailconfig maildirsize qmail-daemon qmaildirmake \
-	qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
-	qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue \
-	qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter qmail-qmqpc \
-	qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue qmail-remote qmail-rm \
-	qmail-rspawn qmail-send qmail-showctl qmail-daned \
-	qmail-smtpd qmail_smtpd.so qmail-start qmail-tcpok qmail-tcpto \
-	qmail-todo qmail-upq qpq qquote qreceipt qsmhook queue-fix \
-	recipient-cdb relaytest rewind irmail rpmattr rrforward rrt \
-	sendmail serialcmd serialqmtp serialsmtp setforward setmaillist \
+	qmail-deliver qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject \
+	qmail-local qmail-lspawn qmail-multi qmail-newmrh qmail-newu \
+	qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter \
+	qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
+	qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl \
+	qmail-daned qmail-smtpd qmail_smtpd.so qmail-start qmail-tcpok \
+	qmail-tcpto qmail-todo qmail-upq qpq qquote qreceipt qsmhook \
+	queue-fix recipient-cdb relaytest rewind irmail rpmattr rrforward \
+	rrt sendmail serialcmd serialqmtp serialsmtp setforward setmaillist \
 	smtpd-plugin0.so smtpd-plugin.so sortedtest \
 	spawn-filter spfquery splogger srsfilter surblfilter surblqueue \
 	swaks sys-checkpwd \
@@ -59,7 +59,7 @@ man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	forward.1 condredirect.1 qmail-control.5 rrforward.1 \
 	qreceipt.1 maildirserial.1 qmail-rm.1 dot-qmail.5 \
 	qmail-users.5 dot-forward.1 fastforward.1 new-inject.1 \
-	filterto.1 replier.1 qmail-local.8 \
+	filterto.1 replier.1 qmail-local.8 qmail-deliver.8 \
 	qmail-getpw.8 qmail-remote.8 qmail-send.8 qmail-todo.8 \
 	qmail-start.8 qmail-queue.8 qmail-dkim.8 dk-filter.8 \
 	qmail-dk.8 dktest.8 qmail-multi.8 spawn-filter.8 \
@@ -1388,6 +1388,24 @@ drate.9 conf-prefix
 	cat drate.9 \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> drate.1
+
+qmail-deliver: load qmail-deliver.o auto_uids.o auto_qmail.o \
+variables.o control.o auto_control.o auto_split.o fmtqfn.o \
+get_uid.o
+	./load qmail-deliver auto_uids.o auto_qmail.o \
+	control.o auto_control.o auto_split.o fmtqfn.o \
+	variables.o get_uid.o -lqmail
+
+qmail-deliver.o: \
+compile qmail-deliver.c auto_qmail.h auto_uids.h fmtqfn.h \
+control.h variables.h
+	./compile qmail-deliver.c
+
+qmail-deliver.8: \
+qmail-deliver.9 conf-sysconfdir
+	cat qmail-deliver.9 \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> qmail-deliver.8
 
 qmail-queue: \
 load qmail-queue.o triggerpull.o fmtqfn.o get_uid.o MakeArgs.o \

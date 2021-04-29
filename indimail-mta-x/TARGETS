@@ -1140,3 +1140,5 @@ queue-fix.8
 hassmtputf8.h
 idn2.lib
 PKGBUILD
+qmail-deliver
+qmail-deliver.8

@@ -104,7 +104,12 @@ install: build
 	fi
 	# for indimail-mini we require an empty control directory
 	# so we create a directory and use that in indimail-mini.install
-	mkdir -p $(DESTDIR)/indimail-mini/control
+	mkdir -p $(DESTDIR)/indimail-mini/control/defaultqueue
+	if [ -f indimail-mta.perms ] ; then \
+		install -m 0644 indimail-mta.perms  $(DESTDIR)/indimail-mini/control/indimail-mta.perms; \
+		echo "${prefix}/sbin/qmail-qmqpc" > $(DESTDIR)/indimail-mini/control/defaultqueue/QMAILQUEUE; \
+		echo "root" > $(DESTDIR)/indimail-mini/control/direct_mail_users; \
+	fi
 	if [ -f qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
 		install -m 0755 qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \

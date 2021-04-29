@@ -625,3 +625,6 @@ PKGBUILD.proto
 hassmtputf8.h
 PKGBUILD
 archpkg*.install
+qmail-deliver
+qmail-deliver.o
+qmail-deliver.8
