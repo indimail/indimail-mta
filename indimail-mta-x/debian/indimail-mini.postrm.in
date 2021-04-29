@@ -45,25 +45,29 @@ esac
 # Debian silliness
 #
 if [ " $1" = " remove" ] ; then
-	${rm} -f ${prefix}/bin/qmail-queue ${qsysconfdir}/control/idhost || true
+	${rm} -f ${prefix}/bin/qmail-queue
 	if [ ! "@prefix@" = "/usr" ] ; then
-	for i in bin sbin libexecdir/indimail lib/indimail share/indimail
-	do
-		${rm} -rf ${prefix}/$i || true
-	done
+		for i in bin sbin libexecdir/indimail lib/indimail share/indimail
+		do
+			${rm} -rf ${prefix}/$i || true
+		done
 	fi
-	${rmdir} --ignore-fail-on-non-empty ${qsysconfdir} 2>/dev/null || true
 	${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
 fi
+${rmdir} --ignore-fail-on-non-empty ${qsysconfdir} 2>/dev/null || true
 if [ " $1" = " purge" ] ; then
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd stop
+		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+			/bin/systemctl start nscd.service
 		fi
 	fi
 	echo "removing user indimail"
 	/usr/bin/getent passwd indimail > /dev/null && /usr/sbin/userdel indimail >/dev/null || true
+	echo "removing user qmailq"
+	/usr/bin/getent passwd qmailq > /dev/null && /usr/sbin/userdel qmailq >/dev/null || true
 	echo "removing group indimail"
 	/usr/bin/getent group indimail  > /dev/null && /usr/sbin/groupdel indimail >/dev/null || true
 	if [ $nscd_up -ge 1 ] ; then
@@ -71,14 +75,19 @@ if [ " $1" = " purge" ] ; then
 			/etc/init.d/nscd start
 		fi
 	fi
-	if [ ! "@prefix@" = "/usr" ] ; then
-	for i in bin sbin libexecdir/indimail lib/indimail share/indimail
+	${rm} -f ${prefix}/sbin/qmail-queue
+	for i in idhost defaulthost defaultdomain plusdomain
 	do
-		${rm} -rf ${prefix}/$i || true
+		${rm} -f ${qsysconfdir}/control/$i || true
 	done
+	if [ ! "@prefix@" = "/usr" ] ; then
+		for i in bin sbin libexecdir/indimail lib/indimail share/indimail
+		do
+			${rm} -rf ${prefix}/$i || true
+		done
+		${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
 	fi
 	${rmdir} --ignore-fail-on-non-empty ${qsysconfdir} 2>/dev/null || true
-	${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
 fi
 if [ ! "${prefix}" = "/usr" ] ; then
 	echo "recreating ld.so cache"
