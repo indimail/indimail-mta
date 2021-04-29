@@ -34,7 +34,7 @@ indimail-mta, indimail-virtualdomains, libqmail gets installed with man pages.
 
 Refer to this [WIKI](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for a detailed understanding of Indimail Virtual Domains and indimail-mta.
 
-This document contains instructions for building indimail-mta from source. indimail-mta compiles and runs on all linux distros, Arch Linux, FreeBSD and Mac OS X. Let me know if you want me to try it on any other OS.
+This document contains instructions for building indimail-mta from source. indimail-mta compiles and runs on all linux distros, Arch Linux, Gentoo, FreeBSD and Mac OS X. Let me know if you want me to try it on any other OS.
 
 To install you need to do the following
 
