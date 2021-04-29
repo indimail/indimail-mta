@@ -51,6 +51,9 @@ Release 2.13 Start 14/02/2021
 - 29/04/2021
 30. binm1.sh: removed setting of PATH env variable
 31. replaced QMAIL with QMAILHOME in scripts and man pages
+32. qmail-inject: use 'n' option in QMAILINJECT env variable to print message
+    rather than queue
+33. debian/indimail-mini: corrected package file list
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

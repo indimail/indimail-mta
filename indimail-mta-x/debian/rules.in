@@ -102,6 +102,9 @@ install: build
 	if [ -f ../BUILD/debian/usr.bin.freshclam ] ; then \
 		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
 	fi
+	# for indimail-mini we require an empty control directory
+	# so we create a directory and use that in indimail-mini.install
+	mkdir -p $(DESTDIR)/indimail-mini/control
 	if [ -f qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
 		install -m 0755 qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
