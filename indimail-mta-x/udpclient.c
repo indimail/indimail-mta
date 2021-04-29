@@ -1,5 +1,8 @@
 /*
  * $Log: udpclient.c,v $
+ * Revision 1.6  2021-04-29 20:30:32+05:30  Cprogrammer
+ * moved variable inside if block
+ *
  * Revision 1.5  2018-06-01 15:17:29+05:30  Cprogrammer
  * use strerr_die2sys to display error message
  *
@@ -90,8 +93,8 @@ main(int argc, char **argv)
 	}
 	if (substdio_flush(subfdout) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
-		int r;
 	if (maxresponsesize > 0) {
+		int             r;
 		if ((r = timeoutread(timeout, sfd, buf, maxresponsesize)) == -1)
 			strerr_die2sys(111, FATAL, "read: ");
 		if (r > 0) {
@@ -109,7 +112,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	static char    *x = "$Id: udpclient.c,v 1.5 2018-06-01 15:17:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udpclient.c,v 1.6 2021-04-29 20:30:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
