@@ -10,6 +10,56 @@ shareddir=@shareddir@
 rm=/bin/rm
 mv=/bin/mv
 
+setperm()
+{
+	local user="$1"; shift
+	local group="$1"; shift
+	local mode="$1"; shift
+	local file="$1"; shift
+	/usr/sbin/dpkg-statoverride --list "$file" >/dev/null && return 0
+	/usr/sbin/dpkg-statoverride --update --add "$user" "$group" "$mode" "$file"
+}
+
+fixperms()
+{
+	if [ $# -eq 3 ] ; then # directory
+	#%dir %attr(0555,root,indimail) /var/indimail/sbin
+		lin=$2
+		file=$3
+		if [ ! -d $file ] ; then
+			return 0
+		fi
+	elif [ $# = 2 ] ; then # file
+	#%attr(0555,root,qmail) /var/indimail/bin/rsmtp
+		lin=$1
+		file=$2
+		if [ ! -f $file ] ; then
+			return 0
+		fi
+	fi
+	perm=`echo $lin|cut -d\( -f2 | cut -d, -f1`
+	perm_f1=`echo $perm | cut -c1`
+	own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
+	grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
+	if [ -f $file ] ; then
+		if [ $perm_f1 -eq 0 ] ; then # 4755, 0644
+			/bin/chown $own:$grp $file
+			/bin/chmod $perm $file
+		else
+			echo $file
+			if [ -f /usr/sbin/dpkg-statoverride ] ; then
+				setperm $own $grp $perm $file
+			else
+				/bin/chown $own:$grp $file
+				/bin/chmod $perm $file
+			fi
+		fi
+	elif [ -d $file ] ; then
+		/bin/chown $own:$grp $file
+		/bin/chmod $perm $file
+	fi
+}
+
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
 	echo "You are not root" 1>&2
@@ -38,11 +88,17 @@ esac
 
 #DEBHELPER#
 
-if [ -f ${prefix}/sbin/qmail-qmqpc ] ; then
-	${rm} -f ${prefix}/sbin/qmail-queue
+if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
+(
+/bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | while read line
+do
+	if [ " $line" = " " ] ; then
+		continue
+	fi
+	fixperms $line
+done
+) > ${qsysconfdir}/indimail-mta-stat.override
 fi
-cd ${prefix}/sbin
-/bin/ln -sf qmail-qmqpc qmail-queue
 if [ -f /etc/init.d/sendmail ] ; then
 	/etc/init.d/sendmail stop
 	if [ -f /sbin/chkconfig ] ; then
