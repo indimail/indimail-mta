@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: qmail-deliver.c,v $
+ * Revision 1.1  2021-04-29 21:16:22+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -361,22 +364,26 @@ main(int argc, char **argv)
 	if (chdir(queuedir) == -1)
 		die(62);
 	myuid = getuid();
-	if (!(pw = getpwuid(myuid)))
-		die(67);
-	if (control_readfile(&uidlist, "direct_mail_users", 0) == -1)
-		die(55);
-	if (!uidlist.len)
-		die(55);
-	for (auth_flag = len = 0, ptr = uidlist.s;len < uidlist.len;) {
-		len += ((token_len = str_len(ptr)) + 1);
-		if (!str_diffn(ptr, pw->pw_name, token_len)) {
-			auth_flag = 1;
-			break;
+	if (myuid) {
+		if (!(pw = getpwuid(myuid)))
+			die(67);
+		if (control_readfile(&uidlist, "direct_mail_users", 0) == -1)
+			die(55);
+		if (!uidlist.len)
+			die(55);
+		for (auth_flag = len = 0, ptr = uidlist.s;len < uidlist.len;) {
+			len += ((token_len = str_len(ptr)) + 1);
+			if (!str_diffn(ptr, pw->pw_name, token_len)) {
+				auth_flag = 1;
+				break;
+			}
+			ptr = uidlist.s + len;
 		}
-		ptr = uidlist.s + len;
-	}
-	if (!auth_flag)
-		die(55);
+		if (!auth_flag)
+			die(55);
+	} else /*- allow uid 0 to send without restriction */
+	if (!(pw = getpwnam("alias")))
+		die(67);
 	mypid = getpid();
 	starttime = now();
 	datetime_tai(&dt, starttime);
@@ -523,4 +530,13 @@ main(int argc, char **argv)
 	if (unlink(fntmptph.s) == -1)
 		die(61);
 	die(0);
+}
+
+void
+getversion_qmail_deliver_c()
+{
+	static char    *x = "$Id: qmail-deliver.c,v 1.1 2021-04-29 21:16:22+05:30 Cprogrammer Exp mbhangui $";
+
+	if (x)
+		x++;
 }
