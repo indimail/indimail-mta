@@ -285,7 +285,6 @@ auto_usera.o: compile auto_usera.c
 swaks: swaks.pl conf-qmail conf-prefix
 	cat swaks.pl \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> swaks
 	chmod 755 swaks
 
@@ -307,7 +306,7 @@ greydaemon: greydaemon.pl conf-prefix
 binm1: \
 binm1.sh conf-qmail
 	cat binm1.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-qmail`"}g \
 	> binm1
 
 binm1+df: \
@@ -588,7 +587,7 @@ warn-auto.sh rmail.sh conf-prefix
 etrn: \
 warn-auto.sh etrn.sh conf-qmail conf-libexec conf-prefix
 	cat warn-auto.sh etrn.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> etrn
@@ -598,7 +597,7 @@ warn-auto.sh atrn.sh conf-qmail conf-sysconfdir conf-prefix
 	cat warn-auto.sh atrn.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> atrn
 
@@ -612,7 +611,7 @@ warn-auto.sh multirotate.sh conf-prefix conf-servicedir
 qpq: \
 warn-auto.sh qpq.sh conf-qmail conf-prefix
 	cat warn-auto.sh qpq.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qpq
 
@@ -1571,7 +1570,7 @@ socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o idn2.lib
 qmail-remote.8: \
 qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
 	cat qmail-remote.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
 	> qmail-remote.8
@@ -1789,7 +1788,7 @@ compile qmail-nullqueue.c
 qmail-todo.8: \
 qmail-todo.9 conf-qmail conf-sysconfdir
 	cat qmail-todo.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-todo.8
 
@@ -1850,7 +1849,7 @@ load qmail-start.o prot.o auto_uids.o get_uid.o
 qmail-start.8: \
 qmail-start.9 conf-qmail
 	cat qmail-start.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> qmail-start.8
 
 qmail-start.o: \
@@ -1905,14 +1904,14 @@ auto_control.h conf-sync conf-todo
 qmail-upq: \
 warn-auto.sh qmail-upq.sh conf-qmail conf-split
 	cat warn-auto.sh qmail-upq.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> qmail-upq
 
 qmail-users.5: \
 qmail-users.9 conf-qmail conf-sysconfdir
 	cat qmail-users.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@assign@}"`head -1 conf-sysconfdir`/users"}g \
 	> qmail-users.5
 
@@ -2725,7 +2724,6 @@ warn-auto.sh dk-filter.sh conf-prefix conf-sysconfdir
 senders: \
 warn-auto.sh senders.sh conf-qmail
 	cat warn-auto.sh senders.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> senders
 
 fmt_ushort.o: \
@@ -3212,7 +3210,6 @@ hastlsa.h conf-ip conf-tls MakeArgs.h
 qmail-daned.8: \
 qmail-daned.9 conf-qmail conf-sysconfdir
 	cat qmail-daned.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-daned.8
 

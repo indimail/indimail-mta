@@ -1,5 +1,8 @@
 #
 # $Log: atrn.sh,v $
+# Revision 1.11  2021-04-29 10:04:52+05:30  Cprogrammer
+# replaced QMAIL with QMAILHOME
+#
 # Revision 1.10  2017-03-09 16:37:26+05:30  Cprogrammer
 # FHS changes
 #
@@ -38,7 +41,7 @@
 # 3 - No Pending message for node
 # 4 - Pending message for node
 #
-# $Id: atrn.sh,v 1.10 2017-03-09 16:37:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: atrn.sh,v 1.11 2021-04-29 10:04:52+05:30 Cprogrammer Exp mbhangui $
 #
 trap "" 1 2 3
 if [ $# -lt 2 ] ; then
@@ -66,7 +69,7 @@ else
 	LIFETIME=1209600
 fi
 PATH=/bin:/usr/bin:$PATH
-cd QMAIL/autoturn
+cd QMAILHOME/autoturn
 total=0
 pend=0
 for domains in $1
@@ -88,11 +91,11 @@ fi
 #
 # .qvirtual allows mails for a main domain to be
 # distributed across multiple directories in 
-# QMAIL/autoturn directory. i.e. if etrn.dom
+# QMAILHOME/autoturn directory. i.e. if etrn.dom
 # is the main domain and mails have been split
 # into directories location1.etrn.dom and location2.etrn.dom
-# specify .qvirtual having etrn.dom in QMAIL/autoturn/location1.etrn.dom
-# and QMAIL/autoturn/location2.etrn.dom.
+# specify .qvirtual having etrn.dom in QMAILHOME/autoturn/location1.etrn.dom
+# and QMAILHOME/autoturn/location2.etrn.dom.
 # .qvirtual also allows mails for a domain to be delivered to
 # any directory and the domain identified by looking up the .qvirtual file
 #

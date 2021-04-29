@@ -54,7 +54,7 @@ next MX (as per \fBrfc-2821(5)\fR) under the following conditions
 
 4. connection to the remote host times out.
 
-In these cases, the remote host's IP address is recorded in the timeout table QMAIL/queue/lock/tcpto, which causes
+In these cases, the remote host's IP address is recorded in the timeout table QMAILHOME/queue/lock/tcpto, which causes
 subsequent deliveries to back off from the IP address and try the next MX (if it exists).
 \fBqmail-tcpto(8)\fR can be used to print the TCP timeout table.
 

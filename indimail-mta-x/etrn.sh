@@ -1,5 +1,8 @@
 #
 # $Log: etrn.sh,v $
+# Revision 1.12  2021-04-29 10:03:52+05:30  Cprogrammer
+# replaced QMAIL with QMAILHOME
+#
 # Revision 1.11  2019-02-20 19:55:10+05:30  Cprogrammer
 # set pipefail to catch error if ipmeprint fails
 #
@@ -34,7 +37,7 @@
 # 3 - No Pending message for node
 # 4 - Pending message for node
 #
-# $Id: etrn.sh,v 1.11 2019-02-20 19:55:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: etrn.sh,v 1.12 2021-04-29 10:03:52+05:30 Cprogrammer Exp mbhangui $
 #
 trap "" 1 2 3
 if [ $# -ne 2 ] ; then
@@ -45,7 +48,7 @@ elif [ " $TCPREMOTEIP" = " " ] ; then
 	exit 1
 fi
 PATH=/bin:/usr/bin:$PATH
-cd QMAIL/autoturn
+cd QMAILHOME/autoturn
 if [ -d $1 ] ; then
 	count=`for i in $1/Maildir/new $1/Maildir/cur ; do /bin/ls $i; done|wc -l`
 	PREFIX/bin/setlock -nx $1/seriallock rm $1/seriallock

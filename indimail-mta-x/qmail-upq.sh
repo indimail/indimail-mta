@@ -1,4 +1,4 @@
-cd QMAIL
+cd QMAILHOME
 cd queue
 for dir in mess info local remote
 do

@@ -1,5 +1,8 @@
 #
 # $Log: qpq.sh,v $
+# Revision 1.7  2021-04-29 10:04:27+05:30  Cprogrammer
+# replaced QMAIL with QMAILHOME
+#
 # Revision 1.6  2016-06-17 18:27:32+05:30  Cprogrammer
 # FHS compliance
 #
@@ -10,7 +13,7 @@
 # This script locates all messages currently in qmail's queue and 
 # calls the 822header program.
 #
-# $Id: qpq.sh,v 1.6 2016-06-17 18:27:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: qpq.sh,v 1.7 2021-04-29 10:04:27+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage ()
@@ -33,10 +36,10 @@ do
 done
 
 if [ -z "$qbase" ] ; then
-	if [ -d QMAIL/queue/nqueue ] ; then
-		queues=`echo QMAIL/queue/*`
+	if [ -d QMAILHOME/queue/nqueue ] ; then
+		queues=`echo QMAILHOME/queue/*`
 	else
-		queues=`echo QMAIL/queue*`
+		queues=`echo QMAILHOME/queue*`
 	fi
 else
 	if [ -d $qbase/nqueue ] ; then
@@ -61,7 +64,7 @@ do
 		done
 		#| PREFIX/bin/qmail-queue-print $*
 	else
-		for i in `find QMAIL/$queuedir/mess/ -type f`
+		for i in `find QMAILHOME/$queuedir/mess/ -type f`
 		do
 			echo "$count: Message $i"
 			echo

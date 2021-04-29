@@ -48,6 +48,9 @@ Release 2.13 Start 14/02/2021
 28. svctool - fixed check_libmysqlclient_lib function
 - 28/04/2021
 29. svctool - allow --force to override norefreshsvc flag for a service
+- 29/04/2021
+30. binm1.sh: removed setting of PATH env variable
+31. replaced QMAIL with QMAILHOME in scripts and man pages
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
