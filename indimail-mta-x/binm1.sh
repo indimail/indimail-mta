@@ -4,7 +4,6 @@
 # Using binmail to deliver messages to /var/spool/mail/$USER by default.
 # Using BSD 4.4 binmail interface: /usr/libexec/mail.local -r
 
-exec env - PATH="QMAIL/bin:$PATH" \
-qmail-daemon \
+exec PREFIX/sbin/qmail-daemon \
 '|preline -f /usr/libexec/mail.local -r "${SENDER:-MAILER-DAEMON}" -d "$USER"' \
 splogger qmail
