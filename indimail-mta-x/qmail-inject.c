@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.36  2021-04-29 12:04:00+05:30  Cprogrammer
+ * use 'n' option in QMAILINJECT env variable to print message rather than queue
+ *
  * Revision 1.35  2020-11-24 13:46:52+05:30  Cprogrammer
  * removed exit.h
  *
@@ -1179,6 +1182,7 @@ main(argc, argv)
 	sig_pipeignore();
 	starttime = now();
 	qmopts = env_get("QMAILINJECT");
+	flagqueue = 1;
 	if (qmopts) {
 		while (*qmopts) {
 			switch (*qmopts++)
@@ -1200,6 +1204,9 @@ main(argc, argv)
 				break;
 			case 'm':
 				flaghackmess = 1;
+				break;
+			case 'n':
+				flagqueue = 0;
 				break;
 			}
 		}
@@ -1224,7 +1231,6 @@ main(argc, argv)
 	for (i = 0; i < H_NUM; ++i)
 		htypeseen[i] = 0;
 	recipstrategy = RECIP_DEFAULT;
-	flagqueue = 1;
 	getcontrols();
 	if (!saa_readyplus(&hrlist, 1))
 		die_nomem();
@@ -1293,7 +1299,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.35 2020-11-24 13:46:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.36 2021-04-29 12:04:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
