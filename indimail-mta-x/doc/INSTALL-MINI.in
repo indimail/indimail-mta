@@ -68,8 +68,8 @@ Here's what you do need:
   * all the manual pages in @mandir@/man;
   * a list of IP addresses of QMQP servers, one per line, in
     @sysconfdir@/control/qmqpservers;
-  * a copy of @sysconfdir@/control/me, @sysconfdir@/control/defaultdomain,
-    and @sysconfdir@/control/plusdomain from your central server, so
+  * a copy of @sysconfdir@/control/me, defaultdomain, plustdomain and
+    defaulthost from @sysconfdir@/control from your central server, so
     that qmail-inject uses appropriate host names in outgoing mail; and
   * this host's name in @sysconfdir@/control/idhost, so that qmail-inject
     generates Message-ID without any risk of collision. 
