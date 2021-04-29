@@ -1,6 +1,7 @@
 #!/bin/sh
 set -e
 prefix=@prefix@
+qmaildir=@qmaildir@
 rm=/bin/rm
 
 ID=`id -u`
@@ -19,6 +20,8 @@ case "$1" in
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd stop
+		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+			/bin/systemctl stop nscd.service
 		fi
 	fi
 	echo "Adding IndiMail users/groups"
@@ -31,13 +34,17 @@ case "$1" in
 
 	${rm} -f /var/spool/mail/indimail
 
-	/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d ${prefix} indimail || true
+	/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d ${qmaildir} indimail || true
 	if [ $? = 4 ] ; then
 		/usr/sbin/useradd -r -g indimail -d ${prefix} indimail
 	fi
+    /usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}/alias  -s /sbin/nologin alias  || true
+    /usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${qmaildir}        -s /sbin/nologin qmailq || true
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
+		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+			/bin/systemctl start nscd.service
 		fi
 	fi
 	;;

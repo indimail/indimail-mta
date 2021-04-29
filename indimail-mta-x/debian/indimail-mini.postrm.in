@@ -61,7 +61,7 @@ if [ " $1" = " purge" ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd stop
 		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
-			/bin/systemctl start nscd.service
+			/bin/systemctl stop nscd.service
 		fi
 	fi
 	echo "removing user indimail"
@@ -73,6 +73,8 @@ if [ " $1" = " purge" ] ; then
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
+		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+			/bin/systemctl start nscd.service
 		fi
 	fi
 	${rm} -f ${prefix}/sbin/qmail-queue

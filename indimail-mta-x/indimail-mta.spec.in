@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.305 2021-04-29 21:01:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.306 2021-04-29 22:29:27+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1620,7 +1620,7 @@ fi
 %verify_permissions -e %{qsysconfdir}/users/
 %endif
 
-%post -n indimail-mini
+%pre -n indimail-mini
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
@@ -1632,13 +1632,11 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
-  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-    echo "recreating ld.so cache"
-    /sbin/ldconfig
-  fi
   exit 0
 fi
+
 (
+%{__rm} -f /var/spool/mail/indimail
 #
 # Create user/groups indimail. Do not report any problems if it already
 # exists.
@@ -1659,12 +1657,11 @@ fi
 /usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 /usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
 
-%{__rm} -f /var/spool/mail/indimail
-
 /usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{qmaildir} indimail || true
 if [ $? = 4 ] ; then
   /usr/sbin/useradd -r -g indimail -d %{qmaildir} indimail
 fi
+/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin alias  || true
 /usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailq || true
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
@@ -1673,7 +1670,23 @@ if [ $nscd_up -ge 1 ] ; then
     /bin/systemctl start nscd.service
   fi
 fi
+) >> /var/log/%{name}-setup.log
 
+%post -n indimail-mini
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+# we are doing upgrade
+if [ $argv1 -eq 2 ] ; then
+  exit 0
+fi
+(
 %if 0%{?suse_version} >= 1120
 %if 0%{?set_permissions:1} > 0
   %set_permissions %{qsysconfdir}/control/
@@ -1842,6 +1855,8 @@ echo "removing user indimail"
 /usr/bin/getent passwd indimail > /dev/null && /usr/sbin/userdel indimail >/dev/null || true
 echo "removing user qmailq"
 /usr/bin/getent passwd qmailq > /dev/null && /usr/sbin/userdel qmailq >/dev/null || true
+echo "removing user alias"
+/usr/bin/getent passwd alias > /dev/null && /usr/sbin/userdel alias >/dev/null || true
 echo "removing group indimail"
 /usr/bin/getent group indimail  > /dev/null && /usr/sbin/groupdel indimail >/dev/null || true
 if [ $nscd_up -ge 1 ] ; then
