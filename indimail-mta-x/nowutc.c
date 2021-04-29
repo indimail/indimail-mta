@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.5  2021-04-29 20:27:35+05:30  Cprogrammer
+ * renamed variable now to cur to avoid clash with now() function.
+ *
  * Revision 1.4  2020-05-11 11:03:11+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -23,7 +26,7 @@
 #include "caltime.h"
 #include "auto_sysconfdir.h"
 
-struct taia     now;
+struct taia     cur;
 struct tai      sec;
 struct caltime  ct;
 
@@ -41,10 +44,10 @@ main()
 		_exit (111);
 	}
 
-	taia_now(&now);
-	x[taia_fmtfrac(x, &now)] = 0;
+	taia_now(&cur);
+	x[taia_fmtfrac(x, &cur)] = 0;
 
-	taia_tai(&now, &sec);
+	taia_tai(&cur, &sec);
 	caltime_utc(&ct, &sec, (int *) 0, (int *) 0);
 
 	printf("%ld-%02d-%02d %02d:%02d:%02d.%s\n", ct.date.year, ct.date.month, ct.date.day, ct.hour, ct.minute, ct.second, x);
@@ -55,7 +58,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	static char    *z = "$Id: nowutc.c,v 1.4 2020-05-11 11:03:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *z = "$Id: nowutc.c,v 1.5 2021-04-29 20:27:35+05:30 Cprogrammer Exp mbhangui $";
 
 	z++;
 }
