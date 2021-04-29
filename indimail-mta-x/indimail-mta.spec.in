@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.304 2021-04-29 20:28:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.305 2021-04-29 21:01:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -818,8 +818,8 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)               %{_prefix}/bin/srsfilter
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
 
-%attr(644,root,root)  %config(missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
-%attr(644,root,root)  %config(missingok) %{qsysconfdir}/control/direct_mail_users
+%attr(644,root,root)  %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+%attr(644,root,root)  %config(noreplace,missingok) %{qsysconfdir}/control/direct_mail_users
 
 %if 0%{?suse_version} >= 1120
 %attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions
@@ -875,11 +875,11 @@ echo ../resolv.conf 1>&3
 %if 0%{?suse_version} >= 1120
 %verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
 %verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
-%verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-deliver
+%verify (not user group mode caps) %attr(4551, root, qmail)     %{_prefix}/sbin/qmail-deliver
 %else
 %attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
 %attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
-%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-deliver
+%attr(4551,root,qmail)                  %{_prefix}/sbin/qmail-deliver
 %endif
 
 %clean
