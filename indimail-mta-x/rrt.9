@@ -24,8 +24,8 @@ Disposition-Notification-To header instead.
 \fBrrt\fR(1) can be enabled by setting \fBONSUCCESS_REMOTE\fR, \fBONFAILURE_REMOTE\fR,
 \fBONTEMPORARY_REMOTE\fR environment variables to the path of \fBrrt\fR binary.
 \fBrrt\fR(1) uses \fBqmail-queue\fR(8) to queue the Return Receipt.
-\fBrrt\fR(1) uses environment modified according to files in
-$HOME/defaultqueue directory if present, else it uses environment modified
+\fBrrt\fR(1) uses environment set according to files in
+$HOME/.defaultqueue directory if present, else it uses environment set
 according to files in @controldir@/defaultqueue directory.
 
 .SH OPTIONS
