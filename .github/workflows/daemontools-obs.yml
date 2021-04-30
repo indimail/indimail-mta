@@ -9,6 +9,7 @@ on:
       - .github/workflows/daemontools-obs.yml
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   build:

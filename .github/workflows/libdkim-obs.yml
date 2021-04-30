@@ -9,6 +9,7 @@ on:
       - .github/workflows/libdkim-obs.yml
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   build:
