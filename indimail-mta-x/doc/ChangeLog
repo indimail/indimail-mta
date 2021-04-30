@@ -54,6 +54,9 @@ Release 2.13 Start 14/02/2021
 32. qmail-inject: use 'n' option in QMAILINJECT env variable to print message
     rather than queue
 33. debian/indimail-mini: corrected package file list
+- 30/04/2021
+34. rennamed qmail-deliver to qmail-direct
+35. remove zero bytes package_name-stat.override file
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
