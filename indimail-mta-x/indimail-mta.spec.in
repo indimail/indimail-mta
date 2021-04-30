@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.306 2021-04-29 22:29:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.307 2021-04-30 12:08:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1413,7 +1413,7 @@ else
   echo "2. Execute /sbin/init q to start services"
   count=2
 fi
-default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 count=`expr $count + 1`
 echo "$count. Change your default domain in %{qsysconfdir}/control/defaultdomain"
 count=`expr $count + 1`

@@ -57,6 +57,7 @@ Release 2.13 Start 14/02/2021
 - 30/04/2021
 34. rennamed qmail-deliver to qmail-direct
 35. remove zero bytes package_name-stat.override file
+36. fixed syntax error getting HOSTNAME
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
