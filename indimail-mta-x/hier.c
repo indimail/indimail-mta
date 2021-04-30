@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.282  2021-04-30 08:28:18+05:30  Cprogrammer
+ * added qmail-direct
+ *
  * Revision 1.281  2021-04-05 07:18:20+05:30  Cprogrammer
  * added qmail-todo.h
  *
@@ -1100,6 +1103,7 @@ hier(inst_dir, fatal, dev_package)
 
 	/* setuid/setgid Programs */
 	c(auto_prefix, "sbin", "qmail-queue", auto_uidq, auto_gidq, 06551);
+	c(auto_prefix, "sbin", "qmail-direct", auto_uido, auto_gidq, 04551);
 	c(auto_prefix, "sbin", "qhpsi", auto_uidc, auto_gidq, 06551);
 	c(auto_prefix, "sbin", "qscanq", auto_uidc, auto_gidc, 04551);
 	c(auto_prefix, "sbin", "run-cleanq", auto_uido, auto_gidc, 02551);
@@ -1479,7 +1483,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.281 2021-04-05 07:18:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.282 2021-04-30 08:28:18+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
