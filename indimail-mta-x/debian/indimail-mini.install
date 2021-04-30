@@ -19,7 +19,7 @@ usr/bin/queue-fix                              /usr/bin
 usr/bin/srsfilter                              /usr/bin
 usr/sbin/qmail-qmqpc                           /usr/sbin
 usr/sbin/qmail-queue                           /usr/sbin
-usr/sbin/qmail-deliver                         /usr/sbin
+usr/sbin/qmail-direct                          /usr/sbin
 usr/sbin/qhpsi                                 /usr/sbin
 usr/share/man/man1/forward.1.gz                /usr/share/man/man1
 usr/share/man/man1/predate.1.gz                /usr/share/man/man1
@@ -36,7 +36,7 @@ usr/share/man/man8/isendmail.8.gz              /usr/share/man/man8
 usr/share/man/man8/irmail.8.gz                 /usr/share/man/man8
 usr/share/man/man8/qmail-qmqpc.8.gz            /usr/share/man/man8
 usr/share/man/man8/qmail-queue.8.gz            /usr/share/man/man8
-usr/share/man/man8/qmail-deliver.8.gz          /usr/share/man/man8
+usr/share/man/man8/qmail-direct.8.gz           /usr/share/man/man8
 usr/share/indimail/doc/INSTALL-MINI            /usr/share/indimail/doc
 usr/share/indimail/doc/COPYING-indimail-mta    /usr/share/indimail/doc
 usr/share/indimail/doc/README.licenses         /usr/share/indimail/doc

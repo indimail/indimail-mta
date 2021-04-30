@@ -252,7 +252,7 @@
 %attr(2551,root,qscand) @prefix@/sbin/run-cleanq
 %attr(4551,qscand,qscand) @prefix@/sbin/qscanq
 %attr(6551,qmailq,qmail) @prefix@/sbin/qmail-queue
-%attr(4551,root,qmail) @prefix@/sbin/qmail-deliver
+%attr(4551,root,qmail) @prefix@/sbin/qmail-direct
 %attr(6551,qscand,qmail) @prefix@/sbin/qhpsi
 %attr(4551,root,root)    @prefix@/sbin/sys-checkpwd
 #
@@ -476,7 +476,7 @@
 %attr(0644,root,root) @mandir@/man8/qmail-qmtpd.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-qread.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-queue.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-deliver.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-direct.8.gz
 %attr(0644,root,root) @mandir@/man8/qhpsi.8.gz
 %attr(0644,root,root) @mandir@/man8/surblqueue.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-remote.8.gz
