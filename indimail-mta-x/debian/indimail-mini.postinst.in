@@ -88,16 +88,19 @@ esac
 
 #DEBHELPER#
 
-if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
-(
-/bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | while read line
-do
-	if [ " $line" = " " ] ; then
-		continue
+if [ -f ${qsysconfdir}/indimail-mini.perms ] ; then
+	(
+	/bin/grep -v "^#" ${qsysconfdir}/indimail-mini.perms | while read line
+	do
+		if [ " $line" = " " ] ; then
+			continue
+		fi
+		fixperms $line
+	done
+	) > ${qsysconfdir}/indimail-mini-stat.override
+	if [ ! -s ${qsysconfdir}/indimail-mini-stat.override ] ; then
+		/bin/rm -f ${qsysconfdir}/indimail-mini-stat.override
 	fi
-	fixperms $line
-done
-) > ${qsysconfdir}/indimail-mta-stat.override
 fi
 if [ -f /etc/init.d/sendmail ] ; then
 	/etc/init.d/sendmail stop
@@ -157,21 +160,5 @@ fi
 if [ ! -f ${qsysconfdir}/control/idhost ] ; then
 	default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 	echo $default_domain > ${qsysconfdir}/control/idhost
-fi
-if [ ! "${prefix}" = "/usr" ] ; then
-	# Recreate ld.so links and cache
-	if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
-	echo "recreating ld.so cache"
-	(
-		if [ -d /usr/lib64 ] ; then
-			echo /usr/lib64
-		else
-			echo /usr/lib
-		fi
-	) > ${sysconfdir}/ld.so.conf.d/indimail-mta-`uname -m`.conf
-	/sbin/ldconfig
-	fi
-else
-	/sbin/ldconfig
 fi
 exit 0

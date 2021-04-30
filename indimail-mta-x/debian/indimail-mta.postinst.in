@@ -121,15 +121,18 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
-(
-/bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | while read line
-do
-	if [ " $line" = " " ] ; then
-		continue
+	(
+	/bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | while read line
+	do
+		if [ " $line" = " " ] ; then
+			continue
+		fi
+		fixperms $line
+	done
+	) > ${qsysconfdir}/indimail-mta-stat.override
+	if [ ! -s ${qsysconfdir}/indimail-mta-stat.override ] ; then
+		/bin/rm -f ${qsysconfdir}/indimail-mta-stat.override
 	fi
-	fixperms $line
-done
-) > ${qsysconfdir}/indimail-mta-stat.override
 fi
 
 # indimail-mta.upgrade/indimail-mta.install are created
