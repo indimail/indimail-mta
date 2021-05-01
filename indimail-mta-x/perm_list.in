@@ -173,6 +173,7 @@
 %attr(0755,root,root)  @prefix@/sbin/ctrlenv
 %attr(0751,root,root)  @prefix@/sbin/qmail-newu
 %attr(0755,root,root)  @prefix@/sbin/recipient-cdb
+%attr(0755,root,qmail) @prefix@/sbin/qmail-direct
 
 %attr(0755,root,root)  @libexecdir@/cdbmake-12
 %attr(0755,root,root)  @libexecdir@/cdbmake-sv
@@ -252,7 +253,6 @@
 %attr(2551,root,qscand) @prefix@/sbin/run-cleanq
 %attr(4551,qscand,qscand) @prefix@/sbin/qscanq
 %attr(6551,qmailq,qmail) @prefix@/sbin/qmail-queue
-%attr(4551,root,qmail) @prefix@/sbin/qmail-direct
 %attr(6551,qscand,qmail) @prefix@/sbin/qhpsi
 %attr(4551,root,root)    @prefix@/sbin/sys-checkpwd
 #

@@ -61,6 +61,8 @@ Release 2.13 Start 14/02/2021
 01/05/2021
 37. qmail-direct.c: removed uidinit() and auto_uids to run on a minimal
     system.
+38. qmail-direct.c: use modified Maildir as the queue directory and eliminate
+    requirement of setuid
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

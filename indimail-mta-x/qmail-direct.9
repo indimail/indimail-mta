@@ -1,21 +1,24 @@
 .TH qmail-direct 8
 .SH NAME
 qmail-direct \- deliver mail message directly to Maildir
+
 .SH SYNOPSIS
 .B qmail-direct
 .SH DESCRIPTION
 .B qmail-direct
 reads a mail message from descriptor 0.
 It then reads envelope information from descriptor 1.
-It places the message directly into user's maildir. The
+It places the message directly into user's Maildir directory. The
 user is the entry in passwd(5) that matches the uid of the
-process running \fBqmail-direct\fR
+process running \fBqmail-direct\fR. For the root user, message
+will be placed into ~alias/Maildir
 
-The envelope information is
-an envelope sender address
-followed by a list of envelope recipient addresses.
-The sender address is preceded by the letter F
-and terminated by a 0 byte.
+qmail-direct uses a modified Maildir which has \fImess\fR and \fIintd\fR
+directories in addition of \fIcur\fR, \fInew\fR and \fItmp\fR.
+
+The envelope information is an envelope sender address followed by a list
+of envelope recipient addresses. The sender address is preceded by the
+letter F and terminated by a 0 byte.
 .B qmail-direct
 writes the sender address as the
 .B Return-Path

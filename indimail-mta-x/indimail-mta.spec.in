@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.308 2021-04-30 12:49:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.309 2021-05-01 18:36:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -581,6 +581,7 @@ echo ../resolv.conf 1>&3
 %attr(751,root,root)                    %{_prefix}/sbin/ofmipd
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-dkim
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-dk
+%attr(755,root,root)                    %{_prefix}/sbin/qmail-direct
 %attr(755,root,root)                    %{_prefix}/sbin/spawn-filter
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-getpw
 %attr(755,root,root)                    %{_prefix}/sbin/qmail-local
@@ -772,14 +773,12 @@ echo ../resolv.conf 1>&3
 %verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
 %verify (not user group mode caps) %attr(2551, root, qscand)    %{_prefix}/sbin/run-cleanq
 %verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
-%verify (not user group mode caps) %attr(4551, root, qmail)     %{_prefix}/sbin/qmail-direct
 %verify (not user group mode caps) %attr(4551, qscand, qscand)  %{_prefix}/sbin/qscanq
 %verify (not user group mode caps) %attr(4551, root, root)      %{_prefix}/sbin/sys-checkpwd
 %else
 %attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
 %attr(2551,root,qscand)                 %{_prefix}/sbin/run-cleanq
 %attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
-%attr(4551,root,qmail)                  %{_prefix}/sbin/qmail-direct
 %attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
 %attr(4551,root,root)                   %{_prefix}/sbin/sys-checkpwd
 %endif
@@ -810,13 +809,13 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/bin/predate
 %attr(0755,root,root)              %{_prefix}/bin/datemail
 %attr(0755,root,root)              %{_prefix}/bin/mailsubj
-%attr(0755,root,root)              %{_prefix}/bin/queue-fix
 %attr(0755,root,root)              %{_prefix}/bin/qmail-showctl
 %attr(0755,root,root)              %{_prefix}/bin/qmaildirmake
 %attr(0755,root,root)              %{_prefix}/bin/maildir2mbox
 %attr(0755,root,root)              %{_prefix}/bin/maildirwatch
 %attr(755,root,root)               %{_prefix}/bin/srsfilter
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
+%attr(0755,root,root)              %{_prefix}/sbin/qmail-direct
 
 %attr(644,root,root)  %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 %attr(644,root,root)  %config(noreplace,missingok) %{qsysconfdir}/control/direct_mail_users
@@ -845,7 +844,6 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)              %{mandir}/man8/qmail-direct.8.gz
 %attr(0644,root,root)              %{mandir}/man8/irmail.8.gz
 %attr(0644,root,root)              %{mandir}/man8/qhpsi.8.gz
-%attr(0644,root,root)              %{mandir}/man8/queue-fix.8.gz
 
 %if %build_on_obs == 0
 %license %attr(0644,root,root)     %{shareddir}/doc/COPYING-indimail-mta
@@ -861,7 +859,6 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)              %{shareddir}/doc/README.clamav
 %attr(0644,root,root)              %{shareddir}/doc/README.indimail-mta
 %attr(0644,root,root)              %{shareddir}/doc/README.qhpsi
-%attr(0644,root,root)              %{shareddir}/doc/README.queue-fix
 %attr(0644,root,root)              %{shareddir}/doc/README.srs
 %attr(0644,root,root)              %{shareddir}/doc/CREDITS
 %attr(0644,root,root)              %{shareddir}/doc/ChangeLog-indimail-mta
@@ -875,11 +872,9 @@ echo ../resolv.conf 1>&3
 %if 0%{?suse_version} >= 1120
 %verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
 %verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
-%verify (not user group mode caps) %attr(4551, root, qmail)     %{_prefix}/sbin/qmail-direct
 %else
 %attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
 %attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
-%attr(4551,root,qmail)                  %{_prefix}/sbin/qmail-direct
 %endif
 
 %clean
@@ -922,7 +917,6 @@ fi
 %verify_permissions -e %{_prefix}/sbin/qhpsi
 %verify_permissions -e %{_prefix}/sbin/run-cleanq
 %verify_permissions -e %{_prefix}/sbin/qmail-queue
-%verify_permissions -e %{_prefix}/sbin/qmail-direct
 %verify_permissions -e %{_prefix}/sbin/qscanq
 %verify_permissions -e %{_prefix}/sbin/sys-checkpwd
 %verify_permissions -e %{qmaildir}/alias/
@@ -1164,7 +1158,6 @@ fi
 %if 0%{?set_permissions:1} > 0
   %set_permissions %{_prefix}/sbin/qhpsi
   %set_permissions %{_prefix}/sbin/qmail-queue
-  %set_permissions %{_prefix}/sbin/qmail-direct
   %set_permissions %{_prefix}/sbin/qscanq
   %set_permissions %{_prefix}/sbin/run-cleanq
   %set_permissions %{_prefix}/sbin/sys-checkpwd
