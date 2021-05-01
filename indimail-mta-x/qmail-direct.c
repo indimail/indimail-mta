@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-direct.c,v $
- * Revision 1.4  2021-05-01 19:47:07+05:30  Cprogrammer
+ * Revision 1.4  2021-05-01 22:31:32+05:30  Cprogrammer
  * use standard Maildir for queue operation
  * removed control file direct_mail_users
  *
@@ -388,8 +388,8 @@ main(int argc, char **argv)
 	if (fstat(messfd, &pidst) == -1)
 		die(63);
 	messnum = pidst.st_ino;
-	messfn = fnnum("mess/", ".h");
-	intdfn = fnnum("intd/", ".m");
+	messfn = fnnum("tmp/", ".h");
+	intdfn = fnnum("tmp/", ".m");
 	/*- link mess file to pid file */
 	if (link(pidfn, messfn) == -1) {
 		unlink(pidfn);
@@ -524,7 +524,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.4 2021-05-01 19:47:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.4 2021-05-01 22:31:32+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
