@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.4  2021-05-01 19:47:07+05:30  Cprogrammer
+ * use standard Maildir for queue operation
+ * removed control file direct_mail_users
+ *
  * Revision 1.3  2021-05-01 18:37:30+05:30  Cprogrammer
  * use modified Maildir as queue
  *
@@ -18,7 +22,6 @@
 #include <sys/time.h>
 #include <pwd.h>
 #include "sig.h"
-#include "control.h"
 #include "env.h"
 #include "stralloc.h"
 #include "seek.h"
@@ -29,14 +32,12 @@
 #include "datetime.h"
 #include "now.h"
 #include "date822fmt.h"
-/*- #include "variables.h" -*/
 
 #define DEATH 86400				/* 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
 
 int             uidinit(int);
 
-char           *controldir;
 static char     inbuf[2048];
 static char     outbuf[256];
 static struct substdio ssin, ssout;
@@ -192,7 +193,7 @@ pidfmt(char *s, unsigned long seq)
 }
 
 unsigned int
-fmtqfn(char *s, char *dirslash, unsigned long id)
+fmtqfn(char *s, char *dirslash, unsigned long id, char *suffix)
 {
 	unsigned int    len;
 	unsigned int    i;
@@ -206,6 +207,10 @@ fmtqfn(char *s, char *dirslash, unsigned long id)
 	len += i;
 	if (s)
 		s += i;
+	i = fmt_str(s, suffix);
+	len += i;
+	if (s)
+		s += i;
 	if (s)
 		*s++ = 0;
 	++len;
@@ -213,13 +218,13 @@ fmtqfn(char *s, char *dirslash, unsigned long id)
 }
 
 char           *
-fnnum(char *dirslash)
+fnnum(char *dirslash, char *suffix)
 {
 	char           *s;
 
-	if (!(s = alloc(fmtqfn((char *) 0, dirslash, messnum))))
+	if (!(s = alloc(fmtqfn((char *) 0, dirslash, messnum, suffix))))
 		die(51);
-	fmtqfn(s, dirslash, messnum);
+	fmtqfn(s, dirslash, messnum, suffix);
 	return s;
 }
 
@@ -354,40 +359,20 @@ mailopen(uid_t uid, gid_t gid)
 int
 main(int argc, char **argv)
 {
-	unsigned int    len, rcptcount, token_len, auth_flag;
+	unsigned int    len, rcptcount;
 	char           *ptr;
 	struct passwd  *pw;
 	char            ch;
 
 	sig_blocknone();
 	umask(033);
-	if (!(ptr = env_get("HOME")))
-		die(61);
-	if (chdir(ptr) == -1)
-		die(61);
-	if (chdir("Maildir") == -1)
-		die(62);
-	myuid = getuid();
-	if (myuid) {
-		if (!(pw = getpwuid(myuid)))
-			die(67);
-		if (control_readfile(&uidlist, "direct_mail_users", 0) == -1)
-			die(55);
-		if (!uidlist.len)
-			die(55);
-		for (auth_flag = len = 0, ptr = uidlist.s;len < uidlist.len;) {
-			len += ((token_len = str_len(ptr)) + 1);
-			if (!str_diffn(ptr, pw->pw_name, token_len)) {
-				auth_flag = 1;
-				break;
-			}
-			ptr = uidlist.s + len;
-		}
-		if (!auth_flag)
-			die(55);
-	} else /*- allow uid 0 to send without restriction */
-	if (!(pw = getpwnam("alias"))) /*- for root user use ~alias/Maildir */
+	if (!(ptr = env_get("LOGNAME")))
 		die(67);
+	if (!(pw = getpwnam(ptr)))
+		die(67);
+	if (chdir(pw->pw_dir) == -1 || chdir("Maildir") == -1)
+		die(61);
+	myuid = getuid();
 	mypid = getpid();
 	starttime = now();
 	datetime_tai(&dt, starttime);
@@ -403,8 +388,8 @@ main(int argc, char **argv)
 	if (fstat(messfd, &pidst) == -1)
 		die(63);
 	messnum = pidst.st_ino;
-	messfn = fnnum("mess/");
-	intdfn = fnnum("intd/");
+	messfn = fnnum("mess/", ".h");
+	intdfn = fnnum("intd/", ".m");
 	/*- link mess file to pid file */
 	if (link(pidfn, messfn) == -1) {
 		unlink(pidfn);
@@ -539,7 +524,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.3 2021-05-01 18:37:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.4 2021-05-01 19:47:07+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

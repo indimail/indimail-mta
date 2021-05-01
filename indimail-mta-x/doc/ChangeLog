@@ -63,6 +63,8 @@ Release 2.13 Start 14/02/2021
     system.
 38. qmail-direct.c: use modified Maildir as the queue directory and eliminate
     requirement of setuid
+39. qmail-direct.c: use standard Maildir for queue operation
+40. qmail-direct.c: removed control file direct_mail_users
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
