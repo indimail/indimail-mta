@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.2  2021-05-01 14:50:33+05:30  Cprogrammer
+ * removed uidinit() and auto_uids to run on a minimal system
+ *
  * Revision 1.1  2021-04-29 21:16:22+05:30  Cprogrammer
  * Initial revision
  *
@@ -24,7 +27,6 @@
 #include "now.h"
 #include "date822fmt.h"
 #include "auto_qmail.h"
-#include "auto_uids.h"
 #include "fmtqfn.h"
 #include "variables.h"
 
@@ -122,33 +124,14 @@ receivedfmt(char *s)
 	len += i;
 	if (s)
 		s += i;
-	if (myuid == auto_uida) {
-		i = fmt_str(s, "by alias");
-		len += i;
-		if (s)
-			s += i;
-	} else
-	if (myuid == auto_uidd) {
-		i = fmt_str(s, "from network");
-		len += i;
-		if (s)
-			s += i;
-	} else
-	if (myuid == auto_uids) {
-		i = fmt_str(s, "for bounce");
-		len += i;
-		if (s)
-			s += i;
-	} else {
-		i = fmt_str(s, "by uid ");
-		len += i;
-		if (s)
-			s += i;
-		i = fmt_ulong(s, myuid);
-		len += i;
-		if (s)
-			s += i;
-	}
+	i = fmt_str(s, "by uid ");
+	len += i;
+	if (s)
+		s += i;
+	i = fmt_ulong(s, myuid);
+	len += i;
+	if (s)
+		s += i;
 	i = fmt_str(s, "); ");
 	len += i;
 	if (s)
@@ -355,8 +338,6 @@ main(int argc, char **argv)
 
 	sig_blocknone();
 	umask(033);
-	if (uidinit(1) == -1)
-		die(67);
 	if (chdir(auto_qmail) == -1)
 		die(61);
 	if (!(queuedir = env_get("QUEUEDIR")))
@@ -535,7 +516,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.1 2021-04-29 21:16:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.2 2021-05-01 14:50:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

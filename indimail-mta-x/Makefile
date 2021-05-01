@@ -1389,15 +1389,14 @@ drate.9 conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> drate.1
 
-qmail-direct: load qmail-direct.o auto_uids.o auto_qmail.o \
-variables.o control.o auto_control.o auto_split.o fmtqfn.o \
-get_uid.o
-	./load qmail-direct auto_uids.o auto_qmail.o \
-	control.o auto_control.o auto_split.o fmtqfn.o \
-	variables.o get_uid.o -lqmail
+qmail-direct: load qmail-direct.o auto_qmail.o variables.o \
+control.o auto_control.o auto_split.o fmtqfn.o
+	./load qmail-direct auto_qmail.o control.o \
+	auto_control.o auto_split.o fmtqfn.o \
+	variables.o -lqmail
 
 qmail-direct.o: \
-compile qmail-direct.c auto_qmail.h auto_uids.h fmtqfn.h \
+compile qmail-direct.c auto_qmail.h fmtqfn.h \
 control.h variables.h
 	./compile qmail-direct.c
 
