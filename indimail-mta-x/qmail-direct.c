@@ -366,7 +366,7 @@ main(int argc, char **argv)
 
 	sig_blocknone();
 	umask(033);
-	if (!(ptr = env_get("LOGNAME")))
+	if (!(ptr = env_get("USER")))
 		die(67);
 	if (!(pw = getpwnam(ptr)))
 		die(67);

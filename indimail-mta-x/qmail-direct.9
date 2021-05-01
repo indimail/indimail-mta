@@ -7,14 +7,9 @@ qmail-direct \- deliver mail message directly to Maildir
 .SH DESCRIPTION
 .B qmail-direct
 reads a mail message from descriptor 0.
-It then reads envelope information from descriptor 1.
-It places the message directly into user's Maildir directory. The
-user is the entry in passwd(5) that matches the uid of the
-process running \fBqmail-direct\fR. For the root user, message
-will be placed into ~alias/Maildir
-
-qmail-direct uses a modified Maildir which has \fImess\fR and \fIintd\fR
-directories in addition of \fIcur\fR, \fInew\fR and \fItmp\fR.
+It then reads envelope information from descriptor 1. It places the message
+directly into user's Maildir directory. The user is the value of USER
+environment variable.
 
 The envelope information is an envelope sender address followed by a list
 of envelope recipient addresses. The sender address is preceded by the
@@ -30,31 +25,24 @@ If
 writes X-Recipients header as a comma separated list of recipients.
 If
 .B qmail-direct
-sees end-of-file before the extra 0 byte,
-it aborts without delivering the message.
+sees end-of-file before the extra 0 byte, it aborts without delivering the
+message.
 
-Every envelope recipient address
-should contain a username,
-an @ sign,
+Every envelope recipient address should contain a username, an @ sign,
 and a fully qualified domain name.
 
 .B qmail-direct
 always adds a
+.BR Return-Path ,
+.BR X-Recipients ,
+and
 .B Received
-line to the top of the message.
-Other than this,
+line to the top of the message.  Other than this,
 .B qmail-direct
-does not inspect the message
-and does not enforce any restrictions on its contents.
-However, the recipients probably expect to see a proper header,
+does not inspect the message and does not enforce any restrictions on its
+contents. However, the recipients probably expect to see a proper header,
 as described in
 .BR qmail-header(5) .
-
-\fBqmail-direct\fR uses the control file
-\fI@controldir@/direct_mail_users\fR.
-Only users listed in this file can deliver mails directly to any local user.
-\fBqmail-direct\fR will exit with code 55 if user who invokes any of the programs
-like sendmail(8), qmail-inject(8), is not listed in this control file
 
 Programs included with qmail which invoke
 .B qmail-direct
@@ -63,18 +51,9 @@ will invoke the contents of
 instead, if that environment variable is set.
 
 \fBqmail-direct\fB allows you to deliver mails without requiring costly
-services and processes to manage queue and delivery. It is usefull on
+services and processes to manage queue and delivery. It is useful on
 single board computers where you might want to conserver the CPU as much
 as possible but want mails generated on the system to get delivered to a user.
-
-.SH "FILESYSTEM RESTRICTIONS"
-.B qmail-direct
-imposes two constraints on the queue structure:
-each
-.B mess
-subdirectory must be in the same filesystem as the
-.B pid
-directory;
 
 .SH "EXIT CODES"
 .B qmail-direct
@@ -119,20 +98,18 @@ Unable to read a configuration file.
 Problem with the indimail or user's home directory.
 
 .TP
-.B 62
-Problem with the queue directory.
-
-.TP
 .B 63
-Problem with queue/pid.
+Problem with \fIMaildir/tmp/pid\fR.
 
 .TP
 .B 64
-Problem with queue/mess.
+Problem with \fIMaildir/tmp/fnnum.b\fR. Here \fIfnnum\fR is the inode number
+of \fIMaildir/tmp/pid\fR
 
 .TP
 .B 65
-Problem with queue/intd.
+Problem with \fIMaildir/tmp/fnnum.h\fR. Here \fIfnnum\fR is the inode number
+of \fIMaildir/tmp/pid\fR
 
 .TP
 .B 81
