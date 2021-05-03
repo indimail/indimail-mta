@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.552 2021-04-28 11:20:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.553 2021-05-03 08:51:05+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.552 2021-04-28 11:20:35+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.553 2021-05-03 08:51:05+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -6904,12 +6904,14 @@ create_startup()
     		if [ $? -ne 0 ] ; then
 				echo "svscan startup enabled in systemd /lib/systemd/system/svscan.service"
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service
+      			/bin/systemctl daemon-reload && echo "installed new svscan service"
 			fi
 		elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
     		if [ $? -ne 0 ] ; then
 				echo "svscan startup enabled in systemd /usr/lib/systemd/system/svscan.service"
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service
+      			/bin/systemctl daemon-reload && echo "installed new svscan service"
 			fi
 		elif [ -f /sbin/initctl -a -d /etc/init ] ; then
     		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
@@ -6971,10 +6973,12 @@ remove_startup()
 		/bin/systemctl stop svscan
 		/bin/systemctl disable svscan.service
 		/bin/rm -f /lib/systemd/system/svscan.service
+      	/bin/systemctl daemon-reload && echo "removed svscan service"
 	elif [ -f /usr/lib/systemd/system/svscan.service -a -x /bin/systemctl ] ; then
 		/bin/systemctl stop svscan
 		/bin/systemctl disable svscan.service
 		/bin/rm -f /usr/lib/systemd/system/svscan
+      	/bin/systemctl daemon-reload && echo "removed svscan service"
 	elif [ -f /etc/init/svscan.conf ] ; then
 		/sbin/initctl emit qmailstop > /dev/null
 		/bin/rm -f /etc/event.d/svscan
