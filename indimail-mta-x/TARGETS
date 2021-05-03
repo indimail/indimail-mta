@@ -880,7 +880,6 @@ testzero testzero.o
 timeoutconn.o
 timeoutread.o
 timeoutwrite.o
-timestamp.o
 tls.lib
 tls.o
 token822.o

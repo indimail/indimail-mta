@@ -817,9 +817,9 @@ qhpsi.o: compile qhpsi.c auto_qmail.h auto_uids.h
 	./compile qhpsi.c
 
 qscanq: load qscanq.o auto_uids.o get_uid.o \
-timestamp.o auto_spool.o mkfn.o do_cleanq.o \
+auto_spool.o mkfn.o do_cleanq.o \
 auto_cleaner.o auto_qstdin.o fmt_xpid.o
-	./load qscanq auto_uids.o get_uid.o timestamp.o \
+	./load qscanq auto_uids.o get_uid.o \
 	fmt_xpid.o mkfn.o auto_spool.o do_cleanq.o \
 	auto_cleaner.o auto_qstdin.o -lqmail
 
@@ -830,10 +830,7 @@ auto_uids.h auto_retries.h
 fmt_xpid.o: compile fmt_xpid.c
 	./compile fmt_xpid.c
 
-timestamp.o: compile timestamp.c
-	./compile timestamp.c
-
-mkfn.o: compile mkfn.c timestamp.h auto_pidt.h
+mkfn.o: compile mkfn.c auto_pidt.h
 	./compile mkfn.c
 
 do_cleanq.o: compile do_cleanq.c auto_cleaner.h
@@ -859,7 +856,7 @@ auto_spool.o: compile auto_spool.c
 auto-fnlen: load auto-fnlen.o
 	./load auto-fnlen -lqmail
 
-auto-fnlen.o: compile auto-fnlen.c timestamp.h auto_pidt.h
+auto-fnlen.o: compile auto-fnlen.c auto_pidt.h
 	./compile auto-fnlen.c
 
 auto_fnlen.h: auto-fnlen
@@ -909,12 +906,12 @@ conf-servicedir
 MakeArgs.o: compile MakeArgs.c
 	./compile MakeArgs.c
 
-qscanq-stdin: load qscanq-stdin.o auto_qmail.o timestamp.o \
+qscanq-stdin: load qscanq-stdin.o auto_qmail.o \
 auto_spool.o mkfn.o MakeArgs.o do_ripmime.o auto_ripmime_cmd.o \
 do_scan.o auto_scancmd.o do_cleanq.o auto_cleaner.o qregex.o \
 wildmat.o matchregex.o variables.o control.o auto_control.o \
 fmt_xpid.o
-	./load qscanq-stdin auto_qmail.o timestamp.o MakeArgs.o \
+	./load qscanq-stdin auto_qmail.o MakeArgs.o \
 	matchregex.o auto_spool.o mkfn.o do_ripmime.o \
 	auto_ripmime_cmd.o do_scan.o auto_scancmd.o do_cleanq.o \
 	auto_cleaner.o qregex.o wildmat.o control.o variables.o \

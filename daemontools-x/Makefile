@@ -161,13 +161,12 @@ fghack: fghack.o load pathexec_run.o
 fghack.o: compile fghack.c pathexec.h
 	./compile fghack.c
 	
-multilog: load multilog.o timestamp.o match.o deepsleep.o \
+multilog: load multilog.o match.o deepsleep.o \
 iopause.o
-	./load multilog timestamp.o match.o deepsleep.o \
+	./load multilog match.o deepsleep.o \
 	iopause.o -lqmail
 
-multilog.o: compile deepsleep.h direntry.h match.h multilog.c \
-timestamp.h
+multilog.o: compile deepsleep.h direntry.h match.h multilog.c
 	./compile multilog.c
 
 deepsleep.o: compile deepsleep.c deepsleep.h iopause.h
@@ -250,10 +249,10 @@ svstat: load svstat.o run_init.o
 svstat.o: compile svstat.c conf-runfs
 	./compile `grep -v "^#" conf-runfs` svstat.c
 
-tai64n: load tai64n.o timestamp.o
-	./load tai64n timestamp.o -lqmail
+tai64n: load tai64n.o
+	./load tai64n -lqmail
 
-tai64n.o: compile tai64n.c timestamp.h
+tai64n.o: compile tai64n.c
 	./compile tai64n.c
 
 tai64nlocal: load tai64nlocal.o
@@ -321,9 +320,6 @@ chkshsgr: load chkshsgr.o
 chkshsgr.o: compile chkshsgr.c
 	./compile chkshsgr.c
 
-timestamp.o: compile timestamp.c
-	./compile timestamp.c
-
 spipe: load spipe.o svcfns.o
 	./load spipe svcfns.o
 
@@ -352,7 +348,7 @@ teepipe.o: compile teepipe.c
 	./compile teepipe.c
 
 logselect.o: compile direntry.h sorted.h pathexec.h \
-timestamp.h logselect.c
+logselect.c
 	./compile logselect.c
 
 logselect: load logselect.o sorted.o
