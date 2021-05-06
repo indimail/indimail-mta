@@ -15,7 +15,7 @@ fi
 #
 
 case "$1" in
-    install|upgrade)
+    install)
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
@@ -38,7 +38,6 @@ case "$1" in
 	if [ $? = 4 ] ; then
 		/usr/sbin/useradd -r -g indimail -d ${prefix} indimail
 	fi
-    /usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${qmaildir}/alias  -s /sbin/nologin alias  || true
     /usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${qmaildir}        -s /sbin/nologin qmailq || true
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
