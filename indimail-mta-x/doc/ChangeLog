@@ -72,6 +72,7 @@ Release 2.13 Start 14/02/2021
 43. svctool: removed mix usage of space and tab
 44. indimail-mini.preinst: removed adduser of alias user
 45. indimail-mini-postinst, indimail-mini-prerm: removed unused variables
+46. indimail-mini-preinst: added missing 'upgrade' case
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
