@@ -3,10 +3,8 @@
 set -e
 
 prefix=@prefix@
-logdir=@logdir@
 mandir=@mandir@
 qsysconfdir=@qsysconfdir@
-shareddir=@shareddir@
 rm=/bin/rm
 mv=/bin/mv
 

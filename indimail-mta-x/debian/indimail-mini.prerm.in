@@ -4,9 +4,7 @@
 # see: dh_installdeb(1)
 
 set -e
-
 prefix=@prefix@
-shareddir=@shareddir@
 rm=/bin/rm
 mv=/bin/mv
 
