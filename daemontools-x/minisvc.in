@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.16 2021-05-03 09:29:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.17 2021-05-06 09:21:18+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.16 2021-05-03 09:29:02+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.17 2021-05-06 09:21:18+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -699,34 +699,34 @@ create_startup()
 		"$DESTDIR"$prefix/sbin/initsvc -status
 	else
 		if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
-    		cmp -s "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
-    		if [ $? -ne 0 ] ; then
+			cmp -s "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
+			if [ $? -ne 0 ] ; then
 				if [ $silent -eq 0 ] ; then
 					echo "svscan startup enabled in systemd /lib/systemd/system/svscan.service"
 				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service
-      			/bin/systemctl daemon-reload && echo "installed new svscan service"
+				/bin/systemctl daemon-reload && echo "installed new svscan service"
 			fi
 		elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
-    		cmp -s "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
-    		if [ $? -ne 0 ] ; then
+			cmp -s "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
+			if [ $? -ne 0 ] ; then
 				if [ $silent -eq 0 ] ; then
 					echo "svscan startup enabled in systemd /usr/lib/systemd/system/svscan.service"
 				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service
-      			/bin/systemctl daemon-reload && echo "installed new svscan service"
+				/bin/systemctl daemon-reload && echo "installed new svscan service"
 			fi
 		elif [ -f /sbin/initctl -a -d /etc/init ] ; then
-    		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
-    		if [ $? -ne 0 ] ; then
+			cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
+			if [ $? -ne 0 ] ; then
 				if [ $silent -eq 0 ] ; then
 					echo "svscan startup enabled in /etc/init/svscan.conf"
 				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf
 			fi
 		elif [ -d /etc/event.d ] ; then
-    		cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/event.d/upstart >/dev/null 2>&1
-    		if [ $? -ne 0 ] ; then
+			cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/event.d/upstart >/dev/null 2>&1
+			if [ $? -ne 0 ] ; then
 				if [ $silent -eq 0 ] ; then
 					echo "svscan startup enabled in /etc/event.d/upstart"
 				fi
@@ -786,12 +786,12 @@ remove_startup()
 		/bin/systemctl stop svscan
 		/bin/systemctl disable svscan.service
 		/bin/rm -f /lib/systemd/system/svscan.service
-      	/bin/systemctl daemon-reload && echo "removed svscan service"
+		/bin/systemctl daemon-reload && echo "removed svscan service"
 	elif [ -f /usr/lib/systemd/system/svscan.service -a -x /bin/systemctl ] ; then
 		/bin/systemctl stop svscan
 		/bin/systemctl disable svscan.service
 		/bin/rm -f /usr/lib/systemd/system/svscan
-      	/bin/systemctl daemon-reload && echo "removed svscan service"
+		/bin/systemctl daemon-reload && echo "removed svscan service"
 	elif [ -f /etc/init/svscan.conf ] ; then
 		/sbin/initctl emit qmailstop > /dev/null
 		/bin/rm -f /etc/event.d/svscan
@@ -816,7 +816,7 @@ remove_startup()
 				/sbin/chkconfig --del svscan
 			fi
 		elif [ -f /sbin/chkconfig ] ; then
-				/usr/sbin/chkconfig --del svscan 2>/dev/null
+			/usr/sbin/chkconfig --del svscan 2>/dev/null
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d -f svscan remove
 		fi
@@ -1633,6 +1633,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.17  2021-05-06 09:21:18+05:30  Cprogrammer
+# remove mixed uses of space and tab
+#
 # Revision 1.16  2021-05-03 09:29:02+05:30  Cprogrammer
 # do systemctl daemon-reload after installing, updating or removing svscan service
 #

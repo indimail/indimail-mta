@@ -33,6 +33,8 @@ Release 1.1 Start 27/02/2021
 - 03/05/2021
 18. do systemctl daemon-reload after installing/removing svscan service
 19. timestam.h: fix function prototype for timestamp()
+- 06/05/2021
+20. minisvc: removed mixed use of space and tab
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
