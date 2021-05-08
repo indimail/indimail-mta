@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.43  2021-05-08 12:26:31+05:30  Cprogrammer
+ * added log7() function
+ * use /var/indimail/queue if QUEUEDIR is not defined
+ *
  * Revision 1.42  2021-04-05 07:19:58+05:30  Cprogrammer
  * added qmail-todo.h
  *
@@ -152,6 +156,7 @@ void            log1(char *w);
 void            log3(char *w, char *x, char *y);
 void            log4(char *w, char *x, char *y, char *z);
 void            log5(char *u, char *w, char *x, char *y, char *z);
+void            log7(char *s, char *t, char *u, char *w, char *x, char *y, char *z);
 void            log9(char *r, char *s, char *t, char *u, char *v, char *w, char *x, char *y, char *z);
 int             flagstopasap = 0;
 char           *queuedesc;
@@ -414,6 +419,36 @@ log5(char *v, char *w, char *x, char *y, char *z)
 
 	pos = comm_buf.len;
 	if (!stralloc_cats(&comm_buf, "L"))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, v))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, w))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, x))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, y))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, z))
+		goto fail;
+	if (!stralloc_0(&comm_buf))
+		goto fail;
+	return;
+fail:
+	/*- either all or nothing */
+	comm_buf.len = pos;
+}
+
+void
+log7(char *t, char *u, char *v, char *w, char *x, char *y, char *z)
+{
+	int             pos;
+
+	pos = comm_buf.len;
+	if (!stralloc_cats(&comm_buf, "L"))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, t))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, u))
 		goto fail;
 	if (!stralloc_cats(&comm_buf, v))
 		goto fail;
@@ -1045,16 +1080,14 @@ void
 reread(void)
 {
 	if (chdir(auto_qmail) == -1) {
-		log3("alert: ", queuedesc, ": qmail-todo: unable to reread controls: unable to switch to home directory\n");
+		log7("alert: ", queuedesc, ": qmail-todo: cannot start: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 		return;
 	}
 	regetcontrols();
-	if (!queuedir) {
-		if (!(queuedir = env_get("QUEUEDIR")))
-			queuedir = "queue1";
-	}
+	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
+		queuedir = "queue"; /*- single queue like qmail */
 	while (chdir(queuedir) == -1) {
-		log3("alert: ", queuedesc, ": qmail-todo: unable to switch back to queue directory; HELP! sleeping...\n");
+		log7("alert: ", queuedesc, ": qmail-todo: unable to switch back to queue directory ", queuedir, ": ", error_str(errno), "HELP! sleeping...\n");
 		sleep(10);
 	}
 }
@@ -1068,16 +1101,14 @@ main()
 	char           *ptr;
 	struct timeval  tv;
 
-	if (!queuedir) {
-		if (!(queuedir = env_get("QUEUEDIR")))
-			queuedir = "queue1";
-	}
+	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
+		queuedir = "queue"; /*- single queue like qmail */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
 	if (*queuedesc == '/')
 		queuedesc++;
 	if (chdir(auto_qmail) == -1) {
-		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to switch to home directory\n");
+		log7("alert: ", queuedesc, ": qmail-todo: cannot start: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 		_exit(111);
 	}
 	if (!getcontrols()) {
@@ -1085,7 +1116,7 @@ main()
 		_exit(111);
 	}
 	if (chdir(queuedir) == -1) {
-		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to switch to queue directory\n");
+		log7("alert: ", queuedesc, ": qmail-todo: cannot start: unable to switch to queue directory", queuedir, ": ", error_str(errno), "\n");
 		_exit(111);
 	}
 #ifdef USE_FSYNC
@@ -1168,7 +1199,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.42 2021-04-05 07:19:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.43 2021-05-08 12:26:31+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

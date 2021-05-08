@@ -54,7 +54,7 @@ triggered before TODO_INTERVAL seconds it will schedule a forced queue run at la
 queue run plus TODO_INTERVAL seconds to not miss the new additions to the queue. TODO_INTERVAL
 can also be set in the control file
 .IR todointerval .
-The control file takes precedence over the environment variable. If TODO_INTERVAL=0 or
+The control file takes precedence over the environment variable. If TODO_INTERVAL=0,
 TODO_INTERVAL="" or a value less than zero, qmail-todo silently uses 10 secs as the value for
 TODO_INTERVAL.
 
