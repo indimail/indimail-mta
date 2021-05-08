@@ -1,5 +1,8 @@
 /*
  * $Log: tcpto.c,v $
+ * Revision 1.15  2021-05-08 12:23:35+05:30  Cprogrammer
+ * use /var/indimail/queue if QUEUEDIR is not defined
+ *
  * Revision 1.14  2018-01-09 12:37:11+05:30  Cprogrammer
  * removed header hasindimail.h
  *
@@ -56,11 +59,8 @@ getbuf()
 	int             r, fd;
 	char            lockfile[1024];
 
-	if(!queuedir)
-	{
-		if(!(queuedir = env_get("QUEUEDIR")))
-			queuedir = "queue1";
-	}
+	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
+		queuedir = "queue"; /*- single queue like qmail */
 	if ((r = fmt_strn(lockfile, queuedir, 1024)) > 1012)
 		return(0);
 	r += fmt_str(lockfile + r, "/lock/tcpto");
@@ -273,7 +273,7 @@ tcpto_err(ix, flagerr, max_tolerance)
 void
 getversion_tcpto_c()
 {
-	static char    *x = "$Id: tcpto.c,v 1.14 2018-01-09 12:37:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpto.c,v 1.15 2021-05-08 12:23:35+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

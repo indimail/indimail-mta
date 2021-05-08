@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.28  2021-05-08 12:23:15+05:30  Cprogrammer
+ * use /var/indimail/queue if QUEUEDIR is not defined
+ *
  * Revision 1.27  2020-11-24 13:48:16+05:30  Cprogrammer
  * removed exit.h
  *
@@ -432,7 +435,7 @@ main(argc, argv)
 	if (chdir(auto_qmail) == -1)
 		_exit(111);
 	if (!(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue1";
+		queuedir = "queue"; /*- single queue like qmail */
 	if (chdir(queuedir) == -1)
 		_exit(111);
 	if (chdir("mess") == -1)
@@ -543,7 +546,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.27 2020-11-24 13:48:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.28 2021-05-08 12:23:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

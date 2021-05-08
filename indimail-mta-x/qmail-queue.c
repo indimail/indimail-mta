@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.68  2021-05-08 12:22:00+05:30  Cprogrammer
+ * use /var/indimail/queue if QUEUEDIR is not defined
+ *
  * Revision 1.67  2020-12-07 16:10:12+05:30  Cprogrammer
  * use exit code 79 for envelope format error
  *
@@ -862,7 +865,7 @@ main()
 		flagarchive = 1;
 #endif
 	if (!(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue1";
+		queuedir = "queue"; /*- single queue like qmail */
 	if (chdir(queuedir) == -1)
 		die(62);
 #ifdef USE_FSYNC
@@ -1239,7 +1242,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.67 2020-12-07 16:10:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.68 2021-05-08 12:22:00+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
