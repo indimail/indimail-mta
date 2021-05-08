@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.c,v $
+ * Revision 1.4  2021-05-08 12:23:04+05:30  Cprogrammer
+ * converted functions to ansic
+ *
  * Revision 1.3  2004-10-22 20:29:54+05:30  Cprogrammer
  * added RCS id
  *
@@ -14,10 +17,7 @@
 #include "auto_split.h"
 
 void
-readsubdir_init(rs, name, pause)
-	readsubdir     *rs;
-	char           *name;
-	void            (*pause) ();
+readsubdir_init(readsubdir *rs, char *name, void (*pause)())
 {
 	rs->name = name;
 	rs->pause = pause;
@@ -28,19 +28,15 @@ readsubdir_init(rs, name, pause)
 static char     namepos[FMT_ULONG + 4 + READSUBDIR_NAMELEN];
 
 int
-readsubdir_next(rs, id)
-	readsubdir     *rs;
-	unsigned long  *id;
+readsubdir_next(readsubdir *rs, unsigned long *id)
 {
 	direntry       *d;
 	unsigned int    len;
 
-	if (!rs->dir)
-	{
+	if (!rs->dir) {
 		if (rs->pos >= auto_split)
-			return 0;
-		if (str_len(rs->name) > READSUBDIR_NAMELEN)
-		{
+			return 0; /*- end */
+		if (str_len(rs->name) > READSUBDIR_NAMELEN) {
 			rs->pos++;
 			return -1;
 		}
@@ -54,10 +50,7 @@ readsubdir_next(rs, id)
 		rs->pos++;
 		return -1;
 	}
-
-	d = readdir(rs->dir);
-	if (!d)
-	{
+	if (!(d = readdir(rs->dir))) {
 		closedir(rs->dir);
 		rs->dir = 0;
 		return -1;
@@ -76,7 +69,7 @@ readsubdir_next(rs, id)
 void
 getversion_readsubdir_c()
 {
-	static char    *x = "$Id: readsubdir.c,v 1.3 2004-10-22 20:29:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: readsubdir.c,v 1.4 2021-05-08 12:23:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
