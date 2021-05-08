@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.12  2021-05-08 12:25:15+05:30  Cprogrammer
+ * include stralloc.h
+ *
  * Revision 1.11  2016-03-31 17:02:49+05:30  Cprogrammer
  * added log3_noflush(), lockerr(), flush() functions
  *
@@ -30,6 +33,7 @@
  */
 #ifndef QSUTIL_H
 #define QSUTIL_H
+#include <stralloc.h>
 
 void            log1(char *);
 void            log1_noflush(char *);
