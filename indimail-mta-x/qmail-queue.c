@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.69  2021-05-09 17:37:51+05:30  Cprogrammer
+ * documented Received headers
+ *
  * Revision 1.68  2021-05-08 12:22:00+05:30  Cprogrammer
  * use /var/indimail/queue if QUEUEDIR is not defined
  *
@@ -349,11 +352,14 @@ tcpgetremoteip()
 	return;
 }
 
+/*
+ * Received headers created by qmail-queue
+ * "Received: (indimail-mta 37166 invoked by alias); 26 Sep 1995 04:46:54 -0000\n"
+ * "Received: (indimail-mta 37166 invoked from network from w.x.y.z by host q.r.s.t by uid 123); 26 Sep 1995 04:46:54 -0000\n"
+ * "Received: (indimail-mta 37166 invoked for bounce); 26 Sep 1995 04:46:54 -0000\n"
+ */
 unsigned int    receivedlen;
-unsigned int    originlen;
 char           *received;
-/* "Received: (qmail-queue invoked by alias); 26 Sep 1995 04:46:54 -0000\n" */
-char           *origin; /* "X-Originating-IP: 10.0.0.1\n" */
 
 static unsigned int
 receivedfmt(char *s)
@@ -471,6 +477,9 @@ originfmt(char *s)
 		s += i;
 	return len;
 }
+
+unsigned int    originlen;
+char           *origin; /* "X-Originating-IP: 10.0.0.1\n" */
 
 void
 origin_setup()
@@ -1242,7 +1251,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.68 2021-05-08 12:22:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.69 2021-05-09 17:37:51+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
