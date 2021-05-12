@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_run.c,v $
+ * Revision 1.6  2021-05-12 21:03:30+05:30  Cprogrammer
+ * replace pathexec with upathexec
+ *
  * Revision 1.5  2020-08-03 17:25:25+05:30  Cprogrammer
  * use qmail library
  *
@@ -21,12 +24,12 @@
 #include <str.h>
 #include <env.h>
 #include <unistd.h>
-#include "pathexec.h"
+#include "upathexec.h"
 
 static stralloc tmp;
 
 void
-pathexec_run(char *file, char **argv, char **envp)
+upathexec_run(char *file, char **argv, char **envp)
 {
 	char           *path;
 	unsigned int    split;

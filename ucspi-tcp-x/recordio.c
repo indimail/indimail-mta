@@ -1,5 +1,8 @@
 /*
  * $Log: recordio.c,v $
+ * Revision 1.3  2021-05-12 21:03:45+05:30  Cprogrammer
+ * replace pathexec with upathexec
+ *
  * Revision 1.2  2020-11-27 17:34:08+05:30  Cprogrammer
  * removed exit.h
  *
@@ -16,7 +19,7 @@
 #include "fmt.h"
 #include "iopause.h"
 #include "fd.h"
-#include "pathexec.h"
+#include "upathexec.h"
 
 #define FATAL "recordio: fatal: "
 
@@ -199,7 +202,7 @@ main(int argc, char **argv, char **envp)
 	if (fd_move(1, piout[1]) == -1)
 		strerr_die2sys(111, FATAL, "unable to move descriptors: ");
 
-	pathexec_run(argv[1], argv + 1, envp);
+	upathexec_run(argv[1], argv + 1, envp);
 	strerr_die4sys(111, FATAL, "unable to run ", argv[1], ": ");
 	/*- Not reached */
 	return(1);
@@ -208,7 +211,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_recordio_c()
 {
-	static char    *x = "$Id: recordio.c,v 1.2 2020-11-27 17:34:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: recordio.c,v 1.3 2021-05-12 21:03:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
