@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.45  2021-05-12 17:51:49+05:30  Cprogrammer
+ * display todo filename in logs
+ *
  * Revision 1.44  2021-05-12 15:51:36+05:30  Cprogrammer
  * set conf_split from CONFSPLIT env variable
  * added code comments
@@ -739,6 +742,7 @@ todo_do(fd_set * rfds)
 	int             fd, fdinfo, match, c;
 	int             fdchan[CHANNELS], flagchan[CHANNELS];
 	char            ch;
+	char           *ptr;
 	unsigned long   id, uid, pid;
 
 	fd = -1;
@@ -768,10 +772,13 @@ todo_do(fd_set * rfds)
 		break;
 	case 0: /*- no files in todo/split/ */
 		flagtododir = 0;
+		/*- flow through */
 	default: /*- error */
 		return;
 	}
+	ptr = readsubdir_name(&todosubdir);
 	fnmake_todo(id); /*- set fn as todo/split/id */
+	log7("todo: ", queuedesc, ": subdir=todo/", ptr, " fn=", fn.s, "\n");
 	if ((fd = open_read(fn.s)) == -1) { /*- envelope */
 		log5("warning: ", queuedesc, ": qmail-todo: unable to open ", fn.s, "\n");
 		return;
@@ -1126,6 +1133,8 @@ main()
 		_exit(111);
 	}
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	strnum[fmt_ulong(strnum, conf_split)] = 0;
+	log5("info: ", queuedesc, ": conf split=", strnum, "\n");
 	if (!getcontrols()) {
 		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to read controls or out of memory\n");
 		_exit(111);
@@ -1230,7 +1239,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.44 2021-05-12 15:51:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.45 2021-05-12 17:51:49+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
