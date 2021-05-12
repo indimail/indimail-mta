@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-send.c,v $
- * Revision 1.76  2021-05-08 12:21:35+05:30  Cprogrammer
- * added code comments
+ * Revision 1.76  2021-05-12 15:27:02+05:30  Cprogrammer
+ * added code documentation
  *
  * Revision 1.75  2021-04-05 07:19:23+05:30  Cprogrammer
  * converted local variables/functions to static
@@ -2914,7 +2914,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.76 2021-05-08 12:21:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.76 2021-05-12 15:27:02+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

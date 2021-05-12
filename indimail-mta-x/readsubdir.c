@@ -1,7 +1,7 @@
 /*
  * $Log: readsubdir.c,v $
- * Revision 1.4  2021-05-08 12:23:04+05:30  Cprogrammer
- * converted functions to ansic
+ * Revision 1.4  2021-05-12 15:30:10+05:30  Cprogrammer
+ * converted to c99 function prototypes
  *
  * Revision 1.3  2004-10-22 20:29:54+05:30  Cprogrammer
  * added RCS id
@@ -69,7 +69,7 @@ readsubdir_next(readsubdir *rs, unsigned long *id)
 void
 getversion_readsubdir_c()
 {
-	static char    *x = "$Id: readsubdir.c,v 1.4 2021-05-08 12:23:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: readsubdir.c,v 1.4 2021-05-12 15:30:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

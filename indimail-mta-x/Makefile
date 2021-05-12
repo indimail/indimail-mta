@@ -377,20 +377,19 @@ mysql_config.o: compile mysql_config.c conf-mysqlrules
 mysql_config: load mysql_config.o
 	./load mysql_config
 
-envdir_set.o: compile envdir_set.c direntry.h \
-pathexec.h
+envdir_set.o: compile envdir_set.c direntry.h
 	./compile envdir_set.c
 
 condredirect: \
-load condredirect.o qmail.o envdir_set.o pathexec_env.o \
+load condredirect.o qmail.o envdir_set.o \
 auto_sysconfdir.o variables.o auto_control.o \
-auto_qmail.o pathexec_run.o
-	./load condredirect qmail.o envdir_set.o pathexec_env.o \
+auto_qmail.o
+	./load condredirect qmail.o envdir_set.o \
 	auto_sysconfdir.o variables.o auto_control.o \
-	auto_qmail.o pathexec_run.o -lqmail
+	auto_qmail.o -lqmail
 
 condredirect.o: compile condredirect.c qmail.h \
-auto_sysconfdir.h pathexec.h variables.h auto_control.h
+auto_sysconfdir.h variables.h auto_control.h
 	./compile `grep -h -v "^#" conf-spf` condredirect.c
 
 condredirect.1: condredirect.9 conf-qmail conf-sysconfdir
@@ -501,7 +500,7 @@ dnsfq: \
 load dnsfq.o dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
 tlsarralloc.o socket_v4mappedprefix.o \
 socket_v6any.o dns.lib socket.lib
-	./load dnsfq dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o  \
+	./load dnsfq dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
 	tlsarralloc.o socket_v4mappedprefix.o \
 	socket_v6any.o `cat dns.lib socket.lib` -lqmail
 
@@ -652,11 +651,9 @@ fmtqfn.o: compile fmtqfn.c fmtqfn.h auto_split.h
 
 forward: \
 load forward.o auto_qmail.o qmail.o variables.o \
-envdir_set.o pathexec_env.o pathexec_run.o \
-auto_sysconfdir.o auto_control.o
+envdir_set.o auto_sysconfdir.o auto_control.o
 	./load forward auto_qmail.o qmail.o variables.o \
-	envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_sysconfdir.o auto_control.o -lqmail
+	envdir_set.o auto_sysconfdir.o auto_control.o -lqmail
 
 forward.1: forward.9 conf-sysconfdir
 	cat forward.9 \
@@ -664,7 +661,7 @@ forward.1: forward.9 conf-sysconfdir
 	> forward.1
 
 forward.o: compile forward.c qmail.h variables.h \
-envdir.h pathexec.h auto_sysconfdir.h auto_control.h
+envdir.h auto_sysconfdir.h auto_control.h
 	./compile `grep -h -v "^#" conf-spf` forward.c
 
 gfrom.o: \
@@ -1089,14 +1086,13 @@ qlx.h
 
 qmail-inject: load qmail-inject.o headerbody.o hfield.o \
 newfield.o quote.o control.o qmail.o envrules.o wildmat.o \
-matchregex.o pathexec_run.o pathexec_env.o envdir_set.o \
-srs.o rcpthosts.o auto_control.o token822.o auto_qmail.o variables.o \
-auto_sysconfdir.o srs.lib
+matchregex.o envdir_set.o srs.o rcpthosts.o auto_control.o \
+token822.o auto_qmail.o variables.o auto_sysconfdir.o srs.lib
 	./load qmail-inject headerbody.o hfield.o newfield.o \
-	quote.o control.o qmail.o pathexec_run.o \
-	pathexec_env.o envdir_set.o matchregex.o envrules.o \
+	quote.o control.o qmail.o envdir_set.o matchregex.o envrules.o \
 	wildmat.o srs.o rcpthosts.o auto_control.o variables.o auto_qmail.o \
-	auto_sysconfdir.o token822.o -L../libsrs2-x/libsrs2/.libs `cat srs.lib` -lqmail
+	auto_sysconfdir.o token822.o -L../libsrs2-x/libsrs2/.libs \
+	`cat srs.lib` -lqmail
 
 qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
 	cat qmail-inject.9 \
@@ -1107,7 +1103,7 @@ qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
 qmail-inject.o: \
 compile qmail-inject.c hfield.h token822.h control.h \
 qmail.h quote.h headerbody.h envdir.h \
-auto_sysconfdir.h newfield.h envrules.h pathexec.h \
+auto_sysconfdir.h newfield.h envrules.h \
 variables.h conf-srs auto_control.h hassrs.h
 	./compile qmail-inject.c
 
@@ -1317,13 +1313,11 @@ control.h received.h recipients.h
 	./compile qmail-qmtpd.c
 
 qmail-qread: \
-load qmail-qread.o fmtqfn.o readsubdir.o \
-auto_qmail.o auto_split.o variables.o control.o envdir_set.o \
-pathexec_env.o auto_sysconfdir.o auto_control.o \
-pathexec_run.o
-	./load qmail-qread fmtqfn.o readsubdir.o \
-	control.o auto_qmail.o auto_split.o variables.o \
-	envdir_set.o pathexec_env.o pathexec_run.o \
+load qmail-qread.o fmtqfn.o readsubdir.o auto_qmail.o \
+auto_split.o variables.o control.o envdir_set.o \
+auto_sysconfdir.o auto_control.o
+	./load qmail-qread fmtqfn.o readsubdir.o control.o \
+	auto_qmail.o auto_split.o variables.o envdir_set.o \
 	auto_sysconfdir.o auto_control.o -lqmail
 
 qmail-qread.8: qmail-qread.9 conf-sysconfdir
@@ -1333,8 +1327,8 @@ qmail-qread.8: qmail-qread.9 conf-sysconfdir
 
 qmail-qread.o: \
 compile qmail-qread.c fmtqfn.h readsubdir.h direntry.h \
-control.h auto_qmail.h envdir.h pathexec.h \
-variables.h conf-queue auto_control.h auto_sysconfdir.h
+control.h auto_qmail.h envdir.h variables.h conf-queue \
+auto_control.h auto_sysconfdir.h
 	if test -f conf-queue ; then \
 		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`head -1 conf-queue` qmail-qread.c; \
 	else \
@@ -1451,13 +1445,13 @@ dknewkey: dknewkey.sh warn-auto.sh
 	cat warn-auto.sh dknewkey.sh > dknewkey
 
 qmail-dk: \
-load qmail-dk.o triggerpull.o fmtqfn.o \
-tlsarralloc.o auto_control.o auto_qmail.o auto_split.o variables.o \
-dns.o strsalloc.o ip.o ipalloc.o MakeArgs.o socket_v4mappedprefix.o \
-socket_v6any.o domainkeys.o dktrace.o control.o dns_text.o dns.lib
-	./load qmail-dk triggerpull.o fmtqfn.o auto_control.o auto_qmail.o \
-	auto_split.o variables.o socket_v4mappedprefix.o \
-	socket_v6any.o tlsarralloc.o dns.o strsalloc.o ip.o ipalloc.o \
+load qmail-dk.o tlsarralloc.o auto_control.o \
+auto_qmail.o variables.o dns.o strsalloc.o ip.o \
+ipalloc.o MakeArgs.o socket_v4mappedprefix.o socket_v6any.o \
+domainkeys.o dktrace.o control.o dns_text.o dns.lib
+	./load qmail-dk auto_control.o auto_qmail.o \
+	variables.o socket_v4mappedprefix.o tlsarralloc.o \
+	socket_v6any.o dns.o strsalloc.o ip.o ipalloc.o \
 	domainkeys.o dktrace.o control.o dns_text.o MakeArgs.o \
 	`cat dns.lib` -lcrypto -lqmail
 
@@ -1930,11 +1924,9 @@ qmail.o: compile qmail.c qmail.h auto_qmail.h
 
 qreceipt: \
 load qreceipt.o headerbody.o hfield.o quote.o token822.o qmail.o \
-envdir_set.o pathexec_env.o pathexec_run.o \
-auto_sysconfdir.o variables.o auto_qmail.o auto_control.o
+envdir_set.o auto_sysconfdir.o variables.o auto_qmail.o auto_control.o
 	./load qreceipt headerbody.o hfield.o quote.o token822.o \
-	envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_sysconfdir.o variables.o auto_control.o \
+	envdir_set.o auto_sysconfdir.o variables.o auto_control.o \
 	auto_qmail.o qmail.o -lqmail
 
 qreceipt.1: qreceipt.9 conf-sysconfdir
@@ -1945,7 +1937,7 @@ qreceipt.1: qreceipt.9 conf-sysconfdir
 qreceipt.o: \
 compile qreceipt.c hfield.h token822.h variables.h \
 auto_sysconfdir.h headerbody.h \
-quote.h qmail.h auto_qmail.h envdir.h pathexec.h \
+quote.h qmail.h auto_qmail.h envdir.h \
 auto_control.h auto_sysconfdir.h
 	./compile qreceipt.c
 
@@ -1990,11 +1982,9 @@ haveip6.h socket.h remoteinfo.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` remoteinfo.c
 
 rrforward: \
-load rrforward.o qmail.o auto_qmail.o \
-envdir_set.o pathexec_env.o pathexec_run.o \
+load rrforward.o qmail.o auto_qmail.o envdir_set.o \
 auto_sysconfdir.o auto_control.o variables.o
-	./load rrforward qmail.o auto_qmail.o \
-	envdir_set.o pathexec_env.o pathexec_run.o \
+	./load rrforward qmail.o auto_qmail.o envdir_set.o \
 	auto_sysconfdir.o auto_control.o variables.o -lqmail
 
 rrforward.1: rrforward.9 conf-sysconfdir
@@ -2004,7 +1994,7 @@ rrforward.1: rrforward.9 conf-sysconfdir
 
 rrforward.o: \
 compile rrforward.c qmail.h auto_sysconfdir.h \
-envdir.h pathexec.h variables.h auto_control.h
+envdir.h variables.h auto_control.h
 	./compile rrforward.c
 
 sendmail: \
@@ -2337,16 +2327,16 @@ compile 822header.c
 822headerok.o: compile 822headerok.c
 	./compile 822headerok.c
 
-822bodyfilter: load 822bodyfilter.o pathexec_run.o
-	./load 822bodyfilter pathexec_run.o -lqmail
+822bodyfilter: load 822bodyfilter.o
+	./load 822bodyfilter -lqmail
 
-822bodyfilter.o: compile 822bodyfilter.c pathexec.h
+822bodyfilter.o: compile 822bodyfilter.c
 	./compile 822bodyfilter.c
 
-822headerfilter: load 822headerfilter.o pathexec_run.o
-	./load 822headerfilter pathexec_run.o -lqmail
+822headerfilter: load 822headerfilter.o
+	./load 822headerfilter -lqmail
 
-822headerfilter.o: compile 822headerfilter.c pathexec.h
+822headerfilter.o: compile 822headerfilter.c
 	./compile 822headerfilter.c
 
 822addr: load 822addr.o
@@ -2374,25 +2364,23 @@ checkdomain.o: compile checkdomain.c
 	./compile checkdomain.c
 
 filterto.o: compile filterto.c variables.h auto_control.h \
-qmail.h pathexec.h envdir.h auto_sysconfdir.h
+qmail.h envdir.h auto_sysconfdir.h
 	./compile filterto.c
 
 filterto: load filterto.o auto_qmail.o qmail.o \
-variables.o envdir_set.o pathexec_env.o \
-pathexec_run.o auto_sysconfdir.o auto_control.o
+variables.o envdir_set.o auto_sysconfdir.o auto_control.o
 	./load filterto auto_qmail.o qmail.o variables.o \
-	envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_sysconfdir.o auto_control.o -lqmail
+	envdir_set.o auto_sysconfdir.o auto_control.o -lqmail
 
 filterto.1: filterto.9 conf-sysconfdir
 	cat filterto.9 \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> filterto.1
 
-condtomaildir: load condtomaildir.o pathexec_run.o
-	./load condtomaildir pathexec_run.o -lqmail
+condtomaildir: load condtomaildir.o
+	./load condtomaildir -lqmail
 
-condtomaildir.o: compile condtomaildir.c pathexec.h
+condtomaildir.o: compile condtomaildir.c
 	./compile condtomaildir.c
 
 iftoccfrom: load iftoccfrom.o
@@ -2407,16 +2395,14 @@ ifaddr: load ifaddr.o
 ifaddr.o: compile ifaddr.c
 	./compile ifaddr.c
 
-replier: load replier.o qmail.o variables.o pathexec_env.o \
-pathexec_run.o getconf.o auto_qmail.o \
+replier: load replier.o qmail.o variables.o getconf.o auto_qmail.o \
 auto_sysconfdir.o auto_control.o envdir_set.o
 	./load replier qmail.o variables.o auto_control.o \
-	pathexec_env.o pathexec_run.o \
 	auto_sysconfdir.o getconf.o auto_qmail.o \
 	envdir_set.o -lqmail
 
 replier.o: compile replier.c auto_sysconfdir.h variables.h \
-getconf.h pathexec.h auto_control.h
+getconf.h auto_control.h
 	./compile replier.c
 
 replier.1: replier.9 conf-sysconfdir
@@ -2443,11 +2429,9 @@ compile serialsmtp.c quote.h conf-ip
 
 maildirserial: \
 load maildirserial.o auto_qmail.o qmail.o maildir.o quote.o \
-envdir_set.o pathexec_env.o pathexec_run.o variables.o \
-auto_sysconfdir.o auto_control.o prioq.o
+envdir_set.o variables.o auto_sysconfdir.o auto_control.o prioq.o
 	./load maildirserial auto_qmail.o qmail.o maildir.o variables.o \
-	envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_control.o auto_sysconfdir.o quote.o prioq.o \
+	envdir_set.o auto_control.o auto_sysconfdir.o quote.o prioq.o \
 	-lqmail
 
 maildirserial.1: maildirserial.9 conf-sysconfdir
@@ -2750,7 +2734,7 @@ columnt.o: compile columnt.c slurpclose.h
 columnt.o: compile columnt.c slurpclose.h \
 	./compile columnt.c
 
-qmail-cat: load  qmail-cat.o
+qmail-cat: load qmail-cat.o
 	./load qmail-cat -lqmail
 
 qmail-cat.o: compile qmail-cat.c
@@ -2770,36 +2754,29 @@ qarf.o: compile qarf.c
 	./compile qarf.c
 
 qnotify: \
-load  qnotify.o qmail.o auto_qmail.o \
-pathexec_env.o pathexec_run.o envdir_set.o variables.o \
+load qnotify.o qmail.o auto_qmail.o envdir_set.o variables.o \
 auto_sysconfdir.o auto_control.o
-	./load qnotify qmail.o \
-	auto_qmail.o pathexec_env.o pathexec_run.o envdir_set.o \
-	variables.o auto_sysconfdir.o \
-	auto_control.o -lqmail
+	./load qnotify qmail.o auto_qmail.o envdir_set.o \
+	variables.o auto_sysconfdir.o auto_control.o -lqmail
 
 qnotify.o: \
 compile qnotify.c qmail.h variables.h \
-envdir.h pathexec.h auto_sysconfdir.h \
-auto_control.h
+envdir.h auto_sysconfdir.h auto_control.h
 	./compile qnotify.c
 
 rrt.o: \
 compile rrt.c auto_sysconfdir.h control.h qmail.h \
-variables.h envdir.h pathexec.h auto_control.h
+variables.h envdir.h auto_control.h
 	./compile rrt.c
 
 rrt: \
 load rrt.o auto_qmail.o qmail.o control.o variables.o \
-auto_control.o envdir_set.o pathexec_env.o \
-auto_sysconfdir.o pathexec_run.o
+auto_control.o envdir_set.o auto_sysconfdir.o
 	./load rrt auto_qmail.o qmail.o control.o variables.o \
-	envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_sysconfdir.o auto_control.o -lqmail
-
+	envdir_set.o auto_sysconfdir.o auto_control.o -lqmail
 
 qmail-poppass: \
-load  qmail-poppass.o auto_uids.o MakeArgs.o
+load qmail-poppass.o auto_uids.o MakeArgs.o
 	./load qmail-poppass auto_uids.o MakeArgs.o -lqmail
 
 qmail-poppass.o: \
@@ -2807,7 +2784,7 @@ compile qmail-poppass.c auto_uids.h MakeArgs.h
 	./compile qmail-poppass.c
 
 rpmattr: \
-load  rpmattr.o auto_uids.o get_uid.o
+load rpmattr.o auto_uids.o get_uid.o
 	./load rpmattr auto_uids.o get_uid.o -lqmail
 	
 
@@ -2856,11 +2833,9 @@ compile ofmipname.c cdbmss.h
 
 new-inject: \
 load new-inject.o qmail.o auto_sysconfdir.o rwhconfig.o \
-envdir_set.o pathexec_env.o pathexec_run.o \
-variables.o auto_qmail.o auto_control.o
+envdir_set.o variables.o auto_qmail.o auto_control.o
 	./load new-inject qmail.o auto_sysconfdir.o variables.o \
-	auto_qmail.o envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_control.o rwhconfig.o -lqmail
+	auto_qmail.o envdir_set.o auto_control.o rwhconfig.o -lqmail
 
 new-inject.1: new-inject.9 conf-sysconfdir
 	cat new-inject.9 \
@@ -2868,9 +2843,8 @@ new-inject.1: new-inject.9 conf-sysconfdir
 	> new-inject.1
 
 new-inject.o: \
-compile new-inject.c variables.h \
-auto_sysconfdir.h qmail.h \
-rwhconfig.h envdir.h pathexec.h auto_control.h
+compile new-inject.c variables.h auto_sysconfdir.h qmail.h \
+rwhconfig.h envdir.h auto_control.h
 	./compile new-inject.c
 
 822date: load 822date.o auto_sysconfdir.o
@@ -2916,12 +2890,6 @@ qquote: load qquote.o
 qquote.o: compile qquote.c
 	./compile qquote.c
 
-pathexec_run.o: compile pathexec_run.c pathexec.h
-	./compile pathexec_run.c
-
-pathexec_env.o: compile pathexec_env.c pathexec.h
-	./compile pathexec_env.c
-
 getconf.o: compile getconf.c getconf.h
 	./compile getconf.c
 
@@ -2964,7 +2932,7 @@ tmprsadh: update_tmprsadh
 #
 # Domain KEYS
 #
-domainkeys.h: domainkeys.c makeheader  dktrace.h
+domainkeys.h: domainkeys.c makeheader dktrace.h
 	./makeheader <domainkeys.c >domainkeys.h
 
 makeheader: load makeheader.o
@@ -2975,11 +2943,9 @@ makeheader.o: makeheader.c compile
 
 dot-forward: \
 load dot-forward.o control.o qmail.o auto_qmail.o variables.o \
-envdir_set.o pathexec_env.o token822.o \
-auto_sysconfdir.o auto_control.o pathexec_run.o
+envdir_set.o token822.o auto_sysconfdir.o auto_control.o
 	./load dot-forward control.o qmail.o auto_qmail.o variables.o \
-	envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_sysconfdir.o auto_control.o token822.o -lqmail
+	envdir_set.o auto_sysconfdir.o auto_control.o token822.o -lqmail
 
 dot-forward.1: dot-forward.9 conf-sysconfdir
 	cat dot-forward.9 \
@@ -2987,16 +2953,14 @@ dot-forward.1: dot-forward.9 conf-sysconfdir
 	> dot-forward.1
 
 dot-forward.o: compile dot-forward.c token822.h control.h qmail.h \
-auto_sysconfdir.h variables.h envdir.h pathexec.h auto_control.h
+auto_sysconfdir.h variables.h envdir.h auto_control.h
 	./compile dot-forward.c
 
 fastforward: \
 load fastforward.o slurpclose.o strset.o qmail.o auto_qmail.o \
-envdir_set.o pathexec_env.o pathexec_run.o variables.o \
-auto_sysconfdir.o auto_control.o
+envdir_set.o variables.o auto_sysconfdir.o auto_control.o
 	./load fastforward slurpclose.o strset.o qmail.o variables.o \
-	envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_sysconfdir.o auto_qmail.o auto_control.o -lqmail
+	envdir_set.o auto_sysconfdir.o auto_qmail.o auto_control.o -lqmail
 
 fastforward.1: fastforward.9 conf-sysconfdir
 	cat fastforward.9 \
@@ -3005,7 +2969,7 @@ fastforward.1: fastforward.9 conf-sysconfdir
 
 fastforward.o: \
 compile fastforward.c strset.h qmail.h slurpclose.h auto_sysconfdir.h \
-envdir.h pathexec.h variables.h auto_control.h
+envdir.h variables.h auto_control.h
 	./compile fastforward.c
 
 strset.o: \
@@ -3310,7 +3274,7 @@ shadow.lib
 	`cat shadow.lib` -lqmail
 
 sys-checkpwd.o: \
-compile sys-checkpwd.c pathexec.h hasspnam.h \
+compile sys-checkpwd.c hasspnam.h \
 hasuserpw.h MakeArgs.h
 	./compile sys-checkpwd.c
 
@@ -3331,7 +3295,7 @@ tryspnam.c compile load
 hasuserpw.h: \
 tryuserpw.c compile load
 	( ( ./compile tryuserpw.c \
-	  && ./load tryuserpw ) >/dev/null 2>&1 \
+	&& ./load tryuserpw ) >/dev/null 2>&1 \
 	&& echo \#define HASGETUSERPW 1 || exit 0 ) > hasuserpw.h
 	rm -f tryuserpw.o tryuserpw
 
@@ -3361,7 +3325,7 @@ load ldap-checkpwd.o ldap.lib
 	./load ldap-checkpwd `cat ldap.lib` -lqmail
 
 ldap-checkpwd.o: \
-compile ldap-checkpwd.c pathexec.h hasldap.h
+compile ldap-checkpwd.c hasldap.h
 	./compile -DEXTENDED_ATTRIBUTES -DLDAP_DEPRECATED ldap-checkpwd.c
 
 surblfilter.8: surblfilter.9 conf-qmail conf-sysconfdir
@@ -3523,12 +3487,10 @@ compile qcount_dir.c
 	./compile qcount_dir.c
 
 ctrlenv: \
-load ctrlenv.o control.o auto_control.o \
-pathexec_env.o pathexec_run.o variables.o \
+load ctrlenv.o control.o auto_control.o variables.o \
 load_mysql.o indimail_stub.o sqlmatch.o \
 auto_qmail.o auto_uids.o auto_sysconfdir.o
-	./load ctrlenv auto_control.o control.o \
-	pathexec_env.o pathexec_run.o variables.o \
+	./load ctrlenv auto_control.o control.o variables.o \
 	load_mysql.o indimail_stub.o sqlmatch.o \
 	auto_qmail.o auto_uids.o auto_sysconfdir.o \
 	-lqmail -ldl

@@ -75,6 +75,8 @@ Release 2.13 Start 14/02/2021
 46. indimail-mini-preinst: added missing 'upgrade' case
 - 12/05/2021
 47. inotify.c: added IN_MOVE_SELF, IN_MOVED_FROm, IN_MOVED_TO events
+48. removed pathexec_run.c, pathexec_env.c, pathexec.h and moved functions to
+    libqmail
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
