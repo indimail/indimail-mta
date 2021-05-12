@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-queue.c,v $
- * Revision 1.70  2021-05-12 15:53:18+05:30  Cprogrammer
+ * Revision 1.70  2021-05-12 15:58:55+05:30  Cprogrammer
  * set conf_split from CONFSPLIT env variable
  *
  * Revision 1.69  2021-05-09 17:37:51+05:30  Cprogrammer
@@ -221,6 +221,7 @@
 #include "mess822.h"
 #include "wait.h"
 #include "MakeArgs.h"
+#include "auto_split.h"
 #include "getEnvConfig.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
@@ -1257,7 +1258,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.70 2021-05-12 15:53:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.70 2021-05-12 15:58:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
