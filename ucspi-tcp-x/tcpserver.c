@@ -237,7 +237,7 @@
 #else
 #include <sgetopt.h>
 #endif
-#include "pathexec.h"
+#include "upathexec.h"
 #include "socket.h"
 #include <ndelay.h>
 #include "tcpremoteinfo.h"
@@ -391,7 +391,7 @@ env(char *s, char *t)
 {
 	if (str_equal(s, "MAXPERIP"))
 		scan_ulong(t, &maxperip);
-	if (!pathexec_env(s, t))
+	if (!upathexec_env(s, t))
 		drop_nomem();
 }
 
@@ -1773,7 +1773,7 @@ main(int argc, char **argv, char **envp)
 					/*
 					 * signals are allready set in the parent 
 					 */
-					pathexec(argv);
+					upathexec(argv);
 					strerr_die4sys(111, DROP, "unable to run ", *argv, ": ");
 				case -1:
 					strerr_die2sys(111, DROP, "unable to fork: ");
@@ -1793,7 +1793,7 @@ main(int argc, char **argv, char **envp)
 				_exit(0);
 			}
 #endif
-			pathexec(argv);
+			upathexec(argv);
 			strerr_die4sys(111, DROP, "unable to run ", *argv, ": ");
 		case -1:
 			strerr_warn2(DROP, "unable to fork: ", &strerr_sys);

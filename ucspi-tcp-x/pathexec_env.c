@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_env.c,v $
+ * Revision 1.8  2021-05-12 21:03:20+05:30  Cprogrammer
+ * replaced pathexec with upathexec
+ *
  * Revision 1.7  2020-08-03 17:25:21+05:30  Cprogrammer
  * use qmail library
  *
@@ -27,13 +30,13 @@
 #include <str.h>
 #include <byte.h>
 #include <env.h>
-#include "pathexec.h"
+#include "upathexec.h"
 
 static stralloc plus;
 static stralloc tmp;
 
 int
-pathexec_env(char *s, char *t)
+upathexec_env(char *s, char *t)
 {
 	if (!s)
 		return 1;
@@ -111,7 +114,7 @@ pathexec_dl(int argc, char **argv, char **envp, int (*func) (int, char **, char 
 #endif
 
 void
-pathexec(char **argv)
+upathexec(char **argv)
 {
 	char          **e;
 	unsigned int    elen;
@@ -164,6 +167,6 @@ pathexec(char **argv)
 		}
 	}
 	e[elen] = 0;
-	pathexec_run(*argv, argv, e);
+	upathexec_run(*argv, argv, e);
 	alloc_free((char *) e);
 }

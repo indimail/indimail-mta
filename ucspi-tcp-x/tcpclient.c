@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.20  2021-05-12 21:04:42+05:30  Cprogrammer
+ * replaced pathexec with upathexec
+ *
  * Revision 1.19  2021-03-10 18:23:43+05:30  Cprogrammer
  * use set_essential_fd() to avoid deadlock
  *
@@ -86,7 +89,7 @@
 #include <subfd.h>
 #include <error.h>
 #include <strerr.h>
-#include "pathexec.h"
+#include "upathexec.h"
 #include "timeoutconn.h"
 #include "tcpremoteinfo.h"
 #include "dns.h"
@@ -105,7 +108,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.19 2021-03-10 18:23:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.20 2021-05-12 21:04:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -223,7 +226,7 @@ do_select(char **argv, int flag_tcpclient, int s)
 			close(pi2[0]);
 			if ((fd_move(6, pi1[0]) == -1) || (fd_move(7, pi2[1]) == -1))
 				strerr_die2sys(111, FATAL, "unable to set up descriptors: ");
-			pathexec(argv);
+			upathexec(argv);
 			strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
 			/* Not reached */
 			_exit(0);
@@ -557,7 +560,7 @@ CONNECTED:
 	if (!flagdelay)
 		socket_tcpnodelay(s);	/*- if it fails, bummer */
 #ifndef IPV6
-	if (!pathexec_env("PROTO", "TCP"))
+	if (!upathexec_env("PROTO", "TCP"))
 		nomem();
 	if (socket_local4(s, iplocal, &portlocal) == -1)
 #else
@@ -567,11 +570,11 @@ CONNECTED:
 #ifdef IPV6
 	if (!forcev6 && (ip6_isv4mapped(iplocal) || byte_equal(iplocal, 16, (char *) V6any)))
 		fakev4 = 1;
-	if (!pathexec_env("PROTO", fakev4 ? "TCP" : "TCP6"))
+	if (!upathexec_env("PROTO", fakev4 ? "TCP" : "TCP6"))
 		nomem();
 #endif
 	strnum[fmt_ulong(strnum, portlocal)] = 0;
-	if (!pathexec_env("TCPLOCALPORT", strnum))
+	if (!upathexec_env("TCPLOCALPORT", strnum))
 		nomem();
 #ifdef IPV6
 	if (fakev4)
@@ -581,7 +584,7 @@ CONNECTED:
 #else
 	ipstr[ip4_fmt(ipstr, iplocal)] = 0;
 #endif
-	if (!pathexec_env("TCPLOCALIP", ipstr))
+	if (!upathexec_env("TCPLOCALIP", ipstr))
 		nomem();
 #ifdef IPV6
 	if (!(x = forcelocal) && dns_name6(&tmp, iplocal) == 0)
@@ -593,7 +596,7 @@ CONNECTED:
 			nomem();
 		x = tmp.s;
 	}
-	if (!pathexec_env("TCPLOCALHOST", x))
+	if (!upathexec_env("TCPLOCALHOST", x))
 		nomem();
 #ifdef IPV6
 	if (socket_remote6(s, ipremote, &portremote, &netif) == -1)
@@ -602,7 +605,7 @@ CONNECTED:
 #endif
 		strerr_die2sys(111, FATAL, "unable to get remote address: ");
 	strnum[fmt_ulong(strnum, portremote)] = 0;
-	if (!pathexec_env("TCPREMOTEPORT", strnum))
+	if (!upathexec_env("TCPREMOTEPORT", strnum))
 		nomem();
 #ifdef IPV6
 	if (fakev4)
@@ -612,7 +615,7 @@ CONNECTED:
 #else
 	ipstr[ip4_fmt(ipstr, ipremote)] = 0;
 #endif
-	if (!pathexec_env("TCPREMOTEIP", ipstr))
+	if (!upathexec_env("TCPREMOTEIP", ipstr))
 		nomem();
 	if (verbosity >= 2)
 		strerr_warn4("tcpclient: connected to ", ipstr, " port ", strnum, 0);
@@ -627,7 +630,7 @@ CONNECTED:
 			nomem();
 		x = tmp.s;
 	}
-	if (!pathexec_env("TCPREMOTEHOST", x))
+	if (!upathexec_env("TCPREMOTEHOST", x))
 		nomem();
 	x = 0;
 #ifdef IPV6
@@ -642,7 +645,7 @@ CONNECTED:
 			nomem();
 		x = tmp.s;
 	}
-	if (!pathexec_env("TCPREMOTEINFO", x))
+	if (!upathexec_env("TCPREMOTEINFO", x))
 		nomem();
 #ifdef TLS
 	if (flagssl) {
@@ -675,7 +678,7 @@ CONNECTED:
 		if (fd_copy(7, 6) == -1)
 			strerr_die2sys(111, FATAL, "unable to set up descriptor 7: ");
 		sig_uncatch(sig_pipe);
-		pathexec(argv);
+		upathexec(argv);
 		strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
 	}
 	/* Not reached */

@@ -1,5 +1,8 @@
 /*
  * $Log: dotls.c,v $
+ * Revision 1.6  2021-05-12 21:01:23+05:30  Cprogrammer
+ * replace pathexec() with upathexec()
+ *
  * Revision 1.5  2021-03-09 08:15:56+05:30  Cprogrammer
  * removed unnecessary initializations and type casts
  *
@@ -39,14 +42,14 @@
 #include <gen_allocdefs.h>
 #include <getln.h>
 #include <timeoutwrite.h>
-#include "pathexec.h"
+#include "upathexec.h"
 #include "tls.h"
 
 #define FATAL         "dotls: fatal: "
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.5 2021-03-09 08:15:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.6 2021-05-12 21:01:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_bulk();
@@ -605,7 +608,7 @@ main(int argc, char **argv)
 			close(pi2[0]);
 			if ((fd_move(tcpclient ? 6 : 0, pi1[0]) == -1) || (fd_move(tcpclient ? 7 : 1, pi2[1]) == -1))
 				strerr_die2sys(111, FATAL, "unable to set up descriptors: ");
-			pathexec(argv);
+			upathexec(argv);
 			strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
 			/* Not reached */
 			_exit(0);

@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.23  2021-05-12 21:03:37+05:30  Cprogrammer
+ * replace pathexec with upathexec
+ *
  * Revision 1.22  2021-03-06 23:13:31+05:30  Cprogrammer
  * use commands from libqmail
  *
@@ -85,7 +88,7 @@
 #include <strerr.h>
 #include <stralloc.h>
 #include <commands.h>
-#include "pathexec.h"
+#include "upathexec.h"
 #include "dns.h"
 #ifdef IPV6
 #include "ip6.h"
@@ -94,7 +97,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.22 2021-03-06 23:13:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.23 2021-05-12 21:03:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -656,7 +659,7 @@ rblsmtpd(int argc, char **argv, char **envp)
 		usage();
 	if (decision >= 2)
 		rblsmtpd_f();
-	pathexec_run(*argv, argv, envp);
+	upathexec_run(*argv, argv, envp);
 	strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
 	/*- Not reached */
 	return (0);

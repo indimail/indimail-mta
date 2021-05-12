@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.18  2021-05-12 21:02:52+05:30  Cprogrammer
+ * replaced pathexec with upathexec
+ *
  * Revision 1.17  2020-10-01 14:35:33+05:30  Cprogrammer
  * Darwin Port
  *
@@ -64,7 +67,7 @@
 #include <str.h>
 #include <fmt.h>
 #include <env.h>
-#include "pathexec.h"
+#include "upathexec.h"
 
 #define FATAL "tcpserver: fatal: "
 
@@ -182,7 +185,7 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	static char    *x = "$Id: load_shared.c,v 1.17 2020-10-01 14:35:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_shared.c,v 1.18 2021-05-12 21:02:52+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

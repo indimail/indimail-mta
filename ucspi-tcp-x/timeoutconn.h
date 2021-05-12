@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.h,v $
+ * Revision 1.4  2021-05-12 21:05:17+05:30  Cprogrammer
+ * define arguments as array subscripts to fix gcc 11 warnings
+ *
  * Revision 1.3  2005-06-10 09:14:04+05:30  Cprogrammer
  * added ipv6 support
  *
@@ -19,9 +22,9 @@
 #include "uint32.h"
 #endif
 
-int             timeoutconn(int, char *, uint16, unsigned int);
+int             timeoutconn(int, char ip[4], uint16, unsigned int);
 #ifdef LIBC_HAS_IP6
-int             timeoutconn6(int, char *, uint16, unsigned int, uint32);
+int             timeoutconn6(int, char ip[16], uint16, unsigned int, uint32);
 #endif
 
 #endif
