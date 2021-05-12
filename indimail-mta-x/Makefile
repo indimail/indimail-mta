@@ -1665,7 +1665,7 @@ get_uid.o auto_control.o auto_sysconfdir.o
 qmail-showctl.o: compile qmail-showctl.c control.h direntry.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
 auto_split.h spf.h variables.h auto_control.h indimail_stub.h \
-hassrs.h conf-srs conf-spf conf-batv
+envdir.h hassrs.h conf-srs conf-spf conf-batv
 	./compile `grep -h -v "^#" conf-spf conf-batv` \
 	qmail-showctl.c
 
@@ -2238,11 +2238,15 @@ compile atrn.c etrn.h rcpthosts.h control.h
 ############### Begin queue-fix
 
 queue-fix: \
-load queue-fix.o get_uid.o auto_split.o auto_uids.o
-	./load queue-fix get_uid.o auto_split.o auto_uids.o -lqmail
+load queue-fix.o get_uid.o auto_split.o auto_uids.o \
+auto_control.o variables.o envdir_set.o
+	./load queue-fix get_uid.o auto_split.o \
+	auto_uids.o auto_control.o variables.o \
+	envdir_set.o -lqmail
 
 queue-fix.o: \
-compile queue-fix.c direntry.h auto_split.h auto_uids.h tcpto.h
+compile queue-fix.c direntry.h auto_split.h auto_uids.h tcpto.h \
+envdir.h
 	./compile queue-fix.c
 
 queue-fix.8: queue-fix.9 conf-split
@@ -3575,7 +3579,9 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 svctool: svctool.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared \
 conf-servicedir
-	$(edit) $@.in > $@
+	$(edit) $@.in \
+	| sed s}QUEUESPLIT}"`head -1 conf-split`"}g \
+	> $@
 	chmod +x $@
 
 svctool.8: svctool.9 mysql_config \
