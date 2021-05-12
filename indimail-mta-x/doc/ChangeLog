@@ -84,6 +84,11 @@ Release 2.13 Start 14/02/2021
 52. qmail-clean.c, qmail-inject.c, qmail-qread.c, qmail-queue.c, qmail-rm.c,
 	qmail-send.c, qmail-todo.c, queue-fix.c use CONFSPLIT env variable to set
 	conf_split
+53. queue-fix.c: use envdir_set to load environment from
+    .defaultqueue/defaultqueue
+54. svctool: link env variables for QUEUE in qmail-send, qmail-smtp with
+    control/defaultqueue
+55. envdir_set.c: changed error message
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
