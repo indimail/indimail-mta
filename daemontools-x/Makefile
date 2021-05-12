@@ -137,28 +137,25 @@ chkshsgr warn-shsgr tryshsgr.c compile load
 	hasshsgr.h
 	rm -f tryshsgr.o tryshsgr
 
-envdir: load envdir.o envdir_set.o openreadclose.o pathexec_env.o \
-pathexec_run.o
-	./load envdir envdir_set.o openreadclose.o pathexec_env.o \
-	pathexec_run.o -lqmail
+envdir: load envdir.o envdir_set.o openreadclose.o
+	./load envdir envdir_set.o openreadclose.o -lqmail
 
-envdir.o: compile envdir.c pathexec.h envdir.h
+envdir.o: compile envdir.c envdir.h
 	./compile envdir.c
 
-envdir_set.o: compile envdir_set.c openreadclose.h direntry.h \
-pathexec.h
+envdir_set.o: compile envdir_set.c openreadclose.h direntry.h
 	./compile envdir_set.c
 
-envuidgid: envuidgid.o load pathexec_env.o pathexec_run.o
-	./load envuidgid pathexec_env.o pathexec_run.o -lqmail
+envuidgid: envuidgid.o load 
+	./load envuidgid -lqmail
 
-envuidgid.o: compile envuidgid.c pathexec.h
+envuidgid.o: compile envuidgid.c
 	./compile envuidgid.c
 
-fghack: fghack.o load pathexec_run.o
-	./load fghack pathexec_run.o -lqmail
+fghack: fghack.o load
+	./load fghack -lqmail
 
-fghack.o: compile fghack.c pathexec.h
+fghack.o: compile fghack.c
 	./compile fghack.c
 	
 multilog: load multilog.o match.o deepsleep.o \
@@ -181,10 +178,10 @@ iopause.h: choose compile iopause.h1 iopause.h2 load trypoll.c
 iopause.o: compile iopause.c iopause.h
 	./compile iopause.c
 
-pgrphack: load pgrphack.o pathexec_run.o
-	./load pgrphack pathexec_run.o -lqmail
+pgrphack: load pgrphack.o
+	./load pgrphack -lqmail
 
-pgrphack.o: compile pathexec.h pgrphack.c
+pgrphack.o: compile pgrphack.c
 	./compile pgrphack.c
 
 readproctitle: load readproctitle.o
@@ -193,22 +190,22 @@ readproctitle: load readproctitle.o
 readproctitle.o: compile readproctitle.c
 	./compile readproctitle.c
 
-setlock: load setlock.o pathexec_run.o
-	./load setlock pathexec_run.o -lqmail
+setlock: load setlock.o
+	./load setlock -lqmail
 
-setlock.o: compile pathexec.h setlock.c
+setlock.o: compile setlock.c
 	./compile setlock.c
 
-setuidgid: load setuidgid.o prot.o pathexec_run.o
-	./load setuidgid prot.o pathexec_run.o -lqmail
+setuidgid: load setuidgid.o prot.o
+	./load setuidgid prot.o -lqmail
 
-setuidgid.o: compile pathexec.h prot.h setuidgid.c
+setuidgid.o: compile prot.h setuidgid.c
 	./compile setuidgid.c
 
-softlimit: load softlimit.o pathexec_run.o
-	./load softlimit pathexec_run.o -lqmail
+softlimit: load softlimit.o
+	./load softlimit -lqmail
 
-softlimit.o: compile pathexec.h softlimit.c
+softlimit.o: compile softlimit.c
 	./compile softlimit.c
 
 supervise: deepsleep.o load supervise.o iopause.o
@@ -233,10 +230,10 @@ svok: load svok.o run_init.o
 svok.o: compile svok.c conf-runfs
 	./compile `grep -v "^#" conf-runfs` svok.c
 
-svscan: load svscan.o pathexec_run.o
-	./load svscan pathexec_run.o -lqmail
+svscan: load svscan.o
+	./load svscan -lqmail
 
-svscan.o: compile direntry.h pathexec.h svscan.c \
+svscan.o: compile direntry.h svscan.c \
 auto_sysconfdir.h conf-runfs
 	./compile `grep -v "^#" conf-runfs` svscan.c
 
@@ -294,21 +291,15 @@ tai64n_encode.o: compile tai64n_encode.c tai.h bool.h
 	./compile tai64n_encode.c
 
 recordio.o: \
-compile recordio.c iopause.h pathexec.h
+compile recordio.c iopause.h
 	./compile recordio.c
 
 recordio: \
-load recordio.o pathexec_run.o iopause.o
-	./load recordio pathexec_run.o iopause.o -lqmail
+load recordio.o iopause.o
+	./load recordio iopause.o -lqmail
 
 openreadclose.o: compile openreadclose.c openreadclose.h
 	./compile openreadclose.c
-
-pathexec_run.o: compile pathexec_run.c pathexec.h
-	./compile pathexec_run.c
-
-pathexec_env.o: compile pathexec_env.c pathexec.h
-	./compile pathexec_env.c
 
 prot.o: \
 compile prot.c hasshsgr.h prot.h
@@ -347,8 +338,7 @@ teepipe: load teepipe.o
 teepipe.o: compile teepipe.c
 	./compile teepipe.c
 
-logselect.o: compile direntry.h sorted.h pathexec.h \
-logselect.c
+logselect.o: compile direntry.h sorted.h logselect.c
 	./compile logselect.c
 
 logselect: load logselect.o sorted.o
