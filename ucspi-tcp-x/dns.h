@@ -1,5 +1,8 @@
 /*
  * $Log: dns.h,v $
+ * Revision 1.9  2021-05-12 20:59:50+05:30  Cprogrammer
+ * define arguments as array subscripts to fix gcc 11 warnings
+ *
  * Revision 1.8  2020-04-30 22:04:56+05:30  Cprogrammer
  * define dns_resolve_tx as extern in dns_resolve.c
  *
@@ -76,7 +79,7 @@ struct dns_transmit
 
 extern struct dns_transmit dns_resolve_tx;
 
-extern void     dns_random_init(char *);
+extern void     dns_random_init(char data[128]);
 extern unsigned int dns_random(unsigned int);
 extern void     dns_sortip(char *, unsigned int);
 extern void     dns_domain_free(char **);
@@ -89,17 +92,17 @@ extern int      dns_domain_todot_cat(stralloc *, char *);
 extern unsigned int dns_packet_copy(char *, unsigned int, unsigned int, char *, unsigned int);
 extern unsigned int dns_packet_getname(char *, unsigned int, unsigned int, char **);
 extern unsigned int dns_packet_skipname(char *, unsigned int, unsigned int);
-extern int      dns_transmit_start(struct dns_transmit *, char *, int, char *, char *, unsigned char *);
+extern int      dns_transmit_start(struct dns_transmit *, char servers[256], int, char *, char qtype[2], unsigned char localip[16]);
 extern void     dns_transmit_free(struct dns_transmit *);
 extern void     dns_transmit_io(struct dns_transmit *, iopause_fd *, struct taia *);
 extern int      dns_transmit_get(struct dns_transmit *, iopause_fd *, struct taia *);
-extern int      dns_resolvconfip(char *);
-extern int      dns_resolve(char *, char *);
+extern int      dns_resolvconfip(char s[256]);
+extern int      dns_resolve(char *, char qtype[2]);
 extern int      dns_ip4_packet(stralloc *, char *, unsigned int);
 extern int      dns_ip4(stralloc *, stralloc *);
 extern int      dns_name_packet(stralloc *, char *, unsigned int);
-extern void     dns_name4_domain(char *, char *);
-extern int      dns_name4(stralloc *, char *);
+extern void     dns_name4_domain(char name[DNS_NAME4_DOMAIN], char ip[4]);
+extern int      dns_name4(stralloc *, char ip[4]);
 extern int      dns_txt_packet(stralloc *, char *, unsigned int);
 extern int      rbl_dns_txt(stralloc *, stralloc *);
 extern int      dns_mx_packet(stralloc *, char *, unsigned int);
@@ -110,8 +113,8 @@ extern int      dns_ip4_qualify(stralloc *, stralloc *, stralloc *);
 extern int      dns_packet_nameequal(char *, unsigned int, unsigned int, char *, unsigned int, unsigned int);
 
 #ifdef LIBC_HAS_IP6
-extern int      dns_name6(stralloc *, char *);
-extern int      dns_name6_domain(char *, char *);
+extern int      dns_name6(stralloc *, char ip[16]);
+extern int      dns_name6_domain(char name[DNS_NAME6_DOMAIN], char ip[16]);
 extern void     dns_sortip6(char *, unsigned int);
 extern unsigned int dns_domain_suffixpos(char *, char *);
 extern int      dns_ip6_packet(stralloc *, char *, unsigned int);
