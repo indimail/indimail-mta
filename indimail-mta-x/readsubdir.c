@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.c,v $
+ * Revision 1.5  2021-05-12 17:50:21+05:30  Cprogrammer
+ * added readsubdir_name()
+ *
  * Revision 1.4  2021-05-12 15:43:18+05:30  Cprogrammer
  * reduce calls required to get next entry
  *
@@ -25,6 +28,7 @@ readsubdir_init(readsubdir *rs, char *name, void (*pause)())
 }
 
 static char     namepos[FMT_ULONG + 4 + READSUBDIR_NAMELEN];
+static int      rslen;
 extern int      conf_split;
 
 void
@@ -42,13 +46,19 @@ opensubdir(readsubdir *rs)
 	return;
 }
 
+char           *
+readsubdir_name(readsubdir *rs)
+{
+	return namepos + rslen + 1;
+}
+
 int
 readsubdir_next(readsubdir *rs, unsigned long *id)
 {
 	direntry       *d;
 	unsigned int    len;
 
-	if (str_len(rs->name) > READSUBDIR_NAMELEN)
+	if ((rslen = str_len(rs->name)) > READSUBDIR_NAMELEN)
 		return -1;
 	for (;;) {
 		if (!rs->dir)
@@ -73,7 +83,7 @@ readsubdir_next(readsubdir *rs, unsigned long *id)
 void
 getversion_readsubdir_c()
 {
-	static char    *x = "$Id: readsubdir.c,v 1.4 2021-05-12 15:43:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: readsubdir.c,v 1.5 2021-05-12 17:50:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
