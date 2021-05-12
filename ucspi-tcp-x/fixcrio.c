@@ -1,5 +1,8 @@
 /*
  * $Log: fixcrio.c,v $
+ * Revision 1.3  2021-05-12 21:01:51+05:30  Cprogrammer
+ * replace pathexec() with upathexec()
+ *
  * Revision 1.2  2020-11-27 17:32:22+05:30  Cprogrammer
  * removed exit.h
  *
@@ -13,7 +16,7 @@
 #include "strerr.h"
 #include "byte.h"
 #include "iopause.h"
-#include "pathexec.h"
+#include "upathexec.h"
 #include "fd.h"
 
 #define FATAL "fixcrio: fatal: "
@@ -171,7 +174,7 @@ main(int argc, char **argv, char **envp)
 		strerr_die2sys(111, FATAL, "unable to move descriptors: ");
 	if (fd_move(1, piout[1]) == -1)
 		strerr_die2sys(111, FATAL, "unable to move descriptors: ");
-	pathexec_run(argv[1], argv + 1, envp);
+	upathexec_run(argv[1], argv + 1, envp);
 	strerr_die4sys(111, FATAL, "unable to run ", argv[1], ": ");
 	/*- Not reached */
 	return(0);
@@ -180,7 +183,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fixcrio_c()
 {
-	static char    *x = "$Id: fixcrio.c,v 1.2 2020-11-27 17:32:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fixcrio.c,v 1.3 2021-05-12 21:01:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
