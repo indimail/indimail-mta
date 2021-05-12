@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.18  2021-05-12 18:48:05+05:30  Cprogrammer
+ * use envdir_set to load environment from .defaultqueue/defaultqueue
+ *
  * Revision 1.17  2021-05-12 15:51:58+05:30  Cprogrammer
  * set conf_split from CONFSPLIT env variable
  *
@@ -58,11 +61,16 @@
 #include <scan.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <env.h>
 #include <sgetopt.h>
 #include <strmsg.h>
-#include "tcpto.h"
 #include "direntry.h"
+#include "tcpto.h"
+#include "pathexec.h"
+#include "envdir.h"
 #include "getEnvConfig.h"
+#include "variables.h"
+#include "auto_control.h"
 #include "auto_split.h"
 #include "auto_uids.h"
 
@@ -417,13 +425,13 @@ check_files(char *directory, char *owner, char *group, uid_t uid, gid_t gid, int
 		if (d->d_name[0] == '.')
 			continue;
 		if (!stralloc_copys(&temp_filename, directory))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_append(&temp_filename, "/"))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_cats(&temp_filename, d->d_name))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_0(&temp_filename))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (check_item(temp_filename.s, owner, group, uid, gid, perm, 'f', 0)) {
 			closedir(dir);
 			return -1;
@@ -469,13 +477,13 @@ check_splits(char *directory, char *owner, char *group, char *fgroup,
 	for (i = 0; i < split; i++) {
 		name_num[fmt_ulong(name_num, i)] = 0;
 		if (!stralloc_copys(&temp_dirname, directory))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_append(&temp_dirname, "/"))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_cats(&temp_dirname, name_num))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_0(&temp_dirname))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		/*- check the split dir */
 		if (check_item(temp_dirname.s, owner, group, dir_uid, dir_gid, dir_perm, 'd', 0))
 			return -1;
@@ -486,14 +494,14 @@ check_splits(char *directory, char *owner, char *group, char *fgroup,
 			if (d->d_name[0] == '.')
 				continue;
 			if (!stralloc_copy(&temp_filename, &temp_dirname))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			temp_filename.len--; /*- remove NUL */
 			if (!stralloc_append(&temp_filename, "/"))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (!stralloc_cats(&temp_filename, d->d_name))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (!stralloc_0(&temp_filename))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (check_item(temp_filename.s, owner, fgroup, dir_uid, file_gid, file_perm, 'f', 0)) {
 				closedir(dir);
 				return -1;
@@ -517,39 +525,39 @@ rename_mess(char *dir, char *part, char *new_part, char *old_filename, char *new
 	}
 	/*- prepare the old filename */
 	if (!stralloc_copy(&old_name, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&old_name, dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&old_name, part))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_append(&old_name, "/"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&old_name, old_filename))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&old_name))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	/*- prepare the new filename */
 	if (!stralloc_copy(&new_name, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&new_name, dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&new_name, new_part))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_append(&new_name, "/"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&new_name, new_filename))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&new_name))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	/*- check if destination exists */
 	if (stat(new_name.s, &st) == 0) {
 		/*- it exists */
 		new_name.len--;	/*- remove NUL */
 		/*- append an extension to prevent name clash */
 		if (!stralloc_cats(&new_name, ".tmp"))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_0(&new_name))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		/*- do a double check for collision */
 		if (stat(new_name.s, &st) == 0)
 			die_rerun();
@@ -572,13 +580,13 @@ fix_part(char *part, int part_num)
 	int             correct_part_num;
 
 	if (!stralloc_copy(&mess_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&mess_dir, "mess/"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&mess_dir, part))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&mess_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!(dir = opendir(mess_dir.s)))
 		return -1;
 	while ((d = readdir(dir))) {
@@ -586,14 +594,14 @@ fix_part(char *part, int part_num)
 			continue;
 		/*- check from mess */
 		if (!stralloc_copy(&temp_filename, &mess_dir))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		temp_filename.len--; /*- remove NUL */
 		if (!stralloc_append(&temp_filename, "/"))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_cats(&temp_filename, d->d_name))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_0(&temp_filename))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (stat(temp_filename.s, &st)) {
 			closedir(dir);
 			return -1;
@@ -650,13 +658,13 @@ clean_tmp(char *directory, char *part)
 	int             length;
 
 	if (!stralloc_copy(&mess_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&mess_dir, directory))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&mess_dir, part))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&mess_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!(dir = opendir(mess_dir.s)))
 		return -1;
 	while ((d = readdir(dir))) {
@@ -668,10 +676,10 @@ clean_tmp(char *directory, char *part)
 			if (str_equal(d->d_name + length - 4, ".tmp")) {
 				/*- remove the extension */
 				if (!stralloc_copys(&temp_filename, d->d_name))
-					strerr_die2sys(111, FATAL, "out of memory");
+					strerr_die2x(111, FATAL, "out of memory");
 				temp_filename.len -= 4;
 				if (!stralloc_0(&temp_filename))
-					strerr_die2sys(111, FATAL, "out of memory");
+					strerr_die2x(111, FATAL, "out of memory");
 
 				if (rename_mess(directory, part, part, d->d_name, temp_filename.s)) {
 					closedir(dir);
@@ -690,11 +698,11 @@ fix_names()
 	int             i;
 
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "mess"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	/*- make the filenames match their inode */
 	for (i = 0; i < split; i++) {
 		name_num[fmt_ulong(name_num, i)] = 0;
@@ -727,133 +735,133 @@ check_dirs()
 {
 	/*- check root existence */
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 'd', 0))
 		return -1;
 	/*- check the big 4 */
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "info"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0700, 'd', 0))
 		return -1;
 	if (check_splits(check_dir.s, "qmails", "qmail", "qmail", qmails_uid, qmail_gid, 0700, qmail_gid, 0600))
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "mess"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 'd', 0))
 		return -1;
 	if (check_splits(check_dir.s, "qmailq", "qmail", 0, qmailq_uid, qmail_gid, 0750, -1, 0644))
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "remote"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0700, 'd', 0))
 		return -1;
 	if (check_splits(check_dir.s, "qmails", "qmail", "qmail", qmails_uid, qmail_gid, 0700, qmail_gid, 0600))
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "local"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0700, 'd', 0))
 		return -1;
 	if (check_splits(check_dir.s, "qmails", "qmail", "qmail", qmails_uid, qmail_gid, 0700, qmail_gid, 0600))
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "todo"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 'd', 0))
 		return -1;
 	if (check_splits(check_dir.s, "qmailq", "qmail", "qmail", qmailq_uid, qmail_gid, 0750, qmail_gid, 0644))
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "intd"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 'd', 0))
 		return -1;
 	if (check_splits(check_dir.s, "qmailq", "qmail", "qmail", qmailq_uid, qmail_gid, 0700, qmail_gid, 0644))
 		return -1;
 	/*- check the others */
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "bounce"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0700, 'd', 0))
 		return -1;
 	if (check_files(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0600))
 		return -1;
 	/*- Yank Dir */
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "yanked"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 'd', 0))
 		return -1;
 
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "pid"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 'd', 0))
 		return -1;
 	warn_files(check_dir.s);
 	/*- lock has special files that must exist */
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "lock"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 'd', 0))
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "lock/sendmutex"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0600, 'z', 0))
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "lock/tcpto"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailr", "qmail", qmailr_uid, qmail_gid, 0644, 'z', TCPTO_BUFSIZ))
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "lock/trigger"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0622, 'p', 0))
 		return -1;
 	return 0;
@@ -880,17 +888,17 @@ check_strays(char *directory)
 		new_part[fmt_ulong(new_part, part)] = 0;
 		/*- check for corresponding entry in mess dir */
 		if (!stralloc_copy(&mess_dir, &queue_dir))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_cats(&mess_dir, "mess/"))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_cats(&mess_dir, new_part))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_append(&mess_dir, "/"))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_cats(&mess_dir, d->d_name))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_0(&mess_dir))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (stat(mess_dir.s, &st)) {
 			/*- failed to find in mess */
 			if (flag_interactive && !flag_unlink) {
@@ -902,13 +910,13 @@ check_strays(char *directory)
 				flag_unlink = 1;
 			}
 			if (!stralloc_copys(&temp_filename, directory))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (!stralloc_append(&temp_filename, "/"))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (!stralloc_cats(&temp_filename, d->d_name))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (!stralloc_0(&temp_filename))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			strmsg_out3("Unlinking [", temp_filename.s, "]\n");
 			if (flag_doit && unlink(temp_filename.s) == -1) {
 				closedir(dir);
@@ -928,13 +936,13 @@ check_stray_parts()
 	for (i = 0; i < split; i++) {
 		name_num[fmt_ulong(name_num, i)] = 0;
 		if (!stralloc_copy(&temp_dirname, &check_dir))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_append(&temp_dirname, "/"))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_cats(&temp_dirname, name_num))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!stralloc_0(&temp_dirname))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		/*- check this dir for strays */
 		if (check_strays(temp_dirname.s))
 			return -1;
@@ -946,41 +954,41 @@ int
 find_strays()
 {
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "info"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_stray_parts())
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "local"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_stray_parts())
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "remote"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_stray_parts())
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "todo"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_stray_parts())
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "intd"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_stray_parts())
 		return -1;
 	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_cats(&check_dir, "bounce"))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&check_dir))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (check_strays(check_dir.s))
 		return -1;
 	return 0;
@@ -989,8 +997,36 @@ find_strays()
 int
 main(int argc, char **argv)
 {
-	int             opt;
+	int             opt, fdorigdir;
+	char           *ptr;
+	char          **e;
 
+	if ((fdorigdir = open_read(".")) == -1)
+		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+	if ((ptr = env_get("HOME"))) {
+		if (chdir(ptr) == -1)
+			strerr_die4sys(111, FATAL, "chdir: ", ptr, ": ");
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
+	if (!(ptr = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "chdir: ", controldir, ": ");
+		if (!access("defaultqueue", X_OK)) {
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
+	if (fchdir(fdorigdir) == -1)
+		strerr_die1sys(111, "unable to switch to original directory: ");
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
 	while ((opt = getopt(argc, argv, "iNvs:")) != opteof) {
 		switch (opt)
@@ -1014,10 +1050,10 @@ main(int argc, char **argv)
 	if (optind + 1 != argc)
 		usage();
 	if (!stralloc_copys(&queue_dir, argv[optind]))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (queue_dir.s[queue_dir.len - 1] != '/') {
 		if (!stralloc_append(&queue_dir, "/"))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 	}
 	if (uidinit(1) == -1) {
 		strerr_warn2(WARN, "Unable to get uids/gids: ", &strerr_sys);
@@ -1045,7 +1081,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.17 2021-05-12 15:51:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.18 2021-05-12 18:48:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
