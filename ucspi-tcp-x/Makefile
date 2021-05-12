@@ -269,15 +269,15 @@ compile mconnect-io.c
 	./compile mconnect-io.c
 
 pathexec_env.o: \
-compile pathexec_env.c pathexec.h conf-dlopen
+compile pathexec_env.c upathexec.h conf-dlopen
 	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` pathexec_env.c
 
 pathexec_rundl.o: \
-compile pathexec_run.c pathexec.h conf-dlopen
+compile pathexec_run.c upathexec.h conf-dlopen
 	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` pathexec_run.c -o pathexec_rundl.o
 
 pathexec_run.o: \
-compile pathexec_run.c pathexec.h conf-dlopen
+compile pathexec_run.c upathexec.h conf-dlopen
 	./compile pathexec_run.c
 
 prog: \
@@ -317,12 +317,12 @@ dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
 	`cat socket.lib` -lqmail -ldl
 
 rblsmtpd.o: \
-compile rblsmtpd.c pathexec.h dns.h iopause.h \
+compile rblsmtpd.c upathexec.h dns.h iopause.h \
 haveip6.h ip6.h conf-ip
 	./compile -DMAIN `grep -h -v "^#" conf-ip 2>/dev/null` rblsmtpd.c
 
 rbl.o: \
-compile rblsmtpd.c pathexec.h dns.h iopause.h \
+compile rblsmtpd.c upathexec.h dns.h iopause.h \
 haveip6.h ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` rblsmtpd.c -o rbl.o
 
@@ -418,7 +418,7 @@ pathexec_run.o tls.o dns.a unix.a socket.lib
 	$(SSLLIBS) `cat socket.lib` -lqmail
 
 tcpclient.o: \
-compile tcpclient.c ip4.h socket.h pathexec.h \
+compile tcpclient.c ip4.h socket.h upathexec.h \
 timeoutconn.h tcpremoteinfo.h dns.h iopause.h \
 tls.h haveip6.h ip6.h conf-ip conf-tls
 	./compile \
@@ -430,7 +430,7 @@ load dotls.o tls.o pathexec_run.o pathexec_env.o
 	pathexec_env.o $(SSLLIBS) -lqmail
 
 dotls.o: \
-compile dotls.c tls.c tls.h pathexec.h conf-tls
+compile dotls.c tls.c tls.h upathexec.h conf-tls
 	./compile \
 	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` dotls.c
 
@@ -462,7 +462,7 @@ choose compile load trydlmopen.c hasdlmopen.h1 hasdlmopen.h2 conf-dlmopen
 	./choose CL trydlmopen hasdlmopen.h1 hasdlmopen.h2 > hasdlmopen.h
 
 load_shared.o: \
-compile load_shared.c dlnamespace.h hasdlmopen.h pathexec.h
+compile load_shared.c dlnamespace.h hasdlmopen.h upathexec.h
 	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` load_shared.c
 
 tcdlmopen.o: \
@@ -475,7 +475,7 @@ compile tcpserver_plugin.c hasdlmopen.h dlnamespace.h conf-dlopen
 	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` tcpserver_plugin.c
 
 dlnamespace.o: \
-compile dlnamespace.c hasdlmopen.h pathexec.h
+compile dlnamespace.c hasdlmopen.h upathexec.h
 	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` dlnamespace.c
 
 tcpserver: \
@@ -492,7 +492,7 @@ mysql_inc: mysql_config
 	./mysql_config --include > mysql_inc || true
 
 tcpserver.o: \
-compile tcpserver.c ip4.h prot.h pathexec.h tls.h load_mysql.h \
+compile tcpserver.c ip4.h prot.h upathexec.h tls.h load_mysql.h \
 socket.h tcpremoteinfo.h rules.h dns.h iopause.h haveip6.h ip6.h \
 conf-tls conf-ip conf-mysqlrules conf-dlopen control.h \
 hasmysql.h auto_home.h mysql_inc
@@ -622,7 +622,7 @@ warn-auto.sh who@.sh conf-prefix
 	chmod 755 who@
 
 recordio.o: \
-compile recordio.c iopause.h pathexec.h
+compile recordio.c iopause.h upathexec.h
 	./compile recordio.c
 
 recordio: \
@@ -630,7 +630,7 @@ load recordio.o pathexec_run.o iopause.o
 	./load recordio pathexec_run.o iopause.o -lqmail
 
 argv0.o: \
-compile argv0.c pathexec.h
+compile argv0.c upathexec.h
 	./compile argv0.c
 
 argv0: \
@@ -655,7 +655,7 @@ fixcrio: load fixcrio.o pathexec_run.o iopause.o
 	./load fixcrio pathexec_run.o iopause.o -lqmail
 
 fixcrio.o: \
-compile fixcrio.c iopause.h pathexec.h
+compile fixcrio.c iopause.h upathexec.h
 	./compile fixcrio.c
 
 iopause.h: choose compile iopause.h1 iopause.h2 load trypoll.c
