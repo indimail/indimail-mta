@@ -1,5 +1,8 @@
 /*
  * $Log: inotify.c,v $
+ * Revision 1.8  2021-05-12 13:57:28+05:30  Cprogrammer
+ * added IN_MOVE_SELF, IN_MOVED_FROm, IN_MOVED_TO events
+ *
  * Revision 1.7  2020-05-11 08:11:47+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -29,12 +32,14 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/select.h>
-#include "subfd.h"
-#include "scan.h"
-#include "strerr.h"
-#include "env.h"
-#include "sig.h"
-#include "sgetopt.h"
+#include <subfd.h>
+#include <scan.h>
+#include <strerr.h>
+#include <env.h>
+#include <sig.h>
+#include <error.h>
+#include <fmt.h>
+#include <sgetopt.h>
 
 #define EVENT_SIZE        ( sizeof (struct inotify_event) )
 #define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
@@ -72,7 +77,7 @@ main(int argc, char **argv)
 	struct timeval  timeout;
 	struct timeval *tptr;
 	time_t          last_timeout;
-	char            buffer[EVENT_BUF_LEN];
+	char            buffer[EVENT_BUF_LEN], strnum[FMT_ULONG];
 	char           *ptr;
 	fd_set          rfds;	/*- File descriptor mask for select -*/
 
@@ -101,7 +106,7 @@ main(int argc, char **argv)
 		if (access(argv[optind], F_OK))
 			strerr_die2sys(111, FATAL, argv[optind]);
 		/*- adding a directory into watch list.  */
-		if ((wd[optind - _soptind] = inotify_add_watch(ifd, argv[optind], IN_CREATE | IN_OPEN| IN_CLOSE_WRITE| IN_DELETE)) == -1)
+		if ((wd[optind - _soptind] = inotify_add_watch(ifd, argv[optind], IN_CREATE | IN_OPEN| IN_CLOSE_WRITE| IN_DELETE|IN_MOVE_SELF|IN_MOVED_FROM|IN_MOVED_TO)) == -1)
 			strerr_die4sys(111, FATAL, "inotify_add_watch: ", argv[optind], ": ");
 	}
 	if (substdio_flush(subfdout) == -1)
@@ -169,108 +174,63 @@ main(int argc, char **argv)
 		if (!FD_ISSET(ifd, &rfds))
 			continue;
 		/*
-	 	 * read to determine the event change happens on a directory. Actually 
-	 	 * this read blocks until the change event occurs
+	 	 * read to determine the event change happens on a directory.
+	 	 * Actually this read blocks until the change event occurs
 	 	 */
-		if ((length = read(ifd, buffer, EVENT_BUF_LEN)) < 0)
+		if ((length = read(ifd, buffer, EVENT_BUF_LEN)) < 0) {
+			if (errno = error_intr)
+				continue;
 			strerr_die2sys(111, FATAL, "read-event: ");
+		}
 
 		/*-
-	 	 * actually read return the list of change events happens.
+	 	 * read returns the list of change events.
 		 * Here, read the change event one by one and process it accordingly.
 	 	 */
 		while (i < length) {
 			struct inotify_event *event = (struct inotify_event *) &buffer[i];
 			if (event->len) {
-				if (event->mask & IN_CREATE) {
-					if (event->mask & IN_ISDIR) {
-						out("dir  ");
-						out(event->name);
-						out(" created\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					} else {
-						out("file ");
-						out(event->name);
-						out(" created\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					}
+				if (event->mask & IN_ISDIR)
+					out("dir  ");
+				else
+					out("file ");
+				out(event->name);
+				if (event->mask & IN_CREATE)
+					out(" created\n");
+				else
+				if (event->mask & IN_DELETE)
+					out(" deleted\n");
+				else
+				if (event->mask & IN_OPEN)
+					out(" opened\n");
+				else
+				if (event->mask & IN_DELETE)
+					out(" deleted\n");
+				else
+				if (event->mask & IN_CLOSE_WRITE)
+					out(" closed\n");
+				else
+				if (event->mask & IN_MOVE_SELF) {
+					strnum[fmt_ulong(strnum, event->cookie)] = 0;
+					out(" renamed [");
+					out(strnum);
+					out("]\n");
 				} else
-				if (event->mask & IN_DELETE) {
-					if (event->mask & IN_ISDIR) {
-						out("dir  ");
-						out(event->name);
-						out(" deleted\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					} else {
-						out("file ");
-						out(event->name);
-						out(" deleted\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					}
+				if (event->mask & IN_MOVED_FROM) {
+					strnum[fmt_ulong(strnum, event->cookie)] = 0;
+					out(" oldname renamed[");
+					out(strnum);
+					out("]\n");
 				} else
-				if (event->mask & IN_OPEN) {
-					if (event->mask & IN_ISDIR) {
-						out("dir  ");
-						out(event->name);
-						out(" opened\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					} else {
-						out("file ");
-						out(event->name);
-						out(" opened\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					}
+				if (event->mask & IN_MOVED_TO) {
+					strnum[fmt_ulong(strnum, event->cookie)] = 0;
+					out(" newname renamed[");
+					out(strnum);
+					out("]\n");
 				} else
-				if (event->mask & IN_DELETE) {
-					if (event->mask & IN_ISDIR) {
-						out("dir  ");
-						out(event->name);
-						out(" deleted\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					} else {
-						out("file ");
-						out(event->name);
-						out(" deleted\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					}
-				} else
-				if (event->mask & IN_CLOSE_WRITE) {
-					if (event->mask & IN_ISDIR) {
-						out("dir  ");
-						out(event->name);
-						out(" closed\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					} else {
-						out("file ");
-						out(event->name);
-						out(" closed\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					}
-				} else {
-					if (event->mask & IN_ISDIR) {
-						out("dir ");
-						out(event->name);
-						out("\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					} else {
-						out("file ");
-						out(event->name);
-						out("\n");
-						if (substdio_flush(subfdout) == -1)
-							strerr_die2sys(111, FATAL, "write: ");
-					}
-				}
+					out("unknown event\n");
+				if (substdio_flush(subfdout) == -1)
+					strerr_die2sys(111, FATAL, "write: ");
 			}
 			i += EVENT_SIZE + event->len;
 		}
@@ -297,7 +257,7 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	static char    *x = "$Id: inotify.c,v 1.7 2020-05-11 08:11:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inotify.c,v 1.8 2021-05-12 13:57:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

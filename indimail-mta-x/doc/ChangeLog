@@ -73,6 +73,8 @@ Release 2.13 Start 14/02/2021
 44. indimail-mini.preinst: removed adduser of alias user
 45. indimail-mini-postinst, indimail-mini-prerm: removed unused variables
 46. indimail-mini-preinst: added missing 'upgrade' case
+- 12/05/2021
+47. inotify.c: added IN_MOVE_SELF, IN_MOVED_FROm, IN_MOVED_TO events
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
