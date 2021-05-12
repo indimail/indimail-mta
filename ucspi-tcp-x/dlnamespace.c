@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.11  2021-05-12 20:59:03+05:30  Cprogrammer
+ * replaced pathexec_env() with upathexec_env()
+ *
  * Revision 1.10  2020-09-16 20:47:52+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -41,7 +44,7 @@
 #include <scan.h>
 #include <env.h>
 #include <unistd.h>
-#include "pathexec.h"
+#include "upathexec.h"
 
 static stralloc namespace = {0};
 
@@ -140,7 +143,7 @@ dlnamespace(char *fn, char **envp, unsigned long *id)
 	s += (i = fmt_str((char *) s, "LMID"));
 	s += (i = fmt_ulong((char *) s, *id));
 	*s++ = 0;
-	if (!pathexec_env(env_str, fn))
+	if (!upathexec_env(env_str, fn))
 		return (-1);
 	return (0);
 }
@@ -162,7 +165,7 @@ dlnamespace(char *fn, unsigned long *id)
 void
 getversion_dlnamespace_c()
 {
-	static char    *x = "$Id: dlnamespace.c,v 1.10 2020-09-16 20:47:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dlnamespace.c,v 1.11 2021-05-12 20:59:03+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
