@@ -1,5 +1,8 @@
 /*
  * $Log: envdir_set.c,v $
+ * Revision 1.2  2021-05-12 18:47:16+05:30  Cprogrammer
+ * fixed error message
+ *
  * Revision 1.1  2010-06-08 19:06:28+05:30  Cprogrammer
  * Initial revision
  *
@@ -24,7 +27,7 @@ envdir_set(char *fn)
 	int             i, fdorigdir;
 
 	if ((fdorigdir = open_read(".")) == -1)
-		strerr_die1sys(111, "unable to switch to current directory: ");
+		strerr_die1sys(111, "unable to open current directory: ");
 	if (chdir(fn) == -1)
 		strerr_die3sys(111, "unable to switch to directory ", fn, ": ");
 	if (!(dir = opendir(".")))
@@ -70,7 +73,7 @@ envdir_set(char *fn)
 void
 getversion_envdir_set_c()
 {
-	static char    *x = "$Id: envdir_set.c,v 1.1 2010-06-08 19:06:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: envdir_set.c,v 1.2 2021-05-12 18:47:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
