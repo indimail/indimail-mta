@@ -1,5 +1,8 @@
 /*
  * $Log: tcpremoteinfo.h,v $
+ * Revision 1.3  2021-05-12 21:04:57+05:30  Cprogrammer
+ * define arguments as array subscripts to fix gcc 11 warnings
+ *
  * Revision 1.2  2005-06-10 09:13:36+05:30  Cprogrammer
  * added ipv6 support
  *
@@ -17,9 +20,9 @@
 #include "uint32.h"
 #endif
 
-int             remoteinfo(stralloc *, char *, uint16, char *, uint16, unsigned int);
+int             remoteinfo(stralloc *, char ip[4], uint16, char iplocal[4], uint16, unsigned int);
 #ifdef LIBC_HAS_IP6
-int             remoteinfo6(stralloc *, char *, uint16, char *, uint16, unsigned int, uint32);
+int             remoteinfo6(stralloc *, char ip[16], uint16, char iplocal[16], uint16, unsigned int, uint32);
 #endif
 
 #endif
