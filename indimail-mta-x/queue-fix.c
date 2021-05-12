@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.17  2021-05-12 15:51:58+05:30  Cprogrammer
+ * set conf_split from CONFSPLIT env variable
+ *
  * Revision 1.16  2020-11-30 10:19:51+05:30  Cprogrammer
  * replaced stdio with substdio and added option to specify queue subdirectory split
  *
@@ -59,6 +62,7 @@
 #include <strmsg.h>
 #include "tcpto.h"
 #include "direntry.h"
+#include "getEnvConfig.h"
 #include "auto_split.h"
 #include "auto_uids.h"
 
@@ -594,10 +598,10 @@ fix_part(char *part, int part_num)
 			closedir(dir);
 			return -1;
 		}
-	/*
-	 * check that filename==inode number
-	 * check that inode%auto_split==part_num
-	 */
+		/*
+		 * check that filename==inode number
+		 * check that inode%auto_split==part_num
+		 */
 		scan_int(d->d_name, &old_inode);
 		correct_part_num = st.st_ino % split;
 		if (st.st_ino != old_inode || part_num != correct_part_num) {
@@ -987,7 +991,7 @@ main(int argc, char **argv)
 {
 	int             opt;
 
-	split = auto_split;
+	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
 	while ((opt = getopt(argc, argv, "iNvs:")) != opteof) {
 		switch (opt)
 		{
@@ -1041,7 +1045,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.16 2020-11-30 10:19:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.17 2021-05-12 15:51:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

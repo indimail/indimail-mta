@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.44  2021-05-12 15:51:36+05:30  Cprogrammer
+ * set conf_split from CONFSPLIT env variable
+ * added code comments
+ *
  * Revision 1.43  2021-05-08 12:26:31+05:30  Cprogrammer
  * added log7() function
  * use /var/indimail/queue if QUEUEDIR is not defined
@@ -121,6 +125,8 @@
 #include "env.h"
 #include "variables.h"
 #include "trigger.h"
+#include "getEnvConfig.h"
+#include "auto_split.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
@@ -151,6 +157,10 @@ char            strnum[FMT_ULONG];
 #define CHANNELS 2
 char           *chanaddr[CHANNELS] = { "local/", "remote/" };
 
+int             flagstopasap = 0;
+char           *queuedesc;
+int             conf_split;
+
 datetime_sec    recent;
 void            log1(char *w);
 void            log3(char *w, char *x, char *y);
@@ -158,8 +168,6 @@ void            log4(char *w, char *x, char *y, char *z);
 void            log5(char *u, char *w, char *x, char *y, char *z);
 void            log7(char *s, char *t, char *u, char *w, char *x, char *y, char *z);
 void            log9(char *r, char *s, char *t, char *u, char *v, char *w, char *x, char *y, char *z);
-int             flagstopasap = 0;
-char           *queuedesc;
 
 void
 sigterm(void)
@@ -324,11 +332,12 @@ int             fdin = -1;
 void
 comm_init(void)
 {
+	/* fd 2 is pi9[1] - write to qmail-clean, fd 3 is pi10[0] - read from qmail-clean */
 	substdio_fdbuf(&sstoqc, write, 2, sstoqcbuf, sizeof (sstoqcbuf));
 	substdio_fdbuf(&ssfromqc, read, 3, ssfromqcbuf, sizeof (ssfromqcbuf));
 
-	fdout = 1;	/*- stdout */
-	fdin = 0;	/*- stdin */
+	fdout = 1;	/*- stdout pi8[1] to qmail-send */
+	fdin = 0;	/*- stdin  pi7[0] from qmail-send */
 	/*- this is so stupid: NDELAY semantics should be default on write */
 	if (ndelay_on(fdout) == -1)
 		senddied();	/*- drastic, but better than risking deadlock */
@@ -628,7 +637,7 @@ comm_selprep(int *nfds, fd_set * wfds, fd_set * rfds)
 }
 
 void
-comm_do(fd_set * wfds, fd_set * rfds)
+comm_do(fd_set *wfds, fd_set *rfds)
 {
 	/*- first write then read */
 	if (flagsendalive && comm_canwrite()) {
@@ -652,8 +661,7 @@ comm_do(fd_set * wfds, fd_set * rfds)
 		/*- there are only two messages 'H' and 'X' */
 		char            c;
 		int             r;
-		r = read(fdin, &c, 1);
-		if (r <= 0) {
+		if ((r = read(fdin, &c, 1)) <= 0) {
 			if ((r == -1) && (errno != error_intr))
 				senddied();
 		} else {
@@ -694,7 +702,7 @@ todo_init(void)
 }
 
 void
-todo_selprep(int *nfds, fd_set * rfds, datetime_sec * wakeup)
+todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 {
 	if (flagstopasap)
 		return;
@@ -745,9 +753,10 @@ todo_do(fd_set * rfds)
 		return;	/* skip todo run this time */
 	}
 	if (!flagtododir) {
+		/*- we come here at the beginning or after end of a todo scan */
 		if (!trigger_pulled(rfds) && recent < nexttodorun)
 			return;
-		trigger_set();
+		trigger_set(); /*- open lock/trigger fifo */
 		readsubdir_init(&todosubdir, "todo", pausedir);
 		flagtododir = 1;
 		lasttodorun = recent;
@@ -755,25 +764,25 @@ todo_do(fd_set * rfds)
 	}
 	switch (readsubdir_next(&todosubdir, &id))
 	{
-	case 1:
+	case 1: /*- found file with name=id */
 		break;
-	case 0:
+	case 0: /*- no files in todo/split/ */
 		flagtododir = 0;
-	default:
+	default: /*- error */
 		return;
 	}
-	fnmake_todo(id);
-	if ((fd = open_read(fn.s)) == -1) {
+	fnmake_todo(id); /*- set fn as todo/split/id */
+	if ((fd = open_read(fn.s)) == -1) { /*- envelope */
 		log5("warning: ", queuedesc, ": qmail-todo: unable to open ", fn.s, "\n");
 		return;
 	}
-	fnmake_mess(id);
-	/*- just for the statistics */
+	fnmake_mess(id); /*- change fn to mess/split/id */
+	/*- just for the statistics, stat on mess/split file */
 	if (stat(fn.s, &st) == -1) {
 		log5("warning: ", queuedesc, ": qmail-todo: unable to stat ", fn.s, "\n");
 		goto fail;
 	}
-	Bytes = st.st_size;
+	Bytes = st.st_size; /*- message size */
 	for (c = 0; c < CHANNELS; ++c) {
 		fnmake_chanaddr(id, c);
 		if (unlink(fn.s) == -1 && errno != error_noent) {
@@ -781,7 +790,7 @@ todo_do(fd_set * rfds)
 			goto fail;
 		}
 	}
-	fnmake_info(id);
+	fnmake_info(id); /*- now fn is info/split/id */
 	if (unlink(fn.s) == -1 && errno != error_noent) {
 		log5("warning: ", queuedesc, ": qmail-todo: unable to unlink ", fn.s, "\n");
 		goto fail;
@@ -794,14 +803,14 @@ todo_do(fd_set * rfds)
 	log5("new msg ", strnum, " ", queuedesc, "\n");
 	for (c = 0; c < CHANNELS; ++c)
 		flagchan[c] = 0;
-	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf));
+	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf)); /*- read envelope */
 	substdio_fdbuf(&ssinfo, write, fdinfo, todobufinfo, sizeof (todobufinfo));
 	uid = 0;
 	pid = 0;
 	for (;;) {
 		if (getln(&ss, &todoline, &match, '\0') == -1) {
 			/*- perhaps we're out of memory, perhaps an I/O error */
-			fnmake_todo(id);
+			fnmake_todo(id); /* todo/split/id */
 			log5("warning: ", queuedesc, ": qmail-todo: trouble reading ", fn.s, "\n");
 			goto fail;
 		}
@@ -809,23 +818,23 @@ todo_do(fd_set * rfds)
 			break;
 		switch (todoline.s[0])
 		{
-		case 'u':
+		case 'u': /*- uid */
 			scan_ulong(todoline.s + 1, &uid);
 			break;
-		case 'p':
+		case 'p': /*- process ID */
 			scan_ulong(todoline.s + 1, &pid);
 			break;
-		case 'h':
-		case 'e':
+		case 'h': /*- envheader */
+		case 'e': /*- qqeh */
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
-				fnmake_info(id);
+				fnmake_info(id); /*- info/split/id */
 				log5("warning: ", queuedesc, ": trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
 			break;
-		case 'F':
+		case 'F': /*- from */
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
-				fnmake_info(id);
+				fnmake_info(id); /*- info/split/id */
 				log5("warning: ", queuedesc, ": qmail-todo: trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
@@ -833,9 +842,14 @@ todo_do(fd_set * rfds)
 				nomem();
 				goto fail;
 			}
+			/*- write data to comm_buf, which will be written to qmail-send later */
 			comm_info(id, (unsigned long) st.st_size, todoline.s + 1, pid, uid);
 			break;
 		case 'T':
+			/*- 
+			 * 1. check address in control/locals, controls/virtualdomains
+			 * 2. rewrite address in rwline
+			 */
 			switch (rewrite(todoline.s + 1))
 			{
 			case 0:
@@ -857,9 +871,9 @@ todo_do(fd_set * rfds)
 				break;
 			}
 			if (fdchan[c] == -1) {
+				/*- create local/split/id or remote/split/id */
 				fnmake_chanaddr(id, c);
-				fdchan[c] = open_excl(fn.s);
-				if (fdchan[c] == -1) {
+				if ((fdchan[c] = open_excl(fn.s)) == -1) {
 					log5("warning: ", queuedesc, ": qmail-todo: unable to create ", fn.s, "\n");
 					goto fail;
 				}
@@ -873,14 +887,14 @@ todo_do(fd_set * rfds)
 			}
 			break;
 		default:
-			fnmake_todo(id);
+			fnmake_todo(id); /* todo/split/id */
 			log5("warning: ", queuedesc, ": qmail-todo: unknown record type in ", fn.s, "\n");
 			goto fail;
 		}
 	}
 	close(fd);
 	fd = -1;
-	fnmake_info(id);
+	fnmake_info(id); /* info/split/id */
 	if (substdio_flush(&ssinfo) == -1) {
 		log5("warning: ", queuedesc, ": qmail-todo: trouble writing to ", fn.s, "\n");
 		goto fail;
@@ -914,7 +928,7 @@ todo_do(fd_set * rfds)
 			fdchan[c] = -1;
 		}
 	}
-	fnmake_todo(id);
+	fnmake_todo(id); /* todo/split/id */
 	if (substdio_putflush(&sstoqc, fn.s, fn.len) == -1) {
 		cleandied();
 		return;
@@ -1111,6 +1125,7 @@ main()
 		log7("alert: ", queuedesc, ": qmail-todo: cannot start: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 		_exit(111);
 	}
+	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (!getcontrols()) {
 		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to read controls or out of memory\n");
 		_exit(111);
@@ -1135,10 +1150,11 @@ main()
 		if (todo_interval <= 0)
 			todo_interval = ONCEEVERY;
 	}
-	fnmake_init();
-	todo_init();
-	comm_init();
+	fnmake_init(); /*- initialize fn */
+	todo_init(); /*- set lasttodorun, nexttodorun, open lock/trigger */
+	comm_init(); /*- assign fd 2 to queue comm to, 3 to queue comm from */
 	for (;;) {
+		/*- read from fd 0 (qmail-send) */
 		if ((r = read(fdin, &c, 1)) == -1) {
 			if (errno == error_intr)
 				continue;
@@ -1166,10 +1182,18 @@ main()
 		FD_ZERO(&rfds);
 		FD_ZERO(&wfds);
 		nfds = 1;
+		/* 
+		 * 1. set select on read events on lock/trigger
+		 * 2. if flagtododir is set, reset wakup
+		 */
 		todo_selprep(&nfds, &rfds, &wakeup);
+		/*- set select on read/write events on pipe (fd 0, 1) to/from qmail-send
+		 * fd 0 - pi7[0] - read
+		 * fd 1 - pi8[1] - write
+		 */
 		comm_selprep(&nfds, &wfds, &rfds);
 		if (wakeup <= recent)
-			tv.tv_sec = 0;
+			tv.tv_sec = 0; /*- make select return immediately */
 		else
 			tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
 		tv.tv_usec = 0;
@@ -1179,8 +1203,11 @@ main()
 				log3("warning: ", queuedesc, ": qmail-todo: trouble in select\n");
 		} else {
 			recent = now();
+			/*- read scan todo dir
+			 * set flagtododir if any file found
+			 */
 			todo_do(&rfds);
-			comm_do(&wfds, &rfds);
+			comm_do(&wfds, &rfds); /*- communicate with qmail-send on fd 0, fd 1 */
 		}
 	}
 	for (ptr = queuedir; *ptr; ptr++);
@@ -1189,17 +1216,21 @@ main()
 	_exit(0);
 }
 #else
+#include <unistd.h>
+#include "subfd.h"
 int
 main()
 {
-	return (0);
+	substdio_puts(subfdoutsmall, "qmail-todo not compiled with -DEXTERNAL_TODO\n");
+	substdio_flush(subfdoutsmall);
+	_exit(111);
 }
 #endif
 
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.43 2021-05-08 12:26:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.44 2021-05-12 15:51:36+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

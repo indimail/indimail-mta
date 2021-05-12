@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.31  2021-05-12 15:49:49+05:30  Cprogrammer
+ * set conf_split from CONFSPLIT env variable
+ *
  * Revision 1.30  2020-11-24 13:47:14+05:30  Cprogrammer
  * removed exit.h
  *
@@ -78,19 +81,21 @@
 #include "sgetopt.h"
 #include "fmtqfn.h"
 #include "readsubdir.h"
-#include "auto_qmail.h"
-#include "auto_sysconfdir.h"
-#include "auto_control.h"
 #include "open.h"
 #include "strerr.h"
 #include "datetime.h"
 #include "date822fmt.h"
 #include "env.h"
 #include "error.h"
-#include "control.h"
-#include "variables.h"
 #include "envdir.h"
 #include "pathexec.h"
+#include "getEnvConfig.h"
+#include "auto_qmail.h"
+#include "auto_split.h"
+#include "auto_sysconfdir.h"
+#include "auto_control.h"
+#include "control.h"
+#include "variables.h"
 
 #define FATAL "qmail-qread: fatal: "
 
@@ -99,6 +104,7 @@
 #endif
 
 readsubdir      rs;
+int             conf_split;
 
 void
 die(n)
@@ -412,6 +418,7 @@ main(int argc, char **argv)
 #endif
 	if (chdir(queuedir) == -1)
 		die_chdir(queuedir);
+	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	readsubdir_init(&rs, "info", die_opendir);
 	bCount = lCount = rCount = tCount = 0;
 	while ((x = readsubdir_next(&rs, &id))) {
@@ -664,7 +671,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.30 2020-11-24 13:47:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.31 2021-05-12 15:49:49+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

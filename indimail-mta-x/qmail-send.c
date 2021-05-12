@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-send.c,v $
- * Revision 1.76  2021-05-12 15:27:02+05:30  Cprogrammer
- * added code documentation
+ * Revision 1.76  2021-05-12 15:40:54+05:30  Cprogrammer
+ * added code comments
  *
  * Revision 1.75  2021-04-05 07:19:23+05:30  Cprogrammer
  * converted local variables/functions to static
@@ -241,6 +241,8 @@
 #include "variables.h"
 #include "readsubdir.h"
 #include "hassrs.h"
+#include "getEnvConfig.h"
+#include "auto_split.h"
 #ifdef HAVESRS
 #include "srs.h"
 #endif
@@ -313,6 +315,7 @@ static int      chanfdin[CHANNELS] = { 2, 4 };
 static int      chanskip[CHANNELS] = { 10, 20 };
 
 char           *queuedesc;
+int             conf_split;
 
 #ifdef EXTERNAL_TODO
 static void     reread(int);
@@ -576,6 +579,7 @@ comm_init()
 {
 	int             c;
 
+	/* fd 5 is pi5[1] - write, fd 6 is pi6[0] - read*/
 	substdio_fdbuf(&sstoqc, write, 5, sstoqcbuf, sizeof (sstoqcbuf));
 	substdio_fdbuf(&ssfromqc, read, 6, ssfromqcbuf, sizeof (ssfromqcbuf));
 	for (c = 0; c < CHANNELS; ++c) {
@@ -639,7 +643,7 @@ comm_selprep(int *nfds, fd_set *wfds)
 
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagspawnalive[c] && comm_buf[c].s && comm_buf[c].len) {
-			FD_SET(chanfdout[c], wfds);
+			FD_SET(chanfdout[c], wfds); /*- fd 1 - pi1[1] - write, and fd 3 - pi3[1] - write */
 			if (*nfds <= chanfdout[c])
 				*nfds = chanfdout[c] + 1;
 		}
@@ -1640,6 +1644,7 @@ del_selprep(int *nfds, fd_set *rfds)
 
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagspawnalive[c]) {
+			/* fd 2 - pi2[0] - read. fd 4 - pi4[0] - read */
 			FD_SET(chanfdin[c], rfds);
 			if (*nfds <= chanfdin[c])
 				*nfds = chanfdin[c] + 1;
@@ -1761,7 +1766,7 @@ pass_dochan(int c)
 		fnmake_chanaddr(pe.id, c);
 		prioq_delmin(&pqchan[c]);
 		pass[c].mpos = 0;
-		if ((pass[c].fd = open_read(fn1.s)) == -1)
+		if ((pass[c].fd = open_read(fn1.s)) == -1) /*- open local/split/inode or remote/split/inode */
 			goto trouble;
 		if (!getinfo(&line, &qqeh, &envh, &birth, pe.id)) {
 			close(pass[c].fd);
@@ -1915,11 +1920,165 @@ pass_do()
 
 /*- this file is too long ---------------------------------------------- TODO */
 
-#ifndef EXTERNAL_TODO
+#ifdef EXTERNAL_TODO
+static stralloc todoline = { 0 };
+
+static char     todobuf[2048];
+static int      todofdin, todofdout, flagtodoalive;
+
+static void
+tododied()
+{
+	log3("alert: ", queuedesc, ": oh no! lost qmail-todo connection! dying...\n");
+	flagexitasap = 1;
+	flagtodoalive = 0;
+}
+
+static void
+todo_init()
+{
+	todofdout = 7; /*- write end pi7[1] */
+	todofdin = 8;  /*- read end  pi8[0] */
+	flagtodoalive = 1;
+	/*- sync with external todo */
+	if (write(todofdout, "S", 1) != 1) {
+		log3("alert: unable to write a byte to external todo! dying...:", error_str(errno), "\n");
+		flagexitasap = 1;
+		flagtodoalive = 0;
+	}
+	return;
+}
+
+static void
+todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
+{
+	if (flagexitasap) {
+		if (flagtodoalive && write(todofdout, "X", 1) != 1) {
+			log5("alert: ", queuedesc, ": unable to write a byte to external todo! dying...:", error_str(errno), "\n");
+			flagexitasap = 1;
+			flagtodoalive = 0;
+		}
+	}
+	if (flagtodoalive) {
+		FD_SET(todofdin, rfds);
+		if (*nfds <= todofdin)
+			*nfds = todofdin + 1;
+	}
+}
+
+static void
+todo_del(char *s)
+{
+	int             c;
+	int             flagchan[CHANNELS];
+	struct prioq_elt pe;
+	unsigned long   id;
+	unsigned int    len;
+
+	for (c = 0; c < CHANNELS; ++c)
+		flagchan[c] = 0;
+	switch (*s++)
+	{
+	case 'L':
+		flagchan[0] = 1;
+		break;
+	case 'R':
+		flagchan[1] = 1;
+		break;
+	case 'B':
+		flagchan[0] = 1;
+		flagchan[1] = 1;
+		break;
+	case 'X':
+		break;
+	default:
+		log3("warning: ", queuedesc, ": qmail-send unable to understand qmail-todo\n");
+		return;
+	}
+	len = scan_ulong(s, &id);
+	if (!len || s[len]) {
+		log3("warning: ", queuedesc, ": qmail-send unable to understand qmail-todo\n");
+		return;
+	}
+	pe.id = id;
+	pe.dt = now();
+	for (c = 0; c < CHANNELS; ++c) {
+		if (flagchan[c])
+			while (!prioq_insert(&pqchan[c], &pe))
+				nomem();
+	}
+	for (c = 0; c < CHANNELS; ++c) {
+		if (flagchan[c])
+			break;
+	}
+	if (c == CHANNELS) {
+		while (!prioq_insert(&pqdone, &pe))
+			nomem();
+	}
+	return;
+}
+
+static void
+todo_do(fd_set *rfds)
+{
+	int             r, i;
+	char            ch;
+
+	if (!flagtodoalive)
+		return;
+	if (!FD_ISSET(todofdin, rfds))
+		return;
+
+	if ((r = read(todofdin, todobuf, sizeof (todobuf))) == -1)
+		return;
+	if (r == 0) {
+		if (flagexitasap)
+			flagtodoalive = 0;
+		else
+			tododied();
+		return;
+	}
+	for (i = 0; i < r; ++i) {
+		ch = todobuf[i];
+		while (!stralloc_append(&todoline, &ch))
+			nomem();
+		if (todoline.len > REPORTMAX)
+			todoline.len = REPORTMAX;
+		/*- qmail-todo is responsible for keeping it short */
+		if (!ch && (todoline.len > 1)) {
+			switch (todoline.s[0])
+			{
+			case 'D':
+				if (flagexitasap)
+					break;
+				todo_del(todoline.s + 1);
+				break;
+			case 'L':
+				log1(todoline.s + 1);
+				break;
+			case 'X':
+				if (flagexitasap)
+					flagtodoalive = 0;
+				else
+					tododied();
+				break;
+			default:
+				log3("warning: ", queuedesc, ": qmail-send unable to understand qmail-todo: report mangled\n");
+				break;
+			}
+			todoline.len = 0;
+		}
+	}
+}
+#else /*- #ifdef EXTERNAL_TODO */
 static stralloc rwline = { 0 };
 
-/* 1 if by land, 2 if by sea, 0 if out of memory. not allowed to barf. */
-/* may trash recip. must set up rwline, between a T and a \0. */
+/*
+ * 1 if by land
+ * 2 if by sea
+ * 0 if out of memory. not allowed to barf.
+ * may trash recip. must set up rwline, between a T and a \0.
+ */
 static int
 rewrite(char *recip)
 {
@@ -2261,156 +2420,6 @@ fail:
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1)
 			close(fdchan[c]);
-	}
-}
-#else
-static stralloc todoline = { 0 };
-
-static char     todobuf[2048];
-static int      todofdin, todofdout, flagtodoalive;
-
-static void
-tododied()
-{
-	log3("alert: ", queuedesc, ": oh no! lost qmail-todo connection! dying...\n");
-	flagexitasap = 1;
-	flagtodoalive = 0;
-}
-
-static void
-todo_init()
-{
-	todofdout = 7;
-	todofdin = 8;
-	flagtodoalive = 1;
-	/*- sync with external todo */
-	if (write(todofdout, "S", 1) != 1) {
-		log3("alert: unable to write a byte to external todo! dying...:", error_str(errno), "\n");
-		flagexitasap = 1;
-		flagtodoalive = 0;
-	}
-	return;
-}
-
-static void
-todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
-{
-	if (flagexitasap) {
-		if (flagtodoalive && write(todofdout, "X", 1) != 1) {
-			log5("alert: ", queuedesc, ": unable to write a byte to external todo! dying...:", error_str(errno), "\n");
-			flagexitasap = 1;
-			flagtodoalive = 0;
-		}
-	}
-	if (flagtodoalive) {
-		FD_SET(todofdin, rfds);
-		if (*nfds <= todofdin)
-			*nfds = todofdin + 1;
-	}
-}
-
-static void
-todo_del(char *s)
-{
-	int             c;
-	int             flagchan[CHANNELS];
-	struct prioq_elt pe;
-	unsigned long   id;
-	unsigned int    len;
-
-	for (c = 0; c < CHANNELS; ++c)
-		flagchan[c] = 0;
-	switch (*s++)
-	{
-	case 'L':
-		flagchan[0] = 1;
-		break;
-	case 'R':
-		flagchan[1] = 1;
-		break;
-	case 'B':
-		flagchan[0] = 1;
-		flagchan[1] = 1;
-		break;
-	case 'X':
-		break;
-	default:
-		log3("warning: ", queuedesc, ": qmail-send unable to understand qmail-todo\n");
-		return;
-	}
-	len = scan_ulong(s, &id);
-	if (!len || s[len]) {
-		log3("warning: ", queuedesc, ": qmail-send unable to understand qmail-todo\n");
-		return;
-	}
-	pe.id = id;
-	pe.dt = now();
-	for (c = 0; c < CHANNELS; ++c) {
-		if (flagchan[c])
-			while (!prioq_insert(&pqchan[c], &pe))
-				nomem();
-	}
-	for (c = 0; c < CHANNELS; ++c) {
-		if (flagchan[c])
-			break;
-	}
-	if (c == CHANNELS) {
-		while (!prioq_insert(&pqdone, &pe))
-			nomem();
-	}
-	return;
-}
-
-static void
-todo_do(fd_set *rfds)
-{
-	int             r, i;
-	char            ch;
-
-	if (!flagtodoalive)
-		return;
-	if (!FD_ISSET(todofdin, rfds))
-		return;
-
-	if ((r = read(todofdin, todobuf, sizeof (todobuf))) == -1)
-		return;
-	if (r == 0) {
-		if (flagexitasap)
-			flagtodoalive = 0;
-		else
-			tododied();
-		return;
-	}
-	for (i = 0; i < r; ++i) {
-		ch = todobuf[i];
-		while (!stralloc_append(&todoline, &ch))
-			nomem();
-		if (todoline.len > REPORTMAX)
-			todoline.len = REPORTMAX;
-		/*- qmail-todo is responsible for keeping it short */
-		if (!ch && (todoline.len > 1)) {
-			switch (todoline.s[0])
-			{
-			case 'D':
-				if (flagexitasap)
-					break;
-				todo_del(todoline.s + 1);
-				break;
-			case 'L':
-				log1(todoline.s + 1);
-				break;
-			case 'X':
-				if (flagexitasap)
-					flagtodoalive = 0;
-				else
-					tododied();
-				break;
-			default:
-				log3("warning: ", queuedesc, ": qmail-send unable to understand qmail-todo: report mangled\n");
-				break;
-			}
-			todoline.len = 0;
-		}
 	}
 }
 #endif /*- #ifdef EXTERNAL_TODO */
@@ -2769,6 +2778,9 @@ main()
 	datetime_sec    wakeup;
 	fd_set          rfds, wfds;
 	struct timeval  tv;
+#ifndef EXTERNAL_TODO
+	char           *ptr;
+#endif
 
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue"; /*- single queue like qmail */
@@ -2781,6 +2793,7 @@ main()
 		log7("alert: ", queuedesc, ": cannot start: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 		_exit(111);
 	}
+	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 #ifdef LOCK_LOGS
 	lock_logs_open(0);
 #endif
@@ -2858,7 +2871,7 @@ main()
 	job_init(); /*- initialize numjobs job structures */
 	del_init(); /*- initialize concurrencylocal + concurrrencyremote delivery structure */
 	pass_init(); /*- initialize pass structure */
-	todo_init();
+	todo_init(); /*- set fd 7 to write to qmail-todo, set fd 8 to read from qmail-todo, write 'S' to qmail-todo */
 	cleanup_init(); /*- initialize flagcleanup, cleanuptime */
 #ifdef EXTERNAL_TODO
 	while (!flagexitasap || !del_canexit() || flagtodoalive)
@@ -2899,8 +2912,13 @@ main()
 				log3("warning: ", queuedesc, ": trouble in select\n");
 		} else {
 			recent = now();
+			/*- communicate on pi1, pi3 in qmail-start.c
+			 * fd 1 read by fd 0 in qmail-lspawn,
+			 * fd 3 read by fd 0 in qmail-rspawn
+			 */
 			comm_do(&wfds);
 			del_do(&rfds);
+			/* read fd 8 from qmail-todo */
 			todo_do(&rfds);
 			pass_do();
 			cleanup_do();
@@ -2914,7 +2932,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.76 2021-05-12 15:27:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.76 2021-05-12 15:40:54+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

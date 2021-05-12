@@ -479,8 +479,6 @@ open_trunc.o
 open_write.o
 parsedate
 parsedate.o
-pathexec_env.o
-pathexec_run.o
 pgrphack
 pgrphack.o
 pinq

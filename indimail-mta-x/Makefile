@@ -646,7 +646,7 @@ systype: \
 find-systype trycpp.c
 	./find-systype > systype
 
-fmtqfn.o: compile fmtqfn.c fmtqfn.h auto_split.h
+fmtqfn.o: compile fmtqfn.c fmtqfn.h
 	./compile fmtqfn.c
 
 forward: \
@@ -1055,7 +1055,7 @@ variables.o
 	auto_split.o variables.o -lqmail
 
 qmail-clean.o: compile qmail-clean.c direntry.h fmtqfn.h auto_qmail.h \
-variables.h
+auto_split.h variables.h
 	./compile qmail-clean.c
 
 qmail-control.5: \
@@ -1327,8 +1327,8 @@ qmail-qread.8: qmail-qread.9 conf-sysconfdir
 
 qmail-qread.o: \
 compile qmail-qread.c fmtqfn.h readsubdir.h direntry.h \
-control.h auto_qmail.h envdir.h variables.h conf-queue \
-auto_control.h auto_sysconfdir.h
+control.h auto_qmail.h auto_split.h envdir.h variables.h \
+conf-queue auto_control.h auto_sysconfdir.h
 	if test -f conf-queue ; then \
 		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`head -1 conf-queue` qmail-qread.c; \
 	else \
@@ -1628,12 +1628,11 @@ qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 	> qmail-send.8
 
 qmail-send.o: \
-compile qmail-send.c direntry.h control.h \
-auto_qmail.h trigger.h newfield.h quote.h \
-qmail.h qsutil.h prioq.h envrules.h syncdir.h \
-fmtqfn.h readsubdir.h direntry.h variables.h \
-auto_control.h conf-mime conf-sync conf-batv \
-hassrs.h conf-srs conf-locklogs conf-todo
+compile qmail-send.c direntry.h control.h auto_qmail.h \
+trigger.h newfield.h quote.h qmail.h qsutil.h prioq.h \
+envrules.h syncdir.h fmtqfn.h readsubdir.h direntry.h \
+variables.h auto_control.h auto_split.h hassrs.h \
+conf-mime conf-sync conf-batv conf-srs conf-locklogs conf-todo
 	./compile `grep -h -v "^#" conf-mime conf-todo \
 		conf-sync conf-batv conf-locklogs` qmail-send.c
 
@@ -1655,13 +1654,13 @@ compile get_uid.c auto_uids.h
 
 qmail-showctl: \
 load qmail-showctl.o auto_uids.o control.o \
-auto_qmail.o auto_break.o indimail_stub.o \
+auto_qmail.o auto_break.o indimail_stub.o envdir_set.o \
 auto_patrn.o auto_spawn.o auto_split.o variables.o \
 get_uid.o auto_control.o auto_sysconfdir.o
 	./load qmail-showctl auto_uids.o control.o auto_qmail.o \
 	auto_break.o auto_patrn.o auto_spawn.o auto_control.o \
 	auto_split.o variables.o get_uid.o indimail_stub.o \
-	auto_sysconfdir.o -ldl -lqmail
+	auto_sysconfdir.o envdir_set.o -ldl -lqmail
 
 qmail-showctl.o: compile qmail-showctl.c control.h direntry.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
@@ -1902,7 +1901,7 @@ auto_control.o variables.o libsyncdir.a
 qmail-todo.o: \
 compile qmail-todo.c auto_qmail.h control.h syncdir.h \
 direntry.h fmtqfn.h readsubdir.h trigger.h variables.h \
-auto_control.h conf-sync conf-todo
+auto_control.h auto_split.h conf-sync conf-todo
 	./compile `grep -h -v "^#" conf-sync conf-todo` qmail-todo.c
 
 qmail-upq: \
@@ -1968,8 +1967,7 @@ auto_break.h auto_assign.h
 	./compile recipients.c
 
 readsubdir.o: \
-compile readsubdir.c readsubdir.h direntry.h \
-auto_split.h
+compile readsubdir.c readsubdir.h direntry.h
 	./compile readsubdir.c
 
 received.o: \
