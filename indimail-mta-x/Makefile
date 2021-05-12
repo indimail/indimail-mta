@@ -1399,8 +1399,8 @@ auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
 control.o auto_control.o strsalloc.o socket.lib libsyncdir.a
 	./load qmail-queue triggerpull.o fmtqfn.o get_uid.o MakeArgs.o \
 	auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
-	control.o auto_control.o strsalloc.o \
-	`cat socket.lib` -L. -lsyncdir -lqmail
+	control.o auto_control.o strsalloc.o `cat socket.lib` -L. \
+	-lsyncdir -lqmail
 
 qmail-queue.8: \
 qmail-queue.9 conf-qmail conf-prefix conf-servicedir
