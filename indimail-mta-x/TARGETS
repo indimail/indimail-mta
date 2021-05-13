@@ -1139,3 +1139,4 @@ idn2.lib
 PKGBUILD
 qmail-direct
 qmail-direct.8
+set_environment.o

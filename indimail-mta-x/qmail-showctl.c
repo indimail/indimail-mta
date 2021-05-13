@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.73  2021-05-13 14:44:16+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.72  2021-05-12 15:50:52+05:30  Cprogrammer
  * set env variables from $HOME/.defaultqueue
  * set conf_split from CONFSPLIT env variable
@@ -168,6 +171,10 @@
 #ifdef USE_SPF
 #include "spf.h"
 #endif
+#include "set_environment.h"
+
+#define FATAL "qmail-showctl: fatal: "
+#define WARN  "qmail-showctl: warn: "
 
 int             uidinit(int);
 
@@ -332,7 +339,6 @@ main(int argc, char **argv)
 	direntry       *d;
 	void           *handle = (void *) 0;
 	char           *ptr, *local_ip, *qbase, *local_id, *errstr;
-	char          **e;
 	int             i, verbose;
 	struct stat     stmrh, stmrhcdb;
 	char           *(*get_local_ip) (void);
@@ -342,28 +348,7 @@ main(int argc, char **argv)
 		verbose = 1;
 	else
 		verbose = 0;
-	if ((ptr = env_get("HOME"))) {
-		if (chdir(ptr) == -1)
-			die_chdir(ptr);
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-	}
-	if (!(ptr = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(controldir) == -1)
-			die_chdir(controldir);
-		if (!access("defaultqueue", X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-	}
+	set_environment(WARN, FATAL);
 	substdio_puts(subfdout, "qmail home directory: ");
 	substdio_puts(subfdout, auto_qmail);
 	substdio_puts(subfdout, ".\n");
@@ -906,7 +891,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.72 2021-05-12 15:50:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.73 2021-05-13 14:44:16+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

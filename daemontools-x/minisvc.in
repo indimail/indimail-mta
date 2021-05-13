@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.17 2021-05-06 09:21:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.18 2021-05-13 14:53:36+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.17 2021-05-06 09:21:18+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.18 2021-05-13 14:53:36+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1008,7 +1008,7 @@ if [ -d $dir ] ; then
 	if [ $silent -eq 0 ] ; then
 		printf "export %-35s %s %s %s\n" $dir $owner $group $mode
 	fi
-	export_variables $dir $dir/.variables $owner $group $mode
+	export_variables $dir $dir/.variables "indimail" "qmail" 0644
 fi
 }
 
@@ -1036,7 +1036,7 @@ do
 	import_variables $i/variables $i/variables/.variables 1 $owner $group $mode
 done
 dir="$DESTDIR"$sysconfdir/control/defaultqueue
-import_variables $dir $dir/.variables 1 $owner $group $mode
+import_variables $dir $dir/.variables 1 "indimail" "qmail" 0644
 force=$old
 }
 
@@ -1633,6 +1633,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.18  2021-05-13 14:53:36+05:30  Cprogrammer
+# fixed permissions of env variables in defaultqueue
+#
 # Revision 1.17  2021-05-06 09:21:18+05:30  Cprogrammer
 # remove mixed uses of space and tab
 #

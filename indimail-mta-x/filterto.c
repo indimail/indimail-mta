@@ -1,5 +1,8 @@
 /*
  * $Log: filterto.c,v $
+ * Revision 1.11  2021-05-13 14:43:13+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.10  2020-11-24 13:45:17+05:30  Cprogrammer
  * removed exit.h
  *
@@ -33,8 +36,6 @@
  */
 #include <unistd.h>
 #include <signal.h>
-#include "auto_sysconfdir.h"
-#include "auto_control.h"
 #include "envdir.h"
 #include "sig.h"
 #include "env.h"
@@ -48,9 +49,11 @@
 #include "mess822.h"
 #include "fd.h"
 #include "pathexec.h"
-#include "variables.h"
+#include "set_environment.h"
 
 #define FATAL "filterto: fatal: "
+#define WARN  "filterto: warn: "
+
 void        (*sig_defaulthandler)() = SIG_DFL;
 void        (*sig_ignorehandler)() = SIG_IGN;
 
@@ -77,8 +80,7 @@ char            num[FMT_ULONG];
 int
 main(int argc, char **argv, char **envp)
 {
-	char           *sender, *dtline, *qbase, *home;
-	char          **e;
+	char           *sender, *dtline;
 	int             pid, wstat;
 	char           *qqx;
 	int             pf[2];
@@ -104,33 +106,7 @@ main(int argc, char **argv, char **envp)
 		strerr_die2x(100, FATAL, "SENDER not set");
 	if (!(dtline = env_get("DTLINE")))
 		strerr_die2x(100, FATAL, "DTLINE not set");
-	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		} else
-			home = (char *) 0;
-	}
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(auto_sysconfdir) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-		if (chdir(auto_sysconfdir) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	}
+	set_environment(WARN, FATAL);
 	if (qmail_open(&qqt) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	qmail_puts(&qqt, dtline);
@@ -167,7 +143,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.10 2020-11-24 13:45:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: filterto.c,v 1.11 2021-05-13 14:43:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

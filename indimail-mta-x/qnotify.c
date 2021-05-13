@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.10  2021-05-13 14:44:21+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.9  2020-05-11 11:00:10+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -31,8 +34,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include "auto_control.h"
-#include "auto_sysconfdir.h"
 #include "stralloc.h"
 #include "qmail.h"
 #include "case.h"
@@ -48,11 +49,12 @@
 #include "error.h"
 #include "envdir.h"
 #include "pathexec.h"
-#include "variables.h"
 #include "strerr.h"
 #include "sgetopt.h"
+#include "set_environment.h"
 
 #define FATAL "qnotify: fatal: "
+#define WARN  "qnotify: warn: "
 #define READ_ERR  1
 #define WRITE_ERR 2
 #define MEM_ERR   3
@@ -416,8 +418,7 @@ main(int argc, char **argv)
 	struct substdio ssin;
 	static char     ssinbuf[1024];
 	char            buf[DATE822FMT];
-	char           *rpline, *qqx, *recipient, *host, *qbase, *home;
-	char          **e;
+	char           *rpline, *qqx, *recipient, *host;
 
 	while ((ch = getopt(argc, argv, "nh")) != sgoptdone) {
 		switch (ch)
@@ -468,33 +469,7 @@ main(int argc, char **argv)
 	if (!compare_local(email_disp.s, email_disp.len, rpath.s, rpath.len))
 		_exit (0);
 	if (flagqueue) {
-		if ((home = env_get("HOME"))) {
-			if (chdir(home) == -1)
-				strerr_die4sys(111, FATAL, "unable to chdir to ", home, ": ");
-			if (!access(".defaultqueue", X_OK)) {
-				envdir_set(".defaultqueue");
-				if ((e = pathexec(0)))
-					environ = e;
-			} else
-				home = (char *) 0;
-		}
-		if (!(qbase = env_get("QUEUE_BASE"))) {
-			if (!controldir) {
-				if (!(controldir = env_get("CONTROLDIR")))
-					controldir = auto_control;
-			}
-			if (chdir(auto_sysconfdir) == -1)
-				strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-			if (chdir(controldir) == -1)
-				strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-			if (!access("defaultqueue", X_OK)) {
-				envdir_set("defaultqueue");
-				if ((e = pathexec(0)))
-					environ = e;
-			}
-			if (chdir(auto_sysconfdir) == -1)
-				strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-		}
+		set_environment(WARN, FATAL);
 		if (qmail_open(&qqt) == -1)
 			die_fork();
 	}
@@ -598,7 +573,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.9 2020-05-11 11:00:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.10 2021-05-13 14:44:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.38  2021-05-13 14:44:07+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.37  2021-05-12 15:49:24+05:30  Cprogrammer
  * removed redundant initialization
  *
@@ -131,8 +134,6 @@
 #include "now.h"
 #include "quote.h"
 #include "headerbody.h"
-#include "auto_sysconfdir.h"
-#include "auto_control.h"
 #include "newfield.h"
 #include "constmap.h"
 #include "envrules.h"
@@ -142,7 +143,10 @@
 #ifdef HAVESRS
 #include "srs.h"
 #endif
-#include "variables.h"
+#include "set_environment.h"
+
+#define FATAL "qmail-inject: fatal: "
+#define WARN  "qmail-inject: warn: "
 
 int             wildmat_internal(char *, char *);
 
@@ -1063,38 +1067,10 @@ getcontrols()
 {
 	struct stat     statbuf;
 	static stralloc sa = { 0 };
-	char           *x, *qbase, *home;
-	char          **e;
+	char           *x;
 
 	mft_init();
-	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			die_chdir(home);
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-	}
-	if (chdir(auto_sysconfdir) == -1)
-		die_chdir(auto_sysconfdir);
-	if (control_init() == -1)
-		die_read();
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(controldir) == -1)
-			die_chdir(controldir);
-		if (!access("defaultqueue", X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-		if (chdir(auto_sysconfdir) == -1)
-			die_chdir(auto_sysconfdir);
-	}
+	set_environment(WARN, FATAL);
 	if (!(x = env_get("QMAILDEFAULTDOMAIN"))) {
 		if (control_rldef(&control_defaultdomain, "defaultdomain", 1, "defaultdomain") != 1)
 			die_read();
@@ -1301,7 +1277,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.37 2021-05-12 15:49:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.38 2021-05-13 14:44:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

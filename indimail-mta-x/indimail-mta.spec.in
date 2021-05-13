@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.310 2021-05-01 19:46:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.311 2021-05-13 14:45:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -816,7 +816,7 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-direct
 
-%attr(644,root,root)  %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+%attr(644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 
 %if 0%{?suse_version} >= 1120
 %attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions

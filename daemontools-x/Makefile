@@ -137,14 +137,11 @@ chkshsgr warn-shsgr tryshsgr.c compile load
 	hasshsgr.h
 	rm -f tryshsgr.o tryshsgr
 
-envdir: load envdir.o envdir_set.o openreadclose.o
-	./load envdir envdir_set.o openreadclose.o -lqmail
+envdir: load envdir.o openreadclose.o
+	./load envdir openreadclose.o -lqmail
 
-envdir.o: compile envdir.c envdir.h
+envdir.o: compile envdir.c
 	./compile envdir.c
-
-envdir_set.o: compile envdir_set.c openreadclose.h direntry.h
-	./compile envdir_set.c
 
 envuidgid: envuidgid.o load 
 	./load envuidgid -lqmail
@@ -163,7 +160,7 @@ iopause.o
 	./load multilog match.o deepsleep.o \
 	iopause.o -lqmail
 
-multilog.o: compile deepsleep.h direntry.h match.h multilog.c
+multilog.o: compile deepsleep.h match.h multilog.c
 	./compile multilog.c
 
 deepsleep.o: compile deepsleep.c deepsleep.h iopause.h
@@ -233,8 +230,7 @@ svok.o: compile svok.c conf-runfs
 svscan: load svscan.o
 	./load svscan -lqmail
 
-svscan.o: compile direntry.h svscan.c \
-auto_sysconfdir.h conf-runfs
+svscan.o: compile svscan.c auto_sysconfdir.h conf-runfs
 	./compile `grep -v "^#" conf-runfs` svscan.c
 
 svscan.8: svscan.9 conf-sysconfdir conf-servicedir
@@ -329,7 +325,7 @@ qfilelog.o: compile qfilelog.c
 multipipe: load multipipe.o svcfns.o
 	./load multipipe svcfns.o
 
-multipipe.o: compile multipipe.c direntry.h bool.h svcfns.h
+multipipe.o: compile multipipe.c bool.h svcfns.h
 	./compile multipipe.c
 
 teepipe: load teepipe.o
@@ -338,7 +334,7 @@ teepipe: load teepipe.o
 teepipe.o: compile teepipe.c
 	./compile teepipe.c
 
-logselect.o: compile direntry.h sorted.h logselect.c
+logselect.o: compile sorted.h logselect.c
 	./compile logselect.c
 
 logselect: load logselect.o sorted.o

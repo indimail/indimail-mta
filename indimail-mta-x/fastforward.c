@@ -1,5 +1,8 @@
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.11  2021-05-13 14:43:09+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.10  2020-11-24 13:45:14+05:30  Cprogrammer
  * removed exit.h
  *
@@ -34,8 +37,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "auto_sysconfdir.h"
-#include "auto_control.h"
 #include "envdir.h"
 #include "pathexec.h"
 #include "stralloc.h"
@@ -58,9 +59,10 @@
 #include "seek.h"
 #include "wait.h"
 #include "sgetopt.h"
-#include "variables.h"
+#include "set_environment.h"
 
 #define FATAL "fastforward: fatal: "
+#define WARN  "fastforward: warn: "
 
 void
 usage()
@@ -367,8 +369,7 @@ main(argc, argv)
 	char          **argv;
 {
 	int             opt, i;
-	char           *x, *qbase, *home;
-	char          **e;
+	char           *x;
 
 	sig_pipeignore();
 	if (!(dtline = env_get("DTLINE")))
@@ -481,33 +482,7 @@ main(argc, argv)
 		substdio_flush(subfderr);
 		_exit(flagpassthrough ? 99 : 0);
 	}
-	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		} else
-			home = (char *) 0;
-	}
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-		if (chdir(auto_sysconfdir) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	}
+	set_environment(WARN, FATAL);
 	if (qmail_open(&qq) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	qmail_puts(&qq, dtline);
@@ -534,7 +509,7 @@ main(argc, argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.10 2020-11-24 13:45:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.11 2021-05-13 14:43:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

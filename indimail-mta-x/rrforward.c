@@ -1,5 +1,8 @@
 /*
  * $Log: rrforward.c,v $
+ * Revision 1.9  2021-05-13 14:44:37+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.8  2020-11-24 13:48:01+05:30  Cprogrammer
  * removed exit.h
  *
@@ -28,8 +31,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "auto_sysconfdir.h"
-#include "auto_control.h"
 #include "envdir.h"
 #include "pathexec.h"
 #include "sig.h"
@@ -42,9 +43,10 @@
 #include "strerr.h"
 #include "substdio.h"
 #include "fmt.h"
-#include "variables.h"
+#include "set_environment.h"
 
 #define FATAL "rrforward: fatal: "
+#define WARN  "rrforward: warn: "
 
 #define QRR_FILE ".qmailrr"
 
@@ -107,8 +109,7 @@ main(argc, argv)
 	char          **argv;
 {
 	char            strpos[FMT_ULONG + 2];
-	char           *rrfile, *extension, *sender, *dtline, *qbase, *home;
-	char          **e;
+	char           *rrfile, *extension, *sender, *dtline;
 	int             rrfd, r;
 	unsigned long   pos;
 
@@ -156,33 +157,7 @@ main(argc, argv)
 	lock_un(rrfd);
 	close(rrfd);
 	strpos[r] = '\0';
-	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", home, ": ");
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		} else
-			home = (char *) 0;
-	}
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-		if (chdir(auto_sysconfdir) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	}
+	set_environment(WARN, FATAL);
 	rr_forward(argv[pos], sender, dtline, strpos);
 	/*- Not reached */
 	return(0);
@@ -191,7 +166,7 @@ main(argc, argv)
 void
 getversion_rrforward_c()
 {
-	static char    *x = "$Id: rrforward.c,v 1.8 2020-11-24 13:48:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrforward.c,v 1.9 2021-05-13 14:44:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

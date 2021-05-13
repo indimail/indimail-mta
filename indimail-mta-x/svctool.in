@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.556 2021-05-12 19:34:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.557 2021-05-13 14:44:47+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.556 2021-05-12 19:34:03+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.557 2021-05-13 14:44:47+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -2606,7 +2606,6 @@ if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$CONTROLDIR/$QUEUE_DEF ] ; then
 	return 0
 fi
 /bin/mkdir -p $conf_dir
-#/bin/chmod 500 $conf_dir
 echo $QUEUE_BASE > $conf_dir/QUEUE_BASE
 echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
 echo $FIRST_QUEUE > $conf_dir/QUEUE_START
@@ -2701,6 +2700,8 @@ if [ ! " $logfilter" = " " ] ; then
 else
 	> $conf_dir/LOGFILTER
 fi
+chmod 644 $conf_dir/*
+chgrp -R indimail:qmail $conf_dir
 }
 
 create_qmtp_or_qmqp()
@@ -8815,7 +8816,7 @@ if [ -d $dir ] ; then
 	if [ $silent -eq 0 ] ; then
 		printf "export %-35s %s %s %s\n" $dir $owner $group $mode
 	fi
-	export_variables $dir $dir/.variables $owner $group $mode
+	export_variables $dir $dir/.variables "indimail" "qmail" 0644
 fi
 }
 
@@ -8843,7 +8844,7 @@ do
 	import_variables $i/variables $i/variables/.variables 1 $owner $group $mode
 done
 dir="$DESTDIR"$sysconfdir/control/defaultqueue
-import_variables $dir $dir/.variables 1 $owner $group $mode
+import_variables $dir $dir/.variables 1 "indimail" "qmail" 0644
 force=$old
 }
 

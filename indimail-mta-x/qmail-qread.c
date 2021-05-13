@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.32  2021-05-13 14:44:12+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.31  2021-05-12 15:49:49+05:30  Cprogrammer
  * set conf_split from CONFSPLIT env variable
  *
@@ -93,11 +96,12 @@
 #include "auto_qmail.h"
 #include "auto_split.h"
 #include "auto_sysconfdir.h"
-#include "auto_control.h"
 #include "control.h"
 #include "variables.h"
+#include "set_environment.h"
 
 #define FATAL "qmail-qread: fatal: "
+#define WARN  "qmail-qread: warn: "
 
 #ifndef QUEUE_COUNT
 #define QUEUE_COUNT 10
@@ -569,9 +573,8 @@ main(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
-	char           *queue_count_ptr, *queue_start_ptr, *home;
+	char           *queue_count_ptr, *queue_start_ptr;
 	char            strnum[FMT_ULONG];
-	char          **e;
 	int             idx, count, qcount, qstart, lcount, rcount, bcount, tcount;
 	static stralloc Queuedir = { 0 };
 
@@ -579,33 +582,7 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		return(1);
 	}
-	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			die_chdir(home);
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		} else
-			home = (char *) 0;
-	}
-	if (chdir(auto_sysconfdir))
-		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-		if (chdir(auto_sysconfdir))
-			strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
-	}
+	set_environment(WARN, FATAL);
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
@@ -671,7 +648,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.31 2021-05-12 15:49:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.32 2021-05-13 14:44:12+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

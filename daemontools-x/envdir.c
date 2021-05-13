@@ -1,5 +1,8 @@
 /*
  * $Log: envdir.c,v $
+ * Revision 1.4  2021-05-13 14:51:45+05:30  Cprogrammer
+ * use envdir() function from libqmail
+ *
  * Revision 1.3  2010-06-08 21:57:51+05:30  Cprogrammer
  * moved code to set environment variables to envdir_set.c
  *
@@ -27,7 +30,7 @@ die_usage(void)
 int
 main(int argc, char **argv)
 {
-	char           *fn;
+	char           *fn, *err = (char *) 0;
 	char          **e;
 	int             tmperrno;
 
@@ -38,9 +41,22 @@ main(int argc, char **argv)
 	fn = *argv;
 	if (!*++argv)
 		die_usage();
-	envdir_set(fn);
-	if ((e = pathexec(argv)))
+	switch (envdir(fn, &err))
 	{
+		case -1:
+			strerr_die6sys(111, FATAL, "unable to read environment file ", fn, "/", err, ": ");
+		case -2:
+			strerr_die2sys(111, FATAL, "unable to open current directory: ");
+		case -3:
+			strerr_die4sys(111, FATAL, "unable to switch to environment directory ", fn, ": ");
+		case -4:
+			strerr_die4sys(111, FATAL, "unable to read environment directory ", fn, ": ");
+		case -5:
+			strerr_die2sys(111, FATAL, "unable to switch back to original directory: ");
+		case -6:
+			strerr_die2x(111, FATAL, "out of memory");
+	}
+	if ((e = pathexec(argv))) {
 		tmperrno = errno;
 		alloc_free((char *) e);
 		errno = tmperrno;
@@ -53,7 +69,7 @@ main(int argc, char **argv)
 void
 getversion_envdir_c()
 {
-	static char    *x = "$Id: envdir.c,v 1.3 2010-06-08 21:57:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: envdir.c,v 1.4 2021-05-13 14:51:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
