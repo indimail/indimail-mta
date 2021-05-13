@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.554 2021-05-06 09:23:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.556 2021-05-12 19:34:03+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.554 2021-05-06 09:23:30+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.556 2021-05-12 19:34:03+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -2228,9 +2228,18 @@ if [ " $smtp_ssl" = " 1" -o " $force_tls" = " 1" ] ; then
 	echo $sysconfdir/certs > $conf_dir/CERTDIR
 fi
 if [ " $odmr" = " " ] ; then
-	echo $QUEUE_BASE > $conf_dir/QUEUE_BASE
-	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-	echo $FIRST_QUEUE > $conf_dir/QUEUE_START
+	t=$sysconfdir/control/defaultqueue
+	mkdir -p $t
+	if [ ! -f $t/QUEUE_BASE -o ! -f $t/QUEUE_COUNT -o ! -f $t/QUEUE_START -o ! -f $t/CONFSPLIT ] ; then
+		echo QUEUESPLIT    > $t/CONFSPLIT
+		echo $QUEUE_BASE   > $t/QUEUE_BASE
+		echo $NO_OF_QUEUES > $t/QUEUE_COUNT
+		echo $FIRST_QUEUE  > $t/QUEUE_START
+	fi
+	ln -sf $t/CONFSPLIT   $conf_dir/CONFSPLIT 
+	ln -sf $t/QUEUE_BASE  $conf_dir/QUEUE_BASE
+	ln -sf $t/QUEUE_COUNT $conf_dir/QUEUE_COUNT
+	ln -sf $t/QUEUE_START $conf_dir/QUEUE_START
 	if [ $use_starttls -eq 0 ] ; then
 		> $conf_dir/STARTTLS
 	else

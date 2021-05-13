@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.72  2021-05-12 15:50:52+05:30  Cprogrammer
+ * set env variables from $HOME/.defaultqueue
+ * set conf_split from CONFSPLIT env variable
+ *
  * Revision 1.71  2021-02-07 23:14:18+05:30  Cprogrammer
  * declare verbose variable removed from indimail_stub
  *
@@ -147,6 +151,8 @@
 #include "constmap.h"
 #include "stralloc.h"
 #include "direntry.h"
+#include "pathexec.h"
+#include "envdir.h"
 #include "auto_uids.h"
 #include "auto_qmail.h"
 #include "auto_break.h"
@@ -155,6 +161,7 @@
 #include "auto_split.h"
 #include "auto_control.h"
 #include "env.h"
+#include "getEnvConfig.h"
 #include "variables.h"
 #include "hassrs.h"
 #include "indimail_stub.h"
@@ -165,7 +172,7 @@
 int             uidinit(int);
 
 stralloc        me = { 0 };
-int             meok;
+int             meok, conf_split;
 stralloc        line = { 0 };
 stralloc        libfn = { 0 };
 char            num[FMT_ULONG];
@@ -308,6 +315,16 @@ print_concurrency()
 	}
 }
 
+void
+die_chdir(char *dir)
+{
+	substdio_puts(subfdout, "Oops! Unable to chdir to ");
+	substdio_puts(subfdout, dir);
+	substdio_puts(subfdout, ".\n");
+	substdio_flush(subfdout);
+	_exit(111);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -315,6 +332,7 @@ main(int argc, char **argv)
 	direntry       *d;
 	void           *handle = (void *) 0;
 	char           *ptr, *local_ip, *qbase, *local_id, *errstr;
+	char          **e;
 	int             i, verbose;
 	struct stat     stmrh, stmrhcdb;
 	char           *(*get_local_ip) (void);
@@ -324,6 +342,28 @@ main(int argc, char **argv)
 		verbose = 1;
 	else
 		verbose = 0;
+	if ((ptr = env_get("HOME"))) {
+		if (chdir(ptr) == -1)
+			die_chdir(ptr);
+		if (!access(".defaultqueue", X_OK)) {
+			envdir_set(".defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
+	if (!(ptr = env_get("QUEUE_BASE"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (chdir(controldir) == -1)
+			die_chdir(controldir);
+		if (!access("defaultqueue", X_OK)) {
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
 	substdio_puts(subfdout, "qmail home directory: ");
 	substdio_puts(subfdout, auto_qmail);
 	substdio_puts(subfdout, ".\n");
@@ -340,8 +380,9 @@ main(int argc, char **argv)
 	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_spawn));
 	substdio_puts(subfdout, ".\n");
 
+	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	substdio_puts(subfdout, "subdirectory split: ");
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_split));
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) conf_split));
 	substdio_puts(subfdout, ".\n");
 
 	substdio_put(subfdout, "user ids\n", 9);
@@ -391,22 +432,12 @@ main(int argc, char **argv)
 	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidc));
 	substdio_put(subfdout, "\n", 1);
 
-	if (chdir(auto_qmail) == -1) {
-		substdio_puts(subfdout, "Oops! Unable to chdir to ");
-		substdio_puts(subfdout, auto_qmail);
-		substdio_puts(subfdout, ".\n");
-		substdio_flush(subfdout);
-		_exit(111);
-	}
-	if (!(controldir = env_get("CONTROLDIR")))
+	if (chdir(auto_qmail) == -1)
+		die_chdir(auto_qmail);
+	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-	if (access(controldir, F_OK)) {
-		substdio_puts(subfdout, "Oops! Unable to chdir to control directory [");
-		substdio_puts(subfdout, controldir);
-		substdio_puts(subfdout, "].\n");
-		substdio_flush(subfdout);
-		_exit(111);
-	}
+	if (access(controldir, F_OK))
+		die_chdir(controldir);
 
 	if (!(dir = opendir(controldir))) {
 		substdio_puts(subfdout, "Oops! Unable to open current directory [");
@@ -875,7 +906,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.71 2021-02-07 23:14:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.72 2021-05-12 15:50:52+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

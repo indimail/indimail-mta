@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.37  2021-05-12 15:49:24+05:30  Cprogrammer
+ * removed redundant initialization
+ *
  * Revision 1.36  2021-04-29 12:04:00+05:30  Cprogrammer
  * use 'n' option in QMAILINJECT env variable to print message rather than queue
  *
@@ -1071,8 +1074,7 @@ getcontrols()
 			envdir_set(".defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
-		} else
-			home = (char *) 0;
+		}
 	}
 	if (chdir(auto_sysconfdir) == -1)
 		die_chdir(auto_sysconfdir);
@@ -1299,7 +1301,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.36 2021-04-29 12:04:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.37 2021-05-12 15:49:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

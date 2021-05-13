@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.70  2021-05-12 15:58:55+05:30  Cprogrammer
+ * set conf_split from CONFSPLIT env variable
+ *
  * Revision 1.69  2021-05-09 17:37:51+05:30  Cprogrammer
  * documented Received headers
  *
@@ -218,6 +221,8 @@
 #include "mess822.h"
 #include "wait.h"
 #include "MakeArgs.h"
+#include "auto_split.h"
+#include "getEnvConfig.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
@@ -234,6 +239,7 @@ int             flagmademess = 0;
 int             flagmadeintd = 0;
 int             flagquarantine = 0;
 int             flagblackhole = 0;
+int             conf_split;
 struct substdio ssin, ssout, sslog;
 datetime_sec    starttime;
 struct datetime dt;
@@ -881,6 +887,7 @@ main()
 	if (env_get("USE_FSYNC"))
 		use_fsync = 1;
 #endif
+	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	qqeh = env_get("QQEH");
 	mypid = getpid();
 	uid = getuid();
@@ -1251,7 +1258,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.69 2021-05-09 17:37:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.70 2021-05-12 15:58:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

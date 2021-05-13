@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-clean.c,v $
+ * Revision 1.11  2021-05-12 15:48:59+05:30  Cprogrammer
+ * set conf_split from CONFSPLIT env variable
+ *
  * Revision 1.10  2020-11-24 13:46:37+05:30  Cprogrammer
  * removed exit.h
  *
@@ -38,10 +41,13 @@
 #include "env.h"
 #include "variables.h"
 #include "auto_qmail.h"
+#include "auto_split.h"
+#include "getEnvConfig.h"
 
 #define OSSIFIED 129600	/*- see qmail-send.c */
 
 stralloc        line = { 0 };
+int             conf_split;
 
 void
 cleanuppid()
@@ -100,9 +106,9 @@ main()
 		queuedir = "queue";
 	if (chdir(queuedir) == -1)
 		_exit(111);
-
 	sig_pipeignore();
 
+	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (!stralloc_ready(&line, 200))
 		_exit(111);
 	cleanuploop = 0;
@@ -174,7 +180,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.10 2020-11-24 13:46:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.11 2021-05-12 15:48:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

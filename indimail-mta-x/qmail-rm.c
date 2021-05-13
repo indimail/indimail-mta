@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.20  2021-05-12 15:50:28+05:30  Cprogrammer
+ * set conf_split from CONFSPLIT env variable
+ *
  * Revision 1.19  2020-09-16 19:05:27+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -182,6 +185,7 @@
 #include "control.h"
 #include "sgetopt.h"
 #include "auto_split.h"
+#include "getEnvConfig.h"
 #include "auto_qmail.h"
 
 /*- many linux fcntl.h's seem to be broken */
@@ -207,7 +211,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.19 2020-09-16 19:05:27+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.20 2021-05-12 15:50:28+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -344,7 +348,7 @@ main(int argc, char **argv)
 
 	if (argc < 2)
 		usage();
-	conf_split = auto_split;
+	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	while ((ch = getopt(argc, argv, "deirvh?n:p:q:s:y:X:x:")) != opteof) {
 		switch (ch)
 		{
@@ -1174,7 +1178,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.19 2020-09-16 19:05:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.20 2021-05-12 15:50:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

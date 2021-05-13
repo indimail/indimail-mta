@@ -1,5 +1,8 @@
 /*
  * $Log: fmtqfn.c,v $
+ * Revision 1.4  2021-05-12 15:47:56+05:30  Cprogrammer
+ * use configurable conf_split instead of auto_split variable
+ *
  * Revision 1.3  2004-10-22 20:25:07+05:30  Cprogrammer
  * added RCS id
  *
@@ -9,7 +12,8 @@
  */
 #include "fmtqfn.h"
 #include "fmt.h"
-#include "auto_split.h"
+
+extern int      conf_split;
 
 unsigned int
 fmtqfn(s, dirslash, id, flagsplit)
@@ -28,7 +32,7 @@ fmtqfn(s, dirslash, id, flagsplit)
 		s += i;
 	if (flagsplit)
 	{
-		i = fmt_ulong(s, id % auto_split);
+		i = fmt_ulong(s, id % conf_split);
 		len += i;
 		if (s)
 			s += i;
@@ -50,7 +54,7 @@ fmtqfn(s, dirslash, id, flagsplit)
 void
 getversion_fmtqfn_c()
 {
-	static char    *x = "$Id: fmtqfn.c,v 1.3 2004-10-22 20:25:07+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: fmtqfn.c,v 1.4 2021-05-12 15:47:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

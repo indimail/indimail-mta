@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.h,v $
+ * Revision 1.4  2021-05-12 17:50:29+05:30  Cprogrammer
+ * added readsubdir_name()
+ *
  * Revision 1.3  2004-10-11 14:00:38+05:30  Cprogrammer
  * added function prototypes
  *
@@ -24,5 +27,6 @@ typedef struct readsubdir
 
 void            readsubdir_init(readsubdir *, char *, void (*pause) ());
 int             readsubdir_next(readsubdir *, unsigned long *);
+char           *readsubdir_name(readsubdir *);
 
 #endif

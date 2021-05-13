@@ -77,6 +77,19 @@ Release 2.13 Start 14/02/2021
 47. inotify.c: added IN_MOVE_SELF, IN_MOVED_FROm, IN_MOVED_TO events
 48. removed pathexec_run.c, pathexec_env.c, pathexec.h and moved functions to
     libqmail
+49. readsubdir.c: reduce calls required to get next entry
+50. readsubdir.c: added readsubdir_name function
+51. fmtqfn.c, readsubdir.c: use configurable conf_split instead of compile
+    time auto_split
+52. qmail-clean.c, qmail-inject.c, qmail-qread.c, qmail-queue.c, qmail-rm.c,
+	qmail-send.c, qmail-todo.c, queue-fix.c use CONFSPLIT env variable to set
+	conf_split
+53. queue-fix.c: use envdir_set to load environment from
+    .defaultqueue/defaultqueue
+54. svctool: link env variables for QUEUE in qmail-send, qmail-smtp with
+    control/defaultqueue
+55. envdir_set.c: changed error message
+56. svctool: create CONFSPLIT variable
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
