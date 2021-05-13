@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.10  2021-05-13 14:44:33+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.9  2020-11-24 13:47:58+05:30  Cprogrammer
  * removed exit.h
  *
@@ -34,8 +37,6 @@
 #include <sys/stat.h>
 #include "alloc.h"
 #include "envdir.h"
-#include "auto_sysconfdir.h"
-#include "auto_control.h"
 #include "stralloc.h"
 #include "byte.h"
 #include "strerr.h"
@@ -55,9 +56,10 @@
 #include "fd.h"
 #include "wait.h"
 #include "pathexec.h"
-#include "variables.h"
+#include "set_environment.h"
 
 #define FATAL "replier: fatal: "
+#define WARN  "replier: warn: "
 
 void (*sig_defaulthandler)() = SIG_DFL;
 void (*sig_ignorehandler)() = SIG_IGN;
@@ -137,10 +139,10 @@ stralloc        mydtline = { 0 };
 int
 main(int argc, char **argv)
 {
-	char           *dir, *addr, *sender, *local, *action, *qqx, *qbase, *home;
-	char          **e;
+	char           *dir, *addr, *sender, *local, *action, *qqx;
 	int             flagmlwasthere, match, i, flaginheader, flagbadfield, pid, wstat,
 					tmperrno;
+	char          **e;
 	int             pf[2];
 
 	if (!(dir = argv[1]))
@@ -151,28 +153,7 @@ main(int argc, char **argv)
 	sig_ignore(SIGPIPE);
 	sig_catch(SIGALRM, sigalrm);
 	alarm(86400);
-	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", home, ": ");
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		} else
-			home = (char *) 0;
-	}
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK))
-			envdir_set("defaultqueue");
-	}
+	set_environment(WARN, FATAL);
 	if (chdir(dir) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", dir, ": ");
 	if ((sender = env_get("SENDER"))) {
@@ -323,7 +304,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.9 2020-11-24 13:47:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier.c,v 1.10 2021-05-13 14:44:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

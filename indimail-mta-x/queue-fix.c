@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.19  2021-05-13 14:44:29+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.18  2021-05-12 18:48:05+05:30  Cprogrammer
  * use envdir_set to load environment from .defaultqueue/defaultqueue
  *
@@ -69,10 +72,9 @@
 #include "pathexec.h"
 #include "envdir.h"
 #include "getEnvConfig.h"
-#include "variables.h"
-#include "auto_control.h"
 #include "auto_split.h"
 #include "auto_uids.h"
+#include "set_environment.h"
 
 #define FATAL "queue-fix: fatal: "
 #define WARN  "queue-fix: warn: "
@@ -998,33 +1000,10 @@ int
 main(int argc, char **argv)
 {
 	int             opt, fdorigdir;
-	char           *ptr;
-	char          **e;
 
 	if ((fdorigdir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	if ((ptr = env_get("HOME"))) {
-		if (chdir(ptr) == -1)
-			strerr_die4sys(111, FATAL, "chdir: ", ptr, ": ");
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-	}
-	if (!(ptr = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, FATAL, "chdir: ", controldir, ": ");
-		if (!access("defaultqueue", X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-	}
+	set_environment(WARN, FATAL);
 	if (fchdir(fdorigdir) == -1)
 		strerr_die1sys(111, "unable to switch to original directory: ");
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
@@ -1081,7 +1060,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.18 2021-05-12 18:48:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.19 2021-05-13 14:44:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

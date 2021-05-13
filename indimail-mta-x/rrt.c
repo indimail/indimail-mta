@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.8  2021-05-13 14:44:40+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.7  2020-04-04 13:01:03+05:30  Cprogrammer
  * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
  *
@@ -25,8 +28,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include "sgetopt.h"
-#include "auto_sysconfdir.h"
-#include "auto_control.h"
 #include "control.h"
 #include "qmail.h"
 #include "case.h"
@@ -39,13 +40,16 @@
 #include "getln.h"
 #include "stralloc.h"
 #include "error.h"
-#include "variables.h"
 #include "envdir.h"
 #include "env.h"
 #include "strerr.h"
 #include "pathexec.h"
+#include "auto_sysconfdir.h"
+#include "variables.h"
+#include "set_environment.h"
 
 #define FATAL     "rrt: fatal: "
+#define WARN      "rrt: warn: "
 #define SUCCESS   1
 #define FAILURE   2
 #define TEMPORARY 3
@@ -274,9 +278,8 @@ main(int argc, char **argv)
 	struct substdio ssin;
 	static char     ssinbuf[1024];
 	char            buf[DATE822FMT];
-	char           *rpline, *recipient, *qqx, *qbase, *ptr,
-				   *smtptext = 0, *qmtptext = 0, *home;
-	char          **e;
+	char           *rpline, *recipient, *qqx, *ptr,
+				   *smtptext = 0, *qmtptext = 0;
 
 	while ((ch = getopt(argc, argv, "nb")) != opteof) {
 		switch (ch)
@@ -337,33 +340,7 @@ main(int argc, char **argv)
 			return (0);
 	}
 	if (flagqueue) {
-		if ((home = env_get("HOME"))) {
-			if (chdir(home) == -1)
-				strerr_die4sys(111, FATAL, "unable to chdir to ", home, ": ");
-			if (!access(".defaultqueue", X_OK)) {
-				envdir_set(".defaultqueue");
-				if ((e = pathexec(0)))
-					environ = e;
-			} else
-				home = (char *) 0;
-			if (chdir(auto_sysconfdir) == -1)
-				strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-		}
-		if (!(qbase = env_get("QUEUE_BASE"))) {
-			if (!controldir) {
-				if (!(controldir = env_get("CONTROLDIR")))
-					controldir = auto_control;
-			}
-			if (chdir(controldir) == -1)
-				strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-			if (!access("defaultqueue", X_OK)) {
-				envdir_set("defaultqueue");
-				if ((e = pathexec(0)))
-					environ = e;
-			}
-			if (chdir(auto_sysconfdir) == -1)
-				strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-		}
+		set_environment(WARN, FATAL);
 		if (qmail_open(&qqt) == -1)
 			die_fork();
 	}
@@ -508,7 +485,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.7 2020-04-04 13:01:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.8 2021-05-13 14:44:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

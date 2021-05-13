@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.13  2021-05-13 14:45:41+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.12  2020-11-24 13:45:08+05:30  Cprogrammer
  * removed exit.h
  *
@@ -51,7 +54,6 @@
 #include "case.h"
 #include "wait.h"
 #include "seek.h"
-#include "variables.h"
 #include "env.h"
 #include "str.h"
 #include "fmt.h"
@@ -59,10 +61,10 @@
 #include "control.h"
 #include "qmail.h"
 #include "sgetopt.h"
-#include "auto_sysconfdir.h"
-#include "auto_control.h"
+#include "set_environment.h"
 
 #define FATAL "dot-forward: fatal: "
+#define WARN  "dot-forward: warn: "
 #define INFO "dot-forward: info: "
 
 ssize_t         mywrite(int, char *, int);
@@ -212,38 +214,12 @@ void
 readcontrols()
 {
 	int             r, fddir;
-	char           *qbase, *home;
-	char          **e;
 
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		} else
-			home = (char *) 0;
-	}
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-		if (chdir(auto_sysconfdir) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	}
+	set_environment(WARN, FATAL);
+	if (fchdir(fddir) == -1)
+		strerr_die2sys(111, FATAL, "unable to set current directory: ");
 	if ((r = control_readline(&me, "me")) == -1)
 		die_control();
 	if (!r && !stralloc_copys(&me, "me"))
@@ -260,8 +236,6 @@ readcontrols()
 		die_control();
 	if (!r && !stralloc_copy(&plusdomain, &me))
 		die_nomem();
-	if (fchdir(fddir) == -1)
-		strerr_die2sys(111, FATAL, "unable to set current directory: ");
 }
 
 void
@@ -537,7 +511,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.12 2020-11-24 13:45:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.13 2021-05-13 14:45:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

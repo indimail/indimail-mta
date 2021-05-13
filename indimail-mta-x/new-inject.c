@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.14  2021-05-13 14:44:02+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.13  2020-11-24 13:46:16+05:30  Cprogrammer
  * removed exit.h
  *
@@ -42,7 +45,6 @@
  */
 #include <unistd.h>
 #include "auto_sysconfdir.h"
-#include "auto_control.h"
 #include "env.h"
 #include "envdir.h"
 #include "pathexec.h"
@@ -64,9 +66,10 @@
 #include "sig.h"
 #include "rewritehost.h"
 #include "rwhconfig.h"
-#include "variables.h"
+#include "set_environment.h"
 
 #define FATAL "new-inject: fatal: "
+#define WARN  "new-inject: warn: "
 
 void
 nomem()
@@ -453,8 +456,6 @@ main(argc, argv)
 	char          **argv;
 {
 	int             i, opt, flagheader = 1;
-	char           *qbase, *home;
-	char          **e;
 	struct strerr   rwhconfig_err;
 
 	sig_pipeignore();
@@ -549,33 +550,7 @@ main(argc, argv)
 		if (config_readfile(&rewrite, config_data(&fnrewrite)->s) == -1)
 			strerr_die2sys(111, FATAL, "unable to read $QMAILREWRITEFILE: ");
 	}
-	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		} else
-			home = (char *) 0;
-	}
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-		if (chdir(auto_sysconfdir) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	}
+	set_environment(WARN, FATAL);
 	if (config_env(&name, "QMAILNAME") == -1)
 		nomem();
 	if (config_env(&name, "MAILNAME") == -1)
@@ -690,7 +665,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.13 2020-11-24 13:46:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.14 2021-05-13 14:44:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

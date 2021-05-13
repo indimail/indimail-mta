@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.14  2021-05-13 14:43:28+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
  * Revision 1.13  2020-05-11 11:02:50+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -73,6 +76,7 @@
 #include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "variables.h"
+#include "set_environment.h"
 
 #define FATAL "maildirserial: fatal: "
 #define WARNING "maildirserial: warning: "
@@ -152,42 +156,10 @@ void
 readcontrols()
 {
 	int             fddir;
-	char           *qbase, *home;
-	char          **e;
 
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-		if (!access(".defaultqueue", X_OK)) {
-			envdir_set(".defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		} else
-			home = (char *) 0;
-	}
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&fn, controldir))
-			die_nomem();
-		if (!stralloc_cats(&fn, "/defaultqueue"))
-			die_nomem();
-		if (!stralloc_0(&fn))
-			die_nomem();
-		if (!access(fn.s, X_OK)) {
-			envdir_set("defaultqueue");
-			if ((e = pathexec(0)))
-				environ = e;
-		}
-		if (chdir(auto_sysconfdir) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
-	}
+	set_environment(WARNING, FATAL);
 	my_config_readline(&me, "me");
 	if (config_default(&me, "me") == -1)
 		die_nomem();
@@ -671,7 +643,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.13 2020-05-11 11:02:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.14 2021-05-13 14:43:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
