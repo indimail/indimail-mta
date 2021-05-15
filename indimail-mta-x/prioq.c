@@ -1,5 +1,8 @@
 /*
  * $Log: prioq.c,v $
+ * Revision 1.7  2021-05-16 01:43:39+05:30  Cprogrammer
+ * modified prototype to c99
+ *
  * Revision 1.6  2020-11-22 23:12:00+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *
@@ -23,17 +26,14 @@
 GEN_ALLOC_readyplus(prioq, struct prioq_elt, p, len, a, 100, prioq_readyplus)
 
 int
-prioq_insert(pq, pe)
-	prioq          *pq;
-	struct prioq_elt *pe;
+prioq_insert(prioq *pq, struct prioq_elt *pe)
 {
-	int             i;
-	int             j;
+	int             i, j;
+
 	if (!prioq_readyplus(pq, 1))
 		return 0;
 	j = pq->len++;
-	while (j)
-	{
+	while (j) {
 		i = (j - 1) / 2;
 		if (pq->p[i].dt <= pe->dt)
 			break;
@@ -45,34 +45,24 @@ prioq_insert(pq, pe)
 }
 
 int
-prioq_min(pq, pe)
-	prioq          *pq;
-	struct prioq_elt *pe;
+prioq_min(prioq *pq, struct prioq_elt *pe)
 {
-	if (!pq->p)
-		return 0;
-	if (!pq->len)
+	if (!pq->p || !pq->len)
 		return 0;
 	*pe = pq->p[0];
 	return 1;
 }
 
 void
-prioq_delmin(pq)
-	prioq          *pq;
+prioq_delmin(prioq *pq)
 {
-	int             i;
-	int             j;
-	int             n;
-	if (!pq->p)
-		return;
-	n = pq->len;
-	if (!n)
+	int             i, j, n;
+
+	if (!pq->p || !(n = pq->len))
 		return;
 	i = 0;
 	--n;
-	for (;;)
-	{
+	for (;;) {
 		j = i + i + 2;
 		if (j > n)
 			break;
@@ -90,7 +80,7 @@ prioq_delmin(pq)
 void
 getversion_prioq_c()
 {
-	static char    *x = "$Id: prioq.c,v 1.6 2020-11-22 23:12:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: prioq.c,v 1.7 2021-05-16 01:43:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
