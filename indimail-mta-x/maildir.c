@@ -1,5 +1,8 @@
 /*
  * $Log: maildir.c,v $
+ * Revision 1.6  2021-05-16 00:14:43+05:30  Cprogrammer
+ * include strerr.h explicitly
+ *
  * Revision 1.5  2004-10-22 20:26:12+05:30  Cprogrammer
  * added RCS id
  *
@@ -18,6 +21,7 @@
 #include "now.h"
 #include "str.h"
 #include "maildir.h"
+#include "strerr.h"
 
 struct strerr   maildir_chdir_err;
 struct strerr   maildir_scan_err;
@@ -134,7 +138,7 @@ maildir_scan(pq, filenames, flagnew, flagcur)
 void
 getversion_maildir_c()
 {
-	static char    *x = "$Id: maildir.c,v 1.5 2004-10-22 20:26:12+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: maildir.c,v 1.6 2021-05-16 00:14:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
