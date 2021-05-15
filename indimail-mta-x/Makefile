@@ -1047,6 +1047,10 @@ qmail-clean.o: compile qmail-clean.c fmtqfn.h auto_qmail.h \
 auto_split.h variables.h
 	./compile qmail-clean.c
 
+qmail-clean.8: qmail-clean.9 conf-split
+	cat qmail-clean.9 \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
+
 qmail-control.5: \
 qmail-control.9 conf-sysconfdir
 	cat qmail-control.9 \
@@ -1309,8 +1313,9 @@ auto_control.o set_environment.o
 	auto_qmail.o auto_split.o variables.o auto_sysconfdir.o \
 	auto_control.o set_environment.o -lqmail
 
-qmail-qread.8: qmail-qread.9 conf-sysconfdir
+qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
 	cat qmail-qread.9 \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-qread.8
 
@@ -1392,8 +1397,10 @@ control.o auto_control.o strsalloc.o socket.lib libsyncdir.a
 	`cat socket.lib` -L. -lsyncdir -lqmail
 
 qmail-queue.8: \
-qmail-queue.9 conf-qmail conf-prefix conf-servicedir
-	$(edit) qmail-queue.9 > qmail-queue.8
+qmail-queue.9 conf-qmail conf-prefix conf-servicedir conf-split
+	$(edit) qmail-queue.9 \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
+	> qmail-queue.8
 
 qmail-queue.o: \
 compile qmail-queue.c matchregex.h triggerpull.h MakeArgs.h \
@@ -1655,6 +1662,11 @@ auto_split.h spf.h variables.h auto_control.h indimail_stub.h \
 hassrs.h conf-srs conf-spf conf-batv
 	./compile `grep -h -v "^#" conf-spf conf-batv` \
 	qmail-showctl.c
+
+qmail-showctl.8: qmail-showctl.9 conf-split
+	cat qmail-showctl.9 \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
+	> qmail-showctl.8
 
 plugtest: \
 load plugtest.o auto_qmail.o auto_prefix.o
@@ -2236,7 +2248,7 @@ compile queue-fix.c auto_split.h auto_uids.h tcpto.h
 
 queue-fix.8: queue-fix.9 conf-split
 	cat queue-fix.9 \
-	| sed s}SPLIT}"`head -1 conf-split`"}g \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	> queue-fix.8
 
 qbase64: \
@@ -2263,9 +2275,9 @@ compile qmail-rm.c auto_split.h auto_qmail.h \
 control.h
 	./compile qmail-rm.c
 
-qmail-rm.1: qmail-rm.9 conf-qmail
+qmail-rm.1: qmail-rm.9 conf-qmail conf-split
 	cat qmail-rm.9 \
-	| sed s}SPLIT}"`head -1 conf-split`"}g \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> qmail-rm.1
 
