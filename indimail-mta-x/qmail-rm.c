@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.21  2021-05-16 00:48:57+05:30  Cprogrammer
+ * use configurable conf_split instead of auto_split variable
+ *
  * Revision 1.20  2021-05-12 15:50:28+05:30  Cprogrammer
  * set conf_split from CONFSPLIT env variable
  *
@@ -211,7 +214,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.20 2021-05-12 15:50:28+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.21 2021-05-16 00:48:57+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -349,6 +352,8 @@ main(int argc, char **argv)
 	if (argc < 2)
 		usage();
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	if (conf_split > auto_split)
+		conf_split = auto_split;
 	while ((ch = getopt(argc, argv, "deirvh?n:p:q:s:y:X:x:")) != opteof) {
 		switch (ch)
 		{
@@ -1178,7 +1183,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.20 2021-05-12 15:50:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.21 2021-05-16 00:48:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

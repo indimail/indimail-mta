@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.74  2021-05-16 00:49:19+05:30  Cprogrammer
+ * use configurable conf_split instead of auto_split variable
+ *
  * Revision 1.73  2021-05-13 14:44:16+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -366,6 +369,8 @@ main(int argc, char **argv)
 	substdio_puts(subfdout, ".\n");
 
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	if (conf_split > auto_split)
+		conf_split = auto_split;
 	substdio_puts(subfdout, "subdirectory split: ");
 	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) conf_split));
 	substdio_puts(subfdout, ".\n");
@@ -891,7 +896,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.73 2021-05-13 14:44:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.74 2021-05-16 00:49:19+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

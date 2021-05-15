@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.20  2021-05-16 00:49:33+05:30  Cprogrammer
+ * use configurable conf_split instead of auto_split variable
+ *
  * Revision 1.19  2021-05-13 14:44:29+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -1007,6 +1010,8 @@ main(int argc, char **argv)
 	if (fchdir(fdorigdir) == -1)
 		strerr_die1sys(111, "unable to switch to original directory: ");
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
+	if (split > auto_split)
+		split = auto_split;
 	while ((opt = getopt(argc, argv, "iNvs:")) != opteof) {
 		switch (opt)
 		{
@@ -1060,7 +1065,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.19 2021-05-13 14:44:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.20 2021-05-16 00:49:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

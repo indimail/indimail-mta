@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.71  2021-05-16 00:48:50+05:30  Cprogrammer
+ * use configurable conf_split instead of auto_split variable
+ *
  * Revision 1.70  2021-05-12 15:58:55+05:30  Cprogrammer
  * set conf_split from CONFSPLIT env variable
  *
@@ -888,6 +891,8 @@ main()
 		use_fsync = 1;
 #endif
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	if (conf_split > auto_split)
+		conf_split = auto_split;
 	qqeh = env_get("QQEH");
 	mypid = getpid();
 	uid = getuid();
@@ -1258,7 +1263,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.70 2021-05-12 15:58:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.71 2021-05-16 00:48:50+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
