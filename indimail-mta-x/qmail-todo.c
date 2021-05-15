@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.46  2021-05-16 01:45:13+05:30  Cprogrammer
+ * limit conf_split to compile time value in conf-split
+ * added code comments
+ *
  * Revision 1.45  2021-05-12 17:51:49+05:30  Cprogrammer
  * display todo filename in logs
  *
@@ -343,13 +347,13 @@ comm_init(void)
 	fdin = 0;	/*- stdin  pi7[0] from qmail-send */
 	/*- this is so stupid: NDELAY semantics should be default on write */
 	if (ndelay_on(fdout) == -1)
-		senddied();	/*- drastic, but better than risking deadlock */
+		senddied(); /*- set flagsendalive = 0. drastic but avoids risking deadlock */
 	while (!stralloc_ready(&comm_buf, 1024))
 		nomem();
 }
 
 int
-comm_canwrite(void)
+data_to_write(void)
 {
 	/*- XXX: could allow a bigger buffer; say 10 recipients */
 	/*- XXX: returns true if there is something in the buffer */
@@ -626,14 +630,14 @@ void
 comm_selprep(int *nfds, fd_set * wfds, fd_set * rfds)
 {
 	if (flagsendalive) {
-		if (flagstopasap && comm_canwrite() == 0)
+		if (flagstopasap && data_to_write() == 0)
 			comm_exit();
-		if (comm_canwrite()) {
-			FD_SET(fdout, wfds);
+		if (data_to_write()) {
+			FD_SET(fdout, wfds); /*- write fd to qmail-send */
 			if (*nfds <= fdout)
 				*nfds = fdout + 1;
 		}
-		FD_SET(fdin, rfds);
+		FD_SET(fdin, rfds); /*- read fd from qmail-send */
 		if (*nfds <= fdin)
 			*nfds = fdin + 1;
 	}
@@ -642,15 +646,15 @@ comm_selprep(int *nfds, fd_set * wfds, fd_set * rfds)
 void
 comm_do(fd_set *wfds, fd_set *rfds)
 {
-	/*- first write then read */
-	if (flagsendalive && comm_canwrite()) {
+	/*- first write to qmail-send */
+	if (flagsendalive && data_to_write()) {
 		if (FD_ISSET(fdout, wfds)) {
 			int             w;
 			int             len;
 			len = comm_buf.len;
 			if ((w = write(fdout, comm_buf.s + comm_pos, len - comm_pos)) <= 0) {
 				if ((w == -1) && (errno == error_pipe))
-					senddied();
+					senddied(); /*- set flagsendalive = 0 */
 			} else {
 				comm_pos += w;
 				if (comm_pos == len) {
@@ -660,21 +664,22 @@ comm_do(fd_set *wfds, fd_set *rfds)
 			}
 		}
 	}
+	/*- next read from qmail-send */
 	if (flagsendalive && FD_ISSET(fdin, rfds)) {
 		/*- there are only two messages 'H' and 'X' */
 		char            c;
 		int             r;
 		if ((r = read(fdin, &c, 1)) <= 0) {
 			if ((r == -1) && (errno != error_intr))
-				senddied();
+				senddied(); /*- set flagsendalive = 0 */
 		} else {
 			switch (c)
 			{
 			case 'H':
-				sighup();
+				sighup(); /*- set flagreadasap = 1 */
 				break;
 			case 'X':
-				sigterm();
+				sigterm(); /*-set flagstopasap = 1 */
 				break;
 			default:
 				log3("warning: ", queuedesc, ": qmail-todo: qmail-send speaks an obscure dialect\n");
@@ -701,7 +706,7 @@ todo_init(void)
 {
 	flagtododir = 0;
 	lasttodorun = nexttodorun = now();
-	trigger_set();
+	trigger_set(); /*- close & open lock/trigger fifo */
 }
 
 void
@@ -716,7 +721,7 @@ todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 		*wakeup = nexttodorun;
 }
 
-unsigned long   Bytes;
+unsigned long   msg_size;
 stralloc        mailfrom = { 0 };
 stralloc        mailto = { 0 };
 
@@ -760,7 +765,8 @@ todo_do(fd_set * rfds)
 		/*- we come here at the beginning or after end of a todo scan */
 		if (!trigger_pulled(rfds) && recent < nexttodorun)
 			return;
-		trigger_set(); /*- open lock/trigger fifo */
+		trigger_set(); /*- close & open lock/trigger fifo */
+		/*- initialize todosubdir */
 		readsubdir_init(&todosubdir, "todo", pausedir);
 		flagtododir = 1;
 		lasttodorun = recent;
@@ -789,7 +795,7 @@ todo_do(fd_set * rfds)
 		log5("warning: ", queuedesc, ": qmail-todo: unable to stat ", fn.s, "\n");
 		goto fail;
 	}
-	Bytes = st.st_size; /*- message size */
+	msg_size = st.st_size; /*- message size */
 	for (c = 0; c < CHANNELS; ++c) {
 		fnmake_chanaddr(id, c);
 		if (unlink(fn.s) == -1 && errno != error_noent) {
@@ -948,8 +954,9 @@ todo_do(fd_set * rfds)
 		log5("warning: ", queuedesc, ": qmail-clean unable to clean up ", fn.s, "\n");
 		return;
 	}
-	comm_write(id, flagchan[0], flagchan[1]);
-	log_stat(Bytes);
+	comm_write(id, flagchan[0], flagchan[1]); /*- e.g. "DL656826\0" */
+	/*- "Llocal: mbhangui@argos.indimail.org mbhangui@argos.indimail.org 798 queue1\n\0" */
+	log_stat(msg_size);
 	return;
 
 fail:
@@ -1133,6 +1140,8 @@ main()
 		_exit(111);
 	}
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	if (conf_split > auto_split)
+		conf_split = auto_split;
 	strnum[fmt_ulong(strnum, conf_split)] = 0;
 	log5("info: ", queuedesc, ": conf split=", strnum, "\n");
 	if (!getcontrols()) {
@@ -1193,7 +1202,11 @@ main()
 		nfds = 1;
 		/* 
 		 * 1. set select on read events on lock/trigger
-		 * 2. if flagtododir is set, reset wakup
+		 * 2. if flagtododir is set, reset wakup to 0
+		 *    if any message is found
+		 * This is important so that we set tv.tv_sec=0
+		 * and make select return immediately so as
+		 * to continue scanning remaining directories.
 		 */
 		todo_selprep(&nfds, &rfds, &wakeup);
 		/*- set select on read/write events on pipe (fd 0, 1) to/from qmail-send
@@ -1201,8 +1214,9 @@ main()
 		 * fd 1 - pi8[1] - write
 		 */
 		comm_selprep(&nfds, &wfds, &rfds);
+		/*-  set tv.tv_sec to 0 to make make select return immediately */
 		if (wakeup <= recent)
-			tv.tv_sec = 0; /*- make select return immediately */
+			tv.tv_sec = 0;
 		else
 			tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
 		tv.tv_usec = 0;
@@ -1211,9 +1225,11 @@ main()
 			else
 				log3("warning: ", queuedesc, ": qmail-todo: trouble in select\n");
 		} else {
+			/* we come here on select timeout out or when trigger is pulled */
 			recent = now();
-			/*- read scan todo dir
+			/*- scan todo dir recursively
 			 * set flagtododir if any file found
+			 * This is the main function.
 			 */
 			todo_do(&rfds);
 			comm_do(&wfds, &rfds); /*- communicate with qmail-send on fd 0, fd 1 */
@@ -1239,7 +1255,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.45 2021-05-12 17:51:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.46 2021-05-16 01:45:13+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

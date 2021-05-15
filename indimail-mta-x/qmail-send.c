@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.77  2021-05-16 01:44:27+05:30  Cprogrammer
+ * limit conf_split to compile time value in conf-split
+ * added code comments
+ *
  * Revision 1.76  2021-05-12 15:40:54+05:30  Cprogrammer
  * added code comments
  *
@@ -593,11 +597,21 @@ static int
 comm_canwrite(int c)
 {
 	/*- XXX: could allow a bigger buffer; say 10 recipients */
-	if (comm_buf[c].s && comm_buf[c].len)
+	if (comm_buf[c].s && comm_buf[c].len) /*- data pending to be written to qmail-[l|r]spawn */
 		return 0;
 	return 1;
 }
 
+/*-
+ * "\0\00015/id\0recipient@domain\0qqeh\0envh\0sender@domain\0"
+ * NULL
+ * delivery number
+ * id
+ * recipient
+ * qq extra header
+ * env header
+ * recipient
+ */
 static void
 comm_write(int c, int delnum, unsigned long id, char *sender, char *qqeh, char *envh, char *recip)
 {
@@ -650,6 +664,10 @@ comm_selprep(int *nfds, fd_set *wfds)
 	}
 }
 
+/*-
+ * write to qmail-lspawn, qmail-rspawn
+ * set comm_buff[c].len = 0 when data is written
+ */
 static void
 comm_do(fd_set *wfds)
 {
@@ -1322,7 +1340,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			}
 			while (!stralloc_0(&orig_recip))
 				nomem();
-			/*- 
+			/*-
 			 * orig_recip is of the form orig_recipient:\nbounce_recipient
 			 * remove :\nbounce_report from orig_recip to get the original
 			 * recipient
@@ -1342,7 +1360,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		qmail_put(&qqt, boundary.s, boundary.len);	/*- enclosure boundary */
 		qmail_put(&qqt, "\nContent-Type: message/rfc822\n\n", 31);
 #else
-		qmail_puts(&qqt, 
+		qmail_puts(&qqt,
 			*sender.s ? "--- Below this line is a copy of the message.\n\n" : "--- Below this line is the original bounce.\n\n");
 #endif
 		qmail_put(&qqt, "Return-Path: <", 14);
@@ -1413,20 +1431,20 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 
 /*- this file is too long ---------------------------------------- DELIVERIES */
 
-typedef struct del {
+typedef struct DEL {
 	int             used;
 	int             j;
 	unsigned long   delid;
 	seek_pos        mpos;
 	stralloc        recip;
-} del;
+} DEL;
 
 unsigned long   masterdelid = 1;
 unsigned int    concurrency[CHANNELS] = { 10, 20 };
 unsigned int    concurrencyused[CHANNELS] = { 0, 0 };
 unsigned int    holdjobs[CHANNELS] = { 0, 0 };	/* Booleans: hold deliveries NJL 1998/05/03 */
 
-static del     *d[CHANNELS];
+static DEL     *del[CHANNELS];
 static stralloc concurrencyf = { 0 };
 
 static stralloc dline[CHANNELS];
@@ -1460,11 +1478,11 @@ del_init()
 
 	for (c = 0; c < CHANNELS; ++c) {
 		flagspawnalive[c] = 1;
-		while (!(d[c] = (struct del *) alloc(concurrency[c] * sizeof (struct del))))
+		while (!(del[c] = (struct DEL *) alloc(concurrency[c] * sizeof (struct DEL))))
 			nomem();
 		for (i = 0; i < concurrency[c]; ++i) {
-			d[c][i].used = 0;
-			d[c][i].recip.s = 0;
+			del[c][i].used = 0;
+			del[c][i].recip.s = 0;
 		}
 		dline[c].s = 0;
 		while (!stralloc_copys(&dline[c], ""))
@@ -1506,26 +1524,26 @@ del_start(int j, seek_pos mpos, char *recip)
 	if (!comm_canwrite(c))
 		return;
 	for (i = 0; i < concurrency[c]; ++i)
-		if (!d[c][i].used)
+		if (!del[c][i].used)
 			break;
 	if (i == concurrency[c])
 		return;
-	if (!stralloc_copys(&d[c][i].recip, recip)) {
+	if (!stralloc_copys(&del[c][i].recip, recip)) {
 		nomem();
 		return;
 	}
-	if (!stralloc_0(&d[c][i].recip)) {
+	if (!stralloc_0(&del[c][i].recip)) {
 		nomem();
 		return;
 	}
-	d[c][i].j = j;
+	del[c][i].j = j;
 	++jo[j].refs;
-	d[c][i].delid = masterdelid++;
-	d[c][i].mpos = mpos;
-	d[c][i].used = 1;
+	del[c][i].delid = masterdelid++;
+	del[c][i].mpos = mpos;
+	del[c][i].used = 1;
 	++concurrencyused[c];
 	comm_write(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, jo[j].envh.s, recip);
-	strnum2[fmt_ulong(strnum2, d[c][i].delid)] = 0;
+	strnum2[fmt_ulong(strnum2, del[c][i].delid)] = 0;
 	strnum3[fmt_ulong(strnum3, jo[j].id)] = 0;
 	log2_noflush("starting delivery ", strnum2);
 	log3_noflush(": msg ", strnum3, tochan[c]);
@@ -1562,6 +1580,14 @@ markdone(int c, unsigned long id, seek_pos pos)
 	log5("warning: ", queuedesc, ": trouble marking ", fn1.s, "; message will be delivered twice!\n");
 }
 
+/*
+ * read delivery report
+ * first 2 bytes = delivery number
+ * byte 3 is
+ * 'K' - success
+ * 'Z' - deferral
+ * 'D' - failure
+ */
 static void
 del_dochan(int c)
 {
@@ -1581,18 +1607,18 @@ del_dochan(int c)
 		if (dline[c].len > REPORTMAX)
 			dline[c].len = REPORTMAX;
 		/*-
-		 * qmail-lspawn and qmail-rspawn are responsible for keeping it short 
-		 * but from a security point of view, we don't trust rspawn 
+		 * qmail-lspawn and qmail-rspawn are responsible for keeping it short
+		 * but from a security point of view, we don't trust rspawn
 		 */
 		if (!ch && (dline[c].len > 2)) {
 			delnum = (unsigned int) (unsigned char) dline[c].s[0];
 			delnum += (unsigned int) ((unsigned int) dline[c].s[1]) << 8;
-			if ((delnum < 0) || (delnum >= concurrency[c]) || !d[c][delnum].used)
+			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
 				log3("warning: ", queuedesc, ": internal error: delivery report out of range\n");
 			else {
-				strnum3[fmt_ulong(strnum3, d[c][delnum].delid)] = 0;
+				strnum3[fmt_ulong(strnum3, del[c][delnum].delid)] = 0;
 				if (dline[c].s[2] == 'Z') {
-					if (jo[d[c][delnum].j].flagdying) {
+					if (jo[del[c][delnum].j].flagdying) {
 						dline[c].s[2] = 'D';
 						--dline[c].len;
 						while (!stralloc_cats
@@ -1608,8 +1634,8 @@ del_dochan(int c)
 					log3_noflush("delivery ", strnum3, ": success: ");
 					logsafe_noflush(dline[c].s + 3);
 					log3(" ", queuedesc, "\n");
-					markdone(c, jo[d[c][delnum].j].id, d[c][delnum].mpos);
-					--jo[d[c][delnum].j].numtodo;
+					markdone(c, jo[del[c][delnum].j].id, del[c][delnum].mpos);
+					--jo[del[c][delnum].j].numtodo;
 					break;
 				case 'Z':
 					log3_noflush("delivery ", strnum3, ": deferral: ");
@@ -1620,15 +1646,15 @@ del_dochan(int c)
 					log3_noflush("delivery ", strnum3, ": failure: ");
 					logsafe_noflush(dline[c].s + 3);
 					log3(" ", queuedesc, "\n");
-					addbounce(jo[d[c][delnum].j].id, d[c][delnum].recip.s, dline[c].s + 3);
-					markdone(c, jo[d[c][delnum].j].id, d[c][delnum].mpos);
-					--jo[d[c][delnum].j].numtodo;
+					addbounce(jo[del[c][delnum].j].id, del[c][delnum].recip.s, dline[c].s + 3);
+					markdone(c, jo[del[c][delnum].j].id, del[c][delnum].mpos);
+					--jo[del[c][delnum].j].numtodo;
 					break;
 				default:
 					log5("delivery ", strnum3, ": report mangled, will defer: ", queuedesc, "\n");
 				}
-				job_close(d[c][delnum].j);
-				d[c][delnum].used = 0;
+				job_close(del[c][delnum].j);
+				del[c][delnum].used = 0;
 				--concurrencyused[c];
 				del_status();
 			}
@@ -1659,7 +1685,7 @@ del_do(fd_set *rfds)
 
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagspawnalive[c] && FD_ISSET(chanfdin[c], rfds))
-			del_dochan(c);
+			del_dochan(c); /*- read delivery report from qmail-lspawn, qmail-rspawn */
 	}
 }
 
@@ -1729,6 +1755,10 @@ squareroot(datetime_sec x) /* assuming: >= 0 */
 	return y;
 }
 
+/*- generate quadratic retry schedule
+ * local  chanskip=10
+ * remote chanskip=20
+ */
 static datetime_sec
 nextretry(datetime_sec birth, int c)
 {
@@ -1747,14 +1777,12 @@ pass_dochan(int c)
 {
 	datetime_sec    birth;
 	struct prioq_elt pe;
-	static stralloc line = { 0 };
-	static stralloc qqeh = { 0 };
-	static stralloc envh = { 0 };
+	static stralloc line = {0}, qqeh = {0}, envh = {0};
 	int             match;
 
 	if (flagexitasap)
 		return;
-	if (!pass[c].id) {
+	if (!pass[c].id) { /*- new pass */
 		int             j;
 		
 		if ((j = job_avail()) == -1)
@@ -1791,6 +1819,7 @@ pass_dochan(int c)
 	}
 	if (!del_avail(c))
 		return;
+	/*- read local/split/inode or remote/split/inode */
 	if (getln(&pass[c].ss, &line, &match, '\0') == -1) {
 		fnmake_chanaddr(pass[c].id, c);
 		log5("warning: ", queuedesc, ": trouble reading ", fn1.s, "; will try again later\n");
@@ -2018,6 +2047,13 @@ todo_del(char *s)
 	return;
 }
 
+/*
+ * if data is available fd 8 for read
+ * read data
+ * 'D' - set flagexitasap = 1
+ * 'L' - Write to log (fd 0) for logging
+ * 'X' - set flagtodoalive = 0, flagexitasap = 1
+ */
 static void
 todo_do(fd_set *rfds)
 {
@@ -2450,7 +2486,7 @@ getcontrols()
 	if (control_readint((int *) &concurrency[0], "concurrencylocal") == -1)
 		return 0;
 	/*- per queue concurrency */
-	if (!stralloc_copys(&concurrencyf, "concurrencyl.") || 
+	if (!stralloc_copys(&concurrencyf, "concurrencyl.") ||
 			!stralloc_cats(&concurrencyf, queuedesc) ||
 			!stralloc_0(&concurrencyf))
 		return 0;
@@ -2460,7 +2496,7 @@ getcontrols()
 	if (control_readint((int *) &concurrency[1], "concurrencyremote") == -1)
 		return 0;
 	/*- per queue concurrency */
-	if (!stralloc_copys(&concurrencyf, "concurrencyr.") || 
+	if (!stralloc_copys(&concurrencyf, "concurrencyr.") ||
 			!stralloc_cats(&concurrencyf, queuedesc) ||
 			!stralloc_0(&concurrencyf))
 		return 0;
@@ -2650,16 +2686,16 @@ regetcontrols()
 				log3(chanjobsheldmsg[c], " ", queuedesc);
 			else {
 				log3(chanjobsunheldmsg[c], " ", queuedesc);
-				flagrunasap = 1;
+				flagrunasap = 1; /*- run all jobs now */
 			}
 		}
 	}
 	constmap_free(&maplocals);
-	constmap_free(&mapvdoms);
 	while (!stralloc_copy(&locals, &newlocals))
 		nomem();
 	while (!constmap_init(&maplocals, locals.s, locals.len, 0))
 		nomem();
+	constmap_free(&mapvdoms);
 	if (r) {
 		while (!stralloc_copy(&vdoms, &newvdoms))
 			nomem();
@@ -2794,6 +2830,8 @@ main()
 		_exit(111);
 	}
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	if (conf_split > auto_split)
+		conf_split = auto_split;
 #ifdef LOCK_LOGS
 	lock_logs_open(0);
 #endif
@@ -2827,6 +2865,7 @@ main()
 	sig_intcatch(sigint);
 #endif
 	umask(077);
+	/*- prevent multiple copies of qmail-send to run */
 	if ((fd = open_write("lock/sendmutex")) == -1) {
 		log3("alert: ", queuedesc, ": cannot start: unable to open mutex\n");
 		_exit(111);
@@ -2839,7 +2878,9 @@ main()
 	if (env_get("USE_FSYNC"))
 		use_fsync = 1;
 #endif
+
 	numjobs = 0;
+	/*- read 2 bytes from qmail-lspawn, qmail-rspawn to get concurrency */
 	for (c = 0; c < CHANNELS; ++c) {
 		char            ch1, ch2;
 		int             u;
@@ -2864,15 +2905,16 @@ main()
 		if (concurrency[c] > u)
 			concurrency[c] = u;
 		numjobs += concurrency[c];
-	}
-	fnmake_init(); /*- initialize fn1, fn2 */
-	comm_init(); /*- assign fd 5 to queue comm to, 6 to queue comm from */
-	pqstart(); /*- add files from info/ for processing */
-	job_init(); /*- initialize numjobs job structures */
-	del_init(); /*- initialize concurrencylocal + concurrrencyremote delivery structure */
-	pass_init(); /*- initialize pass structure */
-	todo_init(); /*- set fd 7 to write to qmail-todo, set fd 8 to read from qmail-todo, write 'S' to qmail-todo */
-	cleanup_init(); /*- initialize flagcleanup, cleanuptime */
+	} /*- for (c = 0; c < CHANNELS; ++c) */
+
+	fnmake_init();  /*- initialize fn1, fn2 */
+	comm_init();    /*- assign fd 5 to queue comm to, 6 to queue comm from */
+	pqstart();      /*- add files from info/ for processing */
+	job_init();     /*- initialize numjobs job structures */
+	del_init();     /*- initialize concurrencylocal + concurrrencyremote delivery structure */
+	pass_init();    /*- initialize pass structure */
+	todo_init();    /*- set fd 7 to write to qmail-todo, set fd 8 to read from qmail-todo, write 'S' to qmail-todo */
+	cleanup_init(); /*- initialize flagcleanup = 0, cleanuptime = now*/
 #ifdef EXTERNAL_TODO
 	while (!flagexitasap || !del_canexit() || flagtodoalive)
 #else
@@ -2896,10 +2938,32 @@ main()
 		FD_ZERO(&rfds);
 		FD_ZERO(&wfds);
 		nfds = 1;
+		/*-
+		 * prepare select for write
+		 * fd 1 - pi1[1] - write to qmail-lspawn
+		 * fd 3 - pi3[1] - write to qmail-rspawn
+		 */
 		comm_selprep(&nfds, &wfds);
+		/*-
+		 * prepare readfd for select
+		 * fd 2 - pi2[0] - read from qmail-lspawn
+		 * fd 4 - pi4[0] - read from qmail-rspawn
+		 */
 		del_selprep(&nfds, &rfds);
+		/*- set wakeup
+		 * pqchan, pqfail, pqdone
+		 * 1. set if new delivery jobs available
+		 * 2. set if the earliest mail delivery message added from todo is now or earlier
+		 * 3. set if the earliest mail delivery for local/remote is now is now or earlier
+		 * 4. set if the earliest mail delivery for messages found in todo but stat had failed
+		 */
 		pass_selprep(&wakeup);
+		/*-
+		 * prepare readfd for select
+		 * set todofdin = 8 for select: read end from qmail-todo pi8[0]
+		 */
 		todo_selprep(&nfds, &rfds, &wakeup);
+		/*- set wakeup */
 		cleanup_selprep(&wakeup);
 		if (wakeup <= recent)
 			tv.tv_sec = 0;
@@ -2912,13 +2976,24 @@ main()
 				log3("warning: ", queuedesc, ": trouble in select\n");
 		} else {
 			recent = now();
-			/*- communicate on pi1, pi3 in qmail-start.c
-			 * fd 1 read by fd 0 in qmail-lspawn,
-			 * fd 3 read by fd 0 in qmail-rspawn
+			/*- communicate with qmail-lspawn, qmail-rspawn
+			 * These were creted as pi1, pi3 in qmail-start.c
+			 * write on fd 1 read by fd 0 in qmail-lspawn,
+			 * write on fd 3 read by fd 0 in qmail-rspawn
 			 */
 			comm_do(&wfds);
+			/*-
+			 * if data is available for read on fd 2 or 4
+			 * then read from qmail-lspawn or qmail-rspawn
+			 * fd 2 - pi2[0] - data from qmail-lspawn
+			 * fd 4 - pi4[0] - data from qmail-rspawn
+			 */
 			del_do(&rfds);
-			/* read fd 8 from qmail-todo */
+			/* read data from fd 8 from qmail-todo
+			 * 'D' - set flagexitasap = 1
+			 * 'L' - Write to log (fd 0) for logging
+			 * 'X' - set flagtodoalive = 0, flagexitasap = 1
+			 */
 			todo_do(&rfds);
 			pass_do();
 			cleanup_do();
@@ -2932,7 +3007,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.76 2021-05-12 15:40:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.77 2021-05-16 01:44:27+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
