@@ -1,0 +1,18 @@
+.TH qmail-clean 8
+
+.SH NAME
+qmail-clean \- clean up the queue directory
+
+.SH SYNOPSIS
+.B qmail-clean
+
+.SH DESCRIPTION
+\fBqmail-clean\fR reads a cleanup command from descriptor 0, performs the
+cleanup, prints the results to descriptor 1, and repeats. \fBqmail-clean\fR
+uses the enivronment \fBCONFSPLIT\fR as the run time directory split value.
+If not set it uses the value DIRSPLIT. A value larger than SPLIT for
+\fBCONFSPLIT\fR is silently ignored.
+
+.SH "SEE ALSO"
+qmail-send(8)
+qmail-todo(8)

@@ -1,6 +1,6 @@
 /*
  * $Log: fmtqfn.c,v $
- * Revision 1.4  2021-05-12 15:47:56+05:30  Cprogrammer
+ * Revision 1.4  2021-05-16 00:42:11+05:30  Cprogrammer
  * use configurable conf_split instead of auto_split variable
  *
  * Revision 1.3  2004-10-22 20:25:07+05:30  Cprogrammer
@@ -16,11 +16,7 @@
 extern int      conf_split;
 
 unsigned int
-fmtqfn(s, dirslash, id, flagsplit)
-	char           *s;
-	char           *dirslash;
-	unsigned long   id;
-	int             flagsplit;
+fmtqfn(char *s, char *dirslash, unsigned long id, int flagsplit)
 {
 	unsigned int    len;
 	unsigned int    i;
@@ -30,8 +26,7 @@ fmtqfn(s, dirslash, id, flagsplit)
 	len += i;
 	if (s)
 		s += i;
-	if (flagsplit)
-	{
+	if (flagsplit) {
 		i = fmt_ulong(s, id % conf_split);
 		len += i;
 		if (s)
@@ -54,7 +49,7 @@ fmtqfn(s, dirslash, id, flagsplit)
 void
 getversion_fmtqfn_c()
 {
-	static char    *x = "$Id: fmtqfn.c,v 1.4 2021-05-12 15:47:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fmtqfn.c,v 1.4 2021-05-16 00:42:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

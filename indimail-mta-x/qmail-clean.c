@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-clean.c,v $
- * Revision 1.11  2021-05-12 15:48:59+05:30  Cprogrammer
- * set conf_split from CONFSPLIT env variable
+ * Revision 1.11  2021-05-16 00:40:21+05:30  Cprogrammer
+ * use configurable conf_split instead of auto_split variable
  *
  * Revision 1.10  2020-11-24 13:46:37+05:30  Cprogrammer
  * removed exit.h
@@ -61,8 +61,7 @@ cleanuppid()
 	dir = opendir("pid");
 	if (!dir)
 		return;
-	while ((d = readdir(dir)))
-	{
+	while ((d = readdir(dir))) {
 		if (str_equal(d->d_name, "."))
 			continue;
 		if (str_equal(d->d_name, ".."))
@@ -109,15 +108,15 @@ main()
 	sig_pipeignore();
 
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	if (conf_split > auto_split)
+		conf_split = auto_split;
 	if (!stralloc_ready(&line, 200))
 		_exit(111);
 	cleanuploop = 0;
-	for (;;)
-	{
+	for (;;) {
 		if (cleanuploop)
 			--cleanuploop;
-		else
-		{
+		else {
 			cleanuppid();
 			cleanuploop = 30;
 		}
@@ -125,49 +124,40 @@ main()
 			break;
 		if (!match)
 			break;
-		if (line.len < 7)
-		{
+		if (line.len < 7) {
 			respond("x");
 			continue;
 		}
-		if (line.len > 100)
-		{
+		if (line.len > 100) {
 			respond("x");
 			continue;
 		}
-		if (line.s[line.len - 1])
-		{
+		if (line.s[line.len - 1]) {
 			respond("x");
 			continue;
 		}	/*- impossible */
-		for (i = line.len - 2; i > 4; --i)
-		{
+		for (i = line.len - 2; i > 4; --i) {
 			if (line.s[i] == '/')
 				break;
-			if ((unsigned char) (line.s[i] - '0') > 9)
-			{
+			if ((unsigned char) (line.s[i] - '0') > 9) {
 				respond("x");
 				continue;
 			}
 		}
-		if (line.s[i] == '/')
-		{
-			if (!scan_ulong(line.s + i + 1, &id))
-			{
+		if (line.s[i] == '/') {
+			if (!scan_ulong(line.s + i + 1, &id)) {
 				respond("x");
 				continue;
 			}
 		}
-		if (byte_equal(line.s, 5, "foop/"))
-		{
+		if (byte_equal(line.s, 5, "foop/")) {
 #define U(prefix,flag) fmtqfn(fnbuf,prefix,id,flag); \
 if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 			U("intd/", 1)
 			U("mess/", 1)
 			respond("+");
 		} else
-		if (byte_equal(line.s, 4, "todo/"))
-		{
+		if (byte_equal(line.s, 4, "todo/")) {
 			U("intd/", 1)
 			U("todo/", 1)
 			respond("+");
@@ -180,7 +170,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.11 2021-05-12 15:48:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.11 2021-05-16 00:40:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
