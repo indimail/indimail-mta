@@ -1,5 +1,8 @@
 /*
  * $Log: inotify.c,v $
+ * Revision 1.9  2021-05-16 01:42:32+05:30  Cprogrammer
+ * display full path of directory
+ *
  * Revision 1.8  2021-05-12 13:57:28+05:30  Cprogrammer
  * added IN_MOVE_SELF, IN_MOVED_FROm, IN_MOVED_TO events
  *
@@ -47,7 +50,13 @@
 #define SELECTTIMEOUT     5
 
 char           *usage = "usage: inotify [-n] path1..path2";
-int             ifd, _soptind, _sargc, *wd;
+int             ifd, _soptind, _sargc;
+
+typedef struct inotify_dir {
+	int             wd;
+	char           *name;
+} INOTIFY_DIR;
+INOTIFY_DIR    *wd;
 
 void
 out(char *str)
@@ -66,8 +75,17 @@ sigterm()
 	substdio_flush(subfderr);
  	/* removing the watched directory from the watch list.  */
 	for (optind = _soptind; wd && optind < _sargc; optind++)
-		inotify_rm_watch(ifd, wd[optind - _soptind]);
+		inotify_rm_watch(ifd, wd[optind - _soptind].wd);
 	_exit(1);
+}
+
+void
+print_dir(int fd)
+{
+	for (optind = _soptind; wd && optind < _sargc; optind++) {
+		if (wd[optind - _soptind].wd == fd)
+			out(wd[optind - _soptind].name);
+	}
 }
 
 int
@@ -97,7 +115,7 @@ main(int argc, char **argv)
 	}
 	if (optind == argc)
 		strerr_die1x(100, usage);
-	if (!(wd = (int *) malloc(sizeof(int) * (argc - optind))))
+	if (!(wd = (INOTIFY_DIR *) malloc(sizeof(INOTIFY_DIR) * (argc - optind))))
 		strerr_die2sys(111, FATAL, "out of mem");
 	/*- create a INOTIFY instance */
 	if ((ifd = inotify_init()) < 0)
@@ -106,7 +124,8 @@ main(int argc, char **argv)
 		if (access(argv[optind], F_OK))
 			strerr_die2sys(111, FATAL, argv[optind]);
 		/*- adding a directory into watch list.  */
-		if ((wd[optind - _soptind] = inotify_add_watch(ifd, argv[optind], IN_CREATE | IN_OPEN| IN_CLOSE_WRITE| IN_DELETE|IN_MOVE_SELF|IN_MOVED_FROM|IN_MOVED_TO)) == -1)
+		wd[optind - _soptind].name = argv[optind];
+		if ((wd[optind - _soptind].wd = inotify_add_watch(ifd, argv[optind], IN_CREATE | IN_OPEN| IN_CLOSE_WRITE| IN_DELETE|IN_MOVE_SELF|IN_MOVED_FROM|IN_MOVED_TO)) == -1)
 			strerr_die4sys(111, FATAL, "inotify_add_watch: ", argv[optind], ": ");
 	}
 	if (substdio_flush(subfdout) == -1)
@@ -194,6 +213,7 @@ main(int argc, char **argv)
 					out("dir  ");
 				else
 					out("file ");
+				print_dir(event->wd);
 				out(event->name);
 				if (event->mask & IN_CREATE)
 					out(" created\n");
@@ -237,7 +257,7 @@ main(int argc, char **argv)
 	}
  	/* removing the watched directory from the watch list.  */
 	for (optind = _soptind; optind < argc; optind++)
-		inotify_rm_watch(ifd, wd[optind - _soptind]);
+		inotify_rm_watch(ifd, wd[optind - _soptind].wd);
 	close(ifd);
 	_exit(0);
 }
@@ -257,7 +277,7 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	static char    *x = "$Id: inotify.c,v 1.8 2021-05-12 13:57:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inotify.c,v 1.9 2021-05-16 01:42:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
