@@ -35,6 +35,11 @@ or with user id
 .B qmails
 and group id
 .BR qmail .
+
+\fBqmail-qread\fR uses DIRSPLIT as the directory split. It can be
+overriden by environment variable \fICONFSPLIT\fR upto a max of
+DIRSPLIT
+
 \fBqmail-qread\fR uses the environment variable QUEUE_BASE or the conrol file \fBqbase\fR if
 present to use the queue base. If the environment variables QUEUE_START and QUEUE_COUNT are set,
 \fBqmail-qread\fR will process multiple queues present in the queue base.

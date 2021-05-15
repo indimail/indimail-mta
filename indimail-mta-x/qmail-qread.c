@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.33  2021-05-16 00:46:51+05:30  Cprogrammer
+ * limit conf_split to compile time value in conf-split
+ *
  * Revision 1.32  2021-05-13 14:44:12+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -423,6 +426,8 @@ main(int argc, char **argv)
 	if (chdir(queuedir) == -1)
 		die_chdir(queuedir);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	if (conf_split > auto_split)
+		conf_split = auto_split;
 	readsubdir_init(&rs, "info", die_opendir);
 	bCount = lCount = rCount = tCount = 0;
 	while ((x = readsubdir_next(&rs, &id))) {
@@ -648,7 +653,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.32 2021-05-13 14:44:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.33 2021-05-16 00:46:51+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
