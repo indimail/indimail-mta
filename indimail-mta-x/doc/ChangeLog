@@ -80,6 +80,11 @@ Release 2.13 Start 14/02/2021
 49. renamed envdir_set() to envdir() and moved it to libqmail
 50. new function set_environment() to set environment variables from
     $HOME/.defaultqueue and sysconfdir/control/defaultqueue
+- 16/05/2021
+51. maildir.c: include strerr.h explicitly
+52. qmail-clean.c, qmail-qread.c, qmail-queue.c, qmail-rm.c,
+    qmail-send.c, qmail-showctl.c, qmail-todo.c, queue-fix.c: have
+    auto_split as the max limit for conf_splitk
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
