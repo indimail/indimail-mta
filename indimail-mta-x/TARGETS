@@ -518,6 +518,7 @@ qmail-cat.o
 qmail-clean
 qmail-clean.0
 qmail-clean.o
+qmail-clean.8
 qmail-command.0
 qmail-control.0
 qmail-control.5
@@ -608,6 +609,7 @@ qmail-send.o
 qmail-showctl
 qmail-showctl.0
 qmail-showctl.o
+qmail-showctl.8
 qmail-sigalrm
 qmail-sighup
 qmail-sigterm
