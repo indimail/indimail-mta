@@ -447,9 +447,8 @@ schedule for a message that's undeliverable to a recipient
 until it bounces. Local messages a similar, but more frequent,
 schedule than remote messages.
 
-.TP 5
 .B Local Retry Schedule
-
+is governed by 100 * (x * x), where x is the try number
 
 .TS
 l l.
@@ -534,8 +533,8 @@ l l.
    #74  547600 [06 08:06:40]         14900 [00 04:08:20]
 .TE
 
-.TP 5
 .B Remote Retry Schedule
+is governed by 400 * (x * x), where x is the try number
 
 .TS
 l l.
