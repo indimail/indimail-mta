@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.37  2021-05-16 23:02:33+05:30  Cprogrammer
+ * move out maildir delivery to maildir_child.c
+ *
  * Revision 1.36  2021-05-16 17:17:04+05:30  Cprogrammer
  * added S=message_size in filename
  *
@@ -118,6 +121,7 @@
 #include "control.h"
 #include "variables.h"
 #include "hassrs.h"
+#include "maildir_child.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
@@ -189,11 +193,6 @@ stralloc        ueo = { 0 };
 stralloc        cmds = { 0 };
 stralloc        messline = { 0 };
 stralloc        foo = { 0 };
-stralloc        hostname = { 0 };
-
-/*- child process */
-stralloc        fntmptph = { 0 };
-stralloc        fnnewtph = { 0 };
 
 #ifdef HAVESRS
 void die_control()
@@ -212,204 +211,6 @@ void die_srs()
 #endif
 
 void
-tryunlinktmp()
-{
-	unlink(fntmptph.s);
-}
-
-void
-sigalrm()
-{
-	tryunlinktmp();
-	_exit (3);
-}
-
-/*
- * Some operating systems quickly recycle PIDs, which can lead 
- * to collisions between Maildir-style filenames, which must 
- * be unique and non-repeatable within one second.
- * 
- * This uses the format of the revised Maildir protocol,
- * available at:
- * 
- * http://cr.yp.to/proto/maildir.html
- * 
- * It uses four unique identifiers:
- * - inode number of the file written to Maildir/tmp
- * - device number of the file written to Maildir/tmp
- * - time in microseconds
- * - the PID of the writing process
- * Additionally it puts the size of the file as S=size
- * 
- * A Maildir-style filename would look like the following:
- * 
- * In Maildir/tmp:
- * time.MmicrosecondsPpid.host
- * In Maildir/new:
- * time.IinodeVdeviceMmicrosecondsPpid.host,S=size
- * 
- * Additionally, this patch further comforms to the revised 
- * Maildir protocol by looking through the hostname for 
- * instances of '/' and ':', replacing them with "057" and 
- * "072", respectively, when writing it to disk.
- */
-
-void
-maildir_child(char *dir)
-{
-	char            strnum[FMT_ULONG], host_a[64];
-	char           *s;
-	struct timeval  tmval;
-	struct stat     st;
-	unsigned long   pid;
-	int             loop, fd, i;
-	substdio        ss, ssout;
-
-	sig_alarmcatch(sigalrm);
-	if (chdir(dir) == -1) {
-		if (error_temp(errno))
-			_exit (1);
-		_exit (2);
-	}
-	pid = getpid();
-	host_a[0] = 0;
-	gethostname(host_a, sizeof(host_a));
-	s = host_a;
-	for (loop = 0; loop < str_len(host_a); ++loop) {
-		if (host_a[loop] == '/') {
-			if (!stralloc_cats(&hostname, "057"))
-				temp_nomem();
-			continue;
-		}
-		if (host_a[loop] == ':') {
-			if (!stralloc_cats(&hostname, "072"))
-				temp_nomem();
-			continue;
-		}
-		if (!stralloc_append(&hostname, s + loop))
-			temp_nomem();
-	}
-	if (!stralloc_copyb(&fntmptph, "tmp/", 4))
-		temp_nomem();
-	for (loop = 0;; ++loop) {
-		gettimeofday(&tmval, 0);
-		strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0;
-		fntmptph.len = 4;
-		if (!stralloc_cats(&fntmptph, strnum)
-				|| !stralloc_append(&fntmptph, ".")
-				|| !stralloc_append(&fntmptph, "M"))
-			temp_nomem();
-		strnum[fmt_ulong(strnum, tmval.tv_usec)] = 0;
-		if (!stralloc_cats(&fntmptph, strnum)
-				|| !stralloc_append(&fntmptph, "P"))
-			temp_nomem();
-		strnum[fmt_ulong(strnum, pid)] = 0;
-		if (!stralloc_cats(&fntmptph, strnum)
-				|| !stralloc_append(&fntmptph, ".")
-				|| !stralloc_cat(&fntmptph, &hostname)
-				|| !stralloc_0(&fntmptph))
-			temp_nomem();
-		if ((fd = open_excl(fntmptph.s)) >= 0)
-			break;
-		if (errno == error_exist) {
-			/*- really should never get to this point */
-			if (loop == 2)
-				_exit (1);
-			usleep(100);
-		} else {
-			if (errno == error_dquot)
-				_exit (5);
-			_exit (1);
-		}
-	}
-	alarm(86400);
-	substdio_fdbuf(&ss, read, 0, buf, sizeof(buf));
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	if (substdio_put(&ssout, rpline.s, rpline.len) == -1)
-		goto fail;
-	if (substdio_put(&ssout, dtline.s, dtline.len) == -1)
-		goto fail;
-	if (substdio_puts(&ssout, qqeh) == -1)
-		goto fail;
-	switch (substdio_copy(&ssout, &ss))
-	{
-	case -2:
-		tryunlinktmp();
-		_exit (4);
-	case -3:
-		goto fail;
-	}
-	if (substdio_flush(&ssout) == -1)
-		goto fail;
-#ifdef USE_FSYNC
-	if (use_fsync > 0 && fsync(fd) == -1)
-		goto fail;
-#endif
-	if (fstat(fd, &st) == -1)
-		goto fail;
-	if (close(fd) == -1)
-		goto fail;	/*- NFS dorks */
-	if (!stralloc_copyb(&fnnewtph, "new/", 4))
-		temp_nomem();
-	strnum[i = fmt_ulong(strnum, tmval.tv_sec)] = 0;
-	if (!stralloc_catb(&fnnewtph, strnum, i)
-			|| !stralloc_append(&fnnewtph, "."))
-		temp_nomem();
-	/*- in hexadecimal */
-	if (!stralloc_append(&fnnewtph, "I"))
-		temp_nomem();
-	s = alloc(fmt_xlong(0, st.st_ino) + fmt_xlong(0, st.st_dev));
-	i = fmt_xlong(s, st.st_ino);
-	if (!stralloc_catb(&fnnewtph, s, i)
-			|| !stralloc_append(&fnnewtph, "V"))
-		temp_nomem();
-	i = fmt_xlong(s, st.st_dev);
-	if (!stralloc_catb(&fnnewtph, s, i))
-		temp_nomem();
-	alloc_free(s);
-	/*- in decimal */
-	if (!stralloc_append(&fnnewtph, "M"))
-		temp_nomem();
-	strnum[i = fmt_ulong(strnum, tmval.tv_usec)] = 0;
-	if (!stralloc_catb(&fnnewtph, strnum, i)
-			|| !stralloc_append(&fnnewtph, "P"))
-		temp_nomem();
-	strnum[i = fmt_ulong(strnum, pid)] = 0;
-	if (!stralloc_catb(&fnnewtph, strnum, i)
-			|| !stralloc_append(&fnnewtph, ".")
-			|| !stralloc_cat(&fnnewtph, &hostname))
-		temp_nomem();
-	strnum[i = fmt_ulong(strnum, st.st_size)] = 0;
-	if (!stralloc_catb(&fnnewtph, ",S=", 3)
-			|| !stralloc_catb(&fnnewtph, strnum, i)
-			|| !stralloc_0(&fnnewtph))
-		temp_nomem();
-	if (link(fntmptph.s, fnnewtph.s) == -1)
-		goto fail;
-#ifdef USE_FSYNC
-	if (!env_get("USE_SYNCDIR") && use_fsync > 0) {
-		if ((fd = open(fnnewtph.s, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0)
-			goto fail;
-	}
-#endif
-	/*
-	 * if it was error_exist, almost certainly successful; i hate NFS 
-	 */
-	tryunlinktmp();
-	_exit (0);
-fail:
-	if (errno == error_dquot) {
-		tryunlinktmp();
-		_exit (5);
-	} else {
-		tryunlinktmp();
-		_exit (1);
-	}
-}
-
-/*- end child process */
-
-void
 maildir(char *fn)
 {
 	int             child;
@@ -423,8 +224,7 @@ maildir(char *fn)
 	case -1:
 		temp_fork();
 	case 0:
-		maildir_child(fn);
-		_exit (111);
+		_exit(maildir_child(fn, &rpline, &dtline, qqeh));
 	}
 	wait_pid(&wstat, child);
 	if (wait_crashed(wstat))
@@ -1037,6 +837,8 @@ main(int argc, char **argv)
 #ifdef USE_FSYNC
 	if (env_get("USE_FSYNC"))
 		use_fsync = 1;
+	if (env_get("USE_SYNCDIR"))
+		use_syncdir = 1;
 #endif
 	for (j = 0; j < cmds.len; ++j) {
 		if (cmds.s[j] == '\n') {
@@ -1155,7 +957,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.36 2021-05-16 17:17:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.37 2021-05-16 23:02:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
