@@ -1128,12 +1128,12 @@ syncdir.o: compile syncdir.c conf-sync
 qmail-local: \
 load qmail-local.o qmail.o quote.o gfrom.o myctime.o \
 slurpclose.o srs.o auto_qmail.o auto_patrn.o rcpthosts.o \
-auto_control.o variables.o control.o maildir_child.o \
+auto_control.o variables.o control.o maildir_deliver.o \
 libsyncdir.a socket.lib srs.lib
 	./load qmail-local qmail.o quote.o gfrom.o myctime.o \
 	slurpclose.o srs.o auto_qmail.o rcpthosts.o \
 	auto_patrn.o variables.o auto_control.o control.o \
-	maildir_child.o \
+	maildir_deliver.o \
 	-L../libsrs2-x/libsrs2/.libs `cat socket.lib srs.lib` \
 	-L. -lsyncdir -lqmail
 
@@ -1146,12 +1146,12 @@ qmail-local.9 conf-sysconfdir
 qmail-local.o: \
 compile qmail-local.c quote.h qmail.h slurpclose.h myctime.h \
 gfrom.h auto_patrn.h control.h auto_qmail.h variables.h hassrs.h \
-syncdir.h maildir_child.h conf-sync conf-mailarch
+syncdir.h maildir_deliver.h conf-sync conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-mailarch` qmail-local.c
 
-maildir_child.o: \
-compile maildir_child.c syncdir.h conf-sync
-	./compile `grep -h -v "^#" conf-sync` maildir_child.c
+maildir_deliver.o: \
+compile maildir_deliver.c syncdir.h conf-sync
+	./compile `grep -h -v "^#" conf-sync` maildir_deliver.c
 
 qmail-lspawn.o: compile qmail-lspawn.c prot.h slurpclose.h auto_qmail.h \
 auto_uids.h qlx.h auto_assign.h indimail_stub.h auto_control.h variables.h
@@ -2266,12 +2266,12 @@ qbase64.o: \
 compile qbase64.c
 	./compile qbase64.c
 
-maildirdeliver: load maildirdeliver.o maildir_child.o \
+maildirdeliver: load maildirdeliver.o maildir_deliver.o \
 syncdir.o
-	./load maildirdeliver maildir_child.o syncdir.o \
+	./load maildirdeliver maildir_deliver.o syncdir.o \
 	-lqmail
 
-maildirdeliver.o: compile maildirdeliver.c maildir_child.h
+maildirdeliver.o: compile maildirdeliver.c maildir_deliver.h
 	./compile maildirdeliver.c
 
 qmail-rm: load qmail-rm.o auto_split.o auto_qmail.o \

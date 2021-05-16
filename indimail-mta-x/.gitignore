@@ -630,3 +630,4 @@ qmail-direct.o
 qmail-direct.8
 qmail-clean.8
 qmail-showctl.8
+maildir_deliver.o
