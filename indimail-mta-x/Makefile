@@ -53,9 +53,9 @@ it = indimail-mta.perms 822date 822field 822header 822print 822received \
 
 man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
-	svctool.8 predate.1 datemail.1 queue-fix.8 \
+	svctool.8 predate.1 datemail.1 queue-fix.8 qmail-clean.8 \
 	mlmatchup.8 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
-	qmail-daned.8 qmail-srs.5 qmail-limits.7 \
+	qmail-daned.8 qmail-srs.5 qmail-limits.7 qmail-showctl.8 \
 	forward.1 condredirect.1 qmail-control.5 rrforward.1 \
 	qreceipt.1 maildirserial.1 qmail-rm.1 dot-qmail.5 \
 	qmail-users.5 dot-forward.1 fastforward.1 new-inject.1 \
@@ -1050,6 +1050,7 @@ auto_split.h variables.h
 qmail-clean.8: qmail-clean.9 conf-split
 	cat qmail-clean.9 \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
+	> qmail-clean.8
 
 qmail-control.5: \
 qmail-control.9 conf-sysconfdir
