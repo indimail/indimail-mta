@@ -1,5 +1,8 @@
 /*
  * $Log: syncdir.h,v $
+ * Revision 1.2  2021-05-16 23:02:52+05:30  Cprogrammer
+ * define use_fsync, use_syncdir as extern
+ *
  * Revision 1.1  2020-09-30 20:38:43+05:30  Cprogrammer
  * Initial revision
  *
@@ -7,6 +10,7 @@
 
 #ifndef SYNCDIR_H
 #define SYNCDIR_H
+extern int use_fsync, use_syncdir;
 #ifdef DARWIN
 int             qopen(char *, int, ...);
 int             qlink(char *, char *); 
