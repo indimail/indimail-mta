@@ -1,5 +1,5 @@
 /*
- * $Log: maildir_child.h,v $
+ * $Log: maildir_deliver.h,v $
  * Revision 1.1  2021-05-16 22:43:17+05:30  Cprogrammer
  * Initial revision
  *
@@ -8,6 +8,6 @@
 #define MAILDIR_CHILD_H
 #include <stralloc.h>
 
-int             maildir_child(char *, stralloc *, stralloc *, char *);
+int             maildir_deliver(char *, stralloc *, stralloc *, char *);
 
 #endif

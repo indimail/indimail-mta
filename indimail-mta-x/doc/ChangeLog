@@ -89,8 +89,8 @@ Release 2.13 Start 14/02/2021
     defaultqueue
 54. svctool: fixed TMPDIR creation
 55. qmail-local.c: add S=message_size in filename
-56. qmail-local.c: move maildir delivery code to maildir_child.c
-57. maildirdeliver: complete rewrite using maildir_child() function.
+56. qmail-local.c: move maildir delivery code to maildir_deliver.c
+57. maildirdeliver: complete rewrite using maildir_deliver() function.
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

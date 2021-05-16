@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-local.c,v $
  * Revision 1.37  2021-05-16 23:02:33+05:30  Cprogrammer
- * move out maildir delivery to maildir_child.c
+ * move out maildir delivery to maildir_deliver.c
  *
  * Revision 1.36  2021-05-16 17:17:04+05:30  Cprogrammer
  * added S=message_size in filename
@@ -121,7 +121,7 @@
 #include "control.h"
 #include "variables.h"
 #include "hassrs.h"
-#include "maildir_child.h"
+#include "maildir_deliver.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
@@ -224,7 +224,7 @@ maildir(char *fn)
 	case -1:
 		temp_fork();
 	case 0:
-		_exit(maildir_child(fn, &rpline, &dtline, qqeh));
+		_exit(maildir_deliver(fn, &rpline, &dtline, qqeh));
 	}
 	wait_pid(&wstat, child);
 	if (wait_crashed(wstat))

@@ -10,7 +10,7 @@
 #include <env.h>
 #include <strerr.h>
 #include <stralloc.h>
-#include "maildir_child.h"
+#include "maildir_deliver.h"
 
 #define FATAL "maildirdeliver: fatal: "
 
@@ -38,7 +38,7 @@ main(int argc, char **argv)
 			strerr_die1x(111, "Out of memory. (#4.3.0)");
 	}
 	ptr = env_get("QQEH");
-	i = maildir_child(dir, &rpline, &dtline, ptr);
+	i = maildir_deliver(dir, &rpline, &dtline, ptr);
 	switch (i)
 	{
 	case 0:

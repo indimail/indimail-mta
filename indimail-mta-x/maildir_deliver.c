@@ -1,5 +1,5 @@
 /*
- * $Log: maildir_child.c,v $
+ * $Log: maildir_deliver.c,v $
  * Revision 1.1  2021-05-16 22:53:41+05:30  Cprogrammer
  * Initial revision
  *
@@ -69,7 +69,7 @@ sigalrm()
  */
 
 int
-maildir_child(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
+maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 {
 	char            strnum[FMT_ULONG], host_a[64];
 	char            inbuf[1024], outbuf[1024];
@@ -223,9 +223,9 @@ fail:
 }
 
 void
-getversion_maildirdeliver_child_c()
+getversion_maildir_deliver_c()
 {
-	static char    *x = "$Id: maildir_child.c,v 1.1 2021-05-16 22:53:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir_deliver.c,v 1.1 2021-05-16 22:53:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
