@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.18 2021-05-13 14:53:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.19 2021-05-16 16:47:42+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.18 2021-05-13 14:53:36+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.19 2021-05-16 16:47:42+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1137,12 +1137,18 @@ else
 	chown=/bin/chown
 fi
 
-if [ -f @sysconfdir@/.svctool.cnf ] ; then
-	$chown root:0 @sysconfdir@/.svctool.cnf
-	/bin/chmod 400 @sysconfdir@/.svctool.cnf
-	. @sysconfdir@/.svctool.cnf
+if [ -f @sysconfdir@/svctool.cnf ] ; then
+	$chown root:0 @sysconfdir@/svctool.cnf
+	/bin/chmod 400 @sysconfdir@/svctool.cnf
+	. @sysconfdir@/svctool.cnf
 fi
-[ -z "$TMPDIR" ] && TMPDIR="/tmp/indimail" && mkdir -m 0700 -p /tmp/indimail
+[ -z "$TMPDIR" ] && TMPDIR="/tmp/minisvc"
+[ ! -d "$TMPDIR" ] && mkdir -m 0700 -p $TMPDIR
+
+if [ ! -d $TMPDIR ] ; then
+	echo "$TMPDIR: No such file or directory" 1>&2
+	exit 1
+fi
 
 prog_args="$prefix/sbin/minisvc"
 force=0
@@ -1633,6 +1639,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.19  2021-05-16 16:47:42+05:30  Cprogrammer
+# fixed TMPDIR creation
+#
 # Revision 1.18  2021-05-13 14:53:36+05:30  Cprogrammer
 # fixed permissions of env variables in defaultqueue
 #
