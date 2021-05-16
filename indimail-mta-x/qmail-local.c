@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.36  2021-05-16 17:17:04+05:30  Cprogrammer
+ * added S=message_size in filename
+ *
  * Revision 1.35  2020-11-24 13:46:55+05:30  Cprogrammer
  * removed exit.h
  *
@@ -236,13 +239,14 @@ sigalrm()
  * - device number of the file written to Maildir/tmp
  * - time in microseconds
  * - the PID of the writing process
+ * Additionally it puts the size of the file as S=size
  * 
  * A Maildir-style filename would look like the following:
  * 
  * In Maildir/tmp:
  * time.MmicrosecondsPpid.host
  * In Maildir/new:
- * time.IinodeVdeviceMmicrosecondsPpid.host
+ * time.IinodeVdeviceMmicrosecondsPpid.host,S=size
  * 
  * Additionally, this patch further comforms to the revised 
  * Maildir protocol by looking through the hostname for 
@@ -337,18 +341,18 @@ maildir_child(char *dir)
 	}
 	if (substdio_flush(&ssout) == -1)
 		goto fail;
-	if (fstat(fd, &st) == -1)
-		goto fail;
 #ifdef USE_FSYNC
 	if (use_fsync > 0 && fsync(fd) == -1)
 		goto fail;
 #endif
+	if (fstat(fd, &st) == -1)
+		goto fail;
 	if (close(fd) == -1)
 		goto fail;	/*- NFS dorks */
 	if (!stralloc_copyb(&fnnewtph, "new/", 4))
 		temp_nomem();
-	strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0;
-	if (!stralloc_cats(&fnnewtph, strnum)
+	strnum[i = fmt_ulong(strnum, tmval.tv_sec)] = 0;
+	if (!stralloc_catb(&fnnewtph, strnum, i)
 			|| !stralloc_append(&fnnewtph, "."))
 		temp_nomem();
 	/*- in hexadecimal */
@@ -366,14 +370,18 @@ maildir_child(char *dir)
 	/*- in decimal */
 	if (!stralloc_append(&fnnewtph, "M"))
 		temp_nomem();
-	strnum[fmt_ulong(strnum, tmval.tv_usec)] = 0;
-	if (!stralloc_cats(&fnnewtph, strnum)
+	strnum[i = fmt_ulong(strnum, tmval.tv_usec)] = 0;
+	if (!stralloc_catb(&fnnewtph, strnum, i)
 			|| !stralloc_append(&fnnewtph, "P"))
 		temp_nomem();
-	strnum[fmt_ulong(strnum, pid)] = 0;
-	if (!stralloc_cats(&fnnewtph, strnum)
+	strnum[i = fmt_ulong(strnum, pid)] = 0;
+	if (!stralloc_catb(&fnnewtph, strnum, i)
 			|| !stralloc_append(&fnnewtph, ".")
-			|| !stralloc_cat(&fnnewtph, &hostname)
+			|| !stralloc_cat(&fnnewtph, &hostname))
+		temp_nomem();
+	strnum[i = fmt_ulong(strnum, st.st_size)] = 0;
+	if (!stralloc_catb(&fnnewtph, ",S=", 3)
+			|| !stralloc_catb(&fnnewtph, strnum, i)
 			|| !stralloc_0(&fnnewtph))
 		temp_nomem();
 	if (link(fntmptph.s, fnnewtph.s) == -1)
@@ -1147,7 +1155,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.35 2020-11-24 13:46:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.36 2021-05-16 17:17:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

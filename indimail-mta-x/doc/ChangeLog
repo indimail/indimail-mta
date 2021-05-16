@@ -88,6 +88,7 @@ Release 2.13 Start 14/02/2021
 53. svctool: create env variables in service directory as links to
     defaultqueue
 54. svctool: fixed TMPDIR creation
+55. qmail-local.c: add S=message_size in filename
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
