@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-send.c,v $
- * Revision 1.77  2021-05-16 01:44:27+05:30  Cprogrammer
+ * Revision 1.77  2021-05-16 12:16:14+05:30  Cprogrammer
  * limit conf_split to compile time value in conf-split
  * added code comments
  *
@@ -258,14 +258,15 @@
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
 /*- important timing feature: when triggered, respond instantly */
-#define SLEEP_TODO 1500			/*- check todo/ every 25 minutes in any case */
-#define ONCEEVERY 10			/*- Run todo maximal once every N seconds */
 #define SLEEP_FUZZ 1			/*- slop a bit on sleeps to avoid zeno effect */
 #define SLEEP_FOREVER 86400		/*- absolute maximum time spent in select() */
 #define SLEEP_CLEANUP 76431		/*- time between cleanups */
 #define SLEEP_SYSFAIL 123
 #define OSSIFIED 129600			/*- 36 hours; _must_ exceed q-q's DEATH (24 hours) */
-/*- #define MIME 1 -*/
+#ifndef TODO_INTERVAL
+#define SLEEP_TODO 1500			/*- check todo/ every 25 minutes in any case */
+#define ONCEEVERY 10			/*- Run todo maximal once every N seconds */
+#endif
 
 static int      lifetime = 604800;
 static int      bouncemaxbytes = 50000;
@@ -1837,11 +1838,11 @@ pass_dochan(int c)
 	}
 	switch (line.s[0])
 	{
-	case 'T':
+	case 'T': /*- send message to qmail-lspawn/qmail-rspawn to start delivery */
 		++jo[pass[c].j].numtodo;
 		del_start(pass[c].j, pass[c].mpos, line.s + 1);
 		break;
-	case 'D':
+	case 'D': /*- delivery done */
 		break;
 	default:
 		fnmake_chanaddr(pass[c].id, c);
@@ -2080,19 +2081,24 @@ todo_do(fd_set *rfds)
 			nomem();
 		if (todoline.len > REPORTMAX)
 			todoline.len = REPORTMAX;
-		/*- qmail-todo is responsible for keeping it short */
+		/*- 
+		 * qmail-todo is responsible for keeping it short
+		 * e.g. qmail-todo writes a line like this
+		 * local  DL656826\0
+		 * remote DL656826\0
+		 */
 		if (!ch && (todoline.len > 1)) {
 			switch (todoline.s[0])
 			{
-			case 'D':
+			case 'D': /*- message to be delivered */
 				if (flagexitasap)
 					break;
 				todo_del(todoline.s + 1);
 				break;
-			case 'L':
+			case 'L': /*- write to log */
 				log1(todoline.s + 1);
 				break;
-			case 'X':
+			case 'X': /*- qmail-todo is exiting */
 				if (flagexitasap)
 					flagtodoalive = 0;
 				else
@@ -2909,7 +2915,7 @@ main()
 
 	fnmake_init();  /*- initialize fn1, fn2 */
 	comm_init();    /*- assign fd 5 to queue comm to, 6 to queue comm from */
-	pqstart();      /*- add files from info/ for processing */
+	pqstart();      /*- add files from info/split for processing */
 	job_init();     /*- initialize numjobs job structures */
 	del_init();     /*- initialize concurrencylocal + concurrrencyremote delivery structure */
 	pass_init();    /*- initialize pass structure */
@@ -3007,7 +3013,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.77 2021-05-16 01:44:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.77 2021-05-16 12:16:14+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
