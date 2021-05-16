@@ -1,21 +1,16 @@
 .TH MAILDIRDELIVER 1
 .SH NAME
 maildirdeliver \- deliver a mail message to a maildir
+
 .SH SYNOPSIS
 .B maildirdeliver
 .I dir
+
 .SH DESCRIPTION
 .B maildirdeliver
 reads a mail message from the standard input,
 and stores it in a maildir,
 .IR dir .
-
-If
-.B maildirdeliver
-sees an initial
-.B From_
-line in the incoming message,
-it silently discards that line.
 
 .B maildirdeliver
 exits 0 on a successful delivery.
@@ -34,10 +29,11 @@ prepend a
 .B Return-Path
 line nor a
 .B Delivered-To
-line to the incoming message. \fBmaildirdeliver\fR will use \fBRPLINE\fR if set, to prepend a
-\fBReturn-Path\fR line to the incoming message. \fBmaildirdeliver\fR will use \fBDTLINE\fR if
-set, to prepend a \fBDelivered-To\fR line to the incoming message.
-if \fBRPLINE\fR or \fBDTLINE\fR are not defined and if you use
+line to the incoming message. \fBmaildirdeliver\fR will use \fBRPLINE\fR
+if set, to prepend a \fBReturn-Path\fR line to the incoming message.
+\fBmaildirdeliver\fR will use \fBDTLINE\fR if set, to prepend a
+\fBDelivered-To\fR line to the incoming message. If \fBRPLINE\fR or
+\fBDTLINE\fR are not defined and if you use
 .B maildirdeliver
 in a program line in a
 .B .qmail
@@ -56,6 +52,7 @@ is heavily based on
 in D. J. Bernstein's
 .B qmail
 package.
+
 .SH "SEE ALSO"
 dot-qmail(5),
 maildir(5),
