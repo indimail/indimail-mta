@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.558 2021-05-16 13:27:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.559 2021-05-17 07:22:43+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.558 2021-05-16 13:27:29+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.559 2021-05-17 07:22:43+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -4164,6 +4164,15 @@ echo "$QmailBinPrefix/bin/setuidgid indimail $QmailBinPrefix/sbin/nssd -d notice
 echo "30"
 echo "mysql.3306"
 ) > "$DESTDIR"$SERVICEDIR/pwdlookup/wait
+for i in "$DESTDIR"$SERVICEDIR/qmail-send.*
+do
+	if [ ! -f "$DESTDIR"$SERVICEDIR/qmail-send."$i"/wait ] ; then
+	(
+	echo "10"
+	echo "pwdlookup"
+	) > "$DESTDIR"$SERVICEDIR/qmail-send."$i"/wait
+	fi
+done
 
 if [ ! -d $LOGDIR ] ; then
 	/bin/mkdir -p $LOGDIR
