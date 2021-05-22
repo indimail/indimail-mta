@@ -1,5 +1,8 @@
 /*
  * $Log: evaluate.c,v $
+ * Revision 2.3  2021-05-22 18:27:03+05:30  Cprogrammer
+ * use libqmail for str
+ *
  * Revision 2.2  2008-06-09 15:29:29+05:30  Cprogrammer
  * added original copyright notice
  *
@@ -12,16 +15,11 @@
  */
 
 #include "evaluate.h"
-#include <stdio.h>
+#include <str.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include <string.h>
-
-#ifndef	lint
-static char     sccsid[] = "$Id: evaluate.c,v 2.2 2008-06-09 15:29:29+05:30 Cprogrammer Stab mbhangui $";
-#endif
 
 /*- creates a new memory header for allocating memory */
 struct memh    *create_mem();
@@ -102,7 +100,7 @@ int
 evaluate(char *expr, struct val *result, struct vartable *vartable)
 {
 	struct memh    *mh = NULL;
-	int             error = RESULT_OK, madevar = 0;
+	int             i, error = RESULT_OK, madevar = 0;
 	struct tok     *list;
 	char           *str;
 
@@ -114,13 +112,10 @@ evaluate(char *expr, struct val *result, struct vartable *vartable)
 	if (!vartable)
 		return ERROR_NOMEM;
 	init_scantable();
-	if ((mh = create_mem()))
-	{
-		if (expr && (str = (char *) mem_alloc(mh, strlen(expr) + 1)))
-		{
-			strcpy(str, expr);
-			while (*str)
-			{
+	if ((mh = create_mem())) {
+		if (expr && (str = (char *) mem_alloc(mh, (i = str_len(expr) + 1)))) {
+			str_copyb(str, expr, i);
+			while (*str) {
 				if ((error = tokenize(mh, &str, &list)) != RESULT_OK)
 					break;
 				if ((error = eval(mh, list, vartable, result)) != RESULT_OK)
@@ -177,19 +172,17 @@ tokenize(struct memh *mh, char **string, struct tok **listptr)
 	char           *s, *name, c, c2, nt;
 
 	/*- allocate a block of memory to hold the maximum amount of tokens */
-	i = strlen(*string) + 1;
+	i = str_len(*string) + 1;
 	list = (struct tok *) mem_alloc(mh, i * sizeof(struct tok));
 	if (!list)
 		return ERROR_NOMEM;
 
-	for (s = *string; *s; s++)
-	{
+	for (s = *string; *s; s++) {
 		/*- get token type of character and store into list */
 		c = list[idx].token = scantable[*(unsigned char *) s];
 
 		/*- break out of the for loop on TK_BREAK */
-		if (c == TK_BREAK)
-		{
+		if (c == TK_BREAK) {
 			s++;
 			break;
 		}
@@ -233,8 +226,7 @@ tokenize(struct memh *mh, char **string, struct tok **listptr)
 				nt = TK_GE;
 			if (c == TK_GT && c2 == '>')
 				nt = TK_SHR;
-			if (nt)
-			{
+			if (nt) {
 				list[idx].token = nt;
 				s++;
 			}
@@ -242,8 +234,7 @@ tokenize(struct memh *mh, char **string, struct tok **listptr)
 			break;
 		case TK_ASSN:
 			/*- '=' = TK_ASSN, '==' = TK_EQ */
-			if (s[1] == '=')
-			{
+			if (s[1] == '=') {
 				list[idx++].token = TK_EQ;
 				s++;
 				break;
@@ -265,11 +256,9 @@ tokenize(struct memh *mh, char **string, struct tok **listptr)
 			list[idx].name_end = s + 1;
 			len = s + 1 - name;
 			/*- look for matching function */
-			for (i = 0; functable[i]; i++)
-			{
+			for (i = 0; functable[i]; i++) {
 				char           *fname = functable[i];
-				if (same_str_len(name, fname, len) && strlen(fname) == len)
-				{
+				if (same_str_len(name, fname, len) && str_len(fname) == len) {
 					list[idx].token = TK_FUNC;
 					list[idx].funcid = i;
 					break;
@@ -285,10 +274,8 @@ tokenize(struct memh *mh, char **string, struct tok **listptr)
 	 */
 	*string = s;
 	/*- lace up the tokens and null-terminate the strings */
-	if (idx > 0)
-	{
-		for (i = 0; i < idx; i++)
-		{
+	if (idx > 0) {
+		for (i = 0; i < idx; i++) {
 			list[i].next = &list[i + 1];
 			if (list[i].token == TK_VAR || list[i].token == TK_ASSN)
 				*(list[i].name_end) = '\0';
@@ -312,20 +299,16 @@ scan_number(char **stringptr, struct val *valptr)
 	double          dp;
 
 	/*- test to see if it's a hex number */
-	if (s[0] == '$' || (s[0] == '0' && s[1] == 'x'))
-	{
+	if (s[0] == '$' || (s[0] == '0' && s[1] == 'x')) {
 		s += (s[1] == 'x') ? 2 : 1;
 		*stringptr = s;
 
 		for (; isxdigit(c = (int) *s); s++)
 			v.ival = (v.ival << 4) + (isdigit(c) ? c - '0' : 0) + (isupper(c) ? c - 'A' + 10 : 0) + (islower(c) ? c - 'a' + 10 : 0);
-	} /*- must be a decimal integer or real */
-	else
-	{
+	} else { /*- must be a decimal integer or real */
 		for (; isdigit(c = (int) *s); s++)
 			v.ival = (v.ival * 10) + c - '0';
-		if (*s == '.')
-		{
+		if (*s == '.') {
 			*stringptr = ++s;
 			v.type = T_REAL;
 			v.rval = (double) v.ival;
@@ -432,8 +415,7 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 	/*
 	 * insert and change tokens as neccessary 
 	 */
-	for (l = list, r = l->next; r->next; l = r, r = r->next)
-	{
+	for (l = list, r = l->next; r->next; l = r, r = r->next) {
 		lt = l->token;
 		rt = r->token;
 
@@ -446,8 +428,7 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 		/*
 		 * insert implicit multiplication tokens 
 		 */
-		if ((lt == TK_VAR || lt == TK_VAL || lt == TK_CLOSE) && (rt == TK_VAR || rt == TK_VAL || rt == TK_OPEN || rt == TK_FUNC))
-		{
+		if ((lt == TK_VAR || lt == TK_VAL || lt == TK_CLOSE) && (rt == TK_VAR || rt == TK_VAL || rt == TK_OPEN || rt == TK_FUNC)) {
 			if (lt == rt)
 				return ERROR_SYNTAX;
 			t = (struct tok *) mem_alloc(mh, sizeof(struct tok));
@@ -464,10 +445,8 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 	 */
 
 	vcnt = ocnt = 0;
-	for (t = list; t; t = t->next)
-	{
+	for (t = list; t; t = t->next) {
 		lt = t->token;
-
 		/*
 		 * count the number of values and operators 
 		 */
@@ -475,25 +454,16 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 			vcnt++;
 		else
 			ocnt++;
-
 		/*
 		 * if assigned variables don't exist, create a new blank one 
 		 */
-		if (lt == TK_ASSN)
-		{
+		if (lt == TK_ASSN) {
 			if (!(t->var = get_var(vt, t->name)))
 				if (!(t->var = put_var(vt, t->name, &newval)))
 					return ERROR_NOMEM;
-		}
-
-		/*
-		 * try to get vars from vartable - if not, try the environment 
-		 */
-		else
-		if (lt == TK_VAR)
-		{
-			if (!(t->var = get_var(vt, t->name)))
-			{
+		} else /*- try to get vars from vartable - if not, try the environment */
+		if (lt == TK_VAR) {
+			if (!(t->var = get_var(vt, t->name))) {
 				if (!(envtxt = getenv(t->name)))
 					return ERROR_VARNOTFOUND;
 				if (!scan_number(&envtxt, &env))
@@ -528,8 +498,7 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 	 * MAIN EVALUATION LOOP 
 	 */
 
-	for (t = list; t; t = t->next)
-	{
+	for (t = list; t; t = t->next) {
 		switch (t->token)
 		{
 
@@ -572,31 +541,22 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 			 * that's why 'default' is used rather than all the names
 			 */
 		default:
-			while (precedence(opstk[ostk]) > precedence(t))
-			{
+			while (precedence(opstk[ostk]) > precedence(t)) {
 				struct tok     *op = opstk[ostk--];
-
 				/*
 				 * there should always be at least a close bracket left here 
 				 */
 				if (ostk < 0)
 					return ERROR_SYNTAX;
-
 				/*
 				 * we assume that all operators require at least one value 
-				 */
-				/*
 				 * on the stack, and check here 
 				 */
 				if (vstk < 0)
 					return ERROR_SYNTAX;
-
-				/*
-				 * now we actually perform evaluations 
-				 */
+				/*- now we actually perform evaluations */
 				switch (token = op->token)
 				{
-
 					/*
 					 * binary (int/real) -> (int/real) 
 					 */
@@ -604,7 +564,6 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 				case TK_SUB:
 				case TK_MUL:
 				case TK_MULI:
-
 					/*
 					 * pull two values from the stack, y then x, and push 'x op y' 
 					 */
@@ -612,12 +571,10 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 						return ERROR_SYNTAX;
 					y = &valstk[vstk--];
 					x = &valstk[vstk];
-
 					/*
 					 * if both values are integer, do integer operations only 
 					 */
-					if (x->type == T_INT && y->type == T_INT)
-					{
+					if (x->type == T_INT && y->type == T_INT) {
 						xi = x->ival;
 						yi = y->ival;
 						switch (token)
@@ -638,8 +595,7 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 						 */
 						x->type = T_INT;
 						x->ival = ri;
-					} else
-					{
+					} else {
 						/*
 						 * get real values - convert if neccessary 
 						 */
@@ -679,8 +635,7 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 						return ERROR_SYNTAX;
 					y = &valstk[vstk--];
 					x = &valstk[vstk];
-					if (x->type == T_INT && y->type == T_INT)
-					{
+					if (x->type == T_INT && y->type == T_INT) {
 						xi = x->ival;
 						yi = y->ival;
 						switch (token)
@@ -704,8 +659,7 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 							ri = (xi >= yi);
 							break;
 						}
-					} else
-					{
+					} else {
 						xr = (x->type == T_REAL) ? x->rval : (double) x->ival;
 						yr = (y->type == T_REAL) ? y->rval : (double) y->ival;
 						switch (token)
@@ -744,13 +698,11 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 					x = &valstk[vstk];
 					xr = (x->type == T_REAL) ? x->rval : (double) x->ival;
 					yr = (y->type == T_REAL) ? y->rval : (double) y->ival;
-					if (token == TK_DIV)
-					{
+					if (token == TK_DIV) {
 						if (yr == 0)
 							return ERROR_DIV0;
 						x->rval = xr / yr;
-					} else
-					{
+					} else {
 						x->rval = pow(xr, yr);
 					}
 					x->type = T_REAL;
@@ -891,13 +843,10 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 			}	/*- end while (precedence loop) */
 			/*
 			 * back to the postfixified 
-			 */
-			/*
 			 * if we had a close paren, pull the matching open paren (error if
 			 * we pull something else. otherwise push our new operator
 			 */
-			if (t->token == TK_CLOSE)
-			{
+			if (t->token == TK_CLOSE) {
 				if (opstk[ostk--]->token != TK_OPEN)
 					return ERROR_SYNTAX;
 			} else
@@ -926,8 +875,7 @@ eval(struct memh *mh, struct tok *list, struct vartable *vt, struct val *result)
 void
 prt(struct tok *t)
 {
-	for (; t; t = t->next)
-	{
+	for (; t; t = t->next) {
 		switch (t->token)
 		{
 		case TK_OPEN:
@@ -1043,8 +991,7 @@ dump_vars(struct vartable *vt)
 	if (!vt)
 		printf("no vars\n");
 	else
-		for (v = vt->first; v; v = v->next)
-		{
+		for (v = vt->first; v; v = v->next) {
 			if (v->val.type == T_INT)
 				printf("'%s'=%ld ", v->name, v->val.ival);
 			else
@@ -1072,8 +1019,7 @@ same_str(const char *a, const char *b)
 #elif HAVE_STRCMPI
 	return (strcmpi(a, b) == 0);
 #else
-	while ((tolower((int) *a) == tolower((int) *b)))
-	{
+	while ((tolower((int) *a) == tolower((int) *b))) {
 		if (!*a)
 			return 1;	/*- if end of both strings, return true */
 		a++;
@@ -1101,8 +1047,7 @@ same_str_len(const char *a, const char *b, int len)
 #elif HAVE_STRNCMPI
 	return (strncmpi(a, b) == 0);
 #else
-	while (--len && (tolower((int) *a) == tolower((int) *b)))
-	{
+	while (--len && (tolower((int) *a) == tolower((int) *b))) {
 		if (!*a)
 			return 1;	/*- true if both strings equal & end before len */
 		a++;
@@ -1148,8 +1093,7 @@ void
 free_mem(struct memh *mh)
 {
 	struct memh    *next;
-	for (; mh; mh = next)
-	{
+	for (; mh; mh = next) {
 		next = mh->next;
 		free(mh);
 	}
@@ -1204,19 +1148,18 @@ put_var(struct vartable *vt, char *name, struct val *value)
 {
 	struct var     *v;
 	char           *n;
+	int             i;
 
 	if (!vt || !name || !value)
 		return NULL;
-	if ((v = get_var(vt, name)))
-	{
+	if ((v = get_var(vt, name))) {
 		v->val = *value;
 		return v;
 	}
 	v = (struct var *) mem_alloc(vt->mh, sizeof(struct var));
-	n = (char *) mem_alloc(vt->mh, strlen(name) + 1);
-	if (v && n)
-	{
-		strcpy(n, name);
+	n = (char *) mem_alloc(vt->mh, (i = str_len(name) + 1));
+	if (v && n) {
+		str_copyb(n, name, i);
 		v->name = n;
 		v->val = *value;
 		v->next = vt->first;
@@ -1229,6 +1172,8 @@ put_var(struct vartable *vt, char *name, struct val *value)
 void
 getversion_evaluate_c()
 {
-	printf("%s\n", sccsid);
-	printf("%s\n", sccsidevalh);
+	static char    *x = "$Id: evaluate.c,v 2.3 2021-05-22 18:27:03+05:30 Cprogrammer Exp mbhangui $";
+	x = sccsidevalh;
+
+	x++;
 }
