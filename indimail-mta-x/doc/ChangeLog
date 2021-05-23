@@ -93,6 +93,10 @@ Release 2.13 Start 14/02/2021
 57. maildirdeliver: complete rewrite using maildir_deliver() function.
 - 17/05/2021
 58. svctool: make qmail-send service wait for pwdlookup service
+- 24/05/2021
+59. spawn-filter.c: move report() to report.c
+60. spawn-filter.c: move rate functions to get_rate.c
+61. wildmat.h: header for wildmat_internal(
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
