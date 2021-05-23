@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.39  2021-05-23 07:10:48+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
  * Revision 1.38  2021-05-13 14:44:07+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -111,44 +114,43 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "envdir.h"
-#include "pathexec.h"
-#include "sgetopt.h"
-#include "sig.h"
-#include "scan.h"
-#include "substdio.h"
-#include "stralloc.h"
-#include "subfd.h"
-#include "getln.h"
-#include "alloc.h"
-#include "str.h"
-#include "fmt.h"
+#include <envdir.h>
+#include <pathexec.h>
+#include <sgetopt.h>
+#include <sig.h>
+#include <scan.h>
+#include <substdio.h>
+#include <stralloc.h>
+#include <subfd.h>
+#include <getln.h>
+#include <alloc.h>
+#include <str.h>
+#include <fmt.h>
+#include <env.h>
+#include <gen_alloc.h>
+#include <gen_allocdefs.h>
+#include <error.h>
+#include <now.h>
+#include <constmap.h>
+#include <case.h>
+#include <byte.h>
 #include "hfield.h"
 #include "token822.h"
 #include "control.h"
-#include "env.h"
-#include "gen_alloc.h"
-#include "gen_allocdefs.h"
-#include "error.h"
 #include "qmail.h"
-#include "now.h"
 #include "quote.h"
 #include "headerbody.h"
 #include "newfield.h"
-#include "constmap.h"
 #include "envrules.h"
-#include "case.h"
-#include "byte.h"
 #include "hassrs.h"
 #ifdef HAVESRS
 #include "srs.h"
 #endif
 #include "set_environment.h"
+#include "wildmat.h"
 
 #define FATAL "qmail-inject: fatal: "
 #define WARN  "qmail-inject: warn: "
-
-int             wildmat_internal(char *, char *);
 
 /*- SPAM Ingore Sender Check Variables */
 int             spfok = 0;
@@ -1277,7 +1279,8 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.38 2021-05-13 14:44:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.39 2021-05-23 07:10:48+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidwildmath;
 	x++;
 }

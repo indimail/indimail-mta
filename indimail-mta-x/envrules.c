@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.20  2021-05-23 07:09:26+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
  * Revision 1.19  2019-03-07 00:49:37+05:30  Cprogrammer
  * do not treat regcomp error as matches
  *
@@ -60,17 +63,17 @@
  *
  */
 #include <ctype.h>
-#include "qregex.h"
-#include "error.h"
-#include "matchregex.h"
-#include "stralloc.h"
-#include "env.h"
-#include "str.h"
+#include <fnmatch.h>
+#include <error.h>
+#include <stralloc.h>
+#include <env.h>
+#include <str.h>
 #include "control.h"
 #include "envrules.h"
-#include <fnmatch.h>
+#include "qregex.h"
+#include "matchregex.h"
+#include "wildmat.h"
 
-int             wildmat_internal(char *, char *);
 static int      parse_env(char *);
 
 int
@@ -232,7 +235,8 @@ parse_env(char *envStrings)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.19 2019-03-07 00:49:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.20 2021-05-23 07:09:26+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidwildmath;
 	x++;
 }

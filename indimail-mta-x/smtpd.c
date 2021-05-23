@@ -1,36 +1,37 @@
-#include "sig.h"
-#include "stralloc.h"
-#include "substdio.h"
-#include "alloc.h"
+#include <sig.h>
+#include <stralloc.h>
+#include <substdio.h>
+#include <alloc.h>
+#include <constmap.h>
+#include <case.h>
+#include <error.h>
+#include <str.h>
+#include <fmt.h>
+#include <scan.h>
+#include <byte.h>
+#include <env.h>
+#include <now.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
+#include <commands.h>
+#include <wait.h>
+#include <fd.h>
+#include <datetime.h>
+#include <date822fmt.h>
+#include <base64.h>
+#include <getln.h>
 #include "auto_qmail.h"
 #include "auto_control.h"
 #include "auto_prefix.h"
 #include "control.h"
 #include "received.h"
-#include "constmap.h"
-#include "case.h"
-#include "error.h"
 #include "ipme.h"
 #include "ip.h"
 #include "qmail.h"
-#include "str.h"
-#include "fmt.h"
-#include "scan.h"
-#include "byte.h"
-#include "env.h"
-#include "now.h"
 #include "rcpthosts.h"
 #include "recipients.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
-#include "commands.h"
-#include "wait.h"
-#include "fd.h"
 #include "dns.h"
 #include "etrn.h"
-#include "datetime.h"
-#include "date822fmt.h"
-#include "base64.h"
 #include "greylist.h"
 #include "variables.h"
 #include <fcntl.h>
@@ -43,7 +44,6 @@
 #include "matchregex.h"
 #include "tablematch.h"
 #include "bodycheck.h"
-#include "getln.h"
 #include "qregex.h"
 #include "hasmysql.h"
 #include "mail_acl.h"
@@ -62,7 +62,7 @@
 #endif
 
 #ifdef BATV
-#include "cdb.h"
+#include <cdb.h>
 #define BATVLEN 3	/* number of bytes */
 #define BATVSTALE 7	/* accept for a week */
 #include <openssl/md5.h>
@@ -73,6 +73,7 @@
 #endif
 #include <pwd.h>
 #include "hassmtputf8.h"
+#include "wildmat.h"
 
 #define MAXHOPS   100
 #define SMTP_PORT  25
@@ -99,14 +100,13 @@ int             err_noauthallowed();
 int             addrrelay();
 void            smtp_greet(char *);
 int             atrn_queue(char *, char *);
-int             wildmat_internal(char *, char *);
 
 #ifdef TLS
 int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.238 $";
+char           *revision = "$Revision: 1.239 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6152,6 +6152,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.239  2021-05-23 07:11:18+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
  * Revision 1.238  2021-03-02 10:40:40+05:30  Cprogrammer
  * renamed TLSCIPHERS env variable to TLS_CIPHER_LIST
  *
@@ -6305,9 +6308,9 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.238 2021-03-02 10:40:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.239 2021-05-23 07:11:18+05:30 Cprogrammer Exp mbhangui $";
 
-	if (x)
-		x++;
 	x = sccsidauthcramh;
+	x = sccsidwildmath;
+	x++;
 }

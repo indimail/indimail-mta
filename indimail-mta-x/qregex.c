@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.c,v $
+ * Revision 1.31  2021-05-23 07:11:06+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
  * Revision 1.30  2020-09-16 19:06:06+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -94,12 +97,12 @@
  * Initial revision
  *
  * qregex (v2)
- * $Id: qregex.c,v 1.30 2020-09-16 19:06:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.31 2021-05-23 07:11:06+05:30 Cprogrammer Exp mbhangui $
  *
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2020-09-16 19:06:06+05:30 $
- * Revision: $Revision: 1.30 $
+ * Modified: $Date: 2021-05-23 07:11:06+05:30 $
+ * Revision: $Revision: 1.31 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -137,28 +140,28 @@
  *       http://cr.yp.to/qmail/guarantee.html
  * 
  */
-#include "case.h"
-#include "scan.h"
-#include "stralloc.h"
-#include "constmap.h"
-#include "byte.h"
-#include "str.h"
-#include "env.h"
-#include "cdb.h"
-#include "uint32.h"
-#include "open.h"
-#include "error.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <case.h>
+#include <scan.h>
+#include <stralloc.h>
+#include <constmap.h>
+#include <byte.h>
+#include <str.h>
+#include <env.h>
+#include <cdb.h>
+#include <uint32.h>
+#include <open.h>
+#include <error.h>
 #include "control.h"
 #include "matchregex.h"
 #include "qregex.h"
 #include "auto_control.h"
 #include "variables.h"
-#include <sys/types.h>
-#include <unistd.h>
+#include "wildmat.h"
 
 static int      wildmat_match(stralloc *, struct constmap *, stralloc *);
 static int      regex_match(stralloc *, stralloc *, char **);
-int             wildmat_internal(char *, char *);
 
 static char     dotChar = '@';
 
@@ -336,7 +339,8 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.30 2020-09-16 19:06:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.31 2021-05-23 07:11:06+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidwildmath;
 	x++;
 }

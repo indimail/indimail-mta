@@ -1,5 +1,8 @@
 /*
  * $Log: uacl.c,v $
+ * Revision 1.5  2021-05-23 07:11:36+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
  * Revision 1.4  2010-11-05 06:29:38+05:30  Cprogrammer
  * moved mail_acl() to mail_acl.c
  *
@@ -14,17 +17,18 @@
  *
  */
 #include <unistd.h>
+#include <scan.h>
+#include <str.h>
+#include <fmt.h>
+#include <env.h>
+#include <subfd.h>
+#include <strerr.h>
 #include "auto_qmail.h"
 #include "qregex.h"
-#include "scan.h"
 #include "control.h"
-#include "str.h"
 #include "matchregex.h"
-#include "fmt.h"
-#include "env.h"
-#include "subfd.h"
-#include "strerr.h"
 #include "mail_acl.h"
+#include "wildmat.h"
 
 #define FATAL "uacl: fatal: "
 
@@ -32,8 +36,6 @@
 int             acclistok = 0;
 static stralloc acclist = { 0 };
 int             qregex = 0;
-
-int             wildmat_internal(char *, char *);
 
 void
 out(char *str)
@@ -123,7 +125,8 @@ main(int argc, char **argv)
 void
 getversion_uacl_c()
 {
-	static char    *x = "$Id: uacl.c,v 1.4 2010-11-05 06:29:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: uacl.c,v 1.5 2021-05-23 07:11:36+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidwildmath;
 	x++;
 }

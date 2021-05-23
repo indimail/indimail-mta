@@ -1,5 +1,8 @@
 /*
  * $Log: mail_acl.c,v $
+ * Revision 1.4  2021-05-23 07:10:02+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
  * Revision 1.3  2014-03-07 02:09:22+05:30  Cprogrammer
  * fix regex match
  *
@@ -10,12 +13,11 @@
  * Initial revision
  *
  */
-#include "str.h"
+#include <str.h>
+#include <stralloc.h>
+#include <fmt.h>
 #include "matchregex.h"
-#include "stralloc.h"
-#include "fmt.h"
-
-int             wildmat_internal(char *, char *);
+#include "wildmat.h"
 
 extern void     die_regex(char *);
 extern void     out(char *);
@@ -292,7 +294,8 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.3 2014-03-07 02:09:22+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.4 2021-05-23 07:10:02+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidwildmath;
 	x++;
 }
