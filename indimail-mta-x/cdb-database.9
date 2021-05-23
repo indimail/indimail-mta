@@ -6,35 +6,35 @@ cdb-database \- prepare cdb assignments for ctrlenv
 
 .SH DESCRIPTION
 .B cdb-database
-reads the assignments in \fICONTROL/control/filename\fR
-and writes them into \fICONTROL/control/filename.cdb\fR in a binary format suited
+reads the assignments in \fICONTROL/filename\fR
+and writes them into \fICONTROL/filename.cdb\fR in a binary format suited
 for quick access by \fBctrlenv\fR.
 Extra arguments provided after \fIfilename\fR are silently ignored.
 
-If there is a problem with \fICONTROL/control/filename\fR, \fBcdb-database\fR
-complains and leaves \fICONTROL/control/filename.cdb\fR alone.
+If there is a problem with \fICONTROL/filename\fR, \fBcdb-database\fR
+complains and leaves \fICONTROL/filename.cdb\fR alone.
 
 \fBcdb-database\fR ensures that
-\fICONTROL/control/filename.cdb\fR is updated atomically, so
+\fICONTROL/filename.cdb\fR is updated atomically, so
 \fBctrlenv\fR never has to wait for \fBcdb-database\fR to finish.
 However, \fBcdb-database\fR makes no attempt to protect against two simultaneous updates of
-\fICONTROL/control/filename.cdb\fR.
+\fICONTROL/filename.cdb\fR.
 
-The binary \fICONTROL/control/filename.cdb\fR format is portable across machines.
+The binary \fICONTROL/filename.cdb\fR format is portable across machines.
 
-.B CONTROL/control/filename
+.B CONTROL/filename
 is a series of assignments, one per line.
 It ends with a line containing a single dot.
 Lines must not contain NUL.
 
-Lines in \fICONTROL/control/filename\fR consists of \fIaddress\fR separated by
+Lines in \fICONTROL/filename\fR consists of \fIaddress\fR separated by
 \fIvalue\fR
 .EX
-   =joe.shmoe@indimail.org:CONTROL/control/domainkeys/joe:
+   =joe.shmoe@indimail.org:CONTROL/domainkeys/joe:
 .EE
 
 When \fBctrlenv\fR is run against this file using address
-jome.shmoe@indimail.org, DKIMSIGN will be set to \fICONTROL/control/domainkeys/joe\fR
+jome.shmoe@indimail.org, DKIMSIGN will be set to \fICONTROL/domainkeys/joe\fR
 
 .SH "SIMPLE ASSIGNMENTS"
 A simple assignment is a line of the form
@@ -82,9 +82,9 @@ assignment, and a simple assignment overrides any wildcard assignment.
 For example:
 
 .EX
-   +:CONTROL/control/domainkeys/%/default:
-   +joe-:CONTROL/control/domainkeys/indimail.org/joe:
-   =joe:CONTROL/control/domainkeys/example.com/joe:
+   +:CONTROL/domainkeys/%/default:
+   +joe-:CONTROL/domainkeys/indimail.org/joe:
+   =joe:CONTROL/domainkeys/example.com/joe:
 .EE
 
 The address

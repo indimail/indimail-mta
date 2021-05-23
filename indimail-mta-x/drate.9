@@ -5,7 +5,9 @@ drate \- indimail domain rate control
 .SH SYNOPSIS
 .B drate
 .B \-d \fIdomain
+[
 .B \-D \fIratelimit_dir
+]
 .B \-r \fIrate_expression
 [
 .B \-c
@@ -16,7 +18,9 @@ or
 
 .B drate
 .B \-d \fIdomain
+[
 .B \-D \fIratelimit_dir
+]
 [
 .B \-s
 ]
@@ -61,7 +65,8 @@ the prefix '+' or '-' to increase or decrease the existing rate
 
 .TP
 \fB-D\fR
-The directory to store or retrieve delivery rate parameters and statistics. 
+The directory to store or retrieve delivery rate parameters and statistics.
+If not specified it defaults to CONTROL/ratelimit.
 
 .TP
 \fB-c\fR
