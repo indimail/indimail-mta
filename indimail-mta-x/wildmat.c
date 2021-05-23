@@ -1,5 +1,5 @@
 /*-** wildmat.c.orig	Wed Dec  3 11:46:31 1997
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  * Do shell-style pattern matching for ?, \, [], and * characters.
  * Might not be robust in face of malformed patterns; e.g., "foo[a-"
  * could cause a segmentation violation.  It is 8bit clean.
@@ -35,18 +35,7 @@
  * released version unless you have a good test data base to try it out
  * on.
  */
-#define TRUE			 1
-#define FALSE			 0
-#define ABORT			-1
-
-
-/*- What character marks an inverted character class?  */
-#define NEGATE_CLASS		'^'
-/*- Is "*" a common pattern?  */
-#define OPTIMIZE_JUST_STAR
-/*- Do tar(1) matching rules, which ignore a trailing slash?  */
-#undef MATCH_TAR_PATTERN
-
+#include "wildmat.h"
 
 /*- Match text and p, return TRUE, FALSE, or ABORT.  */
 static int
@@ -167,7 +156,8 @@ main()
 void
 getversion_wildmat_internal_c()
 {
-	static char    *x = "$Id: wildmat.c,v 1.6 2008-08-03 18:26:33+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: wildmat.c,v 1.7 2021-05-23 06:36:19+05:30 Cprogrammer Exp mbhangui $";
+
+	x = sccsidwildmath;
 	x++;
-	x--;
 }
