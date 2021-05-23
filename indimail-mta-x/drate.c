@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.7  2021-05-23 07:07:23+05:30  Cprogrammer
+ * use /etc/indimail/control/ratelimit as default ratelimit directory
+ *
  * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -48,7 +51,7 @@ static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 int             qmailr_uid;
 int             qmail_gid;
-char           *usage = "usage: drate [-scR] -d domain -r deliveryRate -D ratelimit_dir\n";
+char           *usage = "usage: drate [-scR] -d domain -r deliveryRate [-D ratelimit_dir]\n";
 
 void
 logerr(char *s)
@@ -124,7 +127,7 @@ main(int argc, char **argv)
 					consolidate = 0, reset = 0;
 	unsigned long   email_count = 0;
 	double          rate;
-	char           *domain = 0, *rate_expr = 0, *directory = 0;
+	char           *domain = 0, *rate_expr = 0, *directory = "ratelimit";
 	char            stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
 	char            strdouble[FMT_DOUBLE];
 	char            inbuf[2048], outbuf[1024];
@@ -177,12 +180,7 @@ main(int argc, char **argv)
 		logerrf(usage);
 		_exit (111);
 	}
-	if (!directory) {
-		logerrf("rate limit directory not specified\n");
-		logerrf(usage);
-		_exit(111);
-	}
-	if (chdir(directory))
+	if (chdir(auto_control) || chdir(directory))
 		strerr_die4sys(111, FATAL, "unable to switch to ", directory, ": ");
 	if (display) {
 		if ((rfd = open_read(domain)) == -1)
@@ -362,7 +360,7 @@ new:
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.6 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.7 2021-05-23 07:07:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
