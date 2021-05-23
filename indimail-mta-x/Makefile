@@ -1098,11 +1098,12 @@ qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
 qmail-inject.o: \
 compile qmail-inject.c hfield.h token822.h control.h \
 qmail.h quote.h headerbody.h newfield.h envrules.h \
-hassrs.h set_environment.h conf-srs
+hassrs.h set_environment.h wildmat.h conf-srs
 	./compile qmail-inject.c
 
 envrules.o: \
-compile envrules.c envrules.h matchregex.o control.h qregex.h
+compile envrules.c envrules.h matchregex.o control.h \
+qregex.h wildmat.h
 	./compile envrules.c
 
 tablematch.o: \
@@ -1247,7 +1248,7 @@ cdb-database.8: \
 cdb-database.9 conf-prefix conf-sysconfdir
 	cat cdb-database.9 \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}CONTROL}"`head -1 conf-sysconfdir`"}g \
+	| sed s}CONTROL}"`head -1 conf-sysconfdir`/control"}g \
 	> cdb-database.8
 
 qmail-popbull: \
@@ -1351,34 +1352,39 @@ compile qmail-multi.c auto_qmail.h control.h conf-queue MakeArgs.h
 	fi
 
 spawn-filter: \
-load spawn-filter.o variables.o evaluate.o \
+load spawn-filter.o variables.o get_rate.o report.o \
 auto_qmail.o control.o wildmat.o qregex.o MakeArgs.o \
 auto_control.o matchregex.o envrules.o socket.lib dns.lib
-	./load spawn-filter variables.o evaluate.o \
+	./load spawn-filter variables.o get_rate.o report.o \
 	auto_qmail.o control.o wildmat.o qregex.o \
 	MakeArgs.o auto_control.o matchregex.o \
 	envrules.o `cat dns.lib socket.lib` -lm -lqmail
 
 spawn-filter.o: \
 compile spawn-filter.c control.h auto_qmail.h variables.h qregex.h \
-evaluate.h MakeArgs.h
+MakeArgs.h report.h get_rate.h wildmat.h
 	./compile spawn-filter.c
-
-evaluate.o: \
-compile evaluate.h
-	./compile evaluate.c
 
 spawn-filter.8: \
 spawn-filter.9 conf-prefix conf-sysconfdir
 	cat spawn-filter.9 \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}CONTROL}"`head -1 conf-sysconfdir`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> spawn-filter.8
+
+get_rate.o: \
+compile get_rate.c get_rate.h report.h
+	./compile get_rate.c
+
+report.o: \
+compile report.c report.h
+	./compile report.c
 
 drate.1: \
 drate.9 conf-prefix
 	cat drate.9 \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}CONTROL}"`head -1 conf-sysconfdir`/control"}g \
 	> drate.1
 
 qmail-direct: load qmail-direct.o
@@ -1754,7 +1760,7 @@ conf-plugin conf-batv conf-smtputf8 mysql_config mysql_inc
 	./compile `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin mysql_inc` smtpd.c
 
-mail_acl.o: compile mail_acl.c matchregex.h
+mail_acl.o: compile mail_acl.c matchregex.h wildmat.h
 	./compile mail_acl.c
 
 indimail_stub.o: \
@@ -1763,8 +1769,8 @@ variables.h indimail_stub.h
 	./compile indimail_stub.c
 
 qregex.o: \
-compile qregex.c qregex.h matchregex.h \
-control.h variables.h auto_control.h
+compile qregex.c qregex.h matchregex.h control.h \
+variables.h auto_control.h wildmat.h
 	./compile qregex.c
 
 mysql_inc: mysql_config
@@ -3238,7 +3244,7 @@ variables.o qregex.o auto_qmail.o auto_control.o
 
 uacl.o: \
 compile uacl.c qregex.h auto_qmail.h mail_acl.h \
-matchregex.h control.h
+matchregex.h control.h wildmat.h
 	./compile uacl.c
 
 qmail-sql: \
@@ -3373,12 +3379,12 @@ warn-auto.sh surblqueue.sh conf-prefix
 	chmod 755 surblqueue
 
 drate: \
-load drate.o evaluate.o variables.o myctime.o auto_uids.o auto_control.o
-	./load drate evaluate.o variables.o myctime.o \
+load drate.o variables.o myctime.o auto_uids.o auto_control.o
+	./load drate variables.o myctime.o \
 	auto_uids.o auto_control.o -lm -lqmail
 
 drate.o: \
-compile drate.c evaluate.h variables.h myctime.h \
+compile drate.c variables.h myctime.h \
 auto_uids.h auto_control.h
 	./compile drate.c
 

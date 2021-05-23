@@ -1016,7 +1016,6 @@ srs
 srs.o
 cidr.o
 drate.o
-evaluate.o
 fmt_double.o
 hmac_sha512.o
 srs.lib
@@ -1143,3 +1142,5 @@ qmail-direct
 qmail-direct.8
 set_environment.o
 maildir_deliver.o
+get_rate.o
+report.o
