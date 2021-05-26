@@ -1,6 +1,6 @@
 /*
  * $Log: drate.c,v $
- * Revision 1.8  2021-05-26 07:34:09+05:30  Cprogrammer
+ * Revision 1.8  2021-05-26 10:34:22+05:30  Cprogrammer
  * refactored code and added test mode
  *
  * Revision 1.7  2021-05-23 07:07:23+05:30  Cprogrammer
@@ -323,6 +323,7 @@ do_test(char *domain)
 	} else
 	if (errno != error_noent)
 		strerr_die4sys(111, FATAL, "open: ", domain, ": ");
+	else
 	if (!access("ratecontrol", R_OK)) {
 		if (control_readfile(&line, "./ratecontrol", 0) == -1)
 			strerr_die2sys(111, FATAL, "Unable to read ratecontrol: ");
@@ -336,12 +337,13 @@ do_test(char *domain)
 	} else
 	if (errno != error_noent)
 		strerr_die2sys(111, FATAL, "open: ratecontrol: ");
+	else
 	if (!access(".global", W_OK) && !is_rate_ok(".global", 0, &email_count, &conf_rate, &rate)) {
 		strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 		strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 		strnum[fmt_ulong(strnum, email_count)] = 0;
 		strerr_die9x(111, WARN, "high email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
-	}
+	} else
 	if (errno != error_noent)
 		strerr_die2sys(111, FATAL, "open: .global: ");
 	strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
@@ -428,7 +430,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.8 2021-05-26 07:34:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.8 2021-05-26 10:34:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
