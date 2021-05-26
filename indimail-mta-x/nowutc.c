@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.6  2021-05-26 12:10:39+05:30  Cprogrammer
+ * replaced libc stdio with substdio
+ *
  * Revision 1.5  2021-04-29 20:27:35+05:30  Cprogrammer
  * renamed variable now to cur to avoid clash with now() function.
  *
@@ -16,14 +19,17 @@
  * Initial revision
  *
  */
-#include <stdio.h>
 #include <unistd.h>
 #include <error.h>
 #include <strerr.h>
-#include "leapsecs.h"
-#include "tai.h"
-#include "taia.h"
-#include "caltime.h"
+#include <leapsecs.h>
+#include <tai.h>
+#include <taia.h>
+#include <caltime.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <fmt.h>
+#include <qprintf.h>
 #include "auto_sysconfdir.h"
 
 #define FATAL "nowutc: fatal: "
@@ -33,6 +39,7 @@ struct tai      sec;
 struct caltime  ct;
 
 char            x[TAIA_FMTFRAC];
+char            strnum[FMT_ULONG];
 
 int
 main()
@@ -48,15 +55,40 @@ main()
 	taia_tai(&cur, &sec);
 	caltime_utc(&ct, &sec, (int *) 0, (int *) 0);
 
-	printf("%ld-%02d-%02d %02d:%02d:%02d.%s\n", ct.date.year, ct.date.month, ct.date.day, ct.hour, ct.minute, ct.second, x);
+	strnum[fmt_int(strnum, ct.date.year)] = 0;
+	qprintf(subfdoutsmall, strnum, "%+02d");
+	qprintf(subfdoutsmall, "-", "%s");
 
+	strnum[fmt_int(strnum, ct.date.month)] = 0;
+	qprintf(subfdoutsmall, strnum, "%+02d");
+	qprintf(subfdoutsmall, "-", "%s");
+
+	strnum[fmt_int(strnum, ct.date.day)] = 0;
+	qprintf(subfdoutsmall, strnum, "%+02d");
+	qprintf(subfdoutsmall, " ", "%s");
+
+	strnum[fmt_int(strnum, ct.hour)] = 0;
+	qprintf(subfdoutsmall, strnum, "%+02d");
+	qprintf(subfdoutsmall, ":", "%s");
+
+	strnum[fmt_int(strnum, ct.minute)] = 0;
+	qprintf(subfdoutsmall, strnum, "%+02d");
+	qprintf(subfdoutsmall, ":", "%s");
+
+	strnum[fmt_int(strnum, ct.second)] = 0;
+	qprintf(subfdoutsmall, strnum, "%+02d");
+	qprintf(subfdoutsmall, ".", "%s");
+
+	qprintf(subfdoutsmall, x, "%s");
+	qprintf(subfdoutsmall, "\n", "%s");
+	qprintf_flush(subfdoutsmall);
 	return (0);
 }
 
 void
 getversion_nowutc_c()
 {
-	static char    *z = "$Id: nowutc.c,v 1.5 2021-04-29 20:27:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *z = "$Id: nowutc.c,v 1.6 2021-05-26 12:10:39+05:30 Cprogrammer Exp mbhangui $";
 
 	z++;
 }
