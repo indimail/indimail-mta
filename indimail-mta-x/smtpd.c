@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.239 $";
+char           *revision = "$Revision: 1.240 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6052,6 +6052,8 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	for (i = plugin_count = 0;; plugin_count++) {
 		if (!plugin_count) {
 			if (access(plugin.s, R_OK)) {
+				if (errno != error_noent)
+					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
 				plugin.len -= 4;
 				strnum[fmt_ulong(strnum, i++)] = 0;
 				if (!stralloc_catb(&plugin, strnum, 1))
@@ -6060,8 +6062,11 @@ qmail_smtpd(int argc, char **argv, char **envp)
 					die_nomem();
 				if (!stralloc_0(&plugin))
 					die_nomem();
-				if (access(plugin.s, R_OK))
+				if (access(plugin.s, R_OK)) {
+					if (errno != error_noent)
+						die_plugin("unable to access plugin: ", plugin.s, 0, 0);
 					goto command;
+				}
 			}
 		} else {
 			plugin.len = len - 4;
@@ -6072,8 +6077,11 @@ qmail_smtpd(int argc, char **argv, char **envp)
 				die_nomem();
 			if (!stralloc_0(&plugin))
 				die_nomem();
-			if (access(plugin.s, R_OK))
+			if (access(plugin.s, R_OK)) {
+				if (errno != error_noent)
+					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
 				break;
+			}
 		}
 	}
 	if (!(plughandle = (void **) alloc(sizeof (void *) * plugin_count)))
@@ -6088,6 +6096,8 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	for (i = j = 0; i < plugin_count;) {
 		if (!j) {
 			if (access(plugin.s, R_OK)) { /*- smtpd-plugin.so */
+				if (errno != error_noent)
+					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
 				plugin.len -= 4;
 				strnum[fmt_ulong(strnum, i)] = 0;
 				if (!stralloc_catb(&plugin, strnum, 1))
@@ -6096,8 +6106,11 @@ qmail_smtpd(int argc, char **argv, char **envp)
 					die_nomem();
 				if (!stralloc_0(&plugin))
 					die_nomem();
-				if (access(plugin.s, R_OK))		/*- smtpd-plugin0.so */
+				if (access(plugin.s, R_OK)) {		/*- smtpd-plugin0.so */
+					if (errno != error_noent)
+						die_plugin("unable to access plugin: ", plugin.s, 0, 0);
 					goto command;
+				}
 				load_plugin(plugin.s, plugin_symb, j++);
 				i++;
 			} else
@@ -6111,8 +6124,11 @@ qmail_smtpd(int argc, char **argv, char **envp)
 				die_nomem();
 			if (!stralloc_0(&plugin))
 				die_nomem();
-			if (access(plugin.s, R_OK))
+			if (access(plugin.s, R_OK)) {
+				if (errno != error_noent)
+					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
 				break;
+			}
 			load_plugin(plugin.s, plugin_symb, j++);
 			i++;
 		}
@@ -6152,6 +6168,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.240  2021-05-26 10:46:59+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.239  2021-05-23 07:11:18+05:30  Cprogrammer
  * include wildmat.h for wildmat_internal
  *
@@ -6308,7 +6327,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.239 2021-05-23 07:11:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.240 2021-05-26 10:46:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;

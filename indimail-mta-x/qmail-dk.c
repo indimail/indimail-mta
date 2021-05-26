@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.51  2021-05-26 10:44:10+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.50  2020-05-11 11:04:23+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -167,6 +170,7 @@
 #include "alloc.h"
 #include "str.h"
 #include "getln.h"
+#include "error.h"
 #include "case.h"
 #include "stralloc.h"
 #include "datetime.h"
@@ -406,6 +410,10 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 		if (!stralloc_0(&keyfnfrom))
 			die(51);
 		if (access(keyfnfrom.s, F_OK)) {
+			if (errno != error_noent) {
+				custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
+				_exit(88);
+			}
 			/*- since file is not found remove '%' sign */
 			keyfnfrom.len = 8;
 			if (keyfn[0] == '/') {
@@ -885,7 +893,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.50 2020-05-11 11:04:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.51 2021-05-26 10:44:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

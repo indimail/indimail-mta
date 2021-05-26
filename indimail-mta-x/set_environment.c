@@ -1,5 +1,8 @@
 /*
  * $Log: set_environment.c,v $
+ * Revision 1.2  2021-05-26 10:46:50+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.1  2021-05-13 12:37:36+05:30  Cprogrammer
  * Initial revision
  *
@@ -7,6 +10,7 @@
 #include <unistd.h>
 #include <env.h>
 #include <envdir.h>
+#include <error.h>
 #include <strerr.h>
 #include <pathexec.h>
 #include "auto_sysconfdir.h"
@@ -57,7 +61,9 @@ set_environment(char *warn, char *fatal)
 			}
 			if ((e = pathexec(0)))
 				environ = e;
-		}
+		} else
+		if (errno != error_noent)
+			strerr_die2sys(111, fatal, "unable to access defaultqueue: ");
 		if (chdir(auto_sysconfdir) == -1)
 			strerr_die4sys(111, fatal, "unable to switch to ", auto_sysconfdir, ": ");
 	}
@@ -67,7 +73,7 @@ set_environment(char *warn, char *fatal)
 void
 getversion_set_environment_c()
 {
-	static char    *x = "$Id: set_environment.c,v 1.1 2021-05-13 12:37:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: set_environment.c,v 1.2 2021-05-26 10:46:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.10  2021-05-26 10:47:37+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.9  2020-09-28 13:11:38+05:30  Cprogrammer
  * added pid in debug log for authmodule
  *
@@ -203,10 +206,8 @@ main(int argc, char **argv)
 #endif
 		if (count == -1) {
 			print_error("read error");
-			strerr_warn1(WARN"read: ", &strerr_sys);
-			_exit(111);
-		}
-		else
+			strerr_die2sys(111, FATAL, "read: ");
+		} else
 		if (!count)
 			break;
 		offset += count;
@@ -234,9 +235,10 @@ main(int argc, char **argv)
 	if (!(pw = getpwnam(login))) {
 		if (errno != ETXTBSY)
 			pipe_exec(argv, tmpbuf, offset, save);
-		else
-			strerr_warn1(WARN"getpwnam: ", &strerr_sys);
-		print_error("getpwnam");
+		else {
+			print_error("getpwnam");
+			strerr_die2sys(111, FATAL, "getpwnam: ");
+		}
 		_exit (111);
 	}
 	stored = pw->pw_passwd;
@@ -244,10 +246,10 @@ main(int argc, char **argv)
 	if (!(upw = getuserpw(login))) {
 		if (errno != ETXTBSY)
 			pipe_exec(argv, tmpbuf, offset, save);
-		else
-			strerr_warn1(WARN"getuserpw: ", &strerr_sys);
-		print_error("getuserpw");
-		_exit (111);
+		else {
+			print_error("getuserpw");
+			strerr_die2sys(111, FATAL, "getuserpw: ");
+		}
 	}
 	stored = upw->upw_passwd;
 #endif
@@ -255,10 +257,10 @@ main(int argc, char **argv)
 	if (!(spw = getspnam(login))) {
 		if (errno != ETXTBSY)
 			pipe_exec(argv, tmpbuf, offset, save);
-		else
-			strerr_warn1(WARN"getspnam: ", &strerr_sys);
-		print_error("getspnam");
-		_exit (111);
+		else {
+			print_error("getspnam");
+			strerr_die2sys(111, FATAL, "getspnam: ");
+		}
 	}
 	stored = spw->sp_pwdp;
 #endif
@@ -292,23 +294,19 @@ main(int argc, char **argv)
 		flush();
 	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) stored,
-		(unsigned char *) (*response ? challenge : 0),
-		(unsigned char *) (*response ? response : challenge), 0))
-	{
-		pipe_exec(argv, tmpbuf, offset, save);
-		print_error("exec");
-		_exit (111);
-	}
+			(unsigned char *) (*response ? challenge : 0),
+			(unsigned char *) (*response ? response : challenge), 0))
+		pipe_exec(argv, tmpbuf, offset, save); /*- never returns */
 	status = 0;
-	if ((ptr = (char *) env_get("POSTAUTH")) && !access(ptr, X_OK)) {
-		if (stralloc_copys(&buf, ptr) ||
-				!stralloc_append(&buf, " ") ||
-				!stralloc_cats(&buf, login) ||
-				!stralloc_0(&buf)) {
-			strerr_warn1(WARN"out of memory: ", &strerr_sys);
-			_exit (111);
-		}
-		status = runcmmd(buf.s);
+	if ((ptr = (char *) env_get("POSTAUTH"))) {
+		if (!access(ptr, X_OK)) {
+			if (stralloc_copys(&buf, ptr) || !stralloc_append(&buf, " ")
+					|| !stralloc_cats(&buf, login) || !stralloc_0(&buf))
+				strerr_die2x(111, WARN, "out of memory");
+			status = runcmmd(buf.s);
+		} else
+		if (errno != error_noent)
+			strerr_die4sys(111, FATAL, "unable to access ", ptr, ": ");
 	}
 	_exit(status);
 	/*- Not reached */
@@ -318,7 +316,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.9 2020-09-28 13:11:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.10 2021-05-26 10:47:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

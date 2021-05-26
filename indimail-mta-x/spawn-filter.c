@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.78  2021-05-26 10:47:10+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.77  2021-05-26 07:38:04+05:30  Cprogrammer
  * moved getDomainToken() to getDomainToken.c
  *
@@ -758,6 +761,9 @@ main(int argc, char **argv)
 			if (!is_rate_ok(domain, 0, 0, 0, 0))
 				report(111, "spawn: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
 		} else
+		if (errno != error_noent)
+			report(111, "spawn: Unable to access ", domain, ": ", error_str(errno), ". (#4.3.0)", 0);
+		else
 		if (!access("ratecontrol", R_OK)) {
 			if (control_readfile(&ratedefs, "./ratecontrol", 0) == -1)
 				report(111, "spawn: Unable to read ratecontrol: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
@@ -765,8 +771,14 @@ main(int argc, char **argv)
 			if (!is_rate_ok(domain, rate_exp, 0, 0, 0))
 				report(111, "spawn: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
 		} else
+		if (errno != error_noent)
+			report(111, "spawn: Unable to access ratecontrol: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+		else
 		if (!access(".global", W_OK) && !is_rate_ok(".global", 0, 0, 0, 0))
 			report(111, "spawn: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
+		else
+		if (errno != error_noent)
+			report(111, "spawn: Unable to access .global: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (chdir(auto_qmail) == -1)
 			report(111, "spawn: Unable to switch to ", auto_qmail, ": ", error_str(errno), ". (#4.3.0)", 0);
 	}
@@ -905,7 +917,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.77 2021-05-26 07:38:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.78 2021-05-26 10:47:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetrateh;
 	x = sccsidreporth;

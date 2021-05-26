@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.9  2021-05-26 10:37:44+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.8  2020-09-16 19:00:08+05:30  Cprogrammer
  * conditional compilation when mysql development package is present
  *
@@ -78,11 +81,17 @@ initMySQLlibrary(char **errstr)
 				return(-1);
 		}
 		ptr = libfn.s;
-		if (access(ptr, R_OK))
+		if (access(ptr, R_OK)) {
+			if (errno != error_noent)
+				return(-1);
 			return (0);
+		}
 	} else {
-		if (access(ptr, R_OK))
+		if (access(ptr, R_OK)) {
+			if (errno != error_noent)
+				return(-1);
 			return (0);
+		}
 		ptr = "MYSQL_LIB";
 	}
 	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {
@@ -136,7 +145,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.8 2020-09-16 19:00:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.9 2021-05-26 10:37:44+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: plugtest.c,v $
+ * Revision 1.6  2021-05-26 10:43:34+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.5  2017-12-26 21:57:28+05:30  Cprogrammer
  * BUGFIX - fixed wrong copy of plugindir
  *
@@ -21,6 +24,7 @@
 #include "sgetopt.h"
 #include "alloc.h"
 #include "str.h"
+#include "error.h"
 #include "strerr.h"
 #include "env.h"
 #include "stralloc.h"
@@ -157,34 +161,26 @@ main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 	if (!mail_opt && !rcpt_opt && !data_opt)
-	{
 		strerr_die1x(100, usage);
-	}
-	if (mail_opt || rcpt_opt || data_opt)
-	{
-		if (!remoteip)
-		{
+	if (mail_opt || rcpt_opt || data_opt) {
+		if (!remoteip) {
 			out("remoteip not specified\n");
 			flush();
 			_exit(100);
 		}
-		if (!mailfrom)
-		{
+		if (!mailfrom) {
 			out("mailfrom not specified\n");
 			flush();
 			_exit(100);
 		}
 	}
-	if ((rcpt_opt || data_opt) && !argc)
-	{
+	if ((rcpt_opt || data_opt) && !argc) {
 		out("recipients not specified\n");
 		flush();
 		_exit(100);
 	}
-	if (data_opt)
-	{
-		if (!remoteip)
-		{
+	if (data_opt) {
+		if (!remoteip) {
 			out("localip not specified\n");
 			flush();
 			_exit(100);
@@ -221,6 +217,8 @@ main(int argc, char **argv)
 	for (i = plugin_count = 0;;plugin_count++) {
 		if (!plugin_count) {
 			if (access(plugin.s, R_OK)) {
+				if (errno != error_noent)
+					strerr_die3sys(111, FATAL, plugin.s, ": ");
 				plugin.len -= 4;
 				strnum[fmt_ulong(strnum, i++)] = 0;
 				if (!stralloc_catb(&plugin, strnum, 1))
@@ -229,8 +227,9 @@ main(int argc, char **argv)
 					die_nomem();
 				if (!stralloc_0(&plugin))
 					die_nomem();
-				if (access(plugin.s, R_OK))
-				{
+				if (access(plugin.s, R_OK)) {
+					if (errno != error_noent)
+						strerr_die3sys(111, FATAL, plugin.s, ": ");
 					out("plugtest: no plugins found\n");
 					return (0);
 				}
@@ -268,8 +267,7 @@ main(int argc, char **argv)
 					die_nomem();
 				if (!stralloc_0(&plugin))
 					die_nomem();
-				if (access(plugin.s, R_OK)) /*- smtpd-plugin0.so */
-				{
+				if (access(plugin.s, R_OK)) { /*- smtpd-plugin0.so */
 					out("plugtest: no plugins found\n");
 					return (0);
 				}
@@ -295,8 +293,7 @@ main(int argc, char **argv)
 
 	argv_ptr = argv;
 	for (status = i = 0;i < plugin_count;i++) {
-		if (!plug[i])
-		{
+		if (!plug[i]) {
 			out("plugin ");
 			strnum[fmt_ulong(strnum, i)] = 0;
 			out(strnum);
@@ -304,8 +301,7 @@ main(int argc, char **argv)
 			continue;
 		}
 		if (mail_opt) {
-			if (!plug[i]->mail_func)
-			{
+			if (!plug[i]->mail_func) {
 				out("plugin ");
 				strnum[fmt_ulong(strnum, i)] = 0;
 				out(strnum);
@@ -326,8 +322,7 @@ main(int argc, char **argv)
 			}
 		}
 		if (rcpt_opt) {
-			if (!plug[i]->rcpt_func)
-			{
+			if (!plug[i]->rcpt_func) {
 				out("plugin ");
 				strnum[fmt_ulong(strnum, i)] = 0;
 				out(strnum);
@@ -351,8 +346,7 @@ main(int argc, char **argv)
 			}
 		}
 		if (data_opt) {
-			if (!plug[i]->data_func)
-			{
+			if (!plug[i]->data_func) {
 				out("plugin ");
 				strnum[fmt_ulong(strnum, i)] = 0;
 				out(strnum);
@@ -387,7 +381,7 @@ main(int argc, char **argv)
 void
 getversion_plugtest_c()
 {
-	static char    *x = "$Id: plugtest.c,v 1.5 2017-12-26 21:57:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: plugtest.c,v 1.6 2021-05-26 10:43:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

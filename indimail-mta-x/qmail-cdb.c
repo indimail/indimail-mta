@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cdb.c,v $
+ * Revision 1.10  2021-05-26 10:43:46+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.9  2020-11-24 13:46:34+05:30  Cprogrammer
  * removed exit.h
  *
@@ -37,6 +40,7 @@
 #include "getln.h"
 #include "case.h"
 #include "open.h"
+#include "error.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
 #include "variables.h"
@@ -73,8 +77,7 @@ main(int argc, char **argv)
 	substdio        sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 	stralloc        line = {0}, controlfile1 = {0}, controlfile2 = {0};
 
-	if (argc != 2)
-	{
+	if (argc != 2) {
 		if (substdio_puts(&sserr, "USAGE: qmail-cdb filename\n") != -1)
 			substdio_flush(&sserr);
 		return(111);
@@ -99,12 +102,14 @@ main(int argc, char **argv)
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	if (!stralloc_0(&controlfile2))
 		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!access(controlfile1.s, F_OK))
-	{
+	if (!access(controlfile1.s, F_OK)) {
 		if (rename(controlfile1.s, controlfile2.s))
 			strerr_die6sys(111, FATAL, "unable to move ", controlfile1.s, " to ", controlfile2.s, ": ");
-	} else
+	} else {
+		if (errno != error_noent)
+			strerr_die3sys(111, FATAL, controlfile1.s, ": ");
 		return(0);
+	}
 	if((fd = open_read(controlfile2.s)) == -1)
 		die_read(controlfile2.s);
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
@@ -117,25 +122,20 @@ main(int argc, char **argv)
 		die_write(controlfile1.s);
 	if (cdbmss_start(&cdbmss, fdtemp) == -1)
 		die_write(controlfile1.s);
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') != 0)
 			die_read(controlfile2.s);
 		case_lowerb(line.s, line.len);
-		while (line.len)
-		{
-			if (line.s[line.len - 1] == ' ')
-			{
+		while (line.len) {
+			if (line.s[line.len - 1] == ' ') {
 				--line.len;
 				continue;
 			}
-			if (line.s[line.len - 1] == '\n')
-			{
+			if (line.s[line.len - 1] == '\n') {
 				--line.len;
 				continue;
 			}
-			if (line.s[line.len - 1] == '\t')
-			{
+			if (line.s[line.len - 1] == '\t') {
 				--line.len;
 				continue;
 			}
@@ -172,7 +172,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	static char    *x = "$Id: qmail-cdb.c,v 1.9 2020-11-24 13:46:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-cdb.c,v 1.10 2021-05-26 10:43:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

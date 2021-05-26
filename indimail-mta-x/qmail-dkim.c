@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.56  2021-05-26 10:44:21+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.55  2020-05-11 11:06:35+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -193,6 +196,7 @@
 #include "auto_qmail.h"
 #include "auto_control.h"
 #include "env.h"
+#include "error.h"
 #include "control.h"
 #include "dkim.h"
 #include "MakeArgs.h"
@@ -426,6 +430,10 @@ write_signature(char *domain, char *keyfn)
 		if (!stralloc_0(&keyfnfrom))
 			die(51, 1);
 		if (access(keyfnfrom.s, F_OK)) {
+			if (errno != error_noent) {
+				custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
+				_exit(88);
+			}
 			/*- since file does not exists remove '%' sign */
 			keyfnfrom.len = 8;
 			if (keyfn[0] == '/') {
@@ -1440,7 +1448,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.55 2020-05-11 11:06:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.56 2021-05-26 10:44:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.14  2021-05-26 10:47:29+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.13  2020-05-11 10:58:19+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -493,8 +496,11 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 		die_nomem();
 	if (!stralloc_0(&cachefile))
 		die_nomem();
-	if (access(cachefile.s, F_OK))
+	if (access(cachefile.s, F_OK)) {
+		if (errno != error_noent)
+			strerr_die4sys(111, FATAL, "unable to access ", cachefile.s, ": ");
 		return (0);
+	}
 	cachefile.len--;
 	if (!stralloc_append(&cachefile, "/"))
 		die_nomem();
@@ -505,6 +511,9 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 	if (flag) { /*- add the cache */
 		if (!access(cachefile.s, F_OK))
 			return (0);
+		else
+		if (errno != error_noent)
+			strerr_die4sys(111, FATAL, "unable to access ", cachefile.s, ": ");
 		if ((fd = open(cachefile.s, O_CREAT|O_WRONLY, *text ? 0600 : 0644)) == -1)
 			my_error(cachefile.s, 0, 2);
 		if (*text) {
@@ -1009,7 +1018,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.13 2020-05-11 10:58:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.14 2021-05-26 10:47:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.10  2021-05-26 10:47:20+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.9  2020-11-24 13:48:34+05:30  Cprogrammer
  * removed exit.h
  *
@@ -173,11 +176,13 @@ die_nomem()
 }
 
 void
-die_control(char *arg)
+die_control(char *arg1, char *arg2)
 {
 	substdio_flush(subfdout);
-	substdio_puts(subfderr, "fatal: unable to read controls: ");
-	substdio_puts(subfderr, arg);
+	substdio_puts(subfderr, "fatal: ");
+	substdio_puts(subfderr, arg1);
+	substdio_puts(subfderr, ": ");
+	substdio_puts(subfderr, arg2);
 	substdio_puts(subfderr, "\n");
 	substdio_flush(subfderr);
 	die (111);
@@ -554,7 +559,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	if (!stralloc_0(&tlsFilename))
 		die_nomem();
 	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1_2") != 1)
-		die_control(tlsFilename.s);
+		die_control("unable to read control file ", tlsFilename.s);
 	if (!stralloc_0(&ssl_option))
 		die_nomem();
 	if (str_equal(ssl_option.s, "SSLv23"))
@@ -580,8 +585,11 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		die_nomem();
 	if (!stralloc_0(&clientcert))
 		die_nomem();
-	if (access(clientcert.s, F_OK))
+	if (access(clientcert.s, F_OK)) {
+		if (errno != error_noent)
+			die_control("unable to read client certificate ", clientcert.s);
 		return (0);
+	}
 	if (partner_fqdn) {
 		struct stat     st;
 		if (!stralloc_copys(&tlsFilename, certdir))
@@ -729,7 +737,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1) {
 			while (SSL_shutdown(myssl) == 0);
 			SSL_free(myssl);
-			die_control("tlsclientciphers");
+			die_control("unable to read control file ", "tlsclientciphers");
 		}
 		if (saciphers.len) {
 			for (i = 0; i < saciphers.len - 1; ++i)
@@ -1493,7 +1501,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.9 2020-11-24 13:48:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.10 2021-05-26 10:47:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

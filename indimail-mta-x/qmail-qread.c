@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.34  2021-05-26 10:45:51+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.33  2021-05-16 00:46:51+05:30  Cprogrammer
  * limit conf_split to compile time value in conf-split
  *
@@ -620,8 +623,11 @@ main(int argc, char **argv)
 			die_nomem();
 		if (!stralloc_0(&Queuedir))
 			die_nomem();
-		if (access(Queuedir.s, F_OK))
+		if (access(Queuedir.s, F_OK)) {
+			if (errno != error_noent)
+				strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
 			break;
+		}
 		queuedir = Queuedir.s;
 		outok("processing queue ");
 		outok(queuedir);
@@ -642,7 +648,9 @@ main(int argc, char **argv)
 		outok("\n");
 		main_function(&lcount, &rcount, &bcount, &tcount);
 		outok("\n");
-	}
+	} else
+	if (errno != error_noent)
+		strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
 	if (doCount)
 		putcounts("Total ", lcount, rcount, bcount, tcount);
 	substdio_flush(subfdout);
@@ -653,7 +661,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.33 2021-05-16 00:46:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.34 2021-05-26 10:45:51+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.283  2021-05-26 10:37:32+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.282  2021-04-30 08:28:18+05:30  Cprogrammer
  * added qmail-direct
  *
@@ -728,6 +731,7 @@
 #include "auto_libexec.h"
 #include "auto_uids.h"
 #include "fmt.h"
+#include "error.h"
 #include "fifo.h"
 #include "str.h"
 #include "tcpto.h"
@@ -777,9 +781,9 @@ hier(inst_dir, fatal, dev_package)
 	 */
 	auto_cntrl_dir = getdirname(auto_control, &auto_cntrl_base);
 	if (!stralloc_copys(&a1, auto_cntrl_dir))
-		strerr_die2sys(111, fatal, "out of memory: ");
+		strerr_die2x(111, fatal, "out of memory");
 	if (!stralloc_0(&a1))
-		strerr_die2sys(111, fatal, "out of memory: ");
+		strerr_die2x(111, fatal, "out of memory");
 	auto_cntrl_dir = a1.s;
 	if (!str_diff(auto_qmail, auto_cntrl_dir))
 		/* create control directory (/var/indimail/control */
@@ -801,9 +805,9 @@ hier(inst_dir, fatal, dev_package)
 	 */
 	auto_assgn_dir = getdirname(auto_assign, &auto_assgn_base);
 	if (!stralloc_copys(&a2, auto_assgn_dir))
-		strerr_die2sys(111, fatal, "out of memory: ");
+		strerr_die2x(111, fatal, "out of memory");
 	if (!stralloc_0(&a2))
-		strerr_die2sys(111, fatal, "out of memory: ");
+		strerr_die2x(111, fatal, "out of memory");
 	auto_assgn_dir = a2.s;
 	if (!str_diff(auto_qmail, auto_assgn_dir))
 		d(auto_qmail_home, "users", auto_uidv, auto_gidq, 0775);
@@ -820,19 +824,22 @@ hier(inst_dir, fatal, dev_package)
 		/*- autoshared = /usr/share/indimail */
 		mandir_base = auto_prefix; /* /usr/local */
 		if (!stralloc_copys(&a3, auto_prefix))
-			strerr_die2sys(111, fatal, "out of memory: ");
+			strerr_die2x(111, fatal, "out of memory");
 		if (!stralloc_catb(&a3, "/man", 4))
-			strerr_die2sys(111, fatal, "out of memory: ");
+			strerr_die2x(111, fatal, "out of memory");
 		if (!stralloc_0(&a3))
-			strerr_die2sys(111, fatal, "out of memory: ");
+			strerr_die2x(111, fatal, "out of memory");
 		if (!access(a3.s, F_OK))
 			mandir_base = auto_prefix; /* /usr/local/man, /usr/man */
+		else
+		if (errno != error_noent)
+			strerr_die3sys(111, fatal, a3.s, ": ");
 		else {
 			mandir_base = getdirname(auto_shared, 0);
 			if (!stralloc_copys(&a3, mandir_base))
-				strerr_die2sys(111, fatal, "out of memory: ");
+				strerr_die2x(111, fatal, "out of memory");
 			if (!stralloc_0(&a3))
-				strerr_die2sys(111, fatal, "out of memory: ");
+				strerr_die2x(111, fatal, "out of memory");
 			mandir_base = a3.s; /* /usr/share */
 		}
 		h(auto_shared, auto_uido, 0, 0555);
@@ -847,13 +854,13 @@ hier(inst_dir, fatal, dev_package)
 	 */
 	auto_libexec_dir = getdirname(auto_libexec, &auto_libexec_base);
 	if (!stralloc_copys(&a4, auto_libexec_dir))
-		strerr_die2sys(111, fatal, "out of memory: ");
+		strerr_die2x(111, fatal, "out of memory");
 	if (!stralloc_0(&a4))
-		strerr_die2sys(111, fatal, "out of memory: ");
+		strerr_die2x(111, fatal, "out of memory");
 	if (!stralloc_copys(&a5, auto_libexec_base + 1))
-		strerr_die2sys(111, fatal, "out of memory: ");
+		strerr_die2x(111, fatal, "out of memory");
 	if (!stralloc_0(&a5))
-		strerr_die2sys(111, fatal, "out of memory: ");
+		strerr_die2x(111, fatal, "out of memory");
 	auto_libexec_dir = a4.s;
 	auto_libexec_base = a5.s;
 	if (!str_diff(auto_qmail, auto_libexec)) {
@@ -872,8 +879,11 @@ hier(inst_dir, fatal, dev_package)
 		moder_x = 0755; /*- executables */
 		moder_t = 0751; /*- daemons */
 		moder_s = 0755; /*- shared objects */
-		if (access(auto_prefix, F_OK))
+		if (access(auto_prefix, F_OK)) {
+			if (errno != error_noent)
+				strerr_die3sys(111, fatal, auto_prefix, ": ");
 			h(auto_prefix, uidr, gidr, 0755);
+		}
 		l(auto_qmail_home, "bin", auto_prefix, 1);
 		l(auto_qmail_home, "sbin", auto_prefix, 1);
 	} else {
@@ -1483,7 +1493,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.282 2021-04-30 08:28:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.283 2021-05-26 10:37:32+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

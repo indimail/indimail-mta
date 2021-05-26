@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.17  2021-05-26 10:36:55+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.16  2020-03-24 12:58:57+05:30  Cprogrammer
  * use qcount_dir() function to get mail counts
  *
@@ -63,6 +66,7 @@
 #include "auto_qmail.h"
 #include "env.h"
 #include "wait.h"
+#include "error.h"
 #include "qcount_dir.h"
 #include <ctype.h>
 #include <sys/types.h>
@@ -119,8 +123,13 @@ etrn_queue(char *arg, char *remoteip)
 	if (!access(maildir1, F_OK))
 		qcount_dir(maildir1, &mailcount);
 	else
+	if (errno != error_noent)
+		return (-1);
 	if (!access(maildir2, F_OK))
 		qcount_dir(maildir2, &mailcount);
+	else
+	if (errno != error_noent)
+		return (-1);
 	if (!mailcount)
 		return(-3);
 	switch (child = fork())
@@ -196,7 +205,7 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.16 2020-03-24 12:58:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.17 2021-05-26 10:36:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

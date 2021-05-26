@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.22  2021-05-26 10:46:11+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.21  2021-05-16 00:48:57+05:30  Cprogrammer
  * use configurable conf_split instead of auto_split variable
  *
@@ -214,7 +217,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.21 2021-05-16 00:48:57+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.22 2021-05-26 10:46:11+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -315,7 +318,7 @@ check_send(char *queuedir)
 		logerr("alert: cannot start: unable to open ");
 		logerr(lockfile.s);
 		logerr(": ");
-		logerr(strerror(errno));
+		logerr(error_str(errno));
 		logerrf("\n");
 		_exit(111);
 	} else
@@ -326,13 +329,23 @@ check_send(char *queuedir)
 		logerrf(" is already running\n");
 		_exit(111);
 	}
-	if (access(yank_dir, F_OK) && mkdir(yank_dir, 0700)) {
-		logerr("mkdir: ");
-		logerr(yank_dir);
-		logerr(": ");
-		logerr(error_str(errno));
-		logerrf("\n");
-		_exit(111);
+	if (access(yank_dir, F_OK)) {
+		if (errno != error_noent) {
+			logerr("alert: cannot access: ");
+			logerr(yank_dir);
+			logerr(": ");
+			logerr(error_str(errno));
+			logerrf("\n");
+			_exit(111);
+		}
+		if (mkdir(yank_dir, 0700)) {
+			logerr("alert: cannot do mkdir: ");
+			logerr(yank_dir);
+			logerr(": ");
+			logerr(error_str(errno));
+			logerrf("\n");
+			_exit(111);
+		}
 	}
 	return(fd);
 }
@@ -520,8 +533,17 @@ main(int argc, char **argv)
 			die_nomem();
 		if (!stralloc_0(&Queuedir))
 			die_nomem();
-		if (access(Queuedir.s, F_OK))
+		if (access(Queuedir.s, F_OK)) {
+			if (errno != error_noent) {
+				logerr("alert: cannot access: ");
+				logerr(Queuedir.s);
+				logerr(": ");
+				logerr(error_str(errno));
+				logerrf("\n");
+				_exit(111);
+			}
 			break;
+		}
 		queuedir = Queuedir.s;
 		out("processing queue ");
 		out(queuedir);
@@ -1141,7 +1163,7 @@ delete_file(const char *filename)
 						logerr("unlink: ");
 						logerr(old_name);
 						logerr(": ");
-						logerr(strerror(errno));
+						logerr(error_str(errno));
 						logerrf("\n");
 					}
 				}
@@ -1150,7 +1172,7 @@ delete_file(const char *filename)
 				logerr("unlink: ");
 				logerr(old_name);
 				logerr(": ");
-				logerr(strerror(errno));
+				logerr(error_str(errno));
 				logerrf("\n");
 			}
 		}
@@ -1183,7 +1205,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.21 2021-05-16 00:48:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.22 2021-05-26 10:46:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

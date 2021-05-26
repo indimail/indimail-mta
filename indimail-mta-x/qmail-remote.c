@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.143 2021-01-27 13:21:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.144 2021-05-26 10:46:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -494,14 +494,20 @@ temp_chdir()
 }
 
 void
-temp_control(char *arg)
+temp_control(char *arg1, char *arg2)
 {
-	out("ZUnable to read control files. (#4.3.0)\n");
-	if (!stralloc_copys(&smtptext, "Unable to read control files["))
+	out("Z");
+	out(arg1);
+	out(". (#4.3.0)\n");
+	if (!stralloc_copys(&smtptext, arg1))
 		temp_nomem();
-	if (!stralloc_cats(&smtptext, arg))
-		temp_nomem();
-	if (!stralloc_catb(&smtptext, "(#4.3.0)", 8))
+	if (arg2) {
+		if (!stralloc_catb(&smtptext, " [", 2) ||
+				!stralloc_cats(&smtptext, arg2) ||
+				!stralloc_append(&smtptext, "]"))
+			temp_nomem();
+	}
+	if (!stralloc_catb(&smtptext, " (#4.3.0)", 8))
 		temp_nomem();
 	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
@@ -1390,7 +1396,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	if (!stralloc_0(&tlsFilename))
 		temp_nomem();
 	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1_2") != 1)
-		temp_control(tlsFilename.s);
+		temp_control("Unable to read control files", tlsFilename.s);
 	if (!stralloc_0(&ssl_option))
 		temp_nomem();
 	if (str_equal(ssl_option.s, "SSLv23"))
@@ -1419,8 +1425,11 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		temp_nomem();
 	if (!stralloc_0(&clientcert))
 		temp_nomem();
-	if (access(clientcert.s, F_OK))
+	if (access(clientcert.s, F_OK)) {
+		if (errno != error_noent)
+			temp_control("Unable to read client certificate", clientcert.s);
 		return (0);
+	}
 	if (partner_fqdn) {
 		struct stat     st;
 		if (!stralloc_copys(&tlsFilename, certdir))
@@ -1597,7 +1606,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1) {
 			while (SSL_shutdown(myssl) == 0);
 			SSL_free(myssl);
-			temp_control("tlsclientciphers");
+			temp_control("Unable to read control file", "tlsclientciphers");
 		}
 		if (saciphers.len) {
 			for (i = 0; i < saciphers.len - 1; ++i)
@@ -2111,7 +2120,7 @@ auth_digest_md5(int use_size)
 	if (!stralloc_catb(&slop, "\",qop=\"auth\",realm=\"", 20))
 		temp_nomem();
 	if (control_readfile(&realm, "realm", 1) == -1)
-		temp_control("realm");
+		temp_control("Unable to read control file", "realm");
 	realm.len--;
 	if (!stralloc_cat(&slop, &realm))
 		temp_nomem();
@@ -2893,7 +2902,7 @@ cdb_match(char *fn, char *addr, int len)
 		temp_nomem();
 	if ((fd_cdb = open_read(controlfile.s)) == -1) {
 		if (errno != error_noent)
-			temp_control(controlfile.s);
+			temp_control("Unable to read control file", controlfile.s);
 		/*- cdb missing or entry missing */
 		return (0);
 	}
@@ -2949,7 +2958,7 @@ is_in_tlsadomains(char *domain)
 	case 0:
 		return (0);
 	default:
-		temp_control("tlsadomains");
+		temp_control("Unable to read control file", "tlsadomains");
 	}
 	/*- Not reached */
 	return (0);
@@ -2965,13 +2974,13 @@ getcontrols()
 	static stralloc controlfile, outgoingipfn;
 
 	if (control_init() == -1)
-		temp_control("control_init");
+		temp_control("Unable to initialize control files", 0);
 	if (control_readint(&timeout, "timeoutremote") == -1)
-		temp_control("timeoutremote");
+		temp_control("Unable to read control file", "timeoutremote");
 	if (control_readint(&timeoutconnect, "timeoutconnect") == -1)
-		temp_control("timeoutconnect");
+		temp_control("Unable to read control file", "timeoutconnect");
 	if (control_rldef(&helohost, "helohost", 1, (char *) 0) != 1)
-		temp_control("helohost");
+		temp_control("Unable to read control file", "helohost");
 	if ((routes = env_get("QMTPROUTE"))) {	/*- mysql */
 		if (!stralloc_copyb(&qmtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
@@ -2983,7 +2992,7 @@ getcontrols()
 	switch (cntrl_stat2)
 	{
 	case -1:/*- error reading qmtproutes */
-		temp_control("qmtproutes");
+		temp_control("Unable to read control file", "qmtproutes");
 	case 0:/*- qmtproutes absent */
 		if (!constmap_init(&mapqmtproutes, "", 0, 1))
 			temp_nomem();
@@ -3027,7 +3036,7 @@ getcontrols()
 	switch (cntrl_stat1)
 	{
 	case -1:/*- error reading smtproutes */
-		temp_control("smtproutes");
+		temp_control("Unable to read control file", "smtproutes");
 	case 0:/*- smtproutes absent */
 		if (!constmap_init(&mapsmtproutes, "", 0, 1))
 			temp_nomem();
@@ -3040,12 +3049,12 @@ getcontrols()
 	}
 #ifdef BATV
 	if ((batvok = control_readline(&signkey, (x = env_get("SIGNKEY")) ? x : "signkey")) == -1)
-		temp_control(x);
+		temp_control("Unable to read control file", x);
 	if (batvok) {
 		switch (control_readfile(&nosign, "nosignhosts", 0))
 		{
 		case -1:
-			temp_control("nosignhosts");
+			temp_control("Unable to read control file", "nosignhosts");
 		case 0:
 			if (!constmap_init(&mapnosign, "", 0, 1))
 				temp_nomem();
@@ -3058,7 +3067,7 @@ getcontrols()
 		switch (control_readfile(&nosigndoms, "nosignmydoms", 0))
 		{
 		case -1:
-			temp_control("nosignmydoms");
+			temp_control("Unable to read control file", "nosignmydoms");
 		case 0:
 			if (!constmap_init(&mapnosigndoms, "", 0, 1))
 				temp_nomem();
@@ -3088,12 +3097,10 @@ getcontrols()
 		if (r == -1) {
 			if (errno == error_nomem)
 				temp_nomem();
-			temp_control("outgoingip");
+			temp_control("Unable to read control file", "outgoingip");
 		} else
-		if (r && !env_put2("OUTGOINGIP", outgoingip.s)) {
-			my_error("alert: Out of memory", 0, 0);
-			_exit(1);
-		}
+		if (r && !env_put2("OUTGOINGIP", outgoingip.s))
+			temp_nomem();
 	}
 #ifdef IPV6
 	if (0 == r && !stralloc_copys(&outgoingip, "::"))
@@ -3123,7 +3130,7 @@ getcontrols()
 	switch (control_readfile(&localips, (x = env_get("DOMAINBINDINGS")) ? x : "domainbindings", 0))
 	{
 	case -1:
-		temp_control(x);
+		temp_control("Unable to read control file", x);
 	case 0:
 		if (!constmap_init(&maplocalips, "", 0, 1))
 			temp_nomem();
@@ -3173,7 +3180,7 @@ getcontrols()
 	switch (control_readfile(&helohosts, (x = env_get("HELOHOSTBYIP")) ? x : "helohostbyip", 0))
 	{
 	case -1:
-		temp_control(x);
+		temp_control("Unable to read control file", x);
 	case 0:
 		if (!constmap_init(&maphelohosts, "", 0, 1))
 			temp_nomem();
@@ -3190,7 +3197,7 @@ getcontrols()
 	switch (control_readfile(&notlshosts, (x = env_get("NOTLSHOSTS")) ? x : "notlshosts", 0))
 	{
 	case -1:
-		temp_control(x);
+		temp_control("Unable to read control file", x);
 	case 0:
 		if (!constmap_init(&mapnotlshosts, "", 0, 0))
 			temp_nomem();
@@ -3208,7 +3215,7 @@ getcontrols()
 	switch (control_readfile(&tlsadomains, (x = env_get("TLSADOMAINS")) ? x : "tlsadomains", 0))
 	{
 	case -1:
-		temp_control(x);
+		temp_control("Unable to read control file", x);
 	case 1:
 		if (!constmap_init(&maptlsadomains, tlsadomains.s, tlsadomains.len, 0))
 			temp_nomem();
@@ -3291,7 +3298,7 @@ lookup_host(char *hst, int len)
 			temp_nomem();
 		morerelayhost.len = dlen;
 		if (cdb_bread(fdmoreroutes, morerelayhost.s, morerelayhost.len) == -1)
-			temp_control("moresmtproutes.cdb");
+			temp_control("Unable to read control file", "moresmtproutes.cdb");
 		if (!stralloc_0(&morerelayhost))
 			temp_nomem();
 		return morerelayhost.s;
@@ -3696,7 +3703,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.143 2021-01-27 13:21:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.144 2021-05-26 10:46:02+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3704,6 +3711,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.144  2021-05-26 10:46:02+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.143  2021-01-27 13:21:47+05:30  Cprogrammer
  * corrected SMTP code for unicode error
  *

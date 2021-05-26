@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpto.c,v $
+ * Revision 1.23  2021-05-26 10:46:41+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.22  2020-11-24 13:47:38+05:30  Cprogrammer
  * removed exit.h
  *
@@ -77,6 +80,7 @@
 #include "ip.h"
 #include "lock.h"
 #include "error.h"
+#include "strerr.h"
 #include "datetime.h"
 #include "env.h"
 #include "now.h"
@@ -84,6 +88,8 @@
 #include "tcpto.h"
 #include "variables.h"
 #include <unistd.h>
+
+#define FATAL "qmail-tcpto: fatal: "
 
 #ifndef QUEUE_COUNT
 #define QUEUE_COUNT 10
@@ -183,8 +189,7 @@ main()
 #ifndef MULTI_QUEUE
 	if (chdir(auto_qmail))
 		die_home();
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
 		case -1:
@@ -221,10 +226,8 @@ main()
 	r >>= 5;
 	start = now();
 	record = tcpto_buf;
-	for (i = 0; i < r; ++i)
-	{
-		if (record[4] >= 1)
-		{
+	for (i = 0; i < r; ++i) {
+		if (record[4] >= 1) {
 			af = record[0];
 			if (af == AF_INET)
 				byte_copy((char *) &ip.ip, 4, record + 16);
@@ -233,8 +236,7 @@ main()
 			if (af == AF_INET6)
 				byte_copy((char *) &ip.ip6, 16, record + 16);
 #endif
-			else
-			{
+			else {
 				record += 32;
 				continue;
 			}
@@ -249,8 +251,7 @@ main()
 			if (af == AF_INET6)
 				substdio_put(subfderr, tmp, ip6_fmt(tmp, &ip.ip6));
 #endif
-			else
-			{
+			else {
 				record += 32;
 				continue;
 			}
@@ -296,8 +297,7 @@ main(int argc, char **argv)
 
 	if (chdir(auto_qmail))
 		die_home();
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
 		case -1:
@@ -319,8 +319,7 @@ main(int argc, char **argv)
 		qstart = 1;
 	else
 		scan_int(queue_start_ptr, &qstart);
-	for (idx = qstart, count=1; count <= qcount; count++, idx++)
-	{
+	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
 		if (!stralloc_copys(&Queuedir, qbase))
 			die_nomem();
 		if (!stralloc_cats(&Queuedir, "/queue"))
@@ -329,8 +328,11 @@ main(int argc, char **argv)
 			die_nomem();
 		if (!stralloc_0(&Queuedir))
 			die_nomem();
-		if (access(Queuedir.s, F_OK))
+		if (access(Queuedir.s, F_OK)) {
+			if (errno != error_noent)
+				strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
 			break;
+		}
 		queuedir = Queuedir.s;
 		outok("processing queue ");
 		outok(queuedir);
@@ -343,14 +345,15 @@ main(int argc, char **argv)
 		die_nomem();
 	if (!stralloc_0(&Queuedir))
 		die_nomem();
-	if (!access(Queuedir.s, F_OK))
-	{
+	if (!access(Queuedir.s, F_OK)) {
 		queuedir = Queuedir.s;
 		outok("processing queue ");
 		outok(queuedir);
 		outok("\n");
 		main_function();
-	}
+	} else
+	if (errno != error_noent)
+		strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
 	die(0);
 	/*- Not reached */
 	return(0);
@@ -360,7 +363,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpto_c()
 {
-	static char    *x = "$Id: qmail-tcpto.c,v 1.22 2020-11-24 13:47:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-tcpto.c,v 1.23 2021-05-26 10:46:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

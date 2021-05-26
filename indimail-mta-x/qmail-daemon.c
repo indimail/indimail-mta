@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.21  2021-05-26 10:43:58+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
  * Revision 1.20  2020-05-11 11:04:08+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -316,6 +319,14 @@ start_send(char **argv, int qstart, int qcount)
 			die();
 		}
 		nqueue = !access(queuedir.s, F_OK);
+		if (!nqueue && errno != error_noent) {
+			logerr("alert: ");
+			logerr(queuedir.s);
+			logerr(": ");
+			logerr(error_str(errno));
+			logerrf("\n");
+			die();
+		}
 		if (nqueue)
 			my_log(" nqueue");
 	} else
@@ -495,7 +506,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.20 2020-05-11 11:04:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.21 2021-05-26 10:43:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
