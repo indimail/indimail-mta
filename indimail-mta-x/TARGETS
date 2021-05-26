@@ -1144,3 +1144,4 @@ set_environment.o
 maildir_deliver.o
 get_rate.o
 report.o
+getDomainToken.o

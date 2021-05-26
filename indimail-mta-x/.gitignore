@@ -633,3 +633,4 @@ qmail-showctl.8
 maildir_deliver.o
 get_rate.o
 report.o
+getDomainToken.o
