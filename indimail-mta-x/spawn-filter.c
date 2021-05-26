@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.77  2021-05-26 07:38:04+05:30  Cprogrammer
+ * moved getDomainToken() to getDomainToken.c
+ *
  * Revision 1.76  2021-05-23 07:12:36+05:30  Cprogrammer
  * moved report() to report.c
  * moved rate functions to get_rate.c
@@ -264,20 +267,13 @@
 #include "scan.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <regex.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include "MakeArgs.h"
 #include "report.h"
 #include "get_rate.h"
-#include "wildmat.h"
-
-#define REGCOMP(X,Y)    regcomp(&X, Y, REG_EXTENDED|REG_ICASE)
-#define REGEXEC(X,Y)    regexec(&X, Y, (size_t) 0, (regmatch_t *) 0, (int) 0)
-#ifndef REG_NOERROR
-#define REG_NOERROR 0
-#endif
+#include "getDomainToken.h"
 
 static int      mkTempFile(int);
 static int      run_mailfilter(char *, char *, char *, char *, char **);
@@ -285,9 +281,9 @@ static void     log_spam(char *, char *, char *, stralloc *);
 static int      redirect_mail(char *, char *, char *, char *);
 static void     create_logfilter();
 static int      check_size(char *);
-char           *getDomainToken(char *, stralloc *);
 static void     set_environ(char *, char *, char *, char *, char *);
 
+dtype           delivery;
 static int      spfok = 0;
 static stralloc spf = { 0 };
 static int      sppok = 0;
@@ -351,7 +347,7 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 			report(111, "spawn: read: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		close(255);
 		if (!stralloc_0(line))
-			report(111, "spawn: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+			report(111, "spawn: out of memory", ". (#4.3.0)", 0, 0, 0, 0);
 		if (line->len) {
 			if (substdio_puts(&spamout, line->s) == -1)
 				report(111, "spawn: write: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
@@ -368,16 +364,10 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 static void
 set_environ(char *host, char *ext, char *qqeh, char *sender_p, char *recipient_p)
 {
-	if (!env_put2("DOMAIN", host)) 
-		report(111, "spawn: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-	if (!env_put2("_EXT", ext))
-		report(111, "spawn: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-	if (!env_put2("_QQEH", qqeh))
-		report(111, "spawn: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-	if (!env_put2("_SENDER", sender_p))
-		report(111, "spawn: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-	if (!env_put2("_RECIPIENT", recipient_p))
-		report(111, "spawn: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	if (!env_put2("DOMAIN", host) || !env_put2("_EXT", ext) ||
+			!env_put2("_QQEH", qqeh) || !env_put2("_SENDER", sender_p) ||
+			!env_put2("_RECIPIENT", recipient_p))
+		report(111, "spawn: out of memory", ". (#4.3.0)", 0, 0, 0, 0);
 	return;
 }
 
@@ -404,7 +394,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 		/*- Avoid loop if program(s) defined by FILTERARGS call qmail-inject, etc */
 		if (!env_unset("FILTERARGS") || !env_unset("SPAMFILTER") ||
 				!env_unset("QMAILREMOTE") || !env_unset("QMAILLOCAL"))
-			report(111, "spawn: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+			report(111, "spawn: out of memory", ". (#4.3.0)", 0, 0, 0, 0);
 		execv(mailprog, argv); /*- do the delivery (qmail-local/qmail-remote) */
 		report(111, "spawn: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 		_exit(111); /*- To make compiler happy */
@@ -434,7 +424,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 			close(pipefe[1]);
 		/*- Avoid loop if program(s) defined by FILTERARGS call qmail-inject, etc */
 		if (!env_unset("FILTERARGS") || !env_unset("SPAMFILTER"))
-			report(111, "spawn: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+			report(111, "spawn: out of memory", ". (#4.3.0)", 0, 0, 0, 0);
 		execl("/bin/sh", "sh", "-c", filterargs, (char *) 0);
 		report(111, "spawn: could not exec /bin/sh: ",  filterargs, ": ", error_str(errno), ". (#4.3.0)", 0);
 	default:
@@ -496,53 +486,6 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 	}
 	/*- Not reached */
 	return(111);
-}
-
-char           *
-getDomainToken(char *domain, stralloc *sa)
-{
-	regex_t         qreg;
-	int             len, n, retval;
-	char           *ptr, *p;
-
-	for (len = 0, ptr = sa->s;len < sa->len;) {
-		len += ((n = str_len(ptr)) + 1);
-		for (p = ptr;*p && *p != ':';p++);
-		if (*p == ':') {
-			*p = 0;
-			/*- build the regex */
-			if ((retval = str_diff(ptr, domain))) {
-				if (env_get("QREGEX")) {
-					if ((retval = REGCOMP(qreg, ptr)) == 0)
-						retval = (REGEXEC(qreg, domain) == REG_NOMATCH ? 1 : REG_NOERROR);
-					regfree(&qreg);
-				} else
-					retval = !wildmat_internal(domain, ptr);
-			}
-			*p = ':';
-			if (!retval) { /*- match occurred for domain or wildcard */
-				/* check for local/remote directives */
-				if (delivery == remote) { /*- remote delivery */
-					if (!str_diffn(p + 1, "remote:", 7))
-						return (p + 8);
-					if (!str_diffn(p + 1, "local:", 6)) {
-						ptr = sa->s + len;
-						continue; /*- skip local directives for remote mails */
-					}
-				} else { /*- local delivery */
-					if (!str_diffn(p + 1, "local:", 6))
-						return (p + 7);
-					if (!str_diffn(p + 1, "remote:", 7)) {
-						ptr = sa->s + len;
-						continue; /*- skip remote directives for local mails */
-					}
-				}
-				return (p + 1);
-			}
-		}
-		ptr = sa->s + len;
-	} /*- for (len = 0, ptr = sa->s;len < sa->len;) */
-	return ((char *) 0);
 }
 
 static int
@@ -812,17 +755,17 @@ main(int argc, char **argv)
 		if (chdir(rate_dir))
 			report(111, "spawn: Unable to switch to ", rate_dir, ": ", error_str(errno), ". (#4.3.0)", 0);
 		if (!access(domain, W_OK)) {
-			if (!is_rate_ok(rate_dir, domain, 0))
+			if (!is_rate_ok(domain, 0, 0, 0, 0))
 				report(111, "spawn: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
 		} else
 		if (!access("ratecontrol", R_OK)) {
 			if (control_readfile(&ratedefs, "./ratecontrol", 0) == -1)
 				report(111, "spawn: Unable to read ratecontrol: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 			rate_exp = getDomainToken(domain, &ratedefs);
-			if (!is_rate_ok(rate_dir, domain, rate_exp))
+			if (!is_rate_ok(domain, rate_exp, 0, 0, 0))
 				report(111, "spawn: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
 		} else
-		if (!access(".global", W_OK) && !is_rate_ok(rate_dir, ".global", 0))
+		if (!access(".global", W_OK) && !is_rate_ok(".global", 0, 0, 0, 0))
 			report(111, "spawn: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
 		if (chdir(auto_qmail) == -1)
 			report(111, "spawn: Unable to switch to ", auto_qmail, ": ", error_str(errno), ". (#4.3.0)", 0);
@@ -962,10 +905,10 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.76 2021-05-23 07:12:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.77 2021-05-26 07:38:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetrateh;
 	x = sccsidreporth;
-	x = sccsidwildmath;
+	x = sccsidgetdomainth;
 	x++;
 }
