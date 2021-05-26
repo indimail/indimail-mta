@@ -557,7 +557,7 @@ socket_ip4loopback.o dns.lib socket.lib tls.lib
 
 dnstlsarr.o: \
 compile dnstlsarr.c dns.h dnsdoe.h tlsarralloc.h \
-hastlsa.h control.h conf-tls conf-ip
+hastlsa.h control.h starttls.h conf-tls conf-ip
 	./compile `grep -h -v "^#" conf-ip conf-tls` dnstlsarr.c
 
 dot-qmail.5: \
@@ -3203,7 +3203,7 @@ dns.lib tls.o tls.lib starttls.o
 qmail-daned.o: \
 compile qmail-daned.c control.h variables.h \
 tlsacheck.h haveip6.h ip.h auto_qmail.h auto_control.h \
-hastlsa.h conf-ip conf-tls MakeArgs.h
+hastlsa.h MakeArgs.h starttls.h conf-ip conf-tls
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls` \
 	qmail-daned.c
 

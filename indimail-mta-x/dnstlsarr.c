@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.14  2021-05-26 11:05:43+05:30  Cprogrammer
+ * use starttls.h for prototypes in starttls.c
+ *
  * Revision 1.13  2020-11-24 13:45:02+05:30  Cprogrammer
  * removed exit.h
  *
@@ -57,6 +60,7 @@
 #include "control.h"
 #include "scan.h"
 #include "now.h"
+#include "starttls.h"
 
 char            temp[IPFMT + FMT_ULONG];
 int             timeoutssl = 300;
@@ -68,12 +72,6 @@ stralloc        sahost = { 0 };
 extern stralloc sa;
 extern tlsarralloc ta;
 extern ipalloc  ia;
-
-void            die_nomem();
-void            out(char *);
-void            flush();
-void            die_control(char *);
-int             do_dane_validation(char *, int);
 
 void
 pusage()
@@ -128,9 +126,9 @@ main(argc, argv)
 		pusage();
 	if (verify) { /*- DANE Verification */
 		if (control_init() == -1)
-			die_control("me");
+			die_control("unable to read control file ", "me");
 		if (control_rldef(&helohost, "helohost", 1, (char *) 0) != 1)
-			die_control("helohost");
+			die_control("unable to read control file ", "helohost");
 		if (query_mx) {
 			if (!stralloc_copys(&sahost, host)) {
 				substdio_putsflush(subfderr, "out of memory\n");
@@ -280,7 +278,8 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.13 2020-11-24 13:45:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.14 2021-05-26 11:05:43+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidstarttlsh;
 	x++;
 }

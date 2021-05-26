@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.26  2021-05-26 11:06:29+05:30  Cprogrammer
+ * use starttls.h for prototypes in starttls.c
+ *
  * Revision 1.25  2020-11-24 13:46:44+05:30  Cprogrammer
  * removed exit.h
  *
@@ -114,6 +117,7 @@
 #include "MakeArgs.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
+#include "starttls.h"
 
 #define FATAL "qmail-daned: fatal: "
 #define WARN  "qmail-daned: warning: "
@@ -161,21 +165,13 @@ stralloc        helohost = { 0 };
 
 extern stralloc save;
 
-void            out(char *);
-void            die_control(char *);
-void            die_nomem();
-void            logerr(char *);
-void            logerrf(char *);
-void            flush();
-int             get_dane_records(char *);
-
 void
 tlsadomains_init(char *arg)
 {
 	if (verbose > 2)
 		out("initializing tlsadomains\n");
 	if ((tlsadomainsok = control_readfile(&tlsadomains, arg, 0)) == -1)
-		die_control(arg);
+		die_control("unable to read control file ", arg);
 	if (tlsadomainsok && !constmap_init(&maptlsadomains, tlsadomains.s, tlsadomains.len, 0))
 		die_nomem();
 	if (verbose > 2)
@@ -189,7 +185,7 @@ whitelist_init(char *arg)
 	if (verbose > 2)
 		out("initializing whitelist\n");
 	if ((whitelistok = control_readfile(&whitelist, arg, 0)) == -1)
-		die_control(arg);
+		die_control("unable to read control file ", arg);
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
 	if (verbose > 2)
@@ -221,7 +217,7 @@ cdb_match(char *fn, char *addr, int len)
 		die_nomem();
 	if ((fd_cdb = open_read(controlfile.s)) == -1) {
 		if (errno != error_noent)
-			die_control(controlfile.s);
+			die_control("unable to read control file ", controlfile.s);
 		/*- cdb missing or entry missing */
 		return (0);
 	}
@@ -640,7 +636,7 @@ load_context()
 	if ((fd = open(context_file.s, O_RDONLY)) == -1) {
 		if (errno == error_noent)
 			return;
-		die_control(context_file.s);
+		die_control("unable to read control file ", context_file.s);
 	}
 	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
 	cur_time = time(0);
@@ -1027,13 +1023,13 @@ main(int argc, char **argv)
 	struct timeval  tv;
 
 	if (control_init() == -1)
-		die_control("me");
+		die_control("unable to read control file ", "me");
 	if (control_readint(&timeoutconnect, "timeoutconnect") == -1)
-		die_control("timeoutconnect");
+		die_control("unable to read control file ", "timeoutconnect");
 	if (control_readint(&timeoutssl, "timeoutremote") == -1)
-		die_control("timeoutremote");
+		die_control("unable to read control file ", "timeoutremote");
 	if (control_rldef(&helohost, "helohost", 1, (char *) 0) == -1)
-		die_control("helohost");
+		die_control("unable to read control file ", "helohost");
 	/*- defaults */
 	save_interval = 5 * 60;    /*- 5 mins */
 	timeout = 7 * 24 * 3600;   /*- 7 days */
@@ -1371,7 +1367,8 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.25 2020-11-24 13:46:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.26 2021-05-26 11:06:29+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidstarttlsh;
 	x++;
 }
