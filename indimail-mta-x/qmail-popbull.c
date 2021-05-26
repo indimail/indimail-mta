@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-popbull.c,v $
+ * Revision 1.10  2021-05-26 10:44:34+05:30  Cprogrammer
+ * replaced strerror() with error_str()
+ *
  * Revision 1.9  2020-09-16 19:05:06+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -183,7 +186,7 @@ main(argc, argv)
 	execvp(*childargs, childargs);
 	if (!stralloc_copys(&errorstr, "qmail-popbull: execvp: "))
 		die_nomem();
-	if (!stralloc_cats(&errorstr, strerror(errno)))
+	if (!stralloc_cats(&errorstr, error_str(errno)))
 		die_nomem();
 	if (!stralloc_0(&errorstr))
 		die_nomem();
@@ -196,7 +199,7 @@ main(argc, argv)
 void
 getversion_qmail_popbull_c()
 {
-	static char    *x = "$Id: qmail-popbull.c,v 1.9 2020-09-16 19:05:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-popbull.c,v 1.10 2021-05-26 10:44:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
