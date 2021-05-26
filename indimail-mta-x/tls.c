@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.8  2021-05-26 10:47:57+05:30  Cprogrammer
+ * replaced strerror() with error_str()
+ *
  * Revision 1.7  2018-06-11 23:28:54+05:30  Cprogrammer
  * removed ssl_free()
  *
@@ -74,14 +77,14 @@ ssl_strerror()
 		return err;
 	if (!errno)
 		return 0;
-	return errno == error_timeout ? "timed out" : strerror(errno);
+	return errno == error_timeout ? "timed out" : error_str(errno);
 }
 #endif
 
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 1.7 2018-06-11 23:28:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tls.c,v 1.8 2021-05-26 10:47:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
