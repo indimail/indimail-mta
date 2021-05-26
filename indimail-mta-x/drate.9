@@ -28,8 +28,11 @@ or
 or
 
 .B drate
-.B \-d \fIdomain
 .B \-t
+.B \-d \fIdomain
+[
+.B \-f
+]
 
 .SH DESCRIPTION
 \fBdrate\fR(1) displays or sets delivery rate for \fBqmail-remote\fR(8). The actual rate
@@ -60,6 +63,10 @@ Run in test mode as if mail is getting delivered. Every invocation will update
 the email count and the end time. It will calculate the current rate and return
 error with it gets exceeded. This option simulates rate calcuation that happens
 during delivery and shouldn't be used on a production system
+
+.TP
+\fB-f\fR
+Force update email counts and end time.
 
 .TP
 \fB-s\fR
