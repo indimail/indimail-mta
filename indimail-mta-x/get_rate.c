@@ -1,5 +1,8 @@
 /*
  * $Log: get_rate.c,v $
+ * Revision 1.3  2021-05-26 16:30:04+05:30  Cprogrammer
+ * added option to force update
+ *
  * Revision 1.2  2021-05-26 07:42:11+05:30  Cprogrammer
  * made DELIMITER configurable
  * return email count, configure rate and current rate in is_rate_ok()
@@ -12,6 +15,7 @@
 #include <env.h>
 #include <now.h>
 #include <fmt.h>
+#include <str.h>
 #include <open.h>
 #include <scan.h>
 #include <substdio.h>
@@ -64,14 +68,14 @@ get_rate(char *expression, double *rate)
 }
 
 int
-is_rate_ok(char *file, char *rate_exp, unsigned long *e, double *c, double *r)
+is_rate_ok(char *file, char *_rate_exp, unsigned long *e, double *c, double *r)
 {
-	int             wfd, rfd, match, line_no = -1, rate_int, access_flag;
+	int             wfd, rfd, match, line_no = -1, rate_int, access_flag, force = 0;
 	unsigned long   email_count = 0;
 	char            reset, stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
 	double          conf_rate, cur_rate = 0.0;
 	char            inbuf[2048], outbuf[1024];
-	char           *ptr;
+	char           *ptr, *rate_exp;
 	struct substdio ssin, ssout;
 	datetime_sec    starttime, endtime;
 	struct stat     statbuf;
@@ -83,11 +87,14 @@ is_rate_ok(char *file, char *rate_exp, unsigned long *e, double *c, double *r)
 		rate_int = 86400;
 	else
 		scan_int(ptr, &rate_int);
+	rate_exp = _rate_exp;
+	if (rate_exp && !str_diffn(rate_exp, "-1", 3)) {
+		force = 1;
+		rate_exp = NULL;
+	}
 	reset = stat(file, &statbuf) ? 1 : (starttime - statbuf.st_mtime > rate_int);
 	stime[fmt_ulong(stime, starttime)] = 0;
 	etime[fmt_ulong(etime, endtime)] = 0;
-	ecount[0] = '1'; /*- we are delivering the first email since rate control has been imposed */
-	ecount[1] = 0;
 	access_flag = access(file, F_OK);
 	if (access_flag && errno != error_noent)
 		report(111, "spawn: ", "open: ", file, ": ", error_str(errno), ". (#4.3.0)");
@@ -165,7 +172,7 @@ is_rate_ok(char *file, char *rate_exp, unsigned long *e, double *c, double *r)
 	 * conf_rate = 0        - defer emails
 	 * cur_rate > conf_rate - defer emails
 	 */
-	if (line_no < 1 || (conf_rate >= 0 && cur_rate > conf_rate)) {
+	if (line_no < 1 || (force == 0 && conf_rate >= 0 && cur_rate > conf_rate)) {
 		close(wfd);
 		return (line_no < 1 ? 1 : 0);
 	}
@@ -202,7 +209,7 @@ is_rate_ok(char *file, char *rate_exp, unsigned long *e, double *c, double *r)
 void
 getversion_get_rate_c()
 {
-	static char    *x = "$Id: get_rate.c,v 1.2 2021-05-26 07:42:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: get_rate.c,v 1.3 2021-05-26 16:30:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidevalh;
 	x = sccsidgetrateh;

@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.9  2021-05-26 16:30:44+05:30  Cprogrammer
+ * added option to force update
+ *
  * Revision 1.8  2021-05-26 10:34:22+05:30  Cprogrammer
  * refactored code and added test mode
  *
@@ -308,14 +311,14 @@ new:
 }
 
 void
-do_test(char *domain)
+do_test(char *domain, int force)
 {
 	char           *rate_expr = 0;
 	char            strdouble1[FMT_DOUBLE], strdouble2[FMT_DOUBLE];
 	unsigned long   email_count;
 	double          rate, conf_rate;
 
-	if (!access(domain, W_OK) && !is_rate_ok(domain, 0, &email_count, &conf_rate, &rate)) {
+	if (!access(domain, W_OK) && !is_rate_ok(domain, force ? "-1" : 0, &email_count, &conf_rate, &rate)) {
 		strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 		strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 		strnum[fmt_ulong(strnum, email_count)] = 0;
@@ -355,23 +358,28 @@ do_test(char *domain)
 int
 main(int argc, char **argv)
 {
-	int             ch, display = 0, incr = 0, consolidate = 0, 
-					reset_mode = 0, test_mode = 0;
+	int             ch, display = 1, incr = 0, consolidate = 0, 
+					reset_mode = 0, test_mode = 0, force = 0;
 	char           *domain = 0, *rate_expr = 0, *ratelimit_dir = "ratelimit";
 
-	while ((ch = getopt(argc, argv, "ltscRd:r:D:")) != sgoptdone) {
+	while ((ch = getopt(argc, argv, "fltscRd:r:D:")) != sgoptdone) {
 		switch (ch)
 		{
 		case 'l':
 			local_time = 1;
 			break;
 		case 't':
+			display = 0;
 			test_mode = 1;
+			break;
+		case 'f':
+			force = 1;
 			break;
 		case 's':
 			display = 1;
 			break;
 		case 'R':
+			display = 0;
 			reset_mode = 1;
 			break;
 		case 'c':
@@ -381,6 +389,7 @@ main(int argc, char **argv)
 			domain = optarg;
 			break;
 		case 'r': /*- delivery rate */
+			display = 0;
 			rate_expr = optarg;
 			switch (*optarg)
 			{
@@ -415,7 +424,7 @@ main(int argc, char **argv)
 		do_display(domain);
 	else
 	if (test_mode) {
-		do_test(domain);
+		do_test(domain, force);
 	} else {
 		if (!reset_mode && !rate_expr) {
 			logerrf("rate expression not specified\n");
@@ -430,7 +439,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.8 2021-05-26 10:34:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.9 2021-05-26 16:30:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
