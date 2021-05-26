@@ -15,7 +15,6 @@ typedef enum {
 	local,
 	remote
 } dtype;
-extern dtype    delivery;
 
 void            report(int, char *, char *, char *, char *, char *, char *);
 
