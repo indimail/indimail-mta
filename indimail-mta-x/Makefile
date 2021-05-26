@@ -1354,15 +1354,16 @@ compile qmail-multi.c auto_qmail.h control.h conf-queue MakeArgs.h
 spawn-filter: \
 load spawn-filter.o variables.o get_rate.o report.o \
 auto_qmail.o control.o wildmat.o qregex.o MakeArgs.o \
-auto_control.o matchregex.o envrules.o socket.lib dns.lib
+auto_control.o matchregex.o envrules.o getDomainToken.o \
+socket.lib dns.lib
 	./load spawn-filter variables.o get_rate.o report.o \
 	auto_qmail.o control.o wildmat.o qregex.o \
-	MakeArgs.o auto_control.o matchregex.o \
+	MakeArgs.o auto_control.o matchregex.o getDomainToken.o \
 	envrules.o `cat dns.lib socket.lib` -lm -lqmail
 
 spawn-filter.o: \
 compile spawn-filter.c control.h auto_qmail.h variables.h qregex.h \
-MakeArgs.h report.h get_rate.h wildmat.h
+MakeArgs.h report.h get_rate.h getDomainToken.h
 	./compile spawn-filter.c
 
 spawn-filter.8: \
@@ -1379,6 +1380,10 @@ compile get_rate.c get_rate.h report.h
 report.o: \
 compile report.c report.h
 	./compile report.c
+
+getDomainToken.o: \
+compile getDomainToken.c getDomainToken.h wildmat.h
+	./compile getDomainToken.c
 
 drate.1: \
 drate.9 conf-prefix
@@ -3379,13 +3384,15 @@ warn-auto.sh surblqueue.sh conf-prefix
 	chmod 755 surblqueue
 
 drate: \
-load drate.o variables.o myctime.o auto_uids.o auto_control.o
-	./load drate variables.o myctime.o \
-	auto_uids.o auto_control.o -lm -lqmail
+load drate.o variables.o myctime.o auto_uids.o auto_control.o \
+control.o get_rate.o getDomainToken.o
+	./load drate variables.o myctime.o auto_uids.o \
+	auto_control.o get_rate.o getDomainToken.o wildmat.o \
+	control.o -lm -lqmail
 
 drate.o: \
-compile drate.c variables.h myctime.h \
-auto_uids.h auto_control.h
+compile drate.c variables.h myctime.h auto_uids.h auto_control.h \
+get_rate.h control.h getDomainToken.h report.h
 	./compile drate.c
 
 cidr: load cidr.o
