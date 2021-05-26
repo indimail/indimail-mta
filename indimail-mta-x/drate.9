@@ -25,6 +25,12 @@ or
 .B \-s
 ]
 
+or
+
+.B drate
+.B \-d \fIdomain
+.B \-t
+
 .SH DESCRIPTION
 \fBdrate\fR(1) displays or sets delivery rate for \fBqmail-remote\fR(8). The actual rate
 limiting happens in \fBspawn-filter\fR(8). Hence, QMAILREMOTE should be set to
@@ -47,6 +53,13 @@ number of seconds. You can manually reset the interval using \fB-R\fR option of
 
 .SH OPTIONS
 .PP
+
+.TP
+\fB-t\fR
+Run in test mode as if mail is getting delivered. Every invocation will update
+the email count and the end time. It will calculate the current rate and return
+error with it gets exceeded. This option simulates rate calcuation that happens
+during delivery and shouldn't be used on a production system
 
 .TP
 \fB-s\fR
