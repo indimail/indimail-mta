@@ -96,7 +96,18 @@ Release 2.13 Start 14/02/2021
 - 24/05/2021
 59. spawn-filter.c: move report() to report.c
 60. spawn-filter.c: move rate functions to get_rate.c
-61. wildmat.h: header for wildmat_internal(
+61. wildmat.h: header for wildmat_internal()
+- 26/05/2021
+62. drate: refactored code and added test mode
+63. spawn-filter: moved getDomainToken() to getDomainToken.c
+64. get_rate.c: made DELIMITER configurable
+65. get_rate.c: return email count, configure rate and current rate in is_rate_ok()
+66. qmail-popbull.c, tls.c: replaced strerror() with error_str()
+67. etrn.c hier.c load_mysql.c plugtest.c qmail-cdb.c qmail-daemon.c
+    qmail-dk.c qmail-dkim.c qmail-qread.c qmail-remote.c qmail-rm.c qmail-tcpok.c
+    qmail-tcpto.c set_environment.c smtpd.c spawn-filter.c starttls.c
+    surblfilter.c sys-checkpwd.c tcpopen.c: handle access() error other than
+    ENOENT
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

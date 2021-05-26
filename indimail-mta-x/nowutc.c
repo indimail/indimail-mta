@@ -18,13 +18,15 @@
  */
 #include <stdio.h>
 #include <unistd.h>
-#include <errno.h>
-#include <string.h>
+#include <error.h>
+#include <strerr.h>
 #include "leapsecs.h"
 #include "tai.h"
 #include "taia.h"
 #include "caltime.h"
 #include "auto_sysconfdir.h"
+
+#define FATAL "nowutc: fatal: "
 
 struct taia     cur;
 struct tai      sec;
@@ -35,14 +37,10 @@ char            x[TAIA_FMTFRAC];
 int
 main()
 {
-	if (chdir(auto_sysconfdir) == -1) {
-		fprintf(stderr, "chdir: %s: %s\n", auto_sysconfdir, strerror(errno));
-		_exit (111);
-	}
-	if (leapsecs_init() == -1) {
-		fprintf(stderr, "utcnow: fatal: unable to init leapsecs\n");
-		_exit (111);
-	}
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "chdir: ", auto_sysconfdir, ": ");
+	if (leapsecs_init() == -1)
+		strerr_die2x(111, FATAL, "unable to initialize leapsecs");
 
 	taia_now(&cur);
 	x[taia_fmtfrac(x, &cur)] = 0;

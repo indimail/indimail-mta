@@ -1660,8 +1660,8 @@ del_dochan(int c)
 				del_status();
 			}
 			dline[c].len = 0;
-		}
-	}
+		} /* if (!ch && (dline[c].len > 2)) */
+	} /*- for (i = 0; i < r; ++i) */
 }
 
 static void
@@ -1797,7 +1797,7 @@ pass_dochan(int c)
 		pass[c].mpos = 0;
 		if ((pass[c].fd = open_read(fn1.s)) == -1) /*- open local/split/inode or remote/split/inode */
 			goto trouble;
-		if (!getinfo(&line, &qqeh, &envh, &birth, pe.id)) {
+		if (!getinfo(&line, &qqeh, &envh, &birth, pe.id)) { /*- read info/split/inode to get sender */
 			close(pass[c].fd);
 			goto trouble;
 		}
@@ -1840,7 +1840,7 @@ pass_dochan(int c)
 	{
 	case 'T': /*- send message to qmail-lspawn/qmail-rspawn to start delivery */
 		++jo[pass[c].j].numtodo;
-		del_start(pass[c].j, pass[c].mpos, line.s + 1);
+		del_start(pass[c].j, pass[c].mpos, line.s + 1); /*- line.s[1] = recipient */
 		break;
 	case 'D': /*- delivery done */
 		break;
@@ -1996,6 +1996,11 @@ todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 	}
 }
 
+/*
+ * set flagchan for local or remote
+ * set pqchan[c]
+ * set pqdone
+ */
 static void
 todo_del(char *s)
 {
@@ -2051,7 +2056,7 @@ todo_del(char *s)
 /*
  * if data is available fd 8 for read
  * read data
- * 'D' - set flagexitasap = 1
+ * 'D' - set up delivery by calling todo_do()
  * 'L' - Write to log (fd 0) for logging
  * 'X' - set flagtodoalive = 0, flagexitasap = 1
  */
@@ -2780,6 +2785,10 @@ run_plugin()
 		if (ptr != end)
 			plugin_ptr = ptr + 1;
 		if (access(plugin.s, F_OK)) {
+			if (errno != error_noent) {
+				log7("alert: ", queuedesc, ": unable to access: ", plugin.s, ": ", error_str(errno), "\n");
+				_exit(111);
+			}
 			if (ptr == end)
 				break;
 			else
@@ -2960,7 +2969,7 @@ main()
 		 * pqchan, pqfail, pqdone
 		 * 1. set if new delivery jobs available
 		 * 2. set if the earliest mail delivery message added from todo is now or earlier
-		 * 3. set if the earliest mail delivery for local/remote is now is now or earlier
+		 * 3. set if the earliest mail delivery for local/remote is now or earlier
 		 * 4. set if the earliest mail delivery for messages found in todo but stat had failed
 		 */
 		pass_selprep(&wakeup);
@@ -2983,7 +2992,7 @@ main()
 		} else {
 			recent = now();
 			/*- communicate with qmail-lspawn, qmail-rspawn
-			 * These were creted as pi1, pi3 in qmail-start.c
+			 * These were created as pi1, pi3 in qmail-start.c
 			 * write on fd 1 read by fd 0 in qmail-lspawn,
 			 * write on fd 3 read by fd 0 in qmail-rspawn
 			 */
@@ -2996,7 +3005,7 @@ main()
 			 */
 			del_do(&rfds);
 			/* read data from fd 8 from qmail-todo
-			 * 'D' - set flagexitasap = 1
+			 * 'D' - Do deliver
 			 * 'L' - Write to log (fd 0) for logging
 			 * 'X' - set flagtodoalive = 0, flagexitasap = 1
 			 */
