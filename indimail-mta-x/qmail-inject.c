@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.40  2021-05-27 11:25:45+05:30  Cprogrammer
+ * removed spam ignore code
+ *
  * Revision 1.39  2021-05-23 07:10:48+05:30  Cprogrammer
  * include wildmat.h for wildmat_internal
  *
@@ -151,14 +154,6 @@
 
 #define FATAL "qmail-inject: fatal: "
 #define WARN  "qmail-inject: warn: "
-
-/*- SPAM Ingore Sender Check Variables */
-int             spfok = 0;
-stralloc        spf = { 0 };
-struct constmap mapspf;
-int             sppok = 0;
-static stralloc spp = { 0 };
-struct constmap mapspp;
 
 #define LINELEN 80
 
@@ -346,39 +341,6 @@ saa             tocclist = { 0 };
 saa             hrrlist = { 0 };
 saa             reciplist = { 0 };
 int             flagresent;
-
-int
-spfcheck(stralloc *sa)
-{
-	int             i;
-	int             j;
-	int             k = 0;
-	char            subvalue;
-
-	case_lowerb(sa->s, sa->len); /*- convert into lower case */
-	if (spfok) {
-		if (constmap(&mapspf, sa->s, sa->len - 1))
-			return 1;
-		if ((j = byte_rchr(sa->s, sa->len, '@')) < sa->len && constmap(&mapspf, sa->s + j, sa->len -j - 1))
-			return 1;
-	}
-	/*- Include control file control/blackholedpatterns and evaluate with Wildmat check */
-	if (sppok) {
-		i = 0;
-		for (j = 0; j < spp.len; ++j) {
-			if (!spp.s[j]) {
-				subvalue = spp.s[i] != '!';
-				if (!subvalue)
-					i++;
-				if ((k != subvalue) && wildmat_internal(sa->s, spp.s + i))
-					k = subvalue;
-				i = j + 1;
-			}
-		}
-		return k;
-	}
-	return 0;
-}
 
 void
 exitnicely()
@@ -1015,10 +977,6 @@ finishheader()
 		else
 		if (ret == -4)
 			die_regex();
-		if (env_get("SPAMFILTER") && spfcheck(&satmp)) {
-			if (!env_unset("SPAMFILTER"))
-				die_nomem();
-		}
 		if (qmail_open(&qqt) == -1)
 			die_qqt();
 	} /*- if (flagqueue) */
@@ -1130,19 +1088,6 @@ getcontrols()
 		die_stat();
 	if (databytes && statbuf.st_size > databytes)
 		die_size();
-	/*
-	 * Spam Ignore Patch - include Control file 
-	 */
-	if (env_get("SPAMFILTER")) {
-		if ((spfok = control_readfile(&spf, "spamignore", 0)) == -1)
-			die_read();
-		if (spfok && !constmap_init(&mapspf, spf.s, spf.len, 0))
-			die_nomem();
-		if ((sppok = control_readfile(&spp, "spamignorepatterns", 0)) == -1)
-			die_read();
-		if (sppok && !constmap_init(&mapspp, spp.s, spp.len, 0))
-			die_nomem();
-	}
 }
 
 #define RECIP_DEFAULT 1
@@ -1279,7 +1224,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.39 2021-05-23 07:10:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.40 2021-05-27 11:25:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
