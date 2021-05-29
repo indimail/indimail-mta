@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.284  2021-05-29 23:38:12+05:30  Cprogrammer
+ * added slowq-send, slowq-start
+ *
  * Revision 1.283  2021-05-26 10:37:32+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -1033,10 +1036,12 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-qmqpc", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-daemon", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-start", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "slowq-start", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-lspawn", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-rspawn", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-clean", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-send", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "slowq-send", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmqpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmtpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-smtpd", auto_uido, 0, moder_t);
@@ -1408,9 +1413,11 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man8", "qmail-rspawn.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-clean.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-send.8", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man8", "slowq-send.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-todo.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-daemon.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-start.8", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man8", "slowq-start.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "splogger.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-internals.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-queue.8", uidr, gidr, moder_f);
@@ -1493,7 +1500,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.283 2021-05-26 10:37:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.284 2021-05-29 23:38:12+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
