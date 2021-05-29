@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.53  2021-05-29 23:49:39+05:30  Cprogrammer
+ * fixed qbase path
+ *
  * Revision 1.52  2020-09-16 19:04:52+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -480,7 +483,11 @@ qmail_multi(int argc, char **argv)
 				_exit(55);
 				break;
 			case 0:
-				qbase = auto_qmail;
+				if (!stralloc_copys(&QueueBase, auto_qmail) ||
+						!stralloc_catb(&QueueBase, "/queue", 6) ||
+						!stralloc_0(&QueueBase))
+					_exit(51);
+				qbase = QueueBase.s;
 				break;
 			case 1:
 				qbase = QueueBase.s;
@@ -665,6 +672,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.52 2020-09-16 19:04:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.53 2021-05-29 23:49:39+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
