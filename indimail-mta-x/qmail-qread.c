@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.35  2021-05-29 23:50:11+05:30  Cprogrammer
+ * fixed qbase path
+ *
  * Revision 1.34  2021-05-26 10:45:51+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -414,7 +417,11 @@ main(int argc, char **argv)
 			die_control();
 			break;
 		case 0:
-			qbase = auto_qmail;
+			if (!stralloc_copys(&QueueBase, auto_qmail) ||
+					!stralloc_catb(&QueueBase, "/queue", 6) ||
+					!stralloc_0(&QueueBase))
+				die_nomem();
+			qbase = QueueBase.s;
 			break;
 		case 1:
 			qbase = QueueBase.s;
@@ -661,7 +668,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.34 2021-05-26 10:45:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.35 2021-05-29 23:50:11+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
