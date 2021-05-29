@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.72  2021-05-29 23:50:28+05:30  Cprogrammer
+ * replace str_chr with str_rchr to get domain correctly from email address
+ *
  * Revision 1.71  2021-05-16 00:48:50+05:30  Cprogrammer
  * use configurable conf_split instead of auto_split variable
  *
@@ -776,13 +779,13 @@ set_archive(char *eaddr)
 					switch (*(ptr + 1))
 					{
 					case 'u':
-						at = str_chr(addr, '@');
+						at = str_rchr(addr, '@');
 						if (!stralloc_catb(&tmpe, addr, at))
 							return (1);
 						ptr++;
 						break;
 					case 'd':
-						if (addr[at = str_chr(addr, '@')] &&
+						if (addr[at = str_rchr(addr, '@')] &&
 							!stralloc_cats(&tmpe, addr + at + 1))
 							return (1);
 						ptr++;
@@ -1263,7 +1266,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.71 2021-05-16 00:48:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.72 2021-05-29 23:50:28+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
