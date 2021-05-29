@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.13  2021-05-29 23:49:54+05:30  Cprogrammer
+ * replace str_chr with str_rchr to get domain correctly from email address
+ *
  * Revision 1.12  2020-12-07 16:09:42+05:30  Cprogrammer
  * use exit code 79 for envelope format error
  *
@@ -150,7 +153,7 @@ parse_sender(char *env)
 			_exit(QQ_OOM);
 		return 2;
 	}
-	at = str_chr(ptr, '@');
+	at = str_rchr(ptr, '@');
 	if (ptr[at]) {
 		if (!env_put2("QMAILHOST", ptr + at + 1))
 			_exit(QQ_OOM);
@@ -453,7 +456,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.12 2020-12-07 16:09:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.13 2021-05-29 23:49:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
