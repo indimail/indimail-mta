@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.13  2021-05-30 00:14:28+05:30  Cprogrammer
+ * added log11() function
+ *
  * Revision 1.12  2021-05-08 12:25:15+05:30  Cprogrammer
  * include stralloc.h
  *
@@ -45,6 +48,7 @@ void            log4(char *, char *, char *, char *);
 void            log5(char *, char *, char *, char *, char *);
 void            log7(char *, char *, char *, char *, char *, char *, char *);
 void            log9(char *, char *, char *, char *, char *, char *, char *, char *, char *);
+void            log11(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
 void            log13(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);

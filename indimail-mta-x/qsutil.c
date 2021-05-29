@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.14  2021-05-30 00:14:16+05:30  Cprogrammer
+ * added log11() function
+ *
  * Revision 1.13  2016-03-31 17:37:11+05:30  Cprogrammer
  * flush logs only when line gets completed
  * added log lock code to ensure log lines done get jumbled when running as a multi process delivery
@@ -260,6 +263,42 @@ log9(s1, s2, s3, s4, s5, s6, s7, s8, s9)
 }
 
 void
+log11(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
+	char           *s1;
+	char           *s2;
+	char           *s3;
+	char           *s4;
+	char           *s5;
+	char           *s6;
+	char           *s7;
+	char           *s8;
+	char           *s9;
+	char           *s10;
+	char           *s11;
+{
+#ifdef LOCK_LOGS
+	if (loglock_fd != -1)
+		lock_exnb(loglock_fd);
+#endif
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
+	substdio_puts(&sserr, s5);
+	substdio_puts(&sserr, s6);
+	substdio_puts(&sserr, s7);
+	substdio_puts(&sserr, s8);
+	substdio_puts(&sserr, s9);
+	substdio_puts(&sserr, s10);
+	substdio_puts(&sserr, s11);
+	substdio_flush(&sserr);
+#ifdef LOCK_LOGS
+	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
+		lockerr();
+#endif
+}
+
+void
 log13(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13)
 	char           *s1;
 	char           *s2;
@@ -374,7 +413,7 @@ logsafe(s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.13 2016-03-31 17:37:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.14 2021-05-30 00:14:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
