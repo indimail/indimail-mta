@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.21  2021-05-30 00:15:57+05:30  Cprogrammer
+ * added -r option to create ratelimit dir
+ *
  * Revision 1.20  2021-05-16 00:49:33+05:30  Cprogrammer
  * use configurable conf_split instead of auto_split variable
  *
@@ -102,6 +105,7 @@ static int      flag_permfix = 0;
 static int      flag_namefix = 0;
 static int      flag_unlink = 0;
 static int      flag_verbose = 0;
+static int      flag_ratelimit = 0;
 static uid_t    qmailq_uid;
 static uid_t    qmails_uid;
 static uid_t    qmailr_uid;
@@ -132,8 +136,7 @@ usage()
 	strnum[fmt_int(strnum, auto_split)] = 0;
 	strerr_warn4(WARN,
 			"usage: queue-fix [-i | -N | -v] [-s split] queue_dir\n"
-			"                 -s - queue split number (default ",
-			strnum,
+			"                 -s - queue split number (default ", strnum,
 			")\n"
 			"                 -i - Interactive Mode\n"
 			"                 -N - Test Mode", 0);
@@ -143,28 +146,28 @@ usage()
 void
 die_check()
 {
-	strmsg_out1("Failed while checking directory structure.\n"
-		"Make sure the given queue exists and you have permission to access it.\n\n"
-		"Exiting...\n\n");
+	strerr_warn2(WARN, "Failed while checking directory structure.\n"
+		"Make sure the given queue exists and you have permission to access it.\n"
+		"Exiting...\n", 0);
 	_exit(111);
 }
 
 void
 die_recon()
 {
-	strmsg_out1("Failed to reconstruct queue.\n"
-			"Make sure the queue exists and you have permission to modify it.\n\n"
-		   "Exiting...\n\n");
+	strerr_warn2(WARN, "Failed to reconstruct queue.\n"
+			"Make sure the queue exists and you have permission to modify it.\n"
+		   "Exiting...\n", 0);
 	_exit(111);
 }
 
 void
 die_rerun()
 {
-	strmsg_out1(".tmp files exist in the queue.\n"
+	strerr_warn2(WARN, ".tmp files exist in the queue.\n"
 			"queue-fix may have abnormally terminated in a previous run.\n"
-		   "The queue must be manually cleaned of the .tmp files.\n\n"
-		   "Exiting...\n\n");
+		   "The queue must be manually cleaned of the .tmp files.\n"
+		   "Exiting...\n", 0);
 	_exit(111);
 }
 
@@ -186,7 +189,7 @@ confirm()
 }
 
 /*
- * gid may be -1 on files for "unknown
+ * gid may be -1 on files for "unknown"
  */
 int
 check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm, char type, int size)
@@ -200,8 +203,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 	case 'd':	/*- directory */
 		if (stat(name, &st)) {
 			queueError++;
-			if (errno != error_noent)
+			if (errno != error_noent) {
+				strerr_warn4(WARN, "stat: ", name, ":", 0);
 				return -1;
+			}
 			if (!flag_dircreate && flag_interactive) {
 				strmsg_out1("It looks like some directories don't exist, should I create them? (Y/n) - ");
 				if (!confirm())
@@ -209,16 +214,19 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 				flag_dircreate = 1;
 			}
 			/*- create it */
-			strmsg_out3("Creating directory [", name, "]\n");
+			if (flag_verbose)
+				strmsg_out3("Creating directory [", name, "]\n");
 			if (flag_doit && mkdir(name, perm))
 				strerr_die4sys(111, FATAL, "mkdir ", name, ": ");
 			strnum1[fmt_8long(strnum1, perm)] = 0;
-			strmsg_out5("Changing permissions of [", name, "] to [", strnum1, "]\n");
+			if (flag_verbose)
+				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
 			if (flag_doit && chmod(name, perm))
 				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
-			strmsg_out11("Changing ownership of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
+			if (flag_verbose)
+				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
 			if (flag_doit && chown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 			return 0;
@@ -235,7 +243,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			/*- fix it */
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
-			strmsg_out11("Changing ownership of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
+			if (flag_verbose)
+				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
 			if (flag_doit && chown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 		}
@@ -249,14 +258,18 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			}
 			/*- fix it */
 			strnum1[fmt_8long(strnum1, perm)] = 0;
-			strmsg_out5("Changing permissions of [", name, "] to [", strnum1, "]\n");
+			if (flag_verbose)
+				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
 			if (flag_doit && chmod(name, perm))
 				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
 		}
 		return 0;
 	case 'f':	/*- regular file */
-		if (stat(name, &st))
+		if (stat(name, &st)) {
+			if (errno != error_noent)
+				strerr_warn4(WARN, "stat: ", name, ":", 0);
 			return -1;
+		}
 		/*- check the values */
 		if (st.st_uid != uid || (st.st_gid != gid && gid != -1)) {
 			queueError++;
@@ -269,7 +282,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			/*- fix it */
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
-			strmsg_out11("Changing ownership of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
+			if (flag_verbose)
+				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
 			if (flag_doit && chown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 		}
@@ -283,7 +297,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			}
 			/*- fix it */
 			strnum1[fmt_8long(strnum1, perm)] = 0;
-			strmsg_out5("Changing permissions of [", name, "] to [", strnum1, "]\n");
+			if (flag_verbose)
+				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
 			if (flag_doit && chmod(name, perm))
 				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
 		}
@@ -291,8 +306,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 	case 'z':	/*- regular file with a size */
 		if (stat(name, &st)) {
 			queueError++;
-			if (errno != error_noent)
+			if (errno != error_noent) {
+				strerr_warn4(WARN, "stat: ", name, ":", 0);
 				return -1;
+			}
 			if (!flag_filecreate && flag_interactive) {
 				strmsg_out1("It looks like some files don't exist, should I create them? (Y/N) - ");
 				if (!confirm())
@@ -301,7 +318,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			}
 			/*- create it */
 			strnum1[fmt_int(strnum1, size)] = 0;
-			strmsg_out5("Creating [", name, "] with size [", strnum1, "]\n");
+			if (flag_verbose)
+				strmsg_out5("Creating [", name, "] with size [", strnum1, "]\n");
 			if (flag_doit) {
 				if ((fd = open_trunc(name)) == -1)
 					strerr_die4sys(111, FATAL, "open_trunc: ", name, ": ");
@@ -312,12 +330,14 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 				close(fd);
 			}
 			strnum1[fmt_8long(strnum1, perm)] = 0;
-			strmsg_out5("Changing permissions of [", name, "] to [", strnum1, "]\n");
+			if (flag_verbose)
+				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
 			if (flag_doit && chmod(name, perm))
 				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
-			strmsg_out11("Changing ownership of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
+			if (flag_verbose)
+				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
 			if (flag_doit && chown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 			return 0;
@@ -334,7 +354,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			/*- fix it */
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
-			strmsg_out11("Changing ownership of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
+			if (flag_verbose)
+				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
 			if (flag_doit && chown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 		}
@@ -348,7 +369,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			}
 			/*- fix it */
 			strnum1[fmt_8long(strnum1, perm)] = 0;
-			strmsg_out5("Changing permissions of [", name, "] to [", strnum1, "]\n");
+			if (flag_verbose)
+				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
 			if (flag_doit && chmod(name, perm))
 				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
 		}
@@ -360,8 +382,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 	case 'p':	/*- a named pipe */
 		if (stat(name, &st)) {
 			queueError++;
-			if (errno != error_noent)
+			if (errno != error_noent) {
+				strerr_warn4(WARN, "stat: ", name, ":", 0);
 				return -1;
+			}
 			if (!flag_filecreate && flag_interactive) {
 				strmsg_out1("It looks like some files don't exist, should I create them? (Y/N) - ");
 				if (!confirm())
@@ -369,16 +393,19 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 				flag_filecreate = 1;
 			}
 			/*- create it */
-			strmsg_out3("Creating fifo [", name, "]\n");
+			if (flag_verbose)
+				strmsg_out3("Creating fifo [", name, "]\n");
 			if (flag_doit && fifo_make(name, perm))
 				strerr_die4sys(111, FATAL, "fifo_make: ", name, ": ");
 			strnum1[fmt_8long(strnum1, perm)] = 0;
-			strmsg_out5("Changing permissions of [", name, "] to [", strnum1, "]\n");
+			if (flag_verbose)
+				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
 			if (flag_doit && chmod(name, perm))
 				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
-			strmsg_out11("Changing ownership of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
+			if (flag_verbose)
+				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
 			if (flag_doit && chown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 			return 0;
@@ -395,7 +422,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			/*- fix it */
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
-			strmsg_out11("Changing ownership of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
+			if (flag_verbose)
+				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
 			if (flag_doit && chown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 		}
@@ -409,7 +437,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			}
 			/*- fix it */
 			strnum1[fmt_8long(strnum1, perm)] = 0;
-			strmsg_out5("Changing permissions of [", name, "] to [", strnum1, "]\n");
+			if (flag_verbose)
+				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
 			if (flag_doit && chmod(name, perm))
 				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
 		}
@@ -423,24 +452,25 @@ check_files(char *directory, char *owner, char *group, uid_t uid, gid_t gid, int
 {
 	DIR            *dir;
 	direntry       *d;
+	int             s;
 
 	if (!(dir = opendir(directory)))
 		return -1;
+	if (!stralloc_copys(&temp_filename, directory) ||
+			!stralloc_append(&temp_filename, "/"))
+		strerr_die2x(111, FATAL, "out of memory");
+	s = temp_filename.len;
 	while ((d = readdir(dir))) {
 		if (d->d_name[0] == '.')
 			continue;
-		if (!stralloc_copys(&temp_filename, directory))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_append(&temp_filename, "/"))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_cats(&temp_filename, d->d_name))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_0(&temp_filename))
+		if (!stralloc_cats(&temp_filename, d->d_name) ||
+				!stralloc_0(&temp_filename))
 			strerr_die2x(111, FATAL, "out of memory");
 		if (check_item(temp_filename.s, owner, group, uid, gid, perm, 'f', 0)) {
 			closedir(dir);
 			return -1;
 		}
+		temp_filename.len = s;
 	}
 	closedir(dir);
 	return 0;
@@ -481,13 +511,10 @@ check_splits(char *directory, char *owner, char *group, char *fgroup,
 
 	for (i = 0; i < split; i++) {
 		name_num[fmt_ulong(name_num, i)] = 0;
-		if (!stralloc_copys(&temp_dirname, directory))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_append(&temp_dirname, "/"))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_cats(&temp_dirname, name_num))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_0(&temp_dirname))
+		if (!stralloc_copys(&temp_dirname, directory) ||
+				!stralloc_append(&temp_dirname, "/") ||
+				!stralloc_cats(&temp_dirname, name_num) ||
+				!stralloc_0(&temp_dirname))
 			strerr_die2x(111, FATAL, "out of memory");
 		/*- check the split dir */
 		if (check_item(temp_dirname.s, owner, group, dir_uid, dir_gid, dir_perm, 'd', 0))
@@ -498,14 +525,11 @@ check_splits(char *directory, char *owner, char *group, char *fgroup,
 		while ((d = readdir(dir))) {
 			if (d->d_name[0] == '.')
 				continue;
-			if (!stralloc_copy(&temp_filename, &temp_dirname))
-				strerr_die2x(111, FATAL, "out of memory");
-			temp_filename.len--; /*- remove NUL */
-			if (!stralloc_append(&temp_filename, "/"))
-				strerr_die2x(111, FATAL, "out of memory");
-			if (!stralloc_cats(&temp_filename, d->d_name))
-				strerr_die2x(111, FATAL, "out of memory");
-			if (!stralloc_0(&temp_filename))
+			temp_dirname.len--;
+			if (!stralloc_copy(&temp_filename, &temp_dirname) ||
+					!stralloc_append(&temp_filename, "/") ||
+					!stralloc_cats(&temp_filename, d->d_name) ||
+					!stralloc_0(&temp_filename))
 				strerr_die2x(111, FATAL, "out of memory");
 			if (check_item(temp_filename.s, owner, fgroup, dir_uid, file_gid, file_perm, 'f', 0)) {
 				closedir(dir);
@@ -520,7 +544,7 @@ check_splits(char *directory, char *owner, char *group, char *fgroup,
 int
 rename_mess(char *dir, char *part, char *new_part, char *old_filename, char *new_filename)
 {
-	struct stat     st;
+	int             s;
 
 	if (flag_interactive && !flag_namefix) {
 		strmsg_out1("It looks like some files need to be renamed, should I rename them? (Y/N) - ");
@@ -529,45 +553,48 @@ rename_mess(char *dir, char *part, char *new_part, char *old_filename, char *new
 		flag_namefix = 1;
 	}
 	/*- prepare the old filename */
-	if (!stralloc_copy(&old_name, &queue_dir))
+	if (!stralloc_copy(&old_name, &queue_dir) ||
+			!stralloc_cats(&old_name, dir))
 		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&old_name, dir))
+	s = old_name.len;
+	if (!stralloc_cats(&old_name, part) ||
+			!stralloc_append(&old_name, "/") ||
+			!stralloc_cats(&old_name, old_filename) ||
+			!stralloc_0(&old_name))
 		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&old_name, part))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_append(&old_name, "/"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&old_name, old_filename))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&old_name))
-		strerr_die2x(111, FATAL, "out of memory");
+
 	/*- prepare the new filename */
-	if (!stralloc_copy(&new_name, &queue_dir))
+	old_name.len = s;
+	if (!stralloc_copy(&new_name, &old_name))
 		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&new_name, dir))
+	if (!stralloc_cats(&new_name, new_part) ||
+			!stralloc_append(&new_name, "/") ||
+			!stralloc_cats(&new_name, new_filename) ||
+			!stralloc_0(&new_name))
 		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&new_name, new_part))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_append(&new_name, "/"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&new_name, new_filename))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&new_name))
-		strerr_die2x(111, FATAL, "out of memory");
+
 	/*- check if destination exists */
-	if (stat(new_name.s, &st) == 0) {
+	if (!access(new_name.s, F_OK)) {
 		/*- it exists */
 		new_name.len--;	/*- remove NUL */
 		/*- append an extension to prevent name clash */
-		if (!stralloc_cats(&new_name, ".tmp"))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_0(&new_name))
+		if (!stralloc_cats(&new_name, ".tmp") || !stralloc_0(&new_name))
 			strerr_die2x(111, FATAL, "out of memory");
 		/*- do a double check for collision */
-		if (stat(new_name.s, &st) == 0)
+		if (!access(new_name.s, F_OK))
 			die_rerun();
+		else
+		if (errno != error_noent) {
+			strerr_warn3(WARN, new_name.s, ":", 0);
+			return -1;
+		}
+	} else
+	if (errno != error_noent) {
+		strerr_warn3(WARN, new_name.s, ":", 0);
+		return -1;
 	}
-	strmsg_out5("Renaming [", old_name.s, "] to [", new_name.s, "]\n");
+	if (flag_verbose)
+		strmsg_out5("Renaming [", old_name.s, "] to [", new_name.s, "]\n");
 	if (flag_doit && rename(old_name.s, new_name.s) && errno != error_noent)
 		return -1;
 	return 0;
@@ -584,13 +611,10 @@ fix_part(char *part, int part_num)
 	int             old_inode;
 	int             correct_part_num;
 
-	if (!stralloc_copy(&mess_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&mess_dir, "mess/"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&mess_dir, part))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&mess_dir))
+	if (!stralloc_copy(&mess_dir, &queue_dir) ||
+			!stralloc_cats(&mess_dir, "mess/") ||
+			!stralloc_cats(&mess_dir, part) ||
+			!stralloc_0(&mess_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (!(dir = opendir(mess_dir.s)))
 		return -1;
@@ -598,16 +622,15 @@ fix_part(char *part, int part_num)
 		if (d->d_name[0] == '.')
 			continue;
 		/*- check from mess */
-		if (!stralloc_copy(&temp_filename, &mess_dir))
-			strerr_die2x(111, FATAL, "out of memory");
-		temp_filename.len--; /*- remove NUL */
-		if (!stralloc_append(&temp_filename, "/"))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_cats(&temp_filename, d->d_name))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_0(&temp_filename))
+		mess_dir.len--;
+		if (!stralloc_copy(&temp_filename, &mess_dir) ||
+				!stralloc_append(&temp_filename, "/") ||
+				!stralloc_cats(&temp_filename, d->d_name) ||
+				!stralloc_0(&temp_filename))
 			strerr_die2x(111, FATAL, "out of memory");
 		if (stat(temp_filename.s, &st)) {
+			if (errno != error_noent)
+				strerr_warn4(FATAL, "stat: ", temp_filename.s, ":", 0);
 			closedir(dir);
 			return -1;
 		}
@@ -662,13 +685,10 @@ clean_tmp(char *directory, char *part)
 	direntry       *d;
 	int             length;
 
-	if (!stralloc_copy(&mess_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&mess_dir, directory))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&mess_dir, part))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&mess_dir))
+	if (!stralloc_copy(&mess_dir, &queue_dir) ||
+			!stralloc_cats(&mess_dir, directory) ||
+			!stralloc_cats(&mess_dir, part) ||
+			!stralloc_0(&mess_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (!(dir = opendir(mess_dir.s)))
 		return -1;
@@ -702,11 +722,9 @@ fix_names()
 {
 	int             i;
 
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "mess"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
+	if (!stralloc_copy(&check_dir, &queue_dir) ||
+			!stralloc_cats(&check_dir, "mess") ||
+			!stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	/*- make the filenames match their inode */
 	for (i = 0; i < split; i++) {
@@ -717,17 +735,12 @@ fix_names()
 	/*- clean up any tmp files */
 	for (i = 0; i < split; i++) {
 		name_num[fmt_ulong(name_num, i)] = 0;
-		if (clean_tmp("mess/", name_num))
-			return -1;
-		if (clean_tmp("info/", name_num))
-			return -1;
-		if (clean_tmp("local/", name_num))
-			return -1;
-		if (clean_tmp("remote/", name_num))
-			return -1;
-		if (clean_tmp("intd/", name_num))
-			return -1;
-		if (clean_tmp("todo/", name_num))
+		if (clean_tmp("mess/", name_num) ||
+				clean_tmp("info/", name_num) ||
+				clean_tmp("local/", name_num) ||
+				clean_tmp("remote/", name_num) ||
+				clean_tmp("intd/", name_num) ||
+				clean_tmp("todo/", name_num))
 			return -1;
 	}
 	if (clean_tmp("bounce", ""))
@@ -735,140 +748,114 @@ fix_names()
 	return 0;
 }
 
+typedef struct queue_t
+{
+	char *name;
+	char *user;
+	char *group;
+	uid_t uid;
+	gid_t gid;
+	mode_t perm_d;
+	int split;
+	mode_t perm_s;
+	mode_t perm_f;
+} queue_t;
+
 int
 check_dirs()
 {
+	queue_t qinfo[] = {
+		{"info",   "qmails", "qmail", qmails_uid, qmail_gid, 0700, 1, 0700, 0600},
+		{"mess",   "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 1, 0750, 0644},
+		{"remote", "qmails", "qmail", qmails_uid, qmail_gid, 0700, 1, 0700, 0600},
+		{"local",  "qmails", "qmail", qmails_uid, qmail_gid, 0700, 1, 0700, 0600},
+		{"todo",   "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 1, 0750, 0644},
+		{"intd",   "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 1, 0700, 0644},
+		{"bounce", "qmails", "qmail", qmails_uid, qmail_gid, 0700, 0, 0700, 0600},
+		{0},
+	};
+	queue_t        *ptr;
+	int             s;
+
 	/*- check root existence */
 	if (!stralloc_copy(&check_dir, &queue_dir))
 		strerr_die2x(111, FATAL, "out of memory");
+	s = check_dir.len;
 	if (!stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 'd', 0))
 		return -1;
-	/*- check the big 4 */
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "info"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0700, 'd', 0))
-		return -1;
-	if (check_splits(check_dir.s, "qmails", "qmail", "qmail", qmails_uid, qmail_gid, 0700, qmail_gid, 0600))
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "mess"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 'd', 0))
-		return -1;
-	if (check_splits(check_dir.s, "qmailq", "qmail", 0, qmailq_uid, qmail_gid, 0750, -1, 0644))
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "remote"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0700, 'd', 0))
-		return -1;
-	if (check_splits(check_dir.s, "qmails", "qmail", "qmail", qmails_uid, qmail_gid, 0700, qmail_gid, 0600))
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "local"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0700, 'd', 0))
-		return -1;
-	if (check_splits(check_dir.s, "qmails", "qmail", "qmail", qmails_uid, qmail_gid, 0700, qmail_gid, 0600))
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "todo"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 'd', 0))
-		return -1;
-	if (check_splits(check_dir.s, "qmailq", "qmail", "qmail", qmailq_uid, qmail_gid, 0750, qmail_gid, 0644))
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "intd"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 'd', 0))
-		return -1;
-	if (check_splits(check_dir.s, "qmailq", "qmail", "qmail", qmailq_uid, qmail_gid, 0700, qmail_gid, 0644))
-		return -1;
+
+	for (ptr = qinfo; ptr->name;ptr++) {
+		check_dir.len = s;
+		if (!stralloc_cats(&check_dir, ptr->name) ||
+				!stralloc_0(&check_dir))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (check_item(check_dir.s, ptr->user, ptr->group, ptr->uid, ptr->gid, ptr->perm_d, 'd', 0))
+			return -1;
+		if (ptr->split) {
+			if (check_splits(check_dir.s, ptr->user, ptr->group, ptr->group,
+					ptr->uid, ptr->gid, ptr->perm_s, qmail_gid, ptr->perm_f))
+				return -1;
+		} else
+		if (check_files(check_dir.s, ptr->user, ptr->group, ptr->uid, ptr->gid, ptr->perm_f))
+			return -1;
+	}
+
 	/*- check the others */
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "bounce"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0700, 'd', 0))
-		return -1;
-	if (check_files(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0600))
-		return -1;
-	/*- Yank Dir */
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "yanked"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
+	/*- trash Dir */
+	check_dir.len = s;
+	if (!stralloc_cats(&check_dir, "trash") || !stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 'd', 0))
 		return -1;
 
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "pid"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
+	/*- pid */
+	check_dir.len = s;
+	if (!stralloc_cats(&check_dir, "pid") || !stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 'd', 0))
 		return -1;
 	warn_files(check_dir.s);
+
+	/*- lock */
 	/*- lock has special files that must exist */
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "lock"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
+	check_dir.len = s;
+	if (!stralloc_cats(&check_dir, "lock") || !stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 'd', 0))
 		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "lock/sendmutex"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
+
+	check_dir.len = s;
+	if (!stralloc_cats(&check_dir, "lock/sendmutex") || !stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0600, 'z', 0))
 		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "lock/tcpto"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
+
+	check_dir.len = s;
+	if (!stralloc_cats(&check_dir, "lock/tcpto") || !stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmailr", "qmail", qmailr_uid, qmail_gid, 0644, 'z', TCPTO_BUFSIZ))
 		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "lock/trigger"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
+
+	check_dir.len = s;
+	if (!stralloc_cats(&check_dir, "lock/trigger") || !stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0622, 'p', 0))
 		return -1;
+
+	/*- ratelimit */
+	if (flag_ratelimit) {
+		if (!stralloc_copy(&check_dir, &queue_dir) ||
+				!stralloc_cats(&check_dir, "ratelimit") ||
+				!stralloc_0(&check_dir))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (check_item(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0750, 'd', 0))
+			return -1;
+		if (check_files(check_dir.s, "qmails", "qmail", qmails_uid, qmail_gid, 0640))
+			return -1;
+	}
+
 	return 0;
 }
 
@@ -877,7 +864,6 @@ check_strays(char *directory)
 {
 	DIR            *dir;
 	direntry       *d;
-	struct stat     st;
 	int             inode;
 	int             part;
 	char            new_part[FMT_ULONG];
@@ -892,19 +878,18 @@ check_strays(char *directory)
 		part = inode % split;
 		new_part[fmt_ulong(new_part, part)] = 0;
 		/*- check for corresponding entry in mess dir */
-		if (!stralloc_copy(&mess_dir, &queue_dir))
+		if (!stralloc_copy(&mess_dir, &queue_dir) ||
+				!stralloc_cats(&mess_dir, "mess/") ||
+				!stralloc_cats(&mess_dir, new_part) ||
+				!stralloc_append(&mess_dir, "/") ||
+				!stralloc_cats(&mess_dir, d->d_name) ||
+				!stralloc_0(&mess_dir))
 			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_cats(&mess_dir, "mess/"))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_cats(&mess_dir, new_part))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_append(&mess_dir, "/"))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_cats(&mess_dir, d->d_name))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_0(&mess_dir))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (stat(mess_dir.s, &st)) {
+		if (access(mess_dir.s, F_OK)) {
+			if (errno != error_noent) {
+				strerr_warn3(WARN, mess_dir.s, ":", 0);
+				return -1;
+			}
 			/*- failed to find in mess */
 			if (flag_interactive && !flag_unlink) {
 				strmsg_out3("There are some stray files in ", directory,  "\nShould I remove them? (Y/N) - ");
@@ -914,15 +899,13 @@ check_strays(char *directory)
 				}
 				flag_unlink = 1;
 			}
-			if (!stralloc_copys(&temp_filename, directory))
+			if (!stralloc_copys(&temp_filename, directory) ||
+					!stralloc_append(&temp_filename, "/") ||
+					!stralloc_cats(&temp_filename, d->d_name) ||
+					!stralloc_0(&temp_filename))
 				strerr_die2x(111, FATAL, "out of memory");
-			if (!stralloc_append(&temp_filename, "/"))
-				strerr_die2x(111, FATAL, "out of memory");
-			if (!stralloc_cats(&temp_filename, d->d_name))
-				strerr_die2x(111, FATAL, "out of memory");
-			if (!stralloc_0(&temp_filename))
-				strerr_die2x(111, FATAL, "out of memory");
-			strmsg_out3("Unlinking [", temp_filename.s, "]\n");
+			if (flag_verbose)
+				strmsg_out3("Unlinking [", temp_filename.s, "]\n");
 			if (flag_doit && unlink(temp_filename.s) == -1) {
 				closedir(dir);
 				return -1;
@@ -940,13 +923,10 @@ check_stray_parts()
 
 	for (i = 0; i < split; i++) {
 		name_num[fmt_ulong(name_num, i)] = 0;
-		if (!stralloc_copy(&temp_dirname, &check_dir))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_append(&temp_dirname, "/"))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_cats(&temp_dirname, name_num))
-			strerr_die2x(111, FATAL, "out of memory");
-		if (!stralloc_0(&temp_dirname))
+		if (!stralloc_copy(&temp_dirname, &check_dir) ||
+				!stralloc_append(&temp_dirname, "/") ||
+				!stralloc_cats(&temp_dirname, name_num) ||
+				!stralloc_0(&temp_dirname))
 			strerr_die2x(111, FATAL, "out of memory");
 		/*- check this dir for strays */
 		if (check_strays(temp_dirname.s))
@@ -958,41 +938,22 @@ check_stray_parts()
 int
 find_strays()
 {
+	char           *dir_s[] = {"info", "local", "remote", "todo", "intd", 0};
+	char          **ptr;
+	int             save;
+
 	if (!stralloc_copy(&check_dir, &queue_dir))
 		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "info"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_stray_parts())
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "local"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_stray_parts())
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "remote"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_stray_parts())
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "todo"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_stray_parts())
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "intd"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_stray_parts())
-		return -1;
-	if (!stralloc_copy(&check_dir, &queue_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_cats(&check_dir, "bounce"))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (!stralloc_0(&check_dir))
+	save = check_dir.len;
+	for (ptr = dir_s; *ptr; ptr++) {
+		if (!stralloc_cats(&check_dir, *ptr))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (check_stray_parts())
+			return -1;
+		check_dir.len = save;
+	}
+
+	if (!stralloc_cats(&check_dir, "bounce") || !stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	if (check_strays(check_dir.s))
 		return -1;
@@ -1012,7 +973,7 @@ main(int argc, char **argv)
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
 	if (split > auto_split)
 		split = auto_split;
-	while ((opt = getopt(argc, argv, "iNvs:")) != opteof) {
+	while ((opt = getopt(argc, argv, "iNvs:r")) != opteof) {
 		switch (opt)
 		{
 		case 'i':
@@ -1026,6 +987,9 @@ main(int argc, char **argv)
 			break;
 		case 's':
 			scan_int(optarg, &split);
+			break;
+		case 'r':
+			flag_ratelimit = 1;
 			break;
 		default:
 			usage();
@@ -1065,7 +1029,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.20 2021-05-16 00:49:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.21 2021-05-30 00:15:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
