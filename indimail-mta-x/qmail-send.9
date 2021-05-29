@@ -1,8 +1,10 @@
 .TH qmail-send 8
 .SH NAME
-qmail-send \- deliver mail messages from the queue
+qmail-send \- deliver mail messages from the queue with rate control
+
 .SH SYNOPSIS
 .B qmail-send
+
 .SH DESCRIPTION
 .B qmail-send
 handles messages placed into the outgoing queue by
@@ -28,22 +30,20 @@ function to load all the plugins and by default try to execute the symbol
 if any of the loaded functions return non-zero status.
 
 It uses \fBqmail-lspawn\fR to deliver messages to local recipients and
-\fBqmail-rspawn\fR to deliver messages to remote recipients. The behaviour of
-\fBqmail-lspawn\fR can be altered by setting AUTHSELF environment variable
-(see qmail-lspawn(8)). The behaviour of \fBqmail-rspawn\fR can be altered by
-setting ROUTES environment variable (see qmail-rspawn(8)). If a message is
-temporarily undeliverable to one or more addresses, \fBqmail-send\fR leaves
-it in the queue and tries the addresses again later.
+\fBqmail-rspawn\fR to deliver messages to remote recipients.  If a message
+is temporarily undeliverable to one or more addresses, \fBqmail-send\fR
+leaves it in the queue and tries the addresses again later.
 
 \fBqmail-send\fR prints a readable record of its activities to descriptor
 0. It writes commands to \fBqmail-lspawn\fR, \fBqmail-rspawn\fR, and
 \fBqmail-clean\fR on descriptors 1, 3, and 5, and reads responses from
-descriptors 2, 4, and 6. \fBqmail-send\fR is responsible for avoiding deadlock.
+descriptors 2, 4, and 6. \fBqmail-send\fR is responsible for avoiding
+deadlock.
 
-\fBqmail-send\fR uses \fBqmail-queue\fR to queue bounces and aliases/forwards.
-This can be changed by using \fBQMAILQUEUE\fR environment variable. If a
-different queue program is desired for bounces, it can be set by using
-\fBBOUNCEQUEUE\fR environment variable.
+\fBqmail-send\fR uses \fBqmail-queue\fR to queue bounces and
+aliases/forwards. This can be changed by using \fBQMAILQUEUE\fR environment
+variable. If a different queue program is desired for bounces, it can be
+set by using \fBBOUNCEQUEUE\fR environment variable.
 
 When injecting a bounce for a previously forwarded email, whose sender was
 rewritten using \fISRS\fB, \fBqmail-send\fR rewrites the recipient to the
@@ -56,10 +56,11 @@ is useful for programs that generate DKIM signature to use the domain in
 the \fBX-Bounced-Address\fR for the d= DKIM-Signature tag.
 
 If \fBqmail-send\fR receives a TERM signal, it will exit cleanly, after
-waiting (possibly more than a minute) for current delivery attempts to finish.
+waiting (possibly more than a minute) for current delivery attempts to
+finish.
 
-If \fBqmail-send\fR receives an ALRM signal, it will reschedule every message
-in the queue for immediate delivery.
+If \fBqmail-send\fR receives an ALRM signal, it will reschedule every
+message in the queue for immediate delivery.
 
 If the environment variable USE_FSYNC is set, then\fBqmail-send\fR writes
 all data to disk ("flushes") all modified in-core data of (i.e., modified
@@ -79,14 +80,13 @@ The control files conf-syncdir, conf-fsync take precedence over
 the environment variable counterparts. If the control conf-fsync,
 conf-syncdir are present, \fBqmail-send\fR will additionally set
 or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
-is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is
-used for doing this.
+is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is used
+for doing this.
 
 .SH "CONTROL FILES"
 .B WARNING:
 .B qmail-send
-reads its control files only when it starts.
-If you change the control files,
+reads its control files only when it starts. If you change the control files,
 you must stop and restart
 .BR qmail-send .
 Exception:
@@ -107,18 +107,19 @@ it will reread
 and
 .IR conf-fsync .
 
-During startup, \fBqmail-send\fR uses the environment variable \fBLOCK_LOGS\fR and locks the file
-CONTROLDIR/defaultdelivery before writing a line to the log file (or stdout). If multiple qmail-send
-processes are running, all writing to one multilog, lines may get jumbled up in extreme situations.
-This can be avoided by setting LOCK_LOGS environment variable.
+During startup, \fBqmail-send\fR uses the environment variable
+\fBLOCK_LOGS\fR and locks the file CONTROLDIR/defaultdelivery before writing
+a line to the log file (or stdout). If multiple qmail-send processes are
+running, all writing to one multilog, lines may get jumbled up in extreme
+situations. This can be avoided by setting LOCK_LOGS environment variable.
 If
 .B qmail-send
-receives a INT signal, it will toggle log lock synchronization. If log locking is set, it will get
-turned off and vice versa.
+receives a INT signal, it will toggle log lock synchronization. If log
+locking is set, it will get turned off and vice versa.
 
 .B qmail-send
-by default looks at @controldir@ for all control files. This path can be changed by
-defining the \fBCONTROLDIR\fR environment variable.
+by default looks at @controldir@ for all control files. This path can be
+changed by defining the \fBCONTROLDIR\fR environment variable.
 
 .TP 5
 .I bouncefrom
@@ -182,8 +183,8 @@ notice to
 gives up.)
 As a special case, if the first line of
 .IR doublebounceto
-contains a '@' or is blank (contains a single linefeed), qmail-send will not queue
-the double-bounce at all.
+contains a '@' or is blank (contains a single linefeed), qmail-send will
+not queue the double-bounce at all.
 
 .TP 5
 .I doublebouncesubject
@@ -204,13 +205,13 @@ SPAWN.
 
 .TP 5
 .I concurrencylocal.queue
-Maximum number of simultaneous local delivery attempts for the queue \fIqueue\fR. A queue
-can be defined by setting \fBQUEUEDIR\fR environment variable.
+Maximum number of simultaneous local delivery attempts for the queue
+\fIqueue\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
+variable.
 Default: 10.
 If 0, local deliveries will be put on hold.
-.I concurrencylocal
-is limited at compile time to
-SPAWN.
+.I concurrencylocal.queue
+is limited at compile time to SPAWN.
 
 .TP 5
 .I concurrencyremote
@@ -218,8 +219,7 @@ Maximum number of simultaneous remote delivery attempts.
 Default: 20.
 If 0, remote deliveries will be put on hold.
 .I concurrencyremote
-is limited at compile time to
-SPAWN.
+is limited at compile time to SPAWN.
 
 .TP 5
 .I concurrencyremote.queue
@@ -227,9 +227,8 @@ Maximum number of simultaneous remote delivery attempts for the queue \fIqueue\f
 can be defined by setting \fBQUEUEDIR\fR environment variable.
 Default: 20.
 If 0, remote deliveries will be put on hold.
-.I concurrencyremote
-is limited at compile time to
-SPAWN.
+.I concurrencyremote.queue
+is limited at compile time to SPAWN.
 
 .TP 5
 .I envnoathost
@@ -308,19 +307,24 @@ permanent failures.
 
 .TP 5
 .I bounce.envrules
-Specific environment variables can be set for bounce recipients. The format of this file is of the form
-pat:envar1=val,envar2=val,...]   where pat is a regular expression which matches a bounce recipient.
-envar1, envar2 are list of environment variables to be set. If var is omitted, the environment variable is unset.
+Specific environment variables can be set for bounce recipients. The format
+of this file is of the form pat:envar1=val,envar2=val,...]   where pat is a
+regular expression which matches a bounce recipient. envar1, envar2 are list
+of environment variables to be set. If var is omitted, the environment
+variable is unset.
 
-The name of the control file can be overriden by the environment variable BOUNCERULES
+The name of the control file can be overriden by the environment variable
+BOUNCERULES
 
 Example:
 answerme@save*:CONTROLDIR=control2,QMAILQUEUE=
 
-sets CONTROLDIR to control2 for the sender answerme@saveme.com and unsets QMAILQUEUE environment variable. If
-there are multiple lines for a pattern, all lines are applied. However if an environment
-variable is being set in multiple lines, the last rule takes precedence. The environment variable QREGEX can be set to
-use regular expressions for matching pat instead of the internal wildmat function.
+sets CONTROLDIR to control2 for the sender answerme@saveme.com and unsets
+QMAILQUEUE environment variable. If there are multiple lines for a pattern,
+all lines are applied. However if an environment variable is being set in
+multiple lines, the last rule takes precedence. The environment variable
+QREGEX can be set to use regular expressions for matching pat instead of the
+internal wildmat function.
 
 Example:
 answerme@save*:DATABYTES=2000000,MAXRECIPIENT=2,QMAILQUEUE=
@@ -415,14 +419,47 @@ when writing to a file during delivery
 
 .TP 5
 .I conf-syncdir
-A boolean parameter to turn on BSD style sync semantics for flushing directories.
+A boolean parameter to turn on BSD style sync semantics for flushing
+directories.
+
+.SH Delivery Rate Control
+\fBqmail-send\fR turns on delivery rate control if the environment variable
+\fBRATELIMIT_DIR\fR is set and a rate control definition file exists in the
+directory \fIRATELIMIT_DIR\fR with the same name as the recipient domain. For
+details check \fBdrate\fR(1). This directory should be writeable for the user
+\fIqmails\fR. Delivery rate control can be turned off by setting the
+environment variable \fBRATELIMIT_DIR\fR to an empty string.
+
+The following control files described below apply to delivery rate control.
+Remember that a local rate definition file for a domain takes precedence
+over any matching line in \fIratecontrol\fR file. Any matching definition
+for a domain in \fIratecontrol\fR file takes precedence over definition
+in .\fIglobal\fR file.
+
+.TP 5
+.I RATELIMIT_DIR/ratecontrol
+You can set rate control expression for recipient domains. The format of
+this file is of the form
+pat:mathematical_expression
+where pat is a regular expression which matches the domain part the
+recipient. When a match occurs, qmail-send will automatically create a local
+rate definition file and the rate control will apply to the individual
+domain that got matched.
+
+.TP 5
+.I RATELIMIT_DIR/.global
+For recpient domains that do not have a local rate control definition and
+do not match any line in RATELIMIT_DIR/ratecontrol, this file serves as the
+rate control definition for all such domains. This definition does not apply
+individually to the recipient domains but to sum total of all such remaining
+domains that do not have a local definition.
 
 .SH "External BOUNCE Processor"
 .B qmail-send
 will execute an external program defined by the environment variable
 .I BOUNCEPROCESSOR
-when delivery to a recipient fails. The external program will be called with the following
-arguments
+when delivery to a recipient fails. The external program will be called
+with the following arguments
 
 .I original_message_file
 .I bounce_file
@@ -431,13 +468,14 @@ arguments
 .I original_recipient
 .I bounce_recipient
 
-The external program runs with uid of \fIqmails\fR. If the bounce script exits 1, the bounce is
-discarded. You should be very careful in writing your own bounce processor. If the bounce
-processor program returns non-zero exit status (other than an exit value of 1),
-\fBqmail-send\fR will continue to retry the script. Also just like bounces, bounce processor
-is not crash-proof. In case your bounce processor genuinely returns non-zero exit status and
-you shut qmail-send, you will not be able to again get back to retry the bounce that the processor
-was handling.
+The external program runs with uid of \fIqmails\fR. If the bounce script
+exits 1, the bounce is discarded. You should be very careful in writing
+your own bounce processor. If the bounce processor program returns non-zero
+exit status (other than an exit value of 1), \fBqmail-send\fR will continue
+to retry the script. Also just like bounces, bounce processor is not
+crash-proof. In case your bounce processor genuinely returns non-zero exit
+status and you shut qmail-send, you will not be able to again get back to
+retry the bounce that the processor was handling.
 
 .SH Retry Schedule
 Each message has its own retry schedule. The longer a message remains

@@ -6,7 +6,7 @@ qmail-rm \- Remove mails from Queue
 [-eidrvh]
 [-n NUM]
 [-p ]
-[-q queuedir]
+[-q qbase]
 [-s STR]
 [-y yankdir]
 [-t TIME]
@@ -34,7 +34,7 @@ Whatever the reason to pull items from your mail queue, this program
 will delete them in such a manner that will let you restore them easily.
 
 Mails are *not* deleted from the queue!  They are only stored, temporarily,
-in queuedir/yanked/, where you can view them individually and
+in qbase/queue/trash/, where you can view them individually and
 restore them back to the queue manually.  There is currently no support
 for restoring them automatically.
 
@@ -68,7 +68,8 @@ limit our search to the first \fIbytes\fR bytes of each file
 specify the \fIpattern\fR to search for
 .TP
 -q \fIqbase\fR
-specify the base qmail queue dir [default: QMAILHOME/queue]
+specify the base qmail queue dir [default: QMAILHOME/queue]. This directory
+has indimail's multiple qmail queues.
 .TP
 -d
 actually remove files not yank them, no -p will delete all the messages!
@@ -80,7 +81,7 @@ actually remove files, without this we'll only print them
 specify your conf-split value if non-standard [default: SPLIT]
 .TP
 -y \fIyankdir\fR
-directory to put files yanked from the queue [default: <queuedir>/yanked]
+directory to put files trash from the queue [default: qbase/queue/trash]
 .TP
 -X \fIsecs\fR
 modify timestamp on matching files, to make qmail expire mail. \fIsecs\fR is the number of

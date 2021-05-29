@@ -53,12 +53,29 @@ or \fBqmail-remote\fR. \fBspawn-filter\fR unsets FILTERARGS, SPAMFILTER before r
 .TP 5
 .I filterargs
 The format of this file is of the form
-\fBdomain:args\fR for both local and remote mails. \fBdomain:remote:args\fR
-for remote mails and \fBdomain:local:args\fR for local mails. Here \fIdomain\fR
-refers to the recipient domain. If there are multiple lines which match \fIdomain\fR,
-the first line that matches \fIdomain\fR will be used.  This control
-file can be used to setup additional filters after running
-the SPAM filters (See Section on Spam Filtering).
+
+.EX
+\fBdomain:args\fR
+.EE
+
+for both local and remote mails.
+
+.EX
+\fBdomain:remote:args\fR
+.EE
+
+for remote mails and
+
+.EX
+\fBdomain:local:args\fR
+.EE
+
+for local mails. Here \fIdomain\fR refers to the recipient domain.
+\fIdomain\fR can be a wildcard or a regular expression (if QREGEX
+environment variable is defined). If there are multiple lines which match
+\fIdomain\fR, the first line that matches \fIdomain\fR will be used. This
+control file can be used to setup additional filters after running the SPAM
+filters (See Section on Spam Filtering).
 
 .EX
 indimail.org:remote:PREFIX/bin/dk-filter
@@ -103,8 +120,12 @@ will accept.
 .TP 5
 .I fromd.envrules
 Specific environment variables can be set for specific senders.
-The format of this file is of the form                                       
+The format of this file is of the form
+
+.EX
 pat:envar1=val,envar2=val,...]
+.EE
+
 where pat is a regular expression which matches a sender. envar1, envar2
 are list of environment variables to be set. If
 .I var
@@ -124,7 +145,11 @@ can be set sender specific by using fromd.envrules.
 .I rcpt.envrules
 Specific environment variables can be set for specific recipients.
 The format of this file is of the form                                       
+
+.EX
 pat:envar1=val,envar2=val,...]
+.EE
+
 where pat is a regular expression which matches a sender. envar1, envar2
 are list of environment variables to be set. If
 .I val
@@ -272,11 +297,21 @@ address should be valid recipient where the spam mails should be redirected.
 .TP 5
 .I spamfilter
 The format of this file is of the form
+
 .B domain:args
+
 for both local and remote mails.
+
+.EX
 .B domain:remote:args
+.EE
+
 for remote mails and
+
+.EX
 .B domain:local:args
+.EE
+
 for local mails
 
 where domain is a valid (recipient) domain for which mails are being processed and
@@ -323,35 +358,6 @@ can be overriden by the environment variable
 \fIspamignorepatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
 \fIspamignorepatterns\fR uses simple shell-style pattern matching unlike regular
 expressions used by setting \fBQREGEX\fR environment variable.
-
-.SH Delivery Rate Control
-\fBspawn-filter\fR turns on delivery rate control if the environment variable
-\fBRATELIMIT_DIR\fR is set and a rate control definition file exists in the
-directory \fIRATELIMIT_DIR\fR with the same name as the recipient domain. For
-details check \fBdrate\fR(1). This directory should be writeable for the user
-\fIqmailr\fR.
-
-The following control files described below apply to delivery rate control. Remember that a local rate
-definition file for a domain takes precedence over any matching line in
-\fIratecontrol\fR file. Any matching definition for a domain in \fIratecontrol\fR file
-takes precedence over definition in .\fIglobal\fR file.
-
-.TP 5
-.I RATELIMIT_DIR/ratecontrol
-You can set rate control expression for recipient domains. The format of this file is of the form
-pat:mathematical_expression
-where pat is a regular expression which matches the domain part the recipient. When a match occurs,
-spawn-filter will automatically create a local rate definition file and the rate control will apply
-to the individual domain that got matched.
-
-.TP 5
-.I RATELIMIT_DIR/.global
-For recpient domains that do not have a local rate control definition and do not
-match any line in RATELIMIT_DIR/ratecontrol, this file serves as the rate control
-definition for all such domains. This definition does not apply individually to the
-recipient domains but to sum total of all such remaining domains that do not have a
-local definition.
-
 
 .SH Environment Variables
 \fBspawn-filter\fR sets few environment variables. The following environment variables
