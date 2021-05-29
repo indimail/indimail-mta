@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpok.c,v $
+ * Revision 1.25  2021-05-30 00:13:42+05:30  Cprogrammer
+ * fixed qbase path
+ *
  * Revision 1.24  2021-05-26 10:46:25+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -142,7 +145,11 @@ main()
 			die_control();
 			break;
 		case 0:
-			qbase = auto_qmail;
+			if (!stralloc_copys(&QueueBase, auto_qmail) ||
+					!stralloc_catb(&QueueBase, "/queue", 6) ||
+					!stralloc_0(&QueueBase))
+				die_nomem();
+			qbase = QueueBase.s;
 			break;
 		case 1:
 			qbase = QueueBase.s;
@@ -204,7 +211,11 @@ main(int argc, char **argv)
 			die_control();
 			break;
 		case 0:
-			qbase = auto_qmail;
+			if (!stralloc_copys(&QueueBase, auto_qmail) ||
+					!stralloc_catb(&QueueBase, "/queue", 6) ||
+					!stralloc_0(&QueueBase))
+				die_nomem();
+			qbase = QueueBase.s;
 			break;
 		case 1:
 			qbase = QueueBase.s;
@@ -220,13 +231,10 @@ main(int argc, char **argv)
 	else
 		scan_int(queue_start_ptr, &qstart);
 	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
-		if (!stralloc_copys(&Queuedir, qbase))
-			die_nomem();
-		if (!stralloc_cats(&Queuedir, "/queue"))
-			die_nomem();
-		if (!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) idx)))
-			die_nomem();
-		if (!stralloc_0(&Queuedir))
+		if (!stralloc_copys(&Queuedir, qbase) ||
+				!stralloc_cats(&Queuedir, "/queue") ||
+				!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) idx)) ||
+				!stralloc_0(&Queuedir))
 			die_nomem();
 		if (access(Queuedir.s, F_OK)) {
 			if (errno != error_noent)
@@ -239,11 +247,9 @@ main(int argc, char **argv)
 		outok("\n");
 		main_function();
 	}
-	if (!stralloc_copys(&Queuedir, qbase))
-		die_nomem();
-	if (!stralloc_cats(&Queuedir, "/nqueue"))
-		die_nomem();
-	if (!stralloc_0(&Queuedir))
+	if (!stralloc_copys(&Queuedir, qbase) ||
+			!stralloc_cats(&Queuedir, "/nqueue") ||
+			!stralloc_0(&Queuedir))
 		die_nomem();
 	if (!access(Queuedir.s, F_OK)) {
 		queuedir = Queuedir.s;
@@ -263,7 +269,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	static char    *x = "$Id: qmail-tcpok.c,v 1.24 2021-05-26 10:46:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-tcpok.c,v 1.25 2021-05-30 00:13:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
