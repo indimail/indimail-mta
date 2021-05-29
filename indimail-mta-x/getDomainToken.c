@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
+ * Revision 1.2  2021-05-29 23:37:58+05:30  Cprogrammer
+ * refactored for slowq-send
+ *
  * Revision 1.1  2021-05-26 05:20:05+05:30  Cprogrammer
  * Initial revision
  *
@@ -10,7 +13,7 @@
 #include <env.h>
 #include <regex.h>
 #include "wildmat.h"
-#include "report.h"
+#include "variables.h"
 
 #define REGCOMP(X,Y)    regcomp(&X, Y, REG_EXTENDED|REG_ICASE)
 #define REGEXEC(X,Y)    regexec(&X, Y, (size_t) 0, (regmatch_t *) 0, (int) 0)
@@ -20,6 +23,14 @@
 
 extern dtype    delivery;
 
+/*
+ * read control file filterargs which can be one of the three
+ * 1. domain:local:command with args
+ * 2. domain:remote:command with args
+ * 3. domain:command with args
+ * here domain can be a wildcard or a regular expression if
+ * QREGEX environment variable is defined
+ */
 char           *
 getDomainToken(char *domain, stralloc *sa)
 {
@@ -44,22 +55,28 @@ getDomainToken(char *domain, stralloc *sa)
 			*p = ':';
 			if (!retval) { /*- match occurred for domain or wildcard */
 				/* check for local/remote directives */
-				if (delivery == remote) { /*- remote delivery */
+				if (delivery == remote_delivery) { /*- domain:remote:command - remote delivery */
 					if (!str_diffn(p + 1, "remote:", 7))
 						return (p + 8);
 					if (!str_diffn(p + 1, "local:", 6)) {
 						ptr = sa->s + len;
 						continue; /*- skip local directives for remote mails */
 					}
-				} else { /*- local delivery */
+				} else
+				if (delivery == local_delivery) { /*- domain:local:command - local delivery */
 					if (!str_diffn(p + 1, "local:", 6))
 						return (p + 7);
 					if (!str_diffn(p + 1, "remote:", 7)) {
 						ptr = sa->s + len;
 						continue; /*- skip remote directives for local mails */
 					}
+				} if (delivery == local_or_remote) { /*- local/remote delivery */
+					if (!str_diffn(p + 1, "local:", 6))
+						return (p + 7);
+					if (!str_diffn(p + 1, "remote:", 7))
+						return (p + 8);
 				}
-				return (p + 1);
+				return (p + 1); /*- domain:command */
 			}
 		}
 		ptr = sa->s + len;
@@ -70,9 +87,8 @@ getDomainToken(char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	static char    *x = "$Id: getDomainToken.c,v 1.1 2021-05-26 05:20:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getDomainToken.c,v 1.2 2021-05-29 23:37:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
-	x = sccsidreporth;
 	x++;
 }

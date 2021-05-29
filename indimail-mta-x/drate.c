@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.10  2021-05-29 23:37:12+05:30  Cprogrammer
+ * refactored for slowq-send
+ *
  * Revision 1.9  2021-05-26 16:30:44+05:30  Cprogrammer
  * added option to force update
  *
@@ -46,9 +49,9 @@
 #include <str.h>
 #include "variables.h"
 #include "myctime.h"
+#include "auto_qmail.h"
 #include "auto_uids.h"
-#include "auto_control.h"
-#include "get_rate.h"
+#include "do_rate.h"
 #include "control.h"
 #include "getDomainToken.h"
 #include "report.h"
@@ -65,6 +68,7 @@ static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 int             qmailr_uid;
 int             qmail_gid;
+stralloc        qdir = { 0 };
 char           *usage = "usage: drate [-scR] -d domain -r deliveryRate [-D ratelimit_dir]\n";
 
 void
@@ -313,16 +317,21 @@ new:
 void
 do_test(char *domain, int force)
 {
+	int             i;
 	char           *rate_expr = 0;
 	char            strdouble1[FMT_DOUBLE], strdouble2[FMT_DOUBLE];
 	unsigned long   email_count;
 	double          rate, conf_rate;
 
-	if (!access(domain, W_OK) && !is_rate_ok(domain, force ? "-1" : 0, &email_count, &conf_rate, &rate)) {
-		strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
-		strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-		strnum[fmt_ulong(strnum, email_count)] = 0;
-		strerr_die9x(111, WARN, "high email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
+	if (!access(domain, W_OK)) {
+		if (!(i = is_rate_ok(domain, force ? "-1" : 0, &email_count, &conf_rate, &rate))) {
+			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
+			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
+			strnum[fmt_ulong(strnum, email_count)] = 0;
+			strerr_die9x(111, WARN, "high email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
+		} else
+		if (i == -1)
+			strerr_die2sys(111, FATAL, "is_rate_ok: ");
 	} else
 	if (errno != error_noent)
 		strerr_die4sys(111, FATAL, "open: ", domain, ": ");
@@ -330,39 +339,48 @@ do_test(char *domain, int force)
 	if (!access("ratecontrol", R_OK)) {
 		if (control_readfile(&line, "./ratecontrol", 0) == -1)
 			strerr_die2sys(111, FATAL, "Unable to read ratecontrol: ");
+		delivery = remote_delivery;
 		rate_expr = getDomainToken(domain, &line);
-		if (!is_rate_ok(domain, rate_expr, &email_count, &conf_rate, &rate)) {
+		if (!(i = is_rate_ok(domain, rate_expr, &email_count, &conf_rate, &rate))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 			strnum[fmt_ulong(strnum, email_count)] = 0;
 			strerr_die9x(111, WARN, "high email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
-		}
+		} else
+		if (i == -1)
+			strerr_die2sys(111, FATAL, "is_rate_ok: ");
 	} else
 	if (errno != error_noent)
 		strerr_die2sys(111, FATAL, "open: ratecontrol: ");
 	else
-	if (!access(".global", W_OK) && !is_rate_ok(".global", 0, &email_count, &conf_rate, &rate)) {
-		strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
-		strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-		strnum[fmt_ulong(strnum, email_count)] = 0;
-		strerr_die9x(111, WARN, "high email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
+	if (!access(".global", W_OK)) {
+		if (!(i = is_rate_ok(".global", 0, &email_count, &conf_rate, &rate))) {
+			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
+			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
+			strnum[fmt_ulong(strnum, email_count)] = 0;
+			strerr_die9x(111, WARN, "high email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
+		} else
+		if (i == -1)
+			strerr_die2sys(111, FATAL, "is_rate_ok: ");
 	} else
 	if (errno != error_noent)
 		strerr_die2sys(111, FATAL, "open: .global: ");
 	strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 	strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 	strnum[fmt_ulong(strnum, email_count)] = 0;
-	strerr_die8x(0, "email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
+	strerr_warn8("email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain, 0);
+	return;
 }
 
 int
 main(int argc, char **argv)
 {
-	int             ch, display = 1, incr = 0, consolidate = 0, 
-					reset_mode = 0, test_mode = 0, force = 0;
-	char           *domain = 0, *rate_expr = 0, *ratelimit_dir = "ratelimit";
+	int             i, ch, display = 1, incr = 0, consolidate = 0, 
+					reset_mode = 0, test_mode = 0, force = 0, count = 1;
+	char           *qbase, *domain = 0, *rate_expr = 0,
+				   *ptr, *ratelimit_dir = "ratelimit";
 
-	while ((ch = getopt(argc, argv, "fltscRd:r:D:")) != sgoptdone) {
+	while ((ch = getopt(argc, argv, "fltscRd:r:D:C:")) != sgoptdone) {
 		switch (ch)
 		{
 		case 'l':
@@ -382,11 +400,18 @@ main(int argc, char **argv)
 			display = 0;
 			reset_mode = 1;
 			break;
+		case 'C':
+			scan_int(optarg, &count);
+			break;
 		case 'c':
 			consolidate = 1;
 			break;
 		case 'd': /*- domain */
-			domain = optarg;
+			ptr = optarg;
+			if (ptr[i = str_rchr(ptr, '@')])
+				domain = ptr + i + 1;
+			else
+				domain = ptr;
 			break;
 		case 'r': /*- delivery rate */
 			display = 0;
@@ -410,21 +435,48 @@ main(int argc, char **argv)
 			break;
 		}
 	}
-	if (!controldir && !(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		switch (control_readfile(&qdir, "queue_base", 0))
+		{
+		case -1:
+			strerr_die2sys(111, FATAL, "Unable to read control file queue_base: ");
+			break;
+		case 0:
+			if (!stralloc_copys(&qdir, auto_qmail) ||
+					!stralloc_catb(&qdir, "/queue/slowq", 12) ||
+					!stralloc_0(&qdir))
+				strerr_die2x(111, FATAL, "out of memory");
+			break;
+		case 1:
+			qdir.len--; /*- remove NULL put by control_readfile() */
+			if (!stralloc_catb(&qdir, "/slowq", 6) ||
+					!stralloc_0(&qdir))
+				strerr_die2x(111, FATAL, "out of memory");
+			break;
+		}
+	} else {
+		if (!stralloc_copys(&qdir, qbase) ||
+				!stralloc_catb(&qdir, "/slowq", 6) ||
+				!stralloc_0(&qdir))
+			strerr_die2x(111, FATAL, "out of memory");
+	}
+	if (chdir(qdir.s) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", qbase, ": ");
+	if (chdir(ratelimit_dir))
+		strerr_die4sys(111, FATAL, "unable to switch to ", ratelimit_dir, ": ");
+
 	if (!domain) {
 		logerrf("domain not specified\n");
 		logerrf(usage);
 		_exit (111);
 	}
-	if (chdir(auto_control) || chdir(ratelimit_dir))
-		strerr_die4sys(111, FATAL, "unable to switch to ", ratelimit_dir, ": ");
 
 	if (display)
 		do_display(domain);
 	else
 	if (test_mode) {
-		do_test(domain, force);
+		for (i = 0; i < count; i++)
+			do_test(domain, force);
 	} else {
 		if (!reset_mode && !rate_expr) {
 			logerrf("rate expression not specified\n");
@@ -439,7 +491,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.9 2021-05-26 16:30:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.10 2021-05-29 23:37:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
