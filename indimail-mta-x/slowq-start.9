@@ -1,0 +1,181 @@
+.TH qmail-start 8
+.SH NAME
+qmail-start \- turn on mail delivery
+qmail-daemon \- turn on mail delivery
+.SH SYNOPSIS
+.B qmail-start
+[
+.I defaultdelivery
+[
+.I logger arg ...
+]
+]
+
+.B qmail-daemon
+[
+.I defaultdelivery
+[
+.I logger arg ...
+]
+]
+.SH DESCRIPTION
+.B qmail-start
+invokes
+.BR qmail-send ,
+.BR qmail-todo ,
+.BR qmail-lspawn ,
+.BR qmail-rspawn ,
+and
+.BR qmail-clean ,
+under the proper uids and gids for a single queue.
+These five daemons cooperate to deliver messages from the queue.
+
+.B qmail-daemon
+invokes multiple invocations of \fBqmail-start\fR to invoke
+.BR qmail-send ,
+.BR qmail-todo ,
+.BR qmail-lspawn ,
+.BR qmail-rspawn ,
+and
+.BR qmail-clean ,
+under the proper uids and gids for multiple queues. It starts multiple copies
+of \fBqmail-send\fR. The number of \fBqmail-todo\fR, \fBqmail-send\fR instance
+it runs is defined by the environment variable \fBQUEUE_COUNT\fR. For each
+instance of \fBqmail-send\fR,  the queue is defined by \fBqmail-daemon\fR
+by setting the environment variable \fBQUEUEDIR\fR. A queue is defined by
+the integers defined by environment variables \fBQUEUE_START\fR and \fBQUEUE_COUNT\fR.
+
+Setting QUEUE_COUNT=2, QUEUE_START=1 will make \fBqmail-daemon\fR run two instances of
+\fBqmail-send\fR, \fBqmail-todo\fR. The first \fBqmail-send\fR, \fBqmail-todo\fR
+instance will use the queue QMAILHOME/queue/queue1 and the second instance will use
+QMAILHOME/queue/queue2
+
+.B qmail-daemon
+also monitors \fBqmail-send\fR and \fBqmail-todo\fR and restart them if they goes down.
+
+.B qmail-start
+should be used if you desire to run only one queue. For running multiple parallel queues run
+.BR qmail-daemon .
+
+.B qmail-start
+or
+.B qmail-daemon
+arranges for
+.BR qmail-send 's
+activity record to be sent to
+.BR qmail-start 's
+output.
+See
+.B qmail-log(5)
+for the format of the activity record.
+Other than this,
+.B qmail-start
+does not print anything, even on failure.
+.B qmail-daemon
+announces its startup, exit and failures on stdout and stderr
+
+If
+.I defaultdelivery
+is supplied,
+.B qmail-start
+or
+.B qmail-daemon
+passes it to
+.BR qmail-lspawn .
+
+\fBIndiMail(7)\fR installs qmail-daemon to be started under \fBsupervise(8)\fR. The default
+mailbox type is picked up from the \fBdefaultdelivery\fR control file.
+The table below outlines the choices for \fBdefaultdelivery\fR control file
+.TS
+l l.
+Mailbox | Name  | Location       | defaultdelivery | Comments
+Format  |       |                |                 |
+_
+
+mbox    |Mailbox | $HOME         | ./Mailbox       | most common, works with 
+        |        |               |                 | most MUA's
+_
+maildir |Maildir | $HOME         | ./Maildir/      | more reliable, less
+        |        |               |                 | MUA support
+_
+mbox    |username|/var/spool/mail| See INSTALL.vsm | traditional mailbox
+_
+
+.TE
+
+
+If
+.I logger
+is supplied,
+.B qmail-start
+or
+.B qmail-daemon
+invokes
+.I logger
+with the given arguments,
+and feeds
+.BR qmail-send 's
+activity record through
+.IR logger .
+
+Environment variables given to
+.B qmail-start
+or
+.B qmail-daemon
+will eventually be passed on to
+.BR qmail-local ,
+so make sure to clean up the environment if you run
+.B qmail-start
+manually:
+
+.EX
+   # env - PATH="PREFIX/sbin:$PATH"
+.br
+   qmail-start ./Mailbox splogger qmail &
+.br
+   (all on one line)
+.EE
+
+Resource limits, controlling ttys, et al. are also passed from
+.B qmail-start
+or
+.B qmail-daemon
+to
+.BR qmail-local .
+
+Note that
+.B qmail-send
+normally juggles several simultaneous deliveries.
+To reduce
+.BR qmail-send 's
+impact on other programs,
+you can run
+.B qmail-start
+or
+.B qmail-daemon
+with a low priority.
+
+.SH Supplementary Groups
+If you set the environment variable \fBUSE_SETGROUPS\fR, \fBqmail-start\fR
+can set supplementary groups (if defined in /etc/group) for qmail-send
+(for qmails user), qmail-rspawn (for qmailr user), qmail-clean (qmailq user)
+and any logger specified on command line (qmaill user). See group(5) to
+learn how to set supplementary groups.
+
+.SH "SEE ALSO"
+logger(1),
+splogger(1),
+nice(1),
+qmail-log(5),
+qmail-local(8),
+qmail-clean(8),
+qmail-lspawn(8),
+qmail-rspawn(8),
+qmail-send(8),
+qmail-todo(8),
+qmail-multi(8),
+initsvc(1),
+svscan(8),
+supervise(8),
+group(5),
+IndiMail(7)
