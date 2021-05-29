@@ -1,10 +1,7 @@
 /*
  * $Log: myctime.c,v $
- * Revision 1.3  2004-10-22 20:27:38+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-07-17 21:19:50+05:30  Cprogrammer
- * added RCS log
+ * Revision 1.1  2021-05-29 23:46:54+05:30  Cprogrammer
+ * Initial revision
  *
  */
 #include "datetime.h"
@@ -26,6 +23,7 @@ myctime(t)
 {
 	struct datetime dt;
 	unsigned int    len;
+
 	datetime_tai(&dt, t);
 	len = 0;
 	len += fmt_str(result + len, daytab[dt.wday]);
@@ -49,7 +47,7 @@ myctime(t)
 void
 getversion_myctime_c()
 {
-	static char    *x = "$Id: myctime.c,v 1.3 2004-10-22 20:27:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: myctime.c,v 1.1 2021-05-29 23:46:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
