@@ -1623,13 +1623,14 @@ qmail-send: \
 load qmail-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o\
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o variables.o \
-envrules.o qregex.o wildmat.o libsyncdir.a srs.lib
+getDomainToken.o do_rate.o envrules.o qregex.o wildmat.o \
+libsyncdir.a srs.lib
 	./load qmail-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
-	wildmat.o qmail.o auto_qmail.o auto_split.o \
-	variables.o envrules.o matchregex.o srs.o rcpthosts.o \
-	auto_control.o -L. -lsyncdir -L../libsrs2-x/libsrs2/.libs \
-	`cat srs.lib` -ldl -lqmail
+	getDomainToken.o do_rate.o wildmat.o qmail.o auto_qmail.o \
+	auto_split.o variables.o envrules.o matchregex.o srs.o \
+	rcpthosts.o auto_control.o -L. -lsyncdir \
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -ldl -lqmail
 
 qmail-send.o: \
 compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
