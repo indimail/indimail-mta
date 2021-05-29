@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.22  2021-05-29 23:49:06+05:30  Cprogrammer
+ * fixed qbase path
+ *
  * Revision 1.21  2021-05-26 10:43:58+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -292,7 +295,13 @@ start_send(char **argv, int qstart, int qcount)
 			_exit(111);
 			break;
 		case 0:
-			qbase = auto_qmail;
+			if (!stralloc_copys(&QueueBase, auto_qmail) ||
+					!stralloc_catb(&QueueBase, "/queue", 6) ||
+					!stralloc_0(&QueueBase)) {
+				logerrf("alert: out of memory\n");
+				die();
+			}
+			qbase = QueueBase.s;
 			break;
 		case 1:
 			qbase = QueueBase.s;
@@ -506,7 +515,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.21 2021-05-26 10:43:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.22 2021-05-29 23:49:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
