@@ -1,5 +1,8 @@
 /*
  * $Log: report.c,v $
+ * Revision 1.3  2021-05-30 00:16:51+05:30  Cprogrammer
+ * renamed local to local_delivery
+ *
  * Revision 1.2  2021-05-26 07:36:54+05:30  Cprogrammer
  * fixed extra colon char in error messages
  *
@@ -12,13 +15,14 @@
 #include <subfd.h>
 #include <strerr.h>
 #include "report.h"
+#include "variables.h"
 
 extern dtype    delivery;
 
 void
 report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 {
-	if (delivery == local) /*- strerr_die does not return */
+	if (delivery == local_delivery) /*- strerr_die does not return */
 		strerr_die6x(errCode, s1, s2, s3, s4, s5, s6);
 	if (!errCode) { /*- should never happen */
 		if (substdio_put(subfdoutsmall, "r\0Kspawn accepted message.\n", 28) == -1)
@@ -62,7 +66,7 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 void
 getversion_report_c()
 {
-	static char    *x = "$Id: report.c,v 1.2 2021-05-26 07:36:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: report.c,v 1.3 2021-05-30 00:16:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x++;
