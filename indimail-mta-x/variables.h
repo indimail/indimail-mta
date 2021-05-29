@@ -1,5 +1,8 @@
 /*
  * $Log: variables.h,v $
+ * Revision 1.7  2021-05-30 00:18:42+05:30  Cprogrammer
+ * added enum dtype for delivery type
+ *
  * Revision 1.6  2020-09-15 21:10:46+05:30  Cprogrammer
  * added use_syncdir variable
  *
@@ -21,5 +24,10 @@ extern char    *controldir;
 extern char    *certdir;
 extern int      use_fsync, use_syncdir;
 extern int      noipv6;
+typedef enum {
+	local_delivery,
+	remote_delivery,
+	local_or_remote,
+} dtype;
 
 #endif
