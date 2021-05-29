@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.78  2021-05-30 00:12:42+05:30  Cprogrammer
+ * added email rate limiting feature
+ *
  * Revision 1.77  2021-05-16 12:16:14+05:30  Cprogrammer
  * limit conf_split to compile time value in conf-split
  * added code comments
@@ -254,6 +257,8 @@
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
+#include "getDomainToken.h"
+#include "do_rate.h"
 
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
@@ -321,6 +326,10 @@ static int      chanskip[CHANNELS] = { 10, 20 };
 
 char           *queuedesc;
 int             conf_split;
+
+static stralloc ratedefs = { 0 };
+static stralloc ratelimit_file = { 0 };
+dtype           delivery;
 
 #ifdef EXTERNAL_TODO
 static void     reread(int);
@@ -1773,13 +1782,100 @@ nextretry(datetime_sec birth, int c)
 	return birth + n * n;
 }
 
+int
+delivery_rate(char *_domain)
+{
+	char           *rate_dir, *rate_exp, *domain;
+	int             i, s, at;
+	char            strdouble1[FMT_DOUBLE], strdouble2[FMT_DOUBLE],
+	                strnum[FMT_ULONG];
+	unsigned long   email_count;
+	double          rate, conf_rate;
+
+	if (_domain[at = str_rchr(_domain, '@')])
+		domain = _domain + at + 1;
+	else
+		domain = _domain;
+	if ((rate_dir = env_get("RATELIMIT_DIR"))) {
+		if (!*rate_dir)
+			return 1;
+		while (!stralloc_copys(&ratelimit_file, rate_dir))
+			nomem();
+		s = ratelimit_file.len;
+	} else {
+		while (!stralloc_copys(&ratelimit_file, queuedir) ||
+				!stralloc_catb(&ratelimit_file, "/ratelimit", 10))
+			nomem();
+		s = ratelimit_file.len;
+	}
+	while (!stralloc_append(&ratelimit_file, "/") ||
+			!stralloc_cats(&ratelimit_file, domain) ||
+			!stralloc_0(&ratelimit_file))
+		nomem();
+	if (!access(ratelimit_file.s, W_OK)) {
+		if (!(i = is_rate_ok(ratelimit_file.s, 0, &email_count, &conf_rate, &rate))) {
+			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
+			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
+			strnum[fmt_ulong(strnum, email_count)] = 0;
+			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
+			return 0;
+		} else
+			return i; /*- either 1 or -1 */
+	} else
+	if (errno != error_noent)
+		return -1;
+
+	/*- ratecontrol */
+	ratelimit_file.len = s;
+	while (!stralloc_catb(&ratelimit_file, "/ratecontrol", 12) ||
+			!stralloc_0(&ratelimit_file))
+		nomem();
+	if (!access(ratelimit_file.s, R_OK)) {
+		if (control_readfile(&ratedefs, ratelimit_file.s, 0) == -1)
+			return -1;
+		rate_exp = getDomainToken(domain, &ratedefs);
+		if (!(i = is_rate_ok(ratelimit_file.s, rate_exp, &email_count, &conf_rate, &rate))) {
+			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
+			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
+			strnum[fmt_ulong(strnum, email_count)] = 0;
+			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
+			return 0;
+		} else
+			return i; /*- either 0 or -1 */
+	} else
+	if (errno != error_noent)
+		return -1;
+
+	/*- .global */
+	ratelimit_file.len = s;
+	while (!stralloc_catb(&ratelimit_file, "/.global", 8) ||
+			!stralloc_0(&ratelimit_file))
+		nomem();
+	if (!access(ratelimit_file.s, W_OK)) {
+		if (!(i = is_rate_ok(ratelimit_file.s, 0, &email_count, &conf_rate, &rate))) {
+			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
+			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
+			strnum[fmt_ulong(strnum, email_count)] = 0;
+			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
+			return 0;
+		} else
+			return i; /*- either 0 or -1 */
+	} else
+	if (errno != error_noent)
+		return -1;
+	return 0;
+}
+
+/*
+ * pass job to qmail-lspawn, qmail-rpsawn
+ */
 static void
 pass_dochan(int c)
 {
 	datetime_sec    birth;
 	struct prioq_elt pe;
 	static stralloc line = {0}, qqeh = {0}, envh = {0};
-	int             match;
+	int             match, i;
 
 	if (flagexitasap)
 		return;
@@ -1793,7 +1889,7 @@ pass_dochan(int c)
 		if (pe.dt > recent)
 			return;
 		fnmake_chanaddr(pe.id, c);
-		prioq_delmin(&pqchan[c]);
+		prioq_delmin(&pqchan[c]); /*- remove from pqchan */
 		pass[c].mpos = 0;
 		if ((pass[c].fd = open_read(fn1.s)) == -1) /*- open local/split/inode or remote/split/inode */
 			goto trouble;
@@ -1839,6 +1935,16 @@ pass_dochan(int c)
 	switch (line.s[0])
 	{
 	case 'T': /*- send message to qmail-lspawn/qmail-rspawn to start delivery */
+		delivery = c;
+		i = delivery_rate(line.s + 1);
+		if (!i || i == -1) {
+			if (i == -1)
+				log5("warning: ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; will try again later\n");
+			close(pass[c].fd);
+			job_close(pass[c].j);
+			pass[c].id = 0;
+			return;
+		}
 		++jo[pass[c].j].numtodo;
 		del_start(pass[c].j, pass[c].mpos, line.s + 1); /*- line.s[1] = recipient */
 		break;
@@ -3022,8 +3128,10 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.77 2021-05-16 12:16:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.78 2021-05-30 00:12:42+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidgetdomainth;
+	x = sccsidgetrateh;
 	if (x)
 		x++;
 }
