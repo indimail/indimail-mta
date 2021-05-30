@@ -1256,11 +1256,11 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
 
 # slowq service
 %{_prefix}/sbin/svctool --slowq --servicedir=%{servicedir} --qbase=%{qbase} \
-	--cntrldir=control --persistdb --starttls --fsync --syncdir \
-    --dmemory=%{send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
-	--dksign=${sign_opt} --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
-	--remote-authsmtp=plain --localfilter --remotefilter \
-	--deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
+  --cntrldir=control --persistdb --starttls --fsync --syncdir \
+  --dmemory=%{send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
+  --dksign=${sign_opt} --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+  --remote-authsmtp=plain --localfilter --remotefilter \
+  --deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
