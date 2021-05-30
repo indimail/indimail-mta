@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.11  2021-05-30 20:29:44+05:30  Cprogrammer
+ * fixed owner and permission of rate definition files
+ *
  * Revision 1.10  2021-05-29 23:37:12+05:30  Cprogrammer
  * refactored for slowq-send
  *
@@ -66,8 +69,6 @@ static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-int             qmailr_uid;
-int             qmail_gid;
 stralloc        qdir = { 0 };
 char           *usage = "usage: drate [-scR] -d domain -r deliveryRate [-D ratelimit_dir]\n";
 
@@ -271,13 +272,11 @@ set_mode(char *domain, char *rate_expr, int reset_mode, int consolidate, int inc
 	}
 new:
 	t = errno;
-	qmailr_uid = auto_uidr;
-	qmail_gid = auto_gidq;
-	if ((wfd = open(domain, O_WRONLY|O_CREAT, 0644)) == -1)
+	if ((wfd = open(domain, O_WRONLY|O_CREAT, 0640)) == -1)
 		strerr_die4sys(111, FATAL, "unable to write: ", domain, ": ");
 	if (lock_ex(wfd) == -1)
 		cleanup(domain, "unable to lock", t);
-	if (chown(domain, auto_uidr, auto_gidq))
+	if (chown(domain, auto_uids, auto_gidq))
 		cleanup(domain, "unable to chown", t);
 	if (ftruncate(wfd, 0) == -1)
 		cleanup(domain, "unable to truncate", t);
@@ -491,7 +490,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.10 2021-05-29 23:37:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.11 2021-05-30 20:29:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
