@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.559 2021-05-17 07:22:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.560 2021-05-30 07:42:42+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.559 2021-05-17 07:22:43+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.560 2021-05-30 07:42:42+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -209,7 +209,7 @@ Known values for OPTION are:
   [--cname-lookup]
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--logfilter=logfifo]
-  [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
+  [--localfilter --remotefilter]
   [--dkverify=dk|dkim|both|none]
   [--dksign=dk|dkim|both|none --private_key=private_key]
   [--remote-authsmtp=b]
@@ -245,6 +245,64 @@ Known values for OPTION are:
                    1 - Bounce SPAM Mails.
                    2 - Blackhole SPAM Mails
   e              - Exit value of spamfilter that should be treated as spam
+  localfilter    - enable filtering of mails to qmail-local
+  remotefilter   - enable filtering of mails to qmail-remote
+  routes         - Perform SMTPROUTE / QMTPROUTE / static routing
+  cname-lookup   - Perform CNAME lookup for recipient host in qmail-remote
+  fsync          - Sync files and directories when writing files
+  syncdir        - Use BSD style sync semantics for flushing directories
+  paranoid       - Paranoid hostaccess check
+  dmasquerade    - Allow domains to be masqueraded from known IPs
+  default-domain - default domain name for which this host will handle mails
+  mysqlhost      - MySQL Host having authentication tables
+  mysqluser      - Username for connecting to mysql
+  mysqlpass      - Passwd for connecting to mysql
+  private_key    - Path to Private key created by dknewkey
+  persistdb      - Enables qmail-lspawn to have persisten MySQL connection and set
+                   PWSTRUCT environment variable. This eliminates the need for
+                   vdelivermail to make a MySQL connection and hence improves
+                   delivery times.
+  b              - Authenticated SMTP method to use by qmail-remote (plain, login, cram-md5)
+  ssl            - Use SSL encrypted communication in qmail-remote
+  utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
+
+--slowq --qbase=queue_path
+  --servicedir=service_path
+  [--cntrldir=cntrl_path]
+  [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
+  [--persistdb]
+  [--fsync --syncdir]
+  [--qregex]
+  [--dmemory=c]
+  [--overquota_mailsize=o]
+  [--domainlimits]
+  [--routes=smtp|qmtp|static]
+  [--cname-lookup]
+  [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
+  [--localfilter --remotefilter]
+  [--dkverify=dk|dkim|both|none]
+  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--remote-authsmtp=b]
+  [--ssl]
+  [--utf8]
+  --default-domain=domain
+
+ Installs a new queue with a delivery daemon
+  M              - Minimum Disk Space to maintain in queue after which
+                   Temporary error will be returned
+  c              - Max Memory that slowq-start can allocate
+  D              - Max deliveries allowed per day for a user
+  S              - Max sum total size of mails allowed per day for a user
+  o              - Max size of mails to accept after user is overquota
+  service_path   - Path where supervise service will be installed
+  queue_path     - Path where the queues are installed. If this is different from
+                   @qmaildir@ appropriate links will be created in
+                   @qmaildir@
+  cntrl_path     - Path where Qmail control files are stored
+  domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
+  qregex         - Use regular expressions for matching entries in
+                   badmailfrom, badrcptto, blackholedsenders, spamignore
+                   relaymailfrom, authdomains, chkuserdomains
   localfilter    - enable filtering of mails to qmail-local
   remotefilter   - enable filtering of mails to qmail-remote
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
@@ -1076,13 +1134,20 @@ else
     COUNT=`expr $COUNT + 1`
     QUEUE_NO=`expr $QUEUE_NO + 1`
   done
-  "$DESTDIR"$QmailBinPrefix/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null 2>&1
-  if [ $? -ne 0 ] ; then
-    echo "status $? ! nqueue should be fixed. Run queue-fix "$DESTDIR"$QUEUE_BASE/nqueue !" 1>&2
-    OK=0
-  elif [ "$VERB" = y ]; then
-    echo "queue "$DESTDIR"$QUEUE_BASE/nqueue looks OK"
-  fi
+  for i in nqueue slowq
+  do
+	if [ "$i" = "slowq" ] ; then
+    	"$DESTDIR"$QmailBinPrefix/bin/queue-fix -N -r "$DESTDIR"$QUEUE_BASE/$i > /dev/null 2>&1
+	else
+    	"$DESTDIR"$QmailBinPrefix/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/$i > /dev/null 2>&1
+	fi
+    if [ $? -ne 0 ] ; then
+      echo "status $? ! $i should be fixed. Run queue-fix "$DESTDIR"$QUEUE_BASE/$i !" 1>&2
+      OK=0
+    elif [ "$VERB" = y ]; then
+      echo "queue "$DESTDIR"$QUEUE_BASE/$i looks OK"
+    fi
+  done
 fi
 
 echo "Checking IndiMail users"
@@ -5810,6 +5875,7 @@ if [ ! " $QUEUE_BASE" = " $QmailHOME" ] ; then
 	/bin/chmod 755 "$DESTDIR"$QUEUE_BASE
 	$chown root:qmail "$DESTDIR"$QUEUE_BASE
 fi
+
 if [ ! -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
 	/bin/mkdir -p "$DESTDIR"$QUEUE_BASE/nqueue
 fi
@@ -5968,15 +6034,12 @@ else
 fi
 if [ ! " $remotefilter" = " " ] ; then
 	echo "$QmailBinPrefix/sbin/spawn-filter" > $conf_dir/QMAILREMOTE
-	echo "$CONTROLDIR/ratelimit" > $conf_dir/RATELIMIT_DIR
+	echo ""  > $conf_dir/RATELIMIT_DIR
 	echo "1" > $conf_dir/MAKE_SEEKABLE
 else
 	> $conf_dir/QMAILREMOTE
 fi
 echo "startup.so" > $conf_dir/START_PLUGIN
-> $conf_dir/SPAMFILTER
-> $conf_dir/REJECTSPAM
-> $conf_dir/SPAMEXITCODE
 #
 # DEFAULT_DOMAIN will be used by vdelivermail for bounces
 #
@@ -6050,6 +6113,240 @@ if [ $down_state -eq 1 ] ; then
 fi
 dump_log_header deliver.$tag > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log/run
+if [ -z "$skipsend" ] ; then
+	echo "$prog_args" > $conf_dir/.options
+fi
+
+if [ $run_file_only -eq 1 ] ; then
+	if [ -d "$conf_dir".bak ] ; then
+		/bin/rm -rf $conf_dir
+		/bin/mv "$conf_dir".bak $conf_dir
+	fi
+fi
+}
+
+create_slowq()
+{
+if [ $# -ne 5 ] ; then
+	echo "USAGE: create_slowq qbase supervise_dir routes=smtp|qmtp|static use_ssl utf8" 1>&2
+	return 1
+fi
+QUEUE_BASE=$1
+SERVICEDIR=$2
+routes=$3
+qmr_ssl=$4
+utf8=$5
+
+# Create QUEUES
+#---------------------------------------------------------------------------------------
+if [ ! -d "$DESTDIR"$QUEUE_BASE ] ; then
+	/bin/mkdir -p "$DESTDIR"$QUEUE_BASE
+fi
+/bin/chmod 755 "$DESTDIR"$QUEUE_BASE
+$chown root:qmail "$DESTDIR"$QUEUE_BASE
+
+if [ ! -d "$DESTDIR"$QUEUE_BASE/$i ] ; then
+	/bin/mkdir -p "$DESTDIR"$QUEUE_BASE/slowq
+fi
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$QUEUE_BASE/slowq ] ; then
+	return 0
+fi
+echo "Creating Queue "$DESTDIR"$QUEUE_BASE/slowq"
+if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
+	"$DESTDIR"$QmailBinPrefix/bin/queue-fix -r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
+else
+	./queue-fix -r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
+fi
+
+# slowq-send script
+conf_dir="$DESTDIR"$SERVICEDIR/slowq-send/variables
+if [ $run_file_only -eq 1 ] ; then
+	if [ -d $conf_dir ] ; then
+		/bin/mv $conf_dir "$conf_dir".bak
+	fi
+fi
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/slowq-send/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/slowq-send/down
+fi
+/bin/mkdir -p $conf_dir
+/bin/chmod 500 $conf_dir
+t=$sysconfdir/control/defaultqueue
+mkdir -p $t
+ln -sf $t/CONFSPLIT   $conf_dir/CONFSPLIT 
+echo "$QUEUE_BASE/slowq" > $conf_dir/QUEUEDIR
+if [ " $min_free" = " " ] ; then
+	echo 52428800 > $conf_dir/MIN_FREE
+else
+	echo $min_free > $conf_dir/MIN_FREE
+fi
+if [ " $QmailBinPrefix" = " /usr" ] ; then
+	echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
+else
+	echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
+fi
+if [ $qmr_ssl -eq 1 ] ; then
+echo $sysconfdir/certs > $conf_dir/CERTDIR #for qmail-remote
+fi
+if [ $utf8 -eq 1 ] ; then
+	echo $utf8 > $conf_dir/UTF8
+else
+	> $conf_dir/UTF8
+fi
+if [ ! " $routes" = " " ] ; then
+	echo $routes > $conf_dir/ROUTES
+else
+	> $conf_dir/ROUTES
+fi
+if [ " $enable_cname_lookup" = " " ] ; then
+	echo 1 > $conf_dir/DISABLE_CNAME_LOOKUP
+else
+	> $conf_dir/DISABLE_CNAME_LOOKUP
+fi
+if [ ! " $CONTROLDIR" = " " ] ; then
+	echo "$CONTROLDIR" > $conf_dir/CONTROLDIR
+else
+	> $conf_dir/CONTROLDIR
+fi
+if [ ! " $mailcount_limit" = " " ] ; then
+	echo "$mailcount_limit" > $conf_dir/MAILCOUNT_LIMIT
+else
+	> $conf_dir/MAILCOUNT_LIMIT
+fi
+if [ ! " $mailsize_limit" = " " ] ; then
+	echo "$mailsize_limit" > $conf_dir/MAILSIZE_LIMIT
+else
+	> $conf_dir/MAILSIZE_LIMIT
+fi
+if [ ! " $domainlimits" = " " ] ; then
+	echo  > $conf_dir/DOMAIN_LIMITS
+else
+	> $conf_dir/DOMAIN_LIMITS
+fi
+> $conf_dir/FAST_QUOTA
+echo "8192"  > $conf_dir/MAILDIRSIZE_MAX_SIZE
+echo "43200" > $conf_dir/MAILDIRSIZE_MAX_AGE
+if [ ! " $overquota_mailsize" = " " ] ; then
+	echo $overquota_mailsize > $conf_dir/OVERQUOTA_MAILSIZE
+else
+	> $conf_dir/OVERQUOTA_MAILSIZE
+fi
+if [ " $usefsync" = " " ] ; then
+	> $conf_dir/USE_FSYNC
+else
+	echo > $conf_dir/USE_FSYNC
+fi
+if [ " $usesyncdir" = " " ] ; then
+	> $conf_dir/USE_SYNCDIR
+else
+	echo > $conf_dir/USE_SYNCDIR
+fi
+if [ ! " $dmemory" = " " ] ; then
+	echo $dmemory > $conf_dir/SOFT_MEM
+else
+	echo 83886080 > $conf_dir/SOFT_MEM
+fi
+if [ " $persistdb" = " 1" ] ; then
+	echo postmaster > $conf_dir/ROUTE_NULL_USER
+	echo > $conf_dir/AUTHSELF
+	echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
+else
+	> $conf_dir/ROUTE_NULL_USER
+	> $conf_dir/AUTHSELF
+	> $conf_dir/MYSQL_OPT_RECONNECT
+fi
+if [ ! " $remoteauthsmtp" = " " ] ; then
+	echo $remoteauthsmtp > $conf_dir/AUTH_SMTP
+else
+	> $conf_dir/AUTH_SMTP
+fi
+if [ ! " $localfilter" = " " ] ; then
+	echo "$QmailBinPrefix/sbin/spawn-filter" > $conf_dir/QMAILLOCAL
+	echo "1" > $conf_dir/MAKE_SEEKABLE
+else
+	> $conf_dir/QMAILLOCAL
+fi
+if [ ! " $remotefilter" = " " ] ; then
+	mkdir -p "$DESTDIR"$QUEUE_BASE/slowq/ratelimit
+	$chown qmails:qmail "$DESTDIR"$QUEUE_BASE/slowq/ratelimit
+	echo "$QmailBinPrefix/sbin/spawn-filter" > $conf_dir/QMAILREMOTE
+	echo "$QUEUE_BASE/slowq/ratelimit" > $conf_dir/RATELIMIT_DIR
+	echo "1" > $conf_dir/MAKE_SEEKABLE
+else
+	> $conf_dir/QMAILREMOTE
+fi
+#
+# DEFAULT_DOMAIN will be used by vdelivermail for bounces
+#
+if [ ! " $CONTROLDIR" = " " ] ; then
+	if [ -f $CONTROLDIR/defaulthost ] ; then
+		ln -sf $CONTROLDIR/defaulthost $conf_dir/DEFAULT_DOMAIN
+	else
+		> $conf_dir/DEFAULT_DOMAIN
+	fi
+else
+	> $conf_dir/DEFAULT_DOMAIN
+fi
+case "$dksign_option" in
+	dkim)
+	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	echo "$private_key" > $conf_dir/DKIMSIGN
+	> $conf_dir/UNSIGNED_SUBJECT
+	> $conf_dir/UNSIGNED_FROM
+	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
+		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
+	fi
+	;;
+	dk)
+	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	echo "$private_key" > $conf_dir/DKSIGN
+	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
+		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
+	fi
+	;;
+	both)
+	echo "$private_key" > $conf_dir/DKSIGN
+	echo "$private_key" > $conf_dir/DKIMSIGN
+	echo > $conf_dir/UNSIGNED_SUBJECT
+	> $conf_dir/UNSIGNED_FROM
+	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
+		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
+	fi
+	;;
+	none|*)
+	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	;;
+esac
+(
+dump_run_header
+echo "exec 2>&1"
+echo "if [ -s variables/CONTROLDIR ] ; then"
+echo "  cntrl_dir=\`/bin/cat variables/CONTROLDIR\`"
+echo "else"
+echo "  cntrl_dir=/etc/indimail/control"
+echo "fi"
+echo "if [ -f \$cntrl_dir/defaultdelivery ] ; then"
+echo "  defaultdelivery=\`/bin/cat \$cntrl_dir/defaultdelivery\`"
+echo "else"
+echo "  defaultdelivery=\"./Maildir/\""
+echo "fi"
+echo "exec $QmailBinPrefix/bin/envdir variables sh -c \""
+echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "$QmailBinPrefix/sbin/slowq-start \$defaultdelivery\""
+) > "$DESTDIR"$SERVICEDIR/slowq-send/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/slowq-send/run
+
+if [ ! -d $LOGDIR ] ; then
+	/bin/mkdir -p $LOGDIR
+	$chown qmaill:nofiles $LOGDIR
+fi
+# qmail-send log script
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/slowq-send/log
+if [ $down_state -eq 1 ] ; then
+	$TOUCH "$DESTDIR"$SERVICEDIR/slowq-send/down
+fi
+dump_log_header deliver > "$DESTDIR"$SERVICEDIR/slowq-send/log/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/slowq-send/log/run
 if [ -z "$skipsend" ] ; then
 	echo "$prog_args" > $conf_dir/.options
 fi
@@ -9742,6 +10039,10 @@ while test $# -gt 0; do
 	option=44
 	;;
 
+	--slowq)
+	option=45
+	;;
+
 	--version)
 	echo "$RCSID"
 	exit 0
@@ -10861,7 +11162,7 @@ case $option in
 		usage 1
 	fi
 	if [ " $qbase" = " " ] ; then
-	echo "Queue Directory not specified" 1>&2
+		echo "Queue Directory not specified" 1>&2
 		usage 1
 	elif [ " $qcount" = " " ] ; then
 		echo "Queue Count not specified" 1>&2
@@ -11141,6 +11442,49 @@ case $option in
 		usage 1
 	fi
 	restore_all_variables
+	;;
+
+	45) # crete_delivery
+	# Check that we're a privileged user
+	[ `id -u` = 0 ] || exit 4
+	if [ " $servicedir" = " " ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	if [ " $qbase" = " " ] ; then
+		echo "Queue Directory not specified" 1>&2
+		usage 1
+	fi
+	case "$dkverify_option" in
+		dkim|dk|both)
+		;;
+		none|"")
+		;;
+		*)
+		echo "invalid --dkverify=$dkverify_option" 1>&2
+		usage 1
+		;;
+	esac
+	case "$dksign_option" in
+		dkim|dk|both)
+		if [ " $private_key" = " " ] ; then
+			echo "--private_key not specfied" 1>&2
+			usage 1
+		fi
+		;;
+		none|"")
+		;;
+		*)
+		echo "invalid --dksign=$dksign_option" 1>&2
+		usage 1
+		;;
+	esac
+	echo "Creating delivery only slowq"
+	if [ $use_starttls -ne 0 -o $use_ssl -ne 0 ] ; then
+		create_slowq "$qbase" "$servicedir" "$routes" 1 $utf8
+	else
+		create_slowq "$qbase" "$servicedir" "$routes" 0 $utf8
+	fi
 	;;
 
 	*)
