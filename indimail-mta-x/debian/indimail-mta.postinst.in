@@ -173,7 +173,7 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 	for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
 		qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
-		qscanq resolvconf udplogger.3000
+		slowq-send qscanq resolvconf udplogger.3000
 	do
 		${prefix}/bin/svok ${servicedir}/$i 2>&1
 		if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
@@ -335,6 +335,14 @@ eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 	--dkverify="none" --dksign=$sign_opt \
 	--private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
 	$extra_opt
+
+# slowq service
+eval ${prefix}/sbin/svctool --slowq --servicedir=${servicedir} --qbase=${qbase} \
+	--cntrldir=control --persistdb --starttls --fsync --syncdir \
+    --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
+	--dksign=${sign_opt} --private_key=${qsysconfdir}/control/domainkeys/%/${dkimkeyfn} \
+	--remote-authsmtp=plain --localfilter --remotefilter \
+	--deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
 
 #odmr
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${servicedir} \

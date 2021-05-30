@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.312 2021-05-29 23:44:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.313 2021-05-30 08:10:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -951,7 +951,7 @@ echo "shutting down indimail-mta services"
 for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
   qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
-  qscanq resolvconf udplogger.3000
+  slowq-send qscanq resolvconf udplogger.3000
 do
   %{_prefix}/bin/svstat %{servicedir}/$i >/dev/null 2>&1
   if [ $? -eq 0 ] ; then
@@ -1094,7 +1094,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
     qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
-    qscanq resolvconf udplogger.3000
+    slowq-send qscanq resolvconf udplogger.3000
   do
     %{_prefix}/bin/svok %{servicedir}/$i
     if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
@@ -1253,6 +1253,14 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --dkverify="none" --dksign=$sign_opt \
   --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
   $extra_opt
+
+# slowq service
+%{_prefix}/sbin/svctool --slowq --servicedir=%{servicedir} --qbase=%{qbase} \
+	--cntrldir=control --persistdb --starttls --fsync --syncdir \
+    --dmemory=%{send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
+	--dksign=${sign_opt} --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+	--remote-authsmtp=plain --localfilter --remotefilter \
+	--deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
@@ -1451,7 +1459,7 @@ fi
 
 echo "shutting down and removing indimail-mta/indimail-mta-log services"
 for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
-  qscanq qmail-smtpd.465 qmail-smtpd.587 \
+  slowq-send qscanq qmail-smtpd.465 qmail-smtpd.587 \
   qmail-qmtpd.209 qmail-qmqpd.628 greylist.1999 \
   qmail-daned.1998 resolvconf udplogger.3000
 do

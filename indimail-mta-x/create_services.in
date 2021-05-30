@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.93 2021-02-26 23:11:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.94 2021-05-30 08:10:18+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -444,6 +444,9 @@ do
   nobogofilter=$orig_bogofilter
 done
 
+$svctool --smtp=366 --odmr --servicedir=$servicedir \
+  --infifo="" --query-cache --password-cache --memory=$smtp_soft_mem $extra_opt
+
 append_opt=""
 if [ $clamav_os -eq 1 ] ; then
   append_opt="--qhpsi=\"$qhpsi\""
@@ -455,8 +458,12 @@ eval $svctool --queueParam=defaultqueue \
   --private_key=$controldir/domainkeys/%/$dkimkeyfn \
   $append_opt $extra_opt
 
-$svctool --smtp=366 --odmr --servicedir=$servicedir \
-  --infifo="" --query-cache --password-cache --memory=$smtp_soft_mem $extra_opt
+eval $svctool --slowq --servicedir=$servicedir --qbase=$qbase \
+	--cntrldir=control --persistdb --starttls --fsync --syncdir \
+    --dmemory=$send_soft_mem --min-free=52428800 --dkverify=$ver_opt \
+	--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
+	--remote-authsmtp=plain --localfilter --remotefilter \
+	--deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
 #
 # Greylist
 #
