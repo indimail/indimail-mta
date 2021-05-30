@@ -6345,7 +6345,7 @@ fi
 if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/slowq-send/down
 fi
-dump_log_header deliver > "$DESTDIR"$SERVICEDIR/slowq-send/log/run
+dump_log_header slowq > "$DESTDIR"$SERVICEDIR/slowq-send/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/slowq-send/log/run
 if [ -z "$skipsend" ] ; then
 	echo "$prog_args" > $conf_dir/.options
