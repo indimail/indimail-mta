@@ -4,51 +4,65 @@ qmail-multi \- queue multiplexor and filter
 .SH SYNOPSIS
 .B qmail-multi
 .SH DESCRIPTION
-\fBqmail-multi(8)\fR is a queue multiplexor and filter for \fBIndiMail(7)\fR. The
-multiplexor can be turned on by defining the \fBQMAILQUEUE\fR environment variable
+\fBqmail-multi(8)\fR is a queue multiplexor and filter for
+\fBIndiMail(7)\fR. The multiplexor can be turned on by defining the
+\fBQMAILQUEUE\fR environment variable
 
 .EX
 QMAILQUEUE=PREFIX/sbin/qmail-multi
 .EE
 
-The filter can be turned on by defining the \fBFILTERARGS\fR environment variable.
-\fBqmail-multi\fR can also do spam filtering by setting the \fBSPAMFILTER\fR
-environment variable. If \fBRELAYCLIENT\fR environment is set, \fBqmail-multi(8)\fR
-skips spam filtering regardless of \fBSPAMFILTER\fR setting.
+The filter can be turned on by defining the \fBFILTERARGS\fR environment
+variable. \fBqmail-multi\fR can also do spam filtering by setting the
+\fBSPAMFILTER\fR environment variable. If \fBRELAYCLIENT\fR environment is
+set, \fBqmail-multi(8)\fR skips spam filtering regardless of
+\fBSPAMFILTER\fR setting.
 
 .B qmail-multi
 also calls \fBqscanq\fR(8) to perform virus scanning or bad attachment scan
 if the value of the VIRUSCHECK environment variable lies between 2 and 7.
 
-The deposition and balancing of mail across multiple queues is controlled by
-the following environment variables.
+The deposition and balancing of mail across multiple queues is controlled
+by the following environment variables.
+
+.TP 5
+.B QUEUE_BASE
+The base directory having all the indimail queues. If this is not defined,
+the control file \fIqueue_base\fR is used. This is typically
+QMAILHOME/queue.
 
 .TP 5
 .B QUEUE_START
-- This is a number which defines the first queue that should be used.
+This is a number which defines the first queue that should be used.
 
-e.g. QUEUE_START=1 implies the first queue to be QMAILHOME/queue1
+e.g. QUEUE_START=1 implies the first queue to be QMAILHOME/queue/queue1
 
 .TP 5
 .B QUEUE_COUNT
-- This defines the number of queues that should be used for load balancing.
+This defines the number of queues that should be used for load
+balancing.
 
-e.g. QUEUE_COUNT=5 implies 5 queues QMAILHOME/queue1, QMAILHOME/queue2, ..., QMAILHOME/queue5
+e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues QMAILHOME/queue/queue1,
+QMAILHOME/queue/queue2, ..., QMAILHOME/queue/queue5
 
 .TP 5
 .B MIN_FREE
-- This is the minimum free disk space that should be available in the filesystem containing the queues. When
-free space goes below this value, qmail-multi will return a temporary disk full error
-"qq write error or disk full (#4.3.0)". This prevents 
+This is the minimum free disk space that should be available in the
+filesystem containing the queues. When free space goes below this value,
+qmail-multi will return a temporary disk full error "qq write error or disk
+full (#4.3.0)". This prevents
 .B qmail-send
-reaching a deadlock in the case when disk becomes full and there are bounce messages to be processed.
+reaching a deadlock in the case when disk becomes full and there are bounce
+messages to be processed.
 .B qmail-send
-in this case keeps on retrying bounce message which does not succeeed as disk space is not there to
-prepare the bounce. This effectively stops processing of local and remote messages and thus disk space never
-gets freed up.
+in this case keeps on retrying bounce message which does not succeeed as
+disk space is not there to prepare the bounce. This effectively stops
+processing of local and remote messages and thus disk space never gets
+freed up.
 .B qmail-multi
-prevents this from happening by accepting mails only when disk space greater than MIN_FREE is present. It uses
-\fBstatfs(2)\fR (\fBstatvfs\fR on solaris) to get the free space on the filesystem.
+prevents this from happening by accepting mails only when disk space
+greater than MIN_FREE is present. It uses \fBstatfs(2)\fR (\fBstatvfs\fR on
+solaris) to get the free space on the filesystem.
 
 .PP
 If SPAMFILTER is defined,
@@ -56,7 +70,7 @@ If SPAMFILTER is defined,
 additionally runs a command defined by SPAMFILTER environment variable.
 The SPAMFILTER env variable can contain command line arguments too. This
 gives qmail-multi the ability to filter mail messages. The program defined
-by SPAMFILTER environment variable should read descriptor 0 and write to 
+by SPAMFILTER environment variable should read descriptor 0 and write to
 descriptor 1
 
 The sequence in which the filter program is run is given below
@@ -64,18 +78,20 @@ The sequence in which the filter program is run is given below
 .TP 5
 1. create a pipe and fork
 .TP 5
-2. dup write end of the pipe to descriptor 1 in the child and exec the filter program
+2. dup write end of the pipe to descriptor 1 in the child and exec the
+filter program
 .TP 5
-3. dup read end of the pipe to descriptor 0 in parent and exec \fBqmail-queue\fR.
+3. dup read end of the pipe to descriptor 0 in parent and exec
+\fBqmail-queue\fR.
 .TP 0
 
-This gives the ability for the SPAMFILTER program to read the mail message from
-descriptor 0 before passing it to \fBqmail-queue\fR through the pipe.
+This gives the ability for the SPAMFILTER program to read the mail message
+from descriptor 0 before passing it to \fBqmail-queue\fR through the pipe.
 
 .B qmail-multi
-will attempt to make the descriptor 0 seekable if the environment variable MAKE_SEEKABLE
-is defined. This may be necessary for certain filter programs like bogofilter to
-prevent allocating memory for the mail message.
+will attempt to make the descriptor 0 seekable if the environment variable
+MAKE_SEEKABLE is defined. This may be necessary for certain filter programs
+like bogofilter to prevent allocating memory for the mail message.
 
 In this case following interpretations on the exit status will be made
 
@@ -89,28 +105,28 @@ In this case following interpretations on the exit status will be made
 A typical application of this would be to run spam filtering software like
 spamassasin, bogofilter, etc
 
-When the exit code of the filter program matches SPAMEXITCODE, the mail
-is considered to be spam.
+When the exit code of the filter program matches SPAMEXITCODE, the mail is
+considered to be spam.
 
 If REJECTSPAM is set to 1, the mail will be bounced back to the sender. If
-NOTIFYSPAM is set, mails will be redirected to the recipient specified
-by the NOTIFYSPAM environment variable. If NOTIFYSPAM is not set, the recipient
-can be specified by the
+NOTIFYSPAM is set, mails will be redirected to the recipient specified by
+the NOTIFYSPAM environment variable. If NOTIFYSPAM is not set, the
+recipient can be specified by the
 .B globalspamredirect
-control file. The email id in \fBglobalspamdirect\fR can be overriden by the environment
-variable \fBGLOBALSPAMREDIRECT\fR. If both REJECTSPAM and NOTIFYSPAM is set, spam mails will
-be bounced back to the sender with a copy redirected to the recipient
-specified in by the NOTIFYSPAM environment variable as well (or the
+control file. The email id in \fBglobalspamdirect\fR can be overriden by
+the environment variable \fBGLOBALSPAMREDIRECT\fR. If both REJECTSPAM and
+NOTIFYSPAM is set, spam mails will be bounced back to the sender with a
+copy redirected to the recipient specified in by the NOTIFYSPAM environment
+variable as well (or the
 .B globalspamredirect
 control file). you may decide not to generate
 a bounce to the sender by setting the environment variable 
 .B REJECTSPAM
-to a value greater than 1 (i.e. black hole SPAM mails). In addition to running
-SPAM filters, 
-.B qmail-multi
-has the ability to run any filter by setting the FILTERARGS environment
-variable. Any command defined by FILTERARGS will be run using /bin/sh. The
-input to this filter will be fd 0 and the output will be piped to
+to a value greater than 1 (i.e. black hole SPAM mails). In addition to
+running SPAM filters, \fBqmail-multi\fR has the ability to run any filter
+by setting the FILTERARGS environment variable. Any command defined by
+FILTERARGS will be run using /bin/sh. The input to this filter will be fd 0
+and the output will be piped to
 .B qmail-queue.
 e.g.
 
@@ -118,49 +134,54 @@ e.g.
 FILTERARGS="/usr/bin/altermime --input=- --disclaimer=/etc/motd"
 .EE
 
-will append the output of altermime command to all mails. \fBqmail-multi(8)\fR will bounce the
-message if the return status is 100. The mail will be blackholed if the return status is 2. If
-the return status is non-zero, qmail-multi will exit issuing a temporary error.
+will append the output of altermime command to all mails.
+\fBqmail-multi(8)\fR will bounce the message if the return status is 100.
+The mail will be blackholed if the return status is 2. If the return status
+is non-zero, qmail-multi will exit issuing a temporary error.
 .PP
-\fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. If the environment variable
-\fBQUEUEPROG\fR is defined, the program defined by \fBQUEUEPROG\fR will be used instead.
-\fBQUEUEPROG\fR is typically used when you want to use \fBQMQP\fR using \fBqmail-qmqpc\fR to
-queue your mails to a centralized queue hub.
+\fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. If the
+environment variable \fBQUEUEPROG\fR is defined, the program defined by
+\fBQUEUEPROG\fR will be used instead.  \fBQUEUEPROG\fR is typically used
+when you want to use \fBQMQP\fR, using \fBqmail-qmqpc\fR, to queue your
+mails to a centralized queue hub.
 
 .SH
 Multiplexing LOGIC
 .B qmail-multi
-uses time slicing. It gets the current time since epoch and divides it by QUEUE_COUNT. This remainder is
-added to QUEUE_START to arrive at which queue to use. It then sets the QUEUEDIR environment variable and
-calls
+gets the current time in seconds since epoch and divides it by QUEUE_COUNT.
+This remainder is added to QUEUE_START to arrive at which queue to use. It
+then sets the QUEUEDIR environment variable and calls
 .BR qmail-queue .
 
 .B
 qmail-multi
-is actually a wrapper for \fBqmail-queue\fR to manage multiple queues. N queues can be set up in
-/var/qmail as queue1, queue2, ... queueN. To use  qmail-multi set the environment variable
-QMAILQUEUE=/var/qmail/bin/qmail-multi. Additionally set the two environment variables QUEUE_START and
-QUEUE_COUNT as the number of the first queue (excluding queue prefix) and the total number of queues
-respectively.
+is actually a wrapper for \fBqmail-queue\fR to manage multiple queues. N
+queues can be set up in /var/qmail as queue1, queue2, ... queueN. To use
+qmail-multi set the environment variable
+QMAILQUEUE=/var/qmail/bin/qmail-multi. Additionally set the two environment
+variables QUEUE_START and QUEUE_COUNT as the number of the first queue
+(excluding queue prefix) and the total number of queues respectively.
 .B qmail-multi
 does load balancing across these N queues by doing exec of 
 .B qmail-queue
-with QUEUEDIR set as the path of one of these N queues. Each of these \fBN\fR queues should be
-created using \fBqueue-fix(1)\fR program. \fBqmail-send\fR should be used with the
-\fBQUEUEDIR\fR set appropriately to process these N queues.
+with QUEUEDIR set as the path of one of these N queues. Each of these
+\fBN\fR queues should be created using \fBqueue-fix(1)\fR program.
+\fBqmail-send\fR should be used with the \fBQUEUEDIR\fR set appropriately
+to process these N queues.
 
 .SH "EXIT CODES"
 .B qmail-multi
 does not print diagnostics.
 It exits 120 if it is not able to exec
 .B qmail-queue
-It exits 55 if it is not able get the free space for the queue filesystem. It exits 53 if the free space
-is below MIN_FREE value.
-It exits 31 if the program/script defined by \fBFILTERARGS\fR (or defined in the control
-file \fBfilterargs\fR) returns 100 (i.e. mail gets bounced). If the program/script defined by
-\fBFILTERARGS\fR returns 2, then the mail gets blackholed. If the program/script defined
-by \fBFILTERARGS\fR exits non-zero status, it exits 71 and a temporary error is issued. For
-all other cases where no errors occur, it exits 0.
+It exits 55 if it is not able get the free space for the queue filesystem.
+It exits 53 if the free space is below MIN_FREE value.  It exits 31 if the
+program/script defined by \fBFILTERARGS\fR (or defined in the control file
+\fBfilterargs\fR) returns 100 (i.e. mail gets bounced). If the
+program/script defined by \fBFILTERARGS\fR returns 2, then the mail gets
+blackholed. If the program/script defined by \fBFILTERARGS\fR exits
+non-zero status, it exits 71 and a temporary error is issued. For all other
+cases where no errors occur, it exits 0.
 
 
 .SH "SEE ALSO"
@@ -182,4 +203,4 @@ spawn-filter(8)
 
 .SH "AUTHORS"
 
-"Manvendra Bhangui" <mbhangui@gmail.com>.
+"Manvendra Bhangui" <manvendra@indimail.org>.
