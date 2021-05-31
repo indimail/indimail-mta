@@ -1352,18 +1352,18 @@ compile qmail-multi.c auto_qmail.h control.h conf-queue MakeArgs.h
 	fi
 
 spawn-filter: \
-load spawn-filter.o variables.o do_rate.o report.o \
+load spawn-filter.o variables.o report.o \
 auto_qmail.o control.o wildmat.o qregex.o MakeArgs.o \
 auto_control.o matchregex.o envrules.o getDomainToken.o \
 socket.lib dns.lib
-	./load spawn-filter variables.o do_rate.o report.o \
+	./load spawn-filter variables.o report.o \
 	auto_qmail.o control.o wildmat.o qregex.o \
 	MakeArgs.o auto_control.o matchregex.o getDomainToken.o \
 	envrules.o `cat dns.lib socket.lib` -lm -lqmail
 
 spawn-filter.o: \
 compile spawn-filter.c control.h auto_qmail.h variables.h qregex.h \
-MakeArgs.h report.h do_rate.h getDomainToken.h
+MakeArgs.h report.h getDomainToken.h
 	./compile spawn-filter.c
 
 spawn-filter.8: \
@@ -1375,6 +1375,11 @@ spawn-filter.9 conf-prefix conf-sysconfdir
 
 do_rate.o: \
 compile do_rate.c do_rate.h
+	./compile do_rate.c
+
+delivery_rate.o: \
+compile delivery_rate.c delivery_rate.h qsutil.h \
+variables.h do_rate.h getDomainToken.h control.h
 	./compile do_rate.c
 
 report.o: \
@@ -1624,21 +1629,21 @@ load qmail-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o\
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o variables.o \
 getDomainToken.o do_rate.o envrules.o qregex.o wildmat.o \
-libsyncdir.a srs.lib
+delivery_rate.o libsyncdir.a srs.lib
 	./load qmail-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
 	getDomainToken.o do_rate.o wildmat.o qmail.o auto_qmail.o \
 	auto_split.o variables.o envrules.o matchregex.o srs.o \
-	rcpthosts.o auto_control.o -L. -lsyncdir \
+	delivery_rate.o rcpthosts.o auto_control.o -L. -lsyncdir \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -ldl -lqmail
 
 qmail-send.o: \
 compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
-quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h \
+quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-conf-mime conf-sync conf-batv conf-srs
-	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv` \
-	qmail-send.c
+conf-mime conf-sync conf-batv conf-srs conf-todo
+	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
+	conf-todo` qmail-send.c
 
 qmail-send.8: \
 qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1655,20 +1660,20 @@ load slowq-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o \
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o \
 variables.o envrules.o qregex.o wildmat.o getDomainToken.o \
-do_rate.o libsyncdir.a srs.lib
+do_rate.o delivery_rate.o libsyncdir.a srs.lib
 	./load slowq-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
-	wildmat.o qmail.o auto_qmail.o auto_split.o \
+	do_rate.o wildmat.o qmail.o auto_qmail.o auto_split.o \
 	variables.o envrules.o matchregex.o srs.o rcpthosts.o \
-	do_rate.o auto_control.o getDomainToken.o -L. -lsyncdir \
+	delivery_rate.o auto_control.o getDomainToken.o -L. -lsyncdir \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -ldl -lqmail
 
 slowq-send.o: \
 compile slowq-send.c control.h auto_qmail.h trigger.h newfield.h \
-quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h getDomainToken.h \
+quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-conf-mime conf-sync conf-batv conf-srs conf-locklogs conf-todo
-	./compile `grep -h -v "^#" conf-mime conf-todo \
+conf-mime conf-sync conf-batv conf-srs conf-locklogs
+	./compile `grep -h -v "^#" conf-mime \
 	conf-sync conf-batv conf-locklogs` slowq-send.c
 
 slowq-send.8: \
@@ -3436,7 +3441,7 @@ auto_control.o control.o do_rate.o getDomainToken.o
 
 drate.o: \
 compile drate.c variables.h myctime.h auto_uids.h auto_qmail.h \
-do_rate.h control.h getDomainToken.h report.h
+do_rate.h control.h getDomainToken.h
 	./compile drate.c
 
 cidr: load cidr.o
