@@ -1,9 +1,10 @@
-.TH qmail-start 8
+.TH slowq-start 8
+
 .SH NAME
-qmail-start \- turn on mail delivery
-qmail-daemon \- turn on mail delivery
+slowq-start \- turn on mail delivery
+
 .SH SYNOPSIS
-.B qmail-start
+.B slowq-start
 [
 .I defaultdelivery
 [
@@ -11,15 +12,8 @@ qmail-daemon \- turn on mail delivery
 ]
 ]
 
-.B qmail-daemon
-[
-.I defaultdelivery
-[
-.I logger arg ...
-]
-]
 .SH DESCRIPTION
-.B qmail-start
+.B slowq-start
 invokes
 .BR qmail-send ,
 .BR qmail-todo ,
@@ -27,65 +21,36 @@ invokes
 .BR qmail-rspawn ,
 and
 .BR qmail-clean ,
-under the proper uids and gids for a single queue.
-These five daemons cooperate to deliver messages from the queue.
+under the proper uids and gids for a queue defined by the environment
+variable \fBQUEUEDIR\fR. These five daemons cooperate to deliver messages
+from the queue.
 
-.B qmail-daemon
-invokes multiple invocations of \fBqmail-start\fR to invoke
-.BR qmail-send ,
-.BR qmail-todo ,
-.BR qmail-lspawn ,
-.BR qmail-rspawn ,
-and
-.BR qmail-clean ,
-under the proper uids and gids for multiple queues. It starts multiple copies
-of \fBqmail-send\fR. The number of \fBqmail-todo\fR, \fBqmail-send\fR instance
-it runs is defined by the environment variable \fBQUEUE_COUNT\fR. For each
-instance of \fBqmail-send\fR,  the queue is defined by \fBqmail-daemon\fR
-by setting the environment variable \fBQUEUEDIR\fR. A queue is defined by
-the integers defined by environment variables \fBQUEUE_START\fR and \fBQUEUE_COUNT\fR.
+\fBslowq-start\fR borrows most of it's code from \fBqmail-start\fR.
 
-Setting QUEUE_COUNT=2, QUEUE_START=1 will make \fBqmail-daemon\fR run two instances of
-\fBqmail-send\fR, \fBqmail-todo\fR. The first \fBqmail-send\fR, \fBqmail-todo\fR
-instance will use the queue QMAILHOME/queue/queue1 and the second instance will use
-QMAILHOME/queue/queue2
-
-.B qmail-daemon
-also monitors \fBqmail-send\fR and \fBqmail-todo\fR and restart them if they goes down.
-
-.B qmail-start
-should be used if you desire to run only one queue. For running multiple parallel queues run
-.BR qmail-daemon .
-
-.B qmail-start
-or
-.B qmail-daemon
+.B slowq-start
 arranges for
-.BR qmail-send 's
+.BR slowq-send 's
 activity record to be sent to
-.BR qmail-start 's
-output.
-See
+.BR slowq-start 's
+output. See
 .B qmail-log(5)
 for the format of the activity record.
 Other than this,
-.B qmail-start
+.B slowq-start
 does not print anything, even on failure.
-.B qmail-daemon
-announces its startup, exit and failures on stdout and stderr
 
 If
 .I defaultdelivery
 is supplied,
-.B qmail-start
-or
-.B qmail-daemon
+.B slowq-start
 passes it to
 .BR qmail-lspawn .
 
-\fBIndiMail(7)\fR installs qmail-daemon to be started under \fBsupervise(8)\fR. The default
-mailbox type is picked up from the \fBdefaultdelivery\fR control file.
-The table below outlines the choices for \fBdefaultdelivery\fR control file
+The default indimail installation, creates a supervised service in
+@servicedir@/slowq. The output goes to @logdir@/slowq/current. The default
+mailbox type is picked up from the \fBdefaultdelivery\fR control file. The
+table below outlines the choices for \fBdefaultdelivery\fR control file
+
 .TS
 l l.
 Mailbox | Name  | Location       | defaultdelivery | Comments
@@ -107,52 +72,41 @@ _
 If
 .I logger
 is supplied,
-.B qmail-start
-or
-.B qmail-daemon
+.B slowq-start
 invokes
 .I logger
-with the given arguments,
-and feeds
-.BR qmail-send 's
+with the given arguments, and feeds
+.BR slowq-send 's
 activity record through
 .IR logger .
 
 Environment variables given to
-.B qmail-start
-or
-.B qmail-daemon
+.B slowq-start
 will eventually be passed on to
 .BR qmail-local ,
 so make sure to clean up the environment if you run
-.B qmail-start
+.B slowq-start
 manually:
 
 .EX
    # env - PATH="PREFIX/sbin:$PATH"
 .br
-   qmail-start ./Mailbox splogger qmail &
+   slowq-start ./Mailbox splogger qmail &
 .br
    (all on one line)
 .EE
 
 Resource limits, controlling ttys, et al. are also passed from
-.B qmail-start
-or
-.B qmail-daemon
+.B slowq-start
 to
 .BR qmail-local .
 
 Note that
-.B qmail-send
-normally juggles several simultaneous deliveries.
-To reduce
-.BR qmail-send 's
-impact on other programs,
-you can run
-.B qmail-start
-or
-.B qmail-daemon
+.B slowq-send
+normally juggles several simultaneous deliveries. To reduce
+.BR slowq-send 's
+impact on other programs, you can run
+.B slowq-start
 with a low priority.
 
 .SH Supplementary Groups
@@ -171,7 +125,9 @@ qmail-local(8),
 qmail-clean(8),
 qmail-lspawn(8),
 qmail-rspawn(8),
+qmail-start(8),
 qmail-send(8),
+slowq-send(8),
 qmail-todo(8),
 qmail-multi(8),
 initsvc(1),

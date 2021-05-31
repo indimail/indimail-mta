@@ -12,7 +12,8 @@ handles messages placed into the outgoing queue by
 .B slowq-send
 by default looks at QMAILHOME/queue/slowq for messages. This path can be
 changed by defining the QUEUEDIR environment variable. This manual will
-refer \fIqueue\fR as the value of \fBQUEUEDIR\fR.
+refer \fIqueue\fR as the value of \fBQUEUEDIR\fR. \fBslowq-send\fR
+borrows most of it's code from \fBqmail-send\fR.
 
 \fBslowq-send\fR uses \fBqmail-lspawn\fR to deliver messages to local
 recipients and \fBqmail-rspawn\fR to deliver messages to remote recipients.
@@ -177,13 +178,14 @@ If 0, local deliveries will be put on hold.
 is limited at compile time to SPAWN.
 
 .TP 5
-.I concurrencylocal.queue
+.I concurrencyl.slowq
 Maximum number of simultaneous local delivery attempts for the queue
-\fIqueue\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
-variable.
+\fIslowq\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
+variable, referring to the path of the queue. Here \fIslowq\fR refers to
+the basename of the queue path.
 Default: 10.
 If 0, local deliveries will be put on hold.
-.I concurrencylocal.queue
+.I concurrencyl.slowq
 is limited at compile time to SPAWN.
 
 .TP 5
@@ -195,13 +197,14 @@ If 0, remote deliveries will be put on hold.
 is limited at compile time to SPAWN.
 
 .TP 5
-.I concurrencyremote.queue
+.I concurrencyr.slowq
 Maximum number of simultaneous remote delivery attempts for the queue
-\fIqueue\fR. A queue can be defined by setting \fBQUEUEDIR\fR
-environment variable.
+\fIslowq\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
+variable, referring to the path of the queue. Here \fIslowq\fR refers to
+the basename of the queue path.
 Default: 20.
 If 0, remote deliveries will be put on hold.
-.I concurrencyremote.queue
+.I concurrencyr.queue
 is limited at compile time to SPAWN.
 
 .TP 5

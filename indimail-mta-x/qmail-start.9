@@ -1,4 +1,5 @@
 .TH qmail-start 8
+
 .SH NAME
 qmail-start \- turn on mail delivery
 qmail-daemon \- turn on mail delivery
@@ -27,8 +28,9 @@ invokes
 .BR qmail-rspawn ,
 and
 .BR qmail-clean ,
-under the proper uids and gids for a single queue.
-These five daemons cooperate to deliver messages from the queue.
+under the proper uids and gids for a queue defined by the environment
+variable \fBQUEUEDIR\fR. These five daemons cooperate to deliver messages
+from the queue.
 
 .B qmail-daemon
 invokes multiple invocations of \fBqmail-start\fR to invoke
@@ -38,23 +40,27 @@ invokes multiple invocations of \fBqmail-start\fR to invoke
 .BR qmail-rspawn ,
 and
 .BR qmail-clean ,
-under the proper uids and gids for multiple queues. It starts multiple copies
-of \fBqmail-send\fR. The number of \fBqmail-todo\fR, \fBqmail-send\fR instance
+under the proper uids and gids for multiple queues. It invokes \fBqmail-start\fR
+mutiple times. The number of \fBqmail-todo\fR, \fBqmail-send\fR instance
 it runs is defined by the environment variable \fBQUEUE_COUNT\fR. For each
-instance of \fBqmail-send\fR,  the queue is defined by \fBqmail-daemon\fR
+instance of \fBqmail-start\fR,  the queue is defined by \fBqmail-daemon\fR
 by setting the environment variable \fBQUEUEDIR\fR. A queue is defined by
-the integers defined by environment variables \fBQUEUE_START\fR and \fBQUEUE_COUNT\fR.
+the integers defined by environment variables \fBQUEUE_START\fR and
+\fBQUEUE_COUNT\fR.
 
-Setting QUEUE_COUNT=2, QUEUE_START=1 will make \fBqmail-daemon\fR run two instances of
-\fBqmail-send\fR, \fBqmail-todo\fR. The first \fBqmail-send\fR, \fBqmail-todo\fR
-instance will use the queue QMAILHOME/queue/queue1 and the second instance will use
-QMAILHOME/queue/queue2
+Setting QUEUE_COUNT=2, QUEUE_START=1 will make \fBqmail-daemon\fR run
+\fBqmail-start\fR twice. The first invocation of \fBqmail-start\fR will use
+the queue QMAILHOME/queue/queue1 and the second instance will use
+QMAILHOME/queue/queue2. This will cause two copies of qmail-todo,
+qmail-send, qmail-lspawn, qmail-rspawn, qmail-clean to run
 
 .B qmail-daemon
-also monitors \fBqmail-send\fR and \fBqmail-todo\fR and restart them if they goes down.
+also monitors each \fBqmail-todo\fR, \fBqmail-send\fR instances and restart
+them if they goes down.
 
 .B qmail-start
-should be used if you desire to run only one queue. For running multiple parallel queues run
+should be used if you desire to run only one queue. For running multiple
+parallel queues use
 .BR qmail-daemon .
 
 .B qmail-start
@@ -64,11 +70,9 @@ arranges for
 .BR qmail-send 's
 activity record to be sent to
 .BR qmail-start 's
-output.
-See
+output. See
 .B qmail-log(5)
-for the format of the activity record.
-Other than this,
+for the format of the activity record. Other than this,
 .B qmail-start
 does not print anything, even on failure.
 .B qmail-daemon
@@ -83,9 +87,12 @@ or
 passes it to
 .BR qmail-lspawn .
 
-\fBIndiMail(7)\fR installs qmail-daemon to be started under \fBsupervise(8)\fR. The default
-mailbox type is picked up from the \fBdefaultdelivery\fR control file.
-The table below outlines the choices for \fBdefaultdelivery\fR control file
+The default indimail installation, creates a supervised service in
+@servicedir@/deliver.25. The output goes to @logdir@/slowq/current. The
+default mailbox type is picked up from the \fBdefaultdelivery\fR control
+file. The table below outlines the choices for \fBdefaultdelivery\fR
+control file
+
 .TS
 l l.
 Mailbox | Name  | Location       | defaultdelivery | Comments
