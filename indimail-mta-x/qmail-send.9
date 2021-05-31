@@ -18,7 +18,7 @@ each having its own queue defined by the \fBQUEUEDIR\fR environment variable.
 \fBQUEUEDIR\fR will typically be QMAILHOME/queue/queue1, QMAILHOME/queue/queue2
 and so on. This manual will refer \fIqueue\fR as the value of \fBQUEUEDIR\fR.
 
-\fBqmail-send\fR can load startup plugins from PREFIX/usr/lib/indimail/plugins
+\fBqmail-send\fR can load startup plugins from PREFIX/lib/indimail/plugins
 directory. This directory can be changed by defining the \fBPLUGINDIR\fR
 environment variable. By default, qmail-send will attempt to load the plugin
 qmail-send.so. This can be changed by defining \fBSTART_PLUGIN\fR environment
@@ -62,7 +62,7 @@ finish.
 If \fBqmail-send\fR receives an ALRM signal, it will reschedule every
 message in the queue for immediate delivery.
 
-If the environment variable USE_FSYNC is set, then\fBqmail-send\fR writes
+If the environment variable USE_FSYNC is set, then \fBqmail-send\fR writes
 all data to disk ("flushes") all modified in-core data of (i.e., modified
 buffer cache pages for) the new message to the disk device (or other
 permanent storage device) so that all changed information can be

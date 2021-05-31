@@ -47,7 +47,7 @@ waiting (possibly more than a minute) for current delivery attempts to finish.
 If \fBslowq-send\fR receives an ALRM signal, it will reschedule every message
 in the queue for immediate delivery.
 
-If the environment variable USE_FSYNC is set, then\fBslowq-send\fR writes
+If the environment variable USE_FSYNC is set, then \fBslowq-send\fR writes
 all data to disk ("flushes") all modified in-core data of (i.e., modified
 buffer cache pages for) the new message to the disk device (or other
 permanent storage device) so that all changed information can be
