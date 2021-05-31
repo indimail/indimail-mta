@@ -1913,10 +1913,8 @@ load slowq-start.o prot.o auto_uids.o get_uid.o
 	./load slowq-start prot.o auto_uids.o get_uid.o -lqmail
 
 slowq-start.8: \
-slowq-start.9 conf-qmail
-	cat slowq-start.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	> slowq-start.8
+slowq-start.9 conf-qmail conf-servicedir
+	$(edit) slowq-start.9 > $@
 
 slowq-start.o: \
 compile slowq-start.c prot.h auto_uids.h conf-todo
