@@ -1,6 +1,6 @@
 /*
  * $Log: spawn-filter.c,v $
- * Revision 1.79  2021-05-30 00:21:47+05:30  Cprogrammer
+ * Revision 1.79  2021-06-01 01:55:17+05:30  Cprogrammer
  * removed rate limit code, added to qmail-send, slowq-send
  *
  * Revision 1.78  2021-05-26 10:47:10+05:30  Cprogrammer
@@ -278,7 +278,6 @@
 #include <fcntl.h>
 #include "MakeArgs.h"
 #include "report.h"
-#include "do_rate.h"
 #include "getDomainToken.h"
 
 static int      mkTempFile(int);
@@ -875,9 +874,8 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.79 2021-05-30 00:21:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.79 2021-06-01 01:55:17+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidgetrateh;
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
 	x++;
