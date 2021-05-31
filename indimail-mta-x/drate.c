@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.12  2021-06-01 01:51:44+05:30  Cprogrammer
+ * removed report()
+ *
  * Revision 1.11  2021-05-30 20:29:44+05:30  Cprogrammer
  * fixed owner and permission of rate definition files
  *
@@ -57,7 +60,6 @@
 #include "do_rate.h"
 #include "control.h"
 #include "getDomainToken.h"
-#include "report.h"
 
 #define FATAL     "drate: fatal: "
 #define WARN      "drate: warn: "
@@ -71,12 +73,6 @@ static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 stralloc        qdir = { 0 };
 char           *usage = "usage: drate [-scR] -d domain -r deliveryRate [-D ratelimit_dir]\n";
-
-void
-report(int e, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
-{
-	strerr_die6x(e, FATAL, s2, s3, s4, s5, s6);
-}
 
 void
 logerr(char *s)
@@ -490,11 +486,10 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.11 2021-05-30 20:29:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.12 2021-06-01 01:51:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
 	x = sccsidgetrateh;
-	x = sccsidreporth;
 	x++;
 }
