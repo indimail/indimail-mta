@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: slowq-send.c,v $
+ * Revision 1.1  2021-05-31 17:06:24+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2572,7 +2575,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: $";
+	static char    *x = "$Id: slowq-send.c,v 1.1 2021-05-31 17:06:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;

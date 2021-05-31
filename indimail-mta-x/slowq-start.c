@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: slowq-start.c,v $
+ * Revision 1.1  2021-05-31 17:06:21+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -23,6 +26,38 @@ void
 die()
 {
 	_exit(111);
+}
+
+/*
+ * return 0 if userlist (USE_SETGROUPS env vairable is not set
+ * return 1 if userlist is set and == 1
+ * else userlist is a list of users seperated by colon ':'
+ *   return 1 if user is present in the list
+ *   return 0 if user is not present in the list
+ */
+int
+check_user(char *userlist, char *user)
+{
+	char           *ptr1, *ptr2;
+
+	if (!userlist)
+		return 0;
+	if (userlist && *userlist == '1')
+		return 1;
+	for (ptr1 = ptr2 = userlist; *ptr1; ptr1++) {
+		if (*ptr1 == ':') {
+			*ptr1 = 0;
+			if (!str_diff(user, ptr2)) {
+				*ptr1 = ':';
+				return 1;
+			}
+			*ptr1 = ':';
+			ptr2 = ptr1 + 1;
+		}
+	}
+	if (!str_diff(user, ptr2))
+		return 1;
+	return 0;
 }
 
 int             pi0[2];
@@ -69,6 +104,11 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
+	char           *set_supplementary_groups;
+	gid_t          *gidset;
+	int             ngroups;
+
+	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
 		die();
 	if (uidinit(1) == -1)
@@ -98,6 +138,17 @@ main(argc, argv)
 		case -1:
 			die();
 		case 0: /* execute logger */
+			if (check_user(set_supplementary_groups, "qmaill")) {
+				if (!(gidset = grpscan("qmaill", &ngroups)))
+					die();
+				gidset[0] = auto_gidq;
+				gidset[ngroups] = auto_gidn;
+				if (prot_gid(auto_gidn) == -1) /*- nofiles unix group */
+					die();
+				if (setgroups(ngroups + 1, gidset))
+					die();
+				alloc_free((char *) gidset);
+			} else
 			if (prot_gid(auto_gidn) == -1) /*- nofiles unix group */
 				die();
 			if (prot_uid(auto_uidl) == -1) /*- qmaill unix user */
@@ -144,6 +195,14 @@ main(argc, argv)
 	case -1:
 		die();
 	case 0:
+		if (check_user(set_supplementary_groups, "qmailr")) {
+			if (!(gidset = grpscan("qmailr", &ngroups)))
+				die();
+			gidset[0] = auto_gidq;
+			if (setgroups(ngroups, gidset))
+				die();
+			alloc_free((char *) gidset);
+		}
 		if (prot_uid(auto_uidr) == -1) /*- qmailr unix user */
 			die();
 		if (fd_copy(0, pi3[0]) == -1)
@@ -160,6 +219,14 @@ main(argc, argv)
 	case -1:
 		die();
 	case 0:
+		if (check_user(set_supplementary_groups, "qmailq")) {
+			if (!(gidset = grpscan("qmailq", &ngroups)))
+				die();
+			gidset[0] = auto_gidq;
+			if (setgroups(ngroups, gidset))
+				die();
+			alloc_free((char *) gidset);
+		}
 		if (prot_uid(auto_uidq) == -1) /*- qmailq unix user */
 			die();
 		if (fd_copy(0, pi5[0]) == -1)
@@ -170,6 +237,14 @@ main(argc, argv)
 		closepipes();
 		execvp(*qcargs, qcargs); /*- qmail-clean */
 		die();
+	}
+	if (check_user(set_supplementary_groups, "qmails")) {
+		if (!(gidset = grpscan("qmails", &ngroups)))
+			die();
+		gidset[0] = auto_gidq;
+		if (setgroups(ngroups, gidset))
+			die();
+		alloc_free((char *) gidset);
 	}
 	if (prot_uid(auto_uids) == -1) /*- qmails unix user */
 		die();
@@ -197,7 +272,7 @@ main(argc, argv)
 void
 getversion_slowq_start_c()
 {
-	static char    *x = "$Id: $";
+	static char    *x = "$Id: slowq-start.c,v 1.1 2021-05-31 17:06:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
