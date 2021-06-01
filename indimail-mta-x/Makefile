@@ -958,12 +958,12 @@ compile maildir.c prioq.h maildir.h
 	./compile maildir.c
 
 maildir2mbox: \
-load maildir2mbox.o maildir.o prioq.o myctime.o gfrom.o
-	./load maildir2mbox maildir.o prioq.o myctime.o \
+load maildir2mbox.o maildir.o prioq.o gfrom.o
+	./load maildir2mbox maildir.o prioq.o \
 	gfrom.o -lqmail
 
 maildir2mbox.o: \
-compile maildir2mbox.c prioq.h gfrom.h myctime.h maildir.h
+compile maildir2mbox.c prioq.h gfrom.h maildir.h
 	./compile maildir2mbox.c
 
 mbox2maildir: load mbox2maildir.o
@@ -1000,10 +1000,6 @@ warn-auto.sh mailsubj.sh conf-prefix conf-break conf-split
 doc/INSTALL-MINI: doc/INSTALL-MINI.in \
 	conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
-
-myctime.o: \
-compile myctime.c myctime.h
-	./compile myctime.c
 
 newfield.o: \
 compile newfield.c newfield.h
@@ -1127,11 +1123,11 @@ syncdir.o: compile syncdir.c conf-sync
 	./compile `grep -h -v "^#" conf-sync` syncdir.c
 
 qmail-local: \
-load qmail-local.o qmail.o quote.o gfrom.o myctime.o \
+load qmail-local.o qmail.o quote.o gfrom.o \
 slurpclose.o srs.o auto_qmail.o auto_patrn.o rcpthosts.o \
 auto_control.o variables.o control.o maildir_deliver.o \
 libsyncdir.a socket.lib srs.lib
-	./load qmail-local qmail.o quote.o gfrom.o myctime.o \
+	./load qmail-local qmail.o quote.o gfrom.o \
 	slurpclose.o srs.o auto_qmail.o rcpthosts.o \
 	auto_patrn.o variables.o auto_control.o control.o \
 	maildir_deliver.o \
@@ -1145,7 +1141,7 @@ qmail-local.9 conf-sysconfdir
 	> qmail-local.8
 
 qmail-local.o: \
-compile qmail-local.c quote.h qmail.h slurpclose.h myctime.h \
+compile qmail-local.c quote.h qmail.h slurpclose.h \
 gfrom.h auto_patrn.h control.h auto_qmail.h variables.h hassrs.h \
 syncdir.h maildir_deliver.h conf-sync conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-mailarch` qmail-local.c
@@ -1380,7 +1376,7 @@ compile do_rate.c do_rate.h
 delivery_rate.o: \
 compile delivery_rate.c delivery_rate.h qsutil.h \
 variables.h do_rate.h getDomainToken.h control.h
-	./compile do_rate.c
+	./compile delivery_rate.c
 
 report.o: \
 compile report.c report.h variables.h
@@ -2353,11 +2349,9 @@ qmail-rm.1: qmail-rm.9 conf-qmail conf-split
 autoresponder: load autoresponder.o auto_qmail.o \
 variables.o control.o quote.o auto_control.o \
 ip.o ipme.o ipalloc.o socket_v4mappedprefix.o socket_v6any.o \
-qregex.o matchregex.o wildmat.o \
-myctime.o
+qregex.o matchregex.o wildmat.o
 	./load autoresponder auto_control.o auto_qmail.o \
-	variables.o control.o quote.o myctime.o \
-	ip.o ipme.o ipalloc.o \
+	variables.o control.o quote.o ip.o ipme.o ipalloc.o \
 	socket_v4mappedprefix.o socket_v6any.o qregex.o \
 	matchregex.o wildmat.o -lqmail
 
@@ -3433,14 +3427,14 @@ warn-auto.sh surblqueue.sh conf-prefix
 	chmod 755 surblqueue
 
 drate: \
-load drate.o variables.o myctime.o auto_uids.o auto_qmail.o \
+load drate.o variables.o auto_uids.o auto_qmail.o \
 auto_control.o control.o do_rate.o getDomainToken.o
-	./load drate variables.o myctime.o auto_uids.o \
+	./load drate variables.o auto_uids.o \
 	auto_qmail.o do_rate.o getDomainToken.o wildmat.o \
 	auto_control.o control.o -lm -lqmail
 
 drate.o: \
-compile drate.c variables.h myctime.h auto_uids.h auto_qmail.h \
+compile drate.c variables.h auto_uids.h auto_qmail.h \
 do_rate.h control.h getDomainToken.h
 	./compile drate.c
 
