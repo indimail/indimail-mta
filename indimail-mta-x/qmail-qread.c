@@ -189,7 +189,7 @@ char            inbuf[1024];
 stralloc        sender = { 0 };
 
 unsigned long   id;
-datetime_sec    qtime;
+datetime_sec    curtime;
 int             flagbounce;
 unsigned long   size;
 
@@ -203,7 +203,7 @@ fmtstats(s)
 	unsigned int    i;
 
 	len = 0;
-	datetime_tai(&dt, qtime);
+	datetime_tai(&dt, curtime);
 	i = date822fmt(s, &dt) - 7 /*XXX*/;
 	len += i;
 	if (s)
@@ -467,7 +467,7 @@ main(int argc, char **argv)
 				continue;
 			}
 			close(fd);
-			qtime = st.st_mtime;
+			curtime = st.st_mtime;
 			for (flag = 0,channel = (doLocal ? 0 : 1); channel < (doRemote ? 2 : 1); ++channel) {
 				if ((fd = open_read(channel ? fnremote : fnlocal)) == -1) {
 					if (errno != error_noent)
@@ -534,7 +534,7 @@ main(int argc, char **argv)
 				continue;
 			}
 			close(fd);
-			qtime = st.st_mtime;
+			curtime = st.st_mtime;
 			for (flag = 0,channel = 0; channel < 2; ++channel) {
 				if ((fd = open_read(fnmess)) == -1) {
 					if (errno != error_noent)
