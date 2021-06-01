@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.38  2021-06-01 10:05:39+05:30  Cprogrammer
+ * replaced myctime() with libqmail qtime()
+ *
  * Revision 1.37  2021-05-16 23:02:33+05:30  Cprogrammer
  * move out maildir delivery to maildir_deliver.c
  *
@@ -114,7 +117,7 @@
 #include "quote.h"
 #include "qmail.h"
 #include "slurpclose.h"
-#include "myctime.h"
+#include "qtime.h"
 #include "gfrom.h"
 #include "constmap.h"
 #include "auto_qmail.h"
@@ -724,7 +727,7 @@ main(int argc, char **argv)
 			|| !stralloc_cats(&ufline, " "))
 		temp_nomem();
 	starttime = now();
-	if (!stralloc_cats(&ufline, myctime(starttime)))
+	if (!stralloc_cats(&ufline, qtime(starttime)))
 		temp_nomem();
 
 	if (!stralloc_copy(&foo, &ufline) || !stralloc_0(&foo))
@@ -957,7 +960,8 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.37 2021-05-16 23:02:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.38 2021-06-01 10:05:39+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidmyctimeh;
 	x++;
 }

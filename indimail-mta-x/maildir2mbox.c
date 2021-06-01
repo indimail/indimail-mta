@@ -1,5 +1,8 @@
 /*
  * $Log: maildir2mbox.c,v $
+ * Revision 1.7  2021-06-01 10:05:09+05:30  Cprogrammer
+ * replaced myctime() with libqmail qtime()
+ *
  * Revision 1.6  2020-11-24 13:45:41+05:30  Cprogrammer
  * removed exit.h
  *
@@ -24,7 +27,7 @@
 #include "lock.h"
 #include "gfrom.h"
 #include "str.h"
-#include "myctime.h"
+#include "qtime.h"
 #include "maildir.h"
 
 int             rename(const char *, const char *);
@@ -134,7 +137,7 @@ main()
 				}
 			}
 		}
-		if (!stralloc_cats(&ufline, myctime(pe.dt)))
+		if (!stralloc_cats(&ufline, qtime(pe.dt)))
 			die_nomem();
 		if (substdio_put(&ssout, ufline.s, ufline.len) == -1)
 			strerr_die4sys(111, FATAL, "unable to write to ", mboxtmp, ": ");
@@ -180,7 +183,8 @@ main()
 void
 getversion_maildir2mbox_c()
 {
-	static char    *x = "$Id: maildir2mbox.c,v 1.6 2020-11-24 13:45:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir2mbox.c,v 1.7 2021-06-01 10:05:09+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidmyctimeh;
 	x++;
 }
