@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.13  2021-06-01 10:42:03+05:30  Cprogrammer
+ * display local date/time
+ *
  * Revision 1.12  2021-06-01 01:51:44+05:30  Cprogrammer
  * removed report()
  *
@@ -53,8 +56,8 @@
 #include <now.h>
 #include <scan.h>
 #include <str.h>
+#include <date822fmt.h>
 #include "variables.h"
-#include "myctime.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "do_rate.h"
@@ -117,9 +120,10 @@ do_display(char *domain)
 	int             rfd, match, line_no;
 	unsigned long   email_count = 0;
 	struct substdio ssfin;
-	char            inbuf[2048], strdouble[FMT_DOUBLE];
-	double          rate;
+	char            inbuf[2048], strdouble[FMT_DOUBLE], buf[DATE822FMT];
+	double          conf_rate, rate;
 	datetime_sec    starttime = 0, endtime = 0;
+	struct datetime dt;
 
 	if ((rfd = open_read(domain)) == -1)
 		strerr_die3sys(111, "unable to read: ", domain, ": ");
@@ -142,8 +146,8 @@ do_display(char *domain)
 				strerr_die1sys(111, "unable to write: ");
 			if (substdio_put(&ssout, line.s, line.len) == -1)
 				strerr_die1sys(111, "unable to write: ");
-			get_rate(line.s, &rate);
-			strdouble[fmt_double(strdouble, rate, 10)] = 0;
+			get_rate(line.s, &conf_rate);
+			strdouble[fmt_double(strdouble, conf_rate, 10)] = 0;
 			if (substdio_put(&ssout, " (", 2))
 				strerr_die1sys(111, "unable to write: ");
 			if (substdio_puts(&ssout, strdouble))
@@ -164,21 +168,30 @@ do_display(char *domain)
 			scan_ulong(line.s, (unsigned long *) &starttime);
 			if (substdio_put(&ssout, "Start  Time: ", 13))
 				strerr_die1sys(111, "unable to write: ");
-			if (substdio_puts(&ssout, myctime(starttime)))
+			datetime_tai(&dt, starttime);
+			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)))
 				strerr_die1sys(111, "unable to write: ");
 			break;
 		case 4:
 			scan_ulong(line.s, (unsigned long *) &endtime);
-			if (substdio_put(&ssout, "End    Time: ", 13))
+			if (substdio_put(&ssout, "LastUpdated: ", 13))
 				strerr_die1sys(111, "unable to write: ");
-			if (substdio_puts(&ssout, myctime(endtime)))
+			datetime_tai(&dt, endtime);
+			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)))
 				strerr_die1sys(111, "unable to write: ");
-			rate = 
-				(starttime == endtime) ? 0 : (double) email_count / (double) (now() - starttime);
+			endtime = now();
+			if (substdio_put(&ssout, "CurrentTime: ", 13))
+				strerr_die1sys(111, "unable to write: ");
+			datetime_tai(&dt, endtime);
+			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)))
+				strerr_die1sys(111, "unable to write: ");
+			rate = (double) email_count / (double) (endtime - starttime);
 			strdouble[fmt_double(strdouble, rate, 10)] = 0;
 			if (substdio_put(&ssout, "CurrentRate: ", 13))
 				strerr_die1sys(111, "unable to write: ");
 			if (substdio_puts(&ssout, strdouble))
+				strerr_die1sys(111, "unable to write: ");
+			if (substdio_puts(&ssout, rate > conf_rate ? " High" : " OK"))
 				strerr_die1sys(111, "unable to write: ");
 			if (substdio_put(&ssout, "\n", 1))
 				strerr_die1sys(111, "unable to write: ");
@@ -486,7 +499,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.12 2021-06-01 01:51:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.13 2021-06-01 10:42:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
