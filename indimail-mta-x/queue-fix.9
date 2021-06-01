@@ -11,6 +11,12 @@ message files to match their inodes. It will even create missing directories
 and files. You can even create a queue from scratch). It will
 also print warnings for any files it finds that should not exist.
 
+\fBqueue-fix\fR(1) uses environment set according to files in
+$HOME/.defaultqueue directory if present, else it uses environment set
+according to files in @controldir@/defaultqueue directory. This can be
+used for setting default value of \fBCONFSPLIT\fR environment variable for
+your setup.
+
 .SH OPTIONS
 .TP
 \fB\-i\fR
