@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.313 2021-05-30 08:10:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.314 2021-06-01 16:50:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -432,7 +432,6 @@ echo ../resolv.conf 1>&3
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/certs
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/control
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/control/cache
-%dir %attr(2775,qmailr,qmail)                      %{qsysconfdir}/control/ratelimit
 %dir %attr(2755,indimail,qmail)                    %{qsysconfdir}/control/domainkeys
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/tcp
 %dir %attr(755,indimail,qmail)                     %{qsysconfdir}/control/defaultqueue
@@ -926,7 +925,6 @@ fi
 %verify_permissions -e %{qsysconfdir}/control/
 %verify_permissions -e %{qsysconfdir}/control/cache/
 %verify_permissions -e %{qsysconfdir}/control/domainkeys/
-%verify_permissions -e %{qsysconfdir}/control/ratelimit/
 %verify_permissions -e %{qsysconfdir}/tcp/
 %verify_permissions -e %{qsysconfdir}/users/
 %endif
@@ -1168,7 +1166,6 @@ fi
   %set_permissions %{qsysconfdir}/control/
   %set_permissions %{qsysconfdir}/control/cache/
   %set_permissions %{qsysconfdir}/control/domainkeys/
-  %set_permissions %{qsysconfdir}/control/ratelimit/
   %set_permissions %{qsysconfdir}/tcp/
   %set_permissions %{qsysconfdir}/users/
 %else

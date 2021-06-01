@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.285  2021-06-01 16:50:21+05:30  Cprogrammer
+ * removed controldir/ratelimit directory
+ *
  * Revision 1.284  2021-05-29 23:38:12+05:30  Cprogrammer
  * added slowq-send, slowq-start
  *
@@ -915,7 +918,6 @@ hier(inst_dir, fatal, dev_package)
 
 	d(auto_cntrl_dir,  "control/cache", auto_uidv, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 02755);
-	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/defaultqueue", auto_uidv, auto_gidq, 0755);
 
 	d(auto_shared,     "boot", auto_uido, 0, 0555);
@@ -1500,7 +1502,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.284 2021-05-29 23:38:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.285 2021-06-01 16:50:21+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
