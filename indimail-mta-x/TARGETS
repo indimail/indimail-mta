@@ -447,7 +447,6 @@ multilog.o
 multipipe
 multipipe.o
 multirotate
-myctime.o
 ndelay.a
 ndelay.o
 ndelay_off.o
