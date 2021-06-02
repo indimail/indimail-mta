@@ -10,10 +10,21 @@ slowq-send \- deliver mail messages from the queue with rate control
 handles messages placed into the outgoing queue by
 .BR qmail-queue .
 .B slowq-send
-by default looks at QMAILHOME/queue/slowq for messages. This path can be
-changed by defining the QUEUEDIR environment variable. This manual will
-refer \fIqueue\fR as the value of \fBQUEUEDIR\fR. \fBslowq-send\fR
-borrows most of it's code from \fBqmail-send\fR.
+by default looks at QMAILHOME/queue/slowq in the todo subdir for messages.
+This path can be changed by defining the QUEUEDIR environment variable.
+This manual will refer \fIqueue\fR as the value of \fBQUEUEDIR\fR.
+\fBslowq-send\fR borrows most of it's code from \fBqmail-send\fR. The todo
+run can be adjusted by setting the environment variable \fBTODO_INTERVAL\fR
+to have only one queue run every \fBTODO_INTERVAL\fR seconds. It remembers
+the last complete queue run and will just return if we get triggered before
+last queue run plus \fBTODO_INTERVAL\fR seconds. If we get triggered before
+\fBTODO_INTERVAL\fR seconds it will schedule a forced queue run at last
+complete queue run plus TODO_INTERVAL seconds to not miss the new additions
+to the queue. \fBTODO_INTERVAL\fR can also be set in the control file
+\fItodointerval\fR. The control file takes precedence over the environment
+variable. If TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero,
+\fBslowq-send\fR silently uses 10 secs as the value for
+\fBTODO_INTERVAL\fR.
 
 \fBslowq-send\fR uses \fBqmail-lspawn\fR to deliver messages to local
 recipients and \fBqmail-rspawn\fR to deliver messages to remote recipients.
@@ -85,6 +96,7 @@ it will reread
 .IR concurrencyremote.queue ,
 .IR locals ,
 .IR virtualdomains ,
+.IR todointerval ,
 .IR holdlocal ,
 .IR holdremote ,
 .IR envnoathost ,
@@ -386,6 +398,11 @@ dial-up environment when the remote delivery path may not
 always be available, as an alternative to the use of serialmail.
 Default:
 .IR zero
+
+.TP 5
+.I todointerval
+The seconds to sleep between each todo run. It can be
+overriden by the environment variable \fBTODO_INTERVAL\fR.
 
 .TP 5
 .I conf-fsync

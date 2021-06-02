@@ -1,4 +1,3 @@
-.TH qmail-send 8
 .SH NAME
 qmail-send \- deliver mail messages from the queue with rate control
 
@@ -29,8 +28,12 @@ function to load all the plugins and by default try to execute the symbol
 \fBSTART_PLUGIN_SYMB\fR environment variable. \fBqmail-send\fR will terminate
 if any of the loaded functions return non-zero status.
 
-It uses \fBqmail-lspawn\fR to deliver messages to local recipients and
-\fBqmail-rspawn\fR to deliver messages to remote recipients.  If a message
+\fBqmail-send\fR sends a single byte 'S' on desciptor 7 to qmail-todo to
+indicate that it has started. \fBqmail-send\fR reads instructions from
+\fBqmail-todo\fR on descriptor 8. It gets the filename in todo directory
+and the message id and if the message is local or remote. It then uses
+\fBqmail-lspawn\fR to deliver messages to local recipients and
+\fBqmail-rspawn\fR to deliver messages to remote recipients. If a message
 is temporarily undeliverable to one or more addresses, \fBqmail-send\fR
 leaves it in the queue and tries the addresses again later.
 
@@ -311,7 +314,7 @@ permanent failures.
 .TP 5
 .I bounce.envrules
 Specific environment variables can be set for bounce recipients. The format
-of this file is of the form pat:envar1=val,envar2=val,...]   where pat is a
+of this file is of the form pat:envar1=val,envar2=val,...] where pat is a
 regular expression which matches a bounce recipient. envar1, envar2 are list
 of environment variables to be set. If var is omitted, the environment
 variable is unset.
@@ -337,11 +340,9 @@ DATABYTES gets set to 4 MB in for any email matching answerme@save*
 
 .TP 5
 .I virtualdomains
-List of virtual users or domains, one per line.
-A virtual user has the form
+List of virtual users or domains, one per line. A virtual user has the form
 .IR user\fB@\fIdomain\fB:\fIprepend ,
-without any extra spaces.
-When
+without any extra spaces. When
 .B qmail-send
 sees the recipient address
 .IR user\fB@\fIdomain ,
@@ -397,28 +398,26 @@ does not apply.
 
 .TP 5
 .I holdlocal
-A boolean parameter indicating whether mail for local
-hosts should be queued without delivery.  Zero indicates
-delivery as normal; any other value causes local mail to
-be held.
+A boolean parameter indicating whether mail for local hosts should be
+queued without delivery. Zero indicates delivery as normal; any other
+value causes local mail to be held.
 Default:
 .IR zero
 
 .TP 5
 .I holdremote
-A boolean parameter indicating whether mail for remote
-hosts should be queued without delivery.  Zero indicates
-delivery as normal; any other value causes remote mail to
-be held.  This is provided to permit use of qmail in a 
-dial-up environment when the remote delivery path may not
-always be available, as an alternative to the use of serialmail.
+A boolean parameter indicating whether mail for remote hosts should be
+queued without delivery. Zero indicates delivery as normal; any other
+value causes remote mail to be held. This is provided to permit use of
+qmail in a dial-up environment when the remote delivery path may not always
+be available, as an alternative to the use of serialmail.
 Default:
 .IR zero
 
 .TP 5
 .I conf-fsync
-A boolean parameter to turn on fsync of file descriptors
-when writing to a file during delivery
+A boolean parameter to turn on fsync of file descriptors when writing to a
+file during delivery
 
 .TP 5
 .I conf-syncdir
