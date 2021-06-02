@@ -68,7 +68,7 @@
 #define OSSIFIED      129600 /*- 36 hours; _must_ exceed q-q's DEATH (24 hours) */
 #ifndef TODO_INTERVAL
 #define SLEEP_TODO      1500 /*- check todo/ every 25 minutes in any case */
-#define ONCEEVERY        300 /*- Run todo maximal once every N seconds */
+#define ONCEEVERY         10 /*- Run todo maximal once every N seconds */
 #endif
 
 static int      lifetime = 604800;
@@ -480,7 +480,7 @@ cleanup_do()
 	{
 	case 1:
 		break;
-	case 0:
+	case 0: /*- no files found */
 		flagcleanup = 0;
 		cleanuptime = recent + SLEEP_CLEANUP;
 	default:
@@ -1844,7 +1844,7 @@ todo_do(fd_set *rfds)
 	{
 	case 1:
 		break;
-	case 0:
+	case 0: /*- no files found */
 		flagtododir = 0;
 	default:
 		return;
