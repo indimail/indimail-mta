@@ -743,7 +743,7 @@ cleanup_do()
 	{
 	case 1:
 		break;
-	case 0:
+	case 0: /*- no files found */
 		flagcleanup = 0;
 		cleanuptime = recent + SLEEP_CLEANUP;
 	default:
@@ -2279,7 +2279,7 @@ todo_do(fd_set *rfds)
 	{
 	case 1:
 		break;
-	case 0:
+	case 0: /*- no files found */
 		flagtododir = 0;
 	default:
 		return;
