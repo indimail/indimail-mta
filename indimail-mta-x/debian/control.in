@@ -9,7 +9,7 @@ Homepage: https://github.com/mbhangui/indimail-mta
 Package: indimail-mta
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, daemontools, ucspi-tcp, net-tools, coreutils, diffutils, procps
-Provides: indimail-mini
+Provides: indimail-mini, default-mta, mail-transport-agent
 Conflicts: indimail-mini
 Replaces: indimail-mini
 Description: indimail-mta provides a MTA that is part of the IndiMail
