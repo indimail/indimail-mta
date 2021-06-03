@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.80  2021-06-03 12:45:28+05:30  Cprogrammer
+ * use new prioq functions
+ *
  * Revision 1.79  2021-06-01 01:52:23+05:30  Cprogrammer
  * moved delivery_report() to delivery_report.c
  *
@@ -818,7 +821,7 @@ pqadd(unsigned long id)
 	}
 	for (c = 0; c < CHANNELS; ++c)
 		if (flagchan[c])
-			while (!prioq_insert(&pqchan[c], &pechan[c]))
+			while (!prioq_insert(min, &pqchan[c], &pechan[c]))
 				nomem();
 	for (c = 0; c < CHANNELS; ++c)
 		if (flagchan[c])
@@ -826,7 +829,7 @@ pqadd(unsigned long id)
 	if (c == CHANNELS) {
 		pe.id = id;
 		pe.dt = now();
-		while (!prioq_insert(&pqdone, &pe))
+		while (!prioq_insert(min, &pqdone, &pe))
 			nomem();
 	}
 	return;
@@ -834,7 +837,7 @@ fail:
 	log5("warning: ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n");
 	pe.id = id;
 	pe.dt = now() + SLEEP_SYSFAIL;
-	while (!prioq_insert(&pqfail, &pe))
+	while (!prioq_insert(min, &pqfail, &pe))
 		nomem();
 }
 
@@ -862,8 +865,8 @@ pqfinish()
 	/*- time_t          ut[2]; -*/
 
 	for (c = 0; c < CHANNELS; ++c) {
-		while (prioq_min(&pqchan[c], &pe)) {
-			prioq_delmin(&pqchan[c]);
+		while (prioq_test(&pqchan[c], &pe)) {
+			prioq_del(min, &pqchan[c]);
 			fnmake_chanaddr(pe.id, c);
 			/*- ut[0] = ut[1] = pe.dt; -*/
 			ut[0].tv_sec = ut[1].tv_sec = pe.dt;
@@ -973,12 +976,12 @@ job_close(int j)
 				}
 			}
 			pe.dt = now();
-			while (!prioq_insert(&pqdone, &pe))
+			while (!prioq_insert(min, &pqdone, &pe))
 				nomem();
 			return;
 		}
 	}
-	while (!prioq_insert(&pqchan[jo[j].channel], &pe))
+	while (!prioq_insert(min, &pqchan[jo[j].channel], &pe))
 		nomem();
 }
 
@@ -1736,13 +1739,13 @@ pass_selprep(datetime_sec *wakeup)
 	}
 	if (job_avail() != -1) {
 		for (c = 0; c < CHANNELS; ++c) {
-			if (!pass[c].id && prioq_min(&pqchan[c], &pe) && *wakeup > pe.dt)
+			if (!pass[c].id && prioq_test(&pqchan[c], &pe) && *wakeup > pe.dt)
 				*wakeup = pe.dt;
 		}
 	}
-	if (prioq_min(&pqfail, &pe) && *wakeup > pe.dt)
+	if (prioq_test(&pqfail, &pe) && *wakeup > pe.dt)
 		*wakeup = pe.dt;
-	if (prioq_min(&pqdone, &pe) && *wakeup > pe.dt)
+	if (prioq_test(&pqdone, &pe) && *wakeup > pe.dt)
 		*wakeup = pe.dt;
 }
 
@@ -1800,12 +1803,12 @@ pass_dochan(int c)
 		
 		if ((j = job_avail()) == -1)
 			return;
-		if (!prioq_min(&pqchan[c], &pe))
+		if (!prioq_test(&pqchan[c], &pe))
 			return;
 		if (pe.dt > recent)
 			return;
 		fnmake_chanaddr(pe.id, c);
-		prioq_delmin(&pqchan[c]); /*- remove from pqchan */
+		prioq_del(min, &pqchan[c]); /*- remove from pqchan */
 		pass[c].mpos = 0;
 		if ((pass[c].fd = open_read(fn1.s)) == -1) /*- open local/split/inode or remote/split/inode */
 			goto trouble;
@@ -1879,7 +1882,7 @@ pass_dochan(int c)
 trouble:
 	log5("warning: ", queuedesc, ": trouble opening ", fn1.s, "; will try again later\n");
 	pe.dt = recent + SLEEP_SYSFAIL;
-	while (!prioq_insert(&pqchan[c], &pe))
+	while (!prioq_insert(min, &pqchan[c], &pe))
 		nomem();
 }
 
@@ -1943,7 +1946,7 @@ messdone(unsigned long id)
 fail:
 	pe.id = id;
 	pe.dt = now() + SLEEP_SYSFAIL;
-	while (!prioq_insert(&pqdone, &pe))
+	while (!prioq_insert(min, &pqdone, &pe))
 		nomem();
 }
 
@@ -1955,15 +1958,15 @@ pass_do()
 
 	for (c = 0; c < CHANNELS; ++c)
 		pass_dochan(c);
-	if (prioq_min(&pqfail, &pe)) {
+	if (prioq_test(&pqfail, &pe)) {
 		if (pe.dt <= recent) {
-			prioq_delmin(&pqfail);
+			prioq_del(min, &pqfail);
 			pqadd(pe.id);
 		}
 	}
-	if (prioq_min(&pqdone, &pe)) {
+	if (prioq_test(&pqdone, &pe)) {
 		if (pe.dt <= recent) {
-			prioq_delmin(&pqdone);
+			prioq_del(min, &pqdone);
 			messdone(pe.id);
 		}
 	}
@@ -2061,7 +2064,7 @@ todo_del(char *s)
 	pe.dt = now();
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagchan[c])
-			while (!prioq_insert(&pqchan[c], &pe))
+			while (!prioq_insert(min, &pqchan[c], &pe))
 				nomem();
 	}
 	for (c = 0; c < CHANNELS; ++c) {
@@ -2069,7 +2072,7 @@ todo_del(char *s)
 			break;
 	}
 	if (c == CHANNELS) {
-		while (!prioq_insert(&pqdone, &pe))
+		while (!prioq_insert(min, &pqdone, &pe))
 			nomem();
 	}
 	return;
@@ -2467,7 +2470,7 @@ todo_do(fd_set *rfds)
 	pe.dt = now();
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagchan[c])
-			while (!prioq_insert(&pqchan[c], &pe))
+			while (!prioq_insert(min, &pqchan[c], &pe))
 				nomem();
 	}
 	for (c = 0; c < CHANNELS; ++c) {
@@ -2475,7 +2478,7 @@ todo_do(fd_set *rfds)
 			break;
 	}
 	if (c == CHANNELS) {
-		while (!prioq_insert(&pqdone, &pe))
+		while (!prioq_insert(min, &pqdone, &pe))
 			nomem();
 	}
 	log_stat(Bytes);
@@ -3044,7 +3047,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.79 2021-06-01 01:52:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.80 2021-06-03 12:45:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

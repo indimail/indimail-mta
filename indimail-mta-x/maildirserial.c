@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.15  2021-06-03 12:45:10+05:30  Cprogrammer
+ * use new prioq functions
+ *
  * Revision 1.14  2021-05-13 14:43:28+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -140,13 +143,10 @@ my_config_readline(config_str *c, char *fname)
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
-	if (!stralloc_copys(&fn, controldir))
-		die_nomem();
-	if (!stralloc_cats(&fn, "/"))
-		die_nomem();
-	if (!stralloc_cats(&fn, fname))
-		die_nomem();
-	if (!stralloc_0(&fn))
+	if (!stralloc_copys(&fn, controldir) ||
+			!stralloc_cats(&fn, "/") ||
+			!stralloc_cats(&fn, fname) ||
+			!stralloc_0(&fn))
 		die_nomem();
 	if (config_readline(c, fn.s) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", fn.s, ": ");
@@ -175,11 +175,9 @@ readcontrols()
 	my_config_readline(&doublebounceto, "doublebounceto");
 	if (config_default(&doublebounceto, "postmaster") == -1)
 		die_nomem();
-	if (!stralloc_cats(config_data(&doublebounceto), "@"))
-		die_nomem();
-	if (!stralloc_cat(config_data(&doublebounceto), config_data(&doublebouncehost)))
-		die_nomem();
-	if (!stralloc_0(config_data(&doublebounceto)))
+	if (!stralloc_cats(config_data(&doublebounceto), "@") ||
+			!stralloc_cat(config_data(&doublebounceto), config_data(&doublebouncehost)) ||
+			!stralloc_0(config_data(&doublebounceto)))
 		die_nomem();
 	if (fchdir(fddir) == -1)
 		strerr_die2sys(111, FATAL, "unable to set current directory: ");
@@ -211,10 +209,7 @@ stralloc        sender = { 0 };
 stralloc        quoted = { 0 };
 
 int
-bounce(fd, why, flagtimeout)
-	int             fd;
-	stralloc       *why;		/*- must end with \n; must not contain \n\n */
-	int             flagtimeout;
+bounce(int fd, stralloc *why, int flagtimeout) /*- why must end with \n; must not contain \n\n */
 {
 	int             match, n, fddir;
 	char           *bouncesender, *bouncerecip, *x;
@@ -433,8 +428,8 @@ scanner()
 	maildir_clean(&filenames);
 	if (maildir_scan(&pq, &filenames, 1, 1) == -1)
 		strerr_die1(111, FATAL, &maildir_scan_err);
-	while (prioq_min(&pq, &pe)) {
-		prioq_delmin(&pq);
+	while (prioq_test(&pq, &pe)) {
+		prioq_del(min, &pq);
 		filename = filenames.s + pe.id;
 		if (usable(filename)) {
 			if (!pid) {
@@ -643,7 +638,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.14 2021-05-13 14:43:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.15 2021-06-03 12:45:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

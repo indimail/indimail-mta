@@ -1,5 +1,8 @@
 /*
  * $Log: maildir.c,v $
+ * Revision 1.7  2021-06-03 12:45:03+05:30  Cprogrammer
+ * use new prioq functions
+ *
  * Revision 1.6  2021-05-16 00:14:43+05:30  Cprogrammer
  * include strerr.h explicitly
  *
@@ -39,8 +42,7 @@ maildir_chdir()
 }
 
 void
-maildir_clean(tmpname)
-	stralloc       *tmpname;
+maildir_clean(stralloc *tmpname)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -51,15 +53,12 @@ maildir_clean(tmpname)
 	dir = opendir("tmp");
 	if (!dir)
 		return;
-	while ((d = readdir(dir)))
-	{
+	while ((d = readdir(dir))) {
 		if (d->d_name[0] == '.')
 			continue;
-		if (!stralloc_copys(tmpname, "tmp/"))
-			break;
-		if (!stralloc_cats(tmpname, d->d_name))
-			break;
-		if (!stralloc_0(tmpname))
+		if (!stralloc_copys(tmpname, "tmp/") ||
+				!stralloc_cats(tmpname, d->d_name) ||
+				!stralloc_0(tmpname))
 			break;
 		if (stat(tmpname->s, &st) == 0)
 			if (my_time > st.st_atime + 129600)
@@ -69,11 +68,7 @@ maildir_clean(tmpname)
 }
 
 static int
-append(pq, filenames, subdir, my_time)
-	prioq          *pq;
-	stralloc       *filenames;
-	char           *subdir;
-	datetime_sec    my_time;
+append(prioq *pq, stralloc *filenames, char *subdir, datetime_sec my_time)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -81,28 +76,22 @@ append(pq, filenames, subdir, my_time)
 	unsigned int    pos;
 	struct stat     st;
 
-	if(!(dir = opendir(subdir)))
+	if (!(dir = opendir(subdir)))
 		STRERR_SYS3(-1, maildir_scan_err, "unable to scan $MAILDIR/", subdir, ": ")
-	while ((d = readdir(dir)))
-	{
+	while ((d = readdir(dir))) {
 		if (d->d_name[0] == '.')
 			continue;
 		pos = filenames->len;
-		if (!stralloc_cats(filenames, subdir))
+		if (!stralloc_cats(filenames, subdir) ||
+				!stralloc_cats(filenames, "/") ||
+				!stralloc_cats(filenames, d->d_name) ||
+				!stralloc_0(filenames))
 			break;
-		if (!stralloc_cats(filenames, "/"))
-			break;
-		if (!stralloc_cats(filenames, d->d_name))
-			break;
-		if (!stralloc_0(filenames))
-			break;
-		if (stat(filenames->s + pos, &st) == 0)
-		{
-			if (st.st_mtime < my_time)	/*- don't want to mix up the order */
-			{
+		if (stat(filenames->s + pos, &st) == 0) {
+			if (st.st_mtime < my_time) { /*- don't want to mix up the order */
 				pe.dt = st.st_mtime;
 				pe.id = pos;
-				if (!prioq_insert(pq, &pe))
+				if (!prioq_insert(min, pq, &pe))
 					break;
 			}
 		}
@@ -114,19 +103,15 @@ append(pq, filenames, subdir, my_time)
 }
 
 int
-maildir_scan(pq, filenames, flagnew, flagcur)
-	prioq          *pq;
-	stralloc       *filenames;
-	int             flagnew;
-	int             flagcur;
+maildir_scan(prioq *pq, stralloc *filenames, int flagnew, int flagcur)
 {
 	struct prioq_elt pe;
 	datetime_sec    my_time;
 
 	if (!stralloc_copys(filenames, ""))
 		return 0;
-	while (prioq_min(pq, &pe))
-		prioq_delmin(pq);
+	while (prioq_test(pq, &pe))
+		prioq_del(min, pq);
 	my_time = now();
 	if (flagnew && append(pq, filenames, "new", my_time) == -1)
 		return -1;
@@ -138,7 +123,7 @@ maildir_scan(pq, filenames, flagnew, flagcur)
 void
 getversion_maildir_c()
 {
-	static char    *x = "$Id: maildir.c,v 1.6 2021-05-16 00:14:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir.c,v 1.7 2021-06-03 12:45:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

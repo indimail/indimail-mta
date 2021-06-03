@@ -1,5 +1,8 @@
 /*
  * $Log: maildirwatch.c,v $
+ * Revision 1.8  2021-06-03 12:45:18+05:30  Cprogrammer
+ * use new prioq functions
+ *
  * Revision 1.7  2020-11-24 13:45:47+05:30  Cprogrammer
  * removed exit.h
  *
@@ -39,9 +42,7 @@ stralloc        fromline = { 0 };
 stralloc        text = { 0 };
 
 void
-addtext(s, n)
-	char           *s;
-	int             n;
+addtext(char *s, int n)
 {
 	if (!stralloc_catb(&text, s, n))
 		die_nomem();
@@ -50,15 +51,13 @@ addtext(s, n)
 }
 
 void
-dobody(h)
-	stralloc       *h;
+dobody(stralloc *h)
 {
 	addtext(h->s, h->len);
 }
 
 void
-doheader(h)
-	stralloc       *h;
+doheader(stralloc *h)
 {
 	int             i;
 	switch (hfield_known(h->s, h->len))
@@ -105,15 +104,13 @@ main()
 
 	if (maildir_chdir() == -1)
 		strerr_die1(111, FATAL, &maildir_chdir_err);
-	for (;;)
-	{
+	for (;;) {
 		maildir_clean(&filenames);
 		if (maildir_scan(&pq, &filenames, 1, 0) == -1)
 			strerr_die1(111, FATAL, &maildir_scan_err);
 		substdio_putsflush(subfdout, "\033[;H\033[;J");
-		while (prioq_min(&pq, &pe))
-		{
-			prioq_delmin(&pq);
+		while (prioq_test(&pq, &pe)) {
+			prioq_del(min, &pq);
 			fd = open_read(filenames.s + pe.id);
 			if (fd == -1)
 				continue;
@@ -145,8 +142,7 @@ main()
 			substdio_puts(subfdout, " TO <");
 			substdio_put(subfdout, recipient.s, recipient.len);
 			substdio_puts(subfdout, ">\n");
-			if (fromline.len)
-			{
+			if (fromline.len) {
 				substdio_puts(subfdout, "\033[1m");
 				substdio_put(subfdout, fromline.s, fromline.len);
 				substdio_puts(subfdout, "\033[0m\n");
@@ -165,7 +161,7 @@ main()
 void
 getversion_maildirwatch_c()
 {
-	static char    *x = "$Id: maildirwatch.c,v 1.7 2020-11-24 13:45:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirwatch.c,v 1.8 2021-06-03 12:45:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
