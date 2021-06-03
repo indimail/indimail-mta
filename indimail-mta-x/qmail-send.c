@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-send.c,v $
- * Revision 1.80  2021-06-03 12:45:28+05:30  Cprogrammer
+ * Revision 1.80  2021-06-03 18:06:25+05:30  Cprogrammer
  * use new prioq functions
  *
  * Revision 1.79  2021-06-01 01:52:23+05:30  Cprogrammer
@@ -866,7 +866,7 @@ pqfinish()
 
 	for (c = 0; c < CHANNELS; ++c) {
 		while (prioq_get(&pqchan[c], &pe)) {
-			prioq_del(min, &pqchan[c]);
+			prioq_del(&pqchan[c]);
 			fnmake_chanaddr(pe.id, c);
 			/*- ut[0] = ut[1] = pe.dt; -*/
 			ut[0].tv_sec = ut[1].tv_sec = pe.dt;
@@ -1808,7 +1808,7 @@ pass_dochan(int c)
 		if (pe.dt > recent)
 			return;
 		fnmake_chanaddr(pe.id, c);
-		prioq_del(min, &pqchan[c]); /*- remove from pqchan */
+		prioq_del(&pqchan[c]); /*- remove from pqchan */
 		pass[c].mpos = 0;
 		if ((pass[c].fd = open_read(fn1.s)) == -1) /*- open local/split/inode or remote/split/inode */
 			goto trouble;
@@ -1960,13 +1960,13 @@ pass_do()
 		pass_dochan(c);
 	if (prioq_get(&pqfail, &pe)) {
 		if (pe.dt <= recent) {
-			prioq_del(min, &pqfail);
+			prioq_del(&pqfail);
 			pqadd(pe.id);
 		}
 	}
 	if (prioq_get(&pqdone, &pe)) {
 		if (pe.dt <= recent) {
-			prioq_del(min, &pqdone);
+			prioq_del(&pqdone);
 			messdone(pe.id);
 		}
 	}
@@ -3047,7 +3047,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.80 2021-06-03 12:45:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.80 2021-06-03 18:06:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

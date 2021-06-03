@@ -1,6 +1,6 @@
 /*
  * $Log: maildirwatch.c,v $
- * Revision 1.8  2021-06-03 12:45:18+05:30  Cprogrammer
+ * Revision 1.8  2021-06-03 18:15:46+05:30  Cprogrammer
  * use new prioq functions
  *
  * Revision 1.7  2020-11-24 13:45:47+05:30  Cprogrammer
@@ -110,7 +110,7 @@ main()
 			strerr_die1(111, FATAL, &maildir_scan_err);
 		substdio_putsflush(subfdout, "\033[;H\033[;J");
 		while (prioq_get(&pq, &pe)) {
-			prioq_del(min, &pq);
+			prioq_del(&pq);
 			fd = open_read(filenames.s + pe.id);
 			if (fd == -1)
 				continue;
@@ -161,7 +161,7 @@ main()
 void
 getversion_maildirwatch_c()
 {
-	static char    *x = "$Id: maildirwatch.c,v 1.8 2021-06-03 12:45:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirwatch.c,v 1.8 2021-06-03 18:15:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

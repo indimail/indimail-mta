@@ -1,10 +1,7 @@
 /*
  * $Log: prioq.c,v $
- * Revision 1.8  2021-06-03 12:43:33+05:30  Cprogrammer
+ * Revision 1.7  2021-06-03 18:03:39+05:30  Cprogrammer
  * allow prioq to be ordered from max to min
- *
- * Revision 1.7  2021-05-16 01:43:39+05:30  Cprogrammer
- * modified prototype to c99
  *
  * Revision 1.6  2020-11-22 23:12:00+05:30  Cprogrammer
  * removed supression of ANSI C proto
@@ -27,6 +24,7 @@
 #include "prioq.h"
 
 GEN_ALLOC_readyplus(prioq, struct prioq_elt, p, len, a, 100, prioq_readyplus)
+static prioq_type type = min;
 
 /*-
  * prioq_insertmin()
@@ -52,6 +50,9 @@ prioq_insert(prioq_type t, prioq *pq, struct prioq_elt *pe)
 
 	if (!prioq_readyplus(pq, 1))
 		return 0;
+	if (t != min && t != max)
+		return -1;
+	type = t;
 	j = pq->len++;
 	while (j) {
 		i = (j - 1) / 2;
@@ -90,11 +91,13 @@ prioq_get(prioq *pq, struct prioq_elt *pe)
  * 3. decrement length of pq by 1
  */
 void
-prioq_del(prioq_type t, prioq *pq)
+prioq_del(prioq *pq)
 {
 	int             i, j, n;
 
 	if (!pq->p || !(n = pq->len))
+		return;
+	if (type != min && type != max)
 		return;
 	i = 0;
 	--n;
@@ -102,13 +105,13 @@ prioq_del(prioq_type t, prioq *pq)
 		j = i + i + 2;
 		if (j > n)
 			break;
-		if (t == min) {
+		if (type == min) {
 			if (pq->p[j - 1].dt <= pq->p[j].dt)
 				--j;
 			if (pq->p[n].dt <= pq->p[j].dt)
 				break;
 		} else
-		if (t == max) {
+		if (type == max) {
 			if (pq->p[j - 1].dt >= pq->p[j].dt)
 				--j;
 			if (pq->p[n].dt >= pq->p[j].dt)
@@ -124,7 +127,7 @@ prioq_del(prioq_type t, prioq *pq)
 void
 getversion_prioq_c()
 {
-	static char    *x = "$Id: prioq.c,v 1.8 2021-06-03 12:43:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: prioq.c,v 1.7 2021-06-03 18:03:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,6 +1,6 @@
 /*
  * $Log: maildir2mbox.c,v $
- * Revision 1.8  2021-06-03 12:44:51+05:30  Cprogrammer
+ * Revision 1.8  2021-06-03 18:12:04+05:30  Cprogrammer
  * use new prioq functions
  *
  * Revision 1.7  2021-06-01 10:05:09+05:30  Cprogrammer
@@ -98,7 +98,7 @@ main()
 		strerr_die4sys(111, FATAL, "unable to write to ", mboxtmp, ": ");
 	}
 	while (prioq_get(&pq, &pe)) {
-		prioq_del(min, &pq);
+		prioq_del(&pq);
 		if (!prioq_insert(min, &pq2, &pe))
 			die_nomem();
 		if ((fd = open_read(filenames.s + pe.id)) == -1)
@@ -160,7 +160,7 @@ main()
 	if (rename(mboxtmp, mbox) == -1)
 		strerr_die6(111, FATAL, "unable to move ", mboxtmp, " to ", mbox, ": ", &strerr_sys);
 	while (prioq_get(&pq2, &pe)) {
-		prioq_del(min, &pq2);
+		prioq_del(&pq2);
 		if (unlink(filenames.s + pe.id) == -1)
 			strerr_warn4(WARNING, "$MAILDIR/", filenames.s + pe.id, " will be delivered twice; unable to unlink: ", &strerr_sys);
 	}
@@ -170,7 +170,7 @@ main()
 void
 getversion_maildir2mbox_c()
 {
-	static char    *x = "$Id: maildir2mbox.c,v 1.8 2021-06-03 12:44:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir2mbox.c,v 1.8 2021-06-03 18:12:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;

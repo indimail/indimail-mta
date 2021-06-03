@@ -1,6 +1,6 @@
 /*
  * $Log: maildir.c,v $
- * Revision 1.7  2021-06-03 12:45:03+05:30  Cprogrammer
+ * Revision 1.7  2021-06-03 18:09:59+05:30  Cprogrammer
  * use new prioq functions
  *
  * Revision 1.6  2021-05-16 00:14:43+05:30  Cprogrammer
@@ -111,7 +111,7 @@ maildir_scan(prioq *pq, stralloc *filenames, int flagnew, int flagcur)
 	if (!stralloc_copys(filenames, ""))
 		return 0;
 	while (prioq_get(pq, &pe))
-		prioq_del(min, pq);
+		prioq_del(pq);
 	my_time = now();
 	if (flagnew && append(pq, filenames, "new", my_time) == -1)
 		return -1;
@@ -123,7 +123,7 @@ maildir_scan(prioq *pq, stralloc *filenames, int flagnew, int flagcur)
 void
 getversion_maildir_c()
 {
-	static char    *x = "$Id: maildir.c,v 1.7 2021-06-03 12:45:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir.c,v 1.7 2021-06-03 18:09:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

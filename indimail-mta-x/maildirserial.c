@@ -1,6 +1,6 @@
 /*
  * $Log: maildirserial.c,v $
- * Revision 1.15  2021-06-03 12:45:10+05:30  Cprogrammer
+ * Revision 1.15  2021-06-03 18:14:12+05:30  Cprogrammer
  * use new prioq functions
  *
  * Revision 1.14  2021-05-13 14:43:28+05:30  Cprogrammer
@@ -429,7 +429,7 @@ scanner()
 	if (maildir_scan(&pq, &filenames, 1, 1) == -1)
 		strerr_die1(111, FATAL, &maildir_scan_err);
 	while (prioq_get(&pq, &pe)) {
-		prioq_del(min, &pq);
+		prioq_del(&pq);
 		filename = filenames.s + pe.id;
 		if (usable(filename)) {
 			if (!pid) {
@@ -638,7 +638,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.15 2021-06-03 12:45:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.15 2021-06-03 18:14:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
