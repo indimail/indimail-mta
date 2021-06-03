@@ -1,5 +1,8 @@
 /*
  * $Log: prioq.c,v $
+ * Revision 1.8  2021-06-03 11:00:51+05:30  Cprogrammer
+ * added code comment for documenting prioq functions
+ *
  * Revision 1.7  2021-05-16 01:43:39+05:30  Cprogrammer
  * modified prototype to c99
  *
@@ -25,6 +28,20 @@
 
 GEN_ALLOC_readyplus(prioq, struct prioq_elt, p, len, a, 100, prioq_readyplus)
 
+/*-
+ * 1. insert into pq member with pq->p[0].dt have the least value
+ * 2. increment length of pq by 1.
+ *
+ * You can easily sort in increasing order of timestamp
+ * by doing
+ *
+ * struct prioq_elt pe;
+ *
+ * while (prioq_min(&pq, &pe)) {
+ *   prioq_delmin(&pq);
+ *   process(pe.id, pe.dt);
+ * }
+ */
 int
 prioq_insert(prioq *pq, struct prioq_elt *pe)
 {
@@ -44,6 +61,10 @@ prioq_insert(prioq *pq, struct prioq_elt *pe)
 	return 1;
 }
 
+/*
+ * find the structure having lowest timestamp (pq->p[0].dt)
+ * and store it in pe
+ */
 int
 prioq_min(prioq *pq, struct prioq_elt *pe)
 {
@@ -53,6 +74,12 @@ prioq_min(prioq *pq, struct prioq_elt *pe)
 	return 1;
 }
 
+/*
+ * 1. delete structure having lowest timestamp (pq->p[0].dt)
+ * 2. store the member having the next lowest timestamp
+ *    in pq->p[0].dt
+ * 3. decrement length of pq by 1
+ */
 void
 prioq_delmin(prioq *pq)
 {
@@ -80,7 +107,7 @@ prioq_delmin(prioq *pq)
 void
 getversion_prioq_c()
 {
-	static char    *x = "$Id: prioq.c,v 1.7 2021-05-16 01:43:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: prioq.c,v 1.8 2021-06-03 11:00:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
