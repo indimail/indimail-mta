@@ -1,7 +1,7 @@
 /*
  * $Log: prioq.c,v $
- * Revision 1.8  2021-06-03 11:00:51+05:30  Cprogrammer
- * added code comment for documenting prioq functions
+ * Revision 1.8  2021-06-03 12:43:33+05:30  Cprogrammer
+ * allow prioq to be ordered from max to min
  *
  * Revision 1.7  2021-05-16 01:43:39+05:30  Cprogrammer
  * modified prototype to c99
@@ -29,7 +29,10 @@
 GEN_ALLOC_readyplus(prioq, struct prioq_elt, p, len, a, 100, prioq_readyplus)
 
 /*-
- * 1. insert into pq member with pq->p[0].dt have the least value
+ * prioq_insertmin()
+ * 1. insert into pq member with pq->p[0].dt have the min value
+ * or
+ * 1. insert into pq member with pq->p[0].dt have the max value
  * 2. increment length of pq by 1.
  *
  * You can easily sort in increasing order of timestamp
@@ -37,13 +40,13 @@ GEN_ALLOC_readyplus(prioq, struct prioq_elt, p, len, a, 100, prioq_readyplus)
  *
  * struct prioq_elt pe;
  *
- * while (prioq_min(&pq, &pe)) {
- *   prioq_delmin(&pq);
+ * while (prioq_test(&pq, &pe)) {
+ *   prioq_del(min&pq);
  *   process(pe.id, pe.dt);
  * }
  */
 int
-prioq_insert(prioq *pq, struct prioq_elt *pe)
+prioq_insert(prioq_type t, prioq *pq, struct prioq_elt *pe)
 {
 	int             i, j;
 
@@ -52,7 +55,10 @@ prioq_insert(prioq *pq, struct prioq_elt *pe)
 	j = pq->len++;
 	while (j) {
 		i = (j - 1) / 2;
-		if (pq->p[i].dt <= pe->dt)
+		if (t == min && pq->p[i].dt <= pe->dt)
+			break;
+		else
+		if (t == max && pq->p[i].dt >= pe->dt)
 			break;
 		pq->p[j] = pq->p[i];
 		j = i;
@@ -62,11 +68,12 @@ prioq_insert(prioq *pq, struct prioq_elt *pe)
 }
 
 /*
- * find the structure having lowest timestamp (pq->p[0].dt)
+ * find the structure having lowest or greatest timestamp (pq->p[0].dt)
+ * depending on whether you called prioq_insert(min, ..) or prioq_insert(max, ..)
  * and store it in pe
  */
 int
-prioq_min(prioq *pq, struct prioq_elt *pe)
+prioq_test(prioq *pq, struct prioq_elt *pe)
 {
 	if (!pq->p || !pq->len)
 		return 0;
@@ -75,13 +82,15 @@ prioq_min(prioq *pq, struct prioq_elt *pe)
 }
 
 /*
- * 1. delete structure having lowest timestamp (pq->p[0].dt)
+ * 1. delete structure having lowest  timestamp (pq->p[0].dt)
+ * or
+ * 1. delete structure having highest timestamp (pq->p[0].dt)
  * 2. store the member having the next lowest timestamp
  *    in pq->p[0].dt
  * 3. decrement length of pq by 1
  */
 void
-prioq_delmin(prioq *pq)
+prioq_del(prioq_type t, prioq *pq)
 {
 	int             i, j, n;
 
@@ -93,10 +102,18 @@ prioq_delmin(prioq *pq)
 		j = i + i + 2;
 		if (j > n)
 			break;
-		if (pq->p[j - 1].dt <= pq->p[j].dt)
-			--j;
-		if (pq->p[n].dt <= pq->p[j].dt)
-			break;
+		if (t == min) {
+			if (pq->p[j - 1].dt <= pq->p[j].dt)
+				--j;
+			if (pq->p[n].dt <= pq->p[j].dt)
+				break;
+		} else
+		if (t == max) {
+			if (pq->p[j - 1].dt >= pq->p[j].dt)
+				--j;
+			if (pq->p[n].dt >= pq->p[j].dt)
+				break;
+		}
 		pq->p[i] = pq->p[j];
 		i = j;
 	}
@@ -107,7 +124,7 @@ prioq_delmin(prioq *pq)
 void
 getversion_prioq_c()
 {
-	static char    *x = "$Id: prioq.c,v 1.8 2021-06-03 11:00:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: prioq.c,v 1.8 2021-06-03 12:43:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
