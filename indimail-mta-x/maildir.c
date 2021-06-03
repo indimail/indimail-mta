@@ -110,7 +110,7 @@ maildir_scan(prioq *pq, stralloc *filenames, int flagnew, int flagcur)
 
 	if (!stralloc_copys(filenames, ""))
 		return 0;
-	while (prioq_test(pq, &pe))
+	while (prioq_get(pq, &pe))
 		prioq_del(min, pq);
 	my_time = now();
 	if (flagnew && append(pq, filenames, "new", my_time) == -1)

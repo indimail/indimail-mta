@@ -428,7 +428,7 @@ scanner()
 	maildir_clean(&filenames);
 	if (maildir_scan(&pq, &filenames, 1, 1) == -1)
 		strerr_die1(111, FATAL, &maildir_scan_err);
-	while (prioq_test(&pq, &pe)) {
+	while (prioq_get(&pq, &pe)) {
 		prioq_del(min, &pq);
 		filename = filenames.s + pe.id;
 		if (usable(filename)) {

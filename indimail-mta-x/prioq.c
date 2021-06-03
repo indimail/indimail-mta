@@ -40,7 +40,7 @@ GEN_ALLOC_readyplus(prioq, struct prioq_elt, p, len, a, 100, prioq_readyplus)
  *
  * struct prioq_elt pe;
  *
- * while (prioq_test(&pq, &pe)) {
+ * while (prioq_get(&pq, &pe)) {
  *   prioq_del(min&pq);
  *   process(pe.id, pe.dt);
  * }
@@ -73,7 +73,7 @@ prioq_insert(prioq_type t, prioq *pq, struct prioq_elt *pe)
  * and store it in pe
  */
 int
-prioq_test(prioq *pq, struct prioq_elt *pe)
+prioq_get(prioq *pq, struct prioq_elt *pe)
 {
 	if (!pq->p || !pq->len)
 		return 0;

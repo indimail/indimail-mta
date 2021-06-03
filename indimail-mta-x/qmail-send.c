@@ -865,7 +865,7 @@ pqfinish()
 	/*- time_t          ut[2]; -*/
 
 	for (c = 0; c < CHANNELS; ++c) {
-		while (prioq_test(&pqchan[c], &pe)) {
+		while (prioq_get(&pqchan[c], &pe)) {
 			prioq_del(min, &pqchan[c]);
 			fnmake_chanaddr(pe.id, c);
 			/*- ut[0] = ut[1] = pe.dt; -*/
@@ -1739,13 +1739,13 @@ pass_selprep(datetime_sec *wakeup)
 	}
 	if (job_avail() != -1) {
 		for (c = 0; c < CHANNELS; ++c) {
-			if (!pass[c].id && prioq_test(&pqchan[c], &pe) && *wakeup > pe.dt)
+			if (!pass[c].id && prioq_get(&pqchan[c], &pe) && *wakeup > pe.dt)
 				*wakeup = pe.dt;
 		}
 	}
-	if (prioq_test(&pqfail, &pe) && *wakeup > pe.dt)
+	if (prioq_get(&pqfail, &pe) && *wakeup > pe.dt)
 		*wakeup = pe.dt;
-	if (prioq_test(&pqdone, &pe) && *wakeup > pe.dt)
+	if (prioq_get(&pqdone, &pe) && *wakeup > pe.dt)
 		*wakeup = pe.dt;
 }
 
@@ -1803,7 +1803,7 @@ pass_dochan(int c)
 		
 		if ((j = job_avail()) == -1)
 			return;
-		if (!prioq_test(&pqchan[c], &pe))
+		if (!prioq_get(&pqchan[c], &pe))
 			return;
 		if (pe.dt > recent)
 			return;
@@ -1958,13 +1958,13 @@ pass_do()
 
 	for (c = 0; c < CHANNELS; ++c)
 		pass_dochan(c);
-	if (prioq_test(&pqfail, &pe)) {
+	if (prioq_get(&pqfail, &pe)) {
 		if (pe.dt <= recent) {
 			prioq_del(min, &pqfail);
 			pqadd(pe.id);
 		}
 	}
-	if (prioq_test(&pqdone, &pe)) {
+	if (prioq_get(&pqdone, &pe)) {
 		if (pe.dt <= recent) {
 			prioq_del(min, &pqdone);
 			messdone(pe.id);

@@ -78,7 +78,7 @@ main()
 	maildir_clean(&filenames);
 	if (maildir_scan(&pq, &filenames, 1, 1) == -1)
 		strerr_die1(111, FATAL, &maildir_scan_err);
-	if (!prioq_test(&pq, &pe))
+	if (!prioq_get(&pq, &pe))
 		_exit(0);	/*- nothing new */
 	if ((fdlock = open_append(mbox)) == -1)
 		strerr_die4sys(111, FATAL, "unable to lock ", mbox, ": ");
@@ -97,7 +97,7 @@ main()
 	case -3:
 		strerr_die4sys(111, FATAL, "unable to write to ", mboxtmp, ": ");
 	}
-	while (prioq_test(&pq, &pe)) {
+	while (prioq_get(&pq, &pe)) {
 		prioq_del(min, &pq);
 		if (!prioq_insert(min, &pq2, &pe))
 			die_nomem();
@@ -159,7 +159,7 @@ main()
 		strerr_die4sys(111, FATAL, "unable to write to ", mboxtmp, ": ");
 	if (rename(mboxtmp, mbox) == -1)
 		strerr_die6(111, FATAL, "unable to move ", mboxtmp, " to ", mbox, ": ", &strerr_sys);
-	while (prioq_test(&pq2, &pe)) {
+	while (prioq_get(&pq2, &pe)) {
 		prioq_del(min, &pq2);
 		if (unlink(filenames.s + pe.id) == -1)
 			strerr_warn4(WARNING, "$MAILDIR/", filenames.s + pe.id, " will be delivered twice; unable to unlink: ", &strerr_sys);

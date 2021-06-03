@@ -109,7 +109,7 @@ main()
 		if (maildir_scan(&pq, &filenames, 1, 0) == -1)
 			strerr_die1(111, FATAL, &maildir_scan_err);
 		substdio_putsflush(subfdout, "\033[;H\033[;J");
-		while (prioq_test(&pq, &pe)) {
+		while (prioq_get(&pq, &pe)) {
 			prioq_del(min, &pq);
 			fd = open_read(filenames.s + pe.id);
 			if (fd == -1)

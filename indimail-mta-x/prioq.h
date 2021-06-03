@@ -29,7 +29,7 @@ typedef enum {
 GEN_ALLOC_typedef(prioq, struct prioq_elt, p, len, a)
 
 int             prioq_insert(prioq_type, prioq *, struct prioq_elt *);
-int             prioq_test(prioq *, struct prioq_elt *);
+int             prioq_get(prioq *, struct prioq_elt *);
 void            prioq_del(prioq_type, prioq *);
 
 #endif
