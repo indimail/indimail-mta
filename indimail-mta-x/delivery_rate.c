@@ -1,5 +1,8 @@
 /*
  * $Log: delivery_rate.c,v $
+ * Revision 1.3  2021-06-03 18:37:31+05:30  Cprogrammer
+ * display email count if delivery had succeeded
+ *
  * Revision 1.2  2021-06-03 13:22:44+05:30  Cprogrammer
  * display email/curr_rate/conf_rate in logs
  *
@@ -58,7 +61,7 @@ delivery_rate(char *_domain)
 		if (!(i = is_rate_ok(ratelimit_file.s, 0, &email_count, &conf_rate, &rate))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-			strnum[fmt_ulong(strnum, email_count)] = 0;
+			strnum[fmt_ulong(strnum, email_count + 1)] = 0;
 			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum,
 					"/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
 			return 0;
@@ -88,7 +91,7 @@ delivery_rate(char *_domain)
 		if (!(i = is_rate_ok(ratelimit_file.s, rate_exp, &email_count, &conf_rate, &rate))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-			strnum[fmt_ulong(strnum, email_count)] = 0;
+			strnum[fmt_ulong(strnum, email_count + 1)] = 0;
 			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum,
 					"/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
 			return 0;
@@ -115,7 +118,7 @@ delivery_rate(char *_domain)
 		if (!(i = is_rate_ok(ratelimit_file.s, 0, &email_count, &conf_rate, &rate))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-			strnum[fmt_ulong(strnum, email_count)] = 0;
+			strnum[fmt_ulong(strnum, email_count + 1)] = 0;
 			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum,
 					"/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
 			return 0;
@@ -138,7 +141,7 @@ delivery_rate(char *_domain)
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.2 2021-06-03 13:22:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: delivery_rate.c,v 1.3 2021-06-03 18:37:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;

@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.14  2021-06-03 18:38:22+05:30  Cprogrammer
+ * display email count if delivery had succeeded
+ *
  * Revision 1.13  2021-06-01 10:42:03+05:30  Cprogrammer
  * display local date/time
  *
@@ -335,8 +338,8 @@ do_test(char *domain, int force)
 		if (!(i = is_rate_ok(domain, force ? "-1" : 0, &email_count, &conf_rate, &rate))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-			strnum[fmt_ulong(strnum, email_count)] = 0;
-			strerr_die9x(111, WARN, "high email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
+			strnum[fmt_ulong(strnum, email_count + 1)] = 0;
+			strerr_die9x(111, WARN, domain, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "]");
 		} else
 		if (i == -1)
 			strerr_die2sys(111, FATAL, "is_rate_ok: ");
@@ -352,8 +355,8 @@ do_test(char *domain, int force)
 		if (!(i = is_rate_ok(domain, rate_expr, &email_count, &conf_rate, &rate))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-			strnum[fmt_ulong(strnum, email_count)] = 0;
-			strerr_die9x(111, WARN, "high email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
+			strnum[fmt_ulong(strnum, email_count + 1)] = 0;
+			strerr_die9x(111, WARN, domain, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "]");
 		} else
 		if (i == -1)
 			strerr_die2sys(111, FATAL, "is_rate_ok: ");
@@ -365,8 +368,8 @@ do_test(char *domain, int force)
 		if (!(i = is_rate_ok(".global", 0, &email_count, &conf_rate, &rate))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-			strnum[fmt_ulong(strnum, email_count)] = 0;
-			strerr_die9x(111, WARN, "high email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain);
+			strnum[fmt_ulong(strnum, email_count + 1)] = 0;
+			strerr_die9x(111, WARN, domain, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "]");
 		} else
 		if (i == -1)
 			strerr_die2sys(111, FATAL, "is_rate_ok: ");
@@ -376,7 +379,7 @@ do_test(char *domain, int force)
 	strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 	strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 	strnum[fmt_ulong(strnum, email_count)] = 0;
-	strerr_warn8("email rate [", strdouble1, "/", strdouble2, "] emails=", strnum, " for ", domain, 0);
+	strerr_warn9(domain, ": email rate [", strnum, "/", strdouble1, "/", strdouble2, "]", 0, 0);
 	return;
 }
 
@@ -499,7 +502,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.13 2021-06-01 10:42:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.14 2021-06-03 18:38:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
