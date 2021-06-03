@@ -1,5 +1,8 @@
 /*
  * $Log: delivery_rate.c,v $
+ * Revision 1.2  2021-06-03 13:22:44+05:30  Cprogrammer
+ * display email/curr_rate/conf_rate in logs
+ *
  * Revision 1.1  2021-06-01 01:48:01+05:30  Cprogrammer
  * Initial revision
  *
@@ -56,10 +59,19 @@ delivery_rate(char *_domain)
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 			strnum[fmt_ulong(strnum, email_count)] = 0;
-			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
+			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum,
+					"/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
 			return 0;
-		} else
+		} else {
+			if (i == 1) {
+				strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
+				strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
+				strnum[fmt_ulong(strnum, email_count)] = 0;
+				log11(queuedesc, ": ", domain, ": delivery rate [", strdouble1,
+						"] conf rate [", strdouble2, "] email count [", strnum, "]", "\n");
+			}
 			return i; /*- either 1 or -1 */
+		}
 	} else
 	if (errno != error_noent)
 		return -1;
@@ -77,10 +89,19 @@ delivery_rate(char *_domain)
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 			strnum[fmt_ulong(strnum, email_count)] = 0;
-			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
+			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum,
+					"/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
 			return 0;
-		} else
+		} else {
+			if (i == 1) {
+				strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
+				strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
+				strnum[fmt_ulong(strnum, email_count)] = 0;
+				log11(queuedesc, ": ", domain, ": delivery rate [", strdouble1,
+						"] conf rate [", strdouble2, "] email count [", strnum, "]", "\n");
+			}
 			return i; /*- either 1 or -1 */
+		}
 	} else
 	if (errno != error_noent)
 		return -1;
@@ -95,10 +116,19 @@ delivery_rate(char *_domain)
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 			strnum[fmt_ulong(strnum, email_count)] = 0;
-			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
+			log11("warning: ", queuedesc, ": delivery rate exceeded [", strnum,
+					"/", strdouble1, "/", strdouble2, "] for ", domain, "; will try again later\n");
 			return 0;
-		} else
+		} else {
+			if (i == 1) {
+				strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
+				strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
+				strnum[fmt_ulong(strnum, email_count)] = 0;
+				log11(queuedesc, ": ", domain, ": delivery rate [", strdouble1,
+						"] conf rate [", strdouble2, "] email count [", strnum, "]", "\n");
+			}
 			return i; /*- either 1 or -1 */
+		}
 	} else
 	if (errno != error_noent)
 		return -1;
@@ -108,7 +138,7 @@ delivery_rate(char *_domain)
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.1 2021-06-01 01:48:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: delivery_rate.c,v 1.2 2021-06-03 13:22:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;
