@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.6  2021-06-05 18:02:19+05:30  Cprogrammer
+ * corrected log message
+ *
  * Revision 1.5  2021-06-05 17:46:32+05:30  Cprogrammer
  * reduce wakeup when time_needed is earlier than wakeup
  *
@@ -1627,13 +1630,12 @@ pass_dochan(int c)
 			jo[pass[c].j].retry = recent + t;
 			job_close(pass[c].j);
 			pass[c].id = 0;
-			/* update_delayed(pe.id, &pqchan[c]); */
 			delayed_jobs = delayed_job_count();
 			del_status();
 			return;
 		} else
 		if (i == -1)
-			log5("warning: ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; will try again later\n");
+			log5("warning: ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n");
 		else
 		if (_do_ratelimit && delayed_jobs)
 			delayed_jobs = delayed_job_count();
@@ -2541,7 +2543,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.5 2021-06-05 17:46:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.6 2021-06-05 18:02:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

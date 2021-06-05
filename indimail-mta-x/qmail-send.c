@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.83  2021-06-05 18:02:11+05:30  Cprogrammer
+ * corrected log message
+ *
  * Revision 1.82  2021-06-05 17:47:11+05:30  Cprogrammer
  * reduce wakeup when time_needed is earlier than wakeup
  *
@@ -1899,7 +1902,7 @@ pass_dochan(int c)
 			return;
 		} else
 		if (i == -1)
-			log5("warning: ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; will try again later\n");
+			log5("warning: ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n");
 		else /*- i == 1 */
 		if (_do_ratelimit && delayed_jobs)
 			delayed_jobs = delayed_job_count();
@@ -3094,7 +3097,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.82 2021-06-05 17:47:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.83 2021-06-05 18:02:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)
