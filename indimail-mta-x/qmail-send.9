@@ -1,3 +1,4 @@
+.TH qmail-send 8
 .SH NAME
 qmail-send \- deliver mail messages from the queue with rate control
 
@@ -30,8 +31,8 @@ if any of the loaded functions return non-zero status.
 
 \fBqmail-send\fR sends a single byte 'S' on desciptor 7 to qmail-todo to
 indicate that it has started. \fBqmail-send\fR reads instructions from
-\fBqmail-todo\fR on descriptor 8. It gets the filename in todo directory
-and the message id and if the message is local or remote. It then uses
+\fBqmail-todo\fR on descriptor 8. It gets the filename in todo directory,
+the message id and whether the message is local or remote. It then uses
 \fBqmail-lspawn\fR to deliver messages to local recipients and
 \fBqmail-rspawn\fR to deliver messages to remote recipients. If a message
 is temporarily undeliverable to one or more addresses, \fBqmail-send\fR
