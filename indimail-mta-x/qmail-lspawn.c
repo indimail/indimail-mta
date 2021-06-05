@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.37  2021-06-05 23:15:16+05:30  Cprogrammer
+ * converted function prototypes to ansi
+ *
  * Revision 1.36  2021-02-07 23:13:32+05:30  Cprogrammer
  * avoid use of compat functions
  *
@@ -114,6 +117,7 @@
  */
 #include <pwd.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include "fd.h"
 #include "wait.h"
 #include "prot.h"
@@ -151,9 +155,7 @@ static char *setup_qlargs()
 }
 
 void
-initialize(argc, argv)
-	int             argc;
-	char          **argv;
+initialize(int argc, char **argv)
 {
 	aliasempty = argv[1];
 	if (!aliasempty)
@@ -163,11 +165,7 @@ initialize(argc, argv)
 int             truncreport = 3000;
 
 void
-report(ss, wstat, s, len)
-	substdio       *ss;
-	int             wstat;
-	char           *s;
-	int             len;
+report(substdio *ss, int wstat, char *s, int len)
 {
 	int             i;
 	if (wait_crashed(wstat)) {
@@ -236,16 +234,11 @@ static stralloc libfn = { 0 };
 char           *cdbdir;
 
 void
-nughde_get(local)
-	char           *local;
+nughde_get(char *local)
 {
 	char           *(args[3]);
 	int             pi[2];
-	int             gpwpid;
-	int             gpwstat;
-	int             r;
-	int             fd;
-	int             flagwild;
+	int             gpwpid, gpwstat, r, fd, flagwild;
 
 	if (!cdbdir) {
 		if (!(cdbdir = env_get("ASSIGNDIR")))
@@ -255,13 +248,10 @@ nughde_get(local)
 		_exit(QLX_NOMEM);
 	if (cdbfile.s[cdbfile.len - 1] != '/' && !stralloc_cats(&cdbfile, "/"))
 		_exit(QLX_NOMEM);
-	if (!stralloc_catb(&cdbfile, "cdb", 4))
-		_exit(QLX_NOMEM);
-	if (!stralloc_copys(&lower, "!"))
-		_exit(QLX_NOMEM);
-	if (!stralloc_cats(&lower, local))
-		_exit(QLX_NOMEM);
-	if (!stralloc_0(&lower))
+	if (!stralloc_catb(&cdbfile, "cdb", 4) ||
+			!stralloc_copys(&lower, "!") ||
+			!stralloc_cats(&lower, local) ||
+			!stralloc_0(&lower))
 		_exit(QLX_NOMEM);
 	case_lowerb(lower.s, lower.len);
 	if (!stralloc_copys(&nughde, ""))
@@ -304,8 +294,7 @@ nughde_get(local)
 			}
 			--i;
 			flagwild = 1;
-		}
-		while (i);
+		} while (i);
 		close(fd);
 	}
 	if (pipe(pi) == -1)
@@ -346,61 +335,31 @@ static char     strnum[FMT_ULONG];
 int
 copy_pwstruct(struct passwd *pw, char *recip, int at, int is_inactive)
 {
-	if (!stralloc_copyb(&pwstruct, "PWSTRUCT=", 9))
-		return (-1);
-	else
-	if (!stralloc_cats(&pwstruct, pw->pw_name))
-		return (-1);
-	else
-	if (!stralloc_append(&pwstruct, "@"))
-		return (-1);
-	else
-	if (!stralloc_cats(&pwstruct, recip + at + 1))
-		return (-1);
-	else
-	if (!stralloc_append(&pwstruct, ":"))
-		return (-1);
-	else
-	if (!stralloc_cats(&pwstruct, pw->pw_passwd))
-		return (-1);
-	else
-	if (!stralloc_append(&pwstruct, ":"))
+	if (!stralloc_copyb(&pwstruct, "PWSTRUCT=", 9) ||
+			!stralloc_cats(&pwstruct, pw->pw_name) ||
+			!stralloc_append(&pwstruct, "@") ||
+			!stralloc_cats(&pwstruct, recip + at + 1) ||
+			!stralloc_append(&pwstruct, ":") ||
+			!stralloc_cats(&pwstruct, pw->pw_passwd) ||
+			!stralloc_append(&pwstruct, ":"))
 		return (-1);
 	strnum[fmt_uint(strnum, pw->pw_uid)] = 0;
-	if (!stralloc_cats(&pwstruct, strnum))
-		return (-1);
-	else
-	if (!stralloc_append(&pwstruct, ":"))
+	if (!stralloc_cats(&pwstruct, strnum) ||
+			!stralloc_append(&pwstruct, ":"))
 		return (-1);
 	strnum[fmt_uint(strnum, pw->pw_gid)] = 0;
-	if (!stralloc_cats(&pwstruct, strnum))
-		return (-1);
-	else
-	if (!stralloc_append(&pwstruct, ":"))
-		return (-1);
-	else
-	if (!stralloc_cats(&pwstruct, pw->pw_gecos))
-		return (-1);
-	else
-	if (!stralloc_append(&pwstruct, ":"))
-		return (-1);
-	else
-	if (!stralloc_cats(&pwstruct, pw->pw_dir))
-		return (-1);
-	else
-	if (!stralloc_append(&pwstruct, ":"))
-		return (-1);
-	else
-	if (!stralloc_cats(&pwstruct, pw->pw_shell))
-		return (-1);
-	else
-	if (!stralloc_append(&pwstruct, ":"))
+	if (!stralloc_cats(&pwstruct, strnum) ||
+			!stralloc_append(&pwstruct, ":") ||
+			!stralloc_cats(&pwstruct, pw->pw_gecos) ||
+			!stralloc_append(&pwstruct, ":") ||
+			!stralloc_cats(&pwstruct, pw->pw_dir) ||
+			!stralloc_append(&pwstruct, ":") ||
+			!stralloc_cats(&pwstruct, pw->pw_shell) ||
+			!stralloc_append(&pwstruct, ":"))
 		return (-1);
 	strnum[fmt_uint(strnum, is_inactive)] = 0;
-	if (!stralloc_cats(&pwstruct, strnum))
-		return (-1);
-	else
-	if (!stralloc_0(&pwstruct))
+	if (!stralloc_cats(&pwstruct, strnum) ||
+			!stralloc_0(&pwstruct))
 		return (-1);
 	return (0);
 }
@@ -409,14 +368,7 @@ stralloc        user = { 0 };
 stralloc        save = { 0 };
 
 int
-spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
-	int             fdmess;
-	int             fdout;
-	unsigned long   msgsize;
-	char           *sender;
-	char           *qqeh;
-	char           *recip_t;
-	int             at_t;
+spawn(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, char *recip_t, int at_t)
 {
 	int             f, len, at = at_t;
 	char           *ptr, *libptr, *tptr, *recip = recip_t;
@@ -509,10 +461,10 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 				/*-
 				 * delivery to email to local domain
 				 * mailbox@domain
+				 * copy mailbox@localdomain
 				 */
-				if (!stralloc_copys(&user, ptr)) /*- copy mailbox@localdomain */
-					return (-1);
-				if (!stralloc_0(&user))
+				if (!stralloc_copys(&user, ptr) ||
+						!stralloc_0(&user))
 					return (-1);
 				recip = user.s;
 				at = len;
@@ -525,19 +477,14 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 			 * virtual_domain-mailbox@virtual_domain
 			 */
 			f = str_len(tptr + 1); /*- domain length */
-			if (!stralloc_copyb(&save, tptr + 1, f)) /*- copy domain */
+			if (!stralloc_copyb(&save, tptr + 1, f) || /*- copy domain */
+					!stralloc_append(&save, "-") ||
+					!stralloc_catb(&save, ptr, len) || /*- copy user portion */
+					!stralloc_catb(&save, tptr, f + 1) || /*- copy @domain */
+					!stralloc_0(&save))
 				return (-1);
-			if (!stralloc_append(&save, "-"))
-				return (-1);
-			if (!stralloc_catb(&save, ptr, len)) /*- copy user portion */
-				return (-1);
-			if (!stralloc_catb(&save, tptr, f + 1)) /*- copy @domain */
-				return (-1);
-			if (!stralloc_0(&save))
-				return (-1);
-			if (!stralloc_copyb(&user, ptr, len)) /*- copy user portion */
-				return (-1);
-			if (!stralloc_0(&user))
+			if (!stralloc_copyb(&user, ptr, len) || /*- copy user portion */
+					!stralloc_0(&user))
 				return (-1);
 			recip = save.s;
 			at = f + 1 + len;
@@ -553,19 +500,11 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip_t, at_t)
 			if (!(u_not_found = (int *) getlibObject(libptr, &phandle, "userNotFound", 0)))
 				_exit(-3);
 			if (*u_not_found) {
-				if (!stralloc_copys(&pwstruct, "PWSTRUCT=No such user "))
-					return (-1);
-				else
-				if (!stralloc_cats(&pwstruct, user.s))
-					return (-1);
-				else
-				if (!stralloc_append(&pwstruct, "@"))
-					return (-1);
-				else
-				if (!stralloc_cats(&pwstruct, recip + at + 1))
-					return (-1);
-				else
-				if (!stralloc_0(&pwstruct))
+				if (!stralloc_copys(&pwstruct, "PWSTRUCT=No such user ") ||
+						!stralloc_cats(&pwstruct, user.s) ||
+						!stralloc_append(&pwstruct, "@") ||
+						!stralloc_cats(&pwstruct, recip + at + 1) ||
+						!stralloc_0(&pwstruct))
 					return (-1);
 				else
 				if (!env_put(pwstruct.s))
@@ -582,8 +521,8 @@ noauthself: /*- deliver to local user in control/locals */
 		char           *(args[12]);
 		unsigned long   u;
 		int             n;
-		int             uid;
-		int             gid;
+		uid_t           uid;
+		gid_t           gid;
 		char           *x;
 		unsigned int    xlen;
 
@@ -666,7 +605,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.36 2021-02-07 23:13:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.37 2021-06-05 23:15:16+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
