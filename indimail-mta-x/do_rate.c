@@ -1,5 +1,8 @@
 /*
  * $Log: do_rate.c,v $
+ * Revision 1.2  2021-06-05 12:44:50+05:30  Cprogrammer
+ * return time_needed in seconds to reach configured rate
+ *
  * Revision 1.1  2021-05-29 23:35:17+05:30  Cprogrammer
  * Initial revision
  *
@@ -19,6 +22,7 @@
 #include <error.h>
 #include <evaluate.h>
 #include <lock.h>
+#include <datetime.h>
 #include "do_rate.h"
 
 static stralloc fline = { 0 }, _rate_expr = { 0 };
@@ -59,7 +63,8 @@ get_rate(char *expression, double *rate)
 }
 
 int
-is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c, double *r)
+is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c,
+		double *r, datetime_sec *time_needed)
 {
 	int             at, wfd, rfd, match, line_no = -1, rate_int,
 					reset, access_flag, force = 0;
@@ -159,6 +164,8 @@ is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c, double *r)
 				cur_rate = (endtime == starttime) ? 0 : ((float) email_count / (float) (endtime - starttime));
 				if (r)
 					*r = cur_rate;
+				if (time_needed)
+					*time_needed = (long int) email_count/conf_rate - endtime + starttime;
 				break;
 			}
 		}
@@ -203,7 +210,7 @@ is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c, double *r)
 void
 getversion_do_rate_c()
 {
-	static char    *x = "$Id: do_rate.c,v 1.1 2021-05-29 23:35:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_rate.c,v 1.2 2021-06-05 12:44:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidevalh;
 	x = sccsidgetrateh;
