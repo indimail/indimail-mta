@@ -1,6 +1,6 @@
 /*
  * $Log: qsutil.c,v $
- * Revision 1.16  2021-06-05 12:52:42+05:30  Cprogrammer
+ * Revision 1.16  2021-06-05 22:35:05+05:30  Cprogrammer
  * added log4_noflush() function
  *
  * Revision 1.15  2021-06-04 09:22:44+05:30  Cprogrammer
@@ -349,8 +349,7 @@ lockerr()
 #endif
 
 void
-pausedir(dir)
-	char           *dir;
+pausedir(char *dir)
 {
 	if (queuedesc)
 		log5("alert: ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n");
@@ -360,17 +359,16 @@ pausedir(dir)
 }
 
 static int
-issafe(ch)
-	char            ch;
+issafe(char ch)
 {
 	return ( ((ch == '%') || (ch < '!') || (ch > '~')) ? 0 : 1 );
 }
 
 void
-logsafe_noflush(s)
-	char           *s;
+logsafe_noflush(char *s)
 {
 	int             i;
+
 	while (!stralloc_copys(&foo, s))
 		nomem();
 	for (i = 0; i < foo.len; ++i)
@@ -383,10 +381,10 @@ logsafe_noflush(s)
 }
 
 void
-logsafe(s)
-	char           *s;
+logsafe(char *s)
 {
 	int             i;
+
 	while (!stralloc_copys(&foo, s))
 		nomem();
 	for (i = 0; i < foo.len; ++i)
@@ -401,7 +399,7 @@ logsafe(s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.16 2021-06-05 12:52:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.16 2021-06-05 22:35:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
