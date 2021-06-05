@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.4  2021-06-05 12:58:45+05:30  Cprogrammer
+ * refactored rate limit code to display delayed job count in logs
+ *
  * Revision 1.3  2021-06-03 18:08:21+05:30  Cprogrammer
  * use new prioq functions
  *
@@ -101,7 +104,6 @@ static cmap     maplocals;
 
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
-static char     strnum3[FMT_ULONG];
 
 #define CHANNELS 2
 static char    *chanaddr[CHANNELS] = { "local/", "remote/" };
@@ -122,13 +124,15 @@ static int      chanskip[CHANNELS] = { 10, 20 };
 char           *queuedesc;
 int             conf_split;
 
-dtype           delivery;
-
-static void     reread();
-
 static int      flagexitasap = 0;
 static int      flagrunasap = 0;
 static int      flagreadasap = 0;
+
+dtype           delivery;
+int             do_ratelimit;
+unsigned long   delayed_jobs;
+
+static void     reread();
 
 static void
 sigterm()
@@ -177,7 +181,7 @@ spawndied(int c)
 
 #define REPORTMAX 10000
 
-datetime_sec    recent;
+datetime_sec    recent, time_needed;
 
 
 /* this file is too long ----------------------------------------- FILENAMES */
@@ -526,7 +530,7 @@ static prioq    pqchan[CHANNELS] = { {0} , {0} };	/*- pqchan 0: -todo +info +loc
 static prioq    pqfail = { 0 };						/*- stat() failure; has to be pqadded again */
 
 static void
-pqadd(unsigned long id)
+pqadd(unsigned long id, char delayedflag)
 {
 	struct prioq_elt pe;
 	struct prioq_elt pechan[CHANNELS];
@@ -553,16 +557,22 @@ pqadd(unsigned long id)
 		} else {
 			flagchan[c] = 1;
 			pechan[c].id = id;
-			pechan[c].dt = st.st_mtime;
+			if (!recent)
+				recent = now();
+			pechan[c].dt = delayedflag ? recent : st.st_mtime;
+			pechan[c].delayed = delayedflag;
 		}
 	}
-	for (c = 0; c < CHANNELS; ++c)
-		if (flagchan[c])
+	for (c = 0; c < CHANNELS; ++c) {
+		if (flagchan[c]) {
 			while (!prioq_insert(min, &pqchan[c], &pechan[c]))
 				nomem();
-	for (c = 0; c < CHANNELS; ++c)
+		}
+	}
+	for (c = 0; c < CHANNELS; ++c) {
 		if (flagchan[c])
 			break;
+	}
 	if (c == CHANNELS) {
 		pe.id = id;
 		pe.dt = now();
@@ -578,6 +588,20 @@ fail:
 		nomem();
 }
 
+unsigned long
+delayed_job_count()
+{
+	unsigned long   c, i, n;
+
+	for (c = n = 0; c < CHANNELS; ++c) {
+		for (i = 0; i < pqchan[c].len; i++) {
+			if (pqchan[c].p[i].delayed)
+				n++;
+		}
+	}
+	return n;
+}
+
 static void
 pqstart()
 {
@@ -588,8 +612,9 @@ pqstart()
 	readsubdir_init(&rs, "info", pausedir); /*- pausedir is a function in qsutil */
 	while ((x = readsubdir_next(&rs, &id))) { /*- here id is the filename too */
 		if (x > 0)
-			pqadd(id);
+			pqadd(id, do_ratelimit);
 	}
+	delayed_jobs = do_ratelimit ? delayed_job_count() : 0;
 }
 
 static void
@@ -598,14 +623,11 @@ pqfinish()
 	int             c;
 	struct prioq_elt pe;
 	struct timeval   ut[2] = {{0}};
-	/*- XXX: more portable than utimbuf, but still worrisome */
-	/*- time_t          ut[2]; -*/
 
 	for (c = 0; c < CHANNELS; ++c) {
 		while (prioq_get(&pqchan[c], &pe)) {
 			prioq_del(&pqchan[c]);
 			fnmake_chanaddr(pe.id, c);
-			/*- ut[0] = ut[1] = pe.dt; -*/
 			ut[0].tv_sec = ut[1].tv_sec = pe.dt;
 			if (utimes(fn1.s, ut) == -1)
 				log5("warning: ", queuedesc, "unable to utime ", fn1.s, "; message will be retried too soon\n");
@@ -718,6 +740,7 @@ job_close(int j)
 			return;
 		}
 	}
+	pe.delayed = do_ratelimit ? 1 : 0;
 	while (!prioq_insert(min, &pqchan[jo[j].channel], &pe))
 		nomem();
 }
@@ -845,9 +868,9 @@ bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_re
 		return (111);
 	}
 	i = wait_exitcode(wstat);
-	strnum2[fmt_ulong(strnum2, i)] = 0;
+	strnum1[fmt_ulong(strnum1, i)] = 0;
 	log13("bounce processor sender <", sender, "> recipient <", recipient, "> messfn <", messfn, "> bouncefn <", bouncefn,
-		  "> exit=", strnum2, " ", queuedesc, "\n");
+		  "> exit=", strnum1, " ", queuedesc, "\n");
 	return (i);
 }
 
@@ -1203,14 +1226,17 @@ del_status()
 
 	log1_noflush("status:");
 	for (c = 0; c < CHANNELS; ++c) {
-		strnum2[fmt_ulong(strnum2, (unsigned long) concurrencyused[c])] = 0;
-		strnum3[fmt_ulong(strnum3, (unsigned long) concurrency[c])] = 0;
-		log2_noflush(chanstatusmsg[c], strnum2);
-		log2_noflush("/", strnum3);
+		strnum1[fmt_ulong(strnum1, (unsigned long) concurrencyused[c])] = 0;
+		strnum2[fmt_ulong(strnum2, (unsigned long) concurrency[c])] = 0;
+		log4_noflush(chanstatusmsg[c], strnum1, "/", strnum2);
 		if (holdjobs[c]) /*NJL*/
 			log1_noflush(" (held)"); /*NJL*/
 	}
-	log2_noflush(" ", queuedesc);
+	if (delayed_jobs) {
+		strnum1[fmt_ulong(strnum1, delayed_jobs)] = 0;
+		log4_noflush(" delayed jobs=", strnum1, " ", queuedesc);
+	} else
+		log2_noflush(" ", queuedesc);
 	if (flagexitasap)
 		log1_noflush(" exitasap");
 	log1_noflush("\n");
@@ -1289,10 +1315,10 @@ del_start(int j, seek_pos mpos, char *recip)
 	del[c][i].used = 1;
 	++concurrencyused[c];
 	comm_write(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, jo[j].envh.s, recip);
-	strnum2[fmt_ulong(strnum2, del[c][i].delid)] = 0;
-	strnum3[fmt_ulong(strnum3, jo[j].id)] = 0;
-	log2_noflush("starting delivery ", strnum2);
-	log3_noflush(": msg ", strnum3, tochan[c]);
+	strnum1[fmt_ulong(strnum1, del[c][i].delid)] = 0;
+	strnum2[fmt_ulong(strnum2, jo[j].id)] = 0;
+	log2_noflush("starting delivery ", strnum1);
+	log3_noflush(": msg ", strnum2, tochan[c]);
 	logsafe_noflush(recip);
 	log3(" ", queuedesc, "\n");
 	del_status();
@@ -1362,7 +1388,7 @@ del_dochan(int c)
 			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
 				log3("warning: ", queuedesc, ": internal error: delivery report out of range\n");
 			else {
-				strnum3[fmt_ulong(strnum3, del[c][delnum].delid)] = 0;
+				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				if (dline[c].s[2] == 'Z') {
 					if (jo[del[c][delnum].j].flagdying) {
 						dline[c].s[2] = 'D';
@@ -1377,19 +1403,19 @@ del_dochan(int c)
 				switch (dline[c].s[2])
 				{
 				case 'K':
-					log3_noflush("delivery ", strnum3, ": success: ");
+					log3_noflush("delivery ", strnum1, ": success: ");
 					logsafe_noflush(dline[c].s + 3);
 					log3(" ", queuedesc, "\n");
 					markdone(c, jo[del[c][delnum].j].id, del[c][delnum].mpos);
 					--jo[del[c][delnum].j].numtodo;
 					break;
 				case 'Z':
-					log3_noflush("delivery ", strnum3, ": deferral: ");
+					log3_noflush("delivery ", strnum1, ": deferral: ");
 					logsafe_noflush(dline[c].s + 3);
 					log3(" ", queuedesc, "\n");
 					break;
 				case 'D':
-					log3_noflush("delivery ", strnum3, ": failure: ");
+					log3_noflush("delivery ", strnum1, ": failure: ");
 					logsafe_noflush(dline[c].s + 3);
 					log3(" ", queuedesc, "\n");
 					addbounce(jo[del[c][delnum].j].id, del[c][delnum].recip.s, dline[c].s + 3);
@@ -1397,7 +1423,7 @@ del_dochan(int c)
 					--jo[del[c][delnum].j].numtodo;
 					break;
 				default:
-					log5("delivery ", strnum3, ": report mangled, will defer: ", queuedesc, "\n");
+					log5("delivery ", strnum1, ": report mangled, will defer: ", queuedesc, "\n");
 				}
 				job_close(del[c][delnum].j);
 				del[c][delnum].used = 0;
@@ -1527,7 +1553,8 @@ pass_dochan(int c)
 	datetime_sec    birth;
 	struct prioq_elt pe;
 	static stralloc line = {0}, qqeh = {0}, envh = {0};
-	int             i, match;
+	datetime_sec    t;
+	int             i, match, _do_ratelimit;
 
 	if (flagexitasap)
 		return;
@@ -1588,15 +1615,25 @@ pass_dochan(int c)
 	{
 	case 'T': /*- send message to qmail-lspawn/qmail-rspawn to start delivery */
 		delivery = c;
-		i = delivery_rate(line.s + 1);
-		if (!i || i == -1) {
-			if (i == -1)
-				log5("warning: ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; will try again later\n");
+		if (!(i = delivery_rate(line.s + 1, pe.id, &t, &_do_ratelimit))) {
+			if (t && (t < time_needed || !time_needed))
+				time_needed = t + SLEEP_FUZZ; /*- earliest delayed job */
+			else
+				time_needed = 0;
 			close(pass[c].fd);
+			jo[pass[c].j].retry = recent + t;
 			job_close(pass[c].j);
 			pass[c].id = 0;
+			/* update_delayed(pe.id, &pqchan[c]); */
+			delayed_jobs = delayed_job_count();
+			del_status();
 			return;
-		}
+		} else
+		if (i == -1)
+			log5("warning: ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; will try again later\n");
+		else
+		if (_do_ratelimit && delayed_jobs)
+			delayed_jobs = delayed_job_count();
 		++jo[pass[c].j].numtodo;
 		del_start(pass[c].j, pass[c].mpos, line.s + 1); /*- line.s[1] = recipient */
 		break;
@@ -1654,8 +1691,8 @@ messdone(unsigned long id)
 	/*- -todo +info -local -remote ?bounce */
 	if (!injectbounce(id))
 		goto fail;	/*- injectbounce() produced error message */
-	strnum3[fmt_ulong(strnum3, id)] = 0;
-	log5("end msg ", strnum3, " ", queuedesc, "\n");
+	strnum1[fmt_ulong(strnum1, id)] = 0;
+	log5("end msg ", strnum1, " ", queuedesc, "\n");
 
 	/*- -todo +info -local -remote -bounce */
 	fnmake_info(id);
@@ -1694,7 +1731,7 @@ pass_do()
 	if (prioq_get(&pqfail, &pe)) {
 		if (pe.dt <= recent) {
 			prioq_del(&pqfail);
-			pqadd(pe.id);
+			pqadd(pe.id, 0);
 		}
 	}
 	if (prioq_get(&pqdone, &pe)) {
@@ -1798,13 +1835,14 @@ static stralloc mailfrom = { 0 };
 static stralloc mailto = { 0 };
 
 static void
-log_stat(long bytes)
+log_stat(unsigned long id, long bytes)
 {
 	char           *ptr;
 
+	strnum1[fmt_ulong(strnum1, id)] = 0;
 	for (ptr = mailto.s; ptr < mailto.s + mailto.len;) {
-		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>", " ", *(ptr + 2) ? ptr + 2 : "<>", " ",
-			 strnum1, " ", queuedesc, "\n");
+		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>",
+				" ", *(ptr + 2) ? ptr + 2 : "<>", " ", strnum1, " ", queuedesc, "\n");
 		ptr += str_len(ptr) + 1;
 	}
 	mailfrom.len = mailto.len = 0;
@@ -1884,8 +1922,8 @@ todo_do(fd_set *rfds)
 		log3("warning: unable to create ", fn1.s, "\n");
 		goto fail;
 	}
-	strnum3[fmt_ulong(strnum3, id)] = 0;
-	log3("new msg ", strnum3, "\n");
+	strnum1[fmt_ulong(strnum1, id)] = 0;
+	log3("new msg ", strnum1, "\n");
 	for (c = 0; c < CHANNELS; ++c)
 		flagchan[c] = 0;
 	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf));
@@ -1923,7 +1961,7 @@ todo_do(fd_set *rfds)
 				log3("warning: trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
-			log2_noflush("info msg ", strnum3);
+			log2_noflush("info msg ", strnum1);
 			strnum2[fmt_ulong(strnum2, (unsigned long) st.st_size)] = 0;
 			log2_noflush(": bytes ", strnum2);
 			log1_noflush(" from <");
@@ -2046,7 +2084,7 @@ todo_do(fd_set *rfds)
 		while (!prioq_insert(min, &pqdone, &pe))
 			nomem();
 	}
-	log_stat(Bytes);
+	log_stat(id, Bytes);
 	return;
 
 fail:
@@ -2324,6 +2362,7 @@ main()
 
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue/slowq"; /*- single queue like qmail */
+	do_ratelimit = env_get("RATELIMIT_DIR") ? 1 : 0;
 	/*- get basename of queue directory to define slowq-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
@@ -2336,6 +2375,8 @@ main()
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
+	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
+	log7("info: slowq-send: ", queuedesc, ": ratelimit=", do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, "\n");
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
 	else
@@ -2410,8 +2451,7 @@ main()
 	pass_init();    /*- initialize pass structure */
 	todo_init();    /*- set fd 7 to write to qmail-todo, set fd 8 to read from qmail-todo, write 'S' to qmail-todo */
 	cleanup_init(); /*- initialize flagcleanup = 0, cleanuptime = now*/
-	while (!flagexitasap || !del_canexit())
-	{
+	while (!flagexitasap || !del_canexit()) {
 		recent = now();
 		if (flagrunasap) {
 			flagrunasap = 0;
@@ -2421,7 +2461,7 @@ main()
 			flagreadasap = 0;
 			reread();
 		}
-		wakeup = recent + SLEEP_FOREVER;
+		wakeup = time_needed ? recent + time_needed : recent + SLEEP_FOREVER;
 		FD_ZERO(&rfds);
 		FD_ZERO(&wfds);
 		nfds = 1;
@@ -2453,7 +2493,7 @@ main()
 		/*- set wakeup */
 		cleanup_selprep(&wakeup);
 		if (wakeup <= recent)
-			tv.tv_sec = 0;
+			tv.tv_sec = time_needed ? time_needed : 0;
 		else
 			tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
 		tv.tv_usec = 0;
@@ -2462,6 +2502,7 @@ main()
 			else
 				log3("warning: ", queuedesc, ": trouble in select\n");
 		} else {
+			time_needed = 0;
 			recent = now();
 			/*- communicate with qmail-lspawn, qmail-rspawn
 			 * These were created as pi1, pi3 in qmail-start.c
@@ -2494,7 +2535,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.3 2021-06-03 18:08:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.4 2021-06-05 12:58:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)
