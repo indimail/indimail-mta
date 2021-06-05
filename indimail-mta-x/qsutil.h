@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.15  2021-06-05 12:53:00+05:30  Cprogrammer
+ * added log4_noflush() function
+ *
  * Revision 1.14  2021-06-04 09:22:09+05:30  Cprogrammer
  * added log15() function
  *
@@ -46,6 +49,7 @@ void            log1_noflush(char *);
 void            my_log2(char *, char *);
 void            log2_noflush(char *, char *);
 void            log3_noflush(char *, char *, char *);
+void            log4_noflush(char *, char *, char *, char *);
 void            log3(char *, char *, char *);
 void            log4(char *, char *, char *, char *);
 void            log5(char *, char *, char *, char *, char *);

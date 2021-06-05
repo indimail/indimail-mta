@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.16  2021-06-05 12:52:42+05:30  Cprogrammer
+ * added log4_noflush() function
+ *
  * Revision 1.15  2021-06-04 09:22:44+05:30  Cprogrammer
  * added log15() function
  *
@@ -114,6 +117,15 @@ log3_noflush(char *s1, char *s2, char *s3)
 	substdio_puts(&sserr, s1);
 	substdio_puts(&sserr, s2);
 	substdio_puts(&sserr, s3);
+}
+
+void
+log4_noflush(char *s1, char *s2, char *s3, char *s4)
+{
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
 }
 
 void
@@ -389,7 +401,7 @@ logsafe(s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.15 2021-06-04 09:22:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.16 2021-06-05 12:52:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
