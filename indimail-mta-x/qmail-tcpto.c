@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpto.c,v $
+ * Revision 1.25  2021-06-05 12:52:07+05:30  Cprogrammer
+ * process special queue "slowq"
+ *
  * Revision 1.24  2021-05-30 00:13:49+05:30  Cprogrammer
  * fixed qbase path
  *
@@ -300,6 +303,7 @@ main(int argc, char **argv)
 	char           *queue_count_ptr, *queue_start_ptr;
 	char            strnum[FMT_ULONG];
 	int             idx, count, qcount, qstart;
+	char           *extra_queue[] = {"slowq", "nqueue", 0};
 	static stralloc Queuedir = { 0 };
 
 	if (chdir(auto_qmail))
@@ -347,19 +351,22 @@ main(int argc, char **argv)
 		outok("\n");
 		main_function();
 	}
-	if (!stralloc_copys(&Queuedir, qbase) ||
-			!stralloc_cats(&Queuedir, "/nqueue") ||
-			!stralloc_0(&Queuedir))
-		die_nomem();
-	if (!access(Queuedir.s, F_OK)) {
-		queuedir = Queuedir.s;
-		outok("processing queue ");
-		outok(queuedir);
-		outok("\n");
-		main_function();
-	} else
-	if (errno != error_noent)
-		strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
+	for (idx = 0; extra_queue[idx]; idx++) {
+		if (!stralloc_copys(&Queuedir, qbase) ||
+				!stralloc_append(&Queuedir, "/") ||
+				!stralloc_cats(&Queuedir, extra_queue[idx]) ||
+				!stralloc_0(&Queuedir))
+			die_nomem();
+		if (!access(Queuedir.s, F_OK)) {
+			queuedir = Queuedir.s;
+			outok("processing queue ");
+			outok(queuedir);
+			outok("\n");
+			main_function();
+		} else
+		if (errno != error_noent)
+			strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
+	}
 	die(0);
 	/*- Not reached */
 	return(0);
@@ -369,7 +376,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpto_c()
 {
-	static char    *x = "$Id: qmail-tcpto.c,v 1.24 2021-05-30 00:13:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-tcpto.c,v 1.25 2021-06-05 12:52:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

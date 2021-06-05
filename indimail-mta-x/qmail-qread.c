@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.36  2021-06-05 12:51:37+05:30  Cprogrammer
+ * process special queue "slowq"
+ *
  * Revision 1.35  2021-05-29 23:50:11+05:30  Cprogrammer
  * fixed qbase path
  *
@@ -591,6 +594,7 @@ main(int argc, char **argv)
 	char           *queue_count_ptr, *queue_start_ptr;
 	char            strnum[FMT_ULONG];
 	int             idx, count, qcount, qstart, lcount, rcount, bcount, tcount;
+	char           *extra_queue[] = {"slowq", "nqueue", 0};
 	static stralloc Queuedir = { 0 };
 
 	if (get_arguments(argc, argv)) {
@@ -642,22 +646,24 @@ main(int argc, char **argv)
 		main_function(&lcount, &rcount, &bcount, &tcount);
 		outok("\n");
 	}
-	if (!stralloc_copys(&Queuedir, qbase))
-		die_nomem();
-	if (!stralloc_cats(&Queuedir, "/nqueue"))
-		die_nomem();
-	if (!stralloc_0(&Queuedir))
-		die_nomem();
-	if (!access(Queuedir.s, F_OK)) {
-		queuedir = Queuedir.s;
-		outok("processing queue ");
-		outok(queuedir);
-		outok("\n");
-		main_function(&lcount, &rcount, &bcount, &tcount);
-		outok("\n");
-	} else
-	if (errno != error_noent)
-		strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
+
+	for (idx = 0; extra_queue[idx]; idx++) {
+		if (!stralloc_copys(&Queuedir, qbase) ||
+				!stralloc_append(&Queuedir, "/") ||
+				!stralloc_cats(&Queuedir, extra_queue[idx]) ||
+				!stralloc_0(&Queuedir))
+			die_nomem();
+		if (!access(Queuedir.s, F_OK)) {
+			queuedir = Queuedir.s;
+			outok("processing queue ");
+			outok(queuedir);
+			outok("\n");
+			main_function(&lcount, &rcount, &bcount, &tcount);
+			outok("\n");
+		} else
+		if (errno != error_noent)
+			strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
+	}
 	if (doCount)
 		putcounts("Total ", lcount, rcount, bcount, tcount);
 	substdio_flush(subfdout);
@@ -668,7 +674,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.35 2021-05-29 23:50:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.36 2021-06-05 12:51:37+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
