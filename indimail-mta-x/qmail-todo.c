@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.47  2021-06-05 12:53:13+05:30  Cprogrammer
+ * display qmail-todo prefix for startup message
+ *
  * Revision 1.46  2021-05-16 01:45:13+05:30  Cprogrammer
  * limit conf_split to compile time value in conf-split
  * added code comments
@@ -1143,7 +1146,7 @@ main()
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum[fmt_ulong(strnum, conf_split)] = 0;
-	log5("info: ", queuedesc, ": conf split=", strnum, "\n");
+	log5("info: qmail-todo: ", queuedesc, ": conf split=", strnum, "\n");
 	if (!getcontrols()) {
 		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to read controls or out of memory\n");
 		_exit(111);
@@ -1255,7 +1258,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.46 2021-05-16 01:45:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.47 2021-06-05 12:53:13+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
