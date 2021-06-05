@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.84  2021-06-05 22:42:29+05:30  Cprogrammer
+ * added code comments
+ *
  * Revision 1.83  2021-06-05 18:02:11+05:30  Cprogrammer
  * corrected log message
  *
@@ -969,8 +972,8 @@ job_open(unsigned long id, int channel, int j)
 	jo[j].refs = 1;
 	jo[j].id = id;
 	jo[j].channel = channel;
-	jo[j].numtodo = 0;
-	jo[j].flaghiteof = 0;
+	jo[j].numtodo = 0; /*- prevent closing job before delivery complets */
+	jo[j].flaghiteof = 0; /*- prevent closing before message is read */
 	return;
 }
 
@@ -980,7 +983,6 @@ job_close(int j)
 	struct prioq_elt pe;
 	struct stat     st;
 
-    /*- Rolf Eike Beer */
 	if (0 < --jo[j].refs)
 		return;
 	pe.id = jo[j].id;
@@ -1543,7 +1545,7 @@ del_canexit()
 
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagspawnalive[c] && !holdjobs[c]) { /* if dead or held /NJL/, nothing we can do about its jobs */
-			if (concurrencyused[c])
+			if (concurrencyused[c]) /*- stay alive if delivery jobs are present */
 				return 0;
 		}
 	}
@@ -1573,11 +1575,8 @@ del_start(int j, seek_pos mpos, char *recip)
 			break;
 	if (i == concurrency[c])
 		return;
-	if (!stralloc_copys(&del[c][i].recip, recip)) {
-		nomem();
-		return;
-	}
-	if (!stralloc_0(&del[c][i].recip)) {
+	if (!stralloc_copys(&del[c][i].recip, recip) ||
+			!stralloc_0(&del[c][i].recip)) {
 		nomem();
 		return;
 	}
@@ -3002,9 +3001,9 @@ main()
 	todo_init();    /*- set fd 7 to write to qmail-todo, set fd 8 to read from qmail-todo, write 'S' to qmail-todo */
 	cleanup_init(); /*- initialize flagcleanup = 0, cleanuptime = now*/
 #ifdef EXTERNAL_TODO
-	while (!flagexitasap || !del_canexit() || flagtodoalive)
+	while (!flagexitasap || !del_canexit() || flagtodoalive) /*- stay alive if delivery jobs, todo jobs are present */
 #else
-	while (!flagexitasap || !del_canexit())
+	while (!flagexitasap || !del_canexit()) /*- stay alive if delivery jobs are present */
 #endif
 	{
 		recent = now();
@@ -3097,7 +3096,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.83 2021-06-05 18:02:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.84 2021-06-05 22:42:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.7  2021-06-05 22:42:38+05:30  Cprogrammer
+ * added code comments
+ *
  * Revision 1.6  2021-06-05 18:02:19+05:30  Cprogrammer
  * corrected log message
  *
@@ -706,8 +709,8 @@ job_open(unsigned long id, int channel, int j)
 	jo[j].refs = 1;
 	jo[j].id = id;
 	jo[j].channel = channel;
-	jo[j].numtodo = 0;
-	jo[j].flaghiteof = 0;
+	jo[j].numtodo = 0; /*- prevent closing job before delivery complets */
+	jo[j].flaghiteof = 0; /*- prevent closing before message is read */
 	return;
 }
 
@@ -717,7 +720,6 @@ job_close(int j)
 	struct prioq_elt pe;
 	struct stat     st;
 
-    /*- Rolf Eike Beer */
 	if (0 < --jo[j].refs)
 		return;
 	pe.id = jo[j].id;
@@ -725,7 +727,7 @@ job_close(int j)
 	if (jo[j].flaghiteof && !jo[j].numtodo) {
 		fnmake_chanaddr(jo[j].id, jo[j].channel);
 		if (unlink(fn1.s) == -1) {
-			log5("warning: ", queuedesc, ": unable to unlink1 ", fn1.s, "; will try again later\n");
+			log5("warning: ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n");
 			pe.dt = now() + SLEEP_SYSFAIL;
 		} else {
 			int             c;
@@ -750,7 +752,6 @@ job_close(int j)
 	while (!prioq_insert(min, &pqchan[jo[j].channel], &pe))
 		nomem();
 }
-
 
 /*- this file is too long ------------------------------------------- BOUNCES */
 
@@ -1176,7 +1177,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			qmail_to(&qqt, bouncerecip);
 			qmail_close(&qqt);
 			if (unlink(fn2.s) == -1) {
-				log5("warning: ", queuedesc, ": unable to unlink2 ", fn2.s, ". Will try later\n");
+				log5("warning: ", queuedesc, ": unable to unlink ", fn2.s, ". Will try later\n");
 				return 0;
 			}
 			log5("delete bounce: discarding ", fn2.s, " ", queuedesc, "\n");
@@ -1197,7 +1198,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		log5(" qp ", strnum2, " ", queuedesc, "\n");
 	}
 	if (unlink(fn2.s) == -1) {
-		log5("warning: ", queuedesc, ": unable to unlink3 ", fn2.s, "\n");
+		log5("warning: ", queuedesc, ": unable to unlink ", fn2.s, "\n");
 		return 0;
 	}
 	return 1;
@@ -1276,7 +1277,7 @@ del_canexit()
 
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagspawnalive[c] && !holdjobs[c]) { /* if dead or held /NJL/, nothing we can do about its jobs */
-			if (concurrencyused[c])
+			if (concurrencyused[c]) /*- stay alive if delivery jobs are present */
 				return 0;
 		}
 	}
@@ -1306,11 +1307,8 @@ del_start(int j, seek_pos mpos, char *recip)
 			break;
 	if (i == concurrency[c])
 		return;
-	if (!stralloc_copys(&del[c][i].recip, recip)) {
-		nomem();
-		return;
-	}
-	if (!stralloc_0(&del[c][i].recip)) {
+	if (!stralloc_copys(&del[c][i].recip, recip) ||
+			!stralloc_0(&del[c][i].recip)) {
 		nomem();
 		return;
 	}
@@ -1702,7 +1700,7 @@ messdone(unsigned long id)
 	/*- -todo +info -local -remote -bounce */
 	fnmake_info(id);
 	if (unlink(fn1.s) == -1) {
-		log5("warning: ", queuedesc, ": unable to unlink4 ", fn1.s, "; will try again later\n");
+		log5("warning: ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n");
 		goto fail;
 	}
 	/*- -todo -info -local -remote -bounce; we can relax */
@@ -1911,7 +1909,7 @@ todo_do(fd_set *rfds)
 		fnmake_chanaddr(id, c);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
-				log5("warning: unable to unlink5: ", fn1.s, ": ", error_str(errno), "\n");
+				log5("warning: unable to unlink: ", fn1.s, ": ", error_str(errno), "\n");
 				goto fail;
 			}
 		}
@@ -1919,7 +1917,7 @@ todo_do(fd_set *rfds)
 	fnmake_info(id);
 	if (unlink(fn1.s) == -1) {
 		if (errno != error_noent) {
-			log3("warning: unable to unlink6 ", fn1.s, "\n");
+			log3("warning: unable to unlink ", fn1.s, "\n");
 			goto fail;
 		}
 	}
@@ -2456,7 +2454,7 @@ main()
 	pass_init();    /*- initialize pass structure */
 	todo_init();    /*- set fd 7 to write to qmail-todo, set fd 8 to read from qmail-todo, write 'S' to qmail-todo */
 	cleanup_init(); /*- initialize flagcleanup = 0, cleanuptime = now*/
-	while (!flagexitasap || !del_canexit()) {
+	while (!flagexitasap || !del_canexit()) { /*- stay alive if delivery jobs are present */
 		recent = now();
 		if (flagrunasap) {
 			flagrunasap = 0;
@@ -2534,7 +2532,7 @@ main()
 			pass_do();
 			cleanup_do();
 		}
-	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
+	} /*- while (!flagexitasap || !del_canexit()) */
 	pqfinish();
 	log5("status: ", queuedesc, " ", queuedesc, " slowq-send exiting\n");
 	return (0);
@@ -2543,7 +2541,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.6 2021-06-05 18:02:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.7 2021-06-05 22:42:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)
