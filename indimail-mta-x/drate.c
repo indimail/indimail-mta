@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.15  2021-06-05 12:48:27+05:30  Cprogrammer
+ * display time_needed to reach configured rates
+ *
  * Revision 1.14  2021-06-03 18:38:22+05:30  Cprogrammer
  * display email count if delivery had succeeded
  *
@@ -72,7 +75,7 @@
 
 dtype           delivery;
 int             local_time;
-char            strnum[FMT_ULONG];
+char            strnum1[FMT_ULONG], strnum2[FMT_LONG];
 static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
@@ -125,7 +128,7 @@ do_display(char *domain)
 	struct substdio ssfin;
 	char            inbuf[2048], strdouble[FMT_DOUBLE], buf[DATE822FMT];
 	double          conf_rate, rate;
-	datetime_sec    starttime = 0, endtime = 0;
+	datetime_sec    starttime = 0, endtime = 0, time_needed;
 	struct datetime dt;
 
 	if ((rfd = open_read(domain)) == -1)
@@ -145,58 +148,63 @@ do_display(char *domain)
 		switch (line_no)
 		{
 		case 1:
-			if (substdio_put(&ssout, "Conf   Rate: ", 13))
-				strerr_die1sys(111, "unable to write: ");
-			if (substdio_put(&ssout, line.s, line.len) == -1)
+			if (substdio_put(&ssout, "Conf   Rate: ", 13) == -1 ||
+					substdio_put(&ssout, line.s, line.len) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			get_rate(line.s, &conf_rate);
 			strdouble[fmt_double(strdouble, conf_rate, 10)] = 0;
-			if (substdio_put(&ssout, " (", 2))
-				strerr_die1sys(111, "unable to write: ");
-			if (substdio_puts(&ssout, strdouble))
-				strerr_die1sys(111, "unable to write: ");
-			if (substdio_put(&ssout, ")\n", 2))
+			if (substdio_put(&ssout, " (", 2) == -1 ||
+					substdio_puts(&ssout, strdouble) == -1 ||
+					substdio_put(&ssout, ")\n", 2) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			break;
 		case 2:
 			scan_ulong(line.s, (unsigned long *) &email_count);
-			if (substdio_put(&ssout, "Email Count: ", 13))
-				strerr_die1sys(111, "unable to write: ");
-			if (substdio_put(&ssout, line.s, line.len) == -1)
-				strerr_die1sys(111, "unable to write: ");
-			if (substdio_put(&ssout, "\n", 2))
+			if (substdio_put(&ssout, "Email Count: ", 13) == -1 ||
+					substdio_put(&ssout, line.s, line.len) == -1 ||
+					substdio_put(&ssout, "\n", 2) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			break;
 		case 3:
 			scan_ulong(line.s, (unsigned long *) &starttime);
-			if (substdio_put(&ssout, "Start  Time: ", 13))
+			if (substdio_put(&ssout, "Start  Time: ", 13) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			datetime_tai(&dt, starttime);
-			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)))
+			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			break;
 		case 4:
 			scan_ulong(line.s, (unsigned long *) &endtime);
-			if (substdio_put(&ssout, "LastUpdated: ", 13))
+			if (substdio_put(&ssout, "LastUpdated: ", 13) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			datetime_tai(&dt, endtime);
-			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)))
+			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			endtime = now();
-			if (substdio_put(&ssout, "CurrentTime: ", 13))
+			if (substdio_put(&ssout, "CurrentTime: ", 13) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			datetime_tai(&dt, endtime);
-			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)))
+			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			rate = (double) email_count / (double) (endtime - starttime);
+			time_needed = (long int) email_count/conf_rate - endtime + starttime;
 			strdouble[fmt_double(strdouble, rate, 10)] = 0;
-			if (substdio_put(&ssout, "CurrentRate: ", 13))
+			if (substdio_put(&ssout, "CurrentRate: ", 13) == -1 ||
+					substdio_puts(&ssout, strdouble) == -1)
 				strerr_die1sys(111, "unable to write: ");
-			if (substdio_puts(&ssout, strdouble))
-				strerr_die1sys(111, "unable to write: ");
-			if (substdio_puts(&ssout, rate > conf_rate ? " High" : " OK"))
-				strerr_die1sys(111, "unable to write: ");
-			if (substdio_put(&ssout, "\n", 1))
+			strnum1[fmt_int(strnum1, time_needed)] = 0;
+			if (rate > conf_rate) {
+				if (substdio_put(&ssout, " High; need ", 12) == -1 ||
+						substdio_puts(&ssout, strnum1) == -1 ||
+						substdio_put(&ssout, " secs", 5) == -1)
+					strerr_die1sys(111, "unable to write: ");
+			} else {
+				if (substdio_put(&ssout, " OK since ", 10) ||
+						substdio_puts(&ssout, strnum1 + 1) ||
+						substdio_put(&ssout, " secs", 5))
+					strerr_die1sys(111, "unable to write: ");
+			}
+			if (substdio_put(&ssout, "\n", 1) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			break;
 		}
@@ -206,7 +214,7 @@ do_display(char *domain)
 }
 
 void
-set_mode(char *domain, char *rate_expr, int reset_mode, int consolidate, int incr)
+update_mode(char *domain, char *rate_expr, int reset_mode, int consolidate, int incr)
 {
 	int             rfd, wfd, match, line_no, t;
 	unsigned long   email_count;
@@ -299,7 +307,7 @@ new:
 		rexpr.len--;
 		get_rate(rexpr.s, &rate);
 		strdouble[fmt_double(strdouble, rate, 10)] = 0;
-		if (substdio_puts(&ssfout, strdouble))
+		if (substdio_puts(&ssfout, strdouble) == -1)
 			cleanup(domain, "unable to write", t);
 	} else
 	if (substdio_bput(&ssfout, rexpr.s, rexpr.len) == -1)
@@ -332,14 +340,16 @@ do_test(char *domain, int force)
 	char           *rate_expr = 0;
 	char            strdouble1[FMT_DOUBLE], strdouble2[FMT_DOUBLE];
 	unsigned long   email_count;
+	datetime_sec    time_needed;
 	double          rate, conf_rate;
 
 	if (!access(domain, W_OK)) {
-		if (!(i = is_rate_ok(domain, force ? "-1" : 0, &email_count, &conf_rate, &rate))) {
+		if (!(i = is_rate_ok(domain, force ? "-1" : 0, &email_count, &conf_rate, &rate, &time_needed))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-			strnum[fmt_ulong(strnum, email_count + 1)] = 0;
-			strerr_die9x(111, WARN, domain, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "]");
+			strnum1[fmt_ulong(strnum1, email_count)] = 0;
+			strnum2[fmt_long(strnum2, time_needed)] = 0;
+			strerr_die10x(111, WARN, domain, ": delivery rate exceeded [", strnum1, "/", strdouble1, "/", strdouble2, "] need ", strnum2);
 		} else
 		if (i == -1)
 			strerr_die2sys(111, FATAL, "is_rate_ok: ");
@@ -352,11 +362,12 @@ do_test(char *domain, int force)
 			strerr_die2sys(111, FATAL, "Unable to read ratecontrol: ");
 		delivery = remote_delivery;
 		rate_expr = getDomainToken(domain, &line);
-		if (!(i = is_rate_ok(domain, rate_expr, &email_count, &conf_rate, &rate))) {
+		if (!(i = is_rate_ok(domain, rate_expr, &email_count, &conf_rate, &rate, &time_needed))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-			strnum[fmt_ulong(strnum, email_count + 1)] = 0;
-			strerr_die9x(111, WARN, domain, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "]");
+			strnum1[fmt_ulong(strnum1, email_count)] = 0;
+			strnum2[fmt_long(strnum2, time_needed)] = 0;
+			strerr_die10x(111, WARN, domain, ": delivery rate exceeded [", strnum1, "/", strdouble1, "/", strdouble2, "] need ", strnum2);
 		} else
 		if (i == -1)
 			strerr_die2sys(111, FATAL, "is_rate_ok: ");
@@ -365,11 +376,12 @@ do_test(char *domain, int force)
 		strerr_die2sys(111, FATAL, "open: ratecontrol: ");
 	else
 	if (!access(".global", W_OK)) {
-		if (!(i = is_rate_ok(".global", 0, &email_count, &conf_rate, &rate))) {
+		if (!(i = is_rate_ok(".global", 0, &email_count, &conf_rate, &rate, &time_needed))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 			strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-			strnum[fmt_ulong(strnum, email_count + 1)] = 0;
-			strerr_die9x(111, WARN, domain, ": delivery rate exceeded [", strnum, "/", strdouble1, "/", strdouble2, "]");
+			strnum1[fmt_ulong(strnum1, email_count)] = 0;
+			strnum2[fmt_long(strnum2, time_needed)] = 0;
+			strerr_die10x(111, WARN, domain, ": delivery rate exceeded [", strnum1, "/", strdouble1, "/", strdouble2, "] need ", strnum2);
 		} else
 		if (i == -1)
 			strerr_die2sys(111, FATAL, "is_rate_ok: ");
@@ -378,8 +390,9 @@ do_test(char *domain, int force)
 		strerr_die2sys(111, FATAL, "open: .global: ");
 	strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 	strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-	strnum[fmt_ulong(strnum, email_count)] = 0;
-	strerr_warn9(domain, ": email rate [", strnum, "/", strdouble1, "/", strdouble2, "]", 0, 0);
+	strnum1[fmt_ulong(strnum1, email_count)] = 0;
+	strnum2[fmt_long(strnum2, time_needed)] = 0;
+	strerr_warn9(domain, ": email rate [", strnum1, "/", strdouble1, "/", strdouble2, "] need ", strnum2, 0);
 	return;
 }
 
@@ -494,7 +507,7 @@ main(int argc, char **argv)
 			logerrf(usage);
 			_exit(111);
 		}
-		set_mode(domain, rate_expr, reset_mode, consolidate, incr);
+		update_mode(domain, rate_expr, reset_mode, consolidate, incr);
 	}
 	return (0);
 }
@@ -502,7 +515,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.14 2021-06-03 18:38:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.15 2021-06-05 12:48:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
