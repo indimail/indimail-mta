@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.5  2021-06-05 17:46:32+05:30  Cprogrammer
+ * reduce wakeup when time_needed is earlier than wakeup
+ *
  * Revision 1.4  2021-06-05 12:58:45+05:30  Cprogrammer
  * refactored rate limit code to display delayed job count in logs
  *
@@ -1498,7 +1501,7 @@ pass_selprep(datetime_sec *wakeup)
 	}
 	if (job_avail() != -1) {
 		for (c = 0; c < CHANNELS; ++c) {
-			if (!pass[c].id && prioq_get(&pqchan[c], &pe) && *wakeup > pe.dt)
+			if (!pass[c].id && prioq_get(&pqchan[c], &pe) && *wakeup > pe.dt && !pe.delayed)
 				*wakeup = pe.dt;
 		}
 	}
@@ -2495,6 +2498,9 @@ main()
 		if (wakeup <= recent)
 			tv.tv_sec = time_needed ? time_needed : 0;
 		else
+		if (time_needed && time_needed < (wakeup - recent))
+			tv.tv_sec = time_needed + SLEEP_FUZZ;
+		else
 			tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
 		tv.tv_usec = 0;
 		if (select(nfds, &rfds, &wfds, (fd_set *) 0, &tv) == -1) {
@@ -2535,7 +2541,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.4 2021-06-05 12:58:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.5 2021-06-05 17:46:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)
