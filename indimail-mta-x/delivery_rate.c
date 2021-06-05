@@ -1,5 +1,8 @@
 /*
  * $Log: delivery_rate.c,v $
+ * Revision 1.5  2021-06-05 12:43:43+05:30  Cprogrammer
+ * set do_ratelimit
+ *
  * Revision 1.4  2021-06-04 09:24:01+05:30  Cprogrammer
  * added time_needed argument to delivery_rate()
  *
@@ -32,7 +35,8 @@ static stralloc ratelimit_file = { 0 };
 extern char    *queuedesc;
 
 int
-delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed)
+delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
+		int *do_ratelimit)
 {
 	char           *rate_dir, *rate_exp, *domain;
 	int             i, s, at;
@@ -69,9 +73,11 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed)
 			strnum1[fmt_ulong(strnum1, id)] = 0;
 			strnum2[fmt_long(strnum2, *time_needed)] = 0;
 			log15("warning: ", queuedesc, " ", domain, " msg ", strnum1,
-					": delivery rate exceeded [", email, "/", strdouble1,
+					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
 					" secs; will try again later\n");
+			if (do_ratelimit)
+				*do_ratelimit = 1;
 			return 0;
 		} else {
 			if (i == 1) {
@@ -80,10 +86,12 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed)
 				email[fmt_ulong(email, email_count)] = 0;
 				strnum1[fmt_ulong(strnum1, id)] = 0;
 				strnum2[fmt_long(strnum2, *time_needed)] = 0;
-				log15("warning: ", queuedesc, " ", domain, " msg ", strnum1,
-						": delivery rate [", email, "/", strdouble1, "/", strdouble2,
-						"] need ", strnum2, " secs\n");
+				log15("info: ", queuedesc, " ", domain, " msg ", strnum1,
+						": rate [", email, "/", strdouble1, "/", strdouble2,
+						"] ok since ", strnum2 + 1, " secs\n");
 			}
+			if (do_ratelimit && i == 1)
+				*do_ratelimit = 1;
 			return i; /*- either 1 or -1 */
 		}
 	} else
@@ -106,9 +114,11 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed)
 			strnum1[fmt_ulong(strnum1, id)] = 0;
 			strnum2[fmt_long(strnum2, *time_needed)] = 0;
 			log15("warning: ", queuedesc, " ", domain, " msg ", strnum1,
-					": delivery rate exceeded [", email, "/", strdouble1,
+					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
 					" secs; will try again later\n");
+			if (do_ratelimit)
+				*do_ratelimit = 1;
 			return 0;
 		} else {
 			if (i == 1) {
@@ -117,10 +127,12 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed)
 				email[fmt_ulong(email, email_count)] = 0;
 				strnum1[fmt_ulong(strnum1, id)] = 0;
 				strnum2[fmt_long(strnum2, *time_needed)] = 0;
-				log15("warning: ", queuedesc, " ", domain, " msg ", strnum1,
-						": delivery rate [", email, "/", strdouble1, "/", strdouble2,
-						"] need ", strnum2, " secs\n");
+				log15("info: ", queuedesc, " ", domain, " msg ", strnum1,
+						": rate [", email, "/", strdouble1, "/", strdouble2,
+						"] ok since ", strnum2 + 1, " secs\n");
 			}
+			if (do_ratelimit && i == 1)
+				*do_ratelimit = 1;
 			return i; /*- either 1 or -1 */
 		}
 	} else
@@ -140,9 +152,11 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed)
 			strnum1[fmt_ulong(strnum1, id)] = 0;
 			strnum2[fmt_long(strnum2, *time_needed)] = 0;
 			log15("warning: ", queuedesc, " ", domain, " msg ", strnum1,
-					": delivery rate exceeded [", email, "/", strdouble1,
+					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
 					" secs; will try again later\n");
+			if (do_ratelimit)
+				*do_ratelimit = 1;
 			return 0;
 		} else {
 			if (i == 1) {
@@ -151,22 +165,26 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed)
 				email[fmt_ulong(email, email_count)] = 0;
 				strnum1[fmt_ulong(strnum1, id)] = 0;
 				strnum2[fmt_long(strnum2, *time_needed)] = 0;
-				log15("warning: ", queuedesc, " ", domain, " msg ", strnum1,
-						": delivery rate [", email, "/", strdouble1, "/", strdouble2,
-						"] need ", strnum2, " secs\n");
+				log15("info: ", queuedesc, " ", domain, " msg ", strnum1,
+						": rate [", email, "/", strdouble1, "/", strdouble2,
+						"] ok since ", strnum2 + 1, " secs\n");
 			}
+			if (do_ratelimit && i == 1)
+				*do_ratelimit = 1;
 			return i; /*- either 1 or -1 */
 		}
 	} else
 	if (errno != error_noent)
 		return -1;
+	if (do_ratelimit)
+		*do_ratelimit = 0;
 	return 1;
 }
 
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.4 2021-06-04 09:24:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: delivery_rate.c,v 1.5 2021-06-05 12:43:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;
