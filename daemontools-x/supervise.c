@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.21  2021-06-06 10:14:57+05:30  Cprogrammer
+ * indicate service name in logs when supervised service exits/crashes
+ *
  * Revision 1.20  2021-04-27 14:16:23+05:30  Cprogrammer
  * do not treat error_exist as error for mkdir
  *
@@ -392,6 +395,8 @@ doit(void)
 	struct taia     stamp;
 	int             wstat, r, t, g = 0;
 	char            ch, c = 0;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
+	char           *ptr;
 
 	announce(0);
 
@@ -419,9 +424,19 @@ doit(void)
 			if (r == -1 && errno != error_intr)
 				break;
 			if (r == childpid) { /*- process exited */
+				strnum1[fmt_ulong(strnum1, childpid)] = 0;
 				childpid = 0;
 				pidchange(svpid, 0);
 				announce(0);
+				t = str_rchr(dir, '/');
+				ptr = dir[t] ? dir + t + 1 : dir;
+				if (wait_crashed(wstat))
+					strerr_warn6(WARNING, "pid: ", strnum1, " service ", ptr, " crashed", 0);
+				else {
+					t = wait_exitcode(wstat);
+					strnum2[fmt_ulong(strnum2, t)] = 0;
+					strerr_warn7(WARNING, "pid: ", strnum1, " service ", ptr, " exited with status=", strnum2, 0);
+				}
 				if (flagexit)
 					return;
 				if (flagwant && flagwantup) {
@@ -638,6 +653,7 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		strerr_die2x(111, FATAL, "out of memory");
 
 	if (!str_diff(service_dir, "log")) {
+		/*- SV_PWD is the dirname of directory in /service e.g. qmail-smtpd.25 or log */
 		if (!(parent_dir = env_get("SV_PWD"))) {
 			if (!getcwd(buf, 255))
 				strerr_die2sys(111, FATAL, "unable to get current working directory: ");
@@ -650,6 +666,7 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 				!stralloc_append(&run_service_dir, "/"))
 			strerr_die2x(111, FATAL, "out of memory");
 	} 
+	/*- full path /run/svscan/service/qmail-smtpd.25 or /run/svscan/service/qmail-smtpd.25/log */
 	if (!stralloc_cats(&run_service_dir, service_dir) ||
 			!stralloc_0(&run_service_dir))
 		strerr_die2x(111, FATAL, "out of memory");
@@ -682,7 +699,7 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		if (chown(service_dir, own, grp) == -1)
 			strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", service_dir, ": ");
 	}
-	if (chdir(service_dir) == -1)
+	if (chdir(service_dir) == -1) /*- e.g. qmail-smtpd.25 or log */
 		strerr_die6sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan/", service_dir, ": ");
 	dir = run_service_dir.s;
 	return;
@@ -757,7 +774,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.20 2021-04-27 14:16:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.21 2021-06-06 10:14:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
