@@ -172,9 +172,11 @@ f:::0644:/man8/:qmail-direct.8:qmail-direct.8
 f:::0644:/man8/:qmail-remote.8:qmail-remote.8
 f:::0644:/man8/:qmail-rspawn.8:qmail-rspawn.8
 f:::0644:/man8/:qmail-send.8:qmail-send.8
+f:::0644:/man8/:slowq-send.8:slowq-send.8
 f:::0644:/man8/:qmail-showctl.8:qmail-showctl.8
 f:::0644:/man8/:qmail-smtpd.8:qmail-smtpd.8
 f:::0644:/man8/:qmail-start.8:qmail-start.8
+f:::0644:/man8/:slowq-start.8:slowq-start.8
 f:::0644:/man8/:qmail-tcpok.8:qmail-tcpok.8
 f:::0644:/man8/:qmail-tcpto.8:qmail-tcpto.8
 f:::0644:/man8/:qmail-todo.8:qmail-todo.8

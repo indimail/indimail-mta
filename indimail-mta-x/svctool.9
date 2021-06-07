@@ -382,6 +382,117 @@ Known values for OPTION are:
   syncdir        - Use BSD style sync semantics for flushing directories
   private_key    - Path to Private key created by dknewkey
 
+--slowq --qbase=queue_path
+  --servicedir=service_path
+  [--cntrldir=cntrl_path]
+  [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
+  [--persistdb]
+  [--fsync --syncdir]
+  [--qregex]
+  [--dmemory=c]
+  [--overquota_mailsize=o]
+  [--domainlimits]
+  [--routes=smtp|qmtp|static]
+  [--cname-lookup]
+  [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
+  [--localfilter --remotefilter]
+  [--dkverify=dk|dkim|both|none]
+  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--remote-authsmtp=b]
+  [--ssl]
+  [--utf8]
+  --default-domain=domain
+
+ Installs a new queue with a delivery daemon
+  M              - Minimum Disk Space to maintain in queue after which
+                   Temporary error will be returned
+  c              - Max Memory that slowq-start can allocate
+  D              - Max deliveries allowed per day for a user
+  S              - Max sum total size of mails allowed per day for a user
+  o              - Max size of mails to accept after user is overquota
+  service_path   - Path where supervise service will be installed
+  queue_path     - Path where the queues are installed. If this is different from
+                   @qmaildir@ appropriate links will be created in
+                   @qmaildir@
+  cntrl_path     - Path where Qmail control files are stored
+  domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
+  qregex         - Use regular expressions for matching entries in
+                   badmailfrom, badrcptto, blackholedsenders, spamignore
+                   relaymailfrom, authdomains, chkuserdomains
+  localfilter    - enable filtering of mails to qmail-local
+  remotefilter   - enable filtering of mails to qmail-remote
+  routes         - Perform SMTPROUTE / QMTPROUTE / static routing
+  cname-lookup   - Perform CNAME lookup for recipient host in qmail-remote
+  fsync          - Sync files and directories when writing files
+  syncdir        - Use BSD style sync semantics for flushing directories
+  paranoid       - Paranoid hostaccess check
+  dmasquerade    - Allow domains to be masqueraded from known IPs
+  default-domain - default domain name for which this host will handle mails
+  mysqlhost      - MySQL Host having authentication tables
+  mysqluser      - Username for connecting to mysql
+  mysqlpass      - Passwd for connecting to mysql
+  private_key    - Path to Private key created by dknewkey
+  persistdb      - Enables qmail-lspawn to have persisten MySQL connection and set
+                   PWSTRUCT environment variable. This eliminates the need for
+                   vdelivermail to make a MySQL connection and hence improves
+                   delivery times.
+  b              - Authenticated SMTP method to use by qmail-remote (plain, login, cram-md5)
+  ssl            - Use SSL encrypted communication in qmail-remote
+  utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
+
+--queueParam=dir --qbase=queue_path --qcount=N --qstart=I
+  [--cntrldir=cntrl_path]
+  [--min-free=M]
+  [--no-multi]
+  [--fsync --syncdir]
+  [--qregex]
+  [--content-filter=c]
+  [--virus-filter=v]
+  [--qhpsi=q]
+  [--spamfilter=spamfilter_args]
+  [--logfilter=logfifo]
+  [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
+  [--dkverify=dk|dkim|both|none]
+  [--dksign=dk|dkim|both|none --private_key=private_key]
+
+ Installs a new queue without a SMTP Listener
+  dir            - dir where to install queuedef environment variable directory
+  queue_path     - Path where the queues are installed. If this is different from
+                   @qmaildir@ appropriate links will be created in
+                   @qmaildir@
+  N              - No of Queues
+  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
+  cntrl_path     - Path where Qmail control files are stored
+  M              - Minimum Disk Space to maintain in queue after which
+                   Temporary error will be returned
+  no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qregex         - Use regular expressions for matching entries in
+                   badmailfrom, badrcptto, blackholedsenders, spamignore
+                   relaymailfrom, authdomains, chkuserdomains
+  q              - Full path to an external virus scanner (like clamdscan)
+  v              - Enable Virus/Attachment scanner. v can have following values
+                   1 - Internal Scanner
+                   2 - Internal + External + Attachment Scan
+                   3 - Internal + Attachment Scan
+                   4 - External + Attachment Scan
+                   5 - External Scanner
+                   6 - Attachment Scan
+  content-filter - Enable content filtering against regex in bodycheck control
+                   file or the filename given as argument to content-filter
+  c              - Optional filename passed to content-filter argument
+  spamfilter     - Spamfilter program along with arguments
+  logfifo        - Capture additional status message from spamfilter in 
+                   qmail-logfifo logfile via logfifo
+  r              - Mails get rejected as spam if exit status of spamfilter
+                   equals the value of spamexitcode. r can have following values
+                   0 - Do not reject SPAM mails
+                   1 - Bounce SPAM Mails.
+                   2 - Blackhole SPAM Mails
+  e              - Exit value of spamfilter that should be treated as spam
+  fsync          - Sync files and directories when writing files
+  syncdir        - Use BSD style sync semantics for flushing directories
+  private_key    - Path to Private key created by dknewkey
+
 --greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
   --context-file=f --save_interval=s --whitelist=w --hash-size=s
   --localip=a --use-greydaemon --servicedir=service_path

@@ -1,5 +1,8 @@
 /*
  * $Log: report.h,v $
+ * Revision 1.3  2021-05-30 00:17:09+05:30  Cprogrammer
+ * moved dtype enum to variables.h
+ *
  * Revision 1.2  2021-05-26 07:37:41+05:30  Cprogrammer
  * made delivery variable extern
  *
@@ -11,13 +14,8 @@
 #define _REPORT_H
 
 #ifndef	lint
-static char     sccsidreporth[] = "$Id: report.h,v 1.2 2021-05-26 07:37:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidreporth[] = "$Id: report.h,v 1.3 2021-05-30 00:17:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
-
-typedef enum {
-	local,
-	remote
-} dtype;
 
 void            report(int, char *, char *, char *, char *, char *, char *);
 

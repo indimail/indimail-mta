@@ -447,7 +447,6 @@ multilog.o
 multipipe
 multipipe.o
 multirotate
-myctime.o
 ndelay.a
 ndelay.o
 ndelay_off.o
@@ -1142,6 +1141,12 @@ qmail-direct
 qmail-direct.8
 set_environment.o
 maildir_deliver.o
-get_rate.o
+do_rate.o
 report.o
 getDomainToken.o
+slowq-send
+slowq-send.o
+slowq-start
+slowq-start.o
+slowq-start.8
+slowq-send.8

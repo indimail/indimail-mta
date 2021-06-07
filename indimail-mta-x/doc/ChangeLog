@@ -110,6 +110,12 @@ Release 2.13 Start 14/02/2021
     ENOENT
 68. nowutc.c: replaced libc stdio with substdio
 69. get_rate.c, drate.c: added option to force update
+- 29/05/2021
+70. added rate limit feature in qmaii-send, slowq-send
+- 03/06/2021
+71. prioq.c: added feature to get prioq list in both descending and ascending
+    order
+72. delivey_rate.c: log email/curr_rate/conf_rate in logs
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

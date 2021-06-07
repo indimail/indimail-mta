@@ -2,14 +2,20 @@
 .SH NAME
 queue-fix \- Create or Repair a qmail queue structure
 .SH SYNOPSIS
-\fBqueue-fix\fR [-\fBi\fR -\fBN\fR -\fBv\fR] [-s \fIsplit\fR] \fIqueue_dir\fR
+\fBqueue-fix\fR [-\fBi\fR -\fBN\fR -\fBr\fR -\fBv\fR] [-s \fIsplit\fR] \fIqueue_dir\fR
 
 .SH DESCRIPTION
 \fBqueue-fix\fR is a small utility for checking and repairing the qmail queue
 structure. It will fix uid/gid settings and permissions. It will rename the
-message files to match their inodes. It will even create directories and
-files that don't exist. You can even create a queue from scratch). It will
+message files to match their inodes. It will even create missing directories
+and files. You can even create a queue from scratch). It will
 also print warnings for any files it finds that should not exist.
+
+\fBqueue-fix\fR(1) uses environment set according to files in
+$HOME/.defaultqueue directory if present, else it uses environment set
+according to files in @controldir@/defaultqueue directory. This can be
+used for setting default value of \fBCONFSPLIT\fR environment variable for
+your setup.
 
 .SH OPTIONS
 .TP
@@ -18,7 +24,8 @@ Interactive mode
 
 .TP
 \fB\-N\fR
-Test mode
+Test mode. This option will report inconsistencies in the queue and 
+not make any changes.
 
 .TP
 \fB\-s\fR \fIsplit\fR
@@ -27,16 +34,21 @@ this by setting the environment variable \fBCONFSPLIT\fR. Any value above
 DIRSPLIT is silently ignored.
 
 .TP
+\fB\-r\fR
+create ratelimit subdirectory for rate controlled delivery. See
+slowq-send(8)
+
+.TP
 \fB\-v\fR
 Verbose mode
 
 .TP
 \fIqueue_dir\fR
 Directory where the qmail queue stucture is created. This directory has the subdirectories
-bounce, info, intd, local, lock, mess, pid, remote, todo, yanked.
+bounce, info, intd, local, lock, mess, pid, remote, todo, trash, ratelimit.
 
 .SH "SEE ALSO"
-qmail-rm(1), svctool(8), qmail-queue(8), qmail-multi(8)
+qmail-rm(1), svctool(8), qmail-queue(8), qmail-multi(8), slowq-send(8)
 
-.SH AUTHOR
+.SH Original AUTHOR
 Eric Huss

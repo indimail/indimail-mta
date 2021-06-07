@@ -4,11 +4,11 @@ drate \- indimail domain rate control
 
 .SH SYNOPSIS
 .B drate
-.B \-d \fIdomain
+.B \-d \fIdomain\fR
 [
-.B \-D \fIratelimit_dir
+.B \-D \fIratelimit_dir\fR
 ]
-.B \-r \fIrate_expression
+.B \-r \fIrate_expression\fR
 [
 .B \-c
 .B \-R
@@ -17,9 +17,9 @@ drate \- indimail domain rate control
 or
 
 .B drate
-.B \-d \fIdomain
+.B \-d \fIdomain\fR
 [
-.B \-D \fIratelimit_dir
+.B \-D \fIratelimit_dir\fR
 ]
 [
 .B \-s
@@ -29,18 +29,17 @@ or
 
 .B drate
 .B \-t
-.B \-d \fIdomain
+.B \-d \fIdomain\fR
 [
+.B \-C \fIcount\fR
 .B \-f
 ]
 
 .SH DESCRIPTION
-\fBdrate\fR(1) displays or sets delivery rate for \fBqmail-remote\fR(8). The actual rate
-limiting happens in \fBspawn-filter\fR(8). Hence, QMAILREMOTE should be set to
-PREFIX/sbin/spawn-filter. You must also set the environment variable \fBRATELIMIT_DIR\fR
-to the full path of the directory where you will keep the rate definition files created by
-\fBdrate\fR(1). \fBdrate\fR(1) locks the file \fIdomain\fR in \fIratelimit_dir\fR before
-writing the following four lines.
+\fBdrate\fR(1) displays or sets delivery rate for \fBqmail-remote\fR(8). The
+actual rate limiting happens in \fBslowq-send\fR(8), which uses the special
+\fIslowq\fR indimail queue. \fBdrate\fR(1) locks the file \fIdomain\fR in
+\fIratelimit_dir\fR before writing the following four lines.
 
 .EX
  line 1 - Rate Expression
@@ -49,20 +48,25 @@ writing the following four lines.
  line 4 - End   Time of the last sample
 .EE
 
-By default, \fBspawn-filter\fR(8) resets statistics one day after the first sample. You can
-change the default by setting \fBRATELIMIT_INTERVAL\fR environment variable to the desired
-number of seconds. You can manually reset the interval using \fB-R\fR option of
-\fBdrate\fR(1).
+By default, \fBslowq-send\fR(8) resets statistics one day after the first
+sample. You can change the default by setting \fBRATELIMIT_INTERVAL\fR
+environment variable to the desired number of seconds. You can manually
+reset the interval using \fB-R\fR option of \fBdrate\fR(1).
 
 .SH OPTIONS
 .PP
 
 .TP
 \fB-t\fR
-Run in test mode as if mail is getting delivered. Every invocation will update
-the email count and the end time. It will calculate the current rate and return
-error with it gets exceeded. This option simulates rate calcuation that happens
-during delivery and shouldn't be used on a production system
+Run in test mode as if mail is getting delivered. Every invocation will
+update the email count and the end time. It will calculate the current rate
+and return error with it gets exceeded. This option simulates rate
+calcuation that happens during delivery and shouldn't be used on a
+production system
+
+.TP
+\fB-C\fR \fIcount\fR
+Run the test \fIcount\fR times
 
 .TP
 \fB-f\fR
@@ -73,32 +77,34 @@ Force update email counts and end time.
 Display statistics for deliveries to \fIdomain\fR.
 
 .TP
-\fB-d\fR
-Use this argument to set the domain name. \fIdomain\fR can be the special word .\fIglobal\fR in case
-rate limiting has been applied for all domains that does not have a rate definition. See \fBspawn-filter\fR(8)
+\fB-d\fR \fIdomain\fR
+Use this argument to set the domain name. \fIdomain\fR can be the special
+word .\fIglobal\fR in case rate limiting has been applied for all domains
+that does not have a rate definition. See \fBspawn-filter\fR(8)
 
 .TP
-\fB-r\fR
-Use this argument to set the rate expression in terms of deliveries/sec. To set a delivery
-rate of 500 emails / hr, you can use 500/3600 for the rate expression. You can also give
-the prefix '+' or '-' to increase or decrease the existing rate
+\fB-r\fR \fIrate_expression\fR
+Use this argument to set the rate expression in terms of deliveries/sec. To
+set a delivery rate of 500 emails / hr, you can use 500/3600 for the rate
+expression. You can also give the prefix '+' or '-' to increase or decrease
+the existing rate
 
 .TP
-\fB-D\fR
+\fB-D\fR \fIratelimit_dir\fR
 The directory to store or retrieve delivery rate parameters and statistics.
 If not specified it defaults to CONTROL/ratelimit.
 
 .TP
 \fB-c\fR
-Consolidate all rate expressions. When you give the '+' or '-' prefix in the
-\fIrate_expression\fR, the expressions are simply appended without any mathematical
-computation. It is valid to have an expression 1790/3600+10/3600. This option will
-collapse the expression to 0.5
+Consolidate all rate expressions. When you give the '+' or '-' prefix in
+the \fIrate_expression\fR, the expressions are simply appended without any
+mathematical computation. It is valid to have an expression
+1790/3600+10/3600. This option will collapse the expression to 0.5
 
 .TP
 \fB-R\fR
-Reset all statistics in \fIratelimit_dir/domain\fR. This will cause \fBqmail-remote\fR(8) to start
-counting from start.
+Reset all statistics in \fIratelimit_dir/domain\fR. This will cause
+\fBslowq-send\fR(8) to start counting from start.
 
 .SH "SEE ALSO"
-spawn-filter(8), qmail-remote(8)
+slowq-send(8), qmail-remote(8)

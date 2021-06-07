@@ -101,13 +101,13 @@ If
 .B QMAILQUEUE
 environment variable is set to PREFIX/sbin/qmail-multi,
 .B qmail-inject
-gets the ability to multiplex queues and do SPAM filtering. See qmail-multi(8)
-for more details.
+gets the ability to multiplex queues. See qmail-multi(8).
 
 The
 .B QMAILINJECT
 environment variable
 can contain any of the following letters:
+
 .TP
 .B c
 Use address-comment style for the
@@ -116,6 +116,7 @@ field.
 Normally
 .B qmail-inject
 uses name-address style.
+
 .TP
 .B s
 Do not look at any incoming
@@ -127,6 +128,7 @@ is supplied, it sets the envelope sender address,
 overriding all environment variables.
 .B Return-Path
 is deleted in any case.
+
 .TP
 .B f
 Delete any incoming
@@ -138,6 +140,7 @@ is supplied, it overrides the usual
 .B From
 field created by
 .BR qmail-inject .
+
 .TP
 .B i
 Delete any incoming
@@ -149,28 +152,33 @@ is supplied, it overrides the usual
 .B Message-ID
 field created by
 .BR qmail-inject .
+
 .TP
 .B r
 Use a per-recipient VERP.
 .B qmail-inject
 will append each recipient address to the envelope sender
 of the copy going to that recipient.
+
 .TP
 .B m
 Use a per-message VERP.
 .B qmail-inject
 will append the current date and process ID to the envelope sender.
+
 .TP
 .B n
 Print the message rather than feeding it to
 
 .SH OPTIONS
+
 .TP
 .B \-a
 Send the message to all addresses given as
 .I recip
 arguments;
 do not use header recipient addresses.
+
 .TP
 .B \-h
 Send the message to all header recipient addresses.
@@ -188,6 +196,7 @@ the addresses listed under
 Do not use any
 .I recip
 arguments.
+
 .TP
 .B \-A
 (Default.)
@@ -198,12 +207,14 @@ If no
 .I recip
 arguments are supplied,
 send the message to all header recipient addresses.
+
 .TP
 .B \-H
 Send the message to all header recipient addresses,
 and to all addresses given as
 .I recip
 arguments.
+
 .TP
 .B \-f\fIsender
 Pass
@@ -214,11 +225,13 @@ as the envelope sender address.
 This overrides
 .B Return-Path
 and all environment variables.
+
 .TP
 .B \-N
 (Default.)
 Feed the resulting message to
 .BR qmail-queue .
+
 .TP
 .B \-n
 Print the message rather than feeding it to
@@ -336,25 +349,28 @@ The environment variable
 overrides the value in this control file.
 
 .TP 5
-.I spamignore
-envelope sender addresses which should bypass spam filter.
-.B qmail-inject
-will unset SPAMFILTER environment variable for a message
-if the envelope sender address is listed in
-.IR spamignore .
-A line in
-.I spamignore
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-If SPAMFILTER is not defined, 
-.B qmail-multi
-does not apply spam filter on the message See qmail-multi(8) for more details.
+.I domainqueue
+Specific queue can be assigned to recipient domains. The format of this file is of the
+form
 
-.TP 5
-.I spamignorepatterns
-REGEX patterns of envelope sender addresses which should bypass spam filter.
+domain:QUEUEDIR=queue_dir
+
+where domain is the recipient domain and queue_dir is any queue which is part of
+indimail's queue collection. You could also specify a set of queues for a domain.
+
+domain:QUEUE_COUNT=5,QUEUE_START=6,QUEUE_BASE=/var/indimail/queue
+
+specifies that any emails to *@domain be queued in /var/indimail/queue/queue[6,7,8,9,10]
+You can use \fIdomainqueue\fR to queue mails for certain domains into specific domains and
+specify individual concurrencies for these queues (see qmail-send(8)). e.g. having
+
+yahoo.com:QUEUEDIR=/var/indimail/queue/queue6
+in @controldir@/domainqueue and
+
+10
+in @controldir@/concurrencyr.queue6
+
+will set 10 as the remote concurrency for all emails sent to yahoo.com
 
 .TP 5
 .I envrules
@@ -389,13 +405,6 @@ can be set by using envrules.
 .IR LOGHEADERS ,
 .IR LOGHEADERFD ,
 .IR LOGFILTER ,
-.IR SPAMFILTER ,
-.IR SPAMFILTERARGS ,
-.IR SPAMEXITCODE ,
-.IR REJECTSPAM ,
-.IR SPAMREDIRECT ,
-.IR SPAMIGNORE ,
-.IR SPAMIGNOREPATTERNS ,
 .IR TMPDIR ,
 .IR VIRUSCHECK ,
 .IR VIRUSFORWARD ,

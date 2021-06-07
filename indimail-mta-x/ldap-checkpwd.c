@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.11  2021-05-29 23:44:46+05:30  Cprogrammer
+ * replace str_chr with str_rchr to get domain correctly from email address
+ *
  * Revision 1.10  2021-01-27 18:56:32+05:30  Cprogrammer
  * use env variable NATIVE_CHECKPASSWORD to comply with checkpassword protocol
  *
@@ -268,7 +271,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 			*error = error_str(errno);
 		return (-1);
 	}
-	if (login[at = str_chr(login, '@')] == 0)
+	if (login[at = str_rchr(login, '@')] == 0)
 		host = "";
 	else
 		host = login + at + 1;
@@ -569,7 +572,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.10 2021-01-27 18:56:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.11 2021-05-29 23:44:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

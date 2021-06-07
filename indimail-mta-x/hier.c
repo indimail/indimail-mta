@@ -1,5 +1,11 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.285  2021-06-01 16:50:21+05:30  Cprogrammer
+ * removed controldir/ratelimit directory
+ *
+ * Revision 1.284  2021-05-29 23:38:12+05:30  Cprogrammer
+ * added slowq-send, slowq-start
+ *
  * Revision 1.283  2021-05-26 10:37:32+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -912,7 +918,6 @@ hier(inst_dir, fatal, dev_package)
 
 	d(auto_cntrl_dir,  "control/cache", auto_uidv, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 02755);
-	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/defaultqueue", auto_uidv, auto_gidq, 0755);
 
 	d(auto_shared,     "boot", auto_uido, 0, 0555);
@@ -1033,10 +1038,12 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-qmqpc", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-daemon", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-start", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "slowq-start", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-lspawn", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-rspawn", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-clean", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-send", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "slowq-send", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmqpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmtpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-smtpd", auto_uido, 0, moder_t);
@@ -1408,9 +1415,11 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man8", "qmail-rspawn.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-clean.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-send.8", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man8", "slowq-send.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-todo.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-daemon.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-start.8", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man8", "slowq-start.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "splogger.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-internals.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-queue.8", uidr, gidr, moder_f);
@@ -1493,7 +1502,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.283 2021-05-26 10:37:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.285 2021-06-01 16:50:21+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

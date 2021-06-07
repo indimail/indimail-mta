@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.12  2021-05-29 23:47:37+05:30  Cprogrammer
+ * replace str_chr with str_rchr to get domain correctly from email address
+ *
  * Revision 1.11  2020-05-11 11:03:42+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -385,7 +388,7 @@ main(int argc, char **argv)
 	my_putb("To: ", 4);
 	if (copy_rpath)
 	{
-		if (rpath.s[at = str_chr(rpath.s, '@')])
+		if (rpath.s[at = str_rchr(rpath.s, '@')])
 		{
 			my_putb("abuse", 5);
 			my_putb(rpath.s + at, rpath.len - at);
@@ -409,7 +412,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.11 $\n");
+			"X-Mailer: qarf $Revision: 1.12 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -453,7 +456,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.11 2020-05-11 11:03:42+05:30 Cprogrammer Exp mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.12 2021-05-29 23:47:37+05:30 Cprogrammer Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -513,7 +516,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.11 2020-05-11 11:03:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.12 2021-05-29 23:47:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

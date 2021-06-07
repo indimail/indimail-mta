@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.23  2021-05-29 23:50:55+05:30  Cprogrammer
+ * fixed qbase path
+ *
  * Revision 1.22  2021-05-26 10:46:11+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -94,7 +97,7 @@
  *
  * NOTES: 
  *
- *     yanked directory is relative to queue directory unless an
+ *     trash directory is relative to queue directory unless an
  *     absolute path is specified (begins with /) and assumed to
  *     exist.
  *
@@ -179,7 +182,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <fts.h>
-/*- #include <utime.h> -*/
 #include "stralloc.h"
 #include "substdio.h"
 #include "lock.h"
@@ -217,13 +219,13 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.22 2021-05-26 10:46:11+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.23 2021-05-29 23:50:55+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
 const char     *default_pattern = ".*";
 int             regex_flags = 0, verbosity = 0, conf_split, remove_files = 0, delete_files = 0;
-char           *yank_dir = "yanked";
+char           *yank_dir = "trash";
 unsigned long   read_bytes = 0;
 
 char           *strptime(const char *s, const char *format, struct tm *tm);
@@ -502,7 +504,11 @@ main(int argc, char **argv)
 			_exit(111);
 			break;
 		case 0:
-			qbase = auto_qmail;
+			if (!stralloc_copys(&QueueBase, auto_qmail) ||
+					!stralloc_catb(&QueueBase, "/queue", 6) ||
+					!stralloc_0(&QueueBase))
+				die_nomem();
+			qbase = QueueBase.s;
 			break;
 		case 1:
 			qbase = QueueBase.s;
@@ -525,13 +531,10 @@ main(int argc, char **argv)
 	else
 		scan_int(queue_start_ptr, &qstart);
 	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
-		if (!stralloc_copys(&Queuedir, qbase))
-			die_nomem();
-		if (!stralloc_cats(&Queuedir, "/queue"))
-			die_nomem();
-		if (!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) idx)))
-			die_nomem();
-		if (!stralloc_0(&Queuedir))
+		if (!stralloc_copys(&Queuedir, qbase) ||
+				!stralloc_cats(&Queuedir, "/queue") ||
+				!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) idx)) ||
+				!stralloc_0(&Queuedir))
 			die_nomem();
 		if (access(Queuedir.s, F_OK)) {
 			if (errno != error_noent) {
@@ -587,7 +590,7 @@ usage(void)
 	logerr(strnum);
 	logerr("]\n");
 	logerr("  -v            increase verbosity (can be used more than once)\n");
-	logerr("  -y <yankdir>  directory to put files yanked from the queue [default: <queuedir>/yanked]\n");
+	logerr("  -y <trash>    directory to put files removed from the queue [default: <queuedir>/trash]\n");
 	/*- Begin CLM 12/23/2003 */
 	logerr("  -X <secs>     modify timestamp on matching files, to make qmail expire mail\n");
 	logerr("                <secs> is the number of seconds we want to move the file into the past.\n");
@@ -1205,7 +1208,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.22 2021-05-26 10:46:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.23 2021-05-29 23:50:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

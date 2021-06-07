@@ -1,230 +1,26 @@
 /*
- * $Log: qmail-send.c,v $
- * Revision 1.84  2021-06-05 22:42:29+05:30  Cprogrammer
+ * $Log: slowq-send.c,v $
+ * Revision 1.7  2021-06-05 22:42:38+05:30  Cprogrammer
  * added code comments
  *
- * Revision 1.83  2021-06-05 18:02:11+05:30  Cprogrammer
+ * Revision 1.6  2021-06-05 18:02:19+05:30  Cprogrammer
  * corrected log message
  *
- * Revision 1.82  2021-06-05 17:47:11+05:30  Cprogrammer
+ * Revision 1.5  2021-06-05 17:46:32+05:30  Cprogrammer
  * reduce wakeup when time_needed is earlier than wakeup
  *
- * Revision 1.81  2021-06-05 12:57:11+05:30  Cprogrammer
+ * Revision 1.4  2021-06-05 12:58:45+05:30  Cprogrammer
  * refactored rate limit code to display delayed job count in logs
  *
- * Revision 1.80  2021-06-03 18:06:25+05:30  Cprogrammer
+ * Revision 1.3  2021-06-03 18:08:21+05:30  Cprogrammer
  * use new prioq functions
  *
- * Revision 1.79  2021-06-01 01:52:23+05:30  Cprogrammer
- * moved delivery_report() to delivery_report.c
+ * Revision 1.2  2021-06-01 01:52:35+05:30  Cprogrammer
+ * moved delivery_report to delivery_report.c
  *
- * Revision 1.78  2021-05-30 00:12:42+05:30  Cprogrammer
- * added email rate limiting feature
+ * Revision 1.1  2021-05-31 17:06:24+05:30  Cprogrammer
+ * Initial revision
  *
- * Revision 1.77  2021-05-16 12:16:14+05:30  Cprogrammer
- * limit conf_split to compile time value in conf-split
- * added code comments
- *
- * Revision 1.76  2021-05-12 15:40:54+05:30  Cprogrammer
- * added code comments
- *
- * Revision 1.75  2021-04-05 07:19:23+05:30  Cprogrammer
- * converted local variables/functions to static
- *
- * Revision 1.74  2020-11-24 13:47:27+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.73  2020-09-30 20:39:41+05:30  Cprogrammer
- * Darwin port for syncdir
- *
- * Revision 1.72  2020-09-16 19:05:34+05:30  Cprogrammer
- * fix compiler warning for FreeBSD
- *
- * Revision 1.71  2020-09-15 21:45:16+05:30  Cprogrammer
- * unset USE_SYNCDIR, USE_FSYNC only when use_syncdir, use_fsync is zero
- *
- * Revision 1.70  2020-09-15 21:09:07+05:30  Cprogrammer
- * use control files conf-fsync, conf-syncdir to turn on fsync, bsd style syncdir semantics
- * set / unset USE_FSYNC, USE_SYNCDIR env variables
- *
- * Revision 1.69  2020-07-04 22:23:52+05:30  Cprogrammer
- * replaced utime() with utimes()
- *
- * Revision 1.68  2020-05-19 10:33:59+05:30  Cprogrammer
- * define use_fsync for non-external qmail-todo
- *
- * Revision 1.67  2020-05-16 09:57:09+05:30  Cprogrammer
- * avoid possible integer overflow in rewrite()
- *
- * Revision 1.66  2020-05-15 10:49:07+05:30  Cprogrammer
- * converted function prototypes to c89 standard
- * use unsigned int to store return value of str_len
- *
- * Revision 1.65  2019-06-26 18:45:51+05:30  Cprogrammer
- * insert X-Bounced-Address header for bounces
- *
- * Revision 1.64  2018-07-03 01:59:03+05:30  Cprogrammer
- * fixed indentation
- *
- * Revision 1.63  2018-07-03 01:52:37+05:30  Cprogrammer
- * reread envnoathost on HUP
- *
- * Revision 1.62  2018-01-09 11:53:03+05:30  Cprogrammer
- * removed non-indimail code
- *
- * Revision 1.61  2017-03-31 21:10:10+05:30  Cprogrammer
- * log null addresses in log_stat() as <>
- *
- * Revision 1.60  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.59  2016-03-31 17:38:54+05:30  Cprogrammer
- * added log lock code to ensure complete lines get written when running as a multi delivery process
- * flush logs only when line gets completed
- *
- * Revision 1.58  2016-01-29 18:31:00+05:30  Cprogrammer
- * include queue name in logs
- *
- * Revision 1.57  2014-03-07 19:46:01+05:30  Cprogrammer
- * fixed issue with bounce processor returning non-zero exit status
- *
- * Revision 1.56  2014-02-10 16:49:05+05:30  Cprogrammer
- * added discard bounce feature
- *
- * Revision 1.55  2014-01-22 20:38:42+05:30  Cprogrammer
- * added hassrs.h
- *
- * Revision 1.54  2013-09-23 22:13:56+05:30  Cprogrammer
- * added queue specific concurrency
- *
- * Revision 1.53  2013-08-25 18:38:05+05:30  Cprogrammer
- * added SRS
- *
- * Revision 1.52  2013-05-16 23:32:33+05:30  Cprogrammer
- * added log_stat as part of non-indimail code
- *
- * Revision 1.51  2011-07-29 09:29:48+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.50  2011-05-18 12:56:38+05:30  Cprogrammer
- * fix qmail-queue waiting endlessly if bounceprocessor returned non-zero status
- *
- * Revision 1.49  2011-04-16 11:29:28+05:30  Cprogrammer
- * check for write errors
- *
- * Revision 1.48  2010-07-23 13:59:20+05:30  Cprogrammer
- * fixed envrules() not working
- *
- * Revision 1.47  2010-07-21 21:20:51+05:30  Cprogrammer
- * added envheader code
- *
- * Revision 1.46  2010-07-20 18:39:03+05:30  Cprogrammer
- * changed order of arguments of original recipient and bounce sender when running
- * bounceprocessor script
- *
- * Revision 1.45  2010-07-18 19:20:18+05:30  Cprogrammer
- * report all recipients in log_stat()
- * added startup plugins functionality
- *
- * Revision 1.44  2009-09-01 22:03:10+05:30  Cprogrammer
- * added Bounce Address Tag Validation (BATV) code
- *
- * Revision 1.43  2009-05-05 03:19:17+05:30  Cprogrammer
- * added bounce filename, original recipient and bounce report as argument to bounce processor
- *
- * Revision 1.42  2009-05-04 10:32:08+05:30  Cprogrammer
- * fixed recipient get passed twice as an argument
- *
- * Revision 1.41  2009-05-03 22:45:59+05:30  Cprogrammer
- * added bounce_process() function
- *
- * Revision 1.40  2009-05-01 10:41:28+05:30  Cprogrammer
- * added errstr argument to envrules()
- *
- * Revision 1.39  2009-04-10 14:14:15+05:30  Cprogrammer
- * added restore_env() to reset environment
- *
- * Revision 1.38  2009-03-20 22:36:18+05:30  Cprogrammer
- * added BOUNCEQUEUE patch
- *
- * Revision 1.37  2009-02-01 00:07:32+05:30  Cprogrammer
- * display system error when unable to switch directory
- *
- * Revision 1.36  2008-06-12 08:40:08+05:30  Cprogrammer
- * added envrules() to modify behaviour of bounces
- *
- * Revision 1.35  2007-12-20 14:06:09+05:30  Cprogrammer
- * unset SPAMFILTER & FILTERARGS before calling qmail-queue
- *
- * Revision 1.34  2005-12-29 14:03:35+05:30  Cprogrammer
- * separate queuelifetime for bounce messages
- *
- * Revision 1.33  2005-08-23 17:35:29+05:30  Cprogrammer
- * gcc 4 compliance
- *
- * Revision 1.32  2005-03-03 16:12:24+05:30  Cprogrammer
- * minimum interval in secs for todo run
- *
- * Revision 1.31  2004-12-20 22:57:23+05:30  Cprogrammer
- * change log2() to my_log2() to avoid conflicts with fedora3
- *
- * Revision 1.30  2004-10-22 20:29:34+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.29  2004-10-22 15:38:00+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.28  2004-10-22 14:44:58+05:30  Cprogrammer
- * added argument to control_readnativefile()
- *
- * Revision 1.27  2004-08-15 12:54:43+05:30  Cprogrammer
- * qqeh bug fix
- *
- * Revision 1.26  2004-07-17 21:21:40+05:30  Cprogrammer
- * added qqeh code
- * added RCS log
- *
- * Revision 1.25  2004-02-03 13:51:15+05:30  Cprogrammer
- * unset SPAMFILTER, FILTERARGS for bounces
- *
- * Revision 1.24  2004-01-14 23:41:46+05:30  Cprogrammer
- * delay fsync()
- *
- * Revision 1.23  2004-01-02 10:16:31+05:30  Cprogrammer
- * prevent segmentation fault in log_stat() when to or from is null
- * reset to and from
- *
- * Revision 1.22  2003-12-31 20:03:22+05:30  Cprogrammer
- * added use_fsync to turn on/off fsync
- *
- * Revision 1.21  2003-12-15 13:52:46+05:30  Cprogrammer
- * preserve mime when bouncing
- *
- * Revision 1.20  2003-12-09 21:26:42+05:30  Cprogrammer
- * corrected non-indimail compilation
- *
- * Revision 1.19  2003-11-29 23:44:33+05:30  Cprogrammer
- * documentation added for newlocals and newvdoms
- *
- * Revision 1.18  2003-10-23 01:26:16+05:30  Cprogrammer
- * used struct utimbuf for utime()
- * fixed compilation warnings
- *
- * Revision 1.17  2003-10-17 21:03:43+05:30  Cprogrammer
- * added log_stat() to log delivery messages
- *
- * Revision 1.16  2003-10-01 19:05:50+05:30  Cprogrammer
- * changed return type to int
- *
- * This has the following patches
- * big concurrency by "Johannes Erdfelt" / Daemeon Reiydelle
- * big-todo by Russ Nelson
- * external-todo patch Andre Oppermann
- * ext-todo + big-todo Andreas Aardal Hanssen
- * Frank Denis aka Jedi/Sector One <j at 4u.net> - Patched qmail-send to
- *  - limit the size of bounces (bouncemaxbytes)
- *  - MAXRECIPIENT
- *  - maxhop control file
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -280,14 +76,14 @@
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
 /*- important timing feature: when triggered, respond instantly */
-#define SLEEP_FUZZ 1			/*- slop a bit on sleeps to avoid zeno effect */
-#define SLEEP_FOREVER 86400		/*- absolute maximum time spent in select() */
-#define SLEEP_CLEANUP 76431		/*- time between cleanups */
-#define SLEEP_SYSFAIL 123
-#define OSSIFIED 129600			/*- 36 hours; _must_ exceed q-q's DEATH (24 hours) */
+#define SLEEP_FUZZ         1 /*- slop a bit on sleeps to avoid zeno effect */
+#define SLEEP_FOREVER  86400 /*- absolute maximum time spent in select() */
+#define SLEEP_CLEANUP  76431 /*- time between cleanups */
+#define SLEEP_SYSFAIL    123
+#define OSSIFIED      129600 /*- 36 hours; _must_ exceed q-q's DEATH (24 hours) */
 #ifndef TODO_INTERVAL
-#define SLEEP_TODO 1500			/*- check todo/ every 25 minutes in any case */
-#define ONCEEVERY 10			/*- Run todo maximal once every N seconds */
+#define SLEEP_TODO      1500 /*- check todo/ every 25 minutes in any case */
+#define ONCEEVERY         10 /*- Run todo maximal once every N seconds */
 #endif
 
 static int      lifetime = 604800;
@@ -315,12 +111,6 @@ static stralloc doublebouncehost = { 0 };
 static cmap     mappercenthack;
 static cmap     maplocals;
 
-#ifdef LOCK_LOGS
-static stralloc lockfn = { 0 };
-
-static int      loglock_fd = -1;
-#endif
-
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
 
@@ -343,49 +133,15 @@ static int      chanskip[CHANNELS] = { 10, 20 };
 char           *queuedesc;
 int             conf_split;
 
+static int      flagexitasap = 0;
+static int      flagrunasap = 0;
+static int      flagreadasap = 0;
+
 dtype           delivery;
 int             do_ratelimit;
 unsigned long   delayed_jobs;
 
-#ifdef EXTERNAL_TODO
-static void     reread(int);
-#else
 static void     reread();
-#endif
-
-#ifdef LOCK_LOGS
-static void
-lock_logs_open(int preopen)
-{
-	char           *ptr;
-	int             lock_status;
-
-	if (!(ptr = env_get("LOCK_LOGS")))
-		lock_status = 0;
-	else
-		scan_int(ptr, &lock_status);
-	if (!lock_status && preopen)
-		lock_status = preopen;
-	if (lock_status > 0) {
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = auto_control;
-		if (!stralloc_copys(&lockfn, controldir)
-				|| !stralloc_append(&lockfn, "/")
-				|| !stralloc_catb(&lockfn, "/defaultdelivery", 16)
-				|| !stralloc_0(&lockfn))
-			nomem();
-		if ((loglock_fd = open_read(lockfn.s)) == -1) {
-			log3("alert: ", queuedesc, ": cannot start: unable to open defaultdelivery\n");
-			lockerr();
-		}
-	}
-	log3("loglock: ", queuedesc, loglock_fd == -1 ? ": disabled\n" : ": enabled\n");
-}
-#endif
-
-static int      flagexitasap = 0;
-static int      flagrunasap = 0;
-static int      flagreadasap = 0;
 
 static void
 sigterm()
@@ -409,31 +165,12 @@ static void
 chdir_toqueue()
 {
 	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue"; /*- single queue like qmail */
+		queuedir = "queue/slowq";
 	while (chdir(queuedir) == -1) {
 		log5("alert: ", queuedesc, ": unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
 		sleep(10);
 	}
 }
-
-#ifdef LOCK_LOGS
-static void
-sigint()
-{
-	if (loglock_fd == -1) {
-		if (chdir(auto_qmail) == -1) {
-			log7("alert: ", queuedesc, ": unable to reread controls: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
-			return;
-		}
-		lock_logs_open(1);
-		chdir_toqueue();
-	} else {
-		close(loglock_fd);
-		loglock_fd = -1;
-		log3("loglock: ", queuedesc, loglock_fd == -1 ? ": disabled\n" : ": enabled\n");
-	}
-}
-#endif
 
 static void
 cleandied()
@@ -1016,7 +753,6 @@ job_close(int j)
 		nomem();
 }
 
-
 /*- this file is too long ------------------------------------------- BOUNCES */
 
 /*- strip the virtual domain which is prepended to addresses e.g. xxx.com-user01@xxx.com */
@@ -1240,11 +976,7 @@ injectbounce(unsigned long id)
 			break;
 		default:
 			if (ret > 0)
-#ifdef EXTERNAL_TODO
-				reread(0); /*- this does chdir_toqueue() */
-#else
 				reread(); /*- this does chdir_toqueue() */
-#endif
 			else
 			if (ret) {
 				log3("alert: ", queuedesc, ": cannot start: envrules failed\n");
@@ -1332,11 +1064,11 @@ injectbounce(unsigned long id)
 #ifdef MIME
 		/*- MIME header with boundary */
 		qmail_puts(&qqt, "\nMIME-Version: 1.0\n" "Content-Type: multipart/mixed; " "boundary=\"");
-		if (!stralloc_copyb(&boundary, strnum1, fmt_ulong(strnum1, birth)))
+		if (!stralloc_copyb(&boundary, strnum2, fmt_ulong(strnum2, birth)))
 			nomem();
 		if (!stralloc_cat(&boundary, &bouncehost))
 			nomem();
-		if (!stralloc_catb(&boundary, strnum1, fmt_ulong(strnum1, id)))
+		if (!stralloc_catb(&boundary, strnum2, fmt_ulong(strnum2, id)))
 			nomem();
 		qmail_put(&qqt, boundary.s, boundary.len);
 		qmail_puts(&qqt, "\"");
@@ -1360,7 +1092,7 @@ injectbounce(unsigned long id)
 			qmail_put(&qqt, doublebouncemessage.s, doublebouncemessage.len);
 			qmail_puts(&qqt, "\n");
 		} else {
-			qmail_puts(&qqt, "Hi. This is the qmail-send program at ");
+			qmail_puts(&qqt, "Hi. This is the slowq-send program at ");
 			qmail_put(&qqt, bouncehost.s, bouncehost.len);
 			qmail_puts(&qqt, *sender.s ? ".\n\
 I'm afraid I wasn't able to deliver your message to the following addresses.\n\
@@ -1460,10 +1192,10 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			log3("warning: ", queuedesc, ": trouble injecting bounce message, will try later\n");
 			return 0;
 		}
-		strnum1[fmt_ulong(strnum1, id)] = 0;
-		log2_noflush("bounce msg ", strnum1);
-		strnum1[fmt_ulong(strnum1, qp)] = 0;
-		log5(" qp ", strnum1, " ", queuedesc, "\n");
+		strnum2[fmt_ulong(strnum2, id)] = 0;
+		log2_noflush("bounce msg ", strnum2);
+		strnum2[fmt_ulong(strnum2, qp)] = 0;
+		log5(" qp ", strnum2, " ", queuedesc, "\n");
 	}
 	if (unlink(fn2.s) == -1) {
 		log5("warning: ", queuedesc, ": unable to unlink ", fn2.s, "\n");
@@ -1902,7 +1634,7 @@ pass_dochan(int c)
 		} else
 		if (i == -1)
 			log5("warning: ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n");
-		else /*- i == 1 */
+		else
 		if (_do_ratelimit && delayed_jobs)
 			delayed_jobs = delayed_job_count();
 		++jo[pass[c].j].numtodo;
@@ -2016,174 +1748,6 @@ pass_do()
 
 /*- this file is too long ---------------------------------------------- TODO */
 
-#ifdef EXTERNAL_TODO
-static stralloc todoline = { 0 };
-
-static char     todobuf[2048];
-static int      todofdin, todofdout, flagtodoalive;
-
-static void
-tododied()
-{
-	log3("alert: ", queuedesc, ": oh no! lost qmail-todo connection! dying...\n");
-	flagexitasap = 1;
-	flagtodoalive = 0;
-}
-
-static void
-todo_init()
-{
-	todofdout = 7; /*- write end pi7[1] */
-	todofdin = 8;  /*- read end  pi8[0] */
-	flagtodoalive = 1;
-	/*- sync with external todo */
-	if (write(todofdout, "S", 1) != 1) {
-		log3("alert: unable to write a byte to external todo! dying...:", error_str(errno), "\n");
-		flagexitasap = 1;
-		flagtodoalive = 0;
-	}
-	return;
-}
-
-static void
-todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
-{
-	if (flagexitasap) {
-		if (flagtodoalive && write(todofdout, "X", 1) != 1) {
-			log5("alert: ", queuedesc, ": unable to write a byte to external todo! dying...:", error_str(errno), "\n");
-			flagexitasap = 1;
-			flagtodoalive = 0;
-		}
-	}
-	if (flagtodoalive) {
-		FD_SET(todofdin, rfds);
-		if (*nfds <= todofdin)
-			*nfds = todofdin + 1;
-	}
-}
-
-/*
- * set flagchan for local or remote
- * set pqchan[c]
- * set pqdone
- */
-static void
-todo_del(char *s)
-{
-	int             c;
-	int             flagchan[CHANNELS];
-	struct prioq_elt pe;
-	unsigned long   id;
-	unsigned int    len;
-
-	for (c = 0; c < CHANNELS; ++c)
-		flagchan[c] = 0;
-	switch (*s++)
-	{
-	case 'L':
-		flagchan[0] = 1;
-		break;
-	case 'R':
-		flagchan[1] = 1;
-		break;
-	case 'B':
-		flagchan[0] = 1;
-		flagchan[1] = 1;
-		break;
-	case 'X':
-		break;
-	default:
-		log3("warning: ", queuedesc, ": qmail-send unable to understand qmail-todo\n");
-		return;
-	}
-	len = scan_ulong(s, &id);
-	if (!len || s[len]) {
-		log3("warning: ", queuedesc, ": qmail-send unable to understand qmail-todo\n");
-		return;
-	}
-	pe.id = id;
-	pe.dt = now();
-	for (c = 0; c < CHANNELS; ++c) {
-		if (flagchan[c])
-			while (!prioq_insert(min, &pqchan[c], &pe))
-				nomem();
-	}
-	for (c = 0; c < CHANNELS; ++c) {
-		if (flagchan[c])
-			break;
-	}
-	if (c == CHANNELS) {
-		while (!prioq_insert(min, &pqdone, &pe))
-			nomem();
-	}
-	return;
-}
-
-/*
- * if data is available fd 8 for read
- * read data
- * 'D' - set up delivery by calling todo_do()
- * 'L' - Write to log (fd 0) for logging
- * 'X' - set flagtodoalive = 0, flagexitasap = 1
- */
-static void
-todo_do(fd_set *rfds)
-{
-	int             r, i;
-	char            ch;
-
-	if (!flagtodoalive)
-		return;
-	if (!FD_ISSET(todofdin, rfds))
-		return;
-
-	if ((r = read(todofdin, todobuf, sizeof (todobuf))) == -1)
-		return;
-	if (r == 0) {
-		if (flagexitasap)
-			flagtodoalive = 0;
-		else
-			tododied();
-		return;
-	}
-	for (i = 0; i < r; ++i) {
-		ch = todobuf[i];
-		while (!stralloc_append(&todoline, &ch))
-			nomem();
-		if (todoline.len > REPORTMAX)
-			todoline.len = REPORTMAX;
-		/*- 
-		 * qmail-todo is responsible for keeping it short
-		 * e.g. qmail-todo writes a line like this
-		 * local  DL656826\0
-		 * remote DL656826\0
-		 */
-		if (!ch && (todoline.len > 1)) {
-			switch (todoline.s[0])
-			{
-			case 'D': /*- message to be delivered */
-				if (flagexitasap)
-					break;
-				todo_del(todoline.s + 1);
-				break;
-			case 'L': /*- write to log */
-				log1(todoline.s + 1);
-				break;
-			case 'X': /*- qmail-todo is exiting */
-				if (flagexitasap)
-					flagtodoalive = 0;
-				else
-					tododied();
-				break;
-			default:
-				log3("warning: ", queuedesc, ": qmail-send unable to understand qmail-todo: report mangled\n");
-				break;
-			}
-			todoline.len = 0;
-		}
-	}
-}
-#else /*- #ifdef EXTERNAL_TODO */
 static stralloc rwline = { 0 };
 
 /*
@@ -2345,7 +1909,7 @@ todo_do(fd_set *rfds)
 		fnmake_chanaddr(id, c);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
-				log3("warning: unable to unlink ", fn1.s, "\n");
+				log5("warning: unable to unlink: ", fn1.s, ": ", error_str(errno), "\n");
 				goto fail;
 			}
 		}
@@ -2536,7 +2100,6 @@ fail:
 			close(fdchan[c]);
 	}
 }
-#endif /*- #ifdef EXTERNAL_TODO */
 /*- this file is too long ---------------------------------------------- MAIN */
 
 static int
@@ -2667,21 +2230,19 @@ getcontrols()
 			return 0;
 		break;
 	}
-#ifndef EXTERNAL_TODO
 	if (control_readint(&todo_interval, "todointerval") == -1)
 		return 0;
-#endif
 	return 1;
 }
 
 /*
  * The reason for DJB using newlocals and newvdoms is so that
  * the original variables locals and vdoms do not get screwed
- * in regetcontrols. This will allow qmail-send to serve domains
+ * in regetcontrols. This will allow slowq-send to serve domains
  * already being served (inspite of memory problems during regetcontrols).
  * new domains added will not get served till another sighup causes
  * regetcontrols to get executed without problems. This is much
- * better than having qmail-send come to a grinding halt.
+ * better than having slowq-send come to a grinding halt.
  * Another way could be to set flagexitasap to 1
  */
 static stralloc newlocals = { 0 };
@@ -2704,12 +2265,10 @@ regetcontrols()
 		log5("alert: ", queuedesc, ": unable to reread ", controldir, "/virtualdomains\n");
 		return;
 	}
-#ifndef EXTERNAL_TODO
 	if (control_readint(&todo_interval, "todointerval") == -1) {
 		log5("alert: ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/todointerval\n");
 		return;
 	}
-#endif
 	if (control_readint((int *) &concurrency[0], "concurrencylocal") == -1) {
 		log5("alert: ", queuedesc, ": unable to reread ", controldir, "/concurrencylocal\n");
 		return;
@@ -2784,109 +2343,15 @@ regetcontrols()
 			nomem();
 }
 
-#ifdef EXTERNAL_TODO
-static void
-reread(int hupflag)
-#else
 static void
 reread()
-#endif
 {
 	if (chdir(auto_qmail) == -1) {
 		log7("alert: ", queuedesc, ": unable to reread controls: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 		return;
 	}
-#ifdef EXTERNAL_TODO
-	if (hupflag && write(todofdout, "H", 1) != 1) {
-		log5("alert: ", queuedesc, ": unable to write a byte to external todo:", error_str(errno), "\n");
-		return;
-	}
-#endif
 	regetcontrols();
 	chdir_toqueue();
-}
-
-stralloc        plugin = { 0 }, splugin = {0};
-
-void
-run_plugin()
-{
-	/*- startup plugins */
-	void           *handle;
-	int             i, status = 0, len;
-	int             (*func) (void);
-	char           *error, *start_plugin, *plugin_symb, *plugindir, *ptr, *plugin_ptr, *end;
-
-	if (!(plugindir = env_get("PLUGINDIR")))
-		plugindir = "plugins";
-	if (plugindir[i = str_chr(plugindir, '/')]) {
-		log3("alert: ", queuedesc, ": plugindir cannot have an absolute path\n");
-		_exit(111);
-	}
-	if (!(plugin_symb = env_get("START_PLUGIN_SYMB")))
-		plugin_symb = "startup";
-	if (!(start_plugin = env_get("START_PLUGIN")))
-		start_plugin = "qmail-send.so";
-	if (!stralloc_copyb(&splugin, start_plugin, (len = str_len(start_plugin))))
-		nomem();
-	if (!stralloc_0(&splugin))
-		nomem();
-	end = splugin.s + len;
-	for (ptr = plugin_ptr = splugin.s;; ptr++) {
-		if (*ptr != ' ' && ptr != end)
-			continue;
-		if (ptr != end)
-			*ptr = 0;
-		if (!stralloc_copys(&plugin, auto_qmail))
-			nomem();
-		if (!stralloc_append(&plugin, "/"))
-			nomem();
-		if (!stralloc_cats(&plugin, plugindir))
-			nomem();
-		if (!stralloc_append(&plugin, "/"))
-			nomem();
-		if (!stralloc_cats(&plugin, plugin_ptr))
-			nomem();
-		if (!stralloc_0(&plugin))
-			nomem();
-		if (ptr != end)
-			plugin_ptr = ptr + 1;
-		if (access(plugin.s, F_OK)) {
-			if (errno != error_noent) {
-				log7("alert: ", queuedesc, ": unable to access: ", plugin.s, ": ", error_str(errno), "\n");
-				_exit(111);
-			}
-			if (ptr == end)
-				break;
-			else
-				continue;
-		}
-		if (!(handle = dlopen(plugin.s, RTLD_LAZY | RTLD_GLOBAL))) {
-			log7("alert: ", queuedesc, ": dlopen failed for ", plugin.s, ": ", dlerror(), "\n");
-			_exit(111);
-		}
-		dlerror(); /*- man page told me to do this */
-		func = dlsym(handle, plugin_symb);
-		if ((error = dlerror())) {
-			log7("alert: ", queuedesc, ": dlsym ", plugin_symb, " failed: ", error, "\n");
-			_exit(111);
-		}
-		log5("status: ", queuedesc, ": qmail-send executing function ", plugin_symb, "\n");
-		if ((status = (*func) ())) {
-			strnum1[fmt_ulong(strnum1, status)] = 0;
-			log7("alert: ", queuedesc, ": function ", plugin_symb, " failed with status ", strnum1, "\n");
-		}
-		if (dlclose(handle)) {
-			log7("alert: ", queuedesc, ": dlclose for ", plugin.s, "failed: ", error, "\n");
-			_exit(111);
-		}
-		if (ptr == end)
-			break;
-		if (status)
-			break;
-	}
-	if (status)
-		_exit(status);
 }
 
 int
@@ -2896,14 +2361,12 @@ main()
 	datetime_sec    wakeup;
 	fd_set          rfds, wfds;
 	struct timeval  tv;
-#ifndef EXTERNAL_TODO
 	char           *ptr;
-#endif
 
 	if (!(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue"; /*- single queue like qmail */
+		queuedir = "queue/slowq"; /*- single queue like qmail */
 	do_ratelimit = env_get("RATELIMIT_DIR") ? 1 : 0;
-	/*- get basename of queue directory to define qmail-send instance */
+	/*- get basename of queue directory to define slowq-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
 	if (*queuedesc == '/')
@@ -2916,11 +2379,7 @@ main()
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	log7("info: qmail-send: ", queuedesc, ": ratelimit=", do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, "\n");
-#ifdef LOCK_LOGS
-	lock_logs_open(0);
-#endif
-#ifndef EXTERNAL_TODO
+	log7("info: slowq-send: ", queuedesc, ": ratelimit=", do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, "\n");
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
 	else
@@ -2931,12 +2390,10 @@ main()
 		if (todo_interval <= 0)
 			todo_interval = ONCEEVERY;
 	}
-#endif
 	if (!getcontrols()) {
 		log3("alert: ", queuedesc, ": cannot start: unable to read controls\n");
 		_exit(111);
 	}
-	run_plugin();
 	if (chdir(queuedir) == -1) {
 		log7("alert: ", queuedesc, ": cannot start: unable to switch to queue directory ", queuedir, ": ", error_str(errno), "\n");
 		_exit(111);
@@ -2946,17 +2403,14 @@ main()
 	sig_alarmcatch(sigalrm);
 	sig_hangupcatch(sighup);
 	sig_childdefault();
-#ifdef LOCK_LOGS
-	sig_intcatch(sigint);
-#endif
 	umask(077);
-	/*- prevent multiple copies of qmail-send to run */
+	/*- prevent multiple copies of slowq-send to run */
 	if ((fd = open_write("lock/sendmutex")) == -1) {
 		log3("alert: ", queuedesc, ": cannot start: unable to open mutex\n");
 		_exit(111);
 	}
 	if (lock_exnb(fd) == -1) {
-		log3("alert: ", queuedesc, ": cannot start: qmail-send is already running\n");
+		log3("alert: ", queuedesc, ": cannot start: slowq-send is already running\n");
 		_exit(111);
 	}
 #ifdef USE_FSYNC
@@ -3000,12 +2454,7 @@ main()
 	pass_init();    /*- initialize pass structure */
 	todo_init();    /*- set fd 7 to write to qmail-todo, set fd 8 to read from qmail-todo, write 'S' to qmail-todo */
 	cleanup_init(); /*- initialize flagcleanup = 0, cleanuptime = now*/
-#ifdef EXTERNAL_TODO
-	while (!flagexitasap || !del_canexit() || flagtodoalive) /*- stay alive if delivery jobs, todo jobs are present */
-#else
-	while (!flagexitasap || !del_canexit()) /*- stay alive if delivery jobs are present */
-#endif
-	{
+	while (!flagexitasap || !del_canexit()) { /*- stay alive if delivery jobs are present */
 		recent = now();
 		if (flagrunasap) {
 			flagrunasap = 0;
@@ -3013,11 +2462,7 @@ main()
 		}
 		if (flagreadasap) {
 			flagreadasap = 0;
-#ifdef EXTERNAL_TODO
-			reread(1);
-#else
 			reread();
-#endif
 		}
 		wakeup = time_needed ? recent + time_needed : recent + SLEEP_FOREVER;
 		FD_ZERO(&rfds);
@@ -3084,19 +2529,19 @@ main()
 			 * 'X' - set flagtodoalive = 0, flagexitasap = 1
 			 */
 			todo_do(&rfds);
-			pass_do(delayed_jobs);
+			pass_do();
 			cleanup_do();
 		}
-	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
+	} /*- while (!flagexitasap || !del_canexit()) */
 	pqfinish();
-	log5("status: ", queuedesc, " ", queuedesc, " qmail-send exiting\n");
+	log5("status: ", queuedesc, " ", queuedesc, " slowq-send exiting\n");
 	return (0);
 }
 
 void
-getversion_qmail_send_c()
+getversion_slowq_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.84 2021-06-05 22:42:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.7 2021-06-05 22:42:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

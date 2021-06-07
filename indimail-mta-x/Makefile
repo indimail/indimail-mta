@@ -42,12 +42,11 @@ it = indimail-mta.perms 822date 822field 822header 822print 822received \
 	qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl \
 	qmail-daned qmail-smtpd qmail_smtpd.so qmail-start qmail-tcpok \
 	qmail-tcpto qmail-todo qmail-upq qpq qquote qreceipt qsmhook \
-	queue-fix recipient-cdb relaytest rewind irmail rpmattr rrforward \
-	rrt sendmail serialcmd serialqmtp serialsmtp setforward setmaillist \
-	smtpd-plugin0.so smtpd-plugin.so sortedtest \
-	spawn-filter spfquery splogger srsfilter surblfilter surblqueue \
-	swaks sys-checkpwd \
-	tcp-env testzero tokenize uacl \
+	queue-fix recipient-cdb relaytest rewind irmail rpmattr \
+	rrforward rrt sendmail serialcmd serialqmtp serialsmtp setforward \
+	setmaillist smtpd-plugin0.so slowq-send slowq-start smtpd-plugin.so \
+	sortedtest spawn-filter spfquery splogger srsfilter surblfilter \
+	surblqueue swaks sys-checkpwd tcp-env testzero tokenize uacl \
 	udpclient udplogger update_tmprsadh viruscanner whois yearcal \
 	cdb-database analyzer qtools leapsecs.dat
 
@@ -65,7 +64,8 @@ man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
 	qmail-dk.8 dktest.8 qmail-multi.8 spawn-filter.8 \
 	qmail-inject.8 qmail-newmrh.8 recipient-cdb.8 qmail-cdb.8 \
 	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
-	qmail-poppass.8 qscanq.8 cleanq.8 run-cleanq.8
+	qmail-poppass.8 qscanq.8 cleanq.8 run-cleanq.8 slowq-start.8 \
+	slowq-send.8
 
 include Makefile.$(SYSTEM)
 
@@ -958,12 +958,12 @@ compile maildir.c prioq.h maildir.h
 	./compile maildir.c
 
 maildir2mbox: \
-load maildir2mbox.o maildir.o prioq.o myctime.o gfrom.o
-	./load maildir2mbox maildir.o prioq.o myctime.o \
+load maildir2mbox.o maildir.o prioq.o gfrom.o
+	./load maildir2mbox maildir.o prioq.o \
 	gfrom.o -lqmail
 
 maildir2mbox.o: \
-compile maildir2mbox.c prioq.h gfrom.h myctime.h maildir.h
+compile maildir2mbox.c prioq.h gfrom.h maildir.h
 	./compile maildir2mbox.c
 
 mbox2maildir: load mbox2maildir.o
@@ -1000,10 +1000,6 @@ warn-auto.sh mailsubj.sh conf-prefix conf-break conf-split
 doc/INSTALL-MINI: doc/INSTALL-MINI.in \
 	conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
-
-myctime.o: \
-compile myctime.c myctime.h
-	./compile myctime.c
 
 newfield.o: \
 compile newfield.c newfield.h
@@ -1127,11 +1123,11 @@ syncdir.o: compile syncdir.c conf-sync
 	./compile `grep -h -v "^#" conf-sync` syncdir.c
 
 qmail-local: \
-load qmail-local.o qmail.o quote.o gfrom.o myctime.o \
+load qmail-local.o qmail.o quote.o gfrom.o \
 slurpclose.o srs.o auto_qmail.o auto_patrn.o rcpthosts.o \
 auto_control.o variables.o control.o maildir_deliver.o \
 libsyncdir.a socket.lib srs.lib
-	./load qmail-local qmail.o quote.o gfrom.o myctime.o \
+	./load qmail-local qmail.o quote.o gfrom.o \
 	slurpclose.o srs.o auto_qmail.o rcpthosts.o \
 	auto_patrn.o variables.o auto_control.o control.o \
 	maildir_deliver.o \
@@ -1145,7 +1141,7 @@ qmail-local.9 conf-sysconfdir
 	> qmail-local.8
 
 qmail-local.o: \
-compile qmail-local.c quote.h qmail.h slurpclose.h myctime.h \
+compile qmail-local.c quote.h qmail.h slurpclose.h \
 gfrom.h auto_patrn.h control.h auto_qmail.h variables.h hassrs.h \
 syncdir.h maildir_deliver.h conf-sync conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-mailarch` qmail-local.c
@@ -1352,18 +1348,18 @@ compile qmail-multi.c auto_qmail.h control.h conf-queue MakeArgs.h
 	fi
 
 spawn-filter: \
-load spawn-filter.o variables.o get_rate.o report.o \
+load spawn-filter.o variables.o report.o \
 auto_qmail.o control.o wildmat.o qregex.o MakeArgs.o \
 auto_control.o matchregex.o envrules.o getDomainToken.o \
 socket.lib dns.lib
-	./load spawn-filter variables.o get_rate.o report.o \
+	./load spawn-filter variables.o report.o \
 	auto_qmail.o control.o wildmat.o qregex.o \
 	MakeArgs.o auto_control.o matchregex.o getDomainToken.o \
 	envrules.o `cat dns.lib socket.lib` -lm -lqmail
 
 spawn-filter.o: \
 compile spawn-filter.c control.h auto_qmail.h variables.h qregex.h \
-MakeArgs.h report.h get_rate.h getDomainToken.h
+MakeArgs.h report.h getDomainToken.h
 	./compile spawn-filter.c
 
 spawn-filter.8: \
@@ -1373,16 +1369,21 @@ spawn-filter.9 conf-prefix conf-sysconfdir
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> spawn-filter.8
 
-get_rate.o: \
-compile get_rate.c get_rate.h report.h
-	./compile get_rate.c
+do_rate.o: \
+compile do_rate.c do_rate.h
+	./compile do_rate.c
+
+delivery_rate.o: \
+compile delivery_rate.c delivery_rate.h qsutil.h \
+variables.h do_rate.h getDomainToken.h control.h
+	./compile delivery_rate.c
 
 report.o: \
-compile report.c report.h
+compile report.c report.h variables.h
 	./compile report.c
 
 getDomainToken.o: \
-compile getDomainToken.c getDomainToken.h wildmat.h
+compile getDomainToken.c getDomainToken.h wildmat.h variables.h
 	./compile getDomainToken.c
 
 drate.1: \
@@ -1623,13 +1624,22 @@ qmail-send: \
 load qmail-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o\
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o variables.o \
-envrules.o qregex.o wildmat.o libsyncdir.a srs.lib
+getDomainToken.o do_rate.o envrules.o qregex.o wildmat.o \
+delivery_rate.o libsyncdir.a srs.lib
 	./load qmail-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
-	wildmat.o qmail.o auto_qmail.o auto_split.o \
-	variables.o envrules.o matchregex.o srs.o rcpthosts.o \
-	auto_control.o -L. -lsyncdir -L../libsrs2-x/libsrs2/.libs \
-	`cat srs.lib` -ldl -lqmail
+	getDomainToken.o do_rate.o wildmat.o qmail.o auto_qmail.o \
+	auto_split.o variables.o envrules.o matchregex.o srs.o \
+	delivery_rate.o rcpthosts.o auto_control.o -L. -lsyncdir \
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -ldl -lqmail
+
+qmail-send.o: \
+compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
+quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
+fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
+conf-mime conf-sync conf-batv conf-srs conf-todo
+	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
+	conf-todo` qmail-send.c
 
 qmail-send.8: \
 qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1641,13 +1651,36 @@ qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-send.8
 
-qmail-send.o: \
-compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
-quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h \
+slowq-send: \
+load slowq-send.o qsutil.o control.o newfield.o prioq.o \
+trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o \
+auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o \
+variables.o envrules.o qregex.o wildmat.o getDomainToken.o \
+do_rate.o delivery_rate.o libsyncdir.a srs.lib
+	./load slowq-send qsutil.o control.o newfield.o \
+	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
+	do_rate.o wildmat.o qmail.o auto_qmail.o auto_split.o \
+	variables.o envrules.o matchregex.o srs.o rcpthosts.o \
+	delivery_rate.o auto_control.o getDomainToken.o -L. -lsyncdir \
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -ldl -lqmail
+
+slowq-send.o: \
+compile slowq-send.c control.h auto_qmail.h trigger.h newfield.h \
+quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-conf-mime conf-sync conf-batv conf-srs conf-locklogs conf-todo
-	./compile `grep -h -v "^#" conf-mime conf-todo \
-	conf-sync conf-batv conf-locklogs` qmail-send.c
+conf-mime conf-sync conf-batv conf-srs conf-locklogs
+	./compile `grep -h -v "^#" conf-mime \
+	conf-sync conf-batv conf-locklogs` slowq-send.c
+
+slowq-send.8: \
+slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
+	cat slowq-send.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}BREAK}"`head -1 conf-break`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> slowq-send.8
 
 qmail-daemon: \
 load qmail-daemon.o control.o auto_qmail.o auto_control.o variables.o
@@ -1875,6 +1908,18 @@ qmail-start.9 conf-qmail
 qmail-start.o: \
 compile qmail-start.c prot.h auto_uids.h conf-todo
 	./compile `grep -h -v "^#" conf-todo` qmail-start.c
+
+slowq-start: \
+load slowq-start.o prot.o auto_uids.o get_uid.o
+	./load slowq-start prot.o auto_uids.o get_uid.o -lqmail
+
+slowq-start.8: \
+slowq-start.9 conf-qmail conf-servicedir
+	$(edit) slowq-start.9 > $@
+
+slowq-start.o: \
+compile slowq-start.c prot.h auto_uids.h conf-todo
+	./compile `grep -h -v "^#" conf-todo` slowq-start.c
 
 qmail-tcpok: \
 load qmail-tcpok.o auto_qmail.o variables.o \
@@ -2304,11 +2349,9 @@ qmail-rm.1: qmail-rm.9 conf-qmail conf-split
 autoresponder: load autoresponder.o auto_qmail.o \
 variables.o control.o quote.o auto_control.o \
 ip.o ipme.o ipalloc.o socket_v4mappedprefix.o socket_v6any.o \
-qregex.o matchregex.o wildmat.o \
-myctime.o
+qregex.o matchregex.o wildmat.o
 	./load autoresponder auto_control.o auto_qmail.o \
-	variables.o control.o quote.o myctime.o \
-	ip.o ipme.o ipalloc.o \
+	variables.o control.o quote.o ip.o ipme.o ipalloc.o \
 	socket_v4mappedprefix.o socket_v6any.o qregex.o \
 	matchregex.o wildmat.o -lqmail
 
@@ -3384,15 +3427,15 @@ warn-auto.sh surblqueue.sh conf-prefix
 	chmod 755 surblqueue
 
 drate: \
-load drate.o variables.o myctime.o auto_uids.o auto_control.o \
-control.o get_rate.o getDomainToken.o
-	./load drate variables.o myctime.o auto_uids.o \
-	auto_control.o get_rate.o getDomainToken.o wildmat.o \
-	control.o -lm -lqmail
+load drate.o variables.o auto_uids.o auto_qmail.o \
+auto_control.o control.o do_rate.o getDomainToken.o
+	./load drate variables.o auto_uids.o \
+	auto_qmail.o do_rate.o getDomainToken.o wildmat.o \
+	auto_control.o control.o -lm -lqmail
 
 drate.o: \
-compile drate.c variables.h myctime.h auto_uids.h auto_control.h \
-get_rate.h control.h getDomainToken.h report.h
+compile drate.c variables.h auto_uids.h auto_qmail.h \
+do_rate.h control.h getDomainToken.h
 	./compile drate.c
 
 cidr: load cidr.o

@@ -1,11 +1,10 @@
 /*
- * $Log: get_rate.c,v $
- * Revision 1.3  2021-05-26 16:30:04+05:30  Cprogrammer
- * added option to force update
+ * $Log: do_rate.c,v $
+ * Revision 1.2  2021-06-05 12:44:50+05:30  Cprogrammer
+ * return time_needed in seconds to reach configured rate
  *
- * Revision 1.2  2021-05-26 07:42:11+05:30  Cprogrammer
- * made DELIMITER configurable
- * return email count, configure rate and current rate in is_rate_ok()
+ * Revision 1.1  2021-05-29 23:35:17+05:30  Cprogrammer
+ * Initial revision
  *
  */
 #include <unistd.h>
@@ -23,8 +22,8 @@
 #include <error.h>
 #include <evaluate.h>
 #include <lock.h>
-#include "report.h"
-#include "get_rate.h"
+#include <datetime.h>
+#include "do_rate.h"
 
 static stralloc fline = { 0 }, _rate_expr = { 0 };
 
@@ -44,19 +43,15 @@ get_rate(char *expression, double *rate)
 	{
 	case ERROR_SYNTAX:
 		free_vartable(vt);
-		report(111, "spawn: ", "get_rate: syntax error: [", expression, "]. (#4.3.0)", 0, 0);
 		return (-1);
 	case ERROR_VARNOTFOUND:
 		free_vartable(vt);
-		report(111, "spawn: ", "get_rate: variable not found: ", expression, ". (#4.3.0)", 0, 0);
 		return (-1);
 	case ERROR_NOMEM:
 		free_vartable(vt);
-		report(111, "spawn: ", "out of memory", ". (#4.3.0)", 0, 0, 0);
 		return (-1);
 	case ERROR_DIV0:
 		free_vartable(vt);
-		report(111, "spawn: ", "get_rate: division by zero: ", expression, ". (#4.3.0)", 0, 0);
 		return (-1);
 	case RESULT_OK:
 		*rate = (double) ((result.type == T_INT) ? result.ival : result.rval);
@@ -68,18 +63,24 @@ get_rate(char *expression, double *rate)
 }
 
 int
-is_rate_ok(char *file, char *_rate_exp, unsigned long *e, double *c, double *r)
+is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c,
+		double *r, datetime_sec *time_needed)
 {
-	int             wfd, rfd, match, line_no = -1, rate_int, access_flag, force = 0;
+	int             at, wfd, rfd, match, line_no = -1, rate_int,
+					reset, access_flag, force = 0;
 	unsigned long   email_count = 0;
-	char            reset, stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
+	char            stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
 	double          conf_rate, cur_rate = 0.0;
 	char            inbuf[2048], outbuf[1024];
-	char           *ptr, *rate_exp;
+	char           *ptr, *rate_exp, *file;
 	struct substdio ssin, ssout;
 	datetime_sec    starttime, endtime;
 	struct stat     statbuf;
 
+	if (_file[at = str_rchr(_file, '@')])
+		file = _file + at + 1;
+	else
+		file = _file;
 	if (e)
 		*e = 0;
 	starttime = endtime = now();
@@ -97,47 +98,49 @@ is_rate_ok(char *file, char *_rate_exp, unsigned long *e, double *c, double *r)
 	etime[fmt_ulong(etime, endtime)] = 0;
 	access_flag = access(file, F_OK);
 	if (access_flag && errno != error_noent)
-		report(111, "spawn: ", "open: ", file, ": ", error_str(errno), ". (#4.3.0)");
+		return -1;
 	if (rate_exp) {
 		if ((wfd = (access_flag ? open_excl : open_write) (file)) == -1)
-			report(111, "spawn: ", "unable to write_excl: ", file, ": ", error_str(errno), ". (#4.3.0)");
-		if (lock_ex(wfd) == -1)
-			report(111, "spawn: ", "unable to lock: ", file, ": ", error_str(errno), ". (#4.3.0)");
-		if (!stralloc_copys(&_rate_expr, rate_exp))
-			report(111, "spawn: ", "out of memory", ". (#4.3.0)", 0, 0, 0);
+			return -1;
 		else
-		if (!stralloc_append(&_rate_expr, DELIMITER))
-			report(111, "spawn: ", "out of memory", ". (#4.3.0)", 0, 0, 0);
-		get_rate(rate_exp, &conf_rate);
+		if (lock_ex(wfd) == -1)
+			return -1;
+		if (!stralloc_copys(&_rate_expr, rate_exp) ||
+				!stralloc_append(&_rate_expr, DELIMITER))
+			return -1;
+		if (get_rate(rate_exp, &conf_rate))
+			return -1;
 		if (c)
 			*c = conf_rate;
 	} else {
 		if ((wfd = open_write(file)) == -1)
-			report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
+			return -1;
+		else
 		if (lock_ex(wfd) == -1)
-			report(111, "spawn: ", "unable to lock: ", file, ": ", error_str(errno), ". (#4.3.0)");
+			return -1;
 	}
 	if (!access_flag) { /*- only if rate definition exists */
 		if ((rfd = open_read(file)) == -1)
-			report(111, "spawn: ", "unable to read: ", file, ": ", error_str(errno), ". (#4.3.0)");
+			return -1;
 		substdio_fdbuf(&ssin, read, rfd, inbuf, sizeof(inbuf));
 		for (line_no = 1;;line_no++) { /*- Line Processing */
 			if (getln(&ssin, &fline, &match, DELIMITER[0]) == -1)
-				report(111, "spawn: ", "unable to read: ", file, ": ", error_str(errno), ". (#4.3.0)");
+				return -1;
 			if (!match && fline.len == 0)
 				break;
 			fline.len--;
 			if (DELIMITER[0]) {
 				if (!stralloc_0(&fline))
-					report(111, "spawn: ", "out of memory", ". (#4.3.0)", 0, 0, 0);
+					return -1;
 				fline.len--;
 			}
 			switch (line_no)
 			{
 			case 1: /*- rate expression */
 				if (!stralloc_copy(&_rate_expr, &fline))
-					report(111, "spawn: ", "out of memory", ". (#4.3.0)", 0, 0, 0);
-				get_rate(fline.s, &conf_rate);
+					return -1;
+				if (get_rate(fline.s, &conf_rate))
+					return -1;
 				if (c)
 					*c = conf_rate;
 				break;
@@ -161,6 +164,8 @@ is_rate_ok(char *file, char *_rate_exp, unsigned long *e, double *c, double *r)
 				cur_rate = (endtime == starttime) ? 0 : ((float) email_count / (float) (endtime - starttime));
 				if (r)
 					*r = cur_rate;
+				if (time_needed)
+					*time_needed = (long int) email_count/conf_rate - endtime + starttime;
 				break;
 			}
 		}
@@ -180,39 +185,34 @@ is_rate_ok(char *file, char *_rate_exp, unsigned long *e, double *c, double *r)
 	if (e)
 		*e = email_count;
 	substdio_fdbuf(&ssout, write, wfd, outbuf, sizeof(outbuf));
-	if (substdio_bput(&ssout, _rate_expr.s, _rate_expr.len) == -1)
-		report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
-	if (substdio_bput(&ssout, DELIMITER, 1) == -1)
-		report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
+	if (substdio_bput(&ssout, _rate_expr.s, _rate_expr.len) == -1 ||
+			substdio_bput(&ssout, DELIMITER, 1) == -1)
+		return -1;
 
-	if (substdio_bputs(&ssout, ecount) == -1)
-		report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
-	if (substdio_bput(&ssout, DELIMITER, 1) == -1)
-		report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
+	if (substdio_bputs(&ssout, ecount) == -1 ||
+			substdio_bput(&ssout, DELIMITER, 1) == -1)
+		return -1;
 
-	if (substdio_bputs(&ssout, stime) == -1)
-		report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
-	if (substdio_bput(&ssout, DELIMITER, 1) == -1)
-		report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
+	if (substdio_bputs(&ssout, stime) == -1 ||
+			substdio_bput(&ssout, DELIMITER, 1) == -1)
+		return -1;
 
-	if (substdio_bputs(&ssout, etime) == -1)
-		report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
-	if (substdio_bput(&ssout, DELIMITER, 1) == -1)
-		report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
+	if (substdio_bputs(&ssout, etime) == -1 ||
+			substdio_bput(&ssout, DELIMITER, 1) == -1)
+		return -1;
 
 	if (substdio_flush(&ssout) == -1)
-		report(111, "spawn: ", "unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)");
+		return -1;
 	close(wfd);
 	return (1);
 }
 
 void
-getversion_get_rate_c()
+getversion_do_rate_c()
 {
-	static char    *x = "$Id: get_rate.c,v 1.3 2021-05-26 16:30:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_rate.c,v 1.2 2021-06-05 12:44:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidevalh;
 	x = sccsidgetrateh;
-	x = sccsidreporth;
 	x++;
 }

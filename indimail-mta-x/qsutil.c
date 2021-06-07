@@ -1,5 +1,14 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.16  2021-06-05 22:35:05+05:30  Cprogrammer
+ * added log4_noflush() function
+ *
+ * Revision 1.15  2021-06-04 09:22:44+05:30  Cprogrammer
+ * added log15() function
+ *
+ * Revision 1.14  2021-05-30 00:14:16+05:30  Cprogrammer
+ * added log11() function
+ *
  * Revision 1.13  2016-03-31 17:37:11+05:30  Cprogrammer
  * flush logs only when line gets completed
  * added log lock code to ensure log lines done get jumbled when running as a multi process delivery
@@ -70,15 +79,13 @@ flush(void)
 }
 
 void
-logsa_noflush(sa)
-	stralloc       *sa;
+logsa_noflush(stralloc *sa)
 {
 	substdio_put(&sserr, sa->s, sa->len);
 }
 
 void
-logsa(sa)
-	stralloc       *sa;
+logsa(stralloc *sa)
 {
 #ifdef LOCK_LOGS
 	if (loglock_fd != -1)
@@ -92,26 +99,20 @@ logsa(sa)
 }
 
 void
-log1_noflush(s1)
-	char           *s1;
+log1_noflush(char *s1)
 {
 	substdio_puts(&sserr, s1);
 }
 
 void
-log2_noflush(s1, s2)
-	char           *s1;
-	char           *s2;
+log2_noflush(char *s1, char *s2)
 {
 	substdio_puts(&sserr, s1);
 	substdio_puts(&sserr, s2);
 }
 
 void
-log3_noflush(s1, s2, s3)
-	char           *s1;
-	char           *s2;
-	char           *s3;
+log3_noflush(char *s1, char *s2, char *s3)
 {
 	substdio_puts(&sserr, s1);
 	substdio_puts(&sserr, s2);
@@ -119,8 +120,16 @@ log3_noflush(s1, s2, s3)
 }
 
 void
-log1(s1)
-	char           *s1;
+log4_noflush(char *s1, char *s2, char *s3, char *s4)
+{
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
+}
+
+void
+log1(char *s1)
 {
 #ifdef LOCK_LOGS
 	if (loglock_fd != -1)
@@ -134,10 +143,7 @@ log1(s1)
 }
 
 void
-log3(s1, s2, s3)
-	char           *s1;
-	char           *s2;
-	char           *s3;
+log3(char *s1, char *s2, char *s3)
 {
 #ifdef LOCK_LOGS
 	if (loglock_fd != -1)
@@ -154,11 +160,7 @@ log3(s1, s2, s3)
 }
 
 void
-log4(s1, s2, s3, s4)
-	char           *s1;
-	char           *s2;
-	char           *s3;
-	char           *s4;
+log4(char *s1, char *s2, char *s3, char *s4)
 {
 #ifdef LOCK_LOGS
 	if (loglock_fd != -1)
@@ -176,12 +178,7 @@ log4(s1, s2, s3, s4)
 }
 
 void
-log5(s1, s2, s3, s4, s5)
-	char           *s1;
-	char           *s2;
-	char           *s3;
-	char           *s4;
-	char           *s5;
+log5(char *s1, char *s2, char *s3, char *s4, char *s5)
 {
 #ifdef LOCK_LOGS
 	if (loglock_fd != -1)
@@ -200,14 +197,7 @@ log5(s1, s2, s3, s4, s5)
 }
 
 void
-log7(s1, s2, s3, s4, s5, s6, s7)
-	char           *s1;
-	char           *s2;
-	char           *s3;
-	char           *s4;
-	char           *s5;
-	char           *s6;
-	char           *s7;
+log7(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7)
 {
 #ifdef LOCK_LOGS
 	if (loglock_fd != -1)
@@ -228,16 +218,8 @@ log7(s1, s2, s3, s4, s5, s6, s7)
 }
 
 void
-log9(s1, s2, s3, s4, s5, s6, s7, s8, s9)
-	char           *s1;
-	char           *s2;
-	char           *s3;
-	char           *s4;
-	char           *s5;
-	char           *s6;
-	char           *s7;
-	char           *s8;
-	char           *s9;
+log9(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
+		char *s8, char *s9)
 {
 #ifdef LOCK_LOGS
 	if (loglock_fd != -1)
@@ -260,20 +242,34 @@ log9(s1, s2, s3, s4, s5, s6, s7, s8, s9)
 }
 
 void
-log13(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13)
-	char           *s1;
-	char           *s2;
-	char           *s3;
-	char           *s4;
-	char           *s5;
-	char           *s6;
-	char           *s7;
-	char           *s8;
-	char           *s9;
-	char           *s10;
-	char           *s11;
-	char           *s12;
-	char           *s13;
+log11(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
+		char *s8, char *s9, char *s10, char *s11)
+{
+#ifdef LOCK_LOGS
+	if (loglock_fd != -1)
+		lock_exnb(loglock_fd);
+#endif
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
+	substdio_puts(&sserr, s5);
+	substdio_puts(&sserr, s6);
+	substdio_puts(&sserr, s7);
+	substdio_puts(&sserr, s8);
+	substdio_puts(&sserr, s9);
+	substdio_puts(&sserr, s10);
+	substdio_puts(&sserr, s11);
+	substdio_flush(&sserr);
+#ifdef LOCK_LOGS
+	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
+		lockerr();
+#endif
+}
+
+void
+log13(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
+		char *s8, char *s9, char *s10, char *s11, char *s12, char *s13)
 {
 #ifdef LOCK_LOGS
 	if (loglock_fd != -1)
@@ -292,6 +288,37 @@ log13(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13)
 	substdio_puts(&sserr, s11);
 	substdio_puts(&sserr, s12);
 	substdio_puts(&sserr, s13);
+	substdio_flush(&sserr);
+#ifdef LOCK_LOGS
+	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
+		lockerr();
+#endif
+}
+
+void
+log15(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
+		char *s8, char *s9, char *s10, char *s11, char *s12, char *s13,
+		char *s14, char *s15)
+{
+#ifdef LOCK_LOGS
+	if (loglock_fd != -1)
+		lock_exnb(loglock_fd);
+#endif
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
+	substdio_puts(&sserr, s5);
+	substdio_puts(&sserr, s6);
+	substdio_puts(&sserr, s7);
+	substdio_puts(&sserr, s8);
+	substdio_puts(&sserr, s9);
+	substdio_puts(&sserr, s10);
+	substdio_puts(&sserr, s11);
+	substdio_puts(&sserr, s12);
+	substdio_puts(&sserr, s13);
+	substdio_puts(&sserr, s14);
+	substdio_puts(&sserr, s15);
 	substdio_flush(&sserr);
 #ifdef LOCK_LOGS
 	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
@@ -322,8 +349,7 @@ lockerr()
 #endif
 
 void
-pausedir(dir)
-	char           *dir;
+pausedir(char *dir)
 {
 	if (queuedesc)
 		log5("alert: ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n");
@@ -333,17 +359,16 @@ pausedir(dir)
 }
 
 static int
-issafe(ch)
-	char            ch;
+issafe(char ch)
 {
 	return ( ((ch == '%') || (ch < '!') || (ch > '~')) ? 0 : 1 );
 }
 
 void
-logsafe_noflush(s)
-	char           *s;
+logsafe_noflush(char *s)
 {
 	int             i;
+
 	while (!stralloc_copys(&foo, s))
 		nomem();
 	for (i = 0; i < foo.len; ++i)
@@ -356,10 +381,10 @@ logsafe_noflush(s)
 }
 
 void
-logsafe(s)
-	char           *s;
+logsafe(char *s)
 {
 	int             i;
+
 	while (!stralloc_copys(&foo, s))
 		nomem();
 	for (i = 0; i < foo.len; ++i)
@@ -374,7 +399,7 @@ logsafe(s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.13 2016-03-31 17:37:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.16 2021-06-05 22:35:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
