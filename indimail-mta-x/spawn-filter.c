@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.80  2021-06-09 19:37:34+05:30  Cprogrammer
+ * added makeargs.h
+ *
  * Revision 1.79  2021-06-01 01:55:17+05:30  Cprogrammer
  * removed rate limit code, added to qmail-send, slowq-send
  *
@@ -32,7 +35,7 @@
  * fixed spamignore control file not being read
  *
  * Revision 1.69  2020-04-01 16:14:54+05:30  Cprogrammer
- * added header for MakeArgs() function
+ * added header for makeargs() function
  *
  * Revision 1.68  2019-09-30 22:59:06+05:30  Cprogrammer
  * use sh as argv0 instead of IndiMailfilter
@@ -276,7 +279,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include "MakeArgs.h"
+#include "makeargs.h"
 #include "report.h"
 #include "getDomainToken.h"
 
@@ -796,7 +799,7 @@ main(int argc, char **argv)
 		set_environ(domain, ext, qqeh, sender.s, recipient.s);
 		if (!stralloc_copys(&spamfilterargs, spamfilterprog) ||
 				!stralloc_0(&spamfilterargs) ||
-				!(Argv = MakeArgs(spamfilterargs.s)))
+				!(Argv = makeargs(spamfilterargs.s)))
 			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 		/*- Mail content read from fd 0 */
 		if (mkTempFile(0))
@@ -871,12 +874,15 @@ main(int argc, char **argv)
 	return(0);
 }
 
+#ifndef lint
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.79 2021-06-01 01:55:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.80 2021-06-09 19:37:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
+	x = sccsidmakeargsh;
 	x++;
 }
+#endif

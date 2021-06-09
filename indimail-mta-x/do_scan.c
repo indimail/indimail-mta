@@ -1,7 +1,10 @@
 /*
  * $Log: do_scan.c,v $
+ * Revision 1.17  2021-06-09 19:34:19+05:30  Cprogrammer
+ * added makeargs.h
+ *
  * Revision 1.16  2020-04-01 16:13:35+05:30  Cprogrammer
- * added header for MakeArgs() function
+ * added header for makeargs() function
  *
  * Revision 1.15  2018-05-18 17:39:05+05:30  Cprogrammer
  * BUG - break out of loop if file extension matches a line in badext
@@ -66,7 +69,7 @@
 #include "qregex.h"
 #include "control.h"
 #include "str.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 
 extern int      flaglog;
 extern pid_t    pid;
@@ -212,7 +215,7 @@ do_scan()
 			close(0); /*- Don't let it fiddle with message */
 			close(1); /*- Don't let it fiddle with envelope */
 			if ((ptr = env_get("SCANCMD"))) {
-				if (!(scancmd = MakeArgs(ptr)))
+				if (!(scancmd = makeargs(ptr)))
 					_exit(51);
 				for (i = 1;scancmd[i];i++) {
 					if (!str_diffn(scancmd[i], "%s", 2))
@@ -245,10 +248,13 @@ do_scan()
 	return(EX_ALLOK);
 }
 
+#ifndef lint
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.16 2020-04-01 16:13:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_scan.c,v 1.17 2021-06-09 19:34:19+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidmakeargsh;
 	x++;
 }
+#endif

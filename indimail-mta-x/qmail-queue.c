@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.73  2021-06-09 19:36:44+05:30  Cprogrammer
+ * added makeargs.h
+ *
  * Revision 1.72  2021-05-29 23:50:28+05:30  Cprogrammer
  * replace str_chr with str_rchr to get domain correctly from email address
  *
@@ -28,7 +31,7 @@
  * changed default value of use_fsync as -1
  *
  * Revision 1.63  2020-04-01 16:14:45+05:30  Cprogrammer
- * added header for MakeArgs() function
+ * added header for makeargs() function
  *
  * Revision 1.62  2018-01-09 11:49:26+05:30  Cprogrammer
  * use indimail-mta identifier in Received: headers
@@ -76,7 +79,7 @@
  * additional closeflag argument to uidinit()
  *
  * Revision 1.47  2009-12-05 20:07:08+05:30  Cprogrammer
- * added prototype for MakeArgs
+ * added prototype for makeargs
  *
  * Revision 1.46  2009-12-05 20:01:24+05:30  Cprogrammer
  * ansic conversion
@@ -226,7 +229,7 @@
 #include "scan.h"
 #include "mess822.h"
 #include "wait.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 #include "auto_split.h"
 #include "getEnvConfig.h"
 #ifdef USE_FSYNC
@@ -636,10 +639,10 @@ qhpsiprog(char *program)
 				die(51);
 			if (!stralloc_0(&plugin))
 				die(51);
-			if (!(argv = MakeArgs(plugin.s)))
+			if (!(argv = makeargs(plugin.s)))
 				die(51);
 		} else {
-			if (!(argv = MakeArgs(program)))
+			if (!(argv = makeargs(program)))
 				die(51);
 			if (!argv[1]) {
 				scancmd[0] = argv[0];
@@ -1263,11 +1266,13 @@ main()
 	return (0);
 }
 
+#ifndef lint
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.72 2021-05-29 23:50:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.73 2021-06-09 19:36:44+05:30 Cprogrammer Exp mbhangui $";
 
-	if (x)
-		x++;
+	x = sccsidmakeargsh;
+	x++;
 }
+#endif
