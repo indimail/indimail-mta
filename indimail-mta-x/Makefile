@@ -1523,7 +1523,7 @@ compile trydkim.c dns_text.o conf-dkim dns.lib
 	-I/usr/include/dkim -I../libdkim-x \
 	`grep -h -v "^#" conf-dkim` trydkim.c && \
 	c++ -o trydkim trydkim.o dns_text.o \
-	`cat dns.lib` -L/usr/local/lib -L/opt/local/lib \
+	`cat dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
 	-L../libdkim-x/.libs -ldkim -lcrypto -ldkim -lqmail ) >/dev/null \
 	&& echo "-ldkim" || exit 0 ) > dkim.lib
 	rm -f trydkim.o trydkim
@@ -1534,7 +1534,7 @@ trydkim.c compile dns.lib dkim.lib conf-indi
 	-I/usr/include/dkim -I../libdkim-x \
 	`grep -h -v "^#" conf-dkim` trydkim.c && \
 	c++ -o trydkim trydkim.o dns_text.o \
-	`cat dkim.lib dns.lib` -L/usr/local/lib -L/opt/local/lib \
+	`cat dkim.lib dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
 	-L../libdkim-x/.libs -lcrypto -lqmail ) >/dev/null \
 	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h; \
 	rm -f trydkim.o trydkim
