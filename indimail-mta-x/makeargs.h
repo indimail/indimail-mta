@@ -1,6 +1,6 @@
 /*
  * $Log: makeargs.h,v $
- * Revision 1.1  2020-04-01 16:07:53+05:30  Cprogrammer
+ * Revision 1.1  2021-06-09 21:27:06+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -8,7 +8,7 @@
 #define MAKEARGS_H
 
 #ifndef	lint
-static char     sccsidmakeargsh[] = "$Id: $";
+static char     sccsidmakeargsh[] = "$Id: makeargs.h,v 1.1 2021-06-09 21:27:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char          **makeargs(char *);
