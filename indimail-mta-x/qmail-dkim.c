@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-dkim.c,v $
- * Revision 1.57  2021-06-09 19:36:09+05:30  Cprogrammer
+ * Revision 1.57  2021-06-09 21:14:33+05:30  Cprogrammer
  * use qmulti() instead of exec of qmail-multi
  *
  * Revision 1.56  2021-05-26 10:44:21+05:30  Cprogrammer
@@ -1444,10 +1444,12 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.57 2021-06-09 19:36:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.57 2021-06-09 21:14:33+05:30 Cprogrammer Exp mbhangui $";
 
+#ifdef HASDKIM
 	x = sccsidmakeargsh;
 	x = sccsidqmultih;
+#endif
 	x++;
 }
 #endif

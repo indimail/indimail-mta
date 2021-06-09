@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-dk.c,v $
- * Revision 1.52  2021-06-09 19:35:50+05:30  Cprogrammer
+ * Revision 1.52  2021-06-09 21:14:19+05:30  Cprogrammer
  * use qmulti() instead of exec of qmail-multi
  *
  * Revision 1.51  2021-05-26 10:44:10+05:30  Cprogrammer
@@ -889,10 +889,12 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.52 2021-06-09 19:35:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.52 2021-06-09 21:14:19+05:30 Cprogrammer Exp mbhangui $";
 
+#ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
 	x = sccsidqmultih;
+#endif
 	x++;
 }
 #endif
