@@ -116,6 +116,8 @@ Release 2.13 Start 14/02/2021
 71. prioq.c: added feature to get prioq list in both descending and ascending
     order
 72. delivey_rate.c: log email/curr_rate/conf_rate in logs
+- 09/06/2021
+73. split qmail-multi into qmail-multi and qmail-spamfilter
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
