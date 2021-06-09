@@ -157,6 +157,7 @@ f:::0644:/man8/:qmail-internals.8:qmail-internals.8
 f:::0644:/man8/:qmail-local.8:qmail-local.8
 f:::0644:/man8/:qmail-lspawn.8:qmail-lspawn.8
 f:::0644:/man8/:qmail-multi.8:qmail-multi.8
+f:::0644:/man8/:qmail-spamfilter.8:qmail-spamfilter.8
 f:::0644:/man8/:qmail-newmrh.8:qmail-newmrh.8
 f:::0644:/man8/:qmail-newu.8:qmail-newu.8
 f:::0644:/man8/:qmail-nullqueue.8:qmail-nullqueue.8

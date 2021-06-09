@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.286  2021-06-09 19:34:39+05:30  Cprogrammer
+ * added qmail-spamfilter
+ *
  * Revision 1.285  2021-06-01 16:50:21+05:30  Cprogrammer
  * removed controldir/ratelimit directory
  *
@@ -1128,6 +1131,7 @@ hier(inst_dir, fatal, dev_package)
 
 	/*- misc */
 	c(auto_prefix, "sbin", "qmail-multi", auto_uido, 0, moder_x);
+	c(auto_prefix, "sbin", "qmail-spamfilter", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-nullqueue", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "ldap-checkpwd", auto_uido, 0, moder_x);
 
@@ -1439,6 +1443,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man8", "dktest.8", uidr, gidr, moder_f);
 #endif
 	c(mandir_base,     "man/man8", "qmail-multi.8", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man8", "qmail-spamfilter.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "drate.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "qmail-qfilter.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "surblfilter.8", uidr, gidr, moder_f);
@@ -1502,7 +1507,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.285 2021-06-01 16:50:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.286 2021-06-09 19:34:39+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
