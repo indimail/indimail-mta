@@ -1524,7 +1524,7 @@ compile trydkim.c dns_text.o conf-dkim dns.lib
 	`grep -h -v "^#" conf-dkim` trydkim.c && \
 	c++ -o trydkim trydkim.o dns_text.o \
 	`cat dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
-	-L../libdkim-x/.libs -ldkim -lcrypto -ldkim -lqmail ) >/dev/null \
+	-L../libdkim-x/.libs -ldkim -lcrypto -ldkim -lqmail ) >/dev/null 2>&1 \
 	&& echo "-ldkim" || exit 0 ) > dkim.lib
 	rm -f trydkim.o trydkim
 
@@ -1535,7 +1535,7 @@ trydkim.c compile dns.lib dkim.lib conf-indi
 	`grep -h -v "^#" conf-dkim` trydkim.c && \
 	c++ -o trydkim trydkim.o dns_text.o \
 	`cat dkim.lib dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
-	-L../libdkim-x/.libs -lcrypto -lqmail ) >/dev/null \
+	-L../libdkim-x/.libs -lcrypto -lqmail ) >/dev/null 2>&1 \
 	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h; \
 	rm -f trydkim.o trydkim
 
@@ -1545,7 +1545,7 @@ qmulti.o dns.lib dkim.lib conf-ld-$(SYSTEM) load
 	./load qmail-dkim auto_control.o qmulti.o \
 	auto_qmail.o variables.o control.o makeargs.o \
 	dns_text.o -L../libdkim-x/.libs `cat dns.lib dkim.lib` \
-	`cat conf-ld-$(SYSTEM)` \
+	`cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	-lcrypto -lqmail
 
 qmail-dkim.o: \
