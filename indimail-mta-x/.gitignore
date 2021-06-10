@@ -640,3 +640,9 @@ slowq-start
 slowq-start.o
 slowq-start.8
 slowq-send.8
+qmail-spamfilter
+qmail-spamfilter.o
+qmail-spamfilter.8
+qmulti.o
+mailfilter.o
+mktempfile.o

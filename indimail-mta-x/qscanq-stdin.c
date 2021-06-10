@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq-stdin.c,v $
+ * Revision 1.6  2021-06-09 19:36:55+05:30  Cprogrammer
+ * use qmulti() instead of exec of qmail-multi
+ *
  * Revision 1.5  2020-11-24 13:47:46+05:30  Cprogrammer
  * removed exit.h
  *
@@ -21,19 +24,20 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "auto_qmail.h"
-#include "substdio.h"
-#include "open.h"
-#include "fd.h"
-#include "wait.h"
-#include "seek.h"
-#include "sig.h"
-#include "auto_ageout.h"
-#include "exitcodes.h"
+#include <substdio.h>
+#include <open.h>
+#include <fd.h>
+#include <wait.h>
+#include <seek.h>
+#include <sig.h>
+#include <env.h>
+#include <strerr.h>
 #include "mkfn.h"
+#include "exitcodes.h"
 #include "auto_fnlen.h"
-#include "env.h"
-#include "strerr.h"
+#include "auto_ageout.h"
+#include "auto_qmail.h"
+#include "qmulti.h"
 
 #define FATAL "qscanq: fatal: "
 
@@ -90,7 +94,6 @@ alarm_handler(int sig)
 int
 main(int argc, char *argv[])
 {
-	char           *(qqargs[]) = { "sbin/qmail-multi", 0 };
 	int             fdout = -1;
 	int             n = 0;
 	char            inbuf[2048];
@@ -193,14 +196,17 @@ main(int argc, char *argv[])
 	if (argc > 1)
 		execv(argv[1], argv + 1);
 	else
-		execv(*qqargs, argv);
+		return (qmulti(0, argc, argv));
 	_exit(QQ_XTEMP);
 }
 
+#ifndef lint
 void
 getversion_qscanq_stdin_c()
 {
-	static char    *x = "$Id: qscanq-stdin.c,v 1.5 2020-11-24 13:47:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq-stdin.c,v 1.6 2021-06-09 19:36:55+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidqmultih;
 	x++;
 }
+#endif

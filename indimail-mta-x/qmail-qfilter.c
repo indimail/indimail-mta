@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.14  2021-06-09 19:36:38+05:30  Cprogrammer
+ * use qmulti() instead of exec of qmail-multi
+ *
  * Revision 1.13  2021-05-29 23:49:54+05:30  Cprogrammer
  * replace str_chr with str_rchr to get domain correctly from email address
  *
@@ -64,15 +67,16 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <substdio.h>
+#include <env.h>
+#include <scan.h>
+#include <alloc.h>
+#include <str.h>
+#include <fmt.h>
+#include <byte.h>
 #include "auto_qmail.h"
 #include "qmail.h"
-#include "substdio.h"
-#include "env.h"
-#include "scan.h"
-#include "alloc.h"
-#include "str.h"
-#include "fmt.h"
-#include "byte.h"
+#include "qmulti.h"
 
 #ifndef TMPDIR
 #define TMPDIR "/tmp"
@@ -100,7 +104,6 @@
 static size_t   env_len = 0;
 static size_t   msg_len = 0;
 char            strnum[FMT_ULONG];
-static char    *binqqargs[2] = { "sbin/qmail-multi", 0 };
 struct substdio sserr;
 char            errbuf[256];
 
@@ -360,7 +363,7 @@ move_unless_empty(int src, int dst, const void *reopen, size_t *var)
 	}
 }
 
-static void
+char *
 read_qqfd(void)
 {
 	struct stat     st;
@@ -374,9 +377,10 @@ read_qqfd(void)
 		if (read(QQFD, buf, st.st_size) != st.st_size)
 			_exit(QQ_READ_ERROR);
 		buf[st.st_size] = 0;
-		binqqargs[0] = buf;
+		return buf;
 	}
 	close(QQFD);
+	return ((char *) 0);
 }
 
 /*
@@ -431,32 +435,36 @@ int
 main(int argc, char *argv[])
 {
 	const command  *filters;
-	char           *x;
 	int             errfd;
+	char           *x;
 
 	if (!(x = env_get("ERROR_FD")))
 		errfd = CUSTOM_ERR_FD;
 	else
 		scan_int(x, &errfd);
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
-	if (!(binqqargs[0] = getenv("QQF_QMAILQUEUE")))
-		binqqargs[0] = "sbin/qmail-multi";
 	filters = parse_args(argc - 1, argv + 1);
 	copy_fd(0, 0, &msg_len);
 	copy_fd(1, ENVIN, &env_len);
 	parse_envelope();
 	mktmpfd(QQFD);
 	run_filters(filters);
-	read_qqfd();
+	x = read_qqfd();
 	move_fd(ENVIN, 1);
-	execv(*binqqargs, binqqargs);
+	if (x)
+		execl(x, x, (char *) 0);
+	else
+		return(qmulti("QQF_QMAILQUEUE", argc, argv));
 	return QQ_INTERNAL;
 }
 
+#ifndef lint
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.13 2021-05-29 23:49:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.14 2021-06-09 19:36:38+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidqmultih;
 	x++;
 }
+#endif

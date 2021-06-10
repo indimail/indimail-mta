@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.52  2021-06-09 21:14:19+05:30  Cprogrammer
+ * use qmulti() instead of exec of qmail-multi
+ *
  * Revision 1.51  2021-05-26 10:44:10+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -7,7 +10,7 @@
  * fixed shadowing of global variables by local variables
  *
  * Revision 1.49  2020-04-01 16:14:34+05:30  Cprogrammer
- * added header for MakeArgs() function
+ * added header for makeargs() function
  *
  * Revision 1.48  2016-06-13 14:14:27+05:30  Cprogrammer
  * BUG - removed extra semicolon after if () statement
@@ -184,7 +187,8 @@
 #include "control.h"
 #include "variables.h"
 #include "domainkeys.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
+#include "qmulti.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
@@ -372,7 +376,6 @@ DK_STAT         st;
 stralloc        dkoutput = { 0 };    /*- Domainkey-Signature */
 stralloc        dksignature = { 0 }; /*- content of private signature */
 stralloc        dkopts = { 0 };
-char           *dkqueue = 0;
 char           *dkexcludeheaders;
 
 static void
@@ -573,7 +576,7 @@ dk_setoptions(char **selector, int *advicelen, int *opth, int *optr, int *optc,
 		die(51);
 	if (!stralloc_0(&dkopts))
 		die(51);
-	if (!(argv = MakeArgs(dkopts.s)))
+	if (!(argv = makeargs(dkopts.s)))
 		die(51);
 	for (argc = 0;argv[argc];argc++);
 	while ((ch = sgopt(argc, argv, "hrb:c:s:")) != sgoptdone) {
@@ -601,15 +604,13 @@ dk_setoptions(char **selector, int *advicelen, int *opth, int *optr, int *optc,
 			*selector = optarg;
 			break;
 		default:
-			FreeMakeArgs(argv);
+			free_makeargs(argv);
 			return (1);
 		}
 	} /*- while ((ch = sgopt(argc, argv, "hrb:c:s:")) != sgoptdone) */
-	FreeMakeArgs(argv);
+	free_makeargs(argv);
 	return (0);
 }
-
-static char    *binqqargs[2] = { "sbin/qmail-multi", 0 };
 
 int
 main(int argc, char *argv[])
@@ -630,16 +631,11 @@ main(int argc, char *argv[])
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61);
-	dkqueue = env_get("DKQUEUE");
-	if (dkqueue && *dkqueue)
-		binqqargs[0] = dkqueue;
 	dksign = env_get("DKSIGN");
 	dkverify = env_get("DKVERIFY");
 	relayclient = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
-	if (dkverify && relayclient && env_get("RELAYCLIENT_NODKVERIFY")) {
-		execv(*binqqargs, binqqargs);
-		die(120);
-	}
+	if (dkverify && relayclient && env_get("RELAYCLIENT_NODKVERIFY"))
+		return (qmulti("DKQUEUE", argc, argv));
 	if (!dksign && !dkverify && relayclient) {
 		if (!(dksign = env_get("DKKEY"))) {
 			if (!stralloc_copys(&dkfn, "domainkeys/%/default"))
@@ -844,8 +840,7 @@ main(int argc, char *argv[])
 		close(pim[1]);
 		if (fd_move(0, pim[0]) == -1)
 			die(120);
-		execv(*binqqargs, binqqargs);
-		die(120);
+		return (qmulti("DKQUEUE", argc, argv));
 	}
 	close(pim[0]);
 	substdio_fdbuf(&ssin, read, readfd, inbuf, sizeof(inbuf));
@@ -890,10 +885,16 @@ main(argc, argv)
 }
 #endif
 
+#ifndef lint
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.51 2021-05-26 10:44:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.52 2021-06-09 21:14:19+05:30 Cprogrammer Exp mbhangui $";
 
+#ifdef DOMAIN_KEYS
+	x = sccsidmakeargsh;
+	x = sccsidqmultih;
+#endif
 	x++;
 }
+#endif

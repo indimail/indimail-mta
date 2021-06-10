@@ -1,0 +1,110 @@
+.TH qmail-spamfilter 8
+.SH NAME
+qmail-spamfilter \- spam filter for indimail
+
+.SH SYNOPSIS
+.B qmail-spamfilter
+
+.SH DESCRIPTION
+\fBqmail-spamfilter(8)\fR allows indimail to execute anyspam filter. It
+gets invoked by indimail programs using qmail-queue frontend by defining
+the \fBQMAILQUEUE\fR environment variable
+
+.EX
+QMAILQUEUE=PREFIX/sbin/qmail-spamfilter
+.EE
+
+\fBqmail-spamfilter\fR also calls \fBqscanq\fR(8) to perform virus scanning
+or bad attachment scan by setting VIRUSCHECK environment variable between 2
+and 7.
+
+\fBqmail-spamfilter\fR uses SPAMFILTER environment variable to execute the
+actual spam filter. The SPAMFILTER env variable can contain command line
+arguments. The spam filter defined by SPAMFILTER environment variable
+should read descriptor 0 and write to descriptor 1
+
+The sequence in which the filter program is run is given below
+
+.TP 5
+1. create a pipe and fork
+.TP 5
+2. dup write end of the pipe to descriptor 1 in the child and exec the
+filter program
+.TP 5
+3. dup read end of the pipe to descriptor 0 in parent and exec
+\fBqmail-queue\fR.
+.TP 0
+
+This gives the ability for the SPAMFILTER program to read the mail message
+from descriptor 0 before passing it to \fBqmail-queue\fR through the pipe.
+
+\fBqmail-spamfilter\fR will attempt to make the descriptor 0 seekable if
+the environment variable MAKE_SEEKABLE is defined. This may be necessary
+for certain filter programs like bogofilter which allocate memory for the
+mail message when lseek(2) fails.
+
+In this case following interpretations on the exit status will be made
+
+ Exit Status     Interpretation
+ -----------     --------------
+ 0,1,2           Program ran successfully. Interpretation depends
+                 on filter implementation. Mail will be accepted
+                 unless REJECTSPAM is set. See description below.
+ anything else   Mail will be rejected with a temporary error
+
+A typical application of this would be to run spam filtering software like
+spamassasin, bogofilter, etc
+
+When the exit code of the filter program matches SPAMEXITCODE, the mail is
+considered to be spam.
+
+If REJECTSPAM is set to 1, the mail will be bounced back to the sender. If
+NOTIFYSPAM is set, mails will be redirected to the recipient specified by
+the NOTIFYSPAM environment variable. If NOTIFYSPAM is not set, the
+recipient can be specified by the \fBglobalspamredirect\fR control file.
+The email id in \fBglobalspamdirect\fR can be overriden by the environment
+variable \fBGLOBALSPAMREDIRECT\fR. If both REJECTSPAM and NOTIFYSPAM are
+set, spam mails will be bounced back to the sender with a copy redirected
+to the recipient specified in by the NOTIFYSPAM environment variable as
+well (or the \fBglobalspamredirect\fR control file). you may decide not to
+generate a bounce to the sender by setting the environment variable 
+\fBREJECTSPAM\fR to a value greater than 1 (i.e. black hole SPAM mails).
+
+\fBqmail-spamfilter\fR invokes \fBqmail-multi\fR to deposit the mail. This
+can be changed by setting environment variable \fBSPAMQUEUE\fR to the path
+of any qmail-queue frontend.
+
+.SH "EXIT CODES"
+\fBqmail-spamfilter\fR does not print diagnostics.
+.EX
+It exits 51 if it cannot allocate memory
+It exits 55 if it is not able get the free space for the queue filesystem.
+It exits 53 if the free space is below MIN_FREE value.
+It exits 60 if it cannot create pipes or dup file descriptors.
+It exits 61 if cannot change directory to QMAILHOME
+It exits 68 if it cannot create temporary files to make the input seekable.
+It exits 75 if cannot exec qscanq.
+It exits 120 if it is not able to exec \fBqmail-multi\fR.
+It exits 123 if \fBqmail-multi\fR crashes.
+.EE
+
+.SH "SEE ALSO"
+addresses(5),
+rfc-822(5),
+qmail-send(8),
+qmail-inject(8),
+qmail-smtpd(8),
+sendmail(8),
+qmail-control(5),
+qmail-header(5),
+qmail-queue(8),
+qmail-qmqpc(8),
+qscanq(8),
+cleanq(8),
+bogofilter(1),
+queue-fix(8),
+spawn-filter(8)
+
+.SH "AUTHORS"
+
+"Manvendra Bhangui" <manvendra@indimail.org>.

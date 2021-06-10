@@ -1,1 +1,1 @@
--L/opt/local/lib
+-pie -L/opt/local/lib

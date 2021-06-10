@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.27  2021-06-09 19:35:39+05:30  Cprogrammer
+ * added makeargs.h
+ *
  * Revision 1.26  2021-05-26 11:06:29+05:30  Cprogrammer
  * use starttls.h for prototypes in starttls.c
  *
@@ -25,7 +28,7 @@
  * set controldir variable in cdb_match() function
  *
  * Revision 1.18  2020-04-01 16:14:30+05:30  Cprogrammer
- * added header for MakeArgs() function
+ * added header for makeargs() function
  *
  * Revision 1.17  2018-06-01 14:49:22+05:30  Cprogrammer
  * added 'E' option to send back TLSA RR data
@@ -114,7 +117,7 @@
 #include "env.h"
 #include "haveip6.h"
 #include "ip.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
 #include "starttls.h"
@@ -1364,11 +1367,14 @@ main()
 }
 #endif
 
+#ifndef lint
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.26 2021-05-26 11:06:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.27 2021-06-09 19:35:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidstarttlsh;
+	x = sccsidmakeargsh;
 	x++;
 }
+#endif

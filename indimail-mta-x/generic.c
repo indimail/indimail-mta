@@ -1,7 +1,10 @@
 /*
  * $Log: generic.c,v $
+ * Revision 1.5  2021-06-09 19:34:32+05:30  Cprogrammer
+ * added makeargs.h
+ *
  * Revision 1.4  2020-04-01 16:13:40+05:30  Cprogrammer
- * added header for MakeArgs() function
+ * added header for makeargs() function
  *
  * Revision 1.3  2009-04-30 16:14:55+05:30  Cprogrammer
  * removed hasindimail.h
@@ -17,7 +20,7 @@
 #include "str.h"
 #include "env.h"
 #include "wait.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 
 extern char    *auto_scancmd[];
 
@@ -37,7 +40,7 @@ virusscan(char *messfn)
 	case 0:
 		if ((ptr = env_get("SCANCMD")))
 		{
-			if (!(argv = MakeArgs(ptr)))
+			if (!(argv = makeargs(ptr)))
 				_exit(51);
 		} else
 			argv = auto_scancmd;
@@ -65,10 +68,13 @@ virusscan(char *messfn)
 	_exit(wait_exitcode(wstat));
 }
 
+#ifndef lint
 void
 getversion_generic_c()
 {
-	static char    *x = "$Id: generic.c,v 1.4 2020-04-01 16:13:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: generic.c,v 1.5 2021-06-09 19:34:32+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidmakeargsh;
 	x++;
 }
+#endif

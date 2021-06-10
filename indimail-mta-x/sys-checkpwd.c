@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.11  2021-06-09 19:37:40+05:30  Cprogrammer
+ * added makeargs.h
+ *
  * Revision 1.10  2021-05-26 10:47:37+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -53,7 +56,7 @@
 #include "subfd.h"
 #include "in_crypt.h"
 #include "pw_comp.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 
 #define FATAL "sys-checkpwd: fatal: "
 #define WARN  "sys-checkpwd: warn: "
@@ -102,7 +105,7 @@ runcmmd(char *cmmd)
 	case -1:
 		_exit(111);
 	case 0:
-		if (!(argv = MakeArgs(cmmd)))
+		if (!(argv = makeargs(cmmd)))
 			_exit(111);
 		execv(*argv, argv);
 		strerr_die2sys(111, *argv, ": ");
@@ -313,10 +316,13 @@ main(int argc, char **argv)
 	return (0);
 }
 
+#ifndef lint
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.10 2021-05-26 10:47:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.11 2021-06-09 19:37:40+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidmakeargsh;
 	x++;
 }
+#endif

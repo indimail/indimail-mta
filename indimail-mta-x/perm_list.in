@@ -139,6 +139,7 @@
 %attr(0755,root,root)  @prefix@/sbin/qmail-tcpok
 %attr(0755,root,root)  @prefix@/sbin/qmail-tcpto
 %attr(0755,root,root)  @prefix@/sbin/qmail-multi
+%attr(0755,root,root)  @prefix@/sbin/qmail-spamfilter
 %attr(0755,root,root)  @prefix@/sbin/qmail-nullqueue
 %attr(0755,root,root)  @prefix@/sbin/qmail-qmqpc
 %attr(0755,root,root)  @prefix@/sbin/qscanq-stdin
@@ -466,6 +467,7 @@
 %attr(0644,root,root) @mandir@/man8/qmail-local.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-lspawn.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-multi.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-spamfilter.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-newmrh.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-newu.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-nullqueue.8.gz

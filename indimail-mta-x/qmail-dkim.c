@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.57  2021-06-09 21:14:33+05:30  Cprogrammer
+ * use qmulti() instead of exec of qmail-multi
+ *
  * Revision 1.56  2021-05-26 10:44:21+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -7,7 +10,7 @@
  * fixed shadowing of global variables by local variables
  *
  * Revision 1.54  2020-04-01 16:14:36+05:30  Cprogrammer
- * added header for MakeArgs() function
+ * added header for makeargs() function
  *
  * Revision 1.53  2019-06-14 21:26:37+05:30  Cprogrammer
  * added env variable HONOR_BODYLENGTHTAG to honor body length tag during verification
@@ -199,8 +202,9 @@
 #include "error.h"
 #include "control.h"
 #include "dkim.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 #include "variables.h"
+#include "qmulti.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
@@ -396,7 +400,6 @@ stralloc        dksignature = { 0 }; /*- content of private signature */
 stralloc        sigdomains = { 0 };  /*- domains which must have signatures */
 stralloc        nsigdomains = { 0 }; /*- domains which do not have signatures */
 stralloc        dkimopts = { 0 };
-char           *dkimqueue = 0;
 
 static void
 write_signature(char *domain, char *keyfn)
@@ -999,8 +1002,6 @@ checkPractice(int dkimRet, int useADSP, int useSSP)
 	return (0);
 }
 
-static char    *binqqargs[2] = { "sbin/qmail-multi", 0 };
-
 int
 dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 {
@@ -1025,7 +1026,7 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 		die(51, 0);
 	if (!stralloc_0(&dkimopts))
 		die(51, 0);
-	if (!(argv = MakeArgs(dkimopts.s)))
+	if (!(argv = makeargs(dkimopts.s)))
 		die(51, 0);
 	for (argc = 0;argv[argc];argc++);
 #ifdef HAVE_EVP_SHA256
@@ -1048,7 +1049,7 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 				opts->nIncludeBodyHash = DKIM_BODYHASH_BOTH;
 				break;
 			default:
-				FreeMakeArgs(argv);
+				free_makeargs(argv);
 				return (1);
 			}
 			break;
@@ -1068,7 +1069,7 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 				opts->nCanon = DKIM_SIGN_SIMPLE_RELAXED;
 				break;
 			default:
-				FreeMakeArgs(argv);
+				free_makeargs(argv);
 				return (1);
 			}
 			break;
@@ -1110,17 +1111,17 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 				opts->nHash = DKIM_HASH_SHA1_AND_256;
 				break;
 			default:
-				FreeMakeArgs(argv);
+				free_makeargs(argv);
 				return (1);
 			}
 			break;
 #endif
 		default:
-			FreeMakeArgs(argv);
+			free_makeargs(argv);
 			return (1);
 		} /*- switch (ch) */
 	} /*- while (1) */
-	FreeMakeArgs(argv);
+	free_makeargs(argv);
 	return (0);
 }
 
@@ -1149,16 +1150,11 @@ main(int argc, char *argv[])
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61, 0);
-	dkimqueue = env_get("DKIMQUEUE");
-	if (dkimqueue && *dkimqueue)
-		binqqargs[0] = dkimqueue;
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
 	ptr = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
-	if (dkimverify && ptr && env_get("RELAYCLIENT_NODKIMVERIFY")) {
-		execv(*binqqargs, binqqargs);
-		die(120, 0);
-	}
+	if (dkimverify && ptr && env_get("RELAYCLIENT_NODKIMVERIFY"))
+		return (qmulti("DKIMQUEUE", argc, argv));
 	if (!dkimsign && !dkimverify && ptr) {
 		if (!(dkimsign = env_get("DKIMKEY"))) {
 			if (!stralloc_copys(&dkimfn, "domainkeys/%/default"))
@@ -1399,8 +1395,7 @@ main(int argc, char *argv[])
 		close(pim[1]);
 		if (fd_move(0, pim[0]) == -1)
 			die(120, 0);
-		execv(*binqqargs, binqqargs);
-		die(120, 0);
+		return (qmulti("DKIMQUEUE", argc, argv));
 	}
 	close(pim[0]);
 	substdio_fdbuf(&ssin, read, readfd, inbuf, sizeof(inbuf));
@@ -1445,10 +1440,16 @@ main(argc, argv)
 }
 #endif
 
+#ifndef lint
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.56 2021-05-26 10:44:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.57 2021-06-09 21:14:33+05:30 Cprogrammer Exp mbhangui $";
 
+#ifdef HASDKIM
+	x = sccsidmakeargsh;
+	x = sccsidqmultih;
+#endif
 	x++;
 }
+#endif

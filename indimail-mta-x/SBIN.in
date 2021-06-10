@@ -59,5 +59,6 @@ f:qscand:qscand:04551:/sbin/:qscanq:qscanq
 f:root:qscand:02551:/sbin/:run-cleanq:run-cleanq
 f:root::04551:/sbin/:sys-checkpwd:sys-checkpwd
 f:::0755:/sbin/:qmail-multi:qmail-multi
+f:::0755:/sbin/:qmail-spamfilter:qmail-spamfilter
 f:::0755:/sbin/:qmail-nullqueue:qmail-nullqueue
 f:::0755:/sbin/:ldap-checkpwd:ldap-checkpwd

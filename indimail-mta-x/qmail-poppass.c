@@ -1,7 +1,10 @@
 /*
  * $Log: qmail-poppass.c,v $
+ * Revision 1.5  2021-06-09 19:36:23+05:30  Cprogrammer
+ * added makeargs.h
+ *
  * Revision 1.4  2020-04-01 16:14:42+05:30  Cprogrammer
- * added header for MakeArgs() function
+ * added header for makeargs() function
  *
  * Revision 1.3  2009-08-06 22:53:21+05:30  Cprogrammer
  * remove '\r' from input stream
@@ -46,7 +49,7 @@
 #include "getln.h"
 #include "error.h"
 #include "auto_uids.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 
 static char     ssinbuf[1024];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
@@ -231,7 +234,7 @@ main(int argc, char **argv)
 		sleep(1);
 		return (1);
 	}
-	if (!(passargs = MakeArgs(ptr)))
+	if (!(passargs = makeargs(ptr)))
 		my_error("out of memory", 0);
 	host = argv[1];
 	authargs = argv + 2;
@@ -351,10 +354,13 @@ main(int argc, char **argv)
 	return(0);
 }
 
+#ifndef lint
 void
 getversion_qmail_poppass_c()
 {
-	static char    *x = "$Id: qmail-poppass.c,v 1.4 2020-04-01 16:14:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-poppass.c,v 1.5 2021-06-09 19:36:23+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidmakeargsh;
 	x++;
 }
+#endif
