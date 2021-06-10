@@ -60,9 +60,12 @@ these \fIN\fR queues.
 be changed by setting environment variable \fBQUEUEPROG\fR to the path of
 any qmail-queue frontend. \fBQUEUEPROG\fR is typically used when you want
 to use write your own queue frontend, with the queue path available in
-\fBQUEUEDIR\fR environment variable;
+\fBQUEUEDIR\fR environment variable. if \fBQUEUEDIR\fB is set
+\fBqmail-multi\fR execs \fBqmail-queue\fR (or program defined by
+\fBQUEUEPROG\fR without any processing or setting up any environment
+variables.
 
-\fBqmail-multi\fR has the ability to run any filter by setting the
+\fBqmail-multi\fR has the ability to run any filter defined by setting the
 FILTERARGS environment variable. Any command defined by FILTERARGS will be
 run using /bin/sh. The input to this filter will be fd 0 and the output
 will be piped to \fBqmail-queue\fR. e.g.
