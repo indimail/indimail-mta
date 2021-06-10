@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-spamfilter.c,v $
- * Revision 1.1  2021-06-09 19:32:55+05:30  Cprogrammer
+ * Revision 1.1  2021-06-10 15:05:03+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -145,7 +145,6 @@ main(int argc, char **argv)
 		_exit(123);
 	}
 	/*
-	 * Drop message if filter returns 99
 	 * Process message if exit code is 0, 1, 2
 	 */
 	switch (filt_exitcode = wait_exitcode(wstat))
@@ -220,7 +219,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.1 2021-06-09 19:32:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.1 2021-06-10 15:05:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;
