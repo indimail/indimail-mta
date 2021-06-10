@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.144 2021-05-26 10:46:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.145 2021-06-10 10:54:26+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -1035,9 +1035,7 @@ blast()
 
 #ifdef SMTPUTF8
 int
-containsutf8(p, l)
-	unsigned char  *p;
-	int             l;
+containsutf8(char *p, int l)
 {
 	int             i = 0;
 
@@ -3703,7 +3701,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.144 2021-05-26 10:46:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.145 2021-06-10 10:54:26+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3711,6 +3709,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.145  2021-06-10 10:54:26+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.144  2021-05-26 10:46:02+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *

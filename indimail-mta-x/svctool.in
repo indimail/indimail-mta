@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.560 2021-05-30 07:42:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.561 2021-06-10 10:56:29+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.560 2021-05-30 07:42:42+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.561 2021-06-10 10:56:29+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -8941,8 +8941,14 @@ elif [ -f /etc/init/svscan.conf ] ; then
 	file=/etc/init/svscan.conf
 elif [ -f /lib/systemd/system/svscan.service ] ; then
 	file=/lib/systemd/system/svscan.service
+	if [ -d "$file".d ] ; then
+		file="$file $file.d"
+	fi
 elif [ -f /usr/lib/systemd/system/svscan.service ] ; then
 	file=/usr/lib/systemd/system/svscan.service
+	if [ -d "$file".d ] ; then
+		file="$file $file.d"
+	fi
 fi
 # who cuts the barber
 if [ -f $sysconfdir/backup.conf ] ; then
@@ -8950,13 +8956,10 @@ if [ -f $sysconfdir/backup.conf ] ; then
 fi
 servicedir=$1
 (
-for i in $servicedir $CONTROLDIR \
-	$sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
-	$QmailHOME/alias/.qmail-* \
-	/etc/inittab /etc/init.d/svscan \
-	$file /etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
-	/etc/resolv.conf \
-	$QmailHOME/.bashrc $QmailHOME/.bash_profile \
+for i in $servicedir $sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
+	$QmailHOME/alias/.qmail-* /etc/inittab /etc/init.d/svscan \
+	/etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
+	/etc/resolv.conf $QmailHOME/.bashrc $QmailHOME/.bash_profile \
 	$QmailHOME/.indimail $file
 do
 	if [ -f $i -o -d $i ] ; then
