@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.16  2021-06-10 10:52:41+05:30  Cprogrammer
+ * fixed uninitialized variables in do_test()
+ *
  * Revision 1.15  2021-06-05 12:48:27+05:30  Cprogrammer
  * display time_needed to reach configured rates
  *
@@ -336,7 +339,7 @@ new:
 void
 do_test(char *domain, int force)
 {
-	int             i;
+	int             i = -1;
 	char           *rate_expr = 0;
 	char            strdouble1[FMT_DOUBLE], strdouble2[FMT_DOUBLE];
 	unsigned long   email_count;
@@ -388,11 +391,14 @@ do_test(char *domain, int force)
 	} else
 	if (errno != error_noent)
 		strerr_die2sys(111, FATAL, "open: .global: ");
-	strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
-	strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
-	strnum1[fmt_ulong(strnum1, email_count)] = 0;
-	strnum2[fmt_long(strnum2, time_needed)] = 0;
-	strerr_warn9(domain, ": email rate [", strnum1, "/", strdouble1, "/", strdouble2, "] need ", strnum2, 0);
+	if (i == 1) {
+		strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
+		strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
+		strnum1[fmt_ulong(strnum1, email_count)] = 0;
+		strnum2[fmt_long(strnum2, time_needed)] = 0;
+		strerr_warn9(domain, ": email rate [", strnum1, "/", strdouble1, "/", strdouble2, "] need ", strnum2, 0);
+	} else
+		strerr_warn2(domain, ": email rate not configured", 0);
 	return;
 }
 
@@ -515,7 +521,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.15 2021-06-05 12:48:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.16 2021-06-10 10:52:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
