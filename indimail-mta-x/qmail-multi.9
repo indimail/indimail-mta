@@ -59,8 +59,8 @@ these \fIN\fR queues.
 \fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. This can
 be changed by setting environment variable \fBQUEUEPROG\fR to the path of
 any qmail-queue frontend. \fBQUEUEPROG\fR is typically used when you want
-to use \fBQMQP\fR, using \fBqmail-qmqpc\fR, to queue your mails to a
-centralized queue hub.
+to use write your own queue frontend, with the queue path available in
+\fBQUEUEDIR\fR environment variable;
 
 \fBqmail-multi\fR has the ability to run any filter by setting the
 FILTERARGS environment variable. Any command defined by FILTERARGS will be
@@ -118,11 +118,12 @@ It exits 60 if it cannot create pipes or dup file descriptors.
 It exits 61 if cannot change directory to QMAILHOME
 It exits 68 if it cannot create temporary files to make the input seekable.
 It exits 121 if fork fails
-It exits 31 if the program/script defined by \fBFILTERARGS\fR (or defined
-in the control file \fBfilterargs\fR) returns 100 (i.e. mail gets bounced).
+It exits 31 if the program/script defined by \fBFILTERARGS\fR returns 100
+(i.e. mail gets bounced).
 If the program/script defined by \fBFILTERARGS\fR returns 2, then the mail
-gets blackholed. If the program/script defined by \fBFILTERARGS\fR exits
-non-zero status, it exits 71 and a temporary error is issued.
+gets blackholed.
+If the program/script defined by \fBFILTERARGS\fR exits non-zero status,
+it exits 71 and a temporary error is issued.
 It exits 88 when the filter program exits with return value of 88 and also
 passes the error message printed by the filter program on fd2 to
 \fBqmail-queue\fER
