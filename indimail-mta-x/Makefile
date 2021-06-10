@@ -434,7 +434,7 @@ conf-split conf-sysconfdir
 	chmod 755 config-fast
 
 control.o: \
-compile control.c control.h variables.h auto_control.h makeargs.h
+compile control.c control.h variables.h auto_control.h
 	./compile control.c
 
 datemail: \
@@ -889,15 +889,12 @@ run-cleanq.o: compile run-cleanq.c auto_libexec.h \
 conf-servicedir
 	./compile -DSERVICEDIR=\"`head -1 conf-servicedir`\" run-cleanq.c
 
-makeargs.o: compile makeargs.c
-	./compile makeargs.c
-
 qscanq-stdin: load qscanq-stdin.o auto_qmail.o \
-auto_spool.o mkfn.o makeargs.o do_ripmime.o auto_ripmime_cmd.o \
+auto_spool.o mkfn.o do_ripmime.o auto_ripmime_cmd.o \
 do_scan.o auto_scancmd.o do_cleanq.o auto_cleaner.o qregex.o \
 wildmat.o matchregex.o variables.o control.o auto_control.o \
 fmt_xpid.o qmulti.o
-	./load qscanq-stdin auto_qmail.o makeargs.o \
+	./load qscanq-stdin auto_qmail.o \
 	matchregex.o auto_spool.o mkfn.o do_ripmime.o \
 	auto_ripmime_cmd.o do_scan.o auto_scancmd.o do_cleanq.o \
 	auto_cleaner.o qregex.o wildmat.o control.o variables.o \
@@ -911,7 +908,7 @@ do_ripmime.o: compile do_ripmime.c exitcodes.h
 	./compile do_ripmime.c
 
 do_scan.o: compile do_scan.c exitcodes.h qregex.h control.h \
-auto_qmail.h variables.h auto_control.h makeargs.h
+auto_qmail.h variables.h auto_control.h
 	./compile do_scan.c
 
 auto_ripmime_cmd.c: auto-strarr conf-ripmime-cmd
@@ -1333,11 +1330,11 @@ auto_sysconfdir.h set_environment.h conf-queue
 		./compile -DQUEUE_COUNT=10 qmail-qread.c; \
 	fi
 
-qmail-multi: load qmail-multi.o qmulti.o makeargs.o auto_control.o \
-auto_qmail.o variables.o control.o mailfilter.o mktempfile.o \
+qmail-multi: load qmail-multi.o qmulti.o auto_control.o \
+auto_qmail.o variables.o control.o mailfilter.o \
 dns.lib socket.lib
-	./load qmail-multi qmulti.o makeargs.o auto_control.o \
-	auto_qmail.o variables.o control.o mailfilter.o mktempfile.o \
+	./load qmail-multi qmulti.o auto_control.o \
+	auto_qmail.o variables.o control.o mailfilter.o \
 	`cat dns.lib socket.lib` -lqmail
 
 qmail-multi.o: \
@@ -1351,13 +1348,13 @@ qmail-multi.9 conf-prefix conf-qmail
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qmail-multi.8
 
-qmail-spamfilter: load qmail-spamfilter.o qmulti.o makeargs.o \
-auto_control.o auto_qmail.o control.o mktempfile.o
-	./load qmail-spamfilter qmulti.o makeargs.o auto_control.o \
-	auto_qmail.o variables.o control.o mktempfile.o -lqmail
+qmail-spamfilter: load qmail-spamfilter.o qmulti.o \
+auto_control.o auto_qmail.o control.o
+	./load qmail-spamfilter qmulti.o auto_control.o \
+	auto_qmail.o variables.o control.o -lqmail
 
 qmail-spamfilter.o: \
-compile qmail-spamfilter.c auto_qmail.h mktempfile.h
+compile qmail-spamfilter.c auto_qmail.h
 	./compile qmail-spamfilter.c
 
 qmail-spamfilter.8: \
@@ -1372,26 +1369,22 @@ compile qmulti.c auto_qmail.h control.h qmulti.h
 	./compile qmulti.c
 
 mailfilter.o: \
-compile mailfilter.c mailfilter.h qmulti.h mktempfile.h
+compile mailfilter.c mailfilter.h qmulti.h
 	./compile mailfilter.c
-
-mktempfile.o: \
-compile mktempfile.c mktempfile.h
-	./compile mktempfile.c
 
 spawn-filter: \
 load spawn-filter.o variables.o report.o \
-auto_qmail.o control.o wildmat.o qregex.o makeargs.o \
+auto_qmail.o control.o wildmat.o qregex.o \
 auto_control.o matchregex.o envrules.o getDomainToken.o \
 socket.lib dns.lib
 	./load spawn-filter variables.o report.o \
 	auto_qmail.o control.o wildmat.o qregex.o \
-	makeargs.o auto_control.o matchregex.o getDomainToken.o \
+	auto_control.o matchregex.o getDomainToken.o \
 	envrules.o `cat dns.lib socket.lib` -lm -lqmail
 
 spawn-filter.o: \
 compile spawn-filter.c control.h auto_qmail.h variables.h qregex.h \
-makeargs.h report.h getDomainToken.h
+report.h getDomainToken.h
 	./compile spawn-filter.c
 
 spawn-filter.8: \
@@ -1439,10 +1432,10 @@ qmail-direct.9 conf-sysconfdir
 	> qmail-direct.8
 
 qmail-queue: \
-load qmail-queue.o triggerpull.o fmtqfn.o get_uid.o makeargs.o \
+load qmail-queue.o triggerpull.o fmtqfn.o get_uid.o \
 auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
 control.o auto_control.o strsalloc.o socket.lib libsyncdir.a
-	./load qmail-queue triggerpull.o fmtqfn.o get_uid.o makeargs.o \
+	./load qmail-queue triggerpull.o fmtqfn.o get_uid.o \
 	auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
 	control.o auto_control.o strsalloc.o \
 	`cat socket.lib` -L. -lsyncdir -lqmail
@@ -1454,7 +1447,7 @@ qmail-queue.9 conf-qmail conf-prefix conf-servicedir conf-split
 	> qmail-queue.8
 
 qmail-queue.o: \
-compile qmail-queue.c matchregex.h triggerpull.h makeargs.h \
+compile qmail-queue.c matchregex.h triggerpull.h \
 control.h auto_qmail.h auto_uids.h fmtqfn.h \
 variables.h conf-sync conf-qhpsi conf-ip conf-mailarch syncdir.h
 	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
@@ -1494,17 +1487,17 @@ dknewkey: dknewkey.sh warn-auto.sh
 qmail-dk: \
 load qmail-dk.o tlsarralloc.o auto_control.o qmulti.o \
 auto_qmail.o variables.o dns.o strsalloc.o ip.o \
-ipalloc.o makeargs.o socket_v4mappedprefix.o socket_v6any.o \
+ipalloc.o socket_v4mappedprefix.o socket_v6any.o \
 domainkeys.o dktrace.o control.o dns_text.o dns.lib
 	./load qmail-dk auto_control.o auto_qmail.o qmulti.o \
 	variables.o socket_v4mappedprefix.o tlsarralloc.o \
 	socket_v6any.o dns.o strsalloc.o ip.o ipalloc.o \
-	domainkeys.o dktrace.o control.o dns_text.o makeargs.o \
+	domainkeys.o dktrace.o control.o dns_text.o \
 	`cat dns.lib` -lcrypto -lqmail
 
 qmail-dk.o: \
 compile qmail-dk.c qmail.h auto_qmail.h control.h domainkeys.h \
-variables.h conf-domainkeys auto_control.h makeargs.h qmulti.h
+variables.h conf-domainkeys auto_control.h qmulti.h
 	./compile `grep -h -v "^#" conf-domainkeys` qmail-dk.c
 
 qmail-dk.8: qmail-dk.9 conf-sysconfdir
@@ -1540,17 +1533,17 @@ trydkim.c compile dns.lib dkim.lib conf-indi
 	rm -f trydkim.o trydkim
 
 qmail-dkim: qmail-dkim.o auto_control.o \
-auto_qmail.o variables.o control.o makeargs.o dns_text.o \
+auto_qmail.o variables.o control.o dns_text.o \
 qmulti.o dns.lib dkim.lib conf-ld-$(SYSTEM) load
 	./load qmail-dkim auto_control.o qmulti.o \
-	auto_qmail.o variables.o control.o makeargs.o \
+	auto_qmail.o variables.o control.o \
 	dns_text.o -L../libdkim-x/.libs `cat dns.lib dkim.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	-lcrypto -lqmail
 
 qmail-dkim.o: \
 compile qmail-dkim.c qmail.h auto_qmail.h control.h domainkeys.h \
-hasdkim.h variables.h auto_control.h makeargs.h qmulti.h
+hasdkim.h variables.h auto_control.h qmulti.h
 	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
 		-I../libdkim-x -I/opt/local/include/dkim qmail-dkim.c
 
@@ -2867,11 +2860,11 @@ auto_control.o auto_sysconfdir.o set_environment.o
 	auto_sysconfdir.o auto_control.o set_environment.o -lqmail
 
 qmail-poppass: \
-load qmail-poppass.o auto_uids.o makeargs.o
-	./load qmail-poppass auto_uids.o makeargs.o -lqmail
+load qmail-poppass.o auto_uids.o
+	./load qmail-poppass auto_uids.o -lqmail
 
 qmail-poppass.o: \
-compile qmail-poppass.c auto_uids.h makeargs.h
+compile qmail-poppass.c auto_uids.h
 	./compile qmail-poppass.c
 
 rpmattr: \
@@ -3133,7 +3126,7 @@ sortedtest: load sortedtest.o sorted.o
 sortedtest.o: compile sortedtest.c sorted.h
 	./compile sortedtest.c
 
-generic.o: compile generic.c makeargs.h
+generic.o: compile generic.c
 	./compile generic.c
 
 relaytest.o: compile relaytest.c
@@ -3260,20 +3253,20 @@ load qmail-daned.o ip.o socket_v6any.o socket_v4mappedprefix.o \
 variables.o auto_control.o control.o auto_qmail.o \
 ipalloc.o dns.o dnsdoe.o strsalloc.o socket_tcp.o \
 socket_tcp6.o timeoutconn.o tlsarralloc.o ssl_timeoutio.o \
-socket_ip4loopback.o socket_v6loopback.o makeargs.o \
+socket_ip4loopback.o socket_v6loopback.o \
 dns.lib tls.o tls.lib starttls.o
 	./load qmail-daned auto_control.o ssl_timeoutio.o \
 	ip.o socket_v6any.o socket_v4mappedprefix.o \
 	tlsarralloc.o variables.o control.o auto_qmail.o \
 	ipalloc.o dns.o dnsdoe.o strsalloc.o socket_tcp.o \
 	socket_tcp6.o timeoutconn.o socket_ip4loopback.o \
-	socket_v6loopback.o starttls.o makeargs.o \
+	socket_v6loopback.o starttls.o \
 	tls.o `cat dns.lib tls.lib` -lqmail
 
 qmail-daned.o: \
 compile qmail-daned.c control.h variables.h \
 tlsacheck.h haveip6.h ip.h auto_qmail.h auto_control.h \
-hastlsa.h makeargs.h starttls.h conf-ip conf-tls
+hastlsa.h starttls.h conf-ip conf-tls
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls` \
 	qmail-daned.c
 
@@ -3364,14 +3357,14 @@ sql-database.9 conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> sql-database.8
 	
-sys-checkpwd: load sys-checkpwd.o makeargs.o \
+sys-checkpwd: load sys-checkpwd.o \
 shadow.lib
-	./load sys-checkpwd makeargs.o \
+	./load sys-checkpwd \
 	`cat shadow.lib` -lqmail
 
 sys-checkpwd.o: \
 compile sys-checkpwd.c hasspnam.h \
-hasuserpw.h makeargs.h
+hasuserpw.h
 	./compile sys-checkpwd.c
 
 hasifaddr.h: \
@@ -3657,14 +3650,14 @@ smtpd-plugin.so: smtp_plugin.o
 smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
 	./compile smtp_plugin.c
 
-generic.so: generic.o auto_scancmd.o makeargs.o conf-ld-$(SYSTEM)
+generic.so: generic.o auto_scancmd.o conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 		$(LD) -bundle -undefined dynamic_lookup -o generic.so generic.o \
-		auto_scancmd.o makeargs.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
+		auto_scancmd.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 		-lqmail; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s \
-		-O4 -o generic.so generic.o auto_scancmd.o makeargs.o \
+		-O4 -o generic.so generic.o auto_scancmd.o \
 		`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	fi
 
