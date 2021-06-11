@@ -32,7 +32,7 @@ Release 1.1 Start 27/02/2021
 17. remove zero bytes package_name-stat.override file
 - 03/05/2021
 18. do systemctl daemon-reload after installing/removing svscan service
-19. timestam.h: fix function prototype for timestamp()
+19. timestamp.h: fix function prototype for timestamp()
 - 06/05/2021
 20. minisvc: removed mixed use of space and tab
 - 12/05/2021
@@ -41,6 +41,9 @@ Release 1.1 Start 27/02/2021
 22. minisvc: fixed TMPDIR creation
 - 17/05/2021
 23. systemd.override.conf: added systemd-time-wait-sync.service in After=
+- 06/06/2021
+24. supervise.c: indicate service name in logs when supervised service
+    exits/crashes
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
