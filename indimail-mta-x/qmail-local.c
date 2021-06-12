@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.39  2021-06-12 18:19:53+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.38  2021-06-01 10:05:39+05:30  Cprogrammer
  * replaced myctime() with libqmail qtime()
  *
@@ -120,7 +123,6 @@
 #include "qtime.h"
 #include "gfrom.h"
 #include "constmap.h"
-#include "auto_qmail.h"
 #include "control.h"
 #include "variables.h"
 #include "hassrs.h"
@@ -476,14 +478,9 @@ checkhome(char *home_dir)
 	}
 	if (!env_get("LOCALDOMAINS") && stat(".localdomains", &st))
 		ldmok = 0;
-	else {
-		if (chdir(auto_qmail) == -1)
-			strerr_die5x(111, "Unable to switch to ", auto_qmail, ": ", error_str(errno), ". (#4.3.0)");
-		if ((ldmok = control_readfile(&ldm, "localdomains", 0)) == -1)
-			strerr_die1x(111, "Unable to read control file [localdomains]. (#4.3.0)");
-		if (chdir(home_dir) == -1)
-			strerr_die5x(111, "Unable to switch to ", home_dir, ": ", error_str(errno), ". (#4.3.0)");
-	}
+	else
+	if ((ldmok = control_readfile(&ldm, "localdomains", 0)) == -1)
+		strerr_die1x(111, "Unable to read control file [localdomains]. (#4.3.0)");
 	if (ldmok) {
 		stralloc        sas = {0};
 		int             j, len;
@@ -960,7 +957,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.38 2021-06-01 10:05:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.39 2021-06-12 18:19:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;

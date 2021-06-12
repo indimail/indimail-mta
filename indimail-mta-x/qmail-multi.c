@@ -1,10 +1,12 @@
 /*
- * $Log: $
+ * $Log: qmail-multi.c,v $
+ * Revision 1.1  2021-06-12 18:21:28+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <unistd.h>
 #include <sig.h>
 #include <env.h>
-#include "auto_qmail.h"
 #include "qmulti.h"
 #include "mailfilter.h"
 
@@ -28,8 +30,6 @@ main(int argc, char **argv)
 {
 	char           *filterargs;
 
-	if (chdir(auto_qmail) == -1)
-		_exit(61);
 	sig_pipeignore();
 	sig_miscignore();
 	sig_alarmcatch(sigalrm);
@@ -43,7 +43,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.53 2021-05-29 23:49:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.1 2021-06-12 18:21:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmailfilterh;
