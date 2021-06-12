@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.10  2021-06-13 00:32:05+05:30  Cprogrammer
+ * do clean exit on shutdown
+ *
  * Revision 1.9  2019-06-07 11:25:48+05:30  Cprogrammer
  * replaced getopt() with subgetopt()
  *
@@ -33,6 +36,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "substdio.h"
+#include "subfd.h"
 #include "sgetopt.h"
 #include "error.h"
 #include "strerr.h"
@@ -43,12 +47,11 @@
 #include "str.h"
 #include "scan.h"
 #include <time.h>
+#include "sig.h"
 
 #define FATAL "cleanq: fatal: "
 #define WARNING "cleanq: warning: "
 
-char            buf1[256];
-substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
 static int      flaglog = 0, dir_flag = 0;
 
 void
@@ -58,10 +61,9 @@ die_usage(void)
 }
 
 void
-my_puts(s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
-	char           *s;
+my_puts(char *s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
 {
-	if (substdio_puts(&ss1, s) == -1)
+	if (substdio_puts(subfdout, s) == -1)
 		_exit(111);
 }
 
@@ -75,7 +77,7 @@ log_file(const char *h, const char *d, const char *m)
 	my_puts(": ");
 	my_puts((char *) m);
 	my_puts("\n");
-	if (substdio_flush(&ss1) == -1)
+	if (substdio_flush(subfdout) == -1)
 		_exit(111);
 }
 
@@ -185,6 +187,14 @@ tryclean(const char *d)
 	remove_files(d);
 }
 
+void
+sigterm()
+{
+	if (flaglog)
+		strerr_warn2(WARNING, "going down on SIGTERM", 0);
+	_exit(0);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -195,6 +205,7 @@ main(int argc, char **argv)
 	uid_t           uid;
 	struct stat     st;
 
+	sig_termcatch(sigterm);
 	if (uidinit(1) == -1)
 		_exit(67);
 	while ((opt = getopt(argc, argv, "ls:")) != opteof) {
@@ -224,7 +235,7 @@ main(int argc, char **argv)
 		} else
 		if (flaglog)
 			my_puts("cleanq scanning\n");
-		if (substdio_flush(&ss1) == -1)
+		if (substdio_flush(subfdout) == -1)
 			_exit(111);
 		if (stat(".", &st) == -1)
 			strerr_die2sys(111, FATAL, "unable to stat '.'");
@@ -256,7 +267,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.9 2019-06-07 11:25:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.10 2021-06-13 00:32:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
