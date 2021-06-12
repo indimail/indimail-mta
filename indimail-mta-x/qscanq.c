@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.9  2021-06-12 19:24:08+05:30  Cprogrammer
+ * minor optimization by removing call to extra env_get
+ *
  * Revision 1.8  2020-09-16 19:06:34+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -64,15 +67,11 @@ err(s)
  * Global so cleanup routine can find it. 
  */
 void
-reset_sticky()
+reset_sticky(char *scandir)
 {
-	char           *ptr;
-
-	if (!(ptr = env_get("SCANDIR")))
-		ptr = (char *) auto_spool;
-	if (chdir(ptr) == -1) {
+	if (chdir(scandir) == -1) {
 		if (flaglog)
-			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", (char *) ptr, ": ");
+			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", (char *) scandir, ": ");
 		_exit(QQ_XTEMP);	/*- temporary refusal to handle messages */
 	}
 	if (chmod(fn, 0700) == -1)
@@ -80,9 +79,9 @@ reset_sticky()
 }
 
 void
-real_cleanup()
+real_cleanup(char *scandir)
 {
-	reset_sticky();
+	reset_sticky(scandir);
 	do_cleanq();
 }
 
@@ -133,21 +132,21 @@ main(int argc, char *argv[])
 		if (flaglog)
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", fn, ": ");
 		rmdir(fn);				/*- if rmdir fails, bummer.  */
-		reset_sticky();
+		reset_sticky(ptr);
 		_exit(QQ_XTEMP);
 	}
 	/*- [ cwd := fn/work */
 	if (mkdir("work", 0777) == -1) {
 		if (flaglog)
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to mkdir ", fn, "/work: ");
-		reset_sticky();
+		reset_sticky(ptr);
 		_exit(QQ_XTEMP);
 	}
 	if (chdir("work") == -1) {
 		if (flaglog)
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", fn, "/work: ");
 		rmdir("work");
-		real_cleanup();
+		real_cleanup(ptr);
 		_exit(QQ_XTEMP);
 	}
 	/*
@@ -166,17 +165,17 @@ main(int argc, char *argv[])
 		execv(*auto_qstdin, argv);
 		if (flaglog)
 			strerr_die2sys(QQ_XTEMP, FATAL, "execv failed: ");
-		real_cleanup();
+		real_cleanup(ptr);
 		_exit(QQ_XTEMP); /*- hopefully never reached */ ;
 	}
 	/*- Catch the exit status */
 	if (wait_pid(&qstat, pid) == -1) {
 		if (flaglog)
 			strerr_die2sys(QQ_XTEMP, FATAL, "waidpid failed: ");
-		real_cleanup();
+		real_cleanup(ptr);
 		_exit(QQ_XTEMP);
 	}
-	real_cleanup();
+	real_cleanup(ptr);
 	if (wait_crashed(qstat)) {
 		if (flaglog)
 			err("qscanq-stdin crashed.\n");
@@ -188,7 +187,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.8 2020-09-16 19:06:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq.c,v 1.9 2021-06-12 19:24:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
