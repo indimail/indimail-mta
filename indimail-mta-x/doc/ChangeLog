@@ -123,6 +123,8 @@ Release 2.13 Start 14/02/2021
 75. fixed compiler warning for containsutf8()
 76. moved makeargs.c, mktempfile.c to libqmail
 77. svctool: replace qmail-multi with qmail-spamfilter for spam filter
+- 11/05/2021
+78. remove usage of auto_qmail, auto_control for locating files
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
