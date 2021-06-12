@@ -1,5 +1,8 @@
 /*
  * $Log: sql-database.c,v $
+ * Revision 1.3  2021-06-12 19:57:29+05:30  Cprogrammer
+ * removed #include "auto_qmail.h"
+ *
  * Revision 1.2  2021-02-27 20:59:43+05:30  Cprogrammer
  * changed error to warning for missing MySQL libs
  *
@@ -15,7 +18,6 @@
 #ifdef HAS_MYSQL
 #include <ctype.h>
 #include "auto_uids.h"
-#include "auto_qmail.h"
 #include "auto_control.h"
 #include "auto_sysconfdir.h"
 #include <fcntl.h>
@@ -359,7 +361,7 @@ main(int argc, char **argv)
 void
 getversion_sql_database_c()
 {
-	static char    *x = "$Id: sql-database.c,v 1.2 2021-02-27 20:59:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sql-database.c,v 1.3 2021-06-12 19:57:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
