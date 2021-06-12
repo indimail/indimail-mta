@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newmrh.c,v $
+ * Revision 1.12  2021-06-12 18:23:14+05:30  Cprogrammer
+ * collapsed multiple stralloc_.. calls
+ *
  * Revision 1.11  2020-11-24 13:47:01+05:30  Cprogrammer
  * removed exit.h
  *
@@ -50,7 +53,7 @@ int             rename(const char *, const char *);
 void
 die_read()
 {
-	if(!(controldir = env_get("CONTROLDIR")))
+	if (!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
 	strerr_die4sys(111, FATAL, "unable to read ", controldir, "/morercpthosts: ");
 }
@@ -58,7 +61,7 @@ die_read()
 void
 die_write()
 {
-	if(!(controldir = env_get("CONTROLDIR")))
+	if (!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
 	strerr_die4sys(111, FATAL, "unable to write to ", controldir, "/morercpthosts.tmp: ");
 }
@@ -82,70 +85,52 @@ main()
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 
-	if(!(controldir = env_get("CONTROLDIR")))
+	if (!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-	if (!stralloc_copys(&controlfile1, controldir))
+	if (!stralloc_copys(&controlfile1, controldir) ||
+			!stralloc_cats(&controlfile1, "/morercpthosts") ||
+			!stralloc_0(&controlfile1))
 		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_cats(&controlfile1, "/morercpthosts"))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_0(&controlfile1))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if((fd = open_read(controlfile1.s)) == -1)
+	if ((fd = open_read(controlfile1.s)) == -1)
 		die_read();
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
 
 	controlfile1.len--;
-	if (!stralloc_cats(&controlfile1, ".tmp"))
+	if (!stralloc_cats(&controlfile1, ".tmp") ||
+			!stralloc_0(&controlfile1))
 		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_0(&controlfile1))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if((fdtemp = open_trunc(controlfile1.s)) == -1)
+	if ((fdtemp = open_trunc(controlfile1.s)) == -1)
 		die_write();
 
 	if (cdbmss_start(&cdbmss, fdtemp) == -1)
 		die_write();
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') != 0)
 			die_read();
 		case_lowerb(line.s, line.len);
-		while (line.len)
-		{
-			if (line.s[line.len - 1] == ' ')
-			{
+		while (line.len) {
+			if (line.s[line.len - 1] == ' ' ||
+					line.s[line.len - 1] == '\n' ||
+					line.s[line.len - 1] == '\t') {
 				--line.len;
 				continue;
 			}
-			if (line.s[line.len - 1] == '\n')
-			{
-				--line.len;
-				continue;
-			}
-			if (line.s[line.len - 1] == '\t')
-			{
-				--line.len;
-				continue;
-			}
-			if (line.s[0] != '#')
-				if (cdbmss_add(&cdbmss, (unsigned char *) line.s, line.len, (unsigned char *) "", 0) == -1)
-					die_write();
+			if (line.s[0] != '#' && 
+					cdbmss_add(&cdbmss, (unsigned char *) line.s, line.len, (unsigned char *) "", 0) == -1)
+				die_write();
 			break;
 		}
 		if (!match)
 			break;
 	}
-	if (cdbmss_finish(&cdbmss) == -1)
-		die_write();
-	if (fsync(fdtemp) == -1)
-		die_write();
-	if (close(fdtemp) == -1)
+	if (cdbmss_finish(&cdbmss) == -1 ||
+			fsync(fdtemp) == -1 ||
+			close(fdtemp) == -1)
 		die_write();/*- NFS stupidity */
 
-	if (!stralloc_copys(&controlfile2, controldir))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_cats(&controlfile2, "/morercpthosts.cdb"))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_0(&controlfile2))
+	if (!stralloc_copys(&controlfile2, controldir) ||
+			!stralloc_cats(&controlfile2, "/morercpthosts.cdb") ||
+			!stralloc_0(&controlfile2))
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	if (rename(controlfile1.s, controlfile2.s) == -1)
 		strerr_die6sys(111, FATAL, "unable to move ", controlfile1.s, " to ", controlfile2.s, ": ");
@@ -155,7 +140,7 @@ main()
 void
 getversion_qmail_newmrh_c()
 {
-	static char    *x = "$Id: qmail-newmrh.c,v 1.11 2020-11-24 13:47:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-newmrh.c,v 1.12 2021-06-12 18:23:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
