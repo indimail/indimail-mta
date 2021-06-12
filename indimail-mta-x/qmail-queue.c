@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.74  2021-06-12 19:13:53+05:30  Cprogrammer
+ * do chdir(auto_qmail) for qhpsi binary
+ *
  * Revision 1.73  2021-06-09 19:36:44+05:30  Cprogrammer
  * added makeargs.h
  *
@@ -590,6 +593,7 @@ qhpsiprog(char *program)
 	char          **argv;
 	char           *scancmd[3] = { 0, 0, 0 };
 	char           *x;
+	char            qhpsibin[] = "sbin/qhpsi";
 	unsigned long   u;
 	int             childrc = -1;
 	int             qhpsirc = 1, qhpsirn = 0;
@@ -654,13 +658,9 @@ qhpsiprog(char *program)
 					argv[u] = messfn;
 			}
 		}
-		if (!stralloc_copys(&line, auto_qmail))
-			die(51);
-		if (!stralloc_cats(&line, "/sbin/qhpsi"))
-			die(51);
-		if (!stralloc_0(&line))
-			die(51);
-		execv(line.s, argv);
+		if (chdir(auto_qmail) == -1)
+			die(61);
+		execv(qhpsibin, argv);
 		_exit(75);
 	} /*- switch (child = fork()) */
 	if (wait_pid(&wstat, child) == -1) {
@@ -848,8 +848,6 @@ main()
 	umask(033);
 	if (uidinit(1) == -1)
 		die(67);
-	if (chdir(auto_qmail) == -1)
-		die(61);
 	if (control_readint((int *) &originipfield, "originipfield") == -1)
 		die(55);
 	if ((ptr = env_get("ORIGINIPFIELD"))) {
@@ -1270,7 +1268,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.73 2021-06-09 19:36:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.74 2021-06-12 19:13:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
