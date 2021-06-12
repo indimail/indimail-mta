@@ -1,5 +1,8 @@
 /*
  * $Log: uacl.c,v $
+ * Revision 1.6  2021-06-12 20:02:15+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.5  2021-05-23 07:11:36+05:30  Cprogrammer
  * include wildmat.h for wildmat_internal
  *
@@ -23,7 +26,6 @@
 #include <env.h>
 #include <subfd.h>
 #include <strerr.h>
-#include "auto_qmail.h"
 #include "qregex.h"
 #include "control.h"
 #include "matchregex.h"
@@ -105,8 +107,6 @@ main(int argc, char **argv)
 
 	if (argc != 3)
 		die_usage();
-	if (chdir(auto_qmail) == -1)
-		die_chdir();
 	if ((x = env_get("QREGEX")))
 		scan_int(x, &qregex);
 	else
@@ -125,7 +125,7 @@ main(int argc, char **argv)
 void
 getversion_uacl_c()
 {
-	static char    *x = "$Id: uacl.c,v 1.5 2021-05-23 07:11:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: uacl.c,v 1.6 2021-06-12 20:02:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

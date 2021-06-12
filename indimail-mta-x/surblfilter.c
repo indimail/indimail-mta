@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.15  2021-06-12 20:01:57+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.14  2021-05-26 10:47:29+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -64,7 +67,6 @@
 #include "str.h"
 #include "case.h"
 #include "constmap.h"
-#include "auto_qmail.h"
 #include "auto_control.h"
 #include "stralloc.h"
 #include "env.h"
@@ -920,8 +922,6 @@ main(int argc, char **argv)
 			break;
 		}
 	}
-	if (chdir(auto_qmail) == -1)
-		die_control();
 	setup();
 	for (html_plain_text = base64_decode = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
@@ -1018,7 +1018,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.14 2021-05-26 10:47:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.15 2021-06-12 20:01:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
