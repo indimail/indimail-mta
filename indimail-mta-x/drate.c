@@ -491,7 +491,7 @@ main(int argc, char **argv)
 			strerr_die2x(111, FATAL, "out of memory");
 	}
 	if (chdir(qdir.s) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", qbase, ": ");
+		strerr_die4sys(111, FATAL, "unable to switch to ", qdir.s, ": ");
 	if (chdir(ratelimit_dir))
 		strerr_die4sys(111, FATAL, "unable to switch to ", ratelimit_dir, ": ");
 
