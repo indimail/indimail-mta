@@ -1,5 +1,8 @@
 /*
  * $Log: do_scan.c,v $
+ * Revision 1.18  2021-06-12 17:53:07+05:30  Cprogrammer
+ * remove creation of link for /etc/indimail/control in scanq directory
+ *
  * Revision 1.17  2021-06-09 19:34:19+05:30  Cprogrammer
  * added makeargs.h
  *
@@ -57,7 +60,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <dirent.h>
-#include "auto_qmail.h"
 #include "auto_control.h"
 #include "wait.h"
 #include "variables.h"
@@ -108,31 +110,12 @@ scan_badattachments(char *dir_name)
 	struct dirent  *dp;
 	char           *x;
 	int             match;
-	static stralloc cdir = { 0 };
 	static stralloc addr = { 0 };
 
 	if (!dir_name || !*dir_name)
 		return (0);
 	if (!(dir = opendir(dir_name)))
 		die(61);
-	if (!controldir) {
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = auto_control;
-	}
-	if (*controldir != '/') {
-		if (!stralloc_copys(&cdir, auto_qmail))
-			die_nomem();
-		if (!stralloc_append(&cdir, "/"))
-			die_nomem();
-		if (!stralloc_cats(&cdir, controldir))
-			die_nomem();
-	} else
-	if (!stralloc_copys(&cdir, controldir))
-		die_nomem();
-	if (!stralloc_0(&cdir))
-		die_nomem();
-	if (symlink(cdir.s, "control"))
-		die(68);
 	if ((extok = control_readfile(&ext, (x = env_get("BADEXT")) && *x ? x : "badext", 0)) == -1)
 		die_control();
 	if (extok && !constmap_init(&mapext, ext.s, ext.len, 0))
@@ -252,7 +235,7 @@ do_scan()
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.17 2021-06-09 19:34:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_scan.c,v 1.18 2021-06-12 17:53:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
