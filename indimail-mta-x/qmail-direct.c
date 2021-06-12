@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.5  2021-06-12 18:16:49+05:30  Cprogrammer
+ * moved pidopen() out to its own file
+ *
  * Revision 1.4  2021-05-01 22:31:32+05:30  Cprogrammer
  * use standard Maildir for queue operation
  * removed control file direct_mail_users
@@ -32,6 +35,7 @@
 #include "datetime.h"
 #include "now.h"
 #include "date822fmt.h"
+#include "pidopen.h"
 
 #define DEATH 86400				/* 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
@@ -45,10 +49,9 @@ static struct substdio ssin, ssout;
 static datetime_sec starttime;
 static struct datetime dt;
 static unsigned long   mypid, myuid, messnum;
-static char    *pidfn;
 static struct stat pidst;
 static char    *messfn, *intdfn, *tmp_fn;
-static int      messfd, intdfd, mailfd, flagmademess = 0, flagmadeintd = 0;
+static int      intdfd, mailfd, flagmademess = 0, flagmadeintd = 0;
 
 void
 die(int e)
@@ -156,43 +159,6 @@ received_setup()
 }
 
 unsigned int
-pidfmt(char *s, unsigned long seq)
-{
-	unsigned int    i;
-	unsigned int    len;
-
-	len = 0;
-	i = fmt_str(s, "tmp/");
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_ulong(s, mypid);
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_str(s, ".");
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_ulong(s, starttime);
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_str(s, ".");
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_ulong(s, seq);
-	len += i;
-	if (s)
-		s += i;
-	++len;
-	if (s)
-		*s++ = 0;
-	return len;
-}
-
-unsigned int
 fmtqfn(char *s, char *dirslash, unsigned long id, char *suffix)
 {
 	unsigned int    len;
@@ -226,26 +192,6 @@ fnnum(char *dirslash, char *suffix)
 		die(51);
 	fmtqfn(s, dirslash, messnum, suffix);
 	return s;
-}
-
-void
-pidopen()
-{
-	unsigned int    len;
-	unsigned long   seq;
-
-	seq = 1;
-	len = pidfmt((char *) 0, seq);
-	if (!(pidfn = alloc(len)))
-		die(51);
-	for (seq = 1; seq < 10; ++seq) {
-		if (pidfmt((char *) 0, seq) > len)
-			die(81); /* paranoia */
-		pidfmt(pidfn, seq);
-		if ((messfd = open_exclr(pidfn)) != -1)
-			return;
-	}
-	die(63);
 }
 
 stralloc        fntmptph, fnnewtph, hostname, uidlist;
@@ -359,7 +305,7 @@ mailopen(uid_t uid, gid_t gid)
 int
 main(int argc, char **argv)
 {
-	unsigned int    len, rcptcount;
+	unsigned int    ret, len, rcptcount;
 	char           *ptr;
 	struct passwd  *pw;
 	char            ch;
@@ -384,7 +330,8 @@ main(int argc, char **argv)
 	alarm(DEATH);
 
 	/*- open pid file */
-	pidopen();
+	if ((ret = pidopen(starttime)))
+		die(ret);
 	if (fstat(messfd, &pidst) == -1)
 		die(63);
 	messnum = pidst.st_ino;
@@ -524,8 +471,9 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.4 2021-05-01 22:31:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.5 2021-06-12 18:16:49+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidpidopenh;
 	if (x)
 		x++;
 }
