@@ -646,3 +646,4 @@ qmail-spamfilter.8
 qmulti.o
 mailfilter.o
 mktempfile.o
+pidopen.o
