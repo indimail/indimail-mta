@@ -1,5 +1,8 @@
 /*
  * $Log: inewaliases.c,v $
+ * Revision 1.5  2021-06-12 17:57:36+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.4  2005-08-23 17:33:17+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -24,7 +27,6 @@
 #include "variables.h"
 #include "control.h"
 #include "byte.h"
-#include "auto_qmail.h"
 #include "case.h"
 #include "cdbmss.h"
 
@@ -77,12 +79,7 @@ void
 readcontrols()
 {
 	int             r;
-	int             fddir;
 
-	if ((fddir = open_read(".")) == -1)
-		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 	if ((r = control_readline(&me, "me")) == -1)
 		die_control();
 	if (!r && !stralloc_copys(&me, "me"))
@@ -99,8 +96,6 @@ readcontrols()
 		die_control();
 	if (!r && !stralloc_copy(&plusdomain, &me))
 		nomem();
-	if (fchdir(fddir) == -1)
-		strerr_die2sys(111, FATAL, "unable to set current directory: ");
 }
 
 stralloc        target = { 0 };
@@ -146,22 +141,19 @@ gotaddr()
 	if (!address.len)
 		strerr_die2x(111, FATAL, "empty recipient addresses not permitted");
 	flaghasat = 0;
-	for (i = 0; i < tokaddr.len; ++i)
-	{
+	for (i = 0; i < tokaddr.len; ++i) {
 		if (tokaddr.t[i].type == TOKEN822_AT)
 			flaghasat = 1;
 	}
 	tokaddr.len = 0;
 	if (!address.len)
 		return;
-	if (!flaghasat && address.s[0] == '/')
-	{
+	if (!flaghasat && address.s[0] == '/') {
 		if (!stralloc_0(&address))
 			nomem();
 		strerr_die4x(111, FATAL, "file delivery ", address.s, " not supported");
 	}
-	if (!flaghasat && address.s[0] == '|')
-	{
+	if (!flaghasat && address.s[0] == '|') {
 		if (byte_chr(address.s, address.len, '\0') < address.len)
 			strerr_die2x(111, FATAL, "NUL not permitted in program names");
 		if (!stralloc_cats(&instr, "!"))
@@ -172,8 +164,7 @@ gotaddr()
 			nomem();
 		return;
 	}
-	if (target.len)
-	{
+	if (target.len) {
 		if (!stralloc_cats(&instr, "&"))
 			nomem();
 		if (!stralloc_cat(&instr, &fulltarget))
@@ -189,25 +180,21 @@ gotaddr()
 		nomem();
 	if (fulltarget.s[fulltarget.len - 1] == '@' && !stralloc_cat(&fulltarget, &defaulthost))
 		nomem();
-	if (fulltarget.s[fulltarget.len - 1] == '+')
-	{
+	if (fulltarget.s[fulltarget.len - 1] == '+') {
 		fulltarget.s[fulltarget.len - 1] = '.';
 		if (!stralloc_cat(&fulltarget, &plusdomain))
 			nomem();
 	}
 	j = 0;
-	for (i = 0; i < fulltarget.len; ++i)
-	{
+	for (i = 0; i < fulltarget.len; ++i) {
 		if (fulltarget.s[i] == '@')
 			j = i;
 	}
-	for (i = j; i < fulltarget.len; ++i)
-	{
+	for (i = j; i < fulltarget.len; ++i) {
 		if (fulltarget.s[i] == '.')
 			break;
 	}
-	if (i == fulltarget.len)
-	{
+	if (i == fulltarget.len) {
 		if (!stralloc_cats(&fulltarget, "."))
 			nomem();
 		if (!stralloc_cat(&fulltarget, &defaultdomain))
@@ -251,20 +238,16 @@ parseline()
 	if (!token822_readyplus(&tokaddr, 1))
 		nomem();
 	tokaddr.len = 0;
-	while (t > beginning)
-	{
+	while (t > beginning) {
 		switch ((--t)->type)
 		{
 		case TOKEN822_SEMI:
 			/*XXX*/
 			break;
 		case TOKEN822_COLON:
-			if (t >= beginning + 2)
-			{
-				if (t[-2].type == TOKEN822_COLON && t[-1].type == TOKEN822_ATOM)
-				{
-					if (t[-1].slen == 7 && !byte_diff(t[-1].s, 7, "include"))
-					{
+			if (t >= beginning + 2) {
+				if (t[-2].type == TOKEN822_COLON && t[-1].type == TOKEN822_ATOM) {
+					if (t[-1].slen == 7 && !byte_diff(t[-1].s, 7, "include")) {
 						gotincl();
 						t -= 2;
 					}
@@ -275,8 +258,7 @@ parseline()
 		case TOKEN822_RIGHT:
 			if (tokaddr.len)
 				gotaddr();
-			while ((t > beginning) && (t[-1].type != TOKEN822_LEFT))
-			{
+			while ((t > beginning) && (t[-1].type != TOKEN822_LEFT)) {
 				if (!token822_append(&tokaddr, --t))
 					nomem();
 			}
@@ -326,16 +308,14 @@ stralloc        key = { 0 };
 void
 doit()
 {
-	if (!instr.len)
-	{
+	if (!instr.len) {
 		if (target.len)
 			parseerr();
 		return;
 	}
 	if (!target.len)
 		parseerr();
-	if (stralloc_starts(&target, "owner-"))
-	{
+	if (stralloc_starts(&target, "owner-")) {
 		if (!stralloc_copys(&key, "?"))
 			nomem();
 		if (!stralloc_catb(&key, target.s + 6, target.len - 6))
@@ -369,20 +349,17 @@ main()
 		writeerr();
 	if (!stralloc_copys(&line, ""))
 		nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &newline, &match, '\n') != 0)
 			readerr();
 		if (match && (newline.s[0] == '\n'))
 			continue;
-		if (match && ((newline.s[0] == ' ') || (newline.s[0] == '\t')))
-		{
+		if (match && ((newline.s[0] == ' ') || (newline.s[0] == '\t'))) {
 			if (!stralloc_cat(&line, &newline))
 				nomem();
 			continue;
 		}
-		if (line.len && line.s[0] != '#')
-		{
+		if (line.len && line.s[0] != '#') {
 			if (!stralloc_copys(&target, ""))
 				nomem();
 			if (!stralloc_copys(&fulltarget, ""))
@@ -413,7 +390,7 @@ main()
 void
 getversion_newaliases_c()
 {
-	static char    *x = "$Id: inewaliases.c,v 1.4 2005-08-23 17:33:17+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: inewaliases.c,v 1.5 2021-06-12 17:57:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
