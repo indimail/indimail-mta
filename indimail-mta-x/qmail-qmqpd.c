@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpd.c,v $
+ * Revision 1.9  2021-06-12 18:26:58+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.8  2020-11-24 13:47:12+05:30  Cprogrammer
  * removed exit.h
  *
@@ -17,7 +20,6 @@
  *
  */
 #include <unistd.h>
-#include "auto_qmail.h"
 #include "qmail.h"
 #include "received.h"
 #include "sig.h"
@@ -171,8 +173,6 @@ main()
 
 	len = getlen();
 
-	if (chdir(auto_qmail) == -1)
-		resources();
 	if (qmail_open(&qq) == -1)
 		resources();
 	qp = qmail_qp(&qq);
@@ -228,7 +228,7 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	static char    *x = "$Id: qmail-qmqpd.c,v 1.8 2020-11-24 13:47:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpd.c,v 1.9 2021-06-12 18:26:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

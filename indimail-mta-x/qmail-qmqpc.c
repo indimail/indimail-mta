@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.23  2021-06-12 18:26:39+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.22  2020-12-07 16:10:05+05:30  Cprogrammer
  * use exit code 79 for envelope format error
  *
@@ -75,7 +78,6 @@
 #include "timeoutconn.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
-#include "auto_qmail.h"
 #include "auto_control.h"
 #include "control.h"
 #include "fmt.h"
@@ -200,11 +202,9 @@ getmess()
 	if (slurpclose(0, &message, 1024) == -1)
 		die_read();
 	strnum[fmt_ulong(strnum, (unsigned long) message.len)] = 0;
-	if (!stralloc_copys(&beforemessage, strnum))
-		nomem();
-	if (!stralloc_cats(&beforemessage, ":"))
-		nomem();
-	if (!stralloc_copys(&aftermessage, ","))
+	if (!stralloc_copys(&beforemessage, strnum) ||
+			!stralloc_cats(&beforemessage, ":") ||
+			!stralloc_copys(&aftermessage, ","))
 		nomem();
 	if (getln(&envelope, &line, &match, '\0') == -1)
 		die_read();
@@ -215,13 +215,10 @@ getmess()
 	if (line.s[0] != 'F')
 		die_format();
 	strnum[fmt_ulong(strnum, (unsigned long) line.len - 2)] = 0;
-	if (!stralloc_cats(&aftermessage, strnum))
-		nomem();
-	if (!stralloc_cats(&aftermessage, ":"))
-		nomem();
-	if (!stralloc_catb(&aftermessage, line.s + 1, line.len - 2))
-		nomem();
-	if (!stralloc_cats(&aftermessage, ","))
+	if (!stralloc_cats(&aftermessage, strnum) ||
+			!stralloc_cats(&aftermessage, ":") ||
+			!stralloc_catb(&aftermessage, line.s + 1, line.len - 2) ||
+			!stralloc_cats(&aftermessage, ","))
 		nomem();
 	for (;;) {
 		if (getln(&envelope, &line, &match, '\0') == -1)
@@ -233,13 +230,10 @@ getmess()
 		if (line.s[0] != 'T')
 			die_format();
 		strnum[fmt_ulong(strnum, (unsigned long) line.len - 2)] = 0;
-		if (!stralloc_cats(&aftermessage, strnum))
-			nomem();
-		if (!stralloc_cats(&aftermessage, ":"))
-			nomem();
-		if (!stralloc_catb(&aftermessage, line.s + 1, line.len - 2))
-			nomem();
-		if (!stralloc_cats(&aftermessage, ","))
+		if (!stralloc_cats(&aftermessage, strnum) ||
+				!stralloc_cats(&aftermessage, ":") ||
+				!stralloc_catb(&aftermessage, line.s + 1, line.len - 2) ||
+				!stralloc_cats(&aftermessage, ","))
 			nomem();
 	}
 }
@@ -314,8 +308,6 @@ main(int argc, char **argv)
 	stralloc        qmqpfn = {0};
 
 	sig_pipeignore();
-	if (chdir(auto_qmail) == -1)
-		die_home();
 	if (control_init() == -1)
 		die_control();
 	if (argc == 1 && control_readfile(&servers, "qmqpservers", 0) != 1)
@@ -358,9 +350,8 @@ main(int argc, char **argv)
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
-	if (!stralloc_copys(&qmqpfn, controldir))
-		nomem();
-	if (!stralloc_catb(&qmqpfn, "/qmqpservers\0", 13))
+	if (!stralloc_copys(&qmqpfn, controldir) ||
+			!stralloc_catb(&qmqpfn, "/qmqpservers\0", 13))
 		nomem();
 	if (stat(qmqpfn.s, &st) == -1)
 		die_control();
@@ -409,7 +400,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.22 2020-12-07 16:10:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.23 2021-06-12 18:26:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
