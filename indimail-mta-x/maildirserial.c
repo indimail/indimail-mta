@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.16  2021-06-12 17:59:24+05:30  Cprogrammer
+ * added missing chdir removed by mistake
+ *
  * Revision 1.15  2021-06-03 18:14:12+05:30  Cprogrammer
  * use new prioq functions
  *
@@ -155,10 +158,6 @@ my_config_readline(config_str *c, char *fname)
 void
 readcontrols()
 {
-	int             fddir;
-
-	if ((fddir = open_read(".")) == -1)
-		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	set_environment(WARNING, FATAL);
 	my_config_readline(&me, "me");
 	if (config_default(&me, "me") == -1)
@@ -179,8 +178,6 @@ readcontrols()
 			!stralloc_cat(config_data(&doublebounceto), config_data(&doublebouncehost)) ||
 			!stralloc_0(config_data(&doublebounceto)))
 		die_nomem();
-	if (fchdir(fddir) == -1)
-		strerr_die2sys(111, FATAL, "unable to set current directory: ");
 }
 
 struct qmail    qq;
@@ -211,7 +208,7 @@ stralloc        quoted = { 0 };
 int
 bounce(int fd, stralloc *why, int flagtimeout) /*- why must end with \n; must not contain \n\n */
 {
-	int             match, n, fddir;
+	int             match, n;
 	char           *bouncesender, *bouncerecip, *x;
 
 	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
@@ -256,13 +253,7 @@ bounce(int fd, stralloc *why, int flagtimeout) /*- why must end with \n; must no
 		bouncerecip = config_data(&doublebounceto)->s;
 	}
 	tai_now(&datetai);
-	if ((fddir = open_read(".")) == -1)
-		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	caltime_utc(&date.ct, &datetai, (int *) 0, (int *) 0);
-	if (fchdir(fddir) == -1)
-		strerr_die2sys(111, FATAL, "unable to set current directory: ");
 	date.known = 1;
 	if (!mess822_date(&datestr, &date))
 		die_nomem();
@@ -362,8 +353,7 @@ bounce(int fd, stralloc *why, int flagtimeout) /*- why must end with \n; must no
  */
 
 int
-hasprefix(fd)
-	int             fd;
+hasprefix(int fd)
 {
 	int             match;
 
@@ -477,8 +467,7 @@ stralloc        err = { 0 };
 int             match;
 
 void
-info(result)
-	char           *result;
+info(char *result)
 {
 	substdio_puts(subfderr, INFO);
 	substdio_puts(subfderr, fn.s);
@@ -488,9 +477,7 @@ info(result)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             opt, r, progress;
 	char           *dir;
@@ -524,6 +511,9 @@ main(argc, argv)
 	if (!*client)
 		die_usage();
 	readcontrols();
+
+	if (chdir(dir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", dir, ": ");
 	if (!stralloc_copys(&deadfiles, ""))
 		die_nomem();
 	progress = 3;
@@ -638,7 +628,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.15 2021-06-03 18:14:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.16 2021-06-12 17:59:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
