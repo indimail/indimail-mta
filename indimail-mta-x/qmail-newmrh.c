@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-newmrh.c,v $
- * Revision 1.12  2021-06-12 18:23:14+05:30  Cprogrammer
- * collapsed multiple stralloc_.. calls
+ * Revision 1.12  2021-06-13 13:03:43+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
  *
  * Revision 1.11  2020-11-24 13:47:01+05:30  Cprogrammer
  * removed exit.h
@@ -40,7 +40,6 @@
 #include "getln.h"
 #include "case.h"
 #include "open.h"
-#include "auto_qmail.h"
 #include "auto_control.h"
 #include "variables.h"
 #include "env.h"
@@ -50,63 +49,33 @@
 
 int             rename(const char *, const char *);
 
-void
-die_read()
-{
-	if (!(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-	strerr_die4sys(111, FATAL, "unable to read ", controldir, "/morercpthosts: ");
-}
-
-void
-die_write()
-{
-	if (!(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-	strerr_die4sys(111, FATAL, "unable to write to ", controldir, "/morercpthosts.tmp: ");
-}
-
-char            inbuf[1024];
-substdio        ssin;
-
-int             fd;
-int             fdtemp;
-
-struct cdbmss   cdbmss;
-stralloc        line = { 0 };
-int             match;
-
 int
 main()
 {
-	stralloc        controlfile1 = {0}, controlfile2 = {0};
+	int             fd, fdtemp, match;
+	char            inbuf[1024];
+	substdio        ssin;
+	struct cdbmss   cdbmss;
+	stralloc        line = { 0 };
 
 	umask(033);
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 
 	if (!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-	if (!stralloc_copys(&controlfile1, controldir) ||
-			!stralloc_cats(&controlfile1, "/morercpthosts") ||
-			!stralloc_0(&controlfile1))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if ((fd = open_read(controlfile1.s)) == -1)
-		die_read();
+	if (chdir(controldir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", controldir, ": ");
+	if ((fd = open_read("morercpthosts")) == -1)
+		strerr_die4sys(111, FATAL, "unable to read ", controldir, "/morercpthosts: ");
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
 
-	controlfile1.len--;
-	if (!stralloc_cats(&controlfile1, ".tmp") ||
-			!stralloc_0(&controlfile1))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if ((fdtemp = open_trunc(controlfile1.s)) == -1)
-		die_write();
+	if ((fdtemp = open_trunc("morercpthosts.tmp")) == -1)
+		strerr_die4sys(111, FATAL, "unable to write to ", controldir, "/morercpthosts.tmp: ");
 
 	if (cdbmss_start(&cdbmss, fdtemp) == -1)
-		die_write();
+		strerr_die4sys(111, FATAL, "unable to write to ", controldir, "/morercpthosts.tmp: ");
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') != 0)
-			die_read();
+			strerr_die4sys(111, FATAL, "unable to read ", controldir, "/morercpthosts: ");
 		case_lowerb(line.s, line.len);
 		while (line.len) {
 			if (line.s[line.len - 1] == ' ' ||
@@ -117,7 +86,7 @@ main()
 			}
 			if (line.s[0] != '#' && 
 					cdbmss_add(&cdbmss, (unsigned char *) line.s, line.len, (unsigned char *) "", 0) == -1)
-				die_write();
+				strerr_die4sys(111, FATAL, "unable to write to ", controldir, "/morercpthosts.tmp: ");
 			break;
 		}
 		if (!match)
@@ -126,21 +95,17 @@ main()
 	if (cdbmss_finish(&cdbmss) == -1 ||
 			fsync(fdtemp) == -1 ||
 			close(fdtemp) == -1)
-		die_write();/*- NFS stupidity */
+		strerr_die4sys(111, FATAL, "unable to write to ", controldir, "/morercpthosts.tmp: ");
 
-	if (!stralloc_copys(&controlfile2, controldir) ||
-			!stralloc_cats(&controlfile2, "/morercpthosts.cdb") ||
-			!stralloc_0(&controlfile2))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (rename(controlfile1.s, controlfile2.s) == -1)
-		strerr_die6sys(111, FATAL, "unable to move ", controlfile1.s, " to ", controlfile2.s, ": ");
+	if (rename("morercpthosts.tmp", "morercpthosts.cdb") == -1)
+		strerr_die2sys(111, FATAL, "unable to move morercpthosts.tmp to morercpthosts.cdb: ");
 	return(0);
 }
 
 void
 getversion_qmail_newmrh_c()
 {
-	static char    *x = "$Id: qmail-newmrh.c,v 1.12 2021-06-12 18:23:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-newmrh.c,v 1.12 2021-06-13 13:03:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
