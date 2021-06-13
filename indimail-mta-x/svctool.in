@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.562 2021-06-10 20:06:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.563 2021-06-13 21:11:36+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.562 2021-06-10 20:06:17+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.563 2021-06-13 21:11:36+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -7808,86 +7808,18 @@ status=0
 
 create_clamd_conf()
 {
-echo "# Uncomment this option to enable logging."
-echo "# LogFile must be writable for the user running daemon."
-echo "# A full path is required."
-echo "# Default: disabled"
-echo "#LogFile /var/log/clamd.scan"
-echo ""
-echo "# By default the log file is locked for writing - the lock protects against"
-echo "# running clamd multiple times (if want to run another clamd, please"
-echo "# copy the configuration file, change the LogFile variable, and run"
-echo "# the daemon with --config-file option)."
-echo "# This option disables log file locking."
-echo "# Default: no"
-echo "#LogFileUnlock yes"
-echo ""
-echo "# Maximum size of the log file."
-echo "# Value of 0 disables the limit."
-echo "# You may use 'M' or 'm' for megabytes (1M = 1m = 1048576 bytes)"
-echo "# and 'K' or 'k' for kilobytes (1K = 1k = 1024 bytes). To specify the size"
-echo "# in bytes just don't use modifiers. If LogFileMaxSize is enabled, log"
-echo "# rotation (the LogRotate option) will always be enabled."
-echo "# Default: 1M"
-echo "#LogFileMaxSize 2M"
-echo ""
-echo "# Log time with each message."
-echo "# Default: no"
-echo "#LogTime yes"
-echo ""
 echo "# Also log clean files. Useful in debugging but drastically increases the"
 echo "# log size."
 echo "# Default: no"
 echo "LogClean yes"
 echo ""
-echo "# Use system logger (can work together with LogFile)."
-echo "# Default: no"
-echo "#LogSyslog yes"
-echo ""
-echo "# Specify the type of syslog messages - please refer to 'man syslog'"
-echo "# for facility names."
-echo "# Default: LOG_LOCAL6"
-echo "#LogFacility LOG_MAIL"
-echo ""
-echo "# Enable verbose logging."
-echo "# Default: no"
-echo "#LogVerbose yes"
-echo ""
-echo "# Enable log rotation. Always enabled when LogFileMaxSize is enabled."
-echo "# Default: no"
-echo "#LogRotate yes"
-echo ""
-echo "# Enable Prelude output."
-echo "# Default: no"
-echo "#PreludeEnable yes"
-echo "#"
-echo "# Set the name of the analyzer used by prelude-admin."
-echo "# Default: ClamAV"
-echo "#PreludeAnalyzerName ClamAV"
-echo ""
 echo "# Log additional information about the infected file, such as its"
 echo "# size and hash, together with the virus name."
 echo "ExtendedDetectionInfo yes"
 echo ""
-echo "# This option allows you to save a process identifier of the listening"
-echo "# daemon (main thread)."
-echo "# Default: disabled"
-echo "#PidFile /var/run/clamd.scan/clamd.pid"
-echo ""
-echo "# Optional path to the global temporary directory."
-echo "# Default: system specific (usually /tmp or /var/tmp)."
-echo "#TemporaryDirectory /var/tmp"
-echo ""
 echo "# Path to the database directory."
 echo "# Default: hardcoded (depends on installation options)"
-echo "DatabaseDirectory $indimaildir/clamd"
-echo ""
-echo "# Only load the official signatures published by the ClamAV project."
-echo "# Default: no"
-echo "#OfficialDatabaseOnly no"
-echo ""
-echo "# The daemon can work in local mode, network mode or both. "
-echo "# Due to security reasons we recommend the local mode."
+echo "DatabaseDirectory /var/indimail/clamd"
 echo ""
 echo "# Path to a local socket file the daemon will listen on."
 echo "# Default: disabled (must be specified by a user)"
@@ -7905,103 +7837,15 @@ echo "# Remove stale socket after unclean shutdown."
 echo "# Default: yes"
 echo "FixStaleSocket yes"
 echo ""
-echo "# TCP port address."
-echo "# Default: no"
-echo "#TCPSocket 3310"
-echo ""
-echo "# TCP address."
-echo "# By default we bind to INADDR_ANY, probably not wise."
-echo "# Enable the following to provide some degree of protection"
-echo "# from the outside world. This option can be specified multiple"
-echo "# times if you want to listen on multiple IPs. IPv6 is now supported."
-echo "# Default: no"
-echo "#TCPAddr 127.0.0.1"
-echo ""
-echo "# Maximum length the queue of pending connections may grow to."
-echo "# Default: 200"
-echo "#MaxConnectionQueueLength 30"
-echo ""
-echo "# Clamd uses FTP-like protocol to receive data from remote clients."
-echo "# If you are using clamav-milter to balance load between remote clamd daemons"
-echo "# on firewall servers you may need to tune the options below."
-echo ""
-echo "# Close the connection when the data size limit is exceeded."
-echo "# The value should match your MTA's limit for a maximum attachment size."
-echo "# Default: 25M"
-echo "#StreamMaxLength 10M"
-echo ""
-echo "# Limit port range."
-echo "# Default: 1024"
-echo "#StreamMinPort 30000"
-echo "# Default: 2048"
-echo "#StreamMaxPort 32000"
-echo ""
-echo "# Maximum number of threads running at the same time."
-echo "# Default: 10"
-echo "#MaxThreads 20"
-echo ""
-echo "# Waiting for data from a client socket will timeout after this time (seconds)."
-echo "# Default: 120"
-echo "#ReadTimeout 300"
-echo ""
-echo "# This option specifies the time (in seconds) after which clamd should"
-echo "# timeout if a client doesn't provide any initial command after connecting."
-echo "# Default: 5"
-echo "#CommandReadTimeout 5"
-echo ""
-echo "# This option specifies how long to wait (in milliseconds) if the send buffer"
-echo "# is full."
-echo "# Keep this value low to prevent clamd hanging"
-echo "#"
-echo "# Default: 500"
-echo "#SendBufTimeout 200"
-echo ""
-echo "# Maximum number of queued items (including those being processed by"
-echo "# MaxThreads threads)"
-echo "# It is recommended to have this value at least twice MaxThreads if possible."
-echo "# WARNING: you shouldn't increase this too much to avoid running out  of file"
-echo "# descriptors,"
-echo "# the following condition should hold:"
-echo "# MaxThreads*MaxRecursion + (MaxQueue - MaxThreads) + 6< RLIMIT_NOFILE (usual"
-echo "# max is 1024)"
-echo "#"
-echo "# Default: 100"
-echo "#MaxQueue 200"
-echo ""
-echo "# Waiting for a new job will timeout after this time (seconds)."
-echo "# Default: 30"
-echo "#IdleTimeout 60"
-echo ""
-echo "# Don't scan files and directories matching regex"
-echo "# This directive can be used multiple times"
-echo "# Default: scan all"
-echo "#ExcludePath ^/proc/"
-echo "#ExcludePath ^/sys/"
-echo ""
-echo "# Maximum depth directories are scanned at."
-echo "# Default: 15"
-echo "#MaxDirectoryRecursion 20"
-echo ""
-echo "# Follow directory symlinks."
-echo "# Default: no"
-echo "#FollowDirectorySymlinks yes"
-echo ""
-echo "# Follow regular file symlinks."
-echo "# Default: no"
-echo "#FollowFileSymlinks yes"
-echo ""
-echo "# Scan files and directories on other filesystems."
+echo "# Enable non-blocking (multi-threaded/concurrent) database reloads."
+echo "# This feature will temporarily load a second scanning engine while scanning"
+echo "# continues using the first engine. Once loaded, the new engine takes over."
+echo "# The old engine is removed as soon as all scans using the old engine have"
+echo "# completed."
+echo "# This feature requires more RAM, so this option is provided in case users are"
+echo "# willing to block scans during reload in exchange for lower RAM requirements."
 echo "# Default: yes"
-echo "#CrossFilesystems yes"
-echo ""
-echo "# Perform a database check."
-echo "# Default: 600 (10 min)"
-echo "#SelfCheck 600"
-echo ""
-echo "# Execute a command when virus is found. In the command string %v will"
-echo "# be replaced with the virus name."
-echo "# Default: no"
-echo "#VirusEvent /usr/local/bin/send_sms 123456789 \"VIRUS ALERT: %v\""
+echo "ConcurrentDatabaseReload no"
 echo ""
 echo "# Run as another user (clamd must be started by root for this option to work)"
 echo "# Default: don't drop privileges"
@@ -8013,507 +7857,6 @@ echo ""
 echo "# Don't fork into background."
 echo "# Default: no"
 echo "Foreground yes"
-echo ""
-echo "# Enable debug messages in libclamav."
-echo "# Default: no"
-echo "#Debug yes"
-echo ""
-echo "# Do not remove temporary files (for debug purposes)."
-echo "# Default: no"
-echo "#LeaveTemporaryFiles yes"
-echo ""
-echo "# Permit use of the ALLMATCHSCAN command. If set to no, clamd will reject"
-echo "# any ALLMATCHSCAN command as invalid."
-echo "# Default: yes"
-echo "#AllowAllMatchScan no"
-echo ""
-echo "# Detect Possibly Unwanted Applications."
-echo "# Default: no"
-echo "#DetectPUA yes"
-echo ""
-echo "# Exclude a specific PUA category. This directive can be used multiple times."
-echo "# See https://github.com/vrtadmin/clamav-faq/blob/master/faq/faq-pua.md for "
-echo "# the complete list of PUA categories."
-echo "# Default: Load all categories (if DetectPUA is activated)"
-echo "#ExcludePUA NetTool"
-echo "#ExcludePUA PWTool"
-echo ""
-echo "# Only include a specific PUA category. This directive can be used multiple"
-echo "# times."
-echo "# Default: Load all categories (if DetectPUA is activated)"
-echo "#IncludePUA Spy"
-echo "#IncludePUA Scanner"
-echo "#IncludePUA RAT"
-echo ""
-echo "# In some cases (eg. complex malware, exploits in graphic files, and others),"
-echo "# ClamAV uses special algorithms to provide accurate detection. This option"
-echo "# controls the algorithmic detection."
-echo "# Default: yes"
-echo "#AlgorithmicDetection yes"
-echo ""
-echo "# This option causes memory or nested map scans to dump the content to disk."
-echo "# If you turn on this option, more data is written to disk and is available"
-echo "# when the LeaveTemporaryFiles option is enabled."
-echo "#ForceToDisk yes"
-echo ""
-echo "# This option allows you to disable the caching feature of the engine. By"
-echo "# default, the engine will store an MD5 in a cache of any files that are"
-echo "# not flagged as virus or that hit limits checks. Disabling the cache will"
-echo "# have a negative performance impact on large scans."
-echo "# Default: no"
-echo "#DisableCache yes"
-echo ""
-echo "##"
-echo "## Executable files"
-echo "##"
-echo ""
-echo "# PE stands for Portable Executable - it's an executable file format used"
-echo "# in all 32 and 64-bit versions of Windows operating systems. This option"
-echo "# allows ClamAV to perform a deeper analysis of executable files and it's also"
-echo "# required for decompression of popular executable packers such as UPX, FSG,"
-echo "# and Petite. If you turn off this option, the original files will still be"
-echo "# scanned, but without additional processing."
-echo "# Default: yes"
-echo "#ScanPE yes"
-echo ""
-echo "# Certain PE files contain an authenticode signature. By default, we check"
-echo "# the signature chain in the PE file against a database of trusted and"
-echo "# revoked certificates if the file being scanned is marked as a virus."
-echo "# If any certificate in the chain validates against any trusted root, but"
-echo "# does not match any revoked certificate, the file is marked as whitelisted."
-echo "# If the file does match a revoked certificate, the file is marked as virus."
-echo "# The following setting completely turns off authenticode verification."
-echo "# Default: no"
-echo "#DisableCertCheck yes"
-echo ""
-echo "# Executable and Linking Format is a standard format for UN*X executables."
-echo "# This option allows you to control the scanning of ELF files."
-echo "# If you turn off this option, the original files will still be scanned, but"
-echo "# without additional processing."
-echo "# Default: yes"
-echo "#ScanELF yes"
-echo ""
-echo "# With this option clamav will try to detect broken executables (both PE and"
-echo "# ELF) and mark them as Broken.Executable."
-echo "# Default: no"
-echo "DetectBrokenExecutables yes"
-echo ""
-echo ""
-echo "##"
-echo "## Documents"
-echo "##"
-echo ""
-echo "# This option enables scanning of OLE2 files, such as Microsoft Office"
-echo "# documents and .msi files."
-echo "# If you turn off this option, the original files will still be scanned, but"
-echo "# without additional processing."
-echo "# Default: yes"
-echo "#ScanOLE2 yes"
-echo ""
-echo "# With this option enabled OLE2 files with VBA macros, which were not"
-echo "# detected by signatures will be marked as \"Heuristics.OLE2.ContainsMacros\"."
-echo "# Default: no"
-echo "#OLE2BlockMacros no"
-echo ""
-echo "# This option enables scanning within PDF files."
-echo "# If you turn off this option, the original files will still be scanned, but"
-echo "# without decoding and additional processing."
-echo "# Default: yes"
-echo "ScanPDF yes"
-echo ""
-echo "# This option enables scanning within SWF files."
-echo "# If you turn off this option, the original files will still be scanned, but"
-echo "# without decoding and additional processing."
-echo "# Default: yes"
-echo "#ScanSWF yes"
-echo ""
-echo "# This option enables scanning xml-based document files supported by libclamav."
-echo "# If you turn off this option, the original files will still be scanned, but"
-echo "# without additional processing."
-echo "# Default: yes"
-echo "#ScanXMLDOCS yes"
-echo ""
-echo "# This option enables scanning of HWP3 files."
-echo "# If you turn off this option, the original files will still be scanned, but"
-echo "# without additional processing."
-echo "# Default: yes"
-echo "#ScanHWP3 yes"
-echo ""
-echo ""
-echo "##"
-echo "## Mail files"
-echo "##"
-echo ""
-echo "# Enable internal e-mail scanner."
-echo "# If you turn off this option, the original files will still be scanned, but"
-echo "# without parsing individual messages/attachments."
-echo "# Default: yes"
-echo "#ScanMail yes"
-echo ""
-echo "# Scan RFC1341 messages split over many emails."
-echo "# You will need to periodically clean up \$TemporaryDirectory/clamav-partial"
-echo "# directory."
-echo "# WARNING: This option may open your system to a DoS attack."
-echo "# Never use it on loaded servers."
-echo "# Default: no"
-echo "#ScanPartialMessages yes"
-echo ""
-echo "# With this option enabled ClamAV will try to detect phishing attempts by using"
-echo "# signatures."
-echo "# Default: yes"
-echo "#PhishingSignatures yes"
-echo ""
-echo "# Scan URLs found in mails for phishing attempts using heuristics."
-echo "# Default: yes"
-echo "#PhishingScanURLs yes"
-echo ""
-echo "# Always block SSL mismatches in URLs, even if the URL isn't in the database."
-echo "# This can lead to false positives."
-echo "#"
-echo "# Default: no"
-echo "#PhishingAlwaysBlockSSLMismatch no"
-echo ""
-echo "# Always block cloaked URLs, even if URL isn't in database."
-echo "# This can lead to false positives."
-echo "#"
-echo "# Default: no"
-echo "#PhishingAlwaysBlockCloak no"
-echo ""
-echo "# Detect partition intersections in raw disk images using heuristics."
-echo "# Default: no"
-echo "#PartitionIntersection no"
-echo ""
-echo "# Allow heuristic match to take precedence."
-echo "# When enabled, if a heuristic scan (such as phishingScan) detects"
-echo "# a possible virus/phish it will stop scan immediately. Recommended, saves CPU"
-echo "# scan-time."
-echo "# When disabled, virus/phish detected by heuristic scans will be reported"
-echo "# only at the end of a scan. If an archive contains both a heuristically"
-echo "# detected virus/phish, and a real malware, the real malware will be reported."
-echo "#"
-echo "# Keep this disabled if you intend to handle \"*.Heuristics.*\" viruses "
-echo "# differently from \"real\" malware."
-echo "# If a non-heuristically-detected virus (signature-based) is found first, "
-echo "# the scan is interrupted immediately, regardless of this config option."
-echo "#"
-echo "# Default: no"
-echo "#HeuristicScanPrecedence yes"
-echo ""
-echo ""
-echo "##"
-echo "## Data Loss Prevention (DLP)"
-echo "##"
-echo ""
-echo "# Enable the DLP module"
-echo "# Default: No"
-echo "#StructuredDataDetection yes"
-echo ""
-echo "# This option sets the lowest number of Credit Card numbers found in a file"
-echo "# to generate a detect."
-echo "# Default: 3"
-echo "#StructuredMinCreditCardCount 5"
-echo ""
-echo "# This option sets the lowest number of Social Security Numbers found"
-echo "# in a file to generate a detect."
-echo "# Default: 3"
-echo "#StructuredMinSSNCount 5"
-echo ""
-echo "# With this option enabled the DLP module will search for valid"
-echo "# SSNs formatted as xxx-yy-zzzz"
-echo "# Default: yes"
-echo "#StructuredSSNFormatNormal yes"
-echo ""
-echo "# With this option enabled the DLP module will search for valid"
-echo "# SSNs formatted as xxxyyzzzz"
-echo "# Default: no"
-echo "#StructuredSSNFormatStripped yes"
-echo ""
-echo ""
-echo "##"
-echo "## HTML"
-echo "##"
-echo ""
-echo "# Perform HTML normalisation and decryption of MS Script Encoder code."
-echo "# Default: yes"
-echo "# If you turn off this option, the original files will still be scanned, but"
-echo "# without additional processing."
-echo "#ScanHTML yes"
-echo ""
-echo ""
-echo "##"
-echo "## Archives"
-echo "##"
-echo ""
-echo "# ClamAV can scan within archives and compressed files."
-echo "# If you turn off this option, the original files will still be scanned, but"
-echo "# without unpacking and additional processing."
-echo "# Default: yes"
-echo "#ScanArchive yes"
-echo ""
-echo "# Mark encrypted archives as viruses (Encrypted.Zip, Encrypted.RAR)."
-echo "# Default: no"
-echo "#ArchiveBlockEncrypted no"
-echo ""
-echo ""
-echo "##"
-echo "## Limits"
-echo "##"
-echo ""
-echo "# The options below protect your system against Denial of Service attacks"
-echo "# using archive bombs."
-echo ""
-echo "# This option sets the maximum amount of data to be scanned for each input"
-echo "# file."
-echo "# Archives and other containers are recursively extracted and scanned up to"
-echo "# this value."
-echo "# Value of 0 disables the limit"
-echo "# Note: disabling this limit or setting it too high may result in severe damage"
-echo "# to the system."
-echo "# Default: 100M"
-echo "#MaxScanSize 150M"
-echo ""
-echo "# Files larger than this limit won't be scanned. Affects the input file itself"
-echo "# as well as files contained inside it (when the input file is an archive, a"
-echo "# document or some other kind of container)."
-echo "# Value of 0 disables the limit."
-echo "# Note: disabling this limit or setting it too high may result in severe damage"
-echo "# to the system."
-echo "# Default: 25M"
-echo "#MaxFileSize 30M"
-echo ""
-echo "# Nested archives are scanned recursively, e.g. if a Zip archive contains a RAR"
-echo "# file, all files within it will also be scanned. This options specifies how"
-echo "# deeply the process should be continued."
-echo "# Note: setting this limit too high may result in severe damage to the system."
-echo "# Default: 16"
-echo "#MaxRecursion 10"
-echo ""
-echo "# Number of files to be scanned within an archive, a document, or any other"
-echo "# container file."
-echo "# Value of 0 disables the limit."
-echo "# Note: disabling this limit or setting it too high may result in severe damage"
-echo "# to the system."
-echo "# Default: 10000"
-echo "#MaxFiles 15000"
-echo ""
-echo "# Maximum size of a file to check for embedded PE. Files larger than this value"
-echo "# will skip the additional analysis step."
-echo "# Note: disabling this limit or setting it too high may result in severe damage"
-echo "# to the system."
-echo "# Default: 10M"
-echo "#MaxEmbeddedPE 10M"
-echo ""
-echo "# Maximum size of a HTML file to normalize. HTML files larger than this value"
-echo "# will not be normalized or scanned."
-echo "# Note: disabling this limit or setting it too high may result in severe damage"
-echo "# to the system."
-echo "# Default: 10M"
-echo "#MaxHTMLNormalize 10M"
-echo ""
-echo "# Maximum size of a normalized HTML file to scan. HTML files larger than this"
-echo "# value after normalization will not be scanned."
-echo "# Note: disabling this limit or setting it too high may result in severe damage"
-echo "# to the system."
-echo "# Default: 2M"
-echo "#MaxHTMLNoTags 2M"
-echo ""
-echo "# Maximum size of a script file to normalize. Script content larger than this"
-echo "# value will not be normalized or scanned."
-echo "# Note: disabling this limit or setting it too high may result in severe damage"
-echo "# to the system."
-echo "# Default: 5M"
-echo "#MaxScriptNormalize 5M"
-echo ""
-echo "# Maximum size of a ZIP file to reanalyze type recognition. ZIP files larger"
-echo "# than this value will skip the step to potentially reanalyze as PE."
-echo "# Note: disabling this limit or setting it too high may result in severe damage"
-echo "# to the system."
-echo "# Default: 1M"
-echo "#MaxZipTypeRcg 1M"
-echo ""
-echo "# This option sets the maximum number of partitions of a raw disk image to be"
-echo "# scanned."
-echo "# Raw disk images with more partitions than this value will have up to"
-echo "# the value number partitions scanned. Negative values are not allowed."
-echo "# Note: setting this limit too high may result in severe damage or impact"
-echo "# performance."
-echo "# Default: 50"
-echo "#MaxPartitions 128"
-echo ""
-echo "# This option sets the maximum number of icons within a PE to be scanned."
-echo "# PE files with more icons than this value will have up to the value number"
-echo "# icons scanned."
-echo "# Negative values are not allowed."
-echo "# WARNING: setting this limit too high may result in severe damage or impact"
-echo "# performance."
-echo "# Default: 100"
-echo "#MaxIconsPE 200"
-echo ""
-echo "# This option sets the maximum recursive calls for HWP3 parsing during"
-echo "# scanning. HWP3 files using more than this limit will be terminated and"
-echo "# alert the user."
-echo "# Scans will be unable to scan any HWP3 attachments if the recursive limit"
-echo "# is reached."
-echo "# Negative values are not allowed."
-echo "# WARNING: setting this limit too high may result in severe damage or impact"
-echo "# performance."
-echo "# Default: 16"
-echo "#MaxRecHWP3 16"
-echo ""
-echo "# This option sets the maximum calls to the PCRE match function during"
-echo "# an instance of regex matching."
-echo "# Instances using more than this limit will be terminated and alert the user"
-echo "# but the scan will continue."
-echo "# For more information on match_limit, see the PCRE documentation."
-echo "# Negative values are not allowed."
-echo "# WARNING: setting this limit too high may severely impact performance."
-echo "# Default: 100000"
-echo "#PCREMatchLimit 20000"
-echo ""
-echo "# This option sets the maximum recursive calls to the PCRE match function"
-echo "# during an instance of regex matching."
-echo "# Instances using more than this limit will be terminated and alert the user"
-echo "# but the scan will continue."
-echo "# For more information on match_limit_recursion, see the PCRE documentation."
-echo "# Negative values are not allowed and values > PCREMatchLimit are superfluous."
-echo "# WARNING: setting this limit too high may severely impact performance."
-echo "# Default: 5000"
-echo "#PCRERecMatchLimit 10000"
-echo ""
-echo "# This option sets the maximum filesize for which PCRE subsigs will be"
-echo "# executed. Files exceeding this limit will not have PCRE subsigs executed"
-echo "# unless a subsig is encompassed to a smaller buffer."
-echo "# Negative values are not allowed."
-echo "# Setting this value to zero disables the limit."
-echo "# WARNING: setting this limit too high or disabling it may severely impact"
-echo "# performance."
-echo "# Default: 25M"
-echo "#PCREMaxFileSize 100M"
-echo ""
-echo "# When BlockMax is set, files exceeding the MaxFileSize, MaxScanSize, or"
-echo "# MaxRecursion limit will be flagged with the virus"
-echo "# \"Heuristic.Limits.Exceeded\"."
-echo "# Default: no"
-echo "#BlockMax yes"
-echo ""
-echo "##"
-echo "## On-access Scan Settings"
-echo "##"
-echo ""
-echo "# Enable on-access scanning. Currently, this is supported via fanotify."
-echo "# Clamuko/Dazuko support has been deprecated."
-echo "# Default: no"
-echo "#ScanOnAccess yes"
-echo ""
-echo "# Set the  mount point to be scanned. The mount point specified, or the mount"
-echo "# point containing the specified directory will be watched. If any directories"
-echo "# are specified, this option will preempt the DDD system. This will notify"
-echo "# only. It can be used multiple times."
-echo "# (On-access scan only)"
-echo "# Default: disabled"
-echo "#OnAccessMountPath /"
-echo "#OnAccessMountPath /home/user"
-echo ""
-echo "# Don't scan files larger than OnAccessMaxFileSize"
-echo "# Value of 0 disables the limit."
-echo "# Default: 5M"
-echo "#OnAccessMaxFileSize 10M"
-echo ""
-echo "# Set the include paths (all files inside them will be scanned). You can have"
-echo "# multiple OnAccessIncludePath directives but each directory must be added"
-echo "# in a separate line. (On-access scan only)"
-echo "# Default: disabled"
-echo "#OnAccessIncludePath /home"
-echo "#OnAccessIncludePath /students"
-echo ""
-echo "# Set the exclude paths. All subdirectories are also excluded."
-echo "# (On-access scan only)"
-echo "# Default: disabled"
-echo "#OnAccessExcludePath /home/bofh"
-echo ""
-echo "# With this option you can whitelist the root UID (0). Processes run under"
-echo "# root with be able to access all files without triggering scans or"
-echo "# permission denied events."
-echo "# Note that if clamd cannot check the uid of the process that generated an"
-echo "# on-access scan event (e.g., because OnAccessPrevention was not enabled, and"
-echo "# the process already exited), clamd will perform a scan.  Thus, setting"
-echo "# OnAccessExcludeRootUID is not *guaranteed* to prevent every access by the"
-echo "# root user from triggering a scan (unless OnAccessPrevention is enabled)."
-echo "# Default: no"
-echo "#OnAccessExcludeRootUID no"
-echo ""
-echo "# With this option you can whitelist specific UIDs. Processes with these UIDs"
-echo "# will be able to access all files without triggering scans or permission"
-echo "# denied events."
-echo "# This option can be used multiple times (one per line)."
-echo "# Using a value of 0 on any line will disable this option entirely."
-echo "# To whitelist the root UID (0) please enable the OnAccessExcludeRootUID"
-echo "# option."
-echo "# Also note that if clamd cannot check the uid of the process that generated an"
-echo "# on-access scan event (e.g., because OnAccessPrevention was not enabled, and"
-echo "# the process already exited), clamd will perform a scan.  Thus, setting"
-echo "# OnAccessExcludeUID is not *guaranteed* to prevent every access by the"
-echo "# specified uid from triggering a scan (unless OnAccessPrevention is enabled)."
-echo "# Default: disabled"
-echo "#OnAccessExcludeUID -1"
-echo ""
-echo "# Toggles dynamic directory determination. Allows for recursively watching"
-echo "# include paths."
-echo "# (On-access scan only)"
-echo "# Default: no"
-echo "#OnAccessDisableDDD yes"
-echo ""
-echo "# Modifies fanotify blocking behaviour when handling permission events."
-echo "# If off, fanotify will only notify if the file scanned is a virus,"
-echo "# and not perform any blocking."
-echo "# (On-access scan only)"
-echo "# Default: no"
-echo "#OnAccessPrevention yes"
-echo ""
-echo "# Toggles extra scanning and notifications when a file or directory is"
-echo "# created or moved."
-echo "# Requires the  DDD system to kick-off extra scans."
-echo "# NOTE:  This feature is disabled until a thread resource leak bug"
-echo "#        in the OnAccessExtraScanning code can be resolved."
-echo "# (On-access scan only)"
-echo "# Default: no"
-echo "#OnAccessExtraScanning yes"
-echo ""
-echo "##"
-echo "## Bytecode"
-echo "##"
-echo ""
-echo "# With this option enabled ClamAV will load bytecode from the database. "
-echo "# It is highly recommended you keep this option on, otherwise you'll miss"
-echo "# detections for many new viruses."
-echo "# Default: yes"
-echo "#Bytecode yes"
-echo ""
-echo "# Set bytecode security level."
-echo "# Possible values:"
-echo "#   None -      No security at all, meant for debugging."
-echo "#               DO NOT USE THIS ON PRODUCTION SYSTEMS."
-echo "#               This value is only available if clamav was built"
-echo "#               with --enable-debug!"
-echo "#   TrustSigned - Trust bytecode loaded from signed .c[lv]d files, insert"
-echo "#               runtime safety checks for bytecode loaded from other sources."
-echo "#   Paranoid -  Don't trust any bytecode, insert runtime checks for all."
-echo "# Recommended: TrustSigned, because bytecode in .cvd files already has these"
-echo "# checks."
-echo "# Note that by default only signed bytecode is loaded, currently you can only"
-echo "# load unsigned bytecode in --enable-debug mode."
-echo "#"
-echo "# Default: TrustSigned"
-echo "#BytecodeSecurity TrustSigned"
-echo ""
-echo "# Set bytecode timeout in milliseconds."
-echo "# "
-echo "# Default: 5000"
-echo "# BytecodeTimeout 1000"
-echo ""
-echo "##"
-echo "## Statistics gathering and submitting"
-echo "##"
 }
 
 create_freshclam_conf()
@@ -8521,58 +7864,13 @@ create_freshclam_conf()
 echo "# Path to the database directory."
 echo "# WARNING: It must match clamd.conf's directive!"
 echo "# Default: hardcoded (depends on installation options)"
-echo "DatabaseDirectory $indimaildir/clamd"
+echo "DatabaseDirectory /var/indimail/clamd"
 echo ""
-echo "# Path to the log file (make sure it has proper permissions)"
-echo "# Default: disabled"
-echo "#UpdateLogFile /var/log/freshclam.log"
-echo ""
-echo "# Maximum size of the log file."
-echo "# Value of 0 disables the limit."
-echo "# You may use 'M' or 'm' for megabytes (1M = 1m = 1048576 bytes)"
-echo "# and 'K' or 'k' for kilobytes (1K = 1k = 1024 bytes)."
-echo "# in bytes just don't use modifiers. If LogFileMaxSize is enabled,"
-echo "# log rotation (the LogRotate option) will always be enabled."
-echo "# Default: 1M"
-echo "#LogFileMaxSize 2M"
-echo ""
-echo "# Log time with each message."
-echo "# Default: no"
-echo "#LogTime yes"
-echo ""
-echo "# Enable verbose logging."
-echo "# Default: no"
-echo "#LogVerbose yes"
-echo ""
-echo "# Use system logger (can work together with UpdateLogFile)."
-echo "# Default: no"
-echo "#LogSyslog yes"
-echo ""
-echo "# Specify the type of syslog messages - please refer to 'man syslog'"
-echo "# for facility names."
-echo "# Default: LOG_LOCAL6"
-echo "#LogFacility LOG_MAIL"
-echo ""
-echo "# Enable log rotation. Always enabled when LogFileMaxSize is enabled."
-echo "# Default: no"
-echo "#LogRotate yes"
-echo ""
-echo "# This option allows you to save the process identifier of the daemon"
-echo "# Default: disabled"
-echo "#PidFile /var/run/freshclam.pid"
 echo ""
 echo "# By default when started freshclam drops privileges and switches to the"
 echo "# \"clamav\" user. This directive allows you to change the database owner."
 echo "# Default: clamav (may depend on installation options)"
 echo "DatabaseOwner qscand"
-echo ""
-echo "# Use DNS to verify virus database version. Freshclam uses DNS TXT records"
-echo "# to verify database and software versions. With this directive you can change"
-echo "# the database verification domain."
-echo "# WARNING: Do not touch it unless you're configuring freshclam to use your"
-echo "# own database verification domain."
-echo "# Default: current.cvd.clamav.net"
-echo "#DNSDatabaseInfo current.cvd.clamav.net"
 echo ""
 echo "# database.clamav.net is now the primary domain name to be used world-wide."
 echo "# Now that CloudFlare is being used as our Content Delivery Network (CDN), "
@@ -8584,122 +7882,9 @@ echo "# How many attempts to make before giving up."
 echo "# Default: 3 (per mirror)"
 echo "MaxAttempts 5"
 echo ""
-echo "# With this option you can control scripted updates. It's highly recommended"
-echo "# to keep it enabled."
-echo "# Default: yes"
-echo "#ScriptedUpdates yes"
-echo ""
-echo "# By default freshclam will keep the local databases (.cld) uncompressed to"
-echo "# make their handling faster. With this option you can enable the compression;"
-echo "# the change will take effect with the next database update."
-echo "# Default: no"
-echo "#CompressLocalDatabase no"
-echo ""
-echo "# With this option you can provide custom sources (http:// or file://) for"
-echo "# database files. This option can be used multiple times."
-echo "# Default: no custom URLs"
-echo "#DatabaseCustomURL http://myserver.com/mysigs.ndb"
-echo "#DatabaseCustomURL file:///mnt/nfs/local.hdb"
-echo ""
-echo "# This option allows you to easily point freshclam to private mirrors."
-echo "# If PrivateMirror is set, freshclam does not attempt to use DNS"
-echo "# to determine whether its databases are out-of-date, instead it will"
-echo "# use the If-Modified-Since request or directly check the headers of the"
-echo "# remote database files. For each database, freshclam first attempts"
-echo "# to download the CLD file. If that fails, it tries to download the"
-echo "# CVD file. This option overrides DatabaseMirror, DNSDatabaseInfo"
-echo "# and ScriptedUpdates. It can be used multiple times to provide"
-echo "# fall-back mirrors."
-echo "# Default: disabled"
-echo "#PrivateMirror mirror1.mynetwork.com"
-echo "#PrivateMirror mirror2.mynetwork.com"
-echo ""
-echo "# Number of database checks per day."
-echo "# Default: 12 (every two hours)"
-echo "#Checks 24"
-echo ""
-echo "# Proxy settings"
-echo "# Default: disabled"
-echo "#HTTPProxyServer myproxy.com"
-echo "#HTTPProxyPort 1234"
-echo "#HTTPProxyUsername myusername"
-echo "#HTTPProxyPassword mypass"
-echo ""
-echo "# If your servers are behind a firewall/proxy which applies User-Agent"
-echo "# filtering you can use this option to force the use of a different"
-echo "# User-Agent header."
-echo "# Default: clamav/version_number"
-echo "#HTTPUserAgent SomeUserAgentIdString"
-echo ""
-echo "# Use aaa.bbb.ccc.ddd as client address for downloading databases. Useful for"
-echo "# multi-homed systems."
-echo "# Default: Use OS'es default outgoing IP address."
-echo "#LocalIPAddress aaa.bbb.ccc.ddd"
-echo ""
-echo "# Send the RELOAD command to clamd."
-echo "# Default: no"
-echo "#NotifyClamd /path/to/clamd.conf"
-echo ""
-echo "# Run command after successful database update."
-echo "# Default: disabled"
-echo "#OnUpdateExecute command"
-echo ""
-echo "# Run command when database update process fails."
-echo "# Default: disabled"
-echo "#OnErrorExecute command"
-echo ""
-echo "# Run command when freshclam reports outdated version."
-echo "# In the command string %v will be replaced by the new version number."
-echo "# Default: disabled"
-echo "#OnOutdatedExecute command"
-echo ""
 echo "# Don't fork into background."
 echo "# Default: no"
 echo "Foreground yes"
-echo ""
-echo "# Enable debug messages in libclamav."
-echo "# Default: no"
-echo "#Debug yes"
-echo ""
-echo "# Timeout in seconds when connecting to database server."
-echo "# Default: 30"
-echo "#ConnectTimeout 60"
-echo ""
-echo "# Timeout in seconds when reading from database server."
-echo "# Default: 30"
-echo "#ReceiveTimeout 60"
-echo ""
-echo "# With this option enabled, freshclam will attempt to load new"
-echo "# databases into memory to make sure they are properly handled"
-echo "# by libclamav before replacing the old ones."
-echo "# Default: yes"
-echo "#TestDatabases yes"
-echo ""
-echo "# This option enables support for Google Safe Browsing. When activated for"
-echo "# the first time, freshclam will download a new database file"
-echo "# (safebrowsing.cvd) which will be automatically loaded by clamd and"
-echo "# clamscan during the next reload, provided that the heuristic phishing"
-echo "# detection is turned on. This database includes information about websites"
-echo "# that may be phishing sites or possible sources of malware. When using this"
-echo "# option, it's mandatory to run freshclam at least every 30 minutes."
-echo "# Freshclam uses the ClamAV's mirror infrastructure to distribute the"
-echo "# database and its updates but all the contents are provided under Google's"
-echo "# terms of use. See https://www.google.com/transparencyreport/safebrowsing"
-echo "# and https://www.clamav.net/documents/safebrowsing"
-echo "# for more information."
-echo "# Default: disabled"
-echo "#SafeBrowsing yes"
-echo ""
-echo "# This option enables downloading of bytecode.cvd, which includes additional"
-echo "# detection mechanisms and improvements to the ClamAV engine."
-echo "# Default: enabled"
-echo "#Bytecode yes"
-echo ""
-echo "# Download an additional 3rd party signature database distributed through"
-echo "# the ClamAV mirrors. "
-echo "# This option can be used multiple times."
-echo "#ExtraDatabase dbname1"
-echo "#ExtraDatabase dbname2"
 }
 
 create_bogofilter_conf()
@@ -10638,82 +9823,119 @@ case $option in
 		;;
 
 		clamd)
-		if [ ! -d "$DESTDIR"$sysconfdir ] ; then
-			/bin/mkdir -p "$DESTDIR"$sysconfdir
+		if [ ! -d $sysconfdir ] ; then
+			/bin/mkdir -p $sysconfdir
 		fi
 		if [ -f /usr/sbin/clamd ] ; then
-			conf_file="$DESTDIR"$sysconfdir/scan.conf
+			conf_file=$sysconfdir/scan.conf
 		else
-			conf_file="$DESTDIR"$sysconfdir/scan.conf.disabled
+			echo "/usr/sbin/clamd not found" 1>&2
+			exit 1
 		fi
-		if [ -d /etc/clamd.d ] ; then
-			if [ -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.d/scan.conf ] ; then
-				cat /etc/clamd.d/scan.conf | sed \
-					-e 's,#LogClean,LogClean,g' \
-					-e 's,#LocalSocket,LocalSocket,g' \
-					-e 's,LogSyslog,#LogSyslog,g' \
-					-e 's,#DatabaseDirectory.*,DatabaseDirectory /var/indimail/clamd,g' \
-					-e 's,LocalSocketGroup.*,LocalSocketGroup qmail,g'  \
-					-e 's,#LocalSocketMode,LocalSocketMode,g' \
-					-e 's,#FixStaleSocket,FixStaleSocket,g' \
-					-e 's,User.*,User qscand,g'  \
-					-e 's,#Foreground,Foreground,g' \
-					-e '0,/^#Example$/d' > $TMPDIR/config.cnf.$$
-				if [ ! -s $TMPDIR/config.cnf.$$ ] ; then
-					create_clamd_conf > $TMPDIR/config.cnf.$$
-				fi
-			elif [ ! -f /etc/clamd.d/scan.conf ] ; then
-				create_clamd_conf > $TMPDIR/config.cnf.$$
+		if [ ! -d /etc/clamd.d ] ; then
+			if [ ! -f $sysconfdir/scan.conf ] ; then
+				create_clamd_conf > $sysconfdir/scan.conf
 			fi
-		else
-			create_clamd_conf > $TMPDIR/config.cnf.$$
+			mkdir -p /etc/clamd.d
+			if [ $? ne 0 ] ; then
+				exit 1
+			fi
+			/bin/ln -sr $sysconfdir/scan.conf 
+				/etc/clamd.d/scan.conf 2>/dev/null
+			if [ $? -ne 0 ] ; then
+				cd /etc/clamd.d
+				/bin/ln -s $sysconfdir/scan.conf
+			fi
+		elif [ ! -f /etc/clamd.d/scan.conf ] ; then
+			if [ ! -f $sysconfdir/scan.conf ] ; then
+				create_clamd_conf > $sysconfdir/scan.conf
+			fi
+			/bin/ln -sr $sysconfdir/scan.conf 
+				/etc/clamd.d/scan.conf 2>/dev/null
+			if [ $? -ne 0 ] ; then
+				cd /etc/clamd.d
+				/bin/ln -s $sysconfdir/scan.conf
+			fi
 		fi
-		if [ $? -eq 0 ] ; then
-			change_config $conf_file $TMPDIR/config.cnf.$$
+		if [ -f /etc/clamd.d/scan.conf.rpmnew ] ; then
+			mv /etc/clamd.d/scan.conf.rpmnew /etc/clamd.d/scan.conf.BAK
+			f=/etc/clamd.d/scan.conf.rpmnew
+		elif [ -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.d/scan.conf ] ; then
+			mv /etc/clamd.d/scan.conf /etc/clamd.d/scan.conf.BAK
+			f=/etc/clamd.d/scan.conf.BAK
 		else
-			/bin/rm -f $TMPDIR/config.cnf.$$
+			f=""
+		fi
+		if [ -n "$f" ] ; then
+			cat $f | sed \
+				-e 's,#LogClean,LogClean,g' \
+				-e 's,#LocalSocket,LocalSocket,g' \
+				-e 's,LogSyslog,#LogSyslog,g' \
+				-e 's,#DatabaseDirectory.*,DatabaseDirectory /var/indimail/clamd,g' \
+				-e 's,LocalSocketGroup.*,LocalSocketGroup qmail,g'  \
+				-e 's,#LocalSocketMode,LocalSocketMode,g' \
+				-e 's,#FixStaleSocket,FixStaleSocket,g' \
+				-e 's,User.*,User qscand,g'  \
+				-e 's,#Foreground,Foreground,g' \
+				-e '#ConcurrentDatabaseReload,ConcurrentDatabaseReload,g' \
+				-e '0,/^#Example$/d' > $TMPDIR/config.cnf.$$
+			if [ -s $TMPDIR/config.cnf.$$ ] ; then
+				/bin/rm -f $conf_file
+				change_config $conf_file $TMPDIR/config.cnf.$$
+				/bin/rm -f /etc/clamd.d/scan.conf.rpmnew
+			else
+				echo "error generating scan.conf" 1>&1
+				exit 1
+			fi
+		fi
+		if [ -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.d/scan.conf ] ; then
+			mv /etc/clamd.d/scan.conf /etc/clamd.d/scan.conf.BAK
+			if [ -f $sysconfdir/scan.conf ] ; then
+				/bin/ln -sr $sysconfdir/scan.conf 
+					/etc/clamd.d/scan.conf 2>/dev/null
+				if [ $? -ne 0 ] ; then
+					cd /etc/clamd.d
+					/bin/ln -s $sysconfdir/scan.conf
+				fi
+			fi
+		fi
+		if [ ! -f /etc/clamd.d/scan.conf ] ; then
+			echo "clamd config /etc/clamd.d/scan.conf not found" 1>&2
+			exit 1
 		fi
 		dbd=`grep -w "^DatabaseDirectory" $conf_file | awk '{print $2}'`
 		if [ -z "$dbd" ] ; then
 			echo "DatabaseDirectory not defined in $conf_file" 1>&2
 			exit 1
 		fi
-		/bin/mkdir -p $dbd
-		if [ $? -eq 0 ] ; then
-			$chown qscand:qmail $dbd
-			if [ $? -ne 0 ] ; then
-				exit 1
-			fi
-		else
-			exit 1
-		fi
-		if [ -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.conf ] ; then
-			mv /etc/clamd.d/scan.conf /etc/clamd.d/scan.conf.BAK
-		fi
-		if [ -d /etc/clamd.d -a ! -f "$DESTDIR"/etc/clamd.d/scan.conf ] ; then
-			if [ ! -d "$DESTDIR"/etc/clamd.d ] ; then
-				mkdir -p "$DESTDIR"/etc/clamd.d
-			fi
-			/bin/ln -sr "$DESTDIR"$sysconfdir/scan.conf \
-				"$DESTDIR"/etc/clamd.d/scan.conf 2>/dev/null
-			if [ $? -ne 0 ] ; then
-				if [ -d "$DESTDIR"/etc/clamd.d ] ; then
-					cd "$DESTDIR"/etc/clamd.d
-					/bin/ln -s "$DESTDIR"$sysconfdir/scan.conf
-				else
-					echo "Unable to create "$DESTDIR"$sysconfdir/scan.conf" 1>&2
+		if [ ! -d $dbd ] ; then
+			/bin/mkdir -p $dbd
+			if [ $? -eq 0 ] ; then
+				$chown qscand:qmail $dbd
+				if [ $? -ne 0 ] ; then
 					exit 1
 				fi
+			else
+				exit 1
 			fi
 		fi
-
-		if [ -f "$DESTDIR"$QmailBinPrefix/bin/freshclam ] ; then
-			conf_file="$DESTDIR"$sysconfdir/freshclam.conf
+		if [ -f /usr/bin/freshclam ] ; then
+			conf_file=$sysconfdir/freshclam.conf
 		else
-			conf_file="$DESTDIR"$sysconfdir/freshclam.conf.disabled
+			echo "/usr/bin/freshclam not found" 1>&2
+			exit 1
 		fi
-		if [ -f /etc/freshclam.conf -a ! -L /etc/freshclam.conf ] ; then
-			cat /etc/freshclam.conf | sed \
+		if [ -f /etc/freshclam.conf.rpmnew ] ; then
+			mv /etc/freshclam.conf.rpmnew /etc/freshclam.conf.BAK
+			f=/etc/freshclam.conf.rpmnew
+		elif [ -f /etc/freshclam.conf -a ! -L /etc/freshclam.conf ] ; then
+			mv /etc/freshclam.conf /etc/freshclam.conf.BAK
+			f=/etc/freshclam.conf.BAK
+		else
+			f=""
+		fi
+		if [ -n "$f" ] ; then
+			cat $f | sed \
 				-e 's,#LogClean,LogClean,g' \
 				-e 's,LogSyslog,#LogSyslog,g' \
 				-e 's,#DatabaseDirectory.*,DatabaseDirectory /var/indimail/clamd,g' \
@@ -10723,26 +9945,21 @@ case $option in
 			if [ ! -s $TMPDIR/config.cnf.$$ ] ; then
 				create_freshclam_conf > $TMPDIR/config.cnf.$$
 			fi
-		elif [ ! -f /etc/freshclam.conf ] ; then
-			create_freshclam_conf > $TMPDIR/config.cnf.$$
-		fi
-		if [ $? -eq 0 ] ; then
-			change_config $conf_file $TMPDIR/config.cnf.$$
-		else
-			/bin/rm -f $TMPDIR/config.cnf.$$
-		fi
-		if [ -f /etc/freshclam.conf -a ! -L /etc/freshclam.conf ] ; then
-			mv /etc/freshclam.conf /etc/freshclam.conf.BAK
-		fi
-		if [ ! -f "$DESTDIR"/etc/freshclam.conf ] ; then
-			if [ ! -d "$DESTDIR"/etc ] ; then
-				mkdir -p "$DESTDIR"/etc
+			if [ -s $TMPDIR/config.cnf.$$ ] ; then
+				/bin/rm -f $conf_file
+				change_config $conf_file $TMPDIR/config.cnf.$$
+				/bin/rm -f /etc/freshclam.conf.rpmnew
+			else
+				echo "error generating $conf_file" 1>&1
+				exit 1
 			fi
-			/bin/ln -sr "$DESTDIR"$sysconfdir/freshclam.conf \
-				"$DESTDIR"/etc/freshclam.conf 2>/dev/null
+		fi
+		if [ ! -f /etc/freshclam.conf ] ; then
+			/bin/ln -sr $sysconfdir/freshclam.conf \
+				/etc/freshclam.conf 2>/dev/null
 			if [ $? -ne 0 ] ; then
-				cd "$DESTDIR"/etc/
-				/bin/ln -s "$DESTDIR"$sysconfdir/freshclam.conf
+				cd /etc/
+				/bin/ln -s $sysconfdir/freshclam.conf
 			fi
 		fi
 		if [ -f /usr/lib/tmpfiles.d/clamd.scan.conf ] ; then
