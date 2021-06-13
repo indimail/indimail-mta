@@ -125,6 +125,8 @@ Release 2.13 Start 14/02/2021
 77. svctool: replace qmail-multi with qmail-spamfilter for spam filter
 - 11/05/2021
 78. remove usage of auto_qmail, auto_control for locating files
+- 13/05/2021
+79. svctool: simplified generation of clamav, freshclam config
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
