@@ -1,5 +1,8 @@
 /*
  * $Log: 822print.c,v $
+ * Revision 1.8  2021-06-13 17:27:40+05:30  Cprogrammer
+ * removed chdir(auto_sysconfdir)
+ *
  * Revision 1.7  2020-11-24 13:43:41+05:30  Cprogrammer
  * removed exit.h
  *
@@ -429,8 +432,6 @@ main()
 {
 	int             flagheader = 1;
 
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die3sys(111, FATAL, "chdir: ", auto_sysconfdir);
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (!mess822_begin(&h, a))
@@ -464,7 +465,7 @@ main()
 void
 getversion_822print_c()
 {
-	static char    *x = "$Id: 822print.c,v 1.7 2020-11-24 13:43:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822print.c,v 1.8 2021-06-13 17:27:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: 822received.c,v $
+ * Revision 1.9  2021-06-13 17:27:57+05:30  Cprogrammer
+ * removed chdir(auto_sysconfdir)
+ *
  * Revision 1.8  2020-11-24 13:43:43+05:30  Cprogrammer
  * removed exit.h
  *
@@ -181,8 +184,6 @@ main(argc, argv)
 	int             j;
 	int             match;
 
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die3sys(111, FATAL, "chdir: ", auto_sysconfdir);
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (!mess822_begin(&h, a))
@@ -228,7 +229,7 @@ main(argc, argv)
 void
 getversion_822received_c()
 {
-	static char    *x = "$Id: 822received.c,v 1.8 2020-11-24 13:43:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822received.c,v 1.9 2021-06-13 17:27:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

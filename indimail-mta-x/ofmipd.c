@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.20  2021-06-13 17:28:39+05:30  Cprogrammer
+ * removed chdir(auto_sysconfdir)
+ *
  * Revision 1.19  2021-03-04 23:02:29+05:30  Cprogrammer
  * ansic c prototype for safewrite()
  *
@@ -1201,8 +1204,6 @@ main(int argc, char **argv)
 	remoteinfo = env_get("REMOTEINFO");
 	relayclient = env_get("RELAYCLIENT");
 	received_init();
-	if (chdir(auto_sysconfdir) == -1)
-		die_config();
 	if (leapsecs_init() == -1)
 		die_config();
 	if (rwhconfig(&rewrite, &idappend) == -1)
@@ -1221,7 +1222,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.19 2021-03-04 23:02:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.20 2021-06-13 17:28:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

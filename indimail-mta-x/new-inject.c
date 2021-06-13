@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.15  2021-06-13 17:28:12+05:30  Cprogrammer
+ * removed chdir(auto_sysconfdir)
+ *
  * Revision 1.14  2021-05-13 14:44:02+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -527,8 +530,6 @@ main(argc, argv)
 		}
 	} /*- while ((opt = getopt(argc, argv, "nNaAhHFIMRSf:")) != opteof) */
 	argv += optind;
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (config_env(&fnmft, "QMAILMFTFILE") == -1)
@@ -665,7 +666,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.14 2021-05-13 14:44:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.15 2021-06-13 17:28:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
