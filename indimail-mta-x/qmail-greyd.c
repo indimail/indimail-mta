@@ -110,7 +110,7 @@
 #include <netdb.h>
 #include <sys/select.h>
 #include "sgetopt.h"
-#ifndef NETQMAIL
+#ifdef NETQMAIL
 #include "auto_qmail.h"
 #endif
 #include "auto_control.h"
