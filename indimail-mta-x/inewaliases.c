@@ -1,6 +1,6 @@
 /*
  * $Log: inewaliases.c,v $
- * Revision 1.5  2021-06-12 17:57:36+05:30  Cprogrammer
+ * Revision 1.5  2021-06-14 00:44:02+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
  * Revision 1.4  2005-08-23 17:33:17+05:30  Cprogrammer
@@ -120,11 +120,9 @@ gotincl()
 		strerr_die2x(111, FATAL, "NUL not permitted in :include: filenames");
 	if (address.s[0] != '.' && address.s[0] != '/' && !stralloc_cats(&instr, "./"))
 		nomem();
-	if (!stralloc_cat(&instr, &address))
-		nomem();
-	if (!stralloc_cats(&instr, ".bin"))
-		nomem();
-	if (!stralloc_0(&instr))
+	if (!stralloc_cat(&instr, &address) ||
+			!stralloc_cats(&instr, ".bin") ||
+			!stralloc_0(&instr))
 		nomem();
 }
 
@@ -156,29 +154,22 @@ gotaddr()
 	if (!flaghasat && address.s[0] == '|') {
 		if (byte_chr(address.s, address.len, '\0') < address.len)
 			strerr_die2x(111, FATAL, "NUL not permitted in program names");
-		if (!stralloc_cats(&instr, "!"))
-			nomem();
-		if (!stralloc_catb(&instr, address.s + 1, address.len - 1))
-			nomem();
-		if (!stralloc_0(&instr))
+		if (!stralloc_cats(&instr, "!") ||
+				!stralloc_catb(&instr, address.s + 1, address.len - 1) ||
+				!stralloc_0(&instr))
 			nomem();
 		return;
 	}
 	if (target.len) {
-		if (!stralloc_cats(&instr, "&"))
-			nomem();
-		if (!stralloc_cat(&instr, &fulltarget))
-			nomem();
-		if (!stralloc_0(&instr))
+		if (!stralloc_cats(&instr, "&") ||
+				!stralloc_cat(&instr, &fulltarget) ||
+				!stralloc_0(&instr))
 			nomem();
 	}
-	if (!flaghasat && !stralloc_cats(&address, "@"))
-		nomem();
-	if (!stralloc_copy(&target, &address))
-		nomem();
-	if (!stralloc_copy(&fulltarget, &address))
-		nomem();
-	if (fulltarget.s[fulltarget.len - 1] == '@' && !stralloc_cat(&fulltarget, &defaulthost))
+	if ((!flaghasat && !stralloc_cats(&address, "@")) ||
+			!stralloc_copy(&target, &address) ||
+			!stralloc_copy(&fulltarget, &address) ||
+			(fulltarget.s[fulltarget.len - 1] == '@' && !stralloc_cat(&fulltarget, &defaulthost)))
 		nomem();
 	if (fulltarget.s[fulltarget.len - 1] == '+') {
 		fulltarget.s[fulltarget.len - 1] = '.';
@@ -195,9 +186,8 @@ gotaddr()
 			break;
 	}
 	if (i == fulltarget.len) {
-		if (!stralloc_cats(&fulltarget, "."))
-			nomem();
-		if (!stralloc_cat(&fulltarget, &defaultdomain))
+		if (!stralloc_cats(&fulltarget, ".") ||
+				!stralloc_cat(&fulltarget, &defaultdomain))
 			nomem();
 	}
 	if (fulltarget.len > 800)
@@ -316,17 +306,15 @@ doit()
 	if (!target.len)
 		parseerr();
 	if (stralloc_starts(&target, "owner-")) {
-		if (!stralloc_copys(&key, "?"))
-			nomem();
-		if (!stralloc_catb(&key, target.s + 6, target.len - 6))
+		if (!stralloc_copys(&key, "?") ||
+				!stralloc_catb(&key, target.s + 6, target.len - 6))
 			nomem();
 		case_lowerb(key.s, key.len);
 		if (cdbmss_add(&cdbmss, (unsigned char *) key.s, key.len, (unsigned char *) fulltarget.s, fulltarget.len) == -1)
 			writeerr();
 	}
-	if (!stralloc_copys(&key, ":"))
-		nomem();
-	if (!stralloc_cat(&key, &target))
+	if (!stralloc_copys(&key, ":") ||
+			!stralloc_cat(&key, &target))
 		nomem();
 	case_lowerb(key.s, key.len);
 	if (cdbmss_add(&cdbmss, (unsigned char *) key.s, key.len, (unsigned char *) instr.s, instr.len) == -1)
@@ -360,11 +348,9 @@ main()
 			continue;
 		}
 		if (line.len && line.s[0] != '#') {
-			if (!stralloc_copys(&target, ""))
-				nomem();
-			if (!stralloc_copys(&fulltarget, ""))
-				nomem();
-			if (!stralloc_copys(&instr, ""))
+			if (!stralloc_copys(&target, "") ||
+					!stralloc_copys(&fulltarget, "") ||
+					!stralloc_copys(&instr, ""))
 				nomem();
 			parseline();
 			doit();
@@ -390,7 +376,7 @@ main()
 void
 getversion_newaliases_c()
 {
-	static char    *x = "$Id: inewaliases.c,v 1.5 2021-06-12 17:57:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inewaliases.c,v 1.5 2021-06-14 00:44:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
