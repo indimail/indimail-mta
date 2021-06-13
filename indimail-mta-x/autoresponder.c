@@ -1,6 +1,6 @@
 /*
  * $Log: autoresponder.c,v $
- * Revision 1.33  2020-05-11 08:08:33+05:30  Cprogrammer
+ * Revision 1.33  2021-06-14 00:37:37+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
  * Revision 1.32  2017-03-09 14:35:38+05:30  Cprogrammer
@@ -223,17 +223,15 @@ store_addr(stralloc *addrlist, char *line)
 	for (ptr = start;*ptr;ptr++) {
 		if (*ptr == ',' || *ptr == ';') {
 			*ptr = 0;
-			if (!stralloc_cats(addrlist, start))
-				strerr_die2sys(111, FATAL, "out of memory: ");
-			if (!stralloc_0(addrlist))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+			if (!stralloc_cats(addrlist, start) ||
+					!stralloc_0(addrlist))
+				strerr_die2x(111, FATAL, "out of memory");
 			for(start = ptr + 1;*start && isspace((int) *start);start++);
 		}
 	}
-	if (!stralloc_cats(addrlist, start))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_0(addrlist))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_cats(addrlist, start) ||
+			!stralloc_0(addrlist))
+		strerr_die2x(111, FATAL, "out of memory");
 	return;
 }
 
@@ -273,13 +271,13 @@ addrparse(arg)
 		}
 	}
 	if (!stralloc_copys(&addr, ""))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+		strerr_die2x(111, FATAL, "out of memory");
 	flagesc = 0;
 	flagquoted = 0;
 	for (i = 0; (ch = arg[i]); ++i) {	/*- copy arg to addr, stripping quotes */
 		if (flagesc) {
 			if (!stralloc_append(&addr, &ch))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+				strerr_die2x(111, FATAL, "out of memory");
 			flagesc = 0;
 		} else {
 			if (!flagquoted && ch == terminator)
@@ -299,12 +297,12 @@ addrparse(arg)
 				break;
 			default:
 				if (!stralloc_append(&addr, &ch))
-					strerr_die2sys(111, FATAL, "out of memory: ");
+					strerr_die2x(111, FATAL, "out of memory");
 			}
 		}
 	}
 	if (!stralloc_append(&addr, ""))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (liphostok) {
 		if ((i = byte_rchr(addr.s, addr.len, '@')) < addr.len) {
 			/*- if not, partner should go read rfc 821 */
@@ -312,10 +310,9 @@ addrparse(arg)
 				if (!addr.s[i + 1 + ip4_scanbracket(addr.s + i + 1, &ip)]) {
 					if (ipme_is(&ip)) {
 						addr.len = i + 1;
-						if (!stralloc_cat(&addr, &liphost))
-							strerr_die2sys(111, FATAL, "out of memory: ");
-						if (!stralloc_0(&addr))
-							strerr_die2sys(111, FATAL, "out of memory: ");
+						if (!stralloc_cat(&addr, &liphost) ||
+								!stralloc_0(&addr))
+							strerr_die2x(111, FATAL, "out of memory");
 					}
 				}
 			}
@@ -336,9 +333,9 @@ match_addr(stralloc *addrlist, char *email_addr)
 	if (!addrlist->s)
 		return(0);
 	if (!quote2(&quoted, email_addr))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&quoted))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+		strerr_die2x(111, FATAL, "out of memory");
 	for (len = 0, ptr = addrlist->s;len < addrlist->len;) {
 		if (!strcasecmp(ptr, email_addr))
 			return(1);
@@ -468,7 +465,7 @@ get_arguments(int argc, char *argv[])
 		case 'T':
 			if (!optarg[i = str_chr(optarg, '/')]) {
 				if (!stralloc_copys(&content_type, optarg))
-					strerr_die2sys(111, FATAL, "out of memory: ");
+					strerr_die2x(111, FATAL, "out of memory");
 			} else { /*- content-type is in a file */
 				if (control_readnativefile(&content_type, optarg, 0) != 1)
 					strerr_die3sys(111, FATAL, optarg, ": ");
@@ -538,7 +535,7 @@ check_sender(stralloc *sender)
 	if ((control_readfile(&badrcptpatterns, "badrcptpatterns", 0)) == -1)
 		strerr_die2sys(111, FATAL, "badrcptto: ");
 	if (!constmap_init(&mapbadrcpt, badrcptto.s, badrcptto.len, 0))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+		strerr_die2x(111, FATAL, "out of memory");
 	switch (address_match("badrcptto", sender, &badrcptto, &mapbadrcpt, &badrcptpatterns, &errStr))
 	{
 	case 1:
@@ -548,7 +545,7 @@ check_sender(stralloc *sender)
 	case 0:
 		break;
 	case -1:
-		strerr_die2sys(111, FATAL, "out of memory: ");
+		strerr_die2x(111, FATAL, "out of memory");
 	case -2:
 		strerr_die2sys(111, FATAL, "unable to read badrcpto.cdb: ");
 	case -3:
@@ -643,7 +640,7 @@ parse_header(char *str, unsigned length)
 				i++;
 			}
 			if (!(cptr1 = alloc(length - (start - str) - i + 1)))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+				strerr_die2x(111, FATAL, "out of memory");
 			for(cptr2 = cptr1;start != end + 1;start++)
 				*cptr2++ = *start;
 			*cptr2 = 0;
@@ -725,11 +722,11 @@ popen_inject(char *sender)
 		args[5] = 0;
 		close(fds[1]);
 		if (!env_unset("QMAILNAME"))
-			strerr_die2sys(111, FATAL, "out of memory: ");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!env_unset("QMAILUSER="))
-			strerr_die2sys(111, FATAL, "out of memory: ");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (!env_unset("QMAILHOST="))
-			strerr_die2sys(111, FATAL, "out of memory: ");
+			strerr_die2x(111, FATAL, "out of memory");
 		close(0);
 		dup2(fds[0], 0);
 		if (fds[0])
@@ -983,14 +980,11 @@ mkTempFile(int seekfd)
 		strerr_die2sys(111, FATAL, "unable to lseek: ");
 	if (!(tmpdir = env_get("TMPDIR")))
 		tmpdir = "/tmp";
-	if (!stralloc_copys(&tmpFile, tmpdir))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_cats(&tmpFile, "/qmailFilterXXX"))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_catb(&tmpFile, strnum, fmt_ulong(strnum, (unsigned long) getpid())))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_0(&tmpFile))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_copys(&tmpFile, tmpdir) ||
+			!stralloc_cats(&tmpFile, "/qmailFilterXXX") ||
+			!stralloc_catb(&tmpFile, strnum, fmt_ulong(strnum, (unsigned long) getpid())) ||
+			!stralloc_0(&tmpFile))
+		strerr_die2x(111, FATAL, "out of memory");
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 		strerr_die3sys(111, FATAL, "unable to open: ", tmpFile.s);
 	unlink(tmpFile.s);
@@ -1075,10 +1069,9 @@ main(int argc, char *argv[])
 	if (!str_diffn(recipient, dtrecip, str_len(recipient)))
 		opt_laxmode = 1;
 
-	if (!stralloc_copys(&mailfrom, sender))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_0(&mailfrom))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_copys(&mailfrom, sender) ||
+			!stralloc_0(&mailfrom))
+		strerr_die2x(111, FATAL, "out of memory");
 	case_lowers(mailfrom.s);
 	check_sender(&mailfrom);
 	/*- Read and parse header */
@@ -1144,7 +1137,7 @@ main(int argc, char *argv[])
 			from_addr = recipient;
 #ifdef QUOTE
 		if (!quote2(&quoted, from_addr))
-			strerr_die2sys(111, FATAL, "out of memory: ");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (substdio_put(&ssout, quoted.s, quoted.len))
 			strerr_die2sys(111, FATAL, "unable to write: ");
 #else
@@ -1160,7 +1153,7 @@ main(int argc, char *argv[])
 		strerr_die2sys(111, FATAL, "unable to write: ");
 #ifdef QUOTE
 	if (!quote2(&quoted, sender))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (substdio_put(&ssout, quoted.s, quoted.len))
 		strerr_die2sys(111, FATAL, "unable to write: ");
 #else
@@ -1195,16 +1188,12 @@ main(int argc, char *argv[])
 			"Content-Type: multipart/mixed;\n"
 			"\tboundary=\""))
 			strerr_die2sys(111, FATAL, "unable to write: ");
-		if (!stralloc_copyb(&boundary, num, fmt_ulong(num, datetai.x)))
-			strerr_die2sys(111, FATAL, "out of memory: ");
-		if (!stralloc_cats(&boundary, ".qp_"))
-			strerr_die2sys(111, FATAL, "out of memory: ");
-		if (!stralloc_catb(&boundary, num, fmt_ulong(num, getpid())))
-			strerr_die2sys(111, FATAL, "out of memory: ");
-		if (!stralloc_cats(&boundary, ".KUI@"))
-			strerr_die2sys(111, FATAL, "out of memory: ");
-		if (!stralloc_catb(&boundary, bouncehost.s, bouncehost.len))
-			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_copyb(&boundary, num, fmt_ulong(num, datetai.x)) ||
+				!stralloc_cats(&boundary, ".qp_") ||
+				!stralloc_catb(&boundary, num, fmt_ulong(num, getpid())) ||
+				!stralloc_cats(&boundary, ".KUI@") ||
+				!stralloc_catb(&boundary, bouncehost.s, bouncehost.len))
+			strerr_die2x(111, FATAL, "out of memory");
 		if (substdio_put(&ssout, boundary.s, boundary.len))
 			strerr_die2sys(111, FATAL, "unable to write: ");
 		if (substdio_puts(&ssout, "\"\n"))
@@ -1296,7 +1285,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.33 2020-05-11 08:08:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.33 2021-06-14 00:37:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
