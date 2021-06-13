@@ -63,7 +63,7 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" 1>&2
 	exit 1
 fi
-upgarde=0
+upgrade=0
 case "$1" in
     configure)
 		if [ -n "$2" ] ; then
