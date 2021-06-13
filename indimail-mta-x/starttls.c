@@ -1,6 +1,6 @@
 /*
  * $Log: starttls.c,v $
- * Revision 1.11  2021-06-12 20:03:12+05:30  Cprogrammer
+ * Revision 1.11  2021-06-14 01:19:59+05:30  Cprogrammer
  * collapsed stralloc_..
  *
  * Revision 1.10  2021-05-26 10:47:20+05:30  Cprogrammer
@@ -604,6 +604,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 					!stralloc_catb(&tlsFilename, "/notlshosts/", 12) ||
 					!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn) + 1) ||
 					!stralloc_0(&tlsFilename))
+				die_nomem();
 			if (!stat(tlsFilename.s, &st))
 				return (0);
 			if (!stralloc_copys(&tlsFilename, certdir) ||
@@ -1077,10 +1078,10 @@ get_tlsa_rr(char *domain, int mxhost, int port)
 			die_nomem();
 		}
 	} else {
-		dns_init(0);
-		r = now() + getpid();
 		if (!stralloc_copys(&sa, domain))
 			die_nomem();
+		dns_init(0);
+		r = now() + getpid();
 		r = dns_mxip(&ia, &sa, r);
 		switch (r)
 		{
@@ -1479,7 +1480,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.11 2021-06-12 20:03:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.11 2021-06-14 01:19:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
