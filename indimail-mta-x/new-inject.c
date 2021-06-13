@@ -1,6 +1,6 @@
 /*
  * $Log: new-inject.c,v $
- * Revision 1.15  2021-06-13 17:28:12+05:30  Cprogrammer
+ * Revision 1.15  2021-06-14 00:56:59+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
  * Revision 1.14  2021-05-13 14:44:02+05:30  Cprogrammer
@@ -97,8 +97,7 @@ stralloc        tmp = { 0 };
 stralloc        tmp2 = { 0 };
 
 void
-rewritelist(list)
-	stralloc       *list;
+rewritelist(stralloc *list)
 {
 	if (!rewritehost_list(&tmp, list->s, list->len, config_data(&rewrite)))
 		nomem();
@@ -116,20 +115,16 @@ stralloc        sender = { 0 };
 stralloc        recipients = { 0 };
 
 void
-recipient_add(addr)
-	char           *addr;
+recipient_add(char *addr)
 {
-	if (!rewritehost_addr(&tmp, addr, str_len(addr), config_data(&rewrite)))
-		nomem();
-	if (!stralloc_cat(&recipients, &tmp))
-		nomem();
-	if (!stralloc_0(&recipients))
+	if (!rewritehost_addr(&tmp, addr, str_len(addr), config_data(&rewrite)) ||
+			!stralloc_cat(&recipients, &tmp) ||
+			!stralloc_0(&recipients))
 		nomem();
 }
 
 void
-recipient_addlist(list)
-	stralloc       *list;
+recipient_addlist(stralloc *list)
 {
 	int             i;
 	int             j;
@@ -144,8 +139,7 @@ recipient_addlist(list)
 }
 
 void
-sender_get(list)
-	stralloc       *list;
+sender_get(stralloc *list)
 {
 	int             i;
 	int             j;
@@ -163,9 +157,7 @@ int             flagqueue = 1;
 struct qmail    qq;
 
 void
-myput(buf, len)
-	char           *buf;
-	int             len;
+myput(char *buf, int len)
 {
 	if (flagqueue)
 		qmail_put(&qq, buf, len);
@@ -174,8 +166,7 @@ myput(buf, len)
 }
 
 void
-myputs(buf)
-	char           *buf;
+myputs(char *buf)
 {
 	myput(buf, str_len(buf));
 }
@@ -185,9 +176,8 @@ putlist(char *name_t, stralloc *list)
 {
 	if (!list->len)
 		return;
-	if (!mess822_quotelist(&tmp, list))
-		nomem();
-	if (!mess822_fold(&tmp2, &tmp, name_t, 78))
+	if (!mess822_quotelist(&tmp, list) ||
+			!mess822_fold(&tmp2, &tmp, name_t, 78))
 		nomem();
 	myput(tmp2.s, tmp2.len);
 }
@@ -307,23 +297,15 @@ datemsgid_print()
 	myput(tmp.s, tmp.len);
 	myputs("\n");
 	if (!msgid.len) {
-		if (!stralloc_copys(&msgid, "Message-ID: <"))
-			nomem();
-		if (!stralloc_catlong(&msgid, date.ct.date.year))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.date.month, 2))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.date.day, 2))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.hour, 2))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.minute, 2))
-			nomem();
-		if (!stralloc_catint0(&msgid, date.ct.second, 2))
-			nomem();
-		if (!stralloc_cat(&msgid, &idappend))
-			nomem();
-		if (!stralloc_cats(&msgid, ">\n"))
+		if (!stralloc_copys(&msgid, "Message-ID: <") ||
+				!stralloc_catlong(&msgid, date.ct.date.year) ||
+				!stralloc_catint0(&msgid, date.ct.date.month, 2) ||
+				!stralloc_catint0(&msgid, date.ct.date.day, 2) ||
+				!stralloc_catint0(&msgid, date.ct.hour, 2) ||
+				!stralloc_catint0(&msgid, date.ct.minute, 2) ||
+				!stralloc_catint0(&msgid, date.ct.second, 2) ||
+				!stralloc_cat(&msgid, &idappend) ||
+				!stralloc_cats(&msgid, ">\n"))
 			nomem();
 	}
 	myput(msgid.s, msgid.len);
@@ -348,8 +330,7 @@ from_print()
 }
 
 int
-inmft(list)
-	stralloc       *list;
+inmft(stralloc *list)
 {
 	int             i;
 	int             j;
@@ -371,9 +352,8 @@ response_print()
 	putlist("Mail-Reply-To: ", &mailreplyto);
 
 	if (!followupto.len && config(&mft) && (inmft(&to) || inmft(&cc))) {
-		if (!stralloc_cat(&followupto, &to))
-			nomem();
-		if (!stralloc_cat(&followupto, &cc))
+		if (!stralloc_cat(&followupto, &to) ||
+				!stralloc_cat(&followupto, &cc))
 			nomem();
 	}
 	putlist("Mail-Followup-To: ", &followupto);
@@ -454,9 +434,7 @@ stralloc        line = { 0 };
 int             match;
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             i, opt, flagheader = 1;
 	struct strerr   rwhconfig_err;
@@ -552,46 +530,30 @@ main(argc, argv)
 			strerr_die2sys(111, FATAL, "unable to read $QMAILREWRITEFILE: ");
 	}
 	set_environment(WARN, FATAL);
-	if (config_env(&name, "QMAILNAME") == -1)
-		nomem();
-	if (config_env(&name, "MAILNAME") == -1)
-		nomem();
-	if (config_env(&name, "NAME") == -1)
-		nomem();
-	if (config(&name) && !stralloc_0(config_data(&name)))
-		nomem();
-	if (config_env(&user, "QMAILUSER") == -1)
-		nomem();
-	if (config_env(&user, "MAILUSER") == -1)
-		nomem();
-	if (config_env(&user, "USER") == -1)
-		nomem();
-	if (config_env(&user, "LOGNAME") == -1)
-		nomem();
-	if (config_default(&user, "anonymous") == -1)
-		nomem();
-	if (config_env(&suser, "QMAILSUSER") == -1)
-		nomem();
-	if (config_copy(&suser, &user) == -1)
-		nomem();
-	if (config_env(&host, "QMAILHOST") == -1)
-		nomem();
-	if (config_env(&host, "MAILHOST") == -1)
-		nomem();
-	if (config_default(&host, "") == -1)
+	if (config_env(&name, "QMAILNAME") == -1 ||
+			config_env(&name, "MAILNAME") == -1 ||
+			config_env(&name, "NAME") == -1 ||
+			(config(&name) && !stralloc_0(config_data(&name))) ||
+			config_env(&user, "QMAILUSER") == -1 ||
+			config_env(&user, "MAILUSER") == -1 ||
+			config_env(&user, "USER") == -1 ||
+			config_env(&user, "LOGNAME") == -1 ||
+			config_default(&user, "anonymous") == -1 ||
+			config_env(&suser, "QMAILSUSER") == -1 ||
+			config_copy(&suser, &user) == -1 ||
+			config_env(&host, "QMAILHOST") == -1 ||
+			config_env(&host, "MAILHOST") == -1 ||
+			config_default(&host, "") == -1)
 		nomem();
 	if (rwhconfig(&rewrite, &idappend) == -1)
 		strerr_die1(111, FATAL, &rwhconfig_err);
-	if (config_env(&shost, "QMAILSHOST") == -1)
-		nomem();
-	if (config_copy(&shost, &host) == -1)
-		nomem();
-	if (!stralloc_copys(&sender, ""))
+	if (config_env(&shost, "QMAILSHOST") == -1 ||
+			config_copy(&shost, &host) == -1 ||
+			!stralloc_copys(&sender, ""))
 		nomem();
 	if (argsender) {
-		if (!rewritehost_addr(&sender, argsender, str_len(argsender), config_data(&rewrite)))
-			nomem();
-		if (!stralloc_0(&sender))
+		if (!rewritehost_addr(&sender, argsender, str_len(argsender), config_data(&rewrite)) ||
+				!stralloc_0(&sender))
 			nomem();
 	}
 	if (recipstrategy == 'A')
@@ -614,25 +576,20 @@ main(argc, argv)
 		u += nowpack[6];
 		u <<= 8;
 		u += nowpack[7];
-		if (!stralloc_cats(config_data(&suser), "-"))
-			nomem();
-		if (!stralloc_catulong0(config_data(&suser), u, 0))
+		if (!stralloc_cats(config_data(&suser), "-") ||
+				!stralloc_catulong0(config_data(&suser), u, 0))
 			nomem();
 		u = getpid();
-		if (!stralloc_cats(config_data(&suser), "."))
-			nomem();
-		if (!stralloc_catulong0(config_data(&suser), u, 0))
+		if (!stralloc_cats(config_data(&suser), ".") ||
+				!stralloc_catulong0(config_data(&suser), u, 0))
 			nomem();
 	}
 	if (flagverprecip && !stralloc_cats(config_data(&suser), "-"))
 		nomem();
-	if (!stralloc_cats(config_data(&suser), "@"))
-		nomem();
-	if (!stralloc_cat(config_data(&suser), config_data(&shost)))
-		nomem();
-	if (!stralloc_cats(config_data(&user), "@"))
-		nomem();
-	if (!stralloc_cat(config_data(&user), config_data(&host)))
+	if (!stralloc_cats(config_data(&suser), "@") ||
+			!stralloc_cat(config_data(&suser), config_data(&shost)) ||
+			!stralloc_cats(config_data(&user), "@") ||
+			!stralloc_cat(config_data(&user), config_data(&host)))
 		nomem();
 	if (!mess822_begin(&h, a))
 		nomem();
@@ -666,7 +623,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.15 2021-06-13 17:28:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.15 2021-06-14 00:56:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
