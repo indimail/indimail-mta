@@ -1,6 +1,6 @@
 /*
  * $Log: 822received.c,v $
- * Revision 1.9  2021-06-13 17:27:57+05:30  Cprogrammer
+ * Revision 1.9  2021-06-14 00:33:36+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
  * Revision 1.8  2020-11-24 13:43:43+05:30  Cprogrammer
@@ -83,8 +83,7 @@ doit()
 
 	if (!t.known)
 		substdio_puts(subfdoutsmall, "\t\t\t");
-	else
-	{
+	else {
 		caltime_tai(&t.ct, &sec);
 		tai_pack((char *) secpack, &sec);
 		secunix = secpack[0] - 64;
@@ -106,18 +105,15 @@ doit()
 	 */
 
 	for (j = i = 0; j < tokens.len; ++j)
-		if (!tokens.s[j])
-		{
+		if (!tokens.s[j]) {
 			x = tokens.s + i;
-			if (*x == '(')
-			{
+			if (*x == '(') {
 #ifdef notdef
 				if (state == 3)
 					substdio_puts(subfdoutsmall, "\n\t\t\t   ");
 #endif
 				substdio_puts(subfdoutsmall, "(");
-				while ((ch = tokens.s[++i]))
-				{
+				while ((ch = tokens.s[++i])) {
 					if (ch == '\n')
 						ch = 0;
 					substdio_put(subfdoutsmall, &ch, 1);
@@ -126,13 +122,11 @@ doit()
 				if (state & 1)
 					state = 2;
 			} else
-			if (*x == '=')
-			{
+			if (*x == '=') {
 				if (state == 3)
 					if (!case_diffs(x, "=from") || !case_diffs(x, "=by") || !case_diffs(x, "=for") || !case_diffs(x, "=id"))
 						substdio_puts(subfdoutsmall, "\n\t\t\t ");
-				while ((ch = tokens.s[++i]))
-				{
+				while ((ch = tokens.s[++i])) {
 					if (ch == '\n')
 						ch = 0;
 					substdio_put(subfdoutsmall, &ch, 1);
@@ -140,8 +134,7 @@ doit()
 				if (state & 1)
 					state = 2;
 			} else
-			if (*x == ';')
-			{
+			if (*x == ';') {
 				if ((state == 2) || (state == 3))
 					substdio_puts(subfdoutsmall, "\n\t\t\t ");
 				state = 4;
@@ -149,14 +142,12 @@ doit()
 				if (state & 1)
 					state = 2;
 			} else
-			if ((*x == ' ') || (*x == '\t'))
-			{
+			if ((*x == ' ') || (*x == '\t')) {
 				if ((state != 1) && (state != 3))
 					substdio_puts(subfdoutsmall, " ");
 				if (state == 2)
 					state = 3;
-			} else
-			{
+			} else {
 				substdio_put(subfdoutsmall, tokens.s + i, 1);
 				if (state & 1)
 					state = 2;
@@ -176,9 +167,7 @@ mess822_action  a[] = {
 };
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             i;
 	int             j;
@@ -188,8 +177,7 @@ main(argc, argv)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (!mess822_begin(&h, a))
 		nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		if (!mess822_ok(&line))
@@ -203,12 +191,9 @@ main(argc, argv)
 		nomem();
 	i = 0;
 	j = received.len;
-	for (;;)
-	{
-		if (!j || (received.s[j - 1] == '\n'))
-		{
-			if (i >= j)
-			{
+	for (;;) {
+		if (!j || (received.s[j - 1] == '\n')) {
+			if (i >= j) {
 				if (!stralloc_copyb(&line, received.s + j, i - j))
 					nomem();
 				doit();
@@ -229,7 +214,7 @@ main(argc, argv)
 void
 getversion_822received_c()
 {
-	static char    *x = "$Id: 822received.c,v 1.9 2021-06-13 17:27:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822received.c,v 1.9 2021-06-14 00:33:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
