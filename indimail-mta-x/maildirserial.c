@@ -1,6 +1,6 @@
 /*
  * $Log: maildirserial.c,v $
- * Revision 1.16  2021-06-12 17:59:24+05:30  Cprogrammer
+ * Revision 1.16  2021-06-14 00:49:50+05:30  Cprogrammer
  * added missing chdir removed by mistake
  *
  * Revision 1.15  2021-06-03 18:14:12+05:30  Cprogrammer
@@ -275,15 +275,11 @@ bounce(int fd, stralloc *why, int flagtimeout) /*- why must end with \n; must no
 	my_puts("\nMIME-Version: 1.0\n"
 			"Content-Type: multipart/mixed; "
 			"boundary=\"");
-	if (!stralloc_copyb(&boundary, num, fmt_ulong(num, datetai.x)))
-		die_nomem();
-	if (!stralloc_cats(&boundary, ".qp_"))
-		die_nomem();
-	if (!stralloc_catb(&boundary, num, fmt_ulong(num, qp)))
-		die_nomem(); 
-	if (!stralloc_cats(&boundary, ".KUI@"))
-		die_nomem();
-	if (!stralloc_cats(&boundary, config_data(&bouncehost)->s))
+	if (!stralloc_copyb(&boundary, num, fmt_ulong(num, datetai.x)) ||
+			!stralloc_cats(&boundary, ".qp_") ||
+			!stralloc_catb(&boundary, num, fmt_ulong(num, qp)) ||
+			!stralloc_cats(&boundary, ".KUI@") ||
+			!stralloc_cats(&boundary, config_data(&bouncehost)->s))
 		die_nomem();
 	put(boundary.s, boundary.len);
 	my_puts("\"");
@@ -628,7 +624,7 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.16 2021-06-12 17:59:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.16 2021-06-14 00:49:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
