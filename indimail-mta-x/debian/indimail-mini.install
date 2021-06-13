@@ -15,10 +15,8 @@ usr/bin/qmail-showctl                          /usr/bin
 usr/bin/qmaildirmake                           /usr/bin
 usr/bin/maildir2mbox                           /usr/bin
 usr/bin/maildirwatch                           /usr/bin
-usr/bin/queue-fix                              /usr/bin
 usr/bin/srsfilter                              /usr/bin
 usr/sbin/qmail-qmqpc                           /usr/sbin
-usr/sbin/qmail-queue                           /usr/sbin
 usr/sbin/qmail-direct                          /usr/sbin
 usr/sbin/qhpsi                                 /usr/sbin
 usr/share/man/man1/forward.1.gz                /usr/share/man/man1
