@@ -1163,9 +1163,12 @@ indimail_stub.o variables.o dns.lib
 	variables.o auto_assign.o `cat dns.lib` -ldl -lqmail
 
 qmail-newmrh: \
-load qmail-newmrh.o cdbmss.o auto_control.o auto_qmail.o variables.o
-	./load qmail-newmrh cdbmss.o auto_qmail.o auto_control.o \
-	variables.o -lqmail
+load qmail-newmrh.o cdbmss.o auto_control.o variables.o
+	./load qmail-newmrh cdbmss.o auto_control.o variables.o -lqmail
+
+qmail-newmrh.o: \
+compile qmail-newmrh.c cdbmss.h
+	./compile qmail-newmrh.c
 
 qmail-newmrh.8: \
 qmail-newmrh.9 conf-sysconfdir conf-prefix
@@ -1174,15 +1177,14 @@ qmail-newmrh.9 conf-sysconfdir conf-prefix
 	| sed s}@prefix\@}"`head -1 conf-prefix`"}g \
 	> qmail-newmrh.8
 
-qmail-newmrh.o: \
-compile qmail-newmrh.c cdbmss.h auto_control.h
-	./compile qmail-newmrh.c
-
 qmail-cdb: \
-load qmail-cdb.o cdbmss.o auto_qmail.o \
-variables.o auto_control.o
-	./load qmail-cdb cdbmss.o auto_control.o variables.o \
-	auto_qmail.o -lqmail
+load qmail-cdb.o cdbmss.o variables.o auto_control.o
+	./load qmail-cdb cdbmss.o auto_control.o variables.o -lqmail
+
+qmail-cdb.o: \
+compile qmail-cdb.c cdbmss.h \
+variables.h auto_control.h
+	./compile qmail-cdb.c
 
 qmail-cdb.8: \
 qmail-cdb.9 conf-break conf-spawn conf-sysconfdir
@@ -1191,11 +1193,6 @@ qmail-cdb.9 conf-break conf-spawn conf-sysconfdir
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-cdb.8
-
-qmail-cdb.o: \
-compile qmail-cdb.c auto_qmail.h cdbmss.h \
-variables.h auto_control.h
-	./compile qmail-cdb.c
 
 recipient-cdb: \
 load recipient-cdb.o cdbmss.o auto_assign.o
@@ -2177,7 +2174,7 @@ compile ssl_timeoutio.c ssl_timeoutio.h conf-tls
 	./compile `grep -h -v "^#" conf-tls` ssl_timeoutio.c
 
 spawn.o: \
-compile chkspawn spawn.c auto_qmail.h auto_uids.h auto_spawn.h \
+compile chkspawn spawn.c auto_uids.h auto_spawn.h \
 variables.h indimail_stub.h auto_control.h
 	./chkspawn
 	./compile spawn.c
@@ -2848,16 +2845,16 @@ qnotify.o: \
 compile qnotify.c qmail.h set_environment.h
 	./compile qnotify.c
 
-rrt.o: \
-compile rrt.c auto_sysconfdir.h control.h qmail.h \
-variables.h set_environment.h
-	./compile rrt.c
-
 rrt: \
 load rrt.o auto_qmail.o qmail.o control.o variables.o \
-auto_control.o auto_sysconfdir.o set_environment.o
+auto_control.o set_environment.o
 	./load rrt auto_qmail.o qmail.o control.o variables.o \
-	auto_sysconfdir.o auto_control.o set_environment.o -lqmail
+	auto_control.o set_environment.o -lqmail
+
+rrt.o: \
+compile rrt.c control.h qmail.h \
+variables.h set_environment.h
+	./compile rrt.c
 
 qmail-poppass: \
 load qmail-poppass.o auto_uids.o
@@ -3237,13 +3234,12 @@ qmail-greyd: load qmail-greyd.o ip.o socket_v6any.o \
 socket_v4mappedprefix.o variables.o auto_control.o \
 control.o tablematch.o
 	./load qmail-greyd auto_control.o ip.o socket_v6any.o \
-	socket_v4mappedprefix.o variables.o control.o \
-	tablematch.o -lqmail
+	socket_v4mappedprefix.o variables.o control.o tablematch.o \
+	-lqmail
 
 qmail-greyd.o: \
-compile qmail-greyd.c auto_qmail.h ip.h control.h \
-variables.h greylist.h tablematch.h socket.h haveip6.h \
-conf-ip auto_control.h
+compile qmail-greyd.c ip.h control.h variables.h greylist.h \
+tablematch.h socket.h haveip6.h conf-ip auto_control.h
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` qmail-greyd.c
 
 qmail-daned: \
@@ -3314,12 +3310,10 @@ compile uacl.c qregex.h mail_acl.h matchregex.h control.h wildmat.h
 
 qmail-sql: \
 load qmail-sql.o variables.o auto_control.o load_mysql.o \
-sqlmatch.o auto_uids.o auto_sysconfdir.o indimail_stub.o \
-control.o tls.o tls.lib
-	./load qmail-sql indimail_stub.o \
-	variables.o auto_control.o tls.o \
-	control.o sqlmatch.o auto_uids.o auto_sysconfdir.o \
-	load_mysql.o `cat tls.lib` -ldl -lqmail
+sqlmatch.o auto_uids.o indimail_stub.o control.o tls.o tls.lib
+	./load qmail-sql indimail_stub.o variables.o auto_control.o \
+	tls.o control.o sqlmatch.o auto_uids.o load_mysql.o \
+	`cat tls.lib` -ldl -lqmail
 
 qmail-sql.o: \
 compile qmail-sql.c sqlmatch.h variables.h \
@@ -3334,13 +3328,11 @@ qmail-sql.9 conf-sysconfdir
 	> qmail-sql.8
 
 sql-database: \
-load sql-database.o variables.o auto_control.o \
-load_mysql.o sqlmatch.o auto_uids.o auto_sysconfdir.o \
-indimail_stub.o control.o tls.o tls.lib
+load sql-database.o variables.o auto_control.o load_mysql.o \
+sqlmatch.o auto_uids.o indimail_stub.o control.o tls.o tls.lib
 	./load sql-database indimail_stub.o variables.o \
 	auto_control.o tls.o control.o sqlmatch.o auto_uids.o \
-	auto_sysconfdir.o load_mysql.o \
-	`cat tls.lib` -ldl -lqmail
+	load_mysql.o `cat tls.lib` -ldl -lqmail
 
 sql-database.o: \
 compile sql-database.c sqlmatch.h variables.h \
