@@ -125,6 +125,7 @@ Release 2.13 Start 14/02/2021
 77. svctool: replace qmail-multi with qmail-spamfilter for spam filter
 - 13/05/2021
 78. svctool: simplified generation of clamav, freshclam config
+79. fixed debian scripts for indimail-mini
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

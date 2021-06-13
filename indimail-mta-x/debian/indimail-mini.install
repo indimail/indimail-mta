@@ -3,7 +3,7 @@ var/indimail/sbin                              /var/indimail
 var/indimail/control                           /var/indimail
 var/indimail/libexec                           /var/indimail
 var/indimail/users                             /var/indimail
-indimail-mini/control                          /etc/indimail
+etc-indimail-mini                              /etc
 usr/bin/sendmail                               /usr/bin
 usr/bin/qmail-inject                           /usr/bin
 usr/bin/irmail                                 /usr/bin
