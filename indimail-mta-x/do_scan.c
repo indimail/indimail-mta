@@ -1,6 +1,6 @@
 /*
  * $Log: do_scan.c,v $
- * Revision 1.18  2021-06-12 17:53:07+05:30  Cprogrammer
+ * Revision 1.18  2021-06-14 00:39:58+05:30  Cprogrammer
  * remove creation of link for /etc/indimail/control in scanq directory
  *
  * Revision 1.17  2021-06-09 19:34:19+05:30  Cprogrammer
@@ -129,9 +129,8 @@ scan_badattachments(char *dir_name)
 			break;
 		if (!str_diff(dp->d_name, ".") || !str_diff(dp->d_name, ".."))
 			continue;
-		if (!stralloc_copys(&addr, dp->d_name))
-			die_nomem();
-		if (!stralloc_0(&addr))
+		if (!stralloc_copys(&addr, dp->d_name) ||
+				!stralloc_0(&addr))
 			die_nomem();
 		/*- badext, badextpatterns */
 		switch (address_match(0, &addr, extok ? &ext : 0, extok ? &mapext : 0, brpok ? &brp : 0, 0))
@@ -235,7 +234,7 @@ do_scan()
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.18 2021-06-12 17:53:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_scan.c,v 1.18 2021-06-14 00:39:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
