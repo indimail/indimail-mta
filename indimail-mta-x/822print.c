@@ -1,6 +1,6 @@
 /*
  * $Log: 822print.c,v $
- * Revision 1.8  2021-06-13 17:27:40+05:30  Cprogrammer
+ * Revision 1.8  2021-06-14 00:31:37+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
  * Revision 1.7  2020-11-24 13:43:41+05:30  Cprogrammer
@@ -50,20 +50,16 @@ nomem()
 }
 
 void
-putspaces(len)
-	int             len;
+putspaces(int len)
 {
 	while (len-- > 0)
 		substdio_put(subfdout, " ", 1);
 }
 
 void
-putformat(buf, len)
-	char           *buf;
-	unsigned int    len;
+putformat(char *buf, unsigned int len)
 {
-	while (len > 1)
-	{
+	while (len > 1) {
 		switch (*buf++)
 		{
 		case '_':
@@ -80,13 +76,7 @@ putformat(buf, len)
 }
 
 void
-format(out, buf, len, pre, style1, style2)
-	stralloc       *out;
-	char           *buf;
-	int             len;
-	char           *pre;
-	char           *style1;
-	char           *style2;
+format(stralloc *out, char *buf, int len, char *pre, char *style1, char *style2)
 {
 	char            ch;
 	char            ch2;
@@ -94,40 +84,33 @@ format(out, buf, len, pre, style1, style2)
 	if (!stralloc_copys(out, pre))
 		nomem();
 
-	while (len--)
-	{
+	while (len--) {
 		ch = *buf++;
 		if (ch == '\n')
 			ch = 0;
 		if (ch == '\t')
 			ch = ' ';
-		if ((ch >= 32) && (ch <= 126))
-		{
-			if (!stralloc_append(out, style1))
-				nomem();
-			if (!stralloc_append(out, &ch))
+		if ((ch >= 32) && (ch <= 126)) {
+			if (!stralloc_append(out, style1) ||
+					!stralloc_append(out, &ch))
 				nomem();
 			continue;
 		}
 
-		if (!stralloc_cats(out, style2))
-			nomem();
-		if (!stralloc_append(out, "\\"))
+		if (!stralloc_cats(out, style2) ||
+				!stralloc_append(out, "\\"))
 			nomem();
 		ch2 = '0' + (ch >> 6);
-		if (!stralloc_cats(out, style2))
-			nomem();
-		if (!stralloc_append(out, &ch2))
+		if (!stralloc_cats(out, style2) ||
+				!stralloc_append(out, &ch2))
 			nomem();
 		ch2 = '0' + (7 & (ch >> 3));
-		if (!stralloc_cats(out, style2))
-			nomem();
-		if (!stralloc_append(out, &ch2))
+		if (!stralloc_cats(out, style2) ||
+				!stralloc_append(out, &ch2))
 			nomem();
 		ch2 = '0' + (7 & ch);
-		if (!stralloc_cats(out, style2))
-			nomem();
-		if (!stralloc_append(out, &ch2))
+		if (!stralloc_cats(out, style2) ||
+				!stralloc_append(out, &ch2))
 			nomem();
 	}
 }
@@ -145,8 +128,7 @@ doleft()
 
 	len = leftline.len / 2;
 	pos = 0;
-	while (len > 73)
-	{
+	while (len > 73) {
 		i = byte_rchr(leftline.s + pos, 73 * 2, ' ') / 2;
 		/*XXX*/ if (!i)
 			i = 73;
@@ -175,8 +157,7 @@ doleftright()
 	leftxpos = 0;
 	rightxpos = 0;
 
-	while (leftxlen + rightxlen > 76)
-	{
+	while (leftxlen + rightxlen > 76) {
 		i = 50;
 		if (i > leftxlen)
 			i = leftxlen;
@@ -203,9 +184,7 @@ doleftright()
 }
 
 void
-putvalue(a, pre)
-	stralloc       *a;
-	char           *pre;
+putvalue(stralloc *a, char *pre)
 {
 	int             j;
 
@@ -219,15 +198,13 @@ putvalue(a, pre)
 }
 
 void
-putfields(a)
-	stralloc       *a;
+putfields(stralloc *a)
 {
 	int             j;
 	int             i;
 
 	for (j = i = 0; j < a->len; ++j)
-		if (a->s[j] == '\n')
-		{
+		if (a->s[j] == '\n') {
 			format(&leftline, a->s + i, j - i, "", "=", "_");
 			doleft();
 			i = j + 1;
@@ -235,11 +212,7 @@ putfields(a)
 }
 
 void
-putaddr(a, pre, post, style)
-	stralloc       *a;
-	char           *pre;
-	char           *post;
-	char           *style;
+putaddr(stralloc *a, char *pre, char *post, char *style)
 {
 	int             i;
 	int             j;
@@ -248,19 +221,15 @@ putaddr(a, pre, post, style)
 
 	comment = 0;
 	for (j = i = 0; j < a->len; ++j)
-		if (!a->s[j])
-		{
-			if (a->s[i] == '(')
-			{
-				if (comment)
-				{
+		if (!a->s[j]) {
+			if (a->s[i] == '(') {
+				if (comment) {
 					format(&leftline, a->s + comment, str_len(a->s + comment), pre, "_", "=");
 					doleft();
 				}
 				comment = i + 1;
 			} else
-			if (a->s[i] == '+')
-			{
+			if (a->s[i] == '+') {
 				addr = a->s + i + 1;
 				/*
 				 * XXX: replace addr with nickname? 
@@ -276,17 +245,14 @@ putaddr(a, pre, post, style)
 			i = j + 1;
 		}
 
-	if (comment)
-	{
+	if (comment) {
 		format(&leftline, a->s + comment, str_len(a->s + comment), pre, "_", "=");
 		doleft();
 	}
 }
 
 void
-putdate(text, t)
-	stralloc       *text;
-	mess822_time   *t;
+putdate(stralloc *text, mess822_time *t)
 {
 	struct tai      sec;
 	unsigned char   secpack[TAI_PACK];
@@ -299,8 +265,7 @@ putdate(text, t)
 	if (j && (text->s[j - 1] == '\n'))
 		--j;
 	format(&leftline, text->s, j, "=D=a=t=e=:", "=", "_");
-	if (!t->known)
-	{
+	if (!t->known) {
 		doleft();
 		return;
 	}
@@ -436,17 +401,14 @@ main()
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (!mess822_begin(&h, a))
 		nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
-		if (flagheader && !mess822_ok(&line))
-		{
+		if (flagheader && !mess822_ok(&line)) {
 			finishheader();
 			flagheader = 0;
 		}
-		if (!flagheader)
-		{
+		if (!flagheader) {
 			if (substdio_put(subfdout, line.s, line.len))
 				strerr_die2sys(111, FATAL, "unable to write: ");
 		} else
@@ -465,7 +427,7 @@ main()
 void
 getversion_822print_c()
 {
-	static char    *x = "$Id: 822print.c,v 1.8 2021-06-13 17:27:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822print.c,v 1.8 2021-06-14 00:31:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
