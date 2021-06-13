@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-queue.c,v $
- * Revision 1.74  2021-06-12 20:35:20+05:30  Cprogrammer
+ * Revision 1.74  2021-06-14 01:06:22+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
  * Revision 1.73  2021-06-09 19:36:44+05:30  Cprogrammer
@@ -633,17 +633,11 @@ qhpsiprog(char *program)
 		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
 			_exit(50);
 		if (!str_diffn(program, "plugin:", 7)) {
-			if (!stralloc_copys(&plugin, "plugin:"))
-				die(51);
-			if (!stralloc_cats(&plugin, messfn))
-				die(51);
-			if (!stralloc_append(&plugin, " "))
-				die(51);
-			if (!stralloc_cats(&plugin, program + 7))
-				die(51);
-			if (!stralloc_0(&plugin))
-				die(51);
-			if (!(argv = makeargs(plugin.s)))
+			if (!stralloc_copys(&plugin, "plugin:") ||
+					!stralloc_cats(&plugin, messfn) ||
+					!stralloc_append(&plugin, " ") ||
+					!stralloc_cats(&plugin, program + 7) ||
+					!stralloc_0(&plugin) || !(argv = makeargs(plugin.s)))
 				die(51);
 		} else {
 			if (!(argv = makeargs(program)))
@@ -856,9 +850,8 @@ main()
 		if (control_readfile(&extraqueue, "extraqueue", 0) == -1)
 			die(55);
 	} else {
-		if (!stralloc_copys(&extraqueue, ptr))
-			die(51);
-		if (!stralloc_0(&extraqueue))
+		if (!stralloc_copys(&extraqueue, ptr) ||
+				!stralloc_0(&extraqueue))
 			die(51);
 		extraqueue.len--;
 	}
@@ -1070,9 +1063,8 @@ main()
 		die_write();
 #if defined(MAILARCHIVE)
 	if (flagarchive) {
-		if (!stralloc_copys(&line, ""))
-			die(51);
-		if (!stralloc_catb(&line, &ch, 1))
+		if (!stralloc_copys(&line, "") ||
+				!stralloc_catb(&line, &ch, 1))
 			die(51);
 	}
 #endif
@@ -1113,11 +1105,8 @@ main()
 			die_write();
 	}
 	if (flagquarantine) {
-		if (!stralloc_cats(&qqehextra, "X-Quarantine-ID: ")) {
-			cleanup();
-			die(51);
-		}
-		if (!stralloc_cat(&qqehextra, &quarantine)) {
+		if (!stralloc_cats(&qqehextra, "X-Quarantine-ID: ") ||
+				!stralloc_cat(&qqehextra, &quarantine)) {
 			cleanup();
 			die(51);
 		}
@@ -1266,7 +1255,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.74 2021-06-12 20:35:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.74 2021-06-14 01:06:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
