@@ -647,3 +647,4 @@ qmulti.o
 mailfilter.o
 mktempfile.o
 pidopen.o
+auto_qmail.md
