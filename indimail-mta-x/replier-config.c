@@ -1,6 +1,6 @@
 /*
  * $Log: replier-config.c,v $
- * Revision 1.5  2021-06-12 19:28:12+05:30  Cprogrammer
+ * Revision 1.5  2021-06-14 01:08:57+05:30  Cprogrammer
  * removed dependency on auto_qmail.h
  *
  * Revision 1.4  2020-11-24 13:47:56+05:30  Cprogrammer
@@ -110,11 +110,9 @@ void
 dirplusmake(slash)
 	char           *slash;
 {
-	if (!stralloc_copys(&dirplus, dir))
-		nomem();
-	if (!stralloc_cats(&dirplus, slash))
-		nomem();
-	if (!stralloc_0(&dirplus))
+	if (!stralloc_copys(&dirplus, dir) ||
+			!stralloc_cats(&dirplus, slash) ||
+			!stralloc_0(&dirplus))
 		nomem();
 }
 
@@ -123,11 +121,9 @@ linkdotdir(dash, slash)
 	char           *dash;
 	char           *slash;
 {
-	if (!stralloc_copys(&dotplus, dot))
-		nomem();
-	if (!stralloc_cats(&dotplus, dash))
-		nomem();
-	if (!stralloc_0(&dotplus))
+	if (!stralloc_copys(&dotplus, dot) ||
+			!stralloc_cats(&dotplus, dash) ||
+			!stralloc_0(&dotplus))
 		nomem();
 	dirplusmake(slash);
 	if (symlink(dirplus.s, dotplus.s) == -1)
@@ -310,7 +306,7 @@ main(int argc, char **argv)
 void
 getversion_replier_config_c()
 {
-	static char    *x = "$Id: replier-config.c,v 1.5 2021-06-12 19:28:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier-config.c,v 1.5 2021-06-14 01:08:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
