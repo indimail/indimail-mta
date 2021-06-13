@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-sql.c,v $
- * Revision 1.10  2021-06-13 16:14:08+05:30  Cprogrammer
+ * Revision 1.10  2021-06-13 17:19:57+05:30  Cprogrammer
  * do chdir(controldir) instead of chdir(auto_sysconfdir)
  *
  * Revision 1.9  2021-02-27 20:59:05+05:30  Cprogrammer
@@ -76,7 +76,7 @@ flush()
 }
 
 int
-insert_db(MYSQL *conn, char *filename, char *table_name, int replace, char **errStr)
+insert_db(MYSQL *conn, char *fn, char *table_name, int replace, char **errStr)
 {
 
 	int             num = 0, m_error;
@@ -88,13 +88,13 @@ insert_db(MYSQL *conn, char *filename, char *table_name, int replace, char **err
 		return (0);
 	}
 	if (!stralloc_copys(&sql, "LOAD DATA LOW_PRIORITY LOCAL INFILE \"") ||
-			!stralloc_cats(&sql, filename) ||
+			!stralloc_cats(&sql, fn) ||
 			!stralloc_cats(&sql, replace ? "\" REPLACE INTO TABLE " : "\" IGNORE INTO TABLE ") ||
 			!stralloc_cats(&sql, table_name) || !stralloc_catb(&sql, " (email)", 8))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 again:
 	if (!stralloc_0(&sql))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (in_mysql_query(conn, sql.s)) {
 		if ((m_error = in_mysql_errno(conn)) == ER_NO_SUCH_TABLE) {
 			if (create_sqltable(conn, table_name, errStr))
@@ -102,7 +102,7 @@ again:
 			if (in_mysql_query(conn, sql.s)) {
 				sql.len--;
 				if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) || !stralloc_0(&sql))
-					strerr_die2sys(111, FATAL, "out of memory");
+					strerr_die2x(111, FATAL, "out of memory");
 				if (errStr)
 					*errStr = sql.s;
 				return (AM_MYSQL_ERR);
@@ -110,16 +110,16 @@ again:
 		} else
 		if (m_error == ER_PARSE_ERROR) {
 			if (!stralloc_copys(&sql, "LOAD DATA LOW_PRIORITY LOCAL INFILE '") ||
-					!stralloc_cats(&sql, filename) ||
+					!stralloc_cats(&sql, fn) ||
 					!stralloc_cats(&sql, replace ? "' REPLACE INTO TABLE " : "' IGNORE INTO TABLE ") ||
 					!stralloc_cats(&sql, table_name) || !stralloc_catb(&sql, " (email)", 8))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			goto again;
 		} else {
 			sql.len--;
 			if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) ||
 					!stralloc_0(&sql))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (errStr)
 				*errStr = sql.s;
 			return (AM_MYSQL_ERR);
@@ -129,7 +129,7 @@ again:
 		sql.len--;
 		if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) ||
 				!stralloc_0(&sql))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (errStr)
 			*errStr = sql.s;
 		return (AM_MYSQL_ERR);
@@ -214,7 +214,7 @@ main(int argc, char **argv)
 		if (write(fd, str.s, str.len) == -1)
 			strerr_die4sys(111, FATAL, "write: ", fn.s, ": ");
 		if (fchown(fd, auto_uidv, auto_gidv))
-			strerr_die4sys(111, FATAL, "chown: ", fn.s, ": ");
+			strerr_die4sys(111, FATAL, "fchown: ", fn.s, ": ");
 		if (close(fd))
 			strerr_die4sys(111, FATAL, "close: ", fn.s, ": ");
 		out("created file ");
@@ -272,7 +272,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.10 2021-06-13 16:14:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.10 2021-06-13 17:19:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
