@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.241 $";
+char           *revision = "$Revision: 1.242 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2126,8 +2126,9 @@ badhostcheck()
 			negate = 1;
 			j++;
 		}
-		stralloc_copyb(&curregex, brh.s + j, (i - j));
-		stralloc_0(&curregex);
+		if (!stralloc_copyb(&curregex, brh.s + j, (i - j)) ||
+				!stralloc_0(&curregex))
+			die_nomem();
 		x = matchregex(remotehost, curregex.s, 0);
 		if ((negate) && (x == 0))
 			return 1;
@@ -6165,6 +6166,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.242  2021-06-14 01:09:28+05:30  Cprogrammer
+ * added missing error check for stralloc failure
+ *
  * Revision 1.241  2021-06-12 19:57:11+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -6327,7 +6331,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.241 2021-06-12 19:57:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.242 2021-06-14 01:09:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
