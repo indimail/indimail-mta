@@ -1,6 +1,6 @@
 /*
  * $Log: recipient-cdb.c,v $
- * Revision 1.9  2021-06-13 16:38:30+05:30  Cprogrammer
+ * Revision 1.9  2021-06-14 10:15:43+05:30  Cprogrammer
  * added missing error check for stralloc
  *
  * Revision 1.8  2016-05-18 15:34:23+05:30  Cprogrammer
@@ -43,18 +43,6 @@
 
 int             rename(const char *, const char *);
 
-void
-die_read()
-{
-	strerr_die2sys(111, FATAL, "unable to read recipients: ");
-}
-
-void
-die_write()
-{
-	strerr_die2sys(111, FATAL, "unable to write to recipients.tmp: ");
-}
-
 char            inbuf[1024];
 substdio        ssin;
 
@@ -73,17 +61,17 @@ main()
 	if (chdir(auto_assign) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_assign, ": ");
 	if ((fd = open_read("recipients")) == -1)
-		die_read();
+		strerr_die2sys(111, FATAL, "unable to read recipients: ");
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
 	if ((fdtemp = open_trunc("recipients.tmp")) == -1)
-		die_write();
+		strerr_die2sys(111, FATAL, "unable to write to recipients.tmp: ");
 	if (cdbmss_start(&cdbmss, fdtemp) == -1)
-		die_write();
+		strerr_die2sys(111, FATAL, "unable to write to recipients.tmp: ");
 	for (;;) {
 		if (!stralloc_copys(&key, ":"))
 			strerr_die2x(111, FATAL, "out of memory");
 		if (getln(&ssin, &line, &match, '\n') != 0)
-			die_read();
+			strerr_die2sys(111, FATAL, "unable to read recipients: ");
 		while (line.len) {
 			if (line.s[line.len - 1] == ' ' ||
 					line.s[line.len - 1] == '\n' ||
@@ -96,7 +84,7 @@ main()
 					strerr_die2x(111, FATAL, "out of memory");
 				case_lowerb(key.s, key.len);
 				if (cdbmss_add(&cdbmss, (unsigned char *) key.s, key.len, (unsigned char *) "", 0) == -1)
-					die_write();
+					strerr_die2sys(111, FATAL, "unable to write to recipients.tmp: ");
 			}
 			break;
 		}
@@ -104,8 +92,8 @@ main()
 			break;
 	}
 	if (cdbmss_finish(&cdbmss) == -1 || fsync(fdtemp) == -1 ||
-			close(fdtemp) == -1)
-		die_write();			/*- NFS stupidity */
+			close(fdtemp) == -1) /*- NFS stupidity */
+		strerr_die2sys(111, FATAL, "unable to write to recipients.tmp: ");
 	if (rename("recipients.tmp", "recipients.cdb") == -1)
 		strerr_die2sys(111, FATAL, "unable to move recipients.tmp to recipients.cdb");
 	_exit(0);
@@ -116,7 +104,7 @@ main()
 void
 getversion_qmail_recipients_c()
 {
-	static char    *x = "$Id: recipient-cdb.c,v 1.9 2021-06-13 16:38:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: recipient-cdb.c,v 1.9 2021-06-14 10:15:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
