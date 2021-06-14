@@ -39,7 +39,7 @@ void
 nomem(int flaglog)
 {
 	if (flaglog)
-		strerr_die2sys(51, FATAL, "out of memory: ");
+		strerr_die2x(51, FATAL, "out of memory");
 	_exit(51);
 }
 
