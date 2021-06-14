@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-cdb.c,v $
- * Revision 1.11  2021-06-13 17:30:15+05:30  Cprogrammer
+ * Revision 1.11  2021-06-14 09:19:24+05:30  Cprogrammer
  * do chdir(controldir) instead of chdir(auto_qmail)
  *
  * Revision 1.10  2021-05-26 10:43:46+05:30  Cprogrammer
@@ -54,22 +54,6 @@
 
 int             rename(const char *, const char *);
 
-void
-die_read(char *s)
-{
-	if (!(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-	strerr_die6sys(111, FATAL, "unable to read ", controldir, "/", s, ": ");
-}
-
-void
-die_write(char *s)
-{
-	if (!(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-	strerr_die6sys(111, FATAL, "unable to write to ", controldir, "/", s, ": ");
-}
-
 int
 main(int argc, char **argv)
 {
@@ -90,31 +74,27 @@ main(int argc, char **argv)
 		controldir = auto_control;
 	if (chdir(controldir) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", controldir, ": ");
-	if (!stralloc_copys(&fn, controldir) ||
-			!stralloc_append(&fn, "/") ||
-			!stralloc_cats(&fn, argv[1]) ||
+	if (!stralloc_copys(&fn, argv[1]) ||
 			!stralloc_catb(&fn, ".cdb", 4) ||
 			!stralloc_0(&fn))
 		strerr_die2x(111, FATAL, "out of memory");
 	i = fn.len;
-	if (!stralloc_cats(&fn, controldir) ||
-			!stralloc_append(&fn, "/") ||
-			!stralloc_cats(&fn, argv[1]) ||
+	if (!stralloc_cats(&fn, argv[1]) ||
 			!stralloc_catb(&fn, ".bak", 4) ||
 			!stralloc_0(&fn))
 		strerr_die2x(111, FATAL, "out of memory");
 	if ((fd = open_read(argv[1])) == -1)
-		die_read(fn.s);
+		strerr_die6sys(111, FATAL, "unable to read ", controldir, "/", argv[1], ": ");
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
 
 	str_copyb(fn.s - 4, "tmp", 3);
 	if ((fdtemp = open_trunc(fn.s + i)) == -1)
-		die_write(fn.s + i);
+		strerr_die6sys(111, FATAL, "unable to write to ", controldir, "/", fn.s + i, ": ");
 	if (cdbmss_start(&cdbmss, fdtemp) == -1)
-		die_write(fn.s + i);
+		strerr_die6sys(111, FATAL, "unable to write to ", controldir, "/", fn.s + i, ": ");
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') != 0)
-			die_read(argv[1]);
+			strerr_die6sys(111, FATAL, "unable to read ", controldir, "/", argv[1], ": ");
 		case_lowerb(line.s, line.len);
 		while (line.len) {
 			if (line.s[line.len - 1] == ' ' ||
@@ -125,18 +105,18 @@ main(int argc, char **argv)
 			}
 			if (line.s[0] != '#')
 				if (cdbmss_add(&cdbmss, (unsigned char *) line.s, line.len, (unsigned char *) "", 0) == -1)
-					die_write(fn.s + i);
+					strerr_die6sys(111, FATAL, "unable to write to ", controldir, "/", fn.s + i, ": ");
 			break;
 		}
 		if (!match)
 			break;
 	}
 	if (cdbmss_finish(&cdbmss) == -1)
-		die_write(fn.s);
+		strerr_die6sys(111, FATAL, "unable to write to ", controldir, "/", fn.s + i, ": ");
 	if (fsync(fdtemp) == -1)
-		die_write(fn.s);
+		strerr_die6sys(111, FATAL, "unable to write to ", controldir, "/", fn.s + i, ": ");
 	if (close(fdtemp) == -1)
-		die_write(fn.s); /*- NFS stupidity */
+		strerr_die6sys(111, FATAL, "unable to write to ", controldir, "/", fn.s + i, ": ");
 
 	/*- rename fn.tmp to fn.cdb */
 	if (rename(fn.s + i, fn.s) == -1)
@@ -151,7 +131,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	static char    *x = "$Id: qmail-cdb.c,v 1.11 2021-06-13 17:30:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-cdb.c,v 1.11 2021-06-14 09:19:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
