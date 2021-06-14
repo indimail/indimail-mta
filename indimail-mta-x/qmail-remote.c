@@ -1319,8 +1319,8 @@ do_pkix(char *servercert)
  * 1. returns 0 --> fallback to non-tls
  *    if certs do not exist
  *    host is in notlshosts
- *    smtps == 0 and tls session cannot be initated
- * 2. returns 1 if tls session was initated
+ *    smtps == 0 and tls session cannot be initiated
+ * 2. returns 1 if tls session was initiated
  * 3. exits on error, if smtps == 1 and tls session did not succeed
  */
 int
