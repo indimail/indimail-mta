@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-dk.c,v $
- * Revision 1.53  2021-06-12 18:17:22+05:30  Cprogrammer
+ * Revision 1.53  2021-06-14 09:28:26+05:30  Cprogrammer
  * moved pidopen() out to its own file
  *
  * Revision 1.52  2021-06-09 21:14:19+05:30  Cprogrammer
@@ -206,7 +206,6 @@ char            errbuf[256];
 
 datetime_sec    starttime;
 struct datetime dt;
-unsigned long   mypid;
 unsigned long   uid;
 int             readfd;
 char           *dksign = 0;
@@ -585,7 +584,6 @@ main(int argc, char *argv[])
 			_exit(88);
 		}
 	}
-	mypid = getpid();
 	uid = getuid();
 	starttime = now();
 	datetime_tai(&dt, starttime);
@@ -801,7 +799,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.53 2021-06-12 18:17:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.53 2021-06-14 09:28:26+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
