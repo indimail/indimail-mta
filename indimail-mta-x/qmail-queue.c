@@ -1,10 +1,7 @@
 /*
  * $Log: qmail-queue.c,v $
- * Revision 1.74  2021-06-14 01:06:22+05:30  Cprogrammer
+ * Revision 1.73  2021-06-15 12:16:01+05:30  Cprogrammer
  * removed chdir(auto_qmail)
- *
- * Revision 1.73  2021-06-09 19:36:44+05:30  Cprogrammer
- * added makeargs.h
  *
  * Revision 1.72  2021-05-29 23:50:28+05:30  Cprogrammer
  * replace str_chr with str_rchr to get domain correctly from email address
@@ -207,34 +204,34 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-#include "matchregex.h"
-#include "sig.h"
-#include "case.h"
-#include "str.h"
-#include "getln.h"
-#include "open.h"
-#include "seek.h"
-#include "fmt.h"
-#include "alloc.h"
-#include "substdio.h"
-#include "datetime.h"
-#include "now.h"
+#include <sig.h>
+#include <case.h>
+#include <str.h>
+#include <getln.h>
+#include <open.h>
+#include <seek.h>
+#include <fmt.h>
+#include <alloc.h>
+#include <substdio.h>
+#include <datetime.h>
+#include <now.h>
+#include <date822fmt.h>
+#include <stralloc.h>
+#include <env.h>
+#include <error.h>
+#include <scan.h>
+#include <mess822.h>
+#include <wait.h>
+#include <makeargs.h>
+#include <getEnvConfig.h>
+#include "control.h"
+#include "variables.h"
+#include "fmtqfn.h"
 #include "triggerpull.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
-#include "date822fmt.h"
-#include "fmtqfn.h"
-#include "stralloc.h"
-#include "control.h"
-#include "env.h"
-#include "variables.h"
-#include "error.h"
-#include "scan.h"
-#include "mess822.h"
-#include "wait.h"
-#include "makeargs.h"
+#include "matchregex.h"
 #include "auto_split.h"
-#include "getEnvConfig.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
@@ -1255,7 +1252,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.74 2021-06-14 01:06:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.73 2021-06-15 12:16:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
