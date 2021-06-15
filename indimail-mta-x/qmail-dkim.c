@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.59  2021-06-15 21:52:10+05:30  Cprogrammer
+ * pass tmpdir argument to pidopen
+ *
  * Revision 1.58  2021-06-15 11:53:44+05:30  Cprogrammer
  * moved pidopen() out to its own file
  *
@@ -1150,7 +1153,9 @@ main(int argc, char *argv[])
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);
 	alarm(DEATH);
-	if ((ret = pidopen(starttime))) /*- fd = messfd */
+	if (!(ptr = env_get("TMPDIR")))
+		ptr = "/tmp";
+	if ((ret = pidopen(starttime, ptr))) /*- fd = messfd */
 		die(ret, 0);
 	if ((readfd = open_read(pidfn)) == -1)
 		die(63, dkimsign ? 1 : 2);
@@ -1358,7 +1363,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.58 2021-06-15 11:53:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.59 2021-06-15 21:52:10+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;

@@ -1,14 +1,17 @@
 /*
  * $Log: pidopen.c,v $
+ * Revision 1.2  2021-06-15 21:50:34+05:30  Cprogrammer
+ * added tmpdir argument
+ *
  * Revision 1.1  2021-06-12 18:18:03+05:30  Cprogrammer
  * Initial revision
  *
  */
 #include <unistd.h>
 #include <sys/types.h>
-#include <env.h>
 #include <fmt.h>
 #include <alloc.h>
+#include <fcntl.h>
 #include <open.h>
 #include <datetime.h>
 #include "pidopen.h"
@@ -17,15 +20,12 @@ char           *pidfn;
 int             messfd;
 
 unsigned int
-pidfmt(char *s, unsigned long seq, datetime_sec _starttime)
+pidfmt(char *s, unsigned long seq, datetime_sec _starttime, char *tmpdir)
 {
 	unsigned int    i, len;
 	pid_t           mypid;
-	char           *tmpdir;
 
 	mypid = getpid();
-	if (!(tmpdir = env_get("TMPDIR")))
-		tmpdir = "/tmp";
 	len = 0;
 	i = fmt_str(s, tmpdir);
 	len += i;
@@ -63,20 +63,20 @@ pidfmt(char *s, unsigned long seq, datetime_sec _starttime)
 }
 
 int
-pidopen(datetime_sec _starttime)
+pidopen(datetime_sec _starttime, char *tmpdir)
 {
 	unsigned int    len;
 	unsigned long   seq;
 
 	seq = 1;
-	len = pidfmt((char *) 0, seq, _starttime);
+	len = pidfmt((char *) 0, seq, _starttime, tmpdir);
 	if (!(pidfn = alloc(len)))
 		return (51);
 	for (seq = 1; seq < 10; ++seq) {
-		if (pidfmt((char *) 0, seq, _starttime) > len)
+		if (pidfmt((char *) 0, seq, _starttime, tmpdir) > len)
 			return(81);
-		pidfmt(pidfn, seq, _starttime);
-		if ((messfd = open_excl(pidfn)) != -1)
+		pidfmt(pidfn, seq, _starttime, tmpdir);
+		if ((messfd = open_exclr(pidfn)) != -1)
 			return 0;
 	}
 	return(63);
@@ -86,7 +86,7 @@ pidopen(datetime_sec _starttime)
 void
 getversion_pidopen_c()
 {
-	static char    *x = "$Id: pidopen.c,v 1.1 2021-06-12 18:18:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: pidopen.c,v 1.2 2021-06-15 21:50:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	x++;

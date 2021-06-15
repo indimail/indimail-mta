@@ -128,6 +128,9 @@ Release 2.13 Start 14/02/2021
 - 13/05/2021
 79. svctool: simplified generation of clamav, freshclam config
 80. fixed debian scripts for indimail-mini
+- 15/05/2021
+81. moved cdbmss.[c,h], token822.[c,h] to libqmail
+82. pidopen.c: added tmpdir argument
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

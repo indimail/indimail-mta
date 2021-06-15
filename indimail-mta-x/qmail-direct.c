@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.6  2021-06-15 21:51:31+05:30  Cprogrammer
+ * pass local Maildir/tmp as argument to pidopen
+ *
  * Revision 1.5  2021-06-12 18:16:49+05:30  Cprogrammer
  * moved pidopen() out to its own file
  *
@@ -24,17 +27,18 @@
 #include <error.h>
 #include <sys/time.h>
 #include <pwd.h>
-#include "sig.h"
-#include "env.h"
-#include "stralloc.h"
-#include "seek.h"
-#include "str.h"
-#include "fmt.h"
-#include "alloc.h"
-#include "substdio.h"
-#include "datetime.h"
-#include "now.h"
-#include "date822fmt.h"
+#include <open.h>
+#include <sig.h>
+#include <env.h>
+#include <stralloc.h>
+#include <seek.h>
+#include <str.h>
+#include <fmt.h>
+#include <alloc.h>
+#include <substdio.h>
+#include <datetime.h>
+#include <now.h>
+#include <date822fmt.h>
 #include "pidopen.h"
 
 #define DEATH 86400				/* 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
@@ -98,12 +102,6 @@ void
 sigbug()
 {
 	die(81);
-}
-
-int
-open_exclr(const char *fn)
-{
-	return open(fn, O_RDWR | O_EXCL | O_CREAT, 0644);
 }
 
 unsigned int    receivedlen;
@@ -329,8 +327,8 @@ main(int argc, char **argv)
 	sig_bugcatch(sigbug);
 	alarm(DEATH);
 
-	/*- open pid file */
-	if ((ret = pidopen(starttime)))
+	/*- open pid file with fd in messfd */
+	if ((ret = pidopen(starttime, "tmp")))
 		die(ret);
 	if (fstat(messfd, &pidst) == -1)
 		die(63);
@@ -355,7 +353,7 @@ main(int argc, char **argv)
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof (inbuf)); /*- message is read from fd 0 */
 	if (substdio_bput(&ssout, received, receivedlen) == -1)
 		die_write();
-	switch (substdio_copy(&ssout, &ssin))
+	switch (substdio_copy(&ssout, &ssin)) /*- copy message body to messfn */
 	{
 	case -2:
 		die_read();
@@ -373,7 +371,7 @@ main(int argc, char **argv)
 	if (unlink(intdfn) == -1)
 		die(63);
 	substdio_fdbuf(&ssout, write, intdfd, outbuf, sizeof (outbuf));
-	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof (inbuf)); /*- envelop is read from fd 1 */
+	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof (inbuf)); /*- envelope is read from fd 1 */
 
 	/*- Return-Path */
 	if (substdio_get(&ssin, &ch, 1) < 1)
@@ -434,7 +432,7 @@ main(int argc, char **argv)
 	/*- write the mail */
 	mailopen(pw->pw_uid, pw->pw_gid);
 	substdio_fdbuf(&ssout, write, mailfd, outbuf, sizeof (outbuf));
-	substdio_fdbuf(&ssin, read, intdfd, inbuf, sizeof (inbuf)); /*- envelop is read from fd 1 */
+	substdio_fdbuf(&ssin, read, intdfd, inbuf, sizeof (inbuf)); /*- envelope is read from fd 1 */
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2:
@@ -444,7 +442,7 @@ main(int argc, char **argv)
 	}
 	if (substdio_flush(&ssout) == -1)
 		die_write();
-	substdio_fdbuf(&ssin, read, messfd, inbuf, sizeof (inbuf)); /*- envelop is read from fd 1 */
+	substdio_fdbuf(&ssin, read, messfd, inbuf, sizeof (inbuf)); /*- body is read from fd 0 */
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2:
@@ -471,7 +469,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.5 2021-06-12 18:16:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.6 2021-06-15 21:51:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	if (x)

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.54  2021-06-15 21:51:54+05:30  Cprogrammer
+ * pass tmpdir argument to pidopen
+ *
  * Revision 1.53  2021-06-15 11:52:41+05:30  Cprogrammer
  * moved pidopen() out to its own file
  *
@@ -592,7 +595,9 @@ main(int argc, char *argv[])
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);
 	alarm(DEATH);
-	if ((ret = pidopen(starttime)))
+	if (!(x = env_get("TMPDIR")))
+		x = "/tmp";
+	if ((ret = pidopen(starttime, x)))
 		die(ret);
 	if ((readfd = open_read(pidfn)) == -1)
 		die(63);
@@ -799,7 +804,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.53 2021-06-15 11:52:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.54 2021-06-15 21:51:54+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
