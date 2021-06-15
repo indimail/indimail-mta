@@ -4,6 +4,7 @@ qmail-direct \- deliver mail message directly to Maildir
 
 .SH SYNOPSIS
 .B qmail-direct
+
 .SH DESCRIPTION
 .B qmail-direct
 reads a mail message from descriptor 0.
@@ -20,7 +21,6 @@ writes the sender address as the
 header. Each recipient address is preceded by the letter T
 and terminated by a 0 byte.
 The list of recipient addresses is terminated by an extra 0 byte.
-If
 .B qmail-direct
 writes X-Recipients header as a comma separated list of recipients.
 If
