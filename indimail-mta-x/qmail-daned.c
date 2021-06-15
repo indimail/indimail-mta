@@ -1,10 +1,7 @@
 /*
  * $Log: qmail-daned.c,v $
- * Revision 1.28  2021-06-12 18:03:27+05:30  Cprogrammer
+ * Revision 1.27  2021-06-15 11:50:15+05:30  Cprogrammer
  * removed chdir(auto_qmail)
- *
- * Revision 1.27  2021-06-09 19:35:39+05:30  Cprogrammer
- * added makeargs.h
  *
  * Revision 1.26  2021-05-26 11:06:29+05:30  Cprogrammer
  * use starttls.h for prototypes in starttls.c
@@ -100,29 +97,29 @@
 #include <fcntl.h>
 #define __USE_GNU
 #include <netdb.h>
-#include "stralloc.h"
+#include <stralloc.h>
+#include <constmap.h>
+#include <uint32.h>
+#include <error.h>
+#include <cdb.h>
+#include <strerr.h>
+#include <open.h>
+#include <str.h>
+#include <fmt.h>
+#include <getln.h>
+#include <scan.h>
+#include <byte.h>
+#include <sig.h>
+#include <sgetopt.h>
+#include <env.h>
+#include <makeargs.h>
 #include "control.h"
-#include "constmap.h"
-#include "uint32.h"
-#include "variables.h"
-#include "error.h"
-#include "cdb.h"
-#include "strerr.h"
-#include "open.h"
-#include "str.h"
-#include "fmt.h"
 #include "tlsacheck.h"
-#include "getln.h"
-#include "scan.h"
-#include "byte.h"
-#include "sig.h"
-#include "sgetopt.h"
-#include "env.h"
 #include "haveip6.h"
 #include "ip.h"
-#include "makeargs.h"
 #include "auto_control.h"
 #include "starttls.h"
+#include "variables.h"
 
 #define FATAL "qmail-daned: fatal: "
 #define WARN  "qmail-daned: warning: "
@@ -1363,7 +1360,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.28 2021-06-12 18:03:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.27 2021-06-15 11:50:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidstarttlsh;
 	x = sccsidmakeargsh;
