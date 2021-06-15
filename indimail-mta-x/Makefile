@@ -346,10 +346,6 @@ bouncesaying.o: \
 compile bouncesaying.c
 	./compile bouncesaying.c
 
-cdbmss.o: \
-compile cdbmss.c cdbmss.h
-	./compile cdbmss.c
-
 check: \
 it man
 	./instcheck
@@ -1073,13 +1069,13 @@ qlx.h
 
 qmail-inject: load qmail-inject.o headerbody.o hfield.o \
 newfield.o quote.o control.o qmail.o envrules.o wildmat.o \
-matchregex.o srs.o rcpthosts.o auto_control.o token822.o \
+matchregex.o srs.o rcpthosts.o auto_control.o \
 variables.o auto_qmail.o auto_sysconfdir.o set_environment.o \
 srs.lib
 	./load qmail-inject headerbody.o hfield.o newfield.o \
 	quote.o control.o qmail.o matchregex.o envrules.o \
 	wildmat.o srs.o rcpthosts.o auto_control.o variables.o \
-	auto_qmail.o auto_sysconfdir.o token822.o set_environment.o \
+	auto_qmail.o auto_sysconfdir.o set_environment.o \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -lqmail
 
 qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
@@ -1089,7 +1085,7 @@ qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
 	> qmail-inject.8
 
 qmail-inject.o: \
-compile qmail-inject.c hfield.h token822.h control.h \
+compile qmail-inject.c hfield.h control.h \
 qmail.h quote.h headerbody.h newfield.h envrules.h \
 hassrs.h set_environment.h wildmat.h conf-srs
 	./compile qmail-inject.c
@@ -1163,11 +1159,11 @@ indimail_stub.o variables.o dns.lib
 	variables.o auto_assign.o `cat dns.lib` -ldl -lqmail
 
 qmail-newmrh: \
-load qmail-newmrh.o cdbmss.o auto_control.o variables.o
-	./load qmail-newmrh cdbmss.o auto_control.o variables.o -lqmail
+load qmail-newmrh.o auto_control.o variables.o
+	./load qmail-newmrh auto_control.o variables.o -lqmail
 
 qmail-newmrh.o: \
-compile qmail-newmrh.c cdbmss.h
+compile qmail-newmrh.c
 	./compile qmail-newmrh.c
 
 qmail-newmrh.8: \
@@ -1178,12 +1174,11 @@ qmail-newmrh.9 conf-sysconfdir conf-prefix
 	> qmail-newmrh.8
 
 qmail-cdb: \
-load qmail-cdb.o cdbmss.o variables.o auto_control.o
-	./load qmail-cdb cdbmss.o auto_control.o variables.o -lqmail
+load qmail-cdb.o variables.o auto_control.o
+	./load qmail-cdb auto_control.o variables.o -lqmail
 
 qmail-cdb.o: \
-compile qmail-cdb.c cdbmss.h \
-variables.h auto_control.h
+compile qmail-cdb.c variables.h auto_control.h
 	./compile qmail-cdb.c
 
 qmail-cdb.8: \
@@ -1195,8 +1190,8 @@ qmail-cdb.9 conf-break conf-spawn conf-sysconfdir
 	> qmail-cdb.8
 
 recipient-cdb: \
-load recipient-cdb.o cdbmss.o auto_assign.o
-	./load recipient-cdb cdbmss.o auto_assign.o -lqmail
+load recipient-cdb.o auto_assign.o
+	./load recipient-cdb auto_assign.o -lqmail
 
 recipient-cdb.8: \
 recipient-cdb.9 conf-sysconfdir
@@ -1205,12 +1200,12 @@ recipient-cdb.9 conf-sysconfdir
 	> recipient-cdb.8
 
 recipient-cdb.o: \
-compile recipient-cdb.c auto_assign.h cdbmss.h
+compile recipient-cdb.c auto_assign.h
 	./compile recipient-cdb.c
 
 qmail-newu: \
-load qmail-newu.o cdbmss.o auto_assign.o
-	./load qmail-newu cdbmss.o auto_assign.o -lqmail
+load qmail-newu.o auto_assign.o
+	./load qmail-newu auto_assign.o -lqmail
 
 qmail-newu.8: \
 qmail-newu.9 conf-sysconfdir
@@ -1219,15 +1214,15 @@ qmail-newu.9 conf-sysconfdir
 	> qmail-newu.8
 
 qmail-newu.o: \
-compile qmail-newu.c cdbmss.h auto_assign.h
+compile qmail-newu.c auto_assign.h
 	./compile qmail-newu.c
 
 cdb-database: \
-load cdb-database.o cdbmss.o auto_control.o variables.o
-	./load cdb-database cdbmss.o auto_control.o variables.o -lqmail
+load cdb-database.o auto_control.o variables.o
+	./load cdb-database auto_control.o variables.o -lqmail
 
 cdb-database.o: \
-compile cdb-database.c cdbmss.h auto_control.h
+compile cdb-database.c auto_control.h
 	./compile cdb-database.c
 
 cdb-database.8: \
@@ -1999,10 +1994,10 @@ qmail.o: compile qmail.c qmail.h auto_qmail.h
 	./compile qmail.c
 
 qreceipt: \
-load qreceipt.o headerbody.o hfield.o quote.o token822.o qmail.o \
+load qreceipt.o headerbody.o hfield.o quote.o qmail.o \
 auto_sysconfdir.o variables.o auto_qmail.o auto_control.o \
 set_environment.o
-	./load qreceipt headerbody.o hfield.o quote.o token822.o \
+	./load qreceipt headerbody.o hfield.o quote.o \
 	auto_sysconfdir.o variables.o auto_control.o \
 	auto_qmail.o qmail.o set_environment.o -lqmail
 
@@ -2012,7 +2007,7 @@ qreceipt.1: qreceipt.9 conf-sysconfdir
 	> qreceipt.1
 
 qreceipt.o: \
-compile qreceipt.c hfield.h token822.h auto_sysconfdir.h \
+compile qreceipt.c hfield.h auto_sysconfdir.h \
 headerbody.h quote.h qmail.h auto_qmail.h set_environment.h
 	./compile qreceipt.c
 
@@ -2281,10 +2276,6 @@ tcpto.h ip.h ipalloc.h conf-tls conf-ip
 timeoutconn.o: \
 compile timeoutconn.c ip.h timeoutconn.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` timeoutconn.c
-
-token822.o: \
-compile token822.c token822.h
-	./compile token822.c
 
 trigger.o: \
 compile trigger.c trigger.h hasnpbg1.h
@@ -2905,11 +2896,11 @@ rwhconfig.o: compile rwhconfig.c rwhconfig.h variables.h \
 auto_control.h
 	./compile rwhconfig.c
 
-ofmipname: load ofmipname.o cdbmss.o
-	./load ofmipname cdbmss.o -lqmail
+ofmipname: load ofmipname.o
+	./load ofmipname -lqmail
 
 ofmipname.o: \
-compile ofmipname.c cdbmss.h
+compile ofmipname.c
 	./compile ofmipname.c
 
 new-inject: \
@@ -3025,9 +3016,9 @@ makeheader.o: makeheader.c compile
 
 dot-forward: \
 load dot-forward.o control.o qmail.o auto_qmail.o variables.o \
-token822.o auto_sysconfdir.o auto_control.o set_environment.o
+auto_sysconfdir.o auto_control.o set_environment.o
 	./load dot-forward control.o qmail.o auto_qmail.o variables.o \
-	auto_sysconfdir.o auto_control.o token822.o set_environment.o \
+	auto_sysconfdir.o auto_control.o set_environment.o \
 	-lqmail
 
 dot-forward.1: dot-forward.9 conf-sysconfdir
@@ -3035,7 +3026,7 @@ dot-forward.1: dot-forward.9 conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dot-forward.1
 
-dot-forward.o: compile dot-forward.c token822.h control.h qmail.h \
+dot-forward.o: compile dot-forward.c control.h qmail.h \
 set_environment.h
 	./compile dot-forward.c
 
@@ -3077,11 +3068,11 @@ compile printmaillist.c
 	./compile printmaillist.c
 
 setforward: \
-load setforward.o cdbmss.o
-	./load setforward cdbmss.o -lqmail
+load setforward.o
+	./load setforward -lqmail
 
 setforward.o: \
-compile setforward.c cdbmss.h
+compile setforward.c
 	./compile setforward.c
 
 setmaillist: \
@@ -3093,23 +3084,21 @@ compile setmaillist.c
 	./compile setmaillist.c
 
 inewaliases: \
-load inewaliases.o token822.o control.o \
-cdbmss.o variables.o auto_control.o
-	./load inewaliases token822.o control.o \
-	variables.o cdbmss.o auto_control.o -lqmail
+load inewaliases.o control.o variables.o auto_control.o
+	./load inewaliases control.o variables.o \
+	auto_control.o -lqmail
 
 inewaliases.o: \
-compile inewaliases.c token822.h control.h \
-auto_qmail.h cdbmss.h variables.h
+compile inewaliases.c control.h auto_qmail.h variables.h
 	./compile inewaliases.c
 
 newinclude: \
-load newinclude.o token822.o control.o variables.o auto_control.o
-	./load newinclude token822.o control.o variables.o \
+load newinclude.o control.o variables.o auto_control.o
+	./load newinclude control.o variables.o \
 	auto_control.o -lqmail
 
 newinclude.o: \
-compile newinclude.c token822.h control.h variables.h
+compile newinclude.c control.h variables.h
 	./compile newinclude.c
 
 sorted.o: compile sorted.c sorted.h
