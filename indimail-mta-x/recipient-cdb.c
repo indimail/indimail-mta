@@ -1,5 +1,8 @@
 /*
  * $Log: recipient-cdb.c,v $
+ * Revision 1.10  2021-06-15 12:18:38+05:30  Cprogrammer
+ * moved cdbmss.h to libqmail
+ *
  * Revision 1.9  2021-06-14 10:15:43+05:30  Cprogrammer
  * added missing error check for stralloc
  *
@@ -33,11 +36,11 @@
 #include "strerr.h"
 #include "stralloc.h"
 #include "substdio.h"
-#include "getln.h"
-#include "open.h"
-#include "case.h"
+#include <getln.h>
+#include <open.h>
+#include <case.h>
+#include <cdbmss.h>
 #include "auto_assign.h"
-#include "cdbmss.h"
 
 #define FATAL "recipient-cdb: fatal: "
 
@@ -104,7 +107,7 @@ main()
 void
 getversion_qmail_recipients_c()
 {
-	static char    *x = "$Id: recipient-cdb.c,v 1.9 2021-06-14 10:15:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: recipient-cdb.c,v 1.10 2021-06-15 12:18:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
