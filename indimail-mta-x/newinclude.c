@@ -1,5 +1,8 @@
 /*
  * $Log: newinclude.c,v $
+ * Revision 1.5  2021-06-15 11:42:10+05:30  Cprogrammer
+ * moved token822.h to libqmail
+ *
  * Revision 1.4  2021-06-12 18:01:34+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -15,16 +18,16 @@
  */
 #include <unistd.h>
 #include <sys/stat.h>
-#include "substdio.h"
-#include "strerr.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "open.h"
-#include "byte.h"
-#include "token822.h"
+#include <substdio.h>
+#include <strerr.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <open.h>
+#include <byte.h>
+#include <token822.h>
+#include <env.h>
 #include "control.h"
 #include "variables.h"
-#include "env.h"
 
 #define FATAL "newinclude: fatal: "
 
@@ -361,7 +364,7 @@ main(argc, argv)
 void
 getversion_newinclude_c()
 {
-	static char    *x = "$Id: newinclude.c,v 1.4 2021-06-12 18:01:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: newinclude.c,v 1.5 2021-06-15 11:42:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
