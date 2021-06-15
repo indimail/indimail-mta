@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-dk.c,v $
- * Revision 1.53  2021-06-14 09:28:26+05:30  Cprogrammer
+ * Revision 1.53  2021-06-15 11:52:41+05:30  Cprogrammer
  * moved pidopen() out to its own file
  *
  * Revision 1.52  2021-06-09 21:14:19+05:30  Cprogrammer
@@ -166,31 +166,31 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "sgetopt.h"
-#include "substdio.h"
-#include "open.h"
+#include <sgetopt.h>
+#include <substdio.h>
+#include <open.h>
+#include <sig.h>
+#include <fmt.h>
+#include <fd.h>
+#include <alloc.h>
+#include <str.h>
+#include <getln.h>
+#include <error.h>
+#include <case.h>
+#include <stralloc.h>
+#include <datetime.h>
+#include <now.h>
+#include <wait.h>
+#include <env.h>
+#include <scan.h>
+#include <mess822.h>
+#include <makeargs.h>
 #include "qmail.h"
-#include "sig.h"
-#include "fmt.h"
-#include "fd.h"
-#include "alloc.h"
-#include "str.h"
-#include "getln.h"
-#include "error.h"
-#include "case.h"
-#include "stralloc.h"
-#include "datetime.h"
-#include "now.h"
-#include "wait.h"
-#include "auto_control.h"
-#include "env.h"
-#include "scan.h"
-#include "mess822.h"
 #include "control.h"
 #include "variables.h"
 #include "domainkeys.h"
-#include "makeargs.h"
 #include "qmulti.h"
+#include "auto_control.h"
 #include "pidopen.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
@@ -799,7 +799,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.53 2021-06-14 09:28:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.53 2021-06-15 11:52:41+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
