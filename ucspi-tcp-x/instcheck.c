@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.4  2021-06-15 08:22:08+05:30  Cprogrammer
+ * replaced strerr_die2sys with sterr_die2x for memory error
+ *
  * Revision 1.3  2021-04-07 18:33:32+05:30  Cprogrammer
  * fix for systems not having man pages
  * fix for running under non-root uid
@@ -141,10 +144,9 @@ getdirname(char *dir, char **basedir)
 		*basedir = ptr;
 	while (len > 1 && *ptr == '/')
 		ptr--, len--;
-	if (!stralloc_copyb(&dirbuf, dir, len))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_0(&dirbuf))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_copyb(&dirbuf, dir, len) ||
+			!stralloc_0(&dirbuf))
+		strerr_die2x(111, FATAL, "out of memory");
 	return (dirbuf.s);
 }
 
