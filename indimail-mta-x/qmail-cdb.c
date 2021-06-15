@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cdb.c,v $
+ * Revision 1.12  2021-06-15 11:46:25+05:30  Cprogrammer
+ * moved cdbmss.h to libqmail
+ *
  * Revision 1.11  2021-06-14 09:19:24+05:30  Cprogrammer
  * do chdir(controldir) instead of chdir(auto_qmail)
  *
@@ -46,7 +49,7 @@
 #include <open.h>
 #include <error.h>
 #include <env.h>
-#include "cdbmss.h"
+#include <cdbmss.h>
 #include "auto_control.h"
 #include "variables.h"
 
@@ -131,7 +134,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	static char    *x = "$Id: qmail-cdb.c,v 1.11 2021-06-14 09:19:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-cdb.c,v 1.12 2021-06-15 11:46:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
