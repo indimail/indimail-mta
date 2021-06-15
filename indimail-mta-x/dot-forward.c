@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.14  2021-06-15 11:34:34+05:30  Cprogrammer
+ * moved token822.h to libqmail
+ *
  * Revision 1.13  2021-05-13 14:45:41+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -41,26 +44,26 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "envdir.h"
-#include "pathexec.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "strerr.h"
-#include "error.h"
-#include "open.h"
-#include "fd.h"
-#include "sig.h"
-#include "case.h"
-#include "wait.h"
-#include "seek.h"
-#include "env.h"
-#include "str.h"
-#include "fmt.h"
-#include "token822.h"
+#include <substdio.h>
+#include <envdir.h>
+#include <pathexec.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <strerr.h>
+#include <error.h>
+#include <open.h>
+#include <fd.h>
+#include <sig.h>
+#include <case.h>
+#include <wait.h>
+#include <seek.h>
+#include <env.h>
+#include <str.h>
+#include <fmt.h>
+#include <token822.h>
+#include <sgetopt.h>
 #include "control.h"
 #include "qmail.h"
-#include "sgetopt.h"
 #include "set_environment.h"
 
 #define FATAL "dot-forward: fatal: "
@@ -511,7 +514,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.13 2021-05-13 14:45:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.14 2021-06-15 11:34:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
