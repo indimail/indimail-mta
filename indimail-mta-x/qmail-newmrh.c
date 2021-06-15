@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newmrh.c,v $
+ * Revision 1.13  2021-06-15 11:56:13+05:30  Cprogrammer
+ * moved cdbmss.h to libqmail
+ *
  * Revision 1.12  2021-06-13 13:03:43+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -34,16 +37,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "strerr.h"
-#include "stralloc.h"
-#include "substdio.h"
-#include "getln.h"
-#include "case.h"
-#include "open.h"
+#include <strerr.h>
+#include <stralloc.h>
+#include <substdio.h>
+#include <getln.h>
+#include <case.h>
+#include <open.h>
+#include <env.h>
+#include <cdbmss.h>
 #include "auto_control.h"
 #include "variables.h"
-#include "env.h"
-#include "cdbmss.h"
 
 #define FATAL "qmail-newmrh: fatal: "
 
@@ -105,7 +108,7 @@ main()
 void
 getversion_qmail_newmrh_c()
 {
-	static char    *x = "$Id: qmail-newmrh.c,v 1.12 2021-06-13 13:03:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-newmrh.c,v 1.13 2021-06-15 11:56:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
