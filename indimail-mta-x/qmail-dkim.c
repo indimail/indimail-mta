@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-dkim.c,v $
- * Revision 1.58  2021-06-12 18:17:36+05:30  Cprogrammer
+ * Revision 1.58  2021-06-15 11:53:44+05:30  Cprogrammer
  * moved pidopen() out to its own file
  *
  * Revision 1.57  2021-06-09 21:14:33+05:30  Cprogrammer
@@ -184,27 +184,27 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "sgetopt.h"
-#include "substdio.h"
-#include "open.h"
-#include "qmail.h"
-#include "sig.h"
-#include "scan.h"
-#include "case.h"
-#include "fmt.h"
-#include "fd.h"
-#include "alloc.h"
-#include "str.h"
-#include "stralloc.h"
-#include "datetime.h"
-#include "now.h"
-#include "wait.h"
-#include "auto_control.h"
-#include "env.h"
-#include "error.h"
+#include <sgetopt.h>
+#include <substdio.h>
+#include <open.h>
+#include <sig.h>
+#include <scan.h>
+#include <case.h>
+#include <fmt.h>
+#include <fd.h>
+#include <alloc.h>
+#include <str.h>
+#include <stralloc.h>
+#include <datetime.h>
+#include <now.h>
+#include <wait.h>
+#include <env.h>
+#include <error.h>
+#include <dkim.h>
+#include <makeargs.h>
 #include "control.h"
-#include "dkim.h"
-#include "makeargs.h"
+#include "auto_control.h"
+#include "qmail.h"
 #include "variables.h"
 #include "qmulti.h"
 #include "pidopen.h"
@@ -1358,7 +1358,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.58 2021-06-12 18:17:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.58 2021-06-15 11:53:44+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
