@@ -1,5 +1,8 @@
 /*
  * $Log: qreceipt.c,v $
+ * Revision 1.13  2021-06-15 12:17:53+05:30  Cprogrammer
+ * moved token822.h to libqmail
+ *
  * Revision 1.12  2021-05-13 14:44:24+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -29,25 +32,25 @@
  *
  */
 #include <unistd.h>
-#include "sig.h"
-#include "scan.h"
-#include "envdir.h"
-#include "pathexec.h"
-#include "strerr.h"
-#include "env.h"
-#include "substdio.h"
-#include "stralloc.h"
-#include "subfd.h"
-#include "getln.h"
-#include "alloc.h"
-#include "str.h"
+#include <sig.h>
+#include <scan.h>
+#include <envdir.h>
+#include <pathexec.h>
+#include <strerr.h>
+#include <env.h>
+#include <substdio.h>
+#include <stralloc.h>
+#include <subfd.h>
+#include <getln.h>
+#include <alloc.h>
+#include <str.h>
+#include <token822.h>
+#include <error.h>
+#include <gen_alloc.h>
+#include <gen_allocdefs.h>
+#include <open.h>
 #include "hfield.h"
-#include "token822.h"
-#include "error.h"
-#include "gen_alloc.h"
-#include "gen_allocdefs.h"
 #include "headerbody.h"
-#include "open.h"
 #include "quote.h"
 #include "qmail.h"
 #include "set_environment.h"
@@ -254,7 +257,7 @@ main(argc, argv)
 void
 getversion_qreceipt_c()
 {
-	static char    *x = "$Id: qreceipt.c,v 1.12 2021-05-13 14:44:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qreceipt.c,v 1.13 2021-06-15 12:17:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
