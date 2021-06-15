@@ -1,5 +1,8 @@
 /*
  * $Log: inewaliases.c,v $
+ * Revision 1.6  2021-06-15 11:38:13+05:30  Cprogrammer
+ * moved token822 to libqmail
+ *
  * Revision 1.5  2021-06-14 00:44:02+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -18,17 +21,17 @@
  */
 #include <unistd.h>
 #include <sys/stat.h>
-#include "substdio.h"
-#include "strerr.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "open.h"
-#include "token822.h"
-#include "variables.h"
+#include <substdio.h>
+#include <strerr.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <open.h>
+#include <token822.h>
+#include <byte.h>
+#include <case.h>
+#include <cdbmss.h>
 #include "control.h"
-#include "byte.h"
-#include "case.h"
-#include "cdbmss.h"
+#include "variables.h"
 
 #define FATAL "newaliases: fatal: "
 
@@ -376,7 +379,7 @@ main()
 void
 getversion_newaliases_c()
 {
-	static char    *x = "$Id: inewaliases.c,v 1.5 2021-06-14 00:44:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inewaliases.c,v 1.6 2021-06-15 11:38:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
