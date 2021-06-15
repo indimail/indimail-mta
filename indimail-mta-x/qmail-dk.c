@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-dk.c,v $
- * Revision 1.54  2021-06-15 21:51:54+05:30  Cprogrammer
+ * Revision 1.54  2021-06-15 22:14:47+05:30  Cprogrammer
  * pass tmpdir argument to pidopen
  *
  * Revision 1.53  2021-06-15 11:52:41+05:30  Cprogrammer
@@ -368,8 +368,9 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 			if (!stralloc_copys(&keyfnfrom, keyfn))
 				die(51);
 		} else
-		if (!stralloc_cats(&keyfnfrom, keyfn) ||
-				!stralloc_0(&keyfnfrom))
+		if (!stralloc_cats(&keyfnfrom, keyfn))
+			die(51);
+		if (!stralloc_0(&keyfnfrom))
 			die(51);
 	}
 	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + 8, 1))
@@ -804,7 +805,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.54 2021-06-15 21:51:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.54 2021-06-15 22:14:47+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
