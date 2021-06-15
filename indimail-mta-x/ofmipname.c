@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipname.c,v $
+ * Revision 1.5  2021-06-15 11:42:52+05:30  Cprogrammer
+ * moved cdbmss.h to libqmail
+ *
  * Revision 1.4  2020-11-24 13:46:25+05:30  Cprogrammer
  * removed exit.h
  *
@@ -13,17 +16,17 @@
  * Initial revision
  *
  */
-#include "cdbmss.h"
-#include "byte.h"
-#include "strerr.h"
-#include "open.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "stralloc.h"
-#include "getln.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <cdbmss.h>
+#include <byte.h>
+#include <strerr.h>
+#include <open.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <stralloc.h>
+#include <getln.h>
 
 #define FATAL "ofmipname: fatal: "
 
@@ -155,7 +158,7 @@ main(argc, argv)
 void
 getversion_ofmipname_c()
 {
-	static char    *x = "$Id: ofmipname.c,v 1.4 2020-11-24 13:46:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipname.c,v 1.5 2021-06-15 11:42:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
