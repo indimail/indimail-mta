@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.41  2021-06-15 11:55:01+05:30  Cprogrammer
+ * moved token822.h to libqmail
+ *
  * Revision 1.40  2021-05-27 11:25:45+05:30  Cprogrammer
  * removed spam ignore code
  *
@@ -137,8 +140,8 @@
 #include <constmap.h>
 #include <case.h>
 #include <byte.h>
+#include <token822.h>
 #include "hfield.h"
-#include "token822.h"
 #include "control.h"
 #include "qmail.h"
 #include "quote.h"
@@ -1224,7 +1227,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.40 2021-05-27 11:25:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.41 2021-06-15 11:55:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
