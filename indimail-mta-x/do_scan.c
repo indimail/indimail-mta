@@ -1,6 +1,6 @@
 /*
  * $Log: do_scan.c,v $
- * Revision 1.18  2021-06-14 00:39:58+05:30  Cprogrammer
+ * Revision 1.18  2021-06-15 11:32:24+05:30  Cprogrammer
  * remove creation of link for /etc/indimail/control in scanq directory
  *
  * Revision 1.17  2021-06-09 19:34:19+05:30  Cprogrammer
@@ -60,18 +60,18 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <dirent.h>
-#include "auto_control.h"
-#include "wait.h"
-#include "variables.h"
-#include "scan.h"
-#include "sig.h"
-#include "env.h"
-#include "exitcodes.h"
-#include "strerr.h"
-#include "qregex.h"
+#include <wait.h>
+#include <scan.h>
+#include <sig.h>
+#include <env.h>
+#include <strerr.h>
+#include <str.h>
+#include <makeargs.h>
 #include "control.h"
-#include "str.h"
-#include "makeargs.h"
+#include "qregex.h"
+#include "exitcodes.h"
+#include "auto_control.h"
+#include "variables.h"
 
 extern int      flaglog;
 extern pid_t    pid;
@@ -234,7 +234,7 @@ do_scan()
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.18 2021-06-14 00:39:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_scan.c,v 1.18 2021-06-15 11:32:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
