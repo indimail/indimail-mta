@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-spamfilter.c,v $
- * Revision 1.1  2021-06-10 15:05:03+05:30  Cprogrammer
+ * Revision 1.1  2021-06-15 12:16:52+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -15,9 +15,9 @@
 #include <wait.h>
 #include <error.h>
 #include "auto_qmail.h"
+#include <makeargs.h>
+#include <mktempfile.h>
 #include "qmulti.h"
-#include "mktempfile.h"
-#include "makeargs.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 
@@ -219,7 +219,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.1 2021-06-10 15:05:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.1 2021-06-15 12:16:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;
