@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newu.c,v $
+ * Revision 1.11  2021-06-15 11:57:21+05:30  Cprogrammer
+ * moved cdbmss.h to libqmail
+ *
  * Revision 1.10  2020-11-24 13:47:04+05:30  Cprogrammer
  * removed exit.h
  *
@@ -25,16 +28,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "stralloc.h"
-#include "subfd.h"
-#include "getln.h"
-#include "substdio.h"
-#include "cdbmss.h"
-#include "byte.h"
-#include "env.h"
-#include "open.h"
-#include "error.h"
-#include "case.h"
+#include <stralloc.h>
+#include <subfd.h>
+#include <getln.h>
+#include <substdio.h>
+#include <cdbmss.h>
+#include <byte.h>
+#include <env.h>
+#include <open.h>
+#include <error.h>
+#include <case.h>
 #include "auto_assign.h"
 
 int             rename(const char *, const char *);
@@ -211,7 +214,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_newu_c()
 {
-	static char    *x = "$Id: qmail-newu.c,v 1.10 2020-11-24 13:47:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-newu.c,v 1.11 2021-06-15 11:57:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
