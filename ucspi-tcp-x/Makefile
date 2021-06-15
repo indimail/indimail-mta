@@ -268,17 +268,17 @@ mconnect-io.o: \
 compile mconnect-io.c
 	./compile mconnect-io.c
 
-pathexec_env.o: \
-compile pathexec_env.c upathexec.h conf-dlopen
-	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` pathexec_env.c
+upathexec_env.o: \
+compile upathexec_env.c upathexec.h conf-dlopen
+	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` upathexec_env.c
 
-pathexec_rundl.o: \
-compile pathexec_run.c upathexec.h conf-dlopen
-	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` pathexec_run.c -o pathexec_rundl.o
+upathexec_rundl.o: \
+compile upathexec_run.c upathexec.h conf-dlopen
+	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` upathexec_run.c -o upathexec_rundl.o
 
-pathexec_run.o: \
-compile pathexec_run.c upathexec.h conf-dlopen
-	./compile pathexec_run.c
+upathexec_run.o: \
+compile upathexec_run.c upathexec.h conf-dlopen
+	./compile upathexec_run.c
 
 prog: \
 tcpserver tcprules tcprulescheck tcpclient \
@@ -294,25 +294,25 @@ compile prot.c hasshsgr.h prot.h
 	./compile prot.c
 
 rblsmtpd.so: \
-load rbl.o pathexec_rundl.o load_shared.o \
+load rbl.o upathexec_rundl.o load_shared.o \
 dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib \
 conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
-	rbl.o pathexec_rundl.o load_shared.o \
+	rbl.o upathexec_rundl.o load_shared.o \
 	tcdlmopen.o dlnamespace.o dns.a unix.a `cat socket.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail; \
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o rblsmtpd.so \
-	rbl.o pathexec_rundl.o load_shared.o \
+	rbl.o upathexec_rundl.o load_shared.o \
 	dlnamespace.o tcdlmopen.o dns.a unix.a `cat socket.lib` \
 	`cat conf-ld-$(SYSTEM) 2>/dev/null` -lqmail -ldl; \
 	fi
 
 rblsmtpd: \
-load rblsmtpd.o pathexec_rundl.o load_shared.o \
+load rblsmtpd.o upathexec_rundl.o load_shared.o \
 dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
-	./load rblsmtpd pathexec_rundl.o load_shared.o \
+	./load rblsmtpd upathexec_rundl.o load_shared.o \
 	dlnamespace.o tcdlmopen.o dns.a unix.a \
 	`cat socket.lib` -lqmail -ldl
 
@@ -412,9 +412,9 @@ warn-auto.sh tcpcat.sh conf-prefix
 
 tcpclient: \
 load tcpclient.o tcpremoteinfo.o timeoutconn.o \
-pathexec_run.o tls.o dns.a unix.a socket.lib
+upathexec_run.o tls.o dns.a unix.a socket.lib
 	./load tcpclient tcpremoteinfo.o timeoutconn.o \
-	pathexec_run.o tls.o dns.a unix.a \
+	upathexec_run.o tls.o dns.a unix.a \
 	$(SSLLIBS) `cat socket.lib` -lqmail
 
 tcpclient.o: \
@@ -425,9 +425,9 @@ tls.h haveip6.h ip6.h conf-ip conf-tls
 	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` tcpclient.c
 
 dotls: \
-load dotls.o tls.o pathexec_run.o pathexec_env.o
-	./load dotls tls.o pathexec_run.o \
-	pathexec_env.o $(SSLLIBS) -lqmail
+load dotls.o tls.o upathexec_run.o upathexec_env.o
+	./load dotls tls.o upathexec_run.o \
+	upathexec_env.o $(SSLLIBS) -lqmail
 
 dotls.o: \
 compile dotls.c tls.c tls.h upathexec.h conf-tls
@@ -479,13 +479,13 @@ compile dlnamespace.c hasdlmopen.h upathexec.h
 	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` dlnamespace.c
 
 tcpserver: \
-load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o pathexec_rundl.o \
+load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o upathexec_rundl.o \
 tcpserver_plugin.o load_shared.o control.o auto_home.o dlnamespace.o \
 tcdlmopen.o tls.o load_mysql.o dns.a unix.a socket.lib mysql_config \
 conf-ld-$(SYSTEM)
 	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o load_mysql.o \
 	control.o auto_home.o tcpserver_plugin.o load_shared.o tls.o \
-	dlnamespace.o tcdlmopen.o pathexec_rundl.o dns.a unix.a \
+	dlnamespace.o tcdlmopen.o upathexec_rundl.o dns.a unix.a \
 	`cat socket.lib conf-ld-$(SYSTEM) 2>/dev/null` $(SSLLIBS) -lqmail -ldl
 
 mysql_inc: mysql_config
@@ -518,7 +518,7 @@ compile timeoutconn.c socket.h haveip6.h timeoutconn.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` timeoutconn.c
 
 unix.a: \
-makelib pathexec_env.o prot.o socket_accept.o socket_bind.o \
+makelib upathexec_env.o prot.o socket_accept.o socket_bind.o \
 socket_conn.o socket_delay.o socket_listen.o socket_local.o \
 socket_opts.o socket_opts6.o socket_remote.o socket_tcp.o socket_udp.o \
 socket_conn6.o socket_bind6.o socket_accept6.o socket_recv6.o \
@@ -526,7 +526,7 @@ socket_send6.o socket_local6.o socket_tcp6.o ip4_fmt.o ip6_fmt.o \
 ip4_bit.o ip6_bit.o ip4_scan.o ip6_scan.o socket_getifname.o \
 socket_getifidx.o socket_v4mappedprefix.o socket_ip4loopback.o \
 socket_v6any.o socket_v6loopback.o ip6_compactaddr.o ip6_expandaddr.o
-	./makelib unix.a pathexec_env.o prot.o socket_accept.o \
+	./makelib unix.a upathexec_env.o prot.o socket_accept.o \
 	socket_bind.o socket_conn.o socket_delay.o socket_listen.o \
 	socket_local.o socket_opts.o socket_opts6.o socket_remote.o \
 	socket_tcp.o socket_udp.o socket_conn6.o socket_bind6.o \
@@ -626,16 +626,16 @@ compile recordio.c iopause.h upathexec.h
 	./compile recordio.c
 
 recordio: \
-load recordio.o pathexec_run.o iopause.o
-	./load recordio pathexec_run.o iopause.o -lqmail
+load recordio.o upathexec_run.o iopause.o
+	./load recordio upathexec_run.o iopause.o -lqmail
 
 argv0.o: \
 compile argv0.c upathexec.h
 	./compile argv0.c
 
 argv0: \
-load argv0.o pathexec_run.o
-	./load argv0 pathexec_run.o -lqmail
+load argv0.o upathexec_run.o
+	./load argv0 upathexec_run.o -lqmail
 
 addcr: load addcr.o 
 	./load addcr -lqmail
@@ -651,8 +651,8 @@ delcr.o: \
 compile delcr.c
 	./compile delcr.c
 
-fixcrio: load fixcrio.o pathexec_run.o iopause.o
-	./load fixcrio pathexec_run.o iopause.o -lqmail
+fixcrio: load fixcrio.o upathexec_run.o iopause.o
+	./load fixcrio upathexec_run.o iopause.o -lqmail
 
 fixcrio.o: \
 compile fixcrio.c iopause.h upathexec.h

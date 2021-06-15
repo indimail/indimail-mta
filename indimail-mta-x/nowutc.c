@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.7  2021-06-13 17:28:28+05:30  Cprogrammer
+ * removed chdir(auto_sysconfdir)
+ *
  * Revision 1.6  2021-05-26 12:10:39+05:30  Cprogrammer
  * replaced libc stdio with substdio
  *
@@ -44,8 +47,6 @@ char            strnum[FMT_ULONG];
 int
 main()
 {
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "chdir: ", auto_sysconfdir, ": ");
 	if (leapsecs_init() == -1)
 		strerr_die2x(111, FATAL, "unable to initialize leapsecs");
 
@@ -88,7 +89,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	static char    *z = "$Id: nowutc.c,v 1.6 2021-05-26 12:10:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *z = "$Id: nowutc.c,v 1.7 2021-06-13 17:28:28+05:30 Cprogrammer Exp mbhangui $";
 
 	z++;
 }

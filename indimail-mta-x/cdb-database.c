@@ -1,23 +1,23 @@
 /*
  * $Log: cdb-database.c,v $
- * Revision 1.1  2020-04-08 16:03:48+05:30  Cprogrammer
+ * Revision 1.1  2021-06-15 11:30:39+05:30  Cprogrammer
  * Initial revision
  *
  */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "stralloc.h"
-#include "subfd.h"
-#include "getln.h"
-#include "substdio.h"
-#include "cdbmss.h"
-#include "byte.h"
-#include "env.h"
-#include "strerr.h"
-#include "open.h"
-#include "error.h"
-#include "case.h"
+#include <stralloc.h>
+#include <subfd.h>
+#include <getln.h>
+#include <substdio.h>
+#include <cdbmss.h>
+#include <byte.h>
+#include <env.h>
+#include <strerr.h>
+#include <open.h>
+#include <error.h>
+#include <case.h>
 #include "auto_control.h"
 #include "variables.h"
 
@@ -123,7 +123,7 @@ main(int argc, char **argv)
 void
 getversion_cdb_database_c()
 {
-	static char    *x = "$Id: cdb-database.c,v 1.1 2020-04-08 16:03:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdb-database.c,v 1.1 2021-06-15 11:30:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

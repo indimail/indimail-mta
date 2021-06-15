@@ -1,5 +1,8 @@
 /*
  * $Log: parsedate.c,v $
+ * Revision 1.5  2021-06-13 17:28:51+05:30  Cprogrammer
+ * removed chdir(auto_sysconfdir)
+ *
  * Revision 1.4  2016-05-21 14:48:24+05:30  Cprogrammer
  * use auto_sysconfdir for leapsecs_init()
  *
@@ -43,8 +46,6 @@ main()
 {
 	int             i;
 
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die3sys(111, FATAL, "chdir: ", auto_sysconfdir);
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 
@@ -96,7 +97,7 @@ main()
 void
 getversion_parsedate_c()
 {
-	static char    *x = "$Id: parsedate.c,v 1.4 2016-05-21 14:48:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: parsedate.c,v 1.5 2021-06-13 17:28:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

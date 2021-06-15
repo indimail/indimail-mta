@@ -1,5 +1,11 @@
 /*
  * $Log: newinclude.c,v $
+ * Revision 1.5  2021-06-15 11:42:10+05:30  Cprogrammer
+ * moved token822.h to libqmail
+ *
+ * Revision 1.4  2021-06-12 18:01:34+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.3  2004-10-22 20:27:43+05:30  Cprogrammer
  * added RCS id
  *
@@ -12,17 +18,16 @@
  */
 #include <unistd.h>
 #include <sys/stat.h>
-#include "substdio.h"
-#include "strerr.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "open.h"
-#include "byte.h"
-#include "token822.h"
+#include <substdio.h>
+#include <strerr.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <open.h>
+#include <byte.h>
+#include <token822.h>
+#include <env.h>
 #include "control.h"
 #include "variables.h"
-#include "auto_qmail.h"
-#include "env.h"
 
 #define FATAL "newinclude: fatal: "
 
@@ -128,13 +133,8 @@ void
 readcontrols()
 {
 	int             r;
-	int             fddir;
 	char           *x;
 
-	if ((fddir = open_read(".")) == -1)
-		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 	if ((r = control_readline(&me, "me")) == -1)
 		die_control();
 	if (!r && !stralloc_copys(&me, "me"))
@@ -157,8 +157,6 @@ readcontrols()
 		nomem();
 	if ((x = env_get("QMAILPLUSDOMAIN")) && !stralloc_copys(&plusdomain, x))
 		nomem();
-	if (fchdir(fddir) == -1)
-		strerr_die2sys(111, FATAL, "unable to set current directory: ");
 }
 
 void
@@ -182,52 +180,44 @@ gotaddr()
 	if (token822_unquote(&address, &tokaddr) != 1)
 		nomem();
 	flaghasat = 0;
-	for (i = 0; i < tokaddr.len; ++i)
-	{
+	for (i = 0; i < tokaddr.len; ++i) {
 		if (tokaddr.t[i].type == TOKEN822_AT)
 			flaghasat = 1;
 	}
 	tokaddr.len = 0;
 	if (!address.len)
 		return;
-	if (!flaghasat && address.s[0] == '/')
-	{
+	if (!flaghasat && address.s[0] == '/') {
 		if (!stralloc_0(&address))
 			nomem();
 		strerr_die4x(111, FATAL, "file delivery ", address.s, " not supported");
 	}
-	if (!flaghasat && address.s[0] == '|')
-	{
+	if (!flaghasat && address.s[0] == '|') {
 		if (!stralloc_0(&address))
 			nomem();
 		strerr_die4x(111, FATAL, "program delivery ", address.s, " not supported");
 	}
-	if (!flaghasat)
-	{
+	if (!flaghasat) {
 		if (!stralloc_cats(&address, "@"))
 			nomem();
 		if (!stralloc_cat(&address, &defaulthost))
 			nomem();
 	}
-	if (address.s[address.len - 1] == '+')
-	{
+	if (address.s[address.len - 1] == '+') {
 		address.s[address.len - 1] = '.';
 		if (!stralloc_cat(&address, &plusdomain))
 			nomem();
 	}
 	j = 0;
-	for (i = 0; i < address.len; ++i)
-	{
+	for (i = 0; i < address.len; ++i) {
 		if (address.s[i] == '@')
 			j = i;
 	}
-	for (i = j; i < address.len; ++i)
-	{
+	for (i = j; i < address.len; ++i) {
 		if (address.s[i] == '.')
 			break;
 	}
-	if (i == address.len)
-	{
+	if (i == address.len) {
 		if (!stralloc_cats(&address, "."))
 			nomem();
 		if (!stralloc_cat(&address, &defaultdomain))
@@ -264,20 +254,16 @@ parseline()
 	if (!token822_readyplus(&tokaddr, 1))
 		nomem();
 	tokaddr.len = 0;
-	while (t > beginning)
-	{
+	while (t > beginning) {
 		switch ((--t)->type)
 		{
 		case TOKEN822_SEMI:
 			/*XXX*/
 			break;
 		case TOKEN822_COLON:
-			if (t >= beginning + 2)
-			{
-				if (t[-2].type == TOKEN822_COLON && t[-1].type == TOKEN822_ATOM)
-				{
-					if (t[-1].slen == 7 && !byte_diff(t[-1].s, 7, "include"))
-					{
+			if (t >= beginning + 2) {
+				if (t[-2].type == TOKEN822_COLON && t[-1].type == TOKEN822_ATOM) {
+					if (t[-1].slen == 7 && !byte_diff(t[-1].s, 7, "include")) {
 						gotincl();
 						t -= 2;
 					}
@@ -288,8 +274,7 @@ parseline()
 		case TOKEN822_RIGHT:
 			if (tokaddr.len)
 				gotaddr();
-			while ((t > beginning) && (t[-1].type != TOKEN822_LEFT))
-			{
+			while ((t > beginning) && (t[-1].type != TOKEN822_LEFT)) {
 				if (!token822_append(&tokaddr, --t))
 					nomem();
 			}
@@ -342,17 +327,12 @@ main(argc, argv)
 	readcontrols();
 	if (!(fnlist = argv[1]))
 		usage();
-	if (!stralloc_copys(&bin, fnlist))
-		nomem();
-	if (!stralloc_cats(&bin, ".bin"))
-		nomem();
-	if (!stralloc_0(&bin))
-		nomem();
-	if (!stralloc_copys(&tmp, fnlist))
-		nomem();
-	if (!stralloc_cats(&tmp, ".tmp"))
-		nomem();
-	if (!stralloc_0(&tmp))
+	if (!stralloc_copys(&bin, fnlist) ||
+			!stralloc_cats(&bin, ".bin") ||
+			!stralloc_0(&bin) ||
+			!stralloc_copys(&tmp, fnlist) ||
+			!stralloc_cats(&tmp, ".tmp") ||
+			!stralloc_0(&tmp))
 		nomem();
 	if ((fd = open_read(fnlist)) == -1)
 		readerr();
@@ -360,8 +340,7 @@ main(argc, argv)
 	if ((fd = open_trunc(fntmp)) == -1)
 		writeerr();
 	substdio_fdbuf(&sstmp, write, fd, tmpbuf, sizeof tmpbuf);
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&sslist, &line, &match, '\n') == -1)
 			readerr();
 		if (!line.len)
@@ -385,7 +364,7 @@ main(argc, argv)
 void
 getversion_newinclude_c()
 {
-	static char    *x = "$Id: newinclude.c,v 1.3 2004-10-22 20:27:43+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: newinclude.c,v 1.5 2021-06-15 11:42:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

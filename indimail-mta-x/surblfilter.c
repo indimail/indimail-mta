@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.15  2021-06-14 01:22:01+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.14  2021-05-26 10:47:29+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -64,7 +67,6 @@
 #include "str.h"
 #include "case.h"
 #include "constmap.h"
-#include "auto_qmail.h"
 #include "auto_control.h"
 #include "stralloc.h"
 #include "env.h"
@@ -246,18 +248,15 @@ resolve(domain, type)
 	int             i;
 
 	errno = 0;
-	if (!responsebuflen)
-	{
+	if (!responsebuflen) {
 		if ((response.buf = (unsigned char *) alloc(PACKETSZ + 1)))
 			responsebuflen = PACKETSZ + 1;
 		else
 			return DNS_MEM;
 	}
 	responselen = lookup(domain, C_IN, type, response.buf, responsebuflen);
-	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc)))
-	{
-		if (responsebuflen < 65536)
-		{
+	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
+		if (responsebuflen < 65536) {
 			if (alloc_re((char *) &response.buf, responsebuflen, 65536))
 				responsebuflen = 65536;
 			else
@@ -268,8 +267,7 @@ resolve(domain, type)
 		responselen = lookup(domain, C_IN, type, response.buf, responsebuflen);
 		_res.options = saveresoptions;
 	}
-	if (responselen <= 0)
-	{
+	if (responselen <= 0) {
 		if (errno == ECONNREFUSED)
 			return DNS_SOFT;
 		if (h_errno == TRY_AGAIN)
@@ -279,8 +277,7 @@ resolve(domain, type)
 	responseend = response.buf + responselen;
 	responsepos = response.buf + sizeof(HEADER);
 	n = ntohs(((HEADER *) response.buf)->qdcount);
-	while (n-- > 0)
-	{
+	while (n-- > 0) {
 		if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
 			return DNS_SOFT;
 		responsepos += i;
@@ -485,16 +482,13 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 		errno = EINVAL;
 		return (-1);
 	}
-	if (!controldir)
-	{
+	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
-	if (!stralloc_copys(&cachefile, controldir))
-		die_nomem();
-	if (!stralloc_catb(&cachefile, "/cache", 6))
-		die_nomem();
-	if (!stralloc_0(&cachefile))
+	if (!stralloc_copys(&cachefile, controldir) ||
+			!stralloc_catb(&cachefile, "/cache", 6) ||
+			!stralloc_0(&cachefile))
 		die_nomem();
 	if (access(cachefile.s, F_OK)) {
 		if (errno != error_noent)
@@ -502,11 +496,9 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 		return (0);
 	}
 	cachefile.len--;
-	if (!stralloc_append(&cachefile, "/"))
-		die_nomem();
-	if (!stralloc_cats(&cachefile, uri))
-		die_nomem();
-	if (!stralloc_0(&cachefile))
+	if (!stralloc_append(&cachefile, "/") ||
+			!stralloc_cats(&cachefile, uri) ||
+			!stralloc_0(&cachefile))
 		die_nomem();
 	if (flag) { /*- add the cache */
 		if (!access(cachefile.s, F_OK))
@@ -676,13 +668,10 @@ checksurbl(char *uri, int urilen, char *surb_domain, char **text)
 	else
 	if (i)
 		return (0);
-	if (stralloc_copys(&host, uri) == 0)
-		die_nomem();
-	if (stralloc_append(&host, ".") == 0)
-		die_nomem();
-	if (stralloc_cats(&host, surb_domain) == 0)
-		die_nomem();
-	if (!stralloc_0(&host))
+	if (!stralloc_copys(&host, uri) ||
+			!stralloc_append(&host, ".") ||
+			!stralloc_cats(&host, surb_domain) ||
+			!stralloc_0(&host))
 		die_nomem();
 	if (getdnsip(&ip, &host, &code) == -1)
 		return -1;
@@ -920,8 +909,6 @@ main(int argc, char **argv)
 			break;
 		}
 	}
-	if (chdir(auto_qmail) == -1)
-		die_control();
 	setup();
 	for (html_plain_text = base64_decode = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
@@ -939,14 +926,12 @@ main(int argc, char **argv)
 			if (found_content_type) {
 				for (i = 0;i < line.len; i++) {
 					if (case_startb(line.s + i, line.len - i, "boundary=")) {
-						if (line.s[i + 9] == '\"' && line.s[line.len -2] == '\"')
-						{
+						if (line.s[i + 9] == '\"' && line.s[line.len -2] == '\"') {
 							if (!stralloc_copyb(&boundary, line.s + i + 10, line.len -i - 12))
 								die_nomem();
 						} else
-						if (!stralloc_copyb(&boundary, line.s + i + 9, line.len - i - 10))
-							die_nomem();
-						if (!stralloc_0(&boundary))
+						if (!stralloc_copyb(&boundary, line.s + i + 9, line.len - i - 10) ||
+								!stralloc_0(&boundary))
 							die_nomem();
 						boundary.len--;
 					}
@@ -1018,7 +1003,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.14 2021-05-26 10:47:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.15 2021-06-14 01:22:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

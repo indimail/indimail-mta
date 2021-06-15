@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.75  2021-06-15 08:24:25+05:30  Cprogrammer
+ * renamed pathexec.. functions to upathexec to avoid clash with libqmail
+ *
  * Revision 1.74  2021-03-12 14:05:48+05:30  Cprogrammer
  * use typedef my_ulong instead of ulong
  *
@@ -252,7 +255,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.74 2021-03-12 14:05:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.75 2021-06-15 08:24:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6

@@ -1,5 +1,8 @@
 /*
  * $Log: replier-config.c,v $
+ * Revision 1.5  2021-06-14 01:08:57+05:30  Cprogrammer
+ * removed dependency on auto_qmail.h
+ *
  * Revision 1.4  2020-11-24 13:47:56+05:30  Cprogrammer
  * removed exit.h
  *
@@ -22,7 +25,6 @@
 #include "stralloc.h"
 #include "open.h"
 #include "auto_ezmlm.h"
-#include "auto_qmail.h"
 #include "str.h"
 
 #define FATAL "replier-config: fatal: "
@@ -108,11 +110,9 @@ void
 dirplusmake(slash)
 	char           *slash;
 {
-	if (!stralloc_copys(&dirplus, dir))
-		nomem();
-	if (!stralloc_cats(&dirplus, slash))
-		nomem();
-	if (!stralloc_0(&dirplus))
+	if (!stralloc_copys(&dirplus, dir) ||
+			!stralloc_cats(&dirplus, slash) ||
+			!stralloc_0(&dirplus))
 		nomem();
 }
 
@@ -121,11 +121,9 @@ linkdotdir(dash, slash)
 	char           *dash;
 	char           *slash;
 {
-	if (!stralloc_copys(&dotplus, dot))
-		nomem();
-	if (!stralloc_cats(&dotplus, dash))
-		nomem();
-	if (!stralloc_0(&dotplus))
+	if (!stralloc_copys(&dotplus, dot) ||
+			!stralloc_cats(&dotplus, dash) ||
+			!stralloc_0(&dotplus))
 		nomem();
 	dirplusmake(slash);
 	if (symlink(dirplus.s, dotplus.s) == -1)
@@ -226,16 +224,13 @@ main(int argc, char **argv)
 	outs("|");
 	outs(auto_ezmlm);
 	outs("/ezmlm-weed\n|");
-	outs(auto_qmail);
-	outs("/bin/replier ");
+	outs("/usr/bin/replier ");
 	outs(dir);
 	outs(" \"$SENDER\" ");
-	outs(auto_qmail);
-	outs("/bin/822bodyfilter ");
+	outs("/usr/bin/822bodyfilter ");
 	outs(dir);
 	outs("/bodyfilter\n|");
-	outs(auto_qmail);
-	outs("/bin/bouncesaying 'Cannot filter message'\n");
+	outs("/usr/bin/bouncesaying 'Cannot filter message'\n");
 	finish();
 	perm(0600);
 
@@ -243,16 +238,13 @@ main(int argc, char **argv)
 	outs("|");
 	outs(auto_ezmlm);
 	outs("/ezmlm-weed\n|");
-	outs(auto_qmail);
-	outs("/bin/replier ");
+	outs("/usr/bin/replier ");
 	outs(dir);
 	outs(" \"$SENDER\" ");
-	outs(auto_qmail);
-	outs("/bin/822headerfilter ");
+	outs("/usr/bin/822headerfilter ");
 	outs(dir);
 	outs("/headerfilter\n|");
-	outs(auto_qmail);
-	outs("/bin/bouncesaying 'Cannot filter message'\n");
+	outs("/usr/bin/bouncesaying 'Cannot filter message'\n");
 	finish();
 	perm(0600);
 
@@ -260,14 +252,12 @@ main(int argc, char **argv)
 	outs("|");
 	outs(auto_ezmlm);
 	outs("/ezmlm-weed\n|");
-	outs(auto_qmail);
-	outs("/bin/replier ");
+	outs("/usr/bin/replier ");
 	outs(dir);
 	outs(" \"$SENDER\" ");
 	outs(dir);
 	outs("/msgfilter\n|");
-	outs(auto_qmail);
-	outs("/bin/bouncesaying 'Cannot filter message'\n");
+	outs("/usr/bin/bouncesaying 'Cannot filter message'\n");
 	finish();
 	perm(0600);
 
@@ -316,7 +306,7 @@ main(int argc, char **argv)
 void
 getversion_replier_config_c()
 {
-	static char    *x = "$Id: replier-config.c,v 1.4 2020-11-24 13:47:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier-config.c,v 1.5 2021-06-14 01:08:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

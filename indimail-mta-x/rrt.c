@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.9  2021-06-13 17:29:14+05:30  Cprogrammer
+ * removed chdir(auto_sysconfdir)
+ *
  * Revision 1.8  2021-05-13 14:44:40+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -44,7 +47,6 @@
 #include "env.h"
 #include "strerr.h"
 #include "pathexec.h"
-#include "auto_sysconfdir.h"
 #include "variables.h"
 #include "set_environment.h"
 
@@ -315,8 +317,6 @@ main(int argc, char **argv)
 	if (!stralloc_0(&email_rr))
 		my_error("out of memory", 0, MEM_ERR);
 	email_rr.len--;
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	if (control_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to read init controls: ");
 	if (control_rldef(&bouncefrom, "bouncefrom", 0, "MAILER-DAEMON") != 1)
@@ -485,7 +485,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.8 2021-05-13 14:44:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.9 2021-06-13 17:29:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.11  2021-06-14 01:19:59+05:30  Cprogrammer
+ * collapsed stralloc_..
+ *
  * Revision 1.10  2021-05-26 10:47:20+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -208,9 +211,8 @@ outhost()
 		len = ip4_fmt(x, &partner.addr.ip);
 		break;
 	}
-	if (!stralloc_copyb(&rhost, x, len))
-		die_nomem();
-	if (!stralloc_0(&rhost))
+	if (!stralloc_copyb(&rhost, x, len) ||
+			!stralloc_0(&rhost))
 		die_nomem();
 	if (substdio_put(subfderr, x, len) == -1) {
 		strerr_warn1("fatal: write: ", &strerr_sys);
@@ -552,11 +554,9 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (!stralloc_copys(&tlsFilename, controldir))
-		die_nomem();
-	if (!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16))
-		die_nomem();
-	if (!stralloc_0(&tlsFilename))
+	if (!stralloc_copys(&tlsFilename, controldir) ||
+			!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16) ||
+			!stralloc_0(&tlsFilename))
 		die_nomem();
 	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1_2") != 1)
 		die_control("unable to read control file ", tlsFilename.s);
@@ -579,11 +579,9 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 #endif
 	if (!certdir && !(certdir = env_get("CERTDIR")))
 		certdir = auto_control;
-	if (!stralloc_copys(&clientcert, certdir))
-		die_nomem();
-	if (!stralloc_catb(&clientcert, "/clientcert.pem", 15))
-		die_nomem();
-	if (!stralloc_0(&clientcert))
+	if (!stralloc_copys(&clientcert, certdir) ||
+			!stralloc_catb(&clientcert, "/clientcert.pem", 15) ||
+			!stralloc_0(&clientcert))
 		die_nomem();
 	if (access(clientcert.s, F_OK)) {
 		if (errno != error_noent)
@@ -592,35 +590,26 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	}
 	if (partner_fqdn) {
 		struct stat     st;
-		if (!stralloc_copys(&tlsFilename, certdir))
-			die_nomem();
-		if (!stralloc_catb(&tlsFilename, "/tlshosts/", 10))
-			die_nomem();
-		if (!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn)))
-			die_nomem();
-		if (!stralloc_catb(&tlsFilename, ".pem", 4))
-			die_nomem();
-		if (!stralloc_0(&tlsFilename))
+		if (!stralloc_copys(&tlsFilename, certdir) ||
+				!stralloc_catb(&tlsFilename, "/tlshosts/", 10) ||
+				!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn)) ||
+				!stralloc_catb(&tlsFilename, ".pem", 4) ||
+				!stralloc_0(&tlsFilename))
 			die_nomem();
 		if (stat(tlsFilename.s, &st)) {
 			_needtlsauth = 0;
 			if (needtlsauth)
 				*needtlsauth = 0;
-			if (!stralloc_copys(&tlsFilename, certdir))
-				die_nomem();
-			if (!stralloc_catb(&tlsFilename, "/notlshosts/", 12))
-				die_nomem();
-			if (!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn) + 1))
-				die_nomem();
-			if (!stralloc_0(&tlsFilename))
+			if (!stralloc_copys(&tlsFilename, certdir) ||
+					!stralloc_catb(&tlsFilename, "/notlshosts/", 12) ||
+					!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn) + 1) ||
+					!stralloc_0(&tlsFilename))
 				die_nomem();
 			if (!stat(tlsFilename.s, &st))
 				return (0);
-			if (!stralloc_copys(&tlsFilename, certdir))
-				die_nomem();
-			if (!stralloc_catb(&tlsFilename, "/tlshosts/exhaustivelist", 24))
-				die_nomem();
-			if (!stralloc_0(&tlsFilename))
+			if (!stralloc_copys(&tlsFilename, certdir) ||
+					!stralloc_catb(&tlsFilename, "/tlshosts/exhaustivelist", 24) ||
+					!stralloc_0(&tlsFilename))
 				die_nomem();
 			if (!stat(tlsFilename.s, &st))
 				return (0);
@@ -1069,16 +1058,11 @@ get_tlsa_rr(char *domain, int mxhost, int port)
 	unsigned long   r;
 	char            strnum[FMT_ULONG];
 
-	if (!stralloc_copys(&sa, domain))
-		die_nomem();
 	if (mxhost) {
-		if (!stralloc_copyb(&sa, "_", 1))
-			die_nomem();
-		if (!stralloc_catb(&sa, strnum, fmt_uint(strnum, port)))
-			die_nomem();
-		if (!stralloc_catb(&sa, "._tcp.", 6))
-			die_nomem();
-		if (!stralloc_cats(&sa, domain))
+		if (!stralloc_copyb(&sa, "_", 1) ||
+				!stralloc_catb(&sa, strnum, fmt_uint(strnum, port)) ||
+				!stralloc_catb(&sa, "._tcp.", 6) ||
+				!stralloc_cats(&sa, domain))
 			die_nomem();
 		dns_init(0);
 		r = dns_tlsarr(&ta, &sa);
@@ -1094,6 +1078,8 @@ get_tlsa_rr(char *domain, int mxhost, int port)
 			die_nomem();
 		}
 	} else {
+		if (!stralloc_copys(&sa, domain))
+			die_nomem();
 		dns_init(0);
 		r = now() + getpid();
 		r = dns_mxip(&ia, &sa, r);
@@ -1109,13 +1095,10 @@ get_tlsa_rr(char *domain, int mxhost, int port)
 		for (j = 0; j < ia.len; ++j) {
 			if (j && !str_diff(ia.ix[j].fqdn, ia.ix[j - 1].fqdn))
 				continue;
-			if (!stralloc_copyb(&sa, "_", 1))
-				die_nomem();
-			if (!stralloc_catb(&sa, strnum, fmt_uint(strnum, port)))
-				die_nomem();
-			if (!stralloc_catb(&sa, "._tcp.", 6))
-				die_nomem();
-			if (!stralloc_cats(&sa, ia.ix[j].fqdn))
+			if (!stralloc_copyb(&sa, "_", 1) ||
+					!stralloc_catb(&sa, strnum, fmt_uint(strnum, port)) ||
+					!stralloc_catb(&sa, "._tcp.", 6) ||
+					!stralloc_cats(&sa, ia.ix[j].fqdn))
 				die_nomem();
 			r = dns_tlsarr(&ta, &sa);
 			switch (r)
@@ -1180,7 +1163,8 @@ ehlo()
 		for (p = (s += 4);; ++p) {
 			if (*p == '\n' || *p == ' ' || *p == '\t') {
 				if (!wasspace)
-					if (!stralloc_catb(sa_ptr, s, p - s) || !stralloc_0(sa_ptr))
+					if (!stralloc_catb(sa_ptr, s, p - s) ||
+							!stralloc_0(sa_ptr))
 						die_nomem();
 				if (*p == '\n')
 					break;
@@ -1424,18 +1408,16 @@ get_dane_records(char *host)
 			for (len = 0, ptr = tline.s + 5; *ptr; len++, ptr++) {
 				if (*ptr == ':') {
 					/*- record1\0record2\0...recordn\0 */
-					if (!stralloc_catb(&save, ptr + 1, tline.len - (len + 6)))
-						die_nomem();
-					if (!stralloc_0(&save))
+					if (!stralloc_catb(&save, ptr + 1, tline.len - (len + 6)) ||
+							!stralloc_0(&save))
 						die_nomem();
 					break;
 				}
 			}
 		} else
 		if (!str_diffn(tline.s, "dane_query_tlsa: No DANE data were found", 40)) {
-			if (!stralloc_cat(&save, &tline))
-				die_nomem();
-			if (!stralloc_0(&save)) /*- serves as record field seperator */
+			if (!stralloc_cat(&save, &tline) ||
+					!stralloc_0(&save)) /*- serves as record field seperator */
 				die_nomem();
 		}
 	}
@@ -1471,13 +1453,10 @@ get_dane_records(char *host)
 			logerrf("child exec failed\n");
 		break;
 	case 5: /*- perm dns - NO TLSA RR Records */
-		if (!stralloc_copyb(&save, "_25._tcp.", 9))
-			die_nomem();
-		if (!stralloc_cats(&save, host))
-			die_nomem();
-		if (!stralloc_catb(&save, ": No TLSA RR", 12))
-			die_nomem();
-		if (!stralloc_0(&save))
+		if (!stralloc_copyb(&save, "_25._tcp.", 9) ||
+				!stralloc_cats(&save, host) ||
+				!stralloc_catb(&save, ": No TLSA RR", 12) ||
+				!stralloc_0(&save))
 			die_nomem();
 		return (RECORD_OK);
 	case 6:
@@ -1501,7 +1480,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.10 2021-05-26 10:47:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.11 2021-06-14 01:19:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

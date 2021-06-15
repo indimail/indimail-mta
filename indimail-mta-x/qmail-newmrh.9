@@ -1,11 +1,12 @@
 .TH qmail-newmrh 8
 .SH NAME
 qmail-newmrh \- prepare morercpthosts for qmail-smtpd
+
 .SH SYNOPSIS
 .B qmail-newmrh
+
 .SH DESCRIPTION
-@prefix@/sbin/qmail-newmrh
-reads the instructions in
+\fBqmail-newmrh\fR does a chdir to @controldir@ and reads the instructions in
 .B @controldir@/morercpthosts
 and writes them into
 .B @controldir@/morercpthosts.cdb
@@ -38,4 +39,5 @@ The binary
 .B @controldir@/morercpthosts.cdb
 format is portable across machines.
 .SH "SEE ALSO"
+qmail-cdb(8),
 qmail-smtpd(8)

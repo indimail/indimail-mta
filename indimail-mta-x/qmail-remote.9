@@ -1,6 +1,7 @@
 .TH qmail-remote 8
 .SH NAME
 qmail-remote \- send mail via SMTP / ESMTP or QMTP
+
 .SH SYNOPSIS
 .B qmail-remote
 .I host
@@ -9,13 +10,15 @@ qmail-remote \- send mail via SMTP / ESMTP or QMTP
 .I size
 .I recip
 [ \fIrecip\fR ... ]
+
 .SH DESCRIPTION
-\fBqmail-remote\fR reads a mail message from its input and sends the message to one or more
-recipients at a remote host. The remote host \fIhost\fR is \fBqmail-remote\fR's first argument.
-\fBqmail-remote\fR sends the message to \fIhost\fR, or to a mail exchanger for \fIhost\fR
-listed in the Domain Name System, via the Simple Mail Transfer Protocol (SMTP/ESMTP) or the
-Quick Mail Transfer Protocol (QMTP). QMTP is implemented by \fBqmail-qmtpd\fR. \fIhost\fR can
-be either a fully-qualified domain name:
+\fBqmail-remote\fR reads a mail message from its input and sends the
+message to one or more recipients at a remote host. The remote host
+\fIhost\fR is \fBqmail-remote\fR's first argument. \fBqmail-remote\fR sends
+the message to \fIhost\fR, or to a mail exchanger for \fIhost\fR listed in
+the Domain Name System, via the Simple Mail Transfer Protocol (SMTP/ESMTP)
+or the Quick Mail Transfer Protocol (QMTP). QMTP is implemented by
+\fBqmail-qmtpd\fR. \fIhost\fR can be either a fully-qualified domain name:
 
 .EX
      silverton.berkeley.edu
@@ -27,11 +30,13 @@ or an IP address enclosed in brackets:
      [128.32.183.163]
 .EE
 
-The size parameter is only used if the remote host uses the ESMTP SIZE extension defined in
-\fIRFC- 1870\fR. It gives the size of the message in bytes. \fBqmail-remote\fR does not use
-this value to process the mail, the value is only passed to the remote mailserver.
+The size parameter is only used if the remote host uses the ESMTP SIZE
+extension defined in \fIRFC- 1870\fR. It gives the size of the message in
+bytes. \fBqmail-remote\fR does not use this value to process the mail, the
+value is only passed to the remote mailserver.
 
-The envelope recipient addresses are listed as \fIrecip\fR arguments to \fBqmail-remote\fR.
+The envelope recipient addresses are listed as \fIrecip\fR arguments to
+\fBqmail-remote\fR.
 
 The envelope sender address is listed as \fIsender\fR.
 
@@ -40,140 +45,163 @@ SMTPUTF8 and EAI addresses. If message is utf8, qmail-remote will
 use idn2_lookup_u8(3) to perform IDNA2008 lookup string conversion
 on \fIhost\fR.
 
-Any Qmail Queue Extra Header (QQEH) information passed to \fBqmail-queue(8)\fR is passed in
-\fIqqeh\fR.
+Any Qmail Queue Extra Header (QQEH) information passed to
+\fBqmail-queue\fR(8), is passed in the \fIqqeh\fR argument.
 
-If \fBqmail-remote\fR is not able to get the greeting from the remote SMTP server, it tries the
-next MX (as per \fBrfc-2821(5)\fR) under the following conditions
+If \fBqmail-remote\fR is not able to get the greeting from the remote SMTP
+server, it tries the next MX (as per \fBrfc-2821(5)\fR) under the following
+conditions
 
-1. connection to remote host gets dropped without a greeting from the remote host
+1. connection to remote host gets dropped without a greeting from the
+   remote host
 
 2. greeting  code >= 400 and < 500
 
-3. ehlo/helo code >= 400 and < 500 (enabled by setting TRY_NEXT_MX_HELO_FAIL environment variable)
+3. ehlo/helo code >= 400 and < 500 (enabled by setting
+   TRY_NEXT_MX_HELO_FAIL environment variable)
 
 4. connection to the remote host times out.
 
-In these cases, the remote host's IP address is recorded in the timeout table QMAILHOME/queue/lock/tcpto, which causes
-subsequent deliveries to back off from the IP address and try the next MX (if it exists).
+In these cases, the remote host's IP address is recorded in the timeout
+table QMAILHOME/queue/lock/tcpto, which causes subsequent deliveries to
+back off from the IP address and try the next MX (if it exists).
 \fBqmail-tcpto(8)\fR can be used to print the TCP timeout table.
 
 \fBqmail-remote\fR is MXPS compliant. If it sees the MX record
 
      12801 mailin-01.mx.aol.com
 
-it will try a QMTP connection to mailin-01.mx.aol.com before trying a SMTP connection to
-mailin-01.mx.aol.com. The point is that QMTP is faster than SMTP. If the QMTP connection
-attempt fails, the client tries a SMTP connection to port 25 as usual. \fBqmail-remote\fR
-does not try SMTP if the QMTP connection attempt succeeds but mail delivery through that
-connection fails.
+it will try a QMTP connection to mailin-01.mx.aol.com before trying a SMTP
+connection to mailin-01.mx.aol.com. The point is that QMTP is faster than
+SMTP. If the QMTP connection attempt fails, the client tries a SMTP
+connection to port 25 as usual. \fBqmail-remote\fR does not try SMTP if the
+QMTP connection attempt succeeds but mail delivery through that connection
+fails.
 
-\fBqmail-remote\fR normally gets called by qmail-rspawn but can be called by \fBspawn-filter\fR
-when you set the \fBQMAILREMOTE\fR environment variable. \fBspawn-filter\fR can do tasks
-like filtering, delivey rate control, running custom scripts, etc.
+\fBqmail-remote\fR will issue the STARTTLS command if it finds the remote
+server supports STARTTLS and it finds a valid certificate in
+\fI@sysconfdir@/certs/clientcert.pem\fR. \fBqmail-remote\fR will revert
+to non-encrypted session if the TLS connection fails.
 
-Note that \fBqmail-remote\fR does not take options and does not follow the \fBgetopt\fR
-standard.
+\fBqmail-remote\fR normally gets called by qmail-rspawn but can be called
+by \fBspawn-filter\fR when you set the \fBQMAILREMOTE\fR environment
+variable. \fBspawn-filter\fR can do tasks like filterin, running custom
+scripts, etc.
+
+Note that \fBqmail-remote\fR does not take options and does not follow the
+\fBgetopt\fR standard.
 
 .SH DANE VERIFICATION
 
-\fBqmail-remote\fR supports DANE verfication, described in RFC-7671. if the environment
-variable \fBDANE_VERIFICATION\fR is set without '@' sign, then \fBqmail-remote\fR
-will use it's own internal dane verification function.
+\fBqmail-remote\fR supports DANE verfication, described in RFC-7671. if the
+environment variable \fBDANE_VERIFICATION\fR is set without '@' sign, then
+\fBqmail-remote\fR will use it's own internal dane verification function.
 
 .EX
    DANE_VERIFICATION=""
 .EE
 
-If this variable is set as host@port, then qmail-remote will use the tlsacheck(3) function
-and attempt to verify DANE status by connecting to \fBqmail-daned\fR(8) - qmail DANE verification daemon
+If this variable is set as host@port, then qmail-remote will use the
+tlsacheck(3) function and attempt to verify DANE status by connecting
+to \fBqmail-daned\fR(8) - qmail DANE verification daemon
 
 .EX
    DANE_VERIFICATION="127.0.0.1@1998"
 .EE
-DANE verification can be restricted on per host basis by having the \fItlsadomains\fR control file.
+
+DANE verification can be restricted on per host basis by having the
+\fItlsadomains\fR control file.
 
 .SH TRANSPARENCY
-End-of-file in SMTP is encoded as dot CR LF.
-A dot at the beginning of a line is encoded as dot dot.
-It is impossible in SMTP to send a message that does not end with a newline.
-.B qmail-remote
-converts the UNIX newline convention into the SMTP newline convention
-by inserting CR before each LF.
+End-of-file in SMTP is encoded as dot CR LF. A dot at the beginning of a
+line is encoded as dot dot. It is impossible in SMTP to send a message that
+does not end with a newline. \fBqmail-remote\fR converts the UNIX newline
+convention into the SMTP newline convention by inserting CR before each LF.
 
-It is a violation of the SMTP protocol
-to send a message that contains long lines or non-ASCII characters.
-However,
-.B qmail-remote
-will happily send such messages.
-It is the user's responsibility to avoid generating illegal messages.
+It is a violation of the SMTP protocol to send a message that contains long
+lines or non-ASCII characters. However, \fBqmail-remote\fR will happily
+send such messages. It is the user's responsibility to avoid generating
+illegal messages.
 
-.B qmail-remote
-may use SMTP Authenticaton to connect to remote hosts.
+\fBqmail-remote\fR may use SMTP Authenticaton to connect to remote hosts.
 The following reports are provided:
+
 .TP 5
 K
 no supported AUTH method found, continuing without authentication.
+
 .TP 5
 Z
 Connected to
 .I host
 but authentication was rejected (AUTH PLAIN).
+
 .TP 5
 Z
 Connected to
 .I host
 but unable to base64encode (plain).
+
 .TP 5
 Z
 Connected to
 .I host
 but authentication was rejected (plain)."
+
 .TP 5
 Z
 Connected to
 .I host
 but authentication was rejected (AUTH LOGIN).
+
 .TP 5
 Z
 Connected to
 .I host
 but unable to base64encode user.
+
 .TP 5
 Z
 Connected to
 .I host
 but authentication was rejected (username).
+
 .TP 5
 Z
 Connected to
 .I host
 but unable to base64encode pass.
+
 .TP 5
 Z
 Connected to
 .I host
 but authentication was rejected (password).
+
 .TP 5
 Z
 Connected to
 .I host
 but authentication was rejected (AUTH CRAM-MD5/CRAM-SHA1/CRAM-SHA256/CRAM-RIPEMD/DIGEST-MD5).
+
 .TP 5
 Z
 Connected to
 .I host
 but unable to base64decode challenge.
+
 .TP 5
 Z
 Connected to
 .I host
 but got no challenge.
+
 .TP 5
 Z
 Connected to
 .I host
 but unable to base64encode username+digest.
+
 .TP 5
 Z
 Connected to
@@ -181,141 +209,126 @@ Connected to
 but authentication was rejected (username+digest).
 
 .SH "RESULTS"
-.B qmail-remote
-prints some number of
-.I recipient reports\fP,
-followed by a
-.I message report\fR.
-Each report is terminated by a 0 byte.
+\fBqmail-remote\fR prints some number of \fIrecipient reports\fR,
+followed by a \fImessage report\fR. Each report is terminated by a 0 byte.
 Each report begins with a single letter:
+
 .TP 5
 r
 Recipient report: acceptance.
+
 .TP 5
 h
 Recipient report: permanent rejection.
+
 .TP 5
 s
 Recipient report: temporary rejection.
+
 .TP 5
 K
-Message report: success.
-.I host
-has taken responsibility for delivering the message to each
-acceptable recipient.
+Message report: success.  \fIhost\fR has taken responsibility for
+delivering the message to each acceptable recipient.
+
 .TP 5
 Z
 Message report: temporary failure.
+
 .TP 5
 D
 Message report: permanent failure.
+
 .PP
-After this letter comes a human-readable description of
-what happened.
+After this letter comes a human-readable description of what happened.
 
 The recipient reports will always be printed in the same order as
-.BR qmail-remote 's
-.I recip
-arguments.
-Note that in failure cases there may be fewer
-recipient reports
-than
-.I recip
-arguments.
+\fBqmail-remote\fR's \fIrecip\fR arguments. Note that in failure cases
+there may be fewer recipient reports than \fI recip\fR arguments.
 
-If \fBONSUCCESS_REMOTE\fR environment variable is defined and points to a program,
-\fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR, on successful email delivery
-to remote host \fIhost\fR. The exit status of \fBqmail-remote\fR will be the exit status of the
-program. The argument passed to this program will be the same as those for \fBqmail-remote\fR.
+If \fBONSUCCESS_REMOTE\fR environment variable is defined and points to a
+program, \fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR,
+on successful email delivery to remote host \fIhost\fR. The exit status of
+\fBqmail-remote\fR will be the exit status of the program. The argument
+passed to this program will be the same as those for \fBqmail-remote\fR.
 
-If \fBONFAILURE_REMOTE\fR environment variable is defined and points to a program,
-\fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR, on a failed email delivery
-to remote host \fIhost\fR. The exit status of \fBqmail-remote\fR will be the exit status of the
-program. The argument passed to this program will be the same as those for \fBqmail-remote\fR.
+If \fBONFAILURE_REMOTE\fR environment variable is defined and points to a
+program, \fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR,
+on a failed email delivery to remote host \fIhost\fR. The exit status of
+\fBqmail-remote\fR will be the exit status of the program. The argumen
+t passed to this program will be the same as those for \fBqmail-remote\fR.
 
-If \fBONTEMPORARY_REMOTE\fR environment variable is defined and points to a program,
-\fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR, on a deferred email delivery
-to remote host \fIhost\fR. The exit status of \fBqmail-remote\fR will be the exit status of the
-program. The argument passed to this program will be the same as those for \fBqmail-remote\fR.
+If \fBONTEMPORARY_REMOTE\fR environment variable is defined and points to a
+program, \fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR,
+on a deferred email delivery to remote host \fIhost\fR. The exit status of
+\fBqmail-remote\fR will be the exit status of the program. The argument
+passed to this program will be the same as those for \fBqmail-remote\fR.
 
-If neither of these variables \fBONSUCCESS_REMOTE\fR, \fBONFAILURE_REMOTE\fR and \fBONTEMPORARY_REMOTE\fR
-are defined, \fBqmail-remote\fR will always return zero exit status.
+If neither of these variables \fBONSUCCESS_REMOTE\fR,
+\fBONFAILURE_REMOTE\fR and \fBONTEMPORARY_REMOTE\fR are defined,
+\fBqmail-remote\fR will always return zero exit status.
 
-When these two variables are set, \fBqmail-remote\fR will also set the environment variables
+When these two variables are set, \fBqmail-remote\fR will also set the
+environment variables
 
 .TP
 .B SMTPTEXT
 This will contain last SMTP conversion with the remote SMTP server. In case of any error,
 this will contain the latest local error that happened while conversing with the remote
 SMTP server.
+
 .TP
 .B SMTPCODE
 This will contain the 3 digit SMTP code returned by the remote SMTP server.
+
 .TP
 .B SMTPHOST
 This will contain the IP of the remote SMTP server
+
 .TP
 .B SMTPSTATUS
-This will be either 'D' or 'Z' indicating permanent or temporary failure response from
-the remote SMTP server.
+This will be either 'D' or 'Z' indicating permanent or temporary failure
+response from the remote SMTP server.
 
 .PP
-\fBqmail-remote\fR uses many environment variables. These environment variables can be recipient
-specific by using envrules. See \fBspawn-filter(8)\fR for more details.
+\fBqmail-remote\fR uses many environment variables. These environment
+variables can be recipient specific by using envrules. See
+\fBspawn-filter(8)\fR for more details.
 
 .SH "CONTROL FILES"
-.B qmail-remote
-by default looks at @sysconfdir@/control for all control files. This path can be changed by defining the
-CONTROLDIR environment variable.
+\fBqmail-remote\fR by default looks at @sysconfdir@/control for all control
+files. This path can be changed by defining the CONTROLDIR environment
+variable.
 
 .TP 5
 .I outgoingip
-file containing local IP addresses to be bound on socket and used on outgoing connections.
-Default: system-defined.
-The value
-.IR 0.0.0.0
-is equivalent to the system default. You can have multiple IP addresses one per line, one
-per line for each IP. \fBqmail-remote\fR will use the modulus operator with the current time
-to pick a single IP address.
+file containing local IP addresses to be bound on socket and used on
+outgoing connections. Default: system-defined.  The value \fI0.0.0.0\fR is
+equivalent to the system default. You can have multiple IP addresses one
+per line, one per line for each IP. \fBqmail-remote\fR will use the
+modulus operator with the current time to pick a single IP address.
 
 .TP 5
 .I outgoingip.host
-file having a local IP address to be bound on socket and used on outgoing connections.
-.I host
-is the domain or host to which the mail is being delivered.
-.I outgoingip.host
-takes precedence over \fIoutgoingip\fR. You can also set the IP address for outgoing connection
-by setting the environment variable \fBOUTGOINGIP\fR. \fBOUTGOINGIP\fR overrides the
-control files \fIoutgoingip\fR and \fIoutgoingip.host\fR. You can have multiple IP addresses,
-one per line for each IP. \fBqmail-remote\fR will use the modulus operator with the current
-time to pick a single IP address.
+file having a local IP address to be bound on socket and used on outgoing
+connections. \fIhost\fR is the domain or host to which the mail is being
+delivered. \fI outgoingip.host\fR takes precedence over \fIoutgoingip\fR.
+You can also set the IP address for outgoing connection by setting the
+environment variable \fBOUTGOINGIP\fR. \fBOUTGOINGIP\fR overrides the
+control files \fIoutgoingip\fR and \fIoutgoingip.host\fR. You can have
+multiple IP addresses, one per line for each IP. \fBqmail-remote\fR will
+use the modulus operator with the current time to pick a single IP address.
 
 .TP 5
 .I domainbindings
-file having local IP addresses to be bound based on envelope sender domain or envelope sender
-address. Each binding has the form
-.IR domain\fB:\fIlocal-ip ,
-or
-.IR sender_addr\fB:\fIlocal-ip ,
+file having local IP addresses to be bound based on envelope sender domain
+or envelope sender address. Each binding has the form
+\fIdomain\fR:\fIlocal-ip\fR, or \fIsender_addr\fR:\fIlocal-ip\fR ,
 without any extra spaces.
-If
-.I domain
-matches
-.IR host ,
-or
-.I sender_addr
-matches
-.IR sender ,
-.B qmail-remote
-will bind the local side of the socket for the outgoing connection to
-.IR local-ip .
-.I local-ip
-may be empty;
-this tells
-.B qmail-remote
-to let the OS choose the local address for outgoing connections as usual.
-.I domainbindings
-may include wildcards:
+If \fIdomain\fR matches \fI host\fR, or \fIsender_addr\fR matches
+\fI sender\fR, \fBqmail-remote\fR will bind the local side of the socket
+for the outgoing connection to \fIlocal-ip\fR. \fIlocal-ip\fR may be empty;
+this tells \fBqmail-remote\fR to let the OS choose the local address for
+outgoing connections as usual. \fIdomainbindings\fR may include wildcards:
 
 .EX
  user1@example.com:6.5.4.3
@@ -325,59 +338,36 @@ may include wildcards:
  :1.2.3.5
 .EE
 
-Here the connection for any message with an envelope sender address ending with
-.B .example.com
-(but not
-.B example.com
-itself)
-is bound to local address
-.BR 5.6.7.9 ,
-while envelope senders in
-.B example.com
-(but not
-.B user1@example.com
-itself)
-are bound to
-.BR 5.6.7.8 ,
-and senders in
-.B heaven.af.mil
-are bound to
-.BR 1.2.3.4 .
-Connection for message with an envelope sender address of \fBuser1@example.com\fR gets
-bound to
-.BR 6.5.4.3 .
-All other outgoing connections (including messages with the null return-path)
-use the OS-chosen default local address. If you have the following line,
+Here the connection for any message with an envelope sender address ending
+with \fB.example.com\fR (but not \fBexample.com\fR itself) is bound to
+local address \fB 5.6.7.9\fR, while envelope senders in \fBexample.com\fR
+(but not \fBuser1@example.com\fR itself) are bound to \fB5.6.7.8\fR, and
+senders in \fBheaven.af.mil\fR are bound to \fB 1.2.3.4\fR. Connection for
+message with an envelope sender address of \fBuser1@example.com\fR gets
+bound to \fB6.5.4.3\fR. All other outgoing connections (including messages
+with the null return-path) use the OS-chosen default local address. If you
+have the following line,
 
 .EX
  :1.2.3.5
 .EE
 
-then all connections with address not matching any line in \fIdomainbindings\fR, will get
-bound to
-.BR 1.2.3.5 .
-The
-.B qmail
+then all connections with address not matching any line in
+\fIdomainbindings\fR, will get bound to \fB1.2.3.5\fR.  The \fB qmail\fR
 system does not protect you if you specify an invalid local address to
-bind to. \fIdomainbindings\fR takes precedence over \fIoutgoingip\fR. The name for
-domainbindings control file can be configured by setting \fBDOMAINBINDINGS\fR environment
-variable.
+bind to. \fIdomainbindings\fR takes precedence over \fIoutgoingip\fR. The
+name for domainbindings control file can be configured by setting
+\fBDOMAINBINDINGS\fR environment variable.
 
 .TP 5
 .I bindroutes
-Artificial interface binding routes.
-Each route has the form
-.IR remote-address\fB:\fIlocal-address ,
-without any extra spaces.
-If the address of the host to which we are delivering matches the remote
-address, then bind the socket to the interface matching the local
-address, making it appear as if the connection had originated from the
-named local address instead of the default local address.
-.I bindroutes
-may contain suffix wildcards.
-.I bindroutes
-takes precedence over
-.IR domainbindings .
+Artificial interface binding routes. Each route has the form
+\fIremote-address\fR:\fIlocal-address\fR, without any extra spaces. If the
+address of the host to which we are delivering matches the remote address,
+then bind the socket to the interface matching the local address, making it
+appear as if the connection had originated from the named local address
+instead of the default local address. \fIbindroutes\fR may contain suffix
+wildcards. \fIbindroutes\fR takes precedence over \f domainbindings\fR.
 
 .EX
 # Send this on the internal net
@@ -390,110 +380,69 @@ takes precedence over
 
 .TP 5
 .I helohost
-Current host name,
-for use solely in saying hello to the remote SMTP server.
-Default:
-.IR me ,
-if that is supplied;
-otherwise
-.B qmail-remote
-refuses to run.  If the envelope sender address matches a domain in the
-.IR domainbindings
-control file, the envelope sender domain will be used instead of this value.
+Current host name, for use solely in saying hello to the remote SMTP server.
+Default: \fIme\fR, if that is supplied; otherwise \fBqmail-remote\fR
+refuses to run. If the envelope sender address matches a domain in the
+\fIdomainbindings\fR control file, the envelope sender domain will be used
+instead of this value.
 
 .TP 5
 .I helohostbyip
-Map helohost for specific outgoing IPs.s,
-for use solely in saying hello to the remote SMTP server.
-Default:
-.IR me ,
-if that is supplied;
-otherwise
-.B qmail-remote
-refuses to run.  If the envelope sender address matches a domain in the
-.IR domainbindings
-control file, the envelope sender domain will be used instead of this value.
+Map helohost for specific outgoing IPs.s, for use solely in saying hello to
+the remote SMTP server.  Default: \fIme\fR, if that is supplied; otherwise
+\fBqmail-remote\fR refuses to run. If the envelope sender address matches
+a domain in the \fIdomainbindings\fR control file, the envelope sender
+domain will be used instead of this value.
 
 .TP 5
 .I smtproutes
-Artificial SMTP routes.
-Each route has the form
-.IR domain\fB:\fIrelay ,
-without any extra spaces.
-If
-.I domain
-matches
-.IR host ,
-.B qmail-remote
-will connect to
-.IR relay ,
-as if
-.I host
-had
-.I relay
-as its only MX.
-(It will also avoid doing any CNAME lookups on
-.IR recip .)
-.I relay
-may include a colon and a port number to use instead of the
-normal SMTP port, 25:
+Artificial SMTP routes. Each route has the form \fIdomain\fR:\fIrelay\fR,
+without any extra spaces. If \fIdomain\fR matches \fIhost\fR,
+\fBqmail-remote\fR will connect to \fIrelay\fR, as if \fIhost\fR had
+\fIrelay\fR as its only MX. (It will also avoid doing any CNAME lookups on
+\fIrecip\fR.) \fIrelay\fR may include a colon and a port number to use
+instead of the normal SMTP port, 25:
 
 .EX
    inside.af.mil:firewall.af.mil:26
 .EE
 
-.I relay
-may be empty;
-this tells
-.B qmail-remote
-to look up MX records as usual.
-.I port
-value of 465 (deprecated smtps port) causes TLS session to be started.
-.I smtproutes
-may include wildcards:
+\fIrelay\fR may be empty; this tells \fBqmail-remote\fR to look up MX
+records as usual. \fIport\fR value of 465 (deprecated smtps port) causes
+TLS session to be started. \fIsmtproutes\fR may include wildcards:
 
 .EX
    .af.mil:
    :heaven.af.mil
 .EE
 
-Here
-any address ending with
-.B .af.mil
-(but not
-.B af.mil
-itself)
-is routed by its MX records;
-any other address is artificially routed to
-.BR heaven.af.mil .
+Here any address ending with \fB.af.mil\fR (but not \fBaf.mil\fR itself) is
+routed by its MX records; any other address is artificially routed to
+\fBheaven.af.mil\fR.
 
-The
-.B qmail
-system does not protect you if you create an artificial
-mail loop between machines.
-However,
-you are always safe using
-.I smtproutes
-if you do not accept mail from the network.
-Additionally,
-.I smtproutes
-allows to forward bounces (with a 'Nullsender' MAIL FROM: <>)
-literally expressed as '!@'
-to a particular bounce host:
+The \fBqmail\fR system does not protect you if you create an artificial
+mail loop between machines. However, you are always safe using
+\fIsmtproutes\fR if you do not accept mail from the network.  Additionally,
+\fIsmtproutes\fR allows to forward bounces (with
+a 'Nullsender' MAIL FROM: <>) literally expressed as '!@' to a particular
+bounce host:
 
 .EX
    !@:bouncehost.af.mil:27
 .EE
 
-You can override the smtproutes filename by setting environment variable SMTPROUTEFILE.
+You can override the smtproutes filename by setting environment variable
+SMTPROUTEFILE.
 
-The smtproutes control file is bypassed if the SMTPROUTE environment variable is set by
-.B qmail-rspawn.
-The SMTPROUTE environment variable has the same format as the entries in smtproutes control files. It is used
-in a clustered environment where a single domain can exist across multiple hosts. In such a case the SMTPROUTE
-variable points to the host where the user's mailbox lies. You can also use X-SMTPROUTES environment variable.
-SMTPROUTE env variable takes precendence over X-SMTPROUTES variable. Unlike SMTPROUTE, X-SMTPROUTES variable is
-not unset by qmail-rspawn for each delivery.
+The smtproutes control file is bypassed if the SMTPROUTE environment
+variable is set by \fBqmail-rspawn\fR. The SMTPROUTE environment variable
+has the same format as the entries in smtproutes control files. It is used
+in a clustered environment where a single domain can exist across multiple
+hosts. In such a case the SMTPROUTE variable points to the host where the
+user's mailbox lies. You can also use X-SMTPROUTES environment variable.
+SMTPROUTE env variable takes precendence over X-SMTPROUTES variable. Unlike
+SMTPROUTE, X-SMTPROUTES variable is not unset by qmail-rspawn for each
+delivery.
 
 route may also have the form
 
@@ -503,20 +452,14 @@ or
 \fIdomain\fB:\fIrelay\fB:\fIport\fB<sp>username<sp>\fIpassword\fR
 .EE
 
-without any extra spaces. If the environment variable
-.B AUTH_SMTP
-is set,
-.B qmail-remote
-will use
-.B username
-and
-.B password
-to relay out mails through server
-.B relay
-using authenticated SMTP. <sp> is a single space character. AUTH_SMTP can also have the values
-DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA256, CRAM-MD5, LOGIN or PLAIN to use
-the desired authentication method. You can disable specific AUTH methods by defining any one more more
-of the following environment variables
+without any extra spaces. If the environment variable \fBAUTH_SMTP\fR is
+set, \fBqmail-remote\fR will use \fIusername\fR and \fIpassword\fR
+to relay out mails through server \fIrelay\fR using authenticated SMTP.
+<sp> is a single space character. AUTH_SMTP can also have the values
+DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA256, CRAM-MD5, LOGIN or PLAIN
+to use the desired authentication method. You can disable specific AUTH
+methods by defining any one more more of the following environment
+variables
 
 .EX
 	DISABLE_AUTH_LOGIN
@@ -528,34 +471,25 @@ of the following environment variables
 	DISABLE_DIGEST_MD5
 .EE
 
-If you set the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled, unless qmail-remote
-has opened a TLS session wth the remote host. See the control file \fIclientcert.pem\fR
+If you set the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and
+AUTH PLAIN gets disabled, unless qmail-remote has opened a TLS session wth
+the remote host. See the control file \fIclientcert.pem\fR
 
-If all connections to the
-.I relay
-server fail for a
-.I max_tolerance
-seconds, further connections to the same server are avoided for a period of at least
-.I penalty
-seconds.
-The default maximum period of failures that will be tolerated -
-.I max_tolerance
-is 120 seconds and the minimum penalty -
-.I penalty
-is 1 hour.
-By setting the
-.I penalty
-to 0, connections to the server will be attempted inspite of failures. The default values of 1
-hour for minimum penalty, can be changed by setting the environment variable
-.IR MIN_PENALTY .
-The default value of 120 seconds for max_tolerance can be changed by setting the environment
-variable
-.IR MAX_TOLERANCE .
+If all connections to the \fIrelay\fR server fail for a \fImax_tolerance\fR
+seconds, further connections to the same server are avoided for a period of
+at least \fIpenalty\fR seconds. The default maximum period of failures that
+will be tolerated - \fImax_tolerance\fR is 120 seconds and the minimum
+penalty - \fIpenalty\fR is 1 hour. By setting the \fIpenalty\fR to 0,
+connections to the server will be attempted inspite of failures. The
+default values of 1 hour for minimum penalty, can be changed by setting the
+environment variable \fBMIN_PENALTY\fR. The default value of 120 seconds
+for max_tolerance can be changed by setting the environment variable
+\fBMAX_TOLERANCE\fR.
 
 .TP 5
 .I moresmtproutes.cdb
-This file gives smtproutes functionality on a per-user basis. You need to create \fBmoresmtproutes.cdb\fR file
-in the following format
+This file gives smtproutes functionality on a per-user basis. You need to
+create \fBmoresmtproutes.cdb\fR file in the following format
 
 .EX
 <email_address><sp><ip_address>
@@ -567,67 +501,58 @@ Then run the following command in LIBEXEC directory
 \fBcdbmake-12\fR \fImoresmtproutes\fR.\fIcdb\fR < \fImoresmtproutes\fR.\fItmp\fR < \fImoresmtproutes\fR.\fIcdb\fR
 .EE
 
-A route obtained from moresmtproutes.cdb overrides control file \fBsmtproutes\fR or environment variable
-\fBSMTPROUTE\fR. One can also redirect all bounces to a host by specifying
+A route obtained from moresmtproutes.cdb overrides control file
+\fBsmtproutes\fR or environment variable \fBSMTPROUTE\fR. One can also
+redirect all bounces to a host by specifying
 
 !@<sp><ip_address>
 
-You can override the moresmtproutes.cdb filename by setting environment variable MORESMTPROUTECDB.
+You can override the moresmtproutes.cdb filename by setting environment
+variable \fBMORESMTPROUTECDB\fR.
 
 .TP 5
 .I qmtproutes
-Additional QMTP routes which have precedence over
-.IR smtproutes .
-QMTP routes should obey the form
-.IR domain\fB:\fIrelay\fB:\fIport ,
-without any extra spaces.
-.I qmtproutes
-follows the same syntax as
-.IR smtproutes .
-By default,
-.B qmail-remote
-connects to QMTP service port 209. However
-you can chose a dedicated high-port for QMTP communication
-as defined in
-.IR qmtproutes .
-If the recipient domain is listed neither in \fIqmtproutes\fR nor in \fIsmtproutes\fR,
-\fBqmail-remote\fR will choose the protocol according to MX priority.
-The qmtproutes control file is bypassed if the QMTPROUTE environment variable is set by
-.B qmail-rspawn.
-The QMTPROUTE environment variable has the same format as the entries in qmtproutes control files. It is used
-in a clustered environment where a single domain can exist across multiple hosts. In such a case the QMTPROUTE
-variable points to the host where the user's mailbox lies.
+Additional QMTP routes which have precedence over \fIsmtproutes\fR. QMTP
+routes should obey the form \fIdomain\fR:\fIrelay\fR:\fIport\fR, without
+any extra spaces. \fIqmtproutes\fR follows the same syntax as
+\fIsmtproutes\fR. By default, \fBqmail-remote\fR connects to QMTP service
+port 209. However you can chose a dedicated high-port for QMTP
+communication as defined in \fIqmtproutes\fR.  If the recipient domain is
+listed neither in \fIqmtproutes\fR nor in \fIsmtproutes\fR,
+\fBqmail-remote\fR will choose the protocol according to MX priority. The
+qmtproutes control file is bypassed if the \fBQMTPROUTE\fR environment
+variable is set by \fBqmail-rspawn\fR. The \fBQMTPROUTE\fR environment
+variable has the same format as the entries in qmtproutes control files. It
+is used in a clustered environment where a single domain can exist across
+multiple hosts. In such a case the QMTPROUTE variable points to the host
+where the user's mailbox lies.
 
-You can override the qmtproutes filename by setting environment variable QMTPROUTEFILE.
+You can override the qmtproutes filename by setting environment variable
+\fBQMTPROUTEFILE\fR.
 
 .TP 5
 .I timeoutconnect
-Number of seconds
-.B qmail-remote
-will wait for the remote SMTP server to accept a connection.
-Default: 60.
-The kernel normally imposes a 75-second upper limit.
+Number of seconds \fBqmail-remote\fR will wait for the remote SMTP server
+to accept a connection. Default: 60. The kernel normally imposes a
+75-second upper limit.
 
 .TP 5
 .I timeoutremote
-Number of seconds
-.B qmail-remote
-will wait for each response from the remote SMTP server.
-Default: 1200.
+Number of seconds \fBqmail-remote\fR will wait for each response from the
+remote SMTP server. Default: 1200.
 
 .TP 5
 .I signkey
-Key for Bounce Address Tag Validation (BATV) signing. The filename can be overriden by the environment variable
-.IR SIGNKEY .
+Key for Bounce Address Tag Validation (BATV) signing. The filename can be
+overriden by the environment variable \fISIGNKEY\fR.
 
 .TP 5
 .I nosignhosts
-Exclusions of remote hosts for Bounce Address Tag Validation (BATV)
-that do not work with signed addresses.
+Exclusions of remote hosts for Bounce Address Tag Validation (BATV) that do
+not work with signed addresses.
 
-Attention: If a host has more that one hostname, please list them
-all in
-.IR nosignhosts .
+Attention: If a host has more that one hostname, please list them all in
+\fInosignhosts\fR.
 
 .TP 5
 .I nosignmydoms
@@ -635,56 +560,64 @@ Exclusions of domains you host for Bounce Address Tag Validation (BATV).
 
 .TP 5
 .I notlhosts
-domains for which \fBqmail-remote\fR will not initiate TLS sesson. This file in @sysconfdir@/control or directory
-defined by the \fBCONTROLDIR\fR envirnoment variable, shouldn't be confused with \fInotlshosts\fR in
-the directory defined by the \fBCERTDIR\fR environment variable.
+domains for which \fBqmail-remote\fR will not initiate TLS sesson. This
+file in @sysconfdir@/control or directory defined by the \fBCONTROLDIR\fR
+envirnoment variable, shouldn't be confused with \fInotlshosts\fR in the
+directory defined by the \fBCERTDIR\fR environment variable.
 
 .PP
-For TLS sessions, the default location of @sysconfdir@/control can be overriden by environment variable CERTDIR.
-This affects the location of below files/directories \fItlsclientciphers\fR, \fItlsclientmethod\fR,
-\fIclientcert.pem\fR, \fIservercert.pem\fR, \fItlshosts/<FQDN>.pem\fR, \fItlshosts/exhaustivelist\fR,
-\fInotlshosts/<FQDN>\fR, \fInotlshosts/host\fR.
+For TLS sessions, the default location of @sysconfdir@/control can be
+overriden by environment variable CERTDIR. This affects the location of
+below files/directories \fItlsclientciphers\fR, \fItlsclientmethod\fR,
+\fIclientcert.pem\fR, \fIservercert.pem\fR, \fItlshosts/<FQDN>.pem\fR,
+\fItlshosts/exhaustivelist\fR, \fInotlshosts/<FQDN>\fR,
+\fInotlshosts/host\fR.
 
 .TP 5
 .I tlsclientciphers
-A set of OpenSSL client cipher strings. Multiple ciphers contained in a string should be separated by a colon.
-The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
+A set of OpenSSL client cipher strings. Multiple ciphers contained in a
+string should be separated by a colon. The default location of
+@sysconfdir@/control can be overriden by environment variable
+\fBCERTDIR\fR
 
 .TP 5
 .I tlsclientmethod
-The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2. The default is TLSv1.
-This control file is used for openssl version < 1.0.1. OpenSSL Version >= 1.0.1 uses TLS_client_method() where
-the actual protocol version used will be negotiated to the highest version mutually supported by the client
-and the server. The supported protocols are SSLv3, TLSv1, TLSv1.1 and TLSv1.2.
-The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
+The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1_1,
+TLSv1_2. The default is TLSv1. This control file is used for openssl
+version < 1.0.1. OpenSSL Version >= 1.0.1 uses TLS_client_method() where
+the actual protocol version used will be negotiated to the highest version
+mutually supported by the client and the server. The supported protocols
+are SSLv3, TLSv1, TLSv1.1 and TLSv1.2. The default location of
+@sysconfdir@/control can be overriden by environment variable CERTDIR
 
 .TP 5
 .I clientcert.pem
-SSL certificate that is used to authenticate with the remote server
-during a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR
-will not negotiate TLS.
-The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR. \fIclientcert.pem\fR
-can be overriden by environment variable \fBCLIENTCERT\fR.
+SSL certificate that is used to authenticate with the remote server during
+a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR will
+not negotiate TLS. The default location of @sysconfdir@/control can be
+overriden by environment variable CERTDIR. \fIclientcert.pem\fR can be
+overriden by environment variable \fBCLIENTCERT\fR.
 
 .TP 5
 .I tlshosts/<FQDN>.pem
-.B qmail-remote
-requires TLS authentication from servers for which this file exists
+\fBqmail-remote\fR requires TLS authentication from servers for which this
+file exists
 .RB ( <FQDN>
 is the fully-qualified domain name of the remote SMTP server). One of the
 .I dNSName
 or the
 .I CommonName
 attributes have to match. The file contains the trusted CA certificates.
-The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
+The default location of @sysconfdir@/control can be overriden by
+environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I tlshosts/exhaustivelist
-if this file exists
-no TLS will be tried on hosts other than those for which a file
+if this file exists no TLS will be tried on hosts other than those for
+which a file
 .B tlshosts/<FQDN>.pem
-exists.
-The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
+exists. The default location of @sysconfdir@/control can be overriden by
+environment variable CERTDIR
 
 .B WARNING:
 this option may cause mail to be delayed, bounced, doublebounced, or lost.
@@ -696,8 +629,8 @@ will not try TLS on servers for which this file exists
 .RB ( <FQDN>
 is the fully-qualified domain name of the remote SMTP server).
 .IR (tlshosts/<FQDN>.pem
-takes precedence over this file however).
-The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
+takes precedence over this file however). The default location of
+@sysconfdir@/control can be overriden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I notlshosts/host
@@ -706,17 +639,17 @@ will not try TLS on servers for which this file exists
 .RB ( host
 is the domain name of the recipient).
 .IR (tlshosts/<FQDN>.pem
-takes precedence over this file however).
-The default location of @sysconfdir@/control can be overriden by environment variable CERTDIR
+takes precedence over this file however). The default location of
+@sysconfdir@/control can be overriden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I tlsadomains
 file having the list of MX hosts for which TLSA records needs
 to be verified. If this control file is present, TLSA
 verification will be skipped for all domains not in this file. If a file
-with the name \fItlsadomains\fR.\fIcdb\fR exists, \fBqmail-remote\fR will use
-\fBcdb(3)\fR lookup in addition to the normal in-memory search in a table
-of tlsa verification enforced domains.
+with the name \fItlsadomains\fR.\fIcdb\fR exists, \fBqmail-remote\fR will
+use \fBcdb(3)\fR lookup in addition to the normal in-memory search in a
+table of tlsa verification enforced domains.
 
 .SH "SEE ALSO"
 addresses(5),

@@ -1,5 +1,8 @@
 /*
  * $Log: setforward.c,v $
+ * Revision 1.5  2021-06-15 12:19:19+05:30  Cprogrammer
+ * moved cdbmss.h to libqmail
+ *
  * Revision 1.4  2005-08-23 17:35:51+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -14,13 +17,13 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "subfd.h"
-#include "strerr.h"
-#include "stralloc.h"
-#include "open.h"
-#include "case.h"
-#include "cdbmss.h"
+#include <substdio.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <stralloc.h>
+#include <open.h>
+#include <case.h>
+#include <cdbmss.h>
 
 #define FATAL "setforward: fatal: "
 
@@ -230,7 +233,7 @@ eof:
 void
 getversion_setforward_c()
 {
-	static char    *x = "$Id: setforward.c,v 1.4 2005-08-23 17:35:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: setforward.c,v 1.5 2021-06-15 12:19:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

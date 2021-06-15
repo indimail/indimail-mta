@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-clean.c,v $
+ * Revision 1.12  2021-06-14 01:03:48+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.11  2021-05-16 00:40:21+05:30  Cprogrammer
  * use configurable conf_split instead of auto_split variable
  *
@@ -40,7 +43,6 @@
 #include "fmtqfn.h"
 #include "env.h"
 #include "variables.h"
-#include "auto_qmail.h"
 #include "auto_split.h"
 #include "getEnvConfig.h"
 
@@ -62,15 +64,12 @@ cleanuppid()
 	if (!dir)
 		return;
 	while ((d = readdir(dir))) {
-		if (str_equal(d->d_name, "."))
+		if (str_equal(d->d_name, ".") ||
+				str_equal(d->d_name, ".."))
 			continue;
-		if (str_equal(d->d_name, ".."))
-			continue;
-		if (!stralloc_copys(&line, "pid/"))
-			continue;
-		if (!stralloc_cats(&line, d->d_name))
-			continue;
-		if (!stralloc_0(&line))
+		if (!stralloc_copys(&line, "pid/") ||
+				!stralloc_cats(&line, d->d_name) ||
+				!stralloc_0(&line))
 			continue;
 		if (stat(line.s, &st) == -1)
 			continue;
@@ -99,8 +98,6 @@ main()
 	int             cleanuploop;
 	unsigned long   id;
 
-	if (chdir(auto_qmail) == -1)
-		_exit(111);
 	if(!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue";
 	if (chdir(queuedir) == -1)
@@ -170,7 +167,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.11 2021-05-16 00:40:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.12 2021-06-14 01:03:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.29  2021-06-13 17:31:44+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.28  2021-05-08 12:23:15+05:30  Cprogrammer
  * use /var/indimail/queue if QUEUEDIR is not defined
  *
@@ -82,7 +85,6 @@
 #include "error.h"
 #include "alloc.h"
 #include "variables.h"
-#include "auto_qmail.h"
 #include "auto_uids.h"
 #include "auto_spawn.h"
 #include "auto_control.h"
@@ -432,8 +434,6 @@ main(argc, argv)
 
 	if (uidinit(1) == -1)
 		_exit(111);
-	if (chdir(auto_qmail) == -1)
-		_exit(111);
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue"; /*- single queue like qmail */
 	if (chdir(queuedir) == -1)
@@ -546,7 +546,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.28 2021-05-08 12:23:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.29 2021-06-13 17:31:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

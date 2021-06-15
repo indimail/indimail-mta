@@ -1,5 +1,5 @@
 /*
- * $Log: pathexec_env.c,v $
+ * $Log: upathexec_env.c,v $
  * Revision 1.8  2021-05-12 21:03:20+05:30  Cprogrammer
  * replaced pathexec with upathexec
  *

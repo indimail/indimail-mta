@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.15  2021-06-12 18:25:31+05:30  Cprogrammer
+ * removed #include "auto_qmail.h"
+ *
  * Revision 1.14  2021-06-09 19:36:38+05:30  Cprogrammer
  * use qmulti() instead of exec of qmail-multi
  *
@@ -74,7 +77,6 @@
 #include <str.h>
 #include <fmt.h>
 #include <byte.h>
-#include "auto_qmail.h"
 #include "qmail.h"
 #include "qmulti.h"
 
@@ -462,7 +464,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.14 2021-06-09 19:36:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.15 2021-06-12 18:25:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;

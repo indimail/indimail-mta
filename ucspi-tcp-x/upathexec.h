@@ -1,5 +1,8 @@
 /*
- * $Log: pathexec.h,v $
+ * $Log: upathexec.h,v $
+ * Revision 1.5  2021-06-15 08:24:29+05:30  Cprogrammer
+ * renamed pathexec.. functions to upathexec to avoid clash with libqmail
+ *
  * Revision 1.4  2017-04-22 11:52:27+05:30  Cprogrammer
  * added pathexec_dl()
  *

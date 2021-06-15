@@ -1,5 +1,8 @@
 /*
  * $Log: ipme.c,v $
+ * Revision 1.25  2021-06-14 00:47:17+05:30  Cprogrammer
+ * converted to ansic prototypes
+ *
  * Revision 1.24  2018-07-03 02:02:11+05:30  Cprogrammer
  * set allocated to zero for stralloc variable buf
  *
@@ -107,14 +110,12 @@ static int      ipmeok = 0;
 ipalloc         ipme = { 0 };
 
 int
-ipme_is(ip)
-	ip_addr        *ip;
+ipme_is(ip_addr *ip)
 {
 	int             i;
 	if (ipme_init() != 1)
 		return -1;
-	for (i = 0; i < ipme.len; ++i)
-	{
+	for (i = 0; i < ipme.len; ++i) {
 		if (ipme.ix[i].af == AF_INET && byte_equal((char *) &ipme.ix[i].addr.ip, 4, (char *) ip))
 			return 1;
 	}
@@ -122,15 +123,13 @@ ipme_is(ip)
 }
 
 #ifdef IPV6
-int ipme_is6(ip)
-	ip6_addr       *ip;
+int ipme_is6(ip6_addr *ip)
 {
 	int             i;
 
 	if (ipme_init() != 1)
 		return -1;
-	for (i = 0;i < ipme.len;++i)
-	{
+	for (i = 0;i < ipme.len;++i) {
 		if (ipme.ix[i].af == AF_INET6 && byte_equal((char *) &ipme.ix[i].addr.ip6, 16, (char *) ip))
 			return 1;
 	}
@@ -150,9 +149,7 @@ static stralloc buf = { 0 };
 
 #ifdef MOREIPME
 int
-ipme_readipfile(ipa, fn)
-	ipalloc        *ipa;
-	char           *fn;
+ipme_readipfile(ipalloc *ipa, char *fn)
 {
 	int             ret = 1;
 	int             fd, match;
@@ -162,27 +159,20 @@ ipme_readipfile(ipa, fn)
 	stralloc        l = { 0 };
 	struct ip_mx    ix;
 
-	if(!controldir)
-	{
+	if(!controldir) {
 		if(!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
-	if (!stralloc_copys(&controlfile, controldir))
+	if (!stralloc_copys(&controlfile, controldir) ||
+			(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
+			!stralloc_cats(&controlfile, fn) ||
+			!stralloc_0(&controlfile))
 		return(-1);
-	if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
-		return(-1);
-	if (!stralloc_cats(&controlfile, fn))
-		return(-1);
-	if (!stralloc_0(&controlfile))
-		return(-1);
-	if ((fd = open_read(controlfile.s)) != -1)
-	{
+	if ((fd = open_read(controlfile.s)) != -1) {
 		substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
-		while ((getln(&ss, &l, &match, '\n') != -1) && (match || l.len))
-		{
+		while ((getln(&ss, &l, &match, '\n') != -1) && (match || l.len)) {
 			l.len--;
-			if (!stralloc_0(&l))
-			{
+			if (!stralloc_0(&l)) {
 				ret = 0;
 				break;
 			}
@@ -190,8 +180,7 @@ ipme_readipfile(ipa, fn)
 			ix.af = AF_INET6;
 			if (!ip6_scan(l.s, &ix.addr.ip6)) /*- you can use inet_pton */
 				continue;
-			if (ip6_isv4mapped(&ix.addr.ip6.d))
-			{
+			if (ip6_isv4mapped(&ix.addr.ip6.d)) {
 				ix.af = AF_INET;
 				if (!ip4_scan(l.s, &ix.addr.ip))
 					continue;
@@ -201,8 +190,7 @@ ipme_readipfile(ipa, fn)
 			if (!ip4_scan(l.s, &ix.addr.ip))
 				continue;
 #endif
-			if (!ipalloc_append(ipa, &ix))
-			{
+			if (!ipalloc_append(ipa, &ix)) {
 				ret = 0;
 				break;
 			}
@@ -216,16 +204,12 @@ ipme_readipfile(ipa, fn)
 }
 
 int
-ipme_append_unless(ix, notip)
-	struct ip_mx   *ix;
-	struct ipalloc *notip;
+ipme_append_unless(struct ip_mx *ix, struct ipalloc *notip)
 {
 	int             i;
-	for (i = 0; i < notip->len; ++i)
-	{
+	for (i = 0; i < notip->len; ++i) {
 #ifdef IPV6
-		if (notip->ix[i].af == AF_INET)
-		{
+		if (notip->ix[i].af == AF_INET) {
 			if (byte_equal((char *) &notip->ix[i].addr.ip, 4, (char *) &ix->addr.ip))
 				return 1;
 		} else
@@ -292,8 +276,7 @@ ipme_init()
 	 */
 #ifdef IPV6
 	s = 0;
-	if (!ip6_scan("::", &ix.addr.ip6))
-	{
+	if (!ip6_scan("::", &ix.addr.ip6)) {
 		s = -1;
 		byte_copy((char *) &ix.addr.ip, 4, "\0\0\0\0");
 		ix.af = AF_INET;
@@ -410,10 +393,8 @@ ipme_init()
 		return -1;
 #endif /*- #ifdef MOREIPME */
 	len = 8192; /*- any value big enough to get all interfaces in one read is good */
-	for (;;)
-	{
-		if (!stralloc_ready(&buf, len))
-		{
+	for (;;) {
+		if (!stralloc_ready(&buf, len)) {
 			close(s);
 #ifdef MOREIPME
 			ipme_init_retclean(0);
@@ -424,17 +405,14 @@ ipme_init()
 		buf.len = 0;
 		ifc.ifc_buf = buf.s;
 		ifc.ifc_len = len;
-		if (ioctl(s, SIOCGIFCONF, &ifc) >= 0) /*- > is for System V */
-		{
-			if (ifc.ifc_len + sizeof(*ifr) + 64 < len)
-			{
+		if (ioctl(s, SIOCGIFCONF, &ifc) >= 0) /*- > is for System V */ {
+			if (ifc.ifc_len + sizeof(*ifr) + 64 < len) {
 				/*- what a stupid interface */
 				buf.len = ifc.ifc_len;
 				break;
 			}
 		}
-		if (len > 200000)
-		{
+		if (len > 200000) {
 			close(s);
 #ifdef MOREIPME
 			ipme_init_retclean(-1);
@@ -445,8 +423,7 @@ ipme_init()
 		len *= 2;
 	}
 	x = buf.s;
-	while (x < buf.s + buf.len)
-	{
+	while (x < buf.s + buf.len) {
 		ifr = (struct ifreq *) x;
 #ifdef HASSALEN
 		len = sizeof(ifr->ifr_name) + ifr->ifr_addr.sa_len;
@@ -455,24 +432,19 @@ ipme_init()
 #endif
 		if (len < sizeof(*ifr))
 			len = sizeof(*ifr);
-		if (ifr->ifr_addr.sa_family == AF_INET)
-		{
+		if (ifr->ifr_addr.sa_family == AF_INET) {
 			sin = (sockaddr_in *) &ifr->ifr_addr;
 			byte_copy((char *) &ix.addr.ip, 4, (char *) &sin->sin_addr);
 			ix.af = AF_INET;
-			if (ioctl(s, SIOCGIFFLAGS, x) == 0)
-			{
-				if (ifr->ifr_flags & IFF_UP)
-				{
+			if (ioctl(s, SIOCGIFFLAGS, x) == 0) {
+				if (ifr->ifr_flags & IFF_UP) {
 #ifdef MOREIPME
-					if (!ipme_append_unless(&ix, &notipme))
-					{
+					if (!ipme_append_unless(&ix, &notipme)) {
 						close(s);
 						ipme_init_retclean(0);
 					}
 #else
-					if (!ipalloc_append(&ipme, &ix))
-					{
+					if (!ipalloc_append(&ipme, &ix)) {
 						close(s);
 						return 0;
 					}
@@ -488,8 +460,7 @@ ipme_init()
 #ifdef MOREIPME
 	if (!ipme_readipfile(&moreipme, "moreipme"))
 		ipme_init_retclean(0);
-	for (i = 0; i < moreipme.len; ++i)
-	{
+	for (i = 0; i < moreipme.len; ++i) {
 		if (!ipme_append_unless(&moreipme.ix[i], &notipme))
 			ipme_init_retclean(0);
 	}
@@ -504,7 +475,7 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	static char    *x = "$Id: ipme.c,v 1.24 2018-07-03 02:02:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipme.c,v 1.25 2021-06-14 00:47:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

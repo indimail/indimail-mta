@@ -8,9 +8,9 @@
 #include <env.h>
 #include <fmt.h>
 #include <wait.h>
+#include <mktempfile.h>
 #include "mailfilter.h"
 #include "qmulti.h"
-#include "mktempfile.h"
 
 int
 mailfilter(int argc, char **argv, char *filterargs)

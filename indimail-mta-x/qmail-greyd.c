@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.31  2021-06-12 18:07:02+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.30  2020-09-16 19:04:22+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -107,7 +110,9 @@
 #include <netdb.h>
 #include <sys/select.h>
 #include "sgetopt.h"
+#ifdef NETQMAIL
 #include "auto_qmail.h"
+#endif
 #include "auto_control.h"
 #include "ip.h"
 #include "sig.h"
@@ -284,17 +289,16 @@ whitelist_init(char *arg)
 #ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
 	static stralloc controlfile = {0};
 
-	if (!stralloc_copys(&controlfile, "control/"))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, arg))
-		die_nomem();
-	if (!stralloc_0(&controlfile))
+	if (!stralloc_copys(&controlfile, "control/") ||
+			!stralloc_cats(&controlfile, arg) ||
+			!stralloc_0(&controlfile))
 		die_nomem();
 	if ((whitelistok = control_readfile(&whitelist, controlfile.s, 0)) == -1)
+		die_control(arg);
 #else /*- look for control files in $CONTROLDIR/control */
 	if ((whitelistok = control_readfile(&whitelist, arg, 0)) == -1)
-#endif
 		die_control(arg);
+#endif
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
 	if (verbose > 2)
@@ -314,17 +318,15 @@ cdb_match(char *fn, char *addr, int len)
 		return (0);
 #ifdef NETQMAIL
 	if (!stralloc_copys(&controlfile, "control"))
+		die_nomem();
 #else
 	if (!stralloc_copys(&controlfile, controldir))
+		die_nomem();
 #endif
-		die_nomem();
-	if (!stralloc_cats(&controlfile, "/"))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, fn))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, ".cdb"))
-		die_nomem();
-	if (!stralloc_0(&controlfile))
+	if (!stralloc_cats(&controlfile, "/") ||
+			!stralloc_cats(&controlfile, fn) ||
+			!stralloc_cats(&controlfile, ".cdb") ||
+			!stralloc_0(&controlfile))
 		die_nomem();
 	if ((fd_cdb = open_read(controlfile.s)) == -1) {
 		if (errno != error_noent)
@@ -407,9 +409,8 @@ is_white(char *ip)
 	char           *errStr = 0;
 	static stralloc ipaddr = { 0 };
 
-	if (!stralloc_copys(&ipaddr, ip))
-		die_nomem();
-	if (!stralloc_0(&ipaddr))
+	if (!stralloc_copys(&ipaddr, ip) ||
+			!stralloc_0(&ipaddr))
 		die_nomem();
 	switch (ip_match(&ipaddr, whitelistok ? &whitelist : 0, 
 			whitelistok ? &mapwhite : 0, &errStr))
@@ -1243,11 +1244,12 @@ main(int argc, char **argv)
 #else
 		ipaddr = INADDR_ANY;
 #endif
+#ifndef NETQMAIL
+	if (!(controldir = env_get("CONTROLDIR")))
+		controldir = auto_control;
+#else
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir: ", auto_qmail, ": ");
-#ifndef NETQMAIL
-	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
 #endif
 	if (whitefn) {
 		whitelist_init(whitefn);
@@ -1257,17 +1259,17 @@ main(int argc, char **argv)
 	ptr = argv[optind - 1];
 	if (*ptr != '/') {
 #ifndef NETQMAIL
-		if (!stralloc_copys(&context_file, controldir))
+		if (!stralloc_copys(&context_file, controldir) ||
+				!stralloc_cats(&context_file, "/"))
+			die_nomem();
 #else
-		if (!stralloc_copys(&context_file, "control"))
+		if (!stralloc_copys(&context_file, "control") ||
+				!stralloc_cats(&context_file, "/"))
+			die_nomem();
 #endif
-			die_nomem();
-		if (!stralloc_cats(&context_file, "/"))
-			die_nomem();
 	}
-	if (!stralloc_cats(&context_file, ptr))
-		die_nomem();
-	if (!stralloc_0(&context_file))
+	if (!stralloc_cats(&context_file, ptr) ||
+			!stralloc_0(&context_file))
 		die_nomem();
 	load_context();
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
@@ -1557,7 +1559,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.30 2020-09-16 19:04:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.31 2021-06-12 18:07:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

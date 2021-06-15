@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmtpd.c,v $
+ * Revision 1.14  2021-06-12 18:27:09+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.13  2013-08-23 15:32:49+05:30  Cprogrammer
  * validity checks to ensure that input actually conforms to the netstring protocol.
  *
@@ -33,7 +36,6 @@
 #include "sig.h"
 #include "scan.h"
 #include "rcpthosts.h"
-#include "auto_qmail.h"
 #include "control.h"
 #include "received.h"
 
@@ -87,8 +89,7 @@ getlen()
 {
 	unsigned long   len = 0;
 	char            ch;
-	for (;;)
-	{
+	for (;;) {
 		substdio_get(&ssin, &ch, 1);
 		if (ch == ':')
 			return len;
@@ -145,9 +146,6 @@ main()
 	sig_alarmcatch(resources);
 	alarm(3600);
 
-	if (chdir(auto_qmail) == -1)
-		resources();
-
 	if (control_init() == -1)
 		resources();
 	if (rcpthosts_init() == -1)
@@ -155,12 +153,10 @@ main()
 	relayclient = env_get("RELAYCLIENT");
 	relayclientlen = relayclient ? str_len(relayclient) : 0;
 
-	if(!(x = env_get("DATABYTES")))
-	{
+	if(!(x = env_get("DATABYTES"))) {
 		if (control_readint((int *) &databytes, "databytes") == -1)
 			resources();
-	} else
-	{
+	} else {
 		scan_ulong(x, &u);
 		databytes = u;
 	}
@@ -175,8 +171,7 @@ main()
 		local = env_get("TCPLOCALIP");
 	if (!local)
 		local = "unknown";
-	for (;;)
-	{
+	for (;;) {
 		if (!stralloc_copys(&failure, ""))
 			resources();
 		flagsenderok = 1;
@@ -200,14 +195,11 @@ main()
 		/*
 		 * XXX: check for loops? only if len is big? 
 		 */
-		if (flagdos)
-		{
-			while (len > 0)
-			{
+		if (flagdos) {
+			while (len > 0) {
 				substdio_get(&ssin, &ch, 1);
 				--len;
-				while ((ch == 13) && len)
-				{
+				while ((ch == 13) && len) {
 					substdio_get(&ssin, &ch, 1);
 					--len;
 					if (ch == 10)
@@ -222,18 +214,14 @@ main()
 						qmail_fail(&qq);
 				qmail_put(&qq, &ch, 1);
 			}
-		} else
-		{
-			if (databytes)
-			{
-				if (len > databytes)
-				{
+		} else {
+			if (databytes) {
+				if (len > databytes) {
 					bytestooverflow = 0;
 					qmail_fail(&qq);
 				}
 			}
-			while (len > 0)
-			{ /*- XXX: could speed this up, obviously */
+			while (len > 0) { /*- XXX: could speed this up, obviously */
 				substdio_get(&ssin, &ch, 1);
 				--len;
 				qmail_put(&qq, &ch, 1);
@@ -241,16 +229,13 @@ main()
 		}
 		getcomma();
 		len = getlen();
-		if (len >= 1000)
-		{
+		if (len >= 1000) {
 			buf[0] = 0;
 			flagsenderok = 0;
 			for (i = 0; i < len; ++i)
 				substdio_get(&ssin, &ch, 1);
-		} else
-		{
-			for (i = 0; i < len; ++i)
-			{
+		} else {
+			for (i = 0; i < len; ++i) {
 				substdio_get(&ssin, buf + i, 1);
 				if (!buf[i])
 					flagsenderok = 0;
@@ -263,13 +248,11 @@ main()
 		if (!flagsenderok)
 			qmail_fail(&qq);
 		biglen = getlen();
-		while (biglen > 0)
-		{
+		while (biglen > 0) {
 			if (!stralloc_append(&failure, ""))
 				resources();
 			len = 0;
-			for (;;)
-			{
+			for (;;) {
 				if (!biglen)
 					badproto();
 				substdio_get(&ssin, &ch, 1);
@@ -285,15 +268,12 @@ main()
 			}
 			if (len >= biglen)
 				badproto();
-			if (len + relayclientlen >= 1000)
-			{
+			if (len + relayclientlen >= 1000) {
 				failure.s[failure.len - 1] = 'L';
 				for (i = 0; i < len; ++i)
 					substdio_get(&ssin, &ch, 1);
-			} else
-			{
-				for (i = 0; i < len; ++i)
-				{
+			} else {
+				for (i = 0; i < len; ++i) {
 					substdio_get(&ssin, buf + i, 1);
 					if (!buf[i])
 						failure.s[failure.len - 1] = 'N';
@@ -302,8 +282,7 @@ main()
 
 				if (relayclient)
 					str_copy(buf + len, relayclient);
-				else
-				{
+				else {
 					switch (rcpthosts(buf, len, 0))
 					{
 					case -1:
@@ -312,8 +291,7 @@ main()
 						failure.s[failure.len - 1] = 'D';
 					}
 				}
-				if (!failure.s[failure.len - 1])
-				{
+				if (!failure.s[failure.len - 1]) {
 					qmail_to(&qq, buf);
 					flagbother = 1;
 				}
@@ -327,15 +305,13 @@ main()
 		result = qmail_close(&qq);
 		if (!flagsenderok)
 			result = "Dunacceptable sender (#5.1.7)";
-		if (databytes)
-		{
+		if (databytes) {
 			if (!bytestooverflow)
 				result = "Dsorry, that message size exceeds my databytes limit (#5.3.4)";
 		}
 		if (*result)
 			len = str_len(result);
-		else
-		{
+		else {
 			/*- success!  */
 			len = 0;
 			len += fmt_str(buf2 + len, "Kok ");
@@ -349,8 +325,7 @@ main()
 		buf[len++] = ':';
 		len += fmt_str(buf + len, result);
 		buf[len++] = ',';
-		for (i = 0; i < failure.len; ++i)
-		{
+		for (i = 0; i < failure.len; ++i) {
 			switch (failure.s[i])
 			{
 			case 0:
@@ -373,7 +348,7 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	static char    *x = "$Id: qmail-qmtpd.c,v 1.13 2013-08-23 15:32:49+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qmtpd.c,v 1.14 2021-06-12 18:27:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

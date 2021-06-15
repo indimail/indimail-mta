@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-daned.c,v $
- * Revision 1.27  2021-06-09 19:35:39+05:30  Cprogrammer
- * added makeargs.h
+ * Revision 1.27  2021-06-15 11:50:15+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
  *
  * Revision 1.26  2021-05-26 11:06:29+05:30  Cprogrammer
  * use starttls.h for prototypes in starttls.c
@@ -97,30 +97,29 @@
 #include <fcntl.h>
 #define __USE_GNU
 #include <netdb.h>
-#include "stralloc.h"
+#include <stralloc.h>
+#include <constmap.h>
+#include <uint32.h>
+#include <error.h>
+#include <cdb.h>
+#include <strerr.h>
+#include <open.h>
+#include <str.h>
+#include <fmt.h>
+#include <getln.h>
+#include <scan.h>
+#include <byte.h>
+#include <sig.h>
+#include <sgetopt.h>
+#include <env.h>
+#include <makeargs.h>
 #include "control.h"
-#include "constmap.h"
-#include "uint32.h"
-#include "variables.h"
-#include "error.h"
-#include "cdb.h"
-#include "strerr.h"
-#include "open.h"
-#include "str.h"
-#include "fmt.h"
 #include "tlsacheck.h"
-#include "getln.h"
-#include "scan.h"
-#include "byte.h"
-#include "sig.h"
-#include "sgetopt.h"
-#include "env.h"
 #include "haveip6.h"
 #include "ip.h"
-#include "makeargs.h"
-#include "auto_qmail.h"
 #include "auto_control.h"
 #include "starttls.h"
+#include "variables.h"
 
 #define FATAL "qmail-daned: fatal: "
 #define WARN  "qmail-daned: warning: "
@@ -208,15 +207,11 @@ cdb_match(char *fn, char *addr, int len)
 		return (0);
 	if(!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-	if (!stralloc_copys(&controlfile, controldir))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, "/"))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, fn))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, ".cdb"))
-		die_nomem();
-	if (!stralloc_0(&controlfile))
+	if (!stralloc_copys(&controlfile, controldir) ||
+			!stralloc_cats(&controlfile, "/") ||
+			!stralloc_cats(&controlfile, fn) ||
+			!stralloc_cats(&controlfile, ".cdb") ||
+			!stralloc_0(&controlfile))
 		die_nomem();
 	if ((fd_cdb = open_read(controlfile.s)) == -1) {
 		if (errno != error_noent)
@@ -267,9 +262,8 @@ is_tlsadomain(char *domain)
 	char           *errStr = 0;
 	static stralloc _domain = { 0 };
 
-	if (!stralloc_copys(&_domain, domain))
-		die_nomem();
-	if (!stralloc_0(&_domain))
+	if (!stralloc_copys(&_domain, domain) ||
+			!stralloc_0(&_domain))
 		die_nomem();
 	switch (domain_match(tlsadomainsfn, &_domain, tlsadomainsok ? &tlsadomains : 0, 
 			tlsadomainsok ? &maptlsadomains : 0, &errStr))
@@ -294,9 +288,8 @@ is_white(char *domain)
 	char           *errStr = 0;
 	static stralloc _domain = { 0 };
 
-	if (!stralloc_copys(&_domain, domain))
-		die_nomem();
-	if (!stralloc_0(&_domain))
+	if (!stralloc_copys(&_domain, domain) ||
+			!stralloc_0(&_domain))
 		die_nomem();
 	switch (domain_match(whitefn, &_domain, whitelistok ? &whitelist : 0, 
 			whitelistok ? &mapwhite : 0, &errStr))
@@ -1083,8 +1076,6 @@ main(int argc, char **argv)
 #else
 		ipaddr = INADDR_ANY;
 #endif
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir: ", auto_qmail, ": ");
 	if(!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
 	if (tlsadomainsfn)
@@ -1096,14 +1087,12 @@ main(int argc, char **argv)
 	for (ptr = argv[optind++]; *ptr;ptr++);
 	ptr = argv[optind - 1];
 	if (*ptr != '/') {
-		if (!stralloc_copys(&context_file, controldir))
-			die_nomem();
-		if (!stralloc_cats(&context_file, "/"))
+		if (!stralloc_copys(&context_file, controldir) ||
+				!stralloc_cats(&context_file, "/"))
 			die_nomem();
 	}
-	if (!stralloc_cats(&context_file, ptr))
-		die_nomem();
-	if (!stralloc_0(&context_file))
+	if (!stralloc_cats(&context_file, ptr) ||
+			!stralloc_0(&context_file))
 		die_nomem();
 	load_context();
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
@@ -1371,7 +1360,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.27 2021-06-09 19:35:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.27 2021-06-15 11:50:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidstarttlsh;
 	x = sccsidmakeargsh;

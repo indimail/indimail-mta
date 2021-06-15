@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.58  2021-06-15 11:53:44+05:30  Cprogrammer
+ * moved pidopen() out to its own file
+ *
  * Revision 1.57  2021-06-09 21:14:33+05:30  Cprogrammer
  * use qmulti() instead of exec of qmail-multi
  *
@@ -181,30 +184,30 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "sgetopt.h"
-#include "substdio.h"
-#include "open.h"
-#include "qmail.h"
-#include "sig.h"
-#include "scan.h"
-#include "case.h"
-#include "fmt.h"
-#include "fd.h"
-#include "alloc.h"
-#include "str.h"
-#include "stralloc.h"
-#include "datetime.h"
-#include "now.h"
-#include "wait.h"
-#include "auto_qmail.h"
-#include "auto_control.h"
-#include "env.h"
-#include "error.h"
+#include <sgetopt.h>
+#include <substdio.h>
+#include <open.h>
+#include <sig.h>
+#include <scan.h>
+#include <case.h>
+#include <fmt.h>
+#include <fd.h>
+#include <alloc.h>
+#include <str.h>
+#include <stralloc.h>
+#include <datetime.h>
+#include <now.h>
+#include <wait.h>
+#include <env.h>
+#include <error.h>
+#include <dkim.h>
+#include <makeargs.h>
 #include "control.h"
-#include "dkim.h"
-#include "makeargs.h"
+#include "auto_control.h"
+#include "qmail.h"
 #include "variables.h"
 #include "qmulti.h"
+#include "pidopen.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
@@ -221,10 +224,7 @@ struct substdio sserr;
 
 datetime_sec    starttime;
 struct datetime dt;
-unsigned long   mypid;
 unsigned long   uid;
-char           *pidfn;
-int             messfd;
 int             readfd;
 DKIMContext     ctxt;
 
@@ -325,73 +325,6 @@ maybe_die_dkim(e)
 	}
 }
 
-unsigned int
-pidfmt(s, seq)
-	char           *s;
-	unsigned long   seq;
-{
-	unsigned int    i;
-	unsigned int    len;
-	char           *tmpdir;
-
-	if (!(tmpdir = env_get("TMPDIR")))
-		tmpdir = "/tmp";
-	len = 0;
-	i = fmt_str(s, tmpdir);
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_str(s, "/qmail-dkim.");
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_ulong(s, mypid);
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_str(s, ".");
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_ulong(s, starttime);
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_str(s, ".");
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_ulong(s, seq);
-	len += i;
-	if (s)
-		s += i;
-	++len;
-	if (s)
-		*s++ = 0;
-
-	return len;
-}
-
-void
-pidopen()
-{
-	unsigned int    len;
-	unsigned long   seq;
-
-	seq = 1;
-	len = pidfmt((char *) 0, seq);
-	if (!(pidfn = alloc(len)))
-		die(51, 0);
-	for (seq = 1; seq < 10; ++seq) {
-		if (pidfmt((char *) 0, seq) > len)
-			die(81, 0); /*- paranoia */
-		pidfmt(pidfn, seq);
-		if ((messfd = open_excl(pidfn)) != -1)
-			return;
-	}
-	die(63, 0);
-}
-
 char           *dkimsign = 0;
 char           *dkimverify = 0;
 char           *dkimadspverify = 0, *dkimpractice =  "FGHIJKLMNPQRSTUVWX";
@@ -413,9 +346,8 @@ write_signature(char *domain, char *keyfn)
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
-		if (!stralloc_copys(&keyfnfrom, controldir))
-			die(51, 1);
-		if (!stralloc_append(&keyfnfrom, "/"))
+		if (!stralloc_copys(&keyfnfrom, controldir) ||
+				!stralloc_append(&keyfnfrom, "/"))
 			die(51, 1);
 	}
 	i = str_chr(keyfn, '%');
@@ -424,13 +356,10 @@ write_signature(char *domain, char *keyfn)
 			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 				die(51, 1);
 		} else
-		if (!stralloc_catb(&keyfnfrom, keyfn, i))
-			die(51, 1);
-		if (!stralloc_cats(&keyfnfrom, domain))
-			die(51, 1);
-		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
-			die(51, 1);
-		if (!stralloc_0(&keyfnfrom))
+		if (!stralloc_catb(&keyfnfrom, keyfn, i) ||
+				!stralloc_cats(&keyfnfrom, domain) ||
+				!stralloc_cats(&keyfnfrom, keyfn + i + 1) ||
+				!stralloc_0(&keyfnfrom))
 			die(51, 1);
 		if (access(keyfnfrom.s, F_OK)) {
 			if (errno != error_noent) {
@@ -447,9 +376,8 @@ write_signature(char *domain, char *keyfn)
 				die(51, 1);
 			if ((i - 1) > 0 && keyfn[i - 1] == '/' && keyfn[i + 1] == '/')
 				i++;
-			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
-				die(51, 1);
-			if (!stralloc_0(&keyfnfrom))
+			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1) ||
+					!stralloc_0(&keyfnfrom))
 				die(51, 1);
 		} 
 	} else {
@@ -457,9 +385,8 @@ write_signature(char *domain, char *keyfn)
 			if (!stralloc_copys(&keyfnfrom, keyfn))
 				die(51, 1);
 		} else
-		if (!stralloc_cats(&keyfnfrom, keyfn))
-			die(51, 1);
-		if (!stralloc_0(&keyfnfrom))
+		if (!stralloc_cats(&keyfnfrom, keyfn) ||
+				!stralloc_0(&keyfnfrom))
 			die(51, 1);
 	}
 	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + 8, 1))
@@ -490,9 +417,8 @@ write_signature(char *domain, char *keyfn)
 	i = DKIMSignGetSig2(&ctxt, dksignature.s, &pSig);
 	maybe_die_dkim(i);
 	if (pSig) {
-		if (!stralloc_catb(&dkimoutput, pSig, str_len(pSig)))
-			die(51, 1);
-		if (!stralloc_cats(&dkimoutput, "\n"))
+		if (!stralloc_catb(&dkimoutput, pSig, str_len(pSig)) ||
+				!stralloc_cats(&dkimoutput, "\n"))
 			die(51, 1);
 	}
 	DKIMSignFree(&ctxt);
@@ -851,9 +777,8 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 				break;
 		}
 	}
-	if (!stralloc_copys(&dkimoutput, "DKIM-Status: "))
-		die(51, 0);
-	if (!stralloc_cats(&dkimoutput, dkimStatus))
+	if (!stralloc_copys(&dkimoutput, "DKIM-Status: ") ||
+			!stralloc_cats(&dkimoutput, dkimStatus))
 		die(51, 0);
 	if (origRet != DKIM_MAX_ERROR && ret != origRet) {
 		if (!stralloc_cats(&dkimoutput, "\n\t(old="))
@@ -933,9 +858,8 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 			orig = "Unkown error";
 			break;
 		}
-		if (!stralloc_cats(&dkimoutput, orig))
-			die(51, 0);
-		if (!stralloc_cats(&dkimoutput, ":"))
+		if (!stralloc_cats(&dkimoutput, orig) ||
+				!stralloc_cats(&dkimoutput, ":"))
 			die(51, 0);
 		if (origRet < 0) {
 			if (!stralloc_cats(&dkimoutput, "-"))
@@ -943,27 +867,22 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 			strnum[fmt_ulong(strnum, 0 - origRet)] = 0;
 		} else
 			strnum[fmt_ulong(strnum, origRet)] = 0;
-		if (!stralloc_cats(&dkimoutput, strnum))
-			die(51, 0);
-		if (!stralloc_cats(&dkimoutput, ")"))
+		if (!stralloc_cats(&dkimoutput, strnum) ||
+				!stralloc_cats(&dkimoutput, ")"))
 			die(51, 0);
 	}
 	if (!stralloc_cats(&dkimoutput, "\n"))
 		die(51, 0);
 	if (useSSP && sspStatus) {
-		if (!stralloc_cats(&dkimoutput, "X-DKIM-SSP: "))
-			die(51, 0);
-		if (!stralloc_cats(&dkimoutput, sspStatus))
-			die(51, 0);
-		if (!stralloc_cats(&dkimoutput, "\n"))
+		if (!stralloc_cats(&dkimoutput, "X-DKIM-SSP: ") ||
+				!stralloc_cats(&dkimoutput, sspStatus) ||
+				!stralloc_cats(&dkimoutput, "\n"))
 			die(51, 0);
 	}
 	if (useADSP && adspStatus) {
-		if (!stralloc_cats(&dkimoutput, "X-DKIM-ADSP: "))
-			die(51, 0);
-		if (!stralloc_cats(&dkimoutput, adspStatus))
-			die(51, 0);
-		if (!stralloc_cats(&dkimoutput, "\n"))
+		if (!stralloc_cats(&dkimoutput, "X-DKIM-ADSP: ") ||
+				!stralloc_cats(&dkimoutput, adspStatus) ||
+				!stralloc_cats(&dkimoutput, "\n"))
 			die(51, 0);
 	}
 	dkimverify_exit(ret, dkimStatus, code);
@@ -1020,11 +939,9 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 	str_copy(opts->szRequiredHeaders, "NonExistent");
 	if (!signOptions)
 		return (0);
-	if (!stralloc_copys(&dkimopts, "dkim "))
-		die(51, 0);
-	if (!stralloc_cats(&dkimopts, signOptions))
-		die(51, 0);
-	if (!stralloc_0(&dkimopts))
+	if (!stralloc_copys(&dkimopts, "dkim ") ||
+			!stralloc_cats(&dkimopts, signOptions) ||
+			!stralloc_0(&dkimopts))
 		die(51, 0);
 	if (!(argv = makeargs(dkimopts.s)))
 		die(51, 0);
@@ -1148,8 +1065,6 @@ main(int argc, char *argv[])
 	else
 		scan_int(ptr, &errfd);
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
-	if (chdir(auto_qmail) == -1)
-		die(61, 0);
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
 	ptr = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
@@ -1157,9 +1072,8 @@ main(int argc, char *argv[])
 		return (qmulti("DKIMQUEUE", argc, argv));
 	if (!dkimsign && !dkimverify && ptr) {
 		if (!(dkimsign = env_get("DKIMKEY"))) {
-			if (!stralloc_copys(&dkimfn, "domainkeys/%/default"))
-				die(51, 0);
-			if (!stralloc_0(&dkimfn))
+			if (!stralloc_copys(&dkimfn, "domainkeys/%/default") ||
+					!stralloc_0(&dkimfn))
 				die(51, 0);
 			dkimsign = dkimfn.s;
 		}
@@ -1229,7 +1143,6 @@ main(int argc, char *argv[])
 		DKIMVerifyInit(&ctxt, &vopts);		/*- this is always successful */
 	}
 	/*- Initialization */
-	mypid = getpid();
 	uid = getuid();
 	datetime_tai(&dt, starttime);
 	sig_pipeignore();
@@ -1237,7 +1150,8 @@ main(int argc, char *argv[])
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);
 	alarm(DEATH);
-	pidopen(); /*- fd = messfd */
+	if ((ret = pidopen(starttime))) /*- fd = messfd */
+		die(ret, 0);
 	if ((readfd = open_read(pidfn)) == -1)
 		die(63, dkimsign ? 1 : 2);
 	if (unlink(pidfn) == -1)
@@ -1444,11 +1358,12 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.57 2021-06-09 21:14:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.58 2021-06-15 11:53:44+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
 	x = sccsidqmultih;
+	x = sccsidpidopenh;
 #endif
 	x++;
 }

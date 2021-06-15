@@ -173,7 +173,6 @@ cdbmake_hash.o
 cdb_make.o
 cdbmake.o
 cdbmake_pack.o
-cdbmss.o
 cdb.o
 cdb_seek.o
 cdbstats.o
@@ -881,7 +880,6 @@ timeoutread.o
 timeoutwrite.o
 tls.lib
 tls.o
-token822.o
 tokenize
 tokenize.o
 trigger.o
@@ -1156,3 +1154,6 @@ qmail-spamfilter.8
 qmulti.o
 mailfilter.o
 mktempfile.o
+pidopen.o
+qmail-direct.o
+delivery_rate.o

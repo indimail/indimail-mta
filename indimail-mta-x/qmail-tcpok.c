@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpok.c,v $
+ * Revision 1.27  2021-06-12 18:35:07+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.26  2021-06-05 12:52:03+05:30  Cprogrammer
  * process special queue "slowq"
  *
@@ -139,8 +142,6 @@ main()
 	int             fd, i;
 
 #ifndef MULTI_QUEUE
-	if (chdir(auto_qmail))
-		die_home();
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
@@ -206,8 +207,6 @@ main(int argc, char **argv)
 	char           *extra_queue[] = {"slowq", "nqueue", 0};
 	static stralloc Queuedir = { 0 };
 
-	if (chdir(auto_qmail))
-		die_home();
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
@@ -276,7 +275,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	static char    *x = "$Id: qmail-tcpok.c,v 1.26 2021-06-05 12:52:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-tcpok.c,v 1.27 2021-06-12 18:35:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

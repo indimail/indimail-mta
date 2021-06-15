@@ -1,5 +1,8 @@
 /*
  * $Log: set_environment.c,v $
+ * Revision 1.3  2021-06-12 19:56:17+05:30  Cprogrammer
+ * removed calls to chdir to avoid messing cwd
+ *
  * Revision 1.2  2021-05-26 10:46:50+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -13,9 +16,12 @@
 #include <error.h>
 #include <strerr.h>
 #include <pathexec.h>
+#include <stralloc.h>
 #include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "variables.h"
+
+static stralloc tmp = { 0 };
 
 void
 set_environment(char *warn, char *fatal)
@@ -25,26 +31,28 @@ set_environment(char *warn, char *fatal)
 	int             i;
 
 	if ((home = env_get("HOME"))) {
-		if (chdir(home) == -1)
-			strerr_die4sys(111, fatal, "unable to switch to ", home, ": ");
-		if (!access(".defaultqueue", X_OK)) {
-			if ((i = envdir(".defaultqueue", 0)))
+		if (!stralloc_copys(&tmp, home) ||
+				!stralloc_catb(&tmp, "/.defaultqueue", 14) ||
+				!stralloc_0(&tmp))
+			strerr_die2x(111, fatal, "out of memory");
+		if (!access(tmp.s, X_OK)) {
+			if ((i = envdir(tmp.s, 0)))
 				strerr_warn3(warn, envdir_str(i), ":", &strerr_sys);
 			if ((e = pathexec(0)))
 				environ = e;
 		}
 	}
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, fatal, "unable to switch to ", auto_sysconfdir, ": ");
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, fatal, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK)) {
-			switch(envdir("defaultqueue", &err))
+		if (!stralloc_copys(&tmp, controldir) ||
+				!stralloc_catb(&tmp, "/.defaultqueue", 14) ||
+				!stralloc_0(&tmp))
+			strerr_die2x(111, fatal, "out of memory");
+		if (!access(tmp.s, X_OK)) {
+			switch(envdir(tmp.s, &err))
 			{
 			case -1:
 				strerr_die4sys(111, fatal, "unable to read environment file defaultqueue/", err, ": ");
@@ -64,8 +72,6 @@ set_environment(char *warn, char *fatal)
 		} else
 		if (errno != error_noent)
 			strerr_die2sys(111, fatal, "unable to access defaultqueue: ");
-		if (chdir(auto_sysconfdir) == -1)
-			strerr_die4sys(111, fatal, "unable to switch to ", auto_sysconfdir, ": ");
 	}
 	return;
 }
@@ -73,7 +79,7 @@ set_environment(char *warn, char *fatal)
 void
 getversion_set_environment_c()
 {
-	static char    *x = "$Id: set_environment.c,v 1.2 2021-05-26 10:46:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: set_environment.c,v 1.3 2021-06-12 19:56:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

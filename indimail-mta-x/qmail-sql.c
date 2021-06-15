@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.10  2021-06-13 17:19:57+05:30  Cprogrammer
+ * do chdir(controldir) instead of chdir(auto_sysconfdir)
+ *
  * Revision 1.9  2021-02-27 20:59:05+05:30  Cprogrammer
  * changed error to warning for missing MySQL libs
  *
@@ -35,9 +38,7 @@
 #include "hasmysql.h"
 #ifdef HAS_MYSQL
 #include "auto_uids.h"
-#include "auto_qmail.h"
 #include "auto_control.h"
-#include "auto_sysconfdir.h"
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/stat.h>
@@ -74,39 +75,8 @@ flush()
 	return;
 }
 
-void
-logerr(char *s)
-{
-	if (substdio_puts(subfderr, s) == -1)
-		_exit(111);
-}
-
-void
-logerrf(char *s)
-{
-	if (substdio_puts(subfderr, s) == -1)
-		_exit(111);
-	if (substdio_flush(subfderr) == -1)
-		_exit(111);
-}
-
-void
-my_error(char *s1, char *s2, int exit_val)
-{
-	logerr(s1);
-	logerr(": ");
-	if (s2) {
-		logerr(s2);
-		logerr(": ");
-	}
-	if (exit_val > 0)
-		logerr(error_str(errno));
-	logerrf("\n");
-	_exit(exit_val > 0 ? exit_val : -exit_val);
-}
-
 int
-insert_db(MYSQL *conn, char *filename, char *table_name, int replace, char **errStr)
+insert_db(MYSQL *conn, char *fn, char *table_name, int replace, char **errStr)
 {
 
 	int             num = 0, m_error;
@@ -118,13 +88,13 @@ insert_db(MYSQL *conn, char *filename, char *table_name, int replace, char **err
 		return (0);
 	}
 	if (!stralloc_copys(&sql, "LOAD DATA LOW_PRIORITY LOCAL INFILE \"") ||
-			!stralloc_cats(&sql, filename) ||
+			!stralloc_cats(&sql, fn) ||
 			!stralloc_cats(&sql, replace ? "\" REPLACE INTO TABLE " : "\" IGNORE INTO TABLE ") ||
 			!stralloc_cats(&sql, table_name) || !stralloc_catb(&sql, " (email)", 8))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 again:
 	if (!stralloc_0(&sql))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (in_mysql_query(conn, sql.s)) {
 		if ((m_error = in_mysql_errno(conn)) == ER_NO_SUCH_TABLE) {
 			if (create_sqltable(conn, table_name, errStr))
@@ -132,7 +102,7 @@ again:
 			if (in_mysql_query(conn, sql.s)) {
 				sql.len--;
 				if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) || !stralloc_0(&sql))
-					strerr_die2sys(111, FATAL, "out of memory");
+					strerr_die2x(111, FATAL, "out of memory");
 				if (errStr)
 					*errStr = sql.s;
 				return (AM_MYSQL_ERR);
@@ -140,16 +110,16 @@ again:
 		} else
 		if (m_error == ER_PARSE_ERROR) {
 			if (!stralloc_copys(&sql, "LOAD DATA LOW_PRIORITY LOCAL INFILE '") ||
-					!stralloc_cats(&sql, filename) ||
+					!stralloc_cats(&sql, fn) ||
 					!stralloc_cats(&sql, replace ? "' REPLACE INTO TABLE " : "' IGNORE INTO TABLE ") ||
 					!stralloc_cats(&sql, table_name) || !stralloc_catb(&sql, " (email)", 8))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			goto again;
 		} else {
 			sql.len--;
 			if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) ||
 					!stralloc_0(&sql))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (errStr)
 				*errStr = sql.s;
 			return (AM_MYSQL_ERR);
@@ -159,7 +129,7 @@ again:
 		sql.len--;
 		if (!stralloc_cats(&sql, ": ") || !stralloc_cats(&sql, (char *) in_mysql_error(conn)) ||
 				!stralloc_0(&sql))
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		if (errStr)
 			*errStr = sql.s;
 		return (AM_MYSQL_ERR);
@@ -177,7 +147,7 @@ main(int argc, char **argv)
 {
 	int             fd, opt, skip_load = 0, replace = 0;
 	char           *dbserver, *user, *pass, *dbname, *table_name, *tname, *errStr;
-	stralloc        filename = {0}, str = {0};
+	stralloc        fn = {0}, str = {0};
 	struct stat     statbuf;
 	MYSQL          *conn;
 	char            strnum[FMT_ULONG];
@@ -221,52 +191,52 @@ main(int argc, char **argv)
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
-	if (!stralloc_copys(&filename, controldir) || !stralloc_catb(&filename, "/", 1) ||
-			!stralloc_cats(&filename, *argv++) || !stralloc_0(&filename))
-		strerr_die2sys(111, FATAL, "out of memory");
-	if (chdir(auto_sysconfdir) == -1)
-		strerr_die4sys(111, FATAL, "chdir: ", auto_sysconfdir, ": ");
-	if (stat(filename.s, &statbuf))
-		my_error("stat", filename.s, 111);
-	--filename.len;
-	if (!stralloc_cats(&filename, ".sql") || !stralloc_0(&filename))
-		strerr_die2sys(111, FATAL, "out of memory");
-	if (stat(filename.s, &statbuf) && (!dbserver || !user || !pass || !dbname || !table_name))
+	if (chdir(controldir) == -1)
+		strerr_die4sys(111, FATAL, "chdir: ", controldir, ": ");
+	if (!stralloc_copys(&fn, *argv++) || !stralloc_0(&fn))
+		strerr_die2x(111, FATAL, "out of memory");
+	if (stat(fn.s, &statbuf))
+		strerr_die4sys(111, FATAL, "stat: ", fn.s, ": ");
+	--fn.len;
+	if (!stralloc_cats(&fn, ".sql") || !stralloc_0(&fn))
+		strerr_die2x(111, FATAL, "out of memory");
+	if (stat(fn.s, &statbuf) && (!dbserver || !user || !pass || !dbname || !table_name))
 		strerr_die1x(100, usage);
 	if (dbserver && user && pass && dbname && table_name) {
-		if ((fd = open(filename.s, O_CREAT|O_TRUNC|O_WRONLY, 0644)) == -1)
-			my_error("open", filename.s, 111);
+		if ((fd = open(fn.s, O_CREAT|O_TRUNC|O_WRONLY, 0644)) == -1)
+			strerr_die4sys(111, FATAL, "open: ", fn.s, ": ");
 		if (!stralloc_copys(&str, dbserver) || !stralloc_catb(&str, ":", 1) ||
 				!stralloc_cats(&str, user) || !stralloc_catb(&str, ":", 1) ||
 				!stralloc_cats(&str, pass) || !stralloc_catb(&str, ":", 1) ||
 				!stralloc_cats(&str, dbname) || !stralloc_catb(&str, ":", 1) ||
 				!stralloc_cats(&str, table_name) || !stralloc_catb(&str, "\n", 1))
+			strerr_die2x(111, FATAL, "out of memory");
 		if (write(fd, str.s, str.len) == -1)
-			my_error("write", filename.s, 111);
+			strerr_die4sys(111, FATAL, "write: ", fn.s, ": ");
 		if (fchown(fd, auto_uidv, auto_gidv))
-			my_error("chown", filename.s, 111);
+			strerr_die4sys(111, FATAL, "fchown: ", fn.s, ": ");
 		if (close(fd))
-			my_error("close", filename.s, 111);
+			strerr_die4sys(111, FATAL, "close: ", fn.s, ": ");
 		out("created file ");
-		out(filename.s);
+		out(fn.s);
 		out("\n");
 	}
 	if (initMySQLlibrary(&errStr))
-		my_error("initMySQLlibrary: couldn't load MySQL shared library", errStr, 111);
+		strerr_die3x(111, FATAL, "initMySQLlibrary: couldn't load MySQL shared library: ", errStr);
 	else
 	if (!use_sql)
-		my_error("initMySQLlibrary: couldn't load MySQL shared library", errStr, 111);
+		strerr_die3x(111, FATAL, "initMySQLlibrary: couldn't load MySQL shared library: ", errStr);
 	if (!skip_load) {
-		if (connect_sqldb(filename.s, &conn, &tname, &errStr) < 0)
-			my_error("MySQL connect", errStr, 111);
-		filename.len -= 5;
-		if (!stralloc_0(&filename)) {
+		if (connect_sqldb(fn.s, &conn, &tname, &errStr) < 0)
+			strerr_die3x(111, FATAL, "MySQL connect: ", errStr);
+		fn.len -= 5;
+		if (!stralloc_0(&fn)) {
 			in_mysql_close(conn);
-			strerr_die2sys(111, FATAL, "out of memory");
+			strerr_die2x(111, FATAL, "out of memory");
 		}
-		if ((opt = insert_db(conn, filename.s, tname, replace, &errStr)) < 0) {
+		if ((opt = insert_db(conn, fn.s, tname, replace, &errStr)) < 0) {
 			in_mysql_close(conn);
-			my_error("insert_db", errStr, 111);
+			strerr_die3x(111, FATAL, "insert_db: ", errStr);
 		}
 		in_mysql_close(conn);
 		strnum[fmt_ulong(strnum, opt)] = 0;
@@ -302,7 +272,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.9 2021-02-27 20:59:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.10 2021-06-13 17:19:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -231,9 +231,9 @@ getdirname(char *dir, char **basedir)
 	while (len > 1 && *ptr == '/')
 		ptr--, len--;
 	if (!stralloc_copyb(&dirbuf, dir, len))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+		strerr_die2x(111, FATAL, "out of memory");
 	if (!stralloc_0(&dirbuf))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+		strerr_die2x(111, FATAL, "out of memory");
 	return (dirbuf.s);
 }
 

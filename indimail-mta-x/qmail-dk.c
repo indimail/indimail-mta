@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.53  2021-06-15 11:52:41+05:30  Cprogrammer
+ * moved pidopen() out to its own file
+ *
  * Revision 1.52  2021-06-09 21:14:19+05:30  Cprogrammer
  * use qmulti() instead of exec of qmail-multi
  *
@@ -163,32 +166,32 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "sgetopt.h"
-#include "substdio.h"
-#include "open.h"
+#include <sgetopt.h>
+#include <substdio.h>
+#include <open.h>
+#include <sig.h>
+#include <fmt.h>
+#include <fd.h>
+#include <alloc.h>
+#include <str.h>
+#include <getln.h>
+#include <error.h>
+#include <case.h>
+#include <stralloc.h>
+#include <datetime.h>
+#include <now.h>
+#include <wait.h>
+#include <env.h>
+#include <scan.h>
+#include <mess822.h>
+#include <makeargs.h>
 #include "qmail.h"
-#include "sig.h"
-#include "fmt.h"
-#include "fd.h"
-#include "alloc.h"
-#include "str.h"
-#include "getln.h"
-#include "error.h"
-#include "case.h"
-#include "stralloc.h"
-#include "datetime.h"
-#include "now.h"
-#include "wait.h"
-#include "auto_qmail.h"
-#include "auto_control.h"
-#include "env.h"
-#include "scan.h"
-#include "mess822.h"
 #include "control.h"
 #include "variables.h"
 #include "domainkeys.h"
-#include "makeargs.h"
 #include "qmulti.h"
+#include "auto_control.h"
+#include "pidopen.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
@@ -203,10 +206,7 @@ char            errbuf[256];
 
 datetime_sec    starttime;
 struct datetime dt;
-unsigned long   mypid;
 unsigned long   uid;
-char           *pidfn;
-int             messfd;
 int             readfd;
 char           *dksign = 0;
 char           *dkverify = 0;
@@ -302,73 +302,6 @@ maybe_die_dk(e)
 	}
 }
 
-unsigned int
-pidfmt(s, seq)
-	char           *s;
-	unsigned long   seq;
-{
-	unsigned int    i;
-	unsigned int    len;
-	char           *tmpdir;
-
-	if (!(tmpdir = env_get("TMPDIR")))
-		tmpdir = "/tmp";
-	len = 0;
-	i = fmt_str(s, tmpdir);
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_str(s, "/qmail-dk.");
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_ulong(s, mypid);
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_str(s, ".");
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_ulong(s, starttime);
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_str(s, ".");
-	len += i;
-	if (s)
-		s += i;
-	i = fmt_ulong(s, seq);
-	len += i;
-	if (s)
-		s += i;
-	++len;
-	if (s)
-		*s++ = 0;
-
-	return len;
-}
-
-void
-pidopen()
-{
-	unsigned int    len;
-	unsigned long   seq;
-
-	seq = 1;
-	len = pidfmt((char *) 0, seq);
-	if (!(pidfn = alloc(len)))
-		die(51);
-	for (seq = 1; seq < 10; ++seq) {
-		if (pidfmt((char *) 0, seq) > len)
-			die(81); /*- paranoia */
-		pidfmt(pidfn, seq);
-		if ((messfd = open_excl(pidfn)) != -1)
-			return;
-	}
-	die(63);
-}
-
 char            tmp[FMT_ULONG];
 DK_LIB         *dklib;
 DK             *dk;
@@ -393,9 +326,8 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
-		if (!stralloc_copys(&keyfnfrom, controldir))
-			die(51);
-		if (!stralloc_append(&keyfnfrom, "/"))
+		if (!stralloc_copys(&keyfnfrom, controldir) ||
+				!stralloc_append(&keyfnfrom, "/"))
 			die(51);
 	}
 	i = str_chr(keyfn, '%');
@@ -404,13 +336,10 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 				die(51);
 		} else
-		if (!stralloc_catb(&keyfnfrom, keyfn, i))
-			die(51);
-		if (!stralloc_cats(&keyfnfrom, from))
-			die(51);
-		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
-			die(51);
-		if (!stralloc_0(&keyfnfrom))
+		if (!stralloc_catb(&keyfnfrom, keyfn, i) ||
+				!stralloc_cats(&keyfnfrom, from) ||
+				!stralloc_cats(&keyfnfrom, keyfn + i + 1) ||
+				!stralloc_0(&keyfnfrom))
 			die(51);
 		if (access(keyfnfrom.s, F_OK)) {
 			if (errno != error_noent) {
@@ -427,9 +356,8 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 				die(51);
 			if ((i - 1) > 0 && keyfn[i - 1] == '/' && keyfn[i + 1] == '/')
 				i++;
-			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
-				die(51);
-			if (!stralloc_0(&keyfnfrom))
+			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1) ||
+					!stralloc_0(&keyfnfrom))
 				die(51);
 		} 
 	} else {
@@ -437,9 +365,8 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 			if (!stralloc_copys(&keyfnfrom, keyfn))
 				die(51);
 		} else
-		if (!stralloc_cats(&keyfnfrom, keyfn))
-			die(51);
-		if (!stralloc_0(&keyfnfrom))
+		if (!stralloc_cats(&keyfnfrom, keyfn) ||
+				!stralloc_0(&keyfnfrom))
 			die(51);
 	}
 	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + 8, 1))
@@ -480,30 +407,22 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 #if 0
 		"Comment: DomainKeys? See http://antispam.yahoo.com/domainkeys\n"
 #endif
-		"DomainKey-Signature: a=rsa-sha1; q=dns; c="))
-		die(51);
-	if (!stralloc_cats(&dkoutput, canon))
-		die(51);
-	if (!stralloc_cats(&dkoutput, ";\n"))
-		die(51);
-	if (!stralloc_cats(&dkoutput, "    s="))
-		die(51);
-	if (!stralloc_cats(&dkoutput, selector))
-		die(51);
-	if (!stralloc_cats(&dkoutput, "; d="))
+		"DomainKey-Signature: a=rsa-sha1; q=dns; c=") ||
+			!stralloc_cats(&dkoutput, canon) ||
+			!stralloc_cats(&dkoutput, ";\n") ||
+			!stralloc_cats(&dkoutput, "    s=") ||
+			!stralloc_cats(&dkoutput, selector) ||
+			!stralloc_cats(&dkoutput, "; d="))
 		die(51);
 	ptr = env_get("DKDOMAIN");
 	if (from || ptr) {
 		if (!stralloc_cats(&dkoutput, ptr ? ptr : from))
 			die(51);
 	} else
-	if (!stralloc_cats(&dkoutput, "unknown"))
-		die(51);
-	if (!stralloc_cats(&dkoutput, ";\n"))
-		die(51);
-	if (!stralloc_cats(&dkoutput, "    b="))
-		die(51);
-	if (!stralloc_cats(&dkoutput, (char *) advice))
+	if (!stralloc_cats(&dkoutput, "unknown") ||
+			!stralloc_cats(&dkoutput, ";\n") ||
+			!stralloc_cats(&dkoutput, "    b=") ||
+			!stralloc_cats(&dkoutput, (char *) advice))
 		die(51);
 	if (dkexcludeheaders || opth) {
 		if ((i = dk_headers(dka, NULL)) > 0) {
@@ -511,9 +430,8 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 				die(51);
 			if (!dk_headers(dka, ptr))
 				die(51);
-			if (!stralloc_cats(&dkoutput, ";\n    h="))
-				die(51);
-			if (!stralloc_cats(&dkoutput, ptr))
+			if (!stralloc_cats(&dkoutput, ";\n    h=") ||
+					!stralloc_cats(&dkoutput, ptr))
 				die(51);
 			alloc_free(ptr);
 		}
@@ -538,9 +456,8 @@ find_header(stralloc *line)
 		if (!stralloc_copys(&headers, ""))
 			die(51);
 		if (dkexcludeheaders) {
-			if (!stralloc_cats(&headers, dkexcludeheaders))
-				die(51);
-			if (!stralloc_append(&headers, ":"))
+			if (!stralloc_cats(&headers, dkexcludeheaders) ||
+					!stralloc_append(&headers, ":"))
 				die(51);
 		}
 	}
@@ -570,13 +487,10 @@ dk_setoptions(char **selector, int *advicelen, int *opth, int *optr, int *optc,
 	*selector = 0;
 	if (!signOptions)
 		return (0);
-	if (!stralloc_copys(&dkopts, "qmail-dk "))
-		die(51);
-	if (!stralloc_cats(&dkopts, signOptions))
-		die(51);
-	if (!stralloc_0(&dkopts))
-		die(51);
-	if (!(argv = makeargs(dkopts.s)))
+	if (!stralloc_copys(&dkopts, "qmail-dk ") ||
+			!stralloc_cats(&dkopts, signOptions) ||
+			!stralloc_0(&dkopts) ||
+			!(argv = makeargs(dkopts.s)))
 		die(51);
 	for (argc = 0;argv[argc];argc++);
 	while ((ch = sgopt(argc, argv, "hrb:c:s:")) != sgoptdone) {
@@ -617,7 +531,7 @@ main(int argc, char *argv[])
 {
 	int             errfd, pim[2];
 	int             wstat, match, opth = 0, optr = 0, optc = DK_CANON_NOFWS,
-					advicelen = ADVICE_BUF;
+					advicelen = ADVICE_BUF, ret;
 	char           *x, *relayclient, *canon = "nofws", *selector = 0; 
 	stralloc        line = {0}, dkfn = {0};
 	unsigned long   pid;
@@ -629,8 +543,6 @@ main(int argc, char *argv[])
 	else
 		scan_int(x, &errfd);
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
-	if (chdir(auto_qmail) == -1)
-		die(61);
 	dksign = env_get("DKSIGN");
 	dkverify = env_get("DKVERIFY");
 	relayclient = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
@@ -638,9 +550,8 @@ main(int argc, char *argv[])
 		return (qmulti("DKQUEUE", argc, argv));
 	if (!dksign && !dkverify && relayclient) {
 		if (!(dksign = env_get("DKKEY"))) {
-			if (!stralloc_copys(&dkfn, "domainkeys/%/default"))
-				die(51);
-			if (!stralloc_0(&dkfn))
+			if (!stralloc_copys(&dkfn, "domainkeys/%/default") ||
+					!stralloc_0(&dkfn))
 				die(51);
 			dksign = dkfn.s;
 		}
@@ -673,7 +584,6 @@ main(int argc, char *argv[])
 			_exit(88);
 		}
 	}
-	mypid = getpid();
 	uid = getuid();
 	starttime = now();
 	datetime_tai(&dt, starttime);
@@ -682,7 +592,8 @@ main(int argc, char *argv[])
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);
 	alarm(DEATH);
-	pidopen();
+	if ((ret = pidopen(starttime)))
+		die(ret);
 	if ((readfd = open_read(pidfn)) == -1)
 		die(63);
 	if (unlink(pidfn) == -1)
@@ -814,9 +725,8 @@ main(int argc, char *argv[])
 				code = "X.6.0";
 				break;
 			}
-			if (!stralloc_cats(&dkoutput, status))
-				die(51);
-			if (!stralloc_cats(&dkoutput, "\n"))
+			if (!stralloc_cats(&dkoutput, status) ||
+					!stralloc_cats(&dkoutput, "\n"))
 				die(51);
 			if (dkverify[str_chr(dkverify, 'A' + st)]) {
 				custom_error("D", status, code); /*- return permanent error */
@@ -889,11 +799,12 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.52 2021-06-09 21:14:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.53 2021-06-15 11:52:41+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
 	x = sccsidqmultih;
+	x = sccsidpidopenh;
 #endif
 	x++;
 }

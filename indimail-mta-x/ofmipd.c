@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.20  2021-06-14 00:59:59+05:30  Cprogrammer
+ * removed chdir(auto_sysconfdir)
+ *
  * Revision 1.19  2021-03-04 23:02:29+05:30  Cprogrammer
  * ansic c prototype for safewrite()
  *
@@ -1069,17 +1072,12 @@ auth_cram()
 	s += fmt_ulong(s, (unsigned long) now());
 	*s++ = '@';
 	*s++ = 0;
-	if (!stralloc_copys(&pass, "<")) /*- generate challenge */
-		nomem();
-	if (!stralloc_cats(&pass, unique))
-		nomem();
-	if (!stralloc_cats(&pass, hostname))
-		nomem();
-	if (!stralloc_cats(&pass, ">"))
-		nomem();
-	if (b64encode(&pass, &slop) < 0)
-		nomem();
-	if (!stralloc_0(&slop))
+	if (!stralloc_copys(&pass, "<") || /*- generate challenge */
+			!stralloc_cats(&pass, unique) ||
+			!stralloc_cats(&pass, hostname) ||
+			!stralloc_cats(&pass, ">") ||
+			b64encode(&pass, &slop) < 0 ||
+			!stralloc_0(&slop))
 		nomem();
 	out("334 ");	/*- "334 mychallenge \r\n" */
 	out(slop.s);
@@ -1096,9 +1094,8 @@ auth_cram()
 	while (*s == ' ')
 		++s;
 	slop.s[i] = 0;
-	if (!stralloc_copys(&user, slop.s))	/*- userid */
-		nomem();
-	if (!stralloc_copys(&resp, s)) /*- digest */
+	if (!stralloc_copys(&user, slop.s) || /*- userid */
+			!stralloc_copys(&resp, s)) /*- digest */
 		nomem();
 	if (!user.len || !resp.len)
 		return err_input();
@@ -1130,7 +1127,9 @@ smtp_auth(char *arg)
 		out("503 no auth during mail transaction (#5.5.0)\r\n");
 		return;
 	}
-	if (!stralloc_copys(&user, "") || !stralloc_copys(&pass, "") || !stralloc_copys(&resp, ""))
+	if (!stralloc_copys(&user, "") ||
+			!stralloc_copys(&pass, "") ||
+			!stralloc_copys(&resp, ""))
 		nomem();
 	i = str_chr(cmd, ' ');
 	arg = cmd + i;
@@ -1201,8 +1200,6 @@ main(int argc, char **argv)
 	remoteinfo = env_get("REMOTEINFO");
 	relayclient = env_get("RELAYCLIENT");
 	received_init();
-	if (chdir(auto_sysconfdir) == -1)
-		die_config();
 	if (leapsecs_init() == -1)
 		die_config();
 	if (rwhconfig(&rewrite, &idappend) == -1)
@@ -1221,7 +1218,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.19 2021-03-04 23:02:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.20 2021-06-14 00:59:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

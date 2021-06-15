@@ -1,5 +1,8 @@
 /*
  * $Log: srs.c,v $
+ * Revision 1.2  2021-06-12 19:57:46+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.1  2013-08-23 15:34:22+05:30  Cprogrammer
  * Initial revision
  *
@@ -10,7 +13,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <srs2.h>
-#include "auto_qmail.h"
 #include "control.h"
 #include "rcpthosts.h"
 #include "str.h"
@@ -38,8 +40,6 @@ setup(int with_rcpthosts)
 
 	if (setup_ok == 1)
 		return 1;
-	if (chdir(auto_qmail) == -1)
-		return -1;
 	if (control_init() == -1)
 		return -1;
 	if (control_readline(&srs_domain, "srs_domain") == -1)
@@ -193,7 +193,7 @@ srsreverse(char *srsaddress)
 void
 getversion_srs_c()
 {
-	static char    *x = "$Id: srs.c,v 1.1 2013-08-23 15:34:22+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: srs.c,v 1.2 2021-06-12 19:57:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

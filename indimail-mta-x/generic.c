@@ -1,7 +1,7 @@
 /*
  * $Log: generic.c,v $
- * Revision 1.5  2021-06-09 19:34:32+05:30  Cprogrammer
- * added makeargs.h
+ * Revision 1.5  2021-06-15 11:36:51+05:30  Cprogrammer
+ * moved makeargs.h to libqmail
  *
  * Revision 1.4  2020-04-01 16:13:40+05:30  Cprogrammer
  * added header for makeargs() function
@@ -17,10 +17,10 @@
  *
  */
 #include <unistd.h>
-#include "str.h"
-#include "env.h"
-#include "wait.h"
-#include "makeargs.h"
+#include <str.h>
+#include <env.h>
+#include <wait.h>
+#include <makeargs.h>
 
 extern char    *auto_scancmd[];
 
@@ -72,7 +72,7 @@ virusscan(char *messfn)
 void
 getversion_generic_c()
 {
-	static char    *x = "$Id: generic.c,v 1.5 2021-06-09 19:34:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: generic.c,v 1.5 2021-06-15 11:36:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

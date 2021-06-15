@@ -1,7 +1,7 @@
 /*
  * $Log: sys-checkpwd.c,v $
- * Revision 1.11  2021-06-09 19:37:40+05:30  Cprogrammer
- * added makeargs.h
+ * Revision 1.11  2021-06-15 12:22:24+05:30  Cprogrammer
+ * moved makeargs.h to libqmail
  *
  * Revision 1.10  2021-05-26 10:47:37+05:30  Cprogrammer
  * handle access() error other than ENOENT
@@ -46,17 +46,17 @@
 #ifdef HASUSERPW
 #include <userpw.h>
 #endif
-#include "alloc.h"
-#include "stralloc.h"
-#include "strerr.h"
-#include "str.h"
-#include "fmt.h"
-#include "error.h"
-#include "env.h"
-#include "subfd.h"
-#include "in_crypt.h"
-#include "pw_comp.h"
-#include "makeargs.h"
+#include <alloc.h>
+#include <stralloc.h>
+#include <strerr.h>
+#include <str.h>
+#include <fmt.h>
+#include <error.h>
+#include <env.h>
+#include <subfd.h>
+#include <in_crypt.h>
+#include <pw_comp.h>
+#include <makeargs.h>
 
 #define FATAL "sys-checkpwd: fatal: "
 #define WARN  "sys-checkpwd: warn: "
@@ -320,7 +320,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.11 2021-06-09 19:37:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.11 2021-06-15 12:22:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

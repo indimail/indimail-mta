@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-queue.c,v $
- * Revision 1.73  2021-06-09 19:36:44+05:30  Cprogrammer
- * added makeargs.h
+ * Revision 1.73  2021-06-15 12:16:01+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
  *
  * Revision 1.72  2021-05-29 23:50:28+05:30  Cprogrammer
  * replace str_chr with str_rchr to get domain correctly from email address
@@ -204,34 +204,34 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-#include "matchregex.h"
-#include "sig.h"
-#include "case.h"
-#include "str.h"
-#include "getln.h"
-#include "open.h"
-#include "seek.h"
-#include "fmt.h"
-#include "alloc.h"
-#include "substdio.h"
-#include "datetime.h"
-#include "now.h"
+#include <sig.h>
+#include <case.h>
+#include <str.h>
+#include <getln.h>
+#include <open.h>
+#include <seek.h>
+#include <fmt.h>
+#include <alloc.h>
+#include <substdio.h>
+#include <datetime.h>
+#include <now.h>
+#include <date822fmt.h>
+#include <stralloc.h>
+#include <env.h>
+#include <error.h>
+#include <scan.h>
+#include <mess822.h>
+#include <wait.h>
+#include <makeargs.h>
+#include <getEnvConfig.h>
+#include "control.h"
+#include "variables.h"
+#include "fmtqfn.h"
 #include "triggerpull.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
-#include "date822fmt.h"
-#include "fmtqfn.h"
-#include "stralloc.h"
-#include "control.h"
-#include "env.h"
-#include "variables.h"
-#include "error.h"
-#include "scan.h"
-#include "mess822.h"
-#include "wait.h"
-#include "makeargs.h"
+#include "matchregex.h"
 #include "auto_split.h"
-#include "getEnvConfig.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
@@ -590,6 +590,7 @@ qhpsiprog(char *program)
 	char          **argv;
 	char           *scancmd[3] = { 0, 0, 0 };
 	char           *x;
+	char            qhpsibin[] = "/usr/sbin/qhpsi";
 	unsigned long   u;
 	int             childrc = -1;
 	int             qhpsirc = 1, qhpsirn = 0;
@@ -629,17 +630,11 @@ qhpsiprog(char *program)
 		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
 			_exit(50);
 		if (!str_diffn(program, "plugin:", 7)) {
-			if (!stralloc_copys(&plugin, "plugin:"))
-				die(51);
-			if (!stralloc_cats(&plugin, messfn))
-				die(51);
-			if (!stralloc_append(&plugin, " "))
-				die(51);
-			if (!stralloc_cats(&plugin, program + 7))
-				die(51);
-			if (!stralloc_0(&plugin))
-				die(51);
-			if (!(argv = makeargs(plugin.s)))
+			if (!stralloc_copys(&plugin, "plugin:") ||
+					!stralloc_cats(&plugin, messfn) ||
+					!stralloc_append(&plugin, " ") ||
+					!stralloc_cats(&plugin, program + 7) ||
+					!stralloc_0(&plugin) || !(argv = makeargs(plugin.s)))
 				die(51);
 		} else {
 			if (!(argv = makeargs(program)))
@@ -654,13 +649,7 @@ qhpsiprog(char *program)
 					argv[u] = messfn;
 			}
 		}
-		if (!stralloc_copys(&line, auto_qmail))
-			die(51);
-		if (!stralloc_cats(&line, "/sbin/qhpsi"))
-			die(51);
-		if (!stralloc_0(&line))
-			die(51);
-		execv(line.s, argv);
+		execv(qhpsibin, argv);
 		_exit(75);
 	} /*- switch (child = fork()) */
 	if (wait_pid(&wstat, child) == -1) {
@@ -848,8 +837,6 @@ main()
 	umask(033);
 	if (uidinit(1) == -1)
 		die(67);
-	if (chdir(auto_qmail) == -1)
-		die(61);
 	if (control_readint((int *) &originipfield, "originipfield") == -1)
 		die(55);
 	if ((ptr = env_get("ORIGINIPFIELD"))) {
@@ -860,9 +847,8 @@ main()
 		if (control_readfile(&extraqueue, "extraqueue", 0) == -1)
 			die(55);
 	} else {
-		if (!stralloc_copys(&extraqueue, ptr))
-			die(51);
-		if (!stralloc_0(&extraqueue))
+		if (!stralloc_copys(&extraqueue, ptr) ||
+				!stralloc_0(&extraqueue))
 			die(51);
 		extraqueue.len--;
 	}
@@ -1074,9 +1060,8 @@ main()
 		die_write();
 #if defined(MAILARCHIVE)
 	if (flagarchive) {
-		if (!stralloc_copys(&line, ""))
-			die(51);
-		if (!stralloc_catb(&line, &ch, 1))
+		if (!stralloc_copys(&line, "") ||
+				!stralloc_catb(&line, &ch, 1))
 			die(51);
 	}
 #endif
@@ -1117,11 +1102,8 @@ main()
 			die_write();
 	}
 	if (flagquarantine) {
-		if (!stralloc_cats(&qqehextra, "X-Quarantine-ID: ")) {
-			cleanup();
-			die(51);
-		}
-		if (!stralloc_cat(&qqehextra, &quarantine)) {
+		if (!stralloc_cats(&qqehextra, "X-Quarantine-ID: ") ||
+				!stralloc_cat(&qqehextra, &quarantine)) {
 			cleanup();
 			die(51);
 		}
@@ -1270,7 +1252,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.73 2021-06-09 19:36:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.73 2021-06-15 12:16:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

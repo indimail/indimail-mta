@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq-stdin.c,v $
+ * Revision 1.7  2021-06-12 19:25:48+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.6  2021-06-09 19:36:55+05:30  Cprogrammer
  * use qmulti() instead of exec of qmail-multi
  *
@@ -36,7 +39,6 @@
 #include "exitcodes.h"
 #include "auto_fnlen.h"
 #include "auto_ageout.h"
-#include "auto_qmail.h"
 #include "qmulti.h"
 
 #define FATAL "qscanq: fatal: "
@@ -184,8 +186,6 @@ main(int argc, char *argv[])
 	}
 	/*- all done!  */
 	do_cleanq();
-	if (chdir(auto_qmail))
-		_exit(61);
 	/* 
 	 * unset VIRUSCHECK to prevent
 	 * qscanq getting called recursively
@@ -204,7 +204,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_stdin_c()
 {
-	static char    *x = "$Id: qscanq-stdin.c,v 1.6 2021-06-09 19:36:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq-stdin.c,v 1.7 2021-06-12 19:25:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;

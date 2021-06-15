@@ -54,20 +54,20 @@ main(argc, argv)
 		case 'X':
 			exclude = 1;
 			if (!stralloc_cats(&excl, optarg))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (!stralloc_append(&excl, ":"))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (!stralloc_0(&excl))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+				strerr_die2x(111, FATAL, "out of memory");
 			break;
 		case 'I':
 			include = 1;
 			if (!stralloc_cats(&incl, optarg))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (!stralloc_append(&incl, ":"))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+				strerr_die2x(111, FATAL, "out of memory");
 			if (!stralloc_0(&incl))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+				strerr_die2x(111, FATAL, "out of memory");
 			break;
 		default:
 			strerr_die1x(100, "USAGE: 822header [-I include headers] [-X exclude headers]");

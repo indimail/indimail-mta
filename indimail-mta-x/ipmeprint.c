@@ -1,5 +1,8 @@
 /*
  * $Log: ipmeprint.c,v $
+ * Revision 1.13  2021-06-12 17:58:05+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
  * Revision 1.12  2020-11-24 13:45:39+05:30  Cprogrammer
  * removed exit.h
  *
@@ -41,11 +44,6 @@ main()
 {
 	int             j;
 
-	if (chdir(auto_qmail) == -1) /*- needed to correctly load control files notipme, moreipme */
-	{
-		substdio_putsflush(subfderr, "Unable to switch to home directory.\n");
-		_exit(100);
-	}
 	switch (ipme_init())
 	{
 	case 0:
@@ -82,7 +80,7 @@ main()
 void
 getversion_ipmeprint_c()
 {
-	static char    *x = "$Id: ipmeprint.c,v 1.12 2020-11-24 13:45:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipmeprint.c,v 1.13 2021-06-12 17:58:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

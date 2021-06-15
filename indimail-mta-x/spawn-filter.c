@@ -1,7 +1,7 @@
 /*
  * $Log: spawn-filter.c,v $
- * Revision 1.80  2021-06-09 19:37:34+05:30  Cprogrammer
- * added makeargs.h
+ * Revision 1.80  2021-06-15 12:21:12+05:30  Cprogrammer
+ * moved makeargs.h to libqmail
  *
  * Revision 1.79  2021-06-01 01:55:17+05:30  Cprogrammer
  * removed rate limit code, added to qmail-send, slowq-send
@@ -255,33 +255,33 @@
  * Initial revision
  *
  */
-#include "fmt.h"
-#include "str.h"
-#include "getln.h"
-#include "case.h"
-#include "byte.h"
-#include "constmap.h"
-#include "strerr.h"
-#include "env.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "stralloc.h"
-#include "error.h"
-#include "control.h"
-#include "wait.h"
-#include "qregex.h"
-#include "auto_qmail.h"
-#include "variables.h"
-#include "envrules.h"
-#include "scan.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include "makeargs.h"
+#include <fmt.h>
+#include <str.h>
+#include <getln.h>
+#include <case.h>
+#include <byte.h>
+#include <constmap.h>
+#include <strerr.h>
+#include <env.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <stralloc.h>
+#include <error.h>
+#include <wait.h>
+#include <scan.h>
+#include <makeargs.h>
+#include "control.h"
 #include "report.h"
 #include "getDomainToken.h"
+#include "qregex.h"
+#include "auto_qmail.h"
+#include "variables.h"
+#include "envrules.h"
 
 static int      mkTempFile(int);
 static int      run_mailfilter(char *, char *, char *, char *, char **);
@@ -878,7 +878,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.80 2021-06-09 19:37:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.80 2021-06-15 12:21:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;

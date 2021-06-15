@@ -1,10 +1,7 @@
 /*
  * $Log: qmail-poppass.c,v $
- * Revision 1.5  2021-06-09 19:36:23+05:30  Cprogrammer
- * added makeargs.h
- *
- * Revision 1.4  2020-04-01 16:14:42+05:30  Cprogrammer
- * added header for makeargs() function
+ * Revision 1.4  2021-06-15 12:14:05+05:30  Cprogrammer
+ * use makeargs from libqmail
  *
  * Revision 1.3  2009-08-06 22:53:21+05:30  Cprogrammer
  * remove '\r' from input stream
@@ -38,18 +35,18 @@
  *   E: <closes connection>
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "str.h"
-#include "env.h"
-#include "fmt.h"
-#include "wait.h"
-#include "byte.h"
-#include "sig.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "error.h"
+#include <substdio.h>
+#include <str.h>
+#include <env.h>
+#include <fmt.h>
+#include <wait.h>
+#include <byte.h>
+#include <sig.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <error.h>
+#include <makeargs.h>
 #include "auto_uids.h"
-#include "makeargs.h"
 
 static char     ssinbuf[1024];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
@@ -358,7 +355,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	static char    *x = "$Id: qmail-poppass.c,v 1.5 2021-06-09 19:36:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-poppass.c,v 1.4 2021-06-15 12:14:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

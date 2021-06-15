@@ -1,5 +1,8 @@
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.55  2021-06-12 18:52:06+05:30  Cprogrammer
+ * added chdir(auto_qmail) for qmail-queue
+ *
  * Revision 1.54  2021-06-09 19:33:32+05:30  Cprogrammer
  * moved qmail-multi code to qmulti.c
  *
@@ -218,6 +221,8 @@ qmulti(char *queue_env, int argc, char **argv)
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
 	char           *binqqargs[2] = { "sbin/qmail-multi", 0 };
 
+	if (chdir(auto_qmail) == -1)
+		_exit(61);
 	if (queue_env && (ptr = env_get(queue_env)) && *ptr) {
 		binqqargs[0] = ptr;
 		execv(*binqqargs, binqqargs);
@@ -337,7 +342,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.54 2021-06-09 19:33:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.55 2021-06-12 18:52:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
