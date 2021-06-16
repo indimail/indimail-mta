@@ -4,7 +4,7 @@
  * pass local Maildir/tmp as argument to pidopen
  *
  * Revision 1.5  2021-06-12 18:16:49+05:30  Cprogrammer
- * moved pidopen() out to its own file
+ * moved pidopen out to its own file
  *
  * Revision 1.4  2021-05-01 22:31:32+05:30  Cprogrammer
  * use standard Maildir for queue operation
@@ -327,7 +327,7 @@ main(int argc, char **argv)
 	sig_bugcatch(sigbug);
 	alarm(DEATH);
 
-	/*- open pid file with fd in messfd */
+	/*- set pidfn and open with fd = messfd */
 	if ((ret = pidopen(starttime, "tmp")))
 		die(ret);
 	if (fstat(messfd, &pidst) == -1)
@@ -432,7 +432,7 @@ main(int argc, char **argv)
 	/*- write the mail */
 	mailopen(pw->pw_uid, pw->pw_gid);
 	substdio_fdbuf(&ssout, write, mailfd, outbuf, sizeof (outbuf));
-	substdio_fdbuf(&ssin, read, intdfd, inbuf, sizeof (inbuf)); /*- envelope is read from fd 1 */
+	substdio_fdbuf(&ssin, read, intdfd, inbuf, sizeof (inbuf)); /*- envelope read earlier from fd 1 */
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2:
@@ -442,7 +442,7 @@ main(int argc, char **argv)
 	}
 	if (substdio_flush(&ssout) == -1)
 		die_write();
-	substdio_fdbuf(&ssin, read, messfd, inbuf, sizeof (inbuf)); /*- body is read from fd 0 */
+	substdio_fdbuf(&ssin, read, messfd, inbuf, sizeof (inbuf)); /*- body read earlier from fd 0 */
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2:

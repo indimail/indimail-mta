@@ -4,7 +4,7 @@
  * pass tmpdir argument to pidopen
  *
  * Revision 1.58  2021-06-15 11:53:44+05:30  Cprogrammer
- * moved pidopen() out to its own file
+ * moved pidopen out to its own file
  *
  * Revision 1.57  2021-06-09 21:14:33+05:30  Cprogrammer
  * use qmulti() instead of exec of qmail-multi
@@ -74,7 +74,7 @@
  * do not skip X-Mailer headers
  *
  * Revision 1.35  2011-11-10 14:32:08+05:30  Cprogrammer
- * BUG ssout to be assigned only after pidopen()
+ * BUG ssout to be assigned only after pidopen
  *
  * Revision 1.34  2011-11-07 09:35:59+05:30  Cprogrammer
  * set ssout, sserr, ssin before executing other functions
@@ -1156,14 +1156,14 @@ main(int argc, char *argv[])
 	alarm(DEATH);
 	if (!(ptr = env_get("TMPDIR")))
 		ptr = "/tmp";
-	if ((ret = pidopen(starttime, ptr))) /*- fd = messfd */
+	if ((ret = pidopen(starttime, ptr))) /*- set pidfn and open with fd = messfd */
 		die(ret, 0);
 	if ((readfd = open_read(pidfn)) == -1)
 		die(63, dkimsign ? 1 : 2);
 	if (unlink(pidfn) == -1)
 		die(63, dkimsign ? 1 : 2);
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf)); /*- message content */
 	for (ret = 0;;) {
 		register int    n;
 		register char  *x;

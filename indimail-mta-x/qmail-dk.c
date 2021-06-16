@@ -4,7 +4,7 @@
  * pass tmpdir argument to pidopen
  *
  * Revision 1.53  2021-06-15 11:52:41+05:30  Cprogrammer
- * moved pidopen() out to its own file
+ * moved pidopen out to its own file
  *
  * Revision 1.52  2021-06-09 21:14:19+05:30  Cprogrammer
  * use qmulti() instead of exec of qmail-multi
@@ -55,7 +55,7 @@
  * alternate code for chosing DKSIGN selector filename
  *
  * Revision 1.36  2011-11-10 14:31:42+05:30  Cprogrammer
- * BUG ssout to be assigned only after pidopen()
+ * BUG ssout to be assigned only after pidopen
  *
  * Revision 1.35  2011-11-07 09:35:25+05:30  Cprogrammer
  * set ssout, sserr, ssin before executing other functions
@@ -604,8 +604,8 @@ main(int argc, char *argv[])
 		die(63);
 	if (unlink(pidfn) == -1)
 		die(63);
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf)); /*- message content */
 	dkexcludeheaders = env_get("DKEXCLUDEHEADERS");
 	if (dkexcludeheaders) {
 		int             hdr_continue, in_header = 1;
