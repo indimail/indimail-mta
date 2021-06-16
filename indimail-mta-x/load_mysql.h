@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.7  2021-06-16 13:59:40+05:30  Cprogrammer
+ * use MYSQL_RES for non-libmariadb setup
+ *
  * Revision 1.6  2020-05-19 21:27:16+05:30  Cprogrammer
  * fixed typedef for MYSQL_RES
  *
@@ -27,7 +30,7 @@ typedef unsigned int i_uint;
 #ifdef LIBMARIADB
 typedef struct st_mysql_res MYRES;
 #else
-typedef struct MYSQL_RES MYRES;
+#define MYRES MYSQL_RES
 #endif
 
 extern int      use_sql;
