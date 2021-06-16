@@ -131,6 +131,9 @@ Release 2.13 Start 14/02/2021
 - 15/05/2021
 81. moved cdbmss.[c,h], token822.[c,h] to libqmail
 82. pidopen.c: added tmpdir argument
+- 16/05/2021
+83. inotify.c: fixed erroneous check for errno
+84. load_mysql.h: use MYSQL_RES for non-libmariadb setup
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
