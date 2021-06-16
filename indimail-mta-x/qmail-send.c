@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.84  2021-06-16 20:02:05+05:30  Cprogrammer
+ * added code comments
+ *
  * Revision 1.84  2021-06-05 22:42:29+05:30  Cprogrammer
  * added code comments
  *
@@ -3084,7 +3087,7 @@ main()
 			 * 'X' - set flagtodoalive = 0, flagexitasap = 1
 			 */
 			todo_do(&rfds);
-			pass_do(delayed_jobs);
+			pass_do();
 			cleanup_do();
 		}
 	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
@@ -3096,7 +3099,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.84 2021-06-05 22:42:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.84 2021-06-16 20:02:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)
