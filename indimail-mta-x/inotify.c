@@ -197,7 +197,7 @@ main(int argc, char **argv)
 	 	 * Actually this read blocks until the change event occurs
 	 	 */
 		if ((length = read(ifd, buffer, EVENT_BUF_LEN)) < 0) {
-			if (errno = error_intr)
+			if (errno == error_intr)
 				continue;
 			strerr_die2sys(111, FATAL, "read-event: ");
 		}
