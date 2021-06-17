@@ -28,6 +28,7 @@ Description: indimail-mta provides a MTA that is part of the IndiMail
 
 Package: indimail-mini
 Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, procps
+Provides: default-mta, mail-transport-agent
 Section: misc
 Architecture: any
 Breaks: indimail-mta
