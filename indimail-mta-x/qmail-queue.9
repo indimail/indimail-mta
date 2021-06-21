@@ -7,15 +7,13 @@ qmail-queue \- queue a mail message for delivery
 .B qmail-queue
 
 .SH DESCRIPTION
-.B qmail-queue
-reads a mail message from descriptor 0.
-It then reads envelope information from descriptor 1.
-It places the message into the outgoing queue
-for future delivery by
-.BR qmail-send .
-The default outgoing queue is @qmaildir@/queue. This can be changed by
-setting environment variable QUEUEDIR to point to a path having a valid
-qmail queue.
+\fBqmail-queue\fR reads a mail message from descriptor 0. It then reads
+envelope information from descriptor 1. It places the message into the
+outgoing queue for future delivery by \fBqmail-send\fR.  The default
+outgoing queue is @qmaildir@/queue. This can be changed by setting
+environment variable QUEUEDIR to point to a path having a valid
+queue created by the program \fBqueue-fix\fR(8). \fBqmail-queue\fR
+is setuid to uid \fIqmailq\fR.
 
 \fBqmail-queue\fR uses DIRSPLIT as the directory split. It can be
 overriden by environment variable \fBCONFSPLIT\fR upto a max of
@@ -25,20 +23,21 @@ The envelope information is an envelope sender address followed by a list
 of envelope recipient addresses. The sender address is preceded by the
 letter F and terminated by a 0 byte. Each recipient address is preceded by
 the letter T and terminated by a 0 byte. The list of recipient addresses is
-terminated by an extra 0 byte. If
-.B qmail-queue
-sees end-of-file before the extra 0 byte, it aborts without placing the
-message into the queue. If \fBUSE_FSYNC\fR environment variable is defined
-\fBqmail-queue\fR uses fsync(2) to sync the message file in \fIqueue/mess\fR
-and the envelope in \fIqueue/intd\fR file as well. After creating a link
-to the envelope in \fIqueue/todo\fR to \fIqueue/intd\fR, qmail-queue syncs
-the directory using the following two methods.
+terminated by an extra 0 byte. If \fBqmail-queue\fR sees end-of-file before
+the extra 0 byte, it aborts without placing the message into the queue. If
+\fBUSE_FSYNC\fR environment variable is defined \fBqmail-queue\fR uses
+fsync(2) to sync the message file in \fIqueue/mess\fR and the envelope in
+\fIqueue/intd\fR file as well. After creating a link to the envelope in
+\fIqueue/todo\fR to \fIqueue/intd\fR, qmail-queue syncs the directory using
+the following two methods.
+
 .IP \[bu] 2
-.I BSD Style Synchronous Directory
+BSD Style Synchronous Directory -
 This gets enabled if \fBUSE_SYNCDIR\fR environment variable is defined. This
 forces directory syncing.
+
 .IP \[bu]
-.I Using FSYNC
+Using FSYNC -
 \fBqmail-queue\fR opens the file in \fBqueue/todo\fR and uses the fsync(2)
 call to flush data buffers to the disk
 
