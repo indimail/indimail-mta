@@ -44,6 +44,8 @@ Release 1.1 Start 27/02/2021
 - 06/06/2021
 24. supervise.c: indicate service name in logs when supervised service
     exits/crashes
+- 22/06/2021
+25. added RestartSec & PrivateTmp to main unit file and override.conf
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
