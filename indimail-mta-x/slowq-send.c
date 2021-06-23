@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.8  2021-06-23 13:27:26+05:30  Cprogrammer
+ * moved log_stat to qsutil.c
+ *
  * Revision 1.7  2021-06-05 22:42:38+05:30  Cprogrammer
  * added code comments
  *
@@ -1833,23 +1836,8 @@ todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 		*wakeup = nexttodorun;
 }
 
-static unsigned long Bytes;
 static stralloc mailfrom = { 0 };
 static stralloc mailto = { 0 };
-
-static void
-log_stat(unsigned long id, long bytes)
-{
-	char           *ptr;
-
-	strnum1[fmt_ulong(strnum1, id)] = 0;
-	for (ptr = mailto.s; ptr < mailto.s + mailto.len;) {
-		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>",
-				" ", *(ptr + 2) ? ptr + 2 : "<>", " ", strnum1, " ", queuedesc, "\n");
-		ptr += str_len(ptr) + 1;
-	}
-	mailfrom.len = mailto.len = 0;
-}
 
 static void
 todo_do(fd_set *rfds)
@@ -1863,13 +1851,12 @@ todo_do(fd_set *rfds)
 	char            ch;
 	unsigned long   id, uid, pid;
 
+	if (flagexitasap)
+		return;
 	fd = -1;
 	fdinfo = -1;
 	for (c = 0; c < CHANNELS; ++c)
 		fdchan[c] = -1;
-
-	if (flagexitasap)
-		return;
 	/*- run todo maximal once every N seconds */
 	if (todo_interval > 0 && recent < (lasttodorun + todo_interval)) {
 		nexttodorun = lasttodorun + todo_interval;	/* do this to wake us up in N secs */
@@ -1904,7 +1891,6 @@ todo_do(fd_set *rfds)
 		log3("warning: unable to stat ", fn1.s, "\n");
 		goto fail;
 	}
-	Bytes = st.st_size;
 	for (c = 0; c < CHANNELS; ++c) {
 		fnmake_chanaddr(id, c);
 		if (unlink(fn1.s) == -1) {
@@ -2022,7 +2008,7 @@ todo_do(fd_set *rfds)
 			log5("warning: ", queuedesc, ": unknown record type in ", fn1.s, "\n");
 			goto fail;
 		}
-	}
+	} /*- for (;;) */
 	close(fd);
 	fd = -1;
 	fnmake_info(id);
@@ -2032,8 +2018,8 @@ todo_do(fd_set *rfds)
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
-			fnmake_chanaddr(id, c);
 			if (substdio_flush(&sschan[c]) == -1) {
+				fnmake_chanaddr(id, c);
 				log5("warning: ", queuedesc, ": trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
@@ -2051,6 +2037,7 @@ todo_do(fd_set *rfds)
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
 			if (use_fsync > 0 && fsync(fdchan[c]) == -1) {
+				fnmake_chanaddr(id, c);
 				log5("warning: ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
 				goto fail;
 			}
@@ -2087,7 +2074,7 @@ todo_do(fd_set *rfds)
 		while (!prioq_insert(min, &pqdone, &pe))
 			nomem();
 	}
-	log_stat(id, Bytes);
+	log_stat(&mailfrom, &mailto, id, st.st_size);
 	return;
 
 fail:
@@ -2541,7 +2528,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.7 2021-06-05 22:42:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.8 2021-06-23 13:27:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)
