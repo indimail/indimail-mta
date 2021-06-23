@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.48  2021-06-23 13:21:18+05:30  Cprogrammer
+ * display bytes in log_stat function
+ *
  * Revision 1.47  2021-06-05 12:53:13+05:30  Cprogrammer
  * display qmail-todo prefix for startup message
  *
@@ -41,7 +44,7 @@
  * removed non-indimail code
  *
  * Revision 1.35  2017-03-31 21:10:34+05:30  Cprogrammer
- * log null addresses in log_stat() as <>
+ * log null addresses in log_stat as <>
  *
  * Revision 1.34  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
@@ -53,13 +56,13 @@
  * display queue directory for qmail-todo process
  *
  * Revision 1.31  2013-05-16 23:32:53+05:30  Cprogrammer
- * added log_stat() part of non-indimail code
+ * added log_stat part of non-indimail code
  *
  * Revision 1.30  2011-07-29 09:29:54+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
  * Revision 1.29  2010-06-27 09:08:55+05:30  Cprogrammer
- * report all recipients in log_stat() for single transaction multiple recipient emails
+ * report all recipients in log_stat for single transaction multiple recipient emails
  *
  * Revision 1.28  2007-12-20 13:50:59+05:30  Cprogrammer
  * removed compiler warning
@@ -83,7 +86,7 @@
  * delay fsync()
  *
  * Revision 1.21  2004-01-02 10:17:10+05:30  Cprogrammer
- * prevent segmentation fault in log_stat() when to or from is null
+ * prevent segmentation fault in log_stat when to or from is null
  * reset to and from
  *
  * Revision 1.20  2003-12-31 20:03:33+05:30  Cprogrammer
@@ -99,11 +102,11 @@
  * fixed compilation warnings
  *
  * Revision 1.16  2003-10-17 21:06:48+05:30  Cprogrammer
- * added log_stat() function
+ * added log_stat function
  *
  * Revision 1.15  2003-10-01 19:06:12+05:30  Cprogrammer
  * changed return type to int
- * added code for future log_stat()
+ * added code for future log_stat
  *
  */
 #ifdef EXTERNAL_TODO
@@ -373,11 +376,9 @@ log1(char *x)
 	int             pos;
 
 	pos = comm_buf.len;
-	if (!stralloc_cats(&comm_buf, "L"))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, x))
-		goto fail;
-	if (!stralloc_0(&comm_buf))
+	if (!stralloc_cats(&comm_buf, "L") ||
+			!stralloc_cats(&comm_buf, x) ||
+			!stralloc_0(&comm_buf))
 		goto fail;
 	return;
 fail:
@@ -391,15 +392,11 @@ log3(char *x, char *y, char *z)
 	int             pos;
 
 	pos = comm_buf.len;
-	if (!stralloc_cats(&comm_buf, "L"))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, x))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, y))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, z))
-		goto fail;
-	if (!stralloc_0(&comm_buf))
+	if (!stralloc_cats(&comm_buf, "L") ||
+			!stralloc_cats(&comm_buf, x) ||
+			!stralloc_cats(&comm_buf, y) ||
+			!stralloc_cats(&comm_buf, z) ||
+			!stralloc_0(&comm_buf))
 		goto fail;
 	return;
 fail:
@@ -413,17 +410,12 @@ log4(char *w, char *x, char *y, char *z)
 	int             pos;
 
 	pos = comm_buf.len;
-	if (!stralloc_cats(&comm_buf, "L"))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, w))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, x))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, y))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, z))
-		goto fail;
-	if (!stralloc_0(&comm_buf))
+	if (!stralloc_cats(&comm_buf, "L") ||
+			!stralloc_cats(&comm_buf, w) ||
+			!stralloc_cats(&comm_buf, x) ||
+			!stralloc_cats(&comm_buf, y) ||
+			!stralloc_cats(&comm_buf, z) ||
+			!stralloc_0(&comm_buf))
 		goto fail;
 	return;
 fail:
@@ -437,19 +429,13 @@ log5(char *v, char *w, char *x, char *y, char *z)
 	int             pos;
 
 	pos = comm_buf.len;
-	if (!stralloc_cats(&comm_buf, "L"))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, v))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, w))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, x))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, y))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, z))
-		goto fail;
-	if (!stralloc_0(&comm_buf))
+	if (!stralloc_cats(&comm_buf, "L") ||
+			!stralloc_cats(&comm_buf, v) ||
+			!stralloc_cats(&comm_buf, w) ||
+			!stralloc_cats(&comm_buf, x) ||
+			!stralloc_cats(&comm_buf, y) ||
+			!stralloc_cats(&comm_buf, z) ||
+			!stralloc_0(&comm_buf))
 		goto fail;
 	return;
 fail:
@@ -463,23 +449,15 @@ log7(char *t, char *u, char *v, char *w, char *x, char *y, char *z)
 	int             pos;
 
 	pos = comm_buf.len;
-	if (!stralloc_cats(&comm_buf, "L"))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, t))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, u))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, v))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, w))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, x))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, y))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, z))
-		goto fail;
-	if (!stralloc_0(&comm_buf))
+	if (!stralloc_cats(&comm_buf, "L") ||
+			!stralloc_cats(&comm_buf, t) ||
+			!stralloc_cats(&comm_buf, u) ||
+			!stralloc_cats(&comm_buf, v) ||
+			!stralloc_cats(&comm_buf, w) ||
+			!stralloc_cats(&comm_buf, x) ||
+			!stralloc_cats(&comm_buf, y) ||
+			!stralloc_cats(&comm_buf, z) ||
+			!stralloc_0(&comm_buf))
 		goto fail;
 	return;
 fail:
@@ -493,27 +471,17 @@ log9(char *r, char *s, char *t, char *u, char *v, char *w, char *x, char *y, cha
 	int             pos;
 
 	pos = comm_buf.len;
-	if (!stralloc_cats(&comm_buf, "L"))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, r))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, s))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, t))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, u))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, v))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, w))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, x))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, y))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, z))
-		goto fail;
-	if (!stralloc_0(&comm_buf))
+	if (!stralloc_cats(&comm_buf, "L") ||
+			!stralloc_cats(&comm_buf, r) ||
+			!stralloc_cats(&comm_buf, s) ||
+			!stralloc_cats(&comm_buf, t) ||
+			!stralloc_cats(&comm_buf, u) ||
+			!stralloc_cats(&comm_buf, v) ||
+			!stralloc_cats(&comm_buf, w) ||
+			!stralloc_cats(&comm_buf, x) ||
+			!stralloc_cats(&comm_buf, y) ||
+			!stralloc_cats(&comm_buf, z) ||
+			!stralloc_0(&comm_buf))
 		goto fail;
 	return;
 fail:
@@ -724,19 +692,22 @@ todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 		*wakeup = nexttodorun;
 }
 
-unsigned long   msg_size;
 stralloc        mailfrom = { 0 };
 stralloc        mailto = { 0 };
 
 void
-log_stat(long bytes)
+log_stat(unsigned long id, size_t bytes)
 {
 	char           *ptr;
+	char            strnum1[FMT_ULONG + 1], strnum2[FMT_ULONG + 1];
 
-	strnum[fmt_ulong(strnum, bytes)] = 0;
+	strnum1[fmt_ulong(strnum1 + 1, id) + 1] = 0;
+	strnum2[fmt_ulong(strnum2, bytes) + 1] = 0;
+	*strnum1 = ' ';
+	*strnum2 = ' ';
 	for (ptr = mailto.s; ptr < mailto.s + mailto.len;) {
-		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>", " ", *(ptr + 2) ? ptr + 2 : "<>", " ",
-			 strnum, " ", queuedesc, "\n");
+		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>",
+				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes ", queuedesc, "\n");
 		ptr += str_len(ptr) + 1;
 	}
 	mailfrom.len = mailto.len = 0;
@@ -798,7 +769,6 @@ todo_do(fd_set * rfds)
 		log5("warning: ", queuedesc, ": qmail-todo: unable to stat ", fn.s, "\n");
 		goto fail;
 	}
-	msg_size = st.st_size; /*- message size */
 	for (c = 0; c < CHANNELS; ++c) {
 		fnmake_chanaddr(id, c);
 		if (unlink(fn.s) == -1 && errno != error_noent) {
@@ -843,14 +813,12 @@ todo_do(fd_set * rfds)
 		case 'h': /*- envheader */
 		case 'e': /*- qqeh */
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
-				fnmake_info(id); /*- info/split/id */
 				log5("warning: ", queuedesc, ": trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
 			break;
 		case 'F': /*- from */
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
-				fnmake_info(id); /*- info/split/id */
 				log5("warning: ", queuedesc, ": qmail-todo: trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
@@ -917,8 +885,8 @@ todo_do(fd_set * rfds)
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
-			fnmake_chanaddr(id, c);
 			if (substdio_flush(&sschan[c]) == -1) {
+				fnmake_chanaddr(id, c);
 				log5("warning: ", queuedesc, ": qmail-todo: trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
@@ -936,6 +904,7 @@ todo_do(fd_set * rfds)
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
 			if (use_fsync && fsync(fdchan[c]) == -1) {
+				fnmake_chanaddr(id, c);
 				log5("warning: ", queuedesc, ": qmail-todo: trouble fsyncing ", fn.s, "\n");
 				goto fail;
 			}
@@ -959,7 +928,7 @@ todo_do(fd_set * rfds)
 	}
 	comm_write(id, flagchan[0], flagchan[1]); /*- e.g. "DL656826\0" */
 	/*- "Llocal: mbhangui@argos.indimail.org mbhangui@argos.indimail.org 798 queue1\n\0" */
-	log_stat(msg_size);
+	log_stat(id, st.st_size);
 	return;
 
 fail:
@@ -1258,7 +1227,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.47 2021-06-05 12:53:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.48 2021-06-23 13:21:18+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
