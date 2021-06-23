@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.17  2021-06-23 10:03:55+05:30  Cprogrammer
+ * added log_stat() function
+ *
  * Revision 1.16  2021-06-05 22:35:05+05:30  Cprogrammer
  * added log4_noflush() function
  *
@@ -49,10 +52,12 @@
  *
  */
 #include <unistd.h>
-#include "stralloc.h"
-#include "substdio.h"
+#include <stralloc.h>
+#include <fmt.h>
+#include <str.h>
+#include <substdio.h>
+#include <lock.h>
 #include "qsutil.h"
-#include "lock.h"
 
 static stralloc foo = { 0 };
 
@@ -327,6 +332,28 @@ log15(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
 }
 
 void
+log_stat(stralloc *mailfrom, stralloc *mailto, unsigned long id, long bytes)
+{
+	char           *ptr;
+	char            strnum1[FMT_ULONG + 1], strnum2[FMT_ULONG + 1];
+
+	strnum1[fmt_ulong(strnum1 + 1, id) + 1] = 0;
+	strnum2[fmt_ulong(strnum2, bytes) + 1] = 0;
+	*strnum1 = ' ';
+	*strnum2 = ' ';
+	for (ptr = mailto->s; ptr < mailto->s + mailto->len;) {
+		if (queuedesc)
+			log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom->len > 3 ? mailfrom->s + 1 : "<>",
+				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes ", queuedesc, "\n");
+		else
+			log7(*ptr == 'L' ? "local: " : "remote: ", mailfrom->len > 3 ? mailfrom->s + 1 : "<>",
+				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes\n");
+		ptr += str_len(ptr) + 1;
+	}
+	mailfrom->len = mailto->len = 0;
+}
+
+void
 nomem()
 {
 	if (queuedesc)
@@ -399,7 +426,7 @@ logsafe(char *s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.16 2021-06-05 22:35:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.17 2021-06-23 10:03:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

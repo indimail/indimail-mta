@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.16  2021-06-23 10:04:01+05:30  Cprogrammer
+ * added log_stat() function
+ *
  * Revision 1.15  2021-06-05 12:53:00+05:30  Cprogrammer
  * added log4_noflush() function
  *
@@ -60,6 +63,7 @@ void            log13(char *, char *, char *, char *, char *, char *, char *, ch
 void            log15(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
+void            log_stat(stralloc *, stralloc *, unsigned long, long);
 void            nomem(void);
 void            lockerr(void);
 void            pausedir(char *);
