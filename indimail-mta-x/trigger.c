@@ -1,10 +1,7 @@
 /*
  * $Log: trigger.c,v $
- * Revision 1.4  2004-10-22 20:31:50+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.3  2004-07-17 21:24:57+05:30  Cprogrammer
- * added RCS log
+ * Revision 1.2  2021-06-23 10:02:37+05:30  Cprogrammer
+ * converted to ansic prototypes
  *
  */
 #include <unistd.h>
@@ -34,12 +31,9 @@ trigger_set()
 }
 
 void
-trigger_selprep(nfds, rfds)
-	int            *nfds;
-	fd_set         *rfds;
+trigger_selprep(int *nfds, fd_set *rfds)
 {
-	if (fd != -1)
-	{
+	if (fd != -1) {
 		FD_SET(fd, rfds);
 		if (*nfds < fd + 1)
 			*nfds = fd + 1;
@@ -47,19 +41,17 @@ trigger_selprep(nfds, rfds)
 }
 
 int
-trigger_pulled(rfds)
-	fd_set         *rfds;
+trigger_pulled(fd_set *rfds)
 {
-	if (fd != -1)
-		if (FD_ISSET(fd, rfds))
-			return 1;
+	if (fd != -1 && FD_ISSET(fd, rfds))
+		return 1;
 	return 0;
 }
 
 void
 getversion_trigger_c()
 {
-	static char    *x = "$Id: trigger.c,v 1.4 2004-10-22 20:31:50+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: trigger.c,v 1.2 2021-06-23 10:02:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
