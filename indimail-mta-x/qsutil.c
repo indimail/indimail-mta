@@ -1,7 +1,7 @@
 /*
  * $Log: qsutil.c,v $
  * Revision 1.17  2021-06-23 10:03:55+05:30  Cprogrammer
- * added log_stat() function
+ * added log_stat function
  *
  * Revision 1.16  2021-06-05 22:35:05+05:30  Cprogrammer
  * added log4_noflush() function
@@ -332,7 +332,7 @@ log15(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
 }
 
 void
-log_stat(stralloc *mailfrom, stralloc *mailto, unsigned long id, long bytes)
+log_stat(stralloc *mailfrom, stralloc *mailto, unsigned long id, size_t bytes)
 {
 	char           *ptr;
 	char            strnum1[FMT_ULONG + 1], strnum2[FMT_ULONG + 1];

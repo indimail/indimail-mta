@@ -1,7 +1,10 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.17  2021-06-23 13:23:03+05:30  Cprogrammer
+ * include sys/types.h for size_t
+ *
  * Revision 1.16  2021-06-23 10:04:01+05:30  Cprogrammer
- * added log_stat() function
+ * added log_stat function
  *
  * Revision 1.15  2021-06-05 12:53:00+05:30  Cprogrammer
  * added log4_noflush() function
@@ -46,6 +49,7 @@
 #ifndef QSUTIL_H
 #define QSUTIL_H
 #include <stralloc.h>
+#include <sys/types.h>
 
 void            log1(char *);
 void            log1_noflush(char *);
@@ -63,7 +67,7 @@ void            log13(char *, char *, char *, char *, char *, char *, char *, ch
 void            log15(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
-void            log_stat(stralloc *, stralloc *, unsigned long, long);
+void            log_stat(stralloc *, stralloc *, unsigned long, size_t);
 void            nomem(void);
 void            lockerr(void);
 void            pausedir(char *);
