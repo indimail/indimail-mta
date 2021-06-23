@@ -134,6 +134,9 @@ Release 2.13 Start 14/02/2021
 - 16/05/2021
 83. inotify.c: fixed erroneous check for errno
 84. load_mysql.h: use MYSQL_RES for non-libmariadb setup
+- 23/05/2021
+85. qmail-send.c, slowq-send.c: moved log_stat function to qsutil.c
+86. qmail-todo.c: display bytes in log_stat
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
