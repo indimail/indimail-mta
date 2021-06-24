@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.7  2021-06-24 12:16:56+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
  * Revision 1.6  2021-06-15 21:51:31+05:30  Cprogrammer
  * pass local Maildir/tmp as argument to pidopen
  *
@@ -43,8 +46,6 @@
 
 #define DEATH 86400				/* 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
-
-int             uidinit(int);
 
 static char     inbuf[2048];
 static char     outbuf[256];
@@ -469,7 +470,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.6 2021-06-15 21:51:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.7 2021-06-24 12:16:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	if (x)

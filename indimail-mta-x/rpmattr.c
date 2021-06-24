@@ -1,5 +1,8 @@
 /*
  * $Log: rpmattr.c,v $
+ * Revision 1.6  2021-06-24 12:17:06+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
  * Revision 1.5  2011-05-13 10:57:00+05:30  Cprogrammer
  * make rpmattr work for non-indimail installations
  *
@@ -30,7 +33,6 @@
 
 #define WARNING "rpmattr: warning: "
 
-int             uidinit(int);
 char           *get_user(uid_t);
 char           *get_group(gid_t);
 
@@ -141,6 +143,6 @@ main(int argc, char **argv)
 void
 getversion_rpmattr_c()
 {
-	static char    *x = "$Id: rpmattr.c,v 1.5 2011-05-13 10:57:00+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rpmattr.c,v 1.6 2021-06-24 12:17:06+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

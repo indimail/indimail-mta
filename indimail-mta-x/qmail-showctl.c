@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.75  2021-06-24 12:17:02+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
  * Revision 1.74  2021-05-16 00:49:19+05:30  Cprogrammer
  * use configurable conf_split instead of auto_split variable
  *
@@ -178,8 +181,6 @@
 
 #define FATAL "qmail-showctl: fatal: "
 #define WARN  "qmail-showctl: warn: "
-
-int             uidinit(int);
 
 stralloc        me = { 0 };
 int             meok, conf_split;
@@ -896,7 +897,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.74 2021-05-16 00:49:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.75 2021-06-24 12:17:02+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

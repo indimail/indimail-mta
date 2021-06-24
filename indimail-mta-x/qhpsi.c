@@ -1,5 +1,8 @@
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.8  2021-06-24 12:16:52+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
  * Revision 1.7  2019-07-18 10:48:00+05:30  Cprogrammer
  * use strerr_die?x macro instead of strerr_die() function
  *
@@ -32,8 +35,6 @@
 #include "auto_uids.h"
 
 #define FATAL "qhpsi: fatal: "
-
-int             uidinit(int);
 
 void
 nomem(int flaglog)
@@ -132,6 +133,6 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.7 2019-07-18 10:48:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qhpsi.c,v 1.8 2021-06-24 12:16:52+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

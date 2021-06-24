@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.21  2021-06-24 12:17:21+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
  * Revision 1.20  2021-04-05 07:19:44+05:30  Cprogrammer
  * added qmail-todo.h
  *
@@ -153,8 +156,6 @@ closepipes()
 	close(pi10[1]);
 #endif
 }
-
-int             uidinit(int);
 
 int             verbose;
 
@@ -400,7 +401,7 @@ main(argc, argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.20 2021-04-05 07:19:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.21 2021-06-24 12:17:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.32  2021-06-24 12:16:08+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
  * Revision 1.31  2021-04-07 18:29:18+05:30  Cprogrammer
  * 1. use ansi c function prototypes
  * 2. fix for systems not having man pages installed
@@ -95,7 +98,6 @@
 #include "stralloc.h"
 
 void            hier(char *, char *, int);
-int             uidinit(int);
 
 #define FATAL "instcheck: fatal: "
 #define WARNING "instcheck: warning: "
@@ -291,7 +293,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.31 2021-04-07 18:29:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.32 2021-06-24 12:16:08+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

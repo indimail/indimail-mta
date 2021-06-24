@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-start.c,v $
+ * Revision 1.2  2021-06-24 12:17:10+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
  * Revision 1.1  2021-05-31 17:06:21+05:30  Cprogrammer
  * Initial revision
  *
@@ -94,8 +97,6 @@ closepipes()
 	close(pi6[0]);
 	close(pi6[1]);
 }
-
-int             uidinit(int);
 
 int             verbose;
 
@@ -272,7 +273,7 @@ main(argc, argv)
 void
 getversion_slowq_start_c()
 {
-	static char    *x = "$Id: slowq-start.c,v 1.1 2021-05-31 17:06:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-start.c,v 1.2 2021-06-24 12:17:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

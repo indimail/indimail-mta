@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.30  2021-06-24 12:17:13+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
  * Revision 1.29  2021-06-13 17:31:44+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -420,8 +423,6 @@ getcmd()
 
 char            inbuf[128];
 
-int             uidinit(int);
-
 int
 main(argc, argv)
 	int             argc;
@@ -546,7 +547,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.29 2021-06-13 17:31:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.30 2021-06-24 12:17:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

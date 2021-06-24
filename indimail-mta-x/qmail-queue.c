@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.74  2021-06-24 12:16:59+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
  * Revision 1.73  2021-06-15 12:16:01+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -238,8 +241,6 @@
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR  1003
-
-int             uidinit(int);
 
 char            inbuf[2048], outbuf[256], logbuf[2048];
 char           *pidfn, *messfn, *todofn, *intdfn;
@@ -1252,7 +1253,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.73 2021-06-15 12:16:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.74 2021-06-24 12:16:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
