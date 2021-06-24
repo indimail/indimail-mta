@@ -220,6 +220,8 @@ auto_uids.h: conf-users conf-groups
 	echo "#ifndef AUTO_UIDS_H"; \
 	echo "#define AUTO_UIDS_H"; \
 	echo ""; \
+	echo "#include <sys/types.h>"; \
+	echo ""; \
 	echo "#define ALIASU    \"`head -1 conf-users  | tail -1`\""; \
 	echo "#define QMAILD    \"`head -2 conf-users  | tail -1`\""; \
 	echo "#define QMAILL    \"`head -3 conf-users  | tail -1`\""; \
@@ -252,6 +254,8 @@ auto_uids.h: conf-users conf-groups
 	echo "extern int auto_gidc;" ;\
 	echo ""; \
 	echo "int             uidinit(int);"; \
+	echo "char           *get_user(uid_t);"; \
+	echo "char           *get_group(gid_t);"; \
 	echo ""; \
 	echo "#endif"; \
 	) > auto_uids.h
