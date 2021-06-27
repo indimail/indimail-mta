@@ -253,7 +253,7 @@ auto_uids.h: conf-users conf-groups
 	echo "extern int auto_gidv;" ;\
 	echo "extern int auto_gidc;" ;\
 	echo ""; \
-	echo "int             uidinit(int);"; \
+	echo "int             uidinit(int, int);"; \
 	echo "char           *get_user(uid_t);"; \
 	echo "char           *get_group(gid_t);"; \
 	echo ""; \
@@ -1658,9 +1658,9 @@ qmail-send.o: \
 compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-conf-mime conf-sync conf-batv conf-srs conf-todo
+conf-mime conf-sync conf-batv conf-srs conf-todo conf-bounce conf-loglock
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-todo` qmail-send.c
+	conf-todo conf-bounce conf-loglock` qmail-send.c
 
 qmail-send.8: \
 qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1689,9 +1689,9 @@ slowq-send.o: \
 compile slowq-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-conf-mime conf-sync conf-batv conf-srs conf-locklogs
-	./compile `grep -h -v "^#" conf-mime \
-	conf-sync conf-batv conf-locklogs` slowq-send.c
+conf-mime conf-sync conf-batv conf-srs conf-loglock conf-bounce
+	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
+	conf-loglock conf-bounce` slowq-send.c
 
 slowq-send.8: \
 slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -2024,8 +2024,9 @@ compile qsmhook.c
 	./compile qsmhook.c
 
 qsutil.o: \
-compile qsutil.c qsutil.h conf-locklogs
-	./compile `grep -h -v "^#" conf-locklogs` qsutil.c
+compile qsutil.c qsutil.h variables.h conf-loglock \
+auto_control.h
+	./compile `grep -h -v "^#" conf-loglock` qsutil.c
 
 quote.o: \
 compile quote.c quote.h
