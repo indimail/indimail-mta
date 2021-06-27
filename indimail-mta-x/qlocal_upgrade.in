@@ -1,4 +1,7 @@
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.43  2021-06-27 11:35:09+05:30  Cprogrammer
+# renamed LOCK_LOGS env variable to LOGLOCK
+#
 # Revision 1.42  2021-01-23 17:07:59+05:30  Cprogrammer
 # fixed logfifo path
 #
@@ -123,7 +126,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.in,v 1.42 2021-01-23 17:07:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.43 2021-06-27 11:35:09+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -151,7 +154,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.42 2021-01-23 17:07:59+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.43 2021-06-27 11:35:09+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -160,7 +163,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.42 2021-01-23 17:07:59+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.42 2021-01-23 17:07:59+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.43 2021-06-27 11:35:09+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -311,8 +314,9 @@ do
 		if [ -f $sysconfdir/control/virtualdomains -a ! -f $servicedir/$i/variables/ROUTE_NULL_USER ] ; then
 			echo > $servicedir/$i/variables/ROUTE_NULL_USER
 		fi
-		if [ ! -f $servicedir/$i/variables/LOCK_LOGS ] ; then
-			echo > $servicedir/$i/variables/LOCK_LOGS
+		/bin/rm -f $servicedir/$i/variables/LOCK_LOGS
+		if [ ! -f $servicedir/$i/variables/LOGLOCK ] ; then
+			echo > $servicedir/$i/variables/LOGLOCK
 		fi
 		continue
 	fi
