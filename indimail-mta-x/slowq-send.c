@@ -1,5 +1,9 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.9  2021-06-27 10:45:38+05:30  Cprogrammer
+ * moved conf_split variable to fmtqfn.c
+ * fixed error handling in injectbounce
+ *
  * Revision 1.8  2021-06-23 13:27:26+05:30  Cprogrammer
  * moved log_stat to qsutil.c
  *
@@ -134,7 +138,6 @@ static int      chanfdin[CHANNELS] = { 2, 4 };
 static int      chanskip[CHANNELS] = { 10, 20 };
 
 char           *queuedesc;
-int             conf_split;
 
 static int      flagexitasap = 0;
 static int      flagrunasap = 0;
@@ -1009,23 +1012,26 @@ injectbounce(unsigned long id)
 						{
 						case -3:
 							log5("srs: ", queuedesc, ": ", srs_error.s, "\n");
-							_exit(111);
+							qmail_fail(&qqt);
+							break;
 						case -2:
 							nomem();
+							qmail_fail(&qqt);
 							break;
 						case -1:
 							log3("alert: ", queuedesc, ": unable to read controls\n");
-							_exit(111);
+							qmail_fail(&qqt);
+							break;
 						case 0:
 							break;
 						case 1:
-							if (!stralloc_copy(&sender, &srs_result))
+							while (!stralloc_copy(&sender, &srs_result))
 								nomem();
 							break;
 						}
-						if (chdir(auto_qmail) == -1) {
+						while (chdir(auto_qmail) == -1) {
 							log7("alert: ", queuedesc, ": unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
-							_exit(111);
+							sleep(10);
 						}
 						chdir_toqueue();
 					}
@@ -1035,8 +1041,8 @@ injectbounce(unsigned long id)
 			bouncerecip = sender.s;
 		} else
 		if (*sender.s) {
-			bouncesender = "";
-			bouncerecip = sender.s;
+			bouncesender = "#@[]";
+			bouncerecip = doublebounceto.s;
 		}
 #else
 		if (*sender.s) {
@@ -1067,11 +1073,11 @@ injectbounce(unsigned long id)
 #ifdef MIME
 		/*- MIME header with boundary */
 		qmail_puts(&qqt, "\nMIME-Version: 1.0\n" "Content-Type: multipart/mixed; " "boundary=\"");
-		if (!stralloc_copyb(&boundary, strnum2, fmt_ulong(strnum2, birth)))
+		while (!stralloc_copyb(&boundary, strnum2, fmt_ulong(strnum2, birth)))
 			nomem();
-		if (!stralloc_cat(&boundary, &bouncehost))
+		while (!stralloc_cat(&boundary, &bouncehost))
 			nomem();
-		if (!stralloc_catb(&boundary, strnum2, fmt_ulong(strnum2, id)))
+		while (!stralloc_catb(&boundary, strnum2, fmt_ulong(strnum2, id)))
 			nomem();
 		qmail_put(&qqt, boundary.s, boundary.len);
 		qmail_puts(&qqt, "\"");
@@ -2528,7 +2534,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.8 2021-06-23 13:27:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.9 2021-06-27 10:45:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)
