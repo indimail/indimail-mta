@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.10  2021-06-27 10:38:40+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
  * Revision 1.9  2021-06-12 19:24:08+05:30  Cprogrammer
  * minor optimization by removing call to extra env_get
  *
@@ -93,7 +96,7 @@ main(int argc, char *argv[])
 	pid_t           pid = 0;
 	char           *ptr;
 
-	if (uidinit(1) == -1)
+	if (uidinit(1, 1) == -1)
 		_exit(67);
 	/*- Check whether we should be logging errors */
 	if (env_get("DEBUG"))
@@ -187,7 +190,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.9 2021-06-12 19:24:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq.c,v 1.10 2021-06-27 10:38:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

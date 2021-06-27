@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.33  2021-06-27 10:36:45+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
  * Revision 1.32  2021-06-24 12:16:08+05:30  Cprogrammer
  * use uidinit function proto from auto_uids.h
  *
@@ -277,7 +280,7 @@ main(int argc, char **argv)
 {
 	int             i;
 
-	if (uidinit(1) == -1)
+	if (uidinit(1, 1) == -1)
 		strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 	if (argc == 1)
 		hier(0, FATAL, 0);
@@ -293,7 +296,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.32 2021-06-24 12:16:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.33 2021-06-27 10:36:45+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.75  2021-06-27 10:37:27+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ * moved conf_split to fmtqfn.c
+ *
  * Revision 1.74  2021-06-24 12:16:59+05:30  Cprogrammer
  * use uidinit function proto from auto_uids.h
  *
@@ -79,7 +83,7 @@
  * added documentation
  *
  * Revision 1.48  2009-12-09 23:57:23+05:30  Cprogrammer
- * additional closeflag argument to uidinit()
+ * additional closeflag argument to uidinit
  *
  * Revision 1.47  2009-12-05 20:07:08+05:30  Cprogrammer
  * added prototype for makeargs
@@ -249,7 +253,6 @@ int             flagmademess = 0;
 int             flagmadeintd = 0;
 int             flagquarantine = 0;
 int             flagblackhole = 0;
-int             conf_split;
 struct substdio ssin, ssout, sslog;
 datetime_sec    starttime;
 struct datetime dt;
@@ -836,7 +839,7 @@ main()
 
 	sig_blocknone();
 	umask(033);
-	if (uidinit(1) == -1)
+	if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_gidq == -1)
 		die(67);
 	if (control_readint((int *) &originipfield, "originipfield") == -1)
 		die(55);
@@ -1253,7 +1256,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.74 2021-06-24 12:16:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.75 2021-06-27 10:37:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

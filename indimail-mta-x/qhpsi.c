@@ -1,5 +1,8 @@
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.9  2021-06-27 10:37:09+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
  * Revision 1.8  2021-06-24 12:16:52+05:30  Cprogrammer
  * use uidinit function proto from auto_uids.h
  *
@@ -53,7 +56,7 @@ main(int argc, char **argv)
 	char           *messfn, *error, *queue_plugin_symbol, *plugindir;
 	stralloc        plugin = { 0 };
 
-	if (uidinit(1) == -1)
+	if (uidinit(1, 1) == -1)
 		_exit(67);
 	if (env_get("DEBUG"))
 		flaglog = 1;
@@ -133,6 +136,6 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.8 2021-06-24 12:16:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qhpsi.c,v 1.9 2021-06-27 10:37:09+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

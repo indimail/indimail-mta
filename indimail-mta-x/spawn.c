@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.31  2021-06-27 10:39:26+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
  * Revision 1.30  2021-06-24 12:17:13+05:30  Cprogrammer
  * use uidinit function proto from auto_uids.h
  *
@@ -43,7 +46,7 @@
  * display MySQL error
  *
  * Revision 1.16  2009-12-09 23:58:04+05:30  Cprogrammer
- * additional closeflag argument to uidinit()
+ * additional closeflag argument to uidinit
  *
  * Revision 1.15  2008-08-03 18:26:24+05:30  Cprogrammer
  * use proper proto
@@ -433,7 +436,7 @@ main(argc, argv)
 	int             i, r, nfds;
 	fd_set          rfds;
 
-	if (uidinit(1) == -1)
+	if (uidinit(1, 0) == -1 || auto_uidq == -1)
 		_exit(111);
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue"; /*- single queue like qmail */
@@ -547,7 +550,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.30 2021-06-24 12:17:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.31 2021-06-27 10:39:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

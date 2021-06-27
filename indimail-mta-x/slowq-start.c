@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-start.c,v $
+ * Revision 1.3  2021-06-27 10:39:22+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
  * Revision 1.2  2021-06-24 12:17:10+05:30  Cprogrammer
  * use uidinit function proto from auto_uids.h
  *
@@ -112,7 +115,7 @@ main(argc, argv)
 	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
 		die();
-	if (uidinit(1) == -1)
+	if (uidinit(1, 1) == -1)
 		die();
 	umask(077);
 	if (prot_gid(auto_gidq) == -1) /*- qmail unix group */
@@ -273,7 +276,7 @@ main(argc, argv)
 void
 getversion_slowq_start_c()
 {
-	static char    *x = "$Id: slowq-start.c,v 1.2 2021-06-24 12:17:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-start.c,v 1.3 2021-06-27 10:39:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.76  2021-06-27 10:38:23+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
  * Revision 1.75  2021-06-24 12:17:02+05:30  Cprogrammer
  * use uidinit function proto from auto_uids.h
  *
@@ -80,7 +83,7 @@
  * removed dependency on indimail
  *
  * Revision 1.49  2009-12-09 23:57:31+05:30  Cprogrammer
- * additional closeflag argument to uidinit()
+ * additional closeflag argument to uidinit
  *
  * Revision 1.48  2009-12-05 11:25:39+05:30  Cprogrammer
  * added control files badhelo, badhost, originipfield
@@ -377,7 +380,7 @@ main(int argc, char **argv)
 	substdio_puts(subfdout, ".\n");
 
 	substdio_put(subfdout, "user ids\n", 9);
-	if (uidinit(1)) {
+	if (uidinit(1, 0)) {
 		substdio_puts(subfdout, "Oops! Unable to get uids/gids.\n");
 		substdio_flush(subfdout);
 		_exit(111);
@@ -897,7 +900,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.75 2021-06-24 12:17:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.76 2021-06-27 10:38:23+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.11  2021-06-27 10:35:07+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
  * Revision 1.10  2021-06-13 00:32:05+05:30  Cprogrammer
  * do clean exit on shutdown
  *
@@ -206,7 +209,7 @@ main(int argc, char **argv)
 	struct stat     st;
 
 	sig_termcatch(sigterm);
-	if (uidinit(1) == -1)
+	if (uidinit(1, 1) == -1)
 		_exit(67);
 	while ((opt = getopt(argc, argv, "ls:")) != opteof) {
 		switch (opt)
@@ -267,7 +270,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.10 2021-06-13 00:32:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.11 2021-06-27 10:35:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

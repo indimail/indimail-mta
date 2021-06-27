@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.22  2021-06-27 10:38:56+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
  * Revision 1.21  2021-05-30 00:15:57+05:30  Cprogrammer
  * added -r option to create ratelimit dir
  *
@@ -1003,14 +1006,14 @@ main(int argc, char **argv)
 		if (!stralloc_append(&queue_dir, "/"))
 			strerr_die2x(111, FATAL, "out of memory");
 	}
-	if (uidinit(1) == -1) {
+	if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_gidq == -1) {
 		strerr_warn2(WARN, "Unable to get uids/gids: ", &strerr_sys);
 		_exit (111);
 	}
 	/*- prepare the uid and gid */
 	qmailq_uid = auto_uidq;
-	qmails_uid = auto_uids;
-	qmailr_uid = auto_uidr;
+	qmails_uid = auto_uids == -1 ? auto_uidq : auto_uids; /*- qmta */
+	qmailr_uid = auto_uidr == -1 ? auto_uidq : auto_uidr; /*- qmta */
 	qmail_gid = auto_gidq;
 	/*- check that all the proper directories exist with proper credentials */
 	if (check_dirs())
@@ -1021,7 +1024,8 @@ main(int argc, char **argv)
 	/*- check for stray files */
 	if (find_strays())
 		die_check();
-	out("queue-fix finished...\n");
+	if (flag_verbose)
+		out("queue-fix finished...\n");
 	flush();
 	return (queueError);
 }
@@ -1029,7 +1033,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.21 2021-05-30 00:15:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.22 2021-06-27 10:38:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
