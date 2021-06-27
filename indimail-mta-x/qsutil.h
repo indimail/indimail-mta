@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.18  2021-06-27 11:33:49+05:30  Cprogrammer
+ * added loglock_open function
+ *
  * Revision 1.17  2021-06-23 13:23:03+05:30  Cprogrammer
  * include sys/types.h for size_t
  *
@@ -51,6 +54,8 @@
 #include <stralloc.h>
 #include <sys/types.h>
 
+void            loglock_open(int);
+void            lockerr(void);
 void            log1(char *);
 void            log1_noflush(char *);
 void            my_log2(char *, char *);
@@ -69,10 +74,11 @@ void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
 void            log_stat(stralloc *, stralloc *, unsigned long, size_t);
 void            nomem(void);
-void            lockerr(void);
 void            pausedir(char *);
 void            logsafe(char *);
 void            logsafe_noflush(char *);
 void            flush();
+
+extern int      loglock_fd;
 
 #endif
