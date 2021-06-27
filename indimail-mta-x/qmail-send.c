@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.86  2021-06-27 10:48:06+05:30  Cprogrammer
+ * moved conf_split variable to fmtqfn.c
+ * fixed error handling in injectbounce
+ *
  * Revision 1.85  2021-06-23 13:05:13+05:30  Cprogrammer
  * moved log_stat function to qsutil.c
  *
@@ -321,12 +325,6 @@ static stralloc doublebouncehost = { 0 };
 static cmap     mappercenthack;
 static cmap     maplocals;
 
-#ifdef LOCK_LOGS
-static stralloc lockfn = { 0 };
-
-static int      loglock_fd = -1;
-#endif
-
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
 
@@ -347,7 +345,6 @@ static int      chanfdin[CHANNELS] = { 2, 4 };
 static int      chanskip[CHANNELS] = { 10, 20 };
 
 char           *queuedesc;
-int             conf_split;
 
 dtype           delivery;
 int             do_ratelimit;
@@ -357,36 +354,6 @@ unsigned long   delayed_jobs;
 static void     reread(int);
 #else
 static void     reread();
-#endif
-
-#ifdef LOCK_LOGS
-static void
-lock_logs_open(int preopen)
-{
-	char           *ptr;
-	int             lock_status;
-
-	if (!(ptr = env_get("LOCK_LOGS")))
-		lock_status = 0;
-	else
-		scan_int(ptr, &lock_status);
-	if (!lock_status && preopen)
-		lock_status = preopen;
-	if (lock_status > 0) {
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = auto_control;
-		if (!stralloc_copys(&lockfn, controldir)
-				|| !stralloc_append(&lockfn, "/")
-				|| !stralloc_catb(&lockfn, "/defaultdelivery", 16)
-				|| !stralloc_0(&lockfn))
-			nomem();
-		if ((loglock_fd = open_read(lockfn.s)) == -1) {
-			log3("alert: ", queuedesc, ": cannot start: unable to open defaultdelivery\n");
-			lockerr();
-		}
-	}
-	log3("loglock: ", queuedesc, loglock_fd == -1 ? ": disabled\n" : ": enabled\n");
-}
 #endif
 
 static int      flagexitasap = 0;
@@ -422,7 +389,7 @@ chdir_toqueue()
 	}
 }
 
-#ifdef LOCK_LOGS
+#ifdef LOGLOCK
 static void
 sigint()
 {
@@ -431,7 +398,7 @@ sigint()
 			log7("alert: ", queuedesc, ": unable to reread controls: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 			return;
 		}
-		lock_logs_open(1);
+		loglock_open(1);
 		chdir_toqueue();
 	} else {
 		close(loglock_fd);
@@ -1280,23 +1247,26 @@ injectbounce(unsigned long id)
 						{
 						case -3:
 							log5("srs: ", queuedesc, ": ", srs_error.s, "\n");
-							_exit(111);
+							qmail_fail(&qqt);
+							break;
 						case -2:
 							nomem();
+							qmail_fail(&qqt);
 							break;
 						case -1:
 							log3("alert: ", queuedesc, ": unable to read controls\n");
-							_exit(111);
+							qmail_fail(&qqt);
+							break;
 						case 0:
 							break;
 						case 1:
-							if (!stralloc_copy(&sender, &srs_result))
+							while (!stralloc_copy(&sender, &srs_result))
 								nomem();
 							break;
 						}
-						if (chdir(auto_qmail) == -1) {
+						while (chdir(auto_qmail) == -1) {
 							log7("alert: ", queuedesc, ": unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
-							_exit(111);
+							sleep(10);
 						}
 						chdir_toqueue();
 					}
@@ -1304,10 +1274,9 @@ injectbounce(unsigned long id)
 			}
 			bouncesender = "";
 			bouncerecip = sender.s;
-		} else
-		if (*sender.s) {
-			bouncesender = "";
-			bouncerecip = sender.s;
+		} else {
+			bouncesender = "#@[]";
+			bouncerecip = doublebounceto.s;
 		}
 #else
 		if (*sender.s) {
@@ -1338,11 +1307,11 @@ injectbounce(unsigned long id)
 #ifdef MIME
 		/*- MIME header with boundary */
 		qmail_puts(&qqt, "\nMIME-Version: 1.0\n" "Content-Type: multipart/mixed; " "boundary=\"");
-		if (!stralloc_copyb(&boundary, strnum1, fmt_ulong(strnum1, birth)))
+		while (!stralloc_copyb(&boundary, strnum1, fmt_ulong(strnum1, birth)))
 			nomem();
-		if (!stralloc_cat(&boundary, &bouncehost))
+		while (!stralloc_cat(&boundary, &bouncehost))
 			nomem();
-		if (!stralloc_catb(&boundary, strnum1, fmt_ulong(strnum1, id)))
+		while (!stralloc_catb(&boundary, strnum1, fmt_ulong(strnum1, id)))
 			nomem();
 		qmail_put(&qqt, boundary.s, boundary.len);
 		qmail_puts(&qqt, "\"");
@@ -2902,14 +2871,14 @@ main()
 		log7("alert: ", queuedesc, ": cannot start: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 		_exit(111);
 	}
+#ifdef LOGLOCK
+	loglock_open(0);
+#endif
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
 	log7("info: qmail-send: ", queuedesc, ": ratelimit=", do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, "\n");
-#ifdef LOCK_LOGS
-	lock_logs_open(0);
-#endif
 #ifndef EXTERNAL_TODO
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
@@ -2936,7 +2905,7 @@ main()
 	sig_alarmcatch(sigalrm);
 	sig_hangupcatch(sighup);
 	sig_childdefault();
-#ifdef LOCK_LOGS
+#ifdef LOGLOCK
 	sig_intcatch(sigint);
 #endif
 	umask(077);
@@ -3086,7 +3055,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.85 2021-06-23 13:05:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.86 2021-06-27 10:48:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)
