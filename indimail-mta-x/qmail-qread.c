@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.37  2021-06-27 10:45:09+05:30  Cprogrammer
+ * moved conf_split variable to fmtqfn.c
+ *
  * Revision 1.36  2021-06-05 12:51:37+05:30  Cprogrammer
  * process special queue "slowq"
  *
@@ -120,7 +123,6 @@
 #endif
 
 readsubdir      rs;
-int             conf_split;
 
 void
 die(n)
@@ -674,7 +676,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.36 2021-06-05 12:51:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.37 2021-06-27 10:45:09+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-clean.c,v $
+ * Revision 1.13  2021-06-27 10:45:02+05:30  Cprogrammer
+ * moved conf_split variable to fmtqfn.c
+ *
  * Revision 1.12  2021-06-14 01:03:48+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -49,7 +52,6 @@
 #define OSSIFIED 129600	/*- see qmail-send.c */
 
 stralloc        line = { 0 };
-int             conf_split;
 
 void
 cleanuppid()
@@ -167,7 +169,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.12 2021-06-14 01:03:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.13 2021-06-27 10:45:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

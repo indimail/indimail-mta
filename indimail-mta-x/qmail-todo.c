@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.49  2021-06-27 10:45:15+05:30  Cprogrammer
+ * moved conf_split variable to fmtqfn.c
+ *
  * Revision 1.48  2021-06-23 13:21:18+05:30  Cprogrammer
  * display bytes in log_stat function
  *
@@ -172,7 +175,6 @@ char           *chanaddr[CHANNELS] = { "local/", "remote/" };
 
 int             flagstopasap = 0;
 char           *queuedesc;
-int             conf_split;
 
 datetime_sec    recent;
 void            log1(char *w);
@@ -1227,7 +1229,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.48 2021-06-23 13:21:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.49 2021-06-27 10:45:15+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
