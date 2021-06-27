@@ -112,10 +112,10 @@ and
 .IR conf-fsync .
 
 During startup, \fBqmail-send\fR uses the environment variable
-\fBLOCK_LOGS\fR and locks the file CONTROLDIR/defaultdelivery before writing
+\fBLOGLOCK\fR and locks the file CONTROLDIR/defaultdelivery before writing
 a line to the log file (or stdout). If multiple qmail-send processes are
 running, all writing to one multilog, lines may get jumbled up in extreme
-situations. This can be avoided by setting LOCK_LOGS environment variable.
+situations. This can be avoided by setting LOGLOCK environment variable.
 If
 .B qmail-send
 receives a INT signal, it will toggle log lock synchronization. If log
@@ -668,6 +668,7 @@ qmail-srs(5),
 qmail-log(5),
 qmail-queue(8),
 qmail-multi(8),
+drate(1),
 qmail-start(8),
 qmail-daemon(8),
 qmail-todo(8),
