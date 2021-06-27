@@ -118,25 +118,39 @@ Release 2.13 Start 14/02/2021
 72. delivey_rate.c: log email/curr_rate/conf_rate in logs
 - 09/06/2021
 73. split qmail-multi into qmail-multi and qmail-spamfilter
-- 10/05/2021
+- 10/06/2021
 74. fixed uninitialized variables in do_test()
 75. fixed compiler warning for containsutf8()
 76. moved makeargs.c, mktempfile.c to libqmail
 77. svctool: replace qmail-multi with qmail-spamfilter for spam filter
-- 11/05/2021
+- 11/06/2021
 78. remove usage of auto_qmail, auto_control for locating files
-- 13/05/2021
+- 13/06/2021
 79. svctool: simplified generation of clamav, freshclam config
 80. fixed debian scripts for indimail-mini
-- 15/05/2021
+- 15/06/2021
 81. moved cdbmss.[c,h], token822.[c,h] to libqmail
 82. pidopen.c: added tmpdir argument
-- 16/05/2021
+- 16/06/2021
 83. inotify.c: fixed erroneous check for errno
 84. load_mysql.h: use MYSQL_RES for non-libmariadb setup
-- 23/05/2021
+- 23/06/2021
 85. qmail-send.c, slowq-send.c: moved log_stat function to qsutil.c
 86. qmail-todo.c: display bytes in log_stat
+- 27/06/2021
+87. uidnit new argument to disable/enable error on missing uids in
+    qmail-start.c spawn.c slowq-start.c queue-fix.c qscanq.c
+    qmail-showctl.c qmail-queue.c qhpsi.c instcheck.c get_uid.c cleanq.c
+88. qmail-send.c, slowq-send.c: moved conf_split variable to fmtqfn.c
+89. qmail-send.c, slowq-send.c: fixed error handling in injectbounce
+90. qmail-send.c, slowq-send.c: moved conf_split variable to fmtqfn.c
+91. qmail-send.c, slowq-send.c: fixed error handling in injectbounce
+92. qmail-send.c: moved log lock functionality to qsutil.c
+93. qmail-todo.c qmail-qread.c qmail-clean.c fmtqfn.c: moved conf_split
+    variable to fmtqfn.c
+94. qsutil.c qsutil.h: added loglock_open function
+95. svctool.in qlocal_upgrade.in: renamed LOCK_LOGS env variable to LOGLOCK
+96. rpmattr.c: removed call to uidinit
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
