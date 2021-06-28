@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.16  2021-06-28 16:58:47+05:30  Cprogrammer
+ * fix SIGSEGV when libenv argument is NULL
+ *
  * Revision 1.15  2021-02-07 23:12:39+05:30  Cprogrammer
  * refactored code
  *
@@ -99,6 +102,16 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 	char           *ptr;
 	int             i;
 
+	if (!libenv) {
+		if (errflag)
+			*errflag = 0;
+		if (errstr)
+			*errstr = (char *) 0;
+		if (handle && *handle)
+			return (handle);
+		else
+			return ((void *) 0);
+	}
 	if (*libenv == '/') { /*- filename */
 		if ((i = control_readline(&libfn, libenv)) == -1 || !i) {
 			if (errstr)
@@ -271,7 +284,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.15 2021-02-07 23:12:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.16 2021-06-28 16:58:47+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
