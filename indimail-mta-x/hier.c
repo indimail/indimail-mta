@@ -1047,6 +1047,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-clean", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-send", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "slowq-send", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "qmta-send", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmqpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmtpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-smtpd", auto_uido, 0, moder_t);
@@ -1420,6 +1421,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man8", "qmail-clean.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-send.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "slowq-send.8", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man8", "qmta-send.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-todo.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-daemon.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-start.8", uidr, gidr, moder_f);

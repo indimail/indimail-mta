@@ -35,6 +35,7 @@ f:::0751:/sbin/:qmail-rspawn:qmail-rspawn
 f:::0751:/sbin/:qmail-clean:qmail-clean
 f:::0751:/sbin/:qmail-send:qmail-send
 f:::0751:/sbin/:slowq-send:slowq-send
+f:::0751:/sbin/:qmta-send:qmta-send
 f:::0751:/sbin/:qmail-qmqpd:qmail-qmqpd
 f:::0751:/sbin/:qmail-qmtpd:qmail-qmtpd
 f:::0751:/sbin/:qmail-smtpd:qmail-smtpd
