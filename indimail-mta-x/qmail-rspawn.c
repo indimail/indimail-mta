@@ -94,7 +94,7 @@
  * fixed compilation warnings
  *
  * Revision 1.12  2003-10-12 01:13:48+05:30  Cprogrammer
- * added msgsize as argument to spawn()
+ * added msgsize as argument to spawn
  *
  * Revision 1.11  2003-09-27 21:11:59+05:30  Cprogrammer
  * change in rcpthosts() function
@@ -149,29 +149,22 @@ static char *setup_qrargs()
 }
 
 void
-initialize(argc, argv)
-	int             argc;
-	char          **argv;
+initialize_SPAWN(int argc, char **argv)
 {
 	tcpto_clean();
 }
 
-int             truncreport = 0;
+int             truncreport_SPAWN = 0;
 
 void
-report(ss, wstat, s, len)
-	substdio       *ss;
-	int             wstat;
-	char           *s;
-	int             len;
+report_SPAWN(substdio *ss, int wstat, char *s, int len)
 {
 	int             j;
 	int             k;
 	int             result;
 	int             orr;
 
-	if (wait_crashed(wstat))
-	{
+	if (wait_crashed(wstat)) {
 		substdio_puts(ss, "Zqmail-remote crashed.\n");
 		return;
 	}
@@ -186,24 +179,19 @@ report(ss, wstat, s, len)
 		substdio_puts(ss, "DUnable to run qmail-remote.\n");
 		return;
 	}
-	if (!len)
-	{
+	if (!len) {
 		substdio_puts(ss, "Zqmail-remote produced no output.\n");
 		return;
 	}
 	result = -1;
 	j = 0;
-	for (k = 0; k < len; ++k)
-	{
-		if (!s[k])
-		{
-			if (s[j] == 'K')
-			{
+	for (k = 0; k < len; ++k) {
+		if (!s[k]) {
+			if (s[j] == 'K') {
 				result = 1;
 				break;
 			}
-			if (s[j] == 'Z')
-			{
+			if (s[j] == 'Z') {
 				result = 0;
 				break;
 			}
@@ -236,10 +224,8 @@ report(ss, wstat, s, len)
 		substdio_put(ss, "D", 1);
 		break;
 	}
-	for (k = 1; k < len;)
-	{
-		if (!s[k++])
-		{
+	for (k = 1; k < len;) {
+		if (!s[k++]) {
 			substdio_puts(ss, s + 1);
 			if (result <= orr)
 				if (k < len)
@@ -256,18 +242,12 @@ report(ss, wstat, s, len)
 }
 
 int
-spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
-	int             fdmess;
-	int             fdout;
-	unsigned long   msgsize;
-	char           *s;
-	char           *qqeh;
-	char           *r;
-	int             at;
+SPAWN(int fdmess, int fdout, unsigned long msgsize, char *s, char *qqeh, char *r, int at)
 {
 	int             f;
 	char           *ptr, *(args[7]);
 	char            size_buf[FMT_ULONG];
+#ifdef VIRTUAL_PKG
 	/*- indimail */
 	static stralloc libfn = { 0 };
 	int             i;
@@ -279,6 +259,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	int             (*is_distributed_domain) (char *);
 	char *          (*get_real_domain) (char *);
 	char *          (*findhost) (char *, int);
+#endif
 
 	size_buf[fmt_ulong(size_buf, msgsize)] = 0;
 	args[0] = "sbin/qmail-remote";
@@ -289,6 +270,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	args[5] = r;				/*- recipient */
 	args[6] = 0;
 
+#ifdef VIRTUAL_PKG
 	if (!(libptr = env_get("VIRTUAL_PKG_LIB"))) {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -355,6 +337,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 		}
 	}
 noroutes:
+#endif
 	if (!env_unset("QMAILLOCAL"))
 		_exit(111);
 	if (!(f = vfork())) {

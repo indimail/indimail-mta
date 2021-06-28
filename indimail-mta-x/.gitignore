@@ -648,3 +648,6 @@ mailfilter.o
 mktempfile.o
 pidopen.o
 auto_qmail.md
+qmta-send
+qmta-send.0
+qmta-send.8

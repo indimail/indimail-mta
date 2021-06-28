@@ -1157,3 +1157,14 @@ mktempfile.o
 pidopen.o
 qmail-direct.o
 delivery_rate.o
+qmta-send
+qmta-send.0
+qmta-send.8
+lspawn.o
+qmta-lspawn.o
+qmta_lspawn.o
+qmta-rspawn.o
+qmta_rspawn.o
+qmta-send.o
+rspawn.o
+token822.o
