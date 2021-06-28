@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.38  2021-06-28 17:06:33+05:30  Cprogrammer
+ * use process_queue to process all queues
+ *
  * Revision 1.37  2021-06-27 10:45:09+05:30  Cprogrammer
  * moved conf_split variable to fmtqfn.c
  *
@@ -89,31 +92,29 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
-#include "stralloc.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "scan.h"
-#include "fmt.h"
-#include "str.h"
-#include "getln.h"
-#include "sgetopt.h"
-#include "fmtqfn.h"
-#include "readsubdir.h"
-#include "open.h"
-#include "strerr.h"
-#include "datetime.h"
-#include "date822fmt.h"
-#include "env.h"
-#include "error.h"
-#include "envdir.h"
-#include "pathexec.h"
-#include "getEnvConfig.h"
+#include <stralloc.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <fmt.h>
+#include <getln.h>
+#include <sgetopt.h>
+#include <open.h>
+#include <datetime.h>
+#include <date822fmt.h>
+#include <strerr.h>
+#include <error.h>
+#include <getEnvConfig.h>
+#ifndef MULTI_QUEUE
+#include <env.h>
 #include "auto_qmail.h"
+#endif
 #include "auto_split.h"
 #include "auto_sysconfdir.h"
+#include "readsubdir.h"
+#include "fmtqfn.h"
 #include "control.h"
 #include "variables.h"
-#include "set_environment.h"
+#include "process_queue.h"
 
 #define FATAL "qmail-qread: fatal: "
 #define WARN  "qmail-qread: warn: "
@@ -122,85 +123,37 @@
 #define QUEUE_COUNT 10
 #endif
 
-readsubdir      rs;
+static readsubdir rs;
+static char     fnmess[FMTQFN];
+static char     fninfo[FMTQFN];
+static char     fnlocal[FMTQFN];
+static char     fnremote[FMTQFN];
+static char     fnbounce[FMTQFN];
+static char     inbuf[1024];
+static stralloc sender = { 0 };
+static datetime_sec curtime;
+static int      flagbounce, doLocal = 0, doRemote = 0, doTodo = 0, doCount = 0;
+static unsigned long   id;
+static unsigned long   size;
+static stralloc stats = { 0 };
 
-void
-die(n)
-	int             n;
+static void
+die_opendir(char *fn)
 {
-	substdio_flush(subfderr);
-	_exit(n);
+	strerr_die4sys(111, FATAL, "unable to opendir ", fn, ": ");
 }
 
-void
-warn(s1, s2)
-	char           *s1;
-	char           *s2;
-{
-	char           *x;
-	x = error_str(errno);
-	substdio_puts(subfderr, s1);
-	substdio_puts(subfderr, s2);
-	substdio_puts(subfderr, ": ");
-	substdio_puts(subfderr, x);
-	substdio_puts(subfderr, "\n");
-}
-
-void
-die_nomem()
-{
-	substdio_puts(subfderr, "fatal: out of memory\n");
-	die(111);
-}
-
-void
-die_chdir(char *dir)
-{
-	warn("fatal: unable to chdir to ", dir);
-	die(111);
-}
-
-void
-die_opendir(fn)
-	char           *fn;
-{
-	warn("fatal: unable to opendir ", fn);
-	die(111);
-}
-
-void
-die_control()
-{
-	substdio_puts(subfderr, "fatal: unable to read controls\n");
-	die(111);
-}
-
-void
-err(id)
-	unsigned long   id;
+static void
+err(unsigned long _id)
 {
 	char            foo[FMT_ULONG];
-	foo[fmt_ulong(foo, id)] = 0;
-	warn("warning: trouble with #", foo);
+
+	foo[fmt_ulong(foo, _id)] = 0;
+	strerr_warn4(WARN, "trouble with #", foo, ": ", &strerr_sys);
 }
 
-char            fnmess[FMTQFN];
-char            fninfo[FMTQFN];
-char            fnlocal[FMTQFN];
-char            fnremote[FMTQFN];
-char            fnbounce[FMTQFN];
-
-char            inbuf[1024];
-stralloc        sender = { 0 };
-
-unsigned long   id;
-datetime_sec    curtime;
-int             flagbounce;
-unsigned long   size;
-
 unsigned int
-fmtstats(s)
-	char           *s;
+fmtstats(char *s)
 {
 	char           *ptr;
 	struct datetime dt;
@@ -259,12 +212,8 @@ fmtstats(s)
 	return len;
 }
 
-stralloc        stats = { 0 };
-
 void
-out(s, n)
-	char           *s;
-	unsigned int    n;
+out(char *s, unsigned int n)
 {
 	while (n > 0) {
 		substdio_put(subfdout, ((*s >= 32) && (*s <= 126)) ? s : "_", 1);
@@ -272,47 +221,25 @@ out(s, n)
 		++s;
 	}
 }
-void
-outs(s)
-	char           *s;
-{
-	out(s, str_len(s));
-}
 
 void
-outok(s)
-	char           *s;
-{
-	substdio_puts(subfdout, s);
-}
-
-void
-putstats(int doCount)
+putstats()
 {
 	if (!stralloc_ready(&stats, fmtstats(FMT_LEN)))
-		die_nomem();
+		strerr_die2x(111, FATAL, "out of memory");
 	stats.len = fmtstats(stats.s);
 	out(stats.s, stats.len);
-	outok("\n");
+	substdio_puts(subfdout, "\n");
 }
-
-int             doLocal = 0, doRemote = 0, doTodo = 0, doCount = 0;
-
-#ifdef MULTI_QUEUE
 
 void
 usage()
 {
-	outs("qmail-read [-calrt]");
-	outok("\n\t");
-	outs("-a - Display local, remote and todo Queues");
-	outok("\n\t");
-	outs("-c - Display Counts");
-	outok("\n\t");
-	outs("-l - Display local  Queue");
-	outok("\n\t");
-	outs("-r - Display remote Queue");
-	outok("\n");
+	substdio_puts(subfdout, "qmail-read [-calrt]\n\t");
+	substdio_puts(subfdout, "-a - Display local, remote and todo Queues\n\t");
+	substdio_puts(subfdout, "-c - Display Counts\n\t");
+	substdio_puts(subfdout, "-l - Display local  Queue\n\t");
+	substdio_puts(subfdout, "-r - Display remote Queue\n");
 	substdio_flush(subfdout);
 }
 
@@ -323,8 +250,7 @@ get_arguments(int argc, char **argv)
 	int             errflag;
 
 	errflag = 0;
-	doTodo = 0;
-	doCount = 0;
+	doTodo = doCount = doLocal = doRemote = 0;
 	while (!errflag && (c = getopt(argc, argv, "calrt")) != opteof) {
 		switch (c)
 		{
@@ -356,7 +282,6 @@ get_arguments(int argc, char **argv)
 		doLocal = doRemote = 1;
 	return(0);
 }
-#endif
 
 void
 putcounts(char *pre_str, int lCount, int rCount, int bCount, int tCount)
@@ -364,40 +289,36 @@ putcounts(char *pre_str, int lCount, int rCount, int bCount, int tCount)
 	char            foo[FMT_ULONG];
 
 	if (doLocal) {
-	if (pre_str)
-		outs(pre_str);
-	outs("Messages in local  queue: ");
-	foo[fmt_ulong(foo, lCount)] = 0;
-	outs(foo);
-	outok("\n");
+		if (pre_str)
+			substdio_puts(subfdout, pre_str);
+		substdio_puts(subfdout, "Messages in local  queue: ");
+		foo[fmt_ulong(foo, lCount)] = 0;
+		substdio_puts(subfdout, foo);
+		substdio_puts(subfdout, "\n");
 	}
 	if (doRemote) {
-	if (pre_str)
-		outs(pre_str);
-	outs("Messages in remote queue: ");
-	foo[fmt_ulong(foo, rCount)] = 0;
-	outs(foo);
-	outok("\n");
+		if (pre_str)
+			substdio_puts(subfdout, pre_str);
+		substdio_puts(subfdout, "Messages in remote queue: ");
+		foo[fmt_ulong(foo, rCount)] = 0;
+		substdio_puts(subfdout, foo);
+		substdio_puts(subfdout, "\n");
 	}
 	if (pre_str)
-		outs(pre_str);
-	outs("Messages in bounce queue: ");
+		substdio_puts(subfdout, pre_str);
+	substdio_puts(subfdout, "Messages in bounce queue: ");
 	foo[fmt_ulong(foo, bCount)] = 0;
-	outs(foo);
-	outok("\n");
+	substdio_puts(subfdout, foo);
+	substdio_puts(subfdout, "\n");
 	if (doTodo) {
-	if (pre_str)
-		outs(pre_str);
-	outs("Messages in todo   queue: ");
-	foo[fmt_ulong(foo, tCount)] = 0;
-	outs(foo);
-	outok("\n");
+		if (pre_str)
+			substdio_puts(subfdout, pre_str);
+		substdio_puts(subfdout, "Messages in todo   queue: ");
+		foo[fmt_ulong(foo, tCount)] = 0;
+		substdio_puts(subfdout, foo);
+		substdio_puts(subfdout, "\n");
 	}
 }
-
-stralloc        line = { 0 };
-char           *qbase;
-stralloc        QueueBase = { 0 };
 
 #ifdef MULTI_QUEUE
 int
@@ -411,21 +332,30 @@ main(int argc, char **argv)
 	int             bCount, lCount, rCount, tCount;
 	struct stat     st;
 	substdio        ss;
+	static stralloc line = { 0 };
+#ifndef MULTI_QUEUE
+	char           *qbase;
+	static stralloc QueueBase = { 0 };
+#endif
 
 #ifndef MULTI_QUEUE
+	if (get_arguments(argc, argv)) {
+		substdio_flush(subfdout);
+		return(1);
+	}
 	if (chdir(auto_sysconfdir))
 		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
 		case -1:
-			die_control();
+			strerr_die2sys(111, FATAL, "unable to read controls: ");
 			break;
 		case 0:
 			if (!stralloc_copys(&QueueBase, auto_qmail) ||
 					!stralloc_catb(&QueueBase, "/queue", 6) ||
 					!stralloc_0(&QueueBase))
-				die_nomem();
+				strerr_die2x(111, FATAL, "out of memory");
 			qbase = QueueBase.s;
 			break;
 		case 1:
@@ -434,12 +364,12 @@ main(int argc, char **argv)
 		}
 	}
 	if (chdir(qbase) == -1)
-		die_chdir(qbase);
+		strerr_die4sys(111, FATAL, "unable to chdir to ", qbase, ": ");
 	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue";
 #endif
 	if (chdir(queuedir) == -1)
-		die_chdir(queuedir);
+		strerr_die4sys(111, FATAL, "unable to chdir to ", queuedir, ": ");
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
@@ -465,7 +395,7 @@ main(int argc, char **argv)
 			}
 			substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ss, &sender, &match, 0) == -1)
-				die_nomem();
+				strerr_die2x(111, FATAL, "out of memory");
 			if (fstat(fd, &st) == -1) {
 				close(fd);
 				err(id);
@@ -480,25 +410,25 @@ main(int argc, char **argv)
 				} else {
 					for (;;) {
 						if (getln(&ss, &line, &match, 0) == -1)
-							die_nomem();
+							strerr_die2x(111, FATAL, "out of memory");
 						if (!match)
 							break;
 						switch (line.s[0])
 						{
 						case 'D':
 							if (!flag++)
-								putstats(doCount);
-							outok("  done");
+								putstats();
+							substdio_puts(subfdout, "  done");
 						case 'T':
 							if (!flag++)
-								putstats(doCount);
+								putstats();
 							if (channel)
 								rCount++;
 							else
 								lCount++;
-							outok(channel ? "\tremote\t" : "\tlocal\t");
-							outs(line.s + 1);
-							outok("\n");
+							substdio_puts(subfdout, channel ? "\tremote\t" : "\tlocal\t");
+							substdio_puts(subfdout, line.s + 1);
+							substdio_puts(subfdout, "\n");
 							break;
 						}
 					}
@@ -529,7 +459,7 @@ main(int argc, char **argv)
 			substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
 			for (;;) {
 				if (getln(&ss, &sender, &match, 0) == -1)
-					die_nomem();
+					strerr_die2x(111, FATAL, "out of memory");
 				if (!match || sender.s[0] == 'F')
 					break;
 			}
@@ -547,21 +477,21 @@ main(int argc, char **argv)
 				} else {
 					for (;;) {
 						if (getln(&ss, &line, &match, 0) == -1)
-							die_nomem();
+							strerr_die2x(111, FATAL, "out of memory");
 						if (!match)
 							break;
 						switch (line.s[0]) {
 						case 'D':
 							if (!flag++)
-								putstats(doCount);
-							outok("  done");
+								putstats();
+							substdio_puts(subfdout, "  done");
 						case 'T':
 							if (!flag++)
-								putstats(doCount);
+								putstats();
 							tCount++;
-							outok("\ttodo\t");
-							outs(line.s + 1);
-							outok("\n");
+							substdio_puts(subfdout, "\ttodo\t");
+							substdio_puts(subfdout, line.s + 1);
+							substdio_puts(subfdout, "\n");
 							break;
 						}
 					}
@@ -593,79 +523,13 @@ main(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
-	char           *queue_count_ptr, *queue_start_ptr;
-	char            strnum[FMT_ULONG];
-	int             idx, count, qcount, qstart, lcount, rcount, bcount, tcount;
-	char           *extra_queue[] = {"slowq", "nqueue", 0};
-	static stralloc Queuedir = { 0 };
+	int             lcount = 0, rcount = 0, bcount = 0, tcount = 0;
 
 	if (get_arguments(argc, argv)) {
 		substdio_flush(subfdout);
 		return(1);
 	}
-	set_environment(WARN, FATAL);
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		switch (control_readfile(&QueueBase, "queue_base", 0))
-		{
-		case -1:
-			die_control();
-			break;
-		case 0:
-			qbase = auto_qmail;
-			break;
-		case 1:
-			qbase = QueueBase.s;
-			break;
-		}
-	}
-	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
-		qcount = QUEUE_COUNT;
-	else
-		scan_int(queue_count_ptr, &qcount);
-	if (!(queue_start_ptr = env_get("QUEUE_START")))
-		qstart = 1;
-	else
-		scan_int(queue_start_ptr, &qstart);
-	lcount = rcount = bcount = tcount = 0;
-	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
-		if (!stralloc_copys(&Queuedir, qbase))
-			die_nomem();
-		if (!stralloc_cats(&Queuedir, "/queue"))
-			die_nomem();
-		if (!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) idx)))
-			die_nomem();
-		if (!stralloc_0(&Queuedir))
-			die_nomem();
-		if (access(Queuedir.s, F_OK)) {
-			if (errno != error_noent)
-				strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
-			break;
-		}
-		queuedir = Queuedir.s;
-		outok("processing queue ");
-		outok(queuedir);
-		outok("\n");
-		main_function(&lcount, &rcount, &bcount, &tcount);
-		outok("\n");
-	}
-
-	for (idx = 0; extra_queue[idx]; idx++) {
-		if (!stralloc_copys(&Queuedir, qbase) ||
-				!stralloc_append(&Queuedir, "/") ||
-				!stralloc_cats(&Queuedir, extra_queue[idx]) ||
-				!stralloc_0(&Queuedir))
-			die_nomem();
-		if (!access(Queuedir.s, F_OK)) {
-			queuedir = Queuedir.s;
-			outok("processing queue ");
-			outok(queuedir);
-			outok("\n");
-			main_function(&lcount, &rcount, &bcount, &tcount);
-			outok("\n");
-		} else
-		if (errno != error_noent)
-			strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
-	}
+	process_queue(WARN, FATAL, main_function, &lcount, &rcount, &bcount, &tcount);
 	if (doCount)
 		putcounts("Total ", lcount, rcount, bcount, tcount);
 	substdio_flush(subfdout);
@@ -676,7 +540,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.37 2021-06-27 10:45:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.38 2021-06-28 17:06:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

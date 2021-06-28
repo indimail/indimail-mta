@@ -1,5 +1,101 @@
+#include <unistd.h>
+#include <strerr.h>
+#include <scan.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <lock.h>
+#include <open.h>
+#include <env.h>
+#include <error.h>
+#include <stralloc.h>
+#include <fmt.h>
+#include "auto_qmail.h"
+#include "control.h"
+#include "tcpto.h"
+#include "variables.h"
+#include "process_queue.h"
+
+#ifndef QUEUE_COUNT
+#define QUEUE_COUNT 10
+#endif
+
+#define FATAL "qmail-tcpok: fatal: "
+#define WARN  "qmail-tcpok: warn: "
+
+#ifdef MULTI_QUEUE
+int
+main_function()
+#else
+int
+main()
+#endif
+{
+	int             fd, i;
+	char            tcpto_buf[TCPTO_BUFSIZ];	/*- XXX: must match size in tcpto_clean.c, tcpto.c */
+	substdio        ss;
+#ifndef MULTI_QUEUE
+	char           *qbase;
+	stralloc        QueueBase = { 0 };
+#endif
+
+#ifndef MULTI_QUEUE
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		switch (control_readfile(&QueueBase, "queue_base", 0))
+		{
+		case -1:
+			strerr_die2sys(111, FATAL, "unable to read controls: ");
+			break;
+		case 0:
+			if (!stralloc_copys(&QueueBase, auto_qmail) ||
+					!stralloc_catb(&QueueBase, "/queue", 6) ||
+					!stralloc_0(&QueueBase))
+				strerr_die2x(111, FATAL, "out of memory");
+			qbase = QueueBase.s;
+			break;
+		case 1:
+			qbase = QueueBase.s;
+			break;
+		}
+	}
+	if (chdir(qbase) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", qbase, ": ");
+	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
+		queuedir = "queue";
+#endif
+	if (chdir(queuedir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", queuedir, ": ");
+	if (chdir("lock") == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", queuedir, "/lock: ");
+	if ((fd = open_write("tcpto")) == -1)
+		strerr_die4sys(111, FATAL, "unable to open ", queuedir, "/lock/tcpto: ");
+	if (lock_ex(fd) == -1)
+		strerr_die4sys(111, FATAL, "unable to lock ", queuedir, "/lock/tcpto: ");
+	substdio_fdbuf(&ss, write, fd, tcpto_buf, sizeof tcpto_buf);
+	for (i = 0; i < sizeof(tcpto_buf); ++i)
+		substdio_put(&ss, "", 1);
+	if (substdio_flush(&ss) == -1)
+		strerr_die4sys(111, FATAL, "unable to clear ", queuedir, "/lock/tcpto: ");
+#ifdef MULTI_QUEUE
+	return (0);
+#else
+	_exit (0);
+#endif
+}
+
+#ifdef MULTI_QUEUE
+int
+main(int argc, char **argv)
+{
+	process_queue(WARN, FATAL, main_function, 0, 0, 0, 0);
+	return 0;
+}
+#endif
+
 /*
  * $Log: qmail-tcpok.c,v $
+ * Revision 1.28  2021-06-28 17:07:29+05:30  Cprogrammer
+ * use process_queue to process all queues
+ *
  * Revision 1.27  2021-06-12 18:35:07+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -73,209 +169,11 @@
  * added code to process all queues
  *
  */
-#include <stdlib.h>
-#include <unistd.h>
-#include "strerr.h"
-#include "control.h"
-#include "scan.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "lock.h"
-#include "open.h"
-#include "auto_qmail.h"
-#include "env.h"
-#include "error.h"
-#include "variables.h"
-#include "stralloc.h"
-#include "fmt.h"
-#include "tcpto.h"
-
-#ifndef QUEUE_COUNT
-#define QUEUE_COUNT 10
-#endif
-
-#define FATAL "qmail-tcpok: fatal: "
-
-char            tcpto_buf[TCPTO_BUFSIZ];	/*- XXX: must match size in tcpto_clean.c, tcpto.c */
-substdio        ss;
-char           *qbase;
-stralloc        QueueBase = { 0 };
-
-int
-die(n)
-	int             n;
-{
-	substdio_flush(subfderr);
-	substdio_flush(subfdout);
-#ifdef MULTI_QUEUE
-	if (n)
-		_exit(n);
-	else
-		return(0);
-#else
-	_exit(n);
-#endif
-}
-
-void
-die_home()
-{
-	substdio_puts(subfderr, "Unable to switch to home directory.\n");
-	die(111);
-}
-
-void
-die_control()
-{
-	substdio_puts(subfderr, "fatal: unable to read controls\n");
-	die(111);
-}
-
-#ifdef MULTI_QUEUE
-int
-main_function()
-#else
-int
-main()
-#endif
-{
-	int             fd, i;
-
-#ifndef MULTI_QUEUE
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		switch (control_readfile(&QueueBase, "queue_base", 0))
-		{
-		case -1:
-			die_control();
-			break;
-		case 0:
-			if (!stralloc_copys(&QueueBase, auto_qmail) ||
-					!stralloc_catb(&QueueBase, "/queue", 6) ||
-					!stralloc_0(&QueueBase))
-				die_nomem();
-			qbase = QueueBase.s;
-			break;
-		case 1:
-			qbase = QueueBase.s;
-			break;
-		}
-	}
-	if (chdir(qbase) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", qbase, ": ");
-	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue";
-#endif
-	if (chdir(queuedir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", queuedir, ": ");
-	if (chdir("lock") == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", queuedir, "/lock: ");
-	if ((fd = open_write("tcpto")) == -1)
-		strerr_die4sys(111, FATAL, "unable to write ", queuedir, "/lock/tcpto: ");
-	if (lock_ex(fd) == -1)
-		strerr_die4sys(111, FATAL, "unable to lock ", queuedir, "/lock/tcpto: ");
-	substdio_fdbuf(&ss, write, fd, tcpto_buf, sizeof tcpto_buf);
-	for (i = 0; i < sizeof(tcpto_buf); ++i)
-		substdio_put(&ss, "", 1);
-	if (substdio_flush(&ss) == -1)
-		strerr_die4sys(111, FATAL, "unable to clear ", queuedir, "/lock/tcpto: ");
-	die(0);
-	/*- Not reached */
-	return(0);
-}
-
-#ifdef MULTI_QUEUE
-void
-outok(s)
-	char           *s;
-{
-	substdio_puts(subfdout, s);
-}
-
-void
-die_nomem()
-{
-	substdio_puts(subfderr, "fatal: out of memory\n");
-	die(111);
-}
-
-int
-main(int argc, char **argv)
-{
-	char           *queue_count_ptr, *queue_start_ptr;
-	char            strnum[FMT_ULONG];
-	int             idx, count, qcount, qstart;
-	char           *extra_queue[] = {"slowq", "nqueue", 0};
-	static stralloc Queuedir = { 0 };
-
-	if (!(qbase = env_get("QUEUE_BASE"))) {
-		switch (control_readfile(&QueueBase, "queue_base", 0))
-		{
-		case -1:
-			die_control();
-			break;
-		case 0:
-			if (!stralloc_copys(&QueueBase, auto_qmail) ||
-					!stralloc_catb(&QueueBase, "/queue", 6) ||
-					!stralloc_0(&QueueBase))
-				die_nomem();
-			qbase = QueueBase.s;
-			break;
-		case 1:
-			qbase = QueueBase.s;
-			break;
-		}
-	}
-	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
-		qcount = QUEUE_COUNT;
-	else
-		scan_int(queue_count_ptr, &qcount);
-	if (!(queue_start_ptr = env_get("QUEUE_START")))
-		qstart = 1;
-	else
-		scan_int(queue_start_ptr, &qstart);
-	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
-		if (!stralloc_copys(&Queuedir, qbase) ||
-				!stralloc_cats(&Queuedir, "/queue") ||
-				!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) idx)) ||
-				!stralloc_0(&Queuedir))
-			die_nomem();
-		if (access(Queuedir.s, F_OK)) {
-			if (errno != error_noent)
-				strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
-			break;
-		}
-		queuedir = Queuedir.s;
-		outok("processing queue ");
-		outok(queuedir);
-		outok("\n");
-		main_function();
-	}
-	for (idx = 0; extra_queue[idx]; idx++) {
-		if (!stralloc_copys(&Queuedir, qbase) ||
-				!stralloc_append(&Queuedir, "/") ||
-				!stralloc_cats(&Queuedir, extra_queue[idx]) ||
-				!stralloc_0(&Queuedir))
-			die_nomem();
-		if (!access(Queuedir.s, F_OK)) {
-			queuedir = Queuedir.s;
-			outok("processing queue ");
-			outok(queuedir);
-			outok("\n");
-			main_function();
-		} else
-		if (errno != error_noent)
-			strerr_die4sys(111, FATAL, "unable to access ", Queuedir.s, ": ");
-	}
-	die(0);
-	/*- Not reached */
-	return(0);
-}
-#endif
 
 void
 getversion_qmail_tcpok_c()
 {
-	static char    *x = "$Id: qmail-tcpok.c,v 1.27 2021-06-12 18:35:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-tcpok.c,v 1.28 2021-06-28 17:07:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
