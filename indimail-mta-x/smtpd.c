@@ -105,7 +105,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.242 $";
+char           *revision = "$Revision: 1.243 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1464,10 +1464,12 @@ err_child()
 void
 err_library(char *arg)
 {
-	out("451 Requested action aborted: problem with loading shared libs (#4.3.0)\r\n");
+	out("451 Requested action aborted: problem loading virtual domain library (#4.3.0)\r\n");
 	if (arg) {
 		logerr("qmail-smtpd: ");
 		logerrpid();
+		logerr(remoteip);
+		logerr(" ");
 		logerr(arg);
 		logerrf("\n");
 	}
@@ -1852,7 +1854,8 @@ check_recipient_sql(char *rcpt, int len)
 	char           *ptr, *errstr;
 	void           *(*inquery) (char, char *, char *);
 
-	ptr = load_virtual();
+	if (!(ptr = load_virtual()))
+		return -1;
 	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &errstr))) {
 		err_library(errstr);
 		return -1;
@@ -2967,7 +2970,8 @@ pop_bef_smtp(char *mfrom)
 	char           *ptr, *errstr;
 	void           *(*inquery) (char, char *, char *);
 
-	ptr = load_virtual();
+	if (!(ptr = load_virtual()))
+		return 1;
 	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &errstr))) {
 		err_library(errstr);
 		return 1;
@@ -2998,21 +3002,16 @@ domain_compare(char *dom1, char *dom2)
 	char           *ptr, *tmpdom1, *tmpdom2, *errstr;
 	void           *(*inquery) (char, char *, char *);
 
-	ptr = load_virtual();
+	if (!(ptr = load_virtual()))
+		return -1;
 	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &errstr))) {
 		err_library(errstr);
 		return -1;
 	}
 
 	if (str_diff(dom1, dom2)) {
-		if (!(tmpdom1 = (*inquery) (DOMAIN_QUERY, dom1, 0))) {
-			out("451 Requested action aborted: database error (#4.3.2)\r\n");
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerrf("Database error\n");
-			return (-1);
-		}
-		if (!(tmpdom2 = (*inquery) (DOMAIN_QUERY, dom2, 0))) {
+		if (!(tmpdom1 = (*inquery) (DOMAIN_QUERY, dom1, 0)) ||
+				!(tmpdom2 = (*inquery) (DOMAIN_QUERY, dom2, 0))) {
 			out("451 Requested action aborted: database error (#4.3.2)\r\n");
 			logerr("qmail-smtpd: ");
 			logerrpid();
@@ -3143,12 +3142,6 @@ smtp_mail(char *arg)
 	int             r;
 #endif
 	void           *(*inquery) (char, char *, char *);
-
-	ptr = load_virtual();
-	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &x))) {
-		err_library(x);
-		return;
-	}
 
 	/*-
 	 * If this is the second session restore original environment.
@@ -3339,6 +3332,13 @@ smtp_mail(char *arg)
 	}
 	if (!hasvirtual)
 		goto nohasvirtual;
+	if (!(ptr = load_virtual()))
+		return;
+	else
+	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &x))) {
+		err_library(x);
+		return;
+	}
 	/*-
 	 * closed user group mailing
 	 * allow only sender domains listed in rcpthosts to
@@ -5199,7 +5199,8 @@ smtp_atrn(char *arg)
 		err_transaction("ATRN");
 		return;
 	}
-	ptr = load_virtual();
+	if (!(ptr = load_virtual()))
+		return;
 	if (!(iclose = getlibObject(ptr, &phandle, "iclose", &errstr))) {
 		err_library(errstr);
 		return;
@@ -6166,6 +6167,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.243  2021-06-28 16:58:02+05:30  Cprogrammer
+ * fix error when libindimail is missing
+ *
  * Revision 1.242  2021-06-14 01:09:28+05:30  Cprogrammer
  * added missing error check for stralloc failure
  *
@@ -6331,7 +6335,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.242 2021-06-14 01:09:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.243 2021-06-28 16:58:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
