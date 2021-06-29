@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: qmta-send.c,v $
+ * Revision 1.1  2021-06-29 08:43:10+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -47,6 +50,7 @@
 #include "auto_qmail.h"
 #include "auto_split.h"
 #include "auto_uids.h"
+#include "set_environment.h"
 
 #define OSSIFIED      129600 /*- 36 hours; _must_ exceed q-q's DEATH (24 hours) */
 #define SLEEP_CLEANUP 76431 /*- time between cleanups */
@@ -2367,6 +2371,7 @@ main(int argc, char **argv)
 		"       -r Use qmail-rspawn for spawning remote deliveries\n"
 		"       -s queue_split";
 
+	set_environment("qmta-send: warn: ", "qmta-send: fatal: ");
 	while ((opt = getopt(argc, argv, "dfclrs:")) != opteof) {
 		switch (opt)
 		{
