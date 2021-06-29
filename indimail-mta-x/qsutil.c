@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.19  2021-06-29 09:30:25+05:30  Cprogrammer
+ * fixed handling of closed lock descriptor
+ *
  * Revision 1.18  2021-06-27 11:33:38+05:30  Cprogrammer
  * added loglock_open function
  *
@@ -63,6 +66,7 @@
 #include <env.h>
 #include <open.h>
 #include <scan.h>
+#include <error.h>
 #include "auto_control.h"
 #include "qsutil.h"
 #include "variables.h"
@@ -109,11 +113,14 @@ loglock_open(int preopen)
 				|| !stralloc_0(&lockfn))
 			nomem();
 		if ((loglock_fd = open_read(lockfn.s)) == -1) {
-			log3("alert: ", queuedesc, ": cannot start: unable to open defaultdelivery\n");
+			if (queuedesc)
+				log3("alert: ", queuedesc, ": cannot start: unable to open defaultdelivery\n");
+			else
+				log1("alert: cannot start: unable to open defaultdelivery\n");
 			lockerr();
 		}
 	}
-	log1(loglock_fd == -1 ? "loglock: disabled\n" : ": enabled\n");
+	log1(loglock_fd == -1 ? "info: loglock: disabled\n" : "info: loglock: enabled\n");
 }
 #endif
 
@@ -121,8 +128,13 @@ void
 flush(void)
 {
 #ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
+	if (loglock_fd != -1) {
+		if (lock_exnb(loglock_fd) == -1) {
+			if (errno == error_ebadf)
+				loglock_fd = -1;
+			lockerr();
+		}
+	}
 #endif
 	substdio_flush(&sserr);
 #ifdef LOGLOCK
@@ -141,8 +153,13 @@ void
 logsa(stralloc *sa)
 {
 #ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
+	if (loglock_fd != -1) {
+		if (lock_exnb(loglock_fd) == -1) {
+			if (errno == error_ebadf)
+				loglock_fd = -1;
+			lockerr();
+		}
+	}
 #endif
 	substdio_putflush(&sserr, sa->s, sa->len);
 #ifdef LOGLOCK
@@ -462,7 +479,7 @@ logsafe(char *s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.18 2021-06-27 11:33:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.19 2021-06-29 09:30:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
