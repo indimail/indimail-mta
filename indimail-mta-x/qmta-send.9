@@ -107,6 +107,10 @@ or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
 is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is
 used for doing this.
 
+qmta-send uses environment set according to files in $HOME/.defaultqueue
+directory if present, else it uses environment set according to files
+in /etc/indimail/control/defaultqueue directory.
+
 .SH OPTIONS
 .TP
 \fB\-d\fR
