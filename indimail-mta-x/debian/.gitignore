@@ -9,3 +9,7 @@ rules
 indimail-mta.cron.d
 obs_deb_prep
 conf-release
+qmta.postinst
+qmta.postrm
+qmta.preinst
+qmta.prerm

@@ -22,29 +22,30 @@ edit = sed \
 
 it = indimail-mta.perms 822date 822field 822header 822print 822received \
 	addrlist atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q \
-	binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm qnotify \
-	create_services cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr \
-	condredirect config-fast datemail dk-filter dknewkey dktest dnscname \
-	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
-	qdane dnstlsarr etrn except fastforward forward generic.so greydaemon \
-	qf-smtp-ratelimit home home+df hostname sslerator indimail-mta.changes \
-	idedit iftocc instcheck ipmeprint ldap-checkpwd leapsecs \
-	maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
-	maildirsmtp maildirwatch mailsubj mbox2maildir multirotate \
-	inewaliases newinclude new-inject nowutc ofmipd ofmipname parsedate \
-	plugtest installer predate preline printforward qmail-spamfilter \
-	printmaillist proc proc+df qaes ctrlenv qarf qmail-cat qmail-cdb \
-	qmail-clean qmailconfig maildirsize qmail-daemon qmaildirmake \
-	qmail-direct qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject \
-	qmail-local qmail-lspawn qmail-multi qmail-newmrh qmail-newu \
-	qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter \
-	qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
-	qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl \
-	qmail-daned qmail-smtpd qmail_smtpd.so qmail-start qmail-tcpok \
-	qmail-tcpto qmail-todo qmail-upq qpq qquote qreceipt qsmhook \
-	queue-fix recipient-cdb relaytest rewind irmail rpmattr qmta-send \
-	rrforward rrt sendmail serialcmd serialqmtp serialsmtp setforward \
-	setmaillist smtpd-plugin0.so slowq-send slowq-start smtpd-plugin.so \
+	binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm \
+	qnotify create_services cdbmake cdbmake-12 cdbmake-sv cdbstats \
+	cdbtest cidr condredirect config-fast datemail dk-filter dknewkey \
+	dktest dnscname dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt \
+	dot-forward drate qdane dnstlsarr etrn except fastforward forward \
+	generic.so greydaemon qf-smtp-ratelimit home home+df hostname \
+	sslerator indimail-mta.changes idedit iftocc instcheck ipmeprint \
+	ldap-checkpwd leapsecs maildir2mbox maildircmd maildirdeliver \
+	maildirqmtp maildirserial maildirsmtp maildirwatch \
+	mailsubj mbox2maildir multirotate inewaliases newinclude new-inject \
+	nowutc ofmipd ofmipname parsedate plugtest installer predate preline \
+	printforward qmail-spamfilter printmaillist proc proc+df qaes qarf \
+	ctrlenv qmail-cat qmail-cdb qmail-clean qmailconfig maildirsize \
+	qmail-daemon qmaildirmake qmail-direct qmail-dk qmail-dkim \
+	qmail-getpw qmail-greyd qmail-inject qmail-local qmail-lspawn \
+	qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-popbull \
+	qmail-poppass qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd \
+	qmail-qmtpd qmail-qread qmail-queue qmail-remote qmail-rm \
+	qmail-rspawn qmail-send qmail-showctl qmail-daned qmail-smtpd \
+	qmail_smtpd.so qmail-start qmail-tcpok qmail-tcpto qmail-todo \
+	qmail-upq qpq qquote qreceipt qsmhook queue-fix recipient-cdb \
+	relaytest rewind irmail rpmattr qmta-send rrforward rrt sendmail \
+	serialcmd serialqmtp serialsmtp setforward setmaillist \
+	smtpd-plugin0.so slowq-send slowq-start smtpd-plugin.so \
 	sortedtest spawn-filter spfquery splogger srsfilter surblfilter \
 	surblqueue swaks sys-checkpwd tcp-env testzero tokenize uacl \
 	udpclient udplogger update_tmprsadh viruscanner whois yearcal \
@@ -1726,14 +1727,14 @@ auto_split.o auto_qmail.o auto_uids.o prot.o \
 prioq.o newfield.o quote.o qmail.o syncdir.o srs.o \
 rcpthosts.o auto_spawn.o slurpclose.o get_uid.o \
 qmta_lspawn.o qmta_rspawn.o qmta-lspawn.o qmta-rspawn.o \
-auto_assign.o tcpto_clean.o set_environment.o
+auto_assign.o tcpto_clean.o set_environment.o auto_prefix.o
 	./load qmta-send trigger.o fmtqfn.o readsubdir.o \
 	variables.o auto_control.o control.o qsutil.o \
 	rcpthosts.o auto_split.o auto_qmail.o auto_uids.o prot.o \
 	prioq.o newfield.o quote.o qmail.o syncdir.o srs.o \
 	qmta_lspawn.o qmta_rspawn.o qmta-lspawn.o qmta-rspawn.o \
 	slurpclose.o get_uid.o auto_spawn.o auto_assign.o tcpto_clean.o \
-	set_environment.o \
+	set_environment.o auto_prefix.o \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -lqmail
 
 qmta-lspawn.o: compile qmail-lspawn.c prot.h slurpclose.h \
@@ -3778,6 +3779,9 @@ warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec \
 conf-sysconfdir conf-servicedir
 	cat warn-auto.sh qlocal_upgrade.in \
 	| $(edit) > $@
+
+qmta-send.service: qmta-send.service.in warn-auto.sh
+	(sed -n '2,$$p' warn-auto.sh;cat $@.in) | $(edit) > $@
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \

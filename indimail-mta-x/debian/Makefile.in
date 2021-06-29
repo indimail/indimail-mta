@@ -17,6 +17,8 @@ all: rules indimail-mta.prerm indimail-mta.preinst \
 indimail-mta.postrm indimail-mta.postinst \
 indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst \
+qmta.prerm qmta.preinst \
+qmta.postrm qmta.postinst \
 indimail-mta.install indimail-mta.dsc \
 indimail-mta-Debian_9.0.dsc indimail-mta-Debian_10.dsc \
 indimail-mta-xUbuntu_18.04.dsc indimail-mta-Raspbian_10.dsc \
@@ -45,18 +47,23 @@ distclean: clean
 clean:
 	/bin/rm -f rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
-	indimail-mini.postinst *.dsc changelog \
+	indimail-mini.postinst qmta.prerm qmta.preinst qmta.postrm \
+	qmta.postinst *.dsc changelog \
 	indimail-mta.install indimail-mta.postinst debian.tar.gz
 
 noinst_SCRIPTS = indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				 indimail-mta.postinst indimail-mta.install \
 				 indimail-mini.prerm indimail-mini.preinst \
 				 indimail-mini.postrm indimail-mini.postinst \
+				 qmta.prerm qmta.preinst \
+				 qmta.postrm qmta.postinst \
 				 rules
 MOSTLYCLEANFILES= indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				  indimail-mta.postinst rules changelog \
 				  indimail-mini.prerm indimail-mini.preinst \
 				  indimail-mini.postrm indimail-mini.postinst \
+				  qmta.prerm qmta.preinst \
+				  qmta.postrm qmta.postinst \
 				  debian.tar.gz
 
 rules: rules.in Makefile ../conf-version ../conf-release ../conf-email
@@ -113,17 +120,34 @@ indimail-mini.postrm: indimail-mini.postrm.in Makefile \
 indimail-mini.postinst: indimail-mini.postinst.in Makefile \
 ../conf-version ../conf-release
 	$(edit) $@.in > $@;
+qmta.prerm: qmta.prerm.in Makefile \
+../conf-version ../conf-release
+	$(edit) $@.in > $@;
+qmta.preinst: qmta.preinst.in Makefile \
+../conf-version ../conf-release
+	$(edit) $@.in > $@;
+qmta.postrm: qmta.postrm.in Makefile \
+../conf-version ../conf-release
+	$(edit) $@.in > $@;
+qmta.postinst: qmta.postinst.in Makefile \
+../conf-version ../conf-release
+	$(edit) $@.in > $@;
 indimail-mta.cron.d: indimail-mta.cron.d.in Makefile
 	$(edit) $@.in > $@
 
-debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
-indimail-mta.postrm rules changelog compat control usr.bin.freshclam \
-usr.sbin.clamd indimail-mini.prerm indimail-mini.preinst indimail-mta.cron.d \
-indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
-indimail-mta.install
-	tar cf - copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
-		indimail-mta.postrm rules changelog compat \
+debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst \
+indimail-mta.prerm indimail-mta.postrm rules changelog compat control \
+usr.bin.freshclam usr.sbin.clamd \
+indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
+indimail-mini.postinst indimail-mini.install \
+qmta.prerm qmta.preinst qmta.postrm \
+qmta.postinst qmta.install \
+indimail-mta.cron.d indimail-mta.install
+	tar cf - copyright indimail-mta.preinst indimail-mta.postinst \
+		indimail-mta.prerm indimail-mta.postrm rules changelog compat \
 		control usr.bin.freshclam usr.sbin.clamd \
-		indimail-mini.prerm indimail-mini.preinst indimail-mta.cron.d \
+		indimail-mini.prerm indimail-mini.preinst \
 		indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
-		indimail-mta.install | gzip > $@
+		qmta.prerm qmta.preinst \
+		qmta.postrm qmta.postinst qmta.install \
+		indimail-mta.cron.d indimail-mta.install | gzip > $@

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.317 2021-06-29 09:26:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.318 2021-06-30 00:13:18+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -101,6 +101,7 @@ Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 URL: https://github.com/mbhangui/indimail-mta
 AutoReq: Yes
 Conflicts: indimail-mini
+Conflicts: qmta
 Conflicts: indimail < 2.5
 Conflicts: indimail-mta < 2.0
 Obsoletes: indimail-mta < 2.0
@@ -182,6 +183,7 @@ missing in qmail.
 Summary: IndiMail - Mini Client Installation
 Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
+Conflicts: qmta
 Conflicts: indimail-mini < 2.0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
@@ -193,10 +195,32 @@ Requires: /usr/bin /usr/sbin
 
 %description -n indimail-mini
 This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
-programs to have a mini-indimail installation.
+programs to have a indimail-mini installation.
 
-A mini-indimail installation doesn't have a mail queue. It gives each
+A indimail-mini installation doesn't have a mail queue. It gives each
 new message to a central server using QMQP.
+
+%{see_base}
+
+%package -n qmta
+Summary: qmta - A minimal Mail Transport Agent
+Group: Productivity/Networking/Email/Clients
+Conflicts: %{name}
+Conflicts: indimail-mini
+%if 0%{?suse_version} >= 1120
+PreReq: permissions
+%endif
+Requires: coreutils /bin/sh glibc openssl procps
+%if %{undefined suse_version} && %{undefined sles_version}
+Requires: /usr/bin /usr/sbin
+%endif
+
+%description -n qmta
+This package contains the qmta-send mail transport agent and bare minimum
+programs to deliver local and remote mails
+
+A qmta installation doesn't have multiple daemons handling a queue. The
+queue is handled by a single daemon/binary - qmta-send
 
 %{see_base}
 
@@ -334,7 +358,8 @@ fi
   install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 %{__mkdir_p} %{buildroot}%{qsysconfdir}/control/defaultqueue
-echo "%{_prefix}/sbin/qmail-qmqpc" > %{buildroot}%{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+touch %{buildroot}%{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+touch %{buildroot}%{qsysconfdir}/control/defaultqueue/QUEUEDIR
 
 # remove devel files as we are not building a devel package
 %{__rm} -rf %{buildroot}%{mandir}/man3
@@ -623,6 +648,7 @@ echo ../resolv.conf 1>&3
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-clean
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-send
 %attr(751,root,root)                    %{_prefix}/sbin/slowq-send
+%attr(751,root,root)                    %{_prefix}/sbin/qmta-send
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-todo
 %attr(755,root,root)                    %{_prefix}/sbin/surblfilter
 %attr(755,root,root)                    %{_prefix}/sbin/surblqueue
@@ -718,6 +744,7 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)                   %{shareddir}/boot/proc
 %attr(0755,root,root)                   %{shareddir}/boot/home
 %attr(0755,root,root)                   %{shareddir}/boot/binm2+df
+%attr(0755,root,root)                   %{shareddir}/boot/qmta-send.service
 
 %attr(0755,root,root)                   %{plugindir}/generic.so
 %attr(0755,root,root)                   %{plugindir}/smtpd-plugin.so
@@ -792,6 +819,72 @@ echo ../resolv.conf 1>&3
 %dir %attr(0555,root,qmail)        %{qmaildir}
                                    %{qmaildir}/bin
                                    %{qmaildir}/sbin
+                                   %{qmaildir}/control
+%dir %attr(2775,indimail,qmail)    %{qsysconfdir}/control
+%if "%{mandir}" != "/usr/share/man"
+%dir %attr(0755,root,root)         %{mandir}
+%dir %attr(0755,root,root)         %{mandir}/man1
+%dir %attr(0755,root,root)         %{mandir}/man5
+%dir %attr(0755,root,root)         %{mandir}/man8
+%endif
+%dir %attr(755,indimail,qmail)     %{qsysconfdir}/control/defaultqueue
+#
+%attr(0755,root,root)              %{_prefix}/bin/sendmail
+%attr(0755,root,root)              %{_prefix}/bin/qmail-inject
+%attr(755,root,root)               %{_prefix}/bin/srsfilter
+%attr(0755,root,root)              %{_prefix}/bin/predate
+%attr(0755,root,root)              %{_prefix}/bin/datemail
+%attr(0755,root,root)              %{_prefix}/bin/mailsubj
+%attr(0755,root,root)              %{_prefix}/bin/irmail
+%attr(0755,root,root)              %{_prefix}/bin/qmail-showctl
+%attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
+%attr(0755,root,root)              %{_prefix}/sbin/qmail-direct
+
+%attr(644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+
+#
+%attr(0644,root,root)              %{mandir}/man1/srsfilter.1.gz
+%attr(0644,root,root)              %{mandir}/man1/predate.1.gz
+%attr(0644,root,root)              %{mandir}/man1/datemail.1.gz
+%attr(0644,root,root)              %{mandir}/man1/mailsubj.1.gz
+#
+%attr(0644,root,root)              %{mandir}/man5/qmail-srs.5.gz
+#
+%attr(0644,root,root)              %{mandir}/man8/qmail-inject.8.gz
+%attr(0644,root,root)              %{mandir}/man8/isendmail.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qmail-qmqpc.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qmail-direct.8.gz
+%attr(0644,root,root)              %{mandir}/man8/irmail.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qmail-showctl.8.gz
+
+%if %build_on_obs == 0
+%license %attr(0644,root,root)     %{shareddir}/doc/COPYING-indimail-mta
+%license %attr(0644,root,root)     %{shareddir}/doc/README.licenses
+%else
+%attr(0644,root,root)              %{shareddir}/doc/COPYING-indimail-mta
+%attr(0644,root,root)              %{shareddir}/doc/README.licenses
+%endif
+%attr(0644,root,root)              %{shareddir}/doc/softwarelicense1-1.html
+%attr(0644,root,root)              %{shareddir}/doc/INSTALL-MINI
+%attr(0644,root,root)              %{shareddir}/doc/README.indimail-mta
+%attr(0644,root,root)              %{shareddir}/doc/README.srs
+%attr(0644,root,root)              %{shareddir}/doc/CREDITS
+%attr(0644,root,root)              %{shareddir}/doc/ChangeLog-indimail-mta
+
+# a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
+# and /var/qmail/control/plusdomain from your central server, so that
+# qmail-inject uses appropriate host names in outgoing mail; and
+# this host's name in /var/qmail/control/idhost, so that
+# qmail-inject generates Message-ID without any risk of collision
+
+%files -n qmta
+%defattr(-, root, root, 0755)
+#
+# Directories
+#
+%dir %attr(0555,root,qmail)        %{qmaildir}
+                                   %{qmaildir}/bin
+                                   %{qmaildir}/sbin
                                    %{qmaildir}/users
                                    %{qmaildir}/control
 %dir %attr(2775,indimail,qmail)    %{qsysconfdir}/control
@@ -799,6 +892,7 @@ echo ../resolv.conf 1>&3
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)         %{mandir}
 %dir %attr(0755,root,root)         %{mandir}/man1
+%dir %attr(0755,root,root)         %{mandir}/man5
 %dir %attr(0755,root,root)         %{mandir}/man8
 %endif
 %dir %attr(755,indimail,qmail)     %{qsysconfdir}/control/defaultqueue
@@ -828,6 +922,7 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-tcpto
 
 %attr(644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+%attr(644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QUEUEDIR
 
 %if 0%{?suse_version} >= 1120
 %attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions
@@ -1635,7 +1730,6 @@ fi
 %if 0%{?suse_version} >= 1120
 %verify_permissions -e %{qsysconfdir}/
 %verify_permissions -e %{qsysconfdir}/control/
-%verify_permissions -e %{qsysconfdir}/users/
 %endif
 
 %pre -n indimail-mini
@@ -1672,17 +1766,12 @@ echo "Adding IndiMail users/groups"
 if [ $? = 4 ] ; then
   /usr/sbin/groupadd indimail
 fi
-/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 /usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
-/usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
 
 /usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{qmaildir} indimail || true
 if [ $? = 4 ] ; then
   /usr/sbin/useradd -r -g indimail -d %{qmaildir} indimail
 fi
-/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin alias  || true
-/usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailq || true
-/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{qmaildir}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
 
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
@@ -1711,7 +1800,6 @@ fi
 %if 0%{?suse_version} >= 1120
 %if 0%{?set_permissions:1} > 0
   %set_permissions %{qsysconfdir}/control/
-  %set_permissions %{qsysconfdir}/users/
 %else
   %run_permissions
 %endif
@@ -1736,6 +1824,16 @@ if [ -L /usr/sbin ] ; then
 else
   move="$move /usr/sbin/sendmail"
 fi
+if [ -f %{_sysconfdir}/pam.d/smtp -a ! -L %{_sysconfdir}/pam.d/smtp ] ; then
+  echo "! %{_sysconfdir}/pam.d/smtp is a file, should be a link" 1>&2
+  %{__mv} %{_sysconfdir}/pam.d/smtp %{_sysconfdir}/pam.d/smtp.old
+fi
+for i in mailq newaliases; do
+  if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
+    echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
+    %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+  fi
+done
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -1750,22 +1848,11 @@ if [ -n "$alternatives_cmd" ] ; then
       %{__mv} $i $i.old
     fi
   done
-  for i in mailq newaliases; do
-    if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
-      echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
-      %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
-    fi
-  done
-  if [ -f %{_sysconfdir}/pam.d/smtp -a ! -L %{_sysconfdir}/pam.d/smtp ] ; then
-    echo "! %{_sysconfdir}/pam.d/smtp is a file, should be a link" 1>&2
-    %{__mv} %{_sysconfdir}/pam.d/smtp %{_sysconfdir}/pam.d/smtp.old
-  fi
   $alternatives_cmd --install \
     /usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
     --slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
       %{mandir}/man8/isendmail.8.gz \
     --slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
-    --slave /usr/bin/rmail mta-rmail %{_prefix}/bin/irmail
   $alternatives_cmd --set mta %{_prefix}/bin/sendmail
 else
   for i in $move; do
@@ -1779,17 +1866,6 @@ else
     elif [ ! -f $i ];then
       echo "! $i is missing"
       /bin/ln -s %{_prefix}/bin/sendmail $i
-    fi
-  done
-  if [ -f %{_sysconfdir}/pam.d/smtp -a ! -L %{_sysconfdir}/pam.d/smtp ] ; then
-    echo "! %{_sysconfdir}/pam.d/smtp is a file, should be a link" 1>&2
-    %{__mv} %{_sysconfdir}/pam.d/smtp %{_sysconfdir}/pam.d/smtp.old
-    /bin/ln -s %{_sysconfdir}/pam.d/pam.multi %{_sysconfdir}/pam.d/smtp
-  fi
-  for i in mailq newaliases; do
-    if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
-      echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
-      %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
     fi
   done
 fi
@@ -1873,13 +1949,346 @@ if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   /sbin/ldconfig
 fi
 
-for i in indimail alias qmailq qscand; do
-	echo "removing user $i"
-	/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
+echo "removing user indimail"
+/usr/bin/getent passwd indimail > /dev/null && /usr/sbin/userdel indimail >/dev/null || true
+for i in indimail qmail ; do
+  echo "removing group $i"
+  /usr/bin/getent group $i  > /dev/null && /usr/sbin/groupdel $i >/dev/null || true
+done
+
+if [ $nscd_up -ge 1 ] ; then
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
+  fi
+fi
+for i in idhost defaulthost defaultdomain plusdomain
+do
+  %{__rm} -f %{qsysconfdir}/control/$i || true
+done
+rmdir --ignore-fail-on-non-empty %{qsysconfdir} 2>/dev/null || true
+%if "%{_prefix}" != "/usr"
+  for i in bin sbin share/indimail
+  do
+    rmdir --ignore-fail-on-non-empty %{_prefix}/$i 2>/dev/null || true
+  done
+  rmdir --ignore-fail-on-non-empty %{_prefix} 2>/dev/null || true
+%endif
+) >> /var/log/%{name}-setup.log
+
+%verifyscript -n qmta
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+%if 0%{?suse_version} >= 1120
+%verify_permissions -e %{qsysconfdir}/
+%verify_permissions -e %{qsysconfdir}/control/
+%verify_permissions -e %{qsysconfdir}/users/
+%endif
+
+%pretrans -n qmta
+echo "Giving qmta-send exactly 5 seconds to exit nicely"
+count=$(ps -ef|grep qmta-send|grep -v grep|wc -l)
+if [ $count -gt 0 ] ; then
+    touch /var/tmp/.qmta-send.down
+else
+    %{__rm} -f /var/tmp/.qmta-send.down
+fi
+if test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
+then
+    /bin/systemctl stop qmta-send > /dev/null 2>&1
+elif test -x %{_sysconfdir}/init.d/qmta-send
+then
+    %{_sysconfdir}/init.d/qmta-send stop
+fi
+sleep 5
+
+%pre -n qmta
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+# we are doing upgrade
+if [ $argv1 -eq 2 ] ; then
+  (
+  echo "checking if system boot scripts need upgrade"
+  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/qmta-send.service /lib/systemd/system/qmta-send.service >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/qmta-send.service /lib/systemd/system/qmta-send.service
+      /bin/systemctl daemon-reload
+    fi
+  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    cmp -s %{shareddir}/boot/qmta-send.service /usr/lib/systemd/system/qmta-send.service >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      %{__cp} %{shareddir}/boot/qmta-send.service /usr/lib/systemd/system/qmta-send.service
+      /bin/systemctl daemon-reload
+    fi
+  fi
+  # restart svscan service if we find /var/tmp/.qmta-send.down
+  if [ -f /var/tmp/.qmta-send.down ] ; then
+    %{__rm} -f /var/tmp/.qmta-send.down
+    echo "Starting qmta-send"
+    if test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
+    then
+      /bin/systemctl start qmta-send > /dev/null 2>&1
+    fi
+  fi
+  ) >> /var/log/qmta-setup.log 2>&1
+  exit 0
+fi
+
+(
+#
+# Create user/groups. Do not report any problems if it already
+# exists.
+#
+nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+if [ $nscd_up -ge 1 ] ; then
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd stop
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl stop nscd.service
+  fi
+fi
+echo "Adding IndiMail users/groups"
+/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
+if [ $? = 4 ] ; then
+  /usr/sbin/groupadd indimail
+fi
+/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
+/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
+/usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
+
+/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{qmaildir} indimail || true
+if [ $? = 4 ] ; then
+  /usr/sbin/useradd -r -g indimail -d %{qmaildir} indimail
+fi
+/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin alias  || true
+/usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailq || true
+/usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailr || true
+/usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmails || true
+/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{qmaildir}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
+
+if [ $nscd_up -ge 1 ] ; then
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
+  fi
+fi
+) >> /var/log/%{name}-setup.log
+
+%post -n qmta
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+if [ $argv1 -eq 2 ] ; then # upgrade
+  exit 0
+fi
+(
+%if 0%{?suse_version} >= 1120
+%if 0%{?set_permissions:1} > 0
+  %set_permissions %{qsysconfdir}/control/
+  %set_permissions %{qsysconfdir}/users/
+%else
+  %run_permissions
+%endif
+%endif
+
+if [ ! -f %{qsysconfdir}/control/defaultqueue/QMAILQUEUE ] ; then
+  %{__mkdir_p} %{qsysconfdir}/control/defaultqueue
+  echo "%{_prefix}/sbin/qmail-queue" > %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+fi
+
+if [ ! -d%{qmaildir}/queue/qmta ] ; then
+  queue-fix %{qmaildir}/queue/qmta
+fi
+if [ ! -f %{qsysconfdir}/control/defaultqueue/QUEUEDIR ] ; then
+  %{__mkdir_p} %{qsysconfdir}/control/defaultqueue
+  echo %{qmaildir}/queue/qmta > %{qsysconfdir}/control/defaultqueue/QUEUEDIR
+fi
+if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
+  %{_sysconfdir}/init.d/sendmail stop
+  if [ -f /sbin/chkconfig ] ; then
+    /sbin/chkconfig --del sendmail
+  fi
+fi
+move="/usr/lib/sendmail"
+if [ -L /usr/sbin ] ; then
+  link=$(readlink /usr/sbin)
+  if [ ! " $link" = " bin" -a ! " $link" = " /usr/sbin" ] ; then
+    move="$move /usr/sbin/sendmail"
+  fi
+else
+  move="$move /usr/sbin/sendmail"
+fi
+if [ -x /usr/sbin/alternatives ] ; then
+  alternatives_cmd=/usr/sbin/alternatives
+elif [ -x /usr/sbin/update-alternatives ] ; then
+  alternatives_cmd=/usr/sbin/update-alternatives
+else
+  alternatives_cmd=""
+fi
+if [ -n "$alternatives_cmd" ] ; then
+  for i in $move; do
+    if [ -f $i -a ! -L $i ]; then
+      echo "! $i is a file, should be a link" 1>&2
+      %{__mv} $i $i.old
+    fi
+  done
+  for i in mailq newaliases; do
+    if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
+      echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
+      %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+    fi
+  done
+  if [ -f %{_sysconfdir}/pam.d/smtp -a ! -L %{_sysconfdir}/pam.d/smtp ] ; then
+    echo "! %{_sysconfdir}/pam.d/smtp is a file, should be a link" 1>&2
+    %{__mv} %{_sysconfdir}/pam.d/smtp %{_sysconfdir}/pam.d/smtp.old
+  fi
+  $alternatives_cmd --install \
+    /usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
+    --slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
+      %{mandir}/man8/isendmail.8.gz \
+    --slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
+    --slave /usr/bin/rmail mta-rmail %{_prefix}/bin/irmail
+  $alternatives_cmd --set mta %{_prefix}/bin/sendmail
+else
+  for i in $move; do
+    if [ -f $i -a ! -L $i ]; then
+      echo "! $i is a file, should be a link" 1>&2
+      %{__mv} $i $i.old
+      /bin/ln -s %{_prefix}/bin/sendmail $i
+    elif [ -L $i ];then
+      %{__mv} $i $i.old
+      /bin/ln -s %{_prefix}/bin/sendmail $i
+    elif [ ! -f $i ];then
+      echo "! $i is missing"
+      /bin/ln -s %{_prefix}/bin/sendmail $i
+    fi
+  done
+  if [ -f %{_sysconfdir}/pam.d/smtp -a ! -L %{_sysconfdir}/pam.d/smtp ] ; then
+    echo "! %{_sysconfdir}/pam.d/smtp is a file, should be a link" 1>&2
+    %{__mv} %{_sysconfdir}/pam.d/smtp %{_sysconfdir}/pam.d/smtp.old
+    /bin/ln -s %{_sysconfdir}/pam.d/pam.multi %{_sysconfdir}/pam.d/smtp
+  fi
+  for i in mailq newaliases; do
+    if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
+      echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
+      %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+    fi
+  done
+fi
+) >> /var/log/%{name}-setup.log
+
+%preun -n qmta
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+(
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+  exit 0
+fi
+
+echo "Giving qmta-send exactly 5 seconds to exit nicely"
+if test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
+then
+  /bin/systemctl stop qmta-send > /dev/null 2>&1
+fi
+sleep 5
+) >> /var/log/qmta-setup.log 2>&1
+
+%postun -n qmta
+argv1=$1
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+  (
+  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for postun upgrade"
+    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
+  fi
+  ) >> /var/log/%{name}-setup.log
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    echo "recreating ld.so cache"
+    /sbin/ldconfig
+  fi
+  exit 0
+fi
+(
+if [ -x /usr/sbin/alternatives ] ; then
+  alternatives_cmd=/usr/sbin/alternatives
+elif [ -x /usr/sbin/update-alternatives ] ; then
+  alternatives_cmd=/usr/sbin/update-alternatives
+else
+  alternatives_cmd=""
+fi
+if [ -n $alternatives_cmd ] ; then
+  $alternatives_cmd --remove mta %{_prefix}/bin/sendmail
+  $alternatives_cmd --auto mta
+  for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
+    if [ -f $i.old -o -L $i.old ]; then
+      echo "restoring $i"
+      %{__mv} $i.old $i
+    fi
+  done
+else
+  if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
+    if [ -f /sbin/chkconfig ] ; then
+      /sbin/chkconfig --add sendmail
+      echo "to start sendmail, issue"
+      echo "%{_sysconfdir}/init.d/sendmail start"
+    fi
+  fi
+fi
+for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
+  if [ -f $i.old -o -L $i.old ]; then
+    echo "restoring $i"
+    %{__mv} $i.old $i
+  fi
+done
+for i in mailq newaliases; do
+  if [ -f /usr/share/man/man1/$i.old.1.gz ] ; then
+    echo "restoring /usr/share/man/man1/$i.1.gz"
+    %{__mv} /usr/share/man/man1/$i.old.1.gz /usr/share/man/man1/$i.1.gz
+  fi
+done
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  echo "recreating ld.so cache"
+  /sbin/ldconfig
+fi
+
+for i in indimail alias qmailq qmailr qmails qscand; do
+  echo "removing user $i"
+  /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 done
 for i in indimail nofiles qmail qscand; do
-	echo "removing group $i"
-	/usr/bin/getent group $i  > /dev/null && /usr/sbin/groupdel $i >/dev/null || true
+  echo "removing group $i"
+  /usr/bin/getent group $i  > /dev/null && /usr/sbin/groupdel $i >/dev/null || true
 done
 
 if [ $nscd_up -ge 1 ] ; then

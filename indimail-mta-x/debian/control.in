@@ -10,8 +10,8 @@ Package: indimail-mta
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, daemontools, ucspi-tcp, net-tools, coreutils, diffutils, procps
 Provides: indimail-mini, default-mta, mail-transport-agent
-Conflicts: indimail-mini
-Replaces: indimail-mini
+Conflicts: indimail-mini, qmta
+Replaces: indimail-mini, qmta
 Description: indimail-mta provides a MTA that is part of the IndiMail
  messaging platform. The base is built on the following software code
  written by Dan J. Bernstein <djb@cr.yp.to>
@@ -31,10 +31,23 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, procps
 Provides: default-mta, mail-transport-agent
 Section: misc
 Architecture: any
-Breaks: indimail-mta
+Breaks: indimail-mta, qmta
 Description: IndiMail - Mini Client Installation
  This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
- programs to have a mini-indimail installation.
+ programs to have a indimail-mini installation.
  .
- A mini-indimail installation doesn't have a mail queue. It gives each new message to a
+ A indimail-mini installation doesn't have a mail queue. It gives each new message to a
  central server using QMQP.
+
+Package: qmta
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, diffutils, procps
+Provides: default-mta, mail-transport-agent
+Section: misc
+Architecture: any
+Breaks: indimail-mta, indimail-mini
+Description: qmta - A minimal Mail Transport Agent
+ This package contains the qmta-send mail transport agent and bare minimum
+ programs to deliver local and remote mails.
+ .
+ A qmta installation doesn't have multiple daemons handling a queue. The
+ queue is handled by a single daemon/binary - qmta-send

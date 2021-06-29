@@ -1,0 +1,4 @@
+# Linux specific files for startup
+#
+# @shareddir@/boot
+f:::0644:/boot/:qmta-send.service:qmta-send.service

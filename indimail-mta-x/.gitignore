@@ -651,3 +651,4 @@ auto_qmail.md
 qmta-send
 qmta-send.0
 qmta-send.8
+qmta-send.service

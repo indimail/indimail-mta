@@ -1168,3 +1168,4 @@ qmta_rspawn.o
 qmta-send.o
 rspawn.o
 token822.o
+qmta-send.service
