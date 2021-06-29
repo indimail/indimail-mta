@@ -64,12 +64,14 @@ if [ " $1" = " purge" ] ; then
 			/bin/systemctl stop nscd.service
 		fi
 	fi
-	echo "removing user indimail"
-	/usr/bin/getent passwd indimail > /dev/null && /usr/sbin/userdel indimail >/dev/null || true
-	echo "removing user qmailq"
-	/usr/bin/getent passwd qmailq > /dev/null && /usr/sbin/userdel qmailq >/dev/null || true
-	echo "removing group indimail"
-	/usr/bin/getent group indimail  > /dev/null && /usr/sbin/groupdel indimail >/dev/null || true
+	for i in indimail alias qmailq qscand; do
+		echo "removing user $i"
+		/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
+	done
+	for i in indimail nofiles qmail qscand; do
+		echo "removing group $i"
+		/usr/bin/getent group $i  > /dev/null && /usr/sbin/groupdel $i >/dev/null || true
+	done
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
