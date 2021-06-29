@@ -16,30 +16,28 @@ qmta-send \- standalone mail delivery
 ]
 
 .SH DESCRIPTION
-\fBqmta-send\fR is a stand-alone mail transport agent. It doesn't have the
-trust partition of qmail-send, qmail-lspawn/qmail-rspawn and requires to be
-run under uid 0. The use of \fBqmta-send\fR is on systems that requires a
-simple delivery mechanism for mails generated locally (like in cron
-scripts). It can be run as a daemon running continuously or when mail is
-generated.
+\fBqmta-send\fR is a stand-alone mail transport agent. The use of
+\fBqmta-send\fR is on systems that requires a simple delivery mechanism
+for mails generated locally (like in cron scripts). It can be run as a
+daemon running continuously or when mail is generated. qmta-send doesn't
+require qmail-todo, qmail-lspawn, qmail-rspawn, qmail-clean to process
+a queue.
 
 .EX
 1. run qmta-send as a daemon
-   # qmta-send -dlcr ./Maildir/
+   # qmta-send -d ./Maildir/
 2. run qmta-send to delivery mails in the queue and exit after delivery
-   $ qmta-send -lcr ./Maildir/
-3. #un qmta-send and use qmail-lspawn to handle local deliveries,
+   $ qmta-send ./Maildir/
+3. run qmta-send and use qmail-lspawn to handle local deliveries,
    qmail-rspawn to handle remoe delivies, qmail-clean to do cleanups and
    run it as a daemon
-   # qmta-send -d ./Maildir/
+   # qmta-send -dlrc ./Maildir/
 .EE
 
 \fBqmta-send\fR can also invoke \fBqmail-lspawn\fR, \fBqmail-rspawn\fR,
 \fBqmail-clean\fR under the proper uids and gids for a queue defined by the
 environment variable \fBQUEUEDIR\fR. These four daemons cooperate to
-deliver messages from the queue. Unlike \fBqmail-send\fR(8), which requires
-multiple unix uids to operate, \fBqmta-send\fR(8) requires just one uid,
-\fIqmailq\fR to function. \fBqmta-send\fR by default looks at
+deliver messages from the queue. \fBqmta-send\fR by default looks at
 QMAILHOME/queue for messages. This path can be changed by defining the
 QUEUEDIR environment variable.
 
@@ -55,15 +53,10 @@ to the queue. \fBTODO_INTERVAL\fR can also be set in the control file
 variable. If TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero,
 \fBqmta-send\fR silently uses 10 secs as the value for \fBTODO_INTERVAL\fR.
 
-\fBqmta-send\fR uses \fBqmail-lspawn\fR to deliver messages to local
-recipients and \fBqmail-rspawn\fR to deliver messages to remote recipients.
+\fBqmta-send\fR uses \fBqmail-local\fR to deliver messages to local
+recipients and \fBqmail-remote\fR to deliver messages to remote recipients.
 If a message is temporarily undeliverable to one or more addresses,
 \fBqmta-send\fR leaves it in the queue and tries the addresses again later.
-
-\fBqmta-send\fR creates multiple pipes for communication with qmail-lspawn,
-qmail-rspawn and qmail-clean. qmta-send prints a readable record of its
-activities to descriptor 0. \fBqmta-send\fR is responsible for avoiding
-deadlock.
 
 \fBqmta-send\fR uses \fBqmail-queue\fR to queue bounces and
 aliases/forwards. This can be changed by using \fBQMAILQUEUE\fR environment
@@ -107,9 +100,9 @@ or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
 is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is
 used for doing this.
 
-qmta-send uses environment set according to files in $HOME/.defaultqueue
-directory if present, else it uses environment set according to files
-in /etc/indimail/control/defaultqueue directory.
+\fBqmta-send\fR(1) uses environment set according to files in
+$HOME/.defaultqueue and @controldir@/defaultqueue if the environment
+variable QUEUE_BASE is not set.
 
 .SH OPTIONS
 .TP

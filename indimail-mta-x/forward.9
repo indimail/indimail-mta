@@ -27,9 +27,9 @@ rewrites the sender using Sender Rewriting Scheme if \fISRS\fB has been configur
 .B qmail-srs(5)
 for information on how to do this.
 
-\fBforward\fR uses environment set according to files in
-$HOME/.defaultqueue directory if present, else it uses environment set
-according to files in @controldir@/defaultqueue directory.
+\fBforward\fR(1) uses environment set according to files in
+$HOME/.defaultqueue and @controldir@/defaultqueue if the environment
+variable QUEUE_BASE is not set.
 
 .SH "SEE ALSO"
 dot-qmail(5),

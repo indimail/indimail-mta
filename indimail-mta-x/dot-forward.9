@@ -211,9 +211,9 @@ preceded by the environment variables
 and
 .BR $DTLINE .
 
-\fBdot-forward\fR uses environment set according to files in
-$HOME/.defaultqueue directory if present, else it uses environment set
-according to files in @controldir@/defaultqueue directory.
+\fBdot-forward\fR(1) uses environment set according to files in
+$HOME/.defaultqueue and @controldir@/defaultqueue if the environment
+variable QUEUE_BASE is not set.
 
 .B COMPATIBILITY WARNING:
 Internet addresses can legitimately start with a slash or vertical bar.
