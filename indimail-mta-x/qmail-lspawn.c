@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.38  2021-06-29 09:27:49+05:30  Cprogrammer
+ * modularize spawn code
+ *
  * Revision 1.37  2021-06-05 23:15:16+05:30  Cprogrammer
  * converted function prototypes to ansi
  *
@@ -615,7 +618,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.37 2021-06-05 23:15:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.38 2021-06-29 09:27:49+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

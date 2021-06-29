@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.32  2021-06-29 09:29:20+05:30  Cprogrammer
+ * modularize spawn code
+ *
  * Revision 1.31  2021-06-27 10:39:26+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -556,7 +559,7 @@ QSPAWN(int argc, char **argv)
 static void /*- for ident command */
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.31 2021-06-27 10:39:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.32 2021-06-29 09:29:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

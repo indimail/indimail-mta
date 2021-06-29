@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.43  2021-06-29 09:29:09+05:30  Cprogrammer
+ * modularize spawn code
+ *
  * Revision 1.42  2021-02-07 23:14:09+05:30  Cprogrammer
  * avoid use of compat functions
  *
@@ -364,7 +367,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.42 2021-02-07 23:14:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.43 2021-06-29 09:29:09+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
