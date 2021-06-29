@@ -33,6 +33,7 @@ case "$1" in
 	fi
 	/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 	/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
+	/usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
 
 	${rm} -f /var/spool/mail/indimail
 
@@ -40,7 +41,9 @@ case "$1" in
 	if [ $? = 4 ] ; then
 		/usr/sbin/useradd -r -g indimail -d ${prefix} indimail
 	fi
+	/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin alias  || true
     /usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${qmaildir}        -s /sbin/nologin qmailq || true
+	/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{qmaildir}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start

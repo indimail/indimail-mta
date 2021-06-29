@@ -1,5 +1,8 @@
 /*
  * $Log: process_queue.c,v $
+ * Revision 1.2  2021-06-29 09:11:24+05:30  Cprogrammer
+ * fix wrong assignment of qbase variable
+ *
  * Revision 1.1  2021-06-28 17:08:03+05:30  Cprogrammer
  * Initial revision
  *
@@ -44,12 +47,13 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 					!stralloc_catb(&QueueBase, "/queue", 6) ||
 					!stralloc_0(&QueueBase))
 				strerr_die2x(111, fatal, "out of memory");
+			qbase = QueueBase.s;
 			break;
 		case 1:
+			qbase = QueueBase.s;
 			break;
 		}
 	}
-	qbase = QueueBase.s;
 	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
 		qcount = QUEUE_COUNT;
 	else
@@ -106,7 +110,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 void
 getversion_process_queue_c()
 {
-	static char    *x = "$Id: process_queue.c,v 1.1 2021-06-28 17:08:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: process_queue.c,v 1.2 2021-06-29 09:11:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
