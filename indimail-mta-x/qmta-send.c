@@ -1,6 +1,6 @@
 /*
  * $Log: qmta-send.c,v $
- * Revision 1.1  2021-06-29 08:43:10+05:30  Cprogrammer
+ * Revision 1.1  2021-06-30 00:10:30+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -16,6 +16,7 @@
 #include <env.h>
 #include <error.h>
 #include <substdio.h>
+#include <subfd.h>
 #include <getln.h>
 #include <constmap.h>
 #include <byte.h>
@@ -47,6 +48,7 @@
 #include "srs.h"
 #endif
 #include "variables.h"
+#include "auto_prefix.h"
 #include "auto_qmail.h"
 #include "auto_split.h"
 #include "auto_uids.h"
@@ -70,7 +72,7 @@ int             qmail_rspawn(int, char **);
 char           *queuedesc;
 static int      lifetime = 604800;
 static int      flagexitasap = 0, flagrunasap = 1, flagreadasap = 0;
-static int      qmail_clean, _qmail_lspawn, _qmail_rspawn;;
+static int      _qmail_clean, _qmail_lspawn, _qmail_rspawn;;
 static readsubdir todosubdir;
 static datetime_sec nexttodorun, lasttodorun;
 static int      flagtododir = 0;	/*- if 0, have to readsubdir_init again */
@@ -311,18 +313,7 @@ cleanup_do(fd_set *wfds)
 		return;
 	if (errno != error_noent)
 		return;
-	if (!qmail_clean) {
-		fnmake_intd(id);
-		if (unlink(fn1.s) == -1) {
-			log5("warning: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
-			return;
-		}
-		fnmake_mess(id);
-		if (unlink(fn1.s) == -1) {
-			log5("warning: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
-			return;
-		}
-	} else {
+	if (_qmail_clean) { /*- use qmail-clean */
 		fnmake_foop(id); /*- remove intd and mess */
 		if (substdio_putflush(&sstoqc, fn1.s, fn1.len) == -1) {
 			cleandied();
@@ -334,6 +325,17 @@ cleanup_do(fd_set *wfds)
 		}
 		if (ch != '+')
 			log3("warning: qmail-clean unable to clean up ", fn1.s, "\n");
+	} else {
+		fnmake_intd(id);
+		if (unlink(fn1.s) == -1) {
+			log5("warning: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
+			return;
+		}
+		fnmake_mess(id);
+		if (unlink(fn1.s) == -1) {
+			log5("warning: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
+			return;
+		}
 	}
 }
 
@@ -701,7 +703,21 @@ process_todo(unsigned long id)
 			fdchan[c] = -1;
 		}
 	}
-	if (!qmail_clean) {
+	if (_qmail_clean) { /*- use qmail-clean */
+		fnmake_todo(id); /*- remove intd and todo */
+		if (substdio_putflush(&sstoqc, fn1.s, fn1.len) == -1) {
+			cleandied();
+			return;
+		}
+		if (substdio_get(&ssfromqc, &ch, 1) != 1) {
+			cleandied();
+			return;
+		}
+		if (ch != '+') {
+			log3("warning: qmail-clean unable to clean up ", fn1.s, "\n");
+			return;
+		}
+	} else {
 		fnmake_intd(id);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
@@ -715,20 +731,6 @@ process_todo(unsigned long id)
 				log5("warning: unable to unlink ", fn1.s, ": ", error_str(errno), "\n");
 				goto fail;
 			}
-		}
-	} else {
-		fnmake_todo(id); /*- remove intd and todo */
-		if (substdio_putflush(&sstoqc, fn1.s, fn1.len) == -1) {
-			cleandied();
-			return;
-		}
-		if (substdio_get(&ssfromqc, &ch, 1) != 1) {
-			cleandied();
-			return;
-		}
-		if (ch != '+') {
-			log3("warning: qmail-clean unable to clean up ", fn1.s, "\n");
-			return;
 		}
 	}
 	pe.id = id;
@@ -1863,7 +1865,19 @@ messdone(unsigned long id)
 		goto fail;
 	}
 	/*- -todo -info -local -remote -bounce; we can relax */
-	if (!qmail_clean) {
+	if (_qmail_clean) { /*- use qmail-clean */
+		fnmake_foop(id); /*- remove intd and mess */
+		if (substdio_putflush(&sstoqc, fn1.s, fn1.len) == -1) {
+			cleandied();
+			return;
+		}
+		if (substdio_get(&ssfromqc, &ch, 1) != 1) {
+			cleandied();
+			return;
+		}
+		if (ch != '+')
+			log3("warning: qmail-clean unable to clean up ", fn1.s, "\n");
+	} else {
 		fnmake_intd(id);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
@@ -1878,18 +1892,6 @@ messdone(unsigned long id)
 				goto fail;
 			}
 		}
-	} else {
-		fnmake_foop(id); /*- remove intd and mess */
-		if (substdio_putflush(&sstoqc, fn1.s, fn1.len) == -1) {
-			cleandied();
-			return;
-		}
-		if (substdio_get(&ssfromqc, &ch, 1) != 1) {
-			cleandied();
-			return;
-		}
-		if (ch != '+')
-			log3("warning: qmail-clean unable to clean up ", fn1.s, "\n");
 	}
 	return;
 fail:
@@ -2012,7 +2014,9 @@ run_daemons(char **oargv, char **argv)
 		close(pi1[1]);
 		close(pi2[0]);
 		close(pi2[1]);
-		if (_qmail_lspawn) {
+		if (_qmail_lspawn)
+			execvp(*qlargs, qlargs); /*- qmail-lspawn */
+		else {
 			sig_block(sig_int);
 			i = str_rchr(oargv[0], '/');
 			if (oargv[0][i])
@@ -2020,8 +2024,7 @@ run_daemons(char **oargv, char **argv)
 			else
 				str_copy(oargv[0], "MTAlspawn");
 			qmail_lspawn(2, qlargs);
-		} else
-			execvp(*qlargs, qlargs); /*- qmail-lspawn */
+		}
 		_exit(111);
 	}
 	close(pi1[0]);
@@ -2038,7 +2041,7 @@ run_daemons(char **oargv, char **argv)
 	case -1:
 		_exit(111);
 	case 0:
-		if (prot_uid(auto_uidq) == -1) /*- qmailq unix user */
+		if (prot_uid(auto_uidr) == -1) /*- qmailr unix user */
 			_exit(111);
 		if (fd_copy(0, pi3[0]) == -1)
 			_exit(111);
@@ -2053,7 +2056,9 @@ run_daemons(char **oargv, char **argv)
 		close(pi3[1]);
 		close(pi4[0]);
 		close(pi4[1]);
-		if (_qmail_rspawn) {
+		if (_qmail_rspawn)
+			execvp(*qrargs, qrargs); /*- qmail-rspawn */
+		else {
 			sig_block(sig_int);
 			i = str_rchr(oargv[0], '/');
 			if (oargv[0][i])
@@ -2061,15 +2066,15 @@ run_daemons(char **oargv, char **argv)
 			else
 				str_copy(oargv[0], "MTArspawn");
 			qmail_rspawn(1, qrargs);
-		} else
-			execvp(*qrargs, qrargs); /*- qmail-rspawn */
+		}
 		_exit(111);
 	}
 	close(pi3[0]);
 	close(pi4[1]);
 
-	if (!qmail_clean)
-		return;
+	if (!_qmail_clean) { /*- don't fork/exec qmail-clean */
+		goto end;
+	}
 	if (pipe(pi5) == -1 || pipe(pi6) == -1) {
 		log1("alert: trouble creating pipes\n");
 		_exit(111);
@@ -2105,6 +2110,9 @@ run_daemons(char **oargv, char **argv)
 	close(pi6[1]);
 	substdio_fdbuf(&sstoqc, write, pi5[1], sstoqcbuf, sizeof (sstoqcbuf));
 	substdio_fdbuf(&ssfromqc, read, pi6[0], ssfromqcbuf, sizeof (ssfromqcbuf));
+end:
+	if (prot_uid(auto_uids) == -1) /*- qmails unix user */
+		_exit(111);
 	return;
 }
 
@@ -2353,36 +2361,71 @@ sigchld()
 	}
 }
 
-int
-main(int argc, char **argv)
+void
+check_usage(int argc, char **argv, int *daemon_mode, int *flagqfix)
 {
-	int             nfds, fd, opt, daemon_mode = 0, flagqfix = 0;
-	char           *ptr;
-	datetime_sec    wakeup;
-	fd_set          rfds, wfds;
-	struct timeval  tv;
+	int             i, j, opt;
+	char          *bin_programs[] = {"sbin/qmail-lspawn", "sbin/qmail-rspawn", "sbin/qmail-clean", 0};
+	char           opt_str[8];
 	char           *usage_str =
 		"USAGE: qmta-send [options] [ defaultdelivery [logger arg...] ]\n"
 		"OPTIONS\n"
 		"       -d Run as a daemon\n"
 		"       -f fix queue\n"
-		"       -c Use qmail-clean  for cleanup\n"
-		"       -l Use qmail-lspawn for spawning local  deliveries\n"
-		"       -r Use qmail-rspawn for spawning remote deliveries\n"
 		"       -s queue_split";
+	char           *u_str1 =
+		"       -l Use qmail-lspawn for spawning local  deliveries";
+	char           *u_str2 =
+		"       -r Use qmail-rspawn for spawning remote deliveries";
+	char           *u_str3 =
+		"       -c Use qmail-clean  for cleanup";
 
-	set_environment("qmta-send: warn: ", "qmta-send: fatal: ");
-	while ((opt = getopt(argc, argv, "dfclrs:")) != opteof) {
+	*daemon_mode = *flagqfix = 0;
+	if (!stralloc_copys(&fn1, auto_prefix) ||
+			!stralloc_append(&fn1, "/"))
+		strerr_die2x(111, FATAL, "out of memory; will try again later\n");
+
+	for (i = fn1.len, j = 0; j < 3; j++) {
+		if (!stralloc_cats(&fn1, bin_programs[j]) ||
+				!stralloc_0(&fn1))
+			strerr_die2x(111, FATAL, "out of memory; will try again later\n");
+		fn1.len = i;
+		if (access(fn1.s, X_OK)) {
+			switch(j)
+			{
+			case 0:
+				_qmail_lspawn = -1;
+				break;
+			case 1:
+				_qmail_rspawn = -1;
+				break;
+			case 2:
+				_qmail_clean = -1;
+				break;
+			}
+		}
+	}
+	str_copy(opt_str, "dfs:");
+	if (!_qmail_lspawn) {
+		i = str_len(opt_str);
+		str_copy(opt_str + i, "l");
+	}
+	if (!_qmail_rspawn) {
+		i = str_len(opt_str);
+		str_copy(opt_str + i, "r");
+	}
+	if (!_qmail_clean) {
+		i = str_len(opt_str);
+		str_copy(opt_str + i, "c");
+	}
+	while ((opt = getopt(argc, argv, opt_str)) != opteof) {
 		switch (opt)
 		{
 		case 'd':
-			daemon_mode = 1;
+			*daemon_mode = 1;
 			break;
 		case 'f':
-			flagqfix = 1;
-			break;
-		case 'c':
-			qmail_clean = 1;
+			*flagqfix = 1;
 			break;
 		case 'l':
 			_qmail_lspawn = 1;
@@ -2390,14 +2433,49 @@ main(int argc, char **argv)
 		case 'r':
 			_qmail_rspawn = 1;
 			break;
+		case 'c':
+			_qmail_clean = 1;
+			break;
 		case 's':
 			scan_int(optarg, &conf_split);
 			break;
 		default:
-			strerr_die2x(100, FATAL, usage_str);
+			substdio_puts(subfderr, FATAL);
+			substdio_puts(subfderr, usage_str);
+			if (_qmail_lspawn != -1) {
+				substdio_puts(subfderr, "\n");
+				substdio_puts(subfderr, u_str1);
+			}
+			if (_qmail_rspawn != -1) {
+				substdio_puts(subfderr, "\n");
+				substdio_puts(subfderr, u_str2);
+			}
+			if (_qmail_clean != -1) {
+				substdio_puts(subfderr, "\n");
+				substdio_puts(subfderr, u_str3);
+			}
+			substdio_puts(subfderr, "\n");
+			substdio_flush(subfderr);
+			_exit(100);
 			break;
 		}
 	}
+}
+
+int
+main(int argc, char **argv)
+{
+	int             nfds, fd, daemon_mode, flagqfix;
+	char           *ptr;
+	datetime_sec    wakeup;
+	fd_set          rfds, wfds;
+	struct timeval  tv;
+
+	check_usage(argc, argv, &daemon_mode, &flagqfix);
+	umask(077);
+	if (prot_gid(auto_gidq) == -1) /*- qmail group */
+		strerr_die2sys(111, FATAL, "unable to set qmail gid");
+	set_environment("qmta-send: warn: ", "qmta-send: fatal: ");
 	if (!conf_split)
 		getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
@@ -2428,7 +2506,7 @@ main(int argc, char **argv)
 		_exit(111);
 	}
 	if (argc - optind > 1)
-		qlargs[optind] = argv[optind];
+		qlargs[1] = argv[optind];
 	run_daemons(argv, argc - optind > 2 ? argv + optind + 1 : 0);
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
@@ -2444,12 +2522,11 @@ main(int argc, char **argv)
 	sig_termcatch(sigterm);
 	sig_alarmcatch(sigalrm);
 	sig_hangupcatch(sighup);
-	if (qmail_clean)
+	if (!_qmail_clean)
 		sig_childcatch(sigchld);
 #ifdef LOGLOCK
 	sig_intcatch(sigint);
 #endif
-	umask(077);
 	if (!do_controls()) {
 		log1("alert: cannot start: unable to read controls\n");
 		_exit(111);
@@ -2521,4 +2598,13 @@ main(int argc, char **argv)
 		}
 	} /*- while (!flagexitasap || !del_canexit()) */
 	pqfinish();
+}
+
+void
+getversion_qmta_send_c()
+{
+	static char    *x = "$Id: qmta-send.c,v 1.1 2021-06-30 00:10:30+05:30 Cprogrammer Exp mbhangui $";
+
+	if (x)
+		x++;
 }
