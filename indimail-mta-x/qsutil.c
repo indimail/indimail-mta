@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.19  2021-06-29 09:30:25+05:30  Cprogrammer
+ * fixed handling of closed lock descriptor
+ *
  * Revision 1.18  2021-06-27 11:33:38+05:30  Cprogrammer
  * added loglock_open function
  *
@@ -476,7 +479,7 @@ logsafe(char *s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.18 2021-06-27 11:33:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.19 2021-06-29 09:30:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
