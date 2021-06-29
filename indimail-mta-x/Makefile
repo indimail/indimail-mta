@@ -1726,13 +1726,14 @@ auto_split.o auto_qmail.o auto_uids.o prot.o \
 prioq.o newfield.o quote.o qmail.o syncdir.o srs.o \
 rcpthosts.o auto_spawn.o slurpclose.o get_uid.o \
 qmta_lspawn.o qmta_rspawn.o qmta-lspawn.o qmta-rspawn.o \
-auto_assign.o tcpto_clean.o
+auto_assign.o tcpto_clean.o set_environment.o
 	./load qmta-send trigger.o fmtqfn.o readsubdir.o \
 	variables.o auto_control.o control.o qsutil.o \
 	rcpthosts.o auto_split.o auto_qmail.o auto_uids.o prot.o \
 	prioq.o newfield.o quote.o qmail.o syncdir.o srs.o \
 	qmta_lspawn.o qmta_rspawn.o qmta-lspawn.o qmta-rspawn.o \
 	slurpclose.o get_uid.o auto_spawn.o auto_assign.o tcpto_clean.o \
+	set_environment.o \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -lqmail
 
 qmta-lspawn.o: compile qmail-lspawn.c prot.h slurpclose.h \
