@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.287  2021-06-29 09:19:45+05:30  Cprogrammer
+ * added qmta-send
+ *
  * Revision 1.286  2021-06-09 19:34:39+05:30  Cprogrammer
  * added qmail-spamfilter
  *
@@ -1509,7 +1512,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.286 2021-06-09 19:34:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.287 2021-06-29 09:19:45+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
