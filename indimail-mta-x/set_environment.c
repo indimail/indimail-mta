@@ -48,7 +48,7 @@ set_environment(char *warn, char *fatal)
 				controldir = auto_control;
 		}
 		if (!stralloc_copys(&tmp, controldir) ||
-				!stralloc_catb(&tmp, "/.defaultqueue", 14) ||
+				!stralloc_catb(&tmp, "/defaultqueue", 13) ||
 				!stralloc_0(&tmp))
 			strerr_die2x(111, fatal, "out of memory");
 		if (!access(tmp.s, X_OK)) {
