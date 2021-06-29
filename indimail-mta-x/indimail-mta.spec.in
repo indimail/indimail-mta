@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.315 2021-06-09 19:34:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.316 2021-06-29 09:09:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1655,6 +1655,7 @@ if [ $? = 4 ] ; then
 fi
 /usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 /usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
+/usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
 
 /usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{qmaildir} indimail || true
 if [ $? = 4 ] ; then
@@ -1662,6 +1663,8 @@ if [ $? = 4 ] ; then
 fi
 /usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin alias  || true
 /usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailq || true
+/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{qmaildir}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
+
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
@@ -1850,14 +1853,16 @@ if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   echo "recreating ld.so cache"
   /sbin/ldconfig
 fi
-echo "removing user indimail"
-/usr/bin/getent passwd indimail > /dev/null && /usr/sbin/userdel indimail >/dev/null || true
-echo "removing user qmailq"
-/usr/bin/getent passwd qmailq > /dev/null && /usr/sbin/userdel qmailq >/dev/null || true
-echo "removing user alias"
-/usr/bin/getent passwd alias > /dev/null && /usr/sbin/userdel alias >/dev/null || true
-echo "removing group indimail"
-/usr/bin/getent group indimail  > /dev/null && /usr/sbin/groupdel indimail >/dev/null || true
+
+for i in indimail alias qmailq qscand; do
+	echo "removing user $i"
+	/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
+done
+for i in indimail nofiles qmail qscand; do
+	echo "removing group $i"
+	/usr/bin/getent group $i  > /dev/null && /usr/sbin/groupdel $i >/dev/null || true
+done
+
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
