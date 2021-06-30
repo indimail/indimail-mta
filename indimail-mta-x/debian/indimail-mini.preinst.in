@@ -32,13 +32,11 @@ case "$1" in
 		/usr/sbin/groupadd indimail
 	fi
 	/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
-
-	${rm} -f /var/spool/mail/indimail
-
 	/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d ${qmaildir} indimail || true
 	if [ $? = 4 ] ; then
 		/usr/sbin/useradd -r -g indimail -d ${prefix} indimail
 	fi
+	${rm} -f /var/spool/mail/indimail
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start

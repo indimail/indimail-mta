@@ -21,14 +21,12 @@ setperm()
 fixperms()
 {
 	if [ $# -eq 3 ] ; then # directory
-		#%dir %attr(0555,root,indimail) /var/indimail/sbin
 		lin=$2
 		file=$3
 		if [ ! -d $file ] ; then
 			return 0
 		fi
 	elif [ $# = 2 ] ; then # file
-		#%attr(0555,root,qmail) /var/indimail/bin/rsmtp
 		lin=$1
 		file=$2
 		if [ ! -f $file ] ; then
