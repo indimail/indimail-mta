@@ -55,6 +55,8 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "unable to switch back to original directory: ");
 		case -6:
 			strerr_die2x(111, FATAL, "out of memory");
+		case -7:
+			strerr_die2x(111, FATAL, "recursive loop");
 	}
 	if ((e = pathexec(argv))) {
 		tmperrno = errno;

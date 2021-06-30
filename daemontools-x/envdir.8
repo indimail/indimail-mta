@@ -2,59 +2,39 @@
 .SH NAME
 envdir \- runs another program with environment modified according to files
 in a specified directory.
+
 .SH SYNOPSIS
-.B envdir
-.I d
-.I child
+\fBenvdir\fR \fId\fR \fIchild\fR
+
 .SH DESCRIPTION
-.I d
-is a single argument.
-.I child
-consists of one or more arguments. 
+\fId\fR is a single argument. \fIchild\fR consists of one or more
+arguments. 
 
-.B envdir
-sets various environment variables as specified by files in the directory
-named
-.IR d .
-It then runs
-.IR child .
+\fBenvdir\fR sets various environment variables as specified by files in
+the directory named \fId\fR. It then runs \fIchild\R.
 
-If
-.I d
-contains a file named
-.I s
-whose first line is
-.IR t ,
-.B envdir
-removes an environment variable named
-.I s
-if one exists, and then adds an environment variable named
-.I s
-with value
-.IR t .
-The name
-.I s
-must not contain =. Spaces and tabs at the end of
-.I t
-are removed. Nulls in
-.I t
-are changed to newlines in the environment variable. 
+If \fId\fR contains a file named \fIs\fR whose first line is \fIt\fR,
+\fBenvdir\fR removes an environment variable named \fIs\fR if one exists,
+and then adds an environment variable named \fIs\fR with value \fIt\fR. The
+name \fIs\fR must not contain =. Spaces and tabs at the end of \fIt\fR are
+removed. Nulls in \fIt\fR are changed to newlines in the environment
+variable. 
 
-If the file
-.I s
-is completely empty (0 bytes long),
-.B envdir
-removes an environment variable named
-.I s
-if one exists, without adding a new variable.
+If the file \fIs\fR is completely empty (0 bytes long), \fBenvdir\fR
+removes an environment variable named \fIs\fR if one exists, without adding
+a new variable.
+
+If \fBenvdir\fR finds a link pointing to a directory or a directory
+named .\fIdir\fR, it enters that directory and modifies environment
+variables according to files in .\fIdir\fR. \fBenvdir\fR avoids recursive
+loops. \fBenvdir\fR otherwise all files/directories starting with '.' dot
+character.
+
 .SH EXIT CODES
-.B envdir
-exits 111 if it has trouble reading
-.IR d ,
-if it runs out of memory for environment variables, or if it cannot run
-.IR child .
-Otherwise its exit code is the same as that of
-.IR child .
+\fBenvdir\fR exits 111 if it has trouble reading \fId\fR, if it runs out of
+memory for environment variables, or if it cannot run \fIchild\fR.
+Otherwise its exit code is the same as that of \fIchild\fR.
+
 .SH SEE ALSO
 supervise(8),
 svc(8),
