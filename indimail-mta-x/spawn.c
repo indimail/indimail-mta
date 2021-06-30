@@ -538,8 +538,8 @@ QSPAWN(int argc, char **argv)
 							continue;
 						}
 						while (!stralloc_readyplus(&d[i].output, r))
-							sleep(10);
-						/*XXX*/ byte_copy(d[i].output.s + d[i].output.len, r, inbuf);
+							sleep(10); /*XXX*/
+						byte_copy(d[i].output.s + d[i].output.len, r, inbuf);
 						d[i].output.len += r;
 						if (truncreport_SPAWN > 100 && d[i].output.len > truncreport_SPAWN) {
 							char           *truncmess = "\nError report too long, sorry.\n";
