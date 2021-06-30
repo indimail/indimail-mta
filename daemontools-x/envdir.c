@@ -1,5 +1,8 @@
 /*
  * $Log: envdir.c,v $
+ * Revision 1.5  2021-06-30 19:27:53+05:30  Cprogrammer
+ * added -c option to clear existing env variables
+ *
  * Revision 1.4  2021-05-13 14:51:45+05:30  Cprogrammer
  * use envdir() function from libqmail
  *
@@ -13,18 +16,23 @@
  * Initial revision
  *
  */
-#include "envdir.h"
-#include "strerr.h"
-#include "error.h"
-#include "alloc.h"
-#include "pathexec.h"
+#include <sgetopt.h>
+#include <envdir.h>
+#include <strerr.h>
+#include <error.h>
+#include <alloc.h>
+#include <env.h>
+#include <pathexec.h>
 
 #define FATAL "envdir: fatal: "
 
 void
-die_usage(void)
+die_usage(char *str)
 {
-	strerr_die1x(111, "envdir: usage: envdir dir child");
+	if (str)
+		strerr_die3x(100, FATAL, str, "\nusage: envdir dir child");
+	else
+		strerr_die2x(100, FATAL, "\nusage: envdir dir child");
 }
 
 int
@@ -32,15 +40,26 @@ main(int argc, char **argv)
 {
 	char           *fn, *err = (char *) 0;
 	char          **e;
-	int             tmperrno;
+	int             tmperrno, opt;
 
-	if (!*argv)
-		die_usage();
-	if (!*++argv)
-		die_usage();
-	fn = *argv;
-	if (!*++argv)
-		die_usage();
+	while ((opt = getopt(argc, argv, "c")) != opteof) {
+		switch (opt)
+		{
+		case 'c':
+			env_clear();
+			break;
+		default:
+			die_usage(0);
+			break;
+		}
+	}
+	if (argc - optind < 2)
+		die_usage("directory and program must be specfied");
+	if (!argv[optind] || !*argv[optind])
+		die_usage("directory not specified");
+	if (!argv[optind + 1] || !*argv[optind + 1])
+		die_usage("program to run not specified");
+	fn = argv[optind];
 	switch (envdir(fn, &err))
 	{
 		case -1:
@@ -58,12 +77,12 @@ main(int argc, char **argv)
 		case -7:
 			strerr_die2x(111, FATAL, "recursive loop");
 	}
-	if ((e = pathexec(argv))) {
+	if ((e = pathexec(argv + optind + 1))) {
 		tmperrno = errno;
 		alloc_free((char *) e);
 		errno = tmperrno;
 	}
-	strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
+	strerr_die4sys(111, FATAL, "unable to run ", argv[optind + 1], ": ");
 	/*- Not reached */
 	return(1);
 }
@@ -71,7 +90,7 @@ main(int argc, char **argv)
 void
 getversion_envdir_c()
 {
-	static char    *x = "$Id: envdir.c,v 1.4 2021-05-13 14:51:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envdir.c,v 1.5 2021-06-30 19:27:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

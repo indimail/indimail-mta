@@ -4,11 +4,12 @@ envdir \- runs another program with environment modified according to files
 in a specified directory.
 
 .SH SYNOPSIS
-\fBenvdir\fR \fId\fR \fIchild\fR
+\fBenvdir\fR [ -c ] \fId\fR \fIchild\fR
 
 .SH DESCRIPTION
 \fId\fR is a single argument. \fIchild\fR consists of one or more
-arguments. 
+arguments. If you pass the -\fBc\fR argument, all existing environment is
+cleared before modifying any environment variables.
 
 \fBenvdir\fR sets various environment variables as specified by files in
 the directory named \fId\fR. It then runs \fIchild\R.
