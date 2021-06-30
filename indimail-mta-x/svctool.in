@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.564 2021-06-27 11:35:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.565 2021-06-30 11:09:25+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.564 2021-06-27 11:35:51+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.565 2021-06-30 11:09:25+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -7547,7 +7547,7 @@ add_alternatives()
     move="/usr/lib/sendmail"
     if [ -L /usr/sbin ] ; then
         link=$(readlink /usr/sbin)
-        if [ ! " $link" = " bin" -a ! " $link" = " /usr/sbin" ] ; then
+        if [ ! " $link" = " bin" -a ! " $link" = " /usr/bin" ] ; then
             move="$move /usr/sbin/sendmail"
         fi
     else
