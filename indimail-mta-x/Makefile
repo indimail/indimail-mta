@@ -20,53 +20,51 @@ edit = sed \
 	-e 's,@email\@,$(email),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-it = indimail-mta.perms 822date 822field 822header 822print 822received \
-	addrlist atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q \
-	binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm \
-	qnotify create_services cdbmake cdbmake-12 cdbmake-sv cdbstats \
-	cdbtest cidr condredirect config-fast datemail dk-filter dknewkey \
-	dktest dnscname dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt \
-	dot-forward drate qdane dnstlsarr etrn except fastforward forward \
-	generic.so greydaemon qf-smtp-ratelimit home home+df hostname \
-	sslerator indimail-mta.changes idedit iftocc instcheck ipmeprint \
-	ldap-checkpwd leapsecs maildir2mbox maildircmd maildirdeliver \
-	maildirqmtp maildirserial maildirsmtp maildirwatch \
-	mailsubj mbox2maildir multirotate inewaliases newinclude new-inject \
-	nowutc ofmipd ofmipname parsedate plugtest installer predate preline \
-	printforward qmail-spamfilter printmaillist proc proc+df qaes qarf \
-	ctrlenv qmail-cat qmail-cdb qmail-clean qmailconfig maildirsize \
-	qmail-daemon qmaildirmake qmail-direct qmail-dk qmail-dkim \
-	qmail-getpw qmail-greyd qmail-inject qmail-local qmail-lspawn \
-	qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-popbull \
-	qmail-poppass qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd \
-	qmail-qmtpd qmail-qread qmail-queue qmail-remote qmail-rm \
-	qmail-rspawn qmail-send qmail-showctl qmail-daned qmail-smtpd \
-	qmail_smtpd.so qmail-start qmail-tcpok qmail-tcpto qmail-todo \
-	qmail-upq qpq qquote qreceipt qsmhook queue-fix recipient-cdb \
-	relaytest rewind irmail rpmattr qmta-send rrforward rrt sendmail \
-	serialcmd serialqmtp serialsmtp setforward setmaillist \
-	smtpd-plugin0.so slowq-send slowq-start smtpd-plugin.so \
-	sortedtest spawn-filter spfquery splogger srsfilter surblfilter \
-	surblqueue swaks sys-checkpwd tcp-env testzero tokenize uacl \
-	udpclient udplogger update_tmprsadh viruscanner whois yearcal \
-	cdb-database analyzer qtools leapsecs.dat
+it = 822date 822field 822header 822print 822received addrlist analyzer \
+	atrn autoresponder batv binm1 binm1+df binm2 binm2+df binm3 binm3+df \
+	bouncesaying cdb-database cdbdump cdbget cdbgetm cdbmake cdbmake-12 \
+	cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
+	create_services cronlist.q ctrlenv datemail dk-filter dknewkey dktest \
+	dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt dot-forward \
+	drate etrn except fastforward forward generic.so greydaemon home \
+	home+df hostname idedit iftocc indimail-mta.changes \
+	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
+	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
+	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
+	maildirwatch mailsubj mbox2maildir multirotate newinclude new-inject \
+	nowutc ofmipd ofmipname parsedate plugtest predate preline \
+	printforward printmaillist proc proc+df qaes qarf qbase64 qdane \
+	qfrontend qf-smtp-ratelimit qmail-cat qmail-cdb qmail-clean \
+	qmailconfig qmail-daemon qmail-daned qmail-direct qmaildirmake \
+	qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject \
+	qmail-local qmail-lspawn qmail-multi qmail-newmrh qmail-newu \
+	qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter \
+	qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
+	qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl \
+	qmail-smtpd qmail_smtpd.so qmail-spamfilter qmail-start qmail-tcpok \
+	qmail-tcpto qmail-todo qmail-upq qmta-send qnotify qpq qquote \
+	qreceipt qsmhook qtools queue-fix recipient-cdb relaytest rewind \
+	rpmattr rrforward rrt sendmail serialcmd serialqmtp serialsmtp \
+	setforward setmaillist slowq-send slowq-start smtpd-plugin0.so \
+	smtpd-plugin.so sortedtest spawn-filter spfquery splogger srsfilter \
+	sslerator surblfilter surblqueue svctool swaks sys-checkpwd tcp-env \
+	testzero tokenize uacl udpclient udplogger update_tmprsadh \
+	viruscanner whois yearcal
 
-man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
-	cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
-	svctool.8 predate.1 datemail.1 queue-fix.8 qmail-clean.8 \
-	mlmatchup.8 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
-	qmail-daned.8 qmail-srs.5 qmail-limits.7 qmail-showctl.8 \
-	forward.1 condredirect.1 qmail-control.5 rrforward.1 \
-	qreceipt.1 maildirserial.1 qmail-rm.1 dot-qmail.5 \
-	qmail-users.5 dot-forward.1 fastforward.1 new-inject.1 \
-	filterto.1 replier.1 qmail-local.8 qmail-direct.8 \
-	qmail-getpw.8 qmail-remote.8 qmail-send.8 qmail-todo.8 \
-	qmail-start.8 qmail-queue.8 qmail-dkim.8 dk-filter.8 \
-	qmail-dk.8 dktest.8 qmail-multi.8 spawn-filter.8 \
-	qmail-inject.8 qmail-newmrh.8 recipient-cdb.8 qmail-cdb.8 \
-	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
-	qmail-poppass.8 qscanq.8 cleanq.8 run-cleanq.8 slowq-start.8 \
-	slowq-send.8 qmail-spamfilter.8 qmta-send.8
+man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
+	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dktest.8 \
+	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
+	forward.1 maildirserial.1 mlmatchup.8 new-inject.1 plugin_init.3 \
+	plugtest.1 predate.1 qarf.1 qmail-cdb.8 qmail-clean.8 qmail-control.5 \
+	qmail-daned.8 qmail-direct.8 qmail-dk.8 qmail-dkim.8 qmail-getpw.8 \
+	qmail-inject.8 qmail-limits.7 qmail-local.8 qmail-multi.8 \
+	qmail-newmrh.8 qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 \
+	qmail-qread.8 qmail-queue.8 qmail-remote.8 qmail-rm.1 qmail-send.8 \
+	qmail-showctl.8 qmail-smtpd.8 qmail-spamfilter.8 qmail-srs.5 \
+	qmail-start.8 qmail-todo.8 qmail-users.5 qmta-send.8 qnotify.1 \
+	qreceipt.1 qscanq.8 queue-fix.8 recipient-cdb.8 replier.1 rrforward.1 \
+	rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 spawn-filter.8 \
+	surblfilter.8 svctool.8
 
 include Makefile.$(SYSTEM)
 
