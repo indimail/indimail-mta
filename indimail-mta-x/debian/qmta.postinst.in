@@ -109,17 +109,17 @@ if [ $upgrade -eq 1 ] ; then # upgrade
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s ${shareddir}/boot/qmta-send.sevice /lib/systemd/system/qmta-send.service >/dev/null 2>&1 || \
       (${cp} ${shareddir}/boot/systemd /lib/systemd/system/qmta-send.service &&
-      /bin/systemctl daemon-reload && echo "installed new svscan service")
+      /bin/systemctl daemon-reload && echo "installed new qmta-send service")
   elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
     cmp -s ${shareddir}/boot/qmta-send.service /usr/lib/systemd/system/qmta-send.service >/dev/null 2>&1 || \
       (${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/qmta-send.service &&
-      /bin/systemctl daemon-reload && echo "installed new svscan service")
+      /bin/systemctl daemon-reload && echo "installed new qmta-send service")
   fi
-  # restart svscan service if we find /var/tmp/.qmta-send.down
+  # restart qmta-send service if we find /var/tmp/.qmta-send.down
   if [ -f /var/tmp/.qmta-send.down ] ; then
     ${rm} -f /var/tmp/.qmta-send.down
     echo "Starting qmta-send"
-    if test -f ${sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
+    if test -f ${sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
     then
       /bin/systemctl start qmta-send > /dev/null 2>&1
     fi

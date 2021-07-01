@@ -28,7 +28,7 @@ usr/sbin/qmail-clean                           /usr/sbin
 usr/sbin/qmail-tcpok                           /usr/sbin
 usr/sbin/qmail-tcpto                           /usr/sbin
 usr/sbin/qhpsi                                 /usr/sbin
-usr/share/indimail/boot/qmta.service           /usr/share/indimail/boot
+usr/share/indimail/boot/qmta-send.service      /usr/share/indimail/boot
 usr/share/man/man1/forward.1.gz                /usr/share/man/man1
 usr/share/man/man1/predate.1.gz                /usr/share/man/man1
 usr/share/man/man1/datemail.1.gz               /usr/share/man/man1
