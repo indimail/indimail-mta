@@ -153,6 +153,8 @@ Release 2.13 Start 14/02/2021
 96. rpmattr.c: removed call to uidinit
 - 28/06/2021
 97. standalone MTA - qmta-send
+- 01/07/2021
+98. renamed maildirwatch to qmaildirwatch to avoid clash with courier-imap
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

@@ -413,9 +413,9 @@ maildirserial.0
 maildirserial.o
 maildirsmtp
 maildirsmtp.0
-maildirwatch
-maildirwatch.0
-maildirwatch.o
+qmaildirwatch
+qmaildirwatch.0
+qmaildirwatch.o
 mailsubj
 mailsubj.0
 MakeArgs.o

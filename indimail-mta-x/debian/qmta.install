@@ -13,7 +13,7 @@ usr/bin/mailsubj                               /usr/bin
 usr/bin/qmail-showctl                          /usr/bin
 usr/bin/qmaildirmake                           /usr/bin
 usr/bin/maildir2mbox                           /usr/bin
-usr/bin/maildirwatch                           /usr/bin
+usr/bin/qmaildirwatch                          /usr/bin
 usr/bin/srsfilter                              /usr/bin
 usr/bin/queue-fix                              /usr/bin
 usr/sbin/qmail-qmqpc                           /usr/sbin
@@ -35,7 +35,7 @@ usr/share/man/man1/datemail.1.gz               /usr/share/man/man1
 usr/share/man/man1/mailsubj.1.gz               /usr/share/man/man1
 usr/share/man/man1/qmaildirmake.1.gz           /usr/share/man/man1
 usr/share/man/man1/maildir2mbox.1.gz           /usr/share/man/man1
-usr/share/man/man1/maildirwatch.1.gz           /usr/share/man/man1
+usr/share/man/man1/qmaildirwatch.1.gz          /usr/share/man/man1
 usr/share/man/man1/srsfilter.1.gz              /usr/share/man/man1
 usr/share/man/man5/qmail-srs.5.gz              /usr/share/man/man5
 usr/share/man/man8/qmail-showctl.8.gz          /usr/share/man/man8

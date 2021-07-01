@@ -31,7 +31,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
-	maildirwatch mailsubj mbox2maildir multirotate newinclude new-inject \
+	qmaildirwatch mailsubj mbox2maildir multirotate newinclude new-inject \
 	nowutc ofmipd ofmipname parsedate plugtest predate preline \
 	printforward printmaillist proc proc+df qaes qarf qbase64 qdane \
 	qfrontend qf-smtp-ratelimit qmail-cat qmail-cdb qmail-clean \
@@ -976,14 +976,14 @@ qmaildirmake.o: \
 compile qmaildirmake.c
 	./compile qmaildirmake.c
 
-maildirwatch: \
-load maildirwatch.o hfield.o headerbody.o maildir.o prioq.o
-	./load maildirwatch hfield.o headerbody.o maildir.o \
+qmaildirwatch: \
+load qmaildirwatch.o hfield.o headerbody.o maildir.o prioq.o
+	./load qmaildirwatch hfield.o headerbody.o maildir.o \
 	prioq.o -lqmail
 
-maildirwatch.o: \
-compile maildirwatch.c prioq.h hfield.h headerbody.h maildir.h
-	./compile maildirwatch.c
+qmaildirwatch.o: \
+compile qmaildirwatch.c prioq.h hfield.h headerbody.h maildir.h
+	./compile qmaildirwatch.c
 
 mailsubj: \
 warn-auto.sh mailsubj.sh conf-prefix conf-break conf-split
