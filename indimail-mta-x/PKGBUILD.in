@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.3  2021-07-01 16:40:41+05:30  Cprogrammer
+# added qmta
+#
 # Revision 1.2  2021-06-30 11:04:51+05:30  Cprogrammer
 # added qmta package
 #
@@ -8,7 +11,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.2 2021-06-30 11:04:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.3 2021-07-01 16:40:41+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
