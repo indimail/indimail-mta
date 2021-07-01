@@ -200,6 +200,7 @@ package_qmta() {
   (
   echo "d:::0755:::"
   echo "d:::0555:@shareddir@::"
+  echo "d:::0555:@shareddir@/boot::"
   echo "d:::0555:@shareddir@/doc::"
   echo "d::::@mandir@::"
   echo "d::::@mandir@/man1::"
