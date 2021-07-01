@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.11  2021-07-01 21:03:13+05:30  Cprogrammer
+ * copy mode of original file if uid is non-root
+ *
  * Revision 1.10  2021-04-07 17:07:31+05:30  Cprogrammer
  * feature to update permissions for staged builds
  *
@@ -360,7 +363,7 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		break;
 
 	case 'f':
-		if (mode == -1) {
+		if (my_uid || mode == -1) {
 			if (lstat(name, &st) == -1)
 				strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
 			mode = st.st_mode;
@@ -454,7 +457,7 @@ main(argc, argv)
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.10 2021-04-07 17:07:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: installer.c,v 1.11 2021-07-01 21:03:13+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
