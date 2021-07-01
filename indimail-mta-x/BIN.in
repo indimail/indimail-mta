@@ -18,7 +18,7 @@ f:::0755:/bin/:except:except
 f:::0755:/bin/:qmaildirmake:qmaildirmake
 f:::0755:/bin/:maildir2mbox:maildir2mbox
 f:::0755:/bin/:mbox2maildir:mbox2maildir
-f:::0755:/bin/:maildirwatch:maildirwatch
+f:::0755:/bin/:qmaildirwatch:qmaildirwatch
 f:::0755:/bin/:predate:predate
 f:::0755:/bin/:datemail:datemail
 f:::0755:/bin/:mailsubj:mailsubj

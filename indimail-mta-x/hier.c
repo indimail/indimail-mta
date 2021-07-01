@@ -971,7 +971,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "qmaildirmake", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "maildir2mbox", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "mbox2maildir", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "maildirwatch", auto_uido, 0, moder_x);
+	c(auto_prefix, "bin", "qmaildirwatch", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "predate", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "datemail", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "mailsubj", auto_uido, 0, moder_x);
@@ -1294,7 +1294,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man1", "qmaildirmake.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "maildir2mbox.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "mbox2maildir.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "maildirwatch.1", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man1", "qmaildirwatch.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "mailsubj.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "qreceipt.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "preline.1", uidr, gidr, moder_f);
