@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.4  2021-07-01 18:02:41+05:30  Cprogrammer
+# renamed maildirmake to qmaildirmake to avoid clash with courier-imap
+#
 # Revision 1.3  2021-07-01 16:40:41+05:30  Cprogrammer
 # added qmta
 #
@@ -11,7 +14,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.3 2021-07-01 16:40:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.4 2021-07-01 18:02:41+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -221,8 +224,8 @@ package_qmta() {
   echo "f:::0755:/bin/:mailsubj:mailsubj"
   echo "f:::0755:/bin/:qmail-showctl:qmail-showctl"
   echo "f:::0755:/bin/:qmaildirmake:qmaildirmake"
+  echo "f:::0755:/bin/:qmaildirwatch:qmaildirwatch"
   echo "f:::0755:/bin/:maildir2mbox:maildir2mbox"
-  echo "f:::0755:/bin/:maildirwatch:maildirwatch"
   echo "f:::0755:/bin/:srsfilter:srsfilter"
   echo "f:::0755:/bin/:srsfilter:queue-fix"
   echo "f:::0755:/bin/:qmail-qmqpc:qmail-qmqpc"
@@ -242,8 +245,8 @@ package_qmta() {
   echo "f:::0644:/man1/:datemail.1:datemail.1"
   echo "f:::0644:/man1/:mailsubj.1:mailsubj.1"
   echo "f:::0644:/man1/:qmaildirmake.1:qmaildirmake.1"
+  echo "f:::0644:/man1/:qmaildirwatch.1:qmaildirwatch.1"
   echo "f:::0644:/man1/:maildir2mbox.1:maildir2mbox.1"
-  echo "f:::0644:/man1/:maildirwatch.1:maildirwatch.1"
   echo "f:::0644:/man1/:srsfilter.1:srsfilter.1"
   echo "f:::0644:/man5/:qmail-srs.5:qmail-srs.5"
   echo "f:::0644:/man8/:qmail-showctl.8:qmail-showctl.8"
