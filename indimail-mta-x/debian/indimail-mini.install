@@ -1,7 +1,6 @@
 var/indimail/bin                               /var/indimail
 var/indimail/sbin                              /var/indimail
 var/indimail/control                           /var/indimail
-var/indimail/libexec                           /var/indimail
 etc-mini                                       /etc
 usr/bin/sendmail                               /usr/bin
 usr/bin/qmail-inject                           /usr/bin
