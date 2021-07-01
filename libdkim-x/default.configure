@@ -1,5 +1,6 @@
 #!/bin/sh
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
+  mkdir -p m4
   autoreconf -fiv
 fi
 if [ ! -f conf-release ] ; then
