@@ -10,7 +10,7 @@
 #
 # $Id: PKGBUILD.in,v 1.2 2021-06-30 11:04:51+05:30 Cprogrammer Exp mbhangui $
 #
-pkgname=('indimail-mta' 'indimail-mini')
+pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
 pkgrel=@release@
 pkgdesc="MTA for IndiMail virtualdomains"
