@@ -85,14 +85,6 @@ compile auto_shared.c
 check: it instcheck
 	./instcheck
 
-chkshsgr: \
-load chkshsgr.o
-	./load chkshsgr 
-
-chkshsgr.o: \
-compile chkshsgr.c
-	./compile chkshsgr.c
-
 ucspi-tcp.perms: perm_list.in \
 conf-prefix conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
@@ -204,12 +196,6 @@ hassgprm.h: \
 choose compile load trysgprm.c hassgprm.h1 hassgprm.h2
 	./choose cl trysgprm hassgprm.h1 hassgprm.h2 > hassgprm.h
 
-hasshsgr.h: \
-choose compile load tryshsgr.c hasshsgr.h1 hasshsgr.h2 chkshsgr \
-warn-shsgr
-	./chkshsgr || ( cat warn-shsgr; exit 1 )
-	./choose clr tryshsgr hasshsgr.h1 hasshsgr.h2 > hasshsgr.h
-
 haswaitp.h: \
 choose compile load trywaitp.c haswaitp.h1 haswaitp.h2
 	./choose cl trywaitp haswaitp.h1 haswaitp.h2 > haswaitp.h
@@ -288,10 +274,6 @@ argv0 recordio addcr delcr fixcrio rts
 
 shared: \
 rblsmtpd.so
-
-prot.o: \
-compile prot.c hasshsgr.h prot.h
-	./compile prot.c
 
 rblsmtpd.so: \
 load rbl.o upathexec_rundl.o load_shared.o \
@@ -492,7 +474,7 @@ mysql_inc: mysql_config
 	./mysql_config --include > mysql_inc || true
 
 tcpserver.o: \
-compile tcpserver.c ip4.h prot.h upathexec.h tls.h load_mysql.h \
+compile tcpserver.c ip4.h upathexec.h tls.h load_mysql.h \
 socket.h tcpremoteinfo.h rules.h dns.h iopause.h haveip6.h ip6.h \
 conf-tls conf-ip conf-mysqlrules conf-dlopen control.h \
 hasmysql.h auto_home.h mysql_inc
@@ -518,7 +500,7 @@ compile timeoutconn.c socket.h haveip6.h timeoutconn.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` timeoutconn.c
 
 unix.a: \
-makelib upathexec_env.o prot.o socket_accept.o socket_bind.o \
+makelib upathexec_env.o socket_accept.o socket_bind.o \
 socket_conn.o socket_delay.o socket_listen.o socket_local.o \
 socket_opts.o socket_opts6.o socket_remote.o socket_tcp.o socket_udp.o \
 socket_conn6.o socket_bind6.o socket_accept6.o socket_recv6.o \
@@ -526,7 +508,7 @@ socket_send6.o socket_local6.o socket_tcp6.o ip4_fmt.o ip6_fmt.o \
 ip4_bit.o ip6_bit.o ip4_scan.o ip6_scan.o socket_getifname.o \
 socket_getifidx.o socket_v4mappedprefix.o socket_ip4loopback.o \
 socket_v6any.o socket_v6loopback.o ip6_compactaddr.o ip6_expandaddr.o
-	./makelib unix.a upathexec_env.o prot.o socket_accept.o \
+	./makelib unix.a upathexec_env.o socket_accept.o \
 	socket_bind.o socket_conn.o socket_delay.o socket_listen.o \
 	socket_local.o socket_opts.o socket_opts6.o socket_remote.o \
 	socket_tcp.o socket_udp.o socket_conn6.o socket_bind6.o \

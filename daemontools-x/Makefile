@@ -128,15 +128,6 @@ auto_sysconfdir.c: auto-str conf-sysconfdir
 auto_sysconfdir.o: compile auto_sysconfdir.c
 	./compile auto_sysconfdir.c
 
-hasshsgr.h: \
-chkshsgr warn-shsgr tryshsgr.c compile load
-	./chkshsgr || ( cat warn-shsgr; exit 1 )
-	( ( ./compile tryshsgr.c \
-	&& ./load tryshsgr && ./tryshsgr ) >/dev/null 2>&1 \
-	&& echo \#define HASSHORTSETGROUPS 1 || exit 0 ) > \
-	hasshsgr.h
-	rm -f tryshsgr.o tryshsgr
-
 envdir: load envdir.o openreadclose.o
 	./load envdir openreadclose.o -lqmail
 
@@ -193,10 +184,10 @@ setlock: load setlock.o
 setlock.o: compile setlock.c
 	./compile setlock.c
 
-setuidgid: load setuidgid.o prot.o
-	./load setuidgid prot.o -lqmail
+setuidgid: load setuidgid.o
+	./load setuidgid -lqmail
 
-setuidgid.o: compile prot.h setuidgid.c
+setuidgid.o: compile setuidgid.c
 	./compile setuidgid.c
 
 softlimit: load softlimit.o
@@ -296,16 +287,6 @@ load recordio.o iopause.o
 
 openreadclose.o: compile openreadclose.c openreadclose.h
 	./compile openreadclose.c
-
-prot.o: \
-compile prot.c hasshsgr.h prot.h
-	./compile prot.c
-
-chkshsgr: load chkshsgr.o
-	./load chkshsgr
-
-chkshsgr.o: compile chkshsgr.c
-	./compile chkshsgr.c
 
 spipe: load spipe.o svcfns.o
 	./load spipe svcfns.o
