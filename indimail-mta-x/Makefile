@@ -685,21 +685,6 @@ trysgprm.c compile load
 	&& echo \#define HASSIGPROCMASK 1 || exit 0 ) > hassgprm.h
 	rm -f trysgprm.o trysgprm
 
-chkshsgr: load chkshsgr.o
-	./load chkshsgr
-
-chkshsgr.o: compile chkshsgr.c
-	./compile chkshsgr.c
-
-hasshsgr.h: \
-chkshsgr warn-shsgr tryshsgr.c compile load
-	./chkshsgr || ( cat warn-shsgr; exit 1 )
-	( ( ./compile tryshsgr.c \
-	&& ./load tryshsgr && ./tryshsgr ) >/dev/null 2>&1 \
-	&& echo \#define HASSHORTSETGROUPS 1 || exit 0 ) > \
-	hasshsgr.h
-	rm -f tryshsgr.o tryshsgr
-
 headerbody.o: \
 compile headerbody.c hfield.h headerbody.h
 	./compile headerbody.c
@@ -1143,21 +1128,17 @@ maildir_deliver.o: \
 compile maildir_deliver.c syncdir.h conf-sync
 	./compile `grep -h -v "^#" conf-sync` maildir_deliver.c
 
-prot.o: \
-compile prot.c hasshsgr.h prot.h
-	./compile prot.c
-
 qmail-lspawn: \
-load qmail-lspawn.o lspawn.o prot.o slurpclose.o \
+load qmail-lspawn.o lspawn.o slurpclose.o \
 get_uid.o auto_sysconfdir.o auto_control.o auto_qmail.o \
 auto_uids.o auto_spawn.o auto_assign.o control.o \
 indimail_stub.o variables.o dns.lib
-	./load qmail-lspawn lspawn.o prot.o slurpclose.o \
+	./load qmail-lspawn lspawn.o slurpclose.o \
 	auto_uids.o get_uid.o auto_sysconfdir.o auto_control.o \
 	auto_qmail.o auto_spawn.o indimail_stub.o control.o \
 	variables.o auto_assign.o `cat dns.lib` -ldl -lqmail
 
-qmail-lspawn.o: compile qmail-lspawn.c prot.h slurpclose.h \
+qmail-lspawn.o: compile qmail-lspawn.c slurpclose.h \
 auto_qmail.h auto_uids.h qlx.h auto_assign.h indimail_stub.h \
 auto_control.h variables.h conf-virtual
 	./compile `grep -h -v "^#" conf-virtual` \
@@ -1721,21 +1702,21 @@ slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 qmta-send: \
 load qmta-send.o trigger.o fmtqfn.o readsubdir.o \
 variables.o auto_control.o control.o qsutil.o \
-auto_split.o auto_qmail.o auto_uids.o prot.o \
+auto_split.o auto_qmail.o auto_uids.o \
 prioq.o newfield.o quote.o qmail.o syncdir.o srs.o \
 rcpthosts.o auto_spawn.o slurpclose.o get_uid.o \
 qmta_lspawn.o qmta_rspawn.o qmta-lspawn.o qmta-rspawn.o \
 auto_assign.o tcpto_clean.o set_environment.o auto_prefix.o
 	./load qmta-send trigger.o fmtqfn.o readsubdir.o \
 	variables.o auto_control.o control.o qsutil.o \
-	rcpthosts.o auto_split.o auto_qmail.o auto_uids.o prot.o \
+	rcpthosts.o auto_split.o auto_qmail.o auto_uids.o \
 	prioq.o newfield.o quote.o qmail.o syncdir.o srs.o \
 	qmta_lspawn.o qmta_rspawn.o qmta-lspawn.o qmta-rspawn.o \
 	slurpclose.o get_uid.o auto_spawn.o auto_assign.o tcpto_clean.o \
 	set_environment.o auto_prefix.o \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -lqmail
 
-qmta-lspawn.o: compile qmail-lspawn.c prot.h slurpclose.h \
+qmta-lspawn.o: compile qmail-lspawn.c slurpclose.h \
 auto_qmail.h auto_uids.h qlx.h auto_assign.h indimail_stub.h \
 auto_control.h variables.h
 	./compile \
@@ -1757,7 +1738,7 @@ ipalloc.h auto_control.h variables.h conf-tls conf-ip
 
 qmta-send.o: \
 compile qmta-send.c qsutil.h fmtqfn.h readsubdir.h trigger.h \
-variables.h prioq.h qmail.h newfield.h quote.h prot.h \
+variables.h prioq.h qmail.h newfield.h quote.h \
 auto_qmail.h auto_split.h auto_uids.h conf-mime conf-sync \
 conf-batv conf-srs conf-loglock conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
@@ -1982,8 +1963,8 @@ compile fn_handler.c
 	./compile fn_handler.c
 
 qmail-start: \
-load qmail-start.o prot.o auto_uids.o get_uid.o
-	./load qmail-start prot.o auto_uids.o get_uid.o -lqmail
+load qmail-start.o auto_uids.o get_uid.o
+	./load qmail-start auto_uids.o get_uid.o -lqmail
 
 qmail-start.8: \
 qmail-start.9 conf-qmail
@@ -1992,19 +1973,19 @@ qmail-start.9 conf-qmail
 	> qmail-start.8
 
 qmail-start.o: \
-compile qmail-start.c prot.h auto_uids.h conf-todo
+compile qmail-start.c auto_uids.h conf-todo
 	./compile `grep -h -v "^#" conf-todo` qmail-start.c
 
 slowq-start: \
-load slowq-start.o prot.o auto_uids.o get_uid.o
-	./load slowq-start prot.o auto_uids.o get_uid.o -lqmail
+load slowq-start.o auto_uids.o get_uid.o
+	./load slowq-start auto_uids.o get_uid.o -lqmail
 
 slowq-start.8: \
 slowq-start.9 conf-qmail conf-servicedir
 	$(edit) slowq-start.9 > $@
 
 slowq-start.o: \
-compile slowq-start.c prot.h auto_uids.h conf-todo
+compile slowq-start.c auto_uids.h conf-todo
 	./compile `grep -h -v "^#" conf-todo` slowq-start.c
 
 qmail-tcpok: \

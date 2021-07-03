@@ -155,6 +155,10 @@ Release 2.13 Start 14/02/2021
 97. standalone MTA - qmta-send
 - 01/07/2021
 98. renamed maildirwatch to qmaildirwatch to avoid clash with courier-imap
+- 03/07/2021
+99. moved prot.c, prot.h to libqmail
+100. smtpd.c: checkrecipient_pwd: replace getwent() with in-built function to
+    check for user in /etc/passwd
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

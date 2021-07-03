@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.19  2021-07-03 14:04:38+05:30  Cprogrammer
+ * use Lmid_t data type for id instead of unsigned long
+ *
  * Revision 1.18  2021-05-12 21:02:52+05:30  Cprogrammer
  * replaced pathexec with upathexec
  *
@@ -94,7 +97,7 @@ load_shared(char *file, char **argv, char **envp)
 		i = lmid = 0;
 		use_dlmopen = env_get("USE_DLMOPEN") ? 1 : 0;
 		/*- get lmid */
-		if (use_dlmopen && (i = dlnamespace(file, envp, (unsigned long *) &lmid)) < 0)
+		if (use_dlmopen && (i = dlnamespace(file, envp, &lmid)) < 0)
 			strerr_die4x(111, FATAL, "dlnamespace: ", file, ": unable to store namespace");
 		if (!i) { /*- No existing entry for lmid (loaded libs) found */
 #ifdef RTLD_DEEPBIND
@@ -110,7 +113,7 @@ load_shared(char *file, char **argv, char **envp)
 				if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
 					strerr_die5x(111, FATAL, "dlinfo: ", file, ": ", dlerror());
 				/*- store the new lmid */
-				if (dlnamespace(file, 0, (unsigned long *) &lmid) < 0)
+				if (dlnamespace(file, 0, &lmid) < 0)
 					strerr_die4x(111, FATAL, "dlnamespace: ", file, ": unable to store namespace");
 			}
 		} else /*- loaded earlier so use RTLD_NOLOAD */
@@ -128,7 +131,7 @@ load_shared(char *file, char **argv, char **envp)
 				if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
 					strerr_die5x(111, FATAL, "dlinfo: ", file, ": ", dlerror());
 				/*- store the new lmid */
-				if (dlnamespace(file, 0, (unsigned long *) &lmid) < 0)
+				if (dlnamespace(file, 0, &lmid) < 0)
 					strerr_die4x(111, FATAL, "dlnamespace: ", file, ": unable to store namespace");
 			}
 		} else
@@ -185,7 +188,7 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	static char    *x = "$Id: load_shared.c,v 1.18 2021-05-12 21:02:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_shared.c,v 1.19 2021-07-03 14:04:38+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

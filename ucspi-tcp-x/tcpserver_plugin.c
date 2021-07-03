@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.16  2021-07-03 14:05:14+05:30  Cprogrammer
+ *  use Lmid_t data type for id instead of unsigned long
+ *
  *  Revision 1.15  2020-10-01 14:35:43+05:30  Cprogrammer
  *  Darwin Port
  *
@@ -48,7 +51,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.15 2020-10-01 14:35:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.16 2021-07-03 14:05:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -120,7 +123,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 				if (dlinfo(handle, RTLD_DI_LMID, &lmid) == -1)
 					strerr_die5x(111, FATAL, "dlinfo: ", shared_objfn.s, ": ", dlerror());
 				/*- store the new lmid */
-				if (dlnamespace(shared_objfn.s, 0, (unsigned long *) &lmid) < 0)
+				if (dlnamespace(shared_objfn.s, 0, &lmid) < 0)
 					strerr_die4x(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to store namespace");
 				/*- display the new lmid in tcpserver log */
 				strnum[fmt_ulong(strnum, lmid)] = 0;
@@ -136,7 +139,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 			/*- get the old lmid for this shared object */
 			lmid = 0;
 			if (use_dlmopen) {
-				if ((i = dlnamespace(shared_objfn.s, 0, (unsigned long *) &lmid)) < 0)
+				if ((i = dlnamespace(shared_objfn.s, 0, &lmid)) < 0)
 					strerr_die4x(111, FATAL, "dlnamespace: ", shared_objfn.s, ": unable to store namespace");
 				else
 				if (!i)

@@ -11,6 +11,7 @@
 #include <byte.h>
 #include <env.h>
 #include <now.h>
+#include <open.h>
 #include <timeoutread.h>
 #include <timeoutwrite.h>
 #include <commands.h>
@@ -105,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.243 $";
+char           *revision = "$Revision: 1.244 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -460,8 +461,19 @@ die_lcmd()
 }
 
 void
-die_read()
+die_read(char *str)
 {
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" read error: ");
+	if (str) {
+		logerr(str);
+		logerr(": ");
+	}
+	if (errno)
+		logerr(error_str(errno));
+	logerrf("\n");
 	out("451 Requested action aborted: read error (#4.4.2)\r\n");
 	flush();
 	_exit(1);
@@ -488,6 +500,10 @@ die_nomem()
 {
 	out("451 Requested action aborted: out of memory (#4.3.0)\r\n");
 	flush();
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerrf(" out of memory\n");
 	_exit(1);
 }
 
@@ -1798,18 +1814,40 @@ check_recipient_cdb(char *rcpt)
 int
 check_recipient_pwd(char *rcpt, int len)
 {
-	struct passwd  *pw;
+	int             fd, match, i;
+	char            inbuf[4096];
+	static stralloc line = { 0 };
+	substdio        pwss;
 
+	if ((fd = open_read("/etc/passwd")) == -1) {
+		out("451 Requested action aborted: unable to read passwd database (#4.3.0)\r\n");
+		logerr("qmail-smtpd: ");
+		logerrpid();
+		logerrf("passwd database error\n");
+		flush();
+		_exit(1);
+	}
+	substdio_fdbuf(&pwss, read, fd, inbuf, sizeof (inbuf));
 	for (;;) {
-		if (!(pw = getpwent()))
-			break;
-		if (!str_diffn(rcpt, pw->pw_name, len)) {
-			setpwent();
-			return (0);
+		if (getln(&pwss, &line, &match, '\n') == -1) {
+			close(fd);
+			die_read("/etc/passwd");
+		}
+		if (!line.len) {
+			close(fd);
+			return 1;
+		}
+		i = str_chr(line.s, ':');
+		if (line.s[i]) {
+			line.s[i] = 0;
+			if (!str_diffn(line.s, rcpt, len)) {
+				close(fd);
+				return 0;
+			}
 		}
 	}
-	setpwent();
-	return (1);
+	close(fd);
+	return 1;
 }
 
 char           *
@@ -2218,13 +2256,9 @@ greetdelay_check(int delay)
 			return;				/* Timeout ==> No early talking */
 	}
 	if (r <= 0) {
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerr(remoteip);
-		logerr(" read error: ");
-		logerr(!r ? "EOF" : error_str(errno));
-		logerrf("\n");
-		die_read();
+		if (!r)
+			errno = 0;
+		die_read(!r ? "client dropped connection" : 0);
 	}
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -3919,7 +3953,7 @@ saferead(int fd, char *buf, int len)
 			die_alarm();
 	}
 	if (r < 0)
-		die_read();
+		die_read("ssl");
 	return r;
 }
 
@@ -4478,7 +4512,7 @@ authgetl(void)
 			die_nomem(); /*- XXX */
 		i = substdio_get(&ssin, authin.s + authin.len, 1);
 		if (i != 1)
-			die_read();
+			die_read("client dropped connection");
 		if (authin.s[authin.len] == '\n')
 			break;
 		++authin.len;
@@ -4576,7 +4610,7 @@ authenticate(int method)
 	byte_zero(upbuf, sizeof upbuf);
 	if (method == AUTH_DIGEST_MD5) {
 		if ((n = saferead(po[0], respbuf, 33)) == -1)
-			die_read();
+			die_read("err reading digest md5 response");
 		respbuf[n] = 0;
 		close(po[0]);
 	}
@@ -4588,7 +4622,7 @@ authenticate(int method)
 		if (ssl) { /*- don't let plain text from exec'd programs to interfere with ssl */
 			substdio_fdbuf(&pwd_in, saferead, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
 			if (substdio_copy(&ssout, &pwd_in) == -2)
-				die_read();
+				die_read("err reading checkpassword pipe");
 		}
 		/* 
 		 * i == 3 - account doesn't have RELAY permissions.
@@ -4614,7 +4648,7 @@ authenticate(int method)
 		flush();
 		/*- digest-md5 requires a special okay response ...  */
 		if ((n = saferead(0, respbuf, 512)) == -1)
-			die_read();
+			die_read("err getting ack from client");
 		if (n)
 			respbuf[n] = 0;
 		return (0);
@@ -5486,7 +5520,7 @@ tls_err(const char *s)
 {
 	tls_out(s, ssl_error());
 	if (smtps)
-		die_read();
+		die_read("smtps: ssl");
 }
 
 int
@@ -5545,7 +5579,7 @@ tls_verify()
 	if (ssl_timeoutrehandshake(timeout, ssl_rfd, ssl_wfd, ssl) <= 0) {
 		const char     *err = ssl_error_str();
 		tls_out("rehandshake failed", err);
-		die_read();
+		die_read("ssl");
 	}
 
 	do { /*- one iteration */
@@ -5797,7 +5831,7 @@ tls_init()
 		SSL_free(myssl);
 		myssl = 0;
 		tls_out("connection failed", err);
-		die_read();
+		die_read("ssl");
 	}
 	ssl = myssl;
 	/*- populate the protocol string, used in Received */
@@ -6138,7 +6172,7 @@ command:
 	secure_auth = env_get("SECURE_AUTH") ? 1 : 0;
 #endif
 	if (commands(&ssin, cmdptr) == 0)
-		die_read();
+		die_read("client dropped connection");
 	die_nomem();
 }
 
@@ -6167,6 +6201,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.244  2021-07-03 14:01:42+05:30  Cprogrammer
+ * replaced getpwent() with in-build check for user in /etc/passwd
+ *
  * Revision 1.243  2021-06-28 16:58:02+05:30  Cprogrammer
  * fix error when libindimail is missing
  *
@@ -6335,7 +6372,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.243 2021-06-28 16:58:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.244 2021-07-03 14:01:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
