@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.12  2021-07-03 14:03:56+05:30  Cprogrammer
+ * use Lmid_t data type for id instead of unsigned long
+ *
  * Revision 1.11  2021-05-12 20:59:03+05:30  Cprogrammer
  * replaced pathexec_env() with upathexec_env()
  *
@@ -35,6 +38,8 @@
  *
  */
 #ifdef LOAD_SHARED_OBJECTS
+#define _GNU_SOURCE
+#include <dlfcn.h>
 #include "hasdlmopen.h"
 #include <errno.h>
 #ifdef HASDLMOPEN
@@ -58,7 +63,7 @@ static stralloc namespace = {0};
  * -1 - ENOMEM failure
  */
 int
-dlnamespace(char *fn, char **envp, unsigned long *id)
+dlnamespace(char *fn, char **envp, Lmid_t *id)
 {
 	char           *ptr, *cptr, *s;
 	int             i, j;
@@ -96,7 +101,7 @@ dlnamespace(char *fn, char **envp, unsigned long *id)
 					}
 					ptr = envp[j] + 4;
 					if (*ptr) {
-						scan_ulong(ptr, id);
+						scan_long(ptr, id);
 						*s = '=';
 						return (1);
 					} else
@@ -113,7 +118,7 @@ dlnamespace(char *fn, char **envp, unsigned long *id)
 			if (*ptr == ':') {
 				*ptr = 0;
 				if (!str_diff(ptr + 1, fn)) {
-					scan_ulong(cptr, id);
+					scan_long(cptr, id);
 					*ptr = ':';
 					return (1);
 				} else
@@ -165,7 +170,7 @@ dlnamespace(char *fn, unsigned long *id)
 void
 getversion_dlnamespace_c()
 {
-	static char    *x = "$Id: dlnamespace.c,v 1.11 2021-05-12 20:59:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dlnamespace.c,v 1.12 2021-07-03 14:03:56+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
