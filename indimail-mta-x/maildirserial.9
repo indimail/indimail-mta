@@ -56,9 +56,10 @@ exits without handling all the files.
 .B maildirserial
 will give up if it is not making any progress.
 
-\fBmaildirserial\fR(1) uses environment set according to files in
-$HOME/.defaultqueue and @controldir@/defaultqueue if the environment
-variable QUEUE_BASE is not set.
+If running as non-root, \fBmaildirserial\fR uses environment set according
+to files in $HOME/.defaultqueue directory. If QUEUE_BASE environment
+variable is not set, it additionally uses environment set according to
+files in @controldir@/defaultqueue directory.
 
 .SH OPTIONS
 .TP 5

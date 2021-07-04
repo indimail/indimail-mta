@@ -19,9 +19,10 @@ variable \fBRECIPIENT\fR to generate the MDN. \fBqnotify\fR(1) silently exits wi
 status in case it does not get the required information from the environment variables or
 the headers in the email.
 
-\fBqnotify\fR(1) uses environment set according to files in
-$HOME/.defaultqueue and @controldir@/defaultqueue if the environment
-variable QUEUE_BASE is not set.
+If running as non-root, \fBqnotify\fR uses environment set according
+to files in $HOME/.defaultqueue directory. If QUEUE_BASE environment
+variable is not set, it additionally uses environment set according to
+files in @controldir@/defaultqueue directory.
 
 .SH OPTIONS
 .PP

@@ -11,10 +11,10 @@ message files to match their inodes. It will even create missing directories
 and files. You can even create a queue from scratch). It will
 also print warnings for any files it finds that should not exist.
 
-\fBqueue-fix\fR(1) uses environment set according to files in
-$HOME/.defaultqueue and @controldir@/defaultqueue if the environment
-variable QUEUE_BASE is not set. This can be used for setting default value
-of \fBCONFSPLIT\fR environment variable for your setup.
+If running as non-root, \fBqueue-fix\fR uses environment set according
+to files in $HOME/.defaultqueue directory. If QUEUE_BASE environment
+variable is not set, it additionally uses environment set according to
+files in @controldir@/defaultqueue directory.
 
 \fBqueue-fix\fR uses the uids \fIqmailq\fR, \fIqmailr\fR and \fIqmails\fR
 to set permissions for various directories.

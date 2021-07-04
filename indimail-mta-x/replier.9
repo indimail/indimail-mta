@@ -106,9 +106,10 @@ $REQUEST4 is the portion of request in the recipient address that follows the th
 
 NB: These environment variables are not quoted. They are under the control of the sender.
 
-\fBreplier\fR(1) uses environment set according to files in
-$HOME/.defaultqueue and @controldir@/defaultqueue if the environment
-variable QUEUE_BASE is not set.
+If running as non-root, \fBreplier\fR uses environment set according
+to files in $HOME/.defaultqueue directory. If QUEUE_BASE environment
+variable is not set, it additionally uses environment set according to
+files in @controldir@/defaultqueue directory.
 
 .SH "SEE ALSO"
 bouncesaying(1),

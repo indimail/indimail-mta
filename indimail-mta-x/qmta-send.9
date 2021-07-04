@@ -100,9 +100,9 @@ or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
 is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is
 used for doing this.
 
-\fBqmta-send\fR(1) uses environment set according to files in
-$HOME/.defaultqueue and @controldir@/defaultqueue if the environment
-variable QUEUE_BASE is not set.
+If running as non-root, and if QUEUE_BASE environment variable is not set,
+\fBqmta-send\fR uses environment set according to files
+@controldir@/defaultqueue directory.
 
 .SH OPTIONS
 .TP

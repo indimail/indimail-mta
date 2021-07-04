@@ -44,9 +44,10 @@ DIRSPLIT
 present to use the queue base. If the environment variables QUEUE_START and QUEUE_COUNT are set,
 \fBqmail-qread\fR will process multiple queues present in the queue base.
 
-\fBqmail-qread\fR(1) uses environment set according to files in
-$HOME/.defaultqueue and @controldir@/defaultqueue if the environment
-variable QUEUE_BASE is not set.
+If running as non-root, \fBqmail-qread\fR uses environment set according
+to files in $HOME/.defaultqueue directory. If QUEUE_BASE environment
+variable is not set, it additionally uses environment set according to
+files in @controldir@/defaultqueue directory.
 
 .SH "SEE ALSO"
 qmail-send(8)
