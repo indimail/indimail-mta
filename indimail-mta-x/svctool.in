@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.565 2021-06-30 11:09:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.566 2021-07-04 20:07:08+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.565 2021-06-30 11:09:25+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.566 2021-07-04 20:07:08+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -2706,6 +2706,9 @@ if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$CONTROLDIR/$QUEUE_DEF ] ; then
 	return 0
 fi
 /bin/mkdir -p $conf_dir
+if [ -n "$base_path" ] ; then
+echo $base_path    > $conf_dir/BASE_PATH
+fi
 echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
 echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
