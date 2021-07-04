@@ -160,9 +160,9 @@ Release 2.13 Start 14/02/2021
 100. smtpd.c: checkrecipient_pwd: replace getwent() with in-built function to
     check for user in /etc/passwd
 - 04/07/2021
-99. qmail-showctl.c: complete rewrite
-100. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgepwgr.c
-101. svctool: added BASE_PATH env variable for defaultqueue
+101. qmail-showctl.c: complete rewrite
+102. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgepwgr.c
+103. svctool: added BASE_PATH env variable for defaultqueue
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
