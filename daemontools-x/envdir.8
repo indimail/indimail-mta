@@ -25,11 +25,12 @@ If the file \fIs\fR is completely empty (0 bytes long), \fBenvdir\fR
 removes an environment variable named \fIs\fR if one exists, without adding
 a new variable.
 
-If \fBenvdir\fR finds a link pointing to a directory or a directory
-named .\fIdir\fR, it enters that directory and modifies environment
-variables according to files in .\fIdir\fR. \fBenvdir\fR avoids recursive
-loops. \fBenvdir\fR otherwise all files/directories starting with '.' dot
-character.
+If \fBenvdir\fR finds a link named .\fIdir\fR pointing to a directory, or a
+directory named .\fIdir\fR, it enters that directory and modifies
+environment variables according to files in .\fIdir\fR. \fBenvdir\fR avoids
+infinite recursive loops, by storing the inode number of directories
+visited and checking against the list. Apart from .\fIdir\fR, \fBenvdir\fR
+skips all files/directories starting with the '.' dot character.
 
 .SH EXIT CODES
 \fBenvdir\fR exits 111 if it has trouble reading \fId\fR, if it runs out of
