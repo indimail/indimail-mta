@@ -1,5 +1,8 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.18  2021-07-04 14:38:41+05:30  Cprogrammer
+ * use qgetpwent, qgetgrent functions from qgetpwgr.c of libqmail
+ *
  * Revision 1.17  2021-06-27 10:36:34+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -56,10 +59,11 @@
 #include <grp.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <strerr.h>
+#include <str.h>
+#include <fmt.h>
+#include <qgetpwgr.h>
 #include "auto_uids.h"
-#include "strerr.h"
-#include "str.h"
-#include "fmt.h"
 
 static char     strnum[FMT_ULONG];
 
@@ -96,7 +100,7 @@ static char    *user_gid_list[] = {
 };
 
 static int
-get_uid(char *user)
+get_uid(char *user, int all)
 {
 	struct passwd  *pw;
 	int             i, len, len1, len2;
@@ -104,7 +108,7 @@ get_uid(char *user)
 
 	if (!first) {
 		for (;;) {
-			if (!(pw = getpwent()))
+			if (!(pw = qgetpwent()))
 				break;
 			for (i = 0; *user_uid_list[i]; i++) {
 				len = str_len(user_uid_list[i]);
@@ -112,12 +116,12 @@ get_uid(char *user)
 					uid_array[i] = pw->pw_uid;
 			}
 		}
-#if 0
-		for (i = 0; *user_uid_list[i]; i++) {
-			if (uid_array[i] == -1)
-				strerr_die3sys(111, "getpwent: ", user_uid_list[i], ": No such user: ");
+		if (all) {
+			for (i = 0; *user_uid_list[i]; i++) {
+				if (uid_array[i] == -1)
+					strerr_die3sys(111, "qgetpwent: ", user_uid_list[i], ": No such user: ");
+			}
 		}
-#endif
 		first++;
 	}
 	for (i = 0; *user_uid_list[i]; i++) {
@@ -131,7 +135,7 @@ get_uid(char *user)
 }
 
 static int
-get_gid(char *group)
+get_gid(char *group, int all)
 {
 	struct group   *gr;
 	int             i, len, len1, len2;
@@ -139,7 +143,7 @@ get_gid(char *group)
 
 	if (!first) {
 		for (;;) {
-			if (!(gr = getgrent()))
+			if (!(gr = qgetgrent()))
 				break;
 			for (i = 0; *user_gid_list[i]; i++) {
 				len = str_len(user_gid_list[i]);
@@ -147,12 +151,12 @@ get_gid(char *group)
 					gid_array[i] = gr->gr_gid;
 			}
 		}
-#if 0
-		for (i = 0; *user_gid_list[i]; i++) {
-			if (gid_array[i] == -1)
-				strerr_die3sys(111, "getgrent: ", user_gid_list[i], ": No such group: ");
+		if (all) {
+			for (i = 0; *user_gid_list[i]; i++) {
+				if (gid_array[i] == -1)
+					strerr_die3sys(111, "qgetgrent: ", user_gid_list[i], ": No such group: ");
+			}
 		}
-#endif
 		first++;
 	}
 	for (i = 0; *user_gid_list[i]; i++) {
@@ -175,46 +179,46 @@ uidinit(int closeflag, int all)
 
 	if (first)
 		return(0);
-	auto_uida = ((u = get_uid(ALIASU)) == -2) ? -1 : u;
+	auto_uida = ((u = get_uid(ALIASU, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_uidd = ((u = get_uid(QMAILD)) == -2) ? -1 : u;
+	auto_uidd = ((u = get_uid(QMAILD, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_uidl = ((u = get_uid(QMAILL)) == -2) ? -1 : u;
+	auto_uidl = ((u = get_uid(QMAILL, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_uido = ((u = get_uid(ROOTUSER)) == -2) ? -1 : u;
+	auto_uido = ((u = get_uid(ROOTUSER, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_uidp = ((u = get_uid(QMAILP)) == -2) ? -1 : u;
+	auto_uidp = ((u = get_uid(QMAILP, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_uidq = ((u = get_uid(QMAILQ)) == -2) ? -1 : u;
+	auto_uidq = ((u = get_uid(QMAILQ, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_uidr = ((u = get_uid(QMAILR)) == -2) ? -1 : u;
+	auto_uidr = ((u = get_uid(QMAILR, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_uids = ((u = get_uid(QMAILS)) == -2) ? -1 : u;
+	auto_uids = ((u = get_uid(QMAILS, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_uidv = ((u = get_uid(INDIUSER)) == -2) ? -1 : u;
+	auto_uidv = ((u = get_uid(INDIUSER, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_uidc = ((u = get_uid(QSCANDU)) == -2) ? -1 : u;
+	auto_uidc = ((u = get_uid(QSCANDU, all)) == -2) ? -1 : u;
 	if (u == -2)
 		err = 1;
-	auto_gidq = ((g = get_gid(QMAILG)) == -2) ? -1 : g;
+	auto_gidq = ((g = get_gid(QMAILG, all)) == -2) ? -1 : g;
 	if (g == -2)
 		err = 1;
-	auto_gidn = ((g = get_gid(NOFILESG)) == -2) ? -1 : g;
+	auto_gidn = ((g = get_gid(NOFILESG, all)) == -2) ? -1 : g;
 	if (g == -2)
 		err = 1;
-	auto_gidv = ((g = get_gid(INDIGROUP)) == -2) ? -1 : g;
+	auto_gidv = ((g = get_gid(INDIGROUP, all)) == -2) ? -1 : g;
 	if (g == -2)
 		err = 1;
-	auto_gidc = ((g = get_gid(QSCANDG)) == -2) ? -1 : g;
+	auto_gidc = ((g = get_gid(QSCANDG, all)) == -2) ? -1 : g;
 	if (g == -2)
 		err = 1;
 	if (closeflag) {
@@ -226,11 +230,11 @@ uidinit(int closeflag, int all)
 	if (all) {
 		for (i = 0; *user_uid_list[i]; i++) {
 			if (uid_array[i] == -1)
-				strerr_die3sys(111, "getpwent: ", user_uid_list[i], ": No such user: ");
+				strerr_die3sys(111, "qgetpwent: ", user_uid_list[i], ": No such user: ");
 		}
 		for (i = 0; *user_gid_list[i]; i++) {
 			if (gid_array[i] == -1)
-				strerr_die3sys(111, "getgrent: ", user_gid_list[i], ": No such group: ");
+				strerr_die3sys(111, "qgetgrent: ", user_gid_list[i], ": No such group: ");
 		}
 	}
 	first++;
@@ -275,7 +279,7 @@ get_user(uid_t uid)
 	if (uid == auto_uidc)
 		return("qscand");
 	else {
-		if (!(pw = getpwuid(uid))) {
+		if (!(pw = qgetpwuid(uid))) {
 			strnum[fmt_ulong(strnum, uid)] = 0;
 			strerr_die3sys(111, "get_user: unable to get uid for uid ", strnum, ": ");
 		}
@@ -305,7 +309,7 @@ get_group(gid_t gid)
 	if (gid == 0)
 		return("root");
 	else {
-		if (!(gr = getgrgid(gid))) {
+		if (!(gr = qgetgrgid(gid))) {
 			strnum[fmt_ulong(strnum, gid)] = 0;
 			strerr_die3sys(111, "get_user: unable to get gid for gid ", strnum, ": ");
 		}
@@ -316,7 +320,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	static char    *x = "$Id: get_uid.c,v 1.17 2021-06-27 10:36:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: get_uid.c,v 1.18 2021-07-04 14:38:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
