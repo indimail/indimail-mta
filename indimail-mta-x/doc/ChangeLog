@@ -163,6 +163,12 @@ Release 2.13 Start 14/02/2021
 101. qmail-showctl.c: complete rewrite
 102. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgepwgr.c
 103. svctool: added BASE_PATH env variable for defaultqueue
+104. run qmail-dk, qmail-dkim with qmail group to access domainkeys dir 
+105. qmta-send: run as qmailq if running without qmail-clean
+106. indimail-mta.spec, debian/qmta.postinst: create qmta queue with qmta
+     mode (queue-fix -m)
+107. queue-fix: added -m option for qmta-send where dirs are owned by
+     qmailq
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
