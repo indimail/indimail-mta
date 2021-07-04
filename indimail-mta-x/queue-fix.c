@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.23  2021-07-04 23:33:11+05:30  Cprogrammer
+ * added -m option for qmta-send where dirs are owned by qmailq
+ *
  * Revision 1.22  2021-06-27 10:38:56+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -109,6 +112,7 @@ static int      flag_namefix = 0;
 static int      flag_unlink = 0;
 static int      flag_verbose = 0;
 static int      flag_ratelimit = 0;
+static int      flag_qmta = 0;
 static uid_t    qmailq_uid;
 static uid_t    qmails_uid;
 static uid_t    qmailr_uid;
@@ -142,6 +146,8 @@ usage()
 			"                 -s - queue split number (default ", strnum,
 			")\n"
 			"                 -i - Interactive Mode\n"
+			"                 -r - create ratelimit directory\n"
+			"                 -m - qmta mode\n"
 			"                 -N - Test Mode", 0);
 	_exit(100);
 }
@@ -976,7 +982,7 @@ main(int argc, char **argv)
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
 	if (split > auto_split)
 		split = auto_split;
-	while ((opt = getopt(argc, argv, "iNvs:r")) != opteof) {
+	while ((opt = getopt(argc, argv, "imNvs:r")) != opteof) {
 		switch (opt)
 		{
 		case 'i':
@@ -990,6 +996,9 @@ main(int argc, char **argv)
 			break;
 		case 's':
 			scan_int(optarg, &split);
+			break;
+		case 'm':
+			flag_qmta = 1;
 			break;
 		case 'r':
 			flag_ratelimit = 1;
@@ -1012,7 +1021,7 @@ main(int argc, char **argv)
 	}
 	/*- prepare the uid and gid */
 	qmailq_uid = auto_uidq;
-	qmails_uid = auto_uids == -1 ? auto_uidq : auto_uids; /*- qmta */
+	qmails_uid = (flag_qmta || auto_uids == -1) ? auto_uidq : auto_uids; /*- qmta */
 	qmailr_uid = auto_uidr == -1 ? auto_uidq : auto_uidr; /*- qmta */
 	qmail_gid = auto_gidq;
 	/*- check that all the proper directories exist with proper credentials */
@@ -1033,7 +1042,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.22 2021-06-27 10:38:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.23 2021-07-04 23:33:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
