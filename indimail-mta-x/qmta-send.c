@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.2  2021-07-04 23:27:45+05:30  Cprogrammer
+ * run as qmailq if running without a qmail-clean
+ *
  * Revision 1.1  2021-06-30 00:10:30+05:30  Cprogrammer
  * Initial revision
  *
@@ -2072,46 +2075,51 @@ run_daemons(char **oargv, char **argv)
 	close(pi3[0]);
 	close(pi4[1]);
 
-	if (!_qmail_clean) { /*- don't fork/exec qmail-clean */
-		goto end;
-	}
-	if (pipe(pi5) == -1 || pipe(pi6) == -1) {
-		log1("alert: trouble creating pipes\n");
-		_exit(111);
-	}
-	switch ((cleanuppid = fork()))
-	{
-	case -1:
-		_exit(111);
-	case 0:
-		if (prot_uid(auto_uidq) == -1) /*- qmailq unix user */
+	if (_qmail_clean) {
+		if (pipe(pi5) == -1 || pipe(pi6) == -1) {
+			log1("alert: trouble creating pipes\n");
 			_exit(111);
-		if (fd_copy(0, pi5[0]) == -1)
+		}
+		switch ((cleanuppid = fork()))
+		{
+		case -1:
 			_exit(111);
-		if (fd_copy(1, pi6[1]) == -1)
+		case 0:
+			if (prot_uid(auto_uidq) == -1) /*- qmailq unix user */
+				_exit(111);
+			if (fd_copy(0, pi5[0]) == -1)
+				_exit(111);
+			if (fd_copy(1, pi6[1]) == -1)
+				_exit(111);
+			close23456();
+			close(pi1[0]);
+			close(pi1[1]);
+			close(pi2[0]);
+			close(pi2[1]);
+			close(pi3[0]);
+			close(pi3[1]);
+			close(pi4[0]);
+			close(pi4[1]);
+			close(pi5[0]);
+			close(pi5[1]);
+			close(pi6[0]);
+			close(pi6[1]);
+			execvp(*qcargs, qcargs); /*- qmail-clean */
 			_exit(111);
-		close23456();
-		close(pi1[0]);
-		close(pi1[1]);
-		close(pi2[0]);
-		close(pi2[1]);
-		close(pi3[0]);
-		close(pi3[1]);
-		close(pi4[0]);
-		close(pi4[1]);
+		}
 		close(pi5[0]);
-		close(pi5[1]);
-		close(pi6[0]);
 		close(pi6[1]);
-		execvp(*qcargs, qcargs); /*- qmail-clean */
-		_exit(111);
-	}
-	close(pi5[0]);
-	close(pi6[1]);
-	substdio_fdbuf(&sstoqc, write, pi5[1], sstoqcbuf, sizeof (sstoqcbuf));
-	substdio_fdbuf(&ssfromqc, read, pi6[0], ssfromqcbuf, sizeof (ssfromqcbuf));
-end:
-	if (prot_uid(auto_uids) == -1) /*- qmails unix user */
+		substdio_fdbuf(&sstoqc, write, pi5[1], sstoqcbuf, sizeof (sstoqcbuf));
+		substdio_fdbuf(&ssfromqc, read, pi6[0], ssfromqcbuf, sizeof (ssfromqcbuf));
+		/*-
+		 * if using qmail-clean, run as qmails
+		 * we are using the same permission for queue as regular indimail
+		 */
+		if (prot_uid(auto_uids) == -1)
+			_exit(111);
+	} else /*- we are using a queue with modified permissions,
+			 mostly owned by qmailq */
+	if (prot_uid(auto_uidq) == -1)
 		_exit(111);
 	return;
 }
@@ -2603,7 +2611,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.1 2021-06-30 00:10:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.2 2021-07-04 23:27:45+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
