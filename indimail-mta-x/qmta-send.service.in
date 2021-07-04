@@ -1,5 +1,5 @@
 #
-# $Id: qmta-send.service.in,v 1.1 2021-06-29 16:37:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmta-send.service.in,v 1.2 2021-07-04 23:35:11+05:30 Cprogrammer Exp mbhangui $
 #
 [Unit]
 Description=mta-send Mail Transport Agent
@@ -7,7 +7,9 @@ After=local-fs.target network.target
 
 [Service]
 Environment=PATH=/usr/bin:/usr/sbin:${PATH}
-Environment=QUEUEDIR=/var/indimail/queue/qmta
+Environment=QUEUEDIR=@qmaildir@/queue/qmta
+Environment=QMAILQUEUE=@prefix@/sbin/qmail-queue
+Environment=QUEUE_BASE=@qmaildir@/queue
 ExecStart=@prefix@/sbin/qmta-send -d ./Maildir/ splogger qmta-send
 Restart=always
 
@@ -15,6 +17,9 @@ Restart=always
 WantedBy=multi-user.target
 # 
 # $Log: qmta-send.service.in,v $
+# Revision 1.2  2021-07-04 23:35:11+05:30  Cprogrammer
+# added QMAILQUEUE, QUEUE_BASE environment variables
+#
 # Revision 1.1  2021-06-29 16:37:48+05:30  Cprogrammer
 # Initial revision
 #
