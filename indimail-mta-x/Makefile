@@ -1389,10 +1389,11 @@ compile getDomainToken.c getDomainToken.h wildmat.h variables.h
 	./compile getDomainToken.c
 
 drate.1: \
-drate.9 conf-prefix
+drate.9 conf-prefix conf-qmail
 	cat drate.9 \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}CONTROL}"`head -1 conf-sysconfdir`/control"}g \
+	| sed s}QUEUEDIR}"`head -1 conf-qmail`/queue"}g \
 	> drate.1
 
 qmail-direct: load qmail-direct.o pidopen.o
@@ -1707,13 +1708,13 @@ compile get_uid.c auto_uids.h
 qmail-showctl: \
 load qmail-showctl.o auto_uids.o control.o auto_qmail.o auto_break.o \
 indimail_stub.o auto_patrn.o auto_spawn.o auto_split.o variables.o \
-get_uid.o auto_control.o auto_sysconfdir.o set_environment.o
+get_uid.o auto_control.o auto_sysconfdir.o auto_assign.o set_environment.o
 	./load qmail-showctl auto_uids.o control.o auto_qmail.o \
 	auto_break.o auto_patrn.o auto_spawn.o auto_control.o \
 	auto_split.o variables.o get_uid.o indimail_stub.o \
-	auto_sysconfdir.o set_environment.o -ldl -lqmail
+	auto_sysconfdir.o auto_assign.o set_environment.o -ldl -lqmail
 
-qmail-showctl.o: compile qmail-showctl.c control.h \
+qmail-showctl.o: compile qmail-showctl.c control.h auto_sysconfdir.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
 auto_split.h spf.h variables.h auto_control.h indimail_stub.h \
 hassrs.h conf-srs conf-spf conf-batv
@@ -1723,6 +1724,7 @@ hassrs.h conf-srs conf-spf conf-batv
 qmail-showctl.8: qmail-showctl.9 conf-split
 	cat qmail-showctl.9 \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
+	| sed s}CONTROL}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-showctl.8
 
 plugtest: \

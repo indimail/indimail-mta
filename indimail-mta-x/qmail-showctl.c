@@ -1,179 +1,40 @@
 /*
  * $Log: qmail-showctl.c,v $
- * Revision 1.76  2021-06-27 10:38:23+05:30  Cprogrammer
- * uidnit new argument to disable/enable error on missing uids
- *
- * Revision 1.75  2021-06-24 12:17:02+05:30  Cprogrammer
- * use uidinit function proto from auto_uids.h
- *
- * Revision 1.74  2021-05-16 00:49:19+05:30  Cprogrammer
- * use configurable conf_split instead of auto_split variable
- *
- * Revision 1.73  2021-05-13 14:44:16+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.72  2021-05-12 15:50:52+05:30  Cprogrammer
- * set env variables from $HOME/.defaultqueue
- * set conf_split from CONFSPLIT env variable
- *
- * Revision 1.71  2021-02-07 23:14:18+05:30  Cprogrammer
- * declare verbose variable removed from indimail_stub
- *
- * Revision 1.70  2021-02-07 21:13:07+05:30  Cprogrammer
- * removed non-existent control file inquery
- *
- * Revision 1.69  2020-11-24 13:47:30+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.68  2020-05-11 10:59:57+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.67  2019-05-27 20:31:30+05:30  Cprogrammer
- * use VIRTUAL_PKG_LIB env variable if defined
- *
- * Revision 1.66  2019-05-27 12:39:52+05:30  Cprogrammer
- * set libfn with full path of libindimail control file
- *
- * Revision 1.65  2019-05-26 12:32:25+05:30  Cprogrammer
- * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
- *
- * Revision 1.64  2019-04-20 19:52:13+05:30  Cprogrammer
- * changed interface for loadLibrary(), closeLibrary() and getlibObject()
- *
- * Revision 1.63  2018-08-26 03:46:06+05:30  Cprogrammer
- * better indentation
- *
- * Revision 1.62  2018-07-01 11:49:55+05:30  Cprogrammer
- * renamed getFunction() to getlibObject()
- *
- * Revision 1.61  2018-01-09 11:53:53+05:30  Cprogrammer
- * use loadLibrary() to load indimail code
- *
- * Revision 1.60  2017-08-26 09:17:42+05:30  Cprogrammer
- * fixed SIGSEGV
- *
- * Revision 1.59  2017-08-23 13:20:24+05:30  Cprogrammer
- * use tlsclientmethod, tlsservermethod control files only for openssl version < 1.0.1
- *
- * Revision 1.58  2017-03-10 11:30:22+05:30  Cprogrammer
- * added control files maxdeliveredto, tlsclientmethod, tlsservermethod
- *
- * Revision 1.57  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.56  2014-01-22 20:38:48+05:30  Cprogrammer
- * added hassrs.h
- *
- * Revision 1.55  2013-11-22 11:31:37+05:30  Cprogrammer
- * added concurrencyr, concurrencyl and domainqueue control files
- *
- * Revision 1.54  2013-08-25 18:38:09+05:30  Cprogrammer
- * added SRS
- *
- * Revision 1.53  2011-07-29 09:29:51+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.52  2011-07-08 13:47:54+05:30  Cprogrammer
- * added dnsbllist control file
- *
- * Revision 1.51  2010-04-24 20:13:53+05:30  Cprogrammer
- * added badip, qmtproutes control files
- *
- * Revision 1.50  2010-02-10 08:59:05+05:30  Cprogrammer
- * removed dependency on indimail
- *
- * Revision 1.49  2009-12-09 23:57:31+05:30  Cprogrammer
- * additional closeflag argument to uidinit
- *
- * Revision 1.48  2009-12-05 11:25:39+05:30  Cprogrammer
- * added control files badhelo, badhost, originipfield
- *
- * Revision 1.47  2009-09-01 23:19:56+05:30  Cprogrammer
- * changes for batv
- *
- * Revision 1.46  2009-09-01 22:03:31+05:30  Cprogrammer
- * added control files for BATV
- *
- * Revision 1.45  2009-04-29 11:54:08+05:30  Cprogrammer
- * added blackholedrcpt, blackholedrcptpatterns, goodrcpt, goodrcptpatterns
- *
- * Revision 1.44  2009-03-29 01:08:55+05:30  Cprogrammer
- * added signaturedomains
- *
- * Revision 1.43  2009-03-08 10:19:31+05:30  Cprogrammer
- * removed filterargs, spamfilterargs
- *
- * Revision 1.42  2009-01-14 15:24:10+05:30  Cprogrammer
- * display files/directories in error messages
- *
- * Revision 1.41  2008-06-25 20:39:01+05:30  Cprogrammer
- * added queue_base control file
- *
- * Revision 1.40  2008-06-01 15:41:29+05:30  Cprogrammer
- * removed redundant control files
- *
- * Revision 1.39  2008-05-28 22:25:16+05:30  Cprogrammer
- * removed redundant control files. added mcdinfo
- *
- * Revision 1.38  2008-02-05 15:32:24+05:30  Cprogrammer
- * added control file domainbindings
- *
- * Revision 1.37  2007-12-20 13:50:40+05:30  Cprogrammer
- * removed compiler warning
- *
- * Revision 1.36  2005-12-29 14:01:18+05:30  Cprogrammer
- * added separate queuelifetime for bounce messages
- *
- * Revision 1.35  2004-10-22 20:29:35+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.34  2004-10-11 14:27:15+05:30  Cprogrammer
- * added missing argment to control_readfile
- *
- * Revision 1.33  2004-09-23 22:55:49+05:30  Cprogrammer
- * added badext, badextpatterns
- *
- * Revision 1.32  2004-08-14 02:22:05+05:30  Cprogrammer
- * added SPF code
- *
- * Revision 1.31  2004-07-13 22:52:05+05:30  Cprogrammer
- * added control files signatures, bodycheck, chkusrdomains, chkrcptdomains
- *
- * Revision 1.30  2004-07-13 22:44:58+05:30  Cprogrammer
- * added control file maxcmdlen
- *
- * Revision 1.29  2003-12-26 14:06:07+05:30  Cprogrammer
- * added authdomains control file
- * added switch -v for listing out uknown files in control directory
- *
- * Revision 1.28  2003-12-22 18:37:28+05:30  Cprogrammer
- * added RCS log
+ * Revision 1.1  2021-07-04 14:37:46+05:30  Cprogrammer
+ * Initial revision
  *
  */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <string.h>
 #include <openssl/ssl.h>
-#include "substdio.h"
-#include "subfd.h"
-#include "fmt.h"
-#include "str.h"
+#include <substdio.h>
+#include <subfd.h>
+#include <fmt.h>
+#include <str.h>
+#include <constmap.h>
+#include <stralloc.h>
+#include <direntry.h>
+#include <pathexec.h>
+#include <envdir.h>
+#include <env.h>
+#include <getEnvConfig.h>
+#include <sgetopt.h>
+#include <getln.h>
+#include <open.h>
+#include <error.h>
+#include <strerr.h>
+#include <qprintf.h>
 #include "control.h"
-#include "constmap.h"
-#include "stralloc.h"
-#include "direntry.h"
-#include "pathexec.h"
-#include "envdir.h"
 #include "auto_uids.h"
 #include "auto_qmail.h"
+#include "auto_assign.h"
 #include "auto_break.h"
 #include "auto_patrn.h"
 #include "auto_spawn.h"
 #include "auto_split.h"
 #include "auto_control.h"
-#include "env.h"
-#include "getEnvConfig.h"
+#include "auto_sysconfdir.h"
 #include "variables.h"
 #include "hassrs.h"
 #include "indimail_stub.h"
@@ -186,15 +47,20 @@
 #define WARN  "qmail-showctl: warn: "
 
 stralloc        me = { 0 };
-int             meok, conf_split;
 stralloc        line = { 0 };
 stralloc        libfn = { 0 };
+int             meok, conf_split;
 char            num[FMT_ULONG];
 
 void
-safeput(buf, len)
-	char           *buf;
-	unsigned int    len;
+die_nomem()
+{
+	substdio_puts(subfderr, "Out of memory\n");
+	_exit(111);
+}
+
+void
+safeput(char *buf, unsigned int len)
 {
 	char            ch;
 
@@ -209,23 +75,21 @@ safeput(buf, len)
 }
 
 void
-do_int(fn, def, pre, post)
-	char           *fn;
-	char           *def;
-	char           *pre;
-	char           *post;
+do_int(char *fn, char *def, char *pre, char *post)
 {
 	int             i;
-	substdio_puts(subfdout, "\n");
-	substdio_puts(subfdout, fn);
+
+	qprintf(subfdout, fn, "%22s");
 	substdio_puts(subfdout, ": ");
-	switch (control_readint(&i, fn)) {
+	switch (control_readint(&i, fn))
+	{
+	case -1:
+		strerr_die3sys(111, "unable to read ", fn, ": ");
 	case 0:
-		substdio_puts(subfdout, "(Default) ");
 		substdio_puts(subfdout, pre);
 		substdio_puts(subfdout, def);
 		substdio_puts(subfdout, post);
-		substdio_puts(subfdout, ".\n");
+		substdio_puts(subfdout, " (Default)\n\n");
 		break;
 	case 1:
 		if (i < 0)
@@ -233,88 +97,71 @@ do_int(fn, def, pre, post)
 		substdio_puts(subfdout, pre);
 		substdio_put(subfdout, num, fmt_uint(num, i));
 		substdio_puts(subfdout, post);
-		substdio_puts(subfdout, ".\n");
-		break;
-	default:
-		substdio_puts(subfdout, "Oops! Trouble reading this file [");
-		substdio_puts(subfdout, fn);
-		substdio_puts(subfdout, "].\n");
+		substdio_puts(subfdout, "\n\n");
 		break;
 	}
 }
 
 void
-do_str(fn, flagme, def, pre)
-	char           *fn;
-	int             flagme;
-	char           *def;
-	char           *pre;
+do_str(char *fn, int flagme, char *def, char *pre)
 {
-	substdio_puts(subfdout, "\n");
-	substdio_puts(subfdout, fn);
+	int             i = 0;
+
+	qprintf(subfdout, fn, "%22s");
 	substdio_puts(subfdout, ": ");
-	switch (control_readline(&line, fn)) {
+	switch (control_readline(&line, fn))
+	{
+	case -1:
+		strerr_die3sys(111, "unable to read ", fn, ": ");
 	case 0:
-		substdio_puts(subfdout, "(Default) ");
-		if (!stralloc_copys(&line, def)) {
-			substdio_puts(subfdout, "Oops! Out of memory.\n");
-			break;
-		}
+		i = 1;
+		if (!stralloc_copys(&line, def))
+			die_nomem();
 		if (flagme && meok)
-			if (!stralloc_copy(&line, &me)) {
-				substdio_puts(subfdout, "Oops! Out of memory.\n");
-				break;
-			}
+			if (!stralloc_copy(&line, &me))
+				die_nomem();
 	case 1:
 		substdio_puts(subfdout, pre);
 		safeput(line.s, line.len);
-		substdio_puts(subfdout, ".\n");
-		break;
-	default:
-		substdio_puts(subfdout, "Oops! Trouble reading this file [");
-		substdio_puts(subfdout, fn);
-		substdio_puts(subfdout, "] .\n");
+		if (i)
+			substdio_puts(subfdout, " (Default) ");
+		substdio_puts(subfdout, "\n\n");
 		break;
 	}
 }
 
 int
-do_lst(fn, def, pre, post)
-	char           *fn;
-	char           *def;
-	char           *pre;
-	char           *post;
+do_lst(char *fn, char *def, char *pre, char *post)
 {
-	int             i;
-	int             j;
+	int             i, j;
 
-	substdio_puts(subfdout, "\n");
-	substdio_puts(subfdout, fn);
+	qprintf(subfdout, fn, "%22s");
 	substdio_puts(subfdout, ": ");
-	switch (control_readfile(&line, fn, 0)) {
+	switch (control_readfile(&line, fn, 0))
+	{
+	case -1:
+		strerr_die3sys(111, "unable to read ", fn, ": ");
 	case 0:
-		substdio_puts(subfdout, "(Default) ");
 		substdio_puts(subfdout, def);
+		substdio_puts(subfdout, " (Default)\n");
 		substdio_puts(subfdout, "\n");
 		return 0;
 	case 1:
-		substdio_puts(subfdout, "\n");
 		i = 0;
 		for (j = 0; j < line.len; ++j)
 			if (!line.s[j]) {
+				if (i)
+					qprintf(subfdout, " ", "%24s");
 				substdio_puts(subfdout, pre);
 				safeput(line.s + i, j - i);
 				substdio_puts(subfdout, post);
 				substdio_puts(subfdout, "\n");
 				i = j + 1;
 			}
+		substdio_puts(subfdout, "\n");
 		return 1;
-	default:
-		substdio_puts(subfdout, "Oops! Trouble reading this file [");
-		substdio_puts(subfdout, fn);
-		substdio_puts(subfdout, "].\n");
-		return -1;
 	}
+	return 0;
 }
 
 void
@@ -323,9 +170,8 @@ print_concurrency()
 	static char     d = 0;
 
 	if (!d++) {
-		do_int("concurrencylocal", "10", "Local  concurrency is ", "");
-		do_int("concurrencyremote", "20", "Remote concurrency is ", "");
-		do_int("concurrencyincoming", "10", "SMTP   concurrency is ", "");
+		do_int("concurrencylocal",  "10", "Global Local  concurrency is ", "");
+		do_int("concurrencyremote", "20", "Global Remote concurrency is ", "");
 	}
 }
 
@@ -339,107 +185,15 @@ die_chdir(char *dir)
 	_exit(111);
 }
 
-int
-main(int argc, char **argv)
+void
+display_control()
 {
-	DIR            *dir;
-	direntry       *d;
-	void           *handle = (void *) 0;
 	char           *ptr, *local_ip, *qbase, *local_id, *errstr;
-	int             i, verbose;
+	void           *handle = (void *) 0;
 	struct stat     stmrh, stmrhcdb;
+	int             i;
 	char           *(*get_local_ip) (void);
 	char           *(*get_local_hostid) (void);
-
-	if (argc == 2 && str_equal(argv[1], "-v"))
-		verbose = 1;
-	else
-		verbose = 0;
-	set_environment(WARN, FATAL);
-	substdio_puts(subfdout, "qmail home directory: ");
-	substdio_puts(subfdout, auto_qmail);
-	substdio_puts(subfdout, ".\n");
-
-	substdio_puts(subfdout, "user-ext delimiter: ");
-	substdio_puts(subfdout, auto_break);
-	substdio_puts(subfdout, ".\n");
-
-	substdio_puts(subfdout, "paternalism (in decimal): ");
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_patrn));
-	substdio_puts(subfdout, ".\n");
-
-	substdio_puts(subfdout, "silent concurrency limit: ");
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_spawn));
-	substdio_puts(subfdout, ".\n");
-
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
-	if (conf_split > auto_split)
-		conf_split = auto_split;
-	substdio_puts(subfdout, "subdirectory split: ");
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) conf_split));
-	substdio_puts(subfdout, ".\n");
-
-	substdio_put(subfdout, "user ids\n", 9);
-	if (uidinit(1, 0)) {
-		substdio_puts(subfdout, "Oops! Unable to get uids/gids.\n");
-		substdio_flush(subfdout);
-		_exit(111);
-	}
-	substdio_put(subfdout, " alias: ", 8);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uida));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " qmaild: ", 9);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidd));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " qmaill: ", 9);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidl));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " qmailp: ", 9);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidp));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " qmailq: ", 9);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidq));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " qmailr: ", 9);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidr));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " qmails: ", 9);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uids));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " indimail: ", 11);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidv));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " qscand: ", 9);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidc));
-	substdio_put(subfdout, "\n\n", 2);
-	substdio_put(subfdout, "group ids\n", 10);
-	substdio_put(subfdout, " nofiles: ", 10);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidn));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " qmail: ", 8);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidq));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " indimail: ", 11);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidv));
-	substdio_put(subfdout, "\n", 1);
-	substdio_put(subfdout, " qscand: ", 9);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidc));
-	substdio_put(subfdout, "\n", 1);
-
-	if (chdir(auto_qmail) == -1)
-		die_chdir(auto_qmail);
-	if (!controldir && !(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-	if (access(controldir, F_OK))
-		die_chdir(controldir);
-
-	if (!(dir = opendir(controldir))) {
-		substdio_puts(subfdout, "Oops! Unable to open current directory [");
-		substdio_puts(subfdout, controldir);
-		substdio_puts(subfdout, "].\n");
-		substdio_flush(subfdout);
-		_exit(111);
-	}
 
 	if ((meok = control_readline(&me, "me") == -1)) {
 		substdio_puts(subfdout, "Oops! Trouble reading ");
@@ -453,19 +207,13 @@ main(int argc, char **argv)
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
-		if (!stralloc_copys(&libfn, controldir)) {
-			substdio_puts(subfdout, "Oops! Out of memory.\n");
-			_exit(111);
-		}
-		if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/")) {
-			substdio_puts(subfdout, "Oops! Out of memory.\n");
-			_exit(111);
-		}
+		if (!stralloc_copys(&libfn, controldir))
+			die_nomem();
+		if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+			die_nomem();
 		if (!stralloc_catb(&libfn, "libindimail", 11) ||
-				!stralloc_0(&libfn)) {
-			substdio_puts(subfdout, "Oops! Out of memory.\n");
-			_exit(111);
-		}
+				!stralloc_0(&libfn))
+			die_nomem();
 		ptr = libfn.s;
 	} else
 		ptr = "VIRTUAL_PKG_LIB";
@@ -507,18 +255,22 @@ main(int argc, char **argv)
 		do_lst("morercpthosts", "No rcpthosts; morercpthosts is irrelevant.",
 			   "No rcpthosts; doesn't matter that morercpthosts has ", ".");
 	/*- XXX: check morercpthosts.cdb contents */
-	substdio_puts(subfdout, "\nmorercpthosts.cdb: ");
+	qprintf(subfdout, "morercpthosts.cdb", "%22s");
+	substdio_puts(subfdout, ": ");
 	if (stat("morercpthosts", &stmrh) == -1)
 		if (stat("morercpthosts.cdb", &stmrhcdb) == -1)
-			substdio_puts(subfdout, "(Defaul.) No effect\n");
+			substdio_puts(subfdout, "(Default.) No effect\n");
 		else
 			substdio_puts(subfdout, "Oops! morercpthosts.cdb exists but morercpthosts doesn't.\n");
-	else if (stat("morercpthosts.cdb", &stmrhcdb) == -1)
+	else
+	if (stat("morercpthosts.cdb", &stmrhcdb) == -1)
 		substdio_puts(subfdout, "Oops! morercpthosts exists but morercpthosts.cdb doesn't.\n");
-	else if (stmrh.st_mtime > stmrhcdb.st_mtime)
+	else
+	if (stmrh.st_mtime > stmrhcdb.st_mtime)
 		substdio_puts(subfdout, "Oops! morercpthosts.cdb is older than morercpthosts.\n");
 	else
 		substdio_puts(subfdout, "Modified recently enough; hopefully up to date.\n");
+	substdio_puts(subfdout, "\n");
 	do_lst("locals", "Messages for me are delivered locally.", "Messages for ", " are delivered locally.");
 	do_str("defaultdomain", 1, "defaultdomain", "Default domain name is ");
 	do_str("defaulthost", 1, "defaulthost", "Default host name is ");
@@ -635,262 +387,432 @@ main(int argc, char **argv)
 	do_str("tlsservermethod", 0, "TLSv1", "TLS server method is ");
 #endif
 	do_lst("nodnscheck", "Any MAIL FROM is checked for existing Domains.", "", " excluded for DNS checks in MAIL FROM.");
+}
+
+int
+valid_control_files(char *fn)
+{
+	int             len, fd, match;
+	struct substdio ssin;
+	char            inbuf[2048];
+	char          **ptr;
+	char           *control_fn_list[] = {"controlfiles.q", "controlfiles.i", 0};
+	char           *control_files[] = {
+		"bouncefrom", "bouncehost", "bouncesubject", "bouncemaxbytes", "bouncemessage",
+		"doublebouncesubject", "doublebouncemessage", "badhost", "badmailpatterns",
+		"badrcptpatterns", "spamignorepatterns", "filterargs", "spamfilter", "bouncefrom",
+		"bouncehost", "concurrencylocal", "concurrencyremote", "maxdeliveredto",
+		"tlsclientmethod", "tlsservermethod", "domainqueue", "from.envrules",
+		"rcpt.envrules", "databytes", "maxhops", "defaultdomain", "defaulthost",
+		"dnsbllist", "doublebouncehost", "doublebounceto", "envnoathost", "extraqueue",
+		"helohost", "idhost", "localiphost", "locals", "me", "morercpthosts", "signatures",
+		"bodycheck", "morercpthosts.cdb", "nodnscheck", "percenthack", "plusdomain",
+		"qmqpservers", "originipfield", "queuelifetime", "bouncelifetime", "rcpthosts",
+		"smtpgreeting", "smtproutes", "qmtproutes", "queue_base", "timeoutconnect",
+		"timeoutremote", "timeoutsmtpd", "timeoutread", "timeoutwrite", "virtualdomains",
+		"etrnhosts", "relayclients", "relaydomains", "tarpitcount", "tarpitdelay",
+		"maxrecipients", "maxcmdlen", "defaultdelivery", "blackholedpatterns",
+		"blackholedrcptpatterns", "goodrcptpatterns", "outgoingip", "domainbindings",
+		"bindroutes", "badextpatterns", "holdremote", "holdlocal", "signaturedomains",
+#ifdef HAVESRS
+		"srs_domain", "srs_secrets", "srs_maxage", "srs_hashlength", "srs_hashmin",
+#endif
+#ifdef USE_SPF
+		"spfbehavior", "spfexp", "spfguess", "spfrules",
+#endif
+#ifdef BATV
+		"signkey", "signkeystale", "nosignhosts", "nosignmydoms",
+#endif
+		"conf-syncdir", "conf-fsync", "servercert.pem", "tlsserverciphers",
+		"tlsclientciphers", "clientcert.pem", "servicedir.conf", "nosignaturedomains",
+		"domainkeys", "level2-tlds", "level3-tlds", "mysql_lib", 0};
+	char          *cdb_sql_files[] = {
+		"authdomains",  "badhelo",  "badext",  "badmailfrom", "badrcptto", "blackholedsender",
+		"blackholedrcpt", "chkrcptdomains", "goodrcptto", "relaymailfrom", "spamignore",
+		"greylist.white", "tlsa.white", "tlsadomains", "badip", 0};
+
+	for (ptr = control_files; *ptr; ptr++) {
+		if (!str_diff(*ptr, fn))
+			return 1;
+	}
+	for (ptr = cdb_sql_files; *ptr; ptr++) {
+		if (!str_diff(*ptr, fn))
+			return 1;
+		if (!stralloc_copys(&line, *ptr))
+			die_nomem();
+		len = line.len;
+		if (!stralloc_catb(&line, ".sql", 4) ||
+				!stralloc_0(&line))
+			die_nomem();
+		if (!str_diff(line.s, fn))
+			return 1;
+		line.len = len;
+		if (!stralloc_catb(&line, ".cdb", 4) ||
+				!stralloc_0(&line))
+			die_nomem();
+		if (!str_diff(line.s, fn))
+			return 1;
+	}
+	if (chdir(auto_sysconfdir) == -1)
+		die_chdir(auto_sysconfdir);
+	for (ptr = control_fn_list; *ptr; ptr++) {
+		if ((fd = open_read(*ptr)) == -1) {
+			if (errno == error_noent)
+				continue;
+			strerr_die4sys(111, FATAL, "unable to open ", *ptr, ": ");
+		}
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		for (;;) {
+			if (getln(&ssin, &line, &match, '\n') == -1)
+				strerr_die4sys(111, FATAL, "unable to read ", *ptr, ": ");
+			if (line.len == 0)
+				break;
+			line.s[line.len - 1] = 0;
+			if (!str_diff(line.s, fn)) {
+				close(fd);
+				return 1;
+			}
+		}
+		close(fd);
+	}
+	return 0;
+}
+
+void
+show_internals(char *home)
+{
+	substdio_puts(subfdout, "indimail-mta  home directory: ");
+	substdio_puts(subfdout, auto_qmail);
+	substdio_puts(subfdout, "\n");
+
+	substdio_puts(subfdout, "user        assign directory: ");
+	substdio_puts(subfdout, auto_assign);
+	substdio_puts(subfdout, "\n");
+
+	substdio_puts(subfdout, "tcp         access directory: ");
+	substdio_puts(subfdout, auto_sysconfdir);
+	substdio_puts(subfdout, "/tcp\n");
+
+	substdio_puts(subfdout, "certificates       directory: ");
+	substdio_puts(subfdout, auto_sysconfdir);
+	substdio_puts(subfdout, "/certs\n");
+
+	substdio_puts(subfdout, "control      irect directory: ");
+	substdio_puts(subfdout, controldir);
+	substdio_puts(subfdout, "\n");
+
+	substdio_puts(subfdout, "global environment directory: ");
+	substdio_puts(subfdout, controldir);
+	substdio_puts(subfdout, "/defaultqueue\n");
+
+	if (home && !access(".defaultqueue", F_OK) && !chdir(".defaultqueue")) {
+		substdio_puts(subfdout, "user   environment directory: ");
+		substdio_puts(subfdout, home);
+		substdio_puts(subfdout, "/.defaultqueue\n");
+	}
+
+	substdio_puts(subfdout, "surbl        cache directory: ");
+	substdio_puts(subfdout, controldir);
+	substdio_puts(subfdout, "/cache\n");
+
+	substdio_puts(subfdout, "domainkeys         directory: ");
+	substdio_puts(subfdout, controldir);
+	substdio_puts(subfdout, "/domainkeys\n");
+
+	substdio_puts(subfdout, "\n");
+	substdio_puts(subfdout, "user-ext delimiter      : ");
+	substdio_puts(subfdout, auto_break);
+	substdio_puts(subfdout, "\n");
+
+	substdio_puts(subfdout, "paternalism (in decimal): ");
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_patrn));
+	substdio_puts(subfdout, "\n");
+
+	substdio_puts(subfdout, "silent concurrency limit: ");
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_spawn));
+	substdio_puts(subfdout, "\n");
+
+	substdio_puts(subfdout, "\n");
+	substdio_put(subfdout, "user  ids\n", 10);
+	if (uidinit(1, 1))
+		strerr_die2sys(111, FATAL, "unable to initialize uids/gids: ");
+	substdio_put(subfdout, " alias   : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uida));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qmaild  : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidd));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qmaill  : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidl));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qmailp  : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidp));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qmailq  : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidq));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qmailr  : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidr));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qmails  : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uids));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " indimail: ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidv));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qscand  : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidc));
+	substdio_put(subfdout, "\n\n", 2);
+	substdio_put(subfdout, "group ids\n", 10);
+	substdio_put(subfdout, " nofiles : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidn));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qmail   : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidq));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " indimail: ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidv));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qscand  : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidc));
+	substdio_put(subfdout, "\n", 1);
+}
+
+void
+show_concurrency(DIR *dir)
+{
+	direntry       *d;
 
 	while ((d = readdir(dir))) {
-		if ((ptr = (char *) strrchr(d->d_name, '.'))) {
-			ptr++;
-			if (str_equal(ptr, "lock"))
-				continue;
-		}
-		if (str_equal(d->d_name, "."))
+		if (str_equal(d->d_name, ".") || str_equal(d->d_name, ".."))
 			continue;
-		if (str_equal(d->d_name, ".."))
-			continue;
-		if (str_equal(d->d_name, "bouncefrom"))
-			continue;
-		if (str_equal(d->d_name, "bouncehost"))
-			continue;
-		if (str_equal(d->d_name, "bouncesubject"))
-			continue;
-		if (str_equal(d->d_name, "bouncemaxbytes"))
-			continue;
-		if (str_equal(d->d_name, "bouncemessage"))
-			continue;
-		if (str_equal(d->d_name, "doublebouncesubject"))
-			continue;
-		if (str_equal(d->d_name, "doublebouncemessage"))
-			continue;
-		if (str_equal(d->d_name, "badrcptto"))
-			continue;
-		if (str_equal(d->d_name, "badhelo"))
-			continue;
-		if (str_equal(d->d_name, "badhost"))
-			continue;
-		if (str_equal(d->d_name, "badip"))
-			continue;
-		if (str_equal(d->d_name, "badmailpatterns"))
-			continue;
-		if (str_equal(d->d_name, "badrcptpatterns"))
-			continue;
-		if (str_equal(d->d_name, "badmailfrom"))
-			continue;
-		if (str_equal(d->d_name, "spamignore"))
-			continue;
-		if (str_equal(d->d_name, "spamignorepatterns"))
-			continue;
-		if (str_equal(d->d_name, "filterargs"))
-			continue;
-		if (str_equal(d->d_name, "spamfilter"))
-			continue;
-		if (str_equal(d->d_name, "bouncefrom"))
-			continue;
-		if (str_equal(d->d_name, "bouncehost"))
-			continue;
-		if (str_equal(d->d_name, "concurrencylocal"))
-			continue;
-		if (str_equal(d->d_name, "concurrencyremote"))
-			continue;
-		if (str_equal(d->d_name, "maxdeliveredto"))
-			continue;
-		if (str_equal(d->d_name, "tlsclientmethod"))
-			continue;
-		if (str_equal(d->d_name, "tlsservermethod"))
-			continue;
-		if (str_start(d->d_name, "concurrencyr")) {
+		if (str_start(d->d_name, "concurrencyr.")) {
 			print_concurrency();
-			do_int(d->d_name, "20", "Remote Queue concurrency is ", "");
+			do_int(d->d_name, "20", "Remote  Queue concurrency is ", "");
 			continue;
 		}
-		if (str_start(d->d_name, "concurrencyl")) {
+		if (str_start(d->d_name, "concurrencyl.")) {
 			print_concurrency();
-			do_int(d->d_name, "10", "Local Queue concurrency is ", "");
+			do_int(d->d_name, "10", "Local   Queue concurrency is ", "");
 			continue;
-		}
-		if (str_equal(d->d_name, "concurrencyincoming")) {
-			print_concurrency();
-			continue;
-		}
-		if (str_equal(d->d_name, "domainqueue"))
-			continue;
-		if (str_equal(d->d_name, "from.envrules"))
-			continue;
-		if (str_equal(d->d_name, "rcpt.envrules"))
-			continue;
-		if (str_equal(d->d_name, "databytes"))
-			continue;
-		if (str_equal(d->d_name, "maxhops"))
-			continue;
-		if (str_equal(d->d_name, "defaultdomain"))
-			continue;
-		if (str_equal(d->d_name, "defaulthost"))
-			continue;
-		if (str_equal(d->d_name, "dnsbllist"))
-			continue;
-		if (str_equal(d->d_name, "doublebouncehost"))
-			continue;
-		if (str_equal(d->d_name, "doublebounceto"))
-			continue;
-		if (str_equal(d->d_name, "envnoathost"))
-			continue;
-		if (str_equal(d->d_name, "extraqueue"))
-			continue;
-		if (str_equal(d->d_name, "helohost"))
-			continue;
-		if (str_equal(d->d_name, "idhost"))
-			continue;
-		if (str_equal(d->d_name, "localiphost"))
-			continue;
-		if (str_equal(d->d_name, "locals"))
-			continue;
-		if (str_equal(d->d_name, "me"))
-			continue;
-		if (str_equal(d->d_name, "morercpthosts"))
-			continue;
-		if (str_equal(d->d_name, "signatures"))
-			continue;
-		if (str_equal(d->d_name, "bodycheck"))
-			continue;
-		if (str_equal(d->d_name, "morercpthosts.cdb"))
-			continue;
-		if (str_equal(d->d_name, "nodnscheck"))
-			continue;
-		if (str_equal(d->d_name, "percenthack"))
-			continue;
-		if (str_equal(d->d_name, "plusdomain"))
-			continue;
-		if (str_equal(d->d_name, "qmqpservers"))
-			continue;
-		if (str_equal(d->d_name, "originipfield"))
-			continue;
-		if (str_equal(d->d_name, "queuelifetime"))
-			continue;
-		if (str_equal(d->d_name, "bouncelifetime"))
-			continue;
-		if (str_equal(d->d_name, "rcpthosts"))
-			continue;
-		if (str_equal(d->d_name, "smtpgreeting"))
-			continue;
-		if (str_equal(d->d_name, "smtproutes"))
-			continue;
-#ifdef HAVESRS
-		if (str_equal(d->d_name, "srs_domain"))
-			continue;
-		if (str_equal(d->d_name, "srs_secrets"))
-			continue;
-		if (str_equal(d->d_name, "srs_maxage"))
-			continue;
-		if (str_equal(d->d_name, "srs_hashlength"))
-			continue;
-		if (str_equal(d->d_name, "srs_hashmin"))
-			continue;
-#endif
-		if (str_equal(d->d_name, "qmtproutes"))
-			continue;
-		if (str_equal(d->d_name, "queue_base"))
-			continue;
-#ifdef USE_SPF
-		if (str_equal(d->d_name, "spfbehavior"))
-			continue;
-		if (str_equal(d->d_name, "spfexp"))
-			continue;
-		if (str_equal(d->d_name, "spfguess"))
-			continue;
-		if (str_equal(d->d_name, "spfrules"))
-			continue;
-#endif
-		if (str_equal(d->d_name, "timeoutconnect"))
-			continue;
-		if (str_equal(d->d_name, "timeoutremote"))
-			continue;
-		if (str_equal(d->d_name, "timeoutsmtpd"))
-			continue;
-		if (str_equal(d->d_name, "timeoutread"))
-			continue;
-		if (str_equal(d->d_name, "timeoutwrite"))
-			continue;
-		if (str_equal(d->d_name, "virtualdomains"))
-			continue;
-		if (str_equal(d->d_name, "etrnhosts"))
-			continue;
-		if (str_equal(d->d_name, "chkrcptdomains"))
-			continue;
-		if (str_equal(d->d_name, "authdomains"))
-			continue;
-		if (str_equal(d->d_name, "relayclients"))
-			continue;
-		if (str_equal(d->d_name, "relaydomains"))
-			continue;
-		if (str_equal(d->d_name, "relaymailfrom"))
-			continue;
-		if (str_equal(d->d_name, "tarpitcount"))
-			continue;
-		if (str_equal(d->d_name, "tarpitdelay"))
-			continue;
-		if (str_equal(d->d_name, "maxrecipients"))
-			continue;
-		if (str_equal(d->d_name, "maxcmdlen"))
-			continue;
-		if (str_equal(d->d_name, "defaultdelivery"))
-			continue;
-		if (str_equal(d->d_name, "blackholedsender"))
-			continue;
-		if (str_equal(d->d_name, "blackholedpatterns"))
-			continue;
-		if (str_equal(d->d_name, "blackholedrcpt"))
-			continue;
-		if (str_equal(d->d_name, "blackholedrcptpatterns"))
-			continue;
-		if (str_equal(d->d_name, "goodrcptto"))
-			continue;
-		if (str_equal(d->d_name, "goodrcptpatterns"))
-			continue;
-		if (str_equal(d->d_name, "outgoingip"))
-			continue;
-		if (str_equal(d->d_name, "domainbindings"))
-			continue;
-		if (str_equal(d->d_name, "bindroutes"))
-			continue;
-		if (str_equal(d->d_name, "mcdinfo"))
-			continue;
-		if (str_equal(d->d_name, "host.mysql"))
-			continue;
-		if (str_equal(d->d_name, "host.master"))
-			continue;
-		if (str_equal(d->d_name, "host.cntrl"))
-			continue;
-		if (str_equal(d->d_name, "hostip"))
-			continue;
-		if (str_equal(d->d_name, "hostid"))
-			continue;
-		if (str_equal(d->d_name, "mailalert.cfg"))
-			continue;
-		if (str_equal(d->d_name, "badext"))
-			continue;
-		if (str_equal(d->d_name, "badextpatterns"))
-			continue;
-		if (str_equal(d->d_name, "holdremote"))
-			continue;
-		if (str_equal(d->d_name, "holdlocal"))
-			continue;
-		if (str_equal(d->d_name, "signaturedomains"))
-			continue;
-#ifdef BATV
-		if (str_equal(d->d_name, "signkey"))
-			continue;
-		if (str_equal(d->d_name, "signkeystale"))
-			continue;
-		if (str_equal(d->d_name, "nosignhosts"))
-			continue;
-		if (str_equal(d->d_name, "nosignmydoms"))
-			continue;
-#endif
-		if (verbose) {
-			substdio_puts(subfdout, "\n");
-			substdio_puts(subfdout, d->d_name);
-			substdio_puts(subfdout, ": I have no idea what this file does.\n");
 		}
 	}
 	print_concurrency();
+}
+
+void
+show_errors(DIR *dir)
+{
+	direntry       *d;
+
+	while ((d = readdir(dir))) {
+		if (str_equal(d->d_name, ".") || str_equal(d->d_name, ".."))
+			continue;
+		if (str_equal(d->d_name, "libindimail") ||
+				str_equal(d->d_name, "ratelimit") ||
+				str_equal(d->d_name, "cache") ||
+				str_equal(d->d_name, "defaultqueue"))
+			continue;
+		if (valid_control_files(d->d_name))
+			continue;
+		if (str_start(d->d_name, "concurrencyl."))
+			continue;
+		if (str_start(d->d_name, "concurrencyr."))
+			continue;
+		substdio_puts(subfderr, d->d_name);
+		substdio_puts(subfderr, ": I have no idea what this file does\n");
+	}
+}
+
+stralloc        qdir = { 0 };
+void
+show_queues()
+{
+	char           *qbase;
+	int             save, i, j, k, l;
+	char            strnum[FMT_ULONG];
+	char         **ptr;
+	char           *extra_queue[] = {"slowq", "nqueue", "qmta", 0};
+
+	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	if (conf_split > auto_split)
+		conf_split = auto_split;
+	substdio_puts(subfdout, "subdirectory split      : ");
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) conf_split));
+	substdio_puts(subfdout, "\n");
+
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		switch (control_readfile(&qdir, "queue_base", 0))
+		{
+		case -1:
+			strerr_die2sys(111, FATAL, "Unable to read control file queue_base: ");
+			break;
+		case 0:
+			if (!stralloc_copys(&qdir, auto_qmail) ||
+					!stralloc_catb(&qdir, "/queue", 6))
+				strerr_die2x(111, FATAL, "out of memory");
+			break;
+		case 1:
+			qdir.len--; /*- remove NULL put by control_readfile() */
+			break;
+		}
+	} else {
+		if (!stralloc_copys(&qdir, qbase))
+			strerr_die2x(111, FATAL, "out of memory");
+	}
+	save = qdir.len;
+	if (!stralloc_0(&qdir))
+		strerr_die2x(111, FATAL, "out of memory");
+	substdio_puts(subfdout, "indimail-mta  queue base: ");
+	substdio_puts(subfdout, qdir.s);
+	substdio_puts(subfdout, "\n\n");
+	qdir.len--;
+	if (chdir(qdir.s) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", qdir.s, ": ");
+	for (i = 1, k = 0;; i++) {
+		qdir.len = save;
+		strnum[j = fmt_int(strnum, i)] = 0;
+		if (!stralloc_catb(&qdir, "/queue", 6) ||
+				!stralloc_catb(&qdir, strnum, j) ||
+				!stralloc_catb(&qdir, "/lock/sendmutex", 15) ||
+				!stralloc_0(&qdir))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (!access(qdir.s, F_OK)) {
+			if (i == 1) {
+				k = 1;
+				substdio_puts(subfdout, "main  queue directories\n");
+			}
+			qdir.len = save + 6 + j;
+			if (!stralloc_0(&qdir))
+				strerr_die2x(111, FATAL, "out of memory");
+			substdio_puts(subfdout, "queue ");
+			qprintf(subfdout, strnum, "%+03d");
+			substdio_puts(subfdout, " ");
+			substdio_puts(subfdout, qdir.s);
+			substdio_puts(subfdout, "\n");
+		} else
+			break;
+	}
+	for (i = 1, ptr = extra_queue; *ptr; ptr++) {
+		qdir.len = save;
+		if (!stralloc_append(&qdir, "/") ||
+				!stralloc_cats(&qdir, *ptr))
+			strerr_die2x(111, FATAL, "out of memory");
+		l = qdir.len;
+		if (!stralloc_catb(&qdir, "/lock/sendmutex", 15) ||
+				!stralloc_0(&qdir))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (!access(qdir.s, F_OK)) {
+			if (i++ == 1) {
+				if (k)
+					substdio_puts(subfdout, "\n");
+				substdio_puts(subfdout, "extra queue directories\n");
+			}
+			qdir.len = l;
+			if (!stralloc_0(&qdir))
+				strerr_die2x(111, FATAL, "out of memory");
+			qprintf(subfdout, *ptr, "%6s");
+			substdio_puts(subfdout, " ");
+			substdio_puts(subfdout, qdir.s);
+			substdio_puts(subfdout, "\n");
+		}
+	}
+}
+
+int
+main(int argc, char **argv)
+{
+	DIR            *dir;
+	char           *ptr;
+	int             opt, do_control = 0, do_internals = 0, do_concurrency = 0,
+					do_queue = 0, do_errors = 0;
+	char           *svctool[] = { "svctool", "--dumpconfig", 0};
+
+	while ((opt = getopt(argc, argv, "acCiqes")) != opteof) {
+		switch(opt)
+		{
+		case 'a':
+			do_control = do_concurrency = do_internals = do_queue = do_errors = 1;
+			break;
+		case 'c':
+			do_control = 1;
+			break;
+		case 'C':
+			do_concurrency = 1;
+			break;
+		case 'i':
+			do_internals = 1;
+			break;
+		case 'q':
+			do_queue = 1;
+			break;
+		case 'e':
+			do_errors = 1;
+			break;
+		case 's':
+			execvp(*svctool, svctool); /*- run svctool */
+			strerr_die4sys(111, FATAL, "execv: ", *svctool, ": ");
+			break;
+		default:
+			strerr_die2x(100, FATAL,
+					"usage: qmail-showctl [-cCie]\n"
+					"      options:\n"
+					"        -c show control file information\n"
+					"        -C show concurrency limits for deliveries\n"
+					"        -i show internal information\n"
+					"        -q Display indimail-mta queues\n"
+					"        -s Dump entire indimail-mta configuration\n"
+					"        -e Display files that shouldn't be there\n"
+					"        -a Do all of the above");
+		}
+	}
+	if (!do_control && !do_concurrency && !do_internals && !do_errors && !do_queue)
+		do_queue = do_internals = 1;
+
+	set_environment(WARN, FATAL);
+	if (!controldir && !(controldir = env_get("CONTROLDIR")))
+		controldir = auto_control;
+
+	if (do_internals) {
+		if ((ptr = env_get("HOME"))) {
+			if (chdir(ptr) == -1)
+				die_chdir(ptr);
+		}
+		substdio_puts(subfdout, "------------------ begin show internals ----------------------\n");
+		show_internals(ptr);
+		substdio_puts(subfdout, "\n");
+	}
+	if (do_queue) {
+		if (chdir(auto_qmail) == -1)
+			die_chdir(auto_qmail);
+		substdio_puts(subfdout, "--------------------- begin show queues ----------------------\n");
+		show_queues();
+		substdio_puts(subfdout, "\n");
+	}
+
+	if (chdir(controldir) == -1)
+		die_chdir(controldir);
+
+	if (!(dir = opendir(controldir)))
+		strerr_die4sys(111, FATAL, "unable to open directory ", controldir, ": ");
+
+	if (do_concurrency) {
+		substdio_puts(subfdout, "-------------------- concurrency limits ----------------------\n");
+		show_concurrency(dir);
+	}
+	if (do_control) {
+		substdio_puts(subfdout, "------------------- begin control files ----------------------\n");
+		display_control();
+		substdio_puts(subfdout, "\n");
+	}
+	if (do_errors) {
+		rewinddir(dir);
+		substdio_puts(subfderr, "------------------- begin unknown files ----------------------\n");
+		show_errors(dir);
+		substdio_puts(subfderr, "\n");
+	}
+	closedir(dir);
+	substdio_flush(subfderr);
 	substdio_flush(subfdout);
 	_exit(0);
 	/*- Not reached */
@@ -900,7 +822,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.76 2021-06-27 10:38:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.1 2021-07-04 14:37:46+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

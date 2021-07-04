@@ -1,20 +1,47 @@
 .TH qmail-showctl 8
 
 .SH NAME
-qmail-showctl \- analyze the qmail configuration files
+qmail-showctl \- analyze indimail configuration, services and queues
 
 .SH SYNOPSIS
-.B qmail-showctl
+\fBqmail-showctl\fR [\fIoptions\fR]
 
 .SH DESCRIPTION
-.B qmail-showctl
-explains the current
-.B qmail
-configuration.
+\fBqmail-showctl\fR explains the current \fBqmail\fR configuration.
+\fBqmail-showctl\fR may show DIRSPLIT as the directory split or it will
+show the configured CONFSPLIT environment variable in $HOME/.defaultqueue or
+CONTROL/defaultqueue directory.
 
-\fBqmail-showctl\fR uses DIRSPLIT as the directory split. It can be
-overriden by environment variable \fBCONFSPLIT\fR upto a max of
-DIRSPLIT
+.SH OPTIONS
+.TP
+\fB\-i\fR
+display indimail-mta internal information
+
+.TP
+\fB\-q\fR
+display indimail-mta queues
+
+.TP
+\fB\-c\fR
+show information on all control files.
+
+.TP
+\fB\-C\fR
+show information on concurrency limits
+
+.TP
+\fB\-s\fR
+Dump config. Dump the entire indimail configuration and sevice
+information. This option runs \fBsvctool\fR(8).
+
+.TP
+\fB\-e\fR
+error check mode. Show file in the control directory which shouldn't be there
+
+.TP
+\fB\-a\fR
+all. Do all of the above
 
 .SH "SEE ALSO"
+svctool(8),
 qmail-control(8)
