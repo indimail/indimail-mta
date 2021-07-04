@@ -184,6 +184,6 @@ if [ ! -f ${qsysconfdir}/control/idhost ] ; then
 	echo $default_domain > ${qsysconfdir}/control/idhost
 fi
 mkdir -p ${qmaildir}/queue
-queue-fix ${qmaildir}/queue/qmta
+queue-fix -m ${qmaildir}/queue/qmta
 ) >> /var/log/qmta-setup.log 2>&1
 exit 0
