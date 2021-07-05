@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-getpw.c,v $
+ * Revision 1.8  2021-07-05 21:24:03+05:30  Cprogrammer
+ * use qgetpw interface from libqmail if USE_QPWGR is set
+ *
  * Revision 1.7  2020-11-24 13:46:50+05:30  Cprogrammer
  * removed exit.h
  *
@@ -113,7 +116,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_getpw_c()
 {
-	static char    *x = "$Id: qmail-getpw.c,v 1.7 2020-11-24 13:46:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-getpw.c,v 1.8 2021-07-05 21:24:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: serialcmd.c,v $
+ * Revision 1.5  2021-07-05 21:24:39+05:30  Cprogrammer
+ * use qgetpw interface from libqmail if USE_QPWGR is set
+ *
  * Revision 1.4  2004-10-22 20:30:13+05:30  Cprogrammer
  * added RCS id
  *
@@ -420,7 +423,7 @@ main(int argc, char *argv[])
 void
 getversion_serialcmd_c()
 {
-	static char    *x = "$Id: serialcmd.c,v 1.4 2004-10-22 20:30:13+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: serialcmd.c,v 1.5 2021-07-05 21:24:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
