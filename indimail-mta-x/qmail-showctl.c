@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.2  2021-07-05 21:28:04+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
  * Revision 1.1  2021-07-04 14:37:46+05:30  Cprogrammer
  * Initial revision
  *
@@ -191,7 +194,7 @@ display_control()
 	char           *ptr, *local_ip, *qbase, *local_id, *errstr;
 	void           *handle = (void *) 0;
 	struct stat     stmrh, stmrhcdb;
-	int             i;
+	int             i, load_indimail = 0;
 	char           *(*get_local_ip) (void);
 	char           *(*get_local_hostid) (void);
 
@@ -226,6 +229,7 @@ display_control()
 		_exit(111);
 	}
 	if (handle) {
+		load_indimail = 1;
 		if (!(get_local_ip = getlibObject(ptr, &handle, "get_local_ip", &errstr))) {
 			substdio_puts(subfderr, "getlibObject: get_local_ip: ");
 			substdio_puts(subfderr, errstr);
@@ -359,12 +363,12 @@ display_control()
 	do_lst("tarpitcount", "No Tarpitcount defined.", "Actual Tarpitcount: ", "");
 	do_lst("maxrecipients", "No limit on number of Recipients defined.", "Actual Maxrecipients: ", "");
 	do_lst("tarpitdelay", "No Tarpitdelay defined.", "Actual Tarpitdelay: ", "");
-	if (handle) {
+	if (load_indimail) {
 		do_str("host.master", 0, MASTER_HOST, "Master Host: ");
 		do_str("host.cntrl", 0, CNTRL_HOST, "Control Host: ");
 		do_str("host.mysql", 0, MYSQL_HOST, "Mysql Host: ");
-		do_str("hostip", 0, local_ip ? local_ip : "127.0.0.1", "Host Local Ip: ");
-		do_str("hostid", 0, local_id ? local_id : "?", "Host Local Id: ");
+		do_str("hostip", 0, local_ip ? local_ip : "127.0.0.1", "Host Local IP: ");
+		do_str("hostid", 0, local_id ? local_id : "?", "Host Local ID: ");
 	}
 	do_lst("signatures", "No virus signatures defined.", "virus signatures: ", "");
 	do_lst("bodycheck", "No Content-filters.", "Content-filters: ", "");
@@ -769,7 +773,7 @@ main(int argc, char **argv)
 	if (!do_control && !do_concurrency && !do_internals && !do_errors && !do_queue)
 		do_queue = do_internals = 1;
 
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 1);
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
 
@@ -822,7 +826,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.1 2021-07-04 14:37:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.2 2021-07-05 21:28:04+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

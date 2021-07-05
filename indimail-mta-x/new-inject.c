@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.16  2021-07-05 21:27:11+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
  * Revision 1.15  2021-06-14 00:56:59+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
@@ -529,7 +532,7 @@ main(int argc, char **argv)
 		if (config_readfile(&rewrite, config_data(&fnrewrite)->s) == -1)
 			strerr_die2sys(111, FATAL, "unable to read $QMAILREWRITEFILE: ");
 	}
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 1);
 	if (config_env(&name, "QMAILNAME") == -1 ||
 			config_env(&name, "MAILNAME") == -1 ||
 			config_env(&name, "NAME") == -1 ||
@@ -623,7 +626,7 @@ main(int argc, char **argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.15 2021-06-14 00:56:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.16 2021-07-05 21:27:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

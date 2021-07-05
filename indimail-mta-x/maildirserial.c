@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.17  2021-07-05 21:26:29+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
  * Revision 1.16  2021-06-14 00:49:50+05:30  Cprogrammer
  * added missing chdir removed by mistake
  *
@@ -158,7 +161,7 @@ my_config_readline(config_str *c, char *fname)
 void
 readcontrols()
 {
-	set_environment(WARNING, FATAL);
+	set_environment(WARNING, FATAL, 1);
 	my_config_readline(&me, "me");
 	if (config_default(&me, "me") == -1)
 		die_nomem();
@@ -624,7 +627,7 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.16 2021-06-14 00:49:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.17 2021-07-05 21:26:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

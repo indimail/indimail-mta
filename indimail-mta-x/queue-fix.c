@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.24  2021-07-05 21:36:52+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
  * Revision 1.23  2021-07-04 23:33:11+05:30  Cprogrammer
  * added -m option for qmta-send where dirs are owned by qmailq
  *
@@ -976,7 +979,7 @@ main(int argc, char **argv)
 
 	if ((fdorigdir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 1);
 	if (fchdir(fdorigdir) == -1)
 		strerr_die1sys(111, "unable to switch to original directory: ");
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
@@ -1042,7 +1045,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.23 2021-07-04 23:33:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.24 2021-07-05 21:36:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

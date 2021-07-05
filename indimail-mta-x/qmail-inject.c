@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.42  2021-07-05 21:27:47+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
  * Revision 1.41  2021-06-15 11:55:01+05:30  Cprogrammer
  * moved token822.h to libqmail
  *
@@ -1033,7 +1036,7 @@ getcontrols()
 	char           *x;
 
 	mft_init();
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 1);
 	if (!(x = env_get("QMAILDEFAULTDOMAIN"))) {
 		if (control_rldef(&control_defaultdomain, "defaultdomain", 1, "defaultdomain") != 1)
 			die_read();
@@ -1227,7 +1230,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.41 2021-06-15 11:55:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.42 2021-07-05 21:27:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
