@@ -175,6 +175,8 @@ Release 2.13 Start 14/02/2021
 110. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgetpwgr.c
 111. sys-checkpwd.c qmail-getpw.c qmail-direct.c maildirsize.c serialcmd.c:
      use getpw, getgr functions from libqmail getpwgr.c
+112. maildirserial.c new-inject.c process_queue.c qmail-inject.c
+    qmail-showctl.c queue-fix.c: allow $HOME/.defaultqueue for root
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
