@@ -16,6 +16,7 @@
  * serialcmd -- apply a command to a mail message.
  * Copyright 1999,  Len Budney
  */
+#include <unistd.h>
 #include <stdlib.h>
 #include <pwd.h>
 #include <errno.h>
@@ -23,22 +24,23 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "strerr.h"
-#include "getln.h"
-#include "subfd.h"
-#include "substdio.h"
-#include "now.h"
-#include "open.h"
-#include "stralloc.h"
-#include "sig.h"
-#include "str.h"
-#include "byte.h"
+#include <strerr.h>
+#include <getln.h>
+#include <subfd.h>
+#include <substdio.h>
+#include <now.h>
+#include <open.h>
+#include <stralloc.h>
+#include <sig.h>
+#include <str.h>
+#include <byte.h>
+#include <env.h>
+#include <qgetpwgr.h>
 #include "quote.h"
-#include "env.h"
-#include <unistd.h>
-#include <string.h>
 
 #define FATAL "serialcmd: fatal: "
+
+static int      use_pwgr;
 
 void
 die_usage()
@@ -142,7 +144,7 @@ result(fnam, code, statmsg)
 		break;
 	}
 	if (statmsg != NULL)
-		if (!stralloc_catb(&line, statmsg, strlen(statmsg)))
+		if (!stralloc_catb(&line, statmsg, str_len(statmsg)))
 			die_nomem();
 	if (!stralloc_catb(&line, "\n", 1))
 		die_nomem();
@@ -199,13 +201,12 @@ makeenv(void)
 	/*
 	 * Get the username associated with the effective UID. 
 	 */
-	pw = getpwuid(getuid());
+	pw = (use_pwgr ? qgetpwuid : getpwuid) (getuid());
 	if (!stralloc_copys(&user, pw->pw_name))
 		die_nomem();
 	if (!stralloc_0(&user))
 		die_nomem();
-	if (pw == NULL)
-	{
+	if (pw == NULL) {
 		if (errno == ENOMEM)
 			die_nomem();
 		die_nousername();
@@ -216,13 +217,8 @@ makeenv(void)
 	 * Compare the username with the local part of the recipient. 
 	 */
 	ext = recipient.s;
-	if (strlen(user.s) <= strlen(ext))
-	{
-		if (strncmp(user.s, ext, strlen(user.s)) == 0)
-		{
-			ext += strlen(user.s);
-		}
-	}
+	if (str_len(user.s) <= str_len(ext) && !str_diffn(user.s, ext, str_len(user.s)))
+		ext += str_len(user.s);
 	ext += str_chr(ext, '-');
 	if (*ext)
 		++ext;
@@ -243,9 +239,7 @@ makeenv(void)
 	/*
 	 * Determine the home directory of user 
 	 */
-	pw = getpwnam(user.s);
-	if (pw == NULL)
-	{
+	if (!(pw = (use_pwgr ? qgetpwnam : getpwnam) (user.s))) {
 		if (errno == ENOMEM)
 			die_nomem();
 		die_nohomedir();
@@ -264,15 +258,12 @@ runcmd(char **cmd, int fd, stralloc fnam)
 
 	status = pipe(pipedesc);
 	if (status == -1)
-	{
 		strerr_die2sys(111, FATAL, "unable to open pipe: ");
-	}
 	lseek(fd, (off_t) 0, SEEK_SET);
 	pid = fork();
 	if (pid == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
-	if (pid == 0)
-	{
+	if (pid == 0) {
 		if (dup2(fd, 0) == -1)
 			strerr_die2sys(111, FATAL, "unable to read message: ");
 		if (dup2(pipedesc[1], 1) == -1)
@@ -281,8 +272,7 @@ runcmd(char **cmd, int fd, stralloc fnam)
 		close(pipedesc[0]);
 		if (execvp(*cmd, cmd) == -1)
 			strerr_die2sys(111, FATAL, "unable to execvp: ");
-	} else
-	{
+	} else {
 		char            c;
 		int             pstat;
 		/*
@@ -300,8 +290,7 @@ runcmd(char **cmd, int fd, stralloc fnam)
 		/*
 		 * Wait for the child to finish. 
 		 */
-		while (1)
-		{
+		while (1) {
 			if (read(pipedesc[0], &c, 1) == 0)
 				break;
 		}
@@ -404,7 +393,6 @@ doit(fd, argv, fnam)
 	runcmd(argv, fd, fnam);
 }
 
-
 int
 main(int argc, char *argv[])
 {
@@ -414,6 +402,7 @@ main(int argc, char *argv[])
 	substdio        ssfname;
 	int             fd;
 
+	use_pwgr = env_get("USE_QPWGR") ? 1 : 0;
 	substdio_fdbuf(&ssfname, read, 0, fnamebuf, sizeof fnamebuf);
 	if (getln(&ssfname, &fname, &match, '\0') == -1)
 		die_readstdin();

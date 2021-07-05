@@ -50,12 +50,13 @@
 #include <sys/vfs.h>
 #endif
 #include <sys/stat.h>
-#include "sgetopt.h"
-#include "subfd.h"
-#include "strerr.h"
-#include "stralloc.h"
-#include "fmt.h"
-#include "open.h"
+#include <sgetopt.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <stralloc.h>
+#include <fmt.h>
+#include <env.h>
+#include <open.h>
 #include "qcount_dir.h"
 
 #define FATAL "maildirsize: fatal: "

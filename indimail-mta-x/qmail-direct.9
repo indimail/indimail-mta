@@ -6,49 +6,34 @@ qmail-direct \- deliver mail message directly to Maildir
 .B qmail-direct
 
 .SH DESCRIPTION
-.B qmail-direct
-reads a mail message from descriptor 0.
-It then reads envelope information from descriptor 1. It places the message
-directly into user's Maildir directory. The user is the value of USER
-environment variable.
+\fBqmail-direct\fR reads a mail message from descriptor 0. It then reads
+envelope information from descriptor 1. It places the message directly into
+user's Maildir directory. The user is the value of USER environment
+variable. For getting the user's Maildir directory, \fBqmail-direct\fR uses
+getpwnam(3) from glibc(7). It can use qgetpwnam(3) if the environment
+variable USE_QPWGR is set.
 
 The envelope information is an envelope sender address followed by a list
 of envelope recipient addresses. The sender address is preceded by the
-letter F and terminated by a 0 byte.
-.B qmail-direct
-writes the sender address as the
-.B Return-Path
-header. Each recipient address is preceded by the letter T
-and terminated by a 0 byte.
-The list of recipient addresses is terminated by an extra 0 byte.
-.B qmail-direct
-writes X-Recipients header as a comma separated list of recipients.
-If
-.B qmail-direct
-sees end-of-file before the extra 0 byte, it aborts without delivering the
+letter F and terminated by a 0 byte. \fBqmail-direct\fR writes the sender
+address as the \fBReturn-Path\fR header. Each recipient address is preceded
+by the letter T and terminated by a 0 byte. The list of recipient addresses
+is terminated by an extra 0 byte. \fBqmail-direct\fR writes X-Recipients
+header as a comma separated list of recipients. If \fBqmail-direct\fR sees
+end-of-file before the extra 0 byte, it aborts without delivering the
 message.
 
 Every envelope recipient address should contain a username, an @ sign,
 and a fully qualified domain name.
 
-.B qmail-direct
-always adds a
-.BR Return-Path ,
-.BR X-Recipients ,
-and
-.B Received
-line to the top of the message.  Other than this,
-.B qmail-direct
-does not inspect the message and does not enforce any restrictions on its
-contents. However, the recipients probably expect to see a proper header,
-as described in
-.BR qmail-header(5) .
+\fBqmail-direct\fR always adds a \fBReturn-Path\fR, \fBX-Recipients\fR, and
+\fBReceived\fR line to the top of the message. Other than this,
+\fBqmail-direct\fR does not inspect the message and does not enforce any
+restrictions on its contents. However, the recipients probably expect to
+see a proper header, as described in \fBqmail-header\fR(5).
 
-Programs included with qmail which invoke
-.B qmail-direct
-will invoke the contents of
-.B $QMAILQUEUE
-instead, if that environment variable is set.
+Programs included with qmail which invoke \fBqmail-direct\fR will invoke
+the contents of \fBQMAILQUEUE\fR environment variable instead if set.
 
 \fBqmail-direct\fR allows you to deliver mails without requiring costly
 services and processes to manage queues and deliveries. It is useful on
@@ -57,18 +42,12 @@ as possible but want mails generated on the system to get delivered to
 users.
 
 .SH "EXIT CODES"
-.B qmail-direct
-does not print diagnostics.
-It exits
-0 if
-it has successfully queued the message.
-It exits between 1 and 99 if
-it has failed to queue the message.
+\fBqmail-direct\fR does not print diagnostics. It exits 0 if it has
+successfully queued the message. It exits between 1 and 99 if it has failed
+to queue the message.
 
-All
-.B qmail-direct
-error codes between 11 and 40
-indicate permanent errors:
+All \fBqmail-direct\fR error codes between 11 and 40 indicate permanent
+errors:
 
 .TP 5
 .B 11
@@ -104,13 +83,13 @@ Problem with \fIMaildir/tmp/pid\fR.
 
 .TP
 .B 64
-Problem with \fIMaildir/tmp/fnnum.b\fR. Here \fIfnnum\fR is the inode number
-of \fIMaildir/tmp/pid\fR
+Problem with \fIMaildir/tmp/fnnum.b\fR. Here \fIfnnum\fR is the inode
+number of \fIMaildir/tmp/pid\fR
 
 .TP
 .B 65
-Problem with \fIMaildir/tmp/fnnum.h\fR. Here \fIfnnum\fR is the inode number
-of \fIMaildir/tmp/pid\fR
+Problem with \fIMaildir/tmp/fnnum.h\fR. Here \fIfnnum\fR is the inode
+number of \fIMaildir/tmp/pid\fR
 
 .TP
 .B 81
@@ -121,11 +100,13 @@ Internal bug; e.g., segmentation fault.
 Envelope format error.
 
 .SH "SEE ALSO"
+getpwnam(3),
+qgetpwnam(3),
 addresses(5),
 envelopes(5),
 qmail-header(5),
 qmail-inject(8),
 qmail-queue(8),
 qmail-qmqpc(8),
-qmail-nullqueue(8).
+qmail-nullqueue(8),
 qmail-multi(8)

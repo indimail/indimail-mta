@@ -481,41 +481,41 @@ valid_control_files(char *fn)
 void
 show_internals(char *home)
 {
-	substdio_puts(subfdout, "indimail-mta  home directory: ");
+	substdio_puts(subfdout, "indimail-mta  home dir: ");
 	substdio_puts(subfdout, auto_qmail);
 	substdio_puts(subfdout, "\n");
 
-	substdio_puts(subfdout, "user        assign directory: ");
+	substdio_puts(subfdout, "user        assign dir: ");
 	substdio_puts(subfdout, auto_assign);
 	substdio_puts(subfdout, "\n");
 
-	substdio_puts(subfdout, "tcp         access directory: ");
+	substdio_puts(subfdout, "tcp         access dir: ");
 	substdio_puts(subfdout, auto_sysconfdir);
 	substdio_puts(subfdout, "/tcp\n");
 
-	substdio_puts(subfdout, "certificates       directory: ");
+	substdio_puts(subfdout, "certificates       dir: ");
 	substdio_puts(subfdout, auto_sysconfdir);
 	substdio_puts(subfdout, "/certs\n");
 
-	substdio_puts(subfdout, "control      irect directory: ");
+	substdio_puts(subfdout, "control      irect dir: ");
 	substdio_puts(subfdout, controldir);
 	substdio_puts(subfdout, "\n");
 
-	substdio_puts(subfdout, "global environment directory: ");
+	substdio_puts(subfdout, "global environment dir: ");
 	substdio_puts(subfdout, controldir);
 	substdio_puts(subfdout, "/defaultqueue\n");
 
 	if (home && !access(".defaultqueue", F_OK) && !chdir(".defaultqueue")) {
-		substdio_puts(subfdout, "user   environment directory: ");
+		substdio_puts(subfdout, "user   environment dir: ");
 		substdio_puts(subfdout, home);
 		substdio_puts(subfdout, "/.defaultqueue\n");
 	}
 
-	substdio_puts(subfdout, "surbl        cache directory: ");
+	substdio_puts(subfdout, "surbl        cache dir: ");
 	substdio_puts(subfdout, controldir);
 	substdio_puts(subfdout, "/cache\n");
 
-	substdio_puts(subfdout, "domainkeys         directory: ");
+	substdio_puts(subfdout, "domainkeys         dir: ");
 	substdio_puts(subfdout, controldir);
 	substdio_puts(subfdout, "/domainkeys\n");
 

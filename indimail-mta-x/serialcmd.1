@@ -3,10 +3,8 @@
 .\"
 .TH "serialcmd" 1 "0.1.0"
 
-
 .SH NAME
 serialcmd \- Pipe files through a command
-
 
 .SH SYNOPSIS
 .B serialcmd 
@@ -71,6 +69,10 @@ but some cannot be set since they are not known when invoking
 NEWSENDER cannot be known; DEFAULT cannot be reliably determined; and
 EXT, EXT1, EXT2, EXT3, and EXT4 can only be guessed (but are likely to
 be guessed correctly).
+
+For setting the USER and HOME environment variables, \fBserialcmd\fR uses
+getpwuid(3) and getpwnam(3) from glibc(7). It can use qgetpwuid(3) and
+qgetpwnam(3) if the environment variable USE_QPWGR is set.
 
 The remaining variables specified in qmail-command(8) are set
 identically by

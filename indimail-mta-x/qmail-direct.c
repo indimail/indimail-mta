@@ -42,6 +42,7 @@
 #include <datetime.h>
 #include <now.h>
 #include <date822fmt.h>
+#include <qgetpwgr.h>
 #include "pidopen.h"
 
 #define DEATH 86400				/* 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
@@ -304,7 +305,7 @@ mailopen(uid_t uid, gid_t gid)
 int
 main(int argc, char **argv)
 {
-	unsigned int    ret, len, rcptcount;
+	unsigned int    ret, len, rcptcount, use_pwgr;
 	char           *ptr;
 	struct passwd  *pw;
 	char            ch;
@@ -313,9 +314,14 @@ main(int argc, char **argv)
 	umask(033);
 	if (!(ptr = env_get("USER")))
 		die(67);
-	if (!(pw = getpwnam(ptr)))
+	use_pwgr = env_get("USE_QPWGR") ? 1 : 0;
+	if (!(pw = (use_pwgr ? qgetpwnam : getpwnam) (ptr)))
 		die(67);
-	if (chdir(pw->pw_dir) == -1 || chdir("Maildir") == -1)
+	if (!stralloc_copys(&fntmptph, pw->pw_dir) ||
+			!stralloc_catb(&fntmptph, "/Maildir", 8) ||
+			!stralloc_0(&fntmptph))
+		die_nomem();
+	if (chdir(fntmptph.s) == -1)
 		die(61);
 	myuid = getuid();
 	mypid = getpid();
