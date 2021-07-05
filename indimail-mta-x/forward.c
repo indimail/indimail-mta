@@ -1,5 +1,8 @@
 /*
  * $Log: forward.c,v $
+ * Revision 1.14  2021-07-05 21:10:35+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.13  2021-05-13 14:43:20+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -89,7 +92,7 @@ main(argc, argv)
 		strerr_die2x(100, FATAL, "NEWSENDER not set");
 	if (!(dtline = env_get("DTLINE")))
 		strerr_die2x(100, FATAL, "DTLINE not set");
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 0);
 #ifdef HAVESRS
 	if (*sender) {
 		switch(srsforward(sender))
@@ -134,7 +137,7 @@ main(argc, argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.13 2021-05-13 14:43:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: forward.c,v 1.14 2021-07-05 21:10:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

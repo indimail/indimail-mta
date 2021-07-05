@@ -1,5 +1,8 @@
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.12  2021-07-05 21:10:17+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.11  2021-05-13 14:43:09+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -482,7 +485,7 @@ main(argc, argv)
 		substdio_flush(subfderr);
 		_exit(flagpassthrough ? 99 : 0);
 	}
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 0);
 	if (qmail_open(&qq) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	qmail_puts(&qq, dtline);
@@ -509,7 +512,7 @@ main(argc, argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.11 2021-05-13 14:43:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.12 2021-07-05 21:10:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

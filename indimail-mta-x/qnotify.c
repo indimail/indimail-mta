@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.11  2021-07-05 21:11:27+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.10  2021-05-13 14:44:21+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -469,7 +472,7 @@ main(int argc, char **argv)
 	if (!compare_local(email_disp.s, email_disp.len, rpath.s, rpath.len))
 		_exit (0);
 	if (flagqueue) {
-		set_environment(WARN, FATAL);
+		set_environment(WARN, FATAL, 0);
 		if (qmail_open(&qqt) == -1)
 			die_fork();
 	}
@@ -573,7 +576,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.10 2021-05-13 14:44:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.11 2021-07-05 21:11:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

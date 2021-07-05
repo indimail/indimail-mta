@@ -1,5 +1,8 @@
 /*
  * $Log: rrforward.c,v $
+ * Revision 1.10  2021-07-05 21:11:44+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.9  2021-05-13 14:44:37+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -157,7 +160,7 @@ main(argc, argv)
 	lock_un(rrfd);
 	close(rrfd);
 	strpos[r] = '\0';
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 0);
 	rr_forward(argv[pos], sender, dtline, strpos);
 	/*- Not reached */
 	return(0);
@@ -166,7 +169,7 @@ main(argc, argv)
 void
 getversion_rrforward_c()
 {
-	static char    *x = "$Id: rrforward.c,v 1.9 2021-05-13 14:44:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrforward.c,v 1.10 2021-07-05 21:11:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qreceipt.c,v $
+ * Revision 1.14  2021-07-05 21:11:38+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.13  2021-06-15 12:17:53+05:30  Cprogrammer
  * moved token822.h to libqmail
  *
@@ -246,7 +249,7 @@ main(argc, argv)
 		die_usage();
 	if (!(returnpath = env_get("SENDER")))
 		die_usage();
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 0);
 	if (headerbody(subfdin, doheaderfield, finishheader, dobody) == -1)
 		die_read();
 	die_noreceipt();
@@ -257,7 +260,7 @@ main(argc, argv)
 void
 getversion_qreceipt_c()
 {
-	static char    *x = "$Id: qreceipt.c,v 1.13 2021-06-15 12:17:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qreceipt.c,v 1.14 2021-07-05 21:11:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

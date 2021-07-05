@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.10  2021-07-05 21:11:47+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.9  2021-06-13 17:29:14+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
@@ -340,7 +343,7 @@ main(int argc, char **argv)
 			return (0);
 	}
 	if (flagqueue) {
-		set_environment(WARN, FATAL);
+		set_environment(WARN, FATAL, 0);
 		if (qmail_open(&qqt) == -1)
 			die_fork();
 	}
@@ -485,7 +488,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.9 2021-06-13 17:29:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.10 2021-07-05 21:11:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.3  2021-07-05 21:11:22+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.2  2021-07-04 23:27:45+05:30  Cprogrammer
  * run as qmailq if running without a qmail-clean
  *
@@ -2483,7 +2486,7 @@ main(int argc, char **argv)
 	umask(077);
 	if (prot_gid(auto_gidq) == -1) /*- qmail group */
 		strerr_die2sys(111, FATAL, "unable to set qmail gid");
-	set_environment("qmta-send: warn: ", "qmta-send: fatal: ");
+	set_environment("qmta-send: warn: ", "qmta-send: fatal: ", 0);
 	if (!conf_split)
 		getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
@@ -2611,7 +2614,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.2 2021-07-04 23:27:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.3 2021-07-05 21:11:22+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
