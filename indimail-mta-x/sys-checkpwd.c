@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.12  2021-07-05 21:24:53+05:30  Cprogrammer
+ * use qgetpw interface from libqmail if USE_QPWGR is set
+ *
  * Revision 1.11  2021-06-15 12:22:24+05:30  Cprogrammer
  * moved makeargs.h to libqmail
  *
@@ -321,7 +324,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.11 2021-06-15 12:22:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.12 2021-07-05 21:24:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

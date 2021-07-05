@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.8  2021-07-05 21:23:10+05:30  Cprogrammer
+ * use qgetpw interface from libqmail if USE_QPWGR is set
+ *
  * Revision 1.7  2021-06-24 12:16:56+05:30  Cprogrammer
  * use uidinit function proto from auto_uids.h
  *
@@ -476,7 +479,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.7 2021-06-24 12:16:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.8 2021-07-05 21:23:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	if (x)
