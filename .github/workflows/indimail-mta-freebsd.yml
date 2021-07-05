@@ -13,6 +13,11 @@ on:
       - '!**/indimail-mta-x/debian/*'
       - '!**/libdkim-x/debian/*'
       - '!**/libsrs2-x/debian/*'
+      - '!**/indimail-mta-x/*.9'
+      - '!**/indimail-mta-x/*.8'
+      - '!**/indimail-mta-x/*.1'
+      - '!**/libdkim-x/*.9'
+      - '!**/libsrs2-x/*.1'
       - '!**/doc/*'
       - '!**.md'
 

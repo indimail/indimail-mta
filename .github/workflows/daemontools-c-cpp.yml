@@ -7,6 +7,9 @@ on:
       - .github/workflows/daemontools-c-cpp.yml
       - '!**/daemontools-x/debian/*'
       - '!**/daemontools-x/daemontools.spec.in'
+      - '!**/daemontools-x/*.9'
+      - '!**/daemontools-x/*.8'
+      - '!**/daemontools-x/*.1'
       - '!**/doc/*'
       - '!**.md'
 

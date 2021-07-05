@@ -7,6 +7,8 @@ on:
       - .github/workflows/ucspi-tcp-freebsd.yml
       - '!**/ucspi-tcp-x/debian/*'
       - '!**/ucspi-tcp-x/ucspi-tcp.spec.in'
+      - '!**/ucspi-tcp-x/*.1'
+      - '!**/ucspi-tcp-x/*.9'
       - '!**/doc/*'
       - '!**.md'
 
