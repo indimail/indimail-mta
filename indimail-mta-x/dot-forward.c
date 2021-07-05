@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.15  2021-07-05 21:10:12+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.14  2021-06-15 11:34:34+05:30  Cprogrammer
  * moved token822.h to libqmail
  *
@@ -220,7 +223,7 @@ readcontrols()
 
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 0);
 	if (fchdir(fddir) == -1)
 		strerr_die2sys(111, FATAL, "unable to set current directory: ");
 	if ((r = control_readline(&me, "me")) == -1)
@@ -514,7 +517,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.14 2021-06-15 11:34:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.15 2021-07-05 21:10:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

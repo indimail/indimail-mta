@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.287  2021-06-29 09:19:45+05:30  Cprogrammer
+ * added qmta-send
+ *
  * Revision 1.286  2021-06-09 19:34:39+05:30  Cprogrammer
  * added qmail-spamfilter
  *
@@ -968,7 +971,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "qmaildirmake", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "maildir2mbox", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "mbox2maildir", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "maildirwatch", auto_uido, 0, moder_x);
+	c(auto_prefix, "bin", "qmaildirwatch", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "predate", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "datemail", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "mailsubj", auto_uido, 0, moder_x);
@@ -1047,6 +1050,7 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-clean", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-send", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "slowq-send", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "qmta-send", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmqpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmtpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-smtpd", auto_uido, 0, moder_t);
@@ -1290,7 +1294,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man1", "qmaildirmake.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "maildir2mbox.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "mbox2maildir.1", uidr, gidr, moder_f);
-	c(mandir_base,     "man/man1", "maildirwatch.1", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man1", "qmaildirwatch.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "mailsubj.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "qreceipt.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "preline.1", uidr, gidr, moder_f);
@@ -1420,6 +1424,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man8", "qmail-clean.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-send.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "slowq-send.8", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man8", "qmta-send.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-todo.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-daemon.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-start.8", uidr, gidr, moder_f);
@@ -1507,7 +1512,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.286 2021-06-09 19:34:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.287 2021-06-29 09:19:45+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

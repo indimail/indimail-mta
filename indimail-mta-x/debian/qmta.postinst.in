@@ -1,12 +1,16 @@
 #!/bin/sh
-# postinst script for indimail-mini
+# postinst script for qmta
 set -e
 
 prefix=@prefix@
 mandir=@mandir@
+qmaildir=@qmaildir@
 qsysconfdir=@qsysconfdir@
+sysconfdir=@sysconfdir@
+shareddir=@shareddir@
 rm=/bin/rm
 mv=/bin/mv
+cp=/bin/cp
 
 setperm()
 {
@@ -84,20 +88,47 @@ esac
 
 #DEBHELPER#
 
-if [ -f ${qsysconfdir}/indimail-mini.perms ] ; then
+if [ -f ${qsysconfdir}/qmta.perms ] ; then
 	(
-	/bin/grep -v "^#" ${qsysconfdir}/indimail-mini.perms | while read line
+	/bin/grep -v "^#" ${qsysconfdir}/qmta.perms | while read line
 	do
 		if [ " $line" = " " ] ; then
 			continue
 		fi
 		fixperms $line
 	done
-	) > ${qsysconfdir}/indimail-mini-stat.override
-	if [ ! -s ${qsysconfdir}/indimail-mini-stat.override ] ; then
-		/bin/rm -f ${qsysconfdir}/indimail-mini-stat.override
+	) > ${qsysconfdir}/qmta-stat.override
+	if [ ! -s ${qsysconfdir}/qmta-stat.override ] ; then
+		/bin/rm -f ${qsysconfdir}/qmta-stat.override
 	fi
 fi
+
+if [ $upgrade -eq 1 ] ; then # upgrade
+  (
+  echo "checking if system boot scripts need upgrade"
+  if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
+    cmp -s ${shareddir}/boot/qmta-send.sevice /lib/systemd/system/qmta-send.service >/dev/null 2>&1 || \
+      (${cp} ${shareddir}/boot/systemd /lib/systemd/system/qmta-send.service &&
+      /bin/systemctl daemon-reload && echo "installed new qmta-send service")
+  elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
+    cmp -s ${shareddir}/boot/qmta-send.service /usr/lib/systemd/system/qmta-send.service >/dev/null 2>&1 || \
+      (${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/qmta-send.service &&
+      /bin/systemctl daemon-reload && echo "installed new qmta-send service")
+  fi
+  # restart qmta-send service if we find /var/tmp/.qmta-send.down
+  if [ -f /var/tmp/.qmta-send.down ] ; then
+    ${rm} -f /var/tmp/.qmta-send.down
+    echo "Starting qmta-send"
+    if test -f ${sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
+    then
+      /bin/systemctl start qmta-send > /dev/null 2>&1
+    fi
+  fi
+  ) >> /var/log/qmta-setup.log 2>&1
+  exit 0
+fi
+
+(
 if [ -f /etc/init.d/sendmail ] ; then
 	/etc/init.d/sendmail stop
 	if [ -f /sbin/chkconfig ] ; then
@@ -148,9 +179,11 @@ else
 		fi
 	done
 fi
-
 if [ ! -f ${qsysconfdir}/control/idhost ] ; then
 	default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 	echo $default_domain > ${qsysconfdir}/control/idhost
 fi
+mkdir -p ${qmaildir}/queue
+queue-fix -m ${qmaildir}/queue/qmta
+) >> /var/log/qmta-setup.log 2>&1
 exit 0

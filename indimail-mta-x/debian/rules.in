@@ -104,10 +104,15 @@ install: build
 	fi
 	# for indimail-mini we require an empty control directory
 	# so we create a directory and use that in indimail-mini.install
-	mkdir -p $(DESTDIR)/etc-indimail-mini/control/defaultqueue
-	echo "${prefix}/sbin/qmail-qmqpc" > $(DESTDIR)/etc-indimail-mini/control/defaultqueue/QMAILQUEUE
+	# and qmta.install
+	mkdir -p $(DESTDIR)/etc-mini/control/defaultqueue
+	mkdir -p $(DESTDIR)/etc-qmta/control/defaultqueue
+	echo "${prefix}/sbin/qmail-qmqpc" > $(DESTDIR)/etc-mini/control/defaultqueue/QMAILQUEUE
+	echo "${prefix}/sbin/qmail-queue" > $(DESTDIR)/etc-qmta/control/defaultqueue/QMAILQUEUE
+	echo "${qmaildir}/queue/qmta"     > $(DESTDIR)/etc-qmta/control/defaultqueue/QUEUEDIR
 	if [ -f indimail-mta.perms ] ; then \
-		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-indimail-mini/indimail-mini.perms; \
+		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-mini/indimail-mini.perms; \
+		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-qmta/qmta.perms; \
 	fi
 	if [ -f qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
@@ -126,8 +131,10 @@ binary-indep: build install
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
 	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-mta.install
 	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-mini.install
+	sed -i -e 's,@libd\@,$(libd),g' debian/qmta.install
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mta
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mini
+	dh_install --sourcedir=$(DESTDIR) -pqmta
 	dh_installchangelogs
 	dh_installcron
 	dh_installdocs

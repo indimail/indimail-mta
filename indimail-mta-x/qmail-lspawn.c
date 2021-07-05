@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.38  2021-06-29 09:27:49+05:30  Cprogrammer
+ * modularize spawn code
+ *
  * Revision 1.37  2021-06-05 23:15:16+05:30  Cprogrammer
  * converted function prototypes to ansi
  *
@@ -100,7 +103,7 @@
  * fixed compilation warnings
  *
  * Revision 1.5  2003-10-13 10:00:41+05:30  Cprogrammer
- * added msgsize as argument to spawn()
+ * added msgsize as argument to spawn
  *
  * Revision 1.4  2003-07-20 17:06:04+05:30  Cprogrammer
  * *** empty log message ***
@@ -155,17 +158,17 @@ static char *setup_qlargs()
 }
 
 void
-initialize(int argc, char **argv)
+initialize_SPAWN(int argc, char **argv)
 {
 	aliasempty = argv[1];
 	if (!aliasempty)
 		_exit(100);
 }
 
-int             truncreport = 3000;
+int             truncreport_SPAWN = 3000;
 
 void
-report(substdio *ss, int wstat, char *s, int len)
+report_SPAWN(substdio *ss, int wstat, char *s, int len)
 {
 	int             i;
 	if (wait_crashed(wstat)) {
@@ -229,7 +232,9 @@ stralloc        lower = { 0 };
 stralloc        nughde = { 0 };
 stralloc        wildchars = { 0 };
 stralloc        cdbfile = { 0 };
+#ifdef ENABLE_VIRTUAL_PKG
 static stralloc libfn = { 0 };
+#endif
 
 char           *cdbdir;
 
@@ -368,11 +373,14 @@ stralloc        user = { 0 };
 stralloc        save = { 0 };
 
 int
-spawn(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, char *recip_t, int at_t)
+SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, char *recip_t, int at_t)
 {
-	int             f, len, at = at_t;
-	char           *ptr, *libptr, *tptr, *recip = recip_t;
+	int             f, at = at_t;
+	char           *ptr, *recip = recip_t;
+#ifdef ENABLE_VIRTUAL_PKG
 	/*- indimail */
+	char           *libptr, *tptr;
+	int             len;
 	struct passwd  *pw;
 	extern void    *phandle;
 	void            (*iclose) (void);
@@ -381,9 +389,11 @@ spawn(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 	void *          (*inquery) (char, char *, char *);
 	int            *u_not_found, *i_inactive;
 	struct passwd*  (*sql_getpw) (char *, char *);
+#endif
 
 	if (!env_unset("QMAILREMOTE"))
 		_exit(-1);
+#ifdef ENABLE_VIRTUAL_PKG
 	/*- indimail */
 	if (!(libptr = env_get("VIRTUAL_PKG_LIB"))) {
 		if (!controldir) {
@@ -517,6 +527,7 @@ spawn(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 	} /*- if ((*isvirtualdomain) (recip_t + at_t + 1) && !(*iopen) ((char *) 0)) */
 /*- end indimail */
 noauthself: /*- deliver to local user in control/locals */
+#endif
 	if (!(f = fork())) {
 		char           *(args[12]);
 		unsigned long   u;
@@ -526,7 +537,9 @@ noauthself: /*- deliver to local user in control/locals */
 		char           *x;
 		unsigned int    xlen;
 
+#ifdef ENABLE_VIRTUAL_PKG
 		closeLibrary(&phandle);
+#endif
 		recip[at] = 0;
 		if (!recip[0])
 			_exit(0);/*- <> */
@@ -605,7 +618,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.37 2021-06-05 23:15:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.38 2021-06-29 09:27:49+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

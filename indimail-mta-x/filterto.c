@@ -1,5 +1,8 @@
 /*
  * $Log: filterto.c,v $
+ * Revision 1.12  2021-07-05 21:10:21+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.11  2021-05-13 14:43:13+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -106,7 +109,7 @@ main(int argc, char **argv, char **envp)
 		strerr_die2x(100, FATAL, "SENDER not set");
 	if (!(dtline = env_get("DTLINE")))
 		strerr_die2x(100, FATAL, "DTLINE not set");
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 0);
 	if (qmail_open(&qqt) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	qmail_puts(&qqt, dtline);
@@ -143,7 +146,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.11 2021-05-13 14:43:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: filterto.c,v 1.12 2021-07-05 21:10:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

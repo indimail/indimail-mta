@@ -1,0 +1,650 @@
+.TH qmta-send 8
+
+.SH NAME
+qmta-send \- standalone mail delivery
+
+.SH SYNOPSIS
+.B qmta-send
+[
+.I options
+]
+[
+.I defaultdelivery
+[
+.I logger arg ...
+]
+]
+
+.SH DESCRIPTION
+\fBqmta-send\fR is a stand-alone mail transport agent. The use of
+\fBqmta-send\fR is on systems that requires a simple delivery mechanism
+for mails generated locally (like in cron scripts). It can be run as a
+daemon running continuously or when mail is generated. qmta-send doesn't
+require qmail-todo, qmail-lspawn, qmail-rspawn, qmail-clean to process
+a queue.
+
+.EX
+1. run qmta-send as a daemon
+   # qmta-send -d ./Maildir/
+2. run qmta-send to delivery mails in the queue and exit after delivery
+   $ qmta-send ./Maildir/
+3. run qmta-send and use qmail-lspawn to handle local deliveries,
+   qmail-rspawn to handle remoe delivies, qmail-clean to do cleanups and
+   run it as a daemon
+   # qmta-send -dlrc ./Maildir/
+.EE
+
+\fBqmta-send\fR can also invoke \fBqmail-lspawn\fR, \fBqmail-rspawn\fR,
+\fBqmail-clean\fR under the proper uids and gids for a queue defined by the
+environment variable \fBQUEUEDIR\fR. These four daemons cooperate to
+deliver messages from the queue. \fBqmta-send\fR by default looks at
+QMAILHOME/queue for messages. This path can be changed by defining the
+QUEUEDIR environment variable.
+
+\fBqmta-send\fR borrows most of it's code from \fBqmail-send\fR. The todo
+run can be adjusted by setting the environment variable \fBTODO_INTERVAL\fR
+to have only one queue run every \fBTODO_INTERVAL\fR seconds. It remembers
+the last complete queue run and will just return if we get triggered before
+last queue run plus \fBTODO_INTERVAL\fR seconds. If we get triggered before
+\fBTODO_INTERVAL\fR seconds it will schedule a forced queue run at last
+complete queue run plus TODO_INTERVAL seconds to not miss the new additions
+to the queue. \fBTODO_INTERVAL\fR can also be set in the control file
+\fItodointerval\fR. The control file takes precedence over the environment
+variable. If TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero,
+\fBqmta-send\fR silently uses 10 secs as the value for \fBTODO_INTERVAL\fR.
+
+\fBqmta-send\fR uses \fBqmail-local\fR to deliver messages to local
+recipients and \fBqmail-remote\fR to deliver messages to remote recipients.
+If a message is temporarily undeliverable to one or more addresses,
+\fBqmta-send\fR leaves it in the queue and tries the addresses again later.
+
+\fBqmta-send\fR uses \fBqmail-queue\fR to queue bounces and
+aliases/forwards. This can be changed by using \fBQMAILQUEUE\fR environment
+variable. If a different queue program is desired for bounces, it can be set
+by using \fBBOUNCEQUEUE\fR environment variable.
+
+When injecting a bounce for a previously forwarded email, whose sender was
+rewritten using \fISRS\fB, \fBslowq-send\fR rewrites the recipient to the
+original sender using Sender Rewriting Scheme, if \fISRS\fB has been
+configured. see \fBqmail-srs\fR(5) for information on how to do this.
+
+\fBqmta-send\fR adds the \fBX-Bounced-Address\fR header when creating a
+bounce. It assigns the address that caused the bounce to this header. This
+is useful for programs that generate DKIM signature to use the domain in
+the \fBX-Bounced-Address\fR for the d= DKIM-Signature tag.
+
+If \fBqmta-send\fR receives a TERM signal, it will exit cleanly, after
+waiting (possibly more than a minute) for current delivery attempts to finish.
+
+If \fBqmta-send\fR receives an ALRM signal, it will reschedule every message
+in the queue for immediate delivery.
+
+If the environment variable USE_FSYNC is set, then \fBqmta-send\fR writes
+all data to disk ("flushes") all modified in-core data of (i.e., modified
+buffer cache pages for) the new message to the disk device (or other
+permanent storage device) so that all changed information can be
+retrieved even if the system crashes or is rebooted. This includes
+writing through or flushing a disk cache if present. The call blocks
+until the device reports that the transfer has completed. This is done
+for the info and mess files. This can also be set by using \fIconf-fsync\fR
+control file.
+
+If the environment variable USE_SYNCDIR is enabled, \fBqmta-send\fR
+forces BSD style directory syncing. This can also be set by using
+\fIconf-syncdir\fR control file.
+
+The control files conf-syncdir, conf-fsync take precedence over
+the environment variable counterparts. If the control conf-fsync,
+conf-syncdir are present, \fBqmta-send\fR will additionally set
+or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
+is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is
+used for doing this.
+
+If running as non-root, and if QUEUE_BASE environment variable is not set,
+\fBqmta-send\fR uses environment set according to files
+@controldir@/defaultqueue directory.
+
+.SH OPTIONS
+.TP
+\fB\-d\fR
+daemon mode. Run continuously in the background.
+
+.TP
+\fB\-l\fR
+use qmail-lspawn to spawn local deliveries instead of built-in spawn
+function
+
+.TP
+\fB\-r\fR
+use qmail-rspawn to spawn remoe deliveries instead of built-in spawn
+function
+
+.TP
+\fB\-c\fR
+use qmail-clean for cleanup instead of the built-in clean mechansim. 
+
+.TP
+\fB\-f\fR
+use queue-fix to fix the queue
+
+.TP
+\fB\-s\fR \fIsplit\fR
+specify the queue subdirectory split (default DIRSPLIT). You can also set
+this by setting the environment variable \fBCONFSPLIT\fR. Command line
+value takes precedence over the environment variable. Any value greater
+than DIRSPLIT is silently ignored.
+
+
+.SH "CONTROL FILES"
+.B WARNING:
+.B qmta-send
+reads its control files only when it starts. If you change the control
+files, you must stop and restart
+.BR qmta-send .
+Exception:
+If
+.B qmta-send
+receives a HUP signal,
+it will reread
+.IR concurrencylocal ,
+.IR concurrencyremote ,
+.IR locals ,
+.IR virtualdomains ,
+.IR todointerval ,
+.IR envnoathost ,
+.IR conf-syncdir ,
+and
+.IR conf-fsync .
+
+.B qmta-send
+by default looks at @controldir@ for all control files. This path can be
+changed by defining the \fBCONTROLDIR\fR environment variable.
+
+.TP 5
+.I bouncefrom
+Bounce username.
+Default:
+.BR MAILER-DAEMON .
+
+.TP 5
+.I bouncehost
+Bounce host.
+Default:
+.IR me ,
+if that is supplied;
+otherwise the literal name
+.BR bouncehost ,
+which is probably not what you want.
+If a message is permanently undeliverable,
+.B qmta-send
+sends a
+.B single-bounce
+notice back to the message's envelope sender.
+The notice is
+.B From: \fIbouncefrom\fB@\fIbouncehost\fR,
+although its envelope sender is empty.
+
+.TP 5
+.I bouncemaxbyte
+Limit the size of bounces. Default: 50000 bytes.
+
+.TP 5
+.I bouncesubject
+Configures the bounce message subject
+
+.TP 5
+.I bouncemessage
+Text for bounce message. Remember that this may break QSBMF
+
+.TP 5
+.I doublebouncehost
+Double-bounce host.
+Default:
+.IR me ,
+if that is supplied;
+otherwise the literal name
+.BR doublebouncehost ,
+which is probably not what you want.
+
+.TP 5
+.I doublebounceto
+User to receive double-bounces.
+Default:
+.BR postmaster .
+If a single-bounce notice is permanently undeliverable,
+.B qmta-send
+sends a
+.B double-bounce
+notice to
+.IR doublebounceto\fB@\fIdoublebouncehost .
+(If that bounces,
+.B qmta-send
+gives up.)
+As a special case, if the first line of
+.IR doublebounceto
+contains a '@' or is blank (contains a single linefeed), qmta-send will
+not queue the double-bounce at all.
+
+.TP 5
+.I doublebouncesubject
+Configures the double bounce message subject
+
+.TP 5
+.I doublebouncemessage
+Text for double bounce message. Remember that this may break QSBMF
+
+.TP 5
+.I concurrencylocal
+Maximum number of simultaneous local delivery attempts.
+Default: 10.
+If 0, local deliveries will be put on hold.
+.I concurrencylocal
+is limited at compile time to SPAWN.
+
+.TP 5
+.I concurrencyremote
+Maximum number of simultaneous remote delivery attempts.
+Default: 20.
+If 0, remote deliveries will be put on hold.
+.I concurrencyremote
+is limited at compile time to SPAWN.
+
+.TP 5
+.I envnoathost
+Presumed domain name for addresses without @ signs.
+Default:
+.IR me ,
+if that is supplied;
+otherwise the literal name
+.BR envnoathost ,
+which is probably not what you want.
+If
+.B qmta-send
+sees an envelope recipient address without an @ sign,
+it appends
+.B @\fIenvnoathost\fR.
+
+.TP 5
+.I locals
+List of domain names that the current host
+receives mail for,
+one per line.
+Default:
+.IR me ,
+if that is supplied;
+otherwise
+.B qmta-send
+refuses to run.
+An address 
+.I user@domain
+is considered local if
+.I domain
+is listed in
+.IR locals .
+
+.TP 5
+.I percenthack
+List of domain names where the percent hack is applied.
+If
+.I domain
+is listed in
+.IR percenthack ,
+any address of the form
+
+.I user%fqdn@domain
+
+is rewritten as
+.IR user@fqdn .
+.I user
+may contain %, so the percent hack may be applied repeatedly.
+.B qmta-send
+handles
+.I percenthack
+before
+.IR locals .
+
+.TP 5
+.I queuelifetime
+Number of seconds
+a message can stay in the queue.
+Default: 604800 (one week).
+After this time expires,
+.B qmta-send
+will try the message once more, but it will treat any temporary delivery
+failures as permanent failures.
+
+.TP 5
+.I bouncelifetime
+Number of seconds
+a bounce message can stay in the queue.
+Default: 604800 (one week).
+After this time expires,
+.B qmta-send
+will try the message once more, but it will treat any temporary delivery
+failures as permanent failures.
+
+.TP 5
+.I bounce.envrules
+Specific environment variables can be set for bounce recipients. The format
+of this file is of the form pat:envar1=val,envar2=val,...]   where pat is a
+regular expression which matches a bounce recipient. envar1, envar2 are list
+of environment variables to be set. If var is omitted, the environment
+variable is unset.
+
+The name of the control file can be overriden by the environment variable BOUNCERULES
+
+Example:
+answerme@save*:CONTROLDIR=control2,QMAILQUEUE=
+
+sets CONTROLDIR to control2 for the sender answerme@saveme.com and unsets
+QMAILQUEUE environment variable. If there are multiple lines for a pattern,
+all lines are applied. However if an environment variable is being set in
+multiple lines, the last rule takes precedence. The environment variable
+QREGEX can be set to use regular expressions for matching pat instead of
+the internal wildmat function.
+
+Example:
+answerme@save*:DATABYTES=2000000,MAXRECIPIENT=2,QMAILQUEUE=
+answerme@save*:DATABYTES=4000000
+
+DATABYTES gets set to 4 MB in for any email matching answerme@save*
+
+.TP 5
+.I virtualdomains
+List of virtual users or domains, one per line.
+A virtual user has the form
+.IR user\fB@\fIdomain\fB:\fIprepend ,
+without any extra spaces.
+When
+.B qmta-send
+sees the recipient address
+.IR user\fB@\fIdomain ,
+it converts it to
+.I prepend\fB-\fIuser\fB@\fIdomain
+and treats it as local.
+
+A virtual domain has the form
+.IR domain\fB:\fIprepend .
+It applies to any recipient address at
+.IR domain .
+For example, if
+
+.EX
+     nowhere.mil:joeBREAKfoo
+.EE
+
+is in
+.IR virtualdomains ,
+and a message arrives for
+.BR info@nowhere.mil ,
+.B qmta-send
+will rewrite the recipient address as
+.B joeBREAKfoo-info@nowhere.mil
+and deliver the message locally.
+
+.I virtualdomains
+may contain wildcards:
+
+.EX
+     .fax:uucpBREAKfax
+     :aliasBREAKcatchall
+     .nowhere.mil:joeBREAKfoo-host
+.EE
+
+.I virtualdomains
+may also contain exceptions:
+an empty
+.I prepend
+means that
+.I domain
+is not a virtual domain.
+
+.B qmta-send
+handles
+.I virtualdomains
+after
+.IR locals :
+if a domain is listed in
+.IR locals ,
+.I virtualdomains
+does not apply.
+
+.TP 5
+.I todointerval
+The seconds to sleep between each todo run. It can be
+overriden by the environment variable \fBTODO_INTERVAL\fR.
+
+.TP 5
+.I conf-fsync
+A boolean parameter to turn on fsync of file descriptors
+when writing to a file during delivery
+
+.TP 5
+.I conf-syncdir
+A boolean parameter to turn on BSD style sync semantics for flushing
+directories.
+
+.SH "External BOUNCE Processor"
+.B qmta-send
+will execute an external program defined by the environment variable
+.I BOUNCEPROCESSOR
+when delivery to a recipient fails. The external program will be called with
+the following arguments
+
+.I original_message_file
+.I bounce_file
+.I bounce_report
+.I bounce_sender
+.I original_recipient
+.I bounce_recipient
+
+The external program runs with uid of \fIqmails\fR. If the bounce script
+exits 1, the bounce is discarded. You should be very careful in writing
+your own bounce processor. If the bounce processor program returns
+non-zero exit status (other than an exit value of 1), \fBqmta-send\fR will
+continue to retry the script. Also just like bounces, bounce processor is
+not crash-proof. In case your bounce processor genuinely returns non-zero
+exit status and you shut qmta-send, you will not be able to again get back
+to retry the bounce that the processor was handling.
+
+.SH Retry Schedule
+Each message has its own retry schedule. The longer a message remains
+undeliverable, the less frequently qmail tries to send it. The retry
+schedule is not configurable. The following table shows the retry
+schedule for a message that's undeliverable to a recipient
+until it bounces. Local messages a similar, but more frequent,
+schedule than remote messages.
+
+.B Local Retry Schedule
+is governed by 100 * (x * x), where x is the try number
+
+.TS
+l l.
+   qmta-send delivery retry times, for chanskip=10 (local)
+   Try ======= after =======       == delay until next =
+       seconds  dd hh mm ss        seconds  dd hh mm ss
+\...................... ....................... ...................... 
+   #00       0 [00 00:00:00]           100 [00 00:01:40]
+   #01     100 [00 00:01:40]           300 [00 00:05:00]
+   #02     400 [00 00:06:40]           500 [00 00:08:20]
+   #03     900 [00 00:15:00]           700 [00 00:11:40]
+   #04    1600 [00 00:26:40]           900 [00 00:15:00]
+   #05    2500 [00 00:41:40]          1100 [00 00:18:20]
+   #06    3600 [00 01:00:00]          1300 [00 00:21:40]
+   #07    4900 [00 01:21:40]          1500 [00 00:25:00]
+   #08    6400 [00 01:46:40]          1700 [00 00:28:20]
+   #09    8100 [00 02:15:00]          1900 [00 00:31:40]
+   #10   10000 [00 02:46:40]          2100 [00 00:35:00]
+   #11   12100 [00 03:21:40]          2300 [00 00:38:20]
+   #12   14400 [00 04:00:00]          2500 [00 00:41:40]
+   #13   16900 [00 04:41:40]          2700 [00 00:45:00]
+   #14   19600 [00 05:26:40]          2900 [00 00:48:20]
+   #15   22500 [00 06:15:00]          3100 [00 00:51:40]
+   #16   25600 [00 07:06:40]          3300 [00 00:55:00]
+   #17   28900 [00 08:01:40]          3500 [00 00:58:20]
+   #18   32400 [00 09:00:00]          3700 [00 01:01:40]
+   #19   36100 [00 10:01:40]          3900 [00 01:05:00]
+   #20   40000 [00 11:06:40]          4100 [00 01:08:20]
+   #21   44100 [00 12:15:00]          4300 [00 01:11:40]
+   #22   48400 [00 13:26:40]          4500 [00 01:15:00]
+   #23   52900 [00 14:41:40]          4700 [00 01:18:20]
+   #24   57600 [00 16:00:00]          4900 [00 01:21:40]
+   #25   62500 [00 17:21:40]          5100 [00 01:25:00]
+   #26   67600 [00 18:46:40]          5300 [00 01:28:20]
+   #27   72900 [00 20:15:00]          5500 [00 01:31:40]
+   #28   78400 [00 21:46:40]          5700 [00 01:35:00]
+   #29   84100 [00 23:21:40]          5900 [00 01:38:20]
+   #30   90000 [01 01:00:00]          6100 [00 01:41:40]
+   #31   96100 [01 02:41:40]          6300 [00 01:45:00]
+   #32  102400 [01 04:26:40]          6500 [00 01:48:20]
+   #33  108900 [01 06:15:00]          6700 [00 01:51:40]
+   #34  115600 [01 08:06:40]          6900 [00 01:55:00]
+   #35  122500 [01 10:01:40]          7100 [00 01:58:20]
+   #36  129600 [01 12:00:00]          7300 [00 02:01:40]
+   #37  136900 [01 14:01:40]          7500 [00 02:05:00]
+   #38  144400 [01 16:06:40]          7700 [00 02:08:20]
+   #39  152100 [01 18:15:00]          7900 [00 02:11:40]
+   #40  160000 [01 20:26:40]          8100 [00 02:15:00]
+   #41  168100 [01 22:41:40]          8300 [00 02:18:20]
+   #42  176400 [02 01:00:00]          8500 [00 02:21:40]
+   #43  184900 [02 03:21:40]          8700 [00 02:25:00]
+   #44  193600 [02 05:46:40]          8900 [00 02:28:20]
+   #45  202500 [02 08:15:00]          9100 [00 02:31:40]
+   #46  211600 [02 10:46:40]          9300 [00 02:35:00]
+   #47  220900 [02 13:21:40]          9500 [00 02:38:20]
+   #48  230400 [02 16:00:00]          9700 [00 02:41:40]
+   #49  240100 [02 18:41:40]          9900 [00 02:45:00]
+   #50  250000 [02 21:26:40]         10100 [00 02:48:20]
+   #51  260100 [03 00:15:00]         10300 [00 02:51:40]
+   #52  270400 [03 03:06:40]         10500 [00 02:55:00]
+   #53  280900 [03 06:01:40]         10700 [00 02:58:20]
+   #54  291600 [03 09:00:00]         10900 [00 03:01:40]
+   #55  302500 [03 12:01:40]         11100 [00 03:05:00]
+   #56  313600 [03 15:06:40]         11300 [00 03:08:20]
+   #57  324900 [03 18:15:00]         11500 [00 03:11:40]
+   #58  336400 [03 21:26:40]         11700 [00 03:15:00]
+   #59  348100 [04 00:41:40]         11900 [00 03:18:20]
+   #60  360000 [04 04:00:00]         12100 [00 03:21:40]
+   #61  372100 [04 07:21:40]         12300 [00 03:25:00]
+   #62  384400 [04 10:46:40]         12500 [00 03:28:20]
+   #63  396900 [04 14:15:00]         12700 [00 03:31:40]
+   #64  409600 [04 17:46:40]         12900 [00 03:35:00]
+   #65  422500 [04 21:21:40]         13100 [00 03:38:20]
+   #66  435600 [05 01:00:00]         13300 [00 03:41:40]
+   #67  448900 [05 04:41:40]         13500 [00 03:45:00]
+   #68  462400 [05 08:26:40]         13700 [00 03:48:20]
+   #69  476100 [05 12:15:00]         13900 [00 03:51:40]
+   #70  490000 [05 16:06:40]         14100 [00 03:55:00]
+   #71  504100 [05 20:01:40]         14300 [00 03:58:20]
+   #72  518400 [06 00:00:00]         14500 [00 04:01:40]
+   #73  532900 [06 04:01:40]         14700 [00 04:05:00]
+   #74  547600 [06 08:06:40]         14900 [00 04:08:20]
+.TE
+
+.B Remote Retry Schedule
+is governed by 400 * (x * x), where x is the try number
+
+.TS
+l l.
+   qmta-send delivery retry times, for chanskip=20 (remote)
+   Try ======= after =======       == delay until next =
+       seconds  dd hh mm ss        seconds  dd hh mm ss
+   #00       0 [00 00:00:00]           400 [00 00:06:40]
+   #01     400 [00 00:06:40]          1200 [00 00:20:00]
+   #02    1600 [00 00:26:40]          2000 [00 00:33:20]
+   #03    3600 [00 01:00:00]          2800 [00 00:46:40]
+   #04    6400 [00 01:46:40]          3600 [00 01:00:00]
+   #05   10000 [00 02:46:40]          4400 [00 01:13:20]
+   #06   14400 [00 04:00:00]          5200 [00 01:26:40]
+   #07   19600 [00 05:26:40]          6000 [00 01:40:00]
+   #08   25600 [00 07:06:40]          6800 [00 01:53:20]
+   #09   32400 [00 09:00:00]          7600 [00 02:06:40]
+   #10   40000 [00 11:06:40]          8400 [00 02:20:00]
+   #11   48400 [00 13:26:40]          9200 [00 02:33:20]
+   #12   57600 [00 16:00:00]         10000 [00 02:46:40]
+   #13   67600 [00 18:46:40]         10800 [00 03:00:00]
+   #14   78400 [00 21:46:40]         11600 [00 03:13:20]
+   #15   90000 [01 01:00:00]         12400 [00 03:26:40]
+   #16  102400 [01 04:26:40]         13200 [00 03:40:00]
+   #17  115600 [01 08:06:40]         14000 [00 03:53:20]
+   #18  129600 [01 12:00:00]         14800 [00 04:06:40]
+   #19  144400 [01 16:06:40]         15600 [00 04:20:00]
+   #20  160000 [01 20:26:40]         16400 [00 04:33:20]
+   #21  176400 [02 01:00:00]         17200 [00 04:46:40]
+   #22  193600 [02 05:46:40]         18000 [00 05:00:00]
+   #23  211600 [02 10:46:40]         18800 [00 05:13:20]
+   #24  230400 [02 16:00:00]         19600 [00 05:26:40]
+   #25  250000 [02 21:26:40]         20400 [00 05:40:00]
+   #26  270400 [03 03:06:40]         21200 [00 05:53:20]
+   #27  291600 [03 09:00:00]         22000 [00 06:06:40]
+   #28  313600 [03 15:06:40]         22800 [00 06:20:00]
+   #29  336400 [03 21:26:40]         23600 [00 06:33:20]
+   #30  360000 [04 04:00:00]         24400 [00 06:46:40]
+   #31  384400 [04 10:46:40]         25200 [00 07:00:00]
+   #32  409600 [04 17:46:40]         26000 [00 07:13:20]
+   #33  435600 [05 01:00:00]         26800 [00 07:26:40]
+   #34  462400 [05 08:26:40]         27600 [00 07:40:00]
+   #35  490000 [05 16:06:40]         28400 [00 07:53:20]
+   #36  518400 [06 00:00:00]         29200 [00 08:06:40]
+   #37  547600 [06 08:06:40]         30000 [00 08:20:00]
+   #38  577600 [06 16:26:40]         30800 [00 08:33:20]
+   #39  608400 [07 01:00:00]         31600 [00 08:46:40]
+   #40  640000 [07 09:46:40]         32400 [00 09:00:00]
+   #41  672400 [07 18:46:40]         33200 [00 09:13:20]
+   #42  705600 [08 04:00:00]         34000 [00 09:26:40]
+   #43  739600 [08 13:26:40]         34800 [00 09:40:00]
+   #44  774400 [08 23:06:40]         35600 [00 09:53:20]
+   #45  810000 [09 09:00:00]         36400 [00 10:06:40]
+   #46  846400 [09 19:06:40]         37200 [00 10:20:00]
+   #47  883600 [10 05:26:40]         38000 [00 10:33:20]
+   #48  921600 [10 16:00:00]         38800 [00 10:46:40]
+   #49  960400 [11 02:46:40]         39600 [00 11:00:00]
+   #50 1000000 [11 13:46:40]         40400 [00 11:13:20]
+   #51 1040400 [12 01:00:00]         41200 [00 11:26:40]
+   #52 1081600 [12 12:26:40]         42000 [00 11:40:00]
+   #53 1123600 [13 00:06:40]         42800 [00 11:53:20]
+   #54 1166400 [13 12:00:00]         43600 [00 12:06:40]
+   #55 1210000 [14 00:06:40]         44400 [00 12:20:00]
+   #56 1254400 [14 12:26:40]         45200 [00 12:33:20]
+   #57 1299600 [15 01:00:00]         46000 [00 12:46:40]
+   #58 1345600 [15 13:46:40]         46800 [00 13:00:00]
+   #59 1392400 [16 02:46:40]         47600 [00 13:13:20]
+   #60 1440000 [16 16:00:00]         48400 [00 13:26:40]
+   #61 1488400 [17 05:26:40]         49200 [00 13:40:00]
+   #62 1537600 [17 19:06:40]         50000 [00 13:53:20]
+   #63 1587600 [18 09:00:00]         50800 [00 14:06:40]
+   #64 1638400 [18 23:06:40]         51600 [00 14:20:00]
+   #65 1690000 [19 13:26:40]         52400 [00 14:33:20]
+   #66 1742400 [20 04:00:00]         53200 [00 14:46:40]
+   #67 1795600 [20 18:46:40]         54000 [00 15:00:00]
+   #68 1849600 [21 09:46:40]         54800 [00 15:13:20]
+   #69 1904400 [22 01:00:00]         55600 [00 15:26:40]
+   #70 1960000 [22 16:26:40]         56400 [00 15:40:00]
+   #71 2016400 [23 08:06:40]         57200 [00 15:53:20]
+   #72 2073600 [24 00:00:00]         58000 [00 16:06:40]
+   #73 2131600 [24 16:06:40]         58800 [00 16:20:00]
+   #74 2190400 [25 08:26:40]         59600 [00 16:33:20]
+.TE
+
+.SH "SEE ALSO"
+nice(1),
+addresses(5),
+envelopes(5),
+qmail-control(5),
+qmail-srs(5),
+qmail-log(5),
+qmail-queue(8),
+qmail-multi(8),
+drate(1),
+qmail-start(8),
+slowq-start(8),
+qmail-daemon(8),
+qmail-send(8),
+slowq-send(8),
+qmail-todo(8),
+qmail-clean(8),
+qmail-lspawn(8),
+qmail-dkim(8),
+dk-filter(8),
+qmail-rspawn(8),
+fsync(2)

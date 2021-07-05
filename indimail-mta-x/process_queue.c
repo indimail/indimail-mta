@@ -1,5 +1,8 @@
 /*
  * $Log: process_queue.c,v $
+ * Revision 1.3  2021-07-05 21:27:15+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
  * Revision 1.2  2021-06-29 09:11:24+05:30  Cprogrammer
  * fix wrong assignment of qbase variable
  *
@@ -35,7 +38,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 	int             idx, count, qcount, qstart;
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
 
-	set_environment(warn, fatal);
+	set_environment(warn, fatal, 1);
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
@@ -110,7 +113,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 void
 getversion_process_queue_c()
 {
-	static char    *x = "$Id: process_queue.c,v 1.2 2021-06-29 09:11:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: process_queue.c,v 1.3 2021-07-05 21:27:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

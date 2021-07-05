@@ -216,8 +216,8 @@ maildirserial
 maildirserial.0
 maildirsmtp
 maildirsmtp.0
-maildirwatch
-maildirwatch.0
+qmaildirwatch
+qmaildirwatch.0
 mailsubj
 mailsubj.0
 make-compile
@@ -648,3 +648,7 @@ mailfilter.o
 mktempfile.o
 pidopen.o
 auto_qmail.md
+qmta-send
+qmta-send.0
+qmta-send.8
+qmta-send.service

@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.11  2021-07-05 21:11:41+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.10  2021-05-13 14:44:33+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -153,7 +156,7 @@ main(int argc, char **argv)
 	sig_ignore(SIGPIPE);
 	sig_catch(SIGALRM, sigalrm);
 	alarm(86400);
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 0);
 	if (chdir(dir) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", dir, ": ");
 	if ((sender = env_get("SENDER"))) {
@@ -304,7 +307,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.10 2021-05-13 14:44:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier.c,v 1.11 2021-07-05 21:11:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,5 @@
 /*
- * $Log: maildirwatch.c,v $
+ * $Log: qmaildirwatch.c,v $
  * Revision 1.8  2021-06-03 18:15:46+05:30  Cprogrammer
  * use new prioq functions
  *
@@ -28,7 +28,7 @@
 #include "headerbody.h"
 #include "maildir.h"
 
-#define FATAL "maildirwatch: fatal: "
+#define FATAL "qmaildirwatch: fatal: "
 
 void
 die_nomem()
@@ -159,9 +159,9 @@ main()
 }
 
 void
-getversion_maildirwatch_c()
+getversion_qmaildirwatch_c()
 {
-	static char    *x = "$Id: maildirwatch.c,v 1.8 2021-06-03 18:15:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmaildirwatch.c,v 1.8 2021-06-03 18:15:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

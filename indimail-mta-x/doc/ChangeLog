@@ -151,19 +151,32 @@ Release 2.13 Start 14/02/2021
 94. qsutil.c qsutil.h: added loglock_open function
 95. svctool.in qlocal_upgrade.in: renamed LOCK_LOGS env variable to LOGLOCK
 96. rpmattr.c: removed call to uidinit
+- 28/06/2021
+97. standalone MTA - qmta-send
+- 01/07/2021
+98. renamed maildirwatch to qmaildirwatch to avoid clash with courier-imap
 - 03/07/2021
-97. moved prot.c, prot.h to libqmail
-98. smtpd.c: checkrecipient_pwd: replace getwent() with in-built function to
+99. moved prot.c, prot.h to libqmail
+100. smtpd.c: checkrecipient_pwd: replace getwent() with in-built function to
     check for user in /etc/passwd
 - 04/07/2021
-99. qmail-showctl.c: complete rewrite
-100. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgetpwgr.c
-101. svctool: added BASE_PATH env variable for defaultqueue
+101. qmail-showctl.c: complete rewrite
+102. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgepwgr.c
+103. svctool: added BASE_PATH env variable for defaultqueue
+104. run qmail-dk, qmail-dkim with qmail group to access domainkeys dir 
+105. qmta-send: run as qmailq if running without qmail-clean
+106. indimail-mta.spec, debian/qmta.postinst: create qmta queue with qmta
+     mode (queue-fix -m)
+107. queue-fix: added -m option for qmta-send where dirs are owned by
+     qmailq
+108. set_environment.c: skip $HOME/.defaultqueue if running as root
 - 05/07/2021
-102. sys-checkpwd.c qmail-getpw.c qmail-direct.c maildirsize.c serialcmd.c:
+109. qmail-showctl.c: complete rewrite
+110. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgetpwgr.c
+111. sys-checkpwd.c qmail-getpw.c qmail-direct.c maildirsize.c serialcmd.c:
      use getpw, getgr functions from libqmail getpwgr.c
-193. get_uid.c: complete rewrite using getpw, getgr functions from libqmail's
-     qgetpwgr.c
+112. maildirserial.c new-inject.c process_queue.c qmail-inject.c
+    qmail-showctl.c queue-fix.c: allow $HOME/.defaultqueue for root
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

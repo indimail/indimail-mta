@@ -7,10 +7,41 @@ qmail-showctl \- analyze indimail configuration, services and queues
 \fBqmail-showctl\fR [\fIoptions\fR]
 
 .SH DESCRIPTION
-\fBqmail-showctl\fR explains the current \fBqmail\fR configuration.
-\fBqmail-showctl\fR may show DIRSPLIT as the directory split or it will
-show the configured CONFSPLIT environment variable in $HOME/.defaultqueue or
-CONTROL/defaultqueue directory.
+\fBqmail-showctl\fR explains the current \fBindimail\fR configuration.
+
+\fBqmail-showctl\fR uses environment set according to files in
+$HOME/.defaultqueue directory. If QUEUE_BASE environment variable is not
+set, it additionally uses environment set according to files in
+SYSCONFDIR/control/defaultqueue directory.
+
+.SH ENVIRONMENT VARIABLES
+.TP
+VIRTUAL_PKG_LIB
+Path to IndiMail Virtual Domains shared library. If present, it indicates
+a host running IndiMail Virtual Domains. The library will be loaded using
+dlmopen(2) to obtain the local IP and local hostid configured for
+IndiMail Virtual Domains. Defaults to \fIlib_path\fR/libindimail.so where
+\fIlib_path\fR is your systems shared library path (usually /usr/lib or
+/usr/lib64).
+
+.TP
+QUEUE_BASE
+Path to indimail-mta's multi queue collection. Defaults to QMAIL/queue
+
+.TP
+CONTROLDIR
+Path to indimail-mta's control directory. Defaults to SYSCONFDIR/control
+
+.TP
+HOME
+This is set by your shell. It defaults to your home directory in passwd(5)
+database.
+
+.TP
+CONFSPLIT
+This variable can be set to override the compile time directory split value
+of DIRSPLIT. Administrators can set this environment variable in
+$HOME/.defaultqueue or SYSCONFDIR/control/defaultqueue directory.
 
 .SH OPTIONS
 .TP
@@ -32,7 +63,7 @@ show information on concurrency limits
 .TP
 \fB\-s\fR
 Dump config. Dump the entire indimail configuration and sevice
-information. This option runs \fBsvctool\fR(8).
+information. This option runs \fBsvctool\fR(8) and requires root privilegs.
 
 .TP
 \fB\-e\fR

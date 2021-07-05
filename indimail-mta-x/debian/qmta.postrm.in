@@ -52,8 +52,12 @@ if [ " $1" = " remove" ] ; then
 		done
 	fi
 	${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
+	for i in idhost defaulthost defaultdomain plusdomain
+	do
+		${rm} -f ${qsysconfdir}/control/$i || true
+	done
+	${rmdir} --ignore-fail-on-non-empty ${qsysconfdir} 2>/dev/null || true
 fi
-${rmdir} --ignore-fail-on-non-empty ${qsysconfdir} 2>/dev/null || true
 if [ " $1" = " purge" ] ; then
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
@@ -63,9 +67,11 @@ if [ " $1" = " purge" ] ; then
 			/bin/systemctl stop nscd.service
 		fi
 	fi
-	echo "removing user indimail"
-	/usr/bin/getent passwd indimail > /dev/null && /usr/sbin/userdel indimail >/dev/null || true
-	for i in indimail qmail; do
+	for i in indimail alias qmailq qmailr qmails qscand; do
+		echo "removing user $i"
+		/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
+	done
+	for i in indimail nofiles qmail qscand; do
 		echo "removing group $i"
 		/usr/bin/getent group $i  > /dev/null && /usr/sbin/groupdel $i >/dev/null || true
 	done

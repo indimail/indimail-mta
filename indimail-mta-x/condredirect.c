@@ -1,5 +1,8 @@
 /*
  * $Log: condredirect.c,v $
+ * Revision 1.17  2021-07-05 21:09:19+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
  * Revision 1.16  2021-05-13 14:42:23+05:30  Cprogrammer
  * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
  *
@@ -115,7 +118,7 @@ main(argc, argv)
 		strerr_die2x(100, FATAL, "SENDER not set");
 	if (!(dtline = env_get("DTLINE")))
 		strerr_die2x(100, FATAL, "DTLINE not set");
-	set_environment(WARN, FATAL);
+	set_environment(WARN, FATAL, 0);
 #ifdef HAVESRS
 	if (*sender) {
 		switch(srsforward(sender))
@@ -159,7 +162,7 @@ main(argc, argv)
 void
 getversion_condredirect_c()
 {
-	static char    *x = "$Id: condredirect.c,v 1.16 2021-05-13 14:42:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: condredirect.c,v 1.17 2021-07-05 21:09:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

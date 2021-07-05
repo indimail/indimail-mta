@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.32  2021-06-29 09:29:20+05:30  Cprogrammer
+ * modularize spawn code
+ *
  * Revision 1.31  2021-06-27 10:39:26+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -96,12 +99,12 @@
 #include "auto_control.h"
 #include "variables.h"
 
-extern int      truncreport;
-int             spawn(int, int, unsigned long, char *, char *, char *, int);
-void            report(substdio *, int, char *, int);
-void            initialize(int, char **);
+extern int      truncreport_SPAWN;
+int             SPAWN(int, int, unsigned long, char *, char *, char *, int);
+void            report_SPAWN(substdio *, int, char *, int);
+void            initialize_SPAWN(int, char **);
 
-struct delivery
+typedef struct delivery
 {
 	int             used;
 	int             fdin;		/*- pipe input */
@@ -109,12 +112,14 @@ struct delivery
 	int             wstat;		/*- if !pid: status of child */
 	int             fdout;		/*- pipe output, -1 if !pid; delays eof until after death */
 	stralloc        output;
-};
+} delivery;
 
-struct delivery *d;
+static delivery *d;
+#ifdef ENABLE_VIRTUAL_PKG
 void            *phandle;
+#endif
 
-void
+static void
 sigchld()
 {
 	int             wstat;
@@ -135,9 +140,9 @@ sigchld()
 	}
 }
 
-int             flagwriting = 1;
+static int      flagwriting = 1;
 
-ssize_t
+static ssize_t
 okwrite(fd, buf, n)
 	int             fd;
 	char           *buf;
@@ -156,23 +161,24 @@ okwrite(fd, buf, n)
 	return n;
 }
 
-int             flagreading = 1;
-char            outbuf[1024];
-substdio        ssout;
+static int      flagreading = 1;
+static char     outbuf[1024];
+static substdio ssout;
 
-int             stage = 0;	/*- reading 0:delnum 1:delnum 2:messid 3:sender 4:qqeh 5:envh 6:recip */
-int             flagabort = 0;	/*- if 1, everything except delnum is garbage */
-int             delnum;
-stralloc        messid = { 0 };
-stralloc        sender = { 0 };
-stralloc        qqeh = { 0 };
-stralloc        envh = { 0 };
-stralloc        recip = { 0 };
-stralloc        libfn = { 0 };
+static int      stage = 0;	/*- reading 0:delnum 1:delnum 2:messid 3:sender 4:qqeh 5:envh 6:recip */
+static int      flagabort = 0;	/*- if 1, everything except delnum is garbage */
+static int      delnum;
+static stralloc messid = { 0 };
+static stralloc sender = { 0 };
+static stralloc qqeh = { 0 };
+static stralloc envh = { 0 };
+static stralloc recip = { 0 };
+#ifdef ENABLE_VIRTUAL_PKG
+static stralloc libfn = { 0 };
+#endif
 
-void
-err(s)
-	char           *s;
+static void
+err(char *s)
 {
 	char            ch;
 
@@ -184,7 +190,7 @@ err(s)
 	substdio_putflush(&ssout, "", 1);
 }
 
-int
+static int
 variables_set()
 {
 	char           *x, *y, *z, *c, *n;
@@ -215,7 +221,7 @@ variables_set()
 	return (0);
 }
 
-int
+static int
 variables_unset()
 {
 	char           *x, *y, *z;
@@ -237,7 +243,7 @@ variables_unset()
 	return (0);
 }
 
-void
+static void
 docmd()
 {
 	int             f, i, j, fdmess;
@@ -323,7 +329,7 @@ docmd()
 		variables_unset();
 		return;
 	}
-	f = spawn(fdmess, pi[1], st.st_size, sender.s, qqeh.s, recip.s, j);
+	f = SPAWN(fdmess, pi[1], st.st_size, sender.s, qqeh.s, recip.s, j);
 	if (variables_unset()) {
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
 		return;
@@ -348,9 +354,9 @@ docmd()
 	d[delnum].used = 1;
 }
 
-char            cmdbuf[1024];
+static char     cmdbuf[1024];
 
-void
+static void
 getcmd()
 {
 	int             i;
@@ -424,15 +430,15 @@ getcmd()
 	}
 }
 
-char            inbuf[128];
+static char     inbuf[128];
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+QSPAWN(int argc, char **argv)
 {
 	char            ch;
+#ifdef ENABLE_VIRTUAL_PKG
 	char           *ptr;
+#endif
 	int             i, r, nfds;
 	fd_set          rfds;
 
@@ -459,7 +465,7 @@ main(argc, argv)
 	substdio_fdbuf(&ssout, okwrite, 1, outbuf, sizeof(outbuf));
 	sig_pipeignore();
 	sig_childcatch(sigchld);
-	initialize(argc, argv);
+	initialize_SPAWN(argc, argv);
 	ch = auto_spawn;
 	substdio_put(&ssout, &ch, 1);
 	ch = auto_spawn >> 8;
@@ -468,6 +474,7 @@ main(argc, argv)
 		d[i].used = 0;
 		d[i].output.s = 0;
 	}
+#ifdef ENABLE_VIRTUAL_PKG
 	if (!(ptr = env_get("VIRTUAL_PKG_LIB"))) {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -487,6 +494,7 @@ main(argc, argv)
 		ptr = "VIRTUAL_PKG_LIB";
 	if(!(phandle = loadLibrary(&phandle, ptr, &i, 0)) && i)
 		_exit(111);
+#endif
 	for (;;) {
 		if (!flagreading) {
 			for (i = 0; i < auto_spawn; ++i)
@@ -522,7 +530,7 @@ main(argc, argv)
 							substdio_put(&ssout, &ch, 1);
 							ch = i >> 8;
 							substdio_put(&ssout, &ch, 1);
-							report(&ssout, d[i].wstat, d[i].output.s, d[i].output.len);
+							report_SPAWN(&ssout, d[i].wstat, d[i].output.s, d[i].output.len);
 							substdio_put(&ssout, "", 1);
 							substdio_flush(&ssout);
 							close(d[i].fdin);
@@ -530,12 +538,12 @@ main(argc, argv)
 							continue;
 						}
 						while (!stralloc_readyplus(&d[i].output, r))
-							sleep(10);
-						/*XXX*/ byte_copy(d[i].output.s + d[i].output.len, r, inbuf);
+							sleep(10); /*XXX*/
+						byte_copy(d[i].output.s + d[i].output.len, r, inbuf);
 						d[i].output.len += r;
-						if (truncreport > 100 && d[i].output.len > truncreport) {
+						if (truncreport_SPAWN > 100 && d[i].output.len > truncreport_SPAWN) {
 							char           *truncmess = "\nError report too long, sorry.\n";
-							d[i].output.len = truncreport - str_len(truncmess) - 3;
+							d[i].output.len = truncreport_SPAWN - str_len(truncmess) - 3;
 							stralloc_cats(&d[i].output, truncmess);
 						}
 					}
@@ -547,10 +555,19 @@ main(argc, argv)
 	return(0);
 }
 
-void
+#ifdef MAIN
+static void /*- for ident command */
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.31 2021-06-27 10:39:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.32 2021-06-29 09:29:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+int
+main(int argc, char **argv)
+{
+	return QSPAWN(argc, argv);
+	getversion_spawn_c(); /*- suppress compiler warning of unused function */
+}
+#endif

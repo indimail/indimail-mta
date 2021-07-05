@@ -20,52 +20,51 @@ edit = sed \
 	-e 's,@email\@,$(email),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-it = indimail-mta.perms 822date 822field 822header 822print 822received \
-	addrlist atrn autoresponder qbase64 batv binm1 binm1+df cronlist.q \
-	binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm qnotify \
-	create_services cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr \
-	condredirect config-fast datemail dk-filter dknewkey dktest dnscname \
-	dnsfq dnsip svctool qfrontend dnsmxip dnsptr dnstxt dot-forward drate \
-	qdane dnstlsarr etrn except fastforward forward generic.so greydaemon \
-	qf-smtp-ratelimit home home+df hostname sslerator indimail-mta.changes \
-	idedit iftocc instcheck ipmeprint ldap-checkpwd leapsecs \
-	maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
-	maildirsmtp maildirwatch mailsubj mbox2maildir multirotate \
-	inewaliases newinclude new-inject nowutc ofmipd ofmipname parsedate \
-	plugtest installer predate preline printforward qmail-spamfilter \
-	printmaillist proc proc+df qaes ctrlenv qarf qmail-cat qmail-cdb \
-	qmail-clean qmailconfig maildirsize qmail-daemon qmaildirmake \
-	qmail-direct qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject \
+it = 822date 822field 822header 822print 822received addrlist analyzer \
+	atrn autoresponder batv binm1 binm1+df binm2 binm2+df binm3 binm3+df \
+	bouncesaying cdb-database cdbdump cdbget cdbgetm cdbmake cdbmake-12 \
+	cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
+	create_services cronlist.q ctrlenv datemail dk-filter dknewkey dktest \
+	dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt dot-forward \
+	drate etrn except fastforward forward generic.so greydaemon home \
+	home+df hostname idedit iftocc indimail-mta.changes \
+	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
+	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
+	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
+	qmaildirwatch mailsubj mbox2maildir multirotate newinclude new-inject \
+	nowutc ofmipd ofmipname parsedate plugtest predate preline \
+	printforward printmaillist proc proc+df qaes qarf qbase64 qdane \
+	qfrontend qf-smtp-ratelimit qmail-cat qmail-cdb qmail-clean \
+	qmailconfig qmail-daemon qmail-daned qmail-direct qmaildirmake \
+	qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject \
 	qmail-local qmail-lspawn qmail-multi qmail-newmrh qmail-newu \
 	qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter \
 	qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
 	qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl \
-	qmail-daned qmail-smtpd qmail_smtpd.so qmail-start qmail-tcpok \
-	qmail-tcpto qmail-todo qmail-upq qpq qquote qreceipt qsmhook \
-	queue-fix recipient-cdb relaytest rewind irmail rpmattr \
-	rrforward rrt sendmail serialcmd serialqmtp serialsmtp setforward \
-	setmaillist smtpd-plugin0.so slowq-send slowq-start smtpd-plugin.so \
-	sortedtest spawn-filter spfquery splogger srsfilter surblfilter \
-	surblqueue swaks sys-checkpwd tcp-env testzero tokenize uacl \
-	udpclient udplogger update_tmprsadh viruscanner whois yearcal \
-	cdb-database analyzer qtools leapsecs.dat
+	qmail-smtpd qmail_smtpd.so qmail-spamfilter qmail-start qmail-tcpok \
+	qmail-tcpto qmail-todo qmail-upq qmta-send qnotify qpq qquote \
+	qreceipt qsmhook qtools queue-fix recipient-cdb relaytest rewind \
+	rpmattr rrforward rrt sendmail serialcmd serialqmtp serialsmtp \
+	setforward setmaillist slowq-send slowq-start smtpd-plugin0.so \
+	smtpd-plugin.so sortedtest spawn-filter spfquery splogger srsfilter \
+	sslerator surblfilter surblqueue svctool swaks sys-checkpwd tcp-env \
+	testzero tokenize uacl udpclient udplogger update_tmprsadh \
+	viruscanner whois yearcal
 
-man = drate.1 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
-	cdb-database.8 ctrlenv.8 plugtest.1 surblfilter.8 \
-	svctool.8 predate.1 datemail.1 queue-fix.8 qmail-clean.8 \
-	mlmatchup.8 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
-	qmail-daned.8 qmail-srs.5 qmail-limits.7 qmail-showctl.8 \
-	forward.1 condredirect.1 qmail-control.5 rrforward.1 \
-	qreceipt.1 maildirserial.1 qmail-rm.1 dot-qmail.5 \
-	qmail-users.5 dot-forward.1 fastforward.1 new-inject.1 \
-	filterto.1 replier.1 qmail-local.8 qmail-direct.8 \
-	qmail-getpw.8 qmail-remote.8 qmail-send.8 qmail-todo.8 \
-	qmail-start.8 qmail-queue.8 qmail-dkim.8 dk-filter.8 \
-	qmail-dk.8 dktest.8 qmail-multi.8 spawn-filter.8 \
-	qmail-inject.8 qmail-newmrh.8 recipient-cdb.8 qmail-cdb.8 \
-	qmail-newu.8 qmail-pw2u.8 qmail-qread.8 qmail-smtpd.8 \
-	qmail-poppass.8 qscanq.8 cleanq.8 run-cleanq.8 slowq-start.8 \
-	slowq-send.8 qmail-spamfilter.8
+man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
+	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dktest.8 \
+	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
+	forward.1 maildirserial.1 mlmatchup.8 new-inject.1 plugin_init.3 \
+	plugtest.1 predate.1 qarf.1 qmail-cdb.8 qmail-clean.8 qmail-control.5 \
+	qmail-daned.8 qmail-direct.8 qmail-dk.8 qmail-dkim.8 qmail-getpw.8 \
+	qmail-inject.8 qmail-limits.7 qmail-local.8 qmail-multi.8 \
+	qmail-newmrh.8 qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 \
+	qmail-qread.8 qmail-queue.8 qmail-remote.8 qmail-rm.1 qmail-send.8 \
+	qmail-showctl.8 qmail-smtpd.8 qmail-spamfilter.8 qmail-srs.5 \
+	qmail-start.8 qmail-todo.8 qmail-users.5 qmta-send.8 qnotify.1 \
+	qreceipt.1 qscanq.8 queue-fix.8 recipient-cdb.8 replier.1 rrforward.1 \
+	rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 spawn-filter.8 \
+	surblfilter.8 svctool.8
 
 include Makefile.$(SYSTEM)
 
@@ -962,14 +961,14 @@ qmaildirmake.o: \
 compile qmaildirmake.c
 	./compile qmaildirmake.c
 
-maildirwatch: \
-load maildirwatch.o hfield.o headerbody.o maildir.o prioq.o
-	./load maildirwatch hfield.o headerbody.o maildir.o \
+qmaildirwatch: \
+load qmaildirwatch.o hfield.o headerbody.o maildir.o prioq.o
+	./load qmaildirwatch hfield.o headerbody.o maildir.o \
 	prioq.o -lqmail
 
-maildirwatch.o: \
-compile maildirwatch.c prioq.h hfield.h headerbody.h maildir.h
-	./compile maildirwatch.c
+qmaildirwatch.o: \
+compile qmaildirwatch.c prioq.h hfield.h headerbody.h maildir.h
+	./compile qmaildirwatch.c
 
 mailsubj: \
 warn-auto.sh mailsubj.sh conf-prefix conf-break conf-split
@@ -1129,19 +1128,46 @@ maildir_deliver.o: \
 compile maildir_deliver.c syncdir.h conf-sync
 	./compile `grep -h -v "^#" conf-sync` maildir_deliver.c
 
-qmail-lspawn.o: compile qmail-lspawn.c slurpclose.h auto_qmail.h \
-auto_uids.h qlx.h auto_assign.h indimail_stub.h auto_control.h variables.h
-	./compile qmail-lspawn.c
-
 qmail-lspawn: \
-load qmail-lspawn.o spawn.o slurpclose.o \
+load qmail-lspawn.o lspawn.o slurpclose.o \
 get_uid.o auto_sysconfdir.o auto_control.o auto_qmail.o \
 auto_uids.o auto_spawn.o auto_assign.o control.o \
 indimail_stub.o variables.o dns.lib
-	./load qmail-lspawn spawn.o slurpclose.o \
+	./load qmail-lspawn lspawn.o slurpclose.o \
 	auto_uids.o get_uid.o auto_sysconfdir.o auto_control.o \
 	auto_qmail.o auto_spawn.o indimail_stub.o control.o \
 	variables.o auto_assign.o `cat dns.lib` -ldl -lqmail
+
+qmail-lspawn.o: compile qmail-lspawn.c slurpclose.h \
+auto_qmail.h auto_uids.h qlx.h auto_assign.h indimail_stub.h \
+auto_control.h variables.h conf-virtual
+	./compile `grep -h -v "^#" conf-virtual` \
+	-DSPAWN=lspawn -DQSPAWN=qmail_lspawn \
+	-Dreport_SPAWN=report_lspawn \
+	-Dinitialize_SPAWN=initialize_lspawn \
+	-Dtruncreport_SPAWN=truncreport_lspawn \
+	qmail-lspawn.c
+
+qmail-rspawn: \
+load qmail-rspawn.o rspawn.o tcpto_clean.o get_uid.o \
+auto_qmail.o auto_uids.o auto_spawn.o rcpthosts.o \
+control.o variables.o auto_sysconfdir.o auto_qmail.o \
+dns.lib indimail_stub.o
+	./load qmail-rspawn rspawn.o tcpto_clean.o get_uid.o \
+	auto_spawn.o rcpthosts.o control.o variables.o \
+	auto_sysconfdir.o auto_uids.o indimail_stub.o \
+	auto_qmail.o auto_control.o `cat dns.lib` -ldl -lqmail
+
+qmail-rspawn.o: compile qmail-rspawn.c \
+tcpto.h rcpthosts.h auto_qmail.h indimail_stub.h \
+ipalloc.h auto_control.h variables.h conf-tls conf-ip \
+conf-virtual
+	./compile `grep -h -v "^#" conf-tls conf-ip conf-virtual` \
+	-DSPAWN=rspawn -DQSPAWN=qmail_rspawn \
+	-Dreport_SPAWN=report_rspawn \
+	-Dinitialize_SPAWN=initialize_rspawn \
+	-Dtruncreport_SPAWN=truncreport_rspawn \
+	qmail-rspawn.c
 
 qmail-newmrh: \
 load qmail-newmrh.o auto_control.o variables.o
@@ -1612,21 +1638,6 @@ conf-smtputf8
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps \
 		conf-batv` qmail-remote.c
 
-qmail-rspawn: \
-load qmail-rspawn.o spawn.o tcpto_clean.o get_uid.o \
-auto_qmail.o auto_uids.o auto_spawn.o rcpthosts.o \
-control.o variables.o auto_sysconfdir.o auto_qmail.o \
-dns.lib indimail_stub.o
-	./load qmail-rspawn spawn.o tcpto_clean.o get_uid.o \
-	auto_spawn.o rcpthosts.o control.o variables.o \
-	auto_sysconfdir.o auto_uids.o indimail_stub.o \
-	auto_qmail.o auto_control.o `cat dns.lib` -ldl -lqmail
-
-qmail-rspawn.o: compile qmail-rspawn.c \
-tcpto.h rcpthosts.h auto_qmail.h indimail_stub.h \
-ipalloc.h conf-tls conf-ip auto_control.h variables.h
-	./compile `grep -h -v "^#" conf-tls conf-ip` qmail-rspawn.c
-
 qmail-send: \
 load qmail-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o\
@@ -1646,7 +1657,7 @@ quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
 conf-mime conf-sync conf-batv conf-srs conf-todo conf-bounce conf-loglock
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-todo conf-bounce conf-loglock` qmail-send.c
+	conf-srs conf-todo conf-bounce conf-loglock` qmail-send.c
 
 qmail-send.8: \
 qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1677,7 +1688,7 @@ quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
 conf-mime conf-sync conf-batv conf-srs conf-loglock conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-loglock conf-bounce` slowq-send.c
+	conf-srs conf-loglock conf-bounce` slowq-send.c
 
 slowq-send.8: \
 slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1688,6 +1699,63 @@ slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> slowq-send.8
+
+qmta-send: \
+load qmta-send.o trigger.o fmtqfn.o readsubdir.o \
+variables.o auto_control.o control.o qsutil.o \
+auto_split.o auto_qmail.o auto_uids.o \
+prioq.o newfield.o quote.o qmail.o syncdir.o srs.o \
+rcpthosts.o auto_spawn.o slurpclose.o get_uid.o \
+qmta_lspawn.o qmta_rspawn.o qmta-lspawn.o qmta-rspawn.o \
+auto_assign.o tcpto_clean.o set_environment.o auto_prefix.o
+	./load qmta-send trigger.o fmtqfn.o readsubdir.o \
+	variables.o auto_control.o control.o qsutil.o \
+	rcpthosts.o auto_split.o auto_qmail.o auto_uids.o \
+	prioq.o newfield.o quote.o qmail.o syncdir.o srs.o \
+	qmta_lspawn.o qmta_rspawn.o qmta-lspawn.o qmta-rspawn.o \
+	slurpclose.o get_uid.o auto_spawn.o auto_assign.o tcpto_clean.o \
+	set_environment.o auto_prefix.o \
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -lqmail
+
+qmta-lspawn.o: compile qmail-lspawn.c slurpclose.h \
+auto_qmail.h auto_uids.h qlx.h auto_assign.h indimail_stub.h \
+auto_control.h variables.h
+	./compile \
+	-DSPAWN=lspawn -DQSPAWN=qmail_lspawn \
+	-Dreport_SPAWN=report_lspawn \
+	-Dinitialize_SPAWN=initialize_lspawn \
+	-Dtruncreport_SPAWN=truncreport_lspawn \
+	qmail-lspawn.c -o qmta-lspawn.o
+
+qmta-rspawn.o: compile qmail-rspawn.c \
+tcpto.h rcpthosts.h auto_qmail.h indimail_stub.h \
+ipalloc.h auto_control.h variables.h conf-tls conf-ip
+	./compile `grep -h -v "^#" conf-tls conf-ip` \
+	-DSPAWN=rspawn -DQSPAWN=qmail_rspawn \
+	-Dreport_SPAWN=report_rspawn \
+	-Dinitialize_SPAWN=initialize_rspawn \
+	-Dtruncreport_SPAWN=truncreport_rspawn \
+	qmail-rspawn.c -o qmta-rspawn.o
+
+qmta-send.o: \
+compile qmta-send.c qsutil.h fmtqfn.h readsubdir.h trigger.h \
+variables.h prioq.h qmail.h newfield.h quote.h \
+auto_qmail.h auto_split.h auto_uids.h conf-mime conf-sync \
+conf-batv conf-srs conf-loglock conf-bounce
+	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
+	conf-srs conf-loglock conf-bounce` qmta-send.c
+
+qmta-send.8: \
+qmta-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir \
+conf-prefix conf-split
+	cat qmta-send.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}BREAK}"`head -1 conf-break`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> qmta-send.8
 
 qmail-daemon: \
 load qmail-daemon.o control.o auto_qmail.o auto_control.o variables.o
@@ -1721,10 +1789,12 @@ hassrs.h conf-srs conf-spf conf-batv
 	./compile `grep -h -v "^#" conf-spf conf-batv` \
 	qmail-showctl.c
 
-qmail-showctl.8: qmail-showctl.9 conf-split conf-sysconfdir
+qmail-showctl.8: qmail-showctl.9 conf-split conf-sysconfdir conf-qmail
 	cat qmail-showctl.9 \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
-	| sed s}CONTROL}"`head -1 conf-sysconfdir`/control"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qmail-showctl.8
 
 plugtest: \
@@ -2160,11 +2230,47 @@ ssl_timeoutio.o: \
 compile ssl_timeoutio.c ssl_timeoutio.h conf-tls
 	./compile `grep -h -v "^#" conf-tls` ssl_timeoutio.c
 
-spawn.o: \
+lspawn.o: \
+compile chkspawn spawn.c auto_uids.h auto_spawn.h \
+variables.h indimail_stub.h auto_control.h conf-virtual
+	./chkspawn
+	./compile `grep -h -v "^#" conf-virtual` \
+	-DMAIN -DSPAWN=lspawn -DQSPAWN=qmail_lspawn \
+	-Dreport_SPAWN=report_lspawn \
+	-Dinitialize_SPAWN=initialize_lspawn \
+	-Dtruncreport_SPAWN=truncreport_lspawn \
+	spawn.c -o lspawn.o
+
+rspawn.o: \
+compile chkspawn spawn.c auto_uids.h auto_spawn.h \
+variables.h indimail_stub.h auto_control.h conf-virtual
+	./chkspawn
+	./compile `grep -h -v "^#" conf-virtual` \
+	-DMAIN -DSPAWN=rspawn -DQSPAWN=qmail_rspawn \
+	-Dreport_SPAWN=report_rspawn \
+	-Dinitialize_SPAWN=initialize_rspawn \
+	-Dtruncreport_SPAWN=truncreport_rspawn \
+	spawn.c -o rspawn.o
+
+qmta_lspawn.o: \
 compile chkspawn spawn.c auto_uids.h auto_spawn.h \
 variables.h indimail_stub.h auto_control.h
 	./chkspawn
-	./compile spawn.c
+	./compile -DSPAWN=lspawn -DQSPAWN=qmail_lspawn \
+	-Dreport_SPAWN=report_lspawn \
+	-Dinitialize_SPAWN=initialize_lspawn \
+	-Dtruncreport_SPAWN=truncreport_lspawn \
+	spawn.c -o qmta_lspawn.o
+
+qmta_rspawn.o: \
+compile chkspawn spawn.c auto_uids.h auto_spawn.h \
+variables.h indimail_stub.h auto_control.h
+	./chkspawn
+	./compile -DSPAWN=rspawn -DQSPAWN=qmail_rspawn \
+	-Dreport_SPAWN=report_rspawn \
+	-Dinitialize_SPAWN=initialize_rspawn \
+	-Dtruncreport_SPAWN=truncreport_rspawn \
+	spawn.c -o qmta_rspawn.o
 
 spf.o: \
 compile spf.c ipme.h ip.h ipalloc.h strsalloc.h \
@@ -3656,6 +3762,9 @@ warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec \
 conf-sysconfdir conf-servicedir
 	cat warn-auto.sh qlocal_upgrade.in \
 	| $(edit) > $@
+
+qmta-send.service: qmta-send.service.in warn-auto.sh
+	(sed -n '2,$$p' warn-auto.sh;cat $@.in) | $(edit) > $@
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \
