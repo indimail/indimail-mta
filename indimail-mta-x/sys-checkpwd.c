@@ -57,6 +57,7 @@
 #include <in_crypt.h>
 #include <pw_comp.h>
 #include <makeargs.h>
+#include <qgetpwgr.h>
 
 #define FATAL "sys-checkpwd: fatal: "
 #define WARN  "sys-checkpwd: warn: "
@@ -180,7 +181,7 @@ main(int argc, char **argv)
 	char           *ptr, *tmpbuf, *login, *response, *challenge, *stored;
 	char            strnum[FMT_ULONG];
 	static stralloc buf = {0};
-	int             i, count, offset, status, save = -1;
+	int             i, count, offset, status, save = -1, use_pwgr;
 	struct passwd  *pw;
 #ifdef HASUSERPW
 	struct userpw  *upw;
@@ -191,6 +192,7 @@ main(int argc, char **argv)
 
 	if (argc < 2)
 		_exit(2);
+	use_pwgr = env_get("USE_QPWGR") ? 1 : 0;
 	debug = env_get("DEBUG") ? 1 : 0;
 	if (!(tmpbuf = alloc((authlen + 1) * sizeof(char)))) {
 		print_error("out of memory");
@@ -199,8 +201,7 @@ main(int argc, char **argv)
 		_exit(111);
 	}
 	for (offset = 0;;) {
-		do
-		{
+		do {
 			count = read(3, tmpbuf + offset, authlen + 1 - offset);
 #ifdef ERESTART
 		} while(count == -1 && (errno == EINTR || errno == ERESTART));
@@ -235,7 +236,7 @@ main(int argc, char **argv)
 			save = i;
 		}
 	}
-	if (!(pw = getpwnam(login))) {
+	if (!(pw = (use_pwgr ? qgetpwnam : getpwnam) (login))) {
 		if (errno != ETXTBSY)
 			pipe_exec(argv, tmpbuf, offset, save);
 		else {

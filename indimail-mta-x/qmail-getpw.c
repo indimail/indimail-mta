@@ -17,23 +17,24 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
-#include "substdio.h"
-#include "subfd.h"
-#include "error.h"
-#include "byte.h"
-#include "str.h"
-#include "case.h"
-#include "fmt.h"
+#include <substdio.h>
+#include <subfd.h>
+#include <error.h>
+#include <byte.h>
+#include <str.h>
+#include <case.h>
+#include <fmt.h>
+#include <env.h>
+#include <qgetpwgr.h>
 #include "auto_usera.h"
 #include "auto_break.h"
 #include "qlx.h"
 
 #define GETPW_USERLEN 32
 
-char           *local;
-struct passwd  *pw;
-char           *dash;
-char           *extension;
+static char    *local, *dash, *extension;
+static int      use_pwgr;
+static struct passwd  *pw;
 
 int
 userext()
@@ -42,30 +43,22 @@ userext()
 	struct stat     st;
 
 	extension = local + str_len(local);
-	for (;;)
-	{
-		if (extension - local < sizeof(username))
-		{
-			if (!*extension || (*extension == *auto_break))
-			{
+	for (;;) {
+		if (extension - local < sizeof(username)) {
+			if (!*extension || (*extension == *auto_break)) {
 				byte_copy(username, extension - local, local);
 				username[extension - local] = 0;
 				case_lowers(username);
 				errno = 0;
-				pw = getpwnam(username);
+				pw = (use_pwgr ? qgetpwnam : getpwnam) (username);
 				if (errno == error_txtbsy)
 					_exit(QLX_SYS);
-				if (pw)
-				{
-					if (pw->pw_uid)
-					{
-						if (stat(pw->pw_dir, &st) == 0)
-						{
-							if (st.st_uid == pw->pw_uid)
-							{
+				if (pw) {
+					if (pw->pw_uid) {
+						if (stat(pw->pw_dir, &st) == 0) {
+							if (st.st_uid == pw->pw_uid) {
 								dash = "";
-								if (*extension)
-								{
+								if (*extension) {
 									++extension;
 									dash = "-";
 								}
@@ -87,18 +80,15 @@ userext()
 char            num[FMT_ULONG];
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	local = argv[1];
-	if (!local)
+	if (!(local = argv[1]))
 		_exit(100);
-	if (!userext())
-	{
+	use_pwgr = env_get("USE_QPWGR") ? 1 : 0;
+	if (!userext()) {
 		extension = local;
 		dash = "-";
-		pw = getpwnam(auto_usera);
+		pw = (use_pwgr ? qgetpwnam : getpwnam) (auto_usera);
 	}
 	if (!pw)
 		_exit(QLX_NOALIAS);

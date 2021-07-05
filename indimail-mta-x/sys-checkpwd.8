@@ -3,7 +3,7 @@
 sys-checkpwd \- indimail-mta checkpassword program for authentication
 
 .SH SYNOPSYS
-\fBsys-checkpwd\fR \fBalternate_checkpassword_program(s)\fR \fB/bin/false\fR
+\fBsys-checkpwd\fR \fIalternate_checkpassword_program\fR(s) \fB/bin/false\fR
 
 .SH DESCRIPTION
 \fBsys-checkpwd\fR supports authentication for ESMTP AUTH option in \fBqmail-smtpd(8)\fR,
@@ -50,6 +50,12 @@ exit with a non-zero status, or call an alternate checkpassword program. The las
 subprogram can usually be /usr/bin/false (or /bin/false, depending on your flavor of OS).
 
 .PP
+For getting the user's encrypted password, \fBsys-checkpwd\fR(8) uses
+getpwnam(3) and getspnam(3) from glibc(7). It can use an internal version
+of these functions, qgetpwnam(3) and qgetspnam(3) if the environment
+variable \fBUSE_QPWGR\fR is set.
+
+.PP
 \fBsys-checkwd\fR does not authenticate if user is inactive. A user is active if one logs in using
 IMAP or POP3 protocol. If \fBALLOW_INACTIVE\fR is defined, \fBsys-checkwd\fR will proceed regardless
 of the user's active or inactive status.
@@ -81,7 +87,7 @@ Thunderbird - LOGIN, PLAIN
 RoundCube Mail - LOGIN, PLAIN
 
 .SH OPTIONS
-\fBalternate_checkpassword_program\fR
+\fIalternate_checkpassword_program\fR
 Path to an alternate checkpassword utility which supports additional authentication
 advertised by qmail-smtpd.
 

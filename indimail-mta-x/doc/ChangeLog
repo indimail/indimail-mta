@@ -170,6 +170,11 @@ Release 2.13 Start 14/02/2021
 107. queue-fix: added -m option for qmta-send where dirs are owned by
      qmailq
 108. set_environment.c: skip $HOME/.defaultqueue if running as root
+- 05/07/2021
+109. qmail-showctl.c: complete rewrite
+110. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgetpwgr.c
+111. sys-checkpwd.c qmail-getpw.c qmail-direct.c maildirsize.c serialcmd.c:
+     use getpw, getgr functions from libqmail getpwgr.c
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
