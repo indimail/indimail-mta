@@ -23,7 +23,10 @@ and
 .BR qmail-clean ,
 under the proper uids and gids for a queue defined by the environment
 variable \fBQUEUEDIR\fR. These five daemons cooperate to deliver messages
-from the queue.
+from the queue. The uids and gids are obtained from the passwd(5) database
+using standard glibc getpwent(3), getgrent(3) calls which are inherently
+unreliable. You can switch to internal qgetpwent(3), qgetgrent(3) funtions
+by setting the environment variable \fBUSE_QPWGR\fR.
 
 \fBslowq-start\fR borrows most of it's code from \fBqmail-start\fR.
 
@@ -133,5 +136,10 @@ qmail-multi(8),
 initsvc(1),
 svscan(8),
 supervise(8),
+getpwent(3),
+getgrent(3),
+qgetpwent(3),
+qgetgrent(3),
+passwd(5),
 group(5),
 IndiMail(7)
