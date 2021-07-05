@@ -1789,10 +1789,12 @@ hassrs.h conf-srs conf-spf conf-batv
 	./compile `grep -h -v "^#" conf-spf conf-batv` \
 	qmail-showctl.c
 
-qmail-showctl.8: qmail-showctl.9 conf-split conf-sysconfdir
+qmail-showctl.8: qmail-showctl.9 conf-split conf-sysconfdir conf-qmail
 	cat qmail-showctl.9 \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
-	| sed s}CONTROL}"`head -1 conf-sysconfdir`/control"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qmail-showctl.8
 
 plugtest: \
