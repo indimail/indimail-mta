@@ -1,5 +1,8 @@
 /*
  * $Log: set_environment.c,v $
+ * Revision 1.5  2021-07-05 21:18:24+05:30  Cprogrammer
+ * new argument root_rc to allow root to load $HOME/.defaultqueue
+ *
  * Revision 1.4  2021-07-04 23:58:27+05:30  Cprogrammer
  * skip .defaultqueue if running as root
  *
@@ -27,13 +30,17 @@
 static stralloc tmp = { 0 };
 
 void
-set_environment(char *warn, char *fatal)
+set_environment(char *warn, char *fatal, int root_rc)
 {
 	char           *qbase, *home, *err;
 	char           **e;
 	int             i;
 
-	if (getuid() && (home = env_get("HOME"))) {
+	/*- 
+	 * allow $HOME/.defaultqueue for non-root
+	 * or root with non-zero root_rc
+	 */
+	if ((home = env_get("HOME")) && (getuid() || root_rc)) {
 		if (!stralloc_copys(&tmp, home) ||
 				!stralloc_catb(&tmp, "/.defaultqueue", 14) ||
 				!stralloc_0(&tmp))
@@ -82,7 +89,7 @@ set_environment(char *warn, char *fatal)
 void
 getversion_set_environment_c()
 {
-	static char    *x = "$Id: set_environment.c,v 1.4 2021-07-04 23:58:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: set_environment.c,v 1.5 2021-07-05 21:18:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
