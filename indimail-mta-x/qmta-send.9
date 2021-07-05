@@ -19,9 +19,9 @@ qmta-send \- standalone mail delivery
 \fBqmta-send\fR is a stand-alone mail transport agent. The use of
 \fBqmta-send\fR is on systems that requires a simple delivery mechanism
 for mails generated locally (like in cron scripts). It can be run as a
-daemon running continuously or when mail is generated. qmta-send doesn't
-require qmail-todo, qmail-lspawn, qmail-rspawn, qmail-clean to process
-a queue.
+daemon running continuously or as and when mail is generated. qmta-send
+doesn't require qmail-todo, qmail-lspawn, qmail-rspawn, qmail-clean to
+process a queue.
 
 .EX
 1. run qmta-send as a daemon
@@ -37,9 +37,9 @@ a queue.
 \fBqmta-send\fR can also invoke \fBqmail-lspawn\fR, \fBqmail-rspawn\fR,
 \fBqmail-clean\fR under the proper uids and gids for a queue defined by the
 environment variable \fBQUEUEDIR\fR. These four daemons cooperate to
-deliver messages from the queue. \fBqmta-send\fR by default looks at
-QMAILHOME/queue for messages. This path can be changed by defining the
-QUEUEDIR environment variable.
+deliver messages from the queue. \fBqmta-send\fR by default  uses
+QMAILHOME/queue/qmta as it's queue for messages. This path can be changed
+by defining the QUEUEDIR environment variable.
 
 \fBqmta-send\fR borrows most of it's code from \fBqmail-send\fR. The todo
 run can be adjusted by setting the environment variable \fBTODO_INTERVAL\fR
