@@ -55,7 +55,6 @@
 #include <strerr.h>
 #include <stralloc.h>
 #include <fmt.h>
-#include <env.h>
 #include <open.h>
 #include "qcount_dir.h"
 
