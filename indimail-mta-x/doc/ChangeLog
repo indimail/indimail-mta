@@ -157,8 +157,13 @@ Release 2.13 Start 14/02/2021
     check for user in /etc/passwd
 - 04/07/2021
 99. qmail-showctl.c: complete rewrite
-100. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgepwgr.c
+100. get_uid.c: use qgetpwent, qgetgrent from libqmail's qgetpwgr.c
 101. svctool: added BASE_PATH env variable for defaultqueue
+- 05/07/2021
+102. sys-checkpwd.c qmail-getpw.c qmail-direct.c maildirsize.c serialcmd.c:
+     use getpw, getgr functions from libqmail getpwgr.c
+193. get_uid.c: complete rewrite using getpw, getgr functions from libqmail's
+     qgetpwgr.c
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
