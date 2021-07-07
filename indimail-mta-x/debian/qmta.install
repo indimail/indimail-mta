@@ -2,7 +2,7 @@ var/indimail/bin                               /var/indimail
 var/indimail/sbin                              /var/indimail
 var/indimail/control                           /var/indimail
 var/indimail/users                             /var/indimail
-etc-qmta                                       /etc
+etc-qmta                                       /etc/indimail
 usr/bin/sendmail                               /usr/bin
 usr/bin/qmail-inject                           /usr/bin
 usr/bin/irmail                                 /usr/bin
