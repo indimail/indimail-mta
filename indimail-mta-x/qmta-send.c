@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.4  2021-07-07 15:59:54+05:30  Cprogrammer
+ * log lspawn, rspawn die events
+ *
  * Revision 1.3  2021-07-05 21:11:22+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -136,7 +139,7 @@ static int      flagspawnalive[CHANNELS];
 static int      flagcleanup;	/*- if 1, cleanupdir is initialized and ready */
 static readsubdir cleanupdir;
 static datetime_sec cleanuptime;
-static pid_t    cleanuppid;
+static pid_t    cleanuppid, loggerpid, lspawnpid, rspawnpid;
 #ifdef HAVESRS
 static stralloc srs_domain = { 0 };
 #endif
@@ -2368,7 +2371,15 @@ sigchld()
 		if (pid == cleanuppid) {
 			cleandied();
 			break;
-		}
+		} else
+		if (pid == loggerpid)
+			log1("alert: oh no! logger died! dying...\n");
+		else
+		if (pid == lspawnpid)
+			log1("alert: oh no! lspawn died! dying...\n");
+		else
+		if (pid == rspawnpid)
+			log1("alert: oh no! rspawn died! dying...\n");
 	}
 }
 
@@ -2614,7 +2625,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.3 2021-07-05 21:11:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.4 2021-07-07 15:59:54+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
