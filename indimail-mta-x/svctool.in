@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.566 2021-07-04 20:07:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.567 2021-07-07 19:19:48+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.566 2021-07-04 20:07:08+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.567 2021-07-07 19:19:48+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -891,6 +891,14 @@ Known values for OPTION are:
   Restore all variables to orignal state for all service in
   @servicedir@ and @qsysconfdir@/control/defaultqueue
   service_path   - Path where supervise service will be installed
+
+--print-variables
+  --servicedir=service_path
+  --service-name=service_name
+
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
 --config=add-alt|remove-alt|qselinux|iselinux|inittab
@@ -9351,6 +9359,9 @@ while test $# -gt 0; do
 	--restore-all-variables)
 	option=44
 	;;
+	--print-variables)
+	option=45
+	;;
 
 	--slowq)
 	option=45
@@ -10787,6 +10798,26 @@ case $option in
 		usage 1
 	fi
 	restore_all_variables
+	;;
+	45)
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	if [ -z "$service_name" ] ; then
+		echo "service name not specified" 1>&2
+		usage 1
+	fi
+	if [ ! -d $servicedir/$service_name ] ; then
+		echo "$servicedir/$service_name: No such file or directory" 1>&2
+		exit 1
+	fi
+	if [ ! -d $servicedir/$service_name/variables ] ; then
+		echo "$servicedir/$service_name: This service has no configured variables" 1>&2
+		exit 1
+	fi
+	echo "------ environment variables for $servicedir/$service_name ------------"
+	envdir -c $servicedir/$service_name/variables env
 	;;
 
 	45) # crete_delivery
