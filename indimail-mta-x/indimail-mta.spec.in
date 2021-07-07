@@ -742,7 +742,7 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)                   %{shareddir}/boot/proc
 %attr(0755,root,root)                   %{shareddir}/boot/home
 %attr(0755,root,root)                   %{shareddir}/boot/binm2+df
-%attr(0755,root,root)                   %{shareddir}/boot/qmta-send.service
+%attr(0644,root,root)                   %{shareddir}/boot/qmta-send.service
 
 %attr(0755,root,root)                   %{plugindir}/generic.so
 %attr(0755,root,root)                   %{plugindir}/smtpd-plugin.so
