@@ -2912,7 +2912,7 @@ getcontrols()
 		cntrl_stat1 = 2;
 	} else {
 		smtproutefile = (smtproutefile = env_get("SMTPROUTEFILE")) ? smtproutefile : "smtproutes";
-		moresmtproutefile = (moresmtproutefile = env_get("MORESMTPROUTECDB")) ? moresmtproutefile : "moresmtproutes.cdb";
+		moresmtproutefile = (moresmtproutefile = env_get("MORESMTPROUTESCDB")) ? moresmtproutefile : "moresmtproutes.cdb";
 		cntrl_stat1 = control_readfile(&smtproutes, smtproutefile, 0);
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -3718,7 +3718,7 @@ getversion_qmail_remote_c()
  * fix for SMTPROUTE of the form domain:x.x.x.x::penalty:max_tolerance username password
  *
  * Revision 1.106  2017-05-15 19:18:53+05:30  Cprogrammer
- * use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTECDB to configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
+ * use environment variable SMTPROUTEFILE, QMTPROUTEFILE, MORESMTPROUTESCDB to configure smtproutes, qmtproutes, moresmtproutes.cdb filenames
  *
  * Revision 1.105  2017-05-15 15:33:50+05:30  Cprogrammer
  * use X-SMTPROUTES env variable for setting artificial smtp routes. SMTPROUTES takes precendence over X-SMTPROUTES
