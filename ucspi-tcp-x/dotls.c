@@ -536,7 +536,7 @@ main(int argc, char **argv)
 	unsigned long   u;
 
 	sig_ignore(sig_pipe);
-	if (!(certsdir = env_get("CERTSDIR")))
+	if (!(certsdir = env_get("CERTDIR")))
 		certsdir = "/etc/indimail/certs";
 	if (!stralloc_copys(&certfile, certsdir))
 		strerr_die2x(111, FATAL, "out of memory");

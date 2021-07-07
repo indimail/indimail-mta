@@ -7,7 +7,7 @@ Release 1.1 Start 14/02/2021
 03. tcpclient.c: added client mode feature making prog optional
 - 04/03/2021
 04. tls.c: added option to match host with common name
-05. tcpclient.c, tcpserver.c: Use CERTSDIR env variable to specify custom
+05. tcpclient.c, tcpserver.c: Use CERTDIR env variable to specify custom
     certificate location
 06. tcpclient.c: added -m option to match host with common name
 - 06/03/2021

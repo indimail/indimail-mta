@@ -118,7 +118,7 @@ Never delay sending data; enable TCP_NODELAY.
 .B \-n \fIclientcert
 Instead of the default clientcert.pem certificate in @qsysconfdir@/certs,
 use the specified \fIclientcert\fR. The location of certificate directory
-can be changed by setting \fBCERTSDIR\fR environment variable.
+can be changed by setting \fBCERTDIR\fR environment variable.
 
 .TP
 .B \-c \fIcafile
@@ -193,7 +193,7 @@ Specifies the ciphers that should be used in SSL/TLS mode. See
 .I openssl(1)
 for more information.
 .TP
-.B CERTSDIR
+.B CERTDIR
 Sub-directory relative to @qsysconfdir@, having servercert.pem.
 Default is @qsysconfdir@/certs.
 

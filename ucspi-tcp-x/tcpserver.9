@@ -291,7 +291,7 @@ seconds. Default: 26.
 .TP
 .B \-s
 Use default cert servercert.pem in @qsysconfdir@/certs. The location
-of certificate directory can be changed by setting \fBCERTSDIR\fR
+of certificate directory can be changed by setting \fBCERTDIR\fR
 environment variable.
 .TP
 .B \-n \fIcertfile
@@ -319,6 +319,21 @@ Setting up tcpserver in IPv4 mode (-4) only or in compatibility mode, IPv4
 addresses are considered in their native format without the IPv6 prefix.
 Thus, usual IPv4 addresses can be entered in rules.cdb even in common
 IPv4/IPv6 bindings.
+
+.SH DNS RESOLVER SETTINGS
+.TP
+DNSCACHEIP
+.TP
+DNSREWRITEFILE
+Use $DNSCACHEIP to set the DNS resolver's IP(s) dynamically irrespectively
+from the settings in /etc/resolv.conf. The individual IPs are separated by
+blanks; IPv6 LLU addresses may be appended with the interface name
+following a '%' sign.  If the environment variable $LOCALDOMAIN is
+populated, this name will be appended to unqualified host names.
+Additional rewriting of local to public names is facilitated in case the
+file /etc/dnsrewrite exists and is populated, or alternatively, the
+environment variable $DNSREWRITEFILE points to a different file. See
+djbdns(7), qualification(5)
 
 .SH Loading Shared Objects
 tcpserver can load shared objects by specifying a shared object on the
@@ -371,7 +386,7 @@ Specifies the ciphers that should be used in SSL/TLS mode. See
 .I openssl(1)
 for more information.
 .TP
-.B CERTSDIR
+.B CERTDIR
 Sub-directory relative to @qsysconfdir@, having servercert.pem.
 Default is @qsysconfdir@/certs.
 
