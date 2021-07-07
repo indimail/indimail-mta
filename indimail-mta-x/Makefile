@@ -3766,8 +3766,10 @@ conf-sysconfdir conf-servicedir
 qmta-send.service: qmta-send.service.in warn-auto.sh
 	(sed -n '2,$$p' warn-auto.sh;cat $@.in) | $(edit) > $@
 
-indimail-env.5: indimail-env.9
-	$(edit) indimail-env.9 > $@
+indimail-env.5: indimail-env.9 conf-split conf-sysconfdir
+	$(edit) indimail-env.9 \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
+	>$@
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \
