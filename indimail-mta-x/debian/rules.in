@@ -105,14 +105,14 @@ install: build
 	# for indimail-mini we require an empty control directory
 	# so we create a directory and use that in indimail-mini.install
 	# and qmta.install
-	mkdir -p $(DESTDIR)/etc-mini/control/defaultqueue
-	mkdir -p $(DESTDIR)/etc-qmta/control/defaultqueue
-	echo "${prefix}/sbin/qmail-qmqpc" > $(DESTDIR)/etc-mini/control/defaultqueue/QMAILQUEUE
-	echo "${prefix}/sbin/qmail-queue" > $(DESTDIR)/etc-qmta/control/defaultqueue/QMAILQUEUE
-	echo "${qmaildir}/queue/qmta"     > $(DESTDIR)/etc-qmta/control/defaultqueue/QUEUEDIR
+	mkdir -p $(DESTDIR)/etc-mini/indimail/control/defaultqueue
+	mkdir -p $(DESTDIR)/etc-qmta/indimail/control/defaultqueue
+	echo "${prefix}/sbin/qmail-qmqpc" > $(DESTDIR)/etc-mini/indimail/control/defaultqueue/QMAILQUEUE
+	echo "${prefix}/sbin/qmail-queue" > $(DESTDIR)/etc-qmta/indimail/control/defaultqueue/QMAILQUEUE
+	echo "${qmaildir}/queue/qmta"     > $(DESTDIR)/etc-qmta/indimail/control/defaultqueue/QUEUEDIR
 	if [ -f indimail-mta.perms ] ; then \
-		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-mini/indimail-mini.perms; \
-		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-qmta/qmta.perms; \
+		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-mini/indimail/indimail-mini.perms; \
+		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-qmta/indimail/qmta.perms; \
 	fi
 	if [ -f qupgrade.sh ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
