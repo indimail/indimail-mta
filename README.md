@@ -10,6 +10,8 @@
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
 * [mess822](https://cr.yp.to/mess822.html "mess822")
 
+Details for indimail-mta is [here](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md)
+
 **Complation Status (from Github Actions)**
 
 [![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
