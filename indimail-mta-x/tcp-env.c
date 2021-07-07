@@ -1,5 +1,8 @@
 /*
  * $Log: tcp-env.c,v $
+ * Revision 1.13  2021-07-07 08:53:42+05:30  Cprogrammer
+ * removed setting of BOUNCEMAIL, WARNMAILx
+ *
  * Revision 1.12  2020-11-24 13:48:38+05:30  Cprogrammer
  * removed exit.h
  *
@@ -58,12 +61,7 @@ union sockunion saremote;
 unsigned long   remoteport;
 stralloc        remotename = { 0 };
 
-stralloc        bouncemail = { 0 };
-stralloc        bouncetmp = { 0 };
 char            temp[IPFMT + FMT_ULONG];
-
-void            bounce_mail(stralloc *, char *, char *);
-void            warn_mail(stralloc *, char *);
 
 #ifdef IN6_IS_ADDR_V4MAPPED
 void
@@ -104,7 +102,6 @@ main(argc, argv)
 	int             opt;
 	int             flagremoteinfo;
 	unsigned long   timeout;
-	char           *msg;
 #ifdef USE_SPF
 	strsalloc       ssa = { 0 };
 #endif
@@ -327,55 +324,6 @@ main(argc, argv)
 				die();
 		}
 	}
-	/*
-	 * If BOUNCEMAIL is already set, we bounce this host.  If it is not set,
-	 * do the MAPS lookup.
-	 */
-	if ((msg = env_get("BOUNCEMAIL")))
-	{
-		stralloc_copys(&bouncemail, msg);
-		bounce_mail(&bouncemail, NULL, NULL);
-		goto done;
-	}
-	if ((msg = env_get("WARNMAIL")))
-	{
-		stralloc_copys(&bouncemail, msg);
-		warn_mail(&bouncemail, NULL);
-		goto done;
-	}
-	/*
-	 * look in the MAPS RBL, and trust it to contain hosts we really don't
-	 * want to hear from.
-	 */
-#ifdef IPV6
-	switch (dns_maps(&bouncemail, (ip6_addr *) &saremote.sa6.sin6_addr, ".rbl.maps.vix.com."))
-#else
-	switch (dns_maps(&bouncemail, (ip_addr *) &saremote.sa4.sin_addr, ".rbl.maps.vix.com."))
-#endif
-	{
-	case DNS_MEM:
-		die();
-	case 0:
-		bounce_mail(&bouncemail, "553 ", "http://maps.vix.com/rbl/");
-		goto done;
-		break;
-	}
-	/*
-	 * Next, look in the MAPS DUL, and only add a warning header.
-	 */
-#ifdef IPV6
-	switch (dns_maps(&bouncemail, (ip6_addr *) &saremote.sa6.sin6_addr, ".dul.maps.vix.com."))
-#else
-	switch (dns_maps(&bouncemail, (ip_addr *) &saremote.sa4.sin_addr, ".dul.maps.vix.com."))
-#endif
-	{
-	case DNS_MEM:
-		die();
-	case 0:
-		warn_mail(&bouncemail, "http://maps.vix.com/dul/");
-		break;
-	}
-done:
 	sig_pipedefault();
 	execvp(*argv, argv);
 	die();
@@ -383,62 +331,10 @@ done:
 	return (0);
 }
 
-/*
- * return code "code" and message "msg".  If "code" is NULL, the msg
- * portion needs to contain the code.
- */
-void
-bounce_mail(stralloc * msg, char *code, char *source)
-{
-	if (!stralloc_copys(&bouncetmp, ""))
-		die();
-	if (code != NULL && !stralloc_cats(&bouncetmp, code))
-		die();
-	if (source != NULL)
-	{
-		if (!stralloc_cats(&bouncetmp, source))
-			die();
-		if (!stralloc_cats(&bouncetmp, " "))
-			die();
-	}
-	if (!stralloc_cat(&bouncetmp, msg))
-		die();
-	if (!stralloc_0(&bouncetmp))
-		die();
-	if (!env_put2("BOUNCEMAIL", bouncetmp.s))
-		die();
-}
-
-void
-warn_mail(stralloc * msg, char *source)
-{
-	static int      count = 0;
-	char            envar[10];
-
-	if (count > 9)
-		return;
-	str_copy(envar, "WARNMAILx");
-	if (source != NULL)
-	{
-		if (!stralloc_copys(&bouncetmp, source))
-			die();
-		if (!stralloc_cats(&bouncetmp, " "))
-			die();
-	}
-	if (!stralloc_cat(&bouncetmp, msg))
-		die();
-	if (!stralloc_0(&bouncetmp))
-		die();
-	envar[8] = '0' + count;
-	if (!env_put2(envar, bouncetmp.s))
-		die();
-	count++;
-}
-
 void
 getversion_tcp_env_c()
 {
-	static char    *x = "$Id: tcp-env.c,v 1.12 2020-11-24 13:48:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcp-env.c,v 1.13 2021-07-07 08:53:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
