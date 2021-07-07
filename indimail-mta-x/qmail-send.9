@@ -461,8 +461,8 @@ domains that do not have a local definition.
 .B qmail-send
 will execute an external program defined by the environment variable
 .I BOUNCEPROCESSOR
-when delivery to a recipient fails. The external program will be called
-with the following arguments
+(if set) when delivery to a recipient fails. The external program will be
+called with the following arguments
 
 .I original_message_file
 .I bounce_file
