@@ -99,6 +99,7 @@ f:::0644:/man3/:tlsacheck.3:tlsacheck.3
 f:::0644:/man5/:addresses.5:addresses.5
 f:::0644:/man5/:dot-qmail.5:dot-qmail.5
 f:::0644:/man5/:envelopes.5:envelopes.5
+f:::0644:/man5/:indimail-env.5:indimail-env.5
 f:::0644:/man5/:maildir.5:maildir.5
 f:::0644:/man5/:mbox.5:mbox.5
 f:::0644:/man5/:qmail-control.5:qmail-control.5

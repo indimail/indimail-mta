@@ -1,0 +1,961 @@
+.TH indimail-environ 5
+
+REPLACE @sysconfdir@, RELAY_CLEAR_MINUTEs
+
+.SH NAME
+indimail-environ \- indimail-mta environment variables
+
+.SH DESCRIPTION
+
+.TP
+ACCESSLIST
+Override @sysconfdir@/control/accesslist. Used by qmail-smtpd
+
+.TP
+ANTISPOOFING
+If the mailfrom is local and rcptto is local, do not accept
+mail without authentication. This allows you to prevent users
+from forging envelope sender address (unless MASQUERADE is set).
+
+.TP
+ASSIGNDIR
+Override @sysconfdir@/users/assign. Used by qmail-lspawn, qmail-newu,
+qmal-smtpd
+
+.TP
+AUTH_ALL, REQUIREAUTH
+AUTH_ALL enforce authenticated SMTP if relaying. REQUIREAUTH forces
+authenticated SMTP for all SMTP transactions before accepting MAIL FROM.
+
+.TP
+AUTHENTICATED
+Set by qmail-smtpd on successful auhentication
+
+.TP
+AUTHINFO
+Set by qmail-smtpd to the authenticated envelope sender address
+
+.TP
+AUTHSELF
+If set, qmail-spawn authenticates against local database, existence of
+users before deliery, rather than accepting delivery and then bouncing the
+mail after discovring that the account doesn't exist
+
+.TP
+AUTH_SMTP
+If set, qmail-remote will use authenticated SMTP with the remote host
+before starting delivery.
+
+.TP
+BADEXT
+Override @sysconfdir@/control/badext. List of extensions that are banned to
+be send as attachments in emails. Used by qmail-smtpd
+
+.TP
+BADEXTPATTERNS
+Override @sysconfdir@/control/badextpatterns. List of patterns that
+matchextensions that are banned to be send as attachments in emails. Used
+by qmail-smtpd
+
+.TP
+BADHELOCHECK
+If set, enfoces bad helo/ehlo check in qmail-smtpd.
+
+.TP
+BADHOSTCHECK
+Enforce badhost check which rejects connections with TCPREMOTEHOST matching
+entries in badhost control file. Used by qmail-smtpd
+
+.TP
+BADIPCHECK
+Enforce badhost check which rejects connections with TCPREMOTEIP matching
+entries in badip control file. Used by qmail-smtpd
+
+.TP
+BODYCHECK
+Override @sysconfdir@/control/bodycheck control file. Used by qmail-smtpd
+
+.TP
+BOUNCEMAIL
+If set, qmail-smtpd bounces mail with value of BOUNCEMAIL environment
+variable as the bounce message
+
+.TP
+BOUNCEPROCESSOR
+If set, qmail-send can execute an external program defined by this variable
+when delivery to a recipient fails.
+
+.TP
+BOUNCEQUEUE
+If set, qmail-send will use this instead of qmail-queue to queue a bounce
+mail
+
+.TP
+CACHELIFETIME
+Overrides control file @sysconfdir@/control/cachelifetime. Allows you to
+override the 300 seconds default of \fBsurblfilter\fR results in
+@sysconfdir@/control/cache directory.
+
+.TP
+CERTDIR
+Used by qmail-smtpd, qmail-remote, dotls, tcpclient, tcpserver to locate
+openssl certificates
+
+.TP
+CHECKRECIPIENT
+If set, qmail-smtpd checks for recipient status in local passwd(5),
+recipients.cdb or indimail-virtualdomain's MySQL database.
+
+.TP
+CHECKRELAY
+If set, qmail-smtpd will check if the user from indimail-virtual domains as
+successfully authenticated in the last RELAY_CLEAR_MINUTES minutes
+and allows the user to relay mails.
+
+.TP
+RELAY_CLEAR_MINUTES
+Override the default of RELAY_CLEAR_MINUTES minutes within which time an
+indimail-virtual domain user has authenticated, relaying will be allowed.
+
+.TP
+CLIENTCA
+A list of Certifying Authority (CA) certificates that are used to verify
+the client-presented certificates during a TLS-encrypted session. The
+default is @sysconfdir@/certs/clientca.pem. Used by qmail-smtpd
+
+.TP
+CLIENTCERT
+SSL certificate that is used to authenticate with the remote server during
+a TLS session. The default is @sysconfdir@/certs/clientcert.pem. Used by
+qmail-remote as the certificate for negotiating a TLS session.
+
+.TP
+CLIENTCRL
+Override the default @sysconfdir@/certs/clientcrl.pem A list of Certificate
+Revocation Lists (CRLs). If present it should contain the CRLs of the CAs
+in @sysconfdir@/certs/clientca.pem and client certs that will be checked for
+revocation.
+
+.TP
+CONTROLDIR
+The directory to use for control files. The default is @sysconfdir@/control.
+This is used by all indimail-mta to locate various control files. This is a
+powerful variable and allows indimail-mta to be configured dynamically.
+
+.TP
+CUGMAIL
+If set, qmail-smtpd allows email transaction within hosts in
+@sysconfdir@/control/locals and @sysconfdir@/control/virtualdomains.
+
+.TP
+DANETIMEOUT
+Max time to wait for a response from indimail-mta's DANE verification
+daemon. Used by qmail-remote, tlsacheck
+
+.TP
+DANE_VERIFICATION
+Turn on DANE verifiation. Used by qmail-remote
+
+.TP
+DATABYTES
+Max size of mail allowed to be injected in the queue or accepted from
+remote clients. Used by qmail-inject, qmail-smtpd, qmail-lspawn,
+qmail-rspawn. Overrides the @sysconfdir@/control/databytes.
+
+.TP
+DATABYTES_NOTIFY
+If set, qmail-smtpd logs transactions denied when clients exceeed DATABYTES
+limit
+
+.TP
+DATA_TIMEOUT
+Amount of time to wait in seconds for timing out selects in inotify.
+
+.TP
+DEATH
+Amount of time in seconds to wait before dying. Used by qmail-nullqueue
+
+.TP
+DEBUG
+Turns on debug in ldap-checkpwd, qhpsi, qmail-remote, authindi, authpgsql,
+vchkpass and other checkpassword modules. This shouldn't be set on
+production.
+
+.TP
+DEBUG_LOGIN
+Logs logins and passwords for ldap-checkpwd, qhpsi, qmail-remote, authindi,
+authpgsql, vchkpass and other checkpassword modules. This shouldn't be set
+on production. This is dangerous too.
+
+.TP
+DEFAULT
+Used by qmail-local and fastforward as the default recipient address. If
+this is not set, $EXT@$HOST is used.
+
+.TP
+DEFAULT_DOMAIN
+Used by various indimail-virtual programs and qmail-smtpd when domain
+component is missing
+
+.TP
+DISABLE_AUTH_LOGIN
+.TP
+DISABLE_AUTH_PLAIN
+.TP
+DISABLE_CNAME_LOOKUP
+.TP
+DISABLE_CRAM_MD5
+.TP
+DISABLE_CRAM_RIPEMD
+.TP
+DISABLE_CRAM_SHA1
+.TP
+DISABLE_CRAM_SHA256
+.TP
+DISABLE_CRAM_SHA512
+.TP
+DISABLE_DIGEST_MD5
+If set these variables stops qmail-smtpd from advertising these
+authentication mechanisms in EHLO command
+
+.TP
+DISABLE_PLUGIN
+Disables loading of external plugins in qmail-smtpd
+
+.TP
+DISPOSITION_HEADER
+Overrides the default Disposition-Notification-To header used by qnotify
+for sending notifications.
+
+.TP
+DKDOMAIN
+Override the default behaviour of qmail-dk from using the domain from the
+Return-Path, when setting the d= tag
+
+.TP
+DKEXCLUDEHEADERS
+Colon seperated list of headers to exclude from signing by qmail-dk.
+
+.TP
+DKIMEXPIRE
+Used by qmail-dkim to set the expire time in seconds for the signature.
+This overrides the x option in DKIMSIGNOPTIONS
+
+.TP
+DKIMIDENTITY
+Used by qmail-dkim to set the identity for the signature. This overrides
+the i option in DKIMSIGNOPTIONS
+
+.TP
+DKIMKEY
+When both DKIMSIGN and DKIMVERIFY are not set, this turns on DKIM signing
+by qmail-dkim, only for authenticated users and overrides the default
+DKIM private key @sysconfdir@/control/domainkeys/default.
+
+.TP
+DKIMPRACTICE
+qmail-dkim turns on SSP/ADSP signing practice for messages that fail DKIM
+verification
+
+.TP
+DKIMSIGN
+Path to DKIM private key. By default qmail-dkim uses
+@sysconfdir@/control/domainkeys/default
+
+.TP
+DKIMSIGNOPTIONS
+getopt sytle list of DKIM options used by qmail-dkim
+
+.TP
+DKIMVERIFY
+If set, qmail-dkim performs DKIM verification on the message.
+
+.TP
+DKKEY
+When both DKSIGN and DKVERIFY are not set, this turns on DK signing
+by qmail-dk, only for authenticated users and overrides the default
+domainkeys private key @sysconfdir@/control/domainkeys/default.
+
+.TP
+DKSIGN
+Path to domainkeys private key. By default qmail-dk uses
+@sysconfdir@/control/domainkeys/default
+
+.TP
+DKSIGNOPTIONS
+getopt sytle list of domainkeys options used by qmail-dk
+
+.TP
+DKVERIFY
+If set, qmail-dk performs domainkeys verification on the message.
+
+.TP
+DNSBLLIST
+Override @sysconfdir@/control/dnsbllist. A list of dnsbl providers that
+\fBqmail-smtpd\fR checks to identify blacklisted ip addresses.
+
+.TP
+DNSCACHEIP
+.TP
+DNSREWRITEFILE
+.TP
+LOCALDOMAIN
+Set DNSCACHEIP to make tcpserver set the DNS resolver's IP(s) dynamically
+irrespectively of settings in /etc/resolv.conf. The individual IPs are separated by
+blanks; IPv6 LLU addresses may be appended with the interface name
+following a '%' sign. If the environment variable $LOCALDOMAIN is
+populated, this name will be appended to unqualified host names.
+Additional rewriting of local to public names is facilitated in case the
+file /etc/dnsrewrite exists and is populated, or alternatively, the
+environment variable $DNSREWRITEFILE points to a different file. See
+djbdns(7), qualification(5) for more details
+
+.TP
+DOMAINBINDINGS
+Override control file sysconfdir/control/domainbindings which makes
+qmail-remote bind specific local ip addresses based on envelope sender
+address.
+
+.TP
+DOMAIN_MASQUERADE, PARANOID
+If using hostaccess feature in qmail-smtpd, DOMAIN_MASQUERADE allows other
+mails from other domains to be accepted from an IP which has been listed
+for another domain in thoe @sysconfdir@/control/hostaccess control file.
+settin PARANOID allows only specific domain-ip pairs listed in hostaccess
+control file to be accepted.
+
+.TP
+HOSTACCESS
+Override @sysconfdir@/control/hostaccess used by qmail-smtpd
+
+.TP
+DOVECOT_VERSION, NATIVE_CHECKPASSWORD
+If set, vchkpass checkpassword module Supports dovecot's native
+checkpassword authentication mechanism. i.e. vchkpass will run external
+prog on successful authentication and exit 1 if password is unacceptable.
+Totally opposite of what indimail's checkpassword programs do.
+
+
+.TP
+DTLINE
+Used by autoresponder condredirect condtomaildir dot-forward fastforward
+filterto forward maildirdeliver preline rrforward to get the value of
+Delivered-To header. Set by qmail-local and serialmail
+
+.TP
+ENFORCE_FQDN_HELO
+Used by qmail-smtpd to enforce clients to supply a fully qualified domain
+name in helo/ehlo command.
+
+.TP
+ENVHEADERS
+Override control file @sysconfdir@/control/envheaders. List of custom headers
+that qmail-queue should pass to qmail-local, qmail-remote in the queue.
+
+.TP
+ERROR_FD
+Override the default stderr fd of 2. qmail-queue clients can pass on custom
+error (=bounce) messages back on this file descriptor when they exit 88.
+Any qmail-queue client have to write the error message to STDERR and exit
+88, in order to use the custom  message. Used by all programs that use
+qmail-queue to queue messages.
+
+.TP
+EXT
+.TP
+EXT2
+Set by qmail-local, serialcmd
+
+.TP
+EXTRA
+Used by checkpassword programs when using dovecot
+
+.TP
+EXTRAQUEUE
+Override @sysconfdir@/control/extraqueue. If this control file exists, each
+line in the content is added as a recipient to the recipient list by
+qmail-queue
+
+.TP
+FILTERARGS
+A filter program with arguments to execute. Used by qmail-multi,
+spawn-filter to filter mail message through filters. The output of the
+filter becomes the modified / delivered message.
+
+.TP
+FORCE_TLS
+If set, qmail-smtpd forces TLS session with clients.
+
+.TP
+UID
+.TP
+GID
+Used by tcpserver to switch to \fIUID\fR, \fIGID\fR in the child when
+passed -U option.
+
+.TP
+GREETDELAY
+Overrides the control file @sysconfdir@/control/greetdelay used by
+qmail-smtpd
+
+.TP
+GREYIP
+If set, qmail-smtpd enables GREYLISTING against qmail-greyd running on the
+IP $GREYIP
+
+.TP
+SPAMFILTER, HAMEXITCODE, SPAMEXITCODE, SPAMIGNORE, SPAMIGNOREPATTERNS,
+SPAMREDIRECT, REJECTSPAM, UNSUREEXITCODE
+
+Used by qmail-spamfilter when spam filtering is enabled by setting SPAMFILTER.
+
+.TP
+HELOHOSTBYIP
+Override @sysconfdir@/control/helohostbyip contro file used by qmail-remote(8)
+
+.TP
+HOME
+Used by condredirect dot-forward fastforward filterto forward maildirserial
+new-inject process_queue qmail-inject qmail-qread qmail-showctl qmta-send
+qnotify qreceipt queue-fix replier rrforward rrt to load envirnment
+variables from $HOME/.defaultqueue directory
+
+.TP
+HONOR_BODYLENGTHTAG
+If set, qmail-dkim honors body length tag.
+
+.TP
+HOST
+Set by qmail-local, qmail-qfilter, serialcmd. Used by autoresponder,
+dot-forward, fastforward, qmail-inject, qnotify, qsmhook, srsfilter
+
+.TP
+HOSTNAME
+Used by qmail-queue for putting hosname against TCPREMOTEIP in Received
+headers.
+
+.TP
+INCLUDE_TRASH
+If set, maildirsize and qmail-smtpd ETRN will include mails in trash as
+part of the user's quota (size, count or size+count).
+
+.TP
+INITCMD, WAIT_INITCMD
+If set, svscan runs an initialization command defined by this variable
+before startup. If WAIT_INITCMD is set, svscan will wait for the command
+defined by INITCMD to exit.
+
+.TP
+LDAP_BASE, LDAP_BIND_DN, LDAP_BIND_PASSWD, LDAP_FILTER, LDAP_HOST, LDAP_PORT, LDAP_SCOPE
+Used by ldap-checkpasswd checkpassword authentication module
+
+.TP
+LEVEL2_TLD, LEVEL3_TLD
+Set this to override surblfilter control files level2_tld, level3_tld.
+
+.TP
+LOCAL
+Set by qmail-local, serialcmd. Used by replier program
+
+.TP
+LOCALDOMAINS
+If set, forces qmail-local to treat only those domains in control file
+@sysconfdir@/cotrol/localdomains as local. This restrict local deliveries for
+users only from certain domains.
+
+.TP
+LOGFILTER, LOGFD
+LOGFILTER is used by qmail-smtpd to log SMTP transactions marked as spam to
+a fifo created by qmail-logfilter. If this FIFO is pre-opened, it can be
+specied in LOGFD
+
+.TP
+LOGHEADERFD
+
+.TP
+LOGHEADERS
+Override control file @sysconfdir@/control/logheaders used by qmail-queue.
+
+.TP
+LOGLOCK
+indimail-mta uses multiple queues with each queue being served by specific
+qmail-todo, qmail-send, qmail-lspawn, qmail-rspawn and qmail-clean
+processes. The standard output and errors all go to a single fd (usually
+setup by supervise). The output can get jumbled up. Setting this prevents
+log output to be written only with it is a complete line.
+
+.TP
+LOGNAME
+Used by qmail-inject, new-inject
+
+.TP
+MAIL
+Used by maildir2mbox program
+
+.TP
+MAILARCHIVE
+Override @sysconfdir@/control/mailarchive control file used by qmail-queue.
+
+.TP
+MAILDIR
+Used by maildir2mbox, mbox2maildir and maildirwatch programs
+
+.TP
+MAILHOST
+.TP
+NAME
+Used by new-inject, qmail-inject. unset by sendmail
+
+.TP
+MAILNAME
+Used by new-inject, qmail-inject and set by sendmail
+
+.TP
+MAILTMP
+Used by maildir2mbox
+
+.TP
+MAILUSER
+Used by new-inject and, qmail-inject
+
+.TP
+MAKE_SEEKABLE
+Used by qmail-spamfilter and autoresponder
+
+.TP
+MASQUERADE
+If set, authenticated users will be allowed to use envelope sender
+different from that of the authenticated address.
+
+.TP
+MAXPERIP
+Used by tcpserver to limit connections from one IP.
+
+.TP
+MAX_RCPT_ERRCOUNT
+Maximum invalid recipients that qmail-smtpd will allow in a single SMTP
+transaction.
+
+.TP
+MAXRECIPIENTS
+Maximum recipients that qmail-smtpd will allow in a single SMTP
+transaction.
+
+.TP
+MAX_TOLERANCE
+.TP
+MIN_FREE
+.TP
+MIN_PENALTY
+Used by qmail-remote when delivery to remote host result in temporary
+errors.
+
+.TP
+MORESMTPROUTESCDB
+Override @sysconfdir@/control/moresmtproutes.cdb used by qmail-remote
+
+.TP
+MYSQL_LIB
+Override @sysconfdir@/control/mysql_lib control file used by qmail-smtpd,
+qmail-lspawn, qmail-respawn, qmail-showctl, maildirsize, qmail-sql,
+sql-dataabase, ctrlenv
+
+.TP
+MYSQL_TIMEOUT
+Timeout for connecting to MySQL. Used by qmail-smtpd, qmail-sql,
+sql-database, ctrlenv
+
+.TP
+NEWSENDER
+Used by forward, rrforward. set by qmail-local
+
+.TP
+NODNSCHECK
+If set, qmail-smtpd disables dns check of the envelope sender domain
+
+.TP
+NOSIGNATUREDOMAINS
+Override control file @sysconfdir@/nosignaturedomains used by qmail-dkim
+
+.TP
+NOTLSHOSTS
+override @sysconfdir@/control/notlshosts used by qmail-remote
+
+.TP
+NULLQUEUE
+If set, qmail-nullqueue gets used to drain the message without putting it
+in the queue. This overrides QMAILQUEUE environment variable.
+
+.TP
+ONFAILURE_REMOTE, ONSUCCESS_REMOTE, ONTEMPORARY_REMOTE
+Used by qmail-remote to execute external program / scripts after delivery
+or when a temporary failure occur.
+
+.TP
+ORIGINIPFIELD
+Overrides @sysconfdir@/control/originipfield used by qmail-remote
+
+.TP
+OUTGOINGIP
+Overrides @sysconfdir@/control/outgoingip used by qmail-remote
+
+.TP
+PASSWORD_COMMAND
+The password command to execute by the qmail-poppass daemon
+
+.TP
+SMTP_PLUGIN, SMTP_PLUGIN_SYMB
+used by qmail-smtpd to load smtp plugins
+
+.TP
+PLUGINDIR
+Directory to look for plugins by qhpsi and qmail-smtpd
+
+.TP
+PORT_QMQP
+Override the default port 628 used by qmail-qmqpc
+
+.TP
+POSTAUTH
+Program to execute after successful authentication by sys-checkpwd,
+vchkpass, ldap-checkpassword, pam-checkpwd, authindi, authpgsql
+
+.TP
+PROTO
+Set by tcpclient, tcpserver, sendmail, tcp-env
+
+.TP
+PWD
+
+.TP
+QHPSI, QHPSIMAXSIZE, QHPSIMINSIZE, QHPSIRC, QHPSIRN
+Used by qhpsi
+
+.TP
+QMAILDEFAULTDOMAIN, QMAILDEFAULTHOST, QMAILHOST, QMAILIDHOST, QMAILINJECT,
+QMAILINJECT_FORCE_SRS, QMAILINJECT_SKIP_SRS, QMAILMFTFILE, QMAILNAME,
+QMAILPLUSDOMAIN
+
+.TP
+QMAILLOCAL, QMAILREMOTE
+Used by spawn-filter to execute qmail-local, qmail-remote binaries
+
+.TP
+QMAILQUEUE
+Used by all qmail-queue clients condredirect, dot-forward, fastforward,
+filterto, forward, maildirserial, new-inject, ofmipd, qmail-inject,
+qmail-local, qmail-qmqpd, qmail-qmtpd, qmail-queue, qmail-send, qmta-send,
+qnotify, qreceipt, replier, rrforward, rrt, slowq-send, smtpd, srsfilter
+
+.TP
+QMAILRCPTS
+Used by qmail-qfilter, surblfiter
+
+.TP
+QMAILSHOST
+QMAILSUSER
+Used by new-inject, qmail-inject
+
+.TP
+QMAILUSER
+used by new-inject, qmail-inject. Set by qmail-qfilter, sendmail. Unset by
+autoresponder
+
+.TP
+QMTPCODE
+Used by qmail-remote, rrt
+
+
+.TP
+QMTPTEXT
+Used by qmail-remote
+
+.TP
+QQEH
+Used by condredirect, forward, maildirdeliver, preline, qmail-queue. Set
+by qmail-local, spawn-filter.
+
+.TP
+QREGEX
+Used by qmail-smtpd, qmail-inject, spawn-filter, qmail-send, slowq-send,
+drate, uacl
+
+.TP
+QUARANTINE
+Override @sysconfdir@/control/quarantine control file Used by qmail-queue.
+
+.TP
+QUERY_CACHE
+Used by qmail-lspawn
+
+.TP
+QUEUE_BASE, QUEUE_START, QUEUE_COUNT, QUEUEDIR
+Used by drate, qmail-daemon, qmail-qread, qmail-rm, qmail-showctl,
+qmail-tcpok, qmail-tcpto, qmail-multi, spawn-filter, condredirect,
+dot-forward, fastforward, filterto, forward, maildirserial, new-inject,
+process_queue, qmail-inject, qmail-qread, qmail-showctl, qmta-send,
+qnotify, qreceipt, queue-fix, replier, rrforward, rrt to select a queue
+from indimail's multi queue.
+
+.TP
+QUEUE_PLUGIN_SYMB
+Used by qhpsi
+
+.TP
+QUEUEPROG
+Override the the queue program qmail-queue executed by qmail-multi to queue
+the mail.
+
+.TP
+RATELIMIT_DIR, RATELIMIT_INTERVAL
+Used by qmail-send, slowq-send
+
+.TP
+RBLEHLO
+RBLGREETING
+RBLSMTPD
+Used by rblsmtpd
+
+.TP
+RECIPIENT
+Used by autoresponder, checkaddr, checkdomain, fastforward, ifaddr, iftocc,
+iftoccfrom, qnotify. Set by qmail-local, serialcmd
+
+.TP
+REJECTVIRUS, VIRUSFORWARD
+Used by qmail-queue. Infected mails will be quarantined to the email
+defined by VIRUSFORWARD. This will work only if REJECTVIRUS is not equal to
+1. Setting VIRUSFORWARD sets the X-Quarantine-ID containing the list of
+original recipient list is added.
+
+.TP
+RELAYCLIENT
+Used by dnsbl, ofmipd, qmail-dk, qmail-dkim, qmail-qmtpd, qmail-queue,
+qmail-spamfilter, qmail-smtpd. Set by sendimail, tcpserver
+
+.TP
+RELAYCLIENT_NODKIMVERIFY
+used by qmail-dkim
+
+.TP
+RELAYCLIENT_NODKVERIFY
+used by qmail-dk
+
+.TP
+REMOTEINFO
+Used by ofmipd
+
+.TP
+REMOVEHEADERS
+override @sysconfdir@/control/removeheaders used by qmail-queue
+
+.TP
+REQPTR
+If the environment variable REQPTR is set and TCPREMOTEHOST is absent,
+qmail-smtpd rejects connections from unresolvable IP address (hosts without
+reverse  DNS). qmail-smtpd returns permanent error code 553 to the client.
+TCPREMOTEHOST environment variable is removed by tcpserver(1) if remote
+host (TCPREMOTEIP) does not have a reverse DNS record.
+
+.TP
+ROUTE_NULL_USER
+If set, qmail-lspawn redirects double bounces to a mailbox
+
+.TP
+QMTPROUTE
+SMTPROUTE
+Used by qmail-remote, set by qmail-rspawn
+.TP
+SMTPROUTEFILE
+QMTPROUTEFILE
+Override @sysconfdir@/control/[smtproutes,qmtproutes] control file used by
+qmail-remote
+.TP
+ROUTES
+Used by qmail-remote
+If set as "smtp", qmail-rspawn sets the SMTPROUTE variable for a
+indimail-virtualdomain user. If set as "qmtp", qmail-rspawn sets the
+QMTPROUTE variable for a indimail-virtualdomain user.
+
+.TP
+RPLINE
+Used by condtomaildir, dot-forward, maildirdeliver, preline, qnotify to get
+the Return-Path. Set by qmail-local and serialcmd
+
+.TP
+SCANCMD, SCANDIR
+Used by qscanq-stdin, qhpsi
+
+.TP
+SCANINTERVAL, SCANLOG
+Used by svscan
+
+.TP
+SECURE_AUTH
+Enforces TLS when doing authenticated SMTP in qmail-smtpd. In qmail-remote,
+authenticated SMTP gets disabled unless TLS is used.
+
+.TP
+SENDER
+Used by autoresponder, condredirect, fastforward, filterto, qnotify,
+qreceipt, qsmhook, replier, replier-config, qmail-smtpd, srsfilter. Set by
+qmail-local, serialcmd
+
+.TP
+SERVERCERT
+Overrides the default certificate @sysconfdir@/certs/servercert.pem used by
+qmail-smtpd.
+
+.TP
+SERVICE_RESPONDER
+Used by autoresponder
+
+.TP
+SETSID
+Used by svscan. If set, the svscan calls setsid(2) to make the child a
+session leader.
+
+.TP
+SHUTDOWN
+Path to a script / command used by svscan to execute on svc -d
+
+.TP
+SIGNATUREDOMAINS
+Override @sysconfdir@/control/signaturedomains control file used by
+qmail-dkim
+
+.TP
+SIGNKEY
+Override @sysconfdir@/control/signkey control file used by qmail-smtpd,
+qmail-remote.
+
+.TP
+SIGN_PRACTICE
+Used by qmail-dkim to set DKIM SSP/ADSP sign practice
+
+.TP
+SKIPDNSBL
+If set, qmail-smtpd skips dnsbl check
+
+.TP
+SMTPS
+If set, qmail-smtpd starts a tls session to support the deprecated SMTPS
+protocol.
+
+.TP
+SMTPUTF8
+
+.TP
+START_PLUGIN
+
+.TP
+START_PLUGIN_SYMB
+
+.TP
+STARTTLS
+
+.TP
+STRIP_DOMAIN
+
+.TP
+SURBLDOMAINWHITE
+
+.TP
+SURBLRCPT
+
+.TP
+SV_PWD
+
+.TP
+TCP6LOCALIP
+TCP6REMOTEIP
+TCPLOCALHOST
+TCPLOCALIP
+TCPLOCALPORT
+TCPREMOTEHOST
+TCPREMOTEINFO
+TCPREMOTEIP
+See tcp-environ(5)
+
+.TP
+TCPPARANOID
+Set by tcpserver host has reverse DNS but IP does not match remoteip
+
+.TP
+TLSADOMAINS
+Override @sysconfdir@/control/tlsadomains used by qmail-remote
+
+.TP
+TLS_CERTFILE
+Used by sslerator
+
+.TP
+TLS_CIPHER_LIST
+Used by sslerator, qmail-smtpd
+
+.TP
+TMPDIR
+Used as path for creating temporary files by autoresponder, qarf, qmail-dk,
+qmail-dkim, qmail-qfilter, qmail-multi, qnotify, qmail-smtpd, spawn-filter
+
+.TP
+TODO_INTERVAL
+Used by qmail-todo, slowq-send and qmta-send
+
+.TP
+TRY_NEXT_MX_HELO_FAIL
+Used by qmail-remote. If set, qmail-remote tries the next mx when ehlo/helo
+command fails with a temporary error
+
+.TP
+UFLINE
+used by dot-forward, preline. Set by qmail-local
+
+.TP
+UNSIGNED_FROM
+If set, qmail-dkim allows unsigned From headers in DKIM-Signature
+
+.TP
+UNSIGNED_SUBJECT
+If set, qmail-dkim allows unsigned Subject headers in DKIM-Signature
+
+.TP
+USE_DLMOPEN
+If set, tcpserver uses dlmopen(3) instead of dlopen(3) to load tcpserver(1)
+modules.
+
+.TP
+USE_FNMATCH
+If set, qmail-smtpd, qmail-inject, spawn-filter uses file pattern matching
+fnmatch(3) function to match addresses.
+
+.TP
+USE_FSYNC, USE_SYNCDIR
+Used by qmail-queue to sync files after queuing.
+
+.TP
+USE_QPWGR
+Use internal getpwent, getgrent, getpwnam, getgrnam, getpwuid, getgrgid
+functions in qmail-getpw, qmail-direct, serialcmd, sys-checkpwd, qhpsi,
+qscanq, cleanq, qmail-lspawn, qmail-rspawn, qmail-queue, qmta-send,
+qmail-showctl, qmail-start, qmail-daemon, slowq-start, queue-fix
+
+.TP
+USER
+Used by dot-foward, new-inject, qmail-direct, qmail-inject. Set by
+qmail-local, serialcmd
+
+.TP
+USE_SETGROUPS
+Used by qmail-start, slowq-start to add supplementary groups for daemons
+qmail-todo, qmail-send, qmail-lspawn, qmail-rspawn and qmail-clean
+
+.TP
+VIRTUAL_PKG_LIB
+Used by qmail-smtpd, qmail-lspawn, qmail-rpawn, maildirsie, qmail-showctl
+to load indimail-virtualdomains library.
+
+.TP
+VIRUSCHECK
+Used by qmail-smtpd, qmail-spamfilter to execute qscanq for checking if
+the mail is infected
