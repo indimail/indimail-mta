@@ -265,7 +265,9 @@ port 53.
 .B \-p
 Paranoid. After looking up the remote host name in DNS, look up the IP
 addresses in DNS for that host name, and remove the environment variable
-$TCPREMOTEHOST if none of the addresses match the client's IP address.
+$TCPREMOTEHOST if none of the addresses match the client's IP address. The
+environment variable TCPPARANOID is set if host has a reverse dns but IP
+does not match TCPREMOTEIP
 .TP
 .B \-P
 (Default.) Not paranoid. 
