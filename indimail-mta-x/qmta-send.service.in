@@ -2,7 +2,7 @@
 # $Id: qmta-send.service.in,v 1.2 2021-07-04 23:35:11+05:30 Cprogrammer Exp mbhangui $
 #
 [Unit]
-Description=mta-send Mail Transport Agent
+Description=qmta Mail Transport Agent
 After=local-fs.target network.target
 
 [Service]
