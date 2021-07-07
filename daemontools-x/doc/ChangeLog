@@ -50,8 +50,10 @@ Release 1.1 Start 27/02/2021
 26. svscan_rc: implemented addtional rc commands
 27. envdir: handle new error code for recursive loops
 28. envdir: -c option to clear existing environment variables
-- 03/05/2021
+- 03/07/2021
 29. moved prot.c, prot.h to libqmail
+- 07/07/2021
+30. svctool: added --print-variable option
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

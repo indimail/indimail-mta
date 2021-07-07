@@ -179,6 +179,7 @@ Release 2.13 Start 14/02/2021
     qmail-showctl.c queue-fix.c: allow $HOME/.defaultqueue for root
 - 07/07/2021
 113. added indimail-env man page
+114. svctool: added --print-variable option
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

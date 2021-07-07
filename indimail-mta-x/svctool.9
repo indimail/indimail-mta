@@ -969,14 +969,6 @@ Known values for OPTION are:
   service_name   - name of supervise service without path
                    e.g. (qmail-smtpd.25)
 
---print-variables
-  --servicedir=service_path
-  --service-name=service_name
-
-  service_path   - Path where supervise service will be installed
-  service_name   - name of supervise service without path
-                   e.g. (qmail-smtpd.25)
-
 --import-variables=file
   --servicedir=service_path
   --service-name=service_name
@@ -1015,6 +1007,14 @@ Known values for OPTION are:
   Restore all variables to orignal state for all service in
   @servicedir@ and @qsysconfdir@/control/defaultqueue
   service_path   - Path where supervise service will be installed
+
+--print-variables
+  --servicedir=service_path
+  --service-name=service_name
+
+  service_path   - Path where supervise service will be installed
+  service_name   - name of supervise service without path
+                   e.g. (qmail-smtpd.25)
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
 --config=add-alt|remove-alt|qselinux|iselinux|inittab
