@@ -1,7 +1,7 @@
 #
 #Directories
 #
-%dir %attr(0555,root,qmail)        @qmaildir@
+%dir %attr(0555,root,qmail)        @qmaildir@ #indimail-mini #qmta
 %dir %attr(2775,alias,qmail)       @qmaildir@/alias
 %dir %attr(0775,qscand,qscand)     @qmaildir@/clamd
 %dir %attr(0775,root,indimail)     @qmaildir@/domains
@@ -21,15 +21,15 @@
 %dir %attr(0755,root,root)         @mandir@/man7
 %dir %attr(0755,root,root)         @mandir@/man8
 %dir %attr(0755,root,qmail)        @prefix@/lib/indimail/plugins
-%dir %attr(2755,root,qmail)        @qsysconfdir@
+%dir %attr(2755,root,qmail)        @qsysconfdir@ #indimail-mini #qmta
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/certs
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/tcp
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/users
-%dir %attr(2775,indimail,qmail)    @qsysconfdir@/control
+%dir %attr(2775,indimail,qmail)    @qsysconfdir@/control #indimail-mini #qmta
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/control/cache
 %dir %attr(2755,indimail,qmail)    @qsysconfdir@/control/domainkeys
 %dir %attr(2775,qmailr,qmail)      @qsysconfdir@/control/ratelimit
-%dir %attr(0755,indimail,qmail)    @qsysconfdir@/control/defaultqueue
+%dir %attr(0755,indimail,qmail)    @qsysconfdir@/control/defaultqueue #indimail-mini #qmta
 #
 # Binaries
 #
@@ -52,7 +52,7 @@
 %attr(0755,root,root)  @prefix@/bin/cidr
 %attr(0755,root,root)  @prefix@/bin/condredirect
 %attr(0755,root,root)  @prefix@/bin/condtomaildir
-%attr(0755,root,root)  @prefix@/bin/datemail
+%attr(0755,root,root)  @prefix@/bin/datemail #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/dk-filter
 %attr(0755,root,root)  @prefix@/bin/dknewkey
 %attr(0755,root,root)  @prefix@/bin/dktest
@@ -61,45 +61,45 @@
 %attr(0755,root,root)  @prefix@/bin/except
 %attr(0755,root,root)  @prefix@/bin/fastforward
 %attr(0755,root,root)  @prefix@/bin/filterto
-%attr(0755,root,root)  @prefix@/bin/forward
+%attr(0755,root,root)  @prefix@/bin/forward #qmta
 %attr(0755,root,root)  @prefix@/bin/ifaddr
 %attr(0755,root,root)  @prefix@/bin/iftocc
 %attr(0755,root,root)  @prefix@/bin/iftoccfrom
-%attr(0755,root,root)  @prefix@/bin/maildir2mbox
+%attr(0755,root,root)  @prefix@/bin/maildir2mbox #qmta
 %attr(0755,root,root)  @prefix@/bin/maildircmd
 %attr(0755,root,root)  @prefix@/bin/maildirdeliver
 %attr(0755,root,root)  @prefix@/bin/maildirsize
 %attr(0755,root,root)  @prefix@/bin/maildirqmtp
 %attr(0755,root,root)  @prefix@/bin/maildirserial
 %attr(0755,root,root)  @prefix@/bin/maildirsmtp
-%attr(0755,root,root)  @prefix@/bin/maildirwatch
-%attr(0755,root,root)  @prefix@/bin/mailsubj
+%attr(0755,root,root)  @prefix@/bin/qmaildirwatch #qmta
+%attr(0755,root,root)  @prefix@/bin/mailsubj #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/mbox2maildir
 %attr(0755,root,root)  @prefix@/bin/inewaliases
 %attr(0755,root,root)  @prefix@/bin/newinclude
 %attr(0755,root,root)  @prefix@/bin/new-inject
 %attr(0755,root,root)  @prefix@/bin/ofmipname
-%attr(0755,root,root)  @prefix@/bin/predate
+%attr(0755,root,root)  @prefix@/bin/predate #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/preline
 %attr(0755,root,root)  @prefix@/bin/printforward
 %attr(0755,root,root)  @prefix@/bin/printmaillist
 %attr(0755,root,root)  @prefix@/bin/qarf
 %attr(0755,root,root)  @prefix@/bin/qmail-cat
-%attr(0755,root,root)  @prefix@/bin/qmaildirmake
-%attr(0755,root,root)  @prefix@/bin/qmail-inject
+%attr(0755,root,root)  @prefix@/bin/qmaildirmake #qmta
+%attr(0755,root,root)  @prefix@/bin/qmail-inject #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/qmail-qfilter
 %attr(0755,root,root)  @prefix@/bin/qmail-qread
 %attr(0755,root,root)  @prefix@/bin/qmail-rm
-%attr(0755,root,root)  @prefix@/bin/qmail-showctl
+%attr(0755,root,root)  @prefix@/bin/qmail-showctl #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/qnotify
 %attr(0755,root,root)  @prefix@/bin/qreceipt
-%attr(0755,root,root)  @prefix@/bin/queue-fix
+%attr(0755,root,root)  @prefix@/bin/queue-fix #qmta
 %attr(0755,root,root)  @prefix@/bin/replier
 %attr(0755,root,root)  @prefix@/bin/replier-config
-%attr(0755,root,root)  @prefix@/bin/irmail
+%attr(0755,root,root)  @prefix@/bin/irmail #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/rrforward
 %attr(0755,root,root)  @prefix@/bin/rrt
-%attr(0755,root,root)  @prefix@/bin/sendmail
+%attr(0755,root,root)  @prefix@/bin/sendmail #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/serialcmd
 %attr(0755,root,root)  @prefix@/bin/serialqmtp
 %attr(0755,root,root)  @prefix@/bin/serialsmtp
@@ -107,7 +107,7 @@
 %attr(0755,root,root)  @prefix@/bin/setmaillist
 %attr(0755,root,root)  @prefix@/bin/spawn-filter
 %attr(0755,root,root)  @prefix@/bin/spfquery
-%attr(0755,root,root)  @prefix@/bin/srsfilter
+%attr(0755,root,root)  @prefix@/bin/srsfilter #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/inotify
 %attr(0755,root,root)  @prefix@/bin/swaks
 %attr(0755,root,root)  @prefix@/bin/tcp-env
@@ -136,12 +136,12 @@
 %attr(0755,root,root)  @prefix@/sbin/cdbgetm
 %attr(0755,root,root)  @prefix@/sbin/cdbmake
 %attr(0755,root,root)  @prefix@/sbin/qmail-newmrh
-%attr(0755,root,root)  @prefix@/sbin/qmail-tcpok
-%attr(0755,root,root)  @prefix@/sbin/qmail-tcpto
+%attr(0755,root,root)  @prefix@/sbin/qmail-tcpok #qmta
+%attr(0755,root,root)  @prefix@/sbin/qmail-tcpto #qmta
 %attr(0755,root,root)  @prefix@/sbin/qmail-multi
 %attr(0755,root,root)  @prefix@/sbin/qmail-spamfilter
 %attr(0755,root,root)  @prefix@/sbin/qmail-nullqueue
-%attr(0755,root,root)  @prefix@/sbin/qmail-qmqpc
+%attr(0755,root,root)  @prefix@/sbin/qmail-qmqpc #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/sbin/qscanq-stdin
 %attr(0755,root,root)  @prefix@/sbin/ldap-checkpwd
 %attr(0755,root,root)  @prefix@/sbin/plugtest
@@ -151,10 +151,11 @@
 
 %attr(0751,root,root)  @prefix@/sbin/qmail-daemon
 %attr(0751,root,root)  @prefix@/sbin/qmail-start
-%attr(0751,root,root)  @prefix@/sbin/qmail-lspawn
-%attr(0751,root,root)  @prefix@/sbin/qmail-rspawn
-%attr(0751,root,root)  @prefix@/sbin/qmail-clean
+%attr(0751,root,root)  @prefix@/sbin/qmail-lspawn #qmta
+%attr(0751,root,root)  @prefix@/sbin/qmail-rspawn #qmta
+%attr(0751,root,root)  @prefix@/sbin/qmail-clean #qmta
 %attr(0751,root,root)  @prefix@/sbin/qmail-send
+%attr(0751,root,root)  @prefix@/sbin/qmta-send #qmta
 %attr(0751,root,root)  @prefix@/sbin/qmail-todo
 %attr(0755,root,root)  @prefix@/sbin/qmail-greyd
 %attr(0755,root,root)  @prefix@/sbin/greydaemon
@@ -162,8 +163,8 @@
 %attr(0755,root,root)  @prefix@/sbin/surblfilter
 %attr(0755,root,root)  @prefix@/sbin/surblqueue
 %attr(0755,root,root)  @prefix@/sbin/qmail-getpw
-%attr(0755,root,root)  @prefix@/sbin/qmail-local
-%attr(0755,root,root)  @prefix@/sbin/qmail-remote
+%attr(0755,root,root)  @prefix@/sbin/qmail-local #qmta
+%attr(0755,root,root)  @prefix@/sbin/qmail-remote #qmta
 %attr(0755,root,root)  @prefix@/sbin/qmail-pw2u
 %attr(0755,root,root)  @prefix@/sbin/relaytest
 %attr(0755,root,root)  @prefix@/sbin/splogger
@@ -174,7 +175,7 @@
 %attr(0755,root,root)  @prefix@/sbin/ctrlenv
 %attr(0751,root,root)  @prefix@/sbin/qmail-newu
 %attr(0755,root,root)  @prefix@/sbin/recipient-cdb
-%attr(0755,root,qmail) @prefix@/sbin/qmail-direct
+%attr(0755,root,qmail) @prefix@/sbin/qmail-direct #indimail-mini #qmta
 
 %attr(0755,root,root)  @libexecdir@/cdbmake-12
 %attr(0755,root,root)  @libexecdir@/cdbmake-sv
@@ -293,22 +294,23 @@
 # docs
 #
 %attr(0444,root,root)  @shareddir@/doc/COPYING
-%attr(0444,root,root)  @shareddir@/doc/README.license
-%attr(0444,root,root)  @shareddir@/doc/README.indimail-mta
+%attr(0444,root,root)  @shareddir@/doc/COPYING-indimail-mta
+%attr(0444,root,root)  @shareddir@/doc/README.license #indimail-mini
+%attr(0444,root,root)  @shareddir@/doc/README.indimail-mta #indimail-mini
 %attr(0444,root,root)  @shareddir@/doc/README.EXTTODO
 %attr(0444,root,root)  @shareddir@/doc/README.clamav
 %attr(0444,root,root)  @shareddir@/doc/README.greylist
 %attr(0444,root,root)  @shareddir@/doc/README.filters
 %attr(0444,root,root)  @shareddir@/doc/README.recipients
-%attr(0444,root,root)  @shareddir@/doc/README.srs
+%attr(0444,root,root)  @shareddir@/doc/README.srs #indimail-mini
 %attr(0444,root,root)  @shareddir@/doc/README.status
 %attr(0444,root,root)  @shareddir@/doc/README.surbl
-%attr(0444,root,root)  @shareddir@/doc/CREDITS
+%attr(0444,root,root)  @shareddir@/doc/CREDITS #indimail-mini
 %attr(0444,root,root)  @shareddir@/doc/FROMISP
 %attr(0444,root,root)  @shareddir@/doc/TOISP
 %attr(0444,root,root)  @shareddir@/doc/AUTOTURN
 %attr(0444,root,root)  @shareddir@/doc/INTERNALS
-%attr(0444,root,root)  @shareddir@/doc/INSTALL-MINI
+%attr(0444,root,root)  @shareddir@/doc/INSTALL-MINI #indimail-mini
 %attr(0444,root,root)  @shareddir@/doc/INSTALL.alias
 %attr(0444,root,root)  @shareddir@/doc/INSTALL.control
 %attr(0444,root,root)  @shareddir@/doc/INSTALL.maildir
@@ -353,31 +355,31 @@
 %attr(0644,root,root) @mandir@/man1/condredirect.1.gz
 %attr(0644,root,root) @mandir@/man1/condtomaildir.1.gz
 %attr(0644,root,root) @mandir@/man1/date@.1.gz
-%attr(0644,root,root) @mandir@/man1/datemail.1.gz
+%attr(0644,root,root) @mandir@/man1/datemail.1.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man1/dot-forward.1.gz
 %attr(0644,root,root) @mandir@/man1/drate.1.gz
 %attr(0644,root,root) @mandir@/man1/except.1.gz
 %attr(0644,root,root) @mandir@/man1/fastforward.1.gz
 %attr(0644,root,root) @mandir@/man1/filterto.1.gz
-%attr(0644,root,root) @mandir@/man1/forward.1.gz
+%attr(0644,root,root) @mandir@/man1/forward.1.gz #qmta
 %attr(0644,root,root) @mandir@/man1/ifaddr.1.gz
 %attr(0644,root,root) @mandir@/man1/iftocc.1.gz
 %attr(0644,root,root) @mandir@/man1/iftoccfrom.1.gz
-%attr(0644,root,root) @mandir@/man1/maildir2mbox.1.gz
+%attr(0644,root,root) @mandir@/man1/maildir2mbox.1.gz #qmta
 %attr(0644,root,root) @mandir@/man1/mbox2maildir.1.gz
 %attr(0644,root,root) @mandir@/man1/maildircmd.1.gz
 %attr(0644,root,root) @mandir@/man1/maildirdeliver.1.gz
 %attr(0644,root,root) @mandir@/man1/maildirqmtp.1.gz
 %attr(0644,root,root) @mandir@/man1/maildirserial.1.gz
 %attr(0644,root,root) @mandir@/man1/maildirsmtp.1.gz
-%attr(0644,root,root) @mandir@/man1/maildirwatch.1.gz
-%attr(0644,root,root) @mandir@/man1/mailsubj.1.gz
+%attr(0644,root,root) @mandir@/man1/qmaildirwatch.1.gz #qmta
+%attr(0644,root,root) @mandir@/man1/mailsubj.1.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man1/matchup.1.gz
 %attr(0644,root,root) @mandir@/man1/inewaliases.1.gz
 %attr(0644,root,root) @mandir@/man1/newinclude.1.gz
 %attr(0644,root,root) @mandir@/man1/new-inject.1.gz
 %attr(0644,root,root) @mandir@/man1/plugtest.1.gz
-%attr(0644,root,root) @mandir@/man1/predate.1.gz
+%attr(0644,root,root) @mandir@/man1/predate.1.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man1/preline.1.gz
 %attr(0644,root,root) @mandir@/man1/printforward.1.gz
 %attr(0644,root,root) @mandir@/man1/printmaillist.1.gz
@@ -385,7 +387,7 @@
 %attr(0644,root,root) @mandir@/man1/qarf.1.gz
 %attr(0644,root,root) @mandir@/man1/qmail-cat.1.gz
 %attr(0644,root,root) @mandir@/man1/cidr.1.gz
-%attr(0644,root,root) @mandir@/man1/qmaildirmake.1.gz
+%attr(0644,root,root) @mandir@/man1/qmaildirmake.1.gz #qmta
 %attr(0644,root,root) @mandir@/man1/qmail-qfilter.1.gz
 %attr(0644,root,root) @mandir@/man1/qmail-rm.1.gz
 %attr(0644,root,root) @mandir@/man1/qnotify.1.gz
@@ -394,14 +396,13 @@
 %attr(0644,root,root) @mandir@/man1/replier-config.1.gz
 %attr(0644,root,root) @mandir@/man1/rrforward.1.gz
 %attr(0644,root,root) @mandir@/man1/rrt.1.gz
-%attr(0644,root,root) @mandir@/man1/serialcmd.0.gz
 %attr(0644,root,root) @mandir@/man1/serialcmd.1.gz
 %attr(0644,root,root) @mandir@/man1/serialqmtp.1.gz
 %attr(0644,root,root) @mandir@/man1/serialsmtp.1.gz
 %attr(0644,root,root) @mandir@/man1/setforward.1.gz
 %attr(0644,root,root) @mandir@/man1/setmaillist.1.gz
 %attr(0644,root,root) @mandir@/man1/srs.1.gz
-%attr(0644,root,root) @mandir@/man1/srsfilter.1.gz
+%attr(0644,root,root) @mandir@/man1/srsfilter.1.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man1/inotify.1.gz
 %attr(0644,root,root) @mandir@/man1/spfquery.1.gz
 %attr(0644,root,root) @mandir@/man1/qmail-srs.5.gz
@@ -454,7 +455,7 @@
 %attr(0644,root,root) @mandir@/man8/ofmipd.8.gz
 %attr(0644,root,root) @mandir@/man8/ofmipname.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-cdb.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-clean.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-clean.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-command.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-daemon.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dk.8.gz
@@ -462,10 +463,10 @@
 %attr(0644,root,root) @mandir@/man8/qmail-getpw.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-greyd.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-daned.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-inject.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-inject.8.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-internals.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-local.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-lspawn.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-local.8.gz #qmta
+%attr(0644,root,root) @mandir@/man8/qmail-lspawn.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-multi.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-spamfilter.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-newmrh.8.gz
@@ -473,32 +474,32 @@
 %attr(0644,root,root) @mandir@/man8/qmail-nullqueue.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-poppass.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-pw2u.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-qmqpc.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-qmqpc.8.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-qmqpd.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-qmtpd.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-qread.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-queue.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-direct.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-direct.8.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man8/qhpsi.8.gz
 %attr(0644,root,root) @mandir@/man8/surblqueue.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-remote.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-rspawn.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-remote.8.gz #qmta
+%attr(0644,root,root) @mandir@/man8/qmail-rspawn.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-send.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-showctl.8.gz
+%attr(0644,root,root) @mandir@/man8/qmta-send.8.gz #qmta
+%attr(0644,root,root) @mandir@/man8/qmail-showctl.8.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-smtpd.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-sql.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-start.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-tcpok.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-tcpto.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-tcpok.8.gz #qmta
+%attr(0644,root,root) @mandir@/man8/qmail-tcpto.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-todo.8.gz
 %attr(0644,root,root) @mandir@/man8/qscanq.8.gz
 %attr(0644,root,root) @mandir@/man8/qscanq-stdin.8.gz
-%attr(0644,root,root) @mandir@/man8/queue-fix.0.gz
-%attr(0644,root,root) @mandir@/man8/queue-fix.8.gz
+%attr(0644,root,root) @mandir@/man8/queue-fix.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-popbull.8.gz
 %attr(0644,root,root) @mandir@/man8/recipient-cdb.8.gz
-%attr(0644,root,root) @mandir@/man8/irmail.8.gz
-%attr(0644,root,root) @mandir@/man8/isendmail.8.gz
+%attr(0644,root,root) @mandir@/man8/irmail.8.gz #indimail-mini #qmta
+%attr(0644,root,root) @mandir@/man8/isendmail.8.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man8/run-cleanq.8.gz
 %attr(0644,root,root) @mandir@/man8/spawn-filter.8.gz
 %attr(0644,root,root) @mandir@/man8/splogger.8.gz
