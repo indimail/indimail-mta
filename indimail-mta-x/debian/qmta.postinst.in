@@ -90,7 +90,8 @@ esac
 
 if [ -f ${qsysconfdir}/qmta.perms ] ; then
 	(
-	/bin/grep -v "^#" ${qsysconfdir}/qmta.perms | while read line
+	/bin/grep -v "^#" ${qsysconfdir}/qmta.perms | \
+		grep qmta | cut -d# -f1 | while read line
 	do
 		if [ " $line" = " " ] ; then
 			continue

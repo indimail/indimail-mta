@@ -122,7 +122,7 @@ esac
 #
 if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
 	(
-	/bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | while read line
+	/bin/grep -v "^#" ${qsysconfdir}/indimail-mta.perms | cut -d# -f1 | while read line
 	do
 		if [ " $line" = " " ] ; then
 			continue

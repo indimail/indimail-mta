@@ -86,7 +86,8 @@ esac
 
 if [ -f ${qsysconfdir}/indimail-mini.perms ] ; then
 	(
-	/bin/grep -v "^#" ${qsysconfdir}/indimail-mini.perms | while read line
+	/bin/grep -v "^#" ${qsysconfdir}/indimail-mini.perms | \
+		grep indimail-mini | cut -d# -f1 | while read line
 	do
 		if [ " $line" = " " ] ; then
 			continue
