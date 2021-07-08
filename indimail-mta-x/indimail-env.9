@@ -381,14 +381,6 @@ line in the content is added as a recipient to the recipient list by
 \fBqmail-queue\fR(8)
 
 .TP
-\fIFIFODIR\fR
-Overrides default @qmaildir@/inquery used by \fBinlookup\fR(8),
-\fBinquerytest\fR(8)
-
-.TP
-\fIINFIFO\fR
-
-.TP
 \fIFILTERARGS\fR
 A filter program with arguments to execute. Used by \fBqmail-multi\fR(8),
 \fBspawn-filter\fR(8) to filter mail message through filters. The output of
@@ -1123,6 +1115,13 @@ If set, max deliveries permitted for a user in day by \fBvdelivermail\fR(8)
 .TP
 \fIMAILSIZE_LIMIT\fR
 If set, total size of mail delivery/day for user by \fBvdelivermail\fR(8)
+
+.SH indimail-virtualdomains environment variables
+
+.PP
+
+This variables are mostly used by indimail-virtualdomains. But there can
+be overlap with indimail-mta
 
 .TS
 l l.
