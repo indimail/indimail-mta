@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.322 2021-07-04 23:28:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.323 2021-07-08 19:00:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -910,18 +910,18 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/bin/qmaildirmake
 %attr(0755,root,root)              %{_prefix}/bin/maildir2mbox
 %attr(0755,root,root)              %{_prefix}/bin/qmaildirwatch
-%attr(755,root,root)               %{_prefix}/bin/srsfilter
-%attr(755,root,root)               %{_prefix}/bin/queue-fix
+%attr(0755,root,root)              %{_prefix}/bin/srsfilter
+%attr(0755,root,root)              %{_prefix}/bin/queue-fix
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-direct
-%attr(0755,root,root)              %{_prefix}/sbin/qmta-send
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-lspawn
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-local
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-rspawn
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-remote
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-clean
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-tcpok
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-tcpto
+%attr(0751,root,root)              %{_prefix}/sbin/qmta-send
+%attr(0751,root,root)              %{_prefix}/sbin/qmail-lspawn
+%attr(0751,root,root)              %{_prefix}/sbin/qmail-local
+%attr(0751,root,root)              %{_prefix}/sbin/qmail-rspawn
+%attr(0751,root,root)              %{_prefix}/sbin/qmail-remote
+%attr(0751,root,root)              %{_prefix}/sbin/qmail-clean
+%attr(0751,root,root)              %{_prefix}/sbin/qmail-tcpok
+%attr(0751,root,root)              %{_prefix}/sbin/qmail-tcpto
 
 %attr(644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 %attr(644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QUEUEDIR
