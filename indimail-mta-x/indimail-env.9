@@ -1127,15 +1127,15 @@ be overlap with indimail-mta
 l l.
 Environment variable      |Program       |Purpose
 --------------------------|--------------|-------------------------------------
-INFIFO                    |InLookup      |Name of FIFO used for communicating with
-                          |qmail-smtpd   |InLookup. InLookup pools connections to
+INFIFO                    |inlookup      |Name of FIFO used for communicating with
+                          |qmail-smtpd   |inlookup. inlookup pools connections to
                           |authindi      |MySQL and provides the interface between
                           |proxyimap     |IndiMail and MySQL
                           |proxypop3     |
                           |inquerytest   |
 FIFODIR                   |              |Directory specifying location of INFIFO
 --------------------------|--------------|-------------------------------------
-CNTRL_HOST                |InLookup      |Environment variables to be set when a
+CNTRL_HOST                |inlookup      |Environment variables to be set when a
                           |qmail-rspawn  |domain is extended across multiple
                           |qmail-lspawn  |servers. These variables point to the
                           |vuserinfo     |central database which has the
@@ -1204,7 +1204,7 @@ MAX_FAIL_ATTEMPTS         |              |Max failers after which use delay
 MYSQL_RETRY_INTERVAL      |              |Interval before reconnecting
                           |              |after a dropped or failed connection
 --------------------------|--------------|--------------------------------------
-MCDFILE                   |InLookup      |Mail Control Definition file. Specifies
+MCDFILE                   |inlookup      |Mail Control Definition file. Specifies
                           |dbinfo        |the list of all MySQL servers
                           |vuserinfo     |participating in a distributed setup.
                           |vserverinfo   |
@@ -1235,7 +1235,7 @@ OPEN_SMTP                 |              |File containing list of tcprules for I
                           |              |RELAY_CLEAR_MINUTES. Default
                           |              |is @indimaildir@/tcp/open-smtp
 RELAY_CLEAR_MINUTES       |clearopensmtp |No of minutes after which the
-                          |InLookup      |authentication request maintained in the
+                          |inlookup      |authentication request maintained in the
                           |vuserinfo     |relay table is expired. This is used for
                           |authindi      |sites using pop/imap before smtp
                           |vchkpass      |authentication
@@ -1243,8 +1243,9 @@ RELAY_CLEAR_MINUTES       |clearopensmtp |No of minutes after which the
                           |proxypop3     |
 --------------------------|--------------|--------------------------------------
 RELAY_TABLE               |authindi      |MySQL table name containing user
-                          |InLookup      |authentication timestamps for
+                          |inlookup      |authentication timestamps for
                           |clearopensmtp |implementing POP/IMAP before SMTP.
+--------------------------|--------------|--------------------------------------
 .TE
 
 .SH "SEE ALSO"
