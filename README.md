@@ -10,7 +10,7 @@
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
 * [mess822](https://cr.yp.to/mess822.html "mess822")
 
-Details for indimail-mta is [here](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md)
+A detailed [wiki](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for indimail-mta is [here](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md)
 
 **Complation Status (from Github Actions)**
 
