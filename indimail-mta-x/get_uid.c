@@ -1,7 +1,7 @@
 /*
  * $Log: get_uid.c,v $
- * Revision 1.3  2021-07-10 00:01:46+05:30  Cprogrammer
- * fixed wrong uid allocation
+ * Revision 1.3  2021-07-10 00:28:46+05:30  Cprogrammer
+ * fixed wrong uid/gid allocation
  *
  * Revision 1.2  2021-07-05 19:10:20+05:30  Cprogrammer
  * complete rewrite
@@ -113,9 +113,11 @@ get_gid(char *group, int exit_on_error)
 			for (i = 0; gid_a[i].group; i++) {
 				len = str_len(gid_a[i].group);
 				if (!str_diffn(gid_a[i].group, gr->gr_name, len)) {
-					gid_a[i].gid = found = gr->gr_gid;
+					gid_a[i].gid = gr->gr_gid;
 					gid_a[i].len = len;
 				}
+				if (!str_diffn(gid_a[i].group, group, len))
+					found = gid_a[i].gid;
 			}
 		}
 		if (exit_on_error) {
@@ -227,7 +229,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	static char    *x = "$Id: get_uid.c,v 1.3 2021-07-10 00:01:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: get_uid.c,v 1.3 2021-07-10 00:28:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
