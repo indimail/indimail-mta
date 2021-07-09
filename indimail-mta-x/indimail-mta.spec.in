@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.326 2021-07-09 22:17:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.327 2021-07-10 00:06:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -648,6 +648,7 @@ echo ../resolv.conf 1>&3
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-send
 %attr(751,root,root)                    %{_prefix}/sbin/slowq-send
 %attr(751,root,root)                    %{_prefix}/sbin/qmta-send
+%attr(751,root,root)                    %{_prefix}/sbin/mini-smtpd
 %attr(751,root,root)                    %{_prefix}/sbin/qmail-todo
 %attr(755,root,root)                    %{_prefix}/sbin/surblfilter
 %attr(755,root,root)                    %{_prefix}/sbin/surblqueue
