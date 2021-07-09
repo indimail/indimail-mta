@@ -31,20 +31,20 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
-	qmaildirwatch mailsubj mbox2maildir multirotate newinclude new-inject \
+	mailsubj mbox2maildir mini-smtpd multirotate newinclude new-inject \
 	nowutc ofmipd ofmipname parsedate plugtest predate preline \
 	printforward printmaillist proc proc+df qaes qarf qbase64 qdane \
 	qfrontend qf-smtp-ratelimit qmail-cat qmail-cdb qmail-clean \
 	qmailconfig qmail-daemon qmail-daned qmail-direct qmaildirmake \
-	qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject \
-	qmail-local qmail-lspawn qmail-multi qmail-newmrh qmail-newu \
-	qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter \
-	qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
-	qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl \
-	qmail-smtpd qmail_smtpd.so qmail-spamfilter qmail-start qmail-tcpok \
-	qmail-tcpto qmail-todo qmail-upq qmta-send qnotify qpq qquote \
-	qreceipt qsmhook qtools queue-fix recipient-cdb relaytest rewind \
-	rpmattr rrforward rrt sendmail serialcmd serialqmtp serialsmtp \
+	qmaildirwatch qmail-dk qmail-dkim qmail-getpw qmail-greyd \
+	qmail-inject qmail-local qmail-lspawn qmail-multi qmail-newmrh \
+	qmail-newu qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u \
+	qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread \
+	qmail-queue qmail-remote qmail-rm qmail-rspawn qmail-send \
+	qmail-showctl qmail-smtpd qmail_smtpd.so qmail-spamfilter qmail-start \
+	qmail-tcpok qmail-tcpto qmail-todo qmail-upq qmta-send qnotify qpq \
+	qquote qreceipt qsmhook qtools queue-fix recipient-cdb relaytest \
+	rewind rpmattr rrforward rrt sendmail serialcmd serialqmtp serialsmtp \
 	setforward setmaillist slowq-send slowq-start smtpd-plugin0.so \
 	smtpd-plugin.so sortedtest spawn-filter spfquery splogger srsfilter \
 	sslerator surblfilter surblqueue svctool swaks sys-checkpwd tcp-env \
@@ -1876,6 +1876,28 @@ conf-plugin conf-batv conf-smtputf8 mysql_config mysql_inc
 	./compile `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin mysql_inc` smtpd.c
 
+qmail-smtpd.8: \
+qmail-smtpd.9 conf-qmail conf-sysconfdir conf-prefix
+	cat qmail-smtpd.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> qmail-smtpd.8
+
+mini-smtpd: \
+load mini-smtpd.o ipme.o socket_v6any.o socket_v4mappedprefix.o \
+ipalloc.o ip.o variables.o rcpthosts.o control.o qmail.o \
+received.o auto_qmail.o auto_control.o
+	./load mini-smtpd ipme.o socket_v6any.o socket_v4mappedprefix.o \
+	ipalloc.o ip.o variables.o rcpthosts.o control.o qmail.o \
+	received.o auto_qmail.o auto_control.o  -lqmail
+
+mini-smtpd.o: \
+compile mini-smtpd.c auto_qmail.h control.h received.h ipme.h ip.h \
+qmail.h rcpthosts.h
+	./compile mini-smtpd.c
+
 mail_acl.o: compile mail_acl.c matchregex.h wildmat.h
 	./compile mail_acl.c
 
@@ -1922,15 +1944,6 @@ qmail-todo.9 conf-qmail conf-sysconfdir
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-todo.8
-
-qmail-smtpd.8: \
-qmail-smtpd.9 conf-qmail conf-sysconfdir conf-prefix
-	cat qmail-smtpd.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> qmail-smtpd.8
 
 plugin_init.3: \
 plugin_init.9 conf-prefix

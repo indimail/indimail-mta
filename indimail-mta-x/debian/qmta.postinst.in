@@ -116,9 +116,14 @@ if [ $upgrade -eq 1 ] ; then # upgrade
       (${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/qmta-send.service &&
       /bin/systemctl daemon-reload && echo "installed new qmta-send service")
   fi
-  # restart qmta-send service if we find /var/tmp/.qmta-send.down
-  if [ -f /var/tmp/.qmta-send.down ] ; then
-    ${rm} -f /var/tmp/.qmta-send.down
+  # restart qmta-send service if we find $rundir/.qmta-send.down
+  if [ -d /run ] ; then
+    rundir=/run/qmta
+  else
+    rundir=/var/run/qmta
+  fi
+  if [ -f $rundir/.qmta-send.down ] ; then
+    ${rm} -f $rundir/.qmta-send.down
     echo "Starting qmta-send"
     if test -f ${sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
     then
