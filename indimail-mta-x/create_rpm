@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.16  2021-07-09 22:04:49+05:30  Cprogrammer
+# added qmta
+#
 # Revision 1.15  2021-03-26 18:15:02+05:30  Cprogrammer
 # fixed missing catChangeLog in debian builds
 #
@@ -46,7 +49,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.15 2021-03-26 18:15:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.16 2021-07-09 22:04:49+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 
@@ -234,7 +237,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/indimail-mta.spec
-		for i in indimail-mta indimail-mini
+		for i in indimail-mta indimail-mini qmta
 		do
 			rpm --addsign $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
 		done
@@ -243,7 +246,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		read key
 		if [ " $key" = " Y" -o " $key" = " y" ] ; then
 			(
-			for i in indimail-mta indimail-mini
+			for i in indimail-mta indimail-mini qmta
 			do
 				echo $i
 				rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
