@@ -41,6 +41,10 @@ single board computers where you might want to conserve the CPU as much
 as possible but want mails generated on the system to get delivered to
 users.
 
+\fBqmail-direct\fR can deliver to any user for the root user. For any
+other user to deposit mails, the setuid bit needs to be set to root
+for \fBqmail-direct\fR executable.
+
 .SH "EXIT CODES"
 \fBqmail-direct\fR does not print diagnostics. It exits 0 if it has
 successfully queued the message. It exits between 1 and 99 if it has failed
