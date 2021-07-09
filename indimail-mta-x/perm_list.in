@@ -126,8 +126,6 @@
 %attr(0755,root,root)  @prefix@/sbin/qmail-smtpd
 %attr(0755,root,root)  @prefix@/sbin/qmail-qmqpd
 %attr(0755,root,root)  @prefix@/sbin/qmail-qmtpd
-%attr(0755,root,root)  @prefix@/sbin/qmail-dk
-%attr(0755,root,root)  @prefix@/sbin/qmail-dkim
 %attr(0755,root,root)  @prefix@/sbin/qmail-poppass
 %attr(0755,root,root)  @prefix@/sbin/cdbdump
 %attr(0755,root,root)  @prefix@/sbin/cdbstats
@@ -250,13 +248,15 @@
 %attr(0755,root,root)  @libexecdir@/qlocal_upgrade.sh
 %attr(0755,root,root)  @libexecdir@/daneprog
 #
-# Setuid
+# setuid / setgid
 #
-%attr(2551,root,qscand) @prefix@/sbin/run-cleanq
+%attr(2551,root,qscand)   @prefix@/sbin/run-cleanq
 %attr(4551,qscand,qscand) @prefix@/sbin/qscanq
-%attr(6551,qmailq,qmail) @prefix@/sbin/qmail-queue
-%attr(6551,qscand,qmail) @prefix@/sbin/qhpsi
-%attr(4551,root,root)    @prefix@/sbin/sys-checkpwd
+%attr(6551,qmailq,qmail)  @prefix@/sbin/qmail-queue
+%attr(6551,qscand,qmail)  @prefix@/sbin/qhpsi
+%attr(4551,root,root)     @prefix@/sbin/sys-checkpwd
+%attr(2551,root,qmail)    @prefix@/sbin/qmail-dk
+%attr(2551,root,qmail)    @prefix@/sbin/qmail-dkim
 #
 # Boot
 #
