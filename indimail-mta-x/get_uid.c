@@ -1,5 +1,8 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.3  2021-07-10 00:01:46+05:30  Cprogrammer
+ * fixed wrong uid allocation
+ *
  * Revision 1.2  2021-07-05 19:10:20+05:30  Cprogrammer
  * complete rewrite
  *
@@ -69,9 +72,11 @@ get_uid(char *user, int exit_on_error)
 			for (i = 0; uid_a[i].user; i++) {
 				len = str_len(uid_a[i].user);
 				if (!str_diffn(uid_a[i].user, pw->pw_name, len)) {
-					uid_a[i].uid = found = pw->pw_uid;
+					uid_a[i].uid = pw->pw_uid;
 					uid_a[i].len = len;
 				}
+				if (!str_diffn(uid_a[i].user, user, len))
+					found = uid_a[i].uid;
 			}
 		}
 		if (exit_on_error) {
@@ -184,7 +189,7 @@ get_user(uid_t uid)
 	if (uidinit(0, 0) == -1)
 		return ((char *) 0);
 	GET_USER(uid, auto_uida, ALIASU);
-	GET_USER(uid, auto_uidd, ALIASU);
+	GET_USER(uid, auto_uidd, QMAILD);
 	GET_USER(uid, auto_uidl, QMAILL);
 	GET_USER(uid, auto_uido, ROOTUSER);
 	GET_USER(uid, auto_uidp, QMAILP);
@@ -222,7 +227,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	static char    *x = "$Id: get_uid.c,v 1.2 2021-07-05 19:10:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: get_uid.c,v 1.3 2021-07-10 00:01:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
