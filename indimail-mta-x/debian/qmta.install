@@ -19,6 +19,7 @@ usr/bin/queue-fix                              /usr/bin
 usr/sbin/qmail-qmqpc                           /usr/sbin
 usr/sbin/qmail-direct                          /usr/sbin
 usr/sbin/qmta-send                             /usr/sbin
+usr/sbin/mini-smtpd                            /usr/sbin
 usr/sbin/qmail-queue                           /usr/sbin
 usr/sbin/qmail-lspawn                          /usr/sbin
 usr/sbin/qmail-local                           /usr/sbin
@@ -49,6 +50,7 @@ usr/share/man/man8/qmail-remote.8.gz           /usr/share/man/man8
 usr/share/man/man8/qmail-clean.8.gz            /usr/share/man/man8
 usr/share/man/man8/qmail-direct.8.gz           /usr/share/man/man8
 usr/share/man/man8/qmta-send.8.gz              /usr/share/man/man8
+usr/share/man/man8/mini-smtpd.8.gz             /usr/share/man/man8
 usr/share/man/man8/queue-fix.8.gz              /usr/share/man/man8
 usr/share/man/man8/qmail-tcpok.8.gz            /usr/share/man/man8
 usr/share/man/man8/qmail-tcpto.8.gz            /usr/share/man/man8

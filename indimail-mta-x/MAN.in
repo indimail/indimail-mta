@@ -176,6 +176,7 @@ f:::0644:/man8/:qmail-rspawn.8:qmail-rspawn.8
 f:::0644:/man8/:qmail-send.8:qmail-send.8
 f:::0644:/man8/:slowq-send.8:slowq-send.8
 f:::0644:/man8/:qmta-send.8:qmta-send.8
+f:::0644:/man8/:mini-smtpd.8:mini-smtpd.8
 f:::0644:/man8/:qmail-showctl.8:qmail-showctl.8
 f:::0644:/man8/:qmail-smtpd.8:qmail-smtpd.8
 f:::0644:/man8/:qmail-start.8:qmail-start.8

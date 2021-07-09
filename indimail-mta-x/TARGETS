@@ -1171,3 +1171,5 @@ token822.o
 qmta-send.service
 process_queue.o
 indimail-env.5
+mini-smtpd
+mini-smtpd.o

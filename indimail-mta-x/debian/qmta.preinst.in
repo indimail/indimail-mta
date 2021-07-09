@@ -17,9 +17,17 @@ fi
 case "$1" in
 	upgrade)
 	set +e
+	if [ -d /run ] ; then
+		rundir=/run/qmta
+	else
+		rundir=/var/run/qmta
+	fi
 	count=$(ps -ef|grep qmta-send|grep -v grep|wc -l)
 	if [ $count -gt 0 ] ; then
-		touch /var/tmp/.qmta-send.down
+  		mkdir -p $rundir
+		touch $rundir/.qmta-send.down
+	else
+		${rm} -f $rundir/.qmta-send.down
 	fi
 	if test -f /etc/systemd/system/multi-user.target.wants/qmta-send.service
 	then
