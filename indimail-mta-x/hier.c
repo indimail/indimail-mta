@@ -1,5 +1,9 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.288  2021-07-10 00:08:19+05:30  Cprogrammer
+ * added mini-smtpd
+ * qmail-dk, qmail-dkim setgid qmail for accessing private key
+ *
  * Revision 1.287  2021-06-29 09:19:45+05:30  Cprogrammer
  * added qmta-send
  *
@@ -1014,12 +1018,6 @@ hier(inst_dir, fatal, dev_package)
 #endif
 	c(auto_prefix, "bin", "maildirsize", auto_uido, 0, moder_x);
 
-#ifdef DOMAIN_KEYS
-	c(auto_prefix, "sbin", "qmail-dk", auto_uido, 0, moder_x);
-#endif
-#ifdef HASDKIM
-	c(auto_prefix, "sbin", "qmail-dkim", auto_uido, 0, moder_x);
-#endif
 	c(auto_prefix, "sbin", "qmail-popbull", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "qmail-poppass", auto_uido, 0, moder_x);
 	c(auto_prefix, "sbin", "spawn-filter", auto_uido, 0, moder_x);
@@ -1051,9 +1049,11 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "sbin", "qmail-send", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "slowq-send", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmta-send", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "mini-smtpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmqpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-qmtpd", auto_uido, 0, moder_t);
 	c(auto_prefix, "sbin", "qmail-smtpd", auto_uido, 0, moder_t);
+	c(auto_prefix, "sbin", "qmail-direct", auto_uido, 0, moder_x);
 #ifdef EXTERNAL_TODO
 	c(auto_prefix, "sbin", "qmail-todo", auto_uido,0,moder_t);
 #endif
@@ -1127,11 +1127,16 @@ hier(inst_dir, fatal, dev_package)
 
 	/* setuid/setgid Programs */
 	c(auto_prefix, "sbin", "qmail-queue", auto_uidq, auto_gidq, 06551);
-	c(auto_prefix, "sbin", "qmail-direct", auto_uido, auto_gidq, 04551);
 	c(auto_prefix, "sbin", "qhpsi", auto_uidc, auto_gidq, 06551);
 	c(auto_prefix, "sbin", "qscanq", auto_uidc, auto_gidc, 04551);
 	c(auto_prefix, "sbin", "run-cleanq", auto_uido, auto_gidc, 02551);
 	c(auto_prefix, "sbin", "sys-checkpwd", auto_uido, 0, 04551);
+#ifdef DOMAIN_KEYS
+	c(auto_prefix, "sbin", "qmail-dk", auto_uido, auto_gidq, 02551);
+#endif
+#ifdef HASDKIM
+	c(auto_prefix, "sbin", "qmail-dkim", auto_uido, auto_gidq, 02551);
+#endif
 
 	/*- misc */
 	c(auto_prefix, "sbin", "qmail-multi", auto_uido, 0, moder_x);
@@ -1425,6 +1430,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man8", "qmail-send.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "slowq-send.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmta-send.8", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man8", "mini-smtpd.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-todo.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-daemon.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-start.8", uidr, gidr, moder_f);
@@ -1512,7 +1518,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.287 2021-06-29 09:19:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.288 2021-07-10 00:08:19+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
