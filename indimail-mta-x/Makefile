@@ -27,7 +27,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	create_services cronlist.q ctrlenv datemail dk-filter dknewkey dktest \
 	dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt dot-forward \
 	drate etrn except fastforward forward generic.so greydaemon home \
-	home+df hostname idedit iftocc indimail-mta.changes \
+	home+df hostname iftocc indimail-mta.changes \
 	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
@@ -721,13 +721,6 @@ hostname: load hostname.o
 hostname.o: \
 compile hostname.c
 	./compile hostname.c
-
-idedit: load idedit.o
-	./load idedit -lqmail
-
-idedit.o: \
-compile idedit.c
-	./compile idedit.c
 
 instcheck: \
 load instcheck.o hier.o auto_qmail.o get_uid.o auto_uids.o \

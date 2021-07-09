@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.289  2021-07-10 00:56:48+05:30  Cprogrammer
+ * removed idedit
+ *
  * Revision 1.288  2021-07-10 00:08:19+05:30  Cprogrammer
  * added mini-smtpd
  * qmail-dk, qmail-dkim setgid qmail for accessing private key
@@ -1167,7 +1170,6 @@ hier(inst_dir, fatal, dev_package)
 #endif
 	c(auto_libexec_dir, auto_libexec_base, "rpmattr", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "ipmeprint", auto_uido, 0, moder_x);
-	c(auto_libexec_dir, auto_libexec_base, "idedit", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "cdbmake-12", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "cdbmake-sv", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "testzero", auto_uido, 0, moder_x);
@@ -1518,7 +1520,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.288 2021-07-10 00:08:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.289 2021-07-10 00:56:48+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
