@@ -1,5 +1,8 @@
 /*
  * $Log: process_queue.c,v $
+ * Revision 1.4  2021-07-09 20:59:42+05:30  Cprogrammer
+ * added qmta queue
+ *
  * Revision 1.3  2021-07-05 21:27:15+05:30  Cprogrammer
  * allow processing $HOME/.defaultqueue for root
  *
@@ -33,7 +36,7 @@ void
 process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, int *z)
 {
 	char           *queue_count_ptr, *queue_start_ptr, *qbase;
-	char           *extra_queue[] = {"slowq", "nqueue", 0};
+	char           *extra_queue[] = {"nqueue", "slowq", "qmta", 0};
 	char            strnum[FMT_ULONG];
 	int             idx, count, qcount, qstart;
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
@@ -113,7 +116,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 void
 getversion_process_queue_c()
 {
-	static char    *x = "$Id: process_queue.c,v 1.3 2021-07-05 21:27:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: process_queue.c,v 1.4 2021-07-09 20:59:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
