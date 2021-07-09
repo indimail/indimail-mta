@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.325 2021-07-09 22:06:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.326 2021-07-09 22:17:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -842,6 +842,7 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/bin/qmail-showctl
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-direct
+%attr(0755,root,root)              %{_prefix}/sbin/mini-smtpd
 
 %ghost %attr(0644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 #
@@ -855,6 +856,7 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)              %{mandir}/man8/qmail-inject.8.gz
 %attr(0644,root,root)              %{mandir}/man8/isendmail.8.gz
 %attr(0644,root,root)              %{mandir}/man8/qmail-qmqpc.8.gz
+%attr(0644,root,root)              %{mandir}/man8/mini-smtpd.8.gz
 %attr(0644,root,root)              %{mandir}/man8/qmail-direct.8.gz
 %attr(0644,root,root)              %{mandir}/man8/irmail.8.gz
 %attr(0644,root,root)              %{mandir}/man8/qmail-showctl.8.gz
