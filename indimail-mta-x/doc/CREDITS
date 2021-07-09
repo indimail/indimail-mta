@@ -66,7 +66,7 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 24. Chris Garrigues - pretty-print Received: lines.
 25. ftp://ftp.foxharp.boston.ma.us/pub/pgf/qmail/mailroute.pl
 26. Matt Ranney qmail-lagcheck
-27. Michele Beltrame - qmhandle http://sourceforge.net/projects/qmhandle
+27. qmail-liberal-lf patch author: Dean Gaudet version: 0.95
 28. Eric Huss - queue-fix (with patch by Matthew Harrel to work for big-todo)
 29. Eric Huss - qmail-qmqpc timeout patch
 30. William E Baxtar - qtools - http://www.superscript.com/qtools/intro.html
