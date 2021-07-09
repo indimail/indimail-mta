@@ -182,7 +182,7 @@ Release 2.13 Start 14/02/2021
 114. svctool: added --print-variable option
 - 09/07/2021
 115. fmtqfn.c: initialize conf_split
-116. added mini-smtpd for qmta package
+116. added mini-smtpd for qmta, indimail-mini package
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
