@@ -1,4 +1,7 @@
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.44  2021-07-10 23:18:22+05:30  Cprogrammer
+# removed updation of cronlist
+#
 # Revision 1.43  2021-06-27 11:35:09+05:30  Cprogrammer
 # renamed LOCK_LOGS env variable to LOGLOCK
 #
@@ -126,7 +129,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.in,v 1.43 2021-06-27 11:35:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.44 2021-07-10 23:18:22+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -154,7 +157,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.43 2021-06-27 11:35:09+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.44 2021-07-10 23:18:22+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -163,7 +166,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.43 2021-06-27 11:35:09+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.43 2021-06-27 11:35:09+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.44 2021-07-10 23:18:22+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -375,13 +378,6 @@ $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' $servicedir/greylist.1999/run
 # remove STATUSFILE as .svlock serves the same purpose
 rm -f $servicedir/.svscan/variables/STATUSFILE
 
-# copy updated cron entries
-if [ -f $sysconfdir/cronlist.q -a -d /etc/cron.d ] ; then
-	diff $sysconfdir/cronlist.q /etc/cron.d/cronlist.q >/dev/null 2>&1
-	if [ $? -ne 0 ] ; then
-		$cp $sysconfdir/cronlist.q /etc/cron.d/cronlist.q
-	fi
-fi
 # migrate clamd.conf to scan.conf
 if [ -f $sysconfdir/clamd.conf -a ! -f $sysconfdir/scan.conf ] ; then
 	$mv $sysconfdir/clamd.conf $sysconfdir/scan.conf
