@@ -351,8 +351,6 @@ home
 home+df
 hostname
 hostname.o
-idedit
-idedit.o
 ifaddr
 ifaddr.0
 ifaddr.o

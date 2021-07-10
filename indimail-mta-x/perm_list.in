@@ -179,7 +179,6 @@
 %attr(0755,root,root)  @libexecdir@/cdbmake-sv
 %attr(0755,root,root)  @libexecdir@/atrn
 %attr(0755,root,root)  @libexecdir@/etrn
-%attr(0755,root,root)  @libexecdir@/idedit
 %attr(0755,root,root)  @libexecdir@/qmailconfig
 %attr(0755,root,root)  @libexecdir@/config-fast
 %attr(0755,root,root)  @libexecdir@/hostname
