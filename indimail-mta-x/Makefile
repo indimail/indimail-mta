@@ -613,7 +613,7 @@ indimail-mta.fc.in conf-qmail conf-sysconfdir conf-servicedir
 cronlist.q: cronlist.in conf-prefix \
 conf-sysconfdir conf-servicedir
 	( \
-	echo " * WARNING: This file was auto-generated. Do not edit!"; \
+	echo "# WARNING: This file was auto-generated. Do not edit!"; \
 	$(edit) cronlist.in \
 	) > $@
 

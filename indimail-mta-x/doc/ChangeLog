@@ -185,6 +185,8 @@ Release 2.13 Start 14/02/2021
 116. added mini-smtpd for qmta, indimail-mini package
 117. BUG: get_uid.c: fixed wrong uid/gid allocation
 118. hier.c: set setgid bit for qmail-dk, qmail-dkim to access private key
+- 10/07/2021
+119. fixed cronlist.q
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
