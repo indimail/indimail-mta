@@ -29,7 +29,9 @@ If \fBenvdir\fR finds a link named .\fIdir\fR pointing to a directory, or a
 directory named .\fIdir\fR, it enters that directory and modifies
 environment variables according to files in .\fIdir\fR. \fBenvdir\fR avoids
 infinite recursive loops, by storing the inode number of directories
-visited and checking against the list. Apart from .\fIdir\fR, \fBenvdir\fR
+visited and checking against the list. Files in .\fIdir\fR are read first
+to prevent. This prevents .\fIdir\fR from overrideing or deleting
+environment variables set in \fId\fR. Apart from .\fIdir\fR, \fBenvdir\fR
 skips all files/directories starting with the '.' dot character.
 
 .SH EXIT CODES
