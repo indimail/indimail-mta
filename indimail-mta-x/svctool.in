@@ -2160,7 +2160,7 @@ fi
 /bin/mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 555 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 # qmail-logfifo logger
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-logfifo/log
@@ -2241,7 +2241,7 @@ fi
 /bin/mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log
 if [ $down_state -eq 1 ] ; then
@@ -2746,7 +2746,7 @@ fi
 /bin/mkdir -p $conf_dir
 $chown indimail:qmail $conf_dir
 /bin/chmod 755 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 if [ -n "$base_path" ] ; then
 	echo $base_path    > $conf_dir/BASE_PATH
@@ -2920,7 +2920,7 @@ fi
 /bin/mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log
 if [ $down_state -eq 1 ] ; then
@@ -3201,7 +3201,7 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/udplogger.$tag/log
 if [ $down_state -eq 1 ] ; then
@@ -3288,7 +3288,7 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-daned.$tag/log
 if [ $down_state -eq 1 ] ; then
@@ -3377,7 +3377,7 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/greylist.$tag/log
 if [ $down_state -eq 1 ] ; then
@@ -3490,7 +3490,7 @@ fi
 mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 if [ $run_file_only -ne 1 ] ; then
 	if [ " $imap_ssl" = " 1" ] ; then
@@ -3962,7 +3962,7 @@ fi
 /bin/mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log
 if [ $down_state -eq 1 ] ; then
@@ -4075,7 +4075,7 @@ fi
 /bin/mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 500 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qscanq/log
 if [ $down_state -eq 1 ] ; then
@@ -4145,7 +4145,7 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/clamd/log
 if [ $down_state -eq 1 ] ; then
@@ -4352,7 +4352,7 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/pwdlookup/log
 if [ $down_state -eq 1 ] ; then
@@ -4502,7 +4502,7 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
-link_with_global
+link_with_global $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log
 if [ $down_state -eq 1 ] ; then
