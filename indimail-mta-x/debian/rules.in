@@ -86,9 +86,9 @@ install: build
 		install -m 0644 indimail-mta.perms "$(DESTDIR)$(qsysconfdir)"/indimail-mta.perms; \
 	fi
 	unset FAKED_MODE
-	mkdir -p $(DESTDIR)/$(sysconfdir)/control/defaultqueue
-	mkdir -p $(DESTDIR)/$(sysconfdir)/control/global_vars
-	head -1 conf-split > $(DESTDIR)/$(sysconfdir)/control/global_vars/CONFSPLIT
+	mkdir -p $(DESTDIR)$(qsysconfdir)/control/defaultqueue
+	mkdir -p $(DESTDIR)$(qsysconfdir)/control/global_vars
+	head -1 conf-split > $(DESTDIR)/$(qsysconfdir)/control/global_vars/CONFSPLIT
 	${rm} -rf $(DESTDIR)$(mandir)/man3
 	if [ ! -d $(DESTDIR)$(sysconfdir)/apparmor.d/local ] ; then \
 		mkdir -p $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
