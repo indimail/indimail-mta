@@ -187,6 +187,9 @@ Release 2.13 Start 14/02/2021
 118. hier.c: set setgid bit for qmail-dk, qmail-dkim to access private key
 - 10/07/2021
 119. fixed cronlist.q
+- 12/07/2021
+120. svctool: use control/global_vars for common environment variables across
+     svscan services
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

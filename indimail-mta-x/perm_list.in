@@ -30,6 +30,7 @@
 %dir %attr(2755,indimail,qmail)    @qsysconfdir@/control/domainkeys
 %dir %attr(2775,qmailr,qmail)      @qsysconfdir@/control/ratelimit
 %dir %attr(0755,indimail,qmail)    @qsysconfdir@/control/defaultqueue #indimail-mini #qmta
+%dir %attr(0755,root,qmail)        @qsysconfdir@/control/global_vars #indimail-mini #qmta
 #
 # Binaries
 #

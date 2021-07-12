@@ -86,6 +86,9 @@ install: build
 		install -m 0644 indimail-mta.perms "$(DESTDIR)$(qsysconfdir)"/indimail-mta.perms; \
 	fi
 	unset FAKED_MODE
+	mkdir -p $(DESTDIR)/$(sysconfdir)/control/defaultqueue
+	mkdir -p $(DESTDIR)/$(sysconfdir)/control/global_vars
+	head -1 conf-split > $(DESTDIR)/$(sysconfdir)/control/global_vars/CONFSPLIT
 	${rm} -rf $(DESTDIR)$(mandir)/man3
 	if [ ! -d $(DESTDIR)$(sysconfdir)/apparmor.d/local ] ; then \
 		mkdir -p $(DESTDIR)$(sysconfdir)/apparmor.d/local; \
@@ -107,9 +110,11 @@ install: build
 	# and qmta.install
 	mkdir -p $(DESTDIR)/etc-mini/indimail/control/defaultqueue
 	mkdir -p $(DESTDIR)/etc-qmta/indimail/control/defaultqueue
+	mkdir -p $(DESTDIR)/etc-qmta/indimail/control/global_vars
 	echo "${prefix}/sbin/qmail-qmqpc" > $(DESTDIR)/etc-mini/indimail/control/defaultqueue/QMAILQUEUE
 	echo "${prefix}/sbin/qmail-queue" > $(DESTDIR)/etc-qmta/indimail/control/defaultqueue/QMAILQUEUE
 	echo "${qmaildir}/queue/qmta"     > $(DESTDIR)/etc-qmta/indimail/control/defaultqueue/QUEUEDIR
+	head -1 conf-split > $(DESTDIR)/etc-qmta/indimail/control/global_vars/CONFSPLIT
 	if [ -f indimail-mta.perms ] ; then \
 		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-mini/indimail/indimail-mini.perms; \
 		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-qmta/indimail/qmta.perms; \

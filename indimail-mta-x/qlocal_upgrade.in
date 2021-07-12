@@ -1,4 +1,7 @@
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.45  2021-07-12 18:23:00+05:30  Cprogrammer
+# create service/*/variables/.envdir file for control/global_vars
+#
 # Revision 1.44  2021-07-10 23:18:22+05:30  Cprogrammer
 # removed updation of cronlist
 #
@@ -129,7 +132,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.in,v 1.44 2021-07-10 23:18:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.45 2021-07-12 18:23:00+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -157,7 +160,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.44 2021-07-10 23:18:22+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.45 2021-07-12 18:23:00+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -166,7 +169,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.44 2021-07-10 23:18:22+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.44 2021-07-10 23:18:22+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.45 2021-07-12 18:23:00+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -414,6 +417,19 @@ if [ ! -d $sysconfdir/control/cache ] ; then
 	$chown indimail:qmail $sysconfdir/control/cache
 	$chmod 2775 $sysconfdir/control/cache
 fi
+
+# global variable directory
+if [ ! -d $sysconfdir/control/global_vars ] ; then
+	mkdir -p $sysconfdir/control/global_vars
+	chown root:qmail $sysconfdir/control/global_vars
+	chmod 755 $sysconfdir/control/global_vars
+fi
+for i in `echo $servicedir/*/variables`
+do
+	if [ ! -f $i/.envdir -a ! -d $i/.envdir -a ! -L $i/.envdir ] ; then
+		echo $sysconfdir/control/global_vars > $i/.envdir
+	fi
+done
 }
 
 case $1 in
