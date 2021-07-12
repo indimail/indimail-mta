@@ -1,4 +1,7 @@
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.46  2021-07-13 00:24:35+05:30  Cprogrammer
+# fixed typo for servicedir
+#
 # Revision 1.45  2021-07-12 18:23:00+05:30  Cprogrammer
 # create service/*/variables/.envdir file for control/global_vars
 #
@@ -132,7 +135,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.in,v 1.45 2021-07-12 18:23:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.46 2021-07-13 00:24:35+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -160,7 +163,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.45 2021-07-12 18:23:00+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.46 2021-07-13 00:24:35+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -169,7 +172,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.45 2021-07-12 18:23:00+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.45 2021-07-12 18:23:00+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.46 2021-07-13 00:24:35+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -361,7 +364,7 @@ if [ -s $sysconfdir/control/defaultqueue/LOGFILTER ] ; then
 	check_update_if_diff $sysconfdir/control/defaultqueue/LOGFILTER $logfifo
 fi
 if [ -s $servicedir/qmail-send.25/variables/QMAILLOCAL ] ; then
-	check_update_if_diff $servicdi@/qmail-send.25/variables/QMAILLOCAL /usr/sbin/qmail-local
+	check_update_if_diff $servicedir/qmail-send.25/variables/QMAILLOCAL /usr/sbin/qmail-local
 fi
 if [ -s $servicedir/qmail-send.25/variables/QMAILREMOTE ] ; then
 	check_update_if_diff $servicedir/qmail-send.25/variables/QMAILREMOTE /usr/sbin/qmail-remote

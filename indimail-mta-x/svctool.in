@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.570 2021-07-12 23:57:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.571 2021-07-13 00:24:50+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.570 2021-07-12 23:57:06+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.571 2021-07-13 00:24:50+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -9735,7 +9735,7 @@ case $option in
 			mysqld=bin/mysqld
 		else
 			echo "mysqld: No such File or directory" 1>&2
-			return 1
+			exit 1
 		fi
 		conf_file="$DESTDIR"$sysconfdir/indimail.cnf
 		mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
@@ -10063,7 +10063,7 @@ case $option in
 		cert)
 		if [ ! -x /usr/bin/openssl ] ; then
 			echo "/usr/bin/openssl: No such file or directory" 1>&2
-			return 1
+			exit 1
 		fi
 		if [ " $postmaster" = " " ] ; then
 			echo "postmaster not specified" 1>&2
