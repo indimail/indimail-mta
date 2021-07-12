@@ -3744,12 +3744,12 @@ indimail-mta.perms: perm_list.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
 
-svctool: svctool.in mysql_config \
-conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared \
-conf-servicedir
+svctool: svctool.in mysql_config conf-prefix conf-libexec conf-qmail \
+conf-sysconfdir conf-shared conf-servicedir warn-auto.sh
+	( cat warn-auto.sh; \
 	$(edit) $@.in \
 	| sed s}QUEUESPLIT}"`head -1 conf-split`"}g \
-	> $@
+	) > $@
 	chmod +x $@
 
 svctool.8: svctool.9 mysql_config \
