@@ -19,20 +19,35 @@ If \fId\fR contains a file named \fIs\fR whose first line is \fIt\fR,
 and then adds an environment variable named \fIs\fR with value \fIt\fR. The
 name \fIs\fR must not contain =. Spaces and tabs at the end of \fIt\fR are
 removed. Nulls in \fIt\fR are changed to newlines in the environment
-variable. 
+variable. If the file \fIs\fR is completely empty (0 bytes long),
+\fBenvdir\fR removes an environment variable named \fIs\fR if one exists,
+without adding a new variable.
 
-If the file \fIs\fR is completely empty (0 bytes long), \fBenvdir\fR
+If \fBenvdir\fR finds a link named .\fIenvdir\fR pointing to a directory, or a
+directory named .\fIenvdir\fR, it enters that directory and modifies
+environment variables according to files in .\fIenvdir\fR. \fBenvdir\fR avoids
+infinite recursive loops, by storing the inode number of directories
+visited and checking against the list. Any directory already processed is
+silently ignored. Files in .\fIenvdir\fR are read first to prevent. This
+prevents environment variables in .\fIenvdir\fR from overriding or deleting
+environment variables set in \fId\fR. Apart from .\fIenvdir\fR,
+\fBenvdir\fR skips all files/directories starting with the '.' dot
+character.
+
+if \fBenvdir\fR finds a file named .\fIenvdir\fR, it assumes that a file
+contains a list of additional directories to be processed for environment
+variables. Any directory included in his file which have been already
+processed are silently ignored.
+
+if \fBenvdir\fR finds a file named .\fIenvfile\fR, it assumes that a file
+contains envirnoment variables in key=value format. If it finds a line of
+the form \fIs\fR=\fIt\fR, \fBenvdir\fR removes an environment variable
+named \fIs\fR if one exists, and then adds an evironment variable named
+\fIs\fR with value \fIt\fR. Spaces and tabs at the end of \fIt\fR are
+removed. Nulls in \fIt\fR are changed to newlines in the environment
+variable. If \fBenvdir\fR finds a line \fIs\fR, without =, \fBenvdir\fR
 removes an environment variable named \fIs\fR if one exists, without adding
 a new variable.
-
-If \fBenvdir\fR finds a link named .\fIdir\fR pointing to a directory, or a
-directory named .\fIdir\fR, it enters that directory and modifies
-environment variables according to files in .\fIdir\fR. \fBenvdir\fR avoids
-infinite recursive loops, by storing the inode number of directories
-visited and checking against the list. Files in .\fIdir\fR are read first
-to prevent. This prevents .\fIdir\fR from overrideing or deleting
-environment variables set in \fId\fR. Apart from .\fIdir\fR, \fBenvdir\fR
-skips all files/directories starting with the '.' dot character.
 
 .SH EXIT CODES
 \fBenvdir\fR exits 111 if it has trouble reading \fId\fR, if it runs out of
