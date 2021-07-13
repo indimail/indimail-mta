@@ -70,7 +70,7 @@ rules: rules.in Makefile ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release \
 ../conf-email
-	../catChangeLog --debian --name=indimail-mta --state=unstable \
+	../catChangeLog --debian --name=indimail-mta --state=stable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email
 	$(edit) $@.in > $@
